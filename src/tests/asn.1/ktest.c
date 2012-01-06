@@ -641,6 +641,223 @@ ktest_make_sample_iakerb_finished(krb5_iakerb_finished *ih)
     ktest_make_sample_checksum(&ih->checksum);
 }
 
+#ifndef DISABLE_PKINIT
+
+static void
+ktest_make_sample_pk_authenticator(krb5_pk_authenticator *p)
+{
+    p->cusec = SAMPLE_USEC;
+    p->ctime = SAMPLE_TIME;
+    p->nonce = SAMPLE_NONCE;
+    ktest_make_sample_checksum(&p->paChecksum);
+}
+
+static void
+ktest_make_sample_pk_authenticator_draft9(krb5_pk_authenticator_draft9 *p)
+{
+    ktest_make_sample_principal(&p->kdcName);
+    ktest_make_sample_data(&p->kdcRealm);
+    p->cusec = SAMPLE_USEC;
+    p->ctime = SAMPLE_TIME;
+    p->nonce = SAMPLE_NONCE;
+}
+
+static void
+ktest_make_sample_oid(krb5_data *p)
+{
+    krb5_data_parse(p, "\052\206\110\206\367\022\001\002\002");
+}
+
+static void
+ktest_make_sample_algorithm_identifier(krb5_algorithm_identifier *p)
+{
+    ktest_make_sample_oid(&p->algorithm);
+    /* Need a valid DER encoding here; this is the OCTET STRING "params". */
+    krb5_data_parse(&p->parameters, "\x04\x06" "params");
+}
+
+static void
+ktest_make_sample_algorithm_identifier_no_params(krb5_algorithm_identifier *p)
+{
+    ktest_make_sample_oid(&p->algorithm);
+    p->parameters = empty_data();
+}
+
+static void
+ktest_make_sample_subject_pk_info(krb5_subject_pk_info *p)
+{
+    ktest_make_sample_algorithm_identifier(&p->algorithm);
+    ktest_make_sample_data(&p->subjectPublicKey);
+}
+
+static void
+ktest_make_sample_external_principal_identifier(
+    krb5_external_principal_identifier *p)
+{
+    ktest_make_sample_data(&p->subjectName);
+    ktest_make_sample_data(&p->issuerAndSerialNumber);
+    ktest_make_sample_data(&p->subjectKeyIdentifier);
+}
+
+static void
+ktest_make_sample_trusted_ca_principalName(krb5_trusted_ca *p)
+{
+    p->choice = choice_trusted_cas_principalName;
+    ktest_make_sample_principal(&p->u.principalName);
+}
+
+static void
+ktest_make_sample_trusted_ca_caName(krb5_trusted_ca *p)
+{
+    p->choice = choice_trusted_cas_caName;
+    ktest_make_sample_data(&p->u.caName);
+}
+
+static void
+ktest_make_sample_trusted_ca_issuerAndSerial(krb5_trusted_ca *p)
+{
+    p->choice = choice_trusted_cas_issuerAndSerial;
+    ktest_make_sample_data(&p->u.issuerAndSerial);
+}
+
+void
+ktest_make_sample_pa_pk_as_req(krb5_pa_pk_as_req *p)
+{
+    ktest_make_sample_data(&p->signedAuthPack);
+    p->trustedCertifiers =
+        ealloc(2 * sizeof(krb5_external_principal_identifier *));
+    p->trustedCertifiers[0] =
+        ealloc(sizeof(krb5_external_principal_identifier));
+    ktest_make_sample_external_principal_identifier(p->trustedCertifiers[0]);
+    p->trustedCertifiers[1] = NULL;
+    ktest_make_sample_data(&p->kdcPkId);
+}
+
+void
+ktest_make_sample_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *p)
+{
+    int i;
+
+    ktest_make_sample_data(&p->signedAuthPack);
+    p->trustedCertifiers =
+        ealloc(4 * sizeof(krb5_external_principal_identifier *));
+    for (i = 0; i < 3; i++) {
+        p->trustedCertifiers[i] =
+            ealloc(sizeof(krb5_external_principal_identifier));
+    }
+    ktest_make_sample_trusted_ca_principalName(p->trustedCertifiers[0]);
+    ktest_make_sample_trusted_ca_caName(p->trustedCertifiers[1]);
+    ktest_make_sample_trusted_ca_issuerAndSerial(p->trustedCertifiers[2]);
+    p->trustedCertifiers[3] = NULL;
+    ktest_make_sample_data(&p->kdcCert);
+    ktest_make_sample_data(&p->encryptionCert);
+}
+
+static void
+ktest_make_sample_dh_rep_info(krb5_dh_rep_info *p)
+{
+    ktest_make_sample_data(&p->dhSignedData);
+    ktest_make_sample_data(&p->serverDHNonce);
+    p->kdfID = ealloc(sizeof(krb5_data));
+    ktest_make_sample_data(p->kdfID);
+}
+
+void
+ktest_make_sample_pa_pk_as_rep_dhInfo(krb5_pa_pk_as_rep *p)
+{
+    p->choice = choice_pa_pk_as_rep_dhInfo;
+    ktest_make_sample_dh_rep_info(&p->u.dh_Info);
+}
+
+void
+ktest_make_sample_pa_pk_as_rep_encKeyPack(krb5_pa_pk_as_rep *p)
+{
+    p->choice = choice_pa_pk_as_rep_encKeyPack;
+    ktest_make_sample_data(&p->u.encKeyPack);
+}
+
+void
+ktest_make_sample_pa_pk_as_rep_draft9_dhSignedData(krb5_pa_pk_as_rep_draft9 *p)
+{
+    p->choice = choice_pa_pk_as_rep_draft9_dhSignedData;
+    ktest_make_sample_data(&p->u.dhSignedData);
+}
+
+void
+ktest_make_sample_pa_pk_as_rep_draft9_encKeyPack(krb5_pa_pk_as_rep_draft9 *p)
+{
+    p->choice = choice_pa_pk_as_rep_draft9_encKeyPack;
+    ktest_make_sample_data(&p->u.encKeyPack);
+}
+
+void
+ktest_make_sample_auth_pack(krb5_auth_pack *p)
+{
+    ktest_make_sample_pk_authenticator(&p->pkAuthenticator);
+    p->clientPublicValue = ealloc(sizeof(krb5_subject_pk_info));
+    ktest_make_sample_subject_pk_info(p->clientPublicValue);
+    p->supportedCMSTypes = ealloc(3 * sizeof(krb5_algorithm_identifier *));
+    p->supportedCMSTypes[0] = ealloc(sizeof(krb5_algorithm_identifier));
+    ktest_make_sample_algorithm_identifier(p->supportedCMSTypes[0]);
+    p->supportedCMSTypes[1] = ealloc(sizeof(krb5_algorithm_identifier));
+    ktest_make_sample_algorithm_identifier_no_params(p->supportedCMSTypes[1]);
+    p->supportedCMSTypes[2] = NULL;
+    ktest_make_sample_data(&p->clientDHNonce);
+    p->supportedKDFs = ealloc(2 * sizeof(krb5_data ));
+    p->supportedKDFs[0] = ealloc(sizeof(krb5_data));
+    ktest_make_sample_data(p->supportedKDFs[0]);
+    p->supportedKDFs[1] = NULL;
+}
+
+void
+ktest_make_sample_auth_pack_draft9(krb5_auth_pack_draft9 *p)
+{
+    ktest_make_sample_pk_authenticator_draft9(&p->pkAuthenticator);
+    p->clientPublicValue = ealloc(sizeof(krb5_subject_pk_info));
+    ktest_make_sample_subject_pk_info(p->clientPublicValue);
+}
+
+void
+ktest_make_sample_kdc_dh_key_info(krb5_kdc_dh_key_info *p)
+{
+    ktest_make_sample_data(&p->subjectPublicKey);
+    p->nonce = SAMPLE_NONCE;
+    p->dhKeyExpiration = SAMPLE_TIME;
+}
+
+void
+ktest_make_sample_reply_key_pack(krb5_reply_key_pack *p)
+{
+    ktest_make_sample_keyblock(&p->replyKey);
+    ktest_make_sample_checksum(&p->asChecksum);
+}
+
+void
+ktest_make_sample_reply_key_pack_draft9(krb5_reply_key_pack_draft9 *p)
+{
+    ktest_make_sample_keyblock(&p->replyKey);
+    p->nonce = SAMPLE_NONCE;
+}
+
+void
+ktest_make_sample_sp80056a_other_info(krb5_sp80056a_other_info *p)
+{
+    ktest_make_sample_algorithm_identifier_no_params(&p->algorithm_identifier);
+    ktest_make_sample_principal(&p->party_u_info);
+    ktest_make_sample_principal(&p->party_v_info);
+    ktest_make_sample_data(&p->supp_pub_info);
+}
+
+void
+ktest_make_sample_pkinit_supp_pub_info(krb5_pkinit_supp_pub_info *p)
+{
+    p->enctype = ENCTYPE_DES_CBC_CRC;
+    ktest_make_sample_data(&p->as_req);
+    ktest_make_sample_data(&p->pk_as_rep);
+}
+
+#endif /* not DISABLE_PKINIT */
+
 #ifdef ENABLE_LDAP
 static void
 ktest_make_sample_key_data(krb5_key_data *p, int i)
@@ -711,6 +928,13 @@ ktest_empty_data(krb5_data *d)
         d->data = NULL;
         d->length = 0;
     }
+}
+
+static void
+ktest_empty_checksum(krb5_checksum *cs)
+{
+    free(cs->contents);
+    cs->contents = NULL;
 }
 
 void
@@ -1260,6 +1484,195 @@ ktest_empty_iakerb_finished(krb5_iakerb_finished *p)
 {
     krb5_free_checksum_contents(NULL, &p->checksum);
 }
+
+#ifndef DISABLE_PKINIT
+
+static void
+ktest_empty_pk_authenticator(krb5_pk_authenticator *p)
+{
+    ktest_empty_checksum(&p->paChecksum);
+    p->paChecksum.contents = NULL;
+}
+
+static void
+ktest_empty_pk_authenticator_draft9(krb5_pk_authenticator_draft9 *p)
+{
+    ktest_destroy_principal(&p->kdcName);
+    ktest_empty_data(&p->kdcRealm);
+}
+
+static void
+ktest_empty_algorithm_identifier(krb5_algorithm_identifier *p)
+{
+    ktest_empty_data(&p->algorithm);
+    ktest_empty_data(&p->parameters);
+}
+
+static void
+ktest_empty_subject_pk_info(krb5_subject_pk_info *p)
+{
+    ktest_empty_algorithm_identifier(&p->algorithm);
+    ktest_empty_data(&p->subjectPublicKey);
+}
+
+static void
+ktest_empty_external_principal_identifier(
+    krb5_external_principal_identifier *p)
+{
+    ktest_empty_data(&p->subjectName);
+    ktest_empty_data(&p->issuerAndSerialNumber);
+    ktest_empty_data(&p->subjectKeyIdentifier);
+}
+
+static void
+ktest_empty_trusted_ca(krb5_trusted_ca *p)
+{
+    if (p->choice == choice_trusted_cas_principalName)
+        ktest_destroy_principal(&p->u.principalName);
+    else if (p->choice == choice_trusted_cas_caName)
+        ktest_empty_data(&p->u.caName);
+    else if (p->choice == choice_trusted_cas_issuerAndSerial)
+        ktest_empty_data(&p->u.issuerAndSerial);
+    p->choice = choice_trusted_cas_UNKNOWN;
+}
+
+void
+ktest_empty_pa_pk_as_req(krb5_pa_pk_as_req *p)
+{
+    krb5_external_principal_identifier **pi;
+
+    ktest_empty_data(&p->signedAuthPack);
+    for (pi = p->trustedCertifiers; *pi != NULL; pi++) {
+        ktest_empty_external_principal_identifier(*pi);
+        free(*pi);
+    }
+    free(p->trustedCertifiers);
+    p->trustedCertifiers = NULL;
+    ktest_empty_data(&p->kdcPkId);
+}
+
+void
+ktest_empty_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *p)
+{
+    krb5_trusted_ca **ca;
+
+    ktest_empty_data(&p->signedAuthPack);
+    if (p->trustedCertifiers != NULL) {
+        for (ca = p->trustedCertifiers; *ca != NULL; ca++) {
+            ktest_empty_trusted_ca(*ca);
+            free(*ca);
+        }
+        free(p->trustedCertifiers);
+        p->trustedCertifiers = NULL;
+    }
+    ktest_empty_data(&p->kdcCert);
+    ktest_empty_data(&p->encryptionCert);
+}
+
+static void
+ktest_empty_dh_rep_info(krb5_dh_rep_info *p)
+{
+    ktest_empty_data(&p->dhSignedData);
+    ktest_empty_data(&p->serverDHNonce);
+    ktest_destroy_data(&p->kdfID);
+}
+
+void
+ktest_empty_pa_pk_as_rep(krb5_pa_pk_as_rep *p)
+{
+    if (p->choice == choice_pa_pk_as_rep_dhInfo)
+        ktest_empty_dh_rep_info(&p->u.dh_Info);
+    else if (p->choice == choice_pa_pk_as_rep_encKeyPack)
+        ktest_empty_data(&p->u.encKeyPack);
+    p->choice = choice_pa_pk_as_rep_UNKNOWN;
+}
+
+void
+ktest_empty_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 *p)
+{
+    if (p->choice == choice_pa_pk_as_rep_draft9_dhSignedData)
+        ktest_empty_data(&p->u.dhSignedData);
+    else if (p->choice == choice_pa_pk_as_rep_draft9_encKeyPack)
+        ktest_empty_data(&p->u.encKeyPack);
+    p->choice = choice_pa_pk_as_rep_draft9_UNKNOWN;
+}
+
+void
+ktest_empty_auth_pack(krb5_auth_pack *p)
+{
+    krb5_algorithm_identifier **ai;
+    krb5_data **d;
+
+    ktest_empty_pk_authenticator(&p->pkAuthenticator);
+    if (p->clientPublicValue != NULL) {
+        ktest_empty_subject_pk_info(p->clientPublicValue);
+        free(p->clientPublicValue);
+        p->clientPublicValue = NULL;
+    }
+    if (p->supportedCMSTypes != NULL) {
+        for (ai = p->supportedCMSTypes; *ai != NULL; ai++) {
+            ktest_empty_algorithm_identifier(*ai);
+            free(*ai);
+        }
+        free(p->supportedCMSTypes);
+        p->supportedCMSTypes = NULL;
+    }
+    ktest_empty_data(&p->clientDHNonce);
+    if (p->supportedKDFs != NULL) {
+        for (d = p->supportedKDFs; *d != NULL; d++) {
+            ktest_empty_data(*d);
+            free(*d);
+        }
+        free(p->supportedKDFs);
+        p->supportedKDFs = NULL;
+    }
+}
+
+void
+ktest_empty_auth_pack_draft9(krb5_auth_pack_draft9 *p)
+{
+    ktest_empty_pk_authenticator_draft9(&p->pkAuthenticator);
+    if (p->clientPublicValue != NULL) {
+        ktest_empty_subject_pk_info(p->clientPublicValue);
+        free(p->clientPublicValue);
+        p->clientPublicValue = NULL;
+    }
+}
+
+void
+ktest_empty_kdc_dh_key_info(krb5_kdc_dh_key_info *p)
+{
+    ktest_empty_data(&p->subjectPublicKey);
+}
+
+void
+ktest_empty_reply_key_pack(krb5_reply_key_pack *p)
+{
+    ktest_empty_keyblock(&p->replyKey);
+    ktest_empty_checksum(&p->asChecksum);
+}
+
+void
+ktest_empty_reply_key_pack_draft9(krb5_reply_key_pack_draft9 *p)
+{
+    ktest_empty_keyblock(&p->replyKey);
+}
+
+void ktest_empty_sp80056a_other_info(krb5_sp80056a_other_info *p)
+{
+    ktest_empty_algorithm_identifier(&p->algorithm_identifier);
+    ktest_destroy_principal(&p->party_u_info);
+    ktest_destroy_principal(&p->party_v_info);
+    ktest_empty_data(&p->supp_pub_info);
+}
+
+void ktest_empty_pkinit_supp_pub_info(krb5_pkinit_supp_pub_info *p)
+{
+    ktest_empty_data(&p->as_req);
+    ktest_empty_data(&p->pk_as_rep);
+}
+
+#endif /* not DISABLE_PKINIT */
 
 #ifdef ENABLE_LDAP
 void

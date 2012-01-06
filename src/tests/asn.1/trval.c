@@ -221,8 +221,8 @@ context_restart:
 
     print_tag_type(fp, eid, lev);
 
-    if (print_context_shortcut &&
-        ((eid & ID_CLASS) == CLASS_CONT) && (lev > 0)) {
+    if (print_context_shortcut && (eid & ID_CLASS) == CLASS_CONT &&
+        (eid & ID_FORM) == FORM_CONS && lev > 0) {
         rlen_ext += 2 + xlen;
         enc += 2 + xlen;
         goto context_restart;

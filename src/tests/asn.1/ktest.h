@@ -94,6 +94,24 @@ void ktest_make_sample_ad_signedpath(krb5_ad_signedpath *p);
 void ktest_make_sample_iakerb_header(krb5_iakerb_header *p);
 void ktest_make_sample_iakerb_finished(krb5_iakerb_finished *p);
 
+#ifndef DISABLE_PKINIT
+void ktest_make_sample_pa_pk_as_req(krb5_pa_pk_as_req *p);
+void ktest_make_sample_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *p);
+void ktest_make_sample_pa_pk_as_rep_dhInfo(krb5_pa_pk_as_rep *p);
+void ktest_make_sample_pa_pk_as_rep_encKeyPack(krb5_pa_pk_as_rep *p);
+void ktest_make_sample_pa_pk_as_rep_draft9_dhSignedData(
+    krb5_pa_pk_as_rep_draft9 *p);
+void ktest_make_sample_pa_pk_as_rep_draft9_encKeyPack(
+    krb5_pa_pk_as_rep_draft9 *p);
+void ktest_make_sample_auth_pack(krb5_auth_pack *p);
+void ktest_make_sample_auth_pack_draft9(krb5_auth_pack_draft9 *p);
+void ktest_make_sample_kdc_dh_key_info(krb5_kdc_dh_key_info *p);
+void ktest_make_sample_reply_key_pack(krb5_reply_key_pack *p);
+void ktest_make_sample_reply_key_pack_draft9(krb5_reply_key_pack_draft9 *p);
+void ktest_make_sample_sp80056a_other_info(krb5_sp80056a_other_info *p);
+void ktest_make_sample_pkinit_supp_pub_info(krb5_pkinit_supp_pub_info *p);
+#endif
+
 #ifdef ENABLE_LDAP
 void ktest_make_sample_ldap_seqof_key_data(ldap_seqof_key_data *p);
 #endif
@@ -160,6 +178,20 @@ void ktest_empty_ad_signedpath_data(krb5_ad_signedpath_data *p);
 void ktest_empty_ad_signedpath(krb5_ad_signedpath *p);
 void ktest_empty_iakerb_header(krb5_iakerb_header *p);
 void ktest_empty_iakerb_finished(krb5_iakerb_finished *p);
+
+#ifndef DISABLE_PKINIT
+void ktest_empty_pa_pk_as_req(krb5_pa_pk_as_req *p);
+void ktest_empty_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *p);
+void ktest_empty_pa_pk_as_rep(krb5_pa_pk_as_rep *p);
+void ktest_empty_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 *p);
+void ktest_empty_auth_pack(krb5_auth_pack *p);
+void ktest_empty_auth_pack_draft9(krb5_auth_pack_draft9 *p);
+void ktest_empty_kdc_dh_key_info(krb5_kdc_dh_key_info *p);
+void ktest_empty_reply_key_pack(krb5_reply_key_pack *p);
+void ktest_empty_reply_key_pack_draft9(krb5_reply_key_pack_draft9 *p);
+void ktest_empty_sp80056a_other_info(krb5_sp80056a_other_info *p);
+void ktest_empty_pkinit_supp_pub_info(krb5_pkinit_supp_pub_info *p);
+#endif
 
 #ifdef ENABLE_LDAP
 void ktest_empty_ldap_seqof_key_data(krb5_context, ldap_seqof_key_data *p);

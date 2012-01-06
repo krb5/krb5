@@ -47,19 +47,25 @@ check-decode: krb5_decode_test
 		export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./krb5_decode_test
 
-expected_encode.out: reference_encode.out ldap_encode.out
-	if test "$(LDAP)" = yes; then \
-	  cat $(srcdir)/reference_encode.out $(srcdir)/ldap_encode.out > expected_encode.out; \
-	else \
-	  cat $(srcdir)/reference_encode.out > expected_encode.out; \
-	fi
+PKINIT_ENCODE_OUT=$(PKINIT_ENCODE_OUT-@PKINIT@)
+PKINIT_ENCODE_OUT-yes=$(srcdir)/pkinit_encode.out
+PKINIT_ENCODE_OUT-no=
+LDAP_ENCODE_OUT=$(LDAP_ENCODE_OUT-@LDAP@)
+LDAP_ENCODE_OUT-yes=$(srcdir)/ldap_encode.out
+LDAP_ENCODE_OUT-no=
+expected_encode.out: reference_encode.out pkinit_encode.out ldap_encode.out
+	cat $(srcdir)/reference_encode.out $(PKINIT_ENCODE_OUT) \
+		$(LDAP_ENCODE_OUT) > $@
 
-expected_trval.out: trval_reference.out ldap_trval.out
-	if test "$(LDAP)" = yes; then \
-	  cat $(srcdir)/trval_reference.out $(srcdir)/ldap_trval.out > expected_trval.out; \
-	else \
-	  cat $(srcdir)/trval_reference.out > expected_trval.out; \
-	fi
+PKINIT_TRVAL_OUT=$(PKINIT_TRVAL_OUT-@PKINIT@)
+PKINIT_TRVAL_OUT-yes=$(srcdir)/pkinit_trval.out
+PKINIT_TRVAL_OUT-no=
+LDAP_TRVAL_OUT=$(LDAP_TRVAL_OUT-@LDAP@)
+LDAP_TRVAL_OUT-yes=$(srcdir)/ldap_trval.out
+LDAP_TRVAL_OUT-no=
+expected_trval.out: trval_reference.out pkinit_trval.out ldap_trval.out
+	cat $(srcdir)/trval_reference.out $(PKINIT_TRVAL_OUT) \
+		$(LDAP_TRVAL_OUT) > $@
 
 check-encode: krb5_encode_test expected_encode.out
 	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; \
