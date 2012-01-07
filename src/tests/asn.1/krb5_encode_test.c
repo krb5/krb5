@@ -635,15 +635,6 @@ main(argc, argv)
         ktest_destroy_enc_data(&enc_data);
     }
     /****************************************************************/
-    /* encode_krb5_sam_challenge */
-    {
-        krb5_sam_challenge sam_ch;
-        ktest_make_sample_sam_challenge(&sam_ch);
-        encode_run(sam_ch,krb5_sam_challenge,"sam_challenge","",
-                   encode_krb5_sam_challenge);
-        ktest_empty_sam_challenge(&sam_ch);
-    }
-    /****************************************************************/
     /* encode_krb5_sam_challenge_2 */
     {
         krb5_sam_challenge_2 sam_ch2;
@@ -660,42 +651,6 @@ main(argc, argv)
         encode_run(body,krb5_sam_challenge_2_body,"sam_challenge_2_body","",
                    encode_krb5_sam_challenge_2_body);
         ktest_empty_sam_challenge_2_body(&body);
-    }
-    /****************************************************************/
-    /* encode_krb5_sam_response */
-    {
-        krb5_sam_response sam_ch;
-        ktest_make_sample_sam_response(&sam_ch);
-        encode_run(sam_ch,krb5_sam_response,"sam_response","",
-                   encode_krb5_sam_response);
-        ktest_empty_sam_response(&sam_ch);
-    }
-    /****************************************************************/
-    /* encode_krb5_sam_key */
-    {
-        krb5_sam_key sam_ch;
-        ktest_make_sample_sam_key(&sam_ch);
-        encode_run(sam_ch,krb5_sam_key,"sam_key","",
-                   encode_krb5_sam_key);
-        ktest_empty_sam_key(&sam_ch);
-    }
-    /****************************************************************/
-    /* encode_krb5_enc_sam_response_enc */
-    {
-        krb5_enc_sam_response_enc sam_ch;
-        ktest_make_sample_enc_sam_response_enc(&sam_ch);
-        encode_run(sam_ch,krb5_enc_sam_response_enc,"enc_sam_response_enc","",
-                   encode_krb5_enc_sam_response_enc);
-        ktest_empty_enc_sam_response_enc(&sam_ch);
-    }
-    /****************************************************************/
-    /* encode_krb5_predicted_sam_response */
-    {
-        krb5_predicted_sam_response sam_ch;
-        ktest_make_sample_predicted_sam_response(&sam_ch);
-        encode_run(sam_ch,krb5_predicted_sam_response,"predicted_sam_response","",
-                   encode_krb5_predicted_sam_response);
-        ktest_empty_predicted_sam_response(&sam_ch);
     }
     /****************************************************************/
     /* encode_krb5_sam_response_2 */

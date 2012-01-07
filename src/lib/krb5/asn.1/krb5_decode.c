@@ -663,18 +663,6 @@ decode_krb5_pa_enc_ts(const krb5_data *code, krb5_pa_enc_ts **repptr)
 }
 
 krb5_error_code
-decode_krb5_sam_challenge(const krb5_data *code, krb5_sam_challenge **repptr)
-{
-    setup_buf_only(krb5_sam_challenge *);
-    alloc_field(rep);
-
-    retval = asn1_decode_sam_challenge(&buf,rep);
-    if (retval) clean_return(retval);
-
-    cleanup(free);
-}
-
-krb5_error_code
 decode_krb5_sam_challenge_2(const krb5_data *code,
                             krb5_sam_challenge_2 **repptr)
 {
@@ -701,31 +689,6 @@ decode_krb5_sam_challenge_2_body(const krb5_data *code,
 }
 
 krb5_error_code
-decode_krb5_enc_sam_key(const krb5_data *code, krb5_sam_key **repptr)
-{
-    setup_buf_only(krb5_sam_key *);
-    alloc_field(rep);
-
-    retval = asn1_decode_enc_sam_key(&buf,rep);
-    if (retval) clean_return(retval);
-
-    cleanup(free);
-}
-
-krb5_error_code
-decode_krb5_enc_sam_response_enc(const krb5_data *code,
-                                 krb5_enc_sam_response_enc **repptr)
-{
-    setup_buf_only(krb5_enc_sam_response_enc *);
-    alloc_field(rep);
-
-    retval = asn1_decode_enc_sam_response_enc(&buf,rep);
-    if (retval) clean_return(retval);
-
-    cleanup(free);
-}
-
-krb5_error_code
 decode_krb5_enc_sam_response_enc_2(const krb5_data *code,
                                    krb5_enc_sam_response_enc_2 **repptr)
 {
@@ -739,19 +702,6 @@ decode_krb5_enc_sam_response_enc_2(const krb5_data *code,
 }
 
 krb5_error_code
-decode_krb5_sam_response(const krb5_data *code,
-                         krb5_sam_response **repptr)
-{
-    setup_buf_only(krb5_sam_response *);
-    alloc_field(rep);
-
-    retval = asn1_decode_sam_response(&buf,rep);
-    if (retval) clean_return(retval);
-
-    cleanup(free);
-}
-
-krb5_error_code
 decode_krb5_sam_response_2(const krb5_data *code,
                            krb5_sam_response_2 **repptr)
 {
@@ -759,19 +709,6 @@ decode_krb5_sam_response_2(const krb5_data *code,
     alloc_field(rep);
 
     retval = asn1_decode_sam_response_2(&buf,rep);
-    if (retval) clean_return(retval);
-
-    cleanup(free);
-}
-
-krb5_error_code
-decode_krb5_predicted_sam_response(const krb5_data *code,
-                                   krb5_predicted_sam_response **repptr)
-{
-    setup_buf_only(krb5_predicted_sam_response *);           /* preallocated */
-    alloc_field(rep);
-
-    retval = asn1_decode_predicted_sam_response(&buf,rep);
     if (retval) clean_return(retval);
 
     cleanup(free);

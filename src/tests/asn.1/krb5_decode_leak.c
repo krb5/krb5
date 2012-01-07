@@ -606,16 +606,6 @@ main(int argc, char **argv)
         ktest_destroy_enc_data(&enc_data);
     }
     /****************************************************************/
-    /* encode_krb5_sam_challenge */
-    {
-        krb5_sam_challenge sam_ch, *tmp;
-
-        ktest_make_sample_sam_challenge(&sam_ch);
-        leak_test(sam_ch, encode_krb5_sam_challenge, decode_krb5_sam_challenge,
-                  krb5_free_sam_challenge);
-        ktest_empty_sam_challenge(&sam_ch);
-    }
-    /****************************************************************/
     /* encode_krb5_sam_challenge_2 */
     {
         krb5_sam_challenge_2 sam_ch2, *tmp;
@@ -635,38 +625,6 @@ main(int argc, char **argv)
                   decode_krb5_sam_challenge_2_body,
                   krb5_free_sam_challenge_2_body);
         ktest_empty_sam_challenge_2_body(&body);
-    }
-    /****************************************************************/
-    /* encode_krb5_sam_response */
-    {
-        krb5_sam_response sam_ch, *tmp;
-
-        ktest_make_sample_sam_response(&sam_ch);
-        leak_test(sam_ch, encode_krb5_sam_response, decode_krb5_sam_response,
-                  krb5_free_sam_response);
-        ktest_empty_sam_response(&sam_ch);
-    }
-    /****************************************************************/
-    /* encode_krb5_enc_sam_response_enc */
-    {
-        krb5_enc_sam_response_enc sam_ch, *tmp;
-
-        ktest_make_sample_enc_sam_response_enc(&sam_ch);
-        leak_test(sam_ch, encode_krb5_enc_sam_response_enc,
-                  decode_krb5_enc_sam_response_enc,
-                  krb5_free_enc_sam_response_enc);
-        ktest_empty_enc_sam_response_enc(&sam_ch);
-    }
-    /****************************************************************/
-    /* encode_krb5_predicted_sam_response */
-    {
-        krb5_predicted_sam_response sam_ch, *tmp;
-
-        ktest_make_sample_predicted_sam_response(&sam_ch);
-        leak_test(sam_ch, encode_krb5_predicted_sam_response,
-                  decode_krb5_predicted_sam_response,
-                  krb5_free_predicted_sam_response);
-        ktest_empty_predicted_sam_response(&sam_ch);
     }
     /****************************************************************/
     /* encode_krb5_sam_response_2 */

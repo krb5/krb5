@@ -84,10 +84,8 @@ generic(ktest_equal_krb5_pwd_data,krb5_pwd_data);
 generic(ktest_equal_krb5_alt_method,krb5_alt_method);
 generic(ktest_equal_krb5_pa_enc_ts,krb5_pa_enc_ts);
 
-generic(ktest_equal_sam_challenge,krb5_sam_challenge);
 generic(ktest_equal_sam_challenge_2,krb5_sam_challenge_2);
 generic(ktest_equal_sam_challenge_2_body,krb5_sam_challenge_2_body);
-generic(ktest_equal_sam_response,krb5_sam_response);
 
 int ktest_equal_last_req(krb5_last_req_entry **ref, krb5_last_req_entry **var);
 int ktest_equal_sequence_of_ticket(krb5_ticket **ref, krb5_ticket **var);

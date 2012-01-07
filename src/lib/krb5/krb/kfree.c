@@ -537,42 +537,12 @@ krb5_free_string(krb5_context context, char *val)
 }
 
 void KRB5_CALLCONV
-krb5_free_sam_challenge(krb5_context ctx, krb5_sam_challenge *sc)
-{
-    if (!sc)
-        return;
-    krb5_free_sam_challenge_contents(ctx, sc);
-    free(sc);
-}
-
-void KRB5_CALLCONV
 krb5_free_sam_challenge_2(krb5_context ctx, krb5_sam_challenge_2 *sc2)
 {
     if (!sc2)
         return;
     krb5_free_sam_challenge_2_contents(ctx, sc2);
     free(sc2);
-}
-
-void KRB5_CALLCONV
-krb5_free_sam_challenge_contents(krb5_context ctx, krb5_sam_challenge *sc)
-{
-    if (!sc)
-        return;
-    if (sc->sam_type_name.data)
-        krb5_free_data_contents(ctx, &sc->sam_type_name);
-    if (sc->sam_track_id.data)
-        krb5_free_data_contents(ctx, &sc->sam_track_id);
-    if (sc->sam_challenge_label.data)
-        krb5_free_data_contents(ctx, &sc->sam_challenge_label);
-    if (sc->sam_challenge.data)
-        krb5_free_data_contents(ctx, &sc->sam_challenge);
-    if (sc->sam_response_prompt.data)
-        krb5_free_data_contents(ctx, &sc->sam_response_prompt);
-    if (sc->sam_pk_for_sad.data)
-        krb5_free_data_contents(ctx, &sc->sam_pk_for_sad);
-    free(sc->sam_cksum.contents);
-    sc->sam_cksum.contents = 0;
 }
 
 void KRB5_CALLCONV
@@ -627,34 +597,12 @@ krb5_free_sam_challenge_2_body_contents(krb5_context ctx,
 }
 
 void KRB5_CALLCONV
-krb5_free_sam_response(krb5_context ctx, krb5_sam_response *sr)
-{
-    if (!sr)
-        return;
-    krb5_free_sam_response_contents(ctx, sr);
-    free(sr);
-}
-
-void KRB5_CALLCONV
 krb5_free_sam_response_2(krb5_context ctx, krb5_sam_response_2 *sr2)
 {
     if (!sr2)
         return;
     krb5_free_sam_response_2_contents(ctx, sr2);
     free(sr2);
-}
-
-void KRB5_CALLCONV
-krb5_free_sam_response_contents(krb5_context ctx, krb5_sam_response *sr)
-{
-    if (!sr)
-        return;
-    if (sr->sam_track_id.data)
-        krb5_free_data_contents(ctx, &sr->sam_track_id);
-    if (sr->sam_enc_key.ciphertext.data)
-        krb5_free_data_contents(ctx, &sr->sam_enc_key.ciphertext);
-    if (sr->sam_enc_nonce_or_ts.ciphertext.data)
-        krb5_free_data_contents(ctx, &sr->sam_enc_nonce_or_ts.ciphertext);
 }
 
 void KRB5_CALLCONV
@@ -669,40 +617,6 @@ krb5_free_sam_response_2_contents(krb5_context ctx, krb5_sam_response_2 *sr2)
 }
 
 void KRB5_CALLCONV
-krb5_free_predicted_sam_response(krb5_context ctx,
-                                 krb5_predicted_sam_response *psr)
-{
-    if (!psr)
-        return;
-    krb5_free_predicted_sam_response_contents(ctx, psr);
-    free(psr);
-}
-
-void KRB5_CALLCONV
-krb5_free_predicted_sam_response_contents(krb5_context ctx,
-                                          krb5_predicted_sam_response *psr)
-{
-    if (!psr)
-        return;
-    if (psr->sam_key.contents)
-        krb5_free_keyblock_contents(ctx, &psr->sam_key);
-    krb5_free_principal(ctx, psr->client);
-    psr->client = 0;
-    if (psr->msd.data)
-        krb5_free_data_contents(ctx, &psr->msd);
-}
-
-void KRB5_CALLCONV
-krb5_free_enc_sam_response_enc(krb5_context ctx,
-                               krb5_enc_sam_response_enc *esre)
-{
-    if (!esre)
-        return;
-    krb5_free_enc_sam_response_enc_contents(ctx, esre);
-    free(esre);
-}
-
-void KRB5_CALLCONV
 krb5_free_enc_sam_response_enc_2(krb5_context ctx,
                                  krb5_enc_sam_response_enc_2 *esre2)
 {
@@ -710,16 +624,6 @@ krb5_free_enc_sam_response_enc_2(krb5_context ctx,
         return;
     krb5_free_enc_sam_response_enc_2_contents(ctx, esre2);
     free(esre2);
-}
-
-void KRB5_CALLCONV
-krb5_free_enc_sam_response_enc_contents(krb5_context ctx,
-                                        krb5_enc_sam_response_enc *esre)
-{
-    if (!esre)
-        return;
-    if (esre->sam_sad.data)
-        krb5_free_data_contents(ctx, &esre->sam_sad);
 }
 
 void KRB5_CALLCONV

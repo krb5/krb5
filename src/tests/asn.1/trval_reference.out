@@ -1175,20 +1175,6 @@ encode_krb5_enc_data:
 .  [kvno] [Integer] 5
 .  [cipher] [Octet String] "krbASN.1 test message"
 
-encode_krb5_sam_challenge:
-
-[Sequence/Sequence Of] 
-.  [0] [Integer] 42
-.  [1] [Bit String] 0x80000000
-.  [2] [Octet String] "type name"
-.  [4] [Octet String] "challenge label"
-.  [5] [Octet String] "challenge ipse"
-.  [6] [Octet String] "response_prompt ipse"
-.  [8] [Integer] 5517840
-.  [9] [Sequence/Sequence Of] 
-.  .  [0] [Integer] 1
-.  .  [1] [Octet String] "1234"
-
 encode_krb5_sam_challenge_2:
 
 [Sequence/Sequence Of] 
@@ -1210,55 +1196,6 @@ encode_krb5_sam_challenge_2_body:
 .  [6] [Octet String] "response_prompt ipse"
 .  [8] [Integer] 5517840
 .  [9] [Integer] 1
-
-encode_krb5_sam_response:
-
-[Sequence/Sequence Of] 
-.  [0] [Integer] 42
-.  [1] [Bit String] 0x80000000
-.  [2] [Octet String] "track data"
-.  [3] [Sequence/Sequence Of] 
-.  .  [0] [Integer] 1
-.  .  [1] [Integer] 1942
-.  .  [2] [Octet String] "key"
-.  [4] [Sequence/Sequence Of] 
-.  .  [0] [Integer] 1
-.  .  [1] [Integer] 3382
-.  .  [2] [Octet String] "nonce or ts"
-.  [5] [Integer] 5517840
-.  [6] [Generalized Time] "19940610060317Z"
-
-encode_krb5_sam_key:
-
-[Sequence/Sequence Of] 
-.  [0] [Sequence/Sequence Of] 
-.  .  [0] [Integer] 1
-.  .  [1] [Octet String] "12345678"
-
-encode_krb5_enc_sam_response_enc:
-
-[Sequence/Sequence Of] 
-.  [0] [Integer] 78634
-.  [1] [Generalized Time] "19700102034639Z"
-.  [2] [Integer] 399
-.  [3] [Octet String] "enc_sam_response_enc"
-
-encode_krb5_predicted_sam_response:
-
-[Sequence/Sequence Of] 
-.  [0] [Sequence/Sequence Of] 
-.  .  [0] [Integer] 1
-.  .  [1] [Octet String] "12345678"
-.  [1] [Bit String] 0x9
-.  [2] [Generalized Time] "19700101000017Z"
-.  [3] [Integer] 18
-.  [4] [General string] "ATHENA.MIT.EDU"
-.  [5] [Sequence/Sequence Of] 
-.  .  [0] [Integer] 1
-.  .  [1] [Sequence/Sequence Of] 
-.  .  .  [General string] "hftsai"
-.  .  .  [General string] "extra"
-.  [6] [Octet String] "hello"
 
 encode_krb5_sam_response_2:
 

@@ -502,24 +502,6 @@ ktest_equal_krb5_pa_enc_ts(krb5_pa_enc_ts *ref, krb5_pa_enc_ts *var)
 #define equal_str(f) struct_equal(f,ktest_equal_data)
 
 int
-ktest_equal_sam_challenge(krb5_sam_challenge *ref, krb5_sam_challenge *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && scalar_equal(sam_type);
-    p = p && scalar_equal(sam_flags);
-    p = p && scalar_equal(sam_nonce);
-    p = p && ktest_equal_checksum(&ref->sam_cksum,&var->sam_cksum);
-    p = p && equal_str(sam_track_id);
-    p = p && equal_str(sam_challenge_label);
-    p = p && equal_str(sam_challenge);
-    p = p && equal_str(sam_response_prompt);
-    p = p && equal_str(sam_pk_for_sad);
-    return p;
-}
-
-int
 ktest_equal_sam_challenge_2_body(krb5_sam_challenge_2_body *ref,
                                  krb5_sam_challenge_2_body *var)
 {
@@ -548,22 +530,6 @@ ktest_equal_sam_challenge_2(krb5_sam_challenge_2 *ref,
     else if (ref == NULL || var == NULL) return FALSE;
     p = p && equal_str(sam_challenge_2_body);
     p = p && ptr_equal(sam_cksum,ktest_equal_sequence_of_checksum);
-    return p;
-}
-
-int
-ktest_equal_sam_response(krb5_sam_response *ref, krb5_sam_response *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && scalar_equal(sam_type);
-    p = p && scalar_equal(sam_flags);
-    p = p && equal_str(sam_track_id);
-    p = p && struct_equal(sam_enc_key,ktest_equal_enc_data);
-    p = p && struct_equal(sam_enc_nonce_or_ts,ktest_equal_enc_data);
-    p = p && scalar_equal(sam_nonce);
-    p = p && scalar_equal(sam_patimestamp);
     return p;
 }
 

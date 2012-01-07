@@ -515,22 +515,6 @@ ktest_make_sample_pa_enc_ts(krb5_pa_enc_ts *pa_enc)
 }
 
 void
-ktest_make_sample_sam_challenge(krb5_sam_challenge *p)
-{
-    p->magic = KV5M_SAM_CHALLENGE;
-    p->sam_type = 42; /* information */
-    p->sam_flags = KRB5_SAM_USE_SAD_AS_KEY; /* KRB5_SAM_* values */
-    krb5_data_parse(&p->sam_type_name, "type name");
-    p->sam_track_id = empty_data();
-    krb5_data_parse(&p->sam_challenge_label, "challenge label");
-    krb5_data_parse(&p->sam_challenge, "challenge ipse");
-    krb5_data_parse(&p->sam_response_prompt, "response_prompt ipse");
-    p->sam_pk_for_sad = empty_data();
-    p->sam_nonce = 0x543210;
-    ktest_make_sample_checksum(&p->sam_cksum);
-}
-
-void
 ktest_make_sample_sam_challenge_2(krb5_sam_challenge_2 *p)
 {
     /* Need a valid DER sequence encoding here; this one contains the OCTET
@@ -558,23 +542,6 @@ ktest_make_sample_sam_challenge_2_body(krb5_sam_challenge_2_body *p)
 }
 
 void
-ktest_make_sample_sam_response(krb5_sam_response *p)
-{
-    p->magic = KV5M_SAM_RESPONSE;
-    p->sam_type = 42; /* information */
-    p->sam_flags = KRB5_SAM_USE_SAD_AS_KEY; /* KRB5_SAM_* values */
-    krb5_data_parse(&p->sam_track_id, "track data");
-    krb5_data_parse(&p->sam_enc_key.ciphertext, "key");
-    p->sam_enc_key.enctype = ENCTYPE_DES_CBC_CRC;
-    p->sam_enc_key.kvno = 1942;
-    krb5_data_parse(&p->sam_enc_nonce_or_ts.ciphertext, "nonce or ts");
-    p->sam_enc_nonce_or_ts.enctype = ENCTYPE_DES_CBC_CRC;
-    p->sam_enc_nonce_or_ts.kvno = 3382;
-    p->sam_nonce = 0x543210;
-    p->sam_patimestamp = SAMPLE_TIME;
-}
-
-void
 ktest_make_sample_sam_response_2(krb5_sam_response_2 *p)
 {
     p->magic = KV5M_SAM_RESPONSE;
@@ -585,23 +552,6 @@ ktest_make_sample_sam_response_2(krb5_sam_response_2 *p)
     p->sam_enc_nonce_or_sad.enctype = ENCTYPE_DES_CBC_CRC;
     p->sam_enc_nonce_or_sad.kvno = 3382;
     p->sam_nonce = 0x543210;
-}
-
-void
-ktest_make_sample_sam_key(krb5_sam_key *p)
-{
-    p->magic = 99;
-    ktest_make_sample_keyblock(&p->sam_key);
-}
-
-void
-ktest_make_sample_enc_sam_response_enc(krb5_enc_sam_response_enc *p)
-{
-    p->magic = 78;
-    p->sam_nonce = 78634;
-    p->sam_timestamp = 99999;
-    p->sam_usec = 399;
-    krb5_data_parse(&p->sam_sad, "enc_sam_response_enc");
 }
 
 void
@@ -948,18 +898,6 @@ ktest_make_sample_ldap_seqof_key_data(ldap_seqof_key_data *p)
         ktest_make_sample_key_data(&p->key_data[i], i);
 }
 #endif
-
-void
-ktest_make_sample_predicted_sam_response(krb5_predicted_sam_response *p)
-{
-    p->magic = 79;
-    ktest_make_sample_keyblock(&p->sam_key);
-    p->sam_flags = 9;
-    p->stime = 17;
-    p->susec = 18;
-    ktest_make_sample_principal(&p->client);
-    krb5_data_parse(&p->msd, "hello");
-}
 
 
 /****************************************************************/
@@ -1425,19 +1363,6 @@ ktest_empty_alt_method(krb5_alt_method *am)
 }
 
 void
-ktest_empty_sam_challenge(krb5_sam_challenge *p)
-{
-    ktest_empty_data(&p->sam_type_name);
-    ktest_empty_data(&p->sam_track_id);
-    ktest_empty_data(&p->sam_challenge_label);
-    ktest_empty_data(&p->sam_challenge);
-    ktest_empty_data(&p->sam_response_prompt);
-    ktest_empty_data(&p->sam_pk_for_sad);
-    free(p->sam_cksum.contents);
-    p->sam_cksum.contents = NULL;
-}
-
-void
 ktest_empty_sam_challenge_2(krb5_sam_challenge_2 *p)
 {
     krb5_checksum **ck;
@@ -1460,34 +1385,6 @@ ktest_empty_sam_challenge_2_body(krb5_sam_challenge_2_body *p)
     ktest_empty_data(&p->sam_challenge);
     ktest_empty_data(&p->sam_response_prompt);
     ktest_empty_data(&p->sam_pk_for_sad);
-}
-
-void
-ktest_empty_sam_response(krb5_sam_response *p)
-{
-    ktest_empty_data(&p->sam_track_id);
-    ktest_empty_data(&p->sam_enc_key.ciphertext);
-    ktest_empty_data(&p->sam_enc_nonce_or_ts.ciphertext);
-}
-
-void
-ktest_empty_sam_key(krb5_sam_key *p)
-{
-    free(p->sam_key.contents);
-}
-
-void
-ktest_empty_predicted_sam_response(krb5_predicted_sam_response *p)
-{
-    ktest_empty_keyblock(&p->sam_key);
-    ktest_destroy_principal(&p->client);
-    ktest_empty_data(&p->msd);
-}
-
-void
-ktest_empty_enc_sam_response_enc(krb5_enc_sam_response_enc *p)
-{
-    ktest_empty_data(&p->sam_sad);
 }
 
 void

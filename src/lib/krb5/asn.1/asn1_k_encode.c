@@ -464,45 +464,6 @@ DEFPTRTYPE(passwdsequence_ptr, passwdsequence);
 DEFNONEMPTYNULLTERMSEQOFTYPE(seqof_passwdsequence, passwdsequence_ptr);
 DEFPTRTYPE(ptr_seqof_passwdsequence, seqof_passwdsequence);
 
-
-static const struct field_info sam_challenge_fields[] = {
-    FIELDOF_NORM(krb5_sam_challenge, int32, sam_type, 0, 0),
-    FIELDOF_NORM(krb5_sam_challenge, krb5_flags, sam_flags, 1, 0),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_type_name, 2, 0, 2),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_track_id, 3, 0, 3),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_challenge_label,
-                4, 0, 4),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_challenge, 5, 0, 5),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_response_prompt,
-                6, 0, 6),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_pk_for_sad, 7, 0, 7),
-    FIELDOF_OPT(krb5_sam_challenge, int32, sam_nonce, 8, 0, 8),
-    FIELDOF_OPT(krb5_sam_challenge, checksum, sam_cksum, 9, 0, 9),
-};
-static unsigned int
-optional_sam_challenge(const void *p)
-{
-    const krb5_sam_challenge *val = p;
-    unsigned int optional = 0;
-
-    if (val->sam_cksum.length)
-        optional |= (1u << 9);
-
-    if (val->sam_nonce)
-        optional |= (1u << 8);
-
-    if (val->sam_pk_for_sad.length > 0) optional |= (1u << 7);
-    if (val->sam_response_prompt.length > 0) optional |= (1u << 6);
-    if (val->sam_challenge.length > 0) optional |= (1u << 5);
-    if (val->sam_challenge_label.length > 0) optional |= (1u << 4);
-    if (val->sam_track_id.length > 0) optional |= (1u << 3);
-    if (val->sam_type_name.length > 0) optional |= (1u << 2);
-
-    return optional;
-}
-DEFSEQTYPE(sam_challenge,krb5_sam_challenge,sam_challenge_fields,
-           optional_sam_challenge);
-
 static const struct field_info sam_challenge_2_fields[] = {
     FIELDOF_NORM(krb5_sam_challenge_2, opaque_data, sam_challenge_2_body,
                  0, 0),
@@ -546,32 +507,6 @@ optional_sam_challenge_2_body(const void *p)
 DEFSEQTYPE(sam_challenge_2_body,krb5_sam_challenge_2_body,sam_challenge_2_body_fields,
            optional_sam_challenge_2_body);
 
-
-static const struct field_info sam_key_fields[] = {
-    FIELDOF_NORM(krb5_sam_key, encryption_key, sam_key, 0, 0),
-};
-DEFSEQTYPE(sam_key, krb5_sam_key, sam_key_fields, 0);
-
-static const struct field_info enc_sam_response_enc_fields[] = {
-    FIELDOF_NORM(krb5_enc_sam_response_enc, int32, sam_nonce, 0, 0),
-    FIELDOF_NORM(krb5_enc_sam_response_enc, kerberos_time, sam_timestamp,
-                 1, 0),
-    FIELDOF_NORM(krb5_enc_sam_response_enc, int32, sam_usec, 2, 0),
-    FIELDOF_OPT(krb5_enc_sam_response_enc, ostring_data, sam_sad, 3, 0, 3),
-};
-static unsigned int
-optional_enc_sam_response_enc(const void *p)
-{
-    const krb5_enc_sam_response_enc *val = p;
-    unsigned int optional = 0;
-
-    if (val->sam_sad.length > 0) optional |= (1u << 3);
-
-    return optional;
-}
-DEFSEQTYPE(enc_sam_response_enc, krb5_enc_sam_response_enc,
-           enc_sam_response_enc_fields, optional_enc_sam_response_enc);
-
 static const struct field_info enc_sam_response_enc_2_fields[] = {
     FIELDOF_NORM(krb5_enc_sam_response_enc_2, int32, sam_nonce, 0, 0),
     FIELDOF_OPT(krb5_enc_sam_response_enc_2, ostring_data, sam_sad, 1, 0, 1),
@@ -588,34 +523,6 @@ optional_enc_sam_response_enc_2(const void *p)
 }
 DEFSEQTYPE(enc_sam_response_enc_2, krb5_enc_sam_response_enc_2,
            enc_sam_response_enc_2_fields, optional_enc_sam_response_enc_2);
-
-static const struct field_info sam_response_fields[] = {
-    FIELDOF_NORM(krb5_sam_response, int32, sam_type, 0, 0),
-    FIELDOF_NORM(krb5_sam_response, krb5_flags, sam_flags, 1, 0),
-    FIELDOF_OPT(krb5_sam_response, ostring_data, sam_track_id, 2, 0, 2),
-    FIELDOF_OPT(krb5_sam_response, encrypted_data, sam_enc_key, 3, 0, 3),
-    FIELDOF_NORM(krb5_sam_response, encrypted_data, sam_enc_nonce_or_ts, 4, 0),
-    FIELDOF_OPT(krb5_sam_response, int32, sam_nonce, 5, 0, 5),
-    FIELDOF_OPT(krb5_sam_response, kerberos_time, sam_patimestamp, 6, 0, 6),
-};
-static unsigned int
-optional_sam_response(const void *p)
-{
-    const krb5_sam_response *val = p;
-    unsigned int optional = 0;
-
-    if (val->sam_patimestamp)
-        optional |= (1u << 6);
-    if (val->sam_nonce)
-        optional |= (1u << 5);
-    if (val->sam_enc_key.ciphertext.length)
-        optional |= (1u << 3);
-    if (val->sam_track_id.length > 0) optional |= (1u << 2);
-
-    return optional;
-}
-DEFSEQTYPE(sam_response, krb5_sam_response, sam_response_fields,
-           optional_sam_response);
 
 static const struct field_info sam_response_2_fields[] = {
     FIELDOF_NORM(krb5_sam_response_2, int32, sam_type, 0, 0),
@@ -637,30 +544,6 @@ optional_sam_response_2(const void *p)
 }
 DEFSEQTYPE(sam_response_2, krb5_sam_response_2, sam_response_2_fields,
            optional_sam_response_2);
-
-static const struct field_info predicted_sam_response_fields[] = {
-    FIELDOF_NORM(krb5_predicted_sam_response, encryption_key, sam_key, 0, 0),
-    FIELDOF_NORM(krb5_predicted_sam_response, krb5_flags, sam_flags, 1, 0),
-    FIELDOF_NORM(krb5_predicted_sam_response, kerberos_time, stime, 2, 0),
-    FIELDOF_NORM(krb5_predicted_sam_response, int32, susec, 3, 0),
-    FIELDOF_NORM(krb5_predicted_sam_response, realm_of_principal, client,
-                 4, 0),
-    FIELDOF_NORM(krb5_predicted_sam_response, principal, client, 5, 0),
-    FIELDOF_OPT(krb5_predicted_sam_response, ostring_data, msd, 6, 0, 6),
-};
-static unsigned int
-optional_predicted_sam_response(const void *p)
-{
-    const krb5_predicted_sam_response *val = p;
-    unsigned int optional = 0;
-
-    if (val->msd.length > 0) optional |= (1u << 6);
-
-    return optional;
-}
-DEFSEQTYPE(predicted_sam_response, krb5_predicted_sam_response,
-           predicted_sam_response_fields,
-           optional_predicted_sam_response);
 
 static const struct field_info krb5_authenticator_fields[] = {
     /* Authenticator ::= [APPLICATION 2] SEQUENCE */
@@ -1438,19 +1321,12 @@ MAKE_FULL_ENCODER(encode_krb5_pwd_sequence, passwdsequence);
 MAKE_FULL_ENCODER(encode_krb5_pwd_data, pwd_data);
 MAKE_FULL_ENCODER(encode_krb5_padata_sequence, seq_of_pa_data);
 /* sam preauth additions */
-MAKE_FULL_ENCODER(encode_krb5_sam_challenge, sam_challenge);
 MAKE_FULL_ENCODER(encode_krb5_sam_challenge_2, sam_challenge_2);
 MAKE_FULL_ENCODER(encode_krb5_sam_challenge_2_body,
                   sam_challenge_2_body);
-MAKE_FULL_ENCODER(encode_krb5_sam_key, sam_key);
-MAKE_FULL_ENCODER(encode_krb5_enc_sam_response_enc,
-                  enc_sam_response_enc);
 MAKE_FULL_ENCODER(encode_krb5_enc_sam_response_enc_2,
                   enc_sam_response_enc_2);
-MAKE_FULL_ENCODER(encode_krb5_sam_response, sam_response);
 MAKE_FULL_ENCODER(encode_krb5_sam_response_2, sam_response_2);
-MAKE_FULL_ENCODER(encode_krb5_predicted_sam_response,
-                  predicted_sam_response);
 MAKE_FULL_ENCODER(encode_krb5_setpw_req, setpw_req);
 MAKE_FULL_ENCODER(encode_krb5_pa_for_user, pa_for_user);
 MAKE_FULL_ENCODER(encode_krb5_s4u_userid, s4u_userid);

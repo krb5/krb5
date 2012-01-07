@@ -39,36 +39,6 @@ asn1_decode_sam_flags(asn1buf *buf, krb5_flags *val)
     else var.length = 0
 
 asn1_error_code
-asn1_decode_sam_challenge(asn1buf *buf, krb5_sam_challenge *val)
-{
-    setup();
-    val->sam_type_name.data = NULL;
-    val->sam_track_id.data = NULL;
-    val->sam_challenge_label.data = NULL;
-    val->sam_response_prompt.data = NULL;
-    val->sam_pk_for_sad.data = NULL;
-    val->sam_cksum.contents = NULL;
-    { begin_structure();
-        get_field(val->sam_type,0,asn1_decode_int32);
-        get_field(val->sam_flags,1,asn1_decode_sam_flags);
-        opt_string(val->sam_type_name,2,asn1_decode_charstring);
-        opt_string(val->sam_track_id,3,asn1_decode_charstring);
-        opt_string(val->sam_challenge_label,4,asn1_decode_charstring);
-        opt_string(val->sam_challenge,5,asn1_decode_charstring);
-        opt_string(val->sam_response_prompt,6,asn1_decode_charstring);
-        opt_string(val->sam_pk_for_sad,7,asn1_decode_charstring);
-        opt_field(val->sam_nonce,8,asn1_decode_int32,0);
-        opt_cksum(val->sam_cksum,9,asn1_decode_checksum);
-        end_structure();
-        val->magic = KV5M_SAM_CHALLENGE;
-    }
-    return 0;
-error_out:
-    krb5_free_sam_challenge_contents(NULL, val);
-    return retval;
-}
-
-asn1_error_code
 asn1_decode_sam_challenge_2(asn1buf *buf, krb5_sam_challenge_2 *val)
 {
     krb5_checksum **cksump;
@@ -137,40 +107,6 @@ error_out:
     krb5_free_sam_challenge_2_body_contents(NULL, val);
     return retval;
 }
-asn1_error_code
-asn1_decode_enc_sam_key(asn1buf *buf, krb5_sam_key *val)
-{
-    setup();
-    val->sam_key.contents = NULL;
-    { begin_structure();
-        get_field(val->sam_key,0,asn1_decode_encryption_key);
-        end_structure();
-        val->magic = KV5M_SAM_KEY;
-    }
-    return 0;
-error_out:
-    krb5_free_keyblock_contents(NULL, &val->sam_key);
-    return retval;
-}
-
-asn1_error_code
-asn1_decode_enc_sam_response_enc(asn1buf *buf, krb5_enc_sam_response_enc *val)
-{
-    setup();
-    val->sam_sad.data = NULL;
-    { begin_structure();
-        opt_field(val->sam_nonce,0,asn1_decode_int32,0);
-        opt_field(val->sam_timestamp,1,asn1_decode_kerberos_time,0);
-        opt_field(val->sam_usec,2,asn1_decode_int32,0);
-        opt_string(val->sam_sad,3,asn1_decode_charstring);
-        end_structure();
-        val->magic = KV5M_ENC_SAM_RESPONSE_ENC;
-    }
-    return 0;
-error_out:
-    krb5_free_enc_sam_response_enc_contents(NULL, val);
-    return retval;
-}
 
 asn1_error_code
 asn1_decode_enc_sam_response_enc_2(asn1buf *buf, krb5_enc_sam_response_enc_2 *val)
@@ -201,30 +137,6 @@ error_out:
     }
 
 asn1_error_code
-asn1_decode_sam_response(asn1buf *buf, krb5_sam_response *val)
-{
-    setup();
-    val->sam_track_id.data = NULL;
-    val->sam_enc_key.ciphertext.data = NULL;
-    val->sam_enc_nonce_or_ts.ciphertext.data = NULL;
-    { begin_structure();
-        get_field(val->sam_type,0,asn1_decode_int32);
-        get_field(val->sam_flags,1,asn1_decode_sam_flags);
-        opt_string(val->sam_track_id,2,asn1_decode_charstring);
-        opt_encfield(val->sam_enc_key,3,asn1_decode_encrypted_data);
-        get_field(val->sam_enc_nonce_or_ts,4,asn1_decode_encrypted_data);
-        opt_field(val->sam_nonce,5,asn1_decode_int32,0);
-        opt_field(val->sam_patimestamp,6,asn1_decode_kerberos_time,0);
-        end_structure();
-        val->magic = KV5M_SAM_RESPONSE;
-    }
-    return 0;
-error_out:
-    krb5_free_sam_response_contents(NULL, val);
-    return retval;
-}
-
-asn1_error_code
 asn1_decode_sam_response_2(asn1buf *buf, krb5_sam_response_2 *val)
 {
     setup();
@@ -242,31 +154,5 @@ asn1_decode_sam_response_2(asn1buf *buf, krb5_sam_response_2 *val)
     return 0;
 error_out:
     krb5_free_sam_response_2_contents(NULL, val);
-    return retval;
-}
-
-asn1_error_code
-asn1_decode_predicted_sam_response(asn1buf *buf,
-                                   krb5_predicted_sam_response *val)
-{
-    setup();
-    val->sam_key.contents = NULL;
-    val->client = NULL;
-    val->msd.data = NULL;
-    { begin_structure();
-        get_field(val->sam_key,0,asn1_decode_encryption_key);
-        get_field(val->sam_flags,1,asn1_decode_sam_flags);
-        get_field(val->stime,2,asn1_decode_kerberos_time);
-        get_field(val->susec,3,asn1_decode_int32);
-        alloc_principal(val->client);
-        get_field(val->client,4,asn1_decode_realm);
-        get_field(val->client,5,asn1_decode_principal_name);
-        opt_string(val->msd,6,asn1_decode_charstring); /* should be octet */
-        end_structure();
-        val->magic = KV5M_PREDICTED_SAM_RESPONSE;
-    }
-    return 0;
-error_out:
-    krb5_free_predicted_sam_response_contents(NULL, val);
     return retval;
 }

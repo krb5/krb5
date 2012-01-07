@@ -145,26 +145,16 @@ asn1_error_code asn1_decode_passwdsequence(asn1buf *buf,
                                            passwd_phrase_element *val);
 asn1_error_code asn1_decode_passwdsequence_ptr(asn1buf *buf,
                                                passwd_phrase_element **valptr);
-asn1_error_code asn1_decode_sam_challenge(asn1buf *buf,
-                                          krb5_sam_challenge *val);
 asn1_error_code asn1_decode_sam_challenge_2(asn1buf *buf,
                                             krb5_sam_challenge_2 *val);
 asn1_error_code
 asn1_decode_sam_challenge_2_body(asn1buf *buf,
                                  krb5_sam_challenge_2_body *val);
-asn1_error_code asn1_decode_enc_sam_key(asn1buf *buf, krb5_sam_key *val);
-asn1_error_code
-asn1_decode_enc_sam_response_enc(asn1buf *buf,
-                                 krb5_enc_sam_response_enc *val);
 asn1_error_code
 asn1_decode_enc_sam_response_enc_2(asn1buf *buf,
                                    krb5_enc_sam_response_enc_2 *val);
-asn1_error_code asn1_decode_sam_response(asn1buf *buf, krb5_sam_response *val);
 asn1_error_code asn1_decode_sam_response_2(asn1buf *buf,
                                            krb5_sam_response_2 *val);
-asn1_error_code
-asn1_decode_predicted_sam_response(asn1buf *buf,
-                                   krb5_predicted_sam_response *val);
 asn1_error_code asn1_decode_external_principal_identifier(
     asn1buf *buf, krb5_external_principal_identifier *val);
 asn1_error_code asn1_decode_external_principal_identifier_ptr(
