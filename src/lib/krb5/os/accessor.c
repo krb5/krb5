@@ -50,12 +50,10 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 #define S(FIELD, VAL)   internals_temp.FIELD = VAL
             krb5int_access internals_temp;
 #endif
-            S (arcfour_gsscrypt, krb5int_arcfour_gsscrypt),
             S (auth_con_get_subkey_enctype, krb5_auth_con_get_subkey_enctype),
 
             S (clean_hostname, krb5int_clean_hostname),
 
-            S (mandatory_cksumtype, krb5int_c_mandatory_cksumtype),
 #ifndef LEAN_CLIENT
 #define SC(FIELD, VAL)  S(FIELD, VAL)
 #else /* disable */
@@ -102,15 +100,10 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
             SC (decode_krb5_reply_key_pack_draft9, decode_krb5_reply_key_pack_draft9),
             SC (decode_krb5_td_trusted_certifiers, decode_krb5_td_trusted_certifiers),
             SC (decode_krb5_td_dh_parameters, decode_krb5_td_dh_parameters),
-            SC (decode_krb5_as_req, decode_krb5_as_req),
             SC (encode_krb5_kdc_req_body, encode_krb5_kdc_req_body),
             SC (free_kdc_req, krb5_free_kdc_req),
             SC (set_prompt_types, krb5int_set_prompt_types),
-            SC (encode_krb5_authdata_elt, encode_krb5_authdata_elt),
 #undef SC
-
-            S (encode_krb5_sam_response_2, encode_krb5_sam_response_2),
-            S (encode_krb5_enc_sam_response_enc_2, encode_krb5_enc_sam_response_enc_2),
 
 #if DESIGNATED_INITIALIZERS
         };

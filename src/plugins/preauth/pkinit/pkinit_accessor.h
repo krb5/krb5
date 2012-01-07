@@ -68,15 +68,11 @@ extern krb5_error_code (*k5int_encode_krb5_td_trusted_certifiers)
 extern krb5_error_code (*k5int_decode_krb5_td_trusted_certifiers)
 	(const krb5_data *, krb5_external_principal_identifier ***);
 
-extern krb5_error_code (*k5int_decode_krb5_as_req)
-	(const krb5_data *output, krb5_kdc_req **rep);
 extern krb5_error_code (*k5int_encode_krb5_kdc_req_body)
 	(const krb5_kdc_req *rep, krb5_data **code);
 extern void KRB5_CALLCONV (*k5int_krb5_free_kdc_req)
 	(krb5_context, krb5_kdc_req * );
 extern void (*k5int_set_prompt_types)
 	(krb5_context, krb5_prompt_type *);
-extern krb5_error_code (*k5int_encode_krb5_authdata_elt)
-	(const krb5_authdata *rep, krb5_data **code);
 
 #endif /* _PKINIT_ACCESSOR_H */

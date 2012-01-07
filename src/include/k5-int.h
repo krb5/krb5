@@ -1548,9 +1548,6 @@ krb5_error_code
 encode_krb5_authdata(krb5_authdata *const *rep, krb5_data **code);
 
 krb5_error_code
-encode_krb5_authdata_elt(const krb5_authdata *rep, krb5_data **code);
-
-krb5_error_code
 encode_krb5_padata_sequence(krb5_pa_data *const *rep, krb5_data **code);
 
 krb5_error_code
@@ -1959,19 +1956,9 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 19
+#define KRB5INT_ACCESS_STRUCT_VERSION 20
 
-#ifndef ANAME_SZ
-struct ktext;                   /* from krb.h, for krb524 support */
-#endif
 typedef struct _krb5int_access {
-    /* crypto stuff */
-    krb5_error_code (*arcfour_gsscrypt)(const krb5_keyblock *keyblock,
-                                        krb5_keyusage usage,
-                                        const krb5_data *kd_data,
-                                        krb5_crypto_iov *data,
-                                        size_t num_data);
-
     krb5_error_code (*auth_con_get_subkey_enctype)(krb5_context,
                                                    krb5_auth_context,
                                                    krb5_enctype *);
@@ -2086,27 +2073,12 @@ typedef struct _krb5int_access {
                                          ***);
 
     krb5_error_code
-    (*decode_krb5_as_req)(const krb5_data *output, krb5_kdc_req **rep);
-
-    krb5_error_code
     (*encode_krb5_kdc_req_body)(const krb5_kdc_req *rep, krb5_data **code);
 
     void
     (KRB5_CALLCONV *free_kdc_req)(krb5_context, krb5_kdc_req * );
     void
     (*set_prompt_types)(krb5_context, krb5_prompt_type *);
-
-    krb5_error_code
-    (*encode_krb5_authdata_elt)(const krb5_authdata *rep, krb5_data **code);
-
-    /* Exported for testing only!  */
-    krb5_error_code
-    (*encode_krb5_sam_response_2)(const krb5_sam_response_2 *rep,
-                                  krb5_data **code);
-    krb5_error_code
-    (*encode_krb5_enc_sam_response_enc_2)(const
-                                          krb5_enc_sam_response_enc_2 *rep,
-                                          krb5_data **code);
 } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION                                          \

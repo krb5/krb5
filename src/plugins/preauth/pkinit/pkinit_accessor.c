@@ -71,9 +71,6 @@ krb5_error_code
  krb5_external_principal_identifier ***);
 
 krb5_error_code
-(*k5int_decode_krb5_as_req)(const krb5_data *output, krb5_kdc_req **rep);
-
-krb5_error_code
 (*k5int_encode_krb5_kdc_req_body)(const krb5_kdc_req *rep, krb5_data **code);
 
 void KRB5_CALLCONV
@@ -81,10 +78,6 @@ void KRB5_CALLCONV
 
 void
 (*k5int_set_prompt_types)(krb5_context, krb5_prompt_type *);
-
-krb5_error_code
-(*k5int_encode_krb5_authdata_elt)(const krb5_authdata *rep, krb5_data **code);
-
 
 
 /*
@@ -118,10 +111,8 @@ pkinit_accessor_init(void)
 
     /* special cases... */
     k5int_decode_krb5_principal_name = k5int.decode_krb5_principal_name;
-    k5int_decode_krb5_as_req = k5int.decode_krb5_as_req;
     k5int_encode_krb5_kdc_req_body = k5int.encode_krb5_kdc_req_body;
     k5int_krb5_free_kdc_req = k5int.free_kdc_req;
     k5int_set_prompt_types = k5int.set_prompt_types;
-    k5int_encode_krb5_authdata_elt = k5int.encode_krb5_authdata_elt;
     return 0;
 }

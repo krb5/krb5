@@ -1253,7 +1253,6 @@ MAKE_FULL_ENCODER(encode_krb5_cred, krb5_cred);
 MAKE_FULL_ENCODER(encode_krb5_enc_cred_part, enc_cred_part);
 MAKE_FULL_ENCODER(encode_krb5_error, krb5_error);
 MAKE_FULL_ENCODER(encode_krb5_authdata, auth_data);
-MAKE_FULL_ENCODER(encode_krb5_authdata_elt, authdata_elt);
 MAKE_FULL_ENCODER(encode_krb5_etype_info, etype_info);
 MAKE_FULL_ENCODER(encode_krb5_etype_info2, etype_info2);
 MAKE_FULL_ENCODER(encode_krb5_enc_data, encrypted_data);

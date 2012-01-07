@@ -625,7 +625,7 @@ main(argc, argv)
         krb5_sam_response_2 sam_ch2;
         ktest_make_sample_sam_response_2(&sam_ch2);
         encode_run(sam_ch2,krb5_sam_response_2,"sam_response_2","",
-                   acc.encode_krb5_sam_response_2);
+                   encode_krb5_sam_response_2);
         ktest_empty_sam_response_2(&sam_ch2);
     }
     /****************************************************************/
@@ -635,7 +635,7 @@ main(argc, argv)
         ktest_make_sample_enc_sam_response_enc_2(&sam_ch2);
         encode_run(sam_ch2,krb5_enc_sam_response_enc_2,
                    "enc_sam_response_enc_2","",
-                   acc.encode_krb5_enc_sam_response_enc_2);
+                   encode_krb5_enc_sam_response_enc_2);
         ktest_empty_enc_sam_response_enc_2(&sam_ch2);
     }
     /****************************************************************/
