@@ -421,37 +421,6 @@ ktest_make_sample_data(krb5_data *d)
 }
 
 void
-ktest_make_sample_passwd_phrase_element(passwd_phrase_element *ppe)
-{
-    ppe->passwd = ealloc(sizeof(krb5_data));
-    ktest_make_sample_data(ppe->passwd);
-    ppe->phrase = ealloc(sizeof(krb5_data));
-    ktest_make_sample_data(ppe->phrase);
-}
-
-void
-ktest_make_sample_krb5_pwd_data(krb5_pwd_data *pd)
-{
-    int i;
-
-    pd->sequence_count = 2;
-    pd->element = ealloc(3 * sizeof(passwd_phrase_element *));
-    for (i = 0; i <= 1; i++) {
-        pd->element[i] = ealloc(sizeof(passwd_phrase_element));
-        ktest_make_sample_passwd_phrase_element(pd->element[i]);
-    }
-    pd->element[2] = NULL;
-}
-
-void
-ktest_make_sample_alt_method(krb5_alt_method *p)
-{
-    p->method = 42;
-    p->data = (unsigned char *)estrdup("secret");
-    p->length = strlen((char *)p->data);
-}
-
-void
 ktest_make_sample_etype_info(krb5_etype_info_entry ***p)
 {
     krb5_etype_info_entry **info;
@@ -1332,34 +1301,6 @@ void
 ktest_empty_ap_rep_enc_part(krb5_ap_rep_enc_part *arep)
 {
     ktest_destroy_keyblock(&(arep)->subkey);
-}
-
-void
-ktest_empty_passwd_phrase_element(passwd_phrase_element *ppe)
-{
-    ktest_destroy_data(&ppe->passwd);
-    ktest_destroy_data(&ppe->phrase);
-}
-
-void
-ktest_empty_pwd_data(krb5_pwd_data *pd)
-{
-    int i;
-
-    for (i = 0; i <= pd->sequence_count; i++) {
-        if (pd->element[i]) {
-            ktest_empty_passwd_phrase_element(pd->element[i]);
-            free(pd->element[i]);
-        }
-    }
-    free(pd->element);
-}
-
-void
-ktest_empty_alt_method(krb5_alt_method *am)
-{
-    free(am->data);
-    am->data = NULL;
 }
 
 void

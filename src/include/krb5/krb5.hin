@@ -2114,36 +2114,27 @@ typedef struct _krb5_cred {
     krb5_cred_enc_part *enc_part2;  /**< Unencrypted version, if available */
 } krb5_cred;
 
-/*
- * Sandia password generation structure
- * Used by internal functions only
- */
+/* Unused, but here for API compatibility. */
 typedef struct _passwd_phrase_element {
     krb5_magic magic;
     krb5_data *passwd;
     krb5_data *phrase;
 } passwd_phrase_element;
 
-/*
- * Password data.
- * Used by internal functions only
- */
+/* Unused, but here for API compatibility. */
 typedef struct _krb5_pwd_data {
     krb5_magic magic;
     int sequence_count;
     passwd_phrase_element **element;
 } krb5_pwd_data;
 
-/* these need to be here so the typedefs are available for the prototypes */
-/*
- * Note for Windows 2000 compatibility this is encoded
- * in the enc_padata field of the krb5_enc_kdc_rep_part.
- */
+/* Unused, but here for API compatibility. */
 typedef struct _krb5_pa_svr_referral_data {
     /** Referred name, only realm is required */
     krb5_principal     principal;
 } krb5_pa_svr_referral_data;
 
+/* Unused, but here for API compatibility. */
 typedef struct _krb5_pa_server_referral_data {
     krb5_data          *referred_realm;
     krb5_principal     true_principal_name;

@@ -36,9 +36,6 @@
 krb5_context test_context;
 int error_count = 0;
 
-void krb5_ktest_free_alt_method(krb5_context context, krb5_alt_method *val);
-void krb5_ktest_free_pwd_sequence(krb5_context context,
-                                  passwd_phrase_element *val);
 void krb5_ktest_free_enc_data(krb5_context context, krb5_enc_data *val);
 
 int main(argc, argv)
@@ -731,22 +728,6 @@ int main(argc, argv)
     }
 
     /****************************************************************/
-    /* decode_pwd_sequence */
-    {
-        setup(passwd_phrase_element,ktest_make_sample_passwd_phrase_element);
-        decode_run("PasswdSequence","","30 18 A0 0A 04 08 6B 72 62 35 64 61 74 61 A1 0A 04 08 6B 72 62 35 64 61 74 61",decode_krb5_pwd_sequence,ktest_equal_passwd_phrase_element,krb5_ktest_free_pwd_sequence);
-        ktest_empty_passwd_phrase_element(&ref);
-    }
-
-    /****************************************************************/
-    /* decode_passwd_data */
-    {
-        setup(krb5_pwd_data,ktest_make_sample_krb5_pwd_data);
-        decode_run("PasswdData","","30 3D A0 03 02 01 02 A1 36 30 34 30 18 A0 0A 04 08 6B 72 62 35 64 61 74 61 A1 0A 04 08 6B 72 62 35 64 61 74 61 30 18 A0 0A 04 08 6B 72 62 35 64 61 74 61 A1 0A 04 08 6B 72 62 35 64 61 74 61",decode_krb5_pwd_data,ktest_equal_krb5_pwd_data,krb5_free_pwd_data);
-        ktest_empty_pwd_data(&ref);
-    }
-
-    /****************************************************************/
     /* decode_krb5_padata_sequence and decode_krb5_typed_data */
     {
         krb5_pa_data **ref, **var;
@@ -790,16 +771,6 @@ int main(argc, argv)
         krb5_free_pa_data(test_context, var);
         krb5_free_data_contents(test_context, &code);
         ktest_destroy_pa_data_array(&ref);
-    }
-
-    /****************************************************************/
-    /* decode_pwd_sequence */
-    {
-        setup(krb5_alt_method,ktest_make_sample_alt_method);
-        decode_run("alt_method","","30 0F A0 03 02 01 2A A1 08 04 06 73 65 63 72 65 74",decode_krb5_alt_method,ktest_equal_krb5_alt_method,krb5_ktest_free_alt_method);
-        ref.length = 0;
-        decode_run("alt_method (no data)","","30 05 A0 03 02 01 2A",decode_krb5_alt_method,ktest_equal_krb5_alt_method,krb5_ktest_free_alt_method);
-        ktest_empty_alt_method(&ref);
     }
 
     /****************************************************************/
@@ -973,21 +944,6 @@ int main(argc, argv)
     return(error_count);
 }
 
-
-void krb5_ktest_free_alt_method(krb5_context context, krb5_alt_method *val)
-{
-    if (val->data)
-        free(val->data);
-    free(val);
-}
-
-void krb5_ktest_free_pwd_sequence(krb5_context context,
-                                  passwd_phrase_element *val)
-{
-    krb5_free_data(context, val->passwd);
-    krb5_free_data(context, val->phrase);
-    free(val);
-}
 
 void krb5_ktest_free_enc_data(krb5_context context, krb5_enc_data *val)
 {

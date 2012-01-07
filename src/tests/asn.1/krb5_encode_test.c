@@ -485,24 +485,6 @@ main(argc, argv)
     }
 
     /****************************************************************/
-    /* encode_pwd_sequence */
-    {
-        passwd_phrase_element ppe;
-        ktest_make_sample_passwd_phrase_element(&ppe);
-        encode_run(ppe,passwd_phrase_element,"pwd_sequence","",encode_krb5_pwd_sequence);
-        ktest_empty_passwd_phrase_element(&ppe);
-    }
-
-    /****************************************************************/
-    /* encode_passwd_data */
-    {
-        krb5_pwd_data pd;
-        ktest_make_sample_krb5_pwd_data(&pd);
-        encode_run(pd,krb5_pwd_data,"pwd_data","",encode_krb5_pwd_data);
-        ktest_empty_pwd_data(&pd);
-    }
-
-    /****************************************************************/
     /* encode_padata_sequence and encode_krb5_typed_data */
     {
         krb5_pa_data **pa;
@@ -538,21 +520,6 @@ main(argc, argv)
         encoder_print_results(code, "padata_sequence(empty)", "");
 
         ktest_destroy_pa_data_array(&pa);
-    }
-
-    /****************************************************************/
-    /* encode_alt_method */
-    {
-        krb5_alt_method am;
-        ktest_make_sample_alt_method(&am);
-        encode_run(am,krb5_alt_method,"alt_method","",encode_krb5_alt_method);
-        am.length = 0;
-        if (am.data)
-            free(am.data);
-        am.data = 0;
-        encode_run(am,krb5_alt_method,"alt_method (no data)","",
-                   encode_krb5_alt_method);
-        ktest_empty_alt_method(&am);
     }
 
     /****************************************************************/

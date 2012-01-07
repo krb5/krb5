@@ -483,28 +483,6 @@ main(int argc, char **argv)
     }
 
     /****************************************************************/
-    /* encode_pwd_sequence */
-    {
-        passwd_phrase_element ppe, *tmp;
-
-        ktest_make_sample_passwd_phrase_element(&ppe);
-        leak_test(ppe, encode_krb5_pwd_sequence, decode_krb5_pwd_sequence,
-                  krb5_free_passwd_phrase_element);
-        ktest_empty_passwd_phrase_element(&ppe);
-    }
-
-    /****************************************************************/
-    /* encode_passwd_data */
-    {
-        krb5_pwd_data pd, *tmp;
-
-        ktest_make_sample_krb5_pwd_data(&pd);
-        leak_test(pd, encode_krb5_pwd_data, decode_krb5_pwd_data,
-                  krb5_free_pwd_data);
-        ktest_empty_pwd_data(&pd);
-    }
-
-    /****************************************************************/
     /* encode_padata_sequence and encode_typed_data */
     {
         krb5_pa_data **pa, **tmp;
@@ -526,23 +504,6 @@ main(int argc, char **argv)
         leak_test(*pa, encode_krb5_padata_sequence,
                   decode_krb5_padata_sequence, krb5_free_pa_data);
         ktest_destroy_pa_data_array(&pa);
-    }
-
-    /****************************************************************/
-    /* encode_alt_method */
-    {
-        krb5_alt_method am, *tmp;
-
-        ktest_make_sample_alt_method(&am);
-        leak_test(am, encode_krb5_alt_method, decode_krb5_alt_method,
-                  krb5_free_alt_method);
-        am.length = 0;
-        if (am.data)
-            free(am.data);
-        am.data = 0;
-        leak_test(am, encode_krb5_alt_method, decode_krb5_alt_method,
-                  krb5_free_alt_method);
-        ktest_empty_alt_method(&am);
     }
 
     /****************************************************************/

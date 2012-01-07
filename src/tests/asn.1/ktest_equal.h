@@ -79,9 +79,6 @@ generic(ktest_equal_tgs_req,krb5_kdc_req);
 generic(ktest_equal_kdc_req_body,krb5_kdc_req);
 generic(ktest_equal_encryption_key,krb5_keyblock);
 
-generic(ktest_equal_passwd_phrase_element,passwd_phrase_element);
-generic(ktest_equal_krb5_pwd_data,krb5_pwd_data);
-generic(ktest_equal_krb5_alt_method,krb5_alt_method);
 generic(ktest_equal_krb5_pa_enc_ts,krb5_pa_enc_ts);
 
 generic(ktest_equal_sam_challenge_2,krb5_sam_challenge_2);
@@ -100,8 +97,6 @@ len_array(ktest_equal_array_of_enctype,krb5_enctype);
 len_array(ktest_equal_array_of_data,krb5_data);
 len_unsigned_array(ktest_equal_array_of_octet,krb5_octet);
 
-int ktest_equal_array_of_passwd_phrase_element(passwd_phrase_element **ref,
-                                               passwd_phrase_element **var);
 int ktest_equal_authorization_data(krb5_authdata **ref, krb5_authdata **var);
 int ktest_equal_addresses(krb5_address **ref, krb5_address **var);
 int ktest_equal_array_of_char(const unsigned int length, char *ref, char *var);

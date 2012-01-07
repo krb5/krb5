@@ -440,41 +440,6 @@ ktest_equal_cred_info(krb5_cred_info *ref, krb5_cred_info *var)
 }
 
 int
-ktest_equal_passwd_phrase_element(passwd_phrase_element *ref,
-                                  passwd_phrase_element *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && ptr_equal(passwd,ktest_equal_data);
-    p = p && ptr_equal(phrase,ktest_equal_data);
-    return p;
-}
-
-int
-ktest_equal_krb5_pwd_data(krb5_pwd_data *ref, krb5_pwd_data *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && scalar_equal(sequence_count);
-    p = p && ptr_equal(element,ktest_equal_array_of_passwd_phrase_element);
-    return p;
-}
-
-int
-ktest_equal_krb5_alt_method(krb5_alt_method *ref, krb5_alt_method *var)
-{
-    if (ref->method != var->method)
-        return FALSE;
-    if (ref->length != var->length)
-        return FALSE;
-    if (memcmp(ref->data, var->data, ref->length) != 0)
-        return FALSE;
-    return TRUE;
-}
-
-int
 ktest_equal_krb5_etype_info_entry(krb5_etype_info_entry *ref,
                                   krb5_etype_info_entry *var)
 {
@@ -792,12 +757,6 @@ int
 ktest_equal_sequence_of_principal(krb5_principal *ref, krb5_principal *var)
 {
     array_compare(ktest_equal_principal_data);
-}
-
-int
-ktest_equal_array_of_passwd_phrase_element(passwd_phrase_element **ref, passwd_phrase_element **var)
-{
-    array_compare(ktest_equal_passwd_phrase_element);
 }
 
 int

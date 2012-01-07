@@ -1,7 +1,6 @@
 _krb5_conf_boolean
 decode_krb5_ad_kdcissued
 decode_krb5_ad_signedpath
-decode_krb5_alt_method
 decode_krb5_ap_rep
 decode_krb5_ap_rep_enc_part
 decode_krb5_ap_req
@@ -33,8 +32,6 @@ decode_krb5_pa_pac_req
 decode_krb5_pa_s4u_x509_user
 decode_krb5_padata_sequence
 decode_krb5_priv
-decode_krb5_pwd_data
-decode_krb5_pwd_sequence
 decode_krb5_safe
 decode_krb5_sam_challenge_2
 decode_krb5_sam_challenge_2_body
@@ -47,7 +44,6 @@ decode_krb5_typed_data
 encode_krb5_ad_kdcissued
 encode_krb5_ad_signedpath_data
 encode_krb5_ad_signedpath
-encode_krb5_alt_method
 encode_krb5_ap_rep
 encode_krb5_ap_rep_enc_part
 encode_krb5_ap_req
@@ -75,13 +71,9 @@ encode_krb5_pa_enc_ts
 encode_krb5_pa_for_user
 encode_krb5_pa_fx_fast_reply
 encode_krb5_pa_s4u_x509_user
-encode_krb5_pa_server_referral_data
-encode_krb5_pa_svr_referral_data
 encode_krb5_padata_sequence
 encode_krb5_pkinit_supp_pub_info
 encode_krb5_priv
-encode_krb5_pwd_data
-encode_krb5_pwd_sequence
 encode_krb5_s4u_userid
 encode_krb5_safe
 encode_krb5_sam_challenge_2
@@ -259,7 +251,6 @@ krb5_free_ad_kdcissued
 krb5_free_ad_signedpath
 krb5_free_address
 krb5_free_addresses
-krb5_free_alt_method
 krb5_free_ap_rep
 krb5_free_ap_rep_enc_part
 krb5_free_ap_req
@@ -305,14 +296,9 @@ krb5_free_pa_enc_ts
 krb5_free_pa_for_user
 krb5_free_pa_pac_req
 krb5_free_pa_s4u_x509_user
-krb5_free_pa_server_referral_data
-krb5_free_pa_svr_referral_data
-krb5_free_passwd_phrase_element
 krb5_free_principal
 krb5_free_priv
 krb5_free_priv_enc_part
-krb5_free_pwd_data
-krb5_free_pwd_sequences
 krb5_free_realm_tree
 krb5_free_safe
 krb5_free_sam_challenge_2

@@ -454,16 +454,6 @@ DEFNULLTERMSEQOFTYPE(etype_info, etype_info_entry_ptr);
 DEFPTRTYPE(etype_info2_entry_ptr, etype_info2_entry);
 DEFNULLTERMSEQOFTYPE(etype_info2, etype_info2_entry_ptr);
 
-static const struct field_info passwdsequence_fields[] = {
-    FIELDOF_NORM(passwd_phrase_element, ostring_data_ptr, passwd, 0, 0),
-    FIELDOF_NORM(passwd_phrase_element, ostring_data_ptr, phrase, 1, 0),
-};
-DEFSEQTYPE(passwdsequence, passwd_phrase_element, passwdsequence_fields, 0);
-
-DEFPTRTYPE(passwdsequence_ptr, passwdsequence);
-DEFNONEMPTYNULLTERMSEQOFTYPE(seqof_passwdsequence, passwdsequence_ptr);
-DEFPTRTYPE(ptr_seqof_passwdsequence, seqof_passwdsequence);
-
 static const struct field_info sam_challenge_2_fields[] = {
     FIELDOF_NORM(krb5_sam_challenge_2, opaque_data, sam_challenge_2_body,
                  0, 0),
@@ -961,23 +951,6 @@ optional_error(const void *p)
 DEFSEQTYPE(untagged_krb5_error, krb5_error, error_fields, optional_error);
 DEFAPPTAGGEDTYPE(krb5_error, 30, untagged_krb5_error);
 
-static const struct field_info alt_method_fields[] = {
-    FIELDOF_NORM(krb5_alt_method, int32, method, 0, 0),
-    FIELDOF_OPTSTRING(krb5_alt_method, octetstring, data, length, 1, 0, 1),
-};
-static unsigned int
-optional_alt_method(const void *p)
-{
-    const krb5_alt_method *a = p;
-    unsigned int optional = 0;
-
-    if (a->data != NULL && a->length > 0)
-        optional |= (1u << 1);
-
-    return optional;
-}
-DEFSEQTYPE(alt_method, krb5_alt_method, alt_method_fields, optional_alt_method);
-
 static const struct field_info pa_enc_ts_fields[] = {
     FIELDOF_NORM(krb5_pa_enc_ts, kerberos_time, patimestamp, 0, 0),
     FIELDOF_OPT(krb5_pa_enc_ts, int32, pausec, 1, 0, 1),
@@ -994,12 +967,6 @@ optional_pa_enc_ts(const void *p)
     return optional;
 }
 DEFSEQTYPE(pa_enc_ts, krb5_pa_enc_ts, pa_enc_ts_fields, optional_pa_enc_ts);
-
-static const struct field_info pwd_data_fields[] = {
-    FIELDOF_NORM(krb5_pwd_data, int32, sequence_count, 0, 0),
-    FIELDOF_NORM(krb5_pwd_data, ptr_seqof_passwdsequence, element, 1, 0),
-};
-DEFSEQTYPE(pwd_data, krb5_pwd_data, pwd_data_fields, 0);
 
 static const struct field_info setpw_req_fields[] = {
     FIELDOF_NORM(struct krb5_setpw_req, ostring_data, password, 0, 0),
@@ -1048,30 +1015,6 @@ static const struct field_info pa_s4u_x509_user_fields[] = {
 };
 
 DEFSEQTYPE(pa_s4u_x509_user, krb5_pa_s4u_x509_user, pa_s4u_x509_user_fields, 0);
-
-/* draft-ietf-krb-wg-kerberos-referrals Appendix A. */
-static const struct field_info pa_svr_referral_data_fields[] = {
-    FIELDOF_NORM(krb5_pa_svr_referral_data, realm_of_principal, principal,
-                 0, 0),
-    FIELDOF_OPT(krb5_pa_svr_referral_data, principal, principal, 1, 0, 1),
-};
-
-DEFSEQTYPE(pa_svr_referral_data, krb5_pa_svr_referral_data, pa_svr_referral_data_fields, 0);
-
-/* draft-ietf-krb-wg-kerberos-referrals Section 8. */
-static const struct field_info pa_server_referral_data_fields[] = {
-    FIELDOF_OPT(krb5_pa_server_referral_data, gstring_data_ptr, referred_realm,
-                0, 0, 0),
-    FIELDOF_OPT(krb5_pa_server_referral_data, principal, true_principal_name,
-                1, 0, 1),
-    FIELDOF_OPT(krb5_pa_server_referral_data, principal,
-                requested_principal_name, 2, 0, 2),
-    FIELDOF_OPT(krb5_pa_server_referral_data, kerberos_time,
-                referral_valid_until, 3, 0, 3),
-    FIELDOF_NORM(krb5_pa_server_referral_data, checksum, rep_cksum, 4, 0),
-};
-
-DEFSEQTYPE(pa_server_referral_data, krb5_pa_server_referral_data, pa_server_referral_data_fields, 0);
 
 #if 0
 /* draft-brezak-win2k-krb-authz Section 6. */
@@ -1311,14 +1254,10 @@ MAKE_FULL_ENCODER(encode_krb5_enc_cred_part, enc_cred_part);
 MAKE_FULL_ENCODER(encode_krb5_error, krb5_error);
 MAKE_FULL_ENCODER(encode_krb5_authdata, auth_data);
 MAKE_FULL_ENCODER(encode_krb5_authdata_elt, authdata_elt);
-MAKE_FULL_ENCODER(encode_krb5_alt_method, alt_method);
 MAKE_FULL_ENCODER(encode_krb5_etype_info, etype_info);
 MAKE_FULL_ENCODER(encode_krb5_etype_info2, etype_info2);
 MAKE_FULL_ENCODER(encode_krb5_enc_data, encrypted_data);
 MAKE_FULL_ENCODER(encode_krb5_pa_enc_ts, pa_enc_ts);
-/* Sandia Additions */
-MAKE_FULL_ENCODER(encode_krb5_pwd_sequence, passwdsequence);
-MAKE_FULL_ENCODER(encode_krb5_pwd_data, pwd_data);
 MAKE_FULL_ENCODER(encode_krb5_padata_sequence, seq_of_pa_data);
 /* sam preauth additions */
 MAKE_FULL_ENCODER(encode_krb5_sam_challenge_2, sam_challenge_2);
@@ -1331,8 +1270,6 @@ MAKE_FULL_ENCODER(encode_krb5_setpw_req, setpw_req);
 MAKE_FULL_ENCODER(encode_krb5_pa_for_user, pa_for_user);
 MAKE_FULL_ENCODER(encode_krb5_s4u_userid, s4u_userid);
 MAKE_FULL_ENCODER(encode_krb5_pa_s4u_x509_user, pa_s4u_x509_user);
-MAKE_FULL_ENCODER(encode_krb5_pa_svr_referral_data, pa_svr_referral_data);
-MAKE_FULL_ENCODER(encode_krb5_pa_server_referral_data, pa_server_referral_data);
 MAKE_FULL_ENCODER(encode_krb5_etype_list, etype_list);
 
 MAKE_FULL_ENCODER(encode_krb5_pa_fx_fast_request, pa_fx_fast_request);

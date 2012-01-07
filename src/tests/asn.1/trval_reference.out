@@ -1058,24 +1058,6 @@ encode_krb5_authorization_data:
 .  .  [ad-type] [Integer] 1
 .  .  [ad-data] [Octet String] "foobar"
 
-encode_krb5_pwd_sequence:
-
-[Sequence/Sequence Of] 
-.  [0] [Octet String] "krb5data"
-.  [1] [Octet String] "krb5data"
-
-encode_krb5_pwd_data:
-
-[Sequence/Sequence Of] 
-.  [0] [Integer] 2
-.  [1] [Sequence/Sequence Of] 
-.  .  [Sequence/Sequence Of] 
-.  .  .  [0] [Octet String] "krb5data"
-.  .  .  [1] [Octet String] "krb5data"
-.  .  [Sequence/Sequence Of] 
-.  .  .  [0] [Octet String] "krb5data"
-.  .  .  [1] [Octet String] "krb5data"
-
 encode_krb5_padata_sequence:
 
 [Sequence/Sequence Of] 
@@ -1099,17 +1081,6 @@ encode_krb5_typed_data:
 encode_krb5_padata_sequence(empty):
 
 [Sequence/Sequence Of] 
-
-encode_krb5_alt_method:
-
-[Sequence/Sequence Of] 
-.  [0] [Integer] 42
-.  [1] [Octet String] "secret"
-
-encode_krb5_alt_method (no data):
-
-[Sequence/Sequence Of] 
-.  [0] [Integer] 42
 
 encode_krb5_etype_info:
 

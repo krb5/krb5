@@ -380,18 +380,6 @@ typedef INT64_TYPE krb5_int64;
                                                       to the IAKERB proxy */
 
 /*
- * This structure is returned in the e-data field of the KRB-ERROR
- * message when the error calling for an alternative form of
- * authentication is returned, KRB_AP_METHOD.
- */
-typedef struct _krb5_alt_method {
-    krb5_magic      magic;
-    krb5_int32      method;
-    unsigned int    length;
-    krb5_octet      *data;
-} krb5_alt_method;
-
-/*
  * A null-terminated array of this structure is returned by the KDC as
  * the data part of the ETYPE_INFO preauth type.  It informs the
  * client which encryption types are supported.
@@ -1089,13 +1077,6 @@ void KRB5_CALLCONV
 krb5_free_pa_s4u_x509_user(krb5_context, krb5_pa_s4u_x509_user *);
 
 void KRB5_CALLCONV
-krb5_free_pa_svr_referral_data(krb5_context, krb5_pa_svr_referral_data *);
-
-void KRB5_CALLCONV
-krb5_free_pa_server_referral_data(krb5_context,
-                                  krb5_pa_server_referral_data * );
-
-void KRB5_CALLCONV
 krb5_free_pa_pac_req(krb5_context, krb5_pa_pac_req * );
 
 void KRB5_CALLCONV
@@ -1570,19 +1551,10 @@ krb5_error_code
 encode_krb5_authdata_elt(const krb5_authdata *rep, krb5_data **code);
 
 krb5_error_code
-encode_krb5_pwd_sequence(const passwd_phrase_element *rep, krb5_data **code);
-
-krb5_error_code
-encode_krb5_pwd_data(const krb5_pwd_data *rep, krb5_data **code);
-
-krb5_error_code
 encode_krb5_padata_sequence(krb5_pa_data *const *rep, krb5_data **code);
 
 krb5_error_code
 encode_krb5_typed_data(krb5_pa_data *const *rep, krb5_data **code);
-
-krb5_error_code
-encode_krb5_alt_method(const krb5_alt_method *, krb5_data **code);
 
 krb5_error_code
 encode_krb5_etype_info(krb5_etype_info_entry *const *, krb5_data **code);
@@ -1622,14 +1594,6 @@ encode_krb5_s4u_userid(const krb5_s4u_userid *, krb5_data **);
 
 krb5_error_code
 encode_krb5_pa_s4u_x509_user(const krb5_pa_s4u_x509_user *, krb5_data **);
-
-krb5_error_code
-encode_krb5_pa_svr_referral_data(const krb5_pa_svr_referral_data *,
-                                 krb5_data **);
-
-krb5_error_code
-encode_krb5_pa_server_referral_data(const krb5_pa_server_referral_data *,
-                                    krb5_data **);
 
 krb5_error_code
 encode_krb5_pa_pac_req(const krb5_pa_pac_req *, krb5_data **);
@@ -1766,19 +1730,10 @@ krb5_error_code
 decode_krb5_authdata(const krb5_data *output, krb5_authdata ***rep);
 
 krb5_error_code
-decode_krb5_pwd_sequence(const krb5_data *output, passwd_phrase_element **rep);
-
-krb5_error_code
-decode_krb5_pwd_data(const krb5_data *output, krb5_pwd_data **rep);
-
-krb5_error_code
 decode_krb5_padata_sequence(const krb5_data *output, krb5_pa_data ***rep);
 
 krb5_error_code
 decode_krb5_typed_data(const krb5_data *, krb5_pa_data ***);
-
-krb5_error_code
-decode_krb5_alt_method(const krb5_data *output, krb5_alt_method **rep);
 
 krb5_error_code
 decode_krb5_etype_info(const krb5_data *output, krb5_etype_info_entry ***rep);
@@ -1800,14 +1755,6 @@ decode_krb5_pa_for_user(const krb5_data *, krb5_pa_for_user **);
 
 krb5_error_code
 decode_krb5_pa_s4u_x509_user(const krb5_data *, krb5_pa_s4u_x509_user **);
-
-krb5_error_code
-decode_krb5_pa_svr_referral_data(const krb5_data *,
-                                 krb5_pa_svr_referral_data **);
-
-krb5_error_code
-decode_krb5_pa_server_referral_data(const krb5_data *,
-                                    krb5_pa_server_referral_data **);
 
 krb5_error_code
 decode_krb5_pa_pac_req(const krb5_data *, krb5_pa_pac_req **);
@@ -2472,12 +2419,6 @@ void KRB5_CALLCONV krb5_free_cred(krb5_context, krb5_cred *);
 void KRB5_CALLCONV krb5_free_cred_enc_part(krb5_context, krb5_cred_enc_part *);
 void KRB5_CALLCONV krb5_free_pa_data(krb5_context, krb5_pa_data **);
 void KRB5_CALLCONV krb5_free_tkt_authent(krb5_context, krb5_tkt_authent *);
-void KRB5_CALLCONV krb5_free_pwd_data(krb5_context, krb5_pwd_data *);
-void KRB5_CALLCONV krb5_free_pwd_sequences(krb5_context,
-                                           passwd_phrase_element **);
-void KRB5_CALLCONV krb5_free_passwd_phrase_element(krb5_context,
-                                                   passwd_phrase_element *);
-void KRB5_CALLCONV krb5_free_alt_method(krb5_context, krb5_alt_method *);
 void KRB5_CALLCONV krb5_free_enc_data(krb5_context, krb5_enc_data *);
 krb5_error_code krb5_set_config_files(krb5_context, const char **);
 

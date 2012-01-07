@@ -198,18 +198,6 @@ TYPEDEF_FUNC(
 TYPEDEF_FUNC(
     void,
     KRB5_CALLCONV,
-    krb5_free_pwd_data,
-    (krb5_context, krb5_pwd_data *)
-    );
-TYPEDEF_FUNC(
-    void,
-    KRB5_CALLCONV,
-    krb5_free_pwd_sequences,
-    (krb5_context, passwd_phrase_element * *)
-    );
-TYPEDEF_FUNC(
-    void,
-    KRB5_CALLCONV,
     krb5_free_data,
     (krb5_context, krb5_data *)
     );
