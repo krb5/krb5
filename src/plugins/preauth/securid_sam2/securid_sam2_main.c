@@ -112,10 +112,11 @@ cleanup:
     }
 }
 
-static krb5_error_code
+static void
 kdc_include_padata(krb5_context context, krb5_kdc_req *request,
                    krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
-                   krb5_kdcpreauth_moddata moddata, krb5_pa_data *pa_data)
+                   krb5_kdcpreauth_moddata moddata, krb5_preauthtype pa_type,
+                   krb5_kdcpreauth_edata_respond_fn respond, void *arg)
 {
     krb5_error_code retval;
     krb5_keyblock *client_key = NULL;
@@ -124,6 +125,7 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
     int sam_type = 0;             /* unknown */
     krb5_db_entry *sam_db_entry = NULL, *client;
     krb5_data *encoded_challenge = NULL;
+    krb5_pa_data *pa_data = NULL;
 
     memset(&sc2, 0, sizeof(sc2));
     memset(&sc2b, 0, sizeof(sc2b));
@@ -134,7 +136,7 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
     retval = sam_get_db_entry(context, client->princ, &sam_type,
                               &sam_db_entry);
     if (retval)
-        return retval;
+        goto cleanup;
     retval = cb->client_keys(context, rock, &client_key);
     if (retval)
         goto cleanup;
@@ -170,6 +172,9 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
             goto cleanup;
         }
 
+        pa_data = k5alloc(sizeof(*pa_data), &retval);
+        if (pa_data == NULL)
+            goto cleanup;
         pa_data->magic = KV5M_PA_DATA;
         pa_data->pa_type = KRB5_PADATA_SAM_CHALLENGE_2;
         pa_data->contents = (krb5_octet *) encoded_challenge->data;
@@ -189,7 +194,7 @@ cleanup:
     if (sam_db_entry)
         krb5_db_free_principal(context, sam_db_entry);
     cb->free_keys(context, rock, client_key);
-    return retval;
+    (*respond)(arg, retval, pa_data);
 }
 
 static void
