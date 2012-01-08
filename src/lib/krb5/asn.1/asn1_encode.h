@@ -30,6 +30,7 @@
 #include "k5-int.h"
 #include "krbasn1.h"
 #include "asn1buf.h"
+#include "asn1_get.h"
 #include <time.h>
 
 /*
@@ -163,9 +164,11 @@ enum atype_type {
      * and wrapped with a universal primitive tag.  tinfo is a struct
      * primitive_info *. */
     atype_primitive,
-    /* Encoder function (with tag) to be called with address of <thing>.  tinfo
-     * is a struct primitive_info * with tagval ignored.  Cannot be used
-     * with an implicit tag. */
+    /*
+     * Encoder function to be called with address of <thing>.  The encoder
+     * function must generate a sequence without the sequence tag.  tinfo is a
+     * struct fn_info *.  Used only by kdc_req_body.
+     */
     atype_fn,
     /*
      * Encoder function (contents only) to be called with address of <thing>
@@ -175,10 +178,11 @@ enum atype_type {
      */
     atype_string,
     /*
-     * As above, but the encoder function produces the tag as well as the
-     * contents.  Cannot be used with an implicit context tag.
+     * Pre-made DER encoding stored at the address of <thing>.  tinfo is a
+     * struct ptr_info * with the basetype field ignored.  Only usable with the
+     * field_der field type.
      */
-    atype_opaque,
+    atype_der,
     /*
      * Pointer to actual thing to be encoded.  tinfo is a struct ptr_info *.
      *
@@ -209,8 +213,8 @@ enum atype_type {
     atype_nonempty_nullterm_sequence_of,
     /*
      * Encode this object using a single field descriptor.  tinfo is a struct
-     * field_info *.  Cannot be used with an implicit tag.  The presence of
-     * this type may mean the atype/field breakdown needs revision....
+     * field_info *.  The presence of this type may mean the atype/field
+     * breakdown needs revision....
      *
      * Main expected uses: Encode realm component of principal as a
      * GENERALSTRING.  Pluck data and length fields out of a structure
@@ -236,6 +240,10 @@ struct atype_info {
 struct primitive_info {
     asn1_error_code (*enc)(asn1buf *, const void *, unsigned int *);
     unsigned int tagval;
+};
+
+struct fn_info {
+    asn1_error_code (*enc)(asn1buf *, const void *, taginfo *);
 };
 
 struct string_info {
@@ -311,16 +319,8 @@ struct uint_info {
 /* Define a type using an explicit (with tag) encoder function. */
 #define DEFFNTYPE(DESCNAME, CTYPENAME, ENCFN)                           \
     typedef CTYPENAME aux_typedefname_##DESCNAME;                       \
-    static asn1_error_code                                              \
-    aux_encfn_##DESCNAME(asn1buf *buf, const void *val,                 \
-                         unsigned int *retlen)                          \
-    {                                                                   \
-        return ENCFN(buf,                                               \
-                     (const aux_typedefname_##DESCNAME *)val,           \
-                     retlen);                                           \
-    }                                                                   \
-    static const struct primitive_info aux_info_##DESCNAME = {          \
-        aux_encfn_##DESCNAME                                            \
+    static const struct fn_info aux_info_##DESCNAME = {                 \
+        ENCFN                                                           \
     };                                                                  \
     const struct atype_info krb5int_asn1type_##DESCNAME = {             \
         atype_fn, sizeof(CTYPENAME), &aux_info_##DESCNAME               \
@@ -364,18 +364,18 @@ struct uint_info {
     }
 #endif
 /* Not used enough to justify a POINTERS_ARE_ALL_THE_SAME version. */
-#define DEFOPAQUETYPE(DESCNAME, CTYPENAME, ENCFN)               \
+#define DEFDERTYPE(DESCNAME, CTYPENAME)                         \
     typedef CTYPENAME aux_typedefname_##DESCNAME;               \
     static const void *loadptr_for_##DESCNAME(const void *pv)   \
     {                                                           \
         const aux_typedefname_##DESCNAME *p = pv;               \
         return *p;                                              \
     }                                                           \
-    static const struct string_info aux_info_##DESCNAME = {     \
-        ENCFN, loadptr_for_##DESCNAME                           \
+    static const struct ptr_info aux_info_##DESCNAME = {        \
+        loadptr_for_##DESCNAME                                  \
     };                                                          \
     const struct atype_info krb5int_asn1type_##DESCNAME = {     \
-        atype_opaque, 0, &aux_info_##DESCNAME                   \
+        atype_der, 0, &aux_info_##DESCNAME                      \
     }
 /*
  * A sequence, defined by the indicated series of fields, and an
@@ -431,7 +431,7 @@ struct uint_info {
     typedef aux_typedefname_##BASEDESCNAME * aux_typedefname_##DESCNAME; \
     static const struct ptr_info aux_info_##DESCNAME = {                \
         NULL, &krb5int_asn1type_##BASEDESCNAME                          \
-    };
+    };                                                                  \
     const struct atype_info krb5int_asn1type_##DESCNAME = {             \
         atype_ptr, sizeof(aux_typedefname_##DESCNAME),                  \
         &aux_info_##DESCNAME                                            \
@@ -535,24 +535,11 @@ struct uint_info {
     typedef CTYPENAME aux_typedefname_##DESCNAME;               \
     extern const struct atype_info krb5int_asn1type_##DESCNAME
 
-/*
- * Create a partial-encoding function by the indicated name, for the
- * indicated type.  Should only be needed until we've converted all of
- * the encoders, then everything should use descriptor tables.
- */
-extern asn1_error_code
-krb5int_asn1_encode_a_thing(asn1buf *buf, const void *val,
-                            const struct atype_info *a, unsigned int *retlen);
-#define MAKE_ENCFN(FNAME,DESC)                                          \
-    static asn1_error_code FNAME(asn1buf *buf,                          \
-                                 const aux_typedefname_##DESC *val,     \
-                                 unsigned int *retlen)                  \
-    {                                                                   \
-        return krb5int_asn1_encode_a_thing(buf, val,                    \
-                                           &krb5int_asn1type_##DESC,    \
-                                           retlen);                     \
-    }                                                                   \
-    extern int dummy /* gobble semicolon */
+/* Partially encode the contents of a type and return its tag information.
+ * Used only by asn1_encode_kdc_req_body. */
+asn1_error_code
+krb5int_asn1_encode_type(asn1buf *buf, const void *val,
+                         const struct atype_info *a, taginfo *rettag);
 
 /*
  * Sequence field descriptor.
@@ -583,6 +570,8 @@ enum field_type {
      * string would be handled as field_normal.)
      */
     field_string,
+    /* Insert a DER encoding given by the pointer and length. */
+    field_der,
     /*
      * LENOFF indicates a value describing the length of the array at
      * DATAOFF, encoded as a sequence-of with the element type
@@ -616,7 +605,8 @@ struct field_info {
      * compactly as an unsigned bitfield value tagnum+1, with 0=no
      * tag.)  The tag is omitted for optional fields that are not
      * present.  If tag_implicit is set, then the context tag replaces
-     * the outer tag of the field.
+     * the outer tag of the field, and uses the same construction bit
+     * as the outer tag would have used.
      *
      * It's a bit illogical to combine the tag and other field info,
      * since really a sequence field could have zero or several
@@ -720,6 +710,16 @@ struct field_info {
     FIELDOF_OPTSTRING(STYPE,DESC,PTRFIELD,LENFIELD,TAG,IMPLICIT,-1)
 #define FIELD_INT_IMM(VALUE,TAG,IMPLICIT)                       \
     { field_immediate, VALUE, 0, TAG, IMPLICIT, -1, 0, }
+
+#define FIELDOF_OPTDER(STYPE,DESC,PTRFIELD,LENFIELD,LENTYPE,TAG,IMPLICIT,OPT) \
+    { field_der,                                                        \
+            OFFOF(STYPE, PTRFIELD, aux_typedefname_##DESC),             \
+            OFFOF(STYPE, LENFIELD, aux_typedefname_##LENTYPE),          \
+            TAG, IMPLICIT, OPT,                                         \
+            &krb5int_asn1type_##DESC, &krb5int_asn1type_##LENTYPE       \
+    }
+#define FIELDOF_DER(STYPE,DESC,PTRFIELD,LENFIELD,LENTYPE,TAG,IMPLICIT)  \
+    FIELDOF_OPTDER(STYPE,DESC,PTRFIELD,LENFIELD,LENTYPE,TAG,IMPLICIT,-1)
 
 #define FIELDOF_SEQOF_LEN(STYPE,DESC,PTRFIELD,LENFIELD,LENTYPE,TAG,IMPLICIT) \
     {                                                                   \

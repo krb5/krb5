@@ -176,8 +176,9 @@ asn1_encode_bitstring(asn1buf *buf, unsigned int len, const void *val,
  *
  * Two entry points here:
  *
- * krb5int_asn1_encode_a_thing: Incrementally adds the partial
- * encoding of an object to an already-initialized asn1buf.
+ * krb5int_asn1_encode_type: Incrementally adds the contents-only encoding of
+ * an object to an already-initialized asn1buf, and returns its tag
+ * information.
  *
  * krb5int_asn1_do_full_encode: Returns a completed encoding, in the
  * correct byte order, in an allocated krb5_data.
@@ -235,142 +236,143 @@ just_encode_sequence(asn1buf *buf, const void *val,
                      const struct seq_info *seq,
                      unsigned int *retlen);
 static asn1_error_code
-encode_a_field(asn1buf *buf, const void *val,
-               const struct field_info *field,
-               unsigned int *retlen, asn1_construction *omit_tag);
+encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
+               taginfo *rettag);
 
-/* Encode a value according to a type.  If omit_tag is non-NULL, omit the
- * outer tag and return its construction bit instead. */
-static asn1_error_code
-encode_type(asn1buf *buf, const void *val, const struct atype_info *a,
-            unsigned int *retlen, asn1_construction *omit_tag)
+/* Encode a value (contents only, no outer tag) according to a type, and return
+ * its encoded tag information. */
+asn1_error_code
+krb5int_asn1_encode_type(asn1buf *buf, const void *val,
+                         const struct atype_info *a, taginfo *rettag)
 {
     asn1_error_code retval;
-    asn1_class tagclass = UNIVERSAL;
-    asn1_construction construction = PRIMITIVE;
-    asn1_tagnum tagnum = -1;
-    unsigned int length, sum = 0;
 
-    /*
-     * In the switch statement, do one of the following: (1) encode the
-     * contents of val and set tagclass, construction, and tagnum to the
-     * appropriate values for the tag; (2) encode the contents and tag, leaving
-     * tagnum alone (won't work with implicit tagging); (3) delegate the whole
-     * process to a subcall.  If not returning immediately, set length to the
-     * number of bytes encoded.
-     */
     switch (a->type) {
-    case atype_primitive:
-    case atype_fn:
-    {
+    case atype_primitive: {
         const struct primitive_info *prim = a->tinfo;
         assert(prim->enc != NULL);
-        retval = prim->enc(buf, val, &length);
+        retval = prim->enc(buf, val, &rettag->length);
         if (retval) return retval;
-        if (a->type == atype_primitive)
-            tagnum = prim->tagval;
+        rettag->asn1class = UNIVERSAL;
+        rettag->construction = PRIMITIVE;
+        rettag->tagnum = prim->tagval;
         break;
+    }
+    case atype_fn: {
+        const struct fn_info *fn = a->tinfo;
+        assert(fn->enc != NULL);
+        return fn->enc(buf, val, rettag);
     }
     case atype_sequence:
         assert(a->tinfo != NULL);
-        retval = just_encode_sequence(buf, val, a->tinfo, &length);
+        retval = just_encode_sequence(buf, val, a->tinfo, &rettag->length);
         if (retval)
             return retval;
-        construction = CONSTRUCTED;
-        tagnum = ASN1_SEQUENCE;
+        rettag->asn1class = UNIVERSAL;
+        rettag->construction = CONSTRUCTED;
+        rettag->tagnum = ASN1_SEQUENCE;
         break;
-    case atype_ptr:
-    {
+    case atype_ptr: {
         const struct ptr_info *ptr = a->tinfo;
         assert(ptr->basetype != NULL);
-        return encode_type(buf, LOADPTR(val, ptr), ptr->basetype, retlen,
-                           omit_tag);
+        return krb5int_asn1_encode_type(buf, LOADPTR(val, ptr), ptr->basetype,
+                                        rettag);
     }
     case atype_field:
         assert(a->tinfo != NULL);
-        return encode_a_field(buf, val, a->tinfo, retlen, omit_tag);
+        return encode_a_field(buf, val, a->tinfo, rettag);
     case atype_nullterm_sequence_of:
     case atype_nonempty_nullterm_sequence_of:
         assert(a->tinfo != NULL);
         retval = encode_nullterm_sequence_of(buf, val, a->tinfo,
                                              a->type ==
                                              atype_nullterm_sequence_of,
-                                             &length);
+                                             &rettag->length);
         if (retval)
             return retval;
-        construction = CONSTRUCTED;
-        tagnum = ASN1_SEQUENCE;
+        rettag->asn1class = UNIVERSAL;
+        rettag->construction = CONSTRUCTED;
+        rettag->tagnum = ASN1_SEQUENCE;
         break;
-    case atype_tagged_thing:
-    {
+    case atype_tagged_thing: {
         const struct tagged_info *tag = a->tinfo;
-        if (tag->implicit) {
-            retval = encode_type(buf, val, tag->basetype, &length,
-                                 &construction);
-        } else {
-            retval = encode_type(buf, val, tag->basetype, &length, NULL);
-            construction = tag->construction;
+        retval = krb5int_asn1_encode_type(buf, val, tag->basetype, rettag);
+        if (retval)
+            return retval;
+        if (!tag->implicit) {
+            unsigned int tlen;
+            retval = asn1_make_tag(buf, rettag->asn1class,
+                                   rettag->construction, rettag->tagnum,
+                                   rettag->length, &tlen);
+            if (retval)
+                return retval;
+            rettag->length += tlen;
+            rettag->construction = tag->construction;
         }
-        tagclass = tag->tagtype;
-        tagnum = tag->tagval;
+        rettag->asn1class = tag->tagtype;
+        rettag->tagnum = tag->tagval;
         break;
     }
-    case atype_int:
-    {
+    case atype_int: {
         const struct int_info *tinfo = a->tinfo;
         assert(tinfo->loadint != NULL);
-        retval = asn1_encode_integer(buf, tinfo->loadint(val), &length);
+        retval = asn1_encode_integer(buf, tinfo->loadint(val),
+                                     &rettag->length);
         if (retval)
             return retval;
-        tagnum = ASN1_INTEGER;
+        rettag->asn1class = UNIVERSAL;
+        rettag->construction = PRIMITIVE;
+        rettag->tagnum = ASN1_INTEGER;
         break;
     }
-    case atype_uint:
-    {
+    case atype_uint: {
         const struct uint_info *tinfo = a->tinfo;
         assert(tinfo->loaduint != NULL);
         retval = asn1_encode_unsigned_integer(buf, tinfo->loaduint(val),
-                                              &length);
+                                              &rettag->length);
         if (retval)
             return retval;
-        tagnum = ASN1_INTEGER;
+        rettag->asn1class = UNIVERSAL;
+        rettag->construction = PRIMITIVE;
+        rettag->tagnum = ASN1_INTEGER;
         break;
     }
     case atype_min:
     case atype_max:
     case atype_string:          /* only usable with field_string */
-    case atype_opaque:          /* only usable with field_string */
+    case atype_der:             /* only usable with field_der */
+    case atype_choice:          /* only usable with field_choice */
     default:
         assert(a->type > atype_min);
         assert(a->type < atype_max);
         assert(a->type != atype_string);
-        assert(a->type != atype_opaque);
+        assert(a->type != atype_der);
+        assert(a->type != atype_choice);
         abort();
     }
 
-    sum += length;
-    assert(omit_tag == NULL || tagnum != -1);
-    if (omit_tag == NULL && tagnum >= 0) {
-        /* We have not yet encoded the outer tag and should do so. */
-        retval = asn1_make_tag(buf, tagclass, construction, tagnum, sum,
-                               &length);
-        if (retval)
-            return retval;
-        sum += length;
-    } else if (omit_tag != NULL) {
-        /* Don't encode the tag; report its construction bit to the caller. */
-        *omit_tag = construction;
-    }
-
-    *retlen = sum;
     return 0;
 }
 
-/*
- * Encode a value according to a field specification, adding a context tag if
- * specified.  If omit_tag is non-NULL, omit the outer tag and return its
- * construction bit instead (only valid if the field has no context tag).
- */
+static asn1_error_code
+encode_type_and_tag(asn1buf *buf, const void *val, const struct atype_info *a,
+                    unsigned int *retlen)
+{
+    taginfo t;
+    asn1_error_code retval;
+    unsigned int tlen;
+
+    retval = krb5int_asn1_encode_type(buf, val, a, &t);
+    if (retval)
+        return retval;
+    retval = asn1_make_tag(buf, t.asn1class, t.construction, t.tagnum,
+                           t.length, &tlen);
+    if (retval)
+        return retval;
+    *retlen = t.length + tlen;
+    return 0;
+}
+
 static asn1_error_code
 get_field_len(const void *val, const struct field_info *field,
               unsigned int *retlen)
@@ -404,40 +406,51 @@ get_field_len(const void *val, const struct field_info *field,
     return 0;
 }
 
+/* Split a DER encoding into tag and contents.  Insert the contents into buf,
+ * then return the length of the contents and the tag. */
+static asn1_error_code
+split_der(asn1buf *buf, const unsigned char *der, unsigned int len,
+          taginfo *rettag)
+{
+    asn1buf der_buf;
+    krb5_data der_data = make_data((unsigned char *)der, len);
+    asn1_error_code retval;
+
+    retval = asn1buf_wrap_data(&der_buf, &der_data);
+    if (retval)
+        return retval;
+    retval = asn1_get_tag_2(&der_buf, rettag);
+    if (retval)
+        return retval;
+    if ((unsigned int)asn1buf_remains(&der_buf, 0) != rettag->length)
+        return EINVAL;
+    return asn1buf_insert_bytestring(buf, rettag->length,
+                                     der + len - rettag->length);
+}
+
+/* Encode part of a value (contents only, no tag) according to a field
+ * descriptor and return its encoded length and tag. */
 static asn1_error_code
 encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
-               unsigned int *retlen, asn1_construction *omit_tag)
+               taginfo *rettag)
 {
     asn1_error_code retval;
-    asn1_class tagclass = UNIVERSAL;
-    asn1_construction construction = PRIMITIVE;
-    asn1_tagnum tagnum = -1;
-    unsigned int sum = 0, length;
 
     if (val == NULL) return ASN1_MISSING_FIELD;
-    assert(omit_tag == NULL || field->tag < 0);
     assert(!(field->tag_implicit && field->tag < 0));
 
-    /*
-     * In the switch statement, either (1) encode the contents of the field and
-     * set tagclass, construction, and tagnum to the appropriate values for the
-     * tag; (2) encode the contents and tag, leaving tagnum alone; (3) delegate
-     * the whole process to a subcall (only an option if the field has no
-     * context tag).  If not returning immediately, set length to the number of
-     * bytes encoded.
-     */
     switch (field->ftype) {
-    case field_immediate:
-    {
+    case field_immediate: {
         retval = asn1_encode_integer(buf, (asn1_intmax) field->dataoff,
-                                     &length);
+                                     &rettag->length);
         if (retval)
             return retval;
-        tagnum = ASN1_INTEGER;
+        rettag->asn1class = UNIVERSAL;
+        rettag->construction = PRIMITIVE;
+        rettag->tagnum = ASN1_INTEGER;
         break;
     }
-    case field_sequenceof_len:
-    {
+    case field_sequenceof_len: {
         const void *dataptr = (const char *)val + field->dataoff;
         unsigned int slen;
         const struct ptr_info *ptrinfo;
@@ -456,37 +469,29 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
         if (slen != 0 && dataptr == NULL)
             return ASN1_MISSING_FIELD;
         retval = encode_sequence_of(buf, slen, dataptr, ptrinfo->basetype,
-                                    &length);
+                                    &rettag->length);
         if (retval)
             return retval;
-        construction = CONSTRUCTED;
-        tagnum = ASN1_SEQUENCE;
+        rettag->asn1class = UNIVERSAL;
+        rettag->construction = CONSTRUCTED;
+        rettag->tagnum = ASN1_SEQUENCE;
         break;
     }
-    case field_normal:
-    {
+    case field_normal: {
         const void *dataptr = (const char *)val + field->dataoff;
-        if (omit_tag != NULL)
-            return encode_type(buf, dataptr, field->atype, retlen, omit_tag);
-        if (field->tag_implicit) {
-            retval = encode_type(buf, dataptr, field->atype, &length,
-                                 &construction);
-        } else
-            retval = encode_type(buf, dataptr, field->atype, &length, NULL);
+        retval = krb5int_asn1_encode_type(buf, dataptr, field->atype, rettag);
         if (retval)
             return retval;
         break;
     }
-    case field_string:
-    {
+    case field_string: {
         const void *dataptr = (const char *)val + field->dataoff;
         const struct atype_info *a;
         unsigned int slen;
         const struct string_info *string;
 
         a = field->atype;
-        assert(a->type == atype_string || a->type == atype_opaque);
-        assert(!(a->type == atype_opaque && field->tag_implicit));
+        assert(a->type == atype_string);
         retval = get_field_len(val, field, &slen);
         if (retval)
             return retval;
@@ -495,22 +500,39 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
         if (dataptr == NULL && slen != 0)
             return ASN1_MISSING_FIELD;
         assert(string->enclen != NULL);
-        retval = string->enclen(buf, slen, dataptr, &length);
+        retval = string->enclen(buf, slen, dataptr, &rettag->length);
         if (retval)
             return retval;
-        if (a->type == atype_string)
-            tagnum = string->tagval;
-        else
-            assert(omit_tag == NULL && !field->tag_implicit);
+        rettag->asn1class = UNIVERSAL;
+        rettag->construction = PRIMITIVE;
+        rettag->tagnum = string->tagval;
         break;
     }
-    case field_choice:
-    {
+    case field_der: {
+        const void *dataptr = (const char *)val + field->dataoff;
+        const struct atype_info *a;
+        unsigned int slen;
+        const struct ptr_info *ptr;
+
+        a = field->atype;
+        assert(a->type == atype_der);
+        retval = get_field_len(val, field, &slen);
+        if (retval)
+            return retval;
+        ptr = a->tinfo;
+        dataptr = LOADPTR(dataptr, ptr);
+        if (dataptr == NULL && slen != 0)
+            return ASN1_MISSING_FIELD;
+        retval = split_der(buf, dataptr, slen, rettag);
+        if (retval)
+            return retval;
+        break;
+    }
+    case field_choice: {
         const void *dataptr = (const char *)val + field->dataoff;
         unsigned int choice;
         const struct seq_info *seq;
 
-        assert(omit_tag == NULL);
         assert(field->atype->type == atype_choice);
         seq = field->atype->tinfo;
         retval = get_field_len(val, field, &choice);
@@ -518,8 +540,9 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
             return retval;
         if (choice > seq->n_fields)
             return ASN1_MISSING_FIELD;
-        retval = encode_a_field(buf, dataptr, &seq->fields[choice], &length,
-                                NULL);
+        retval = encode_a_field(buf, dataptr, &seq->fields[choice], rettag);
+        if (retval)
+            return retval;
         break;
     }
     default:
@@ -529,31 +552,20 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
         abort();
     }
 
-    sum += length;
-    if (tagnum >= 0 && omit_tag == NULL && !field->tag_implicit) {
-        /* We have not yet encoded the field's outer tag and should do so. */
-        retval = asn1_make_tag(buf, tagclass, construction, tagnum, sum,
-                               &length);
-        if (retval)
-            return retval;
-        sum += length;
-    } else if (omit_tag != NULL) {
-        /* Don't encode the tag; report its construction bit to the caller. */
-        *omit_tag = construction;
-    }
-
-    /* Maybe add a context tag.  Explicit tags are always constructed; implicit
-     * tags are primitive if the replaced outer tag would have been. */
     if (field->tag >= 0) {
-        if (!field->tag_implicit)
-            construction = CONSTRUCTED;
-        retval = asn1_make_tag(buf, CONTEXT_SPECIFIC, construction, field->tag,
-                               sum, &length);
-        if (retval)
-            return retval;
-        sum += length;
+        if (!field->tag_implicit) {
+            unsigned int tlen;
+            retval = asn1_make_tag(buf, rettag->asn1class,
+                                   rettag->construction, rettag->tagnum,
+                                   rettag->length, &tlen);
+            if (retval)
+                return retval;
+            rettag->length += tlen;
+            rettag->construction = CONSTRUCTED;
+        }
+        rettag->asn1class = CONTEXT_SPECIFIC;
+        rettag->tagnum = field->tag;
     }
-    *retlen = sum;
     return 0;
 }
 
@@ -567,21 +579,20 @@ encode_fields(asn1buf *buf, const void *val,
     unsigned int sum = 0;
     for (i = nfields; i > 0; i--) {
         const struct field_info *f = fields+i-1;
-        unsigned int length;
+        taginfo t;
         asn1_error_code retval;
-        int present;
 
-        if (f->opt == -1)
-            present = 1;
-        else if ((1u << f->opt) & optional)
-            present = 1;
-        else
-            present = 0;
-        if (present) {
-            retval = encode_a_field(buf, val, f, &length, NULL);
-            if (retval) return retval;
-            sum += length;
-        }
+        if (f->opt != -1 && !((1u << f->opt) & optional))
+            continue;
+        retval = encode_a_field(buf, val, f, &t);
+        if (retval)
+            return retval;
+        sum += t.length;
+        retval = asn1_make_tag(buf, t.asn1class, t.construction, t.tagnum,
+                               t.length, &t.length);
+        if (retval)
+            return retval;
+        sum += t.length;
     }
     *retlen = sum;
     return 0;
@@ -615,20 +626,13 @@ encode_sequence_of(asn1buf *buf, unsigned int seqlen, const void *val,
 
         assert(eltinfo->size != 0);
         eltptr = (const char *)val + (i - 1) * eltinfo->size;
-        retval = encode_type(buf, eltptr, a, &length, NULL);
+        retval = encode_type_and_tag(buf, eltptr, a, &length);
         if (retval)
             return retval;
         sum += length;
     }
     *retlen = sum;
     return 0;
-}
-
-asn1_error_code
-krb5int_asn1_encode_a_thing(asn1buf *buf, const void *val,
-                            const struct atype_info *a, unsigned int *retlen)
-{
-    return encode_type(buf, val, a, retlen, NULL);
 }
 
 krb5_error_code
@@ -649,7 +653,7 @@ krb5int_asn1_do_full_encode(const void *rep, krb5_data **code,
     if (retval)
         return retval;
 
-    retval = encode_type(buf, rep, a, &length, NULL);
+    retval = encode_type_and_tag(buf, rep, a, &length);
     if (retval)
         goto cleanup;
     retval = asn12krb5_buf(buf, &d);

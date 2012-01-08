@@ -42,7 +42,7 @@ DEFSTRINGTYPE(generalstring, char *, asn1_encode_bytestring,
               ASN1_GENERALSTRING);
 DEFSTRINGTYPE(u_generalstring, unsigned char *, asn1_encode_bytestring,
               ASN1_GENERALSTRING);
-DEFOPAQUETYPE(opaque, char *, asn1_encode_bytestring);
+DEFDERTYPE(der, char *);
 
 DEFFIELDTYPE(gstring_data, krb5_data,
              FIELDOF_STRING(krb5_data, generalstring, data, length, -1, 0));
@@ -52,8 +52,8 @@ DEFFIELDTYPE(ostring_data, krb5_data,
              FIELDOF_STRING(krb5_data, s_octetstring, data, length, -1, 0));
 DEFPTRTYPE(ostring_data_ptr,ostring_data);
 
-DEFFIELDTYPE(opaque_data, krb5_data,
-             FIELDOF_STRING(krb5_data, opaque, data, length, -1, 0));
+DEFFIELDTYPE(der_data, krb5_data,
+             FIELDOF_DER(krb5_data, der, data, length, uint, -1, 0));
 
 DEFFIELDTYPE(realm_of_principal_data, krb5_principal_data,
              FIELDOF_NORM(krb5_principal_data, gstring_data, realm, -1, 0));
@@ -298,13 +298,9 @@ optional_kdc_req_hack(const void *p)
 DEFSEQTYPE(kdc_req_body_hack, struct kdc_req_hack, kdc_req_hack_fields,
            optional_kdc_req_hack);
 static asn1_error_code
-asn1_encode_kdc_req_hack(asn1buf *, const struct kdc_req_hack *,
-                         unsigned int *);
-MAKE_ENCFN(asn1_encode_kdc_req_hack, kdc_req_body_hack);
-static asn1_error_code
-asn1_encode_kdc_req_body(asn1buf *buf, const krb5_kdc_req *val,
-                         unsigned int *retlen)
+asn1_encode_kdc_req_body(asn1buf *buf, const void *ptr, taginfo *rettag)
 {
+    const krb5_kdc_req *val = ptr;
     struct kdc_req_hack val2;
     val2.v = *val;
     if (val->kdc_options & KDC_OPT_ENC_TKT_IN_SKEY) {
@@ -314,7 +310,9 @@ asn1_encode_kdc_req_body(asn1buf *buf, const krb5_kdc_req *val,
     } else if (val->server != NULL) {
         val2.server_realm = &val->server->realm;
     } else return ASN1_MISSING_FIELD;
-    return asn1_encode_kdc_req_hack(buf, &val2, retlen);
+    return krb5int_asn1_encode_type(buf, &val2,
+                                    &krb5int_asn1type_kdc_req_body_hack,
+                                    rettag);
 }
 DEFFNTYPE(kdc_req_body, krb5_kdc_req, asn1_encode_kdc_req_body);
 /* end ugly hack */
@@ -455,8 +453,7 @@ DEFPTRTYPE(etype_info2_entry_ptr, etype_info2_entry);
 DEFNULLTERMSEQOFTYPE(etype_info2, etype_info2_entry_ptr);
 
 static const struct field_info sam_challenge_2_fields[] = {
-    FIELDOF_NORM(krb5_sam_challenge_2, opaque_data, sam_challenge_2_body,
-                 0, 0),
+    FIELDOF_NORM(krb5_sam_challenge_2, der_data, sam_challenge_2_body, 0, 0),
     FIELDOF_NORM(krb5_sam_challenge_2, ptr_seqof_checksum, sam_cksum, 1, 0),
 };
 DEFSEQTYPE(sam_challenge_2, krb5_sam_challenge_2, sam_challenge_2_fields, 0);
@@ -790,7 +787,7 @@ static const struct field_info krb5_safe_fields[] = {
 DEFSEQTYPE(untagged_krb5_safe, krb5_safe, krb5_safe_fields, 0);
 DEFAPPTAGGEDTYPE(krb5_safe, 20, untagged_krb5_safe);
 
-DEFPTRTYPE(krb_saved_safe_body_ptr, opaque_data);
+DEFPTRTYPE(krb_saved_safe_body_ptr, der_data);
 DEFFIELDTYPE(krb5_safe_checksum_only, krb5_safe,
              FIELDOF_NORM(krb5_safe, checksum_ptr, checksum, -1, 0));
 DEFPTRTYPE(krb5_safe_checksum_only_ptr, krb5_safe_checksum_only);
@@ -1307,7 +1304,7 @@ algorithm_identifier_optional(const void *p)
 
 static const struct field_info algorithm_identifier_fields[] = {
     FIELDOF_NORM(krb5_algorithm_identifier, oid_data, algorithm, -1, 0),
-    FIELDOF_OPT(krb5_algorithm_identifier, opaque_data, parameters, -1, 0, 1),
+    FIELDOF_OPT(krb5_algorithm_identifier, der_data, parameters, -1, 0, 1),
 };
 DEFSEQTYPE(algorithm_identifier, krb5_algorithm_identifier,
            algorithm_identifier_fields, algorithm_identifier_optional);
