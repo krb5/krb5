@@ -1428,7 +1428,7 @@ static unsigned int
 auth_pack_draft9_optional(const void *p)
 {
     unsigned int optional = 0;
-    const krb5_auth_pack *val = p;
+    const krb5_auth_pack_draft9 *val = p;
     if (val->clientPublicValue != NULL)
         optional |= (1u << 1);
     return optional;

@@ -260,9 +260,6 @@ pkinit_as_req_create(krb5_context context,
         auth_pack9->pkAuthenticator.cusec = cusec;
         auth_pack9->pkAuthenticator.nonce = nonce;
         auth_pack9->pkAuthenticator.kdcName = server;
-        auth_pack9->pkAuthenticator.kdcRealm.magic = 0;
-        auth_pack9->pkAuthenticator.kdcRealm.data = server->realm.data;
-        auth_pack9->pkAuthenticator.kdcRealm.length = server->realm.length;
         free(cksum->contents);
         break;
     case KRB5_PADATA_PK_AS_REQ:

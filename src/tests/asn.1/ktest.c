@@ -630,7 +630,6 @@ static void
 ktest_make_sample_pk_authenticator_draft9(krb5_pk_authenticator_draft9 *p)
 {
     ktest_make_sample_principal(&p->kdcName);
-    ktest_make_sample_data(&p->kdcRealm);
     p->cusec = SAMPLE_USEC;
     p->ctime = SAMPLE_TIME;
     p->nonce = SAMPLE_NONCE;
@@ -1443,7 +1442,6 @@ static void
 ktest_empty_pk_authenticator_draft9(krb5_pk_authenticator_draft9 *p)
 {
     ktest_destroy_principal(&p->kdcName);
-    ktest_empty_data(&p->kdcRealm);
 }
 
 static void

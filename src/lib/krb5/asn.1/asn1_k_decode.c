@@ -1370,7 +1370,6 @@ asn1_decode_pk_authenticator_draft9(asn1buf *buf,
 {
     setup();
     val->kdcName = NULL;
-    val->kdcRealm.data = NULL;
     { begin_structure();
         alloc_principal(val->kdcName);
         get_field(val->kdcName, 0, asn1_decode_principal_name);

@@ -47,7 +47,6 @@ typedef struct _krb5_pk_authenticator {
 /* PKAuthenticator draft9 */
 typedef struct _krb5_pk_authenticator_draft9 {
     krb5_principal  kdcName;
-    krb5_data       kdcRealm;
     krb5_int32      cusec;  /* (0..999999) */
     krb5_timestamp  ctime;
     krb5_int32      nonce;  /* (0..4294967295) */
