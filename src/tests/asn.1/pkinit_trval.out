@@ -38,8 +38,7 @@ encode_krb5_pa_pk_as_rep(dhInfo):
 .  [Sequence/Sequence Of] 
 .  .  [0] <8>
          6b 72 62 35 64 61 74 61                          krb5data
-.  .  [1] <8>
-         6b 72 62 35 64 61 74 61                          krb5data
+.  .  [1] [Octet String] "krb5data"
 .  .  [2] [Sequence/Sequence Of] 
 .  .  .  [0] [Object Identifier] <8>
             6b 72 62 35 64 61 74 61                          krb5data

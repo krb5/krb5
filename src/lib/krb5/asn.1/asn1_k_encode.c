@@ -1574,15 +1574,9 @@ dh_rep_info_optional(const void *p)
     return optional;
 }
 
-/*
- * RFC 4556 specifies serverDHNonce as an explicitly tagged octet string.
- * Historically we encode it as an implicitly tagged octet string.  This may be
- * harmless (and fixable) since we don't appear to include a serverDHNonce in
- * our PKINIT server code, but we would want to change this carefully.
- */
 static const struct field_info dh_rep_info_fields[] = {
     FIELDOF_NORM(krb5_dh_rep_info, ostring_data, dhSignedData, 0, 1),
-    FIELDOF_OPT(krb5_dh_rep_info, ostring_data, serverDHNonce, 1, 1, 1),
+    FIELDOF_OPT(krb5_dh_rep_info, ostring_data, serverDHNonce, 1, 0, 1),
     FIELDOF_OPT(krb5_dh_rep_info, kdf_alg_id_ptr, kdfID, 2, 0, 2),
 };
 DEFSEQTYPE(dh_rep_info, krb5_dh_rep_info,
