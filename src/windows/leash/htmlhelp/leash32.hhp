@@ -3,7 +3,7 @@ Auto Index=Yes
 Auto TOC=9
 Compatibility=1.1 or later
 Compiled file=leash.chm
-Contents file=Table of Contents.hhc
+Contents file=Table_of_Contents.hhc
 Default Font=Arial,10,0
 Default Window=Default Leash Help Window
 Default topic=html\leash_topic_why_use.htm
@@ -15,7 +15,7 @@ Language=0x409 English (United States)
 Title=Leash Ticket Manager Help
 
 [WINDOWS]
-Default Leash Help Window="Leash Ticket Manager Help","Table of Contents.hhc","leash32.hhk","html\leash_topic_leash_help_topics.htm","html\leash_topic_leash_help_topics.htm",,,,,0x42520,320,0x304e,[0,0,800,560],0x7b0000,,,,,,0
+Default Leash Help Window="Leash Ticket Manager Help","Table_of_Contents.hhc","leash32.hhk","html\leash_topic_leash_help_topics.htm","html\leash_topic_leash_help_topics.htm",,,,,0x42520,320,0x304e,[0,0,800,560],0x7b0000,,,,,,0
 
 
 [FILES]
