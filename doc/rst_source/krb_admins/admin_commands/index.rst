@@ -17,6 +17,7 @@ Administration  programs
    k5srvutil.rst
    kadmind.rst
    kdb5_ldap_util.rst 
+   sserver.rst
 
 ------------
 
