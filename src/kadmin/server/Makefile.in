@@ -21,6 +21,8 @@ $(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS) $(APPUTILS_DEPLIB) $(VE
 
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(SERVER_BINDIR)/$(PROG)
+
+install-oldman::
 	$(INSTALL_DATA) $(srcdir)/$(PROG).M ${DESTDIR}$(SERVER_MANDIR)/$(PROG).8
 
 clean::

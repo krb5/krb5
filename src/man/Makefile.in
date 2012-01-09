@@ -1,0 +1,68 @@
+mydir=man
+BUILDTOP=$(REL)..
+
+GROFF=@GROFF@
+GROFF_MAN=$(GROFF) -mtty-char -Tascii -mandoc -c
+
+all::
+
+install:: install-clientman install-fileman install-adminman install-serverman
+
+install-catman:: install-clientcat install-filecat install-admincat install-servercat
+
+install-clientman::
+	$(INSTALL_DATA) $(srcdir)/k5srvutil.1 ${DESTDIR}$(CLIENT_MANDIR)/k5srvutil.1
+	$(INSTALL_DATA) $(srcdir)/kadmin.1 ${DESTDIR}$(CLIENT_MANDIR)/kadmin.1
+	$(INSTALL_DATA) $(srcdir)/kdestroy.1 ${DESTDIR}$(CLIENT_MANDIR)/kdestroy.1
+	$(INSTALL_DATA) $(srcdir)/kinit.1 ${DESTDIR}$(CLIENT_MANDIR)/kinit.1
+	$(INSTALL_DATA) $(srcdir)/klist.1 ${DESTDIR}$(CLIENT_MANDIR)/klist.1
+	$(INSTALL_DATA) $(srcdir)/kpasswd.1 ${DESTDIR}$(CLIENT_MANDIR)/kpasswd.1
+	$(INSTALL_DATA) $(srcdir)/ksu.1 ${DESTDIR}$(CLIENT_MANDIR)/ksu.1
+	$(INSTALL_DATA) $(srcdir)/kswitch.1 ${DESTDIR}$(CLIENT_MANDIR)/kswitch.1
+	$(INSTALL_DATA) $(srcdir)/ktutil.1 ${DESTDIR}$(CLIENT_MANDIR)/ktutil.1
+	$(INSTALL_DATA) $(srcdir)/kvno.1 ${DESTDIR}$(CLIENT_MANDIR)/kvno.1
+
+install-fileman::
+	$(INSTALL_DATA) $(srcdir)/dot.k5login.5 ${DESTDIR}$(FILE_MANDIR)/.k5login.5
+	$(INSTALL_DATA) $(srcdir)/k5login.5 ${DESTDIR}$(FILE_MANDIR)/k5login.5
+	$(INSTALL_DATA) $(srcdir)/kdc.conf.5 ${DESTDIR}$(FILE_MANDIR)/kdc.conf.5
+	$(INSTALL_DATA) $(srcdir)/krb5.conf.5 ${DESTDIR}$(FILE_MANDIR)/krb5.conf.5
+
+install-adminman::
+	$(INSTALL_DATA) $(srcdir)/kadmin.local.8 ${DESTDIR}$(CLIENT_MANDIR)/kadmin.local.8
+	$(INSTALL_DATA) $(srcdir)/kdb5_ldap_util.8 ${DESTDIR}$(ADMIN_MANDIR)/kdb5_ldap_util.8
+	$(INSTALL_DATA) $(srcdir)/kdb5_util.8 ${DESTDIR}$(ADMIN_MANDIR)/kdb5_util.8
+	$(INSTALL_DATA) $(srcdir)/kprop.8 ${DESTDIR}$(ADMIN_MANDIR)/kprop.8
+	$(INSTALL_DATA) $(srcdir)/kproplog.8 ${DESTDIR}$(ADMIN_MANDIR)/kproplog.8
+
+install-serverman::
+	$(INSTALL_DATA) $(srcdir)/kadmind.8 ${DESTDIR}$(SERVER_MANDIR)/kadmind.8
+	$(INSTALL_DATA) $(srcdir)/kpropd.8 ${DESTDIR}$(SERVER_MANDIR)/kpropd.8
+	$(INSTALL_DATA) $(srcdir)/krb5kdc.8 ${DESTDIR}$(SERVER_MANDIR)/krb5kdc.8
+
+install-clientcat::
+	$(GROFF_MAN) $(srcdir)/k5srvutil.1 > ${DESTDIR}$(CLIENT_CATDIR)/k5srvutil.1
+	$(GROFF_MAN) $(srcdir)/kadmin.1 > ${DESTDIR}$(CLIENT_CATDIR)/kadmin.1
+	$(GROFF_MAN) $(srcdir)/kdestroy.1 > ${DESTDIR}$(CLIENT_CATDIR)/kdestroy.1
+	$(GROFF_MAN) $(srcdir)/kinit.1 > ${DESTDIR}$(CLIENT_CATDIR)/kinit.1
+	$(GROFF_MAN) $(srcdir)/klist.1 > ${DESTDIR}$(CLIENT_CATDIR)/klist.1
+	$(GROFF_MAN) $(srcdir)/kpasswd.1 > ${DESTDIR}$(CLIENT_CATDIR)/kpasswd.1
+	$(GROFF_MAN) $(srcdir)/ksu.1 > ${DESTDIR}$(CLIENT_CATDIR)/ksu.1
+	$(GROFF_MAN) $(srcdir)/kswitch.1 > ${DESTDIR}$(CLIENT_CATDIR)/kswitch.1
+	$(GROFF_MAN) $(srcdir)/ktutil.1 > ${DESTDIR}$(CLIENT_CATDIR)/ktutil.1
+	$(GROFF_MAN) $(srcdir)/kvno.1 > ${DESTDIR}$(CLIENT_CATDIR)/kvno.1
+
+install-filecat::
+	$(GROFF_MAN) $(srcdir)/k5login.5 > ${DESTDIR}$(FILE_CATDIR)/k5login.5
+	($(RM) ${DESTDIR}$(FILE_CATDIR)/.k5login.5; \
+		$(LN_S) $(FILE_CATDIR)/k5login.5 ${DESTDIR}$(FILE_CATDIR)/.k5login.5)
+	$(GROFF_MAN) $(srcdir)/kdc.conf.5 > ${DESTDIR}$(FILE_CATDIR)/kdc.conf.5
+	$(GROFF_MAN) $(srcdir)/krb5.conf.5 > ${DESTDIR}$(FILE_CATDIR)/krb5.conf.5
+
+install-admincat::
+	($(RM) ${DESTDIR}$(ADMIN_CATDIR)/kadmin.local.8; \
+		$(LN_S) $(CLIENT_CATDIR)/kadmin.1 ${DESTDIR}$(ADMIN_CATDIR)/kadmin.local.8)
+	$(GROFF_MAN) $(srcdir)/kdb5_ldap_util.8 > ${DESTDIR}$(ADMIN_CATDIR)/kdb5_ldap_util.8
+	$(GROFF_MAN) $(srcdir)/kdb5_util.8 > ${DESTDIR}$(ADMIN_CATDIR)/kdb5_util.8
+	$(GROFF_MAN) $(srcdir)/kprop.8 > ${DESTDIR}$(ADMIN_CATDIR)/kprop.8
+	$(GROFF_MAN) $(srcdir)/kproplog.8 > ${DESTDIR}$(ADMIN_CATDIR)/kproplog.8

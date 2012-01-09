@@ -1243,6 +1243,8 @@ AC_SUBST([VERTO_CFLAGS])
 AC_SUBST([VERTO_LIBS])
 AC_SUBST([VERTO_VERSION])
 
+AC_PATH_PROG(GROFF, groff)
+
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 V5_AC_OUTPUT_MAKEFILE(.
 
@@ -1276,7 +1278,7 @@ dnl	lib/krb5/ccache/ccapi
 
 dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 
-	kdc slave config-files gen-manpages include
+	kdc slave config-files gen-manpages man include
 
 	plugins/locate/python
 	plugins/kadm5_hook/test

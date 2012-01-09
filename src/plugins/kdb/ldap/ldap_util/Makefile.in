@@ -26,6 +26,8 @@ getdate.c: $(GETDATE)
 
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
+
+install-oldman::
 	$(INSTALL_DATA) $(srcdir)/$(PROG).M ${DESTDIR}$(ADMIN_MANDIR)/$(PROG).8
 
 clean::

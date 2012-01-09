@@ -14,7 +14,7 @@ SUBDIRS=util include lib \
 	@ldap_plugin_dir@ \
 	plugins/preauth/pkinit \
 	kdc kadmin slave clients appl tests \
-	config-files gen-manpages @po@
+	config-files gen-manpages man @po@
 WINSUBDIRS=include util lib ccapi windows clients appl
 BUILDTOP=$(REL).
 LOCALINCLUDES = -I$(srcdir) 
@@ -54,7 +54,10 @@ world::
 INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
 		$(ADMIN_BINDIR) $(SERVER_BINDIR) $(CLIENT_BINDIR) \
 		$(ADMIN_MANDIR) $(SERVER_MANDIR) $(CLIENT_MANDIR) \
-		$(FILE_MANDIR) $(KRB5_LIBDIR) $(KRB5_INCDIR) \
+		$(FILE_MANDIR) \
+		$(ADMIN_CATDIR) $(SERVER_CATDIR) $(CLIENT_CATDIR) \
+		$(FILE_CATDIR) \
+		$(KRB5_LIBDIR) $(KRB5_INCDIR) \
 		$(KRB5_DB_MODULE_DIR) $(KRB5_PA_MODULE_DIR) \
 		$(KRB5_AD_MODULE_DIR) \
 		$(KRB5_LIBKRB5_MODULE_DIR) \

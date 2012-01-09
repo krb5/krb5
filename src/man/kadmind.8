@@ -1,0 +1,287 @@
+.TH "KADMIND" "8" "January 06, 2012" "0.0.1" "MIT Kerberos"
+.SH NAME
+kadmind \- KADM5 administration server
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.\" Man page generated from reStructeredText.
+.
+.SH SYNOPSIS
+.sp
+\fBkadmind\fP [\fB\-x\fP \fIdb_args\fP] [\fB\-r\fP \fIrealm\fP] [\fB\-m\fP] [\fB\-nofork\fP] [\fB\-port\fP \fIport\-number\fP] [\fB\-P\fP \fIpid_file\fP]
+.SH DESCRIPTION
+.sp
+This command starts the KADM5 administration server. If the database is db2, the administration server runs on the master Kerberos server,
+which stores the KDC principal database and the KADM5 policy database. If the database is LDAP, the administration server and
+the KDC server need not run on the same machine.  \fIkadmind\fP accepts remote requests to administer the information in these databases.
+Remote requests are sent, for example, by kadmin(8) and the kpasswd(1) command, both of which are clients of \fIkadmind\fP.
+.sp
+\fIkadmind\fP requires a number of configuration files to be set up in order for it to work:
+.INDENT 0.0
+.TP
+.B \fIkdc.conf\fP
+.sp
+The KDC configuration file contains configuration information for the KDC and the KADM5 system.  \fIkadmind\fP understands a number
+of  variable  settings in this file, some of which are mandatory and some of which are optional.
+See the CONFIGURATION VALUES section below.
+.TP
+.B \fIkeytab\fP
+.sp
+Kadmind requires a keytab containing correct entries for the kadmin/admin and kadmin/changepw principals for every realm that
+\fIkadmind\fP will answer requests for.  The keytab can be created with the kadmin(8) client.
+The location of the keytab is determined by the \fIadmin_keytab\fP configuration variable (see CONFIGURATION VALUES).
+.TP
+.B \fIACL\fP file
+.sp
+\fIkadmind\fP\(aqs \fIACL\fP (access control list) tells it which principals are allowed to perform KADM5 administration actions.
+The  path of  the \fIACL\fP file is specified via the acl_file configuration variable (see CONFIGURATION VALUES).
+The syntax of the \fIACL\fP file is specified in the \fIACL\fP FILE SYNTAX section below.
+.sp
+If the \fIkadmind\fP\(aqs ACL file is modified, the \fIkadmind\fP daemon needs to be restarted for changes to take effect.
+.UNINDENT
+.sp
+After the server begins running, it puts itself in the background and disassociates itself from its controlling terminal.
+.sp
+\fIkadmind\fP can be configured for incremental database propagation.  Incremental propagation allows slave KDC servers to receive  principal
+and  policy  updates  incrementally instead of receiving full dumps of the database.  This facility can be enabled in the \fIkdc.conf\fP file
+with the \fIiprop_enable\fP option.  See the \fIkdc.conf\fP documentation for other options for tuning incremental propagation parameters.
+Incremental propagation requires the principal "kiprop/MASTER@REALM"
+(where MASTER is the master KDC\(aqs canonical host name, and REALM the realm name) to be registered in the database.
+.SH OPTIONS
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fB\-x\fP \fIdb_args\fP
+.sp
+specifies the database specific arguments.
+.sp
+Options supported for LDAP database are:
+.INDENT 7.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fB\-x\fP \fInconns\fP =<number_of_connections>
+.sp
+specifies the number of connections to be maintained per LDAP server.
+.TP
+.B \fB\-x\fP \fIhost\fP =<ldapuri>
+.sp
+specifies the LDAP server to connect to by a LDAP URI.
+.TP
+.B \fB\-x\fP \fIbinddn\fP =<binddn>
+.sp
+specifies the DN of the object used by the administration server to bind to the LDAP server.  This object should have the
+read and write rights on the realm container, principal container and the subtree that is referenced by the realm.
+.TP
+.B \fB\-x\fP \fIbindpwd\fP =<bind_password>
+.sp
+specifies the password for the above mentioned binddn. It is recommended not to use this option.
+Instead, the password can be stashed using the stashsrvpw command of kdb5_ldap_util.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+specifies the default realm that \fIkadmind\fP will serve; if it is not specified, the default realm of the host is used.
+\fIkadmind\fP will answer requests for any realm that exists in the local KDC database and for which the appropriate principals are in its keytab.
+.TP
+.B \fB\-m\fP
+.sp
+specifies that the master database password should be fetched from the keyboard rather than from a file on disk.
+Note that the server gets the password prior to putting itself in the background;
+in combination with the \fI\-nofork\fP option, you must place it in the background by hand.
+.TP
+.B \fB\-nofork\fP
+.sp
+specifies that the server does not put itself in the background and does not disassociate itself from the terminal.
+In normal operation, you should always allow the server place itself in the background.
+.TP
+.B \fB\-port\fP \fIport\-number\fP
+.sp
+specifies the port on which the administration server listens for connections.  The default is is controlled by the \fIkadmind_port\fP
+configuration variable (see below).
+.TP
+.B \fB\-P\fP \fIpid_file\fP
+.sp
+specifies the file to which the PID of \fIkadmind\fP process should be written to after it starts up.  This can be used to identify
+whether \fIkadmind\fP is still running and to allow init scripts to stop the correct process.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH CONFIGURATION VALUES
+.sp
+In addition to the relations defined in kdc.conf(5), \fIkadmind\fP understands the following relations,
+all of which should appear in the [realms] section:
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBacl_file\fP
+.sp
+The path of \fIkadmind\fP\(aqs \fIACL\fP file.  \fBMandatory\fP.  No default.
+.TP
+.B \fBadmin_keytab\fP
+.sp
+The  name  of  the keytab containing entries for the principals kadmin/admin and kadmin/changepw in each realm that \fIkadmind\fP will
+serve.  The default is the value of the KRB5_KTNAME environment variable, if defined.  \fBMandatory\fP.
+.TP
+.B \fBdict_file\fP
+.sp
+The path of \fIkadmind\fP\(aqs password dictionary.  A principal with any password policy will not be allowed to select any  password  in
+the dictionary.  Optional.  No default.
+.TP
+.B \fBkadmind_port\fP
+.sp
+The TCP port on which \fIkadmind\fP will listen.  The default is 749.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH ACL FILE SYNTAX
+.sp
+The \fIACL\fP file controls which principals can or cannot perform which administrative functions.  For operations  that  affect  principals,
+the  \fIACL\fP file also controls which principals can operate on which other principals.  This file can contain comment lines, null lines or
+lines which contain \fIACL\fP entries.  Comment lines start with the sharp sign (#) and continue until the end of the line.
+Lines containing \fIACL\fP entries have the format of principal whitespace \fIoperation\-mask\fP [whitespace \fIoperation\-target\fP]
+.sp
+Ordering  is important.  The first matching entry is the one which will control access for a particular principal on a particular principal.
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBprincipal\fP
+.sp
+may specify a partially or fully qualified Kerberos version 5 principal name.  Each component of  the  name  may  be  wildcarded
+using the asterisk ( * ) character.
+.TP
+.B \fBoperation\-target\fP
+.sp
+[Optional]  may specify a partially or fully qualified Kerberos version 5 principal name.  Each component of the name may be
+wildcarded using the asterisk ( * ) character.
+.TP
+.B \fBoperation\-mask\fP
+.sp
+Specifies what operations may or may not be performed by a principal matching a particular entry.  This is a string of one or
+more of the following list of characters or their upper\-case counterparts.  If the character is upper\-case, then the operation
+is disallowed.  If the character is lower\-case, then the operation is permitted.
+.sp
+.nf
+.ft C
+a    [Dis]allows the addition of principals or policies in the database.
+d    [Dis]allows the deletion of principals or policies in the database.
+m    [Dis]allows the modification of principals or policies in the database.
+c    [Dis]allows the changing of passwords for principals in the database.
+i    [Dis]allows inquiries to the database.
+l    [Dis]allows the listing of principals or policies in the database.
+p    [Dis]allows the propagation of the principal database.
+x    Short for admcil.
+*    Same as x.
+.ft P
+.fi
+.sp
+Some examples of valid entries here are:
+.INDENT 7.0
+.TP
+.B \fIuser/instance@realm adm\fP
+.sp
+A standard fully qualified name.
+The \fIoperation\-mask\fP only applies to this principal and specifies that [s]he may add,
+delete  or modify principals and policies, but not change anybody else\(aqs password.
+.TP
+.B \fIuser/instance@realm cim service/instance@realm\fP
+.sp
+A  standard fully qualified name and a standard fully qualified target.
+The \fIoperation\-mask\fP only applies to this principal operating on this target and specifies
+that [s]he may change the target\(aqs password, request information about the target and  modify it.
+.TP
+.B \fIuser/*@realm ac\fP
+.sp
+A  wildcarded name.  The \fIoperation\-mask\fP applies to all principals in realm "realm" whose first component is "user" and specifies
+that [s]he may add principals and change anybody\(aqs password.
+.TP
+.B \fIuser/*@realm i */instance@realm\fP
+.sp
+A wildcarded name and target.  The \fIoperation\-mask\fP applies to all principals in realm "realm" whose first component is "user" and
+specifies that [s]he may perform inquiries on principals whose second component is "instance" and realm is "realm".
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH FILES
+.sp
+Note: The first three files are specific to db2 database.
+.TS
+center;
+|l|l|.
+_
+T{
+principal.db
+T}	T{
+default name for Kerberos principal database
+T}
+_
+T{
+<dbname>.kadm5
+T}	T{
+KADM5  administrative database.  (This would be "principal.kadm5", if you use the default database name.)  Contains policy information.
+T}
+_
+T{
+<dbname>.kadm5.lock
+T}	T{
+lock file for the KADM5 administrative database.  This file works backwards from most other lock files.  I.e., kadmin will exit with an error if this file does not exist.
+T}
+_
+T{
+kadm5.acl
+T}	T{
+file containing list of principals and their kadmin administrative privileges.  See above for a description.
+T}
+_
+T{
+kadm5.keytab
+T}	T{
+keytab file for \fIkadmin/admin\fP principal.
+T}
+_
+T{
+kadm5.dict
+T}	T{
+file containing dictionary of strings explicitly disallowed as passwords.
+T}
+_
+.TE
+.SH SEE ALSO
+.sp
+kpasswd(1), kadmin(8), kdb5_util(8), kadm5_export(8), kadm5_import(8), kdb5_ldap_util(8)
+.SH AUTHOR
+MIT
+.SH COPYRIGHT
+2011, MIT
+.\" Generated by docutils manpage writer.
+.

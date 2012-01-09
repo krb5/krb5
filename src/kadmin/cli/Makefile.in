@@ -28,6 +28,8 @@ install::
 	$(INSTALL_PROGRAM) $(PROG).local ${DESTDIR}$(ADMIN_BINDIR)/$(PROG).local
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(CLIENT_BINDIR)/$(PROG)
 	$(INSTALL_SCRIPT) $(srcdir)/k5srvutil.sh ${DESTDIR}$(CLIENT_BINDIR)/k5srvutil
+
+install-oldman::
 	$(INSTALL_DATA) $(srcdir)/k5srvutil.M ${DESTDIR}$(CLIENT_MANDIR)/k5srvutil.1
 	$(INSTALL_DATA) $(srcdir)/$(PROG).M ${DESTDIR}$(CLIENT_MANDIR)/$(PROG).1
 	$(INSTALL_DATA) $(srcdir)/$(PROG).local.M ${DESTDIR}$(ADMIN_MANDIR)/$(PROG).local.8

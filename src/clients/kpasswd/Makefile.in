@@ -32,6 +32,8 @@ clean-unix::
 
 install-all install-kdc install-server install-client install-unix::
 	$(INSTALL_PROGRAM) kpasswd $(DESTDIR)$(CLIENT_BINDIR)/`echo kpasswd|sed '$(transform)'`
+
+install-oldman::
 	$(INSTALL_DATA) $(srcdir)/kpasswd.M $(DESTDIR)$(CLIENT_MANDIR)/`echo kpasswd|sed '$(transform)'`.1;
 
 ##WIN32##all-windows:: $(KPWD)
@@ -39,4 +41,3 @@ install-all install-kdc install-server install-client install-unix::
 ##WIN32##$(KPWD): $(OUTPRE)kpasswd.obj $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** $(SCLIB)
 ##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
-

@@ -1,0 +1,1108 @@
+.TH "KDB5_LDAP_UTIL" "8" "January 06, 2012" "0.0.1" "MIT Kerberos"
+.SH NAME
+kdb5_ldap_util \- Kerberos configuration utility
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.\" Man page generated from reStructeredText.
+.
+.SH SYNOPSIS
+.sp
+\fBkdb5_ldap_util\fP [\fB\-D\fP \fIuser_dn\fP [\fB\-w\fP \fIpasswd\fP]] [\fB\-H\fP \fIldapuri\fP] \fBcommand\fP [\fIcommand_options\fP]
+.SH DESCRIPTION
+.sp
+\fIkdb5_ldap_util\fP allows an administrator to manage realms, Kerberos services and ticket policies.
+.SH COMMAND-LINE OPTIONS
+.INDENT 0.0
+.TP
+.B \fB\-D\fP \fIuser_dn\fP
+.sp
+Specifies the Distinguished Name (DN) of the user who has sufficient rights to perform the operation on the LDAP server.
+.TP
+.B \fB\-w\fP \fIpasswd\fP
+.sp
+Specifies the password of \fIuser_dn\fP.  This option is not recommended.
+.TP
+.B \fB\-H\fP \fIldapuri\fP
+.sp
+Specifies the URI of the LDAP server.  It is recommended to use \fIldapi://\fP or \fIldaps://\fP to connect to the LDAP server.
+.UNINDENT
+.SH COMMANDS
+.SS create
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBcreate\fP
+[\fB\-subtrees\fP \fIsubtree_dn_list\fP]
+[\fB\-sscope\fP \fIsearch_scope\fP]
+[\fB\-containerref\fP \fIcontainer_reference_dn\fP]
+[\fB\-k\fP \fImkeytype\fP]
+[\fB\-kv\fP \fImkeyVNO\fP]
+[\fB\-m|\-P\fP \fIpassword*|*\fP\-sf** \fIstashfilename\fP]
+[\fB\-s\fP]
+[\fB\-r\fP \fIrealm\fP]
+[\fB\-kdcdn\fP \fIkdc_service_list\fP]
+[\fB\-admindn\fP \fIadmin_service_list\fP]
+[\fB\-maxtktlife\fP \fImax_ticket_life\fP]
+[\fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP]
+[\fIticket_flags\fP]
+.INDENT 0.0
+.INDENT 3.5
+.sp
+Creates realm in directory. Options:
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \fB\-subtrees\fP \fIsubtree_dn_list\fP
+.sp
+Specifies the list of subtrees containing the principals of a realm.
+The list contains the DNs of the subtree objects separated by colon(:).
+.TP
+.B \fB\-sscope\fP \fIsearch_scope\fP
+.sp
+Specifies the scope for searching the principals under the subtree.
+The possible values are 1 or one (one level), 2 or sub (subtrees).
+.TP
+.B \fB\-containerref\fP \fIcontainer_reference_dn\fP
+.sp
+Specifies the DN of the container object in which the principals of a realm will be created.
+If the container reference is not configured  for  a  realm, the principals will be created in the realm container.
+.TP
+.B \fB\-k\fP \fImkeytype\fP
+.sp
+Specifies the key type of the master key in the database; the default is that given in kdc.conf.
+.TP
+.B \fB\-kv\fP \fImkeyVNO\fP
+.sp
+Specifies the version number of the master key in the database; the default is 1. Note that 0 is not allowed.
+.TP
+.B \fB\-m\fP
+.sp
+Specifies that the master database password should be read from the TTY rather than fetched from a file on the disk.
+.TP
+.B \fB\-P\fP \fIpassword\fP
+.sp
+Specifies the master database password. This option is not recommended.
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+Specifies the Kerberos realm of the database.
+.TP
+.B \fB\-sf\fP \fIstashfilename\fP
+.sp
+Specifies the stash file of the master database password.
+.TP
+.B \fB\-s\fP
+.sp
+Specifies that the stash file is to be created.
+.TP
+.B \fB\-maxtktlife\fP \fImax_ticket_life\fP
+.sp
+Specifies maximum ticket life for principals in this realm.
+.TP
+.B \fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP
+.sp
+Specifies maximum renewable life of tickets for principals in this realm.
+.TP
+.B \fIticket_flags\fP
+.INDENT 7.0
+.INDENT 3.5
+.sp
+Specifies  the ticket flags.
+If this option is not specified, by default, none of the flags are set.
+This means all the ticket options will be allowed and no restriction will be set.
+.UNINDENT
+.UNINDENT
+.sp
+The various flags are:
+.INDENT 7.0
+.TP
+.B {\-|+}allow_postdated
+.
+\fI\-allow_postdated\fP prohibits principals from obtaining postdated tickets.
+(Sets the KRB5_KDB_DISALLOW_POSTDATED flag.)  \fI+allow_postdated\fP clears this flag.
+.TP
+.B {\-|+}allow_forwardable
+.
+\fI\-allow_forwardable\fP prohibits principals from obtaining forwardable tickets.
+(Sets the  KRB5_KDB_DISALLOW_FORWARDABLE  flag.)
+\fI+allow_forwardable\fP  clears this flag.
+.TP
+.B {\-|+}allow_renewable
+.
+\fI\-allow_renewable\fP prohibits principals from obtaining renewable tickets.
+(Sets the KRB5_KDB_DISALLOW_RENEWABLE flag.)
+\fI+allow_renewable\fP clears this flag.
+.TP
+.B {\-|+}allow_proxiable
+.
+\fI\-allow_proxiable\fP prohibits principals from obtaining proxiable tickets.
+(Sets the KRB5_KDB_DISALLOW_PROXIABLE flag.)
+\fI+allow_proxiable\fP clears this flag.
+.TP
+.B {\-|+}allow_dup_skey
+.
+\fI\-allow_dup_skey\fP  disables  user\-to\-user  authentication  for principals by prohibiting principals
+from obtaining a session key for another user.
+(Sets the KRB5_KDB_DISALLOW_DUP_SKEY flag.)
+\fI+allow_dup_skey\fP clears this flag.
+.TP
+.B {\-|+}ok_as_delegate
+.
++ok_as_delegate sets the OK\-AS\-DELEGATE flag on tickets issued for use with this principal as the service,
+which clients may use as a hint that credentials can and should be delegated when authenticating to the service.
+(Sets the KRB5_KDB_OK_AS_DELEGATE flag.)
+\fI\-ok_as_delegate\fP clears this flag.
+.TP
+.B {\-|+}requires_preauth
+.
+\fI+requires_preauth\fP requires principals to preauthenticate before being allowed to \fIkinit\fP.
+(Sets the  KRB5_KDB_REQUIRES_PRE_AUTH  flag.)
+\fI\-requires_preauth\fP clears this flag.
+.TP
+.B {\-|+}requires_hwauth
+.
+\fI+requires_hwauth\fP requires principals to preauthenticate using a hardware device before being allowed to kinit.
+(Sets the KRB5_KDB_REQUIRES_HW_AUTH flag.)
+\fI\-requires_hwauth\fP clears this flag.
+.TP
+.B {\-|+}allow_svr
+.
+\fI\-allow_svr\fP prohibits the issuance of service tickets for principals.  (Sets the KRB5_KDB_DISALLOW_SVR flag.)
+\fI+allow_svr\fP clears this flag.
+.TP
+.B {\-|+}allow_tgs_req
+.
+\fI\-allow_tgs_req\fP specifies that a Ticket\-Granting Service (TGS) request for a service ticket for principals is not permitted.
+This option  is  useless  for most  things.
+\fI+allow_tgs_req\fP  clears  this flag.  The default is \fI+allow_tgs_req\fP.
+In effect, \fI\-allow_tgs_req\fP sets the KRB5_KDB_DISALLOW_TGT_BASED flag on principals in the database.
+.TP
+.B {\-|+}allow_tix
+.
+\fI\-allow_tix\fP forbids the issuance of any tickets for principals.  \fI+allow_tix\fP clears this flag.
+The default is \fI+allow_tix\fP.
+In effect, \fI\-allow_tix\fP  sets  the KRB5_KDB_DISALLOW_ALL_TIX flag on principals in the database.
+.TP
+.B {\-|+}needchange
+.
+\fI+needchange\fP  sets  a  flag in attributes field to force a password change; \fI\-needchange\fP clears it.
+The default is \fI\-needchange\fP.
+In effect, \fI+needchange\fP sets the KRB5_KDB_REQUIRES_PWCHANGE flag on principals in the database.
+.TP
+.B {\-|+}password_changing_service
+.
+\fI+password_changing_service\fP sets a flag in the attributes field marking principal as a password change service principal
+(useless for most things).
+\fI\-password_changing_service\fP  clears  the  flag. This flag intentionally has a long name.
+The default is \fI\-password_changing_service\fP.
+In effect, \fI+password_changing_service\fP sets the KRB5_KDB_PWCHANGE_SERVICE flag on principals in the database.
+.UNINDENT
+.UNINDENT
+.sp
+Command options specific to eDirectory
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fB\-kdcdn\fP \fIkdc_service_list\fP
+.sp
+Specifies the list of KDC service objects serving the realm.
+The list contains the DNs of the KDC service objects separated by colon(:).
+.TP
+.B \fB\-admindn\fP \fIadmin_service_list\fP
+.sp
+Specifies the list of Administration service objects serving the realm.
+The list contains the DNs of  the  Administration  service  objects  separated  by colon(:).
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+kdb5_ldap_util \-D cn=admin,o=org \-H ldaps://ldap\-server1.mit.edu create \-subtrees o=org \-sscope SUB \-r ATHENA.MIT.EDU
+Password for "cn=admin,o=org":
+Initializing database for realm \(aqATHENA.MIT.EDU\(aq
+You will be prompted for the database Master Password.
+It is important that you NOT FORGET this password.
+Enter KDC database master key:
+Re\-enter KDC database master key to verify:
+.ft P
+.fi
+.SS modify
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBmodify\fP
+[\fB\-subtrees\fP \fIsubtree_dn_list\fP]
+[\fB\-sscope\fP \fIsearch_scope\fP]
+[\fB\-containerref\fP \fIcontainer_reference_dn\fP]
+[\fB\-r\fP \fIrealm\fP]
+[\fB\-kdcdn\fP \fIkdc_service_list\fP | [\fB\-clearkdcdn\fP \fIkdc_service_list\fP] [\fB\-addkdcdn\fP \fIkdc_service_list\fP]]
+[\fB\-admindn\fP \fIadmin_service_list\fP | [\fB\-clearadmindn\fP \fIadmin_service_list\fP] [\fB\-addadmindn\fP \fIadmin_service_list\fP]]
+[\fB\-maxtktlife\fP \fImax_ticket_life\fP]
+[\fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP]
+[\fIticket_flags\fP]
+.INDENT 0.0
+.INDENT 3.5
+.sp
+Modifies the attributes of a realm. Options:
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \fB\-subtrees\fP \fIsubtree_dn_list\fP
+.sp
+Specifies  the  list  of subtrees containing the principals of a realm.
+The list contains the DNs of the subtree objects separated by colon(:). This list replaces the existing list.
+.TP
+.B \fB\-sscope\fP \fIsearch_scope\fP
+.sp
+Specifies the scope for searching the principals under the subtrees.
+The possible values are 1 or one (one level), 2 or sub (subtrees).
+.TP
+.B \fB\-containerref\fP \fIcontainer_reference_dn\fP
+.sp
+Specifies the DN of the container object in which the principals of a realm will be created.
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+Specifies the Kerberos realm of the database.
+.TP
+.B \fB\-maxtktlife\fP \fImax_ticket_life\fP
+.sp
+Specifies maximum ticket life for principals in this realm.
+.TP
+.B \fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP
+.sp
+Specifies maximum renewable life of tickets for principals in this realm.
+.TP
+.B \fIticket_flags\fP
+.INDENT 7.0
+.INDENT 3.5
+.sp
+Specifies the ticket flags. If this option is not specified, by default, none of the flags are set.
+This means all the ticket options will be allowed  and no restriction will be set.
+.UNINDENT
+.UNINDENT
+.sp
+The various flags are:
+.INDENT 7.0
+.TP
+.B {\-|+}allow_postdated
+.
+\fI\-allow_postdated\fP prohibits principals from obtaining postdated tickets.  (Sets the KRB5_KDB_DISALLOW_POSTDATED flag.)
+\fI+allow_postdated\fP clears this flag.
+.TP
+.B {\-|+}allow_forwardable
+.
+\fI\-allow_forwardable\fP  prohibits  principals  from  obtaining forwardable tickets.
+(Sets the KRB5_KDB_DISALLOW_FORWARDABLE flag.)
+\fI+allow_forwardable\fP clears this flag.
+.TP
+.B {\-|+}allow_renewable
+.
+\fI\-allow_renewable\fP prohibits principals from obtaining renewable tickets. (Sets the KRB5_KDB_DISALLOW_RENEWABLE flag.)
+\fI+allow_renewable\fP clears this flag.
+.TP
+.B {\-|+}allow_proxiable
+.
+\fI\-allow_proxiable\fP prohibits principals from obtaining proxiable tickets.  (Sets the KRB5_KDB_DISALLOW_PROXIABLE flag.)
+\fI+allow_proxiable\fP clears this flag.
+.TP
+.B {\-|+}allow_dup_skey
+.
+\fI\-allow_dup_skey\fP Disables user\-to\-user authentication for principals by prohibiting principals from
+obtaining a session key for  another  user.
+(Sets  the KRB5_KDB_DISALLOW_DUP_SKEY flag.)
+\fI+allow_dup_skey\fP clears this flag.
+.TP
+.B {\-|+}requires_preauth
+.
+\fI+requires_preauth\fP  requires  principals  to preauthenticate before being allowed to kinit.
+(Sets the KRB5_KDB_REQUIRES_PRE_AUTH flag.)  \fI\-requires_preauth\fP clears this flag.
+.TP
+.B {\-|+}requires_hwauth
+.
+\fI+requires_hwauth\fP requires principals to preauthenticate using a hardware device before being allowed to kinit.
+(Sets the KRB5_KDB_REQUIRES_HW_AUTH flag.)
+\fI\-requires_hwauth\fP clears this flag.
+.TP
+.B {\-|+}allow_svr
+.
+\fI\-allow_svr\fP prohibits the issuance of service tickets for principals.  (Sets the KRB5_KDB_DISALLOW_SVR flag.) \fI+allow_svr\fP clears this flag.
+.TP
+.B {\-|+}allow_tgs_req
+.
+\fI\-allow_tgs_req\fP  specifies  that  a Ticket\-Granting Service (TGS) request for a service ticket for principals is not permitted.
+This option is useless for most things.
+\fI+allow_tgs_req\fP clears this flag.
+The default is \fI+allow_tgs_req\fP.  In effect, \fI\-allow_tgs_req\fP sets  the  KRB5_KDB_DISALLOW_TGT_BASED  flag  on principals in the database.
+.TP
+.B {\-|+}allow_tix
+.
+\fI\-allow_tix\fP  forbids  the issuance of any tickets for principals.
+\fI+allow_tix\fP clears this flag.  The default is \fI+allow_tix\fP.
+In effect, \fI\-allow_tix\fP sets the KRB5_KDB_DISALLOW_ALL_TIX flag on principals in the database.
+.TP
+.B {\-|+}needchange
+.
+\fI+needchange\fP sets a flag in attributes field to force a password change;
+\fI\-needchange\fP clears it. The default is \fI\-needchange\fP.
+In  effect,  \fI+needchange\fP  sets the KRB5_KDB_REQUIRES_PWCHANGE flag on principals in the database.
+.TP
+.B {\-|+}password_changing_service
+.
+\fI+password_changing_service\fP sets a flag in the attributes field marking principal as a password change service principal
+(useless for most things).  \fI\-password_changing_service\fP clears the flag. This flag intentionally has a long name.
+The default is \fI\-password_changing_service\fP.
+In  effect,  \fI+password_changing_service\fP sets the KRB5_KDB_PWCHANGE_SERVICE flag on principals in the database.
+.UNINDENT
+.UNINDENT
+.sp
+Command options specific to eDirectory
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fB\-kdcdn\fP \fIkdc_service_list\fP
+.sp
+Specifies  the  list  of  KDC  service objects serving the realm.
+The list contains the DNs of the KDC service objects separated by a colon (:).
+This list replaces the existing list.
+.TP
+.B \fB\-clearkdcdn\fP \fIkdc_service_list\fP
+.sp
+Specifies the list of KDC service objects that need to be removed from the existing list.
+The list contains the DNs of the KDC service  objects  separated by a colon (:).
+.TP
+.B \fB\-addkdcdn\fP \fIkdc_service_list\fP
+.sp
+Specifies  the list of KDC service objects that need to be added to the existing list.
+The list contains the DNs of the KDC service objects separated by a colon (:).
+.TP
+.B \fB\-admindn\fP \fIadmin_service_list\fP
+.sp
+Specifies the list of Administration service objects serving the realm.
+The list contains the DNs of the Administration service  objects  separated  by  a colon (:).
+This list replaces the existing list.
+.TP
+.B \fB\-clearadmindn\fP \fIadmin_service_list\fP
+.sp
+Specifies  the list of Administration service objects that need to be removed from the existing list.
+The list contains the DNs of the Administration service objects separated by a colon (:).
+.TP
+.B \fB\-addadmindn\fP \fIadmin_service_list\fP
+.sp
+Specifies the list of Administration service objects that need to be added to the existing list.
+The list contains the DNs of the  Administration  service objects separated by a colon (:).
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+shell% kdb5_ldap_util \-D cn=admin,o=org \-H ldaps://ldap\-server1.mit.edu modify +requires_preauth \-r ATHENA.MIT.EDU
+Password for "cn=admin,o=org":
+shell%
+.ft P
+.fi
+.SS view
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBview\fP [\fB\-r\fP \fIrealm\fP]
+.sp
+Displays the attributes of a realm.  Options:
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+Specifies the Kerberos realm of the database.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+kdb5_ldap_util \-D cn=admin,o=org \-H ldaps://ldap\-server1.mit.edu view \-r ATHENA.MIT.EDU
+Password for "cn=admin,o=org":
+Realm Name: ATHENA.MIT.EDU
+Subtree: ou=users,o=org
+Subtree: ou=servers,o=org
+SearchScope: ONE
+Maximum ticket life: 0 days 01:00:00
+Maximum renewable life: 0 days 10:00:00
+Ticket flags: DISALLOW_FORWARDABLE REQUIRES_PWCHANGE
+.ft P
+.fi
+.SS destroy
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBdestroy\fP [\fB\-f\fP] [\fB\-r\fP \fIrealm\fP]
+.sp
+Destroys an existing realm. Options:
+.TP
+.B \fB\-f\fP
+.sp
+If specified, will not prompt the user for confirmation.
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+Specifies the Kerberos realm of the database.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+shell% kdb5_ldap_util \-D cn=admin,o=org \-H ldaps://ldap\-server1.mit.edu destroy \-r ATHENA.MIT.EDU
+Password for "cn=admin,o=org":
+Deleting KDC database of \(aqATHENA.MIT.EDU\(aq, are you sure?
+(type \(aqyes\(aq to confirm)? yes
+OK, deleting database of \(aqATHENA.MIT.EDU\(aq...
+shell%
+.ft P
+.fi
+.SS list
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBlist\fP
+.sp
+Lists the name of realms.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+shell% kdb5_ldap_util \-D cn=admin,o=org \-H ldaps://ldap\-server1.mit.edu list
+Password for "cn=admin,o=org":
+ATHENA.MIT.EDU
+OPENLDAP.MIT.EDU
+MEDIA\-LAB.MIT.EDU
+shell%
+.ft P
+.fi
+.SS stashsrvpw
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBstashsrvpw\fP [\fB\-f\fP \fIfilename\fP] \fIservicedn\fP
+.sp
+Allows  an  administrator to store the password for service object in a file so that KDC and Administration server
+can use it to authenticate to the LDAP server.  Options:
+.TP
+.B \fB\-f\fP \fIfilename\fP
+.sp
+Specifies the complete path of the service password file. By default, \fI/usr/local/var/service_passwd\fP is used.
+.TP
+.B \fIservicedn\fP
+.sp
+Specifies Distinguished Name (DN) of the service object whose password is to be stored in file.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+kdb5_ldap_util stashsrvpw \-f /home/andrew/conf_keyfile cn=service\-kdc,o=org
+Password for "cn=service\-kdc,o=org":
+Re\-enter password for "cn=service\-kdc,o=org":
+.ft P
+.fi
+.SS create_policy
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBcreate_policy\fP [\fB\-r\fP \fIrealm\fP] [\fB\-maxtktlife\fP \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP] \fIpolicy_name\fP
+.sp
+Creates a ticket policy in directory. Options:
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+Specifies the Kerberos realm of the database.
+.TP
+.B \fB\-maxtktlife\fP \fImax_ticket_life\fP
+.sp
+Specifies maximum ticket life for principals.
+.TP
+.B \fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP
+.sp
+Specifies maximum renewable life of tickets for principals.
+.TP
+.B \fIticket_flags\fP
+.sp
+Specifies the ticket flags. If this option is not specified, by default, none of the flags are set.
+This means all the ticket options will be allowed  and no restriction will be set.
+.sp
+The various flags are:
+.INDENT 7.0
+.TP
+.B {\-|+}allow_postdated
+.
+\fI\-allow_postdated\fP prohibits principals from obtaining postdated tickets.
+(Sets the KRB5_KDB_DISALLOW_POSTDATED flag.)  \fI+allow_postdated\fP clears this flag.
+.TP
+.B {\-|+}allow_forwardable
+.
+\fI\-allow_forwardable\fP  prohibits  principals  from  obtaining forwardable tickets.
+(Sets the KRB5_KDB_DISALLOW_FORWARDABLE flag.)  \fI+allow_forwardable\fP clears this flag.
+.TP
+.B {\-|+}allow_renewable
+.
+\fI\-allow_renewable\fP prohibits principals from obtaining renewable tickets.
+(Sets the KRB5_KDB_DISALLOW_RENEWABLE flag.)  \fI+allow_renewable\fP clears this flag.
+.TP
+.B {\-|+}allow_proxiable
+.
+\fI\-allow_proxiable\fP prohibits principals from obtaining proxiable tickets.
+(Sets the KRB5_KDB_DISALLOW_PROXIABLE flag.)  \fI+allow_proxiable\fP clears this flag.
+.TP
+.B {\-|+}allow_dup_skey
+.
+\fI\-allow_dup_skey\fP disables user\-to\-user authentication for principals by prohibiting principals
+from obtaining a session key for  another  user.
+(Sets  the KRB5_KDB_DISALLOW_DUP_SKEY flag.)  \fI+allow_dup_skey\fP clears this flag.
+.TP
+.B {\-|+}requires_preauth
+.
+\fI+requires_preauth\fP  requires  principals  to preauthenticate before being allowed to kinit.
+(Sets the KRB5_KDB_REQUIRES_PRE_AUTH flag.)  \fI\-requires_preauth\fP clears this flag.
+.TP
+.B {\-|+}requires_hwauth
+.
+\fI+requires_hwauth\fP requires principals to preauthenticate using a hardware device before being allowed to \fIkinit\fP.
+(Sets the KRB5_KDB_REQUIRES_HW_AUTH flag.)
+\fI\-requires_hwauth\fP clears this flag.
+.TP
+.B {\-|+}allow_svr
+.
+\fI\-allow_svr\fP prohibits the issuance of service tickets for principals.
+(Sets the KRB5_KDB_DISALLOW_SVR flag.)  \fI+allow_svr\fP clears this flag.
+.TP
+.B {\-|+}allow_tgs_req
+.
+\fI\-allow_tgs_req\fP  specifies  that  a Ticket\-Granting Service (TGS) request
+for a service ticket for principals is not permitted.
+This option is useless for most things.
+\fI+allow_tgs_req\fP clears this flag.  The default is \fI+allow_tgs_req\fP.
+In effect, \fI\-allow_tgs_req sets\fP  the  KRB5_KDB_DISALLOW_TGT_BASED  flag  on principals in the database.
+.TP
+.B {\-|+}allow_tix
+.
+\fI\-allow_tix\fP  forbids  the issuance of any tickets for principals.
+\fI+allow_tix\fP clears this flag.
+The default is \fI+allow_tix\fP.  In effect, \fI\-allow_tix sets\fP the KRB5_KDB_DISALLOW_ALL_TIX flag on principals in the database.
+.TP
+.B {\-|+}needchange
+.
+\fI+needchange\fP sets a flag in attributes field to force a password change;
+\fI\-needchange\fP clears it. The default is \fI\-needchange\fP.
+In  effect,  \fI+needchange\fP  sets the KRB5_KDB_REQUIRES_PWCHANGE flag on principals in the database.
+.TP
+.B {\-|+}password_changing_service
+.
+\fI+password_changing_service\fP sets a flag in the attributes field marking principal as a password change service principal
+(useless for most things).
+\fI\-password_changing_service\fP clears the flag.
+This flag intentionally has a long name. The default is \-password_changing_service.
+In  effect,  \fI+password_changing_service\fP sets the KRB5_KDB_PWCHANGE_SERVICE flag on principals in the database.
+.UNINDENT
+.TP
+.B \fIpolicy_name\fP
+.sp
+Specifies the name of the ticket policy.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+kdb5_ldap_util  \-D  cn=admin,o=org \-H ldaps://ldap\-server1.mit.edu create_policy \-r ATHENA.MIT.EDU \-maxtktlife "1 day" \-maxrenewlife "1 week" \-allow_postdated +needchange \-allow_forwardable tktpolicy
+Password for "cn=admin,o=org":
+.ft P
+.fi
+.SS modify_policy
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBmodify_policy\fP
+[\fB\-r\fP \fIrealm\fP]
+[\fB\-maxtktlife\fP \fImax_ticket_life\fP]
+[\fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP]
+[\fIticket_flags\fP]
+\fIpolicy_name\fP
+.INDENT 0.0
+.INDENT 3.5
+.sp
+Modifies the attributes of a ticket policy. Options are same as create_policy.
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+Specifies the Kerberos realm of the database.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+kdb5_ldap_util \-D cn=admin,o=org \-H ldaps://ldap\-server1.mit.edu modify_policy  \-r  ATHENA.MIT.EDU  \-maxtktlife  "60  minutes"  \-maxrenewlife  "10  hours" +allow_postdated \-requires_preauth tktpolicy
+Password for "cn=admin,o=org":
+.ft P
+.fi
+.SS view_policy
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBview_policy\fP [\fB\-r\fP \fIrealm\fP] \fIpolicy_name\fP
+.sp
+Displays the attributes of a ticket policy. Options:
+.TP
+.B \fIpolicy_name\fP
+.sp
+Specifies the name of the ticket policy.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+kdb5_ldap_util \-D cn=admin,o=org \-H ldaps://ldap\-server1.mit.edu view_policy \-r ATHENA.MIT.EDU tktpolicy
+Password for "cn=admin,o=org":
+Ticket policy: tktpolicy
+Maximum ticket life: 0 days 01:00:00
+Maximum renewable life: 0 days 10:00:00
+Ticket flags: DISALLOW_FORWARDABLE REQUIRES_PWCHANGE
+.ft P
+.fi
+.SS destroy_policy
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBdestroy_policy\fP
+[\fB\-r\fP \fIrealm\fP]
+[\fB\-force\fP]
+\fIpolicy_name\fP
+.INDENT 0.0
+.INDENT 3.5
+.sp
+Destroys an existing ticket policy. Options:
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+Specifies the Kerberos realm of the database.
+.TP
+.B \fB\-force\fP
+.sp
+Forces  the  deletion  of the policy object. If not specified, will be prompted for confirmation while deleting the policy.
+Enter yes to confirm the deletion.
+.TP
+.B \fIpolicy_name\fP
+.sp
+Specifies the name of the ticket policy.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+kdb5_ldap_util \-D cn=admin,o=org \-H ldaps://ldap\-server1.mit.edu destroy_policy \-r ATHENA.MIT.EDU tktpolicy
+Password for "cn=admin,o=org":
+This will delete the policy object \(aqtktpolicy\(aq, are you sure?
+(type \(aqyes\(aq to confirm)? yes
+** policy object \(aqtktpolicy\(aq deleted.
+.ft P
+.fi
+.SS list_policy
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBlist_policy\fP [\fB\-r\fP \fIrealm\fP]
+.sp
+Lists the ticket policies in realm if specified or in the default realm.  Options:
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+Specifies the Kerberos realm of the database.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+kdb5_ldap_util \-D cn=admin,o=org \-H ldaps://ldap\-server1.mit.edu list_policy \-r ATHENA.MIT.EDU
+Password for "cn=admin,o=org":
+tktpolicy
+tmppolicy
+userpolicy
+.ft P
+.fi
+.SH COMMANDS SPECIFIC TO EDIRECTORY
+.SS setsrvpw
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBsetsrvpw\fP
+[\fB\-randpw|\-fileonly\fP]
+[\fB\-f\fP \fIfilename\fP]
+\fIservice_dn\fP
+.INDENT 0.0
+.INDENT 3.5
+.sp
+Allows an administrator to set password for service objects such as KDC and Administration server in eDirectory and store them in a file.
+The  \fI\-fileonly\fP  option stores the password in a file and not in the eDirectory object. Options:
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \fB\-randpw\fP
+.sp
+Generates  and  sets a random password.
+This options can be specified to store the password both in eDirectory and a file.
+The \fI\-fileonly\fP option can not be used if \fI\-randpw\fP option is already specified.
+.TP
+.B \fB\-fileonly\fP
+.sp
+Stores the password only in a file and not in eDirectory.
+The \fI\-randpw\fP option can not be used when \fI\-fileonly\fP options is specified.
+.TP
+.B \fB\-f\fP \fIfilename\fP
+.sp
+Specifies complete path of the service password file. By default, \fI/usr/local/var/service_passwd\fP is used.
+.TP
+.B \fIservice_dn\fP
+.sp
+Specifies Distinguished Name (DN) of the service object whose password is to be set.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+kdb5_ldap_util setsrvpw \-D cn=admin,o=org setsrvpw \-fileonly \-f /home/andrew/conf_keyfile cn=service\-kdc,o=org
+Password for "cn=admin,o=org":
+Password for "cn=service\-kdc,o=org":
+Re\-enter password for "cn=service\-kdc,o=org":
+.ft P
+.fi
+.SS create_service
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBcreate_service\fP
+{\fB\-kdc|\-admin|\-pwd\fP}
+[\fB\-servicehost\fP \fIservice_host_list\fP]
+[\fB\-realm\fP \fIrealm_list\fP]
+[\fB\-randpw|\-fileonly\fP]
+[\fB\-f\fP \fIfilename\fP] \fIservice_dn\fP
+.INDENT 0.0
+.INDENT 3.5
+.sp
+Creates a service in directory and assigns appropriate rights. Options:
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \fB\-kdc\fP
+.sp
+Specifies the service is a KDC service
+.TP
+.B \fB\-admin\fP
+.sp
+Specifies the service is a Administration service
+.TP
+.B \fB\-pwd\fP
+.sp
+Specifies the Password service
+.TP
+.B \fB\-servicehost\fP \fIservice_host_list\fP
+.sp
+Specifies the list of entries separated by a colon (:).
+Each entry consists of the hostname or IP address of the server  hosting  the  service,
+transport protocol, and the port number of the service separated by a pound sign (#).
+For example, server1#tcp#88:server2#udp#89.
+.TP
+.B \fB\-realm\fP \fIrealm_list\fP
+.sp
+Specifies the list of realms that are to be associated with this service.
+The list contains the name of the realms separated by a colon (:).
+.TP
+.B \fB\-randpw\fP
+.sp
+Generates and sets a random password. This option is used to set the random password for
+the service object in directory and also to store it in the file.
+The \fI\-fileonly\fP option can not be used if \fI\-randpw\fP option is specified.
+.TP
+.B \fB\-fileonly\fP
+.sp
+Stores the password only in a file and not in eDirectory.
+The \fI\-randpw\fP option can not be used when \fI\-fileonly\fP option is specified.
+.TP
+.B \fB\-f\fP \fIfilename\fP
+.sp
+Specifies the complete path of the file where the service object password is stashed.
+.TP
+.B \fIservice_dn\fP
+.sp
+Specifies Distinguished Name (DN) of the Kerberos service to be created.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+shell% kdb5_ldap_util \-D cn=admin,o=org create_service \-kdc \-randpw \-f /home/andrew/conf_keyfile cn=service\-kdc,o=org
+Password for "cn=admin,o=org":
+File does not exist. Creating the file /home/andrew/conf_keyfile...
+shell%
+.ft P
+.fi
+.SS modify_service
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBmodify_service\fP
+[\fB\-servicehost\fP \fIservice_host_list\fP  |   [\fB\-clearservicehost\fP \fIservice_host_list\fP]   [\fB\-addservicehost\fP \fIservice_host_list\fP]]
+[\fB\-realm\fP \fIrealm_list\fP   |    [\fB\-clearrealm\fP \fIrealm_list\fP] [\fB\-addrealm\fP \fIrealm_list\fP]]
+\fIservice_dn\fP
+.INDENT 0.0
+.INDENT 3.5
+.sp
+Modifies the attributes of a service and assigns appropriate rights. Options:
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \fB\-servicehost\fP \fIservice_host_list\fP
+.sp
+Specifies the list of entries separated by a colon (:).
+Each entry consists of a host name or IP Address of the Server hosting the service, transport protocol,
+and port number of the service separated by a pound sign (#).  For example:
+.sp
+.nf
+.ft C
+server1#tcp#88:server2#udp#89
+.ft P
+.fi
+.TP
+.B \fB\-clearservicehost\fP \fIservice_host_list\fP
+.sp
+Specifies the list of servicehost entries to be removed from the existing list separated by colon (:).
+Each entry consists of a host name or IP Address of
+the server hosting the service, transport protocol, and port number of the service separated by a pound sign (#).
+.TP
+.B \fB\-addservicehost\fP \fIservice_host_list\fP
+.sp
+Specifies the list of servicehost entries to be added to the existing list separated by colon (:).
+Each entry consists of a host name or IP Address of the
+server hosting the service, transport protocol, and port number of the service separated by a pound sign (#).
+.TP
+.B \fB\-realm\fP \fIrealm_list\fP
+.sp
+Specifies the list of realms that are to be associated with this service.
+The list contains the name of the realms separated by a  colon  (:).
+This  list replaces the existing list.
+.TP
+.B \fB\-clearrealm\fP \fIrealm_list\fP
+.sp
+Specifies the list of realms to be removed from the existing list.
+The list contains the name of the realms separated by a colon (:).
+.TP
+.B \fB\-addrealm\fP \fIrealm_list\fP
+.sp
+Specifies the list of realms to be added to the existing list.
+The list contains the name of the realms separated by a colon (:).
+.TP
+.B \fIservice_dn\fP
+.sp
+Specifies Distinguished Name (DN) of the Kerberos service to be modified.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+shell% kdb5_ldap_util \-D cn=admin,o=org modify_service \-realm ATHENA.MIT.EDU cn=service\-kdc,o=org
+Password for "cn=admin,o=org":
+Changing rights for the service object. Please wait ... done
+shell%
+.ft P
+.fi
+.SS view_service
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBview_service\fP \fIservice_dn\fP
+.sp
+Displays the attributes of a service.  Options:
+.TP
+.B \fIservice_dn\fP
+.sp
+Specifies Distinguished Name (DN) of the Kerberos service to be viewed.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+shell% kdb5_ldap_util \-D cn=admin,o=org view_service cn=service\-kdc,o=org
+Password for "cn=admin,o=org":
+Service dn: cn=service\-kdc,o=org
+Service type: kdc
+Service host list:
+Realm DN list: cn=ATHENA.MIT.EDU,cn=Kerberos,cn=Security
+shell%
+.ft P
+.fi
+.SS destroy_service
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBdestroy_service\fP [\fB\-force\fP] [\fB\-f\fP \fIstashfilename\fP] \fIservice_dn\fP
+.sp
+Destroys an existing service. Options:
+.TP
+.B \fB\-force\fP
+.sp
+If specified, will not prompt for user\(aqs confirmation, instead will force destruction of the service.
+.TP
+.B \fB\-f\fP \fIstashfilename\fP
+.sp
+Specifies the complete path of the service password file from where the entry corresponding
+to the service_dn needs to be removed.
+.TP
+.B \fIservice_dn\fP
+.sp
+Specifies Distinguished Name (DN) of the Kerberos service to be destroyed.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+shell% kdb5_ldap_util \-D cn=admin,o=org destroy_service cn=service\-kdc,o=org
+Password for "cn=admin,o=org":
+This will delete the service object \(aqcn=service\-kdc,o=org\(aq, are you sure?
+(type \(aqyes\(aq to confirm)? yes
+** service object \(aqcn=service\-kdc,o=org\(aq deleted.
+shell%
+.ft P
+.fi
+.SS list_service
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fBlist_service\fP [\fB\-basedn\fP \fIbase_dn\fP]
+.sp
+Lists the name of services under a given base in directory. Options:
+.TP
+.B \fB\-basedn\fP \fIbase_dn\fP
+.sp
+Specifies the base DN for searching the service objects, limiting the search to a particular subtree.
+If this option is not provided, LDAP Server specific search base will be used.
+For eg, in the case of OpenLDAP, value of defaultsearchbase from \fIslapd.conf\fP file will be used,
+where as in the case of  eDirectory, the default value for the base DN is Root.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+EXAMPLE:
+.sp
+.nf
+.ft C
+shell% kdb5_ldap_util \-D cn=admin,o=org list_service
+Password for "cn=admin,o=org":
+cn=service\-kdc,o=org
+cn=service\-adm,o=org
+cn=service\-pwd,o=org
+shell%
+.ft P
+.fi
+.SH SEE ALSO
+.sp
+kadmin(8)
+.SH AUTHOR
+MIT
+.SH COPYRIGHT
+2011, MIT
+.\" Generated by docutils manpage writer.
+.

@@ -4,10 +4,12 @@ all::
 
 install::
 	$(INSTALL_DATA) $(srcdir)/kerberos.M ${DESTDIR}$(CLIENT_MANDIR)/kerberos.1
-	$(INSTALL_DATA) $(srcdir)/k5login.M ${DESTDIR}$(FILE_MANDIR)/k5login.5
-	$(INSTALL_DATA) $(srcdir)/dot.k5login.M \
-		${DESTDIR}$(FILE_MANDIR)/.k5login.5
 	$(INSTALL_DATA) $(srcdir)/k5identity.M \
 		${DESTDIR}$(FILE_MANDIR)/k5identity.5
 	$(INSTALL_DATA) $(srcdir)/dot.k5identity.M \
 		${DESTDIR}$(FILE_MANDIR)/.k5identity.5
+
+install-oldman::
+	$(INSTALL_DATA) $(srcdir)/k5login.M ${DESTDIR}$(FILE_MANDIR)/k5login.5
+	$(INSTALL_DATA) $(srcdir)/dot.k5login.M \
+		${DESTDIR}$(FILE_MANDIR)/.k5login.5

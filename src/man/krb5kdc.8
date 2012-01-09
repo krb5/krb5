@@ -1,0 +1,168 @@
+.TH "KRB5KDC" "8" "January 06, 2012" "0.0.1" "MIT Kerberos"
+.SH NAME
+krb5kdc \- Kerberos V5 KDC
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.\" Man page generated from reStructeredText.
+.
+.SH SYNOPSIS
+.INDENT 0.0
+.TP
+.B \fBkrb5kdc\fP
+.sp
+[  \fB\-x\fP  \fIdb_args\fP ]
+[ \fB\-d\fP \fIdbname\fP ]
+[ \fB\-k\fP \fIkeytype\fP ]
+[ \fB\-M\fP \fImkeyname\fP ]
+[ \fB\-p\fP \fIportnum\fP ]
+[ \fB\-m\fP ]
+[ \fB\-r\fP \fIrealm\fP ]
+[ \fB\-n\fP ]
+[ \fB\-w\fP \fInumworkers\fP ]
+[ \fB\-P\fP \fIpid_file\fP ]
+.UNINDENT
+.SH DESCRIPTION
+.sp
+\fIkrb5kdc\fP is the Kerberos version 5 Authentication Service and Key Distribution Center (AS/KDC).
+.SH OPTIONS
+.sp
+The \fB\-x\fP \fIdb_args\fP option specifies the database specific arguments.
+.INDENT 0.0
+.INDENT 3.5
+.sp
+Options supported for LDAP database are:
+.INDENT 0.0
+.TP
+.B \fB\-x\fP nconns=<number_of_connections>
+.sp
+Specifies the number of connections to be maintained per LDAP server.
+.TP
+.B \fB\-x\fP host=<ldapuri>
+.sp
+Specifies the LDAP server to connect to by a LDAP URI.
+.TP
+.B \fB\-x\fP binddn=<binddn>
+.sp
+Specifies the DN of the object used by the KDC server to bind to the LDAP server.
+This object should have the rights to read the realm container, principal container and
+the subtree that is referenced by the realm.
+.TP
+.B \fB\-x\fP bindpwd=<bind_password>
+.sp
+Specifies the password for the above mentioned binddn.
+It is recommended not to use this option. Instead, the password can be
+stashed using the \fIstashsrvpw\fP command of \fIkdb5_ldap_util(8)\fP
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+The \fB\-r\fP \fIrealm\fP option specifies the realm for which the server should provide service.
+.sp
+The \fB\-d\fP \fIdbname\fP option specifies the name under which the principal database can be found.
+This option does not apply to the LDAP database.
+.sp
+The \fB\-k\fP \fIkeytype\fP option specifies the key type of the master key to be entered manually
+as a password when \fB\-m\fP is given;  the default is "des\-cbc\-crc".
+.sp
+The \fB\-M\fP \fImkeyname\fP option specifies the principal name for the master key
+in the database (usually "K/M" in the KDC\(aqs realm).
+.sp
+The \fB\-m\fP option specifies that the master database password should be fetched
+from the keyboard rather than from a file on disk.
+.sp
+The \fB\-n\fP option specifies that the KDC does not put itself in the background
+and does not disassociate itself from the terminal.
+In normal operation, you should always allow the KDC to place itself in the background.
+.sp
+The \fB\-P\fP \fIpid_file\fP option tells the KDC to write its PID (followed by a newline)
+into \fIpid_file\fP after it starts up.
+This can be used to identify whether the KDC is still running and to allow
+init scripts to stop the correct process.
+.sp
+The \fB\-p\fP \fIportnum\fP option specifies the default UDP port number which the KDC
+should listen on for Kerberos version 5 requests.
+This value is used when no port is specified in the KDC profile and
+when no port is specified in the Kerberos configuration file.
+If no value is available, then the value in \fI/etc/services\fP for service "kerberos" is used.
+.sp
+The \fB\-w\fP \fInumworkers\fP option tells the KDC to fork \fInumworkers\fP processes
+to listen to the KDC ports and process requests in parallel.
+The top level KDC process (whose pid is recorded in the pid file
+if the \fB\-P\fP option is also given) acts as a supervisor.
+The supervisor will relay SIGHUP signals to the worker subprocesses,
+and will terminate the worker subprocess if the it is itself terminated or
+if any other worker process exits.
+.IP Note
+.
+On operating systems which do not have \fIpktinfo\fP support,
+using worker processes will prevent the KDC from listening
+for UDP packets on network interfaces created after the KDC starts.
+.RE
+.SH EXAMPLE
+.sp
+The KDC may service requests for multiple realms (maximum 32 realms).
+The realms are listed on the command line.
+Per\-realm options that can be specified on the command line pertain for each realm
+that follows it and are superseded by subsequent definitions of the same option.
+For example:
+.sp
+.nf
+.ft C
+krb5kdc \-p 2001 \-r REALM1 \-p 2002 \-r REALM2 \-r REALM3
+.ft P
+.fi
+.sp
+specifies that the KDC listen on port 2001 for REALM1 and on port 2002 for REALM2 and REALM3.
+Additionally, per\-realm parameters may be specified in the \fIkdc.conf\fP file.
+The location of this file may be specified by the \fIKRB5_KDC_PROFILE\fP environment variable.
+Parameters specified in this file take precedence over options specified on the command line.
+See the \fIkdc.conf\fP description for further details.
+.SH ENVIRONMENT
+.sp
+\fIkrb5kdc\fP uses the following environment variables:
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.IP \(bu 2
+.
+\fBKRB5_CONFIG\fP
+.IP \(bu 2
+.
+\fBKRB5_KDC_PROFILE\fP
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH SEE ALSO
+.sp
+kdb5_util(8), kdc.conf(5), krb5.conf(5), kdb5_ldap_util(8)
+.SH AUTHOR
+MIT
+.SH COPYRIGHT
+2011, MIT
+.\" Generated by docutils manpage writer.
+.

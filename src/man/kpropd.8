@@ -1,0 +1,161 @@
+.TH "KPROPD" "8" "January 06, 2012" "0.0.1" "MIT Kerberos"
+.SH NAME
+kpropd \- Kerberos V5 slave KDC update server
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.\" Man page generated from reStructeredText.
+.
+.SH SYNOPSIS
+.INDENT 0.0
+.TP
+.B \fBkpropd\fP
+.sp
+[ \fB\-r\fP \fIrealm\fP ]
+[ \fB\-a\fP \fIacl_file\fP ]
+[ \fB\-f\fP \fIslave_dumpfile\fP ]
+[ \fB\-F\fP \fIprincipal_database\fP ]
+[ \fB\-p\fP \fIkdb5_util_prog\fP ]
+[ \fB\-P\fP \fIport\fP ]
+[ \fB\-d\fP ]
+[ \fB\-S\fP ]
+.UNINDENT
+.SH DESCRIPTION
+.sp
+The \fIkpropd\fP command runs on the slave KDC server.
+It listens for update requests made by the \fIkprop(8)\fP program,
+and periodically requests incremental updates from the master KDC.
+.sp
+When the slave receives a \fIkprop\fP request from the master,
+\fIkpropd\fP accepts the dumped KDC database and places it in a file,
+and then runs \fIkdb5_util(8)\fP to load the dumped database into
+the active database which is used by \fIkrb5kdc(8)\fP.
+Thus, the master Kerberos server can use \fIkprop(8)\fP
+to propagate its database to the slave servers.
+Upon a successful download of the KDC database file,
+the slave Kerberos server will have an up\-to\-date KDC database.
+.sp
+Normally, \fIkpropd\fP is invoked out of inetd(8).
+This is done by adding a line to the \fIinetd.conf\fP file which looks like this:
+.sp
+.nf
+.ft C
+kprop     stream    tcp  nowait    root /usr/local/sbin/kpropd   kpropd
+.ft P
+.fi
+.sp
+However, \fIkpropd\fP can also run as a standalone daemon, if the \fI\-S\fP option is turned on.
+This is done for debugging purposes, or if for some reason the system administrator
+just doesn\(aqt want to run it out of inetd(8).
+.sp
+When the slave periodically requests incremental updates,
+\fIkpropd\fP updates its \fIprincipal.ulog\fP file with any updates from the master.
+\fIkproplog(8)\fP can be used to view a summary of the update entry log on the slave KDC.
+Incremental propagation is not enabled by default;
+it can be enabled using the \fIiprop_enable\fP and \fIiprop_slave_poll\fP settings in \fIkdc.conf\fP.
+The principal "kiprop/slavehostname@REALM"
+(where "slavehostname" is the name of the slave KDC host,
+and "REALM" is the name of the Kerberos realm)
+must be present in the slave\(aqs keytab file.
+.SH OPTIONS
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+Specifies the realm of the master server.
+.TP
+.B \fB\-f\fP \fIfile\fP
+.sp
+Specifies the filename where the dumped principal database file is to be stored;
+by default the dumped database file \fI/usr/local/var/krb5kdc/from_master\fP.
+.TP
+.B \fB\-p\fP
+.sp
+Allows the user to specify the pathname to the \fIkdb5_util(8)\fP program;
+by default the pathname used is /usr/local/sbin/kdb5_util.
+.TP
+.B \fB\-S\fP
+.sp
+Turn on standalone mode.  Normally, \fIkpropd\fP is invoked out of inetd(8)
+so it expects a network connection to be passed to it from inetd(8).
+If the \fI\-S\fP option is specified, \fIkpropd\fP will put itself into the background,
+and wait for connections to the \fIkrb5_prop\fP port specified in  /etc/services.
+.TP
+.B \fB\-d\fP
+.sp
+Turn on debug mode.  In this mode, if the \fI\-S\fP option is selected,
+\fIkpropd\fP will not detach itself from the current job and run in the background.
+Instead, it will run in the foreground and print out debugging messages
+during the database propagation.
+.TP
+.B \fB\-P\fP
+.sp
+Allow for an alternate port number for \fIkpropd\fP to listen on.
+This is only useful if the program is run in standalone mode.
+.TP
+.B \fB\-a\fP  \fIacl_file\fP
+.sp
+Allows the user to specify the path to the \fIkpropd.acl\fP file;
+by default the path used is /usr/local/var/krb5kdc/kpropd.acl.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH ENVIRONMENT
+.sp
+\fIkpropd\fP uses the following environment variables:
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.IP \(bu 2
+.
+\fBKRB5_CONFIG\fP
+.IP \(bu 2
+.
+\fBKRB5_KDC_PROFILE\fP
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH FILES
+.INDENT 0.0
+.TP
+.B \fIkpropd.acl\fP
+.sp
+Access file for \fIkpropd\fP; the default location is \fI/usr/local/var/krb5kdc/kpropd.acl\fP.
+Each entry is a line containing the principal of a \fIhost\fP from which the local machine
+will allow Kerberos database propagation via \fIkprop(8)\fP.
+.UNINDENT
+.SH SEE ALSO
+.sp
+kprop(8), kdb5_util(8), krb5kdc(8), inetd(8)
+.SH AUTHOR
+MIT
+.SH COPYRIGHT
+2011, MIT
+.\" Generated by docutils manpage writer.
+.

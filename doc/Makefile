@@ -27,6 +27,8 @@ MANPAGES=$(SRCDIR)/clients/kdestroy/kdestroy.M $(SRCDIR)/clients/kinit/kinit.M $
 USER_GUIDE_INCLUDES=definitions.texinfo copyright.texinfo glossary.texinfo
 USER_GUIDE_DEPS=user-guide.texinfo $(USER_GUIDE_INCLUDES)
 
+SPHINX_BUILD=sphinx-build
+
 .PHONY: all
 all:: admin-guide-full install-guide-full user-guide-full clean-temp-ps clean-tex
 
@@ -155,3 +157,15 @@ tgz::
 
 ../NOTICE: notice.texinfo definitions.texinfo copyright.texinfo
 	makeinfo --plaintext -o $@ notice.texinfo
+
+RSTMAN=k5login.5 k5srvutil.1 kadmin.1 kadmind.8 kdb5_ldap_util.8 kdb5_util.8 \
+	kdc.conf.5 kdestroy.1 kinit.1 klist.1 kpasswd.1 kprop.8 kpropd.8 \
+	kproplog.8 krb5.conf.5 krb5kdc.8 ksu.1 kswitch.1 ktutil.1 kvno.1
+
+# The file editing loop deletes some trailing whitespace that the
+# docutils manpage writer outputs near the end of its output files.
+rstman::
+	$(SPHINX_BUILD) -q -b man rst_source ../src/man
+	(cd ../src/man && for f in $(RSTMAN); do \
+		(echo '$$'; echo '?^.." $$?d'; echo 'w'; echo 'q' ) | ed $$f; \
+	done)
