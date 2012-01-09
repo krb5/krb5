@@ -197,6 +197,32 @@ asn1_decode_generalstring(asn1buf *buf, unsigned int *retlen, char **val)
     cleanup();
 }
 
+asn1_error_code
+asn1_decode_bitstring(asn1buf *buf, unsigned int *retlen, char **val)
+{
+    setup();
+    asn1_octet unused;
+
+    tag(ASN1_BITSTRING);
+
+    /* Get the number of unused bits in the last byte (0-7). */
+    retval = asn1buf_remove_octet(buf, &unused);
+    if (retval)
+        return retval;
+    if (unused > 7)
+        return ASN1_BAD_FORMAT;
+
+    retval = asn1buf_remove_charstring(buf, length - 1, val);
+    if (retval)
+        return retval;
+
+    /* Mask out unused bits (unnecessary for correct DER, but be safe). */
+    if (length > 1)
+        (*val)[length - 2] &= (0xff << unused);
+
+    *retlen = length - 1;
+    return 0;
+}
 
 asn1_error_code
 asn1_decode_null(asn1buf *buf)

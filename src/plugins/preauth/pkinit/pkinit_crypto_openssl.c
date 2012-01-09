@@ -147,9 +147,6 @@ static krb5_error_code pkinit_decode_data_fs
  unsigned char *data, unsigned int data_len,
  unsigned char **decoded_data, unsigned int *decoded_data_len);
 
-static krb5_error_code der_decode_data
-(unsigned char *, long, unsigned char **, long *);
-
 static krb5_error_code
 create_krb5_invalidCertificates(krb5_context context,
                                 pkinit_plg_crypto_context plg_cryptoctx,
@@ -2647,25 +2644,15 @@ client_process_dh(krb5_context context,
     BIGNUM *server_pub_key = NULL;
     ASN1_INTEGER *pub_key = NULL;
     const unsigned char *p = NULL;
-    unsigned char *data = NULL;
-    long data_len;
-
-    /* decode subjectPublicKey (retrieve INTEGER from OCTET_STRING) */
-
-    if (der_decode_data(subjectPublicKey_data, (long)subjectPublicKey_length,
-                        &data, &data_len) != 0) {
-        pkiDebug("failed to decode subjectPublicKey\n");
-        retval = -1;
-        goto cleanup;
-    }
 
     *client_key_len = DH_size(cryptoctx->dh);
     if ((*client_key = malloc(*client_key_len)) == NULL) {
         retval = ENOMEM;
         goto cleanup;
     }
-    p = data;
-    if ((pub_key = d2i_ASN1_INTEGER(NULL, &p, data_len)) == NULL)
+    p = subjectPublicKey_data;
+    pub_key = d2i_ASN1_INTEGER(NULL, &p, (long)subjectPublicKey_length);
+    if (pub_key == NULL)
         goto cleanup;
     if ((server_pub_key = ASN1_INTEGER_to_BN(pub_key, NULL)) == NULL)
         goto cleanup;
@@ -2682,8 +2669,6 @@ client_process_dh(krb5_context context,
         BN_free(server_pub_key);
     if (pub_key != NULL)
         ASN1_INTEGER_free(pub_key);
-    if (data != NULL)
-        free (data);
 
     return retval;
 
@@ -2692,8 +2677,6 @@ cleanup:
     *client_key = NULL;
     if (pub_key != NULL)
         ASN1_INTEGER_free(pub_key);
-    if (data != NULL)
-        free (data);
 
     return retval;
 }
@@ -5998,33 +5981,6 @@ pkcs7_dataDecode(krb5_context context,
 
     return(out);
 }
-
-static krb5_error_code
-der_decode_data(unsigned char *data, long data_len,
-                unsigned char **out, long *out_len)
-{
-    krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
-    ASN1_OCTET_STRING *s = NULL;
-    const unsigned char *p = data;
-
-    if ((s = d2i_ASN1_BIT_STRING(NULL, &p, data_len)) == NULL)
-        goto cleanup;
-    *out_len = s->length;
-    if ((*out = malloc((size_t) *out_len + 1)) == NULL) {
-        retval = ENOMEM;
-        goto cleanup;
-    }
-    memcpy(*out, s->data, (size_t) s->length);
-    (*out)[s->length] = '\0';
-
-    retval = 0;
-cleanup:
-    if (s != NULL)
-        ASN1_OCTET_STRING_free(s);
-
-    return retval;
-}
-
 
 #ifdef DEBUG_DH
 static void

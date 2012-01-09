@@ -45,6 +45,7 @@
  *  asn1_decode_octetstring
  *  asn1_decode_charstring
  *  asn1_decode_generalstring
+ *  asn1_decode_bitstring
  *  asn1_decode_null
  *  asn1_decode_printablestring
  *  asn1_decode_ia5string
@@ -72,6 +73,8 @@ asn1_error_code asn1_decode_octetstring(asn1buf *buf, unsigned int *retlen,
                                         asn1_octet **val);
 asn1_error_code asn1_decode_generalstring(asn1buf *buf, unsigned int *retlen,
                                           char **val);
+asn1_error_code asn1_decode_bitstring(asn1buf *buf, unsigned int *retlen,
+                                      char **val);
 asn1_error_code asn1_decode_charstring(asn1buf *buf, unsigned int *retlen,
                                        char **val);
 /*

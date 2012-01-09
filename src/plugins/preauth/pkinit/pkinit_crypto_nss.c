@@ -950,26 +950,21 @@ secitem_to_dh_pubval(SECItem *item, unsigned char **out, unsigned int *len)
     return i;
 }
 
-/* Decode a bitstring that contains an unsigned integer, and return just the
- * bits that make up that integer. */
+/* Decode a DER unsigned integer, and return just the bits that make up that
+ * integer. */
 static int
 secitem_from_dh_pubval(PLArenaPool *pool,
                        unsigned char *dh_pubkey, unsigned int dh_pubkey_len,
                        SECItem *bits_out)
 {
-    SECItem tmp, uinteger;
+    SECItem tmp;
 
     tmp.data = dh_pubkey;
     tmp.len = dh_pubkey_len;
-    memset(&uinteger, 0, sizeof(uinteger));
-    if (SEC_ASN1DecodeItem(pool, &uinteger,
-                           SEC_ASN1_GET(SEC_BitStringTemplate),
-                           &tmp) != SECSuccess)
-        return ENOMEM;
     memset(bits_out, 0, sizeof(*bits_out));
     if (SEC_ASN1DecodeItem(pool, bits_out,
                            SEC_ASN1_GET(SEC_IntegerTemplate),
-                           &uinteger) != SECSuccess)
+                           &tmp) != SECSuccess)
         return ENOMEM;
     return 0;
 }
