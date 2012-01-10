@@ -712,12 +712,9 @@ ktest_make_sample_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *p)
     int i;
 
     ktest_make_sample_data(&p->signedAuthPack);
-    p->trustedCertifiers =
-        ealloc(4 * sizeof(krb5_external_principal_identifier *));
-    for (i = 0; i < 3; i++) {
-        p->trustedCertifiers[i] =
-            ealloc(sizeof(krb5_external_principal_identifier));
-    }
+    p->trustedCertifiers = ealloc(4 * sizeof(krb5_trusted_ca *));
+    for (i = 0; i < 3; i++)
+        p->trustedCertifiers[i] = ealloc(sizeof(krb5_trusted_ca));
     ktest_make_sample_trusted_ca_principalName(p->trustedCertifiers[0]);
     ktest_make_sample_trusted_ca_caName(p->trustedCertifiers[1]);
     ktest_make_sample_trusted_ca_issuerAndSerial(p->trustedCertifiers[2]);
