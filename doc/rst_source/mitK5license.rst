@@ -2,7 +2,5 @@ MIT Kerberos License information
 ===================================
 
 
-.. include::  NOTICE
+.. include::  ../../NOTICE
    :literal:
-
-
