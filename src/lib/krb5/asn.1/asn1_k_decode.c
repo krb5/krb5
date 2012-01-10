@@ -1515,12 +1515,8 @@ asn1_decode_kdc_dh_key_info(asn1buf *buf, krb5_kdc_dh_key_info *val)
     setup();
     val->subjectPublicKey.data = NULL;
     { begin_structure();
-        /* Special handling for [0] IMPLICIT BIT STRING */
-        error_if_bad_tag(0);
-        if (asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)
-            clean_return(ASN1_BAD_ID);
-        get_lenfield_body(val->subjectPublicKey.length,
-                          val->subjectPublicKey.data, asn1_decode_bitstring);
+        get_lenfield(val->subjectPublicKey.length, val->subjectPublicKey.data,
+                     0, asn1_decode_bitstring);
         get_field(val->nonce, 1, asn1_decode_int32);
         opt_field(val->dhKeyExpiration, 2, asn1_decode_kerberos_time, 0);
         end_structure();
