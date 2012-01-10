@@ -37,6 +37,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "autoconf.h"
 
 static char *_findenv(char *, int *);
