@@ -1049,10 +1049,13 @@ static unsigned int fast_armored_req_optional (const void *p) {
         optional |= (1u)<<0;
     return optional;
 }
+DEFSEQTYPE(fast_armored_req, krb5_fast_armored_req, fast_armored_req_fields,
+           fast_armored_req_optional);
 
-DEFSEQTYPE( fast_armored_req, krb5_fast_armored_req, fast_armored_req_fields, fast_armored_req_optional);
-DEFFIELDTYPE(pa_fx_fast_request, krb5_fast_armored_req,
-             FIELDOF_ENCODEAS(krb5_fast_armored_req, fast_armored_req, 0, 0));
+/* This is a CHOICE type with only one choice (so far) and we're not using a
+ * distinguisher/union for it. */
+DEFTAGGEDTYPE(pa_fx_fast_request, CONTEXT_SPECIFIC, CONSTRUCTED, 0, 0,
+              fast_armored_req);
 
 DEFFIELDTYPE(fast_req_padata, krb5_kdc_req,
              FIELDOF_NORM(krb5_kdc_req, ptr_seqof_pa_data, padata, -1, 0));
@@ -1105,8 +1108,10 @@ static const struct field_info fast_rep_fields[] = {
 };
 DEFSEQTYPE(fast_rep, krb5_enc_data, fast_rep_fields, 0);
 
-DEFFIELDTYPE(pa_fx_fast_reply, krb5_enc_data,
-             FIELDOF_ENCODEAS(krb5_enc_data, fast_rep, 0, 0));
+/* This is a CHOICE type with only one choice (so far) and we're not using a
+ * distinguisher/union for it. */
+DEFTAGGEDTYPE(pa_fx_fast_reply, CONTEXT_SPECIFIC, CONSTRUCTED, 0, 0,
+              fast_rep);
 
 static const struct field_info ad_kdcissued_fields[] = {
     FIELDOF_NORM(krb5_ad_kdcissued, checksum, ad_checksum, 0, 0),
