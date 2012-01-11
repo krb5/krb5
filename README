@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2011 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2012 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -202,6 +202,7 @@ krb5-1.10 changes by ticket ID
 6931    Add libedit/readline support to ss.
 6933    blocking recv caused our server to hang
 6934    don't require a default realm
+6936    multiple mechanisms and spnego_gss_init_sec_context
 6944    gss_acquire_cred erroneous failure and potential segfault for caller
 6945    spnego_gss_acquire_cred_impersonate_name incorrect usage of
         impersonator_cred_handle
@@ -227,7 +228,8 @@ krb5-1.10 changes by ticket ID
 6978    Allow rd_priv/rd_safe without remote address
 6979    Allow password changes over NATs
 6980    Ensure termination in Windows vsnprintf wrapper
-6981    SA-2011-006 KDC denial of service [CVE-2011-1527 CVE-2011-1528 CVE-2011-1529]
+6981    SA-2011-006 KDC denial of service [CVE-2011-1527 CVE-2011-1528
+        CVE-2011-1529]
 6987    Fix krb5_cc_set_config
 6988    Fix handling of null edata method in KDC preauth
 6989    fix tar invocation in mkrel
@@ -262,6 +264,14 @@ krb5-1.10 changes by ticket ID
 7042    SA-2011-007 KDC null pointer deref in TGS handling [CVE-2011-1530]
 7049    Fix subkey memory leak in krb5_get_credentials
 7050    KfW changes for krb5-1.10
+7051    krb5_server_decrypt_ticket_keytab wrongly succeeds
+7053    Verify acceptor's mech in SPNEGO initiator
+7055    Rename Table of Contents.hhc
+7057    Krb5 1.9.x does not build on Solaris 8 - Implicit function
+        declaration error
+7060    Convert securid module edata method
+7065    delete duplicate NOTICE file
+7067    documentation license to CC-BY-SA 3.0 Unported
 
 Acknowledgements
 ----------------
