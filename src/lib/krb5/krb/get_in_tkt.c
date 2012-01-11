@@ -154,6 +154,7 @@ verify_as_reply(krb5_context            context,
     krb5_error_code             retval;
     int                         canon_req;
     int                         canon_ok;
+    krb5_timestamp              time_offset;
 
     /* check the contents for sanity: */
     if (!as_reply->enc_part2->times.starttime)
@@ -216,8 +217,8 @@ verify_as_reply(krb5_context            context,
     }
 
     if (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) {
-        retval = krb5_set_real_time(context,
-                                    as_reply->enc_part2->times.authtime, -1);
+        time_offset = as_reply->enc_part2->times.authtime - time_now;
+        retval = krb5_set_time_offsets(context, time_offset, 0);
         if (retval)
             return retval;
     } else {
@@ -742,9 +743,7 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
     if (code != 0)
         goto cleanup;
 
-    code = krb5_timeofday(context, &ctx->request_time);
-    if (code != 0)
-        goto cleanup;
+    ctx->request_time = time(NULL);
 
     code = krb5int_fast_as_armor(context, ctx->fast_state,
                                  ctx->opte, ctx->request);
