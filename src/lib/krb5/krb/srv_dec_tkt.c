@@ -79,8 +79,6 @@ krb5_server_decrypt_ticket_keytab(krb5_context context,
     krb5_error_code       retval;
     krb5_keytab_entry     ktent;
 
-    retval = KRB5_KT_NOTFOUND;
-
     if (keytab->ops->start_seq_get == NULL) {
         retval = krb5_kt_get_entry(context, keytab,
                                    ticket->server,
@@ -99,6 +97,7 @@ krb5_server_decrypt_ticket_keytab(krb5_context context,
         if (retval != 0)
             goto map_error;
 
+        retval = KRB5_KT_NOTFOUND;
         while ((code = krb5_kt_next_entry(context, keytab,
                                           &ktent, &cursor)) == 0) {
             if (ktent.key.enctype != ticket->enc_part.enctype)
