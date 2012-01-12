@@ -97,9 +97,6 @@ Since in our case the updates should only come from *kerberos.mit.edu* server,  
 Then, add the following line to */etc/inetd.conf* file on each KDC (Adjust the path to *kpropd*)::
 
      krb5_prop stream tcp nowait root /usr/local/sbin/kpropd kpropd
-     eklogin stream tcp nowait root  /usr/local/sbin/klogind klogind -5 -c -e
-
-     
 
 You also need to add the following lines to */etc/services* on each KDC (assuming that default ports are used)::
 
