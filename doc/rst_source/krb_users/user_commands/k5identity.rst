@@ -4,19 +4,19 @@
 DESCRIPTION
 -------------
 
-The *.k5identity*  file, which resides in a user's home directory, 
-contains a list of rules for selecting a client principals based on 
-the server being accessed. These rules are used to choose a credential 
+The *.k5identity*  file, which resides in a user's home directory,
+contains a list of rules for selecting a client principals based on
+the server being accessed. These rules are used to choose a credential
 cache within the cache collection when possible.
 
 Blank lines and lines beginning with '#' are ignored.  Each line has the form:
 
         principal field=value ...
 
-If the server principal meets all of the field constraints, then principal 
+If the server principal meets all of the field constraints, then principal
 is chosen as the client principal.  The following fields are recognized:
 
-**realm**  
+**realm** 
         If the realm of the server principal is known, it is matched
         against *value*, which may be a pattern using shell wildcards.
         For host-based server principals, the realm will generally only
