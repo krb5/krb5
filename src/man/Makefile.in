@@ -23,6 +23,8 @@ install-clientman::
 	$(INSTALL_DATA) $(srcdir)/kvno.1 ${DESTDIR}$(CLIENT_MANDIR)/kvno.1
 
 install-fileman::
+	$(INSTALL_DATA) $(srcdir)/dot.k5identity.5 ${DESTDIR}$(FILE_MANDIR)/.k5identity.5
+	$(INSTALL_DATA) $(srcdir)/k5identity.5 ${DESTDIR}$(FILE_MANDIR)/k5identity.5
 	$(INSTALL_DATA) $(srcdir)/dot.k5login.5 ${DESTDIR}$(FILE_MANDIR)/.k5login.5
 	$(INSTALL_DATA) $(srcdir)/k5login.5 ${DESTDIR}$(FILE_MANDIR)/k5login.5
 	$(INSTALL_DATA) $(srcdir)/kdc.conf.5 ${DESTDIR}$(FILE_MANDIR)/kdc.conf.5
@@ -53,6 +55,9 @@ install-clientcat::
 	$(GROFF_MAN) $(srcdir)/kvno.1 > ${DESTDIR}$(CLIENT_CATDIR)/kvno.1
 
 install-filecat::
+	$(GROFF_MAN) $(srcdir)/k5identity.5 > ${DESTDIR}$(FILE_CATDIR)/k5identity.5
+	($(RM) ${DESTDIR}$(FILE_CATDIR)/.k5identity.5; \
+		$(LN_S) $(FILE_CATDIR)/k5identity.5 ${DESTDIR}$(FILE_CATDIR)/.k5identity.5)
 	$(GROFF_MAN) $(srcdir)/k5login.5 > ${DESTDIR}$(FILE_CATDIR)/k5login.5
 	($(RM) ${DESTDIR}$(FILE_CATDIR)/.k5login.5; \
 		$(LN_S) $(FILE_CATDIR)/k5login.5 ${DESTDIR}$(FILE_CATDIR)/.k5login.5)

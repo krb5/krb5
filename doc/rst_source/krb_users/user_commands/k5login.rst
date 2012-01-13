@@ -1,5 +1,9 @@
-.k5login - Kerberos V5 acl file for host access
-===================================================
+Kerberos V5 acl file for host access
+====================================
+
+SYNOPSIS
+--------
+**~/.k5login**
 
 DESCRIPTION
 --------------

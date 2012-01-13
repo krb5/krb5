@@ -158,9 +158,10 @@ tgz::
 ../NOTICE: notice.texinfo definitions.texinfo copyright.texinfo
 	makeinfo --plaintext -o $@ notice.texinfo
 
-RSTMAN=k5login.5 k5srvutil.1 kadmin.1 kadmind.8 kdb5_ldap_util.8 kdb5_util.8 \
-	kdc.conf.5 kdestroy.1 kinit.1 klist.1 kpasswd.1 kprop.8 kpropd.8 \
-	kproplog.8 krb5.conf.5 krb5kdc.8 ksu.1 kswitch.1 ktutil.1 kvno.1
+RSTMAN=k5identity.5 k5login.5 k5srvutil.1 kadmin.1 kadmind.8 kdb5_ldap_util.8 \
+	kdb5_util.8 kdc.conf.5 kdestroy.1 kinit.1 klist.1 kpasswd.1 kprop.8 \
+	kpropd.8 kproplog.8 krb5.conf.5 krb5kdc.8 ksu.1 kswitch.1 ktutil.1 \
+	kvno.1
 
 # The file editing loop deletes some trailing whitespace that the
 # docutils manpage writer outputs near the end of its output files.

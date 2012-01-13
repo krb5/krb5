@@ -1,5 +1,9 @@
-.k5identity - Kerberos V5 client principal selection rules
-===============================================================
+Kerberos V5 client principal selection rules
+============================================
+
+SYNOPSIS
+--------
+**~/.k5identity**
 
 DESCRIPTION
 -------------
