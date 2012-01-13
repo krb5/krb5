@@ -38,6 +38,25 @@ int error_count = 0;
 
 void krb5_ktest_free_enc_data(krb5_context context, krb5_enc_data *val);
 
+#ifndef DISABLE_PKINIT
+static int equal_principal(krb5_principal *ref, krb5_principal var);
+static void ktest_free_auth_pack(krb5_context context, krb5_auth_pack *val);
+static void ktest_free_auth_pack_draft9(krb5_context context,
+                                        krb5_auth_pack_draft9 *val);
+static void ktest_free_kdc_dh_key_info(krb5_context context,
+                                       krb5_kdc_dh_key_info *val);
+static void ktest_free_pa_pk_as_req(krb5_context context,
+                                    krb5_pa_pk_as_req *val);
+static void ktest_free_pa_pk_as_rep(krb5_context context,
+                                    krb5_pa_pk_as_rep *val);
+static void ktest_free_pa_pk_as_rep_draft9(krb5_context context,
+                                           krb5_pa_pk_as_rep_draft9 *val);
+static void ktest_free_reply_key_pack(krb5_context context,
+                                      krb5_reply_key_pack *val);
+static void ktest_free_reply_key_pack_draft9(krb5_context context,
+                                             krb5_reply_key_pack_draft9 *val);
+#endif
+
 int main(argc, argv)
     int argc;
     char **argv;
@@ -929,6 +948,123 @@ int main(argc, argv)
         ktest_destroy_enc_data(&ref);
     }
 
+#ifndef DISABLE_PKINIT
+
+    /****************************************************************/
+    /* decode_krb5_pa_pk_as_req */
+    {
+        setup(krb5_pa_pk_as_req,ktest_make_sample_pa_pk_as_req);
+        decode_run("krb5_pa_pk_as_req","","30 38 80 08 6B 72 62 35 64 61 74 61 A1 22 30 20 30 1E 80 08 6B 72 62 35 64 61 74 61 81 08 6B 72 62 35 64 61 74 61 82 08 6B 72 62 35 64 61 74 61 82 08 6B 72 62 35 64 61 74 61",
+                   acc.decode_krb5_pa_pk_as_req,
+                   ktest_equal_pa_pk_as_req,ktest_free_pa_pk_as_req);
+        ktest_empty_pa_pk_as_req(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_krb5_pa_pk_as_rep */
+    {
+        setup(krb5_pa_pk_as_rep,ktest_make_sample_pa_pk_as_rep_dhInfo);
+        decode_run("krb5_pa_pk_as_rep","(dhInfo)","A0 28 30 26 80 08 6B 72 62 35 64 61 74 61 A1 0A 04 08 6B 72 62 35 64 61 74 61 A2 0E 30 0C A0 0A 06 08 6B 72 62 35 64 61 74 61",
+                   acc.decode_krb5_pa_pk_as_rep,
+                   ktest_equal_pa_pk_as_rep,ktest_free_pa_pk_as_rep);
+        ktest_empty_pa_pk_as_rep(&ref);
+    }
+    {
+        setup(krb5_pa_pk_as_rep,ktest_make_sample_pa_pk_as_rep_encKeyPack);
+        decode_run("krb5_pa_pk_as_rep","(encKeyPack)","81 08 6B 72 62 35 64 61 74 61",
+                   acc.decode_krb5_pa_pk_as_rep,
+                   ktest_equal_pa_pk_as_rep,ktest_free_pa_pk_as_rep);
+        ktest_empty_pa_pk_as_rep(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_krb5_pa_pk_as_rep_draft9 */
+    /*
+     * NOTE: These are NOT the encodings produced by
+     * encode_krb5_pa_pk_as_rep_draft9; they are hand-generated to match what
+     * the decoder expects.  The decoder expects a sequence containing an
+     * explicitly tagged octet string, while the encoder produces an implicitly
+     * tagged octet string.  See issue #7072.
+     */
+    {
+        setup(krb5_pa_pk_as_rep_draft9,ktest_make_sample_pa_pk_as_rep_draft9_dhSignedData);
+        decode_run("krb5_pa_pk_as_rep_draft9","(dhSignedData)","30 0C A0 0A 04 08 6B 72 62 35 64 61 74 61",
+                   acc.decode_krb5_pa_pk_as_rep_draft9,
+                   ktest_equal_pa_pk_as_rep_draft9,ktest_free_pa_pk_as_rep_draft9);
+        ktest_empty_pa_pk_as_rep_draft9(&ref);
+    }
+    {
+        setup(krb5_pa_pk_as_rep_draft9,ktest_make_sample_pa_pk_as_rep_draft9_encKeyPack);
+        decode_run("krb5_pa_pk_as_rep_draft9","(encKeyPack)","30 0C A1 0A 04 08 6B 72 62 35 64 61 74 61",
+                   acc.decode_krb5_pa_pk_as_rep_draft9,
+                   ktest_equal_pa_pk_as_rep_draft9,ktest_free_pa_pk_as_rep_draft9);
+        ktest_empty_pa_pk_as_rep_draft9(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_krb5_auth_pack */
+    {
+        setup(krb5_auth_pack,ktest_make_sample_auth_pack);
+        decode_run("krb5_auth_pack","","30 81 93 A0 29 30 27 A0 05 02 03 01 E2 40 A1 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A2 03 02 01 2A A3 06 04 04 31 32 33 34 A1 22 30 20 30 13 06 09 2A 86 48 86 F7 12 01 02 02 04 06 70 61 72 61 6D 73 03 09 00 6B 72 62 35 64 61 74 61 A2 24 30 22 30 13 06 09 2A 86 48 86 F7 12 01 02 02 04 06 70 61 72 61 6D 73 30 0B 06 09 2A 86 48 86 F7 12 01 02 02 A3 0A 04 08 6B 72 62 35 64 61 74 61 A4 10 30 0E 30 0C A0 0A 06 08 6B 72 62 35 64 61 74 61",
+                   acc.decode_krb5_auth_pack,
+                   ktest_equal_auth_pack,ktest_free_auth_pack);
+        ktest_empty_auth_pack(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_krb5_auth_pack_draft9 */
+    {
+        setup(krb5_auth_pack_draft9,ktest_make_sample_auth_pack_draft9);
+        decode_run("krb5_auth_pack_draft9","","30 75 A0 4F 30 4D A0 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 05 02 03 01 E2 40 A3 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A4 03 02 01 2A A1 22 30 20 30 13 06 09 2A 86 48 86 F7 12 01 02 02 04 06 70 61 72 61 6D 73 03 09 00 6B 72 62 35 64 61 74 61",
+                   acc.decode_krb5_auth_pack_draft9,
+                   ktest_equal_auth_pack_draft9,ktest_free_auth_pack_draft9);
+        ktest_empty_auth_pack_draft9(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_krb5_kdc_dh_key_info */
+    {
+        setup(krb5_kdc_dh_key_info,ktest_make_sample_kdc_dh_key_info);
+        decode_run("krb5_kdc_dh_key_info","","30 25 A0 0B 03 09 00 6B 72 62 35 64 61 74 61 A1 03 02 01 2A A2 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",
+                   acc.decode_krb5_kdc_dh_key_info,
+                   ktest_equal_kdc_dh_key_info,ktest_free_kdc_dh_key_info);
+        ktest_empty_kdc_dh_key_info(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_krb5_reply_key_pack */
+    {
+        setup(krb5_reply_key_pack,ktest_make_sample_reply_key_pack);
+        decode_run("krb5_reply_key_pack","","30 26 A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A1 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34",
+                   acc.decode_krb5_reply_key_pack,
+                   ktest_equal_reply_key_pack,ktest_free_reply_key_pack);
+        ktest_empty_reply_key_pack(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_krb5_reply_key_pack_draft9 */
+    {
+        setup(krb5_reply_key_pack_draft9,ktest_make_sample_reply_key_pack_draft9);
+        decode_run("krb5_reply_key_pack_draft9","","30 1A A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A1 03 02 01 2A",
+                   acc.decode_krb5_reply_key_pack_draft9,
+                   ktest_equal_reply_key_pack_draft9,ktest_free_reply_key_pack_draft9);
+        ktest_empty_reply_key_pack_draft9(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_krb5_principal_name */
+    /* We have no encoder for this type (KerberosName from RFC 4556); the
+     * encoding is hand-generated. */
+    {
+        krb5_principal ref, var;
+
+        ktest_make_sample_principal(&ref);
+        decode_run("krb5_principal_name","","30 2E A0 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A1 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61",
+                   acc.decode_krb5_principal_name,equal_principal,krb5_free_principal);
+    }
+
+#endif /* not DISABLE_PKINIT */
+
 #ifdef ENABLE_LDAP
     /* ldap sequence_of_keys */
     {
@@ -952,3 +1088,81 @@ void krb5_ktest_free_enc_data(krb5_context context, krb5_enc_data *val)
         free(val);
     }
 }
+
+#ifndef DISABLE_PKINIT
+
+/* Glue function to make ktest_equal_principal_data look like what decode_run
+ * expects. */
+static int
+equal_principal(krb5_principal *ref, krb5_principal var)
+{
+    return ktest_equal_principal_data(*ref, var);
+}
+
+static void
+ktest_free_auth_pack(krb5_context context, krb5_auth_pack *val)
+{
+    if (val)
+        ktest_empty_auth_pack(val);
+    free(val);
+}
+
+static void
+ktest_free_auth_pack_draft9(krb5_context context, krb5_auth_pack_draft9 *val)
+{
+    if (val)
+        ktest_empty_auth_pack_draft9(val);
+    free(val);
+}
+
+static void
+ktest_free_kdc_dh_key_info(krb5_context context, krb5_kdc_dh_key_info *val)
+{
+    if (val)
+        ktest_empty_kdc_dh_key_info(val);
+    free(val);
+}
+
+static void
+ktest_free_pa_pk_as_req(krb5_context context, krb5_pa_pk_as_req *val)
+{
+    if (val)
+        ktest_empty_pa_pk_as_req(val);
+    free(val);
+}
+
+static void
+ktest_free_pa_pk_as_rep(krb5_context context, krb5_pa_pk_as_rep *val)
+{
+    if (val)
+        ktest_empty_pa_pk_as_rep(val);
+    free(val);
+}
+
+static void
+ktest_free_pa_pk_as_rep_draft9(krb5_context context,
+                               krb5_pa_pk_as_rep_draft9 *val)
+{
+    if (val)
+        ktest_empty_pa_pk_as_rep_draft9(val);
+    free(val);
+}
+
+static void
+ktest_free_reply_key_pack(krb5_context context, krb5_reply_key_pack *val)
+{
+    if (val)
+        ktest_empty_reply_key_pack(val);
+    free(val);
+}
+
+static void
+ktest_free_reply_key_pack_draft9(krb5_context context,
+                                 krb5_reply_key_pack_draft9 *val)
+{
+    if (val)
+        ktest_empty_reply_key_pack_draft9(val);
+    free(val);
+}
+
+#endif /* not DISABLE_PKINIT */

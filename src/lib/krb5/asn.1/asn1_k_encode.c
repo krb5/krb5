@@ -1632,6 +1632,15 @@ DEFFIELDTYPE(pa_pk_as_rep, krb5_pa_pk_as_rep,
              FIELDOF_CHOICE(krb5_pa_pk_as_rep, pa_pk_as_rep_choice, u, choice,
                             pa_pk_as_rep_selection, -1));
 
+/*
+ * draft-ietf-cat-kerberos-pk-init-09 specifies these alternatives as
+ * explicitly tagged SignedData and EnvelopedData respectively, which means
+ * they should have constructed context tags.  However, our historical behavior
+ * is to use primitive context tags, and we don't want to change that behavior
+ * without interop testing.  We have the encodings for each alternative in a
+ * krb5_data object; pretend that they are wrapped in IMPLICIT OCTET STRING in
+ * order to wrap them in primitive [0] and [1] tags.
+ */
 typedef union krb5_pa_pk_as_rep_draft9_choices
 krb5_pa_pk_as_rep_draft9_choices;
 typedef enum krb5_pa_pk_as_rep_draft9_selection

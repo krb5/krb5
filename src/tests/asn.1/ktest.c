@@ -624,6 +624,8 @@ ktest_make_sample_pk_authenticator(krb5_pk_authenticator *p)
     p->ctime = SAMPLE_TIME;
     p->nonce = SAMPLE_NONCE;
     ktest_make_sample_checksum(&p->paChecksum);
+    /* We don't encode the checksum type, only the contents. */
+    p->paChecksum.checksum_type = 0;
 }
 
 static void

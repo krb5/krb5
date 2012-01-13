@@ -770,3 +770,249 @@ ktest_equal_sequence_of_checksum(krb5_checksum **ref, krb5_checksum **var)
 {
     array_compare(ktest_equal_checksum);
 }
+
+#ifndef DISABLE_PKINIT
+
+static int
+ktest_equal_pk_authenticator(krb5_pk_authenticator *ref,
+                             krb5_pk_authenticator *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && scalar_equal(cusec);
+    p = p && scalar_equal(ctime);
+    p = p && scalar_equal(nonce);
+    p = p && struct_equal(paChecksum, ktest_equal_checksum);
+    return p;
+}
+
+static int
+ktest_equal_pk_authenticator_draft9(krb5_pk_authenticator_draft9 *ref,
+                                    krb5_pk_authenticator_draft9 *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && ptr_equal(kdcName, ktest_equal_principal_data);
+    p = p && scalar_equal(cusec);
+    p = p && scalar_equal(ctime);
+    p = p && scalar_equal(nonce);
+    return p;
+}
+
+static int
+ktest_equal_algorithm_identifier(krb5_algorithm_identifier *ref,
+                                 krb5_algorithm_identifier *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && equal_str(algorithm);
+    p = p && equal_str(parameters);
+    return p;
+}
+
+static int
+ktest_equal_sequence_of_algorithm_identifier(krb5_algorithm_identifier **ref,
+                                             krb5_algorithm_identifier **var)
+{
+    array_compare(ktest_equal_algorithm_identifier);
+}
+
+static int
+ktest_equal_subject_pk_info(krb5_subject_pk_info *ref,
+                            krb5_subject_pk_info *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && struct_equal(algorithm, ktest_equal_algorithm_identifier);
+    p = p && equal_str(subjectPublicKey);
+    return p;
+}
+
+static int
+ktest_equal_external_principal_identifier(
+    krb5_external_principal_identifier *ref,
+    krb5_external_principal_identifier *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && equal_str(subjectName);
+    p = p && equal_str(issuerAndSerialNumber);
+    p = p && equal_str(subjectKeyIdentifier);
+    return p;
+}
+
+static int
+ktest_equal_sequence_of_external_principal_identifier(
+    krb5_external_principal_identifier **ref,
+    krb5_external_principal_identifier **var)
+{
+    array_compare(ktest_equal_external_principal_identifier);
+}
+
+static int
+ktest_equal_trusted_ca(krb5_trusted_ca *ref, krb5_trusted_ca *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    if (ref->choice != var->choice) return FALSE;
+    if (ref->choice == choice_trusted_cas_principalName)
+        p = p && ptr_equal(u.principalName, ktest_equal_principal_data);
+    else if (ref->choice == choice_trusted_cas_caName)
+        p = p && equal_str(u.caName);
+    else if (ref->choice == choice_trusted_cas_issuerAndSerial)
+        p = p && equal_str(u.issuerAndSerial);
+    return p;
+}
+
+static int
+ktest_equal_sequence_of_trusted_ca(krb5_trusted_ca **ref,
+                                   krb5_trusted_ca **var)
+{
+    array_compare(ktest_equal_trusted_ca);
+}
+
+int
+ktest_equal_pa_pk_as_req(krb5_pa_pk_as_req *ref, krb5_pa_pk_as_req *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && equal_str(signedAuthPack);
+    p = p && ptr_equal(trustedCertifiers,
+                       ktest_equal_sequence_of_external_principal_identifier);
+    p = p && equal_str(kdcPkId);
+    return p;
+}
+
+int
+ktest_equal_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *ref,
+                                krb5_pa_pk_as_req_draft9 *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && equal_str(signedAuthPack);
+    p = p && ptr_equal(trustedCertifiers, ktest_equal_sequence_of_trusted_ca);
+    p = p && equal_str(kdcCert);
+    p = p && equal_str(encryptionCert);
+    return p;
+}
+
+static int
+ktest_equal_dh_rep_info(krb5_dh_rep_info *ref, krb5_dh_rep_info *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && equal_str(dhSignedData);
+    p = p && equal_str(serverDHNonce);
+    p = p && ptr_equal(kdfID, ktest_equal_data);
+    return p;
+}
+
+int
+ktest_equal_pa_pk_as_rep(krb5_pa_pk_as_rep *ref, krb5_pa_pk_as_rep *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    if (ref->choice != var->choice) return FALSE;
+    if (ref->choice == choice_pa_pk_as_rep_dhInfo)
+        p = p && struct_equal(u.dh_Info, ktest_equal_dh_rep_info);
+    else if (ref->choice == choice_pa_pk_as_rep_encKeyPack)
+        p = p && equal_str(u.encKeyPack);
+    return p;
+}
+
+int
+ktest_equal_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 *ref,
+                                krb5_pa_pk_as_rep_draft9 *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    if (ref->choice != var->choice) return FALSE;
+    if (ref->choice == choice_pa_pk_as_rep_draft9_dhSignedData)
+        p = p && equal_str(u.dhSignedData);
+    else if (ref->choice == choice_pa_pk_as_rep_draft9_encKeyPack)
+        p = p && equal_str(u.encKeyPack);
+    return p;
+}
+
+static int
+ktest_equal_sequence_of_data(krb5_data **ref, krb5_data **var)
+{
+    array_compare(ktest_equal_data);
+}
+
+int
+ktest_equal_auth_pack(krb5_auth_pack *ref, krb5_auth_pack *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && struct_equal(pkAuthenticator, ktest_equal_pk_authenticator);
+    p = p && ptr_equal(clientPublicValue, ktest_equal_subject_pk_info);
+    p = p && ptr_equal(supportedCMSTypes,
+                       ktest_equal_sequence_of_algorithm_identifier);
+    p = p && equal_str(clientDHNonce);
+    p = p && ptr_equal(supportedKDFs, ktest_equal_sequence_of_data);
+    return p;
+}
+
+int
+ktest_equal_auth_pack_draft9(krb5_auth_pack_draft9 *ref,
+                             krb5_auth_pack_draft9 *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && struct_equal(pkAuthenticator,
+                          ktest_equal_pk_authenticator_draft9);
+    p = p && ptr_equal(clientPublicValue, ktest_equal_subject_pk_info);
+    return p;
+}
+
+int
+ktest_equal_kdc_dh_key_info(krb5_kdc_dh_key_info *ref,
+                            krb5_kdc_dh_key_info *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && equal_str(subjectPublicKey);
+    p = p && scalar_equal(nonce);
+    p = p && scalar_equal(dhKeyExpiration);
+    return p;
+}
+
+int
+ktest_equal_reply_key_pack(krb5_reply_key_pack *ref, krb5_reply_key_pack *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && struct_equal(replyKey, ktest_equal_keyblock);
+    p = p && struct_equal(asChecksum, ktest_equal_checksum);
+    return p;
+}
+
+int
+ktest_equal_reply_key_pack_draft9(krb5_reply_key_pack_draft9 *ref,
+                                  krb5_reply_key_pack_draft9 *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && struct_equal(replyKey, ktest_equal_keyblock);
+    p = p && scalar_equal(nonce);
+    return p;
+}
+
+#endif /* not DISABLE_PKINIT */
