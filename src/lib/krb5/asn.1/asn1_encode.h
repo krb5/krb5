@@ -223,9 +223,8 @@ enum atype_type {
     atype_field,
     /* Tagged version of another type.  tinfo is a struct tagged_info *. */
     atype_tagged_thing,
-    /* Integer.  tinfo is a struct int_info. */
+    /* Signed or unsigned integer.  tinfo is NULL. */
     atype_int,
-    /* Unsigned integer.  tinfo is a struct uint_info. */
     atype_uint,
     /* Unused except for bounds checking.  */
     atype_max
@@ -261,14 +260,6 @@ struct ptr_info {
 struct tagged_info {
     unsigned int tagval : 16, tagtype : 8, construction : 6, implicit : 1;
     const struct atype_info *basetype;
-};
-
-struct int_info {
-    asn1_intmax (*loadint)(const void *);
-};
-
-struct uint_info {
-    asn1_uintmax (*loaduint)(const void *);
 };
 
 /*
@@ -399,31 +390,15 @@ struct uint_info {
         atype_choice, sizeof(CTYPENAME), &aux_seqinfo_##DESCNAME        \
     }
 /* Integer types.  */
-#define DEFINTTYPE(DESCNAME, CTYPENAME)                                 \
-    typedef CTYPENAME aux_typedefname_##DESCNAME;                       \
-    static asn1_intmax loadint_##DESCNAME(const void *p)                \
-    {                                                                   \
-        assert(sizeof(CTYPENAME) <= sizeof(asn1_intmax));               \
-        return *(const aux_typedefname_##DESCNAME *)p;                  \
-    }                                                                   \
-    static const struct int_info aux_info_##DESCNAME = {                \
-        loadint_##DESCNAME                                              \
-    };                                                                  \
-    const struct atype_info krb5int_asn1type_##DESCNAME = {             \
-        atype_int, sizeof(CTYPENAME), &aux_info_##DESCNAME              \
+#define DEFINTTYPE(DESCNAME, CTYPENAME)                         \
+    typedef CTYPENAME aux_typedefname_##DESCNAME;               \
+    const struct atype_info krb5int_asn1type_##DESCNAME = {     \
+        atype_int, sizeof(CTYPENAME), NULL                      \
     }
 #define DEFUINTTYPE(DESCNAME, CTYPENAME)                        \
     typedef CTYPENAME aux_typedefname_##DESCNAME;               \
-    static asn1_uintmax loaduint_##DESCNAME(const void *p)      \
-    {                                                           \
-        assert(sizeof(CTYPENAME) <= sizeof(asn1_uintmax));      \
-        return *(const aux_typedefname_##DESCNAME *)p;          \
-    }                                                           \
-    static const struct uint_info aux_info_##DESCNAME = {       \
-        loaduint_##DESCNAME                                     \
-    };                                                          \
     const struct atype_info krb5int_asn1type_##DESCNAME = {     \
-        atype_uint, sizeof(CTYPENAME), &aux_info_##DESCNAME     \
+        atype_uint, sizeof(CTYPENAME), NULL                     \
     }
 /* Pointers to other types, to be encoded as those other types.  */
 #ifdef POINTERS_ARE_ALL_THE_SAME

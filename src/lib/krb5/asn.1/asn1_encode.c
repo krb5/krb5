@@ -231,6 +231,30 @@ encode_nullterm_sequence_of(asn1buf *buf, const void *val,
     return encode_sequence_of(buf, length, val, type, retlen);
 }
 
+static asn1_intmax
+load_int(const void *val, size_t size)
+{
+    switch (size) {
+    case 1: return *(signed char *)val;
+    case 2: return *(krb5_int16 *)val;
+    case 4: return *(krb5_int32 *)val;
+    case 8: return *(INT64_TYPE *)val;
+    default: abort();
+    }
+}
+
+static asn1_uintmax
+load_uint(const void *val, size_t size)
+{
+    switch (size) {
+    case 1: return *(unsigned char *)val;
+    case 2: return *(krb5_ui_2 *)val;
+    case 4: return *(krb5_ui_4 *)val;
+    case 8: return *(UINT64_TYPE *)val;
+    default: abort();
+    }
+}
+
 static asn1_error_code
 just_encode_sequence(asn1buf *buf, const void *val,
                      const struct seq_info *seq,
@@ -314,9 +338,7 @@ krb5int_asn1_encode_type(asn1buf *buf, const void *val,
         break;
     }
     case atype_int: {
-        const struct int_info *tinfo = a->tinfo;
-        assert(tinfo->loadint != NULL);
-        retval = asn1_encode_integer(buf, tinfo->loadint(val),
+        retval = asn1_encode_integer(buf, load_int(val, a->size),
                                      &rettag->length);
         if (retval)
             return retval;
@@ -326,9 +348,7 @@ krb5int_asn1_encode_type(asn1buf *buf, const void *val,
         break;
     }
     case atype_uint: {
-        const struct uint_info *tinfo = a->tinfo;
-        assert(tinfo->loaduint != NULL);
-        retval = asn1_encode_unsigned_integer(buf, tinfo->loaduint(val),
+        retval = asn1_encode_unsigned_integer(buf, load_uint(val, a->size),
                                               &rettag->length);
         if (retval)
             return retval;
@@ -385,8 +405,7 @@ get_field_len(const void *val, const struct field_info *field,
     assert(sizeof(int) <= sizeof(asn1_intmax));
     assert(sizeof(unsigned int) <= sizeof(asn1_uintmax));
     if (field->lentype->type == atype_int) {
-        const struct int_info *tinfo = field->lentype->tinfo;
-        asn1_intmax xlen = tinfo->loadint(lenptr);
+        asn1_intmax xlen = load_int(lenptr, field->lentype->size);
         if (xlen < 0)
             return EINVAL;
         if ((unsigned int)xlen != (asn1_uintmax)xlen)
@@ -395,8 +414,7 @@ get_field_len(const void *val, const struct field_info *field,
             return EINVAL;
         *retlen = (unsigned int)xlen;
     } else {
-        const struct uint_info *tinfo = field->lentype->tinfo;
-        asn1_uintmax xlen = tinfo->loaduint(lenptr);
+        asn1_uintmax xlen = load_uint(lenptr, field->lentype->size);
         if ((unsigned int)xlen != xlen)
             return EINVAL;
         if (xlen > UINT_MAX)
