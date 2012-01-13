@@ -31,7 +31,7 @@ install-fileman::
 	$(INSTALL_DATA) $(srcdir)/krb5.conf.5 ${DESTDIR}$(FILE_MANDIR)/krb5.conf.5
 
 install-adminman::
-	$(INSTALL_DATA) $(srcdir)/kadmin.local.8 ${DESTDIR}$(CLIENT_MANDIR)/kadmin.local.8
+	$(INSTALL_DATA) $(srcdir)/kadmin.local.8 ${DESTDIR}$(ADMIN_MANDIR)/kadmin.local.8
 	$(INSTALL_DATA) $(srcdir)/kdb5_ldap_util.8 ${DESTDIR}$(ADMIN_MANDIR)/kdb5_ldap_util.8
 	$(INSTALL_DATA) $(srcdir)/kdb5_util.8 ${DESTDIR}$(ADMIN_MANDIR)/kdb5_util.8
 	$(INSTALL_DATA) $(srcdir)/kprop.8 ${DESTDIR}$(ADMIN_MANDIR)/kprop.8
