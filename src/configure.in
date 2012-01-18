@@ -202,7 +202,7 @@ AC_MSG_RESULT("pkinit will use \'$withval\'")
 ], withval=$PKINIT_CRYPTO_IMPL)
 case "$withval" in
 builtin|openssl)
-  AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
+  AC_CHECK_LIB(crypto, PKCS7_get_signer_info, PKINIT_CRYPTO_IMPL_LIBS=-lcrypto)
   PKINIT_CRYPTO_IMPL=openssl
   ;;
 nss)
