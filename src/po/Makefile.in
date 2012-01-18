@@ -45,7 +45,7 @@ install::
 	  lang=`basename $$c .mo`; \
 	  $(top_srcdir)/config/mkinstalldirs \
 	    $(DESTDIR)$(KRB5_LOCALEDIR)/$$lang/LC_MESSAGES; \
-	  install -c $$c \
+	  $(INSTALL_DATA) $$c \
 	    $(DESTDIR)$(KRB5_LOCALEDIR)/$$lang/LC_MESSAGES/$(DOMAIN).mo; \
 	done
 
