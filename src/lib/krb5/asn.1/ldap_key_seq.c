@@ -51,59 +51,66 @@
  * Imports from asn1_k_encode.c.
  * XXX Must be manually synchronized for now.
  */
-IMPORT_TYPE(octetstring, unsigned char *);
 IMPORT_TYPE(int32, krb5_int32);
 
 DEFINTTYPE(int16, krb5_int16);
-DEFINTTYPE(ui_2, krb5_ui_2);
 
-static const struct field_info krbsalt_fields[] = {
-    FIELDOF_NORM(krb5_key_data, int16, key_data_type[1], 0, 0),
-    FIELDOF_OPTSTRINGL(krb5_key_data, octetstring, key_data_contents[1],
-                       ui_2, key_data_length[1], 1, 0, 1),
+DEFCOUNTEDSTRINGTYPE(ui2_octetstring, unsigned char *, krb5_ui_2,
+                     asn1_encode_bytestring, ASN1_OCTETSTRING);
+
+DEFFIELD(krbsalt_0, krb5_key_data, key_data_type[1], 0, int16);
+DEFCNFIELD(krbsalt_1, krb5_key_data, key_data_contents[1], key_data_length[1],
+           1, ui2_octetstring);
+static const struct atype_info *krbsalt_fields[] = {
+    &k5_atype_krbsalt_0, &k5_atype_krbsalt_1
 };
 static unsigned int
 optional_krbsalt (const void *p)
 {
     const krb5_key_data *k = p;
-    unsigned int optional = 0;
-
-    if (k->key_data_length[1] > 0)
-        optional |= (1u << 1);
-
-    return optional;
+    unsigned int not_present = 0;
+    if (k->key_data_length[1] == 0)
+        not_present |= (1u << 1);
+    return not_present;
 }
 DEFSEQTYPE(krbsalt, krb5_key_data, krbsalt_fields, optional_krbsalt);
-static const struct field_info encryptionkey_fields[] = {
-    FIELDOF_NORM(krb5_key_data, int16, key_data_type[0], 0, 0),
-    FIELDOF_STRINGL(krb5_key_data, octetstring, key_data_contents[0],
-                    ui_2, key_data_length[0], 1, 0),
-};
-DEFSEQTYPE(encryptionkey, krb5_key_data, encryptionkey_fields, 0);
 
-static const struct field_info key_data_fields[] = {
-    FIELDOF_ENCODEAS(krb5_key_data, krbsalt, 0, 0),
-    FIELDOF_ENCODEAS(krb5_key_data, encryptionkey, 1, 0),
+DEFFIELD(encryptionkey_0, krb5_key_data, key_data_type[0], 0, int16);
+DEFCNFIELD(encryptionkey_1, krb5_key_data, key_data_contents[0],
+           key_data_length[0], 1, ui2_octetstring);
+static const struct atype_info *encryptionkey_fields[] = {
+    &k5_atype_encryptionkey_0, &k5_atype_encryptionkey_1
+};
+DEFSEQTYPE(encryptionkey, krb5_key_data, encryptionkey_fields, NULL);
+
+DEFCTAGGEDTYPE(key_data_0, 0, krbsalt);
+DEFCTAGGEDTYPE(key_data_1, 1, encryptionkey);
 #if 0 /* We don't support this field currently.  */
-    FIELDOF_blah(krb5_key_data, s2kparams, ...),
+DEFCTAGGEDTYPE(key_data_2, 2, s2kparams),
 #endif
+static const struct atype_info *key_data_fields[] = {
+    &k5_atype_key_data_0, &k5_atype_key_data_1
 };
 DEFSEQTYPE(key_data, krb5_key_data, key_data_fields, 0);
 DEFPTRTYPE(ptr_key_data, key_data);
+DEFCOUNTEDSEQOFTYPE(cseqof_key_data, krb5_int16, ptr_key_data);
 
-DEFFIELDTYPE(key_data_kvno, krb5_key_data,
-             FIELDOF_NORM(krb5_key_data, int16, key_data_kvno, -1, 0));
+DEFOFFSETTYPE(key_data_kvno, krb5_key_data, key_data_kvno, int16);
 DEFPTRTYPE(ptr_key_data_kvno, key_data_kvno);
 
-static const struct field_info ldap_key_seq_fields[] = {
-    FIELD_INT_IMM(1, 0, 0),
-    FIELD_INT_IMM(1, 1, 0),
-    FIELDOF_NORM(ldap_seqof_key_data, ptr_key_data_kvno, key_data, 2, 0),
-    FIELDOF_NORM(ldap_seqof_key_data, int32, mkvno, 3, 0), /* mkvno */
-    FIELDOF_SEQOF_LEN(ldap_seqof_key_data, ptr_key_data, key_data, n_key_data,
-                      int16, 4, 0),
+DEFINT_IMMEDIATE(one, 1);
+DEFCTAGGEDTYPE(ldap_key_seq_0, 0, one);
+DEFCTAGGEDTYPE(ldap_key_seq_1, 1, one);
+DEFFIELD(ldap_key_seq_2, ldap_seqof_key_data, key_data, 2, ptr_key_data_kvno);
+DEFFIELD(ldap_key_seq_3, ldap_seqof_key_data, mkvno, 3, int32);
+DEFCNFIELD(ldap_key_seq_4, ldap_seqof_key_data, key_data, n_key_data, 4,
+           cseqof_key_data);
+static const struct atype_info *ldap_key_seq_fields[] = {
+    &k5_atype_ldap_key_seq_0, &k5_atype_ldap_key_seq_1,
+    &k5_atype_ldap_key_seq_2, &k5_atype_ldap_key_seq_3,
+    &k5_atype_ldap_key_seq_4
 };
-DEFSEQTYPE(ldap_key_seq, ldap_seqof_key_data, ldap_key_seq_fields, 0);
+DEFSEQTYPE(ldap_key_seq, ldap_seqof_key_data, ldap_key_seq_fields, NULL);
 
 /* Export a function to do the whole encoding.  */
 MAKE_FULL_ENCODER(krb5int_ldap_encode_sequence_of_keys, ldap_key_seq);
