@@ -340,7 +340,7 @@ struct choice_info {
         atype_uint, sizeof(CTYPENAME), NULL                     \
     }
 #define DEFINT_IMMEDIATE(DESCNAME, VAL)                 \
-    typedef void aux_typedefname_##DESCNAME;            \
+    typedef int aux_typedefname_##DESCNAME;             \
     static const int aux_int_##DESCNAME = VAL;          \
     const struct atype_info k5_atype_##DESCNAME = {     \
         atype_int_immediate, 0, &aux_int_##DESCNAME     \
