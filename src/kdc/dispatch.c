@@ -51,7 +51,7 @@ finish_dispatch(struct dispatch_state *state, krb5_error_code code,
     void *oldarg = state->arg;
 
     if (state->is_tcp == 0 && response &&
-        response->length > max_dgram_reply_size) {
+        response->length > (unsigned int)max_dgram_reply_size) {
         krb5_free_data(kdc_context, response);
         response = NULL;
         code = make_too_big_error(&response);
@@ -114,22 +114,19 @@ dispatch(void *cb, struct sockaddr *local_saddr,
         const char *name = 0;
         char buf[46];
 
-        if (!response || is_tcp != 0 ||
-            response->length <= max_dgram_reply_size) {
-            name = inet_ntop (ADDRTYPE2FAMILY (from->address->addrtype),
-                              from->address->contents, buf, sizeof (buf));
-            if (name == 0)
-                name = "[unknown address type]";
-            if (response)
-                krb5_klog_syslog(LOG_INFO,
-                                 "DISPATCH: repeated (retransmitted?) request "
-                                 "from %s, resending previous response", name);
-            else
-                krb5_klog_syslog(LOG_INFO,
-                                 "DISPATCH: repeated (retransmitted?) request "
-                                 "from %s during request processing, dropping "
-                                 "repeated request", name);
-        }
+        name = inet_ntop (ADDRTYPE2FAMILY (from->address->addrtype),
+                          from->address->contents, buf, sizeof (buf));
+        if (name == 0)
+            name = "[unknown address type]";
+        if (response)
+            krb5_klog_syslog(LOG_INFO,
+                             "DISPATCH: repeated (retransmitted?) request "
+                             "from %s, resending previous response", name);
+        else
+            krb5_klog_syslog(LOG_INFO,
+                             "DISPATCH: repeated (retransmitted?) request "
+                             "from %s during request processing, dropping "
+                             "repeated request", name);
 
         finish_dispatch(state, response ? 0 : KRB5KDC_ERR_DISCARD, response);
         return;
