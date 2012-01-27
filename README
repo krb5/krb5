@@ -83,8 +83,8 @@ and
 
 Code quality:
 
-* Fix MITKRB5-SA-2011-006 and MITKRB5SA-2011-007 KDC denial of service
-  vulnerabilities [CVE-2011-1527 CVE-2011-1528 CVE-2011-1529
+* Fix MITKRB5-SA-2011-006 and MITKRB5-SA-2011-007 KDC denial of
+  service vulnerabilities [CVE-2011-1527 CVE-2011-1528 CVE-2011-1529
   CVE-2011-1530].
 
 * Update the Fortuna implementation to more accurately implement the
@@ -272,6 +272,8 @@ krb5-1.10 changes by ticket ID
 7060    Convert securid module edata method
 7065    delete duplicate NOTICE file
 7067    documentation license to CC-BY-SA 3.0 Unported
+7077    LIBS should not include PKINIT_CRYPTO_IMPL_LIBS
+7078    Use INSTALL_DATA to install message catalogues
 
 Acknowledgements
 ----------------
