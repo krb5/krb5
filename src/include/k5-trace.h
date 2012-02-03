@@ -371,5 +371,8 @@
     TRACE(c, (c, "Requesting TGT {princ} using TGT {princ}", next, cur))
 #define TRACE_TKT_CREDS_WRONG_ENCTYPE(c)                                \
     TRACE(c, (c, "Retrying TGS request with desired service ticket enctypes"))
+#define TRACE_PROFILE_ERR(c,subsection, section, retval)                                \
+    TRACE(c, (c, "Bad value of {str} from [{str}] in conf file: {kerr}", \
+               subsection, section, retval))
 
 #endif /* K5_TRACE_H */
