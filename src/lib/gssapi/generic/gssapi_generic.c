@@ -224,147 +224,174 @@ static struct mech_attr_info_desc {
     {
         oids+8,
         STRING_BUFFER("GSS_C_MA_MECH_CONCRETE"),
+        STRING_BUFFER("concrete-mech"),
         STRING_BUFFER("Mechanism is neither a pseudo-mechanism nor a "
                       "composite mechanism."),
     },
     {
         oids+9,
         STRING_BUFFER("GSS_C_MA_MECH_PSEUDO"),
-        STRING_BUFFER("Mechanism is a pseudo-mechanism"),
+        STRING_BUFFER("pseudo-mech"),
+        STRING_BUFFER("Mechanism is a pseudo-mechanism."),
     },
     {
         oids+10,
         STRING_BUFFER("GSS_C_MA_MECH_COMPOSITE"),
+        STRING_BUFFER("composite-mech"),
         STRING_BUFFER("Mechanism is a composite of other mechanisms."),
     },
     {
         oids+11,
         STRING_BUFFER("GSS_C_MA_MECH_NEGO"),
+        STRING_BUFFER("mech-negotiation-mech"),
         STRING_BUFFER("Mechanism negotiates other mechanisms."),
     },
     {
         oids+12,
         STRING_BUFFER("GSS_C_MA_MECH_GLUE"),
+        STRING_BUFFER("mech-glue"),
         STRING_BUFFER("OID is not a mechanism but the GSS-API itself."),
     },
     {
         oids+13,
         STRING_BUFFER("GSS_C_MA_NOT_MECH"),
+        STRING_BUFFER("not-mech"),
         STRING_BUFFER("Known OID but not a mechanism OID."),
     },
     {
         oids+14,
         STRING_BUFFER("GSS_C_MA_DEPRECATED"),
+        STRING_BUFFER("mech-deprecated"),
         STRING_BUFFER("Mechanism is deprecated."),
     },
     {
         oids+15,
         STRING_BUFFER("GSS_C_MA_NOT_DFLT_MECH"),
+        STRING_BUFFER("mech-not-default"),
         STRING_BUFFER("Mechanism must not be used as a default mechanism."),
     },
     {
         oids+16,
         STRING_BUFFER("GSS_C_MA_ITOK_FRAMED"),
+        STRING_BUFFER("initial-is-framed"),
         STRING_BUFFER("Mechanism's initial contexts are properly framed."),
     },
     {
         oids+17,
         STRING_BUFFER("GSS_C_MA_AUTH_INIT"),
+        STRING_BUFFER("auth-init-princ"),
         STRING_BUFFER("Mechanism supports authentication of initiator to "
                       "acceptor."),
     },
     {
         oids+18,
         STRING_BUFFER("GSS_C_MA_AUTH_TARG"),
+        STRING_BUFFER("auth-targ-princ"),
         STRING_BUFFER("Mechanism supports authentication of acceptor to "
                       "initiator."),
     },
     {
         oids+19,
         STRING_BUFFER("GSS_C_MA_AUTH_INIT_INIT"),
+        STRING_BUFFER("auth-init-princ-initial"),
         STRING_BUFFER("Mechanism supports authentication of initiator using "
                       "initial credentials."),
     },
     {
         oids+20,
         STRING_BUFFER("GSS_C_MA_AUTH_TARG_INIT"),
+        STRING_BUFFER("auth-target-princ-initial"),
         STRING_BUFFER("Mechanism supports authentication of acceptor using "
                       "initial credentials."),
     },
     {
         oids+21,
         STRING_BUFFER("GSS_C_MA_AUTH_INIT_ANON"),
+        STRING_BUFFER("auth-init-princ-anon"),
         STRING_BUFFER("Mechanism supports GSS_C_NT_ANONYMOUS as an initiator "
                       "name."),
     },
     {
         oids+22,
         STRING_BUFFER("GSS_C_MA_AUTH_TARG_ANON"),
+        STRING_BUFFER("auth-targ-princ-anon"),
         STRING_BUFFER("Mechanism supports GSS_C_NT_ANONYMOUS as an acceptor "
                       "name."),
     },
     {
         oids+23,
         STRING_BUFFER("GSS_C_MA_DELEG_CRED"),
+        STRING_BUFFER("deleg-cred"),
         STRING_BUFFER("Mechanism supports credential delegation."),
     },
     {
         oids+24,
         STRING_BUFFER("GSS_C_MA_INTEG_PROT"),
+        STRING_BUFFER("integ-prot"),
         STRING_BUFFER("Mechanism supports per-message integrity protection."),
     },
     {
         oids+25,
         STRING_BUFFER("GSS_C_MA_CONF_PROT"),
+        STRING_BUFFER("conf-prot"),
         STRING_BUFFER("Mechanism supports per-message confidentiality "
                       "protection."),
     },
     {
         oids+26,
         STRING_BUFFER("GSS_C_MA_MIC"),
+        STRING_BUFFER("mic"),
         STRING_BUFFER("Mechanism supports Message Integrity Code (MIC) "
                       "tokens."),
     },
     {
         oids+27,
         STRING_BUFFER("GSS_C_MA_WRAP"),
+        STRING_BUFFER("wrap"),
         STRING_BUFFER("Mechanism supports wrap tokens."),
     },
     {
         oids+28,
         STRING_BUFFER("GSS_C_MA_PROT_READY"),
+        STRING_BUFFER("prot-ready"),
         STRING_BUFFER("Mechanism supports per-message proteciton prior to "
                       "full context establishment."),
     },
     {
         oids+29,
         STRING_BUFFER("GSS_C_MA_REPLAY_DET"),
+        STRING_BUFFER("replay-detection"),
         STRING_BUFFER("Mechanism supports replay detection."),
     },
     {
         oids+30,
         STRING_BUFFER("GSS_C_MA_OOS_DET"),
+        STRING_BUFFER("oos-detection"),
         STRING_BUFFER("Mechanism supports out-of-sequence detection."),
     },
     {
         oids+31,
         STRING_BUFFER("GSS_C_MA_CBINDINGS"),
+        STRING_BUFFER("channel-bindings"),
         STRING_BUFFER("Mechanism supports channel bindings."),
     },
     {
         oids+32,
         STRING_BUFFER("GSS_C_MA_PFS"),
+        STRING_BUFFER("pfs"),
         STRING_BUFFER("Mechanism supports Perfect Forward Security."),
     },
     {
         oids+33,
         STRING_BUFFER("GSS_C_MA_COMPRESS"),
+        STRING_BUFFER("compress"),
         STRING_BUFFER("Mechanism supports compression of data inputs to "
                       "gss_wrap()."),
     },
     {
         oids+34,
         STRING_BUFFER("GSS_C_MA_CTX_TRANS"),
+        STRING_BUFFER("context-transfer"),
         STRING_BUFFER("Mechanism supports security context export/import."),
     },
 };
@@ -403,6 +430,12 @@ generic_gss_display_mech_attr(
             if (short_desc != GSS_C_NO_BUFFER &&
                 !g_make_string_buffer((char *)mai->short_desc.value,
                                       short_desc)) {
+                *minor_status = ENOMEM;
+                return GSS_S_FAILURE;
+            }
+            if (long_desc != GSS_C_NO_BUFFER &&
+                !g_make_string_buffer((char *)mai->long_desc.value,
+                                      long_desc)) {
                 *minor_status = ENOMEM;
                 return GSS_S_FAILURE;
             }
