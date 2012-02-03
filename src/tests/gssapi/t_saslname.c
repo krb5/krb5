@@ -57,6 +57,46 @@ displayStatus(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
     displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
 }
 
+static OM_uint32
+dumpKnownMechAttrs(OM_uint32 *minor, gss_OID mech)
+{
+    OM_uint32 major, tmpMinor;
+    gss_OID_set mech_attrs = GSS_C_NO_OID_SET;
+    gss_OID_set known_attrs = GSS_C_NO_OID_SET;
+    size_t i;
+
+    major = gss_inquire_attrs_for_mech(minor, mech, &mech_attrs, &known_attrs);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_inquire_attrs_for_mech", major, *minor);
+        return major;
+    }
+
+    printf("Known attributes\n");
+    printf("----------------\n");
+    for (i = 0; i < known_attrs->count; i++) {
+        gss_buffer_desc name = GSS_C_EMPTY_BUFFER;
+        gss_buffer_desc short_desc = GSS_C_EMPTY_BUFFER;
+        gss_buffer_desc long_desc = GSS_C_EMPTY_BUFFER;
+
+        major = gss_display_mech_attr(minor, &known_attrs->elements[i],
+                                      &name, &short_desc, &long_desc);
+        if (GSS_ERROR(major)) {
+            displayStatus("gss_display_mech_attr", major, *minor);
+            continue;
+        }
+        printf("%.*s (%.*s): %.*s\n", (int)short_desc.length,
+               (char *)short_desc.value, (int)name.length, (char *)name.value,
+               (int)long_desc.length, (char *)long_desc.value);
+        gss_release_buffer(minor, &name);
+        gss_release_buffer(minor, &short_desc);
+        gss_release_buffer(minor, &long_desc);
+    }
+    printf("\n");
+    gss_release_oid_set(&tmpMinor, &mech_attrs);
+    gss_release_oid_set(&tmpMinor, &known_attrs);
+    return GSS_S_COMPLETE;
+}
+
 static
 OM_uint32 dumpMechAttrs(OM_uint32 *minor, gss_OID mech)
 {
@@ -91,26 +131,6 @@ OM_uint32 dumpMechAttrs(OM_uint32 *minor, gss_OID mech)
     }
     printf("\n");
 
-    printf("Known attrs: ");
-
-    for (i = 0; i < known_attrs->count; i++) {
-        gss_buffer_desc name = GSS_C_EMPTY_BUFFER;
-        gss_buffer_desc short_desc = GSS_C_EMPTY_BUFFER;
-        gss_buffer_desc long_desc = GSS_C_EMPTY_BUFFER;
-
-        major = gss_display_mech_attr(minor, &known_attrs->elements[i],
-                                      &name, &short_desc, &long_desc);
-        if (GSS_ERROR(major)) {
-            displayStatus("gss_display_mech_attr", major, *minor);
-            continue;
-        }
-        printf("%.*s ", (int)name.length, (char *)name.value);
-        gss_release_buffer(minor, &name);
-        gss_release_buffer(minor, &short_desc);
-        gss_release_buffer(minor, &long_desc);
-    }
-    printf("\n");
-
     gss_release_oid_set(&tmpMinor, &mech_attrs);
     gss_release_oid_set(&tmpMinor, &known_attrs);
 
@@ -129,6 +149,8 @@ int main(int argc, char *argv[])
         return major;
     }
 
+    if (mechs->count > 0)
+        dumpKnownMechAttrs(&minor, mechs->elements);
     for (i = 0; i < mechs->count; i++) {
         gss_buffer_desc oidstr = GSS_C_EMPTY_BUFFER;
         gss_buffer_desc sasl_mech_name = GSS_C_EMPTY_BUFFER;
