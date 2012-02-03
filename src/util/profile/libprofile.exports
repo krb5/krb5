@@ -7,11 +7,8 @@ profile_flush
 profile_free_list
 profile_get_boolean
 profile_get_integer
-profile_get_string
-profile_get_boolean_nodef
-profile_get_integer_nodef
-profile_get_string_nodef
 profile_get_relation_names
+profile_get_string
 profile_get_subsection_names
 profile_get_values
 profile_init

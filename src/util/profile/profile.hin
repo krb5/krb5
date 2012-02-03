@@ -91,15 +91,6 @@ long KRB5_CALLCONV profile_get_boolean
 			const char *subsubname, int def_val,
 			int *ret_default);
 
-long KRB5_CALLCONV profile_get_string_nodef
-	(profile_t profile, const char **names, char **ret_string);
-
-long KRB5_CALLCONV profile_get_integer_nodef
-	(profile_t profile, const char **names, int *ret_default);
-
-long KRB5_CALLCONV profile_get_boolean_nodef
-	(profile_t profile, const char **names, int *ret_default);
-
 long KRB5_CALLCONV profile_get_relation_names
 	(profile_t profile, const char **names, char ***ret_names);
 

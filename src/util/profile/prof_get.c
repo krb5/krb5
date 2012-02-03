@@ -280,23 +280,6 @@ profile_get_string(profile_t profile, const char *name, const char *subname,
     return 0;
 }
 
-errcode_t KRB5_CALLCONV
-profile_get_string_nodef(profile_t profile, const char **names, char **ret_string)
-{
-    char            *value = NULL;
-    errcode_t       retval = 0;
-
-    if (profile == 0)
-        return 0;
-
-    retval = profile_get_value(profile, names, &value);
-    if (retval == 0) {
-        *ret_string = value;
-        return 0;
-    } else if (retval != PROF_NO_SECTION && retval != PROF_NO_RELATION)
-        return retval;
-}
-
 static errcode_t
 parse_int(const char *value, int *ret_int)
 {
@@ -351,30 +334,11 @@ profile_get_integer(profile_t profile, const char *name, const char *subname,
     return retval;
 }
 
-errcode_t KRB5_CALLCONV
-profile_get_integer_nodef(profile_t profile, const char **names, int *ret_int)
-{
-    char            *value = NULL;
-    errcode_t       retval = 0;
-
-    if (profile == 0)
-        return 0;
-
-    retval = profile_get_value(profile, names, &value);
-    if (retval == PROF_NO_SECTION || retval == PROF_NO_RELATION) {
-        return retval;
-    } else if (retval)
-        return retval;
-
-    retval = parse_int(value, ret_int);
-    free(value);
-    return retval;
-}
-
 static const char *const conf_yes[] = {
     "y", "yes", "true", "t", "1", "on",
     0,
 };
+
 static const char *const conf_no[] = {
     "n", "no", "false", "nil", "0", "off",
     0,
@@ -426,27 +390,6 @@ profile_get_boolean(profile_t profile, const char *name, const char *subname,
     if (retval == PROF_NO_SECTION || retval == PROF_NO_RELATION) {
         *ret_boolean = def_val;
         return 0;
-    } else if (retval)
-        return retval;
-
-    retval = profile_parse_boolean(value, ret_boolean);
-    free(value);
-    return retval;
-}
-
-errcode_t KRB5_CALLCONV
-profile_get_boolean_nodef(profile_t profile, const char **names,
-                          int *ret_boolean)
-{
-    char            *value = NULL;
-    errcode_t       retval = 0;
-
-    if (profile == 0)
-        return 0;
-
-    retval = profile_get_value(profile, names, &value);
-    if (retval == PROF_NO_SECTION || retval == PROF_NO_RELATION) {
-        return retval;
     } else if (retval)
         return retval;
 
