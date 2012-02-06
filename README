@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2011 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2012 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -69,6 +69,31 @@ krb5-1.7 release contains measures to encourage sites to migrate away
 from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
+
+Major changes in 1.9.3
+----------------------
+
+This is primarily a bugfix release.
+
+* Fix MITKRB5-SA-2011-007 KDC null pointer dereference in TGS handling
+  [CVE-2011-1530].
+
+* Fix an interaction in iprop that could cause spurious excess kadmind
+  processes when a kprop child fails.
+
+krb5-1.9.3 changes by ticket ID
+-------------------------------
+
+6993    Fix format string for TRACE_INIT_CREDS_SERVICE
+7007    Fix intermediate key length in hmac-md5 checksum
+7008    Exit on error in kadmind kprop child
+7009    Fix month/year units in getdate
+7016    Handle TGS referrals to the same realm
+7040    Fix failure interval of 0 in LDAP lockout code
+7043    SA-2011-007 KDC null pointer deref in TGS handling [CVE-2011-1530]
+7052    Fix subkey memory leak in krb5_get_credentials
+7068    Fix implicit declaration in ksu for some builds
+7069    krb5_server_decrypt_ticket_keytab wrongly succeeds
 
 Major changes in 1.9.2
 ----------------------
@@ -400,6 +425,7 @@ reports, suggestions, and valuable resources:
     Michael B Allen
     Heinz-Ado Arnolds
     Derek Atkins
+    Mark Bannister
     David Bantz
     Alex Baule
     Arlene Berry
@@ -439,7 +465,9 @@ reports, suggestions, and valuable resources:
     Philip Guenther
     Dominic Hargreaves
     Jakob Haufe
+    Paul B. Henson
     Jeff Hodges
+    Christopher Hogan
     Love Hörnquist Åstrand
     Ken Hornstein
     Henry B. Hotz
@@ -459,6 +487,7 @@ reports, suggestions, and valuable resources:
     Nathaniel McCallum
     Greg McClement
     Cameron Meadors
+    Alexey Melnikov
     Franklyn Mendez
     Markus Moeller
     Kyle Moffett
@@ -471,6 +500,7 @@ reports, suggestions, and valuable resources:
     Andrej Ota
     Dmitri Pal
     Javier Palacios
+    Tom Parker
     Ezra Peisach
     W. Michael Petullo
     Mark Phalan
@@ -490,6 +520,8 @@ reports, suggestions, and valuable resources:
     Jorgen Wahlsten
     Max (Weijun) Wang
     John Washington
+    Kevin Wasserman
+    Margaret Wasserman
     Marcus Watts
     Simon Wilkinson
     Nicolas Williams
