@@ -387,7 +387,7 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
             *complete = kcomplete;
 
         if (display_value != NULL) {
-            if (code != 0)
+            if (code == 0)
                 code = data_to_gss(&kdisplay_value, display_value);
             else
                 free(kdisplay_value.data);
