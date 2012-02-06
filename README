@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2011 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2012 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -81,6 +81,20 @@ additional measures include:
 * new API to allow applications (e.g. AFS) to explicitly reenable weak
   crypto
 * easier kadmin history key changes
+
+Major changes in 1.8.6
+----------------------
+
+This is primarily a bugfix release.
+
+krb5-1.8.6 changes by ticket ID
+-------------------------------
+
+7010    Fix intermediate key length in hmac-md5 checksum
+7011    Exit on error in kadmind kprop child
+7012    Fix month/year units in getdate
+7041    Fix failure interval of 0 in LDAP lockout code
+7070    krb5_server_decrypt_ticket_keytab wrongly succeeds
 
 Major changes in 1.8.5
 ----------------------
@@ -498,6 +512,7 @@ reports, suggestions, and valuable resources:
     Michael B Allen
     Heinz-Ado Arnolds
     Derek Atkins
+    Mark Bannister
     David Bantz
     Alex Baule
     Arlene Berry
@@ -537,7 +552,9 @@ reports, suggestions, and valuable resources:
     Philip Guenther
     Dominic Hargreaves
     Jakob Haufe
+    Paul B. Henson
     Jeff Hodges
+    Christopher Hogan
     Love Hörnquist Åstrand
     Ken Hornstein
     Henry B. Hotz
@@ -557,6 +574,7 @@ reports, suggestions, and valuable resources:
     Nathaniel McCallum
     Greg McClement
     Cameron Meadors
+    Alexey Melnikov
     Franklyn Mendez
     Markus Moeller
     Kyle Moffett
@@ -569,6 +587,7 @@ reports, suggestions, and valuable resources:
     Andrej Ota
     Dmitri Pal
     Javier Palacios
+    Tom Parker
     Ezra Peisach
     W. Michael Petullo
     Mark Phalan
@@ -588,6 +607,8 @@ reports, suggestions, and valuable resources:
     Jorgen Wahlsten
     Max (Weijun) Wang
     John Washington
+    Kevin Wasserman
+    Margaret Wasserman
     Marcus Watts
     Simon Wilkinson
     Nicolas Williams
