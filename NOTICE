@@ -2,23 +2,42 @@ Copyright (C) 1985-2012 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
-     Export of software employing encryption from the United States of
-     America may require a specific license from the United States
-     Government.  It is the responsibility of any person or organization
-     contemplating export to obtain such a license before exporting.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
 
-WITHIN THAT CONSTRAINT, permission to use, copy, modify, and distribute
-this software for any purpose and without fee is hereby granted,
-provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in
-supporting documentation, and that the name of M.I.T. not be used in
-advertising or publicity pertaining to distribution of the software
-without specific, written prior permission.  Furthermore if you modify
-this software you must label your software as modified software and not
-distribute it in such a fashion that it might be confused with the
-original MIT software.  M.I.T. makes no representations about the
-suitability of this software for any purpose.  It is provided "as is"
-without express or implied warranty.
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the
+     distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Downloading of this software may constitute an export of cryptographic
+software from the United States of America that is subject to the
+United States Export Administration Regulations (EAR), 15 CFR 730-774.
+Additional laws or regulations may apply.  It is the responsibility of
+the person or entity contemplating export to comply with all applicable
+export laws and regulations, including obtaining any required license
+from the U.S. government.
+
+The U.S. government prohibits export of encryption source code to
+certain countries and individuals, including, but not limited to, the
+countries of Cuba, Iran, North Korea, Sudan, Syria, and residents and
+nationals of those countries.
 
 Documentation components of this software distribution are licensed
 under a Creative Commons Attribution-ShareAlike 3.0 Unported License.
