@@ -176,7 +176,7 @@ int trval2(fp, enc, len, lev, rlen)
     int lev;
     int *rlen;
 {
-    int l, eid, elen, xlen, r, rlen2;
+    int l, eid, elen, xlen, r, rlen2 = 0;
     int rlen_ext = 0;
 
     r = OK;
