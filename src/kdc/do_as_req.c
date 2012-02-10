@@ -102,6 +102,7 @@ struct as_req_state {
     loop_respond_fn respond;
     void *arg;
 
+    krb5_principal_data client_princ;
     krb5_enc_tkt_part enc_tkt_reply;
     krb5_enc_kdc_rep_part reply_encpart;
     krb5_ticket ticket_reply;
@@ -458,7 +459,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     krb5_error_code errcode;
     krb5_timestamp rtime;
     unsigned int s_flags = 0;
-    krb5_principal_data client_princ;
     krb5_data encoded_req_body;
     krb5_enctype useenctype;
     struct as_req_state *state;
@@ -699,13 +699,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     state->enc_tkt_reply.session = &state->session_key;
     if (isflagset(state->c_flags, KRB5_KDB_FLAG_CANONICALIZE)) {
-        client_princ = *(state->client->princ);
+        state->client_princ = *(state->client->princ);
     } else {
-        client_princ = *(state->request->client);
+        state->client_princ = *(state->request->client);
         /* The realm is always canonicalized */
-        client_princ.realm = state->client->princ->realm;
+        state->client_princ.realm = state->client->princ->realm;
     }
-    state->enc_tkt_reply.client = &client_princ;
+    state->enc_tkt_reply.client = &state->client_princ;
     state->enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     state->enc_tkt_reply.transited.tr_contents = empty_string;
 
