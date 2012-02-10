@@ -224,16 +224,6 @@ krb5_gss_inquire_cred_by_mech(minor_status, cred_handle,
     OM_uint32           lifetime;
     OM_uint32           mstat;
 
-    /*
-     * We only know how to handle our own creds.
-     */
-    if ((mech_type != GSS_C_NULL_OID) &&
-        !g_OID_equal(gss_mech_krb5_old, mech_type) &&
-        !g_OID_equal(gss_mech_krb5, mech_type)) {
-        *minor_status = 0;
-        return(GSS_S_NO_CRED);
-    }
-
     cred = (krb5_gss_cred_id_t) cred_handle;
     mstat = krb5_gss_inquire_cred(minor_status,
                                   cred_handle,
