@@ -24,94 +24,101 @@
  * or implied warranty.
  */
 
-/* ASN.1 primitive encoders */
-
 #include "asn1_encode.h"
 
+/**** Functions for encoding primitive types ****/
+
 asn1_error_code
-asn1_encode_boolean(asn1buf *buf, asn1_intmax val, size_t *retlen)
+k5_asn1_encode_bool(asn1buf *buf, asn1_intmax val, size_t *len_out)
 {
     asn1_octet bval = val ? 0xFF : 0x00;
 
-    *retlen = 1;
+    *len_out = 1;
     return asn1buf_insert_octet(buf, bval);
 }
 
 asn1_error_code
-asn1_encode_integer(asn1buf *buf, asn1_intmax val, size_t *retlen)
+k5_asn1_encode_int(asn1buf *buf, asn1_intmax val, size_t *len_out)
 {
-    asn1_error_code retval;
-    size_t length = 0;
+    asn1_error_code ret;
+    size_t len = 0;
     long valcopy;
     int digit;
 
     valcopy = val;
     do {
-        digit = (int) (valcopy&0xFF);
-        retval = asn1buf_insert_octet(buf,(asn1_octet) digit);
-        if (retval) return retval;
-        length++;
+        digit = valcopy & 0xFF;
+        ret = asn1buf_insert_octet(buf, digit);
+        if (ret)
+            return ret;
+        len++;
         valcopy = valcopy >> 8;
     } while (valcopy != 0 && valcopy != ~0);
 
-    if ((val > 0) && ((digit&0x80) == 0x80)) { /* make sure the high bit is */
-        retval = asn1buf_insert_octet(buf,0); /* of the proper signed-ness */
-        if (retval) return retval;
-        length++;
-    } else if ((val < 0) && ((digit&0x80) != 0x80)) {
-        retval = asn1buf_insert_octet(buf,0xFF);
-        if (retval) return retval;
-        length++;
+    if (val > 0 && (digit & 0x80) == 0x80) { /* make sure the high bit is */
+        ret = asn1buf_insert_octet(buf, 0);  /* of the proper signed-ness */
+        if (ret)
+            return ret;
+        len++;
+    } else if (val < 0 && (digit & 0x80) != 0x80) {
+        ret = asn1buf_insert_octet(buf, 0xFF);
+        if (ret)
+            return ret;
+        len++;
     }
 
 
-    *retlen = length;
+    *len_out = len;
     return 0;
 }
 
 asn1_error_code
-asn1_encode_unsigned_integer(asn1buf *buf, asn1_uintmax val, size_t *retlen)
+k5_asn1_encode_uint(asn1buf *buf, asn1_uintmax val, size_t *len_out)
 {
-    asn1_error_code retval;
-    size_t length = 0;
-    unsigned long valcopy;
+    asn1_error_code ret;
+    size_t len = 0;
+    asn1_uintmax valcopy;
     int digit;
 
     valcopy = val;
     do {
-        digit = (int) (valcopy&0xFF);
-        retval = asn1buf_insert_octet(buf,(asn1_octet) digit);
-        if (retval) return retval;
-        length++;
+        digit = valcopy & 0xFF;
+        ret = asn1buf_insert_octet(buf, digit);
+        if (ret)
+            return ret;
+        len++;
         valcopy = valcopy >> 8;
     } while (valcopy != 0);
 
-    if (digit&0x80) {                     /* make sure the high bit is */
-        retval = asn1buf_insert_octet(buf,0); /* of the proper signed-ness */
-        if (retval) return retval;
-        length++;
+    if (digit & 0x80) {                     /* make sure the high bit is */
+        ret = asn1buf_insert_octet(buf, 0); /* of the proper signed-ness */
+        if (ret)
+            return ret;
+        len++;
     }
 
-    *retlen = length;
+    *len_out = len;
     return 0;
 }
 
 asn1_error_code
-asn1_encode_bytestring(asn1buf *buf, unsigned char *const *val, size_t len,
-                       size_t *retlen)
+k5_asn1_encode_bytestring(asn1buf *buf, unsigned char *const *val, size_t len,
+                          size_t *len_out)
 {
-    if (len > 0 && val == NULL) return ASN1_MISSING_FIELD;
-    *retlen = len;
+    if (len > 0 && val == NULL)
+        return ASN1_MISSING_FIELD;
+    *len_out = len;
     return asn1buf_insert_octetstring(buf, len, *val);
 }
 
 asn1_error_code
-asn1_encode_generaltime(asn1buf *buf, time_t val, size_t *retlen)
+k5_asn1_encode_generaltime(asn1buf *buf, time_t val, size_t *len_out)
 {
     struct tm *gtime, gtimebuf;
     char s[16];
     unsigned char *sp;
     time_t gmt_time = val;
+    int len;
 
     /*
      * Time encoding: YYYYMMDDhhmmssZ
@@ -119,26 +126,24 @@ asn1_encode_generaltime(asn1buf *buf, time_t val, size_t *retlen)
     if (gmt_time == 0) {
         sp = (unsigned char *)"19700101000000Z";
     } else {
-        int len;
-
         /*
          * Sanity check this just to be paranoid, as gmtime can return NULL,
          * and some bogus implementations might overrun on the sprintf.
          */
 #ifdef HAVE_GMTIME_R
-# ifdef GMTIME_R_RETURNS_INT
+#ifdef GMTIME_R_RETURNS_INT
         if (gmtime_r(&gmt_time, &gtimebuf) != 0)
             return ASN1_BAD_GMTIME;
-# else
+#else
         if (gmtime_r(&gmt_time, &gtimebuf) == NULL)
             return ASN1_BAD_GMTIME;
-# endif
-#else
+#endif
+#else /* HAVE_GMTIME_R */
         gtime = gmtime(&gmt_time);
         if (gtime == NULL)
             return ASN1_BAD_GMTIME;
         memcpy(&gtimebuf, gtime, sizeof(gtimebuf));
-#endif
+#endif /* HAVE_GMTIME_R */
         gtime = &gtimebuf;
 
         if (gtime->tm_year > 8099 || gtime->tm_mon > 11 ||
@@ -146,7 +151,7 @@ asn1_encode_generaltime(asn1buf *buf, time_t val, size_t *retlen)
             gtime->tm_min > 59 || gtime->tm_sec > 59)
             return ASN1_BAD_GMTIME;
         len = snprintf(s, sizeof(s), "%04d%02d%02d%02d%02d%02dZ",
-                       1900+gtime->tm_year, gtime->tm_mon+1,
+                       1900 + gtime->tm_year, gtime->tm_mon + 1,
                        gtime->tm_mday, gtime->tm_hour,
                        gtime->tm_min, gtime->tm_sec);
         if (SNPRINTF_OVERFLOW(len, sizeof(s)))
@@ -155,21 +160,24 @@ asn1_encode_generaltime(asn1buf *buf, time_t val, size_t *retlen)
         sp = (unsigned char *)s;
     }
 
-    return asn1_encode_bytestring(buf, &sp, 15, retlen);
+    return k5_asn1_encode_bytestring(buf, &sp, 15, len_out);
 }
 
 asn1_error_code
-asn1_encode_bitstring(asn1buf *buf, unsigned char *const *val, size_t len,
-                      size_t *retlen)
+k5_asn1_encode_bitstring(asn1buf *buf, unsigned char *const *val, size_t len,
+                         size_t *len_out)
 {
-    asn1_error_code retval;
+    asn1_error_code ret;
 
-    retval = asn1buf_insert_octetstring(buf, len, *val);
-    if (retval) return retval;
-    *retlen = len + 1;
+    ret = asn1buf_insert_octetstring(buf, len, *val);
+    if (ret)
+        return ret;
+    *len_out = len + 1;
     return asn1buf_insert_octet(buf, '\0');
 }
 
+/* Encode a DER tag into buf with the tag and length parameters in t.  Place
+ * the length of the encoded tag in *retlen. */
 static asn1_error_code
 make_tag(asn1buf *buf, const taginfo *t, size_t *retlen)
 {
@@ -235,24 +243,10 @@ make_tag(asn1buf *buf, const taginfo *t, size_t *retlen)
     return 0;
 }
 
-/*
- * ASN.1 constructed type encoder engine
- *
- * Two entry points here:
- *
- * krb5int_asn1_encode_type: Incrementally adds the contents-only encoding of
- * an object to an already-initialized asn1buf, and returns its tag
- * information.
- *
- * krb5int_asn1_do_full_encode: Returns a completed encoding, in the
- * correct byte order, in an allocated krb5_data.
- */
-
 #ifdef POINTERS_ARE_ALL_THE_SAME
-#define LOADPTR(PTR,TYPE)                       \
-    (*(const void *const *)(PTR))
+#define LOADPTR(PTR, TYPE) (*(const void *const *)(PTR))
 #else
-#define LOADPTR(PTR,PTRINFO)                                            \
+#define LOADPTR(PTR, PTRINFO)                                           \
     (assert((PTRINFO)->loadptr != NULL), (PTRINFO)->loadptr(PTR))
 #endif
 
@@ -271,7 +265,7 @@ get_nullterm_sequence_len(const void *valp, const struct atype_info *seq)
     ptr = a->tinfo;
 
     while (1) {
-        eltptr = (const char *) valp + i * seq->size;
+        eltptr = (const char *)valp + i * seq->size;
         elt = LOADPTR(eltptr, ptr);
         if (elt == NULL)
             break;
@@ -281,16 +275,18 @@ get_nullterm_sequence_len(const void *valp, const struct atype_info *seq)
 }
 static asn1_error_code
 encode_sequence_of(asn1buf *buf, size_t seqlen, const void *val,
-                   const struct atype_info *eltinfo, size_t *retlen);
+                   const struct atype_info *eltinfo, size_t *len_out);
 
 static asn1_error_code
 encode_nullterm_sequence_of(asn1buf *buf, const void *val,
                             const struct atype_info *type,
-                            int can_be_empty, size_t *retlen)
+                            int can_be_empty, size_t *len_out)
 {
-    size_t length = get_nullterm_sequence_len(val, type);
-    if (!can_be_empty && length == 0) return ASN1_MISSING_FIELD;
-    return encode_sequence_of(buf, length, val, type, retlen);
+    size_t len = get_nullterm_sequence_len(val, type);
+
+    if (!can_be_empty && len == 0)
+        return ASN1_MISSING_FIELD;
+    return encode_sequence_of(buf, len, val, type, len_out);
 }
 
 static asn1_intmax
@@ -319,7 +315,7 @@ load_uint(const void *val, size_t size)
 
 static asn1_error_code
 load_count(const void *val, const struct counted_info *counted,
-           size_t *retcount)
+           size_t *count_out)
 {
     const void *countptr = (const char *)val + counted->lenoff;
 
@@ -328,12 +324,12 @@ load_count(const void *val, const struct counted_info *counted,
         asn1_intmax xlen = load_int(countptr, counted->lensize);
         if (xlen < 0 || (asn1_uintmax)xlen > SIZE_MAX)
             return EINVAL;
-        *retcount = xlen;
+        *count_out = xlen;
     } else {
         asn1_uintmax xlen = load_uint(countptr, counted->lensize);
         if ((size_t)xlen != xlen || xlen > SIZE_MAX)
             return EINVAL;
-        *retcount = xlen;
+        *count_out = xlen;
     }
     return 0;
 }
@@ -341,38 +337,39 @@ load_count(const void *val, const struct counted_info *counted,
 /* Split a DER encoding into tag and contents.  Insert the contents into buf,
  * then return the length of the contents and the tag. */
 static asn1_error_code
-split_der(asn1buf *buf, unsigned char *const *der, size_t len, taginfo *rettag)
+split_der(asn1buf *buf, unsigned char *const *der, size_t len,
+          taginfo *tag_out)
 {
     asn1buf der_buf;
     krb5_data der_data = make_data(*der, len);
-    asn1_error_code retval;
+    asn1_error_code ret;
 
-    retval = asn1buf_wrap_data(&der_buf, &der_data);
-    if (retval)
-        return retval;
-    retval = asn1_get_tag_2(&der_buf, rettag);
-    if (retval)
-        return retval;
-    if ((size_t)asn1buf_remains(&der_buf, 0) != rettag->length)
+    ret = asn1buf_wrap_data(&der_buf, &der_data);
+    if (ret)
+        return ret;
+    ret = asn1_get_tag_2(&der_buf, tag_out);
+    if (ret)
+        return ret;
+    if ((size_t)asn1buf_remains(&der_buf, 0) != tag_out->length)
         return EINVAL;
-    return asn1buf_insert_bytestring(buf, rettag->length,
-                                     *der + len - rettag->length);
+    return asn1buf_insert_bytestring(buf, tag_out->length,
+                                     *der + len - tag_out->length);
 }
 
 static asn1_error_code
 encode_sequence(asn1buf *buf, const void *val, const struct seq_info *seq,
-                size_t *retlen);
+                size_t *len_out);
 static asn1_error_code
 encode_cntype(asn1buf *buf, const void *val, size_t len,
-              const struct cntype_info *c, taginfo *rettag);
+              const struct cntype_info *c, taginfo *tag_out);
 
 /* Encode a value (contents only, no outer tag) according to a type, and return
  * its encoded tag information. */
-asn1_error_code
-krb5int_asn1_encode_type(asn1buf *buf, const void *val,
-                         const struct atype_info *a, taginfo *rettag)
+static asn1_error_code
+encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
+             taginfo *tag_out)
 {
-    asn1_error_code retval;
+    asn1_error_code ret;
 
     if (val == NULL)
         return ASN1_MISSING_FIELD;
@@ -381,95 +378,94 @@ krb5int_asn1_encode_type(asn1buf *buf, const void *val,
     case atype_fn: {
         const struct fn_info *fn = a->tinfo;
         assert(fn->enc != NULL);
-        return fn->enc(buf, val, rettag);
+        return fn->enc(buf, val, tag_out);
     }
     case atype_sequence:
         assert(a->tinfo != NULL);
-        retval = encode_sequence(buf, val, a->tinfo, &rettag->length);
-        if (retval)
-            return retval;
-        rettag->asn1class = UNIVERSAL;
-        rettag->construction = CONSTRUCTED;
-        rettag->tagnum = ASN1_SEQUENCE;
+        ret = encode_sequence(buf, val, a->tinfo, &tag_out->length);
+        if (ret)
+            return ret;
+        tag_out->asn1class = UNIVERSAL;
+        tag_out->construction = CONSTRUCTED;
+        tag_out->tagnum = ASN1_SEQUENCE;
         break;
     case atype_ptr: {
         const struct ptr_info *ptr = a->tinfo;
         assert(ptr->basetype != NULL);
-        return krb5int_asn1_encode_type(buf, LOADPTR(val, ptr), ptr->basetype,
-                                        rettag);
+        return encode_atype(buf, LOADPTR(val, ptr), ptr->basetype, tag_out);
     }
     case atype_offset: {
         const struct offset_info *off = a->tinfo;
         assert(off->basetype != NULL);
-        return krb5int_asn1_encode_type(buf, (const char *)val + off->dataoff,
-                                        off->basetype, rettag);
+        return encode_atype(buf, (const char *)val + off->dataoff,
+                            off->basetype, tag_out);
     }
     case atype_counted: {
         const struct counted_info *counted = a->tinfo;
         const void *dataptr = (const char *)val + counted->dataoff;
         size_t count;
         assert(counted->basetype != NULL);
-        retval = load_count(val, counted, &count);
-        if (retval)
-            return retval;
-        return encode_cntype(buf, dataptr, count, counted->basetype, rettag);
+        ret = load_count(val, counted, &count);
+        if (ret)
+            return ret;
+        return encode_cntype(buf, dataptr, count, counted->basetype, tag_out);
     }
     case atype_nullterm_sequence_of:
     case atype_nonempty_nullterm_sequence_of:
         assert(a->tinfo != NULL);
-        retval = encode_nullterm_sequence_of(buf, val, a->tinfo,
-                                             a->type ==
-                                             atype_nullterm_sequence_of,
-                                             &rettag->length);
-        if (retval)
-            return retval;
-        rettag->asn1class = UNIVERSAL;
-        rettag->construction = CONSTRUCTED;
-        rettag->tagnum = ASN1_SEQUENCE;
+        ret = encode_nullterm_sequence_of(buf, val, a->tinfo,
+                                          a->type ==
+                                          atype_nullterm_sequence_of,
+                                          &tag_out->length);
+        if (ret)
+            return ret;
+        tag_out->asn1class = UNIVERSAL;
+        tag_out->construction = CONSTRUCTED;
+        tag_out->tagnum = ASN1_SEQUENCE;
         break;
     case atype_tagged_thing: {
         const struct tagged_info *tag = a->tinfo;
-        retval = krb5int_asn1_encode_type(buf, val, tag->basetype, rettag);
-        if (retval)
-            return retval;
+        ret = encode_atype(buf, val, tag->basetype, tag_out);
+        if (ret)
+            return ret;
         if (!tag->implicit) {
             size_t tlen;
-            retval = make_tag(buf, rettag, &tlen);
-            if (retval)
-                return retval;
-            rettag->length += tlen;
-            rettag->construction = tag->construction;
+            ret = make_tag(buf, tag_out, &tlen);
+            if (ret)
+                return ret;
+            tag_out->length += tlen;
+            tag_out->construction = tag->construction;
         }
-        rettag->asn1class = tag->tagtype;
-        rettag->tagnum = tag->tagval;
+        tag_out->asn1class = tag->tagtype;
+        tag_out->tagnum = tag->tagval;
         break;
     }
     case atype_int:
-        retval = asn1_encode_integer(buf, load_int(val, a->size),
-                                     &rettag->length);
-        if (retval)
-            return retval;
-        rettag->asn1class = UNIVERSAL;
-        rettag->construction = PRIMITIVE;
-        rettag->tagnum = ASN1_INTEGER;
+        ret = k5_asn1_encode_int(buf, load_int(val, a->size),
+                                 &tag_out->length);
+        if (ret)
+            return ret;
+        tag_out->asn1class = UNIVERSAL;
+        tag_out->construction = PRIMITIVE;
+        tag_out->tagnum = ASN1_INTEGER;
         break;
     case atype_uint:
-        retval = asn1_encode_unsigned_integer(buf, load_uint(val, a->size),
-                                              &rettag->length);
-        if (retval)
-            return retval;
-        rettag->asn1class = UNIVERSAL;
-        rettag->construction = PRIMITIVE;
-        rettag->tagnum = ASN1_INTEGER;
+        ret = k5_asn1_encode_uint(buf, load_uint(val, a->size),
+                                  &tag_out->length);
+        if (ret)
+            return ret;
+        tag_out->asn1class = UNIVERSAL;
+        tag_out->construction = PRIMITIVE;
+        tag_out->tagnum = ASN1_INTEGER;
         break;
     case atype_int_immediate: {
         const int *iptr = a->tinfo;
-        retval = asn1_encode_integer(buf, *iptr, &rettag->length);
-        if (retval)
-            return retval;
-        rettag->asn1class = UNIVERSAL;
-        rettag->construction = PRIMITIVE;
-        rettag->tagnum = ASN1_INTEGER;
+        ret = k5_asn1_encode_int(buf, *iptr, &tag_out->length);
+        if (ret)
+            return ret;
+        tag_out->asn1class = UNIVERSAL;
+        tag_out->construction = PRIMITIVE;
+        tag_out->tagnum = ASN1_INTEGER;
         break;
     }
     default:
@@ -482,20 +478,20 @@ krb5int_asn1_encode_type(asn1buf *buf, const void *val,
 }
 
 static asn1_error_code
-encode_type_and_tag(asn1buf *buf, const void *val, const struct atype_info *a,
-                    size_t *retlen)
+encode_atype_and_tag(asn1buf *buf, const void *val, const struct atype_info *a,
+                     size_t *len_out)
 {
     taginfo t;
-    asn1_error_code retval;
+    asn1_error_code ret;
     size_t tlen;
 
-    retval = krb5int_asn1_encode_type(buf, val, a, &t);
-    if (retval)
-        return retval;
-    retval = make_tag(buf, &t, &tlen);
-    if (retval)
-        return retval;
-    *retlen = t.length + tlen;
+    ret = encode_atype(buf, val, a, &t);
+    if (ret)
+        return ret;
+    ret = make_tag(buf, &t, &tlen);
+    if (ret)
+        return ret;
+    *len_out = t.length + tlen;
     return 0;
 }
 
@@ -506,44 +502,43 @@ encode_type_and_tag(asn1buf *buf, const void *val, const struct atype_info *a,
  */
 static asn1_error_code
 encode_cntype(asn1buf *buf, const void *val, size_t count,
-              const struct cntype_info *c, taginfo *rettag)
+              const struct cntype_info *c, taginfo *tag_out)
 {
-    asn1_error_code retval;
+    asn1_error_code ret;
 
     switch (c->type) {
     case cntype_string: {
         const struct string_info *string = c->tinfo;
         assert(string->enc != NULL);
-        retval = string->enc(buf, val, count, &rettag->length);
-        if (retval)
-            return retval;
-        rettag->asn1class = UNIVERSAL;
-        rettag->construction = PRIMITIVE;
-        rettag->tagnum = string->tagval;
+        ret = string->enc(buf, val, count, &tag_out->length);
+        if (ret)
+            return ret;
+        tag_out->asn1class = UNIVERSAL;
+        tag_out->construction = PRIMITIVE;
+        tag_out->tagnum = string->tagval;
         break;
     }
     case cntype_der:
-        return split_der(buf, val, count, rettag);
+        return split_der(buf, val, count, tag_out);
     case cntype_seqof: {
         const struct atype_info *a = c->tinfo;
         const struct ptr_info *ptr = a->tinfo;
         assert(a->type == atype_ptr);
         val = LOADPTR(val, ptr);
-        retval = encode_sequence_of(buf, count, val, ptr->basetype,
-                                    &rettag->length);
-        if (retval)
-            return retval;
-        rettag->asn1class = UNIVERSAL;
-        rettag->construction = CONSTRUCTED;
-        rettag->tagnum = ASN1_SEQUENCE;
+        ret = encode_sequence_of(buf, count, val, ptr->basetype,
+                                 &tag_out->length);
+        if (ret)
+            return ret;
+        tag_out->asn1class = UNIVERSAL;
+        tag_out->construction = CONSTRUCTED;
+        tag_out->tagnum = ASN1_SEQUENCE;
         break;
     }
     case cntype_choice: {
         const struct choice_info *choice = c->tinfo;
         if (count >= choice->n_options)
             return ASN1_MISSING_FIELD;
-        return krb5int_asn1_encode_type(buf, val, choice->options[count],
-                                        rettag);
+        return encode_atype(buf, val, choice->options[count], tag_out);
     }
 
     default:
@@ -557,11 +552,11 @@ encode_cntype(asn1buf *buf, const void *val, size_t count,
 
 static asn1_error_code
 encode_sequence(asn1buf *buf, const void *val, const struct seq_info *seq,
-                size_t *retlen)
+                size_t *len_out)
 {
-    asn1_error_code retval;
+    asn1_error_code ret;
     unsigned int not_present;
-    size_t i, length, sum = 0;
+    size_t i, len, sum = 0;
     const struct atype_info *a;
 
     /* If any fields might be optional, get a bitmask of fields not present. */
@@ -570,63 +565,66 @@ encode_sequence(asn1buf *buf, const void *val, const struct seq_info *seq,
         a = seq->fields[i - 1];
         if ((1u << (i - 1)) & not_present)
             continue;
-        retval = encode_type_and_tag(buf, val, a, &length);
-        if (retval)
-            return retval;
-        sum += length;
+        ret = encode_atype_and_tag(buf, val, a, &len);
+        if (ret)
+            return ret;
+        sum += len;
     }
-    *retlen = sum;
+    *len_out = sum;
     return 0;
 }
 
 static asn1_error_code
 encode_sequence_of(asn1buf *buf, size_t seqlen, const void *val,
-                   const struct atype_info *eltinfo, size_t *retlen)
+                   const struct atype_info *eltinfo, size_t *len_out)
 {
-    asn1_error_code retval;
-    size_t sum = 0, i, length;
+    asn1_error_code ret;
+    size_t sum = 0, i, len;
+    const void *eltptr;
 
+    assert(eltinfo->size != 0);
     for (i = seqlen; i > 0; i--) {
-        const void *eltptr;
-        const struct atype_info *a = eltinfo;
-
-        assert(eltinfo->size != 0);
         eltptr = (const char *)val + (i - 1) * eltinfo->size;
-        retval = encode_type_and_tag(buf, eltptr, a, &length);
-        if (retval)
-            return retval;
-        sum += length;
+        ret = encode_atype_and_tag(buf, eltptr, eltinfo, &len);
+        if (ret)
+            return ret;
+        sum += len;
     }
-    *retlen = sum;
+    *len_out = sum;
     return 0;
 }
 
-krb5_error_code
-krb5int_asn1_do_full_encode(const void *rep, krb5_data **code,
-                            const struct atype_info *a)
+asn1_error_code
+k5_asn1_encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
+                     taginfo *tag_out)
 {
-    size_t length;
-    asn1_error_code retval;
+    return encode_atype(buf, val, a, tag_out);
+}
+
+krb5_error_code
+k5_asn1_full_encode(const void *rep, const struct atype_info *a,
+                    krb5_data **code_out)
+{
+    size_t len;
+    asn1_error_code ret;
     asn1buf *buf = NULL;
     krb5_data *d;
 
-    *code = NULL;
+    *code_out = NULL;
 
     if (rep == NULL)
         return ASN1_MISSING_FIELD;
-
-    retval = asn1buf_create(&buf);
-    if (retval)
-        return retval;
-
-    retval = encode_type_and_tag(buf, rep, a, &length);
-    if (retval)
+    ret = asn1buf_create(&buf);
+    if (ret)
+        return ret;
+    ret = encode_atype_and_tag(buf, rep, a, &len);
+    if (ret)
         goto cleanup;
-    retval = asn12krb5_buf(buf, &d);
-    if (retval)
+    ret = asn12krb5_buf(buf, &d);
+    if (ret)
         goto cleanup;
-    *code = d;
+    *code_out = d;
 cleanup:
     asn1buf_destroy(&buf);
-    return retval;
+    return ret;
 }

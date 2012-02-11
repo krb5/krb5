@@ -55,7 +55,7 @@ IMPORT_TYPE(int32, krb5_int32);
 DEFINTTYPE(int16, krb5_int16);
 
 DEFCOUNTEDSTRINGTYPE(ui2_octetstring, unsigned char *, krb5_ui_2,
-                     asn1_encode_bytestring, ASN1_OCTETSTRING);
+                     k5_asn1_encode_bytestring, ASN1_OCTETSTRING);
 
 DEFFIELD(krbsalt_0, krb5_key_data, key_data_type[1], 0, int16);
 DEFCNFIELD(krbsalt_1, krb5_key_data, key_data_contents[1], key_data_length[1],
@@ -112,7 +112,7 @@ static const struct atype_info *ldap_key_seq_fields[] = {
 DEFSEQTYPE(ldap_key_seq, ldap_seqof_key_data, ldap_key_seq_fields, NULL);
 
 /* Export a function to do the whole encoding.  */
-MAKE_FULL_ENCODER(krb5int_ldap_encode_sequence_of_keys, ldap_key_seq);
+MAKE_ENCODER(krb5int_ldap_encode_sequence_of_keys, ldap_key_seq);
 
 /************************************************************************/
 /* Decode the Principal's keys                                          */
