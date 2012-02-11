@@ -70,15 +70,16 @@ DEFSEQTYPE(principal_data, krb5_principal_data, princname_fields, NULL);
 DEFPTRTYPE(principal, principal_data);
 
 static asn1_error_code
-asn1_encode_kerberos_time_at(asn1buf *buf, const krb5_timestamp *val,
-                             unsigned int *retlen)
+encode_kerberos_time(asn1buf *buf, const void *val, taginfo *rettag)
 {
     /* Range checking for time_t vs krb5_timestamp?  */
-    time_t tval = *val;
-    return asn1_encode_generaltime(buf, tval, retlen);
+    time_t tval = *(krb5_timestamp *)val;
+    rettag->asn1class = UNIVERSAL;
+    rettag->construction = PRIMITIVE;
+    rettag->tagnum = ASN1_GENERALTIME;
+    return asn1_encode_generaltime(buf, tval, &rettag->length);
 }
-DEFPRIMITIVETYPE(kerberos_time, krb5_timestamp, asn1_encode_kerberos_time_at,
-                 ASN1_GENERALTIME);
+DEFFNTYPE(kerberos_time, krb5_timestamp, encode_kerberos_time);
 
 DEFFIELD(address_0, krb5_address, addrtype, 0, int32);
 DEFCNFIELD(address_1, krb5_address, contents, length, 1, octetstring);
@@ -115,15 +116,16 @@ DEFSEQTYPE(encrypted_data, krb5_enc_data, encrypted_data_fields,
  * as a 32-bit integer in host order.
  */
 static asn1_error_code
-asn1_encode_krb5_flags_at(asn1buf *buf, const krb5_flags *val,
-                          unsigned int *retlen)
+encode_krb5_flags(asn1buf *buf, const void *val, taginfo *rettag)
 {
     unsigned char cbuf[4], *cptr = cbuf;
-    store_32_be((krb5_ui_4) *val, cbuf);
-    return asn1_encode_bitstring(buf, &cptr, 4, retlen);
+    store_32_be((krb5_ui_4)*(const krb5_flags *)val, cbuf);
+    rettag->asn1class = UNIVERSAL;
+    rettag->construction = PRIMITIVE;
+    rettag->tagnum = ASN1_BITSTRING;
+    return asn1_encode_bitstring(buf, &cptr, 4, &rettag->length);
 }
-DEFPRIMITIVETYPE(krb5_flags, krb5_flags, asn1_encode_krb5_flags_at,
-                 ASN1_BITSTRING);
+DEFFNTYPE(krb5_flags, krb5_flags, encode_krb5_flags);
 
 DEFFIELD(authdata_0, krb5_authdata, ad_type, 0, int32);
 DEFCNFIELD(authdata_1, krb5_authdata, contents, length, 1, octetstring);

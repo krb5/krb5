@@ -325,16 +325,6 @@ krb5int_asn1_encode_type(asn1buf *buf, const void *val,
         return ASN1_MISSING_FIELD;
 
     switch (a->type) {
-    case atype_primitive: {
-        const struct primitive_info *prim = a->tinfo;
-        assert(prim->enc != NULL);
-        retval = prim->enc(buf, val, &rettag->length);
-        if (retval) return retval;
-        rettag->asn1class = UNIVERSAL;
-        rettag->construction = PRIMITIVE;
-        rettag->tagnum = prim->tagval;
-        break;
-    }
     case atype_fn: {
         const struct fn_info *fn = a->tinfo;
         assert(fn->enc != NULL);

@@ -139,13 +139,9 @@ enum atype_type {
      * invalid.
      */
     atype_min = 1,
-    /* Encoder function (contents-only) to be called with address of <thing>
-     * and wrapped with a universal primitive tag.  tinfo is a struct
-     * primitive_info *. */
-    atype_primitive,
     /*
      * Encoder function to be called with address of <thing>.  tinfo is a
-     * struct fn_info *.  Used only by kdc_req_body.
+     * struct fn_info *.
      */
     atype_fn,
     /* Pointer to actual thing to be encoded.  tinfo is a struct ptr_info *. */
@@ -186,11 +182,6 @@ struct atype_info {
     enum atype_type type;
     size_t size;                /* Used for sequence-of processing */
     const void *tinfo;          /* Points to type-specific structure */
-};
-
-struct primitive_info {
-    asn1_error_code (*enc)(asn1buf *, const void *, unsigned int *);
-    unsigned int tagval;
 };
 
 struct fn_info {
@@ -284,32 +275,7 @@ struct choice_info {
  * Nothing else should directly define the atype_info structures.
  */
 
-/*
- * Define a type using a primitive (content-only) encoder function.
- *
- * Because we need a single, consistent type for the descriptor structure
- * field, we use the function pointer type that uses void*, and create a
- * wrapper function in DEFFNXTYPE.  The supplied function is static and not
- * used otherwise, so the compiler can merge it with the wrapper function if
- * the optimizer is good enough.
- */
-#define DEFPRIMITIVETYPE(DESCNAME, CTYPENAME, ENCFN, TAG)               \
-    typedef CTYPENAME aux_typedefname_##DESCNAME;                       \
-    static asn1_error_code                                              \
-    aux_encfn_##DESCNAME(asn1buf *buf, const void *val,                 \
-                         unsigned int *retlen)                          \
-    {                                                                   \
-        return ENCFN(buf,                                               \
-                     (const aux_typedefname_##DESCNAME *)val,           \
-                     retlen);                                           \
-    }                                                                   \
-    static const struct primitive_info aux_info_##DESCNAME = {          \
-        aux_encfn_##DESCNAME, TAG                                       \
-    };                                                                  \
-    const struct atype_info k5_atype_##DESCNAME = {                     \
-        atype_primitive, sizeof(CTYPENAME), &aux_info_##DESCNAME        \
-    }
-/* Define a type using an explicit (with tag) encoder function. */
+/* Define a type using an encoder function. */
 #define DEFFNTYPE(DESCNAME, CTYPENAME, ENCFN)                           \
     typedef CTYPENAME aux_typedefname_##DESCNAME;                       \
     static const struct fn_info aux_info_##DESCNAME = {                 \
