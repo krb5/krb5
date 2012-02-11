@@ -1434,14 +1434,9 @@ DEFSEQTYPE(pa_pk_as_req, krb5_pa_pk_as_req, pa_pk_as_req_fields,
  * krb5_data object; pretend that they are wrapped in IMPLICIT OCTET STRING in
  * order to wrap them in primitive [1] and [2] tags.
  */
-DEFOFFSETTYPE(trusted_ca_0_untagged, union krb5_trusted_ca_choices,
-              principalName, principal);
-DEFTAGGEDTYPE(trusted_ca_0, CONTEXT_SPECIFIC, PRIMITIVE, 0, 0,
-              trusted_ca_0_untagged);
-DEFFIELD_IMPLICIT(trusted_ca_1, union krb5_trusted_ca_choices, caName, 1,
-                  ostring_data);
-DEFFIELD_IMPLICIT(trusted_ca_2, union krb5_trusted_ca_choices,
-                  issuerAndSerial, 2, ostring_data);
+DEFTAGGEDTYPE(trusted_ca_0, CONTEXT_SPECIFIC, PRIMITIVE, 0, 0, principal);
+DEFCTAGGEDTYPE_IMPLICIT(trusted_ca_1, 1, ostring_data);
+DEFCTAGGEDTYPE_IMPLICIT(trusted_ca_2, 2, ostring_data);
 static const struct atype_info *trusted_ca_alternatives[] = {
     &k5_atype_trusted_ca_0, &k5_atype_trusted_ca_1, &k5_atype_trusted_ca_2
 };
@@ -1546,10 +1541,8 @@ static const struct atype_info *reply_key_pack_draft9_fields[] = {
 DEFSEQTYPE(reply_key_pack_draft9, krb5_reply_key_pack_draft9,
            reply_key_pack_draft9_fields, NULL);
 
-DEFFIELD(pa_pk_as_rep_0, union krb5_pa_pk_as_rep_choices, dh_Info, 0,
-         dh_rep_info);
-DEFFIELD_IMPLICIT(pa_pk_as_rep_1, union krb5_pa_pk_as_rep_choices, encKeyPack,
-                  1, ostring_data);
+DEFCTAGGEDTYPE(pa_pk_as_rep_0, 0, dh_rep_info);
+DEFCTAGGEDTYPE_IMPLICIT(pa_pk_as_rep_1, 1, ostring_data);
 static const struct atype_info *pa_pk_as_rep_alternatives[] = {
     &k5_atype_pa_pk_as_rep_0, &k5_atype_pa_pk_as_rep_1
 };
@@ -1567,10 +1560,8 @@ DEFCOUNTEDTYPE_SIGNED(pa_pk_as_rep, krb5_pa_pk_as_rep, u, choice,
  * krb5_data object; pretend that they are wrapped in IMPLICIT OCTET STRING in
  * order to wrap them in primitive [0] and [1] tags.
  */
-DEFFIELD_IMPLICIT(pa_pk_as_rep9_0, union krb5_pa_pk_as_rep_draft9_choices,
-                  dhSignedData, 0, ostring_data);
-DEFFIELD_IMPLICIT(pa_pk_as_rep9_1, union krb5_pa_pk_as_rep_draft9_choices,
-                  encKeyPack, 1, ostring_data);
+DEFCTAGGEDTYPE_IMPLICIT(pa_pk_as_rep9_0, 0, ostring_data);
+DEFCTAGGEDTYPE_IMPLICIT(pa_pk_as_rep9_1, 1, ostring_data);
 static const struct atype_info *pa_pk_as_rep_draft9_alternatives[] = {
     &k5_atype_pa_pk_as_rep9_0, &k5_atype_pa_pk_as_rep9_1
 };
