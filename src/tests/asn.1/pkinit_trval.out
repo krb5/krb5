@@ -19,17 +19,7 @@ encode_krb5_pa_pk_as_req_draft9:
 [Sequence/Sequence Of] 
 .  [0] <8>
       6b 72 62 35 64 61 74 61                             krb5data
-.  [1] [Sequence/Sequence Of] 
-.  .  [0] <26>
-         30 18 a0 03 02 01 01 a1 11 30 0f 1b 06 68 66     0........0...hf
-         74 73 61 69 1b 05 65 78 74 72 61                 tsai..extra
-.  .  [1] <8>
-         6b 72 62 35 64 61 74 61                          krb5data
-.  .  [2] <8>
-         6b 72 62 35 64 61 74 61                          krb5data
 .  [2] <8>
-      6b 72 62 35 64 61 74 61                             krb5data
-.  [3] <8>
       6b 72 62 35 64 61 74 61                             krb5data
 
 encode_krb5_pa_pk_as_rep(dhInfo):

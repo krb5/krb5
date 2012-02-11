@@ -852,19 +852,6 @@ decode_krb5_pa_pk_as_rep(const krb5_data *code, krb5_pa_pk_as_rep **repptr)
 }
 
 krb5_error_code
-decode_krb5_pa_pk_as_rep_draft9(const krb5_data *code,
-                                krb5_pa_pk_as_rep_draft9 **repptr)
-{
-    setup_buf_only(krb5_pa_pk_as_rep_draft9 *);
-    alloc_field(rep);
-
-    retval = asn1_decode_pa_pk_as_rep_draft9(&buf, rep);
-    if (retval) clean_return(retval);
-
-    cleanup(free);
-}
-
-krb5_error_code
 decode_krb5_auth_pack(const krb5_data *code, krb5_auth_pack **repptr)
 {
     setup_buf_only(krb5_auth_pack *);

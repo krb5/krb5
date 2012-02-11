@@ -400,22 +400,6 @@ krb5_error_code create_krb5_trustedCertifiers
 	krb5_external_principal_identifier ***trustedCertifiers); /* OUT */
 
 /*
- * this functions takes in crypto specific representation of
- * trustedCas (draft9) and creates a list of krb5_trusted_ca (draft9).
- * draft9 trustedCAs is a CHOICE. we only support choices for
- * [1] caName and [2] issuerAndSerial.  there is no config
- * option available to select the choice yet. default = 1.
- */
-krb5_error_code create_krb5_trustedCas
-	(krb5_context context,				/* IN */
-	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
-	pkinit_req_crypto_context req_cryptoctx,	/* IN */
-	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
-	int flag,					/* IN
-		    specifies the tag of the CHOICE */
-	krb5_trusted_ca ***trustedCas);			/* OUT */
-
-/*
  * this functions takes in crypto specific representation of the
  * KDC's certificate and creates a DER encoded kdcPKId
  */

@@ -156,9 +156,6 @@ asn1_error_code asn1_decode_external_principal_identifier(
 asn1_error_code asn1_decode_external_principal_identifier_ptr(
     asn1buf *buf, krb5_external_principal_identifier **valptr);
 asn1_error_code asn1_decode_pa_pk_as_req(asn1buf *buf, krb5_pa_pk_as_req *val);
-asn1_error_code asn1_decode_trusted_ca(asn1buf *buf, krb5_trusted_ca *val);
-asn1_error_code asn1_decode_trusted_ca_ptr(asn1buf *buf,
-                                           krb5_trusted_ca **valptr);
 asn1_error_code asn1_decode_pa_pk_as_req_draft9(asn1buf *buf,
                                                 krb5_pa_pk_as_req_draft9 *val);
 asn1_error_code asn1_decode_dh_rep_info(asn1buf *buf, krb5_dh_rep_info *val);
@@ -179,8 +176,6 @@ asn1_error_code asn1_decode_auth_pack_draft9(asn1buf *buf,
                                              krb5_auth_pack_draft9 *val);
 asn1_error_code asn1_decode_pa_pk_as_rep(asn1buf *buf,
                                          krb5_pa_pk_as_rep *val);
-asn1_error_code asn1_decode_pa_pk_as_rep_draft9(asn1buf *buf,
-                                                krb5_pa_pk_as_rep_draft9 *val);
 asn1_error_code asn1_decode_kdc_dh_key_info(asn1buf *buf,
                                             krb5_kdc_dh_key_info *val);
 asn1_error_code asn1_decode_krb5_principal_name(asn1buf *buf,
@@ -221,8 +216,6 @@ asn1_error_code asn1_decode_etype_info2(asn1buf *buf,
                                         krb5_boolean v1_3_behavior);
 asn1_error_code asn1_decode_sequence_of_external_principal_identifier(
     asn1buf *buf, krb5_external_principal_identifier ***val);
-asn1_error_code asn1_decode_sequence_of_trusted_ca(asn1buf *buf,
-                                                   krb5_trusted_ca ***val);
 asn1_error_code asn1_decode_sequence_of_algorithm_identifier(
     asn1buf *buf, krb5_algorithm_identifier ***val);
 

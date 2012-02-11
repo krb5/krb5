@@ -126,9 +126,6 @@ free_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
     if (*in == NULL) return;
     free((*in)->signedAuthPack.data);
     free((*in)->kdcCert.data);
-    free((*in)->encryptionCert.data);
-    if ((*in)->trustedCertifiers != NULL)
-        free_krb5_trusted_ca(&(*in)->trustedCertifiers);
     free(*in);
 }
 
@@ -223,30 +220,6 @@ free_krb5_external_principal_identifier(krb5_external_principal_identifier ***in
 }
 
 void
-free_krb5_trusted_ca(krb5_trusted_ca ***in)
-{
-    int i = 0;
-    if (*in == NULL) return;
-    while ((*in)[i] != NULL) {
-        switch((*in)[i]->choice) {
-        case choice_trusted_cas_principalName:
-            break;
-        case choice_trusted_cas_caName:
-            free((*in)[i]->u.caName.data);
-            break;
-        case choice_trusted_cas_issuerAndSerial:
-            free((*in)[i]->u.issuerAndSerial.data);
-            break;
-        case choice_trusted_cas_UNKNOWN:
-            break;
-        }
-        free((*in)[i]);
-        i++;
-    }
-    free(*in);
-}
-
-void
 free_krb5_algorithm_identifier(krb5_algorithm_identifier *in)
 {
     if (in == NULL)
@@ -304,11 +277,8 @@ init_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
     if ((*in) == NULL) return;
     (*in)->signedAuthPack.data = NULL;
     (*in)->signedAuthPack.length = 0;
-    (*in)->trustedCertifiers = NULL;
     (*in)->kdcCert.data = NULL;
     (*in)->kdcCert.length = 0;
-    (*in)->encryptionCert.data = NULL;
-    (*in)->encryptionCert.length = 0;
 }
 
 void

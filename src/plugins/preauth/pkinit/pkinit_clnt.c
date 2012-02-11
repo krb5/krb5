@@ -431,14 +431,6 @@ pkinit_as_req_create(krb5_context context,
         retval = k5int_encode_krb5_pa_pk_as_req(req, as_req);
         break;
     case KRB5_PADATA_PK_AS_REQ_OLD:
-#if 0
-        /* W2K3 KDC doesn't like this */
-        retval = create_krb5_trustedCas(context, plgctx->cryptoctx,
-                                        reqctx->cryptoctx, reqctx->idctx, 1, &req9->trustedCertifiers);
-        if (retval)
-            goto cleanup;
-
-#endif
         retval = create_issuerAndSerial(context, plgctx->cryptoctx,
                                         reqctx->cryptoctx, reqctx->idctx,
                                         (unsigned char **)&req9->kdcCert.data,

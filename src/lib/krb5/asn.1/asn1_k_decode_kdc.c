@@ -147,16 +147,6 @@ error_out:
     return retval;
 }
 
-static void
-free_trusted_ca(void *dummy, krb5_trusted_ca *val)
-{
-    if (val->choice == choice_trusted_cas_caName)
-        free(val->u.caName.data);
-    else if (val->choice == choice_trusted_cas_issuerAndSerial)
-        free(val->u.issuerAndSerial.data);
-    free(val);
-}
-
 asn1_error_code
 asn1_decode_pa_pk_as_req_draft9(asn1buf *buf, krb5_pa_pk_as_req_draft9 *val)
 {
@@ -164,29 +154,16 @@ asn1_decode_pa_pk_as_req_draft9(asn1buf *buf, krb5_pa_pk_as_req_draft9 *val)
     setup();
     val->signedAuthPack.data = NULL;
     val->kdcCert.data = NULL;
-    val->encryptionCert.data = NULL;
-    val->trustedCertifiers = NULL;
     { begin_structure();
+        /* PA-PK-AS-REQ in draft9 has four fields, but we only care about the
+         * first one. */
         get_implicit_charstring(val->signedAuthPack.length, val->signedAuthPack.data, 0);
-        opt_field(val->trustedCertifiers, 1, asn1_decode_sequence_of_trusted_ca, NULL);
-        opt_lenfield(val->kdcCert.length, val->kdcCert.data, 2, asn1_decode_charstring);
-        opt_lenfield(val->encryptionCert.length, val->encryptionCert.data, 2, asn1_decode_charstring);
         end_structure();
     }
     return 0;
 error_out:
     free(val->signedAuthPack.data);
-    free(val->kdcCert.data);
-    free(val->encryptionCert.data);
-    if (val->trustedCertifiers) {
-        for (i = 0; val->trustedCertifiers[i]; i++)
-            free_trusted_ca(NULL, val->trustedCertifiers[i]);
-        free(val->trustedCertifiers);
-    }
     val->signedAuthPack.data = NULL;
-    val->kdcCert.data = NULL;
-    val->encryptionCert.data = NULL;
-    val->trustedCertifiers = NULL;
     return retval;
 }
 

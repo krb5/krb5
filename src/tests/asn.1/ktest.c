@@ -674,27 +674,6 @@ ktest_make_sample_external_principal_identifier(
     ktest_make_sample_data(&p->subjectKeyIdentifier);
 }
 
-static void
-ktest_make_sample_trusted_ca_principalName(krb5_trusted_ca *p)
-{
-    p->choice = choice_trusted_cas_principalName;
-    ktest_make_sample_principal(&p->u.principalName);
-}
-
-static void
-ktest_make_sample_trusted_ca_caName(krb5_trusted_ca *p)
-{
-    p->choice = choice_trusted_cas_caName;
-    ktest_make_sample_data(&p->u.caName);
-}
-
-static void
-ktest_make_sample_trusted_ca_issuerAndSerial(krb5_trusted_ca *p)
-{
-    p->choice = choice_trusted_cas_issuerAndSerial;
-    ktest_make_sample_data(&p->u.issuerAndSerial);
-}
-
 void
 ktest_make_sample_pa_pk_as_req(krb5_pa_pk_as_req *p)
 {
@@ -714,15 +693,7 @@ ktest_make_sample_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *p)
     int i;
 
     ktest_make_sample_data(&p->signedAuthPack);
-    p->trustedCertifiers = ealloc(4 * sizeof(krb5_trusted_ca *));
-    for (i = 0; i < 3; i++)
-        p->trustedCertifiers[i] = ealloc(sizeof(krb5_trusted_ca));
-    ktest_make_sample_trusted_ca_principalName(p->trustedCertifiers[0]);
-    ktest_make_sample_trusted_ca_caName(p->trustedCertifiers[1]);
-    ktest_make_sample_trusted_ca_issuerAndSerial(p->trustedCertifiers[2]);
-    p->trustedCertifiers[3] = NULL;
     ktest_make_sample_data(&p->kdcCert);
-    ktest_make_sample_data(&p->encryptionCert);
 }
 
 static void
@@ -1466,18 +1437,6 @@ ktest_empty_external_principal_identifier(
     ktest_empty_data(&p->subjectKeyIdentifier);
 }
 
-static void
-ktest_empty_trusted_ca(krb5_trusted_ca *p)
-{
-    if (p->choice == choice_trusted_cas_principalName)
-        ktest_destroy_principal(&p->u.principalName);
-    else if (p->choice == choice_trusted_cas_caName)
-        ktest_empty_data(&p->u.caName);
-    else if (p->choice == choice_trusted_cas_issuerAndSerial)
-        ktest_empty_data(&p->u.issuerAndSerial);
-    p->choice = choice_trusted_cas_UNKNOWN;
-}
-
 void
 ktest_empty_pa_pk_as_req(krb5_pa_pk_as_req *p)
 {
@@ -1496,19 +1455,8 @@ ktest_empty_pa_pk_as_req(krb5_pa_pk_as_req *p)
 void
 ktest_empty_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *p)
 {
-    krb5_trusted_ca **ca;
-
     ktest_empty_data(&p->signedAuthPack);
-    if (p->trustedCertifiers != NULL) {
-        for (ca = p->trustedCertifiers; *ca != NULL; ca++) {
-            ktest_empty_trusted_ca(*ca);
-            free(*ca);
-        }
-        free(p->trustedCertifiers);
-        p->trustedCertifiers = NULL;
-    }
     ktest_empty_data(&p->kdcCert);
-    ktest_empty_data(&p->encryptionCert);
 }
 
 static void

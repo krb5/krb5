@@ -91,7 +91,6 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
             SC (decode_krb5_pa_pk_as_req, decode_krb5_pa_pk_as_req),
             SC (decode_krb5_pa_pk_as_req_draft9, decode_krb5_pa_pk_as_req_draft9),
             SC (decode_krb5_pa_pk_as_rep, decode_krb5_pa_pk_as_rep),
-            SC (decode_krb5_pa_pk_as_rep_draft9, decode_krb5_pa_pk_as_rep_draft9),
             SC (decode_krb5_auth_pack, decode_krb5_auth_pack),
             SC (decode_krb5_auth_pack_draft9, decode_krb5_auth_pack_draft9),
             SC (decode_krb5_kdc_dh_key_info, decode_krb5_kdc_dh_key_info),

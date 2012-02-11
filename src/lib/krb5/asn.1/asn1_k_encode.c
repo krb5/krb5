@@ -1425,64 +1425,26 @@ DEFSEQTYPE(pa_pk_as_req, krb5_pa_pk_as_req, pa_pk_as_req_fields,
            pa_pk_as_req_optional);
 
 /*
- * draft-ietf-cat-kerberos-pk-init-09 specifies these fields as explicitly
- * tagged KerberosName, Name, and IssuerAndSerialNumber respectively, which
- * means they should have constructed context tags.  However, our historical
- * behavior is to use primitive context-specific tags, and we don't want to
- * change that behavior without interop testing.  For the principal name, which
- * we encode ourselves, use a DEFTAGGEDTYPE to wrap the principal encoding in a
- * primitive [0] tag.  For the other two types, we have the encoding in a
- * krb5_data object; pretend that they are wrapped in IMPLICIT OCTET STRING in
- * order to wrap them in primitive [1] and [2] tags.
- */
-DEFTAGGEDTYPE(trusted_ca_0, CONTEXT_SPECIFIC, PRIMITIVE, 0, 0, principal);
-DEFCTAGGEDTYPE_IMPLICIT(trusted_ca_1, 1, ostring_data);
-DEFCTAGGEDTYPE_IMPLICIT(trusted_ca_2, 2, ostring_data);
-static const struct atype_info *trusted_ca_alternatives[] = {
-    &k5_atype_trusted_ca_0, &k5_atype_trusted_ca_1, &k5_atype_trusted_ca_2
-};
-DEFCHOICETYPE(trusted_ca_choice, union krb5_trusted_ca_choices,
-              enum krb5_trusted_ca_selection, trusted_ca_alternatives);
-DEFCOUNTEDTYPE_SIGNED(trusted_ca, krb5_trusted_ca, u, choice,
-                      trusted_ca_choice);
-DEFPTRTYPE(trusted_ca_ptr, trusted_ca);
-
-DEFNULLTERMSEQOFTYPE(seqof_trusted_ca, trusted_ca_ptr);
-DEFPTRTYPE(ptr_seqof_trusted_ca, seqof_trusted_ca);
-
-/*
- * draft-ietf-cat-kerberos-pk-init-09 specifies signedAuthPack, kdcCert, and
- * EncryptionCert as explictly tagged SignedData, IssuerAndSerialNumber, and
- * IssuerAndSerialNumber, which means they should have constructed context
- * tags.  However, our historical behavior is to use a primitive context tag,
- * and we don't want to change that without interop testing.  We have the DER
- * encodings of these fields in krb5_data objects; pretend that they are
- * wrapped in IMPLICIT OCTET STRING in order to generate primitive context
- * tags.
+ * In draft-ietf-cat-kerberos-pk-init-09, this sequence has four fields, but we
+ * only ever use the first and third.  The fields are specified as explicitly
+ * tagged, but our historical behavior is to pretend that they are wrapped in
+ * IMPLICIT OCTET STRING (i.e., generate primitive context tags), and we don't
+ * want to change that without interop testing.
  */
 DEFFIELD_IMPLICIT(pa_pk_as_req9_0, krb5_pa_pk_as_req_draft9, signedAuthPack, 0,
                   ostring_data);
-DEFFIELD(pa_pk_as_req9_1, krb5_pa_pk_as_req_draft9, trustedCertifiers, 1,
-         ptr_seqof_trusted_ca);
 DEFFIELD_IMPLICIT(pa_pk_as_req9_2, krb5_pa_pk_as_req_draft9, kdcCert, 2,
                   ostring_data);
-DEFFIELD_IMPLICIT(pa_pk_as_req9_3, krb5_pa_pk_as_req_draft9, encryptionCert, 3,
-                  ostring_data);
 static const struct atype_info *pa_pk_as_req_draft9_fields[] = {
-    &k5_atype_pa_pk_as_req9_0, &k5_atype_pa_pk_as_req9_1,
-    &k5_atype_pa_pk_as_req9_2, &k5_atype_pa_pk_as_req9_3
+    &k5_atype_pa_pk_as_req9_0, &k5_atype_pa_pk_as_req9_2
 };
 static unsigned int
 pa_pk_as_req_draft9_optional(const void *p)
 {
     unsigned int not_present = 0;
     const krb5_pa_pk_as_req_draft9 *val = p;
-    if (val->trustedCertifiers == NULL)
-        not_present |= (1u << 1);
     if (val->kdcCert.length == 0)
-        not_present |= (1u << 2);
-    if (val->encryptionCert.length == 0)
-        not_present |= (1u << 3);
+        not_present |= (1u << 1);
     return not_present;
 }
 DEFSEQTYPE(pa_pk_as_req_draft9, krb5_pa_pk_as_req_draft9,

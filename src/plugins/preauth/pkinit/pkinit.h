@@ -316,7 +316,6 @@ void free_krb5_auth_pack_draft9(krb5_context, krb5_auth_pack_draft9 **in);
 void free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in);
 void free_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in);
 void free_krb5_external_principal_identifier(krb5_external_principal_identifier ***in);
-void free_krb5_trusted_ca(krb5_trusted_ca ***in);
 void free_krb5_algorithm_identifiers(krb5_algorithm_identifier ***in);
 void free_krb5_algorithm_identifier(krb5_algorithm_identifier *in);
 void free_krb5_kdc_dh_key_info(krb5_kdc_dh_key_info **in);

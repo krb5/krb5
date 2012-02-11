@@ -1765,18 +1765,6 @@ create_krb5_supportedCMSTypes(krb5_context context,
     return 0;
 }
 
-#if 0
-krb5_error_code
-create_krb5_trustedCas(krb5_context context,
-                       pkinit_plg_crypto_context plg_cryptoctx,
-                       pkinit_req_crypto_context req_cryptoctx,
-                       pkinit_identity_crypto_context id_cryptoctx,
-                       int flag, krb5_trusted_ca ***trustedCas)
-{
-    return ENOSYS;
-}
-#endif
-
 /* Populate a list of trusted certifiers with the list of the root certificates
  * that we trust. */
 static void

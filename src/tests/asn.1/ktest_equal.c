@@ -854,29 +854,6 @@ ktest_equal_sequence_of_external_principal_identifier(
     array_compare(ktest_equal_external_principal_identifier);
 }
 
-static int
-ktest_equal_trusted_ca(krb5_trusted_ca *ref, krb5_trusted_ca *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    if (ref->choice != var->choice) return FALSE;
-    if (ref->choice == choice_trusted_cas_principalName)
-        p = p && ptr_equal(u.principalName, ktest_equal_principal_data);
-    else if (ref->choice == choice_trusted_cas_caName)
-        p = p && equal_str(u.caName);
-    else if (ref->choice == choice_trusted_cas_issuerAndSerial)
-        p = p && equal_str(u.issuerAndSerial);
-    return p;
-}
-
-static int
-ktest_equal_sequence_of_trusted_ca(krb5_trusted_ca **ref,
-                                   krb5_trusted_ca **var)
-{
-    array_compare(ktest_equal_trusted_ca);
-}
-
 int
 ktest_equal_pa_pk_as_req(krb5_pa_pk_as_req *ref, krb5_pa_pk_as_req *var)
 {
@@ -898,9 +875,7 @@ ktest_equal_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *ref,
     if (ref == var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     p = p && equal_str(signedAuthPack);
-    p = p && ptr_equal(trustedCertifiers, ktest_equal_sequence_of_trusted_ca);
     p = p && equal_str(kdcCert);
-    p = p && equal_str(encryptionCert);
     return p;
 }
 
@@ -926,21 +901,6 @@ ktest_equal_pa_pk_as_rep(krb5_pa_pk_as_rep *ref, krb5_pa_pk_as_rep *var)
     if (ref->choice == choice_pa_pk_as_rep_dhInfo)
         p = p && struct_equal(u.dh_Info, ktest_equal_dh_rep_info);
     else if (ref->choice == choice_pa_pk_as_rep_encKeyPack)
-        p = p && equal_str(u.encKeyPack);
-    return p;
-}
-
-int
-ktest_equal_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 *ref,
-                                krb5_pa_pk_as_rep_draft9 *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    if (ref->choice != var->choice) return FALSE;
-    if (ref->choice == choice_pa_pk_as_rep_draft9_dhSignedData)
-        p = p && equal_str(u.dhSignedData);
-    else if (ref->choice == choice_pa_pk_as_rep_draft9_encKeyPack)
         p = p && equal_str(u.encKeyPack);
     return p;
 }

@@ -49,8 +49,6 @@ static void ktest_free_pa_pk_as_req(krb5_context context,
                                     krb5_pa_pk_as_req *val);
 static void ktest_free_pa_pk_as_rep(krb5_context context,
                                     krb5_pa_pk_as_rep *val);
-static void ktest_free_pa_pk_as_rep_draft9(krb5_context context,
-                                           krb5_pa_pk_as_rep_draft9 *val);
 static void ktest_free_reply_key_pack(krb5_context context,
                                       krb5_reply_key_pack *val);
 static void ktest_free_reply_key_pack_draft9(krb5_context context,
@@ -1008,30 +1006,6 @@ int main(argc, argv)
     }
 
     /****************************************************************/
-    /* decode_krb5_pa_pk_as_rep_draft9 */
-    /*
-     * NOTE: These are NOT the encodings produced by
-     * encode_krb5_pa_pk_as_rep_draft9; they are hand-generated to match what
-     * the decoder expects.  The decoder expects a sequence containing an
-     * explicitly tagged octet string, while the encoder produces an implicitly
-     * tagged octet string.  See issue #7072.
-     */
-    {
-        setup(krb5_pa_pk_as_rep_draft9,ktest_make_sample_pa_pk_as_rep_draft9_dhSignedData);
-        decode_run("krb5_pa_pk_as_rep_draft9","(dhSignedData)","30 0C A0 0A 04 08 6B 72 62 35 64 61 74 61",
-                   acc.decode_krb5_pa_pk_as_rep_draft9,
-                   ktest_equal_pa_pk_as_rep_draft9,ktest_free_pa_pk_as_rep_draft9);
-        ktest_empty_pa_pk_as_rep_draft9(&ref);
-    }
-    {
-        setup(krb5_pa_pk_as_rep_draft9,ktest_make_sample_pa_pk_as_rep_draft9_encKeyPack);
-        decode_run("krb5_pa_pk_as_rep_draft9","(encKeyPack)","30 0C A1 0A 04 08 6B 72 62 35 64 61 74 61",
-                   acc.decode_krb5_pa_pk_as_rep_draft9,
-                   ktest_equal_pa_pk_as_rep_draft9,ktest_free_pa_pk_as_rep_draft9);
-        ktest_empty_pa_pk_as_rep_draft9(&ref);
-    }
-
-    /****************************************************************/
     /* decode_krb5_auth_pack */
     {
         setup(krb5_auth_pack,ktest_make_sample_auth_pack);
@@ -1166,15 +1140,6 @@ ktest_free_pa_pk_as_rep(krb5_context context, krb5_pa_pk_as_rep *val)
 {
     if (val)
         ktest_empty_pa_pk_as_rep(val);
-    free(val);
-}
-
-static void
-ktest_free_pa_pk_as_rep_draft9(krb5_context context,
-                               krb5_pa_pk_as_rep_draft9 *val)
-{
-    if (val)
-        ktest_empty_pa_pk_as_rep_draft9(val);
     free(val);
 }
 
