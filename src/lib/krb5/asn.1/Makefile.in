@@ -16,7 +16,6 @@ STLIBOBJS= \
 	asn1_k_decode_sam.o\
 	asn1_encode.o\
 	asn1_get.o\
-	asn1_make.o\
 	asn1buf.o\
 	krb5_decode.o\
 	krb5_decode_kdc.o\
@@ -32,7 +31,6 @@ SRCS= \
 	$(srcdir)/asn1_k_decode_sam.c\
 	$(srcdir)/asn1_encode.c\
 	$(srcdir)/asn1_get.c\
-	$(srcdir)/asn1_make.c\
 	$(srcdir)/asn1buf.c\
 	$(srcdir)/krb5_decode.c\
 	$(srcdir)/krb5_decode_kdc.c\
@@ -48,7 +46,6 @@ OBJS= \
 	$(OUTPRE)asn1_k_decode_sam.$(OBJEXT)\
 	$(OUTPRE)asn1_encode.$(OBJEXT)\
 	$(OUTPRE)asn1_get.$(OBJEXT)\
-	$(OUTPRE)asn1_make.$(OBJEXT)\
 	$(OUTPRE)asn1buf.$(OBJEXT)\
 	$(OUTPRE)krb5_decode.$(OBJEXT)\
 	$(OUTPRE)krb5_decode_kdc.$(OBJEXT)\

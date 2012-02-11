@@ -27,7 +27,6 @@
 /* ASN.1 primitive encoders */
 
 #include "asn1_encode.h"
-#include "asn1_make.h"
 
 asn1_error_code
 asn1_encode_boolean(asn1buf *buf, asn1_intmax val, unsigned int *retlen)
@@ -170,6 +169,71 @@ asn1_encode_bitstring(asn1buf *buf, unsigned char *const *val,
     if (retval) return retval;
     *retlen = len + 1;
     return asn1buf_insert_octet(buf, '\0');
+}
+
+static asn1_error_code
+make_tag(asn1buf *buf, const taginfo *t, unsigned int *retlen)
+{
+    asn1_error_code ret;
+    asn1_tagnum tag_copy;
+    unsigned int sum = 0, length, len_copy;
+
+    if (t->tagnum > ASN1_TAGNUM_MAX)
+        return ASN1_OVERFLOW;
+
+    /* Encode the length of the content within the tag. */
+    if (t->length < 128) {
+        ret = asn1buf_insert_octet(buf, t->length & 0x7F);
+        if (ret)
+            return ret;
+        length = 1;
+    } else {
+        length = 0;
+        for (len_copy = t->length; len_copy != 0; len_copy >>= 8) {
+            ret = asn1buf_insert_octet(buf, len_copy & 0xFF);
+            if (ret)
+                return ret;
+            length++;
+        }
+        ret = asn1buf_insert_octet(buf, 0x80 | (length & 0x7F));
+        if (ret)
+            return ret;
+        length++;
+    }
+    sum += length;
+
+    /* Encode the tag and construction bit. */
+    if (t->tagnum < 31) {
+        ret = asn1buf_insert_octet(buf,
+                                   t->asn1class | t->construction | t->tagnum);
+        if (ret)
+            return ret;
+        length = 1;
+    } else {
+        tag_copy = t->tagnum;
+        length = 0;
+        ret = asn1buf_insert_octet(buf, tag_copy & 0x7F);
+        if (ret)
+            return ret;
+        tag_copy >>= 7;
+        length++;
+
+        for (; tag_copy != 0; tag_copy >>= 7) {
+            ret = asn1buf_insert_octet(buf, 0x80 | (tag_copy & 0x7F));
+            if (ret)
+                return ret;
+            length++;
+        }
+
+        ret = asn1buf_insert_octet(buf, t->asn1class | t->construction | 0x1F);
+        if (ret)
+            return ret;
+        length++;
+    }
+    sum += length;
+
+    *retlen = sum;
+    return 0;
 }
 
 /*
@@ -381,9 +445,7 @@ krb5int_asn1_encode_type(asn1buf *buf, const void *val,
             return retval;
         if (!tag->implicit) {
             unsigned int tlen;
-            retval = asn1_make_tag(buf, rettag->asn1class,
-                                   rettag->construction, rettag->tagnum,
-                                   rettag->length, &tlen);
+            retval = make_tag(buf, rettag, &tlen);
             if (retval)
                 return retval;
             rettag->length += tlen;
@@ -441,8 +503,7 @@ encode_type_and_tag(asn1buf *buf, const void *val, const struct atype_info *a,
     retval = krb5int_asn1_encode_type(buf, val, a, &t);
     if (retval)
         return retval;
-    retval = asn1_make_tag(buf, t.asn1class, t.construction, t.tagnum,
-                           t.length, &tlen);
+    retval = make_tag(buf, &t, &tlen);
     if (retval)
         return retval;
     *retlen = t.length + tlen;

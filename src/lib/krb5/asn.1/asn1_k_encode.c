@@ -24,7 +24,6 @@
  * or implied warranty.
  */
 
-#include "asn1_make.h"
 #include "asn1_encode.h"
 #include <assert.h>
 

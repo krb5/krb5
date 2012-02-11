@@ -38,7 +38,6 @@
 #include "krbasn1.h"
 #include "asn1_encode.h"
 #include "asn1_decode.h"
-#include "asn1_make.h"
 #include "asn1_get.h"
 
 #ifdef ENABLE_LDAP
