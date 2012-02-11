@@ -46,7 +46,7 @@ rd_safe_basic(krb5_context context, krb5_auth_context ac,
 {
     krb5_error_code       retval;
     krb5_safe           * message;
-    krb5_data safe_body;
+    krb5_data *safe_body = NULL;
     krb5_checksum our_cksum, *his_cksum;
     krb5_octet zero_octet = 0;
     krb5_data *scratch;
@@ -89,7 +89,7 @@ rd_safe_basic(krb5_context context, krb5_auth_context ac,
 
     message->checksum = &our_cksum;
 
-    swb.body = &safe_body;
+    swb.body = safe_body;
     swb.safe = message;
     retval = encode_krb5_safe_with_body(&swb, &scratch);
     message->checksum = his_cksum;
@@ -110,7 +110,7 @@ rd_safe_basic(krb5_context context, krb5_auth_context ac,
          */
         retval = krb5_k_verify_checksum(context, key,
                                         KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
-                                        &safe_body, his_cksum, &valid);
+                                        safe_body, his_cksum, &valid);
         if (!valid) {
             retval = KRB5KRB_AP_ERR_MODIFIED;
             goto cleanup;
@@ -127,6 +127,7 @@ rd_safe_basic(krb5_context context, krb5_auth_context ac,
 
 cleanup:
     krb5_free_safe(context, message);
+    krb5_free_data(context, safe_body);
     return retval;
 }
 

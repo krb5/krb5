@@ -49,6 +49,11 @@ typedef struct {
     asn1_tagnum tagnum;
     size_t length;
     int indef;
+
+    /* When decoding, stores the leading and trailing lengths of a tag.  Used
+     * by store_der(). */
+    size_t tag_len;
+    size_t tag_end_len;
 } taginfo;
 
 asn1_error_code asn1_get_tag_2 (asn1buf *buf, taginfo *tinfo);

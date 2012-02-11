@@ -32,6 +32,7 @@
 #include "krb5_decode_macros.h"
 
 #ifndef LEAN_CLIENT
+#if 0
 krb5_error_code
 decode_krb5_authenticator(const krb5_data *code, krb5_authenticator **repptr)
 {
@@ -65,6 +66,7 @@ error_out:
     return retval;
 }
 #endif
+#endif
 
 krb5_error_code KRB5_CALLCONV
 krb5_decode_ticket(const krb5_data *code, krb5_ticket **repptr)
@@ -72,6 +74,7 @@ krb5_decode_ticket(const krb5_data *code, krb5_ticket **repptr)
     return decode_krb5_ticket(code, repptr);
 }
 
+#if 0
 krb5_error_code
 decode_krb5_ticket(const krb5_data *code, krb5_ticket **repptr)
 {
@@ -812,6 +815,7 @@ decode_krb5_iakerb_finished(const krb5_data *code, krb5_iakerb_finished **repptr
 
     cleanup(free);
 }
+#endif
 
 krb5_error_code KRB5_CALLCONV
 krb5int_get_authdata_containee_types(krb5_context context,
@@ -837,6 +841,7 @@ krb5int_get_authdata_containee_types(krb5_context context,
     assert(0); /* NOTREACHED */
 }
 
+#if 0
 #ifndef DISABLE_PKINIT
 
 krb5_error_code
@@ -959,3 +964,4 @@ decode_krb5_typed_data(const krb5_data *code, krb5_pa_data ***repptr)
 
     cleanup(free);
 }
+#endif

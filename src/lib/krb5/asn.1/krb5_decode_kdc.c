@@ -28,6 +28,7 @@
 #include "krbasn1.h"
 #include "krb5_decode_macros.h"
 
+#if 0
 krb5_error_code
 decode_krb5_as_req(const krb5_data *code, krb5_kdc_req **repptr)
 {
@@ -165,3 +166,4 @@ decode_krb5_pa_pk_as_req_draft9(const krb5_data *code,
     cleanup(free);
 }
 #endif /* DISABLE_PKINIT */
+#endif

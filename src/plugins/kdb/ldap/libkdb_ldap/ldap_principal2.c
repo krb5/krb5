@@ -365,6 +365,7 @@ asn1_encode_sequence_of_keys(krb5_key_data *key_data, krb5_int16 n_key_data,
     val.key_data = key_data;
     val.n_key_data = n_key_data;
     val.mkvno = mkvno;
+    val.kvno = key_data[0].key_data_kvno;
 
     return accessor.asn1_ldap_encode_sequence_of_keys(&val, code);
 }
@@ -375,6 +376,7 @@ asn1_decode_sequence_of_keys(krb5_data *in, krb5_key_data **out,
 {
     krb5_error_code err;
     ldap_seqof_key_data *p;
+    int i;
 
     /*
      * This should be pushed back into other library initialization
@@ -387,6 +389,14 @@ asn1_decode_sequence_of_keys(krb5_data *in, krb5_key_data **out,
     err = accessor.asn1_ldap_decode_sequence_of_keys(in, &p);
     if (err)
         return err;
+
+    /* Set kvno and key_data_ver in each key_data element. */
+    for (i = 0; i < p->n_key_data; i++) {
+        p->key_data[i].key_data_kvno = p->kvno;
+        p->key_data[i].key_data_ver =
+            (p->key_data[i].key_data_length[1] == 0) ? 1 : 2;
+    }
+
     *out = p->key_data;
     *n_key_data = p->n_key_data;
     *mkvno = p->mkvno;

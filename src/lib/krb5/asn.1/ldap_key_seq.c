@@ -55,7 +55,8 @@ IMPORT_TYPE(int32, krb5_int32);
 DEFINTTYPE(int16, krb5_int16);
 
 DEFCOUNTEDSTRINGTYPE(ui2_octetstring, unsigned char *, krb5_ui_2,
-                     k5_asn1_encode_bytestring, ASN1_OCTETSTRING);
+                     k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
+                     ASN1_OCTETSTRING);
 
 static int
 is_salt_present(const void *p)
@@ -65,7 +66,7 @@ is_salt_present(const void *p)
 }
 DEFCOUNTEDTYPE(krbsalt_salt, krb5_key_data, key_data_contents[1],
                key_data_length[1], ui2_octetstring);
-DEFOPTIONALTYPE(krbsalt_salt_if_present, is_salt_present, krbsalt_salt);
+DEFOPTIONALTYPE(krbsalt_salt_if_present, is_salt_present, NULL, krbsalt_salt);
 DEFFIELD(krbsalt_0, krb5_key_data, key_data_type[1], 0, int16);
 DEFCTAGGEDTYPE(krbsalt_1, 1, krbsalt_salt_if_present);
 static const struct atype_info *krbsalt_fields[] = {
@@ -93,13 +94,10 @@ DEFSEQTYPE(key_data, krb5_key_data, key_data_fields);
 DEFPTRTYPE(ptr_key_data, key_data);
 DEFCOUNTEDSEQOFTYPE(cseqof_key_data, krb5_int16, ptr_key_data);
 
-DEFOFFSETTYPE(key_data_kvno, krb5_key_data, key_data_kvno, int16);
-DEFPTRTYPE(ptr_key_data_kvno, key_data_kvno);
-
-DEFINT_IMMEDIATE(one, 1);
+DEFINT_IMMEDIATE(one, 1, ASN1_BAD_FORMAT);
 DEFCTAGGEDTYPE(ldap_key_seq_0, 0, one);
 DEFCTAGGEDTYPE(ldap_key_seq_1, 1, one);
-DEFFIELD(ldap_key_seq_2, ldap_seqof_key_data, key_data, 2, ptr_key_data_kvno);
+DEFFIELD(ldap_key_seq_2, ldap_seqof_key_data, kvno, 2, int16);
 DEFFIELD(ldap_key_seq_3, ldap_seqof_key_data, mkvno, 3, int32);
 DEFCNFIELD(ldap_key_seq_4, ldap_seqof_key_data, key_data, n_key_data, 4,
            cseqof_key_data);
@@ -112,7 +110,9 @@ DEFSEQTYPE(ldap_key_seq, ldap_seqof_key_data, ldap_key_seq_fields);
 
 /* Export a function to do the whole encoding.  */
 MAKE_ENCODER(krb5int_ldap_encode_sequence_of_keys, ldap_key_seq);
+MAKE_DECODER(krb5int_ldap_decode_sequence_of_keys, ldap_key_seq);
 
+#if 0
 /************************************************************************/
 /* Decode the Principal's keys                                          */
 /************************************************************************/
@@ -392,4 +392,5 @@ last:
 
     return ret;
 }
+#endif
 #endif

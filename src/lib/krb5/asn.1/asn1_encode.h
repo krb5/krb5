@@ -50,9 +50,25 @@ asn1_error_code k5_asn1_encode_bitstring(asn1buf *buf,
 asn1_error_code k5_asn1_encode_generaltime(asn1buf *buf, time_t val,
                                            size_t *len_out);
 
+/* These functions are referenced by encoder structures.  They handle the
+ * decoding of primitive ASN.1 types. */
+asn1_error_code k5_asn1_decode_bool(const unsigned char *asn1, size_t len,
+                                    asn1_intmax *val);
+asn1_error_code k5_asn1_decode_int(const unsigned char *asn1, size_t len,
+                                   asn1_intmax *val);
+asn1_error_code k5_asn1_decode_uint(const unsigned char *asn1, size_t len,
+                                    asn1_uintmax *val);
+asn1_error_code k5_asn1_decode_generaltime(const unsigned char *asn1,
+                                           size_t len, time_t *time_out);
+asn1_error_code k5_asn1_decode_bytestring(const unsigned char *asn1,
+                                          size_t len, unsigned char **str_out,
+                                          size_t *len_out);
+asn1_error_code k5_asn1_decode_bitstring(const unsigned char *asn1, size_t len,
+                                         unsigned char **bits_out,
+                                         size_t *len_out);
+
 /*
- * An atype_info structure specifies how to encode a pointer to a C
- * object as an ASN.1 type.
+ * An atype_info structure specifies how to map a C object to an ASN.1 value.
  *
  * We wind up with a lot of load-time relocations being done, which is
  * a bit annoying.  Be careful about "fixing" that at the cost of too
@@ -69,25 +85,26 @@ enum atype_type {
     /* For bounds checking only.  By starting with 2, we guarantee that
      * zero-initialized storage will be recognized as invalid. */
     atype_min = 1,
-    /* Encoder function to be called with address of <thing>.  tinfo is a
-     * struct fn_info *. */
+    /* Use a function table to handle encoding or decoding.  tinfo is a struct
+     * fn_info *. */
     atype_fn,
-    /* Pointer to actual thing to be encoded.  tinfo is a struct ptr_info *. */
+    /* C object is a pointer to the object to be encoded or decoded.  tinfo is
+     * a struct ptr_info *. */
     atype_ptr,
-    /* Actual thing to be encoded is at an offset from the original pointer.
-     * tinfo is a struct offset_info *. */
+    /* C object to be encoded or decoded is at an offset from the original
+     * pointer.  tinfo is a struct offset_info *. */
     atype_offset,
     /*
-     * Indicates a sequence field which may or may not be present in an object.
-     * tinfo is a struct optional_info *.  Must be used within a sequence,
-     * although the optional type may be nested within offset, ptr, and/or tag
-     * types.
+     * Indicates a sequence field which may or may not be present in the C
+     * object or ASN.1 sequence.  tinfo is a struct optional_info *.  Must be
+     * used within a sequence, although the optional type may be nested within
+     * offset, ptr, and/or tag types.
      */
     atype_optional,
     /*
-     * Actual thing to be encoded is an object at an offset from the original
-     * pointer, combined with an integer at a different offset, in a manner
-     * specified by a cntype_info structure.  tinfo is a struct counted_info *.
+     * C object contains an integer and another C object at specified offsets,
+     * to be combined and encoded or decoded as specified by a cntype_info
+     * structure.  tinfo is a struct counted_info *.
      */
     atype_counted,
     /* Sequence.  tinfo is a struct seq_info *. */
@@ -102,12 +119,17 @@ enum atype_type {
     atype_nonempty_nullterm_sequence_of,
     /* Tagged version of another type.  tinfo is a struct tagged_info *. */
     atype_tagged_thing,
-    /* Signed or unsigned integer.  tinfo is NULL (the atype_info size field is
-     * used to determine the width). */
+    /* Boolean value.  tinfo is NULL (size field determines C type width). */
+    atype_bool,
+    /* Signed or unsigned integer.  tinfo is NULL. */
     atype_int,
     atype_uint,
-    /* Integer value taken from the type info, not from the object being
-     * encoded.  tinfo is an int *. */
+    /*
+     * Integer value taken from the type info, not from the object being
+     * encoded.  tinfo is a struct immediate_info * giving the integer value
+     * and error code to return if a decoded object doesn't match it (or 0 if
+     * the value shouldn't be checked on decode).
+     */
     atype_int_immediate,
     /* Unused except for bounds checking.  */
     atype_max
@@ -121,10 +143,15 @@ struct atype_info {
 
 struct fn_info {
     asn1_error_code (*enc)(asn1buf *, const void *, taginfo *);
+    asn1_error_code (*dec)(const taginfo *, const unsigned char *, size_t,
+                           void *);
+    int (*check_tag)(const taginfo *);
+    void (*free)(void *);
 };
 
 struct ptr_info {
-    const void *(*loadptr)(const void *);
+    void *(*loadptr)(const void *);
+    void (*storeptr)(void *, void *);
     const struct atype_info *basetype;
 };
 
@@ -135,6 +162,7 @@ struct offset_info {
 
 struct optional_info {
     int (*is_present)(const void *);
+    void (*init)(void *);
     const struct atype_info *basetype;
 };
 
@@ -151,29 +179,37 @@ struct tagged_info {
     const struct atype_info *basetype;
 };
 
-/* A cntype_info structure specifies how to encode a pointer to a C object and
- * count (length or union distinguisher) as an ASN.1 object. */
+struct immediate_info {
+    asn1_intmax val;
+    asn1_error_code err;
+};
+
+/* A cntype_info structure specifies how to map a C object and count (length or
+ * union distinguisher) to an ASN.1 value. */
 
 enum cntype_type {
     cntype_min = 1,
 
     /*
      * Apply an encoder function (contents only) and wrap it in a universal
-     * primitive tag.  The object must be a char * or unsigned char *.  tinfo
+     * primitive tag.  The C object must be a char * or unsigned char *.  tinfo
      * is a struct string_info *.
      */
     cntype_string,
 
-    /* Insert a pre-made DER encoding contained at the pointer and length.  The
-     * object must be a char * or unsigned char *.  tinfo is NULL. */
+    /*
+     * The C object is a DER encoding (with tag), to be simply inserted on
+     * encode or stored on decode.  The C object must be a char * or unsigned
+     * char *.  tinfo is NULL.
+     */
     cntype_der,
 
-    /* Encode a counted sequence of a given base type.  tinfo is a struct
+    /* An ASN.1 sequence-of value, represtened in C as a counted array.  struct
      * atype_info * giving the base type, which must be of type atype_ptr. */
     cntype_seqof,
 
-    /* Encode one of several alternatives from a union object, using the count
-     * as a distinguisher.  tinfo is a struct choice_info *. */
+    /* An ASN.1 choice, represented in C as a distinguisher and union.  tinfo
+     * is a struct choice_info *. */
     cntype_choice,
 
     cntype_max
@@ -186,6 +222,8 @@ struct cntype_info {
 
 struct string_info {
     asn1_error_code (*enc)(asn1buf *, unsigned char *const *, size_t,
+                           size_t *);
+    asn1_error_code (*dec)(const unsigned char *, size_t, unsigned char **,
                            size_t *);
     unsigned int tagval : 5;
 };
@@ -221,14 +259,14 @@ struct seq_info {
  * Nothing else should directly define the atype_info structures.
  */
 
-/* Define a type using an encoder function. */
-#define DEFFNTYPE(DESCNAME, CTYPENAME, ENCFN)                   \
-    typedef CTYPENAME aux_type_##DESCNAME;                      \
-    static const struct fn_info aux_info_##DESCNAME = {         \
-        ENCFN                                                   \
-    };                                                          \
-    const struct atype_info k5_atype_##DESCNAME = {             \
-        atype_fn, sizeof(CTYPENAME), &aux_info_##DESCNAME       \
+/* Define a type using a function table. */
+#define DEFFNTYPE(DESCNAME, CTYPENAME, ENCFN, DECFN, CHECKFN, FREEFN)   \
+    typedef CTYPENAME aux_type_##DESCNAME;                              \
+    static const struct fn_info aux_info_##DESCNAME = {                 \
+        ENCFN, DECFN, CHECKFN, FREEFN                                   \
+    };                                                                  \
+    const struct atype_info k5_atype_##DESCNAME = {                     \
+        atype_fn, sizeof(CTYPENAME), &aux_info_##DESCNAME               \
     }
 /* A sequence, defined by the indicated series of types, and an optional
  * function indicating which fields are not present. */
@@ -239,6 +277,12 @@ struct seq_info {
     };                                                                  \
     const struct atype_info k5_atype_##DESCNAME = {                     \
         atype_sequence, sizeof(CTYPENAME), &aux_seqinfo_##DESCNAME      \
+    }
+/* A boolean type. */
+#define DEFBOOLTYPE(DESCNAME, CTYPENAME)                        \
+    typedef CTYPENAME aux_type_##DESCNAME;                      \
+    const struct atype_info k5_atype_##DESCNAME = {             \
+        atype_bool, sizeof(CTYPENAME), NULL                     \
     }
 /* Integer types.  */
 #define DEFINTTYPE(DESCNAME, CTYPENAME)                         \
@@ -251,11 +295,13 @@ struct seq_info {
     const struct atype_info k5_atype_##DESCNAME = {             \
         atype_uint, sizeof(CTYPENAME), NULL                     \
     }
-#define DEFINT_IMMEDIATE(DESCNAME, VAL)                 \
-    typedef int aux_type_##DESCNAME;                    \
-    static const int aux_int_##DESCNAME = VAL;          \
-    const struct atype_info k5_atype_##DESCNAME = {     \
-        atype_int_immediate, 0, &aux_int_##DESCNAME     \
+#define DEFINT_IMMEDIATE(DESCNAME, VAL, ERR)                    \
+    typedef int aux_type_##DESCNAME;                            \
+    static const struct immediate_info aux_info_##DESCNAME = {  \
+        VAL, ERR                                                \
+    };                                                          \
+    const struct atype_info k5_atype_##DESCNAME = {             \
+        atype_int_immediate, 0, &aux_info_##DESCNAME            \
     }
 
 /* Pointers to other types, to be encoded as those other types.  */
@@ -263,7 +309,7 @@ struct seq_info {
 #define DEFPTRTYPE(DESCNAME,BASEDESCNAME)                       \
     typedef aux_type_##BASEDESCNAME *aux_type_##DESCNAME;       \
     static const struct ptr_info aux_info_##DESCNAME = {        \
-        NULL, &k5_atype_##BASEDESCNAME                          \
+        NULL, NULL, &k5_atype_##BASEDESCNAME                    \
     };                                                          \
     const struct atype_info k5_atype_##DESCNAME = {             \
         atype_ptr, sizeof(aux_type_##DESCNAME),                 \
@@ -272,13 +318,19 @@ struct seq_info {
 #else
 #define DEFPTRTYPE(DESCNAME,BASEDESCNAME)                       \
     typedef aux_type_##BASEDESCNAME *aux_type_##DESCNAME;       \
-    static const void *                                         \
+    static void *                                               \
     aux_loadptr_##DESCNAME(const void *p)                       \
     {                                                           \
         return *(aux_type_##DESCNAME *)p;                       \
     }                                                           \
+    static void                                                 \
+    aux_storeptr_##DESCNAME(void *ptr, void *val)               \
+    {                                                           \
+        *(aux_type_##DESCNAME *)val = ptr;                      \
+    }                                                           \
     static const struct ptr_info aux_info_##DESCNAME = {        \
-        aux_loadptr_##DESCNAME, &k5_atype_##BASEDESCNAME        \
+        aux_loadptr_##DESCNAME, aux_storeptr_##DESCNAME,        \
+        &k5_atype_##BASEDESCNAME                                \
     };                                                          \
     const struct atype_info k5_atype_##DESCNAME = {             \
         atype_ptr, sizeof(aux_type_##DESCNAME),                 \
@@ -314,11 +366,11 @@ struct seq_info {
     DEFCOUNTEDTYPE_base(DESCNAME, STYPE, DATAFIELD, COUNTFIELD, 1, CDESC)
 
 /* Optional sequence fields.  The basic form allows arbitrary test and
- * initializer functions to be used. */
-#define DEFOPTIONALTYPE(DESCNAME, PRESENT, BASEDESC)            \
-    typedef aux_type_##BASEDESC aux_type_##DESCNAME;            \
+ * initializer functions to be used.  INIT may be null. */
+#define DEFOPTIONALTYPE(DESCNAME, PRESENT, INIT, BASEDESC)       \
+    typedef aux_type_##BASEDESC aux_type_##DESCNAME;             \
     static const struct optional_info aux_info_##DESCNAME = {   \
-        PRESENT, &k5_atype_##BASEDESC                           \
+        PRESENT, INIT, &k5_atype_##BASEDESC                     \
     };                                                          \
     const struct atype_info k5_atype_##DESCNAME = {             \
         atype_optional, sizeof(aux_type_##DESCNAME),            \
@@ -326,23 +378,23 @@ struct seq_info {
     }
 /* This form defines an is_present function for a zero-valued integer or null
  * pointer of the base type's C type. */
-#define DEFOPTIONALZEROTYPE(DESCNAME, BASEDESC)                 \
-    static int                                                  \
-    aux_present_##DESCNAME(const void *p)                       \
-    {                                                           \
-        return *(aux_type_##BASEDESC *)p != 0;                  \
-    }                                                           \
-    DEFOPTIONALTYPE(DESCNAME, aux_present_##DESCNAME, BASEDESC)
+#define DEFOPTIONALZEROTYPE(DESCNAME, BASEDESC)                         \
+    static int                                                          \
+    aux_present_##DESCNAME(const void *p)                               \
+    {                                                                   \
+        return *(aux_type_##BASEDESC *)p != 0;                          \
+    }                                                                   \
+    DEFOPTIONALTYPE(DESCNAME, aux_present_##DESCNAME, NULL, BASEDESC)
 /* This form defines an is_present function for a null or empty null-terminated
  * array of the base type's C type. */
-#define DEFOPTIONALEMPTYTYPE(DESCNAME, BASEDESC)                \
-    static int                                                  \
-    aux_present_##DESCNAME(const void *p)                       \
-    {                                                           \
-        const aux_type_##BASEDESC *val = p;                     \
-        return (*val != NULL && **val != NULL);                 \
-    }                                                           \
-    DEFOPTIONALTYPE(DESCNAME, aux_present_##DESCNAME, BASEDESC)
+#define DEFOPTIONALEMPTYTYPE(DESCNAME, BASEDESC)                        \
+    static int                                                          \
+    aux_present_##DESCNAME(const void *p)                               \
+    {                                                                   \
+        const aux_type_##BASEDESC *val = p;                             \
+        return (*val != NULL && **val != NULL);                         \
+    }                                                                   \
+    DEFOPTIONALTYPE(DESCNAME, aux_present_##DESCNAME, NULL, BASEDESC)
 
 /*
  * This encodes a pointer-to-pointer-to-thing where the passed-in
@@ -419,11 +471,11 @@ struct seq_info {
  * + Accept a following semicolon syntactically.
  */
 
-#define DEFCOUNTEDSTRINGTYPE(DESCNAME, DTYPE, LTYPE, ENCFN, TAGVAL)     \
+#define DEFCOUNTEDSTRINGTYPE(DESCNAME, DTYPE, LTYPE, ENCFN, DECFN, TAGVAL) \
     typedef DTYPE aux_ptrtype_##DESCNAME;                               \
     typedef LTYPE aux_counttype_##DESCNAME;                             \
     static const struct string_info aux_info_##DESCNAME = {             \
-        ENCFN, TAGVAL                                                   \
+        ENCFN, DECFN, TAGVAL                                            \
     };                                                                  \
     const struct cntype_info k5_cntype_##DESCNAME = {                   \
         cntype_string, &aux_info_##DESCNAME                             \
@@ -474,11 +526,20 @@ asn1_error_code
 k5_asn1_encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
                      taginfo *tag_out);
 
+/* Decode the tag and contents of a type, storing the result in the
+ * caller-allocated C object val.  Used only by kdc_req_body. */
+asn1_error_code
+k5_asn1_decode_atype(const taginfo *t, const unsigned char *asn1,
+                     size_t len, const struct atype_info *a, void *val);
+
 /* Returns a completed encoding, with tag and in the correct byte order, in an
  * allocated krb5_data. */
 extern krb5_error_code
 k5_asn1_full_encode(const void *rep, const struct atype_info *a,
                     krb5_data **code_out);
+asn1_error_code
+k5_asn1_full_decode(const krb5_data *code, const struct atype_info *a,
+                    void **rep_out);
 
 #define MAKE_ENCODER(FNAME, DESC)                                       \
     krb5_error_code                                                     \
@@ -487,6 +548,25 @@ k5_asn1_full_encode(const void *rep, const struct atype_info *a,
         return k5_asn1_full_encode(rep, &k5_atype_##DESC, code_out);    \
     }                                                                   \
     extern int dummy /* gobble semicolon */
+
+#define MAKE_DECODER(FNAME, DESC)                                       \
+    krb5_error_code                                                     \
+    FNAME(const krb5_data *code, aux_type_##DESC **rep_out)             \
+    {                                                                   \
+        asn1_error_code ret;                                            \
+        void *rep;                                                      \
+        *rep_out = NULL;                                                \
+        ret = k5_asn1_full_decode(code, &k5_atype_##DESC, &rep);        \
+        if (ret)                                                        \
+            return ret;                                                 \
+        *rep_out = rep;                                                 \
+        return 0;                                                       \
+    }                                                                   \
+    extern int dummy /* gobble semicolon */
+
+#define MAKE_CODEC(TYPENAME, DESC)              \
+    MAKE_ENCODER(encode_##TYPENAME, DESC);      \
+    MAKE_DECODER(decode_##TYPENAME, DESC)
 
 #include <stddef.h>
 /*

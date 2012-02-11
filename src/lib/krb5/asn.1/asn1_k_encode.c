@@ -27,8 +27,9 @@
 #include "asn1_encode.h"
 #include <assert.h>
 
-DEFINT_IMMEDIATE(krb5_version, KVNO);
+DEFINT_IMMEDIATE(krb5_version, KVNO, KRB5KDC_ERR_BAD_PVNO);
 
+DEFBOOLTYPE(bool, krb5_boolean);
 DEFINTTYPE(int32, krb5_int32);
 DEFPTRTYPE(int32_ptr, int32);
 DEFCOUNTEDSEQOFTYPE(cseqof_int32, krb5_int32, int32_ptr);
@@ -38,7 +39,6 @@ DEFUINTTYPE(uint, unsigned int);
 DEFUINTTYPE(octet, krb5_octet);
 DEFUINTTYPE(ui_4, krb5_ui_4);
 DEFOPTIONALZEROTYPE(opt_uint, uint);
-DEFOPTIONALZEROTYPE(opt_ui_4, ui_4);
 
 static int
 nonempty_data(const void *p)
@@ -49,23 +49,27 @@ nonempty_data(const void *p)
 
 DEFCOUNTEDDERTYPE(der, char *, unsigned int);
 DEFCOUNTEDTYPE(der_data, krb5_data, data, length, der);
-DEFOPTIONALTYPE(opt_der_data, nonempty_data, der_data);
+DEFOPTIONALTYPE(opt_der_data, nonempty_data, NULL, der_data);
 
 DEFCOUNTEDSTRINGTYPE(octetstring, unsigned char *, unsigned int,
-                     k5_asn1_encode_bytestring, ASN1_OCTETSTRING);
+                     k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
+                     ASN1_OCTETSTRING);
 DEFCOUNTEDSTRINGTYPE(s_octetstring, char *, unsigned int,
-                     k5_asn1_encode_bytestring, ASN1_OCTETSTRING);
+                     k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
+                     ASN1_OCTETSTRING);
 DEFCOUNTEDTYPE(ostring_data, krb5_data, data, length, s_octetstring);
 DEFPTRTYPE(ostring_data_ptr, ostring_data);
-DEFOPTIONALTYPE(opt_ostring_data, nonempty_data, ostring_data);
+DEFOPTIONALTYPE(opt_ostring_data, nonempty_data, NULL, ostring_data);
 DEFOPTIONALZEROTYPE(opt_ostring_data_ptr, ostring_data_ptr);
 
 DEFCOUNTEDSTRINGTYPE(generalstring, char *, unsigned int,
-                     k5_asn1_encode_bytestring, ASN1_GENERALSTRING);
+                     k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
+                     ASN1_GENERALSTRING);
 DEFCOUNTEDSTRINGTYPE(u_generalstring, unsigned char *, unsigned int,
-                     k5_asn1_encode_bytestring, ASN1_GENERALSTRING);
+                     k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
+                     ASN1_GENERALSTRING);
 DEFCOUNTEDTYPE(gstring_data, krb5_data, data, length, generalstring);
-DEFOPTIONALTYPE(opt_gstring_data, nonempty_data, gstring_data);
+DEFOPTIONALTYPE(opt_gstring_data, nonempty_data, NULL, gstring_data);
 DEFPTRTYPE(gstring_data_ptr, gstring_data);
 DEFCOUNTEDSEQOFTYPE(cseqof_gstring_data, krb5_int32, gstring_data_ptr);
 
@@ -84,6 +88,45 @@ DEFSEQTYPE(principal_data, krb5_principal_data, princname_fields);
 DEFPTRTYPE(principal, principal_data);
 DEFOPTIONALZEROTYPE(opt_principal, principal);
 
+/*
+ * Define the seqno type, which is an ASN.1 integer represented in a krb5_ui_4.
+ * When decoding, negative 32-bit numbers are accepted for interoperability
+ * with old implementations.
+ */
+static asn1_error_code
+encode_seqno(asn1buf *buf, const void *p, taginfo *rettag)
+{
+    krb5_ui_4 val = *(krb5_ui_4 *)p;
+    rettag->asn1class = UNIVERSAL;
+    rettag->construction = PRIMITIVE;
+    rettag->tagnum = ASN1_INTEGER;
+    return k5_asn1_encode_uint(buf, val, &rettag->length);
+}
+static asn1_error_code
+decode_seqno(const taginfo *t, const unsigned char *asn1, size_t len, void *p)
+{
+    asn1_error_code ret;
+    asn1_intmax val;
+    ret = k5_asn1_decode_int(asn1, len, &val);
+    if (ret)
+        return ret;
+    if (val < KRB5_INT32_MIN || val > 0xFFFFFFFF)
+        return ASN1_OVERFLOW;
+    /* Negative values will cast correctly to krb5_ui_4. */
+    *(krb5_ui_4 *)p = val;
+    return 0;
+}
+static int
+check_seqno(const taginfo *t)
+{
+    return (t->asn1class == UNIVERSAL && t->construction == PRIMITIVE &&
+            t->tagnum == ASN1_INTEGER);
+}
+DEFFNTYPE(seqno, krb5_ui_4, encode_seqno, decode_seqno, check_seqno, NULL);
+DEFOPTIONALZEROTYPE(opt_seqno, seqno);
+
+/* Define the kerberos_time type, which is an ASN.1 generaltime represented in
+ * a krb5_timestamp. */
 static asn1_error_code
 encode_kerberos_time(asn1buf *buf, const void *p, taginfo *rettag)
 {
@@ -94,7 +137,26 @@ encode_kerberos_time(asn1buf *buf, const void *p, taginfo *rettag)
     rettag->tagnum = ASN1_GENERALTIME;
     return k5_asn1_encode_generaltime(buf, val, &rettag->length);
 }
-DEFFNTYPE(kerberos_time, krb5_timestamp, encode_kerberos_time);
+static asn1_error_code
+decode_kerberos_time(const taginfo *t, const unsigned char *asn1, size_t len,
+                     void *p)
+{
+    asn1_error_code ret;
+    time_t val;
+    ret = k5_asn1_decode_generaltime(asn1, len, &val);
+    if (ret)
+        return ret;
+    *(krb5_timestamp *)p = val;
+    return 0;
+}
+static int
+check_kerberos_time(const taginfo *t)
+{
+    return (t->asn1class == UNIVERSAL && t->construction == PRIMITIVE &&
+            t->tagnum == ASN1_GENERALTIME);
+}
+DEFFNTYPE(kerberos_time, krb5_timestamp, encode_kerberos_time,
+          decode_kerberos_time, check_kerberos_time, NULL);
 DEFOPTIONALZEROTYPE(opt_kerberos_time, kerberos_time);
 
 DEFFIELD(address_0, krb5_address, addrtype, 0, int32);
@@ -123,13 +185,10 @@ nonempty_enc_data(const void *p)
     const krb5_enc_data *val = p;
     return (val->ciphertext.data != NULL);
 }
-DEFOPTIONALTYPE(opt_encrypted_data, nonempty_enc_data, encrypted_data);
+DEFOPTIONALTYPE(opt_encrypted_data, nonempty_enc_data, NULL, encrypted_data);
 
-/*
- * The encode_bitstring function wants an array of bytes (since PKINIT
- * may provide something that isn't 32 bits), but krb5_flags is stored
- * as a 32-bit integer in host order.
- */
+/* Define the krb5_flags type, which is an ASN.1 bit string represented in a
+ * 32-bit integer. */
 static asn1_error_code
 encode_krb5_flags(asn1buf *buf, const void *p, taginfo *rettag)
 {
@@ -140,7 +199,32 @@ encode_krb5_flags(asn1buf *buf, const void *p, taginfo *rettag)
     rettag->tagnum = ASN1_BITSTRING;
     return k5_asn1_encode_bitstring(buf, &cptr, 4, &rettag->length);
 }
-DEFFNTYPE(krb5_flags, krb5_flags, encode_krb5_flags);
+static asn1_error_code
+decode_krb5_flags(const taginfo *t, const unsigned char *asn1, size_t len,
+                  void *val)
+{
+    asn1_error_code ret;
+    size_t i, blen;
+    krb5_flags f = 0;
+    unsigned char *bits;
+    ret = k5_asn1_decode_bitstring(asn1, len, &bits, &blen);
+    if (ret)
+        return ret;
+    /* Copy up to 32 bits into f, starting at the most significant byte. */
+    for (i = 0; i < blen && i < 4; i++)
+        f |= bits[i] << (8 * (3 - i));
+    *(krb5_flags *)val = f;
+    free(bits);
+    return 0;
+}
+static int
+check_krb5_flags(const taginfo *t)
+{
+    return (t->asn1class == UNIVERSAL && t->construction == PRIMITIVE &&
+            t->tagnum == ASN1_BITSTRING);
+}
+DEFFNTYPE(krb5_flags, krb5_flags, encode_krb5_flags, decode_krb5_flags,
+          check_krb5_flags, NULL);
 DEFOPTIONALZEROTYPE(opt_krb5_flags, krb5_flags);
 
 DEFFIELD(authdata_0, krb5_authdata, ad_type, 0, int32);
@@ -174,7 +258,46 @@ DEFNULLTERMSEQOFTYPE(seqof_checksum, checksum_ptr);
 DEFPTRTYPE(ptr_seqof_checksum, seqof_checksum);
 DEFOPTIONALZEROTYPE(opt_checksum_ptr, checksum_ptr);
 
-DEFFIELD(last_req_0, krb5_last_req_entry, lr_type, 0, int32);
+/* Define the last_req_type type, which is a krb5_int32 with some massaging
+ * on decode for backward compatibility. */
+static asn1_error_code
+encode_lr_type(asn1buf *buf, const void *p, taginfo *rettag)
+{
+    krb5_int32 val = *(krb5_int32 *)p;
+    rettag->asn1class = UNIVERSAL;
+    rettag->construction = PRIMITIVE;
+    rettag->tagnum = ASN1_INTEGER;
+    return k5_asn1_encode_int(buf, val, &rettag->length);
+}
+static asn1_error_code
+decode_lr_type(const taginfo *t, const unsigned char *asn1, size_t len,
+               void *p)
+{
+    asn1_error_code ret;
+    asn1_intmax val;
+    ret = k5_asn1_decode_int(asn1, len, &val);
+    if (ret)
+        return ret;
+    if (val > KRB5_INT32_MAX || val < KRB5_INT32_MIN)
+        return ASN1_OVERFLOW;
+#ifdef KRB5_GENEROUS_LR_TYPE
+    /* If type is in the 128-255 range, treat it as a negative 8-bit value. */
+    if (val >= 128 && val <= 255)
+        val -= 256;
+#endif
+    *(krb5_int32 *)p = val;
+    return 0;
+}
+static int
+check_lr_type(const taginfo *t)
+{
+    return (t->asn1class == UNIVERSAL && t->construction == PRIMITIVE &&
+            t->tagnum == ASN1_INTEGER);
+}
+DEFFNTYPE(last_req_type, krb5_int32, encode_lr_type, decode_lr_type,
+          check_lr_type, NULL);
+
+DEFFIELD(last_req_0, krb5_last_req_entry, lr_type, 0, last_req_type);
 DEFFIELD(last_req_1, krb5_last_req_entry, value, 1, kerberos_time);
 static const struct atype_info *lr_fields[] = {
     &k5_atype_last_req_0, &k5_atype_last_req_1
@@ -215,6 +338,18 @@ DEFPTRTYPE(ptr_seqof_ticket, seqof_ticket);
 DEFOPTIONALEMPTYTYPE(opt_ptr_seqof_ticket, ptr_seqof_ticket);
 
 static int
+is_enc_kdc_rep_start_set(const void *p)
+{
+    const krb5_enc_kdc_rep_part *val = p;
+    return (val->times.starttime != 0);
+}
+static void
+init_enc_kdc_rep_start(void *p)
+{
+    krb5_enc_kdc_rep_part *val = p;
+    val->times.starttime = val->times.authtime;
+}
+static int
 is_renewable_flag_set(const void *p)
 {
     const krb5_enc_kdc_rep_part *val = p;
@@ -227,13 +362,15 @@ DEFFIELD(enc_kdc_rep_3, krb5_enc_kdc_rep_part, key_exp, 3, opt_kerberos_time);
 DEFFIELD(enc_kdc_rep_4, krb5_enc_kdc_rep_part, flags, 4, krb5_flags);
 DEFFIELD(enc_kdc_rep_5, krb5_enc_kdc_rep_part, times.authtime, 5,
          kerberos_time);
-DEFFIELD(enc_kdc_rep_6, krb5_enc_kdc_rep_part, times.starttime, 6,
-         opt_kerberos_time);
+DEFFIELD(enc_kdc_rep_6_def, krb5_enc_kdc_rep_part, times.starttime, 6,
+         kerberos_time);
+DEFOPTIONALTYPE(enc_kdc_rep_6, is_enc_kdc_rep_start_set,
+                init_enc_kdc_rep_start, enc_kdc_rep_6_def);
 DEFFIELD(enc_kdc_rep_7, krb5_enc_kdc_rep_part, times.endtime, 7,
          kerberos_time);
 DEFFIELD(enc_kdc_rep_8_def, krb5_enc_kdc_rep_part, times.renew_till, 8,
          kerberos_time);
-DEFOPTIONALTYPE(enc_kdc_rep_8, is_renewable_flag_set, enc_kdc_rep_8_def);
+DEFOPTIONALTYPE(enc_kdc_rep_8, is_renewable_flag_set, NULL, enc_kdc_rep_8_def);
 DEFFIELD(enc_kdc_rep_9, krb5_enc_kdc_rep_part, server, 9, realm_of_principal);
 DEFFIELD(enc_kdc_rep_10, krb5_enc_kdc_rep_part, server, 10, principal);
 DEFFIELD(enc_kdc_rep_11, krb5_enc_kdc_rep_part, caddrs, 11,
@@ -257,11 +394,11 @@ DEFSEQTYPE(enc_kdc_rep_part, krb5_enc_kdc_rep_part, enc_kdc_rep_part_fields);
  */
 typedef struct kdc_req_hack {
     krb5_kdc_req v;
-    krb5_data *server_realm;
+    krb5_data server_realm;
 } kdc_req_hack;
 DEFFIELD(req_body_0, kdc_req_hack, v.kdc_options, 0, krb5_flags);
 DEFFIELD(req_body_1, kdc_req_hack, v.client, 1, opt_principal);
-DEFFIELD(req_body_2, kdc_req_hack, server_realm, 2, gstring_data_ptr);
+DEFFIELD(req_body_2, kdc_req_hack, server_realm, 2, gstring_data);
 DEFFIELD(req_body_3, kdc_req_hack, v.server, 3, opt_principal);
 DEFFIELD(req_body_4, kdc_req_hack, v.from, 4, opt_kerberos_time);
 DEFFIELD(req_body_5, kdc_req_hack, v.till, 5, kerberos_time);
@@ -288,16 +425,75 @@ encode_kdc_req_body(asn1buf *buf, const void *p, taginfo *tag_out)
     h.v = *val;
     if (val->kdc_options & KDC_OPT_ENC_TKT_IN_SKEY) {
         if (val->second_ticket != NULL && val->second_ticket[0] != NULL)
-            h.server_realm = &val->second_ticket[0]->server->realm;
+            h.server_realm = val->second_ticket[0]->server->realm;
         else
             return ASN1_MISSING_FIELD;
     } else if (val->server != NULL)
-        h.server_realm = &val->server->realm;
+        h.server_realm = val->server->realm;
     else
         return ASN1_MISSING_FIELD;
     return k5_asn1_encode_atype(buf, &h, &k5_atype_kdc_req_body_hack, tag_out);
 }
-DEFFNTYPE(kdc_req_body, krb5_kdc_req, encode_kdc_req_body);
+static void
+free_kdc_req_body(void *val)
+{
+    krb5_kdc_req *req = val;
+    krb5_free_principal(NULL, req->client);
+    krb5_free_principal(NULL, req->server);
+    free(req->ktype);
+    krb5_free_addresses(NULL, req->addresses);
+    free(req->authorization_data.ciphertext.data);
+    krb5_free_tickets(NULL, req->second_ticket);
+}
+static asn1_error_code
+decode_kdc_req_body(const taginfo *t, const unsigned char *asn1, size_t len,
+                    void *val)
+{
+    asn1_error_code ret;
+    kdc_req_hack h;
+    krb5_kdc_req *b = val;
+    memset(&h, 0, sizeof(h));
+    ret = k5_asn1_decode_atype(t, asn1, len, &k5_atype_kdc_req_body_hack, &h);
+    if (ret)
+        return ret;
+    b->kdc_options = h.v.kdc_options;
+    b->client = h.v.client;
+    b->server = h.v.server;
+    b->from = h.v.from;
+    b->till = h.v.till;
+    b->rtime = h.v.rtime;
+    b->nonce = h.v.nonce;
+    b->ktype = h.v.ktype;
+    b->nktypes = h.v.nktypes;
+    b->addresses = h.v.addresses;
+    b->authorization_data = h.v.authorization_data;
+    b->second_ticket = h.v.second_ticket;
+    if (b->client != NULL && b->server != NULL) {
+        ret = krb5int_copy_data_contents(NULL, &h.server_realm,
+                                         &b->client->realm);
+        if (ret) {
+            free_kdc_req_body(b);
+            free(h.server_realm.data);
+            memset(&h, 0, sizeof(h));
+            return ret;
+        }
+        b->server->realm = h.server_realm;
+    } else if (b->client != NULL)
+        b->client->realm = h.server_realm;
+    else if (b->server != NULL)
+        b->server->realm = h.server_realm;
+    else
+        free(h.server_realm.data);
+    return 0;
+}
+static int
+check_kdc_req_body(const taginfo *t)
+{
+    return (t->asn1class == UNIVERSAL && t->construction == CONSTRUCTED &&
+            t->tagnum == ASN1_SEQUENCE);
+}
+DEFFNTYPE(kdc_req_body, krb5_kdc_req, encode_kdc_req_body, decode_kdc_req_body,
+          check_kdc_req_body, free_kdc_req_body);
 /* end ugly hack */
 
 DEFFIELD(transited_0, krb5_transited, tr_type, 0, octet);
@@ -316,8 +512,8 @@ is_safe_timestamp_set(const void *p)
 DEFFIELD(safe_body_0, krb5_safe, user_data, 0, ostring_data);
 DEFFIELD(safe_body_1, krb5_safe, timestamp, 1, opt_kerberos_time);
 DEFFIELD(safe_body_2_def, krb5_safe, usec, 2, int32);
-DEFOPTIONALTYPE(safe_body_2, is_safe_timestamp_set, safe_body_2_def);
-DEFFIELD(safe_body_3, krb5_safe, seq_number, 3, opt_ui_4);
+DEFOPTIONALTYPE(safe_body_2, is_safe_timestamp_set, NULL, safe_body_2_def);
+DEFFIELD(safe_body_3, krb5_safe, seq_number, 3, opt_seqno);
 DEFFIELD(safe_body_4, krb5_safe, s_address, 4, address_ptr);
 DEFFIELD(safe_body_5, krb5_safe, r_address, 5, opt_address_ptr);
 static const struct atype_info *safe_body_fields[] = {
@@ -351,15 +547,21 @@ DEFNULLTERMSEQOFTYPE(seqof_cred_info, cred_info_ptr);
 DEFPTRTYPE(ptrseqof_cred_info, seqof_cred_info);
 
 static int
-is_etype_info_salt_present(const void *p)
+is_salt_present(const void *p)
 {
     const krb5_etype_info_entry *val = p;
     return (val->length != KRB5_ETYPE_NO_SALT);
 }
+static void
+init_no_salt(void *p)
+{
+    krb5_etype_info_entry *val = p;
+    val->length = KRB5_ETYPE_NO_SALT;
+}
 DEFFIELD(etype_info_0, krb5_etype_info_entry, etype, 0, int32);
 DEFCNFIELD(etype_info_1_def, krb5_etype_info_entry, salt, length, 1,
            octetstring);
-DEFOPTIONALTYPE(etype_info_1, is_etype_info_salt_present, etype_info_1_def);
+DEFOPTIONALTYPE(etype_info_1, is_salt_present, init_no_salt, etype_info_1_def);
 static const struct atype_info *etype_info_entry_fields[] = {
     &k5_atype_etype_info_0, &k5_atype_etype_info_1
 };
@@ -368,7 +570,7 @@ DEFSEQTYPE(etype_info_entry, krb5_etype_info_entry, etype_info_entry_fields);
 /* First field is the same as etype-info. */
 DEFCNFIELD(etype_info2_1_def, krb5_etype_info_entry, salt, length, 1,
            u_generalstring);
-DEFOPTIONALTYPE(etype_info2_1, is_etype_info_salt_present, etype_info2_1_def);
+DEFOPTIONALTYPE(etype_info2_1, is_salt_present, NULL, etype_info2_1_def);
 DEFFIELD(etype_info2_2, krb5_etype_info_entry, s2kparams, 2, opt_ostring_data);
 static const struct atype_info *etype_info2_entry_fields[] = {
     &k5_atype_etype_info_0, &k5_atype_etype_info2_1, &k5_atype_etype_info2_2
@@ -439,7 +641,7 @@ DEFFIELD(authenticator_4, krb5_authenticator, cusec, 4, int32);
 DEFFIELD(authenticator_5, krb5_authenticator, ctime, 5, kerberos_time);
 DEFFIELD(authenticator_6, krb5_authenticator, subkey, 6,
          opt_ptr_encryption_key);
-DEFFIELD(authenticator_7, krb5_authenticator, seq_number, 7, opt_ui_4);
+DEFFIELD(authenticator_7, krb5_authenticator, seq_number, 7, opt_seqno);
 DEFFIELD(authenticator_8, krb5_authenticator, authorization_data, 8,
          opt_auth_data_ptr);
 static const struct atype_info *authenticator_fields[] = {
@@ -452,13 +654,27 @@ static const struct atype_info *authenticator_fields[] = {
 DEFSEQTYPE(untagged_authenticator, krb5_authenticator, authenticator_fields);
 DEFAPPTAGGEDTYPE(authenticator, 2, untagged_authenticator);
 
+static int
+is_enc_tkt_start_set(const void *p)
+{
+    const krb5_enc_tkt_part *val = p;
+    return (val->times.starttime != 0);
+}
+static void
+init_enc_tkt_start(void *p)
+{
+    krb5_enc_tkt_part *val = p;
+    val->times.starttime = val->times.authtime;
+}
 DEFFIELD(enc_tkt_0, krb5_enc_tkt_part, flags, 0, krb5_flags);
 DEFFIELD(enc_tkt_1, krb5_enc_tkt_part, session, 1, ptr_encryption_key);
 DEFFIELD(enc_tkt_2, krb5_enc_tkt_part, client, 2, realm_of_principal);
 DEFFIELD(enc_tkt_3, krb5_enc_tkt_part, client, 3, principal);
 DEFFIELD(enc_tkt_4, krb5_enc_tkt_part, transited, 4, transited);
 DEFFIELD(enc_tkt_5, krb5_enc_tkt_part, times.authtime, 5, kerberos_time);
-DEFFIELD(enc_tkt_6, krb5_enc_tkt_part, times.starttime, 6, opt_kerberos_time);
+DEFFIELD(enc_tkt_6_def, krb5_enc_tkt_part, times.starttime, 6, kerberos_time);
+DEFOPTIONALTYPE(enc_tkt_6, is_enc_tkt_start_set, init_enc_tkt_start,
+                enc_tkt_6_def);
 DEFFIELD(enc_tkt_7, krb5_enc_tkt_part, times.endtime, 7, kerberos_time);
 DEFFIELD(enc_tkt_8, krb5_enc_tkt_part, times.renew_till, 8, opt_kerberos_time);
 DEFFIELD(enc_tkt_9, krb5_enc_tkt_part, caddrs, 9,
@@ -474,38 +690,26 @@ static const struct atype_info *enc_tkt_part_fields[] = {
 DEFSEQTYPE(untagged_enc_tkt_part, krb5_enc_tkt_part, enc_tkt_part_fields);
 DEFAPPTAGGEDTYPE(enc_tkt_part, 3, untagged_enc_tkt_part);
 
+DEFAPPTAGGEDTYPE(enc_as_rep_part, 24, enc_kdc_rep_part);
 DEFAPPTAGGEDTYPE(enc_tgs_rep_part, 26, enc_kdc_rep_part);
 
-DEFINT_IMMEDIATE(as_rep_msg_type, KRB5_AS_REP);
 DEFCTAGGEDTYPE(kdc_rep_0, 0, krb5_version);
-DEFCTAGGEDTYPE(as_rep_1, 1, as_rep_msg_type);
+DEFFIELD(kdc_rep_1, krb5_kdc_rep, msg_type, 1, uint);
 DEFFIELD(kdc_rep_2, krb5_kdc_rep, padata, 2, opt_ptr_seqof_pa_data);
 DEFFIELD(kdc_rep_3, krb5_kdc_rep, client, 3, realm_of_principal);
 DEFFIELD(kdc_rep_4, krb5_kdc_rep, client, 4, principal);
 DEFFIELD(kdc_rep_5, krb5_kdc_rep, ticket, 5, ticket_ptr);
 DEFFIELD(kdc_rep_6, krb5_kdc_rep, enc_part, 6, encrypted_data);
-static const struct atype_info *as_rep_fields[] = {
-    &k5_atype_kdc_rep_0, &k5_atype_as_rep_1, &k5_atype_kdc_rep_2,
+static const struct atype_info *kdc_rep_fields[] = {
+    &k5_atype_kdc_rep_0, &k5_atype_kdc_rep_1, &k5_atype_kdc_rep_2,
     &k5_atype_kdc_rep_3, &k5_atype_kdc_rep_4, &k5_atype_kdc_rep_5,
     &k5_atype_kdc_rep_6
 };
-DEFSEQTYPE(untagged_as_rep, krb5_kdc_rep, as_rep_fields);
-DEFAPPTAGGEDTYPE(as_rep, 11, untagged_as_rep);
+DEFSEQTYPE(kdc_rep, krb5_kdc_rep, kdc_rep_fields);
+DEFAPPTAGGEDTYPE(as_rep, 11, kdc_rep);
+DEFAPPTAGGEDTYPE(tgs_rep, 13, kdc_rep);
 
-/* TGS-REP ::= [APPLICATION 13] KDC-REP */
-/* But KDC-REP needs to know what type it's being encapsulated in, so use a
- * separate atype.  Most fields are the same. */
-DEFINT_IMMEDIATE(tgs_rep_msg_type, KRB5_TGS_REP);
-DEFCTAGGEDTYPE(tgs_rep_1, 1, tgs_rep_msg_type);
-static const struct atype_info *tgs_rep_fields[] = {
-    &k5_atype_kdc_rep_0, &k5_atype_tgs_rep_1, &k5_atype_kdc_rep_2,
-    &k5_atype_kdc_rep_3, &k5_atype_kdc_rep_4, &k5_atype_kdc_rep_5,
-    &k5_atype_kdc_rep_6
-};
-DEFSEQTYPE(untagged_tgs_rep, krb5_kdc_rep, tgs_rep_fields);
-DEFAPPTAGGEDTYPE(tgs_rep, 13, untagged_tgs_rep);
-
-DEFINT_IMMEDIATE(ap_req_msg_type, ASN1_KRB_AP_REQ);
+DEFINT_IMMEDIATE(ap_req_msg_type, ASN1_KRB_AP_REQ, 0);
 DEFCTAGGEDTYPE(ap_req_0, 0, krb5_version);
 DEFCTAGGEDTYPE(ap_req_1, 1, ap_req_msg_type);
 DEFFIELD(ap_req_2, krb5_ap_req, ap_options, 2, krb5_flags);
@@ -518,7 +722,7 @@ static const struct atype_info *ap_req_fields[] = {
 DEFSEQTYPE(untagged_ap_req, krb5_ap_req, ap_req_fields);
 DEFAPPTAGGEDTYPE(ap_req, 14, untagged_ap_req);
 
-DEFINT_IMMEDIATE(ap_rep_msg_type, ASN1_KRB_AP_REP);
+DEFINT_IMMEDIATE(ap_rep_msg_type, ASN1_KRB_AP_REP, 0);
 DEFCTAGGEDTYPE(ap_rep_0, 0, krb5_version);
 DEFCTAGGEDTYPE(ap_rep_1, 1, ap_rep_msg_type);
 DEFFIELD(ap_rep_2, krb5_ap_rep, enc_part, 2, encrypted_data);
@@ -532,7 +736,7 @@ DEFFIELD(ap_rep_enc_part_0, krb5_ap_rep_enc_part, ctime, 0, kerberos_time);
 DEFFIELD(ap_rep_enc_part_1, krb5_ap_rep_enc_part, cusec, 1, int32);
 DEFFIELD(ap_rep_enc_part_2, krb5_ap_rep_enc_part, subkey, 2,
          opt_ptr_encryption_key);
-DEFFIELD(ap_rep_enc_part_3, krb5_ap_rep_enc_part, seq_number, 3, opt_ui_4);
+DEFFIELD(ap_rep_enc_part_3, krb5_ap_rep_enc_part, seq_number, 3, opt_seqno);
 static const struct atype_info *ap_rep_enc_part_fields[] = {
     &k5_atype_ap_rep_enc_part_0, &k5_atype_ap_rep_enc_part_1,
     &k5_atype_ap_rep_enc_part_2, &k5_atype_ap_rep_enc_part_3
@@ -543,29 +747,38 @@ DEFAPPTAGGEDTYPE(ap_rep_enc_part, 27, untagged_ap_rep_enc_part);
 
 /* First context tag is 1.  Fourth field is the encoding of the krb5_kdc_req
  * structure as a KDC-REQ-BODY. */
-DEFINT_IMMEDIATE(as_req_msg_type, KRB5_AS_REQ);
-DEFCTAGGEDTYPE(as_req_1, 1, krb5_version);
+DEFCTAGGEDTYPE(kdc_req_1, 1, krb5_version);
+DEFFIELD(kdc_req_2, krb5_kdc_req, msg_type, 2, uint);
+DEFFIELD(kdc_req_3, krb5_kdc_req, padata, 3, opt_ptr_seqof_pa_data);
+DEFCTAGGEDTYPE(kdc_req_4, 4, kdc_req_body);
+static const struct atype_info *kdc_req_fields[] = {
+    &k5_atype_kdc_req_1, &k5_atype_kdc_req_2, &k5_atype_kdc_req_3,
+    &k5_atype_kdc_req_4
+};
+DEFSEQTYPE(kdc_req, krb5_kdc_req, kdc_req_fields);
+DEFAPPTAGGEDTYPE(as_req, 10, kdc_req);
+DEFAPPTAGGEDTYPE(tgs_req, 12, kdc_req);
+
+/* This is only needed because libkrb5 doesn't set msg_type when encoding
+ * krb5_kdc_reqs.  If we fix that, we can use the above types for encoding. */
+DEFINT_IMMEDIATE(as_req_msg_type, KRB5_AS_REQ, 0);
 DEFCTAGGEDTYPE(as_req_2, 2, as_req_msg_type);
-DEFFIELD(as_req_3, krb5_kdc_req, padata, 3, opt_ptr_seqof_pa_data);
-DEFCTAGGEDTYPE(as_req_4, 4, kdc_req_body);
+DEFINT_IMMEDIATE(tgs_req_msg_type, KRB5_TGS_REQ, 0);
+DEFCTAGGEDTYPE(tgs_req_2, 2, tgs_req_msg_type);
 static const struct atype_info *as_req_fields[] = {
-    &k5_atype_as_req_1, &k5_atype_as_req_2, &k5_atype_as_req_3,
-    &k5_atype_as_req_4
+    &k5_atype_kdc_req_1, &k5_atype_as_req_2, &k5_atype_kdc_req_3,
+    &k5_atype_kdc_req_4
+};
+static const struct atype_info *tgs_req_fields[] = {
+    &k5_atype_kdc_req_1, &k5_atype_tgs_req_2, &k5_atype_kdc_req_3,
+    &k5_atype_kdc_req_4
 };
 DEFSEQTYPE(untagged_as_req, krb5_kdc_req, as_req_fields);
-DEFAPPTAGGEDTYPE(as_req, 10, untagged_as_req);
-
-/* Most fields are the same as as_req. */
-DEFINT_IMMEDIATE(tgs_req_msg_type, KRB5_TGS_REQ);
-DEFCTAGGEDTYPE(tgs_req_2, 2, tgs_req_msg_type);
-static const struct atype_info *tgs_req_fields[] = {
-    &k5_atype_as_req_1, &k5_atype_tgs_req_2, &k5_atype_as_req_3,
-    &k5_atype_as_req_4
-};
+DEFAPPTAGGEDTYPE(as_req_encode, 10, untagged_as_req);
 DEFSEQTYPE(untagged_tgs_req, krb5_kdc_req, tgs_req_fields);
-DEFAPPTAGGEDTYPE(tgs_req, 12, untagged_tgs_req);
+DEFAPPTAGGEDTYPE(tgs_req_encode, 12, untagged_tgs_req);
 
-DEFINT_IMMEDIATE(safe_msg_type, ASN1_KRB_SAFE);
+DEFINT_IMMEDIATE(safe_msg_type, ASN1_KRB_SAFE, 0);
 DEFCTAGGEDTYPE(safe_0, 0, krb5_version);
 DEFCTAGGEDTYPE(safe_1, 1, safe_msg_type);
 DEFCTAGGEDTYPE(safe_2, 2, safe_body);
@@ -594,7 +807,7 @@ DEFSEQTYPE(untagged_safe_with_body, struct krb5_safe_with_body,
 DEFAPPTAGGEDTYPE(safe_with_body, 20, untagged_safe_with_body);
 
 /* Third tag is [3] instead of [2]. */
-DEFINT_IMMEDIATE(priv_msg_type, ASN1_KRB_PRIV);
+DEFINT_IMMEDIATE(priv_msg_type, ASN1_KRB_PRIV, 0);
 DEFCTAGGEDTYPE(priv_0, 0, krb5_version);
 DEFCTAGGEDTYPE(priv_1, 1, priv_msg_type);
 DEFFIELD(priv_3, krb5_priv, enc_part, 3, encrypted_data);
@@ -613,8 +826,9 @@ is_priv_timestamp_set(const void *p)
 DEFFIELD(priv_enc_part_0, krb5_priv_enc_part, user_data, 0, ostring_data);
 DEFFIELD(priv_enc_part_1, krb5_priv_enc_part, timestamp, 1, opt_kerberos_time);
 DEFFIELD(priv_enc_part_2_def, krb5_priv_enc_part, usec, 2, int32);
-DEFOPTIONALTYPE(priv_enc_part_2, is_priv_timestamp_set, priv_enc_part_2_def);
-DEFFIELD(priv_enc_part_3, krb5_priv_enc_part, seq_number, 3, opt_ui_4);
+DEFOPTIONALTYPE(priv_enc_part_2, is_priv_timestamp_set, NULL,
+                priv_enc_part_2_def);
+DEFFIELD(priv_enc_part_3, krb5_priv_enc_part, seq_number, 3, opt_seqno);
 DEFFIELD(priv_enc_part_4, krb5_priv_enc_part, s_address, 4, address_ptr);
 DEFFIELD(priv_enc_part_5, krb5_priv_enc_part, r_address, 5, opt_address_ptr);
 static const struct atype_info *priv_enc_part_fields[] = {
@@ -625,7 +839,7 @@ static const struct atype_info *priv_enc_part_fields[] = {
 DEFSEQTYPE(untagged_priv_enc_part, krb5_priv_enc_part, priv_enc_part_fields);
 DEFAPPTAGGEDTYPE(priv_enc_part, 28, untagged_priv_enc_part);
 
-DEFINT_IMMEDIATE(cred_msg_type, ASN1_KRB_CRED);
+DEFINT_IMMEDIATE(cred_msg_type, ASN1_KRB_CRED, 0);
 DEFCTAGGEDTYPE(cred_0, 0, krb5_version);
 DEFCTAGGEDTYPE(cred_1, 1, cred_msg_type);
 DEFFIELD(cred_2, krb5_cred, tickets, 2, ptr_seqof_ticket);
@@ -647,7 +861,8 @@ DEFFIELD(enc_cred_part_0, krb5_cred_enc_part, ticket_info, 0,
 DEFFIELD(enc_cred_part_1, krb5_cred_enc_part, nonce, 1, opt_int32);
 DEFFIELD(enc_cred_part_2, krb5_cred_enc_part, timestamp, 2, opt_kerberos_time);
 DEFFIELD(enc_cred_part_3_def, krb5_cred_enc_part, usec, 3, int32);
-DEFOPTIONALTYPE(enc_cred_part_3, is_cred_timestamp_set, enc_cred_part_3_def);
+DEFOPTIONALTYPE(enc_cred_part_3, is_cred_timestamp_set, NULL,
+                enc_cred_part_3_def);
 DEFFIELD(enc_cred_part_4, krb5_cred_enc_part, s_address, 4, opt_address_ptr);
 DEFFIELD(enc_cred_part_5, krb5_cred_enc_part, r_address, 5, opt_address_ptr);
 static const struct atype_info *enc_cred_part_fields[] = {
@@ -658,7 +873,7 @@ static const struct atype_info *enc_cred_part_fields[] = {
 DEFSEQTYPE(untagged_enc_cred_part, krb5_cred_enc_part, enc_cred_part_fields);
 DEFAPPTAGGEDTYPE(enc_cred_part, 29, untagged_enc_cred_part);
 
-DEFINT_IMMEDIATE(error_msg_type, ASN1_KRB_ERROR);
+DEFINT_IMMEDIATE(error_msg_type, ASN1_KRB_ERROR, 0);
 DEFCTAGGEDTYPE(error_0, 0, krb5_version);
 DEFCTAGGEDTYPE(error_1, 1, error_msg_type);
 DEFFIELD(error_2, krb5_error, ctime, 2, opt_kerberos_time);
@@ -715,7 +930,7 @@ is_s4u_principal_present(const void *p)
     krb5_const_principal val = *(krb5_const_principal *)p;
     return (val->length != 0);
 }
-DEFOPTIONALTYPE(opt_s4u_principal, is_s4u_principal_present, principal);
+DEFOPTIONALTYPE(opt_s4u_principal, is_s4u_principal_present, NULL, principal);
 DEFFIELD(s4u_userid_0, krb5_s4u_userid, nonce, 0, int32);
 DEFFIELD(s4u_userid_1, krb5_s4u_userid, user, 1, opt_s4u_principal);
 DEFFIELD(s4u_userid_2, krb5_s4u_userid, user, 2, realm_of_principal);
@@ -733,6 +948,12 @@ static const struct atype_info *pa_s4u_x509_user_fields[] = {
     &k5_atype_pa_s4u_x509_user_0, &k5_atype_pa_s4u_x509_user_1
 };
 DEFSEQTYPE(pa_s4u_x509_user, krb5_pa_s4u_x509_user, pa_s4u_x509_user_fields);
+
+DEFFIELD(pa_pac_req_0, krb5_pa_pac_req, include_pac, 0, bool);
+static const struct atype_info *pa_pac_req_fields[] = {
+    &k5_atype_pa_pac_req_0
+};
+DEFSEQTYPE(pa_pac_req, krb5_pa_pac_req, pa_pac_req_fields);
 
 /* RFC 4537 */
 DEFCOUNTEDTYPE(etype_list, krb5_etype_list, etypes, length, cseqof_int32);
@@ -880,65 +1101,155 @@ DEFSEQTYPE(iakerb_finished, krb5_iakerb_finished, iakerb_finished_fields);
 /* Exported complete encoders -- these produce a krb5_data with
    the encoding in the correct byte order.  */
 
-MAKE_ENCODER(encode_krb5_authenticator, authenticator);
-MAKE_ENCODER(encode_krb5_ticket, ticket);
-MAKE_ENCODER(encode_krb5_encryption_key, encryption_key);
-MAKE_ENCODER(encode_krb5_enc_tkt_part, enc_tkt_part);
-/* XXX We currently (for backwards compatibility) encode both
-   EncASRepPart and EncTGSRepPart with application tag 26.  */
-MAKE_ENCODER(encode_krb5_enc_kdc_rep_part, enc_tgs_rep_part);
-MAKE_ENCODER(encode_krb5_as_rep, as_rep);
-MAKE_ENCODER(encode_krb5_tgs_rep, tgs_rep);
-MAKE_ENCODER(encode_krb5_ap_req, ap_req);
-MAKE_ENCODER(encode_krb5_ap_rep, ap_rep);
-MAKE_ENCODER(encode_krb5_ap_rep_enc_part, ap_rep_enc_part);
-MAKE_ENCODER(encode_krb5_as_req, as_req);
-MAKE_ENCODER(encode_krb5_tgs_req, tgs_req);
-MAKE_ENCODER(encode_krb5_kdc_req_body, kdc_req_body);
-MAKE_ENCODER(encode_krb5_safe, safe);
+MAKE_CODEC(krb5_authenticator, authenticator);
+MAKE_CODEC(krb5_ticket, ticket);
+MAKE_CODEC(krb5_encryption_key, encryption_key);
+MAKE_CODEC(krb5_enc_tkt_part, enc_tkt_part);
 
 /*
- * encode_krb5_safe_with_body
- *
- * Like encode_krb5_safe(), except takes a saved KRB-SAFE-BODY
- * encoding to avoid problems with re-encoding.
+ * For backwards compatibility, we encode both EncASRepPart and EncTGSRepPart
+ * with application tag 26.  On decode, we accept either app tag and set the
+ * msg_type field of the resulting structure.  This could be simplified and
+ * pushed up into libkrb5.
  */
+MAKE_ENCODER(encode_krb5_enc_kdc_rep_part, enc_tgs_rep_part);
+krb5_error_code
+decode_krb5_enc_kdc_rep_part(const krb5_data *code,
+                             krb5_enc_kdc_rep_part **rep_out)
+{
+    asn1_error_code ret;
+    krb5_enc_kdc_rep_part *rep;
+    void *rep_ptr;
+    krb5_msgtype msg_type = KRB5_TGS_REP;
+
+    *rep_out = NULL;
+    ret = k5_asn1_full_decode(code, &k5_atype_enc_tgs_rep_part, &rep_ptr);
+    if (ret == ASN1_BAD_ID) {
+        msg_type = KRB5_AS_REP;
+        ret = k5_asn1_full_decode(code, &k5_atype_enc_as_rep_part, &rep_ptr);
+    }
+    if (ret)
+        return ret;
+    rep = rep_ptr;
+    rep->msg_type = msg_type;
+    *rep_out = rep;
+    return 0;
+}
+
+MAKE_CODEC(krb5_as_rep, as_rep);
+MAKE_CODEC(krb5_tgs_rep, tgs_rep);
+MAKE_CODEC(krb5_ap_req, ap_req);
+MAKE_CODEC(krb5_ap_rep, ap_rep);
+MAKE_CODEC(krb5_ap_rep_enc_part, ap_rep_enc_part);
+MAKE_ENCODER(encode_krb5_as_req, as_req_encode);
+MAKE_DECODER(decode_krb5_as_req, as_req);
+MAKE_ENCODER(encode_krb5_tgs_req, tgs_req_encode);
+MAKE_DECODER(decode_krb5_tgs_req, tgs_req);
+MAKE_CODEC(krb5_kdc_req_body, kdc_req_body);
+MAKE_CODEC(krb5_safe, safe);
+
+/* encode_krb5_safe_with_body takes a saved KRB-SAFE-BODY encoding to avoid
+ * mismatches from re-encoding if the sender isn't quite DER-compliant. */
 MAKE_ENCODER(encode_krb5_safe_with_body, safe_with_body);
 
-MAKE_ENCODER(encode_krb5_priv, priv);
-MAKE_ENCODER(encode_krb5_enc_priv_part, priv_enc_part);
-MAKE_ENCODER(encode_krb5_checksum, checksum);
+/*
+ * decode_krb5_safe_with_body fully decodes a KRB-SAFE, but also returns
+ * the KRB-SAFE-BODY encoding.  This interface was designed for an earlier
+ * generation of decoder and should probably be re-thought.
+ */
+krb5_error_code
+decode_krb5_safe_with_body(const krb5_data *code, krb5_safe **rep_out,
+                           krb5_data **body_out)
+{
+    asn1_error_code ret;
+    void *swb_ptr, *safe_ptr;
+    struct krb5_safe_with_body *swb;
+    krb5_safe *safe;
 
-MAKE_ENCODER(encode_krb5_cred, krb5_cred);
-MAKE_ENCODER(encode_krb5_enc_cred_part, enc_cred_part);
-MAKE_ENCODER(encode_krb5_error, krb5_error);
-MAKE_ENCODER(encode_krb5_authdata, auth_data);
-MAKE_ENCODER(encode_krb5_etype_info, etype_info);
-MAKE_ENCODER(encode_krb5_etype_info2, etype_info2);
-MAKE_ENCODER(encode_krb5_enc_data, encrypted_data);
-MAKE_ENCODER(encode_krb5_pa_enc_ts, pa_enc_ts);
-MAKE_ENCODER(encode_krb5_padata_sequence, seqof_pa_data);
+    ret = k5_asn1_full_decode(code, &k5_atype_safe_with_body, &swb_ptr);
+    if (ret)
+        return ret;
+    swb = swb_ptr;
+    ret = k5_asn1_full_decode(swb->body, &k5_atype_safe_body, &safe_ptr);
+    if (ret) {
+        krb5_free_safe(NULL, swb->safe);
+        krb5_free_data(NULL, swb->body);
+        free(swb);
+        return ret;
+    }
+    safe = safe_ptr;
+    safe->checksum = swb->safe->checksum;
+    free(swb->safe);
+    *rep_out = safe;
+    *body_out = swb->body;
+    free(swb);
+    return 0;
+}
+
+MAKE_CODEC(krb5_priv, priv);
+MAKE_CODEC(krb5_enc_priv_part, priv_enc_part);
+MAKE_CODEC(krb5_checksum, checksum);
+
+MAKE_CODEC(krb5_cred, krb5_cred);
+MAKE_CODEC(krb5_enc_cred_part, enc_cred_part);
+MAKE_CODEC(krb5_error, krb5_error);
+MAKE_CODEC(krb5_authdata, auth_data);
+MAKE_CODEC(krb5_etype_info, etype_info);
+MAKE_CODEC(krb5_etype_info2, etype_info2);
+MAKE_CODEC(krb5_enc_data, encrypted_data);
+MAKE_CODEC(krb5_pa_enc_ts, pa_enc_ts);
+MAKE_CODEC(krb5_padata_sequence, seqof_pa_data);
 /* sam preauth additions */
-MAKE_ENCODER(encode_krb5_sam_challenge_2, sam_challenge_2);
-MAKE_ENCODER(encode_krb5_sam_challenge_2_body, sam_challenge_2_body);
-MAKE_ENCODER(encode_krb5_enc_sam_response_enc_2, enc_sam_response_enc_2);
-MAKE_ENCODER(encode_krb5_sam_response_2, sam_response_2);
+MAKE_CODEC(krb5_sam_challenge_2, sam_challenge_2);
+MAKE_CODEC(krb5_sam_challenge_2_body, sam_challenge_2_body);
+MAKE_CODEC(krb5_enc_sam_response_enc_2, enc_sam_response_enc_2);
+MAKE_CODEC(krb5_sam_response_2, sam_response_2);
+
+/* setpw_req has an odd decoder interface which should probably be
+ * normalized. */
 MAKE_ENCODER(encode_krb5_setpw_req, setpw_req);
-MAKE_ENCODER(encode_krb5_pa_for_user, pa_for_user);
+krb5_error_code
+decode_krb5_setpw_req(const krb5_data *code, krb5_data **password_out,
+                      krb5_principal *target_out)
+{
+    asn1_error_code ret;
+    void *req_ptr;
+    struct krb5_setpw_req *req;
+    krb5_data *data;
+
+    *password_out = NULL;
+    *target_out = NULL;
+    data = malloc(sizeof(*data));
+    if (data == NULL)
+        return ENOMEM;
+    ret = k5_asn1_full_decode(code, &k5_atype_setpw_req, &req_ptr);
+    if (ret) {
+        free(data);
+        return ret;
+    }
+    req = req_ptr;
+    *data = req->password;
+    *password_out = data;
+    *target_out = req->target;
+    return 0;
+}
+
+MAKE_CODEC(krb5_pa_for_user, pa_for_user);
 MAKE_ENCODER(encode_krb5_s4u_userid, s4u_userid);
-MAKE_ENCODER(encode_krb5_pa_s4u_x509_user, pa_s4u_x509_user);
-MAKE_ENCODER(encode_krb5_etype_list, etype_list);
+MAKE_CODEC(krb5_pa_s4u_x509_user, pa_s4u_x509_user);
+MAKE_DECODER(decode_krb5_pa_pac_req, pa_pac_req);
+MAKE_CODEC(krb5_etype_list, etype_list);
 
-MAKE_ENCODER(encode_krb5_pa_fx_fast_request, pa_fx_fast_request);
-MAKE_ENCODER(encode_krb5_fast_req, fast_req);
-MAKE_ENCODER(encode_krb5_pa_fx_fast_reply, pa_fx_fast_reply);
-MAKE_ENCODER(encode_krb5_fast_response, fast_response);
+MAKE_CODEC(krb5_pa_fx_fast_request, pa_fx_fast_request);
+MAKE_CODEC(krb5_fast_req, fast_req);
+MAKE_CODEC(krb5_pa_fx_fast_reply, pa_fx_fast_reply);
+MAKE_CODEC(krb5_fast_response, fast_response);
 
-MAKE_ENCODER(encode_krb5_ad_kdcissued, ad_kdc_issued);
+MAKE_CODEC(krb5_ad_kdcissued, ad_kdc_issued);
 MAKE_ENCODER(encode_krb5_ad_signedpath_data, ad_signedpath_data);
-MAKE_ENCODER(encode_krb5_ad_signedpath, ad_signedpath);
-MAKE_ENCODER(encode_krb5_iakerb_header, iakerb_header);
-MAKE_ENCODER(encode_krb5_iakerb_finished, iakerb_finished);
+MAKE_CODEC(krb5_ad_signedpath, ad_signedpath);
+MAKE_CODEC(krb5_iakerb_header, iakerb_header);
+MAKE_CODEC(krb5_iakerb_finished, iakerb_finished);
 
 /*
  * PKINIT
@@ -947,7 +1258,8 @@ MAKE_ENCODER(encode_krb5_iakerb_finished, iakerb_finished);
 #ifndef DISABLE_PKINIT
 
 DEFCOUNTEDSTRINGTYPE(object_identifier, char *, unsigned int,
-                     k5_asn1_encode_bytestring, ASN1_OBJECTIDENTIFIER);
+                     k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
+                     ASN1_OBJECTIDENTIFIER);
 DEFCOUNTEDTYPE(oid_data, krb5_data, data, length, object_identifier);
 DEFPTRTYPE(oid_data_ptr, oid_data);
 
@@ -1040,7 +1352,8 @@ DEFSEQTYPE(pk_authenticator_draft9, krb5_pk_authenticator_draft9,
            pk_authenticator_draft9_fields);
 
 DEFCOUNTEDSTRINGTYPE(s_bitstring, char *, unsigned int,
-                     k5_asn1_encode_bitstring, ASN1_BITSTRING);
+                     k5_asn1_encode_bitstring, k5_asn1_decode_bitstring,
+                     ASN1_BITSTRING);
 DEFCOUNTEDTYPE(bitstring_data, krb5_data, data, length, s_bitstring);
 
 /* RFC 3280.  No context tags. */
@@ -1128,6 +1441,12 @@ static const struct atype_info *pa_pk_as_req_draft9_fields[] = {
 };
 DEFSEQTYPE(pa_pk_as_req_draft9, krb5_pa_pk_as_req_draft9,
            pa_pk_as_req_draft9_fields);
+/* For decoding, we only care about the first field; we can ignore the rest. */
+static const struct atype_info *pa_pk_as_req_draft9_decode_fields[] = {
+    &k5_atype_pa_pk_as_req9_0
+};
+DEFSEQTYPE(pa_pk_as_req_draft9_decode, krb5_pa_pk_as_req_draft9,
+           pa_pk_as_req_draft9_decode_fields);
 
 DEFFIELD_IMPLICIT(dh_rep_info_0, krb5_dh_rep_info, dhSignedData, 0,
                   ostring_data);
@@ -1193,18 +1512,19 @@ DEFCHOICETYPE(pa_pk_as_rep_draft9_choice,
 DEFCOUNTEDTYPE_SIGNED(pa_pk_as_rep_draft9, krb5_pa_pk_as_rep_draft9, u, choice,
                       pa_pk_as_rep_draft9_choice);
 
-MAKE_ENCODER(encode_krb5_pa_pk_as_req, pa_pk_as_req);
+MAKE_CODEC(krb5_pa_pk_as_req, pa_pk_as_req);
 MAKE_ENCODER(encode_krb5_pa_pk_as_req_draft9, pa_pk_as_req_draft9);
-MAKE_ENCODER(encode_krb5_pa_pk_as_rep, pa_pk_as_rep);
+MAKE_DECODER(decode_krb5_pa_pk_as_req_draft9, pa_pk_as_req_draft9_decode);
+MAKE_CODEC(krb5_pa_pk_as_rep, pa_pk_as_rep);
 MAKE_ENCODER(encode_krb5_pa_pk_as_rep_draft9, pa_pk_as_rep_draft9);
-MAKE_ENCODER(encode_krb5_auth_pack, auth_pack);
-MAKE_ENCODER(encode_krb5_auth_pack_draft9, auth_pack_draft9);
-MAKE_ENCODER(encode_krb5_kdc_dh_key_info, kdc_dh_key_info);
-MAKE_ENCODER(encode_krb5_reply_key_pack, reply_key_pack);
-MAKE_ENCODER(encode_krb5_reply_key_pack_draft9, reply_key_pack_draft9);
-MAKE_ENCODER(encode_krb5_td_trusted_certifiers,
-             seqof_external_principal_identifier);
-MAKE_ENCODER(encode_krb5_td_dh_parameters, seqof_algorithm_identifier);
+MAKE_CODEC(krb5_auth_pack, auth_pack);
+MAKE_CODEC(krb5_auth_pack_draft9, auth_pack_draft9);
+MAKE_CODEC(krb5_kdc_dh_key_info, kdc_dh_key_info);
+MAKE_CODEC(krb5_reply_key_pack, reply_key_pack);
+MAKE_CODEC(krb5_reply_key_pack_draft9, reply_key_pack_draft9);
+MAKE_CODEC(krb5_td_trusted_certifiers, seqof_external_principal_identifier);
+MAKE_CODEC(krb5_td_dh_parameters, seqof_algorithm_identifier);
+MAKE_DECODER(decode_krb5_principal_name, pkinit_krb5_principal_name_data);
 
 #else /* DISABLE_PKINIT */
 
@@ -1235,4 +1555,4 @@ DEFSEQTYPE(typed_data, krb5_pa_data, typed_data_fields);
 DEFPTRTYPE(typed_data_ptr, typed_data);
 
 DEFNULLTERMSEQOFTYPE(seqof_typed_data, typed_data_ptr);
-MAKE_ENCODER(encode_krb5_typed_data, seqof_typed_data);
+MAKE_CODEC(krb5_typed_data, seqof_typed_data);

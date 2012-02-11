@@ -808,8 +808,6 @@ ktest_make_sample_key_data(krb5_key_data *p, int i)
     char *str;
     int len;
 
-    p->key_data_ver = 2;
-    p->key_data_kvno = 42;
     len = asprintf(&str, "key%d", i);
     if (len < 0)
         abort();
@@ -832,6 +830,7 @@ ktest_make_sample_ldap_seqof_key_data(ldap_seqof_key_data *p)
     p->mkvno = 14;
     p->n_key_data = 3;
     p->key_data = calloc(3,sizeof(krb5_key_data));
+    p->kvno = 42;
     for (i = 0; i < 3; i++)
         ktest_make_sample_key_data(&p->key_data[i], i);
 }
