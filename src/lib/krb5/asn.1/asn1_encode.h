@@ -50,9 +50,9 @@
  */
 
 asn1_error_code asn1_encode_boolean(asn1buf *buf, asn1_intmax val,
-                                    unsigned int *retlen);
+                                    size_t *retlen);
 asn1_error_code asn1_encode_integer(asn1buf *buf, asn1_intmax val,
-                                    unsigned int *retlen);
+                                    size_t *retlen);
 /*
  * requires  *buf is allocated
  * modifies  *buf, *retlen
@@ -63,7 +63,7 @@ asn1_error_code asn1_encode_integer(asn1buf *buf, asn1_intmax val,
  */
 
 asn1_error_code asn1_encode_unsigned_integer(asn1buf *buf, asn1_uintmax val,
-                                             unsigned int *retlen);
+                                             size_t *retlen);
 /*
  * requires  *buf is allocated
  * modifies  *buf, *retlen
@@ -74,7 +74,7 @@ asn1_error_code asn1_encode_unsigned_integer(asn1buf *buf, asn1_uintmax val,
  */
 
 asn1_error_code asn1_encode_bytestring(asn1buf *buf, unsigned char *const *val,
-                                       unsigned int len, unsigned int *retlen);
+                                       size_t len, size_t *retlen);
 /*
  * requires  *buf is allocated
  * modifies  *buf, *retlen
@@ -95,7 +95,7 @@ asn1_error_code asn1_encode_null(asn1buf *buf, int *retlen);
  */
 
 asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
-                                        unsigned int *retlen);
+                                        size_t *retlen);
 /*
  * requires  *buf is allocated
  * modifies  *buf, *retlen
@@ -107,7 +107,7 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
  */
 
 asn1_error_code asn1_encode_bitstring(asn1buf *buf, unsigned char *const *val,
-                                      unsigned int len, unsigned int *retlen);
+                                      size_t len, size_t *retlen);
 /*
  * requires  *buf is allocated, *val has a length of len characters
  * modifies  *buf, *retlen
@@ -245,8 +245,8 @@ struct cntype_info {
 };
 
 struct string_info {
-    asn1_error_code (*enc)(asn1buf *, unsigned char *const *, unsigned int,
-                           unsigned int *);
+    asn1_error_code (*enc)(asn1buf *, unsigned char *const *, size_t,
+                           size_t *);
     unsigned int tagval : 5;
 };
 

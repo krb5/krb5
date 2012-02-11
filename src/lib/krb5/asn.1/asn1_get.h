@@ -47,7 +47,7 @@ typedef struct {
     asn1_construction construction;
 #endif
     asn1_tagnum tagnum;
-    unsigned int length;
+    size_t length;
     int indef;
 } taginfo;
 
