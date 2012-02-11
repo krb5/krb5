@@ -400,6 +400,14 @@ encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
         return encode_atype(buf, (const char *)val + off->dataoff,
                             off->basetype, tag_out);
     }
+    case atype_optional: {
+        const struct optional_info *opt = a->tinfo;
+        assert(opt->is_present != NULL);
+        if (opt->is_present(val))
+            return encode_atype(buf, val, opt->basetype, tag_out);
+        else
+            return ASN1_OMITTED;
+    }
     case atype_counted: {
         const struct counted_info *counted = a->tinfo;
         const void *dataptr = (const char *)val + counted->dataoff;
@@ -555,18 +563,13 @@ encode_sequence(asn1buf *buf, const void *val, const struct seq_info *seq,
                 size_t *len_out)
 {
     asn1_error_code ret;
-    unsigned int not_present;
     size_t i, len, sum = 0;
-    const struct atype_info *a;
 
-    /* If any fields might be optional, get a bitmask of fields not present. */
-    not_present = (seq->optional == NULL) ? 0 : seq->optional(val);
     for (i = seq->n_fields; i > 0; i--) {
-        a = seq->fields[i - 1];
-        if ((1u << (i - 1)) & not_present)
+        ret = encode_atype_and_tag(buf, val, seq->fields[i - 1], &len);
+        if (ret == ASN1_OMITTED)
             continue;
-        ret = encode_atype_and_tag(buf, val, a, &len);
-        if (ret)
+        else if (ret != 0)
             return ret;
         sum += len;
     }

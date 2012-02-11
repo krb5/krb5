@@ -78,6 +78,13 @@ enum atype_type {
      * tinfo is a struct offset_info *. */
     atype_offset,
     /*
+     * Indicates a sequence field which may or may not be present in an object.
+     * tinfo is a struct optional_info *.  Must be used within a sequence,
+     * although the optional type may be nested within offset, ptr, and/or tag
+     * types.
+     */
+    atype_optional,
+    /*
      * Actual thing to be encoded is an object at an offset from the original
      * pointer, combined with an integer at a different offset, in a manner
      * specified by a cntype_info structure.  tinfo is a struct counted_info *.
@@ -123,6 +130,11 @@ struct ptr_info {
 
 struct offset_info {
     unsigned int dataoff : 9;
+    const struct atype_info *basetype;
+};
+
+struct optional_info {
+    int (*is_present)(const void *);
     const struct atype_info *basetype;
 };
 
@@ -184,10 +196,6 @@ struct choice_info {
 };
 
 struct seq_info {
-    /* If present, returns a bitmask indicating which fields are present.  The
-     * bit (1 << N) corresponds to index N in the fields array. */
-    unsigned int (*optional)(const void *);
-    /* Indicates an array of sequence field descriptors.  */
     const struct atype_info **fields;
     size_t n_fields;
     /* Currently all sequences are assumed to be extensible. */
@@ -224,10 +232,10 @@ struct seq_info {
     }
 /* A sequence, defined by the indicated series of types, and an optional
  * function indicating which fields are not present. */
-#define DEFSEQTYPE(DESCNAME, CTYPENAME, FIELDS, OPT)                    \
+#define DEFSEQTYPE(DESCNAME, CTYPENAME, FIELDS)                         \
     typedef CTYPENAME aux_type_##DESCNAME;                              \
     static const struct seq_info aux_seqinfo_##DESCNAME = {             \
-        OPT, FIELDS, sizeof(FIELDS)/sizeof(FIELDS[0])                   \
+        FIELDS, sizeof(FIELDS)/sizeof(FIELDS[0])                        \
     };                                                                  \
     const struct atype_info k5_atype_##DESCNAME = {                     \
         atype_sequence, sizeof(CTYPENAME), &aux_seqinfo_##DESCNAME      \
@@ -304,6 +312,37 @@ struct seq_info {
     DEFCOUNTEDTYPE_base(DESCNAME, STYPE, DATAFIELD, COUNTFIELD, 0, CDESC)
 #define DEFCOUNTEDTYPE_SIGNED(DESCNAME, STYPE, DATAFIELD, COUNTFIELD, CDESC) \
     DEFCOUNTEDTYPE_base(DESCNAME, STYPE, DATAFIELD, COUNTFIELD, 1, CDESC)
+
+/* Optional sequence fields.  The basic form allows arbitrary test and
+ * initializer functions to be used. */
+#define DEFOPTIONALTYPE(DESCNAME, PRESENT, BASEDESC)            \
+    typedef aux_type_##BASEDESC aux_type_##DESCNAME;            \
+    static const struct optional_info aux_info_##DESCNAME = {   \
+        PRESENT, &k5_atype_##BASEDESC                           \
+    };                                                          \
+    const struct atype_info k5_atype_##DESCNAME = {             \
+        atype_optional, sizeof(aux_type_##DESCNAME),            \
+        &aux_info_##DESCNAME                                    \
+    }
+/* This form defines an is_present function for a zero-valued integer or null
+ * pointer of the base type's C type. */
+#define DEFOPTIONALZEROTYPE(DESCNAME, BASEDESC)                 \
+    static int                                                  \
+    aux_present_##DESCNAME(const void *p)                       \
+    {                                                           \
+        return *(aux_type_##BASEDESC *)p != 0;                  \
+    }                                                           \
+    DEFOPTIONALTYPE(DESCNAME, aux_present_##DESCNAME, BASEDESC)
+/* This form defines an is_present function for a null or empty null-terminated
+ * array of the base type's C type. */
+#define DEFOPTIONALEMPTYTYPE(DESCNAME, BASEDESC)                \
+    static int                                                  \
+    aux_present_##DESCNAME(const void *p)                       \
+    {                                                           \
+        const aux_type_##BASEDESC *val = p;                     \
+        return (*val != NULL && **val != NULL);                 \
+    }                                                           \
+    DEFOPTIONALTYPE(DESCNAME, aux_present_##DESCNAME, BASEDESC)
 
 /*
  * This encodes a pointer-to-pointer-to-thing where the passed-in

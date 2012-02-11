@@ -57,22 +57,21 @@ DEFINTTYPE(int16, krb5_int16);
 DEFCOUNTEDSTRINGTYPE(ui2_octetstring, unsigned char *, krb5_ui_2,
                      k5_asn1_encode_bytestring, ASN1_OCTETSTRING);
 
+static int
+is_salt_present(const void *p)
+{
+    const krb5_key_data *val = p;
+    return (val->key_data_length[1] != 0);
+}
+DEFCOUNTEDTYPE(krbsalt_salt, krb5_key_data, key_data_contents[1],
+               key_data_length[1], ui2_octetstring);
+DEFOPTIONALTYPE(krbsalt_salt_if_present, is_salt_present, krbsalt_salt);
 DEFFIELD(krbsalt_0, krb5_key_data, key_data_type[1], 0, int16);
-DEFCNFIELD(krbsalt_1, krb5_key_data, key_data_contents[1], key_data_length[1],
-           1, ui2_octetstring);
+DEFCTAGGEDTYPE(krbsalt_1, 1, krbsalt_salt_if_present);
 static const struct atype_info *krbsalt_fields[] = {
     &k5_atype_krbsalt_0, &k5_atype_krbsalt_1
 };
-static unsigned int
-optional_krbsalt (const void *p)
-{
-    const krb5_key_data *k = p;
-    unsigned int not_present = 0;
-    if (k->key_data_length[1] == 0)
-        not_present |= (1u << 1);
-    return not_present;
-}
-DEFSEQTYPE(krbsalt, krb5_key_data, krbsalt_fields, optional_krbsalt);
+DEFSEQTYPE(krbsalt, krb5_key_data, krbsalt_fields);
 
 DEFFIELD(encryptionkey_0, krb5_key_data, key_data_type[0], 0, int16);
 DEFCNFIELD(encryptionkey_1, krb5_key_data, key_data_contents[0],
@@ -80,7 +79,7 @@ DEFCNFIELD(encryptionkey_1, krb5_key_data, key_data_contents[0],
 static const struct atype_info *encryptionkey_fields[] = {
     &k5_atype_encryptionkey_0, &k5_atype_encryptionkey_1
 };
-DEFSEQTYPE(encryptionkey, krb5_key_data, encryptionkey_fields, NULL);
+DEFSEQTYPE(encryptionkey, krb5_key_data, encryptionkey_fields);
 
 DEFCTAGGEDTYPE(key_data_0, 0, krbsalt);
 DEFCTAGGEDTYPE(key_data_1, 1, encryptionkey);
@@ -90,7 +89,7 @@ DEFCTAGGEDTYPE(key_data_2, 2, s2kparams),
 static const struct atype_info *key_data_fields[] = {
     &k5_atype_key_data_0, &k5_atype_key_data_1
 };
-DEFSEQTYPE(key_data, krb5_key_data, key_data_fields, 0);
+DEFSEQTYPE(key_data, krb5_key_data, key_data_fields);
 DEFPTRTYPE(ptr_key_data, key_data);
 DEFCOUNTEDSEQOFTYPE(cseqof_key_data, krb5_int16, ptr_key_data);
 
@@ -109,7 +108,7 @@ static const struct atype_info *ldap_key_seq_fields[] = {
     &k5_atype_ldap_key_seq_2, &k5_atype_ldap_key_seq_3,
     &k5_atype_ldap_key_seq_4
 };
-DEFSEQTYPE(ldap_key_seq, ldap_seqof_key_data, ldap_key_seq_fields, NULL);
+DEFSEQTYPE(ldap_key_seq, ldap_seqof_key_data, ldap_key_seq_fields);
 
 /* Export a function to do the whole encoding.  */
 MAKE_ENCODER(krb5int_ldap_encode_sequence_of_keys, ldap_key_seq);
