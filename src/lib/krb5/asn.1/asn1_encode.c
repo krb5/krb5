@@ -500,7 +500,7 @@ encode_cntype(asn1buf *buf, const void *val, unsigned int count,
     }
     case cntype_choice: {
         const struct choice_info *choice = c->tinfo;
-        if (count > choice->n_options)
+        if (count >= choice->n_options)
             return ASN1_MISSING_FIELD;
         return krb5int_asn1_encode_type(buf, val, choice->options[count],
                                         rettag);
