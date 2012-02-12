@@ -646,20 +646,17 @@ static asn1_error_code
 split_der(asn1buf *buf, unsigned char *const *der, size_t len,
           taginfo *tag_out)
 {
-    asn1buf der_buf;
-    krb5_data der_data = make_data(*der, len);
     asn1_error_code ret;
+    const unsigned char *contents, *remainder;
+    size_t clen, rlen;
 
-    ret = asn1buf_wrap_data(&der_buf, &der_data);
+    ret = get_tag(*der, len, tag_out, &contents, &clen, &remainder, &rlen);
     if (ret)
         return ret;
-    ret = asn1_get_tag_2(&der_buf, tag_out);
-    if (ret)
-        return ret;
-    if ((size_t)asn1buf_remains(&der_buf, 0) != tag_out->length)
-        return EINVAL;
-    return asn1buf_insert_bytestring(buf, tag_out->length,
-                                     *der + len - tag_out->length);
+    if (rlen != 0)
+        return ASN1_BAD_LENGTH;
+    tag_out->length = clen;
+    return asn1buf_insert_bytestring(buf, clen, contents);
 }
 
 /*

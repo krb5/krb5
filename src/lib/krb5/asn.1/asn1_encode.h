@@ -30,8 +30,19 @@
 #include "k5-int.h"
 #include "krbasn1.h"
 #include "asn1buf.h"
-#include "asn1_get.h"
 #include <time.h>
+
+typedef struct {
+    asn1_class asn1class;
+    asn1_construction construction;
+    asn1_tagnum tagnum;
+    size_t length;
+
+    /* When decoding, stores the leading and trailing lengths of a tag.  Used
+     * by store_der(). */
+    size_t tag_len;
+    size_t tag_end_len;
+} taginfo;
 
 /* These functions are referenced by encoder structures.  They handle the
  * encoding of primitive ASN.1 types. */

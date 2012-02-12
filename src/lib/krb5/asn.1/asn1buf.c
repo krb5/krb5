@@ -57,7 +57,6 @@
 #define ASN1BUF_OMIT_INLINE_FUNCS
 #include "asn1buf.h"
 #include <stdio.h>
-#include "asn1_get.h"
 
 #ifdef USE_VALGRIND
 #include <valgrind/memcheck.h>
@@ -86,82 +85,6 @@ asn1buf_create(asn1buf **buf)
     (*buf)->base = NULL;
     (*buf)->bound = NULL;
     (*buf)->next = NULL;
-    return 0;
-}
-
-asn1_error_code
-asn1buf_wrap_data(asn1buf *buf, const krb5_data *code)
-{
-    if (code == NULL || code->data == NULL) return ASN1_MISSING_FIELD;
-    buf->next = buf->base = code->data;
-    buf->bound = code->data + code->length - 1;
-    return 0;
-}
-
-asn1_error_code
-asn1buf_imbed(asn1buf *subbuf, const asn1buf *buf, const unsigned int length, const int indef)
-{
-    if (buf->next > buf->bound + 1) return ASN1_OVERRUN;
-    subbuf->base = subbuf->next = buf->next;
-    if (!indef) {
-        if (length > (size_t)(buf->bound + 1 - buf->next)) return ASN1_OVERRUN;
-        subbuf->bound = subbuf->base + length - 1;
-    } else /* constructed indefinite */
-        subbuf->bound = buf->bound;
-    return 0;
-}
-
-asn1_error_code
-asn1buf_sync(asn1buf *buf, asn1buf *subbuf,
-             asn1_class asn1class, asn1_tagnum lasttag,
-             unsigned int length, int indef, int seqindef)
-{
-    asn1_error_code retval;
-
-    if (!seqindef) {
-        /* sequence was encoded as definite length */
-        buf->next = subbuf->bound + 1;
-    } else if (!asn1_is_eoc(asn1class, lasttag, indef)) {
-        retval = asn1buf_skiptail(subbuf, length, indef);
-        if (retval)
-            return retval;
-    } else {
-        /* We have just read the EOC octets. */
-        buf->next = subbuf->next;
-    }
-    return 0;
-}
-
-asn1_error_code
-asn1buf_skiptail(asn1buf *buf, const unsigned int length, const int indef)
-{
-    asn1_error_code retval;
-    taginfo t;
-    int nestlevel;
-
-    nestlevel = 1 + indef;
-    if (!indef) {
-        if (length <= (size_t)(buf->bound - buf->next + 1))
-            buf->next += length;
-        else
-            return ASN1_OVERRUN;
-    }
-    while (nestlevel > 0) {
-        if (buf->bound - buf->next + 1 <= 0)
-            return ASN1_OVERRUN;
-        retval = asn1_get_tag_2(buf, &t);
-        if (retval) return retval;
-        if (!t.indef) {
-            if (t.length <= (size_t)(buf->bound - buf->next + 1))
-                buf->next += t.length;
-            else
-                return ASN1_OVERRUN;
-        }
-        if (t.indef)
-            nestlevel++;
-        if (asn1_is_eoc(t.asn1class, t.tagnum, t.indef))
-            nestlevel--;                /* got an EOC encoding */
-    }
     return 0;
 }
 
@@ -205,69 +128,6 @@ asn1buf_insert_bytestring(asn1buf *buf, const unsigned int len, const void *sv)
     return 0;
 }
 
-
-#undef asn1buf_remove_octet
-asn1_error_code asn1buf_remove_octet(asn1buf *buf, asn1_octet *o)
-{
-    if (buf->next > buf->bound) return ASN1_OVERRUN;
-    *o = (asn1_octet)(*((buf->next)++));
-    return 0;
-}
-
-asn1_error_code
-asn1buf_remove_octetstring(asn1buf *buf, const unsigned int len, asn1_octet **s)
-{
-    unsigned int i;
-
-    if (buf->next > buf->bound + 1) return ASN1_OVERRUN;
-    if (len > (size_t)(buf->bound + 1 - buf->next)) return ASN1_OVERRUN;
-    if (len == 0) {
-        *s = 0;
-        return 0;
-    }
-    *s = (asn1_octet*)malloc(len*sizeof(asn1_octet));
-    if (*s == NULL)
-        return ENOMEM;
-    for (i=0; i<len; i++)
-        (*s)[i] = (asn1_octet)(buf->next)[i];
-    buf->next += len;
-    return 0;
-}
-
-asn1_error_code
-asn1buf_remove_charstring(asn1buf *buf, const unsigned int len, char **s)
-{
-    unsigned int i;
-
-    if (buf->next > buf->bound + 1) return ASN1_OVERRUN;
-    if (len > (size_t)(buf->bound + 1 - buf->next)) return ASN1_OVERRUN;
-    if (len == 0) {
-        *s = 0;
-        return 0;
-    }
-    *s = (char*)malloc(len*sizeof(char));
-    if (*s == NULL) return ENOMEM;
-    for (i=0; i<len; i++)
-        (*s)[i] = (char)(buf->next)[i];
-    buf->next += len;
-    return 0;
-}
-
-int
-asn1buf_remains(asn1buf *buf, int indef)
-{
-    int remain;
-    if (buf == NULL || buf->base == NULL) return 0;
-    remain = buf->bound - buf->next +1;
-    if (remain <= 0) return remain;
-    /*
-     * Two 0 octets means the end of an indefinite encoding.
-     */
-    if (indef && remain >= 2 && !*(buf->next) && !*(buf->next + 1))
-        return 0;
-    else return remain;
-}
-
 asn1_error_code
 asn12krb5_buf(const asn1buf *buf, krb5_data **code)
 {
@@ -290,68 +150,6 @@ asn12krb5_buf(const asn1buf *buf, krb5_data **code)
     d->data[d->length] = '\0';
     d->magic = KV5M_DATA;
     *code = d;
-    return 0;
-}
-
-
-
-/*
- * These parse and unparse procedures should be moved out. They're
- * useful only for debugging and superfluous in the production
- * version.
- */
-
-asn1_error_code
-asn1buf_unparse(const asn1buf *buf, char **s)
-{
-    free(*s);
-    if (buf == NULL) {
-        *s = strdup("<NULL>");
-        if (*s == NULL) return ENOMEM;
-    } else if (buf->base == NULL) {
-        *s = strdup("<EMPTY>");
-        if (*s == NULL) return ENOMEM;
-    } else {
-        unsigned int length = asn1buf_len(buf);
-        unsigned int i;
-
-        *s = calloc(length+1, sizeof(char));
-        if (*s == NULL) return ENOMEM;
-        (*s)[length] = '\0';
-        for (i=0; i<length; i++) ;
-/*      OLDDECLARG( (*s)[i] = , (buf->base)[length-i-1]) */
-    }
-    return 0;
-}
-
-asn1_error_code
-asn1buf_hex_unparse(const asn1buf *buf, char **s)
-{
-#define hexchar(d) ((d)<=9 ? ('0'+(d)) :        \
-                    ((d)<=15 ? ('A'+(d)-10) :   \
-                     'X'))
-
-    free(*s);
-
-    if (buf == NULL) {
-        *s = strdup("<NULL>");
-        if (*s == NULL) return ENOMEM;
-    } else if (buf->base == NULL) {
-        *s = strdup("<EMPTY>");
-        if (*s == NULL) return ENOMEM;
-    } else {
-        unsigned int length = asn1buf_len(buf);
-        int i;
-
-        *s = malloc(3*length);
-        if (*s == NULL) return ENOMEM;
-        for (i = length-1; i >= 0; i--) {
-            (*s)[3*(length-i-1)] = hexchar(((buf->base)[i]&0xF0)>>4);
-            (*s)[3*(length-i-1)+1] = hexchar((buf->base)[i]&0x0F);
-            (*s)[3*(length-i-1)+2] = ' ';
-        }
-        (*s)[3*length-1] = '\0';
-    }
     return 0;
 }
 
