@@ -728,9 +728,11 @@ int main(argc, argv)
     }
 
     /****************************************************************/
-    /* decode_krb5_authdata */
+    /* decode_krb5_authdata and krb5int_get_authdata_containee_types */
     {
-        krb5_authdata **ref, **var;
+        krb5_authdata **ref, **var, tmp;
+        unsigned int count;
+        krb5_authdatatype *types = NULL;
         ktest_make_sample_authorization_data(&ref);
         retval = krb5_data_hex_parse(&code,"30 22 30 0F A0 03 02 01 01 A1 08 04 06 66 6F 6F 62 61 72 30 0F A0 03 02 01 01 A1 08 04 06 66 6F 6F 62 61 72");
         if (retval) {
@@ -739,8 +741,16 @@ int main(argc, argv)
         }
         retval = decode_krb5_authdata(&code,&var);
         if (retval) com_err("decoding authorization_data",retval,"");
-        test(ktest_equal_authorization_data(ref,var),"authorization_data\n")
-            krb5_free_data_contents(test_context, &code);
+        test(ktest_equal_authorization_data(ref,var),"authorization_data\n");
+        tmp.length = code.length;
+        tmp.contents = (krb5_octet *)code.data;
+        retval = krb5int_get_authdata_containee_types(test_context, &tmp,
+                                                      &count, &types);
+        if (retval) com_err("reading authdata types",retval,"");
+        test(count == 2 && types[0] == 1 && types[1] == 1,
+             "authorization_data(types only)\n");
+        free(types);
+        krb5_free_data_contents(test_context, &code);
         krb5_free_authdata(test_context, var);
         ktest_destroy_authorization_data(&ref);
     }

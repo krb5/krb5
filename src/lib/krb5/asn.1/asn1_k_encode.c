@@ -238,6 +238,22 @@ DEFNONEMPTYNULLTERMSEQOFTYPE(auth_data, authdata_elt_ptr);
 DEFPTRTYPE(auth_data_ptr, auth_data);
 DEFOPTIONALEMPTYTYPE(opt_auth_data_ptr, auth_data_ptr);
 
+/* authdata_types retrieves just the types of authdata elements in an array. */
+DEFCTAGGEDTYPE(authdata_elt_type_0, 0, int32);
+static const struct atype_info *authdata_elt_type_fields[] = {
+    &k5_atype_authdata_elt_type_0
+};
+DEFSEQTYPE(authdata_elt_type, krb5_authdatatype, authdata_elt_type_fields);
+DEFPTRTYPE(ptr_authdata_elt_type, authdata_elt_type);
+DEFCOUNTEDSEQOFTYPE(cseqof_authdata_elt_type, unsigned int,
+                    ptr_authdata_elt_type);
+struct authdata_types {
+    krb5_authdatatype *types;
+    unsigned int ntypes;
+};
+DEFCOUNTEDTYPE(authdata_types, struct authdata_types, types, ntypes,
+               cseqof_authdata_elt_type);
+
 DEFFIELD(keyblock_0, krb5_keyblock, enctype, 0, int32);
 DEFCNFIELD(keyblock_1, krb5_keyblock, contents, length, 1, octetstring);
 static const struct atype_info *encryption_key_fields[] = {
@@ -1106,6 +1122,12 @@ MAKE_CODEC(krb5_ticket, ticket);
 MAKE_CODEC(krb5_encryption_key, encryption_key);
 MAKE_CODEC(krb5_enc_tkt_part, enc_tkt_part);
 
+krb5_error_code KRB5_CALLCONV
+krb5_decode_ticket(const krb5_data *code, krb5_ticket **repptr)
+{
+    return decode_krb5_ticket(code, repptr);
+}
+
 /*
  * For backwards compatibility, we encode both EncASRepPart and EncTGSRepPart
  * with application tag 26.  On decode, we accept either app tag and set the
@@ -1250,6 +1272,27 @@ MAKE_ENCODER(encode_krb5_ad_signedpath_data, ad_signedpath_data);
 MAKE_CODEC(krb5_ad_signedpath, ad_signedpath);
 MAKE_CODEC(krb5_iakerb_header, iakerb_header);
 MAKE_CODEC(krb5_iakerb_finished, iakerb_finished);
+
+krb5_error_code KRB5_CALLCONV
+krb5int_get_authdata_containee_types(krb5_context context,
+                                     const krb5_authdata *authdata,
+                                     unsigned int *num_out,
+                                     krb5_authdatatype **types_out)
+{
+    asn1_error_code ret;
+    struct authdata_types *atypes;
+    void *atypes_ptr;
+    krb5_data d = make_data(authdata->contents, authdata->length);
+
+    ret = k5_asn1_full_decode(&d, &k5_atype_authdata_types, &atypes_ptr);
+    if (ret)
+        return ret;
+    atypes = atypes_ptr;
+    *num_out = atypes->ntypes;
+    *types_out = atypes->types;
+    free(atypes);
+    return 0;
+}
 
 /*
  * PKINIT
