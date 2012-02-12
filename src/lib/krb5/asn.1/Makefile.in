@@ -12,8 +12,7 @@ STLIBOBJS= \
 	asn1_encode.o\
 	asn1buf.o\
 	asn1_k_encode.o\
-	ldap_key_seq.o\
-	asn1_misc.o
+	ldap_key_seq.o
 
 SRCS= \
 	$(srcdir)/asn1_encode.c\
@@ -25,8 +24,7 @@ OBJS= \
 	$(OUTPRE)asn1_encode.$(OBJEXT)\
 	$(OUTPRE)asn1buf.$(OBJEXT)\
 	$(OUTPRE)asn1_k_encode.$(OBJEXT)\
-	$(OUTPRE)ldap_key_seq.$(OBJEXT)\
-	$(OUTPRE)asn1_misc.$(OBJEXT)
+	$(OUTPRE)ldap_key_seq.$(OBJEXT)
 
 ##DOS##LIBOBJS = $(OBJS)
 
