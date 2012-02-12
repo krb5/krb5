@@ -36,7 +36,6 @@ typedef struct {
     asn1_class asn1class;
     asn1_construction construction;
     asn1_tagnum tagnum;
-    size_t length;
 
     /* When decoding, stores the leading and trailing lengths of a tag.  Used
      * by store_der(). */
@@ -153,7 +152,7 @@ struct atype_info {
 };
 
 struct fn_info {
-    asn1_error_code (*enc)(asn1buf *, const void *, taginfo *);
+    asn1_error_code (*enc)(asn1buf *, const void *, taginfo *, size_t *);
     asn1_error_code (*dec)(const taginfo *, const unsigned char *, size_t,
                            void *);
     int (*check_tag)(const taginfo *);
@@ -535,7 +534,7 @@ struct seq_info {
  * Used only by kdc_req_body. */
 asn1_error_code
 k5_asn1_encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
-                     taginfo *tag_out);
+                     taginfo *tag_out, size_t *len_out);
 
 /* Decode the tag and contents of a type, storing the result in the
  * caller-allocated C object val.  Used only by kdc_req_body. */

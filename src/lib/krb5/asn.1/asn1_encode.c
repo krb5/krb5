@@ -311,10 +311,10 @@ k5_asn1_decode_bitstring(const unsigned char *asn1, size_t len,
 
 /**** Functions for encoding and decoding tags ****/
 
-/* Encode a DER tag into buf with the tag and length parameters in t.  Place
- * the length of the encoded tag in *retlen. */
+/* Encode a DER tag into buf with the tag parameters in t and the content
+ * length len.  Place the length of the encoded tag in *retlen. */
 static asn1_error_code
-make_tag(asn1buf *buf, const taginfo *t, size_t *retlen)
+make_tag(asn1buf *buf, const taginfo *t, size_t len, size_t *retlen)
 {
     asn1_error_code ret;
     asn1_tagnum tag_copy;
@@ -324,14 +324,14 @@ make_tag(asn1buf *buf, const taginfo *t, size_t *retlen)
         return ASN1_OVERFLOW;
 
     /* Encode the length of the content within the tag. */
-    if (t->length < 128) {
-        ret = asn1buf_insert_octet(buf, t->length & 0x7F);
+    if (len < 128) {
+        ret = asn1buf_insert_octet(buf, len & 0x7F);
         if (ret)
             return ret;
         length = 1;
     } else {
         length = 0;
-        for (len_copy = t->length; len_copy != 0; len_copy >>= 8) {
+        for (len_copy = len; len_copy != 0; len_copy >>= 8) {
             ret = asn1buf_insert_octet(buf, len_copy & 0xFF);
             if (ret)
                 return ret;
@@ -644,7 +644,7 @@ store_count(size_t count, const struct counted_info *counted, void *val)
  * then return the length of the contents and the tag. */
 static asn1_error_code
 split_der(asn1buf *buf, unsigned char *const *der, size_t len,
-          taginfo *tag_out)
+          taginfo *tag_out, size_t *len_out)
 {
     asn1_error_code ret;
     const unsigned char *contents, *remainder;
@@ -655,7 +655,7 @@ split_der(asn1buf *buf, unsigned char *const *der, size_t len,
         return ret;
     if (rlen != 0)
         return ASN1_BAD_LENGTH;
-    tag_out->length = clen;
+    *len_out = clen;
     return asn1buf_insert_bytestring(buf, clen, contents);
 }
 
@@ -687,13 +687,13 @@ encode_sequence(asn1buf *buf, const void *val, const struct seq_info *seq,
                 size_t *len_out);
 static asn1_error_code
 encode_cntype(asn1buf *buf, const void *val, size_t len,
-              const struct cntype_info *c, taginfo *tag_out);
+              const struct cntype_info *c, taginfo *tag_out, size_t *len_out);
 
 /* Encode a value (contents only, no outer tag) according to a type, and return
  * its encoded tag information. */
 static asn1_error_code
 encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
-             taginfo *tag_out)
+             taginfo *tag_out, size_t *len_out)
 {
     asn1_error_code ret;
 
@@ -704,11 +704,11 @@ encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
     case atype_fn: {
         const struct fn_info *fn = a->tinfo;
         assert(fn->enc != NULL);
-        return fn->enc(buf, val, tag_out);
+        return fn->enc(buf, val, tag_out, len_out);
     }
     case atype_sequence:
         assert(a->tinfo != NULL);
-        ret = encode_sequence(buf, val, a->tinfo, &tag_out->length);
+        ret = encode_sequence(buf, val, a->tinfo, len_out);
         if (ret)
             return ret;
         tag_out->asn1class = UNIVERSAL;
@@ -718,19 +718,20 @@ encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
     case atype_ptr: {
         const struct ptr_info *ptr = a->tinfo;
         assert(ptr->basetype != NULL);
-        return encode_atype(buf, LOADPTR(val, ptr), ptr->basetype, tag_out);
+        return encode_atype(buf, LOADPTR(val, ptr), ptr->basetype, tag_out,
+                            len_out);
     }
     case atype_offset: {
         const struct offset_info *off = a->tinfo;
         assert(off->basetype != NULL);
         return encode_atype(buf, (const char *)val + off->dataoff,
-                            off->basetype, tag_out);
+                            off->basetype, tag_out, len_out);
     }
     case atype_optional: {
         const struct optional_info *opt = a->tinfo;
         assert(opt->is_present != NULL);
         if (opt->is_present(val))
-            return encode_atype(buf, val, opt->basetype, tag_out);
+            return encode_atype(buf, val, opt->basetype, tag_out, len_out);
         else
             return ASN1_OMITTED;
     }
@@ -742,7 +743,8 @@ encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
         ret = load_count(val, counted, &count);
         if (ret)
             return ret;
-        return encode_cntype(buf, dataptr, count, counted->basetype, tag_out);
+        return encode_cntype(buf, dataptr, count, counted->basetype, tag_out,
+                             len_out);
     }
     case atype_nullterm_sequence_of:
     case atype_nonempty_nullterm_sequence_of:
@@ -750,7 +752,7 @@ encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
         ret = encode_nullterm_sequence_of(buf, val, a->tinfo,
                                           a->type ==
                                           atype_nullterm_sequence_of,
-                                          &tag_out->length);
+                                          len_out);
         if (ret)
             return ret;
         tag_out->asn1class = UNIVERSAL;
@@ -759,15 +761,15 @@ encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
         break;
     case atype_tagged_thing: {
         const struct tagged_info *tag = a->tinfo;
-        ret = encode_atype(buf, val, tag->basetype, tag_out);
+        ret = encode_atype(buf, val, tag->basetype, tag_out, len_out);
         if (ret)
             return ret;
         if (!tag->implicit) {
             size_t tlen;
-            ret = make_tag(buf, tag_out, &tlen);
+            ret = make_tag(buf, tag_out, *len_out, &tlen);
             if (ret)
                 return ret;
-            tag_out->length += tlen;
+            *len_out += tlen;
             tag_out->construction = tag->construction;
         }
         tag_out->asn1class = tag->tagtype;
@@ -775,8 +777,7 @@ encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
         break;
     }
     case atype_bool:
-        ret = k5_asn1_encode_bool(buf, load_int(val, a->size)
-                                  , &tag_out->length);
+        ret = k5_asn1_encode_bool(buf, load_int(val, a->size), len_out);
         if (ret)
             return ret;
         tag_out->asn1class = UNIVERSAL;
@@ -784,8 +785,7 @@ encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
         tag_out->tagnum = ASN1_BOOLEAN;
         break;
     case atype_int:
-        ret = k5_asn1_encode_int(buf, load_int(val, a->size),
-                                 &tag_out->length);
+        ret = k5_asn1_encode_int(buf, load_int(val, a->size), len_out);
         if (ret)
             return ret;
         tag_out->asn1class = UNIVERSAL;
@@ -793,8 +793,7 @@ encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
         tag_out->tagnum = ASN1_INTEGER;
         break;
     case atype_uint:
-        ret = k5_asn1_encode_uint(buf, load_uint(val, a->size),
-                                  &tag_out->length);
+        ret = k5_asn1_encode_uint(buf, load_uint(val, a->size), len_out);
         if (ret)
             return ret;
         tag_out->asn1class = UNIVERSAL;
@@ -803,7 +802,7 @@ encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
         break;
     case atype_int_immediate: {
         const struct immediate_info *imm = a->tinfo;
-        ret = k5_asn1_encode_int(buf, imm->val, &tag_out->length);
+        ret = k5_asn1_encode_int(buf, imm->val, len_out);
         if (ret)
             return ret;
         tag_out->asn1class = UNIVERSAL;
@@ -826,15 +825,15 @@ encode_atype_and_tag(asn1buf *buf, const void *val, const struct atype_info *a,
 {
     taginfo t;
     asn1_error_code ret;
-    size_t tlen;
+    size_t clen, tlen;
 
-    ret = encode_atype(buf, val, a, &t);
+    ret = encode_atype(buf, val, a, &t, &clen);
     if (ret)
         return ret;
-    ret = make_tag(buf, &t, &tlen);
+    ret = make_tag(buf, &t, clen, &tlen);
     if (ret)
         return ret;
-    *len_out = t.length + tlen;
+    *len_out = clen + tlen;
     return 0;
 }
 
@@ -845,7 +844,7 @@ encode_atype_and_tag(asn1buf *buf, const void *val, const struct atype_info *a,
  */
 static asn1_error_code
 encode_cntype(asn1buf *buf, const void *val, size_t count,
-              const struct cntype_info *c, taginfo *tag_out)
+              const struct cntype_info *c, taginfo *tag_out, size_t *len_out)
 {
     asn1_error_code ret;
 
@@ -853,7 +852,7 @@ encode_cntype(asn1buf *buf, const void *val, size_t count,
     case cntype_string: {
         const struct string_info *string = c->tinfo;
         assert(string->enc != NULL);
-        ret = string->enc(buf, val, count, &tag_out->length);
+        ret = string->enc(buf, val, count, len_out);
         if (ret)
             return ret;
         tag_out->asn1class = UNIVERSAL;
@@ -862,14 +861,13 @@ encode_cntype(asn1buf *buf, const void *val, size_t count,
         break;
     }
     case cntype_der:
-        return split_der(buf, val, count, tag_out);
+        return split_der(buf, val, count, tag_out, len_out);
     case cntype_seqof: {
         const struct atype_info *a = c->tinfo;
         const struct ptr_info *ptr = a->tinfo;
         assert(a->type == atype_ptr);
         val = LOADPTR(val, ptr);
-        ret = encode_sequence_of(buf, count, val, ptr->basetype,
-                                 &tag_out->length);
+        ret = encode_sequence_of(buf, count, val, ptr->basetype, len_out);
         if (ret)
             return ret;
         tag_out->asn1class = UNIVERSAL;
@@ -881,7 +879,8 @@ encode_cntype(asn1buf *buf, const void *val, size_t count,
         const struct choice_info *choice = c->tinfo;
         if (count >= choice->n_options)
             return ASN1_MISSING_FIELD;
-        return encode_atype(buf, val, choice->options[count], tag_out);
+        return encode_atype(buf, val, choice->options[count], tag_out,
+                            len_out);
     }
 
     default:
@@ -1573,9 +1572,9 @@ error:
 
 asn1_error_code
 k5_asn1_encode_atype(asn1buf *buf, const void *val, const struct atype_info *a,
-                     taginfo *tag_out)
+                     taginfo *tag_out, size_t *len_out)
 {
-    return encode_atype(buf, val, a, tag_out);
+    return encode_atype(buf, val, a, tag_out, len_out);
 }
 
 asn1_error_code

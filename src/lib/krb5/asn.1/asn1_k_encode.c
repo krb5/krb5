@@ -94,13 +94,13 @@ DEFOPTIONALZEROTYPE(opt_principal, principal);
  * with old implementations.
  */
 static asn1_error_code
-encode_seqno(asn1buf *buf, const void *p, taginfo *rettag)
+encode_seqno(asn1buf *buf, const void *p, taginfo *rettag, size_t *len_out)
 {
     krb5_ui_4 val = *(krb5_ui_4 *)p;
     rettag->asn1class = UNIVERSAL;
     rettag->construction = PRIMITIVE;
     rettag->tagnum = ASN1_INTEGER;
-    return k5_asn1_encode_uint(buf, val, &rettag->length);
+    return k5_asn1_encode_uint(buf, val, len_out);
 }
 static asn1_error_code
 decode_seqno(const taginfo *t, const unsigned char *asn1, size_t len, void *p)
@@ -128,14 +128,15 @@ DEFOPTIONALZEROTYPE(opt_seqno, seqno);
 /* Define the kerberos_time type, which is an ASN.1 generaltime represented in
  * a krb5_timestamp. */
 static asn1_error_code
-encode_kerberos_time(asn1buf *buf, const void *p, taginfo *rettag)
+encode_kerberos_time(asn1buf *buf, const void *p, taginfo *rettag,
+                     size_t *len_out)
 {
     /* Range checking for time_t vs krb5_timestamp?  */
     time_t val = *(krb5_timestamp *)p;
     rettag->asn1class = UNIVERSAL;
     rettag->construction = PRIMITIVE;
     rettag->tagnum = ASN1_GENERALTIME;
-    return k5_asn1_encode_generaltime(buf, val, &rettag->length);
+    return k5_asn1_encode_generaltime(buf, val, len_out);
 }
 static asn1_error_code
 decode_kerberos_time(const taginfo *t, const unsigned char *asn1, size_t len,
@@ -190,14 +191,15 @@ DEFOPTIONALTYPE(opt_encrypted_data, nonempty_enc_data, NULL, encrypted_data);
 /* Define the krb5_flags type, which is an ASN.1 bit string represented in a
  * 32-bit integer. */
 static asn1_error_code
-encode_krb5_flags(asn1buf *buf, const void *p, taginfo *rettag)
+encode_krb5_flags(asn1buf *buf, const void *p, taginfo *rettag,
+                  size_t *len_out)
 {
     unsigned char cbuf[4], *cptr = cbuf;
     store_32_be((krb5_ui_4)*(const krb5_flags *)p, cbuf);
     rettag->asn1class = UNIVERSAL;
     rettag->construction = PRIMITIVE;
     rettag->tagnum = ASN1_BITSTRING;
-    return k5_asn1_encode_bitstring(buf, &cptr, 4, &rettag->length);
+    return k5_asn1_encode_bitstring(buf, &cptr, 4, len_out);
 }
 static asn1_error_code
 decode_krb5_flags(const taginfo *t, const unsigned char *asn1, size_t len,
@@ -277,13 +279,13 @@ DEFOPTIONALZEROTYPE(opt_checksum_ptr, checksum_ptr);
 /* Define the last_req_type type, which is a krb5_int32 with some massaging
  * on decode for backward compatibility. */
 static asn1_error_code
-encode_lr_type(asn1buf *buf, const void *p, taginfo *rettag)
+encode_lr_type(asn1buf *buf, const void *p, taginfo *rettag, size_t *len_out)
 {
     krb5_int32 val = *(krb5_int32 *)p;
     rettag->asn1class = UNIVERSAL;
     rettag->construction = PRIMITIVE;
     rettag->tagnum = ASN1_INTEGER;
-    return k5_asn1_encode_int(buf, val, &rettag->length);
+    return k5_asn1_encode_int(buf, val, len_out);
 }
 static asn1_error_code
 decode_lr_type(const taginfo *t, const unsigned char *asn1, size_t len,
@@ -434,7 +436,8 @@ static const struct atype_info *kdc_req_hack_fields[] = {
 };
 DEFSEQTYPE(kdc_req_body_hack, kdc_req_hack, kdc_req_hack_fields);
 static asn1_error_code
-encode_kdc_req_body(asn1buf *buf, const void *p, taginfo *tag_out)
+encode_kdc_req_body(asn1buf *buf, const void *p, taginfo *tag_out,
+                    size_t *len_out)
 {
     const krb5_kdc_req *val = p;
     kdc_req_hack h;
@@ -448,7 +451,8 @@ encode_kdc_req_body(asn1buf *buf, const void *p, taginfo *tag_out)
         h.server_realm = val->server->realm;
     else
         return ASN1_MISSING_FIELD;
-    return k5_asn1_encode_atype(buf, &h, &k5_atype_kdc_req_body_hack, tag_out);
+    return k5_asn1_encode_atype(buf, &h, &k5_atype_kdc_req_body_hack, tag_out,
+                                len_out);
 }
 static void
 free_kdc_req_body(void *val)
