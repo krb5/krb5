@@ -2,12 +2,6 @@
 
 Stuff that should still be done on the ASN.1 encoder conversion:
 
-* Add support for opaque objects (pre-encoded fields, or ANY), and fix
-  up those remaining encoders (e.g., asn1_encode_sam_challenge_2) that
-  need them.
-
-* Convert PKINIT encoders, after we have test cases.
-
 * Make offsetof uses conforming.  Currently we may use foo.bar or
   foo[0] as fields.
 
@@ -47,19 +41,11 @@ Stuff that should still be done on the ASN.1 encoder conversion:
   them use the encoders in the code.  Only a subset of types would be
   exported probably.
 
-* More compact encoding: For tags and optional-field bit positions,
-  encode N+1, and use 0 for "none", then make the field unsigned.
-  Currently the fields are signed, non-negative values hold useful
-  data, -1 means "none", and MIN..-2 are unused.  Changing this will
-  either let us reduce the field size one bit, or extend the maximum
-  tag/bitpos value from 2**(N-1)-1 to 2**N-2.
-
-* More compact encoding: Use a union with designated initializers, or
-  some ugly casting, to make the structures smaller by not having all
-  fields present when we never use all of them at once.  The union
-  approach is certainly more appealing, aside from the little detail
-  that it won't work on Windows unless we do all the initialization at
-  run time.
+* More compact encoding: For struct atype and struct cntype, we could
+  use structures with a common base type (similar to Xlib events)
+  instead of a base structure with a void pointer, to save the cost of
+  a pointer for each type.  Doing this might not be strictly correct
+  C.
 
 * Pie in the sky: A verbose mode that can tell you "missing field
   KDC-REP.cname.name-string[1].data" or some such.  This would require
@@ -69,7 +55,8 @@ Stuff that should still be done on the ASN.1 encoder conversion:
 * For ALL_POINTERS_ARE_THE_SAME mode (which is not strictly conforming
   with the C standard, and thus not default currently, but makes
   things a little smaller and faster), eliminate the loadptr structure
-  entry.
+  entry.  (Note that if this infrastructure becomes exposed to
+  plugins, ALL_POINTERS_ARE_THE_SAME changes the ABI.)
 
 * Maybe: Reorganize the data of a "module" so everything needing
   relocation is put in some tables, referenced by index from other
@@ -86,5 +73,3 @@ Stuff that should still be done on the ASN.1 encoder conversion:
   fetch-a-pointer function ignoring the integer argument, while at the
   C level it's strictly conforming by using the correct types for
   access.
-
-* Table-driven decoders?
