@@ -1529,7 +1529,7 @@ decode_sequence_of(const unsigned char *asn1, size_t len,
                    size_t *count_out)
 {
     asn1_error_code ret;
-    void *seq = NULL, *newseq;
+    void *seq = NULL, *elem, *newseq;
     const unsigned char *contents;
     size_t clen, count = 0;
     taginfo t;
@@ -1550,9 +1550,9 @@ decode_sequence_of(const unsigned char *asn1, size_t len,
             goto error;
         }
         seq = newseq;
-        memset((char *)(seq + count * elemtype->size), 0, elemtype->size);
-        ret = decode_atype(&t, contents, clen, elemtype,
-                           (char *)(seq + count * elemtype->size));
+        elem = (char *)seq + count * elemtype->size;
+        memset(elem, 0, elemtype->size);
+        ret = decode_atype(&t, contents, clen, elemtype, elem);
         if (ret)
             goto error;
         count++;
