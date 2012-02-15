@@ -1830,7 +1830,7 @@ kadmin_getpols(int argc, char *argv[])
 void
 kadmin_getprivs(int argc, char *argv[])
 {
-    static char *privs[] = {"GET", "ADD", "MODIFY", "DELETE"};
+    static char *privs[] = {"INQUIRE", "ADD", "MODIFY", "DELETE"};
     krb5_error_code retval;
     size_t i;
     long plist;
