@@ -14,6 +14,7 @@ extern int current_appl_type;
 krb5_context test_context;
 int error_count = 0;
 int do_trval = 0;
+int first_trval = 1;
 int trval2();
 
 static void encoder_print_results(code, typestring, description)
@@ -26,9 +27,13 @@ static void encoder_print_results(code, typestring, description)
     int r, rlen;
 
     if (do_trval) {
+        if (first_trval)
+            first_trval = 0;
+        else
+            printf("\n");
         printf("encode_krb5_%s%s:\n", typestring, description);
         r = trval2(stdout, code->data, code->length, 0, &rlen);
-        printf("\n\n");
+        printf("\n");
         if (rlen < 0 || (unsigned int) rlen != code->length) {
             printf("Error: length mismatch: was %d, parsed %d\n",
                    code->length, rlen);
@@ -623,6 +628,12 @@ main(argc, argv)
         setup(enc_data,krb5_enc_data,"enc_data",ktest_make_sample_enc_data);
         current_appl_type = 1001;
         encode_run(enc_data,krb5_enc_data,"enc_data","",encode_krb5_enc_data);
+        enc_data.kvno = 0xFF000000;
+        current_appl_type = 1001;
+        encode_run(enc_data,krb5_enc_data,"enc_data","(MSB-set kvno)",encode_krb5_enc_data);
+        enc_data.kvno = 0xFFFFFFFF;
+        current_appl_type = 1001;
+        encode_run(enc_data,krb5_enc_data,"enc_data","(kvno=-1)",encode_krb5_enc_data);
         ktest_destroy_enc_data(&enc_data);
     }
     /****************************************************************/
