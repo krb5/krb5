@@ -173,16 +173,8 @@ DEFNULLTERMSEQOFTYPE(seqof_host_addresses, address_ptr);
 DEFPTRTYPE(ptr_seqof_host_addresses, seqof_host_addresses);
 DEFOPTIONALEMPTYTYPE(opt_ptr_seqof_host_addresses, ptr_seqof_host_addresses);
 
-/*
- * krb5_kvno is defined as unsigned int, but historically (MIT krb5 through
- * 1.6, and through 1.10 in the decoder) we treat it as signed, in violation of
- * RFC 4120.  kvno values large enough to be problematic are only likely to be
- * seen with Windows read-only domain controllers, which overload the high
- * 16-bits of kvno values for krbtgt principals.  Since Windows encodes kvnos
- * as signed 32-bit values, for interoperability it's best if we do the same.
- */
 DEFFIELD(enc_data_0, krb5_enc_data, enctype, 0, int32);
-DEFFIELD(enc_data_1, krb5_enc_data, kvno, 1, opt_int);
+DEFFIELD(enc_data_1, krb5_enc_data, kvno, 1, opt_uint);
 DEFFIELD(enc_data_2, krb5_enc_data, ciphertext, 2, ostring_data);
 static const struct atype_info *encrypted_data_fields[] = {
     &k5_atype_enc_data_0, &k5_atype_enc_data_1, &k5_atype_enc_data_2
