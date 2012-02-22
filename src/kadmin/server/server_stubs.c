@@ -1634,10 +1634,13 @@ get_strings_2_svc(gstrings_arg *arg, struct svc_req *rqstp)
         goto exit_func;
     }
 
-    if (CHANGEPW_SERVICE(rqstp) || !kadm5int_acl_check(handle->context,
-                                                       rqst2name(rqstp),
-                                                       ACL_LIST, NULL, NULL)) {
-        ret.code = KADM5_AUTH_LIST;
+    if (! cmp_gss_krb5_name(handle, rqst2name(rqstp), arg->princ) &&
+        (CHANGEPW_SERVICE(rqstp) || !kadm5int_acl_check(handle->context,
+                                                        rqst2name(rqstp),
+                                                        ACL_INQUIRE,
+                                                        arg->princ,
+                                                        NULL))) {
+        ret.code = KADM5_AUTH_GET;
         log_unauth("kadm5_get_strings", prime_arg,
                    &client_name, &service_name, rqstp);
     } else {
@@ -1690,10 +1693,10 @@ set_string_2_svc(sstring_arg *arg, struct svc_req *rqstp)
         goto exit_func;
     }
 
-    if (CHANGEPW_SERVICE(rqstp) || !kadm5int_acl_check(handle->context,
-                                                       rqst2name(rqstp),
-                                                       ACL_LIST, NULL, NULL)) {
-        ret.code = KADM5_AUTH_LIST;
+    if (CHANGEPW_SERVICE(rqstp)
+        || !kadm5int_acl_check(handle->context, rqst2name(rqstp), ACL_MODIFY,
+                               arg->princ, NULL)) {
+        ret.code = KADM5_AUTH_MODIFY;
         log_unauth("kadm5_mod_strings", prime_arg,
                    &client_name, &service_name, rqstp);
     } else {
