@@ -12,8 +12,8 @@ Quick facts
 -----------
 
    ====================================================== ======================================= =============================================================================
-    Latest stable  version                                 1.9.2
-    Supported versions                                     1.7.3, 1.8.5, 1.9.2
+    Latest stable  version                                 1.10
+    Supported versions                                     1.8.6, 1.9.3, 1.10
     Release cycle                                          9 - 12 months
     Supported platforms/OS distributions                   Solaris
                                                                - SPARC
@@ -33,7 +33,7 @@ Quick facts
     krb4 support                                           < 1.8
     DES support                                            configurable                             http://k5wiki.kerberos.org/wiki/Projects/Disable_DES
     GSS-API S4U extensions                                 1.8+                                     http://msdn.microsoft.com/en-us/library/cc246071
-                                                               - S4U2Proxy
+                                                               - S4U2Self
                                                                - S4U2Proxy
     GSS-API naming extensions                              1.8+                                     http://tools.ietf.org/html/draft-ietf-kitten-gssapi-naming-exts-11
 
@@ -109,8 +109,8 @@ Feature list
     kadmin over IPv6                               1.9
     Trace logging                                  1.9          http://k5wiki.kerberos.org/wiki/Projects/Trace_logging
     GSSAPI/KRB5 multi-realm support
-    Plugins to test password quality               1.9          http://k5wiki.kerberos.org/wiki/Projects/Password_quality_pluggable_interface
-    Plugins to synchronize password changes        1.9
+    Plugin to test password quality                1.9          http://k5wiki.kerberos.org/wiki/Projects/Password_quality_pluggable_interface
+    Plugin to synchronize password changes         1.9
     Parallel KDC                                   1.9
     GS2                                            1.9          :rfc:`5801` :rfc:`5587` http://k5wiki.kerberos.org/wiki/Projects/GS2
     Purging old keys                               1.9
@@ -122,6 +122,7 @@ Feature list
      - ENC-TIMESTAMP                                            :rfc:`4120#section-5.2.7.2`
      - SAM-2
      - FAST negotiation framework                  1.8          :rfc:`6113`
+     - PKINIT with FAST on client                  1.10         :rfc:`6113`
      - PKINIT                                                   :rfc:`4556`
      - FX-COOKIE                                                :rfc:`6113#section-5.2`
      - S4U-X509-USER                               1.8          http://msdn.microsoft.com/en-us/library/cc246091
@@ -133,6 +134,8 @@ Feature list
       - OS PRNG                                       1.10      OS's native PRNG
     Zero configuration
     IPv6 support in iprop
+    Plugin interface for configuration             1.10         http://k5wiki.kerberos.org/wiki/Projects/Pluggable_configuration
+    Credentials for multiple identities            1.10         http://k5wiki.kerberos.org/wiki/Projects/Client_principal_selection
    =============================================== =========== ============================================
 
 
