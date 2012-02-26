@@ -1,8 +1,8 @@
-MIT Kerberos Documentation.
-===================================
+MIT Kerberos Documentation
+==========================
 
 Contents
-=========
+--------
 
 .. toctree::
    :maxdepth: 1
@@ -20,15 +20,14 @@ Contents
 
 
 Feedback
-========
+--------
 
-Please, provide your feedback or suggest a new topic at krb5-bugs@mit.edu?subject=Documentation___main
-
-..
+Please, provide your feedback or suggest a new topic at
+krb5-bugs@mit.edu?subject=Documentation___main
 
 
 Version
-=======
+-------
 
 .. _reference:
 

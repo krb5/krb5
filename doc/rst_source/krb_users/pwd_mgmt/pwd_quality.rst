@@ -1,12 +1,11 @@
 Password quality verification
-==============================
+=============================
 
 TODO
 
-------------------
 
-Feedback:
+Feedback
+--------
 
-Please, provide your feedback at krb5-bugs@mit.edu?subject=Documentation___users_pwd_mgmt
-
-
+Please, provide your feedback at
+krb5-bugs@mit.edu?subject=Documentation___users_pwd_mgmt

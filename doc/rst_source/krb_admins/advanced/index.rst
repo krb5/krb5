@@ -1,6 +1,5 @@
 Advanced topics
-============================
-
+===============
 
 Contents:
 ---------
@@ -12,19 +11,19 @@ Contents:
    plugins.rst
 
 
-
 Topics in TODO list:
----------------------
+--------------------
 
-#.   Choosing backend: LDAP vs DB2
-#.   Validating Kerberos tickets
-#.   Cross-realm interaction with AD
-#.   Replication
-#.   Performance tuning tips
-#.   Logging error messages
+#. Choosing backend: LDAP vs DB2
+#. Validating Kerberos tickets
+#. Cross-realm interaction with AD
+#. Replication
+#. Performance tuning tips
+#. Logging error messages
 
-------------------
 
-Feedback:
+Feedback
+--------
 
-Please, provide your feedback on this document at krb5-bugs@mit.edu?subject=Documentation___admin_advanced
+Please, provide your feedback on this document at
+krb5-bugs@mit.edu?subject=Documentation___admin_advanced

@@ -1,9 +1,8 @@
 For application developers
-===================================
+==========================
 
-Contents:
----------
-
+Contents
+--------
 
 .. toctree::
    :maxdepth: 1
@@ -12,9 +11,8 @@ Contents:
    princ_handle.rst
 
 
-------------
+Feedback
+--------
 
-Feedback:
-
-Please, provide your feedback or suggest a new topic at krb5-bugs@mit.edu?subject=Documentation___appdev
-
+Please, provide your feedback or suggest a new topic at
+krb5-bugs@mit.edu?subject=Documentation___appdev

@@ -1,84 +1,130 @@
 .. _ktutil(1):
 
 ktutil
-=============
-
+======
 
 SYNOPSIS
--------------
+--------
 
 **ktutil**
 
-DESCRIPTION
--------------
 
-The *ktutil* command invokes a subshell from which an administrator can read, write, or edit entries in a Kerberos V5 keytab or V4 srvtab file.
+DESCRIPTION
+-----------
+
+The ktutil command invokes a subshell from which an administrator can
+read, write, or edit entries in a Kerberos V5 keytab or V4 srvtab
+file.
+
 
 COMMANDS
--------------
+--------
 
-       **list**   
-              Displays the current keylist.
+list
+~~~~
 
-              Alias: **l**
+    **list**
 
-       **read_kt** *keytab*
-              Read the Kerberos V5 keytab file *keytab* into the current keylist.
+Displays the current keylist.
 
-              Alias: **rkt**
+Alias: **l**
 
-       **read_st** *srvtab*
-              Read the Kerberos V4 srvtab file *srvtab* into the current keylist.
+read_kt
+~~~~~~~
 
-              Alias: **rst**
+    **read_kt** *keytab*
 
-       **write_kt** *keytab*
-              Write the current keylist into the Kerberos V5 keytab file *keytab*.
+Read the Kerberos V5 keytab file *keytab* into the current keylist.
 
-              Alias: **wkt**
+Alias: **rkt**
 
-       **write_st** *srvtab*
-              Write the current keylist into the Kerberos V4 srvtab file *srvtab*.
+read_st
+~~~~~~~
 
-              Alias: **wst**
+    **read_st** *srvtab*
+
+Read the Kerberos V4 srvtab file *srvtab* into the current keylist.
+
+Alias: **rst**
+
+write_kt
+~~~~~~~~
+
+    **write_kt** *keytab*
+
+Write the current keylist into the Kerberos V5 keytab file *keytab*.
+
+Alias: **wkt**
+
+write_st
+~~~~~~~~
+
+    **write_st** *srvtab*
+
+Write the current keylist into the Kerberos V4 srvtab file *srvtab*.
+
+Alias: **wst**
+
+clear_list
+~~~~~~~~~~
 
        **clear_list**
-              Clear the current keylist.
 
-              Alias: **clear**
+Clear the current keylist.
 
-       **delete_entry** *slot*
-              Delete the entry in slot number *slot* from the current keylist.
+Alias: **clear**
 
-              Alias: *delent*
+delete_entry
+~~~~~~~~~~~~
 
-       **add_entry** (**-key | -password)** **-p** *principal* **-k** *kvno* **-e** *enctype*
-              Add *principal* to keylist using key or password.
+    **delete_entry** *slot*
 
-              Alias: **addent**
+Delete the entry in slot number *slot* from the current keylist.
 
-       **list_requests**
-              Displays a listing of available commands.
+Alias: **delent**
 
-              Aliases: **lr**, **?**
+add_entry
+~~~~~~~~~
 
-       **quit**
-              Quits ktutil.
+    **add_entry** {**-key**\|\ **-password**} **-p** *principal*
+    **-k** *kvno* **-e** *enctype*
 
-              Aliases: **exit**, **q**
+Add *principal* to keylist using key or password.
+
+Alias: **addent**
+
+list_requests
+~~~~~~~~~~~~~
+
+    **list_requests**
+
+Displays a listing of available commands.
+
+Aliases: **lr**, **?**
+
+quit
+~~~~
+
+    **quit**
+
+Quits ktutil.
+
+Aliases: **exit**, **q**
 
 
-EXAMPLE::
+EXAMPLE
+-------
 
-      ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e aes128-cts-hmac-sha1-96
-      Password for alice@BLEEP.COM:
-      ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e aes256-cts-hmac-sha1-96
-      Password for alice@BLEEP.COM:
-      ktutil:  write_kt keytab
-      ktutil:
+::
+
+    ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e aes128-cts-hmac-sha1-96
+    Password for alice@BLEEP.COM:
+    ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e aes256-cts-hmac-sha1-96
+    Password for alice@BLEEP.COM:
+    ktutil:  write_kt keytab
+    ktutil:
 
 SEE ALSO
--------------
+--------
 
-       kadmin(8), kdb5_util(8)
-
+kadmin(8), kdb5_util(8)

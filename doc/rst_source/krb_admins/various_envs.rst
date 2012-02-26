@@ -1,20 +1,20 @@
-Various links 
-==============================================================
+Various links
+=============
 
-Whitepapers:
-------------
+Whitepapers
+-----------
 
 #. http://kerberos.org/software/whitepapers.html
 
 
-Tutorials:
------------
+Tutorials
+---------
 
 #. Fulvio Ricciardi  <http://www.kerberos.org/software/tutorial.html>_
 
 
-Troubleshooting:
-----------------
+Troubleshooting
+---------------
 
 #. http://www.ncsa.illinois.edu/UserInfo/Resources/Software/kerberos/troubleshooting.html
 
@@ -32,11 +32,9 @@ Troubleshooting:
 
 #. http://h71000.www7.hp.com/doc/83final/ba548_90007/ch06s05.html
 
-..
-
-------------------
 
 Feedback
+--------
 
-
-Please, provide your feedback on this document at krb5-bugs@mit.edu?subject=Documentation___various_envs
+Please, provide your feedback on this document at
+krb5-bugs@mit.edu?subject=Documentation___various_envs

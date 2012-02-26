@@ -1,5 +1,5 @@
 Principal manipulation and parsing
-============================================
+==================================
 
 Kerberos principal structure
 
@@ -78,10 +78,9 @@ Utilities:
 
 ..
 
-------------------
 
 Feedback
+--------
 
-
-Please, provide your feedback on this document at krb5-bugs@mit.edu?subject=Documentation___princ_handle
-
+Please, provide your feedback on this document at
+krb5-bugs@mit.edu?subject=Documentation___princ_handle

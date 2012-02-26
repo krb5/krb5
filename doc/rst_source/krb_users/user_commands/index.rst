@@ -1,10 +1,12 @@
 .. _user_commands:
 
 User commands
-====================================
+=============
 
-.. note:: This document was copied from Kerberos man pages. Currently it is under review. Please, send your feedback, corrections and additions to krb5-bugs@mit.edu. Your contribution is greatly appreciated.
-
+.. note:: This document was copied from Kerberos man pages.  Currently
+          it is under review.  Please, send your feedback, corrections
+          and additions to krb5-bugs@mit.edu.  Your contribution is
+          greatly appreciated.
 
 .. toctree::
    :maxdepth: 1
@@ -24,10 +26,8 @@ User commands
    send-pr.rst
 
 
-------------------
+Feedback
+--------
 
-Feedback:
-
-Please, provide your feedback at krb5-bugs@mit.edu?subject=Documentation___user_commands
-
-
+Please, provide your feedback at
+krb5-bugs@mit.edu?subject=Documentation___user_commands

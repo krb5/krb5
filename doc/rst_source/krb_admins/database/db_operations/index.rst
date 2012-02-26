@@ -1,9 +1,10 @@
 .. _db_operations_label:
 
 Operations on the Kerberos database
-=============================================
+===================================
 
-The :ref:`kdb5_util(8)` command is the primary tool for administrating the Kerberos database.
+The :ref:`kdb5_util(8)` command is the primary tool for administrating
+the Kerberos database.
 
 .. include:: ../../admin_commands/kdb5_util.rst
    :start-after:  _kdb5_util_synopsys:
@@ -23,9 +24,9 @@ The :ref:`kdb5_util(8)` command is the primary tool for administrating the Kerbe
    create_stash.rst
    create_destroy_db.rst
 
-------------
 
-Feedback:
+Feedback
+--------
 
-Please, provide your feedback at krb5-bugs@mit.edu?subject=Documentation___db_operations
-
+Please, provide your feedback at
+krb5-bugs@mit.edu?subject=Documentation___db_operations

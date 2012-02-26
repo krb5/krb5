@@ -1,48 +1,60 @@
-.. note:: This document was copied from **Kerberos V5 Installation Guide** with minor changes. Currently it is under review. Please, send your feedback, corrections and additions to krb5-bugs@mit.edu. Your contribution is greatly appreciated.
+.. note:: This document was copied from **Kerberos V5 Installation
+          Guide** with minor changes. Currently it is under
+          review. Please, send your feedback, corrections and
+          additions to krb5-bugs@mit.edu. Your contribution is greatly
+          appreciated.
 
 
 Installing KDCs
-======================
+===============
 
-When setting up Kerberos in a production environment it is recommended to have multiple secondary (slave) KDCs 
-alongside with a primary (master) KDC to ensure the continued availability of the Kerberized services.  
-Each KDC contains a copy of the Kerberos database. 
-The master KDC contains the writable copy of the realm database, which it replicates to the slave KDCs at regular intervals. 
-All database changes (such as password changes) are made on the master KDC.  
-Slave KDCs provide Kerberos ticket-granting services, but not database administration. 
-This allows clients to continue to obtain tickets when the master KDC is unavailable.
-MIT recommends that you install all of your KDCs to be able to function as either the master or one of the slaves. 
-This will enable you to easily switch your master KDC with one of the slaves if necessary. (See :ref:`switch_master_slave`.) 
-This installation procedure is based on that recommendation. 
+When setting up Kerberos in a production environment it is recommended
+to have multiple secondary (slave) KDCs alongside with a primary
+(master) KDC to ensure the continued availability of the Kerberized
+services.  Each KDC contains a copy of the Kerberos database.  The
+master KDC contains the writable copy of the realm database, which it
+replicates to the slave KDCs at regular intervals.  All database
+changes (such as password changes) are made on the master KDC.  Slave
+KDCs provide Kerberos ticket-granting services, but not database
+administration.  This allows clients to continue to obtain tickets
+when the master KDC is unavailable.  MIT recommends that you install
+all of your KDCs to be able to function as either the master or one of
+the slaves.  This will enable you to easily switch your master KDC
+with one of the slaves if necessary. (See :ref:`switch_master_slave`.)
+This installation procedure is based on that recommendation.
 
-.. warning:: 
-          - The Kerberos system heavily relies on the timestamps, so all Kerberos exchange participants should be rather well synchronized.
+.. warning::
+    - The Kerberos system heavily relies on the timestamps, so all
+      Kerberos exchange participants should be rather well
+      synchronized.
 
-          - It is recomended to install and run KDCs on the secured and dedicated solely to KDC hardware with limited access. 
-            If your KDC is also a file server, FTP server, Web server, or even just a client machine,
-            someone who obtained root access through a security hole in any of those areas could gain access to the Kerberos database.
-
+    - It is recomended to install and run KDCs on the secured and
+      dedicated solely to KDC hardware with limited access.  If your
+      KDC is also a file server, FTP server, Web server, or even just
+      a client machine, someone who obtained root access through a
+      security hole in any of those areas could gain access to the
+      Kerberos database.
 
 
 Install and configure the master KDC
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 
-Install Kerberos either from the OS-provided packages or from the source (See :ref:`do_build`).
+Install Kerberos either from the OS-provided packages or from the
+source (See :ref:`do_build`).
 
-.. note:: For the purpose of this document we will use the following names
-          ::
+.. note:: For the purpose of this document we will use the following
+          names::
 
-          - kerberos.mit.edu    - master KDC
-          - kerberos-1.mit.edu  - slave KDC
-          - mit.edu             - domain name
-          - ATHENA.MIT.EDU      - realm name
-          - .k5.ATHENA.MIT.EDU  - stash file
-          - admin/admin         - admin principal
-  
-          See :ref:`mitK5defaults` for the default names and locations of the relevant to this topic files.
-          Adjust the names and paths to your system environment.
+             kerberos.mit.edu    - master KDC
+             kerberos-1.mit.edu  - slave KDC
+             mit.edu             - domain name
+             ATHENA.MIT.EDU      - realm name
+             .k5.ATHENA.MIT.EDU  - stash file
+             admin/admin         - admin principal
 
-
+          See :ref:`mitK5defaults` for the default names and locations
+          of the relevant to this topic files.  Adjust the names and
+          paths to your system environment.
 
 .. toctree::
    :maxdepth: 1
@@ -56,7 +68,7 @@ Install Kerberos either from the OS-provided packages or from the source (See :r
 
 
 Install the Slave KDCs
-~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 .. toctree::
    :maxdepth: 1
@@ -64,35 +76,38 @@ Install the Slave KDCs
    slave_install.rst
    kdc_prop_slave.rst
 
-Once your KDCs are set up and running, you are ready to use kadmin to load principals for your users, 
-hosts, and other services into the Kerberos database. 
-This procedure is described fully in the :ref:`add_mod_del_princs_label`. 
-The keytab is generated by running kadmin and issuing the :ref:`ktadd` command. 
+Once your KDCs are set up and running, you are ready to use kadmin to
+load principals for your users, hosts, and other services into the
+Kerberos database.  This procedure is described fully in the
+:ref:`add_mod_del_princs_label`.  The keytab is generated by running
+kadmin and issuing the :ref:`ktadd` command.
 
+You may occasionally want to use one of your slave KDCs as the master.
+This might happen if you are upgrading the master KDC, or if your
+master KDC has a disk crash.  See the following section for the
+instructions.
 
-You may occasionally want to use one of your slave KDCs as the master. 
-This might happen if you are upgrading the master KDC, or if your master KDC has a disk crash. 
-See the following section for the instructions.
 
 Switching Master and Slave KDCs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 .. toctree::
    :maxdepth: 2
 
    switch_master_slave.rst
 
+
 Incremental database propagation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 .. toctree::
    :maxdepth: 1
 
    ../database/incr_db_prop.rst
 
-------------
 
-Feedback:
+Feedback
+--------
 
-Please, provide your feedback or suggest a new topic at krb5-bugs@mit.edu?subject=Documentation___install_kdc
-
+Please, provide your feedback or suggest a new topic at
+krb5-bugs@mit.edu?subject=Documentation___install_kdc

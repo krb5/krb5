@@ -1,10 +1,8 @@
 For administrators
-============================
-
+==================
 
 Contents:
 ---------
-
 
 .. toctree::
    :maxdepth: 1
@@ -18,7 +16,6 @@ Contents:
    appl_servers/index.rst
    backup_host.rst
 
-
 .. toctree::
    :maxdepth: 1
 
@@ -30,9 +27,8 @@ Contents:
    various_envs.rst
 
 
-------------
+Feedback
+--------
 
-Feedback:
-
-Please, provide your feedback or suggest a new topic at krb5-bugs@mit.edu?subject=Documentation___admin
-
+Please, provide your feedback or suggest a new topic at
+krb5-bugs@mit.edu?subject=Documentation___admin

@@ -1,21 +1,23 @@
 Kerberos realms
-==================
+===============
 
-Although your Kerberos realm can be any ASCII string, convention is to make it the same as your domain name, in **upper-case** letters. 
+Although your Kerberos realm can be any ASCII string, convention is to
+make it the same as your domain name, in upper-case letters.
 
-For example, hosts in the domain *example.com* would be in the Kerberos realm::
-        
-     EXAMPLE.COM
+For example, hosts in the domain ``example.com`` would be in the
+Kerberos realm::
 
-If you need multiple Kerberos realms, MIT recommends that you use descriptive names which end with your domain name, such as::
+    EXAMPLE.COM
 
-      BOSTON.EXAMPLE.COM
-      HOUSTON.EXAMPLE.COM 
+If you need multiple Kerberos realms, MIT recommends that you use
+descriptive names which end with your domain name, such as::
 
-------------
-
-Feedback:
-
-Please, provide your feedback or suggest a new topic at krb5-bugs@mit.edu?subject=Documentation___realm_config
+    BOSTON.EXAMPLE.COM
+    HOUSTON.EXAMPLE.COM
 
 
+Feedback
+--------
+
+Please, provide your feedback or suggest a new topic at
+krb5-bugs@mit.edu?subject=Documentation___realm_config
