@@ -8,11 +8,11 @@ However, it will only have the encryption types supported by the KDC
 at the time of the initial database creation.  To allow use of newer
 encryption types for the TGT, this key has to be changed.
 
-Changing this key using the normal kadmin **change_password** command
-would invalidate any previously issued TGTs.  Therefore, when changing
-this key, normally one should use the **-keepold** flag to
-change_password to retain the previous key in the database as well as
-the new key.  For example::
+Changing this key using the normal :ref:`kadmin(1)`
+**change_password** command would invalidate any previously issued
+TGTs.  Therefore, when changing this key, normally one should use the
+**-keepold** flag to change_password to retain the previous key in the
+database as well as the new key.  For example::
 
     kadmin: change_password -randkey -keepold krbtgt/ATHENA.MIT.EDU@ATHENA.MIT.EDU
 

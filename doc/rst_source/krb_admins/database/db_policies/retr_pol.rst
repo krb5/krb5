@@ -1,7 +1,7 @@
 Retrieving policies
 ===================
 
-To retrieve a policy, use the kadmin **get_policy** command.
+To retrieve a policy, use the :ref:`kadmin(1)` **get_policy** command.
 
 You can retrieve the list of policies with the kadmin
 **list_policies** command.

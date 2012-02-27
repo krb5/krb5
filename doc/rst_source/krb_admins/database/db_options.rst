@@ -1,8 +1,8 @@
 kadmin options
 ==============
 
-You can invoke kadmin or kadmin.local with any of the following
-options:
+You can invoke :ref:`kadmin(1)` or kadmin.local with any of the
+following options:
 
 .. include:: ../admin_commands/kadmin_local.rst
    :start-after:  kadmin_synopsys:

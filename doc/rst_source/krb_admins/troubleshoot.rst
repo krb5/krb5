@@ -11,7 +11,7 @@ List
            encryption type
 
 Add ``allow_weak_crypto = true`` to the [libdefaults] section of
-krb5.conf.
+:ref:`krb5.conf(5)`.
 
 Version 1.7+
 

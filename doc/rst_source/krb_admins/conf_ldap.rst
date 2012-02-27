@@ -38,19 +38,20 @@ Configuring Kerberos with OpenLDAP back-end
 
        include /etc/openldap/schema/kerberos.schema
 
-3. Choose DNs for the KDC and kadmin servers to bind to the LDAP
-   server, and create them if necessary. These DNs will be specified
-   with the **ldap_kdc_dn** and **ldap_kadmind_dn** directives in
-   krb5.conf; their passwords can be stashed with "``kdb5_ldap_util
-   stashsrvpw``" and the resulting file specified with the
-   **ldap_service_password_file** directive.
+3. Choose DNs for the :ref:`krb5kdc(8)` and :ref:`kadmind(8)` servers
+   to bind to the LDAP server, and create them if necessary. These DNs
+   will be specified with the **ldap_kdc_dn** and **ldap_kadmind_dn**
+   directives in :ref:`krb5.conf(5)`; their passwords can be stashed
+   with "``kdb5_ldap_util stashsrvpw``" and the resulting file
+   specified with the **ldap_service_password_file** directive.
 
 4. Choose a DN for the global Kerberos container entry (but do not
    create the entry at this time).  This DN will be specified with the
-   **ldap_kerberos_container_dn** directive in krb5.conf.  Realm
-   container entries will be created underneath this DN.  Principal
-   entries may exist either underneath the realm container (the
-   default) or in separate trees referenced from the realm container.
+   **ldap_kerberos_container_dn** directive in :ref:`krb5.conf(5)`.
+   Realm container entries will be created underneath this DN.
+   Principal entries may exist either underneath the realm container
+   (the default) or in separate trees referenced from the realm
+   container.
 
 5. Configure the LDAP server ACLs to enable the KDC and kadmin server
    DNs to read and write the Kerberos data.
@@ -94,8 +95,8 @@ Configuring Kerberos with OpenLDAP back-end
 
        slapd -h "ldapi:/// ldaps:///"
 
-7. Modify the krb5.conf file to include LDAP specific items listed
-   below::
+7. Modify the :ref:`krb5.conf(5)` file to include LDAP specific items
+   listed below::
 
        realms
            database_module
@@ -109,11 +110,10 @@ Configuring Kerberos with OpenLDAP back-end
            ldap_servers
            ldap_conns_per_server
 
-   For the sample krb5.conf file, refer to
-   :ref:`krb5_conf_sample_label`.  For more details, refer to
-   :ref:`krb5.conf`
+   For the sample :ref:`krb5.conf(5)` file, refer to
+   :ref:`krb5_conf_sample_label`.
 
-8. Create the realm using kdb5_ldap_util (see
+8. Create the realm using :ref:`kdb5_ldap_util(8)` (see
    :ref:`ldap_create_realm_label`)::
 
        kdb5_ldap_util -D cn=admin,dc=example,dc=com create -subtrees ou=users,dc=example,dc=com -r EXAMPLE.COM -s
@@ -136,10 +136,10 @@ Configuring Kerberos with OpenLDAP back-end
 
 9. Stash the password of the service object used by the KDC and
    Administration service to bind to the LDAP server using the
-   **stashsrvpw** command of kdb5_ldap_util (see
+   :ref:`kdb5_ldap_util(8)` **stashsrvpw** command (see
    :ref:`stash_ldap_label`).  The object DN should be the same as
    **ldap_kdc*_dn* and **ldap_kadmind_dn** values specified in the
-   krb5.conf file::
+   :ref:`krb5.conf(5)` file::
 
        kdb5_ldap_util -D cn=admin,dc=example,dc=com stashsrvpw -f /etc/kerberos/service.keyfile cn=krbadmin,dc=example,dc=com
 

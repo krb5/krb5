@@ -5,10 +5,10 @@ Granting access to your account
 
 If you need to give someone access to log into your account, you can
 do so through Kerberos, without telling the person your password.
-Simply create a file called .k5login in your home directory.  This
-file should contain the Kerberos principal of each person to whom you
-wish to give access.  Each principal must be on a separate line.  Here
-is a sample .k5login file::
+Simply create a file called :ref:`.k5login(5)` in your home directory.
+This file should contain the Kerberos principal of each person to whom
+you wish to give access.  Each principal must be on a separate line.
+Here is a sample .k5login file::
 
     jennifer@ATHENA.MIT.EDU
     david@EXAMPLE.COM

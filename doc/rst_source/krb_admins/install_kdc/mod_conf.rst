@@ -1,16 +1,16 @@
 Edit the configuration files
 ============================
 
-Modify the configuration files, krb5.conf and kdc.conf, to reflect the
-correct information (such as domain-realm mappings and Kerberos
-servers names) for your realm.  (See :ref:`mitK5defaults` for the
-recommended default locations for these files).
+Modify the configuration files, :ref:`krb5.conf(5)` and
+:ref:`kdc.conf(5)`, to reflect the correct information (such as
+domain-realm mappings and Kerberos servers names) for your realm.
+(See :ref:`mitK5defaults` for the recommended default locations for
+these files).
 
 Most of the tags in the configuration have default values that will
-work well for most sites.  There are some tags in the krb5.conf file
-whose values must be specified, and this section will explain those.
-For more information on Kerberos V5 configuration files see
-:ref:`krb5.conf` and :ref:`kdc.conf`.
+work well for most sites.  There are some tags in the
+:ref:`krb5.conf(5)` file whose values must be specified, and this
+section will explain those.
 
 If the locations for these configuration files differs from the
 default ones, set **KRB5_CONFIG** and **KRB5_KDC_PROFILE** environment
@@ -33,8 +33,8 @@ server in each realm, the **admin_server** tag must be set in the
 :ref:`realms` section.  If your domain name and realm name are not the
 same, you must provide a translation in :ref:`domain_realm`.  It is
 also higly recommeneded that you create a :ref:`logging` stanza if the
-computer will be functioning as a KDC so that the KDC and kadmind will
-generate logging output.
+computer will be functioning as a KDC so that :ref:`krb5kdc(8)` and
+:ref:`kadmind(8)` will generate logging output.
 
 An example krb5.conf file::
 

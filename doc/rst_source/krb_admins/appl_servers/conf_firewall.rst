@@ -8,10 +8,10 @@ realm, they must be able to get to your KDC.  This requires either
 that you have a slave KDC outside your firewall, or you configure your
 firewall to allow UDP requests into at least one of your KDCs, on
 whichever port the KDC is running.  (The default is port 88; other
-ports may be specified in the KDC's kdc.conf file.)  Similarly, if you
-need off-site users to be able to change their passwords in your
-realm, they must be able to get to your Kerberos admin server.  The
-default port for the admin server is 749.
+ports may be specified in the KDC's :ref:`kdc.conf(5)` file.)
+Similarly, if you need off-site users to be able to change their
+passwords in your realm, they must be able to get to your Kerberos
+admin server.  The default port for the admin server is 749.
 
 If your on-site users inside your firewall will need to get to KDCs in
 other realms, you will also need to configure your firewall to allow
@@ -22,8 +22,8 @@ firewall will need to get to Kerberos admin servers in other realms,
 you will also need to allow outgoing TCP and UDP requests to port 749.
 
 If any of your KDCs are outside your firewall, you will need to allow
-kprop requests to get through to the remote KDC.  kprop uses the
-``krb5_prop`` service on port 754 (tcp).
+kprop requests to get through to the remote KDC.  :ref:`kprop(8)` uses
+the ``krb5_prop`` service on port 754 (tcp).
 
 If you need your off-site users to have access to machines inside your
 firewall, you need to allow TCP connections from their off-site hosts

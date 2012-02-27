@@ -1,5 +1,7 @@
-Kerberos V5 acl file for host access
-====================================
+.. _.k5login(5):
+
+.k5login
+========
 
 SYNOPSIS
 --------

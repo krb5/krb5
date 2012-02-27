@@ -1,5 +1,7 @@
-kvno - print key version numbers of Kerberos principals
-=======================================================
+.. _kvno(1):
+
+kvno
+====
 
 SYNOPSIS
 --------
@@ -79,4 +81,4 @@ FILES
 SEE ALSO
 --------
 
-kinit(1), kdestroy(1)
+:ref:`kinit(1)`, :ref:`kdestroy(1)`

@@ -28,12 +28,13 @@ master KDC:
 On the *new* master KDC:
 
 #. Create a database keytab.  (See Create a kadmind Keytab (optional).)
-#. Start the kadmind daemon.  (See Start the Kerberos Daemons.)
+#. Start the :ref:`kadmind(8)` daemon.  (See Start the Kerberos
+   Daemons.)
 #. Set up the cron job to propagate the database.  (See Propagate the
    Database to Each Slave KDC.)
 #. Switch the CNAMEs of the old and new master KDCs.  (If you don't do
-   this, you'll need to change the krb5.conf file on every client
-   machine in your Kerberos realm.)
+   this, you'll need to change the :ref:`krb5.conf(5)` file on every
+   client machine in your Kerberos realm.)
 
 
 Feedback

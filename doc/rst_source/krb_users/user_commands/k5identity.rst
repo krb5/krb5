@@ -1,5 +1,7 @@
-Kerberos V5 client principal selection rules
-============================================
+.. _.k5identity(5):
+
+.k5identity
+===========
 
 SYNOPSIS
 --------
@@ -28,7 +30,7 @@ recognized:
     against *value*, which may be a pattern using shell wildcards.
     For host-based server principals, the realm will generally only be
     known if there is a :ref:`domain_realm` section in
-    :ref:`krb5.conf` with a mapping for the hostname.
+    :ref:`krb5.conf(5)` with a mapping for the hostname.
 
 **service**
     If the server principal is a host-based principal, its service
@@ -64,4 +66,4 @@ accessing the IMAP service on ``mail.example.com``::
 SEE ALSO
 --------
 
-kerberos(1), krb5.conf(5)
+kerberos(1), :ref:`krb5.conf(5)`

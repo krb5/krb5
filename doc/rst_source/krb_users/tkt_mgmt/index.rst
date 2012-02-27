@@ -13,10 +13,10 @@ remote host.  Most of these programs also automatically destroy your
 tickets when they exit.  However, MIT recommends that you explicitly
 destroy your Kerberos tickets when you are through with them, just to
 be sure.  One way to help ensure that this happens is to add the
-kdestroy command to your .logout file.  Additionally, if you are going
-to be away from your machine and are concerned about an intruder using
-your permissions, it is safest to either destroy all copies of your
-tickets, or use a screensaver that locks the screen.
+:ref:`kdestroy(1)` command to your .logout file.  Additionally, if you
+are going to be away from your machine and are concerned about an
+intruder using your permissions, it is safest to either destroy all
+copies of your tickets, or use a screensaver that locks the screen.
 
 .. toctree::
    :maxdepth: 1

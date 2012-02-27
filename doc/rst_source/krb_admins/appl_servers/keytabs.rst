@@ -8,8 +8,9 @@ and key.  Just as it is important for users to protect their
 passwords, it is equally important for hosts to protect their keytabs.
 You should always store keytab files on local disk, and make them
 readable only by root, and you should never send a keytab file over a
-network in the clear.  Ideally, you should run the kadmin command to
-extract a keytab on the host on which the keytab is to reside.
+network in the clear.  Ideally, you should run the :ref:`kadmin(1)`
+command to extract a keytab on the host on which the keytab is to
+reside.
 
 
 .. _add_princ_kt:
@@ -47,7 +48,7 @@ Here is a sample session, using configuration files that enable only
 Removing principals from keytabs
 ---------------------------------
 
-To remove a principal from an existing keytab, use the *kadmin*
+To remove a principal from an existing keytab, use the kadmin
 **ktremove** command.
 
 .. include:: ../admin_commands/kadmin_local.rst

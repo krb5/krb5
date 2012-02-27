@@ -43,15 +43,15 @@ kpasswd looks first for::
 
     kpasswd_server = host:port
 
-in the [realms] section of the krb5.conf file under the current realm.
-If that is missing, kpasswd looks for the **admin_server** entry, but
-substitutes 464 for the port.
+in the [realms] section of the :ref:`krb5.conf(5)` file under the
+current realm.  If that is missing, kpasswd looks for the
+**admin_server** entry, but substitutes 464 for the port.
 
 
 SEE ALSO
 --------
 
-kadmin(8), kadmind(8)
+:ref:`kadmin(1)`, :ref:`kadmind(8)`
 
 
 BUGS

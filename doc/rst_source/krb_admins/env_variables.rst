@@ -36,12 +36,12 @@ The following environment variables can be used during runtime:
     default location)
 
 **KPROP_PORT**
-    *kprop* port to use.  Defaults to 754.
+    :ref:`kprop(8)` port to use.  Defaults to 754.
 
 **KRB5_TRACE**
     Debugging and tracing. (Introduced in release 1.9)
 
-    E.g. *KRB5_TRACE=/dev/stdout kinit*
+    E.g. ``KRB5_TRACE=/dev/stdout kinit``
 
     The setting of this environment variable can be overridden by
     the tracing behavior set by the application using either of the following API:

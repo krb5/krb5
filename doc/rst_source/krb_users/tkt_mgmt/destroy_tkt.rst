@@ -11,9 +11,9 @@ Destroying your tickets is easy.  Simply type kdestroy::
     shell% kdestroy
     shell%
 
-If kdestroy fails to destroy your tickets, it will beep and give an
-error message.  For example, if kdestroy can't find any tickets to
-destroy, it will give the following message::
+If :ref:`kdestroy(1)` fails to destroy your tickets, it will beep and
+give an error message.  For example, if kdestroy can't find any
+tickets to destroy, it will give the following message::
 
     shell% kdestroy
     kdestroy: No credentials cache file found while destroying cache

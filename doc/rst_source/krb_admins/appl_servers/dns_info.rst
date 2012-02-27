@@ -37,7 +37,8 @@ issuing the command ``klist -k``. For example::
        1 host/daffodil.mit.edu@ATHENA.MIT.EDU
 
 If you telnet to the host with a fresh credentials cache (ticket
-file), and then klist, the host's service principal should be::
+file), and then :ref:`klist(1)`, the host's service principal should
+be::
 
     host/fully-qualified-hostname@REALM_NAME.
 

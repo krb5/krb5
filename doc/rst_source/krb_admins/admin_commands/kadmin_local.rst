@@ -1,9 +1,7 @@
 .. _kadmin(1):
 
-.. _kadmin.local(1):
-
-kadmin, kadmin.local
-====================
+kadmin
+======
 
 SYNOPSIS
 --------
@@ -66,9 +64,7 @@ kadmin.local can be configured to log updates for incremental database
 propagation.  Incremental propagation allows slave KDC servers to
 receive principal and policy updates incrementally instead of
 receiving full dumps of the database.  This facility can be enabled in
-the :ref:`kdc.conf` file with the **iprop_enable** option.  See the
-:ref:`kdc.conf` documentation for other options for tuning incremental
-propagation parameters.
+the :ref:`kdc.conf(5)` file with the **iprop_enable** option.
 
 
 OPTIONS
@@ -99,8 +95,8 @@ OPTIONS
     Requests anonymous processing.  Two types of anonymous principals
     are supported.  For fully anonymous Kerberos, configure pkinit on
     the KDC and configure **pkinit_anchors** in the client's
-    :ref:`krb5.conf`.  Then use the **-n** option with a principal of
-    the form ``@REALM`` (an empty principal name followed by the
+    :ref:`krb5.conf(5)`.  Then use the **-n** option with a principal
+    of the form ``@REALM`` (an empty principal name followed by the
     at-sign and a realm name).  If permitted by the KDC, an anonymous
     ticket will be returned.  A second form of anonymous tickets is
     supported; these realm-exposed tickets hide the identity of the
@@ -924,7 +920,7 @@ The options are:
     key of the principal.  The enctype-salttype pairs may be delimited
     with commas or whitespace.  The quotes are necessary for
     whitespace-delimited list.  If this option is not specified, then
-    **supported_enctypes** from :ref:`krb5.conf` will be used.  See
+    **supported_enctypes** from :ref:`krb5.conf(5)` will be used.  See
     :ref:`Supported_Encryption_Types_and_Salts` for all possible
     values.
 
@@ -970,7 +966,7 @@ If the string "all" is specified, all entries for that principal are
 removed; if the string "old" is specified, all entries for that
 principal except those with the highest kvno are removed.  Otherwise,
 the value specified is parsed as an integer, and all entries whose
-*kvno* match that integer are removed.
+kvno match that integer are removed.
 
 The options are:
 
@@ -1042,4 +1038,4 @@ interface to the OpenVision Kerberos administration program.
 SEE ALSO
 --------
 
-kerberos(1), kpasswd(1), kadmind(8)
+kerberos(1), :ref:`kpasswd(1)`, kadmind(8)

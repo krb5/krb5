@@ -3,8 +3,8 @@
 Adding, modifying and deleting principals
 ============================================
 
-To add a principal to the database, use the kadmin **add_principal**
-command.
+To add a principal to the database, use the :ref:`kadmin(1)`
+**add_principal** command.
 
 To modify attributes of a principal, use the kadmin
 **modify_principal** command.

@@ -1,8 +1,7 @@
 Client machine configuration files
 ==================================
 
-Each machine running Kerberos must have a ``/etc/krb5.conf`` file.
-(See :ref:`krb5.conf`.)
+Each machine running Kerberos must have a :ref:`krb5.conf(5)` file.
 
 Also, for most UNIX systems, you must add the appropriate Kerberos
 services to each client machine's ``/etc/services`` file.  If you are

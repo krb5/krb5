@@ -155,7 +155,7 @@ Stash the password::
 
     kdb5_ldap_util -D cn=admin,dc=example,dc=com -H ldapi:/// stashsrvpw cn=admin,dc=example,dc=com
 
-Start kdc::
+Start :ref:`krb5kdc(8)`::
 
     krb5kdc
 

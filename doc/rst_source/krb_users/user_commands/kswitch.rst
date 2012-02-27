@@ -1,5 +1,7 @@
-kswitch - switch primary credential cache
-=========================================
+.. _kswitch(1):
+
+kswitch
+=======
 
 SYNOPSIS
 ~~~~~~~~
@@ -52,4 +54,4 @@ FILES
 SEE ALSO
 --------
 
-kinit(1), kdestroy(1), klist(1), kerberos(1)
+:ref:`kinit(1)`, :ref:`kdestroy(1)`, :ref:`klist(1)`), kerberos(1)

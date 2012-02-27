@@ -3,9 +3,9 @@
 Operations on the LDAP database
 ===============================
 
-The kdb5_ldap_util is the primary tool for administrating the Kerberos
-LDAP database.  It allows an administrator to manage realms, Kerberos
-services (KDC and Admin Server) and ticket policies.
+The :ref:`kdb5_ldap_util(8)` is the primary tool for administrating
+the Kerberos LDAP database.  It allows an administrator to manage
+realms, Kerberos services (KDC and Admin Server) and ticket policies.
 
 .. include:: ../../admin_commands/kdb5_ldap_util.rst
    :start-after:  _kdb5_ldap_util_synopsis:

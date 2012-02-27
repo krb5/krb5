@@ -1,4 +1,4 @@
-.. _kdc.conf:
+.. _kdc.conf(5):
 
 kdc.conf
 ========
@@ -13,7 +13,8 @@ setting the environment variable KRB5_KDC_PROFILE.
 Structure
 ---------
 
-The kdc.conf file is set up in the same format as the :ref:`krb5.conf` file.
+The kdc.conf file is set up in the same format as the
+:ref:`krb5.conf(5)` file.
 
 
 Sections
@@ -92,8 +93,8 @@ subsection:
 
 **acl_file**
     (String.)  Location of the access control list (acl) file that
-    kadmin uses to determine which principals are allowed which
-    permissions on the database.  The default is
+    :ref:`kadmind(8)` uses to determine which principals are allowed
+    which permissions on the database.  The default is
     ``/usr/local/var/krb5kdc/kadm5.acl``.
 
 **admin_keytab**
@@ -235,8 +236,9 @@ subsection:
     default value will not use values from the [dbmodules] section.)
 
 **kadmind_port**
-    (Port number.)  Specifies the port on which the kadmind daemon is
-    to listen for this realm.  The assigned port for kadmind is 749.
+    (Port number.)  Specifies the port on which the :ref:`kadmind(8)`
+    daemon is to listen for this realm.  The assigned port for kadmind
+    is 749.
 
 **key_stash_file**
     (String.)  Specifies the location where the master key has been
@@ -285,12 +287,12 @@ subsection:
     A boolean value (true, false).  If set to true, the KDC will check
     the list of transited realms for cross-realm tickets against the
     transit path computed from the realm names and the capaths section
-    of its krb5.conf file; if the path in the ticket to be issued
-    contains any realms not in the computed path, the ticket will not
-    be issued, and an error will be returned to the client instead.
-    If this value is set to false, such tickets will be issued
-    anyways, and it will be left up to the application server to
-    validate the realm transit path.
+    of its :ref:`krb5.conf(5)` file; if the path in the ticket to be
+    issued contains any realms not in the computed path, the ticket
+    will not be issued, and an error will be returned to the client
+    instead.  If this value is set to false, such tickets will be
+    issued anyways, and it will be left up to the application server
+    to validate the realm transit path.
 
     If the disable-transited-check flag is set in the incoming
     request, this check is not performed at all.  Having the
@@ -319,8 +321,8 @@ subsection:
 **supported_enctypes**
     List of *key*:*salt* strings.  Specifies the default key/salt
     combinations of principals for this realm.  Any principals created
-    through kadmin will have keys of these types.  The default value
-    for this tag is ``aes256-cts-hmac-sha1-96:normal
+    through :ref:`kadmin(1)` will have keys of these types.  The
+    default value for this tag is ``aes256-cts-hmac-sha1-96:normal
     aes128-cts-hmac-sha1-96:normal des3-cbc-sha1:normal
     arcfour-hmac-md5:normal``.  For lists of possible values, see
     :ref:`Supported_Encryption_Types_and_Salts`
@@ -331,7 +333,7 @@ subsection:
 [logging]
 ~~~~~~~~~
 
-See :ref:`logging` section in :ref:`krb5.conf`
+See :ref:`logging` section in :ref:`krb5.conf(5)`
 
 
 PKINIT options
@@ -471,4 +473,4 @@ FILES
 SEE ALSO
 ---------
 
-krb5.conf(5), krb5kdc(8)
+:ref:`krb5.conf(5)`, :ref:`krb5kdc(8)`

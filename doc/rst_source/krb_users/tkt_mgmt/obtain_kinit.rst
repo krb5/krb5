@@ -1,15 +1,16 @@
 .. _otwk_labal:
 
-Obtaining tickets with *kinit*
-==============================
+Obtaining tickets with kinit
+============================
 
 If your site is using the Kerberos V5 login program, you will get
 Kerberos tickets automatically when you log in.  If your site uses a
 different login program, you may need to explicitly obtain your
-Kerberos tickets, using the kinit program.  Similarly, if your
-Kerberos tickets expire, use the kinit program to obtain new ones.
+Kerberos tickets, using the :ref:`kinit(1)` program.  Similarly, if
+your Kerberos tickets expire, use the kinit program to obtain new
+ones.
 
-To use the kinit program, simply type kinit and then type your
+To use the kinit program, simply type ``kinit`` and then type your
 password at the prompt. For example, Jennifer (whose username is
 ``jennifer``) works for Bleep, Inc. (a fictitious company with the
 domain name mit.edu and the Kerberos realm ATHENA.MIT.EDU).  She would
@@ -53,7 +54,7 @@ need to request forwardable tickets. You do this by specifying the
     shell%
 
 Note that kinit does not tell you that it obtained forwardable
-tickets; you can verify this using the *klist* command (see
+tickets; you can verify this using the :ref:`klist(1)` command (see
 :ref:`vytwk_label`).
 
 Normally, your tickets are good for your system's default ticket
@@ -75,7 +76,7 @@ type::
           lifetime.
 
 .. [1] Note: the realm EXAMPLE.COM must be listed in your computer's
-       Kerberos configuration file, */etc/krb5.conf*.
+       Kerberos configuration file, :ref:`krb5.conf(5)`.
 
 
 Feedback

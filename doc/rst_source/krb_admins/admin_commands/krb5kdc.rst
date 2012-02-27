@@ -112,17 +112,17 @@ For example::
 
 specifies that the KDC listen on port 2001 for REALM1 and on port 2002
 for REALM2 and REALM3.  Additionally, per-realm parameters may be
-specified in the :ref:`kdc.conf` file.  The location of this file may
-be specified by the **KRB5_KDC_PROFILE** environment variable.
+specified in the :ref:`kdc.conf(5)` file.  The location of this file
+may be specified by the **KRB5_KDC_PROFILE** environment variable.
 Parameters specified in this file take precedence over options
-specified on the command line.  See the :ref:`kdc.conf` description
+specified on the command line.  See the :ref:`kdc.conf(5)` description
 for further details.
 
 
 ENVIRONMENT
 -----------
 
-*krb5kdc* uses the following environment variables:
+krb5kdc uses the following environment variables:
 
 * **KRB5_CONFIG**
 * **KRB5_KDC_PROFILE**
@@ -131,4 +131,5 @@ ENVIRONMENT
 SEE ALSO
 --------
 
-kdb5_util(8), kdc.conf(5), krb5.conf(5), kdb5_ldap_util(8)
+:ref:`kdb5_util(8)`, :ref:`kdc.conf(5)`, :ref:`krb5.conf(5)`,
+:ref:`kdb5_ldap_util(8)`

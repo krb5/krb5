@@ -46,12 +46,12 @@ his keytab or to add new keys to the keytab.
 In all cases, the default file used is ``/etc/krb5.keytab`` file
 unless this is overridden by the **-f** option.
 
-k5srvutil uses the kadmin program to edit the keytab in place.
-However, old keys are retained, so they are available in case of
-failure.
+k5srvutil uses the :ref:`kadmin(1)` program to edit the keytab in
+place.  However, old keys are retained, so they are available in case
+of failure.
 
 
 SEE ALSO
 --------
 
-kadmin(8), ktutil(8)
+:ref:`kadmin(1)`, :ref:`ktutil(1)`

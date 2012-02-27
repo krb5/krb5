@@ -1,7 +1,7 @@
 .. _kinit(1):
 
-kinit - obtain and cache Kerberos ticket-granting ticket
-========================================================
+kinit
+=====
 
 SYNOPSIS
 --------
@@ -120,10 +120,11 @@ OPTIONS
     are supported.
 
     For fully anonymous Kerberos, configure pkinit on the KDC and
-    configure **pkinit_anchors** in the client's krb5.conf.  Then use
-    the **-n** option with a principal of the form ``@REALM`` (an
-    empty principal name followed by the at-sign and a realm name).
-    If permitted by the KDC, an anonymous ticket will be returned.
+    configure **pkinit_anchors** in the client's :ref:`krb5.conf(5)`.
+    Then use the **-n** option with a principal of the form ``@REALM``
+    (an empty principal name followed by the at-sign and a realm
+    name).  If permitted by the KDC, an anonymous ticket will be
+    returned.
 
     A second form of anonymous tickets is supported; these
     realm-exposed tickets hide the identity of the client but not the
@@ -210,4 +211,4 @@ FILES
 SEE ALSO
 --------
 
-klist(1), kdestroy(1), kerberos(1)
+:ref:`klist(1)`, :ref:`kdestroy(1)`, kerberos(1)

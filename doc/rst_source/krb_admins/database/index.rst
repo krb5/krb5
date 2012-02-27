@@ -11,8 +11,8 @@ Your Kerberos database contains all of your realm's Kerberos
 principals, their passwords, and other administrative information
 about each principal.  For the most part, you will use the
 :ref:`kdb5_util(8)` program to manipulate the Kerberos database as a
-whole, and the kadmin program to make changes to the entries in the
-database.  (One notable exception is that users will use the
+whole, and the :ref:`kadmin(1)` program to make changes to the entries
+in the database.  (One notable exception is that users will use the
 :ref:`kpasswd(1)` program to change their own passwords.)  The kadmin
 program has its own command-line interface, to which you type the
 database administrating commands.
@@ -20,7 +20,8 @@ database administrating commands.
 :ref:`kdb5_util(8)` provides a means to create, delete, load, or dump
 a Kerberos database.  It also includes a command to stash a copy of
 the master database key in a file on a KDC, so that the KDC can
-authenticate itself to the kadmind and krb5kdc daemons at boot time.
+authenticate itself to the :ref:`kadmind(8)` and :ref:`krb5kdc(8)`
+daemons at boot time.
 
 kadmin provides for the maintenance of Kerberos principals, KADM5
 policies, and service key tables (keytabs).  It exists as both a

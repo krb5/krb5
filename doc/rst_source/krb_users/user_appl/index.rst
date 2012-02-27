@@ -29,8 +29,8 @@ because Kerberos has already proven your identity.
 
 The Kerberos V5 network programs allow you the options of forwarding
 your tickets to the remote host (if you obtained forwardable tickets
-with the kinit program; see :ref:`otwk_labal`), and encrypting data
-transmitted between you and the remote host.
+with the :ref:`kinit(1)` program; see :ref:`otwk_labal`), and
+encrypting data transmitted between you and the remote host.
 
 The Kerberos V5 applications are versions of existing UNIX network
 programs with the Kerberos features added.

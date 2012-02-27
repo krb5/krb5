@@ -85,7 +85,7 @@ Creates realm in directory. Options:
 
 **-k** *mkeytype*
     Specifies the key type of the master key in the database; the
-    default is that given in kdc.conf.
+    default is that given in :ref:`kdc.conf(5)`.
 
 **-kv** *mkeyVNO*
     Specifies the version number of the master key in the database;
@@ -997,4 +997,4 @@ EXAMPLE::
 SEE ALSO
 --------
 
-kadmin(8)
+:ref:`kadmin(1)`

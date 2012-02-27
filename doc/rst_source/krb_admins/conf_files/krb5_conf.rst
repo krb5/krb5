@@ -1,4 +1,4 @@
-.. _krb5.conf:
+.. _krb5.conf(5):
 
 krb5.conf
 =========
@@ -63,7 +63,7 @@ headers::
 *MODULEPATH* may be relative to the library path of the krb5
 installation, or it may be an absolute path.  *RESIDUAL* is provided
 to the module at initialization time.  If krb5.conf uses a module
-directive, kdc.conf should also use one if it exists.
+directive, :ref:`kdc.conf(5)` should also use one if it exists.
 
 
 Sections
@@ -116,12 +116,12 @@ The libdefaults section may contain any of the following relations:
 
 **ccache_type**
     Use this parameter on systems which are DCE clients, to specify
-    the type of cache to be created by kinit, or when forwarded
-    tickets are received.  DCE and Kerberos can share the cache, but
-    some versions of DCE do not support the default cache as created
-    by this version of Kerberos.  Use a value of 1 on DCE 1.0.3a
-    systems, and a value of 2 on DCE 1.1 systems.  The default value
-    is 4.
+    the type of cache to be created by :ref:`kinit(1)`, or when
+    forwarded tickets are received.  DCE and Kerberos can share the
+    cache, but some versions of DCE do not support the default cache
+    as created by this version of Kerberos.  Use a value of 1 on DCE
+    1.0.3a systems, and a value of 2 on DCE 1.1 systems.  The default
+    value is 4.
 
 **clockskew**
     Sets the maximum allowable amount of clockskew in seconds that the
@@ -224,10 +224,10 @@ The libdefaults section may contain any of the following relations:
 **k5login_authoritative**
     If the value of this relation is true (the default), principals
     must be listed in a local user's k5login file to be granted login
-    access, if a .k5login file exists.  If the value of this relation
-    is false, a principal may still be granted login access through
-    other mechanisms even if a k5login file exists but does not list
-    the principal.
+    access, if a :ref:`.k5login(5)` file exists.  If the value of this
+    relation is false, a principal may still be granted login access
+    through other mechanisms even if a k5login file exists but does
+    not list the principal.
 
 **k5login_directory**
     If set, the library will look for a local user's k5login file
@@ -357,8 +357,8 @@ following tags may be specified in the realm's subsection:
 **admin_server**
     Identifies the host where the administration server is running.
     Typically, this is the master Kerberos server.  This tag must be
-    given a value in order to communicate with the kadmin server for
-    the realm.
+    given a value in order to communicate with the :ref:`kadmind(8)`
+    server for the realm.
 
 **auth_to_local**
     This tag allows you to set a general rule for mapping principal
@@ -703,9 +703,9 @@ The following tags are used in this section:
 
 **ldap_service_password_file**
     This LDAP specific tag indicates the file containing the stashed
-    passwords (created by kdb5_ldap_util stashsrvpw) for the objects
-    used by the Kerberos servers to bind to the LDAP server.  This
-    file must be kept secure.  This value is used if no service
+    passwords (created by ``kdb5_ldap_util stashsrvpw``) for the
+    objects used by the Kerberos servers to bind to the LDAP server.
+    This file must be kept secure.  This value is used if no service
     password file is mentioned in the configuration section under
     dbmodules_.
 
@@ -795,9 +795,9 @@ subsection:
 
 **ldap_service_password_file**
     This LDAP specific tag indicates the file containing the stashed
-    passwords (created by "kdb5_ldap_util stashsrvpw") for the objects
-    used by the Kerberos servers to bind to the LDAP server.  This
-    file must be kept secure.
+    passwords (created by ``kdb5_ldap_util stashsrvpw``) for the
+    objects used by the Kerberos servers to bind to the LDAP server.
+    This file must be kept secure.
 
 
 .. _appdefaults:

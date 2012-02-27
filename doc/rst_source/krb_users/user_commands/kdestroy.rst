@@ -1,5 +1,7 @@
-kdestroy - destroy Kerberos tickets
-===================================
+.. _kdestroy(1):
+
+kdestroy
+========
 
 SYNOPSIS
 --------
@@ -73,7 +75,7 @@ FILES
 SEE ALSO
 --------
 
-kinit(1), klist(1)
+:ref:`kinit(1)`, :ref:`klist(1)`
 
 
 BUGS

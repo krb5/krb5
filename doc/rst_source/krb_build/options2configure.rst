@@ -48,10 +48,10 @@ Most commonly used options
 **--enable-dns-for-realm**
     Enable the use of DNS to look up a host's Kerberos realm, or a
     realm's KDCs, if the information is not provided in
-    :ref:`krb5.conf`.  See :ref:`kdc_hn_label` for information about
-    using DNS to locate the KDCs, and :ref:`mapping_hn_label` for
-    information about using DNS to determine the default realm.  By
-    default, DNS lookups are enabled for the former but not for the
+    :ref:`krb5.conf(5)`.  See :ref:`kdc_hn_label` for information
+    about using DNS to locate the KDCs, and :ref:`mapping_hn_label`
+    for information about using DNS to determine the default realm.
+    By default, DNS lookups are enabled for the former but not for the
     latter.
 
 **--with-system-et**

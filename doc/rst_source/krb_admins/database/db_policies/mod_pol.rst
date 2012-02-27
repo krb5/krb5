@@ -1,7 +1,7 @@
 Adding, modifying and deleting policies
 =======================================
 
-To add a new policy, use the kadmin **add_policy** command.
+To add a new policy, use the :ref:`kadmin(1)` **add_policy** command.
 
 To modify attributes of a principal, use the kadmin **modify_policy**
 command.

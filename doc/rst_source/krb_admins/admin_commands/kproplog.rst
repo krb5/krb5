@@ -14,12 +14,12 @@ DESCRIPTION
 The kproplog command displays the contents of the Kerberos principal
 update log to standard output.  It can be used to keep track of the
 incremental updates to the principal database, when enabled.  The
-update log file contains the update log maintained by the kadmind
-process on the master KDC server and the kpropd process on the slave
-KDC servers.  When updates occur, they are logged to this file.
-Subsequently any KDC slave configured for incremental updates will
-request the current data from the master KDC and update their
-principal.ulog file with any updates returned.
+update log file contains the update log maintained by the
+:ref:`kadmind(8)` process on the master KDC server and the kpropd
+process on the slave KDC servers.  When updates occur, they are logged
+to this file.  Subsequently any KDC slave configured for incremental
+updates will request the current data from the master KDC and update
+their principal.ulog file with any updates returned.
 
 The kproplog command can only be run on a KDC server by someone with
 privileges comparable to the superuser.  It will display update
@@ -73,4 +73,4 @@ kproplog uses the following environment variables:
 SEE ALSO
 --------
 
-kpropd(8)
+:ref:`kpropd(8)`

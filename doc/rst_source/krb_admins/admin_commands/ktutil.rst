@@ -127,4 +127,4 @@ EXAMPLE
 SEE ALSO
 --------
 
-kadmin(8), kdb5_util(8)
+:ref:`kadmin(1)`, :ref:`kdb5_util(8)`

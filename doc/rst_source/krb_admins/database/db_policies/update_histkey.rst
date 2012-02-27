@@ -5,7 +5,7 @@ The following text is for release < 1.8.
 
 If a policy specifies a number of old keys kept of two or more, the
 stored old keys are encrypted in a history key, which is found in the
-key data of the *kadmin/history* principal.
+key data of the ``kadmin/history`` principal.
 
 Currently there is no support for proper rollover of the history key,
 but you can change the history key (for example, to use a better

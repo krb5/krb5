@@ -17,7 +17,7 @@ Each server daemon will fork and run in the background.
 
 You can verify that they started properly by checking for their
 startup messages in the logging locations you defined in
-krb5.conf. (See :ref:`logging`).  For example::
+:ref:`krb5.conf(5)` (see :ref:`logging`).  For example::
 
     shell% tail /var/log/krb5kdc.log
     Dec 02 12:35:47 beeblebrox krb5kdc[3187](info): commencing operation
@@ -27,8 +27,8 @@ krb5.conf. (See :ref:`logging`).  For example::
 Any errors the daemons encounter while starting will also be listed in
 the logging output.
 
-As an additional verification, check if kinit succeeds against the
-principals that you have created on the previous step
+As an additional verification, check if :ref:`kinit(1)` succeeds
+against the principals that you have created on the previous step
 (:ref:`addadmin_kdb`). Run::
 
     shell% /usr/local/bin/kinit admin/admin@ATHENA.MIT.EDU

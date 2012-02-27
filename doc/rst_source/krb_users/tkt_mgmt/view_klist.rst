@@ -3,9 +3,9 @@
 Viewing tickets with klist
 ==========================
 
-The klist command shows your tickets.  When you first obtain tickets,
-you will have only the ticket-granting ticket.  The listing would look
-like this::
+The :ref:`klist(1)` command shows your tickets.  When you first obtain
+tickets, you will have only the ticket-granting ticket.  The listing
+would look like this::
 
     shell% klist
     Ticket cache: /tmp/krb5cc_ttypa

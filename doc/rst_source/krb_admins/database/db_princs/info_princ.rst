@@ -2,7 +2,7 @@ Retrieving information about a principal
 ========================================
 
 To retrieve a listing of the attributes and/or policies associated
-with a principal, use the kadmin **get_principal** command.
+with a principal, use the :ref:`kadmin(1)` **get_principal** command.
 
 To generate a listing of principals, use the kadmin
 **list_principals** command.

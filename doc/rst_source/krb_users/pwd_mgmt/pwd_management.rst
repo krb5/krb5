@@ -1,12 +1,12 @@
 Changing your password
 ======================
 
-To change your Kerberos password, use the kpasswd command. It will ask
-you for your old password (to prevent someone else from walking up to
-your computer when you're not there and changing your password), and
-then prompt you for the new one twice.  (The reason you have to type
-it twice is to make sure you have typed it correctly.)  For example,
-user ``david`` would do the following::
+To change your Kerberos password, use the :ref:`kpasswd(1)` command.
+It will ask you for your old password (to prevent someone else from
+walking up to your computer when you're not there and changing your
+password), and then prompt you for the new one twice.  (The reason you
+have to type it twice is to make sure you have typed it correctly.)
+For example, user ``david`` would do the following::
 
     shell% kpasswd
     Password for david:    <- Type your old password.

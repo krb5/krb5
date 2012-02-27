@@ -1,5 +1,7 @@
-ksu - Kerberized super-user
-===========================
+.. _ksu(1):
+
+ksu
+===
 
 SYNOPSIS
 --------
@@ -78,8 +80,9 @@ option, see the OPTIONS section.
 Upon successful authentication, ksu checks whether the target
 principal is authorized to access the target account.  In the target
 user's home directory, ksu attempts to access two authorization files:
-.k5login and .k5users.  In the .k5login file each line contains the
-name of a principal that is authorized to access the account.
+:ref:`.k5login(5)` and .k5users.  In the .k5login file each line
+contains the name of a principal that is authorized to access the
+account.
 
 For example::
 

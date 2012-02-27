@@ -1,8 +1,8 @@
 Changing passwords
 ==================
 
-To change a principal's password use the kadmin **change_password**
-command.
+To change a principal's password use the :ref:`kadmin(1)`
+**change_password** command.
 
 .. include:: ../../admin_commands/kadmin_local.rst
    :start-after:  _change_password:

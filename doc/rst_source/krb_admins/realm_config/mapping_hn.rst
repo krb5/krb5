@@ -14,8 +14,8 @@ Mapping hostnames onto Kerberos realms is done in one of two ways.
 
 The first mechanism, which has been in use for years in MIT-based
 Kerberos distributions, works through a set of rules in the
-:ref:`krb5.conf` configuration file.  You can specify mappings for an
-entire domain or subdomain, and/or on a hostname-by-hostname basis.
+:ref:`krb5.conf(5)` configuration file.  You can specify mappings for
+an entire domain or subdomain, and/or on a hostname-by-hostname basis.
 Since greater specificity takes precedence, you would do this by
 specifying the mappings for a given domain or subdomain and listing
 the exceptions.

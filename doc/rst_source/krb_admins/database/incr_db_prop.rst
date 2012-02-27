@@ -21,25 +21,25 @@ With incremental propagation enabled, all programs on the master KDC
 that change the database also write information about the changes to
 an "update log" file, maintained as a circular buffer of a certain
 size.  A process on each slave KDC connects to a service on the master
-KDC (currently implmented in the kadmind server) and periodically
-requests the changes that have been made since the last check.  By
-default, this check is done every two minutes.  If the database has
-just been modified in the previous several seconds (currently the
-threshold is hard-coded at 10 seconds), the slave will not retrieve
-updates, but instead will pause and try again soon after.  This
-reduces the likelihood that incremental update queries will cause
+KDC (currently implemented in the :ref:`kadmind(8)` server) and
+periodically requests the changes that have been made since the last
+check.  By default, this check is done every two minutes.  If the
+database has just been modified in the previous several seconds
+(currently the threshold is hard-coded at 10 seconds), the slave will
+not retrieve updates, but instead will pause and try again soon after.
+This reduces the likelihood that incremental update queries will cause
 delays for an administrator trying to make a bunch of changes to the
 database at the same time.
 
 Incremental propagation uses the following entries in the per-realm
-data in the KDC config file (See :ref:`kdc.conf`):
+data in the KDC config file (See :ref:`kdc.conf(5)`):
 
 ====================== =============== ===========================================
 iprop_enable           *boolean*       If *true*, then incremental propagation is enabled, and (as noted below) normal kprop propagation is disabled. The default is *false*.
 iprop_master_ulogsize  *integer*       Indicates the number of entries that should be retained in the update log. The default is 1000; the maximum number is 2500.
 iprop_slave_poll       *time interval* Indicates how often the slave should poll the master KDC for changes to the database. The default is two minutes.
 iprop_port             *integer*       Specifies the port number to be used for incremental propagation. This is required in both master and slave configuration files.
-iprop_logfile          *file name*     Specifies where the update log file for the realm database is to be stored. The default is to use the *database_name* entry from the realms section of the config file :ref:`kdc.conf`, with *.ulog* appended. (NOTE: If database_name isn't specified in the realms section, perhaps because the LDAP database back end is being used, or the file name is specified in the *dbmodules* section, then the hard-coded default for *database_name* is used. Determination of the *iprop_logfile*  default value will not use values from the *dbmodules* section.)
+iprop_logfile          *file name*     Specifies where the update log file for the realm database is to be stored. The default is to use the *database_name* entry from the realms section of the config file :ref:`kdc.conf(5)`, with *.ulog* appended. (NOTE: If database_name isn't specified in the realms section, perhaps because the LDAP database back end is being used, or the file name is specified in the *dbmodules* section, then the hard-coded default for *database_name* is used. Determination of the *iprop_logfile*  default value will not use values from the *dbmodules* section.)
 ====================== =============== ===========================================
 
 Both master and slave sides must have principals named
@@ -51,9 +51,9 @@ On the master KDC side, the ``kiprop/hostname`` principal must be
 listed in the kadmind ACL file kadm5.acl, and given the **p**
 privilege (See :ref:`privileges_label`)
 
-On the slave KDC side, kpropd should be run.  When incremental
-propagation is enabled, it will connect to the kadmind on the master
-KDC and start requesting updates.
+On the slave KDC side, :ref:`kpropd(8)` should be run.  When
+incremental propagation is enabled, it will connect to the kadmind on
+the master KDC and start requesting updates.
 
 The normal kprop mechanism is disabled by the incremental propagation
 support.  However, if the slave has been unable to fetch changes from

@@ -32,7 +32,7 @@ create it.)  To create the kadmin keytab, run kadmin.local and use the
 As specified in the **-k** argument, :ref:`ktadd` will save the
 extracted keytab as ``/usr/local/var/krb5kdc/kadm5.keytab`` (This is
 also the default location for the admin keytab).  The filename you use
-must be the one specified in your kdc.conf file.
+must be the one specified in your :ref:`kdc.conf(5)` file.
 
 
 Feedback

@@ -4,7 +4,8 @@ Creating a stash file
 =====================
 
 A stash file allows a KDC to authenticate itself to the database
-utilities, such as kadmin, kadmind, krb5kdc, and kdb5_util.
+utilities, such as :ref:`kadmind(8)`, :ref:`krb5kdc(5)`, and
+:ref:`kdb5_util(8)`.
 
 To create a stash file, use the :ref:`kdb5_util(8)` **stash** command.
 
@@ -23,7 +24,7 @@ Example
     shell%
 
 If you do not specify a stash file, kdb5_util will stash the key in
-the file specified in your :ref:`kdc.conf` file.
+the file specified in your :ref:`kdc.conf(5)` file.
 
 
 Feedback

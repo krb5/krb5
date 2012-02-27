@@ -48,13 +48,13 @@ COMMAND-LINE OPTIONS
 
 **-d** *dbname*
     specifies the name under which the principal database is stored;
-    by default the database is that listed in :ref:`kdc.conf`.  The
+    by default the database is that listed in :ref:`kdc.conf(5)`.  The
     KADM5 policy database and lock file are also derived from this
     value.
 
 **-k** *mkeytype*
     specifies the key type of the master key in the database; the
-    default is that given in :ref:`kdc.conf`.
+    default is that given in :ref:`kdc.conf(5)`.
 
 **-kv** *mkeyVNO*
     Specifies the version number of the master key in the database;
@@ -62,7 +62,7 @@ COMMAND-LINE OPTIONS
 
 **-M** *mkeyname*
     principal name for the master key in the database; the default is
-    that given in :ref:`kdc.conf`.
+    that given in :ref:`kdc.conf(5)`.
 
 **-m**
     specifies that the master database password should be read from
@@ -267,7 +267,8 @@ the principal keys change, are newly created or when the
 **update_princ_encryption** command is run.  If the time argument is
 provided then that will be the activation time otherwise the current
 time is used by default.  The format of the optional time argument is
-that specified in the *Time Formats* section of the kadmin man page.
+that specified in the *Time Formats* section of the :ref:`kadmin(1)`
+man page.
 
 list_mkeys
 ~~~~~~~~~~
@@ -276,8 +277,8 @@ list_mkeys
 
 List all master keys from most recent to earliest in ``K/M``
 principal.  The output will show the kvno, enctype and salt for each
-mkey similar to kadmin getprinc output.  A ``*`` following an mkey
-denotes the currently active master key.
+mkey similar to :ref:`kadmin(1)` **getprinc** output.  A ``*``
+following an mkey denotes the currently active master key.
 
 purge_mkeys
 ~~~~~~~~~~~
@@ -321,4 +322,4 @@ seek confirmation.
 SEE ALSO
 --------
 
-kadmin(8)
+:ref:`kadmin(1)`

@@ -5,11 +5,11 @@ Add administrators to the ACL file
 
 Next, you need create an Access Control List (ACL) file, and put the
 Kerberos principal of at least one of the administrators into it.
-This file is used by the kadmind daemon to control which principals
-may view and make privileged modifications to the Kerberos database
-files.  The filename should match the value you have set for
-**acl_file** (see :ref:`kdc_realms`) in your kdc.conf file.  The
-default file name is ``/usr/local/var/krb5kdc/kadm5.acl`` (See
+This file is used by the :ref:`kadmind(8)` daemon to control which
+principals may view and make privileged modifications to the Kerberos
+database files.  The filename should match the value you have set for
+**acl_file** (see :ref:`kdc_realms`) in your :ref:`kdc.conf(5)` file.
+The default file name is ``/usr/local/var/krb5kdc/kadm5.acl`` (See
 :ref:`mitK5defaults`).
 
 The format of the file is::

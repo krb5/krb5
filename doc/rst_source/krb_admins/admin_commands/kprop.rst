@@ -57,4 +57,4 @@ ENVIRONMENT
 SEE ALSO
 --------
 
-kpropd(8), kdb5_util(8), krb5kdc(8)
+:ref:`kpropd(8)`, :ref:`kdb5_util(8)`, :ref:`krb5kdc(8)`

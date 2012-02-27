@@ -23,13 +23,13 @@ which stores the KDC principal database and the KADM5 policy database.
 If the database is LDAP, the administration server and the KDC server
 need not run on the same machine.  kadmind accepts remote requests to
 administer the information in these databases.  Remote requests are
-sent, for example, by kadmin(8) and the kpasswd(1) command, both of
-which are clients of kadmind.
+sent, for example, by kadmin(8) and the :ref:`kpasswd(1)` command,
+both of which are clients of kadmind.
 
 kadmind requires a number of configuration files to be set up in order
 for it to work:
 
-:ref:`kdc.conf`
+:ref:`kdc.conf(5)`
     The KDC configuration file contains configuration information for
     the KDC and the KADM5 system.  kadmind understands a number of
     variable settings in this file, some of which are mandatory and
@@ -38,11 +38,11 @@ for it to work:
 
 keytab
     kadmind requires a keytab containing correct entries for the
-    kadmin/admin and kadmin/changepw principals for every realm that
-    kadmind will answer requests for.  The keytab can be created with
-    the kadmin(8) client.  The location of the keytab is determined by
-    the **admin_keytab** configuration variable (see CONFIGURATION
-    VALUES).
+    ``kadmin/admin`` and ``kadmin/changepw`` principals for every
+    realm that kadmind will answer requests for.  The keytab can be
+    created with the :ref:`kadmin(1)` client.  The location of the
+    keytab is determined by the **admin_keytab** configuration
+    variable (see CONFIGURATION VALUES).
 
 ACL file
     kadmind's ACL (access control list) tells it which principals are
@@ -60,12 +60,11 @@ disassociates itself from its controlling terminal.
 kadmind can be configured for incremental database propagation.
 Incremental propagation allows slave KDC servers to receive principal
 and policy updates incrementally instead of receiving full dumps of
-the database.  This facility can be enabled in the :ref:`kdc.conf`
-file with the **iprop_enable** option.  See the :ref:`kdc.conf`
-documentation for other options for tuning incremental propagation
-parameters.  Incremental propagation requires the principal
-``kiprop/MASTER\@REALM`` (where MASTER is the master KDC's canonical
-host name, and REALM the realm name) to be registered in the database.
+the database.  This facility can be enabled in the :ref:`kdc.conf(5)`
+file with the **iprop_enable** option.  Incremental propagation
+requires the principal ``kiprop/MASTER\@REALM`` (where MASTER is the
+master KDC's canonical host name, and REALM the realm name) to be
+registered in the database.
 
 
 OPTIONS
@@ -131,7 +130,7 @@ OPTIONS
 CONFIGURATION VALUES
 --------------------
 
-In addition to the relations defined in kdc.conf(5), kadmind
+In addition to the relations defined in :ref:`kdc.conf(5)`, kadmind
 understands the following relations, all of which should appear in the
 [realms] section:
 
@@ -140,9 +139,9 @@ understands the following relations, all of which should appear in the
 
 **admin_keytab**
     The name of the keytab containing entries for the principals
-    kadmin/admin and kadmin/changepw in each realm that kadmind will
-    serve.  The default is the value of the KRB5_KTNAME environment
-    variable, if defined.  **Mandatory**.
+    ``kadmin/admin`` and ``kadmin/changepw`` in each realm that
+    kadmind will serve.  The default is the value of the KRB5_KTNAME
+    environment variable, if defined.  **Mandatory**.
 
 **dict_file**
     The path of kadmind's password dictionary.  A principal with any
@@ -245,5 +244,5 @@ kadm5.dict            file containing dictionary of strings explicitly disallowe
 SEE ALSO
 --------
 
-kpasswd(1), kadmin(8), kdb5_util(8), kadm5_export(8), kadm5_import(8),
-kdb5_ldap_util(8)
+:ref:`kpasswd(1)`, :ref:`kadmin(1)`, :ref:`kdb5_util(8)`,
+:ref:`kdb5_ldap_util(8)`

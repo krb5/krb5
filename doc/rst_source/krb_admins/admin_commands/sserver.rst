@@ -42,8 +42,8 @@ like this::
 
 When using sclient, you will first have to have an entry in the
 Kerberos database, by using :ref:`kadmin(1)`, and then you have to get
-Kerberos tickets, by using kinit(1).  Also, if you are running the
-sclient program on a different host than the sserver it will be
+Kerberos tickets, by using :ref:`kinit(1)`.  Also, if you are running
+the sclient program on a different host than the sserver it will be
 connecting to, be sure that both hosts have an entry in /etc/services
 for the sample tcp port, and that the same port number is in both
 files.
@@ -58,7 +58,7 @@ When you run sclient you should see something like this::
 COMMON ERROR MESSAGES
 ---------------------
 
-1) *kinit* returns the error::
+1) kinit returns the error::
 
        kinit: Client not found in Kerberos database while getting initial credentials
 
@@ -85,8 +85,8 @@ COMMON ERROR MESSAGES
 
    This means that the ``sample/hostname@LOCAL.REALM`` service was not
    defined in the Kerberos database; it should be created using
-   kadmin, and a keytab file needs to be generated to make the key for
-   that service principal available for sclient.
+   :ref:`kadmin(1)`, and a keytab file needs to be generated to make
+   the key for that service principal available for sclient.
 
 5) sclient returns the error::
 

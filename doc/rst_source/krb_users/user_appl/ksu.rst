@@ -1,17 +1,17 @@
 ksu
 ===
 
-The Kerberos V5 ksu program replaces the standard UNIX su program (See
-ksu_vs_su_).  ksu first authenticates you to Kerberos.  Depending on
-the configuration of your system, ksu may ask for your Kerberos
-password if authentication fails.  Note that you should never type
-your password if you are remotely logged in using an unencrypted
+The Kerberos V5 :ref:`ksu(1)` program replaces the standard UNIX su
+program (See ksu_vs_su_).  ksu first authenticates you to Kerberos.
+Depending on the configuration of your system, ksu may ask for your
+Kerberos password if authentication fails.  Note that you should never
+type your password if you are remotely logged in using an unencrypted
 connection.
 
 Once ksu has authenticated you, if your Kerberos principal appears in
-the target's .k5login file (see Granting Access to Your Account) or in
-the target's .k5users file (see below), it switches your user ID to
-the target user ID.
+the target's :ref:`.k5login(5)` file (see Granting Access to Your
+Account) or in the target's .k5users file (see below), it switches
+your user ID to the target user ID.
 
 For example, ``david`` has put ``jennifer``'s Kerberos principal in
 his .k5login file.  If ``jennifer`` uses ksu to become ``david``, the

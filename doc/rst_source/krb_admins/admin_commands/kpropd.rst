@@ -46,7 +46,7 @@ updates its principal.ulog file with any updates from the master.
 :ref:`kproplog(8)` can be used to view a summary of the update entry
 log on the slave KDC.  Incremental propagation is not enabled by
 default; it can be enabled using the **iprop_enable** and
-**iprop_slave_poll** settings in :ref:`kdc.conf`.  The principal
+**iprop_slave_poll** settings in :ref:`kdc.conf(5)`.  The principal
 ``kiprop/slavehostname@REALM`` (where *slavehostname* is the name of
 the slave KDC host, and *REALM* is the name of the Kerberos realm)
 must be present in the slave's keytab file.
@@ -108,4 +108,4 @@ kpropd.acl
 SEE ALSO
 --------
 
-kprop(8), kdb5_util(8), krb5kdc(8), inetd(8)
+:ref:`kprop(8)`, :ref:`kdb5_util(8)`, :ref:`krb5kdc(8)`, inetd(8)

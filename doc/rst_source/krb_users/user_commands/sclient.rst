@@ -20,4 +20,4 @@ server's response.
 SEE ALSO
 --------
 
-kinit(1), sserver(8)
+:ref:`kinit(1)`, :ref:`sserver(8)`

@@ -1,12 +1,12 @@
 Installing and configuring UNIX client machines
 ===============================================
 
-The Kerberized client programs are kinit, klist, kdestroy, kpasswd,
-and ksu. All of these programs are in the directory
-``/usr/local/bin``.  MIT recommends that you use login.krb5 in place
-of ``/bin/login`` to give your users a single-sign-on system. You will
-need to make sure your users know to use their Kerberos passwords when
-they log in.
+The Kerberized client programs are :ref:`kinit(1)`, :ref:`klist(1)`,
+:ref:`kdestroy(1)`, :ref:`kpasswd(1)`, and :ref:`ksu(1)`.  All of
+these programs are in the directory ``/usr/local/bin``.  MIT
+recommends that you use login.krb5 in place of ``/bin/login`` to give
+your users a single-sign-on system. You will need to make sure your
+users know to use their Kerberos passwords when they log in.
 
 You will also need to educate your users to use the ticket management
 programs kinit, klist, kdestroy, and to use the Kerberos programs ksu
