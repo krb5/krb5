@@ -39,8 +39,14 @@
 #include <kdb5.h>
 #include <kadm5/admin.h>
 
-#if defined(NEED_ISBLANK_PROTO) && !defined(isblank)
+#if !defined(isblank) && defined(HAVE_ISBLANK)
+#if defined(NEED_ISBLANK_PROTO)
 extern int isblank();
+#endif
+#else /* isblank missing */
+#if !defined(isblank)
+#define isblank isspace
+#endif
 #endif
 
 krb5_error_code
