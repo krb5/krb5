@@ -1,8 +1,10 @@
+.. _start_kdc_daemons:
+
 Start the Kerberos daemons on the master KDC
-===============================================
+============================================
 
 At this point, you are ready to start the Kerberos KDC
-(:ref:`krb5kdc(8)`) and administrative daemons on the Master KDC. To
+(:ref:`krb5kdc(8)`) and administrative daemons on the Master KDC.  To
 do so, type::
 
     shell% /usr/local/sbin/krb5kdc
@@ -29,16 +31,9 @@ the logging output.
 
 As an additional verification, check if :ref:`kinit(1)` succeeds
 against the principals that you have created on the previous step
-(:ref:`addadmin_kdb`). Run::
+(:ref:`addadmin_kdb`).  Run::
 
     shell% /usr/local/bin/kinit admin/admin@ATHENA.MIT.EDU
-
-You are now ready to start configuring the slave KDCs.
-
-.. note:: Assuming you are setting the KDCs up so that you can easily
-          switch the master KDC with one of the slaves, you should
-          perform each of these steps on the master KDC as well as the
-          slave KDCs, unless these instructions specify otherwise.
 
 
 Feedback

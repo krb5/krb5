@@ -6,13 +6,12 @@ Add administrators to the Kerberos database
 Next you need to add administrative principals (i.e. principals who
 are allowed to administer Kerberos database) to the Kerberos database.
 You *must* add at least one principal now to allow communication
-between Kerberos administration daemon kadmind and kadmin program over
-the network for the further Kerberos administration.  To do this, use
-kadmin.local utility on the master KDC.  Note, that kadmin.local is
-designed to be ran on the same host as the primary KDC without using
-the Kerberos authentication to its database.  (However, one needs
-administrative privileges on the local filesystem to access database
-files for this command to succeed.)
+between the Kerberos administration daemon kadmind and the kadmin
+program over the network for further administration.  To do this, use
+the kadmin.local utility on the master KDC.  kadmin.local is designed
+to be run on the master KDC host without using Kerberos authentication
+to its database; instead, it must have read and write access to the
+Kerberos database on the local filesystem.
 
 The administrative principals you create should be the ones you added
 to the ACL file (see :ref:`admin_acl`).

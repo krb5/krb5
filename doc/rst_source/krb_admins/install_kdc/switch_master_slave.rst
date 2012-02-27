@@ -17,24 +17,17 @@ master KDC:
 #. Kill the kadmind process.
 #. Disable the cron job that propagates the database.
 #. Run your database propagation script manually, to ensure that the
-   slaves all have the latest copy of the database.  (See Propagate
-   the Database to Each Slave KDC.)  If there is a need to preserve
-   per-principal policy information from the database, you should do a
-   "kdb5_util dump -ov" in order to preserve that information and
-   propogate that dump file securely by some means to the slave so
-   that its database has the correct state of the per-principal policy
-   information.
+   slaves all have the latest copy of the database (see
+   :ref:`kprop_to_slaves`).
 
 On the *new* master KDC:
 
-#. Create a database keytab.  (See Create a kadmind Keytab (optional).)
-#. Start the :ref:`kadmind(8)` daemon.  (See Start the Kerberos
-   Daemons.)
-#. Set up the cron job to propagate the database.  (See Propagate the
-   Database to Each Slave KDC.)
-#. Switch the CNAMEs of the old and new master KDCs.  (If you don't do
+#. Start the :ref:`kadmind(8)` daemon (see :ref:`start_kdc_daemons`).
+#. Set up the cron job to propagate the database (see
+   :ref:`kprop_to_slaves`).
+#. Switch the CNAMEs of the old and new master KDCs.  If you can't do
    this, you'll need to change the :ref:`krb5.conf(5)` file on every
-   client machine in your Kerberos realm.)
+   client machine in your Kerberos realm.
 
 
 Feedback

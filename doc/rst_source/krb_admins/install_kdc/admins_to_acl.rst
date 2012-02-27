@@ -3,7 +3,7 @@
 Add administrators to the ACL file
 ==================================
 
-Next, you need create an Access Control List (ACL) file, and put the
+Next, you need create an Access Control List (ACL) file and put the
 Kerberos principal of at least one of the administrators into it.
 This file is used by the :ref:`kadmind(8)` daemon to control which
 principals may view and make privileged modifications to the Kerberos
@@ -14,15 +14,15 @@ The default file name is ``/usr/local/var/krb5kdc/kadm5.acl`` (See
 
 The format of the file is::
 
-    kerberos_principal      permissions     [target_principal]  [restrictions]
+    client_principal      permissions     [target_principal]  [restrictions]
 
-The *kerberos_principal* (and optional *target_principal*) can include
-the "*" wildcard, so if you want any principal with the instance
-"admin" to have full permissions on the database, you could use the
-principal "\*\/admin\@REALM" where "REALM" is your Kerberos realm.
+The *client_principal* (and optional *target_principal*) can include
+the ``*`` wildcard, so if you want any principal with the instance
+``admin`` to have full permissions on the database, you could use the
+principal ``*/admin@REALM`` where *REALM* is your Kerberos realm.
 *target_principal* can also include backreferences to
-*kerberos_principal*, in which "\*number" matches the component number
-in the *kerberos_principal*.
+*client_principal*, in which ``*number`` matches the component number
+in *client_principal*.
 
 .. note:: A common use of an admin instance is so you can grant
           separate permissions (such as administrator access to the
@@ -32,9 +32,9 @@ in the *kerberos_principal*.
           way, ``joeadmin`` would obtain ``joeadmin/admin`` tickets
           only when he actually needs to use those permissions.
 
-The permissions are represented by single letters.  The lower-case
-charecter specifies that operation can be performed by the principal,
-while its UPPER-CASE counterparts represent negative permissions.  The
+The permissions are represented by single letters.  A lowercase
+character specifies that operation can be performed by the principal,
+while its uppercase counterpart indicates negative permission.  The
 permissions are:
 
     ==== ==========================================================
@@ -49,7 +49,7 @@ permissions are:
     x    All privileges (admcil); identical to "\*"
     ==== ==========================================================
 
-The restrictions are a string of flags. Allowed restrictions are:
+*Restrictions* are a string of flags. Allowed restrictions are:
 
     ====================== ===============================
     [+\|-]flagname          flag is forced to indicated value.  The permissible flags are the same as the + and - flags for the kadmin :ref:`add_principal` and :ref:`modify_principal` commands.
@@ -66,8 +66,8 @@ which is allowed due to that ACL line.
 
 Here is an example of a kadm5.acl file.
 
-.. warning:: The order is important; permissions are determined by the
-             first matching entry.
+.. warning:: The order of lines is important; permissions are
+             determined by the first matching entry.
 
 ::
 
