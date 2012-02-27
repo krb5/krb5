@@ -1,4 +1,4 @@
-.. _privileges_label:
+.. _privileges:
 
 Privileges
 ==========
@@ -46,8 +46,8 @@ l    allows the listing of principals or policies in the database.
 L    disallows the listing of principals or policies in the database.
 m    allows the modification of principals or policies in the database.
 M    disallows the modification of principals or policies in the database.
-p    allow the propagation of  the  principal  database (Used in :ref:`incr_db_prop_label`).
-P    disallow the propagation of the principal database (Used in :ref:`incr_db_prop_label`).
+p    allow the propagation of the principal database (used in :ref:`incr_db_prop`).
+P    disallow the propagation of the principal database (used in :ref:`incr_db_prop`).
 s    allows the explicit setting of the key for a principal
 S    disallows the explicit setting of the key for a principal
 \*   All privileges (admcil).

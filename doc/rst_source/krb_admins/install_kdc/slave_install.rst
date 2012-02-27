@@ -1,4 +1,4 @@
-.. _slave_host_key_label:
+.. _slave_host_key:
 
 Setting up slave KDCs
 =====================

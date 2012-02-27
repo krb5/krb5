@@ -12,8 +12,8 @@ you--send email that comes from you, read, edit, or delete your files,
 or log into other hosts as you--and no one will be able to tell the
 difference.  For this reason, it is important that you choose a good
 password, and keep it secret.  If you need to give access to your
-account to someone else, you can do so through Kerberos.  (See
-:ref:`gatya_label`.)  You should never tell your password to anyone,
+account to someone else, you can do so through Kerberos (see
+:ref:`grant_access`).  You should never tell your password to anyone,
 including your system administrator, for any reason.  You should
 change your password frequently, particularly any time you think
 someone may have found out what it is.

@@ -1,4 +1,4 @@
-.. _otwk_labal:
+.. _obtain_tkt
 
 Obtaining tickets with kinit
 ============================
@@ -55,7 +55,7 @@ need to request forwardable tickets. You do this by specifying the
 
 Note that kinit does not tell you that it obtained forwardable
 tickets; you can verify this using the :ref:`klist(1)` command (see
-:ref:`vytwk_label`).
+:ref:`view_tkt`).
 
 Normally, your tickets are good for your system's default ticket
 lifetime, which is ten hours on many systems.  You can specify a

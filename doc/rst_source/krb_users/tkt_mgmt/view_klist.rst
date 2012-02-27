@@ -1,4 +1,4 @@
-.. _vytwk_label:
+.. _view_tkt:
 
 Viewing tickets with klist
 ==========================

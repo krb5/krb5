@@ -1,4 +1,4 @@
-.. _conf_firewall_label:
+.. _conf_firewall:
 
 Configuring your firewall to work with Kerberos V5
 ==================================================

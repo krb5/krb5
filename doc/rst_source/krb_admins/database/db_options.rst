@@ -5,8 +5,8 @@ You can invoke :ref:`kadmin(1)` or kadmin.local with any of the
 following options:
 
 .. include:: ../admin_commands/kadmin_local.rst
-   :start-after:  kadmin_synopsys:
-   :end-before: kadmin_synopsys_end:
+   :start-after:  kadmin_synopsis:
+   :end-before: kadmin_synopsis_end:
 
 **OPTIONS**
 

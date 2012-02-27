@@ -96,9 +96,9 @@ The ksu options you are most likely to use are:
                     (e.g., the user *joeadmin* might want to use his admin instance.)
 -c                  specifies the location of your Kerberos credentials cache (ticket file).
 -k                  tells ksu not to destroy your Kerberos tickets when ksu is finished.
--f                  requests forwardable tickets. (See :ref:`otwk_labal`.)
+-f                  requests forwardable tickets. (See :ref:`obtain_tkt`.)
                     This is only applicable if ksu needs to obtain tickets.
--l *lifetime*       sets the ticket lifetime. (See :ref:`otwk_labal`.) i
+-l *lifetime*       sets the ticket lifetime. (See :ref:`obtain_tkt`.)
                     This is only applicable if ksu needs to obtain tickets.
 -z                  tells ksu to copy your Kerberos tickets only if the UID you are switching
                     is the same as the Kerberos primary

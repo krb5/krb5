@@ -1,4 +1,4 @@
-.. _xrealm_authn_label:
+.. _xrealm_authn:
 
 Cross-realm authentication
 ==========================

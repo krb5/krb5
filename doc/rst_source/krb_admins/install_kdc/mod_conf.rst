@@ -24,10 +24,10 @@ example::
 krb5.conf
 ---------
 
-If you are not using DNS TXT records (see :ref:`mapping_hn_label`),
+If you are not using DNS TXT records (see :ref:`mapping_hostnames`),
 you must specify the **default_realm** in the :ref:`libdefaults`
 section.  If you are not using DNS SRV records (see
-:ref:`kdc_hn_label`), you must include the **kdc** tag for each
+:ref:`kdc_hostnames`), you must include the **kdc** tag for each
 *realm* in the :ref:`realms` section.  To communicate with the kadmin
 server in each realm, the **admin_server** tag must be set in the
 :ref:`realms` section.  If your domain name and realm name are not the

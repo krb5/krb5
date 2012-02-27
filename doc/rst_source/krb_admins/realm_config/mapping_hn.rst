@@ -1,4 +1,4 @@
-.. _mapping_hn_label:
+.. _mapping_hostnames:
 
 
 Mapping hostnames onto Kerberos realms

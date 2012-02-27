@@ -1,4 +1,4 @@
-.. _gatya_label:
+.. _grant_access:
 
 Granting access to your account
 ===============================

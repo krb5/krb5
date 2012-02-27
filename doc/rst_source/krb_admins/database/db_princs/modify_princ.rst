@@ -1,4 +1,4 @@
-.. _add_mod_del_princs_label:
+.. _add_mod_del_princs:
 
 Adding, modifying and deleting principals
 ============================================
@@ -76,7 +76,7 @@ principals ``krbtgt/EXAMPLE.COM@ATHENA.MIT.EDU`` and
 ``krbtgt/ATHENA.MIT.EDU@EXAMPLE.COM`` to both databases. You need to
 be sure the passwords and the key version numbers (kvno) are the same
 in both databases. This may require explicitly setting the kvno with
-the **-kvno** option. See :ref:`xrealm_authn_label` for more details.
+the **-kvno** option. See :ref:`xrealm_authn` for more details.
 
 If you want to delete a principal ::
 

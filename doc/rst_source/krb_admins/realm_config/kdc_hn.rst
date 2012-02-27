@@ -1,4 +1,4 @@
-.. _kdc_hn_label:
+.. _kdc_hostnames:
 
 Hostnames for KDCs
 ==================

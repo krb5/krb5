@@ -1,4 +1,4 @@
-.. _create_db_label:
+.. _create_db:
 
 Create the database
 ===================
@@ -52,7 +52,7 @@ This will create five files in the directory specified in your
   **-s** option.
 
 For more information on administrating Kerberos database see
-:ref:`db_operations_label`.
+:ref:`db_operations`.
 
 
 Feedback

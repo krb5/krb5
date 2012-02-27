@@ -6,7 +6,7 @@ kadmin
 SYNOPSIS
 --------
 
-.. _kadmin_synopsys:
+.. _kadmin_synopsis:
 
 **kadmin**
 [**-O**\|\ **-N**]
@@ -26,7 +26,7 @@ SYNOPSIS
 [**-m**]
 [**-x** *db_args*]
 
-.. _kadmin_synopsys_end:
+.. _kadmin_synopsis_end:
 
 
 DESCRIPTION
@@ -852,7 +852,7 @@ list_policies
 
 Retrieves all or some policy names.  *expression* is a shell-style
 glob expression that can contain the wild-card characters ``?``,
-``*``, and ``[]'`.  All policy names matching the expression are
+``*``, and ``[]``.  All policy names matching the expression are
 printed.  If no expression is provided, all existing policy names are
 printed.
 

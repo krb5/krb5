@@ -1,4 +1,4 @@
-.. _ldap_mod_realm_label:
+.. _ldap_mod_realm:
 
 Modifying a Kerberos realm
 ==========================
@@ -10,7 +10,7 @@ If you need to modify a realm, use the :ref:`kdb5_ldap_util(8)`
    :start-after:  _kdb5_ldap_util_modify:
    :end-before: _kdb5_ldap_util_modify_end:
 
-.. seealso:: :ref:`edir_mod_realm_label`
+.. seealso:: :ref:`edir_mod_realm`
 
 
 Feedback

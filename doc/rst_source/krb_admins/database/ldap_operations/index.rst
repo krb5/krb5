@@ -1,4 +1,4 @@
-.. _ops_on_ldap_label:
+.. _ops_on_ldap:
 
 Operations on the LDAP database
 ===============================

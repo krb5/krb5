@@ -1,5 +1,3 @@
-.. _db_policies_label:
-
 Policies
 ========
 

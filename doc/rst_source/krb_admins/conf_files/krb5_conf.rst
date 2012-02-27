@@ -136,7 +136,7 @@ The libdefaults section may contain any of the following relations:
 **default_realm**
     Identifies the default Kerberos realm for the client.  Set its
     value to your Kerberos realm.  If this is not specified and the
-    TXT record lookup is enabled (see :ref:`udns_label`), then that
+    TXT record lookup is enabled (see :ref:`using_dns`), then that
     information will be used to determine the default realm.  If this
     tag is not set in this configuration file and there is no DNS
     information found, then an error will be returned.
@@ -438,7 +438,7 @@ following tags may be specified in the realm's subsection:
     be able to communicate with the KDC for each realm, this tag must
     be given a value in each realm subsection in the configuration
     file, or there must be DNS SRV records specifying the KDCs (see
-    :ref:`udns_label`).
+    :ref:`using_dns`).
 
 **kpasswd_server**
     Points to the server where all the password changes are performed.
@@ -1184,8 +1184,6 @@ PKINIT krb5.conf options
     patched to return a reply with a checksum rather than a nonce.
     The default is false.
 
-
-.. _krb5_conf_sample_label:
 
 Sample krb5.conf file
 ---------------------

@@ -15,7 +15,7 @@ administrative privileges on the local filesystem to access database
 files for this command to succeed.)
 
 The administrative principals you create should be the ones you added
-to the ACL file. (See :ref:`admin_acl_label`.)
+to the ACL file (see :ref:`admin_acl`).
 
 In the following example, the administrative principal ``admin/admin``
 is created::

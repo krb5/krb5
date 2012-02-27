@@ -1,4 +1,4 @@
-.. _udns_label:
+.. _using_dns:
 
 Using DNS
 =========
@@ -9,9 +9,9 @@ Using DNS
           additions to krb5-bugs@mit.edu.  Your contribution is
           greatly appreciated.
 
-See :ref:`mapping_hn_label`
+See :ref:`mapping_hostnames`
 
-See :ref:`kdc_hn_label`
+See :ref:`kdc_hostnames`
 
 
 Feedback

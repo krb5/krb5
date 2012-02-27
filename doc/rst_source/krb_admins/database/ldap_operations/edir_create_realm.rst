@@ -1,9 +1,9 @@
-.. _edir_create_realm_label:
+.. _edir_create_realm:
 
 eDir: Creating a Kerberos realm
 ===============================
 
-See :ref:`ldap_create_realm_label`
+See :ref:`ldap_create_realm`
 
 The following are the eDirectory specific options:
 
@@ -24,13 +24,13 @@ EXAMPLE::
     Re-enter KDC database master key to verify:
     shell%
 
-.. _edir_mod_realm_label:
+.. _edir_mod_realm:
 
 
 eDir: Modifying a Kerberos realm
 ================================
 
-See :ref:`ldap_mod_realm_label`
+See :ref:`ldap_mod_realm`
 
 .. include:: ../../admin_commands/kdb5_ldap_util.rst
    :start-after:  _kdb5_ldap_util_modify_edir:

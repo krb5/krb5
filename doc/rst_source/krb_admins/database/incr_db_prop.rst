@@ -1,4 +1,4 @@
-.. _incr_db_prop_label:
+.. _incr_db_prop:
 
 Incremental database propagation
 ================================
@@ -49,7 +49,7 @@ stored in the default keytab file (``/etc/krb5.keytab``).
 
 On the master KDC side, the ``kiprop/hostname`` principal must be
 listed in the kadmind ACL file kadm5.acl, and given the **p**
-privilege (See :ref:`privileges_label`)
+privilege (see :ref:`privileges`).
 
 On the slave KDC side, :ref:`kpropd(8)` should be run.  When
 incremental propagation is enabled, it will connect to the kadmind on

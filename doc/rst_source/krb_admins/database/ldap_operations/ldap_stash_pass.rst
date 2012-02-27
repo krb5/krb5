@@ -1,4 +1,4 @@
-.. _stash_ldap_label:
+.. _stash_ldap:
 
 Stashing service object's password
 ==================================

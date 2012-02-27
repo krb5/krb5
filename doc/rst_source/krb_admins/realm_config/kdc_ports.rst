@@ -6,7 +6,7 @@ The default ports used by Kerberos are port 88 for the KDC1 and port
 ports, as long as they are specified in each host's ``/etc/services``
 and :ref:`krb5.conf(5)` files, and the :ref:`kdc.conf(5)` file on each
 KDC.  For a more thorough treatment of port numbers used by the
-Kerberos V5 programs, refer to the :ref:`conf_firewall_label`.
+Kerberos V5 programs, refer to the :ref:`conf_firewall`.
 
 Feedback
 --------

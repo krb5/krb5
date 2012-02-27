@@ -114,7 +114,7 @@ Configuring Kerberos with OpenLDAP back-end
    :ref:`krb5_conf_sample_label`.
 
 8. Create the realm using :ref:`kdb5_ldap_util(8)` (see
-   :ref:`ldap_create_realm_label`)::
+   :ref:`ldap_create_realm`)::
 
        kdb5_ldap_util -D cn=admin,dc=example,dc=com create -subtrees ou=users,dc=example,dc=com -r EXAMPLE.COM -s
 
@@ -125,8 +125,7 @@ Configuring Kerberos with OpenLDAP back-end
    exist underneath the realm container, omit the **-subtrees** option
    and do not worry about creating the principal subtree.
 
-   For more information, refer to the section
-   :ref:`ops_on_ldap_label`.
+   For more information, refer to the section :ref:`ops_on_ldap`.
 
    The realm object is created under the
    **ldap_kerberos_container_dn** specified in the configuration file.
@@ -137,7 +136,7 @@ Configuring Kerberos with OpenLDAP back-end
 9. Stash the password of the service object used by the KDC and
    Administration service to bind to the LDAP server using the
    :ref:`kdb5_ldap_util(8)` **stashsrvpw** command (see
-   :ref:`stash_ldap_label`).  The object DN should be the same as
+   :ref:`stash_ldap`).  The object DN should be the same as
    **ldap_kdc*_dn* and **ldap_kadmind_dn** values specified in the
    :ref:`krb5.conf(5)` file::
 

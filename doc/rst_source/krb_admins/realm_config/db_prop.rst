@@ -1,4 +1,4 @@
-.. _db_prop_label:
+.. _db_prop:
 
 Database propagation
 ====================
@@ -18,7 +18,7 @@ parallel.  To do this, have the master KDC propagate the database to
 one set of slaves, and then have each of these slaves propagate the
 database to additional slaves.
 
-See also :ref:`incr_db_prop_label`
+See also :ref:`incr_db_prop`
 
 
 Feedback

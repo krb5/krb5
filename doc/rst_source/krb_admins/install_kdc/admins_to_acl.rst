@@ -1,4 +1,4 @@
-.. _admin_acl_label:
+.. _admin_acl:
 
 Add administrators to the ACL file
 ==================================

@@ -6,7 +6,7 @@ kdb5_util
 SYNOPSIS
 --------
 
-.. _kdb5_util_synopsys:
+.. _kdb5_util_synopsis:
 
 **kdb5_util**
 [**-r** *realm*]
@@ -18,7 +18,7 @@ SYNOPSIS
 [**-m**]
 *command* [*command_options*]
 
-.. _kdb5_util_synopsys_end:
+.. _kdb5_util_synopsis_end:
 
 DESCRIPTION
 -----------

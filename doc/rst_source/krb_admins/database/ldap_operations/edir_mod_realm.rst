@@ -1,10 +1,10 @@
-.. _edir_mod_realm_label:
+.. _edir_mod_realm:
 
 
 eDir: Modifying a Kerberos realm
 =================================
 
-See :ref:`ldap_mod_realm_label`
+See :ref:`ldap_mod_realm`
 
 The following are the eDirectory specific options
 

@@ -1,4 +1,4 @@
-.. _db_operations_label:
+.. _db_operations:
 
 Operations on the Kerberos database
 ===================================
@@ -7,8 +7,8 @@ The :ref:`kdb5_util(8)` command is the primary tool for administrating
 the Kerberos database.
 
 .. include:: ../../admin_commands/kdb5_util.rst
-   :start-after:  _kdb5_util_synopsys:
-   :end-before: _kdb5_util_synopsys_end:
+   :start-after:  _kdb5_util_synopsis:
+   :end-before: _kdb5_util_synopsis_end:
 
 **OPTIONS**
 
