@@ -361,10 +361,8 @@ module_callback(void *cbdata, int socktype, struct sockaddr *sa)
         return 0;
     if (sa->sa_family == AF_INET)
         addrlen = sizeof(struct sockaddr_in);
-#ifdef KRB5_USE_INET6
     else if (sa->sa_family == AF_INET6)
         addrlen = sizeof(struct sockaddr_in6);
-#endif
     else
         return 0;
     if (add_addr_to_list(d->list, socktype, sa->sa_family, addrlen,

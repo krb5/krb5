@@ -115,7 +115,6 @@ typedef _W64 int         ssize_t;
 #define SYS_ERRLIST_DECLARED
 /* if __STDC_VERSION__ >= 199901L this shouldn't be needed */
 #define inline __inline
-#define KRB5_USE_INET6
 #define NEED_INSIXADDR_ANY
 #define ENABLE_THREADS
 #endif

@@ -409,13 +409,8 @@ struct krb5_kdcpreauth_rock_st {
 #define max(a, b)       ((a) > (b) ? (a) : (b))
 #endif
 
-#ifdef KRB5_USE_INET6
 #define ADDRTYPE2FAMILY(X)                                              \
     ((X) == ADDRTYPE_INET6 ? AF_INET6 : (X) == ADDRTYPE_INET ? AF_INET : -1)
-#else
-#define ADDRTYPE2FAMILY(X)                      \
-    ((X) == ADDRTYPE_INET ? AF_INET : -1)
-#endif
 
 /* RFC 4120: KRB5KDC_ERR_KEY_TOO_WEAK
  * RFC 4556: KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED */

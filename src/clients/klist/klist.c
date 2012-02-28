@@ -776,7 +776,6 @@ void one_addr(a)
             memcpy (&sinp->sin_addr, a->contents, 4);
         }
         break;
-#ifdef KRB5_USE_INET6
     case ADDRTYPE_INET6:
         if (a->length != 16)
             goto broken;
@@ -789,7 +788,6 @@ void one_addr(a)
             memcpy (&sin6p->sin6_addr, a->contents, 16);
         }
         break;
-#endif
     default:
         printf(_("unknown addrtype %d"), a->addrtype);
         return;

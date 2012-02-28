@@ -248,12 +248,10 @@ get_wildcard_addr(struct addrinfo **res)
     memset(&hints, 0, sizeof(hints));
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;
-#ifdef KRB5_USE_INET6
     hints.ai_family = AF_INET6;
     error = getaddrinfo(NULL, port, &hints, res);
     if (error == 0)
         return 0;
-#endif
     hints.ai_family = AF_INET;
     return getaddrinfo(NULL, port, &hints, res);
 }
@@ -288,7 +286,7 @@ retry:
     if (setsockopt(finet, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) < 0)
         com_err(progname, errno, _("while setting SO_REUSEADDR option"));
 
-#if defined(KRB5_USE_INET6) && defined(IPV6_V6ONLY)
+#if defined(IPV6_V6ONLY)
     /* Make sure dual-stack support is enabled on IPv6 listener sockets if
      * possible. */
     val = 0;

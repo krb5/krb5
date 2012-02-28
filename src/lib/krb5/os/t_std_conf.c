@@ -133,7 +133,6 @@ test_locate_kdc(krb5_context ctx, char *realm)
                    ntohs(s_sin->sin_port));
         }
         break;
-#ifdef KRB5_USE_INET6
         case AF_INET6:
         {
             struct sockaddr_in6 *s_sin6 = (struct sockaddr_in6 *)&entry->addr;
@@ -146,7 +145,6 @@ test_locate_kdc(krb5_context ctx, char *realm)
             printf("/%d", ntohs(s_sin6->sin6_port));
             break;
         }
-#endif
         default:
             printf(" unknown-af-%d", entry->family);
             break;

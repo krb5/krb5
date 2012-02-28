@@ -389,8 +389,7 @@ if test $ac_cv_func_getaddrinfo = yes; then
 fi
 dnl
 AC_REQUIRE([KRB5_SOCKADDR_SA_LEN])dnl
-AC_ARG_ENABLE([ipv6], , AC_MSG_WARN(enable/disable-ipv6 option is deprecated))dnl
-AC_MSG_CHECKING(for IPv6 compile-time support)
+AC_MSG_CHECKING(for IPv6 compile-time support without -DINET6)
 AC_CACHE_VAL(krb5_cv_inet6,[
 if test "$ac_cv_func_inet_ntop" != "yes" ; then
   krb5_cv_inet6=no
@@ -433,7 +432,6 @@ if test $krb5_cv_inet6 = yes || test "$krb5_cv_inet6_with_dinet6" = yes; then
   if test "$krb5_cv_inet6_with_dinet6" = yes; then
     AC_DEFINE(INET6,1,[May need to be defined to enable IPv6 support, for example on IRIX])
   fi
-  AC_DEFINE(KRB5_USE_INET6,1,[Define if we should compile in IPv6 support (even if we can't use it at run time)])
 fi
 ])dnl
 dnl

@@ -552,9 +552,7 @@ static inline int fai_add_entry (struct addrinfo **result, void *addr,
     if (n == 0)
         return EAI_MEMORY;
     if (template->ai_family != AF_INET
-#ifdef KRB5_USE_INET6
         && template->ai_family != AF_INET6
-#endif
     )
         return EAI_FAMILY;
     *n = *template;
@@ -572,7 +570,6 @@ static inline int fai_add_entry (struct addrinfo **result, void *addr,
         sin4->sin_len = sizeof (struct sockaddr_in);
 #endif
     }
-#ifdef KRB5_USE_INET6
     if (template->ai_family == AF_INET6) {
         struct sockaddr_in6 *sin6;
         sin6 = malloc (sizeof (struct sockaddr_in6));
@@ -587,7 +584,6 @@ static inline int fai_add_entry (struct addrinfo **result, void *addr,
         sin6->sin6_len = sizeof (struct sockaddr_in6);
 #endif
     }
-#endif
     n->ai_next = *result;
     *result = n;
     return 0;
@@ -1355,15 +1351,8 @@ static int krb5int_unlock_fac (void)
 }
 #endif
 
-#if defined(KRB5_USE_INET6)
 /* Some systems don't define in6addr_any.  */
 const struct in6_addr krb5int_in6addr_any = IN6ADDR_ANY_INIT;
-#else
-/* Are any of the systems without IPv6 support among those where
-   we cross-check the actual exported symbols against the export
-   list?  Not sure, play it safe.  */
-const char krb5int_in6addr_any = 0;
-#endif
 
 int krb5int_getaddrinfo (const char *node, const char *service,
                          const struct addrinfo *hints,

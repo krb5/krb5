@@ -59,9 +59,7 @@ krb5_os_hostaddr(krb5_context context, const char *name,
     for (i = 0, aip = ai; aip; aip = aip->ai_next) {
         switch (aip->ai_addr->sa_family) {
         case AF_INET:
-#ifdef KRB5_USE_INET6
         case AF_INET6:
-#endif
             i++;
         default:
             /* Ignore addresses of unknown families.  */
@@ -87,13 +85,11 @@ krb5_os_hostaddr(krb5_context context, const char *name,
             ptr = &((struct sockaddr_in *)aip->ai_addr)->sin_addr;
             atype = ADDRTYPE_INET;
             break;
-#ifdef KRB5_USE_INET6
         case AF_INET6:
             addrlen = sizeof (struct in6_addr);
             ptr = &((struct sockaddr_in6 *)aip->ai_addr)->sin6_addr;
             atype = ADDRTYPE_INET6;
             break;
-#endif
         default:
             continue;
         }

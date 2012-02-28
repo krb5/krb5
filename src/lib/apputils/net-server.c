@@ -78,11 +78,9 @@ set_sa_port(struct sockaddr *addr, int port)
     case AF_INET:
         sa2sin(addr)->sin_port = port;
         break;
-#ifdef KRB5_USE_INET6
     case AF_INET6:
         sa2sin6(addr)->sin6_port = port;
         break;
-#endif
     default:
         break;
     }
@@ -91,7 +89,6 @@ set_sa_port(struct sockaddr *addr, int port)
 static int
 ipv6_enabled()
 {
-#ifdef KRB5_USE_INET6
     static int result = -1;
     if (result == -1) {
         int s;
@@ -103,9 +100,6 @@ ipv6_enabled()
             result = 0;
     }
     return result;
-#else
-    return 0;
-#endif
 }
 
 static int
@@ -114,7 +108,7 @@ setreuseaddr(int sock, int value)
     return setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value));
 }
 
-#if defined(KRB5_USE_INET6) && defined(IPV6_V6ONLY)
+#if defined(IPV6_V6ONLY)
 static int
 setv6only(int sock, int value)
 {
@@ -611,7 +605,6 @@ create_server_socket(struct socksetup *data, struct sockaddr *addr, int type)
                 _("Cannot enable SO_REUSEADDR on fd %d"), sock);
     }
 
-#ifdef KRB5_USE_INET6
     if (addr->sa_family == AF_INET6) {
 #ifdef IPV6_V6ONLY
         if (setv6only(sock, 1))
@@ -624,7 +617,6 @@ create_server_socket(struct socksetup *data, struct sockaddr *addr, int type)
         krb5_klog_syslog(LOG_INFO, _("no IPV6_V6ONLY socket option support"));
 #endif /* IPV6_V6ONLY */
     }
-#endif /* KRB5_USE_INET6 */
 
     if (bind(sock, addr, socklen(addr)) == -1) {
         data->retval = errno;
@@ -737,9 +729,7 @@ static int
 setup_tcp_listener_ports(struct socksetup *data)
 {
     struct sockaddr_in sin4;
-#ifdef KRB5_USE_INET6
     struct sockaddr_in6 sin6;
-#endif
     int i, port;
 
     memset(&sin4, 0, sizeof(sin4));
@@ -749,14 +739,12 @@ setup_tcp_listener_ports(struct socksetup *data)
 #endif
     sin4.sin_addr.s_addr = INADDR_ANY;
 
-#ifdef KRB5_USE_INET6
     memset(&sin6, 0, sizeof(sin6));
     sin6.sin6_family = AF_INET6;
 #ifdef SIN6_LEN
     sin6.sin6_len = sizeof(sin6);
 #endif
     sin6.sin6_addr = in6addr_any;
-#endif
 
     FOREACH_ELT (tcp_port_data, i, port) {
         int s4, s6;
@@ -768,9 +756,6 @@ setup_tcp_listener_ports(struct socksetup *data)
                 return -1;
             s6 = -1;
         } else {
-#ifndef KRB5_USE_INET6
-            abort();
-#else
             s4 = s6 = -1;
 
             set_sa_port((struct sockaddr *)&sin6, htons(port));
@@ -780,7 +765,6 @@ setup_tcp_listener_ports(struct socksetup *data)
                 return -1;
 
             s4 = setup_a_tcp_listener(data, (struct sockaddr *)&sin4);
-#endif /* KRB5_USE_INET6 */
         }
 
         /* Sockets are created, prepare to listen on them. */
@@ -792,7 +776,6 @@ setup_tcp_listener_ports(struct socksetup *data)
                                  s4, paddr((struct sockaddr *)&sin4));
             }
         }
-#ifdef KRB5_USE_INET6
         if (s6 >= 0) {
             if (add_tcp_listener_fd(data, s6) == NULL) {
                 close(s6);
@@ -805,7 +788,6 @@ setup_tcp_listener_ports(struct socksetup *data)
                 krb5_klog_syslog(LOG_INFO,
                                  _("assuming IPv6 socket accepts IPv4"));
         }
-#endif
     }
     return 0;
 }
@@ -814,9 +796,7 @@ static int
 setup_rpc_listener_ports(struct socksetup *data)
 {
     struct sockaddr_in sin4;
-#ifdef KRB5_USE_INET6
     struct sockaddr_in6 sin6;
-#endif
     int i;
     struct rpc_svc_data svc;
 
@@ -827,20 +807,16 @@ setup_rpc_listener_ports(struct socksetup *data)
 #endif
     sin4.sin_addr.s_addr = INADDR_ANY;
 
-#ifdef KRB5_USE_INET6
     memset(&sin6, 0, sizeof(sin6));
     sin6.sin6_family = AF_INET6;
 #ifdef HAVE_SA_LEN
     sin6.sin6_len = sizeof(sin6);
 #endif
     sin6.sin6_addr = in6addr_any;
-#endif
 
     FOREACH_ELT (rpc_svc_data, i, svc) {
         int s4;
-#ifdef KRB5_USE_INET6
         int s6;
-#endif
 
         set_sa_port((struct sockaddr *)&sin4, htons(svc.port));
         s4 = create_server_socket(data, (struct sockaddr *)&sin4, SOCK_STREAM);
@@ -853,7 +829,6 @@ setup_rpc_listener_ports(struct socksetup *data)
             krb5_klog_syslog(LOG_INFO, _("listening on fd %d: rpc %s"),
                              s4, paddr((struct sockaddr *)&sin4));
 
-#ifdef KRB5_USE_INET6
         if (ipv6_enabled()) {
             set_sa_port((struct sockaddr *)&sin6, htons(svc.port));
             s6 = create_server_socket(data, (struct sockaddr *)&sin6,
@@ -867,7 +842,6 @@ setup_rpc_listener_ports(struct socksetup *data)
                 krb5_klog_syslog(LOG_INFO, _("listening on fd %d: rpc %s"),
                                  s6, paddr((struct sockaddr *)&sin6));
         }
-#endif
     }
 
     return 0;
@@ -992,18 +966,7 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
         break;
 #ifdef AF_INET6
     case AF_INET6:
-#ifdef KRB5_USE_INET6
         break;
-#else
-        {
-            static int first = 1;
-            if (first) {
-                krb5_klog_syslog(LOG_INFO, _("skipping local ipv6 addresses"));
-                first = 0;
-            }
-            return 0;
-        }
-#endif
 #endif
 #ifdef AF_LINK /* some BSD systems, AIX */
     case AF_LINK:
@@ -1312,7 +1275,6 @@ init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
         faddr->address->contents = (krb5_octet *) &sa2sin(sa)->sin_addr;
         faddr->port = ntohs(sa2sin(sa)->sin_port);
         break;
-#ifdef KRB5_USE_INET6
     case AF_INET6:
         if (IN6_IS_ADDR_V4MAPPED(&sa2sin6(sa)->sin6_addr)) {
             faddr->address->addrtype = ADDRTYPE_INET;
@@ -1325,7 +1287,6 @@ init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
         }
         faddr->port = ntohs(sa2sin6(sa)->sin6_port);
         break;
-#endif
     default:
         faddr->address->addrtype = -1;
         faddr->address->length = 0;
@@ -1412,8 +1373,7 @@ recv_from_to(int s, void *buf, size_t len, int flags,
                 return r;
             }
 #endif
-#if defined(KRB5_USE_INET6) && defined(IPV6_PKTINFO) && \
-    defined(HAVE_STRUCT_IN6_PKTINFO)
+#if defined(IPV6_PKTINFO) && defined(HAVE_STRUCT_IN6_PKTINFO)
             if (cmsgptr->cmsg_level == IPPROTO_IPV6
                 && cmsgptr->cmsg_type == IPV6_PKTINFO
                 && *tolen >= sizeof(struct sockaddr_in6)) {
@@ -1489,8 +1449,7 @@ send_to_from(int s, void *buf, size_t len, int flags,
         msg.msg_controllen = CMSG_SPACE(sizeof(struct in_pktinfo));
         break;
 #endif
-#if defined(KRB5_USE_INET6) && defined(IPV6_PKTINFO) && \
-    defined(HAVE_STRUCT_IN6_PKTINFO)
+#if defined(IPV6_PKTINFO) && defined(HAVE_STRUCT_IN6_PKTINFO)
     case AF_INET6:
         if (fromlen != sizeof(struct sockaddr_in6))
             goto use_sendto;

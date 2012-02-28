@@ -203,7 +203,7 @@ struct addrinfo {
 # define AI_DEFAULT (AI_ADDRCONFIG|AI_V4MAPPED)
 #endif
 
-#if defined(KRB5_USE_INET6) && defined(NEED_INSIXADDR_ANY)
+#if defined(NEED_INSIXADDR_ANY)
 /* If compiling with IPv6 support and C library does not define in6addr_any */
 extern const struct in6_addr krb5int_in6addr_any;
 #undef in6addr_any
