@@ -1,4 +1,4 @@
-.. _obtain_tkt
+.. _obtain_tkt:
 
 Obtaining tickets with kinit
 ============================
