@@ -110,9 +110,6 @@ Configuring Kerberos with OpenLDAP back-end
            ldap_servers
            ldap_conns_per_server
 
-   For the sample :ref:`krb5.conf(5)` file, refer to
-   :ref:`krb5_conf_sample_label`.
-
 8. Create the realm using :ref:`kdb5_ldap_util(8)` (see
    :ref:`ldap_create_realm`)::
 
