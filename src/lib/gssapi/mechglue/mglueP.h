@@ -605,6 +605,34 @@ typedef struct gss_config {
 	    gss_OID_set *		/* known_mech_attrs */
 	/* */);
 
+	/* Credential store extensions */
+
+	OM_uint32       (KRB5_CALLCONV *gss_acquire_cred_from)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_name_t,			/* desired_name */
+	    OM_uint32,			/* time_req */
+	    gss_OID_set,		/* desired_mechs */
+	    gss_cred_usage_t,		/* cred_usage */
+	    gss_const_key_value_set_t,	/* cred_store */
+	    gss_cred_id_t *,		/* output_cred_handle */
+	    gss_OID_set *,		/* actual_mechs */
+	    OM_uint32 *			/* time_rec */
+	/* */);
+
+	OM_uint32       (KRB5_CALLCONV *gss_store_cred_into)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_cred_id_t,		/* input_cred_handle */
+	    gss_cred_usage_t,		/* input_usage */
+	    gss_OID,			/* desired_mech */
+	    OM_uint32,			/* overwrite_cred */
+	    OM_uint32,			/* default_cred */
+	    gss_const_key_value_set_t,	/* cred_store */
+	    gss_OID_set *,		/* elements_stored */
+	    gss_cred_usage_t *		/* cred_usage_stored */
+	/* */);
+
 } *gss_mechanism;
 
 /* This structure MUST NOT be used by any code outside libgss */

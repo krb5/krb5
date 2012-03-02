@@ -12,6 +12,36 @@
 #include <mglueP.h>
 
 static OM_uint32
+store_cred_fallback(
+	OM_uint32 *minor_status,
+	gss_mechanism mech,
+	gss_cred_id_t mech_cred,
+	gss_cred_usage_t cred_usage,
+	gss_OID desired_mech,
+	OM_uint32 overwrite_cred,
+	OM_uint32 default_cred,
+	gss_const_key_value_set_t cred_store,
+	gss_OID_set *elements_stored,
+	gss_cred_usage_t *cred_usage_stored)
+{
+	if (mech->gss_store_cred_into != NULL) {
+		return mech->gss_store_cred_into(minor_status, mech_cred,
+						 cred_usage, desired_mech,
+						 overwrite_cred, default_cred,
+						 cred_store, elements_stored,
+						 cred_usage_stored);
+	} else if (cred_store == GSS_C_NO_CRED_STORE) {
+		return mech->gss_store_cred(minor_status, mech_cred,
+					    cred_usage, desired_mech,
+					    overwrite_cred, default_cred,
+					    elements_stored,
+					    cred_usage_stored);
+	} else {
+		return GSS_S_UNAVAILABLE;
+	}
+}
+
+static OM_uint32
 val_store_cred_args(
 	OM_uint32 *minor_status,
 	const gss_cred_id_t input_cred_handle,
@@ -19,6 +49,7 @@ val_store_cred_args(
 	const gss_OID desired_mech,
 	OM_uint32 overwrite_cred,
 	OM_uint32 default_cred,
+	gss_const_key_value_set_t cred_store,
 	gss_OID_set *elements_stored,
 	gss_cred_usage_t *cred_usage_stored)
 {
@@ -49,6 +80,12 @@ val_store_cred_args(
 	    return GSS_S_FAILURE;
 	}
 
+	if (cred_store != NULL && cred_store->count == 0) {
+		*minor_status = EINVAL;
+		map_errcode(minor_status);
+		return GSS_S_FAILURE;
+	}
+
 	return (GSS_S_COMPLETE);
 }
 
@@ -73,6 +110,34 @@ gss_OID_set		*elements_stored;
 gss_cred_usage_t	*cred_usage_stored;
 
 {
+	return gss_store_cred_into(minor_status, input_cred_handle, cred_usage,
+				   desired_mech, overwrite_cred, default_cred,
+				   GSS_C_NO_CRED_STORE, elements_stored,
+				   cred_usage_stored);
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_store_cred_into(minor_status,
+		    input_cred_handle,
+		    cred_usage,
+		    desired_mech,
+		    overwrite_cred,
+		    default_cred,
+		    cred_store,
+		    elements_stored,
+		    cred_usage_stored)
+
+OM_uint32			 *minor_status;
+gss_cred_id_t			 input_cred_handle;
+gss_cred_usage_t		 cred_usage;
+gss_OID				 desired_mech;
+OM_uint32			 overwrite_cred;
+OM_uint32			 default_cred;
+gss_const_key_value_set_t	 cred_store;
+gss_OID_set			 *elements_stored;
+gss_cred_usage_t		 *cred_usage_stored;
+
+{
 	OM_uint32		major_status = GSS_S_FAILURE;
 	gss_union_cred_t	union_cred;
 	gss_cred_id_t		mech_cred;
@@ -86,6 +151,7 @@ gss_cred_usage_t	*cred_usage_stored;
 					   desired_mech,
 					   overwrite_cred,
 					   default_cred,
+					   cred_store,
 					   elements_stored,
 					   cred_usage_stored);
 	if (major_status != GSS_S_COMPLETE)
@@ -105,22 +171,25 @@ gss_cred_usage_t	*cred_usage_stored;
 		if (mech == NULL)
 			return (GSS_S_BAD_MECH);
 
-		if (mech->gss_store_cred == NULL)
+		if (mech->gss_store_cred_into == NULL &&
+		    cred_store != GSS_C_NO_CRED_STORE)
+			return (major_status);
+
+		if (mech->gss_store_cred == NULL &&
+		    mech->gss_store_cred_into == NULL)
 			return (major_status);
 
 		mech_cred = gssint_get_mechanism_cred(union_cred, desired_mech);
 		if (mech_cred == GSS_C_NO_CREDENTIAL)
 			return (GSS_S_NO_CRED);
 
-		major_status = mech->gss_store_cred(
-						    minor_status,
-						    (gss_cred_id_t)mech_cred,
-						    cred_usage,
-						    desired_mech,
-						    overwrite_cred,
-						    default_cred,
-						    elements_stored,
-						    cred_usage_stored);
+		major_status = store_cred_fallback(minor_status, mech,
+						   mech_cred, cred_usage,
+						   desired_mech,
+						   overwrite_cred,
+						   default_cred, cred_store,
+						   elements_stored,
+						   cred_usage_stored);
 		if (major_status != GSS_S_COMPLETE)
 		    map_error(minor_status, mech);
 		return major_status;
@@ -137,22 +206,23 @@ gss_cred_usage_t	*cred_usage_stored;
 		if (mech == NULL)
 			continue;
 
-		if (mech->gss_store_cred == NULL)
+		if (mech->gss_store_cred_into == NULL &&
+		    cred_store != GSS_C_NO_CRED_STORE)
+			continue;
+
+		if (mech->gss_store_cred == NULL &&
+		    mech->gss_store_cred_into == NULL)
 			continue;
 
 		mech_cred = gssint_get_mechanism_cred(union_cred, dmech);
 		if (mech_cred == GSS_C_NO_CREDENTIAL)
 			continue; /* can't happen, but safe to ignore */
 
-		major_status = mech->gss_store_cred(
-						minor_status,
-						(gss_cred_id_t)mech_cred,
-						cred_usage,
-						dmech,
-						overwrite_cred,
-						default_cred,
-						NULL,
-						cred_usage_stored);
+		major_status = store_cred_fallback(minor_status, mech,
+						   mech_cred, cred_usage,
+						   dmech, overwrite_cred,
+						   default_cred, cred_store,
+						   NULL, cred_usage_stored);
 		if (major_status != GSS_S_COMPLETE) {
 		    map_error(minor_status, mech);
 		    continue;

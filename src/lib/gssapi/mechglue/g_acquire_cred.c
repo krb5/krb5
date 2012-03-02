@@ -42,6 +42,7 @@ val_acq_cred_args(
     OM_uint32 time_req,
     gss_OID_set desired_mechs,
     int cred_usage,
+    gss_const_key_value_set_t cred_store,
     gss_cred_id_t *output_cred_handle,
     gss_OID_set *actual_mechs,
     OM_uint32 *time_rec)
@@ -79,6 +80,12 @@ val_acq_cred_args(
 	return GSS_S_FAILURE;
     }
 
+    if (cred_store != NULL && cred_store->count == 0) {
+	*minor_status = EINVAL;
+	map_errcode(minor_status);
+	return GSS_S_FAILURE;
+    }
+
     return (GSS_S_COMPLETE);
 }
 
@@ -103,6 +110,33 @@ gss_OID_set *		actual_mechs;
 OM_uint32 *		time_rec;
 
 {
+    return gss_acquire_cred_from(minor_status, desired_name, time_req,
+				 desired_mechs, cred_usage, NULL,
+				 output_cred_handle, actual_mechs, time_rec);
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_acquire_cred_from(minor_status,
+		      desired_name,
+		      time_req,
+		      desired_mechs,
+		      cred_usage,
+		      cred_store,
+		      output_cred_handle,
+		      actual_mechs,
+		      time_rec)
+
+OM_uint32 *			minor_status;
+gss_name_t			desired_name;
+OM_uint32			time_req;
+gss_OID_set			desired_mechs;
+int				cred_usage;
+gss_const_key_value_set_t	cred_store;
+gss_cred_id_t *			output_cred_handle;
+gss_OID_set *			actual_mechs;
+OM_uint32 *			time_rec;
+
+{
     OM_uint32 major = GSS_S_FAILURE, tmpMinor;
     OM_uint32 first_major = GSS_S_COMPLETE, first_minor = 0;
     OM_uint32 initTimeOut, acceptTimeOut, outTime = GSS_C_INDEFINITE;
@@ -115,6 +149,7 @@ OM_uint32 *		time_rec;
 			      time_req,
 			      desired_mechs,
 			      cred_usage,
+			      cred_store,
 			      output_cred_handle,
 			      actual_mechs,
 			      time_rec);
@@ -150,11 +185,11 @@ OM_uint32 *		time_rec;
 
     /* for each requested mech attempt to obtain a credential */
     for (i = 0, major = GSS_S_UNAVAILABLE; i < mechs->count; i++) {
-	major = gss_add_cred(&tmpMinor, (gss_cred_id_t)creds,
-			     desired_name,
-			     &mechs->elements[i],
-			     cred_usage, time_req, time_req, NULL,
-			     NULL, &initTimeOut, &acceptTimeOut);
+	major = gss_add_cred_from(&tmpMinor, (gss_cred_id_t)creds,
+				  desired_name, &mechs->elements[i],
+				  cred_usage, time_req, time_req,
+				  cred_store, NULL, NULL, &initTimeOut,
+				  &acceptTimeOut);
 	if (major == GSS_S_COMPLETE) {
 	    /* update the credential's time */
 	    if (cred_usage == GSS_C_ACCEPT) {
@@ -226,6 +261,7 @@ val_add_cred_args(
     gss_name_t desired_name,
     gss_OID desired_mech,
     gss_cred_usage_t cred_usage,
+    gss_const_key_value_set_t cred_store,
     OM_uint32 initiator_time_req,
     OM_uint32 acceptor_time_req,
     gss_cred_id_t *output_cred_handle,
@@ -270,6 +306,12 @@ val_add_cred_args(
 	return GSS_S_FAILURE;
     }
 
+    if (cred_store != NULL && cred_store->count == 0) {
+	*minor_status = EINVAL;
+	map_errcode(minor_status);
+	return GSS_S_FAILURE;
+    }
+
     return (GSS_S_COMPLETE);
 }
 
@@ -293,6 +335,34 @@ gss_add_cred(minor_status, input_cred_handle,
     OM_uint32		*initiator_time_rec;
     OM_uint32		*acceptor_time_rec;
 {
+    return gss_add_cred_from(minor_status, input_cred_handle, desired_name,
+			     desired_mech, cred_usage, initiator_time_req,
+			     acceptor_time_req, NULL, output_cred_handle,
+			     actual_mechs, initiator_time_rec,
+			     acceptor_time_rec);
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_add_cred_from(minor_status, input_cred_handle,
+		  desired_name, desired_mech,
+		  cred_usage,
+		  initiator_time_req, acceptor_time_req,
+		  cred_store,
+		  output_cred_handle, actual_mechs,
+		  initiator_time_rec, acceptor_time_rec)
+    OM_uint32		*minor_status;
+    gss_cred_id_t	input_cred_handle;
+    gss_name_t		desired_name;
+    gss_OID		desired_mech;
+    gss_cred_usage_t	cred_usage;
+    OM_uint32		initiator_time_req;
+    OM_uint32		acceptor_time_req;
+    gss_const_key_value_set_t  cred_store;
+    gss_cred_id_t	*output_cred_handle;
+    gss_OID_set		*actual_mechs;
+    OM_uint32		*initiator_time_rec;
+    OM_uint32		*acceptor_time_rec;
+{
     OM_uint32		status, temp_minor_status;
     OM_uint32		time_req, time_rec;
     gss_union_name_t	union_name;
@@ -309,6 +379,7 @@ gss_add_cred(minor_status, input_cred_handle,
 			       desired_name,
 			       desired_mech,
 			       cred_usage,
+			       cred_store,
 			       initiator_time_req,
 			       acceptor_time_req,
 			       output_cred_handle,
@@ -330,15 +401,16 @@ gss_add_cred(minor_status, input_cred_handle,
 	    return (GSS_S_FAILURE);
 
 	(void) memset(union_cred, 0, sizeof (gss_union_cred_desc));
-
-	/* for default credentials we will use GSS_C_NO_NAME */
-	internal_name = GSS_C_NO_NAME;
     } else {
 	union_cred = (gss_union_cred_t)input_cred_handle;
 	if (gssint_get_mechanism_cred(union_cred, desired_mech) !=
 	    GSS_C_NO_CREDENTIAL)
 	    return (GSS_S_DUPLICATE_ELEMENT);
+    }
 
+    /* for default credentials we will use GSS_C_NO_NAME */
+    if (input_cred_handle != GSS_C_NO_CREDENTIAL ||
+        cred_store != GSS_C_NO_CRED_STORE) {
 	/* may need to create a mechanism specific name */
 	if (desired_name) {
 	    union_name = (gss_union_name_t)desired_name;
@@ -367,10 +439,18 @@ gss_add_cred(minor_status, input_cred_handle,
     else
 	time_req = 0;
 
-    status = mech->gss_acquire_cred(minor_status,
-				    internal_name, time_req,
-				    GSS_C_NULL_OID_SET, cred_usage,
-				    &cred, NULL, &time_rec);
+    if (mech->gss_acquire_cred_from) {
+	status = mech->gss_acquire_cred_from(minor_status, internal_name,
+					     time_req, GSS_C_NULL_OID_SET,
+					     cred_usage, cred_store, &cred,
+					     NULL, &time_rec);
+    } else if (cred_store == GSS_C_NO_CRED_STORE) {
+	status = mech->gss_acquire_cred(minor_status, internal_name, time_req,
+					GSS_C_NULL_OID_SET, cred_usage, &cred,
+					NULL, &time_rec);
+    } else {
+	return GSS_S_UNAVAILABLE;
+    }
 
     if (status != GSS_S_COMPLETE) {
 	map_error(minor_status, mech);

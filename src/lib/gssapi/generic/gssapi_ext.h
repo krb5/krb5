@@ -461,6 +461,62 @@ int KRB5_CALLCONV gss_oid_equal
     gss_const_OID       /* second_oid */
 );
 
+/* Credential store extensions */
+
+struct gss_key_value_element_struct {
+    const char *key;
+    const char *value;
+};
+typedef struct gss_key_value_element_struct gss_key_value_element_desc;
+
+struct gss_key_value_set_struct {
+    OM_uint32 count;
+    gss_key_value_element_desc *elements;
+};
+typedef struct gss_key_value_set_struct gss_key_value_set_desc;
+typedef const gss_key_value_set_desc *gss_const_key_value_set_t;
+
+#define GSS_C_NO_CRED_STORE ((gss_const_key_value_set_t) 0)
+
+OM_uint32 KRB5_CALLCONV
+gss_acquire_cred_from(
+    OM_uint32 *,               /* minor_status */
+    gss_name_t,                /* desired_name */
+    OM_uint32,                 /* time_req */
+    gss_OID_set,               /* desired_mechs */
+    gss_cred_usage_t,          /* cred_usage */
+    gss_const_key_value_set_t, /* cred_store */
+    gss_cred_id_t *,           /* output_cred_handle */
+    gss_OID_set *,             /* actual_mechs */
+    OM_uint32 *);              /* time_rec */
+
+OM_uint32 KRB5_CALLCONV
+gss_add_cred_from(
+    OM_uint32 *,               /* minor_status */
+    gss_cred_id_t,             /* input_cred_handle */
+    gss_name_t,                /* desired_name */
+    gss_OID,                   /* desired_mech */
+    gss_cred_usage_t,          /* cred_usage */
+    OM_uint32,                 /* initiator_time_req */
+    OM_uint32,                 /* acceptor_time_req */
+    gss_const_key_value_set_t, /* cred_store */
+    gss_cred_id_t *,           /* output_cred_handle */
+    gss_OID_set *,             /* actual_mechs */
+    OM_uint32 *,               /* initiator_time_rec */
+    OM_uint32 *);              /* acceptor_time_rec */
+
+OM_uint32 KRB5_CALLCONV
+gss_store_cred_into(
+    OM_uint32 *,               /* minor_status */
+    gss_cred_id_t,             /* input_cred_handle */
+    gss_cred_usage_t,          /* input_usage */
+    gss_OID,                   /* desired_mech */
+    OM_uint32,                 /* overwrite_cred */
+    OM_uint32,                 /* default_cred */
+    gss_const_key_value_set_t, /* cred_store */
+    gss_OID_set *,             /* elements_stored */
+    gss_cred_usage_t *);       /* cred_usage_stored */
+
 #ifdef __cplusplus
 }
 #endif
