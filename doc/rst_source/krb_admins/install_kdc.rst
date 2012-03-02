@@ -339,6 +339,7 @@ is created::
     Principal "admin/admin@ATHENA.MIT.EDU" created.
     kadmin.local:
 
+.. _start_kdc_daemons:
 
 Start the Kerberos daemons on the master KDC
 --------------------------------------------
