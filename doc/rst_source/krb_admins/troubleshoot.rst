@@ -53,7 +53,7 @@ Seen in: ssh
 
 ----
 
-.. include:: ./install_kdc/kdc_prop_slave.rst
+.. include:: ./install_kdc.rst
    :start-after:  _prop_failed_start:
    :end-before: _prop_failed_end:
 

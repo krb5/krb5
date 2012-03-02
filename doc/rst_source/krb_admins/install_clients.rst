@@ -1,5 +1,38 @@
+Installing and configuring UNIX client machines
+===============================================
+
+The Kerberized client programs are :ref:`kinit(1)`, :ref:`klist(1)`,
+:ref:`kdestroy(1)`, :ref:`kpasswd(1)`, and :ref:`ksu(1)`.  All of
+these programs are in the directory ``/usr/local/bin``.  MIT
+recommends that you use login.krb5 in place of ``/bin/login`` to give
+your users a single-sign-on system. You will need to make sure your
+users know to use their Kerberos passwords when they log in.
+
+You will also need to educate your users to use the ticket management
+programs kinit, klist, kdestroy, and to use the Kerberos programs ksu
+and kpasswd in place of their non-Kerberos counterparts su and passwd.
+
+
+Client machine configuration files
+----------------------------------
+
+Each machine running Kerberos must have a :ref:`krb5.conf(5)` file.
+
+Also, for most UNIX systems, you must add the appropriate Kerberos
+services to each client machine's ``/etc/services`` file.  If you are
+using the default configuration for Kerberos V5, you should be able to
+just insert the following code::
+
+    kerberos      88/udp    kdc    # Kerberos V5 KDC
+    kerberos      88/tcp    kdc    # Kerberos V5 KDC
+    kerberos-adm  749/tcp          # Kerberos 5 admin/changepw
+    kerberos-adm  749/udp          # Kerberos 5 admin/changepw
+    krb5_prop     754/tcp          # Kerberos slave propagation
+    krb524        4444/tcp         # Kerberos 5 to 4 ticket translator
+
+
 Mac OS X configuration
-======================
+----------------------
 
 To install Kerberos V5 on Mac OS X and Mac OS X Server, follow the
 directions for generic Unix-based OS's, except for the

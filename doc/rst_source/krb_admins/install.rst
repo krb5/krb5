@@ -14,8 +14,8 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   install_kdc/index.rst
-   install_clients/index.rst
+   install_kdc.rst
+   install_clients.rst
    install_appl_srv.rst
 
 
