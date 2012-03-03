@@ -9,7 +9,7 @@ Contents:
 
    install.rst
    conf_files/index.rst
-   realm_config/index.rst
+   realm_config.rst
    dns.rst
    database/index.rst
    conf_ldap.rst
