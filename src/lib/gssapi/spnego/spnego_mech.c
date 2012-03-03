@@ -97,8 +97,9 @@ static gss_OID get_mech_oid(OM_uint32 *, unsigned char **, size_t);
 static gss_buffer_t get_input_token(unsigned char **, unsigned int);
 static gss_OID_set get_mech_set(OM_uint32 *, unsigned char **, unsigned int);
 static OM_uint32 get_req_flags(unsigned char **, OM_uint32, OM_uint32 *);
-static OM_uint32 get_available_mechs(OM_uint32 *, gss_name_t,
-	gss_cred_usage_t, gss_cred_id_t *, gss_OID_set *);
+static OM_uint32 get_available_mechs(OM_uint32 *, gss_name_t, gss_cred_usage_t,
+				     gss_const_key_value_set_t,
+				     gss_cred_id_t *, gss_OID_set *);
 static OM_uint32 get_negotiable_mechs(OM_uint32 *, spnego_gss_cred_id_t,
 				      gss_cred_usage_t, gss_OID_set *);
 static void release_spnego_ctx(spnego_gss_ctx_id_t *);
@@ -273,6 +274,8 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_inquire_saslname_for_mech,
 	spnego_gss_inquire_mech_for_saslname,
 	spnego_gss_inquire_attrs_for_mech,
+	spnego_gss_acquire_cred_from,
+	NULL,				/* gss_store_cred_into */
 };
 
 static struct gss_config_ext spnego_mechanism_ext =
@@ -331,6 +334,24 @@ spnego_gss_acquire_cred(OM_uint32 *minor_status,
 			gss_OID_set *actual_mechs,
 			OM_uint32 *time_rec)
 {
+    return spnego_gss_acquire_cred_from(minor_status, desired_name, time_req,
+					desired_mechs, cred_usage, NULL,
+					output_cred_handle, actual_mechs,
+					time_rec);
+}
+
+/*ARGSUSED*/
+OM_uint32 KRB5_CALLCONV
+spnego_gss_acquire_cred_from(OM_uint32 *minor_status,
+			     const gss_name_t desired_name,
+			     OM_uint32 time_req,
+			     const gss_OID_set desired_mechs,
+			     gss_cred_usage_t cred_usage,
+			     gss_const_key_value_set_t cred_store,
+			     gss_cred_id_t *output_cred_handle,
+			     gss_OID_set *actual_mechs,
+			     OM_uint32 *time_rec)
+{
 	OM_uint32 status, tmpmin;
 	gss_OID_set amechs;
 	gss_cred_id_t mcred = NULL;
@@ -358,9 +379,9 @@ spnego_gss_acquire_cred(OM_uint32 *minor_status,
 	 * mechs for which creds are available.
 	 */
 	if (desired_mechs == GSS_C_NULL_OID_SET) {
-		status = get_available_mechs(minor_status,
-				desired_name, cred_usage,
-				&mcred, &amechs);
+		status = get_available_mechs(minor_status, desired_name,
+					     cred_usage, cred_store, &mcred,
+					     &amechs);
 	} else {
 		/*
 		 * The caller gave a specific list of mechanisms,
@@ -368,10 +389,10 @@ spnego_gss_acquire_cred(OM_uint32 *minor_status,
 		 * gss_acquire_creds will return the subset of mechs for
 		 * which the given 'output_cred_handle' is valid.
 		 */
-		status = gss_acquire_cred(minor_status,
-				desired_name, time_req,
-				desired_mechs, cred_usage,
-				&mcred, &amechs, time_rec);
+		status = gss_acquire_cred_from(minor_status, desired_name,
+					       time_req, desired_mechs,
+					       cred_usage, cred_store, &mcred,
+					       &amechs, time_rec);
 	}
 
 	if (actual_mechs && amechs != GSS_C_NULL_OID_SET) {
@@ -1916,6 +1937,7 @@ spnego_gss_inquire_cred(
 		status = get_available_mechs(minor_status,
 			GSS_C_NO_NAME,
 			GSS_C_BOTH,
+			GSS_C_NO_CRED_STORE,
 			&creds,
 			mechanisms);
 		if (status != GSS_S_COMPLETE) {
@@ -2538,7 +2560,8 @@ spnego_gss_acquire_cred_with_password(OM_uint32 *minor_status,
 	dmechs = desired_mechs;
 	if (desired_mechs == GSS_C_NULL_OID_SET) {
 		status = get_available_mechs(minor_status, desired_name,
-					     cred_usage, NULL, &amechs);
+					     cred_usage, GSS_C_NO_CRED_STORE,
+					     NULL, &amechs);
 		dmechs = amechs;
 	}
 
@@ -2849,6 +2872,7 @@ release_spnego_ctx(spnego_gss_ctx_id_t *ctx)
 static OM_uint32
 get_available_mechs(OM_uint32 *minor_status,
 	gss_name_t name, gss_cred_usage_t usage,
+	gss_const_key_value_set_t cred_store,
 	gss_cred_id_t *creds, gss_OID_set *rmechs)
 {
 	unsigned int	i;
@@ -2890,10 +2914,11 @@ get_available_mechs(OM_uint32 *minor_status,
 	 * for which the creds are valid.
 	 */
 	if (found > 0 && major_status == GSS_S_COMPLETE && creds != NULL) {
-		major_status = gss_acquire_cred(minor_status,
-						name, GSS_C_INDEFINITE,
-						*rmechs, usage, creds,
-						&goodmechs, NULL);
+		major_status = gss_acquire_cred_from(minor_status, name,
+						     GSS_C_INDEFINITE,
+						     *rmechs, usage,
+						     cred_store, creds,
+						     &goodmechs, NULL);
 
 		/*
 		 * Drop the old list in favor of the new
@@ -2942,7 +2967,8 @@ get_negotiable_mechs(OM_uint32 *minor_status, spnego_gss_cred_id_t spcred,
 		 */
 		credptr = (usage == GSS_C_INITIATE) ? &creds : NULL;
 		ret = get_available_mechs(minor_status, GSS_C_NO_NAME, usage,
-					  credptr, rmechs);
+					  GSS_C_NO_CRED_STORE, credptr,
+					  rmechs);
 		gss_release_cred(&tmpmin, &creds);
 		return (ret);
 	}
