@@ -39,7 +39,8 @@ OPTIONS
 PORTS
 -----
 
-kpasswd looks first for::
+kpasswd looks first for
+ ::
 
     kpasswd_server = host:port
 

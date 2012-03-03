@@ -186,7 +186,7 @@ control access for a particular principal on a particular principal.
     is disallowed.  If the character is lower-case, then the operation
     is permitted.
 
-    ::
+     ::
 
         a    [Dis]allows the addition of principals or policies in the database.
         d    [Dis]allows the deletion of principals or policies in the database.

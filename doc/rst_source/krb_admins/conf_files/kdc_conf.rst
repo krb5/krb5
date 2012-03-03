@@ -346,14 +346,16 @@ PKINIT options
           to, a generic [kdcdefaults] specification.  The search order
           is:
 
-1. realm-specific subsection of [realms], ::
+1. realm-specific subsection of [realms],
+    ::
 
     [realms]
         EXAMPLE.COM = {
             pkinit_anchors = FILE\:/usr/local/example.com.crt
         }
 
-2. generic value in the [kdcdefaults] section. ::
+2. generic value in the [kdcdefaults] section.
+    ::
 
     [kdcdefaults]
         pkinit_anchors = DIR\:/usr/local/generic_trusted_cas/
@@ -445,7 +447,8 @@ identity syntax.
 Sample kdc.conf File
 --------------------
 
-Here's an example of a kdc.conf file::
+Here's an example of a kdc.conf file:
+ ::
 
     [kdcdefaults]
         kdc_ports = 88

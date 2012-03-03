@@ -17,11 +17,13 @@ Structure
 
 The krb5.conf file is set up in the style of a Windows INI file.
 Sections are headed by the section name, in square brackets.  Each
-section may contain zero or more relations, of the form::
+section may contain zero or more relations, of the form:
+ ::
 
     foo = bar
 
-or::
+or
+ ::
 
     fubar = {
         foo = bar
@@ -33,7 +35,8 @@ value for the tag.  This means that neither the remainder of this
 configuration file nor any other configuration file will be checked
 for any other values for this tag.
 
-For example, if you have the following lines::
+For example, if you have the following lines:
+ ::
 
     foo = bar*
     foo = baz
@@ -41,7 +44,8 @@ For example, if you have the following lines::
 then the second value of ``foo`` (``baz``) would never be read.
 
 The krb5.conf file can include other files using either of the
-following directives at the beginning of a line::
+following directives at the beginning of a line:
+ ::
 
     include FILENAME
     includedir DIRNAME
@@ -56,7 +60,8 @@ file must begin with a section header.
 The krb5.conf file can specify that configuration should be obtained
 from a loadable module, rather than the file itself, using the
 following directive at the beginning of a line before any section
-headers::
+headers:
+ ::
 
     module MODULEPATH:RESIDUAL
 
@@ -393,7 +398,8 @@ following tags may be specified in the realm's subsection:
         default realm, this rule is not applicable and the conversion
         will fail.
 
-    For example::
+    For example:
+     ::
 
         [realms]
             ATHENA.MIT.EDU = {
@@ -487,7 +493,8 @@ Host names and domain names should be in lower case.
 
 If no translation entry applies, the host's realm is considered to be
 the hostname's domain portion converted to upper case.  For example,
-the following [domain_realm] section::
+the following [domain_realm] section:
+ ::
 
     [domain_realm]
         crash.mit.edu = TEST.ATHENA.MIT.EDU
@@ -564,7 +571,8 @@ In the following example, the logging messages from the KDC will go to
 the console and to the system log under the facility LOG_DAEMON with
 default severity of LOG_INFO; and the logging messages from the
 administrative server will be appended to the file
-``/var/adm/kadmin.log`` and sent to the device ``/dev/tty04``.::
+``/var/adm/kadmin.log`` and sent to the device ``/dev/tty04``.
+ ::
 
     [logging]
         kdc = CONSOLE
@@ -604,7 +612,8 @@ For example, ``ANL.GOV``, ``PNL.GOV``, and ``NERSC.GOV`` all wish to
 use the ``ES.NET`` realm as an intermediate realm.  ``ANL`` has a sub
 realm of ``TEST.ANL.GOV`` which will authenticate with ``NERSC.GOV``
 but not ``PNL.GOV``.  The [capaths] section for ``ANL.GOV`` systems
-would look like this::
+would look like this:
+ ::
 
     [capaths]
         ANL.GOV = {
@@ -627,7 +636,8 @@ would look like this::
         }
 
 The [capaths] section of the configuration file used on ``NERSC.GOV``
-systems would look like this::
+systems would look like this:
+ ::
 
     [capaths]
         NERSC.GOV = {
@@ -809,7 +819,8 @@ Each tag in the [appdefaults] section names a Kerberos V5 application
 or an option that is used by some Kerberos V5 application[s].  The
 value of the tag defines the default behaviors for that application.
 
-For example::
+For example:
+ ::
 
     [appdefaults]
         telnet = {
@@ -947,21 +958,24 @@ PKINIT options
           does not add to, a generic [libdefaults] specification.  The
           search order is:
 
-1. realm-specific subsection of [libdefaults] ::
+1. realm-specific subsection of [libdefaults] :
+    ::
 
     [libdefaults]
         EXAMPLE.COM = {
             pkinit_anchors = FILE\:/usr/local/example.com.crt
         }
 
-2. realm-specific value in the [realms] section, ::
+2. realm-specific value in the [realms] section,
+    ::
 
     [realms]
         OTHERREALM.ORG = {
             pkinit_anchors = FILE\:/usr/local/otherrealm.org.crt
         }
 
-3. generic value in the [libdefaults] section. ::
+3. generic value in the [libdefaults] section.
+    ::
 
     [libdefaults]
         pkinit_anchors = DIR\:/usr/local/generic_trusted_cas/
@@ -1095,7 +1109,8 @@ PKINIT krb5.conf options
         * digitalSignature
         * keyEncipherment
 
-    Examples::
+    Examples:
+     ::
 
         pkinit_cert_match = ||<SUBJECT>.*DoE.*<SAN>.*@EXAMPLE.COM
         pkinit_cert_match = &&<EKU>msScLogin,clientAuth<ISSUER>.*DoE.*
@@ -1188,7 +1203,8 @@ PKINIT krb5.conf options
 Sample krb5.conf file
 ---------------------
 
-Here is an example of a generic krb5.conf file::
+Here is an example of a generic krb5.conf file:
+ ::
 
     [libdefaults]
         default_realm = ATHENA.MIT.EDU

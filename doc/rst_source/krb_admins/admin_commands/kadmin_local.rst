@@ -175,7 +175,8 @@ DATE FORMAT
 .. _date_format:
 
 Many of the kadmin commands take a duration or time as an
-argument. The date can appear in a wide variety of formats, such as::
+argument. The date can appear in a wide variety of formats, such as:
+ ::
 
     1 month ago
     2 hours ago
@@ -392,7 +393,8 @@ The options are:
     multiple enctype-salttype pairs.  This will not function against
     kadmin daemons earlier than krb5-1.2.
 
-Example::
+Example:
+ ::
 
     kadmin: addprinc jennifer
     WARNING: no policy specified for "jennifer@ATHENA.MIT.EDU";
@@ -402,7 +404,8 @@ Example::
     Principal "jennifer@ATHENA.MIT.EDU" created.
     kadmin:
 
-Errors::
+Errors:
+ ::
 
     KADM5_AUTH_ADD (requires "add" privilege)
     KADM5_BAD_MASK (shouldn't happen)
@@ -448,7 +451,8 @@ The options are:
     authentication attempts without enough time between them according
     to its password policy) so that it can successfully authenticate.
 
-Errors::
+Errors:
+ ::
 
     KADM5_AUTH_MODIFY  (requires "modify" privilege)
     KADM5_UNK_PRINC (principal does not exist)
@@ -472,7 +476,8 @@ given.
 
 Alias: **renprinc**
 
-Errors::
+Errors:
+ ::
 
     KADM5_AUTH_ADD (requires "add" privilege)
     KADM5_AUTH_DELETE (requires "delete" privilege)
@@ -495,7 +500,8 @@ prompts for deletion, unless the **-force** option is given.
 
 Alias: **delprinc**
 
-Errors::
+Errors:
+ ::
 
     KADM5_AUTH_DELETE (requires "delete" privilege)
     KADM5_UNK_PRINC (principal does not exist)
@@ -539,7 +545,8 @@ The following options are available:
     you know what you're doing. This option is not supported for the
     LDAP database.
 
-Example::
+Example:
+ ::
 
     kadmin: cpw systest
     Enter password for principal systest@BLEEP.COM:
@@ -547,7 +554,8 @@ Example::
     Password for systest@BLEEP.COM changed.
     kadmin:
 
-Errors::
+Errors:
+ ::
 
     KADM5_AUTH_MODIFY (requires the modify privilege)
     KADM5_UNK_PRINC (principal does not exist)
@@ -588,7 +596,8 @@ fields as quoted tab-separated strings.
 
 Alias: **getprinc**
 
-Examples::
+Examples:
+ ::
 
     kadmin: getprinc tlyu/admin
     Principal: tlyu/admin@BLEEP.COM
@@ -613,7 +622,8 @@ Examples::
     tlyu/admin@BLEEP.COM     786100034 0    0
     kadmin:
 
-Errors::
+Errors:
+ ::
 
     KADM5_AUTH_GET (requires the get (inquire) privilege)
     KADM5_UNK_PRINC (principal does not exist)
@@ -639,7 +649,8 @@ expression.
 
 Alias: **listprincs**, **get_principals**, **get_princs**
 
-Example::
+Example:
+ ::
 
     kadmin:  listprincs test*
     test3@SECURE-TEST.OV.COM
@@ -744,12 +755,14 @@ The following options are available:
     without the specified failure count interval elapsing.  A
     duration of 0 means forever.
 
-Example::
+Example:
+ ::
 
     kadmin: add_policy -maxlife "2 days" -minlength 5 guests
     kadmin:
 
-Errors::
+Errors:
+ ::
 
     KADM5_AUTH_ADD (requires the add privilege)
     KADM5_DUP (policy already exists)
@@ -769,7 +782,8 @@ Modifies the named *policy*.  Options are as above for *add_policy*.
 
 Alias: **modpol**
 
-Errors::
+Errors:
+ ::
 
     KADM5_AUTH_MODIFY (requires the modify privilege)
     KADM5_UNK_POLICY (policy does not exist)
@@ -790,14 +804,16 @@ The command will fail if the policy is in use by any principals.
 
 Alias: **delpol**
 
-Example::
+Example:
+ ::
 
     kadmin: del_policy guests
     Are you sure you want to delete the policy "guests"?
     (yes/no): yes
     kadmin:
 
-Errors::
+Errors:
+ ::
 
     KADM5_AUTH_DELETE (requires the delete privilege)
     KADM5_UNK_POLICY (policy does not exist)
@@ -819,7 +835,8 @@ outputs the fields as quoted strings separated by tabs.
 
 Alias: getpol
 
-Examples::
+Examples:
+ ::
 
     kadmin: get_policy admin
     Policy: admin
@@ -836,7 +853,8 @@ Examples::
 
 The "Reference count" is the number of principals using that policy.
 
-Errors::
+Errors:
+ ::
 
     KADM5_AUTH_GET (requires the get privilege)
     KADM5_UNK_POLICY (policy does not exist)
@@ -860,7 +878,8 @@ printed.
 
 Aliases: **listpols**, **get_policies**, **getpols**.
 
-Examples::
+Examples:
+ ::
 
     kadmin:  listpols
     test-pol
@@ -885,7 +904,8 @@ is currently running kadmin.
 
 Alias: **getprivs**
 
-Example::
+Example:
+ ::
 
     kadmin:  get_privs
     Principal joe/admin@ATHENA.MIT.EDU
@@ -942,7 +962,8 @@ An entry for each of the principal's unique encryption types is added,
 ignoring multiple keys with the same encryption type but different
 salt types.
 
-Example::
+Example:
+ ::
 
     kadmin: ktadd -k /tmp/foo-new-keytab host/foo.mit.edu
     Entry for principal host/foo.mit.edu@ATHENA.MIT.EDU with
@@ -978,7 +999,8 @@ The options are:
     Run in quiet mode.  This causes ktremove to display less verbose
     information.
 
-Example::
+Example:
+ ::
 
     kadmin: ktremove -k /usr/local/var/krb5kdc/kadmind.keytab kadmin/admin all
     Entry for principal kadmin/admin with kvno 3 removed

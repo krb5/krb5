@@ -115,7 +115,7 @@ Aliases: **exit**, **q**
 EXAMPLE
 -------
 
-::
+ ::
 
     ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e aes128-cts-hmac-sha1-96
     Password for alice@BLEEP.COM:

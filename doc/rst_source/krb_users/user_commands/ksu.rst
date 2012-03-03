@@ -84,7 +84,8 @@ user's home directory, ksu attempts to access two authorization files:
 contains the name of a principal that is authorized to access the
 account.
 
-For example::
+For example:
+ ::
 
     jqpublic@USC.EDU
     jqpublic/secure@USC.EDU
@@ -216,7 +217,8 @@ OPTIONS
     defined the source cache name is set to ``krb5cc_<source uid>``.
     The target cache name is automatically set to ``krb5cc_<target
     uid>.(gen_sym())``, where gen_sym generates a new number such that
-    the resulting cache does not already exist.  For example::
+    the resulting cache does not already exist.  For example:
+     ::
 
         krb5cc_1984.2
 
@@ -276,7 +278,8 @@ Ticket granting ticket options:
 **-e** *command* [*args* ...]
     ksu proceeds exactly the same as if it was invoked without the
     **-e** option, except instead of executing the target shell, ksu
-    executes the specified command Example of usage::
+    executes the specified command. Example of usage:
+     ::
 
         ksu bob -e ls -lag
 
@@ -295,7 +298,8 @@ Ticket granting ticket options:
     list of commands that the principal is authorized to execute.  A
     principal name followed by a ``*`` means that the user is
     authorized to execute any command.  Thus, in the following
-    example::
+    example:
+     ::
 
         jqpublic@USC.EDU ls mail /local/kerberos/klist
         jqpublic/secure@USC.EDU *
@@ -327,7 +331,8 @@ Ticket granting ticket options:
     thus all options intended for ksu must precede **-a**.
 
     The **-a** option can be used to simulate the **-e** option if
-    used as follows::
+    used as follows:
+     ::
 
         -a -c [command [arguments]].
 
@@ -364,7 +369,8 @@ ksu can be compiled with the following four flags:
     called to obtain the names of "legal shells".  Note that the
     target user's shell is obtained from the passwd file.
 
-Sample configuration::
+Sample configuration:
+ ::
 
     KSU_OPTS = -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH='"/bin /usr/ucb /local/bin"
 

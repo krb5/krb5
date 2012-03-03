@@ -216,7 +216,8 @@ Command options specific to eDirectory:
 
 .. _kdb5_ldap_util_create_edir_end:
 
-Example::
+EXAMPLE:
+ ::
 
     kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu create -subtrees o=org -sscope SUB -r ATHENA.MIT.EDU
     Password for "cn=admin,o=org":
@@ -393,7 +394,8 @@ Command options specific to eDirectory:
 
 .. _kdb5_ldap_util_modify_edir_end:
 
-Example::
+EXAMPLE:
+ ::
 
     shell% kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu modify +requires_preauth -r ATHENA.MIT.EDU
     Password for "cn=admin,o=org":
@@ -413,7 +415,8 @@ Displays the attributes of a realm.  Options:
 **-r** *realm*
     Specifies the Kerberos realm of the database.
 
-EXAMPLE::
+EXAMPLE:
+ ::
 
     kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu view -r ATHENA.MIT.EDU
     Password for "cn=admin,o=org":
@@ -442,7 +445,8 @@ Destroys an existing realm. Options:
 **-r** *realm*
     Specifies the Kerberos realm of the database.
 
-EXAMPLE::
+EXAMPLE:
+ ::
 
     shell% kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu destroy -r ATHENA.MIT.EDU
     Password for "cn=admin,o=org":
@@ -462,7 +466,8 @@ list
 
 Lists the name of realms.
 
-EXAMPLE::
+EXAMPLE:
+ ::
 
     shell% kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu list
     Password for "cn=admin,o=org":
@@ -494,7 +499,8 @@ to the LDAP server.  Options:
     Specifies Distinguished Name (DN) of the service object whose
     password is to be stored in file.
 
-EXAMPLE::
+EXAMPLE:
+ ::
 
     kdb5_ldap_util stashsrvpw -f /home/andrew/conf_keyfile cn=service-kdc,o=org
     Password for "cn=service-kdc,o=org":
@@ -613,7 +619,8 @@ Creates a ticket policy in directory. Options:
 *policy_name*
     Specifies the name of the ticket policy.
 
-EXAMPLE::
+EXAMPLE:
+ ::
 
     kdb5_ldap_util  -D  cn=admin,o=org -H ldaps://ldap-server1.mit.edu create_policy -r ATHENA.MIT.EDU -maxtktlife "1 day" -maxrenewlife "1 week" -allow_postdated +needchange -allow_forwardable tktpolicy
     Password for "cn=admin,o=org":
@@ -638,7 +645,8 @@ create_policy.
 **-r** *realm*
     Specifies the Kerberos realm of the database.
 
-Example::
+EXAMPLE:
+ ::
 
     kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu modify_policy  -r  ATHENA.MIT.EDU  -maxtktlife  "60  minutes"  -maxrenewlife  "10  hours" +allow_postdated -requires_preauth tktpolicy
     Password for "cn=admin,o=org":
@@ -659,7 +667,8 @@ Displays the attributes of a ticket policy. Options:
 *policy_name*
     Specifies the name of the ticket policy.
 
-EXAMPLE::
+EXAMPLE:
+ ::
 
     kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu view_policy -r ATHENA.MIT.EDU tktpolicy
     Password for "cn=admin,o=org":
@@ -693,7 +702,8 @@ Destroys an existing ticket policy. Options:
 *policy_name*
     Specifies the name of the ticket policy.
 
-Example::
+EXAMPLE:
+ ::
 
     kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu destroy_policy -r ATHENA.MIT.EDU tktpolicy
     Password for "cn=admin,o=org":
@@ -717,7 +727,8 @@ realm.  Options:
 **-r** *realm*
     Specifies the Kerberos realm of the database.
 
-Example::
+EXAMPLE:
+ ::
 
     kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu list_policy -r ATHENA.MIT.EDU
     Password for "cn=admin,o=org":
@@ -765,7 +776,8 @@ eDirectory object. Options:
     Specifies Distinguished Name (DN) of the service object whose
     password is to be set.
 
-Example::
+EXAMPLE:
+ ::
 
     kdb5_ldap_util setsrvpw -D cn=admin,o=org setsrvpw -fileonly -f /home/andrew/conf_keyfile cn=service-kdc,o=org
     Password for "cn=admin,o=org":
@@ -829,7 +841,8 @@ Creates a service in directory and assigns appropriate rights. Options:
     Specifies Distinguished Name (DN) of the Kerberos service to be
     created.
 
-Example::
+EXAMPLE:
+ ::
 
     shell% kdb5_ldap_util -D cn=admin,o=org create_service -kdc -randpw -f /home/andrew/conf_keyfile cn=service-kdc,o=org
     Password for "cn=admin,o=org":
@@ -895,7 +908,8 @@ rights.  Options:
     Specifies Distinguished Name (DN) of the Kerberos service to be
     modified.
 
-Example::
+EXAMPLE:
+ ::
 
     shell% kdb5_ldap_util -D cn=admin,o=org modify_service -realm ATHENA.MIT.EDU cn=service-kdc,o=org
     Password for "cn=admin,o=org":
@@ -917,7 +931,8 @@ Displays the attributes of a service.  Options:
     Specifies Distinguished Name (DN) of the Kerberos service to be
     viewed.
 
-Example::
+EXAMPLE:
+ ::
 
     shell% kdb5_ldap_util -D cn=admin,o=org view_service cn=service-kdc,o=org
     Password for "cn=admin,o=org":
@@ -954,7 +969,8 @@ Destroys an existing service.  Options:
     Specifies Distinguished Name (DN) of the Kerberos service to be
     destroyed.
 
-EXAMPLE::
+EXAMPLE:
+ ::
 
     shell% kdb5_ldap_util -D cn=admin,o=org destroy_service cn=service-kdc,o=org
     Password for "cn=admin,o=org":
@@ -982,7 +998,8 @@ Lists the name of services under a given base in directory.  Options:
     slapd.conf file will be used, where as in the case of eDirectory,
     the default value for the base DN is Root.
 
-EXAMPLE::
+EXAMPLE:
+ ::
 
     shell% kdb5_ldap_util -D cn=admin,o=org list_service
     Password for "cn=admin,o=org":
