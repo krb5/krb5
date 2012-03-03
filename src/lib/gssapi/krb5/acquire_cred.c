@@ -716,13 +716,13 @@ error:
 }
 
 static OM_uint32
-acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
-             gss_buffer_t password, OM_uint32 time_req,
-             gss_cred_usage_t cred_usage, krb5_ccache ccache,
-             krb5_keytab keytab, krb5_boolean iakerb,
-             gss_cred_id_t *output_cred_handle, OM_uint32 *time_rec)
+acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
+                     gss_name_t desired_name, gss_buffer_t password,
+                     OM_uint32 time_req, gss_cred_usage_t cred_usage,
+                     krb5_ccache ccache, krb5_keytab keytab,
+                     krb5_boolean iakerb, gss_cred_id_t *output_cred_handle,
+                     OM_uint32 *time_rec)
 {
-    krb5_context context = NULL;
     krb5_gss_cred_id_t cred = NULL;
     krb5_gss_name_t name = (krb5_gss_name_t)desired_name;
     OM_uint32 ret;
@@ -732,14 +732,6 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
     *output_cred_handle = GSS_C_NO_CREDENTIAL;
     if (time_rec)
         *time_rec = 0;
-
-    code = gss_krb5int_initialize_library();
-    if (code)
-        goto krb_error_out;
-
-    code = krb5_gss_init_context(&context);
-    if (code)
-        goto krb_error_out;
 
     /* create the gss cred structure */
     cred = k5alloc(sizeof(krb5_gss_cred_id_rec), &code);
@@ -821,7 +813,6 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
     *minor_status = 0;
     *output_cred_handle = (gss_cred_id_t) cred;
 
-    krb5_free_context(context);
     return GSS_S_COMPLETE;
 
 krb_error_out:
@@ -844,6 +835,39 @@ error_out:
         xfree(cred);
     }
     save_error_info(*minor_status, context);
+    return ret;
+}
+
+static OM_uint32
+acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
+             gss_buffer_t password, OM_uint32 time_req,
+             gss_cred_usage_t cred_usage, krb5_ccache ccache,
+             krb5_keytab keytab, krb5_boolean iakerb,
+             gss_cred_id_t *output_cred_handle, OM_uint32 *time_rec)
+{
+    krb5_context context = NULL;
+    krb5_error_code code = 0;
+    OM_uint32 ret;
+
+    code = gss_krb5int_initialize_library();
+    if (code) {
+        *minor_status = code;
+        ret = GSS_S_FAILURE;
+        goto out;
+    }
+
+    code = krb5_gss_init_context(&context);
+    if (code) {
+        *minor_status = code;
+        ret = GSS_S_FAILURE;
+        goto out;
+    }
+
+    ret = acquire_cred_context(context, minor_status, desired_name, password,
+                               time_req, cred_usage, ccache, keytab, iakerb,
+                               output_cred_handle, time_rec);
+
+out:
     krb5_free_context(context);
     return ret;
 }
@@ -1091,4 +1115,75 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
     if (req->keytab_principal != NULL)
         k5_mutex_destroy(&name.lock);
     return code;
+}
+
+OM_uint32 KRB5_CALLCONV
+krb5_gss_acquire_cred_from(OM_uint32 *minor_status,
+                           const gss_name_t desired_name,
+                           OM_uint32 time_req,
+                           const gss_OID_set desired_mechs,
+                           gss_cred_usage_t cred_usage,
+                           gss_const_key_value_set_t cred_store,
+                           gss_cred_id_t *output_cred_handle,
+                           gss_OID_set *actual_mechs,
+                           OM_uint32 *time_rec)
+{
+    krb5_context context = NULL;
+    krb5_error_code code = 0;
+    krb5_keytab keytab = NULL;
+    krb5_ccache ccache = NULL;
+    const char *value;
+    OM_uint32 ret;
+
+    code = gss_krb5int_initialize_library();
+    if (code) {
+        *minor_status = code;
+        ret = GSS_S_FAILURE;
+        goto out;
+    }
+
+    code = krb5_gss_init_context(&context);
+    if (code) {
+        *minor_status = code;
+        ret = GSS_S_FAILURE;
+        goto out;
+    }
+
+    ret = kg_value_from_cred_store(cred_store, KRB5_CS_CCACHE_URN, &value);
+    if (GSS_ERROR(ret))
+        goto out;
+
+    if (value) {
+        code = krb5_cc_resolve(context, value, &ccache);
+        if (code != 0) {
+            *minor_status = code;
+            ret = GSS_S_CRED_UNAVAIL;
+            goto out;
+        }
+    }
+
+    ret = kg_value_from_cred_store(cred_store, KRB5_CS_KEYTAB_URN, &value);
+    if (GSS_ERROR(ret))
+        goto out;
+
+    if (value) {
+        code = krb5_kt_resolve(context, value, &keytab);
+        if (code != 0) {
+            *minor_status = code;
+            ret = GSS_S_CRED_UNAVAIL;
+            goto out;
+        }
+    }
+
+    ret = acquire_cred_context(context, minor_status, desired_name, NULL,
+                               time_req, cred_usage, ccache, keytab, 0,
+                               output_cred_handle, time_rec);
+
+out:
+    if (ccache != NULL)
+        krb5_cc_close(context, ccache);
+    if (keytab != NULL)
+        krb5_kt_close(context, keytab);
+    krb5_free_context(context);
+    return ret;
 }

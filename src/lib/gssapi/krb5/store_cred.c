@@ -32,7 +32,8 @@
 static int
 has_unexpired_creds(krb5_gss_cred_id_t kcred,
                     const gss_OID desired_mech,
-                    int default_cred)
+                    int default_cred,
+                    gss_const_key_value_set_t cred_store)
 {
     OM_uint32 major_status, minor;
     gss_name_t cred_name;
@@ -48,9 +49,10 @@ has_unexpired_creds(krb5_gss_cred_id_t kcred,
     else
         cred_name = (gss_name_t)kcred->name;
 
-    major_status = krb5_gss_acquire_cred(&minor, cred_name, 0,
-                                         &desired_mechs, GSS_C_INITIATE,
-                                         &tmp_cred, NULL, &time_rec);
+    major_status = krb5_gss_acquire_cred_from(&minor, cred_name, 0,
+                                              &desired_mechs, GSS_C_INITIATE,
+                                              cred_store, &tmp_cred, NULL,
+                                              &time_rec);
 
     krb5_gss_release_cred(&minor, &tmp_cred);
 
@@ -62,15 +64,19 @@ copy_initiator_creds(OM_uint32 *minor_status,
                      gss_cred_id_t input_cred_handle,
                      const gss_OID desired_mech,
                      OM_uint32 overwrite_cred,
-                     OM_uint32 default_cred)
+                     OM_uint32 default_cred,
+                     gss_const_key_value_set_t cred_store)
 {
     OM_uint32 major_status;
     krb5_error_code code;
     krb5_gss_cred_id_t kcred = NULL;
     krb5_context context = NULL;
     krb5_ccache ccache = NULL;
+    const char *ccache_name;
 
-    if (!default_cred) {
+    *minor_status = 0;
+
+    if (!default_cred && cred_store == GSS_C_NO_CRED_STORE) {
         *minor_status = G_STORE_NON_DEFAULT_CRED_NOSUPP;
         major_status = GSS_S_FAILURE;
         goto cleanup;
@@ -98,16 +104,44 @@ copy_initiator_creds(OM_uint32 *minor_status,
     }
 
     if (!overwrite_cred &&
-        has_unexpired_creds(kcred, desired_mech, default_cred)) {
+        has_unexpired_creds(kcred, desired_mech, default_cred, cred_store)) {
         major_status = GSS_S_DUPLICATE_ELEMENT;
         goto cleanup;
     }
 
-    code = krb5int_cc_default(context, &ccache);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
+    major_status = kg_value_from_cred_store(cred_store,
+                                            KRB5_CS_CCACHE_URN, &ccache_name);
+    if (GSS_ERROR(major_status))
         goto cleanup;
+
+    if (ccache_name != NULL) {
+        code = krb5_cc_resolve(context, ccache_name, &ccache);
+        if (code != 0) {
+            *minor_status = code;
+            major_status = GSS_S_CRED_UNAVAIL;
+            goto cleanup;
+        }
+        code = krb5_cc_initialize(context, ccache,
+                                  kcred->name->princ);
+        if (code != 0) {
+            *minor_status = code;
+            major_status = GSS_S_CRED_UNAVAIL;
+            goto cleanup;
+        }
+    }
+
+    if (ccache == NULL) {
+        if (!default_cred) {
+            *minor_status = G_STORE_NON_DEFAULT_CRED_NOSUPP;
+            major_status = GSS_S_FAILURE;
+            goto cleanup;
+        }
+        code = krb5int_cc_default(context, &ccache);
+        if (code != 0) {
+            *minor_status = code;
+            major_status = GSS_S_FAILURE;
+            goto cleanup;
+        }
     }
 
     code = krb5_cc_copy_creds(context, kcred->ccache, ccache);
@@ -139,6 +173,24 @@ krb5_gss_store_cred(OM_uint32 *minor_status,
                     OM_uint32 default_cred,
                     gss_OID_set *elements_stored,
                     gss_cred_usage_t *cred_usage_stored)
+{
+    return krb5_gss_store_cred_into(minor_status, input_cred_handle,
+                                    cred_usage, desired_mech,
+                                    overwrite_cred, default_cred,
+                                    GSS_C_NO_CRED_STORE,
+                                    elements_stored, cred_usage_stored);
+}
+
+OM_uint32 KRB5_CALLCONV
+krb5_gss_store_cred_into(OM_uint32 *minor_status,
+                         gss_cred_id_t input_cred_handle,
+                         gss_cred_usage_t cred_usage,
+                         const gss_OID desired_mech,
+                         OM_uint32 overwrite_cred,
+                         OM_uint32 default_cred,
+                         gss_const_key_value_set_t cred_store,
+                         gss_OID_set *elements_stored,
+                         gss_cred_usage_t *cred_usage_stored)
 {
     OM_uint32 major_status;
     gss_cred_usage_t actual_usage;
@@ -173,7 +225,7 @@ krb5_gss_store_cred(OM_uint32 *minor_status,
 
     major_status = copy_initiator_creds(minor_status, input_cred_handle,
                                         desired_mech, overwrite_cred,
-                                        default_cred);
+                                        default_cred, cred_store);
     if (GSS_ERROR(major_status))
         return major_status;
 

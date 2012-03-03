@@ -897,6 +897,8 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_inquire_saslname_for_mech,
     krb5_gss_inquire_mech_for_saslname,
     krb5_gss_inquire_attrs_for_mech,
+    krb5_gss_acquire_cred_from,
+    krb5_gss_store_cred_into,
 };
 
 static struct gss_config_ext krb5_mechanism_ext = {

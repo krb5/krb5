@@ -43,6 +43,7 @@ SRCS = \
 	$(srcdir)/compare_name.c \
 	$(srcdir)/context_time.c \
 	$(srcdir)/copy_ccache.c \
+	$(srcdir)/cred_store.c \
 	$(srcdir)/delete_sec_context.c \
 	$(srcdir)/disp_name.c \
 	$(srcdir)/disp_status.c \
@@ -93,6 +94,7 @@ OBJS = \
 	$(OUTPRE)compare_name.$(OBJEXT) \
 	$(OUTPRE)context_time.$(OBJEXT) \
 	$(OUTPRE)copy_ccache.$(OBJEXT) \
+	$(OUTPRE)cred_store.$(OBJEXT) \
 	$(OUTPRE)delete_sec_context.$(OBJEXT) \
 	$(OUTPRE)disp_name.$(OBJEXT) \
 	$(OUTPRE)disp_status.$(OBJEXT) \
@@ -146,6 +148,7 @@ STLIBOBJS = \
 	compare_name.o \
 	context_time.o \
 	copy_ccache.o \
+	cred_store.o \
 	delete_sec_context.o \
 	disp_name.o \
 	disp_status.o \

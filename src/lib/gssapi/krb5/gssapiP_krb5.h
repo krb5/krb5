@@ -1224,4 +1224,38 @@ data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
 
 #define KRB5_GSS_EXTS_IAKERB_FINISHED 1
 
+
+/* Credential store extensions */
+
+#define KRB5_CS_KEYTAB_URN "keytab"
+#define KRB5_CS_CCACHE_URN "ccache"
+
+OM_uint32
+kg_value_from_cred_store(gss_const_key_value_set_t cred_store,
+                         const char *type, const char **value);
+
+OM_uint32 KRB5_CALLCONV
+krb5_gss_acquire_cred_from(
+    OM_uint32 *,               /* minor_status */
+    const gss_name_t,          /* desired_name */
+    OM_uint32,                 /* time_req */
+    const gss_OID_set,         /* desired_mechs */
+    gss_cred_usage_t,          /* cred_usage */
+    gss_const_key_value_set_t, /* cred_store */
+    gss_cred_id_t *,           /* output_cred_handle */
+    gss_OID_set *,             /* actual_mechs */
+    OM_uint32 *);              /* time_rec */
+
+OM_uint32 KRB5_CALLCONV
+krb5_gss_store_cred_into(
+    OM_uint32 *,               /* minor_status */
+    gss_cred_id_t,             /* input_cred_handle */
+    gss_cred_usage_t,          /* input_usage */
+    const gss_OID,             /* desired_mech */
+    OM_uint32,                 /* overwrite_cred */
+    OM_uint32,                 /* default_cred */
+    gss_const_key_value_set_t, /* cred_store */
+    gss_OID_set *,             /* elements_stored */
+    gss_cred_usage_t *);       /* cred_usage_stored */
+
 #endif /* _GSSAPIP_KRB5_H_ */
