@@ -134,7 +134,7 @@ typedef long            kadm5_ret_t;
 #define KADM5_CONFIG_MAX_RLIFE          0x00000010
 #define KADM5_CONFIG_EXPIRATION         0x00000020
 #define KADM5_CONFIG_FLAGS              0x00000040
-#define KADM5_CONFIG_ADMIN_KEYTAB       0x00000080
+/*#define KADM5_CONFIG_ADMIN_KEYTAB       0x00000080*/
 #define KADM5_CONFIG_STASH_FILE         0x00000100
 #define KADM5_CONFIG_ENCTYPE            0x00000200
 #define KADM5_CONFIG_ADBNAME            0x00000400
@@ -240,7 +240,6 @@ typedef struct _kadm5_config_params {
        file.  */
     char *             dbname;
 
-    char *             admin_keytab;
     char *             acl_file;
     char *             dict_file;
 

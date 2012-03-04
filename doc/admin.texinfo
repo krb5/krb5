@@ -1635,11 +1635,6 @@ subsection:
 uses to determine which principals are allowed which permissions on the
 database.  The default is @code{@value{DefaultAclFile}}.
 
-@itemx admin_keytab
-(String.)  Location of the keytab file that the legacy administration
-daemons @code{kadmind4} and @code{v5passwdd} use to authenticate to
-the database.  The default is @code{@value{DefaultAdminKeytab}}.
-
 @itemx default_principal_expiration
 (Absolute time string.)  Specifies the default expiration date of
 principals created in this realm.  The default value for this tag is

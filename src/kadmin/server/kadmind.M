@@ -32,19 +32,6 @@ understands a number of variable settings in this file, some of which are
 mandatory and some of which are optional.  See the CONFIGURATION VALUES
 section below.
 .TP
-keytab
-.B Kadmind
-requires a keytab containing correct entries for the 
-.I kadmin/admin
-and
-.I kadmin/changepw
-principals for every realm that kadmind will answer requests for.  The
-keytab can be created with the
-.IR kadmin (8)
-client.  The location of the keytab is determined by the
-.I admin_keytab
-configuration variable (see CONFIGURATION VALUES).
-.TP
 ACL file
 .BR Kadmind 's
 ACL (access control list) tells it which principals are allowed to
@@ -144,17 +131,6 @@ dict_file
 The path of kadmind's password dictionary.  A principal with any
 password policy will not be allowed to select any password in the
 dictionary.  Optional.  No default.
-.TP
-admin_keytab
-The name of the keytab containing entries for the principals
-.I kadmin/admin
-and
-.I kadmin/changepw
-in each realm that
-.B kadmind
-will serve.  The default is the value of the 
-.SM KRB5_KTNAME
-environment variable, if defined.  Mandatory.
 .TP
 kadmind_port
 The

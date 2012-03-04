@@ -236,8 +236,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
 #define ILLEGAL_PARAMS (KADM5_CONFIG_DBNAME | KADM5_CONFIG_ADBNAME |    \
                         KADM5_CONFIG_ADB_LOCKFILE |                     \
                         KADM5_CONFIG_ACL_FILE | KADM5_CONFIG_DICT_FILE  \
-                        | KADM5_CONFIG_ADMIN_KEYTAB |                   \
-                        KADM5_CONFIG_STASH_FILE |                       \
+                        | KADM5_CONFIG_STASH_FILE |                     \
                         KADM5_CONFIG_MKEY_NAME | KADM5_CONFIG_ENCTYPE   \
                         | KADM5_CONFIG_MAX_LIFE |                       \
                         KADM5_CONFIG_MAX_RLIFE |                        \

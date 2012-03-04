@@ -5,7 +5,6 @@
 	__REALM__ = {
 		profile = __K5ROOT__/krb5.conf
 		database_name = __K5ROOT__/kdb5
-		admin_keytab = __K5ROOT__/ovsec_adm.srvtab
 		key_stash_file = __K5ROOT__/.k5.__REALM__
 		acl_file = __K5ROOT__/ovsec_adm.acl
 		dict_file = __K5ROOT__/ovsec_adm.dict

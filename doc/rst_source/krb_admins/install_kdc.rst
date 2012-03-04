@@ -126,7 +126,6 @@ An example kdc.conf file::
             # explicitly configure the following four values:
             #    database_name = /var/krb5kdc/principal
             #    key_stash_file = /var/krb5kdc/.k5.ATHENA.MIT.EDU
-            #    admin_keytab = FILE:/var/krb5kdc/kadm5.keytab
             #    acl_file = /var/krb5kdc/kadm5.acl
         }
 
@@ -142,7 +141,7 @@ your Kerberos realm and server respectively.
 
 .. note:: You have to have write permission on the target directories
           (these directories must exist) used by **database_name**,
-          **key_stash_file**, **admin_keytab**, and **acl_file**.
+          **key_stash_file**, and **acl_file**.
 
 
 .. _create_db:

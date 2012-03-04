@@ -97,12 +97,6 @@ subsection:
     which permissions on the database.  The default is
     ``/usr/local/var/krb5kdc/kadm5.acl``.
 
-**admin_keytab**
-    (String.)  Location of the keytab file that the legacy
-    administration daemons kadmind4 and v5passwdd use to authenticate
-    to the database.  The default is
-    ``/usr/local/var/krb5kdc/kadm5.keytab``.
-
 **database_name**
     This string specifies the location of the Kerberos database for
     this realm.

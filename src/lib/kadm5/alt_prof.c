@@ -616,17 +616,6 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     GET_STRING_PARAM(dbname, KADM5_CONFIG_DBNAME, KRB5_CONF_DATABASE_NAME,
                      DEFAULT_KDB_FILE);
 
-    /* Get the value for the admin (policy) database lock file*/
-    if (!GET_STRING_PARAM(admin_keytab, KADM5_CONFIG_ADMIN_KEYTAB,
-                          KRB5_CONF_ADMIN_KEYTAB, NULL)) {
-        const char *s = getenv("KRB5_KTNAME");
-        if (s == NULL)
-            s = DEFAULT_KADM5_KEYTAB;
-        params.admin_keytab = strdup(s);
-        if (params.admin_keytab)
-            params.mask |= KADM5_CONFIG_ADMIN_KEYTAB;
-    }
-
     /* Get the name of the acl file */
     GET_STRING_PARAM(acl_file, KADM5_CONFIG_ACL_FILE, KRB5_CONF_ACL_FILE,
                      DEFAULT_KADM5_ACL_FILE);
@@ -862,7 +851,6 @@ kadm5_free_config_params(context, params)
         free(params->stash_file);
         free(params->keysalts);
         free(params->admin_server);
-        free(params->admin_keytab);
         free(params->dict_file);
         free(params->acl_file);
         free(params->realm);

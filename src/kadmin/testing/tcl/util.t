@@ -29,8 +29,6 @@ proc config_params {masks values} {
 	    "KADM5_CONFIG_ADBNAME" {set params [lreplace $params 5 5 $value]}
 	    "KADM5_CONFIG_ADB_LOCKFILE" {
 		set params [lreplace $params 6 6 $value]}
-	    "KADM5_CONFIG_ADMIN_KEYTAB" {
-		set params [lreplace $params 7 7 $value]}
 	    "KADM5_CONFIG_ACL_FILE" {set params [lreplace $params 8 8 $value]}
 	    "KADM5_CONFIG_DICT_FILE" {
 		set params [lreplace $params 9 9 $value]}

@@ -185,7 +185,6 @@ typedef INT64_TYPE krb5_int64;
 
 /* cofiguration variables */
 #define KRB5_CONF_ACL_FILE                       "acl_file"
-#define KRB5_CONF_ADMIN_KEYTAB                   "admin_keytab"
 #define KRB5_CONF_ADMIN_SERVER                   "admin_server"
 #define KRB5_CONF_ALLOW_WEAK_CRYPTO              "allow_weak_crypto"
 #define KRB5_CONF_AP_REQ_CHECKSUM_TYPE           "ap_req_checksum_type"

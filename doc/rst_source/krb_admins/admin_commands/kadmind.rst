@@ -36,14 +36,6 @@ for it to work:
     some of which are optional.  See the CONFIGURATION VALUES section
     below.
 
-keytab
-    kadmind requires a keytab containing correct entries for the
-    ``kadmin/admin`` and ``kadmin/changepw`` principals for every
-    realm that kadmind will answer requests for.  The keytab can be
-    created with the :ref:`kadmin(1)` client.  The location of the
-    keytab is determined by the **admin_keytab** configuration
-    variable (see CONFIGURATION VALUES).
-
 ACL file
     kadmind's ACL (access control list) tells it which principals are
     allowed to perform KADM5 administration actions.  The path of the
@@ -136,12 +128,6 @@ understands the following relations, all of which should appear in the
 
 **acl_file**
     The path of kadmind's ACL file.  **Mandatory**.  No default.
-
-**admin_keytab**
-    The name of the keytab containing entries for the principals
-    ``kadmin/admin`` and ``kadmin/changepw`` in each realm that
-    kadmind will serve.  The default is the value of the KRB5_KTNAME
-    environment variable, if defined.  **Mandatory**.
 
 **dict_file**
     The path of kadmind's password dictionary.  A principal with any

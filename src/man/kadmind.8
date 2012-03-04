@@ -49,12 +49,6 @@ The KDC configuration file contains configuration information for the KDC and th
 of  variable  settings in this file, some of which are mandatory and some of which are optional.
 See the CONFIGURATION VALUES section below.
 .TP
-.B \fIkeytab\fP
-.sp
-Kadmind requires a keytab containing correct entries for the kadmin/admin and kadmin/changepw principals for every realm that
-\fIkadmind\fP will answer requests for.  The keytab can be created with the kadmin(8) client.
-The location of the keytab is determined by the \fIadmin_keytab\fP configuration variable (see CONFIGURATION VALUES).
-.TP
 .B \fIACL\fP file
 .sp
 \fIkadmind\fP\(aqs \fIACL\fP (access control list) tells it which principals are allowed to perform KADM5 administration actions.
@@ -145,11 +139,6 @@ all of which should appear in the [realms] section:
 .B \fBacl_file\fP
 .sp
 The path of \fIkadmind\fP\(aqs \fIACL\fP file.  \fBMandatory\fP.  No default.
-.TP
-.B \fBadmin_keytab\fP
-.sp
-The  name  of  the keytab containing entries for the principals kadmin/admin and kadmin/changepw in each realm that \fIkadmind\fP will
-serve.  The default is the value of the KRB5_KTNAME environment variable, if defined.  \fBMandatory\fP.
 .TP
 .B \fBdict_file\fP
 .sp
