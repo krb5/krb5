@@ -11,7 +11,7 @@ Contents:
    conf_files/index.rst
    realm_config.rst
    dns.rst
-   database/index.rst
+   database.rst
    conf_ldap.rst
    appl_servers/index.rst
    backup_host.rst
