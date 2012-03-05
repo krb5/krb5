@@ -339,9 +339,6 @@ Optional packages
 **--with-ldap**
     Compile OpenLDAP database backend module.
 
-**--with-edirectory**
-    Compile eDirectory database backend module.
-
 **--with-vague-errors**
     Do not send helpful errors to client.  For example, if the KDC
     should return only vague error codes to clients.

@@ -31,13 +31,3 @@ LDAP
    ldap_realm_list.rst
    ldap_stash_pass.rst
    ldap_tkt_pol.rst
-
-
-eDirectory
-----------
-
-.. toctree::
-   :maxdepth: 1
-
-   edir_create_realm.rst
-   edir_create_so.rst

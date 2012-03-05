@@ -10,8 +10,6 @@ If you need to modify a realm, use the :ref:`kdb5_ldap_util(8)`
    :start-after:  _kdb5_ldap_util_modify:
    :end-before: _kdb5_ldap_util_modify_end:
 
-.. seealso:: :ref:`edir_mod_realm`
-
 
 Feedback
 --------
