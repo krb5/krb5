@@ -343,16 +343,16 @@ PKINIT options
 1. realm-specific subsection of [realms],
     ::
 
-    [realms]
-        EXAMPLE.COM = {
-            pkinit_anchors = FILE\:/usr/local/example.com.crt
-        }
+       [realms]
+           EXAMPLE.COM = {
+               pkinit_anchors = FILE\:/usr/local/example.com.crt
+           }
 
 2. generic value in the [kdcdefaults] section.
     ::
 
-    [kdcdefaults]
-        pkinit_anchors = DIR\:/usr/local/generic_trusted_cas/
+       [kdcdefaults]
+           pkinit_anchors = DIR\:/usr/local/generic_trusted_cas/
 
 For information about the syntax of some of these options, see pkinit
 identity syntax.

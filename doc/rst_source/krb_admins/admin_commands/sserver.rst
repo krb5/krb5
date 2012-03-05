@@ -31,6 +31,7 @@ The **-S** option allows for a different keytab than the default.
 
 sserver is normally invoked out of inetd(8), using a line in
 ``/etc/inetd.conf`` that looks like this:
+
  ::
 
     sample  stream  tcp     nowait  root /usr/local/sbin/sserver     sserver
@@ -38,6 +39,7 @@ sserver is normally invoked out of inetd(8), using a line in
 Since ``sample`` is normally not a port defined in ``/etc/services``,
 you will usually have to add a line to ``/etc/services`` which looks
 like this:
+
  ::
 
     sample          13135/tcp

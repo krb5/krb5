@@ -24,6 +24,7 @@ EXAMPLES
 
 Suppose the user ``alice`` had a .k5login file in her home directory
 containing the following line:
+
  ::
 
     bob@FOOBAR.ORG
@@ -35,6 +36,7 @@ access ``alice``'s account, using ``bob``'s Kerberos tickets.
 Let us further suppose that ``alice`` is a system administrator.
 Alice and the other system administrators would have their principals
 in root's .k5login file on each host:
+
  ::
 
     alice@BLEEP.COM

@@ -57,6 +57,7 @@ The following example .k5identity file selects the client principal
 the principal ``alice/root@EXAMPLE.COM`` if the server host is within
 a servers subdomain, and the principal ``alice/mail@EXAMPLE.COM`` when
 accessing the IMAP service on ``mail.example.com``:
+
  ::
 
     alice@KRBTEST.COM       realm=KRBTEST.COM

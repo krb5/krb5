@@ -33,6 +33,7 @@ file, the slave Kerberos server will have an up-to-date KDC database.
 
 Normally, kpropd is invoked out of inetd(8).  This is done by adding
 a line to the ``/etc/inetd.conf`` file which looks like this:
+
  ::
 
     kprop     stream    tcp  nowait    root /usr/local/sbin/kpropd   kpropd

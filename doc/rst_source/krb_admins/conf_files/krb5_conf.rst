@@ -18,6 +18,7 @@ Structure
 The krb5.conf file is set up in the style of a Windows INI file.
 Sections are headed by the section name, in square brackets.  Each
 section may contain zero or more relations, of the form:
+
  ::
 
     foo = bar
@@ -45,6 +46,7 @@ then the second value of ``foo`` (``baz``) would never be read.
 
 The krb5.conf file can include other files using either of the
 following directives at the beginning of a line:
+
  ::
 
     include FILENAME
@@ -61,6 +63,7 @@ The krb5.conf file can specify that configuration should be obtained
 from a loadable module, rather than the file itself, using the
 following directive at the beginning of a line before any section
 headers:
+
  ::
 
     module MODULEPATH:RESIDUAL
@@ -238,8 +241,8 @@ The libdefaults section may contain any of the following relations:
     If set, the library will look for a local user's k5login file
     within the named directory, with a filename corresponding to the
     local username.  If not set, the library will look for k5login
-    files in the user's home directory, with the filename
-    .k5login.  For security reasons, .k5login files must be owned by
+    files in the user's home directory, with the filename .k5login.
+    For security reasons, .k5login files must be owned by
     the local user or by root.
 
 **kdc_default_options**
@@ -494,6 +497,7 @@ Host names and domain names should be in lower case.
 If no translation entry applies, the host's realm is considered to be
 the hostname's domain portion converted to upper case.  For example,
 the following [domain_realm] section:
+
  ::
 
     [domain_realm]
@@ -572,6 +576,7 @@ the console and to the system log under the facility LOG_DAEMON with
 default severity of LOG_INFO; and the logging messages from the
 administrative server will be appended to the file
 ``/var/adm/kadmin.log`` and sent to the device ``/dev/tty04``.
+
  ::
 
     [logging]
@@ -613,6 +618,7 @@ use the ``ES.NET`` realm as an intermediate realm.  ``ANL`` has a sub
 realm of ``TEST.ANL.GOV`` which will authenticate with ``NERSC.GOV``
 but not ``PNL.GOV``.  The [capaths] section for ``ANL.GOV`` systems
 would look like this:
+
  ::
 
     [capaths]
@@ -637,6 +643,7 @@ would look like this:
 
 The [capaths] section of the configuration file used on ``NERSC.GOV``
 systems would look like this:
+
  ::
 
     [capaths]
@@ -961,24 +968,24 @@ PKINIT options
 1. realm-specific subsection of [libdefaults] :
     ::
 
-    [libdefaults]
-        EXAMPLE.COM = {
-            pkinit_anchors = FILE\:/usr/local/example.com.crt
-        }
+       [libdefaults]
+           EXAMPLE.COM = {
+               pkinit_anchors = FILE\:/usr/local/example.com.crt
+           }
 
 2. realm-specific value in the [realms] section,
     ::
 
-    [realms]
-        OTHERREALM.ORG = {
-            pkinit_anchors = FILE\:/usr/local/otherrealm.org.crt
-        }
+       [realms]
+           OTHERREALM.ORG = {
+               pkinit_anchors = FILE\:/usr/local/otherrealm.org.crt
+           }
 
 3. generic value in the [libdefaults] section.
     ::
 
-    [libdefaults]
-        pkinit_anchors = DIR\:/usr/local/generic_trusted_cas/
+       [libdefaults]
+           pkinit_anchors = DIR\:/usr/local/generic_trusted_cas/
 
 
 Specifying pkinit identity information

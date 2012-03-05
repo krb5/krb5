@@ -47,6 +47,7 @@ OPTIONS
 **-v**
     Display individual attributes per update.  An example of the
     output generated for one entry:
+
      ::
 
         Update Entry

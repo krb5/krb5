@@ -176,6 +176,7 @@ DATE FORMAT
 
 Many of the kadmin commands take a duration or time as an
 argument. The date can appear in a wide variety of formats, such as:
+
  ::
 
     1 month ago

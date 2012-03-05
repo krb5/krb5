@@ -218,6 +218,7 @@ OPTIONS
     The target cache name is automatically set to ``krb5cc_<target
     uid>.(gen_sym())``, where gen_sym generates a new number such that
     the resulting cache does not already exist.  For example:
+
      ::
 
         krb5cc_1984.2
@@ -279,6 +280,7 @@ Ticket granting ticket options:
     ksu proceeds exactly the same as if it was invoked without the
     **-e** option, except instead of executing the target shell, ksu
     executes the specified command. Example of usage:
+
      ::
 
         ksu bob -e ls -lag
@@ -299,6 +301,7 @@ Ticket granting ticket options:
     principal name followed by a ``*`` means that the user is
     authorized to execute any command.  Thus, in the following
     example:
+
      ::
 
         jqpublic@USC.EDU ls mail /local/kerberos/klist
@@ -332,6 +335,7 @@ Ticket granting ticket options:
 
     The **-a** option can be used to simulate the **-e** option if
     used as follows:
+
      ::
 
         -a -c [command [arguments]].
@@ -353,11 +357,10 @@ ksu can be compiled with the following four flags:
     channel, the password may get exposed.
 
 **PRINC_LOOK_AHEAD**
-
     During the resolution of the default principal name,
-    **PRINC_LOOK_AHEAD** enables ksu to find principal names in the
-    .k5users file as described in the OPTIONS section (see **-n**
-    option).
+    **PRINC_LOOK_AHEAD** enables ksu to find principal names in
+    the .k5users file as described in the OPTIONS section
+    (see **-n** option).
 
 **CMD_PATH**
     Specifies a list of directories containing programs that users are

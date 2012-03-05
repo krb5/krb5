@@ -45,6 +45,7 @@ OPTIONS
     requests a ticket  with  the  lifetime  lifetime.   The
     value  for lifetime must be followed immediately by one
     of the following delimiters:
+
      ::
 
         s  seconds
