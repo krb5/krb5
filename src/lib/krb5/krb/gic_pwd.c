@@ -168,6 +168,10 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
         return;
     }
 
+    /* Don't warn if no password expiry value was sent. */
+    if (pw_exp == 0)
+        return;
+
     /* Don't warn if the password is being changed. */
     if (in_tkt_service && strcmp(in_tkt_service, "kadmin/changepw") == 0)
         return;
