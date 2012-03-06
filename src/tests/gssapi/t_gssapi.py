@@ -78,6 +78,20 @@ output = realm.run_as_client(['./t_imp_cred', 'service2/dwight'],
 if 'Wrong principal in request' not in output:
     fail('Expected error message not seen in t_imp_cred output')
 
+# Test credential store extension.
+tmpccname = 'FILE:' + os.path.join(realm.testdir, 'def_cache')
+realm.env_client['KRB5CCNAME'] = tmpccname
+storagecache = 'FILE:' + os.path.join(realm.testdir, 'user_store')
+servicekeytab = os.path.join(realm.testdir, 'kt')
+service_cs = 'service/cs@%s' % realm.realm
+realm.addprinc(service_cs)
+realm.extract_keytab(service_cs, servicekeytab)
+realm.kinit(service_cs, None, ['-k', '-t', servicekeytab])
+output = realm.run_as_client(['./t_credstore', service_cs, '--cred_store',
+                              'ccache', storagecache, 'keytab', servicekeytab])
+if 'Cred Store Success' not in output:
+    fail('Expected test to succeed')
+
 # Verify that we can't acquire acceptor creds without a keytab.
 os.remove(realm.keytab)
 output = realm.run_as_client(['./t_accname', 'abc'], expected_code=1)
