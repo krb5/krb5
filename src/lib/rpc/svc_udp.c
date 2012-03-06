@@ -55,6 +55,10 @@ static char sccsid[] = "@(#)svc_udp.c 1.24 87/08/11 Copyr 1984 Sun Micro";
 #include "k5-platform.h"
 
 
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE int
+#endif
+
 #define rpc_buffer(xprt) ((xprt)->xp_p1)
 #ifndef MAX
 #define MAX(a, b)     ((a > b) ? a : b)
@@ -115,7 +119,7 @@ svcudp_bufcreate(
 	register SVCXPRT *xprt;
 	register struct svcudp_data *su;
 	struct sockaddr_in addr;
-	int len = sizeof(struct sockaddr_in);
+	GETSOCKNAME_ARG3_TYPE len = sizeof(struct sockaddr_in);
 
 	if (sock == RPC_ANYSOCK) {
 		if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
@@ -216,7 +220,7 @@ svcudp_recv(
 	    0, (struct sockaddr *)&(xprt->xp_raddr), &(xprt->xp_addrlen));
 	if (rlen == -1 && errno == EINTR)
 		goto again;
-	if (rlen < (int) 4*sizeof(uint32_t))
+	if (rlen < (int) (4*sizeof(uint32_t)))
 		return (FALSE);
 	xdrs->x_op = XDR_DECODE;
 	XDR_SETPOS(xdrs, 0);
