@@ -9,7 +9,7 @@ realms of interest, defaults for the current realm and for Kerberos
 applications, and mappings of hostnames onto Kerberos realms.
 Normally, you should install your krb5.conf file in the directory
 ``/etc``.  You can override the default location by setting the
-environment variable KRB5_CONFIG.
+environment variable **KRB5_CONFIG**.
 
 
 Structure
@@ -77,16 +77,16 @@ directive, :ref:`kdc.conf(5)` should also use one if it exists.
 Sections
 --------
 
-The krb5.conf file may contain any or all of the following sections:
+The krb5.conf file may contain the following sections:
 
 ============== =======================================================
-libdefaults_   Contains default values used by the Kerberos V5 library.
-realms_        Contains subsections keyed by Kerberos realm names. Each subsection describes realm-specific information, including where to find the Kerberos servers for that realm.
-domain_realm_  Contains relations which map domain names and subdomains onto Kerberos realm names. This is used by programs to determine what realm a host should be in, given its fully qualified domain name.
-logging_       Contains relations which determine how Kerberos programs are to perform logging.
-capaths_       Contains the authentication paths used with direct (nonhierarchical) cross-realm authentication. Entries in this section are used by the client to determine the intermediate realms which may be used in cross-realm authentication. It is also used by the end-service when checking the transited field for trusted intermediate realms.
-plugins_       Contains tags to register dynamic plugin modules and to turn modules on and off.
-appdefaults_   Contains default values that can be used by Kerberos V5 applications.
+libdefaults_   Settings used by the Kerberos V5 library
+realms_        Realm-specific contact information and settings
+domain_realm_  Maps server hostnames to Kerberos realms
+logging_       Controls how Kerberos daemons perform logging
+capaths_       Authentication paths for non-hierarchical cross-realm
+plugins_       Controls plugin module registration
+appdefaults_   Default values used by some Kerberos V5 applications
 ============== =======================================================
 
 
@@ -98,8 +98,8 @@ appdefaults_   Contains default values that can be used by Kerberos V5 applicati
 The libdefaults section may contain any of the following relations:
 
 **allow_weak_crypto**
-    If this is set to 0 (for false), then weak encryption types will
-    be filtered out of the previous three lists (as noted in
+    If this flag is set to false, then weak encryption types will be
+    filtered out of the previous three lists (as noted in
     :ref:`Supported_Encryption_Types_and_Salts`).  The default value
     for this tag is false, which may cause authentication failures in
     existing Kerberos infrastructures that do not support strong
@@ -107,29 +107,25 @@ The libdefaults section may contain any of the following relations:
     true until their infrastructure adopts stronger ciphers.
 
 **ap_req_checksum_type**
-     An integer which specifies the type of AP-REQ checksum to use in
-     authenticators.  This variable should be unset so the appropriate
-     checksum for the encryption key in use will be used.  This can be
-     set if backward compatibility requires a specific checksum type.
-     See the **kdc_req_checksum_type** configuration option for the
-     possible values and their meanings.
+    An integer which specifies the type of AP-REQ checksum to use in
+    authenticators.  This variable should be unset so the appropriate
+    checksum for the encryption key in use will be used.  This can be
+    set if backward compatibility requires a specific checksum type.
+    See the **kdc_req_checksum_type** configuration option for the
+    possible values and their meanings.
 
 **canonicalize**
-    This flag indicates to the KDC that the client is prepared to
-    receive a reply that contains a principal name other than the one
-    requested.  The client should expect, when sending names with the
-    "canonicalize" KDC option, that names in the KDC's reply will be
-    different than the name in the request.  The default value for
-    this flag is not set.
+    If this flag is set to true, initial ticket requests to the KDC
+    will request canonicalization of the client principal name, and
+    answers with different client principals than the requested
+    principal will be accepted.  The default value is false.
 
 **ccache_type**
-    Use this parameter on systems which are DCE clients, to specify
-    the type of cache to be created by :ref:`kinit(1)`, or when
-    forwarded tickets are received.  DCE and Kerberos can share the
-    cache, but some versions of DCE do not support the default cache
-    as created by this version of Kerberos.  Use a value of 1 on DCE
-    1.0.3a systems, and a value of 2 on DCE 1.1 systems.  The default
-    value is 4.
+    This parameter determines the format of credential cache types
+    created by :ref:`kinit(1)` or other programs.  The default value
+    is 4, which represents the most current format.  Smaller values
+    can be used for compatibility with very old implementations of
+    Kerberos which interact with credential caches on the same host.
 
 **clockskew**
     Sets the maximum allowable amount of clockskew in seconds that the
@@ -143,39 +139,36 @@ The libdefaults section may contain any of the following relations:
 
 **default_realm**
     Identifies the default Kerberos realm for the client.  Set its
-    value to your Kerberos realm.  If this is not specified and the
-    TXT record lookup is enabled (see :ref:`using_dns`), then that
-    information will be used to determine the default realm.  If this
-    tag is not set in this configuration file and there is no DNS
-    information found, then an error will be returned.
+    value to your Kerberos realm.  If this value is not set, then a
+    realm must be specified with every Kerberos principal when
+    invoking programs such as :ref:`kinit(1)`.
 
 **default_tgs_enctypes**
     Identifies the supported list of session key encryption types that
-    should be returned by the KDC. The list may be delimited with
-    commas or whitespace.  Kerberos supports many different encryption
-    types, and support for more is planned in the future. (see
+    should be returned by the KDC.  The list may be delimited with
+    commas or whitespace.  See
     :ref:`Supported_Encryption_Types_and_Salts` for a list of the
-    accepted values for this tag).  The default value is
+    accepted values for this tag.  The default value is
     ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1
-    arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``.
+    arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``, but
+    single-DES encryption types will be implicitly removed from this
+    list if the value of **allow_weak_crypto** is false.
 
 **default_tkt_enctypes**
     Identifies the supported list of session key encryption types that
-    should be requested by the client. The format is the same as for
+    should be requested by the client.  The format is the same as for
     default_tgs_enctypes.  The default value for this tag is
     ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1
-    arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``.
-
-**dns_fallback**
-    General flag controlling the use of DNS for Kerberos information.
-    If both of the preceding options are specified, this option has no
-    effect.
+    arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``, but
+    single-DES encryption types will be implicitly removed from this
+    list if the value of **allow_weak_crypto** is false.
 
 **dns_lookup_kdc**
     Indicate whether DNS SRV records should be used to locate the KDCs
     and other servers for a realm, if they are not listed in the
-    information for the realm.  (Note that the admin_server entry must
-    be in the file, because the DNS implementation for it is
+    krb5.conf information for the realm.  (Note that the admin_server
+    entry must be in the krb5.conf realm information in order to
+    contact kadmind, because the DNS implementation for kadmin is
     incomplete.)
 
     Enabling this option does open up a type of denial-of-service
@@ -186,56 +179,34 @@ The libdefaults section may contain any of the following relations:
     data), and anything the fake KDC sends will not be trusted without
     verification using some secret that it won't know.
 
-    If this option is not specified but dns_fallback is, that value
-    will be used instead.  If neither option is specified, the
-    behavior depends on configure-time options; if none were given,
-    the default is to enable this option.  If the DNS support is not
-    compiled in, this entry has no effect.
-
-**dns_lookup_realm**
-    Indicate whether DNS TXT records should be used to determine the
-    Kerberos realm of a host.
-
-    Enabling this option may permit a redirection attack, where
-    spoofed DNS replies persuade a client to authenticate to the wrong
-    realm, when talking to the wrong host (either by spoofing yet more
-    DNS records or by intercepting the net traffic).  Depending on how
-    the client software manages hostnames, however, it could already
-    be vulnerable to such attacks.  We are looking at possible ways to
-    minimize or eliminate this exposure.  For now, we encourage more
-    adventurous sites to try using Secure DNS.
-
-    If this option is not specified but dns_fallback is, that value
-    will be used instead.  If neither option is specified, the
-    behavior depends on configure-time options; if none were given,
-    the default is to disable this option.  If the DNS support is not
-    compiled in, this entry has no effect.
-
 **extra_addresses**
     This allows a computer to use multiple local addresses, in order
-    to allow Kerberos to work in a network that uses NATs.  The
-    addresses should be in a comma-separated list.
+    to allow Kerberos to work in a network that uses NATs while still
+    using address-restricted tickets.  The addresses should be in a
+    comma-separated list.  This option has no effect if
+    **noaddresses** is true.
 
 **forwardable**
-    If this flag is set, initial tickets by default will be
-    forwardable.  The default value for this flag is not set.
+    If this flag is true, initial tickets will be forwardable by
+    default, if allowed by the KDC.  The default value is false.
 
 **ignore_acceptor_hostname**
     When accepting GSSAPI or krb5 security contexts for host-based
     service principals, ignore any hostname passed by the calling
-    application and allow any service principal present in the keytab
-    which matches the service name and realm name (if given).  This
-    option can improve the administrative flexibility of server
-    applications on multihomed hosts, but can compromise the security
-    of virtual hosting environments.  The default value is false.
+    application, and allow clients to authenticate to any service
+    principal in the keytab matching the service name and realm name
+    (if given).  This option can improve the administrative
+    flexibility of server applications on multihomed hosts, but could
+    compromise the security of virtual hosting environments.  The
+    default value is false.
 
 **k5login_authoritative**
-    If the value of this relation is true (the default), principals
-    must be listed in a local user's k5login file to be granted login
-    access, if a :ref:`.k5login(5)` file exists.  If the value of this
-    relation is false, a principal may still be granted login access
-    through other mechanisms even if a k5login file exists but does
-    not list the principal.
+    If this flag is true, principals must be listed in a local user's
+    k5login file to be granted login access, if a :ref:`.k5login(5)`
+    file exists.  If this flag is false, a principal may still be
+    granted login access through other mechanisms even if a k5login
+    file exists but does not list the principal.  The default value is
+    true.
 
 **k5login_directory**
     If set, the library will look for a local user's k5login file
@@ -246,22 +217,22 @@ The libdefaults section may contain any of the following relations:
     the local user or by root.
 
 **kdc_default_options**
-   Default KDC options (Xored for multiple values) when requesting
-   initial credentials.  By default it is set to 0x00000010
-   (KDC_OPT_RENEWABLE_OK).
+    Default KDC options (Xored for multiple values) when requesting
+    initial tickets.  By default it is set to 0x00000010
+    (KDC_OPT_RENEWABLE_OK).
 
 **kdc_timesync**
-    If this is set to 1 (for true), then client machines will compute
-    the difference between their time and the time returned by the KDC
-    in the timestamps in the tickets and use this value to correct for
-    an inaccurate system clock.  This corrective factor is only used
-    by the Kerberos library.  The default is 1.
+    If this flag is true, client machines will compute the difference
+    between their time and the time returned by the KDC in the
+    timestamps in the tickets and use this value to correct for an
+    inaccurate system clock when requesting service tickets or
+    authenticating to services.  This corrective factor is only used
+    by the Kerberos library; it is not used to change the system
+    clock.  The default value is true.
 
 **kdc_req_checksum_type**
     An integer which specifies the type of checksum to use for the KDC
-    requests for compatibility with DCE security servers which do not
-    support the default RSA MD5 used by Kerberos V5.  This applies to
-    DCE 1.1 and earlier.  Use a value of 2 to use the RSA MD4 instead.
+    requests, for compatibility with very old KDC implementations.
     This value is only used for DES keys; other keys use the preferred
     checksum type for those keys.
 
@@ -280,14 +251,17 @@ The libdefaults section may contain any of the following relations:
     ======== ===============================
 
 **noaddresses**
-    Setting this flag causes the initial Kerberos ticket to be
-    addressless.  The default for the flag is set.
+    If this flag is true, requests for initial tickets will not be
+    made with address restrictions set, allowing the tickets to be
+    used across NATs.  The default value is true.
 
 **permitted_enctypes**
     Identifies all encryption types that are permitted for use in
     session key encryption.  The default value for this tag is
     ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1
-    arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``.
+    arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``, but
+    single-DES encryption types will be implicitly removed from this
+    list if the value of **allow_weak_crypto** is false.
 
 **plugin_base_dir**
     If set, determines the base directory where krb5 plugins are
@@ -301,15 +275,13 @@ The libdefaults section may contain any of the following relations:
     which forces libkrb5 to attempt to use PKINIT if it is supported.
 
 **proxiable**
-    If this flag is set, initial tickets by default will be proxiable.
-    The default value for this flag is not set.
+    If this flag is true, initial tickets will be proxiable by
+    default, if allowed by the KDC.  The default value is false.
 
 **rdns**
-    If set to false, prevent the use of reverse DNS resolution when
-    translating hostnames into service principal names.  Defaults to
-    true.  Setting this flag to false is more secure, but may force
-    users to exclusively use fully qualified domain names when
-    authenticating to services.
+    If this flag is true, reverse name lookup will be used in addition
+    to forward name lookup to canonicalizing hostnames for use in
+    service principal names.  The default value is true.
 
 **realm_try_domains**
     Indicate whether a host's domain components should be used to
@@ -322,8 +294,8 @@ The libdefaults section may contain any of the following relations:
     set.  The default is not to search domain components.
 
 **renew_lifetime**
-    The value of this tag is the default renewable lifetime for
-    initial tickets.  The default value for the tag is 0.
+    Sets the default renewable lifetime for initial ticket requests.
+    The default value is 0.
 
 **safe_checksum_type**
     An integer which specifies the type of checksum to use for the
@@ -335,21 +307,21 @@ The libdefaults section may contain any of the following relations:
     configuration option for the possible values and their meanings.
 
 **ticket_lifetime**
-    The value of this tag is the default lifetime for initial tickets.
-    The default value for the tag is 1 day.
+    Sets the default lifetime for initial ticket requests.  The
+    default value is 1 day.
 
 **udp_preference_limit**
     When sending a message to the KDC, the library will try using TCP
     before UDP if the size of the message is above
-    **udp_preference_list**.  If the message is smaller than
-    **udp_preference_list**, then UDP will be tried before
-    TCP.  Regardless of the size, both protocols will be tried if the
-    first attempt fails.
+    **udp_preference_limit**.  If the message is smaller than
+    **udp_preference_limit**, then UDP will be tried before TCP.
+    Regardless of the size, both protocols will be tried if the first
+    attempt fails.
 
 **verify_ap_req_nofail**
-    If this flag is set, then an attempt to get initial credentials
-    will fail if the client machine does not have a keytab.  The
-    default for the flag is not set.
+    If this flag is true, then an attempt to verify initial
+    credentials will fail if the client machine does not have a
+    keytab.  The default value is false.
 
 
 .. _realms:
@@ -373,10 +345,6 @@ following tags may be specified in the realm's subsection:
     names to local user names.  It will be used if there is not an
     explicit mapping for the principal name that is being
     translated. The possible values are:
-
-    **DB:**\ *filename*
-        The principal will be looked up in the database *filename*.
-        Support for this is not currently compiled in by default.
 
     **RULE:**\ *exp*
         The local name will be formulated from *exp*.
@@ -431,12 +399,10 @@ following tags may be specified in the realm's subsection:
     loadable database library.
 
 **default_domain**
-    This tag is used for Kerberos 4 compatibility. Kerberos 4 does not
-    require the entire hostname of a server to be in its principal
-    like Kerberos 5 does.  This tag provides the domain name needed to
-    produce a full hostname when translating V4 principal names into
-    V5 principal names.  All servers in this realm are assumed to be
-    in the domain given as the value of this tag.
+    This tag specifies the domain used to expand hostnames when
+    translating Kerberos 4 service principals to Kerberos 5 principals
+    (for example, when converting ``rcmd.hostname`` to
+    ``host/hostname.domain``).
 
 **kdc**
     The name or address of a host running a KDC for that realm.  An
@@ -453,10 +419,6 @@ following tags may be specified in the realm's subsection:
     Points to the server where all the password changes are performed.
     If there is no such entry, the port 464 on the **admin_server**
     host will be tried.
-
-**krb524_server**
-    Points to the server that does 524 conversions.  If it is not
-    mentioned, the krb524 port 4444 on the kdc will be tried.
 
 **master_kdc**
     Identifies the master KDC(s).  Currently, this tag is used in only
@@ -487,16 +449,12 @@ following tags may be specified in the realm's subsection:
 ~~~~~~~~~~~~~~
 
 The [domain_realm] section provides a translation from a domain name
-or hostname to a Kerberos realm name.  The tag name can be a host
-name, or a domain name, where domain names are indicated by a prefix
-of a period (.).  The value of the relation is the Kerberos realm name
+or hostname to a Kerberos realm name.  The tag name can be a host name
+or domain name, where domain names are indicated by a prefix of a
+period (``.``).  The value of the relation is the Kerberos realm name
 for that particular host or domain.  The Kerberos realm may be
 identified either in the realms_ section or using DNS SRV records.
-Host names and domain names should be in lower case.
-
-If no translation entry applies, the host's realm is considered to be
-the hostname's domain portion converted to upper case.  For example,
-the following [domain_realm] section:
+Host names and domain names should be in lower case.  For example:
 
  ::
 
@@ -504,72 +462,77 @@ the following [domain_realm] section:
         crash.mit.edu = TEST.ATHENA.MIT.EDU
         .mit.edu = ATHENA.MIT.EDU
         mit.edu = ATHENA.MIT.EDU
-        example.com = EXAMPLE.COM
 
-maps the host with the *exact* name ``crash.mit.edu`` into the
+maps the host with the exact name ``crash.mit.edu`` into the
 TEST.ATHENA.MIT.EDU realm.  The period prefix in ``.mit.edu`` denotes
-that *all* systems in the ``mit.edu`` domain belong to
-``ATHENA.MIT.EDU`` realm.  Note the entries for the hosts ``mit.edu``
-and ``example.com``.  Without these entries, these hosts would be
-mapped into the Kerberos realms EDU and COM, respectively.
+that all systems in the ``mit.edu`` domain belong to
+``ATHENA.MIT.EDU`` realm.  The third entry maps the host ``mit.edu``
+itself to the ``ATHENA.MIT.EDU`` realm.
+
+If no translation entry applies to a hostname used for a service
+principal for a service ticket request, the library will try to get a
+referral to the appropriate realm from the client realm's KDC.  If
+that does not succeed, the host's realm is considered to be the
+hostname's domain portion converted to uppercase, unless the
+**realm_try_domains** setting in [libdefaults] causes a different
+parent domain to be used.
+
 
 .. _logging:
 
 [logging]
 ~~~~~~~~~
 
-The [logging] section indicates how a particular entity is to perform
-its logging.  The relations in this section assign one or more values
-to the entity name.  Currently, the following entities are used:
+The [logging] section indicates how :ref:`krb5kdc(8)` and
+:ref:`kadmind(8)` perform logging.  The keys in this section are
+daemon names, which may be one of:
 
 **admin_server**
-    These entries specify how the administrative server is to perform
-    its logging.
-
-**default**
-    These entries specify how to perform logging in the absence of
-    explicit specifications otherwise.
+    Specifies how :ref:`kadmind(8)` performs logging.
 
 **kdc**
-    These entries specify how the KDC is to perform its logging.
+    Specifies how :ref:`krb5kdc(8)` performs logging.
+
+**default**
+    Specifies how either daemon performs logging in the absence of
+    relations specific to the daemon.
 
 Values are of the following forms:
 
 **FILE=**\ *filename* or **FILE:**\ *filename*
-    This value causes the entity's logging messages to go to the
-    *filename*.  If the = form is used, the file is overwritten.  If
-    the \: form is used, the file is appended to.
+    This value causes the daemon's logging messages to go to the
+    *filename*.  If the ``=`` form is used, the file is overwritten.
+    If the ``:`` form is used, the file is appended to.
 
 **STDERR**
-    This value causes the entity's logging messages to go to its
+    This value causes the daemon's logging messages to go to its
     standard error stream.
 
 **CONSOLE**
-    This value causes the entity's logging messages to go to the
+    This value causes the daemon's logging messages to go to the
     console, if the system supports it.
 
 **DEVICE=**\ *<devicename>*
-    This causes the entity's logging messages to go to the specified
+    This causes the daemon's logging messages to go to the specified
     device.
 
 **SYSLOG**\ [\ **:**\ *severity*\ [\ **:**\ *facility*\ ]]
-    This causes the entity's logging messages to go to the system log.
+    This causes the daemon's logging messages to go to the system log.
 
     The severity argument specifies the default severity of system log
     messages.  This may be any of the following severities supported
-    by the syslog(3) call, minus the LOG\_ prefix: LOG_EMERG,
-    LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING, LOG_NOTICE, LOG_INFO,
-    and LOG_DEBUG.  For example, a value of CRIT would specify
-    LOG_CRIT severity.
+    by the syslog(3) call, minus the ``LOG_`` prefix: **EMERG**,
+    **ALERT**, **CRIT**, **ERR**, **WARNING**, **NOTICE**, **INFO**,
+    and **DEBUG**.
 
     The facility argument specifies the facility under which the
     messages are logged.  This may be any of the following facilities
-    supported by the syslog(3) call minus the LOG\_ prefix: LOG_KERN,
-    LOG_USER, LOG_MAIL, LOG_DAEMON, LOG_AUTH, LOG_LPR, LOG_NEWS,
-    LOG_UUCP, LOG_CRON, and LOG_LOCAL0 through LOG_LOCAL7.
+    supported by the syslog(3) call minus the LOG\_ prefix: **KERN**,
+    **USER**, **MAIL**, **DAEMON**, **AUTH**, **LPR**, **NEWS**,
+    **UUCP**, **CRON**, and **LOCAL0** through **LOCAL7**.
 
-    If no severity is specified, the default is ERR.  If no facility
-    is specified, the default is AUTH.
+    If no severity is specified, the default is **ERR**.  If no
+    facility is specified, the default is **AUTH**.
 
 In the following example, the logging messages from the KDC will go to
 the console and to the system log under the facility LOG_DAEMON with
@@ -592,29 +555,30 @@ administrative server will be appended to the file
 ~~~~~~~~~
 
 In order to perform direct (non-hierarchical) cross-realm
-authentication, a database is needed to construct the authentication
-paths between the realms.  This section defines that database.
+authentication, configuration is needed to determine the
+authentication paths between realms.
 
 A client will use this section to find the authentication path between
-its realm and the realm of the server. The server will use this
+its realm and the realm of the server.  The server will use this
 section to verify the authentication path used by the client, by
 checking the transited field of the received ticket.
 
-There is a tag for each participating realm, and each tag has subtags
-for each of the realms. The value of the subtags is an intermediate
-realm which may participate in the cross-realm authentication.  The
-subtags may be repeated if there is more then one intermediate realm.
-A value of "." means that the two realms share keys directly, and no
-intermediate realms should be allowed to participate.
+There is a tag for each participating client realm, and each tag has
+subtags for each of the server realms.  The value of the subtags is an
+intermediate realm which may participate in the cross-realm
+authentication.  The subtags may be repeated if there is more then one
+intermediate realm.  A value of "." means that the two realms share
+keys directly, and no intermediate realms should be allowed to
+participate.
 
-There are n**2 possible entries in this table, but only those entries
-which will be needed on the client or the server need to be present.
-The client needs a tag for its local realm, with subtags for all the
-realms of servers it will need to authenticate with.  A server needs a
-tag for each realm of the clients it will serve.
+Only those entries which will be needed on the client or the server
+need to be present.  A client needs a tag for its local realm with
+subtags for all the realms of servers it will need to authenticate to.
+A server needs a tag for each realm of the clients it will serve, with
+a subtag of the server realm.
 
 For example, ``ANL.GOV``, ``PNL.GOV``, and ``NERSC.GOV`` all wish to
-use the ``ES.NET`` realm as an intermediate realm.  ``ANL`` has a sub
+use the ``ES.NET`` realm as an intermediate realm.  ANL has a sub
 realm of ``TEST.ANL.GOV`` which will authenticate with ``NERSC.GOV``
 but not ``PNL.GOV``.  The [capaths] section for ``ANL.GOV`` systems
 would look like this:
@@ -668,15 +632,9 @@ systems would look like this:
             NERSC.GOV = ES.NET
         }
 
-In the above examples, the ordering is not important, except when the
-same subtag name is used more then once.  The client will use this to
-determine the path.  (It is not important to the server, since the
-transited field is not sorted.)
-
-This feature is not currently supported by DCE.  DCE security servers
-can be used with Kerberized clients and servers, but versions prior to
-DCE 1.1 did not fill in the transited field, and should be used with
-caution.
+When a subtag is used more than once within a tag, clients will use
+the order of values to determine the path.  The order of values is not
+important to servers.
 
 
 .. _dbdefaults:
@@ -684,62 +642,17 @@ caution.
 [dbdefaults]
 ~~~~~~~~~~~~
 
-The [dbdefaults] section provides default values for the database
-specific parameters.  It can also specify the configuration section
-under dbmodules_ section for database specific parameters used by the
-database library.
+The [dbdefaults] section specifies default values for some database
+parameters, to be used if the [dbmodules] subsection does not contain
+a relation for the tag.  See the :ref:`dbmodules` section for the
+definitions of these relations.
 
-The following tags are used in this section:
-
-**database_module**
-    This relation indicates the name of the configuration section
-    under the dbmodules_ for database specific parameters used by the
-    loadable database library.
-
-**ldap_kerberos_container_dn**
-    This LDAP specific tag indicates the DN of the container object
-    where the realm objects will be located.  This value is used if
-    the container object is not mentioned in the configuration section
-    under dbmodules_.
-
-**ldap_kdc_dn**
-    This LDAP specific tag indicates the default bind DN for the KDC
-    server.  The KDC server does a login to the directory as this
-    object.  This object should have the rights to read the Kerberos
-    data in the LDAP database.  This value is used if the bind DN for
-    the KDC is not mentioned in the configuration section under
-    dbmodules_.
-
-**ldap_kadmind_dn**
-    This LDAP specific tag indicates the default bind DN for the
-    Administration server.  The administration server does a login to
-    the directory as this object.  This object should have the rights
-    to read and write the Kerberos data in the LDAP database. This
-    value is used if the bind DN for the Administration server is not
-    mentioned in the configuration section under dbmodules_.
-
-**ldap_service_password_file**
-    This LDAP specific tag indicates the file containing the stashed
-    passwords (created by ``kdb5_ldap_util stashsrvpw``) for the
-    objects used by the Kerberos servers to bind to the LDAP server.
-    This file must be kept secure.  This value is used if no service
-    password file is mentioned in the configuration section under
-    dbmodules_.
-
-**ldap_servers**
-    This LDAP specific tag indicates the list of LDAP servers that the
-    Kerberos servers can connect to. The list of LDAP servers is
-    whitespace-separated.  The LDAP server is specified by a LDAP URI.
-    This value is used if no LDAP servers are mentioned in the
-    configuration section under dbmodules_.  It is recommended to use
-    the ``ldapi://`` or ``ldaps://`` interface and not to use
-    ``ldap://`` interface.
-
-**ldap_conns_per_server**
-    This LDAP specific tag indicates the number of connections to be
-    maintained per LDAP server.  This value is used if the number of
-    connections per LDAP server are not mentioned in the configuration
-    section under dbmodules_.  The default value is 5.
+* **ldap_kerberos_container_dn**
+* **ldap_kdc_dn**
+* **ldap_kadmind_dn**
+* **ldap_service_password_file**
+* **ldap_servers**
+* **ldap_conns_per_server**
 
 
 .. _dbmodules:
@@ -747,14 +660,18 @@ The following tags are used in this section:
 [dbmodules]
 ~~~~~~~~~~~
 
-Contains database specific parameters used by the database library.
-Each tag in the [dbmodules] section of the file names a configuration
-section for database specific parameters that can be referred to by a
-realm.  The value of the tag is a subsection where the relations in
-that subsection define the database specific parameters.
+The [dbmodules] section contains parameters used by the KDC database
+library and database modules.  The following tag may be specified
+in the [dbmodules] section:
 
-For each section, the following tags may be specified in the
-subsection:
+**db_module_dir**
+    This tag controls where the plugin system looks for modules.  The
+    value should be an absolute path.
+
+Other tags in the [dbmodules] section name a configuration subsection
+for parameters which can be referred to by a realm's
+**database_module** parameter.  The following tags may be specified in
+the subsection:
 
 **database_name**
     This DB2-specific tag indicates the location of the database in
@@ -762,13 +679,9 @@ subsection:
     ``/usr/local/var/krb5kdc/principal``.
 
 **db_library**
-    This tag indicates the name of the loadable database library.  The
-    value should be ``db2`` for DB2 database and ``kldap`` for LDAP
-    database.
-
-**db_module_dir**
-    This tag controls where the plugin system looks for modules.  The
-    value should be an absolute path.
+    This tag indicates the name of the loadable database module.  The
+    value should be ``db2`` for the DB2 module and ``kldap`` for the
+    LDAP module.
 
 **disable_last_success**
     If set to ``true``, suppresses KDC updates to the "Last successful
@@ -784,37 +697,38 @@ subsection:
     improve performance, but also disables account lockout.
 
 **ldap_conns_per_server**
-    This LDAP specific tags indicates the number of connections to be
+    This LDAP-specific tag indicates the number of connections to be
     maintained per LDAP server.
 
 **ldap_kadmind_dn**
-    This LDAP specific tag indicates the default bind DN for the
-    Administration server.  The administration server does a login to
-    the directory as this object.  This object should have the rights
-    to read and write the Kerberos data in the LDAP database.
+    This LDAP-specific tag indicates the default bind DN for the
+    :ref:`kadmind(8)` daemon.  kadmind does a login to the directory
+    as this object.  This object should have the rights to read and
+    write the Kerberos data in the LDAP database.
 
 **ldap_kdc_dn**
-    This LDAP specific tag indicates the default bind DN for the KDC
-    server.  The KDC server does a login to the directory as this
-    object.  This object should have the rights to read the Kerberos
-    data in the LDAP database.
+    This LDAP-specific tag indicates the default bind DN for the
+    :ref:`krb5kdc(8)` daemon.  The KDC does a login to the directory
+    as this object.  This object should have the rights to read the
+    Kerberos data in the LDAP database, and to write data unless
+    **disable_lockout** and **disable_last_success** are true.
 
 **ldap_kerberos_container_dn**
-    This LDAP specific tag indicates the DN of the container object
+    This LDAP-specific tag indicates the DN of the container object
     where the realm objects will be located.
 
 **ldap_servers**
-    This LDAP specific tag indicates the list of LDAP servers that the
+    This LDAP-specific tag indicates the list of LDAP servers that the
     Kerberos servers can connect to.  The list of LDAP servers is
     whitespace-separated.  The LDAP server is specified by a LDAP URI.
-    It is recommended to use ``ldapi://`` or ``ldaps://`` interface to
-    connect to the LDAP server.
+    It is recommended to use ``ldapi:`` or ``ldaps:`` URLs to connect
+    to the LDAP server.
 
 **ldap_service_password_file**
-    This LDAP specific tag indicates the file containing the stashed
+    This LDAP-specific tag indicates the file containing the stashed
     passwords (created by ``kdb5_ldap_util stashsrvpw``) for the
-    objects used by the Kerberos servers to bind to the LDAP server.
-    This file must be kept secure.
+    **ldap_kadmind_dn** and **ldap_kdc_dn** objects.  This file must
+    be kept secure.
 
 
 .. _appdefaults:
@@ -854,7 +768,7 @@ have ``option2`` set to false by default.  Any programs running in
 other realms should have ``option2`` set to true.
 
 The list of specifiable options for each application may be found in
-that application's man pages. The application defaults specified here
+that application's man pages.  The application defaults specified here
 are overridden by those specified in the realms_ section.
 
 
@@ -891,7 +805,7 @@ All subsections support the same tags:
     located at *pathname* to be registered as a dynamic module named
     *modulename* for the pluggable interface.  If *pathname* is not an
     absolute path, it will be treated as relative to the
-    ``krb5/plugins`` subdirectory of the krb5 library directory.
+    **plugin_base_dir** value from :ref:`libdefaults`.
 
 The following subsections are currently supported within the [plugins]
 section:
@@ -954,18 +868,15 @@ built-in modules exist for these interfaces:
 PKINIT options
 --------------
 
-* pkinit identity syntax
-* pkinit krb5.conf options
+.. note:: The following are PKINIT-specific options.  These values may
+          be specified in [libdefaults] as global defaults, or within
+          a realm-specific subsection of [libdefaults], or may be
+          specified as realm-specific values in the [realms] section.
+          A realm-specific value overrides, not adds to, a generic
+          [libdefaults] specification.  The search order is:
 
-.. note:: The following are pkinit-specific options.  Note that these
-          values may be specified in [libdefaults] as global defaults,
-          or within a realm-specific subsection of [libdefaults], or
-          may be specified as realm-specific values in the [realms]
-          section.  Also note that a realm-specific value over-rides,
-          does not add to, a generic [libdefaults] specification.  The
-          search order is:
+1. realm-specific subsection of [libdefaults]:
 
-1. realm-specific subsection of [libdefaults] :
     ::
 
        [libdefaults]
@@ -974,6 +885,7 @@ PKINIT options
            }
 
 2. realm-specific value in the [realms] section,
+
     ::
 
        [realms]
@@ -982,17 +894,20 @@ PKINIT options
            }
 
 3. generic value in the [libdefaults] section.
+
     ::
 
        [libdefaults]
            pkinit_anchors = DIR\:/usr/local/generic_trusted_cas/
 
 
-Specifying pkinit identity information
+.. _pkinit_identity:
+
+Specifying PKINIT identity information
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The syntax for specifying Public Key identity, trust, and revocation
-information for pkinit is as follows:
+information for PKINIT is as follows:
 
 **FILE:**\ *filename*\ [**,**\ *keyfilename*]
     This option has context-specific behavior.
@@ -1000,7 +915,7 @@ information for pkinit is as follows:
     In **pkinit_identity** or **pkinit_identities**, *filename*
     specifies the name of a PEM-format file containing the user's
     certificate.  If *keyfilename* is not specified, the user's
-    private key is expected to be in file-name as well.  Otherwise,
+    private key is expected to be in *filename* as well.  Otherwise,
     *keyfilename* is the name of the file containing the private key.
 
     In **pkinit_anchors** or **pkinit_pool**, *filename* is assumed to
@@ -1009,7 +924,7 @@ information for pkinit is as follows:
 **DIR:**\ *dirname*
     This option has context-specific behavior.
 
-    In **pkinit_identity** or **pkinit_identities**, *directory-name*
+    In **pkinit_identity** or **pkinit_identities**, *dirname*
     specifies a directory with files named ``*.crt`` and ``*.key``
     where the first part of the file name is the same for matching
     pairs of certificate and private key files.  When a file with a
@@ -1017,36 +932,33 @@ information for pkinit is as follows:
     ``.key`` is assumed to contain the private key.  If no such file
     is found, then the certificate in the ``.crt`` is not used.
 
-    In **pkinit_anchors** or **pkinit_pool**, *directory-name* is
-    assumed to be an OpenSSL-style hashed CA directory where each CA
-    cert is stored in a file named ``hash-of-ca-cert.#``.  This
-    infrastructure is encouraged, but all files in the directory will
-    be examined and if they contain certificates (in PEM format), they
-    will be used.
+    In **pkinit_anchors** or **pkinit_pool**, *dirname* is assumed to
+    be an OpenSSL-style hashed CA directory where each CA cert is
+    stored in a file named ``hash-of-ca-cert.#``.  This infrastructure
+    is encouraged, but all files in the directory will be examined and
+    if they contain certificates (in PEM format), they will be used.
 
-    In **pkinit_revoke**, *directory-name* is assumed to be an
-    OpenSSL-style hashed CA directory where each revocation list is
-    stored in a file named ``hash-of-ca-cert.r#``.  This
-    infrastructure is encouraged, but all files in the directory will
-    be examined and if they contain a revocation list (in PEM format),
-    they will be used.
+    In **pkinit_revoke**, *dirname* is assumed to be an OpenSSL-style
+    hashed CA directory where each revocation list is stored in a file
+    named ``hash-of-ca-cert.r#``.  This infrastructure is encouraged,
+    but all files in the directory will be examined and if they
+    contain a revocation list (in PEM format), they will be used.
 
-**PKCS12:**\ *pkcs12-file-name*
-    *pkcs12-file-name* is the name of a PKCS #12 format file,
-    containing the user's certificate and private key.
+**PKCS12:**\ *filename*
+    *filename* is the name of a PKCS #12 format file, containing the
+    user's certificate and private key.
 
-**PKCS11:**\ [**module_name=**]\ *module-name*\ [**:slotid=**\ *slot-id*][**:token=**\ *token-label*][**:certid=**\ *cert-id*][**:certlabel=**\ *cert-label*]
-    All keyword/values are optional.  *module-name* specifies the
-    location of a library implementing PKCS #11.  If a value is
-    encountered with no keyword, it is assumed to be the
-    *module-name*.  If no module-name is specified, the default is
-    ``opensc-pkcs11.so``.  ``slotid=`` and/or ``token=`` may be
-    specified to force the use of a particular smard card reader or
-    token if there is more than one available.  ``certid=`` and/or
-    ``certlabel=`` may be specified to force the selection of a
-    particular certificate on the device.  See the
-    **pkinit_cert_match** configuration option for more ways to select
-    a particular certificate to use for pkinit.
+**PKCS11:**\ [**module_name=**]\ *modname*\ [**:slotid=**\ *slot-id*][**:token=**\ *token-label*][**:certid=**\ *cert-id*][**:certlabel=**\ *cert-label*]
+    All keyword/values are optional.  *modname* specifies the location
+    of a library implementing PKCS #11.  If a value is encountered
+    with no keyword, it is assumed to be the *modname*.  If no
+    module-name is specified, the default is ``opensc-pkcs11.so``.
+    ``slotid=`` and/or ``token=`` may be specified to force the use of
+    a particular smard card reader or token if there is more than one
+    available.  ``certid=`` and/or ``certlabel=`` may be specified to
+    force the selection of a particular certificate on the device.
+    See the **pkinit_cert_match** configuration option for more ways
+    to select a particular certificate to use for PKINIT.
 
 **ENV:**\ *envvar*
     *envvar* specifies the name of an environment variable which has
@@ -1066,10 +978,10 @@ PKINIT krb5.conf options
 
 **pkinit_cert_match**
     Specifies matching rules that the client certificate must match
-    before it is used to attempt pkinit authentication.  If a user has
+    before it is used to attempt PKINIT authentication.  If a user has
     multiple certificates available (on a smart card, or via other
     media), there must be exactly one certificate chosen before
-    attempting pkinit authentication.  This option may be specified
+    attempting PKINIT authentication.  This option may be specified
     multiple times.  All the available certificates are checked
     against each rule in order until there is a match of exactly one
     certificate.
@@ -1117,6 +1029,7 @@ PKINIT krb5.conf options
         * keyEncipherment
 
     Examples:
+
      ::
 
         pkinit_cert_match = ||<SUBJECT>.*DoE.*<SAN>.*@EXAMPLE.COM
@@ -1146,8 +1059,8 @@ PKINIT krb5.conf options
 
 **pkinit_dh_min_bits**
     Specifies the size of the Diffie-Hellman key the client will
-    attempt to use.  The acceptable values are currently 1024, 2048,
-    and 4096.  The default is 2048.
+    attempt to use.  The acceptable values are 1024, 2048, and 4096.
+    The default is 2048.
 
 **pkinit_identities**
     Specifies the location(s) to be used to find the user's X.509
@@ -1211,6 +1124,7 @@ Sample krb5.conf file
 ---------------------
 
 Here is an example of a generic krb5.conf file:
+
  ::
 
     [libdefaults]
