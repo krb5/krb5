@@ -940,7 +940,6 @@ ctx_iterate(krb5_context context, krb5_db2_context *dbc,
             krb5_error_code (*func)(krb5_pointer, krb5_db_entry *),
             krb5_pointer func_arg)
 {
-    DB *db;
     DBT key, contents;
     krb5_data contdata;
     krb5_db_entry *entry;
@@ -951,8 +950,7 @@ ctx_iterate(krb5_context context, krb5_db2_context *dbc,
     if (retval)
         return retval;
 
-    db = dbc->db;
-    dbret = db->seq(db, &key, &contents, R_FIRST);
+    dbret = dbc->db->seq(dbc->db, &key, &contents, R_FIRST);
     while (dbret == 0) {
         contdata.data = contents.data;
         contdata.length = contents.size;
@@ -974,7 +972,7 @@ ctx_iterate(krb5_context context, krb5_db2_context *dbc,
             retval = retval2;
             break;
         }
-        dbret = db->seq(db, &key, &contents, R_NEXT);
+        dbret = dbc->db->seq(dbc->db, &key, &contents, R_NEXT);
     }
     switch (dbret) {
     case 1:
