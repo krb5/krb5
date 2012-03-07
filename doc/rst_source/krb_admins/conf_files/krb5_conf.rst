@@ -79,15 +79,14 @@ Sections
 
 The krb5.conf file may contain the following sections:
 
-============== =======================================================
-libdefaults_   Settings used by the Kerberos V5 library
-realms_        Realm-specific contact information and settings
-domain_realm_  Maps server hostnames to Kerberos realms
-logging_       Controls how Kerberos daemons perform logging
-capaths_       Authentication paths for non-hierarchical cross-realm
-plugins_       Controls plugin module registration
-appdefaults_   Default values used by some Kerberos V5 applications
-============== =======================================================
+===================  =======================================================
+:ref:`libdefaults`   Settings used by the Kerberos V5 library
+:ref:`realms`        Realm-specific contact information and settings
+:ref:`domain_realm`  Maps server hostnames to Kerberos realms
+:ref:`capaths`       Authentication paths for non-hierarchical cross-realm
+:ref:`appdefaults`   Settings used by some Kerberos V5 applications
+:ref:`plugins`       Controls plugin module registration
+===================  =======================================================
 
 
 .. _libdefaults:
@@ -393,11 +392,6 @@ following tags may be specified in the realm's subsection:
     names to local user names.  The tag is the mapping name, and the
     value is the corresponding local user name.
 
-**database_module**
-    This relation indicates the name of the configuration section
-    under dbmodules_ for database specific parameters used by the
-    loadable database library.
-
 **default_domain**
     This tag specifies the domain used to expand hostnames when
     translating Kerberos 4 service principals to Kerberos 5 principals
@@ -476,77 +470,6 @@ that does not succeed, the host's realm is considered to be the
 hostname's domain portion converted to uppercase, unless the
 **realm_try_domains** setting in [libdefaults] causes a different
 parent domain to be used.
-
-
-.. _logging:
-
-[logging]
-~~~~~~~~~
-
-The [logging] section indicates how :ref:`krb5kdc(8)` and
-:ref:`kadmind(8)` perform logging.  The keys in this section are
-daemon names, which may be one of:
-
-**admin_server**
-    Specifies how :ref:`kadmind(8)` performs logging.
-
-**kdc**
-    Specifies how :ref:`krb5kdc(8)` performs logging.
-
-**default**
-    Specifies how either daemon performs logging in the absence of
-    relations specific to the daemon.
-
-Values are of the following forms:
-
-**FILE=**\ *filename* or **FILE:**\ *filename*
-    This value causes the daemon's logging messages to go to the
-    *filename*.  If the ``=`` form is used, the file is overwritten.
-    If the ``:`` form is used, the file is appended to.
-
-**STDERR**
-    This value causes the daemon's logging messages to go to its
-    standard error stream.
-
-**CONSOLE**
-    This value causes the daemon's logging messages to go to the
-    console, if the system supports it.
-
-**DEVICE=**\ *<devicename>*
-    This causes the daemon's logging messages to go to the specified
-    device.
-
-**SYSLOG**\ [\ **:**\ *severity*\ [\ **:**\ *facility*\ ]]
-    This causes the daemon's logging messages to go to the system log.
-
-    The severity argument specifies the default severity of system log
-    messages.  This may be any of the following severities supported
-    by the syslog(3) call, minus the ``LOG_`` prefix: **EMERG**,
-    **ALERT**, **CRIT**, **ERR**, **WARNING**, **NOTICE**, **INFO**,
-    and **DEBUG**.
-
-    The facility argument specifies the facility under which the
-    messages are logged.  This may be any of the following facilities
-    supported by the syslog(3) call minus the LOG\_ prefix: **KERN**,
-    **USER**, **MAIL**, **DAEMON**, **AUTH**, **LPR**, **NEWS**,
-    **UUCP**, **CRON**, and **LOCAL0** through **LOCAL7**.
-
-    If no severity is specified, the default is **ERR**.  If no
-    facility is specified, the default is **AUTH**.
-
-In the following example, the logging messages from the KDC will go to
-the console and to the system log under the facility LOG_DAEMON with
-default severity of LOG_INFO; and the logging messages from the
-administrative server will be appended to the file
-``/var/adm/kadmin.log`` and sent to the device ``/dev/tty04``.
-
- ::
-
-    [logging]
-        kdc = CONSOLE
-        kdc = SYSLOG:INFO:DAEMON
-        admin_server = FILE:/var/adm/kadmin.log
-        admin_server = DEVICE=/dev/tty04
 
 
 .. _capaths:
@@ -635,100 +558,6 @@ systems would look like this:
 When a subtag is used more than once within a tag, clients will use
 the order of values to determine the path.  The order of values is not
 important to servers.
-
-
-.. _dbdefaults:
-
-[dbdefaults]
-~~~~~~~~~~~~
-
-The [dbdefaults] section specifies default values for some database
-parameters, to be used if the [dbmodules] subsection does not contain
-a relation for the tag.  See the :ref:`dbmodules` section for the
-definitions of these relations.
-
-* **ldap_kerberos_container_dn**
-* **ldap_kdc_dn**
-* **ldap_kadmind_dn**
-* **ldap_service_password_file**
-* **ldap_servers**
-* **ldap_conns_per_server**
-
-
-.. _dbmodules:
-
-[dbmodules]
-~~~~~~~~~~~
-
-The [dbmodules] section contains parameters used by the KDC database
-library and database modules.  The following tag may be specified
-in the [dbmodules] section:
-
-**db_module_dir**
-    This tag controls where the plugin system looks for modules.  The
-    value should be an absolute path.
-
-Other tags in the [dbmodules] section name a configuration subsection
-for parameters which can be referred to by a realm's
-**database_module** parameter.  The following tags may be specified in
-the subsection:
-
-**database_name**
-    This DB2-specific tag indicates the location of the database in
-    the filesystem.  The default is
-    ``/usr/local/var/krb5kdc/principal``.
-
-**db_library**
-    This tag indicates the name of the loadable database module.  The
-    value should be ``db2`` for the DB2 module and ``kldap`` for the
-    LDAP module.
-
-**disable_last_success**
-    If set to ``true``, suppresses KDC updates to the "Last successful
-    authentication" field of principal entries requiring
-    preauthentication.  Setting this flag may improve performance.
-    (Principal entries which do not require preauthentication never
-    update the "Last successful authentication" field.).
-
-**disable_lockout**
-    If set to ``true``, suppresses KDC updates to the "Last failed
-    authentication" and "Failed password attempts" fields of principal
-    entries requiring preauthentication.  Setting this flag may
-    improve performance, but also disables account lockout.
-
-**ldap_conns_per_server**
-    This LDAP-specific tag indicates the number of connections to be
-    maintained per LDAP server.
-
-**ldap_kadmind_dn**
-    This LDAP-specific tag indicates the default bind DN for the
-    :ref:`kadmind(8)` daemon.  kadmind does a login to the directory
-    as this object.  This object should have the rights to read and
-    write the Kerberos data in the LDAP database.
-
-**ldap_kdc_dn**
-    This LDAP-specific tag indicates the default bind DN for the
-    :ref:`krb5kdc(8)` daemon.  The KDC does a login to the directory
-    as this object.  This object should have the rights to read the
-    Kerberos data in the LDAP database, and to write data unless
-    **disable_lockout** and **disable_last_success** are true.
-
-**ldap_kerberos_container_dn**
-    This LDAP-specific tag indicates the DN of the container object
-    where the realm objects will be located.
-
-**ldap_servers**
-    This LDAP-specific tag indicates the list of LDAP servers that the
-    Kerberos servers can connect to.  The list of LDAP servers is
-    whitespace-separated.  The LDAP server is specified by a LDAP URI.
-    It is recommended to use ``ldapi:`` or ``ldaps:`` URLs to connect
-    to the LDAP server.
-
-**ldap_service_password_file**
-    This LDAP-specific tag indicates the file containing the stashed
-    passwords (created by ``kdb5_ldap_util stashsrvpw``) for the
-    **ldap_kadmind_dn** and **ldap_kdc_dn** objects.  This file must
-    be kept secure.
 
 
 .. _appdefaults:
