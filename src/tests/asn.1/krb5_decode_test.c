@@ -888,6 +888,10 @@ int main(argc, argv)
     {
         setup(krb5_enc_data,"krb5_enc_data",ktest_make_sample_enc_data);
         decode_run("enc_data","","30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_enc_data,ktest_equal_enc_data,krb5_ktest_free_enc_data);
+        ref.kvno = 0xFF000000;
+        decode_run("enc_data","(MSB-set kvno)","30 26 A0 03 02 01 00 A1 06 02 04 FF 00 00 00 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_enc_data,ktest_equal_enc_data,krb5_ktest_free_enc_data);
+        ref.kvno = 0xFFFFFFFF;
+        decode_run("enc_data","(kvno=-1)","30 23 A0 03 02 01 00 A1 03 02 01 FF A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_enc_data,ktest_equal_enc_data,krb5_ktest_free_enc_data);
         ktest_destroy_enc_data(&ref);
     }
 

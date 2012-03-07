@@ -648,6 +648,12 @@ main(argc, argv)
         setup(enc_data,krb5_enc_data,"enc_data",ktest_make_sample_enc_data);
         current_appl_type = 1001;
         encode_run(enc_data,krb5_enc_data,"enc_data","",encode_krb5_enc_data);
+        enc_data.kvno = 0xFF000000;
+        current_appl_type = 1001;
+        encode_run(enc_data,krb5_enc_data,"enc_data","(MSB-set kvno)",encode_krb5_enc_data);
+        enc_data.kvno = 0xFFFFFFFF;
+        current_appl_type = 1001;
+        encode_run(enc_data,krb5_enc_data,"enc_data","(kvno=-1)",encode_krb5_enc_data);
         ktest_destroy_enc_data(&enc_data);
     }
     /****************************************************************/

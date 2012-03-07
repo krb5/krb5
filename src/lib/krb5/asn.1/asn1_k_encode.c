@@ -143,9 +143,23 @@ optional_encrypted_data (const void *vptr)
     return optional;
 }
 
+/*
+ * Encode krb5_kvno as signed 32-bit for Windows RODC interop.  (This is an
+ * inelegant backport; it's an alteration of the expansion of DEFINTTYPE(kvno,
+ * krb5_kvno).)
+ */
+typedef krb5_kvno aux_typedefname_kvno;
+static asn1_intmax loadint_kvno(const void *p)
+{
+    return (krb5_int32)*(krb5_kvno *)p;
+}
+const struct atype_info krb5int_asn1type_kvno = {
+    atype_int, sizeof(krb5_kvno), 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    loadint_kvno, 0,
+};
 static const struct field_info encrypted_data_fields[] = {
     FIELDOF_NORM(krb5_enc_data, int32, enctype, 0),
-    FIELDOF_OPT(krb5_enc_data, uint, kvno, 1, 1),
+    FIELDOF_OPT(krb5_enc_data, kvno, kvno, 1, 1),
     FIELDOF_NORM(krb5_enc_data, ostring_data, ciphertext, 2),
 };
 DEFSEQTYPE(encrypted_data, krb5_enc_data, encrypted_data_fields,
