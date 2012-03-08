@@ -45,10 +45,3 @@ programs with the Kerberos features added.
    rsh.rst
    ksu.rst
    ssh.rst
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_appl

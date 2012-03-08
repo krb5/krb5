@@ -25,10 +25,3 @@ copies of your tickets, or use a screensaver that locks the screen.
    obtain_kinit.rst
    view_klist.rst
    destroy_tkt.rst
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_tkt_mgmt

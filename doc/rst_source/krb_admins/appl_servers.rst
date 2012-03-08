@@ -205,10 +205,3 @@ possible, list the allowed hosts.
 
 The book UNIX System Security, by David Curry, is a good starting
 point for learning to configure firewalls.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___appl_servers

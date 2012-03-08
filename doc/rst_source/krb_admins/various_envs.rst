@@ -31,10 +31,3 @@ Troubleshooting
 #. https://bugs.launchpad.net/ubuntu/+source/libpam-heimdal/+bug/86528
 
 #. http://h71000.www7.hp.com/doc/83final/ba548_90007/ch06s05.html
-
-
-Feedback
---------
-
-Please, provide your feedback on this document at
-krb5-bugs@mit.edu?subject=Documentation___various_envs

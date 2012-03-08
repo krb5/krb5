@@ -18,10 +18,3 @@ tickets to destroy, it will give the following message::
     shell% kdestroy
     kdestroy: No credentials cache file found while destroying cache
     shell%
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_tkt_mgmt

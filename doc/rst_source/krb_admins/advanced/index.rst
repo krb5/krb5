@@ -20,10 +20,3 @@ Topics in TODO list:
 #. Replication
 #. Performance tuning tips
 #. Logging error messages
-
-
-Feedback
---------
-
-Please, provide your feedback on this document at
-krb5-bugs@mit.edu?subject=Documentation___admin_advanced

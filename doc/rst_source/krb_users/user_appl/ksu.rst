@@ -143,10 +143,3 @@ system, but always authenticate locally and then use Kerberos to
 authenticate to remote systems.  We're moving in that way (by allowing
 root logins only via GSSAPI), but the tradeoff is that you have to
 allow remote direct root logins, which makes some a bit uncomfortable.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_appl

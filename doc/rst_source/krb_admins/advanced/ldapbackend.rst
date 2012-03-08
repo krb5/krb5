@@ -168,10 +168,3 @@ Useful references
 -----------------
 
 * `Kerberos and LDAP <https://help.ubuntu.com/10.04/serverguide/C/kerberos-ldap.html>`_
-
-
-Feedback
---------
-
-Please, provide your feedback on this document at
-krb5-bugs@mit.edu?subject=Documentation___ldap_be_ubuntu

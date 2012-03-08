@@ -74,10 +74,3 @@ generic principal for that realm; it does not actually specify the
 individual that will be using the ticket.  This ticket is meant only
 to securely distribute a session key.  This is a new addition to the
 Kerberos V5 protocol and is not yet implemented on MIT servers.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_tkt_mgmt

@@ -77,10 +77,3 @@ type::
 
 .. [1] Note: the realm EXAMPLE.COM must be listed in your computer's
        Kerberos configuration file, :ref:`krb5.conf(5)`.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_tkt_mgmt

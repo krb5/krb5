@@ -25,10 +25,3 @@ Contents:
    troubleshoot.rst
    advanced/index.rst
    various_envs.rst
-
-
-Feedback
---------
-
-Please, provide your feedback or suggest a new topic at
-krb5-bugs@mit.edu?subject=Documentation___admin

@@ -20,10 +20,3 @@ Administration  programs
    kadmind.rst
    kdb5_ldap_util.rst
    sserver.rst
-
-
-Feedback
---------
-
-Please, provide your feedback or suggest a new topic at
-krb5-bugs@mit.edu?subject=Documentation___admin_commands

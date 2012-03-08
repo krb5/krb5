@@ -39,10 +39,3 @@ this might be anywhere from a few minutes to an hour or more.  If you
 need to get new Kerberos tickets shortly after changing your password,
 try the new password.  If the new password doesn't work, try again
 using the old one.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_pwd_mgmt

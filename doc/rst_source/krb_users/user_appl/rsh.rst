@@ -22,10 +22,3 @@ program as follows::
 
 If you forwarded your Kerberos tickets, rsh automatically destroys
 them when it exits.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_appl

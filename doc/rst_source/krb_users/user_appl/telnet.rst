@@ -63,10 +63,3 @@ her, and she never typed her password.
 
 If you forwarded your Kerberos tickets, telnet automatically destroys
 them when it exits.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_appl

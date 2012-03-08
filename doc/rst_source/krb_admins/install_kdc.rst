@@ -624,10 +624,3 @@ Incremental database propagation
 If you expect your Kerberos database to become large, you may wish to
 set up incremental propagation to slave KDCs.  See :ref:`incr_db_prop`
 for details.
-
-
-Feedback
---------
-
-Please, provide your feedback or suggest a new topic at
-krb5-bugs@mit.edu?subject=Documentation___install_kdc

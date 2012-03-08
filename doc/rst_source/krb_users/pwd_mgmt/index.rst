@@ -24,10 +24,3 @@ someone may have found out what it is.
    pwd_management.rst
    grant_access.rst
    pwd_quality.rst
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_pwd_mgmt

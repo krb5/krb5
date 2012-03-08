@@ -48,10 +48,3 @@ The following environment variables can be used during runtime:
 
     * :c:func:`krb5_set_trace_callback()` or
     * :c:func:`krb5_set_trace_filename()`
-
-
-Feedback
---------
-
-Please, provide your feedback on this document at
-krb5-bugs@mit.edu?subject=Documentation___env

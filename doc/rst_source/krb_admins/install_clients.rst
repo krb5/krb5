@@ -96,10 +96,3 @@ caching.  Run the following commands and reboot::
 
 The remainder of the setup of a Mac OS X client machine or application
 server should be the same as for other UNIX-based systems.
-
-
-Feedback
---------
-
-Please, provide your feedback or suggest a new topic at
-krb5-bugs@mit.edu?subject=Documentation___cl_install

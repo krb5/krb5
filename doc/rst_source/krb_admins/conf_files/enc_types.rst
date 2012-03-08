@@ -62,10 +62,3 @@ onlyrealm         uses only realm information as the salt
 afs3              AFS version 3, only used for compatibility with Kerberos 4 in AFS
 special           generate a random salt
 ================= ============================================
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___conf_files

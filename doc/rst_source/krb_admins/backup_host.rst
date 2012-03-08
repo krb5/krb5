@@ -36,10 +36,3 @@ backups are stored as secure as your KDCs, and to encrypt its
 transmission across your network.)  Then if your database becomes
 corrupted, you can load the most recent dump onto the master KDC.
 (See :ref:`restore_from_dump`.)
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___backup_secure_hosts

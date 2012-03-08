@@ -109,10 +109,3 @@ In the following example, the user *david*'s tickets were forwarded
     07/31/05 12:03:48  07/31/05 21:11:23  host/trillium.example.com@EXAMPLE.COM
             Flags: Ff
     shell%
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_tkt_mgmt

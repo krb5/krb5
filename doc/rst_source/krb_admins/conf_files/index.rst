@@ -13,10 +13,3 @@ Configuration Files
    enc_types.rst
    krb5_conf.rst
    kdc_conf.rst
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___conf_files

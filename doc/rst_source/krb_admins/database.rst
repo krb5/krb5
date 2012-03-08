@@ -884,10 +884,3 @@ update log and the per-slave kprop dump files.  In the MIT
 implementation, the pathname for the update log is specified in the
 config file, and the per-slave dump files are stored in
 ``/usr/local/var/krb5kdc/slave_datatrans_hostname``.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___db

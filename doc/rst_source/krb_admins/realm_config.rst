@@ -231,10 +231,3 @@ one set of slaves, and then have each of these slaves propagate the
 database to additional slaves.
 
 See also :ref:`incr_db_prop`
-
-
-Feedback
---------
-
-Please, provide your feedback or suggest a new topic at
-krb5-bugs@mit.edu?subject=Documentation___realm_config

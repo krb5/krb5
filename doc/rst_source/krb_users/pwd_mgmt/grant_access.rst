@@ -39,10 +39,3 @@ principals listed.  This allows system administrators to allow users
 to become root locally, or to log in remotely as root, without their
 having to give out the root password, and without anyone having to
 type the root password over the network.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_pwd_mgmt

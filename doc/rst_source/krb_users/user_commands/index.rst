@@ -24,10 +24,3 @@ User commands
    ../../krb_admins/admin_commands/k5srvutil.rst
    sclient.rst
    send-pr.rst
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___user_commands

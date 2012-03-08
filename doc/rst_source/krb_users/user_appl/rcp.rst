@@ -16,10 +16,3 @@ connection, you would simply type::
     shell% rcp -x daffodil.mit.edu:/etc/motd .
 
 The rcp program negotiates authentication and encryption transparently.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_appl

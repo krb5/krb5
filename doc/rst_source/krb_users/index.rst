@@ -19,10 +19,3 @@ Contents
    tkt_mgmt/index.rst
    user_appl/index.rst
    user_commands/index.rst
-
-
-Feedback
---------
-
-Please, provide your feedback or suggest a new topic at
-krb5-bugs@mit.edu?subject=Documentation___users

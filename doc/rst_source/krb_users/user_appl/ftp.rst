@@ -38,10 +38,3 @@ following::
     361662 bytes received in 2.5 seconds (1.4e+02 Kbytes/s)
     ftp> quit
     shell%
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___users_appl

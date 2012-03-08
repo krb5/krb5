@@ -12,10 +12,3 @@ Using DNS
 See :ref:`mapping_hostnames`
 
 See :ref:`kdc_hostnames`
-
-
-Feedback
---------
-
-Please, provide your feedback or suggest a new topic at
-krb5-bugs@mit.edu?subject=Documentation___admin_dns

@@ -90,7 +90,7 @@ Heimdal
 
 
 Feature list
-~~~~~~~~~~~~
+------------
 
    =============================================== =========== ============================================
     \                                              Available    Additional information
@@ -138,9 +138,3 @@ Feature list
     Credentials for multiple identities            1.10         http://k5wiki.kerberos.org/wiki/Projects/Client_principal_selection
    =============================================== =========== ============================================
 
-
-Feedback
---------
-
-Please, provide your feedback on this document at
-krb5-bugs@mit.edu?subject=Documentation___krb5_implementation_features

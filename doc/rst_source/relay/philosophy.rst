@@ -39,8 +39,8 @@ Feedback and Comments
 ---------------------
 
 At the moment the comments should be sent via email to
-krb5-bugs@mit.edu.  Normally, every document has an email link with
-the pre-constructed subject line similar to the following:
+krb5-bugs@mit.edu.
 
-Please, provide your feedback on this document at
-krb5-bugs@mit.edu?subject=Documentation___relay_feedback
+The html version of this documentation has a "feedback" link
+(within the sidebar) to the krb5-bugs@mit.edu email address
+with the pre-constructed subject line "Documentation".

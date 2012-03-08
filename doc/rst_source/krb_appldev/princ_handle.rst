@@ -77,10 +77,3 @@ Utilities:
 :c:func:`krb5_realm_compare()`
 
 ..
-
-
-Feedback
---------
-
-Please, provide your feedback on this document at
-krb5-bugs@mit.edu?subject=Documentation___princ_handle

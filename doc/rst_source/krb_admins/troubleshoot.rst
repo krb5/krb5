@@ -65,11 +65,3 @@ Seen in: ssh
 Set **db_module_dir** in :ref:`dbmodules` to the absolute path to the
 location of the database plugin
 
-----
-
-
-Feedback
---------
-
-Please, provide your feedback on this document at
-krb5-bugs@mit.edu?subject=Documentation___errors

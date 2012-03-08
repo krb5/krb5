@@ -53,10 +53,3 @@ DNS.
 
 MIT: Computes the default realm each time if it wasn't explicitly set
 in the context
-
-
-Feedback
---------
-
-Please, provide your feedback on this document at
-krb5-bugs@mit.edu?subject=Documentation___h5lMITdiff

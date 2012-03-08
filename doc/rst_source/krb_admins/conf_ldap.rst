@@ -161,10 +161,3 @@ requests canonicalization.  Canonicalization is normally requested for
 service principals; for client principals, an explicit flag is often
 required (e.g. ``kinit -C``) and canonicalization is only performed
 for initial ticket requests.
-
-
-Feedback
---------
-
-Please, provide your feedback at
-krb5-bugs@mit.edu?subject=Documentation___conf_ldap
