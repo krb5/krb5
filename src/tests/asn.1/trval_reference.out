@@ -1094,14 +1094,14 @@ encode_krb5_etype_info:
 .  .  [0] [Integer] 2
 .  .  [1] [Octet String] "Morton's #2"
 
-encode_krb5_etype_info (only 1):
+encode_krb5_etype_info(only 1):
 
 [Sequence/Sequence Of] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Integer] 0
 .  .  [1] [Octet String] "Morton's #0"
 
-encode_krb5_etype_info (no info):
+encode_krb5_etype_info(no info):
 
 [Sequence/Sequence Of] 
 
@@ -1120,7 +1120,7 @@ encode_krb5_etype_info2:
 .  .  [1] [General string] "Morton's #2"
 .  .  [2] [Octet String] "s2k: 2"
 
-encode_krb5_etype_info2 (only 1):
+encode_krb5_etype_info2(only 1):
 
 [Sequence/Sequence Of] 
 .  [Sequence/Sequence Of] 

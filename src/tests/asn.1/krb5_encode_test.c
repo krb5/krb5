@@ -506,35 +506,13 @@ main(argc, argv)
         krb5_pa_data **pa;
 
         ktest_make_sample_pa_data_array(&pa);
-        retval = encode_krb5_padata_sequence(pa,&(code));
-        if (retval) {
-            com_err("encoding padata_sequence",retval,"");
-            exit(1);
-        }
-        encoder_print_results(code, "padata_sequence", "");
-        retval = encode_krb5_typed_data(pa, &code);
-        if (retval) {
-            com_err("encoding typed_data", retval, "");
-            exit(1);
-        }
-        encoder_print_results(code, "typed_data", "");
-
+        encode_run(*pa, "padata_sequence", "", encode_krb5_padata_sequence);
+        encode_run(*pa, "typed_data", "", encode_krb5_typed_data);
         ktest_destroy_pa_data_array(&pa);
-    }
-
-    /****************************************************************/
-    /* encode_padata_sequence (empty) */
-    {
-        krb5_pa_data **pa;
 
         ktest_make_sample_empty_pa_data_array(&pa);
-        retval = encode_krb5_padata_sequence(pa,&(code));
-        if (retval) {
-            com_err("encoding padata_sequence(empty)",retval,"");
-            exit(1);
-        }
-        encoder_print_results(code, "padata_sequence(empty)", "");
-
+        encode_run(*pa, "padata_sequence", "(empty)",
+                   encode_krb5_padata_sequence);
         ktest_destroy_pa_data_array(&pa);
     }
 
@@ -544,58 +522,32 @@ main(argc, argv)
         krb5_etype_info_entry **info;
 
         ktest_make_sample_etype_info(&info);
-        retval = encode_krb5_etype_info(info,&(code));
-        if (retval) {
-            com_err("encoding etype_info",retval,"");
-            exit(1);
-        }
-        encoder_print_results(code, "etype_info", "");
+        encode_run(*info, "etype_info", "", encode_krb5_etype_info);
+
         ktest_destroy_etype_info_entry(info[2]);      info[2] = 0;
         ktest_destroy_etype_info_entry(info[1]);      info[1] = 0;
-
-        retval = encode_krb5_etype_info(info,&(code));
-        if (retval) {
-            com_err("encoding etype_info (only 1)",retval,"");
-            exit(1);
-        }
-        encoder_print_results(code, "etype_info (only 1)", "");
+        encode_run(*info, "etype_info", "(only 1)", encode_krb5_etype_info);
 
         ktest_destroy_etype_info_entry(info[0]);      info[0] = 0;
-
-        retval = encode_krb5_etype_info(info,&(code));
-        if (retval) {
-            com_err("encoding etype_info (no info)",retval,"");
-            exit(1);
-        }
-        encoder_print_results(code, "etype_info (no info)", "");
+        encode_run(*info, "etype_info", "(no info)", encode_krb5_etype_info);
 
         ktest_destroy_etype_info(info);
     }
 
-    /* encode_etype_info 2*/
+    /* encode_etype_info2 */
     {
         krb5_etype_info_entry **info;
 
         ktest_make_sample_etype_info2(&info);
-        retval = encode_krb5_etype_info2(info,&(code));
-        if (retval) {
-            com_err("encoding etype_info",retval,"");
-            exit(1);
-        }
-        encoder_print_results(code, "etype_info2", "");
+        encode_run(*info, "etype_info2", "", encode_krb5_etype_info2);
+
         ktest_destroy_etype_info_entry(info[2]);      info[2] = 0;
         ktest_destroy_etype_info_entry(info[1]);      info[1] = 0;
+        encode_run(*info, "etype_info2", "(only 1)", encode_krb5_etype_info2);
 
-        retval = encode_krb5_etype_info2(info,&(code));
-        if (retval) {
-            com_err("encoding etype_info (only 1)",retval,"");
-            exit(1);
-        }
-        encoder_print_results(code, "etype_info2 (only 1)", "");
+        /* etype_info2 sequences aren't allowed to be empty. */
 
         ktest_destroy_etype_info(info);
-/*    ktest_destroy_etype_info_entry(info[0]);      info[0] = 0;*/
-
     }
 
     /****************************************************************/
