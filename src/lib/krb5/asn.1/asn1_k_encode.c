@@ -602,7 +602,8 @@ DEFSEQTYPE(etype_info_entry, krb5_etype_info_entry, etype_info_entry_fields);
 /* First field is the same as etype-info. */
 DEFCNFIELD(etype_info2_1_def, krb5_etype_info_entry, salt, length, 1,
            u_generalstring);
-DEFOPTIONALTYPE(etype_info2_1, is_salt_present, NULL, etype_info2_1_def);
+DEFOPTIONALTYPE(etype_info2_1, is_salt_present, init_no_salt,
+                etype_info2_1_def);
 DEFFIELD(etype_info2_2, krb5_etype_info_entry, s2kparams, 2, opt_ostring_data);
 static const struct atype_info *etype_info2_entry_fields[] = {
     &k5_atype_etype_info_0, &k5_atype_etype_info2_1, &k5_atype_etype_info2_2

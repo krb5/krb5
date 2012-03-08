@@ -859,6 +859,46 @@ int main(argc, argv)
     }
 
     /****************************************************************/
+    /* decode_etype_info2 */
+    {
+        krb5_etype_info ref, var;
+
+        ktest_make_sample_etype_info2(&ref);
+        retval = krb5_data_hex_parse(&code,"30 51 30 1E A0 03 02 01 00 A1 0D 1B 0B 4D 6F 72 74 6F 6E 27 73 20 23 30 A2 08 04 06 73 32 6B 3A 20 30 30 0F A0 03 02 01 01 A2 08 04 06 73 32 6B 3A 20 31 30 1E A0 03 02 01 02 A1 0D 1B 0B 4D 6F 72 74 6F 6E 27 73 20 23 32 A2 08 04 06 73 32 6B 3A 20 32");
+        if (retval) {
+            com_err("krb5_decode_test", retval, "while parsing etype_info2");
+            exit(1);
+        }
+        retval = decode_krb5_etype_info2(&code,&var);
+        if (retval) {
+            com_err("krb5_decode_test", retval, "while decoding etype_info2");
+        }
+        test(ktest_equal_etype_info(ref,var),"etype_info2\n");
+
+        ktest_destroy_etype_info(var);
+        ktest_destroy_etype_info_entry(ref[2]);      ref[2] = 0;
+        ktest_destroy_etype_info_entry(ref[1]);      ref[1] = 0;
+        krb5_free_data_contents(test_context, &code);
+
+        retval = krb5_data_hex_parse(&code,"30 20 30 1E A0 03 02 01 00 A1 0D 1B 0B 4D 6F 72 74 6F 6E 27 73 20 23 30 A2 08 04 06 73 32 6B 3A 20 30");
+        if (retval) {
+            com_err("krb5_decode_test", retval,
+                    "while parsing etype_info2 (only one)");
+            exit(1);
+        }
+        retval = decode_krb5_etype_info2(&code,&var);
+        if (retval) {
+            com_err("krb5_decode_test", retval,
+                    "while decoding etype_info2 (only one)");
+        }
+        test(ktest_equal_etype_info(ref,var),"etype_info2 (only one)\n");
+
+        krb5_free_data_contents(test_context, &code);
+        ktest_destroy_etype_info(var);
+        ktest_destroy_etype_info(ref);
+    }
+
+    /****************************************************************/
     /* decode_pa_enc_ts */
     {
         setup(krb5_pa_enc_ts,ktest_make_sample_pa_enc_ts);
