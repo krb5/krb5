@@ -70,6 +70,34 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.10.1
+-----------------------
+
+This is a bugfix release.
+
+* Fix access controls for KDB string attributes [CVE-2012-1012]
+
+* Make the ASN.1 encoding of key version numbers interoperate with
+  Windows Read-Only Domain Controllers
+
+* Avoid generating spurious password expiry warnings in cases where
+  the KDC sends an account expiry time without a password expiry time.
+
+krb5-1.10.1 changes by ticket ID
+--------------------------------
+
+7074    workaround for Solaris 8 lacking isblank
+7081    Don't use stack variable address in as_req state
+7082    Various lookaside cache fixes
+7084    Don't check mech in krb5_gss_inquire_cred_by_mech
+7087    krb5_gss_get_name_attribute fails to set display_value
+7088    Fix uninitialized variable warning in trval.c
+7089    Initialize gss_get_name_attribute output buffers
+7092    kvno ASN.1 encoding interop with Windows RODCs
+7093    Access controls for string RPCs [CVE-2012-1012]
+7096    Fix KDB iteration when callback does write calls
+7098    Fix spurious password expiry warning
+
 Major changes in 1.10
 ---------------------
 
