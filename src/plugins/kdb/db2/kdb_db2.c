@@ -1032,7 +1032,6 @@ krb5_db2_iterate_ext(krb5_context context,
                      krb5_pointer func_arg, int backwards, int recursive)
 {
     krb5_db2_context *db_ctx;
-    DB     *db;
     DBT     key, contents;
     krb5_data contdata;
     krb5_db_entry *entry;
@@ -1050,17 +1049,17 @@ krb5_db2_iterate_ext(krb5_context context,
     if (retval)
         return retval;
 
-    db = db_ctx->db;
-    if (recursive && db->type != DB_BTREE) {
+    if (recursive && db_ctx->db->type != DB_BTREE) {
         (void) krb5_db2_unlock(context);
         return KRB5_KDB_UK_RERROR;      /* Not optimal, but close enough. */
     }
 
     if (!recursive) {
-        dbret = (*db->seq) (db, &key, &contents, backwards ? R_LAST : R_FIRST);
+        dbret = db_ctx->db->seq(db_ctx->db, &key, &contents,
+                                backwards ? R_LAST : R_FIRST);
     } else {
 #ifdef HAVE_BT_RSEQ
-        dbret = bt_rseq(db, &key, &contents, &cookie,
+        dbret = bt_rseq(db_ctx->db, &key, &contents, &cookie,
                         backwards ? R_LAST : R_FIRST);
 #else
         (void) krb5_db2_unlock(context);
@@ -1091,11 +1090,11 @@ krb5_db2_iterate_ext(krb5_context context,
             break;
         }
         if (!recursive) {
-            dbret = (*db->seq) (db, &key, &contents,
-                                backwards ? R_PREV : R_NEXT);
+            dbret = db_ctx->db->seq(db_ctx->db, &key, &contents,
+                                    backwards ? R_PREV : R_NEXT);
         } else {
 #ifdef HAVE_BT_RSEQ
-            dbret = bt_rseq(db, &key, &contents, &cookie,
+            dbret = bt_rseq(db_ctx->db, &key, &contents, &cookie,
                             backwards ? R_PREV : R_NEXT);
 #else
             (void) krb5_db2_unlock(context);
