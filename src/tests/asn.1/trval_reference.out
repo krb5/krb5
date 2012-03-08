@@ -1165,6 +1165,20 @@ encode_krb5_enc_data:
 .  [kvno] [Integer] 5
 .  [cipher] [Octet String] "krbASN.1 test message"
 
+encode_krb5_enc_data(MSB-set kvno):
+
+[Sequence/Sequence Of] 
+.  [etype] [Integer] 0
+.  [kvno] [Integer] -16777216
+.  [cipher] [Octet String] "krbASN.1 test message"
+
+encode_krb5_enc_data(kvno=-1):
+
+[Sequence/Sequence Of] 
+.  [etype] [Integer] 0
+.  [kvno] [Integer] -1
+.  [cipher] [Octet String] "krbASN.1 test message"
+
 encode_krb5_sam_challenge:
 
 [Sequence/Sequence Of] 
