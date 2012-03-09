@@ -1066,7 +1066,10 @@ static void
 do_network_reconfig(verto_ctx *ctx, verto_ev *ev)
 {
     struct connection *conn = verto_get_private(ev);
-    assert(loop_setup_network(ctx, conn->handle, conn->prog) == 0);
+    if (loop_setup_network(ctx, conn->handle, conn->prog) != 0) {
+        krb5_klog_syslog(LOG_ERR, _("Failed to reconfigure network, exiting"));
+        verto_break(ctx);
+    }
 }
 
 static int
