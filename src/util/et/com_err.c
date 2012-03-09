@@ -154,8 +154,10 @@ et_old_error_hook_func set_com_err_hook (et_old_error_hook_func new_proc)
     et_old_error_hook_func x;
 
     /* Broken initialization?  What can we do?  */
-    assert(com_err_finish_init() == 0);
-    assert(com_err_lock_hook_handle() == 0);
+    if (com_err_finish_init() != 0)
+        abort();
+    if (com_err_lock_hook_handle() != 0)
+        abort();
     x = com_err_hook;
     com_err_hook = new_proc;
     k5_mutex_unlock(&com_err_hook_lock);
@@ -167,8 +169,10 @@ et_old_error_hook_func reset_com_err_hook ()
     et_old_error_hook_func x;
 
     /* Broken initialization?  What can we do?  */
-    assert(com_err_finish_init() == 0);
-    assert(com_err_lock_hook_handle() == 0);
+    if (com_err_finish_init() != 0)
+        abort();
+    if (com_err_lock_hook_handle() != 0)
+        abort();
     x = com_err_hook;
     com_err_hook = NULL;
     k5_mutex_unlock(&com_err_hook_lock);
