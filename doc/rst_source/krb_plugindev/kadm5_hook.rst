@@ -2,7 +2,7 @@ KADM5 hook interface (kadm5_hook)
 =================================
 
 The kadm5_hook interface allows modules to perform actions when
-changes are made to the Kerberos database through :ref:`kadmin(8)`.
+changes are made to the Kerberos database through :ref:`kadmin(1)`.
 For a detailed description of the kadm5_hook interface, see the header
 file ``<krb5/kadm5_hook_plugin.h>``.
 
