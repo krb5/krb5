@@ -406,8 +406,7 @@ following tags may be specified in the realm's subsection:
     distinguish the colon from a port separator.  For your computer to
     be able to communicate with the KDC for each realm, this tag must
     be given a value in each realm subsection in the configuration
-    file, or there must be DNS SRV records specifying the KDCs (see
-    :ref:`using_dns`).
+    file, or there must be DNS SRV records specifying the KDCs.
 
 **kpasswd_server**
     Points to the server where all the password changes are performed.

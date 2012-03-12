@@ -8,7 +8,6 @@ Contents:
    :maxdepth: 1
 
    ldapbackend.rst
-   plugins.rst
 
 
 Topics in TODO list:

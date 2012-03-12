@@ -10,12 +10,14 @@ Backups of secure hosts
 When you back up a secure host, you should exclude the host's keytab
 file from the backup.  If someone obtained a copy of the keytab from a
 backup, that person could make any host masquerade as the host whose
-keytab was compromised.  This could be particularly dangerous if the
-compromised keytab was from one of your KDCs.  If the machine has a
-disk crash and the keytab file is lost, it is easy to generate another
-keytab file.  (See :ref:`add_princ_kt`.)  If you are unable to exclude
-particular files from backups, you should ensure that the backups are
-kept as secure as the host's root password.
+keytab was compromised.  In many configurations, knowledge of the
+host's keytab also allows root access to the host.  This could be
+particularly dangerous if the compromised keytab was from one of your
+KDCs.  If the machine has a disk crash and the keytab file is lost, it
+is easy to generate another keytab file.  (See :ref:`add_princ_kt`.)
+If you are unable to exclude particular files from backups, you should
+ensure that the backups are kept as secure as the host's root
+password.
 
 
 Backing up the Kerberos database

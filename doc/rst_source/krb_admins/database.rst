@@ -7,38 +7,34 @@ Database administration
           additions to krb5-bugs@mit.edu.  Your contribution is
           greatly appreciated.
 
-Your Kerberos database contains all of your realm's Kerberos
-principals, their passwords, and other administrative information
-about each principal.  For the most part, you will use the
-:ref:`kdb5_util(8)` program to manipulate the Kerberos database as a
-whole, and the :ref:`kadmin(1)` program to make changes to the entries
-in the database.  (One notable exception is that users will use the
+A Kerberos database contains all of a realm's Kerberos principals,
+their passwords, and other administrative information about each
+principal.  For the most part, you will use the :ref:`kdb5_util(8)`
+program to manipulate the Kerberos database as a whole, and the
+:ref:`kadmin(1)` program to make changes to the entries in the
+database.  (One notable exception is that users will use the
 :ref:`kpasswd(1)` program to change their own passwords.)  The kadmin
 program has its own command-line interface, to which you type the
 database administrating commands.
 
 :ref:`kdb5_util(8)` provides a means to create, delete, load, or dump
-a Kerberos database.  It also includes a command to stash a copy of
-the master database key in a file on a KDC, so that the KDC can
-authenticate itself to the :ref:`kadmind(8)` and :ref:`krb5kdc(8)`
-daemons at boot time.
+a Kerberos database.  It also contains commands to roll over the
+database master key, and to stash a copy of the key so that the
+:ref:`kadmind(8)` and :ref:`krb5kdc(8)` daemons can use the database
+without manual input.
 
-kadmin provides for the maintenance of Kerberos principals, KADM5
-policies, and service key tables (keytabs).  It exists as both a
-Kerberos client, kadmin, using Kerberos authentication and an RPC, to
-operate securely from anywhere on the network, and as a local client,
-kadmin.local, intended to run directly on the KDC without Kerberos
-authentication.  kadmin.local need not run on the kdc if the database
-is LDAP.  Other than the fact that the remote client uses Kerberos to
-authenticate the person using it, the functionalities of the two
-versions are identical.  The local version is necessary to enable you
-to set up enough of the database to be able to use the remote version.
-It replaces the now obsolete kdb5_edit (except for database dump and
-load, which are provided by kdb5_util).
+:ref:`kadmin(1)` provides for the maintenance of Kerberos principals,
+password policies, and service key tables (keytabs).  Normally it
+operates as a network client using Kerberos authentication to
+communicate with :ref:`kadmind(8)`, but there is also a variant, named
+kadmin.local, which directly accesses the Kerberos database on the
+local filesystem (or through LDAP).  kadmin.local is necessary to set
+up enough of the database to be able to use the remote version.
 
-The remote version authenticates to the KADM5 server using the service
-principal ``kadmin/admin``. If the credentials cache contains a ticket
-for the ``kadmin/admin`` principal, and the **-c** ccache option is
+kadmin can authenticate to the admin server using the service
+principal ``kadmin/HOST`` (where *HOST* is the hostname of the admin
+server) or ``kadmin/admin``.  If the credentials cache contains a
+ticket for either service principal and the **-c** ccache option is
 specified, that ticket is used to authenticate to KADM5.  Otherwise,
 the **-p** and **-k** options are used to specify the client Kerberos
 principal name used to authenticate.  Once kadmin has determined the
@@ -309,8 +305,9 @@ To change a principal's password use the :ref:`kadmin(1)`
    :start-after:  _change_password:
    :end-before: _change_password_end:
 
-.. note:: *change_password* will not let you change the password to
-          one that is in the principal's password history.
+.. note:: Password changes through kadmin are subject to the same
+          password policies as would apply to password changes through
+          :ref:`kpasswd(1)`.
 
 
 Policies
@@ -372,8 +369,6 @@ You can retrieve the list of policies with the kadmin
 Updating the history key
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following text is for release < 1.8.
-
 If a policy specifies a number of old keys kept of two or more, the
 stored old keys are encrypted in a history key, which is found in the
 key data of the ``kadmin/history`` principal.
@@ -381,9 +376,9 @@ key data of the ``kadmin/history`` principal.
 Currently there is no support for proper rollover of the history key,
 but you can change the history key (for example, to use a better
 encryption type) at the cost of invalidating currently stored old
-keys. To change the history key, run::
+keys.  To change the history key, run::
 
-     kadmin: change_password -randkey kadmin/history
+    kadmin: change_password -randkey kadmin/history
 
 This command will fail if you specify the **-keepold** flag.  Only one
 new history key will be created, even if you specify multiple key/salt
@@ -391,7 +386,7 @@ combinations.
 
 In the future, we plan to migrate towards encrypting old keys in the
 master key instead of the history key, and implementing proper
-rollover support for stored old keys. - implemented in 1.8+
+rollover support for stored old keys.
 
 
 .. _db_operations:
@@ -725,7 +720,7 @@ Cross-realm authentication
 In order for a KDC in one realm to authenticate Kerberos users in a
 different realm, it must share a key with the KDC in the other realm.
 In both databases, there must be krbtgt service principals for realms.
-These principals should all have the same passwords, key version
+These principals must all have the same passwords, key version
 numbers, and encryption types.
 
 For example, if the administrators of ATHENA.MIT.EDU and EXAMPLE.COM
@@ -823,10 +818,11 @@ iprop_port             *integer*       Specifies the port number to be used for 
 iprop_logfile          *file name*     Specifies where the update log file for the realm database is to be stored. The default is to use the *database_name* entry from the realms section of the config file :ref:`kdc.conf(5)`, with *.ulog* appended. (NOTE: If database_name isn't specified in the realms section, perhaps because the LDAP database back end is being used, or the file name is specified in the *dbmodules* section, then the hard-coded default for *database_name* is used. Determination of the *iprop_logfile*  default value will not use values from the *dbmodules* section.)
 ====================== =============== ===========================================
 
-Both master and slave sides must have principals named
-``kiprop/hostname`` (where *hostname* is, as usual, the lower-case,
-fully-qualified, canonical name for the host) registered and keys
-stored in the default keytab file (``/etc/krb5.keytab``).
+Both master and slave sides must have a principal named
+``kiprop/hostname`` (where *hostname* is the lowercase,
+fully-qualified, canonical name for the host) registered in the
+Kerberos database, and have keys for that principal stored in the
+default keytab file (``/etc/krb5.keytab``).
 
 On the master KDC side, the ``kiprop/hostname`` principal must be
 listed in the kadmind ACL file kadm5.acl, and given the **p**
@@ -854,9 +850,7 @@ implementation:
   propagation fails to connect for some reason, the process on the
   slave may hang waiting for it, and will need to be restarted.
 - The master and slave must be able to initiate TCP connections in
-  both directions, without an intervening NAT.  They must also be able
-  to communicate over IPv4, since MIT's kprop and RPC code does not
-  currently support IPv6.
+  both directions, without an intervening NAT.
 
 
 Sun/MIT incremental propagation differences

@@ -12,9 +12,9 @@ following issues:
 
 * The name of your Kerberos realm (or the name of each realm, if you
   need more than one).
-* How you will map your hostnames onto Kerberos realms.
-* Which ports your KDC and and kadmin (database access) services will
-  use.
+* How you will assign your hostnames to Kerberos realms.
+* Which ports your KDC and and kadmind services will use, if they will
+  not be using the default ports.
 * How many slave KDCs you need and where they should be located.
 * The hostnames of your master and slave KDCs.
 * How frequently you will propagate the database from the master KDC
@@ -46,41 +46,25 @@ Mapping hostnames onto Kerberos realms
 
 Mapping hostnames onto Kerberos realms is done in one of two ways.
 
-The first mechanism, which has been in use for years in MIT-based
-Kerberos distributions, works through a set of rules in the
-:ref:`krb5.conf(5)` configuration file.  You can specify mappings for
-an entire domain or subdomain, and/or on a hostname-by-hostname basis.
-Since greater specificity takes precedence, you would do this by
-specifying the mappings for a given domain or subdomain and listing
-the exceptions.
+The first mechanism works through a set of rules in the
+:ref:`domain_realm` section of :ref:`krb5.conf(5)`.  You can specify
+mappings for an entire domain or on a per-hostname basis.  Typically
+you would do this by specifying the mappings for a given domain or
+subdomain and listing the exceptions.
 
-The second mechanism works by looking up the information in special
-TXT records in the Domain Name Service.  This is currently not used by
-default because security holes could result if the DNS TXT records
-were spoofed.  If this mechanism is enabled on the client, it will try
-to look up a TXT record for the DNS name formed by putting the prefix
-``_kerberos`` in front of the hostname in question. If that record is
-not found, it will try using ``_kerberos`` and the host's domain name,
-then its parent domain, and so forth.  So for the hostname
-``BOSTON.ENGINEERING.FOOBAR.COM``, the names looked up would be::
+The second mechanism is to use KDC host-based service referrals.  With
+this method, the KDC's krb5.conf has a full [domain_realm] mapping for
+hosts, but the clients do not, or have mappings for only a subset of
+the hosts they might contact.  When a client needs to contact a server
+host for which it has no mapping, it will ask the client realm's KDC
+for the service ticket, and will receive a referral to the appropriate
+service realm.
 
-    _kerberos.boston.engineering.foobar.com
-    _kerberos.engineering.foobar.com
-    _kerberos.foobar.com
-    _kerberos.com
-
-The value of the first TXT record found is taken as the realm name.
-(Obviously, this doesn't work all that well if a host and a subdomain
-have the same name, and different realms.  For example, if all the
-hosts in the ``ENGINEERING.FOOBAR.COM`` domain are in the
-``ENGINEERING.FOOBAR.COM`` realm, but a host named
-``ENGINEERING.FOOBAR.COM`` is for some reason in another realm.  In
-that case, you would set up TXT records for all hosts, rather than
-relying on the fallback to the domain name.)
-
-Even if you do not choose to use this mechanism within your site, you
-may wish to set it up anyway, for use when interacting with other
-sites.
+To use referrals, clients must be running MIT krb5 1.6 or later, and
+the KDC must be running MIT krb5 1.7 or later.  The
+**host_based_services** and **no_host_referral** variables in the
+:ref:`kdc_realms` section of :ref:`kdc.conf(5)` can be used to
+fine-tune referral behavior on the KDC.
 
 
 Ports for the KDC and admin services
@@ -88,10 +72,11 @@ Ports for the KDC and admin services
 
 The default ports used by Kerberos are port 88 for the KDC1 and port
 749 for the admin server.  You can, however, choose to run on other
-ports, as long as they are specified in each host's ``/etc/services``
-and :ref:`krb5.conf(5)` files, and the :ref:`kdc.conf(5)` file on each
-KDC.  For a more thorough treatment of port numbers used by the
-Kerberos V5 programs, refer to the :ref:`conf_firewall`.
+ports, as long as they are specified in each host's
+:ref:`krb5.conf(5)` files or in DNS SRV records, and the
+:ref:`kdc.conf(5)` file on each KDC.  For a more thorough treatment of
+port numbers used by the Kerberos V5 programs, refer to the
+:ref:`conf_firewall`.
 
 
 Slave KDCs
@@ -103,10 +88,9 @@ number of slave KDCs you need and the decision of where to place them,
 both physically and logically, depends on the specifics of your
 network.
 
-All of the Kerberos authentication on your network requires that each
-client be able to contact a KDC.  Therefore, you need to anticipate
-any likely reason a KDC might be unavailable and have a slave KDC to
-take up the slack.
+Kerberos authentication requires that each client be able to contact a
+KDC.  Therefore, you need to anticipate any likely reason a KDC might
+be unavailable and have a slave KDC to take up the slack.
 
 Some considerations include:
 
@@ -132,20 +116,13 @@ MIT recommends that your KDCs have a predefined set of CNAME records
 you need to swap a machine, you only need to change a DNS entry,
 rather than having to change hostnames.
 
-A new mechanism for locating KDCs of a realm through DNS has been
-added to the MIT Kerberos V5 distribution.  A relatively new record
-type called SRV has been added to DNS.  Looked up by a service name
-and a domain name, these records indicate the hostname and port number
-to contact for that service, optionally with weighting and
-prioritization.  (See :rfc:`2782` if you want more information. You
-can follow the example below for straightforward cases.)
-
-The use with Kerberos is fairly straightforward.  The domain name used
-in the SRV record name is the domain-style Kerberos realm name.  (It
-is possible to have Kerberos realm names that are not DNS-style names,
-but we don't recommend it for Internet use, and our code does not
-support it well.)  Several different Kerberos-related service names
-are used:
+As of MIT krb5 1.4, clients can locate a realm's KDCs through DNS
+using SRV records (:rfc:`2782`), assuming the Kerberos realm name is
+also a DNS domain name.  These records indicate the hostname and port
+number to contact for that service, optionally with weighting and
+prioritization.  The domain name used in the SRV record name is the
+realm name.  Several different Kerberos-related service names are
+used:
 
 _kerberos._udp
     This is for contacting any KDC by UDP.  This entry will be used
@@ -159,13 +136,10 @@ _kerberos._tcp
     normally you should use port 88.
 _kerberos-master._udp
     This entry should refer to those KDCs, if any, that will
-    immediately see password changes to the Kerberos database.  This
-    entry is used only in one case, when the user is logging in and
-    the password appears to be incorrect; the master KDC is then
-    contacted, and the same password used to try to decrypt the
-    response, in case the user's password had recently been changed
-    and the first KDC contacted hadn't been updated.  Only if that
-    fails is an "incorrect password" error given.
+    immediately see password changes to the Kerberos database.  If a
+    user is logging in and the password appears to be incorrect, the
+    client will retry with the master KDC before failing with an
+    "incorrect password" error given.
 
     If you have only one KDC, or for whatever reason there is no
     accessible KDC that would get database changes faster than the
@@ -174,15 +148,16 @@ _kerberos-adm._tcp
     This should list port 749 on your master KDC.  Support for it is
     not complete at this time, but it will eventually be used by the
     :ref:`kadmin(1)` program and related utilities.  For now, you will
-    also need the admin_server entry in :ref:`krb5.conf(5)`.
+    also need the **admin_server** variable in :ref:`krb5.conf(5)`.
 _kpasswd._udp
     This should list port 464 on your master KDC.  It is used when a
-    user changes her password.
+    user changes her password.  If this entry is not defined but a
+    _kerberos-adm._tcp entry is defined, the client will use the
+    _kerberos-adm._tcp entry with the port number changed to 749.
 
-Be aware, however, that the DNS SRV specification requires that the
-hostnames listed be the canonical names, not aliases.  So, for
-example, you might include the following records in your (BIND-style)
-zone file::
+The DNS SRV specification requires that the hostnames listed be the
+canonical names, not aliases.  So, for example, you might include the
+following records in your (BIND-style) zone file::
 
     $ORIGIN foobar.com.
     _kerberos               TXT       "FOOBAR.COM"
@@ -196,18 +171,11 @@ zone file::
     _kerberos-adm._tcp      SRV       0 0 749 daisy
     _kpasswd._udp           SRV       0 0 464 daisy
 
-As with the DNS-based mechanism for determining the Kerberos realm of
-a host, we recommend distributing the information this way for use by
-other sites that may want to interact with yours using Kerberos, even
-if you don't immediately make use of it within your own site.  If you
-anticipate installing a very large number of machines on which it will
-be hard to update the Kerberos configuration files, you may wish to do
-all of your Kerberos service lookups via DNS and not put the
-information (except for **admin_server** as noted above) in future
-versions of your :ref:`krb5.conf(5)` files at all.  Eventually, we
-hope to phase out the listing of server hostnames in the client-side
-configuration files; making preparations now will make the transition
-easier in the future.
+Clients can also locate services using the **kdc**, **master_kdc**,
+**admin_server**, and **kpasswd_server** variables in the
+:ref:`realms` section of :ref:`krb5.conf(5)`.  However, providing SRV
+records may still be useful for use by other sites or by unconfigured
+client hosts.
 
 
 .. _db_prop:

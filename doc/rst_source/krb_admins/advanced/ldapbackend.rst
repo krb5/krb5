@@ -3,7 +3,7 @@
 LDAP backend on Ubuntu 10.4 (lucid)
 ===================================
 
-Setting up Kerberos v1.9 with LDAP backend on Ubuntu 10.4 (lucid Lynx)
+Setting up Kerberos v1.9 with LDAP backend on Ubuntu 10.4 (Lucid Lynx)
 
 
 Prerequisites
@@ -31,13 +31,9 @@ Building Kerberos from source
 
 ::
 
-    util/reconf
-    ./configure –with-ldap
+    ./configure --with-ldap
     make
     sudo make install
-
-.. note:: in some environments one may need to suppress rpath linker
-          option: ``./configure –with-ldap –disable-rpath``
 
 
 Setting up Kerberos
@@ -46,45 +42,22 @@ Setting up Kerberos
 Configuration
 ~~~~~~~~~~~~~
 
-Update Kerberos configuration files with the backend information:
-
-krb5.conf::
+Update kdc.conf with the LDAP back-end information::
 
     [realms]
         EXAMPLE.COM = {
             database_module = LDAP
         }
 
-    [dbdefaults]
-        ldap_kerberos_container_dn = "cn=krbContainer,dc=example,dc=com"
-
     [dbmodules]
         LDAP = {
             db_library = kldap
-            ldap_kerberos_container_dn = "cn=krbContainer,dc=example,dc=com"
+            ldap_kerberos_container_dn = cn=krbContainer,dc=example,dc=com
             ldap_kdc_dn = cn=admin,dc=example,dc=com
             ldap_kadmind_dn = cn=admin,dc=example,dc=com
-            ldap_service_password_file = /tmp/krb5kdc/admin.stash
+            ldap_service_password_file = /usr/local/var/krb5kdc/admin.stash
             ldap_servers = ldapi:///
         }
-
-kdc.conf::
-
-    [realms]
-        EXAMPLE.COM = {
-            acl_file = /tmp/kadm5.acl
-
-kadm5.acl::
-
-    # See Kerberos V5 Installation Guide for detail of ACL setup and
-    # configuration
-    */admin *
-
-Setup run-time environment to point to the Kerberos configuration
-files::
-
-    export KRB5_CONFIG=/tmp/krb5.conf
-    export KRB5_KDC_PROFILE=/tmp/kdc.conf
 
 
 Schema
@@ -94,28 +67,28 @@ From the source tree copy
 ``src/plugins/kdb/ldap/libkdb_ldap/kerberos.schema`` into
 ``/etc/ldap/schema``
 
-Warning: it should be done after slapd is installed to avoid problems
-with slapd installation
+Warning: this step should be done after slapd is installed to avoid
+problems with slapd installation.
 
 To convert kerberos.schema to run-time configuration (``cn=config``)
-do the folowing:
+do the following:
 
-#. create temporary file ``/tmp/schema_convert.conf`` with the
+#. Create a temporary file ``/tmp/schema_convert.conf`` with the
    following content::
 
        include /etc/ldap/schema/kerberos.schema
 
-#. Create temporary directory ``/tmp/krb5_ldif``
+#. Create a temporary directory ``/tmp/krb5_ldif``.
 
 #. Run::
 
        slaptest -f /tmp/schema_convert.conf -F /tmp/krb5_ldif
 
-   It should result into a new file
-   ``/tmp/krb5_ldif/cn=config/cn=schema/cn={0}kerberos.ldif``
+   This should in a new file named
+   ``/tmp/krb5_ldif/cn=config/cn=schema/cn={0}kerberos.ldif``.
 
 #. Edit ``/tmp/krb5_ldif/cn=config/cn=schema/cn={0}kerberos.ldif`` by
-   replacing lines::
+   replacing the lines::
 
        dn: cn={0}kerberos
        cn: {0}kerberos
@@ -133,25 +106,25 @@ do the folowing:
        createTimestamp: ...
        entryCSN: ...
        modifiersName: cn=config
-      modifyTimestamp: ...
+       modifyTimestamp: ...
 
 #. Load the new schema with ldapadd (with the proper authentication)::
 
        ldapadd -Y EXTERNAL -H ldapi:/// -f  /tmp/krb5_ldif/cn=config/cn=schema/cn={0}kerberos.ldif
 
-    which should result into ``adding new entry
-    "cn=kerberos,cn=schema,cn=config"`` message
+   which should result the message ``adding new entry
+   "cn=kerberos,cn=schema,cn=config"``.
 
 
 Create Kerberos database
 ------------------------
 
 Using LDAP administrator credentials, create Kerberos database and
-stash::
+master key stash::
 
-    kdb5_ldap_util -D cn=admin,dc=example,dc=com -H ldapi:/// create
+    kdb5_ldap_util -D cn=admin,dc=example,dc=com -H ldapi:/// create -s
 
-Stash the password::
+Stash the LDAP administrative passwords::
 
     kdb5_ldap_util -D cn=admin,dc=example,dc=com -H ldapi:/// stashsrvpw cn=admin,dc=example,dc=com
 

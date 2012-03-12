@@ -10,58 +10,15 @@ List
 .. error:: credential verification failed: KDC has no support for
            encryption type
 
-Add ``allow_weak_crypto = true`` to the [libdefaults] section of
-:ref:`krb5.conf(5)`.
-
-Version 1.7+
+This most commonly happens when trying to use a principal with only
+DES keys, in a release (MIT krb5 1.7 or later) which disables DES by
+default.  You can re-enable DES by adding ``allow_weak_crypto = true``
+to the :ref:`libdefaults` section of :ref:`krb5.conf(5)`.
 
 Seen in: clients
-
-----
-
-.. error:: Hostname cannot be canonicalized
-
-The problem is that ssh is attempting to authenticate to the
-canonicalization of inside-host in DNS, but since that's inside your
-internal network, there is no DNS available to do the
-canonicalization, so one needs to tell GSSAPI what the hostname is
-separately.
-
-|   Host inside-host
-|       GSSAPITrustDns no
-|       HostName inside-host.inside.domain
-|       ProxyCommand ssh -t jump-box.example.com "nc -w2 %h %p"
-
-``GSSAPITrustDns yes`` is setting the exact opposite of ``rdns =
-false``.  It's the equivalent of ``rdns = true``.
-
-External links: [http://www.mail-archive.com/kerberos@mit.edu/msg17101.html]
-
-Seen in: ssh
-
-----
-
-.. error:: Wrong principal in request
-
-If referrals are being used, specifying the host to realm mapping in
-the krb5 profile results in the referrals logic being disabled and may
-solve the problem.
-
-External links: [http://www.mail-archive.com/kerberos@mit.edu/msg16257.html]
-
-Seen in: ssh
 
 ----
 
 .. include:: ./install_kdc.rst
    :start-after:  _prop_failed_start:
    :end-before: _prop_failed_end:
-
-----
-
-.. error:: Unable to find requested database type - while initializing
-           database for realm X.Y
-
-Set **db_module_dir** in :ref:`dbmodules` to the absolute path to the
-location of the database plugin
-
