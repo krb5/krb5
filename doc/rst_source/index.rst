@@ -13,6 +13,7 @@ Contents
    krb_users/index.rst
    krb_plugindev/index.rst
    krb_build/index.rst
+   krb_basic/index.rst
 
 .. toctree::
    :maxdepth: 1
