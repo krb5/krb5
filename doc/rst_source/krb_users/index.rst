@@ -17,5 +17,4 @@ Contents
 
    pwd_mgmt.rst
    tkt_mgmt.rst
-   user_appl/index.rst
    user_commands/index.rst
