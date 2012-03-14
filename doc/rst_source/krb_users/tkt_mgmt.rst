@@ -7,16 +7,16 @@ Ticket management
           Your contribution is greatly appreciated.
 
 On many systems, Kerberos is built into the login program, and you get
-tickets automatically when you log in.  Other programs, such as rsh,
-rcp, telnet, and rlogin, can forward copies of your tickets to the
-remote host.  Most of these programs also automatically destroy your
-tickets when they exit.  However, MIT recommends that you explicitly
-destroy your Kerberos tickets when you are through with them, just to
-be sure.  One way to help ensure that this happens is to add the
-:ref:`kdestroy(1)` command to your .logout file.  Additionally, if you
-are going to be away from your machine and are concerned about an
-intruder using your permissions, it is safest to either destroy all
-copies of your tickets, or use a screensaver that locks the screen.
+tickets automatically when you log in.  Other programs, such as ssh,
+can forward copies of your tickets to the.  Most of these programs
+also automatically destroy your tickets when they exit.  However, MIT
+recommends that you explicitly destroy your Kerberos tickets when you
+are through with them, just to be sure.  One way to help ensure that
+this happens is to add the :ref:`kdestroy(1)` command to your .logout
+file.  Additionally, if you are going to be away from your machine and
+are concerned about an intruder using your permissions, it is safest
+to either destroy all copies of your tickets, or use a screensaver
+that locks the screen.
 
 
 Kerberos ticket properties
@@ -102,12 +102,11 @@ Kerberos V5 protocol and is not yet implemented on MIT servers.
 Obtaining tickets with kinit
 ----------------------------
 
-If your site is using the Kerberos V5 login program, you will get
-Kerberos tickets automatically when you log in.  If your site uses a
-different login program, you may need to explicitly obtain your
-Kerberos tickets, using the :ref:`kinit(1)` program.  Similarly, if
-your Kerberos tickets expire, use the kinit program to obtain new
-ones.
+If your site has integrated Kerberos V5 with the login system, you
+will get Kerberos tickets automatically when you log in.  Otherwise,
+you may need to explicitly obtain your Kerberos tickets, using the
+:ref:`kinit(1)` program.  Similarly, if your Kerberos tickets expire,
+use the kinit program to obtain new ones.
 
 To use the kinit program, simply type ``kinit`` and then type your
 password at the prompt. For example, Jennifer (whose username is
@@ -129,7 +128,7 @@ following error message::
 
 and you won't get Kerberos tickets.
 
-Notice that kinit assumes you want tickets for your own username in
+By default, kinit assumes you want tickets for your own username in
 your default realm.  Suppose Jennifer's friend David is visiting, and
 he wants to borrow a window to check his mail.  David needs to get
 tickets for himself in his own realm, EXAMPLE.COM [1]_. He would
@@ -145,7 +144,7 @@ machine, but it never went over the network.  Kerberos on the local
 host performed the authentication to the KDC in the other realm.
 
 If you want to be able to forward your tickets to another host, you
-need to request forwardable tickets. You do this by specifying the
+need to request forwardable tickets.  You do this by specifying the
 **-f** option::
 
     shell% kinit -f
@@ -201,8 +200,8 @@ principal is your Kerberos principal.
 
 The "valid starting" and "expires" fields describe the period of time
 during which the ticket is valid.  The "service principal" describes
-each ticket.  The ticket-granting ticket has the primary ``krbtgt``,
-and the instance is the realm name.
+each ticket.  The ticket-granting ticket has a first component
+``krbtgt``, and a second component which is the realm name.
 
 Now, if ``jennifer`` connected to the machine ``daffodil.mit.edu``,
 and then typed "klist" again, she would have gotten the following
@@ -217,16 +216,16 @@ result::
     06/07/04 20:22:30  06/08/04 05:49:19  host/daffodil.mit.edu@ATHENA.MIT.EDU
     shell%
 
-Here's what happened: when ``jennifer`` used telnet to connect to the
-host ``daffodil.mit.edu``, the telnet program presented her
+Here's what happened: when ``jennifer`` used ssh to connect to the
+host ``daffodil.mit.edu``, the ssh program presented her
 ticket-granting ticket to the KDC and requested a host ticket for the
-host ``daffodil.mit.edu``.  The KDC sent the host ticket, which telnet
+host ``daffodil.mit.edu``.  The KDC sent the host ticket, which ssh
 then presented to the host ``daffodil.mit.edu``, and she was allowed
 to log in without typing her password.
 
 Suppose your Kerberos tickets allow you to log into a host in another
 domain, such as ``trillium.example.com``, which is also in another
-Kerberos realm, ``EXAMPLE.COM``.  If you telnet to this host, you will
+Kerberos realm, ``EXAMPLE.COM``.  If you ssh to this host, you will
 receive a ticket-granting ticket for the realm ``EXAMPLE.COM``, plus
 the new host ticket for ``trillium.example.com``.  klist will now
 show::
@@ -241,6 +240,14 @@ show::
     06/07/04 20:24:18  06/08/04 05:49:19  krbtgt/EXAMPLE.COM@ATHENA.MIT.EDU
     06/07/04 20:24:18  06/08/04 05:49:19  host/trillium.example.com@EXAMPLE.COM
     shell%
+
+Depending on your host's and realm's configuration, you may also see a
+ticket with the service principal ``host/trillium.example.com@``.  If
+so, this means that your host did not know what realm
+trillium.example.com is in, so it asked the ``ATHENA.MIT.EDU`` KDC for
+a referral.  The next time you connect to ``trillium.example.com``,
+the odd-looking entry will be used to avoid needing to ask for a
+referral again.
 
 You can use the **-f** option to view the flags that apply to your
 tickets.  The flags are:
