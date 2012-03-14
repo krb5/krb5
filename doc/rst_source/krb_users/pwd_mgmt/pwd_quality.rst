@@ -1,4 +1,0 @@
-Password quality verification
-=============================
-
-TODO

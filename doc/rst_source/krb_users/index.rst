@@ -15,7 +15,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   pwd_mgmt/index.rst
-   tkt_mgmt/index.rst
+   pwd_mgmt.rst
+   tkt_mgmt.rst
    user_appl/index.rst
    user_commands/index.rst
