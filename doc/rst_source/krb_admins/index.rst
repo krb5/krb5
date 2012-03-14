@@ -13,6 +13,7 @@ Contents:
    database.rst
    conf_ldap.rst
    appl_servers.rst
+   host_config.rst
    backup_host.rst
 
 .. toctree::
