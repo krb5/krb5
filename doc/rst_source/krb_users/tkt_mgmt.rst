@@ -8,15 +8,15 @@ Ticket management
 
 On many systems, Kerberos is built into the login program, and you get
 tickets automatically when you log in.  Other programs, such as ssh,
-can forward copies of your tickets to the.  Most of these programs
-also automatically destroy your tickets when they exit.  However, MIT
-recommends that you explicitly destroy your Kerberos tickets when you
-are through with them, just to be sure.  One way to help ensure that
-this happens is to add the :ref:`kdestroy(1)` command to your .logout
-file.  Additionally, if you are going to be away from your machine and
-are concerned about an intruder using your permissions, it is safest
-to either destroy all copies of your tickets, or use a screensaver
-that locks the screen.
+can forward copies of your tickets to a remote host.  Most of these
+programs also automatically destroy your tickets when they exit.
+However, MIT recommends that you explicitly destroy your Kerberos
+tickets when you are through with them, just to be sure.  One way to
+help ensure that this happens is to add the :ref:`kdestroy(1)` command
+to your .logout file.  Additionally, if you are going to be away from
+your machine and are concerned about an intruder using your
+permissions, it is safest to either destroy all copies of your
+tickets, or use a screensaver that locks the screen.
 
 
 Kerberos ticket properties
@@ -25,12 +25,13 @@ Kerberos ticket properties
 There are various properties that Kerberos tickets can have:
 
 If a ticket is **forwardable**, then the KDC can issue a new ticket
-with a different network address based on the forwardable ticket.
-This allows for authentication forwarding without requiring a password
-to be typed in again.  For example, if a user with a forwardable TGT
-logs into a remote system, the KDC could issue a new TGT for that user
-with the netword address of the remote system, allowing authentication
-on that host to work as though the user were logged in locally.
+(with a different network address, if necessary) based on the
+forwardable ticket.  This allows for authentication forwarding without
+requiring a password to be typed in again.  For example, if a user
+with a forwardable TGT logs into a remote system, the KDC could issue
+a new TGT for that user with the netword address of the remote system,
+allowing authentication on that host to work as though the user were
+logged in locally.
 
 When the KDC creates a new ticket based on a forwardable ticket, it
 sets the **forwarded** flag on that new ticket.  Any tickets that are
@@ -84,11 +85,11 @@ the one that issued the current ticket.  If this flag is not set, then
 the application server must check the transited realms itself or else
 reject the ticket.
 
-The okay as **delegate** flag indicates that the server specified in
+The **okay as delegate** flag indicates that the server specified in
 the ticket is suitable as a delegate as determined by the policy of
-that realm.  A server that is acting as a delegate has been granted a
-proxy or a forwarded TGT.  This flag is a new addition to the Kerberos
-V5 protocol and is not yet implemented on MIT servers.
+that realm.  Some client applications may use this flag to decide
+whether to forward tickets to a remote host, although many
+applications do not honor it.
 
 An **anonymous** ticket is one in which the named principal is a
 generic principal for that realm; it does not actually specify the

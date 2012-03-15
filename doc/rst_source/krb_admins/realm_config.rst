@@ -70,7 +70,7 @@ fine-tune referral behavior on the KDC.
 Ports for the KDC and admin services
 ------------------------------------
 
-The default ports used by Kerberos are port 88 for the KDC1 and port
+The default ports used by Kerberos are port 88 for the KDC and port
 749 for the admin server.  You can, however, choose to run on other
 ports, as long as they are specified in each host's
 :ref:`krb5.conf(5)` files or in DNS SRV records, and the
