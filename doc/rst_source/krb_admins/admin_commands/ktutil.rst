@@ -12,9 +12,9 @@ SYNOPSIS
 DESCRIPTION
 -----------
 
-The ktutil command invokes a subshell from which an administrator can
-read, write, or edit entries in a Kerberos V5 keytab or V4 srvtab
-file.
+The ktutil command invokes a command interface from which an
+administrator can read, write, or edit entries in a keytab or Kerberos
+V4 srvtab file.
 
 
 COMMANDS
@@ -117,12 +117,15 @@ EXAMPLE
 
  ::
 
-    ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e aes128-cts-hmac-sha1-96
+    ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e
+        aes128-cts-hmac-sha1-96
     Password for alice@BLEEP.COM:
-    ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e aes256-cts-hmac-sha1-96
+    ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e
+        aes256-cts-hmac-sha1-96
     Password for alice@BLEEP.COM:
     ktutil:  write_kt keytab
     ktutil:
+
 
 SEE ALSO
 --------

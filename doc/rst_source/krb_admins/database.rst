@@ -66,7 +66,7 @@ Date Format
 -----------
 
 .. include:: admin_commands/kadmin_local.rst
-   :start-after:  _date_format:
+   :start-after:  _date_format_start:
    :end-before: _date_format_end:
 
 .. note:: If the date specification contains spaces, you must enclose

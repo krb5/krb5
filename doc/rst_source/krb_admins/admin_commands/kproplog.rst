@@ -8,28 +8,29 @@ SYNOPSIS
 
 **kproplog** [**-h**] [**-e** *num*] [-v]
 
+
 DESCRIPTION
 -----------
 
-The kproplog command displays the contents of the Kerberos principal
-update log to standard output.  It can be used to keep track of the
-incremental updates to the principal database, when enabled.  The
-update log file contains the update log maintained by the
-:ref:`kadmind(8)` process on the master KDC server and the kpropd
-process on the slave KDC servers.  When updates occur, they are logged
-to this file.  Subsequently any KDC slave configured for incremental
-updates will request the current data from the master KDC and update
-their principal.ulog file with any updates returned.
+The kproplog command displays the contents of the KDC database update
+log to standard output.  It can be used to keep track of incremental
+updates to the principal database.  The update log file contains the
+update log maintained by the :ref:`kadmind(8)` process on the master
+KDC server and the :ref:`kpropd(8)` process on the slave KDC servers.
+When updates occur, they are logged to this file.  Subsequently any
+KDC slave configured for incremental updates will request the current
+data from the master KDC and update their principal.ulog file with any
+updates returned.
 
-The kproplog command can only be run on a KDC server by someone with
-privileges comparable to the superuser.  It will display update
-entries for that server only.
+The kproplog command requires read access to the update log file.  It
+will display update entries only for the KDC it runs on.
 
-If no options are specified, the summary of the update log is
-displayed.  If invoked on the master, all of the update entries are
-also displayed.  When invoked on a slave KDC server, only a summary of
-the updates are displayed, which includes the serial number of the
+If no options are specified, kproplog displays a summary of the update
+log.  If invoked on the master, kproplog also displays all of the
+update entries.  If invoked on a slave KDC server, kproplog displays
+only a summary of the updates, which includes the serial number of the
 last update received and the associated time stamp of the last update.
+
 
 OPTIONS
 -------
@@ -65,12 +66,14 @@ OPTIONS
                  Modification time
                  TL data
 
+
 ENVIRONMENT
 -----------
 
 kproplog uses the following environment variables:
 
 * **KRB5_KDC_PROFILE**
+
 
 SEE ALSO
 --------

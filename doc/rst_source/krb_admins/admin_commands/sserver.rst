@@ -34,7 +34,7 @@ sserver is normally invoked out of inetd(8), using a line in
 
  ::
 
-    sample  stream  tcp     nowait  root /usr/local/sbin/sserver     sserver
+    sample stream tcp nowait root /usr/local/sbin/sserver sserver
 
 Since ``sample`` is normally not a port defined in ``/etc/services``,
 you will usually have to add a line to ``/etc/services`` which looks
@@ -53,6 +53,7 @@ for the sample tcp port, and that the same port number is in both
 files.
 
 When you run sclient you should see something like this:
+
  ::
 
     sendauth succeeded, reply is:
@@ -64,14 +65,17 @@ COMMON ERROR MESSAGES
 ---------------------
 
 1) kinit returns the error:
+
     ::
 
-       kinit: Client not found in Kerberos database while getting initial credentials
+       kinit: Client not found in Kerberos database while getting
+           initial credentials
 
    This means that you didn't create an entry for your username in the
    Kerberos database.
 
 2) sclient returns the error:
+
     ::
 
        unknown service sample/tcp; check /etc/services
@@ -80,6 +84,7 @@ COMMON ERROR MESSAGES
    sample tcp port.
 
 3) sclient returns the error:
+
     ::
 
        connect: Connection refused
@@ -88,9 +93,11 @@ COMMON ERROR MESSAGES
    you didn't restart inetd after editing inetd.conf.
 
 4) sclient returns the error:
+
     ::
 
-       sclient: Server not found in Kerberos database while using sendauth
+       sclient: Server not found in Kerberos database while using
+           sendauth
 
    This means that the ``sample/hostname@LOCAL.REALM`` service was not
    defined in the Kerberos database; it should be created using
@@ -98,10 +105,11 @@ COMMON ERROR MESSAGES
    the key for that service principal available for sclient.
 
 5) sclient returns the error:
+
     ::
 
        sendauth rejected, error reply is:
-               " No such file or directory"
+           "No such file or directory"
 
    This probably means sserver couldn't find the keytab file.  It was
    probably not installed in the proper directory.

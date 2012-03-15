@@ -29,28 +29,6 @@ Distribution Center (AS/KDC).
 OPTIONS
 -------
 
-The **-x** *db_args* option specifies the database specific arguments.
-Options supported for LDAP database are:
-
-    **-x** nconns=<number_of_connections>
-        Specifies the number of connections to be maintained per
-        LDAP server.
-
-    **-x** host=<ldapuri>
-        Specifies the LDAP server to connect to by a LDAP URI.
-
-    **-x** binddn=<binddn>
-        Specifies the DN of the object used by the KDC server to bind
-        to the LDAP server.  This object should have the rights to
-        read the realm container, principal container and the subtree
-        that is referenced by the realm.
-
-    **-x** bindpwd=<bind_password>
-        Specifies the password for the above mentioned binddn.  It is
-        recommended not to use this option. Instead, the password can
-        be stashed using the **stashsrvpw** command of
-        :ref:`kdb5_ldap_util(8)`
-
 The **-r** *realm* option specifies the realm for which the server
 should provide service.
 
@@ -62,28 +40,28 @@ The **-k** *keytype* option specifies the key type of the master key
 to be entered manually as a password when **-m** is given; the default
 is ``des-cbc-crc``.
 
-The **-M** *mkeyname* option specifies the principal name for the master key
-in the database (usually ``K/M`` in the KDC's realm).
+The **-M** *mkeyname* option specifies the principal name for the
+master key in the database (usually ``K/M`` in the KDC's realm).
 
 The **-m** option specifies that the master database password should
-be fetched from the keyboard rather than from a file on disk.
+be fetched from the keyboard rather than from a stash file.
 
 The **-n** option specifies that the KDC does not put itself in the
 background and does not disassociate itself from the terminal.  In
 normal operation, you should always allow the KDC to place itself in
 the background.
 
-The **-P** *pid_file* option tells the KDC to write its PID (followed
-by a newline) into *pid_file* after it starts up.  This can be used to
-identify whether the KDC is still running and to allow init scripts to
-stop the correct process.
+The **-P** *pid_file* option tells the KDC to write its PID into
+*pid_file* after it starts up.  This can be used to identify whether
+the KDC is still running and to allow init scripts to stop the correct
+process.
 
-The **-p** *portnum* option specifies the default UDP port number
-which the KDC should listen on for Kerberos version 5 requests.  This
-value is used when no port is specified in the KDC profile and when no
-port is specified in the Kerberos configuration file.  If no value is
-available, then the value in ``/etc/services`` for service
-``kerberos`` is used.
+The **-p** *portnum* option specifies the default UDP port numbers
+which the KDC should listen on for Kerberos version 5 requests, as a
+comma-separated list.  This value overrides the UDP port numbers
+specified in the :ref:`kdcdefaults` section of :ref:`kdc.conf(5)`, but
+may be overridden by realm-specific values.  If no value is given from
+any source, the default ports are 88 and 750.
 
 The **-w** *numworkers* option tells the KDC to fork *numworkers*
 processes to listen to the KDC ports and process requests in parallel.
@@ -98,6 +76,29 @@ any other worker process exits.
           for UDP packets on network interfaces created after the KDC
           starts.
 
+The **-x** *db_args* option specifies database-specific arguments.
+Options supported for the LDAP database module are:
+
+    **-x** nconns=<number_of_connections>
+        Specifies the number of connections to be maintained per
+        LDAP server.
+
+    **-x** host=<ldapuri>
+        Specifies the LDAP server to connect to by URI.
+
+    **-x** binddn=<binddn>
+        Specifies the DN of the object used by the KDC server to bind
+        to the LDAP server.  This object should have read and write
+        privileges to the realm container, the principal container,
+        and the subtree that is referenced by the realm.
+
+    **-x** bindpwd=<bind_password>
+        Specifies the password for the above mentioned binddn.  Using
+        this option may expose the password to other users on the
+        system via the process list; to avoid this, instead stash the
+        password using the **stashsrvpw** command of
+        :ref:`kdb5_ldap_util(8)`.
+
 
 EXAMPLE
 -------
@@ -108,6 +109,7 @@ be specified on the command line pertain for each realm that follows
 it and are superseded by subsequent definitions of the same option.
 
 For example:
+
  ::
 
     krb5kdc -p 2001 -r REALM1 -p 2002 -r REALM2 -r REALM3
@@ -116,9 +118,9 @@ specifies that the KDC listen on port 2001 for REALM1 and on port 2002
 for REALM2 and REALM3.  Additionally, per-realm parameters may be
 specified in the :ref:`kdc.conf(5)` file.  The location of this file
 may be specified by the **KRB5_KDC_PROFILE** environment variable.
-Parameters specified in this file take precedence over options
-specified on the command line.  See the :ref:`kdc.conf(5)` description
-for further details.
+Per-realm parameters specified in this file take precedence over
+options specified on the command line.  See the :ref:`kdc.conf(5)`
+description for further details.
 
 
 ENVIRONMENT

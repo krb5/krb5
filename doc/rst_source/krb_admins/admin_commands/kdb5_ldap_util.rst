@@ -16,11 +16,13 @@ SYNOPSIS
 
 .. _kdb5_ldap_util_synopsis_end:
 
+
 DESCRIPTION
 -----------
 
 kdb5_ldap_util allows an administrator to manage realms, Kerberos
 services and ticket policies.
+
 
 COMMAND-LINE OPTIONS
 --------------------
@@ -116,94 +118,16 @@ Creates realm in directory. Options:
     realm.
 
 *ticket_flags*
-    Specifies the ticket flags.  If this option is not specified, by
-    default, none of the flags are set.  This means all the ticket
-    options will be allowed and no restriction will be set.
+    Specifies global ticket flags for the realm.  Allowable flags are
+    documented in the description of the **add_principal** command in
+    :ref:`kadmin(1)`.
 
-    The various flags are:
+Example:
 
-    {-\|+}\ **allow_postdated**
-        **-allow_postdated** prohibits this principal from obtaining
-        postdated tickets.  (Sets the **KRB5_KDB_DISALLOW_POSTDATED**
-        flag.)  **+allow_postdated** clears this flag.
-
-    {-\|+}\ **allow_forwardable**
-        **-allow_forwardable** prohibits this principal from obtaining
-        forwardable tickets.  (Sets the
-        **KRB5_KDB_DISALLOW_FORWARDABLE** flag.)
-        **+allow_forwardable** clears this flag.
-
-    {-\|+}\ **allow_renewable**
-        **-allow_renewable** prohibits this principal from obtaining
-        renewable tickets.  (Sets the **KRB5_KDB_DISALLOW_RENEWABLE**
-        flag.)  **+allow_renewable** clears this flag.
-
-    {-\|+}\ **allow_proxiable**
-        **-allow_proxiable** prohibits this principal from obtaining
-        proxiable tickets.  (Sets the **KRB5_KDB_DISALLOW_PROXIABLE**
-        flag.)  **+allow_proxiable** clears this flag.
-
-    {-\|+}\ **allow_dup_skey**
-        **-allow_dup_skey** disables user-to-user authentication for
-        this principal by prohibiting this principal from obtaining a
-        session key for another user.  (Sets the
-        **KRB5_KDB_DISALLOW_DUP_SKEY** flag.)  **+allow_dup_skey**
-        clears this flag.
-
-    {-\|+}\ **requires_preauth**
-        **+requires_preauth** requires this principal to
-        preauthenticate before being allowed to kinit.  (Sets the
-        **KRB5_KDB_REQUIRES_PRE_AUTH** flag.)  **-requires_preauth**
-        clears this flag.
-
-    {-\|+}\ **requires_hwauth**
-        **+requires_hwauth** requires this principal to
-        preauthenticate using a hardware device before being allowed
-        to kinit.  (Sets the **KRB5_KDB_REQUIRES_HW_AUTH** flag.)
-        **-requires_hwauth** clears this flag.
-
-    {-\|+}\ **allow_svr**
-        **-allow_svr** prohibits the issuance of service tickets for
-        this principal.  (Sets the **KRB5_KDB_DISALLOW_SVR** flag.)
-        **+allow_svr** clears this flag.
-
-    {-\|+}\ **allow_tgs_req**
-        **-allow_tgs_req** specifies that a Ticket-Granting Service
-        (TGS) request for a service ticket for this principal is not
-        permitted.  This option is useless for most things.
-        **+allow_tgs_req** clears this flag.  The default is
-        +allow_tgs_req.  In effect, **-allow_tgs_req sets** the
-        **KRB5_KDB_DISALLOW_TGT_BASED** flag on the principal in the
-        database.
-
-    {-\|+}\ **allow_tix**
-        **-allow_tix** forbids the issuance of any tickets for this
-        principal.  **+allow_tix** clears this flag.  The default is
-        **+allow_tix**.  In effect, **-allow_tix** sets the
-        **KRB5_KDB_DISALLOW_ALL_TIX** flag on the principal in the
-        database.
-
-    {-\|+}\ **needchange**
-        **+needchange** sets a flag in attributes field to force a
-        password change; **-needchange** clears it.  The default is
-        **-needchange**.  In effect, **+needchange** sets the
-        **KRB5_KDB_REQUIRES_PWCHANGE** flag on the principal in the
-        database.
-
-    {-\|+}\ **password_changing_service**
-        **+password_changing_service** sets a flag in the attributes
-        field marking this as a password change service principal
-        (useless for most things).  **-password_changing_service**
-        clears the flag.  This flag intentionally has a long name.
-        The default is **-password_changing_service**.  In effect,
-        **+password_changing_service** sets the
-        *KRB5_KDB_PWCHANGE_SERVICE* flag on the principal in the
-        database.
-
-EXAMPLE:
  ::
 
-    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu create -subtrees o=org -sscope SUB -r ATHENA.MIT.EDU
+    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu
+        create -subtrees o=org -sscope SUB -r ATHENA.MIT.EDU
     Password for "cn=admin,o=org":
     Initializing database for realm 'ATHENA.MIT.EDU'
     You will be prompted for the database Master Password.
@@ -232,7 +156,6 @@ modify
 Modifies the attributes of a realm.  Options:
 
 **-subtrees** *subtree_dn_list*
-
     Specifies the list of subtrees containing the principals of a
     realm.  The list contains the DNs of the subtree objects separated
     by colon (``:``).  This list replaces the existing list.
@@ -257,94 +180,17 @@ Modifies the attributes of a realm.  Options:
     realm.
 
 *ticket_flags*
-    Specifies the ticket flags. If this option is not specified, by
-    default, none of the flags are set.  This means all the ticket
-    options will be allowed and no restriction will be set.
+    Specifies global ticket flags for the realm.  Allowable flags are
+    documented in the description of the **add_principal** command in
+    :ref:`kadmin(1)`.
 
-    The various flags are:
+Example:
 
-    {-\|+}\ **allow_postdated**
-        **-allow_postdated** prohibits this principal from obtaining
-        postdated tickets.  (Sets the **KRB5_KDB_DISALLOW_POSTDATED**
-        flag.)  **+allow_postdated** clears this flag.
-
-    {-\|+}\ **allow_forwardable**
-        **-allow_forwardable** prohibits this principal from obtaining
-        forwardable tickets.  (Sets the
-        **KRB5_KDB_DISALLOW_FORWARDABLE** flag.)
-        **+allow_forwardable** clears this flag.
-
-    {-\|+}\ **allow_renewable**
-        **-allow_renewable** prohibits this principal from obtaining
-        renewable tickets.  (Sets the **KRB5_KDB_DISALLOW_RENEWABLE**
-        flag.)  **+allow_renewable** clears this flag.
-
-    {-\|+}\ **allow_proxiable**
-        **-allow_proxiable** prohibits this principal from obtaining
-        proxiable tickets.  (Sets the **KRB5_KDB_DISALLOW_PROXIABLE**
-        flag.)  **+allow_proxiable** clears this flag.
-
-    {-\|+}\ **allow_dup_skey**
-        **-allow_dup_skey** disables user-to-user authentication for
-        this principal by prohibiting this principal from obtaining a
-        session key for another user.  (Sets the
-        **KRB5_KDB_DISALLOW_DUP_SKEY** flag.)  **+allow_dup_skey**
-        clears this flag.
-
-    {-\|+}\ **requires_preauth**
-        **+requires_preauth** requires this principal to
-        preauthenticate before being allowed to kinit.  (Sets the
-        **KRB5_KDB_REQUIRES_PRE_AUTH** flag.)  **-requires_preauth**
-        clears this flag.
-
-    {-\|+}\ **requires_hwauth**
-        **+requires_hwauth** requires this principal to
-        preauthenticate using a hardware device before being allowed
-        to kinit.  (Sets the **KRB5_KDB_REQUIRES_HW_AUTH** flag.)
-        **-requires_hwauth** clears this flag.
-
-    {-\|+}\ **allow_svr**
-        **-allow_svr** prohibits the issuance of service tickets for
-        this principal.  (Sets the **KRB5_KDB_DISALLOW_SVR** flag.)
-        **+allow_svr** clears this flag.
-
-    {-\|+}\ **allow_tgs_req**
-        **-allow_tgs_req** specifies that a Ticket-Granting Service
-        (TGS) request for a service ticket for this principal is not
-        permitted.  This option is useless for most things.
-        **+allow_tgs_req** clears this flag.  The default is
-        +allow_tgs_req.  In effect, **-allow_tgs_req sets** the
-        **KRB5_KDB_DISALLOW_TGT_BASED** flag on the principal in the
-        database.
-
-    {-\|+}\ **allow_tix**
-        **-allow_tix** forbids the issuance of any tickets for this
-        principal.  **+allow_tix** clears this flag.  The default is
-        **+allow_tix**.  In effect, **-allow_tix** sets the
-        **KRB5_KDB_DISALLOW_ALL_TIX** flag on the principal in the
-        database.
-
-    {-\|+}\ **needchange**
-        **+needchange** sets a flag in attributes field to force a
-        password change; **-needchange** clears it.  The default is
-        **-needchange**.  In effect, **+needchange** sets the
-        **KRB5_KDB_REQUIRES_PWCHANGE** flag on the principal in the
-        database.
-
-    {-\|+}\ **password_changing_service**
-        **+password_changing_service** sets a flag in the attributes
-        field marking this as a password change service principal
-        (useless for most things).  **-password_changing_service**
-        clears the flag.  This flag intentionally has a long name.
-        The default is **-password_changing_service**.  In effect,
-        **+password_changing_service** sets the
-        *KRB5_KDB_PWCHANGE_SERVICE* flag on the principal in the
-        database.
-
-EXAMPLE:
  ::
 
-    shell% kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu modify +requires_preauth -r ATHENA.MIT.EDU
+    shell% kdb5_ldap_util -D cn=admin,o=org -H
+        ldaps://ldap-server1.mit.edu modify +requires_preauth -r
+        ATHENA.MIT.EDU
     Password for "cn=admin,o=org":
     shell%
 
@@ -362,10 +208,12 @@ Displays the attributes of a realm.  Options:
 **-r** *realm*
     Specifies the Kerberos realm of the database.
 
-EXAMPLE:
+Example:
+
  ::
 
-    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu view -r ATHENA.MIT.EDU
+    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu
+        view -r ATHENA.MIT.EDU
     Password for "cn=admin,o=org":
     Realm Name: ATHENA.MIT.EDU
     Subtree: ou=users,o=org
@@ -392,10 +240,12 @@ Destroys an existing realm. Options:
 **-r** *realm*
     Specifies the Kerberos realm of the database.
 
-EXAMPLE:
+Example:
+
  ::
 
-    shell% kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu destroy -r ATHENA.MIT.EDU
+    shell% kdb5_ldap_util -D cn=admin,o=org -H
+        ldaps://ldap-server1.mit.edu destroy -r ATHENA.MIT.EDU
     Password for "cn=admin,o=org":
     Deleting KDC database of 'ATHENA.MIT.EDU', are you sure?
     (type 'yes' to confirm)? yes
@@ -413,10 +263,12 @@ list
 
 Lists the name of realms.
 
-EXAMPLE:
+Example:
+
  ::
 
-    shell% kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu list
+    shell% kdb5_ldap_util -D cn=admin,o=org -H
+        ldaps://ldap-server1.mit.edu list
     Password for "cn=admin,o=org":
     ATHENA.MIT.EDU
     OPENLDAP.MIT.EDU
@@ -446,10 +298,12 @@ to the LDAP server.  Options:
     Specifies Distinguished Name (DN) of the service object whose
     password is to be stored in file.
 
-EXAMPLE:
+Example:
+
  ::
 
-    kdb5_ldap_util stashsrvpw -f /home/andrew/conf_keyfile cn=service-kdc,o=org
+    kdb5_ldap_util stashsrvpw -f /home/andrew/conf_keyfile
+        cn=service-kdc,o=org
     Password for "cn=service-kdc,o=org":
     Re-enter password for "cn=service-kdc,o=org":
 
@@ -467,7 +321,7 @@ create_policy
     [*ticket_flags*]
     *policy_name*
 
-Creates a ticket policy in directory. Options:
+Creates a ticket policy in the directory.  Options:
 
 **-r** *realm*
     Specifies the Kerberos realm of the database.
@@ -479,97 +333,22 @@ Creates a ticket policy in directory. Options:
     Specifies maximum renewable life of tickets for principals.
 
 *ticket_flags*
-    Specifies the ticket flags. If this option is not specified, by
-    default, none of the flags are set.  This means all the ticket
-    options will be allowed and no restriction will be set.
-
-    The various flags are:
-
-    {-\|+}\ **allow_postdated**
-        **-allow_postdated** prohibits this principal from obtaining
-        postdated tickets.  (Sets the **KRB5_KDB_DISALLOW_POSTDATED**
-        flag.)  **+allow_postdated** clears this flag.
-
-    {-\|+}\ **allow_forwardable**
-        **-allow_forwardable** prohibits this principal from obtaining
-        forwardable tickets.  (Sets the
-        **KRB5_KDB_DISALLOW_FORWARDABLE** flag.)
-        **+allow_forwardable** clears this flag.
-
-    {-\|+}\ **allow_renewable**
-        **-allow_renewable** prohibits this principal from obtaining
-        renewable tickets.  (Sets the **KRB5_KDB_DISALLOW_RENEWABLE**
-        flag.)  **+allow_renewable** clears this flag.
-
-    {-\|+}\ **allow_proxiable**
-        **-allow_proxiable** prohibits this principal from obtaining
-        proxiable tickets.  (Sets the **KRB5_KDB_DISALLOW_PROXIABLE**
-        flag.)  **+allow_proxiable** clears this flag.
-
-    {-\|+}\ **allow_dup_skey**
-        **-allow_dup_skey** disables user-to-user authentication for
-        this principal by prohibiting this principal from obtaining a
-        session key for another user.  (Sets the
-        **KRB5_KDB_DISALLOW_DUP_SKEY** flag.)  **+allow_dup_skey**
-        clears this flag.
-
-    {-\|+}\ **requires_preauth**
-        **+requires_preauth** requires this principal to
-        preauthenticate before being allowed to kinit.  (Sets the
-        **KRB5_KDB_REQUIRES_PRE_AUTH** flag.)  **-requires_preauth**
-        clears this flag.
-
-    {-\|+}\ **requires_hwauth**
-        **+requires_hwauth** requires this principal to
-        preauthenticate using a hardware device before being allowed
-        to kinit.  (Sets the **KRB5_KDB_REQUIRES_HW_AUTH** flag.)
-        **-requires_hwauth** clears this flag.
-
-    {-\|+}\ **allow_svr**
-        **-allow_svr** prohibits the issuance of service tickets for
-        this principal.  (Sets the **KRB5_KDB_DISALLOW_SVR** flag.)
-        **+allow_svr** clears this flag.
-
-    {-\|+}\ **allow_tgs_req**
-        **-allow_tgs_req** specifies that a Ticket-Granting Service
-        (TGS) request for a service ticket for this principal is not
-        permitted.  This option is useless for most things.
-        **+allow_tgs_req** clears this flag.  The default is
-        +allow_tgs_req.  In effect, **-allow_tgs_req sets** the
-        **KRB5_KDB_DISALLOW_TGT_BASED** flag on the principal in the
-        database.
-
-    {-\|+}\ **allow_tix**
-        **-allow_tix** forbids the issuance of any tickets for this
-        principal.  **+allow_tix** clears this flag.  The default is
-        **+allow_tix**.  In effect, **-allow_tix** sets the
-        **KRB5_KDB_DISALLOW_ALL_TIX** flag on the principal in the
-        database.
-
-    {-\|+}\ **needchange**
-        **+needchange** sets a flag in attributes field to force a
-        password change; **-needchange** clears it.  The default is
-        **-needchange**.  In effect, **+needchange** sets the
-        **KRB5_KDB_REQUIRES_PWCHANGE** flag on the principal in the
-        database.
-
-    {-\|+}\ **password_changing_service**
-        **+password_changing_service** sets a flag in the attributes
-        field marking this as a password change service principal
-        (useless for most things).  **-password_changing_service**
-        clears the flag.  This flag intentionally has a long name.
-        The default is **-password_changing_service**.  In effect,
-        **+password_changing_service** sets the
-        *KRB5_KDB_PWCHANGE_SERVICE* flag on the principal in the
-        database.
+    Specifies the ticket flags.  If this option is not specified, by
+    default, no restriction will be set by the policy.  Allowable
+    flags are documented in the description of the **add_principal**
+    command in :ref:`kadmin(1)`.
 
 *policy_name*
     Specifies the name of the ticket policy.
 
-EXAMPLE:
+Example:
+
  ::
 
-    kdb5_ldap_util  -D  cn=admin,o=org -H ldaps://ldap-server1.mit.edu create_policy -r ATHENA.MIT.EDU -maxtktlife "1 day" -maxrenewlife "1 week" -allow_postdated +needchange -allow_forwardable tktpolicy
+    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu
+        create_policy -r ATHENA.MIT.EDU -maxtktlife "1 day"
+        -maxrenewlife "1 week" -allow_postdated +needchange
+        -allow_forwardable tktpolicy
     Password for "cn=admin,o=org":
 
 .. _kdb5_ldap_util_create_policy_end:
@@ -586,16 +365,20 @@ modify_policy
     [*ticket_flags*]
     *policy_name*
 
-Modifies the attributes of a ticket policy.  Options are same as
-create_policy.
+Modifies the attributes of a ticket policy.  Options are same as for
+**create_policy**.
 
 **-r** *realm*
     Specifies the Kerberos realm of the database.
 
-EXAMPLE:
+Example:
+
  ::
 
-    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu modify_policy  -r  ATHENA.MIT.EDU  -maxtktlife  "60  minutes"  -maxrenewlife  "10  hours" +allow_postdated -requires_preauth tktpolicy
+    kdb5_ldap_util -D cn=admin,o=org -H
+        ldaps://ldap-server1.mit.edu modify_policy -r ATHENA.MIT.EDU
+        -maxtktlife "60 minutes" -maxrenewlife "10 hours"
+        +allow_postdated -requires_preauth tktpolicy
     Password for "cn=admin,o=org":
 
 .. _kdb5_ldap_util_modify_policy_end:
@@ -609,15 +392,17 @@ view_policy
     [**-r** *realm*]
     *policy_name*
 
-Displays the attributes of a ticket policy. Options:
+Displays the attributes of a ticket policy.  Options:
 
 *policy_name*
     Specifies the name of the ticket policy.
 
-EXAMPLE:
+Example:
+
  ::
 
-    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu view_policy -r ATHENA.MIT.EDU tktpolicy
+    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu
+        view_policy -r ATHENA.MIT.EDU tktpolicy
     Password for "cn=admin,o=org":
     Ticket policy: tktpolicy
     Maximum ticket life: 0 days 01:00:00
@@ -636,7 +421,7 @@ destroy_policy
     [**-force**]
     *policy_name*
 
-Destroys an existing ticket policy. Options:
+Destroys an existing ticket policy.  Options:
 
 **-r** *realm*
     Specifies the Kerberos realm of the database.
@@ -649,10 +434,12 @@ Destroys an existing ticket policy. Options:
 *policy_name*
     Specifies the name of the ticket policy.
 
-EXAMPLE:
+Example:
+
  ::
 
-    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu destroy_policy -r ATHENA.MIT.EDU tktpolicy
+    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu
+        destroy_policy -r ATHENA.MIT.EDU tktpolicy
     Password for "cn=admin,o=org":
     This will delete the policy object 'tktpolicy', are you sure?
     (type 'yes' to confirm)? yes
@@ -674,10 +461,12 @@ realm.  Options:
 **-r** *realm*
     Specifies the Kerberos realm of the database.
 
-EXAMPLE:
+Example:
+
  ::
 
-    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu list_policy -r ATHENA.MIT.EDU
+    kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu
+        list_policy -r ATHENA.MIT.EDU
     Password for "cn=admin,o=org":
     tktpolicy
     tmppolicy

@@ -23,20 +23,19 @@ SYNOPSIS
 DESCRIPTION
 -----------
 
-kdb5_util allows an administrator to perform low-level maintenance
-procedures on the Kerberos and KADM5 database.  Databases can be
-created, destroyed, and dumped to and loaded from ASCII files.
-Additionally, kdb5_util can create a Kerberos master key stash file.
-kdb5_util subsumes the functionality of and makes obsolete the
-previous database maintenance programs kdb5_create, kdb5_edit,
-kdb5_destroy, and kdb5_stash.
+kdb5_util allows an administrator to perform maintenance procedures on
+the KDC database.  Databases can be created, destroyed, and dumped to
+or loaded from ASCII files.  kdb5_util can create a Kerberos master
+key stash file or perform live rollover of the master key.
 
 When kdb5_util is run, it attempts to acquire the master key and open
 the database.  However, execution continues regardless of whether or
 not kdb5_util successfully opens the database, because the database
 may not exist yet or the stash file may be corrupt.
 
-Note that some KDB plugins may not support all kdb5_util commands.
+Note that some KDC database modules may not support all kdb5_util
+commands.
+
 
 COMMAND-LINE OPTIONS
 --------------------
@@ -49,7 +48,7 @@ COMMAND-LINE OPTIONS
 **-d** *dbname*
     specifies the name under which the principal database is stored;
     by default the database is that listed in :ref:`kdc.conf(5)`.  The
-    KADM5 policy database and lock file are also derived from this
+    password policy database and lock files are also derived from this
     value.
 
 **-k** *mkeytype*
@@ -61,21 +60,26 @@ COMMAND-LINE OPTIONS
     the default is 1.  Note that 0 is not allowed.
 
 **-M** *mkeyname*
-    principal name for the master key in the database; the default is
-    that given in :ref:`kdc.conf(5)`.
+    principal name for the master key in the database.  If not
+    specified, the name is determined by the **master_key_name**
+    variable in :ref:`kdc.conf(5)`.
 
 **-m**
     specifies that the master database password should be read from
-    the TTY rather than fetched from a file on disk.
+    the keyboard rather than fetched from a file on disk.
 
 **-sf** *stash_file*
-    specifies the stash file of the master database password.
+    specifies the stash filename of the master database password.  If
+    not specified, the filename is determined by the
+    **key_stash_file** variable in :ref:`kdc.conf(5)`.
 
 **-P** *password*
-    specifies the master database password.  This option is not
-    recommended.
+    specifies the master database password.  Using this option may
+    expose the password to other users on the system via the process
+    list.
 
 .. _kdb5_util_options_end:
+
 
 COMMANDS
 --------
@@ -147,7 +151,7 @@ load_dump version 6".  If filename is not specified, or is the string
     releases prior to 1.2.2.
 
 **-ov**
-    causes the dump to be in *ovsec_adm_export* format.
+    causes the dump to be in "ovsec_adm_export" format.
 
 **-r13**
     causes the dump to be in the Kerberos 5 1.3 format ("kdb5_util
@@ -187,7 +191,7 @@ load
 .. _kdb5_util_load:
 
     **load** [**-old**\|\ **-b6**\|\ **-b7**\|\ **-ov**\|\ **-r13**]
-    [**-hash**] [**-verbose**] [**-update**] *filename* *dbname*
+    [**-hash**] [**-verbose**] [**-update**] *filename* [*dbname*]
 
 Loads a database dump from the named file into the named database.
 Unless the **-old** or **-b6** option is given, the format of the dump
@@ -210,7 +214,7 @@ plugin the **-update** must be given.  Options:
     ("kdb5_util load_dump version 4").
 
 **-ov**
-    requires the database to be in ovsec_adm_import format.  Must be
+    requires the database to be in "ovsec_adm_import" format.  Must be
     used with the **-update** option.
 
 **-hash**
@@ -232,7 +236,7 @@ plugin the **-update** must be given.  Options:
     what is in the dump file and the old one destroyed upon successful
     completion.
 
-*dbname* is required and overrides the value specified on the command
+If specified, *dbname* overrides the value specified on the command
 line or the default.
 
 .. _kdb5_util_load_end:
@@ -240,20 +244,29 @@ line or the default.
 ark
 ~~~
 
-    **ark**
+    **ark** [**-e** *enc*:*salt*,...] *principal*
 
-Adds a random key.
+Adds new random keys to *principal* at the next available key version
+number.  Keys for the current highest key version number will be
+preserved.  The **-e** option specifies the list of encryption and
+salt types to be used for the new keys.
 
 add_mkey
 ~~~~~~~~
 
     **add_mkey** [**-e** *etype*] [**-s**]
 
-Adds a new master key to the ``K/M`` (master key) principal.  Existing
-master keys will remain.  The **-e** *etype* option allows
-specification of the enctype of the new master key.  The **-s** option
-stashes the new master key in a local stash file which will be created
-if it doesn't already exist.
+Adds a new master key to the master key principal, but does not mark
+it as active.  Existing master keys will remain.  The **-e** option
+specifies of the encryption type of the new master key.  The **-s**
+option stashes the new master key in the stash file, which will be
+created if it doesn't already exist.
+
+After a new master key is added, it should be propagated to slave
+servers via a manual or periodic invocation of :ref:`kprop(8)`.  Then,
+the stash files on the slave servers should be updated with the
+kdb5_util **stash** command.  Once those steps are complete, the key
+is ready to be marked active with the kdb5_util **use_mkey** command.
 
 use_mkey
 ~~~~~~~~
@@ -261,44 +274,44 @@ use_mkey
     **use_mkey** *mkeyVNO* [*time*]
 
 Sets the activation time of the master key specified by *mkeyVNO*.
-Once a master key is active (i.e. its activation time has been
-reached) it will then be used to encrypt principal keys either when
-the principal keys change, are newly created or when the
-**update_princ_encryption** command is run.  If the time argument is
-provided then that will be the activation time otherwise the current
-time is used by default.  The format of the optional time argument is
-that specified in the *Time Formats* section of the :ref:`kadmin(1)`
-man page.
+Once a master key becomes active, it will be used to encrypt newly
+created principal keys.  If no *time* argument is given, the current
+time is used, causing the specified master key version to become
+active immediately.  The format of *time* is specified in the
+:ref:`date_format` section of the :ref:`kadmin(1)` man page.
+
+After a new master key becomes active, the kdb5_util
+**update_princ_encryption** command can be used to update all
+principal keys to be encrypted in the new master key.
 
 list_mkeys
 ~~~~~~~~~~
 
     **list_mkeys**
 
-List all master keys from most recent to earliest in ``K/M``
-principal.  The output will show the kvno, enctype and salt for each
-mkey similar to :ref:`kadmin(1)` **getprinc** output.  A ``*``
-following an mkey denotes the currently active master key.
+List all master keys, from most recent to earliest, in the master key
+principal.  The output will show the kvno, enctype, and salt type for
+each mkey, similar to the output of :ref:`kadmin(1)` **getprinc**.  A
+``*`` following an mkey denotes the currently active master key.
 
 purge_mkeys
 ~~~~~~~~~~~
 
     **purge_mkeys** [**-f**] [**-n**] [**-v**]
 
-Delete master keys from the ``K/M`` principal that are not used to
+Delete master keys from the master key principal that are not used to
 protect any principals.  This command can be used to remove old master
-keys from a ``K/M`` principal once all principal keys are protected by
-a newer master key.
+keys all principal keys are protected by a newer master key.
 
 **-f**
-    does not prompt user.
+    does not prompt for confirmation.
 
 **-n**
-    do a dry run, shows master keys that would be purged, does not
-    actually purge any keys.
+    performs a dry run, showing master keys that would be purged, but
+    not actually purging any keys.
 
 **-v**
-    verbose output.
+    gives more verbose output.
 
 update_princ_encryption
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -312,12 +325,10 @@ active database master key, if they are encrypted using older
 versions, and give a count at the end of the number of principals
 updated.  If the **-f** option is not given, ask for confirmation
 before starting to make changes.  The **-v** option causes each
-principal processed (each one matching the pattern) to be listed, and
-an indication given as to whether it needed updating or not.  The
-**-n** option causes the actions not to be taken, only the normal or
-verbose status messages displayed; this implies **-f** since no
-database changes will be performed and thus there's little reason to
-seek confirmation.
+principal processed to be listed, with an indication as to whether it
+needed updating or not.  The **-n** option performs a dry run, only
+showing the actions which would have been taken.
+
 
 SEE ALSO
 --------

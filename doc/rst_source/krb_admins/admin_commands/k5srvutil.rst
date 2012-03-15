@@ -13,8 +13,8 @@ SYNOPSIS
 DESCRIPTION
 -----------
 
-k5srvutil allows a system manager to list or change keys currently in
-his keytab or to add new keys to the keytab.
+k5srvutil allows an administrator to list or change keys currently in
+a keytab or to add new keys to the keytab.
 
 *operation* must be one of the following:
 
@@ -23,32 +23,32 @@ his keytab or to add new keys to the keytab.
     name.
 
 **change**
-    Changes all the keys in the keytab to new randomly-generated keys,
-    updating the keys in the Kerberos server's database to match by
-    using the kadmin protocol.  If a key's version number doesn't
-    match the version number stored in the Kerberos server's database,
-    then the operation will fail. The old keys are retained so that
+    Uses the kadmin protocol to update the keys in the Kerberos
+    database to new randomly-generated keys, and updates the keys in
+    the keytab to match.  If a key's version number doesn't match the
+    version number stored in the Kerberos server's database, then the
+    operation will fail.  Old keys are retained in the keytab so that
     existing tickets continue to work.  If the **-i** flag is given,
-    k5srvutil will prompt for yes or no before changing each key.  If
-    the **-k** option is used, the old and new keys will be displayed.
+    k5srvutil will prompt for confirmation before changing each key.
+    If the **-k** option is given, the old and new keys will be
+    displayed.
 
 **delold**
     Deletes keys that are not the most recent version from the keytab.
     This operation should be used some time after a change operation
-    to remove old keys.  If the **-i** flag is used, then the program
-    prompts the user whether the old keys associated with each
-    principal should be removed.
+    to remove old keys, after existing tickets issued for the service
+    have expired.  If the **-i** flag is given, then k5srvutil will
+    prompt for confirmation for each principal.
 
 **delete**
     Deletes particular keys in the keytab, interactively prompting for
     each key.
 
-In all cases, the default file used is ``/etc/krb5.keytab`` file
-unless this is overridden by the **-f** option.
+In all cases, the default keytab is used unless this is overridden by
+the **-f** option.
 
 k5srvutil uses the :ref:`kadmin(1)` program to edit the keytab in
-place.  However, old keys are retained, so they are available in case
-of failure.
+place.
 
 
 SEE ALSO
