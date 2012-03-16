@@ -164,8 +164,8 @@ load_dump version 6".  If filename is not specified, or is the string
 
 **-mkey_convert**
     prompts for a new master key.  This new master key will be used to
-    re-encrypt the key data in the dumpfile.  The key data in the
-    database will not be changed.
+    re-encrypt principal key data in the dumpfile.  The principal keys
+    themselves will not be changed.
 
 **-new_mkey_file** *mkey_file*
     the filename of a stash file.  The master key in this stash file
@@ -193,13 +193,15 @@ load
     **load** [**-old**\|\ **-b6**\|\ **-b7**\|\ **-ov**\|\ **-r13**]
     [**-hash**] [**-verbose**] [**-update**] *filename* [*dbname*]
 
-Loads a database dump from the named file into the named database.
-Unless the **-old** or **-b6** option is given, the format of the dump
-file is detected automatically and handled as appropriate.  Unless the
-**-update** option is given, load creates a new database containing
-only the principals in the dump file, overwriting the contents of any
-previously existing database.  Note that when using the LDAP KDB
-plugin the **-update** must be given.  Options:
+Loads a database dump from the named file into the named database.  If
+no option is given to determine the format of the dump file, the
+format is detected automatically and handled as appropriate.  Unless
+the **-update** option is given, **load** creates a new database
+containing only the data in the dump file, overwriting the contents of
+any previously existing database.  Note that when using the LDAP KDC
+database module, the **-update** flag is required.
+
+Options:
 
 **-old**
     requires the database to be in the Kerberos 5 Beta 5 and earlier

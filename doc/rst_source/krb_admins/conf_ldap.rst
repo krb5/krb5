@@ -139,7 +139,7 @@ Configuring Kerberos with OpenLDAP back-end
 
        kdb5_ldap_util -D cn=admin,dc=example,dc=com stashsrvpw -f /etc/kerberos/service.keyfile cn=krbadmin,dc=example,dc=com
 
-10. Add ``krb5principalname`` to the indexes in slapd.conf to speed up
+10. Add ``krbPrincipalName`` to the indexes in slapd.conf to speed up
     the access.
 
 With the LDAP back end it is possible to provide aliases for principal

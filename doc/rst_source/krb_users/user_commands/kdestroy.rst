@@ -76,12 +76,3 @@ SEE ALSO
 --------
 
 :ref:`kinit(1)`, :ref:`klist(1)`
-
-
-BUGS
-----
-
-Only the tickets in the specified credentials cache are destroyed.
-Separate ticket caches are used to hold root instance and password
-changing tickets.  These should probably be destroyed too, or all of a
-user's tickets kept in a single credentials cache.

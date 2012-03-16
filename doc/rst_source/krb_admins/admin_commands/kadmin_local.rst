@@ -647,7 +647,9 @@ The following options are available:
     sets the minimum length of a password
 
 **-minclasses** *number*
-    sets the minimum number of character classes allowed in a password
+    sets the minimum number of character classes required in a
+    password.  The five character classes are lower case, upper case,
+    numbers, punctuation, and whitespace/unprintable characters.
 
 **-history** *number*
     sets the number of past keys kept for a principal.  This option is
@@ -881,7 +883,8 @@ Example:
 lock
 ~~~~
 
-Lock database exclusively.  Use with extreme caution!
+Lock database exclusively.  Use with extreme caution!  This command
+only works with the DB2 KDC database module.
 
 unlock
 ~~~~~~

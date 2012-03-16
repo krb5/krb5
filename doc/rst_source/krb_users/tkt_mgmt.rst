@@ -50,8 +50,8 @@ A **postdated** ticket is issued with the invalid flag set.  After the
 starting time listed on the ticket, it can be presented to the KDC to
 obtain valid tickets.
 
-Tickets with the **postdateable** flag set can be used to issue
-postdated tickets.
+Ticket-granting tickets with the **postdateable** flag set can be used
+to obtain postdated service tickets.
 
 **Renewable** tickets can be used to obtain new session keys without
 the user entering their password again.  A renewable ticket has two
@@ -60,10 +60,10 @@ ticket expires.  The second is the latest possible expiration time for
 any ticket issued based on this renewable ticket.
 
 A ticket with the **initial flag** set was issued based on the
-authentication protocol, and not on a ticket-granting ticket.  Clients
-that wish to ensure that the user's key has been recently presented
-for verification could specify that this flag must be set to accept
-the ticket.
+authentication protocol, and not on a ticket-granting ticket.
+Application servers that wish to ensure that the user's key has been
+recently presented for verification could specify that this flag must
+be set to accept the ticket.
 
 An **invalid** ticket must be rejected by application servers.
 Postdated tickets are usually issued with this flag set, and must be
@@ -94,8 +94,7 @@ applications do not honor it.
 An **anonymous** ticket is one in which the named principal is a
 generic principal for that realm; it does not actually specify the
 individual that will be using the ticket.  This ticket is meant only
-to securely distribute a session key.  This is a new addition to the
-Kerberos V5 protocol and is not yet implemented on MIT servers.
+to securely distribute a session key.
 
 
 .. _obtain_tkt:
@@ -132,8 +131,7 @@ and you won't get Kerberos tickets.
 By default, kinit assumes you want tickets for your own username in
 your default realm.  Suppose Jennifer's friend David is visiting, and
 he wants to borrow a window to check his mail.  David needs to get
-tickets for himself in his own realm, EXAMPLE.COM [1]_. He would
-type::
+tickets for himself in his own realm, EXAMPLE.COM.  He would type::
 
     shell% kinit david@EXAMPLE.COM
     Password for david@EXAMPLE.COM: <-- [Type david's password here.]
@@ -173,9 +171,6 @@ type::
           maximum ticket lifetime.  If you request a longer ticket
           lifetime, it will be automatically truncated to the maximum
           lifetime.
-
-.. [1] Note: the realm EXAMPLE.COM must be listed in your computer's
-       Kerberos configuration file, :ref:`krb5.conf(5)`.
 
 
 .. _view_tkt:
@@ -303,7 +298,8 @@ Destroying tickets with kdestroy
 --------------------------------
 
 Your Kerberos tickets are proof that you are indeed yourself, and
-tickets can be stolen.  If this happens, the person who has them can
+tickets could be stolen if someone gains access to a computer where
+they are stored.  If this happens, the person who has them can
 masquerade as you until they expire.  For this reason, you should
 destroy your Kerberos tickets when you are away from your computer.
 

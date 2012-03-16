@@ -87,8 +87,7 @@ section.  If you are not using DNS SRV records (see
 :ref:`kdc_hostnames`), you must include the **kdc** tag for each
 *realm* in the :ref:`realms` section.  To communicate with the kadmin
 server in each realm, the **admin_server** tag must be set in the
-:ref:`realms` section.  If your domain name and realm name are not the
-same, you must provide a translation in :ref:`domain_realm`.
+:ref:`realms` section.
 
 An example krb5.conf file::
 
@@ -318,7 +317,7 @@ between the Kerberos administration daemon kadmind and the kadmin
 program over the network for further administration.  To do this, use
 the kadmin.local utility on the master KDC.  kadmin.local is designed
 to be run on the master KDC host without using Kerberos authentication
-to its database; instead, it must have read and write access to the
+to an admin server; instead, it must have read and write access to the
 Kerberos database on the local filesystem.
 
 The administrative principals you create should be the ones you added

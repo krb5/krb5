@@ -19,8 +19,8 @@ update log maintained by the :ref:`kadmind(8)` process on the master
 KDC server and the :ref:`kpropd(8)` process on the slave KDC servers.
 When updates occur, they are logged to this file.  Subsequently any
 KDC slave configured for incremental updates will request the current
-data from the master KDC and update their principal.ulog file with any
-updates returned.
+data from the master KDC and update their log file with any updates
+returned.
 
 The kproplog command requires read access to the update log file.  It
 will display update entries only for the KDC it runs on.

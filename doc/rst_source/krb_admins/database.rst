@@ -229,9 +229,6 @@ To delete a policy, use the kadmin **delete_policy** command.
    :start-after:  _add_policy:
    :end-before: _add_policy_end:
 
-.. note:: The policies are created under **realm** container in the
-          LDAP database.
-
 .. include:: admin_commands/kadmin_local.rst
    :start-after:  _modify_policy:
    :end-before: _modify_policy_end:
@@ -454,12 +451,6 @@ will not be dumped::
 
 If you do not specify a dump file, kdb5_util will dump the database to
 the standard output.
-
-There is currently a bug where the default dump format omits the
-per-principal policy information.  In order to dump all the data
-contained in the Kerberos database, you must perform a normal dump
-(with no option flags) and an additional dump using the "-ov" flag to
-a different file.
 
 
 .. _restore_from_dump:

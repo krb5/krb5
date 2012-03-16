@@ -23,14 +23,13 @@ The keytab file
 
 All Kerberos server machines need a keytab file to authenticate to the
 KDC. By default on UNIX-like systems this file is named
-``/etc/krb5.keytab``.  The keytab file is an encrypted, local, on-disk
-copy of the host's key.  The keytab file, like the stash file (see
-:ref:`create_db`) is a potential point-of-entry for a break-in, and if
-compromised, would allow unrestricted access to its host.  The keytab
-file should be readable only by root, and should exist only on the
-machine's local disk.  The file should not be part of any backup of
-the machine, unless access to the backup data is secured as tightly as
-access to the machine's root password itself.
+``/etc/krb5.keytab``.  The keytab file is an local copy of the host's
+key.  The keytab file is a potential point of entry for a break-in,
+and if compromised, would allow unrestricted access to its host.  The
+keytab file should be readable only by root, and should exist only on
+the machine's local disk.  The file should not be part of any backup
+of the machine, unless access to the backup data is secured as tightly
+as access to the machine's root password.
 
 In order to generate a keytab for a host, the host must have a
 principal in the Kerberos database.  The procedure for adding hosts to

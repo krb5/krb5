@@ -368,9 +368,6 @@ modify_policy
 Modifies the attributes of a ticket policy.  Options are same as for
 **create_policy**.
 
-**-r** *realm*
-    Specifies the Kerberos realm of the database.
-
 Example:
 
  ::
@@ -427,9 +424,8 @@ Destroys an existing ticket policy.  Options:
     Specifies the Kerberos realm of the database.
 
 **-force**
-    Forces the deletion of the policy object.  If not specified, will
-    be prompted for confirmation while deleting the policy.  Enter yes
-    to confirm the deletion.
+    Forces the deletion of the policy object.  If not specified, the
+    user will be prompted for confirmation before deleting the policy.
 
 *policy_name*
     Specifies the name of the ticket policy.

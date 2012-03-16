@@ -36,10 +36,6 @@ the **ktadd** command from kadmin.
    :start-after:  _ktadd:
    :end-before: _ktadd_end:
 
-.. note:: Alternatively, the keytab can be generated using
-          :ref:`ktutil(1)` **add_entry -password** and **write_kt**
-          commands.
-
 
 Examples
 ########

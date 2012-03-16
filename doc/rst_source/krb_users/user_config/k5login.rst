@@ -29,9 +29,9 @@ containing the following line:
 
     bob@FOOBAR.ORG
 
-This would allow ``bob`` to use any of the Kerberos network
-applications, such as telnet(1), rlogin(1), rsh(1), and rcp(1), to
-access ``alice``'s account, using ``bob``'s Kerberos tickets.
+This would allow ``bob`` to use Kerberos network applications, such as
+ssh(1), to access ``alice``'s account, using ``bob``'s Kerberos
+tickets.
 
 Let us further suppose that ``alice`` is a system administrator.
 Alice and the other system administrators would have their principals
@@ -55,4 +55,4 @@ password.
 SEE ALSO
 --------
 
-telnet(1), rlogin(1), rsh(1), rcp(1), ksu(1), telnetd(8), klogind(8)
+kerberos(1)

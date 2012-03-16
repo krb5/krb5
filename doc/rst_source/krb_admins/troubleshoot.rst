@@ -12,8 +12,10 @@ List
 
 This most commonly happens when trying to use a principal with only
 DES keys, in a release (MIT krb5 1.7 or later) which disables DES by
-default.  You can re-enable DES by adding ``allow_weak_crypto = true``
-to the :ref:`libdefaults` section of :ref:`krb5.conf(5)`.
+default.  DES encryption is considered weak due to its inadequate key
+size.  If you cannot migrate away from its use, you can re-enable DES
+by adding ``allow_weak_crypto = true`` to the :ref:`libdefaults`
+section of :ref:`krb5.conf(5)`.
 
 Seen in: clients
 
