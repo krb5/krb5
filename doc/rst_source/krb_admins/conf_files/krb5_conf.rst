@@ -638,6 +638,24 @@ All subsections support the same tags:
 The following subsections are currently supported within the [plugins]
 section:
 
+.. _ccselect:
+
+ccselect interface
+##################
+
+The ccselect subsection controls modules for credential cache
+selection within a cache collection.  In addition to any registered
+dynamic modules, the following built-in modules exist (and may be
+disabled with the disable tag):
+
+**k5identity**
+    Uses a .k5identity file in the user's home directory to select a
+    client principal
+
+**realm**
+    Uses the service realm to guess an appropriate cache from the
+    collection
+
 .. _pwqual:
 
 pwqual interface
@@ -645,8 +663,7 @@ pwqual interface
 
 The pwqual subsection controls modules for the password quality
 interface, which is used to reject weak passwords when passwords are
-changed.  In addition to any registered dynamic modules, the following
-built-in modules exist (and may be disabled with the disable tag):
+changed.  The following built-in modules exist for this interface:
 
 **dict**
     Checks against the realm dictionary file
