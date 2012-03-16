@@ -65,7 +65,7 @@ OPTIONS
 **-s**
     Causes klist to run silently (produce no output), but to still set
     the exit status according to whether it finds the credentials
-    cache. The exit status is '0' if klist finds a credentials cache,
+    cache.  The exit status is '0' if klist finds a credentials cache,
     and '1' if it does not or if the tickets are expired.
 
 **-a**
@@ -90,8 +90,8 @@ OPTIONS
 
 If *cache_name* or *keytab_name* is not specified, klist will display
 the credentials in the default credentials cache or keytab file as
-appropriate. If the **KRB5CCNAME** environment variable is set, its
-value is used to name the default ticket cache.
+appropriate.  If the **KRB5CCNAME** environment variable is set, its
+value is used to locate the default ticket cache.
 
 
 ENVIRONMENT
@@ -101,7 +101,7 @@ klist uses the following environment variable:
 
 **KRB5CCNAME**
     Location of the default Kerberos 5 credentials (ticket) cache, in
-    the form *type*:*residual*.  If no type prefix is present, the
+    the form *type*:*residual*.  If no *type* prefix is present, the
     **FILE** type is assumed.  The type of the default cache may
     determine the availability of a cache collection; for instance, a
     default cache of type **DIR** causes caches within the directory

@@ -36,7 +36,7 @@ kswitch uses the following environment variables:
 
 **KRB5CCNAME**
     Location of the default Kerberos 5 credentials (ticket) cache, in
-    the form *type*:*residual*.  If no type prefix is present, the
+    the form *type*:*residual*.  If no *type* prefix is present, the
     **FILE** type is assumed.  The type of the default cache may
     determine the availability of a cache collection; for instance, a
     default cache of type **DIR** causes caches within the directory

@@ -42,9 +42,9 @@ OPTIONS
     display verbose output.
 
 **-l** *lifetime*
-    requests a ticket  with  the  lifetime  lifetime.   The
-    value  for lifetime must be followed immediately by one
-    of the following delimiters:
+    requests a ticket with the lifetime *lifetime*.  The integer value
+    for *lifetime* must be followed immediately by one of the
+    following delimiters:
 
      ::
 
@@ -64,7 +64,7 @@ OPTIONS
 **-s** *start_time*
     requests a postdated ticket, valid starting at *start_time*.
     Postdated tickets are issued with the **invalid** flag set, and
-    need to be fed back to the kdc before use.
+    need to be resubmitted to the KDC for validation before use.
 
 **-r** *renewable_life*
     requests renewable tickets, with a total lifetime of
@@ -72,31 +72,34 @@ OPTIONS
     **-l** option, with the same delimiters.
 
 **-f**
-    request forwardable tickets.
+    requests forwardable tickets.
 
 **-F**
-    do not request forwardable tickets.
+    requests non-forwardable tickets.
 
 **-p**
-    request proxiable tickets.
+    requests proxiable tickets.
 
 **-P**
-    do not request proxiable tickets.
+    requests non-proxiable tickets.
 
 **-a**
-    request tickets with the local address[es].
+    requests tickets restricted to the host's local address[es].
 
 **-A**
-    request address-less tickets.
+    requests tickets not restricted by address.
 
 **-C**
-    requests canonicalization of the principal name.
+    requests canonicalization of the principal name, and allows the
+    KDC to reply with a different client principal from the one
+    requested.
 
 **-E**
-    treats the principal name as an enterprise name.
+    treats the principal name as an enterprise name (implies the
+    **-C** option).
 
 **-v**
-    requests that the ticket granting ticket in the cache (with the
+    requests that the ticket-granting ticket in the cache (with the
     **invalid** flag set) be passed to the KDC for validation.  If the
     ticket is within its requested time range, the cache is replaced
     with the validated ticket.
@@ -107,15 +110,15 @@ OPTIONS
     within its renewable life.
 
 **-k** [**-t** *keytab_file*]
-    requests a ticket, obtained from a key in the local host's keytab
-    file.  The name and location of the key tab file may be specified
-    with the **-t** *keytab_file* option; otherwise the default name
-    and location will be used.  By default a host ticket is requested
-    but any principal may be specified.  On a KDC, the special keytab
-    location ``KDB:`` can be used to indicate that kinit should open
-    the KDC database and look up the key directly.  This permits an
+    requests a ticket, obtained from a key in the local host's keytab.
+    The location of the keytab may be specified with the **-t**
+    *keytab_file* option; otherwise the default keytab will be used.
+    By default, a host ticket for the local host is requested, but any
+    principal may be specified.  On a KDC, the special keytab location
+    ``KDB:`` can be used to indicate that kinit should open the KDC
+    database and look up the key directly.  This permits an
     administrator to obtain tickets as any principal that supports
-    password-based authentication.
+    authentication based on the key.
 
 **-n**
     Requests anonymous processing.  Two types of anonymous principals
@@ -138,40 +141,39 @@ OPTIONS
     anonymous operation.
 
 **-T** *armor_ccache*
-    Specifies the name of a credential cache that already contains a
-    ticket.  If supported by the KDC, this ccache will be used to
-    armor the request so that an attacker would have to know both the
-    key of the armor ticket and the key of the principal used for
-    authentication in order to attack the request.  Armoring also
+    Specifies the name of a credentials cache that already contains a
+    ticket.  If supported by the KDC, this cache will be used to armor
+    the request, preventing offline dictionary attacks and allowing
+    the use of additional preauthentication mechanisms.  Armoring also
     makes sure that the response from the KDC is not modified in
     transit.
 
 **-c** *cache_name*
-    use *cache_name* as the Kerberos 5 credentials (ticket) cache name
-    and location; if this option is not used, the default cache name
-    and location are used.
+    use *cache_name* as the Kerberos 5 credentials (ticket) cache
+    location.  If this option is not used, the default cache location
+    is used.
 
-    The default credentials cache may vary between systems.  If the
+    The default cache location may vary between systems.  If the
     **KRB5CCNAME** environment variable is set, its value is used to
-    name the default ticket cache.  If a principal name is specified
-    and the type of the default credentials cache supports a
-    collection (such as the DIR type), an existing cache containing
-    credentials for the principal is selected or a new one is created
-    and becomes the new primary cache.  Otherwise, any existing
-    contents of the default cache are destroyed by kinit.
+    locate the default cache.  If a principal name is specified and
+    the type of the default cache supports a collection (such as the
+    DIR type), an existing cache containing credentials for the
+    principal is selected or a new one is created and becomes the new
+    primary cache.  Otherwise, any existing contents of the default
+    cache are destroyed by kinit.
 
 **-S** *service_name*
     specify an alternate service name to use when getting initial
     tickets.
 
 **-X** *attribute*\ [=\ *value*]
-    specify a pre-authentication *attribute* and *value* to be passed
-    to pre-authentication plugins.  The acceptable attribute and value
-    values vary from pre-authentication plugin to plugin.  This option
-    may be specified multiple times to specify multiple attributes.
-    If no value is specified, it is assumed to be "yes".
+    specify a pre-authentication *attribute* and *value* to be
+    interpreted by pre-authentication modules.  The acceptable
+    attribute and value values vary from module to module.  This
+    option may be specified multiple times to specify multiple
+    attributes.  If no value is specified, it is assumed to be "yes".
 
-    The following attributes are recognized by the OpenSSL pkinit
+    The following attributes are recognized by the PKINIT
     pre-authentication mechanism:
 
     **X509_user_identity**\ =\ *value*
@@ -191,12 +193,12 @@ ENVIRONMENT
 kinit uses the following environment variables:
 
 **KRB5CCNAME**
-    Location of the default Kerberos 5 credentials (ticket) cache, in
-    the form *type*:*residual*.  If no type prefix is present, the
-    **FILE** type is assumed.  The type of the default cache may
-    determine the availability of a cache collection; for instance, a
-    default cache of type **DIR** causes caches within the directory
-    to be present in the collection.
+    Location of the default Kerberos 5 credentials cache, in the form
+    *type*:*residual*.  If no *type* prefix is present, the **FILE**
+    type is assumed.  The type of the default cache may determine the
+    availability of a cache collection; for instance, a default cache
+    of type **DIR** causes caches within the directory to be present
+    in the collection.
 
 
 FILES
@@ -207,7 +209,7 @@ FILES
     decimal UID of the user).
 
 ``/etc/krb5.keytab``
-    default location for the local host's keytab file.
+    default location for the local host's keytab.
 
 
 SEE ALSO

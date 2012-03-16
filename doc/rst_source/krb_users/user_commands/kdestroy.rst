@@ -15,10 +15,10 @@ SYNOPSIS
 DESCRIPTION
 -----------
 
-The kdestroy utility destroys the user's active Kerberos
-authorization tickets by writing zeros to the specified
-credentials cache that contains them. If the credentials
-cache is not specified, the default credentials cache is destroyed.
+The kdestroy utility destroys the user's active Kerberos authorization
+tickets by overwriting and deleting the credentials cache that
+contains them.  If the credentials cache is not specified, the default
+credentials cache is destroyed.
 
 
 OPTIONS
@@ -57,7 +57,7 @@ kdestroy uses the following environment variable:
 
 **KRB5CCNAME**
     Location of the default Kerberos 5 credentials (ticket) cache, in
-    the form *type*:*residual*.  If no type prefix is present, the
+    the form *type*:*residual*.  If no *type* prefix is present, the
     **FILE** type is assumed.  The type of the default cache may
     determine the availability of a cache collection; for instance, a
     default cache of type **DIR** causes caches within the directory

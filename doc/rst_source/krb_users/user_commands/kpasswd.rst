@@ -13,11 +13,8 @@ DESCRIPTION
 -----------
 
 The kpasswd command is used to change a Kerberos principal's password.
-kpasswd prompts for the current Kerberos password, which is used to
-obtain a ``changepw`` ticket from the KDC for the user's Kerberos
-realm.  If kpasswd successfully obtains the ``changepw`` ticket, the
-user is prompted twice for the new password, and the password is
-changed.
+kpasswd first prompts for the current Kerberos password, then prompts
+the user twice for the new password, and the password is changed.
 
 If the principal is governed by a policy that specifies the length
 and/or number of character classes required in the new password, the
@@ -36,27 +33,7 @@ OPTIONS
     identity of the user invoking the kpasswd command.
 
 
-PORTS
------
-
-kpasswd looks first for
- ::
-
-    kpasswd_server = host:port
-
-in the [realms] section of the :ref:`krb5.conf(5)` file under the
-current realm.  If that is missing, kpasswd looks for the
-**admin_server** entry, but substitutes 464 for the port.
-
-
 SEE ALSO
 --------
 
 :ref:`kadmin(1)`, :ref:`kadmind(8)`
-
-
-BUGS
-----
-
-kpasswd may not work with multi-homed hosts running on the Solaris
-platform.

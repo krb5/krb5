@@ -28,8 +28,8 @@ OPTIONS
 -------
 
 **-c** *ccache*
-   Specifies the name of a credentials cache to use (if not the
-   default)
+    Specifies the name of a credentials cache to use (if not the
+    default)
 
 **-e** *etype*
     Specifies the enctype which will be requested for the session key
@@ -37,10 +37,12 @@ OPTIONS
     certain backward compatibility situations.
 
 **-q**
-   Suppress printing
+    Suppress printing output when successful.  If a service ticket
+    cannot be obtained, an error message will still be printed and
+    kvno will exit with nonzero status.
 
 **-h**
-   Prints a usage statement and exits
+    Prints a usage statement and exits.
 
 **-P**
     Specifies that the *service1 service2* ...  arguments are to be
@@ -49,10 +51,11 @@ OPTIONS
     conjunction with protocol transition.
 
 **-S** *sname*
-    Specifies that *krb5_sname_to_principal()* will be used to build
-    principal names.  If this flag is specified, the *service1
-    service2* ...  arguments are interpreted as hostnames (rather than
-    principal names), and *sname* is interpreted as the service name.
+    Specifies that the *service1 service2* ... arguments are
+    interpreted as hostnames, and the service principals are to be
+    constructed from those hostnames and the service name *sname*.
+    The service hostnames will be canonicalized according to the usual
+    rules for constructing service principals.
 
 **-U** *for_user*
     Specifies that protocol transition (S4U2Self) is to be used to
