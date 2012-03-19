@@ -27,4 +27,3 @@ Version
 
 :Release: |version|
 
-:Date: |today|
