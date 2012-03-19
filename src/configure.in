@@ -1245,6 +1245,12 @@ AC_SUBST([VERTO_VERSION])
 
 AC_PATH_PROG(GROFF, groff)
 
+# Make localedir work in autoconf 2.5x.
+if test "${localedir+set}" != set; then
+    localedir='$(datadir)/locale'
+fi
+AC_SUBST(localedir)
+
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 V5_AC_OUTPUT_MAKEFILE(.
 
