@@ -10,6 +10,5 @@ Configuration Files
 .. toctree::
    :maxdepth: 2
 
-   enc_types.rst
    krb5_conf.rst
    kdc_conf.rst

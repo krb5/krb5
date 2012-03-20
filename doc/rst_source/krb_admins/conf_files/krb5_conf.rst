@@ -99,11 +99,12 @@ The libdefaults section may contain any of the following relations:
 **allow_weak_crypto**
     If this flag is set to false, then weak encryption types will be
     filtered out of the previous three lists (as noted in
-    :ref:`Supported_Encryption_Types_and_Salts`).  The default value
-    for this tag is false, which may cause authentication failures in
-    existing Kerberos infrastructures that do not support strong
-    crypto.  Users in affected environments should set this tag to
-    true until their infrastructure adopts stronger ciphers.
+    :ref:`Encryption_and_salt_types` in :ref:`kdc.conf(5)`).  The
+    default value for this tag is false, which may cause
+    authentication failures in existing Kerberos infrastructures that
+    do not support strong crypto.  Users in affected environments
+    should set this tag to true until their infrastructure adopts
+    stronger ciphers.
 
 **ap_req_checksum_type**
     An integer which specifies the type of AP-REQ checksum to use in
@@ -145,13 +146,13 @@ The libdefaults section may contain any of the following relations:
 **default_tgs_enctypes**
     Identifies the supported list of session key encryption types that
     should be returned by the KDC.  The list may be delimited with
-    commas or whitespace.  See
-    :ref:`Supported_Encryption_Types_and_Salts` for a list of the
-    accepted values for this tag.  The default value is
-    ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1
-    arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``, but
-    single-DES encryption types will be implicitly removed from this
-    list if the value of **allow_weak_crypto** is false.
+    commas or whitespace.  See :ref:`Encryption_and_salt_types` in
+    :ref:`kdc.conf(5)` for a list of the accepted values for this tag.
+    The default value is ``aes256-cts-hmac-sha1-96
+    aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc
+    des-cbc-md5 des-cbc-md4``, but single-DES encryption types will be
+    implicitly removed from this list if the value of
+    **allow_weak_crypto** is false.
 
 **default_tkt_enctypes**
     Identifies the supported list of session key encryption types that

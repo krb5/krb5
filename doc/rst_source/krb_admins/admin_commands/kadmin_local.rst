@@ -128,7 +128,8 @@ OPTIONS
 
 **-e** "*enc*:*salt* ..."
     Sets the list of encryption types and salt types to be used for
-    any new keys created.
+    any new keys created.  See :ref:`Encryption_and_salt_types` in
+    :ref:`kdc.conf(5)` for a list of possible values.
 
 **-O**
     Force use of old AUTH_GSSAPI authentication flavor.

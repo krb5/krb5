@@ -86,8 +86,9 @@ Creates realm in directory. Options:
     realm container.
 
 **-k** *mkeytype*
-    Specifies the key type of the master key in the database; the
-    default is that given in :ref:`kdc.conf(5)`.
+    Specifies the key type of the master key in the database.  The
+    default is given by the **master_key_type** variable in
+    :ref:`kdc.conf(5)`.
 
 **-kv** *mkeyVNO*
     Specifies the version number of the master key in the database;
