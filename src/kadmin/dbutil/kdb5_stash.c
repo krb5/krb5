@@ -56,7 +56,6 @@
 #include "kdb5_util.h"
 
 extern krb5_keyblock master_keyblock;
-extern krb5_keylist_node *master_keylist;
 extern krb5_principal master_princ;
 extern kadm5_config_params global_params;
 
@@ -119,8 +118,7 @@ kdb5_stash(argc, argv)
         }
 
         retval = krb5_db_fetch_mkey_list(util_context, master_princ,
-                                         &master_keyblock, mkey_kvno,
-                                         &master_keylist);
+                                         &master_keyblock);
         if (retval) {
             com_err(progname, retval, _("while getting master key list"));
             exit_status++; return;
@@ -130,7 +128,7 @@ kdb5_stash(argc, argv)
     }
 
     retval = krb5_db_store_master_key_list(util_context, keyfile, master_princ,
-                                           master_keylist, NULL);
+                                           NULL);
     if (retval) {
         com_err(progname, errno, _("while storing key"));
         exit_status++; return;

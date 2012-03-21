@@ -25,7 +25,6 @@
 extern  krb5_principal      master_princ;
 extern  krb5_principal      hist_princ;
 extern  krb5_keyblock       master_keyblock;
-extern  krb5_keylist_node  *master_keylist;
 extern  krb5_actkvno_node  *active_mkey_list;
 extern  krb5_db_entry       master_db;
 
@@ -364,8 +363,8 @@ kadm5_create_principal_3(void *server_handle,
 
     /* initialize the keys */
 
-    ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-                                 active_mkey_list, &act_kvno, &act_mkey);
+    ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list, &act_kvno,
+                                 &act_mkey);
     if (ret)
         goto cleanup;
 
@@ -869,8 +868,7 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
                 entry->kvno = kdb->key_data[i].key_data_kvno;
 
     if (mask & KADM5_MKVNO) {
-        ret = krb5_dbe_get_mkvno(handle->context, kdb, master_keylist,
-                                 &entry->mkvno);
+        ret = krb5_dbe_get_mkvno(handle->context, kdb, &entry->mkvno);
         if (ret)
             goto done;
     }
@@ -1385,8 +1383,8 @@ kadm5_chpass_principal_3(void *server_handle,
                             principal)))
         goto done;
 
-    ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-                                 active_mkey_list, &act_kvno, &act_mkey);
+    ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list, &act_kvno,
+                                 &act_mkey);
     if (ret)
         goto done;
 
@@ -1579,8 +1577,8 @@ kadm5_randkey_principal_3(void *server_handle,
     if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
         return(ret);
 
-    ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-                                 active_mkey_list, NULL, &act_mkey);
+    ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list, NULL,
+                                 &act_mkey);
     if (ret)
         goto done;
 
@@ -1727,8 +1725,8 @@ kadm5_setv4key_principal(void *server_handle,
     keysalt.data.length = 0;
     keysalt.data.data = NULL;
 
-    ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-                                 active_mkey_list, NULL, &act_mkey);
+    ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list, NULL,
+                                 &act_mkey);
     if (ret)
         goto done;
 
@@ -1931,8 +1929,8 @@ kadm5_setkey_principal_3(void *server_handle,
         }
         memset (&tmp_key_data, 0, sizeof(tmp_key_data));
 
-        ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,
-                                     active_mkey_list, NULL, &act_mkey);
+        ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list, NULL,
+                                     &act_mkey);
         if (ret)
             goto done;
 
@@ -2178,17 +2176,13 @@ kadm5_ret_t kadm5_decrypt_key(void *server_handle,
 
     /* find_mkey only uses this field */
     dbent.tl_data = entry->tl_data;
-    if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist, &dbent,
-                                  &mkey_ptr))) {
-        krb5_keylist_node *tmp_mkey_list;
+    if ((ret = krb5_dbe_find_mkey(handle->context, &dbent, &mkey_ptr))) {
         /* try refreshing master key list */
         /* XXX it would nice if we had the mkvno here for optimization */
         if (krb5_db_fetch_mkey_list(handle->context, master_princ,
-                                    &master_keyblock, 0, &tmp_mkey_list) == 0) {
-            krb5_dbe_free_key_list(handle->context, master_keylist);
-            master_keylist = tmp_mkey_list;
-            if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist,
-                                          &dbent, &mkey_ptr))) {
+                                    &master_keyblock) == 0) {
+            if ((ret = krb5_dbe_find_mkey(handle->context, &dbent,
+                                          &mkey_ptr))) {
                 return ret;
             }
         } else {

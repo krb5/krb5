@@ -418,7 +418,6 @@ krb5_error_code
 krb5_def_fetch_mkey_list(krb5_context        context,
                          krb5_principal        mprinc,
                          const krb5_keyblock  *mkey,
-                         krb5_kvno             mkvno,
                          krb5_keylist_node  **mkeys_list)
 {
     krb5_error_code retval;

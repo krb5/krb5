@@ -18,7 +18,6 @@
 
 krb5_principal      master_princ;
 krb5_keyblock       master_keyblock; /* local mkey */
-krb5_keylist_node  *master_keylist = NULL;
 krb5_actkvno_node   *active_mkey_list = NULL;
 krb5_db_entry       master_db;
 
@@ -69,7 +68,7 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
         goto done;
 
     if ((ret = krb5_db_fetch_mkey_list(handle->context, master_princ,
-                                       &master_keyblock, mkvno, &master_keylist))) {
+                                       &master_keyblock))) {
         krb5_db_fini(handle->context);
         return (ret);
     }
@@ -192,7 +191,7 @@ kdb_get_hist_key(kadm5_server_handle_t handle, krb5_keyblock *hist_keyblock,
         goto done;
     }
 
-    ret = krb5_dbe_find_mkey(handle->context, master_keylist, kdb, &mkey);
+    ret = krb5_dbe_find_mkey(handle->context, kdb, &mkey);
     if (ret)
         goto done;
 

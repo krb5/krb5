@@ -106,7 +106,6 @@ void usage()
 
 krb5_keyblock master_keyblock;
 krb5_kvno   master_kvno; /* fetched */
-extern krb5_keylist_node *master_keylist;
 extern krb5_principal master_princ;
 krb5_db_entry *master_entry = NULL;
 int     valid_master_key = 0;
@@ -485,8 +484,7 @@ static int open_db_and_mkey()
     }
 
     if ((retval = krb5_db_fetch_mkey_list(util_context, master_princ,
-                                          &master_keyblock, master_kvno,
-                                          &master_keylist))) {
+                                          &master_keyblock))) {
         com_err(progname, retval, "while getting master key list");
         com_err(progname, 0, "Warning: proceeding without master key list");
         exit_status++;
@@ -501,7 +499,6 @@ static int open_db_and_mkey()
         exit_status++;
         memset(master_keyblock.contents, 0, master_keyblock.length);
         krb5_free_keyblock_contents(util_context, &master_keyblock);
-        krb5_db_free_mkey_list(util_context, master_keylist);
         return(1);
     }
 
@@ -532,7 +529,6 @@ quit()
 
     if (finished)
         return 0;
-    krb5_db_free_mkey_list(util_context, master_keylist);
     retval = krb5_db_fini(util_context);
     memset(master_keyblock.contents, 0, master_keyblock.length);
     finished = TRUE;
@@ -605,7 +601,7 @@ add_random_key(argc, argv)
         free_keysalts = 1;
 
     /* Find the mkey used to protect the existing keys */
-    ret = krb5_dbe_find_mkey(util_context, master_keylist, dbent, &tmp_mkey);
+    ret = krb5_dbe_find_mkey(util_context, dbent, &tmp_mkey);
     if (ret) {
         com_err(me, ret, _("while finding mkey"));
         krb5_db_free_principal(util_context, dbent);

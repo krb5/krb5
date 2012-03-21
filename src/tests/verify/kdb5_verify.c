@@ -353,7 +353,6 @@ set_dbname_help(context, pname, dbname)
     krb5_error_code retval;
     krb5_data pwd, scratch;
     char *args[2];
-    krb5_keylist_node *mkeys;
     krb5_db_entry *master_entry;
 
     /* assemble & parse the master key name */
@@ -407,13 +406,11 @@ set_dbname_help(context, pname, dbname)
         return(1);
     }
     if ((retval = krb5_db_fetch_mkey_list(context, master_princ,
-                                          &master_keyblock, IGNORE_VNO,
-                                          &mkeys))) {
+                                          &master_keyblock))) {
         com_err(pname, retval, "while verifying master key");
         (void) krb5_db_fini(context);
         return(1);
     }
-    krb5_db_free_mkey_list(context, mkeys);
     if ((retval = krb5_db_get_principal(context, master_princ, 0,
                                         &master_entry))) {
         com_err(pname, retval, "while retrieving master entry");

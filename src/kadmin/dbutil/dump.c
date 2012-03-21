@@ -295,7 +295,7 @@ krb5_error_code master_key_convert(context, db_entry)
             krb5_keyblock   *tmp_mkey;
 
             key_data = &db_entry->key_data[i];
-            retval = krb5_dbe_find_mkey(context, master_keylist, db_entry, &tmp_mkey);
+            retval = krb5_dbe_find_mkey(context, db_entry, &tmp_mkey);
             if (retval)
                 return retval;
             retval = krb5_dbe_decrypt_key_data(context, tmp_mkey, key_data,
@@ -1078,7 +1078,6 @@ dump_db(argc, argv)
     bool_t              dump_sno = FALSE;
     kdb_log_context     *log_ctx;
     unsigned int        ipropx_version = IPROPX_VERSION_0;
-    krb5_keylist_node *mkeys;
 
     /*
      * Parse the arguments.
@@ -1182,13 +1181,11 @@ dump_db(argc, argv)
                 exit(1);
             }
             retval = krb5_db_fetch_mkey_list(util_context, master_princ,
-                                             &master_keyblock, IGNORE_VNO,
-                                             &mkeys);
+                                             &master_keyblock);
             if (retval) {
                 com_err(progname, retval, _("while verifying master key"));
                 exit(1);
             }
-            krb5_db_free_mkey_list(util_context, mkeys);
         }
         new_master_keyblock.enctype = global_params.enctype;
         if (new_master_keyblock.enctype == ENCTYPE_UNKNOWN)

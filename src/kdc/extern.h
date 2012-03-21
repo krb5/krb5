@@ -51,10 +51,9 @@ typedef struct __kdc_realm_data {
     krb5_principal      realm_mprinc;   /* Master principal for realm       */
     /*
      * Note realm_mkey is mkey read from stash or keyboard and may not be the
-     * latest.  The mkey_list will have all the mkeys in use.
+     * latest.
      */
     krb5_keyblock       realm_mkey;     /* Master key for this realm        */
-    krb5_keylist_node * mkey_list;      /* list of mkeys in use for this realm */
     /*
      * TGS per-realm data.
      */
@@ -88,7 +87,6 @@ kdc_realm_t *find_realm_data (char *, krb5_ui_4);
 #define max_life_for_realm              kdc_active_realm->realm_maxlife
 #define max_renewable_life_for_realm    kdc_active_realm->realm_maxrlife
 #define master_keyblock                 kdc_active_realm->realm_mkey
-#define master_keylist                  kdc_active_realm->mkey_list
 #define master_princ                    kdc_active_realm->realm_mprinc
 #define tgs_server                      kdc_active_realm->realm_tgsprinc
 #define reject_bad_transit              kdc_active_realm->realm_reject_bad_transit

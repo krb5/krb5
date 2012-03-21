@@ -69,8 +69,6 @@ gss_name_t gss_changepw_name = NULL, gss_oldchangepw_name = NULL;
 gss_name_t gss_kadmin_name = NULL;
 void *global_server_handle;
 
-extern krb5_keylist_node  *master_keylist;
-
 char *build_princ_name(char *name, char *realm);
 void log_badauth(OM_uint32 major, OM_uint32 minor,
                  struct sockaddr_in *addr, char *data);

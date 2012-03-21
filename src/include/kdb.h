@@ -377,7 +377,6 @@ krb5_error_code krb5_db_store_master_key  ( krb5_context kcontext,
 krb5_error_code krb5_db_store_master_key_list  ( krb5_context kcontext,
                                                  char *keyfile,
                                                  krb5_principal mname,
-                                                 krb5_keylist_node *keylist,
                                                  char *master_pwd);
 krb5_error_code krb5_db_fetch_mkey  ( krb5_context   context,
                                       krb5_principal mname,
@@ -391,15 +390,7 @@ krb5_error_code krb5_db_fetch_mkey  ( krb5_context   context,
 krb5_error_code
 krb5_db_fetch_mkey_list( krb5_context    context,
                          krb5_principal  mname,
-                         const krb5_keyblock * mkey,
-                         krb5_kvno             mkvno,
-                         krb5_keylist_node  **mkeys_list );
-/**
- * Free a master keylist.
- */
-void
-krb5_db_free_mkey_list( krb5_context         context,
-                        krb5_keylist_node  *mkey_list );
+                         const krb5_keyblock * mkey );
 
 krb5_error_code
 krb5_dbe_find_enctype( krb5_context     kcontext,
@@ -451,14 +442,12 @@ krb5_dbe_fetch_act_key_list(krb5_context          context,
 
 krb5_error_code
 krb5_dbe_find_act_mkey( krb5_context          context,
-                        krb5_keylist_node   * mkey_list,
                         krb5_actkvno_node   * act_mkey_list,
                         krb5_kvno           * act_kvno,
                         krb5_keyblock      ** act_mkey);
 
 krb5_error_code
 krb5_dbe_find_mkey( krb5_context         context,
-                    krb5_keylist_node * mkey_list,
                     krb5_db_entry      * entry,
                     krb5_keyblock      ** mkey);
 
@@ -468,11 +457,13 @@ krb5_dbe_lookup_mkvno( krb5_context    context,
                        krb5_db_entry * entry,
                        krb5_kvno     * mkvno);
 
+krb5_keylist_node *
+krb5_db_mkey_list_alias( krb5_context kcontext );
+
 /* Set *mkvno to mkvno in entry tl_data, or minimum value from mkey_list. */
 krb5_error_code
 krb5_dbe_get_mkvno( krb5_context        context,
                     krb5_db_entry     * entry,
-                    krb5_keylist_node * mkey_list,
                     krb5_kvno         * mkvno);
 
 krb5_error_code
@@ -698,7 +689,6 @@ krb5_error_code
 krb5_def_fetch_mkey_list( krb5_context            context,
                           krb5_principal        mprinc,
                           const krb5_keyblock  *mkey,
-                          krb5_kvno             mkvno,
                           krb5_keylist_node  **mkeys_list);
 
 krb5_error_code
@@ -1092,7 +1082,6 @@ typedef struct _kdb_vftabl {
     krb5_error_code (*fetch_master_key_list)(krb5_context kcontext,
                                              krb5_principal mname,
                                              const krb5_keyblock *key,
-                                             krb5_kvno kvno,
                                              krb5_keylist_node **mkeys_list);
 
     /*

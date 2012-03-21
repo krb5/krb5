@@ -64,6 +64,18 @@ static db_library lib_list;
 MAKE_INIT_FUNCTION(kdb_init_lock_list);
 MAKE_FINI_FUNCTION(kdb_fini_lock_list);
 
+static void
+free_mkey_list(krb5_context context, krb5_keylist_node *mkey_list)
+{
+    krb5_keylist_node *cur, *next;
+
+    for (cur = mkey_list; cur != NULL; cur = next) {
+        next = cur->next;
+        krb5_free_keyblock_contents(context, &cur->keyblock);
+        krb5_xfree(cur);
+    }
+}
+
 int
 kdb_init_lock_list()
 {
@@ -569,16 +581,12 @@ static krb5_error_code
 kdb_free_lib_handle(krb5_context kcontext)
 {
     krb5_error_code status = 0;
-    krb5_keylist_node *old_keylist = kcontext->dal_handle->master_keylist;
 
     status = kdb_free_library(kcontext->dal_handle->lib_handle);
     if (status)
         return status;
-    /* The dal_handle holds an alias to the most recent mkey_list. */
-    if (kcontext->dal_handle->free_keylist) {
-        kcontext->dal_handle->master_keylist = NULL; /* Force freeing. */
-        krb5_db_free_mkey_list(kcontext, old_keylist);
-    }
+
+    free_mkey_list(kcontext, kcontext->dal_handle->master_keylist);
     krb5_free_principal(kcontext, kcontext->dal_handle->master_princ);
     free(kcontext->dal_handle);
     kcontext->dal_handle = NULL;
@@ -1011,10 +1019,16 @@ krb5_db_iterate(krb5_context kcontext, char *match_entry,
     return v->iterate(kcontext, match_entry, func, func_arg);
 }
 
+/* Return a read only pointer alias to mkey list.  Do not free this! */
+krb5_keylist_node *
+krb5_db_mkey_list_alias(krb5_context kcontext)
+{
+    return kcontext->dal_handle->master_keylist;
+}
+
 krb5_error_code
 krb5_db_fetch_mkey_list(krb5_context context, krb5_principal mname,
-                        const krb5_keyblock *mkey, krb5_kvno mkvno,
-                        krb5_keylist_node **mkey_list)
+                        const krb5_keyblock *mkey)
 {
     kdb_vftabl *v;
     krb5_error_code status = 0;
@@ -1023,50 +1037,20 @@ krb5_db_fetch_mkey_list(krb5_context context, krb5_principal mname,
     status = get_vftabl(context, &v);
     if (status)
         return status;
+
     if (!context->dal_handle->master_princ) {
         status = krb5_copy_principal(context, mname,
                                      &context->dal_handle->master_princ);
         if (status)
             return status;
     }
-    if (mkey_list == NULL)
-        mkey_list = &local_keylist;
-    status = v->fetch_master_key_list(context, mname, mkey, mkvno, mkey_list);
+
+    status = v->fetch_master_key_list(context, mname, mkey, &local_keylist);
     if (status == 0) {
-        /* The dal_handle holds an alias to the most recent master_keylist. */
-        krb5_keylist_node *old_keylist = context->dal_handle->master_keylist;
-        context->dal_handle->master_keylist = *mkey_list;
-        if (context->dal_handle->free_keylist)
-            krb5_db_free_mkey_list(context, old_keylist);
-        context->dal_handle->free_keylist = (mkey_list == &local_keylist);
+        free_mkey_list(context, context->dal_handle->master_keylist);
+        context->dal_handle->master_keylist = local_keylist;
     }
     return status;
-}
-
-void
-krb5_db_free_mkey_list(krb5_context context, krb5_keylist_node *mkey_list)
-{
-    krb5_keylist_node *cur, *prev;
-
-    /*
-     * The dal_handle holds onto the most recent master keylist that has been
-     * fetched throughout the lifetime of the context; if this function is
-     * called on that keylist, then the dal_handle is updated to indicate that
-     * the keylist should be freed on next call to krb5_db_fetch_mkey_list() or
-     * when the database is closed.  Otherwise, the master_keylist is freed.
-     * Either way, the caller must not access this master keylist after calling
-     * this function.
-     */
-    if (context && context->dal_handle->master_keylist == mkey_list) {
-        context->dal_handle->free_keylist = 1;
-        return;
-    }
-    for (cur = mkey_list; cur != NULL;) {
-        prev = cur;
-        cur = cur->next;
-        krb5_free_keyblock_contents(context, &prev->keyblock);
-        krb5_xfree(prev);
-    }
 }
 
 krb5_error_code
@@ -1074,19 +1058,28 @@ krb5_db_store_master_key(krb5_context kcontext, char *keyfile,
                          krb5_principal mname, krb5_kvno kvno,
                          krb5_keyblock * key, char *master_pwd)
 {
+    krb5_error_code status = 0;
+    kdb_vftabl *v;
     krb5_keylist_node list;
+
+    status = get_vftabl(kcontext, &v);
+    if (status)
+        return status;
+
+    if (v->store_master_key_list == NULL)
+        return KRB5_KDB_DBTYPE_NOSUP;
 
     list.kvno = kvno;
     list.keyblock = *key;
     list.next = NULL;
-    return krb5_db_store_master_key_list(kcontext, keyfile, mname, &list,
-                                         master_pwd);
+
+    return v->store_master_key_list(kcontext, keyfile, mname,
+                                    &list, master_pwd);
 }
 
 krb5_error_code
 krb5_db_store_master_key_list(krb5_context kcontext, char *keyfile,
-                              krb5_principal mname, krb5_keylist_node *keylist,
-                              char *master_pwd)
+                              krb5_principal mname, char *master_pwd)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
@@ -1094,9 +1087,15 @@ krb5_db_store_master_key_list(krb5_context kcontext, char *keyfile,
     status = get_vftabl(kcontext, &v);
     if (status)
         return status;
+
     if (v->store_master_key_list == NULL)
-        return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->store_master_key_list(kcontext, keyfile, mname, keylist,
+        return KRB5_KDB_DBTYPE_NOSUP;
+
+    if (kcontext->dal_handle->master_keylist == NULL)
+        return KRB5_KDB_DBNOTINITED;
+
+    return v->store_master_key_list(kcontext, keyfile, mname,
+                                    kcontext->dal_handle->master_keylist,
                                     master_pwd);
 }
 
@@ -1244,13 +1243,12 @@ krb5_dbe_fetch_act_key_list(krb5_context context, krb5_principal princ,
  */
 
 krb5_error_code
-krb5_dbe_find_act_mkey(krb5_context context, krb5_keylist_node *mkey_list,
-                       krb5_actkvno_node *act_mkey_list, krb5_kvno *act_kvno,
-                       krb5_keyblock **act_mkey)
+krb5_dbe_find_act_mkey(krb5_context context, krb5_actkvno_node *act_mkey_list,
+                       krb5_kvno *act_kvno, krb5_keyblock **act_mkey)
 {
     krb5_kvno tmp_act_kvno;
     krb5_error_code retval;
-    krb5_keylist_node *cur_keyblock = mkey_list;
+    krb5_keylist_node *cur_keyblock = context->dal_handle->master_keylist;
     krb5_actkvno_node   *prev_actkvno, *cur_actkvno;
     krb5_timestamp      now;
     krb5_boolean        found = FALSE;
@@ -1260,6 +1258,9 @@ krb5_dbe_find_act_mkey(krb5_context context, krb5_keylist_node *mkey_list,
         *act_mkey = NULL;
         return 0;
     }
+
+    if (!cur_keyblock)
+        return KRB5_KDB_DBNOTINITED;
 
     if ((retval = krb5_timeofday(context, &now)))
         return (retval);
@@ -1327,14 +1328,17 @@ krb5_dbe_find_act_mkey(krb5_context context, krb5_keylist_node *mkey_list,
  * free the output key.
  */
 krb5_error_code
-krb5_dbe_find_mkey(krb5_context context, krb5_keylist_node *mkey_list,
-                   krb5_db_entry *entry, krb5_keyblock **mkey)
+krb5_dbe_find_mkey(krb5_context context, krb5_db_entry *entry,
+                   krb5_keyblock **mkey)
 {
     krb5_kvno mkvno;
     krb5_error_code retval;
-    krb5_keylist_node *cur_keyblock = mkey_list;
+    krb5_keylist_node *cur_keyblock = context->dal_handle->master_keylist;
 
-    retval = krb5_dbe_get_mkvno(context, entry, mkey_list, &mkvno);
+    if (!cur_keyblock)
+        return KRB5_KDB_DBNOTINITED;
+
+    retval = krb5_dbe_get_mkvno(context, entry, &mkvno);
     if (retval)
         return (retval);
 
@@ -1614,13 +1618,14 @@ krb5_dbe_lookup_mkvno(krb5_context context, krb5_db_entry *entry,
 
 krb5_error_code
 krb5_dbe_get_mkvno(krb5_context context, krb5_db_entry *entry,
-                   krb5_keylist_node *mkey_list, krb5_kvno *mkvno)
+                   krb5_kvno *mkvno)
 {
     krb5_error_code code;
     krb5_kvno kvno;
+    krb5_keylist_node *mkey_list = context->dal_handle->master_keylist;
 
     if (mkey_list == NULL)
-        return EINVAL;
+        return KRB5_KDB_DBNOTINITED;
 
     /* Output the value from entry tl_data if present. */
     code = krb5_dbe_lookup_mkvno(context, entry, &kvno);
@@ -2432,13 +2437,12 @@ krb5_dbe_decrypt_key_data(krb5_context kcontext, const krb5_keyblock *mkey,
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
-    krb5_keylist_node *n = kcontext->dal_handle->master_keylist;
     krb5_keyblock *cur_mkey;
 
     status = get_vftabl(kcontext, &v);
     if (status)
         return status;
-    if (mkey || !n)
+    if (mkey || kcontext->dal_handle->master_keylist == NULL)
         return v->decrypt_key_data(kcontext, mkey, key_data, dbkey, keysalt);
     status = decrypt_iterator(kcontext, key_data, dbkey, keysalt);
     if (status == 0)
@@ -2448,7 +2452,7 @@ krb5_dbe_decrypt_key_data(krb5_context kcontext, const krb5_keyblock *mkey,
         cur_mkey = &kcontext->dal_handle->master_keylist->keyblock;
         if (krb5_db_fetch_mkey_list(kcontext,
                                     kcontext->dal_handle->master_princ,
-                                    cur_mkey, -1, NULL) == 0)
+                                    cur_mkey) == 0)
             return decrypt_iterator(kcontext, key_data, dbkey, keysalt);
     }
     return status;

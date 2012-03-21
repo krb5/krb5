@@ -31,7 +31,6 @@ struct _kdb5_dal_handle
     void *db_context;
     db_library lib_handle;
     krb5_keylist_node *master_keylist;
-    krb5_boolean free_keylist;
     krb5_principal master_princ;
 };
 /* typedef kdb5_dal_handle is in k5-int.h now */

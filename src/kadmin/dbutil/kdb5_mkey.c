@@ -32,7 +32,6 @@
 extern krb5_keyblock master_keyblock; /* current mkey */
 extern krb5_kvno   master_kvno;
 extern krb5_principal master_princ;
-extern krb5_keylist_node *master_keylist;
 extern krb5_data master_salt;
 extern char *mkey_password;
 extern char *progname;
@@ -77,6 +76,7 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
     krb5_key_data tmp_key_data, *old_key_data;
     krb5_mkey_aux_node  *mkey_aux_data_head = NULL, **mkey_aux_data;
     krb5_keylist_node  *keylist_node;
+    krb5_keylist_node *master_keylist = krb5_db_mkey_list_alias(context);
 
     /* do this before modifying master_entry key_data */
     new_mkey_kvno = get_next_kvno(context, master_entry);
@@ -372,6 +372,7 @@ kdb5_use_mkey(int argc, char *argv[])
     krb5_db_entry *master_entry;
     krb5_keylist_node *keylist_node;
     krb5_boolean inserted = FALSE;
+    krb5_keylist_node *master_keylist = krb5_db_mkey_list_alias(util_context);
 
     memset(&master_princ, 0, sizeof(master_princ));
 
@@ -577,6 +578,7 @@ kdb5_list_mkeys(int argc, char *argv[])
     krb5_db_entry *master_entry;
     krb5_keylist_node  *cur_kb_node;
     krb5_keyblock *act_mkey;
+    krb5_keylist_node *master_keylist = krb5_db_mkey_list_alias(util_context);
 
     if (master_keylist == NULL) {
         com_err(progname, 0, _("master keylist not initialized"));
@@ -613,8 +615,8 @@ kdb5_list_mkeys(int argc, char *argv[])
     if (actkvno_list == NULL) {
         act_kvno = master_entry->key_data[0].key_data_kvno;
     } else {
-        retval = krb5_dbe_find_act_mkey(util_context, master_keylist,
-                                        actkvno_list, &act_kvno, &act_mkey);
+        retval = krb5_dbe_find_act_mkey(util_context, actkvno_list, &act_kvno,
+                                        &act_mkey);
         if (retval == KRB5_KDB_NOACTMASTERKEY) {
             /* Maybe we went through a time warp, and the only keys
                with activation dates have them set in the future?  */
@@ -834,7 +836,7 @@ update_princ_encryption_1(void *cb, krb5_db_entry *ent)
         goto skip;
     }
     p->re_match_count++;
-    retval = krb5_dbe_get_mkvno(util_context, ent, master_keylist, &old_mkvno);
+    retval = krb5_dbe_get_mkvno(util_context, ent, &old_mkvno);
     if (retval) {
         com_err(progname, retval,
                 _("determining master key used for principal '%s'"), pname);
@@ -934,6 +936,7 @@ kdb5_update_princ_encryption(int argc, char *argv[])
 #endif
     char *regexp = NULL;
     krb5_keyblock *tmp_keyblock = NULL;
+    krb5_keylist_node *master_keylist = krb5_db_mkey_list_alias(util_context);
 
     while ((optchar = getopt(argc, argv, "fnv")) != -1) {
         switch (optchar) {
@@ -1023,8 +1026,7 @@ kdb5_update_princ_encryption(int argc, char *argv[])
                                           master_entry->n_key_data,
                                           master_entry->key_data);
 
-    retval = krb5_dbe_find_mkey(util_context, master_keylist,
-                                master_entry, &tmp_keyblock);
+    retval = krb5_dbe_find_mkey(util_context, master_entry, &tmp_keyblock);
     if (retval) {
         com_err(progname, retval, _("retrieving the most recent master key"));
         exit_status++;
@@ -1071,7 +1073,6 @@ kdb5_update_princ_encryption(int argc, char *argv[])
 cleanup:
     free(regexp);
     memset(&new_master_keyblock, 0, sizeof(new_master_keyblock));
-    krb5_free_keyblock(util_context, tmp_keyblock);
     krb5_free_unparsed_name(util_context, mkey_fullname);
     krb5_dbe_free_actkvno_list(util_context, actkvno_list);
 }
@@ -1098,7 +1099,7 @@ find_mkvnos_in_use(krb5_pointer   ptr,
 
     args = (struct purge_args *) ptr;
 
-    retval = krb5_dbe_get_mkvno(args->kcontext, entry, master_keylist, &mkvno);
+    retval = krb5_dbe_get_mkvno(args->kcontext, entry, &mkvno);
     if (retval)
         return (retval);
 
@@ -1129,6 +1130,17 @@ kdb5_purge_mkeys(int argc, char *argv[])
     krb5_mkey_aux_node *mkey_aux_list = NULL, *mkey_aux_entry, *prev_mkey_aux_entry;
     krb5_key_data *old_key_data;
 
+    /*
+     * Verify that the master key list has been initialized before doing
+     * anything else.
+     */
+    if (krb5_db_mkey_list_alias(util_context) == NULL) {
+        com_err(progname, KRB5_KDB_DBNOTINITED,
+                _("master keylist not initialized"));
+        exit_status++;
+        return;
+    }
+
     memset(&master_princ, 0, sizeof(master_princ));
     memset(&args, 0, sizeof(args));
 
@@ -1150,12 +1162,6 @@ kdb5_purge_mkeys(int argc, char *argv[])
             usage();
             return;
         }
-    }
-
-    if (master_keylist == NULL) {
-        com_err(progname, 0, _("master keylist not initialized"));
-        exit_status++;
-        return;
     }
 
     /* assemble & parse the master key name */

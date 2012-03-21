@@ -179,8 +179,6 @@ finish_realm(kdc_realm_t *rdp)
             memset(rdp->realm_mkey.contents, 0, rdp->realm_mkey.length);
             free(rdp->realm_mkey.contents);
         }
-        if (rdp->mkey_list)
-            krb5_dbe_free_key_list(rdp->realm_context, rdp->mkey_list);
         krb5_db_fini(rdp->realm_context);
         if (rdp->realm_tgsprinc)
             krb5_free_principal(rdp->realm_context, rdp->realm_tgsprinc);
@@ -427,7 +425,7 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
     }
 
     if ((kret = krb5_db_fetch_mkey_list(rdp->realm_context, rdp->realm_mprinc,
-                                        &rdp->realm_mkey, mkvno, &rdp->mkey_list))) {
+                                        &rdp->realm_mkey))) {
         kdc_err(rdp->realm_context, kret,
                 _("while fetching master keys list for realm %s"), realm);
         goto whoops;
