@@ -187,7 +187,7 @@ static kadm5_ret_t kadm5_get_either(int princ,
 #ifdef BSD_REGEXPS
     char *msg;
 #endif
-    char *regexp;
+    char *regexp = NULL;
     int i, ret;
     kadm5_server_handle_t handle = server_handle;
 

@@ -310,7 +310,7 @@ void get_tickets(context)
 }
 
 static void
-open_connection(krb5_context context, char *host, int *fd)
+open_connection(krb5_context context, char *host, int *fd_out)
 {
     int     s;
     krb5_error_code retval;
@@ -320,6 +320,7 @@ open_connection(krb5_context context, char *host, int *fd)
     struct sockaddr_storage my_sin;
     int error;
 
+    *fd_out = -1;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -347,7 +348,7 @@ open_connection(krb5_context context, char *host, int *fd)
         }
 
         /* We successfully connect()ed */
-        *fd = s;
+        *fd_out = s;
         retval = sockaddr2krbaddr(context, res->ai_family, res->ai_addr,
                                   &receiver_addr);
         if (retval != 0) {
