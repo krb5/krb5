@@ -44,16 +44,17 @@ pop, the administrator ``joeadmin`` would issue the command (on
 ``trillium.mit.edu``)::
 
     trillium% kadmin
-    kadmin5: ktadd host/trillium.mit.edu ftp/trillium.mit.edu pop/trillium.mit.edu
+    kadmin5: ktadd host/trillium.mit.edu ftp/trillium.mit.edu
+        pop/trillium.mit.edu
     kadmin: Entry for principal host/trillium.mit.edu@ATHENA.MIT.EDU with
-    kvno 3, encryption type DES-CBC-CRC added to keytab
-    WRFILE:/etc/krb5.keytab.
+        kvno 3, encryption type DES-CBC-CRC added to keytab
+        FILE:/etc/krb5.keytab.
     kadmin: Entry for principal ftp/trillium.mit.edu@ATHENA.MIT.EDU with
-    kvno 3, encryption type DES-CBC-CRC added to keytab
-    WRFILE:/etc/krb5.keytab.
+        kvno 3, encryption type DES-CBC-CRC added to keytab
+        FILE:/etc/krb5.keytab.
     kadmin: Entry for principal pop/trillium.mit.edu@ATHENA.MIT.EDU with
-    kvno 3, encryption type DES-CBC-CRC added to keytab
-    WRFILE:/etc/krb5.keytab.
+        kvno 3, encryption type DES-CBC-CRC added to keytab
+        FILE:/etc/krb5.keytab.
     kadmin5: quit
     trillium%
 

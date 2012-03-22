@@ -18,9 +18,6 @@ interesting variables.
 **DEFAULT_KDC_ENCTYPE**
     The default encryption type for the KDC database master key.  The
     default value is |defmkey|.
-**KDCRCACHE**
-    The name of the replay cache used by the KDC.  The default value
-    is ``krb5kdc_rcache``.
 **RCTMPDIR**
     The directory which stores replay caches.  The default is
     ``/var/tmp``.

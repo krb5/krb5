@@ -122,7 +122,7 @@ An example kdc.conf file::
             master_key_type = aes256-cts
             supported_enctypes = aes256-cts:normal aes128-cts:normal
             # If the default location does not suit your setup,
-            # explicitly configure the following four values:
+            # explicitly configure the following values:
             #    database_name = /var/krb5kdc/principal
             #    key_stash_file = /var/krb5kdc/.k5.ATHENA.MIT.EDU
             #    acl_file = /var/krb5kdc/kadm5.acl
@@ -450,7 +450,7 @@ the :ref:`kpropd(8)` daemon.  You must explicitly specify the
 principals which are allowed to provide Kerberos dump updates on the
 slave machine with a new database.  Create a file named kpropd.acl in
 the KDC state directory containing the ``host`` principals for each of
-the KDCs:
+the KDCs::
 
     host/kerberos.mit.edu@ATHENA.MIT.EDU
     host/kerberos-1.mit.edu@ATHENA.MIT.EDU
@@ -463,7 +463,7 @@ the KDCs:
           slave KDCs.
 
 Then, add the following line to ``/etc/inetd.conf`` on each KDC
-(Adjust the path to kpropd)::
+(adjust the path to kpropd)::
 
     krb5_prop stream tcp nowait root /usr/local/sbin/kpropd kpropd
 
