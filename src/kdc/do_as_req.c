@@ -191,6 +191,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
      * by request keytype list.
      */
     client_key = NULL;
+    useenctype = 0;
     for (i = 0; i < state->request->nktypes; i++) {
         useenctype = state->request->ktype[i];
         if (!krb5_c_valid_enctype(useenctype))
