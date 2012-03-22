@@ -173,7 +173,7 @@ The following is an example of how to create a Kerberos database and
 stash file on the master KDC, using the :ref:`kdb5_util(8)` command.
 Replace ``ATHENA.MIT.EDU`` with the name of your Kerberos realm::
 
-    shell% /usr/local/sbin/kdb5_util create -r ATHENA.MIT.EDU -s
+    shell% kdb5_util create -r ATHENA.MIT.EDU -s
 
     Initializing database '/usr/local/var/krb5kdc/principal' for realm 'ATHENA.MIT.EDU',
     master key name 'K/M@ATHENA.MIT.EDU'
@@ -183,17 +183,15 @@ Replace ``ATHENA.MIT.EDU`` with the name of your Kerberos realm::
     Re-enter KDC database master key to verify:  <= Type it again.
     shell%
 
-This will create five files in the directory specified in your
-:ref:`kdc.conf(5)` file (the default location is
-``/usr/local/var/krb5kdc`` directory; see :ref:`mitK5defaults`):
+This will create five files in |kdcdir| (or at the locations specified
+in :ref:`kdc.conf(5)`):
 
 * two Kerberos database files, ``principal``, and ``principal.ok``
 * the Kerberos administrative database file, ``principal.kadm5``
 * the administrative database lock file, ``principal.kadm5.lock``
-* the stash file, in this example ``.k5.ATHENA.MIT.EDU`` (by default
-  it is ``.k5.`` prefix followed by the realm name of the database).
-  If you do not want a stash file, run the above command without the
-  **-s** option.
+* the stash file, in this example ``.k5.ATHENA.MIT.EDU``.  If you do
+  not want a stash file, run the above command without the **-s**
+  option.
 
 For more information on administrating Kerberos database see
 :ref:`db_operations`.
@@ -208,10 +206,9 @@ Next, you need create an Access Control List (ACL) file and put the
 Kerberos principal of at least one of the administrators into it.
 This file is used by the :ref:`kadmind(8)` daemon to control which
 principals may view and make privileged modifications to the Kerberos
-database files.  The filename should match the value you have set for
-**acl_file** (see :ref:`kdc_realms`) in your :ref:`kdc.conf(5)` file.
-The default file name is ``/usr/local/var/krb5kdc/kadm5.acl`` (See
-:ref:`mitK5defaults`).
+database files.  The ACL filename is determined by the **acl_file**
+variable in :ref:`kdc.conf(5)`; the default is |kdcdir|\
+``/kadm5.acl``.
 
 The format of the file is::
 
@@ -326,7 +323,7 @@ to the ACL file (see :ref:`admin_acl`).
 In the following example, the administrative principal ``admin/admin``
 is created::
 
-    shell% /usr/local/sbin/kadmin.local
+    shell% kadmin.local
 
     kadmin.local: addprinc admin/admin@ATHENA.MIT.EDU
 
@@ -346,8 +343,8 @@ At this point, you are ready to start the Kerberos KDC
 (:ref:`krb5kdc(8)`) and administrative daemons on the Master KDC.  To
 do so, type::
 
-    shell% /usr/local/sbin/krb5kdc
-    shell% /usr/local/sbin/kadmind
+    shell% krb5kdc
+    shell% kadmind
 
 Each server daemon will fork and run in the background.
 
@@ -372,7 +369,7 @@ As an additional verification, check if :ref:`kinit(1)` succeeds
 against the principals that you have created on the previous step
 (:ref:`addadmin_kdb`).  Run::
 
-    shell% /usr/local/bin/kinit admin/admin@ATHENA.MIT.EDU
+    shell% kinit admin/admin@ATHENA.MIT.EDU
 
 
 Install the slave KDCs
@@ -400,7 +397,7 @@ host principal for each of the KDCs' ``host`` services.  For example,
 if the master KDC were called ``kerberos.mit.edu``, and you had a
 slave KDC named ``kerberos-1.mit.edu``, you would type the following::
 
-    shell% /usr/local/bin/kadmin
+    shell% kadmin
     kadmin: addprinc -randkey host/kerberos.mit.edu
     NOTICE: no policy specified for "host/kerberos.mit.edu@ATHENA.MIT.EDU"; assigning "default"
     Principal "host/kerberos.mit.edu@ATHENA.MIT.EDU" created.
@@ -496,12 +493,12 @@ Propagate the database to each slave KDC
 First, create a dump file of the database on the master KDC, as
 follows::
 
-    shell% /usr/local/sbin/kdb5_util dump /usr/local/var/krb5kdc/slave_datatrans
+    shell% kdb5_util dump /usr/local/var/krb5kdc/slave_datatrans
 
 Then, manually propagate the database to each slave KDC, as in the
 following example::
 
-    shell% /usr/local/sbin/kprop -f /usr/local/var/krb5kdc/slave_datatrans kerberos-1.mit.edu
+    shell% kprop -f /usr/local/var/krb5kdc/slave_datatrans kerberos-1.mit.edu
 
     Database propagation to kerberos-1.mit.edu: SUCCEEDED
 
@@ -517,11 +514,11 @@ following is an example of a Bourne shell script that will do this.
 
     kdclist = "kerberos-1.mit.edu kerberos-2.mit.edu"
 
-    /usr/local/sbin/kdb5_util dump /usr/local/var/krb5kdc/slave_datatrans
+    kdb5_util dump /usr/local/var/krb5kdc/slave_datatrans
 
     for kdc in $kdclist
     do
-        /usr/local/sbin/kprop -f /usr/local/var/krb5kdc/slave_datatrans $kdc
+        kprop -f /usr/local/var/krb5kdc/slave_datatrans $kdc
     done
 
 You will need to set up a cron job to run this script at the intervals
@@ -530,7 +527,7 @@ you decided on earlier (see :ref:`db_prop`).
 Now that the slave KDC has a copy of the Kerberos database, you can
 start the krb5kdc daemon::
 
-    shell% /usr/local/sbin/krb5kdc
+    shell% krb5kdc
 
 As with the master KDC, you will probably want to add this command to
 the KDCs' ``/etc/rc`` or ``/etc/inittab`` files, so they will start

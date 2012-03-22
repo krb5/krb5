@@ -534,7 +534,7 @@ Examples
 
 ::
 
-    shell% /usr/local/sbin/kdb5_util -r ATHENA.MIT.EDU create -s
+    shell% kdb5_util -r ATHENA.MIT.EDU create -s
     kdb5_util: No such file or directory while setting active database to'/usr/local/var/krb5kdc/principal'
     Initializing database '/usr/local/var/krb5kdc/principal' for realm 'ATHENA.MIT.EDU',
     master key name 'K/M@ATHENA.MIT.EDU'
@@ -544,7 +544,7 @@ Examples
     Re-enter KDC database master key to verify:  <= Type it again.
     shell%
 
-    shell% /usr/local/sbin/kdb5_util -r ATHENA.MIT.EDU destroy
+    shell% kdb5_util -r ATHENA.MIT.EDU destroy
     kdb5_util: Deleting KDC database stored in /usr/local/var/krb5kdc/principal, are you sure (type yes to confirm)? <== yes
     OK, deleting database '/usr/local/var/krb5kdc/principal'...
     shell%
@@ -813,7 +813,7 @@ Both master and slave sides must have a principal named
 ``kiprop/hostname`` (where *hostname* is the lowercase,
 fully-qualified, canonical name for the host) registered in the
 Kerberos database, and have keys for that principal stored in the
-default keytab file (``/etc/krb5.keytab``).
+default keytab file (|keytab|).
 
 On the master KDC side, the ``kiprop/hostname`` principal must be
 listed in the kadmind ACL file kadm5.acl, and given the **p**
@@ -868,4 +868,4 @@ The Sun implementation hard-codes pathnames in ``/var/krb5`` for the
 update log and the per-slave kprop dump files.  In the MIT
 implementation, the pathname for the update log is specified in the
 config file, and the per-slave dump files are stored in
-``/usr/local/var/krb5kdc/slave_datatrans_hostname``.
+|kdcdir|\ ``/slave_datatrans_hostname``.

@@ -23,10 +23,10 @@ authenticated to by the client, if the krb5 mechanism is used.
 
 The simplest choice is to pass **GSS_C_NO_CREDENTIAL** as the acceptor
 credential.  In this case, clients may authenticate to any service
-principal in the default keytab (typically ``/etc/krb5.keytab``, or
-the value of the **KRB5_KTNAME** environment variable).  This is the
-recommended approach if the server application has no specific
-requirements to the contrary.
+principal in the default keytab (typically |keytab|, or the value of
+the **KRB5_KTNAME** environment variable).  This is the recommended
+approach if the server application has no specific requirements to the
+contrary.
 
 A server may acquire an acceptor credential with gss_acquire_cred_ and
 a *cred_usage* of **GSS_C_ACCEPT** or **GSS_C_BOTH**.  If the

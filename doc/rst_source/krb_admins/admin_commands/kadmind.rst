@@ -38,9 +38,8 @@ ACL file
     kadmind's ACL (access control list) tells it which principals are
     allowed to perform administration actions.  The pathname to the
     ACL file can be specified with the **acl_file** kdc.conf variable;
-    by default, it is ``/usr/local/var/krb5kdc/kadm5.acl``.  The
-    syntax of the ACL file is specified in the ACL FILE SYNTAX section
-    below.
+    by default, it is |kdcdir|\ ``/kadm5.acl``.  The syntax of the ACL
+    file is specified in the ACL FILE SYNTAX section below.
 
     If the kadmind ACL file is modified, the kadmind daemon needs to
     be restarted for changes to take effect.

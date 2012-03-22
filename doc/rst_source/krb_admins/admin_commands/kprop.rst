@@ -33,7 +33,7 @@ OPTIONS
 **-f** *file*
     Specifies the filename where the dumped principal database file is
     to be found; by default the dumped database file is normally
-    ``/usr/local/var/krb5kdc/slave_datatrans``.
+    |kdcdir|\ ``/slave_datatrans``.
 
 **-P** *port*
     Specifies the port to use to contact the :ref:`kpropd(8)` server

@@ -64,13 +64,13 @@ OPTIONS
 
 **-f** *file*
     Specifies the filename where the dumped principal database file is
-    to be stored; by default the dumped database file is
-    ``/usr/local/var/krb5kdc/from_master``.
+    to be stored; by default the dumped database file is |kdcdir|\
+    ``/from_master``.
 
 **-p**
     Allows the user to specify the pathname to the :ref:`kdb5_util(8)`
-    program; by default the pathname used is
-    ``/usr/local/sbin/kdb5_util``.
+    program; by default the pathname used is |sbindir|\
+    ``/kdb5_util``.
 
 **-S**
     Turn on standalone mode.  Normally, kpropd is invoked out of
@@ -91,7 +91,7 @@ OPTIONS
 
 **-a** *acl_file*
     Allows the user to specify the path to the kpropd.acl file; by
-    default the path used is ``/usr/local/var/krb5kdc/kpropd.acl``.
+    default the path used is |kdcdir|\ ``/kpropd.acl``.
 
 
 ENVIRONMENT

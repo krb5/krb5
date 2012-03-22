@@ -9,8 +9,8 @@ are typically only used on a KDC, such as the :ref:`krb5kdc(8)` and
 Relations documented here may also be specified in krb5.conf.
 
 Normally, the kdc.conf file is found in the KDC state directory,
-``/usr/local/var/krb5kdc``.  You can override the default location by
-setting the environment variable **KRB5_KDC_PROFILE**.
+|kdcdir|.  You can override the default location by setting the
+environment variable **KRB5_KDC_PROFILE**.
 
 
 Structure
@@ -71,7 +71,7 @@ subsection:
     (String.)  Location of the access control list file that
     :ref:`kadmind(8)` uses to determine which principals are allowed
     which permissions on the database.  The default value is
-    ``/usr/local/var/krb5kdc/kadm5.acl``.
+    |kdcdir|\ ``/kadm5.acl``.
 
 **database_module**
     This relation indicates the name of the configuration section
@@ -84,7 +84,7 @@ subsection:
     **database_module** is specified for the realm and the
     corresponding module contains a **database_name** parameter, that
     value will take precedence over this one.  The default value is
-    ``/usr/local/var/krb5kdc/principal``.
+    |kdcdir|\ ``/principal``.
 
 **default_principal_expiration**
     (Absolute time string.)  Specifies the default expiration date of
@@ -222,9 +222,8 @@ subsection:
 
 **key_stash_file**
     (String.)  Specifies the location where the master key has been
-    stored (via kdb5_util stash).  The default is
-    ``/usr/local/var/krb5kdc/.k5.REALM``, where *REALM* is the
-    Kerberos realm.
+    stored (via kdb5_util stash).  The default is |kdcdir|\
+    ``/.k5.REALM``, where *REALM* is the Kerberos realm.
 
 **kdc_ports**
     (Whitespace- or comma-separated list.)  Lists the ports on which
@@ -250,8 +249,8 @@ subsection:
 
 **master_key_type**
     (Key type string.)  Specifies the master key's key type.  The
-    default value for this is ``aes256-cts``.  For a list of all
-    possible values, see :ref:`Encryption_and_salt_types`.
+    default value for this is |defmkey|.  For a list of all possible
+    values, see :ref:`Encryption_and_salt_types`.
 
 **max_life**
     (Delta time string.)  Specifies the maximum time period for which
@@ -303,10 +302,8 @@ subsection:
     (List of *key*:*salt* strings.)  Specifies the default key/salt
     combinations of principals for this realm.  Any principals created
     through :ref:`kadmin(1)` will have keys of these types.  The
-    default value for this tag is ``aes256-cts-hmac-sha1-96:normal
-    aes128-cts-hmac-sha1-96:normal des3-cbc-sha1:normal
-    arcfour-hmac-md5:normal``.  For lists of possible values, see
-    :ref:`Encryption_and_salt_types`.
+    default value for this tag is |defkeysalts|.  For lists of
+    possible values, see :ref:`Encryption_and_salt_types`.
 
 
 .. _logging:
@@ -418,8 +415,7 @@ the subsection:
 
 **database_name**
     This DB2-specific tag indicates the location of the database in
-    the filesystem.  The default is
-    ``/usr/local/var/krb5kdc/principal``.
+    the filesystem.  The default is |kdcdir|\ ``/principal``.
 
 **db_library**
     This tag indicates the name of the loadable database module.  The
@@ -669,7 +665,7 @@ Here's an example of a kdc.conf file:
 FILES
 ------
 
-``/usr/local/var/krb5kdc/kdc.conf``
+|kdcdir|\ ``/kdc.conf``
 
 
 SEE ALSO

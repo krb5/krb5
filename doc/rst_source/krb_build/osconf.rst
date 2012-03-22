@@ -11,13 +11,13 @@ interesting variables.
 
 **DEFAULT_PROFILE_PATH**
     The pathname to the file which contains the profiles for the known
-    realms, their KDCs, etc. The default value is ``/etc/krb5.conf``.
+    realms, their KDCs, etc. The default value is |krb5conf|.
 **DEFAULT_KEYTAB_NAME**
     The type and pathname to the default server keytab file.  The
-    default is ``/etc/krb5.keytab``.
+    default is |keytab|.
 **DEFAULT_KDC_ENCTYPE**
-    The default encryption type for the KDC.  The default value is
-    ``aes256-cts-hmac-sha1-96``.
+    The default encryption type for the KDC database master key.  The
+    default value is |defmkey|.
 **KDCRCACHE**
     The name of the replay cache used by the KDC.  The default value
     is ``krb5kdc_rcache``.
@@ -26,4 +26,4 @@ interesting variables.
     ``/var/tmp``.
 **DEFAULT_KDB_FILE**
     The location of the default database.  The default value is
-    ``/usr/local/var/krb5kdc/principal``.
+    |kdcdir|\ ``/principal``.

@@ -22,14 +22,14 @@ The keytab file
 ---------------
 
 All Kerberos server machines need a keytab file to authenticate to the
-KDC. By default on UNIX-like systems this file is named
-``/etc/krb5.keytab``.  The keytab file is an local copy of the host's
-key.  The keytab file is a potential point of entry for a break-in,
-and if compromised, would allow unrestricted access to its host.  The
-keytab file should be readable only by root, and should exist only on
-the machine's local disk.  The file should not be part of any backup
-of the machine, unless access to the backup data is secured as tightly
-as access to the machine's root password.
+KDC.  By default on UNIX-like systems this file is named |keytab|.
+The keytab file is an local copy of the host's key.  The keytab file
+is a potential point of entry for a break-in, and if compromised,
+would allow unrestricted access to its host.  The keytab file should
+be readable only by root, and should exist only on the machine's local
+disk.  The file should not be part of any backup of the machine,
+unless access to the backup data is secured as tightly as access to
+the machine's root password.
 
 In order to generate a keytab for a host, the host must have a
 principal in the Kerberos database.  The procedure for adding hosts to
@@ -43,7 +43,7 @@ For example, to generate a keytab file to allow the host
 pop, the administrator ``joeadmin`` would issue the command (on
 ``trillium.mit.edu``)::
 
-    trillium% /usr/local/sbin/kadmin
+    trillium% kadmin
     kadmin5: ktadd host/trillium.mit.edu ftp/trillium.mit.edu pop/trillium.mit.edu
     kadmin: Entry for principal host/trillium.mit.edu@ATHENA.MIT.EDU with
     kvno 3, encryption type DES-CBC-CRC added to keytab
@@ -73,9 +73,9 @@ every possible attack, but it is worth noting some of the larger holes
 and how to close them.
 
 We recommend that backups of secure machines exclude the keytab file
-(``/etc/krb5.keytab``).  If this is not possible, the backups should
-at least be done locally, rather than over a network, and the backup
-tapes should be physically secured.
+(|keytab|).  If this is not possible, the backups should at least be
+done locally, rather than over a network, and the backup tapes should
+be physically secured.
 
 The keytab file and any programs run by root, including the Kerberos
 V5 binaries, should be kept on local disk.  The keytab file should be

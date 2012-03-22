@@ -135,7 +135,7 @@ The libdefaults section may contain any of the following relations:
 **default_keytab_name**
     This relation specifies the default keytab name to be used by
     application servers such as telnetd and rlogind.  The default is
-    ``/etc/krb5.keytab``.
+    |keytab|.
 
 **default_realm**
     Identifies the default Kerberos realm for the client.  Set its
@@ -148,20 +148,17 @@ The libdefaults section may contain any of the following relations:
     should be returned by the KDC.  The list may be delimited with
     commas or whitespace.  See :ref:`Encryption_and_salt_types` in
     :ref:`kdc.conf(5)` for a list of the accepted values for this tag.
-    The default value is ``aes256-cts-hmac-sha1-96
-    aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc
-    des-cbc-md5 des-cbc-md4``, but single-DES encryption types will be
-    implicitly removed from this list if the value of
+    The default value is |defetypes|, but single-DES encryption types
+    will be implicitly removed from this list if the value of
     **allow_weak_crypto** is false.
 
 **default_tkt_enctypes**
     Identifies the supported list of session key encryption types that
     should be requested by the client.  The format is the same as for
     default_tgs_enctypes.  The default value for this tag is
-    ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1
-    arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``, but
-    single-DES encryption types will be implicitly removed from this
-    list if the value of **allow_weak_crypto** is false.
+    |defetypes|, but single-DES encryption types will be implicitly
+    removed from this list if the value of **allow_weak_crypto** is
+    false.
 
 **dns_lookup_kdc**
     Indicate whether DNS SRV records should be used to locate the KDCs
@@ -258,10 +255,9 @@ The libdefaults section may contain any of the following relations:
 **permitted_enctypes**
     Identifies all encryption types that are permitted for use in
     session key encryption.  The default value for this tag is
-    ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1
-    arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``, but
-    single-DES encryption types will be implicitly removed from this
-    list if the value of **allow_weak_crypto** is false.
+    |defetypes|, but single-DES encryption types will be implicitly
+    removed from this list if the value of **allow_weak_crypto** is
+    false.
 
 **plugin_base_dir**
     If set, determines the base directory where krb5 plugins are
@@ -1037,7 +1033,7 @@ Here is an example of a generic krb5.conf file:
 FILES
 -----
 
-``/etc/krb5.conf``
+|krb5conf|
 
 
 SEE ALSO

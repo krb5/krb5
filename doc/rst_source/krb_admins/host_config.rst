@@ -71,9 +71,9 @@ KDC location modules
 For historical reasons, modules to control how KDC servers are located
 are registered simply by placing the shared object or DLL into the
 "libkrb5" subdirectory of the krb5 plugin directory, which defaults to
-``/usr/local/lib/krb5/plugins``.  For example, Samba's winbind krb5
+|libdir|\ ``/krb5/plugins``.  For example, Samba's winbind krb5
 locator plugin would be registered by placing its shared object in
-``/usr/local/lib/krb5/plugins/libkrb5/winbind_krb5_locator.so``.
+|libdir|\ ``/krb5/plugins/libkrb5/winbind_krb5_locator.so``.
 
 
 GSSAPI mechanism modules

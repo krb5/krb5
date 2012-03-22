@@ -212,6 +212,17 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
+rst_epilog='''
+.. |bindir| replace:: ``/usr/local/bin``
+.. |sbindir| replace:: ``/usr/local/sbin``
+.. |libdir| replace:: ``/usr/local/lib``
+.. |kdcdir| replace:: ``/usr/local/var/krb5kdc``
+.. |keytab| replace:: ``/etc/krb5.keytab``
+.. |krb5conf| replace:: ``/etc/krb5.conf``
+.. |defkeysalts| replace:: ``aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal des3-cbc-sha1:normal arcfour-hmac-md5:normal``
+.. |defetypes| replace:: ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``
+.. |defmkey| replace:: ``aes256-cts-hmac-sha1-96``
+'''
 
 # -- Options for manual page output --------------------------------------------
 

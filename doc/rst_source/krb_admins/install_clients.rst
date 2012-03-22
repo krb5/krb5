@@ -3,7 +3,7 @@ Installing and configuring UNIX client machines
 
 The Kerberized client programs include :ref:`kinit(1)`,
 :ref:`klist(1)`, :ref:`kdestroy(1)`, and :ref:`kpasswd(1)`.  All of
-these programs are in the directory ``/usr/local/bin``.
+these programs are in the directory |bindir|.
 
 You can often integrate Kerberos with the login system on client
 machines, typically through the use of PAM.  The details vary by

@@ -25,7 +25,7 @@ The service name used by sserver and sclient is sample.  Hence,
 sserver will require that there be a keytab entry for the service
 ``sample/hostname.domain.name@REALM.NAME``.  This keytab is generated
 using the :ref:`kadmin(1)` program.  The keytab file is usually
-installed as ``/etc/krb5.keytab``.
+installed as |keytab|.
 
 The **-S** option allows for a different keytab than the default.
 

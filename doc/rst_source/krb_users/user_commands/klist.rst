@@ -115,7 +115,7 @@ FILES
     Default location of Kerberos 5 credentials cache ([uid] is the
     decimal UID of the user).
 
-``/etc/krb5.keytab``
+|keytab|
     Default location for the local host's keytab file.
 
 
