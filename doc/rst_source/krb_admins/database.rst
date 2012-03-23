@@ -1,12 +1,6 @@
 Database administration
 =======================
 
-.. note:: This document was copied from **Kerberos V5 System
-          Administrator's Guide** with minor changes.  Currently it is
-          under review.  Please, send your feedback, corrections and
-          additions to krb5-bugs@mit.edu.  Your contribution is
-          greatly appreciated.
-
 A Kerberos database contains all of a realm's Kerberos principals,
 their passwords, and other administrative information about each
 principal.  For the most part, you will use the :ref:`kdb5_util(8)`
@@ -769,12 +763,6 @@ database as well as the new key.  For example::
 
 Incremental database propagation
 --------------------------------
-
-.. note:: This document was copied from **Kerberos V5 Installation
-          Guide** with minor changes.  Currently it is under review.
-          Please, send your feedback, corrections and additions to
-          krb5-bugs@mit.edu.  Your contribution is greatly
-          appreciated.
 
 Overview
 ~~~~~~~~

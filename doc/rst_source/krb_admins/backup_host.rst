@@ -1,12 +1,6 @@
 Backups of secure hosts
 =======================
 
-.. note:: This document was copied from **Kerberos V5 System
-          Administrator's Guide** with minor changes.  Currently it is
-          under review.  Please, send your feedback, corrections and
-          additions to krb5-bugs@mit.edu.  Your contribution is
-          greatly appreciated.
-
 When you back up a secure host, you should exclude the host's keytab
 file from the backup.  If someone obtained a copy of the keytab from a
 backup, that person could make any host masquerade as the host whose

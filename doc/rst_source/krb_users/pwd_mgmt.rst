@@ -1,11 +1,6 @@
 Password management
 ===================
 
-.. note:: This document was copied from **Kerberos V5 UNIX User's
-          Guide**.  Currently it is under review.  Please, send your
-          feedback, corrections and additions to krb5-bugs@mit.edu.
-          Your contribution is greatly appreciated.
-
 Your password is the only way Kerberos has of verifying your identity.
 If someone finds out your password, that person can masquerade as
 you--send email that comes from you, read, edit, or delete your files,

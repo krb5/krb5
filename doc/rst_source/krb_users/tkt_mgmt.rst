@@ -1,11 +1,6 @@
 Ticket management
 =================
 
-.. note:: This document was copied from **Kerberos V5 UNIX User's
-          Guide**.  Currently it is under review.  Please, send your
-          feedback, corrections and additions to krb5-bugs@mit.edu.
-          Your contribution is greatly appreciated.
-
 On many systems, Kerberos is built into the login program, and you get
 tickets automatically when you log in.  Other programs, such as ssh,
 can forward copies of your tickets to a remote host.  Most of these

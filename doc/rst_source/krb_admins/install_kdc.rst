@@ -1,10 +1,3 @@
-.. note:: This document was copied from **Kerberos V5 Installation
-          Guide** with minor changes. Currently it is under
-          review. Please, send your feedback, corrections and
-          additions to krb5-bugs@mit.edu. Your contribution is greatly
-          appreciated.
-
-
 Installing KDCs
 ===============
 

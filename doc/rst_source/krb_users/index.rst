@@ -1,14 +1,6 @@
 For users
 =========
 
-A collection of documents for Kerberos users
-
-.. note:: This document was copied from **Kerberos V5 UNIX User's
-          Guide**.  Currently it is under review.  Please, send your
-          feedback, corrections and additions to krb5-bugs@mit.edu.
-          Your contribution is greatly appreciated.
-
-
 Contents
 --------
 

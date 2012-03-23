@@ -100,8 +100,3 @@ Site- and system-wide initialization for the code compiled on Linux or Solaris
  ===================== ============================== =================
 
 
-Report the problem
-------------------
-
-Please, provide your feedback on this document at
-krb5-bugsmit.edu?subject=Documentation___krb5_implementation_features
