@@ -14,7 +14,7 @@ SUBDIRS=util include lib \
 	@ldap_plugin_dir@ \
 	plugins/preauth/pkinit \
 	kdc kadmin slave clients appl tests \
-	config-files gen-manpages man @po@
+	config-files gen-manpages man doc @po@
 WINSUBDIRS=include util lib ccapi windows clients appl
 BUILDTOP=$(REL).
 LOCALINCLUDES = -I$(srcdir) 

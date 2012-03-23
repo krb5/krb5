@@ -1,0 +1,391 @@
+.TH "KDB5_UTIL" "8" " " "0.0.1" "MIT Kerberos"
+.SH NAME
+kdb5_util \- Kerberos database maintenance utility
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.\" Man page generated from reStructeredText.
+.
+.SH SYNOPSIS
+.sp
+\fBkdb5_util\fP
+[\fB\-r\fP \fIrealm\fP]
+[\fB\-d\fP \fIdbname\fP]
+[\fB\-k\fP \fImkeytype\fP]
+[\fB\-M\fP \fImkeyname\fP]
+[\fB\-kv\fP \fImkeyVNO\fP]
+[\fB\-sf\fP \fIstashfilename\fP]
+[\fB\-m\fP]
+\fIcommand\fP [\fIcommand_options\fP]
+.SH DESCRIPTION
+.sp
+kdb5_util allows an administrator to perform maintenance procedures on
+the KDC database.  Databases can be created, destroyed, and dumped to
+or loaded from ASCII files.  kdb5_util can create a Kerberos master
+key stash file or perform live rollover of the master key.
+.sp
+When kdb5_util is run, it attempts to acquire the master key and open
+the database.  However, execution continues regardless of whether or
+not kdb5_util successfully opens the database, because the database
+may not exist yet or the stash file may be corrupt.
+.sp
+Note that some KDC database modules may not support all kdb5_util
+commands.
+.SH COMMAND-LINE OPTIONS
+.INDENT 0.0
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+specifies the Kerberos realm of the database.
+.TP
+.B \fB\-d\fP \fIdbname\fP
+.sp
+specifies the name under which the principal database is stored;
+by default the database is that listed in \fIkdc.conf(5)\fP.  The
+password policy database and lock files are also derived from this
+value.
+.TP
+.B \fB\-k\fP \fImkeytype\fP
+.sp
+specifies the key type of the master key in the database.  The
+default is given by the \fBmaster_key_type\fP variable in
+\fIkdc.conf(5)\fP.
+.TP
+.B \fB\-kv\fP \fImkeyVNO\fP
+.sp
+Specifies the version number of the master key in the database;
+the default is 1.  Note that 0 is not allowed.
+.TP
+.B \fB\-M\fP \fImkeyname\fP
+.sp
+principal name for the master key in the database.  If not
+specified, the name is determined by the \fBmaster_key_name\fP
+variable in \fIkdc.conf(5)\fP.
+.TP
+.B \fB\-m\fP
+.sp
+specifies that the master database password should be read from
+the keyboard rather than fetched from a file on disk.
+.TP
+.B \fB\-sf\fP \fIstash_file\fP
+.sp
+specifies the stash filename of the master database password.  If
+not specified, the filename is determined by the
+\fBkey_stash_file\fP variable in \fIkdc.conf(5)\fP.
+.TP
+.B \fB\-P\fP \fIpassword\fP
+.sp
+specifies the master database password.  Using this option may
+expose the password to other users on the system via the process
+list.
+.UNINDENT
+.SH COMMANDS
+.SS create
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBcreate\fP [\fB\-s\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Creates a new database.  If the \fB\-s\fP option is specified, the stash
+file is also created.  This command fails if the database already
+exists.  If the command is successful, the database is opened just as
+if it had already existed when the program was first run.
+.SS destroy
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBdestroy\fP [\fB\-f\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Destroys the database, first overwriting the disk sectors and then
+unlinking the files, after prompting the user for confirmation.  With
+the \fB\-f\fP argument, does not prompt the user.
+.SS stash
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBstash\fP [\fB\-f\fP \fIkeyfile\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Stores the master principal\(aqs keys in a stash file.  The \fB\-f\fP
+argument can be used to override the \fIkeyfile\fP specified at startup.
+.SS dump
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBdump\fP [\fB\-old\fP|\fB\-b6\fP|\fB\-b7\fP|\fB\-ov\fP|\fB\-r13\fP]
+[\fB\-verbose\fP] [\fB\-mkey_convert\fP] [\fB\-new_mkey_file\fP \fImkey_file\fP]
+[\fB\-rev\fP] [\fB\-recurse\fP] [\fIfilename\fP [\fIprincipals\fP...]]
+.UNINDENT
+.UNINDENT
+.sp
+Dumps the current Kerberos and KADM5 database into an ASCII file.  By
+default, the database is dumped in current format, "kdb5_util
+load_dump version 6".  If filename is not specified, or is the string
+"\-", the dump is sent to standard output.  Options:
+.INDENT 0.0
+.TP
+.B \fB\-old\fP
+.sp
+causes the dump to be in the Kerberos 5 Beta 5 and earlier dump
+format ("kdb5_edit load_dump version 2.0").
+.TP
+.B \fB\-b6\fP
+.sp
+causes the dump to be in the Kerberos 5 Beta 6 format ("kdb5_edit
+load_dump version 3.0").
+.TP
+.B \fB\-b7\fP
+.sp
+causes the dump to be in the Kerberos 5 Beta 7 format ("kdb5_util
+load_dump version 4").  This was the dump format produced on
+releases prior to 1.2.2.
+.TP
+.B \fB\-ov\fP
+.sp
+causes the dump to be in "ovsec_adm_export" format.
+.TP
+.B \fB\-r13\fP
+.sp
+causes the dump to be in the Kerberos 5 1.3 format ("kdb5_util
+load_dump version 5").  This was the dump format produced on
+releases prior to 1.8.
+.TP
+.B \fB\-verbose\fP
+.sp
+causes the name of each principal and policy to be printed as it
+is dumped.
+.TP
+.B \fB\-mkey_convert\fP
+.sp
+prompts for a new master key.  This new master key will be used to
+re\-encrypt principal key data in the dumpfile.  The principal keys
+themselves will not be changed.
+.TP
+.B \fB\-new_mkey_file\fP \fImkey_file\fP
+.sp
+the filename of a stash file.  The master key in this stash file
+will be used to re\-encrypt the key data in the dumpfile.  The key
+data in the database will not be changed.
+.TP
+.B \fB\-rev\fP
+.sp
+dumps in reverse order.  This may recover principals that do not
+dump normally, in cases where database corruption has occurred.
+.TP
+.B \fB\-recurse\fP
+.sp
+causes the dump to walk the database recursively (btree only).
+This may recover principals that do not dump normally, in cases
+where database corruption has occurred.  In cases of such
+corruption, this option will probably retrieve more principals
+than the \fB\-rev\fP option will.
+.UNINDENT
+.SS load
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBload\fP [\fB\-old\fP|\fB\-b6\fP|\fB\-b7\fP|\fB\-ov\fP|\fB\-r13\fP]
+[\fB\-hash\fP] [\fB\-verbose\fP] [\fB\-update\fP] \fIfilename\fP [\fIdbname\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Loads a database dump from the named file into the named database.  If
+no option is given to determine the format of the dump file, the
+format is detected automatically and handled as appropriate.  Unless
+the \fB\-update\fP option is given, \fBload\fP creates a new database
+containing only the data in the dump file, overwriting the contents of
+any previously existing database.  Note that when using the LDAP KDC
+database module, the \fB\-update\fP flag is required.
+.sp
+Options:
+.INDENT 0.0
+.TP
+.B \fB\-old\fP
+.sp
+requires the database to be in the Kerberos 5 Beta 5 and earlier
+format ("kdb5_edit load_dump version 2.0").
+.TP
+.B \fB\-b6\fP
+.sp
+requires the database to be in the Kerberos 5 Beta 6 format
+("kdb5_edit load_dump version 3.0").
+.TP
+.B \fB\-b7\fP
+.sp
+requires the database to be in the Kerberos 5 Beta 7 format
+("kdb5_util load_dump version 4").
+.TP
+.B \fB\-ov\fP
+.sp
+requires the database to be in "ovsec_adm_import" format.  Must be
+used with the \fB\-update\fP option.
+.TP
+.B \fB\-hash\fP
+.sp
+requires the database to be stored as a hash.  If this option is
+not specified, the database will be stored as a btree.  This
+option is not recommended, as databases stored in hash format are
+known to corrupt data and lose principals.
+.TP
+.B \fB\-verbose\fP
+.sp
+causes the name of each principal and policy to be printed as it
+is dumped.
+.TP
+.B \fB\-update\fP
+.sp
+records from the dump file are added to or updated in the existing
+database.  (This is useful in conjunction with an ovsec_adm_export
+format dump if you want to preserve per\-principal policy
+information, since the current default format does not contain
+this data.)  Otherwise, a new database is created containing only
+what is in the dump file and the old one destroyed upon successful
+completion.
+.UNINDENT
+.sp
+If specified, \fIdbname\fP overrides the value specified on the command
+line or the default.
+.SS ark
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBark\fP [\fB\-e\fP \fIenc\fP:\fIsalt\fP,...] \fIprincipal\fP
+.UNINDENT
+.UNINDENT
+.sp
+Adds new random keys to \fIprincipal\fP at the next available key version
+number.  Keys for the current highest key version number will be
+preserved.  The \fB\-e\fP option specifies the list of encryption and
+salt types to be used for the new keys.
+.SS add_mkey
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBadd_mkey\fP [\fB\-e\fP \fIetype\fP] [\fB\-s\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Adds a new master key to the master key principal, but does not mark
+it as active.  Existing master keys will remain.  The \fB\-e\fP option
+specifies the encryption type of the new master key; see
+\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP for a list of
+possible values.  The \fB\-s\fP option stashes the new master key in the
+stash file, which will be created if it doesn\(aqt already exist.
+.sp
+After a new master key is added, it should be propagated to slave
+servers via a manual or periodic invocation of \fIkprop(8)\fP.  Then,
+the stash files on the slave servers should be updated with the
+kdb5_util \fBstash\fP command.  Once those steps are complete, the key
+is ready to be marked active with the kdb5_util \fBuse_mkey\fP command.
+.SS use_mkey
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBuse_mkey\fP \fImkeyVNO\fP [\fItime\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Sets the activation time of the master key specified by \fImkeyVNO\fP.
+Once a master key becomes active, it will be used to encrypt newly
+created principal keys.  If no \fItime\fP argument is given, the current
+time is used, causing the specified master key version to become
+active immediately.  The format of \fItime\fP is specified in the
+\fIdate_format\fP section of the \fIkadmin(1)\fP man page.
+.sp
+After a new master key becomes active, the kdb5_util
+\fBupdate_princ_encryption\fP command can be used to update all
+principal keys to be encrypted in the new master key.
+.SS list_mkeys
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBlist_mkeys\fP
+.UNINDENT
+.UNINDENT
+.sp
+List all master keys, from most recent to earliest, in the master key
+principal.  The output will show the kvno, enctype, and salt type for
+each mkey, similar to the output of \fIkadmin(1)\fP \fBgetprinc\fP.  A
+\fB*\fP following an mkey denotes the currently active master key.
+.SS purge_mkeys
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBpurge_mkeys\fP [\fB\-f\fP] [\fB\-n\fP] [\fB\-v\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Delete master keys from the master key principal that are not used to
+protect any principals.  This command can be used to remove old master
+keys all principal keys are protected by a newer master key.
+.INDENT 0.0
+.TP
+.B \fB\-f\fP
+.sp
+does not prompt for confirmation.
+.TP
+.B \fB\-n\fP
+.sp
+performs a dry run, showing master keys that would be purged, but
+not actually purging any keys.
+.TP
+.B \fB\-v\fP
+.sp
+gives more verbose output.
+.UNINDENT
+.SS update_princ_encryption
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBupdate_princ_encryption\fP [\fB\-f\fP] [\fB\-n\fP] [\fB\-v\fP]
+[\fIprinc\-pattern\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Update all principal records (or only those matching the
+\fIprinc\-pattern\fP glob pattern) to re\-encrypt the key data using the
+active database master key, if they are encrypted using older
+versions, and give a count at the end of the number of principals
+updated.  If the \fB\-f\fP option is not given, ask for confirmation
+before starting to make changes.  The \fB\-v\fP option causes each
+principal processed to be listed, with an indication as to whether it
+needed updating or not.  The \fB\-n\fP option performs a dry run, only
+showing the actions which would have been taken.
+.SH SEE ALSO
+.sp
+\fIkadmin(1)\fP
+.SH AUTHOR
+MIT
+.SH COPYRIGHT
+2011, MIT
+.\" Generated by docutils manpage writer.
+.

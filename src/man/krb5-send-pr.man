@@ -1,0 +1,231 @@
+.TH "KRB5-SEND-PR" "1" " " "0.0.1" "MIT Kerberos"
+.SH NAME
+krb5-send-pr \- send problem report (PR) to a central support site
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.\" Man page generated from reStructeredText.
+.
+.SH SYNOPSIS
+.sp
+\fBkrb5\-send\-pr\fP
+[\fIsite\fP]
+[\fB\-f\fP \fIproblem\-report\fP]
+[\fB\-t\fP \fImail\-address\fP]
+[\fB\-P\fP]
+[\fB\-L\fP]
+[\fB\-s\fP \fIseverity\fP]
+[\fB\-c\fP \fIaddress\fP]
+[\fB\-\-request\-id\fP]
+[\fB\-V\fP]
+.SH DESCRIPTION
+.sp
+krb5\-send\-pr is a tool used to submit problem reports (PRs) to a
+central support site.  In most cases the correct site will be the
+default.  This argument indicates the support site which is
+responsible for the category of problem involved.  Some sites may use
+a local address as a default.  \fIsite\fP values are defined by using the
+aliases(5).
+.sp
+krb5\-send\-pr invokes an editor on a problem report template (after
+trying to fill in some fields with reasonable default values).  When
+you exit the editor, krb5\-send\-pr sends the completed form to the
+Problem Report Management System (\fBGNATS\fP) at a central support
+site.  At the support site, the PR is assigned a unique number and is
+stored in the GNATS database according to its category and
+submitter\-id.  GNATS automatically replies with an acknowledgement,
+citing the category and the PR number.
+.sp
+To ensure that a PR is handled promptly, it should contain your (unique)
+\fIsubmitter\-id\fP and one of the available \fIcategories\fP to identify the problem area.
+(Use  \fIkrb5\-send\-pr \-L\fP to see a list of categories.)
+.sp
+The krb5\-send\-pr template at your site should already be customized
+with your submitter\-id (running \fBinstall\-sid submitter\-id\fP to
+accomplish this is part of the installation procedures for
+krb5\-send\-pr).  If this hasn\(aqt been done, see your system
+administrator for your submitter\-id, or request one from your support
+site by invoking \fBkrb5\-send\-pr \-\-request\-id\fP.  If your site does not
+distinguish between different user sites, or if you are not affiliated
+with the support site, use \fBnet\fP for this field.
+.sp
+The more precise your problem description and the more complete your
+information, the faster your support team can solve your problems.
+.SH OPTIONS
+.INDENT 0.0
+.TP
+.B \fB\-f\fP \fIproblem\-report\fP
+.sp
+Specify a file \fIproblem\-report\fP which already contains a complete
+problem report.  krb5\-send\-pr sends the contents of the file
+without invoking the editor.  If the value for problem\-report is
+\fB\-\fP, then krb5\-send\-pr reads from standard input.
+.TP
+.B \fB\-s\fP \fIseverity\fP
+.sp
+Give the problem report the severity \fIseverity\fP.
+.TP
+.B \fB\-t\fP \fImail\-address\fP
+.sp
+Change mail address at the support site for problem reports.  The
+default mail address is the address used for the default site.
+Use the site argument rather than this option in nearly all cases.
+.TP
+.B \fB\-c\fP \fIaddress\fP
+.sp
+Put \fIaddress\fP in the \fICc:\fP header of the message.
+.TP
+.B \fB\-P\fP
+.sp
+Print the form specified by the environment variable \fBPR_FORM\fP
+on standard output.  If \fBPR_FORM\fP is not set, print the standard
+blank PR template.  No mail is sent.
+.TP
+.B \fB\-L\fP
+.sp
+Print the list of available categories.  No mail is sent.
+.TP
+.B \fB\-\-request\-id\fP
+.sp
+Sends mail to the default support site, or site if specified, with
+a request for your submitter\-id.  If you are not affiliated with
+site, use a submitter\-id of \fBnet\fP.
+.TP
+.B \fB\-V\fP
+.sp
+Display the krb5\-send\-pr version number.
+.UNINDENT
+.IP Note
+.
+Use krb5\-send\-pr to submit problem reports rather than
+mailing them directly.  Using both the template and
+krb5\-send\-pr itself will help ensure all necessary
+information will reach the support site.
+.RE
+.SH ENVIRONMENT
+.sp
+The environment variable \fBEDITOR\fP specifies the editor to invoke on
+the template.  Default: \fBvi\fP.
+.sp
+If the environment variable \fBPR_FORM\fP is set, then its value is used
+as the file name of the template for your problem\-report editing
+session.  You can use this to start with a partially completed form
+(for example, a form with the identification fields already
+completed).
+.SH HOW TO FILL OUT A PROBLEM REPORT
+.sp
+Problem reports have to be in a particular form so that a program can
+easily manage them.  Please remember the following guidelines:
+.INDENT 0.0
+.IP \(bu 2
+.
+Describe only one problem with each problem report.
+.IP \(bu 2
+.
+For follow\-up mail, use the same subject line as the one in the
+automatic acknowledgent.  It consists of category, PR number and the
+original synopsis line.  This allows the support site to relate
+several mail messages to a particular PR and to record them
+automatically.
+.IP \(bu 2
+.
+Please try to be as accurate as possible in the subject and/or
+synopsis line.
+.IP \(bu 2
+.
+The subject and the synopsis line are not confidential.  This is
+because open\-bugs lists are compiled from them.  Avoid confidential
+information there.
+.UNINDENT
+.sp
+See the GNU Info file \fIkrb5\-send\-pr.info\fP or the document
+Reporting Problems With krb5\-send\-pr for detailed information on reporting problems.
+.SH HOW TO SUBMIT TEST CASES, CODE, ETC.
+.sp
+Submit small code samples with the PR.  Contact the support site for
+instructions on submitting larger test cases and problematic source
+code.
+.SH FILES
+.INDENT 0.0
+.TP
+.B \fB/tmp/p$$\fP
+.sp
+copy of PR used in editing session
+.TP
+.B \fB/tmp/pf$$\fP
+.sp
+copy of empty PR form, for testing purposes
+.TP
+.B \fB/tmp/pbad$$\fP
+.sp
+file for rejected PRs
+.UNINDENT
+.SH EMACS USER INTERFACE
+.sp
+An Emacs user interface for krb5\-send\-pr with completion of field
+values is part of the krb5\-send\-pr distribution (invoked with \fBM\-x
+krb5\-send\-pr\fP).  See the file krb5\-send\-pr.info or the ASCII file
+INSTALL in the top level directory of the distribution for
+configuration and installation information.  The Emacs LISP template
+file is krb5\-send\-pr\-el.in and is installed as krb5\-send\-pr.el.
+.SH INSTALLATION AND CONFIGURATION
+.sp
+See krb5\-send\-pr.info or INSTALL for installation instructions.
+.SH SEE ALSO
+.sp
+Reporting Problems Using krb5\-send\-pr (also installed as the GNU Info
+file krb5\-send\-pr.info).
+.sp
+gnats(l), query\-pr(1), edit\-pr(1), gnats(8), queue\-pr(8), at\-pr(8),
+mkcat(8), mkdist(8).
+.SH AUTHORS
+.sp
+Jeffrey Osier, Brendan Kehoe, Jason Merrill, Heinz G. Seidl (Cygnus Support)
+.SH COPYING
+.sp
+Copyright (c) 1992, 1993 Free Software Foundation, Inc.
+.sp
+Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+.sp
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the
+entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+.sp
+Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions, except that this permission notice may be included in
+translations approved by the Free Software Foundation instead of in
+the original English.
+.SH AUTHOR
+MIT
+.SH COPYRIGHT
+2011, MIT
+.\" Generated by docutils manpage writer.
+.

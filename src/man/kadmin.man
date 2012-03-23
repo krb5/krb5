@@ -1,0 +1,1065 @@
+.TH "KADMIN" "1" " " "0.0.1" "MIT Kerberos"
+.SH NAME
+kadmin \- Kerberos V5 database administration program
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.\" Man page generated from reStructeredText.
+.
+.SH SYNOPSIS
+.sp
+\fBkadmin\fP
+[\fB\-O\fP|\fB\-N\fP]
+[\fB\-r\fP \fIrealm\fP]
+[\fB\-p\fP \fIprincipal\fP]
+[\fB\-q\fP \fIquery\fP]
+[[\fB\-c\fP \fIcache_name\fP]|[\fB\-k\fP [\fB\-t\fP \fIkeytab\fP]]|\fB\-n\fP]
+[\fB\-w\fP \fIpassword\fP]
+[\fB\-s\fP \fIadmin_server\fP[:\fIport\fP]]
+.sp
+\fBkadmin.local\fP
+[\fB\-r\fP \fIrealm\fP]
+[\fB\-p\fP \fIprincipal\fP]
+[\fB\-q\fP \fIquery\fP]
+[\fB\-d\fP \fIdbname\fP]
+[\fB\-e\fP \fIenc\fP:\fIsalt\fP ...]
+[\fB\-m\fP]
+[\fB\-x\fP \fIdb_args\fP]
+.SH DESCRIPTION
+.sp
+kadmin and kadmin.local are command\-line interfaces to the Kerberos V5
+administration system.  They provide nearly identical functionalities;
+the difference is that kadmin.local directly accesses the KDC
+database, while kadmin performs operations using \fIkadmind(8)\fP.
+Except as explicitly noted otherwise, this man page will use "kadmin"
+to refer to both versions.  kadmin provides for the maintenance of
+Kerberos principals, password policies, and service key tables
+(keytabs).
+.sp
+The remote kadmin client uses Kerberos to authenticate to kadmind
+using the service principal \fBkadmin/ADMINHOST\fP (where \fIADMINHOST\fP is
+the fully\-qualified hostname of the admin server) or \fBkadmin/admin\fP.
+If the credentials cache contains a ticket for one of these
+principals, and the \fB\-c\fP credentials_cache option is specified, that
+ticket is used to authenticate to kadmind.  Otherwise, the \fB\-p\fP and
+\fB\-k\fP options are used to specify the client Kerberos principal name
+used to authenticate.  Once kadmin has determined the principal name,
+it requests a service ticket from the KDC, and uses that service
+ticket to authenticate to kadmind.
+.sp
+Since kadmin.local directly accesses the KDC database, it usually must
+be run directly on the master KDC with sufficient permissions to read
+the KDC database.  If the KDC database uses the LDAP database module,
+kadmin.local can be run on any host which can access the LDAP server.
+.SH OPTIONS
+.INDENT 0.0
+.TP
+.B \fB\-r\fP \fIrealm\fP
+.sp
+Use \fIrealm\fP as the default database realm.
+.TP
+.B \fB\-p\fP \fIprincipal\fP
+.sp
+Use \fIprincipal\fP to authenticate.  Otherwise, kadmin will append
+\fB/admin\fP to the primary principal name of the default ccache,
+the value of the \fBUSER\fP environment variable, or the username as
+obtained with getpwuid, in order of preference.
+.TP
+.B \fB\-k\fP
+.sp
+Use a keytab to decrypt the KDC response instead of prompting for
+a password.  In this case, the default principal will be
+\fBhost/hostname\fP.  If there is no keytab specified with the
+\fB\-t\fP option, then the default keytab will be used.
+.TP
+.B \fB\-t\fP \fIkeytab\fP
+.sp
+Use \fIkeytab\fP to decrypt the KDC response.  This can only be used
+with the \fB\-k\fP option.
+.TP
+.B \fB\-n\fP
+.sp
+Requests anonymous processing.  Two types of anonymous principals
+are supported.  For fully anonymous Kerberos, configure PKINIT on
+the KDC and configure \fBpkinit_anchors\fP in the client\(aqs
+\fIkrb5.conf(5)\fP.  Then use the \fB\-n\fP option with a principal
+of the form \fB@REALM\fP (an empty principal name followed by the
+at\-sign and a realm name).  If permitted by the KDC, an anonymous
+ticket will be returned.  A second form of anonymous tickets is
+supported; these realm\-exposed tickets hide the identity of the
+client but not the client\(aqs realm.  For this mode, use \fBkinit
+\-n\fP with a normal principal name.  If supported by the KDC, the
+principal (but not realm) will be replaced by the anonymous
+principal.  As of release 1.8, the MIT Kerberos KDC only supports
+fully anonymous operation.
+.TP
+.B \fB\-c\fP \fIcredentials_cache\fP
+.sp
+Use \fIcredentials_cache\fP as the credentials cache.  The
+cache should contain a service ticket for the \fBkadmin/ADMINHOST\fP
+(where \fIADMINHOST\fP is the fully\-qualified hostname of the admin
+server) or \fBkadmin/admin\fP service; it can be acquired with the
+\fIkinit(1)\fP program.  If this option is not specified, kadmin
+requests a new service ticket from the KDC, and stores it in its
+own temporary ccache.
+.TP
+.B \fB\-w\fP \fIpassword\fP
+.sp
+Use \fIpassword\fP instead of prompting for one.  Use this option with
+care, as it may expose the password to other users on the system
+via the process list.
+.TP
+.B \fB\-q\fP \fIquery\fP
+.sp
+Perform the specified query and then exit.  This can be useful for
+writing scripts.
+.TP
+.B \fB\-d\fP \fIdbname\fP
+.sp
+Specifies the name of the KDC database.  This option does not
+apply to the LDAP database module.
+.TP
+.B \fB\-s\fP \fIadmin_server\fP[:\fIport\fP]
+.sp
+Specifies the admin server which kadmin should contact.
+.TP
+.B \fB\-m\fP
+.sp
+If using kadmin.local, prompt for the database master password
+instead of reading it from a stash file.
+.TP
+.B \fB\-e\fP "\fIenc\fP:\fIsalt\fP ..."
+.sp
+Sets the list of encryption types and salt types to be used for
+any new keys created.  See \fIEncryption_and_salt_types\fP in
+\fIkdc.conf(5)\fP for a list of possible values.
+.TP
+.B \fB\-O\fP
+.sp
+Force use of old AUTH_GSSAPI authentication flavor.
+.TP
+.B \fB\-N\fP
+.sp
+Prevent fallback to AUTH_GSSAPI authentication flavor.
+.TP
+.B \fB\-x\fP \fIdb_args\fP
+.sp
+Specifies the database specific arguments.  Options supported for
+the LDAP database module are:
+.INDENT 7.0
+.TP
+.B \fB\-x host=\fP\fIhostname\fP
+.sp
+specifies the LDAP server to connect to by a LDAP URI.
+.TP
+.B \fB\-x binddn=\fP\fIbind_dn\fP
+.sp
+specifies the DN of the object used by the administration
+server to bind to the LDAP server.  This object should have
+the read and write privileges on the realm container, the
+principal container, and the subtree that is referenced by the
+realm.
+.TP
+.B \fB\-x bindpwd=\fP\fIbind_password\fP
+.sp
+specifies the password for the above mentioned binddn.  Using
+this option may expose the password to other users on the
+system via the process list; to avoid this, instead stash the
+password using the \fBstashsrvpw\fP command of
+\fIkdb5_ldap_util(8)\fP.
+.UNINDENT
+.UNINDENT
+.SH DATE FORMAT
+.sp
+Many of the kadmin commands take a duration or time as an
+argument. The date can appear in a wide variety of formats, such as:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+1 month ago
+2 hours ago
+400000 seconds ago
+last year
+this Monday
+next Monday
+yesterday
+tomorrow
+now
+second Monday
+fortnight ago
+3/31/92 10:00:07 PST
+January 23, 1987 10:05pm
+22:00 GMT
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+Dates which do not have the "ago" specifier default to being absolute
+dates, unless they appear in a field where a duration is expected.  In
+that case the time specifier will be interpreted as relative.
+Specifying "ago" in a duration may result in unexpected behavior.
+.sp
+The following is a list of all of the allowable keywords.
+.TS
+center;
+|l|l|.
+_
+T{
+Months
+T}	T{
+january, jan, february, feb, march, mar, april, apr, may,
+june, jun, july, jul, august, aug, september, sep, sept,
+october, oct, november, nov, december, dec
+T}
+_
+T{
+Days
+T}	T{
+sunday, sun, monday, mon, tuesday, tues, tue, wednesday,
+wednes, wed, thursday, thurs, thur, thu, friday, fri,
+saturday, sat
+T}
+_
+T{
+Units
+T}	T{
+year, month, fortnight, week, day, hour, minute, min,
+second, sec
+T}
+_
+T{
+Relative
+T}	T{
+tomorrow, yesterday, today, now, last, this, next, first,
+second, third, fourth, fifth, sixth, seventh, eighth,
+ninth, tenth, eleventh, twelfth, ago
+T}
+_
+T{
+Time Zones
+T}	T{
+kadmin recognizes abbreviations for most of the world\(aqs
+time zones.
+T}
+_
+T{
+Meridians
+T}	T{
+am, pm
+T}
+_
+.TE
+.SH COMMANDS
+.sp
+When using the remote client, available commands may be restricted
+according to the privileges specified in the kadm5.acl file on the
+admin server.
+.SS add_principal
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBadd_principal\fP [\fIoptions\fP] \fInewprinc\fP
+.UNINDENT
+.UNINDENT
+.sp
+Creates the principal \fInewprinc\fP, prompting twice for a password.  If
+no password policy is specified with the \fB\-policy\fP option, and the
+policy named \fBdefault\fP is assigned to the principal if it exists.
+However, creating a policy named \fBdefault\fP will not automatically
+assign this policy to previously existing principals.  This policy
+assignment can be suppressed with the \fB\-clearpolicy\fP option.
+.sp
+This command requires the \fBadd\fP privilege.
+.sp
+Aliases: \fBaddprinc\fP, \fBank\fP
+.sp
+Options:
+.INDENT 0.0
+.TP
+.B \fB\-expire\fP \fIexpdate\fP
+.sp
+expiration date of the principal
+.TP
+.B \fB\-pwexpire\fP \fIpwexpdate\fP
+.sp
+password expiration date
+.TP
+.B \fB\-maxlife\fP \fImaxlife\fP
+.sp
+maximum ticket life for the principal
+.TP
+.B \fB\-maxrenewlife\fP \fImaxrenewlife\fP
+.sp
+maximum renewable life of tickets for the principal
+.TP
+.B \fB\-kvno\fP \fIkvno\fP
+.sp
+initial key version number
+.TP
+.B \fB\-policy\fP \fIpolicy\fP
+.sp
+password policy used by this principal.  If not specified, the
+policy \fBdefault\fP is used if it exists (unless \fB\-clearpolicy\fP
+is specified).
+.TP
+.B \fB\-clearpolicy\fP
+.sp
+prevents any policy from being assigned when \fB\-policy\fP is not
+specified.
+.TP
+.B {\-|+}\fBallow_postdated\fP
+.sp
+\fB\-allow_postdated\fP prohibits this principal from obtaining
+postdated tickets.  \fB+allow_postdated\fP clears this flag.
+.TP
+.B {\-|+}\fBallow_forwardable\fP
+.sp
+\fB\-allow_forwardable\fP prohibits this principal from obtaining
+forwardable tickets.  \fB+allow_forwardable\fP clears this flag.
+.TP
+.B {\-|+}\fBallow_renewable\fP
+.sp
+\fB\-allow_renewable\fP prohibits this principal from obtaining
+renewable tickets.  \fB+allow_renewable\fP clears this flag.
+.TP
+.B {\-|+}\fBallow_proxiable\fP
+.sp
+\fB\-allow_proxiable\fP prohibits this principal from obtaining
+proxiable tickets.  \fB+allow_proxiable\fP clears this flag.
+.TP
+.B {\-|+}\fBallow_dup_skey\fP
+.sp
+\fB\-allow_dup_skey\fP disables user\-to\-user authentication for this
+principal by prohibiting this principal from obtaining a session
+key for another user.  \fB+allow_dup_skey\fP clears this flag.
+.TP
+.B {\-|+}\fBrequires_preauth\fP
+.sp
+\fB+requires_preauth\fP requires this principal to preauthenticate
+before being allowed to kinit.  \fB\-requires_preauth\fP clears this
+flag.
+.TP
+.B {\-|+}\fBrequires_hwauth\fP
+.sp
+\fB+requires_hwauth\fP requires this principal to preauthenticate
+using a hardware device before being allowed to kinit.
+\fB\-requires_hwauth\fP clears this flag.
+.TP
+.B {\-|+}\fBok_as_delegate\fP
+.sp
+\fB+ok_as_delegate\fP sets the \fBokay as delegate\fP flag on tickets
+issued with this principal as the service.  Clients may use this
+flag as a hint that credentials should be delegated when
+authenticating to the service.  \fB\-ok_as_delegate\fP clears this
+flag.
+.TP
+.B {\-|+}\fBallow_svr\fP
+.sp
+\fB\-allow_svr\fP prohibits the issuance of service tickets for this
+principal.  \fB+allow_svr\fP clears this flag.
+.TP
+.B {\-|+}\fBallow_tgs_req\fP
+.sp
+\fB\-allow_tgs_req\fP specifies that a Ticket\-Granting Service (TGS)
+request for a service ticket for this principal is not permitted.
+\fB+allow_tgs_req\fP clears this flag.
+.TP
+.B {\-|+}\fBallow_tix\fP
+.sp
+\fB\-allow_tix\fP forbids the issuance of any tickets for this
+principal.  \fB+allow_tix\fP clears this flag.
+.TP
+.B {\-|+}\fBneedchange\fP
+.sp
+\fB+needchange\fP forces a password change on the next initial
+authentication to this principal.  \fB\-needchange\fP clears this
+flag.
+.TP
+.B {\-|+}\fBpassword_changing_service\fP
+.sp
+\fB+password_changing_service\fP marks this principal as a password
+change service principal.
+.TP
+.B \fB\-randkey\fP
+.sp
+sets the key of the principal to a random value
+.TP
+.B \fB\-pw\fP \fIpassword\fP
+.sp
+sets the password of the principal to the specified string and
+does not prompt for a password.  Note: using this option in a
+shell script may expose the password to other users on the system
+via the process list.
+.TP
+.B \fB\-e\fP \fIenc\fP:\fIsalt\fP,...
+.sp
+uses the specified list of enctype\-salttype pairs for setting the
+key of the principal.
+.TP
+.B \fB\-x\fP \fIdb_princ_args\fP
+.sp
+indicates database\-specific options.  The options for the LDAP
+database module are:
+.INDENT 7.0
+.TP
+.B \fB\-x dn=\fP\fIdn\fP
+.sp
+specifies the LDAP object that will contain the Kerberos
+principal being created.
+.TP
+.B \fB\-x linkdn=\fP\fIdn\fP
+.sp
+specifies the LDAP object to which the newly created Kerberos
+principal object will point.
+.TP
+.B \fB\-x containerdn=\fP\fIcontainer_dn\fP
+.sp
+specifies the container object under which the Kerberos
+principal is to be created.
+.TP
+.B \fB\-x tktpolicy=\fP\fIpolicy\fP
+.sp
+associates a ticket policy to the Kerberos principal.
+.UNINDENT
+.IP Note
+.INDENT 7.0
+.IP \(bu 2
+.
+The \fBcontainerdn\fP and \fBlinkdn\fP options cannot be
+specified with the \fBdn\fP option.
+.IP \(bu 2
+.
+If the \fIdn\fP or \fIcontainerdn\fP options are not specified while
+adding the principal, the principals are created under the
+principal container configured in the realm or the realm
+container.
+.IP \(bu 2
+.
+\fIdn\fP and \fIcontainerdn\fP should be within the subtrees or
+principal container configured in the realm.
+.UNINDENT
+.RE
+.UNINDENT
+.sp
+Example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin: addprinc jennifer
+WARNING: no policy specified for "jennifer@ATHENA.MIT.EDU";
+defaulting to no policy.
+Enter password for principal jennifer@ATHENA.MIT.EDU:
+Re\-enter password for principal jennifer@ATHENA.MIT.EDU:
+Principal "jennifer@ATHENA.MIT.EDU" created.
+kadmin:
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS modify_principal
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBmodify_principal\fP [\fIoptions\fP] \fIprincipal\fP
+.UNINDENT
+.UNINDENT
+.sp
+Modifies the specified principal, changing the fields as specified.
+The options to \fBadd_principal\fP also apply to this command, except
+for the \fB\-randkey\fP, \fB\-pw\fP, and \fB\-e\fP options.  In addition, the
+option \fB\-clearpolicy\fP will clear the current policy of a principal.
+.sp
+This command requires the \fImodify\fP privilege.
+.sp
+Alias: \fBmodprinc\fP
+.sp
+Options (in addition to the \fBaddprinc\fP options):
+.INDENT 0.0
+.TP
+.B \fB\-unlock\fP
+.sp
+Unlocks a locked principal (one which has received too many failed
+authentication attempts without enough time between them according
+to its password policy) so that it can successfully authenticate.
+.UNINDENT
+.SS rename_principal
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBrename_principal\fP [\fB\-force\fP] \fIold_principal\fP \fInew_principal\fP
+.UNINDENT
+.UNINDENT
+.sp
+Renames the specified \fIold_principal\fP to \fInew_principal\fP.  This
+command prompts for confirmation, unless the \fB\-force\fP option is
+given.
+.sp
+This command requires the \fBadd\fP and \fBdelete\fP privileges.
+.sp
+Alias: \fBrenprinc\fP
+.SS delete_principal
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBdelete_principal\fP [\fB\-force\fP] \fIprincipal\fP
+.UNINDENT
+.UNINDENT
+.sp
+Deletes the specified \fIprincipal\fP from the database.  This command
+prompts for deletion, unless the \fB\-force\fP option is given.
+.sp
+This command requires the \fBdelete\fP privilege.
+.sp
+Alias: \fBdelprinc\fP
+.SS change_password
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBchange_password\fP [\fIoptions\fP] \fIprincipal\fP
+.UNINDENT
+.UNINDENT
+.sp
+Changes the password of \fIprincipal\fP.  Prompts for a new password if
+neither \fB\-randkey\fP or \fB\-pw\fP is specified.
+.sp
+This command requires the \fBchangepw\fP privilege, or that the
+principal running the program is the same as the principal being
+changed.
+.sp
+Alias: \fBcpw\fP
+.sp
+The following options are available:
+.INDENT 0.0
+.TP
+.B \fB\-randkey\fP
+.sp
+Sets the key of the principal to a random value
+.TP
+.B \fB\-pw\fP \fIpassword\fP
+.sp
+Set the password to the specified string.  Using this option in a
+script may expose the password to other users on the system via
+the process list.
+.TP
+.B \fB\-e\fP \fIenc\fP:\fIsalt\fP,...
+.sp
+Uses the specified list of enctype\-salttype pairs for setting the
+key of the principal.
+.TP
+.B \fB\-keepold\fP
+.sp
+Keeps the existing keys in the database.  This flag is usually not
+necessary except perhaps for \fBkrbtgt\fP principals.
+.UNINDENT
+.sp
+Example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin: cpw systest
+Enter password for principal systest@BLEEP.COM:
+Re\-enter password for principal systest@BLEEP.COM:
+Password for systest@BLEEP.COM changed.
+kadmin:
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS purgekeys
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBpurgekeys\fP [\fB\-keepkvno\fP \fIoldest_kvno_to_keep\fP] \fIprincipal\fP
+.UNINDENT
+.UNINDENT
+.sp
+Purges previously retained old keys (e.g., from \fBchange_password
+\-keepold\fP) from \fIprincipal\fP.  If \fB\-keepkvno\fP is specified, then
+only purges keys with kvnos lower than \fIoldest_kvno_to_keep\fP.
+.sp
+This command requires the \fBmodify\fP privilege.
+.SS get_principal
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBget_principal\fP [\fB\-terse\fP] \fIprincipal\fP
+.UNINDENT
+.UNINDENT
+.sp
+Gets the attributes of principal.  With the \fB\-terse\fP option, outputs
+fields as quoted tab\-separated strings.
+.sp
+This command requires the \fBinquire\fP privilege, or that the principal
+running the the program to be the same as the one being listed.
+.sp
+Alias: \fBgetprinc\fP
+.sp
+Examples:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin: getprinc tlyu/admin
+Principal: tlyu/admin@BLEEP.COM
+Expiration date: [never]
+Last password change: Mon Aug 12 14:16:47 EDT 1996
+Password expiration date: [none]
+Maximum ticket life: 0 days 10:00:00
+Maximum renewable life: 7 days 00:00:00
+Last modified: Mon Aug 12 14:16:47 EDT 1996 (bjaspan/admin@BLEEP.COM)
+Last successful authentication: [never]
+Last failed authentication: [never]
+Failed password attempts: 0
+Number of keys: 2
+Key: vno 1, DES cbc mode with CRC\-32, no salt
+Key: vno 1, DES cbc mode with CRC\-32, Version 4
+Attributes:
+Policy: [none]
+
+kadmin: getprinc \-terse systest
+systest@BLEEP.COM   3    86400     604800    1
+785926535 753241234 785900000
+tlyu/admin@BLEEP.COM     786100034 0    0
+kadmin:
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS list_principals
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBlist_principals\fP [\fIexpression\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Retrieves all or some principal names.  \fIexpression\fP is a shell\-style
+glob expression that can contain the wild\-card characters \fB?\fP,
+\fB*\fP, and \fB[]\fP.  All principal names matching the expression are
+printed.  If no expression is provided, all principal names are
+printed.  If the expression does not contain an \fB@\fP character, an
+\fB@\fP character followed by the local realm is appended to the
+expression.
+.sp
+This command requires the \fBlist\fP privilege.
+.sp
+Alias: \fBlistprincs\fP, \fBget_principals\fP, \fBget_princs\fP
+.sp
+Example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin:  listprincs test*
+test3@SECURE\-TEST.OV.COM
+test2@SECURE\-TEST.OV.COM
+test1@SECURE\-TEST.OV.COM
+testuser@SECURE\-TEST.OV.COM
+kadmin:
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS get_strings
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBget_strings\fP \fIprincipal\fP
+.UNINDENT
+.UNINDENT
+.sp
+Displays string attributes on \fIprincipal\fP.  String attributes are used
+to supply per\-principal configuration to some KDC plugin modules.
+.sp
+This command requires the \fBinquire\fP privilege.
+.sp
+Alias: \fBgetstr\fP
+.SS set_string
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBset_string\fP \fIprincipal\fP \fIkey\fP \fIvalue\fP
+.UNINDENT
+.UNINDENT
+.sp
+Sets a string attribute on \fIprincipal\fP.
+.sp
+This command requires the \fBmodify\fP privilege.
+.sp
+Alias: \fBsetstr\fP
+.SS del_string
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBdel_string\fP \fIprincipal\fP \fIkey\fP
+.UNINDENT
+.UNINDENT
+.sp
+Deletes a string attribute from \fIprincipal\fP.
+.sp
+This command requires the \fBdelete\fP privilege.
+.sp
+Alias: \fBdelstr\fP
+.SS add_policy
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBadd_policy\fP [\fIoptions\fP] \fIpolicy\fP
+.UNINDENT
+.UNINDENT
+.sp
+Adds a password policy named \fIpolicy\fP to the database.
+.sp
+This command requires the \fBadd\fP privilege.
+.sp
+Alias: \fBaddpol\fP
+.sp
+The following options are available:
+.INDENT 0.0
+.TP
+.B \fB\-maxlife\fP \fItime\fP
+.sp
+sets the maximum lifetime of a password
+.TP
+.B \fB\-minlife\fP \fItime\fP
+.sp
+sets the minimum lifetime of a password
+.TP
+.B \fB\-minlength\fP \fIlength\fP
+.sp
+sets the minimum length of a password
+.TP
+.B \fB\-minclasses\fP \fInumber\fP
+.sp
+sets the minimum number of character classes required in a
+password.  The five character classes are lower case, upper case,
+numbers, punctuation, and whitespace/unprintable characters.
+.TP
+.B \fB\-history\fP \fInumber\fP
+.sp
+sets the number of past keys kept for a principal.  This option is
+not supported with the LDAP KDC database module.
+.TP
+.B \fB\-maxfailure\fP \fImaxnumber\fP
+.sp
+sets the maximum number of authentication failures before the
+principal is locked.  Authentication failures are only tracked for
+principals which require preauthentication.
+.TP
+.B \fB\-failurecountinterval\fP \fIfailuretime\fP
+.sp
+sets the allowable time between authentication failures.  If an
+authentication failure happens after \fIfailuretime\fP has elapsed
+since the previous failure, the number of authentication failures
+is reset to 1.
+.TP
+.B \fB\-lockoutduration\fP \fIlockouttime\fP
+.sp
+sets the duration for which the principal is locked from
+authenticating if too many authentication failures occur without
+the specified failure count interval elapsing.  A duration of 0
+means forever.
+.UNINDENT
+.sp
+Example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin: add_policy \-maxlife "2 days" \-minlength 5 guests
+kadmin:
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS modify_policy
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBmodify_policy\fP [\fIoptions\fP] \fIpolicy\fP
+.UNINDENT
+.UNINDENT
+.sp
+Modifies the password policy named \fIpolicy\fP.  Options are as described
+for \fBadd_policy\fP.
+.sp
+This command requires the \fBmodify\fP privilege.
+.sp
+Alias: \fBmodpol\fP
+.SS delete_policy
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBdelete_policy\fP [\fB\-force\fP] \fIpolicy\fP
+.UNINDENT
+.UNINDENT
+.sp
+Deletes the password policy named \fIpolicy\fP.  Prompts for confirmation
+before deletion.  The command will fail if the policy is in use by any
+principals.
+.sp
+This command requires the \fBdelete\fP privilege.
+.sp
+Alias: \fBdelpol\fP
+.sp
+Example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin: del_policy guests
+Are you sure you want to delete the policy "guests"?
+(yes/no): yes
+kadmin:
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS get_policy
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBget_policy\fP [ \fB\-terse\fP ] \fIpolicy\fP
+.UNINDENT
+.UNINDENT
+.sp
+Displays the values of the password policy named \fIpolicy\fP.  With the
+\fB\-terse\fP flag, outputs the fields as quoted strings separated by
+tabs.
+.sp
+This command requires the \fBinquire\fP privilege.
+.sp
+Alias: getpol
+.sp
+Examples:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin: get_policy admin
+Policy: admin
+Maximum password life: 180 days 00:00:00
+Minimum password life: 00:00:00
+Minimum password length: 6
+Minimum number of password character classes: 2
+Number of old keys kept: 5
+Reference count: 17
+
+kadmin: get_policy \-terse admin
+admin     15552000  0    6    2    5    17
+kadmin:
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+The "Reference count" is the number of principals using that policy.
+With the LDAP KDC database module, the reference count field is not
+meaningful.
+.SS list_policies
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBlist_policies\fP [\fIexpression\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Retrieves all or some policy names.  \fIexpression\fP is a shell\-style
+glob expression that can contain the wild\-card characters \fB?\fP,
+\fB*\fP, and \fB[]\fP.  All policy names matching the expression are
+printed.  If no expression is provided, all existing policy names are
+printed.
+.sp
+This command requires the \fBlist\fP privilege.
+.sp
+Aliases: \fBlistpols\fP, \fBget_policies\fP, \fBgetpols\fP.
+.sp
+Examples:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin:  listpols
+test\-pol
+dict\-only
+once\-a\-min
+test\-pol\-nopw
+
+kadmin:  listpols t*
+test\-pol
+test\-pol\-nopw
+kadmin:
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS ktadd
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBktadd\fP [[\fIprincipal\fP|\fB\-glob\fP \fIprinc\-exp\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Adds a \fIprincipal\fP, or all principals matching \fIprinc\-exp\fP, to a
+keytab file.  Each principal\(aqs keys are randomized in the process.
+The rules for \fIprinc\-exp\fP are described in the \fBlist_principals\fP
+command.
+.sp
+This command requires the \fBinquire\fP and \fBchangepw\fP privileges.
+With the \fB\-glob\fP option, it also requires the \fBlist\fP privilege.
+.sp
+The options are:
+.INDENT 0.0
+.TP
+.B \fB\-k[eytab]\fP \fIkeytab\fP
+.sp
+Use \fIkeytab\fP as the keytab file.  Otherwise, the default keytab is
+used.
+.TP
+.B \fB\-e\fP \fIenc\fP:\fIsalt\fP,...
+.sp
+Use the specified list of enctype\-salttype pairs for setting the
+new keys of the principal.
+.TP
+.B \fB\-q\fP
+.sp
+Display less verbose information.
+.TP
+.B \fB\-norandkey\fP
+.sp
+Do not randomize the keys. The keys and their version numbers stay
+unchanged.  This option is only available in kadmin.local, and
+cannot be specified in combination with the \fB\-e\fP option.
+.UNINDENT
+.sp
+An entry for each of the principal\(aqs unique encryption types is added,
+ignoring multiple keys with the same encryption type but different
+salt types.
+.sp
+Example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin: ktadd \-k /tmp/foo\-new\-keytab host/foo.mit.edu
+Entry for principal host/foo.mit.edu@ATHENA.MIT.EDU with kvno 3,
+     encryption type aes256\-cts\-hmac\-sha1\-96 added to keytab
+     FILE:/tmp/foo\-new\-keytab
+kadmin:
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS ktremove
+.INDENT 0.0
+.INDENT 3.5
+.sp
+\fBktremove\fP \fIprincipal\fP [\fIkvno\fP|\fIall\fP| \fIold\fP]
+.UNINDENT
+.UNINDENT
+.sp
+Removes entries for the specified \fIprincipal\fP from a keytab.  Requires
+no permissions, since this does not require database access.
+.sp
+If the string "all" is specified, all entries for that principal are
+removed; if the string "old" is specified, all entries for that
+principal except those with the highest kvno are removed.  Otherwise,
+the value specified is parsed as an integer, and all entries whose
+kvno match that integer are removed.
+.sp
+The options are:
+.INDENT 0.0
+.TP
+.B \fB\-k[eytab]\fP \fIkeytab\fP
+.sp
+Use \fIkeytab\fP as the keytab file.  Otherwise, the default keytab is
+used.
+.TP
+.B \fB\-q\fP
+.sp
+Display less verbose information.
+.UNINDENT
+.sp
+Example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin: ktremove kadmin/admin all
+Entry for principal kadmin/admin with kvno 3 removed from keytab
+     FILE:/etc/krb5.keytab
+kadmin:
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS lock
+.sp
+Lock database exclusively.  Use with extreme caution!  This command
+only works with the DB2 KDC database module.
+.SS unlock
+.sp
+Release the exclusive database lock.
+.SS list_requests
+.sp
+Lists available for kadmin requests.
+.sp
+Aliases: \fBlr\fP, \fB?\fP
+.SS quit
+.sp
+Exit program.  If the database was locked, the lock is released.
+.sp
+Aliases: \fBexit\fP, \fBq\fP
+.SH HISTORY
+.sp
+The kadmin program was originally written by Tom Yu at MIT, as an
+interface to the OpenVision Kerberos administration program.
+.SH SEE ALSO
+.sp
+\fIkpasswd(1)\fP, \fIkadmind(8)\fP
+.SH AUTHOR
+MIT
+.SH COPYRIGHT
+2011, MIT
+.\" Generated by docutils manpage writer.
+.

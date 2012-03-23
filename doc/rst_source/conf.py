@@ -212,11 +212,23 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
-rst_epilog='''
-.. |bindir| replace:: ``/usr/local/bin``
-.. |sbindir| replace:: ``/usr/local/sbin``
-.. |libdir| replace:: ``/usr/local/lib``
-.. |kdcdir| replace:: ``/usr/local/var/krb5kdc``
+if 'mansubs' in tags:
+    bindir = '@BINDIR@'
+    sbindir = '@SBINDIR@'
+    libdir = '@LIBDIR@'
+    localstatedir = '@LOCALSTATEDIR@'
+else:
+    bindir = '/usr/local/bin'
+    sbindir = '/usr/local/sbin'
+    libdir = '/usr/local/lib'
+    localstatedir = '/usr/local/var'
+
+rst_epilog = '\n'
+rst_epilog += '.. |bindir| replace:: ``%s``\n' % bindir
+rst_epilog += '.. |sbindir| replace:: ``%s``\n' % sbindir
+rst_epilog += '.. |libdir| replace:: ``%s``\n' % libdir
+rst_epilog += '.. |kdcdir| replace:: ``%s/krb5kdc``\n' % localstatedir
+rst_epilog += '''
 .. |keytab| replace:: ``/etc/krb5.keytab``
 .. |krb5conf| replace:: ``/etc/krb5.conf``
 .. |defkeysalts| replace:: ``aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal des3-cbc-sha1:normal arcfour-hmac-md5:normal``

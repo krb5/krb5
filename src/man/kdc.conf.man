@@ -1,0 +1,939 @@
+.TH "KDC.CONF" "5" " " "0.0.1" "MIT Kerberos"
+.SH NAME
+kdc.conf \- Kerberos V5 KDC configuration file
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.\" Man page generated from reStructeredText.
+.
+.sp
+The kdc.conf file supplements \fIkrb5.conf(5)\fP for programs which
+are typically only used on a KDC, such as the \fIkrb5kdc(8)\fP and
+\fIkadmind(8)\fP daemons and the \fIkdb5_util(8)\fP program.
+Relations documented here may also be specified in krb5.conf.
+.sp
+Normally, the kdc.conf file is found in the KDC state directory,
+\fB@LOCALSTATEDIR@/krb5kdc\fP.  You can override the default location by setting the
+environment variable \fBKRB5_KDC_PROFILE\fP.
+.SH STRUCTURE
+.sp
+The kdc.conf file is set up in the same format as the
+\fIkrb5.conf(5)\fP file.
+.SH SECTIONS
+.sp
+The kdc.conf file may contain the following sections:
+.TS
+center;
+|l|l|.
+_
+T{
+\fI\%[kdcdefaults]\fP
+T}	T{
+Default values for KDC behavior
+T}
+_
+T{
+\fI\%[realms]\fP
+T}	T{
+Realm\-specific database configuration and settings
+T}
+_
+T{
+\fI\%[logging]\fP
+T}	T{
+Controls how Kerberos daemons perform logging
+T}
+_
+T{
+\fI\%[dbdefaults]\fP
+T}	T{
+Default database settings
+T}
+_
+T{
+\fI\%[dbmodules]\fP
+T}	T{
+Per\-database settings
+T}
+_
+.TE
+.SS [kdcdefaults]
+.sp
+With one exception, relations in the [kdcdefaults] section specify
+default values for realm variables, to be used if the [realms]
+subsection does not contain a relation for the tag.  See the
+\fI\%[realms]\fP section for the definitions of these relations.
+.INDENT 0.0
+.IP \(bu 2
+.
+\fBhost_based_services\fP
+.IP \(bu 2
+.
+\fBkdc_ports\fP
+.IP \(bu 2
+.
+\fBkdc_tcp_ports\fP
+.IP \(bu 2
+.
+\fBno_host_referral\fP
+.IP \(bu 2
+.
+\fBrestrict_anonymous_to_tgt\fP
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \fBkdc_max_dgram_reply_size\fP
+.sp
+Specifies the maximum packet size that can be sent over UDP.  The
+default value is 4096 bytes.
+.UNINDENT
+.SS [realms]
+.sp
+Each tag in the [realms] section of the file names a Kerberos realm.
+The value of the tag is a subsection where the relations in that
+subsection define KDC parameters for that particular realm.
+.sp
+For each realm, the following tags may be specified in the [realms]
+subsection:
+.INDENT 0.0
+.TP
+.B \fBacl_file\fP
+.sp
+(String.)  Location of the access control list file that
+\fIkadmind(8)\fP uses to determine which principals are allowed
+which permissions on the database.  The default value is
+\fB@LOCALSTATEDIR@/krb5kdc\fP\fB/kadm5.acl\fP.
+.TP
+.B \fBdatabase_module\fP
+.sp
+This relation indicates the name of the configuration section
+under \fI\%[dbmodules]\fP for database specific parameters used by
+the loadable database library.
+.TP
+.B \fBdatabase_name\fP
+.sp
+(String.)  This string specifies the location of the Kerberos
+database for this realm, if the DB2 back\-end is being used.  If a
+\fBdatabase_module\fP is specified for the realm and the
+corresponding module contains a \fBdatabase_name\fP parameter, that
+value will take precedence over this one.  The default value is
+\fB@LOCALSTATEDIR@/krb5kdc\fP\fB/principal\fP.
+.TP
+.B \fBdefault_principal_expiration\fP
+.sp
+(Absolute time string.)  Specifies the default expiration date of
+principals created in this realm.  The default value is 0, which
+means no expiration date.
+.TP
+.B \fBdefault_principal_flags\fP
+.sp
+(Flag string.)  Specifies the default attributes of principals
+created in this realm.  The format for this string is a
+comma\-separated list of flags, with \(aq+\(aq before each flag that
+should be enabled and \(aq\-\(aq before each flag that should be
+disabled.  The \fBpostdateable\fP, \fBforwardable\fP, \fBtgt\-based\fP,
+\fBrenewable\fP, \fBproxiable\fP, \fBdup\-skey\fP, \fBallow\-tickets\fP, and
+\fBservice\fP flags default to enabled.
+.sp
+There are a number of possible flags:
+.INDENT 7.0
+.TP
+.B \fBallow\-tickets\fP
+.sp
+Enabling this flag means that the KDC will issue tickets for
+this principal.  Disabling this flag essentially deactivates
+the principal within this realm.
+.TP
+.B \fBdup\-skey\fP
+.sp
+Enabling this flag allows the principal to obtain a session
+key for another user, permitting user\-to\-user authentication
+for this principal.
+.TP
+.B \fBforwardable\fP
+.sp
+Enabling this flag allows the principal to obtain forwardable
+tickets.
+.TP
+.B \fBhwauth\fP
+.sp
+If this flag is enabled, then the principal is required to
+preauthenticate using a hardware device before receiving any
+tickets.
+.TP
+.B \fBno\-auth\-data\-required\fP
+.sp
+Enabling this flag prvents PAC data from being added to the
+service tickets.
+.TP
+.B \fBok\-as\-delegate\fP
+.sp
+If this flag is enabled, it hints the client that credentials
+can and should be delegated when authenticating to the
+service.
+.TP
+.B \fBok\-to\-auth\-as\-delegate\fP
+.sp
+Enabling this flag allows the principal to use S4USelf ticket.
+.TP
+.B \fBpostdateable\fP
+.sp
+Enabling this flag allows the principal to obtain postdateable
+tickets.
+.TP
+.B \fBpreauth\fP
+.sp
+If this flag is enabled on a client principal, then that
+principal is required to preauthenticate to the KDC before
+receiving any tickets.  On a service principal, enabling this
+flag means that service tickets for this principal will only
+be issued to clients with a TGT that has the preauthenticated
+ticket set.
+.TP
+.B \fBproxiable\fP
+.sp
+Enabling this flag allows the principal to obtain proxy
+tickets.
+.TP
+.B \fBpwchange\fP
+.sp
+Enabling this flag forces a password change for this
+principal.
+.TP
+.B \fBpwservice\fP
+.sp
+If this flag is enabled, it marks this principal as a password
+change service.  This should only be used in special cases,
+for example, if a user\(aqs password has expired, then the user
+has to get tickets for that principal without going through
+the normal password authentication in order to be able to
+change the password.
+.TP
+.B \fBrenewable\fP
+.sp
+Enabling this flag allows the principal to obtain renewable
+tickets.
+.TP
+.B \fBservice\fP
+.sp
+Enabling this flag allows the the KDC to issue service tickets
+for this principal.
+.TP
+.B \fBtgt\-based\fP
+.sp
+Enabling this flag allows a principal to obtain tickets based
+on a ticket\-granting\-ticket, rather than repeating the
+authentication process that was used to obtain the TGT.
+.UNINDENT
+.TP
+.B \fBdict_file\fP
+.sp
+(String.)  Location of the dictionary file containing strings that
+are not allowed as passwords.  If none is specified or if there is
+no policy assigned to the principal, no dictionary checks of
+passwords will be performed.
+.TP
+.B \fBhost_based_services\fP
+.sp
+(Whitespace\- or comma\-separated list.)  Lists services which will
+get host\-based referral processing even if the server principal is
+not marked as host\-based by the client.
+.TP
+.B \fBiprop_enable\fP
+.sp
+(Boolean value.)  Specifies whether incremental database
+propagation is enabled.  The default value is false.
+.TP
+.B \fBiprop_master_ulogsize\fP
+.sp
+(Integer.)  Specifies the maximum number of log entries to be
+retained for incremental propagation.  The maximum value is 2500;
+the default value is 1000.
+.TP
+.B \fBiprop_slave_poll\fP
+.sp
+(Delta time string.)  Specifies how often the slave KDC polls for
+new updates from the master.  The default value is \fB2m\fP (that
+is, two minutes).
+.TP
+.B \fBiprop_port\fP
+.sp
+(Port number.)  Specifies the port number to be used for
+incremental propagation.  This is required in both master and
+slave configuration files.
+.TP
+.B \fBiprop_logfile\fP
+.sp
+(File name.)  Specifies where the update log file for the realm
+database is to be stored.  The default is to use the
+\fBdatabase_name\fP entry from the realms section of the krb5 config
+file, with \fB.ulog\fP appended.  (NOTE: If \fBdatabase_name\fP isn\(aqt
+specified in the realms section, perhaps because the LDAP database
+back end is being used, or the file name is specified in the
+[dbmodules] section, then the hard\-coded default for
+\fBdatabase_name\fP is used.  Determination of the \fBiprop_logfile\fP
+default value will not use values from the [dbmodules] section.)
+.TP
+.B \fBkadmind_port\fP
+.sp
+(Port number.)  Specifies the port on which the \fIkadmind(8)\fP
+daemon is to listen for this realm.  The assigned port for kadmind
+is 749.
+.TP
+.B \fBkey_stash_file\fP
+.sp
+(String.)  Specifies the location where the master key has been
+stored (via kdb5_util stash).  The default is \fB@LOCALSTATEDIR@/krb5kdc\fP\fB/.k5.REALM\fP, where \fIREALM\fP is the Kerberos realm.
+.TP
+.B \fBkdc_ports\fP
+.sp
+(Whitespace\- or comma\-separated list.)  Lists the ports on which
+the Kerberos server should listen for UDP requests, as a
+comma\-separated list of integers.  The default value is
+\fB88,750\fP, which are the assigned Kerberos port and the port
+historically used by Kerberos V4.
+.TP
+.B \fBkdc_tcp_ports\fP
+.sp
+(Whitespace\- or comma\-separated list.)  Lists the ports on which
+the Kerberos server should listen for TCP connections, as a
+comma\-separated list of integers.  If this relation is not
+specified, the compiled\-in default is not to listen for TCP
+connections at all.
+.sp
+If you wish to change this (note that the current implementation
+has little protection against denial\-of\-service attacks), the
+standard port number assigned for Kerberos TCP traffic is port 88.
+.TP
+.B \fBmaster_key_name\fP
+.sp
+(String.)  Specifies the name of the principal associated with the
+master key.  The default is \fBK/M\fP.
+.TP
+.B \fBmaster_key_type\fP
+.sp
+(Key type string.)  Specifies the master key\(aqs key type.  The
+default value for this is \fBaes256\-cts\-hmac\-sha1\-96\fP.  For a list of all possible
+values, see \fI\%Encryption and salt types\fP.
+.TP
+.B \fBmax_life\fP
+.sp
+(Delta time string.)  Specifies the maximum time period for which
+a ticket may be valid in this realm.  The default value is 24
+hours.
+.TP
+.B \fBmax_renewable_life\fP
+.sp
+(Delta time string.)  Specifies the maximum time period during
+which a valid ticket may be renewed in this realm.  The default
+value is 0.
+.TP
+.B \fBno_host_referral\fP
+.sp
+(Whitespace\- or comma\-separated list.)  Lists services to block
+from getting host\-based referral processing, even if the client
+marks the server principal as host\-based or the service is also
+listed in \fBhost_based_services\fP.  \fBno_host_referral = *\fP will
+disable referral processing altogether.
+.TP
+.B \fBreject_bad_transit\fP
+.sp
+(Boolean value.)  If set to true, the KDC will check the list of
+transited realms for cross\-realm tickets against the transit path
+computed from the realm names and the capaths section of its
+\fIkrb5.conf(5)\fP file; if the path in the ticket to be issued
+contains any realms not in the computed path, the ticket will not
+be issued, and an error will be returned to the client instead.
+If this value is set to false, such tickets will be issued
+anyways, and it will be left up to the application server to
+validate the realm transit path.
+.sp
+If the disable\-transited\-check flag is set in the incoming
+request, this check is not performed at all.  Having the
+\fBreject_bad_transit\fP option will cause such ticket requests to
+be rejected always.
+.sp
+This transit path checking and config file option currently apply
+only to TGS requests.
+.sp
+The default value is true.
+.TP
+.B \fBrestrict_anonymous_to_tgt\fP
+.sp
+(Boolean value.)  If set to true, the KDC will reject ticket
+requests from anonymous principals to service principals other
+than the realm\(aqs ticket\-granting service.  This option allows
+anonymous PKINIT to be enabled for use as FAST armor tickets
+without allowing anonymous authentication to services.  The
+default value is false.
+.TP
+.B \fBsupported_enctypes\fP
+.sp
+(List of \fIkey\fP:\fIsalt\fP strings.)  Specifies the default key/salt
+combinations of principals for this realm.  Any principals created
+through \fIkadmin(1)\fP will have keys of these types.  The
+default value for this tag is \fBaes256\-cts\-hmac\-sha1\-96:normal aes128\-cts\-hmac\-sha1\-96:normal des3\-cbc\-sha1:normal arcfour\-hmac\-md5:normal\fP.  For lists of
+possible values, see \fI\%Encryption and salt types\fP.
+.UNINDENT
+.SS [logging]
+.sp
+The [logging] section indicates how \fIkrb5kdc(8)\fP and
+\fIkadmind(8)\fP perform logging.  The keys in this section are
+daemon names, which may be one of:
+.INDENT 0.0
+.TP
+.B \fBadmin_server\fP
+.sp
+Specifies how \fIkadmind(8)\fP performs logging.
+.TP
+.B \fBkdc\fP
+.sp
+Specifies how \fIkrb5kdc(8)\fP performs logging.
+.TP
+.B \fBdefault\fP
+.sp
+Specifies how either daemon performs logging in the absence of
+relations specific to the daemon.
+.UNINDENT
+.sp
+Values are of the following forms:
+.INDENT 0.0
+.TP
+.B \fBFILE=\fP\fIfilename\fP or \fBFILE:\fP\fIfilename\fP
+.sp
+This value causes the daemon\(aqs logging messages to go to the
+\fIfilename\fP.  If the \fB=\fP form is used, the file is overwritten.
+If the \fB:\fP form is used, the file is appended to.
+.TP
+.B \fBSTDERR\fP
+.sp
+This value causes the daemon\(aqs logging messages to go to its
+standard error stream.
+.TP
+.B \fBCONSOLE\fP
+.sp
+This value causes the daemon\(aqs logging messages to go to the
+console, if the system supports it.
+.TP
+.B \fBDEVICE=\fP\fI<devicename>\fP
+.sp
+This causes the daemon\(aqs logging messages to go to the specified
+device.
+.TP
+.B \fBSYSLOG\fP[\fB:\fP\fIseverity\fP[\fB:\fP\fIfacility\fP]]
+.sp
+This causes the daemon\(aqs logging messages to go to the system log.
+.sp
+The severity argument specifies the default severity of system log
+messages.  This may be any of the following severities supported
+by the syslog(3) call, minus the \fBLOG_\fP prefix: \fBEMERG\fP,
+\fBALERT\fP, \fBCRIT\fP, \fBERR\fP, \fBWARNING\fP, \fBNOTICE\fP, \fBINFO\fP,
+and \fBDEBUG\fP.
+.sp
+The facility argument specifies the facility under which the
+messages are logged.  This may be any of the following facilities
+supported by the syslog(3) call minus the LOG_ prefix: \fBKERN\fP,
+\fBUSER\fP, \fBMAIL\fP, \fBDAEMON\fP, \fBAUTH\fP, \fBLPR\fP, \fBNEWS\fP,
+\fBUUCP\fP, \fBCRON\fP, and \fBLOCAL0\fP through \fBLOCAL7\fP.
+.sp
+If no severity is specified, the default is \fBERR\fP.  If no
+facility is specified, the default is \fBAUTH\fP.
+.UNINDENT
+.sp
+In the following example, the logging messages from the KDC will go to
+the console and to the system log under the facility LOG_DAEMON with
+default severity of LOG_INFO; and the logging messages from the
+administrative server will be appended to the file
+\fB/var/adm/kadmin.log\fP and sent to the device \fB/dev/tty04\fP.
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[logging]
+    kdc = CONSOLE
+    kdc = SYSLOG:INFO:DAEMON
+    admin_server = FILE:/var/adm/kadmin.log
+    admin_server = DEVICE=/dev/tty04
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS [dbdefaults]
+.sp
+The [dbdefaults] section specifies default values for some database
+parameters, to be used if the [dbmodules] subsection does not contain
+a relation for the tag.  See the \fI\%[dbmodules]\fP section for the
+definitions of these relations.
+.INDENT 0.0
+.IP \(bu 2
+.
+\fBldap_kerberos_container_dn\fP
+.IP \(bu 2
+.
+\fBldap_kdc_dn\fP
+.IP \(bu 2
+.
+\fBldap_kadmind_dn\fP
+.IP \(bu 2
+.
+\fBldap_service_password_file\fP
+.IP \(bu 2
+.
+\fBldap_servers\fP
+.IP \(bu 2
+.
+\fBldap_conns_per_server\fP
+.UNINDENT
+.SS [dbmodules]
+.sp
+The [dbmodules] section contains parameters used by the KDC database
+library and database modules.  The following tag may be specified
+in the [dbmodules] section:
+.INDENT 0.0
+.TP
+.B \fBdb_module_dir\fP
+.sp
+This tag controls where the plugin system looks for modules.  The
+value should be an absolute path.
+.UNINDENT
+.sp
+Other tags in the [dbmodules] section name a configuration subsection
+for parameters which can be referred to by a realm\(aqs
+\fBdatabase_module\fP parameter.  The following tags may be specified in
+the subsection:
+.INDENT 0.0
+.TP
+.B \fBdatabase_name\fP
+.sp
+This DB2\-specific tag indicates the location of the database in
+the filesystem.  The default is \fB@LOCALSTATEDIR@/krb5kdc\fP\fB/principal\fP.
+.TP
+.B \fBdb_library\fP
+.sp
+This tag indicates the name of the loadable database module.  The
+value should be \fBdb2\fP for the DB2 module and \fBkldap\fP for the
+LDAP module.
+.TP
+.B \fBdisable_last_success\fP
+.sp
+If set to \fBtrue\fP, suppresses KDC updates to the "Last successful
+authentication" field of principal entries requiring
+preauthentication.  Setting this flag may improve performance.
+(Principal entries which do not require preauthentication never
+update the "Last successful authentication" field.).
+.TP
+.B \fBdisable_lockout\fP
+.sp
+If set to \fBtrue\fP, suppresses KDC updates to the "Last failed
+authentication" and "Failed password attempts" fields of principal
+entries requiring preauthentication.  Setting this flag may
+improve performance, but also disables account lockout.
+.TP
+.B \fBldap_conns_per_server\fP
+.sp
+This LDAP\-specific tag indicates the number of connections to be
+maintained per LDAP server.
+.TP
+.B \fBldap_kadmind_dn\fP
+.sp
+This LDAP\-specific tag indicates the default bind DN for the
+\fIkadmind(8)\fP daemon.  kadmind does a login to the directory
+as this object.  This object should have the rights to read and
+write the Kerberos data in the LDAP database.
+.TP
+.B \fBldap_kdc_dn\fP
+.sp
+This LDAP\-specific tag indicates the default bind DN for the
+\fIkrb5kdc(8)\fP daemon.  The KDC does a login to the directory
+as this object.  This object should have the rights to read the
+Kerberos data in the LDAP database, and to write data unless
+\fBdisable_lockout\fP and \fBdisable_last_success\fP are true.
+.TP
+.B \fBldap_kerberos_container_dn\fP
+.sp
+This LDAP\-specific tag indicates the DN of the container object
+where the realm objects will be located.
+.TP
+.B \fBldap_servers\fP
+.sp
+This LDAP\-specific tag indicates the list of LDAP servers that the
+Kerberos servers can connect to.  The list of LDAP servers is
+whitespace\-separated.  The LDAP server is specified by a LDAP URI.
+It is recommended to use \fBldapi:\fP or \fBldaps:\fP URLs to connect
+to the LDAP server.
+.TP
+.B \fBldap_service_password_file\fP
+.sp
+This LDAP\-specific tag indicates the file containing the stashed
+passwords (created by \fBkdb5_ldap_util stashsrvpw\fP) for the
+\fBldap_kadmind_dn\fP and \fBldap_kdc_dn\fP objects.  This file must
+be kept secure.
+.UNINDENT
+.SH PKINIT OPTIONS
+.IP Note
+.
+The following are pkinit\-specific options.  These values may
+be specified in [kdcdefaults] as global defaults, or within
+a realm\-specific subsection of [realms].  Also note that a
+realm\-specific value over\-rides, does not add to, a generic
+[kdcdefaults] specification.  The search order is:
+.RE
+.INDENT 0.0
+.IP 1. 3
+.
+realm\-specific subsection of [realms],
+.INDENT 3.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[realms]
+    EXAMPLE.COM = {
+        pkinit_anchors = FILE\e:/usr/local/example.com.crt
+    }
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.IP 2. 3
+.
+generic value in the [kdcdefaults] section.
+.INDENT 3.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[kdcdefaults]
+    pkinit_anchors = DIR\e:/usr/local/generic_trusted_cas/
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+For information about the syntax of some of these options, see
+\fISpecifying PKINIT identity information\fP in
+\fIkrb5.conf(5)\fP.
+.INDENT 0.0
+.TP
+.B \fBpkinit_anchors\fP
+.sp
+Specifies the location of trusted anchor (root) certificates which
+the KDC trusts to sign client certificates.  This option is
+required if pkinit is to be supported by the KDC.  This option may
+be specified multiple times.
+.TP
+.B \fBpkinit_dh_min_bits\fP
+.sp
+Specifies the minimum number of bits the KDC is willing to accept
+for a client\(aqs Diffie\-Hellman key.  The default is 2048.
+.TP
+.B \fBpkinit_allow_upn\fP
+.sp
+Specifies that the KDC is willing to accept client certificates
+with the Microsoft UserPrincipalName (UPN) Subject Alternative
+Name (SAN).  This means the KDC accepts the binding of the UPN in
+the certificate to the Kerberos principal name.  The default value
+is false.
+.sp
+Without this option, the KDC will only accept certificates with
+the id\-pkinit\-san as defined in \fI\%RFC 4556\fP.  There is currently
+no option to disable SAN checking in the KDC.
+.TP
+.B \fBpkinit_eku_checking\fP
+.sp
+This option specifies what Extended Key Usage (EKU) values the KDC
+is willing to accept in client certificates.  The values
+recognized in the kdc.conf file are:
+.INDENT 7.0
+.TP
+.B \fBkpClientAuth\fP
+.sp
+This is the default value and specifies that client
+certificates must have the id\-pkinit\-KPClientAuth EKU as
+defined in \fI\%RFC 4556\fP.
+.TP
+.B \fBscLogin\fP
+.sp
+If scLogin is specified, client certificates with the
+Microsoft Smart Card Login EKU (id\-ms\-kp\-sc\-logon) will be
+accepted.
+.TP
+.B \fBnone\fP
+.sp
+If none is specified, then client certificates will not be
+checked to verify they have an acceptable EKU.  The use of
+this option is not recommended.
+.UNINDENT
+.TP
+.B \fBpkinit_identity\fP
+.sp
+Specifies the location of the KDC\(aqs X.509 identity information.
+This option is required if pkinit is to be supported by the KDC.
+.TP
+.B \fBpkinit_kdc_ocsp\fP
+.sp
+Specifies the location of the KDC\(aqs OCSP.
+.TP
+.B \fBpkinit_mapping_file\fP
+.sp
+Specifies the name of the ACL pkinit mapping file.  This file maps
+principals to the certificates that they can use.
+.TP
+.B \fBpkinit_pool\fP
+.sp
+Specifies the location of intermediate certificates which may be
+used by the KDC to complete the trust chain between a client\(aqs
+certificate and a trusted anchor.  This option may be specified
+multiple times.
+.TP
+.B \fBpkinit_revoke\fP
+.sp
+Specifies the location of Certificate Revocation List (CRL)
+information to be used by the KDC when verifying the validity of
+client certificates.  This option may be specified multiple times.
+.TP
+.B \fBpkinit_require_crl_checking\fP
+.sp
+The default certificate verification process will always check the
+available revocation information to see if a certificate has been
+revoked.  If a match is found for the certificate in a CRL,
+verification fails.  If the certificate being verified is not
+listed in a CRL, or there is no CRL present for its issuing CA,
+and \fBpkinit_require_crl_checking\fP is false, then verification
+succeeds.
+.sp
+However, if \fBpkinit_require_crl_checking\fP is true and there is
+no CRL information available for the issuing CA, then verification
+fails.
+.sp
+\fBpkinit_require_crl_checking\fP should be set to true if the
+policy is such that up\-to\-date CRLs must be present for every CA.
+.UNINDENT
+.SH ENCRYPTION AND SALT TYPES
+.sp
+Any tag in the configuration files which requires a list of encryption
+types can be set to some combination of the following strings.
+Encryption types marked as "weak" are available for compatibility but
+not recommended for use.
+.TS
+center;
+|l|l|.
+_
+T{
+des\-cbc\-crc
+T}	T{
+DES cbc mode with CRC\-32 (weak)
+T}
+_
+T{
+des\-cbc\-md4
+T}	T{
+DES cbc mode with RSA\-MD4 (weak)
+T}
+_
+T{
+des\-cbc\-md5
+T}	T{
+DES cbc mode with RSA\-MD5 (weak)
+T}
+_
+T{
+des\-cbc\-raw
+T}	T{
+DES cbc mode raw (weak)
+T}
+_
+T{
+des3\-cbc\-raw
+T}	T{
+Triple DES cbc mode raw (weak)
+T}
+_
+T{
+des3\-cbc\-sha1 des3\-hmac\-sha1 des3\-cbc\-sha1\-kd
+T}	T{
+Triple DES cbc mode with HMAC/sha1
+T}
+_
+T{
+des\-hmac\-sha1
+T}	T{
+DES with HMAC/sha1 (weak)
+T}
+_
+T{
+aes256\-cts\-hmac\-sha1\-96 aes256\-cts AES\-256
+T}	T{
+CTS mode with 96\-bit SHA\-1 HMAC
+T}
+_
+T{
+aes128\-cts\-hmac\-sha1\-96 aes128\-cts AES\-128
+T}	T{
+CTS mode with 96\-bit SHA\-1 HMAC
+T}
+_
+T{
+arcfour\-hmac rc4\-hmac arcfour\-hmac\-md5
+T}	T{
+RC4 with HMAC/MD5
+T}
+_
+T{
+arcfour\-hmac\-exp rc4\-hmac\-exp arcfour\-hmac\-md5\-exp
+T}	T{
+Exportable RC4 with HMAC/MD5 (weak)
+T}
+_
+T{
+des
+T}	T{
+The DES family: des\-cbc\-crc, des\-cbc\-md5, and des\-cbc\-md4 (weak)
+T}
+_
+T{
+des3
+T}	T{
+The triple DES family: des3\-cbc\-sha1
+T}
+_
+T{
+aes
+T}	T{
+The AES family: aes256\-cts\-hmac\-sha1\-96 and aes128\-cts\-hmac\-sha1\-96
+T}
+_
+T{
+rc4
+T}	T{
+The RC4 family: arcfour\-hmac
+T}
+_
+.TE
+.sp
+The string \fBDEFAULT\fP can be used to refer to the default set of
+types for the variable in question.  Types or families can be removed
+from the current list by prefixing them with a minus sign ("\-").
+Types or families can be prefixed with a plus sign ("+") for symmetry;
+it has the same meaning as just listing the type or family.  For
+example, "\fBDEFAULT \-des\fP" would be the default set of encryption
+types with DES types removed, and "\fBdes3 DEFAULT\fP" would be the
+default set of encryption types with triple DES types moved to the
+front.
+.sp
+While \fBaes128\-cts\fP and \fBaes256\-cts\fP are supported for all Kerberos
+operations, they are not supported by very old versions of our GSSAPI
+implementation (krb5\-1.3.1 and earlier).  Services running versions of
+krb5 without AES support must not be given AES keys in the KDC
+database.
+.sp
+Kerberos keys for users are usually derived from passwords.  To ensure
+that people who happen to pick the same password do not have the same
+key, Kerberos 5 incorporates more information into the key using
+something called a salt.  The supported salt types are as follows:
+.TS
+center;
+|l|l|.
+_
+T{
+normal
+T}	T{
+default for Kerberos Version 5
+T}
+_
+T{
+v4
+T}	T{
+the only type used by Kerberos Version 4 (no salt)
+T}
+_
+T{
+norealm
+T}	T{
+same as the default, without using realm information
+T}
+_
+T{
+onlyrealm
+T}	T{
+uses only realm information as the salt
+T}
+_
+T{
+afs3
+T}	T{
+AFS version 3, only used for compatibility with Kerberos 4 in AFS
+T}
+_
+T{
+special
+T}	T{
+generate a random salt
+T}
+_
+.TE
+.SH SAMPLE KDC.CONF FILE
+.sp
+Here\(aqs an example of a kdc.conf file:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[kdcdefaults]
+    kdc_ports = 88
+
+[realms]
+    ATHENA.MIT.EDU = {
+        kadmind_port = 749
+        max_life = 12h 0m 0s
+        max_renewable_life = 7d 0h 0m 0s
+        master_key_type = des3\-hmac\-sha1
+        supported_enctypes = des3\-hmac\-sha1:normal des\-cbc\-crc:normal des\-cbc\-crc:v4
+    }
+
+[logging]
+    kdc = FILE:/usr/local/var/krb5kdc/kdc.log
+    admin_server = FILE:/usr/local/var/krb5kdc/kadmin.log
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SH FILES
+.sp
+\fB@LOCALSTATEDIR@/krb5kdc\fP\fB/kdc.conf\fP
+.SH SEE ALSO
+.sp
+\fIkrb5.conf(5)\fP, \fIkrb5kdc(8)\fP
+.SH AUTHOR
+MIT
+.SH COPYRIGHT
+2011, MIT
+.\" Generated by docutils manpage writer.
+.
