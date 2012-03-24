@@ -262,7 +262,6 @@ man_pages = [
     ('krb_admins/admin_commands/kdb5_ldap_util', 'kdb5_ldap_util', u'Kerberos configuration utility', [u'MIT'], 8),
     ('krb_admins/conf_files/krb5_conf', 'krb5.conf', u'Kerberos configuration file', [u'MIT'], 5),
     ('krb_admins/conf_files/kdc_conf', 'kdc.conf', u'Kerberos V5 KDC configuration file', [u'MIT'], 5),
-    ('krb_users/user_commands/send-pr', 'krb5-send-pr', u'send problem report (PR) to a central support site', [u'MIT'], 1),
     ('krb_users/user_commands/sclient', 'sclient', u'sample Kerberos version 5 client', [u'MIT'], 1),
     ('krb_admins/admin_commands/sserver', 'sserver', u'sample Kerberos version 5 server', [u'MIT'], 8),
 ]

@@ -14,4 +14,3 @@ User commands
    kvno.rst
    ksu.rst
    sclient.rst
-   send-pr.rst
