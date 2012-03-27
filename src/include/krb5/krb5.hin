@@ -52,7 +52,11 @@
 #ifndef KRB5_GENERAL__
 #define KRB5_GENERAL__
 
-/* By default, do not expose deprecated interfaces. */
+/** @defgroup KRB5_H krb5 library API
+ * @{
+ */
+
+ /* By default, do not expose deprecated interfaces. */
 #ifndef KRB5_DEPRECATED
 #define KRB5_DEPRECATED 0
 #endif
@@ -251,8 +255,7 @@ typedef krb5_principal_data * krb5_principal;
 #define KRB5_NT_X500_PRINCIPAL 6 /**< PKINIT */
 #define KRB5_NT_SMTP_NAME      7 /**< Name in form of SMTP email name */
 #define KRB5_NT_ENTERPRISE_PRINCIPAL  10        /**< Windows 2000 UPN */
-#define KRB5_NT_WELLKNOWN      11 /**< well known principal
-                                       (anonymous Kerberos) */
+#define KRB5_NT_WELLKNOWN      11 /**< Well-known (special) principal */
 #define KRB5_WELLKNOWN_NAMESTR "WELLKNOWN" /**< First component of
                                                 NT_WELLKNOWN principals */
 #define KRB5_NT_MS_PRINCIPAL         -128 /**< Windows 2000 UPN and SID */
@@ -311,8 +314,8 @@ krb5_anonymous_realm(void);
 krb5_const_principal KRB5_CALLCONV
 krb5_anonymous_principal(void);
 
-#define KRB5_ANONYMOUS_REALMSTR "WELLKNOWN:ANONYMOUS"
-#define KRB5_ANONYMOUS_PRINCSTR "ANONYMOUS" /**< WELLKNOWN name type */
+#define KRB5_ANONYMOUS_REALMSTR "WELLKNOWN:ANONYMOUS" /**< Anonymous realm */
+#define KRB5_ANONYMOUS_PRINCSTR "ANONYMOUS" /**< Anonymous principal name */
 /*
  * end "base-defs.h"
  */
@@ -1846,11 +1849,11 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 /** @} */ /* end of KRB5_AUTHDATA group */
 
 /* password change constants */
-#define KRB5_KPASSWD_SUCCESS            0
-#define KRB5_KPASSWD_MALFORMED          1
-#define KRB5_KPASSWD_HARDERROR          2
-#define KRB5_KPASSWD_AUTHERROR          3
-#define KRB5_KPASSWD_SOFTERROR          4
+#define KRB5_KPASSWD_SUCCESS            0  /**< Success */
+#define KRB5_KPASSWD_MALFORMED          1  /**< Malformed request */
+#define KRB5_KPASSWD_HARDERROR          2  /**< Server error */
+#define KRB5_KPASSWD_AUTHERROR          3  /**< Authentication error */
+#define KRB5_KPASSWD_SOFTERROR          4  /**< Password change rejected */
 /* These are Microsoft's extensions in RFC 3244, and it looks like
    they'll become standardized, possibly with other additions.  */
 #define KRB5_KPASSWD_ACCESSDENIED       5       /* unused */
@@ -2155,9 +2158,13 @@ typedef struct _krb5_pa_pac_req {
 /** @defgroup KRB5_AUTH_CONTEXT KRB5_AUTH_CONTEXT
  * @{
  */
-#define KRB5_AUTH_CONTEXT_DO_TIME       0x00000001 /**< set timestamp in the message */
+/** Prevent replays with timestamps and replay cache. */
+#define KRB5_AUTH_CONTEXT_DO_TIME       0x00000001
+/** Save timestamps for application. */
 #define KRB5_AUTH_CONTEXT_RET_TIME      0x00000002
-#define KRB5_AUTH_CONTEXT_DO_SEQUENCE   0x00000004 /**< set sequence number in the message */
+/** Prevent replays with sequence numbers. */
+#define KRB5_AUTH_CONTEXT_DO_SEQUENCE   0x00000004
+/** Save sequence numbers for application. */
 #define KRB5_AUTH_CONTEXT_RET_SEQUENCE  0x00000008
 #define KRB5_AUTH_CONTEXT_PERMIT_ALL    0x00000010
 #define KRB5_AUTH_CONTEXT_USE_SUBKEY    0x00000020
@@ -6653,7 +6660,7 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds,
 struct _krb5_init_creds_context;
 typedef struct _krb5_init_creds_context *krb5_init_creds_context;
 
-#define KRB5_INIT_CREDS_STEP_FLAG_CONTINUE 0x1  /* More responses needed */
+#define KRB5_INIT_CREDS_STEP_FLAG_CONTINUE 0x1  /**< More responses needed */
 
 /**
  * Free an initial credentials context.
@@ -6901,7 +6908,7 @@ krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
 void KRB5_CALLCONV
 krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx);
 
-#define KRB5_TKT_CREDS_STEP_FLAG_CONTINUE 0x1  /* More responses needed. */
+#define KRB5_TKT_CREDS_STEP_FLAG_CONTINUE 0x1  /**< More responses needed */
 
 /**
  * Get the next KDC request in a TGS exchange.
@@ -7168,9 +7175,13 @@ krb5_appdefault_boolean(krb5_context context, const char *appname,
 /*
  * Prompter enhancements
  */
+/** Prompt for password */
 #define KRB5_PROMPT_TYPE_PASSWORD            0x1
+/** Prompt for new password (during password change) */
 #define KRB5_PROMPT_TYPE_NEW_PASSWORD        0x2
+/** Prompt for new password again */
 #define KRB5_PROMPT_TYPE_NEW_PASSWORD_AGAIN  0x3
+/** Prompt for preauthentication data (such as an OTP value) */
 #define KRB5_PROMPT_TYPE_PREAUTH             0x4
 
 typedef krb5_int32 krb5_prompt_type;
@@ -7385,13 +7396,13 @@ typedef struct krb5_pac_data *krb5_pac;
  * if there isn't already a buffer of this type present.
  *
  * The valid values of @a type is one of the following:
- * @li #PAC_LOGON_INFO         -  Logon information
- * @li #PAC_CREDENTIALS_INFO   -  Credentials information
- * @li #PAC_SERVER_CHECKSUM    -  Server checksum
- * @li #PAC_PRIVSVR_CHECKSUM   -  KDC checksum
- * @li #PAC_CLIENT_INFO        -  Client name and ticket information
- * @li #PAC_DELEGATION_INFO    -  Constrained delegation information
- * @li #PAC_UPN_DNS_INFO       -  User principal name and DNS information
+ * @li #KRB5_PAC_LOGON_INFO         -  Logon information
+ * @li #KRB5_PAC_CREDENTIALS_INFO   -  Credentials information
+ * @li #KRB5_PAC_SERVER_CHECKSUM    -  Server checksum
+ * @li #KRB5_PAC_PRIVSVR_CHECKSUM   -  KDC checksum
+ * @li #KRB5_PAC_CLIENT_INFO        -  Client name and ticket information
+ * @li #KRB5_PAC_DELEGATION_INFO    -  Constrained delegation information
+ * @li #KRB5_PAC_UPN_DNS_INFO       -  User principal name and DNS information
  *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
@@ -7598,5 +7609,7 @@ KRB5INT_END_DECLS
 #define krb5_const const
 
 #undef KRB5_ATTR_DEPRECATED
+
+/** @} */ /* end of KRB5_H group */
 
 #endif /* KRB5_GENERAL__ */
