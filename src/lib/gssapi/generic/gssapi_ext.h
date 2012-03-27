@@ -47,12 +47,12 @@ gss_pname_to_uid
  * Provides a platform-specific name for a GSSAPI name as interpreted by a
  * given mechanism.
  *
- * @param name       The gss name resulting from accept_sec_context
- * @param mech_type  The mechanism that will be asked to map @a name to a
- *                   local name
- * @param localname  Pointer to a buffer_desc allocated by the caller
- *                   that will be filled in with the local name on successful
- *                   completion.
+ * @param [out] minor      Minor status code
+ * @param [in] name        The gss name resulting from accept_sec_context
+ * @param [in] mech_type   The mechanism that will be asked to map @a name to a
+ *                         local name
+ * @param [out] localname  Caller-allocated buffer to be filled in with the
+ *                         local name on success
  */
 OM_uint32 KRB5_CALLCONV
 gss_localname
@@ -61,7 +61,8 @@ gss_localname
 	 gss_const_OID mech_type,
 	 gss_buffer_t localname);
 
-/** Determine whether a mechanism name is authorized to act as a username.
+/**
+ * Determine whether a mechanism name is authorized to act as a username.
  *
  * @param [in] name      Mechanism name
  * @param [in] username  System username
@@ -77,7 +78,8 @@ int KRB5_CALLCONV
 gss_userok(const gss_name_t name,
            const char *username);
 
-/** Determine whether a mechanism name is authorized to act as a local name.
+/**
+ *  Determine whether a mechanism name is authorized to act as a local name.
  *
  * @param [out] minor  Minor status code
  * @param [in] name    Mechanism name
