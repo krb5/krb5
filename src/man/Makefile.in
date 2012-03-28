@@ -1,6 +1,7 @@
 mydir=man
 BUILDTOP=$(REL)..
 
+SPHINX_BUILD=sphinx-build
 GROFF=@GROFF@
 GROFF_MAN=$(GROFF) -mtty-char -Tascii -mandoc -c
 localstatedir=@localstatedir@
@@ -9,6 +10,22 @@ MANSUBS=k5identity.sub k5login.sub k5srvutil.sub kadmin.sub kadmind.sub \
 	kdb5_ldap_util.sub kdb5_util.sub kdc.conf.sub kdestroy.sub kinit.sub \
 	klist.sub kpasswd.sub kprop.sub kpropd.sub kproplog.sub krb5.conf.sub \
 	krb5kdc.sub ksu.sub kswitch.sub ktutil.sub kvno.sub
+
+docsrc=$(top_srcdir)/../doc
+
+# Update checked-in man pages from RST sources in the top-level doc
+# directory.  This can be done from an unconfigured tree with:
+#     make -f Makefile.in top_srcdir=.. srcdir=. rstman
+#     make -f Makefile.in clean
+# The sed command deletes some trailing whitespace that the docutils
+# manpage writer outputs near the end of its output files.
+rstman:
+	rm -rf rst_man
+	$(SPHINX_BUILD) -q -t mansubs -b man $(docsrc)/rst_source rst_man
+	for f in rst_man/*.[0-9]; do \
+		name=`echo $$f | sed -e 's|^.*/\(.*\)\.[0-9]$$|\1|'`; \
+		sed -e '/^\.\\" $$/d' $$f > $(srcdir)/$$name.man; \
+	done
 
 .SUFFIXES: .man .sub
 
@@ -21,7 +38,7 @@ MANSUBS=k5identity.sub k5login.sub k5srvutil.sub kadmin.sub kadmind.sub \
 all:: $(MANSUBS)
 
 clean::
-	$(RM) $(MANSUBS)
+	rm -rf $(MANSUBS) rst_man
 
 install:: install-clientman install-fileman install-adminman install-serverman
 

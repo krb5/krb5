@@ -31,7 +31,12 @@ Updating man pages
 
 Man pages generated from the RST sources, are checked into the src/man
 directory.  To regenerate these files, run ``make rstman`` from the
-doc subdir of a configured build tree.
+man subdirectory of a configured build tree.  You can also do this
+from an unconfigured source tree with::
+
+    cd src/man
+    make -f Makefile.in top_srcdir=.. srcdir=. rstman
+    make clean
 
 As with the simple build, it is normal to see warnings about missing
 files when rebuilding the man pages.

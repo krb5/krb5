@@ -5,17 +5,6 @@ SPHINX_BUILD=sphinx-build
 DOXYGEN=doxygen
 
 docsrc=$(top_srcdir)/../doc
-mansrc=$(top_srcdir)/man
-
-# The file editing loop deletes some trailing whitespace that the
-# docutils manpage writer outputs near the end of its output files.
-rstman::
-	$(RM) -r mantmp && mkdir mantmp
-	$(SPHINX_BUILD) -q -t mansubs -b man $(docsrc)/rst_source mantmp
-	for f in mantmp/*.[0-9]; do \
-		name=`echo $$f | sed -e 's|^.*/\(.*\)\.[0-9]$$|\1|'`; \
-		sed -e '/^\.\\" $$/d' $$f > $(mansrc)/$$name.man; \
-	done
 
 # Create HTML documentation in $(docsrc)/rst_html suitable for a
 # release tarball or the web site (that is, without substitutions for
@@ -47,4 +36,4 @@ Doxyfile: $(srcdir)/Doxyfile.in
 	    -e 's|@DOC@|$(top_srcdir)/../doc|g' $(srcdir)/Doxyfile.in > $@
 
 clean::
-	rm -rf rst_man doxy rst_apiref rst_composite Doxyfile
+	rm -rf doxy rst_apiref rst_composite Doxyfile
