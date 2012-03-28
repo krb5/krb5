@@ -5,6 +5,7 @@ SPHINX_BUILD=sphinx-build
 GROFF=@GROFF@
 GROFF_MAN=$(GROFF) -mtty-char -Tascii -mandoc -c
 localstatedir=@localstatedir@
+sysconfdir=@sysconfdir@
 
 MANSUBS=k5identity.sub k5login.sub k5srvutil.sub kadmin.sub kadmind.sub \
 	kdb5_ldap_util.sub kdb5_util.sub kdc.conf.sub kdestroy.sub kinit.sub \
@@ -33,7 +34,8 @@ rstman:
 	sed -e 's|@BINDIR@|$(CLIENT_BINDIR)|g' \
 	    -e 's|@SBINDIR@|$(SERVER_BINDIR)|g' \
 	    -e 's|@LIBDIR@|$(KRB5_LIBDIR)|g' \
-	    -e 's|@LOCALSTATEDIR@|$(localstatedir)|g' $? > $@
+	    -e 's|@LOCALSTATEDIR@|$(localstatedir)|g' \
+	    -e 's|@SYSCONFDIR@|$(sysconfdir)|g' $? > $@
 
 all:: $(MANSUBS)
 
