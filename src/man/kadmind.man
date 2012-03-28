@@ -65,7 +65,7 @@ settings.
 kadmind\(aqs ACL (access control list) tells it which principals are
 allowed to perform administration actions.  The pathname to the
 ACL file can be specified with the \fBacl_file\fP kdc.conf variable;
-by default, it is \fB@LOCALSTATEDIR@/krb5kdc\fP\fB/kadm5.acl\fP.  The syntax of the ACL
+by default, it is \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/kadm5.acl\fP.  The syntax of the ACL
 file is specified in the ACL FILE SYNTAX section below.
 .sp
 If the kadmind ACL file is modified, the kadmind daemon needs to

@@ -209,24 +209,24 @@ latex_documents = [
 #latex_domain_indices = True
 
 if 'mansubs' in tags:
-    bindir = '@BINDIR@'
-    sbindir = '@SBINDIR@'
-    libdir = '@LIBDIR@'
-    localstatedir = '@LOCALSTATEDIR@'
-    sysconfdir = '@SYSCONFDIR@'
+    bindir = '``@BINDIR@``'
+    sbindir = '``@SBINDIR@``'
+    libdir = '``@LIBDIR@``'
+    localstatedir = '``@LOCALSTATEDIR@``'
+    sysconfdir = '``@SYSCONFDIR@``'
 else:
-    bindir = '/usr/local/bin'
-    sbindir = '/usr/local/sbin'
-    libdir = '/usr/local/lib'
-    localstatedir = '/usr/local/var'
-    sysconfdir = '/usr/local/etc'
+    bindir = ':ref:`BINDIR <paths>`'
+    sbindir = ':ref:`SBINDIR <paths>`'
+    libdir = ':ref:`LIBDIR <paths>`'
+    localstatedir = ':ref:`LOCALSTATEDIR <paths>`'
+    sysconfdir = ':ref:`SYSCONFDIR <paths>`'
 
 rst_epilog = '\n'
-rst_epilog += '.. |bindir| replace:: ``%s``\n' % bindir
-rst_epilog += '.. |sbindir| replace:: ``%s``\n' % sbindir
-rst_epilog += '.. |libdir| replace:: ``%s``\n' % libdir
-rst_epilog += '.. |kdcdir| replace:: ``%s/krb5kdc``\n' % localstatedir
-rst_epilog += '.. |sysconfdir| replace:: ``%s``\n' % sysconfdir
+rst_epilog += '.. |bindir| replace:: %s\n' % bindir
+rst_epilog += '.. |sbindir| replace:: %s\n' % sbindir
+rst_epilog += '.. |libdir| replace:: %s\n' % libdir
+rst_epilog += '.. |kdcdir| replace:: %s\\ ``/krb5kdc``\n' % localstatedir
+rst_epilog += '.. |sysconfdir| replace:: %s\n' % sysconfdir
 rst_epilog += '''
 .. |keytab| replace:: ``/etc/krb5.keytab``
 .. |krb5conf| replace:: ``/etc/krb5.conf``

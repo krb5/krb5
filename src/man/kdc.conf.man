@@ -37,7 +37,7 @@ are typically only used on a KDC, such as the \fIkrb5kdc(8)\fP and
 Relations documented here may also be specified in krb5.conf.
 .sp
 Normally, the kdc.conf file is found in the KDC state directory,
-\fB@LOCALSTATEDIR@/krb5kdc\fP.  You can override the default location by setting the
+\fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP.  You can override the default location by setting the
 environment variable \fBKRB5_KDC_PROFILE\fP.
 .SH STRUCTURE
 .sp
@@ -126,7 +126,7 @@ subsection:
 (String.)  Location of the access control list file that
 \fIkadmind(8)\fP uses to determine which principals are allowed
 which permissions on the database.  The default value is
-\fB@LOCALSTATEDIR@/krb5kdc\fP\fB/kadm5.acl\fP.
+\fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/kadm5.acl\fP.
 .TP
 .B \fBdatabase_module\fP
 .sp
@@ -141,7 +141,7 @@ database for this realm, if the DB2 back\-end is being used.  If a
 \fBdatabase_module\fP is specified for the realm and the
 corresponding module contains a \fBdatabase_name\fP parameter, that
 value will take precedence over this one.  The default value is
-\fB@LOCALSTATEDIR@/krb5kdc\fP\fB/principal\fP.
+\fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/principal\fP.
 .TP
 .B \fBdefault_principal_expiration\fP
 .sp
@@ -307,7 +307,7 @@ is 749.
 .B \fBkey_stash_file\fP
 .sp
 (String.)  Specifies the location where the master key has been
-stored (via kdb5_util stash).  The default is \fB@LOCALSTATEDIR@/krb5kdc\fP\fB/.k5.REALM\fP, where \fIREALM\fP is the Kerberos realm.
+stored (via kdb5_util stash).  The default is \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/.k5.REALM\fP, where \fIREALM\fP is the Kerberos realm.
 .TP
 .B \fBkdc_ports\fP
 .sp
@@ -531,7 +531,7 @@ the subsection:
 .B \fBdatabase_name\fP
 .sp
 This DB2\-specific tag indicates the location of the database in
-the filesystem.  The default is \fB@LOCALSTATEDIR@/krb5kdc\fP\fB/principal\fP.
+the filesystem.  The default is \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/principal\fP.
 .TP
 .B \fBdb_library\fP
 .sp
@@ -927,7 +927,7 @@ Here\(aqs an example of a kdc.conf file:
 .UNINDENT
 .SH FILES
 .sp
-\fB@LOCALSTATEDIR@/krb5kdc\fP\fB/kdc.conf\fP
+\fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/kdc.conf\fP
 .SH SEE ALSO
 .sp
 \fIkrb5.conf(5)\fP, \fIkrb5kdc(8)\fP

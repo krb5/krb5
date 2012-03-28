@@ -94,7 +94,7 @@ Specifies the realm of the master server.
 .B \fB\-f\fP \fIfile\fP
 .sp
 Specifies the filename where the dumped principal database file is
-to be stored; by default the dumped database file is \fB@LOCALSTATEDIR@/krb5kdc\fP\fB/from_master\fP.
+to be stored; by default the dumped database file is \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/from_master\fP.
 .TP
 .B \fB\-p\fP
 .sp
@@ -124,7 +124,7 @@ is only useful in combination with the \fB\-S\fP option.
 .B \fB\-a\fP \fIacl_file\fP
 .sp
 Allows the user to specify the path to the kpropd.acl file; by
-default the path used is \fB@LOCALSTATEDIR@/krb5kdc\fP\fB/kpropd.acl\fP.
+default the path used is \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/kpropd.acl\fP.
 .UNINDENT
 .SH ENVIRONMENT
 .sp
