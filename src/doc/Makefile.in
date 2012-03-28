@@ -5,6 +5,8 @@ SPHINX_BUILD=sphinx-build
 DOXYGEN=doxygen
 
 docsrc=$(top_srcdir)/../doc
+localstatedir=@localstatedir@
+sysconfdir=@sysconfdir@
 
 # Create HTML documentation in $(docsrc)/rst_html suitable for a
 # release tarball or the web site (that is, without substitutions for
@@ -16,10 +18,18 @@ rsthtml: composite
 	rm -rf $(docsrc)/rst_html
 	$(SPHINX_BUILD) -q rst_composite $(docsrc)/rst_html
 
+# Create HTML documentation in rst_html_subst suitable for
+# installation by an OS package, with substitutions for configured
+# paths.
+substhtml: composite paths.py
+	rm -rf rst_html_subst
+	cp paths.py rst_composite
+	$(SPHINX_BUILD) -t pathsubs -q rst_composite rst_html_subst
+
 # Use doxygen to generate API documentation, translate it into RST
 # format, and then create a composite of $(docsrc)/rst_source, the
 # generated files, and the NOTICE file in rst_composite.  Used by the
-# rsthtml and ___ targets.
+# rsthtml and substhtml targets.
 composite: Doxyfile
 	rm -rf doxy rst_apiref rst_composite
 	$(DOXYGEN)
@@ -35,5 +45,13 @@ Doxyfile: $(srcdir)/Doxyfile.in
 	sed -e 's|@SRC@|$(top_srcdir)|g' \
 	    -e 's|@DOC@|$(top_srcdir)/../doc|g' $(srcdir)/Doxyfile.in > $@
 
+paths.py:
+	rm -f $@
+	echo 'bindir = "``$(CLIENT_BINDIR)``"' > $@
+	echo 'sbindir = "``$(SERVER_BINDIR)``"' >> $@
+	echo 'libdir = "``$(KRB5_LIBDIR)``"' >> $@
+	echo 'localstatedir = "``$(localstatedir)``"' >> $@
+	echo 'sysconfdir = "``$(sysconfdir)``"' >> $@
+
 clean::
-	rm -rf doxy rst_apiref rst_composite Doxyfile
+	rm -rf doxy rst_apiref rst_composite rst_html_subst Doxyfile paths.py

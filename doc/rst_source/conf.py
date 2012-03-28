@@ -214,6 +214,9 @@ if 'mansubs' in tags:
     libdir = '``@LIBDIR@``'
     localstatedir = '``@LOCALSTATEDIR@``'
     sysconfdir = '``@SYSCONFDIR@``'
+elif 'pathsubs' in tags:
+    # Read configured paths from a file produced by the build system.
+    execfile('paths.py')
 else:
     bindir = ':ref:`BINDIR <paths>`'
     sbindir = ':ref:`SBINDIR <paths>`'

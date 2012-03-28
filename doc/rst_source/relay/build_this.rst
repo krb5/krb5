@@ -46,14 +46,34 @@ Building for a release tarball or web site
 ------------------------------------------
 
 To generate documentation in HTML format, run ``make rsthtml`` in the
-``doc`` subdir of a configured build tree (the build directory
+``doc`` subdirectory of a configured build tree (the build directory
 corresponding to ``src/doc``, not the top-level ``doc`` directory).
 The output be placed in the top-level ``doc/rst_html`` directory.
 This build will include the API reference generated from Doxygen
 markup in the source tree.
+
+Documentation generated this way will use symbolic names for paths
+(like ``BINDIR`` for the directory containing user programs), with the
+symbolic names being links to a table showing typical values for those
+paths.
 
 You can also do this from an unconfigured source tree with::
 
     cd src/doc
     make -f Makefile.in top_srcdir=.. PYTHON=python rsthml
     make -f Makefile.in clean
+
+
+Building for an OS package or site documentation
+------------------------------------------------
+
+To generate documentation specific to a build of MIT krb5 as you have
+configured it, run ``make substhtml`` in the ``doc`` subdirectory of a
+configured build tree (the build directory corresponding to
+``src/doc``, not the top-level ``doc`` directory).  The output will be
+placed in the ``rst_html_subst`` subdirectory of that build directory.
+This build will include the API reference.
+
+Documentation generated this way will use concrete paths (like
+``/usr/local/bin`` for the directory containing user programs, for a
+default custom build).
