@@ -1,131 +1,54 @@
 How to build this documentation from the source
 ===============================================
 
-Pre-requisites:
+Pre-requisites for the simple build, or to update man pages:
 
 * Sphinx 1.0.4 or higher (See http://sphinx.pocoo.org) with “autodoc”
   extension installed.
 
+Additional prerequisites to include the API reference based on Doxygen
+markup:
 
-How to build the Sphinx based documentation without references to API documentation
------------------------------------------------------------------------------------
-
-To generate documentation in HTML format, from the
-``trunk/doc/rst_source`` run::
-
-    sphinx-build . output_dir
-
-To produce manpages run::
-
-    sphinx-build -b man . output_dir
-
-.. note:: The manpages output is controled by **man_pages** tag in the
-          Sphinx configuration file *trunk/doc/rst_source/conf.py*.
-
-How to deploy the Doxygen output in Sphinx project
---------------------------------------------------
-
-The text below is meant to give the instructions on how to incorporate
-MIT Kerberos API reference documentation into Sphinx document
-hierarchy.  The Sphinx API documentation can be constructed without
-(:ref:`Part_A`) or with (:ref:`Part_B`) the bridge to the original
-Doxygen HTML output.
-
-Pre-requisites:
-
-* python 2.5+ with *Cheetah, lxml* and *xml* extension modules
-  installed;
-* Doxygen documentation generator (http://www.doxygen.org) installed;
-* For "Part B" only:
-  - Sphinx “doxylink” extension;
-  - Doxygen HTML output
-
-.. _Part_A:
-
-Part A: Transforming Doxygen XML output into reStructuredText (rst)  without the bridge to Doxygen HTML output
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1. Delete lines containing text "Doxygen reference" from the template
-   files func_document.tmpl and type_document.tmpl located in
-   trunk/doc/rst_tools directory;
-
-2. In the Doxygen configuration file (``trunk/src/Doxyfile``) set
-   **GENERATE_XML** flag to ``YES``.  Generate Doxygen XML output.  To
-   do so from the command line from the source directory
-   (``trunk/src``) run::
-
-        doxygen
-
-   The **XML_OUTPUT** tag specifies the location of the Doxygen XML
-   output.  The default location for this setup is ``trunk/out/xml``.
-
-3. Suppose the Doxygen XML output is located in ``trunk/out/xml``
-   directory and the desired name for the reStructuredText output
-   directory is ``rst_dir``.  From ``trunk/doc/rst_tools`` run::
-
-       python doxy.py –i  ../../out/xml –o rst_dir –t func
-
-   This will result in the storing the API function documentation
-   files in rst format in ``rst_dir``.
-
-   .. note:: The file names are constructed based on the function
-             name.  For example, the file for krb5_build_principal()
-             will be krb5_build_principal.rst
-
-   Run::
-
-       python doxy.py –i ../../out/xml –o rst_dir –t typedef
-
-   It is similar to the API function conversion, but for data types.
-   The result will be stored under ``rst_dir/types`` directory
-
-   Alternatively, running::
-
-       python doxy.py –i  ../../out/xml  –o rst_dir
-
-   or
-
-       python doxy.py –i  ../../out/xml  –o rst_dir -t all
-
-   converts Doxygen XML output into reStructuredText format files both
-   for API functions and data types;
-
-4. In ``trunk/doc/krb_appldev/index.rst`` add the following section to
-   point to the API references::
-
-       .. toctree::
-          :maxdepth: 1
-
-          refs/index.rst
-
-5. Copy the content of
-
-   * ``rst_dir`` into ``krb_appldev/refs/api`` directory, and
-   * ``rst_dir/types`` into ``krb_appldev/refs/types`` directory;
-
-6. Rebuild Sphinx source. From the ``trunk/doc/rst_source`` run::
-
-       sphinx-build .  output_dir
+* python 2.5 with the Cheetah, lxml, and xml modules
+* Doxygen
 
 
-.. _Part_B:
+Simple build without API reference
+----------------------------------
 
-Part B: Bridge to Doxygen HTML output
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To test simple changes to the RST sources, you can build the
+documentation without the Doxygen reference by running, from the doc
+directory::
 
-1. Transform Doxygen XML output into reStructuredText.
-   In src/Doxygen configuration file request generation of the tag
-   file and XML output::
+    sphinx-build rst_source test_html
 
-       GENERATE_TAGFILE       = krb5doxy.tag
-       GENERATE_XML           = YES
+You will see a number of warnings about missing files.  This is
+expected.
 
-2. Modify Sphinx conf.py file to point to the “doxylink” extension and
-   Doxygen tag file::
 
-       extensions = ['sphinx.ext.autodoc', 'sphinxcontrib.doxylink']
-       doxylink = { ' krb5doxy' : ('/tmp/krb5doxy.tag, ' doxy_html_dir ') }
+Updating man pages
+------------------
 
-   where *doxy_html_dir* is the location of the Doxygen HTML output
+Man pages generated from the RST sources, are checked into the src/man
+directory.  To regenerate these files, run ``make rstman`` from the
+doc subdir of a configured build tree.
 
-3. Continue with steps 3 - 6 of Part A.
+As with the simple build, it is normal to see warnings about missing
+files when rebuilding the man pages.
+
+
+Building for a release tarball or web site
+------------------------------------------
+
+To generate documentation in HTML format, run ``make rsthtml`` in the
+``doc`` subdir of a configured build tree (the build directory
+corresponding to ``src/doc``, not the top-level ``doc`` directory).
+The output be placed in the top-level ``doc/rst_html`` directory.
+This build will include the API reference generated from Doxygen
+markup in the source tree.
+
+You can also do this from an unconfigured source tree with::
+
+    cd src/doc
+    make -f Makefile.in top_srcdir=.. PYTHON=python rsthml
+    make -f Makefile.in clean

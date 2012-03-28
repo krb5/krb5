@@ -27,10 +27,6 @@ import sys, os
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 #extensions = ['sphinx.ext.autodoc', 'sphinxcontrib.doxylink']
 extensions = ['sphinx.ext.autodoc']
-#extensions = ['sphinx.ext.autodoc', 'sphinxcontrib.doxylink']
-#doxylink = {
-#    'krb5doxy' : ('path-to-doxygen-tag-file/krb5doxy.tag', 'location-of-doxygen-html-output/'),
-#}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

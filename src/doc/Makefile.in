@@ -2,6 +2,7 @@ mydir=doc
 BUILDTOP=$(REL)..
 
 SPHINX_BUILD=sphinx-build
+DOXYGEN=doxygen
 
 docsrc=$(top_srcdir)/../doc
 mansrc=$(top_srcdir)/man
@@ -16,5 +17,34 @@ rstman::
 		sed -e '/^\.\\" $$/d' $$f > $(mansrc)/$$name.man; \
 	done
 
+# Create HTML documentation in $(docsrc)/rst_html suitable for a
+# release tarball or the web site (that is, without substitutions for
+# configured paths).  This can be done in an unconfigured source tree
+# with:
+#     make -f Makefile.in top_srcdir=.. PYTHON=python rsthml
+#     make -f Makefile.in clean
+rsthtml: composite
+	rm -rf $(docsrc)/rst_html
+	$(SPHINX_BUILD) -q rst_composite $(docsrc)/rst_html
+
+# Use doxygen to generate API documentation, translate it into RST
+# format, and then create a composite of $(docsrc)/rst_source, the
+# generated files, and the NOTICE file in rst_composite.  Used by the
+# rsthtml and ___ targets.
+composite: Doxyfile
+	rm -rf doxy rst_apiref rst_composite
+	$(DOXYGEN)
+	cwd=`pwd`; cd $(docsrc)/rst_tools && \
+		$(PYTHON) doxy.py -i $$cwd/doxy/xml -o $$cwd/rst_apiref
+	cp -r $(docsrc)/rst_source rst_composite
+	cp rst_apiref/*.rst rst_composite/krb_appldev/refs/api
+	cp rst_apiref/types/*.rst rst_composite/krb_appldev/refs/types
+	cp rst_apiref/macros/*.rst rst_composite/krb_appldev/refs/macros
+	cp $(top_srcdir)/../NOTICE rst_composite
+
+Doxyfile: $(srcdir)/Doxyfile.in
+	sed -e 's|@SRC@|$(top_srcdir)|g' \
+	    -e 's|@DOC@|$(top_srcdir)/../doc|g' $(srcdir)/Doxyfile.in > $@
+
 clean::
-	$(RM) -r mantmp
+	rm -rf rst_man doxy rst_apiref rst_composite Doxyfile

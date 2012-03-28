@@ -773,10 +773,3 @@ check-copyright:
 	(cd $(top_srcdir) && \
 	$(FIND) . \( -name '*.[ch]' -o -name '*.hin' \) -print0 | \
 	$(XARGS) -0 python util/krb5-check-copyright.py)
-
-doxygen::
-	if test "which doxygen" != ""; then \
-		doxygen; \
-	else \
-		echo "Doxygen is not installed or incorrect PATH"; \
-	fi
