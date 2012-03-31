@@ -330,7 +330,7 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
         krb5_transited *trans = &(req->ticket->enc_part2->transited);
 
         /* If the transited list is empty, then we have at most one hop */
-        if (trans->tr_contents.data && trans->tr_contents.data[0])
+        if (trans->tr_contents.length > 0 && trans->tr_contents.data[0])
             retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
     }
 
@@ -351,7 +351,7 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
          * So we also have to check that the client's realm is the local one
          */
         krb5_get_default_realm(context, &lrealm);
-        if ((trans->tr_contents.data && trans->tr_contents.data[0]) ||
+        if ((trans->tr_contents.length > 0 && trans->tr_contents.data[0]) ||
             !data_eq_string(*realm, lrealm)) {
             retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
         }
@@ -374,7 +374,7 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
          * transited are within the hierarchy between the client's realm
          * and the local realm.
          */
-        if (trans->tr_contents.data && trans->tr_contents.data[0]) {
+        if (trans->tr_contents.length > 0 && trans->tr_contents.data[0]) {
             retval = krb5_check_transited_list(context, &(trans->tr_contents),
                                                realm,
                                                krb5_princ_realm (context,server));
