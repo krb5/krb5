@@ -234,6 +234,8 @@ k5_asn1_decode_bytestring(const unsigned char *asn1, size_t len,
 
     *str_out = NULL;
     *len_out = 0;
+    if (len == 0)
+        return 0;
     str = malloc(len);
     if (str == NULL)
         return ENOMEM;
