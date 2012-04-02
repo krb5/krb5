@@ -43,4 +43,39 @@ expected = 'krbtgt/%s@%s\n\tEtype (skey, tkt): ' \
 if expected not in output:
     fail('keyrollover: expected TGS enctype not found after change')
 
+# Test that the KDC only accepts the first enctype for a kvno, for a
+# local-realm TGS request.  To set this up, we abuse an edge-case
+# behavior of modprinc -kvno.  First, set up a DES3 krbtgt entry at
+# kvno 1 and cache a krbtgt ticket.
+realm.run_kadminl('cpw -randkey -e des3-cbc-sha1:normal krbtgt/%s' %
+                  realm.realm)
+realm.run_kadminl('modprinc -kvno 1 krbtgt/%s' % realm.realm)
+realm.kinit(realm.user_princ, password('user'))
+# Add an AES krbtgt entry at kvno 2, and then reset it to kvno 1
+# (modprinc -kvno sets the kvno on all entries without deleting any).
+realm.run_kadminl('cpw -randkey -keepold -e aes256-cts:normal krbtgt/%s' %
+                  realm.realm)
+realm.run_kadminl('modprinc -kvno 1 krbtgt/%s' % realm.realm)
+output = realm.run_kadminl('getprinc krbtgt/%s' % realm.realm)
+if 'vno 1, aes256' not in output or 'vno 1, des3' not in output:
+    fail('keyrollover: setup for TGS enctype test failed')
+# Now present the DES3 ticket to the KDC and make sure it's rejected.
+realm.run_as_client([kvno, realm.host_princ], expected_code=1)
+
+realm.stop()
+
+# Test a cross-realm TGT key rollover scenario where realm 1 mimics
+# the Active Directory behavior of always using kvno 0 when issuing
+# cross-realm TGTs.  The first kvno invocation caches a cross-realm
+# TGT with the old key, and the second kvno invocation sends it to
+# r2's KDC with no kvno to identify it, forcing the KDC to try
+# multiple keys.
+r1, r2 = cross_realms(2, start_kadmind=False)
+r1.run_kadminl('modprinc -kvno 0 krbtgt/%s' % r2.realm)
+r1.run_as_client([kvno, r2.host_princ])
+r2.run_kadminl('cpw -pw newcross -keepold krbtgt/%s@%s' % (r2.realm, r1.realm))
+r1.run_kadminl('cpw -pw newcross krbtgt/%s' % r2.realm)
+r1.run_kadminl('modprinc -kvno 0 krbtgt/%s' % r2.realm)
+r1.run_as_client([kvno, r2.user_princ])
+
 success('keyrollover')
