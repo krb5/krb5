@@ -258,6 +258,10 @@
 #define TRACE_PREAUTH_TRYAGAIN_OUTPUT(c, padata)                        \
     TRACE(c, (c, "Followup preauth for next request: {patypes}", padata))
 
+#define TRACE_PROFILE_ERR(c,subsection, section, retval)                 \
+    TRACE(c, (c, "Bad value of {str} from [{str}] in conf file: {kerr}", \
+               subsection, section, retval))
+
 #define TRACE_RD_REP(c, ctime, cusec, subkey, seqnum)                   \
     TRACE(c, (c, "Read AP-REP, time {long}.{int}, subkey {keyblock}, "  \
               "seqnum {int}", (long) ctime, (int) cusec, subkey, (int) seqnum))

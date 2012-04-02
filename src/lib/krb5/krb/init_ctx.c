@@ -72,6 +72,32 @@ extern krb5_error_code krb5_vercheck();
 extern void krb5_win_ccdll_load(krb5_context context);
 #endif
 
+#define DEFAULT_CLOCKSKEW  300 /* 5 min */
+
+static krb5_error_code
+get_integer(krb5_context ctx, const char *name, int def_val, int *int_out)
+{
+    krb5_error_code retval;
+
+    retval = profile_get_integer(ctx->profile, KRB5_CONF_LIBDEFAULTS,
+                                 name, NULL, def_val, int_out);
+    if (retval)
+        TRACE_PROFILE_ERR(ctx, name, KRB5_CONF_LIBDEFAULTS, retval);
+    return retval;
+}
+
+static krb5_error_code
+get_boolean(krb5_context ctx, const char *name, int def_val, int *boolean_out)
+{
+    krb5_error_code retval;
+
+    retval = profile_get_boolean(ctx->profile, KRB5_CONF_LIBDEFAULTS,
+                                 name, NULL, def_val, boolean_out);
+    if (retval)
+        TRACE_PROFILE_ERR(ctx, name, KRB5_CONF_LIBDEFAULTS, retval);
+    return retval;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_init_context(krb5_context *context)
 {
@@ -165,15 +191,17 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
     if ((retval = krb5_os_init_context(ctx, profile, flags)) != 0)
         goto cleanup;
 
-    retval = profile_get_boolean(ctx->profile, KRB5_CONF_LIBDEFAULTS,
-                                 KRB5_CONF_ALLOW_WEAK_CRYPTO, NULL, 0, &tmp);
+#ifndef DISABLE_TRACING
+    if (!ctx->profile_secure)
+        krb5int_init_trace(ctx);
+#endif
+
+    retval = get_boolean(ctx, KRB5_CONF_ALLOW_WEAK_CRYPTO, 0, &tmp);
     if (retval)
         goto cleanup;
     ctx->allow_weak_crypto = tmp;
 
-    retval = profile_get_boolean(ctx->profile, KRB5_CONF_LIBDEFAULTS,
-                                 KRB5_CONF_IGNORE_ACCEPTOR_HOSTNAME, NULL, 0,
-                                 &tmp);
+    retval = get_boolean(ctx, KRB5_CONF_IGNORE_ACCEPTOR_HOSTNAME, 0, &tmp);
     if (retval)
         goto cleanup;
     ctx->ignore_acceptor_hostname = tmp;
@@ -190,8 +218,7 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
         goto cleanup;
 
     ctx->default_realm = 0;
-    profile_get_integer(ctx->profile, KRB5_CONF_LIBDEFAULTS, KRB5_CONF_CLOCKSKEW,
-                        0, 5 * 60, &tmp);
+    get_integer(ctx, KRB5_CONF_CLOCKSKEW, DEFAULT_CLOCKSKEW, &tmp);
     ctx->clockskew = tmp;
 
 #if 0
@@ -203,37 +230,33 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
 
     /* DCE 1.1 and below only support CKSUMTYPE_RSA_MD4 (2)  */
     /* DCE add kdc_req_checksum_type = 2 to krb5.conf */
-    profile_get_integer(ctx->profile, KRB5_CONF_LIBDEFAULTS,
-                        KRB5_CONF_KDC_REQ_CHECKSUM_TYPE, 0, CKSUMTYPE_RSA_MD5,
-                        &tmp);
+    get_integer(ctx, KRB5_CONF_KDC_REQ_CHECKSUM_TYPE, CKSUMTYPE_RSA_MD5,
+                &tmp);
     ctx->kdc_req_sumtype = tmp;
 
-    profile_get_integer(ctx->profile, KRB5_CONF_LIBDEFAULTS,
-                        KRB5_CONF_AP_REQ_CHECKSUM_TYPE, 0, 0,
-                        &tmp);
+    get_integer(ctx, KRB5_CONF_AP_REQ_CHECKSUM_TYPE, 0, &tmp);
     ctx->default_ap_req_sumtype = tmp;
 
-    profile_get_integer(ctx->profile, KRB5_CONF_LIBDEFAULTS,
-                        KRB5_CONF_SAFE_CHECKSUM_TYPE, 0,
-                        CKSUMTYPE_RSA_MD5_DES, &tmp);
+    get_integer(ctx, KRB5_CONF_SAFE_CHECKSUM_TYPE, CKSUMTYPE_RSA_MD5_DES,
+                &tmp);
     ctx->default_safe_sumtype = tmp;
 
-    profile_get_integer(ctx->profile, KRB5_CONF_LIBDEFAULTS,
-                        KRB5_CONF_KDC_DEFAULT_OPTIONS, 0,
-                        KDC_OPT_RENEWABLE_OK, &tmp);
+    get_integer(ctx, KRB5_CONF_KDC_DEFAULT_OPTIONS, KDC_OPT_RENEWABLE_OK,
+                &tmp);
     ctx->kdc_default_options = tmp;
 #define DEFAULT_KDC_TIMESYNC 1
-    profile_get_integer(ctx->profile, KRB5_CONF_LIBDEFAULTS,
-                        KRB5_CONF_KDC_TIMESYNC, 0, DEFAULT_KDC_TIMESYNC,
-                        &tmp);
+    get_integer(ctx, KRB5_CONF_KDC_TIMESYNC, DEFAULT_KDC_TIMESYNC, &tmp);
     ctx->library_options = tmp ? KRB5_LIBOPT_SYNC_KDCTIME : 0;
 
     retval = profile_get_string(ctx->profile, KRB5_CONF_LIBDEFAULTS,
                                 KRB5_CONF_PLUGIN_BASE_DIR, 0,
                                 DEFAULT_PLUGIN_BASE_DIR,
                                 &ctx->plugin_base_dir);
-    if (retval)
+    if (retval) {
+        TRACE_PROFILE_ERR(ctx, KRB5_CONF_PLUGIN_BASE_DIR,
+                          KRB5_CONF_LIBDEFAULTS, retval);
         goto cleanup;
+    }
 
     /*
      * We use a default file credentials cache of 3.  See
@@ -244,17 +267,12 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
      *      DCE 1.1 supports a cache type of 2.
      */
 #define DEFAULT_CCACHE_TYPE 4
-    profile_get_integer(ctx->profile, KRB5_CONF_LIBDEFAULTS, KRB5_CONF_CCACHE_TYPE,
-                        0, DEFAULT_CCACHE_TYPE, &tmp);
+    get_integer(ctx, KRB5_CONF_CCACHE_TYPE, DEFAULT_CCACHE_TYPE, &tmp);
     ctx->fcc_default_format = tmp + 0x0500;
     ctx->prompt_types = 0;
     ctx->use_conf_ktypes = 0;
     ctx->udp_pref_limit = -1;
     ctx->trace_callback = NULL;
-#ifndef DISABLE_TRACING
-    if (!ctx->profile_secure)
-        krb5int_init_trace(ctx);
-#endif
     *context_out = ctx;
     return 0;
 
