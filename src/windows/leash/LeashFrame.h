@@ -16,7 +16,7 @@
 #ifndef _LEASH_PERSISTENT_FRAME
 #define _LEASH_PERSISTENT_FRAME
 
-class CLeashFrame : public CFrameWnd
+class CLeashFrame : public CFrameWndEx
 { // remembers where it was on the desktop
 	DECLARE_DYNAMIC(CLeashFrame)
     static const CRect s_rectDefault;

@@ -166,6 +166,7 @@ extern "C" {
 
 BOOL CLeashApp::InitInstance()
 {
+    AfxOleInit();
     // NOTE: Not used at this time
     /// Set LEASH_DLL to the path where the Leash.exe is
     char modulePath[MAX_PATH];
