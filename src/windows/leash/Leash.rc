@@ -110,40 +110,29 @@ IDR_MAINFRAME MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "E&xit",                       ID_APP_EXIT
-    END
-    POPUP "&Action"
-    BEGIN
-        MENUITEM "&Gew Ticket(s)/Token(s)\tCtrl+T", ID_INIT_TICKET
-        MENUITEM "&Renew Ticket(s)/Token(s)\tCtrl+R", ID_RENEW_TICKET
-        MENUITEM "&Import Ticket(s)/Token(s)\tCtrl+I", ID_IMPORT_TICKET
-        MENUITEM "&Destroy Ticket(s)/Token(s)\tCtrl+D", ID_DESTROY_TICKET
+        MENUITEM "&Initialize Ticket(s)\tCtrl+T", ID_INIT_TICKET
+        MENUITEM "&Renew Ticket(s)\tCtrl+R",    ID_RENEW_TICKET
+        MENUITEM "&Import Ticket(s)\tCtrl+I",   ID_IMPORT_TICKET
+        MENUITEM "&Destroy Ticket(s)\tCtrl+D",  ID_DESTROY_TICKET
         MENUITEM SEPARATOR
         MENUITEM "&Change Password...",         ID_CHANGE_PASSWORD
         MENUITEM SEPARATOR
-        MENUITEM "&Reset Window Size/Pos",      ID_RESET_WINDOW_SIZE
-        MENUITEM "&Synchronize Time",           ID_SYN_TIME
-        MENUITEM "&Update Display\tF5",         ID_UPDATE_DISPLAY
+        MENUITEM "E&xit",                       ID_APP_EXIT
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "&Large Icons",                ID_LARGE_ICONS
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
-        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-        MENUITEM "&Debug Window",               ID_DEBUG_MODE
+        MENUITEM "&Time Issued",                ID_TIME_ISSUED
+        MENUITEM "&Renewable Until",            ID_RENEWABLE_UNTIL
+        MENUITEM "&Valid Until",                ID_VALID_UNTIL
+        MENUITEM "&Encryption Type",            ID_ENCRYPTION_TYPE
+        MENUITEM "&Flags",                      ID_SHOW_TICKET_FLAGS
     END
     POPUP "&Options"
     BEGIN
         MENUITEM "Upper &Case Realm Name",      ID_UPPERCASE_REALM
         MENUITEM "&Automatic Ticket Renewal",   ID_AUTO_RENEW
         MENUITEM "&Expiration Alarm",           ID_LOW_TICKET_ALARM
-        MENUITEM "&Destroy Tickets/Tokens on Exit", ID_KILL_TIX_ONEXIT
-        MENUITEM SEPARATOR
-        MENUITEM "&Leash Properties...\tCtrl+L", ID_LEASH_PROPERTIES
-        MENUITEM "&Kerberos Properties...\tCtrl+K", ID_PROPERTIES
-        MENUITEM "Kerberos v&4 Properties...\tCtrl+4", ID_KRB4_PROPERTIES
-        MENUITEM "Kerberos v&5 Properties...\tCtrl+5", ID_KRB5_PROPERTIES
-        MENUITEM "&AFS Properties\tCtrl+A",     ID_AFS_CONTROL_PANEL
+        MENUITEM "&Destroy Tickets on Exit",    ID_KILL_TIX_ONEXIT
     END
     POPUP "&Help"
     BEGIN
@@ -165,14 +154,9 @@ END
 
 IDR_MAINFRAME ACCELERATORS
 BEGIN
-    "4",            ID_KRB4_PROPERTIES,     VIRTKEY, CONTROL, NOINVERT
-    "5",            ID_KRB5_PROPERTIES,     VIRTKEY, CONTROL, NOINVERT
-    "A",            ID_AFS_CONTROL_PANEL,   VIRTKEY, CONTROL, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "D",            ID_DESTROY_TICKET,      VIRTKEY, CONTROL, NOINVERT
     "I",            ID_IMPORT_TICKET,       VIRTKEY, CONTROL, NOINVERT
-    "K",            ID_PROPERTIES,          VIRTKEY, CONTROL, NOINVERT
-    "L",            ID_LEASH_PROPERTIES,    VIRTKEY, CONTROL, NOINVERT
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
     "R",            ID_RENEW_TICKET,        VIRTKEY, CONTROL, NOINVERT
@@ -958,18 +942,24 @@ STRINGTABLE
 BEGIN
     ID_KILL_TIX_ONEXIT      "Dispose of or keep tickets/tokens upon exiting Leash"
     ID_LARGE_ICONS          "Show large or small tree icons"
-    ID_UPPERCASE_REALM      "Force upper or lower case realm name"
+    ID_UPPERCASE_REALM      "Allow mixed case or force upper case realm name"
     ID_OPTIONS_RESETWINDOWSIZE
                             "Puts Leash's main window back to it's default size "
     ID_RESET_WINDOW_SIZE    "Refresh Leash window to it's default size/position"
     ID_AFS_CONTROL_PANEL    "Enables you to change settings"
     ID_SYSTEM_CONTROL_PANEL "Open your System Properties window"
-    ID_KRB4_PROPERTIES      "Enables you to change settings"
-    ID_KRB5_PROPERTIES      "Enables you to change settings"
-    ID_LEASH_PROPERTIES     "Enables you to change settings"
     ID_OPTIONS_LOWTICKETALARMSOUND
                             "Turn alarm off or on,  when ticket time is low"
     ID_LOW_TICKET_ALARM     "Turn alarm on or off, on low ticket(s)/token(s) times"
+    ID_TIME_ISSUED          "Display ticket time issued column"
+    ID_RENEWABLE_UNTIL      "Display ticket renewable until time column"
+    ID_SHOW_TICKET_FLAGS    "Display ticket flags column"
+END
+
+STRINGTABLE
+BEGIN
+    ID_ENCRYPTION_TYPE      "Display ticket encryption type column"
+    ID_VALID_UNTIL          "Display ticket valid until time column"
 END
 
 #endif    // English (U.S.) resources
