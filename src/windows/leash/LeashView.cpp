@@ -59,8 +59,20 @@ BEGIN_MESSAGE_MAP(CLeashView, CFormView)
 	ON_COMMAND(ID_SYN_TIME, OnSynTime)
 	ON_COMMAND(ID_DEBUG_MODE, OnDebugMode)
 	ON_COMMAND(ID_LARGE_ICONS, OnLargeIcons)
+	ON_COMMAND(ID_TIME_ISSUED, OnTimeIssued)
+	ON_COMMAND(ID_VALID_UNTIL, OnValidUntil)
+	ON_COMMAND(ID_RENEWABLE_UNTIL, OnRenewableUntil)
+	ON_COMMAND(ID_SHOW_TICKET_FLAGS, OnShowTicketFlags)
+	ON_COMMAND(ID_ENCRYPTION_TYPE, OnEncryptionType)
+	ON_UPDATE_COMMAND_UI(ID_TIME_ISSUED, OnUpdateTimeIssued)
+	ON_UPDATE_COMMAND_UI(ID_VALID_UNTIL, OnUpdateValidUntil)
+	ON_UPDATE_COMMAND_UI(ID_RENEWABLE_UNTIL, OnUpdateRenewableUntil)
+	ON_UPDATE_COMMAND_UI(ID_SHOW_TICKET_FLAGS, OnUpdateShowTicketFlags)
+	ON_UPDATE_COMMAND_UI(ID_ENCRYPTION_TYPE, OnUpdateEncryptionType)
 	ON_COMMAND(ID_UPPERCASE_REALM, OnUppercaseRealm)
 	ON_COMMAND(ID_KILL_TIX_ONEXIT, OnKillTixOnExit)
+	ON_UPDATE_COMMAND_UI(ID_UPPERCASE_REALM, OnUpdateUppercaseRealm)
+	ON_UPDATE_COMMAND_UI(ID_KILL_TIX_ONEXIT, OnUpdateKillTixOnExit)
 	ON_WM_DESTROY()
 	ON_UPDATE_COMMAND_UI(ID_DESTROY_TICKET, OnUpdateDestroyTicket)
     ON_UPDATE_COMMAND_UI(ID_IMPORT_TICKET, OnUpdateImportTicket)
@@ -77,6 +89,8 @@ BEGIN_MESSAGE_MAP(CLeashView, CFormView)
     ON_COMMAND(ID_LEASH_MINIMIZE, OnLeashMinimize)
 	ON_COMMAND(ID_LOW_TICKET_ALARM, OnLowTicketAlarm)
 	ON_COMMAND(ID_AUTO_RENEW, OnAutoRenew)
+	ON_UPDATE_COMMAND_UI(ID_LOW_TICKET_ALARM, OnUpdateLowTicketAlarm)
+	ON_UPDATE_COMMAND_UI(ID_AUTO_RENEW, OnUpdateAutoRenew)
 	ON_UPDATE_COMMAND_UI(ID_KRB4_PROPERTIES, OnUpdateKrb4Properties)
 	ON_UPDATE_COMMAND_UI(ID_KRB5_PROPERTIES, OnUpdateKrb5Properties)
 	ON_UPDATE_COMMAND_UI(ID_AFS_CONTROL_PANEL, OnUpdateAfsControlPanel)
@@ -341,6 +355,13 @@ VOID CLeashView::OnShowWindow(BOOL bShow, UINT nStatus)
 
         // Public IP Address
         m_publicIPAddress = pLeash_get_default_publicip();
+
+        // @TODO: get/set defaults for these
+        m_showRenewableUntil = m_pApp->GetProfileInt("Settings", "ShowRenewableUntil", OFF);
+        m_showTicketFlags = m_pApp->GetProfileInt("Settings", "ShowTicketFlags", OFF);
+        m_showTimeIssued = m_pApp->GetProfileInt("Settings", "ShowTimeIssued", OFF);
+        m_showValidUntil = m_pApp->GetProfileInt("Settings", "ShowValidUntil", ON);
+        m_showEncryptionType = m_pApp->GetProfileInt("Settings", "ShowEncryptionType", OFF);
 
         OnLargeIcons();
     }
@@ -756,9 +777,9 @@ VOID CLeashView::OnDestroyTicket()
                                      MB_ICONEXCLAMATION|MB_YESNO, 0);
         else
             whatToDo = AfxMessageBox("You are about to destroy your ticket(s)/token(s)!",
-                                     MB_OKCANCEL, 0);
+                                     MB_ICONEXCLAMATION|MB_YESNO, 0);
 
-        if (whatToDo == IDOK)
+        if (whatToDo == IDYES)
         {
             pLeash_kdestroy();
             ResetTreeNodes();
@@ -1314,63 +1335,55 @@ VOID CLeashView::OnActivateView(BOOL bActivate, CView* pActivateView,
     } else {
         return;
     }
-    if( m_hMenu == NULL )
-    {
-        AfxMessageBox("There is a problem finding the Leash main menu!",
-                   MB_OK|MB_ICONSTOP);
-        return;
-    }
-    if (!m_largeIcons)
-        check = CheckMenuItem(m_hMenu, ID_LARGE_ICONS, MF_CHECKED);
-    else
-        check = CheckMenuItem(m_hMenu, ID_LARGE_ICONS, MF_UNCHECKED);
 
-    if( check != MF_CHECKED || check != MF_UNCHECKED )
-    {
-        m_debugStartUp = 1;
-    }
+    if (m_hMenu) {
+        if (!m_largeIcons)
+            check = CheckMenuItem(m_hMenu, ID_LARGE_ICONS, MF_CHECKED);
+        else
+            check = CheckMenuItem(m_hMenu, ID_LARGE_ICONS, MF_UNCHECKED);
 
-    if (!m_destroyTicketsOnExit)
-        check = CheckMenuItem(m_hMenu, ID_KILL_TIX_ONEXIT, MF_UNCHECKED);
-    else
-        check = CheckMenuItem(m_hMenu, ID_KILL_TIX_ONEXIT, MF_CHECKED);
+        if( check != MF_CHECKED || check != MF_UNCHECKED )
+        {
+            m_debugStartUp = 1;
+        }
 
-    if (!m_upperCaseRealm)
-        check = CheckMenuItem(m_hMenu, ID_UPPERCASE_REALM, MF_UNCHECKED);
-    else
-        check = CheckMenuItem(m_hMenu, ID_UPPERCASE_REALM, MF_CHECKED);
+        if (!m_destroyTicketsOnExit)
+            check = CheckMenuItem(m_hMenu, ID_KILL_TIX_ONEXIT, MF_UNCHECKED);
+        else
+            check = CheckMenuItem(m_hMenu, ID_KILL_TIX_ONEXIT, MF_CHECKED);
 
-    if (!m_lowTicketAlarm)
-    {
-        m_lowTicketAlarmSound = FALSE;
+        if (!m_upperCaseRealm)
+            check = CheckMenuItem(m_hMenu, ID_UPPERCASE_REALM, MF_UNCHECKED);
+        else
+            check = CheckMenuItem(m_hMenu, ID_UPPERCASE_REALM, MF_CHECKED);
 
-        if (m_hMenu)
+        CheckMenuItem(m_hMenu, ID_SHOW_TICKET_FLAGS,
+                      m_showTicketFlags ? MF_CHECKED : MF_UNCHECKED);
+
+        CheckMenuItem(m_hMenu, ID_RENEWABLE_UNTIL,
+                      m_showRenewableUntil ? MF_CHECKED : MF_UNCHECKED);
+
+        CheckMenuItem(m_hMenu, ID_TIME_ISSUED,
+                      m_showTimeIssued ? MF_CHECKED : MF_UNCHECKED);
+
+
+        if (!m_lowTicketAlarm)
             CheckMenuItem(m_hMenu, ID_LOW_TICKET_ALARM, MF_UNCHECKED);
-    }
-    else
-    {
-        m_lowTicketAlarmSound = TRUE;
-        if (m_hMenu)
+        else
             CheckMenuItem(m_hMenu, ID_LOW_TICKET_ALARM, MF_CHECKED);
-    }
 
-    if (!m_autoRenewTickets)
-    {
-        if (m_hMenu)
+        if (!m_autoRenewTickets)
             CheckMenuItem(m_hMenu, ID_AUTO_RENEW, MF_UNCHECKED);
-    }
-    else
-    {
-        if (m_hMenu)
+        else
             CheckMenuItem(m_hMenu, ID_AUTO_RENEW, MF_CHECKED);
+
+        m_debugWindow = m_pApp->GetProfileInt("Settings", "DebugWindow", 0);
+        if (!m_debugWindow)
+            check = CheckMenuItem(m_hMenu, ID_DEBUG_MODE, MF_UNCHECKED);
+        else
+            check = CheckMenuItem(m_hMenu, ID_DEBUG_MODE, MF_CHECKED);
     }
-
-    m_debugWindow = m_pApp->GetProfileInt("Settings", "DebugWindow", 0);
-    if (!m_debugWindow)
-        check = CheckMenuItem(m_hMenu, ID_DEBUG_MODE, MF_UNCHECKED);
-    else
-        check = CheckMenuItem(m_hMenu, ID_DEBUG_MODE, MF_CHECKED);
-
+    m_lowTicketAlarmSound = !!m_lowTicketAlarm;
     m_alreadyPlayed = TRUE;
     if (m_pApp)
     {
@@ -1486,6 +1499,75 @@ VOID CLeashView::OnDebugMode()
     }
 }
 
+VOID CLeashView::OnRenewableUntil()
+{
+    m_showRenewableUntil = !m_showRenewableUntil;
+    if (m_hMenu)
+        CheckMenuItem(m_hMenu, ID_RENEWABLE_UNTIL,
+                      m_showRenewableUntil ? MF_CHECKED : MF_UNCHECKED);
+    if (m_pApp)
+        m_pApp->WriteProfileInt("Settings", "ShowRenewableUntil", m_showRenewableUntil);
+}
+
+VOID CLeashView::OnUpdateRenewableUntil(CCmdUI *pCmdUI)
+{
+    pCmdUI->SetCheck(m_showRenewableUntil);
+}
+
+VOID CLeashView::OnShowTicketFlags()
+{
+    m_showTicketFlags = !m_showTicketFlags;
+    if (m_hMenu)
+        CheckMenuItem(m_hMenu, ID_SHOW_TICKET_FLAGS,
+                      m_showTicketFlags ? MF_CHECKED : MF_UNCHECKED);
+    if (m_pApp)
+        m_pApp->WriteProfileInt("Settings", "ShowTicketFlags", m_showTicketFlags);
+}
+
+VOID CLeashView::OnUpdateShowTicketFlags(CCmdUI *pCmdUI)
+{
+    pCmdUI->SetCheck(m_showTicketFlags);
+}
+
+VOID CLeashView::OnTimeIssued()
+{
+    m_showTimeIssued = !m_showTimeIssued;
+    if (m_hMenu)
+        CheckMenuItem(m_hMenu, ID_TIME_ISSUED,
+                      m_showTimeIssued ? MF_CHECKED : MF_UNCHECKED);
+    if (m_pApp)
+        m_pApp->WriteProfileInt("Settings", "ShowTimeIssued", m_showTimeIssued);
+}
+
+VOID CLeashView::OnUpdateTimeIssued(CCmdUI *pCmdUI)
+{
+    pCmdUI->SetCheck(m_showTimeIssued);
+}
+
+VOID CLeashView::OnValidUntil()
+{
+    m_showValidUntil = !m_showValidUntil;
+    if (m_pApp)
+        m_pApp->WriteProfileInt("Settings", "ShowValidUntil", m_showValidUntil);
+}
+
+VOID CLeashView::OnUpdateValidUntil(CCmdUI *pCmdUI)
+{
+    pCmdUI->SetCheck(m_showValidUntil);
+}
+
+VOID CLeashView::OnEncryptionType()
+{
+    m_showEncryptionType = !m_showEncryptionType;
+    if (m_pApp)
+        m_pApp->WriteProfileInt("Settings", "ShowEncryptionType", m_showEncryptionType);
+}
+
+VOID CLeashView::OnUpdateEncryptionType(CCmdUI *pCmdUI)
+{
+    pCmdUI->SetCheck(m_showEncryptionType);
+}
+
 VOID CLeashView::OnLargeIcons()
 {
     INT x, y, n;
@@ -1598,64 +1680,29 @@ VOID CLeashView::OnLargeIcons()
 
 VOID CLeashView::OnKillTixOnExit()
 {
-    if (m_destroyTicketsOnExit%2 == 0)
-        m_destroyTicketsOnExit = ON;
-    else
-        m_destroyTicketsOnExit = OFF;
+    m_destroyTicketsOnExit = !m_destroyTicketsOnExit;
 
     if (m_pApp)
-    {
-        if (!m_destroyTicketsOnExit)
-        {
-            if (m_hMenu)
-                CheckMenuItem(m_hMenu, ID_KILL_TIX_ONEXIT, MF_UNCHECKED);
+        m_pApp->WriteProfileInt("Settings", "DestroyTicketsOnExit",
+                                m_destroyTicketsOnExit);
+}
 
-            AfxMessageBox("Tickets will be not be destroyed upon exiting Leash!!!",
-                       MB_OK|MB_ICONWARNING);
-            m_pApp->WriteProfileInt("Settings", "DestroyTicketsOnExit",
-                                    FALSE_FLAG);
-        }
-        else
-        {
-            if (m_hMenu)
-                CheckMenuItem(m_hMenu, ID_KILL_TIX_ONEXIT, MF_CHECKED);
-
-            AfxMessageBox("All tickets/tokens will be destroyed upon exiting Leash!!!",
-                       MB_OK|MB_ICONWARNING);
-            m_pApp->WriteProfileInt("Settings", "DestroyTicketsOnExit", TRUE_FLAG);
-        }
-    }
-    else
-    {
-        ApplicationInfoMissingMsg();
-    }
+VOID CLeashView::OnUpdateKillTixOnExit(CCmdUI *pCmdUI)
+{
+    pCmdUI->SetCheck(m_destroyTicketsOnExit);
 }
 
 VOID CLeashView::OnUppercaseRealm()
 {
-    if (m_upperCaseRealm%2 == 0)
-        m_upperCaseRealm = ON;
-    else
-        m_upperCaseRealm = OFF;
+    m_upperCaseRealm = !m_upperCaseRealm;
 
-    if (!m_pApp)
-    {
-        ApplicationInfoMissingMsg();
-    }
-    else if (!m_upperCaseRealm)
-    {
-        pLeash_set_default_uppercaserealm(FALSE_FLAG);
+    pLeash_set_default_uppercaserealm(m_upperCaseRealm);
+}
 
-        if (m_hMenu)
-            CheckMenuItem(m_hMenu, ID_UPPERCASE_REALM, MF_UNCHECKED);
-    }
-    else
-    {
-        pLeash_set_default_uppercaserealm(TRUE_FLAG);
-
-        if (m_hMenu)
-            CheckMenuItem(m_hMenu, ID_UPPERCASE_REALM, MF_CHECKED);
-    }
+VOID CLeashView::OnUpdateUppercaseRealm(CCmdUI *pCmdUI)
+{
+    // description is now 'allow mixed case', so reverse logic
+    pCmdUI->SetCheck(!m_upperCaseRealm);
 }
 
 VOID CLeashView::ResetTreeNodes()
@@ -2746,61 +2793,30 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
 
 VOID CLeashView::OnLowTicketAlarm()
 {
-    if (m_lowTicketAlarm%2 == 0)
-        m_lowTicketAlarm = ON;
-    else
-        m_lowTicketAlarm = OFF;
+    m_lowTicketAlarm = !m_lowTicketAlarm;
 
+    if (m_pApp)
+        m_pApp->WriteProfileInt("Settings", "LowTicketAlarm", m_lowTicketAlarm);
+}
 
-    if (!m_pApp)
-    {
-        ApplicationInfoMissingMsg();
-    }
-    else if (!m_lowTicketAlarm)
-    {
-        if (m_hMenu)
-            CheckMenuItem(m_hMenu, ID_LOW_TICKET_ALARM, MF_UNCHECKED);
-
-        m_pApp->WriteProfileInt("Settings", "LowTicketAlarm", FALSE_FLAG);
-    }
-    else
-    {
-        if (m_hMenu)
-            CheckMenuItem(m_hMenu, ID_LOW_TICKET_ALARM, MF_CHECKED);
-
-        m_pApp->WriteProfileInt("Settings", "LowTicketAlarm", TRUE_FLAG);
-    }
+VOID CLeashView::OnUpdateLowTicketAlarm(CCmdUI* pCmdUI)
+{
+    pCmdUI->SetCheck(m_lowTicketAlarm);
 }
 
 VOID CLeashView::OnAutoRenew()
 {
-    if (m_autoRenewTickets%2 == 0)
-        m_autoRenewTickets = ON;
-    else
-        m_autoRenewTickets = OFF;
+    m_autoRenewTickets = !m_autoRenewTickets;
 
+    if (m_pApp)
+        m_pApp->WriteProfileInt("Settings", "AutoRenewTickets", m_autoRenewTickets);
 
-    if (!m_pApp)
-    {
-        ApplicationInfoMissingMsg();
-    }
-    else if (!m_autoRenewTickets)
-    {
-        if (m_hMenu)
-            CheckMenuItem(m_hMenu, ID_AUTO_RENEW, MF_UNCHECKED);
-
-        m_pApp->WriteProfileInt("Settings", "AutoRenewTickets", FALSE_FLAG);
-        m_autoRenewTickets = FALSE;
-    }
-    else
-    {
-        if (m_hMenu)
-            CheckMenuItem(m_hMenu, ID_AUTO_RENEW, MF_CHECKED);
-
-        m_pApp->WriteProfileInt("Settings", "AutoRenewTickets", TRUE_FLAG);
-        m_autoRenewTickets = TRUE;
-    }
     m_autoRenewalAttempted = 0;
+}
+
+VOID CLeashView::OnUpdateAutoRenew(CCmdUI* pCmdUI)
+{
+    pCmdUI->SetCheck(m_autoRenewTickets);
 }
 
 VOID CLeashView::AlarmBeep()

@@ -322,14 +322,23 @@
 #define ID_INIT_TICKET                  32807
 #define ID_AUTO_RENEW                   32808
 #define ID_OBTAIN_TGT_WITH_LPARAM       32809
+#define ID_TIME_ISSUED                  32810
+#define ID_RENEWABLE_UNTIL              32811
+#define ID_SHOW_TICKET_FLAGS            32812
+#define ID_BUTTON2                      32813
+#define ID_BUTTON5                      32816
+#define ID_BUTTON4                      32818
+#define ID_ENCRYPTION_TYPE              32826
+#define ID_VALID_UNTIL                  32828
+#define ID_BUTTON9                      32834
 
 // Next default values for new objects
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        241
-#define _APS_NEXT_COMMAND_VALUE         32810
+#define _APS_NEXT_RESOURCE_VALUE        269
+#define _APS_NEXT_COMMAND_VALUE         32835
 #define _APS_NEXT_CONTROL_VALUE         1207
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
