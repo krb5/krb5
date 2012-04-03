@@ -31,9 +31,9 @@ const char CLeashFrame::s_profileMax[] = "max";
 const char CLeashFrame::s_profileTool[] = "tool";
 const char CLeashFrame::s_profileStatus[] = "status";
 
-IMPLEMENT_DYNAMIC(CLeashFrame, CFrameWnd)
+IMPLEMENT_DYNAMIC(CLeashFrame, CFrameWndEx)
 
-BEGIN_MESSAGE_MAP(CLeashFrame, CFrameWnd)
+BEGIN_MESSAGE_MAP(CLeashFrame, CFrameWndEx)
 	//{{AFX_MSG_MAP(CLeashFrame)
 	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
@@ -101,7 +101,7 @@ void CLeashFrame::OnDestroy()
 
 	SaveBarState(AfxGetApp()->m_pszProfileName);
 
-	CFrameWnd::OnDestroy();
+	CFrameWndEx::OnDestroy();
 }
 
 ///////////////////////////////////////////////////////////////
@@ -112,8 +112,7 @@ void CLeashFrame::ActivateFrame(int nCmdShow)
 	{
 		m_bFirstTime = FALSE;
 
-        LoadBarState(AfxGetApp()->m_pszProfileName);
     }
 
-	CFrameWnd::ActivateFrame(nCmdShow);
+	CFrameWndEx::ActivateFrame(nCmdShow);
 }

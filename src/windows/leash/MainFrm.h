@@ -39,8 +39,8 @@ protected: // create from serialization only
 // Attributes
 public:
 	static int         m_whatSide;
-    static CStatusBar  m_wndStatusBar;
-	static CToolBar    m_wndToolBar;
+    static CMFCStatusBar  m_wndStatusBar;
+	static CMFCToolBar    m_wndToolBar;
 	static BOOL		   m_isMinimum;
     static BOOL        m_isBeingResized;
     static CImageList  m_imageList;

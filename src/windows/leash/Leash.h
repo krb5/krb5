@@ -92,7 +92,7 @@
 // See Leash.cpp for the implementation of this class
 //
 
-class CLeashApp : public CWinApp
+class CLeashApp : public CWinAppEx
 {
 private:
 	CString		m_leashDLL;

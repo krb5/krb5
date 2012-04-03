@@ -33,8 +33,8 @@ static char THIS_FILE[] = __FILE__;
 #define MIN_RIGHT	  530
 #define MIN_BOTTOM	  280
 
-CStatusBar CMainFrame::m_wndStatusBar;
-CToolBar   CMainFrame::m_wndToolBar;
+CMFCStatusBar CMainFrame::m_wndStatusBar;
+CMFCToolBar   CMainFrame::m_wndToolBar;
 CImageList CMainFrame::m_imageList;
 CImageList CMainFrame::m_disabledImageList;
 BOOL	   CMainFrame::m_isMinimum;
@@ -124,67 +124,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
-    // Create an image list of Icons so that we can use the best color
-    // depth available on the system and then assign this new list to
-    // be used instead of the single bitmap file assigned to the toolbar
-    // in the resource file
-    CToolBarCtrl *_toolBar = NULL;
-    CToolBarCtrl& toolBar = CMainFrame::m_wndToolBar.GetToolBarCtrl();
-    HICON      hIcon[7];
-    int n;
-
-    for (n = 0; n < 7; n++)
-    {
-        hIcon[n] = NULL;
-    }
-
-    UINT bitsPerPixel = GetDeviceCaps( ::GetDC(::GetDesktopWindow()), BITSPIXEL);
-    UINT ilcColor;
-    if ( bitsPerPixel >= 32 )
-        ilcColor = ILC_COLOR32;
-    else if ( bitsPerPixel >= 24 )
-        ilcColor = ILC_COLOR24;
-    else if ( bitsPerPixel >= 16 )
-        ilcColor = ILC_COLOR16;
-    else if ( bitsPerPixel >= 8 )
-        ilcColor = ILC_COLOR8;
-    else
-        ilcColor = ILC_COLOR;
-
-    m_imageList.Create(18, 18, ilcColor | ILC_MASK, 8, 4);
-    m_imageList.SetBkColor(GetSysColor(COLOR_BTNFACE));
-
-    hIcon[0] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_INIT);
-    hIcon[1] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_RENEW);
-    hIcon[2] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_IMPORT);
-    hIcon[3] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_DESTROY);
-    hIcon[4] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_PASSWORD);
-    hIcon[5] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_REFRESH);
-    hIcon[6] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_SYNC);
-
-    for (n = 0; n < 7; n++)
-    {
-        m_imageList.Add(hIcon[n]);
-    }
-    toolBar.SetImageList(&m_imageList);
-
-    m_disabledImageList.Create(18, 18, ilcColor | ILC_MASK, 8, 4);
-    m_disabledImageList.SetBkColor(GetSysColor(COLOR_INACTIVECAPTIONTEXT));
-
-    hIcon[0] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_INIT_DISABLED);
-    hIcon[1] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_RENEW_DISABLED);
-    hIcon[2] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_IMPORT_DISABLED);
-    hIcon[3] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_DESTROY_DISABLED);
-    hIcon[4] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_PASSWORD_DISABLED);
-    hIcon[5] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_REFRESH_DISABLED);
-    hIcon[6] = AfxGetApp()->LoadIcon(IDI_TOOLBAR_SYNC_DISABLED);
-
-    for (n = 0; n < 7; n++)
-    {
-        m_disabledImageList.Add(hIcon[n]);
-    }
-    toolBar.SetDisabledImageList(&m_disabledImageList);
-
 	if (!m_wndStatusBar.Create(this) ||
 		!m_wndStatusBar.SetIndicators(indicators,
 		  (CLeashApp::m_hAfsDLL ? 4 : 3)))
@@ -196,13 +135,13 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	// TODO: Remove this if you don't want tool tips or a resizeable toolbar
-	m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() |
+	m_wndToolBar.SetPaneStyle(m_wndToolBar.GetPaneStyle() |
 		                     CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 
 	// TODO: Delete these three lines if you don't want the toolbar to
 	//  be dockable
-	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
-	EnableDocking(CBRS_ALIGN_ANY);
+//	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
+//	EnableDocking(CBRS_ALIGN_ANY);
 	//DockControlBar(&m_wndToolBar);
 
 	return 0;
