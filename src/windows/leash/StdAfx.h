@@ -11,7 +11,8 @@
 #define AFX_STDAFX_H__6F45AD93_561B_11D0_8FCF_00C04FC2A0C2__INCLUDED_
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
-
+#define WINVER 0x0600       // Target Vista+
+#define _WIN32_WINNT 0x0600 // Target Vista+
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 #include <afxdisp.h>        // MFC OLE automation classes
