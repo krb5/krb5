@@ -972,6 +972,9 @@ check_pw_reuse(krb5_context context,
 
     assert (n_new_key_data >= 0);
     for (x = 0; x < (unsigned) n_new_key_data; x++) {
+        /* Check only entries with the most recent kvno. */
+        if (new_key_data[x].key_data_kvno != new_key_data[0].key_data_kvno)
+            break;
         ret = krb5_dbe_decrypt_key_data(context, NULL, &(new_key_data[x]),
                                         &newkey, NULL);
         if (ret)
