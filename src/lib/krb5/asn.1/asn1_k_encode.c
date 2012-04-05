@@ -723,7 +723,7 @@ static const struct atype_info *enc_tkt_part_fields[] = {
 DEFSEQTYPE(untagged_enc_tkt_part, krb5_enc_tkt_part, enc_tkt_part_fields);
 DEFAPPTAGGEDTYPE(enc_tkt_part, 3, untagged_enc_tkt_part);
 
-DEFAPPTAGGEDTYPE(enc_as_rep_part, 24, enc_kdc_rep_part);
+DEFAPPTAGGEDTYPE(enc_as_rep_part, 25, enc_kdc_rep_part);
 DEFAPPTAGGEDTYPE(enc_tgs_rep_part, 26, enc_kdc_rep_part);
 
 DEFCTAGGEDTYPE(kdc_rep_0, 0, krb5_version);
