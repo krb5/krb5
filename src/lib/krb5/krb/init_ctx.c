@@ -191,6 +191,7 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
     if ((retval = krb5_os_init_context(ctx, profile, flags)) != 0)
         goto cleanup;
 
+    ctx->trace_callback = NULL;
 #ifndef DISABLE_TRACING
     if (!ctx->profile_secure)
         krb5int_init_trace(ctx);
@@ -272,7 +273,6 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
     ctx->prompt_types = 0;
     ctx->use_conf_ktypes = 0;
     ctx->udp_pref_limit = -1;
-    ctx->trace_callback = NULL;
     *context_out = ctx;
     return 0;
 
