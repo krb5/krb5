@@ -12,7 +12,7 @@ sysconfdir=@sysconfdir@
 # release tarball or the web site (that is, without substitutions for
 # configured paths).  This can be done in an unconfigured source tree
 # with:
-#     make -f Makefile.in top_srcdir=.. PYTHON=python rsthml
+#     make -f Makefile.in srcdir=. top_srcdir=.. PYTHON=python rsthml
 #     make -f Makefile.in clean
 rsthtml: composite
 	rm -rf $(docsrc)/rst_html
