@@ -219,13 +219,13 @@ The libdefaults section may contain any of the following relations:
     (KDC_OPT_RENEWABLE_OK).
 
 **kdc_timesync**
-    If this flag is true, client machines will compute the difference
-    between their time and the time returned by the KDC in the
-    timestamps in the tickets and use this value to correct for an
-    inaccurate system clock when requesting service tickets or
-    authenticating to services.  This corrective factor is only used
-    by the Kerberos library; it is not used to change the system
-    clock.  The default value is true.
+    The value of this relation must be an integer.  If it is nonzero,
+    client machines will compute the difference between their time and
+    the time returned by the KDC in the timestamps in the tickets and
+    use this value to correct for an inaccurate system clock when
+    requesting service tickets or authenticating to services.  This
+    corrective factor is only used by the Kerberos library; it is not
+    used to change the system clock.  The default value is 1.
 
 **kdc_req_checksum_type**
     An integer which specifies the type of checksum to use for the KDC
