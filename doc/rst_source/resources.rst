@@ -1,5 +1,5 @@
-MIT resources
-=============
+Resources
+=========
 
 Mailing lists
 -------------

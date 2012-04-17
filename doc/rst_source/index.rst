@@ -13,7 +13,7 @@ MIT Kerberos Documentation
    krb_basic/index.rst
    mitK5features.rst
    relay/index.rst
-   mitresources
+   resources
 
 
 .. _reference:
