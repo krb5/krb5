@@ -86,6 +86,7 @@ static void finish_realms (void);
 
 static int nofork = 0;
 static int workers = 0;
+static int time_offset = 0;
 static const char *pid_file = NULL;
 static int rkey_init_done = 0;
 static volatile int signal_received = 0;
@@ -293,6 +294,8 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
         kdc_err(NULL, kret, _("while getting context for realm %s"), realm);
         goto whoops;
     }
+    if (time_offset != 0)
+        (void)krb5_set_time_offsets(rdp->realm_context, time_offset, 0);
 
     kret = krb5_read_realm_params(rdp->realm_context, rdp->realm_name,
                                   &rparams);
@@ -733,7 +736,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
      */
-    while ((c = getopt(argc, argv, "x:r:d:mM:k:R:e:P:p:s:nw:4:X3")) != -1) {
+    while ((c = getopt(argc, argv, "x:r:d:mM:k:R:e:P:p:s:nw:4:T:X3")) != -1) {
         switch(c) {
         case 'x':
             db_args_size++;
@@ -844,6 +847,9 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                 free(default_tcp_ports);
             default_tcp_ports = strdup(optarg);
 #endif
+            break;
+        case 'T':
+            time_offset = atoi(optarg);
             break;
         case '4':
             break;

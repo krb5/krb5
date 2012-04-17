@@ -17,6 +17,7 @@ SYNOPSIS
 [**-n**]
 [**-w** *numworkers*]
 [**-P** *pid_file*]
+[**-T** *time_offset*]
 
 
 DESCRIPTION
@@ -99,6 +100,8 @@ Options supported for the LDAP database module are:
         password using the **stashsrvpw** command of
         :ref:`kdb5_ldap_util(8)`.
 
+The **-T** *offset* option specifies a time offset, in seconds, which
+the KDC will operate under.  It is intended only for testing purposes.
 
 EXAMPLE
 -------

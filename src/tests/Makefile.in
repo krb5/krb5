@@ -71,6 +71,7 @@ check-pytests::
 	$(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_stringattr.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_crossrealm.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_skew.py $(PYTESTFLAGS)
 #	$(RUNPYTEST) $(srcdir)/kdc_realm/kdcref.py $(PYTESTFLAGS)
 
 clean::
