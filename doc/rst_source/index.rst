@@ -1,8 +1,6 @@
 MIT Kerberos Documentation
 ==========================
 
-Contents
---------
 
 .. toctree::
    :maxdepth: 1
@@ -14,14 +12,9 @@ Contents
    krb_build/index.rst
    krb_basic/index.rst
    mitK5features.rst
-
-.. toctree::
-   :maxdepth: 1
-
    relay/index.rst
+   mitresources
 
-Version
--------
 
 .. _reference:
 
