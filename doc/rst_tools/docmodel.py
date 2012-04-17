@@ -120,6 +120,7 @@ class Function(object):
         self.warn_description = argkw.get('warn_description')
         self.sa_description = argkw.get('sa_description')
         self.notes_description = argkw.get('notes_description')
+        self.version_num = argkw.get('version_num')
         self.short_description = argkw.get('short_description')
         self.long_description = argkw.get('long_description')
         self.deprecated_description = argkw.get('deprecated_description')
@@ -179,6 +180,7 @@ class Function(object):
         lines.append('Warning description:\n%s' % self.warn_description)
         lines.append('See also description:\n%s' % self.sa_description)
         lines.append('NOTE description:\n%s' % self.notes_description) 
+        lines.append('Version introduced:\n%s' % self.version_num)
         lines.append('Deprecated description:\n%s' % self.deprecated_description)
         result = '\n'.join(lines)
         

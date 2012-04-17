@@ -199,6 +199,7 @@ class DoxyFuncs(XML2AST):
         warning_description = self._process_warning_description(f_detailed)
         seealso_description = self._process_seealso_description(f_detailed)
         notes_description = self._process_notes_description(f_detailed)
+        f_version = self._process_version_description(f_detailed)
         deprecated_description = self._process_deprecated_description(f_detailed)
         param_description_map = self.process_parameter_description(f_detailed)
         f_definition = node.children['definition'][0].getContent()
@@ -214,6 +215,7 @@ class DoxyFuncs(XML2AST):
                           'warn_description': warning_description,
                           'notes_description': notes_description,
                           'short_description': f_brief,
+                          'version_num': f_version,
                           'long_description': detailed_description,
                           'deprecated_description': deprecated_description,
                           'parameters': list()}
@@ -473,6 +475,29 @@ class DoxyFuncs(XML2AST):
                     decorators = {'default': self.return_seealso_decorator,
                                   'para': self.paragraph_content_decorator}
                     result = it.walk(decorators, 1)
+        return result
+
+    def return_version_decorator(self, node, value):
+        if node.name == 'simplesect':
+            if node.attributes['kind'] == 'version':
+                return value
+        else:
+            return None
+
+    def _process_version_description(self, node):
+        result = None
+        para = node.children.get('para')
+        if para is not None:
+            for p in para:
+                simplesect_list = p.children.get('simplesect')
+                if simplesect_list is None:
+                    continue
+                for it in simplesect_list:
+                    decorators = {'default': self.return_version_decorator,
+                                  'para': self.paragraph_content_decorator}
+                    result = it.walk(decorators, 1)
+                    if result is not None:
+                        return result
         return result
 
     def return_notes_decorator(self, node, value):
