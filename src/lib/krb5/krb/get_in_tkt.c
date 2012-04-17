@@ -1281,6 +1281,23 @@ check_reply_enctype(krb5_init_creds_context ctx)
     return KRB5_CONFIG_ETYPE_NOSUPP;
 }
 
+/* Note the difference between the KDC's time, as reported to us in a
+ * preauth-required error, and the current time. */
+static void
+note_req_timestamp(krb5_context kcontext, krb5_clpreauth_rock rock,
+                   krb5_timestamp kdc_time, krb5_int32 kdc_usec)
+{
+    krb5_timestamp now;
+    krb5_int32 usec;
+
+    if (k5_time_with_offset(0, 0, &now, &usec) != 0)
+        return;
+    rock->pa_offset = kdc_time - now;
+    rock->pa_offset_usec = kdc_usec - usec;
+    rock->pa_offset_state = (rock->fast_state->armor_key != NULL) ?
+        AUTH_OFFSET : UNAUTH_OFFSET;
+}
+
 static krb5_error_code
 init_creds_step_reply(krb5_context context,
                       krb5_init_creds_context ctx,
@@ -1328,6 +1345,8 @@ init_creds_step_reply(krb5_context context,
             krb5_free_pa_data(context, ctx->preauth_to_use);
             ctx->preauth_to_use = ctx->err_padata;
             ctx->err_padata = NULL;
+            note_req_timestamp(context, &ctx->preauth_rock,
+                               ctx->err_reply->stime, ctx->err_reply->susec);
             /* this will trigger a new call to krb5_do_preauth() */
             krb5_free_error(context, ctx->err_reply);
             ctx->err_reply = NULL;

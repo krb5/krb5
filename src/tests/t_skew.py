@@ -13,9 +13,13 @@ realm.kinit(realm.user_princ, password('user'), flags=['-T', realm.ccache])
 realm.run_as_client([kvno, realm.host_princ])
 realm.run_as_client([kdestroy])
 
-# kinit (with preauth) should fail.
+# kinit (with preauth) should work, with or without FAST.
 realm.run_kadminl('modprinc +requires_preauth user')
-realm.kinit(realm.user_princ, password('user'), expected_code=1)
+realm.kinit(realm.user_princ, password('user'))
+realm.run_as_client([kvno, realm.host_princ])
+realm.kinit(realm.user_princ, password('user'), flags=['-T', realm.ccache])
+realm.run_as_client([kvno, realm.host_princ])
+realm.run_as_client([kdestroy])
 
 realm.stop()
 
@@ -31,8 +35,10 @@ realm.run_as_client([kvno, realm.host_princ], expected_code=1)
 realm.kinit(realm.user_princ, password('user'), flags=['-T', realm.ccache],
             expected_code=1)
 
-# kinit (with preauth) should fail.
+# kinit (with preauth) should fail, with or without FAST.
 realm.run_kadminl('modprinc +requires_preauth user')
 realm.kinit(realm.user_princ, password('user'), expected_code=1)
+realm.kinit(realm.user_princ, password('user'), flags=['-T', realm.ccache],
+            expected_code=1)
 
 success('Clock skew tests')

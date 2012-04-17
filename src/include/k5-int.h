@@ -665,6 +665,12 @@ typedef struct _krb5_os_context {
     char *                  default_ccname;
 } *krb5_os_context;
 
+/* Get the current time of day plus a specified offset. */
+krb5_error_code k5_time_with_offset(krb5_timestamp offset,
+                                    krb5_int32 offset_usec,
+                                    krb5_timestamp *time_out,
+                                    krb5_int32 *usec_out);
+
 /*
  * Flags for the os_flags field
  *
@@ -753,6 +759,11 @@ struct krb5_clpreauth_rock_st {
     krb5_principal client;
     krb5_prompter_fct prompter;
     void *prompter_data;
+
+    /* Discovered offset of server time during preauth */
+    krb5_timestamp pa_offset;
+    krb5_int32 pa_offset_usec;
+    enum { NO_OFFSET = 0, UNAUTH_OFFSET, AUTH_OFFSET } pa_offset_state;
 };
 
 typedef struct _krb5_pa_enc_ts {

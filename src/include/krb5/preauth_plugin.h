@@ -176,6 +176,24 @@ typedef struct krb5_clpreauth_callbacks_st {
                                   const krb5_keyblock *keyblock);
 
     /* End of version 1 clpreauth callbacks. */
+
+    /*
+     * Get the current time for use in a preauth response.  If
+     * allow_unauth_time is true and the library has been configured to allow
+     * it, the current time will be offset using unauthenticated timestamp
+     * information received from the KDC in the preauth-required error, if one
+     * has been received.  Otherwise, the timestamp in a preauth-required error
+     * will only be used if it is protected by a FAST channel.  Only set
+     * allow_unauth_time if using an unauthenticated time offset would not
+     * create a security issue.
+     */
+    krb5_error_code (*get_preauth_time)(krb5_context context,
+                                        krb5_clpreauth_rock rock,
+                                        krb5_boolean allow_unauth_time,
+                                        krb5_timestamp *time_out,
+                                        krb5_int32 *usec_out);
+
+    /* End of version 2 clpreauth callbacks (added in 1.11). */
 } *krb5_clpreauth_callbacks;
 
 /*

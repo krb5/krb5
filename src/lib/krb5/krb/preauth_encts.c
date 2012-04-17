@@ -58,8 +58,15 @@ encts_process(krb5_context context, krb5_clpreauth_moddata moddata,
         goto cleanup;
     TRACE_PREAUTH_ENC_TS_KEY_GAK(context, as_key);
 
-    /* now get the time of day, and encrypt it accordingly */
-    ret = krb5_us_timeofday(context, &pa_enc.patimestamp, &pa_enc.pausec);
+    /*
+     * Try and use the timestamp of the preauth request, even if it's
+     * unauthenticated.  We could be fooled into making a preauth response for
+     * a future time, but that has no security consequences other than the
+     * KDC's audit logs.  If kdc_timesync is not configured, then this will
+     * just use local time.
+     */
+    ret = cb->get_preauth_time(context, rock, TRUE, &pa_enc.patimestamp,
+                               &pa_enc.pausec);
     if (ret)
         goto cleanup;
 

@@ -412,12 +412,31 @@ set_as_key(krb5_context context, krb5_clpreauth_rock rock,
     return krb5_copy_keyblock_contents(context, keyblock, rock->as_key);
 }
 
+static krb5_error_code
+get_preauth_time(krb5_context context, krb5_clpreauth_rock rock,
+                 krb5_boolean allow_unauth_time, krb5_timestamp *time_out,
+                 krb5_int32 *usec_out)
+{
+    if (rock->pa_offset_state != NO_OFFSET &&
+        (allow_unauth_time || rock->pa_offset_state == AUTH_OFFSET) &&
+        (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME)) {
+        /* Use the offset we got from the preauth-required error. */
+        return k5_time_with_offset(rock->pa_offset, rock->pa_offset_usec,
+                                   time_out, usec_out);
+
+    } else {
+        /* Use the time offset from the context, or no offset. */
+        return krb5_us_timeofday(context, time_out, usec_out);
+    }
+}
+
 static struct krb5_clpreauth_callbacks_st callbacks = {
-    1,
+    2,
     get_etype,
     fast_armor,
     get_as_key,
-    set_as_key
+    set_as_key,
+    get_preauth_time
 };
 
 /* Tweak the request body, for now adding any enctypes which the module claims

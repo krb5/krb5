@@ -92,7 +92,10 @@ ec_process(krb5_context context, krb5_clpreauth_moddata moddata,
         krb5_data *encoded_ts = NULL;
         krb5_pa_enc_ts ts;
         enc.ciphertext.data = NULL;
-        retval = krb5_us_timeofday(context, &ts.patimestamp, &ts.pausec);
+        /* Use the timestamp from the preauth-required error if possible.
+         * This time should always be secured by the FAST channel. */
+        retval = cb->get_preauth_time(context, rock, FALSE, &ts.patimestamp,
+                                      &ts.pausec);
         if (retval == 0)
             retval = encode_krb5_pa_enc_ts(&ts, &encoded_ts);
         if (retval == 0)
