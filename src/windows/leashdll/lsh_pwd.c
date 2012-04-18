@@ -1453,7 +1453,8 @@ AdjustOptions(HWND hDialog, int show, int hideDiff)
                  dlgRect.bottom-dlgRect.top+(show ? 1 : - 1) * hideDiff,
                  SWP_NOZORDER|SWP_NOMOVE);
 
-    CSetDlgItemText(hDialog, IDC_BUTTON_OPTIONS, show ? "Hide Options" : "Show Options");
+    CSetDlgItemText(hDialog, IDC_BUTTON_OPTIONS, show ?
+                    "Hide Advanced Settings" : "Show Advanced Settings");
 
 }
 
