@@ -104,33 +104,30 @@ BEGIN
                     CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     DEFPUSHBUTTON   "OK",IDOK,302,235,49,14
     PUSHBUTTON      "Cancel",IDCANCEL,249,235,49,14
-    PUSHBUTTON      "Hide Options",IDC_BUTTON_OPTIONS,186,235,49,14
+    PUSHBUTTON      "Hide Advanced Settings",IDC_BUTTON_OPTIONS,146,235,89,14
     CONTROL         "Ticket Lifetime",IDC_SLIDER_LIFETIME,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,90,113,258,15
-    CONTROL         "Get tickets that can be forwarded to other machines",
+    CONTROL         "Forwardable (can be forwarded to other machines)",
                     IDC_CHECK_FORWARDABLE,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,89,150,203,10
-    CONTROL         "Get tickets without IP addresses (NAT mode)",
-                    IDC_CHECK_NOADDRESS,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,89,163,228,10
-    CONTROL         "Get tickets that can be renewed for:",
+    CONTROL         "Renewable (can be renewed during the renwable lifetime)",
                     IDC_CHECK_RENEWABLE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,89,176,186,10
+                    WS_TABSTOP,89,163,186,10
     CONTROL         "Slider2",IDC_SLIDER_RENEWLIFE,"msctls_trackbar32",
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,100,207,246,15
-    RTEXT           "Name:",IDC_STATIC_NAME,63,44,21,8
-    RTEXT           "Realm:",IDC_STATIC_REALM,62,60,23,8
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,90,194,258,15
+    RTEXT           "Name:",IDC_STATIC_NAME,66,44,21,8
+    RTEXT           "Realm:",IDC_STATIC_REALM,64,60,23,8
     RTEXT           "Password:",IDC_STATIC_PWD,13,76,74,8
-    RTEXT           "Ticket Lifetime:",IDC_STATIC_LIFETIME,19,103,65,8,0,
+    RTEXT           "Ticket Lifetime:",IDC_STATIC_LIFETIME,23,103,65,8,0,
                     WS_EX_RIGHT
-    LTEXT           "Kerberos 5 Options:",IDC_STATIC_KRB5,22,139,101,8
-    LTEXT           "HMS",IDC_STATIC_LIFETIME_VALUE,89,103,131,8
-    LTEXT           "HMS",IDC_STATIC_RENEW_TILL_VALUE,102,193,141,8
-    LTEXT           "",IDC_STATIC_VERSION,7,244,143,8
+    LTEXT           "Flag this ticket as:",IDC_STATIC_KRB5,36,139,101,8
+    LTEXT           "HMS",IDC_STATIC_LIFETIME_VALUE,90,103,131,8
+    LTEXT           "HMS",IDC_STATIC_RENEW_TILL_VALUE,90,180,141,8
+    LTEXT           "",IDC_STATIC_VERSION,7,244,130,8
     ICON            LEASHICON,IDC_PICTURE_LEASH,21,15,20,20
-    LTEXT           "You are required to type your Kerberos Password",
+    LTEXT           "Please Authenticate",
                     IDC_STATIC_NOTICE,51,23,276,8
-    RTEXT           "Renew Till:",IDC_STATIC_RENEW,37,193,59,8
+    RTEXT           "Renewable Lifetime:",IDC_STATIC_RENEW,10,180,79,8
     LTEXT           "",IDC_STATIC_COPYRIGHT,7,256,323,8
 END
 
