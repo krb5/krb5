@@ -108,7 +108,7 @@ IDR_MAINFRAME MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&Initialize Ticket(s)\tCtrl+T", ID_INIT_TICKET
+        MENUITEM "&Get Ticket(s)\tCtrl+T",      ID_INIT_TICKET
         MENUITEM "&Renew Ticket(s)\tCtrl+R",    ID_RENEW_TICKET
         MENUITEM "&Import Ticket(s)\tCtrl+I",   ID_IMPORT_TICKET
         MENUITEM "&Destroy Ticket(s)\tCtrl+D",  ID_DESTROY_TICKET
@@ -878,6 +878,7 @@ END
 IDR_MAINFRAME           BITMAP                  "res\\Leash_toolbar.bmp"
 IDB_HOMESMALL           BITMAP                  "res\\homesmall.bmp"
 IDB_HOMELARGE           BITMAP                  "res\\homelarge.bmp"
+IDB_BITMAP2             BITMAP                  "res\\main.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -931,7 +932,7 @@ STRINGTABLE
 BEGIN
     ID_PROPERTIES           "Enables you to change settings"
     ID_IMPORT_TICKET        "Convert MS Windows credentials into tickets/tokens\n Import Ticket(s) "
-    ID_INIT_TICKET          "Activate all tickets/tokens\n Initialize Ticket(s) "
+    ID_INIT_TICKET          "Get Ticket(s) "
     ID_AUTO_RENEW           "Automatically attempt to renew tickets"
     ID_TIME_ISSUED          "Display ticket time issued column"
     ID_RENEWABLE_UNTIL      "Display ticket renewable until time column"

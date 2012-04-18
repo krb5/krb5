@@ -248,7 +248,7 @@ BOOL CLeashApp::InitInstance()
 
 				ldi.size = LSH_DLGINFO_EX_V1_SZ;
 				ldi.dlgtype = DLGTYPE_PASSWD;
-                ldi.title = "Initialize Ticket";
+                ldi.title = "Get Ticket";
                 ldi.username = username;
 				ldi.realm = realm;
                 ldi.dlgtype = DLGTYPE_PASSWD;
@@ -1532,7 +1532,7 @@ CLeashApp::ObtainTicketsViaUserIfNeeded(HWND hWnd)
             LSH_DLGINFO_EX ldi;
             ldi.size = LSH_DLGINFO_EX_V1_SZ;
             ldi.dlgtype = DLGTYPE_PASSWD;
-            ldi.title = "Initialize Ticket";
+            ldi.title = "Get Ticket";
             ldi.username = NULL;
             ldi.realm = NULL;
             ldi.dlgtype = DLGTYPE_PASSWD;
@@ -1565,7 +1565,7 @@ CLeashApp::ObtainTicketsViaUserIfNeeded(HWND hWnd)
             LSH_DLGINFO_EX ldi;
             ldi.size = LSH_DLGINFO_EX_V1_SZ;
             ldi.dlgtype = DLGTYPE_PASSWD;
-            ldi.title = "Initialize Ticket";
+            ldi.title = "Get Ticket";
             ldi.username = NULL;
             ldi.realm = NULL;
             ldi.dlgtype = DLGTYPE_PASSWD;
@@ -1591,7 +1591,7 @@ CLeashApp::ObtainTicketsViaUserIfNeeded(HWND hWnd)
             LSH_DLGINFO_EX ldi;
             ldi.size = LSH_DLGINFO_EX_V1_SZ;
             ldi.dlgtype = DLGTYPE_PASSWD;
-            ldi.title = "Initialize Ticket";
+            ldi.title = "Get Ticket";
             ldi.username = NULL;
             ldi.realm = NULL;
             ldi.dlgtype = DLGTYPE_PASSWD;
