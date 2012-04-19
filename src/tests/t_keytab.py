@@ -10,7 +10,12 @@ realm.kinit(realm.host_princ, flags=['-k'])
 pkeytab = realm.keytab + '.partial'
 realm.run_as_master([ktutil], input=('rkt %s\ndelent 1\nwkt %s\n' %
                                      (realm.keytab, pkeytab)))
-realm.kinit(realm.host_princ, flags=['-k', '-t', pkeytab], expected_code=1)
+realm.kinit(realm.host_princ, flags=['-k', '-t', pkeytab])
+
+# Test kinit with no keys for client in keytab.
+output = realm.kinit(realm.user_princ, flags=['-k'], expected_code=1)
+if 'no suitable keys' not in output:
+    fail('Expected error not seen in kinit output')
 
 # Test handling of kvno values beyond 255.
 princ = 'foo/bar@%s' % realm.realm

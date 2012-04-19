@@ -77,13 +77,131 @@ get_as_key_keytab(krb5_context context,
     return(ret);
 }
 
+/* Return the list of etypes available for client in keytab. */
+static krb5_error_code
+lookup_etypes_for_keytab(krb5_context context, krb5_keytab keytab,
+                         krb5_principal client, krb5_enctype **etypes_out)
+{
+    krb5_kt_cursor cursor;
+    krb5_keytab_entry entry;
+    krb5_enctype *p, *etypes = NULL;
+    krb5_kvno max_kvno = 0;
+    krb5_error_code ret;
+    size_t count = 0;
+
+    *etypes_out = NULL;
+
+    if (keytab->ops->start_seq_get == NULL)
+        return EINVAL;
+    ret = krb5_kt_start_seq_get(context, keytab, &cursor);
+    if (ret != 0)
+        return ret;
+
+    for (;;) {
+        ret = krb5_kt_next_entry(context, keytab, &entry, &cursor);
+        if (ret == KRB5_KT_END)
+            break;
+        if (ret)
+            goto cleanup;
+
+        if (!krb5_c_valid_enctype(entry.key.enctype))
+            continue;
+        if (!krb5_principal_compare(context, entry.principal, client))
+            continue;
+        /* Make sure our list is for the highest kvno found for client. */
+        if (entry.vno > max_kvno) {
+            free(etypes);
+            etypes = NULL;
+            count = 0;
+            max_kvno = entry.vno;
+        } else if (entry.vno != max_kvno)
+            continue;
+
+        /* Leave room for the terminator and possibly a second entry. */
+        p = realloc(etypes, (count + 3) * sizeof(*etypes));
+        if (p == NULL) {
+            ret = ENOMEM;
+            goto cleanup;
+        }
+        etypes = p;
+        etypes[count++] = entry.key.enctype;
+        /* All DES key types work with des-cbc-crc, which is more likely to be
+         * accepted by the KDC (since MIT KDCs refuse des-cbc-md5). */
+        if (entry.key.enctype == ENCTYPE_DES_CBC_MD5 ||
+            entry.key.enctype == ENCTYPE_DES_CBC_MD4)
+            etypes[count++] = ENCTYPE_DES_CBC_CRC;
+        etypes[count] = 0;
+    }
+
+    ret = 0;
+    *etypes_out = etypes;
+    etypes = NULL;
+cleanup:
+    krb5_kt_end_seq_get(context, keytab, &cursor);
+    free(etypes);
+    return ret;
+}
+
+/* Return true if search_for is in etype_list. */
+static krb5_boolean
+check_etypes_have(krb5_enctype *etype_list, krb5_enctype search_for)
+{
+    int i;
+
+    if (!etype_list)
+        return FALSE;
+
+    for (i = 0; etype_list[i] != 0; i++) {
+        if (etype_list[i] == search_for)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_set_keytab(krb5_context context,
                            krb5_init_creds_context ctx,
                            krb5_keytab keytab)
 {
+    krb5_enctype *etype_list;
+    krb5_error_code ret;
+    int i, j;
+    char *name;
+
     ctx->gak_fct = get_as_key_keytab;
     ctx->gak_data = keytab;
+
+    ret = lookup_etypes_for_keytab(context, keytab, ctx->request->client,
+                                   &etype_list);
+    if (ret) {
+        TRACE_INIT_CREDS_KEYTAB_LOOKUP_FAILED(context, ret);
+        return 0;
+    }
+
+    TRACE_INIT_CREDS_KEYTAB_LOOKUP(context, etype_list);
+
+    /* Filter the ktypes list based on what's in the keytab */
+    for (i = 0, j = 0; i < ctx->request->nktypes; i++) {
+        if (check_etypes_have(etype_list, ctx->request->ktype[i])) {
+            ctx->request->ktype[j] = ctx->request->ktype[i];
+            j++;
+        }
+    }
+    ctx->request->nktypes = j;
+    free(etype_list);
+
+    /* Error out now if there's no overlap. */
+    if (ctx->request->nktypes == 0) {
+        ret = krb5_unparse_name(context, ctx->request->client, &name);
+        if (ret == 0) {
+            krb5_set_error_message(context, KRB5_KT_NOTFOUND,
+                                   _("Keytab contains no suitable keys for "
+                                     "%s"), name);
+        }
+        krb5_free_unparsed_name(context, name);
+        return KRB5_KT_NOTFOUND;
+    }
 
     return 0;
 }

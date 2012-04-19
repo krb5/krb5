@@ -187,6 +187,10 @@
 #define TRACE_INIT_CREDS_GAK(c, salt, s2kparams)                        \
     TRACE(c, (c, "Getting AS key, salt \"{data}\", params \"{data}\"",  \
               salt, s2kparams))
+#define TRACE_INIT_CREDS_KEYTAB_LOOKUP(c, etypes)                       \
+    TRACE(c, (c, "Looked up etypes in keytab: {etypes}", etypes))
+#define TRACE_INIT_CREDS_KEYTAB_LOOKUP_FAILED(c, code)                  \
+    TRACE(c, (c, "Couldn't lookup etypes in keytab: {kerr}", code))
 #define TRACE_INIT_CREDS_PREAUTH_DECRYPT_FAIL(c, code)                  \
     TRACE(c, (c, "Decrypt with preauth AS key failed: {kerr}", code))
 #define TRACE_INIT_CREDS_RESTART_FAST(c)                \
