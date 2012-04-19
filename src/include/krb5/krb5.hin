@@ -5699,6 +5699,8 @@ krb5_auth_con_setsendsubkey(krb5_context ctx, krb5_auth_context ac,
  * This function sets the send subkey in @a ac to @a key, incrementing its
  * reference count.
  *
+ * @version First introduced in 1.9
+ *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
@@ -5728,6 +5730,8 @@ krb5_auth_con_setrecvsubkey(krb5_context ctx, krb5_auth_context ac,
  *
  * This function sets the receiving subkey in @a ac to @a key, incrementing its
  * reference count.
+ *
+ * @version First introduced in 1.9
  *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
@@ -6138,6 +6142,8 @@ krb5_enctype_to_string(krb5_enctype enctype, char *buffer, size_t buflen);
  * (like "aes128-cts-hmac-sha1-96").  If @a shortest is TRUE, it return the
  * enctype's shortest alias (like "aes128-cts").
  *
+ * @version First introduced in 1.9
+ *
  * @retval 0  Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
@@ -6510,6 +6516,8 @@ krb5_get_init_creds_opt_set_fast_ccache_name(krb5_context context,
  *
  * This function is similar to krb5_get_init_creds_opt_set_fast_ccache_name(),
  * but uses a credential cache handle instead of a name.
+ *
+ * @version First introduced in 1.9
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_fast_ccache(krb5_context context,
@@ -6612,6 +6620,8 @@ typedef void
  * @warning Setting an expire callback with this API will cause
  * krb5_get_init_creds_password() not to send password expiry warnings to the
  * prompter, as it ordinarily may.
+ *
+ * @version First introduced in 1.9
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_expire_callback(krb5_context context,
@@ -6872,6 +6882,8 @@ typedef struct _krb5_tkt_creds_context *krb5_tkt_creds_context;
  *
  * Use krb5_tkt_creds_free() to free @a ctx when it is no longer needed.
  *
+ * @version First introduced in 1.9
+ *
  * @retval 0  Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
@@ -6888,6 +6900,8 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
  * This function synchronously obtains credentials using a context created by
  * krb5_tkt_creds_init().  On successful return, the credentials can be
  * retrieved with krb5_tkt_creds_get_creds().
+ *
+ * @version First introduced in 1.9
  *
  * @retval 0  Success; otherwise - Kerberos error codes
  */
@@ -6906,6 +6920,8 @@ krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx);
  * krb5_tkt_creds_step().  Use krb5_free_cred_contents() to free @a creds when
  * it is no longer needed.
  *
+ * @version First introduced in 1.9
+ *
  * @retval 0  Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
@@ -6917,6 +6933,8 @@ krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
  *
  * @param[in]  context  Library context
  * @param[in]  ctx      TGS request context
+ *
+ * @version First introduced in 1.9
  */
 void KRB5_CALLCONV
 krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx);
@@ -6947,6 +6965,8 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx);
  * transmit the next request using TCP rather than UDP.  If this function
  * returns any other error, the TGS exchange has failed.
  *
+ * @version First introduced in 1.9
+ *
  * @retval 0  Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
@@ -6963,6 +6983,8 @@ krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
  *
  * The TGS request context must have completed obtaining credentials via either
  * krb5_tkt_creds_get() or krb5_tkt_creds_step().
+ *
+ * @version First introduced in 1.9
  *
  * @retval 0  Success; otherwise - Kerberos error codes
  */
@@ -7589,6 +7611,8 @@ typedef void
  * @note This function overrides the information passed through the
  * @a KRB5_TRACE environment variable.
  *
+ * @version First introduced in 1.9
+ *
  * @return Returns KRB5_TRACE_NOSUPP if tracing is not supported in the library
  * (unless @a fn is NULL).
  */
@@ -7607,6 +7631,8 @@ krb5_set_trace_callback(krb5_context context, krb5_trace_callback fn,
  *
  * @note This function overrides the information passed through the
  * @a KRB5_TRACE environment variable.
+ *
+ * @version First introduced in 1.9
  *
  * @retval KRB5_TRACE_NOSUPP Tracing is not supported in the library.
  */
