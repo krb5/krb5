@@ -890,8 +890,8 @@ class K5Realm(object):
             input = password + "\n"
         else:
             input = None
-        self.run_as_client([kinit] + flags + [princname], input=input,
-                           **keywords)
+        return self.run_as_client([kinit] + flags + [princname], input=input,
+                                  **keywords)
 
     def klist(self, client_princ, service_princ=None, ccache=None, **keywords):
         if service_princ is None:
