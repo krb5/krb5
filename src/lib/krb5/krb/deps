@@ -473,7 +473,8 @@ gic_keytab.so gic_keytab.po $(OUTPRE)gic_keytab.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h gic_keytab.c init_creds_ctx.h
+  $(top_srcdir)/include/socket-utils.h gic_keytab.c init_creds_ctx.h \
+  int-proto.h
 gic_opt.so gic_opt.po $(OUTPRE)gic_opt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \

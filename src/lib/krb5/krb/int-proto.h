@@ -196,4 +196,8 @@ krb5int_mk_setpw_req(krb5_context context, krb5_auth_context auth_context,
 void
 k5_ccselect_free_context(krb5_context context);
 
+krb5_error_code
+k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
+                  int *use_master);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */

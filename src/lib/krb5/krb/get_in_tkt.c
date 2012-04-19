@@ -542,10 +542,9 @@ krb5_init_creds_free(krb5_context context,
     free(ctx);
 }
 
-static krb5_error_code
-init_creds_get(krb5_context context,
-               krb5_init_creds_context ctx,
-               int *use_master)
+krb5_error_code
+k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
+                  int *use_master)
 {
     krb5_error_code code;
     krb5_data request;
@@ -599,7 +598,7 @@ krb5_init_creds_get(krb5_context context,
 {
     int use_master = 0;
 
-    return init_creds_get(context, ctx, &use_master);
+    return k5_init_creds_get(context, ctx, &use_master);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -1664,7 +1663,7 @@ krb5int_get_init_creds(krb5_context context,
             goto cleanup;
     }
 
-    code = init_creds_get(context, ctx, use_master);
+    code = k5_init_creds_get(context, ctx, use_master);
     if (code != 0)
         goto cleanup;
 

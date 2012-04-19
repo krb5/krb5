@@ -26,6 +26,7 @@
 #ifndef LEAN_CLIENT
 
 #include "k5-int.h"
+#include "int-proto.h"
 #include "init_creds_ctx.h"
 
 static krb5_error_code
@@ -87,6 +88,44 @@ krb5_init_creds_set_keytab(krb5_context context,
     return 0;
 }
 
+static krb5_error_code
+get_init_creds_keytab(krb5_context context, krb5_creds *creds,
+                      krb5_principal client, krb5_keytab keytab,
+                      krb5_deltat start_time, char *in_tkt_service,
+                      krb5_get_init_creds_opt *options, int *use_master)
+{
+    krb5_error_code ret;
+    krb5_init_creds_context ctx = NULL;
+
+    ret = krb5_init_creds_init(context, client, NULL, NULL, start_time,
+                               options, &ctx);
+    if (ret != 0)
+        goto cleanup;
+
+    if (in_tkt_service) {
+        ret = krb5_init_creds_set_service(context, ctx, in_tkt_service);
+        if (ret != 0)
+            goto cleanup;
+    }
+
+    ret = krb5_init_creds_set_keytab(context, ctx, keytab);
+    if (ret != 0)
+        goto cleanup;
+
+    ret = k5_init_creds_get(context, ctx, use_master);
+    if (ret != 0)
+        goto cleanup;
+
+    ret = krb5_init_creds_get_creds(context, ctx, creds);
+    if (ret != 0)
+        goto cleanup;
+
+cleanup:
+    krb5_init_creds_free(context, ctx);
+
+    return ret;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab(krb5_context context,
                            krb5_creds *creds,
@@ -111,10 +150,8 @@ krb5_get_init_creds_keytab(krb5_context context,
 
     /* first try: get the requested tkt from any kdc */
 
-    ret = krb5int_get_init_creds(context, creds, client, NULL, NULL,
-                                 start_time, in_tkt_service, options,
-                                 get_as_key_keytab, (void *) keytab,
-                                 &use_master,NULL);
+    ret = get_init_creds_keytab(context, creds, client, keytab, start_time,
+                                in_tkt_service, options, &use_master);
 
     /* check for success */
 
@@ -132,10 +169,9 @@ krb5_get_init_creds_keytab(krb5_context context,
     if (!use_master) {
         use_master = 1;
 
-        ret2 = krb5int_get_init_creds(context, creds, client, NULL, NULL,
-                                      start_time, in_tkt_service, options,
-                                      get_as_key_keytab, (void *) keytab,
-                                      &use_master, NULL);
+        ret2 = get_init_creds_keytab(context, creds, client, keytab,
+                                     start_time, in_tkt_service, options,
+                                     &use_master);
 
         if (ret2 == 0) {
             ret = 0;
