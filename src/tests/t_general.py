@@ -39,15 +39,4 @@ for realm in multipass_realms(create_host=False):
     if 'No credentials cache found' not in output:
         fail('Expected error message not seen in klist output')
 
-    # Test handling of kvno values beyond 255.
-    princ = 'foo/bar@%s' % realm.realm
-    realm.addprinc(princ)
-    realm.run_kadminl('modprinc -kvno 252 %s' % princ)
-    for kvno in range(253, 259):
-        realm.run_kadminl('ktadd -k %s %s' % (realm.keytab, princ))
-        realm.klist_keytab(princ)
-    output = realm.run_kadminl('getprinc %s' % princ)
-    if 'Key: vno 258,' not in output:
-        fail('Expected vno not seen in kadmin.local output')
-
 success('Dump/load, FAST kinit, kdestroy, kvno wrapping')
