@@ -5,6 +5,7 @@
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <errno.h>
 
 /* Some of our own infrastructure where the WinSock stuff was too hairy
    to dump into a clean Unix program...  */
@@ -22,7 +23,7 @@ typedef WSABUF sg_buf;
 
 #define SOCKET_INITIALIZE()     0
 #define SOCKET_CLEANUP()
-#define SOCKET_ERRNO            (WSAGetLastError())
+#define SOCKET_ERRNO            (TranslatedWSAGetLastError())
 #define SOCKET_SET_ERRNO(x)     (WSASetLastError (x))
 #define SOCKET_NFDS(f)          (0)     /* select()'s first arg is ignored */
 #define SOCKET_READ(fd, b, l)   (recv(fd, b, l, 0))
@@ -44,6 +45,10 @@ typedef WSABUF sg_buf;
 #define SHUTDOWN_WRITE  SD_SEND
 #define SHUTDOWN_BOTH   SD_BOTH
 
+/*
+ * Define any missing Posix socket errors
+ * This is for compatibiliy with older versions of msvc (pre-2010)
+ */
 #ifndef EINPROGRESS
 #define EINPROGRESS WSAEINPROGRESS
 #endif
@@ -65,6 +70,35 @@ typedef WSABUF sg_buf;
 #ifndef ETIMEDOUT
 #define ETIMEDOUT WSAETIMEDOUT
 #endif
+
+/*
+ * Translate WinSock errors to their Posix counterparts.
+ * This is necessary for msvc 2010+, where both WinSock and Posix errors
+ * are defined.
+ */
+static __inline int TranslatedWSAGetLastError()
+{
+    int err = WSAGetLastError();
+    switch (err) {
+    case WSAEINPROGRESS:
+        err = EINPROGRESS; break;
+    case WSAEWOULDBLOCK:
+        err = EWOULDBLOCK; break;
+    case WSAECONNRESET:
+        err = ECONNRESET; break;
+    case WSAECONNABORTED:
+        err = ECONNABORTED; break;
+    case WSAECONNREFUSED:
+        err = ECONNREFUSED; break;
+    case WSAEHOSTUNREACH:
+        err = EHOSTUNREACH; break;
+    case WSAETIMEDOUT:
+        err = ETIMEDOUT; break;
+    default:
+        break;
+    }
+    return err;
+}
 
 #elif defined(__palmos__)
 
