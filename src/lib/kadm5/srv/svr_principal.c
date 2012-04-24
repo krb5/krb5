@@ -996,12 +996,13 @@ done:
  */
 static kadm5_ret_t
 check_pw_reuse(krb5_context context,
-               krb5_keyblock *hist_keyblock,
+               krb5_keyblock *hist_keyblocks,
                int n_new_key_data, krb5_key_data *new_key_data,
                unsigned int n_pw_hist_data, osa_pw_hist_ent *pw_hist_data)
 {
     unsigned int x, y, z;
-    krb5_keyblock newkey, histkey;
+    krb5_keyblock newkey, histkey, *kb;
+    krb5_key_data *key_data;
     krb5_error_code ret;
 
     assert (n_new_key_data >= 0);
@@ -1012,22 +1013,22 @@ check_pw_reuse(krb5_context context,
             return(ret);
         for (y = 0; y < n_pw_hist_data; y++) {
             for (z = 0; z < (unsigned int) pw_hist_data[y].n_key_data; z++) {
-                ret = krb5_dbe_decrypt_key_data(context, hist_keyblock,
-                                                &pw_hist_data[y].key_data[z],
-                                                &histkey, NULL);
-                if (ret)
-                    return(ret);
-
-                if ((newkey.length == histkey.length) &&
-                    (newkey.enctype == histkey.enctype) &&
-                    (memcmp(newkey.contents, histkey.contents,
-                            histkey.length) == 0)) {
+                for (kb = hist_keyblocks; kb->enctype != 0; kb++) {
+                    key_data = &pw_hist_data[y].key_data[z];
+                    ret = krb5_dbe_decrypt_key_data(context, kb, key_data,
+                                                    &histkey, NULL);
+                    if (ret)
+                        continue;
+                    if (newkey.length == histkey.length &&
+                        newkey.enctype == histkey.enctype &&
+                        memcmp(newkey.contents, histkey.contents,
+                               histkey.length) == 0) {
+                        krb5_free_keyblock_contents(context, &histkey);
+                        krb5_free_keyblock_contents(context, &newkey);
+                        return KADM5_PASS_REUSE;
+                    }
                     krb5_free_keyblock_contents(context, &histkey);
-                    krb5_free_keyblock_contents(context, &newkey);
-
-                    return(KADM5_PASS_REUSE);
                 }
-                krb5_free_keyblock_contents(context, &histkey);
             }
         }
         krb5_free_keyblock_contents(context, &newkey);
@@ -1372,7 +1373,7 @@ kadm5_chpass_principal_3(void *server_handle,
     int                         have_pol = 0;
     kadm5_server_handle_t       handle = server_handle;
     osa_pw_hist_ent             hist;
-    krb5_keyblock               *act_mkey, hist_keyblock;
+    krb5_keyblock               *act_mkey, *hist_keyblocks = NULL;
     krb5_kvno                   act_kvno, hist_kvno;
 
     CHECK_HANDLE(server_handle);
@@ -1381,7 +1382,6 @@ kadm5_chpass_principal_3(void *server_handle,
 
     hist_added = 0;
     memset(&hist, 0, sizeof(hist));
-    memset(&hist_keyblock, 0, sizeof(hist_keyblock));
 
     if (principal == NULL || password == NULL)
         return EINVAL;
@@ -1404,10 +1404,10 @@ kadm5_chpass_principal_3(void *server_handle,
         have_pol = 1;
 
         /* Create a password history entry before we change kdb's key_data. */
-        ret = kdb_get_hist_key(handle, &hist_keyblock, &hist_kvno);
+        ret = kdb_get_hist_key(handle, &hist_keyblocks, &hist_kvno);
         if (ret)
             goto done;
-        ret = create_history_entry(handle->context, &hist_keyblock,
+        ret = create_history_entry(handle->context, &hist_keyblocks[0],
                                    kdb->n_key_data, kdb->key_data, &hist);
         if (ret)
             goto done;
@@ -1459,7 +1459,7 @@ kadm5_chpass_principal_3(void *server_handle,
         }
 #endif
 
-        ret = check_pw_reuse(handle->context, &hist_keyblock,
+        ret = check_pw_reuse(handle->context, hist_keyblocks,
                              kdb->n_key_data, kdb->key_data,
                              1, &hist);
         if (ret)
@@ -1469,7 +1469,7 @@ kadm5_chpass_principal_3(void *server_handle,
             /* If hist_kvno has changed since the last password change, we
              * can't check the history. */
             if (adb.admin_history_kvno == hist_kvno) {
-                ret = check_pw_reuse(handle->context, &hist_keyblock,
+                ret = check_pw_reuse(handle->context, hist_keyblocks,
                                      kdb->n_key_data, kdb->key_data,
                                      adb.old_key_len, adb.old_keys);
                 if (ret)
@@ -1549,7 +1549,7 @@ done:
     if (!hist_added && hist.key_data)
         free_history_entry(handle->context, &hist);
     kdb_free_entry(handle, kdb, &adb);
-    krb5_free_keyblock_contents(handle->context, &hist_keyblock);
+    kdb_free_keyblocks(handle, hist_keyblocks);
 
     if (have_pol && (ret2 = kadm5_free_policy_ent(handle->lhandle, &pol))
         && !ret)
