@@ -39,4 +39,22 @@ output = realm.run_as_client([klist], expected_code=1)
 if 'No credentials cache found' not in output:
     fail('Expected error message not seen in klist output')
 
-success('Dump/load, FAST kinit, kdestroy')
+# Spot-check KRB5_TRACE output
+tracefile = os.path.join(realm.testdir, 'trace')
+realm.run_as_client(['env', 'KRB5_TRACE=' + tracefile, kinit,
+                     realm.user_princ], input=(password('user') + "\n"))
+f = open(tracefile, 'r')
+trace = f.read()
+f.close()
+expected = ('Sending initial UDP request',
+            'Received answer',
+            'Selected etype info',
+            'AS key obtained',
+            'Decrypted AS reply',
+            'FAST negotiation: available',
+            'Storing user@KRBTEST.COM')
+for e in expected:
+    if e not in trace:
+        fail('Expected output not in kinit trace log')
+
+success('Dump/load, FAST kinit, kdestroy, trace logging')
