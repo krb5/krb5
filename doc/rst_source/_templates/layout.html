@@ -1,8 +1,49 @@
 {% extends "!layout.html" %}
+{% set rellinks = rellinks +
+                  [('index', 'Full Table of Contents', 'C', 'Contents')] +
+                  [('search', 'Enter search criteria', 'C', 'Search')] %}
+{% set css_files = css_files + ["_static/kerb.css"] %}
 
-{% block relbaritems %}
-   <li class="right" id="krb5">
-     <a  href="mailto:krb5-bugs.mit.edu?subject=Documentation" style="color: #990000;" >feedback</a> {{reldelim2}}
-   </li>
+{% block relbar1 %}
+   <div class="header-wrapper">
+       <div class="header" >
+           <div class="right" >
+              <a href="mailto:krb5-bugs@mit.edu?subject=Documentation__{{ title }}";>
+                  feedback </a>
+           </div>
+           <br/>
+       </div>
+   </div>
 {% endblock %}
 
+{%- block content %}
+    <div class="content-wrapper" style="width: 97%;">
+        <div class="content">
+           {%- block sidebar1 %}
+               <div class="sidebar"
+                    style="float: right; margin: 5px; background: #F9F9F9">
+                  <h2>{{ _('On this page') }} </h2>
+                  {{ toc }}
+                  <br/>
+                  <h2>{{ _('Table of contents') }}</h2>
+                  {{ toctree(collapse=true, maxdepth=-1, titles_only=true) }}
+                  <br/>
+                  <h4><a href="{{ pathto('index') }}">Full Table of Contents</a></h4>
+                  <h4>{{ _('Search') }}</h4>
+                  <form class="search" action="{{ pathto('search') }}" method="get">
+                      <input type="text" name="q" size="18" />
+                      <input type="submit" value="{{ _('Go') }}" />
+                      <input type="hidden" name="check_keywords" value="yes" />
+                      <input type="hidden" name="area" value="default" />
+                  </form>
+               </div>
+           {%- endblock %}
+           <div class="document">
+              {%- block document %}
+                  {{ super() }}
+              {%- endblock %}
+           </div>
+           <div class="clearer"></div>
+        </div>
+    </div>
+{% endblock %}

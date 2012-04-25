@@ -1,0 +1,62 @@
+/*
+ * kerb.css
+ * ~~~~~~~~~~~
+ *
+ * Sphinx stylesheet -- modification to agogo theme.
+ *
+ */
+div.body {
+  padding-right: 2em;
+  text-align: left;
+}
+
+/* Page layout */
+
+div.header-wrapper {
+  background: #59121e;
+  border-bottom: 3px solid #2e3436;
+  border-top: 3px solid #2e3436;
+}
+
+/* Header */
+
+div.header div.right a {
+  color: #fcaf3e;
+  letter-spacing: .1em;
+  text-transform: lowercase;
+  float: right;
+}
+
+/* Content */
+
+div.document div.section h1 {
+  margin-bottom: 20px;
+  padding: 1px;
+  line-height: 130%;
+}
+
+div.document div.section dl {
+  margin-top: 15px;
+  margin-bottom: 5px;
+  padding: 1px;
+  text-align: left;
+}
+
+/* Sidebar */
+
+div.sidebar ul {
+  list-style-type: none;
+  padding: 1px;
+  margin-left: 1em;
+}
+
+div.sidebar li.toctree-l3.current a {
+  border-right: 5px solid #fcaf3e;
+  font-weight: bold;
+}
+
+/* Other body styles */
+
+dt:target, .highlighted {
+  background-color: #c1c1c1;
+}
