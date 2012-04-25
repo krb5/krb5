@@ -1,9 +1,6 @@
 For users
 =========
 
-Contents
---------
-
 .. toctree::
    :maxdepth: 2
 

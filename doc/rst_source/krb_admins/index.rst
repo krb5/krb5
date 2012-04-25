@@ -1,9 +1,6 @@
 For administrators
 ==================
 
-Contents:
----------
-
 .. toctree::
    :maxdepth: 1
 

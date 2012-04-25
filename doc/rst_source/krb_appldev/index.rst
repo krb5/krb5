@@ -1,9 +1,6 @@
 For application developers
 ==========================
 
-Contents
---------
-
 .. toctree::
    :maxdepth: 1
 

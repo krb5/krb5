@@ -12,8 +12,8 @@ Quick facts
 -----------
 
    ====================================================== ======================================= =============================================================================
-    Latest stable  version                                 1.10
-    Supported versions                                     1.8.6, 1.9.3, 1.10
+    Latest stable  version                                 1.10.1
+    Supported versions                                     1.8.6, 1.9.3, 1.10.1
     Release cycle                                          9 - 12 months
     Supported platforms/OS distributions                   Solaris
                                                                - SPARC
