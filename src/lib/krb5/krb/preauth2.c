@@ -281,6 +281,7 @@ krb5_preauth_request_context_init(krb5_context context)
     if (context->preauth_context == NULL)
         return;
     for (i = 0; i < context->preauth_context->n_modules; i++) {
+        context->preauth_context->modules[i].use_count = 0;
         mod = &context->preauth_context->modules[i];
         if (mod->client_req_init != NULL)
             mod->client_req_init(context, mod->moddata, mod->modreq_p);
