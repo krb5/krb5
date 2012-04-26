@@ -64,6 +64,10 @@ clpreauth_encrypted_timestamp_initvt(krb5_context context, int maj_ver,
                                      int min_ver, krb5_plugin_vtable vtable);
 
 krb5_error_code
+clpreauth_sam2_initvt(krb5_context context, int maj_ver, int min_ver,
+                      krb5_plugin_vtable vtable);
+
+krb5_error_code
 krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
                                  krb5_creds *in_creds, krb5_creds *mcreds,
                                  krb5_flags *fields);

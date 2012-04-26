@@ -79,6 +79,7 @@ STLIBOBJS= \
 	preauth2.o	\
 	preauth_ec.o	\
 	preauth_encts.o	\
+	preauth_sam2.o	\
 	gic_opt_set_pa.o	\
 	princ_comp.o	\
 	privsafe.o	\
