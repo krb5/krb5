@@ -1,7 +1,7 @@
 {% extends "!layout.html" %}
-{% set rellinks = rellinks +
-                  [('index', 'Full Table of Contents', 'C', 'Contents')] +
-                  [('search', 'Enter search criteria', 'C', 'Search')] %}
+{% set rellinks = [('search', 'Enter search criteria', 'C', 'Search')] +
+                  rellinks +
+                  [('index', 'Full Table of Contents', 'C', 'Contents')] %}
 {% set css_files = css_files + ["_static/kerb.css"] %}
 
 {% block relbar1 %}
