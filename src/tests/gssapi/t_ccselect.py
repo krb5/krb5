@@ -24,9 +24,9 @@
 from k5test import *
 
 # Create two independent realms (no cross-realm TGTs).
-r1 = K5Realm(start_kadmind=False, create_user=False)
-r2 = K5Realm(start_kadmind=False, create_user=False, realm='KRBTEST2.COM',
-             testdir=os.path.join(r1.testdir, 'r2'), portbase=62000)
+r1 = K5Realm(create_user=False)
+r2 = K5Realm(create_user=False, realm='KRBTEST2.COM', portbase=62000,
+             testdir=os.path.join(r1.testdir, 'r2'))
 
 # gsserver specifies the target as a GSS name.  The resulting
 # principal will have the host-based type, but the realm won't be

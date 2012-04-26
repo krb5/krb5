@@ -2,7 +2,7 @@
 from k5test import *
 
 # Create a realm with the KDC one hour in the past.
-realm = K5Realm(start_kadmind=False, start_kdc=False)
+realm = K5Realm(start_kdc=False)
 realm.start_kdc(['-T', '-3600'])
 
 # kinit (no preauth) should work, and should set a clock skew allowing
@@ -25,7 +25,7 @@ realm.stop()
 
 # Repeat the above tests with kdc_timesync disabled.
 conf = {'all': {'libdefaults': {'kdc_timesync': '0'}}}
-realm = K5Realm(start_kadmind=False, start_kdc=False, krb5_conf=conf)
+realm = K5Realm(start_kdc=False, krb5_conf=conf)
 realm.start_kdc(['-T', '-3600'])
 
 # kinit (no preauth) should work, but kvno should not.  kinit with

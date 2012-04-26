@@ -36,7 +36,7 @@ def stop(*realms):
 
 
 # Basic two-realm test with cross TGTs in both directions.
-r1, r2 = cross_realms(2, start_kadmind=False)
+r1, r2 = cross_realms(2)
 test_kvno(r1, r2.host_princ, 'basic r1->r2')
 test_kvno(r2, r1.host_princ, 'basic r2->r1')
 stop(r1, r2)
@@ -47,8 +47,7 @@ stop(r1, r2)
 # instead.  The client will use that to get a TGT for B.X.
 r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)), 
                           args=({'realm': 'A.X'}, {'realm': 'X'},
-                                {'realm': 'B.X'}),
-                          start_kadmind=False)
+                                {'realm': 'B.X'}))
 test_kvno(r1, r3.host_princ, 'KDC domain walk')
 stop(r1, r2, r3)
 
@@ -65,8 +64,7 @@ r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
                                     {'realm': 'C',
                                      'krb5_conf': {'master': capaths}},
                                     {'realm': 'D',
-                                     'krb5_conf': {'master': capaths}}),
-                              start_kadmind=False)
+                                     'krb5_conf': {'master': capaths}}))
 test_kvno(r1, r4.host_princ, 'client capaths')
 stop(r1, r2, r3, r4)
 
@@ -79,8 +77,7 @@ r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
                               args=({'realm': 'A', 'krb5_conf': conf},
                                     {'realm': 'B', 'krb5_conf': conf},
                                     {'realm': 'C', 'krb5_conf': conf},
-                                    {'realm': 'D', 'krb5_conf': conf}),
-                              start_kadmind=False)
+                                    {'realm': 'D', 'krb5_conf': conf}))
 test_kvno(r1, r4.host_princ, 'KDC capaths')
 stop(r1, r2, r3, r4)
 
@@ -91,8 +88,7 @@ capaths = {'capaths': {'A': {'C': 'B'}}}
 r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)),
                           args=({'realm': 'A',
                                  'krb5_conf': {'client': capaths}},
-                                {'realm': 'B'}, {'realm': 'C'}),
-                          start_kadmind=False)
+                                {'realm': 'B'}, {'realm': 'C'}))
 output = r1.run_as_client([kvno, r3.host_princ], expected_code=1)
 if 'KDC policy rejects request' not in output:
     fail('transited 1: Expected error message not in output')
@@ -107,8 +103,7 @@ r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
                               args=({'realm': 'A', 'krb5_conf': conf},
                                     {'realm': 'B', 'krb5_conf': conf},
                                     {'realm': 'C', 'krb5_conf': conf},
-                                    {'realm': 'D'}),
-                              start_kadmind=False)
+                                    {'realm': 'D'}))
 output = r1.run_as_client([kvno, r4.host_princ], expected_code=1)
 if 'Illegal cross-realm ticket' not in output:
     fail('transited 2: Expected error message not in output')

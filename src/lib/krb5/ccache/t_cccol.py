@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from k5test import *
 
-realm = K5Realm(create_host=False, start_kadmind=False)
+realm = K5Realm(create_host=False)
 
 realm.addprinc('alice', password('alice'))
 realm.addprinc('bob', password('bob'))

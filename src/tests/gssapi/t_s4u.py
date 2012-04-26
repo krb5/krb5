@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from k5test import *
 
-realm = K5Realm(start_kadmind=False, create_host=False, get_creds=False)
+realm = K5Realm(create_host=False, get_creds=False)
 usercache = 'FILE:' + os.path.join(realm.testdir, 'usercache')
 storagecache = 'FILE:' + os.path.join(realm.testdir, 'save')
 

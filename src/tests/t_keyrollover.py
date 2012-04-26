@@ -70,7 +70,7 @@ realm.stop()
 # TGT with the old key, and the second kvno invocation sends it to
 # r2's KDC with no kvno to identify it, forcing the KDC to try
 # multiple keys.
-r1, r2 = cross_realms(2, start_kadmind=False)
+r1, r2 = cross_realms(2)
 r1.run_kadminl('modprinc -kvno 0 krbtgt/%s' % r2.realm)
 r1.run_as_client([kvno, r2.host_princ])
 r2.run_kadminl('cpw -pw newcross -keepold krbtgt/%s@%s' % (r2.realm, r1.realm))

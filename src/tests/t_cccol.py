@@ -23,7 +23,7 @@
 #!/usr/bin/python
 from k5test import *
 
-realm = K5Realm(start_kadmind=False, create_user=False, create_host=False)
+realm = K5Realm(create_user=False, create_host=False)
 
 # Make a directory collection and use it for client commands in both realms.
 ccdir = os.path.join(realm.testdir, 'cc')

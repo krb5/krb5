@@ -24,7 +24,7 @@
 
 from k5test import *
 
-realm = K5Realm(start_kadmind=False)
+realm = K5Realm()
 
 # Verify the default.
 realm.run_as_server(['./t_vfy_increds'])
@@ -47,7 +47,7 @@ realm.run_as_server(['./t_vfy_increds'])
 # Try with verify_ap_req_nofail set and no keytab.  This should fail.
 realm.stop()
 conf = { 'server' : { 'libdefaults' : { 'verify_ap_req_nofail' : 'true' } } }
-realm = K5Realm(start_kadmind=False, krb5_conf=conf)
+realm = K5Realm(krb5_conf=conf)
 os.remove(realm.keytab)
 realm.run_as_server(['./t_vfy_increds'], expected_code=1)
 

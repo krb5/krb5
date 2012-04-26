@@ -56,10 +56,10 @@ def supplement_path(env):
     env['PATH'] = path_prefix + env['PATH']
 
 if args:
-    realms = cross_realms(int(args[0]))
+    realms = cross_realms(int(args[0]), start_kadmind=True)
     realm = realms[0]
 else:
-    realm = K5Realm()
+    realm = K5Realm(start_kadmind=True)
 env = realm.env_master.copy()
 supplement_path(env)
 

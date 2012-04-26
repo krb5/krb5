@@ -27,7 +27,7 @@ def run_kadmin(query):
     global realm
     return realm.run_as_master([kadmin, '-c', realm.ccache, '-q', query])
 
-realm = K5Realm(create_host=False, get_creds=False)
+realm = K5Realm(start_kadmind=True, create_host=False, get_creds=False)
 
 realm.kinit(realm.admin_princ, password('admin'), flags=['-S', 'kadmin/admin'])
 

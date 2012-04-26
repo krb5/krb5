@@ -23,7 +23,7 @@
 #!/usr/bin/python
 from k5test import *
 
-realm = K5Realm(create_host=False, start_kadmind=False)
+realm = K5Realm(create_host=False)
 
 realm.run_kadminl('addpol -maxfailure 2 -failurecountinterval 5m lockout')
 realm.run_kadminl('modprinc +requires_preauth -policy lockout user')

@@ -53,7 +53,7 @@ By default, the realm will have:
   self-contained test operation
 * Two different kdc.conf files for the master and slave KDCs
 * A fresh DB2 KDB
-* Running krb5kdc and kadmind processes
+* Running krb5kdc (but not kadmind)
 * Principals named realm.user_princ and realm.admin_princ; call
   password('user') and password('admin') to get the password
 * Credentials for realm.user_princ in realm.ccache
@@ -119,7 +119,7 @@ keyword arguments:
 
 * start_kdc=False: Don't start the KDC.  Implies get_creds=False.
 
-* start_kadmind=False: Don't start kadmind.
+* start_kadmind=True: Start kadmind.
 
 * get_creds=False: Don't get user credentials.
 
@@ -677,7 +677,7 @@ class K5Realm(object):
     def __init__(self, realm='KRBTEST.COM', portbase=61000, testdir='testdir',
                  krb5_conf=None, kdc_conf=None, create_kdb=True,
                  krbtgt_keysalt=None, create_user=True, get_creds=True,
-                 create_host=True, start_kdc=True, start_kadmind=True):
+                 create_host=True, start_kdc=True, start_kadmind=False):
         global hostname, _default_krb5_conf, _default_kdc_conf
 
         self.realm = realm

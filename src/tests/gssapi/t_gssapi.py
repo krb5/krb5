@@ -7,7 +7,7 @@ for realm in multipass_realms():
 
 ### Test acceptor name behavior.
 
-realm = K5Realm(start_kadmind=False)
+realm = K5Realm()
 
 # Create some host-based principals and put most of them into the
 # keytab.  Rename one principal so that the keytab name matches the
@@ -84,7 +84,7 @@ realm.stop()
 # and the principal for the mismatching hostname in the keytab.
 ignore_conf = { 'all' : { 'libdefaults' : {
             'ignore_acceptor_hostname' : 'true' } } }
-realm = K5Realm(krb5_conf=ignore_conf, start_kadmind=False)
+realm = K5Realm(krb5_conf=ignore_conf)
 realm.run_kadminl('addprinc -randkey host/-nomatch-')
 realm.run_kadminl('xst host/-nomatch-')
 output = realm.run_as_client(['./t_accname', 'host/-nomatch-',

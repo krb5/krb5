@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from k5test import *
 
-realm = K5Realm(start_kadmind=False)
+realm = K5Realm()
 
 # Test kinit with a keytab.
 realm.kinit(realm.host_princ, flags=['-k'])

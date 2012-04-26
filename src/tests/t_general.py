@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from k5test import *
 
-for realm in multipass_realms(create_host=False, start_kadmind=False):
+for realm in multipass_realms(create_host=False):
     # Check that kinit fails appropriately with the wrong password.
     output = realm.run_as_client([kinit, realm.user_princ], input='wrong\n',
                                  expected_code=1)
@@ -22,7 +22,7 @@ for realm in multipass_realms(create_host=False, start_kadmind=False):
     # Test kinit against kdb keytab
     realm.run_as_master([kinit, "-k", "-t", "KDB:", realm.user_princ])
 
-realm = K5Realm(create_host=False, start_kadmind=False)
+realm = K5Realm(create_host=False)
 
 # Create a policy and see if it survives a dump/load.
 realm.run_kadminl('addpol fred')
