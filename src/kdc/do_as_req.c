@@ -73,15 +73,6 @@
 #include "adm_proto.h"
 #include "extern.h"
 
-#if APPLE_PKINIT
-#define     AS_REQ_DEBUG    0
-#if         AS_REQ_DEBUG
-#define     asReqDebug(args...)       printf(args)
-#else
-#define     asReqDebug(args...)
-#endif
-#endif /* APPLE_PKINIT */
-
 static krb5_error_code
 prepare_error_as(struct kdc_request_state *, krb5_kdc_req *,
                  int, krb5_pa_data **, krb5_boolean, krb5_principal,
@@ -253,13 +244,6 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
         state->status = "KDC_RETURN_PADATA";
         goto egress;
     }
-
-#if APPLE_PKINIT
-    asReqDebug("process_as_req reply realm %s name %s\n",
-               reply.client->realm.data, reply.client->data->data);
-#endif /* APPLE_PKINIT */
-
-
 
     errcode = handle_authdata(kdc_context,
                               state->c_flags,
@@ -474,11 +458,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->request = request;
     state->req_pkt = req_pkt;
     state->from = from;
-
-#if APPLE_PKINIT
-    asReqDebug("process_as_req top realm %s name %s\n",
-               request->client->realm.data, request->client->data->data);
-#endif /* APPLE_PKINIT */
 
     if (state->request->msg_type != KRB5_AS_REQ) {
         state->status = "msg_type mismatch";

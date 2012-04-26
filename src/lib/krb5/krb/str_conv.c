@@ -69,9 +69,6 @@ static const struct salttype_lookup_entry salttype_table[] = {
     { KRB5_KDB_SALTTYPE_ONLYREALM,  "onlyrealm",    "Version 5 - Realm Only" },
     { KRB5_KDB_SALTTYPE_SPECIAL,    "special",      "Special" },
     { KRB5_KDB_SALTTYPE_AFS3,       "afs3",         "AFS version 3"    },
-#if PKINIT_APPLE
-    { KRB5_KDB_SALTTYPE_CERTHASH,   "certhash",     "PKINIT Cert Hash"  }
-#endif /* PKINIT_APPLE */
 };
 static const int salttype_table_nents = sizeof(salttype_table)/
     sizeof(salttype_table[0]);

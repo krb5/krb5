@@ -32,15 +32,6 @@
 #include "fast.h"
 #include "init_creds_ctx.h"
 
-#if APPLE_PKINIT
-#define     IN_TKT_DEBUG    0
-#if         IN_TKT_DEBUG
-#define     inTktDebug(args...)       printf(args)
-#else
-#define     inTktDebug(args...)
-#endif
-#endif /* APPLE_PKINIT */
-
 /* some typedef's for the function args to make things look a bit cleaner */
 
 static krb5_error_code make_preauth_list (krb5_context,
@@ -202,17 +193,6 @@ verify_as_reply(krb5_context            context,
             (request->till != 0) &&
             (as_reply->enc_part2->times.renew_till > request->till))
     ) {
-#if APPLE_PKINIT
-        inTktDebug("verify_as_reply: KDCREP_MODIFIED\n");
-#if IN_TKT_DEBUG
-        if(request->client->realm.length && request->client->data->length)
-            inTktDebug("request: name %s realm %s\n",
-                       request->client->realm.data, request->client->data->data);
-        if(as_reply->client->realm.length && as_reply->client->data->length)
-            inTktDebug("reply  : name %s realm %s\n",
-                       as_reply->client->realm.data, as_reply->client->data->data);
-#endif
-#endif /* APPLE_PKINIT */
         return KRB5_KDCREP_MODIFIED;
     }
 
