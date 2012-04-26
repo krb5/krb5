@@ -112,6 +112,61 @@ cleanup:
     }
 }
 
+krb5_error_code
+sam_make_challenge(krb5_context context, krb5_sam_challenge_2_body *sc2b,
+                   krb5_keyblock *cksum_key, krb5_sam_challenge_2 *sc2_out)
+{
+    krb5_error_code retval;
+    krb5_checksum **cksum_array = NULL;
+    krb5_checksum *cksum = NULL;
+    krb5_cksumtype cksumtype;
+    krb5_data *encoded_challenge_body = NULL;
+
+    if (!cksum_key)
+        return KRB5_PREAUTH_NO_KEY;
+    if (!sc2_out || !sc2b)
+        return KRB5KDC_ERR_PREAUTH_FAILED;
+
+    retval = encode_krb5_sam_challenge_2_body(sc2b, &encoded_challenge_body);
+    if (retval || !encoded_challenge_body) {
+        encoded_challenge_body = NULL;
+        goto cksum_cleanup;
+    }
+
+    cksum_array = calloc(2, sizeof(krb5_checksum *));
+    if (!cksum_array) {
+        retval = ENOMEM;
+        goto cksum_cleanup;
+    }
+
+    cksum = (krb5_checksum *)k5alloc(sizeof(krb5_checksum), &retval);
+    if (retval)
+        goto cksum_cleanup;
+    cksum_array[0] = cksum;
+    cksum_array[1] = NULL;
+
+    retval = krb5int_c_mandatory_cksumtype(context, cksum_key->enctype,
+                                           &cksumtype);
+    if (retval)
+        goto cksum_cleanup;
+
+    retval = krb5_c_make_checksum(context, cksumtype, cksum_key,
+                                  KRB5_KEYUSAGE_PA_SAM_CHALLENGE_CKSUM,
+                                  encoded_challenge_body, cksum);
+    if (retval)
+        goto cksum_cleanup;
+
+    sc2_out->sam_cksum = cksum_array;
+    sc2_out->sam_challenge_2_body = *encoded_challenge_body;
+    return 0;
+
+cksum_cleanup:
+    krb5_free_data(context, encoded_challenge_body);
+    free(cksum_array);
+    free(cksum);
+    return retval;
+}
+
 static void
 kdc_include_padata(krb5_context context, krb5_kdc_req *request,
                    krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
@@ -121,16 +176,12 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
     krb5_error_code retval;
     krb5_keyblock *client_key = NULL;
     krb5_sam_challenge_2 sc2;
-    krb5_sam_challenge_2_body sc2b;
     int sam_type = 0;             /* unknown */
     krb5_db_entry *sam_db_entry = NULL, *client;
     krb5_data *encoded_challenge = NULL;
     krb5_pa_data *pa_data = NULL;
 
     memset(&sc2, 0, sizeof(sc2));
-    memset(&sc2b, 0, sizeof(sc2b));
-    sc2b.magic = KV5M_SAM_CHALLENGE_2;
-    sc2b.sam_type = sam_type;
 
     client = cb->client_entry(context, rock);
     retval = sam_get_db_entry(context, client->princ, &sam_type,
@@ -161,33 +212,38 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
     switch (sam_type) {
 #ifdef ARL_SECURID_PREAUTH
     case PA_SAM_TYPE_SECURID:
-        retval = get_securid_edata_2(context, client, client_key, &sc2b, &sc2);
+        retval = get_securid_edata_2(context, client, client_key, &sc2);
         if (retval)
             goto cleanup;
-
-        retval = encode_krb5_sam_challenge_2(&sc2, &encoded_challenge);
-        if (retval) {
-            com_err("krb5kdc", retval,
-                    "while encoding SECURID SAM_CHALLENGE_2");
-            goto cleanup;
-        }
-
-        pa_data = k5alloc(sizeof(*pa_data), &retval);
-        if (pa_data == NULL)
-            goto cleanup;
-        pa_data->magic = KV5M_PA_DATA;
-        pa_data->pa_type = KRB5_PADATA_SAM_CHALLENGE_2;
-        pa_data->contents = (krb5_octet *) encoded_challenge->data;
-        pa_data->length = encoded_challenge->length;
-        encoded_challenge->data = NULL;
-
-        retval = 0;
         break;
 #endif  /* ARL_SECURID_PREAUTH */
+#ifdef GRAIL_PREAUTH
+    case PA_SAM_TYPE_GRAIL:
+        retval = get_grail_edata(context, client, client_key, &sc2);
+        if (retval)
+            goto cleanup;
+        break;
+#endif /* GRAIL_PREAUTH */
     default:
         retval = KRB5_PREAUTH_BAD_TYPE;
         goto cleanup;
     }
+
+    retval = encode_krb5_sam_challenge_2(&sc2, &encoded_challenge);
+    if (retval) {
+        com_err("krb5kdc", retval,
+                "while encoding SECURID SAM_CHALLENGE_2");
+        goto cleanup;
+    }
+
+    pa_data = k5alloc(sizeof(*pa_data), &retval);
+    if (pa_data == NULL)
+        goto cleanup;
+    pa_data->magic = KV5M_PA_DATA;
+    pa_data->pa_type = KRB5_PADATA_SAM_CHALLENGE_2;
+    pa_data->contents = (krb5_octet *)encoded_challenge->data;
+    pa_data->length = encoded_challenge->length;
+    encoded_challenge->data = NULL;
 
 cleanup:
     krb5_free_data(context, encoded_challenge);
@@ -235,6 +291,14 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
             goto cleanup;
         break;
 #endif  /* ARL_SECURID_PREAUTH */
+#ifdef GRAIL_PREAUTH
+    case PA_SAM_TYPE_GRAIL:
+        retval = verify_grail_data(context, client, sr2, enc_tkt_reply,
+                                   pa_data, &out_sc2);
+        if (retval)
+            goto cleanup;
+        break;
+#endif /* GRAIL_PREAUTH */
     default:
         retval = KRB5_PREAUTH_BAD_TYPE;
         com_err("krb5kdc", retval, "while verifying SAM 2 data");

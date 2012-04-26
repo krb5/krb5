@@ -36,6 +36,8 @@
  * RESULTING FROM THE USE OF THIS SOFTWARE.
  */
 
+#ifdef ARL_SECURID_PREAUTH
+
 #include "k5-int.h"
 #include <kdb.h>
 #include <stdio.h>
@@ -119,64 +121,6 @@ cleanup:
         krb5_db_free_principal(context, sam_securid_entry);
     return retval;
 }
-
-krb5_error_code
-securid_make_sam_challenge_2_and_cksum(krb5_context context,
-                                       krb5_sam_challenge_2 *sc2,
-                                       krb5_sam_challenge_2_body *sc2b,
-                                       krb5_keyblock *cksum_key)
-{
-    krb5_error_code retval;
-    krb5_checksum **cksum_array = NULL;
-    krb5_checksum *cksum = NULL;
-    krb5_cksumtype cksumtype;
-    krb5_data *encoded_challenge_body = NULL;
-
-    if (!cksum_key)
-        return KRB5_PREAUTH_NO_KEY;
-    if (!sc2 || !sc2b)
-        return KRB5KDC_ERR_PREAUTH_FAILED;
-
-    retval = encode_krb5_sam_challenge_2_body(sc2b, &encoded_challenge_body);
-    if (retval || !encoded_challenge_body) {
-        encoded_challenge_body = NULL;
-        goto cksum_cleanup;
-    }
-
-    cksum_array = calloc(2, sizeof(krb5_checksum *));
-    if (!cksum_array) {
-        retval = ENOMEM;
-        goto cksum_cleanup;
-    }
-
-    cksum = (krb5_checksum *)k5alloc(sizeof(krb5_checksum), &retval);
-    if (retval)
-        goto cksum_cleanup;
-    cksum_array[0] = cksum;
-    cksum_array[1] = NULL;
-
-    retval = krb5int_c_mandatory_cksumtype(context, cksum_key->enctype,
-                                           &cksumtype);
-    if (retval)
-        goto cksum_cleanup;
-
-    retval = krb5_c_make_checksum(context, cksumtype, cksum_key,
-                                  KRB5_KEYUSAGE_PA_SAM_CHALLENGE_CKSUM,
-                                  encoded_challenge_body, cksum);
-    if (retval)
-        goto cksum_cleanup;
-
-    sc2->sam_cksum = cksum_array;
-    sc2->sam_challenge_2_body = *encoded_challenge_body;
-    return 0;
-
-cksum_cleanup:
-    krb5_free_data(context, encoded_challenge_body);
-    free(cksum_array);
-    free(cksum);
-    return retval;
-}
-
 
 static krb5_error_code
 securid_decrypt_track_data_2(krb5_context context, krb5_db_entry *client,
@@ -262,45 +206,47 @@ cleanup:
 
 krb5_error_code
 get_securid_edata_2(krb5_context context, krb5_db_entry *client,
-                    krb5_keyblock *client_key,
-                    krb5_sam_challenge_2_body *sc2b, krb5_sam_challenge_2 *sc2)
+                    krb5_keyblock *client_key, krb5_sam_challenge_2 *sc2)
 {
     krb5_error_code retval;
-    krb5_data scratch;
+    krb5_data scratch, track_id = empty_data();
     char *user = NULL;
     char *def_user = "<unknown user>";
     struct securid_track_data sid_track_data;
     krb5_data tmp_data;
+    krb5_sam_challenge_2_body sc2b;
 
     scratch.data = NULL;
-    sc2b->sam_track_id.data = NULL;
 
     retval = krb5_unparse_name(context, client->princ, &user);
     if (retval)
         goto cleanup;
 
-    sc2b->sam_flags = KRB5_SAM_SEND_ENCRYPTED_SAD;
-    sc2b->sam_type_name.length = 0;
-    sc2b->sam_challenge_label.length = 0;
-    sc2b->sam_challenge.length = 0;
-    sc2b->sam_response_prompt.data = PASSCODE_message;
-    sc2b->sam_response_prompt.length = strlen(sc2b->sam_response_prompt.data);
-    sc2b->sam_pk_for_sad.length = 0;
-    sc2b->sam_type = PA_SAM_TYPE_SECURID;
+    memset(&sc2b, 0, sizeof(sc2b));
+    sc2b.magic = KV5M_SAM_CHALLENGE_2;
+    sc2b.sam_flags = KRB5_SAM_SEND_ENCRYPTED_SAD;
+    sc2b.sam_type_name.length = 0;
+    sc2b.sam_challenge_label.length = 0;
+    sc2b.sam_challenge.length = 0;
+    sc2b.sam_response_prompt.data = PASSCODE_message;
+    sc2b.sam_response_prompt.length = strlen(sc2b.sam_response_prompt.data);
+    sc2b.sam_pk_for_sad.length = 0;
+    sc2b.sam_type = PA_SAM_TYPE_SECURID;
 
     sid_track_data.state = SECURID_STATE_INITIAL;
     sid_track_data.hostid = gethostid();
     tmp_data.data = (char *)&sid_track_data;
     tmp_data.length = sizeof(sid_track_data);
     retval = securid_encrypt_track_data_2(context, client, &tmp_data,
-                                          &sc2b->sam_track_id);
+                                          &track_id);
     if (retval != 0) {
         com_err("krb5kdc", retval, "while encrypting nonce track data");
         goto cleanup;
     }
+    sc2b.sam_track_id = track_id;
 
-    scratch.data = (char *)&sc2b->sam_nonce;
-    scratch.length = sizeof(sc2b->sam_nonce);
+    scratch.data = (char *)&sc2b.sam_nonce;
+    scratch.length = sizeof(sc2b.sam_nonce);
     retval = krb5_c_random_make_octets(context, &scratch);
     if (retval) {
         com_err("krb5kdc", retval,
@@ -310,10 +256,9 @@ get_securid_edata_2(krb5_context context, krb5_db_entry *client,
     }
 
     /* Get the client's key */
-    sc2b->sam_etype = client_key->enctype;
+    sc2b.sam_etype = client_key->enctype;
 
-    retval = securid_make_sam_challenge_2_and_cksum(context,
-                                                    sc2, sc2b, client_key);
+    retval = sam_make_challenge(context, &sc2b, client_key, sc2);
     if (retval) {
         com_err("krb5kdc", retval,
                 "while making SAM_CHALLENGE_2 checksum (%s)",
@@ -322,10 +267,7 @@ get_securid_edata_2(krb5_context context, krb5_db_entry *client,
 
 cleanup:
     free(user);
-    if (retval) {
-        krb5_free_data_contents(context, &sc2b->sam_track_id);
-        sc2b->sam_track_id.data = NULL;
-    }
+    krb5_free_data_contents(context, &track_id);
     return retval;
 }
 
@@ -554,9 +496,7 @@ verify_securid_data_2(krb5_context context, krb5_db_entry *client,
                         securid_user);
                 goto cleanup;
             }
-            retval = securid_make_sam_challenge_2_and_cksum(context, sc2p,
-                                                            &sc2b,
-                                                            &client_key);
+            retval = sam_make_challenge(context, &sc2b, &client_key, sc2p);
             if (retval) {
                 com_err("krb5kdc", retval,
                         "while making cksum for "
@@ -688,9 +628,7 @@ verify_securid_data_2(krb5_context context, krb5_db_entry *client,
                         securid_user);
                 goto cleanup;
             }
-            retval = securid_make_sam_challenge_2_and_cksum(context, sc2p,
-                                                            &sc2b,
-                                                            &client_key);
+            retval = sam_make_challenge(context, &sc2b, &client_key, sc2p);
             if (retval) {
                 com_err("krb5kdc", retval,
                         "while making cksum for SAM_CHALLENGE_2 (%s)",
@@ -727,3 +665,5 @@ cleanup:
     krb5_free_sam_challenge_2(context, sc2p);
     return retval;
 }
+
+#endif /* ARL_SECURID_PREAUTH */
