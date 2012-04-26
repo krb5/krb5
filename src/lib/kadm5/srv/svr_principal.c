@@ -236,10 +236,11 @@ kadm5_create_principal_3(void *server_handle,
      */
     if(!(mask & KADM5_PRINCIPAL) || (mask & KADM5_MOD_NAME) ||
        (mask & KADM5_MOD_TIME) || (mask & KADM5_LAST_PWD_CHANGE) ||
-       (mask & KADM5_MKVNO) || (mask & KADM5_POLICY_CLR) ||
-       (mask & KADM5_AUX_ATTRIBUTES) || (mask & KADM5_KEY_DATA) ||
-       (mask & KADM5_LAST_SUCCESS) || (mask & KADM5_LAST_FAILED) ||
-       (mask & KADM5_FAIL_AUTH_COUNT))
+       (mask & KADM5_MKVNO) || (mask & KADM5_AUX_ATTRIBUTES) ||
+       (mask & KADM5_KEY_DATA) || (mask & KADM5_LAST_SUCCESS) ||
+       (mask & KADM5_LAST_FAILED) || (mask & KADM5_FAIL_AUTH_COUNT))
+        return KADM5_BAD_MASK;
+    if((mask & KADM5_POLICY) && (mask & KADM5_POLICY_CLR))
         return KADM5_BAD_MASK;
     if((mask & ~ALL_PRINC_MASK))
         return KADM5_BAD_MASK;
