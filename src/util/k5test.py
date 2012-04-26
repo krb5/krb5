@@ -279,6 +279,15 @@ Scripts may use the following realm methods and attributes:
 
 * realm.run_kadminl(query): Run the specified query in kadmin.local.
 
+* realm.prep_kadmin(princname=None, password=None, flags=[]): Populate
+  realm.kadmin_ccache with a ticket which can be used to run kadmin.
+  If princname is not specified, realm.admin_princ and its default
+  password will be used.
+
+* realm.run_kadmin(query, **keywords): Run the specified query in
+  kadmin, using realm.kadmin_ccache to authenticate.  Accepts the same
+  keyword arguments as run_as_client.
+
 * realm.realm: The realm's name.
 
 * realm.testdir: The realm's storage directory (absolute path).
@@ -300,6 +309,9 @@ Scripts may use the following realm methods and attributes:
 * realm.ccache: A ccache file in realm.testdir.  Initially contains
   credentials for user unless disabled by the realm construction
   options.
+
+* realm.kadmin_ccache: The ccache file initialized by prep_kadmin and
+  used by run_kadmin.
 
 * Attributes for the client, server, master, and slave environments.
   These environments are extensions of os.environ.
@@ -689,6 +701,7 @@ class K5Realm(object):
         self.krbtgt_princ = 'krbtgt/%s@%s' % (self.realm, self.realm)
         self.keytab = os.path.join(self.testdir, 'keytab')
         self.ccache = os.path.join(self.testdir, 'ccache')
+        self.kadmin_ccache = os.path.join(self.testdir, 'kadmin_ccache')
         self._krb5_conf = _cfg_merge(_default_krb5_conf, krb5_conf)
         self._kdc_conf = _cfg_merge(_default_kdc_conf, kdc_conf)
         self._kdc_proc = None
@@ -916,6 +929,18 @@ class K5Realm(object):
     def run_kadminl(self, query):
         global kadmin_local
         return self.run_as_master([kadmin_local, '-q', query])
+
+    def prep_kadmin(self, princname=None, pw=None, flags=[]):
+        if princname is None:
+            princname = self.admin_princ
+            pw = password('admin')
+        return self.kinit(princname, pw,
+                          flags=['-S', 'kadmin/admin',
+                                 '-c', self.kadmin_ccache] + flags)
+
+    def run_kadmin(self, query, **keywords):
+        return self.run_as_client([kadmin, '-c', self.kadmin_ccache,
+                                   '-q', query], **keywords)
 
 
 def multipass_realms(**keywords):

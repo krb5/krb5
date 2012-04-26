@@ -23,32 +23,28 @@
 #!/usr/bin/python
 from k5test import *
 
-def run_kadmin(query):
-    global realm
-    return realm.run_as_master([kadmin, '-c', realm.ccache, '-q', query])
-
 realm = K5Realm(start_kadmind=True, create_host=False, get_creds=False)
 
-realm.kinit(realm.admin_princ, password('admin'), flags=['-S', 'kadmin/admin'])
+realm.prep_kadmin()
 
-output = run_kadmin('getstrs user')
+output = realm.run_kadmin('getstrs user')
 if '(No string attributes.)' not in output:
     fail('Empty attribute query')
 
-output = run_kadmin('setstr user attr1 value1')
+output = realm.run_kadmin('setstr user attr1 value1')
 if 'Attribute set for principal' not in output:
     fail('Setting attr1')
-output = run_kadmin('setstr user attr2 value2')
+output = realm.run_kadmin('setstr user attr2 value2')
 if 'Attribute set for principal' not in output:
     fail('Setting attr2')
-output = run_kadmin('delstr user attr1')
+output = realm.run_kadmin('delstr user attr1')
 if 'Attribute removed from principal' not in output:
     fail('Deleting attr1')
-output = run_kadmin('setstr user attr3 value3')
+output = realm.run_kadmin('setstr user attr3 value3')
 if 'Attribute set for principal' not in output:
     fail('Setting attr3')
 
-output = run_kadmin('getstrs user')
+output = realm.run_kadmin('getstrs user')
 if 'attr2: value2' not in output or 'attr3: value3' not in output or \
         'attr1:' in output:
     fail('Final attribute query')
