@@ -565,7 +565,7 @@ pa_salt(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
 
     tmp = padata2data(*in_padata);
     krb5_free_data_contents(context, salt);
-    retval = krb5int_copy_data_contents(context, &tmp, salt);
+    retval = krb5int_copy_data_contents_add0(context, &tmp, salt);
     if (retval)
         return retval;
 
