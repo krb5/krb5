@@ -51,21 +51,9 @@ krb5_c_string_to_key_with_params(krb5_context context, krb5_enctype enctype,
         return KRB5_BAD_ENCTYPE;
     keylength = ktp->enc->keylength;
 
-    /*
-     * xxx AFS string2key function is indicated by a special length  in
-     * the salt in much of the code.  However only the DES enctypes can
-     * deal with this.  Using s2kparams would be a much better solution.
-     */
-    if (salt && salt->length == SALT_TYPE_AFS_LENGTH) {
-        switch (enctype) {
-        case ENCTYPE_DES_CBC_CRC:
-        case ENCTYPE_DES_CBC_MD4:
-        case ENCTYPE_DES_CBC_MD5:
-            break;
-        default:
-            return KRB5_CRYPTO_INTERNAL;
-        }
-    }
+    /* Fail gracefully if someone is using the old AFS string-to-key hack. */
+    if (salt != NULL && salt->length == SALT_TYPE_AFS_LENGTH)
+        return EINVAL;
 
     key->contents = malloc(keylength);
     if (key->contents == NULL)

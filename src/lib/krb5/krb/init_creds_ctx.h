@@ -36,6 +36,7 @@ struct _krb5_init_creds_context {
     krb5_data *encoded_previous_request;
     struct krb5int_fast_request_state *fast_state;
     krb5_pa_data **preauth_to_use;
+    krb5_boolean default_salt;
     krb5_data salt;
     krb5_data s2kparams;
     krb5_keyblock as_key;

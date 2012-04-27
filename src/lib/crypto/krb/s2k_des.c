@@ -670,7 +670,6 @@ krb5int_des_string_to_key(const struct krb5_keytypes *ktp,
                           const krb5_data *parm, krb5_keyblock *keyblock)
 {
     int type;
-    krb5_data afssalt;
 
     if (parm != NULL) {
         if (parm->length != 1)
@@ -684,13 +683,6 @@ krb5int_des_string_to_key(const struct krb5_keytypes *ktp,
     /* Use AFS string to key if we were told to. */
     if (type == 1)
         return afs_s2k(string, salt, keyblock->contents);
-
-    /* Also use AFS string to key if the salt indicates it. */
-    if (salt != NULL && (salt->length == SALT_TYPE_AFS_LENGTH
-                         || salt->length == (unsigned)-1)) {
-        afssalt = make_data(salt->data, strcspn(salt->data, "@"));
-        return afs_s2k(string, &afssalt, keyblock->contents);
-    }
 
     return des_s2k(string, salt, keyblock->contents);
 }

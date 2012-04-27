@@ -63,7 +63,7 @@ krb5_get_as_key_password(krb5_context context,
             return(ret);
     }
 
-    if (salt->length == SALT_TYPE_AFS_LENGTH && salt->data == NULL) {
+    if (salt == NULL) {
         if ((ret = krb5_principal2salt(context, client, &defsalt)))
             return(ret);
 

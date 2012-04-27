@@ -218,12 +218,7 @@ typedef struct _krb5_octet_data {
     krb5_octet *data;
 } krb5_octet_data;
 
-/*
- * Hack length for crypto library to use the afs_string_to_key It is
- * equivalent to -1 without possible sign extension
- * We also overload for an unset salt type length - which is also -1, but
- * hey, why not....
- */
+/* Originally used to recognize AFS and default salts.  No longer used. */
 #define SALT_TYPE_AFS_LENGTH UINT_MAX
 #define SALT_TYPE_NO_LENGTH  UINT_MAX
 

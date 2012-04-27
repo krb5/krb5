@@ -391,10 +391,12 @@ get_as_key(krb5_context context, krb5_clpreauth_rock rock,
            krb5_keyblock **keyblock)
 {
     krb5_error_code ret;
+    krb5_data *salt;
 
     if (rock->as_key->length == 0) {
+        salt = (*rock->default_salt) ? NULL : rock->salt;
         ret = (*rock->gak_fct)(context, rock->client, *rock->etype,
-                               rock->prompter, rock->prompter_data, rock->salt,
+                               rock->prompter, rock->prompter_data, salt,
                                rock->s2kparams, rock->as_key, *rock->gak_data);
         if (ret)
             return ret;
@@ -565,6 +567,7 @@ get_etype_info(krb5_context context, krb5_pa_data **padata,
     krb5_etype_info etype_info = NULL, e;
     krb5_etype_info_entry *entry;
     krb5_boolean valid_found;
+    const char *p;
     int i;
 
     /* Find an etype-info2 or etype-info element in padata. */
@@ -604,6 +607,10 @@ get_etype_info(krb5_context context, krb5_pa_data **padata,
         if (entry->length != KRB5_ETYPE_NO_SALT) {
             *rock->salt = make_data(entry->salt, entry->length);
             entry->salt = NULL;
+            *rock->default_salt = FALSE;
+        } else {
+            *rock->salt = empty_data();
+            *rock->default_salt = TRUE;
         }
         krb5_free_data_contents(context, rock->s2kparams);
         *rock->s2kparams = entry->s2kparams;
@@ -619,12 +626,27 @@ get_etype_info(krb5_context context, krb5_pa_data **padata,
             /* Set rock->salt based on the element we found. */
             krb5_free_data_contents(context, rock->salt);
             d = padata2data(*pa);
-            ret = krb5int_copy_data_contents_add0(context, &d, rock->salt);
+            ret = krb5int_copy_data_contents(context, &d, rock->salt);
             if (ret)
                 goto cleanup;
+            if (pa->pa_type == KRB5_PADATA_AFS3_SALT) {
+                /* Work around a (possible) old Heimdal KDC foible. */
+                p = memchr(rock->salt->data, '@', rock->salt->length);
+                if (p != NULL)
+                    rock->salt->length = p - rock->salt->data;
+                /* Tolerate extra null in MIT KDC afs3-salt value. */
+                if (rock->salt->length > 0 &&
+                    rock->salt->data[rock->salt->length - 1] == '\0')
+                    rock->salt->length--;
+                /* Set an s2kparams value to indicate AFS string-to-key. */
+                krb5_free_data_contents(context, rock->s2kparams);
+                ret = alloc_data(rock->s2kparams, 1);
+                if (ret)
+                    goto cleanup;
+                rock->s2kparams->data[0] = '\1';
+            }
+            *rock->default_salt = FALSE;
             TRACE_PREAUTH_SALT(context, rock->salt, pa->pa_type);
-            if (pa->pa_type == KRB5_PADATA_AFS3_SALT)
-                rock->salt->length = SALT_TYPE_AFS_LENGTH;
         }
     }
 

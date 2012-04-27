@@ -822,6 +822,7 @@ krb5_init_creds_init(krb5_context context,
     ctx->preauth_rock.as_key = &ctx->as_key;
     ctx->preauth_rock.gak_fct = &ctx->gak_fct;
     ctx->preauth_rock.gak_data = &ctx->gak_data;
+    ctx->preauth_rock.default_salt = &ctx->default_salt;
     ctx->preauth_rock.salt = &ctx->salt;
     ctx->preauth_rock.s2kparams = &ctx->s2kparams;
     ctx->preauth_rock.client = client;
@@ -944,9 +945,10 @@ krb5_init_creds_init(krb5_context context,
         code = krb5int_copy_data_contents(context, opte->salt, &ctx->salt);
         if (code != 0)
             goto cleanup;
+        ctx->default_salt = FALSE;
     } else {
-        ctx->salt.length = SALT_TYPE_AFS_LENGTH;
-        ctx->salt.data = NULL;
+        ctx->salt = empty_data();
+        ctx->default_salt = TRUE;
     }
 
     /* Anonymous. */
@@ -1416,7 +1418,7 @@ init_creds_step_reply(krb5_context context,
      * salt.  local_as_reply->client will be checked later on in
      * verify_as_reply.
      */
-    if (ctx->salt.length == SALT_TYPE_AFS_LENGTH && ctx->salt.data == NULL) {
+    if (ctx->default_salt) {
         code = krb5_principal2salt(context, ctx->reply->client, &ctx->salt);
         TRACE_INIT_CREDS_SALT_PRINC(context, &ctx->salt);
         if (code != 0)

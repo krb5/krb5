@@ -754,6 +754,7 @@ struct krb5_clpreauth_rock_st {
     krb5_keyblock *as_key;
     krb5_gic_get_as_key_fct *gak_fct;
     void **gak_data;
+    krb5_boolean *default_salt;
     krb5_data *salt;
     krb5_data *s2kparams;
     krb5_principal client;
