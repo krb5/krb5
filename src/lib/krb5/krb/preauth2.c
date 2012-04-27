@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright 1995, 2003, 2008 by the Massachusetts Institute of Technology.  All
+ * Copyright 1995, 2003, 2008, 2012 by the Massachusetts Institute of Technology.  All
  * Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -554,26 +554,83 @@ padata2data(krb5_pa_data p)
     return d;
 }
 
+/* Set etype info parameters in rock based on padata. */
 static krb5_error_code
-pa_salt(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
-        krb5_pa_data **out_padata, krb5_data *salt, krb5_data *s2kparams,
-        krb5_enctype *etype, krb5_keyblock *as_key, krb5_prompter_fct prompter,
-        void *prompter_data, krb5_gic_get_as_key_fct gak_fct, void *gak_data)
+get_etype_info(krb5_context context, krb5_pa_data **padata,
+               krb5_kdc_req *request, krb5_clpreauth_rock rock)
 {
-    krb5_data tmp;
-    krb5_error_code retval;
+    krb5_error_code ret = 0;
+    krb5_pa_data *pa;
+    krb5_data d;
+    krb5_etype_info etype_info = NULL, e;
+    krb5_etype_info_entry *entry;
+    krb5_boolean valid_found;
+    int i;
 
-    tmp = padata2data(*in_padata);
-    krb5_free_data_contents(context, salt);
-    retval = krb5int_copy_data_contents_add0(context, &tmp, salt);
-    if (retval)
-        return retval;
+    /* Find an etype-info2 or etype-info element in padata. */
+    pa = krb5int_find_pa_data(context, padata, KRB5_PADATA_ETYPE_INFO2);
+    if (pa != NULL) {
+        d = padata2data(*pa);
+        ret = decode_krb5_etype_info2(&d, &etype_info);
+    } else {
+        pa = krb5int_find_pa_data(context, padata, KRB5_PADATA_ETYPE_INFO2);
+        if (pa != NULL) {
+            d = padata2data(*pa);
+            ret = decode_krb5_etype_info2(&d, &etype_info);
+        }
+    }
 
-    TRACE_PREAUTH_SALT(context, salt, in_padata->pa_type);
-    if (in_padata->pa_type == KRB5_PADATA_AFS3_SALT)
-        salt->length = SALT_TYPE_AFS_LENGTH;
+    if (etype_info != NULL) {
+        /* Search entries in order of the requests's enctype preference. */
+        entry = NULL;
+        valid_found = FALSE;
+        for (i = 0; i < request->nktypes && entry == NULL; i++) {
+            for (e = etype_info; *e != NULL && entry == NULL; e++) {
+                if ((*e)->etype == request->ktype[i])
+                    entry = *e;
+                if (krb5_c_valid_enctype((*e)->etype))
+                    valid_found = TRUE;
+            }
+        }
+        if (entry == NULL) {
+            ret = (valid_found) ? KRB5_CONFIG_ETYPE_NOSUPP :
+                KRB5_PROG_ETYPE_NOSUPP;
+            goto cleanup;
+        }
 
-    return(0);
+        /* Set rock fields based on the entry we selected. */
+        *rock->etype = entry->etype;
+        krb5_free_data_contents(context, rock->salt);
+        if (entry->length != KRB5_ETYPE_NO_SALT) {
+            *rock->salt = make_data(entry->salt, entry->length);
+            entry->salt = NULL;
+        }
+        krb5_free_data_contents(context, rock->s2kparams);
+        *rock->s2kparams = entry->s2kparams;
+        entry->s2kparams = empty_data();
+        TRACE_PREAUTH_ETYPE_INFO(context, *rock->etype, rock->salt,
+                                 rock->s2kparams);
+    } else {
+        /* Look for a pw-salt or afs3-salt element. */
+        pa = krb5int_find_pa_data(context, padata, KRB5_PADATA_PW_SALT);
+        if (pa == NULL)
+            pa = krb5int_find_pa_data(context, padata, KRB5_PADATA_AFS3_SALT);
+        if (pa != NULL) {
+            /* Set rock->salt based on the element we found. */
+            krb5_free_data_contents(context, rock->salt);
+            d = padata2data(*pa);
+            ret = krb5int_copy_data_contents_add0(context, &d, rock->salt);
+            if (ret)
+                goto cleanup;
+            TRACE_PREAUTH_SALT(context, rock->salt, pa->pa_type);
+            if (pa->pa_type == KRB5_PADATA_AFS3_SALT)
+                rock->salt->length = SALT_TYPE_AFS_LENGTH;
+        }
+    }
+
+cleanup:
+    krb5_free_etype_info(context, etype_info);
+    return ret;
 }
 
 static krb5_error_code
@@ -651,16 +708,6 @@ pa_s4u_x509_user(krb5_context context, krb5_kdc_req *request,
 
 /* FIXME - order significant? */
 static const pa_types_t pa_types[] = {
-    {
-        KRB5_PADATA_PW_SALT,
-        pa_salt,
-        PA_INFO,
-    },
-    {
-        KRB5_PADATA_AFS3_SALT,
-        pa_salt,
-        PA_INFO,
-    },
     {
         KRB5_PADATA_FX_COOKIE,
         pa_fx_cookie,
@@ -761,10 +808,7 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
 {
     unsigned int h;
     int i, j, out_pa_list_size;
-    int seen_etype_info2 = 0;
     krb5_pa_data *out_pa = NULL, **out_pa_list = NULL;
-    krb5_data scratch;
-    krb5_etype_info etype_info = NULL;
     krb5_error_code ret;
     static const int paorder[] = { PA_INFO, PA_REAL };
     int realdone;
@@ -778,6 +822,11 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
 
     TRACE_PREAUTH_INPUT(context, in_padata);
 
+    /* Scan the padata list and process etype-info or salt elements. */
+    ret = get_etype_info(context, in_padata, request, rock);
+    if (ret)
+        return ret;
+
     out_pa_list = NULL;
     out_pa_list_size = 0;
 
@@ -786,107 +835,6 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
     for (h=0; h<(sizeof(paorder)/sizeof(paorder[0])); h++) {
         realdone = 0;
         for (i=0; in_padata[i] && !realdone; i++) {
-            int k, l, etype_found, valid_etype_found;
-            /*
-             * This is really gross, but is necessary to prevent
-             * lossage when talking to a 1.0.x KDC, which returns an
-             * erroneous PA-PW-SALT when it returns a KRB-ERROR
-             * requiring additional preauth.
-             */
-            switch (in_padata[i]->pa_type) {
-            case KRB5_PADATA_ETYPE_INFO:
-            case KRB5_PADATA_ETYPE_INFO2:
-            {
-                krb5_preauthtype pa_type = in_padata[i]->pa_type;
-                if (etype_info) {
-                    if (seen_etype_info2 || pa_type != KRB5_PADATA_ETYPE_INFO2)
-                        continue;
-                    if (pa_type == KRB5_PADATA_ETYPE_INFO2) {
-                        krb5_free_etype_info( context, etype_info);
-                        etype_info = NULL;
-                    }
-                }
-
-                scratch.length = in_padata[i]->length;
-                scratch.data = (char *) in_padata[i]->contents;
-                if (pa_type == KRB5_PADATA_ETYPE_INFO2) {
-                    seen_etype_info2++;
-                    ret = decode_krb5_etype_info2(&scratch, &etype_info);
-                }
-                else ret = decode_krb5_etype_info(&scratch, &etype_info);
-                if (ret) {
-                    ret = 0; /*Ignore error and etype_info element*/
-                    if (etype_info)
-                        krb5_free_etype_info( context, etype_info);
-                    etype_info = NULL;
-                    continue;
-                }
-                if (etype_info[0] == NULL) {
-                    krb5_free_etype_info(context, etype_info);
-                    etype_info = NULL;
-                    break;
-                }
-                /*
-                 * Select first etype in our request which is also in
-                 * etype-info (preferring client request ktype order).
-                 */
-                for (etype_found = 0, valid_etype_found = 0, k = 0;
-                     !etype_found && k < request->nktypes; k++) {
-                    for (l = 0; etype_info[l]; l++) {
-                        if (etype_info[l]->etype == request->ktype[k]) {
-                            etype_found++;
-                            break;
-                        }
-                        /* check if program has support for this etype for more
-                         * precise error reporting.
-                         */
-                        if (krb5_c_valid_enctype(etype_info[l]->etype))
-                            valid_etype_found++;
-                    }
-                }
-                if (!etype_found) {
-                    if (valid_etype_found) {
-                        /* supported enctype but not requested */
-                        ret =  KRB5_CONFIG_ETYPE_NOSUPP;
-                        goto cleanup;
-                    }
-                    else {
-                        /* unsupported enctype */
-                        ret =  KRB5_PROG_ETYPE_NOSUPP;
-                        goto cleanup;
-                    }
-
-                }
-                scratch.data = (char *) etype_info[l]->salt;
-                scratch.length = etype_info[l]->length;
-                krb5_free_data_contents(context, rock->salt);
-                if (scratch.length == KRB5_ETYPE_NO_SALT)
-                    rock->salt->data = NULL;
-                else {
-                    ret = krb5int_copy_data_contents(context, &scratch,
-                                                     rock->salt);
-                    if (ret)
-                        goto cleanup;
-                }
-                *rock->etype = etype_info[l]->etype;
-                krb5_free_data_contents(context, rock->s2kparams);
-                ret = krb5int_copy_data_contents(context,
-                                                 &etype_info[l]->s2kparams,
-                                                 rock->s2kparams);
-                if (ret)
-                    goto cleanup;
-                TRACE_PREAUTH_ETYPE_INFO(context, *rock->etype, rock->salt,
-                                         rock->s2kparams);
-                break;
-            }
-            case KRB5_PADATA_PW_SALT:
-            case KRB5_PADATA_AFS3_SALT:
-                if (etype_info)
-                    continue;
-                break;
-            default:
-                ;
-            }
             /* Try the internally-provided preauth type list. */
             if (!realdone) for (j=0; pa_types[j].type >= 0; j++) {
                     if ((in_padata[i]->pa_type == pa_types[j].type) &&
@@ -962,8 +910,6 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
 
     TRACE_PREAUTH_OUTPUT(context, out_pa_list);
     *out_padata = out_pa_list;
-    if (etype_info)
-        krb5_free_etype_info(context, etype_info);
 
     *got_real_out = realdone;
     return(0);
@@ -972,8 +918,6 @@ cleanup:
         out_pa_list[out_pa_list_size++] = NULL;
         krb5_free_pa_data(context, out_pa_list);
     }
-    if (etype_info)
-        krb5_free_etype_info(context, etype_info);
     return (ret);
 }
 
