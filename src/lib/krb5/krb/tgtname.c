@@ -30,8 +30,19 @@
 krb5_error_code
 krb5int_tgtname(krb5_context context, const krb5_data *server, const krb5_data *client, krb5_principal *tgtprinc)
 {
-    return krb5_build_principal_ext(context, tgtprinc, client->length, client->data,
-                                    KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
-                                    server->length, server->data,
-                                    0);
+    krb5_error_code ret;
+
+    ret = krb5_build_principal_ext(context, tgtprinc, client->length, client->data,
+                                   KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
+                                   server->length, server->data,
+                                   0);
+    if (ret)
+        return ret;
+    /*
+     * Windows Server 2008 R2 RODC insists on TGS principal names having the
+     * right name type.
+     */
+    krb5_princ_type(context, *tgtprinc) = KRB5_NT_SRV_INST;
+
+    return ret;
 }
