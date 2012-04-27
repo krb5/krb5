@@ -252,7 +252,7 @@
 #define TRACE_PREAUTH_SAM_KEY_GAK(c, keyblock)                          \
     TRACE(c, (c, "AS key obtained for SAM: {keyblock}", keyblock))
 #define TRACE_PREAUTH_SALT(c, salt, patype)                             \
-    TRACE(c, (c, "Received salt \"{str}\" via padata type {int}", salt, \
+    TRACE(c, (c, "Received salt \"{data}\" via padata type {int}", salt, \
               (int) patype))
 #define TRACE_PREAUTH_SKIP(c, name, patype)                             \
     TRACE(c, (c, "Skipping previously used preauth module {str} ({int})", \
