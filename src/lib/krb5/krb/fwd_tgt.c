@@ -29,6 +29,7 @@
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif
+#include "int-proto.h"
 
 /* helper function: convert flags to necessary KDC options */
 #define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
@@ -99,14 +100,9 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
     if ((retval = krb5_copy_principal(context, client, &creds.client)))
         goto errout;
 
-    if ((retval = krb5_build_principal_ext(context, &creds.server,
-                                           client->realm.length,
-                                           client->realm.data,
-                                           KRB5_TGS_NAME_SIZE,
-                                           KRB5_TGS_NAME,
-                                           client->realm.length,
-                                           client->realm.data,
-                                           0)))
+    retval = krb5_tgtname(context, &client->realm, &client->realm,
+                          &creds.server);
+    if (retval)
         goto errout;
 
     /* fetch tgt directly from cache */
