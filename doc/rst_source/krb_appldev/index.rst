@@ -6,6 +6,7 @@ For application developers
 
    gssapi.rst
    h5l_mit_apidiff.rst
+   init_creds.rst
    princ_handle.rst
 
 .. toctree::
