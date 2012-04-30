@@ -312,65 +312,36 @@ grow_ktypes(krb5_enctype **out_ktypes, int *out_nktypes, krb5_enctype ktype)
 {
     int i;
     krb5_enctype *ktypes;
+
     for (i = 0; i < *out_nktypes; i++) {
         if ((*out_ktypes)[i] == ktype)
             return;
     }
-    ktypes = malloc((*out_nktypes + 2) * sizeof(ktype));
-    if (ktypes) {
-        for (i = 0; i < *out_nktypes; i++)
-            ktypes[i] = (*out_ktypes)[i];
-        ktypes[i++] = ktype;
-        ktypes[i] = 0;
-        free(*out_ktypes);
+    ktypes = realloc(*out_ktypes, (*out_nktypes + 2) * sizeof(ktype));
+    if (ktypes != NULL) {
         *out_ktypes = ktypes;
-        *out_nktypes = i;
+        ktypes[(*out_nktypes)++] = ktype;
+        ktypes[*out_nktypes] = 0;
     }
 }
 
-/*
- * Add the given list of pa_data items to the existing list of items.
- * Factored out here to make reading the do_preauth logic easier to read.
- */
+/* Add a list of new pa_data items to an existing list. */
 static int
 grow_pa_list(krb5_pa_data ***out_pa_list, int *out_pa_list_size,
              krb5_pa_data **addition, int num_addition)
 {
     krb5_pa_data **pa_list;
-    int i, j;
+    int i;
 
-    if (out_pa_list == NULL || addition == NULL) {
-        return EINVAL;
-    }
-
-    if (*out_pa_list == NULL) {
-        /* Allocate room for the new additions and a NULL terminator. */
-        pa_list = malloc((num_addition + 1) * sizeof(krb5_pa_data *));
-        if (pa_list == NULL)
-            return ENOMEM;
-        for (i = 0; i < num_addition; i++)
-            pa_list[i] = addition[i];
-        pa_list[i] = NULL;
-        *out_pa_list = pa_list;
-        *out_pa_list_size = num_addition;
-    } else {
-        /*
-         * Allocate room for the existing entries plus
-         * the new additions and a NULL terminator.
-         */
-        pa_list = malloc((*out_pa_list_size + num_addition + 1)
-                         * sizeof(krb5_pa_data *));
-        if (pa_list == NULL)
-            return ENOMEM;
-        for (i = 0; i < *out_pa_list_size; i++)
-            pa_list[i] = (*out_pa_list)[i];
-        for (j = 0; j < num_addition;)
-            pa_list[i++] = addition[j++];
-        pa_list[i] = NULL;
-        free(*out_pa_list);
-        *out_pa_list = pa_list;
-        *out_pa_list_size = i;
-    }
+    /* Allocate space for new entries and a null terminator. */
+    pa_list = realloc(*out_pa_list, (*out_pa_list_size + num_addition + 1) *
+                      sizeof(*pa_list));
+    if (pa_list == NULL)
+        return ENOMEM;
+    *out_pa_list = pa_list;
+    for (i = 0; i < num_addition; i++)
+        pa_list[(*out_pa_list_size)++] = addition[i];
+    pa_list[*out_pa_list_size] = NULL;
     return 0;
 }
 
