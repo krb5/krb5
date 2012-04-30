@@ -643,57 +643,53 @@ cleanup:
     return ret;
 }
 
+/* Look for an fx-cookie element in in_padata and add it to out_pa_list. */
 static krb5_error_code
-pa_fx_cookie(krb5_context context, krb5_kdc_req *request,
-             krb5_pa_data *in_padata, krb5_pa_data **out_padata,
-             krb5_data *salt, krb5_data *s2kparams, krb5_enctype *etype,
-             krb5_keyblock *as_key, krb5_prompter_fct prompter,
-             void *prompter_data, krb5_gic_get_as_key_fct gak_fct,
-             void *gak_data)
+copy_cookie(krb5_context context, krb5_pa_data **in_padata,
+            krb5_pa_data ***out_pa_list, int *out_pa_list_size)
 {
-    krb5_pa_data *pa = calloc(1, sizeof(krb5_pa_data));
-    krb5_octet *contents;
+    krb5_error_code ret;
+    krb5_pa_data *cookie, *pa = NULL;
 
-    TRACE_PREAUTH_COOKIE(context, in_padata->length, in_padata->contents);
+    cookie = krb5int_find_pa_data(context, in_padata, KRB5_PADATA_FX_COOKIE);
+    if (cookie == NULL)
+        return 0;
+    TRACE_PREAUTH_COOKIE(context, cookie->length, cookie->contents);
+    pa = k5alloc(sizeof(*pa), &ret);
     if (pa == NULL)
-        return ENOMEM;
-    contents = malloc(in_padata->length);
-    if (contents == NULL) {
-        free(pa);
-        return ENOMEM;
-    }
-    *pa = *in_padata;
-    pa->contents = contents;
-    memcpy(contents, in_padata->contents, pa->length);
-    *out_padata = pa;
+        return ret;
+    *pa = *cookie;
+    pa->contents = k5alloc(cookie->length, &ret);
+    if (pa->contents == NULL)
+        goto error;
+    memcpy(pa->contents, cookie->contents, cookie->length);
+    ret = grow_pa_list(out_pa_list, out_pa_list_size, &pa, 1);
+    if (ret)
+        goto error;
     return 0;
+
+error:
+    free(pa->contents);
+    free(pa);
+    return ENOMEM;
 }
 
 static krb5_error_code
-pa_s4u_x509_user(krb5_context context, krb5_kdc_req *request,
-                 krb5_pa_data *in_padata, krb5_pa_data **out_padata,
-                 krb5_data *salt, krb5_data *s2kparams, krb5_enctype *etype,
-                 krb5_keyblock *as_key, krb5_prompter_fct prompter,
-                 void *prompter_data, krb5_gic_get_as_key_fct gak_fct,
-                 void *gak_data)
+add_s4u_x509_user_padata(krb5_context context, krb5_s4u_userid *userid,
+                         krb5_principal client, krb5_pa_data ***out_pa_list,
+                         int *out_pa_list_size)
 {
-    krb5_s4u_userid *userid = (krb5_s4u_userid *)gak_data; /* XXX private contract */
     krb5_pa_data *s4u_padata;
     krb5_error_code code;
-    krb5_principal client;
-
-    *out_padata = NULL;
+    krb5_principal client_copy;
 
     if (userid == NULL)
         return EINVAL;
-
-    code = krb5_copy_principal(context, request->client, &client);
+    code = krb5_copy_principal(context, client, &client_copy);
     if (code != 0)
         return code;
-
-    if (userid->user != NULL)
-        krb5_free_principal(context, userid->user);
-    userid->user = client;
+    krb5_free_principal(context, userid->user);
+    userid->user = client_copy;
 
     if (userid->subject_cert.length != 0) {
         s4u_padata = malloc(sizeof(*s4u_padata));
@@ -710,30 +706,16 @@ pa_s4u_x509_user(krb5_context context, krb5_kdc_req *request,
         memcpy(s4u_padata->contents, userid->subject_cert.data, userid->subject_cert.length);
         s4u_padata->length = userid->subject_cert.length;
 
-        *out_padata = s4u_padata;
+        code = grow_pa_list(out_pa_list, out_pa_list_size, &s4u_padata, 1);
+        if (code) {
+            free(s4u_padata->contents);
+            free(s4u_padata);
+            return code;
+        }
     }
 
     return 0;
 }
-
-/* FIXME - order significant? */
-static const pa_types_t pa_types[] = {
-    {
-        KRB5_PADATA_FX_COOKIE,
-        pa_fx_cookie,
-        PA_INFO,
-    },
-    {
-        KRB5_PADATA_S4U_X509_USER,
-        pa_s4u_x509_user,
-        PA_INFO,
-    },
-    {
-        -1,
-        NULL,
-        0,
-    },
-};
 
 /*
  * If one of the modules can adjust its AS_REQ data using the contents of the
@@ -817,8 +799,8 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
                 krb5_boolean *got_real_out)
 {
     unsigned int h;
-    int i, j, out_pa_list_size;
-    krb5_pa_data *out_pa = NULL, **out_pa_list = NULL;
+    int i, out_pa_list_size = 0;
+    krb5_pa_data **out_pa_list = NULL;
     krb5_error_code ret;
     static const int paorder[] = { PA_INFO, PA_REAL };
     int realdone;
@@ -837,52 +819,26 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
     if (ret)
         return ret;
 
-    out_pa_list = NULL;
-    out_pa_list_size = 0;
+    /* Copy the cookie if there is one. */
+    ret = copy_cookie(context, in_padata, &out_pa_list, &out_pa_list_size);
+    if (ret)
+        return ret;
+
+    if (krb5int_find_pa_data(context, in_padata,
+                             KRB5_PADATA_S4U_X509_USER) != NULL) {
+        /* Fulfill a private contract with krb5_get_credentials_for_user. */
+        ret = add_s4u_x509_user_padata(context, *rock->gak_data,
+                                       request->client, &out_pa_list,
+                                       &out_pa_list_size);
+        if (ret)
+            return ret;
+    }
 
     /* first do all the informational preauths, then the first real one */
 
     for (h=0; h<(sizeof(paorder)/sizeof(paorder[0])); h++) {
         realdone = 0;
         for (i=0; in_padata[i] && !realdone; i++) {
-            /* Try the internally-provided preauth type list. */
-            if (!realdone) for (j=0; pa_types[j].type >= 0; j++) {
-                    if ((in_padata[i]->pa_type == pa_types[j].type) &&
-                        (pa_types[j].flags & paorder[h])) {
-#ifdef DEBUG
-                        fprintf (stderr, "calling internal function for pa_type "
-                                 "%d, flag %d\n", pa_types[j].type, paorder[h]);
-#endif
-                        out_pa = NULL;
-
-                        ret = pa_types[j].fct(context, request, in_padata[i],
-                                              &out_pa, rock->salt,
-                                              rock->s2kparams, rock->etype,
-                                              rock->as_key, prompter,
-                                              prompter_data, *rock->gak_fct,
-                                              *rock->gak_data);
-                        if (ret) {
-                            if (paorder[h] == PA_INFO) {
-                                TRACE_PREAUTH_INFO_FAIL(context,
-                                                        in_padata[i]->pa_type,
-                                                        ret);
-                                ret = 0;
-                                continue; /* PA_INFO type failed, ignore */
-                            }
-
-                            goto cleanup;
-                        }
-
-                        ret = grow_pa_list(&out_pa_list, &out_pa_list_size,
-                                           &out_pa, 1);
-                        if (ret != 0) {
-                            goto cleanup;
-                        }
-                        if (paorder[h] == PA_REAL)
-                            realdone = 1;
-                    }
-                }
-
             /* Try to use plugins now. */
             if (!realdone) {
                 krb5_init_preauth_context(context);
@@ -923,12 +879,6 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
 
     *got_real_out = realdone;
     return(0);
-cleanup:
-    if (out_pa_list) {
-        out_pa_list[out_pa_list_size++] = NULL;
-        krb5_free_pa_data(context, out_pa_list);
-    }
-    return (ret);
 }
 
 /*
