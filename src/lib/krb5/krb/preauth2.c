@@ -453,8 +453,7 @@ run_preauth_plugins(krb5_context kcontext,
                     krb5_clpreauth_rock preauth_rock,
                     krb5_pa_data ***out_pa_list,
                     int *out_pa_list_size,
-                    int *module_ret,
-                    int *module_flags,
+                    krb5_error_code *module_ret,
                     krb5_gic_opt_ext *opte)
 {
     int i;
@@ -498,7 +497,6 @@ run_preauth_plugins(krb5_context kcontext,
         TRACE_PREAUTH_PROCESS(kcontext, module->name, module->pa_type,
                               module->flags, ret);
         /* Make note of the module's flags and status. */
-        *module_flags = module->flags;
         *module_ret = ret;
         /* Save the new preauth data item. */
         if (out_pa_data != NULL) {
@@ -798,19 +796,17 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
                 krb5_clpreauth_rock rock, krb5_gic_opt_ext *opte,
                 krb5_boolean *got_real_out)
 {
-    unsigned int h;
-    int i, out_pa_list_size = 0;
+    size_t i, h;
+    int out_pa_list_size = 0;
     krb5_pa_data **out_pa_list = NULL;
-    krb5_error_code ret;
+    krb5_error_code ret, module_ret;
     static const int paorder[] = { PA_INFO, PA_REAL };
-    int realdone;
 
+    *out_padata = NULL;
     *got_real_out = FALSE;
 
-    if (in_padata == NULL) {
-        *out_padata = NULL;
-        return(0);
-    }
+    if (in_padata == NULL)
+        return 0;
 
     TRACE_PREAUTH_INPUT(context, in_padata);
 
@@ -822,7 +818,7 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
     /* Copy the cookie if there is one. */
     ret = copy_cookie(context, in_padata, &out_pa_list, &out_pa_list_size);
     if (ret)
-        return ret;
+        goto error;
 
     if (krb5int_find_pa_data(context, in_padata,
                              KRB5_PADATA_S4U_X509_USER) != NULL) {
@@ -831,54 +827,43 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
                                        request->client, &out_pa_list,
                                        &out_pa_list_size);
         if (ret)
-            return ret;
+            goto error;
     }
 
-    /* first do all the informational preauths, then the first real one */
+    /* If we can't initialize the preauth context, stop with what we have. */
+    krb5_init_preauth_context(context);
+    if (context->preauth_context == NULL) {
+        *out_padata = out_pa_list;
+        goto error;
+    }
 
-    for (h=0; h<(sizeof(paorder)/sizeof(paorder[0])); h++) {
-        realdone = 0;
-        for (i=0; in_padata[i] && !realdone; i++) {
-            /* Try to use plugins now. */
-            if (!realdone) {
-                krb5_init_preauth_context(context);
-                if (context->preauth_context != NULL) {
-                    int module_ret = 0, module_flags;
+    /* First do all the informational preauths, then the first real one. */
+    for (h = 0; h < sizeof(paorder) / sizeof(paorder[0]); h++) {
+        for (i = 0; in_padata[i] != NULL; i++) {
 #ifdef DEBUG
-                    fprintf (stderr, "trying modules for pa_type %d, flag %d\n",
-                             in_padata[i]->pa_type, paorder[h]);
+            fprintf (stderr, "trying modules for pa_type %d, flag %d\n",
+                     in_padata[i]->pa_type, paorder[h]);
 #endif
-                    ret = run_preauth_plugins(context,
-                                              paorder[h],
-                                              request,
-                                              encoded_request_body,
-                                              encoded_previous_request,
-                                              in_padata[i],
-                                              prompter,
-                                              prompter_data,
-                                              rock,
-                                              &out_pa_list,
-                                              &out_pa_list_size,
-                                              &module_ret,
-                                              &module_flags,
-                                              opte);
-                    if (ret == 0) {
-                        if (module_ret == 0) {
-                            if (paorder[h] == PA_REAL) {
-                                realdone = 1;
-                            }
-                        }
-                    }
-                }
+            ret = run_preauth_plugins(context, paorder[h], request,
+                                      encoded_request_body,
+                                      encoded_previous_request, in_padata[i],
+                                      prompter, prompter_data, rock,
+                                      &out_pa_list, &out_pa_list_size,
+                                      &module_ret, opte);
+            if (ret == 0 && module_ret == 0 && paorder[h] == PA_REAL) {
+                *got_real_out = TRUE;
+                break;
             }
         }
     }
 
     TRACE_PREAUTH_OUTPUT(context, out_pa_list);
     *out_padata = out_pa_list;
+    return 0;
 
-    *got_real_out = realdone;
-    return(0);
+error:
+    krb5_free_pa_data(context, out_pa_list);
+    return ret;
 }
 
 /*
