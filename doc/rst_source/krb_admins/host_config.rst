@@ -90,6 +90,8 @@ and *options* (if present) are options provided to the plugin module,
 surrounded in square brackets.
 
 
+.. _profile_plugin_config:
+
 Configuration profile modules
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

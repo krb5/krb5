@@ -6,9 +6,15 @@ configuration information is obtained by the Kerberos library and
 applications.  For a detailed description of the profile interface,
 see the header file ``<profile.h>``.
 
-.. note: The locate interface does not follow the normal conventions
-         for MIT krb5 pluggable interfaces, because it is part of a
-         lower-level component of the krb5 library.
+.. note:: The profile interface does not follow the normal conventions
+          for MIT krb5 pluggable interfaces, because it is part of a
+          lower-level component of the krb5 library.
+
+As with other types of plugin modules, a profile module is a Unix
+shared object or Windows DLL, built separately from the krb5 tree.
+The krb5 library will dynamically load and use a profile plugin module
+if it reads a ``module`` directive at the beginning of krb5.conf, as
+described in :ref:`profile_plugin_config`.
 
 A profile module exports a function named ``profile_module_init``
 matching the signature of the profile_module_init_fn type.  This
