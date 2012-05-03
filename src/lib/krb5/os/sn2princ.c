@@ -105,7 +105,7 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
                hostnames associated.  */
 
             memset(&hints, 0, sizeof(hints));
-            hints.ai_flags = AI_CANONNAME | AI_ADDRCONFIG;
+            hints.ai_flags = AI_CANONNAME;
             err = getaddrinfo(hostname, 0, &hints, &ai);
             if (err) {
 #ifdef DEBUG_REFERRALS
