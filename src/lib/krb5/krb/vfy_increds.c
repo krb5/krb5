@@ -32,8 +32,6 @@ copy_creds_except(krb5_context context, krb5_ccache incc,
     flags = 0;                           /* turns off OPENCLOSE mode */
     if ((code = krb5_cc_set_flags(context, incc, flags)))
         return(code);
-    if ((code = krb5_cc_set_flags(context, outcc, flags)))
-        return(code);
 
     if ((code = krb5_cc_start_seq_get(context, incc, &cur)))
         goto cleanup;
@@ -60,11 +58,6 @@ cleanup:
         krb5_cc_set_flags(context, incc, flags);
     else
         code = krb5_cc_set_flags(context, incc, flags);
-
-    if (code)
-        krb5_cc_set_flags(context, outcc, flags);
-    else
-        code = krb5_cc_set_flags(context, outcc, flags);
 
     return(code);
 }
