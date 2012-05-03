@@ -181,7 +181,9 @@ class DoxyTypes(object):
                 d_type = self._process_type_node(node.xpath("./initializer/ref")[0])        
             if len(d_type) > 0:
                 len_text = len(node.xpath('./initializer/text()'))
-                if len(node.xpath('./initializer/text()')[0]) > 0:
+                if len_text == 0 and d_type[1]:
+                    d_initializer = d_type[1]
+                if len_text > 0 and len(node.xpath('./initializer/text()')[0]) > 0:
                     d_initializer = node.xpath('./initializer/text()')[0] + d_type[1]
                 if len_text > 1:
                     if node.xpath('./initializer/text()')[1] is not None:
