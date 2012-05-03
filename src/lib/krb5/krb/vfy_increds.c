@@ -1,4 +1,35 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/vfy_increds.c - Verify initial credentials with keytab */
+/*
+ * Copyright (C) 1998, 2011, 2012 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "k5-int.h"
 #include "int-proto.h"
 
@@ -24,42 +55,35 @@ static krb5_error_code
 copy_creds_except(krb5_context context, krb5_ccache incc,
                   krb5_ccache outcc, krb5_principal princ)
 {
-    krb5_error_code code;
-    krb5_flags flags;
+    krb5_error_code ret, ret2;
     krb5_cc_cursor cur;
     krb5_creds creds;
 
-    flags = 0;                           /* turns off OPENCLOSE mode */
-    if ((code = krb5_cc_set_flags(context, incc, flags)))
-        return(code);
-
-    if ((code = krb5_cc_start_seq_get(context, incc, &cur)))
+    /* Turn off TC_OPENCLOSE on input ccache. */
+    ret = krb5_cc_set_flags(context, incc, 0);
+    if (ret)
+        return ret;
+    ret = krb5_cc_start_seq_get(context, incc, &cur);
+    if (ret)
         goto cleanup;
 
-    while (!(code = krb5_cc_next_cred(context, incc, &cur, &creds))) {
+    while (!(ret = krb5_cc_next_cred(context, incc, &cur, &creds))) {
         if (krb5_principal_compare(context, princ, creds.server))
             continue;
 
-        code = krb5_cc_store_cred(context, outcc, &creds);
+        ret = krb5_cc_store_cred(context, outcc, &creds);
         krb5_free_cred_contents(context, &creds);
-        if (code)
+        if (ret)
             goto cleanup;
     }
 
-    if (code != KRB5_CC_END)
+    if (ret != KRB5_CC_END)
         goto cleanup;
-
-    code = 0;
+    ret = 0;
 
 cleanup:
-    flags = KRB5_TC_OPENCLOSE;
-
-    if (code)
-        krb5_cc_set_flags(context, incc, flags);
-    else
-        code = krb5_cc_set_flags(context, incc, flags);
-
-    return(code);
+    ret2 = krb5_cc_set_flags(context, incc, KRB5_TC_OPENCLOSE);
+    return (ret == 0) ? ret2 : ret;
 }
 
 static krb5_error_code
@@ -67,114 +91,98 @@ get_vfy_cred(krb5_context context, krb5_creds *creds, krb5_principal server,
              krb5_keytab keytab, krb5_ccache *ccache_arg)
 {
     krb5_error_code ret;
-    krb5_ccache ccache;
-    krb5_creds in_creds, *out_creds;
-    krb5_auth_context authcon;
-    krb5_data ap_req;
+    krb5_ccache ccache = NULL, retcc = NULL;
+    krb5_creds in_creds, *out_creds = NULL;
+    krb5_auth_context authcon = NULL;
+    krb5_data ap_req = empty_data();
 
-    ccache = NULL;
-    out_creds = NULL;
-    authcon = NULL;
-    ap_req.data = NULL;
     /* If the creds are for the server principal, we're set, just do a mk_req.
-     * Otherwise, do a get_credentials first.
-     */
-
+     * Otherwise, do a get_credentials first. */
     if (krb5_principal_compare(context, server, creds->server)) {
-        /* make an ap_req */
-        if ((ret = krb5_mk_req_extended(context, &authcon, 0, NULL, creds,
-                                        &ap_req)))
+        /* Make an ap-req. */
+        ret = krb5_mk_req_extended(context, &authcon, 0, NULL, creds, &ap_req);
+        if (ret)
             goto cleanup;
     } else {
-        /* this is unclean, but it's the easiest way without ripping the
-           library into very small pieces.  store the client's initial cred
-           in a memory ccache, then call the library.  Later, we'll copy
-           everything except the initial cred into the ccache we return to
-           the user.  A clean implementation would involve library
-           internals with a coherent idea of "in" and "out". */
+        /*
+         * This is unclean, but it's the easiest way without ripping the
+         * library into very small pieces.  store the client's initial cred
+         * in a memory ccache, then call the library.  Later, we'll copy
+         * everything except the initial cred into the ccache we return to
+         * the user.  A clean implementation would involve library
+         * internals with a coherent idea of "in" and "out".
+         */
 
-        /* insert the initial cred into the ccache */
-
-        if ((ret = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache))) {
-            ccache = NULL;
+        /* Insert the initial cred into the ccache. */
+        ret = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache);
+        if (ret)
             goto cleanup;
-        }
-
-        if ((ret = krb5_cc_initialize(context, ccache, creds->client)))
+        ret = krb5_cc_initialize(context, ccache, creds->client);
+        if (ret)
+            goto cleanup;
+        ret = krb5_cc_store_cred(context, ccache, creds);
+        if (ret)
             goto cleanup;
 
-        if ((ret = krb5_cc_store_cred(context, ccache, creds)))
-            goto cleanup;
-
-        /* set up for get_creds */
+        /* Get credentials with get_creds. */
         memset(&in_creds, 0, sizeof(in_creds));
         in_creds.client = creds->client;
         in_creds.server = server;
-        if ((ret = krb5_timeofday(context, &in_creds.times.endtime)))
+        ret = krb5_timeofday(context, &in_creds.times.endtime);
+        if (ret)
             goto cleanup;
         in_creds.times.endtime += 5*60;
-
-        if ((ret = krb5_get_credentials(context, 0, ccache, &in_creds,
-                                        &out_creds)))
+        ret = krb5_get_credentials(context, 0, ccache, &in_creds, &out_creds);
+        if (ret)
             goto cleanup;
 
-        /* make an ap_req */
-        if ((ret = krb5_mk_req_extended(context, &authcon, 0, NULL, out_creds,
-                                        &ap_req)))
+        /* Make an ap-req. */
+        ret = krb5_mk_req_extended(context, &authcon, 0, NULL, out_creds,
+                                   &ap_req);
+        if (ret)
             goto cleanup;
     }
 
-    /* wipe the auth context for mk_req */
+    /* Wipe the auth context created by mk_req. */
     if (authcon) {
         krb5_auth_con_free(context, authcon);
         authcon = NULL;
     }
 
-    /* verify the ap_req */
-
-    if ((ret = krb5_rd_req(context, &authcon, &ap_req, server, keytab,
-                           NULL, NULL)))
+    /* Verify the ap_req. */
+    ret = krb5_rd_req(context, &authcon, &ap_req, server, keytab, NULL, NULL);
+    if (ret)
         goto cleanup;
 
-    /* if we get this far, then the verification succeeded.  We can
-       still fail if the library stuff here fails, but that's it */
-
-    if (ccache_arg && ccache) {
+    /* If we get this far, then the verification succeeded.  We can
+     * still fail if the library stuff here fails, but that's it. */
+    if (ccache_arg != NULL && ccache != NULL) {
         if (*ccache_arg == NULL) {
-            krb5_ccache retcc;
-
+            ret = krb5_cc_resolve(context, "MEMORY:rd_req2", &retcc);
+            if (ret)
+                goto cleanup;
+            ret = krb5_cc_initialize(context, retcc, creds->client);
+            if (ret)
+                goto cleanup;
+            ret = copy_creds_except(context, ccache, retcc, creds->server);
+            if (ret)
+                goto cleanup;
+            *ccache_arg = retcc;
             retcc = NULL;
-
-            if ((ret = krb5_cc_resolve(context, "MEMORY:rd_req2", &retcc)) ||
-                (ret = krb5_cc_initialize(context, retcc, creds->client)) ||
-                (ret = copy_creds_except(context, ccache, retcc,
-                                         creds->server))) {
-                if (retcc)
-                    krb5_cc_destroy(context, retcc);
-            } else {
-                *ccache_arg = retcc;
-            }
         } else {
-            ret = copy_creds_except(context, ccache, *ccache_arg,
-                                    server);
+            ret = copy_creds_except(context, ccache, *ccache_arg, server);
         }
     }
 
-    /* if any of the above paths returned an errors, then ret is set accordingly.
-     * Either that, or it's zero, which is fine, too
-     */
-
 cleanup:
-    if (ccache)
+    if (retcc != NULL)
+        krb5_cc_destroy(context, retcc);
+    if (ccache != NULL)
         krb5_cc_destroy(context, ccache);
-    if (out_creds)
-        krb5_free_creds(context, out_creds);
-    if (authcon)
-        krb5_auth_con_free(context, authcon);
-    if (ap_req.data)
-        free(ap_req.data);
-
-    return(ret);
+    krb5_free_creds(context, out_creds);
+    krb5_auth_con_free(context, authcon);
+    krb5_free_data_contents(context, &ap_req);
+    return ret;
 }
 
 /* Free the principals in plist and plist itself. */
