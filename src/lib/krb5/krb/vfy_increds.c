@@ -69,77 +69,20 @@ cleanup:
     return(code);
 }
 
-krb5_error_code KRB5_CALLCONV
-krb5_verify_init_creds(krb5_context context,
-                       krb5_creds *creds,
-                       krb5_principal server_arg,
-                       krb5_keytab keytab_arg,
-                       krb5_ccache *ccache_arg,
-                       krb5_verify_init_creds_opt *options)
+static krb5_error_code
+get_vfy_cred(krb5_context context, krb5_creds *creds, krb5_principal server,
+             krb5_keytab keytab, krb5_ccache *ccache_arg)
 {
     krb5_error_code ret;
-    krb5_principal server;
-    krb5_keytab keytab;
     krb5_ccache ccache;
-    krb5_keytab_entry kte;
     krb5_creds in_creds, *out_creds;
     krb5_auth_context authcon;
     krb5_data ap_req;
 
-    /* KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN */
-
-    server = NULL;
-    keytab = NULL;
     ccache = NULL;
     out_creds = NULL;
     authcon = NULL;
     ap_req.data = NULL;
-
-    if (keytab_arg) {
-        keytab = keytab_arg;
-    } else {
-        if ((ret = krb5_kt_default(context, &keytab)))
-            goto cleanup;
-    }
-
-    if (server_arg) {
-        ret = krb5_copy_principal(context, server_arg, &server);
-        if (ret)
-            goto cleanup;
-    } else {
-        /* Use a principal name from the keytab. */
-        ret = k5_kt_get_principal(context, keytab, &server);
-        if (ret) {
-            /* There's no keytab, or it's empty, or we can't read it.
-             * Allow this unless configuration demands verification. */
-            if (!nofail(context, options, creds))
-                ret = 0;
-            goto cleanup;
-        }
-    }
-
-    /* first, check if the server is in the keytab.  If not, there's
-       no reason to continue.  rd_req does all this, but there's
-       no way to know that a given error is caused by a missing
-       keytab or key, and not by some other problem. */
-
-    if (krb5_is_referral_realm(&server->realm)) {
-        krb5_free_data_contents(context, &server->realm);
-        ret = krb5_get_default_realm(context, &server->realm.data);
-        if (ret) goto cleanup;
-        server->realm.length = strlen(server->realm.data);
-    }
-
-    if ((ret = krb5_kt_get_entry(context, keytab, server, 0, 0, &kte))) {
-        /* this means there is no keying material.  This is ok, as long as
-           it is not prohibited by the configuration */
-        if (!nofail(context, options, creds))
-            ret = 0;
-        goto cleanup;
-    }
-
-    krb5_kt_free_entry(context, &kte);
-
     /* If the creds are for the server principal, we're set, just do a mk_req.
      * Otherwise, do a get_credentials first.
      */
@@ -229,10 +172,6 @@ krb5_verify_init_creds(krb5_context context,
      */
 
 cleanup:
-    if ( server)
-        krb5_free_principal(context, server);
-    if (!keytab_arg && keytab)
-        krb5_kt_close(context, keytab);
     if (ccache)
         krb5_cc_destroy(context, ccache);
     if (out_creds)
@@ -243,4 +182,142 @@ cleanup:
         free(ap_req.data);
 
     return(ret);
+}
+
+/* Free the principals in plist and plist itself. */
+static void
+free_princ_list(krb5_context context, krb5_principal *plist)
+{
+    size_t i;
+
+    if (plist == NULL)
+        return;
+    for (i = 0; plist[i] != NULL; i++)
+        krb5_free_principal(context, plist[i]);
+    free(plist);
+}
+
+/* Add princ to plist if it isn't already there. */
+static krb5_error_code
+add_princ_list(krb5_context context, krb5_const_principal princ,
+               krb5_principal **plist)
+{
+    size_t i;
+    krb5_principal *newlist;
+
+    /* Check if princ is already in plist, and count the elements. */
+    for (i = 0; (*plist) != NULL && (*plist)[i] != NULL; i++) {
+        if (krb5_principal_compare(context, princ, (*plist)[i]))
+            return 0;
+    }
+
+    newlist = realloc(*plist, (i + 2) * sizeof(*newlist));
+    if (newlist == NULL)
+        return ENOMEM;
+    *plist = newlist;
+    newlist[i] = newlist[i + 1] = NULL; /* terminate the list */
+    return krb5_copy_principal(context, princ, &newlist[i]);
+}
+
+/* Return a list of all unique host service princs in keytab. */
+static krb5_error_code
+get_host_princs_from_keytab(krb5_context context, krb5_keytab keytab,
+                            krb5_principal **princ_list_out)
+{
+    krb5_error_code ret;
+    krb5_kt_cursor cursor;
+    krb5_keytab_entry kte;
+    krb5_principal *plist = NULL, p;
+
+    *princ_list_out = NULL;
+
+    ret = krb5_kt_start_seq_get(context, keytab, &cursor);
+    if (ret)
+        goto cleanup;
+
+    while ((ret = krb5_kt_next_entry(context, keytab, &kte, &cursor)) == 0) {
+        p = kte.principal;
+        if (p->length == 2 && data_eq_string(p->data[0], "host"))
+            ret = add_princ_list(context, p, &plist);
+        krb5_kt_free_entry(context, &kte);
+        if (ret)
+            break;
+    }
+    (void)krb5_kt_end_seq_get(context, keytab, &cursor);
+    if (ret == KRB5_KT_END)
+        ret = 0;
+    if (ret)
+        goto cleanup;
+
+    *princ_list_out = plist;
+    plist = NULL;
+
+cleanup:
+    free_princ_list(context, plist);
+    return ret;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_verify_init_creds(krb5_context context, krb5_creds *creds,
+                       krb5_principal server, krb5_keytab keytab,
+                       krb5_ccache *ccache,
+                       krb5_verify_init_creds_opt *options)
+{
+    krb5_error_code ret;
+    krb5_principal *host_princs = NULL;
+    krb5_keytab defkeytab = NULL;
+    krb5_keytab_entry kte;
+    krb5_boolean have_keys = FALSE;
+    size_t i;
+
+    if (keytab == NULL) {
+        ret = krb5_kt_default(context, &defkeytab);
+        if (ret)
+            goto cleanup;
+        keytab = defkeytab;
+    }
+
+    if (server != NULL) {
+        /* Check if server exists in keytab first. */
+        ret = krb5_kt_get_entry(context, keytab, server, 0, 0, &kte);
+        if (ret)
+            goto cleanup;
+        krb5_kt_free_entry(context, &kte);
+        have_keys = TRUE;
+        ret = get_vfy_cred(context, creds, server, keytab, ccache);
+    } else {
+        /* Try using the host service principals from the keytab. */
+        if (keytab->ops->start_seq_get == NULL) {
+            ret = EINVAL;
+            goto cleanup;
+        }
+        ret = get_host_princs_from_keytab(context, keytab, &host_princs);
+        if (ret)
+            goto cleanup;
+        if (host_princs == NULL) {
+            ret = KRB5_KT_NOTFOUND;
+            goto cleanup;
+        }
+        have_keys = TRUE;
+
+        /* Try all host principals until one succeeds or they all fail. */
+        for (i = 0; host_princs[i] != NULL; i++) {
+            ret = get_vfy_cred(context, creds, host_princs[i], keytab, ccache);
+            if (ret == 0)
+                break;
+        }
+    }
+
+cleanup:
+    /* If we have no key to verify with, pretend to succeed unless
+     * configuration directs otherwise. */
+    if (!have_keys && !nofail(context, options, creds))
+        ret = 0;
+
+    if (defkeytab != NULL)
+        krb5_kt_close(context, defkeytab);
+    krb5_free_principal(context, server);
+    free_princ_list(context, host_princs);
+
+    return ret;
 }

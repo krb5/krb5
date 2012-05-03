@@ -301,6 +301,9 @@ Scripts may use the following realm methods and attributes:
 * realm.host_princ: The name of the host principal for this machine,
   with realm.
 
+* realm.nfs_princ: The name of the nfs principal for this machine,
+  with realm.
+
 * realm.krbtgt_princ: The name of the krbtgt principal for the realm.
 
 * realm.keytab: A keytab file in realm.testdir.  Initially contains a
@@ -698,6 +701,7 @@ class K5Realm(object):
         self.user_princ = 'user@' + self.realm
         self.admin_princ = 'user/admin@' + self.realm
         self.host_princ = 'host/%s@%s' % (hostname, self.realm)
+        self.nfs_princ = 'nfs/%s@%s' % (hostname, self.realm)
         self.krbtgt_princ = 'krbtgt/%s@%s' % (self.realm, self.realm)
         self.keytab = os.path.join(self.testdir, 'keytab')
         self.ccache = os.path.join(self.testdir, 'ccache')

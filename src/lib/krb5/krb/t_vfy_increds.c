@@ -33,6 +33,15 @@
 
 #include "k5-int.h"
 
+static void
+check(krb5_error_code code)
+{
+    if (code != 0) {
+        com_err("t_vfy_increds", code, NULL);
+        abort();
+    }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -40,17 +49,28 @@ main(int argc, char **argv)
     krb5_ccache ccache;
     krb5_cc_cursor cursor;
     krb5_creds creds;
+    krb5_principal princ = NULL;
+    krb5_verify_init_creds_opt opt;
 
-    assert(krb5_init_context(&context) == 0);
+    check(krb5_init_context(&context));
+
+    krb5_verify_init_creds_opt_init(&opt);
+    argv++;
+    if (*argv != NULL && strcmp(*argv, "-n") == 0) {
+        argv++;
+        krb5_verify_init_creds_opt_set_ap_req_nofail(&opt, TRUE);
+    }
+    if (*argv != NULL)
+        check(krb5_parse_name(context, *argv, &princ));
 
     /* Fetch the first credential from the default ccache. */
-    assert(krb5_cc_default(context, &ccache) == 0);
-    assert(krb5_cc_start_seq_get(context, ccache, &cursor) == 0);
-    assert(krb5_cc_next_cred(context, ccache, &cursor, &creds) == 0);
-    assert(krb5_cc_end_seq_get(context, ccache, &cursor) == 0);
-    assert(krb5_cc_close(context, ccache) == 0);
+    check(krb5_cc_default(context, &ccache));
+    check(krb5_cc_start_seq_get(context, ccache, &cursor));
+    check(krb5_cc_next_cred(context, ccache, &cursor, &creds));
+    check(krb5_cc_end_seq_get(context, ccache, &cursor));
+    check(krb5_cc_close(context, ccache));
 
-    if (krb5_verify_init_creds(context, &creds, NULL, NULL, NULL, NULL) != 0)
+    if (krb5_verify_init_creds(context, &creds, princ, NULL, NULL, &opt) != 0)
         return 1;
     return 0;
 }
