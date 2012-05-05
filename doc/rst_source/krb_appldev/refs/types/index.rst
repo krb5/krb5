@@ -90,7 +90,6 @@ Internal
    krb5_cksumtype
    krb5_context.rst
    krb5_cc_cursor.rst
-   krb5_cc_ops.rst
    krb5_ccache.rst
    krb5_cccol_cursor.rst
    krb5_init_creds_context.rst
