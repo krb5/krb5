@@ -47,6 +47,7 @@ class CompositeType():
         self.category = 'composite'
         self.definition = argkw.get('definition')
         self.name = argkw.get('name')
+        self.name_signature = argkw.get('name_signature')
         self.Id = argkw.get('Id')
         self.initializer = argkw.get('initializer')
         self.active = argkw.get('active', False)

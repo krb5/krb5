@@ -175,6 +175,21 @@ class DoxyTypes(object):
         print  d_name
         d_initializer = ''
         d_type = ''
+        d_signature = ''
+
+        # Process param/defname node
+        if len(node.xpath('./param/defname')) > 0:
+            prm_str = ''
+            prm_list = list()
+            for p in node.xpath("./param"):
+                x = self._process_paragraph_content(p)
+                if x is not None and len(x):
+                   prm_list.append(x)
+            if prm_list is not None:
+                prm_str = prm_str.join(prm_list)
+            d_signature = " %s (%s) " % (d_name , prm_str)
+            d_signature = re.sub(', \)', ')', d_signature)
+
         if len(node.xpath('./initializer')) > 0:
             len_ref = len(node.xpath('./initializer/ref'))
             if len(node.xpath('./initializer/ref')) > 0:
@@ -199,6 +214,7 @@ class DoxyTypes(object):
         define_descr = {'category': 'composite',
                         'definition': '',
                         'name': d_name,
+                        'name_signature': d_signature,
                         'Id': d_Id,
                         'initializer': d_initializer,
                         'type': '',
@@ -265,6 +281,8 @@ class DoxyTypes(object):
                     result.append(e.strip())
                 else:
                     result.append('*%s*' % e.strip())
+            elif  e.getparent().tag == 'defname':
+                result.append('%s, ' % e.strip())
         result = ' '.join(result)
 
         return result

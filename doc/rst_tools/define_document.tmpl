@@ -16,8 +16,12 @@ $composite.short_description
 
 $composite.long_description
 
-#echo ''.join(['=']*len($composite.name)) + '== ======================' #
+#if $composite.name_signature is not None and len($composite.name_signature)
+#echo ''.join(['=']*len($composite.name_signature)) + '== ======================' #
+$composite.name_signature       $composite.initializer
+#echo ''.join(['=']*len($composite.name_signature)) + '== ======================' #
+#else
+#echo ''.join(['=']*len($composite.name)) + '=== ======================' #
 $composite.name       $composite.initializer
-#echo ''.join(['=']*len($composite.name)) + '== ======================' #
-
-
+#echo ''.join(['=']*len($composite.name)) + '=== ======================' #
+#end if
