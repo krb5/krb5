@@ -2,33 +2,26 @@
 
 .. $composite.struct_reference($composite.name):
 
-
-
-#if $composite.short_description is not None and len($composite.short_description)
-	#set $title = $composite.name + ' - ' + $composite.short_description
-#else
-	#set $title = $composite.name
-#end if
+#set $title = $composite.name
 $title
 #echo ''.join(['=']*len($title)) #
-
-
 
 ..
 .. c:type:: $composite.name
 ..
+
+#if $composite.short_description is not None and len($composite.short_description)
+$composite.short_description
+#end if
+
+$composite.long_description
 
 Declaration
 ------------
 
 $composite.definition
 
-$composite.long_description
- 
-
 #if $composite.Id is not None 
-
-
 #if len($composite.attributes)
 
 Members

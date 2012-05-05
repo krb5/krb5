@@ -2,31 +2,22 @@
 
 .. $composite.macro_reference($composite.name):
 
-
-
-#if $composite.short_description is not None and len($composite.short_description)
-	#set $title = $composite.name + ' - ' + $composite.short_description
-#else
-	#set $title = $composite.name
-#end if
+#set $title = $composite.name
 $title
 #echo ''.join(['=']*len($title)) #
-
-
 
 ..
 .. data:: $composite.name
 ..
+
+#if $composite.short_description is not None and len($composite.short_description)
+$composite.short_description
+#end if
+
+$composite.long_description
 
 #echo ''.join(['=']*len($composite.name)) + '== ======================' #
 $composite.name       $composite.initializer
 #echo ''.join(['=']*len($composite.name)) + '== ======================' #
 
 
-$composite.long_description
- 
-
-#if $composite.Id is not None 
-
-
-#end if
