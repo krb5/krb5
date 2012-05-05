@@ -570,6 +570,7 @@ install-windows::
 	copy windows\leashdll\$(OUTPRE)*.pdb "$(KRB_INSTALL_DIR)\bin\."
 	copy windows\leash\$(OUTPRE)*.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy windows\leash\$(OUTPRE)*.pdb "$(KRB_INSTALL_DIR)\bin\."
+	copy windows\leash\$(OUTPRE)*.chm "$(KRB_INSTALL_DIR)\bin\."
 	copy windows\kfwlogon\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
 	copy windows\kfwlogon\$(OUTPRE)*.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy windows\kfwlogon\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
