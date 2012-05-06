@@ -430,3 +430,4 @@ EXPORTS
 	krb5_kt_have_content				@401
 	krb5_cccol_have_content				@402
 	krb5_kt_client_default				@403
+	krb5int_cc_user_set_default_name		@404 ; PRIVATE LEASH

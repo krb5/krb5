@@ -81,6 +81,32 @@ static int get_from_registry_indirect(char *name_buf, int name_size)
     return 1;
 }
 
+static const char *key_path = "Software\\MIT\\Kerberos5";
+static const char *value_name = "ccname";
+static int
+set_to_registry(
+    HKEY hBaseKey,
+    const char *name_buf
+)
+{
+    HRESULT result;
+    HKEY hKey;
+
+    if ((result = RegCreateKeyEx(hBaseKey, key_path, 0, NULL,
+                                 REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL,
+                                 &hKey, NULL)) != ERROR_SUCCESS) {
+        return 0;
+    }
+    if (RegSetValueEx(hKey, value_name, 0, REG_SZ, name_buf,
+                      strlen(name_buf)+1) != ERROR_SUCCESS) {
+        RegCloseKey(hKey);
+        return 0;
+    }
+    RegCloseKey(hKey);
+    return 1;
+}
+
+
 /*
  * get_from_registry
  *
@@ -97,8 +123,6 @@ get_from_registry(
 {
     HKEY hKey;
     DWORD name_buf_size = (DWORD)name_size;
-    const char *key_path = "Software\\MIT\\Kerberos5";
-    const char *value_name = "ccname";
 
     if (RegOpenKeyEx(hBaseKey, key_path, 0, KEY_QUERY_VALUE,
                      &hKey) != ERROR_SUCCESS)
@@ -143,7 +167,7 @@ try_dir(
 static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
 {
     char *prefix = krb5_cc_dfl_ops->prefix;
-    int size;
+    unsigned int size;
     char *p;
     DWORD gle;
 
@@ -179,7 +203,7 @@ static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
         if (!try_dir(getenv("TEMP"), p, size) &&
             !try_dir(getenv("TMP"), p, size))
         {
-            int len = GetWindowsDirectory(p, size);
+            unsigned int len = GetWindowsDirectory(p, size);
             name_buf[name_size - 1] = 0;
             if (len < size - sizeof(APPEND_KRB5CC))
                 strcat(p, APPEND_KRB5CC);
@@ -236,6 +260,32 @@ static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
 }
 #endif
 #endif
+
+#if defined(_WIN32)
+static void set_for_os(const char *name)
+{
+    set_to_registry(HKEY_CURRENT_USER, name);
+}
+#else
+static void set_for_os(const char *name)
+{
+    // @TODO
+}
+#endif
+
+/*
+ * Set the default ccache name for all processes for the current user
+ * (and the current context)
+ */
+krb5_error_code KRB5_CALLCONV
+krb5int_cc_user_set_default_name(krb5_context context, const char *name)
+{
+    krb5_error_code code = 0;
+    if ((code = krb5_cc_set_default_name(context, name)))
+        return code;
+    set_for_os(name);
+    return code;
+}
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_set_default_name(krb5_context context, const char *name)
