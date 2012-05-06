@@ -764,11 +764,13 @@ krb5_stdccv3_get_principal (krb5_context context,
 
     if (!err) {
         err = krb5_parse_name (context, name->data, princ);
+    } else {
+        err = cc_err_xlate (err);
     }
 
     if (name) { cc_string_release (name); }
 
-    return cc_err_xlate (err);
+    return err;
 }
 
 /*
