@@ -117,6 +117,8 @@ krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_lock
 krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_unlock
 (krb5_context context);
 
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_switch_to
+(krb5_context context, krb5_ccache id);
 #else
 
 krb5_error_code KRB5_CALLCONV krb5_stdcc_close

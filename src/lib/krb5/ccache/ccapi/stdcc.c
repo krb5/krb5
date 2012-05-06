@@ -95,6 +95,7 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
     NULL, /* wasdefault */
     krb5_stdccv3_lock,
     krb5_stdccv3_unlock,
+    krb5_stdccv3_switch_to,
 #else
     krb5_stdcc_get_name,
     krb5_stdcc_resolve,
@@ -388,6 +389,7 @@ krb5_stdccv3_resolve (krb5_context context, krb5_ccache *id , const char *residu
     stdccCacheDataPtr ccapi_data = NULL;
     krb5_ccache ccache = NULL;
     char *name = NULL;
+    cc_string_t defname = NULL;
 
     if (id == NULL) { err = KRB5_CC_NOMEM; }
 
@@ -403,6 +405,14 @@ krb5_stdccv3_resolve (krb5_context context, krb5_ccache *id , const char *residu
     if (!err) {
         ccache = (krb5_ccache ) malloc (sizeof (*ccache));
         if (!ccache) { err = KRB5_CC_NOMEM; }
+    }
+
+    if (!err) {
+        if ((residual == NULL) || (strlen(residual) == 0)) {
+            err = cc_context_get_default_ccache_name(gCntrlBlock, &defname);
+            if (defname)
+                residual = defname->data;
+        }
     }
 
     if (!err) {
@@ -434,6 +444,7 @@ krb5_stdccv3_resolve (krb5_context context, krb5_ccache *id , const char *residu
     if (ccache)     { free (ccache); }
     if (ccapi_data) { free (ccapi_data); }
     if (name)       { free (name); }
+    if (defname)    { cc_string_release(defname); }
 
     return cc_err_xlate (err);
 }
@@ -1067,6 +1078,20 @@ krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_unlock
     if (!err) {
         err = cc_context_unlock(gCntrlBlock);
     }
+    return cc_err_xlate(err);
+}
+
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_switch_to
+(krb5_context context, krb5_ccache id)
+{
+    krb5_error_code retval;
+    stdccCacheDataPtr ccapi_data = id->data;
+    int err;
+
+    if ((retval = stdccv3_setup(context, ccapi_data)))
+        return retval;
+
+    err = cc_ccache_set_default(ccapi_data->NamedCache);
     return cc_err_xlate(err);
 }
 
