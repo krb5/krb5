@@ -178,7 +178,8 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
         } else if (strcmp(tmpbuf, "kerr") == 0) {
             kerr = va_arg(ap, krb5_error_code);
             p = krb5_get_error_message(context, kerr);
-            krb5int_buf_add_fmt(&buf, "%ld/%s", (long) kerr, p);
+            krb5int_buf_add_fmt(&buf, "%ld/%s", (long) kerr,
+                                kerr ? p : "Success");
             krb5_free_error_message(context, p);
         } else if (strcmp(tmpbuf, "keyblock") == 0) {
             keyblock = va_arg(ap, const krb5_keyblock *);
