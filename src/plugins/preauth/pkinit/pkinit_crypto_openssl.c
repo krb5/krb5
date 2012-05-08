@@ -1030,10 +1030,14 @@ cms_signeddata_create(krb5_context context,
                                 id_cryptoctx->intermediateCAs);
             X509_STORE_CTX_trusted_stack(&certctx, id_cryptoctx->trustedCAs);
             if (!X509_verify_cert(&certctx)) {
-                pkiDebug("failed to create a certificate chain: %s\n",
-                         X509_verify_cert_error_string(X509_STORE_CTX_get_error(&certctx)));
+                int code = X509_STORE_CTX_get_error(&certctx);
+                const char *msg = X509_verify_cert_error_string(code);
+                pkiDebug("failed to create a certificate chain: %s\n", msg);
                 if (!sk_X509_num(id_cryptoctx->trustedCAs))
                     pkiDebug("No trusted CAs found. Check your X509_anchors\n");
+                retval = KRB5_PREAUTH_FAILED;
+                krb5_set_error_message(context, retval,
+                                       _("Cannot create cert chain: %s"), msg);
                 goto cleanup;
             }
             certstack = X509_STORE_CTX_get1_chain(&certctx);

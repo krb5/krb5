@@ -548,6 +548,9 @@ pkinit_identity_initialize(krb5_context context,
                                                  idopts->identity_alt[i]);
             }
         } else {
+            retval = KRB5_PREAUTH_FAILED;
+            krb5_set_error_message(context, retval,
+                                   _("No user identity options specified"));
             pkiDebug("%s: no user identity options specified\n", __FUNCTION__);
             goto errout;
         }
