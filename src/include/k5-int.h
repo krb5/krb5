@@ -130,7 +130,6 @@ typedef unsigned char   u_char;
 
 
 #include "k5-platform.h"
-#include "k5-trace.h"
 /* not used in krb5.h (yet) */
 typedef UINT64_TYPE krb5_ui_8;
 typedef INT64_TYPE krb5_int64;
@@ -182,6 +181,9 @@ typedef INT64_TYPE krb5_int64;
 
 /* Get string buffer support. */
 #include "k5-buf.h"
+
+/* Define tracing macros. */
+#include "k5-trace.h"
 
 /* cofiguration variables */
 #define KRB5_CONF_ACL_FILE                       "acl_file"
@@ -2605,7 +2607,6 @@ krb5_set_error_message_fl(krb5_context ctx, krb5_error_code code,
 #ifndef DISABLE_TRACING
 /* Do not use these functions directly; see k5-trace.h. */
 void krb5int_init_trace(krb5_context context);
-void krb5int_trace(krb5_context context, const char *fmt, ...);
 #endif
 
 #endif /* _KRB5_INT_H */
