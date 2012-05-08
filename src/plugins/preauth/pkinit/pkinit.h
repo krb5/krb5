@@ -38,6 +38,7 @@
 #include <autoconf.h>
 #include <profile.h>
 #include "pkinit_accessor.h"
+#include "pkinit_trace.h"
 
 /*
  * It is anticipated that all the special checks currently
