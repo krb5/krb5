@@ -1073,6 +1073,7 @@ int k5_path_isabs(const char *path);
 #else
 #define _(s) s
 #define dgettext(d, m) m
+#define ngettext(m1, m2, n) (((n) == 1) ? m1 : m2)
 #define bindtextdomain(p, d)
 #define setlocale(c, l)
 #endif
