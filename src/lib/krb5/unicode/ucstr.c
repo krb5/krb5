@@ -105,7 +105,7 @@ krb5int_ucstr2upper(
 
 krb5_error_code
 krb5int_utf8_normalize(
-		       krb5_data * data,
+		       const krb5_data * data,
 		       krb5_data ** newdataptr,
 		       unsigned flags)
 {

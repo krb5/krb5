@@ -118,7 +118,7 @@ void krb5int_ucstr2upper(
 #define KRB5_UTF8_APPROX        0x8U
 
 krb5_error_code krb5int_utf8_normalize(
-    krb5_data *,
+    const krb5_data *,
     krb5_data **,
     unsigned);
 
