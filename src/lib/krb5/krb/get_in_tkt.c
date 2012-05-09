@@ -437,7 +437,7 @@ sort_krb5_padata_sequence(krb5_context context, krb5_data *realm,
 
 static krb5_error_code
 build_in_tkt_name(krb5_context context,
-                  char *in_tkt_service,
+                  const char *in_tkt_service,
                   krb5_const_principal client,
                   krb5_principal *server)
 {
@@ -1616,7 +1616,7 @@ krb5int_get_init_creds(krb5_context context,
                        krb5_prompter_fct prompter,
                        void *prompter_data,
                        krb5_deltat start_time,
-                       char *in_tkt_service,
+                       const char *in_tkt_service,
                        krb5_get_init_creds_opt *options,
                        krb5_gic_get_as_key_fct gak_fct,
                        void *gak_data,

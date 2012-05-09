@@ -1013,7 +1013,8 @@ krb5_error_code KRB5_CALLCONV
 krb5int_get_init_creds(krb5_context context, krb5_creds *creds,
                        krb5_principal client, krb5_prompter_fct prompter,
                        void *prompter_data, krb5_deltat start_time,
-                       char *in_tkt_service, krb5_get_init_creds_opt *options,
+                       const char *in_tkt_service,
+                       krb5_get_init_creds_opt *options,
                        krb5_gic_get_as_key_fct gak, void *gak_data,
                        int *master, krb5_kdc_rep **as_reply);
 

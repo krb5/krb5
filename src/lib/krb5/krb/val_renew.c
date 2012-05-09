@@ -136,7 +136,7 @@ krb5_get_credentials_renew(krb5_context context, krb5_flags options,
 static krb5_error_code
 get_valrenewed_creds(krb5_context context, krb5_creds *out_creds,
                      krb5_principal client, krb5_ccache ccache,
-                     char *in_tkt_service, int kdcopt)
+                     const char *in_tkt_service, int kdcopt)
 {
     krb5_error_code code;
     krb5_creds in_creds, *new_creds;
@@ -181,7 +181,7 @@ cleanup:
 krb5_error_code KRB5_CALLCONV
 krb5_get_validated_creds(krb5_context context, krb5_creds *creds,
                          krb5_principal client, krb5_ccache ccache,
-                         char *in_tkt_service)
+                         const char *in_tkt_service)
 {
     return get_valrenewed_creds(context, creds, client, ccache,
                                 in_tkt_service, KDC_OPT_VALIDATE);
@@ -190,7 +190,7 @@ krb5_get_validated_creds(krb5_context context, krb5_creds *creds,
 krb5_error_code KRB5_CALLCONV
 krb5_get_renewed_creds(krb5_context context, krb5_creds *creds,
                        krb5_principal client, krb5_ccache ccache,
-                       char *in_tkt_service)
+                       const char *in_tkt_service)
 {
     return get_valrenewed_creds(context, creds, client, ccache,
                                 in_tkt_service, KDC_OPT_RENEW);

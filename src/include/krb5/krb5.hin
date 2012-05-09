@@ -6696,9 +6696,10 @@ krb5_get_init_creds_opt_set_expire_callback(krb5_context context,
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password(krb5_context context, krb5_creds *creds,
-                             krb5_principal client, char *password,
+                             krb5_principal client, const char *password,
                              krb5_prompter_fct prompter, void *data,
-                             krb5_deltat start_time, char *in_tkt_service,
+                             krb5_deltat start_time,
+                             const char *in_tkt_service,
                              krb5_get_init_creds_opt *k5_gic_options);
 
 struct _krb5_init_creds_context;
@@ -7040,7 +7041,7 @@ krb5_tkt_creds_get_times(krb5_context context, krb5_tkt_creds_context ctx,
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds,
                            krb5_principal client, krb5_keytab arg_keytab,
-                           krb5_deltat start_time, char *in_tkt_service,
+                           krb5_deltat start_time, const char *in_tkt_service,
                            krb5_get_init_creds_opt *k5_gic_options);
 
 typedef struct _krb5_verify_init_creds_opt {
@@ -7150,7 +7151,7 @@ krb5_verify_init_creds(krb5_context context, krb5_creds *creds,
 krb5_error_code KRB5_CALLCONV
 krb5_get_validated_creds(krb5_context context, krb5_creds *creds,
                          krb5_principal client, krb5_ccache ccache,
-                         char *in_tkt_service);
+                         const char *in_tkt_service);
 
 /**
  * Get renewed credential from KDC using an existing credential.
@@ -7176,7 +7177,7 @@ krb5_get_validated_creds(krb5_context context, krb5_creds *creds,
 krb5_error_code KRB5_CALLCONV
 krb5_get_renewed_creds(krb5_context context, krb5_creds *creds,
                        krb5_principal client, krb5_ccache ccache,
-                       char *in_tkt_service);
+                       const char *in_tkt_service);
 
 /**
  * Decode an ASN.1-formatted ticket.

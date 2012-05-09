@@ -218,11 +218,11 @@ krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password(krb5_context context,
                              krb5_creds *creds,
                              krb5_principal client,
-                             char *password,
+                             const char *password,
                              krb5_prompter_fct prompter,
                              void *data,
                              krb5_deltat start_time,
-                             char *in_tkt_service,
+                             const char *in_tkt_service,
                              krb5_get_init_creds_opt *options)
 {
     krb5_error_code ret, ret2;

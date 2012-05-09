@@ -209,7 +209,7 @@ krb5_init_creds_set_keytab(krb5_context context,
 static krb5_error_code
 get_init_creds_keytab(krb5_context context, krb5_creds *creds,
                       krb5_principal client, krb5_keytab keytab,
-                      krb5_deltat start_time, char *in_tkt_service,
+                      krb5_deltat start_time, const char *in_tkt_service,
                       krb5_get_init_creds_opt *options, int *use_master)
 {
     krb5_error_code ret;
@@ -250,7 +250,7 @@ krb5_get_init_creds_keytab(krb5_context context,
                            krb5_principal client,
                            krb5_keytab arg_keytab,
                            krb5_deltat start_time,
-                           char *in_tkt_service,
+                           const char *in_tkt_service,
                            krb5_get_init_creds_opt *options)
 {
     krb5_error_code ret, ret2;
