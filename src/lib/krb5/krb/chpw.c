@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "k5-int.h"
+#include "k5-unicode.h"
 #include "int-proto.h"
 #include "auth_con.h"
 
@@ -348,4 +349,169 @@ cleanup:
         packet->data = NULL;
     }
     return ret;
+}
+
+/*
+ * Active Directory policy information is communicated in the result string
+ * field as a packed 30-byte sequence, starting with two zero bytes (so that
+ * the string appears as zero-length when interpreted as UTF-8).  The bytes
+ * correspond to the fields in the following structure, with each field in
+ * big-endian byte order.
+ */
+struct ad_policy_info {
+    uint16_t zero_bytes;
+    uint32_t min_length_password;
+    uint32_t password_history;
+    uint32_t password_properties; /* see defines below */
+    uint64_t expire;              /* in seconds * 10,000,000 */
+    uint64_t min_passwordage;     /* in seconds * 10,000,000 */
+};
+
+#define AD_POLICY_INFO_LENGTH      30
+#define AD_POLICY_TIME_TO_DAYS     (86400ULL * 10000000ULL)
+
+#define AD_POLICY_COMPLEX          0x00000001
+#define AD_POLICY_NO_ANON_CHANGE   0x00000002
+#define AD_POLICY_NO_CLEAR_CHANGE  0x00000004
+#define AD_POLICY_LOCKOUT_ADMINS   0x00000008
+#define AD_POLICY_STORE_CLEARTEXT  0x00000010
+#define AD_POLICY_REFUSE_CHANGE    0x00000020
+
+/* If buf already contains one or more sentences, add spaces to separate them
+ * from the next sentence. */
+static void
+add_spaces(struct k5buf *buf)
+{
+    if (krb5int_buf_len(buf) > 0)
+        krb5int_buf_add(buf, "  ");
+}
+
+static krb5_error_code
+decode_ad_policy_info(const krb5_data *data, char **msg_out)
+{
+    struct ad_policy_info policy;
+    uint64_t password_days;
+    const char *p;
+    char *msg;
+    struct k5buf buf;
+
+    *msg_out = NULL;
+    if (data->length != AD_POLICY_INFO_LENGTH)
+        return 0;
+
+    p = data->data;
+    policy.zero_bytes = load_16_be(p);
+    p += 2;
+
+    /* first two bytes are zeros */
+    if (policy.zero_bytes != 0)
+        return 0;
+
+    /* Read in the rest of structure */
+    policy.min_length_password = load_32_be(p);
+    p += 4;
+    policy.password_history = load_32_be(p);
+    p += 4;
+    policy.password_properties = load_32_be(p);
+    p += 4;
+    policy.expire = load_64_be(p);
+    p += 8;
+    policy.min_passwordage = load_64_be(p);
+    p += 8;
+
+    /* Check that we processed exactly the expected number of bytes. */
+    assert(p == data->data + AD_POLICY_INFO_LENGTH);
+
+    krb5int_buf_init_dynamic(&buf);
+
+    /*
+     * Update src/tests/misc/test_chpw_message.c if changing these strings!
+     */
+
+    if (policy.password_properties & AD_POLICY_COMPLEX) {
+        krb5int_buf_add(&buf,
+                        _("The password must include numbers or symbols.  "
+                          "Don't include any part of your name in the "
+                          "password."));
+    }
+    if (policy.min_length_password > 0) {
+        add_spaces(&buf);
+        krb5int_buf_add_fmt(&buf,
+                            ngettext("The password must contain at least %d "
+                                     "character.",
+                                     "The password must contain at least %d "
+                                     "characters.",
+                                     policy.min_length_password),
+                            policy.min_length_password);
+    }
+    if (policy.password_history) {
+        add_spaces(&buf);
+        krb5int_buf_add_fmt(&buf,
+                            ngettext("The password must be different from the "
+                                     "previous password.",
+                                     "The password must be different from the "
+                                     "previous %d passwords.",
+                                     policy.password_history),
+                            policy.password_history);
+    }
+    if (policy.min_passwordage) {
+        password_days = policy.min_passwordage / AD_POLICY_TIME_TO_DAYS;
+        if (password_days == 0)
+            password_days = 1;
+        add_spaces(&buf);
+        krb5int_buf_add_fmt(&buf,
+                            ngettext("The password can only be changed once a "
+                                     "day.",
+                                     "The password can only be changed every "
+                                     "%d days.", (int)password_days),
+                            (int)password_days);
+    }
+
+    msg = krb5int_buf_data(&buf);
+    if (msg == NULL)
+        return ENOMEM;
+
+    if (*msg != '\0')
+        *msg_out = msg;
+    else
+        free(msg);
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_chpw_message(krb5_context context, const krb5_data *server_string,
+                  char **message_out)
+{
+    krb5_error_code ret;
+    krb5_data *string;
+    char *msg;
+
+    *message_out = NULL;
+
+    /* If server_string contains an AD password policy, construct a message
+     * based on that. */
+    ret = decode_ad_policy_info(server_string, &msg);
+    if (ret == 0 && msg != NULL) {
+        *message_out = msg;
+        return 0;
+    }
+
+    /* If server_string contains a valid UTF-8 string, return that. */
+    if (server_string->length > 0 &&
+        memchr(server_string->data, 0, server_string->length) == NULL &&
+        krb5int_utf8_normalize(server_string, &string,
+                               KRB5_UTF8_APPROX) == 0) {
+        *message_out = string->data; /* already null terminated */
+        free(string);
+        return 0;
+    }
+
+    /* server_string appears invalid, so try to be helpful. */
+    msg = strdup(_("Try a more complex password, or contact your "
+                   "administrator."));
+    if (msg == NULL)
+        return ENOMEM;
+
+    *message_out = msg;
+    return 0;
 }

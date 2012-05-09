@@ -235,6 +235,7 @@ krb5_get_init_creds_password(krb5_context context,
     char banner[1024], pw0array[1024], pw1array[1024];
     krb5_prompt prompt[2];
     krb5_prompt_type prompt_types[sizeof(prompt)/sizeof(prompt[0])];
+    char *message;
 
     use_master = 0;
     as_reply = NULL;
@@ -413,19 +414,21 @@ krb5_get_init_creds_password(krb5_context context,
 
             /* the error was soft, so try again */
 
+            if (krb5_chpw_message(context, &result_string, &message) != 0)
+                message = NULL;
+
             /* 100 is I happen to know that no code_string will be longer
                than 100 chars */
 
-            if (result_string.length > (sizeof(banner)-100))
-                result_string.length = sizeof(banner)-100;
+            if (message != NULL && strlen(message) > (sizeof(banner) - 100))
+                message[sizeof(banner) - 100] = '\0';
 
             snprintf(banner, sizeof(banner),
-                     _("%.*s%s%.*s.  Please try again.\n"),
+                     _("%.*s%s%s.  Please try again.\n"),
                      (int) code_string.length, code_string.data,
-                     result_string.length ? ": " : "",
-                     (int) result_string.length,
-                     result_string.data ? result_string.data : "");
+                     message ? ": " : "", message ? message : "");
 
+            free(message);
             free(code_string.data);
             free(result_string.data);
         }

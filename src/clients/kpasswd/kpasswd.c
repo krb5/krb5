@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
     krb5_ccache ccache;
     krb5_get_init_creds_opt *opts = NULL;
     krb5_creds creds;
+    char *message;
 
     char pw[1024];
     unsigned int pwlen;
@@ -154,11 +155,12 @@ int main(int argc, char *argv[])
     }
 
     if (result_code) {
-        printf("%.*s%s%.*s\n",
+        if (krb5_chpw_message(context, &result_string, &message) != 0)
+            message = NULL;
+        printf("%.*s%s%s\n",
                (int) result_code_string.length, result_code_string.data,
-               result_string.length?": ":"",
-               (int) result_string.length,
-               result_string.data ? result_string.data : "");
+               message ? ": " : "", message ? message : NULL);
+        krb5_free_string(context, message);
         krb5_get_init_creds_opt_free(context, opts);
         exit(2);
     }

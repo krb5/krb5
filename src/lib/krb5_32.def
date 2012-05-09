@@ -421,3 +421,6 @@ EXPORTS
 	krb5_pac_sign					@395
 	krb5_find_authdata				@396
 	krb5_check_clockskew				@397
+
+; new in 1.11
+	krb5_chpw_message				@398

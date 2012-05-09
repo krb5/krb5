@@ -147,6 +147,7 @@ krb5_sname_to_principal
 krb5_change_password
 krb5_set_password
 krb5_set_password_using_ccache
+krb5_chpw_message
 krb5_get_profile
 krb5_mk_safe
 krb5_mk_priv

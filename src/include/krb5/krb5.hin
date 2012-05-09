@@ -4963,6 +4963,32 @@ krb5_set_password_using_ccache(krb5_context context, krb5_ccache ccache,
                                krb5_data *result_string);
 
 /**
+ * Get a result message for changing or setting a password.
+ *
+ * @param [in]  context            Library context
+ * @param [in]  server_string      Data returned from the remote system
+ * @param [out] message_out        A message displayable to the user
+ *
+ * This function processes the @a server_string returned in the @a
+ * result_string parameter of krb5_change_password(), krb5_set_password(), and
+ * related functions, and returns a displayable string.  If @a server_string
+ * contains Active Directory structured policy information, it will be
+ * converted into human-readable text.
+ *
+ * Use krb5_free_string() to free @a message_out when it is no longer needed.
+ *
+ * @retval
+ * 0 Success
+ * @return
+ * Kerberos error codes
+ *
+ * @version First introduced in 1.11
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_chpw_message(krb5_context context, const krb5_data *server_string,
+                  char **message_out);
+
+/**
  * Retrieve configuration profile from the context.
  *
  * @param [in]  context         Library context

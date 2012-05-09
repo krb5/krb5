@@ -213,6 +213,7 @@ krb5_change_cache
 krb5_change_password
 krb5_check_clockskew
 krb5_check_transited_list
+krb5_chpw_message
 krb5_chpw_result_code_string
 krb5_clear_error_message
 krb5_copy_addr
