@@ -260,7 +260,7 @@ gss_buffer_t		output_message_buffer;
     if (!mech)
 	return (GSS_S_BAD_MECH);
 
-    return gssint_wrap_aead(mech, minor_status, context_handle,
+    return gssint_wrap_aead(mech, minor_status, ctx,
 			    conf_req_flag, qop_req,
 			    input_assoc_buffer, input_payload_buffer,
 			    conf_state, output_message_buffer);

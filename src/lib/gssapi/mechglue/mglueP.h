@@ -23,8 +23,8 @@ do {								\
 /*
  * Array of context IDs typed by mechanism OID
  */
-typedef struct gss_ctx_id_struct {
-	struct gss_ctx_id_struct *loopback;
+typedef struct gss_union_ctx_id_struct {
+	struct gss_union_ctx_id_struct *loopback;
 	gss_OID			mech_type;
 	gss_ctx_id_t		internal_ctx_id;
 } gss_union_ctx_id_desc, *gss_union_ctx_id_t;

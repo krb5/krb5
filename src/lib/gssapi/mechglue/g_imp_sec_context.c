@@ -148,7 +148,7 @@ gss_ctx_id_t *		context_handle;
 
     if (status == GSS_S_COMPLETE) {
 	ctx->loopback = ctx;
-	*context_handle = ctx;
+	*context_handle = (gss_ctx_id_t)ctx;
 	return (GSS_S_COMPLETE);
     }
     map_error(minor_status, mech);

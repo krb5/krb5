@@ -191,7 +191,7 @@ gss_qop_t		*qop_state;
     if (!mech)
 	return (GSS_S_BAD_MECH);
 
-    return gssint_unwrap_aead(mech, minor_status, context_handle,
+    return gssint_unwrap_aead(mech, minor_status, ctx,
 			      input_message_buffer, input_assoc_buffer,
 			      output_payload_buffer, conf_state, qop_state);
 }

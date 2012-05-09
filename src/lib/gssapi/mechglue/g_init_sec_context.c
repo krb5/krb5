@@ -194,7 +194,7 @@ OM_uint32 *		time_rec;
 	/* copy the supplied context handle */
 	union_ctx_id->internal_ctx_id = GSS_C_NO_CONTEXT;
     } else
-	union_ctx_id = *context_handle;
+	union_ctx_id = (gss_union_ctx_id_t)*context_handle;
 
     /*
      * get the appropriate cred handle from the union cred struct.
