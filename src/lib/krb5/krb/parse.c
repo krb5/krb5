@@ -180,6 +180,7 @@ krb5_parse_name_flags(krb5_context context, const char *name,
     krb5_boolean enterprise = (flags & KRB5_PRINCIPAL_PARSE_ENTERPRISE);
     krb5_boolean require_realm = (flags & KRB5_PRINCIPAL_PARSE_REQUIRE_REALM);
     krb5_boolean no_realm = (flags & KRB5_PRINCIPAL_PARSE_NO_REALM);
+    krb5_boolean ignore_realm = (flags & KRB5_PRINCIPAL_PARSE_IGNORE_REALM);
 
     *principal_out = NULL;
 
@@ -201,7 +202,7 @@ krb5_parse_name_flags(krb5_context context, const char *name,
                                    name);
             goto cleanup;
         }
-        if (!no_realm) {
+        if (!no_realm && !ignore_realm) {
             ret = krb5_get_default_realm(context, &default_realm);
             if (ret)
                 goto cleanup;
@@ -212,6 +213,9 @@ krb5_parse_name_flags(krb5_context context, const char *name,
         krb5_set_error_message(context, ret,
                                _("Principal %s has realm present"), name);
         goto cleanup;
+    } else if (ignore_realm) {
+        krb5_free_data_contents(context, &princ->realm);
+        princ->realm = empty_data();
     }
 
     princ->type = (enterprise) ? KRB5_NT_ENTERPRISE_PRINCIPAL :
