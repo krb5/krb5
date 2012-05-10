@@ -3374,7 +3374,7 @@ krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
  *
  * @param [in]  context         Library context
  * @param [in]  name            String representation of a principal name
- * @param [out] nprincipal      Principal
+ * @param [out] principal_out   New principal
  *
  * Convert a string representation of a principal name to a krb5_principal
  * structure.
@@ -3393,7 +3393,8 @@ krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
  * @note The realm in a Kerberos @a name cannot contain slash, colon,
  * or NULL characters.
  *
- * Use krb5_free_principal() to free @a nprincipal when it is no longer needed.
+ * Use krb5_free_principal() to free @a principal_out when it is no longer
+ * needed.
  *
  * @retval
  * 0 Success
@@ -3401,7 +3402,8 @@ krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
  * Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
-krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincipal);
+krb5_parse_name(krb5_context context, const char *name,
+                krb5_principal *principal_out);
 
 #define KRB5_PRINCIPAL_PARSE_NO_REALM      0x1 /**< Error if realm is present */
 #define KRB5_PRINCIPAL_PARSE_REQUIRE_REALM 0x2 /**< Error if realm is not present */
@@ -3409,12 +3411,12 @@ krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincip
                                                   enterprise principle */
 
 /**
- * Convert a string principal name to a krb5_principal with flags
+ * Convert a string principal name to a krb5_principal with flags.
  *
  * @param [in]  context         Library context
  * @param [in]  name            String representation of a principal name
  * @param [in]  flags           Flag
- * @param [out] nprincipal      Principal
+ * @param [out] principal_out   New principal
  *
  * Similar to krb5_parse_name(), this function converts a single-string
  * representation of a principal name to a krb5_principal structure.
@@ -3425,7 +3427,8 @@ krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincip
  * @li #KRB5_PRINCIPAL_PARSE_ENTERPRISE - create single-component enterprise
  *                                        principal
  *
- * Use krb5_free_principal() to free @a nprincipal when it is no longer needed.
+ * Use krb5_free_principal() to free @a principal_out when it is no longer
+ * needed.
  *
  * @retval
  * 0 Success
@@ -3434,7 +3437,7 @@ krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincip
  */
 krb5_error_code KRB5_CALLCONV
 krb5_parse_name_flags(krb5_context context, const char *name,
-                      int flags, krb5_principal *nprincipal);
+                      int flags, krb5_principal *principal_out);
 
 /**
  * Convert a krb5_principal structure to a string representation.
