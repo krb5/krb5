@@ -446,6 +446,11 @@ build_in_tkt_name(krb5_context context,
     *server = NULL;
 
     if (in_tkt_service) {
+        /* Minimally invasive fix for inability to change password with no
+         * default realm, for backporting. */
+        if (strcmp(in_tkt_service, "kadmin/changepw") == 0)
+            in_tkt_service = "kadmin/changepw@";
+
         /* this is ugly, because so are the data structures involved.  I'm
            in the library, so I'm going to manipulate the data structures
            directly, otherwise, it will be worse. */
