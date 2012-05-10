@@ -439,42 +439,27 @@ static krb5_error_code
 build_in_tkt_name(krb5_context context,
                   const char *in_tkt_service,
                   krb5_const_principal client,
-                  krb5_principal *server)
+                  krb5_principal *server_out)
 {
     krb5_error_code ret;
+    krb5_principal server = NULL;
 
-    *server = NULL;
+    *server_out = NULL;
 
     if (in_tkt_service) {
-        /* Minimally invasive fix for inability to change password with no
-         * default realm, for backporting. */
-        if (strcmp(in_tkt_service, "kadmin/changepw") == 0)
-            in_tkt_service = "kadmin/changepw@";
-
-        /* this is ugly, because so are the data structures involved.  I'm
-           in the library, so I'm going to manipulate the data structures
-           directly, otherwise, it will be worse. */
-
-        if ((ret = krb5_parse_name(context, in_tkt_service, server)))
+        ret = krb5_parse_name_flags(context, in_tkt_service,
+                                    KRB5_PRINCIPAL_PARSE_IGNORE_REALM,
+                                    &server);
+        if (ret)
             return ret;
-
-        /* stuff the client realm into the server principal.
-           realloc if necessary */
-        if ((*server)->realm.length < client->realm.length) {
-            char *p = realloc((*server)->realm.data,
-                              client->realm.length);
-            if (p == NULL) {
-                krb5_free_principal(context, *server);
-                *server = NULL;
-                return ENOMEM;
-            }
-            (*server)->realm.data = p;
+        ret = krb5int_copy_data_contents(context, &client->realm,
+                                         &server->realm);
+        if (ret) {
+            krb5_free_principal(context, server);
+            return ret;
         }
-
-        (*server)->realm.length = client->realm.length;
-        memcpy((*server)->realm.data, client->realm.data, client->realm.length);
     } else {
-        ret = krb5_build_principal_ext(context, server,
+        ret = krb5_build_principal_ext(context, &server,
                                        client->realm.length,
                                        client->realm.data,
                                        KRB5_TGS_NAME_SIZE,
@@ -489,11 +474,12 @@ build_in_tkt_name(krb5_context context,
      * Windows Server 2008 R2 RODC insists on TGS principal names having the
      * right name type.
      */
-    if (krb5_princ_size(context, *server) == 2 &&
-        data_eq_string(*krb5_princ_component(context, *server, 0),
+    if (krb5_princ_size(context, server) == 2 &&
+        data_eq_string(*krb5_princ_component(context, server, 0),
                        KRB5_TGS_NAME)) {
-        krb5_princ_type(context, *server) = KRB5_NT_SRV_INST;
+        krb5_princ_type(context, server) = KRB5_NT_SRV_INST;
     }
+    *server_out = server;
     return 0;
 }
 
