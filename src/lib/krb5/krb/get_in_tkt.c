@@ -666,6 +666,8 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
     krb5_error_code code = 0;
     unsigned char random_buf[4];
     krb5_data random_data;
+    krb5_timestamp from;
+
     if (ctx->preauth_to_use) {
         krb5_free_pa_data(context, ctx->preauth_to_use);
         ctx->preauth_to_use = NULL;
@@ -728,14 +730,16 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
     /* give the preauth plugins a chance to prep the request body */
     krb5_preauth_prepare_request(context, ctx->opte, ctx->request);
 
-    ctx->request->from = krb5int_addint32(ctx->request_time,
-                                          ctx->start_time);
-    ctx->request->till = krb5int_addint32(ctx->request->from,
-                                          ctx->tkt_life);
+    /* Omit request start time in the common case.  MIT and Heimdal KDCs will
+     * ignore it for non-postdated tickets anyway. */
+    from = krb5int_addint32(ctx->request_time, ctx->start_time);
+    if (ctx->start_time != 0)
+        ctx->request->from = from;
+    ctx->request->till = krb5int_addint32(from, ctx->tkt_life);
 
     if (ctx->renew_life > 0) {
         ctx->request->rtime =
-            krb5int_addint32(ctx->request->from, ctx->renew_life);
+            krb5int_addint32(from, ctx->renew_life);
         if (ctx->request->rtime < ctx->request->till) {
             /* don't ask for a smaller renewable time than the lifetime */
             ctx->request->rtime = ctx->request->till;

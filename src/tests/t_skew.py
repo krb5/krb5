@@ -28,17 +28,31 @@ conf = {'all': {'libdefaults': {'kdc_timesync': '0'}}}
 realm = K5Realm(start_kdc=False, krb5_conf=conf)
 realm.start_kdc(['-T', '-3600'])
 
-# kinit (no preauth) should work, but kvno should not.  kinit with
-# FAST should also fail since the armor AP-REQ won't be valid.
-realm.kinit(realm.user_princ, password('user'))
-realm.run_as_client([kvno, realm.host_princ], expected_code=1)
-realm.kinit(realm.user_princ, password('user'), flags=['-T', realm.ccache],
-            expected_code=1)
+# Get tickets to use for FAST kinit tests.  The start time offset is
+# ignored by the KDC since we aren't getting postdatable tickets, but
+# serves to suppress the client clock skew check on the KDC reply.
+fast_cache = realm.ccache + '.fast'
+realm.kinit(realm.user_princ, password('user'),
+            flags=['-s', '-3600s', '-c', fast_cache])
 
-# kinit (with preauth) should fail, with or without FAST.
+# kinit should detect too much skew in the KDC response.  kinit with
+# FAST should fail from the KDC since the armor AP-REQ won't be valid.
+out = realm.kinit(realm.user_princ, password('user'), expected_code=1)
+if 'Clock skew too great in KDC reply' not in out:
+    fail('Expected error message not seen in kinit skew case')
+out = realm.kinit(realm.user_princ, password('user'), flags=['-T', fast_cache],
+                  expected_code=1)
+if 'Clock skew too great while' not in out:
+    fail('Expected error message not seen in kinit FAST skew case')
+
+# kinit (with preauth) should fail from the KDC, with or without FAST.
 realm.run_kadminl('modprinc +requires_preauth user')
-realm.kinit(realm.user_princ, password('user'), expected_code=1)
-realm.kinit(realm.user_princ, password('user'), flags=['-T', realm.ccache],
+out = realm.kinit(realm.user_princ, password('user'), expected_code=1)
+if 'Clock skew too great while' not in out:
+    fail('Expected error message not seen in kinit skew case (preauth)')
+realm.kinit(realm.user_princ, password('user'), flags=['-T', fast_cache],
             expected_code=1)
+if 'Clock skew too great while' not in out:
+    fail('Expected error message not seen in kinit FAST skew case (preauth)')
 
 success('Clock skew tests')
