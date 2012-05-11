@@ -336,23 +336,15 @@ UnicodeToANSI(LPTSTR lpInputString, LPSTR lpszOutputString, int nOutStringLen)
 
 static VOID
 WINAPI
-ANSIToUnicode(LPSTR lpInputString, LPTSTR lpszOutputString, int nOutStringLen)
+ANSIToUnicode(LPCSTR lpInputString, LPWSTR lpszOutputString, int nOutStringLen)
 {
 
     CPINFO CodePageInfo;
 
-    lstrcpy(lpszOutputString, (LPTSTR) lpInputString);
-
     GetCPInfo(CP_ACP, &CodePageInfo);
 
-    if (CodePageInfo.MaxCharSize > 1 || ((LPBYTE) lpInputString)[1] != '\0')
-    {
-        // Looks like ANSI or MultiByte, better translate it
-        MultiByteToWideChar(CP_ACP, 0, (LPCSTR) lpInputString, -1,
-                            (LPWSTR) lpszOutputString, nOutStringLen);
-    }
-    else
-        lstrcpy(lpszOutputString, (LPTSTR) lpInputString);
+    MultiByteToWideChar(CP_ACP, 0, lpInputString, -1,
+                        lpszOutputString, nOutStringLen);
 }  // ANSIToUnicode
 
 
