@@ -542,7 +542,7 @@ generic_gss_copy_oid_set(OM_uint32 *minor_status,
     *new_oidset = copy;
 done:
     if (major != GSS_S_COMPLETE) {
-        (void) gss_release_oid_set(&minor, &copy);
+        (void) generic_gss_release_oid_set(&minor, &copy);
     }
 
     return (major);
