@@ -25,9 +25,6 @@
  */
 
 #include "mglueP.h"
-/* should include to get protos #include "../generic/gssapiP_generic.h" */
-
-extern gss_mechanism *gssint_mechs_array;
 
 /*
  * gss_release_oid has been moved to g_initialize, becasue it requires access
