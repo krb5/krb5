@@ -96,19 +96,16 @@ allocate_princ(krb5_context context, const char *name, krb5_boolean enterprise,
         }
     }
 
-    /* Allocate space for each non-empty component and the realm. */
+    /* Allocate space for each component and the realm, with space for null
+     * terminators on each field. */
     for (i = 0; i < princ->length; i++) {
-        if (princ->data[i].length > 0) {
-            princ->data[i].data = k5alloc(princ->data[i].length, &ret);
-            if (princ->data[i].data == NULL)
-                goto cleanup;
-        }
-    }
-    if (princ->realm.length > 0) {
-        princ->realm.data = k5alloc(princ->realm.length, &ret);
-        if (princ->realm.data == NULL)
+        princ->data[i].data = k5alloc(princ->data[i].length + 1, &ret);
+        if (princ->data[i].data == NULL)
             goto cleanup;
     }
+    princ->realm.data = k5alloc(princ->realm.length + 1, &ret);
+    if (princ->realm.data == NULL)
+        goto cleanup;
 
     *princ_out = princ;
     *has_realm_out = (cur_data == &princ->realm);
@@ -120,7 +117,8 @@ cleanup:
 
 /*
  * Parse name into princ, assuming that name is correctly formed and that all
- * principal fields are allocated to the correct length.  If enterprise is
+ * principal fields are allocated to the correct length with zero-filled memory
+ * (so we get null-terminated fields without any extra work).  If enterprise is
  * true, use enterprise principal parsing rules.
  */
 static void

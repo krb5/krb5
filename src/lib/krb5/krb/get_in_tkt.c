@@ -452,6 +452,7 @@ build_in_tkt_name(krb5_context context,
                                     &server);
         if (ret)
             return ret;
+        krb5_free_data_contents(context, &server->realm);
         ret = krb5int_copy_data_contents(context, &client->realm,
                                          &server->realm);
         if (ret) {
