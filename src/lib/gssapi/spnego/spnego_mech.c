@@ -331,7 +331,7 @@ spnego_gss_acquire_cred(OM_uint32 *minor_status,
 			gss_OID_set *actual_mechs,
 			OM_uint32 *time_rec)
 {
-	OM_uint32 status;
+	OM_uint32 status, tmpmin;
 	gss_OID_set amechs;
 	gss_cred_id_t mcred = NULL;
 	spnego_gss_cred_id_t spcred = NULL;
@@ -375,9 +375,9 @@ spnego_gss_acquire_cred(OM_uint32 *minor_status,
 	}
 
 	if (actual_mechs && amechs != GSS_C_NULL_OID_SET) {
-		(void) gssint_copy_oid_set(minor_status, amechs, actual_mechs);
+		(void) gssint_copy_oid_set(&tmpmin, amechs, actual_mechs);
 	}
-	(void) gss_release_oid_set(minor_status, &amechs);
+	(void) gss_release_oid_set(&tmpmin, &amechs);
 
 	if (status == GSS_S_COMPLETE) {
 		spcred->mcred = mcred;
