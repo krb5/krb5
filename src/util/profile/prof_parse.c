@@ -47,8 +47,6 @@ static void parse_quoted_string(char *str)
 {
     char *to, *from;
 
-    to = from = str;
-
     for (to = from = str; *from && *from != '"'; to++, from++) {
         if (*from == '\\') {
             from++;
