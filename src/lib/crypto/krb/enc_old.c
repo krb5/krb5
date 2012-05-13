@@ -104,6 +104,8 @@ krb5int_old_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
     /* Use the key as the ivec for des-cbc-crc if none was provided. */
     if (key->keyblock.enctype == ENCTYPE_DES_CBC_CRC && ivec == NULL) {
         ret = alloc_data(&crcivec, key->keyblock.length);
+        if (ret != 0)
+            goto cleanup;
         memcpy(crcivec.data, key->keyblock.contents, key->keyblock.length);
         ivec = &crcivec;
     }
