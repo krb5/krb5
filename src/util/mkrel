@@ -137,7 +137,7 @@ if test $newstyle = t; then
 #define KRB5_RELDATE "'"$reldate"'"' patchlevel.h > patchlevel.h.new && \
 		mv patchlevel.h.new patchlevel.h)
 	if test $checkout = t; then
-		(cd $reldir && git log --stat $repository/$reltag > doc/CHANGES)
+		(cd $reldir && git log --stat $reltag > doc/CHANGES)
 	fi
 else
 
