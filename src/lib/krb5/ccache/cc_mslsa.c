@@ -172,37 +172,6 @@ is_windows_vista (void)
     return fIsVista;
 }
 
-static BOOL
-is_process_uac_limited (void)
-{
-    static BOOL fChecked = FALSE;
-    static BOOL fIsUAC = FALSE;
-
-    if (!fChecked)
-    {
-        NTSTATUS Status = 0;
-        HANDLE  TokenHandle;
-        DWORD   ElevationLevel;
-        DWORD   ReqLen;
-        BOOL    Success;
-
-        if (is_windows_vista()) {
-            Success = OpenProcessToken( GetCurrentProcess(), TOKEN_QUERY, &TokenHandle );
-            if ( Success ) {
-                Success = GetTokenInformation( TokenHandle,
-                                               TokenOrigin+1 /* ElevationLevel */,
-                                               &ElevationLevel, sizeof(DWORD), &ReqLen );
-                CloseHandle( TokenHandle );
-                if ( Success && ElevationLevel == 3 /* Limited */ )
-                    fIsUAC = TRUE;
-            }
-        }
-        fChecked = TRUE;
-    }
-    return fIsUAC;
-
-}
-
 typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 
 static BOOL
@@ -444,9 +413,6 @@ static BOOL
 IsMSSessionKeyNull(KERB_CRYPTO_KEY *mskey)
 {
     DWORD i;
-
-    if (is_process_uac_limited())
-        return TRUE;
 
     if (mskey->KeyType == KERB_ETYPE_NULL)
         return TRUE;
@@ -1252,6 +1218,10 @@ krb5_is_permitted_tgs_enctype(krb5_context context, krb5_const_principal princ, 
 // tickets.  This is safe to do because the LSA purges its cache when it
 // retrieves a new TGT (ms calls this renew) but not when it renews the TGT
 // (ms calls this refresh).
+// UAC-limited processes are not allowed to obtain a copy of the MSTGT
+// session key.  We used to check for UAC-limited processes and refuse all
+// access to the TGT, but this makes the MSLSA ccache completely unusable.
+// Instead we ought to just flag that the tgt session key is not valid.
 
 static BOOL
 GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNAL_TICKET **ticket, BOOL enforce_tgs_enctypes)
@@ -1278,11 +1248,6 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
 #endif /* ENABLE_PURGING */
     int    ignore_cache = 0;
     krb5_enctype *etype_list = NULL, *ptr = NULL, etype = 0;
-
-    if (is_process_uac_limited()) {
-        Status = STATUS_ACCESS_DENIED;
-        goto cleanup;
-    }
 
     memset(&CacheRequest, 0, sizeof(KERB_QUERY_TKT_CACHE_REQUEST));
     CacheRequest.MessageType = KerbRetrieveTicketMessage;
