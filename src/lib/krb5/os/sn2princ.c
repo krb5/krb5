@@ -109,7 +109,8 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
             err = getaddrinfo(hostname, 0, &hints, &ai);
             if (err) {
 #ifdef DEBUG_REFERRALS
-                printf("sname_to_princ: failed to canonicalize %s; using as-is", hostname);
+                printf("sname_to_princ: failed to canonicalize %s; "
+                       "using as-is\n", hostname);
 #endif
             }
             remote_host = strdup((ai && ai->ai_canonname) ? ai->ai_canonname : hostname);
