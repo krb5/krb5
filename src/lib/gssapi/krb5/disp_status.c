@@ -48,7 +48,7 @@ char *get_error_message(OM_uint32 minor_code)
     gsserrmap *p = k5_getspecific(K5_KEY_GSS_KRB5_ERROR_MESSAGE);
     char *msg = NULL;
 #ifdef DEBUG
-    fprintf(stderr, "%s(%lu, p=%p)", __func__, (unsigned long) minor_code,
+    fprintf(stderr, "%s(%lu, p=%p)", __FUNCTION__, (unsigned long) minor_code,
             (void *) p);
 #endif
     if (p) {
@@ -74,7 +74,7 @@ static int save_error_string_nocopy(OM_uint32 minor_code, char *msg)
     int ret;
 
 #ifdef DEBUG
-    fprintf(stderr, "%s(%lu, %s)", __func__, (unsigned long) minor_code, msg);
+    fprintf(stderr, "%s(%lu, %s)", __FUNCTION__, (unsigned long) minor_code, msg);
 #endif
     p = k5_getspecific(K5_KEY_GSS_KRB5_ERROR_MESSAGE);
     if (!p) {
@@ -131,12 +131,12 @@ void krb5_gss_save_error_info(OM_uint32 minor_code, krb5_context ctx)
     char *s;
 
 #ifdef DEBUG
-    fprintf(stderr, "%s(%lu, ctx=%p)\n", __func__,
+    fprintf(stderr, "%s(%lu, ctx=%p)\n", __FUNCTION__,
             (unsigned long) minor_code, (void *)ctx);
 #endif
     s = (char *)krb5_get_error_message(ctx, (krb5_error_code)minor_code);
 #ifdef DEBUG
-    fprintf(stderr, "%s(%lu, ctx=%p) saving: %s\n", __func__,
+    fprintf(stderr, "%s(%lu, ctx=%p) saving: %s\n", __FUNCTION__,
             (unsigned long) minor_code, (void *)ctx, s);
 #endif
     save_error_string(minor_code, s);
