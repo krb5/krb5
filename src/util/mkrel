@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-repository=git.mit.edu:/git/krb5
+repository=git.mit.edu:/git/krb5.git
 dodoc=t
 dosrc=t
 checkout=t
@@ -97,7 +97,7 @@ echo "major=$relmajor minor=$relminor patch=$relpatch"
 if test $checkout = t; then
 	echo "Checking out krb5 with tag $reltag into directory $reldir..."
 	git clone -q -n $repository $reldir
-	(cd $reldir && git checkout -q $reltag --)
+	(cd $reldir && git checkout -q $reltag)
 fi
 
 #
@@ -179,8 +179,9 @@ echo "Nuking unneeded files..."
 find $reldir \( -name TODO -o -name todo -o -name .cvsignore \
 	-o -name .gitignore -o -name BADSYMS -o -name .Sanitize \
 	-o -name .rconf \) -print | xargs rm -f || true
-find $reldir -type d \( -name autom4te.cache -o -name .git \
+find $reldir -type d \( -name autom4te.cache \
 	-o -name \$ac_config_fragdir \) -exec rm -rf {} \; || true
+rm -rf $reldir/.git || true
 
 if test $dodoc = t; then
 	echo "Building doc..."
