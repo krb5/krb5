@@ -134,6 +134,7 @@ extern "C" cc_int32 cci_os_ipc_thread_init (void) {
                                     opts.cMaxCalls,
                                     (RPC_CSTR)endpoint,
                                     sa.lpSecurityDescriptor);  // SD
+        free(endpoint);
         cci_check_error(err);
         }
 
