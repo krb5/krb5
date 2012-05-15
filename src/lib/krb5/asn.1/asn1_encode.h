@@ -156,7 +156,7 @@ struct fn_info {
     asn1_error_code (*dec)(const taginfo *, const unsigned char *, size_t,
                            void *);
     int (*check_tag)(const taginfo *);
-    void (*free)(void *);
+    void (*free_func)(void *);
 };
 
 struct ptr_info {

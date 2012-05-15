@@ -952,8 +952,8 @@ free_atype(const struct atype_info *a, void *val)
     switch (a->type) {
     case atype_fn: {
         const struct fn_info *fn = a->tinfo;
-        if (fn->free != NULL)
-            fn->free(val);
+        if (fn->free_func != NULL)
+            fn->free_func(val);
         break;
     }
     case atype_sequence:
