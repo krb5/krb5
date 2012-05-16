@@ -225,7 +225,7 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
         } else if (strcmp(tmpbuf, "etypes") == 0) {
             etypes = va_arg(ap, krb5_enctype *);
             if (etypes == NULL || *etypes == 0)
-                krb5int_buf_add(&buf, "(empty");
+                krb5int_buf_add(&buf, "(empty)");
             for (; etypes != NULL && *etypes != 0; etypes++) {
                 subfmt(context, &buf, "{etype}", *etypes);
                 if (*(etypes + 1) != 0)
