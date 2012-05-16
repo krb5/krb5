@@ -193,7 +193,7 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
         } else if (strcmp(tmpbuf, "key") == 0) {
             key = va_arg(ap, krb5_key);
             if (key == NULL)
-                krb5int_buf_add(&buf, "(null");
+                krb5int_buf_add(&buf, "(null)");
             else
                 subfmt(context, &buf, "{keyblock}", &key->keyblock);
         } else if (strcmp(tmpbuf, "cksum") == 0) {
