@@ -55,4 +55,4 @@
 #define KRB5_PATCHLEVEL 6
 #define KRB5_RELTAIL "postrelease"
 /* #undef KRB5_RELDATE */
-#define KRB5_RELTAG "branches/krb5-1-8"
+#define KRB5_RELTAG "krb5-1.8"
