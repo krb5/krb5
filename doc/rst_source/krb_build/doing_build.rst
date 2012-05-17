@@ -6,26 +6,20 @@ Using autoconf
 
 (If you are not a developer, you can skip this section.)
 
-In most of the Kerberos V5 source directories, there is a configure
-script which automatically determines the compilation environment and
-creates the proper Makefiles for a particular platform.  These
-configure files are generated using autoconf, which can be found in
-the ``src/util/autoconf`` directory in the distribution.
+In the Kerberos V5 source directory, there is a configure script which
+automatically determines the compilation environment and creates the
+proper Makefiles for a particular platform.  This configure script is
+generated using autoconf, which you should already have installed.
 
 Normal users will not need to worry about running autoconf; the
-distribution comes with the configure files already prebuilt.
-
-Note that in order to run autoconf, you must have GNU m4 in your path.
-Before you use the autoconf in the Kerberos V5 source tree, you may
-also need to run configure, and then run make in the
-``src/util/autoconf`` directory in order to properly set up autoconf.
+distribution comes with the configure script already prebuilt.
 
 One tool which is provided for the convenience of developers can be
 found in ``src/util/reconf``.  This program should be run while the
 current directory is the top source directory.  It will automatically
-rebuild any configure files which need rebuilding.  If you know that
-you have made a change that will require that all the configure files
-need to be rebuilt from scratch, specify the **--force** option::
+rebuild the configure script if it needs rebuilding.  If you know that
+you have made a change that will require that the configure file be
+rebuilt from scratch, specify the **--force** option::
 
     cd /u1/krb5-1.9/src
     ./util/reconf --force
