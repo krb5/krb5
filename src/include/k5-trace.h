@@ -73,6 +73,7 @@
  *   {etype}       krb5_enctype, display shortest name of enctype
  *   {etypes}      krb5_enctype *, display list of enctypes
  *   {ccache}      krb5_ccache, display type:name
+ *   {keytab}      krb5_keytab, display name
  *   {creds}       krb5_creds *, display clientprinc -> serverprinc
  */
 
