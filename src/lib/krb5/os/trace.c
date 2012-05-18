@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/krb5/os/trace.c - k5trace implementation */
+/* lib/krb5/os/trace.c - krb5int_trace implementation */
 /*
  * Copyright 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +25,10 @@
  */
 
 /*
- * k5trace is defined in k5-int.h as a macro or static inline function,
- * and is called like so:
+ * krb5int_trace is defined in k5-trace.h as a macro or static inline
+ * function, and is called like so:
  *
- *   void k5trace(krb5_context context, const char *fmt, ...)
+ *   void krb5int_trace(krb5_context context, const char *fmt, ...)
  *
  * Arguments may or may not be evaluated, so don't pass argument
  * expressions with side effects.  Tracing support and calls can be
