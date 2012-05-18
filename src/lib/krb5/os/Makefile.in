@@ -155,13 +155,15 @@ clean-unix:: clean-libobjs
 shared:
 	mkdir shared
 
-TEST_PROGS= t_std_conf t_an_to_ln t_kuserok t_locate_kdc
+TEST_PROGS= t_std_conf t_an_to_ln t_kuserok t_locate_kdc t_trace
 
 T_STD_CONF_OBJS= t_std_conf.o 
 
 T_AN_TO_LN_OBJS = t_an_to_ln.o an_to_ln.o 
 
 T_KUSEROK_OBJS = t_kuserok.o
+
+T_TRACE_OBJS = t_trace.o
 
 t_std_conf: $(T_STD_CONF_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_std_conf $(T_STD_CONF_OBJS) $(KRB5_BASE_LIBS)
@@ -183,6 +185,9 @@ $(OUTPRE)t_locate_kdc.exe: $(OUTPRE)t_locate_kdc.obj \
 		$(KLIB) $(PLIB) $(CLIB) $(SLIB)
 	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(DNSLIBS)
 
+t_trace: $(T_TRACE_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_trace $(T_TRACE_OBJS) $(KRB5_BASE_LIBS)
+
 LCLINT=lclint
 LCLINTOPTS= -warnposix \
 	-usedef +charintliteral +ignoresigns -predboolint +boolint \
@@ -192,7 +197,8 @@ lclint-localaddr: localaddr.c
 	$(LCLINT) $(LCLINTOPTS) $(CPPFLAGS) $(LOCALINCLUDES) $(DEFS) \
 		-DTEST $(srcdir)/localaddr.c
 
-check-unix:: check-unix-stdconf check-unix-locate check-unix-antoln t_kuserok
+check-unix:: check-unix-stdconf check-unix-locate check-unix-antoln \
+	check-unix-trace t_kuserok
 
 check-unix-stdconf:: t_std_conf
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
@@ -253,6 +259,10 @@ check-unix-antoln:: t_an_to_ln
 	KRB5_CONFIG=./t_an.conf ; export KRB5_CONFIG ; \
 	$(KRB5_RUN_ENV) $(VALGRIND) ./t_an_to_ln fred/r@r barney/r@r x/r/r/r@r
 	$(RM) ./t_an.*
+
+check-unix-trace:: t_trace
+	export KRB5_TRACE=/dev/stdout ; \
+	$(KRB5_RUN_ENV) $(VALGRIND) ./t_trace
 
 clean:: 
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o t_locate_kdc.o
