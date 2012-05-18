@@ -140,9 +140,7 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
     krb5_error_code retval;
     char local_host[MAXDNAME+1];
 
-#ifdef DEBUG_REFERRALS
-    printf("get_host_realm(host:%s) called\n",host);
-#endif
+    TRACE_GET_HOST_REALM(context, host);
 
     retval = krb5int_clean_hostname(context, host, local_host, sizeof local_host);
     if (retval)
@@ -161,15 +159,11 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
     */
 
     cp = local_host;
-#ifdef DEBUG_REFERRALS
-    printf("  local_host: %s\n",local_host);
-#endif
+    TRACE_GET_HOST_REALM_LOCALHOST(context, local_host);
     realm = (char *)NULL;
     temp_realm = 0;
     while (cp) {
-#ifdef DEBUG_REFERRALS
-        printf("  trying to look up %s in the domain_realm map\n",cp);
-#endif
+        TRACE_GET_HOST_REALM_DOMAIN_REALM_MAP(context, cp);
         retval = profile_get_string(context->profile, KRB5_CONF_DOMAIN_REALM, cp,
                                     0, (char *)NULL, &temp_realm);
         if (retval)
@@ -184,13 +178,8 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
             cp = strchr(cp, '.');
         }
     }
-#ifdef DEBUG_REFERRALS
-    printf("  done searching the domain_realm map\n");
-#endif
     if (temp_realm) {
-#ifdef DEBUG_REFERRALS
-        printf("  temp_realm is %s\n",temp_realm);
-#endif
+        TRACE_GET_HOST_REALM_TEMP_REALM(context, temp_realm);
         realm = strdup(temp_realm);
         if (!realm) {
             profile_release_string(temp_realm);
@@ -214,6 +203,7 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
     retrealms[0] = realm;
     retrealms[1] = 0;
 
+    TRACE_GET_HOST_REALM_RETURN(context, host, realm);
     *realmsp = retrealms;
     return 0;
 }
@@ -285,9 +275,7 @@ krb5_get_fallback_host_realm(krb5_context context,
     memcpy(host, hdata->data, hdata->length);
     host[hdata->length]=0;
 
-#ifdef DEBUG_REFERRALS
-    printf("get_fallback_host_realm(host >%s<) called\n",host);
-#endif
+    TRACE_GET_FALLBACK_HOST_REALM(context, host);
 
     retval = krb5int_clean_hostname(context, host, local_host, sizeof local_host);
     if (retval)
@@ -367,6 +355,7 @@ krb5_get_fallback_host_realm(krb5_context context,
     retrealms[0] = realm;
     retrealms[1] = 0;
 
+    TRACE_GET_FALLBACK_HOST_REALM_RETURN(context, host, realm);
     *realmsp = retrealms;
     return 0;
 }
@@ -384,9 +373,7 @@ krb5int_clean_hostname(krb5_context context,
     int l;
 
     local_host[0]=0;
-#ifdef DEBUG_REFERRALS
-    printf("krb5int_clean_hostname called: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
-#endif
+    TRACE_CLEAN_HOSTNAME(context, host, lhsize, local_host);
     if (host) {
         /* Filter out numeric addresses if the caller utterly failed to
            convert them to names.  */
@@ -429,9 +416,7 @@ krb5int_clean_hostname(krb5_context context,
     if (l && local_host[l-1] == '.')
         local_host[l-1] = 0;
 
-#ifdef DEBUG_REFERRALS
-    printf("krb5int_clean_hostname ending: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
-#endif
+    TRACE_CLEAN_HOSTNAME_RETURN(context, host, lhsize, local_host);
     return 0;
 }
 

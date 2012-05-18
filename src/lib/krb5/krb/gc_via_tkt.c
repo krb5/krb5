@@ -118,13 +118,9 @@ check_reply_server(krb5_context context, krb5_flags kdcoptions,
     if (kdcoptions & KDC_OPT_CANONICALIZE) {
         /* in_cred server differs from ticket returned, but ticket
            returned is consistent and we requested canonicalization. */
-#if 0
-#ifdef DEBUG_REFERRALS
-        printf("gc_via_tkt: in_cred and encoding don't match but referrals requested\n");
-        krb5int_dbgref_dump_principal("gc_via_tkt: in_cred",in_cred->server);
-        krb5int_dbgref_dump_principal("gc_via_tkt: encoded server",dec_rep->enc_part2->server);
-#endif
-#endif
+
+        TRACE_CHECK_REPLY_SERVER_DIFFERS(context, in_cred->server,
+                                         dec_rep->enc_part2->server);
         return 0;
     }
 
@@ -434,11 +430,8 @@ krb5_get_cred_via_tkt_ext(krb5_context context, krb5_creds *tkt,
     if (retval)
         goto cleanup;
 
-#ifdef DEBUG_REFERRALS
-    printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
-    krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt requested ticket", in_cred->server);
-    krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt TGT in use", tkt->server);
-#endif
+    TRACE_GET_CRED_VIA_TKT_EXT(context, in_cred->server, tkt->server,
+                               kdcoptions);
 
     retval = krb5int_make_tgs_request(context, fast_state, tkt, kdcoptions,
                                       address, in_padata, in_cred,
@@ -487,9 +480,7 @@ send_again:
 
 cleanup:
     krb5int_fast_free_state(context, fast_state);
-#ifdef DEBUG_REFERRALS
-    printf("krb5_get_cred_via_tkt ending; %s\n", retval?error_message(retval):"no error");
-#endif
+    TRACE_GET_CRED_VIA_TKT_EXT_RETURN(context, retval);
 
     krb5_free_data_contents(context, &request_data);
     krb5_free_data_contents(context, &response_data);

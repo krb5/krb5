@@ -386,4 +386,50 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_TKT_CREDS_WRONG_ENCTYPE(c)                                \
     TRACE(c, "Retrying TGS request with desired service ticket enctypes")
 
+#define TRACE_GET_HOST_REALM(c, host) \
+    TRACE(c, "Get host realm for {str}", host)
+#define TRACE_GET_HOST_REALM_LOCALHOST(c, localhost) \
+    TRACE(c, "Use local host {str} to get host realm", localhost)
+#define TRACE_GET_HOST_REALM_DOMAIN_REALM_MAP(c, host) \
+    TRACE(c, "Look up {str} in the domain_realm map", host)
+#define TRACE_GET_HOST_REALM_TEMP_REALM(c, realm) \
+    TRACE(c, "Temporary realm is {str}", realm)
+#define TRACE_GET_HOST_REALM_RETURN(c, host, realm) \
+    TRACE(c, "Got realm {str} for host {str}", realm, host)
+
+#define TRACE_GET_FALLBACK_HOST_REALM(c, host) \
+    TRACE(c, "Get fallback host realm for {str}", host)
+#define TRACE_GET_FALLBACK_HOST_REALM_RETURN(c, host, realm) \
+    TRACE(c, "Got fallback realm {str} for host {str}", realm, host)
+
+#define TRACE_CLEAN_HOSTNAME(c, host, size, localhost) \
+    TRACE(c, "Clean host {str} with local host {lenstr}", \
+          host, size, localhost)
+#define TRACE_CLEAN_HOSTNAME_RETURN(c, host, size, localhost)  \
+    TRACE(c, "Cleaned host {str} to local host {lenstr}", \
+          host, size, localhost)
+
+#define TRACE_SNAME_TO_PRINCIPAL(c, host, sname, type) \
+    TRACE(c, "Convert service {str} ({ptype}) on host {str} to principal", \
+          sname, type, host)
+#define TRACE_SNAME_TO_PRINCIPAL_NOCANON(c, host) \
+    TRACE(c, "Failed to canonicalize {str}; using as-is", host)
+#define TRACE_SNAME_TO_PRINCIPAL_CANON(c, host) \
+    TRACE(c, "Remote host after forward canonicalization: {str}", host)
+#define TRACE_SNAME_TO_PRINCIPAL_RDNS(c, host) \
+    TRACE(c, "Remote host after reverse DNS processing: {str}", host)
+#define TRACE_SNAME_TO_PRINCIPAL_RETURN(c, princ) \
+    TRACE(c, "Got service principal {princ}", princ)
+
+#define TRACE_CHECK_REPLY_SERVER_DIFFERS(c, request, reply) \
+    TRACE(c, "Reply server {princ} differs from requested {princ}", \
+          reply, request)
+
+#define TRACE_GET_CRED_VIA_TKT_EXT(c, request, reply, kdcoptions) \
+    TRACE(c, "Get cred via TGT {princ} after requesting {prince} " \
+          "(canonicalize {str})", \
+          reply, request, kdcoptions & KDC_OPT_CANONICALIZE ? "on" : "off")
+#define TRACE_GET_CRED_VIA_TKT_EXT_RETURN(c, ret) \
+    TRACE(c, "Got cred; {kerr}", ret)
+
 #endif /* K5_TRACE_H */

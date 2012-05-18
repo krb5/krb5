@@ -189,7 +189,7 @@ main (int argc, char *argv[])
           KRB5_NT_ENT_PRINCIPAL_AND_ID);
     TRACE(ctx, "int, krb5_principal type: {ptype}", -1);
 
-    padatap = (krb5_pa_data **) malloc(sizeof(krb5_pa_data *)*2);
+    padatap = malloc(sizeof(krb5_pa_data *) * 3);
     padatap[0] = &padata;
     memcpy(&padata2, &padata, sizeof(padata));
     padatap[1] = &padata2;

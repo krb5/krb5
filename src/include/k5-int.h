@@ -2272,14 +2272,9 @@ extern krb5_error_code
 krb5int_c_mandatory_cksumtype(krb5_context, krb5_enctype, krb5_cksumtype *);
 
 /*
- * Referral definitions, debugging hooks, and subfunctions.
+ * Referral definitions and subfunctions.
  */
 #define        KRB5_REFERRAL_MAXHOPS    10
-/* #define DEBUG_REFERRALS */
-
-#ifdef DEBUG_REFERRALS
-void krb5int_dbgref_dump_principal(char *, krb5_principal);
-#endif
 
 /* Common hostname-parsing code. */
 krb5_error_code
