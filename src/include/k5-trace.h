@@ -69,6 +69,7 @@
  *   {key}         krb5_key, display enctype and hash of key
  *   {cksum}       const krb5_checksum *, display cksumtype and hex checksum
  *   {princ}       krb5_principal, unparse and display
+ *   {ptype}       krb5_int32, krb5_principal type, display name
  *   {patypes}     krb5_pa_data **, display list of padata type numbers
  *   {etype}       krb5_enctype, display shortest name of enctype
  *   {etypes}      krb5_enctype *, display list of enctypes

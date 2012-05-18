@@ -64,6 +64,27 @@ hash_bytes(krb5_context context, const void *ptr, size_t len)
 }
 
 static char *
+principal_type_string(krb5_int32 type)
+{
+    switch (type) {
+    case KRB5_NT_UNKNOWN: return "unknown";
+    case KRB5_NT_PRINCIPAL: return "principal";
+    case KRB5_NT_SRV_INST: return "service instance";
+    case KRB5_NT_SRV_HST: return "service with host as instance";
+    case KRB5_NT_SRV_XHST: return "service with host as components";
+    case KRB5_NT_UID: return "unique ID";
+    case KRB5_NT_X500_PRINCIPAL: return "X.509";
+    case KRB5_NT_SMTP_NAME: return "SMTP email";
+    case KRB5_NT_ENTERPRISE_PRINCIPAL: return "Windows 2000 UPN";
+    case KRB5_NT_WELLKNOWN: return "well-known";
+    case KRB5_NT_MS_PRINCIPAL: return "Windows 2000 UPN and SID";
+    case KRB5_NT_MS_PRINCIPAL_AND_ID: return "NT 4 style name";
+    case KRB5_NT_ENT_PRINCIPAL_AND_ID: return "NT 4 style name and SID";
+    default: return "?";
+    }
+}
+
+static char *
 trace_format(krb5_context context, const char *fmt, va_list ap)
 {
     struct k5buf buf;
@@ -207,6 +228,9 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
                 krb5int_buf_add(&buf, str);
                 krb5_free_unparsed_name(context, str);
             }
+        } else if (strcmp(tmpbuf, "ptype") == 0) {
+            p = principal_type_string(va_arg(ap, krb5_int32));
+            krb5int_buf_add(&buf, p);
         } else if (strcmp(tmpbuf, "patypes") == 0) {
             padata = va_arg(ap, krb5_pa_data **);
             if (padata == NULL || *padata == NULL)
