@@ -125,7 +125,11 @@ DNSFLAGS=
 TIME_T_FLAGS=-D_USE_32BIT_TIME_T
 !endif
 
+!if defined (NODEBUG)
 KFWFLAGS=-DUSE_LEASH=1
+!else
+KFWFLAGS=-DUSE_LEASH=1 -DDEBUG -D_CRTDBG_MAP_ALLOC
+!endif
 
 #
 # The name of the C compiler for the target
