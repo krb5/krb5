@@ -53,6 +53,8 @@
 #define UNICODE
 #define _UNICODE
 
+#include <ntstatus.h>
+#define WIN32_NO_STATUS
 #include "k5-int.h"
 #include "com_err.h"
 #include "cc-int.h"
@@ -70,7 +72,6 @@
 #endif
 #define _WIN32_WINNT 0x0600
 #include <ntsecapi.h>
-#include <ntstatus.h>
 
 
 /* The following two features can only be built using the version of the
@@ -2161,6 +2162,8 @@ krb5_lcc_close(krb5_context context, krb5_ccache id)
 
         if (data) {
             LsaDeregisterLogonProcess(data->LogonHandle);
+            if (data->cc_name)
+                free(data->cc_name);
             free(data);
         }
         free(id);
@@ -2735,6 +2738,58 @@ krb5_lcc_get_flags(krb5_context context, krb5_ccache id, krb5_flags *flags)
     return KRB5_OK;
 }
 
+struct krb5int_lcc_iterator {
+    int id;
+};
+
+static krb5_error_code KRB5_CALLCONV
+krb5_lcc_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor)
+{
+    krb5_cc_ptcursor new_cursor = (krb5_cc_ptcursor )malloc(sizeof(*new_cursor));
+    if (!new_cursor)
+        return ENOMEM;
+    new_cursor->ops = &krb5_lcc_ops;
+    new_cursor->data = (krb5_pointer)(1);
+    *cursor = new_cursor;
+    new_cursor = NULL;
+    return 0;
+}
+
+static krb5_error_code KRB5_CALLCONV
+krb5_lcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor, krb5_ccache *ccache)
+{
+    krb5_error_code code = 0;
+    *ccache = 0;
+    if (cursor->data == NULL)
+        return 0;
+
+    cursor->data = NULL;
+    if ((code = krb5_lcc_resolve(context, ccache, ""))) {
+        if (code != KRB5_FCC_NOFILE)
+            /* Note that we only want to return serious errors.
+             * Any non-zero return code will prevent the cccol iterator
+             * from advancing to the next ccache collection. */
+            return code;
+    }
+    return 0;
+}
+
+static krb5_error_code KRB5_CALLCONV
+krb5_lcc_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor)
+{
+    if (*cursor) {
+        free(*cursor);
+        *cursor = NULL;
+    }
+    return 0;
+}
+
+static krb5_error_code KRB5_CALLCONV
+krb5_lcc_switch_to(krb5_context context, krb5_ccache id)
+{
+    return 0;
+}
+
 const krb5_cc_ops krb5_lcc_ops = {
     0,
     "MSLSA",
@@ -2753,12 +2808,14 @@ const krb5_cc_ops krb5_lcc_ops = {
     krb5_lcc_remove_cred,
     krb5_lcc_set_flags,
     krb5_lcc_get_flags,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    krb5_lcc_ptcursor_new,
+    krb5_lcc_ptcursor_next,
+    krb5_lcc_ptcursor_free,
+    NULL, /* move */
+    NULL, /* lastchange */
+    NULL, /* wasdefault */
+    NULL, /* lock */
+    NULL, /* unlock */
+    krb5_lcc_switch_to,
 };
 #endif /* _WIN32 */
