@@ -570,6 +570,8 @@ krb5_set_password_using_ccache
 krb5_set_principal_realm
 krb5_set_real_time
 krb5_set_time_offsets
+krb5_set_trace_callback
+krb5_set_trace_filename
 krb5_size_opaque
 krb5_sname_match
 krb5_sname_to_principal
