@@ -376,6 +376,9 @@ EXPORTS
 	krb5_unparse_name_flags				@354
 	krb5_unparse_name_flags_ext			@355
 	krb5_verify_authdata_kdc_issued			@356
+; Accidentally left out until a 1.9/1.10 bugfix
+	krb5_set_trace_callback				@399
+	krb5_set_trace_filename				@400
 
 ; More internal symbols used by gssapi
 	decode_krb5_error				@357 ; PRIVATE GSSAPI
