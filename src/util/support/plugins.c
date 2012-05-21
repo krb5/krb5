@@ -354,7 +354,7 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
         sym = GetProcAddress(h->hinstPlugin, csymname);
         if (sym == NULL) {
             const char *e = "unable to get dll symbol"; /* XXX copy and save away */
-            Tprintf ("GetProcAddress(%s): %s\n", csymname, GetLastError());
+            Tprintf ("GetProcAddress(%s): %i\n", csymname, GetLastError());
             err = ENOENT; /* XXX */
             krb5int_set_error(ep, err, "%s", e);
 
