@@ -127,6 +127,9 @@ CLeashApp::~CLeashApp()
 	AfxFreeLibrary(m_hPsapi);
     AfxFreeLibrary(m_hToolHelp32);
     AfxFreeLibrary(m_hKrbLSA);
+#ifdef DEBUG
+    _CrtDumpMemoryLeaks();
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -158,6 +161,15 @@ extern "C" {
 
 BOOL CLeashApp::InitInstance()
 {
+#ifdef DEBUG
+    _CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
+    _CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
+    _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
+    _CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
+
+    int tmp = _CrtSetDbgFlag( _CRTDBG_REPORT_FLAG);
+    _CrtSetDbgFlag( tmp | _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
     AfxOleInit();
     // NOTE: Not used at this time
     /// Set LEASH_DLL to the path where the Leash.exe is
