@@ -4,46 +4,80 @@
                   [('index', 'Full Table of Contents', 'C', 'Contents')] %}
 {% set css_files = css_files + ["_static/kerb.css"] %}
 
-{% block relbar1 %}
-   <div class="header-wrapper">
-       <div class="header" >
-           <div class="right" >
-              <a href="mailto:krb5-bugs@mit.edu?subject=Documentation__{{ title }}";>
-                  feedback </a>
-           </div>
-           <br/>
-       </div>
-   </div>
+{% macro feedback_rellinks() %}
+    <div class="footer-wrapper" >
+        <div class="footer"  >
+            <div class="left" >
+                {%- for rellink in rellinks|reverse %}
+                    <a href="{{ pathto(rellink[0]) }}"
+                    title="{{ rellink[1]|striptags }}"
+                    {{ accesskey(rellink[2]) }}>{{ rellink[3] }}</a>
+                    {{ reldelim2 }}
+                {%- endfor %}
+                {%- block rootrellink %}
+                    <a href="mailto:krb5-bugs@mit.edu?subject=Documentation__{{ title }}";>feedback</a>
+                {%- endblock %}
+            </div>
+        </div>
+    </div>
+{%- endmacro %}
+
+{% block footer %} {{ feedback_rellinks() }}{% endblock %}
+
+{% block header %}
+    <div class="header-wrapper">
+        <div class="header" style="padding-bottom: 0px;">
+            {% if logo %}
+                <p class="logo">
+                    <a href="http://kerberos.org"> <img class="logo"
+                    src="{{ pathto('_static/' + logo, 1) }}" alt="Logo" /></a>
+                </p>
+            {% endif %}
+            {% block headertitle %}
+                <h1><a href="{{ pathto (master_doc) }}"
+                style="color: #59121e; font-size: 120%;
+                padding-top: 10px;">{{ shorttitle|e }}</a><h1>
+            {% endblock %}
+            <div class="rel" style="font-size: 60%; padding-bottom: 0px;" >
+                {%- for rellink in rellinks|reverse %}
+                    <a href="{{ pathto(rellink[0]) }}"
+                    title="{{ rellink[1]|striptags }}"
+                    {{ accesskey(rellink[2]) }}>{{ rellink[3] }}</a>
+                    {%- if not loop.last %}{{ reldelim2 }}{% endif %}
+                {%- endfor %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
+
 {%- block content %}
-    <div class="content-wrapper" style="width: 97%;">
+    <div class="content-wrapper" ;">
         <div class="content">
-           {%- block sidebar1 %}
-               <div class="sidebar"
+            {%- block sidebar1 %}
+                <div class="sidebar"
                     style="float: right; margin: 5px; background: #F9F9F9">
-                  <h2>{{ _('On this page') }} </h2>
-                  {{ toc }}
-                  <br/>
-                  <h2>{{ _('Table of contents') }}</h2>
-                  {{ toctree(collapse=true, maxdepth=-1, titles_only=true) }}
-                  <br/>
-                  <h4><a href="{{ pathto('index') }}">Full Table of Contents</a></h4>
-                  <h4>{{ _('Search') }}</h4>
-                  <form class="search" action="{{ pathto('search') }}" method="get">
-                      <input type="text" name="q" size="18" />
-                      <input type="submit" value="{{ _('Go') }}" />
-                      <input type="hidden" name="check_keywords" value="yes" />
-                      <input type="hidden" name="area" value="default" />
-                  </form>
-               </div>
-           {%- endblock %}
-           <div class="document">
-              {%- block document %}
-                  {{ super() }}
-              {%- endblock %}
-           </div>
-           <div class="clearer"></div>
+                    <h2>{{ _('On this page') }} </h2>
+                    {{ toc }}
+                    <br/>
+                    <h2>{{ _('Table of contents') }}</h2>
+                    {{ toctree(collapse=true, maxdepth=-1, titles_only=true) }}
+                    <br/>
+                    <h4><a href="{{ pathto('index') }}">Full Table of Contents
+                    </a></h4>
+                    <h4>{{ _('Search') }}</h4>
+                    <form class="search" action="{{ pathto('search') }}" method="get">
+                        <input type="text" name="q" size="18" />
+                        <input type="submit" value="{{ _('Go') }}" />
+                        <input type="hidden" name="check_keywords" value="yes" />
+                        <input type="hidden" name="area" value="default" />
+                    </form>
+                </div>
+            {%- endblock %}
+            <div class="document">
+                 {%- block document %}{{ super() }}{%- endblock %}
+            </div>
+            <div class="clearer" ></div>
         </div>
     </div>
 {% endblock %}

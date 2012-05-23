@@ -8,17 +8,35 @@
 div.body {
   padding-right: 2em;
   text-align: left;
+  overflow-x: hidden;
 }
 
 /* Page layout */
 
+div.header, div.content, div.footer {
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
 div.header-wrapper {
-  background: #59121e;
+  background: white;
   border-bottom: 3px solid #2e3436;
-  border-top: 3px solid #2e3436;
+  border-top: 13px solid #59121e;
 }
 
 /* Header */
+
+div.header {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+div.header h1 {
+  font-family: "Georgia", "Times New Roman", serif,  black;
+  font-weight: normal;
+}
 
 div.header div.right a {
   color: #fcaf3e;
@@ -28,6 +46,14 @@ div.header div.right a {
 }
 
 /* Content */
+
+div.document {
+  width: 70%;
+  float: left;
+  background-color: white;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
 
 div.document div.section h1 {
   margin-bottom: 20px;
@@ -43,6 +69,14 @@ div.document div.section dl {
 }
 
 /* Sidebar */
+
+div.sidebar {
+  float: right;
+  font-size: .9em;
+  padding-top: 0px;
+  width: 20%;
+  background-color: #4c0f1a;
+}
 
 div.sidebar ul {
   list-style-type: none;
