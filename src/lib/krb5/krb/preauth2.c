@@ -60,6 +60,7 @@ struct krb5_preauth_context_st {
          * convenience when we populated the list. */
         const char *name;
         int flags, use_count;
+        krb5_clpreauth_fill_rset_fn client_fill_rset;
         krb5_clpreauth_process_fn client_process;
         krb5_clpreauth_tryagain_fn client_tryagain;
         krb5_clpreauth_supply_gic_opts_fn client_supply_gic_opts;
@@ -136,7 +137,7 @@ krb5_init_preauth_context(krb5_context kcontext)
     if (vtables == NULL)
         goto cleanup;
     for (pl = plugins, n_tables = 0; *pl != NULL; pl++) {
-        if ((*pl)(kcontext, 1, 1, (krb5_plugin_vtable)&vtables[n_tables]) == 0)
+        if ((*pl)(kcontext, 1, 2, (krb5_plugin_vtable)&vtables[n_tables]) == 0)
             n_tables++;
     }
 
@@ -186,6 +187,7 @@ krb5_init_preauth_context(krb5_context kcontext)
                 mod->name = vt->name;
                 mod->flags = (*vt->flags)(kcontext, pa_type);
                 mod->use_count = 0;
+                mod->client_fill_rset = vt->fill_rset;
                 mod->client_process = vt->process;
                 mod->client_tryagain = vt->tryagain;
                 mod->client_supply_gic_opts = first ? vt->gic_opts : NULL;
@@ -402,13 +404,28 @@ get_preauth_time(krb5_context context, krb5_clpreauth_rock rock,
     }
 }
 
+static krb5_error_code
+rset_set_item(krb5_context context, krb5_clpreauth_rock rock,
+              const char *name, void *item, void (*free_item)(void *item))
+{
+    return k5_response_set_set_item(rock->rset, name, item, free_item);
+}
+
+static void *
+rset_get_item(krb5_context context, krb5_clpreauth_rock rock, const char *name)
+{
+    return k5_response_set_get_item(rock->rset, name);
+}
+
 static struct krb5_clpreauth_callbacks_st callbacks = {
     2,
     get_etype,
     fast_armor,
     get_as_key,
     set_as_key,
-    get_preauth_time
+    get_preauth_time,
+    rset_set_item,
+    rset_get_item
 };
 
 /* Tweak the request body, for now adding any enctypes which the module claims
@@ -436,6 +453,12 @@ krb5_preauth_prepare_request(krb5_context kcontext,
             }
         }
     }
+}
+
+static void *
+get_item(krb5_context context, krb5_response_set *rset, const char *name)
+{
+    return k5_response_set_get_item(rset, name);
 }
 
 /* Find the first module which provides for the named preauth type which also
@@ -787,6 +810,40 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
     return ret;
 }
 
+/* Compile the set of response items for in_padata by invoke each module's
+ * fill_rset method. */
+static krb5_error_code
+fill_response_set(krb5_context context, krb5_kdc_req *request,
+                  krb5_data *encoded_request_body,
+                  krb5_data *encoded_previous_request,
+                  krb5_pa_data **in_padata, krb5_clpreauth_rock rock,
+                  krb5_gic_opt_ext *opte)
+{
+    krb5_error_code ret;
+    krb5_pa_data *pa;
+    struct krb5_preauth_context_module_st *module;
+    krb5_clpreauth_fill_rset_fn fill_rset;
+    int i, j;
+
+    k5_response_set_reset(rock->rset);
+    for (i = 0; in_padata[i] != NULL; i++) {
+        pa = in_padata[i];
+        for (j = 0; j < context->preauth_context->n_modules; j++) {
+            module = &context->preauth_context->modules[j];
+            fill_rset = module->client_fill_rset;
+            if (module->pa_type != pa->pa_type || fill_rset == NULL)
+                continue;
+            ret = (*fill_rset)(context, module->moddata, *module->modreq_p,
+                               (krb5_get_init_creds_opt *)opte, &callbacks,
+                               rock, request, encoded_request_body,
+                               encoded_previous_request, pa);
+            if (ret)
+                return ret;
+        }
+    }
+    return 0;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
                 krb5_data *encoded_request_body,
@@ -800,6 +857,7 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
     int out_pa_list_size = 0;
     krb5_pa_data **out_pa_list = NULL;
     krb5_error_code ret, module_ret;
+    krb5_responder_fn responder = opte->opt_private->responder;
     static const int paorder[] = { PA_INFO, PA_REAL };
 
     *out_padata = NULL;
@@ -837,7 +895,22 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
         goto error;
     }
 
-    /* First do all the informational preauths, then the first real one. */
+    /* Get a list of response items for in_padata from the preauth modules. */
+    ret = fill_response_set(context, request, encoded_request_body,
+                            encoded_previous_request, in_padata, rock, opte);
+    if (ret)
+        goto error;
+
+    /* Call the responder to answer response items. */
+    if (responder != NULL) {
+        ret = (*responder)(context, opte->opt_private->responder_data,
+                           rock->rset, get_item);
+        if (ret)
+            goto error;
+    }
+
+    /* Produce output padata, first from all the informational preauths, then
+     * the from first real one. */
     for (h = 0; h < sizeof(paorder) / sizeof(paorder[0]); h++) {
         for (i = 0; in_padata[i] != NULL; i++) {
 #ifdef DEBUG
