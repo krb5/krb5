@@ -48,7 +48,7 @@ krb5_get_as_key_noop(
     void *gak_data)
 {
     /* force a hard error, we don't actually have the key */
-    return KDC_ERR_PREAUTH_FAILED;
+    return KRB5_PREAUTH_FAILED;
 }
 
 static krb5_error_code
@@ -118,9 +118,7 @@ s4u_identify_user(krb5_context context,
                                   NULL, NULL, 0, NULL, opts,
                                   krb5_get_as_key_noop, &userid,
                                   &use_master, NULL);
-    if (code == 0 ||
-        code == KDC_ERR_PREAUTH_REQUIRED ||
-        code == KDC_ERR_PREAUTH_FAILED) {
+    if (code == 0 || code == KRB5_PREAUTH_FAILED) {
         *canon_user = userid.user;
         userid.user = NULL;
         code = 0;
