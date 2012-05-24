@@ -426,9 +426,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
           reply, request)
 
 #define TRACE_GET_CRED_VIA_TKT_EXT(c, request, reply, kdcoptions) \
-    TRACE(c, "Get cred via TGT {princ} after requesting {prince} " \
+    TRACE(c, "Get cred via TGT {princ} after requesting {princ} " \
           "(canonicalize {str})", \
-          reply, request, kdcoptions & KDC_OPT_CANONICALIZE ? "on" : "off")
+          reply, request, (kdcoptions & KDC_OPT_CANONICALIZE) ? "on" : "off")
 #define TRACE_GET_CRED_VIA_TKT_EXT_RETURN(c, ret) \
     TRACE(c, "Got cred; {kerr}", ret)
 
