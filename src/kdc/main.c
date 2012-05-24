@@ -1006,6 +1006,15 @@ int main(int argc, char **argv)
      */
     initialize_realms(kcontext, argc, argv);
 
+#ifndef NOCACHE
+    retval = kdc_init_lookaside(kcontext);
+    if (retval) {
+        kdc_err(kcontext, retval, _("while initializing lookaside cache"));
+        finish_realms();
+        return 1;
+    }
+#endif
+
     ctx = loop_init(VERTO_EV_TYPE_NONE);
     if (!ctx) {
         kdc_err(kcontext, ENOMEM, _("while creating main loop"));
