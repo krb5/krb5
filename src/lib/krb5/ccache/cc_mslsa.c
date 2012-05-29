@@ -2162,6 +2162,8 @@ krb5_lcc_close(krb5_context context, krb5_ccache id)
 
         if (data) {
             LsaDeregisterLogonProcess(data->LogonHandle);
+            if (data->cc_name)
+                free(data->cc_name);
             free(data);
         }
         free(id);
