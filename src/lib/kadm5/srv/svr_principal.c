@@ -187,7 +187,7 @@ check_1_6_dummy(kadm5_principal_ent_t entry, long mask,
     char *password = *passptr;
 
     /* Old-style randkey operations disallowed tickets to start. */
-    if (!(mask & KADM5_ATTRIBUTES) ||
+    if (password == NULL || !(mask & KADM5_ATTRIBUTES) ||
         !(entry->attributes & KRB5_KDB_DISALLOW_ALL_TIX))
         return;
 
