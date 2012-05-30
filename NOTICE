@@ -846,7 +846,8 @@ the following notice:
 
                           -------------------
 
-The following notice applies to `src/lib/krb5/krb/strptime.c':
+The following notice applies to `src/lib/krb5/krb/strptime.c' and
+`src/include/k5-queue.h'.
 
      Copyright (C) 1997, 1998 The NetBSD Foundation, Inc.
      All rights reserved.

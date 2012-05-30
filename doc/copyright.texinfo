@@ -919,7 +919,8 @@ express or implied warranty.
 
 @cdivider
 
-The following notice applies to @code{src/lib/krb5/krb/strptime.c}:
+The following notice applies to @code{src/lib/krb5/krb/strptime.c} and
+@code{src/include/k5-queue.h}.
 
 @quotation
 Copyright @copyright{} 1997, 1998 The NetBSD Foundation, Inc.@*
