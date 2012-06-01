@@ -1421,18 +1421,18 @@ kadm5_chpass_principal_3(void *server_handle,
         }
 #endif
 
-        ret = kdb_get_hist_key(handle, &hist_keyblock, &hist_kvno);
+        ret = kdb_get_hist_key(handle, &hist_keyblocks, &hist_kvno);
         if (ret)
             goto done;
 
         ret = create_history_entry(handle->context,
-                                   &hist_keyblock,
+                                   &hist_keyblocks[0],
                                    kdb_save->n_key_data,
                                    kdb_save->key_data, &hist);
         if (ret)
             goto done;
 
-        ret = check_pw_reuse(handle->context, &hist_keyblock,
+        ret = check_pw_reuse(handle->context, hist_keyblocks,
                              kdb->n_key_data, kdb->key_data,
                              1, &hist);
         if (ret)
