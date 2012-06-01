@@ -4,9 +4,10 @@
                   [('index', 'Full Table of Contents', 'C', 'Contents')] %}
 {% set css_files = css_files + ["_static/kerb.css"] %}
 
+{# Add a "feedback" button to the footer #}
 {% macro feedback_rellinks() %}
     <div class="footer-wrapper" >
-        <div class="footer"  >
+        <div class="footer" >
             <div class="left" >
                 {%- for rellink in rellinks|reverse %}
                     <a href="{{ pathto(rellink[0]) }}"
@@ -29,6 +30,7 @@
         <div class="header" style="padding-bottom: 0px;">
             {% if logo %}
                 <p class="logo">
+                    {# Link logo to kerberos.org #}
                     <a href="http://kerberos.org"> <img class="logo"
                     src="{{ pathto('_static/' + logo, 1) }}" alt="Logo" /></a>
                 </p>
@@ -50,13 +52,13 @@
     </div>
 {% endblock %}
 
-
 {%- block content %}
     <div class="content-wrapper" ;">
         <div class="content">
+            {%- block sidebar2 %} {%- endblock %}
             {%- block sidebar1 %}
                 <div class="sidebar"
-                    style="float: right; margin: 5px; background: #F9F9F9">
+                    style="float: right; background: #F9F9F9">
                     <h2>{{ _('On this page') }} </h2>
                     {{ toc }}
                     <br/>

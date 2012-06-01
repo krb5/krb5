@@ -6,7 +6,7 @@
  *
  */
 div.body {
-  padding-right: 2em;
+  padding-right: .5em;
   text-align: left;
   overflow-x: hidden;
 }
@@ -14,11 +14,9 @@ div.body {
 /* Page layout */
 
 div.header, div.content, div.footer {
-  width: 70%;
   margin-left: auto;
   margin-right: auto;
 }
-
 
 div.header-wrapper {
   background: white;
@@ -48,8 +46,9 @@ div.header div.right a {
 /* Content */
 
 div.document {
-  width: 70%;
+  width: 80%;
   float: left;
+  margin: 0;
   background-color: white;
   padding-top: 20px;
   padding-bottom: 20px;
@@ -73,20 +72,39 @@ div.document div.section dl {
 div.sidebar {
   float: right;
   font-size: .9em;
-  padding-top: 0px;
   width: 20%;
-  background-color: #4c0f1a;
+  margin: 0;
+  padding: 0;
+  background-color: white;
 }
 
 div.sidebar ul {
   list-style-type: none;
-  padding: 1px;
-  margin-left: 1em;
+  margin-left: .5em;
+}
+
+div.sidebar li.toctree-l1 a {
+  margin-left: .5em;
+}
+
+div.sidebar li.toctree-l2 a {
+  margin-left: .5em;
+}
+
+div.sidebar li.toctree-l3 a {
+  margin-left: .5em;
+}
+
+div.sidebar li.toctree-l2.current a {
+  border-right: 2px solid #fcaf3e  !important;
 }
 
 div.sidebar li.toctree-l3.current a {
-  border-right: 5px solid #fcaf3e;
   font-weight: bold;
+}
+
+div.sidebar li.toctree-l4 a {
+  display: none;
 }
 
 /* Other body styles */
