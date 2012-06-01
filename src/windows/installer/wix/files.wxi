@@ -331,11 +331,7 @@
 	                    <File Id="fil_mit2ms_pdb" Name="mit2ms.pdb" />
                     </Component>
                 <?endif?>
-                
-                    <Component Win64="$(var.Win64)" Id="cmf_psapi_dll" Guid="877F4DD5-8AE0-451C-8F4D-C27F6F30D221" DiskId="1">
-	                    <File Id="fil_psapi_dll" Name="psapi.dll" src="$(var.SystemDir)psapi.dll" KeyPath="yes" />
-                    </Component>
-                
+
                 </Directory> <!-- /bin -->
                 
                 <Directory Id="dirinc" Name="include" src="$(var.IncDir)">
