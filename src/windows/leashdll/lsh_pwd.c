@@ -1458,6 +1458,9 @@ AdjustOptions(HWND hDialog, int show, int hideDiff)
 
 }
 
+extern void *lacInit(HWND hEditCtl);
+extern void lacTerm(void *pAutoComplete);
+extern void lacAddPrincipal(char *principal);
 
 /* Callback function for the Authentication Dialog box that initializes and
    renews tickets. */
@@ -1487,15 +1490,20 @@ AuthenticateProc(
     static HWND hSliderRenew=0;
     static RECT dlgRect;
     static int  hideDiff = 0;
+    static void *pAutoComplete = 0;
     char principal[256];
     long realm_count = 0;
     int disable_noaddresses = 0;
+    HWND hEditCtrl=0;
 
     switch (message) {
 
     case WM_INITDIALOG:
 	hDlg = hDialog;
 
+        hEditCtrl = GetDlgItem(hDialog, IDC_EDIT_PRINCIPAL);
+        if (hEditCtrl)
+            pAutoComplete = lacInit(hEditCtrl);
         SetVersionInfo(hDialog,IDC_STATIC_VERSION,IDC_STATIC_COPYRIGHT);
 	hSliderLifetime = GetDlgItem(hDialog, IDC_STATIC_LIFETIME_VALUE);
 	hSliderRenew = GetDlgItem(hDialog, IDC_STATIC_RENEW_TILL_VALUE);
@@ -1828,6 +1836,10 @@ AuthenticateProc(
 		CleanupSliders();
 		memset(password,0,sizeof(password));
 		RemoveProp(hDialog, "HANDLES_HELP");
+        if (pAutoComplete) {
+            lacTerm(pAutoComplete);
+            pAutoComplete = NULL;
+        }
 		EndDialog(hDialog, (int)lParam);
                 return TRUE;
 	    }
@@ -1957,6 +1969,7 @@ AuthenticateProc(
                     strncpy(lpdi->out.realm, realm, LEASH_REALM_SZ);
                     lpdi->out.realm[LEASH_REALM_SZ-1] = 0;
                 }
+                lacAddPrincipal(username);
 
                 CloseMe(TRUE); /* success */
                 return FALSE;
