@@ -29,6 +29,7 @@ OBJS=	$(OUTPRE)AFSroutines.$(OBJEXT) \
 	$(OUTPRE)lsh_pwd.$(OBJEXT) \
 	$(OUTPRE)lshcallb.$(OBJEXT) \
 	$(OUTPRE)lshfunc.$(OBJEXT) \
+	$(OUTPRE)lshutil.$(OBJEXT) \
 	$(OUTPRE)timesync.$(OBJEXT) \
 	$(OUTPRE)winerr.$(OBJEXT) \
 	$(OUTPRE)winutil.$(OBJEXT) \
