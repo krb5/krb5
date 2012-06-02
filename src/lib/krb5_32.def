@@ -427,3 +427,4 @@ EXPORTS
 
 ; new in 1.11 (note that 399-400 are used above)
 	krb5_chpw_message				@398
+	krb5_kt_have_content				@401

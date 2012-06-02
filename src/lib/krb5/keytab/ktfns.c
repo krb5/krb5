@@ -98,6 +98,29 @@ krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
     return krb5_x((keytab)->ops->end_get,(context, keytab, cursor));
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_kt_have_content(krb5_context context, krb5_keytab keytab)
+{
+    krb5_keytab_entry entry;
+    krb5_kt_cursor cursor;
+    krb5_error_code ret;
+
+    /* If the keytab is not iterable, assume that it has content. */
+    if (keytab->ops->start_seq_get == NULL)
+        return 0;
+
+    /* See if we can get at least one entry via iteration. */
+    ret = krb5_kt_start_seq_get(context, keytab, &cursor);
+    if (ret)
+	return KRB5_KT_NOTFOUND;
+    ret = krb5_kt_next_entry(context, keytab, &entry, &cursor);
+    krb5_kt_end_seq_get(context, keytab, &cursor);
+    if (ret)
+	return KRB5_KT_NOTFOUND;
+    krb5_kt_free_entry(context, &entry);
+    return 0;
+}
+
 /*
  * In a couple of places we need to get a principal name from a keytab: when
  * verifying credentials against a keytab, and when querying the name of a

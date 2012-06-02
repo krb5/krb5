@@ -2872,6 +2872,18 @@ krb5_error_code KRB5_CALLCONV
 krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
                     krb5_kt_cursor *cursor);
 
+/**
+ * Check if a keytab exists and contains entries.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  keytab          Key table handle
+ *
+ * @retval 0 Keytab exists and contains entries
+ * @retval KRB5_KT_NOTFOUND Keytab does not contain entries
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_kt_have_content(krb5_context context, krb5_keytab keytab);
+
 /*
  * end "keytab.h"
  */

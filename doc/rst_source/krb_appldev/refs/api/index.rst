@@ -215,6 +215,7 @@ Rarely used public interfaces
    krb5_kt_add_entry.rst
    krb5_kt_end_seq_get.rst
    krb5_kt_get_entry.rst
+   krb5_kt_have_content.rst
    krb5_kt_next_entry.rst
    krb5_kt_read_service_key.rst
    krb5_kt_remove_entry.rst

@@ -132,6 +132,9 @@ kt_test(krb5_context context, const char *name)
         CHECK_ERR(kret, KRB5_KT_NOTFOUND, "Getting non-existent entry");
     }
 
+    kret = krb5_kt_have_content(context, kt);
+    CHECK_ERR(kret, KRB5_KT_NOTFOUND, "Checking for keytab content (empty)");
+
 
     /* ===================   Add entries to keytab ================= */
     /*
@@ -168,6 +171,9 @@ kt_test(krb5_context context, const char *name)
     krb5_free_principal(context, princ);
 
     /* ==============   Test iterating over contents of keytab ========= */
+
+    kret = krb5_kt_have_content(context, kt);
+    CHECK(kret, "Checking for keytab content (full)");
 
     kret = krb5_kt_start_seq_get(context, kt, &cursor);
     CHECK(kret, "Start sequence get");
