@@ -261,8 +261,11 @@ check-unix-antoln:: t_an_to_ln
 	$(RM) ./t_an.*
 
 check-unix-trace:: t_trace
-	export KRB5_TRACE=/dev/stdout ; \
+	rm -f t_trace.out
+	KRB5_TRACE=t_trace.out ; export KRB5_TRACE ; \
 	$(KRB5_RUN_ENV) $(VALGRIND) ./t_trace
+	sed -e 's/^[^:]*: //' t_trace.out | cmp - $(srcdir)/t_trace.ref
+	rm -f t_trace.out
 
 clean:: 
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o t_locate_kdc.o
