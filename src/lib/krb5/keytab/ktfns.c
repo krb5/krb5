@@ -104,6 +104,7 @@ krb5_kt_have_content(krb5_context context, krb5_keytab keytab)
     krb5_keytab_entry entry;
     krb5_kt_cursor cursor;
     krb5_error_code ret;
+    char name[1024];
 
     /* If the keytab is not iterable, assume that it has content. */
     if (keytab->ops->start_seq_get == NULL)
@@ -112,13 +113,20 @@ krb5_kt_have_content(krb5_context context, krb5_keytab keytab)
     /* See if we can get at least one entry via iteration. */
     ret = krb5_kt_start_seq_get(context, keytab, &cursor);
     if (ret)
-	return KRB5_KT_NOTFOUND;
+	goto no_entries;
     ret = krb5_kt_next_entry(context, keytab, &entry, &cursor);
     krb5_kt_end_seq_get(context, keytab, &cursor);
     if (ret)
-	return KRB5_KT_NOTFOUND;
+	goto no_entries;
     krb5_kt_free_entry(context, &entry);
     return 0;
+
+no_entries:
+    if (krb5_kt_get_name(context, keytab, name, sizeof(name)) == 0) {
+        krb5_set_error_message(context, KRB5_KT_NOTFOUND,
+                               _("Keytab %s is nonexistent or empty"), name);
+    }
+    return KRB5_KT_NOTFOUND;
 }
 
 /*
