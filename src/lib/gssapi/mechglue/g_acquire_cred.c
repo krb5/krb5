@@ -104,6 +104,7 @@ OM_uint32 *		time_rec;
 
 {
     OM_uint32 major = GSS_S_FAILURE, tmpMinor;
+    OM_uint32 first_major = GSS_S_COMPLETE, first_minor = 0;
     OM_uint32 initTimeOut, acceptTimeOut, outTime = GSS_C_INDEFINITE;
     gss_OID_set mechs = GSS_C_NO_OID_SET;
     unsigned int i;
@@ -149,7 +150,7 @@ OM_uint32 *		time_rec;
 
     /* for each requested mech attempt to obtain a credential */
     for (i = 0, major = GSS_S_UNAVAILABLE; i < mechs->count; i++) {
-	major = gss_add_cred(minor_status, (gss_cred_id_t)creds,
+	major = gss_add_cred(&tmpMinor, (gss_cred_id_t)creds,
 			     desired_name,
 			     &mechs->elements[i],
 			     cred_usage, time_req, time_req, NULL,
@@ -174,12 +175,19 @@ OM_uint32 *		time_rec;
 		    outTime = (outTime > initTimeOut) ?
 			initTimeOut : outTime;
 	    }
+	} else if (first_major == GSS_S_COMPLETE) {
+	    first_major = major;
+	    first_minor = tmpMinor;
 	}
     } /* for */
 
-    /* ensure that we have at least one credential element */
-    if (creds->count < 1)
+    /* If we didn't get any creds, return the error status from the first mech
+     * (which is often the preferred one). */
+    if (creds->count < 1) {
+	major = first_major;
+	*minor_status = first_minor;
 	goto cleanup;
+    }
     major = GSS_S_COMPLETE;
 
     /*
