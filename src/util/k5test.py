@@ -1185,20 +1185,3 @@ t_inetd = os.path.join(buildtop, 'tests', 'dejagnu', 't_inetd')
 kproplog = os.path.join(buildtop, 'slave', 'kproplog')
 kpropd = os.path.join(buildtop, 'slave', 'kpropd')
 kprop = os.path.join(buildtop, 'slave', 'kprop')
-
-# Currently there are no helpers for doing cross-realm testing, but
-# the necessary flexibility is present in K5Realm to create them.  A
-# cross-realm test setup would need to:
-#
-# * Select distinct realm names, port bases, and directories for each
-#   realm.
-# 
-# * Create a krb5_conf fragment with a comprehensive [realms] section
-#   so that each realm knows how to reach the others, since there
-#   won't be DNS SRV records.  The fragment should probably None out
-#   'realms' -> '$realm' to avoid a duplicate section for the home
-#   realm.  capaths configuration may also be desired for some test
-#   cases.
-#
-# * Create cross-TGS principals for some or all of the pairs of
-#   realms.
