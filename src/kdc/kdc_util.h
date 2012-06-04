@@ -89,16 +89,6 @@ validate_tgs_request (krb5_kdc_req *, krb5_db_entry,
 int
 fetch_asn1_field (unsigned char *, unsigned int, unsigned int, krb5_data *);
 
-int
-dbentry_has_key_for_enctype (krb5_context context,
-                             krb5_db_entry *client,
-                             krb5_enctype enctype);
-
-int
-dbentry_supports_enctype (krb5_context context,
-                          krb5_db_entry *client,
-                          krb5_enctype enctype);
-
 krb5_enctype
 select_session_keytype (krb5_context context,
                         krb5_db_entry *server,

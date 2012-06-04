@@ -584,8 +584,7 @@ get_strings
 
     **get_strings** *principal*
 
-Displays string attributes on *principal*.  String attributes are used
-to supply per-principal configuration to some KDC plugin modules.
+Displays string attributes on *principal*.
 
 This command requires the **inquire** privilege.
 
@@ -600,7 +599,15 @@ set_string
 
     **set_string** *principal* *key* *value*
 
-Sets a string attribute on *principal*.
+Sets a string attribute on *principal*.  String attributes are used to
+supply per-principal configuration to the KDC and some KDC plugin
+modules.  The following string attributes are recognized by the KDC:
+
+**session_enctypes**
+    Specifies the encryption types supported for session keys when the
+    principal is authenticated to as a server.  See
+    :ref:`Encryption_and_salt_types` in :ref:`kdc.conf(5)` for a list
+    of the accepted values.
 
 This command requires the **modify** privilege.
 

@@ -70,6 +70,7 @@ typedef struct __kdc_realm_data {
     krb5_deltat         realm_maxrlife; /* Maximum renewable life for realm */
     krb5_boolean        realm_reject_bad_transit; /* Accept unverifiable transited_realm ? */
     krb5_boolean        realm_restrict_anon;  /* Anon to local TGT only */
+    krb5_boolean        realm_assume_des_crc_sess;  /* Assume princs support des-cbc-crc for session keys */
 } kdc_realm_t;
 
 extern kdc_realm_t      **kdc_realmlist;
@@ -91,6 +92,7 @@ kdc_realm_t *find_realm_data (char *, krb5_ui_4);
 #define tgs_server                      kdc_active_realm->realm_tgsprinc
 #define reject_bad_transit              kdc_active_realm->realm_reject_bad_transit
 #define restrict_anon                   kdc_active_realm->realm_restrict_anon
+#define assume_des_crc_sess             kdc_active_realm->realm_assume_des_crc_sess
 
 /* various externs for KDC */
 extern krb5_data        empty_string;   /* an empty string */

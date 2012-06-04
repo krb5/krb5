@@ -369,6 +369,12 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
     else
         rdp->realm_reject_bad_transit = 1;
 
+    /* Handle assume des-cbc-crc is supported for session keys */
+    if (rparams && rparams->realm_assume_des_crc_sess_valid)
+        rdp->realm_assume_des_crc_sess = rparams->realm_assume_des_crc_sess;
+    else
+        rdp->realm_assume_des_crc_sess = 1;
+
     /* Handle ticket maximum life */
     rdp->realm_maxlife = (rparams && rparams->realm_max_life_valid) ?
         rparams->realm_max_life : KRB5_KDB_MAX_LIFE;

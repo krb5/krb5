@@ -590,6 +590,7 @@ krb5int_get_authdata_containee_types
 krb5int_init_context_kdc
 krb5int_init_trace
 krb5int_initialize_library
+krb5int_parse_enctype_list
 krb5int_sendtokdc_debug_handler
 krb5int_trace
 profile_abandon

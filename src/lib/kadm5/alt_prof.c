@@ -1048,6 +1048,12 @@ krb5_read_realm_params(kcontext, realm, rparamp)
         rparams->realm_restrict_anon_valid = 1;
     }
 
+    hierarchy[2] = KRB5_CONF_ASSUME_DES_CRC_SESSION;
+    if (!krb5_aprof_get_boolean(aprofile, hierarchy, TRUE, &bvalue)) {
+        rparams->realm_assume_des_crc_sess = bvalue;
+        rparams->realm_assume_des_crc_sess_valid = 1;
+    }
+
     hierarchy[2] = KRB5_CONF_NO_HOST_REFERRAL;
     if (!krb5_aprof_get_string_all(aprofile, hierarchy, &no_refrls))
         rparams->realm_no_host_referral = no_refrls;

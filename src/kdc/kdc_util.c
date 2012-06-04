@@ -1516,60 +1516,50 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
     return 0;
 }
 
-/*
- * This function returns 1 if the dbentry has a key for a specified
- * keytype, and 0 if not.
- */
-int
-dbentry_has_key_for_enctype(krb5_context context, krb5_db_entry *client,
-                            krb5_enctype enctype)
+/* Return true if we believe server can support enctype as a session key. */
+krb5_boolean
+dbentry_supports_enctype(krb5_context context, krb5_db_entry *server,
+                         krb5_enctype enctype)
 {
     krb5_error_code     retval;
     krb5_key_data       *datap;
+    char                *etypes_str = NULL;
+    krb5_enctype        default_enctypes[1] = { 0 };
+    krb5_enctype        *etypes;
+    size_t              i;
 
-    retval = krb5_dbe_find_enctype(context, client, enctype,
-                                   -1, 0, &datap);
-    if (retval)
-        return 0;
-    else
-        return 1;
-}
+    /* Look up the supported session key enctypes list in the KDB. */
+    retval = krb5_dbe_get_string(context, server, KRB5_KDB_SK_SESSION_ENCTYPES,
+                                 &etypes_str);
+    if (retval == 0 && etypes_str != NULL && *etypes_str != '\0') {
+        /* Pass a fake profile key for tracing of unrecognized tokens. */
+        retval = krb5int_parse_enctype_list(context, "KDB-session_etypes",
+                                            etypes_str, default_enctypes,
+                                            &etypes);
+        free(etypes_str);
+        if (retval == 0 && etypes != NULL && etypes[0]) {
+            for (i = 0; etypes[i]; i++)
+                if (enctype == etypes[i])
+                    return TRUE;
+            return FALSE;
+        }
+        /* Fall through on error or empty list */
+    } else {
+        free(etypes_str);
+    }
 
-/*
- * This function returns 1 if the entity referenced by this
- * structure can support the a particular encryption system, and 0 if
- * not.
- *
- * XXX eventually this information should be looked up in the
- * database.  Since it isn't, we use some hueristics and attribute
- * options bits for now.
- */
-int
-dbentry_supports_enctype(krb5_context context, krb5_db_entry *client,
-                         krb5_enctype enctype)
-{
-    /*
-     * If it's DES_CBC_MD5, there's a bit in the attribute mask which
-     * checks to see if we support it.  For now, treat it as always
-     * clear.
-     *
-     * In theory everything's supposed to support DES_CBC_MD5, but
-     * that's not the reality....
-     */
+    /* If configured to, assume every server without a session_enctypes
+     * attribute supports DES_CBC_CRC. */
+    if (assume_des_crc_sess && enctype == ENCTYPE_DES_CBC_CRC)
+        return TRUE;
+
+    /* Due to an ancient interop problem, assume nothing supports des-cbc-md5
+     * unless there's a session_enctypes explicitly saying that it does. */
     if (enctype == ENCTYPE_DES_CBC_MD5)
-        return 0;
+        return FALSE;
 
-    /*
-     * XXX we assume everything can understand DES_CBC_CRC
-     */
-    if (enctype == ENCTYPE_DES_CBC_CRC)
-        return 1;
-
-    /*
-     * If we have a key for the encryption system, we assume it's
-     * supported.
-     */
-    return dbentry_has_key_for_enctype(context, client, enctype);
+    /* Assume the server supports any enctype it has a long-term key for. */
+    return !krb5_dbe_find_enctype(context, server, enctype, -1, 0, &datap);
 }
 
 /*

@@ -266,6 +266,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_REJECT_BAD_TRANSIT          "reject_bad_transit"
 #define KRB5_CONF_RENEW_LIFETIME              "renew_lifetime"
 #define KRB5_CONF_RESTRICT_ANONYMOUS_TO_TGT   "restrict_anonymous_to_tgt"
+#define KRB5_CONF_ASSUME_DES_CRC_SESSION      "des_crc_session_supported"
 #define KRB5_CONF_SAFE_CHECKSUM_TYPE          "safe_checksum_type"
 #define KRB5_CONF_SUPPORTED_ENCTYPES          "supported_enctypes"
 #define KRB5_CONF_TICKET_LIFETIME             "ticket_lifetime"
