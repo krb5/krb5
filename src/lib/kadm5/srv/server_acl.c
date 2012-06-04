@@ -568,7 +568,7 @@ kadm5int_acl_match_data(e1, e2, targetflag, ws)
         if (ws && !targetflag) {
             if (ws->nwild >= 9) {
                 DPRINT(DEBUG_ACL, acl_debug_level,
-                       ("Too many wildcards in ACL entry %s\n", entry->ae_name));
+                       ("Too many wildcards in ACL entry.\n"));
             }
             else
                 ws->backref[ws->nwild++] = e2;
@@ -579,7 +579,7 @@ kadm5int_acl_match_data(e1, e2, targetflag, ws)
         int     n = e1->data[1] - '1';
         if (n >= ws->nwild) {
             DPRINT(DEBUG_ACL, acl_debug_level,
-                   ("Too many backrefs in ACL entry %s\n", entry->ae_name));
+                   ("Too many backrefs in ACL entry.\n"));
         }
         else if ((ws->backref[n]->length == e2->length) &&
                  (!strncmp(ws->backref[n]->data, e2->data, e2->length)))
