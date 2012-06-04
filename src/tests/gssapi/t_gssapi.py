@@ -78,6 +78,13 @@ output = realm.run_as_client(['./t_imp_cred', 'service2/dwight'],
 if 'Wrong principal in request' not in output:
     fail('Expected error message not seen in t_imp_cred output')
 
+# Verify that we can't acquire acceptor creds without a keytab.
+os.remove(realm.keytab)
+output = realm.run_as_client(['./t_accname', 'abc'], expected_code=1)
+if ('gss_acquire_cred: Keytab' not in output or
+    'nonexistent or empty' not in output):
+    fail('Expected error message not seen for nonexistent keytab')
+
 realm.stop()
 
 # Re-run the last acceptor name test with ignore_acceptor_hostname set

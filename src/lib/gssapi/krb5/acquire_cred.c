@@ -227,6 +227,7 @@ acquire_accept_cred(krb5_context context,
     }
 
     if (desired_name != NULL) {
+        /* Make sure we keys matching the desired name in the keytab. */
         code = check_keytab(context, kt, desired_name);
         if (code) {
             krb5_kt_close(context, kt);
@@ -250,6 +251,13 @@ acquire_accept_cred(krb5_context context,
         /* Open the replay cache for this principal. */
         code = krb5_get_server_rcache(context, &desired_name->princ->data[0],
                                       &cred->rcache);
+        if (code) {
+            *minor_status = code;
+            return GSS_S_FAILURE;
+        }
+    } else {
+        /* Make sure we have a keytab with keys in it. */
+        code = krb5_kt_have_content(context, kt);
         if (code) {
             *minor_status = code;
             return GSS_S_FAILURE;
