@@ -118,6 +118,7 @@ extern const gss_OID_desc * const gss_mech_spnego;
 extern const gss_OID_set_desc * const gss_mech_set_spnego;
 
 #ifdef DEBUG
+#include <syslog.h>
 #define	dsyslog(a) syslog(LOG_DEBUG, a)
 #else
 #define	dsyslog(a)
