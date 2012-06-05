@@ -117,6 +117,8 @@ main (int argc, char *argv[])
     addr_in->sin_family = AF_INET;
     addr_in->sin_addr.s_addr = INADDR_ANY;
     addr_in->sin_port = htons(88);
+    conn.addrlen = sizeof(struct sockaddr_in);
+    conn.family = AF_INET;
     TRACE(ctx, "struct conn_state *, show socket type, address, port: "
           "{connstate}", &conn);
     conn.socktype = SOCK_DGRAM;
@@ -191,13 +193,14 @@ main (int argc, char *argv[])
 
     padatap = malloc(sizeof(krb5_pa_data *) * 3);
     padatap[0] = &padata;
-    memcpy(&padata2, &padata, sizeof(padata));
     padatap[1] = &padata2;
     padatap[2] = NULL;
     padata.magic = 0;
     padata.pa_type = KRB5_PADATA_NONE;
     padata.length = oct_length;
     padata.contents = oct;
+    padata2 = padata;
+    padata.pa_type = KRB5_PADATA_PW_SALT;
     TRACE(ctx, "krb5_pa_data **, display list of padata type numbers: "
           "{patypes}", padatap);
     TRACE(ctx, "krb5_pa_data **, display list of padata type numbers: "
