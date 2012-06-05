@@ -439,8 +439,7 @@ def _find_srctop():
 def _get_hostname():
     hostname = socket.gethostname()
     try:
-        ai = socket.getaddrinfo(hostname, None, 0, 0, 0,
-                                socket.AI_CANONNAME | socket.AI_ADDRCONFIG)
+        ai = socket.getaddrinfo(hostname, None, 0, 0, 0, socket.AI_CANONNAME)
     except socket.gaierror, (error, errstr):
         fail('Local hostname "%s" does not resolve: %s.' % (hostname, errstr))
     (family, socktype, proto, canonname, sockaddr) = ai[0]
