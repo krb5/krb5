@@ -83,11 +83,13 @@ SOFTWARE.
 // Only works for Win2k and above
 #define _WIN32_WINNT 0x500
 #include "custom.h"
+#include <shellapi.h>
 
 // linker stuff
 #pragma comment(lib, "msi")
 #pragma comment(lib, "advapi32")
-
+#pragma comment(lib, "shell32")
+#pragma comment(lib, "user32")
 
 void ShowMsiError( MSIHANDLE hInstall, DWORD errcode, DWORD param ){
 	MSIHANDLE hRecord;
@@ -100,6 +102,22 @@ void ShowMsiError( MSIHANDLE hInstall, DWORD errcode, DWORD param ){
 	MsiProcessMessage( hInstall, INSTALLMESSAGE_ERROR, hRecord );
 	
 	MsiCloseHandle( hRecord );
+}
+
+static void ShowMsiErrorEx(MSIHANDLE hInstall, DWORD errcode, LPTSTR str,
+                           DWORD param )
+{
+    MSIHANDLE hRecord;
+
+    hRecord = MsiCreateRecord(3);
+    MsiRecordClearData(hRecord);
+    MsiRecordSetInteger(hRecord, 1, errcode);
+    MsiRecordSetString(hRecord, 2, str);
+    MsiRecordSetInteger(hRecord, 3, param);
+
+    MsiProcessMessage(hInstall, INSTALLMESSAGE_ERROR, hRecord);
+
+    MsiCloseHandle(hRecord);
 }
 
 #define LSA_KERBEROS_KEY "SYSTEM\\CurrentControlSet\\Control\\Lsa\\Kerberos"
@@ -520,130 +538,189 @@ _cleanup:
     return rv;
 }
 
+static bool IsNSISInstalled()
+{
+    HKEY nsisKfwKey = NULL;
+    // Note: check Wow6432 node if 64 bit build
+    HRESULT res = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+                               "SOFTWARE\\Microsoft\\Windows\\CurrentVersion"
+                               "\\Uninstall\\Kerberos for Windows",
+                               0,
+                               KEY_READ | KEY_WOW64_32KEY,
+                               &nsisKfwKey);
+    if (res != ERROR_SUCCESS)
+        return FALSE;
+
+    RegCloseKey(nsisKfwKey);
+    return TRUE;
+}
+
+static HANDLE NSISUninstallShellExecute(LPTSTR pathUninstall)
+{
+    SHELLEXECUTEINFO   sei;
+    ZeroMemory ( &sei, sizeof(sei) );
+
+    sei.cbSize          = sizeof(sei);
+    sei.hwnd            = GetForegroundWindow();
+    sei.fMask           = SEE_MASK_NOASYNC | SEE_MASK_FLAG_NO_UI |
+                          SEE_MASK_NOCLOSEPROCESS;
+    sei.lpVerb          = _T("runas"); // run as administrator
+    sei.lpFile          = pathUninstall;
+    sei.lpParameters    = _T("");
+    sei.nShow           = SW_SHOWNORMAL;
+
+    if (!ShellExecuteEx(&sei)) {
+        // FAILED! TODO: report details?
+    }
+    return sei.hProcess;
+}
+
+static HANDLE NSISUninstallCreateProcess(LPTSTR pathUninstall)
+{
+    STARTUPINFO sInfo;
+    PROCESS_INFORMATION pInfo;
+    pInfo.hProcess = NULL;
+    pInfo.hThread = NULL;
+
+    // Create a process for the uninstaller
+    sInfo.cb = sizeof(sInfo);
+    sInfo.lpReserved = NULL;
+    sInfo.lpDesktop = _T("");
+    sInfo.lpTitle = _T("NSIS Uninstaller for Kerberos for Windows");
+    sInfo.dwX = 0;
+    sInfo.dwY = 0;
+    sInfo.dwXSize = 0;
+    sInfo.dwYSize = 0;
+    sInfo.dwXCountChars = 0;
+    sInfo.dwYCountChars = 0;
+    sInfo.dwFillAttribute = 0;
+    sInfo.dwFlags = 0;
+    sInfo.wShowWindow = 0;
+    sInfo.cbReserved2 = 0;
+    sInfo.lpReserved2 = 0;
+    sInfo.hStdInput = 0;
+    sInfo.hStdOutput = 0;
+    sInfo.hStdError = 0;
+
+    if (!CreateProcess(pathUninstall,
+                       _T("Uninstall /S"),
+                       NULL,
+                       NULL,
+                       FALSE,
+                       CREATE_SUSPENDED,
+                       NULL,
+                       NULL,
+                       &sInfo,
+                       &pInfo)) {
+        // failure; could grab info, but we should be able to recover by
+        // using NSISUninstallShellExecute...
+    } else {
+        // success
+        // start up the thread
+        ResumeThread(pInfo.hThread);
+        // done with thread handle
+        CloseHandle(pInfo.hThread);
+    }
+    return pInfo.hProcess;
+}
+
+
 /* Uninstall NSIS */
 MSIDLLEXPORT UninstallNsisInstallation( MSIHANDLE hInstall )
 {
-	DWORD rv = ERROR_SUCCESS;
-	// lookup the NSISUNINSTALL property value
-	LPTSTR cNsisUninstall = _T("UPGRADENSIS");
-	HANDLE hIo = NULL;
-	DWORD dwSize = 0;
-	LPTSTR strPathUninst = NULL;
-	HANDLE hJob = NULL;
-	STARTUPINFO sInfo;
-	PROCESS_INFORMATION pInfo;
+    DWORD rv = ERROR_SUCCESS;
+    DWORD lastError;
+    // lookup the NSISUNINSTALL property value
+    LPTSTR cNsisUninstall = _T("UPGRADENSIS");
+    LPTSTR strPathUninst = NULL;
+    DWORD dwSize = 0;
+    HANDLE hProcess = NULL;
+    HANDLE hIo = NULL;
+    HANDLE hJob = NULL;
 
-	pInfo.hProcess = NULL;
-	pInfo.hThread = NULL;
+    rv = MsiGetProperty( hInstall, cNsisUninstall, _T(""), &dwSize );
+    if(rv != ERROR_MORE_DATA) goto _cleanup;
 
-	rv = MsiGetProperty( hInstall, cNsisUninstall, _T(""), &dwSize );
-	if(rv != ERROR_MORE_DATA) goto _cleanup;
+    strPathUninst = new TCHAR[ ++dwSize ];
 
-	strPathUninst = new TCHAR[ ++dwSize ];
+    rv = MsiGetProperty(hInstall, cNsisUninstall, strPathUninst, &dwSize);
+    if(rv != ERROR_SUCCESS) goto _cleanup;
 
-	rv = MsiGetProperty( hInstall, cNsisUninstall, strPathUninst, &dwSize );
-	if(rv != ERROR_SUCCESS) goto _cleanup;
+    hProcess = NSISUninstallCreateProcess(strPathUninst);
+    if (hProcess == NULL) // expected when run on UAC-limited account
+        hProcess = NSISUninstallShellExecute(strPathUninst);
 
-	// Create a process for the uninstaller
-	sInfo.cb = sizeof(sInfo);
-	sInfo.lpReserved = NULL;
-	sInfo.lpDesktop = _T("");
-	sInfo.lpTitle = _T("NSIS Uninstaller for Kerberos for Windows");
-	sInfo.dwX = 0;
-	sInfo.dwY = 0;
-	sInfo.dwXSize = 0;
-	sInfo.dwYSize = 0;
-	sInfo.dwXCountChars = 0;
-	sInfo.dwYCountChars = 0;
-	sInfo.dwFillAttribute = 0;
-	sInfo.dwFlags = 0;
-	sInfo.wShowWindow = 0;
-	sInfo.cbReserved2 = 0;
-	sInfo.lpReserved2 = 0;
-	sInfo.hStdInput = 0;
-	sInfo.hStdOutput = 0;
-	sInfo.hStdError = 0;
+    if (hProcess == NULL) {
+        // still no uninstall process? ick...
+        lastError = GetLastError();
+        rv = 40;
+        goto _cleanup;
+    }
+    // note that it is not suffiecient to wait for the initial process to
+    // finish; there is a whole process tree that we need to wait for.  sigh.
+    JOBOBJECT_ASSOCIATE_COMPLETION_PORT acp;
+    acp.CompletionKey = 0;
+    hJob = CreateJobObject(NULL, _T("NSISUninstallObject"));
+    if(!hJob) {
+        rv = 41;
+        goto _cleanup;
+    }
 
-	if(!CreateProcess( 
-		strPathUninst,
-		_T("Uninstall /S"),
-		NULL,
-		NULL,
-		FALSE,
-		CREATE_SUSPENDED,
-		NULL,
-		NULL,
-		&sInfo,
-		&pInfo)) {
-            DWORD lastError = GetLastError();
-            MSIHANDLE hRecord;
+    hIo = CreateIoCompletionPort(INVALID_HANDLE_VALUE,0,0,0);
+    if(!hIo) {
+        rv = 42;
+        goto _cleanup;
+    }
 
-            hRecord = MsiCreateRecord(4);
-            MsiRecordClearData(hRecord);
-            MsiRecordSetInteger(hRecord, 1, ERR_NSS_FAILED_CP);
-            MsiRecordSetString(hRecord, 2, strPathUninst);
-            MsiRecordSetInteger(hRecord, 3, lastError);
+    acp.CompletionPort = hIo;
 
-            MsiProcessMessage( hInstall, INSTALLMESSAGE_ERROR, hRecord );
-	
-            MsiCloseHandle( hRecord );
+    SetInformationJobObject(hJob,
+                            JobObjectAssociateCompletionPortInformation,
+                            &acp,
+                            sizeof(acp));
 
-            pInfo.hProcess = NULL;
-            pInfo.hThread = NULL;
-            rv = 40;
-            goto _cleanup;
-        };
+    AssignProcessToJobObject(hJob, hProcess);
 
-	// Create a job object to contain the NSIS uninstall process tree
+    DWORD msgId;
+    ULONG_PTR unusedCompletionKey;
+    LPOVERLAPPED unusedOverlapped;
+    for (;;) {
+        if (!GetQueuedCompletionStatus(hIo,
+                                       &msgId,
+                                       &unusedCompletionKey,
+                                       &unusedOverlapped,
+                                       INFINITE)) {
+            Sleep(1000);
+        } else if (msgId == JOB_OBJECT_MSG_ACTIVE_PROCESS_ZERO) {
+            break;
+        }
+    }
 
-	JOBOBJECT_ASSOCIATE_COMPLETION_PORT acp;
-
-	acp.CompletionKey = 0;
-
-	hJob = CreateJobObject(NULL, _T("NSISUninstallObject"));
-	if(!hJob) {
-		rv = 41;
-		goto _cleanup;
-	}
-
-	hIo = CreateIoCompletionPort(INVALID_HANDLE_VALUE,0,0,0);
-	if(!hIo) {
-		rv = 42;
-		goto _cleanup;
-	}
-
-	acp.CompletionPort = hIo;
-
-	SetInformationJobObject( hJob, JobObjectAssociateCompletionPortInformation, &acp, sizeof(acp));
-
-	AssignProcessToJobObject( hJob, pInfo.hProcess );
-
-	ResumeThread( pInfo.hThread );
-
-	DWORD a,b,c;
-	for(;;) {
-		if(!GetQueuedCompletionStatus(hIo, &a, (PULONG_PTR) &b, (LPOVERLAPPED *) &c, INFINITE)) {
-			Sleep(1000);
-			continue;
-		}
-		if(a == JOB_OBJECT_MSG_ACTIVE_PROCESS_ZERO) {
-			break;
-		}
-	}
-
-	rv = ERROR_SUCCESS;
-    
 _cleanup:
-	if(hIo) CloseHandle(hIo);
-	if(pInfo.hProcess)	CloseHandle( pInfo.hProcess );
-	if(pInfo.hThread) 	CloseHandle( pInfo.hThread );
-	if(hJob) CloseHandle(hJob);
-	if(strPathUninst) delete strPathUninst;
+    if (hProcess) CloseHandle(hProcess);
+    if (hIo) CloseHandle(hIo);
+    if (hJob) CloseHandle(hJob);
 
-	if(rv != ERROR_SUCCESS && rv != 40) {
-            ShowMsiError( hInstall, ERR_NSS_FAILED, rv );
-	}
-	return rv;
+    if (IsNSISInstalled()) {
+        // uninstall failed: maybe user cancelled uninstall, or something else
+        // went wrong...
+        if (rv == ERROR_SUCCESS)
+            rv = 43;
+    } else {
+        // Maybe something went wrong, but it doesn't matter as long as nsis
+        // is gone now...
+        rv = ERROR_SUCCESS;
+    }
+
+    if (rv == 40) {
+        // CreateProcess() / ShellExecute() errors get extra data
+        ShowMsiErrorEx(hInstall, ERR_NSS_FAILED_CP, strPathUninst, lastError);
+    } else if (rv != ERROR_SUCCESS) {
+        ShowMsiError(hInstall, ERR_NSS_FAILED, rv);
+    }
+
+    if (strPathUninst) delete strPathUninst;
+    return rv;
 }
 
 /* Check and add or remove networkprovider key value
