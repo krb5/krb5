@@ -123,19 +123,17 @@ gss_OID_set *		mechanisms;
      */
 
     if(mechanisms != NULL) {
-	status = gss_create_empty_oid_set(minor_status, &mechs);
-	if (GSS_ERROR(status))
-	    goto error;
-
 	if (union_cred) {
-	    for (i = 0; i < union_cred->count; i++) {
-		status = gss_add_oid_set_member(minor_status,
-						&union_cred->mechs_array[i],
-						&mechs);
-		if (GSS_ERROR(status))
-		    goto error;
-	    }
+	    status = gssint_make_public_oid_set(minor_status,
+						union_cred->mechs_array,
+						union_cred->count, &mechs);
+	    if (GSS_ERROR(status))
+		goto error;
 	} else {
+	    status = gss_create_empty_oid_set(minor_status, &mechs);
+	    if (GSS_ERROR(status))
+		goto error;
+
 	    status = gss_add_oid_set_member(minor_status,
 					    &mech->mech_type, &mechs);
 	    if (GSS_ERROR(status))
@@ -172,6 +170,7 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
     gss_mechanism	mech;
     OM_uint32		status, temp_minor_status;
     gss_name_t		internal_name;
+    gss_OID		selected_mech;
 
     if (minor_status != NULL)
 	*minor_status = 0;
@@ -182,14 +181,18 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
     if (minor_status == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-    mech = gssint_get_mechanism (mech_type);
+    status = gssint_select_mech_type(minor_status, mech_type, &selected_mech);
+    if (status != GSS_S_COMPLETE)
+	return (status);
+
+    mech = gssint_get_mechanism(selected_mech);
     if (!mech)
 	return (GSS_S_BAD_MECH);
     if (!mech->gss_inquire_cred_by_mech)
 	return (GSS_S_BAD_BINDINGS);
 
     union_cred = (gss_union_cred_t) cred_handle;
-    mech_cred = gssint_get_mechanism_cred(union_cred, mech_type);
+    mech_cred = gssint_get_mechanism_cred(union_cred, selected_mech);
 
 #if 0
     if (mech_cred == NULL)
@@ -197,7 +200,7 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
 #endif
 
     status = mech->gss_inquire_cred_by_mech(minor_status,
-					    mech_cred, mech_type,
+					    mech_cred, selected_mech,
 					    name ? &internal_name : NULL,
 					    initiator_lifetime,
 					    acceptor_lifetime, cred_usage);

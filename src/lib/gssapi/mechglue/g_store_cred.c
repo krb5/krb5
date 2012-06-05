@@ -143,6 +143,7 @@ gss_cred_usage_t		 *cred_usage_stored;
 	gss_cred_id_t		mech_cred;
 	gss_mechanism		mech;
 	gss_OID			dmech;
+	gss_OID			selected_mech;
 	int			i;
 
 	major_status = val_store_cred_args(minor_status,
@@ -167,7 +168,13 @@ gss_cred_usage_t		 *cred_usage_stored;
 
 	/* desired_mech != GSS_C_NULL_OID -> store one element */
 	if (desired_mech != GSS_C_NULL_OID) {
-		mech = gssint_get_mechanism(desired_mech);
+		major_status = gssint_select_mech_type(minor_status,
+						       desired_mech,
+						       &selected_mech);
+		if (major_status != GSS_S_COMPLETE)
+			return (major_status);
+
+		mech = gssint_get_mechanism(selected_mech);
 		if (mech == NULL)
 			return (GSS_S_BAD_MECH);
 
@@ -179,13 +186,13 @@ gss_cred_usage_t		 *cred_usage_stored;
 		    mech->gss_store_cred_into == NULL)
 			return (major_status);
 
-		mech_cred = gssint_get_mechanism_cred(union_cred, desired_mech);
+		mech_cred = gssint_get_mechanism_cred(union_cred, selected_mech);
 		if (mech_cred == GSS_C_NO_CREDENTIAL)
 			return (GSS_S_NO_CRED);
 
 		major_status = store_cred_fallback(minor_status, mech,
 						   mech_cred, cred_usage,
-						   desired_mech,
+						   selected_mech,
 						   overwrite_cred,
 						   default_cred, cred_store,
 						   elements_stored,

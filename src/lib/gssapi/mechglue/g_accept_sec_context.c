@@ -114,7 +114,7 @@ gss_cred_id_t *		d_cred;
 {
     OM_uint32		status, temp_status, temp_minor_status;
     OM_uint32		temp_ret_flags = 0;
-    gss_union_ctx_id_t	union_ctx_id;
+    gss_union_ctx_id_t	union_ctx_id = NULL;
     gss_cred_id_t	input_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t	tmp_d_cred = GSS_C_NO_CREDENTIAL;
     gss_name_t		internal_name = GSS_C_NO_NAME;
@@ -122,7 +122,11 @@ gss_cred_id_t *		d_cred;
     gss_OID_desc	token_mech_type_desc;
     gss_OID		token_mech_type = &token_mech_type_desc;
     gss_OID		actual_mech = GSS_C_NO_OID;
+    gss_OID		selected_mech = GSS_C_NO_OID;
+    gss_OID		public_mech;
     gss_mechanism	mech = NULL;
+    gss_union_cred_t	uc;
+    int			i;
 
     status = val_acc_sec_ctx_args(minor_status,
 				  context_handle,
@@ -155,6 +159,36 @@ gss_cred_id_t *		d_cred;
 	if (status)
 	    return status;
 
+	/*
+	 * An interposer calling back into the mechglue can't pass in a special
+	 * mech, so we have to recognize it using verifier_cred_handle.  Use
+	 * the mechanism for which we have matching creds, if available.
+	 */
+	if (verifier_cred_handle != GSS_C_NO_CREDENTIAL) {
+	    uc = (gss_union_cred_t)verifier_cred_handle;
+	    for (i = 0; i < uc->count; i++) {
+		public_mech = gssint_get_public_oid(&uc->mechs_array[i]);
+		if (public_mech && g_OID_equal(token_mech_type, public_mech)) {
+		    selected_mech = &uc->mechs_array[i];
+		    break;
+		}
+	    }
+	}
+
+	if (selected_mech == GSS_C_NO_OID) {
+	    status = gssint_select_mech_type(minor_status, token_mech_type,
+					     &selected_mech);
+	    if (status)
+		return status;
+	}
+
+    } else {
+	union_ctx_id = (gss_union_ctx_id_t)*context_handle;
+	selected_mech = union_ctx_id->mech_type;
+    }
+
+    /* Now create a new context if we didn't get one. */
+    if (*context_handle == GSS_C_NO_CONTEXT) {
 	status = GSS_S_FAILURE;
 	union_ctx_id = (gss_union_ctx_id_t)
 	    malloc(sizeof(gss_union_ctx_id_desc));
@@ -163,8 +197,7 @@ gss_cred_id_t *		d_cred;
 
 	union_ctx_id->loopback = union_ctx_id;
 	union_ctx_id->internal_ctx_id = GSS_C_NO_CONTEXT;
-	status = generic_gss_copy_oid(&temp_minor_status,
-				      token_mech_type,
+	status = generic_gss_copy_oid(&temp_minor_status, selected_mech,
 				      &union_ctx_id->mech_type);
 	if (status != GSS_S_COMPLETE) {
 	    free(union_ctx_id);
@@ -173,9 +206,6 @@ gss_cred_id_t *		d_cred;
 
 	/* set the new context handle to caller's data */
 	*context_handle = (gss_ctx_id_t)union_ctx_id;
-    } else {
-	union_ctx_id = (gss_union_ctx_id_t)*context_handle;
-	token_mech_type = union_ctx_id->mech_type;
     }
 
     /*
@@ -184,7 +214,7 @@ gss_cred_id_t *		d_cred;
     if (verifier_cred_handle != GSS_C_NO_CREDENTIAL) {
 	input_cred_handle =
 	    gssint_get_mechanism_cred((gss_union_cred_t)verifier_cred_handle,
-				      token_mech_type);
+				      selected_mech);
 	if (input_cred_handle == GSS_C_NO_CREDENTIAL) {
 	    /* verifier credential specified but no acceptor credential found */
 	    status = GSS_S_NO_CRED;
@@ -197,7 +227,7 @@ gss_cred_id_t *		d_cred;
      * call it.
      */
 
-    mech = gssint_get_mechanism (token_mech_type);
+    mech = gssint_get_mechanism(selected_mech);
     if (mech && mech->gss_accept_sec_context) {
 
 	    status = mech->gss_accept_sec_context(minor_status,
@@ -253,8 +283,10 @@ gss_cred_id_t *		d_cred;
 	    /* Ensure we're returning correct creds format */
 	    if ((temp_ret_flags & GSS_C_DELEG_FLAG) &&
 		tmp_d_cred != GSS_C_NO_CREDENTIAL) {
+		public_mech = gssint_get_public_oid(selected_mech);
 		if (actual_mech != GSS_C_NO_OID &&
-		    !g_OID_prefix_equal(actual_mech, token_mech_type)) {
+		    public_mech != GSS_C_NO_OID &&
+		    !g_OID_prefix_equal(actual_mech, public_mech)) {
 		    *d_cred = tmp_d_cred; /* unwrapped pseudo-mech */
 		} else {
 		    gss_union_cred_t d_u_cred = NULL;
@@ -269,7 +301,7 @@ gss_cred_id_t *		d_cred;
 		    d_u_cred->count = 1;
 
 		    status = generic_gss_copy_oid(&temp_minor_status,
-						  token_mech_type,
+						  selected_mech,
 						  &d_u_cred->mechs_array);
 
 		    if (status != GSS_S_COMPLETE) {
@@ -292,9 +324,7 @@ gss_cred_id_t *		d_cred;
 	    }
 
 	    if (mech_type != NULL)
-		*mech_type = actual_mech;
-	    else
-		(void) gss_release_oid(&temp_minor_status, &actual_mech);
+		*mech_type = gssint_get_public_oid(actual_mech);
 	    if (ret_flags != NULL)
 		*ret_flags = temp_ret_flags;
 	    return	(status);

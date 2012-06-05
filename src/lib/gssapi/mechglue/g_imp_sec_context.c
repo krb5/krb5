@@ -83,6 +83,7 @@ gss_ctx_id_t *		context_handle;
     char		*p;
     gss_union_ctx_id_t	ctx;
     gss_buffer_desc	token;
+    gss_OID		selected_mech = GSS_C_NO_OID;
     gss_mechanism	mech;
 
     status = val_imp_sec_ctx_args(minor_status,
@@ -133,7 +134,12 @@ gss_ctx_id_t *		context_handle;
      * call it.
      */
 
-    mech = gssint_get_mechanism (ctx->mech_type);
+    status = gssint_select_mech_type(minor_status, ctx->mech_type,
+				     &selected_mech);
+    if (status != GSS_S_COMPLETE)
+	goto error_out;
+
+    mech = gssint_get_mechanism(selected_mech);
     if (!mech) {
 	status = GSS_S_BAD_MECH;
 	goto error_out;

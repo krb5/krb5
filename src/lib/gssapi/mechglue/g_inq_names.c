@@ -40,6 +40,7 @@ gss_OID_set *	name_types;
 
 {
     OM_uint32		status;
+    gss_OID		selected_mech = GSS_C_NO_OID;
     gss_mechanism	mech;
 
     /* Initialize outputs. */
@@ -63,14 +64,19 @@ gss_OID_set *	name_types;
      * call it.
      */
 
-    mech = gssint_get_mechanism (mechanism);
+    status = gssint_select_mech_type(minor_status, mechanism,
+				     &selected_mech);
+    if (status != GSS_S_COMPLETE)
+	return (status);
+
+    mech = gssint_get_mechanism(selected_mech);
 
     if (mech) {
 
 	if (mech->gss_inquire_names_for_mech) {
 	    status = mech->gss_inquire_names_for_mech(
 				minor_status,
-				mechanism,
+				selected_mech,
 				name_types);
 	    if (status != GSS_S_COMPLETE)
 		map_error(minor_status, mech);

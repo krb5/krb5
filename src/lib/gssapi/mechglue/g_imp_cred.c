@@ -96,6 +96,7 @@ gss_import_cred(OM_uint32 *minor_status, gss_buffer_t token,
     gss_mechanism mech;
     gss_buffer_desc tok, mech_token;
     gss_OID_desc mech_oid;
+    gss_OID selected_mech;
     gss_cred_id_t mech_cred;
     void *elemcopy;
 
@@ -128,7 +129,11 @@ gss_import_cred(OM_uint32 *minor_status, gss_buffer_t token,
         (void)get_entry(minor_status, &tok, &mech_oid, &mech_token);
 
         /* Import this entry's mechanism token. */
-        mech = gssint_get_mechanism(&mech_oid);
+        status = gssint_select_mech_type(minor_status, &mech_oid,
+                                         &selected_mech);
+        if (status != GSS_S_COMPLETE)
+            goto error;
+        mech = gssint_get_mechanism(selected_mech);
         if (mech == NULL || mech->gss_import_cred == NULL) {
             status = GSS_S_DEFECTIVE_TOKEN;
             goto error;
@@ -140,14 +145,14 @@ gss_import_cred(OM_uint32 *minor_status, gss_buffer_t token,
         }
 
         /* Add the resulting mechanism cred to the union cred. */
-        elemcopy = malloc(mech_oid.length);
+        elemcopy = malloc(selected_mech->length);
         if (elemcopy == NULL) {
             if (mech->gss_release_cred != NULL)
                 mech->gss_release_cred(&tmpmin, &mech_cred);
             goto oom;
         }
-        memcpy(elemcopy, mech_oid.elements, mech_oid.length);
-        cred->mechs_array[cred->count].length = mech_oid.length;
+        memcpy(elemcopy, selected_mech->elements, selected_mech->length);
+        cred->mechs_array[cred->count].length = selected_mech->length;
         cred->mechs_array[cred->count].elements = elemcopy;
         cred->cred_array[cred->count++] = mech_cred;
     }

@@ -62,6 +62,7 @@ gss_export_cred(OM_uint32 * minor_status, gss_cred_id_t cred_handle,
     OM_uint32 status, tmpmin;
     gss_union_cred_t cred;
     gss_OID mech_oid;
+    gss_OID public_oid;
     gss_mechanism mech;
     gss_buffer_desc mech_token;
     struct k5buf buf;
@@ -78,6 +79,7 @@ gss_export_cred(OM_uint32 * minor_status, gss_cred_id_t cred_handle,
     for (i = 0; i < cred->count; i++) {
         /* Get an export token for this mechanism. */
         mech_oid = &cred->mechs_array[i];
+        public_oid = gssint_get_public_oid(mech_oid);
         mech = gssint_get_mechanism(mech_oid);
         if (mech == NULL) {
             status = GSS_S_DEFECTIVE_CREDENTIAL;
@@ -95,9 +97,9 @@ gss_export_cred(OM_uint32 * minor_status, gss_cred_id_t cred_handle,
         }
 
         /* Append the mech OID and token to buf. */
-        store_32_be(mech_oid->length, lenbuf);
+        store_32_be(public_oid->length, lenbuf);
         krb5int_buf_add_len(&buf, lenbuf, 4);
-        krb5int_buf_add_len(&buf, mech_oid->elements, mech_oid->length);
+        krb5int_buf_add_len(&buf, public_oid->elements, public_oid->length);
         store_32_be(mech_token.length, lenbuf);
         krb5int_buf_add_len(&buf, lenbuf, 4);
         krb5int_buf_add_len(&buf, mech_token.value, mech_token.length);

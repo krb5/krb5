@@ -123,6 +123,7 @@ gss_localname(OM_uint32 *minor,
     gss_mechanism mech;
     gss_union_name_t unionName;
     gss_name_t mechName = GSS_C_NO_NAME, mechNameP;
+    gss_OID selected_mech = GSS_C_NO_OID;
 
     if (localname != GSS_C_NO_BUFFER) {
 	localname->length = 0;
@@ -142,9 +143,12 @@ gss_localname(OM_uint32 *minor,
 
     unionName = (gss_union_name_t)pname;
 
-    if (mech_type != GSS_C_NO_OID)
-        mech = gssint_get_mechanism(mech_type);
-    else
+    if (mech_type != GSS_C_NO_OID) {
+        major = gssint_select_mech_type(minor, mech_type, &selected_mech);
+        if (major != GSS_S_COMPLETE)
+	    return major;
+        mech = gssint_get_mechanism(selected_mech);
+    } else
         mech = gssint_get_mechanism(unionName->mech_type);
 
     if (mech == NULL)

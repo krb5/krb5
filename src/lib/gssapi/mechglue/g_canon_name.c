@@ -65,11 +65,17 @@ gss_name_t *output_name;
 {
 	gss_union_name_t in_union, out_union = NULL, dest_union = NULL;
 	OM_uint32 major_status = GSS_S_FAILURE, tmpmin;
+	gss_OID selected_mech;
 
 	major_status = val_canon_name_args(minor_status,
 					   input_name,
 					   mech_type,
 					   output_name);
+	if (major_status != GSS_S_COMPLETE)
+		return (major_status);
+
+	major_status = gssint_select_mech_type(minor_status, mech_type,
+					       &selected_mech);
 	if (major_status != GSS_S_COMPLETE)
 		return (major_status);
 
@@ -82,7 +88,7 @@ gss_name_t *output_name;
 	 * been converted, then there is nothing for us to do.
 	 */
 	if (!output_name && in_union->mech_type &&
-		g_OID_equal(in_union->mech_type, mech_type))
+	    g_OID_equal(in_union->mech_type, selected_mech))
 		return (GSS_S_COMPLETE);
 
 	/* ok, then we need to do something - start by creating data struct */
@@ -133,14 +139,14 @@ gss_name_t *output_name;
 		dest_union = out_union;
 
 	/* now let's create the new mech name */
-	if ((major_status = generic_gss_copy_oid(minor_status, mech_type,
+	if ((major_status = generic_gss_copy_oid(minor_status, selected_mech,
 						 &dest_union->mech_type))) {
 	    map_errcode(minor_status);
 	    goto allocation_failure;
 	}
 
 	if ((major_status =
-		gssint_import_internal_name(minor_status, mech_type,
+		gssint_import_internal_name(minor_status, selected_mech,
 						in_union,
 						&dest_union->mech_name)))
 		goto allocation_failure;

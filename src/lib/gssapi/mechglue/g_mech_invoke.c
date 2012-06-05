@@ -38,6 +38,7 @@ gssspi_mech_invoke (OM_uint32 *minor_status,
 		    gss_buffer_t value)
 {
     OM_uint32		status;
+    gss_OID		selected_mech = GSS_C_NO_OID;
     gss_mechanism	mech;
 
     if (minor_status == NULL)
@@ -50,13 +51,18 @@ gssspi_mech_invoke (OM_uint32 *minor_status,
      * call it.
      */
 
-    mech = gssint_get_mechanism (desired_mech);
+    status = gssint_select_mech_type(minor_status, desired_mech,
+				     &selected_mech);
+    if (status != GSS_S_COMPLETE)
+	return status;
+
+    mech = gssint_get_mechanism(selected_mech);
     if (mech == NULL || mech->gssspi_mech_invoke == NULL) {
 	return GSS_S_BAD_MECH;
     }
 
     status = mech->gssspi_mech_invoke(minor_status,
-				      desired_mech,
+				      gssint_get_public_oid(selected_mech),
 				      desired_object,
 				      value);
     if (status != GSS_S_COMPLETE)
