@@ -24,6 +24,10 @@
 #include <windows.h>
 
 #else /* ! RES_ONLY */
+#include <stdlib.h>
+#ifdef DEBUG
+#include <crtdbg.h>
+#endif
 
 /* To ensure backward compatibility of the ABI use 32-bit time_t on
  * 32-bit Windows.
@@ -76,6 +80,8 @@ typedef unsigned long    u_long;      /* Not part of sys/types.h on the pc */
 typedef unsigned int     u_int;
 typedef unsigned short   u_short;
 typedef unsigned char    u_char;
+typedef unsigned short   uint16_t;
+typedef short            int16_t;
 typedef unsigned int     uint32_t;
 typedef int              int32_t;
 #if _INTEGRAL_MAX_BITS >= 64
