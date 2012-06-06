@@ -395,10 +395,9 @@ def _onexit():
         if not verbose:
             print 'See testlog for details, or re-run with -v flag.'
             print
-        print 'Use --debug=NUM to run a command (other than a daemon) under a'
-        print 'debugger.  Use --stop-after=NUM to stop after a daemon is'
-        print 'started in order to attach to it with a debugger.  Use --help'
-        print 'to see other options.'
+        print 'Use --debug=NUM to run a command under a debugger.  Use'
+        print '--stop-after=NUM to stop after a daemon is started in order to'
+        print 'attach to it with a debugger.  Use --help to see other options.'
 
 # Find the parent of dir which is at the root of a build or source directory.
 def _find_root(dir):
@@ -638,9 +637,12 @@ def _start_daemon(args, env, sentinel):
     global null_input, _cmd_index, _debug
     global _stop_before, _stop_after, _shell_before, _shell_after
 
-    # Make this non-fatal so that --debug=all works.
     if (_match_cmdnum(_debug, _cmd_index)):
-        output('*** [%d] Cannot run daemon in debugger\n' % _cmd_index, True)
+        output('*** [%d] Warning: ' % _cmd_index, True)
+        output( 'test script cannot proceed after debugging a daemon\n', True)
+        _debug_cmd(args, env, None)
+        output('*** Exiting after debugging daemon\n', True)
+        sys.exit(1)
 
     args = _valgrind(args)
     output('*** [%d] Starting: %s\n' %
