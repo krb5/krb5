@@ -1475,8 +1475,7 @@ AuthenticateProc(
     )
 {
     static POINT Position = { -1, -1 };
-    static char username[LEASH_USERNAME_SZ]="";
-    static char realm[LEASH_REALM_SZ]="";
+    static char principal[256]="";
     static char password[256]="";
     static int  lifetime=0;
     static int  renew_till=0;
@@ -1491,7 +1490,6 @@ AuthenticateProc(
     static RECT dlgRect;
     static int  hideDiff = 0;
     static void *pAutoComplete = 0;
-    char principal[256];
     long realm_count = 0;
     int disable_noaddresses = 0;
     HWND hEditCtrl=0;
@@ -1535,7 +1533,8 @@ AuthenticateProc(
 	    SetWindowText(hDialog, lpdi->title);
 
         SetProp(hDialog, "HANDLES_HELP", (HANDLE)1);
-
+// @TODO: in/out principal
+/*
         if ( lpdi->size >= LSH_DLGINFO_EX_V3_SZ )
             lstrcpy(username, lpdi->in.username);
         else if (lpdi->username)
@@ -1544,7 +1543,7 @@ AuthenticateProc(
 	    lstrcpy(realm, lpdi->in.realm);
 	else if (lpdi->realm)
 	    lstrcpy(realm, lpdi->realm);
-
+*/
 	if (lpdi->use_defaults) {
 	    lifetime = Leash_get_default_lifetime();
 	    if (lifetime <= 0)
@@ -1576,109 +1575,13 @@ AuthenticateProc(
 	    publicip = lpdi->publicip;
 	}
 
-        CSetDlgItemText(hDialog, IDC_EDIT_PRINCIPAL, username);
+        CSetDlgItemText(hDialog, IDC_EDIT_PRINCIPAL, principal);
         CSetDlgItemText(hDialog, IDC_EDIT_PASSWORD, "");
 
 #if 0  /* 20030619 - mjv wishes to return to the default character */
         /* echo spaces */
 	CSendDlgItemMessage(hDialog, IDC_EDIT_PASSWORD, EM_SETPASSWORDCHAR, 32, 0);
 #endif
-
-	/* Populate list of Realms */
-	CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, CB_RESETCONTENT, 0, 0);
-	CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, CB_LIMITTEXT, 192, 0);
-
-	if (pprofile_get_subsection_names && pprofile_free_list) {
-	    const char*  rootSection[] = {"realms", NULL};
-	    const char** rootsec = rootSection;
-	    char **sections = NULL, **cpp = NULL, *value = NULL;
-
-	    char krb5_conf[MAX_PATH+1];
-
-	    if (!GetProfileFile(krb5_conf,sizeof(krb5_conf))) {
-		profile_t profile;
-		long retval;
-		const char *filenames[2];
-
-		filenames[0] = krb5_conf;
-		filenames[1] = NULL;
-		retval = pprofile_init(filenames, &profile);
-		if (!retval) {
-		    retval = pprofile_get_subsection_names(profile,	rootsec, &sections);
-
-		    if (!retval)
-		    {
-			for (cpp = sections; *cpp; cpp++)
-			{
-			    CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, CB_ADDSTRING, 0, (LPARAM)*cpp);
-			    realm_count++;
-			}
-		    }
-		    pprofile_free_list(sections);
-
-                    retval = pprofile_get_string(profile, "libdefaults","noaddresses", 0, "true", &value);
-                    if ( value ) {
-                        disable_noaddresses = config_boolean_to_int(value);
-                        pprofile_release_string(value);
-                    }
-
-		    pprofile_release(profile);
-		}
-	    }
-	} else {
-	    FILE * file;
-	    char krb_conf[MAX_PATH+1];
-	    char * p;
-
-	    if (!GetKrb4ConFile(krb_conf,sizeof(krb_conf)) &&
-		 (file = fopen(krb_conf, "rt")))
-	    {
-		char lineBuf[256];
-		// Skip the default realm
-		readstring(file,lineBuf,sizeof(lineBuf));
-
-		// Read the defined realms
-		while (TRUE)
-		{
-		    if (readstring(file,lineBuf,sizeof(lineBuf)) < 0)
-			break;
-
-		    if (*(lineBuf + strlen(lineBuf) - 1) == '\r')
-			*(lineBuf + strlen(lineBuf) - 1) = 0;
-
-		    for (p=lineBuf; *p ; p++)
-		    {
-			if (isspace(*p)) {
-			    *p = 0;
-			    break;
-			}
-		    }
-
-		    if ( strncmp(".KERBEROS.OPTION.",lineBuf,17) ) {
-			CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, CB_ADDSTRING, 0, (LPARAM)lineBuf);
-			realm_count++;
-		    }
-		}
-
-		fclose(file);
-	    }
-	}
-	if (realm_count == 0)
-	    CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, CB_ADDSTRING, 0, (LPARAM)realm);
-
-	/* Select the default Realm */
-	if (!realm[0] && hKrb5) {
-	    krb5_context ctx=0;
-	    char * def = 0;
-	    pkrb5_init_context(&ctx);
-	    pkrb5_get_default_realm(ctx,&def);
-	    if (def) {
-		lstrcpy(realm, def);
-		free(def);
-	    }
-	    pkrb5_free_context(ctx);
-	}
-	CSetDlgItemText(hDialog, IDC_COMBO_REALM, realm);
 
 	/* Set Lifetime Slider
 	*   min value = 5
@@ -1848,32 +1751,24 @@ AuthenticateProc(
 	    {
 		DWORD value = 0;
 
-		CGetDlgItemText(hDialog, IDC_EDIT_PRINCIPAL, username, sizeof(username));
+		CGetDlgItemText(hDialog, IDC_EDIT_PRINCIPAL, principal, sizeof(principal));
 		CGetDlgItemText(hDialog, IDC_EDIT_PASSWORD, password, sizeof(password));
-		CGetDlgItemText(hDialog, IDC_COMBO_REALM, realm, sizeof(realm));
 
-		if (!username[0])
-		{
+		if (!principal[0]) {
 		    MessageBox(hDialog,
-                                "You are not allowed to enter a blank username.",
-				"Invalid Principal",
-				MB_OK | MB_ICONSTOP);
+                       "You are not allowed to enter a blank principal.",
+                       "Invalid Principal",
+                       MB_OK | MB_ICONSTOP);
 		    return TRUE;
 		}
-		if (!realm[0])
-		{
-		    MessageBox(hDialog,
-                                "You are not allowed to enter a blank realm.",
-				"Invalid Principal",
-				MB_OK | MB_ICONSTOP);
-		    return TRUE;
-		}
-
+        // @TODO: parse realm portion and auto-uppercase
+/*
 		if (Leash_get_default_uppercaserealm())
 		{
 		    // found
 		    strupr(realm);
 		}
+*/
 
 		if (!password[0])
 		{
@@ -1894,7 +1789,6 @@ AuthenticateProc(
 		    renew_till= 0;
 		}
 
-		sprintf(principal,"%s@%s",username,realm);
 		lsh_errno = Leash_int_kinit_ex( 0,
 						hDialog,
 						principal, password, lifetime,
@@ -1962,14 +1856,15 @@ AuthenticateProc(
                     Leash_set_default_forwardable(forwardable);
                     Leash_set_default_noaddresses(noaddresses);
                 }
-
+/* @TODO: out username/realm
                 if ( lpdi->size >= LSH_DLGINFO_EX_V2_SZ ) {
                     strncpy(lpdi->out.username, username, LEASH_USERNAME_SZ);
                     lpdi->out.username[LEASH_USERNAME_SZ-1] = 0;
                     strncpy(lpdi->out.realm, realm, LEASH_REALM_SZ);
                     lpdi->out.realm[LEASH_REALM_SZ-1] = 0;
                 }
-                lacAddPrincipal(username);
+*/
+                lacAddPrincipal(principal);
 
                 CloseMe(TRUE); /* success */
                 return FALSE;
