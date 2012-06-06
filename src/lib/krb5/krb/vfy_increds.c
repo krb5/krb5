@@ -317,7 +317,6 @@ cleanup:
 
     if (defkeytab != NULL)
         krb5_kt_close(context, defkeytab);
-    krb5_free_principal(context, server);
     free_princ_list(context, host_princs);
 
     return ret;
