@@ -124,11 +124,12 @@ main (int argc, char *argv[])
     conn.socktype = SOCK_DGRAM;
     TRACE(ctx, "struct conn_state *, show socket type, address, port: "
           "{connstate}", &conn);
-    conn.socktype = SOCK_RDM;
+    conn.socktype = 1234;
     addr_in->sin_family = AF_UNSPEC;
+    conn.family = AF_UNSPEC;
     TRACE(ctx, "struct conn_state *, show socket type, address, port: "
           "{connstate}", &conn);
-    conn.family = AF_UNSPEC;
+    conn.family = 5678;
     TRACE(ctx, "struct conn_state *, show socket type, address, port: "
           "{connstate}", &conn);
 
@@ -140,8 +141,7 @@ main (int argc, char *argv[])
     TRACE(ctx, "krb5_data *, display as hex bytes: {hexdata}", &data);
     TRACE(ctx, "krb5_data *, display as hex bytes: {hexdata}", NULL);
 
-    TRACE(ctx, "int, display as number/errorstring: {errno}", 0);
-    TRACE(ctx, "int, display as number/errorstring: {errno}", 1);
+    TRACE(ctx, "int, display as number/errorstring: {errno}", ENOENT);
     TRACE(ctx, "krb5_error_code, display as number/errorstring: {kerr}", 0);
 
     key.keyblock.magic = 0;
@@ -213,11 +213,11 @@ main (int argc, char *argv[])
     TRACE(ctx, "krb5_enctype *, display list of enctypes: {etypes}", enctypes);
     TRACE(ctx, "krb5_enctype *, display list of enctypes: {etypes}", NULL);
 
-    err = krb5_cc_default(ctx, &ccache);
+    err = krb5_cc_resolve(ctx, "FILE:/path/to/ccache", &ccache);
     TRACE(ctx, "krb5_ccache, display type:name: {ccache}", ccache);
     krb5_cc_close(ctx, ccache);
 
-    err = krb5_kt_default(ctx, &keytab);
+    err = krb5_kt_resolve(ctx, "FILE:/etc/krb5.keytab", &keytab);
     TRACE(ctx, "krb5_keytab, display name: {keytab}", keytab);
     krb5_kt_close(ctx, keytab);
 

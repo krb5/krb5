@@ -264,8 +264,7 @@ check-unix-trace:: t_trace
 	rm -f t_trace.out
 	KRB5_TRACE=t_trace.out ; export KRB5_TRACE ; \
 	$(KRB5_RUN_ENV) $(VALGRIND) ./t_trace
-# Output is not consistent across runs; disable comparison until we can fix.
-#	sed -e 's/^[^:]*: //' t_trace.out | cmp - $(srcdir)/t_trace.ref
+	sed -e 's/^[^:]*: //' t_trace.out | cmp - $(srcdir)/t_trace.ref
 	rm -f t_trace.out
 
 clean:: 

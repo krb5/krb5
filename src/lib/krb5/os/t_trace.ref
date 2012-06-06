@@ -8,16 +8,15 @@ size_t and const char *, as hex bytes: 6578616D706C652E64617461
 size_t and const char *, as hex bytes: (null)
 size_t and const char *, as four-character hex hash: 7B9A
 size_t and const char *, as four-character hex hash: (null)
-struct conn_state *, show socket type, address, port: stream af-12644520
-struct conn_state *, show socket type, address, port: dgram af-12644520
-struct conn_state *, show socket type, address, port: socktype5 af-12644520
-struct conn_state *, show socket type, address, port: socktype5 AF_UNSPEC
+struct conn_state *, show socket type, address, port: stream 0.0.0.0:88
+struct conn_state *, show socket type, address, port: dgram 0.0.0.0:88
+struct conn_state *, show socket type, address, port: socktype1234 AF_UNSPEC
+struct conn_state *, show socket type, address, port: socktype1234 af5678
 krb5_data *, display as counted string: example.data
 krb5_data *, display as counted string: (null)
 krb5_data *, display as hex bytes: 6578616D706C652E64617461
 krb5_data *, display as hex bytes: (null)
-int, display as number/errorstring: 0/Error 0
-int, display as number/errorstring: 1/Not owner
+int, display as number/errorstring: 2/No such file or directory
 krb5_error_code, display as number/errorstring: 0/Success
 const krb5_keyblock *, display enctype and hash of key: 511/7B9A
 const krb5_keyblock *, display enctype and hash of key: (null)
@@ -39,11 +38,11 @@ int, krb5_principal type: Windows 2000 UPN and SID
 int, krb5_principal type: NT 4 style name
 int, krb5_principal type: NT 4 style name and SID
 int, krb5_principal type: ?
-krb5_pa_data **, display list of padata type numbers: 0, 12
+krb5_pa_data **, display list of padata type numbers: 3, 0
 krb5_pa_data **, display list of padata type numbers: (empty)
 krb5_enctype, display shortest name of enctype: des-cbc-crc
 krb5_enctype *, display list of enctypes: 5, rc4-hmac-exp, 511
 krb5_enctype *, display list of enctypes: (empty)
-krb5_ccache, display type:name: FILE:/tmp/krb5cc_3622_myrai14144
+krb5_ccache, display type:name: FILE:/path/to/ccache
 krb5_keytab, display name: FILE:/etc/krb5.keytab
 krb5_creds *, display clientprinc -> serverprinc: @ATHENA.MIT.EDU -> @ZEUS.MIT.EDU
