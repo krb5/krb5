@@ -381,7 +381,7 @@ krb5_auth_con_setpermetypes(krb5_context context,
     krb5_enctype *newpe;
     krb5_error_code ret;
 
-    ret = krb5int_copy_etypes(permetypes, &newpe);
+    ret = k5_copy_etypes(permetypes, &newpe);
     if (ret != 0)
         return ret;
 
@@ -398,7 +398,7 @@ krb5_auth_con_getpermetypes(krb5_context context,
     *permetypes = NULL;
     if (auth_context->permitted_etypes == NULL)
         return 0;
-    return krb5int_copy_etypes(auth_context->permitted_etypes, permetypes);
+    return k5_copy_etypes(auth_context->permitted_etypes, permetypes);
 }
 
 krb5_error_code KRB5_CALLCONV

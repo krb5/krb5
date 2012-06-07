@@ -906,7 +906,7 @@ krb5_init_creds_init(krb5_context context,
                ctx->request->nktypes * sizeof(krb5_enctype));
     } else if (krb5_get_default_in_tkt_ktypes(context,
                                               &ctx->request->ktype) == 0) {
-        ctx->request->nktypes = krb5int_count_etypes(ctx->request->ktype);
+        ctx->request->nktypes = k5_count_etypes(ctx->request->ktype);
     } else {
         /* there isn't any useful default here. */
         code = KRB5_CONFIG_ETYPE_NOSUPP;
@@ -1679,7 +1679,7 @@ krb5int_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **out,
     if (addrs)
         krb5_get_init_creds_opt_set_address_list(opt, (krb5_address **) addrs);
     if (ktypes) {
-        i = krb5int_count_etypes(ktypes);
+        i = k5_count_etypes(ktypes);
         if (i)
             krb5_get_init_creds_opt_set_etype_list(opt, ktypes, i);
     }

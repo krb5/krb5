@@ -2579,6 +2579,12 @@ krb5_error_code krb5int_parse_enctype_list(krb5_context context,
                                            krb5_enctype *default_list,
                                            krb5_enctype **result);
 
+/* Utility functions for zero-terminated enctype lists. */
+size_t k5_count_etypes(const krb5_enctype *list);
+krb5_error_code k5_copy_etypes(const krb5_enctype *old_list,
+                               krb5_enctype **new_list);
+krb5_boolean k5_etypes_contains(const krb5_enctype *list, krb5_enctype etype);
+
 #ifdef DEBUG_ERROR_LOCATIONS
 #define krb5_set_error_message(ctx, code, ...)                          \
     krb5_set_error_message_fl(ctx, code, __FILE__, __LINE__, __VA_ARGS__)

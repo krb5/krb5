@@ -494,7 +494,7 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
             if (retval != 0)
                 goto cleanup;
         }
-        permitted_etypes_len = krb5int_count_etypes(permitted_etypes);
+        permitted_etypes_len = k5_count_etypes(permitted_etypes);
     } else {
         permitted_etypes = NULL;
         permitted_etypes_len = 0;

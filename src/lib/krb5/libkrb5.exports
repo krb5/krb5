@@ -98,6 +98,9 @@ initialize_k5e1_error_table
 initialize_kv5m_error_table
 initialize_prof_error_table
 k5_ccselect_free_context
+k5_copy_etypes
+k5_count_etypes
+k5_etypes_contains
 k5_free_serverlist
 k5_kt_get_principal
 k5_locate_kdc

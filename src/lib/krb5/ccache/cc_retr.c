@@ -277,7 +277,7 @@ krb5_cc_retrieve_cred_default (krb5_context context, krb5_ccache id, krb5_flags 
         ret = krb5_get_tgs_ktypes (context, mcreds->server, &ktypes);
         if (ret)
             return ret;
-        nktypes = krb5int_count_etypes (ktypes);
+        nktypes = k5_count_etypes (ktypes);
 
         ret = krb5_cc_retrieve_cred_seq (context, id, flags, mcreds, creds,
                                          nktypes, ktypes);

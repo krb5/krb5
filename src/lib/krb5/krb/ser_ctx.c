@@ -100,7 +100,7 @@ static const krb5_ser_entry krb5_profile_ser_entry = {
 static inline unsigned int
 etypes_len(krb5_enctype *list)
 {
-    return (list == NULL) ? 0 : krb5int_count_etypes(list);
+    return (list == NULL) ? 0 : k5_count_etypes(list);
 }
 
 /*

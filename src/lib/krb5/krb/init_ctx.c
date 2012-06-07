@@ -329,7 +329,7 @@ set_default_etype_var(krb5_context context, const krb5_enctype *etypes,
         /* Empty list passed in. */
         if (etypes[0] == 0)
             return EINVAL;
-        code = krb5int_copy_etypes(etypes, &list);
+        code = k5_copy_etypes(etypes, &list);
         if (code)
             return code;
 
@@ -508,7 +508,7 @@ get_profile_etype_list(krb5_context context, krb5_enctype **etypes_ptr,
 
     if (ctx_list) {
         /* Use application defaults. */
-        code = krb5int_copy_etypes(ctx_list, &etypes);
+        code = k5_copy_etypes(ctx_list, &etypes);
         if (code)
             return code;
     } else {
@@ -577,20 +577,12 @@ krb5_get_permitted_enctypes(krb5_context context, krb5_enctype **ktypes)
 krb5_boolean
 krb5_is_permitted_enctype(krb5_context context, krb5_enctype etype)
 {
-    krb5_enctype *list, *ptr;
+    krb5_enctype *list;
     krb5_boolean ret;
 
     if (krb5_get_permitted_enctypes(context, &list))
-        return(0);
-
-
-    ret = 0;
-
-    for (ptr = list; *ptr; ptr++)
-        if (*ptr == etype)
-            ret = 1;
-
-    krb5_free_ktypes (context, list);
-
-    return(ret);
+        return FALSE;
+    ret = k5_etypes_contains(list, etype);
+    krb5_free_ktypes(context, list);
+    return ret;
 }
