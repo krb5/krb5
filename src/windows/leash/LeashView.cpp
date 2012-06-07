@@ -115,6 +115,7 @@ BEGIN_MESSAGE_MAP(CLeashView, CListView)
     ON_NOTIFY_REFLECT(LVN_ITEMACTIVATE, &CLeashView::OnLvnItemActivate)
     ON_NOTIFY_REFLECT(LVN_KEYDOWN, &CLeashView::OnLvnKeydown)
     ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, &CLeashView::OnNMCustomdraw)
+    ON_COMMAND(ID_FORGET_PRINCIPALS, &CLeashView::OnForgetPrincipals)
 END_MESSAGE_MAP()
 
 
@@ -2916,4 +2917,9 @@ void CLeashView::OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *pResult)
     default:
         break;
     }
+}
+
+
+void CLeashView::OnForgetPrincipals()
+{
 }
