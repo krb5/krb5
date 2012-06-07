@@ -1525,8 +1525,8 @@ dbentry_supports_enctype(krb5_context context, krb5_db_entry *server,
     krb5_key_data       *datap;
     char                *etypes_str = NULL;
     krb5_enctype        default_enctypes[1] = { 0 };
-    krb5_enctype        *etypes;
-    size_t              i;
+    krb5_enctype        *etypes = NULL;
+    krb5_boolean        in_list;
 
     /* Look up the supported session key enctypes list in the KDB. */
     retval = krb5_dbe_get_string(context, server, KRB5_KDB_SK_SESSION_ENCTYPES,
@@ -1536,17 +1536,16 @@ dbentry_supports_enctype(krb5_context context, krb5_db_entry *server,
         retval = krb5int_parse_enctype_list(context, "KDB-session_etypes",
                                             etypes_str, default_enctypes,
                                             &etypes);
-        free(etypes_str);
         if (retval == 0 && etypes != NULL && etypes[0]) {
-            for (i = 0; etypes[i]; i++)
-                if (enctype == etypes[i])
-                    return TRUE;
-            return FALSE;
+            in_list = k5_etypes_contains(etypes, enctype);
+            free(etypes_str);
+            free(etypes);
+            return in_list;
         }
         /* Fall through on error or empty list */
-    } else {
-        free(etypes_str);
     }
+    free(etypes_str);
+    free(etypes);
 
     /* If configured to, assume every server without a session_enctypes
      * attribute supports DES_CBC_CRC. */
