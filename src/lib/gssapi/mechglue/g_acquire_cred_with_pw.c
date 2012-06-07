@@ -339,6 +339,7 @@ gss_add_cred_with_password(minor_status, input_cred_handle,
     gss_cred_id_t	cred = NULL;
     gss_OID		new_mechs_array = NULL;
     gss_cred_id_t *	new_cred_array = NULL;
+    gss_OID_set		target_mechs = GSS_C_NO_OID_SET;
 
     status = val_add_cred_pw_args(minor_status,
 			          input_cred_handle,
@@ -402,15 +403,24 @@ gss_add_cred_with_password(minor_status, input_cred_handle,
     else
 	time_req = 0;
 
+    status = gss_create_empty_oid_set(minor_status, &target_mechs);
+    if (status != GSS_S_COMPLETE)
+	goto errout;
+
+    status = gss_add_oid_set_member(minor_status,
+				    &mech->mech_type, &target_mechs);
+    if (status != GSS_S_COMPLETE)
+	goto errout;
+
     status = mech_ext->gssspi_acquire_cred_with_password(minor_status,
-				                         internal_name,
-				                         password,
-                                                         time_req,
-				                         GSS_C_NULL_OID_SET,
-                                                         cred_usage,
-				                         &cred,
-                                                         NULL,
-                                                         &time_rec);
+							 internal_name,
+							 password,
+							 time_req,
+							 target_mechs,
+							 cred_usage,
+							 &cred,
+							 NULL,
+							 &time_rec);
     if (status != GSS_S_COMPLETE) {
 	map_error(minor_status, mech);
 	goto errout;
@@ -505,6 +515,9 @@ errout:
 	(void) gssint_release_internal_name(&temp_minor_status,
 					   &mech->mech_type,
 					   &allocated_name);
+
+    if (target_mechs)
+	(void)gss_release_oid_set(&temp_minor_status, &target_mechs);
 
     if (input_cred_handle == GSS_C_NO_CREDENTIAL && union_cred)
 	free(union_cred);

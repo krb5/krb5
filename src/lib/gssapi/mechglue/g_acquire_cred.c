@@ -373,6 +373,7 @@ gss_add_cred_from(minor_status, input_cred_handle,
     gss_cred_id_t	cred = NULL;
     gss_OID		new_mechs_array = NULL;
     gss_cred_id_t *	new_cred_array = NULL;
+    gss_OID_set		target_mechs = GSS_C_NO_OID_SET;
 
     status = val_add_cred_args(minor_status,
 			       input_cred_handle,
@@ -439,15 +440,24 @@ gss_add_cred_from(minor_status, input_cred_handle,
     else
 	time_req = 0;
 
+    status = gss_create_empty_oid_set(minor_status, &target_mechs);
+    if (status != GSS_S_COMPLETE)
+	goto errout;
+
+    status = gss_add_oid_set_member(minor_status,
+				    &mech->mech_type, &target_mechs);
+    if (status != GSS_S_COMPLETE)
+	goto errout;
+
     if (mech->gss_acquire_cred_from) {
 	status = mech->gss_acquire_cred_from(minor_status, internal_name,
-					     time_req, GSS_C_NULL_OID_SET,
+					     time_req, target_mechs,
 					     cred_usage, cred_store, &cred,
 					     NULL, &time_rec);
     } else if (cred_store == GSS_C_NO_CRED_STORE) {
 	status = mech->gss_acquire_cred(minor_status, internal_name, time_req,
-					GSS_C_NULL_OID_SET, cred_usage, &cred,
-					NULL, &time_rec);
+					target_mechs, cred_usage, &cred, NULL,
+					&time_rec);
     } else {
 	return GSS_S_UNAVAILABLE;
     }
