@@ -937,7 +937,7 @@ END
 STRINGTABLE
 BEGIN
     ID_PROPERTIES           "Enables you to change settings"
-    ID_IMPORT_TICKET        "Convert MS Windows credentials into tickets\n Import Ticket(s) "
+    ID_IMPORT_TICKET        "import tickets from your Windows Logon Session.\n Import Tickets"
     ID_INIT_TICKET          "Obtain a new ticket\n Get Ticket"
     ID_AUTO_RENEW           "Automatically attempt to renew tickets.\n Automatic Ticket Renewal"
     ID_TIME_ISSUED          "Display column showing when your tickets will expire.\n Issued"
@@ -973,6 +973,7 @@ END
 
 STRINGTABLE
 BEGIN
+    ID_FORGET_PRINCIPALS    "Clear the Principal history.  This only affects autocompletion in the Get Tickets and Change Password dialogs.\n Forget Principals"
     ID_ENCRYPTION_TYPE      "Display column showing the encryption type for your tickets and session keys.\n Encryption Type"
     ID_VALID_UNTIL          "Display column showing when your tickets will expire.\n Valid Until"
 END
@@ -981,6 +982,8 @@ STRINGTABLE
 BEGIN
     ID_MAKE_DEFAULT         "Make the selected principal the default principal.\n Make Default"
     ID_IMPORT_TICKETS       "Automatically import tickets from your Windows Logon Session.\n Import Tickets"
+    ID_EXPORT_TICKET        "Export tickets to your Windows Logon Sesion.\n Export Tickets"
+    ID_AUTO_IMPORT_TICKET   "Automatically import tickets from your Windows Logon Session.\n Automatic Import Tickets"
 END
 
 #endif    // English (United States) resources
