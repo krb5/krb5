@@ -2324,16 +2324,6 @@ void KRB5_CALLCONV krb5_free_ktypes(krb5_context, krb5_enctype *);
 
 krb5_boolean krb5_is_permitted_enctype(krb5_context, krb5_enctype);
 
-typedef struct
-{
-    krb5_enctype *etype;
-    krb5_boolean *etype_ok;
-    krb5_int32 etype_count;
-} krb5_etypes_permitted;
-
-krb5_boolean krb5_is_permitted_enctype_ext(krb5_context,
-                                           krb5_etypes_permitted *);
-
 krb5_boolean KRB5_CALLCONV krb5int_c_weak_enctype(krb5_enctype);
 
 krb5_error_code krb5_kdc_rep_decrypt_proc(krb5_context, const krb5_keyblock *,
