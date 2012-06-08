@@ -3,9 +3,11 @@
 Building Kerberos V5
 ====================
 
+This section details how to build and install MIT Kerberos software
+from the source.
 
-Build Requirements
-------------------
+Prerequisites
+-------------
 
 In order to build Kerberos V5, you will need approximately 60-70
 megabytes of disk space.  The exact amount will vary depending on the
@@ -23,26 +25,31 @@ need a make program which supports **VPATH**, or you will need to use
 a tool such as lndir to produce a symbolic link tree for your build
 tree.
 
-The first step in each of these build procedures is to unpack the
-source distribution.  The Kerberos V5 distribution comes in a tar
-file, generally named krb5-1.9.tar (for version 1.9. We will assume
-that version is 1.9. Please, adjust this number accordingly), which
-contains a compressed tar file consisting of the sources for all of
-Kerberos (generally krb5-1.9.tar.gz) and a PGP signature for this
-source tree (generally krb5-1.9.tar.gz.asc).  MIT highly recommends
-that you verify the integrity of the source code using this signature.
+Obtaining the software
+----------------------
 
-Unpack the compressed tar file in some directory, such as
-``/u1/krb5-1.9``.  (In the rest of this document, we will assume that
-you have chosen to unpack the Kerberos V5 source distribution in this
-directory.  Note that the tarfiles will by default all unpack into the
-``./krb5-1.9`` directory, so that if your current directory is ``/u1``
-when you unpack the tarfiles, you will get ``/u1/krb5-1.9/src``, etc.)
+The source code can be obtained from MIT Kerberos Distribution page,
+at http://web.mit.edu/kerberos/dist/index.html.
+The MIT Kerberos distribution comes in an archive file, generally named
+krb5-VERSION.tar, where *VERSION* is a placeholder for the major and minor
+versions of MIT Kerberos.  (For example, MIT Kerberos 1.9
+has major version "1" and minor version "9".)
 
+The krb5-VERSION.tar contains a compressed tar file consisting of the
+sources for all of Kerberos (generally krb5-VERSION.tar.gz) and
+a PGP signature file for this source tree (generally
+krb5-VERSION.tar.gz.asc).  MIT highly recommends that you verify
+the integrity of the source code using this signature.
+
+Unpack krb5-VERSION.tar.gz in some directory. In this section we will assume
+that you have chosen the top directory of the distribution the directory
+``/u1/krb5-VERSION``.
+
+Review the README file for the license, copyright and other sprecific to the
+distribution information.
 
 Contents
 --------
-
 .. toctree::
    :maxdepth: 1
 

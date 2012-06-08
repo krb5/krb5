@@ -21,13 +21,13 @@ rebuild the configure script if it needs rebuilding.  If you know that
 you have made a change that will require that the configure file be
 rebuilt from scratch, specify the **--force** option::
 
-    cd /u1/krb5-1.9/src
+    cd /u1/krb5-VERSION/src
     ./util/reconf --force
 
 Then follow the instructions for building packaged source trees
 (below).  To install the binaries into a binary tree, do::
 
-    cd /u1/krb5-1.9/src
+    cd /u1/krb5-VERSION/src
     make all
     make install DESTDIR=somewhere-else
 
@@ -49,7 +49,7 @@ systems.
 If you don't want separate build trees for each architecture, then use
 the following abbreviated procedure::
 
-    cd /u1/krb5-1.9/src
+    cd /u1/krb5-VERSION/src
     ./configure
     make
 
@@ -69,7 +69,7 @@ directory you might use the following procedure::
 
    mkdir /u1/tmpbuild
    cd /u1/tmpbuild
-   /u1/krb5-1.9/src/configure
+   /u1/krb5-VERSION/src/configure
    make
 
 
@@ -82,11 +82,11 @@ not lost.  You can use the lndir program to create symbolic link trees
 in your build directory.
 
 For example, if you wish to create a build directory for solaris
-binaries you might use the following procedure:
+binaries you might use the following procedure::
 
-    mkdir /u1/krb5-1.9/solaris
-    cd /u1/krb5-1.9/solaris
-    /u1/krb5-1.9/src/util/lndir `pwd`/../src
+    mkdir /u1/krb5-VERSION/solaris
+    cd /u1/krb5-VERSION/solaris
+    /u1/krb5-VERSION/src/util/lndir `pwd`/../src
     ./configure
     make
 
