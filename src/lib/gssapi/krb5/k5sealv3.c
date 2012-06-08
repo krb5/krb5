@@ -82,8 +82,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     krb5_key key;
     krb5_cksumtype cksumtype;
 
-    assert(ctx->big_endian == 0);
-
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
     key_usage = (toktype == KG_TOK_WRAP_MSG
                  ? (ctx->initiate
@@ -318,9 +316,6 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     krb5_boolean valid;
     krb5_key key;
     krb5_cksumtype cksumtype;
-
-    if (ctx->big_endian != 0)
-        goto defective;
 
     if (qop_state)
         *qop_state = GSS_C_QOP_DEFAULT;

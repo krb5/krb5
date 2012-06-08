@@ -428,7 +428,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
 
     /* compute the hash of the channel bindings */
 
-    if ((code = kg_checksum_channel_bindings(context, chan_bindings, &md5, 0)))
+    if ((code = kg_checksum_channel_bindings(context, chan_bindings, &md5)))
         return(code);
 
     krb5_auth_con_set_req_cksumtype(context, ctx->auth_context,
@@ -585,7 +585,6 @@ kg_new_connection(
                                       GSS_C_DCE_STYLE | GSS_C_IDENTIFY_FLAG |
                                       GSS_C_EXTENDED_ERROR_FLAG)));
     ctx->seed_init = 0;
-    ctx->big_endian = 0;  /* all initiators do little-endian, as per spec */
     ctx->seqstate = 0;
 
     if (req_flags & GSS_C_DCE_STYLE)

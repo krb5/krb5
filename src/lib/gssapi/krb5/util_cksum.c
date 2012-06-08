@@ -28,11 +28,10 @@
 
 /* Checksumming the channel bindings always uses plain MD5.  */
 krb5_error_code
-kg_checksum_channel_bindings(context, cb, cksum, bigend)
+kg_checksum_channel_bindings(context, cb, cksum)
     krb5_context context;
     gss_channel_bindings_t cb;
     krb5_checksum *cksum;
-    int bigend;
 {
     size_t len;
     char *buf = 0;
@@ -75,11 +74,11 @@ kg_checksum_channel_bindings(context, cb, cksum, bigend)
 
     ptr = buf;
 
-    TWRITE_INT(ptr, cb->initiator_addrtype, bigend);
-    TWRITE_BUF(ptr, cb->initiator_address, bigend);
-    TWRITE_INT(ptr, cb->acceptor_addrtype, bigend);
-    TWRITE_BUF(ptr, cb->acceptor_address, bigend);
-    TWRITE_BUF(ptr, cb->application_data, bigend);
+    TWRITE_INT(ptr, cb->initiator_addrtype, 0);
+    TWRITE_BUF(ptr, cb->initiator_address, 0);
+    TWRITE_INT(ptr, cb->acceptor_addrtype, 0);
+    TWRITE_BUF(ptr, cb->acceptor_address, 0);
+    TWRITE_BUF(ptr, cb->application_data, 0);
 
     /* checksum the data */
 

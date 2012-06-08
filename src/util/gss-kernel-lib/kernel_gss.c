@@ -116,8 +116,6 @@ import_lucid_sec_context_v1(const gss_krb5_lucid_context_v1_t *lctx,
         }
     }
 
-    /* Assume the proper krb5 mech and no big-endian compatibility. */
-    gctx->big_endian = 0;
     gctx->seed_init = 0;
     gctx->established = 1;
     gctx->mech_used = (gss_OID_desc *)gss_mech_krb5;

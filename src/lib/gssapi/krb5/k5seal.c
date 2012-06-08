@@ -64,7 +64,6 @@ make_seal_token_v1 (krb5_context context,
                     int sealalg,
                     int do_encrypt,
                     int toktype,
-                    int bigend,
                     gss_OID oid)
 {
     krb5_error_code code;
@@ -89,7 +88,7 @@ make_seal_token_v1 (krb5_context context,
     assert((!do_encrypt) || (toktype == KG_TOK_SEAL_MSG));
     /* create the token buffer */
     /* Do we need confounder? */
-    if (do_encrypt || (!bigend && (toktype == KG_TOK_SEAL_MSG)))
+    if (do_encrypt || toktype == KG_TOK_SEAL_MSG)
         conflen = kg_confounder_size(context, enc->keyblock.enctype);
     else conflen = 0;
 
@@ -185,18 +184,14 @@ make_seal_token_v1 (krb5_context context,
     /* compute the checksum */
 
     /* 8 = head of token body as specified by mech spec */
-    if (! (data_ptr =
-           (char *) xmalloc(8 + (bigend ? text->length : msglen)))) {
+    if (! (data_ptr = xmalloc(8 + msglen))) {
         xfree(plain);
         gssalloc_free(t);
         return(ENOMEM);
     }
     (void) memcpy(data_ptr, ptr-2, 8);
-    if (bigend)
-        (void) memcpy(data_ptr+8, text->value, text->length);
-    else
-        (void) memcpy(data_ptr+8, plain, msglen);
-    plaind.length = 8 + (bigend ? text->length : msglen);
+    (void) memcpy(data_ptr+8, plain, msglen);
+    plaind.length = 8 + msglen;
     plaind.data = data_ptr;
     code = krb5_k_make_checksum(context, md5cksum.checksum_type, seq,
                                 sign_usage, &plaind, &md5cksum);
@@ -360,8 +355,7 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
                                   &ctx->seq_send, ctx->initiate,
                                   input_message_buffer, output_message_buffer,
                                   ctx->signalg, ctx->cksum_size, ctx->sealalg,
-                                  conf_req_flag, toktype, ctx->big_endian,
-                                  ctx->mech_used);
+                                  conf_req_flag, toktype, ctx->mech_used);
         break;
     case 1:
         code = gss_krb5int_make_seal_token_v3(context, ctx,

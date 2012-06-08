@@ -726,36 +726,15 @@ kg_accept_krb5(minor_status, context_handle,
             goto fail;
         }
 
-        /*
-          "Be liberal in what you accept, and
-          conservative in what you send"
-          -- rfc1123
-
-          This code will let this acceptor interoperate with an initiator
-          using little-endian or big-endian integer encoding.
-        */
-
         ptr = (unsigned char *) authdat->checksum->contents;
-        bigend = 0;
 
-        TREAD_INT(ptr, tmp, bigend);
+        TREAD_INT(ptr, tmp, 0);
 
         if (tmp != md5len) {
-            ptr = (unsigned char *) authdat->checksum->contents;
-            bigend = 1;
-
-            TREAD_INT(ptr, tmp, bigend);
-
-            if (tmp != md5len) {
-                code = KG_BAD_LENGTH;
-                major_status = GSS_S_FAILURE;
-                goto fail;
-            }
+            code = KG_BAD_LENGTH;
+            major_status = GSS_S_FAILURE;
+            goto fail;
         }
-
-        /* at this point, bigend is set according to the initiator's
-           byte order */
-
 
         /*
           The following section of code attempts to implement the
@@ -772,7 +751,7 @@ kg_accept_krb5(minor_status, context_handle,
 
         if ((code = kg_checksum_channel_bindings(context,
                                                  input_chan_bindings,
-                                                 &reqcksum, bigend))) {
+                                                 &reqcksum))) {
             major_status = GSS_S_BAD_BINDINGS;
             goto fail;
         }
@@ -794,7 +773,7 @@ kg_accept_krb5(minor_status, context_handle,
         xfree(reqcksum.contents);
         reqcksum.contents = 0;
 
-        TREAD_INT(ptr, gss_flags, bigend);
+        TREAD_INT(ptr, gss_flags, 0);
 #if 0
         gss_flags &= ~GSS_C_DELEG_FLAG; /* mask out the delegation flag; if
                                            there's a delegation, we'll set
@@ -807,8 +786,8 @@ kg_accept_krb5(minor_status, context_handle,
         i = authdat->checksum->length - 24;
         if (i && (gss_flags & GSS_C_DELEG_FLAG)) {
             if (i >= 4) {
-                TREAD_INT16(ptr, option_id, bigend);
-                TREAD_INT16(ptr, option.length, bigend);
+                TREAD_INT16(ptr, option_id, 0);
+                TREAD_INT16(ptr, option.length, 0);
                 i -= 4;
 
                 if (i < option.length || option.length < 0) {
@@ -904,7 +883,6 @@ kg_accept_krb5(minor_status, context_handle,
                                       GSS_C_DCE_STYLE | GSS_C_IDENTIFY_FLAG |
                                       GSS_C_EXTENDED_ERROR_FLAG)));
     ctx->seed_init = 0;
-    ctx->big_endian = bigend;
     ctx->cred_rcache = cred_rcache;
 
     /* XXX move this into gss_name_t */

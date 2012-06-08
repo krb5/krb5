@@ -137,8 +137,6 @@ kg_unseal_v1_iov(krb5_context context,
         return GSS_S_BAD_SIG;
     }
 
-    assert(ctx->big_endian == 0);
-
     /* decode the message, if SEAL */
     if (toktype == KG_TOK_WRAP_MSG) {
         if (sealalg != 0xFFFF) {

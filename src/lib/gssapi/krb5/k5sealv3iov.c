@@ -54,7 +54,6 @@ gss_krb5int_make_seal_token_v3_iov(krb5_context context,
     krb5_cksumtype cksumtype;
     size_t data_length, assoc_data_length;
 
-    assert(ctx->big_endian == 0);
     assert(ctx->proto == 1);
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
@@ -299,9 +298,6 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     krb5_boolean valid;
     krb5_cksumtype cksumtype;
     int conf_flag = 0;
-
-    if (ctx->big_endian != 0)
-        return GSS_S_DEFECTIVE_TOKEN;
 
     if (qop_state != NULL)
         *qop_state = GSS_C_QOP_DEFAULT;

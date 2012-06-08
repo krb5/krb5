@@ -199,7 +199,6 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_magic magic;
     unsigned int initiate : 1;   /* nonzero if initiating, zero if accepting */
     unsigned int established : 1;
-    unsigned int big_endian : 1;
     unsigned int have_acceptor_subkey : 1;
     unsigned int seed_init : 1;  /* XXX tested but never actually set */
     OM_uint32 gss_flags;
@@ -253,8 +252,7 @@ OM_uint32 kg_get_defcred
 
 krb5_error_code kg_checksum_channel_bindings
 (krb5_context context, gss_channel_bindings_t cb,
- krb5_checksum *cksum,
- int bigend);
+ krb5_checksum *cksum);
 
 krb5_error_code kg_make_seq_num (krb5_context context,
                                  krb5_key key,
