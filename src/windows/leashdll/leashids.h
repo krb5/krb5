@@ -108,6 +108,7 @@
 #define IDC_STATIC_NOTICE               1089
 #define IDC_STATIC_RENEW                1090
 #define IDD_PASSWORD                    1091
+#define IDC_BUTTON_CLEAR_HISTORY        1092
 #define IDC_EDIT_PASSWORD2              1192
 #define IDC_STATIC_PWD2                 1193
 #define IDC_EDIT_PASSWORD3              1194

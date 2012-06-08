@@ -102,7 +102,8 @@ BEGIN
                     ES_AUTOHSCROLL
     DEFPUSHBUTTON   "OK",IDOK,302,219,49,14
     PUSHBUTTON      "Cancel",IDCANCEL,249,219,49,14
-    PUSHBUTTON      "Hide Advanced Settings",IDC_BUTTON_OPTIONS,146,219,89,14
+    PUSHBUTTON      "Hide Advanced",IDC_BUTTON_OPTIONS,146,219,89,14
+    PUSHBUTTON      "Clear Principal History",IDC_BUTTON_CLEAR_HISTORY,13,203,120,14
     CONTROL         "Ticket Lifetime",IDC_SLIDER_LIFETIME,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,90,97,258,15
     CONTROL         "Forwardable (can be forwarded to other machines)",
