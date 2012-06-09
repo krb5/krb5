@@ -5,6 +5,7 @@
 #ifndef NO_KRB4
 #include <krb.h>
 #else
+#include <krb5.h>
 #define ANAME_SZ	        40
 #define	REALM_SZ	        40
 #define	SNAME_SZ	        40
@@ -127,6 +128,10 @@ struct TICKETINFO {
     unsigned long flags;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int FAR Leash_kinit_dlg(HWND hParent, LPLSH_DLGINFO lpdlginfo);
 int FAR Leash_kinit_dlg_ex(HWND hParent, LPLSH_DLGINFO_EX lpdlginfoex);
 int FAR Leash_changepwd_dlg(HWND hParent, LPLSH_DLGINFO lpdlginfo);
@@ -208,5 +213,8 @@ DWORD Leash_reset_default_mslsa_import();
 DWORD Leash_get_default_preserve_kinit_settings();
 DWORD Leash_set_default_preserve_kinit_settings(DWORD onoff);
 DWORD Leash_reset_default_preserve_kinit_settings();
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LEASHWIN */
