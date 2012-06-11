@@ -75,6 +75,7 @@ static void getRegKeyValue(HKEY key, const char *keyPath, const char *valueName,
 static void loadConfigFromRegistry(HKEY keyBase, const char *keyPath);
 #endif
 static void updateMechList(void);
+static void initMechList(void);
 static void loadInterMech(gss_mech_info aMech);
 static void freeMechList(void);
 
@@ -456,6 +457,19 @@ updateMechList(void)
 			loadInterMech(minfo);
 	}
 } /* updateMechList */
+
+/* Update the mech list from system configuration if we have never done so.
+ * Must be invoked with the g_mechListLock mutex held. */
+static void
+initMechList(void)
+{
+	static int lazy_init = 0;
+
+	if (lazy_init == 0) {
+		updateMechList();
+		lazy_init = 1;
+	}
+}
 
 static void
 releaseMechInfo(gss_mech_info *pCf)
@@ -885,6 +899,124 @@ freeMechList(void)
 }
 
 /*
+ * Determine the mechanism to use for a caller-specified mech OID.  For the
+ * real mech OID of an interposed mech, return the interposed OID.  For an
+ * interposed mech OID (which an interposer mech uses when re-entering the
+ * mechglue), return the real mech OID.  The returned OID is an alias and
+ * should not be modified or freed.
+ */
+OM_uint32
+gssint_select_mech_type(OM_uint32 *minor, gss_const_OID oid,
+			gss_OID *selected_oid)
+{
+	gss_mech_info minfo;
+	OM_uint32 status;
+
+	*selected_oid = GSS_C_NO_OID;
+
+	if (gssint_mechglue_initialize_library() != 0)
+		return GSS_S_FAILURE;
+
+	if (k5_mutex_lock(&g_mechListLock) != 0)
+		return GSS_S_FAILURE;
+
+	/* Read conf file at least once so that interposer plugins have a
+	 * chance of getting initialized. */
+	initMechList();
+
+	minfo = g_mechList;
+	if (oid == GSS_C_NULL_OID)
+		oid = minfo->mech_type;
+	while (minfo != NULL) {
+		if (g_OID_equal(minfo->mech_type, oid)) {
+			if (minfo->int_mech_type != GSS_C_NO_OID)
+				*selected_oid = minfo->int_mech_type;
+			else
+				*selected_oid = minfo->mech_type;
+			status = GSS_S_COMPLETE;
+			goto done;
+		} else if ((minfo->int_mech_type != GSS_C_NO_OID) &&
+			   (g_OID_equal(minfo->int_mech_type, oid))) {
+			*selected_oid = minfo->mech_type;
+			status = GSS_S_COMPLETE;
+			goto done;
+		}
+		minfo = minfo->next;
+	}
+	status = GSS_S_BAD_MECH;
+
+done:
+	(void)k5_mutex_unlock(&g_mechListLock);
+	return status;
+}
+
+/* If oid is an interposed OID, return the corresponding real mech OID.  If
+ * it's a real mech OID, return it unmodified.  Otherwised return null. */
+gss_OID
+gssint_get_public_oid(gss_const_OID oid)
+{
+	gss_mech_info minfo;
+	gss_OID public_oid = GSS_C_NO_OID;
+
+	/* if oid is null -> then get default which is the first in the list */
+	if (oid == GSS_C_NO_OID)
+		return GSS_C_NO_OID;
+
+	if (gssint_mechglue_initialize_library() != 0)
+		return GSS_C_NO_OID;
+
+	if (k5_mutex_lock(&g_mechListLock) != 0)
+		return GSS_C_NO_OID;
+
+	for (minfo = g_mechList; minfo != NULL; minfo = minfo->next) {
+		if (minfo->is_interposer)
+			continue;
+		if (g_OID_equal(minfo->mech_type, oid) ||
+		    ((minfo->int_mech_type != GSS_C_NO_OID) &&
+		     (g_OID_equal(minfo->int_mech_type, oid)))) {
+			public_oid = minfo->mech_type;
+			break;
+		}
+	}
+
+	(void)k5_mutex_unlock(&g_mechListLock);
+	return public_oid;
+}
+
+/* Translate a vector of oids (as from a union cred struct) into a set of
+ * public OIDs using gssint_get_public_oid. */
+OM_uint32
+gssint_make_public_oid_set(OM_uint32 *minor_status, gss_OID oids, int count,
+			   gss_OID_set *public_set)
+{
+	OM_uint32 status, tmpmin;
+	gss_OID_set set;
+	gss_OID public_oid;
+	int i;
+
+	*public_set = GSS_C_NO_OID_SET;
+
+	status = generic_gss_create_empty_oid_set(minor_status, &set);
+	if (GSS_ERROR(status))
+		return status;
+
+	for (i = 0; i < count; i++) {
+		public_oid = gssint_get_public_oid(&oids[i]);
+		if (public_oid == GSS_C_NO_OID)
+			continue;
+		status = generic_gss_add_oid_set_member(minor_status,
+							public_oid, &set);
+		if (GSS_ERROR(status)) {
+			(void) generic_gss_release_oid_set(&tmpmin, &set);
+			return status;
+		}
+	}
+
+	*public_set = set;
+	return GSS_S_COMPLETE;
+}
+
+/*
  * Register a mechanism.  Called with g_mechListLock held.
  */
 
@@ -908,10 +1040,21 @@ gssint_get_mechanism(gss_const_OID oid)
 
 	if (k5_mutex_lock(&g_mechListLock) != 0)
 		return NULL;
-	/* check if the mechanism is already loaded */
-	if ((aMech = searchMechList(oid)) != NULL && aMech->mech) {
-		(void) k5_mutex_unlock(&g_mechListLock);
-		return (aMech->mech);
+
+	/* Check if the mechanism is already loaded. */
+	aMech = g_mechList;
+	if (oid == GSS_C_NULL_OID)
+		oid = aMech->mech_type;
+	while (aMech != NULL) {
+		if (g_OID_equal(aMech->mech_type, oid) && aMech->mech) {
+			(void)k5_mutex_unlock(&g_mechListLock);
+			return aMech->mech;
+		} else if (aMech->int_mech_type != GSS_C_NO_OID &&
+			   g_OID_equal(aMech->int_mech_type, oid)) {
+			(void)k5_mutex_unlock(&g_mechListLock);
+			return aMech->int_mech;
+		}
+		aMech = aMech->next;
 	}
 
 	/*

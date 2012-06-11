@@ -682,6 +682,11 @@ int gssint_mechglue_init(void);
 void gssint_mechglue_fini(void);
 #endif
 
+OM_uint32 gssint_select_mech_type(OM_uint32 *minor, gss_const_OID in_oid,
+				  gss_OID *selected_oid);
+gss_OID gssint_get_public_oid(gss_const_OID internal_oid);
+OM_uint32 gssint_make_public_oid_set(OM_uint32 *minor_status, gss_OID oids,
+				     int count, gss_OID_set *public_set);
 gss_mechanism gssint_get_mechanism (gss_const_OID);
 OM_uint32 gssint_get_mech_type (gss_OID, gss_buffer_t);
 char *gssint_get_kmodName(const gss_OID);
