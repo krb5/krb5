@@ -2176,9 +2176,6 @@ struct _krb5_cc_ops {
 
 extern const krb5_cc_ops *krb5_cc_dfl_ops;
 
-krb5_error_code
-krb5int_cc_os_default_name(krb5_context context, char **name);
-
 typedef struct _krb5_donot_replay {
     krb5_magic magic;
     krb5_ui_4 hash;
