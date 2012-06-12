@@ -374,26 +374,12 @@ spnego_gss_acquire_cred_from(OM_uint32 *minor_status,
 	spcred->neg_mechs = GSS_C_NULL_OID_SET;
 
 	/*
-	 * If the user did not specify a list of mechs,
-	 * use get_available_mechs to collect a list of
+	 * Always use get_available_mechs to collect a list of
 	 * mechs for which creds are available.
 	 */
-	if (desired_mechs == GSS_C_NULL_OID_SET) {
-		status = get_available_mechs(minor_status, desired_name,
-					     cred_usage, cred_store, &mcred,
-					     &amechs);
-	} else {
-		/*
-		 * The caller gave a specific list of mechanisms,
-		 * so just get whatever creds are available.
-		 * gss_acquire_creds will return the subset of mechs for
-		 * which the given 'output_cred_handle' is valid.
-		 */
-		status = gss_acquire_cred_from(minor_status, desired_name,
-					       time_req, desired_mechs,
-					       cred_usage, cred_store, &mcred,
-					       &amechs, time_rec);
-	}
+	status = get_available_mechs(minor_status, desired_name,
+				     cred_usage, cred_store, &mcred,
+				     &amechs);
 
 	if (actual_mechs && amechs != GSS_C_NULL_OID_SET) {
 		(void) gssint_copy_oid_set(&tmpmin, amechs, actual_mechs);
