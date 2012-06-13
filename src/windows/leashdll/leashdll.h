@@ -2,6 +2,9 @@
 #define _LEASHDLL_H_
 
 #include <com_err.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifndef NO_KRB4
 /*
  * This is a hack needed because the real com_err.h does
@@ -261,5 +264,9 @@ extern DECL_FUNC_PTR(LsaLookupAuthenticationPackage);
 extern DECL_FUNC_PTR(LsaCallAuthenticationPackage);
 extern DECL_FUNC_PTR(LsaFreeReturnBuffer);
 extern DECL_FUNC_PTR(LsaGetLogonSessionData);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _LEASHDLL_H_ */
