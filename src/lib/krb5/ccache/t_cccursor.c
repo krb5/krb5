@@ -28,7 +28,9 @@
  * Displays a list of caches returned by the cccol cursor.  The first argument,
  * if given, is set to the default cache name for the context before iterating.
  * Any remaining argments are resolved as caches and kept open during the
- * iteration.
+ * iteration.  If the argument "CONTENT" is given as one of the cache names,
+ * immediately exit with status 0 if the collection contains credentials and 1
+ * if it does not.
  */
 
 #include "k5-int.h"
@@ -48,8 +50,11 @@ main(int argc, char **argv)
 
     if (argc > 2) {
         assert(argc < 60);
-        for (i = 2; i < argc; i++)
+        for (i = 2; i < argc; i++) {
+            if (strcmp(argv[i], "CONTENT") == 0)
+                return (krb5_cccol_have_content(ctx) != 0);
             assert(krb5_cc_resolve(ctx, argv[i], &hold[i - 2]) == 0);
+        }
     }
 
     assert(krb5_cccol_cursor_new(ctx, &cursor) == 0);

@@ -160,6 +160,7 @@ Rarely used public interfaces
    krb5_cccol_cursor_free.rst
    krb5_cccol_cursor_new.rst
    krb5_cccol_cursor_next.rst
+   krb5_cccol_have_content.rst
    krb5_cccol_last_change_time.rst
    krb5_cccol_lock.rst
    krb5_cccol_unlock.rst

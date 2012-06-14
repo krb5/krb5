@@ -2632,6 +2632,17 @@ krb5_error_code KRB5_CALLCONV
 krb5_cccol_cursor_free(krb5_context context, krb5_cccol_cursor *cursor);
 
 /**
+ * Check if the credential cache collection contains any credentials.
+ *
+ * @param [in]  context         Library context
+ *
+ * @retval 0 Credentials are available in the collection
+ * @retval KRB5_CC_NOTFOUND The collection contains no credentials
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_cccol_have_content(krb5_context context);
+
+/**
  * Return a timestamp of the last modification of any known credential cache.
  *
  * @param [in]  context         Library context
