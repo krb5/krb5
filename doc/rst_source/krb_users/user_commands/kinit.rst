@@ -72,7 +72,7 @@ OPTIONS
     **invalid** flag set, and need to be resubmitted to the KDC for
     validation before use.
 
-    *start-time* specifies the duration of the delay before the ticket
+    *start_time* specifies the duration of the delay before the ticket
     can become valid using the same time format as the  **-l** option.
 
 **-r** *renewable_life*
