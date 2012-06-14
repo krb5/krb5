@@ -45,6 +45,13 @@ refserver = 'host/' + hostname + '@'
 #r1.run_as_client(['/bin/sh', '-c', '(echo rkt %s; echo wkt %s) | %s' %
 #                  (r1.keytab, r2.keytab, ktutil)])
 
+# Verify that we can't get initiator creds with no credentials in the
+# collection.
+output = r1.run_as_client(['./t_ccselect', r1.host_princ, '-'],
+                          expected_code=1)
+if 'No Kerberos credentials available' not in output:
+    fail('Expected error not seen in output when no credentials available')
+
 # Make a directory collection and use it for client commands in both realms.
 ccdir = os.path.join(r1.testdir, 'cc')
 ccname = 'DIR:' + ccdir

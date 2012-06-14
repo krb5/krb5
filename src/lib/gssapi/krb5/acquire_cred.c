@@ -606,6 +606,14 @@ acquire_init_cred(krb5_context context,
             return GSS_S_CRED_UNAVAIL;
         }
         cred->ccache = ccache;
+    } else {
+        /* We haven't decided on a ccache or principal yet, but fail now if
+         * there are no krb5 credentials at all. */
+        code = krb5_cccol_have_content(context);
+        if (code != 0) {
+            *minor_status = code;
+            return GSS_S_CRED_UNAVAIL;
+        }
     }
 
     /*
