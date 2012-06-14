@@ -260,13 +260,28 @@ Ticket granting ticket options:
 
 **-l** *lifetime*
     specifies the lifetime to be requested for the ticket; if this
-    option is not specified, the default ticket lifetime (configured
-    by each site) is used instead.
+    option is not specified, the default ticket lifetime (12 hours)
+    is used instead.  The valid formats for *lifetime* are:
+
+     ::
+
+        h:m:s
+        NdNhNmNs
+
+    where
+
+     ::
+
+        s  seconds
+        m  minutes
+        h  hours
+        d  days
+        N  number
 
 **-r** *time*
     specifies that the **renewable** option should be requested for
     the ticket, and specifies the desired total lifetime of the
-    ticket.
+    ticket using the same time format as the  **-l** option.
 
 **-p**
     specifies that the **proxiable** option should be requested for
