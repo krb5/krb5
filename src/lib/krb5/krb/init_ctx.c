@@ -539,7 +539,7 @@ krb5_get_tgs_ktypes(krb5_context context, krb5_const_principal princ, krb5_encty
         /* This one is set *only* by reading the config file; it's not
            set by the application.  */
         return get_profile_etype_list(context, ktypes,
-                                      KRB5_CONF_DEFAULT_TKT_ENCTYPES, NULL,
+                                      KRB5_CONF_DEFAULT_TGS_ENCTYPES, NULL,
                                       default_enctype_list);
     else
         return get_profile_etype_list(context, ktypes,
