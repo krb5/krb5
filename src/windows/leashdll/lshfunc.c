@@ -2662,23 +2662,6 @@ Leash_reset_defaults(void)
     Leash_reset_default_preserve_kinit_settings();
 }
 
-static BOOL CALLBACK
-EnumChildProc(HWND hwnd, LPARAM lParam)
-{
-    HWND * h = (HWND *)lParam;
-    *h = hwnd;
-    return FALSE;
-}
-
-
-static HWND
-FindFirstChildWindow(HWND parent)
-{
-    HWND hFirstChild = 0;
-    EnumChildWindows(parent, EnumChildProc, (LPARAM) &hFirstChild);
-    return hFirstChild;
-}
-
 static int
 acquire_tkt_send_msg(krb5_context ctx, const char * title,
 		     const char * ccachename,
@@ -2775,7 +2758,6 @@ acquire_tkt_send_msg(krb5_context ctx, const char * title,
     } else {
 	HGLOBAL 		hData;
 	HWND hLeash = FindWindow("LEASH.0WNDCLASS", NULL);
-	hLeash = FindFirstChildWindow(hLeash);
 
 	/* construct a marshalling of data
 	 *   <title><principal><realm><ccache>
