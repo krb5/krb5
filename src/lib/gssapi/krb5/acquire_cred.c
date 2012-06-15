@@ -565,27 +565,16 @@ acquire_init_cred(krb5_context context,
     return GSS_S_COMPLETE;
 }
 
-struct acquire_cred_args {
-    gss_name_t desired_name;
-    gss_buffer_t password;
-    OM_uint32 time_req;
-    gss_OID_set desired_mechs;
-    gss_cred_usage_t cred_usage;
-    krb5_keytab keytab;
-    krb5_ccache ccache;
-    int iakerb;
-};
-
-/*ARGSUSED*/
 static OM_uint32
-acquire_cred(OM_uint32 *minor_status,
-             const struct acquire_cred_args *args,
-             gss_cred_id_t *output_cred_handle,
-             OM_uint32 *time_rec)
+acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
+             gss_buffer_t password, OM_uint32 time_req,
+             gss_cred_usage_t cred_usage, krb5_ccache ccache,
+             krb5_keytab keytab, krb5_boolean iakerb,
+             gss_cred_id_t *output_cred_handle, OM_uint32 *time_rec)
 {
     krb5_context context = NULL;
     krb5_gss_cred_id_t cred = NULL;
-    krb5_gss_name_t name = (krb5_gss_name_t)args->desired_name;
+    krb5_gss_name_t name = (krb5_gss_name_t)desired_name;
     OM_uint32 ret;
     krb5_error_code code = 0;
 
@@ -607,10 +596,10 @@ acquire_cred(OM_uint32 *minor_status,
     if (cred == NULL)
         goto krb_error_out;
 
-    cred->usage = args->cred_usage;
+    cred->usage = cred_usage;
     cred->name = NULL;
     cred->impersonator = NULL;
-    cred->iakerb_mech = args->iakerb;
+    cred->iakerb_mech = iakerb;
     cred->default_identity = (name == NULL);
 #ifndef LEAN_CLIENT
     cred->keytab = NULL;
@@ -622,7 +611,7 @@ acquire_cred(OM_uint32 *minor_status,
     if (code)
         goto krb_error_out;
 
-    switch (args->cred_usage) {
+    switch (cred_usage) {
     case GSS_C_INITIATE:
     case GSS_C_ACCEPT:
     case GSS_C_BOTH:
@@ -638,9 +627,8 @@ acquire_cred(OM_uint32 *minor_status,
      * If requested, acquire credentials for accepting. This will fill
      * in cred->name if desired_princ is specified.
      */
-    if (args->cred_usage == GSS_C_ACCEPT || args->cred_usage == GSS_C_BOTH) {
-        ret = acquire_accept_cred(context, minor_status, name, args->keytab,
-                                  cred);
+    if (cred_usage == GSS_C_ACCEPT || cred_usage == GSS_C_BOTH) {
+        ret = acquire_accept_cred(context, minor_status, name, keytab, cred);
         if (ret != GSS_S_COMPLETE)
             goto error_out;
     }
@@ -650,10 +638,9 @@ acquire_cred(OM_uint32 *minor_status,
      * If requested, acquire credentials for initiation. This will fill
      * in cred->name if it wasn't set above.
      */
-    if (args->cred_usage == GSS_C_INITIATE || args->cred_usage == GSS_C_BOTH) {
-        ret = acquire_init_cred(context, minor_status, args->ccache,
-                                name ? name->princ : NULL, args->password,
-                                cred);
+    if (cred_usage == GSS_C_INITIATE || cred_usage == GSS_C_BOTH) {
+        ret = acquire_init_cred(context, minor_status, ccache,
+                                name ? name->princ : NULL, password, cred);
         if (ret != GSS_S_COMPLETE)
             goto error_out;
     }
@@ -662,7 +649,7 @@ acquire_cred(OM_uint32 *minor_status,
 
     /*** at this point, the cred structure has been completely created */
 
-    if (args->cred_usage == GSS_C_ACCEPT) {
+    if (cred_usage == GSS_C_ACCEPT) {
         if (time_rec)
             *time_rec = GSS_C_INDEFINITE;
     } else {
@@ -813,53 +800,25 @@ gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
  */
 
 OM_uint32 KRB5_CALLCONV
-krb5_gss_acquire_cred(minor_status, desired_name, time_req,
-                      desired_mechs, cred_usage, output_cred_handle,
-                      actual_mechs, time_rec)
-    OM_uint32 *minor_status;
-    gss_name_t desired_name;
-    OM_uint32 time_req;
-    gss_OID_set desired_mechs;
-    gss_cred_usage_t cred_usage;
-    gss_cred_id_t *output_cred_handle;
-    gss_OID_set *actual_mechs;
-    OM_uint32 *time_rec;
+krb5_gss_acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
+                      OM_uint32 time_req, gss_OID_set desired_mechs,
+                      gss_cred_usage_t cred_usage,
+                      gss_cred_id_t *output_cred_handle,
+                      gss_OID_set *actual_mechs, OM_uint32 *time_rec)
 {
-    struct acquire_cred_args args;
-
-    memset(&args, 0, sizeof(args));
-    args.desired_name = desired_name;
-    args.time_req = time_req;
-    args.desired_mechs = desired_mechs;
-    args.cred_usage = cred_usage;
-    args.iakerb = 0;
-
-    return acquire_cred(minor_status, &args, output_cred_handle, time_rec);
+    return acquire_cred(minor_status, desired_name, NULL, time_req, cred_usage,
+                        NULL, NULL, FALSE, output_cred_handle, time_rec);
 }
 
 OM_uint32 KRB5_CALLCONV
-iakerb_gss_acquire_cred(minor_status, desired_name, time_req,
-                        desired_mechs, cred_usage, output_cred_handle,
-                        actual_mechs, time_rec)
-    OM_uint32 *minor_status;
-    gss_name_t desired_name;
-    OM_uint32 time_req;
-    gss_OID_set desired_mechs;
-    gss_cred_usage_t cred_usage;
-    gss_cred_id_t *output_cred_handle;
-    gss_OID_set *actual_mechs;
-    OM_uint32 *time_rec;
+iakerb_gss_acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
+                        OM_uint32 time_req, gss_OID_set desired_mechs,
+                        gss_cred_usage_t cred_usage,
+                        gss_cred_id_t *output_cred_handle,
+                        gss_OID_set *actual_mechs, OM_uint32 *time_rec)
 {
-    struct acquire_cred_args args;
-
-    memset(&args, 0, sizeof(args));
-    args.desired_name = desired_name;
-    args.time_req = time_req;
-    args.desired_mechs = desired_mechs;
-    args.cred_usage = cred_usage;
-    args.iakerb = 1;
-
-    return acquire_cred(minor_status, &args, output_cred_handle, time_rec);
+    return acquire_cred(minor_status, desired_name, NULL, time_req, cred_usage,
+                        NULL, NULL, TRUE, output_cred_handle, time_rec);
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -873,17 +832,9 @@ krb5_gss_acquire_cred_with_password(OM_uint32 *minor_status,
                                     gss_OID_set *actual_mechs,
                                     OM_uint32 *time_rec)
 {
-    struct acquire_cred_args args;
-
-    memset(&args, 0, sizeof(args));
-    args.desired_name = desired_name;
-    args.password = password;
-    args.time_req = time_req;
-    args.desired_mechs = desired_mechs;
-    args.cred_usage = cred_usage;
-    args.iakerb = 0;
-
-    return acquire_cred(minor_status, &args, output_cred_handle, time_rec);
+    return acquire_cred(minor_status, desired_name, password, time_req,
+                        cred_usage, NULL, NULL, FALSE, output_cred_handle,
+                        time_rec);
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -897,17 +848,9 @@ iakerb_gss_acquire_cred_with_password(OM_uint32 *minor_status,
                                       gss_OID_set *actual_mechs,
                                       OM_uint32 *time_rec)
 {
-    struct acquire_cred_args args;
-
-    memset(&args, 0, sizeof(args));
-    args.desired_name = desired_name;
-    args.password = password;
-    args.time_req = time_req;
-    args.desired_mechs = desired_mechs;
-    args.cred_usage = cred_usage;
-    args.iakerb = 1;
-
-    return acquire_cred(minor_status, &args, output_cred_handle, time_rec);
+    return acquire_cred(minor_status, desired_name, password, time_req,
+                        cred_usage, NULL, NULL, TRUE, output_cred_handle,
+                        time_rec);
 }
 
 OM_uint32
@@ -917,10 +860,11 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
                         const gss_buffer_t value)
 {
     struct krb5_gss_import_cred_req *req;
-    struct acquire_cred_args args;
     krb5_gss_name_rec name;
     OM_uint32 time_rec;
     krb5_error_code code;
+    gss_cred_usage_t usage;
+    gss_name_t desired_name = GSS_C_NO_NAME;
 
     assert(value->length == sizeof(*req));
 
@@ -929,20 +873,16 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
 
     req = (struct krb5_gss_import_cred_req *)value->value;
 
-    memset(&args, 0, sizeof(args));
-
-    if (req->id && req->keytab)
-        args.cred_usage = GSS_C_BOTH;
-    else if (req->id)
-        args.cred_usage = GSS_C_INITIATE;
-    else if (req->keytab)
-        args.cred_usage = GSS_C_ACCEPT;
-    else {
+    if (req->id != NULL) {
+        usage = (req->keytab != NULL) ? GSS_C_BOTH : GSS_C_INITIATE;
+    } else if (req->keytab != NULL) {
+        usage = GSS_C_ACCEPT;
+    } else {
         *minor_status = EINVAL;
         return GSS_S_FAILURE;
     }
 
-    if (req->keytab_principal) {
+    if (req->keytab_principal != NULL) {
         memset(&name, 0, sizeof(name));
         code = k5_mutex_init(&name.lock);
         if (code != 0) {
@@ -950,14 +890,13 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
             return GSS_S_FAILURE;
         }
         name.princ = req->keytab_principal;
-        args.desired_name = (gss_name_t)&name;
+        desired_name = (gss_name_t)&name;
     }
 
-    args.ccache = req->id;
-    args.keytab = req->keytab;
-
-    code = acquire_cred(minor_status, &args, cred_handle, &time_rec);
-    if (req->keytab_principal)
+    code = acquire_cred(minor_status, desired_name, NULL, GSS_C_INDEFINITE,
+                        usage, req->id, req->keytab, FALSE, cred_handle,
+                        &time_rec);
+    if (req->keytab_principal != NULL)
         k5_mutex_destroy(&name.lock);
     return code;
 }
