@@ -112,9 +112,9 @@ BEGIN
     CONTROL         "Proxiable (can be forwarded to other machines)",
                     IDC_CHECK_FORWARDABLE,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,89,135,203,10
-    CONTROL         "Renewable (can be renewed during the renwable lifetime)",
+    CONTROL         "Renewable (can be renewed during the renewable lifetime)",
                     IDC_CHECK_RENEWABLE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,89,147,186,10
+                    WS_TABSTOP,89,147,203,10
     CONTROL         "Slider2",IDC_SLIDER_RENEWLIFE,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,90,178,258,15
     RTEXT           "Principal:",IDC_STATIC_NAME,13,44,74,8
