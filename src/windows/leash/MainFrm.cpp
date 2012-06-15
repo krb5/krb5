@@ -418,6 +418,10 @@ LRESULT CMainFrame::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
             break;
         }
         break;
+    case ID_OBTAIN_TGT_WITH_LPARAM:
+        GetActiveView()->SendMessage(ID_OBTAIN_TGT_WITH_LPARAM, wParam,
+                                     lParam);
+        break;
 	}
 
     if ( oldMin != m_isMinimum ) {
