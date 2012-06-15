@@ -132,6 +132,10 @@ The libdefaults section may contain any of the following relations:
     library will tolerate before assuming that a Kerberos message is
     invalid.  The default value is 300 seconds, or five minutes.
 
+**default_client_keytab_name**
+    This relation specifies the name of the default keytab for
+    obtaining client credentials.  The default is |clkeytab|.
+
 **default_keytab_name**
     This relation specifies the default keytab name to be used by
     application servers such as telnetd and rlogind.  The default is

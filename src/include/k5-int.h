@@ -199,6 +199,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_DB_MODULE_DIR                  "db_module_dir"
 #define KRB5_CONF_DEFAULT                        "default"
 #define KRB5_CONF_DEFAULT_REALM                  "default_realm"
+#define KRB5_CONF_DEFAULT_CLIENT_KEYTAB_NAME     "default_client_keytab_name"
 #define KRB5_CONF_DEFAULT_DOMAIN                 "default_domain"
 #define KRB5_CONF_DEFAULT_TKT_ENCTYPES           "default_tkt_enctypes"
 #define KRB5_CONF_DEFAULT_TGS_ENCTYPES           "default_tgs_enctypes"
@@ -2352,6 +2353,9 @@ krb5_error_code KRB5_CALLCONV krb5_kt_register(krb5_context,
 
 krb5_error_code k5_kt_get_principal(krb5_context context, krb5_keytab keytab,
                                     krb5_principal *princ_out);
+
+krb5_error_code k5_kt_client_default_name(krb5_context context,
+                                          char **name_out);
 
 krb5_error_code krb5_principal2salt_norealm(krb5_context, krb5_const_principal,
                                             krb5_data *);

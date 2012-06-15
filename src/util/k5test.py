@@ -309,6 +309,9 @@ Scripts may use the following realm methods and attributes:
 * realm.keytab: A keytab file in realm.testdir.  Initially contains a
   host keytab unless disabled by the realm construction options.
 
+* realm.client_keytab: A keytab file in realm.testdir.  Initially
+  nonexistent.
+
 * realm.ccache: A ccache file in realm.testdir.  Initially contains
   credentials for user unless disabled by the realm construction
   options.
@@ -705,6 +708,7 @@ class K5Realm(object):
         self.nfs_princ = 'nfs/%s@%s' % (hostname, self.realm)
         self.krbtgt_princ = 'krbtgt/%s@%s' % (self.realm, self.realm)
         self.keytab = os.path.join(self.testdir, 'keytab')
+        self.client_keytab = os.path.join(self.testdir, 'client_keytab')
         self.ccache = os.path.join(self.testdir, 'ccache')
         self.kadmin_ccache = os.path.join(self.testdir, 'kadmin_ccache')
         self._krb5_conf = _cfg_merge(_default_krb5_conf, krb5_conf)
@@ -835,6 +839,7 @@ class K5Realm(object):
             env['KRB5_KDC_PROFILE'] = filename
         env['KRB5CCNAME'] = self.ccache
         env['KRB5_KTNAME'] = self.keytab
+        env['KRB5_CLIENT_KTNAME'] = self.client_keytab
         env['KRB5RCACHEDIR'] = self.testdir
         return env
 

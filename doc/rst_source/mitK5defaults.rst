@@ -10,6 +10,7 @@ General defaults
 Description                 Default                        Environment
 ==========================  =============================  ====================
 Keytab file                 ``FILE:``\ |keytab|            **KRB5_KTNAME**
+Client keytab file          ``FILE:``\ |clkeytab|          **KRB5_CLIENT_KTNAME**
 Kerberos config file        |krb5conf|\ ``:``\             **KRB5_CONFIG**
                             |sysconfdir|\ ``/krb5.conf``
 KDC config file             |kdcdir|\ ``/kdc.conf``        **KRB5_KDC_PROFILE**

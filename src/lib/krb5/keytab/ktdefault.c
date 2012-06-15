@@ -44,4 +44,18 @@ krb5_kt_default(krb5_context context, krb5_keytab *id)
     return krb5_kt_resolve(context, defname, id);
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_kt_client_default(krb5_context context, krb5_keytab *keytab_out)
+{
+    krb5_error_code ret;
+    char *name;
+
+    ret = k5_kt_client_default_name(context, &name);
+    if (ret)
+        return ret;
+    ret = krb5_kt_resolve(context, name, keytab_out);
+    free(name);
+    return ret;
+}
+
 #endif /* LEAN_CLIENT */

@@ -631,7 +631,7 @@ proc envstack_pop { } {
 # Initialize the envstack
 #
 set envvars_tosave {
-    KRB5_CONFIG KRB5CCNAME KRBTKFILE KRB5RCACHEDIR KRB5_KDC_PROFILE
+    KRB5_CONFIG KRB5CCNAME KRB5_CLIENT_KTNAME KRB5RCACHEDIR KRB5_KDC_PROFILE
 }
 set krb5_init_vars [list ]
 # XXX -- fix me later!
@@ -997,6 +997,12 @@ if [info exists env(KRB5CCNAME)] {
     catch "unset orig_krb5ccname"
 }
 
+if [info exists env(KRB5_CLIENT_KTNAME)] {
+    set orig_krb5clientktname $env(KRB5_CLIENT_KTNAME)
+} else {
+    catch "unset orig_krb5clientktname"
+}
+
 if [ info exists env(KRB5RCACHEDIR)] {
     set orig_krb5rcachedir $env(KRB5RCACHEDIR)
 } else {
@@ -1024,6 +1030,10 @@ proc setup_kerberos_env { {type client} } {
     set env(KRB5CCNAME) $tmppwd/tkt
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
 
+    # Direct the Kerberos programs at a local client keytab.
+    set env(KRB5_CLIENT_KTNAME) $tmppwd/client_keytab
+    verbose "KRB5_CLIENT_KTNAME=$env(KRB5_CLIENT_KTNAME)"
+
     # Direct the Kerberos server at a cache file stored in the
     # temporary directory.
     set env(KRB5RCACHEDIR) $tmppwd
@@ -1049,6 +1059,7 @@ proc setup_kerberos_env { {type client} } {
 	set envfile [open $tmppwd/$type-env.sh w]
 	puts $envfile "KRB5_CONFIG=$env(KRB5_CONFIG)"
 	puts $envfile "KRB5CCNAME=$env(KRB5CCNAME)"
+	puts $envfile "KRB5_CLIENT_KTNAME=$env(KRB5_CLIENT_KTNAME)"
 	puts $envfile "KRB5RCACHEDIR=$env(KRB5RCACHEDIR)"
 	if [info exists env(KRB5_KDC_PROFILE)] {
 	    puts $envfile "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
@@ -1056,7 +1067,7 @@ proc setup_kerberos_env { {type client} } {
 	    puts $envfile "unset KRB5_KDC_PROFILE"
 	}
 	puts $envfile "export KRB5_CONFIG KRB5CCNAME KRB5RCACHEDIR"
-	puts $envfile "export KRB5_KDC_PROFILE"
+	puts $envfile "export KRB5_KDC_PROFILE KRB5_CLIENT_KTNAME"
 	foreach i $krb5_init_vars {
 		regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
 		puts $envfile "$evar=$env($evar)"
@@ -1068,6 +1079,7 @@ proc setup_kerberos_env { {type client} } {
 	set envfile [open $tmppwd/$type-env.csh w]
 	puts $envfile "setenv KRB5_CONFIG $env(KRB5_CONFIG)"
 	puts $envfile "setenv KRB5CCNAME $env(KRB5CCNAME)"
+	puts $envfile "setenv KRB5_CLIENT_KTNAME $env(KRB5_CLIENT_KTNAME)"
 	puts $envfile "setenv KRB5RCACHEDIR $env(KRB5RCACHEDIR)"
 	if [info exists env(KRB5_KDC_PROFILE)] {
 	    puts $envfile "setenv KRB5_KDC_PROFILE $env(KRB5_KDC_PROFILE)"

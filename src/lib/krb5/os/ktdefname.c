@@ -74,3 +74,36 @@ krb5_kt_default_name(krb5_context context, char *name, int name_size)
     }
     return 0;
 }
+
+krb5_error_code
+k5_kt_client_default_name(krb5_context context, char **name_out)
+{
+    char *str, *name;
+
+    *name_out = NULL;
+    if (!context->profile_secure &&
+        (str = getenv("KRB5_CLIENT_KTNAME")) != NULL) {
+        name = strdup(str);
+    } else if (profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                                  KRB5_CONF_DEFAULT_CLIENT_KEYTAB_NAME, NULL,
+                                  NULL, &str) == 0 && str != NULL) {
+        name = strdup(str);
+        profile_release_string(str);
+    } else {
+#ifdef _WIN32
+        char windir[160];
+        unsigned int len;
+
+        len = GetWindowsDirectory(windir, sizeof(windir) - 2);
+        windir[len] = '\0';
+        if (asprintf(&name, DEFAULT_CLIENT_KEYTAB_NAME, windir) < 0)
+            return ENOMEM;
+#else
+        name = strdup(DEFAULT_CLIENT_KEYTAB_NAME);
+#endif
+    }
+    if (name == NULL)
+        return ENOMEM;
+    *name_out = name;
+    return 0;
+}

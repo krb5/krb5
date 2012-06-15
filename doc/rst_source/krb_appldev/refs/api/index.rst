@@ -64,6 +64,7 @@ Frequently used public interfaces
    krb5_is_config_principal.rst
    krb5_is_thread_safe.rst
    krb5_kt_close.rst
+   krb5_kt_client_default.rst
    krb5_kt_default.rst
    krb5_kt_default_name.rst
    krb5_kt_get_name.rst

@@ -15,6 +15,10 @@ The following environment variables can be used during runtime:
     Default keytab file name.  (See :ref:`mitK5defaults` for the
     default name.)
 
+**KRB5_CLIENT_KTNAME**
+    Default client keytab file name.  (See :ref:`mitK5defaults` for
+    the default name.)
+
 **KRB5CCNAME**
     Default name for the credentials cache file, in the form *type*\:\
     *residual*.  The type of the default cache may determine the
