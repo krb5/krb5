@@ -2636,6 +2636,8 @@ krb5_cccol_cursor_free(krb5_context context, krb5_cccol_cursor *cursor);
  *
  * @param [in]  context         Library context
  *
+ * @version First introduced in 1.11
+ *
  * @retval 0 Credentials are available in the collection
  * @retval KRB5_CC_NOTFOUND The collection contains no credentials
  */
@@ -2888,6 +2890,8 @@ krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
  *
  * @param [in]  context         Library context
  * @param [in]  keytab          Key table handle
+ *
+ * @version First introduced in 1.11
  *
  * @retval 0 Keytab exists and contains entries
  * @retval KRB5_KT_NOTFOUND Keytab does not contain entries
