@@ -43,6 +43,9 @@ struct entry {
 #ifndef LOOKASIDE_HASH_SIZE
 #define LOOKASIDE_HASH_SIZE 16384
 #endif
+#ifndef LOOKASIDE_MAX_SIZE
+#define LOOKASIDE_MAX_SIZE (10 * 1024 * 1024)
+#endif
 
 LIST_HEAD(entry_list, entry);
 TAILQ_HEAD(entry_queue, entry);
@@ -54,6 +57,7 @@ static int hits = 0;
 static int calls = 0;
 static int max_hits_per_entry = 0;
 static int num_entries = 0;
+static size_t total_size = 0;
 static krb5_ui_4 seed;
 
 #define STALE_TIME      (2*60)            /* two minutes */
@@ -98,10 +102,19 @@ murmurhash3(const krb5_data *data)
     return h % LOOKASIDE_HASH_SIZE;
 }
 
+/* Return the rough memory footprint of an entry containing req and rep. */
+static size_t
+entry_size(const krb5_data *req, const krb5_data *rep)
+{
+    return sizeof(struct entry) + req->length +
+        ((rep == NULL) ? 0 : rep->length);
+}
+
 /* Remove entry from its hash bucket and the expiration queue, and free it. */
 static void
 discard_entry(krb5_context context, struct entry *entry)
 {
+    total_size -= entry_size(&entry->req_packet, &entry->reply_packet);
     LIST_REMOVE(entry, bucket_links);
     TAILQ_REMOVE(&expiration_queue, entry, expire_links);
     krb5_free_data_contents(context, &entry->req_packet);
@@ -152,22 +165,10 @@ kdc_remove_lookaside(krb5_context kcontext, krb5_data *req_packet)
 krb5_boolean
 kdc_check_lookaside(krb5_data *req_packet, krb5_data **reply_packet_out)
 {
-    krb5_int32 timenow;
-    struct entry *e, *next;
+    struct entry *e;
 
     *reply_packet_out = NULL;
     calls++;
-
-    if (krb5_timeofday(kdc_context, &timenow) != 0)
-        return FALSE;
-
-    /* Purge stale entries using the expiration queue. */
-    TAILQ_FOREACH_SAFE(e, &expiration_queue, expire_links, next) {
-        if (!STALE(e, timenow))
-            break;
-        max_hits_per_entry = max(max_hits_per_entry, e->num_hits);
-        discard_entry(kdc_context, e);
-    }
 
     e = find_entry(req_packet);
     if (e == NULL)
@@ -184,12 +185,21 @@ kdc_check_lookaside(krb5_data *req_packet, krb5_data **reply_packet_out)
 void
 kdc_insert_lookaside(krb5_data *req_packet, krb5_data *reply_packet)
 {
-    struct entry *e;
+    struct entry *e, *next;
     krb5_timestamp timenow;
     krb5_ui_4 hash = murmurhash3(req_packet);
+    size_t esize = entry_size(req_packet, reply_packet);
 
     if (krb5_timeofday(kdc_context, &timenow))
         return;
+
+    /* Purge stale entries and limit the total size of the entries. */
+    TAILQ_FOREACH_SAFE(e, &expiration_queue, expire_links, next) {
+        if (!STALE(e, timenow) && total_size + esize <= LOOKASIDE_MAX_SIZE)
+            break;
+        max_hits_per_entry = max(max_hits_per_entry, e->num_hits);
+        discard_entry(kdc_context, e);
+    }
 
     /* Create a new entry for this request and reply. */
     e = calloc(1, sizeof(*e));
@@ -211,6 +221,7 @@ kdc_insert_lookaside(krb5_data *req_packet, krb5_data *reply_packet)
     TAILQ_INSERT_TAIL(&expiration_queue, e, expire_links);
     LIST_INSERT_HEAD(&hash_table[hash], e, bucket_links);
     num_entries++;
+    total_size += esize;
     return;
 }
 
