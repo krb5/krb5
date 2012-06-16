@@ -36,8 +36,8 @@ struct entry {
     TAILQ_ENTRY(entry) expire_links;
     int num_hits;
     krb5_timestamp timein;
-    krb5_data *req_packet;
-    krb5_data *reply_packet;
+    krb5_data req_packet;
+    krb5_data reply_packet;
 };
 
 #ifndef LOOKASIDE_HASH_SIZE
@@ -104,8 +104,8 @@ discard_entry(krb5_context context, struct entry *entry)
 {
     LIST_REMOVE(entry, bucket_links);
     TAILQ_REMOVE(&expiration_queue, entry, expire_links);
-    krb5_free_data(context, entry->req_packet);
-    krb5_free_data(context, entry->reply_packet);
+    krb5_free_data_contents(context, &entry->req_packet);
+    krb5_free_data_contents(context, &entry->reply_packet);
     free(entry);
 }
 
@@ -117,7 +117,7 @@ find_entry(krb5_data *req_packet)
     struct entry *e;
 
     LIST_FOREACH(e, &hash_table[hash], bucket_links) {
-        if (data_eq(*e->req_packet, *req_packet))
+        if (data_eq(e->req_packet, *req_packet))
             return e;
     }
     return NULL;
@@ -175,7 +175,7 @@ kdc_check_lookaside(krb5_data *req_packet, krb5_data **reply_packet_out)
 
     e->num_hits++;
     hits++;
-    return (krb5_copy_data(kdc_context, e->reply_packet,
+    return (krb5_copy_data(kdc_context, &e->reply_packet,
                            reply_packet_out) == 0);
 }
 
@@ -196,12 +196,14 @@ kdc_insert_lookaside(krb5_data *req_packet, krb5_data *reply_packet)
     if (e == NULL)
         return;
     e->timein = timenow;
-    if (krb5_copy_data(kdc_context, req_packet, &e->req_packet)) {
+    if (krb5int_copy_data_contents(kdc_context, req_packet, &e->req_packet)) {
         free(e);
         return;
     }
-    if (krb5_copy_data(kdc_context, reply_packet, &e->reply_packet)) {
-        krb5_free_data(kdc_context, e->req_packet);
+    if (reply_packet != NULL &&
+        krb5int_copy_data_contents(kdc_context, reply_packet,
+                                   &e->reply_packet)) {
+        krb5_free_data_contents(kdc_context, &e->req_packet);
         free(e);
         return;
     }
