@@ -237,7 +237,7 @@ krb5_cccol_have_content(krb5_context context)
             continue;
         while (!found &&
                !krb5_cc_next_cred(context, cache, &cache_cursor, &creds)) {
-            if (!krb5_is_config_principal(context, creds.client))
+            if (!krb5_is_config_principal(context, creds.server))
                 found = TRUE;
             krb5_free_cred_contents(context, &creds);
         }
