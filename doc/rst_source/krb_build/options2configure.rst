@@ -399,4 +399,6 @@ several packages to be used by Kerberos are installed in
 needs to link against the curses library.  The configuration of
 Kerberos might be done thus::
 
-    ./configure CPPFLAGS=-I/usr/foobar/include LDFLAGS=-L/usr/foobar/lib --with-system-et --with-system-ss --with-system-db  SS_LIB='-lss -lcurses'  DB_HEADER=db3/db_185.h DB_LIB=-ldb-3.3
+    ./configure CPPFLAGS=-I/usr/foobar/include LDFLAGS=-L/usr/foobar/lib \
+    --with-system-et --with-system-ss --with-system-db  \
+    SS_LIB='-lss -lcurses'  DB_HEADER=db3/db_185.h DB_LIB=-ldb-3.3
