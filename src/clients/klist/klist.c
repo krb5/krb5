@@ -386,8 +386,8 @@ list_ccache(krb5_ccache cache)
     status = 0;
 cleanup:
     krb5_free_principal(kcontext, princ);
-    free(princname);
-    free(ccname);
+    krb5_free_unparsed_name(kcontext, princname);
+    krb5_free_string(kcontext, ccname);
     return status;
 }
 
