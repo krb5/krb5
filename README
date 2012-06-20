@@ -70,6 +70,37 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+
+Major changes in 1.9.4
+----------------------
+
+This is a bugfix release.
+
+* Fix interop issues with Windows Server 2008 R2 Read-Only Domain
+  Controllers.
+
+* Work around a glibc bug that causes spurious DNS PTR queries to
+  occur even when rdns = false.
+
+* Fix a kadmind denial of service issue (null pointer dereference),
+  which could only be triggered by an administrator with the "create"
+  privilege.  [CVE-2012-1013]
+
+krb5-1.9.4 changes by ticket ID
+-------------------------------
+
+7101    workaround for Solaris 8 lacking isblank
+7102    kvno ASN.1 encoding interop with Windows RODCs
+7103    Fix KDB iteration when callback does write calls
+7104    Fix spurious password expiry warning
+7142    Use correct name-type in TGS-REQs for 2008R2 RODCs
+7156    Try all history keys to decrypt password history
+7164    Work around glibc getaddrinfo PTR lookups
+7165    Make password change work without default realm
+7168    Null pointer deref in kadmind [CVE-2012-1013]
+7169    Export krb5_set_trace_callback/filename
+7170    Export gss_mech_krb5_wrong from libgssapi_krb5
+
 Major changes in 1.9.3
 ----------------------
 
