@@ -354,8 +354,6 @@ int Leash_kinit_dlg_ex(HWND hParent, LPLSH_DLGINFO_EX lpdlginfo)
         return 1;   /* pretend the dialog was displayed and succeeded */
     }
 
-    lpdlginfo->dlgtype = DLGTYPE_PASSWD;
-
     /* set the help file */
     Leash_set_help_file(NULL);
 
@@ -1495,6 +1493,8 @@ AuthenticateProc(
     long realm_count = 0;
     int disable_noaddresses = 0;
     HWND hEditCtrl=0;
+    HWND hFocusCtrl=0;
+    BOOL bReadOnlyPrinc=0;
 
     switch (message) {
 
@@ -1513,13 +1513,15 @@ AuthenticateProc(
 	if ((lpdi->size != LSH_DLGINFO_EX_V1_SZ &&
 	     lpdi->size != LSH_DLGINFO_EX_V2_SZ &&
 	      lpdi->size < LSH_DLGINFO_EX_V3_SZ) ||
-	     lpdi->dlgtype != DLGTYPE_PASSWD) {
+	     (lpdi->dlgtype & DLGTYPE_MASK) != DLGTYPE_PASSWD) {
 
 	    MessageBox(hDialog, "An incorrect initialization data structure was provided.",
 			"AuthenticateProc()",
 			MB_OK | MB_ICONSTOP);
 	    return FALSE;
 	}
+        bReadOnlyPrinc = (lpdi->dlgtype & DLGFLAG_READONLYPRINC) ?
+                         TRUE : FALSE;
 
         if ( lpdi->size >= LSH_DLGINFO_EX_V2_SZ ) {
             lpdi->out.username[0] = 0;
@@ -1535,17 +1537,6 @@ AuthenticateProc(
 	    SetWindowText(hDialog, lpdi->title);
 
         SetProp(hDialog, "HANDLES_HELP", (HANDLE)1);
-// @TODO: in/out principal
-/*
-        if ( lpdi->size >= LSH_DLGINFO_EX_V3_SZ )
-            lstrcpy(username, lpdi->in.username);
-        else if (lpdi->username)
-            lstrcpy(username, lpdi->username);
-        if ( lpdi->size >= LSH_DLGINFO_EX_V3_SZ )
-	    lstrcpy(realm, lpdi->in.realm);
-	else if (lpdi->realm)
-	    lstrcpy(realm, lpdi->realm);
-*/
 	if (lpdi->use_defaults) {
 	    lifetime = Leash_get_default_lifetime();
 	    if (lifetime <= 0)
@@ -1576,7 +1567,14 @@ AuthenticateProc(
 	    proxiable = lpdi->proxiable;
 	    publicip = lpdi->publicip;
 	}
-
+        if (lpdi->username && (strlen(lpdi->username) > 0) &&
+            lpdi->realm && (strlen(lpdi->realm) > 0)) {
+            sprintf_s(principal, sizeof(principal), "%s@%s", lpdi->username,
+                      lpdi->realm);
+        } else {
+            principal[0] = 0;
+        }
+        Edit_SetReadOnly(hEditCtrl, bReadOnlyPrinc);
         CSetDlgItemText(hDialog, IDC_EDIT_PRINCIPAL, principal);
         CSetDlgItemText(hDialog, IDC_EDIT_PASSWORD, "");
 
@@ -1658,9 +1656,11 @@ AuthenticateProc(
         /* Take keyboard focus */
         SetActiveWindow(hDialog);
         SetForegroundWindow(hDialog);
-        if (GetDlgCtrlID((HWND) wParam) != IDC_EDIT_PRINCIPAL)
-        {
-            SetFocus(GetDlgItem(hDialog, IDC_EDIT_PRINCIPAL));
+        /* put focus on password if princ is read-only */
+        hFocusCtrl = bReadOnlyPrinc ?
+            GetDlgItem(hDialog, IDC_EDIT_PASSWORD) : hEditCtrl;
+        if (((HWND)wParam) != hFocusCtrl) {
+            SetFocus(hFocusCtrl);
         }
         break;
 
