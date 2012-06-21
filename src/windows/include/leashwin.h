@@ -16,6 +16,8 @@
 
 #define DLGTYPE_PASSWD   0
 #define DLGTYPE_CHPASSWD 1
+#define DLGTYPE_MASK 0x0000ffff
+#define DLGFLAG_READONLYPRINC 0x10000
 typedef struct {
     int dlgtype;
     // Tells whether dialog box is in change pwd more or init ticket mode???
