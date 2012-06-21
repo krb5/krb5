@@ -1397,8 +1397,15 @@ cms_signeddata_verify(krb5_context context,
         X509_STORE_set_verify_cb_func(store, openssl_callback_ignore_crls);
     X509_STORE_set_flags(store, vflags);
 
-    /* get the signer's information from the CMS message */
+    /*
+     * Get the signer's information from the CMS message.  Match signer ID
+     * against anchors and intermediate CAs in case no certs are present in the
+     * SignedData.  If we start sending kdcPkId values in requests, we'll need
+     * to match against the source of that information too.
+     */
     CMS_set1_signers_certs(cms, NULL, 0);
+    CMS_set1_signers_certs(cms, idctx->trustedCAs, CMS_NOINTERN);
+    CMS_set1_signers_certs(cms, idctx->intermediateCAs, CMS_NOINTERN);
     if (((si_sk = CMS_get0_SignerInfos(cms)) == NULL) ||
         ((si = sk_CMS_SignerInfo_value(si_sk, 0)) == NULL)) {
         /* Not actually signed; anonymous case */
