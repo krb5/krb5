@@ -2729,7 +2729,7 @@ LRESULT
 CLeashView::OnObtainTGTWithParam(WPARAM wParam, LPARAM lParam)
 {
     LRESULT res = 0;
-    char * param = (char *) GlobalLock((HGLOBAL) lParam);
+    char *param = 0;
     LSH_DLGINFO_EX ldi;
     ldi.size = sizeof(ldi);
     ldi.dlgtype = DLGTYPE_PASSWD;
@@ -2737,6 +2737,14 @@ CLeashView::OnObtainTGTWithParam(WPARAM wParam, LPARAM lParam)
     ldi.title = ldi.in.title;
     ldi.username = ldi.in.username;
     ldi.realm = ldi.in.realm;
+
+    if (lParam)
+        param = (char *) MapViewOfFile((HANDLE)lParam,
+                                       FILE_MAP_ALL_ACCESS,
+                                       0,
+                                       0,
+                                       4096);
+
     if ( param ) {
         if ( *param )
             strcpy(ldi.in.title,param);
@@ -2757,7 +2765,10 @@ CLeashView::OnObtainTGTWithParam(WPARAM wParam, LPARAM lParam)
         ldi.dlgtype |= DLGFLAG_READONLYPRINC;
 
     res = pLeash_kinit_dlg_ex(m_hWnd, &ldi);
-    GlobalUnlock((HGLOBAL) lParam);
+    if (param)
+        UnmapViewOfFile(param);
+    if (lParam)
+        CloseHandle((HANDLE )lParam);
     ::SendMessage(m_hWnd, WM_COMMAND, ID_UPDATE_DISPLAY, 0);
     return res;
 }
