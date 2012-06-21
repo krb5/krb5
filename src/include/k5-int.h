@@ -2471,15 +2471,6 @@ krb5_error_code krb5_use_natural_time(krb5_context);
 krb5_error_code krb5_set_time_offsets(krb5_context, krb5_timestamp,
                                       krb5_int32);
 
-/* Internal principal function used by KIM to avoid code duplication */
-krb5_error_code KRB5_CALLCONV
-krb5int_build_principal_alloc_va(krb5_context context,
-                                 krb5_principal *princ,
-                                 unsigned int rlen,
-                                 const char *realm,
-                                 const char *first,
-                                 va_list ap);
-
 /* Some data comparison and conversion functions.  */
 static inline int
 data_eq(krb5_data d1, krb5_data d2)
