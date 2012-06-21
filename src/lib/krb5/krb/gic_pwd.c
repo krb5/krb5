@@ -310,11 +310,6 @@ krb5_get_init_creds_password(krb5_context context,
             use_master = 0;
     }
 
-#ifdef USE_KIM
-    if (ret == KRB5KDC_ERR_KEY_EXP)
-        goto cleanup;   /* Login library will deal appropriately with this error */
-#endif
-
     /* at this point, we have an error from the master.  if the error
        is not password expired, or if it is but there's no prompter,
        return this error */

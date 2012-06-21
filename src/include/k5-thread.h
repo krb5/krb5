@@ -406,10 +406,8 @@ typedef enum {
     K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME,
     K5_KEY_GSS_KRB5_CCACHE_NAME,
     K5_KEY_GSS_KRB5_ERROR_MESSAGE,
-    K5_KEY_KIM_ERROR_MESSAGE,
 #if defined(__MACH__) && defined(__APPLE__)
     K5_KEY_IPC_CONNECTION_INFO,
-    K5_KEY_COM_ERR_REENTER,
 #endif
     K5_KEY_MAX
 } k5_key_t;

@@ -26,10 +26,7 @@
 
 #include "k5-int.h"
 
-#if defined(USE_KIM)
-#include <kim/kim.h>
-#include "kim_library_private.h"
-#elif defined(USE_LEASH)
+#ifdef USE_LEASH
 static void (*pLeash_AcquireInitialTicketsIfNeeded)(krb5_context,krb5_principal,char*,int) = NULL;
 static HANDLE hLeashDLL = INVALID_HANDLE_VALUE;
 #ifdef _WIN64
@@ -75,46 +72,6 @@ krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
         return KV5M_CONTEXT;
     }
 
-#ifdef USE_KIM
-    if (kim_library_allow_automatic_prompting ()) {
-        kim_error err = KIM_NO_ERROR;
-        kim_ccache kimccache = NULL;
-        kim_identity identity = KIM_IDENTITY_ANY;
-        kim_credential_state state;
-        kim_string name = NULL;
-
-        err = kim_ccache_create_from_display_name (&kimccache,
-                                                   krb5_cc_default_name (context));
-
-        if (!err) {
-            err = kim_ccache_get_client_identity (kimccache, &identity);
-        }
-
-        if (!err) {
-            err = kim_ccache_get_state (kimccache, &state);
-        }
-
-        if (err || state != kim_credentials_state_valid) {
-            /* Either the ccache is does not exist or is invalid.  Get new
-             * tickets.  Use the identity in the ccache if there was one. */
-            kim_ccache_free (&kimccache);
-            err = kim_ccache_create_new (&kimccache,
-                                         identity, KIM_OPTIONS_DEFAULT);
-        }
-
-        if (!err) {
-            err = kim_ccache_get_display_name (kimccache, &name);
-        }
-
-        if (!err) {
-            krb5_cc_set_default_name (context, name);
-        }
-
-        kim_identity_free (&identity);
-        kim_string_free (&name);
-        kim_ccache_free (&kimccache);
-    }
-#else
 #ifdef USE_LEASH
     if ( hLeashDLL == INVALID_HANDLE_VALUE ) {
         hLeashDLL = LoadLibrary(LEASH_DLL);
@@ -134,7 +91,6 @@ krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
             }
         }
     }
-#endif
 #endif
 
     return krb5_cc_default (context, ccache);

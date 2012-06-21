@@ -78,10 +78,7 @@
 #include <strings.h>
 #endif
 
-#if defined(USE_KIM)
-#include <kim/kim.h>
-#include "kim_library_private.h"
-#elif defined(USE_LEASH)
+#ifdef USE_LEASH
 #ifdef _WIN64
 #define LEASH_DLL "leashw64.dll"
 #else
@@ -269,62 +266,6 @@ acquire_accept_cred(krb5_context context,
     return GSS_S_COMPLETE;
 }
 #endif /* LEAN_CLIENT */
-
-#ifdef USE_KIM
-krb5_error_code
-get_ccache_kim(krb5_context context, krb5_principal desired_princ,
-               krb5_ccache *ccache_out)
-{
-    kim_error err;
-    kim_ccache kimccache = NULL;
-    kim_identity identity = NULL;
-    kim_credential_state state;
-    krb5_ccache ccache;
-
-    *ccache_out = NULL;
-
-    err = kim_identity_create_from_krb5_principal(&identity, context,
-                                                  desired_princ);
-    if (err)
-        goto cleanup;
-
-    err = kim_ccache_create_from_client_identity(&kimccache, identity);
-    if (err)
-        goto cleanup;
-
-    err = kim_ccache_get_state(kimccache, &state);
-    if (err)
-        goto cleanup;
-
-    if (state != kim_credentials_state_valid) {
-        if (state == kim_credentials_state_needs_validation) {
-            err = kim_ccache_validate(kimccache, KIM_OPTIONS_DEFAULT);
-            if (err)
-                goto cleanup;
-        } else {
-            kim_ccache_free(&kimccache);
-        }
-    }
-
-    if (!kimccache && kim_library_allow_automatic_prompting()) {
-        /* ccache does not already exist, create a new one. */
-        err = kim_ccache_create_new(&kimccache, identity, KIM_OPTIONS_DEFAULT);
-        if (err)
-            goto cleanup;
-    }
-
-    err = kim_ccache_get_krb5_ccache(kimccache, context, &ccache);
-    if (err)
-        goto cleanup;
-
-    *ccache_out = ccache;
-
-cleanup:
-    kim_ccache_free(&kimccache);
-    kim_identity_free(&identity);
-    return err;
-}
-#endif /* USE_KIM */
 
 #ifdef USE_LEASH
 static krb5_error_code
@@ -575,9 +516,7 @@ acquire_init_cred(krb5_context context,
         code = krb5int_cc_default(context, &ccache);
     } else if (desired_princ) {
         /* Try to find an appropriate ccache for the desired name. */
-#if defined(USE_KIM)
-        code = get_ccache_kim(context, desired_princ, &ccache);
-#elif defined(USE_LEASH)
+#ifdef USE_LEASH
         code = get_ccache_leash(context, desired_princ, &ccache);
 #else
         code = krb5_cc_cache_match(context, desired_princ, &ccache);

@@ -47,10 +47,6 @@
 #include <time.h>
 #include "kadmin.h"
 
-#if defined(USE_KIM)
-#include <kim/kim.h>
-#endif
-
 /* special struct to convert flag names for principals
    to actual krb5_flags for a principal */
 struct pflag {
@@ -255,16 +251,6 @@ kadmin_startup(int argc, char *argv[])
     char *svcname, *realm;
 
     memset(&params, 0, sizeof(params));
-
-#if defined(USE_KIM)
-    /* Turn off all password prompting from the KLL */
-    retval = kim_library_set_allow_automatic_prompting(0);
-    if (retval) {
-        com_err(whoami, retval,
-                "while calling kim_library_set_allow_automatic_prompting()");
-        exit(1);
-    }
-#endif
 
     if (strcmp(whoami, "kadmin.local") == 0)
         set_com_err_hook(extended_com_err_fn);
