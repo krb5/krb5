@@ -2662,6 +2662,117 @@ Leash_reset_defaults(void)
     Leash_reset_default_preserve_kinit_settings();
 }
 
+static void
+acquire_tkt_send_msg_leash(const char *title,
+                           const char *ccachename,
+                           const char *name,
+                           const char *realm)
+{
+    DWORD leashProcessId = 0;
+    DWORD bufsize = 4096;
+    DWORD step;
+    HANDLE hLeashProcess = NULL;
+    HANDLE hMapFile = NULL;
+    HANDLE hTarget = NULL;
+    HWND hLeashWnd = FindWindow("LEASH.0WNDCLASS", NULL);
+    char *strs;
+    void *view;
+    if (!hLeashWnd)
+        // no leash window
+        return;
+
+    GetWindowThreadProcessId(hLeashWnd, &leashProcessId);
+    hLeashProcess = OpenProcess(PROCESS_DUP_HANDLE,
+                                FALSE,
+                                leashProcessId);
+    if (!hLeashProcess)
+        // can't get process handle; use GetLastError() for more info
+        return;
+
+    hMapFile = CreateFileMapping(INVALID_HANDLE_VALUE, // use paging file
+                                 NULL,                 // default security
+                                 PAGE_READWRITE,       // read/write access
+                                 0,                    // max size (high 32)
+                                 bufsize,              // max size (low 32)
+                                 NULL);                // name
+    if (!hMapFile) {
+        // GetLastError() for more info
+        CloseHandle(hLeashProcess);
+        return;
+    }
+
+    SetForegroundWindow(hLeashWnd);
+
+    view = MapViewOfFile(hMapFile,
+                         FILE_MAP_ALL_ACCESS,
+                         0,
+                         0,
+                         bufsize);
+    if (view != NULL) {
+        /* construct a marshalling of data
+         *   <title><principal><realm><ccache>
+         * then send to Leash
+         */
+        strs = (char *)view;
+        // first reserve space for three more NULLs (4 strings total)
+        bufsize -= 3;
+        // Dialog title
+        if (title != NULL)
+            strcpy_s(strs, bufsize, title);
+        else if (name != NULL && realm != NULL)
+            sprintf_s(strs, bufsize,
+                      "Obtain Kerberos TGT for %s@%s", name, realm);
+        else
+            strcpy_s(strs, bufsize, "Obtain Kerberos TGT");
+        step = strlen(strs);
+        strs += step + 1;
+        bufsize -= step;
+        // name and realm
+        if (name != NULL) {
+            strcpy_s(strs, bufsize, name);
+            step = strlen(strs);
+            strs += step + 1;
+            bufsize -= step;
+            if (realm != NULL) {
+                strcpy_s(strs, bufsize, realm);
+                step = strlen(strs);
+                strs += step + 1;
+                bufsize -= step;
+            } else {
+                *strs = 0;
+                strs++;
+            }
+        } else {
+            *strs = 0;
+            strs++;
+            *strs = 0;
+            strs++;
+        }
+
+        /* Append the ccache name */
+        if (ccachename != NULL)
+            strcpy_s(strs, bufsize, ccachename);
+        else
+            *strs = 0;
+
+        UnmapViewOfFile(view);
+    }
+    // Duplicate the file mapping handle to one leash can use
+    if (DuplicateHandle(GetCurrentProcess(),
+                        hMapFile,
+                        hLeashProcess,
+                        &hTarget,
+                        PAGE_READWRITE,
+                        FALSE,
+                        DUPLICATE_SAME_ACCESS |
+                        DUPLICATE_CLOSE_SOURCE)) {
+        /* 32809 = ID_OBTAIN_TGT_WITH_LPARAM in src/windows/leash/resource.h */
+        SendMessage(hLeashWnd, 32809, 0, (LPARAM) hTarget);
+    } else {
+        // GetLastError()
+    }
+}
+
 static int
 acquire_tkt_send_msg(krb5_context ctx, const char * title,
 		     const char * ccachename,
@@ -2756,53 +2867,8 @@ acquire_tkt_send_msg(krb5_context ctx, const char * title,
 	UnmapViewOfFile(dlginfo);
 	CloseHandle(hMap);
     } else {
-	HGLOBAL 		hData;
-	HWND hLeash = FindWindow("LEASH.0WNDCLASS", NULL);
-
-	/* construct a marshalling of data
-	 *   <title><principal><realm><ccache>
-	 * then send to Leash
-	 */
-
-	hData = GlobalAlloc( GHND, 4096 );
-	SetForegroundWindow(hLeash);
-	if ( hData && hLeash ) {
-	    char * strs = GlobalLock(hData);
-	    if ( strs ) {
-		if (title)
-		    strcpy(strs, title);
-		else if (desiredName)
-		    sprintf(strs, "Obtain Kerberos TGT for %s@%s",desiredName,desiredRealm);
-		else
-		    strcpy(strs, "Obtain Kerberos TGT");
-		strs += strlen(strs) + 1;
-		if ( desiredName ) {
-		    strcpy(strs, desiredName);
-		    strs += strlen(strs) + 1;
-		    if (desiredRealm) {
-			strcpy(strs, desiredRealm);
-			strs += strlen(strs) + 1;
-		    }
-		} else {
-		    *strs = 0;
-		    strs++;
-		    *strs = 0;
-		    strs++;
-		}
-
-		/* Append the ccache name */
-		if (ccachename)
-		    strcpy(strs, ccachename);
-		else
-		    *strs = 0;
-		strs++;
-
-		GlobalUnlock( hData );
-		/* 32809 = ID_OBTAIN_TGT_WITH_LPARAM in src/windows/leash/resource.h */
-		SendMessage(hLeash, 32809, 0, (LPARAM) hData);
-	    }
-	}
-	GlobalFree( hData );
+        acquire_tkt_send_msg_leash(title,
+                                   ccachename, desiredName, desiredRealm);
     }
 
     SetForegroundWindow(hForeground);
