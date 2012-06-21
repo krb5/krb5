@@ -2753,6 +2753,9 @@ CLeashView::OnObtainTGTWithParam(WPARAM wParam, LPARAM lParam)
         strcpy(ldi.in.title,"Get Ticket");
     }
 
+    if (strlen(ldi.username) > 0 && strlen(ldi.realm) > 0)
+        ldi.dlgtype |= DLGFLAG_READONLYPRINC;
+
     res = pLeash_kinit_dlg_ex(m_hWnd, &ldi);
     GlobalUnlock((HGLOBAL) lParam);
     ::SendMessage(m_hWnd, WM_COMMAND, ID_UPDATE_DISPLAY, 0);
