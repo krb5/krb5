@@ -37,6 +37,7 @@ extern int current_appl_type;
 krb5_context test_context;
 int error_count = 0;
 int do_trval = 0;
+int first_trval = 1;
 int trval2();
 
 static void
@@ -46,9 +47,13 @@ encoder_print_results(krb5_data *code, char *typestring, char *description)
     int r, rlen;
 
     if (do_trval) {
+        if (first_trval)
+            first_trval = 0;
+        else
+            printf("\n");
         printf("encode_krb5_%s%s:\n", typestring, description);
         r = trval2(stdout, code->data, code->length, 0, &rlen);
-        printf("\n\n");
+        printf("\n");
         if (rlen < 0 || (unsigned int) rlen != code->length) {
             printf("Error: length mismatch: was %d, parsed %d\n",
                    code->length, rlen);

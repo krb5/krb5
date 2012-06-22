@@ -225,6 +225,7 @@ context_restart:
         (eid & ID_FORM) == FORM_CONS && lev > 0) {
         rlen_ext += 2 + xlen;
         enc += 2 + xlen;
+        fprintf(fp, " ");
         goto context_restart;
     }
 
@@ -477,7 +478,7 @@ struct typestring_table univ_types[] = {
 #ifdef KRB5
 struct typestring_table krb5_types[] = {
     { 1, -1, "Krb5 Ticket"},
-    { 2, -1, "Krb5 Autenticator"},
+    { 2, -1, "Krb5 Authenticator"},
     { 3, -1, "Krb5 Encrypted ticket part"},
     { 10, -1, "Krb5 AS-REQ packet"},
     { 11, -1, "Krb5 AS-REP packet"},
@@ -760,7 +761,7 @@ void print_tag_type(fp, eid, lev)
             fprintf(fp, "UNIV %d???", eid & ID_TAG);
     }
 
-    fprintf(fp, "] ");
+    fprintf(fp, "]");
 
 }
 
