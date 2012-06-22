@@ -194,30 +194,6 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
     code = krb5_get_credentials(context, flags, cred->ccache,
                                 &in_creds, &result_creds);
-    if (code == KRB5_CC_NOTFOUND && cred->password != NULL &&
-        !cred->iakerb_mech) {
-        krb5_creds tgt_creds;
-
-        memset(&tgt_creds, 0, sizeof(tgt_creds));
-
-        /* No TGT in the ccache, but we can get one with the password. */
-        code = krb5_get_init_creds_password(context, &tgt_creds,
-                                            in_creds.client, cred->password,
-                                            NULL, NULL, 0, NULL, NULL);
-        if (code)
-            goto cleanup;
-
-        code = krb5_cc_store_cred(context, cred->ccache, &tgt_creds);
-        if (code) {
-            krb5_free_cred_contents(context, &tgt_creds);
-            goto cleanup;
-        }
-        cred->expire = tgt_creds.times.endtime;
-        krb5_free_cred_contents(context, &tgt_creds);
-
-        code = krb5_get_credentials(context, flags, cred->ccache,
-                                    &in_creds, &result_creds);
-    }
     if (code)
         goto cleanup;
 

@@ -183,7 +183,10 @@ typedef struct _krb5_gss_cred_id_rec {
 
     /* ccache (init) data */
     krb5_ccache ccache;
+    krb5_keytab client_keytab;
+    krb5_boolean have_tgt;
     krb5_timestamp expire;
+    krb5_timestamp refresh_time;
     krb5_enctype *req_enctypes;  /* limit negotiated enctypes to this list */
     char *password;
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t;
@@ -475,6 +478,13 @@ krb5_error_code
 krb5_to_gss_cred(krb5_context context,
                  krb5_creds *creds,
                  krb5_gss_cred_id_t *out_cred);
+
+krb5_boolean
+kg_cred_time_to_refresh(krb5_context context, krb5_gss_cred_id_rec *cred);
+
+void
+kg_cred_set_initial_refresh(krb5_context context, krb5_gss_cred_id_rec *cred,
+                            krb5_ticket_times *times);
 
 OM_uint32
 kg_cred_resolve(OM_uint32 *minor_status, krb5_context context,

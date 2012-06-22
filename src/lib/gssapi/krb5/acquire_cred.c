@@ -185,7 +185,6 @@ cleanup:
 static OM_uint32
 acquire_accept_cred(krb5_context context,
                     OM_uint32 *minor_status,
-                    krb5_gss_name_t desired_name,
                     krb5_keytab req_keytab,
                     krb5_gss_cred_id_rec *cred)
 {
@@ -223,9 +222,9 @@ acquire_accept_cred(krb5_context context,
         return GSS_S_CRED_UNAVAIL;
     }
 
-    if (desired_name != NULL) {
+    if (cred->name != NULL) {
         /* Make sure we keys matching the desired name in the keytab. */
-        code = check_keytab(context, kt, desired_name);
+        code = check_keytab(context, kt, cred->name);
         if (code) {
             krb5_kt_close(context, kt);
             if (code == KRB5_KT_NOTFOUND) {
@@ -238,15 +237,8 @@ acquire_accept_cred(krb5_context context,
             return GSS_S_CRED_UNAVAIL;
         }
 
-        assert(cred->name == NULL);
-        code = kg_duplicate_name(context, desired_name, &cred->name);
-        if (code) {
-            *minor_status = code;
-            return GSS_S_FAILURE;
-        }
-
         /* Open the replay cache for this principal. */
-        code = krb5_get_server_rcache(context, &desired_name->princ->data[0],
+        code = krb5_get_server_rcache(context, &cred->name->princ->data[0],
                                       &cred->rcache);
         if (code) {
             *minor_status = code;
@@ -307,65 +299,6 @@ get_ccache_leash(krb5_context context, krb5_principal desired_princ,
 }
 #endif /* USE_LEASH */
 
-/* Prepare to acquire credentials into ccache using password at
- * init_sec_context time.  On success, cred takes ownership of ccache. */
-static krb5_error_code
-prep_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
-            krb5_ccache ccache, krb5_principal desired_princ,
-            gss_buffer_t password)
-{
-    krb5_error_code code;
-    krb5_principal ccache_princ;
-    krb5_data pwdata = make_data(password->value, password->length), pwcopy;
-    krb5_boolean eq;
-    const char *cctype;
-    krb5_ccache newcache = NULL;
-
-    /* Check the ccache principal or initialize a new cache. */
-    code = krb5_cc_get_principal(context, ccache, &ccache_princ);
-    if (code == 0) {
-        eq = krb5_principal_compare(context, ccache_princ, desired_princ);
-        krb5_free_principal(context, ccache_princ);
-        if (!eq) {
-            cctype = krb5_cc_get_type(context, ccache);
-            if (krb5_cc_support_switch(context, cctype)) {
-                /* Make a new ccache within the collection. */
-                code = krb5_cc_new_unique(context, cctype, NULL, &newcache);
-                if (code)
-                    return code;
-            } else
-                return KG_CCACHE_NOMATCH;
-        }
-    } else if (code == KRB5_FCC_NOFILE) {
-        /* Cache file does not exist; create and initialize one. */
-        code = krb5_cc_initialize(context, ccache, desired_princ);
-        if (code)
-            return code;
-    } else
-        return code;
-
-    /* Save the desired principal as the credential name if not already set. */
-    if (!cred->name) {
-        code = kg_init_name(context, desired_princ, NULL, NULL, NULL, 0,
-                            &cred->name);
-        if (code)
-            return code;
-    }
-
-    /* Stash the password for later. */
-    code = krb5int_copy_data_contents_add0(context, &pwdata, &pwcopy);
-    if (code)
-        return code;
-    cred->password = pwcopy.data;
-
-    if (newcache) {
-        krb5_cc_close(context, ccache);
-        cred->ccache = newcache;
-    } else
-        cred->ccache = ccache;
-    return 0;
-}
-
 /* Set fields in cred according to a ccache config entry whose key (in
  * principal form) is config_princ and whose value is value. */
 static krb5_error_code
@@ -386,36 +319,67 @@ scan_cc_config(krb5_context context, krb5_gss_cred_id_rec *cred,
         krb5_free_data_contents(context, &data0);
         if (code)
             return code;
+    } else if (data_eq_string(config_princ->data[1], KRB5_CONF_REFRESH_TIME) &&
+               cred->refresh_time == 0) {
+        code = krb5int_copy_data_contents_add0(context, value, &data0);
+        if (code)
+            return code;
+        cred->refresh_time = atol(data0.data);
+        krb5_free_data_contents(context, &data0);
     }
     return 0;
 }
 
-/* Check ccache and scan it for its expiry time.  On success, cred takes
- * ownership of ccache. */
-static krb5_error_code
-scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
-            krb5_ccache ccache, krb5_principal desired_princ)
+/* Return true if it appears that we can non-interactively get initial
+ * tickets for cred. */
+static krb5_boolean
+can_get_initial_creds(krb5_context context, krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
+    krb5_keytab_entry entry;
+
+    if (cred->password != NULL)
+        return TRUE;
+
+    /* If we don't know the client principal yet, check for any keytab keys. */
+    if (cred->name == NULL)
+        return !krb5_kt_have_content(context, cred->client_keytab);
+
+    /* Check if we have a keytab key for the client principal. */
+    code = krb5_kt_get_entry(context, cred->client_keytab, cred->name->princ,
+                             0, 0, &entry);
+    if (code) {
+        krb5_clear_error_message(context);
+        return FALSE;
+    }
+    krb5_free_keytab_entry_contents(context, &entry);
+    return TRUE;
+}
+
+/* Scan cred->ccache for name, expiry time, impersonator, refresh time. */
+static krb5_error_code
+scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred)
+{
+    krb5_error_code code;
+    krb5_ccache ccache = cred->ccache;
     krb5_principal ccache_princ = NULL, tgt_princ = NULL;
     krb5_data *realm;
     krb5_cc_cursor cursor;
     krb5_creds creds;
     krb5_timestamp endtime;
-    int got_endtime = 0, is_tgt;
+    krb5_boolean is_tgt;
 
     /* Turn off OPENCLOSE mode while extensive frobbing is going on. */
     code = krb5_cc_set_flags(context, ccache, 0);
     if (code)
         return code;
 
+    /* Credentials cache principal must match the initiator name. */
     code = krb5_cc_get_principal(context, ccache, &ccache_princ);
     if (code != 0)
-        return code;
-
-    /* Credentials cache principal must match the initiator name. */
-    if (desired_princ != NULL &&
-        !krb5_principal_compare(context, ccache_princ, desired_princ)) {
+        goto cleanup;
+    if (cred->name != NULL &&
+        !krb5_principal_compare(context, ccache_princ, cred->name->princ)) {
         code = KG_CCACHE_NOMATCH;
         goto cleanup;
     }
@@ -457,109 +421,298 @@ scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
         is_tgt = krb5_principal_compare(context, tgt_princ, creds.server);
         endtime = creds.times.endtime;
         krb5_free_cred_contents(context, &creds);
-        if (is_tgt || !got_endtime)
-            cred->expire = creds.times.endtime;
-        got_endtime = 1;
+        if (is_tgt)
+            cred->have_tgt = TRUE;
+        if (is_tgt || cred->expire == 0)
+            cred->expire = endtime;
     }
     krb5_cc_end_seq_get(context, ccache, &cursor);
     if (code && code != KRB5_CC_END)
         goto cleanup;
     code = 0;
 
-    if (!got_endtime) {         /* ccache is empty. */
+    if (cred->expire == 0 && !can_get_initial_creds(context, cred)) {
         code = KG_EMPTY_CCACHE;
         goto cleanup;
     }
 
     (void)krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE);
-    cred->ccache = ccache;
 
 cleanup:
+    (void)krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE);
     krb5_free_principal(context, ccache_princ);
     krb5_free_principal(context, tgt_princ);
     return code;
 }
 
-/* get credentials corresponding to the default credential cache.
-   If successful, set the ccache-specific fields in cred.
-*/
+/* Find an existing or destination ccache for cred->name. */
+static krb5_error_code
+get_cache_for_name(krb5_context context, krb5_gss_cred_id_rec *cred)
+{
+    krb5_error_code code;
+    krb5_boolean can_get, have_collection;
+    krb5_ccache defcc = NULL;
+    krb5_principal princ = NULL;
+    const char *cctype;
+
+    assert(cred->name != NULL && cred->ccache == NULL);
+#ifdef USE_LEASH
+    return get_ccache_leash(context, cred->name->princ, &cred->ccache);
+#else
+    /* Check first whether we can acquire tickets, to avoid overwriting the
+     * extended error message from krb5_cc_cache_match. */
+    can_get = can_get_initial_creds(context, cred);
+
+    /* Look for an existing cache for the client principal. */
+    code = krb5_cc_cache_match(context, cred->name->princ, &cred->ccache);
+    if (code == 0)
+        return scan_ccache(context, cred);
+    if (code != KRB5_CC_NOTFOUND || !can_get)
+        return code;
+    krb5_clear_error_message(context);
+
+    /* There is no existing ccache, but we can acquire credentials.  Get the
+     * default ccache to help decide where we should put them. */
+    code = krb5_cc_default(context, &defcc);
+    if (code)
+        return code;
+    cctype = krb5_cc_get_type(context, defcc);
+    have_collection = krb5_cc_support_switch(context, cctype);
+
+    /* We can use an empty default ccache if we're using a password or if
+     * there's no collection. */
+    if (cred->password != NULL || !have_collection) {
+        if (krb5_cc_get_principal(context, defcc, &princ) == KRB5_FCC_NOFILE) {
+            cred->ccache = defcc;
+            defcc = NULL;
+        }
+        krb5_clear_error_message(context);
+    }
+
+    /* Otherwise, try to use a new cache in the collection. */
+    if (cred->ccache == NULL) {
+        if (!have_collection) {
+            code = KG_CCACHE_NOMATCH;
+            goto cleanup;
+        }
+        code = krb5_cc_new_unique(context, cctype, NULL, &cred->ccache);
+        if (code)
+            goto cleanup;
+    }
+
+cleanup:
+    krb5_free_principal(context, princ);
+    if (defcc != NULL)
+        krb5_cc_close(context, defcc);
+    return code;
+#endif /* not USE_LEASH */
+}
+
+/* Try to set cred->name using the client keytab. */
+static krb5_error_code
+get_name_from_client_keytab(krb5_context context, krb5_gss_cred_id_rec *cred)
+{
+    krb5_error_code code;
+    krb5_principal princ;
+
+    assert(cred->name == NULL);
+    code = k5_kt_get_principal(context, cred->client_keytab, &princ);
+    if (code)
+        return code;
+    code = kg_init_name(context, princ, NULL, NULL, NULL, KG_INIT_NAME_NO_COPY,
+                        &cred->name);
+    if (code) {
+        krb5_free_principal(context, princ);
+        return code;
+    }
+    return 0;
+}
+
+/* Make a note in ccache that we should attempt to refresh it from the client
+ * keytab at refresh_time. */
+static void
+set_refresh_time(krb5_context context, krb5_ccache ccache,
+                 krb5_timestamp refresh_time)
+{
+    char buf[128];
+    krb5_data d;
+
+    snprintf(buf, sizeof(buf), "%ld", (long)refresh_time);
+    d = string2data(buf);
+    (void)krb5_cc_set_config(context, ccache, NULL, KRB5_CONF_REFRESH_TIME,
+                             &d);
+    krb5_clear_error_message(context);
+}
+
+/* Return true if it's time to refresh cred from the client keytab.  If
+ * returning true, avoid retrying for 30 seconds. */
+krb5_boolean
+kg_cred_time_to_refresh(krb5_context context, krb5_gss_cred_id_rec *cred)
+{
+    krb5_timestamp now;
+
+    if (krb5_timeofday(context, &now))
+        return FALSE;
+    if (cred->refresh_time != 0 && now >= cred->refresh_time) {
+        set_refresh_time(context, cred->ccache, cred->refresh_time + 30);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+/* If appropriate, make a note to refresh cred from the client keytab when it
+ * is halfway to expired. */
+void
+kg_cred_set_initial_refresh(krb5_context context, krb5_gss_cred_id_rec *cred,
+                            krb5_ticket_times *times)
+{
+    krb5_timestamp refresh;
+
+    /* For now, we only mark keytab-acquired credentials for refresh. */
+    if (cred->password != NULL)
+        return;
+
+    /* Make a note to refresh these when they are halfway to expired. */
+    refresh = times->starttime + (times->endtime - times->starttime) / 2;
+    set_refresh_time(context, cred->ccache, refresh);
+}
+
+/* Get initial credentials using the supplied password or client keytab. */
+static krb5_error_code
+get_initial_cred(krb5_context context, krb5_gss_cred_id_rec *cred)
+{
+    krb5_error_code code;
+    krb5_get_init_creds_opt *opt = NULL;
+    krb5_creds creds;
+
+    code = krb5_get_init_creds_opt_alloc(context, &opt);
+    if (code)
+        return code;
+    code = krb5_get_init_creds_opt_set_out_ccache(context, opt, cred->ccache);
+    if (code)
+        goto cleanup;
+    if (cred->password != NULL) {
+        code = krb5_get_init_creds_password(context, &creds, cred->name->princ,
+                                            cred->password, NULL, NULL, 0,
+                                            NULL, opt);
+    } else {
+        code = krb5_get_init_creds_keytab(context, &creds, cred->name->princ,
+                                          cred->client_keytab, 0, NULL, opt);
+    }
+    if (code)
+        goto cleanup;
+    kg_cred_set_initial_refresh(context, cred, &creds.times);
+    cred->have_tgt = TRUE;
+    cred->expire = creds.times.endtime;
+    krb5_free_cred_contents(context, &creds);
+cleanup:
+    krb5_get_init_creds_opt_free(context, opt);
+    return code;
+}
+
+/* Get initial credentials if we ought to and are able to. */
+static krb5_error_code
+maybe_get_initial_cred(krb5_context context, krb5_gss_cred_id_rec *cred)
+{
+    krb5_error_code code;
+
+    /* Don't get creds if we don't know the name or are doing IAKERB. */
+    if (cred->name == NULL || cred->iakerb_mech)
+        return 0;
+
+    /* Get creds if we have none or if it's time to refresh. */
+    if (cred->expire == 0 || kg_cred_time_to_refresh(context, cred)) {
+        code = get_initial_cred(context, cred);
+        /* If we were trying to refresh and failed, we can keep going. */
+        if (code && cred->expire == 0)
+            return code;
+        krb5_clear_error_message(context);
+    }
+    return 0;
+}
 
 static OM_uint32
 acquire_init_cred(krb5_context context,
                   OM_uint32 *minor_status,
                   krb5_ccache req_ccache,
-                  krb5_principal desired_princ,
                   gss_buffer_t password,
                   krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
-    krb5_ccache ccache = NULL;
+    krb5_data pwdata, pwcopy;
     int caller_ccname = 0;
 
-    cred->ccache = NULL;
-
-    /* Load the GSS ccache name, if specified, into the context. */
+    /* Get ccache from caller if available. */
     if (GSS_ERROR(kg_sync_ccache_name(context, minor_status)))
         return GSS_S_FAILURE;
     if (GSS_ERROR(kg_caller_provided_ccache_name(minor_status,
                                                  &caller_ccname)))
         return GSS_S_FAILURE;
-
-    /* Pick a credential cache. */
     if (req_ccache != NULL) {
-        code = krb5_cc_dup(context, req_ccache, &ccache);
+        code = krb5_cc_dup(context, req_ccache, &cred->ccache);
+        if (code)
+            goto error;
     } else if (caller_ccname) {
         /* Caller's ccache name has been set as the context default. */
-        code = krb5int_cc_default(context, &ccache);
-    } else if (desired_princ) {
-        /* Try to find an appropriate ccache for the desired name. */
-#ifdef USE_LEASH
-        code = get_ccache_leash(context, desired_princ, &ccache);
-#else
-        code = krb5_cc_cache_match(context, desired_princ, &ccache);
-        if (code == KRB5_CC_NOTFOUND && password != GSS_C_NO_BUFFER) {
-            /* Grab the default ccache for now; if it's not empty, prep_ccache
-             * will create a new one of the default type or error out. */
-            krb5_clear_error_message(context);
-            code = krb5_cc_default(context, &ccache);
-        }
-#endif
-    } else
-        code = 0;
-    if (code != 0) {
-        *minor_status = code;
-        return GSS_S_CRED_UNAVAIL;
+        code = krb5int_cc_default(context, &cred->ccache);
+        if (code)
+            goto error;
     }
 
-    if (ccache != NULL) {
-        if (password != GSS_C_NO_BUFFER && desired_princ != NULL)
-            code = prep_ccache(context, cred, ccache, desired_princ, password);
-        else
-            code = scan_ccache(context, cred, ccache, desired_princ);
-        if (code != 0) {
-            krb5_cc_close(context, ccache);
-            *minor_status = code;
-            return GSS_S_CRED_UNAVAIL;
+    code = krb5_kt_client_default(context, &cred->client_keytab);
+    if (code)
+        goto error;
+
+    if (password != GSS_C_NO_BUFFER) {
+        pwdata = make_data(password->value, password->length);
+        code = krb5int_copy_data_contents_add0(context, &pwdata, &pwcopy);
+        if (code)
+            goto error;
+        cred->password = pwcopy.data;
+    }
+
+    if (cred->ccache != NULL) {
+        /* The caller specified a ccache; check what's in it. */
+        code = scan_ccache(context, cred);
+        if (code == KRB5_FCC_NOFILE) {
+            /* See if we can get initial creds.  If the caller didn't specify
+             * a name, pick one from the client keytab. */
+            if (cred->name == NULL) {
+                if (!get_name_from_client_keytab(context, cred))
+                    code = 0;
+            } else if (can_get_initial_creds(context, cred)) {
+                code = 0;
+            }
         }
-        cred->ccache = ccache;
-    } else {
-        /* We haven't decided on a ccache or principal yet, but fail now if
-         * there are no krb5 credentials at all. */
+        if (code)
+            goto error;
+    } else if (cred->name != NULL) {
+        /* The caller specified a name but not a ccache; pick a cache. */
+        code = get_cache_for_name(context, cred);
+        if (code)
+            goto error;
+    }
+
+#ifndef USE_LEASH
+    /* If we haven't picked a name, make sure we have or can get any creds,
+     * unless we're using Leash and might be able to get them interactively. */
+    if (cred->name == NULL && !can_get_initial_creds(context, cred)) {
         code = krb5_cccol_have_content(context);
-        if (code != 0) {
-            *minor_status = code;
-            return GSS_S_CRED_UNAVAIL;
-        }
+        if (code)
+            goto error;
     }
+#endif
 
-    /*
-     * If the caller specified no ccache and no desired principal, leave
-     * cred->ccache and cred->name NULL.  They will be resolved later by
-     * kg_cred_resolve(), possibly using the target principal name.
-     */
+    code = maybe_get_initial_cred(context, cred);
+    if (code)
+        goto error;
 
     *minor_status = 0;
     return GSS_S_COMPLETE;
+
+error:
+    *minor_status = code;
+    return GSS_S_CRED_UNAVAIL;
 }
 
 static OM_uint32
@@ -619,13 +772,21 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
         goto error_out;
     }
 
+    if (name != NULL) {
+        code = kg_duplicate_name(context, name, &cred->name);
+        if (code) {
+            *minor_status = code;
+            return GSS_S_FAILURE;
+        }
+    }
+
 #ifndef LEAN_CLIENT
     /*
      * If requested, acquire credentials for accepting. This will fill
      * in cred->name if desired_princ is specified.
      */
     if (cred_usage == GSS_C_ACCEPT || cred_usage == GSS_C_BOTH) {
-        ret = acquire_accept_cred(context, minor_status, name, keytab, cred);
+        ret = acquire_accept_cred(context, minor_status, keytab, cred);
         if (ret != GSS_S_COMPLETE)
             goto error_out;
     }
@@ -636,8 +797,7 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
      * in cred->name if it wasn't set above.
      */
     if (cred_usage == GSS_C_INITIATE || cred_usage == GSS_C_BOTH) {
-        ret = acquire_init_cred(context, minor_status, ccache,
-                                name ? name->princ : NULL, password, cred);
+        ret = acquire_init_cred(context, minor_status, ccache, password, cred);
         if (ret != GSS_S_COMPLETE)
             goto error_out;
     }
@@ -702,8 +862,7 @@ kg_cred_resolve(OM_uint32 *minor_status, krb5_context context,
     krb5_error_code code;
     krb5_gss_cred_id_t cred = (krb5_gss_cred_id_t)cred_handle;
     krb5_gss_name_t tname = (krb5_gss_name_t)target_name;
-    krb5_ccache ccache = NULL;
-    krb5_principal client_princ = NULL;
+    krb5_principal client_princ;
 
     *minor_status = 0;
 
@@ -712,37 +871,73 @@ kg_cred_resolve(OM_uint32 *minor_status, krb5_context context,
         return maj;
     k5_mutex_assert_locked(&cred->lock);
 
-    if (cred->ccache != NULL || cred->usage == GSS_C_ACCEPT)
+    if (cred->usage == GSS_C_ACCEPT || cred->name != NULL)
         return GSS_S_COMPLETE;
+    /* acquire_init_cred should have set both name and ccache, or neither. */
+    assert(cred->ccache == NULL);
 
-    /* Pick a credential cache. */
     if (tname != NULL) {
-        code = krb5_cc_select(context, tname->princ, &ccache, &client_princ);
+        /* Use the target name to select an existing ccache or a principal. */
+        code = krb5_cc_select(context, tname->princ, &cred->ccache,
+                              &client_princ);
         if (code && code != KRB5_CC_NOTFOUND)
             goto kerr;
+        if (client_princ != NULL) {
+            code = kg_init_name(context, client_princ, NULL, NULL, NULL,
+                                KG_INIT_NAME_NO_COPY, &cred->name);
+            if (code) {
+                krb5_free_principal(context, client_princ);
+                goto kerr;
+            }
+        }
+        if (cred->ccache != NULL) {
+            code = scan_ccache(context, cred);
+            if (code)
+                goto kerr;
+        }
     }
-    if (ccache == NULL) {
-        /*
-         * Ideally we would get credentials for client_princ if it is set.  At
-         * the moment, we just get the default ccache (obtaining credentials if
-         * the platform supports it) and check it against client_princ below.
-         */
-        code = krb5int_cc_default(context, &ccache);
+
+    /* If we still haven't picked a client principal, try using an existing
+     * default ccache.  (On Windows, this may acquire initial creds.) */
+    if (cred->name == NULL) {
+        code = krb5int_cc_default(context, &cred->ccache);
+        if (code)
+            goto kerr;
+        code = scan_ccache(context, cred);
+        if (code == KRB5_FCC_NOFILE) {
+            /* Default ccache doesn't exist; fall through to client keytab. */
+            krb5_cc_close(context, cred->ccache);
+            cred->ccache = NULL;
+        } else if (code) {
+            goto kerr;
+        }
+    }
+
+    /* If that didn't work, try getting a name from the client keytab. */
+    if (cred->name == NULL) {
+        code = get_name_from_client_keytab(context, cred);
+        if (code) {
+            code = KG_EMPTY_CCACHE;
+            goto kerr;
+        }
+    }
+
+    if (cred->name != NULL && cred->ccache == NULL) {
+        /* Pick a cache for the name we chose (from krb5_cc_select or from the
+         * client keytab). */
+        code = get_cache_for_name(context, cred);
         if (code)
             goto kerr;
     }
 
-    code = scan_ccache(context, cred, ccache, client_princ);
-    if (code) {
-        krb5_cc_close(context, ccache);
+    /* Resolve name to ccache and possibly get initial credentials. */
+    code = maybe_get_initial_cred(context, cred);
+    if (code)
         goto kerr;
-    }
 
-    krb5_free_principal(context, client_princ);
     return GSS_S_COMPLETE;
 
 kerr:
-    krb5_free_principal(context, client_princ);
     k5_mutex_unlock(&cred->lock);
     save_error_info(code, context);
     *minor_status = code;

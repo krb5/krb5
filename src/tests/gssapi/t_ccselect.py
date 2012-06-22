@@ -123,7 +123,7 @@ if output != (bob + '\n'):
     fail('bob not chosen via primary cache when no .k5identity line matches.')
 output = r1.run_as_client(['./t_ccselect', 'gss:bogus@' + hostname],
                           expected_code=1)
-if 'does not match desired' not in output:
+if 'Can\'t find client principal noprinc' not in output:
     fail('Expected error not seen when k5identity selects bad principal.')
 
 success('GSSAPI credential selection tests')

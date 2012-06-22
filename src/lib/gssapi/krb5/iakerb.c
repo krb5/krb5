@@ -416,7 +416,7 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
 {
     krb5_error_code code;
 
-    if (cred->iakerb_mech == 0 || cred->password == NULL) {
+    if (cred->iakerb_mech == 0) {
         code = EINVAL;
         goto cleanup;
     }
@@ -446,7 +446,13 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
     if (code != 0)
         goto cleanup;
 
-    code = krb5_init_creds_set_password(ctx->k5c, ctx->icc, cred->password);
+    if (cred->password != NULL) {
+        code = krb5_init_creds_set_password(ctx->k5c, ctx->icc,
+                                            cred->password);
+    } else {
+        code = krb5_init_creds_set_keytab(ctx->k5c, ctx->icc,
+                                          cred->client_keytab);
+    }
     if (code != 0)
         goto cleanup;
 
@@ -547,10 +553,17 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
 
         code = krb5_init_creds_step(ctx->k5c, ctx->icc, &in, &out, &realm,
                                     &flags);
-        if (code != 0)
-            goto cleanup;
-        if (!(flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE)) {
+        if (code != 0) {
+            if (cred->have_tgt) {
+                /* We were trying to refresh; keep going with current creds. */
+                ctx->state = IAKERB_TGS_REQ;
+                krb5_clear_error_message(ctx->k5c);
+            } else {
+                goto cleanup;
+            }
+        } else if (!(flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE)) {
             krb5_init_creds_get_times(ctx->k5c, ctx->icc, &times);
+            kg_cred_set_initial_refresh(ctx->k5c, cred, &times);
             cred->expire = times.endtime;
 
             krb5_init_creds_free(ctx->k5c, ctx->icc);
@@ -650,43 +663,18 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
         in_creds.times.endtime = now + time_req;
     }
 
-    code = krb5_get_credentials(ctx->k5c, KRB5_GC_CACHED,
-                                cred->ccache,
+    /* Make an AS request if we have no creds or it's time to refresh them. */
+    if (cred->expire == 0 || kg_cred_time_to_refresh(ctx->k5c, cred)) {
+        *state = IAKERB_AS_REQ;
+        code = 0;
+        goto cleanup;
+    }
+
+    code = krb5_get_credentials(ctx->k5c, KRB5_GC_CACHED, cred->ccache,
                                 &in_creds, &out_creds);
     if (code == KRB5_CC_NOTFOUND || code == KRB5_CC_NOT_KTYPE) {
-        krb5_principal tgs;
-        krb5_data *realm = krb5_princ_realm(ctx->k5c, in_creds.client);
-
-        /* If we have a TGT for the client realm, can proceed to TGS-REQ. */
-        code = krb5_build_principal_ext(ctx->k5c,
-                                        &tgs,
-                                        realm->length,
-                                        realm->data,
-                                        KRB5_TGS_NAME_SIZE,
-                                        KRB5_TGS_NAME,
-                                        realm->length,
-                                        realm->data,
-                                        NULL);
-        if (code != 0)
-            goto cleanup;
-
-        in_creds.server = tgs;
-
-        /* It would be nice if we could return KRB5KRB_AP_ERR_TKT_EXPIRED if
-         * the TGT is expired, for consistency with the krb5 mech.  As it
-         * stands, we won't see the expired TGT and will return
-         * KRB5_CC_NOTFOUND. */
-        code = krb5_get_credentials(ctx->k5c, KRB5_GC_CACHED,
-                                    cred->ccache,
-                                    &in_creds, &out_creds);
-        if (code == KRB5_CC_NOTFOUND && cred->password != NULL) {
-            *state = IAKERB_AS_REQ;
-            code = 0;
-        } else if (code == 0) {
-            *state = IAKERB_TGS_REQ;
-            krb5_free_creds(ctx->k5c, out_creds);
-        }
-        krb5_free_principal(ctx->k5c, tgs);
+        *state = cred->have_tgt ? IAKERB_TGS_REQ : IAKERB_AS_REQ;
+        code = 0;
     } else if (code == 0) {
         *state = IAKERB_AP_REQ;
         krb5_free_creds(ctx->k5c, out_creds);

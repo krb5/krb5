@@ -53,6 +53,66 @@ name types are supported by the krb5 mechanism:
   gss_export_name_ call.
 
 
+Initiator credentials
+---------------------
+
+A GSSAPI client application uses gss_init_sec_context_ to establish a
+security context.  The *initiator_cred_handle* parameter determines
+what tickets are used to establish the connection.  An application can
+either pass **GSS_C_NO_CREDENTIAL** to use the default client
+credential, or it can use gss_acquire_cred_ beforehand to acquire an
+initiator credential.  The call to gss_acquire_cred_ may include a
+*desired_name* parameter, or it may pass **GSS_C_NO_NAME** if it does
+not have a specific name preference.
+
+If the desired name for a krb5 initiator credential is a host-based
+name, it is converted to a principal name of the form
+``service/hostname`` in the local realm, where *hostname* is the local
+hostname if not specified.  The hostname will be canonicalized using
+forward name resolution, and possibly also using reverse name
+resolution depending on the value of the **rdns** variable in
+:ref:`libdefaults`.
+
+If a desired name is specified in the call to gss_acquire_cred_, the
+krb5 mechanism will attempt to find existing tickets for that client
+principal name in the default credential cache or collection.  If the
+default cache type does not support a collection, and the default
+cache contains credentials for a different principal than the desired
+name, a **GSS_S_CRED_UNAVAIL** error will be returned with a minor
+code indicating a mismatch.
+
+If no existing tickets are available for the desired name, but the
+name has an entry in the default client :ref:`keytab_definition`, the
+krb5 mechanism will acquire initial tickets for the name using the
+default client keytab.
+
+If no desired name is specified, credential acquisition will be
+deferred until the credential is used in a call to
+gss_init_sec_context_ or gss_inquire_cred_.  If the call is to
+gss_init_sec_context_, the target name will be used to choose a client
+principal name using the credential cache selection facility.  (This
+facility might, for instance, try to choose existing tickets for a
+client principal in the same realm as the target service).  If there
+are no existing tickets for the chosen principal, but it is present in
+the default client keytab, the krb5 mechanism will acquire initial
+tickets using the keytab.
+
+If the target name cannot be used to select a client principal
+(because the credentials are used in a call to gss_inquire_cred_), or
+if the credential cache selection facility cannot choose a principal
+for it, the default credential cache will be selected if it exists and
+contains tickets.
+
+If the default credential cache does exist, but the default keytab
+does exist, the krb5 mechanism will try to acquire initial tickets for
+the first principal in the default client keytab.
+
+If the krb5 mechanism acquires initial tickets using the default
+client keytab, the resulting tickets will be stored in the default
+cache or collection, and will be refreshed by future calls to
+gss_acquire_cred_ as they approach their expire time.
+
+
 Acceptor names
 --------------
 
@@ -108,3 +168,5 @@ allowed to authenticate to that principal in the default keytab.
 .. _gss_acquire_cred: http://tools.ietf.org/html/rfc2744.html#section-5.2
 .. _gss_export_name: http://tools.ietf.org/html/rfc2744.html#section-5.13
 .. _gss_import_name: http://tools.ietf.org/html/rfc2744.html#section-5.16
+.. _gss_init_sec_context: http://tools.ietf.org/html/rfc2744.html#section-5.19
+.. _gss_inquire_cred: http://tools.ietf.org/html/rfc2744.html#section-5.21

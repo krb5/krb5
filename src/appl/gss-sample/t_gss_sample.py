@@ -61,10 +61,16 @@ def tgs_test(realm, options):
 
 # Perform a test of the server and client with initial credentials
 # obtained through gss_acquire_cred_with_password().
-def as_test(realm, options):
+def pw_test(realm, options):
     os.remove(realm.ccache)
     server_client_test(realm, options + ['-user', realm.user_princ,
                                          '-pass', password('user')])
+
+# Perform a test of the server and client with initial credentials
+# obtained with the client keytab
+def kt_test(realm, options):
+    os.remove(realm.ccache)
+    server_client_test(realm, options)
 
 for realm in multipass_realms():
     ccache_save(realm)
@@ -75,10 +81,15 @@ for realm in multipass_realms():
     # test default (i.e., krb5) mechanism with GSS_C_DCE_STYLE
     tgs_test(realm, ['-dce'])
 
-    as_test(realm, ['-krb5'])
-    as_test(realm, ['-spnego'])
-    as_test(realm, ['-iakerb'])
-    # test default (i.e., krb5) mechanism with GSS_C_DCE_STYLE
-    as_test(realm, ['-dce'])
+    pw_test(realm, ['-krb5'])
+    pw_test(realm, ['-spnego'])
+    pw_test(realm, ['-iakerb'])
+    pw_test(realm, ['-dce'])
+
+    realm.extract_keytab(realm.user_princ, realm.client_keytab)
+    kt_test(realm, ['-krb5'])
+    kt_test(realm, ['-spnego'])
+    kt_test(realm, ['-iakerb'])
+    kt_test(realm, ['-dce'])
 
 success('GSS sample application')
