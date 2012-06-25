@@ -21,14 +21,15 @@ off registered or built-in modules.
 A plugin module takes the form of a Unix shared object
 (``modname.so``) or Windows DLL (``modname.dll``).  If you have
 installed a third-party plugin module and want to register it, you do
-so using the **module** directive in the appropriate subsection of the
-[plugins] section.  For example, to register a client
-preauthentication plugin for one-time password authentication
-installed at ``/path/to/otp.so``, you could write::
+so using the **module** relation in the appropriate subsection of the
+[plugins] section.  The value for **module** must give the module name
+and the path to the module, separated by a colon.  For example, to
+register a client preauthentication module named ``otp`` installed at
+``/path/to/otp.so``, you could write::
 
     [plugins]
         clpreauth = {
-            module = /path/to/otp.so
+            module = otp:/path/to/otp.so
         }
 
 Many of the pluggable behaviors in MIT krb5 contain built-in modules
