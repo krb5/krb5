@@ -236,8 +236,8 @@ context_restart:
         break;
     case FORM_CONS:
         if (print_constructed_length) {
-            fprintf(fp, "constr ");
-            fprintf(fp, "<%d>", elen);
+            fprintf(fp, " constr");
+            fprintf(fp, " <%d>", elen);
         }
         r = do_cons(fp, enc+2+xlen, elen, lev+1, &rlen2);
         *rlen = 2 + xlen + rlen2 + rlen_ext;
@@ -287,7 +287,7 @@ int do_prim_bitstring(fp, tag, enc, len, lev)
         num += enc[i];
     }
 
-    fprintf(fp, "0x%lx", num);
+    fprintf(fp, " 0x%lx", num);
     if (enc[0])
         fprintf(fp, " (%d unused bits)", enc[0]);
     return 1;
@@ -317,7 +317,7 @@ int do_prim_int(fp, tag, enc, len, lev)
         num += enc[i];
     }
 
-    fprintf(fp, "%ld", num);
+    fprintf(fp, " %ld", num);
     return 1;
 }
 
@@ -344,7 +344,7 @@ int do_prim_string(fp, tag, enc, len, lev)
     for (i=0; i < len; i++)
         if (!isprint(enc[i]))
             return 0;
-    fprintf(fp, "\"%.*s\"", len, enc);
+    fprintf(fp, " \"%.*s\"", len, enc);
     return 1;
 }
 
@@ -368,7 +368,7 @@ int do_prim(fp, tag, enc, len, lev)
         return OK;
 
     if (print_primitive_length)
-        fprintf(fp, "<%d>", len);
+        fprintf(fp, " <%d>", len);
 
     width = (80 - (lev * 3) - 8) / 4;
 
