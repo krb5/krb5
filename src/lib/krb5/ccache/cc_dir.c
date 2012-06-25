@@ -343,9 +343,9 @@ dcc_resolve(krb5_context context, krb5_ccache *cache_out, const char *residual)
             if (ret)
                 goto cleanup;
             ret = subsidiary_residual(residual, "tkt", &sresidual);
-            if (ret)
-                goto cleanup;
         }
+        if (ret)
+            goto cleanup;
         residual = sresidual;
     }
 
