@@ -54,7 +54,7 @@ module you have registered, and no other mechanism, you could write::
 
     [plugins]
         pwqual = {
-            module = /path/to/mymodule.so
+            module = mymodule:/path/to/mymodule.so
             enable_only = mymodule
         }
 
