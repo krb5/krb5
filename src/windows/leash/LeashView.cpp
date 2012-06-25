@@ -37,6 +37,7 @@
 static CHAR THIS_FILE[] = __FILE__;
 #endif
 
+#pragma comment(lib, "uxtheme")
 /////////////////////////////////////////////////////////////////////////////
 // CLeashView
 
@@ -1053,16 +1054,9 @@ void CLeashView::AddDisplayItem(CListCtrl &list,
     TCHAR* localTimeStr=NULL;
     TCHAR* durationStr=NULL;
     TCHAR tempStr[MAX_DURATION_STR+1];
-    int imageIndex;
     time_t now = LeashTime();
-    if (iItem != elem->m_index)
-        imageIndex = -1;
-    else if (elem->m_expanded)
-        imageIndex = 0;
-    else
-        imageIndex = 2;
 
-    list.InsertItem(iItem, principal, imageIndex);
+    list.InsertItem(iItem, principal, -1);
 
     int iSubItem = 1;
     if (sm_viewColumns[TIME_ISSUED].m_enabled) {
@@ -2901,6 +2895,8 @@ void CLeashView::OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *pResult)
     HFONT font;
     CCacheDisplayData *pElem;
     *pResult = CDRF_DODEFAULT;
+    int iItem;
+
     LPNMLVCUSTOMDRAW pNMLVCD = reinterpret_cast<LPNMLVCUSTOMDRAW>(pNMHDR);
     switch (pNMLVCD->nmcd.dwDrawStage) {
     case CDDS_PREPAINT:
@@ -2910,8 +2906,8 @@ void CLeashView::OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *pResult)
         *pResult = CDRF_NOTIFYSUBITEMDRAW;
         break;
     case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
-        pElem = FindCCacheDisplayElem(m_ccacheDisplay,
-                                      pNMLVCD->nmcd.dwItemSpec);
+        iItem = pNMLVCD->nmcd.dwItemSpec;
+        pElem = FindCCacheDisplayElem(m_ccacheDisplay, iItem);
         if (pNMLVCD->iSubItem == 0) {
             // set bold font if default princ
             if (pElem && pElem->m_isDefault) {
@@ -2925,6 +2921,23 @@ void CLeashView::OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *pResult)
             font = GetSubItemFont(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->iSubItem);
         }
         SelectObject(pNMLVCD->nmcd.hdc, font);
+        if (pElem != NULL && pNMLVCD->iSubItem == 0) {
+            CListCtrl &list = GetListCtrl();
+            CRect drawRect, nextRect;
+            if (list.GetSubItemRect(iItem, 0, LVIR_BOUNDS, drawRect)) {
+                HTHEME hTheme = OpenThemeData(pNMLVCD->nmcd.hdr.hwndFrom,
+                                              L"Explorer::TreeView");
+                drawRect.right = drawRect.left +
+                                 (drawRect.bottom - drawRect.top);
+                // @TODO: need hot states, too: TVP_HOTGLYPH, HGLPS_OPENED,
+                //        HGLPS_CLOSED
+                int state = pElem->m_expanded ? GLPS_OPENED : GLPS_CLOSED;
+                DrawThemeBackground(hTheme,
+                                    pNMLVCD->nmcd.hdc,
+                                    TVP_GLYPH, state,
+                                    &drawRect, NULL);
+            }
+        }
         *pResult = CDRF_NEWFONT;
         break;
     default:
