@@ -23,8 +23,11 @@ A plugin module takes the form of a Unix shared object
 installed a third-party plugin module and want to register it, you do
 so using the **module** relation in the appropriate subsection of the
 [plugins] section.  The value for **module** must give the module name
-and the path to the module, separated by a colon.  For example, to
-register a client preauthentication module named ``otp`` installed at
+and the path to the module, separated by a colon.  The module name
+will often be the same as the shared object's name, but in unusual
+cases (such as a shared object which implements multiple modules for
+the same interface) it might not be.  For example, to register a
+client preauthentication module named ``otp`` installed at
 ``/path/to/otp.so``, you could write::
 
     [plugins]
