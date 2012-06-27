@@ -277,7 +277,7 @@ __big_keydata(hashp, pagep, key, val, ndx)
 	key->data = hashp->bigkey_buf;
 	__put_page(hashp, key_pagep, A_RAW, 0);
 
-	if (key->size == -1)
+	if (key->size == (size_t)-1)
 		return (-1);
 
 	/* Create an item_info to direct __big_return to the beginning pgno. */

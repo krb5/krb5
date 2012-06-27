@@ -386,7 +386,7 @@ void display_ctx_flags(flags)
 void print_token(tok)
      gss_buffer_t tok;
 {
-    int i;
+    size_t i;
     unsigned char *p = tok->value;
 
     if (!display_file)
