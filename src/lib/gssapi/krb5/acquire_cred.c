@@ -316,7 +316,7 @@ prep_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
 {
     krb5_error_code code;
     krb5_principal ccache_princ;
-    krb5_data password_data = make_data(password->value, password->length);
+    krb5_data pwdata = make_data(password->value, password->length), pwcopy;
     krb5_boolean eq;
     const char *cctype;
     krb5_ccache newcache = NULL;
@@ -353,10 +353,10 @@ prep_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
     }
 
     /* Stash the password for later. */
-    code = krb5int_copy_data_contents_add0(context, &password_data,
-                                           &cred->password);
+    code = krb5int_copy_data_contents_add0(context, &pwdata, &pwcopy);
     if (code)
         return code;
+    cred->password = pwcopy.data;
 
     if (newcache) {
         krb5_cc_close(context, ccache);

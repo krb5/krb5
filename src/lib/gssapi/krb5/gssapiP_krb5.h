@@ -185,7 +185,7 @@ typedef struct _krb5_gss_cred_id_rec {
     krb5_ccache ccache;
     krb5_timestamp tgt_expire;
     krb5_enctype *req_enctypes;  /* limit negotiated enctypes to this list */
-    krb5_data password;
+    char *password;
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t;
 
 typedef struct _krb5_gss_ctx_ext_rec {

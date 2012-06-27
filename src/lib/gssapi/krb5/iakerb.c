@@ -414,7 +414,7 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
 {
     krb5_error_code code;
 
-    if (cred->iakerb_mech == 0 || cred->password.data == NULL) {
+    if (cred->iakerb_mech == 0 || cred->password == NULL) {
         code = EINVAL;
         goto cleanup;
     }
@@ -444,8 +444,7 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
     if (code != 0)
         goto cleanup;
 
-    code = krb5_init_creds_set_password(ctx->k5c, ctx->icc,
-                                        cred->password.data);
+    code = krb5_init_creds_set_password(ctx->k5c, ctx->icc, cred->password);
     if (code != 0)
         goto cleanup;
 
@@ -678,7 +677,7 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
         code = krb5_get_credentials(ctx->k5c, KRB5_GC_CACHED,
                                     cred->ccache,
                                     &in_creds, &out_creds);
-        if (code == KRB5_CC_NOTFOUND && cred->password.data != NULL) {
+        if (code == KRB5_CC_NOTFOUND && cred->password != NULL) {
             *state = IAKERB_AS_REQ;
             code = 0;
         } else if (code == 0) {
