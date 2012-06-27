@@ -458,7 +458,7 @@ scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
         endtime = creds.times.endtime;
         krb5_free_cred_contents(context, &creds);
         if (is_tgt || !got_endtime)
-            cred->tgt_expire = creds.times.endtime;
+            cred->expire = creds.times.endtime;
         got_endtime = 1;
     }
     krb5_cc_end_seq_get(context, ccache, &cursor);
@@ -657,7 +657,7 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
             goto krb_error_out;
 
         if (time_rec)
-            *time_rec = (cred->tgt_expire > now) ? (cred->tgt_expire - now) : 0;
+            *time_rec = (cred->expire > now) ? (cred->expire - now) : 0;
     }
 
     *minor_status = 0;

@@ -243,7 +243,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
 
     cred->usage = GSS_C_INITIATE;
 
-    cred->tgt_expire = subject_creds->times.endtime;
+    cred->expire = subject_creds->times.endtime;
 
     code = kg_init_name(context, subject_creds->client, NULL, NULL, NULL, 0,
                         &cred->name);
@@ -282,7 +282,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
         if (code != 0)
             goto cleanup;
 
-        *time_rec = cred->tgt_expire - now;
+        *time_rec = cred->expire - now;
     }
 
     major_status = GSS_S_COMPLETE;

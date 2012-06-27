@@ -212,7 +212,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
             krb5_free_cred_contents(context, &tgt_creds);
             goto cleanup;
         }
-        cred->tgt_expire = tgt_creds.times.endtime;
+        cred->expire = tgt_creds.times.endtime;
         krb5_free_cred_contents(context, &tgt_creds);
 
         code = krb5_get_credentials(context, flags, cred->ccache,

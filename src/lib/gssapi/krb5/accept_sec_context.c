@@ -251,7 +251,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
         cred->usage = GSS_C_INITIATE; /* we can't accept with this */
         /* cred->name already set */
         cred->keytab = NULL; /* no keytab associated with this... */
-        cred->tgt_expire = creds[0]->times.endtime; /* store the end time */
+        cred->expire = creds[0]->times.endtime; /* store the end time */
         cred->ccache = ccache; /* the ccache containing the credential */
         cred->destroy_ccache = 1;
         ccache = NULL; /* cred takes ownership so don't destroy */
