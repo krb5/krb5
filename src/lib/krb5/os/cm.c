@@ -30,6 +30,7 @@
  */
 
 #include "k5-int.h"
+#include "os-proto.h"
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
