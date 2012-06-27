@@ -183,7 +183,7 @@ static void auth_gssapi_display_status_1(
 	  putc ('\n', stderr);
 	  if (misc_debug_gssapi)
 	      gssrpcint_printf("GSS-API authentication error %s: %*s\n",
-			       m, msg.length, (char *) msg.value);
+			       m, (int)msg.length, (char *) msg.value);
 	  (void) gss_release_buffer(&minor_stat, &msg);
 
 	  if (!msg_ctx)
@@ -296,8 +296,9 @@ bool_t auth_gssapi_unwrap_data(
      if (*major != GSS_S_COMPLETE)
 	  return FALSE;
 
-     PRINTF(("gssapi_unwrap_data: %d bytes data, %d bytes sealed\n",
-	     out_buf.length, in_buf.length));
+     PRINTF(("gssapi_unwrap_data: %llu bytes data, %llu bytes sealed\n",
+	     (unsigned long long)out_buf.length,
+	     (unsigned long long)in_buf.length));
 
      xdrmem_create(&temp_xdrs, out_buf.value, out_buf.length, XDR_DECODE);
 
