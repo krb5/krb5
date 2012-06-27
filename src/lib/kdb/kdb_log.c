@@ -204,7 +204,7 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
      * We need to overflow our sno, replicas will do full
      * resyncs once they see their sno > than the masters.
      */
-    if (cur_sno == ULONG_MAX)
+    if (cur_sno == (kdb_sno_t)-1)
         cur_sno = 1;
     else
         cur_sno++;
