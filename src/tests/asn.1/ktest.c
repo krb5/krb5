@@ -690,8 +690,6 @@ ktest_make_sample_pa_pk_as_req(krb5_pa_pk_as_req *p)
 void
 ktest_make_sample_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *p)
 {
-    int i;
-
     ktest_make_sample_data(&p->signedAuthPack);
     ktest_make_sample_data(&p->kdcCert);
 }
