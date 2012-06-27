@@ -64,7 +64,7 @@ oid_as_data(sha256_id, krb5_pkinit_sha256_oid);
 oid_as_data(sha512_id, krb5_pkinit_sha512_oid);
 #undef oid_as_data
 
-const krb5_data const *supported_kdf_alg_ids[] = {
+krb5_data const * const supported_kdf_alg_ids[] = {
     &sha256_id,
     &sha1_id,
     &sha512_id,

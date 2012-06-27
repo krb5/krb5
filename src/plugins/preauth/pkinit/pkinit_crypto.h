@@ -640,6 +640,6 @@ extern const size_t  krb5_pkinit_sha512_oid_len;
  * supported by this implementation. The order of this array controls
  * the order in which the server will pick.
  */
-extern const krb5_data const *supported_kdf_alg_ids[] ;
+extern krb5_data const * const supported_kdf_alg_ids[];
 
 #endif	/* _PKINIT_CRYPTO_H */
