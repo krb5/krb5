@@ -366,32 +366,28 @@ prep_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
     return 0;
 }
 
-/* If an impersonator config entry exists in ccache, set *impersonator_out to
- * the parsed principal.  Otherwise set *impersonator_out to NULL. */
+/* Set fields in cred according to a ccache config entry whose key (in
+ * principal form) is config_princ and whose value is value. */
 static krb5_error_code
-get_impersonator(krb5_context context, krb5_ccache ccache,
-                 krb5_principal *impersonator_out)
+scan_cc_config(krb5_context context, krb5_gss_cred_id_rec *cred,
+               krb5_const_principal config_princ, const krb5_data *value)
 {
     krb5_error_code code;
-    krb5_data data = empty_data(), data0 = empty_data();
+    krb5_data data0 = empty_data();
 
-    *impersonator_out = NULL;
-
-    code = krb5_cc_get_config(context, ccache, NULL,
-                              KRB5_CONF_PROXY_IMPERSONATOR, &data);
-    if (code)
-        return (code == KRB5_CC_NOTFOUND) ? 0 : code;
-
-    code = krb5int_copy_data_contents_add0(context, &data, &data0);
-    if (code)
-        goto cleanup;
-
-    code = krb5_parse_name(context, data0.data, impersonator_out);
-
-cleanup:
-    krb5_free_data_contents(context, &data);
-    krb5_free_data_contents(context, &data0);
-    return code;
+    if (config_princ->length != 2)
+        return 0;
+    if (data_eq_string(config_princ->data[1], KRB5_CONF_PROXY_IMPERSONATOR) &&
+        cred->impersonator == NULL) {
+        code = krb5int_copy_data_contents_add0(context, value, &data0);
+        if (code)
+            return code;
+        code = krb5_parse_name(context, data0.data, &cred->impersonator);
+        krb5_free_data_contents(context, &data0);
+        if (code)
+            return code;
+    }
+    return 0;
 }
 
 /* Check ccache and scan it for its expiry time.  On success, cred takes
@@ -451,14 +447,19 @@ scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
         return code;
     }
     while (!(code = krb5_cc_next_cred(context, ccache, &cursor, &creds))) {
+        if (krb5_is_config_principal(context, creds.server)) {
+            code = scan_cc_config(context, cred, creds.server, &creds.ticket);
+            krb5_free_cred_contents(context, &creds);
+            if (code)
+                break;
+            continue;
+        }
         is_tgt = krb5_principal_compare(context, tgt_princ, creds.server);
         endtime = creds.times.endtime;
         krb5_free_cred_contents(context, &creds);
         if (is_tgt || !got_endtime)
             cred->tgt_expire = creds.times.endtime;
         got_endtime = 1;
-        if (is_tgt)
-            break;
     }
     krb5_cc_end_seq_get(context, ccache, &cursor);
     if (code && code != KRB5_CC_END)
@@ -469,10 +470,6 @@ scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
         code = KG_EMPTY_CCACHE;
         goto cleanup;
     }
-
-    code = get_impersonator(context, ccache, &cred->impersonator);
-    if (code)
-        goto cleanup;
 
     (void)krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE);
     cred->ccache = ccache;
