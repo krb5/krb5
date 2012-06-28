@@ -655,7 +655,7 @@ UINT CLeashView::InitTicket(void * hWnd)
     ldi.size = sizeof(ldi);
     ldi.dlgtype = DLGTYPE_PASSWD;
     ldi.title = ldi.in.title;
-    strcpy(ldi.in.title,"Get Ticket");
+    strcpy_s(ldi.in.title,"MIT Kerberos: Get Ticket");
     ldi.username = ldi.in.username;
     strcpy(ldi.in.username,username);
     ldi.realm = ldi.in.realm;
