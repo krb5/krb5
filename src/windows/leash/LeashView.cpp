@@ -2786,18 +2786,18 @@ CLeashView::OnObtainTGTWithParam(WPARAM wParam, LPARAM lParam)
 
     if ( param ) {
         if ( *param )
-            strcpy(ldi.in.title,param);
+            strcpy_s(ldi.in.title,param);
         param += strlen(param) + 1;
         if ( *param )
-            strcpy(ldi.in.username,param);
+            strcpy_s(ldi.in.username,param);
         param += strlen(param) + 1;
         if ( *param )
-            strcpy(ldi.in.realm,param);
+            strcpy_s(ldi.in.realm,param);
         param += strlen(param) + 1;
 	if ( *param )
-	    strcpy(ldi.in.ccache,param);
+	    strcpy_s(ldi.in.ccache,param);
     } else {
-        strcpy(ldi.in.title,"Get Ticket");
+        strcpy_s(ldi.in.title, "MIT Kerberos: Get Ticket");
     }
 
     if (strlen(ldi.username) > 0 && strlen(ldi.realm) > 0)
