@@ -45,6 +45,7 @@ public:
     CButton	m_radio_LeashDLLs;
     CListBox	m_LB_DLLsLoaded;
     CString	m_fileItem;
+    BOOL        m_bListModules;
     //}}AFX_DATA
 
 

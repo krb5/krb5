@@ -33,6 +33,7 @@ static char THIS_FILE[] = __FILE__;
 
 CLeashAboutBox::CLeashAboutBox(CWnd* pParent /*=NULL*/)
 	: CDialog(CLeashAboutBox::IDD, pParent)
+        , m_bListModules(FALSE)
 {
     m_missingFileError = FALSE;
 
@@ -244,20 +245,44 @@ BOOL CLeashAboutBox::OnInitDialog()
     CDialog::OnInitDialog();
 
     // XXX - we need to add some sensible behavior on error.
+    // We need to get the version info and display it...
     SetVersionInfo(IDC_ABOUT_VERSION, IDC_ABOUT_COPYRIGHT);
 
     if (!CLeashApp::m_hToolHelp32 && !CLeashApp::m_hPsapi)
         m_missingFileError = TRUE;
 
-    m_radio_LeashDLLs.SetCheck(TRUE);
-    OnLeashModules();
+    if (m_bListModules) {
+        m_radio_LeashDLLs.SetCheck(TRUE);
+        OnLeashModules();
 
-    // We need to get the version info and display it...
-    HighlightFirstItem();
+        HighlightFirstItem();
 
-    if (!CLeashApp::m_hPsapi)
-        GetDlgItem(IDC_PROPERTIES)->EnableWindow(FALSE);
+        if (!CLeashApp::m_hPsapi)
+            GetDlgItem(IDC_PROPERTIES)->EnableWindow(FALSE);
+    } else {
+        m_radio_LeashDLLs.ShowWindow(SW_HIDE);
+        GetDlgItem(IDC_NOT_LOADED_MODULES)->ShowWindow(SW_HIDE);
+        GetDlgItem(IDC_ALL_MODULES)->ShowWindow(SW_HIDE);
+        GetDlgItem(IDC_PROPERTIES)->ShowWindow(SW_HIDE);
+        GetDlgItem(IDC_STATIC_MODULES_LOADED)->ShowWindow(SW_HIDE);
+        GetDlgItem(IDC_STATIC_NO_OF_MODULES)->ShowWindow(SW_HIDE);
+        m_LB_DLLsLoaded.ShowWindow(SW_HIDE);
+        // shrink window, move 'OK' button
+        const int hideDiff = 175;
+        RECT okRect;
+        CWnd* pOK = GetDlgItem(IDOK);
+        pOK->GetWindowRect(&okRect);
+        ScreenToClient(&okRect);
+        pOK->SetWindowPos(0, okRect.left, okRect.top - hideDiff,
+                          0, 0, SWP_NOZORDER | SWP_NOSIZE);
+        RECT dlgRect;
+        GetWindowRect( &dlgRect );
 
+        SetWindowPos(0,0,0,
+                     dlgRect.right-dlgRect.left,
+                     dlgRect.bottom-dlgRect.top - hideDiff,
+                     SWP_NOZORDER|SWP_NOMOVE);
+    }
     return TRUE;  // return TRUE unless you set the focus to a control
     // EXCEPTION: OCX Property Pages should return FALSE
 }
