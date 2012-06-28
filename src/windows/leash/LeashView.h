@@ -119,8 +119,9 @@ public:
 
 struct ListItemInfo
 {
-    ListItemInfo() : m_font(NULL) {}
-    HFONT m_font;
+    ListItemInfo() : m_font(NULL), m_durationFont(NULL) {}
+    HFONT m_durationFont; // For renewable/valid until; italic when expired
+    HFONT m_font;         // For all other items
 };
 
 class CLeashView : public CListView
@@ -166,6 +167,7 @@ private:
     HFONT               m_BaseFont;
     HFONT               m_BoldFont;
     HFONT               m_ItalicFont;
+    HFONT               m_BoldItalicFont;
     ListItemInfo*       m_aListItemInfo;
 
     static ViewColumnInfo sm_viewColumns[NUM_VIEW_COLUMNS];
