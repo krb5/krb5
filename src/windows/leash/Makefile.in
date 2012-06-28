@@ -90,7 +90,7 @@ $(OUTPRE)$(EXE_NAME).exe: $(OBJS) $(XOBJS) $(LIBS)
 	  $(LIBS) $(SYSLIBS) $(BUILDTOP)\util\wshelper\$(OUTPRE)$(WSHELPER).lib \
 	  ../lib/$(OUTPRE)libwin.lib atl.lib $(MFCLIB) $(SCLIB)
 
-$(RESFILE): ..\version.rc Leash.rc
+$(RESFILE): Leash.rc res/Leash.rc2 ver.rc ../version.rc ../kerberos.ver
 
 clean::
 	if exist $(OUTPRE)*.exe del $(OUTPRE)*.exe
