@@ -210,10 +210,19 @@ static HFONT CreateItalicFont(HFONT font)
     LOGFONT fontAttributes = { 0 };
     ::GetObject(font, sizeof(fontAttributes), &fontAttributes);
     fontAttributes.lfItalic = TRUE;
-    HFONT boldFont = ::CreateFontIndirect(&fontAttributes);
-    return boldFont;
+    HFONT italicFont = ::CreateFontIndirect(&fontAttributes);
+    return italicFont;
 }
 
+static HFONT CreateBoldItalicFont(HFONT font)
+{
+    LOGFONT fontAttributes = { 0 };
+    ::GetObject(font, sizeof(fontAttributes), &fontAttributes);
+    fontAttributes.lfWeight = FW_BOLD;
+    fontAttributes.lfItalic = TRUE;
+    HFONT boldItalicFont = ::CreateFontIndirect(&fontAttributes);
+    return boldItalicFont;
+}
 
 bool change_icon_size = true;
 
@@ -1164,6 +1173,17 @@ BOOL CLeashView::IsExpired(TicketList *ticket)
     return LeashTime() > ticket->valid_until ? TRUE : FALSE;
 }
 
+CCacheDisplayData *
+FindCCacheDisplayElem(CCacheDisplayData *pElem, int itemIndex)
+{
+    while (pElem != NULL) {
+        if (pElem->m_index == itemIndex)
+            return pElem;
+        pElem = pElem->m_next;
+    }
+    return NULL;
+}
+
 VOID CLeashView::OnUpdateDisplay()
 {
     BOOL AfsEnabled = m_pApp->GetProfileInt("Settings", "AfsStatus", 1);
@@ -1174,6 +1194,7 @@ VOID CLeashView::OnUpdateDisplay()
         m_BaseFont = *list.GetFont();
         m_BoldFont = CreateBoldFont(m_BaseFont);
         m_ItalicFont = CreateItalicFont(m_BaseFont);
+        m_BoldItalicFont = CreateBoldItalicFont(m_BaseFont);
     }
     // Determine currently focused item
     int focusItem = list.GetNextItem(-1, LVNI_FOCUSED);
@@ -1454,13 +1475,25 @@ VOID CLeashView::OnUpdateDisplay()
     for (principal = principallist; principal != NULL;
          principal = principal->next) {
         //
-        HFONT font = IsExpired(principal) ? m_ItalicFont : m_BaseFont;
-        m_aListItemInfo[iItem++].m_font = font;
+        HFONT font, durationFont;
+        elem = FindCCacheDisplayElem(m_ccacheDisplay, iItem);
+        if (elem != NULL && elem->m_isDefault) {
+            font = m_BoldFont;
+            durationFont = IsExpired(principal) ? m_BoldItalicFont : m_BoldFont;
+        } else {
+            font = m_BaseFont;
+            durationFont = IsExpired(principal) ? m_ItalicFont : m_BaseFont;
+        }
+        m_aListItemInfo[iItem].m_font = font;
+        m_aListItemInfo[iItem++].m_durationFont = durationFont;
+
         if (IsExpanded(principal)) {
             for (TicketList *ticket = principal->ticket_list;
                  ticket != NULL; ticket = ticket->next) {
-                HFONT font = IsExpired(ticket) ? m_ItalicFont : m_BaseFont;
-                m_aListItemInfo[iItem++].m_font = font;
+                font = m_BaseFont;
+                durationFont = IsExpired(ticket) ? m_ItalicFont : m_BaseFont;
+                m_aListItemInfo[iItem].m_font = font;
+                m_aListItemInfo[iItem++].m_durationFont = durationFont;
             }
         }
     }
@@ -2889,17 +2922,6 @@ void CLeashView::OnLvnItemchanging(NMHDR *pNMHDR, LRESULT *pResult)
     *pResult = result;
 }
 
-CCacheDisplayData *
-FindCCacheDisplayElem(CCacheDisplayData *pElem, int itemIndex)
-{
-    while (pElem != NULL) {
-        if (pElem->m_index == itemIndex)
-            return pElem;
-        pElem = pElem->m_next;
-    }
-    return NULL;
-}
-
 HFONT CLeashView::GetSubItemFont(int iItem, int iSubItem)
 {
     HFONT retval = m_BaseFont;
@@ -2917,9 +2939,10 @@ HFONT CLeashView::GetSubItemFont(int iItem, int iSubItem)
     switch (iColumn) {
     case RENEWABLE_UNTIL:
     case VALID_UNTIL:
-        retval = m_aListItemInfo[iItem].m_font;
+        retval = m_aListItemInfo[iItem].m_durationFont;
         break;
     default:
+        retval = m_aListItemInfo[iItem].m_font;
         break;
     }
     return retval;
@@ -2943,18 +2966,7 @@ void CLeashView::OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *pResult)
     case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
         iItem = pNMLVCD->nmcd.dwItemSpec;
         pElem = FindCCacheDisplayElem(m_ccacheDisplay, iItem);
-        if (pNMLVCD->iSubItem == 0) {
-            // set bold font if default princ
-            if (pElem && pElem->m_isDefault) {
-                font = m_BoldFont;
-            } else {
-                font = m_BaseFont;
-            }
-        } else {
-            // set italic font for 'valid until' and 'renewable until'
-            // columns if expired ticket
-            font = GetSubItemFont(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->iSubItem);
-        }
+        font = GetSubItemFont(iItem, pNMLVCD->iSubItem);
         SelectObject(pNMLVCD->nmcd.hdc, font);
         if (pElem != NULL && pNMLVCD->iSubItem == 0) {
             CListCtrl &list = GetListCtrl();
