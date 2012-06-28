@@ -2721,9 +2721,9 @@ acquire_tkt_send_msg_leash(const char *title,
             strcpy_s(strs, bufsize, title);
         else if (name != NULL && realm != NULL)
             sprintf_s(strs, bufsize,
-                      "Obtain Kerberos TGT for %s@%s", name, realm);
+                      "MIT Kerberos: Get Ticket for %s@%s", name, realm);
         else
-            strcpy_s(strs, bufsize, "Obtain Kerberos TGT");
+            strcpy_s(strs, bufsize, "MIT Kerberos: Get Ticket");
         step = strlen(strs);
         strs += step + 1;
         bufsize -= step;
