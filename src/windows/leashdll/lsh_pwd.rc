@@ -121,12 +121,10 @@ BEGIN
     LTEXT           "Flag this ticket as:",IDC_STATIC_KRB5,32,123,56,8
     LTEXT           "HMS",IDC_STATIC_LIFETIME_VALUE,90,87,131,8
     LTEXT           "HMS",IDC_STATIC_RENEW_TILL_VALUE,90,164,141,8
-    LTEXT           "",IDC_STATIC_VERSION,7,228,130,8
     ICON            LEASHICON,IDC_PICTURE_LEASH,21,15,20,20
     LTEXT           "Please Authenticate",
                     IDC_STATIC_NOTICE,51,23,276,8
     RTEXT           "Renewable Lifetime:",IDC_STATIC_RENEW,10,164,79,8
-    LTEXT           "",IDC_STATIC_COPYRIGHT,7,240,323,8
 END
 
 IDD_PASSWORD DIALOG DISCARDABLE  0, 0, 382, 198
@@ -148,13 +146,11 @@ BEGIN
     RTEXT           "Name:",IDC_STATIC_NAME,73,55,21,8
     RTEXT           "Realm:",IDC_STATIC_REALM,72,71,23,8
     RTEXT           "Old Password:",IDC_STATIC_PWD,19,85,74,21
-    LTEXT           "Copyright 2003 MIT",IDC_STATIC_COPYRIGHT,7,183,329,8
     ICON            LEASHICON,IDC_PICTURE_LEASH,15,15,20,20
     LTEXT           "Change your Kerberos password or phrase",
                     IDC_STATIC_NOTICE,48,20,276,8
     RTEXT           "New Password:",IDC_STATIC_PWD2,23,112,74,16
     RTEXT           "New Password (again):",IDC_STATIC_PWD3,22,135,74,18
-    LTEXT           "Version",IDC_STATIC_VERSION,7,170,172,8
 END
 
 

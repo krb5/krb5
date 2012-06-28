@@ -1062,157 +1062,6 @@ GetKrb4RealmFile(
     return FALSE;
 }
 
-static BOOL
-FindDLLName(CHAR * filename, UINT len)
-{
-    if ( !filename || len == 0 )
-        return 0;
-
-    filename[0] = 0;
-
-    if ( pEnumProcessModules ) {
-        char checkName[1024];
-        HMODULE hMods[1024];
-        HANDLE hProcess;
-        DWORD cbNeeded;
-        unsigned int i;
-
-        /* Get a list of all the modules in this process. */
-        hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
-
-        if (pEnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded))
-        {
-            for (i = 0; i < (cbNeeded / sizeof(HMODULE)); i++)
-            {
-                char szModName[2048];
-
-                /* Get the full path to the module's file. */
-                if (pGetModuleFileNameEx(hProcess, hMods[i], szModName, sizeof(szModName)))
-                {
-                    lstrcpyn(checkName, szModName, sizeof(checkName));
-                    strupr(checkName);
-
-                    if (strstr(checkName, "LEASHW32")) {
-                        lstrcpyn(filename, checkName, len);
-                        break;
-                    }
-                }
-            }
-        }
-
-        CloseHandle(hProcess);
-    } else if (pCreateToolhelp32Snapshot && pModule32First && pModule32Next ) {
-        char checkName[1024];
-        MODULEENTRY32 me32 = {0};
-        HANDLE hProcessSnap = NULL;
-
-        hProcessSnap = pCreateToolhelp32Snapshot(TH32CS_SNAPMODULE, GetCurrentProcessId());
-        if (hProcessSnap == (HANDLE)-1)
-            return FALSE;
-
-        me32.dwSize = sizeof(MODULEENTRY32);
-        if (pModule32First(hProcessSnap, &me32))
-        {
-            do
-            {
-                lstrcpyn(checkName, me32.szExePath, sizeof(checkName));
-                strupr(checkName);
-
-                if (strstr(checkName, "LEASHW32")) {
-                    lstrcpyn(filename, checkName, len);
-                    break;
-                }
-            }
-            while (pModule32Next(hProcessSnap, &me32));
-        }
-    }
-
-    return filename[0] ? 1 : 0;
-}
-
-static DWORD
-SetVersionInfo(
-    HWND hDialog,
-    UINT id_version,
-    UINT id_copyright
-    )
-{
-    CHAR filename[1024];
-    DWORD dwVersionHandle;
-    LPVOID pVersionInfo = 0;
-    DWORD retval = 0;
-    LPDWORD pLangInfo = 0;
-    LPTSTR szVersion = 0;
-    LPTSTR szCopyright = 0;
-    UINT len = 0;
-    CHAR sname_version[] = "FileVersion";
-    CHAR sname_copyright[] = "LegalCopyright";
-    CHAR szVerQ[(sizeof("\\StringFileInfo\\12345678\\") +
-                  max(sizeof(sname_version) / sizeof(CHAR),
-                      sizeof(sname_copyright) / sizeof(CHAR)))];
-    CHAR szVerCopy[128] = "";
-    CHAR * cp = szVerQ;
-    DWORD size;
-
-    if (!FindDLLName(filename, sizeof(filename)))
-        return GetLastError();
-
-    size = GetFileVersionInfoSize(filename, &dwVersionHandle);
-
-    if (!size)
-        return GetLastError();
-
-    pVersionInfo = malloc(size);
-    if (!pVersionInfo)
-        return ERROR_NOT_ENOUGH_MEMORY;
-
-    if (!GetFileVersionInfo(filename, dwVersionHandle, size, pVersionInfo))
-    {
-        retval = GetLastError();
-        goto cleanup;
-    }
-
-    if (!VerQueryValue(pVersionInfo, "\\VarFileInfo\\Translation",
-                       (LPVOID*)&pLangInfo, &len))
-    {
-        retval = GetLastError();
-        goto cleanup;
-    }
-
-
-    cp += wsprintf(szVerQ,
-                   "\\StringFileInfo\\%04x%04x\\",
-                   LOWORD(*pLangInfo), HIWORD(*pLangInfo));
-
-    lstrcpy(cp, sname_version);
-    if (!VerQueryValue(pVersionInfo, szVerQ, (LPVOID*)&szVersion, &len))
-    {
-        retval = GetLastError() || ERROR_NOT_ENOUGH_MEMORY;
-        goto cleanup;
-    }
-
-    lstrcpy(cp, sname_copyright);
-    if (!VerQueryValue(pVersionInfo, szVerQ, (LPVOID*)&szCopyright, &len))
-    {
-        retval = GetLastError() || ERROR_NOT_ENOUGH_MEMORY;
-        goto cleanup;
-    }
-
-    if ( strlen(szVersion) < sizeof(szVerCopy) - 8 ) {
-        wsprintf(szVerCopy, "Version %s", szVersion);
-        szVerCopy[sizeof(szVerCopy) - 1] = 0;
-
-        SetWindowText(GetDlgItem(hDialog,id_version),szVerCopy);
-    }
-    SetWindowText(GetDlgItem(hDialog,id_copyright),szCopyright);
-
- cleanup:
-    if (pVersionInfo)
-        free(pVersionInfo);
-    return retval;
-}
-
-
 int
 readstring(FILE * file, char * buf, int len)
 {
@@ -1504,7 +1353,6 @@ AuthenticateProc(
         hEditCtrl = GetDlgItem(hDialog, IDC_EDIT_PRINCIPAL);
         if (hEditCtrl)
             pAutoComplete = lacInit(hEditCtrl);
-        SetVersionInfo(hDialog,IDC_STATIC_VERSION,IDC_STATIC_COPYRIGHT);
 	hSliderLifetime = GetDlgItem(hDialog, IDC_STATIC_LIFETIME_VALUE);
 	hSliderRenew = GetDlgItem(hDialog, IDC_STATIC_RENEW_TILL_VALUE);
 
@@ -1921,8 +1769,6 @@ NewPasswordProc(
 
     case WM_INITDIALOG:
 	hDlg = hDialog;
-
-        SetVersionInfo(hDialog,IDC_STATIC_VERSION,IDC_STATIC_COPYRIGHT);
 
         *( (LPLSH_DLGINFO_EX far *)(&lpdi) ) = (LPLSH_DLGINFO_EX)(LPSTR)lParam;
 
