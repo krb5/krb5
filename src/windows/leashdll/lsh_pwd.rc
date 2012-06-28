@@ -97,13 +97,13 @@ STYLE DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Authenticate to Kerberos"
 FONT 8, "Microsoft Sans Serif"
 BEGIN
-    EDITTEXT        IDC_EDIT_PRINCIPAL,89,42,259,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PRINCIPAL,89,42,199,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_EDIT_PASSWORD,89,58,259,14,ES_PASSWORD |
                     ES_AUTOHSCROLL
     DEFPUSHBUTTON   "OK",IDOK,302,219,49,14
     PUSHBUTTON      "Cancel",IDCANCEL,249,219,49,14
     PUSHBUTTON      "Hide Advanced",IDC_BUTTON_OPTIONS,146,219,89,14
-    PUSHBUTTON      "Clear Principal History",IDC_BUTTON_CLEAR_HISTORY,13,203,120,14
+    PUSHBUTTON      "Clear History",IDC_BUTTON_CLEAR_HISTORY,288,42,60,14
     CONTROL         "Ticket Lifetime",IDC_SLIDER_LIFETIME,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,90,97,258,15
     CONTROL         "Forwardable and Proxiable (can be forwarded to other machines)",
