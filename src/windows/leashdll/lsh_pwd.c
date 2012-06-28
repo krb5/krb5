@@ -1786,7 +1786,8 @@ AuthenticateProc(
 
 		lifetime = NewSliderValue(hDialog, IDC_SLIDER_LIFETIME);
 
-		forwardable = IsDlgButtonChecked(hDialog, IDC_CHECK_FORWARDABLE);
+		forwardable = proxiable =
+                    IsDlgButtonChecked(hDialog, IDC_CHECK_FORWARDABLE);
 		noaddresses = IsDlgButtonChecked(hDialog, IDC_CHECK_NOADDRESS);
 		if (IsDlgButtonChecked(hDialog, IDC_CHECK_RENEWABLE)) {
 		    renew_till = NewSliderValue(hDialog, IDC_SLIDER_RENEWLIFE);

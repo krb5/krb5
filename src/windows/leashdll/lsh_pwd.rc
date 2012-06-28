@@ -106,15 +106,12 @@ BEGIN
     PUSHBUTTON      "Clear Principal History",IDC_BUTTON_CLEAR_HISTORY,13,203,120,14
     CONTROL         "Ticket Lifetime",IDC_SLIDER_LIFETIME,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,90,97,258,15
-    CONTROL         "Forwardable (can be forwarded to other machines)",
+    CONTROL         "Forwardable and Proxiable (can be forwarded to other machines)",
                     IDC_CHECK_FORWARDABLE,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,89,123,203,10
-    CONTROL         "Proxiable (can be forwarded to other machines)",
-                    IDC_CHECK_FORWARDABLE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,89,135,203,10
     CONTROL         "Renewable (can be renewed during the renewable lifetime)",
                     IDC_CHECK_RENEWABLE,"Button",BS_AUTOCHECKBOX |
-                    WS_TABSTOP,89,147,203,10
+                    WS_TABSTOP,89,135,203,10
     CONTROL         "Slider2",IDC_SLIDER_RENEWLIFE,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,90,178,258,15
     RTEXT           "Principal:",IDC_STATIC_NAME,13,44,74,8
