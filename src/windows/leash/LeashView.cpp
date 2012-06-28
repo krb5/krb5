@@ -309,25 +309,15 @@ void DurationToString(long delta, LPTSTR *outStr)
     delta -= hours * SECONDS_PER_HOUR;
     minutes = delta / SECONDS_PER_MINUTE;
 
-    if (minutes != 1)
-        _snprintf(minutesStr, MAX_DURATION_STR, "%d minutes", minutes);
-    else
-        _snprintf(minutesStr, MAX_DURATION_STR, "1 minute");
+    _snprintf(minutesStr, MAX_DURATION_STR, "%d m", minutes);
     minutesStr[MAX_DURATION_STR] = 0;
 
-    if (hours != 1)
-        _snprintf(hoursStr, MAX_DURATION_STR, "%d hours", hours);
-    else
-        _snprintf(hoursStr, MAX_DURATION_STR, "1 hour");
+    _snprintf(hoursStr, MAX_DURATION_STR, "%d h", hours);
     hoursStr[MAX_DURATION_STR] = 0;
 
     if (days > 0) {
-        if (days > 1)
-            _snprintf(*outStr, MAX_DURATION_STR, "(%d days, %s remaining)",
-                      days, hoursStr);
-        else
-            _snprintf(*outStr, MAX_DURATION_STR, "(1 day, %s remaining)",
-                      hoursStr);
+        _snprintf(*outStr, MAX_DURATION_STR, "(%d d, %s remaining)", days,
+                  hoursStr);
     } else if (hours > 0) {
         _snprintf(*outStr, MAX_DURATION_STR, "(%s, %s remaining)", hoursStr,
                   minutesStr);
