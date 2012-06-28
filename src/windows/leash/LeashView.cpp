@@ -2110,6 +2110,8 @@ LRESULT CLeashView::OnTrayIcon(WPARAM wParam, LPARAM lParam)
 VOID CLeashView::OnAppAbout()
 {
     CLeashAboutBox leashAboutBox;
+    // To debug loaded dlls:
+    // leashAboutBox.m_bListModules = TRUE;
     leashAboutBox.DoModal();
 }
 
