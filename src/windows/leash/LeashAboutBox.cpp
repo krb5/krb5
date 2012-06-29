@@ -222,7 +222,7 @@ CLeashAboutBox::SetVersionInfo(
         goto cleanup;
     }
     TCHAR version[100];
-    _sntprintf(version, sizeof(version), TEXT("Leash Version %s"), szVersion);
+    _sntprintf(version, sizeof(version), TEXT("MIT Kerberos Version %s"), szVersion);
     version[sizeof(version) - 1] = 0;
     GetDlgItem(id_version)->SetWindowText(version);
 

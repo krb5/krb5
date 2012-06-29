@@ -2039,9 +2039,9 @@ LRESULT CLeashView::OnTrayIcon(WPARAM wParam, LPARAM lParam)
             CMenu * menu = new CMenu();
             menu->CreatePopupMenu();
             if ( !CMainFrame::m_isMinimum )
-                menu->AppendMenu(MF_STRING, ID_LEASH_MINIMIZE, "&Close Leash Window");
+                menu->AppendMenu(MF_STRING, ID_LEASH_MINIMIZE, "&Close MIT Kerberos Window");
             else
-                menu->AppendMenu(MF_STRING, ID_LEASH_RESTORE, "&Open Leash Window");
+                menu->AppendMenu(MF_STRING, ID_LEASH_RESTORE, "&Open MIT Kerberos Window");
             menu->AppendMenu(MF_SEPARATOR);
             menu->AppendMenu(MF_STRING, ID_INIT_TICKET, "&Get Tickets");
             if (WaitForSingleObject( ticketinfo.lockObj, INFINITE ) != WAIT_OBJECT_0)
@@ -2581,20 +2581,20 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
             if (CMainFrame::m_isMinimum)
             {
                 if ( CLeashApp::m_hAfsDLL )
-                    strTimeDate = ( "Leash - "
+                    strTimeDate = ( "MIT Kerberos - "
                                     "[" + ticketStatusKrb5 + "] - " +
                                     "[" + ticketStatusAfs + "] - " +
                                     "[" + ticketinfo.Krb5.principal + "]" + " - " +
                                     tTimeDate.Format("%A, %B %d, %Y  %H:%M "));
                 else
-                    strTimeDate = ( "Leash - "
+                    strTimeDate = ( "MIT Kerberos - "
                                     "[" + ticketStatusKrb5 + "] - " +
                                     "[" + ticketinfo.Krb5.principal + "]" + " - " +
                                     tTimeDate.Format("%A, %B %d, %Y  %H:%M "));
             }
             else
             {
-                strTimeDate = ("Leash - " +
+                strTimeDate = ("MIT Kerberos - " +
                                 tTimeDate.Format("%A, %B %d, %Y  %H:%M ")
                                 //timeDate.Format("%d %b %y %H:%M:%S - ")
                                 );
@@ -2603,11 +2603,11 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
 
             if (CLeashApp::m_hKrb5DLL) {
                 if ( ticketinfo.Krb5.btickets )
-                    strTimeDate = ( "Leash: "
+                    strTimeDate = ( "MIT Kerberos: "
                                     "[" + ticketStatusKrb5 + "]" +
                                     " - [" + ticketinfo.Krb5.principal + "]");
                 else
-                    strTimeDate = "Leash: Kerb-5 No Tickets";
+                    strTimeDate = "MIT Kerberos: No Tickets";
             }
             ReleaseMutex(ticketinfo.lockObj);
 
