@@ -1141,14 +1141,17 @@ routing_update_needed(struct rt_msghdr *rtm)
 static void
 process_routing_update(verto_ctx *ctx, verto_ev *ev)
 {
-    int n_read, fd;
+    int fd;
+    ssize_t n_read;
+    size_t sz_read;
     struct rt_msghdr rtm;
     struct connection *conn;
 
     fd = verto_get_fd(ev);
     conn = verto_get_private(ev);
     while ((n_read = read(fd, &rtm, sizeof(rtm))) > 0) {
-        if (n_read < sizeof(rtm)) {
+        sz_read = (size_t) n_read; /* Safe, since we just checked the sign */
+        if (sz_read < sizeof(rtm)) {
             /* Quick hack to figure out if the interesting
                fields are present in a short read.
 
@@ -1156,12 +1159,12 @@ process_routing_update(verto_ctx *ctx, verto_ev *ev)
                Only complain if we don't have the critical initial
                header fields.  */
 #define RS(FIELD) (offsetof(struct rt_msghdr, FIELD) + sizeof(rtm.FIELD))
-            if (n_read < RS(rtm_type) ||
-                n_read < RS(rtm_version) ||
-                n_read < RS(rtm_msglen)) {
+            if (sz_read < RS(rtm_type) ||
+                sz_read < RS(rtm_version) ||
+                sz_read < RS(rtm_msglen)) {
                 krb5_klog_syslog(LOG_ERR,
                                  _("short read (%d/%d) from routing socket"),
-                                 n_read, (int) sizeof(rtm));
+                                 (int)sz_read, (int) sizeof(rtm));
                 return;
             }
         }
@@ -1174,10 +1177,10 @@ process_routing_update(verto_ctx *ctx, verto_ev *ev)
         if (rtm.rtm_msglen > sizeof(rtm)) {
             /* It appears we get a partial message and the rest is
                thrown away?  */
-        } else if (rtm.rtm_msglen != n_read) {
+        } else if (rtm.rtm_msglen != sz_read) {
             krb5_klog_syslog(LOG_ERR,
                              _("read %d from routing socket but msglen is %d"),
-                             n_read, rtm.rtm_msglen);
+                             (int)sz_read, rtm.rtm_msglen);
         }
 
         if (routing_update_needed(&rtm)) {
