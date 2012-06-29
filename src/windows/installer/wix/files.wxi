@@ -292,8 +292,34 @@
                     <Component Win64="$(var.Win64)" Id="cmf_xpprof32_dll" Guid="$(var.cmf_xpprof32_dll_guid)" DiskId="1">
 	                    <File Id="fil_xpprof32_dll" Name="$(var.cmf_xpprof32_dll_name)" KeyPath="yes" />
                     </Component>
-                    
-                    <!-- Debug symbols -->
+                  <?if $(var.Platform) = "x64"?>
+                    <Component Win64="$(var.Win64)" Id="cmf_krb5_64_dll" Guid="$(var.cmf_krb5_64_dll_guid)" DiskId="1">
+                      <File Id="fil_krb5_64_dll" Name="$(var.cmf_krb5_64_dll_name)" KeyPath="yes" />
+                    </Component>
+                    <Component Win64="$(var.Win64)" Id="cmf_k5sprt64_dll" Guid="$(var.cmf_k5sprt64_dll_guid)" DiskId="1">
+                      <File Id="fil_k5sprt64_dll" Name="$(var.cmf_k5sprt64_dll_name)" />
+                    </Component>
+                    <Component Win64="$(var.Win64)" Id="cmf_krbcc64_dll" Guid="$(var.cmf_krbcc64_dll_guid)" DiskId="1">
+                      <File Id="fil_krbcc64_dll" Name="$(var.cmf_krbcc64_dll_name)" KeyPath="yes" />
+                    </Component>
+                    <Component Win64="$(var.Win64)" Id="cmf_gssapi64_dll" Guid="$(var.cmf_gssapi64_dll_guid)" DiskId="1">
+                      <File Id="fil_gssapi64_dll" Name="$(var.cmf_gssapi64_dll_name)" KeyPath="yes" />
+                    </Component>
+                    <Component Win64="$(var.Win64)" Id="cmf_comerr64_dll" Guid="$(var.cmf_comerr64_dll_guid)" DiskId="1">
+                      <File Id="fil_comerr64_dll" Name="$(var.cmf_comerr64_dll_name)" KeyPath="yes" />
+                    </Component>
+                    <Component Win64="$(var.Win64)" Id="cmf_leashw64_dll" Guid="$(var.cmf_leashw64_dll_guid)" DiskId="1">
+                      <File Id="fil_leashw64_dll" Name="$(var.cmf_leashw64_dll_name)" KeyPath="yes" />
+                    </Component>
+                    <Component Win64="$(var.Win64)" Id="cmf_wshelp64_dll" Guid="$(var.cmf_wshelp64_dll_guid)" DiskId="1">
+                      <File Id="fil_wshelp64_dll" Name="$(var.cmf_wshelp64_dll_name)" KeyPath="yes" />
+                    </Component>
+                    <Component Win64="$(var.Win64)" Id="cmf_xpprof64_dll" Guid="$(var.cmf_xpprof64_dll_guid)" DiskId="1">
+                      <File Id="fil_xpprof64_dll" Name="$(var.cmf_xpprof64_dll_name)" KeyPath="yes" />
+                    </Component>
+                  <?endif?>
+
+                  <!-- Debug symbols -->
                 <?ifdef DebugSyms?>
                     <Component Win64="$(var.Win64)" Id="cmf_bin_debug" Guid="$(var.cmf_bin_debug_guid)" DiskId="1">
                         <?if $(var.Platform) = "Intel" ?>
