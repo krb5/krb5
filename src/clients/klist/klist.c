@@ -105,7 +105,7 @@ static void usage()
     fprintf(stderr, _("\t\t\t-n do not reverse-resolve\n"));
     fprintf(stderr, _("\toptions for keytabs:\n"));
     fprintf(stderr, _("\t\t-t shows keytab entry timestamps\n"));
-    fprintf(stderr, _("\t\t-K shows keytab entry DES keys\n"));
+    fprintf(stderr, _("\t\t-K shows keytab entry keys\n"));
     exit(1);
 }
 
