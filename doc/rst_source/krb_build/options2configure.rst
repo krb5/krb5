@@ -303,9 +303,6 @@ Optional features
 **--enable-athena**
     Build with MIT Project Athena configuration.
 
-**--enable-fortuna-test**
-    Build to test Fortuna PRNG.
-
 **--disable-kdc-lookaside-cache**
     Disable the cache which detects client retransmits.
 
@@ -328,12 +325,39 @@ Optional packages
     Enable a few optimizations to reduce code size possibly at some
     run-time cost.
 
+**--with-system-et**
+    Use the com_err library and compile_et utility that are already
+    installed on the system, instead of building and installing
+    local versions.
+
+**--with-system-ss**
+    Use the ss library and mk_cmds utility that are already installed
+    on the system, instead of building and using private versions.
+
+**--with-system-db**
+    Use the berkeley db utility already installed on the system,
+    instead of using a private version.  This option is not
+    recommended; enabling it may result in incompatibility with key
+    databases originating on other systems.
+
+**--with-netlib=**\ *LIBS*
+    Use the resolver library specified in *LIBS*.  Use this variable
+    if the C library resolver is insufficient or broken.
+
 **--with-hesiod=**\ *path*
     Compile with Hesiod support.  The *path* points to the Hesiod
     directory.  By default Hesiod is unsupported.
 
 **--with-ldap**
     Compile OpenLDAP database backend module.
+
+**--with-edirectory**
+    Compile the eDirectory database backend module.
+
+**--with-tcl=**\ *path*
+    Specifies that *path* is the location of a Tcl installation.
+    Tcl is needed for some of the tests run by 'make check'; such tests
+    will be skipped if this option is not set.
 
 **--with-vague-errors**
     Do not send helpful errors to client.  For example, if the KDC
@@ -353,6 +377,10 @@ Optional packages
     backend use one must explicitly specify ``--with-prng-alg=nss``.
     (See :ref:`mitK5features`)
 
+**--with-pkinit-crypto-impl=**\ *IMPL*
+    Use the specified pkinit crypto implementation *IMPL*.
+    Defaults to using OpenSSL.
+
 **--with-kdc-kdb-update**
     Update the KDC database with the information about
 
@@ -361,6 +389,16 @@ Optional packages
     * the number of the failed authentication attempts.
 
     By default the kdb is not updated with this information.
+
+**--without-libedit**
+    Do not compile and link against libedit.  Some utilities will no
+    longer offer command history or completion in interactive mode if
+    libedit is disabled.
+
+**--with-readline**
+    Compile and link against GNU readline, as an alternative to libedit.
+    Building with readline breaks the dejagnu test suite, which is a
+    subset of the tests run by 'make check'.
 
 **--with-system-verto**
     Use an installed version of libverto.  If the libverto header and
