@@ -300,7 +300,7 @@ longer than 9 hours.
 Add administrators to the Kerberos database
 -------------------------------------------
 
-Next you need to add administrative principals (i.e. principals who
+Next you need to add administrative principals (i.e., principals who
 are allowed to administer Kerberos database) to the Kerberos database.
 You *must* add at least one principal now to allow communication
 between the Kerberos administration daemon kadmind and the kadmin

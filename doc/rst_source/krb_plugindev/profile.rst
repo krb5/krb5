@@ -26,7 +26,7 @@ them.
 
 A basic read-only profile module need only implement the
 **get_values** and **free_values** methods.  The **get_values** method
-accepts a null-terminated list of C string names (e.g. an array
+accepts a null-terminated list of C string names (e.g., an array
 containing "libdefaults", "clockskew", and NULL for the **clockskew**
 variable in the :ref:`libdefaults` section) and returns a
 null-terminated list of values, which will be cleaned up with the

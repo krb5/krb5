@@ -357,7 +357,7 @@ following tags may be specified in the realm's subsection:
         principal should have.  If this matches, then a string will be
         formed from *string*, substituting the realm of the principal
         for ``$0`` and the *n*'th component of the principal for
-        ``$n`` (e.g. if the principal was ``johndoe/admin`` then
+        ``$n`` (e.g., if the principal was ``johndoe/admin`` then
         ``[2:$2$1foo]`` would result in the string
         ``adminjohndoefoo``).  If this string matches *regexp*, then
         the ``s//[g]`` substitution command will be run over the

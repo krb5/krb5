@@ -100,7 +100,7 @@ Environment variables
     Use *FLAGS* as the default set of C compiler flags.
 
 **CPP=**\ *CPP*
-    C preprocessor to use. (e.g. ``CPP='gcc -E'``)
+    C preprocessor to use. (e.g., ``CPP='gcc -E'``)
 
 **CPPFLAGS=**\ *CPPOPTS*
     Use *CPPOPTS* as the default set of C preprocessor flags.  The
@@ -129,11 +129,11 @@ Environment variables
 
 **LDFLAGS=**\ *LDOPTS*
     This option informs the linker where to get additional libraries
-    (e.g. ``-L<lib dir>``).
+    (e.g., ``-L<lib dir>``).
 
 **LIBS=**\ *LDNAME*
     This option allows one to specify libraries to be passed to the
-    linker (e.g. ``-l<library>``)
+    linker (e.g., ``-l<library>``)
 
 **SS_LIB=**\ *libs*...
     If ``-lss`` is not the correct way to link in your installed ss
@@ -267,11 +267,11 @@ System types
 
 **--build=**\ *BUILD*
     Configure for building on *BUILD*
-    (e.g. ``--build=x86_64-linux-gnu``).
+    (e.g., ``--build=x86_64-linux-gnu``).
 
 **--host=**\ *HOST*
     Cross-compile to build programs to run on *HOST*
-    (e.g. ``--host=x86_64-linux-gnu``).  By default, Kerberos V5
+    (e.g., ``--host=x86_64-linux-gnu``).  By default, Kerberos V5
     configuration will look for "build" option.
 
 
@@ -314,12 +314,12 @@ Optional packages
 -----------------
 
 **--with-**\ *PACKAGE*\ [=ARG\]
-    Use *PACKAGE* (e.g. ``--with-imap``).  The default value of *ARG*
+    Use *PACKAGE* (e.g., ``--with-imap``).  The default value of *ARG*
     is ``yes``.
 
 **--without-**\ *PACKAGE*
     Do not use *PACKAGE* (same as ``--with-PACKAGE=no``)
-    (e.g. ``--without-libedit``).
+    (e.g., ``--without-libedit``).
 
 **--with-size-optimizations**
     Enable a few optimizations to reduce code size possibly at some
@@ -364,7 +364,7 @@ Optional packages
     should return only vague error codes to clients.
 
 **--with-crypto-impl=**\ *IMPL*
-    Use specified crypto implementation (e.g. **--with-crypto=**\
+    Use specified crypto implementation (e.g., **--with-crypto=**\
     *openssl*).  Default is a native MIT Kerberos implementation
     ``builtin``.  The other currently implemented crypto backends are
     ``openssl`` and ``nss``.  (See :ref:`mitK5features`)

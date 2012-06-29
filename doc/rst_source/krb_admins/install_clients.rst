@@ -36,7 +36,7 @@ through reverse address lookup.  The default value of this flag is
 true for historical reasons only.
 
 If you anticipate users frequently logging into remote hosts
-(e.g. using ssh) using forwardable credentials, consider setting
+(e.g., using ssh) using forwardable credentials, consider setting
 **forwardable** to true so that users obtain forwardable tickets by
 default.  Otherwise users will need to use ``kinit -f`` to get
 forwardable tickets.

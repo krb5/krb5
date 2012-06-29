@@ -2,7 +2,7 @@ Test coverage
 =============
 
 It is considered good practice to develop and maintain the test suite
-with high level of test coverage, i.e. the tests that execute every
+with high level of test coverage, i.e., the tests that execute every
 single statement, every line of the code and then validate the result.
 
 The GNU's gcov is a tool that analyses the frequency of execution of

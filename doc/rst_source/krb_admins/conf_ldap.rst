@@ -153,5 +153,5 @@ to the pre-existing *krbPrincipalName* value), and then add additional
 Principal aliases are only returned by the KDC when the client
 requests canonicalization.  Canonicalization is normally requested for
 service principals; for client principals, an explicit flag is often
-required (e.g. ``kinit -C``) and canonicalization is only performed
+required (e.g., ``kinit -C``) and canonicalization is only performed
 for initial ticket requests.

@@ -36,7 +36,7 @@ the target user, and the other is to create a new security context.
 
 .. note:: For the sake of clarity, all references to and attributes of
           the user invoking the program will start with "source"
-          (e.g. "source user", "source cache", etc.).
+          (e.g., "source user", "source cache", etc.).
 
           Likewise, all references to and attributes of the target
           account will start with "target".
@@ -47,12 +47,12 @@ AUTHENTICATION
 To fulfill the first mission, ksu operates in two phases:
 authentication and authorization.  Resolving the target principal name
 is the first step in authentication.  The user can either specify his
-principal name with the **-n** option (e.g. ``-n jqpublic@USC.EDU``)
+principal name with the **-n** option (e.g., ``-n jqpublic@USC.EDU``)
 or a default principal name will be assigned using a heuristic
 described in the OPTIONS section (see **-n** option).  The target user
 name must be the first argument to ksu; if not specified root is the
 default.  If ``.`` is specified then the target user will be the
-source user (e.g. ``ksu .``).  If the source user is root or the
+source user (e.g., ``ksu .``).  If the source user is root or the
 target user is the source user, no authentication or authorization
 takes place.  Otherwise, ksu looks for an appropriate Kerberos ticket
 in the source cache.
@@ -211,7 +211,7 @@ OPTIONS
 
 **-c** *source_cache_name*
 
-    Specify source cache name (e.g. ``-c FILE:/tmp/my_cache``).  If
+    Specify source cache name (e.g., ``-c FILE:/tmp/my_cache``).  If
     **-c** option is not used then the name is obtained from
     **KRB5CCNAME** environment variable.  If **KRB5CCNAME** is not
     defined the source cache name is set to ``krb5cc_<source uid>``.
@@ -396,7 +396,7 @@ ksu should be owned by root and have the set user id bit turned on.
 
 ksu attempts to get a ticket for the end server just as Kerberized
 telnet and rlogin.  Thus, there must be an entry for the server in the
-Kerberos database (e.g. ``host/nii.isi.edu@ISI.EDU``).  The keytab
+Kerberos database (e.g., ``host/nii.isi.edu@ISI.EDU``).  The keytab
 file must be in an appropriate location.
 
 
