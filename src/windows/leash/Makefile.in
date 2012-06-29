@@ -90,6 +90,7 @@ $(OUTPRE)$(EXE_NAME).exe: $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) /out:$@ /ENTRY:WinMainCRTStartup $(OBJS) $(XOBJS) \
 	  $(LIBS) $(SYSLIBS) $(BUILDTOP)\util\wshelper\$(OUTPRE)$(WSHELPER).lib \
 	  ../lib/$(OUTPRE)libwin.lib atl.lib $(MFCLIB) $(SCLIB)
+	copy $@ "$(OUTPRE)MIT Kerberos.exe"
 
 $(RESFILE): Leash.rc res/Leash.rc2 ver.rc ../version.rc ../kerberos.ver
 
