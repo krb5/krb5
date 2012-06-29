@@ -2766,7 +2766,7 @@ krb5_kt_get_type(krb5_context context, krb5_keytab keytab);
  * @param [out] name            Key table name
  * @param [in]  namelen         Maximum length to fill in name
  *
- * Fills in @a name with the name of @a keytab including the type and delimiter.
+ * Fill @a name with the name of @a keytab including the type and delimiter.
  *
  * @sa MAX_KEYTAB_NAME_LEN
  *
@@ -4149,8 +4149,8 @@ krb5_524_convert_creds(krb5_context context, krb5_creds *v5creds,
  * @param [in]  name            Name of the key table
  * @param [out] ktid            Key table handle
  *
- * Resolve the key table name @a name and fill in a handle identifying the key
- * table.  The key table is not opened.
+ * Resolve the key table name @a name and set @a ktid to a handle identifying
+ * the key table.  The key table is not opened.
  *
  * @note @a name must be of the form @c type:residual, where @a type must be a
  * type known to the library and @a residual portion should be specific to the
@@ -4159,7 +4159,7 @@ krb5_524_convert_creds(krb5_context context, krb5_creds *v5creds,
  * @sa krb5_kt_close()
  *
  * @code
- *  Example: krb5_kt_resolve(context, "FILE:/tmp/filename",&ktid);
+ *  Example: krb5_kt_resolve(context, "FILE:/tmp/filename", &ktid);
  * @endcode
  *
  * @retval
@@ -4171,14 +4171,13 @@ krb5_error_code KRB5_CALLCONV
 krb5_kt_resolve(krb5_context context, const char *name, krb5_keytab *ktid);
 
 /**
- * Get default key table name.
+ * Get the default key table name.
  *
  * @param [in]     context      Library context
- * @param [in,out] name         Key table name to be resolved
- * @param [in]     name_size    Size of @a name to return
+ * @param [out]    name         Default key table name
+ * @param [in]     name_size    Space available in @a name
  *
- * Fill @a name with the first @a name_size bytes of the name of the default
- * key table for the current user.
+ * Fill @a name with the name of the default key table for @a context.
  *
  * @sa MAX_KEYTAB_NAME_LEN
  *
@@ -4193,12 +4192,13 @@ krb5_error_code KRB5_CALLCONV
 krb5_kt_default_name(krb5_context context, char *name, int name_size);
 
 /**
- * Resolve default key table.
+ * Resolve the default key table.
  *
  * @param [in]  context         Library context
- * @param [in,out] id           Key table handle
+ * @param [out] id              Key table handle
  *
- * Fill @a keytab with the default key table's @a handle.
+ * Set @a id to a handle to the default key table.  The key table is not
+ * opened.
  *
  * @retval
  * 0  Success
