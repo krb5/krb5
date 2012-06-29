@@ -99,13 +99,19 @@ Environment variables
 **CFLAGS=**\ *FLAGS*
     Use *FLAGS* as the default set of C compiler flags.
 
+**CPP=**\ *CPP*
+    C preprocessor to use. (e.g. ``CPP='gcc -E'``)
+
 **CPPFLAGS=**\ *CPPOPTS*
     Use *CPPOPTS* as the default set of C preprocessor flags.  The
     most common use of this option is to select certain #define's for
     use with the operating system's include files.
 
-**CPP=**\ *CPP*
-    C preprocessor to use. (e.g. ``CPP='gcc -E'``)
+**CXX**
+     C++ compiler command
+
+**CXXFLAGS**
+     C++ compiler flags
 
 **DB_HEADER=**\ *headername*
     If db.h is not the correct header file to include to compile
@@ -138,12 +144,6 @@ Environment variables
     explicitly specified.
 
     This option is ignored if **--with-system-ss** is not specified.
-
-**CXX**
-     C++ compiler command
-
-**CXXFLAGS**
-     C++ compiler flags
 
 **YACC**
      The 'Yet Another C Compiler' implementation to use. Defaults to
@@ -278,11 +278,11 @@ System types
 Optional features
 -----------------
 
-**--disable-**\ *FEATURE*
-    Do not include *FEATURE* (same as --enable-FEATURE=no).
-
 **--disable-option-checking**
     Ignore unrecognized --enable/--with options.
+
+**--disable-**\ *FEATURE*
+    Do not include *FEATURE* (same as --enable-FEATURE=no).
 
 **--enable-**\ *FEATURE*\ [=\ *ARG*]
     Include *FEATURE* [ARG=yes].
