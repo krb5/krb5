@@ -287,9 +287,6 @@ Optional features
 **--enable-**\ *FEATURE*\ [=\ *ARG*]
     Include *FEATURE* [ARG=yes].
 
-**--enable-dns-for-realm**
-    Enable DNS lookups of Kerberos realm names.
-
 **--enable-maintainer-mode**
     Enable rebuilding of source files, Makefiles, etc.
 
