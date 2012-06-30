@@ -13,13 +13,54 @@ behave with the krb5 mechanism as implemented in MIT krb5, as well as
 krb5-specific extensions to the GSSAPI.
 
 
+Name types
+----------
+
+A GSSAPI application can name a local or remote entity by calling
+gss_import_name_, specifying a name type and a value.  The following
+name types are supported by the krb5 mechanism:
+
+* **GSS_C_NT_HOSTBASED_SERVICE**: The value should be a string of the
+  form ``service`` or ``service@hostname``.  This is the most common
+  way to name target services when initiating a security context, and
+  is the most likely name type to work across multiple mechanisms.
+
+* **GSS_KRB5_NT_PRINCIPAL_NAME**: The value should be a principal name
+  string.  This name type only works with the krb5 mechanism, and is
+  defined in the ``<gssapi_krb5.h>`` header.
+
+* **GSS_C_NT_USER_NAME** or **GSS_C_NULL_OID**: The value is treated
+  as an unparsed principal name string, as above.  These name types
+  may work with mechanisms other than krb5, but will have different
+  interpretations in those mechanisms.  **GSS_C_NT_USER_NAME** is
+  intended to be used with a local username, which will parse into a
+  single-component principal in the default realm.
+
+* **GSS_C_NT_ANONYMOUS**: The value is ignored.  The anonymous
+  principal is used, allowing a client to authenticate to a server
+  without asserting a particular identity (which may or may not be
+  allowed by a particular server or Kerberos realm).
+
+* **GSS_C_NT_MACHINE_UID_NAME**: The value is uid_t object.  On
+  Unix-like systems, the username of the uid is looked up in the
+  system user database and the resulting username is parsed as a
+  principal name.
+
+* **GSS_C_NT_STRING_UID_NAME**: As above, but the value is a decimal
+  string representation of the uid.
+
+* **GSS_C_NT_EXPORT_NAME**: The value must be the result of a
+  gss_export_name_ call.
+
+
 Acceptor names
 --------------
 
-A GSSAPI server uses gss_accept_sec_context_ to establish a security
-context based on tokens provided by the client.  The
-*acceptor_cred_handle* parameter determines what keytab entries may be
-authenticated to by the client, if the krb5 mechanism is used.
+A GSSAPI server application uses gss_accept_sec_context_ to establish
+a security context based on tokens provided by the client.  The
+*acceptor_cred_handle* parameter determines what
+:ref:`keytab_definition` entries may be authenticated to by the
+client, if the krb5 mechanism is used.
 
 The simplest choice is to pass **GSS_C_NO_CREDENTIAL** as the acceptor
 credential.  In this case, clients may authenticate to any service
@@ -30,22 +71,19 @@ contrary.
 
 A server may acquire an acceptor credential with gss_acquire_cred_ and
 a *cred_usage* of **GSS_C_ACCEPT** or **GSS_C_BOTH**.  If the
-*desired_name* parameter is **GSS_C_NO_NAME**, clients, as above, be
+*desired_name* parameter is **GSS_C_NO_NAME**, then clients will be
 allowed to authenticate to any service principal in the default
-keytab.
+keytab, just as if no acceptor credential was supplied.
 
 If a server wishes to specify a *desired_name* to gss_acquire_cred_,
-the most common method is to call gss_import_name_ with an
-*input_name_type* of **GSS_C_NT_HOSTBASED_SERVCE** and an
-*input_name_buffer* containing a string of the form ``service`` or
-``service@hostname``.  If the input name contains just a *service*,
-then clients will be allowed to authenticate to any host-based service
-principal (that is, a principal of the form
-``service/hostname@REALM``) for the named service, regardless of
-hostname or realm, as long as it is present in the default keytab.  If
-the input name contains both a *service* and a *hostname*, clients
-will be allowed to authenticate to any host-based principal for the
-named service and hostname, regardless of realm.
+the most common choice is a host-based name.  If the host-based
+*desired_name* contains just a *service*, then clients will be allowed
+to authenticate to any host-based service principal (that is, a
+principal of the form ``service/hostname@REALM``) for the named
+service, regardless of hostname or realm, as long as it is present in
+the default keytab.  If the input name contains both a *service* and a
+*hostname*, clients will be allowed to authenticate to any host-based
+principal for the named service and hostname, regardless of realm.
 
 .. note:: If a *hostname* is specified, it will be canonicalized
           using forward name resolution, and possibly also using
@@ -62,14 +100,11 @@ named service and hostname, regardless of realm.
           ``service@localhostname``, where *localhostname* is the
           string returned by gethostname().
 
-It is also possible to directly specify a service principal name using
-the *input_name_type* value **GSS_KRB5_NT_PRINCIPAL_NAME** (defined in
-``<gssapi_krb5.h>``), and an *input_name_buffer* containing an
-unparsed principal name.  Doing so will prevent the server application
-from working with mechanisms other than krb5.  If the a service
-principal name is specified, clients will only be allowed to
-authenticate to that principal in the default keytab.
+If the *desired_name* is a krb5 principal name or a local system name
+type which is mapped to a krb5 principal name, clients will only be
+allowed to authenticate to that principal in the default keytab.
 
 .. _gss_accept_sec_context: http://tools.ietf.org/html/rfc2744.html#section-5.1
 .. _gss_acquire_cred: http://tools.ietf.org/html/rfc2744.html#section-5.2
+.. _gss_export_name: http://tools.ietf.org/html/rfc2744.html#section-5.13
 .. _gss_import_name: http://tools.ietf.org/html/rfc2744.html#section-5.16
