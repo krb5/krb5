@@ -564,7 +564,7 @@ protected:
 
 
 
-extern "C" void lacAddPrincipal(char *principal)
+extern "C" void Leash_pec_add_principal(char *principal)
 {
     // write princ to registry
     HKEY hKey;
@@ -593,15 +593,15 @@ extern "C" void Leash_pec_clear_history(void *pec)
 }
 
 
-extern "C" void *lacInit(HWND hEdit)
+extern "C" void *Leash_pec_create(HWND hEdit)
 {
     return new PrincipalEditControl(
         hEdit,
         Leash_get_default_uppercaserealm() ? true : false);
 }
 
-extern "C" void lacTerm(void *pHook)
+extern "C" void Leash_pec_destroy(void *pec)
 {
-    if (pHook != NULL)
-        delete ((PrincipalEditControl *)pHook);
+    if (pec != NULL)
+        delete ((PrincipalEditControl *)pec);
 }
