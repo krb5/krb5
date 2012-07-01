@@ -1,10 +1,11 @@
 #!/usr/bin/python
 from k5test import *
 
-realm = K5Realm()
+for realm in multipass_realms(create_user=False):
+    # Test kinit with a keytab.
+    realm.kinit(realm.host_princ, flags=['-k'])
 
-# Test kinit with a keytab.
-realm.kinit(realm.host_princ, flags=['-k'])
+realm = K5Realm(get_creds=False)
 
 # Test kinit with a partial keytab.
 pkeytab = realm.keytab + '.partial'
