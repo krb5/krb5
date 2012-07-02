@@ -573,6 +573,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         } else
             break;
         in = empty_data();
+        /* Done with AS request; fall through to TGS request. */
     case IAKERB_TGS_REQ:
         if (ctx->tcc == NULL) {
             code = iakerb_tkt_creds_ctx(ctx, cred, name, time_req);
@@ -594,6 +595,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             ctx->state = IAKERB_AP_REQ;
         } else
             break;
+        /* Done with TGS request; fall through to AP request. */
     case IAKERB_AP_REQ:
         break;
     }
