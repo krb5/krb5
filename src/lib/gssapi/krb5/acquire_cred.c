@@ -774,10 +774,8 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
 
     if (name != NULL) {
         code = kg_duplicate_name(context, name, &cred->name);
-        if (code) {
-            *minor_status = code;
-            return GSS_S_FAILURE;
-        }
+        if (code)
+            goto krb_error_out;
     }
 
 #ifndef LEAN_CLIENT
@@ -834,6 +832,8 @@ error_out:
     if (cred != NULL) {
         if (cred->ccache)
             krb5_cc_close(context, cred->ccache);
+        if (cred->client_keytab)
+            krb5_kt_close(context, cred->client_keytab);
 #ifndef LEAN_CLIENT
         if (cred->keytab)
             krb5_kt_close(context, cred->keytab);
