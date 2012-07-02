@@ -142,21 +142,34 @@ cleanup:
     return ret;
 }
 
-/* Return true if search_for is in etype_list. */
-static krb5_boolean
-check_etypes_have(krb5_enctype *etype_list, krb5_enctype search_for)
+/* Move the entries in keytab_list (zero-terminated) to the front of req_list
+ * (of length req_len), preserving order otherwise. */
+static krb5_error_code
+sort_enctypes(krb5_enctype *req_list, int req_len, krb5_enctype *keytab_list)
 {
-    int i;
+    krb5_enctype *save_list;
+    int save_pos, req_pos, i;
 
-    if (!etype_list)
-        return FALSE;
+    save_list = malloc(req_len * sizeof(*save_list));
+    if (save_list == NULL)
+        return ENOMEM;
 
-    for (i = 0; etype_list[i] != 0; i++) {
-        if (etype_list[i] == search_for)
-            return TRUE;
+    /* Sort req_list entries into the front of req_list or into save_list. */
+    req_pos = save_pos = 0;
+    for (i = 0; i < req_len; i++) {
+        if (k5_etypes_contains(keytab_list, req_list[i]))
+            req_list[req_pos++] = req_list[i];
+        else
+            save_list[save_pos++] = req_list[i];
     }
 
-    return FALSE;
+    /* Put the entries we saved back in at the end, in order. */
+    for (i = 0; i < save_pos; i++)
+        req_list[req_pos++] = save_list[i];
+    assert(req_pos == req_len);
+
+    free(save_list);
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -166,7 +179,6 @@ krb5_init_creds_set_keytab(krb5_context context,
 {
     krb5_enctype *etype_list;
     krb5_error_code ret;
-    int i, j;
     char *name;
 
     ctx->gak_fct = get_as_key_keytab;
@@ -178,21 +190,10 @@ krb5_init_creds_set_keytab(krb5_context context,
         TRACE_INIT_CREDS_KEYTAB_LOOKUP_FAILED(context, ret);
         return 0;
     }
-
     TRACE_INIT_CREDS_KEYTAB_LOOKUP(context, etype_list);
 
-    /* Filter the ktypes list based on what's in the keytab */
-    for (i = 0, j = 0; i < ctx->request->nktypes; i++) {
-        if (check_etypes_have(etype_list, ctx->request->ktype[i])) {
-            ctx->request->ktype[j] = ctx->request->ktype[i];
-            j++;
-        }
-    }
-    ctx->request->nktypes = j;
-    free(etype_list);
-
-    /* Error out now if there's no overlap. */
-    if (ctx->request->nktypes == 0) {
+    /* Error out if we have no keys for the client principal. */
+    if (etype_list == NULL) {
         ret = krb5_unparse_name(context, ctx->request->client, &name);
         if (ret == 0) {
             krb5_set_error_message(context, KRB5_KT_NOTFOUND,
@@ -203,6 +204,9 @@ krb5_init_creds_set_keytab(krb5_context context,
         return KRB5_KT_NOTFOUND;
     }
 
+    /* Sort the request enctypes so the ones in the keytab appear first. */
+    sort_enctypes(ctx->request->ktype, ctx->request->nktypes, etype_list);
+    free(etype_list);
     return 0;
 }
 

@@ -1571,7 +1571,6 @@ select_session_keytype(krb5_context context, krb5_db_entry *server,
                        int nktypes, krb5_enctype *ktype)
 {
     int         i;
-    krb5_enctype first_permitted = 0;
 
     for (i = 0; i < nktypes; i++) {
         if (!krb5_c_valid_enctype(ktype[i]))
@@ -1580,22 +1579,9 @@ select_session_keytype(krb5_context context, krb5_db_entry *server,
         if (!krb5_is_permitted_enctype(context, ktype[i]))
             continue;
 
-        if (first_permitted == 0)
-            first_permitted = ktype[i];
-
         if (dbentry_supports_enctype(context, server, ktype[i]))
             return ktype[i];
     }
-
-    /*
-     * If we didn't find a match and the server is the local TGS server, this
-     * could be a keytab-based AS request where the keytab enctypes don't
-     * overlap the TGT principal enctypes.  Try to make this work by using the
-     * first permitted enctype in the request, even though we can't be certain
-     * that other KDCs in the realm support it.
-     */
-    if (krb5_principal_compare(context, server->princ, tgs_server))
-        return first_permitted;
 
     return 0;
 }
