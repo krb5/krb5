@@ -232,7 +232,7 @@ kdc_free_lookaside(krb5_context kcontext)
     struct entry *e, *next;
 
     TAILQ_FOREACH_SAFE(e, &expiration_queue, expire_links, next) {
-        discard_entry(kdc_context, e);
+        discard_entry(kcontext, e);
     }
 }
 
