@@ -38,6 +38,11 @@
 #endif /* NO_KRB5 */
 #include <commctrl.h>
 
+extern void * Leash_pec_create(HWND hEditCtl);
+extern void Leash_pec_destroy(void *pAutoComplete);
+extern void Leash_pec_add_principal(char *principal);
+extern void Leash_pec_clear_history(void *pec);
+
 /* Global Variables. */
 static long lsh_errno;
 static char *err_context;       /* error context */
@@ -1306,11 +1311,6 @@ AdjustOptions(HWND hDialog, int show, int hideDiff)
 
 }
 
-extern void *Leash_pec_create(HWND hEditCtl);
-extern void Leash_pec_destroy(void *pAutoComplete);
-extern void Leasch_pec_add_principal(char *principal);
-extern void Leash_pec_clear_history(void *pec);
-
 /* Callback function for the Authentication Dialog box that initializes and
    renews tickets. */
 
@@ -1755,15 +1755,15 @@ NewPasswordProc(
     )
 {
     static POINT Position = { -1, -1 };
-    static char username[LEASH_USERNAME_SZ]="";
-    static char realm[LEASH_REALM_SZ]="";
     static char password[256]="";
     static char password2[256]="";
     static char password3[256]="";
     static LPLSH_DLGINFO_EX lpdi;
     static HWND hDlg=0;
+    static void *pAutoComplete = NULL;
     char principal[256];
     long realm_count = 0;
+    HWND hEditCtrl = NULL;
 
     switch (message) {
 
@@ -1798,19 +1798,22 @@ NewPasswordProc(
 
         SetProp(hDialog, "HANDLES_HELP", (HANDLE)1);
 
-        if ( lpdi->size >= LSH_DLGINFO_EX_V3_SZ )
-            lstrcpy(username, lpdi->in.username);
-        else if (lpdi->username)
-            lstrcpy(username, lpdi->username);
-        if ( lpdi->size >= LSH_DLGINFO_EX_V3_SZ )
-	    lstrcpy(realm, lpdi->in.realm);
-	else if (lpdi->realm)
-	    lstrcpy(realm, lpdi->realm);
+        if (lpdi->username != NULL && (strlen(lpdi->username) > 0) &&
+            lpdi->realm != NULL && (strlen(lpdi->realm) > 0)) {
+            sprintf_s(principal,
+                      sizeof(principal), "%s@%s", lpdi->username, lpdi->realm);
+        } else {
+            principal[0] = 0;
+        }
 
-        CSetDlgItemText(hDialog, IDC_EDIT_PRINCIPAL, username);
+        CSetDlgItemText(hDialog, IDC_EDIT_PRINCIPAL, principal);
         CSetDlgItemText(hDialog, IDC_EDIT_PASSWORD, "");
         CSetDlgItemText(hDialog, IDC_EDIT_PASSWORD2, "");
         CSetDlgItemText(hDialog, IDC_EDIT_PASSWORD3, "");
+
+        hEditCtrl = GetDlgItem(hDialog, IDC_EDIT_PRINCIPAL);
+        if (hEditCtrl)
+            pAutoComplete = Leash_pec_create(hEditCtrl);
 
 #if 0  /* 20030619 - mjv wishes to return to the default character */
 	/* echo spaces */
@@ -1818,96 +1821,6 @@ NewPasswordProc(
 	CSendDlgItemMessage(hDialog, IDC_EDIT_PASSWORD2, EM_SETPASSWORDCHAR, 32, 0);
 	CSendDlgItemMessage(hDialog, IDC_EDIT_PASSWORD3, EM_SETPASSWORDCHAR, 32, 0);
 #endif
-
-	/* Populate list of Realms */
-	CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, CB_RESETCONTENT, 0, 0);
-	CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, CB_LIMITTEXT, 192, 0);
-
-	if (pprofile_get_subsection_names && pprofile_free_list) {
-	    const char*  rootSection[] = {"realms", NULL};
-	    const char** rootsec = rootSection;
-	    char **sections = NULL, **cpp = NULL, *value = NULL;
-
-	    char krb5_conf[MAX_PATH+1];
-
-	    if (!GetProfileFile(krb5_conf,sizeof(krb5_conf))) {
-		profile_t profile;
-		long retval;
-		const char *filenames[2];
-
-		filenames[0] = krb5_conf;
-		filenames[1] = NULL;
-		retval = pprofile_init(filenames, &profile);
-		if (!retval) {
-		    retval = pprofile_get_subsection_names(profile,	rootsec, &sections);
-
-		    if (!retval)
-		    {
-			for (cpp = sections; *cpp; cpp++)
-			{
-			    CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, CB_ADDSTRING, 0, (LPARAM)*cpp);
-			    realm_count++;
-			}
-		    }
-		    pprofile_free_list(sections);
-		    pprofile_release(profile);
-		}
-	    }
-	} else {
-	    FILE * file;
-	    char krb_conf[MAX_PATH+1];
-	    char * p;
-
-	    if (!GetKrb4ConFile(krb_conf,sizeof(krb_conf)) &&
-		 (file = fopen(krb_conf, "rt")))
-	    {
-		char lineBuf[256];
-		// Skip the default realm
-		readstring(file,lineBuf,sizeof(lineBuf));
-
-		// Read the defined realms
-		while (TRUE)
-		{
-		    if (readstring(file,lineBuf,sizeof(lineBuf)) < 0)
-			break;
-
-		    if (*(lineBuf + strlen(lineBuf) - 1) == '\r')
-			*(lineBuf + strlen(lineBuf) - 1) = 0;
-
-		    for (p=lineBuf; *p ; p++)
-		    {
-			if (isspace(*p)) {
-			    *p = 0;
-			    break;
-			}
-		    }
-
-		    if ( strncmp(".KERBEROS.OPTION.",lineBuf,17) ) {
-			CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, CB_ADDSTRING, 0, (LPARAM)lineBuf);
-			realm_count++;
-		    }
-		}
-
-		fclose(file);
-	    }
-	}
-	if (realm_count == 0)
-	    CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, CB_ADDSTRING, 0, (LPARAM)realm);
-
-	/* Select the default Realm */
-	if (!realm[0] && hKrb5) {
-	    krb5_context ctx=0;
-	    char * def = 0;
-	    pkrb5_init_context(&ctx);
-	    pkrb5_get_default_realm(ctx,&def);
-	    if (def) {
-		lstrcpy(realm, def);
-		free(def);
-	    }
-	    pkrb5_free_context(ctx);
-	}
-	CSetDlgItemText(hDialog, IDC_COMBO_REALM, realm);
-
         /* setup text of stuff. */
 
         if (Position.x > 0 && Position.y > 0 &&
@@ -1943,6 +1856,10 @@ NewPasswordProc(
 		memset(password3,0,sizeof(password3));
 		RemoveProp(hDialog, "HANDLES_HELP");
 		EndDialog(hDialog, (int)lParam);
+                if (pAutoComplete != NULL) {
+                    Leash_pec_destroy(pAutoComplete);
+                    pAutoComplete = NULL;
+                }
                 return TRUE;
 	    }
 	    break;
@@ -1952,33 +1869,18 @@ NewPasswordProc(
 		int i = 0;
                 int bit8 = 0;
 
-		CGetDlgItemText(hDialog, IDC_EDIT_PRINCIPAL, username, sizeof(username));
+		CGetDlgItemText(hDialog, IDC_EDIT_PRINCIPAL, principal, sizeof(principal));
 		CGetDlgItemText(hDialog, IDC_EDIT_PASSWORD, password, sizeof(password));
 		CGetDlgItemText(hDialog, IDC_EDIT_PASSWORD2, password2, sizeof(password2));
 		CGetDlgItemText(hDialog, IDC_EDIT_PASSWORD3, password3, sizeof(password3));
-		CGetDlgItemText(hDialog, IDC_COMBO_REALM, realm, sizeof(realm));
 
-		if (!username[0])
+		if (!principal[0])
 		{
 		    MessageBox(hDialog, "You are not allowed to enter a "
 				"blank username.",
 				"Invalid Principal",
 				MB_OK | MB_ICONSTOP);
 		    return TRUE;
-		}
-		if (!realm[0])
-		{
-		    MessageBox(hDialog, "You are not allowed to enter a "
-				"blank realm.",
-				"Invalid Principal",
-				MB_OK | MB_ICONSTOP);
-		    return TRUE;
-		}
-
-		if (Leash_get_default_uppercaserealm())
-		{
-		    // found
-		    strupr(realm);
 		}
 
 		if (!password[0] || !password2[0] || !password3[0])
@@ -2022,8 +1924,6 @@ NewPasswordProc(
                     return TRUE;
 		}
 
-		sprintf(principal,"%s@%s",username,realm);
-
                 lsh_errno = Leash_int_changepwd(principal, password, password2, 0, 1);
 		if (lsh_errno != 0)
 		{
@@ -2063,14 +1963,7 @@ NewPasswordProc(
 #endif /* COMMENT */
                     return TRUE;
 		}
-
-                if ( lpdi->size >= LSH_DLGINFO_EX_V2_SZ ) {
-                    strncpy(lpdi->out.username, username, LEASH_USERNAME_SZ);
-                    lpdi->out.username[LEASH_USERNAME_SZ-1] = 0;
-                    strncpy(lpdi->out.realm, realm, LEASH_REALM_SZ);
-                    lpdi->out.realm[LEASH_REALM_SZ-1] = 0;
-                }
-
+                Leash_pec_add_principal(principal);
                 CloseMe(TRUE); /* success */
 	    }
 	    break;

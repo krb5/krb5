@@ -1026,47 +1026,74 @@ VOID CLeashView::OnMakeDefault()
 
 VOID CLeashView::OnChangePassword()
 {
-    if (!m_hWnd)
-    {
-        AfxMessageBox("There is a problem finding the Leash Window!",
-                   MB_OK|MB_ICONSTOP);
-        return;
+    krb5_context ctx;
+    krb5_ccache ccache = 0;
+    krb5_principal princ = 0;
+    char *pname = NULL;
+    char *username = NULL;
+    char *realm = NULL;
+    int code = 0;
+
+    CCacheDisplayData *elem = m_ccacheDisplay;
+    while (elem != NULL) {
+        if (elem->m_selected) {
+            if (elem->m_ccacheName)
+                break;
+        }
+        elem = elem->m_next;
+    }
+    if (elem != NULL) {
+        code = pkrb5_init_context(&ctx);
+        if (code) {
+            // TODO: spew error
+            goto cleanup;
+        }
+        code = pkrb5_cc_resolve(ctx, elem->m_ccacheName, &ccache);
+        if (code) {
+            // TODO: spew error
+            goto cleanup;
+        }
+        code = pkrb5_cc_get_principal(ctx, ccache, &princ);
+        if (code) {
+            goto cleanup;
+        }
+        code = pkrb5_unparse_name(ctx, princ, &pname);
+        if (code) {
+            goto cleanup;
+        }
     }
 
-    if (WaitForSingleObject( ticketinfo.lockObj, INFINITE ) != WAIT_OBJECT_0)
-        throw("Unable to lock ticketinfo");
-
     LSH_DLGINFO_EX ldi;
-    char username[64];
-    char realm[192];
-    char * principal = ticketinfo.Krb5.principal;
-    int i=0, j=0;
-    if (principal)
-        for (; principal[i] && principal[i] != '@'; i++)
-	        username[i] = principal[i];
-    username[i] = '\0';
-    if (principal && principal[i])
-	    for (i++ ; principal[i] ; i++, j++)
-	        realm[j] = principal[i];
-    realm[j] = '\0';
-    ReleaseMutex(ticketinfo.lockObj);
-
+    if (pname != NULL) {
+        username = pname;
+        realm = strchr(pname, '@');
+        if (realm != NULL)
+            *realm++ = '\0';
+    }
     ldi.size = sizeof(ldi);
     ldi.dlgtype = DLGTYPE_CHPASSWD;
     ldi.title = ldi.in.title;
-    strcpy(ldi.in.title,"Change Password");
+    strcpy_s(ldi.in.title, "MIT Kerberos: Change Password");
     ldi.username = ldi.in.username;
-    strcpy(ldi.in.username,username);
+    strcpy_s(ldi.in.username, username ? username : "");
     ldi.realm = ldi.in.realm;
-    strcpy(ldi.in.realm,realm);
+    strcpy_s(ldi.in.realm, realm ? realm : "");
     ldi.use_defaults = 1;
 
     int result = pLeash_changepwd_dlg_ex(m_hWnd, &ldi);
-    if (-1 == result)
-    {
+    if (-1 == result) {
         AfxMessageBox("There is a problem changing password!",
                    MB_OK|MB_ICONSTOP);
     }
+cleanup:
+    if (pname != NULL)
+        pkrb5_free_unparsed_name(ctx, pname);
+    if (princ != NULL)
+        pkrb5_free_principal(ctx, princ);
+    if (ccache != NULL)
+        pkrb5_cc_close(ctx, ccache);
+    if (ctx != NULL)
+        pkrb5_free_context(ctx);
 }
 
 static CCacheDisplayData **
