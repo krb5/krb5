@@ -205,9 +205,10 @@ krb5_init_creds_set_keytab(krb5_context context,
     }
 
     /* Sort the request enctypes so the ones in the keytab appear first. */
-    sort_enctypes(ctx->request->ktype, ctx->request->nktypes, etype_list);
+    ret = sort_enctypes(ctx->request->ktype, ctx->request->nktypes,
+                        etype_list);
     free(etype_list);
-    return 0;
+    return ret;
 }
 
 static krb5_error_code
