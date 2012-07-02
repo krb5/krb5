@@ -5,7 +5,7 @@ Configuring Kerberos with OpenLDAP back-end
 
 1. Set up SSL on the OpenLDAP server and client to ensure secure
    communication when the KDC service and LDAP server are on different
-   machines.  ``ldapi\://`` can be used if the LDAP server and KDC
+   machines.  ``ldapi://`` can be used if the LDAP server and KDC
    service are running on the same machine.
 
    A. Setting up SSL on the OpenLDAP server:

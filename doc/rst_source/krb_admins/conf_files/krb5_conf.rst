@@ -727,7 +727,7 @@ PKINIT options
 
        [libdefaults]
            EXAMPLE.COM = {
-               pkinit_anchors = FILE\:/usr/local/example.com.crt
+               pkinit_anchors = FILE:/usr/local/example.com.crt
            }
 
 2. realm-specific value in the [realms] section,
@@ -736,7 +736,7 @@ PKINIT options
 
        [realms]
            OTHERREALM.ORG = {
-               pkinit_anchors = FILE\:/usr/local/otherrealm.org.crt
+               pkinit_anchors = FILE:/usr/local/otherrealm.org.crt
            }
 
 3. generic value in the [libdefaults] section.
@@ -744,7 +744,7 @@ PKINIT options
     ::
 
        [libdefaults]
-           pkinit_anchors = DIR\:/usr/local/generic_trusted_cas/
+           pkinit_anchors = DIR:/usr/local/generic_trusted_cas/
 
 
 .. _pkinit_identity:

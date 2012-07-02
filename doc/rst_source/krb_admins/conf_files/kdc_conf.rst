@@ -492,7 +492,7 @@ PKINIT options
 
        [realms]
            EXAMPLE.COM = {
-               pkinit_anchors = FILE\:/usr/local/example.com.crt
+               pkinit_anchors = FILE:/usr/local/example.com.crt
            }
 
 2. generic value in the [kdcdefaults] section.
@@ -500,7 +500,7 @@ PKINIT options
     ::
 
        [kdcdefaults]
-           pkinit_anchors = DIR\:/usr/local/generic_trusted_cas/
+           pkinit_anchors = DIR:/usr/local/generic_trusted_cas/
 
 For information about the syntax of some of these options, see
 :ref:`Specifying PKINIT identity information <pkinit_identity>` in
