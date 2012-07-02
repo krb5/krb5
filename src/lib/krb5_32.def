@@ -429,3 +429,4 @@ EXPORTS
 	krb5_chpw_message				@398
 	krb5_kt_have_content				@401
 	krb5_cccol_have_content				@402
+	krb5_kt_client_default				@403
