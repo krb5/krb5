@@ -40,6 +40,7 @@ enum iakerb_state {
 struct _iakerb_ctx_id_rec {
     krb5_magic magic;                   /* KG_IAKERB_CONTEXT */
     krb5_context k5c;
+    gss_cred_id_t defcred;              /* Initiator only */
     enum iakerb_state state;            /* Initiator only */
     krb5_init_creds_context icc;        /* Initiator only */
     krb5_tkt_creds_context tcc;         /* Initiator only */
@@ -65,6 +66,7 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
     if (ctx == NULL)
         return;
 
+    krb5_gss_release_cred(&tmp, &ctx->defcred);
     krb5_init_creds_free(ctx->k5c, ctx->icc);
     krb5_tkt_creds_free(ctx->k5c, ctx->tcc);
     krb5_gss_delete_sec_context(&tmp, &ctx->gssc, NULL);
@@ -710,6 +712,7 @@ iakerb_alloc_context(iakerb_ctx_id_t *pctx)
     ctx = k5alloc(sizeof(*ctx), &code);
     if (ctx == NULL)
         goto cleanup;
+    ctx->defcred = GSS_C_NO_CREDENTIAL;
     ctx->magic = KG_IAKERB_CONTEXT;
     ctx->state = IAKERB_AS_REQ;
     ctx->count = 0;
@@ -893,10 +896,8 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
                             OM_uint32 *time_rec)
 {
     OM_uint32 major_status = GSS_S_FAILURE;
-    OM_uint32 tmpmin;
     krb5_error_code code;
     iakerb_ctx_id_t ctx;
-    gss_cred_id_t defcred = GSS_C_NO_CREDENTIAL;
     krb5_gss_cred_id_t kcred;
     krb5_gss_name_t kname;
     krb5_boolean cred_locked = FALSE;
@@ -908,21 +909,23 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
             *minor_status = code;
             goto cleanup;
         }
-    } else
+        if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {
+            major_status = iakerb_gss_acquire_cred(minor_status, NULL,
+                                                   GSS_C_INDEFINITE,
+                                                   GSS_C_NULL_OID_SET,
+                                                   GSS_C_INITIATE,
+                                                   &ctx->defcred, NULL, NULL);
+            if (GSS_ERROR(major_status))
+                goto cleanup;
+            claimant_cred_handle = ctx->defcred;
+        }
+    } else {
         ctx = (iakerb_ctx_id_t)*context_handle;
+        if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)
+            claimant_cred_handle = ctx->defcred;
+    }
 
     kname = (krb5_gss_name_t)target_name;
-
-    if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {
-        major_status = krb5_gss_acquire_cred(minor_status, NULL,
-                                             GSS_C_INDEFINITE,
-                                             GSS_C_NULL_OID_SET,
-                                             GSS_C_INITIATE,
-                                             &defcred, NULL, NULL);
-        if (GSS_ERROR(major_status))
-            goto cleanup;
-        claimant_cred_handle = defcred;
-    }
 
     major_status = kg_cred_resolve(minor_status, ctx->k5c,
                                    claimant_cred_handle, target_name);
@@ -1011,7 +1014,6 @@ cleanup:
         iakerb_release_context(ctx);
         *context_handle = GSS_C_NO_CONTEXT;
     }
-    krb5_gss_release_cred(&tmpmin, &defcred);
 
     return major_status;
 }

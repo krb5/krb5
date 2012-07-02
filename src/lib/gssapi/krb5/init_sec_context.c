@@ -948,29 +948,6 @@ krb5_gss_init_sec_context_ext(
     if (actual_mech_type)
         *actual_mech_type = NULL;
 
-    /* verify the credential, or use the default */
-    /*SUPPRESS 29*/
-    if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {
-        major_status = kg_get_defcred(minor_status, &defcred);
-        if (major_status && GSS_ERROR(major_status)) {
-            if (*context_handle == GSS_C_NO_CONTEXT)
-                krb5_free_context(context);
-            return(major_status);
-        }
-        claimant_cred_handle = defcred;
-    }
-
-    major_status = kg_cred_resolve(minor_status, context, claimant_cred_handle,
-                                   target_name);
-    if (GSS_ERROR(major_status)) {
-        save_error_info(*minor_status, context);
-        krb5_gss_release_cred(&tmp_min_stat, &defcred);
-        if (*context_handle == GSS_C_NO_CONTEXT)
-            krb5_free_context(context);
-        return(major_status);
-    }
-    cred = (krb5_gss_cred_id_t)claimant_cred_handle;
-
     /* verify the mech_type */
 
     if (mech_type == GSS_C_NULL_OID || g_OID_equal(mech_type, gss_mech_krb5)) {
@@ -982,8 +959,6 @@ krb5_gss_init_sec_context_ext(
     } else if (g_OID_equal(mech_type, gss_mech_iakerb)) {
         mech_type = (gss_OID) gss_mech_iakerb;
     } else {
-        k5_mutex_unlock(&cred->lock);
-        krb5_gss_release_cred(minor_status, &defcred);
         *minor_status = 0;
         if (*context_handle == GSS_C_NO_CONTEXT)
             krb5_free_context(context);
@@ -994,6 +969,29 @@ krb5_gss_init_sec_context_ext(
 
     /*SUPPRESS 29*/
     if (*context_handle == GSS_C_NO_CONTEXT) {
+        /* verify the credential, or use the default */
+        /*SUPPRESS 29*/
+        if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {
+            major_status = kg_get_defcred(minor_status, &defcred);
+            if (major_status && GSS_ERROR(major_status)) {
+                if (*context_handle == GSS_C_NO_CONTEXT)
+                    krb5_free_context(context);
+                return(major_status);
+            }
+            claimant_cred_handle = defcred;
+        }
+
+        major_status = kg_cred_resolve(minor_status, context,
+                                       claimant_cred_handle, target_name);
+        if (GSS_ERROR(major_status)) {
+            save_error_info(*minor_status, context);
+            krb5_gss_release_cred(&tmp_min_stat, &defcred);
+            if (*context_handle == GSS_C_NO_CONTEXT)
+                krb5_free_context(context);
+            return(major_status);
+        }
+        cred = (krb5_gss_cred_id_t)claimant_cred_handle;
+
         major_status = kg_new_connection(minor_status, cred, context_handle,
                                          target_name, mech_type, req_flags,
                                          time_req, input_chan_bindings,
@@ -1001,6 +999,7 @@ krb5_gss_init_sec_context_ext(
                                          output_token, ret_flags, time_rec,
                                          context, exts);
         k5_mutex_unlock(&cred->lock);
+        krb5_gss_release_cred(&tmp_min_stat, &defcred);
         if (*context_handle == GSS_C_NO_CONTEXT) {
             save_error_info (*minor_status, context);
             krb5_free_context(context);
@@ -1008,7 +1007,6 @@ krb5_gss_init_sec_context_ext(
             ((krb5_gss_ctx_id_rec *) *context_handle)->k5_context = context;
     } else {
         /* mutual_auth doesn't care about the credentials */
-        k5_mutex_unlock(&cred->lock);
         major_status = mutual_auth(minor_status, context_handle,
                                    target_name, mech_type, req_flags,
                                    time_req, input_chan_bindings,
@@ -1020,7 +1018,6 @@ krb5_gss_init_sec_context_ext(
            too.  */
     }
 
-    krb5_gss_release_cred(&tmp_min_stat, &defcred);
     return(major_status);
 }
 
