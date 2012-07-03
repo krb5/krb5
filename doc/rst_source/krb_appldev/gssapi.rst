@@ -103,9 +103,9 @@ if the credential cache selection facility cannot choose a principal
 for it, the default credential cache will be selected if it exists and
 contains tickets.
 
-If the default credential cache does exist, but the default keytab
-does exist, the krb5 mechanism will try to acquire initial tickets for
-the first principal in the default client keytab.
+If the default credential cache does not exist, but the default client
+keytab does, the krb5 mechanism will try to acquire initial tickets
+for the first principal in the default client keytab.
 
 If the krb5 mechanism acquires initial tickets using the default
 client keytab, the resulting tickets will be stored in the default
