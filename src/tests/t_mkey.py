@@ -155,6 +155,15 @@ check_master_dbent(1, (1, defetype))
 check_stash((1, defetype))
 check_mkvno(realm.user_princ, 1)
 
+# Check that stash will fail if a temp stash file is already present.
+collisionfile = os.path.join(realm.testdir, 'stash_tmp')
+f = open(collisionfile, 'w')
+f.close()
+output = realm.run([kdb5_util, 'stash'], expected_code=1)
+if 'Temporary stash file already exists' not in output:
+    fail('Did not detect temp stash file collision')
+os.unlink(collisionfile)
+
 # Add a new master key with no options.  Verify that:
 # 1. The new key appears in list_mkeys but has no activation time and
 #    is not active.

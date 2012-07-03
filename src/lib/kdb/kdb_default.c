@@ -156,10 +156,6 @@ krb5_def_store_mkey_list(krb5_context       context,
         keyfile = defkeyfile;
     }
 
-    /*
-     * XXX making the assumption that the keyfile is in a dir that requires root
-     * privilege to write to thus making timing attacks unlikely.
-     */
     if ((statrc = stat(keyfile, &stb)) >= 0) {
         /* if keyfile exists it better be a regular file */
         if (!S_ISREG(stb.st_mode)) {
@@ -171,27 +167,40 @@ krb5_def_store_mkey_list(krb5_context       context,
         }
     }
 
-    /* Use temp keytab file name in case creation of keytab fails */
-
-    /* create temp file template for use by mktemp() */
-    if ((retval = asprintf(&tmp_ktname, "WRFILE:%s_XXXXXX", keyfile)) < 0) {
+    /*
+     * We assume the stash file is in a directory writable only by root.
+     * As such, don't worry about collisions, just do an atomic rename.
+     */
+    retval = asprintf(&tmp_ktname, "FILE:%s_tmp", keyfile);
+    if (retval < 0) {
         krb5_set_error_message(context, retval,
                                _("Could not create temp keytab file name."));
         goto out;
     }
 
     /*
-     * Set tmp_ktpath to point to the keyfile path (skip WRFILE:).  Subtracting
+     * Set tmp_ktpath to point to the keyfile path (skip FILE:).  Subtracting
      * 1 to account for NULL terminator in sizeof calculation of a string
      * constant.  Used further down.
      */
-    tmp_ktpath = tmp_ktname + (sizeof("WRFILE:") - 1);
+    tmp_ktpath = tmp_ktname + (sizeof("FILE:") - 1);
 
-    if (mktemp(tmp_ktpath) == NULL) {
+    /*
+     * This time-of-check-to-time-of-access race is fine; we care only
+     * about an administrator running the command twice, not an attacker
+     * trying to beat us to creating the file.  Per the above comment, we
+     * assume the stash file is in a directory writable only by root.
+     */
+    statrc = stat(tmp_ktpath, &stb);
+    if (statrc == -1 && errno != ENOENT) {
+        /* ENOENT is the expected case */
         retval = errno;
+        goto out;
+    } else if (statrc == 0) {
+        retval = EEXIST;
         krb5_set_error_message(context, retval,
-                               _("Could not create temp stash file: %s"),
-                               error_message(errno));
+                               _("Temporary stash file already exists: %s."),
+                               tmp_ktpath);
         goto out;
     }
 
@@ -215,7 +224,7 @@ krb5_def_store_mkey_list(krb5_context       context,
         /* Clean up by deleting the tmp keyfile if it exists. */
         (void)unlink(tmp_ktpath);
     } else {
-        /* rename original keyfile to original filename */
+        /* Atomically rename temp keyfile to original filename. */
         if (rename(tmp_ktpath, keyfile) < 0) {
             retval = errno;
             krb5_set_error_message(context, retval,

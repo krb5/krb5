@@ -187,9 +187,9 @@ void PRS(argc, argv)
 void get_tickets(context)
     krb5_context context;
 {
-    char   buf[BUFSIZ], *def_realm;
+    char const ccname[] = "MEMORY:kpropcc";
+    char *def_realm;
     krb5_error_code retval;
-    static char tkstring[] = "/tmp/kproptktXXXXXX";
     krb5_keytab keytab = NULL;
 
     /*
@@ -230,20 +230,18 @@ void get_tickets(context)
 #endif
 
     /*
-     * Initialize cache file which we're going to be using
+     * Use a memory cache to avoid possible filesystem conflicts.
      */
-    (void) mktemp(tkstring);
-    snprintf(buf, sizeof(buf), "FILE:%s", tkstring);
-
-    retval = krb5_cc_resolve(context, buf, &ccache);
+    retval = krb5_cc_resolve(context, ccname, &ccache);
     if (retval) {
-        com_err(progname, retval, _("while opening credential cache %s"), buf);
+        com_err(progname, retval, _("while opening credential cache %s"),
+                ccname);
         exit(1);
     }
 
     retval = krb5_cc_initialize(context, ccache, my_principal);
     if (retval) {
-        com_err(progname, retval, _("when initializing cache %s"), buf);
+        com_err(progname, retval, _("when initializing cache %s"), ccname);
         exit(1);
     }
 
