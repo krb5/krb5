@@ -3,8 +3,8 @@ Password management
 
 Your password is the only way Kerberos has of verifying your identity.
 If someone finds out your password, that person can masquerade as
-you--send email that comes from you, read, edit, or delete your files,
-or log into other hosts as you--and no one will be able to tell the
+you---send email that comes from you, read, edit, or delete your files,
+or log into other hosts as you---and no one will be able to tell the
 difference.  For this reason, it is important that you choose a good
 password, and keep it secret.  If you need to give access to your
 account to someone else, you can do so through Kerberos (see

@@ -55,5 +55,5 @@ setting.)
 This accommodates a use case where a large number of unkeyed shared
 desktop workstations need to allow users to log in using Kerberos.
 The security risks from this practice are mitigated by the absence of
-valuable state on the shared workstations -- any valuable resources
+valuable state on the shared workstations---any valuable resources
 that the users would access reside on networked servers.
