@@ -112,7 +112,7 @@ get_fq_hostname(char *buf, size_t bufsize, const char *name)
     if (err)
         return krb5int_translate_gai_error (err);
     if (ai->ai_canonname == NULL) {
-        freaddrinfo(ai);
+        freeaddrinfo(ai);
         return KRB5_EAI_FAIL;
     }
     strncpy (buf, ai->ai_canonname, bufsize);
