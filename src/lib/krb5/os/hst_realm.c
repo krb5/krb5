@@ -111,8 +111,10 @@ get_fq_hostname(char *buf, size_t bufsize, const char *name)
     err = getaddrinfo (name, 0, &hints, &ai);
     if (err)
         return krb5int_translate_gai_error (err);
-    if (ai->ai_canonname == 0)
+    if (ai->ai_canonname == NULL) {
+        freaddrinfo(ai);
         return KRB5_EAI_FAIL;
+    }
     strncpy (buf, ai->ai_canonname, bufsize);
     buf[bufsize-1] = 0;
     freeaddrinfo (ai);
