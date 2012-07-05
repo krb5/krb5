@@ -665,7 +665,7 @@ verify_kdc_eku(krb5_context context,
     }
 
 out:
-    if (eku_accepted)
+    if (*eku_accepted)
         TRACE_PKINIT_CLIENT_EKU_ACCEPT(context);
     else
         TRACE_PKINIT_CLIENT_EKU_REJECT(context);
