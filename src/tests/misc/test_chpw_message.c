@@ -116,7 +116,7 @@ main(void)
     krb5_context context;
     char *msg;
 
-    setlocale(LC_MESSAGES, "C");
+    setlocale(LC_ALL, "C");
 
     check(krb5_init_context(&context));
 

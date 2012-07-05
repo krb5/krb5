@@ -57,7 +57,7 @@ main(int argc, char **argv)
     const char *cache_name = NULL, *princ_name = NULL;
     krb5_boolean errflag = FALSE;
 
-    setlocale(LC_MESSAGES, "");
+    setlocale(LC_ALL, "");
     progname = GET_PROGNAME(argv[0]);
 
     while ((c = getopt(argc, argv, "c:p:")) != -1) {

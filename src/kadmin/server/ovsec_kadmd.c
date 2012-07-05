@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
 
     verto_ctx *ctx;
 
-    setlocale(LC_MESSAGES, "");
+    setlocale(LC_ALL, "");
     setvbuf(stderr, NULL, _IONBF, 0);
 
     /* This is OID value the Krb5_Name NameType */

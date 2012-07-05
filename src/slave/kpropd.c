@@ -191,7 +191,7 @@ main(argc, argv)
     int ret = 0;
     kdb_log_context *log_ctx;
 
-    setlocale(LC_MESSAGES, "");
+    setlocale(LC_ALL, "");
     PRS(argv);
 
     log_ctx = kpropd_context->kdblog_context;

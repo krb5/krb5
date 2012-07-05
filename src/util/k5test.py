@@ -518,8 +518,9 @@ def _build_env():
             env[k] = os.path.join(buildtop, v)
         else:
             env[k] = v
-    # Make sure we don't get confused by translated messages.
-    env['LC_MESSAGES'] = 'C'
+    # Make sure we don't get confused by translated messages
+    # or localized times.
+    env['LC_ALL'] = 'C'
     return env
 
 

@@ -974,7 +974,7 @@ int main(int argc, char **argv)
     int errout = 0;
     int i;
 
-    setlocale(LC_MESSAGES, "");
+    setlocale(LC_ALL, "");
     if (strrchr(argv[0], '/'))
         argv[0] = strrchr(argv[0], '/')+1;
 
