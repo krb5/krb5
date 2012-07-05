@@ -451,18 +451,12 @@ pkinit_as_req_create(krb5_context context,
 #endif
 
 cleanup:
-    switch((int)reqctx->pa_type) {
-    case KRB5_PADATA_PK_AS_REQ:
+    if (auth_pack != NULL)
         auth_pack->supportedKDFs = NULL; /*alias to global constant*/
-        free_krb5_auth_pack(&auth_pack);
-        free_krb5_pa_pk_as_req(&req);
-        break;
-    case KRB5_PADATA_PK_AS_REQ_OLD:
-        free_krb5_pa_pk_as_req_draft9(&req9);
-        free(auth_pack9);
-        break;
-    }
-
+    free_krb5_auth_pack(&auth_pack);
+    free_krb5_pa_pk_as_req(&req);
+    free_krb5_pa_pk_as_req_draft9(&req9);
+    free(auth_pack9);
 
     pkiDebug("pkinit_as_req_create retval=%d\n", (int) retval);
 
