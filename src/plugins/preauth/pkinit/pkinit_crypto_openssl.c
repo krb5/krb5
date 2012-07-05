@@ -3012,6 +3012,7 @@ pkinit_create_sequence_of_principal_identifiers(
     pa_data[1] = NULL;
     pa_data[0] = malloc(sizeof(krb5_pa_data));
     if (pa_data[0] == NULL) {
+        free(pa_data);
         retval = ENOMEM;
         goto cleanup;
     }
@@ -3190,6 +3191,7 @@ pkinit_create_td_dh_parameters(krb5_context context,
     pa_data[1] = NULL;
     pa_data[0] = malloc(sizeof(krb5_pa_data));
     if (pa_data[0] == NULL) {
+        free(pa_data);
         retval = ENOMEM;
         goto cleanup;
     }
