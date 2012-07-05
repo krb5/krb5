@@ -256,6 +256,8 @@ testlog
 /src/tests/gss-threads/gss-client
 /src/tests/gss-threads/gss-server
 
+/src/tests/gssapi/ccinit
+/src/tests/gssapi/ccrefresh
 /src/tests/gssapi/t_accname
 /src/tests/gssapi/t_ccselect
 /src/tests/gssapi/t_gssexts
