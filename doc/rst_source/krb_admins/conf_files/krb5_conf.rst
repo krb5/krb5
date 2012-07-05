@@ -88,6 +88,8 @@ The krb5.conf file may contain the following sections:
 :ref:`plugins`       Controls plugin module registration
 ===================  =======================================================
 
+Additionally, krb5.conf may include any of the relations described in
+:ref:`kdc.conf(5)`, but it is not a recommended practice.
 
 .. _libdefaults:
 
@@ -1011,28 +1013,6 @@ Here is an example of a generic krb5.conf file:
         EXAMPLE.COM = {
                ATHENA.MIT.EDU = .
         }
-
-    [logging]
-        kdc = SYSLOG:INFO
-        admin_server = FILE=/var/kadm5.log
-    [dbdefaults]
-        ldap_kerberos_container_dn = cn=krbcontainer,dc=example,dc=com
-    [dbmodules]
-        openldap_ldapconf = {
-            db_library = kldap
-            disable_last_success = true
-            ldap_kerberos_container_dn = cn=krbcontainer,dc=example,dc=com
-            ldap_kdc_dn = "cn=krbadmin,dc=example,dc=com"
-                # this object needs to have read rights on
-                # the realm container and principal subtrees
-            ldap_kadmind_dn = "cn=krbadmin,dc=example,dc=com"
-                # this object needs to have read and write rights on
-                # the realm container and principal subtrees
-            ldap_service_password_file = /etc/kerberos/service.keyfile
-            ldap_servers = ldaps://kerberos.mit.edu
-            ldap_conns_per_server = 5
-    }
-
 
 FILES
 -----
