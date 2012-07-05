@@ -73,7 +73,11 @@ OPTIONS
     validation before use.
 
     *start_time* specifies the duration of the delay before the ticket
-    can become valid using the same time format as the  **-l** option.
+    can become valid using the same time format as the  **-l** option;
+    alternately, an absolute time may be specified in one of several
+    forms, including *[[yy]yymmdd]hhmm[ss]* (and some variants with
+    *.* or *:* as a field separator), and some locale-specific time
+    specifications.
 
 **-r** *renewable_life*
     requests renewable tickets, with a total lifetime of
