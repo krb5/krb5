@@ -299,7 +299,6 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_checksum cksum = {0, 0, 0, NULL};
     krb5_data *der_req = NULL;
     int valid_eku = 0, valid_san = 0;
-    krb5_kdc_req *tmp_as_req = NULL;
     krb5_data k5data;
     int is_signed = 1;
     krb5_pa_data **e_data = NULL;
@@ -548,16 +547,12 @@ cleanup:
     case KRB5_PADATA_PK_AS_REQ_OLD:
         free_krb5_pa_pk_as_req_draft9(&reqp9);
     }
-    if (tmp_as_req != NULL)
-        k5int_krb5_free_kdc_req(context, tmp_as_req);
     free(authp_data.data);
     free(krb5_authz.data);
     if (reqctx != NULL)
         pkinit_fini_kdc_req_context(context, reqctx);
-    if (auth_pack != NULL)
-        free_krb5_auth_pack(&auth_pack);
-    if (auth_pack9 != NULL)
-        free_krb5_auth_pack_draft9(context, &auth_pack9);
+    free_krb5_auth_pack(&auth_pack);
+    free_krb5_auth_pack_draft9(context, &auth_pack9);
 
     (*respond)(arg, retval, modreq, e_data, NULL);
 }
