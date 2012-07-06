@@ -24,6 +24,7 @@
  * or implied warranty.
  */
 
+#include <locale.h>
 #include "k5-int.h"
 
 extern int optind;

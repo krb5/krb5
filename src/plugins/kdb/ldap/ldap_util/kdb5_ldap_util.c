@@ -75,6 +75,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <locale.h>
 #include <stdio.h>
 #include <time.h>
 

@@ -10,6 +10,7 @@
  * This module will parse the update logs on the master or slave servers.
  */
 
+#include <locale.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <time.h>

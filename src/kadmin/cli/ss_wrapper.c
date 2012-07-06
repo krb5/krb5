@@ -25,6 +25,7 @@
 
 #include <krb5.h>
 #include <k5-platform.h>
+#include <locale.h>
 #include <ss/ss.h>
 #include "kadmin.h"
 

@@ -28,6 +28,7 @@
 #include "k5-platform.h"        /* for asprintf */
 #include <krb5.h>
 #include "extern.h"
+#include <locale.h>
 #include <string.h>
 #include <stdio.h>
 #include <time.h>

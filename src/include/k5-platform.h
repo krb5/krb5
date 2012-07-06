@@ -41,7 +41,7 @@
  * + mkstemp
  * + zap (support function; macro is in k5-int.h)
  * + path manipulation
- * + _, N_, dgettext, bindtextdomain, setlocale (for localization)
+ * + _, N_, dgettext, bindtextdomain (for localization)
  */
 
 #ifndef K5_PLATFORM_H
@@ -1061,13 +1061,12 @@ int k5_path_isabs(const char *path);
 
 /*
  * Localization macros.  If we have gettext, define _ appropriately for
- * translating a string.  If we do not have gettext, define _, bindtextdomain,
- * and setlocale as no-ops.  N_ is always a no-op; it marks a string for
+ * translating a string.  If we do not have gettext, define _ and
+ * bindtextdomain as no-ops.  N_ is always a no-op; it marks a string for
  * extraction to pot files but does not translate it.
  */
 #ifdef ENABLE_NLS
 #include <libintl.h>
-#include <locale.h>
 #define KRB5_TEXTDOMAIN "mit-krb5"
 #define _(s) dgettext(KRB5_TEXTDOMAIN, s)
 #else
@@ -1075,7 +1074,6 @@ int k5_path_isabs(const char *path);
 #define dgettext(d, m) m
 #define ngettext(m1, m2, n) (((n) == 1) ? m1 : m2)
 #define bindtextdomain(p, d)
-#define setlocale(c, l)
 #endif
 #define N_(s) s
 

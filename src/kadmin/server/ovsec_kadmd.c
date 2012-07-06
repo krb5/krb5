@@ -31,6 +31,7 @@
  */
 
 #include    <errno.h>
+#include    <locale.h>
 #include    <stdio.h>
 #include    <signal.h>
 #include    <syslog.h>

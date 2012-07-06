@@ -27,6 +27,7 @@
 #include "k5-platform.h"
 #include <krb5.h>
 #include <com_err.h>
+#include <locale.h>
 #include <string.h>
 #include <stdio.h>
 #ifdef HAVE_UNISTD_H

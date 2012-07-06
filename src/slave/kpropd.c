@@ -60,6 +60,7 @@
  */
 
 
+#include <locale.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/file.h>

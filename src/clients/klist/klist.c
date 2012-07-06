@@ -27,6 +27,7 @@
 #include "k5-int.h"
 #include <krb5.h>
 #include <com_err.h>
+#include <locale.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

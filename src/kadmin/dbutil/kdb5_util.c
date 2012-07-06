@@ -56,6 +56,7 @@
 #include <stdio.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
+#include <locale.h>
 #include <adm_proto.h>
 #include <time.h>
 #include "kdb5_util.h"

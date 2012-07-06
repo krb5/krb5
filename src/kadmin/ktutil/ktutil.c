@@ -27,6 +27,7 @@
 #include "k5-int.h"
 #include "ktutil.h"
 #include <com_err.h>
+#include <locale.h>
 #include "adm_proto.h"
 #include <ss/ss.h>
 #include <stdio.h>

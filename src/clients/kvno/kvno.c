@@ -25,6 +25,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "k5-platform.h"
