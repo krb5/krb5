@@ -281,17 +281,6 @@ krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen)
     int                 days, hours, minutes, seconds;
     krb5_deltat         dt;
 
-    /*
-     * We want something like ceil(log10(2**(nbits-1))) + 1.  That log
-     * value is log10(2)*(nbits-1) or log10(2**8)*(nbits-1)/8.  So,
-     * 2.4... is log10(256), rounded up.  Add one to handle leading
-     * minus, and one more to force int cast to round the value up.
-     * This doesn't include room for a trailing nul.
-     *
-     * This will break if bytes are more than 8 bits.
-     */
-#define MAX_CHARS_FOR_INT_TYPE(TYPE)    ((int) (2 + 2.408241 * sizeof (TYPE)))
-
     days = (int) (deltat / (24*3600L));
     dt = deltat % (24*3600L);
     hours = (int) (dt / 3600);
