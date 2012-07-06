@@ -330,6 +330,8 @@ parse_options(argc, argv, opts)
         case 's':
             code = krb5_string_to_deltat(optarg, &opts->starttime);
             if (code != 0 || opts->starttime == 0) {
+                /* Parse as an absolute time; intentionally undocumented
+                 * but left for backwards compatibility. */
                 krb5_timestamp abs_starttime;
 
                 code = krb5_string_to_timestamp(optarg, &abs_starttime);
