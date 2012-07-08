@@ -79,6 +79,8 @@ allocate_princ(krb5_context context, const char *name, krb5_boolean enterprise,
         } else if (*p == '@' && (!enterprise || !first_at)) {
             /* Realm separator.  In enterprise principals, the first one of
              * these we see is part of the component. */
+            if (cur_data == &princ->realm)
+                return KRB5_PARSE_MALFORMED;
             cur_data = &princ->realm;
         } else {
             /* Component or realm character, possibly quoted.  Make note if
