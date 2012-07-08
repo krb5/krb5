@@ -15,7 +15,7 @@ MAYBE_ET_sys =
 MAYBE_ET_intlsys =
 MAYBE_SS_sys =
 MAYBE_VERTO_sys =
-MAYBE_VERTO_k5 = verto k5ev
+MAYBE_VERTO_k5 = verto
 
 all-recurse:
 

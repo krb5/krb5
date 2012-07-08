@@ -58,10 +58,6 @@
 
 #include "fake-addrinfo.h"
 #include "net-server.h"
-#ifdef INTERNAL_VERTO
-#include "verto-k5ev.h"
-#endif
-
 #include <signal.h>
 
 /* XXX */
@@ -269,12 +265,7 @@ loop_init(verto_ev_type types)
     types |= VERTO_EV_TYPE_IO;
     types |= VERTO_EV_TYPE_SIGNAL;
     types |= VERTO_EV_TYPE_TIMEOUT;
-
-#ifdef INTERNAL_VERTO
-    return verto_default_k5ev();
-#else
     return verto_default(NULL, types);
-#endif
 }
 
 static void

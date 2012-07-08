@@ -1,7 +1,0 @@
-# 
-# Generated makefile dependencies follow.
-#
-verto-k5ev.so verto-k5ev.po $(OUTPRE)verto-k5ev.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(VERTO_DEPS) $(srcdir)/../verto/verto-module.h \
-  ev.c ev.h ev_poll.c ev_select.c ev_vars.h ev_wrap.h \
-  rename.h verto-k5ev.c verto-k5ev.h

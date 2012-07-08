@@ -32,7 +32,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "verto-k5ev.h"
+#include <verto.h>
 #include <verto-module.h>
 #include "rename.h"
 #include "autoconf.h"
@@ -201,15 +201,12 @@ k5ev_ctx_del(verto_mod_ctx *ctx, const verto_ev *ev, verto_mod_ev *evpriv)
     free(evpriv);
 }
 
+verto_ctx *verto_new_k5ev(void);
+verto_ctx *verto_default_k5ev(void);
+
 VERTO_MODULE(k5ev, NULL,
              VERTO_EV_TYPE_IO |
              VERTO_EV_TYPE_TIMEOUT |
              VERTO_EV_TYPE_IDLE |
              VERTO_EV_TYPE_SIGNAL |
              VERTO_EV_TYPE_CHILD);
-
-verto_ctx *
-verto_convert_k5ev(struct ev_loop* loop)
-{
-    return verto_convert(k5ev, 0, loop);
-}
