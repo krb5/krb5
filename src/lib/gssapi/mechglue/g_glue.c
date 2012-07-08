@@ -375,7 +375,8 @@ gss_name_t	*internal_name;
 					  union_name->mech_name,
 					  internal_name);
 	if (status != GSS_S_UNAVAILABLE) {
-	    map_error(minor_status, mech);
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
 	    return (status);
 	}
     }
