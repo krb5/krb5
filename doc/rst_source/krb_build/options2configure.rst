@@ -107,11 +107,6 @@ Environment variables
     most common use of this option is to select certain #define's for
     use with the operating system's include files.
 
-**CXX**
-     C++ compiler command
-
-**CXXFLAGS**
-     C++ compiler flags
 
 **DB_HEADER=**\ *headername*
     If db.h is not the correct header file to include to compile
@@ -169,20 +164,11 @@ Fine tuning of the installation directories
     *EXECPREFIX* is the path specified by **--exec-prefix**
     configuration option.
 
-**--libexecdir=**\ *DIR*
-    Program executables.  Defaults to ``EXECPREFIX/libexec``, where
-    *EXECPREFIX* is the path specified by **--exec-prefix**
-    configuration option.
-
 **--sysconfdir=**\ *DIR*
-    Read-only single-machine data.  Defaults to ``PREFIX/etc``, where
+    Read-only single-machine data such as krb5.conf.
+    Defaults to ``PREFIX/etc``, where
     *PREFIX* is the path specified by **--prefix** configuration
     option.
-
-**--sharedstatedir=**\ *DIR*
-    Modifiable architecture-independent data.  Defaults to
-    ``PREFIX/com``, where *PREFIX* is the path specified by
-    **--prefix** configuration option.
 
 **--libdir=**\ *DIR*
     Object code libraries.  Defaults to ``EXECPREFIX/lib``, where
@@ -193,9 +179,6 @@ Fine tuning of the installation directories
     C header files.  Defaults to ``PREFIX/include``, where *PREFIX* is
     the path specified by **--prefix** configuration option.
 
-**--oldincludedir=**\ *DIR*
-    C header files for non-gcc.  Default to ``/usr/include``.
-
 **--datarootdir=**\ *DATAROOTDIR*
     Read-only architecture-independent data root.  Defaults to
     ``PREFIX/share``, where *PREFIX* is the path specified by
@@ -204,11 +187,6 @@ Fine tuning of the installation directories
 **--datadir=**\ *DIR*
     Read-only architecture-independent data.  Defaults to path
     specified by **--datarootdir** configuration option.
-
-**--infodir=**\ *DIR*
-    Info documentation.  Defaults to ``DATAROOTDIR/info``, where
-    *DATAROOTDIR* is the path specified by **--datarootdir**
-    configuration option.
 
 **--localedir=**\ *DIR*
     Locale-dependent data.  Defaults to ``DATAROOTDIR/locale``, where
@@ -219,27 +197,6 @@ Fine tuning of the installation directories
     Man documentation.  Defaults to ``DATAROOTDIR/man``, where
     *DATAROOTDIR* is the path specified by **--datarootdir**
     configuration option.
-
-**--docdir=**\ *DOCDIR*
-    Documentation root.  Defaults to ``DATAROOTDIR/doc/krb5``, where
-    *DATAROOTDIR* is the path specified by **--datarootdir**
-    configuration option.
-
-**--htmldir=**\ *DIR*
-    HTML documentation.  Defaults to path specified by **--docdir**
-    configuration option.
-
-**--dvidir=**\ *DIR*
-    DVI documentation.  Defaults to path specified by **--docdir**
-    configuration option.
-
-**--pdfdir=**\ *DIR*
-    PDF documentation.  Defaults to path specified by **--docdir**
-    configuration option.
-
-**--psdir=**\ *DIR*
-    PostScript documentation.  Defaults to path specified by
-    **--docdir** configuration option.
 
 
 Program names
