@@ -1281,7 +1281,6 @@ AdjustOptions(HWND hDialog, int show, int hideDiff)
     ShowWindow(GetDlgItem(hDialog,IDC_CHECK_RENEWABLE),show);
     ShowWindow(GetDlgItem(hDialog,IDC_STATIC_KRB5),show);
     ShowWindow(GetDlgItem(hDialog,IDC_BUTTON_CLEAR_HISTORY),show);
-    ShowWindow(GetDlgItem(hDialog,IDC_CHECK_REMEMBER_PRINCIPAL),show);
 
     GetWindowRect( hDialog, &dlgRect );
     diff = dlgRect.top + GetSystemMetrics(SM_CYCAPTION)
