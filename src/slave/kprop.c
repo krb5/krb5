@@ -188,9 +188,10 @@ void get_tickets(context)
     krb5_context context;
 {
     char const ccname[] = "MEMORY:kpropcc";
-    char *def_realm;
+    char *def_realm, *server;
     krb5_error_code retval;
     krb5_keytab keytab = NULL;
+    krb5_principal server_princ = NULL;
 
     /*
      * Figure out what tickets we'll be using to send stuff
@@ -253,19 +254,17 @@ void get_tickets(context)
     memset(&creds, 0, sizeof(creds));
     retval = krb5_sname_to_principal(context,
                                      slave_host, KPROP_SERVICE_NAME,
-                                     KRB5_NT_SRV_HST, &creds.server);
+                                     KRB5_NT_SRV_HST, &server_princ);
     if (retval) {
         com_err(progname, errno, _("while setting server principal name"));
         (void) krb5_cc_destroy(context, ccache);
         exit(1);
     }
-    if (realm) {
-        retval = krb5_set_principal_realm(context, creds.server, realm);
-        if (retval) {
-            com_err(progname, errno,
-                    _("while setting server principal realm"));
-            exit(1);
-        }
+    retval = krb5_unparse_name_flags(context, server_princ,
+                                     KRB5_PRINCIPAL_UNPARSE_NO_REALM, &server);
+    if (retval) {
+        com_err(progname, retval, _("while unparsing server name"));
+        exit(1);
     }
 
     /*
@@ -286,10 +285,10 @@ void get_tickets(context)
         }
     }
 
-    retval = krb5_get_in_tkt_with_keytab(context, 0, 0, NULL,
-                                         NULL, keytab, ccache, &creds, 0);
+    retval = krb5_get_init_creds_keytab(context, &creds, my_principal,
+                                        keytab, 0, server, NULL);
     if (retval) {
-        com_err(progname, retval, _("while getting initial ticket\n"));
+        com_err(progname, retval, _("while getting initial credentials\n"));
         (void) krb5_cc_destroy(context, ccache);
         exit(1);
     }
@@ -297,15 +296,8 @@ void get_tickets(context)
     if (keytab)
         (void) krb5_kt_close(context, keytab);
 
-    /*
-     * Now destroy the cache right away --- the credentials we
-     * need will be in my_creds.
-     */
-    retval = krb5_cc_destroy(context, ccache);
-    if (retval) {
-        com_err(progname, retval, _("while destroying ticket cache"));
-        exit(1);
-    }
+    krb5_free_unparsed_name(context, server);
+    krb5_free_principal(context, server_princ);
 }
 
 static void

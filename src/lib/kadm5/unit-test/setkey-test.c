@@ -63,6 +63,7 @@ main(int argc, char **argv)
     krb5_keytab_entry ktent;
     krb5_encrypt_block eblock;
     krb5_creds my_creds;
+    krb5_get_init_creds_opt *opt;
     kadm5_principal_ent_rec princ_ent;
     krb5_principal princ, server;
     char pw[16];
@@ -138,8 +139,8 @@ main(int argc, char **argv)
      * For each enctype in the test, construct a random password/key.
      * Assign all keys to principal with kadm5_setkey_principal.  Add
      * each key to the keytab, and acquire an initial ticket with the
-     * keytab (XXX can I specify the enctype & kvno explicitly?).  If
-     * krb5_get_in_tkt_with_keytab succeeds, then the keys were set
+     * keytab (XXX can I specify the kvno explicitly?).  If
+     * krb5_get_init_creds_keytab succeeds, then the keys were set
      * successfully.
      */
     for (test = 0; tests[test] != NULL; test++) {
@@ -191,13 +192,16 @@ main(int argc, char **argv)
             my_creds.server = server;
 
             ktypes[0] = testp[encnum].enctype;
-            ret = krb5_get_in_tkt_with_keytab(context,
-                                              0 /* options */,
-                                              NULL /* addrs */,
-                                              ktypes,
-                                              NULL /* preauth */,
-                                              kt, 0,
-                                              &my_creds, 0);
+            ret = krb5_get_init_creds_opt_allocate(context, &opt);
+            if (ret) {
+                com_err(whoami, ret, "while allocating gic opts");
+                exit(1);
+            }
+            krb5_get_init_creds_opt_set_etype_list(opt, ktypes, 1);
+            ret = krb5_get_init_creds_keytab(context, &my_creds, princ,
+                                             kt, 0, NULL /* in_tkt_service */,
+                                             opt);
+            krb5_get_init_creds_opt_free(context, opt);
             if (ret) {
                 com_err(whoami, ret, "while acquiring initial ticket");
                 exit(1);

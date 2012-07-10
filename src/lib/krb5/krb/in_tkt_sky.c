@@ -78,23 +78,29 @@ krb5_get_in_tkt_with_skey(krb5_context context, krb5_flags options,
     int use_master = 0;
     krb5_get_init_creds_opt *opts = NULL;
 
-#ifndef LEAN_CLIENT
-    if (key == NULL) {
-        return krb5_get_in_tkt_with_keytab(context, options, addrs, ktypes,
-                                           pre_auth_types, NULL, ccache,
-                                           creds, ret_as_reply);
-    }
-#endif /* LEAN_CLIENT */
-
     retval = k5_populate_gic_opt(context, &opts, options, addrs, ktypes,
                                  pre_auth_types, creds);
     if (retval)
         return retval;
-    retval = krb5_unparse_name(context, creds->server, &server);
-    if (retval) {
-        krb5_get_init_creds_opt_free(context, opts);
-        return retval;
+
+    retval = krb5_get_init_creds_opt_set_out_ccache(context, opts, ccache);
+    if (retval)
+        goto cleanup;
+
+#ifndef LEAN_CLIENT
+    if (key == NULL) {
+        retval = krb5_get_init_creds_keytab(context, creds, creds->client,
+                                            NULL /* keytab */,
+                                            creds->times.starttime,
+                                            NULL /* in_tkt_service */,
+                                            opts);
+        goto cleanup;
     }
+#endif /* LEAN_CLIENT */
+
+    retval = krb5_unparse_name(context, creds->server, &server);
+    if (retval)
+        goto cleanup;
     server_princ = creds->server;
     client_princ = creds->client;
     retval = k5_get_init_creds(context, creds, creds->client,
@@ -102,15 +108,13 @@ krb5_get_in_tkt_with_skey(krb5_context context, krb5_flags options,
                                get_as_key_skey, (void *)key, &use_master,
                                ret_as_reply);
     krb5_free_unparsed_name(context, server);
-    krb5_get_init_creds_opt_free(context, opts);
     if (retval)
-        return retval;
+        goto cleanup;
     krb5_free_principal( context, creds->server);
     krb5_free_principal( context, creds->client);
     creds->client = client_princ;
     creds->server = server_princ;
-    /* store it in the ccache! */
-    if (ccache)
-        retval = krb5_cc_store_cred(context, ccache, creds);
+cleanup:
+    krb5_get_init_creds_opt_free(context, opts);
     return retval;
 }
