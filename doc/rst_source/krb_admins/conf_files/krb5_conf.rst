@@ -996,11 +996,6 @@ Here is an example of a generic krb5.conf file:
             kdc = kerberos-1.example.com
             admin_server = kerberos.example.com
         }
-        OPENLDAP.MIT.EDU = {
-            kdc = kerberos.mit.edu
-            admin_server = kerberos.mit.edu
-            database_module = openldap_ldapconf
-        }
 
     [domain_realm]
         .mit.edu = ATHENA.MIT.EDU

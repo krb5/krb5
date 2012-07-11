@@ -662,11 +662,30 @@ Here's an example of a kdc.conf file:
             max_renewable_life = 7d 0h 0m 0s
             master_key_type = des3-hmac-sha1
             supported_enctypes = des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4
+            database_module = openldap_ldapconf
         }
 
     [logging]
         kdc = FILE:/usr/local/var/krb5kdc/kdc.log
         admin_server = FILE:/usr/local/var/krb5kdc/kadmin.log
+
+    [dbdefaults]
+        ldap_kerberos_container_dn = cn=krbcontainer,dc=mit,dc=edu
+
+    [dbmodules]
+        openldap_ldapconf = {
+            db_library = kldap
+            disable_last_success = true
+            ldap_kdc_dn = "cn=krbadmin,dc=mit,dc=edu"
+                # this object needs to have read rights on
+                # the realm container and principal subtrees
+            ldap_kadmind_dn = "cn=krbadmin,dc=mit,dc=edu"
+                # this object needs to have read and write rights on
+                # the realm container and principal subtrees
+            ldap_service_password_file = /etc/kerberos/service.keyfile
+            ldap_servers = ldaps://kerberos.mit.edu
+            ldap_conns_per_server = 5
+        }
 
 
 FILES
