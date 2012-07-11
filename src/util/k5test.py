@@ -922,8 +922,11 @@ class K5Realm(object):
             service_princ = self.krbtgt_princ
         if ccache is None:
             ccache = self.ccache
+        ccachestr = ccache
+        if len(ccachestr) < 2 or ':' not in ccachestr[2:]:
+            ccachestr = 'FILE:' + ccachestr
         output = self.run_as_client([klist, ccache], **keywords)
-        if (('Ticket cache: FILE:%s\n' % ccache) not in output or
+        if (('Ticket cache: %s\n' % ccachestr) not in output or
             ('Default principal: %s\n' % client_princ) not in output or
             service_princ not in output):
             fail('Unexpected klist output.')
