@@ -6,11 +6,11 @@ User commands
 .. toctree::
    :maxdepth: 1
 
+   kdestroy.rst
    kinit.rst
    klist.rst
-   kdestroy.rst
-   kswitch.rst
    kpasswd.rst
-   kvno.rst
    ksu.rst
+   kswitch.rst
+   kvno.rst
    sclient.rst
