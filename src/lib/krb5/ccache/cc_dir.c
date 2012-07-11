@@ -218,13 +218,15 @@ cleanup:
     return ret;
 }
 
-/* Verify that a cache directory path exists as a directory. */
+/* Verify or create a cache directory path. */
 static krb5_error_code
 verify_dir(krb5_context context, const char *dirname)
 {
     struct stat st;
 
     if (stat(dirname, &st) < 0) {
+        if (errno == ENOENT && mkdir(dirname, S_IRWXU) == 0)
+            return 0;
         krb5_set_error_message(context, KRB5_FCC_NOFILE,
                                _("Credential cache directory %s does not "
                                  "exist"), dirname);

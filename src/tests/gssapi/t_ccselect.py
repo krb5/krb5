@@ -55,7 +55,6 @@ if 'No Kerberos credentials available' not in output:
 # Make a directory collection and use it for client commands in both realms.
 ccdir = os.path.join(r1.testdir, 'cc')
 ccname = 'DIR:' + ccdir
-os.mkdir(ccdir)
 r1.env_client['KRB5CCNAME'] = ccname
 r2.env_client['KRB5CCNAME'] = ccname
 

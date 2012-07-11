@@ -11,7 +11,6 @@ dccname = 'DIR:%s' % ccdir
 duser = 'DIR::%s/tkt1' % ccdir
 dalice = 'DIR::%s/tkt2' % ccdir
 dbob = 'DIR::%s/tkt3' % ccdir
-os.mkdir(ccdir)
 realm.kinit('user', password('user'), flags=['-c', duser])
 realm.kinit('alice', password('alice'), flags=['-c', dalice])
 realm.kinit('bob', password('bob'), flags=['-c', dbob])

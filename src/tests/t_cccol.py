@@ -28,7 +28,6 @@ realm = K5Realm(create_user=False, create_host=False)
 # Make a directory collection and use it for client commands in both realms.
 ccdir = os.path.join(realm.testdir, 'cc')
 ccname = 'DIR:' + ccdir
-os.mkdir(ccdir)
 realm.env_client['KRB5CCNAME'] = ccname
 
 realm.addprinc('alice', password('alice'))
