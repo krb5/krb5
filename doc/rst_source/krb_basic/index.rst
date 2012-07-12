@@ -9,3 +9,4 @@ Basic Kerberos V5 concepts
 
    keytab_def.rst
    stash_file_def.rst
+   date_time.rst
