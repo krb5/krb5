@@ -874,12 +874,10 @@ proc setup_kerberos_files { } {
     }
 
     # Create ACL file.
-    if ![file exists $tmppwd/acl] {
-	set aclfile [open $tmppwd/acl w]
-	puts $aclfile "krbtest/admin@$REALMNAME *"
-	puts $aclfile "kiprop/$hostname@$REALMNAME p"
-	close $aclfile
-    }
+    set aclfile [open $tmppwd/acl w]
+    puts $aclfile "krbtest/admin@$REALMNAME *"
+    puts $aclfile "kiprop/$hostname@$REALMNAME p"
+    close $aclfile
 
     # Create dictfile file.
     if ![file exists $tmppwd/dictfile] {

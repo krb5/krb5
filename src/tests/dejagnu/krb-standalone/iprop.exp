@@ -5,11 +5,9 @@ proc setup_slave {} {
     global tmppwd hostname REALMNAME KDB5_UTIL
     file delete $tmppwd/slave-stash $tmppwd/slave-acl
     file copy -force $tmppwd/acl $tmppwd/slave-acl
-    if ![file exists $tmppwd/kpropdacl] {
-	set aclfile [open $tmppwd/kpropd-acl w]
-	puts $aclfile "host/$hostname@$REALMNAME"
-	close $aclfile
-    }
+    set aclfile [open $tmppwd/kpropd-acl w]
+    puts $aclfile "host/$hostname@$REALMNAME"
+    close $aclfile
     setup_slave_db
     # copy database - must be used after master db set up
     envstack_push
