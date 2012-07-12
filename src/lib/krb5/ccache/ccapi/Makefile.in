@@ -3,7 +3,6 @@ BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = $(WIN_INCLUDES)
 DEFS= -DUSE_CCAPI -DUSE_CCAPI_V3
 
-##DOS##DEFS=
 ##DOS##WIN_INCLUDES = -I$(top_srcdir)\windows\lib
 
 ##DOS##BUILDTOP = ..\..\..\..
