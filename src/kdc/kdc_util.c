@@ -2575,6 +2575,10 @@ krb5int_get_domain_realm_mapping(krb5_context context,
     return 0;
 }
 
+/*
+ * Although the KDC doesn't call this function directly,
+ * process_tcp_connection_read() in net-server.c does call it.
+ */
 krb5_error_code
 make_toolong_error (void *handle, krb5_data **out)
 {
