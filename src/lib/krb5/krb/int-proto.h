@@ -208,6 +208,9 @@ k5_response_set_free(krb5_response_set *rset);
 void
 k5_response_set_reset(krb5_response_set *rset);
 
+krb5_boolean
+k5_response_set_empty(krb5_response_set *rset);
+
 krb5_error_code
 k5_response_set_set_item(krb5_response_set *rset, const char *name, void *item,
                          void (*free_item)(void *item));

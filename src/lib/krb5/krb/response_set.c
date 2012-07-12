@@ -78,6 +78,12 @@ k5_response_set_reset(krb5_response_set *rset)
     rset->head = NULL;
 }
 
+krb5_boolean
+k5_response_set_empty(krb5_response_set *rset)
+{
+    return rset->head == NULL;
+}
+
 void *
 k5_response_set_get_item(krb5_response_set *rsp, const char *name)
 {

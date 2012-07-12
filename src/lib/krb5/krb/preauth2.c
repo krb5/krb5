@@ -902,7 +902,7 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
         goto error;
 
     /* Call the responder to answer response items. */
-    if (responder != NULL) {
+    if (responder != NULL && !k5_response_set_empty(rock->rset)) {
         ret = (*responder)(context, opte->opt_private->responder_data,
                            rock->rset, get_item);
         if (ret)

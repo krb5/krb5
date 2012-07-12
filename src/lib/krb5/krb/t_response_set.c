@@ -61,15 +61,18 @@ main()
     krb5_response_set *rset;
 
     check(k5_response_set_new(&rset));
+    check_pred(k5_response_set_empty(rset));
 
     check(k5_response_set_set_item(rset, "foo", (void *)0x1234, onfree));
     check(k5_response_set_set_item(rset, "bar", (void *)0x4321, onfree));
     check_pred(k5_response_set_get_item(rset, "foo") == (void *)0x1234);
     check_pred(k5_response_set_get_item(rset, "bar") == (void *)0x4321);
+    check_pred(!k5_response_set_empty(rset));
 
     freecount = 0;
     k5_response_set_reset(rset);
     check_pred(freecount == 2);
+    check_pred(k5_response_set_empty(rset));
 
     check_pred(k5_response_set_get_item(rset, "foo") == NULL);
     check_pred(k5_response_set_get_item(rset, "bar") == NULL);
