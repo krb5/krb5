@@ -11,6 +11,7 @@ main()
 	TMP1=${TMPDIR-.}/t1
 	TMP2=${TMPDIR-.}/t2
 	TMP3=${TMPDIR-.}/t3
+	BINFILES=${TMPDIR-.}/binfiles
 
 	if [ \! -z "$WORDLIST" -a -f "$WORDLIST" ]; then
 		DICT=$WORDLIST
@@ -32,6 +33,7 @@ main()
 	dictsize=`wc -l < $DICT`
 
 	bindir=/bin/.
+	find $bindir -type f -exec test -r {} \; -print | head -100 > $BINFILES
 
 	if [ $# -eq 0 ]; then
 		for t in 1 2 3 4 5 6 7 8 9 10 11 12 13 20 40 41; do
@@ -64,7 +66,7 @@ main()
 			shift
 		done
 	fi
-	rm -f $TMP1 $TMP2 $TMP3
+	rm -f $TMP1 $TMP2 $TMP3 $BINFILES
 	exit 0
 }
 
@@ -154,10 +156,10 @@ test3()
 {
 	echo "Test 3: hash: small key, big data pairs"
 	rm -f $TMP1
-	(find $bindir -type f -exec test -r {} \; -print | xargs cat) > $TMP1
+	xargs cat < $BINFILES > $TMP1
 	for type in hash; do
 		rm -f $TMP2 $TMP3
-		for i in `find $bindir -type f -exec test -r {} \; -print`; do
+		for i in `cat $BINFILES`; do
 			echo p
 			echo k$i
 			echo D$i
@@ -176,7 +178,7 @@ test3()
 		echo "    page size $psize"
 		for type in btree; do
 			rm -f $TMP2 $TMP3
-			for i in `find $bindir -type f -exec test -r {} \; -print`; do
+			for i in `cat $BINFILES`; do
 				echo p
 				echo k$i
 				echo D$i
@@ -193,11 +195,10 @@ test3()
 	done
 	echo "Test 3: recno: big data pairs"
 	rm -f $TMP2 $TMP3
-	find $bindir -type f -exec test -r {} \; -print | 
 	awk '{
 		++i;
 		printf("p\nk%d\nD%s\ng\nk%d\n", i, $0, i);
-	}' > $TMP2
+	}' < $BINFILES > $TMP2
 	for psize in 512 16384 65536; do
 		echo "    page size $psize"
 		$PROG -i psize=$psize -o $TMP3 recno $TMP2
