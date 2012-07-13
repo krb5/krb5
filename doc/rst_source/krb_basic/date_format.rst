@@ -71,11 +71,11 @@ strings are:
 Examples::
 
     Create a principal that expires on the date indicated:
-        addprincl test1 -expire "3/27/12 10:00:07 EST"
-        addprincl test2 -expire "January 23, 2015 10:05pm"
-        addprincl test3 -expire "22:00 GMT"
+        addprinc test1 -expire "3/27/12 10:00:07 EST"
+        addprinc test2 -expire "January 23, 2015 10:05pm"
+        addprinc test3 -expire "22:00 GMT"
     Add a principal that will expire in 30 minutes:
-        addprincl test4 -expire "30 minutes"
+        addprinc test4 -expire "30 minutes"
 
 
 .. _abstime:
