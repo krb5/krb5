@@ -112,11 +112,12 @@ Creates realm in directory. Options:
     Specifies that the stash file is to be created.
 
 **-maxtktlife** *max_ticket_life*
-    Specifies maximum ticket life for principals in this realm.
+    (:ref:`getdate` string) Specifies maximum ticket life for
+    principals in this realm.
 
 **-maxrenewlife** *max_renewable_ticket_life*
-    Specifies maximum renewable life of tickets for principals in this
-    realm.
+    (:ref:`getdate` string) Specifies maximum renewable life of
+    tickets for principals in this realm.
 
 *ticket_flags*
     Specifies global ticket flags for the realm.  Allowable flags are
@@ -174,11 +175,12 @@ Modifies the attributes of a realm.  Options:
     Specifies the Kerberos realm of the database.
 
 **-maxtktlife** *max_ticket_life*
-    Specifies maximum ticket life for principals in this realm.
+    (:ref:`getdate` string) Specifies maximum ticket life for
+    principals in this realm.
 
 **-maxrenewlife** *max_renewable_ticket_life*
-    Specifies maximum renewable life of tickets for principals in this
-    realm.
+    (:ref:`getdate` string) Specifies maximum renewable life of
+    tickets for principals in this realm.
 
 *ticket_flags*
     Specifies global ticket flags for the realm.  Allowable flags are
@@ -328,10 +330,12 @@ Creates a ticket policy in the directory.  Options:
     Specifies the Kerberos realm of the database.
 
 **-maxtktlife** *max_ticket_life*
-    Specifies maximum ticket life for principals.
+    (:ref:`getdate` string) Specifies maximum ticket life for
+    principals.
 
 **-maxrenewlife** *max_renewable_ticket_life*
-    Specifies maximum renewable life of tickets for principals.
+    (:ref:`getdate` string) Specifies maximum renewable life of
+    tickets for principals.
 
 *ticket_flags*
     Specifies the ticket flags.  If this option is not specified, by

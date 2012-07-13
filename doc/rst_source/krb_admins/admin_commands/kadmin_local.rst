@@ -161,60 +161,6 @@ OPTIONS
 .. _kadmin_options_end:
 
 
-.. _date_format:
-
-DATE FORMAT
------------
-
-.. _date_format_start:
-
-Many of the kadmin commands take a duration or time as an
-argument. The date can appear in a wide variety of formats, such as:
-
- ::
-
-    1 month ago
-    2 hours ago
-    400000 seconds ago
-    last year
-    this Monday
-    next Monday
-    yesterday
-    tomorrow
-    now
-    second Monday
-    fortnight ago
-    3/31/92 10:00:07 PST
-    January 23, 1987 10:05pm
-    22:00 GMT
-
-Dates which do not have the "ago" specifier default to being absolute
-dates, unless they appear in a field where a duration is expected.  In
-that case the time specifier will be interpreted as relative.
-Specifying "ago" in a duration may result in unexpected behavior.
-
-The following is a list of all of the allowable keywords.
-
-==========  ==========================================================
-Months      january, jan, february, feb, march, mar, april, apr, may,
-            june, jun, july, jul, august, aug, september, sep, sept,
-            october, oct, november, nov, december, dec
-Days        sunday, sun, monday, mon, tuesday, tues, tue, wednesday,
-            wednes, wed, thursday, thurs, thur, thu, friday, fri,
-            saturday, sat
-Units       year, month, fortnight, week, day, hour, minute, min,
-            second, sec
-Relative    tomorrow, yesterday, today, now, last, this, next, first,
-            second, third, fourth, fifth, sixth, seventh, eighth,
-            ninth, tenth, eleventh, twelfth, ago
-Time Zones  kadmin recognizes abbreviations for most of the world's
-            time zones.
-Meridians   am, pm
-==========  ==========================================================
-
-.. _date_format_end:
-
-
 COMMANDS
 --------
 
@@ -243,16 +189,16 @@ Aliases: **addprinc**, **ank**
 Options:
 
 **-expire** *expdate*
-    expiration date of the principal
+    (:ref:`getdate` string) expiration date of the principal
 
 **-pwexpire** *pwexpdate*
-    password expiration date
+    (:ref:`getdate` string) password expiration date
 
 **-maxlife** *maxlife*
-    maximum ticket life for the principal
+    (:ref:`getdate` string) maximum ticket life for the principal
 
 **-maxrenewlife** *maxrenewlife*
-    maximum renewable life of tickets for the principal
+    (:ref:`getdate` string) maximum renewable life of tickets for the principal
 
 **-kvno** *kvno*
     initial key version number
@@ -646,10 +592,10 @@ Alias: **addpol**
 The following options are available:
 
 **-maxlife** *time*
-    sets the maximum lifetime of a password
+    (:ref:`getdate` string) sets the maximum lifetime of a password
 
 **-minlife** *time*
-    sets the minimum lifetime of a password
+    (:ref:`getdate` string) sets the minimum lifetime of a password
 
 **-minlength** *length*
     sets the minimum length of a password
@@ -669,16 +615,16 @@ The following options are available:
     principals which require preauthentication.
 
 **-failurecountinterval** *failuretime*
-    sets the allowable time between authentication failures.  If an
-    authentication failure happens after *failuretime* has elapsed
-    since the previous failure, the number of authentication failures
-    is reset to 1.
+    (:ref:`getdate` string) sets the allowable time between
+    authentication failures.  If an authentication failure happens
+    after *failuretime* has elapsed since the previous failure,
+    the number of authentication failures is reset to 1.
 
 **-lockoutduration** *lockouttime*
-    sets the duration for which the principal is locked from
-    authenticating if too many authentication failures occur without
-    the specified failure count interval elapsing.  A duration of 0
-    means forever.
+    (:ref:`getdate` string) sets the duration for which the principal
+    is locked from authenticating if too many authentication failures
+    occur without the specified failure count interval elapsing.
+    A duration of 0 means forever.
 
 Example:
 

@@ -281,8 +281,7 @@ Sets the activation time of the master key specified by *mkeyVNO*.
 Once a master key becomes active, it will be used to encrypt newly
 created principal keys.  If no *time* argument is given, the current
 time is used, causing the specified master key version to become
-active immediately.  The format of *time* is specified in the
-:ref:`date_format` section of the :ref:`kadmin(1)` man page.
+active immediately.  The format for *time* is :ref:`getdate` string.
 
 After a new master key becomes active, the kdb5_util
 **update_princ_encryption** command can be used to update all
