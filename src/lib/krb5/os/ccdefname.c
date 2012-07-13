@@ -269,7 +269,7 @@ static void set_for_os(const char *name)
 #else
 static void set_for_os(const char *name)
 {
-    // @TODO
+    /* No implementation at present. */
 }
 #endif
 
