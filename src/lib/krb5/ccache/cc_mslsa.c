@@ -53,6 +53,8 @@
 #define UNICODE
 #define _UNICODE
 
+#include <ntstatus.h>
+#define WIN32_NO_STATUS
 #include "k5-int.h"
 #include "com_err.h"
 #include "cc-int.h"
@@ -70,7 +72,6 @@
 #endif
 #define _WIN32_WINNT 0x0600
 #include <ntsecapi.h>
-#include <ntstatus.h>
 
 
 /* The following two features can only be built using the version of the
