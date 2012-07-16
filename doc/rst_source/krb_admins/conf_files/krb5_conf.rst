@@ -298,7 +298,7 @@ The libdefaults section may contain any of the following relations:
     host's domain itself, 1 means to also try the domain's immediate
     parent, and so forth.  The library's usual mechanism for locating
     Kerberos realms is used to determine whether a domain is a valid
-    realm---which may involve consulting DNS if **dns_lookup_kdc** is
+    realm, which may involve consulting DNS if **dns_lookup_kdc** is
     set.  The default is not to search domain components.
 
 **renew_lifetime**
