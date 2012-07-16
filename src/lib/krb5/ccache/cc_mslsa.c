@@ -655,7 +655,8 @@ does_retrieve_ticket_cache_ticket (void)
         LsaDeregisterLogonProcess(LogonHandle);
 
         if (FAILED(Status) || FAILED(SubStatus)) {
-            if ( SubStatus == STATUS_NOT_SUPPORTED )
+            if (SubStatus == STATUS_NOT_SUPPORTED ||
+                SubStatus == SEC_E_NO_CREDENTIALS)
                 /* The combination of the two CacheOption flags
                  * is not supported; therefore, the new flag is supported
                  */
