@@ -2738,10 +2738,6 @@ krb5_lcc_get_flags(krb5_context context, krb5_ccache id, krb5_flags *flags)
     return KRB5_OK;
 }
 
-struct krb5int_lcc_iterator {
-    int id;
-};
-
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor)
 {
@@ -2784,12 +2780,6 @@ krb5_lcc_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor)
     return 0;
 }
 
-static krb5_error_code KRB5_CALLCONV
-krb5_lcc_switch_to(krb5_context context, krb5_ccache id)
-{
-    return 0;
-}
-
 const krb5_cc_ops krb5_lcc_ops = {
     0,
     "MSLSA",
@@ -2816,6 +2806,6 @@ const krb5_cc_ops krb5_lcc_ops = {
     NULL, /* wasdefault */
     NULL, /* lock */
     NULL, /* unlock */
-    krb5_lcc_switch_to,
+    NULL, /* switch_to */
 };
 #endif /* _WIN32 */
