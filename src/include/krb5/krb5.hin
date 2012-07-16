@@ -4216,6 +4216,8 @@ krb5_kt_default(krb5_context context, krb5_keytab *id);
  *
  * Fill @a keytab_out with a handle to the default client key table.
  *
+ * @version First introduced in 1.11
+ *
  * @retval
  * 0  Success
  * @return
