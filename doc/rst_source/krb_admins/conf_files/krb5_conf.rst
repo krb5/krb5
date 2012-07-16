@@ -296,8 +296,8 @@ The libdefaults section may contain any of the following relations:
     set.  The default is not to search domain components.
 
 **renew_lifetime**
-    Sets the default renewable lifetime for initial ticket requests.
-    The default value is 0.
+    (:ref:`duration` string.)  Sets the default renewable lifetime
+    for initial ticket requests.  The default value is 0.
 
 **safe_checksum_type**
     An integer which specifies the type of checksum to use for the
@@ -309,8 +309,8 @@ The libdefaults section may contain any of the following relations:
     configuration option for the possible values and their meanings.
 
 **ticket_lifetime**
-    Sets the default lifetime for initial ticket requests.  The
-    default value is 1 day.
+    (:ref:`duration` string.)  Sets the default lifetime for initial
+    ticket requests.  The default value is 1 day.
 
 **udp_preference_limit**
     When sending a message to the KDC, the library will try using TCP

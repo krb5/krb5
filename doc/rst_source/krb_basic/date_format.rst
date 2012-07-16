@@ -1,12 +1,12 @@
 .. _datetime:
 
-Supported date and time formats.
-================================
+Supported date and time formats
+===============================
 
 .. _duration:
 
-Duration ("deltat")
--------------------
+Time duration
+-------------
 
 This format is used to express a time duration in the Kerberos
 configuration files and user commands.  The allowed formats are:
@@ -100,9 +100,9 @@ following ways:
  +------------------------+----------------------+              |
  | dd-month-yyyy:hh:mm:ss | 31-Dec-2014:23:59:00 |              |
  +------------------------+----------------------+--------------+
- | hh:mm:ss               | 20:30:00             | 8 o'clock in |
+ | hh:mm:ss               | 20:00:00             | 8 o'clock in |
  +------------------------+----------------------+ the evening  |
- | hhmmss                 | 203000               |              |
+ | hhmmss                 | 200000               |              |
  +------------------------+----------------------+--------------+
 
 (See :ref:`abbreviation`.)

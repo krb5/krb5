@@ -42,23 +42,8 @@ OPTIONS
     display verbose output.
 
 **-l** *lifetime*
-    requests a ticket with the lifetime *lifetime*.  The valid formats
-    for *lifetime* are:
-
-     ::
-
-        h:m:s
-        NdNhNmNs
-
-    where
-
-     ::
-
-        s  seconds
-        m  minutes
-        h  hours
-        d  days
-        N  number
+    (:ref:`duration` string.)  Requests a ticket with the lifetime
+    *lifetime*.
 
     For example, ``kinit -l 5:30`` or ``kinit -l 5h30m``.
 
@@ -68,17 +53,16 @@ OPTIONS
     will not override the configured maximum ticket lifetime.
 
 **-s** *start_time*
-    requests a postdated ticket.  Postdated tickets are issued with the
-    **invalid** flag set, and need to be resubmitted to the KDC for
-    validation before use.
+    (:ref:`duration` string.)  Requests a postdated ticket.  Postdated
+    tickets are issued with the **invalid** flag set, and need to be
+    resubmitted to the KDC for validation before use.
 
     *start_time* specifies the duration of the delay before the ticket
-    can become valid using the same time format as the  **-l** option.
+    can become valid.
 
 **-r** *renewable_life*
-    requests renewable tickets, with a total lifetime of
-    *renewable_life*.  The duration is in the same format as the
-    **-l** option.
+    (:ref:`duration` string.)  Requests renewable tickets, with a total
+    lifetime of *renewable_life*.
 
 **-f**
     requests forwardable tickets.

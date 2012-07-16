@@ -259,29 +259,14 @@ Ticket granting ticket options:
     when getting a ticket granting ticket from the Kerberos server.
 
 **-l** *lifetime*
-    specifies the lifetime to be requested for the ticket; if this
-    option is not specified, the default ticket lifetime (12 hours)
-    is used instead.  The valid formats for *lifetime* are:
-
-     ::
-
-        h:m:s
-        NdNhNmNs
-
-    where
-
-     ::
-
-        s  seconds
-        m  minutes
-        h  hours
-        d  days
-        N  number
+    (:ref:`duration` string.)  Specifies the lifetime to be requested
+    for the ticket; if this option is not specified, the default ticket
+    lifetime (12 hours) is used instead.
 
 **-r** *time*
-    specifies that the **renewable** option should be requested for
-    the ticket, and specifies the desired total lifetime of the
-    ticket using the same time format as the  **-l** option.
+    (:ref:`duration` string.)  Specifies that the **renewable** option
+    should be requested for the ticket, and specifies the desired
+    total lifetime of the ticket.
 
 **-p**
     specifies that the **proxiable** option should be requested for

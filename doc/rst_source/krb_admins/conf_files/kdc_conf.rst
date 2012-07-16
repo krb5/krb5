@@ -87,7 +87,7 @@ subsection:
     |kdcdir|\ ``/principal``.
 
 **default_principal_expiration**
-    (Absolute time string.)  Specifies the default expiration date of
+    (:ref:`abstime` string.)  Specifies the default expiration date of
     principals created in this realm.  The default value is 0, which
     means no expiration date.
 
@@ -253,14 +253,14 @@ subsection:
     values, see :ref:`Encryption_and_salt_types`.
 
 **max_life**
-    (Delta time string.)  Specifies the maximum time period for which
-    a ticket may be valid in this realm.  The default value is 24
-    hours.
+    (:ref:`duration` string.)  Specifies the maximum time period for
+    which a ticket may be valid in this realm.  The default value is
+    24 hours.
 
 **max_renewable_life**
-    (Delta time string.)  Specifies the maximum time period during
-    which a valid ticket may be renewed in this realm.  The default
-    value is 0.
+    (:ref:`duration` string.)  Specifies the maximum time period
+    during which a valid ticket may be renewed in this realm.
+    The default value is 0.
 
 **no_host_referral**
     (Whitespace- or comma-separated list.)  Lists services to block
