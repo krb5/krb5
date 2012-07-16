@@ -77,6 +77,11 @@ OPTIONS
 **-k**
     List keys held in a keytab file.
 
+**-i**
+    In combination with **-k**, defaults to using the default client
+    keytab instead of the default acceptor keytab, if no name is
+    given.
+
 **-t**
     Display the time entry timestamps for each keytab entry in the
     keytab file.

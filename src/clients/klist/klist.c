@@ -58,7 +58,7 @@ extern int optind;
 
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
 int show_etype = 0, show_addresses = 0, no_resolve = 0, print_version = 0;
-int show_adtype = 0, show_all = 0, list_all = 0;
+int show_adtype = 0, show_all = 0, list_all = 0, use_client_keytab = 0;
 char *defname;
 char *progname;
 krb5_int32 now;
@@ -92,6 +92,7 @@ static void usage()
     fprintf(stderr, _("\t-c specifies credentials cache\n"));
     fprintf(stderr, _("\t-k specifies keytab\n"));
     fprintf(stderr, _("\t   (Default is credentials cache)\n"));
+    fprintf(stderr, _("\t-i uses default client keytab if no name given\n"));
     fprintf(stderr, _("\t-l lists credential caches in collection\n"));
     fprintf(stderr, _("\t-A shows content of all credential caches\n"));
     fprintf(stderr, _("\t-e shows the encryption type\n"));
@@ -125,7 +126,7 @@ main(argc, argv)
     name = NULL;
     mode = DEFAULT;
     /* V=version so v can be used for verbose later if desired.  */
-    while ((c = getopt(argc, argv, "dfetKsnack45lAV")) != -1) {
+    while ((c = getopt(argc, argv, "dfetKsnacki45lAV")) != -1) {
         switch (c) {
         case 'd':
             show_adtype = 1;
@@ -158,6 +159,9 @@ main(argc, argv)
         case 'k':
             if (mode != DEFAULT) usage();
             mode = KEYTAB;
+            break;
+        case 'i':
+            use_client_keytab = 1;
             break;
         case '4':
             fprintf(stderr, _("Kerberos 4 is no longer supported\n"));
@@ -255,7 +259,12 @@ void do_keytab(name)
     char *pname;
     int code;
 
-    if (name == NULL) {
+    if (name == NULL && use_client_keytab) {
+        if ((code = krb5_kt_client_default(kcontext, &kt))) {
+            com_err(progname, code, _("while getting default client keytab"));
+            exit(1);
+        }
+    } else if (name == NULL) {
         if ((code = krb5_kt_default(kcontext, &kt))) {
             com_err(progname, code, _("while getting default keytab"));
             exit(1);

@@ -118,14 +118,15 @@ OPTIONS
     expired ticket cannot be renewed, even if the ticket is still
     within its renewable life.
 
-**-k** [**-t** *keytab_file*]
+**-k** [**-i** | **-t** *keytab_file*]
     requests a ticket, obtained from a key in the local host's keytab.
     The location of the keytab may be specified with the **-t**
-    *keytab_file* option; otherwise the default keytab will be used.
-    By default, a host ticket for the local host is requested, but any
-    principal may be specified.  On a KDC, the special keytab location
-    ``KDB:`` can be used to indicate that kinit should open the KDC
-    database and look up the key directly.  This permits an
+    *keytab_file* option, or with the **-i** option to specify the use
+    of the default client keytab; otherwise the default keytab will be
+    used.  By default, a host ticket for the local host is requested,
+    but any principal may be specified.  On a KDC, the special keytab
+    location ``KDB:`` can be used to indicate that kinit should open
+    the KDC database and look up the key directly.  This permits an
     administrator to obtain tickets as any principal that supports
     authentication based on the key.
 

@@ -18,6 +18,14 @@ output = realm.kinit(realm.user_princ, flags=['-k'], expected_code=1)
 if 'no suitable keys' not in output:
     fail('Expected error not seen in kinit output')
 
+# Test kinit and klist with client keytab defaults.
+realm.extract_keytab(realm.user_princ, realm.client_keytab);
+realm.kinit(realm.user_princ, flags=['-k', '-i'])
+realm.klist(realm.user_princ)
+out = realm.run_as_client([klist, '-k', '-i'])
+if realm.client_keytab not in out or realm.user_princ not in out:
+    fail('Expected output not seen from klist -k -i')
+
 # Test handling of kvno values beyond 255.
 princ = 'foo/bar@%s' % realm.realm
 realm.addprinc(princ)

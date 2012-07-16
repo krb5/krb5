@@ -120,6 +120,7 @@ struct k_opts
     char *armor_ccache;
 
     action_type action;
+    int use_client_keytab;
 
     int num_pa_opts;
     krb5_gic_opt_pa_data *pa_opts;
@@ -197,7 +198,7 @@ usage()
             "[-E" USAGE_LONG_ENTERPRISE "] "
             USAGE_BREAK
             "[-v] [-R] "
-            "[-k [-t keytab_file]] "
+            "[-k [-i|-t keytab_file]] "
             "[-c cachename] "
             USAGE_BREAK
             "[-S service_name] [-T ticket_armor_cache]"
@@ -223,6 +224,7 @@ usage()
     fprintf(stderr, _("\t-C canonicalize\n"));
     fprintf(stderr, _("\t-E client is enterprise principal name\n"));
     fprintf(stderr, _("\t-k use keytab\n"));
+    fprintf(stderr, _("\t-i use default client keytab (with -k)\n"));
     fprintf(stderr, _("\t-t filename of keytab to use\n"));
     fprintf(stderr, _("\t-c Kerberos 5 cache name\n"));
     fprintf(stderr, _("\t-S service\n"));
@@ -284,7 +286,7 @@ parse_options(argc, argv, opts)
     int errflg = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv, "r:fpFPn54aAVl:s:c:kt:T:RS:vX:CE"))
+    while ((i = GETOPT(argc, argv, "r:fpFPn54aAVl:s:c:kit:T:RS:vX:CE"))
            != -1) {
         switch (i) {
         case 'V':
@@ -348,6 +350,9 @@ parse_options(argc, argv, opts)
             break;
         case 'k':
             opts->action = INIT_KT;
+            break;
+        case 'i':
+            opts->use_client_keytab = 1;
             break;
         case 't':
             if (opts->keytab_name)
@@ -700,6 +705,12 @@ k5_kinit(opts, k5)
         }
         if (opts->verbose)
             fprintf(stderr, _("Using keytab: %s\n"), opts->keytab_name);
+    } else if (opts->action == INIT_KT && opts->use_client_keytab) {
+        code = krb5_kt_client_default(k5->ctx, &keytab);
+        if (code != 0) {
+            com_err(progname, code, _("resolving default client keytab"));
+            goto cleanup;
+        }
     }
 
     for (i = 0; i < opts->num_pa_opts; i++) {
