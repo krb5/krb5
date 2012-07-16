@@ -1947,22 +1947,17 @@ VOID CLeashView::ResetTreeNodes()
 
 VOID CLeashView::OnDestroy()
 {
+    CCacheDisplayData *elem;
     SetTrayIcon(NIM_DELETE);
 
-    CListView::OnDestroy();
-    if (WaitForSingleObject( ticketinfo.lockObj, INFINITE ) != WAIT_OBJECT_0)
-        throw("Unable to lock ticketinfo");
-    BOOL b_destroy = m_destroyTicketsOnExit && ticketinfo.Krb5.btickets;
-    ReleaseMutex(ticketinfo.lockObj);
-
-    if (b_destroy)
-    {
-        if (pLeash_kdestroy())
-        {
-            AfxMessageBox("There is a problem destroying tickets!",
-                       MB_OK|MB_ICONSTOP);
+    if (m_destroyTicketsOnExit) {
+        elem = m_ccacheDisplay;
+        while (elem != NULL) {
+            kdestroy(elem->m_ccacheName);
+            elem = elem->m_next;
         }
     }
+    CListView::OnDestroy();
 }
 
 VOID CLeashView::OnUpdateDestroyTicket(CCmdUI* pCmdUI)
