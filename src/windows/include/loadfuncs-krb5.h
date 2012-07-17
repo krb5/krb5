@@ -1337,6 +1337,13 @@ TYPEDEF_FUNC(
 TYPEDEF_FUNC(
     krb5_error_code,
     KRB5_CALLCONV,
+    krb5_enctype_to_name,
+    (krb5_enctype, krb5_boolean, char *, size_t)
+    );
+
+TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
     krb5_salttype_to_string,
     (krb5_int32, char *, size_t)
     );
@@ -1719,6 +1726,13 @@ TYPEDEF_FUNC(
     );
 
 TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
+    krb5_cc_get_full_name,
+    (krb5_context context, krb5_ccache cache, char **)
+    );
+
+TYPEDEF_FUNC(
     char *,
     KRB5_CALLCONV,
     krb5_kt_get_type,
@@ -1807,4 +1821,68 @@ TYPEDEF_FUNC(
     krb5_is_config_principal,
     (krb5_context, krb5_const_principal)
     );
+
+TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
+    krb5_cccol_cursor_new,
+    (krb5_context, krb5_cccol_cursor *)
+    );
+
+TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
+    krb5_cccol_cursor_next,
+    (krb5_context, krb5_cccol_cursor cursor, krb5_ccache *)
+    );
+
+TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
+    krb5_cccol_cursor_free,
+    (krb5_context, krb5_cccol_cursor *cursor)
+    );
+
+TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
+    krb5_cc_cache_match,
+    (krb5_context, krb5_principal, krb5_ccache *)
+    );
+
+TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
+    krb5_cc_new_unique,
+    (krb5_context, const char *, const char *, krb5_ccache *)
+    );
+
+TYPEDEF_FUNC(
+    krb5_boolean,
+    KRB5_CALLCONV,
+    krb5_cc_support_switch,
+    (krb5_context, const char *)
+    );
+
+TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
+    krb5_cc_switch,
+    (krb5_context, krb5_ccache)
+    );
+
+TYPEDEF_FUNC(
+    void,
+    KRB5_CALLCONV,
+    krb5_free_string,
+    (krb5_context, char *)
+    );
+
+TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
+    krb5int_cc_user_set_default_name,
+    (krb5_context context, const char *)
+    );
+
 #endif /* __LOADFUNCS_KRB5_H__ */

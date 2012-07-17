@@ -106,6 +106,7 @@ private:
 public:
 	static HWND			m_hProgram;
 	static HINSTANCE	m_hLeashDLL;
+	static HINSTANCE	m_hComErr;
 ////
 #ifndef NO_KRB4
 	static HINSTANCE	m_hKrb4DLL;

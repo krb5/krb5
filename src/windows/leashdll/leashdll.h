@@ -172,6 +172,7 @@ extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_address_list);
 extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_out_ccache);
 extern DECL_FUNC_PTR(krb5_get_init_creds_password);
 extern DECL_FUNC_PTR(krb5_build_principal_ext);
+extern DECL_FUNC_PTR(krb5_cc_get_name);
 extern DECL_FUNC_PTR(krb5_cc_resolve);
 extern DECL_FUNC_PTR(krb5_cc_default);
 extern DECL_FUNC_PTR(krb5_cc_default_name);
@@ -189,9 +190,11 @@ extern DECL_FUNC_PTR(krb5_cc_end_seq_get);
 // extern DECL_FUNC_PTR(krb5_cc_remove_cred);
 extern DECL_FUNC_PTR(krb5_cc_set_flags);
 // extern DECL_FUNC_PTR(krb5_cc_get_type);
+extern DECL_FUNC_PTR(krb5_cc_get_full_name);
 extern DECL_FUNC_PTR(krb5_free_context);
 extern DECL_FUNC_PTR(krb5_free_cred_contents);
 extern DECL_FUNC_PTR(krb5_free_principal);
+extern DECL_FUNC_PTR(krb5_free_string);
 extern DECL_FUNC_PTR(krb5_get_in_tkt_with_password);
 extern DECL_FUNC_PTR(krb5_init_context);
 extern DECL_FUNC_PTR(krb5_parse_name);
@@ -225,6 +228,15 @@ extern DECL_FUNC_PTR(krb5_free_default_realm);
 extern DECL_FUNC_PTR(krb5_principal_compare);
 extern DECL_FUNC_PTR(krb5_string_to_deltat);
 extern DECL_FUNC_PTR(krb5_is_config_principal);
+extern DECL_FUNC_PTR(krb5_cccol_cursor_new);
+extern DECL_FUNC_PTR(krb5_cccol_cursor_next);
+extern DECL_FUNC_PTR(krb5_cccol_cursor_free);
+extern DECL_FUNC_PTR(krb5_cc_cache_match);
+extern DECL_FUNC_PTR(krb5_cc_get_type);
+extern DECL_FUNC_PTR(krb5_cc_new_unique);
+extern DECL_FUNC_PTR(krb5_cc_support_switch);
+extern DECL_FUNC_PTR(krb5_cc_switch);
+extern DECL_FUNC_PTR(krb5int_cc_user_set_default_name);
 
 #ifndef NO_KRB4
 // Krb524 functions

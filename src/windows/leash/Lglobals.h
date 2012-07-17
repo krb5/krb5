@@ -17,6 +17,7 @@
 #define LEASHGLOBALS_H
 
 #include <tlhelp32.h>
+#include <loadfuncs-com_err.h>
 #include <loadfuncs-krb5.h>
 ////#include <loadfuncs-krb.h>
 #include <loadfuncs-profile.h>
@@ -167,6 +168,9 @@ extern DECL_FUNC_PTR(CreateToolhelp32Snapshot);
 extern DECL_FUNC_PTR(Module32First);
 extern DECL_FUNC_PTR(Module32Next);
 
+// com_err functions
+extern DECL_FUNC_PTR(error_message);
+
 // krb5 functions
 extern DECL_FUNC_PTR(krb5_cc_default_name);
 extern DECL_FUNC_PTR(krb5_cc_set_default_name);
@@ -185,6 +189,29 @@ extern DECL_FUNC_PTR(krb5_unparse_name);
 extern DECL_FUNC_PTR(krb5_free_unparsed_name);
 extern DECL_FUNC_PTR(krb5_free_principal);
 extern DECL_FUNC_PTR(krb5_cc_close);
+extern DECL_FUNC_PTR(krb5_cc_default);
+extern DECL_FUNC_PTR(krb5_cc_destroy);
+extern DECL_FUNC_PTR(krb5_cc_set_flags);
+extern DECL_FUNC_PTR(krb5_cc_get_name);
+extern DECL_FUNC_PTR(krb5_cc_start_seq_get);
+extern DECL_FUNC_PTR(krb5_cc_end_seq_get);
+extern DECL_FUNC_PTR(krb5_cc_next_cred);
+extern DECL_FUNC_PTR(krb5_cccol_cursor_new);
+extern DECL_FUNC_PTR(krb5_cccol_cursor_next);
+extern DECL_FUNC_PTR(krb5_cccol_cursor_free);
+extern DECL_FUNC_PTR(krb5_decode_ticket);
+extern DECL_FUNC_PTR(krb5_free_ticket);
+extern DECL_FUNC_PTR(krb5_init_context);
+extern DECL_FUNC_PTR(krb5_is_config_principal);
+extern DECL_FUNC_PTR(krb5_cc_switch);
+extern DECL_FUNC_PTR(krb5_build_principal_ext);
+extern DECL_FUNC_PTR(krb5_get_renewed_creds);
+extern DECL_FUNC_PTR(krb5_cc_initialize);
+extern DECL_FUNC_PTR(krb5_cc_store_cred);
+extern DECL_FUNC_PTR(krb5_cc_get_full_name);
+extern DECL_FUNC_PTR(krb5_enctype_to_name);
+extern DECL_FUNC_PTR(krb5_cc_get_type);
+extern DECL_FUNC_PTR(krb5int_cc_user_set_default_name);
 // extern DECL_FUNC_PTR(krb5_get_host_realm);
 
 // profile functions
