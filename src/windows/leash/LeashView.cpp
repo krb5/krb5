@@ -1016,6 +1016,14 @@ VOID CLeashView::OnMakeDefault()
             code = pkrb5_cc_resolve(ctx, elem->m_ccacheName, &cc);
             if (!code)
                 code = pkrb5_cc_switch(ctx, cc);
+            if (!code) {
+                const char *cctype = pkrb5_cc_get_type(ctx, cc);
+                if (cctype != NULL) {
+                    char defname[20];
+                    sprintf_s(defname, "%s:", cctype);
+                    code = pkrb5int_cc_user_set_default_name(ctx, defname);
+                }
+            }
             pkrb5_free_context(ctx);
             CLeashApp::m_bUpdateDisplay = TRUE;
             break;
