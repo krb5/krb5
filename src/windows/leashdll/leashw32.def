@@ -101,9 +101,7 @@ EXPORTS
 
 	; XXX - These have to go...
 	not_an_API_LeashAFSGetToken
-	not_an_API_LeashKRB5GetTickets
 	not_an_API_LeashFreeTicketList
 	not_an_API_LeashKRB4GetTickets
 	not_an_API_LeashGetTimeServerName
     not_an_API_Leash_AcquireInitialTicketsIfNeeded
-    not_an_API_LeashKRB5FreeTickets
