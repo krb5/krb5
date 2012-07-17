@@ -2878,17 +2878,121 @@ acquire_tkt_send_msg(krb5_context ctx, const char * title,
     return 0;
 }
 
+static BOOL cc_have_tickets(krb5_context ctx, krb5_ccache cache)
+{
+    krb5_cc_cursor cur = NULL;
+    krb5_creds creds;
+    krb5_flags flags;
+    krb5_error_code code;
+    BOOL have_tickets = FALSE;
+
+    // Don't need the actual ticket, also turns off OPENCLOSE mode
+    flags = KRB5_TC_NOTICKET;
+    code = pkrb5_cc_set_flags(ctx, cache, flags);
+    if (code)
+        goto cleanup;
+    code = pkrb5_cc_start_seq_get(ctx, cache, &cur);
+    if (code)
+        goto cleanup;
+
+    _tzset();
+    while (!(code = pkrb5_cc_next_cred(ctx, cache, &cur, &creds))) {
+        if ((!pkrb5_is_config_principal(ctx, creds.server)) &&
+            (creds.times.endtime - time(0) > 0))
+            have_tickets = TRUE;
+
+        pkrb5_free_cred_contents(ctx, &creds);
+    }
+    if (code == KRB5_CC_END) {
+        code = pkrb5_cc_end_seq_get(ctx, cache, &cur);
+        if (code)
+            goto cleanup;
+        flags = KRB5_TC_OPENCLOSE;      /* turns on OPENCLOSE mode */
+        code = pkrb5_cc_set_flags(ctx, cache, flags);
+        if (code)
+            goto cleanup;
+    }
+cleanup:
+    return have_tickets;
+}
+
+static BOOL
+cc_have_tickets_for_princ(krb5_context ctx,
+                          krb5_ccache cache,
+                          krb5_principal princ)
+{
+    krb5_error_code code;
+    krb5_principal cc_princ = NULL;
+    BOOL have_tickets = FALSE;
+    code = pkrb5_cc_get_principal(ctx, cache, &cc_princ);
+    if (code)
+        goto cleanup;
+
+    if (pkrb5_principal_compare(ctx, princ, cc_princ))
+        have_tickets = cc_have_tickets(ctx, cache);
+
+cleanup:
+    if (cc_princ != NULL)
+        pkrb5_free_principal(ctx, cc_princ);
+    return have_tickets;
+}
+
+static BOOL cc_default_have_tickets(krb5_context ctx)
+{
+    krb5_ccache cache = NULL;
+    BOOL have_tickets = FALSE;
+    if (pkrb5_cc_default(ctx, &cache) == 0)
+        have_tickets = cc_have_tickets(ctx, cache);
+    if (cache != NULL)
+        pkrb5_cc_close(ctx, cache);
+    return have_tickets;
+}
+
+static BOOL
+cccol_have_tickets_for_princ(krb5_context ctx,
+                             krb5_principal princ,
+                             char *ccname,
+                             int cclen)
+{
+    krb5_error_code code;
+    krb5_ccache cache;
+    krb5_cccol_cursor cursor;
+    BOOL have_tickets = FALSE;
+    char *ccfullname;
+
+    code = pkrb5_cccol_cursor_new(ctx, &cursor);
+    if (code)
+        goto cleanup;
+
+    while (!have_tickets &&
+           !(code = pkrb5_cccol_cursor_next(ctx, cursor, &cache)) &&
+           cache != NULL) {
+        if (cc_have_tickets_for_princ(ctx, cache, princ)) {
+            if (pkrb5_cc_get_full_name(ctx, cache, &ccfullname)==0) {
+                strcpy_s(ccname, cclen, ccfullname);
+                pkrb5_free_string(ctx, ccfullname);
+                have_tickets = TRUE;
+            }
+        }
+        pkrb5_cc_close(ctx, cache);
+    }
+    pkrb5_cccol_cursor_free(ctx, &cursor);
+cleanup:
+
+    return have_tickets;
+}
+
 static void
 acquire_tkt_no_princ(krb5_context context, char * ccname, int cclen)
 {
     TicketList 		*list = NULL;
-    TICKETINFO   	ticketinfo;
     krb5_context        ctx;
     DWORD 		dwMsLsaImport = Leash_get_default_mslsa_import();
     DWORD		gle;
     char ccachename[272]="";
     char loginenv[16];
     BOOL prompt;
+    BOOL haveTickets;
 
     GetEnvironmentVariable("KERBEROSLOGIN_NEVER_PROMPT", loginenv, sizeof(loginenv));
     prompt = (GetLastError() == ERROR_ENVVAR_NOT_FOUND);
@@ -2904,10 +3008,9 @@ acquire_tkt_no_princ(krb5_context context, char * ccname, int cclen)
 	GetEnvironmentVariable("KRB5CCNAME", ccachename, sizeof(ccachename));
     }
 
-    not_an_API_LeashKRB5GetTickets(&ticketinfo,&ctx);
-
-    if ( ticketinfo.btickets != GOOD_TICKETS &&
-         dwMsLsaImport && Leash_importable() ) {
+    haveTickets = cc_default_have_tickets(ctx);
+    if ((!haveTickets) &&
+        dwMsLsaImport && Leash_importable() ) {
         // We have the option of importing tickets from the MSLSA
         // but should we?  Do the tickets in the MSLSA cache belong
         // to the default realm used by Leash?  Does the default
@@ -2968,13 +3071,11 @@ acquire_tkt_no_princ(krb5_context context, char * ccname, int cclen)
 
         if ( import ) {
             Leash_import();
-
-            not_an_API_LeashKRB5FreeTickets(&ticketinfo);
-            not_an_API_LeashKRB5GetTickets(&ticketinfo,&ctx);
+            haveTickets = cc_default_have_tickets(ctx);
         }
     }
 
-    if ( prompt && ticketinfo.btickets != GOOD_TICKETS ) {
+    if ( prompt && !haveTickets ) {
 	acquire_tkt_send_msg(ctx, NULL, ccachename, NULL, ccname, cclen);
         /*
          * If the ticket manager returned an alternative credential cache
@@ -2988,313 +3089,57 @@ acquire_tkt_no_princ(krb5_context context, char * ccname, int cclen)
 	strncpy(ccname, ccachename, cclen);
 	ccname[cclen-1] = '\0';
     }
-    not_an_API_LeashKRB5FreeTickets(&ticketinfo);
     if ( !context )
         pkrb5_free_context(ctx);
 }
 
 
 static void
-acquire_tkt_for_princ(krb5_context context, krb5_principal desiredPrincipal,
+acquire_tkt_for_princ(krb5_context ctx, krb5_principal desiredPrincipal,
 		      char * ccname, int cclen)
 {
-    TICKETINFO   	ticketinfo;
-    krb5_context        ctx;
-    DWORD 		dwMsLsaImport = Leash_get_default_mslsa_import();
     DWORD		gle;
     char 		ccachename[272]="";
     char 		loginenv[16];
     BOOL 		prompt;
-    char 		*name = NULL;
 
     GetEnvironmentVariable("KERBEROSLOGIN_NEVER_PROMPT", loginenv, sizeof(loginenv));
     prompt = (GetLastError() == ERROR_ENVVAR_NOT_FOUND);
 
-    ctx = context;
-
     SetLastError(0);
     GetEnvironmentVariable("KRB5CCNAME", ccachename, sizeof(ccachename));
     gle = GetLastError();
-    if ( ((gle == ERROR_ENVVAR_NOT_FOUND) || !ccachename[0]) && context ) {
+    if ((gle == ERROR_ENVVAR_NOT_FOUND || !ccachename[0]) && ctx != NULL) {
         const char * ccdef = pkrb5_cc_default_name(ctx);
 	SetEnvironmentVariable("KRB5CCNAME", ccdef ? ccdef : NULL);
 	GetEnvironmentVariable("KRB5CCNAME", ccachename, sizeof(ccachename));
     }
-
-    not_an_API_LeashKRB5GetTickets(&ticketinfo,&ctx);
-
-    pkrb5_unparse_name(ctx, desiredPrincipal, &name);
-
-    if ( ticketinfo.btickets != GOOD_TICKETS &&
-         dwMsLsaImport && Leash_importable() ) {
-        // We have the option of importing tickets from the MSLSA
-        // but should we?  Does the MSLSA principal match the requested
-	// principal?  If not, there is no benefit to importing.
-        int import = 0;
-	krb5_error_code code;
-	krb5_ccache mslsa_ccache=NULL;
-	krb5_principal princ = NULL;
-
-	if (code = pkrb5_cc_resolve(ctx, "MSLSA:", &mslsa_ccache))
-	    goto cleanup;
-
-	if (code = pkrb5_cc_get_principal(ctx, mslsa_ccache, &princ))
-	    goto cleanup;
-
-	import = pkrb5_principal_compare(ctx, desiredPrincipal, princ);
-
-      cleanup:
-	if (princ)
-	    pkrb5_free_principal(ctx, princ);
-
-	if (mslsa_ccache)
-	    pkrb5_cc_close(ctx, mslsa_ccache);
-
-
-        if ( import ) {
-	    /* Construct a new default ccache name into which the MSLSA:
-	     * credentials can be imported, set the default ccache to that
-	     * ccache, and then only import if that ccache does not already
-	     * contain valid tickets */
-	    sprintf(ccachename, "API:%s", name);
-
-	    SetEnvironmentVariable("KRB5CCNAME", ccachename);
-
-	    not_an_API_LeashKRB5FreeTickets(&ticketinfo);
-	    not_an_API_LeashKRB5GetTickets(&ticketinfo,&ctx);
-
-	    if (ticketinfo.btickets != GOOD_TICKETS) {
-		Leash_import();
-
-		not_an_API_LeashKRB5FreeTickets(&ticketinfo);
-		not_an_API_LeashKRB5GetTickets(&ticketinfo,&ctx);
-	    }
-	}
-    }
-
-    if (prompt) {
-	if (ticketinfo.btickets != GOOD_TICKETS || strcmp(name,ticketinfo.principal)) {
-	    acquire_tkt_send_msg(ctx, NULL, ccachename, desiredPrincipal, ccname, cclen);
+    if (!cccol_have_tickets_for_princ(ctx, desiredPrincipal, ccname, cclen)) {
+        if (prompt) {
+	        acquire_tkt_send_msg(ctx, NULL,
+                                 ccachename, desiredPrincipal, ccname, cclen);
             /*
              * If the ticket manager returned an alternative credential cache
              * remember it as the default for this process.
              */
-            if ( ccname && ccname[0] && strcmp(ccachename,ccname) ) {
+            if (ccname != NULL && ccname[0] &&
+                strcmp(ccachename, ccname)) {
                 SetEnvironmentVariable("KRB5CCNAME",ccname);
             }
-	} else if (ccachename[0] && ccname) {
-	    strncpy(ccname, ccachename, cclen);
-	    ccname[cclen-1] = '\0';
-	}
-    }
-    not_an_API_LeashKRB5FreeTickets(&ticketinfo);
-
-    if (name)
-	pkrb5_free_unparsed_name(ctx, name);
-
-    if ( !context )
-        pkrb5_free_context(ctx);
-}
-
-
-static int
-leash_int_get_princ_expiration_time(krb5_context ctx, krb5_ccache cc,
-				    krb5_principal desiredPrincipal,
-				    krb5_timestamp * pexpiration)
-{
-    krb5_principal principal = 0;
-    char * princ_name = NULL;
-    char * desired_name = NULL;
-    krb5_creds creds;
-    krb5_error_code code, code2;
-    krb5_error_code cc_code;
-    krb5_cc_cursor cur;
-    krb5_timestamp now, expiration = 0;
-
-    int rv = -1;
-
-    if (!ctx || !cc || !desiredPrincipal || !pexpiration)
-        return -1;
-
-    code = pkrb5_cc_get_principal(ctx, cc, &principal);
-    if ( code )
-        return -1;
-
-
-    code = pkrb5_unparse_name(ctx, desiredPrincipal, &desired_name);
-    code2 = pkrb5_unparse_name(ctx, principal, &princ_name);
-
-    /* compare principal to ident. */
-    if ( code || !princ_name ||	code2 || !desired_name ||
-	 strcmp(princ_name, desired_name) ) {
-        if (princ_name)
-            pkrb5_free_unparsed_name(ctx, princ_name);
-        if (desired_name)
-            pkrb5_free_unparsed_name(ctx, desired_name);
-        pkrb5_free_principal(ctx, principal);
-        return -1;
-    }
-
-    pkrb5_free_unparsed_name(ctx, princ_name);
-    pkrb5_free_unparsed_name(ctx, desired_name);
-    pkrb5_free_principal(ctx, principal);
-
-    code = pkrb5_timeofday(ctx, &now);
-
-    if (code)
-        return -1;
-
-    cc_code = pkrb5_cc_start_seq_get(ctx, cc, &cur);
-
-    while (!(cc_code = pkrb5_cc_next_cred(ctx, cc, &cur, &creds))) {
-        krb5_data * c0 = krb5_princ_name(ctx, creds.server);
-        krb5_data * c1  = krb5_princ_component(ctx, creds.server, 1);
-        krb5_data * r = krb5_princ_realm(ctx, creds.server);
-
-        if ( c0 && c1 && r && c1->length == r->length &&
-             !strncmp(c1->data,r->data,r->length) &&
-             !strncmp("krbtgt",c0->data,c0->length) ) {
-
-            /* we have a TGT, check for the expiration time.
-             * if it is valid and renewable, use the renew time
-             */
-
-            if (!(creds.ticket_flags & TKT_FLG_INVALID) &&
-                creds.times.starttime < now && creds.times.endtime > now) {
-                expiration = creds.times.endtime;
-
-                if ((creds.ticket_flags & TKT_FLG_RENEWABLE) &&
-                    (creds.times.renew_till > creds.times.endtime)) {
-                    expiration = creds.times.renew_till;
-                }
-            }
         }
-    }
-
-    if (cc_code == KRB5_CC_END) {
-        cc_code = pkrb5_cc_end_seq_get(ctx, cc, &cur);
-        rv = 0;
-        *pexpiration = expiration;
-    }
-
-    return rv;
-}
-
-/* returns 0 on success */
-static int
-leash_int_find_ccache_for_princ(krb5_context ctx, krb5_principal princ,
-				char * buffer, int * pcbbuf)
-{
-    krb5_ccache         cache = 0;
-    krb5_error_code     code;
-    apiCB *             cc_ctx = 0;
-    struct _infoNC **   pNCi = NULL;
-    int                 i;
-    krb5_timestamp      expiration = 0;
-    krb5_timestamp      best_match_expiration = 0;
-    char                best_match_ccname[256] = "";
-    DWORD 		dwMsLsaImport = Leash_get_default_mslsa_import();
-
-    if (!buffer || !pcbbuf)
-	return -1;
-
-    code = cc_initialize(&cc_ctx, CC_API_VER_2, NULL, NULL);
-    if (code)
-        goto _exit;
-
-    code = cc_get_NC_info(cc_ctx, &pNCi);
-    if (code)
-        goto _exit;
-
-    for(i=0; pNCi[i]; i++) {
-        if (pNCi[i]->vers != CC_CRED_V5)
-            continue;
-
-        code = pkrb5_cc_resolve(ctx, pNCi[i]->name, &cache);
-        if (code)
-            continue;
-
-        /* need a function to check the cache for the identity
-         * and determine if it has valid tickets.  If it has
-         * the right identity and valid tickets, store the
-         * expiration time and the cache name.  If it has the
-         * right identity but no valid tickets, store the ccache
-         * name and an expiration time of zero.  if it does not
-         * have the right identity don't save the name.
-         *
-         * Keep searching to find the best cache available.
-         */
-
-        if (!leash_int_get_princ_expiration_time(ctx, cache, princ,
-						 &expiration)) {
-            if ( expiration > best_match_expiration ) {
-                best_match_expiration = expiration;
-                strncpy(best_match_ccname, "API:",
-                              sizeof(best_match_ccname));
-                strncat(best_match_ccname, pNCi[i]->name,
-			 sizeof(best_match_ccname));
-		best_match_ccname[sizeof(best_match_ccname)-1] = '\0';
-                expiration = 0;
-            }
-        }
-
-        if(ctx != NULL && cache != NULL)
-            pkrb5_cc_close(ctx, cache);
-        cache = 0;
-    }
-
-    if (dwMsLsaImport) {
-	code = pkrb5_cc_resolve(ctx, "MSLSA:", &cache);
-	if (code == 0 && cache) {
-	    if (!leash_int_get_princ_expiration_time(ctx, cache, princ,
-						      &expiration)) {
-		if ( expiration > best_match_expiration ) {
-		    best_match_expiration = expiration;
-		    strcpy(best_match_ccname, "MSLSA:");
-		    expiration = 0;
-		}
-	    }
 	}
-    }
-
-    if (ctx != NULL && cache != NULL)
-	pkrb5_cc_close(ctx, cache);
-
-    cache = 0;
-
- _exit:
-    if (pNCi)
-        cc_free_NC_info(cc_ctx, &pNCi);
-
-    if (cc_ctx)
-        cc_shutdown(&cc_ctx);
-
-    if (best_match_ccname[0]) {
-	strncpy(buffer, best_match_ccname, *pcbbuf);
-	buffer[*pcbbuf-1]='\0';
-
-	*pcbbuf = strlen(buffer) + 1;
-	return 0;
-    }
-
-    return -1;
 }
+
 
 void FAR
 not_an_API_Leash_AcquireInitialTicketsIfNeeded(krb5_context context,
 					       krb5_principal desiredKrb5Principal,
 					       char * ccname, int cclen)
 {
-    char		*desiredName = 0;
-    char                *desiredRealm = 0;
-    TicketList 		*list = NULL;
-    char ccachename[272]="";
-
     if (!desiredKrb5Principal) {
 	acquire_tkt_no_princ(context, ccname, cclen);
     } else {
-	if (leash_int_find_ccache_for_princ(context, desiredKrb5Principal, ccname, &cclen))
-	    acquire_tkt_for_princ(context, desiredKrb5Principal, ccname, cclen);
+        acquire_tkt_for_princ(context, desiredKrb5Principal, ccname, cclen);
     }
     return;
 }
