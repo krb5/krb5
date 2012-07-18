@@ -212,9 +212,8 @@ krb5_def_store_mkey_list(krb5_context       context,
     krb5_kt_close(context, kt);
 
     if (retval != 0) {
-        /* delete tmp keyfile if it exists and an error occurrs */
-        if (stat(keyfile, &stb) >= 0)
-            (void) unlink(tmp_ktpath);
+        /* Clean up by deleting the tmp keyfile if it exists. */
+        (void)unlink(tmp_ktpath);
     } else {
         /* rename original keyfile to original filename */
         if (rename(tmp_ktpath, keyfile) < 0) {
