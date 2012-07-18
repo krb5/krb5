@@ -126,7 +126,7 @@ Abbreviations used in this document
 | *N*    : number;
 | *pp*   : AM or PM;
 | *ss*   : seconds  (00-60);
-| *tt*   : time units (houris, minutes, min, seconds, sec);
+| *tt*   : time units (hours, minutes, min, seconds, sec);
 | *yyyy* : year;
 | *yy*   : last two digits of the year;
 | *Z*    : alphabetic time zone abbreviation;
