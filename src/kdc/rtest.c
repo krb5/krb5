@@ -62,7 +62,7 @@ main(int argc, char **argv)
     krb5_data ntrans;
     krb5_principal tgs, cl, sv;
     krb5_error_code kret;
-    kdc_realm_t     kdc_realm;
+    krb5_context ctx;
 
     if (argc < 4) {
         fprintf(stderr, "not enough args\n");
@@ -71,13 +71,11 @@ main(int argc, char **argv)
 
 
     /* Get a context */
-    kret = krb5int_init_context_kdc(&kdc_realm.realm_context);
+    kret = krb5int_init_context_kdc(&ctx);
     if (kret) {
         com_err(argv[0], kret, "while getting krb5 context");
         exit(2);
     }
-    /* Needed so kdc_context will work */
-    kdc_active_realm = &kdc_realm;
 
     ntrans.length = 0;
     ntrans.data = 0;
@@ -89,9 +87,9 @@ main(int argc, char **argv)
         otrans.data = 0;
     memcpy(otrans.data,argv[1], otrans.length);
 
-    tgs = make_princ(kdc_context, argv[2], argv[0]);
-    cl  = make_princ(kdc_context, argv[3], argv[0]);
-    sv  = make_princ(kdc_context, argv[4], argv[0]);
+    tgs = make_princ(ctx, argv[2], argv[0]);
+    cl  = make_princ(ctx, argv[3], argv[0]);
+    sv  = make_princ(ctx, argv[4], argv[0]);
 
     add_to_transited(&otrans,&ntrans,tgs,cl,sv);
 
@@ -102,10 +100,10 @@ main(int argc, char **argv)
         free(otrans.data);
     free(ntrans.data);
 
-    krb5_free_principal(kdc_realm.realm_context, tgs);
-    krb5_free_principal(kdc_realm.realm_context, cl);
-    krb5_free_principal(kdc_realm.realm_context, sv);
-    krb5_free_context(kdc_realm.realm_context);
+    krb5_free_principal(ctx, tgs);
+    krb5_free_principal(ctx, cl);
+    krb5_free_principal(ctx, sv);
+    krb5_free_context(ctx);
 
     exit(0);
 }
