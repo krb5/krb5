@@ -159,6 +159,11 @@ load_dump version 6".  If filename is not specified, or is the string
     load_dump version 5").  This was the dump format produced on
     releases prior to 1.8.
 
+**-r18**
+    causes the dump to be in the Kerberos 5 1.8 format ("kdb5_util
+    load_dump version 6").  This was the dump format produced on
+    releases prior to 1.11.
+
 **-verbose**
     causes the name of each principal and policy to be printed as it
     is dumped.
@@ -219,6 +224,16 @@ Options:
 **-ov**
     requires the database to be in "ovsec_adm_import" format.  Must be
     used with the **-update** option.
+
+**-r13**
+    requires the database to be in Kerberos 5 1.3 format ("kdb5_util
+    load_dump version 5").  This was the dump format produced on
+    releases prior to 1.8.
+
+**-r18**
+    requires the database to be in Kerberos 5 1.8 format ("kdb5_util
+    load_dump version 6").  This was the dump format produced on
+    releases prior to 1.11.
 
 **-hash**
     requires the database to be stored as a hash.  If this option is

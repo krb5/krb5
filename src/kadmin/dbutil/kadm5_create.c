@@ -108,7 +108,7 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
         return retval;
     if ((retval = kadm5_init(context, progname, NULL, NULL, params,
                              KADM5_STRUCT_VERSION,
-                             KADM5_API_VERSION_3,
+                             KADM5_API_VERSION_4,
                              db5util_db_args,
                              &handle))) {
         com_err(progname, retval, _("while initializing the Kerberos admin "

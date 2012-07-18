@@ -62,4 +62,5 @@ error_code KADM5_MISSING_KRB5_CONF_PARAMS, "Missing parameters in krb5.conf requ
 error_code KADM5_XDR_FAILURE,		"XDR encoding error"
 error_code KADM5_CANT_RESOLVE, "Cannot resolve network address for admin server in requested realm"
 error_code KADM5_PASS_Q_GENERIC, "Unspecified password quality failure"
+error_code KADM5_BAD_KEYSALTS, "Invalid key/salt tuples"
 end

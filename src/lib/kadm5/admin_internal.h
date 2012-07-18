@@ -32,7 +32,7 @@
             return KADM5_BAD_API_VERSION;                               \
         if (srvr->api_version < KADM5_API_VERSION_2)                    \
             return old_api_version;                                     \
-        if (srvr->api_version > KADM5_API_VERSION_3)                    \
+        if (srvr->api_version > KADM5_API_VERSION_4)                    \
             return new_api_version;                                     \
     }
 

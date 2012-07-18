@@ -69,6 +69,7 @@ check-pytests:: hist
 	$(RUNPYTEST) $(srcdir)/t_lockout.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadm5_hook.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_keyrollover.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_allowed_keysalts.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_renew.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_renprinc.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_ccache.py $(PYTESTFLAGS)

@@ -62,7 +62,7 @@ kinit_kdb_init(krb5_context *pcontext, char *realm)
     config.realm = realm;
     retval = kadm5_init(*pcontext, "kinit", NULL /*pass*/,
                         "kinit", &config,
-                        KADM5_STRUCT_VERSION, KADM5_API_VERSION_3, NULL,
+                        KADM5_STRUCT_VERSION, KADM5_API_VERSION_4, NULL,
                         &server_handle);
     if (retval)
         return retval;

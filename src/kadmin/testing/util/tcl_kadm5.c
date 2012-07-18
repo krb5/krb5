@@ -2528,6 +2528,8 @@ void Tcl_kadm5_init(Tcl_Interp *interp)
     Tcl_SetVar(interp, "KADM5_API_VERSION_2", buf, TCL_GLOBAL_ONLY);
     (void) sprintf(buf, "%d", KADM5_API_VERSION_3);
     Tcl_SetVar(interp, "KADM5_API_VERSION_3", buf, TCL_GLOBAL_ONLY);
+    (void) sprintf(buf, "%d", KADM5_API_VERSION_4);
+    Tcl_SetVar(interp, "KADM5_API_VERSION_4", buf, TCL_GLOBAL_ONLY);
     (void) sprintf(buf, "%d", KADM5_API_VERSION_MASK);
     Tcl_SetVar(interp, "KADM5_API_VERSION_MASK", buf, TCL_GLOBAL_ONLY);
     (void) sprintf(buf, "%d", KADM5_STRUCT_VERSION_MASK);

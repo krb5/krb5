@@ -489,13 +489,13 @@ kadmin_startup(int argc, char *argv[])
                  "credentials.\n"), princstr);
         retval = kadm5_init_with_creds(context, princstr, cc, svcname, &params,
                                        KADM5_STRUCT_VERSION,
-                                       KADM5_API_VERSION_3, db_args, &handle);
+                                       KADM5_API_VERSION_4, db_args, &handle);
     } else if (use_anonymous) {
         printf(_("Authenticating as principal %s with password; "
                  "anonymous requested.\n"), princstr);
         retval = kadm5_init_anonymous(context, princstr, svcname, &params,
                                       KADM5_STRUCT_VERSION,
-                                      KADM5_API_VERSION_3, db_args, &handle);
+                                      KADM5_API_VERSION_4, db_args, &handle);
     } else if (use_keytab) {
         if (keytab_name)
             printf(_("Authenticating as principal %s with keytab %s.\n"),
@@ -505,13 +505,13 @@ kadmin_startup(int argc, char *argv[])
                    princstr);
         retval = kadm5_init_with_skey(context, princstr, keytab_name, svcname,
                                       &params, KADM5_STRUCT_VERSION,
-                                      KADM5_API_VERSION_3, db_args, &handle);
+                                      KADM5_API_VERSION_4, db_args, &handle);
     } else {
         printf(_("Authenticating as principal %s with password.\n"),
                princstr);
         retval = kadm5_init_with_password(context, princstr, password, svcname,
                                           &params, KADM5_STRUCT_VERSION,
-                                          KADM5_API_VERSION_3, db_args,
+                                          KADM5_API_VERSION_4, db_args,
                                           &handle);
     }
     if (retval) {
@@ -855,14 +855,14 @@ cleanup:
 }
 
 static void
-kadmin_free_tl_data(kadm5_principal_ent_t princ)
+kadmin_free_tl_data(krb5_int16 *n_tl_datap, krb5_tl_data **tl_datap)
 {
-    krb5_tl_data *tl_data = princ->tl_data, *next;
-    int n_tl_data = princ->n_tl_data;
+    krb5_tl_data *tl_data = *tl_datap, *next;
+    int n_tl_data = *n_tl_datap;
     int i;
 
-    princ->n_tl_data = 0;
-    princ->tl_data = NULL;
+    *n_tl_datap = 0;
+    *tl_datap = NULL;
 
     for (i = 0; tl_data && (i < n_tl_data); i++) {
         next = tl_data->tl_data_next;
@@ -872,12 +872,12 @@ kadmin_free_tl_data(kadm5_principal_ent_t princ)
     }
 }
 
-/* Construct a tl_data element and add it to the tail of princ->tl_data. */
+/* Construct a tl_data element and add it to the tail of *tl_datap. */
 static void
-add_tl_data(kadm5_principal_ent_t princ, krb5_int16 tl_type, krb5_ui_2 len,
-            krb5_octet *contents)
+add_tl_data(krb5_int16 *n_tl_datap, krb5_tl_data **tl_datap,
+            krb5_int16 tl_type, krb5_ui_2 len, krb5_octet *contents)
 {
-    krb5_tl_data *tl_data, **tlp;
+    krb5_tl_data *tl_data;
     krb5_octet *copy;
 
     copy = malloc(len);
@@ -893,9 +893,9 @@ add_tl_data(kadm5_principal_ent_t princ, krb5_int16 tl_type, krb5_ui_2 len,
     tl_data->tl_data_contents = copy;
     tl_data->tl_data_next = NULL;
 
-    for (tlp = &princ->tl_data; *tlp != NULL; tlp = &(*tlp)->tl_data_next);
-    *tlp = tl_data;
-    princ->n_tl_data++;
+    for (; *tl_datap != NULL; tl_datap = &(*tl_datap)->tl_data_next);
+    *tl_datap = tl_data;
+    (*n_tl_datap)++;
 }
 
 static void
@@ -917,7 +917,8 @@ unlock_princ(kadm5_principal_ent_t princ, long *mask, const char *caller)
         exit(1);
     }
     store_32_le((krb5_int32)now, timebuf);
-    add_tl_data(princ, KRB5_TL_LAST_ADMIN_UNLOCK, 4, timebuf);
+    add_tl_data(&princ->n_tl_data, &princ->tl_data,
+                KRB5_TL_LAST_ADMIN_UNLOCK, 4, timebuf);
     *mask |= KADM5_TL_DATA;
 }
 
@@ -949,7 +950,8 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
             if (++i > argc - 2)
                 return -1;
 
-            add_tl_data(oprinc, KRB5_TL_DB_ARGS, strlen(argv[i]) + 1,
+            add_tl_data(&oprinc->n_tl_data, &oprinc->tl_data,
+                        KRB5_TL_DB_ARGS, strlen(argv[i]) + 1,
                         (krb5_octet *)argv[i]);
             *mask |= KADM5_TL_DATA;
             continue;
@@ -1259,7 +1261,7 @@ cleanup:
     krb5_free_principal(context, princ.principal);
     free(ks_tuple);
     free(canon);
-    kadmin_free_tl_data(&princ);
+    kadmin_free_tl_data(&princ.n_tl_data, &princ.tl_data);
 }
 
 void
@@ -1323,7 +1325,7 @@ kadmin_modprinc(int argc, char *argv[])
 cleanup:
     krb5_free_principal(context, kprinc);
     krb5_free_principal(context, princ.principal);
-    kadmin_free_tl_data(&princ);
+    kadmin_free_tl_data(&princ.n_tl_data, &princ.tl_data);
     free(canon);
     free(ks_tuple);
 }
@@ -1473,6 +1475,7 @@ static int
 kadmin_parse_policy_args(int argc, char *argv[], kadm5_policy_ent_t policy,
                          long *mask, char *caller)
 {
+    krb5_error_code retval;
     int i;
     time_t now, date;
 
@@ -1562,6 +1565,25 @@ kadmin_parse_policy_args(int argc, char *argv[], kadm5_policy_ent_t policy,
             }
             *mask |= KADM5_PW_LOCKOUT_DURATION;
             continue;
+        } else if (!strcmp(argv[i], "-allowedkeysalts")) {
+            krb5_key_salt_tuple *ks_tuple = NULL;
+            int n_ks_tuple = 0;
+
+            if (++i > argc - 2)
+                return -1;
+            if (strcmp(argv[i], "-")) {
+                retval = krb5_string_to_keysalts(argv[i], ",", ":.-", 0,
+                                                 &ks_tuple, &n_ks_tuple);
+                if (retval) {
+                    com_err(caller, retval, _("while parsing keysalts %s"),
+                            argv[i]);
+                    return -1;
+                }
+                free(ks_tuple);
+                policy->allowed_keysalts = argv[i];
+            }
+            *mask |= KADM5_POLICY_ALLOWED_KEYSALTS;
+            continue;
         } else
             return -1;
     }
@@ -1580,7 +1602,8 @@ kadmin_addmodpol_usage(char *func)
     fprintf(stderr,
             _("\t\t[-maxlife time] [-minlife time] [-minlength length]\n"
               "\t\t[-minclasses number] [-history number]\n"
-              "\t\t[-maxfailure number] [-failurecountinterval time]\n"));
+              "\t\t[-maxfailure number] [-failurecountinterval time]\n"
+              "\t\t[-allowedkeysalts keysalts]\n"));
     fprintf(stderr, _("\t\t[-lockoutduration time]\n"));
 }
 
@@ -1683,14 +1706,18 @@ kadmin_getpol(int argc, char *argv[])
                strdur(policy.pw_failcnt_interval));
         printf(_("Password lockout duration: %s\n"),
                strdur(policy.pw_lockout_duration));
+        if (policy.allowed_keysalts != NULL)
+            printf(_("Allowed key/salt types: %s\n"), policy.allowed_keysalts);
     } else {
-        printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%lu\t%ld\t%ld\n",
+        printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%lu\t%ld\t%ld\t%s\n",
                policy.policy, policy.pw_max_life, policy.pw_min_life,
                policy.pw_min_length, policy.pw_min_classes,
                policy.pw_history_num, policy.policy_refcnt,
                (unsigned long)policy.pw_max_fail,
                (long)policy.pw_failcnt_interval,
-               (long)policy.pw_lockout_duration);
+               (long)policy.pw_lockout_duration,
+               (policy.allowed_keysalts == NULL) ? "-" :
+               policy.allowed_keysalts);
     }
     kadm5_free_policy_ent(handle, &policy);
 }

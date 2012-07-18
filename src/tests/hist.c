@@ -72,7 +72,7 @@ main(int argc, char **argv)
     params.mask |= KADM5_CONFIG_REALM;
     params.realm = realm;
     check(kadm5_init(ctx, "user", "", "", &params, KADM5_STRUCT_VERSION,
-                     KADM5_API_VERSION_3, NULL, &handle));
+                     KADM5_API_VERSION_4, NULL, &handle));
     if (strcmp(argv[1], "make") == 0) {
         memset(&kent, 0, sizeof(kent));
         kent.principal = hprinc;

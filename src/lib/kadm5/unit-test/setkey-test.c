@@ -120,7 +120,7 @@ main(int argc, char **argv)
     }
 
     ret = kadm5_init(context, authprinc, NULL, KADM5_ADMIN_SERVICE, NULL,
-                     KADM5_STRUCT_VERSION, KADM5_API_VERSION_3, NULL,
+                     KADM5_STRUCT_VERSION, KADM5_API_VERSION_4, NULL,
                      &handle);
     if (ret) {
         com_err(whoami, ret, "while initializing connection");

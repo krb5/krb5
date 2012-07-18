@@ -220,6 +220,13 @@ typedef struct _osa_policy_ent_t {
     krb5_ui_4       pw_max_fail;                /* pwdMaxFailure */
     krb5_ui_4       pw_failcnt_interval;        /* pwdFailureCountInterval */
     krb5_ui_4       pw_lockout_duration;        /* pwdLockoutDuration */
+    /* Only valid if version > 2 */
+    krb5_ui_4       attributes;
+    krb5_ui_4       max_life;
+    krb5_ui_4       max_renewable_life;
+    char          * allowed_keysalts;
+    krb5_int16      n_tl_data;
+    krb5_tl_data  * tl_data;
 } osa_policy_ent_rec, *osa_policy_ent_t;
 
 typedef       void    (*osa_adb_iter_policy_func) (void *, osa_policy_ent_t);
@@ -231,6 +238,8 @@ typedef struct __krb5_key_salt_tuple {
 
 #define KRB5_KDB_MAGIC_NUMBER           0xdbdbdbdb
 #define KRB5_KDB_V1_BASE_LENGTH         38
+
+#define KRB5_KDB_MAX_ALLOWED_KS_LEN     512
 
 #define KRB5_TL_LAST_PWD_CHANGE         0x0001
 #define KRB5_TL_MOD_PRINC               0x0002
@@ -564,6 +573,12 @@ krb5_error_code
 krb5_dbe_delete_tl_data( krb5_context    context,
                          krb5_db_entry * entry,
                          krb5_int16      tl_data_type);
+
+krb5_error_code
+krb5_db_update_tl_data(krb5_context          context,
+                       krb5_int16          * n_tl_datap,
+                       krb5_tl_data        **tl_datap,
+                       krb5_tl_data        * new_tl_data);
 
 krb5_error_code
 krb5_dbe_update_tl_data( krb5_context          context,

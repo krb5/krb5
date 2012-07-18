@@ -2185,8 +2185,8 @@ krb5_dbe_delete_tl_data(krb5_context context, krb5_db_entry *entry,
 }
 
 krb5_error_code
-krb5_dbe_update_tl_data(krb5_context context, krb5_db_entry *entry,
-                        krb5_tl_data *new_tl_data)
+krb5_db_update_tl_data(krb5_context context, krb5_int16 *n_tl_datap,
+                       krb5_tl_data **tl_datap, krb5_tl_data *new_tl_data)
 {
     krb5_tl_data *tl_data = NULL;
     krb5_octet *tmp;
@@ -2206,7 +2206,7 @@ krb5_dbe_update_tl_data(krb5_context context, krb5_db_entry *entry,
      */
 
     if (new_tl_data->tl_data_type != KRB5_TL_DB_ARGS) { /* db_args can be multiple */
-        for (tl_data = entry->tl_data; tl_data;
+        for (tl_data = *tl_datap; tl_data;
              tl_data = tl_data->tl_data_next)
             if (tl_data->tl_data_type == new_tl_data->tl_data_type)
                 break;
@@ -2221,9 +2221,9 @@ krb5_dbe_update_tl_data(krb5_context context, krb5_db_entry *entry,
             return (ENOMEM);
         }
         memset(tl_data, 0, sizeof(krb5_tl_data));
-        tl_data->tl_data_next = entry->tl_data;
-        entry->tl_data = tl_data;
-        entry->n_tl_data++;
+        tl_data->tl_data_next = *tl_datap;
+        *tl_datap = tl_data;
+        (*n_tl_datap)++;
     }
 
     /* fill in the record */
@@ -2237,6 +2237,14 @@ krb5_dbe_update_tl_data(krb5_context context, krb5_db_entry *entry,
     memcpy(tmp, new_tl_data->tl_data_contents, tl_data->tl_data_length);
 
     return (0);
+}
+
+krb5_error_code
+krb5_dbe_update_tl_data(krb5_context context, krb5_db_entry *entry,
+                        krb5_tl_data *new_tl_data)
+{
+    return krb5_db_update_tl_data(context, &entry->n_tl_data, &entry->tl_data,
+                                  new_tl_data);
 }
 
 krb5_error_code
