@@ -345,6 +345,9 @@ BOOL CLeashApp::InitInstance()
     if (!FirstInstance())
         return FALSE;
 
+    if (!CWinAppEx::InitInstance())
+        return FALSE;
+
     //register our unique wnd class name to find it later
     WNDCLASS wndcls;
     memset(&wndcls, 0, sizeof(WNDCLASS));
