@@ -54,7 +54,9 @@
     <String Id="KerberosDocDesc">Documentation</String>
     
     <String Id="AdminRequired">You need administrative privileges to install Kerberos for Windows</String>
-    <String Id="OsVersionRequired">This product requires Windows 2000/XP/2003.  The current operating system is not supported.</String>
+    <String Id="OsVersionRequired">This product requires Windows XP or Higher.  The current operating system is not supported.</String>
+    <String Id="OsXPSP3">This product requires Windows XP Service Pack 3</String>
+    <String Id="OsVistaSP2">This product requires Windows Vista Service Pack 2</String>
     <String Id="CMNotSelected">Neither Leash nor Network Identity Manager has been selected for this package.  Please contact your administrator or the provider of this installation package to resolve this issue.</String>
     <String Id="CMDupSelected">Both Leash and Network Identity Manager has been selected for this package.  Only one of these can be selected at one time.  Please contact your administrator or the provider of this installation package to resolve this issue.</String>
 

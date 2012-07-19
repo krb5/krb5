@@ -60,7 +60,9 @@
         
         <!-- Launch conditions -->
         <Condition Message="$(loc.AdminRequired)">Privileged</Condition>
-        <Condition Message="$(loc.OsVersionRequired)">VersionNT &gt;= 500</Condition>
+        <Condition Message="$(loc.OsVersionRequired)">VersionNT &gt;= 501</Condition>
+        <Condition Message="$(loc.OsXPSP3)">(Not (VersionNT = 501)) Or (ServicePackLevel &gt;= 3)</Condition>
+        <Condition Message="$(loc.OsVistaSP2)">(Not (VersionNT = 600)) Or (ServicePackLevel &gt;= 2)</Condition>
         <Condition Message="$(loc.CMNotSelected)">USELEASH Or USENETIDMGR</Condition>
         <Condition Message="$(loc.CMDupSelected)">Not (USELEASH And USENETIDMGR)</Condition>
         <?if $(var.Platform) = "x64" ?>
