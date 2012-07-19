@@ -739,17 +739,111 @@ cleanup:
     return 0;
 }
 
+static UINT krenew(void *param)
+{
+    char *ccache_name = (char *)param;
+    krb5_context ctx = 0;
+    krb5_ccache ccache = NULL;
+    krb5_principal me = 0;
+    krb5_principal server = 0;
+    krb5_creds my_creds;
+    krb5_data *realm = 0;
+
+    // @TODO: logic to check for imported tickets and auto-renew/re-import
+    // from MSLSA
+
+    memset(&my_creds, 0, sizeof(krb5_creds));
+    if (ccache_name == NULL)
+        // Bad param
+        goto cleanup;
+
+    krb5_error_code code = pkrb5_init_context(&ctx);
+    if (code) {
+        // TODO: spew error
+        goto cleanup;
+    }
+    code = pkrb5_cc_resolve(ctx, ccache_name, &ccache);
+    if (code) {
+        // TODO: spew error
+        goto cleanup;
+    }
+
+    code = pkrb5_cc_get_principal(ctx, ccache, &me);
+    if (code)
+        goto cleanup;
+
+    realm = krb5_princ_realm(ctx, me);
+
+    code = pkrb5_build_principal_ext(ctx, &server,
+                                    realm->length, realm->data,
+                                    KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
+                                    realm->length, realm->data,
+                                    0);
+    if (code)
+        goto cleanup;
+
+    my_creds.client = me;
+    my_creds.server = server;
+
+#ifdef KRB5_TC_NOTICKET
+    pkrb5_cc_set_flags(ctx, ccache, 0);
+#endif
+    code = pkrb5_get_renewed_creds(ctx, &my_creds, me, ccache, NULL);
+#ifdef KRB5_TC_NOTICKET
+    pkrb5_cc_set_flags(ctx, ccache, KRB5_TC_NOTICKET);
+#endif
+    if (code) {
+/* TODO
+        if (code != KRB5KDC_ERR_ETYPE_NOSUPP || code != KRB5_KDC_UNREACH)
+            Leash_krb5_error(code, "krb5_get_renewed_creds()", 0, &ctx,
+                             &ccache);
+*/
+        goto cleanup;
+    }
+
+    code = pkrb5_cc_initialize(ctx, ccache, me);
+    if (code)
+        goto cleanup;
+
+    code = pkrb5_cc_store_cred(ctx, ccache, &my_creds);
+    if (code)
+        goto cleanup;
+
+cleanup:
+    if (my_creds.client == me)
+        my_creds.client = 0;
+    if (my_creds.server == server)
+        my_creds.server = 0;
+    pkrb5_free_cred_contents(ctx, &my_creds);
+    if (me != NULL)
+        pkrb5_free_principal(ctx, me);
+    if (server != NULL)
+        pkrb5_free_principal(ctx, server);
+    if (ccache != NULL)
+        pkrb5_cc_close(ctx, ccache);
+    if (ctx != NULL)
+        pkrb5_free_context(ctx);
+    if (ccache_name != NULL)
+        free(ccache_name);
+    return 0;
+}
+
 VOID CLeashView::OnRenewTicket()
 {
     if ( !CLeashApp::m_hKrb5DLL )
         return;
 
-    try {
-        RenewTicket(m_hWnd);
+    // @TODO: grab list mutex
+    CCacheDisplayData *elem = m_ccacheDisplay;
+    while (elem != NULL) {
+        if (elem->m_selected) {
+            char *ccache_name = strdup(elem->m_ccacheName);
+            if (ccache_name)
+                AfxBeginThread(krenew, (void *)ccache_name);
+        }
+        elem = elem->m_next;
     }
-    catch(...) {
-        AfxMessageBox("Ticket Getting operation already in progress", MB_OK|MB_ICONWARNING, 0);
-    }
+    // release list mutex
 }
 
 UINT CLeashView::RenewTicket(void * hWnd)
