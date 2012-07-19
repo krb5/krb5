@@ -19,7 +19,7 @@ found in ``src/util/reconf``.  This program should be run while the
 current directory is the top source directory.  It will automatically
 rebuild the configure script if it needs rebuilding.  If you know that
 you have made a change that will require that the configure file be
-rebuilt from scratch, specify the **--force** option::
+rebuilt from scratch, specify the **-**\ **-force** option::
 
     cd /u1/krb5-VERSION/src
     ./util/reconf --force
@@ -134,7 +134,7 @@ start building Kerberos; see :ref:`do_build`)::
 However, there are several prerequisites that must be satisfied first:
 
 * Configure and build Kerberos with Tcl support. Tcl is used to drive
-  the test suite.  This often means passing **--with-tcl** to
+  the test suite.  This often means passing **-**\ **-with-tcl** to
   configure to tell it the location of the Tcl configuration
   script. (See :ref:`options2configure`.)
 * On some operating systems, you have to run ``make install`` before
@@ -142,7 +142,7 @@ However, there are several prerequisites that must be satisfied first:
   versions of Kerberos libraries rather than the newly built ones.
   You can install into a prefix that isn't in the system library
   search path, though. Alternatively, you can configure with
-  **--disable-rpath**, which renders the build tree less suitable for
+  **-**\ **-disable-rpath**, which renders the build tree less suitable for
   installation, but allows testing without interference from
   previously installed libraries.
 * In order to test the RPC layer, the local system has to be running

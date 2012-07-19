@@ -9,43 +9,43 @@ control how the Kerberos distribution is built.
 Most commonly used options
 --------------------------
 
-**--help**
+**-**\ **-help**
     Provides help to configure.  This will list the set of commonly
     used options for building Kerberos.
 
-**--prefix=**\ *PREFIX*
+**-**\ **-prefix=**\ *PREFIX*
     By default, Kerberos will install the package's files rooted at
     ``/usr/local``.  If you desire to place the binaries into the
     directory *PREFIX*, use this option.
 
-**--exec-prefix=**\ *EXECPREFIX*
+**-**\ **-exec-prefix=**\ *EXECPREFIX*
     This option allows one to separate the architecture independent
     programs from the host-dependent files (configuration files,
     manual pages).  Use this option to install architecture-dependent
     programs in *EXECPREFIX*.  The default location is the value of
-    specified by **--prefix** option.
+    specified by **-**\ **-prefix** option.
 
-**--localstatedir=**\ *LOCALSTATEDIR*
+**-**\ **-localstatedir=**\ *LOCALSTATEDIR*
     This option sets the directory for locally modifiable
     single-machine data.  In Kerberos, this mostly is useful for
     setting a location for the KDC data files, as they will be
     installed in ``LOCALSTATEDIR/krb5kdc``, which is by default
     ``PREFIX/var/krb5kdc``.
 
-**--with-netlib**\ [=\ *libs*]
+**-**\ **-with-netlib**\ [=\ *libs*]
     Allows for suppression of or replacement of network libraries.  By
     default, Kerberos V5 configuration will look for ``-lnsl`` and
     ``-lsocket``.  If your operating system has a broken resolver
     library or fails to pass the tests in ``src/tests/resolv``, you
     will need to use this option.
 
-**--with-tcl=**\ *TCLPATH*
+**-**\ **-with-tcl=**\ *TCLPATH*
     Some of the unit-tests in the build tree rely upon using a program
     in Tcl.  The directory specified by *TCLPATH* specifies where the
     Tcl header file (TCLPATH/include/tcl.h) as well as where the Tcl
     library (TCLPATH/lib) should be found.
 
-**--enable-dns-for-realm**
+**-**\ **-enable-dns-for-realm**
     Enable the use of DNS to look up a host's Kerberos realm,
     if the information is not provided in
     :ref:`krb5.conf(5)`.  See
@@ -53,7 +53,7 @@ Most commonly used options
     for information about using DNS to determine the default realm.
     DNS lookups for realm names are disabled by default.
 
-**--with-system-et**
+**-**\ **-with-system-et**
     Use an installed version of the error-table (et) support software,
     the compile_et program, the com_err.h header file and the com_err
     library.  If these are not in the default locations, you may wish
@@ -65,7 +65,7 @@ Most commonly used options
     sources will be built and installed along with the rest of the
     Kerberos tree, for Kerberos applications to link against.
 
-**--with-system-ss**
+**-**\ **-with-system-ss**
     Use an installed version of the subsystem command-line interface
     software, the mk_cmds program, the ``ss/ss.h`` header file and the
     ss library.  If these are not in the default locations, you may
@@ -77,7 +77,7 @@ Most commonly used options
     Kerberos sources will be compiled and linked into those programs
     that need it; it will not be installed separately.
 
-**--with-system-db**
+**-**\ **-with-system-db**
     Use an installed version of the Berkeley DB package, which must
     provide an API compatible with version 1.85.  This option is
     unsupported and untested.  In particular, we do not know if the
@@ -147,7 +147,7 @@ Environment variables
     different versions require different support libraries to be
     explicitly specified.
 
-    This option is ignored if **--with-system-ss** is not specified.
+    This option is ignored if **-**\ **-with-system-ss** is not specified.
 
 **YACC**
      The 'Yet Another C Compiler' implementation to use. Defaults to
@@ -163,67 +163,67 @@ Environment variables
 Fine tuning of the installation directories
 -------------------------------------------
 
-**--bindir=**\ *DIR*
+**-**\ **-bindir=**\ *DIR*
     User executables.  Defaults to ``EXECPREFIX/bin``, where
-    *EXECPREFIX* is the path specified by **--exec-prefix**
+    *EXECPREFIX* is the path specified by **-**\ **-exec-prefix**
     configuration option.
 
-**--sbindir=**\ *DIR*
+**-**\ **-sbindir=**\ *DIR*
     System admin executables.  Defaults to ``EXECPREFIX/sbin``, where
-    *EXECPREFIX* is the path specified by **--exec-prefix**
+    *EXECPREFIX* is the path specified by **-**\ **-exec-prefix**
     configuration option.
 
-**--sysconfdir=**\ *DIR*
+**-**\ **-sysconfdir=**\ *DIR*
     Read-only single-machine data such as krb5.conf.
     Defaults to ``PREFIX/etc``, where
-    *PREFIX* is the path specified by **--prefix** configuration
+    *PREFIX* is the path specified by **-**\ **-prefix** configuration
     option.
 
-**--libdir=**\ *DIR*
+**-**\ **-libdir=**\ *DIR*
     Object code libraries.  Defaults to ``EXECPREFIX/lib``, where
-    *EXECPREFIX* is the path specified by **--exec-prefix**
+    *EXECPREFIX* is the path specified by **-**\ **-exec-prefix**
     configuration option.
 
-**--includedir=**\ *DIR*
+**-**\ **-includedir=**\ *DIR*
     C header files.  Defaults to ``PREFIX/include``, where *PREFIX* is
-    the path specified by **--prefix** configuration option.
+    the path specified by **-**\ **-prefix** configuration option.
 
-**--datarootdir=**\ *DATAROOTDIR*
+**-**\ **-datarootdir=**\ *DATAROOTDIR*
     Read-only architecture-independent data root.  Defaults to
     ``PREFIX/share``, where *PREFIX* is the path specified by
-    **--prefix** configuration option.
+    **-**\ **-prefix** configuration option.
 
-**--datadir=**\ *DIR*
+**-**\ **-datadir=**\ *DIR*
     Read-only architecture-independent data.  Defaults to path
-    specified by **--datarootdir** configuration option.
+    specified by **-**\ **-datarootdir** configuration option.
 
-**--localedir=**\ *DIR*
+**-**\ **-localedir=**\ *DIR*
     Locale-dependent data.  Defaults to ``DATAROOTDIR/locale``, where
-    *DATAROOTDIR* is the path specified by **--datarootdir**
+    *DATAROOTDIR* is the path specified by **-**\ **-datarootdir**
     configuration option.
 
-**--mandir=**\ *DIR*
+**-**\ **-mandir=**\ *DIR*
     Man documentation.  Defaults to ``DATAROOTDIR/man``, where
-    *DATAROOTDIR* is the path specified by **--datarootdir**
+    *DATAROOTDIR* is the path specified by **-**\ **-datarootdir**
     configuration option.
 
 
 Program names
 -------------
 
-**--program-prefix=**\ *PREFIX*
+**-**\ **-program-prefix=**\ *PREFIX*
     Prepend *PREFIX* to the names of the programs when installing
     them. For example, specifying ``--program-prefix=mit-`` at the
     configure time will cause the program named ``abc`` to be
     installed as ``mit-abc``.
 
-**--program-suffix=**\ *SUFFIX*
+**-**\ **-program-suffix=**\ *SUFFIX*
     Append *SUFFIX* to the names of the programs when installing them.
     For example, specifying ``--program-suffix=-mit`` at the configure
     time will cause the program named ``abc`` to be installed as
     ``abc-mit``.
 
-**--program-transform-name=**\ *PROGRAM*
+**-**\ **-program-transform-name=**\ *PROGRAM*
     Run ``sed -e PROGRAM`` on installed program names. (*PROGRAM* is a
     sed script).
 
@@ -231,11 +231,11 @@ Program names
 System types
 ------------
 
-**--build=**\ *BUILD*
+**-**\ **-build=**\ *BUILD*
     Configure for building on *BUILD*
     (e.g., ``--build=x86_64-linux-gnu``).
 
-**--host=**\ *HOST*
+**-**\ **-host=**\ *HOST*
     Cross-compile to build programs to run on *HOST*
     (e.g., ``--host=x86_64-linux-gnu``).  By default, Kerberos V5
     configuration will look for "build" option.
@@ -244,95 +244,95 @@ System types
 Optional features
 -----------------
 
-**--disable-option-checking**
+**-**\ **-disable-option-checking**
     Ignore unrecognized --enable/--with options.
 
-**--disable-**\ *FEATURE*
+**-**\ **-disable-**\ *FEATURE*
     Do not include *FEATURE* (same as --enable-FEATURE=no).
 
-**--enable-**\ *FEATURE*\ [=\ *ARG*]
+**-**\ **-enable-**\ *FEATURE*\ [=\ *ARG*]
     Include *FEATURE* [ARG=yes].
 
-**--enable-maintainer-mode**
+**-**\ **-enable-maintainer-mode**
     Enable rebuilding of source files, Makefiles, etc.
 
-**--disable-delayed-initialization**
+**-**\ **-disable-delayed-initialization**
     Initialize library code when loaded.  Defaults to delay until
     first use.
 
-**--disable-thread-support**
+**-**\ **-disable-thread-support**
     Don't enable thread support.  Defaults to enabled.
 
-**--disable-rpath**
+**-**\ **-disable-rpath**
     Suppress run path flags in link lines.
 
-**--enable-athena**
+**-**\ **-enable-athena**
     Build with MIT Project Athena configuration.
 
-**--disable-kdc-lookaside-cache**
+**-**\ **-disable-kdc-lookaside-cache**
     Disable the cache which detects client retransmits.
 
-**--disable-pkinit**
+**-**\ **-disable-pkinit**
     Disable PKINIT plugin support.
 
 
 Optional packages
 -----------------
 
-**--with-**\ *PACKAGE*\ [=ARG\]
+**-**\ **-with-**\ *PACKAGE*\ [=ARG\]
     Use *PACKAGE* (e.g., ``--with-imap``).  The default value of *ARG*
     is ``yes``.
 
-**--without-**\ *PACKAGE*
+**-**\ **-without-**\ *PACKAGE*
     Do not use *PACKAGE* (same as ``--with-PACKAGE=no``)
     (e.g., ``--without-libedit``).
 
-**--with-size-optimizations**
+**-**\ **-with-size-optimizations**
     Enable a few optimizations to reduce code size possibly at some
     run-time cost.
 
-**--with-system-et**
+**-**\ **-with-system-et**
     Use the com_err library and compile_et utility that are already
     installed on the system, instead of building and installing
     local versions.
 
-**--with-system-ss**
+**-**\ **-with-system-ss**
     Use the ss library and mk_cmds utility that are already installed
     on the system, instead of building and using private versions.
 
-**--with-system-db**
+**-**\ **-with-system-db**
     Use the berkeley db utility already installed on the system,
     instead of using a private version.  This option is not
     recommended; enabling it may result in incompatibility with key
     databases originating on other systems.
 
-**--with-netlib=**\ *LIBS*
+**-**\ **-with-netlib=**\ *LIBS*
     Use the resolver library specified in *LIBS*.  Use this variable
     if the C library resolver is insufficient or broken.
 
-**--with-hesiod=**\ *path*
+**-**\ **-with-hesiod=**\ *path*
     Compile with Hesiod support.  The *path* points to the Hesiod
     directory.  By default Hesiod is unsupported.
 
-**--with-ldap**
+**-**\ **-with-ldap**
     Compile OpenLDAP database backend module.
 
-**--with-tcl=**\ *path*
+**-**\ **-with-tcl=**\ *path*
     Specifies that *path* is the location of a Tcl installation.
     Tcl is needed for some of the tests run by 'make check'; such tests
     will be skipped if this option is not set.
 
-**--with-vague-errors**
+**-**\ **-with-vague-errors**
     Do not send helpful errors to client.  For example, if the KDC
     should return only vague error codes to clients.
 
-**--with-crypto-impl=**\ *IMPL*
-    Use specified crypto implementation (e.g., **--with-crypto=**\
+**-**\ **-with-crypto-impl=**\ *IMPL*
+    Use specified crypto implementation (e.g., **-**\ **-with-crypto=**\
     *openssl*).  Default is a native MIT Kerberos implementation
     ``builtin``.  The other currently implemented crypto backends are
     ``openssl`` and ``nss``.  (See :ref:`mitK5features`)
 
-**--with-prng-alg=**\ *ALG*
+**-**\ **-with-prng-alg=**\ *ALG*
     Use specified PRNG algorithm.  For example, to use the OS native
     prng specify ``--with-prng-alg=os``.
 
@@ -340,11 +340,11 @@ Optional packages
     backend use one must explicitly specify ``--with-prng-alg=nss``.
     (See :ref:`mitK5features`)
 
-**--with-pkinit-crypto-impl=**\ *IMPL*
+**-**\ **-with-pkinit-crypto-impl=**\ *IMPL*
     Use the specified pkinit crypto implementation *IMPL*.
     Defaults to using OpenSSL.
 
-**--with-kdc-kdb-update**
+**-**\ **-with-kdc-kdb-update**
     Update the KDC database with the information about
 
     * the last successful authentication;
@@ -353,17 +353,17 @@ Optional packages
 
     By default the kdb is not updated with this information.
 
-**--without-libedit**
+**-**\ **-without-libedit**
     Do not compile and link against libedit.  Some utilities will no
     longer offer command history or completion in interactive mode if
     libedit is disabled.
 
-**--with-readline**
+**-**\ **-with-readline**
     Compile and link against GNU readline, as an alternative to libedit.
     Building with readline breaks the dejagnu test suite, which is a
     subset of the tests run by 'make check'.
 
-**--with-system-verto**
+**-**\ **-with-system-verto**
     Use an installed version of libverto.  If the libverto header and
     library are not in default locations, you may wish to specify
     ``CPPFLAGS=-I/some/dir`` and ``LDFLAGS=-L/some/other/dir`` options
@@ -377,10 +377,10 @@ Optional packages
     replacement for the upstream version, but will work for the
     purposes of Kerberos.
 
-    Specifying **--without-system-verto** will cause the built-in
+    Specifying **-**\ **-without-system-verto** will cause the built-in
     version of libverto to be used unconditionally.
 
-**--with-krb5-config=**\ *PATH*
+**-**\ **-with-krb5-config=**\ *PATH*
     Use the krb5-config program at *PATH* to obtain the build-time
     default credential cache, keytab, and client keytab names.  The
     default is to use ``krb5-config`` from the program path.  Specify
