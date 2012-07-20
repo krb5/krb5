@@ -68,6 +68,7 @@ HINSTANCE CLeashApp::m_hToolHelp32 = 0;
 krb5_context CLeashApp::m_krbv5_context = 0;
 profile_t CLeashApp::m_krbv5_profile = 0;
 HINSTANCE CLeashApp::m_hKrbLSA = 0;
+int CLeashApp::m_useRibbon = TRUE;
 
 /////////////////////////////////////////////////////////////////////////////
 // CLeashApp
@@ -190,10 +191,12 @@ BOOL CLeashApp::InitInstance()
 
     // Check for args (switches)
     LPCTSTR exeFile		= __targv[0];
-    LPCTSTR optionParam =  __targv[1];
+    for (int argi = 1; argi < __argc; argi++) {
+        LPCTSTR optionParam =  __targv[argi];
 
-    if (optionParam)
-    {
+        if (!optionParam)
+            continue;
+
         if (*optionParam  == '-' || *optionParam  == '/')
         {
             if (0 == stricmp(optionParam+1, "kinit") ||
@@ -311,6 +314,10 @@ BOOL CLeashApp::InitInstance()
                      0 == stricmp(optionParam+1, "c"))
             {
                 CreateConsoleEcho();
+            }
+            else if (0 == stricmp(optionParam+1, "noribbon"))
+            {
+                m_useRibbon = FALSE;
             }
             else
             {
