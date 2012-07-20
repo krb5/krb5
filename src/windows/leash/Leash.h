@@ -119,6 +119,7 @@ public:
 	static krb5_context m_krbv5_context;
 	static profile_t    m_krbv5_profile;
 	static HINSTANCE    m_hKrbLSA;
+	static int          m_useRibbon; // temporary while ribbon UI in dev
 
 	CLeashApp();
 	virtual ~CLeashApp();
