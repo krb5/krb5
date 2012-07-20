@@ -752,8 +752,8 @@ VOID CLeashView::OnDestroyTicket()
         INT whatToDo;
 
         if (!CLeashApp::m_hAfsDLL)
-            whatToDo = AfxMessageBox("You are about to destroy your ticket(s)!",
-                                     MB_OKCANCEL, 0);
+            whatToDo = AfxMessageBox("Are you sure you want to destroy these tickets?",
+                                     MB_ICONEXCLAMATION|MB_YESNO, 0);
         else
             whatToDo = AfxMessageBox("You are about to destroy your ticket(s)/token(s)!",
                                      MB_OKCANCEL, 0);
