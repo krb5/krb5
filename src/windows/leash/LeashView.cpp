@@ -2249,24 +2249,26 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
                             ticketStatusKrb5.Format("Kerb-5 Ticket Life: < 1 min");
                         }
                     }
-
+#ifndef NO_STATUS_BAR
                     if (CMainFrame::m_wndStatusBar)
                     {
                         CMainFrame::m_wndStatusBar.SetPaneInfo(1, 111112, SBPS_NORMAL, 130);
                         CMainFrame::m_wndStatusBar.SetPaneText(1, ticketStatusKrb5, SBT_POPOUT);
                     }
+#endif
                 }
             }
             else
             {
                 // not installed
                 ticketStatusKrb5.Format("Kerb-5: Not Available");
-
+#ifndef NO_STATUS_BAR
                 if (CMainFrame::m_wndStatusBar)
                 {
                     CMainFrame::m_wndStatusBar.SetPaneInfo(1, 111112, SBPS_NORMAL, 130);
                     CMainFrame::m_wndStatusBar.SetPaneText(1, ticketStatusKrb5, SBT_POPOUT);
                 }
+#endif
             }
             //KRB5
 
@@ -2474,12 +2476,13 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
                             ticketStatusAfs.Format("AFS Token Life: < 1 min");
                         }
                     }
-
+#ifndef NO_STATUS_BAR
                     if (CMainFrame::m_wndStatusBar)
                     {
                         CMainFrame::m_wndStatusBar.SetPaneInfo(3, 111113, SBPS_NORMAL, 130);
                         CMainFrame::m_wndStatusBar.SetPaneText(3, ticketStatusAfs, SBT_POPOUT);
                     }
+#endif
                 }
             }
 #ifdef COMMENT
