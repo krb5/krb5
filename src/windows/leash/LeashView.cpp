@@ -40,9 +40,9 @@ static CHAR THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CLeashView
 
-IMPLEMENT_DYNCREATE(CLeashView, CFormView)
+IMPLEMENT_DYNCREATE(CLeashView, CListView)
 
-BEGIN_MESSAGE_MAP(CLeashView, CFormView)
+BEGIN_MESSAGE_MAP(CLeashView, CListView)
 	//{{AFX_MSG_MAP(CLeashView)
     ON_MESSAGE(WM_WARNINGPOPUP, OnWarningPopup)
 	ON_MESSAGE(WM_GOODBYE, OnGoodbye)
@@ -106,6 +106,7 @@ BEGIN_MESSAGE_MAP(CLeashView, CFormView)
 	ON_WM_VSCROLL()
     ON_WM_SYSCOLORCHANGE()
     ON_MESSAGE(ID_OBTAIN_TGT_WITH_LPARAM, OnObtainTGTWithParam)
+    ON_NOTIFY(HDN_ITEMCHANGED, 0, OnItemChanged)
 	//}}AFX_MSG_MAP
 
 END_MESSAGE_MAP()
@@ -133,6 +134,16 @@ BOOL CLeashView::m_lowTicketAlarmSound;
 INT  CLeashView::m_autoRenewalAttempted = 0;
 BOOL CLeashView::m_importedTickets = 0;
 LONG CLeashView::m_timerMsgNotInProgress = 1;
+ViewColumnInfo CLeashView::sm_viewColumns[] =
+{
+    {"Principal", true, -1, 100},                        // PRINCIPAL
+    {"Issued", false, ID_TIME_ISSUED, 100},              // TIME_ISSUED
+    {"Renewable Until", false, ID_RENEWABLE_UNTIL, 100}, // RENEWABLE_UNTIL
+    {"Valid Until", true, ID_VALID_UNTIL, 100},          // VALID_UNTIL
+    {"Encryption Type", false, ID_ENCRYPTION_TYPE, 100}, // ENCRYPTION_TYPE
+    {"Flags", false, ID_SHOW_TICKET_FLAGS, 100},         // TICKET_FLAGS
+};
+
 
 bool change_icon_size = true;
 #ifndef KRB5_TC_NOTICKET
@@ -142,8 +153,7 @@ extern HANDLE m_tgsReqMutex;
 /////////////////////////////////////////////////////////////////////////////
 // CLeashView construction/destruction
 
-CLeashView::CLeashView():
-CFormView(CLeashView::IDD)
+CLeashView::CLeashView()
 {
 ////@#+Need removing as well!
 #ifndef NO_KRB4
@@ -176,7 +186,6 @@ CFormView(CLeashView::IDD)
     m_lowTicketAlarmSound = FALSE;
     m_alreadyPlayed = FALSE;
     ResetTreeNodes();
-    m_pTree = NULL;
     m_hMenu = NULL;
     m_pApp = NULL;
     m_pImageList = NULL;
@@ -206,12 +215,32 @@ CLeashView::~CLeashView()
         delete m_pDebugWindow;
 }
 
+void CLeashView::OnItemChanged(NMHDR* pNmHdr, LRESULT* pResult)
+{
+    NMHEADER* pHdr = (NMHEADER*)pNmHdr;
+    if (!pHdr->pitem)
+        return;
+    if (!pHdr->pitem->mask & HDI_WIDTH)
+        return;
+
+    // Sync column width and save to registry
+    for (int i = 0, columnIndex = 0; i < NUM_VIEW_COLUMNS; i++) {
+        ViewColumnInfo &info = sm_viewColumns[i];
+        if ((info.m_enabled) && (columnIndex++ == pHdr->iItem)) {
+            info.m_columnWidth = pHdr->pitem->cxy;
+            if (m_pApp)
+                m_pApp->WriteProfileInt("ColumnWidths", info.m_name, info.m_columnWidth);
+            break;
+        }
+    }
+}
+
 BOOL CLeashView::PreCreateWindow(CREATESTRUCT& cs)
 {
     // TODO: Modify the Window class or styles here by modifying
     //  the CREATESTRUCT cs
 
-    return CFormView::PreCreateWindow(cs);
+    return CListView::PreCreateWindow(cs);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -220,12 +249,12 @@ BOOL CLeashView::PreCreateWindow(CREATESTRUCT& cs)
 #ifdef _DEBUG
 VOID CLeashView::AssertValid() const
 {
-    CFormView::AssertValid();
+    CListView::AssertValid();
 }
 
 VOID CLeashView::Dump(CDumpContext& dc) const
 {
-    CFormView::Dump(dc);
+    CListView::Dump(dc);
 }
 
 /*
@@ -244,13 +273,13 @@ BOOL CLeashView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
                         DWORD dwStyle, const RECT& rect, CWnd* pParentWnd,
                         UINT nID, CCreateContext* pContext)
 {
-    return CFormView::Create(lpszClassName, lpszWindowName, dwStyle, rect,
+    return CListView::Create(lpszClassName, lpszWindowName, dwStyle, rect,
                              pParentWnd, nID, pContext);
 }
 
 INT CLeashView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-    if (CFormView::OnCreate(lpCreateStruct) == -1)
+    if (CListView::OnCreate(lpCreateStruct) == -1)
         return -1;
     return 0;
 }
@@ -317,7 +346,7 @@ VOID  CLeashView::ApplicationInfoMissingMsg()
 
 VOID CLeashView::OnShowWindow(BOOL bShow, UINT nStatus)
 {
-    CFormView::OnShowWindow(bShow, nStatus);
+    CListView::OnShowWindow(bShow, nStatus);
 
     // Get State of Icons Size
     m_pApp = AfxGetApp();
@@ -356,12 +385,16 @@ VOID CLeashView::OnShowWindow(BOOL bShow, UINT nStatus)
         // Public IP Address
         m_publicIPAddress = pLeash_get_default_publicip();
 
-        // @TODO: get/set defaults for these
-        m_showRenewableUntil = m_pApp->GetProfileInt("Settings", "ShowRenewableUntil", OFF);
-        m_showTicketFlags = m_pApp->GetProfileInt("Settings", "ShowTicketFlags", OFF);
-        m_showTimeIssued = m_pApp->GetProfileInt("Settings", "ShowTimeIssued", OFF);
-        m_showValidUntil = m_pApp->GetProfileInt("Settings", "ShowValidUntil", ON);
-        m_showEncryptionType = m_pApp->GetProfileInt("Settings", "ShowEncryptionType", OFF);
+        // UI main display column widths
+        for (int i=0; i<NUM_VIEW_COLUMNS; i++) {
+            ViewColumnInfo &info = sm_viewColumns[i];
+            info.m_enabled = m_pApp->GetProfileInt("Settings",
+                                                   info.m_name,
+                                                   info.m_enabled);
+            info.m_columnWidth = m_pApp->GetProfileInt("ColumnWidths",
+                                                   info.m_name,
+                                                   info.m_columnWidth);
+        }
 
         OnLargeIcons();
     }
@@ -845,12 +878,25 @@ VOID CLeashView::OnUpdateDisplay()
 {
     BOOL AfsEnabled = m_pApp->GetProfileInt("Settings", "AfsStatus", 1);
 
-    m_pTree = (CTreeCtrl*) GetDlgItem(IDC_TREEVIEW);
-    if (!m_pTree)
-    {
-        AfxMessageBox("There is a problem finding the Ticket Tree!",
-                    MB_OK|MB_ICONSTOP);
-        return;
+    CListCtrl& list = GetListCtrl();
+    list.DeleteAllItems();
+    ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
+	UpdateWindow();
+    // Delete all of the columns.
+    while (list.DeleteColumn(0));
+
+    // Reconstruct based on current options
+    int columnIndex = 0;
+    int itemIndex = 0;
+    for (int i = 0; i < NUM_VIEW_COLUMNS; i++) {
+        ViewColumnInfo &info = sm_viewColumns[i];
+        if (info.m_enabled) {
+            list.InsertColumn(columnIndex++,
+                (info.m_name), // @LOCALIZEME!
+                LVCFMT_LEFT,
+                info.m_columnWidth,
+                itemIndex++);
+        }
     }
 
     m_pImageList = &m_imageList;
@@ -860,8 +906,6 @@ VOID CLeashView::OnUpdateDisplay()
                    MB_OK|MB_ICONSTOP);
         return;
     }
-
-    m_pTree->SetImageList(&m_imageList, TVSIL_NORMAL);
 
     TV_INSERTSTRUCT m_tvinsert;
 
@@ -1027,9 +1071,6 @@ VOID CLeashView::OnUpdateDisplay()
         iconStatusAfs = TICKET_NOT_INSTALLED;
     }
 
-    // Tree Structure common values
-    m_pTree->DeleteAllItems();
-
     m_tvinsert.hParent = NULL;
     m_tvinsert.hInsertAfter = TVI_LAST;
     m_tvinsert.item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE;
@@ -1077,7 +1118,6 @@ VOID CLeashView::OnUpdateDisplay()
     m_tvinsert.item.cChildren = 0;
     m_tvinsert.item.lParam = 0;
     m_tvinsert.hParent = NULL;
-    m_hPrincipal = m_pTree->InsertItem(&m_tvinsert);
 
     SetTrayIcon(NIM_MODIFY, m_tvinsert.item.iImage);
 
@@ -1100,8 +1140,6 @@ VOID CLeashView::OnUpdateDisplay()
         m_tvinsert.item.iSelectedImage = TICKET_NOT_INSTALLED;
     }
 
-    m_hKerb5 = m_pTree->InsertItem(&m_tvinsert);
-
     TicketList* tempList = m_listKrb5, *killList;
     while (tempList)
     {
@@ -1109,21 +1147,18 @@ VOID CLeashView::OnUpdateDisplay()
         m_tvinsert.item.iImage = ticketIconStatusKrb5;
         m_tvinsert.item.iSelectedImage = ticketIconStatus_SelectedKrb5;
         m_tvinsert.item.pszText = tempList->theTicket;
-        m_hk5tkt = m_pTree->InsertItem(&m_tvinsert);
 
         if ( tempList->tktEncType ) {
             m_tvinsert.hParent = m_hk5tkt;
             m_tvinsert.item.iImage = TKT_ENCRYPTION;
             m_tvinsert.item.iSelectedImage = TKT_ENCRYPTION;
             m_tvinsert.item.pszText = tempList->tktEncType;
-            m_pTree->InsertItem(&m_tvinsert);
         }
         if ( tempList->keyEncType ) {
             m_tvinsert.hParent = m_hk5tkt;
             m_tvinsert.item.iImage = TKT_SESSION;
             m_tvinsert.item.iSelectedImage = TKT_SESSION;
             m_tvinsert.item.pszText = tempList->keyEncType;
-            m_pTree->InsertItem(&m_tvinsert);
         }
 
         if ( tempList->addrCount && tempList->addrList ) {
@@ -1132,7 +1167,7 @@ VOID CLeashView::OnUpdateDisplay()
                 m_tvinsert.item.iImage = TKT_ADDRESS;
                 m_tvinsert.item.iSelectedImage = TKT_ADDRESS;
                 m_tvinsert.item.pszText = tempList->addrList[n];
-                m_pTree->InsertItem(&m_tvinsert);
+//                m_pTree->InsertItem(&m_tvinsert);
             }
         }
         tempList = tempList->next;
@@ -1140,8 +1175,8 @@ VOID CLeashView::OnUpdateDisplay()
 
     pLeashFreeTicketList(&m_listKrb5);
 
-    if (m_hKerb5State == NODE_IS_EXPANDED)
-        m_pTree->Expand(m_hKerb5, TVE_EXPAND);
+//    if (m_hKerb5State == NODE_IS_EXPANDED)
+//        m_pTree->Expand(m_hKerb5, TVE_EXPAND);
 
     // Krb4
     m_tvinsert.hParent = m_hPrincipal;
@@ -1217,8 +1252,6 @@ VOID CLeashView::OnUpdateDisplay()
             m_tvinsert.item.iSelectedImage = TICKET_NOT_INSTALLED;
         }
 
-        m_hAFS = m_pTree->InsertItem(&m_tvinsert);
-
         m_tvinsert.hParent = m_hAFS;
         m_tvinsert.item.iImage = ticketIconStatusAfs;
         m_tvinsert.item.iSelectedImage = ticketIconStatus_SelectedAfs;
@@ -1227,14 +1260,10 @@ VOID CLeashView::OnUpdateDisplay()
         while (tempList)
         {
             m_tvinsert.item.pszText = tempList->theTicket;
-            m_pTree->InsertItem(&m_tvinsert);
             tempList = tempList->next;
         }
 
         pLeashFreeTicketList(&m_listAfs);
-
-        if (m_hAFSState == NODE_IS_EXPANDED)
-            m_pTree->Expand(m_hAFS, TVE_EXPAND);
     }
     else if (!afsError && CLeashApp::m_hAfsDLL && !m_tvinsert.item.pszText)
     {
@@ -1261,13 +1290,10 @@ VOID CLeashView::OnUpdateDisplay()
     if (!ticketinfo.Krb4.btickets && !ticketinfo.Krb5.btickets && !ticketinfo.Afs.btickets) //&& sPrincipal.IsEmpty())
     {
         // No tickets
-        m_pTree->DeleteAllItems();
-
         m_tvinsert.hParent = NULL;
         m_tvinsert.item.pszText = " No Tickets/Tokens ";
         m_tvinsert.item.iImage = NONE_PARENT_NODE;
         m_tvinsert.item.iSelectedImage = NONE_PARENT_NODE;
-        m_hPrincipal = m_pTree->InsertItem(&m_tvinsert);
 
 /*        if (CMainFrame::m_wndToolBar)
         {
@@ -1289,7 +1315,7 @@ VOID CLeashView::OnUpdateDisplay()
     else
     {
         // We have some tickets
-        m_pTree->SetItemText(m_hPrincipal, sPrincipal);
+//        m_pTree->SetItemText(m_hPrincipal, sPrincipal);
 /*
         if (CMainFrame::m_wndToolBar)
         {
@@ -1323,7 +1349,7 @@ VOID CLeashView::OnActivateView(BOOL bActivate, CView* pActivateView,
 
     if (m_alreadyPlayed)
     {
-        CFormView::OnActivateView(bActivate, pActivateView, pDeactiveView);
+        CListView::OnActivateView(bActivate, pActivateView, pDeactiveView);
         return;
     }
 
@@ -1359,15 +1385,12 @@ VOID CLeashView::OnActivateView(BOOL bActivate, CView* pActivateView,
         else
             check = CheckMenuItem(m_hMenu, ID_UPPERCASE_REALM, MF_CHECKED);
 
-        CheckMenuItem(m_hMenu, ID_SHOW_TICKET_FLAGS,
-                      m_showTicketFlags ? MF_CHECKED : MF_UNCHECKED);
-
-        CheckMenuItem(m_hMenu, ID_RENEWABLE_UNTIL,
-                      m_showRenewableUntil ? MF_CHECKED : MF_UNCHECKED);
-
-        CheckMenuItem(m_hMenu, ID_TIME_ISSUED,
-                      m_showTimeIssued ? MF_CHECKED : MF_UNCHECKED);
-
+        for (int i=0; i<NUM_VIEW_COLUMNS; i++) {
+            ViewColumnInfo &info = sm_viewColumns[i];
+            if (info.m_id >= 0)
+                CheckMenuItem(m_hMenu, info.m_id,
+                              info.m_enabled ? MF_CHECKED : MF_UNCHECKED);
+        }
 
         if (!m_lowTicketAlarm)
             CheckMenuItem(m_hMenu, ID_LOW_TICKET_ALARM, MF_UNCHECKED);
@@ -1420,7 +1443,7 @@ VOID CLeashView::OnActivateView(BOOL bActivate, CView* pActivateView,
 
     m_debugStartUp = FALSE;
 
-    CFormView::OnActivateView(bActivate, pActivateView, pDeactiveView);
+    CListView::OnActivateView(bActivate, pActivateView, pDeactiveView);
 }
 
 ////@#+Is this KRB4 only?
@@ -1501,73 +1524,67 @@ VOID CLeashView::OnDebugMode()
     }
 }
 
+void CLeashView::ToggleViewColumn(eViewColumn viewOption)
+{
+    if ((viewOption < 0) || (viewOption >= NUM_VIEW_COLUMNS)) {
+        //LeashWarn("ToggleViewColumn(): invalid view option index %i", viewOption);
+        return;
+    }
+    ViewColumnInfo &info = sm_viewColumns[viewOption];
+    info.m_enabled = !info.m_enabled;
+    if (m_pApp)
+        m_pApp->WriteProfileInt("Settings", info.m_name, info.m_enabled);
+    OnUpdateDisplay();
+}
+
 VOID CLeashView::OnRenewableUntil()
 {
-    m_showRenewableUntil = !m_showRenewableUntil;
-    if (m_hMenu)
-        CheckMenuItem(m_hMenu, ID_RENEWABLE_UNTIL,
-                      m_showRenewableUntil ? MF_CHECKED : MF_UNCHECKED);
-    if (m_pApp)
-        m_pApp->WriteProfileInt("Settings", "ShowRenewableUntil", m_showRenewableUntil);
+    ToggleViewColumn(RENEWABLE_UNTIL);
 }
 
 VOID CLeashView::OnUpdateRenewableUntil(CCmdUI *pCmdUI)
 {
-    pCmdUI->SetCheck(m_showRenewableUntil);
+    pCmdUI->SetCheck(sm_viewColumns[RENEWABLE_UNTIL].m_enabled);
 }
 
 VOID CLeashView::OnShowTicketFlags()
 {
-    m_showTicketFlags = !m_showTicketFlags;
-    if (m_hMenu)
-        CheckMenuItem(m_hMenu, ID_SHOW_TICKET_FLAGS,
-                      m_showTicketFlags ? MF_CHECKED : MF_UNCHECKED);
-    if (m_pApp)
-        m_pApp->WriteProfileInt("Settings", "ShowTicketFlags", m_showTicketFlags);
+    ToggleViewColumn(TICKET_FLAGS);
 }
 
 VOID CLeashView::OnUpdateShowTicketFlags(CCmdUI *pCmdUI)
 {
-    pCmdUI->SetCheck(m_showTicketFlags);
+    pCmdUI->SetCheck(sm_viewColumns[TICKET_FLAGS].m_enabled);
 }
 
 VOID CLeashView::OnTimeIssued()
 {
-    m_showTimeIssued = !m_showTimeIssued;
-    if (m_hMenu)
-        CheckMenuItem(m_hMenu, ID_TIME_ISSUED,
-                      m_showTimeIssued ? MF_CHECKED : MF_UNCHECKED);
-    if (m_pApp)
-        m_pApp->WriteProfileInt("Settings", "ShowTimeIssued", m_showTimeIssued);
+    ToggleViewColumn(TIME_ISSUED);
 }
 
 VOID CLeashView::OnUpdateTimeIssued(CCmdUI *pCmdUI)
 {
-    pCmdUI->SetCheck(m_showTimeIssued);
+    pCmdUI->SetCheck(sm_viewColumns[TIME_ISSUED].m_enabled);
 }
 
 VOID CLeashView::OnValidUntil()
 {
-    m_showValidUntil = !m_showValidUntil;
-    if (m_pApp)
-        m_pApp->WriteProfileInt("Settings", "ShowValidUntil", m_showValidUntil);
+    ToggleViewColumn(VALID_UNTIL);
 }
 
 VOID CLeashView::OnUpdateValidUntil(CCmdUI *pCmdUI)
 {
-    pCmdUI->SetCheck(m_showValidUntil);
+    pCmdUI->SetCheck(sm_viewColumns[VALID_UNTIL].m_enabled);
 }
 
 VOID CLeashView::OnEncryptionType()
 {
-    m_showEncryptionType = !m_showEncryptionType;
-    if (m_pApp)
-        m_pApp->WriteProfileInt("Settings", "ShowEncryptionType", m_showEncryptionType);
+    ToggleViewColumn(ENCRYPTION_TYPE);
 }
 
 VOID CLeashView::OnUpdateEncryptionType(CCmdUI *pCmdUI)
 {
-    pCmdUI->SetCheck(m_showEncryptionType);
+    pCmdUI->SetCheck(sm_viewColumns[ENCRYPTION_TYPE].m_enabled);
 }
 
 VOID CLeashView::OnLargeIcons()
@@ -1673,9 +1690,6 @@ VOID CLeashView::OnLargeIcons()
         m_imageList.Add(hIcon[n]);
     }
 
-    m_pTree = (CTreeCtrl*) GetDlgItem(IDC_TREEVIEW);
-    m_pTree->SetItemHeight(y+2);
-
     if (!m_startup)
         SendMessage(WM_COMMAND, ID_UPDATE_DISPLAY, 0);
 }
@@ -1721,7 +1735,7 @@ VOID CLeashView::OnDestroy()
 {
     SetTrayIcon(NIM_DELETE);
 
-    CFormView::OnDestroy();
+    CListView::OnDestroy();
     if (WaitForSingleObject( ticketinfo.lockObj, INFINITE ) != WAIT_OBJECT_0)
         throw("Unable to lock ticketinfo");
     BOOL b_destroy = m_destroyTicketsOnExit && (ticketinfo.Krb4.btickets || ticketinfo.Krb5.btickets);
@@ -1956,7 +1970,7 @@ VOID CLeashView::OnAfsControlPanel()
 
 VOID CLeashView::OnInitialUpdate()
 {
-    CFormView::OnInitialUpdate();
+    CListView::OnInitialUpdate();
     CLeashApp::m_hProgram = ::FindWindow(_T("LEASH.0WNDCLASS"), NULL);
     EnableToolTips();
 }
@@ -2609,186 +2623,15 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
 
     if (CMainFrame::m_isBeingResized)
     {
-        WINDOWPLACEMENT headingWndpl;
-        headingWndpl.length = sizeof(WINDOWPLACEMENT);
-
-        CWnd *heading = GetDlgItem(IDC_LABEL_KERB_TICKETS);
-        if (!heading->GetWindowPlacement(&headingWndpl))
-        {
-            AfxMessageBox("There is a problem getting Leash Heading size!",
-                       MB_OK|MB_ICONSTOP);
-            return CFormView::PreTranslateMessage(pMsg);;
-         }
-
-        m_pTree = (CTreeCtrl*) GetDlgItem(IDC_TREEVIEW);
-        VERIFY(m_pTree);
-        if (!m_pTree)
-        {
-            AfxMessageBox("There is a problem finding the Ticket Tree!",
-                       MB_OK|MB_ICONSTOP);
-            return CFormView::PreTranslateMessage(pMsg);
-        }
-
-        CRect rect;
-        GetClientRect(&rect);
-
-        WINDOWPLACEMENT wndpl;
-        wndpl.length = sizeof(WINDOWPLACEMENT);
-
-        if (!GetWindowPlacement(&wndpl))
-        {
-            AfxMessageBox("There is a problem getting Leash Window size!",
-                       MB_OK|MB_ICONSTOP);
-            return CFormView::PreTranslateMessage(pMsg);
-        }
-
-
-        wndpl.rcNormalPosition.top = rect.top + headingWndpl.rcNormalPosition.bottom;
-        wndpl.rcNormalPosition.right = rect.right;
-        wndpl.rcNormalPosition.bottom = rect.bottom;
-
         m_startup = FALSE;
 
-        if (!m_pTree->SetWindowPlacement(&wndpl))
-        {
-            AfxMessageBox("There is a problem setting Leash ticket Tree size!",
-                       MB_OK|MB_ICONSTOP);
-        }
-
-
         UpdateWindow();
-
-#ifdef COOL_SCROLL
-        // The follow code creates a cool scroll bar on the MainFrame
-           m_pTree = (CTreeCtrl*) GetDlgItem(IDC_TREEVIEW);
-           CWnd *pLabel = GetDlgItem(IDC_LABEL_KERB_TICKETS);
-
-           VERIFY(m_pTree);
-
-           // Sync Tree Frame with Main Frame
-           // WINDOWPLACEMENT wndpl;
-           WINDOWPLACEMENT wndplTree;
-           WINDOWPLACEMENT wndplLabel;
-           wndpl.length = sizeof(WINDOWPLACEMENT);
-           wndplTree.length = sizeof(WINDOWPLACEMENT);
-           wndplLabel.length = sizeof(WINDOWPLACEMENT);
-           GetWindowPlacement(&wndpl);
-           m_pTree->GetWindowPlacement(&wndplTree);
-           pLabel->GetWindowPlacement(&wndplLabel);
-
-           if (!m_startup)
-           {
-           if (ticketinfo.Krb4.btickets || ticketinfo.Krb5.btickets)
-           { // control scroll bars to TreeView
-           #define TICKET_LABEL_TOP 8
-           #define TICKET_LABEL_BOTTOM 28
-           #define TICKET_LABEL_RIGHT 398
-           #define RIGHT_FRAME_ADJUSTMENT 13
-           #define BOTTOM_FRAME_ADJUSTMENT 72
-           #define STRETCH_FACTOR 3
-
-           char theText[MAX_K_NAME_SZ+40];
-           int longestLine = 0;
-           int theHeight = 0;
-           BOOL disableScrollHorz = FALSE;
-           BOOL disableScrollVert = FALSE;
-           RECT rect;
-
-           HTREEITEM  xTree;
-           TV_ITEM item;
-           item.mask = TVIF_HANDLE | TVIF_TEXT;
-           item.cchTextMax = sizeof(theText);
-
-           xTree = m_hKerb4;
-           do
-           {
-           item.hItem = xTree;
-           item.pszText = theText;
-           VERIFY(m_pTree->GetItem(&item));
-
-           UINT offSet = m_pTree->GetIndent();
-           if (!m_pTree->GetItemRect(xTree, &rect, TRUE))
-           {
-           longestLine = 0;
-           theHeight = 0;
-           break;
-           }
-
-           if (rect.right > longestLine)
-           longestLine = rect.right + RIGHT_FRAME_ADJUSTMENT;
-
-           theHeight = rect.bottom + BOTTOM_FRAME_ADJUSTMENT;
-           }
-           while ((xTree = m_pTree->GetNextItem(xTree, TVGN_NEXTVISIBLE)));
-
-
-           // Horz
-           if (longestLine < wndpl.rcNormalPosition.right)
-           { // disable scroll
-           disableScrollHorz = TRUE;
-           SetScrollPos(SB_HORZ, 0, TRUE);
-           EnableScrollBar(SB_HORZ, ESB_DISABLE_BOTH);
-           }
-           else
-           { // enable scroll
-           EnableScrollBar(SB_HORZ, ESB_ENABLE_BOTH);
-           SetScrollRange(SB_HORZ, 0, longestLine , TRUE);
-           }
-
-           // Vert
-           if (theHeight < wndpl.rcNormalPosition.bottom)
-           { // disable scroll
-           disableScrollVert = TRUE;
-           SetScrollPos(SB_VERT, 0, TRUE);
-           EnableScrollBar(SB_VERT, ESB_DISABLE_BOTH);
-           }
-           else
-           { // enable scroll
-           EnableScrollBar(SB_VERT, ESB_ENABLE_BOTH);
-           SetScrollRange(SB_VERT, 0, theHeight, TRUE);
-           }
-
-
-           if (!disableScrollHorz)
-           {
-           wndpl.rcNormalPosition.left =
-           wndplTree.rcNormalPosition.left;
-
-           wndplLabel.rcNormalPosition.left =
-           wndpl.rcNormalPosition.left + 8;
-           }
-
-           if (!disableScrollVert)
-           {
-           wndpl.rcNormalPosition.top =
-           wndplTree.rcNormalPosition.top;
-           }
-           else
-           {
-           wndplLabel.rcNormalPosition.left =
-           wndpl.rcNormalPosition.left + 8;
-
-           wndplLabel.rcNormalPosition.top = TICKET_LABEL_TOP;
-           wndplLabel.rcNormalPosition.bottom = TICKET_LABEL_BOTTOM;
-           wndplLabel.rcNormalPosition.right = TICKET_LABEL_RIGHT;
-           }
-
-           wndpl.rcNormalPosition.right *= STRETCH_FACTOR;
-           wndpl.rcNormalPosition.bottom *= STRETCH_FACTOR;
-           }
-           }
-
-           m_startup = FALSE;
-
-           m_pTree->SetWindowPlacement(&wndpl);
-           pLabel->SetWindowPlacement(&wndplLabel);
-#endif /* COOL_SCROLL */
 
         CMainFrame::m_isBeingResized = FALSE;
     }
 
 	if (::IsWindow(pMsg->hwnd))
-		return CFormView::PreTranslateMessage(pMsg);
+		return CListView::PreTranslateMessage(pMsg);
 	else
 		return FALSE;
 }
