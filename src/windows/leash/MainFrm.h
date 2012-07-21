@@ -45,7 +45,9 @@ protected: // create from serialization only
 // Attributes
 public:
 	static int         m_whatSide;
+#ifndef NO_STATUS_BAR
     static CMFCStatusBar  m_wndStatusBar;
+#endif
 	static CMFCToolBar    m_wndToolBar;
 	static BOOL		   m_isMinimum;
     static BOOL        m_isBeingResized;
