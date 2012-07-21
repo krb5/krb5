@@ -90,9 +90,23 @@ CMainFrame::~CMainFrame()
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
     if (CLeashApp::m_useRibbon) {
-		CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows7));
-		CDockingManager::SetDockingMode(DT_SMART);
-		m_wndRibbonBar.SetWindows7Look(TRUE);
+        // Fixup tooltips (cribbed from http://social.msdn.microsoft.com/Forums/en/vcmfcatl/thread/5c5b4879-d278-4d79-8894-99e7f9b322df)
+
+        CMFCToolTipInfo ttParams;
+        ttParams.m_bVislManagerTheme = TRUE;
+        ttParams.m_bVislManagerTheme = FALSE;
+        ttParams.m_bDrawSeparator = FALSE;
+        ttParams.m_clrFillGradient = afxGlobalData.clrBarFace;
+        ttParams.m_clrFill = RGB(255, 255, 255);
+        ttParams.m_clrBorder = afxGlobalData.clrBarShadow;
+        ttParams.m_clrText = afxGlobalData.clrBarText;
+
+        theApp.GetTooltipManager()->SetTooltipParams(AFX_TOOLTIP_TYPE_ALL,
+                RUNTIME_CLASS(CMFCToolTipCtrl), &ttParams);
+
+        CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows7));
+        CDockingManager::SetDockingMode(DT_SMART);
+        m_wndRibbonBar.SetWindows7Look(TRUE);
 
         // Create the ribbon bar
         if (!m_wndRibbonBar.Create(this))
