@@ -67,8 +67,26 @@ enum ticketTimeLeft{NO_TICKETS, ZERO_MINUTES_LEFT, FIVE_MINUTES_LEFT, TEN_MINUTE
 // Don't change 'NO_TICKET's' value
 
 class CLeashDebugWindow;
+class ViewColumnInfo
+{
+public:
+    const char * m_name;
+    int m_enabled;
+    int m_id;
+    int m_columnWidth;
+};
 
-class CLeashView : public CFormView
+enum eViewColumn {
+    PRINCIPAL,
+    TIME_ISSUED,
+    RENEWABLE_UNTIL,
+    VALID_UNTIL,
+    ENCRYPTION_TYPE,
+    TICKET_FLAGS,
+    NUM_VIEW_COLUMNS
+};
+
+class CLeashView : public CListView
 {
 private:
 ////@#+Remove
@@ -80,7 +98,6 @@ private:
     CLeashDebugWindow*	m_pDebugWindow;
 	CImageList			m_imageList;
 	CImageList			*m_pImageList;
-    CTreeCtrl*			m_pTree;
 	CWinApp*			m_pApp;
 	HTREEITEM			m_hPrincipal;
 ////@#+Remove
@@ -97,11 +114,6 @@ private:
 	BOOL				m_debugStartUp;
 	BOOL				m_alreadyPlayed;
     INT					m_upperCaseRealm;
-	INT					m_showTicketFlags;
-	INT					m_showTimeIssued;
-	INT					m_showValidUntil;
-	INT					m_showRenewableUntil;
-	INT					m_showEncryptionType;
 	INT					m_destroyTicketsOnExit;
 	INT					m_debugWindow;
 	INT					m_largeIcons;
@@ -115,6 +127,8 @@ private:
     CString*            m_pWarningMessage;
     BOOL                m_bIconAdded;
     BOOL                m_bIconDeleted;
+
+    static ViewColumnInfo sm_viewColumns[NUM_VIEW_COLUMNS];
 
     static INT		   	m_autoRenewTickets;
     static INT          m_ticketStatusAfs;
@@ -136,6 +150,7 @@ private:
     static BOOL			m_lowTicketAlarmSound;
     static LONG         m_timerMsgNotInProgress;
 
+    void ToggleViewColumn(eViewColumn viewOption);
 	VOID ResetTreeNodes();
     VOID ApplicationInfoMissingMsg();
     VOID GetScrollBarState(CSize sizeClient, CSize& needSb,
@@ -272,7 +287,8 @@ protected:
 	afx_msg LRESULT OnGoodbye(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTrayIcon(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnObtainTGTWithParam(WPARAM wParam, LPARAM lParam);
-	//}}AFX_MSG
+    afx_msg void OnItemChanged(NMHDR* pNmHdr, LRESULT* pResult);
+    //}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
 

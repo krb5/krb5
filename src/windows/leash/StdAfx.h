@@ -14,6 +14,7 @@
 #define WINVER 0x0600       // Target Vista+
 #define _WIN32_WINNT 0x0600 // Target Vista+
 #include <afxwin.h>         // MFC core and standard components
+#include <afxcview.h>
 #include <afxext.h>         // MFC extensions
 #include <afxdisp.h>        // MFC OLE automation classes
 #ifndef _AFX_NO_AFXCMN_SUPPORT
