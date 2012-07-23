@@ -220,6 +220,8 @@ static const char null_mprinc_name[] = "kdb5_dump@MISSING";
 #define oflock_error      _("%s: cannot lock %s (%s)\n")
 #define dumprec_err       _("%s: error performing %s dump (%s)\n")
 #define trash_end_fmt     _("%s(%d): ignoring trash at end of line: ")
+#define read_nomem        _("entry (out of memory)")
+#define read_header       _("dump entry header")
 #define read_name_string  _("name string")
 #define read_key_type     _("key type")
 #define read_key_data     _("key data")
@@ -1796,291 +1798,252 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
  * Returns -1 for end of file, 0 for success and 1 for failure.
  */
 static int
-process_k5beta6_record(fname, kcontext, filep, flags, linenop)
-    char                *fname;
-    krb5_context        kcontext;
-    FILE                *filep;
-    int                 flags;
-    int                 *linenop;
+process_k5beta6_record(char *fname, krb5_context kcontext, FILE *filep,
+                       int flags, int *linenop)
 {
-    int                 retval;
+    int                 retval = 1;
     krb5_db_entry       *dbentry;
     krb5_int32          t1, t2, t3, t4, t5, t6, t7, t8, t9;
     int                 nread;
-    int                 error;
+    int                 error = 1;
     int                 i, j;
     char                *name;
     krb5_key_data       *kp, *kdatap;
     krb5_tl_data        **tlp, *tl;
     krb5_octet          *op;
     krb5_error_code     kret;
-    const char          *try2read;
+    const char          *try2read = read_header;
 
-    try2read = (char *) NULL;
     dbentry = krb5_db_alloc(kcontext, NULL, sizeof(*dbentry));
     if (dbentry == NULL)
-        return(1);
+        return 1;
     memset(dbentry, 0, sizeof(*dbentry));
     (*linenop)++;
-    retval = 1;
-    name = (char *) NULL;
-    kp = (krb5_key_data *) NULL;
-    op = (krb5_octet *) NULL;
-    error = 0;
-    kret = 0;
+    name = NULL;
+    kp = NULL;
+    op = NULL;
     nread = fscanf(filep, "%d\t%d\t%d\t%d\t%d\t", &t1, &t2, &t3, &t4, &t5);
-    if (nread == 5) {
-        /* Get memory for flattened principal name */
-        if (!(name = (char *) malloc((size_t) t2 + 1)))
-            error++;
+    if (nread == EOF) {
+        error = 0;
+        retval = -1;
+        goto cleanup;
+    }
+    if (nread != 5)
+        goto cleanup;
 
-        /* Get memory for and form tagged data linked list */
-        tlp = &dbentry->tl_data;
-        for (i=0; i<t3; i++) {
-            if ((*tlp = (krb5_tl_data *) malloc(sizeof(krb5_tl_data)))) {
-                memset(*tlp, 0, sizeof(krb5_tl_data));
-                tlp = &((*tlp)->tl_data_next);
-                dbentry->n_tl_data++;
+    /* Get memory for flattened principal name */
+    if ((name = malloc(t2 + 1)) == NULL)
+        goto cleanup;
+
+    /* Get memory for and form tagged data linked list */
+    tlp = &dbentry->tl_data;
+    for (i = 0; i < t3; i++) {
+        if (!(*tlp = malloc(sizeof(krb5_tl_data))))
+            goto cleanup;
+        memset(*tlp, 0, sizeof(krb5_tl_data));
+        tlp = &((*tlp)->tl_data_next);
+        dbentry->n_tl_data++;
+    }
+
+    /* Get memory for key list */
+    if (t4 && (kp = malloc(t4*sizeof(krb5_key_data))) == NULL)
+        goto cleanup;
+
+    /* Get memory for extra data */
+    if (t5 && !(op = malloc(t5)))
+        goto cleanup;
+
+    dbentry->len = t1;
+    dbentry->n_key_data = t4;
+    dbentry->e_length = t5;
+
+    if (kp != NULL) {
+        memset(kp, 0, t4*sizeof(krb5_key_data));
+        dbentry->key_data = kp;
+        kp = NULL;
+    }
+    if (op != NULL) {
+        memset(op, 0, t5);
+        dbentry->e_data = op;
+        op = NULL;
+    }
+
+    /* Read in and parse the principal name */
+    if (read_string(filep, name, t2, linenop)) {
+        try2read = no_mem_fmt;
+        goto cleanup;
+    }
+    if ((kret = krb5_parse_name(kcontext, name, &dbentry->princ))) {
+        fprintf(stderr, parse_err_fmt,
+                fname, *linenop, name, error_message(kret));
+        try2read = read_name_string;
+        goto cleanup;
+    }
+
+    /* Get the fixed principal attributes */
+    nread = fscanf(filep, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
+                   &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
+    if (nread != 8) {
+        try2read = read_nint_data;
+        goto cleanup;
+    }
+    dbentry->attributes = (krb5_flags) t2;
+    dbentry->max_life = (krb5_deltat) t3;
+    dbentry->max_renewable_life = (krb5_deltat) t4;
+    dbentry->expiration = (krb5_timestamp) t5;
+    dbentry->pw_expiration = (krb5_timestamp) t6;
+    dbentry->last_success = (krb5_timestamp) t7;
+    dbentry->last_failed = (krb5_timestamp) t8;
+    dbentry->fail_auth_count = (krb5_kvno) t9;
+    dbentry->mask = KADM5_LOAD | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
+        KADM5_MAX_LIFE | KADM5_MAX_RLIFE |
+        KADM5_PRINC_EXPIRE_TIME | KADM5_LAST_SUCCESS |
+        KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
+
+    /*
+     * Get the tagged data.
+     *
+     * Really, this code ought to discard tl data types
+     * that it knows are special to the current version
+     * and were not supported in the previous version.
+     * But it's a pain to implement that here, and doing
+     * it at dump time has almost as good an effect, so
+     * that's what I did.  [krb5-admin/89]
+     */
+    if (dbentry->n_tl_data) {
+        for (tl = dbentry->tl_data; tl; tl = tl->tl_data_next) {
+            nread = fscanf(filep, "%d\t%d\t", &t1, &t2);
+            if (nread != 2) {
+                try2read = read_ttypelen;
+                goto cleanup;
             }
-            else {
-                error++;
-                break;
-            }
-        }
-
-        /* Get memory for key list */
-        if (t4 && !(kp = (krb5_key_data *) malloc((size_t)
-                                                  (t4*sizeof(krb5_key_data)))))
-            error++;
-
-        /* Get memory for extra data */
-        if (t5 && !(op = (krb5_octet *) malloc((size_t) t5)))
-            error++;
-
-        if (!error) {
-            dbentry->len = t1;
-            dbentry->n_key_data = t4;
-            dbentry->e_length = t5;
-            if (kp) {
-                memset(kp, 0, (size_t) (t4*sizeof(krb5_key_data)));
-                dbentry->key_data = kp;
-                kp = (krb5_key_data *) NULL;
-            }
-            if (op) {
-                memset(op, 0, (size_t) t5);
-                dbentry->e_data = op;
-                op = (krb5_octet *) NULL;
-            }
-
-            /* Read in and parse the principal name */
-            if (!read_string(filep, name, t2, linenop) &&
-                !(kret = krb5_parse_name(kcontext, name, &dbentry->princ))) {
-
-                /* Get the fixed principal attributes */
-                nread = fscanf(filep, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
-                               &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
-                if (nread == 8) {
-                    dbentry->attributes = (krb5_flags) t2;
-                    dbentry->max_life = (krb5_deltat) t3;
-                    dbentry->max_renewable_life = (krb5_deltat) t4;
-                    dbentry->expiration = (krb5_timestamp) t5;
-                    dbentry->pw_expiration = (krb5_timestamp) t6;
-                    dbentry->last_success = (krb5_timestamp) t7;
-                    dbentry->last_failed = (krb5_timestamp) t8;
-                    dbentry->fail_auth_count = (krb5_kvno) t9;
-                    dbentry->mask = KADM5_LOAD | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
-                        KADM5_MAX_LIFE | KADM5_MAX_RLIFE |
-                        KADM5_PRINC_EXPIRE_TIME | KADM5_LAST_SUCCESS |
-                        KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
-                } else {
-                    try2read = read_nint_data;
-                    error++;
+            tl->tl_data_type = (krb5_int16) t1;
+            tl->tl_data_length = (krb5_int16) t2;
+            if (!tl->tl_data_length) {
+                /* Should be a null field */
+                nread = fscanf(filep, "%d", &t9);
+                if ((nread != 1) || (t9 != -1)) {
+                    try2read = read_tcontents;
+                    goto cleanup;
                 }
+                continue;
+            }
+            if (!(tl->tl_data_contents = malloc(t2 + 1)) ||
+                read_octet_string(filep, tl->tl_data_contents, t2)) {
+                try2read = read_nomem;
+                goto cleanup;
+            }
+
+            /* test to set mask fields */
+            if (t1 == KRB5_TL_KADM_DATA) {
+                XDR xdrs;
+                osa_princ_ent_rec osa_princ_ent;
 
                 /*
-                 * Get the tagged data.
-                 *
-                 * Really, this code ought to discard tl data types
-                 * that it knows are special to the current version
-                 * and were not supported in the previous version.
-                 * But it's a pain to implement that here, and doing
-                 * it at dump time has almost as good an effect, so
-                 * that's what I did.  [krb5-admin/89]
+                 * Assuming aux_attributes will always be
+                 * there
                  */
-                if (!error && dbentry->n_tl_data) {
-                    for (tl = dbentry->tl_data; tl; tl = tl->tl_data_next) {
-                        nread = fscanf(filep, "%d\t%d\t", &t1, &t2);
-                        if (nread == 2) {
-                            tl->tl_data_type = (krb5_int16) t1;
-                            tl->tl_data_length = (krb5_int16) t2;
-                            if (tl->tl_data_length) {
-                                if (!(tl->tl_data_contents =
-                                      (krb5_octet *) malloc((size_t) t2+1)) ||
-                                    read_octet_string(filep,
-                                                      tl->tl_data_contents,
-                                                      t2)) {
-                                    try2read = read_tcontents;
-                                    error++;
-                                    break;
-                                }
-                                /* test to set mask fields */
-                                if (t1 == KRB5_TL_KADM_DATA) {
-                                    XDR xdrs;
-                                    osa_princ_ent_rec osa_princ_ent;
+                dbentry->mask |= KADM5_AUX_ATTRIBUTES;
 
-                                    /*
-                                     * Assuming aux_attributes will always be
-                                     * there
-                                     */
-                                    dbentry->mask |= KADM5_AUX_ATTRIBUTES;
+                /* test for an actual policy reference */
+                memset(&osa_princ_ent, 0, sizeof(osa_princ_ent));
+                xdrmem_create(&xdrs, (char *)tl->tl_data_contents,
+                              tl->tl_data_length, XDR_DECODE);
+                if (xdr_osa_princ_ent_rec(&xdrs, &osa_princ_ent) &&
+                    (osa_princ_ent.aux_attributes & KADM5_POLICY) &&
+                    osa_princ_ent.policy != NULL) {
 
-                                    /* test for an actual policy reference */
-                                    memset(&osa_princ_ent, 0, sizeof(osa_princ_ent));
-                                    xdrmem_create(&xdrs, (char *)tl->tl_data_contents,
-                                                  tl->tl_data_length, XDR_DECODE);
-                                    if (xdr_osa_princ_ent_rec(&xdrs, &osa_princ_ent) &&
-                                        (osa_princ_ent.aux_attributes & KADM5_POLICY) &&
-                                        osa_princ_ent.policy != NULL) {
-
-                                        dbentry->mask |= KADM5_POLICY;
-                                        kdb_free_entry(NULL, NULL, &osa_princ_ent);
-                                    }
-                                    xdr_destroy(&xdrs);
-                                }
-                            }
-                            else {
-                                /* Should be a null field */
-                                nread = fscanf(filep, "%d", &t9);
-                                if ((nread != 1) || (t9 != -1)) {
-                                    error++;
-                                    try2read = read_tcontents;
-                                    break;
-                                }
-                            }
-                        }
-                        else {
-                            try2read = read_ttypelen;
-                            error++;
-                            break;
-                        }
-                    }
-                    if (!error)
-                        dbentry->mask |= KADM5_TL_DATA;
+                    dbentry->mask |= KADM5_POLICY;
+                    kdb_free_entry(NULL, NULL, &osa_princ_ent);
                 }
+                xdr_destroy(&xdrs);
+            }
+        }
+        dbentry->mask |= KADM5_TL_DATA;
+    }
 
-                /* Get the key data */
-                if (!error && dbentry->n_key_data) {
-                    for (i=0; !error && (i<dbentry->n_key_data); i++) {
-                        kdatap = &dbentry->key_data[i];
-                        nread = fscanf(filep, "%d\t%d\t", &t1, &t2);
-                        if (nread == 2) {
-                            kdatap->key_data_ver = (krb5_int16) t1;
-                            kdatap->key_data_kvno = (krb5_int16) t2;
+    /* Get the key data */
+    if (dbentry->n_key_data) {
+        for (i = 0; i < dbentry->n_key_data; i++) {
+            kdatap = &dbentry->key_data[i];
+            nread = fscanf(filep, "%d\t%d\t", &t1, &t2);
+            if (nread != 2) {
+                try2read = read_kcontents;
+                goto cleanup;
+            }
 
-                            for (j=0; j<t1; j++) {
-                                nread = fscanf(filep, "%d\t%d\t", &t3, &t4);
-                                if (nread == 2) {
-                                    kdatap->key_data_type[j] = t3;
-                                    kdatap->key_data_length[j] = t4;
-                                    if (t4) {
-                                        if (!(kdatap->key_data_contents[j] =
-                                              (krb5_octet *)
-                                              malloc((size_t) t4+1)) ||
-                                            read_octet_string(filep,
-                                                              kdatap->key_data_contents[j],
-                                                              t4)) {
-                                            try2read = read_kcontents;
-                                            error++;
-                                            break;
-                                        }
-                                    }
-                                    else {
-                                        /* Should be a null field */
-                                        nread = fscanf(filep, "%d", &t9);
-                                        if ((nread != 1) || (t9 != -1)) {
-                                            error++;
-                                            try2read = read_kcontents;
-                                            break;
-                                        }
-                                    }
-                                }
-                                else {
-                                    try2read = read_ktypelen;
-                                    error++;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (!error)
-                        dbentry->mask |= KADM5_KEY_DATA;
+            kdatap->key_data_ver = (krb5_int16) t1;
+            kdatap->key_data_kvno = (krb5_int16) t2;
+
+            for (j = 0; j < t1; j++) {
+                nread = fscanf(filep, "%d\t%d\t", &t3, &t4);
+                if (nread != 2) {
+                    try2read = read_ktypelen;
+                    goto cleanup;
                 }
-
-                /* Get the extra data */
-                if (!error && dbentry->e_length) {
-                    if (read_octet_string(filep,
-                                          dbentry->e_data,
-                                          (int) dbentry->e_length)) {
-                        try2read = read_econtents;
-                        error++;
-                    }
-                }
-                else {
+                kdatap->key_data_type[j] = t3;
+                kdatap->key_data_length[j] = t4;
+                if (!t4) {
+                    /* Should be a null field */
                     nread = fscanf(filep, "%d", &t9);
                     if ((nread != 1) || (t9 != -1)) {
-                        error++;
-                        try2read = read_econtents;
+                        try2read = read_kcontents;
+                        goto cleanup;
                     }
+                    continue;
                 }
-
-                /* Finally, find the end of the record. */
-                if (!error)
-                    find_record_end(filep, fname, *linenop);
-
-                /*
-                 * We have either read in all the data or choked.
-                 */
-                if (!error) {
-                    if ((kret = krb5_db_put_principal(kcontext, dbentry))) {
-                        fprintf(stderr, store_err_fmt,
-                                fname, *linenop,
-                                name, error_message(kret));
-                    }
-                    else {
-                        if (flags & FLAG_VERBOSE)
-                            fprintf(stderr, add_princ_fmt, name);
-                        retval = 0;
-                    }
-                }
-                else {
-                    fprintf(stderr, read_err_fmt, fname, *linenop, try2read);
+                if ((kdatap->key_data_contents[j] = malloc(t4 + 1)) == NULL ||
+                    read_octet_string(filep, kdatap->key_data_contents[j],
+                                      t4)) {
+                    try2read = read_kcontents;
+                    goto cleanup;
                 }
             }
-            else {
-                if (kret)
-                    fprintf(stderr, parse_err_fmt,
-                            fname, *linenop, name, error_message(kret));
-                else
-                    fprintf(stderr, no_mem_fmt, fname, *linenop);
-            }
         }
-        else {
-            fprintf(stderr, rhead_err_fmt, fname, *linenop);
-        }
+        dbentry->mask |= KADM5_KEY_DATA;
+    }
 
-        if (op)
-            free(op);
-        if (kp)
-            free(kp);
-        if (name)
-            free(name);
-        krb5_db_free_principal(kcontext, dbentry);
+    /* Get the extra data */
+    if (dbentry->e_length) {
+        if (read_octet_string(filep,
+                              dbentry->e_data,
+                              (int) dbentry->e_length)) {
+            try2read = read_econtents;
+            goto cleanup;
+        }
     }
     else {
-        if (nread == EOF)
-            retval = -1;
+        nread = fscanf(filep, "%d", &t9);
+        if ((nread != 1) || (t9 != -1)) {
+            try2read = read_econtents;
+            goto cleanup;
+        }
     }
-    return(retval);
+
+    /* Finally, find the end of the record. */
+    find_record_end(filep, fname, *linenop);
+
+    if ((kret = krb5_db_put_principal(kcontext, dbentry))) {
+        fprintf(stderr, store_err_fmt, fname, *linenop, name,
+                error_message(kret));
+        goto cleanup;
+    }
+
+    if (flags & FLAG_VERBOSE)
+        fprintf(stderr, add_princ_fmt, name);
+    retval = 0;
+    error = 0;
+
+cleanup:
+    if (error)
+        fprintf(stderr, read_err_fmt, fname, *linenop, try2read);
+
+    free(op);
+    free(kp);
+    free(name);
+    krb5_db_free_principal(kcontext, dbentry);
+
+    return retval;
 }
 
 static int
