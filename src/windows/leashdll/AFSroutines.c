@@ -207,8 +207,7 @@ not_an_API_LeashAFSGetToken(
         list->name = strdup(aclient.name);
         list->inst = aclient.instance[0] ? strdup(aclient.instance) : NULL;
         list->realm = strdup(aclient.cell);
-        list->tktEncType = NULL;
-        list->keyEncType = NULL;
+        list->encTypes = NULL;
         list->addrCount = 0;
         list->addrList = NULL;
 

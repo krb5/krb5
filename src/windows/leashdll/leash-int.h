@@ -162,7 +162,9 @@ BOOL IsKerberosLogon(VOID);
 int Leash_krb5_error(krb5_error_code rc, LPCSTR FailedFunctionName,
                      int FreeContextFlag, krb5_context *ctx,
                      krb5_ccache *cache);
-int Leash_krb5_initialize(krb5_context *, krb5_ccache *);
+int Leash_krb5_initialize(krb5_context *);
+krb5_error_code
+Leash_krb5_cc_default(krb5_context *ctx, krb5_ccache *cache);
 #endif /* NO_KRB5 */
 
 LPSTR err_describe(LPSTR buf, long code);
