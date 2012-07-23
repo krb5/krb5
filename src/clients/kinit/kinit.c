@@ -116,7 +116,8 @@ struct k_opts
     char* principal_name;
     char* service_name;
     char* keytab_name;
-    char* k5_cache_name;
+    char* k5_in_cache_name;
+    char* k5_out_cache_name;
     char *armor_ccache;
 
     action_type action;
@@ -132,7 +133,7 @@ struct k_opts
 struct k5_data
 {
     krb5_context ctx;
-    krb5_ccache cc;
+    krb5_ccache in_cc, out_cc;
     krb5_principal me;
     char* name;
     krb5_boolean switch_to_cache;
@@ -286,8 +287,8 @@ parse_options(argc, argv, opts)
     int errflg = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv, "r:fpFPn54aAVl:s:c:kit:T:RS:vX:CE"))
-           != -1) {
+    while ((i = GETOPT(argc, argv,
+                       "r:fpFPn54aAVl:s:c:kit:T:RS:vX:CEI:")) != -1) {
         switch (i) {
         case 'V':
             opts->verbose = 1;
@@ -376,12 +377,20 @@ parse_options(argc, argv, opts)
             opts->action = VALIDATE;
             break;
         case 'c':
-            if (opts->k5_cache_name)
+            if (opts->k5_out_cache_name)
             {
                 fprintf(stderr, _("Only one -c option allowed\n"));
                 errflg++;
             } else {
-                opts->k5_cache_name = optarg;
+                opts->k5_out_cache_name = optarg;
+            }
+            break;
+        case 'I':
+            if (opts->k5_in_cache_name) {
+                fprintf(stderr, _("Only one -I option allowed\n"));
+                errflg++;
+            } else {
+                opts->k5_in_cache_name = optarg;
             }
             break;
         case 'X':
@@ -467,16 +476,16 @@ k5_begin(opts, k5)
         }
     }
 
-    if (opts->k5_cache_name) {
-        code = krb5_cc_resolve(k5->ctx, opts->k5_cache_name, &k5->cc);
+    if (opts->k5_out_cache_name) {
+        code = krb5_cc_resolve(k5->ctx, opts->k5_out_cache_name, &k5->out_cc);
         if (code != 0) {
             com_err(progname, code, _("resolving ccache %s"),
-                    opts->k5_cache_name);
+                    opts->k5_out_cache_name);
             return 0;
         }
         if (opts->verbose) {
             fprintf(stderr, _("Using specified cache: %s\n"),
-                    opts->k5_cache_name);
+                    opts->k5_out_cache_name);
         }
     } else {
         if ((code = krb5_cc_default(k5->ctx, &defcache))) {
@@ -486,7 +495,7 @@ k5_begin(opts, k5)
         deftype = krb5_cc_get_type(k5->ctx, defcache);
         if (k5->me != NULL && krb5_cc_support_switch(k5->ctx, deftype)) {
             /* Use an existing cache for the specified principal if we can. */
-            code = krb5_cc_cache_match(k5->ctx, k5->me, &k5->cc);
+            code = krb5_cc_cache_match(k5->ctx, k5->me, &k5->out_cc);
             if (code != 0 && code != KRB5_CC_NOTFOUND) {
                 com_err(progname, code, _("while searching for ccache for %s"),
                         opts->principal_name);
@@ -494,7 +503,7 @@ k5_begin(opts, k5)
                 return 0;
             }
             if (code == KRB5_CC_NOTFOUND) {
-                code = krb5_cc_new_unique(k5->ctx, deftype, NULL, &k5->cc);
+                code = krb5_cc_new_unique(k5->ctx, deftype, NULL, &k5->out_cc);
                 if (code) {
                     com_err(progname, code, _("while generating new ccache"));
                     krb5_cc_close(k5->ctx, defcache);
@@ -502,20 +511,32 @@ k5_begin(opts, k5)
                 }
                 if (opts->verbose) {
                     fprintf(stderr, _("Using new cache: %s\n"),
-                            krb5_cc_get_name(k5->ctx, k5->cc));
+                            krb5_cc_get_name(k5->ctx, k5->out_cc));
                 }
             } else if (opts->verbose) {
                 fprintf(stderr, _("Using existing cache: %s\n"),
-                        krb5_cc_get_name(k5->ctx, k5->cc));
+                        krb5_cc_get_name(k5->ctx, k5->out_cc));
             }
             krb5_cc_close(k5->ctx, defcache);
             k5->switch_to_cache = 1;
         } else {
-            k5->cc = defcache;
+            k5->out_cc = defcache;
             if (opts->verbose) {
                 fprintf(stderr, _("Using default cache: %s\n"),
-                        krb5_cc_get_name(k5->ctx, k5->cc));
+                        krb5_cc_get_name(k5->ctx, k5->out_cc));
             }
+        }
+    }
+    if (opts->k5_in_cache_name) {
+        code = krb5_cc_resolve(k5->ctx, opts->k5_in_cache_name, &k5->in_cc);
+        if (code != 0) {
+            com_err(progname, code, _("resolving ccache %s"),
+                    opts->k5_in_cache_name);
+            return 0;
+        }
+        if (opts->verbose) {
+            fprintf(stderr, _("Using specified input cache: %s\n"),
+                    opts->k5_in_cache_name);
         }
     }
 
@@ -563,7 +584,7 @@ k5_begin(opts, k5)
                 }
             } else {
                 /* Get default principal from cache if one exists */
-                code = krb5_cc_get_principal(k5->ctx, k5->cc,
+                code = krb5_cc_get_principal(k5->ctx, k5->out_cc,
                                              &k5->me);
                 if (code) {
                     char *name = get_name_from_os();
@@ -603,8 +624,10 @@ k5_end(k5)
         krb5_free_unparsed_name(k5->ctx, k5->name);
     if (k5->me)
         krb5_free_principal(k5->ctx, k5->me);
-    if (k5->cc)
-        krb5_cc_close(k5->ctx, k5->cc);
+    if (k5->in_cc)
+        krb5_cc_close(k5->ctx, k5->in_cc);
+    if (k5->out_cc)
+        krb5_cc_close(k5->ctx, k5->out_cc);
     if (k5->ctx)
         krb5_free_context(k5->ctx);
     errctx = NULL;
@@ -727,7 +750,14 @@ k5_kinit(opts, k5)
                     opts->pa_opts[i].value);
         }
     }
-    code = krb5_get_init_creds_opt_set_out_ccache(k5->ctx, options, k5->cc);
+    if (k5->in_cc) {
+        code = krb5_get_init_creds_opt_set_in_ccache(k5->ctx, options,
+                                                     k5->in_cc);
+        if (code)
+            goto cleanup;
+    }
+    code = krb5_get_init_creds_opt_set_out_ccache(k5->ctx, options,
+                                                  k5->out_cc);
     if (code)
         goto cleanup;
 
@@ -747,11 +777,11 @@ k5_kinit(opts, k5)
                                           options);
         break;
     case VALIDATE:
-        code = krb5_get_validated_creds(k5->ctx, &my_creds, k5->me, k5->cc,
+        code = krb5_get_validated_creds(k5->ctx, &my_creds, k5->me, k5->out_cc,
                                         opts->service_name);
         break;
     case RENEW:
-        code = krb5_get_renewed_creds(k5->ctx, &my_creds, k5->me, k5->cc,
+        code = krb5_get_renewed_creds(k5->ctx, &my_creds, k5->me, k5->out_cc,
                                       opts->service_name);
         break;
     }
@@ -780,17 +810,17 @@ k5_kinit(opts, k5)
     }
 
     if ((opts->action != INIT_PW) && (opts->action != INIT_KT)) {
-        code = krb5_cc_initialize(k5->ctx, k5->cc, opts->canonicalize ?
+        code = krb5_cc_initialize(k5->ctx, k5->out_cc, opts->canonicalize ?
                                   my_creds.client : k5->me);
         if (code) {
             com_err(progname, code, _("when initializing cache %s"),
-                    opts->k5_cache_name?opts->k5_cache_name:"");
+                    opts->k5_out_cache_name?opts->k5_out_cache_name:"");
             goto cleanup;
         }
         if (opts->verbose)
             fprintf(stderr, _("Initialized cache\n"));
 
-        code = krb5_cc_store_cred(k5->ctx, k5->cc, &my_creds);
+        code = krb5_cc_store_cred(k5->ctx, k5->out_cc, &my_creds);
         if (code) {
             com_err(progname, code, _("while storing credentials"));
             goto cleanup;
@@ -801,7 +831,7 @@ k5_kinit(opts, k5)
     notix = 0;
 
     if (k5->switch_to_cache) {
-        code = krb5_cc_switch(k5->ctx, k5->cc);
+        code = krb5_cc_switch(k5->ctx, k5->out_cc);
         if (code) {
             com_err(progname, code, _("while switching to new ccache"));
             goto cleanup;

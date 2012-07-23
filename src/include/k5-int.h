@@ -1029,6 +1029,7 @@ typedef struct _krb5_gic_opt_private {
     int num_preauth_data;
     krb5_gic_opt_pa_data *preauth_data;
     char * fast_ccache_name;
+    krb5_ccache in_ccache;
     krb5_ccache out_ccache;
     krb5_flags fast_flags;
     krb5_expire_callback_func expire_cb;
