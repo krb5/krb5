@@ -120,6 +120,7 @@ public:
 	static profile_t    m_krbv5_profile;
 	static HINSTANCE    m_hKrbLSA;
 	static int          m_useRibbon; // temporary while ribbon UI in dev
+	static BOOL         m_bUpdateDisplay;
 
 	CLeashApp();
 	virtual ~CLeashApp();
@@ -155,6 +156,8 @@ public:
 	//{{AFX_MSG(CLeashApp)
     //}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+    virtual BOOL OnIdle(LONG lCount);
 };
 
 extern CLeashApp theApp;

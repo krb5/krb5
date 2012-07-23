@@ -22,19 +22,7 @@
 ////#include <loadfuncs-krb.h>
 #include <loadfuncs-profile.h>
 #include <loadfuncs-leash.h>
-
-typedef struct TicketList
-{
-    char* theTicket;
-    TicketList* next;
-    char* tktEncType;
-    char* keyEncType;
-    int   addrCount;
-    char ** addrList;
-    char * name;
-    char * inst;
-    char * realm;
-} TicketList;
+#include <krb5.h>
 
 // toolhelp functions
 TYPEDEF_FUNC(
@@ -82,20 +70,8 @@ TYPEDEF_FUNC(
 TYPEDEF_FUNC(
     long,
     WINAPIV,
-    not_an_API_LeashKRB5GetTickets,
-    (TICKETINFO *, TicketList **, krb5_context *)
-    );
-TYPEDEF_FUNC(
-    long,
-    WINAPIV,
     not_an_API_LeashAFSGetToken,
     (TICKETINFO *, TicketList **, char *)
-    );
-TYPEDEF_FUNC(
-    long,
-    WINAPIV,
-    not_an_API_LeashFreeTicketList,
-    (TicketList**)
     );
 TYPEDEF_FUNC(
     long,
@@ -105,9 +81,7 @@ TYPEDEF_FUNC(
     );
 
 extern DECL_FUNC_PTR(not_an_API_LeashKRB4GetTickets);
-extern DECL_FUNC_PTR(not_an_API_LeashKRB5GetTickets);
 extern DECL_FUNC_PTR(not_an_API_LeashAFSGetToken);
-extern DECL_FUNC_PTR(not_an_API_LeashFreeTicketList);
 extern DECL_FUNC_PTR(not_an_API_LeashGetTimeServerName);
 extern DECL_FUNC_PTR(Leash_kdestroy);
 extern DECL_FUNC_PTR(Leash_changepwd_dlg);
@@ -154,9 +128,7 @@ extern DECL_FUNC_PTR(Leash_reset_defaults);
 
 ////Do we still need this one?
 #define pLeashKRB4GetTickets     pnot_an_API_LeashKRB4GetTickets
-#define pLeashKRB5GetTickets     pnot_an_API_LeashKRB5GetTickets
 #define pLeashAFSGetToken        pnot_an_API_LeashAFSGetToken
-#define pLeashFreeTicketList     pnot_an_API_LeashFreeTicketList
 #define pLeashGetTimeServerName  pnot_an_API_LeashGetTimeServerName
 
 // psapi functions
@@ -266,6 +238,17 @@ extern BOOL SetRegistryVariable(const CString& regVariable,
 extern VOID LeashErrorBox(LPCSTR errorMsg, LPCSTR insertedString,
                           LPCSTR errorFlag = "Error");
 
+// Get ticket info for the default ccache only
+extern void LeashKRB5ListDefaultTickets(TICKETINFO *ticketinfo);
+// clean up ticket info
+extern void LeashKRB5FreeTicketInfo(TICKETINFO *ticketinfo);
+
+// Allocate TICKETINFO for each ccache that contain tickets
+extern void LeashKRB5ListAllTickets(TICKETINFO **ticketinfolist);
+// clean up ticket info list
+extern void LeashKRB5FreeTickets(TICKETINFO **ticketinfolist);
+
+
 
 class Directory
 {
@@ -283,8 +266,6 @@ public:
 class TicketInfoWrapper {
   public:
     HANDLE     lockObj;
-////Can this be commented out?
-    TICKETINFO Krb4;
     TICKETINFO Krb5;
     TICKETINFO Afs;
 };

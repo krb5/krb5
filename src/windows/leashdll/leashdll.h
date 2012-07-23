@@ -58,6 +58,8 @@ void FAR Leash_load_com_err_callback(FARPROC,FARPROC,FARPROC);
 #endif
 #include <ntsecapi.h>
 
+#include <krb5.h>
+
 #ifndef NO_KRB4
 extern HINSTANCE hKrb4;
 #endif
@@ -72,19 +74,6 @@ extern HINSTANCE hProfile;
 
 #define LEASH_PRIORITY_LOW  0
 #define LEASH_PRIORITY_HIGH 1
-
-typedef struct TicketList
-{
-    char* theTicket;
-    struct TicketList* next;
-    char* tktEncType;
-    char* keyEncType;
-    int   addrCount;
-    char ** addrList;
-    char * name;
-    char * inst;
-    char * realm;
-} TicketList;
 
 ///////////////////////////////////////////////////////////////////////////////
 

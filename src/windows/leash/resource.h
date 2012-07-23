@@ -334,9 +334,9 @@
 #define ID_BUTTON2                      32813
 #define ID_BUTTON5                      32816
 #define ID_BUTTON4                      32818
+#define ID_ABOUT                        32818
 #define ID_ENCRYPTION_TYPE              32826
 #define ID_VALID_UNTIL                  32828
-#define ID_BUTTON3                      32835
 #define ID_MAKE_DEFAULT                 32835
 
 // Next default values for new objects
