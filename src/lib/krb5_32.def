@@ -424,3 +424,6 @@ EXPORTS
 	krb5_pac_sign					@395
 	krb5_find_authdata				@396
 	krb5_check_clockskew				@397
+
+; New for 1.10.3 / KfW 4.0
+	krb5int_cc_user_set_default_name		@404 ; PRIVATE LEASH

@@ -2389,6 +2389,9 @@ typedef struct _krb5_donot_replay {
     krb5_timestamp ctime;
 } krb5_donot_replay;
 
+krb5_error_code KRB5_CALLCONV
+krb5int_cc_user_set_default_name(krb5_context context, const char *name);
+
 krb5_error_code krb5_rc_default(krb5_context, krb5_rcache *);
 krb5_error_code krb5_rc_resolve_type(krb5_context, krb5_rcache *,char *);
 krb5_error_code krb5_rc_resolve_full(krb5_context, krb5_rcache *,char *);
