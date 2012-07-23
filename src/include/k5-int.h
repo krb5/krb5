@@ -282,6 +282,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_FAST_AVAIL                  "fast_avail"
 #define KRB5_CONF_PROXY_IMPERSONATOR          "proxy_impersonator"
 #define KRB5_CONF_REFRESH_TIME                "refresh_time"
+#define KRB5_CONF_PA_TYPE                     "pa_type"
 
 /* Error codes used in KRB_ERROR protocol messages.
    Return values of library routines are based on a different error table
@@ -839,6 +840,17 @@ struct krb5_clpreauth_rock_st {
     krb5_int32 pa_offset_usec;
     enum { NO_OFFSET = 0, UNAUTH_OFFSET, AUTH_OFFSET } pa_offset_state;
     struct krb5_responder_context_st rctx;
+
+    /*
+     * Configuration information read from an in_ccache, actually stored in the
+     * containing context structure, but needed by callbacks which currently
+     * only get a pointer to the rock
+     */
+
+    /* The allowed preauth type (number) that we might use, equal to
+     * KRB5_PADATA_NONE if none was set. */
+    krb5_preauthtype *allowed_preauth_type;
+    krb5_preauthtype *selected_preauth_type;
 };
 
 typedef struct _krb5_pa_enc_ts {

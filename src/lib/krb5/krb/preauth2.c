@@ -536,6 +536,10 @@ run_preauth_plugins(krb5_context kcontext,
         /* skip over those which don't match the flags (INFO vs REAL, mainly) */
         if ((module->flags & module_required_flags) == 0)
             continue;
+        if ((module->flags & PA_REAL) &&
+            *preauth_rock->allowed_preauth_type != KRB5_PADATA_NONE &&
+            in_padata->pa_type != *preauth_rock->allowed_preauth_type)
+            continue;
         /* if it's a REAL module, try to call it only once per library call */
         if (module_required_flags & PA_REAL) {
             if (module->use_count > 0) {
@@ -570,6 +574,9 @@ run_preauth_plugins(krb5_context kcontext,
             if (ret != 0)
                 return ret;
         }
+        /* Record which pa_type we answered a call for. */
+        if (preauth_rock->selected_preauth_type != NULL)
+            *preauth_rock->selected_preauth_type = in_padata->pa_type;
         break;
     }
     if (i >= kcontext->preauth_context->n_modules) {
@@ -821,6 +828,12 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
             if (module->pa_type != padata[i]->pa_type) {
                 continue;
             }
+            if ((module->flags & PA_REAL) &&
+                *preauth_rock->allowed_preauth_type != KRB5_PADATA_NONE &&
+                padata[i]->pa_type != *preauth_rock->allowed_preauth_type) {
+                /* It's unlikely that we'll get here. */
+                continue;
+            }
             if (module->client_tryagain == NULL) {
                 continue;
             }
@@ -872,6 +885,10 @@ fill_response_items(krb5_context context, krb5_kdc_req *request,
             module = &context->preauth_context->modules[j];
             prep_questions = module->client_prep_questions;
             if (module->pa_type != pa->pa_type || prep_questions == NULL)
+                continue;
+            if ((module->flags & PA_REAL) &&
+                *rock->allowed_preauth_type != KRB5_PADATA_NONE &&
+                pa->pa_type != *rock->allowed_preauth_type)
                 continue;
             ret = (*prep_questions)(context, module->moddata,
                                     *module->modreq_p,

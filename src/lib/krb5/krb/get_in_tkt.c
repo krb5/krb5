@@ -830,6 +830,8 @@ krb5_init_creds_init(krb5_context context,
     ctx->preauth_rock.client = client;
     ctx->preauth_rock.prompter = prompter;
     ctx->preauth_rock.prompter_data = data;
+    ctx->preauth_rock.allowed_preauth_type = &ctx->allowed_preauth_type;
+    ctx->preauth_rock.selected_preauth_type = &ctx->selected_preauth_type;
 
     /* Initialise request parameters as per krb5_get_init_creds() */
     ctx->request->kdc_options = context->kdc_default_options;
@@ -1088,6 +1090,53 @@ init_creds_validate_reply(krb5_context context,
     return 0;
 }
 
+static void
+read_allowed_preauth_type(krb5_context context, krb5_init_creds_context ctx)
+{
+    krb5_data config;
+    char *tmp, *p;
+
+    ctx->allowed_preauth_type = KRB5_PADATA_NONE;
+    if (ctx->opte->opt_private->in_ccache == NULL)
+        return;
+    memset(&config, 0, sizeof(config));
+    if (krb5_cc_get_config(context, ctx->opte->opt_private->in_ccache,
+                           ctx->request->server,
+                           KRB5_CONF_PA_TYPE, &config) != 0)
+        return;
+    tmp = malloc(config.length + 1);
+    if (tmp == NULL) {
+        krb5_free_data_contents(context, &config);
+        return;
+    }
+    memcpy(tmp, config.data, config.length);
+    tmp[config.length] = '\0';
+    ctx->allowed_preauth_type = strtol(tmp, &p, 10);
+    if (p == NULL || *p != '\0')
+        ctx->allowed_preauth_type = KRB5_PADATA_NONE;
+    free(tmp);
+    krb5_free_data_contents(context, &config);
+}
+
+static krb5_error_code
+save_selected_preauth_type(krb5_context context, krb5_ccache ccache,
+                           krb5_init_creds_context ctx)
+{
+    krb5_data config_data;
+    char *tmp;
+    krb5_error_code code;
+
+    if (ctx->selected_preauth_type == KRB5_PADATA_NONE)
+        return 0;
+    if (asprintf(&tmp, "%ld", (long)ctx->selected_preauth_type) < 0)
+        return ENOMEM;
+    config_data = string2data(tmp);
+    code = krb5_cc_set_config(context, ccache, ctx->cred.server,
+                              KRB5_CONF_PA_TYPE, &config_data);
+    free(tmp);
+    return code;
+}
+
 static krb5_error_code
 init_creds_step_request(krb5_context context,
                         krb5_init_creds_context ctx,
@@ -1122,6 +1171,11 @@ init_creds_step_request(krb5_context context,
     code = encode_krb5_kdc_req_body(ctx->request, &ctx->inner_request_body);
     if (code)
         goto cleanup;
+
+    /* Read the allowed patype for this server principal from the in_ccache,
+     * if the application supplied one. */
+    read_allowed_preauth_type(context, ctx);
+    ctx->selected_preauth_type = KRB5_PADATA_NONE;
 
     if (ctx->err_reply == NULL) {
         /* either our first attempt, or retrying after PREAUTH_NEEDED */
@@ -1396,6 +1450,15 @@ init_creds_step_reply(krb5_context context,
 
     ctx->etype = ctx->reply->enc_part.enctype;
 
+    /*
+     * At this point, allow whichever preauth plugin that can handle the KDC's
+     * reply padata to do so, regardless of that data's padata type.  We don't
+     * want to record the type of padata in the reply, so set the pointer for
+     * that data to NULL.
+     */
+    ctx->allowed_preauth_type = KRB5_PADATA_NONE;
+    ctx->preauth_rock.selected_preauth_type = NULL;
+
     code = krb5_do_preauth(context,
                            ctx->request,
                            ctx->inner_request_body,
@@ -1507,7 +1570,10 @@ init_creds_step_reply(krb5_context context,
             config_data.length = strlen(config_data.data);
             code = krb5_cc_set_config(context, out_ccache, ctx->cred.server,
                                       KRB5_CONF_FAST_AVAIL, &config_data);
+            if (code != 0)
+                goto cc_cleanup;
         }
+        code = save_selected_preauth_type(context, out_ccache, ctx);
     cc_cleanup:
         if (code !=0) {
             const char *msg;
