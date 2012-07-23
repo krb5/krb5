@@ -184,7 +184,6 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)preauth2.$(OBJEXT)	\
 	$(OUTPRE)preauth_ec.$(OBJEXT)	\
 	$(OUTPRE)preauth_encts.$(OBJEXT)	\
-	$(OUTPRE)preauth_sam2.$(OBJEXT)	\
 	$(OUTPRE)gic_opt_set_pa.$(OBJEXT)	\
 	$(OUTPRE)princ_comp.$(OBJEXT)	\
 	$(OUTPRE)privsafe.$(OBJEXT)	\
