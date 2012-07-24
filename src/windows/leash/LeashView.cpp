@@ -1978,11 +1978,6 @@ VOID CLeashView::OnUpdateDestroyTicket(CCmdUI* pCmdUI)
 
 VOID CLeashView::OnUpdateInitTicket(CCmdUI* pCmdUI)
 {
-    if (!CLeashApp::m_hAfsDLL)
-        pCmdUI->SetText("&Get Ticket(s)\tCtrl+T");
-    else
-        pCmdUI->SetText("&Get Ticket(s)/Token(s)\tCtrl+T");
-
     if (
 ////Is this logic correct?
 #ifndef NO_KRB4
