@@ -60,7 +60,7 @@
     <?define DebugSyms?>
 
     <!-- Optional defines -->
-    <!-- <?define Beta="1"?>  --> <!-- Numeric Beta identifier -->
+    <?define Beta="1"?> <!-- Numeric Beta identifier -->
     <!-- <?define OldHelp?> --> <!-- Specifies the use of the old leash32.hlp file
                            instead of the new leash32.chm file -->
 
