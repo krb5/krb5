@@ -42,8 +42,6 @@
 
 #if defined(_WIN32)
 #define DEFAULT_PROFILE_FILENAME "krb5.ini"
-#define DEFAULT_KEYTAB_NAME     "FILE:%{WINDOWS}\\krb5kt"
-#define DEFAULT_CLIENT_KEYTAB_NAME "FILE:%{WINDOWS}\\krb5clientkt"
 #else /* !_WINDOWS */
 #if TARGET_OS_MAC
 #define DEFAULT_SECURE_PROFILE_PATH "/Library/Preferences/edu.mit.Kerberos:/etc/krb5.conf:@SYSCONFDIR/krb5.conf"
@@ -55,8 +53,6 @@
 #define DEFAULT_SECURE_PROFILE_PATH     "/etc/krb5.conf:@SYSCONFDIR/krb5.conf"
 #define DEFAULT_PROFILE_PATH        DEFAULT_SECURE_PROFILE_PATH
 #endif
-#define DEFAULT_KEYTAB_NAME     "FILE:/etc/krb5.keytab"
-#define DEFAULT_CLIENT_KEYTAB_NAME "FILE:/etc/krb5.client-keytab"
 #endif /* _WINDOWS  */
 
 #define DEFAULT_PLUGIN_BASE_DIR "@LIBDIR/krb5/plugins"

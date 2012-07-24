@@ -6,6 +6,9 @@ GROFF=@GROFF@
 GROFF_MAN=$(GROFF) -mtty-char -Tascii -mandoc -c
 localstatedir=@localstatedir@
 sysconfdir=@sysconfdir@
+DEFCCNAME=@DEFCCNAME@
+DEFKTNAME=@DEFKTNAME@
+DEFCKTNAME=@DEFCKTNAME@
 
 MANSUBS=k5identity.sub k5login.sub k5srvutil.sub kadmin.sub kadmind.sub \
 	kdb5_ldap_util.sub kdb5_util.sub kdc.conf.sub kdestroy.sub kinit.sub \
@@ -35,7 +38,10 @@ rstman:
 	    -e 's|@SBINDIR@|$(SERVER_BINDIR)|g' \
 	    -e 's|@LIBDIR@|$(KRB5_LIBDIR)|g' \
 	    -e 's|@LOCALSTATEDIR@|$(localstatedir)|g' \
-	    -e 's|@SYSCONFDIR@|$(sysconfdir)|g' $? > $@
+	    -e 's|@SYSCONFDIR@|$(sysconfdir)|g' \
+	    -e 's|@CCNAME@|$(DEFCCNAME)|g' \
+	    -e 's|@KTNAME@|$(DEFKTNAME)|g' \
+	    -e 's|@CKTNAME@|$(DEFCKTNAME)|g' $? > $@
 
 all:: $(MANSUBS)
 

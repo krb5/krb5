@@ -226,10 +226,8 @@ get_from_os(krb5_context context)
 static void
 get_from_os(krb5_context context)
 {
-    char *name;
-
-    if (asprintf(&name, "FILE:/tmp/krb5cc_%ld", (long)getuid()) >= 0)
-        context->os_context.default_ccname = name;
+    (void)k5_expand_path_tokens(context, DEFCCNAME,
+                                &context->os_context.default_ccname);
 }
 
 #endif /* not _WIN32 */

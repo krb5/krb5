@@ -231,6 +231,9 @@ HINSTANCE get_lib_instance(void);
 
 #define THREEPARAMOPEN(x,y,z) open(x,y,z)
 
+#define DEFKTNAME "FILE:%{WINDOWS}\\krb5kt"
+#define DEFCKTNAME "FILE:%{WINDOWS}\\krb5clientkt"
+
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #endif

@@ -10,7 +10,7 @@ General defaults
 Description                 Default                        Environment
 ==========================  =============================  ====================
 Keytab file                 ``FILE:``\ |keytab|            **KRB5_KTNAME**
-Client keytab file          ``FILE:``\ |clkeytab|          **KRB5_CLIENT_KTNAME**
+Client keytab file          ``FILE:``\ |ckeytab|           **KRB5_CLIENT_KTNAME**
 Kerberos config file        |krb5conf|\ ``:``\             **KRB5_CONFIG**
                             |sysconfdir|\ ``/krb5.conf``
 KDC config file             |kdcdir|\ ``/kdc.conf``        **KRB5_KDC_PROFILE**
@@ -58,12 +58,15 @@ subdirectories of ``/usr/local``.  When MIT krb5 is integrated into an
 operating system, the paths are generally chosen to match the
 operating system's filesystem layout.
 
-=======================  ===============  ===================  ===============
-Description	         Symbolic name    Custom build path    Typical OS path
-=======================  ===============  ===================  ===============
-User programs	         BINDIR           ``/usr/local/bin``   ``/usr/bin``
-Libraries and plugins    LIBDIR           ``/usr/local/lib``   ``/usr/lib``
-Parent of KDC state dir  LOCALSTATEDIR    ``/usr/local/var``   ``/var``
-Administrative programs  SBINDIR          ``/usr/local/sbin``  ``/usr/sbin``
-Alternate krb5.conf dir  SYSCONFDIR       ``/usr/local/etc``   ``/etc``
-=======================  ===============  ===================  ===============
+==========================  =============  ===========================  ===========================
+Description                 Symbolic name  Custom build path            Typical OS path
+==========================  =============  ===========================  ===========================
+User programs               BINDIR         ``/usr/local/bin``           ``/usr/bin``
+Libraries and plugins       LIBDIR         ``/usr/local/lib``           ``/usr/lib``
+Parent of KDC state dir     LOCALSTATEDIR  ``/usr/local/var``           ``/var``
+Administrative programs     SBINDIR        ``/usr/local/sbin``          ``/usr/sbin``
+Alternate krb5.conf dir     SYSCONFDIR     ``/usr/local/etc``           ``/etc``
+Default ccache name         DEFCCNAME      ``/tmp/krb5cc_%{UID}``       ``/tmp/krb5cc_%{UID}``
+Default keytab name         DEFKTNAME      ``/etc/krb5.keytab``         ``/etc/krb5.keytab``
+Default client keytab name  DEFCKTNAME     ``/etc/krb5.client-keytab``  ``/etc/krb5.client-keytab``
+==========================  =============  ===========================  ===========================

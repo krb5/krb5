@@ -35,8 +35,6 @@
 
 #include "k5-int.h"
 
-char *krb5_defkeyname  = DEFAULT_KEYTAB_NAME;
-
 unsigned int krb5_max_dgram_size = MAX_DGRAM_SIZE;
 
 const char *krb5_default_pwd_prompt1 = DEFAULT_PWD_STRING1;

@@ -76,9 +76,8 @@ kvno uses the following environment variable:
 FILES
 -----
 
-``/tmp/krb5cc_[uid]``
-    Default location of the credentials cache ([*uid*] is the decimal
-    UID of the user).
+|ccache|
+    Default location of the credentials cache
 
 
 SEE ALSO

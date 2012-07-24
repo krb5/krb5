@@ -58,4 +58,4 @@ decreasing order of preference:
 #. The **default_client_keytab_name** profile variable in
    :ref:`libdefaults`.
 
-#. The hardcoded default, ``FILE:``\ |clkeytab|.
+#. The hardcoded default, ``FILE:``\ |ckeytab|.

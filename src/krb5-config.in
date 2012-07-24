@@ -38,6 +38,9 @@ RPATH_FLAG='@RPATH_FLAG@'
 PROG_RPATH_FLAGS='@PROG_RPATH_FLAGS@'
 PTHREAD_CFLAGS='@PTHREAD_CFLAGS@'
 DL_LIB='@DL_LIB@'
+DEFCCNAME='@DEFCCNAME@'
+DEFKTNAME='@DEFKTNAME@'
+DEFCKTNAME='@DEFCKTNAME@'
 
 LIBS='@LIBS@'
 GEN_LIB=@GEN_LIB@
@@ -57,6 +60,15 @@ while test $# != 0; do
 	    ;;
 	--cflags)
 	    do_cflags=1
+	    ;;
+	--defccname)
+	    do_defccname=1
+	    ;;
+	--defcktname)
+	    do_defcktname=1
+	    ;;
+	--defktname)
+	    do_defktname=1
 	    ;;
 	--deps)
 	    do_deps=1
@@ -102,7 +114,10 @@ while test $# != 0; do
 done
 
 # If required options - provide help
-if test -z "$do_all" -a -z "$do_version" -a -z "$do_vendor" -a -z "$do_prefix" -a -z "$do_vendor" -a -z "$do_exec_prefix" -a -z "$do_cflags" -a -z "$do_libs"; then
+if test -z "$do_all" -a -z "$do_version" -a -z "$do_vendor" -a \
+    -z "$do_prefix" -a -z "$do_vendor" -a -z "$do_exec_prefix" -a \
+    -z "$do_defccname" -a -z "$do_defktname" -a -z "$do_defcktname" -a \
+    -z "$do_cflags" -a -z "$do_libs"; then
     do_help=1
 fi
 
@@ -116,6 +131,9 @@ if test -n "$do_help"; then
     echo "        [--vendor]        Vendor information"
     echo "        [--prefix]        Kerberos installed prefix"
     echo "        [--exec-prefix]   Kerberos installed exec_prefix"
+    echo "        [--defccname]     Show built-in default ccache name"
+    echo "        [--defktname]     Show built-in default keytab name"
+    echo "        [--defcktname]    Show built-in default client keytab name"
     echo "        [--cflags]        Compile time CFLAGS"
     echo "        [--libs]          List libraries required to link [LIBRARIES]"
     echo "Libraries:"
@@ -158,6 +176,21 @@ fi
 
 if test -n "$do_exec_prefix"; then
     echo "$title_exec_prefix$exec_prefix"
+    $all_exit
+fi
+
+if test -n "$do_defccname"; then
+    echo "$DEFCCNAME"
+    $all_exit
+fi
+
+if test -n "$do_defktname"; then
+    echo "$DEFKTNAME"
+    $all_exit
+fi
+
+if test -n "$do_defcktname"; then
+    echo "$DEFCKTNAME"
     $all_exit
 fi
 

@@ -53,6 +53,15 @@ prints the prefix with which Kerberos was built.
 \fB\--exec-prefix\fP 
 prints the exec-prefix with which Kerberos was built.
 .TP
+\fB\--defccname\fP
+prints the built-in default credential cache name.
+.TP
+\fB\--defktname\fP
+prints the built-in default keytab name.
+.TP
+\fB\--defcktname\fP
+prints the built-in default client keytab name.
+.TP
 \fB\--cflags\fP 
 prints the compiler flags with which Kerberos was built.
 .TP

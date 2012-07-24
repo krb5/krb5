@@ -216,6 +216,9 @@ if 'mansubs' in tags:
     libdir = '``@LIBDIR@``'
     localstatedir = '``@LOCALSTATEDIR@``'
     sysconfdir = '``@SYSCONFDIR@``'
+    ccache = '``@CCNAME@``'
+    keytab = '``@KTNAME@``'
+    ckeytab = '``@CKTNAME@``'
 elif 'pathsubs' in tags:
     # Read configured paths from a file produced by the build system.
     execfile('paths.py')
@@ -225,6 +228,9 @@ else:
     libdir = ':ref:`LIBDIR <paths>`'
     localstatedir = ':ref:`LOCALSTATEDIR <paths>`'
     sysconfdir = ':ref:`SYSCONFDIR <paths>`'
+    ccache = ':ref:`DEFCCNAME <paths>`'
+    keytab = ':ref:`DEFKTNAME <paths>`'
+    ckeytab = ':ref:`DEFCKTNAME <paths>`'
 
 rst_epilog = '\n'
 rst_epilog += '.. |bindir| replace:: %s\n' % bindir
@@ -232,10 +238,10 @@ rst_epilog += '.. |sbindir| replace:: %s\n' % sbindir
 rst_epilog += '.. |libdir| replace:: %s\n' % libdir
 rst_epilog += '.. |kdcdir| replace:: %s\\ ``/krb5kdc``\n' % localstatedir
 rst_epilog += '.. |sysconfdir| replace:: %s\n' % sysconfdir
+rst_epilog += '.. |ccache| replace:: %s\n' % ccache
+rst_epilog += '.. |keytab| replace:: %s\n' % keytab
+rst_epilog += '.. |ckeytab| replace:: %s\n' % ckeytab
 rst_epilog += '''
-.. |ccache| replace:: ``/tmp/krb5cc_<uid>``
-.. |clkeytab| replace:: ``/etc/krb5.client-keytab``
-.. |keytab| replace:: ``/etc/krb5.keytab``
 .. |krb5conf| replace:: ``/etc/krb5.conf``
 .. |defkeysalts| replace:: ``aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal des3-cbc-sha1:normal arcfour-hmac-md5:normal``
 .. |defetypes| replace:: ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``

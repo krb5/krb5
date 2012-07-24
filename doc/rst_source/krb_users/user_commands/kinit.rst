@@ -198,9 +198,8 @@ kinit uses the following environment variables:
 FILES
 -----
 
-``/tmp/krb5cc_[uid]``
-    default location of Kerberos 5 credentials cache ([*uid*] is the
-    decimal UID of the user).
+|ccache|
+    default location of Kerberos 5 credentials cache
 
 |keytab|
     default location for the local host's keytab.

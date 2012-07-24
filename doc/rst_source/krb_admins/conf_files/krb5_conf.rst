@@ -141,7 +141,7 @@ The libdefaults section may contain any of the following relations:
 
 **default_client_keytab_name**
     This relation specifies the name of the default keytab for
-    obtaining client credentials.  The default is |clkeytab|.  This
+    obtaining client credentials.  The default is |ckeytab|.  This
     relation is subject to parameter expansion (see below).
 
 **default_keytab_name**

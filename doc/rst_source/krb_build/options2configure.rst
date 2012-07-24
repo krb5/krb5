@@ -118,6 +118,15 @@ Environment variables
     Berkeley DB library version to be used, override it with this
     option. For example, ``DB_LIB=-ldb-3.3``.
 
+**DEFCCNAME=**\ *ccachename*
+    Override the built-in default credential cache name.
+
+**DEFCKTNAME=**\ *keytabname*
+    Override the built-in default client keytab name.
+
+**DEFKTNAME=**\ *keytabname*
+    Override the built-in default keytab name.
+
 **LD=**\ *LINKER*
     Use *LINKER* as the default loader if it should be different from
     C compiler as specified above.
@@ -373,6 +382,13 @@ Optional packages
 
     Specifying **--without-system-verto** will cause the built-in
     version of libverto to be used unconditionally.
+
+**--with-krb5-config=**\ *PATH*
+    Use the krb5-config program at *PATH* to obtain the build-time
+    default credential cache, keytab, and client keytab names.  The
+    default is to use ``krb5-config`` from the program path.  Specify
+    ``--without-krb5-config`` to disable the use of krb5-config and
+    use the usual built-in defaults.
 
 
 Examples

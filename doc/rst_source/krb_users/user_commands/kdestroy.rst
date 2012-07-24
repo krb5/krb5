@@ -67,9 +67,8 @@ kdestroy uses the following environment variable:
 FILES
 -----
 
-``/tmp/krb5cc_[uid]``
-    Default location of Kerberos 5 credentials cache ([*uid*] is the
-    decimal UID of the user).
+|ccache|
+    Default location of Kerberos 5 credentials cache
 
 
 SEE ALSO

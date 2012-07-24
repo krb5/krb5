@@ -29,8 +29,6 @@
 #include "k5-int.h"
 #include "os-proto.h"
 
-extern char *krb5_defkeyname;
-
 /* this is a an exceedinly gross thing. */
 char *krb5_overridekeyname = NULL;
 
@@ -54,7 +52,7 @@ kt_default_name(krb5_context context, char **name_out)
         profile_release_string(str);
         return ret;
     } else {
-        return k5_expand_path_tokens(context, krb5_defkeyname, name_out);
+        return k5_expand_path_tokens(context, DEFKTNAME, name_out);
     }
 }
 
@@ -75,8 +73,7 @@ k5_kt_client_default_name(krb5_context context, char **name_out)
         profile_release_string(str);
         return ret;
     } else {
-        return k5_expand_path_tokens(context, DEFAULT_CLIENT_KEYTAB_NAME,
-                                     name_out);
+        return k5_expand_path_tokens(context, DEFCKTNAME, name_out);
     }
 }
 
