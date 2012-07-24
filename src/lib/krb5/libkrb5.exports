@@ -101,6 +101,8 @@ k5_ccselect_free_context
 k5_copy_etypes
 k5_count_etypes
 k5_etypes_contains
+k5_expand_path_tokens
+k5_expand_path_tokens_extra
 k5_free_serverlist
 k5_kt_get_principal
 k5_locate_kdc

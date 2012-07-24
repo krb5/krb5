@@ -107,6 +107,12 @@ int krb5int_net_writev (krb5_context, int, sg_buf *, int);
 
 int k5_getcurtime(struct timeval *tvp);
 
+krb5_error_code k5_expand_path_tokens(krb5_context context,
+                                      const char *path_in, char **path_out);
+krb5_error_code k5_expand_path_tokens_extra(krb5_context context,
+                                            const char *path_in,
+                                            char **path_out, ...);
+
 #include "k5-thread.h"
 extern k5_mutex_t krb5int_us_time_mutex;
 

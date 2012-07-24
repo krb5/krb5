@@ -4,7 +4,8 @@ KRB5_RUN_ENV = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
-DEFINES=-DLIBDIR=\"$(KRB5_LIBDIR)\"
+DEFINES=-DLIBDIR=\"$(KRB5_LIBDIR)\" -DBINDIR=\"$(CLIENT_BINDIR)\" \
+	-DSBINDIR=\"$(ADMIN_BINDIR)\"
 LOCALINCLUDES=-I$(top_srcdir)/util/profile
 
 ##DOS##BUILDTOP = ..\..\..
@@ -21,6 +22,7 @@ STLIBOBJS= \
 	cm.o		\
 	dnsglue.o	\
 	dnssrv.o	\
+	expand_path.o	\
 	free_krbhs.o	\
 	full_ipadr.o	\
 	get_krbhst.o	\
@@ -65,6 +67,7 @@ OBJS= \
 	$(OUTPRE)cm.$(OBJEXT)		\
 	$(OUTPRE)dnsglue.$(OBJEXT)	\
 	$(OUTPRE)dnssrv.$(OBJEXT)	\
+	$(OUTPRE)expand_path.$(OBJEXT)	\
 	$(OUTPRE)free_krbhs.$(OBJEXT)	\
 	$(OUTPRE)full_ipadr.$(OBJEXT)	\
 	$(OUTPRE)get_krbhst.$(OBJEXT)	\
@@ -109,6 +112,7 @@ SRCS= \
 	$(srcdir)/cm.c		\
 	$(srcdir)/dnsglue.c	\
 	$(srcdir)/dnssrv.c	\
+	$(srcdir)/expand_path.c	\
 	$(srcdir)/free_krbhs.c	\
 	$(srcdir)/full_ipadr.c	\
 	$(srcdir)/get_krbhst.c	\
@@ -144,7 +148,7 @@ SRCS= \
 	$(srcdir)/write_msg.c
 
 EXTRADEPSRCS = \
-	t_an_to_ln.c t_gifconf.c t_locate_kdc.c \
+	t_an_to_ln.c t_expand_path.c t_gifconf.c t_locate_kdc.c \
 	t_std_conf.c
 
 ##DOS##LIBOBJS = $(OBJS)
@@ -155,7 +159,7 @@ clean-unix:: clean-libobjs
 shared:
 	mkdir shared
 
-TEST_PROGS= t_std_conf t_an_to_ln t_kuserok t_locate_kdc t_trace
+TEST_PROGS= t_std_conf t_an_to_ln t_kuserok t_locate_kdc t_trace t_expand_path
 
 T_STD_CONF_OBJS= t_std_conf.o 
 
@@ -188,6 +192,9 @@ $(OUTPRE)t_locate_kdc.exe: $(OUTPRE)t_locate_kdc.obj \
 t_trace: $(T_TRACE_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_trace $(T_TRACE_OBJS) $(KRB5_BASE_LIBS)
 
+t_expand_path: t_expand_path.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_expand_path.o $(KRB5_BASE_LIBS)
+
 LCLINT=lclint
 LCLINTOPTS= -warnposix \
 	-usedef +charintliteral +ignoresigns -predboolint +boolint \
@@ -198,7 +205,7 @@ lclint-localaddr: localaddr.c
 		-DTEST $(srcdir)/localaddr.c
 
 check-unix:: check-unix-stdconf check-unix-locate check-unix-antoln \
-	check-unix-trace t_kuserok
+	check-unix-trace check-unix-expand t_kuserok
 
 check-unix-stdconf:: t_std_conf
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
@@ -266,6 +273,14 @@ check-unix-trace:: t_trace
 	$(KRB5_RUN_ENV) $(VALGRIND) ./t_trace
 	sed -e 's/^[^:]*: //' t_trace.out | cmp - $(srcdir)/t_trace.ref
 	rm -f t_trace.out
+
+check-unix-expand:: t_expand_path
+	$(KRB5_RUN_ENV) $(VALGRIND) ./t_expand_path '%{null}' ''
+	$(KRB5_RUN_ENV) $(VALGRIND) ./t_expand_path ' %{BINDIR}%{LIBDIR} ' \
+		' $(CLIENT_BINDIR)$(KRB5_LIBDIR) '
+	$(KRB5_RUN_ENV) $(VALGRIND) ./t_expand_path \
+		'the %{animal}%{s} on the %{place}%{s}' \
+		'the frogs on the pads'
 
 clean:: 
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o t_locate_kdc.o
