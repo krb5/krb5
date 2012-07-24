@@ -59,6 +59,7 @@ extern int optind;
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
 int show_etype = 0, show_addresses = 0, no_resolve = 0, print_version = 0;
 int show_adtype = 0, show_all = 0, list_all = 0, use_client_keytab = 0;
+int show_config = 0;
 char *defname;
 char *progname;
 krb5_int32 now;
@@ -126,7 +127,7 @@ main(argc, argv)
     name = NULL;
     mode = DEFAULT;
     /* V=version so v can be used for verbose later if desired.  */
-    while ((c = getopt(argc, argv, "dfetKsnacki45lAV")) != -1) {
+    while ((c = getopt(argc, argv, "dfetKsnacki45lAVC")) != -1) {
         switch (c) {
         case 'd':
             show_adtype = 1;
@@ -174,6 +175,9 @@ main(argc, argv)
             break;
         case 'A':
             show_all = 1;
+            break;
+        case 'C':
+            show_config = 1;
             break;
         case 'V':
             print_version = 1;
@@ -516,7 +520,7 @@ do_ccache(krb5_ccache cache)
         return 1;
     }
     while (!(code = krb5_cc_next_cred(kcontext, cache, &cur, &creds))) {
-        if (krb5_is_config_principal(kcontext, creds.server))
+        if (!show_config && krb5_is_config_principal(kcontext, creds.server))
             continue;
         if (status_only) {
             if (exit_status && creds.server->length == 2 &&
@@ -624,6 +628,31 @@ printtime(tv)
     }
 }
 
+static void
+print_config_data(int col, krb5_data *data)
+{
+    unsigned int i;
+
+    for (i = 0; i < data->length; i++) {
+        while (col < 8) {
+            putchar(' ');
+            col++;
+        }
+        if (data->data[i] > 0x20 && data->data[i] < 0x7f) {
+            putchar(data->data[i]);
+            col++;
+        } else {
+            col += printf("\\%03o", (unsigned char)data->data[i]);
+        }
+        if (col > 72) {
+            putchar('\n');
+            col = 0;
+        }
+    }
+    if (col > 0)
+        putchar('\n');
+}
+
 void
 show_credential(cred)
     register krb5_creds * cred;
@@ -631,7 +660,7 @@ show_credential(cred)
     krb5_error_code retval;
     krb5_ticket *tkt;
     char *name, *sname, *flags;
-    int extra_field = 0;
+    int extra_field = 0, ccol = 0, i;
 
     retval = krb5_unparse_name(kcontext, cred->client, &name);
     if (retval) {
@@ -647,17 +676,34 @@ show_credential(cred)
     if (!cred->times.starttime)
         cred->times.starttime = cred->times.authtime;
 
-    printtime(cred->times.starttime);
-    putchar(' '); putchar(' ');
-    printtime(cred->times.endtime);
-    putchar(' '); putchar(' ');
+    if (!krb5_is_config_principal(kcontext, cred->server)) {
+        printtime(cred->times.starttime);
+        putchar(' '); putchar(' ');
+        printtime(cred->times.endtime);
+        putchar(' '); putchar(' ');
 
-    printf("%s\n", sname);
+        printf("%s\n", sname);
+    } else {
+        fputs("config: ", stdout);
+        ccol = 8;
+        for (i = 1; i < cred->server->length; i++) {
+            ccol += printf("%s%.*s%s",
+                           i > 1 ? "(" : "",
+                           (int)cred->server->data[i].length,
+                           cred->server->data[i].data,
+                           i > 1 ? ")" : "");
+        }
+        fputs(" = ", stdout);
+        ccol += 3;
+    }
 
     if (strcmp(name, defname)) {
         printf(_("\tfor client %s"), name);
         extra_field++;
     }
+
+    if (krb5_is_config_principal(kcontext, cred->server))
+        print_config_data(ccol, &cred->ticket);
 
     if (cred->times.renew_till) {
         if (!extra_field)
@@ -712,8 +758,6 @@ show_credential(cred)
     }
 
     if (show_adtype) {
-        int i;
-
         if (cred->authdata != NULL) {
             if (!extra_field)
                 fputs("\t",stdout);
@@ -738,8 +782,6 @@ show_credential(cred)
         if (!cred->addresses || !cred->addresses[0]) {
             printf(_("\tAddresses: (none)\n"));
         } else {
-            int i;
-
             printf(_("\tAddresses: "));
             one_addr(cred->addresses[0]);
 

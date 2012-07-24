@@ -9,6 +9,7 @@ SYNOPSIS
 **klist**
 [**-e**]
 [[**-c**] [**-l**] [**-A**] [**-f**] [**-s**] [**-a** [**-n**]]]
+[**-C**]
 [**-k** [**-t**] [**-K**]]
 [**-V**]
 [*cache_name*\|\ *keytab_name*]
@@ -73,6 +74,11 @@ OPTIONS
 
 **-n**
     Show numeric addresses instead of reverse-resolving addresses.
+
+**-C**
+    List configuration data that has been stored in the credentials
+    cache when klist encounters it.  By default, configuration data
+    is not listed.
 
 **-k**
     List keys held in a keytab file.
