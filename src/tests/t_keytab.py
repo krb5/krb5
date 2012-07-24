@@ -40,4 +40,20 @@ output = realm.run_kadminl('getprinc %s' % princ)
 if 'Key: vno 258,' not in output:
     fail('Expected vno not seen in kadmin.local output')
 
+# Test parameter expansion in profile variables
+realm.stop()
+conf = {'client': {'libdefaults': {
+            'default_keytab_name': 'testdir/%{null}abc%{uid}',
+            'default_client_keytab_name': 'testdir/%{null}xyz%{uid}'}}}
+realm = K5Realm(krb5_conf=conf, create_kdb=False)
+del realm.env_client['KRB5_KTNAME']
+del realm.env_client['KRB5_CLIENT_KTNAME']
+uidstr = str(os.getuid())
+out = realm.run_as_client([klist, '-k'], expected_code=1)
+if 'FILE:testdir/abc%s' % uidstr not in out:
+    fail('Wrong keytab in klist -k output')
+out = realm.run_as_client([klist, '-ki'], expected_code=1)
+if 'FILE:testdir/xyz%s' % uidstr not in out:
+    fail('Wrong keytab in klist -ki output')
+
 success('Keytab-related tests')

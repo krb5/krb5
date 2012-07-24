@@ -27,83 +27,71 @@
 #define NEED_WINDOWS
 
 #include "k5-int.h"
+#include "os-proto.h"
 
 extern char *krb5_defkeyname;
 
 /* this is a an exceedinly gross thing. */
 char *krb5_overridekeyname = NULL;
 
-krb5_error_code KRB5_CALLCONV
-krb5_kt_default_name(krb5_context context, char *name, int name_size)
+static krb5_error_code
+kt_default_name(krb5_context context, char **name_out)
 {
-    char *cp = 0;
-    char *retval;
-    unsigned int namesize = (name_size < 0 ? 0 : name_size);
+    krb5_error_code ret;
+    char *str;
 
-    if (krb5_overridekeyname) {
-        if (strlcpy(name, krb5_overridekeyname, namesize) >= namesize)
-            return KRB5_CONFIG_NOTENUFSPACE;
-    } else if ((context->profile_secure == FALSE) &&
-               (cp = getenv("KRB5_KTNAME"))) {
-        if (strlcpy(name, cp, namesize) >= namesize)
-            return KRB5_CONFIG_NOTENUFSPACE;
-    } else if ((profile_get_string(context->profile,
-                                   KRB5_CONF_LIBDEFAULTS,
-                                   KRB5_CONF_DEFAULT_KEYTAB_NAME, NULL,
-                                   NULL, &retval) == 0) &&
-               retval) {
-        if (strlcpy(name, retval, namesize) >= namesize)
-            return KRB5_CONFIG_NOTENUFSPACE;
-        profile_release_string(retval);
+    if (krb5_overridekeyname != NULL) {
+        *name_out = strdup(krb5_overridekeyname);
+        return (*name_out == NULL) ? ENOMEM : 0;
+    } else if (context->profile_secure == FALSE &&
+               (str = getenv("KRB5_KTNAME")) != NULL) {
+        *name_out = strdup(str);
+        return (*name_out == NULL) ? ENOMEM : 0;
+    } else if (profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                                  KRB5_CONF_DEFAULT_KEYTAB_NAME, NULL, NULL,
+                                  &str) == 0 && str != NULL) {
+        ret = k5_expand_path_tokens(context, str, name_out);
+        profile_release_string(str);
+        return ret;
     } else {
-#if defined(_WIN32)
-        {
-            char    defname[160];
-            int     len;
-
-            len= GetWindowsDirectory( defname, sizeof(defname)-2 );
-            defname[len]= '\0';
-            if ( (len + strlen(krb5_defkeyname) + 1) > namesize )
-                return KRB5_CONFIG_NOTENUFSPACE;
-            snprintf(name, namesize, krb5_defkeyname, defname);
-        }
-#else
-        if (strlcpy(name, krb5_defkeyname, namesize) >= namesize)
-            return KRB5_CONFIG_NOTENUFSPACE;
-#endif
+        return k5_expand_path_tokens(context, krb5_defkeyname, name_out);
     }
-    return 0;
 }
 
 krb5_error_code
 k5_kt_client_default_name(krb5_context context, char **name_out)
 {
-    char *str, *name;
+    krb5_error_code ret;
+    char *str;
 
-    *name_out = NULL;
-    if (!context->profile_secure &&
+    if (context->profile_secure == FALSE &&
         (str = getenv("KRB5_CLIENT_KTNAME")) != NULL) {
-        name = strdup(str);
+        *name_out = strdup(str);
+        return (*name_out == NULL) ? ENOMEM : 0;
     } else if (profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
                                   KRB5_CONF_DEFAULT_CLIENT_KEYTAB_NAME, NULL,
                                   NULL, &str) == 0 && str != NULL) {
-        name = strdup(str);
+        ret = k5_expand_path_tokens(context, str, name_out);
         profile_release_string(str);
+        return ret;
     } else {
-#ifdef _WIN32
-        char windir[160];
-        unsigned int len;
-
-        len = GetWindowsDirectory(windir, sizeof(windir) - 2);
-        windir[len] = '\0';
-        if (asprintf(&name, DEFAULT_CLIENT_KEYTAB_NAME, windir) < 0)
-            return ENOMEM;
-#else
-        name = strdup(DEFAULT_CLIENT_KEYTAB_NAME);
-#endif
+        return k5_expand_path_tokens(context, DEFAULT_CLIENT_KEYTAB_NAME,
+                                     name_out);
     }
-    if (name == NULL)
-        return ENOMEM;
-    *name_out = name;
-    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_kt_default_name(krb5_context context, char *name, int name_size)
+{
+    krb5_error_code ret;
+    unsigned int namesize = (name_size < 0 ? 0 : name_size);
+    char *ktname;
+
+    ret = kt_default_name(context, &ktname);
+    if (ret)
+        return ret;
+    if (strlcpy(name, ktname, namesize) >= namesize)
+        ret = KRB5_CONFIG_NOTENUFSPACE;
+    free(ktname);
+    return ret;
 }

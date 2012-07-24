@@ -136,12 +136,13 @@ The libdefaults section may contain any of the following relations:
 
 **default_client_keytab_name**
     This relation specifies the name of the default keytab for
-    obtaining client credentials.  The default is |clkeytab|.
+    obtaining client credentials.  The default is |clkeytab|.  This
+    relation is subject to parameter expansion (see below).
 
 **default_keytab_name**
     This relation specifies the default keytab name to be used by
-    application servers such as telnetd and rlogind.  The default is
-    |keytab|.
+    application servers such as sshd.  The default is |keytab|.  This
+    relation is subject to parameter expansion (see below).
 
 **default_realm**
     Identifies the default Kerberos realm for the client.  Set its
@@ -966,6 +967,33 @@ PKINIT krb5.conf options
     If this flag is set to true, it expects that the target KDC is
     patched to return a reply with a checksum rather than a nonce.
     The default is false.
+
+
+.. _parameter_expansion:
+
+Parameter expansion
+-------------------
+
+Several variables, such as **default_keytab_name**, allow parameters
+to be expanded.  Valid parameters are:
+
+    =================  ===================================================
+    %{TEMP}            Temporary directory
+    %{uid}             Unix real UID or Windows SID
+    %{euid}            Unix effective user ID or Windows SID
+    %{USERID}          Same as %{uid}
+    %{null}            Empty string
+    %{LIBDIR}          Installation library directory
+    %{BINDIR}          Installation binary directory
+    %{SBINDIR}         Installation admin binary directory
+    %{APPDATA}         (Windows) Roaming application data for current user
+    %{COMMON_APPDATA}  (Windows) Application data for all users
+    %{LOCAL_APPDATA}   (Windows) Local application data for current user
+    %{SYSTEM}          (Windows) Windows system folder
+    %{WINDOWS}         (Windows) Windows folder
+    %{USERCONFIG}      (Windows) Per-user MIT krb5 config file directory
+    %{COMMONCONFIG}    (Windows) Common MIT krb5 config file directory
+    ================   ===================================================
 
 
 Sample krb5.conf file
