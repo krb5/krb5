@@ -964,8 +964,11 @@ static void
 pkinit_client_profile(krb5_context context,
                       pkinit_context plgctx,
                       pkinit_req_context reqctx,
+                      krb5_clpreauth_callbacks cb,
+                      krb5_clpreauth_rock rock,
                       const krb5_data *realm)
 {
+    const char *configured_identity;
     char *eku_string = NULL;
 
     pkiDebug("pkinit_client_profile %p %p %p %p\n",
@@ -1035,6 +1038,16 @@ pkinit_client_profile(krb5_context context,
     pkinit_libdefault_strings(context, realm,
                               KRB5_CONF_PKINIT_IDENTITIES,
                               &reqctx->idopts->identity_alt);
+    reqctx->do_identity_matching = TRUE;
+
+    /* If we had a primary identity in the stored configuration, pick it up. */
+    configured_identity = cb->get_cc_config(context, rock,
+                                            "X509_user_identity");
+    if (configured_identity != NULL) {
+        free(reqctx->idopts->identity);
+        reqctx->idopts->identity = strdup(configured_identity);
+        reqctx->do_identity_matching = FALSE;
+    }
 }
 
 static krb5_error_code
@@ -1092,12 +1105,14 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     }
 
     if (processing_request) {
-        pkinit_client_profile(context, plgctx, reqctx,
+        pkinit_client_profile(context, plgctx, reqctx, cb, rock,
                               &request->server->realm);
         pkinit_identity_set_prompter(reqctx->idctx, prompter, prompter_data);
         retval = pkinit_identity_initialize(context, plgctx->cryptoctx,
                                             reqctx->cryptoctx, reqctx->idopts,
-                                            reqctx->idctx, 1, request->client);
+                                            reqctx->idctx, cb, rock,
+                                            reqctx->do_identity_matching,
+                                            request->client);
         if (retval) {
             TRACE_PKINIT_CLIENT_NO_IDENTITY(context);
             pkiDebug("pkinit_identity_initialize returned %d (%s)\n",

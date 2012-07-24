@@ -517,10 +517,13 @@ pkinit_identity_initialize(krb5_context context,
                            pkinit_req_crypto_context req_cryptoctx,
                            pkinit_identity_opts *idopts,
                            pkinit_identity_crypto_context id_cryptoctx,
+                           krb5_clpreauth_callbacks cb,
+                           krb5_clpreauth_rock rock,
                            int do_matching,
                            krb5_principal princ)
 {
     krb5_error_code retval = EINVAL;
+    const char *signer_identity;
     int i;
 
     pkiDebug("%s: %p %p %p\n", __FUNCTION__, context, idopts, id_cryptoctx);
@@ -581,6 +584,15 @@ pkinit_identity_initialize(krb5_context context,
                 crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
                                       id_cryptoctx);
                 goto errout;
+            }
+        }
+
+        if (rock != NULL && cb != NULL && retval == 0) {
+            /* Save the signer identity if we're the client. */
+            if (crypto_retrieve_signer_identity(context, id_cryptoctx,
+                                                &signer_identity) == 0) {
+                cb->set_cc_config(context, rock, "X509_user_identity",
+                                  signer_identity);
             }
         }
 

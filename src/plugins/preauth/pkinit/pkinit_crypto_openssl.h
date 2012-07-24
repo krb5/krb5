@@ -51,6 +51,7 @@
 #define MAX_CREDS_ALLOWED 20
 
 struct _pkinit_cred_info {
+    char *name;
     X509 *cert;
     EVP_PKEY *key;
 #ifndef WITHOUT_PKCS11
@@ -63,6 +64,7 @@ typedef struct _pkinit_cred_info * pkinit_cred_info;
 struct _pkinit_identity_crypto_context {
     pkinit_cred_info creds[MAX_CREDS_ALLOWED+1];
     STACK_OF(X509) *my_certs;   /* available user certs */
+    char *identity;             /* identity name for user cert */
     int cert_index;             /* cert to use out of available certs*/
     EVP_PKEY *my_key;           /* available user keys if in filesystem */
     STACK_OF(X509) *trustedCAs; /* available trusted ca certs */

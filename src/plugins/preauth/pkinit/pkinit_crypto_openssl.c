@@ -39,6 +39,7 @@
 #include <arpa/inet.h>
 
 #include "k5-platform.h"
+#include "k5-buf.h"
 
 #include "pkinit_crypto_openssl.h"
 
@@ -479,6 +480,8 @@ pkinit_init_identity_crypto(pkinit_identity_crypto_context *idctx)
         goto out;
     memset(ctx, 0, sizeof(*ctx));
 
+    ctx->identity = NULL;
+
     retval = pkinit_init_certs(ctx);
     if (retval)
         goto out;
@@ -506,6 +509,7 @@ pkinit_fini_identity_crypto(pkinit_identity_crypto_context idctx)
         return;
 
     pkiDebug("%s: freeing   ctx at %p\n", __FUNCTION__, idctx);
+    free(idctx->identity);
     pkinit_fini_certs(idctx);
     pkinit_fini_pkcs11(idctx);
     free(idctx);
@@ -2135,6 +2139,17 @@ cleanup:
         }
     }
     return retval;
+}
+
+krb5_error_code
+crypto_retrieve_signer_identity(krb5_context context,
+                                pkinit_identity_crypto_context id_cryptoctx,
+                                const char **identity)
+{
+    *identity = id_cryptoctx->identity;
+    if (*identity == NULL)
+        return ENOENT;
+    return 0;
 }
 
 krb5_error_code
@@ -3776,7 +3791,7 @@ pkinit_open_session(krb5_context context,
     }
     cctx->slotid = slotlist[i];
     free(slotlist);
-    pkiDebug("open_session: slotid %d (%d of %d)\n", (int) cctx->slotid,
+    pkiDebug("open_session: slotid %d (%lu of %d)\n", (int) cctx->slotid,
              i + 1, (int) count);
 
     /* Login if needed */
@@ -4168,6 +4183,16 @@ pkinit_get_kdc_cert(krb5_context context,
     return retval;
 }
 
+static char *
+reassemble_pkcs12_name(const char *filename)
+{
+    char *ret;
+
+    if (asprintf(&ret, "PKCS12:%s", filename) < 0)
+        return NULL;
+    return ret;
+}
+
 static krb5_error_code
 pkinit_get_certs_pkcs12(krb5_context context,
                         pkinit_plg_crypto_context plg_cryptoctx,
@@ -4255,6 +4280,8 @@ pkinit_get_certs_pkcs12(krb5_context context,
     id_cryptoctx->creds[0] = malloc(sizeof(struct _pkinit_cred_info));
     if (id_cryptoctx->creds[0] == NULL)
         goto cleanup;
+    id_cryptoctx->creds[0]->name =
+        reassemble_pkcs12_name(idopts->cert_filename);
     id_cryptoctx->creds[0]->cert = x;
 #ifndef WITHOUT_PKCS11
     id_cryptoctx->creds[0]->cert_id = NULL;
@@ -4275,6 +4302,21 @@ cleanup:
             EVP_PKEY_free(y);
     }
     return retval;
+}
+
+static char *
+reassemble_files_name(const char *certfile, const char *keyfile)
+{
+    char *ret;
+
+    if (keyfile != NULL) {
+        if (asprintf(&ret, "FILE:%s,%s", certfile, keyfile) < 0)
+            return NULL;
+    } else {
+        if (asprintf(&ret, "FILE:%s", certfile) < 0)
+            return NULL;
+    }
+    return ret;
 }
 
 static krb5_error_code
@@ -4305,6 +4347,8 @@ pkinit_load_fs_cert_and_key(krb5_context context,
         retval = ENOMEM;
         goto cleanup;
     }
+    id_cryptoctx->creds[cindex]->name = reassemble_files_name(certname,
+                                                              keyname);
     id_cryptoctx->creds[cindex]->cert = x;
 #ifndef WITHOUT_PKCS11
     id_cryptoctx->creds[cindex]->cert_id = NULL;
@@ -4440,6 +4484,49 @@ cleanup:
 }
 
 #ifndef WITHOUT_PKCS11
+static char *
+reassemble_pkcs11_name(pkinit_identity_opts *idopts)
+{
+    struct k5buf buf;
+    int n = 0;
+    char *ret;
+
+    krb5int_buf_init_dynamic(&buf);
+    krb5int_buf_add(&buf, "PKCS11:");
+    n = 0;
+    if (idopts->p11_module_name != NULL) {
+        krb5int_buf_add_fmt(&buf, "%smodule_name=%s",
+                            n++ ? "," : "",
+                            idopts->p11_module_name);
+    }
+    if (idopts->token_label != NULL) {
+        krb5int_buf_add_fmt(&buf, "%stoken=%s",
+                            n++ ? "," : "",
+                            idopts->token_label);
+    }
+    if (idopts->cert_label != NULL) {
+        krb5int_buf_add_fmt(&buf, "%scertlabel=%s",
+                            n++ ? "," : "",
+                            idopts->cert_label);
+    }
+    if (idopts->cert_id_string != NULL) {
+        krb5int_buf_add_fmt(&buf, "%scertid=%s",
+                            n++ ? "," : "",
+                            idopts->cert_id_string);
+    }
+    if (idopts->slotid != PK_NOSLOT) {
+        krb5int_buf_add_fmt(&buf, "%sslotid=%ld",
+                            n++ ? "," : "",
+                            (long)idopts->slotid);
+    }
+    if (krb5int_buf_len(&buf) >= 0)
+        ret = strdup(krb5int_buf_data(&buf));
+    else
+        ret = NULL;
+    krb5int_free_buf(&buf);
+    return ret;
+}
+
 static krb5_error_code
 pkinit_get_certs_pkcs11(krb5_context context,
                         pkinit_plg_crypto_context plg_cryptoctx,
@@ -4496,8 +4583,6 @@ pkinit_get_certs_pkcs11(krb5_context context,
     }
     id_cryptoctx->slotid = idopts->slotid;
     id_cryptoctx->pkcs11_method = 1;
-
-
 
     if (pkinit_open_session(context, id_cryptoctx)) {
         pkiDebug("can't open pkcs11 session\n");
@@ -4632,6 +4717,7 @@ pkinit_get_certs_pkcs11(krb5_context context,
         id_cryptoctx->creds[i] = malloc(sizeof(struct _pkinit_cred_info));
         if (id_cryptoctx->creds[i] == NULL)
             return KRB5KDC_ERR_PREAUTH_FAILED;
+        id_cryptoctx->creds[i]->name = reassemble_pkcs11_name(idopts);
         id_cryptoctx->creds[i]->cert = x;
         id_cryptoctx->creds[i]->key = NULL;
         id_cryptoctx->creds[i]->cert_id = cert_id;
@@ -4659,6 +4745,7 @@ free_cred_info(krb5_context context,
 #ifndef WITHOUT_PKCS11
         free(cred->cert_id);
 #endif
+        free(cred->name);
         free(cred);
     }
 }
@@ -5099,6 +5186,12 @@ crypto_cert_select(krb5_context context,
     }
     cd->idctx->my_certs = sk_X509_new_null();
     sk_X509_push(cd->idctx->my_certs, cd->cred->cert);
+    free(cd->idctx->identity);
+    /* hang on to the selected credential name */
+    if (cd->idctx->creds[cd->index]->name != NULL)
+        cd->idctx->identity = strdup(cd->idctx->creds[cd->index]->name);
+    else
+        cd->idctx->identity = NULL;
     cd->idctx->creds[cd->index]->cert = NULL;       /* Don't free it twice */
     cd->idctx->cert_index = 0;
 
@@ -5150,6 +5243,11 @@ crypto_cert_select_default(krb5_context context,
     sk_X509_push(id_cryptoctx->my_certs, id_cryptoctx->creds[0]->cert);
     id_cryptoctx->creds[0]->cert = NULL;        /* Don't free it twice */
     id_cryptoctx->cert_index = 0;
+    /* hang on to the selected credential name */
+    if (id_cryptoctx->creds[0]->name != NULL)
+        id_cryptoctx->identity = strdup(id_cryptoctx->creds[0]->name);
+    else
+        id_cryptoctx->identity = NULL;
 
     if (id_cryptoctx->pkcs11_method != 1) {
         id_cryptoctx->my_key = id_cryptoctx->creds[0]->key;

@@ -231,6 +231,16 @@ krb5_error_code cms_envelopeddata_verify
 		    receives length of signed_data */
 
 /*
+ * This function retrieves the signer's identity, in a form that could
+ * be passed back in to a future invocation of this module as a candidate
+ * client identity location.
+ */
+krb5_error_code crypto_retrieve_signer_identity
+	(krb5_context context,				/* IN */
+	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
+	const char **identity);				/* OUT */
+
+/*
  * this function returns SAN information found in the
  * received certificate.  at least one of pkinit_sans,
  * upn_sans, or kdc_hostnames must be non-NULL.

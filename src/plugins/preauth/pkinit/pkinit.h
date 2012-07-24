@@ -226,6 +226,7 @@ struct _pkinit_req_context {
     pkinit_req_opts *opts;
     pkinit_identity_crypto_context idctx;
     pkinit_identity_opts *idopts;
+    int do_identity_matching;
     krb5_preauthtype pa_type;
     int rfc6112_kdc;
 };
@@ -284,6 +285,8 @@ krb5_error_code pkinit_identity_initialize
 	 pkinit_req_crypto_context req_cryptoctx,	/* IN */
 	 pkinit_identity_opts *idopts,			/* IN */
 	 pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
+	 krb5_clpreauth_callbacks cb,			/* IN/OUT */
+	 krb5_clpreauth_rock rock,			/* IN/OUT */
 	 int do_matching,				/* IN */
 	 krb5_principal princ);				/* IN (optional) */
 
