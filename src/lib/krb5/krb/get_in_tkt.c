@@ -834,7 +834,7 @@ krb5_init_creds_init(krb5_context context,
     /* Initialise request parameters as per krb5_get_init_creds() */
     ctx->request->kdc_options = context->kdc_default_options;
 
-    /* forwaradble */
+    /* forwardable */
     if (opte->flags & KRB5_GET_INIT_CREDS_OPT_FORWARDABLE)
         tmp = opte->forwardable;
     else if (krb5int_libdefault_boolean(context, &ctx->request->client->realm,
@@ -927,7 +927,7 @@ krb5_init_creds_init(krb5_context context,
     if (ctx->request->nktypes > 0)
         ctx->etype = ctx->request->ktype[0];
 
-    /* addresess */
+    /* addresses */
     if (opte->flags & KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST) {
         code = krb5_copy_addresses(context, opte->address_list,
                                    &ctx->request->addresses);
