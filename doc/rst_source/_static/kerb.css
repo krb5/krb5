@@ -112,3 +112,17 @@ div.sidebar li.toctree-l4 a {
 dt:target, .highlighted {
   background-color: #c1c1c1;
 }
+
+/* Code displays */
+
+pre {
+    overflow: auto;
+    overflow-y: hidden;
+}
+
+td.linenos pre {
+    padding: 5px 0px;
+    border: 0;
+    background-color: transparent;
+    color: #aaa;
+}
