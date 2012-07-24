@@ -52,10 +52,10 @@
         <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="[DialogBitmap]" />
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Disabled="yes" Text="[ButtonText_Back]" />
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="374" Height="0" />
-        <Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="20" Transparent="yes" NoPrefix="yes">
+        <Control Id="Description" Type="Text" X="135" Y="110" Width="220" Height="20" Transparent="yes" NoPrefix="yes">
           <Text>Click the Finish button to exit the [Wizard].</Text>
         </Control>
-        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
+        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="100" Transparent="yes" NoPrefix="yes">
           <Text>{\VerdanaBold13}Completing the [ProductName] [Wizard]</Text>
         </Control>
       </Dialog>
@@ -67,13 +67,13 @@
         <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="[DialogBitmap]" />
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Disabled="yes" Text="[ButtonText_Back]" />
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="374" Height="0" />
-        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
+        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="100" Transparent="yes" NoPrefix="yes">
           <Text>{\VerdanaBold13}[ProductName] [Wizard] ended prematurely</Text>
         </Control>
-        <Control Id="Description1" Type="Text" X="135" Y="70" Width="220" Height="40" Transparent="yes" NoPrefix="yes">
+        <Control Id="Description1" Type="Text" X="135" Y="110" Width="220" Height="40" Transparent="yes" NoPrefix="yes">
           <Text>[ProductName] setup ended prematurely because of an error.  Your system has not been modified.  To install this program at a later time, please run the installation again.</Text>
         </Control>
-        <Control Id="Description2" Type="Text" X="135" Y="115" Width="220" Height="20" Transparent="yes" NoPrefix="yes">
+        <Control Id="Description2" Type="Text" X="135" Y="155" Width="220" Height="20" Transparent="yes" NoPrefix="yes">
           <Text>Click the Finish button to exit the [Wizard].</Text>
         </Control>
       </Dialog>
@@ -83,10 +83,10 @@
         </Control>
         <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="[DialogBitmap]" />
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="374" Height="0" />
-        <Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="20" Transparent="yes" NoPrefix="yes">
+        <Control Id="Description" Type="Text" X="135" Y="110" Width="220" Height="20" Transparent="yes" NoPrefix="yes">
           <Text>Please wait while the [Wizard] prepares to guide you through the installation.</Text>
         </Control>
-        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
+        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="100" Transparent="yes" NoPrefix="yes">
           <Text>{\VerdanaBold13}Welcome to the [ProductName] [Wizard]</Text>
         </Control>
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Disabled="yes" TabSkip="yes" Text="[ButtonText_Back]" />
@@ -129,13 +129,13 @@
         <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="[DialogBitmap]" />
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Disabled="yes" Text="[ButtonText_Back]" />
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="374" Height="0" />
-        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
+        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="100" Transparent="yes" NoPrefix="yes">
           <Text>{\VerdanaBold13}[ProductName] [Wizard] was interrupted</Text>
         </Control>
-        <Control Id="Description1" Type="Text" X="135" Y="70" Width="220" Height="40" Transparent="yes" NoPrefix="yes">
+        <Control Id="Description1" Type="Text" X="135" Y="110" Width="220" Height="40" Transparent="yes" NoPrefix="yes">
           <Text>[ProductName] setup was interrupted.  Your system has not been modified.  To install this program at a later time, please run the installation again.</Text>
         </Control>
-        <Control Id="Description2" Type="Text" X="135" Y="115" Width="220" Height="20" Transparent="yes" NoPrefix="yes">
+        <Control Id="Description2" Type="Text" X="135" Y="155" Width="220" Height="20" Transparent="yes" NoPrefix="yes">
           <Text>Click the Finish button to exit the [Wizard].</Text>
         </Control>
       </Dialog>
@@ -866,10 +866,10 @@
         <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="[DialogBitmap]" />
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Disabled="yes" Text="[ButtonText_Back]" />
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="374" Height="0" />
-        <Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="30" Transparent="yes" NoPrefix="yes">
+        <Control Id="Description" Type="Text" X="135" Y="110" Width="220" Height="30" Transparent="yes" NoPrefix="yes">
           <Text>The [Wizard] will install [ProductName] on your computer.  Click Next to continue or Cancel to exit the [Wizard].</Text>
         </Control>
-        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
+        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="100" Transparent="yes" NoPrefix="yes">
           <Text>{\VerdanaBold13}Welcome to the [ProductName] [Wizard]</Text>
         </Control>
       </Dialog>
