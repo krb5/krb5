@@ -45,6 +45,45 @@
 static void subfmt(krb5_context context, struct k5buf *buf,
                    const char *fmt, ...);
 
+static krb5_boolean
+buf_is_printable(const char *p, size_t len)
+{
+    size_t i;
+
+    for (i = 0; i < len; i++) {
+        if (p[i] < 32 || p[i] > 126)
+            break;
+    }
+    return i == len;
+}
+
+static void
+buf_add_printable_len(struct k5buf *buf, const char *p, size_t len)
+{
+    char text[5];
+    size_t i;
+
+    if (buf_is_printable(p, len)) {
+        krb5int_buf_add_len(buf, p, len);
+    } else {
+        for (i = 0; i < len; i++) {
+            if (buf_is_printable(p + i, 1)) {
+                krb5int_buf_add_len(buf, p + i, 1);
+            } else {
+                snprintf(text, sizeof(text), "\\x%02x",
+                         (unsigned)(p[i] & 0xff));
+                krb5int_buf_add_len(buf, text, 4);
+            }
+        }
+    }
+}
+
+static void
+buf_add_printable(struct k5buf *buf, const char *p)
+{
+    buf_add_printable_len(buf, p, strlen(p));
+}
+
 /* Return a four-byte hex string from the first two bytes of a SHA-1 hash of a
  * byte array.  Return NULL on failure. */
 static char *
@@ -128,14 +167,14 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
             krb5int_buf_add_fmt(&buf, "%ld", va_arg(ap, long));
         } else if (strcmp(tmpbuf, "str") == 0) {
             p = va_arg(ap, const char *);
-            krb5int_buf_add(&buf, (p == NULL) ? "(null)" : p);
+            buf_add_printable(&buf, (p == NULL) ? "(null)" : p);
         } else if (strcmp(tmpbuf, "lenstr") == 0) {
             len = va_arg(ap, size_t);
             p = va_arg(ap, const char *);
             if (p == NULL && len != 0)
                 krb5int_buf_add(&buf, "(null)");
             else
-                krb5int_buf_add_len(&buf, p, len);
+                buf_add_printable_len(&buf, p, len);
         } else if (strcmp(tmpbuf, "hexlenstr") == 0) {
             len = va_arg(ap, size_t);
             p = va_arg(ap, const char *);
@@ -179,7 +218,7 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
             if (d == NULL || (d->length != 0 && d->data == NULL))
                 krb5int_buf_add(&buf, "(null)");
             else
-                krb5int_buf_add_len(&buf, d->data, d->length);
+                buf_add_printable_len(&buf, d->data, d->length);
         } else if (strcmp(tmpbuf, "hexdata") == 0) {
             d = va_arg(ap, krb5_data *);
             if (d == NULL)
