@@ -26,6 +26,7 @@
 
 #define NEED_WINDOWS
 #include "k5-int.h"
+#include "os-proto.h"
 #include <stdio.h>
 
 #if defined(_WIN32)
@@ -290,7 +291,7 @@ const char * KRB5_CALLCONV
 krb5_cc_default_name(krb5_context context)
 {
     krb5_os_context os_ctx;
-    char *envstr;
+    char *profstr, *envstr;
 
     if (!context || context->magic != KV5M_CONTEXT)
         return NULL;
@@ -303,6 +304,14 @@ krb5_cc_default_name(krb5_context context)
     envstr = getenv(KRB5_ENV_CCNAME);
     if (envstr != NULL) {
         os_ctx->default_ccname = strdup(envstr);
+        return os_ctx->default_ccname;
+    }
+
+    if (profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                           KRB5_CONF_DEFAULT_CCACHE_NAME, NULL, NULL,
+                           &profstr) == 0 && profstr != NULL) {
+        (void)k5_expand_path_tokens(context, profstr, &os_ctx->default_ccname);
+        profile_release_string(profstr);
         return os_ctx->default_ccname;
     }
 

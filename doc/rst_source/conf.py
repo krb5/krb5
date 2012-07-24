@@ -233,6 +233,7 @@ rst_epilog += '.. |libdir| replace:: %s\n' % libdir
 rst_epilog += '.. |kdcdir| replace:: %s\\ ``/krb5kdc``\n' % localstatedir
 rst_epilog += '.. |sysconfdir| replace:: %s\n' % sysconfdir
 rst_epilog += '''
+.. |ccache| replace:: ``/tmp/krb5cc_<uid>``
 .. |clkeytab| replace:: ``/etc/krb5.client-keytab``
 .. |keytab| replace:: ``/etc/krb5.keytab``
 .. |krb5conf| replace:: ``/etc/krb5.conf``

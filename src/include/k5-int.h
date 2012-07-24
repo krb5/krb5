@@ -198,6 +198,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_DB_MODULE_DIR                  "db_module_dir"
 #define KRB5_CONF_DEFAULT                        "default"
 #define KRB5_CONF_DEFAULT_REALM                  "default_realm"
+#define KRB5_CONF_DEFAULT_CCACHE_NAME            "default_ccache_name"
 #define KRB5_CONF_DEFAULT_CLIENT_KEYTAB_NAME     "default_client_keytab_name"
 #define KRB5_CONF_DEFAULT_DOMAIN                 "default_domain"
 #define KRB5_CONF_DEFAULT_TKT_ENCTYPES           "default_tkt_enctypes"

@@ -78,4 +78,15 @@ output = realm.run_as_client([klist, '-l'], expected_code=1)
 if not output.endswith('---\n') or output.count('\n') != 2:
     fail('kdestroy -a failed to empty cache collection.')
 
+# Test parameter expansion in default_ccache_name
+realm.stop()
+conf = {'client': {'libdefaults': {
+            'default_ccache_name': 'testdir/%{null}abc%{uid}'}}}
+realm = K5Realm(krb5_conf=conf, create_kdb=False)
+del realm.env_client['KRB5CCNAME']
+uidstr = str(os.getuid())
+out = realm.run_as_client([klist], expected_code=1)
+if 'FILE:testdir/abc%s' % uidstr not in out:
+    fail('Wrong ccache in klist')
+
 success('Credential cache tests')
