@@ -122,7 +122,7 @@ Abbreviations used in this document
 | *dd*   : day of month (01-31);
 | *HH*   : hours (00-12);
 | *hh*   : hours (00-23);
-| *mm*   : in time - minutes (00-59); in date - month (00-12);
+| *mm*   : in time - minutes (00-59); in date - month (01-12);
 | *N*    : number;
 | *pp*   : AM or PM;
 | *ss*   : seconds  (00-60);

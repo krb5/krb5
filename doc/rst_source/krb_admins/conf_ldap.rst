@@ -1,14 +1,13 @@
 Configuring Kerberos with OpenLDAP back-end
 ===========================================
 
-.. seealso:: :ref:`ldap_be_ubuntu`
 
-1. Set up SSL on the OpenLDAP server and client to ensure secure
-   communication when the KDC service and LDAP server are on different
-   machines.  ``ldapi://`` can be used if the LDAP server and KDC
-   service are running on the same machine.
+ 1. Set up SSL on the OpenLDAP server and client to ensure secure
+    communication when the KDC service and LDAP server are on different
+    machines.  ``ldapi://`` can be used if the LDAP server and KDC
+    service are running on the same machine.
 
-   A. Setting up SSL on the OpenLDAP server:
+    A. Setting up SSL on the OpenLDAP server:
 
       i) Get a CA certificate using OpenSSL tools
       ii) Configure OpenLDAP server for using SSL/TLS
@@ -19,38 +18,38 @@ Configuring Kerberos with OpenLDAP back-end
           Refer to the following link for more information:
           http://www.openldap.org/doc/admin23/tls.html
 
-    B. Setting up SSL on OpenLDAP Client:
+    B. Setting up SSL on OpenLDAP client:
 
        i) For the KDC and Admin Server, you need to do the client-side
           configuration in ldap.conf.  For example::
 
               TLS_CACERT /etc/openldap/certs/cacert.pem
 
-2. Include the Kerberos schema file (kerberos.schema) in the
-   configuration file (slapd.conf) on the LDAP Server, by providing
-   the location where it is stored::
+ 2. Include the Kerberos schema file (kerberos.schema) in the
+    configuration file (slapd.conf) on the LDAP Server, by providing
+    the location where it is stored::
 
        include /etc/openldap/schema/kerberos.schema
 
-3. Choose DNs for the :ref:`krb5kdc(8)` and :ref:`kadmind(8)` servers
-   to bind to the LDAP server, and create them if necessary. These DNs
-   will be specified with the **ldap_kdc_dn** and **ldap_kadmind_dn**
-   directives in :ref:`krb5.conf(5)`; their passwords can be stashed
-   with "``kdb5_ldap_util stashsrvpw``" and the resulting file
-   specified with the **ldap_service_password_file** directive.
+ 3. Choose DNs for the :ref:`krb5kdc(8)` and :ref:`kadmind(8)` servers
+    to bind to the LDAP server, and create them if necessary. These DNs
+    will be specified with the **ldap_kdc_dn** and **ldap_kadmind_dn**
+    directives in :ref:`kdc.conf(5)`; their passwords can be stashed
+    with "``kdb5_ldap_util stashsrvpw``" and the resulting file
+    specified with the **ldap_service_password_file** directive.
 
-4. Choose a DN for the global Kerberos container entry (but do not
-   create the entry at this time).  This DN will be specified with the
-   **ldap_kerberos_container_dn** directive in :ref:`krb5.conf(5)`.
-   Realm container entries will be created underneath this DN.
-   Principal entries may exist either underneath the realm container
-   (the default) or in separate trees referenced from the realm
-   container.
+ 4. Choose a DN for the global Kerberos container entry (but do not
+    create the entry at this time).  This DN will be specified with the
+    **ldap_kerberos_container_dn** directive in :ref:`kdc.conf(5)`.
+    Realm container entries will be created underneath this DN.
+    Principal entries may exist either underneath the realm container
+    (the default) or in separate trees referenced from the realm
+    container.
 
-5. Configure the LDAP server ACLs to enable the KDC and kadmin server
-   DNs to read and write the Kerberos data.
+ 5. Configure the LDAP server ACLs to enable the KDC and kadmin server
+    DNs to read and write the Kerberos data.
 
-   Sample access control information::
+    Sample access control information::
 
        access to dn.base=""
            by * read
@@ -81,16 +80,16 @@ Configuring Kerberos with OpenLDAP back-end
        access to *
            by * read
 
-      If the locations of the container and principals or the DNs of
-      the service objects for a realm are changed then this
-      information should be updated.
+    If the locations of the container and principals or the DNs of
+    the service objects for a realm are changed then this
+    information should be updated.
 
-6. Start the LDAP server as follows::
+ 6. Start the LDAP server as follows::
 
        slapd -h "ldapi:/// ldaps:///"
 
-7. Modify the :ref:`krb5.conf(5)` file to include LDAP specific items
-   listed below::
+ 7. Modify the :ref:`kdc.conf(5)` file to include LDAP specific items
+    listed below::
 
        realms
            database_module
@@ -104,37 +103,37 @@ Configuring Kerberos with OpenLDAP back-end
            ldap_servers
            ldap_conns_per_server
 
-8. Create the realm using :ref:`kdb5_ldap_util(8)` (see
-   :ref:`ldap_create_realm`)::
+ 8. Create the realm using :ref:`kdb5_ldap_util(8)` (see
+    :ref:`ldap_create_realm`)::
 
        kdb5_ldap_util -D cn=admin,dc=example,dc=com create -subtrees ou=users,dc=example,dc=com -r EXAMPLE.COM -s
 
-   Use the **-subtrees** option if the principals are to exist in a
-   separate subtree from the realm container.  Before executing the
-   command, make sure that the subtree mentioned above
-   ``(ou=users,dc=example,dc=com)`` exists.  If the principals will
-   exist underneath the realm container, omit the **-subtrees** option
-   and do not worry about creating the principal subtree.
+    Use the **-subtrees** option if the principals are to exist in a
+    separate subtree from the realm container.  Before executing the
+    command, make sure that the subtree mentioned above
+    ``(ou=users,dc=example,dc=com)`` exists.  If the principals will
+    exist underneath the realm container, omit the **-subtrees** option
+    and do not worry about creating the principal subtree.
 
-   For more information, refer to the section :ref:`ops_on_ldap`.
+    For more information, refer to the section :ref:`ops_on_ldap`.
 
-   The realm object is created under the
-   **ldap_kerberos_container_dn** specified in the configuration file.
-   This operation will also create the Kerberos container, if not
-   present already.  This will be used to store information related to
-   all realms.
+    The realm object is created under the
+    **ldap_kerberos_container_dn** specified in the configuration file.
+    This operation will also create the Kerberos container, if not
+    present already.  This will be used to store information related to
+    all realms.
 
-9. Stash the password of the service object used by the KDC and
-   Administration service to bind to the LDAP server using the
-   :ref:`kdb5_ldap_util(8)` **stashsrvpw** command (see
-   :ref:`stash_ldap`).  The object DN should be the same as
-   **ldap_kdc*_dn* and **ldap_kadmind_dn** values specified in the
-   :ref:`krb5.conf(5)` file::
+ 9. Stash the password of the service object used by the KDC and
+    Administration service to bind to the LDAP server using the
+    :ref:`kdb5_ldap_util(8)` **stashsrvpw** command (see
+    :ref:`stash_ldap`).  The object DN should be the same as
+    **ldap_kdc_dn** and **ldap_kadmind_dn** values specified in the
+    :ref:`kdc.conf(5)` file::
 
        kdb5_ldap_util -D cn=admin,dc=example,dc=com stashsrvpw -f /etc/kerberos/service.keyfile cn=krbadmin,dc=example,dc=com
 
-10. Add ``krbPrincipalName`` to the indexes in slapd.conf to speed up
-    the access.
+ 10. Add ``krbPrincipalName`` to the indexes in slapd.conf to speed up
+     the access.
 
 With the LDAP back end it is possible to provide aliases for principal
 entries.  Currently we provide no mechanism provided for creating
@@ -155,3 +154,5 @@ requests canonicalization.  Canonicalization is normally requested for
 service principals; for client principals, an explicit flag is often
 required (e.g., ``kinit -C``) and canonicalization is only performed
 for initial ticket requests.
+
+.. seealso:: :ref:`ldap_be_ubuntu`
