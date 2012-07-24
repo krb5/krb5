@@ -28,10 +28,6 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-#if defined(USE_CCAPI)
-#include <CredentialsCache.h>
-#endif
-
 #if defined(_WIN32)
 static int get_from_registry_indirect(char *name_buf, int name_size)
 {
@@ -161,10 +157,9 @@ try_dir(
     buffer[buf_len-1] = '\0';
     return 1;
 }
-#endif
 
-#if defined(_WIN32)
-static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
+static krb5_error_code
+get_from_os_buffer(char *name_buf, unsigned int name_size)
 {
     char *prefix = krb5_cc_dfl_ops->prefix;
     unsigned int size;
@@ -214,60 +209,39 @@ static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
     name_buf[name_size - 1] = 0;
     return 0;
 }
-#endif
 
-#if defined(USE_CCAPI)
-
-static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
+static void
+get_from_os(krb5_context context)
 {
-    krb5_error_code result = 0;
-    cc_context_t cc_context = NULL;
-    cc_string_t default_name = NULL;
+    krb5_error_code err;
+    char buf[1024];
 
-    cc_int32 ccerr = cc_initialize (&cc_context, ccapi_version_3, NULL, NULL);
-    if (ccerr == ccNoError) {
-        ccerr = cc_context_get_default_ccache_name (cc_context, &default_name);
-    }
-
-    if (ccerr == ccNoError) {
-        if (strlen (default_name -> data) + 5 > name_size) {
-            result = ENOMEM;
-            goto cleanup;
-        } else {
-            snprintf (name_buf, name_size, "API:%s",
-                      default_name -> data);
-        }
-    }
-
-cleanup:
-    if (cc_context != NULL) {
-        cc_context_release (cc_context);
-    }
-
-    if (default_name != NULL) {
-        cc_string_release (default_name);
-    }
-
-    return result;
+    if (get_from_os_buffer(buf, sizeof(buf)) == 0)
+        context->os_context.default_ccname = strdup(buf);
 }
 
-#else
-#if !(defined(_WIN32))
-static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
+#else /* not _WIN32 */
+
+static void
+get_from_os(krb5_context context)
 {
-    snprintf(name_buf, name_size, "FILE:/tmp/krb5cc_%ld", (long) getuid());
-    return 0;
+    char *name;
+
+    if (asprintf(&name, "FILE:/tmp/krb5cc_%ld", (long)getuid()) >= 0)
+        context->os_context.default_ccname = name;
 }
-#endif
-#endif
+
+#endif /* not _WIN32 */
 
 #if defined(_WIN32)
-static void set_for_os(const char *name)
+static void
+set_for_os(const char *name)
 {
     set_to_registry(HKEY_CURRENT_USER, name);
 }
 #else
-static void set_for_os(const char *name)
+static void
+set_for_os(const char *name)
 {
     /* No implementation at present. */
 }
@@ -280,71 +254,59 @@ static void set_for_os(const char *name)
 krb5_error_code KRB5_CALLCONV
 krb5int_cc_user_set_default_name(krb5_context context, const char *name)
 {
-    krb5_error_code code = 0;
-    if ((code = krb5_cc_set_default_name(context, name)))
-        return code;
+    krb5_error_code err;
+
+    err = krb5_cc_set_default_name(context, name);
+    if (err)
+        return err;
     set_for_os(name);
-    return code;
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_set_default_name(krb5_context context, const char *name)
 {
-    krb5_error_code err = 0;
+    krb5_os_context os_ctx;
     char *new_ccname = NULL;
 
-    if (!context || context->magic != KV5M_CONTEXT) { err = KV5M_CONTEXT; }
+    if (!context || context->magic != KV5M_CONTEXT)
+        return KV5M_CONTEXT;
 
     if (name != NULL) {
-        if (!err) {
-            /* If the name isn't NULL, make a copy of it */
-            new_ccname = strdup (name);
-            if (new_ccname == NULL) { err = ENOMEM; }
-        }
+        new_ccname = strdup(name);
+        if (new_ccname == NULL)
+            return ENOMEM;
     }
 
-    if (!err) {
-        /* free the old ccname and store the new one */
-        krb5_os_context os_ctx = &context->os_context;
-        if (os_ctx->default_ccname) { free (os_ctx->default_ccname); }
-        os_ctx->default_ccname = new_ccname;
-        new_ccname = NULL;  /* don't free */
-    }
-
-    return err;
+    /* Free the old ccname and store the new one. */
+    os_ctx = &context->os_context;
+    free(os_ctx->default_ccname);
+    os_ctx->default_ccname = new_ccname;
+    return 0;
 }
 
 
 const char * KRB5_CALLCONV
 krb5_cc_default_name(krb5_context context)
 {
-    krb5_error_code err = 0;
-    krb5_os_context os_ctx = NULL;
+    krb5_os_context os_ctx;
+    char *envstr;
 
-    if (!context || context->magic != KV5M_CONTEXT) { err = KV5M_CONTEXT; }
+    if (!context || context->magic != KV5M_CONTEXT)
+        return NULL;
 
-    if (!err) {
-        os_ctx = &context->os_context;
+    os_ctx = &context->os_context;
+    if (os_ctx->default_ccname != NULL)
+        return os_ctx->default_ccname;
 
-        if (os_ctx->default_ccname == NULL) {
-            /* Default ccache name has not been set yet */
-            char *new_ccname = NULL;
-            char new_ccbuf[1024];
-
-            /* try the environment variable first */
-            new_ccname = getenv(KRB5_ENV_CCNAME);
-
-            if (new_ccname == NULL) {
-                /* fall back on the default ccache name for the OS */
-                new_ccname = new_ccbuf;
-                err = get_from_os (new_ccbuf, sizeof (new_ccbuf));
-            }
-
-            if (!err) {
-                err = krb5_cc_set_default_name (context, new_ccname);
-            }
-        }
+    /* Try the environment variable first. */
+    envstr = getenv(KRB5_ENV_CCNAME);
+    if (envstr != NULL) {
+        os_ctx->default_ccname = strdup(envstr);
+        return os_ctx->default_ccname;
     }
 
-    return err ? NULL : os_ctx->default_ccname;
+    /* Fall back on the default ccache name for the OS. */
+    get_from_os(context);
+    return os_ctx->default_ccname;
 }
