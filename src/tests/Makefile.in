@@ -71,7 +71,7 @@ check-pytests:: hist
 	$(RUNPYTEST) $(srcdir)/t_keyrollover.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_renew.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_renprinc.py $(PYTESTFLAGS)
-	$(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_ccache.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_stringattr.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_sesskeynego.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_crossrealm.py $(PYTESTFLAGS)

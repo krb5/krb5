@@ -23,11 +23,16 @@
 #!/usr/bin/python
 from k5test import *
 
-realm = K5Realm(create_user=False, create_host=False)
+realm = K5Realm(create_host=False)
 
-# Make a directory collection and use it for client commands in both realms.
-ccdir = os.path.join(realm.testdir, 'cc')
-ccname = 'DIR:' + ccdir
+# Test kdestroy and klist of a non-existent ccache.
+realm.run_as_client([kdestroy])
+output = realm.run_as_client([klist], expected_code=1)
+if 'No credentials cache found' not in output:
+    fail('Expected error message not seen in klist output')
+
+# Make a directory collection and use it for client commands.
+ccname = 'DIR:' + os.path.join(realm.testdir, 'cc')
 realm.env_client['KRB5CCNAME'] = ccname
 
 realm.addprinc('alice', password('alice'))
@@ -73,4 +78,4 @@ output = realm.run_as_client([klist, '-l'], expected_code=1)
 if not output.endswith('---\n') or output.count('\n') != 2:
     fail('kdestroy -a failed to empty cache collection.')
 
-success('Credential cache collection tests')
+success('Credential cache tests')

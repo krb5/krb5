@@ -33,12 +33,6 @@ output = realm.run_kadminl('getpols')
 if 'fred\n' not in output:
     fail('Policy not preserved across dump/load.')
 
-# Test kdestroy and klist of a non-existent ccache.
-realm.run_as_client([kdestroy])
-output = realm.run_as_client([klist], expected_code=1)
-if 'No credentials cache found' not in output:
-    fail('Expected error message not seen in klist output')
-
 # Spot-check KRB5_TRACE output
 tracefile = os.path.join(realm.testdir, 'trace')
 realm.run_as_client(['env', 'KRB5_TRACE=' + tracefile, kinit,
