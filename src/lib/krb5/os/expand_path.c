@@ -223,7 +223,7 @@ cleanup:
         CloseHandle(hToken);
 
     if (pOwner != NULL)
-        free (pOwner);
+        free(pOwner);
 
     if (strSid != NULL)
         LocalFree(strSid);
@@ -293,7 +293,7 @@ static krb5_error_code
 expand_userid(krb5_context context, PTYPE param, const char *postfix,
               char **str)
 {
-    if (asprintf(str, "%ld", (unsigned long)getuid()) < 0)
+    if (asprintf(str, "%lu", (unsigned long)getuid()) < 0)
         return ENOMEM;
     return 0;
 }
@@ -301,7 +301,7 @@ expand_userid(krb5_context context, PTYPE param, const char *postfix,
 static krb5_error_code
 expand_euid(krb5_context context, PTYPE param, const char *postfix, char **str)
 {
-    if (asprintf(str, "%ld", (unsigned long)geteuid()) < 0)
+    if (asprintf(str, "%lu", (unsigned long)geteuid()) < 0)
         return ENOMEM;
     return 0;
 }
@@ -334,54 +334,43 @@ expand_null(krb5_context context, PTYPE param, const char *postfix, char **ret)
     return 0;
 }
 
-
 static const struct token {
     const char *tok;
-    int ftype;
-#define FTYPE_CSIDL 0
-#define FTYPE_SPECIAL 1
-
     PTYPE param;
     const char *postfix;
-
     int (*exp_func)(krb5_context, PTYPE, const char *, char **);
-
-#define SPECIALP(f, P) FTYPE_SPECIAL, 0, P, f
-#define SPECIAL(f) SPECIALP(f, NULL)
-
 } tokens[] = {
 #ifdef _WIN32
-#define CSIDLP(C,P) FTYPE_CSIDL, C, P, expand_csidl
-#define CSIDL(C) CSIDLP(C, NULL)
-
     /* Roaming application data (for current user) */
-    {"APPDATA", CSIDL(CSIDL_APPDATA)},
+    {"APPDATA", CSIDL_APPDATA, NULL, expand_csidl},
     /* Application data (all users) */
-    {"COMMON_APPDATA", CSIDL(CSIDL_COMMON_APPDATA)},
+    {"COMMON_APPDATA", CSIDL_COMMON_APPDATA, NULL, expand_csidl},
     /* Local application data (for current user) */
-    {"LOCAL_APPDATA", CSIDL(CSIDL_LOCAL_APPDATA)},
+    {"LOCAL_APPDATA", CSIDL_LOCAL_APPDATA, NULL, expand_csidl},
     /* Windows System folder (e.g. %WINDIR%\System32) */
-    {"SYSTEM", CSIDL(CSIDL_SYSTEM)},
+    {"SYSTEM", CSIDL_SYSTEM, NULL, expand_csidl},
     /* Windows folder */
-    {"WINDOWS", CSIDL(CSIDL_WINDOWS)},
+    {"WINDOWS", CSIDL_WINDOWS, NULL, expand_csidl},
     /* Per user MIT krb5 configuration file directory */
-    {"USERCONFIG", CSIDLP(CSIDL_APPDATA, "\\MIT\\Kerberos5")},
+    {"USERCONFIG", CSIDL_APPDATA, "\\MIT\\Kerberos5",
+     expand_csidl},
     /* Common MIT krb5 configuration file directory */
-    {"COMMONCONFIG", CSIDLP(CSIDL_COMMON_APPDATA, "\\MIT\\Kerberos5")},
-    {"LIBDIR", SPECIAL(expand_bin_dir)},
-    {"BINDIR", SPECIAL(expand_bin_dir)},
-    {"SBINDIR", SPECIAL(expand_bin_dir)},
-    {"euid", SPECIAL(expand_userid)},
+    {"COMMONCONFIG", CSIDL_COMMON_APPDATA, "\\MIT\\Kerberos5",
+     expand_csidl},
+    {"LIBDIR", 0, NULL, expand_bin_dir},
+    {"BINDIR", 0, NULL, expand_bin_dir},
+    {"SBINDIR", 0, NULL, expand_bin_dir},
+    {"euid", 0, NULL, expand_userid},
 #else
-    {"LIBDIR", FTYPE_SPECIAL, 0, LIBDIR, expand_path},
-    {"BINDIR", FTYPE_SPECIAL, 0, BINDIR, expand_path},
-    {"SBINDIR", FTYPE_SPECIAL, 0, SBINDIR, expand_path},
-    {"euid", SPECIAL(expand_euid)},
+    {"LIBDIR", 0, LIBDIR, expand_path},
+    {"BINDIR", 0, BINDIR, expand_path},
+    {"SBINDIR", 0, SBINDIR, expand_path},
+    {"euid", 0, NULL, expand_euid},
 #endif
-    {"TEMP", SPECIAL(expand_temp_folder)},
-    {"USERID", SPECIAL(expand_userid)},
-    {"uid", SPECIAL(expand_userid)},
-    {"null", SPECIAL(expand_null)}
+    {"TEMP", 0, NULL, expand_temp_folder},
+    {"USERID", 0, NULL, expand_userid},
+    {"uid", 0, NULL, expand_userid},
+    {"null", 0, NULL, expand_null}
 };
 
 static krb5_error_code
