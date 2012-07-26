@@ -14,7 +14,11 @@ AFS_INCLUDES=
 AFS_LIBS=
 !endif
 
+!if defined(NODEBUG)
+MFCLIB=MFC100.LIB
+!else
 MFCLIB=MFC100D.LIB
+!endif
 EXE_NAME=leash
 WSHELPER=wshelp32
 
