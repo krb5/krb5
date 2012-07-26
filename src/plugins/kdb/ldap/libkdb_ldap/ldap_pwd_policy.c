@@ -254,30 +254,11 @@ krb5_ldap_get_password_policy_from_dn(krb5_context context, char *pol_name,
     memset(*policy, 0, sizeof(osa_policy_ent_rec));
 
     LDAP_SEARCH(pol_dn, LDAP_SCOPE_BASE, "(objectclass=krbPwdPolicy)", password_policy_attributes);
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-    (*policy)->name = strdup(name);
-    CHECK_NULL((*policy)->name);
-    (*policy)->version = 1;
-#endif /**************** END IFDEF'ed OUT *******************************/
 
     ent=ldap_first_entry(ld, result);
     if (ent != NULL) {
         if ((st = populate_policy(context, ld, ent, pol_name, *policy)) != 0)
             goto cleanup;
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-        krb5_ldap_get_value(ld, ent, "krbmaxpwdlife", &((*policy)->pw_max_life));
-        krb5_ldap_get_value(ld, ent, "krbminpwdlife", &((*policy)->pw_min_life));
-        krb5_ldap_get_value(ld, ent, "krbpwdmindiffchars", &((*policy)->pw_min_classes));
-        krb5_ldap_get_value(ld, ent, "krbpwdminlength", &((*policy)->pw_min_length));
-        krb5_ldap_get_value(ld, ent, "krbpwdhistorylength", &((*policy)->pw_history_num));
-
-        /* Get the reference count */
-        st = krb5_ldap_get_reference_count (context,
-                                            name,
-                                            "krbPwdPolicyReference",
-                                            &(*policy)->policy_refcnt,
-                                            ld);
-#endif /**************** END IFDEF'ed OUT *******************************/
     }
 
 cleanup:
@@ -420,23 +401,6 @@ krb5_ldap_iterate_password_policy(krb5_context context, char *match_expr,
         memset(entry, 0, sizeof(osa_policy_ent_rec));
         if ((st = populate_policy(context, ld, ent, policy, entry)) != 0)
             goto cleanup;
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-        entry->name = policy;
-        entry->version = 1;
-
-        krb5_ldap_get_value(ld, ent, "krbmaxpwdlife", &(entry->pw_max_life));
-        krb5_ldap_get_value(ld, ent, "krbminpwdlife", &(entry->pw_min_life));
-        krb5_ldap_get_value(ld, ent, "krbpwdmindiffchars", &(entry->pw_min_classes));
-        krb5_ldap_get_value(ld, ent, "krbpwdminlength", &(entry->pw_min_length));
-        krb5_ldap_get_value(ld, ent, "krbpwdhistorylength", &(entry->pw_history_num));
-
-        /* Get the reference count */
-        st = krb5_ldap_get_reference_count (context,
-                                            policy,
-                                            "krbPwdPolicyReference",
-                                            &(entry->policy_refcnt),
-                                            ld);
-#endif /**************** END IFDEF'ed OUT *******************************/
 
         (*func)(func_arg, entry);
         /* XXX this will free policy so don't free it */
