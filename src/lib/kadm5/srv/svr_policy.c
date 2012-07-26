@@ -54,7 +54,7 @@ kadm5_create_policy(void *server_handle,
 
 /* Validate allowed_keysalts. */
 static kadm5_ret_t
-validate_allowed_keysalts(char *allowed_keysalts)
+validate_allowed_keysalts(const char *allowed_keysalts)
 {
     kadm5_ret_t ret;
     krb5_key_salt_tuple *ks_tuple = NULL;

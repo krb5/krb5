@@ -70,7 +70,7 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
    maybe shouldn't be named krb5_*, but they are. */
 
 krb5_error_code
-krb5_string_to_keysalts(char *string, const char *tupleseps,
+krb5_string_to_keysalts(const char *string, const char *tupleseps,
                         const char *ksaltseps, krb5_boolean dups,
                         krb5_key_salt_tuple **ksaltp, krb5_int32 *nksaltp);
 

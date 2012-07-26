@@ -100,7 +100,7 @@ krb5_error_code krb5_keysalt_iterate(krb5_key_salt_tuple *, krb5_int32,
                                                          krb5_pointer),
                                      krb5_pointer);
 
-krb5_error_code krb5_string_to_keysalts(char *, const char *, const char *,
-                                        krb5_boolean, krb5_key_salt_tuple **,
-                                        krb5_int32 *);
+krb5_error_code krb5_string_to_keysalts(const char *, const char *,
+                                        const char *, krb5_boolean,
+                                        krb5_key_salt_tuple **, krb5_int32 *);
 #endif  /* KRB5_ADM_PROTO_H__ */

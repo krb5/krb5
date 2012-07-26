@@ -251,16 +251,12 @@ krb5_keysalt_is_present(ksaltlist, nksalts, enctype, salttype)
  *                                of key/salt tuples.
  */
 krb5_error_code
-krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
-    char                *string;
-    const char          *tupleseps;
-    const char          *ksaltseps;
-    krb5_boolean        dups;
-    krb5_key_salt_tuple **ksaltp;
-    krb5_int32          *nksaltp;
+krb5_string_to_keysalts(const char *string, const char *tupleseps,
+                        const char *ksaltseps, krb5_boolean dups,
+                        krb5_key_salt_tuple **ksaltp, krb5_int32 *nksaltp)
 {
     krb5_error_code     kret;
-    char                *kp, *sp, *ep;
+    char                *dup_string, *kp, *sp, *ep;
     char                sepchar = 0, trailchar = 0;
     krb5_enctype        ktype;
     krb5_int32          stype;
@@ -271,7 +267,10 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
     size_t              len;
 
     kret = 0;
-    kp = string;
+    dup_string = strdup(string);
+    if (dup_string == NULL)
+        return ENOMEM;
+    kp = dup_string;
     tseplist = (tupleseps) ? tupleseps : default_tupleseps;
     ksseplist = (ksaltseps) ? ksaltseps : default_ksaltseps;
     while (kp) {
@@ -346,8 +345,10 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
                 break;
             }
         }
-        if (kret)
+        if (kret) {
+            free(dup_string);
             return kret;
+        }
         if (sp)
             sp[-1] = sepchar;
         if (ep)
@@ -369,6 +370,7 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
             if (!*kp) kp = NULL;
         }
     } /* while kp */
+    free(dup_string);
     return(kret);
 }
 
