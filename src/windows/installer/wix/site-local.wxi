@@ -52,12 +52,7 @@
 
     <!-- At most one of the following could be defined and must correspond
          to the type of build performed. -->
-    <?define Debug?>
     <!--<?define Release?>-->
-
-    <!-- We are including debug symbols anyway.  Undefine this for a leaner
-         installer without debug syms. -->
-    <?define DebugSyms?>
 
     <!-- Optional defines -->
     <?define Beta="2"?> <!-- Numeric Beta identifier -->

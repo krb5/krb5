@@ -64,6 +64,14 @@
     <?include lang\config_$(var.BuildLang).wxi?>
     
     <!-- Parameters for the features containing debug symbols -->
+    <?ifdef env.NODEBUG?>
+         <?ifdef env.DEBUG_SYMBOL?>
+              <?define DebugSyms?>
+         <?endif?>
+    <?else?>
+         <?define Debug?>
+         <?define DebugSyms?>
+    <?endif?>
     <?ifdef DebugSyms?>
          <?ifdef Debug?>
              <?define DebugSymInstallDefault="followParent"?>
