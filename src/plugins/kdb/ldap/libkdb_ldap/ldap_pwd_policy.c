@@ -43,6 +43,57 @@ static char *password_policy_attributes[] = { "cn", "krbmaxpwdlife", "krbminpwdl
                                               "krbpwdfailurecountinterval",
                                               "krbpwdlockoutduration", NULL };
 
+/* Fill in mods with LDAP operations for the fields of policy, using the
+ * modification type op.  mods must be freed by the caller on error. */
+static krb5_error_code
+add_policy_mods(krb5_context context, LDAPMod ***mods, osa_policy_ent_t policy,
+                int op)
+{
+    krb5_error_code st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbmaxpwdlife", op,
+                                   (int)policy->pw_max_life);
+    if (st)
+        return st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbminpwdlife", op,
+                                   (int)policy->pw_min_life);
+    if (st)
+        return st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbpwdmindiffchars", op,
+                                   (int)policy->pw_min_classes);
+    if (st)
+        return st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbpwdminlength", op,
+                                   (int)policy->pw_min_length);
+    if (st)
+        return st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbpwdhistorylength", op,
+                                   (int)policy->pw_history_num);
+    if (st)
+        return st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbpwdmaxfailure", op,
+                                   (int)policy->pw_max_fail);
+    if (st)
+        return st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbpwdfailurecountinterval", op,
+                                   (int)policy->pw_failcnt_interval);
+    if (st)
+        return st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbpwdlockoutduration", op,
+                                   (int)policy->pw_lockout_duration);
+    if (st)
+        return st;
+
+    return 0;
+}
+
 /*
  * Function to create password policy object.
  */
@@ -89,22 +140,8 @@ krb5_ldap_create_password_policy(krb5_context context, osa_policy_ent_t policy)
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
         goto cleanup;
 
-    if (((st=krb5_add_int_mem_ldap_mod(&mods, "krbmaxpwdlife", LDAP_MOD_ADD,
-                                       (signed) policy->pw_max_life)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbminpwdlife", LDAP_MOD_ADD,
-                                          (signed) policy->pw_min_life)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdmindiffchars", LDAP_MOD_ADD,
-                                          (signed) policy->pw_min_classes)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdminlength", LDAP_MOD_ADD,
-                                          (signed) policy->pw_min_length)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdhistorylength", LDAP_MOD_ADD,
-                                          (signed) policy->pw_history_num)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdmaxfailure", LDAP_MOD_ADD,
-                                          (signed) policy->pw_max_fail)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdfailurecountinterval", LDAP_MOD_ADD,
-                                          (signed) policy->pw_failcnt_interval)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdlockoutduration", LDAP_MOD_ADD,
-                                          (signed) policy->pw_lockout_duration)) != 0))
+    st = add_policy_mods(context, &mods, policy, LDAP_MOD_ADD);
+    if (st)
         goto cleanup;
 
     /* password policy object creation */
@@ -153,22 +190,8 @@ krb5_ldap_put_password_policy(krb5_context context, osa_policy_ent_t policy)
     if (st != 0)
         goto cleanup;
 
-    if (((st=krb5_add_int_mem_ldap_mod(&mods, "krbmaxpwdlife", LDAP_MOD_REPLACE,
-                                       (signed) policy->pw_max_life)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbminpwdlife", LDAP_MOD_REPLACE,
-                                          (signed) policy->pw_min_life)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdmindiffchars", LDAP_MOD_REPLACE,
-                                          (signed) policy->pw_min_classes)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdminlength", LDAP_MOD_REPLACE,
-                                          (signed) policy->pw_min_length)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdhistorylength", LDAP_MOD_REPLACE,
-                                          (signed) policy->pw_history_num)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdmaxfailure", LDAP_MOD_REPLACE,
-                                          (signed) policy->pw_max_fail)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdfailurecountinterval", LDAP_MOD_REPLACE,
-                                          (signed) policy->pw_failcnt_interval)) != 0)
-        || ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpwdlockoutduration", LDAP_MOD_REPLACE,
-                                          (signed) policy->pw_lockout_duration)) != 0))
+    st = add_policy_mods(context, &mods, policy, LDAP_MOD_REPLACE);
+    if (st)
         goto cleanup;
 
     /* modify the password policy object. */
