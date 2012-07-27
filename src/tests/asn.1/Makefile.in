@@ -11,6 +11,8 @@ SRCS= $(srcdir)/krb5_encode_test.c $(srcdir)/krb5_decode_test.c \
 	$(srcdir)/ktest_equal.c $(srcdir)/utility.c \
 	$(srcdir)/trval.c $(srcdir)/t_trval.c
 
+ASN1SRCS= $(srcdir)/krb5.asn1 $(srcdir)/pkix.asn1 $(srcdir)/otp.asn1
+
 all:: krb5_encode_test krb5_decode_test krb5_decode_leak t_trval
 
 LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1
@@ -78,6 +80,17 @@ check-encode-trval: krb5_encode_test expected_trval.out
 		export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test -t > trval.out
 	cmp trval.out expected_trval.out
+
+# This target uses asn1c to generate encodings of sample objects, to
+# help ensure that our implementation is correct.  asn1c must be in the
+# path for this to work.
+test-vectors:
+	$(RM) -r vectors
+	mkdir vectors
+	cp $(ASN1SRCS) $(srcdir)/make-vectors.c vectors
+	(cd vectors && asn1c *.asn1 && rm converter-sample.c)
+	(cd vectors && $(CC) -I. -w *.c -o make-vectors)
+	(cd vectors && ./make-vectors)
 
 install::
 

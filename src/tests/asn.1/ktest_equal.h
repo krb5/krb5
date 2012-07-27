@@ -92,6 +92,11 @@ int ktest_equal_sequence_of_cred_info(krb5_cred_info **ref,
 int ktest_equal_sequence_of_principal(krb5_principal *ref,
                                       krb5_principal *var);
 int ktest_equal_sequence_of_checksum(krb5_checksum **ref, krb5_checksum **var);
+int
+ktest_equal_sequence_of_algorithm_identifier(krb5_algorithm_identifier **ref,
+                                             krb5_algorithm_identifier **var);
+int ktest_equal_sequence_of_otp_tokeninfo(krb5_otp_tokeninfo **ref,
+                                          krb5_otp_tokeninfo **var);
 
 len_array(ktest_equal_array_of_enctype,krb5_enctype);
 len_array(ktest_equal_array_of_data,krb5_data);
@@ -120,6 +125,11 @@ int ktest_equal_iakerb_finished(krb5_iakerb_finished *ref,
                                 krb5_iakerb_finished *var);
 int ktest_equal_fast_response(krb5_fast_response *ref,
                               krb5_fast_response *var);
+int ktest_equal_otp_tokeninfo(krb5_otp_tokeninfo *ref,
+                              krb5_otp_tokeninfo *var);
+int ktest_equal_pa_otp_challenge(krb5_pa_otp_challenge *ref,
+                                 krb5_pa_otp_challenge *var);
+int ktest_equal_pa_otp_req(krb5_pa_otp_req *ref, krb5_pa_otp_req *var);
 
 int ktest_equal_ldap_sequence_of_keys(ldap_seqof_key_data *ref,
                                       ldap_seqof_key_data *var);

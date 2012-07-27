@@ -615,6 +615,105 @@ ktest_make_sample_fast_response(krb5_fast_response *p)
     p->nonce = SAMPLE_NONCE;
 }
 
+void
+ktest_make_sha256_alg(krb5_algorithm_identifier *p)
+{
+    /* { 2 16 840 1 101 3 4 2 1 } */
+    krb5_data_parse(&p->algorithm, "\x60\x86\x48\x01\x65\x03\x04\x02\x01");
+    p->parameters = empty_data();
+}
+
+void
+ktest_make_sha1_alg(krb5_algorithm_identifier *p)
+{
+    /* { 1 3 14 3 2 26 } */
+    krb5_data_parse(&p->algorithm, "\x2b\x0e\x03\x02\x1a");
+    p->parameters = empty_data();
+}
+
+void
+ktest_make_minimal_otp_tokeninfo(krb5_otp_tokeninfo *p)
+{
+    memset(p, 0, sizeof(*p));
+    p->length = p->format = p->iteration_count = -1;
+}
+
+void
+ktest_make_maximal_otp_tokeninfo(krb5_otp_tokeninfo *p)
+{
+    p->flags = KRB5_OTP_FLAG_NEXTOTP | KRB5_OTP_FLAG_COMBINE |
+        KRB5_OTP_FLAG_COLLECT_PIN | KRB5_OTP_FLAG_ENCRYPT_NONCE |
+        KRB5_OTP_FLAG_SEPARATE_PIN | KRB5_OTP_FLAG_CHECK_DIGIT;
+    krb5_data_parse(&p->vendor, "Examplecorp");
+    krb5_data_parse(&p->challenge, "hark!");
+    p->length = 10;
+    p->format = 2;
+    krb5_data_parse(&p->token_id, "yourtoken");
+    krb5_data_parse(&p->alg_id, "urn:ietf:params:xml:ns:keyprov:pskc:hotp");
+    p->supported_hash_alg = ealloc(3 * sizeof(*p->supported_hash_alg));
+    p->supported_hash_alg[0] = ealloc(sizeof(*p->supported_hash_alg[0]));
+    ktest_make_sha256_alg(p->supported_hash_alg[0]);
+    p->supported_hash_alg[1] = ealloc(sizeof(*p->supported_hash_alg[1]));
+    ktest_make_sha1_alg(p->supported_hash_alg[1]);
+    p->supported_hash_alg[2] = NULL;
+    p->iteration_count = 1000;
+}
+
+void
+ktest_make_minimal_pa_otp_challenge(krb5_pa_otp_challenge *p)
+{
+    memset(p, 0, sizeof(*p));
+    krb5_data_parse(&p->nonce, "minnonce");
+    p->tokeninfo = ealloc(2 * sizeof(*p->tokeninfo));
+    p->tokeninfo[0] = ealloc(sizeof(*p->tokeninfo[0]));
+    ktest_make_minimal_otp_tokeninfo(p->tokeninfo[0]);
+    p->tokeninfo[1] = NULL;
+}
+
+void
+ktest_make_maximal_pa_otp_challenge(krb5_pa_otp_challenge *p)
+{
+    krb5_data_parse(&p->nonce, "maxnonce");
+    krb5_data_parse(&p->service, "testservice");
+    p->tokeninfo = ealloc(3 * sizeof(*p->tokeninfo));
+    p->tokeninfo[0] = ealloc(sizeof(*p->tokeninfo[0]));
+    ktest_make_minimal_otp_tokeninfo(p->tokeninfo[0]);
+    p->tokeninfo[1] = ealloc(sizeof(*p->tokeninfo[1]));
+    ktest_make_maximal_otp_tokeninfo(p->tokeninfo[1]);
+    p->tokeninfo[2] = NULL;
+    krb5_data_parse(&p->salt, "keysalt");
+    krb5_data_parse(&p->s2kparams, "1234");
+}
+
+void
+ktest_make_minimal_pa_otp_req(krb5_pa_otp_req *p)
+{
+    memset(p, 0, sizeof(*p));
+    p->iteration_count = -1;
+    p->format = -1;
+    ktest_make_sample_enc_data(&p->enc_data);
+}
+
+void
+ktest_make_maximal_pa_otp_req(krb5_pa_otp_req *p)
+{
+    p->flags = KRB5_OTP_FLAG_NEXTOTP | KRB5_OTP_FLAG_COMBINE;
+    krb5_data_parse(&p->nonce, "nonce");
+    ktest_make_sample_enc_data(&p->enc_data);
+    p->hash_alg = ealloc(sizeof(*p->hash_alg));
+    ktest_make_sha256_alg(p->hash_alg);
+    p->iteration_count = 1000;
+    krb5_data_parse(&p->otp_value, "frogs");
+    krb5_data_parse(&p->pin, "myfirstpin");
+    krb5_data_parse(&p->challenge, "hark!");
+    p->time = SAMPLE_TIME;
+    krb5_data_parse(&p->counter, "346");
+    p->format = 2;
+    krb5_data_parse(&p->token_id, "yourtoken");
+    krb5_data_parse(&p->alg_id, "urn:ietf:params:xml:ns:keyprov:pskc:hotp");
+    krb5_data_parse(&p->vendor, "Examplecorp");
+}
+
 #ifndef DISABLE_PKINIT
 
 static void
@@ -1396,6 +1495,71 @@ ktest_empty_fast_response(krb5_fast_response *p)
     }
 }
 
+static void
+ktest_empty_algorithm_identifier(krb5_algorithm_identifier *p)
+{
+    ktest_empty_data(&p->algorithm);
+    ktest_empty_data(&p->parameters);
+}
+
+void
+ktest_empty_otp_tokeninfo(krb5_otp_tokeninfo *p)
+{
+    krb5_algorithm_identifier **alg;
+
+    p->flags = 0;
+    krb5_free_data_contents(NULL, &p->vendor);
+    krb5_free_data_contents(NULL, &p->challenge);
+    krb5_free_data_contents(NULL, &p->token_id);
+    krb5_free_data_contents(NULL, &p->alg_id);
+    for (alg = p->supported_hash_alg; alg != NULL && *alg != NULL; alg++) {
+        ktest_empty_algorithm_identifier(*alg);
+        free(*alg);
+    }
+    free(p->supported_hash_alg);
+    p->supported_hash_alg = NULL;
+    p->length = p->format = p->iteration_count = -1;
+}
+
+void
+ktest_empty_pa_otp_challenge(krb5_pa_otp_challenge *p)
+{
+    krb5_otp_tokeninfo **ti;
+
+    krb5_free_data_contents(NULL, &p->nonce);
+    krb5_free_data_contents(NULL, &p->service);
+    for (ti = p->tokeninfo; *ti != NULL; ti++) {
+        ktest_empty_otp_tokeninfo(*ti);
+        free(*ti);
+    }
+    free(p->tokeninfo);
+    p->tokeninfo = NULL;
+    krb5_free_data_contents(NULL, &p->salt);
+    krb5_free_data_contents(NULL, &p->s2kparams);
+}
+
+void
+ktest_empty_pa_otp_req(krb5_pa_otp_req *p)
+{
+    p->flags = 0;
+    krb5_free_data_contents(NULL, &p->nonce);
+    ktest_destroy_enc_data(&p->enc_data);
+    if (p->hash_alg != NULL)
+        ktest_empty_algorithm_identifier(p->hash_alg);
+    free(p->hash_alg);
+    p->hash_alg = NULL;
+    p->iteration_count = -1;
+    krb5_free_data_contents(NULL, &p->otp_value);
+    krb5_free_data_contents(NULL, &p->pin);
+    krb5_free_data_contents(NULL, &p->challenge);
+    p->time = 0;
+    krb5_free_data_contents(NULL, &p->counter);
+    p->format = -1;
+    krb5_free_data_contents(NULL, &p->token_id);
+    krb5_free_data_contents(NULL, &p->alg_id);
+    krb5_free_data_contents(NULL, &p->vendor);
+}
+
 #ifndef DISABLE_PKINIT
 
 static void
@@ -1409,13 +1573,6 @@ static void
 ktest_empty_pk_authenticator_draft9(krb5_pk_authenticator_draft9 *p)
 {
     ktest_destroy_principal(&p->kdcName);
-}
-
-static void
-ktest_empty_algorithm_identifier(krb5_algorithm_identifier *p)
-{
-    ktest_empty_data(&p->algorithm);
-    ktest_empty_data(&p->parameters);
 }
 
 static void

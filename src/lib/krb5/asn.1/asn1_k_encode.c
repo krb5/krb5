@@ -29,11 +29,24 @@
 
 DEFINT_IMMEDIATE(krb5_version, KVNO, KRB5KDC_ERR_BAD_PVNO);
 
+static int
+int32_not_minus1(const void *p)
+{
+    return (*(krb5_int32 *)p != -1);
+}
+
+static void
+init_int32_minus1(void *p)
+{
+    *(krb5_int32 *)p = -1;
+}
+
 DEFBOOLTYPE(bool, krb5_boolean);
 DEFINTTYPE(int32, krb5_int32);
 DEFPTRTYPE(int32_ptr, int32);
 DEFCOUNTEDSEQOFTYPE(cseqof_int32, krb5_int32, int32_ptr);
 DEFOPTIONALZEROTYPE(opt_int32, int32);
+DEFOPTIONALTYPE(opt_int32_minus1, int32_not_minus1, init_int32_minus1, int32);
 
 DEFUINTTYPE(uint, unsigned int);
 DEFUINTTYPE(octet, krb5_octet);
@@ -72,6 +85,19 @@ DEFCOUNTEDTYPE(gstring_data, krb5_data, data, length, generalstring);
 DEFOPTIONALTYPE(opt_gstring_data, nonempty_data, NULL, gstring_data);
 DEFPTRTYPE(gstring_data_ptr, gstring_data);
 DEFCOUNTEDSEQOFTYPE(cseqof_gstring_data, krb5_int32, gstring_data_ptr);
+
+DEFCOUNTEDSTRINGTYPE(utf8string, char *, unsigned int,
+                     k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
+                     ASN1_UTF8STRING);
+DEFCOUNTEDTYPE(utf8_data, krb5_data, data, length, utf8string);
+DEFOPTIONALTYPE(opt_utf8_data, nonempty_data, NULL, utf8_data);
+DEFPTRTYPE(utf8_data_ptr, utf8_data);
+
+DEFCOUNTEDSTRINGTYPE(object_identifier, char *, unsigned int,
+                     k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
+                     ASN1_OBJECTIDENTIFIER);
+DEFCOUNTEDTYPE(oid_data, krb5_data, data, length, object_identifier);
+DEFPTRTYPE(oid_data_ptr, oid_data);
 
 DEFOFFSETTYPE(realm_of_principal_data, krb5_principal_data, realm,
               gstring_data);
@@ -1311,18 +1337,6 @@ krb5int_get_authdata_containee_types(krb5_context context,
     return 0;
 }
 
-/*
- * PKINIT
- */
-
-#ifndef DISABLE_PKINIT
-
-DEFCOUNTEDSTRINGTYPE(object_identifier, char *, unsigned int,
-                     k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
-                     ASN1_OBJECTIDENTIFIER);
-DEFCOUNTEDTYPE(oid_data, krb5_data, data, length, object_identifier);
-DEFPTRTYPE(oid_data_ptr, oid_data);
-
 /* RFC 3280.  No context tags. */
 DEFOFFSETTYPE(algid_0, krb5_algorithm_identifier, algorithm, oid_data);
 DEFOFFSETTYPE(algid_1, krb5_algorithm_identifier, parameters, opt_der_data);
@@ -1331,7 +1345,18 @@ static const struct atype_info *algorithm_identifier_fields[] = {
 };
 DEFSEQTYPE(algorithm_identifier, krb5_algorithm_identifier,
            algorithm_identifier_fields);
-DEFPTRTYPE(algorithm_identifier_ptr, algorithm_identifier);
+DEFPTRTYPE(ptr_algorithm_identifier, algorithm_identifier);
+DEFOPTIONALZEROTYPE(opt_ptr_algorithm_identifier, ptr_algorithm_identifier);
+DEFNULLTERMSEQOFTYPE(seqof_algorithm_identifier, ptr_algorithm_identifier);
+DEFPTRTYPE(ptr_seqof_algorithm_identifier, seqof_algorithm_identifier);
+DEFOPTIONALEMPTYTYPE(opt_ptr_seqof_algorithm_identifier,
+                     ptr_seqof_algorithm_identifier);
+
+/*
+ * PKINIT
+ */
+
+#ifndef DISABLE_PKINIT
 
 DEFCTAGGEDTYPE(kdf_alg_id_0, 0, oid_data);
 static const struct atype_info *kdf_alg_id_fields[] = {
@@ -1426,10 +1451,6 @@ DEFSEQTYPE(subject_pk_info, krb5_subject_pk_info, subject_pk_info_fields);
 DEFPTRTYPE(subject_pk_info_ptr, subject_pk_info);
 DEFOPTIONALZEROTYPE(opt_subject_pk_info_ptr, subject_pk_info_ptr);
 
-DEFNULLTERMSEQOFTYPE(seqof_algorithm_identifier, algorithm_identifier_ptr);
-DEFPTRTYPE(ptr_seqof_algorithm_identifier, seqof_algorithm_identifier);
-DEFOPTIONALZEROTYPE(opt_ptr_seqof_algorithm_identifier,
-                    ptr_seqof_algorithm_identifier);
 DEFFIELD(auth_pack_0, krb5_auth_pack, pkAuthenticator, 0, pk_authenticator);
 DEFFIELD(auth_pack_1, krb5_auth_pack, clientPublicValue, 1,
          opt_subject_pk_info_ptr);
@@ -1616,3 +1637,77 @@ DEFPTRTYPE(typed_data_ptr, typed_data);
 
 DEFNULLTERMSEQOFTYPE(seqof_typed_data, typed_data_ptr);
 MAKE_CODEC(krb5_typed_data, seqof_typed_data);
+
+/* Definitions for OTP preauth (RFC 6560) */
+
+DEFFIELD_IMPLICIT(tokinfo_0, krb5_otp_tokeninfo, flags, 0, krb5_flags);
+DEFFIELD_IMPLICIT(tokinfo_1, krb5_otp_tokeninfo, vendor, 1, opt_utf8_data);
+DEFFIELD_IMPLICIT(tokinfo_2, krb5_otp_tokeninfo, challenge, 2,
+                  opt_ostring_data);
+DEFFIELD_IMPLICIT(tokinfo_3, krb5_otp_tokeninfo, length, 3, opt_int32_minus1);
+DEFFIELD_IMPLICIT(tokinfo_4, krb5_otp_tokeninfo, format, 4, opt_int32_minus1);
+DEFFIELD_IMPLICIT(tokinfo_5, krb5_otp_tokeninfo, token_id, 5,
+                  opt_ostring_data);
+DEFFIELD_IMPLICIT(tokinfo_6, krb5_otp_tokeninfo, alg_id, 6, opt_utf8_data);
+DEFFIELD_IMPLICIT(tokinfo_7, krb5_otp_tokeninfo, supported_hash_alg, 7,
+                  opt_ptr_seqof_algorithm_identifier);
+DEFFIELD_IMPLICIT(tokinfo_8, krb5_otp_tokeninfo, iteration_count, 8,
+                  opt_int32_minus1);
+static const struct atype_info *otp_tokeninfo_fields[] = {
+    &k5_atype_tokinfo_0, &k5_atype_tokinfo_1, &k5_atype_tokinfo_2,
+    &k5_atype_tokinfo_3, &k5_atype_tokinfo_4, &k5_atype_tokinfo_5,
+    &k5_atype_tokinfo_6, &k5_atype_tokinfo_7, &k5_atype_tokinfo_8
+};
+DEFSEQTYPE(otp_tokeninfo, krb5_otp_tokeninfo, otp_tokeninfo_fields);
+MAKE_CODEC(krb5_otp_tokeninfo, otp_tokeninfo);
+
+DEFPTRTYPE(otp_tokeninfo_ptr, otp_tokeninfo);
+DEFNONEMPTYNULLTERMSEQOFTYPE(seqof_otp_tokeninfo, otp_tokeninfo_ptr);
+DEFPTRTYPE(ptr_seqof_otp_tokeninfo, seqof_otp_tokeninfo);
+
+DEFFIELD_IMPLICIT(otp_ch_0, krb5_pa_otp_challenge, nonce, 0, ostring_data);
+DEFFIELD_IMPLICIT(otp_ch_1, krb5_pa_otp_challenge, service, 1, opt_utf8_data);
+DEFFIELD_IMPLICIT(otp_ch_2, krb5_pa_otp_challenge, tokeninfo, 2,
+                  ptr_seqof_otp_tokeninfo);
+DEFFIELD_IMPLICIT(otp_ch_3, krb5_pa_otp_challenge, salt, 3, opt_gstring_data);
+DEFFIELD_IMPLICIT(otp_ch_4, krb5_pa_otp_challenge, s2kparams, 4,
+                  opt_ostring_data);
+static const struct atype_info *pa_otp_challenge_fields[] = {
+    &k5_atype_otp_ch_0, &k5_atype_otp_ch_1, &k5_atype_otp_ch_2,
+    &k5_atype_otp_ch_3, &k5_atype_otp_ch_4
+};
+DEFSEQTYPE(pa_otp_challenge, krb5_pa_otp_challenge, pa_otp_challenge_fields);
+MAKE_CODEC(krb5_pa_otp_challenge, pa_otp_challenge);
+
+DEFFIELD_IMPLICIT(otp_req_0, krb5_pa_otp_req, flags, 0, krb5_flags);
+DEFFIELD_IMPLICIT(otp_req_1, krb5_pa_otp_req, nonce, 1, opt_ostring_data);
+DEFFIELD_IMPLICIT(otp_req_2, krb5_pa_otp_req, enc_data, 2, encrypted_data);
+DEFFIELD_IMPLICIT(otp_req_3, krb5_pa_otp_req, hash_alg, 3,
+                  opt_ptr_algorithm_identifier);
+DEFFIELD_IMPLICIT(otp_req_4, krb5_pa_otp_req, iteration_count, 4,
+                  opt_int32_minus1);
+DEFFIELD_IMPLICIT(otp_req_5, krb5_pa_otp_req, otp_value, 5, opt_ostring_data);
+DEFFIELD_IMPLICIT(otp_req_6, krb5_pa_otp_req, pin, 6, opt_utf8_data);
+DEFFIELD_IMPLICIT(otp_req_7, krb5_pa_otp_req, challenge, 7, opt_ostring_data);
+DEFFIELD_IMPLICIT(otp_req_8, krb5_pa_otp_req, time, 8, opt_kerberos_time);
+DEFFIELD_IMPLICIT(otp_req_9, krb5_pa_otp_req, counter, 9, opt_ostring_data);
+DEFFIELD_IMPLICIT(otp_req_10, krb5_pa_otp_req, format, 10, opt_int32_minus1);
+DEFFIELD_IMPLICIT(otp_req_11, krb5_pa_otp_req, token_id, 11, opt_ostring_data);
+DEFFIELD_IMPLICIT(otp_req_12, krb5_pa_otp_req, alg_id, 12, opt_utf8_data);
+DEFFIELD_IMPLICIT(otp_req_13, krb5_pa_otp_req, vendor, 13, opt_utf8_data);
+static const struct atype_info *pa_otp_req_fields[] = {
+    &k5_atype_otp_req_0, &k5_atype_otp_req_1, &k5_atype_otp_req_2,
+    &k5_atype_otp_req_3, &k5_atype_otp_req_4, &k5_atype_otp_req_5,
+    &k5_atype_otp_req_6, &k5_atype_otp_req_7, &k5_atype_otp_req_8,
+    &k5_atype_otp_req_9, &k5_atype_otp_req_10, &k5_atype_otp_req_11,
+    &k5_atype_otp_req_12, &k5_atype_otp_req_13
+};
+DEFSEQTYPE(pa_otp_req, krb5_pa_otp_req, pa_otp_req_fields);
+MAKE_CODEC(krb5_pa_otp_req, pa_otp_req);
+
+DEFCTAGGEDTYPE_IMPLICIT(pa_otp_enc_req_0, 0, ostring_data);
+static const struct atype_info *pa_otp_enc_req_fields[] = {
+    &k5_atype_pa_otp_enc_req_0
+};
+DEFSEQTYPE(pa_otp_enc_req, krb5_data, pa_otp_enc_req_fields);
+MAKE_CODEC(krb5_pa_otp_enc_req, pa_otp_enc_req);

@@ -613,6 +613,75 @@ ktest_equal_fast_response(krb5_fast_response *ref, krb5_fast_response *var)
     return p;
 }
 
+static int
+ktest_equal_algorithm_identifier(krb5_algorithm_identifier *ref,
+                                 krb5_algorithm_identifier *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && equal_str(algorithm);
+    p = p && equal_str(parameters);
+    return p;
+}
+
+int
+ktest_equal_otp_tokeninfo(krb5_otp_tokeninfo *ref, krb5_otp_tokeninfo *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && scalar_equal(flags);
+    p = p && equal_str(vendor);
+    p = p && equal_str(challenge);
+    p = p && scalar_equal(length);
+    p = p && scalar_equal(format);
+    p = p && equal_str(token_id);
+    p = p && equal_str(alg_id);
+    p = p && ptr_equal(supported_hash_alg,
+                       ktest_equal_sequence_of_algorithm_identifier);
+    p = p && scalar_equal(iteration_count);
+    return p;
+}
+
+int
+ktest_equal_pa_otp_challenge(krb5_pa_otp_challenge *ref,
+                             krb5_pa_otp_challenge *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && equal_str(nonce);
+    p = p && equal_str(service);
+    p = p && ptr_equal(tokeninfo, ktest_equal_sequence_of_otp_tokeninfo);
+    p = p && equal_str(salt);
+    p = p && equal_str(s2kparams);
+    return p;
+}
+
+int
+ktest_equal_pa_otp_req(krb5_pa_otp_req *ref, krb5_pa_otp_req *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && scalar_equal(flags);
+    p = p && equal_str(nonce);
+    p = p && struct_equal(enc_data, ktest_equal_enc_data);
+    p = p && ptr_equal(hash_alg, ktest_equal_algorithm_identifier);
+    p = p && scalar_equal(iteration_count);
+    p = p && equal_str(otp_value);
+    p = p && equal_str(pin);
+    p = p && equal_str(challenge);
+    p = p && scalar_equal(time);
+    p = p && equal_str(counter);
+    p = p && scalar_equal(format);
+    p = p && equal_str(token_id);
+    p = p && equal_str(alg_id);
+    p = p && equal_str(vendor);
+    return p;
+}
+
 #ifdef ENABLE_LDAP
 static int
 equal_key_data(krb5_key_data *ref, krb5_key_data *var)
@@ -770,6 +839,20 @@ ktest_equal_sequence_of_checksum(krb5_checksum **ref, krb5_checksum **var)
     array_compare(ktest_equal_checksum);
 }
 
+int
+ktest_equal_sequence_of_algorithm_identifier(krb5_algorithm_identifier **ref,
+                                             krb5_algorithm_identifier **var)
+{
+    array_compare(ktest_equal_algorithm_identifier);
+}
+
+int
+ktest_equal_sequence_of_otp_tokeninfo(krb5_otp_tokeninfo **ref,
+                                      krb5_otp_tokeninfo **var)
+{
+    array_compare(ktest_equal_otp_tokeninfo);
+}
+
 #ifndef DISABLE_PKINIT
 
 static int
@@ -798,25 +881,6 @@ ktest_equal_pk_authenticator_draft9(krb5_pk_authenticator_draft9 *ref,
     p = p && scalar_equal(ctime);
     p = p && scalar_equal(nonce);
     return p;
-}
-
-static int
-ktest_equal_algorithm_identifier(krb5_algorithm_identifier *ref,
-                                 krb5_algorithm_identifier *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && equal_str(algorithm);
-    p = p && equal_str(parameters);
-    return p;
-}
-
-static int
-ktest_equal_sequence_of_algorithm_identifier(krb5_algorithm_identifier **ref,
-                                             krb5_algorithm_identifier **var)
-{
-    array_compare(ktest_equal_algorithm_identifier);
 }
 
 static int

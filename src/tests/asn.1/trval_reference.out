@@ -1348,3 +1348,133 @@ encode_krb5_pa_fx_fast_reply:
 .  .  .  [0] [Integer] 0
 .  .  .  [1] [Integer] 5
 .  .  .  [2] [Octet String] "krbASN.1 test message"
+
+encode_krb5_otp_tokeninfo(optionals NULL):
+
+[Sequence/Sequence Of]
+.  [0] <5>
+      00 00 00 00 00                                      .....
+
+encode_krb5_otp_tokeninfo:
+
+[Sequence/Sequence Of]
+.  [0] <5>
+      00 77 00 00 00                                      .w...
+.  [1] <11>
+      45 78 61 6d 70 6c 65 63 6f 72 70                    Examplecorp
+.  [2] <5>
+      68 61 72 6b 21                                      hark!
+.  [3] 0x0 (10 unused bits)
+.  [4] <1>
+      02                                                  .
+.  [5] <9>
+      79 6f 75 72 74 6f 6b 65 6e                          yourtoken
+.  [6] <40>
+      75 72 6e 3a 69 65 74 66 3a 70 61 72 61 6d 73 3a     urn:ietf:params:
+      78 6d 6c 3a 6e 73 3a 6b 65 79 70 72 6f 76 3a 70     xml:ns:keyprov:p
+      73 6b 63 3a 68 6f 74 70                             skc:hotp
+.  [7] [Sequence/Sequence Of]
+.  .  [Object Identifier] <9>
+         60 86 48 01 65 03 04 02 01                       `.H.e....
+.  [Sequence/Sequence Of]
+.  .  [Object Identifier] <5>
+         2b 0e 03 02 1a                                   +....
+.  [8] <2>
+      03 e8                                               ..
+
+encode_krb5_pa_otp_challenge(optionals NULL):
+
+[Sequence/Sequence Of]
+.  [0] <8>
+      6d 69 6e 6e 6f 6e 63 65                             minnonce
+.  [2] [Sequence/Sequence Of]
+.  .  [0] <5>
+         00 00 00 00 00                                   .....
+
+encode_krb5_pa_otp_challenge:
+
+[Sequence/Sequence Of]
+.  [0] <8>
+      6d 61 78 6e 6f 6e 63 65                             maxnonce
+.  [1] <11>
+      74 65 73 74 73 65 72 76 69 63 65                    testservice
+.  [2] [Sequence/Sequence Of]
+.  .  [0] <5>
+         00 00 00 00 00                                   .....
+.  [Sequence/Sequence Of]
+.  .  [0] <5>
+         00 77 00 00 00                                   .w...
+.  .  [1] <11>
+         45 78 61 6d 70 6c 65 63 6f 72 70                 Examplecorp
+.  .  [2] <5>
+         68 61 72 6b 21                                   hark!
+.  .  [3] 0x0 (10 unused bits)
+.  .  [4] <1>
+         02                                               .
+.  .  [5] <9>
+         79 6f 75 72 74 6f 6b 65 6e                       yourtoken
+.  .  [6] <40>
+         75 72 6e 3a 69 65 74 66 3a 70 61 72 61 6d 73     urn:ietf:params
+         3a 78 6d 6c 3a 6e 73 3a 6b 65 79 70 72 6f 76     :xml:ns:keyprov
+         3a 70 73 6b 63 3a 68 6f 74 70                    :pskc:hotp
+.  .  [7] [Sequence/Sequence Of]
+.  .  .  [Object Identifier] <9>
+            60 86 48 01 65 03 04 02 01                       `.H.e....
+.  .  [Sequence/Sequence Of]
+.  .  .  [Object Identifier] <5>
+            2b 0e 03 02 1a                                   +....
+.  .  [8] <2>
+         03 e8                                            ..
+.  [3] <7>
+      6b 65 79 73 61 6c 74                                keysalt
+.  [4] "1234"
+
+encode_krb5_pa_otp_req(optionals NULL):
+
+[Sequence/Sequence Of]
+.  [0] <5>
+      00 00 00 00 00                                      .....
+.  [2] [0] [Integer] 0
+.  [1] [Integer] 5
+.  [2] [Octet String] "krbASN.1 test message"
+
+encode_krb5_pa_otp_req:
+
+[Sequence/Sequence Of]
+.  [0] <5>
+      00 60 00 00 00                                      .`...
+.  [1] <5>
+      6e 6f 6e 63 65                                      nonce
+.  [2] [0] [Integer] 0
+.  [1] [Integer] 5
+.  [2] [Octet String] "krbASN.1 test message"
+.  [3] [Object Identifier] <9>
+      60 86 48 01 65 03 04 02 01                          `.H.e....
+.  [4] <2>
+      03 e8                                               ..
+.  [5] <5>
+      66 72 6f 67 73                                      frogs
+.  [6] <10>
+      6d 79 66 69 72 73 74 70 69 6e                       myfirstpin
+.  [7] <5>
+      68 61 72 6b 21                                      hark!
+.  [8] <15>
+      31 39 39 34 30 36 31 30 30 36 30 33 31 37 5a        19940610060317Z
+.  [9] <3>
+      33 34 36                                            346
+.  [10] <1>
+      02                                                  .
+.  [11] <9>
+      79 6f 75 72 74 6f 6b 65 6e                          yourtoken
+.  [12] <40>
+      75 72 6e 3a 69 65 74 66 3a 70 61 72 61 6d 73 3a     urn:ietf:params:
+      78 6d 6c 3a 6e 73 3a 6b 65 79 70 72 6f 76 3a 70     xml:ns:keyprov:p
+      73 6b 63 3a 68 6f 74 70                             skc:hotp
+.  [13] <11>
+      45 78 61 6d 70 6c 65 63 6f 72 70                    Examplecorp
+
+encode_krb5_pa_otp_enc_req:
+
+[Sequence/Sequence Of]
+.  [0] <8>
+      6b 72 62 35 64 61 74 61                             krb5data

@@ -765,3 +765,68 @@ krb5_free_iakerb_finished(krb5_context context, krb5_iakerb_finished *val)
     krb5_free_checksum_contents(context, &val->checksum);
     free(val);
 }
+
+void
+k5_free_algorithm_identifier(krb5_context context,
+                             krb5_algorithm_identifier *val)
+{
+    if (val == NULL)
+        return;
+    free(val->algorithm.data);
+    free(val->parameters.data);
+    free(val);
+}
+
+void
+k5_free_otp_tokeninfo(krb5_context context, krb5_otp_tokeninfo *val)
+{
+    krb5_algorithm_identifier **alg;
+
+    if (val == NULL)
+        return;
+    free(val->vendor.data);
+    free(val->challenge.data);
+    free(val->token_id.data);
+    free(val->alg_id.data);
+    for (alg = val->supported_hash_alg; alg != NULL && *alg != NULL; alg++)
+        k5_free_algorithm_identifier(context, *alg);
+    free(val->supported_hash_alg);
+    free(val);
+}
+
+void
+k5_free_pa_otp_challenge(krb5_context context, krb5_pa_otp_challenge *val)
+{
+    krb5_otp_tokeninfo **ti;
+
+    if (val == NULL)
+        return;
+    free(val->nonce.data);
+    free(val->service.data);
+    for (ti = val->tokeninfo; *ti != NULL; ti++)
+        k5_free_otp_tokeninfo(context, *ti);
+    free(val->tokeninfo);
+    free(val->salt.data);
+    free(val->s2kparams.data);
+    free(val);
+}
+
+void
+k5_free_pa_otp_req(krb5_context context, krb5_pa_otp_req *val)
+{
+    if (val == NULL)
+        return;
+    val->flags = 0;
+    free(val->nonce.data);
+    free(val->enc_data.ciphertext.data);
+    if (val->hash_alg != NULL)
+        k5_free_algorithm_identifier(context, val->hash_alg);
+    free(val->otp_value.data);
+    free(val->pin.data);
+    free(val->challenge.data);
+    free(val->counter.data);
+    free(val->token_id.data);
+    free(val->alg_id.data);
+    free(val->vendor.data);
+    free(val);
+}

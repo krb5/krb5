@@ -471,6 +471,51 @@ typedef struct _krb5_enc_sam_response_enc_2 {
 
 #include "k5-int-pkinit.h"
 
+#define KRB5_OTP_FLAG_NEXTOTP        0x40000000
+#define KRB5_OTP_FLAG_COMBINE        0x20000000
+#define KRB5_OTP_FLAG_COLLECT_PIN    0x10000000
+#define KRB5_OTP_FLAG_NO_COLLECT_PIN 0x08000000
+#define KRB5_OTP_FLAG_ENCRYPT_NONCE  0x04000000
+#define KRB5_OTP_FLAG_SEPARATE_PIN   0x02000000
+#define KRB5_OTP_FLAG_CHECK_DIGIT    0x01000000
+
+typedef struct _krb5_otp_tokeninfo {
+    krb5_flags flags;
+    krb5_data vendor;
+    krb5_data challenge;
+    krb5_int32 length;          /* -1 for unspecified */
+    krb5_int32 format;          /* -1 for unspecified */
+    krb5_data token_id;
+    krb5_data alg_id;
+    krb5_algorithm_identifier **supported_hash_alg;
+    krb5_int32 iteration_count; /* -1 for unspecified */
+} krb5_otp_tokeninfo;
+
+typedef struct _krb5_pa_otp_challenge {
+    krb5_data nonce;
+    krb5_data service;
+    krb5_otp_tokeninfo **tokeninfo;
+    krb5_data salt;
+    krb5_data s2kparams;
+} krb5_pa_otp_challenge;
+
+typedef struct _krb5_pa_otp_req {
+    krb5_int32 flags;
+    krb5_data nonce;
+    krb5_enc_data enc_data;
+    krb5_algorithm_identifier *hash_alg;
+    krb5_int32 iteration_count; /* -1 for unspecified */
+    krb5_data otp_value;
+    krb5_data pin;
+    krb5_data challenge;
+    krb5_timestamp time;
+    krb5_data counter;
+    krb5_int32 format;          /* -1 for unspecified */
+    krb5_data token_id;
+    krb5_data alg_id;
+    krb5_data vendor;
+} krb5_pa_otp_req;
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -1110,6 +1155,12 @@ void KRB5_CALLCONV krb5_free_ad_signedpath(krb5_context, krb5_ad_signedpath *);
 void KRB5_CALLCONV krb5_free_iakerb_header(krb5_context, krb5_iakerb_header *);
 void KRB5_CALLCONV krb5_free_iakerb_finished(krb5_context,
                                              krb5_iakerb_finished *);
+void k5_free_algorithm_identifier(krb5_context context,
+                                  krb5_algorithm_identifier *val);
+void k5_free_otp_tokeninfo(krb5_context context, krb5_otp_tokeninfo *val);
+void k5_free_pa_otp_challenge(krb5_context context,
+                              krb5_pa_otp_challenge *val);
+void k5_free_pa_otp_req(krb5_context context, krb5_pa_otp_req *val);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1642,6 +1693,18 @@ encode_krb5_ad_signedpath(const krb5_ad_signedpath *, krb5_data **);
 krb5_error_code
 encode_krb5_ad_signedpath_data(const krb5_ad_signedpath_data *, krb5_data **);
 
+krb5_error_code
+encode_krb5_otp_tokeninfo(const krb5_otp_tokeninfo *, krb5_data **);
+
+krb5_error_code
+encode_krb5_pa_otp_challenge(const krb5_pa_otp_challenge *, krb5_data **);
+
+krb5_error_code
+encode_krb5_pa_otp_req(const krb5_pa_otp_req *, krb5_data **);
+
+krb5_error_code
+encode_krb5_pa_otp_enc_req(const krb5_data *, krb5_data **);
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1799,6 +1862,18 @@ decode_krb5_iakerb_header(const krb5_data *, krb5_iakerb_header **);
 
 krb5_error_code
 decode_krb5_iakerb_finished(const krb5_data *, krb5_iakerb_finished **);
+
+krb5_error_code
+decode_krb5_otp_tokeninfo(const krb5_data *, krb5_otp_tokeninfo **);
+
+krb5_error_code
+decode_krb5_pa_otp_challenge(const krb5_data *, krb5_pa_otp_challenge **);
+
+krb5_error_code
+decode_krb5_pa_otp_req(const krb5_data *, krb5_pa_otp_req **);
+
+krb5_error_code
+decode_krb5_pa_otp_enc_req(const krb5_data *, krb5_data **);
 
 struct _krb5_key_data;          /* kdb.h */
 
