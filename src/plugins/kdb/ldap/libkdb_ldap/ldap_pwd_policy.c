@@ -41,7 +41,11 @@ static char *password_policy_attributes[] = { "cn", "krbmaxpwdlife", "krbminpwdl
                                               "krbpwdmindiffchars", "krbpwdminlength",
                                               "krbpwdhistorylength", "krbpwdmaxfailure",
                                               "krbpwdfailurecountinterval",
-                                              "krbpwdlockoutduration", NULL };
+                                              "krbpwdlockoutduration",
+                                              "krbpwdattributes",
+                                              "krbpwdmaxlife",
+                                              "krbpwdmaxrenewablelife",
+                                              "krbpwdallowedkeysalts", NULL };
 
 /* Fill in mods with LDAP operations for the fields of policy, using the
  * modification type op.  mods must be freed by the caller on error. */
@@ -50,6 +54,7 @@ add_policy_mods(krb5_context context, LDAPMod ***mods, osa_policy_ent_t policy,
                 int op)
 {
     krb5_error_code st;
+    char *strval[2] = { NULL };
 
     st = krb5_add_int_mem_ldap_mod(mods, "krbmaxpwdlife", op,
                                    (int)policy->pw_max_life);
@@ -90,6 +95,34 @@ add_policy_mods(krb5_context context, LDAPMod ***mods, osa_policy_ent_t policy,
                                    (int)policy->pw_lockout_duration);
     if (st)
         return st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbpwdattributes", op,
+                                   (int)policy->attributes);
+    if (st)
+        return st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbpwdmaxlife", op,
+                                   (int)policy->max_life);
+    if (st)
+        return st;
+
+    st = krb5_add_int_mem_ldap_mod(mods, "krbpwdmaxrenewablelife", op,
+                                   (int)policy->max_renewable_life);
+    if (st)
+        return st;
+
+    if (policy->allowed_keysalts != NULL) {
+        strval[0] = policy->allowed_keysalts;
+        st = krb5_add_str_mem_ldap_mod(mods, "krbpwdallowedkeysalts",
+                                       op, strval);
+        if (st)
+            return st;
+    }
+
+    /*
+     * Each policy tl-data type we add should be explicitly marshalled here.
+     * Unlike principals, we do not marshal unrecognized policy tl-data.
+     */
 
     return 0;
 }
@@ -235,7 +268,15 @@ populate_policy(krb5_context context,
     krb5_ldap_get_value(ld, ent, "krbpwdmaxfailure", &(pol_entry->pw_max_fail));
     krb5_ldap_get_value(ld, ent, "krbpwdfailurecountinterval", &(pol_entry->pw_failcnt_interval));
     krb5_ldap_get_value(ld, ent, "krbpwdlockoutduration", &(pol_entry->pw_lockout_duration));
+    krb5_ldap_get_value(ld, ent, "krbpwdattributes", &(pol_entry->attributes));
+    krb5_ldap_get_value(ld, ent, "krbpwdmaxlife", &(pol_entry->max_life));
+    krb5_ldap_get_value(ld, ent, "krbpwdmaxrenewablelife",
+                        &(pol_entry->max_renewable_life));
 
+    st = krb5_ldap_get_string(ld, ent, "krbpwdallowedkeysalts",
+                              &(pol_entry->allowed_keysalts), NULL);
+    if (st)
+        goto cleanup;
     /*
      * We don't store the policy refcnt, because principals might be maintained
      * outside of kadmin.  Instead, we will check for principal references when

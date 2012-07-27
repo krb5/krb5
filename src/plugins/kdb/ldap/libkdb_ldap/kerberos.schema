@@ -297,6 +297,42 @@ attributetype ( 1.3.6.1.4.1.5322.21.2.3
                 SINGLE-VALUE)
 
 
+##### Policy attribute flags
+
+attributetype ( 1.2.840.113554.1.4.1.6.2
+                NAME 'krbPwdAttributes'
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE)
+
+
+##### Policy maximum ticket lifetime
+
+attributetype ( 1.2.840.113554.1.4.1.6.3
+                NAME 'krbPwdMaxLife'
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE)
+
+
+##### Policy maximum ticket renewable lifetime
+
+attributetype ( 1.2.840.113554.1.4.1.6.4
+                NAME 'krbPwdMaxRenewableLife'
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE)
+
+
+##### Allowed enctype:salttype combinations for key changes
+
+attributetype ( 1.2.840.113554.1.4.1.6.5
+                NAME 'krbPwdAllowedKeysalts'
+                EQUALITY caseIgnoreIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+                SINGLE-VALUE)
+
+
 ##### FDN pointing to a Kerberos Password Policy object
 
 attributetype ( 2.16.840.1.113719.1.301.4.36.1
@@ -656,7 +692,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.14.1
                 NAME 'krbPwdPolicy' 
                 SUP top
                 MUST ( cn )
-                MAY ( krbMaxPwdLife $ krbMinPwdLife $ krbPwdMinDiffChars $ krbPwdMinLength $ krbPwdHistoryLength $ krbPwdMaxFailure $ krbPwdFailureCountInterval $ krbPwdLockoutDuration ) )
+                MAY ( krbMaxPwdLife $ krbMinPwdLife $ krbPwdMinDiffChars $ krbPwdMinLength $ krbPwdHistoryLength $ krbPwdMaxFailure $ krbPwdFailureCountInterval $ krbPwdLockoutDuration $ krbPwdAttributes $ krbPwdMaxLife $ krbPwdMaxRenewableLife $ krbPwdAllowedKeysalts ) )
 
 
 ##### The krbTicketPolicyAux holds Kerberos ticket policy attributes.
