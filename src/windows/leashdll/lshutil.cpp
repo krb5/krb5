@@ -440,7 +440,8 @@ protected:
                 }
                 // add the new one
                 m_enumString->AddString(princStr);
-                m_acdd->ResetEnumerator();
+                if (m_acdd != NULL)
+                    m_acdd->ResetEnumerator();
                 m_princStr = princStr;
             }
         }
@@ -524,25 +525,25 @@ protected:
         IAutoComplete *pac = NULL;
         hRes = CoCreateInstance(CLSID_AutoComplete, NULL, CLSCTX_INPROC_SERVER,
                                 IID_PPV_ARGS(&pac));
-        // @TODO: error handling
+        if (pac != NULL) {
+            pac->Init(m_hwnd, pEnumString, NULL, NULL);
 
-        pac->Init(m_hwnd, pEnumString, NULL, NULL);
-
-        IAutoCompleteDropDown* pacdd = NULL;
-        hRes = pac->QueryInterface(IID_IAutoCompleteDropDown, (LPVOID*)&pacdd);
-        pac->Release();
+            IAutoCompleteDropDown* pacdd = NULL;
+            hRes = pac->QueryInterface(IID_IAutoCompleteDropDown, (LPVOID*)&pacdd);
+            pac->Release();
 
         // @TODO: auto-suggest; other advanced options?
 #if 0
-        IAutoComplete2 *pac2;
+            IAutoComplete2 *pac2;
 
-        if (SUCCEEDED(pac->QueryInterface(IID_IAutoComplete2, (LPVOID*)&pac2)))
-        {
-            pac2->SetOptions(ACO_AUTOSUGGEST);
-            pac2->Release();
-        }
+            if (SUCCEEDED(pac->QueryInterface(IID_IAutoComplete2,
+                                              (LPVOID*)&pac2))) {
+                pac2->SetOptions(ACO_AUTOSUGGEST);
+                pac2->Release();
+            }
 #endif
-        m_acdd = pacdd;
+            m_acdd = pacdd;
+        }
     }
 
     void DestroyAutocomplete()
