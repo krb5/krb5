@@ -78,8 +78,6 @@ cc_int32        cci_os_ipc_msg( cc_int32        in_launch_server,
 extern "C" cc_int32 cci_os_ipc_process_init (void) {
     RPC_STATUS status;
 
-    opts.cMinCalls  = 1;
-    opts.cMaxCalls  = 20;
     if (!isNT()) {
         status = RpcServerRegisterIf(ccs_reply_ServerIfHandle,  // interface
                                      NULL,                      // MgrTypeUuid
@@ -90,7 +88,7 @@ extern "C" cc_int32 cci_os_ipc_process_init (void) {
                                        NULL,                      // MgrTypeUuid
                                        NULL,                      // MgrEpv; 0 means default
                                        RPC_IF_ALLOW_SECURE_ONLY,
-                                       opts.cMaxCalls,
+                                       RPC_C_LISTEN_MAX_CALLS_DEFAULT,
                                        NULL);                     // No security callback.
         }
     cci_check_error(status);
@@ -118,10 +116,6 @@ extern "C" cc_int32 cci_os_ipc_thread_init (void) {
 
     if (!GetTspData(GetTlsIndex(), &ptspdata)) return ccErrNoMem;
 
-    opts.cMinCalls  = 1;
-    opts.cMaxCalls  = 20;
-    opts.fDontWait  = TRUE;
-
     err   = cci_check_error(UuidCreate(&uuid)); // Get a UUID
     if (err == RPC_S_OK) {                      // Convert to string
         err = UuidToString(&uuid, &uuidString);
@@ -131,7 +125,7 @@ extern "C" cc_int32 cci_os_ipc_thread_init (void) {
         tspdata_setUUID(ptspdata, uuidString);
         endpoint = clientEndpoint((const char *)uuidString);
         err = RpcServerUseProtseqEp((RPC_CSTR)"ncalrpc",
-                                    opts.cMaxCalls,
+                                    RPC_C_PROTSEQ_MAX_REQS_DEFAULT,
                                     (RPC_CSTR)endpoint,
                                     sa.lpSecurityDescriptor);  // SD
         free(endpoint);
@@ -155,9 +149,7 @@ extern "C" cc_int32 cci_os_ipc_thread_init (void) {
     if (!err) {
         static bool bListening = false;
         if (!bListening) {
-            err = RpcServerListen(opts.cMinCalls,
-                                  opts.cMaxCalls,
-                                  TRUE);
+            err = RpcServerListen(1, RPC_C_LISTEN_MAX_CALLS_DEFAULT, TRUE);
             cci_check_error(err);
             }
             bListening = err == 0;
@@ -202,25 +194,29 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
     PROCESS_INFORMATION     pi      = { 0 };
     HANDLE          replyEvent      = 0;
     BOOL            bCCAPI_Connected= FALSE;
+    BOOL            bListening      = FALSE;
     unsigned char tspdata_handle[8] = { 0 };
 
     if (!in_request_stream) { err = cci_check_error (ccErrBadParam); }
     if (!out_reply_stream ) { err = cci_check_error (ccErrBadParam); }
     
     if (!GetTspData(GetTlsIndex(), &ptspdata)) {return ccErrBadParam;}
+    bListening = tspdata_getListening(ptspdata);
+    if (!bListening) {
+        err = cci_check_error(cci_os_ipc_thread_init());
+        bListening = !err;
+        tspdata_setListening(ptspdata, bListening);
+        }
+
     bCCAPI_Connected = tspdata_getConnected  (ptspdata);
     replyEvent       = tspdata_getReplyEvent (ptspdata);
     sst              = tspdata_getSST (ptspdata);
     uuid             = tspdata_getUUID(ptspdata);
 
-    // Initialize old CCAPI if necessary:
-    if (!err) if (!Init::  Initialized()) err = cci_check_error(Init::  Initialize( ));
-    if (!err) if (!Client::Initialized()) err = cci_check_error(Client::Initialize(0));
-
     // The lazy connection to the server has been put off as long as possible!
     // ccapi_connect starts listening for replies as an RPC server and then
     //   calls ccs_rpc_connect.
-    if (!bCCAPI_Connected) {
+    if (!err && !bCCAPI_Connected) {
         err                 = cci_check_error(ccapi_connect(ptspdata));
         bCCAPI_Connected    = !err;
         tspdata_setConnected(ptspdata, bCCAPI_Connected);
@@ -329,10 +325,6 @@ cc_int32 ccapi_connect(const struct tspdata* tsp) {
     /* Build complete RPC uuid using previous CCAPI implementation: */
     replyEvent      = tspdata_getReplyEvent(tsp);
     uuid            = tspdata_getUUID(tsp);
-
-    opts.cMinCalls  = 1;
-    opts.cMaxCalls  = 20;
-    opts.fDontWait  = TRUE;
 
     cci_debug_printf("%s is listening ...", __FUNCTION__);
 

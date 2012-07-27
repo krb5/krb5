@@ -106,10 +106,12 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,     // DLL module handle
 
             memset(ptspdata, 0, sizeof(struct tspdata));
 
-            // Initialize CCAPI thread data:
-            cci_ipc_thread_init();
-
-            break; 
+            // Do not call cci_ipc_thread_init() yet; defer until we actually
+            // need it.  On XP, cci_ipc_thread_init() will cause additional
+            // threads to be immediately spawned, which will bring us right
+            // back here again ad infinitum, until windows
+            // resources are exhausted.
+            break;
  
         // The thread of the attached process terminates:
         case DLL_THREAD_DETACH: 

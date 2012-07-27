@@ -47,6 +47,8 @@ void tspdata_setUUID(struct tspdata* p, unsigned char __RPC_FAR* uuidString) {
     strncpy(p->_uuid, uuidString, UUID_SIZE-1);
     };
 
+void         tspdata_setListening (struct tspdata* p, BOOL b)           {p->_listening = b;}
+
 void         tspdata_setConnected (struct tspdata* p, BOOL b)           {p->_CCAPI_Connected = b;}
 
 void         tspdata_setReplyEvent(struct tspdata* p, HANDLE h)         {p->_replyEvent = h;}
@@ -58,6 +60,7 @@ void         tspdata_setSST       (struct tspdata* p, time_t t)         {p->_sst
 
 void         tspdata_setStream    (struct tspdata* p, k5_ipc_stream s)   {p->_stream = s;}
 
+BOOL         tspdata_getListening (const struct tspdata* p)         {return p->_listening;}
 
 BOOL         tspdata_getConnected (const struct tspdata* p)         {return p->_CCAPI_Connected;}
 
