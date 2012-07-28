@@ -58,7 +58,12 @@
     <?define SrcDir="$(var.TargetDir)"?>
     <?define InstallDir="$(var.TargetDir)windows\installer\"?>
     <?define SampleDir="$(var.TargetDir)sample\"?>
-    <?define ConfigDir=".\"?>
+    <?ifdef env.MIT_INTERNAL?>
+      <?define ConfigDir=".\athena\"?>
+    <?else?>
+      <?define ConfigDir=".\"?>
+    <?endif?>
+
     <?define SystemDir="$(env.SystemRoot)\System32\"?>
 
     <?include lang\config_$(var.BuildLang).wxi?>
