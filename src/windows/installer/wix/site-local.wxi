@@ -38,9 +38,6 @@
         <?define ProductCode="????????-????-????-????-????????????"?>
     <?endif?>
 
-    <!-- DefaultRealm, is your default realm.  Must be uppercase -->
-    <?define DefaultRealm="ATHENA.MIT.EDU"?>
-
     <!-- One of the following must be defined and must correspond to the
          version of compiler used for building Kerberos for Windows -->
 
@@ -69,10 +66,6 @@
         <?define TargetDir="$(sys.SOURCEFILEDIR)..\..\..\"?>
     <?endif?>
 
-    <?ifndef ConfigDir?>
-        <?define ConfigDir="$(env.SystemRoot)\"?>
-    <?endif?>
-
     <?ifndef VersionMajor?>
         <?define VersionMajor="4"?>
         <?define VersionMinor="0"?>
@@ -89,11 +82,6 @@
 
     <?ifndef BuildLang?>
         <?error Must define BuildLang?>
-    <?endif?>
-
-    <!-- DefaultRealm.  Must be uppercase. -->
-    <?ifndef DefaultRealm?>
-        <?error Must define DefaultRealm?>
     <?endif?>
 
     <!-- The build makefile defines 'Date' and 'Time' which are strings that
