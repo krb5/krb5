@@ -63,11 +63,6 @@ extern struct timeval timelimit;
 #define  DEFAULT_CONNS_PER_SERVER    5
 #define  REALM_READ_REFRESH_INTERVAL (5 * 60)
 
-#ifdef HAVE_EDIRECTORY
-#define  SECURITY_CONTAINER "cn=Security"
-#define  KERBEROS_CONTAINER "cn=Kerberos,cn=Security"
-#endif
-
 #if !defined(LDAP_OPT_RESULT_CODE) && defined(LDAP_OPT_ERROR_NUMBER)
 #define LDAP_OPT_RESULT_CODE LDAP_OPT_ERROR_NUMBER
 #endif
@@ -194,9 +189,6 @@ struct _krb5_ldap_server_info {
     krb5_ldap_server_handle      *ldap_server_handles;
     time_t                       downtime;
     char                        *server_name;
-#ifdef HAVE_EDIRECTORY
-    char                        *root_certificate_file;
-#endif
     int                          modify_increment;
     struct _krb5_ldap_server_info *next;
 };

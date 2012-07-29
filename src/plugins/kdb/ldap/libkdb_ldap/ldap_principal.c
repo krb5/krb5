@@ -54,10 +54,6 @@ char     *principal_attributes[] = { "krbprincipalname",
                                      "krbLastFailedAuth",
                                      "krbLoginFailedCount",
                                      "krbLastSuccessfulAuth",
-#ifdef HAVE_EDIRECTORY
-                                     "loginexpirationtime",
-                                     "logindisabled",
-#endif
                                      "krbLastPwdChange",
                                      "krbLastAdminUnlock",
                                      "krbExtraData",

@@ -62,9 +62,6 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
     krb5_ldap_krbcontainer_params kparams = {0};
     int srv_cnt = 0;
     int mask = 0;
-#ifdef HAVE_EDIRECTORY
-    int i = 0, rightsmask = 0;
-#endif
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -180,36 +177,6 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
             }
 
             srv_cnt++;
-#ifdef HAVE_EDIRECTORY
-        } else if (opt && !strcmp(opt, "cert")) {
-            if (val == NULL) {
-                status = EINVAL;
-                krb5_set_error_message (context, status, "'cert' value missing");
-                free(opt);
-                goto cleanup;
-            }
-
-            if (ldap_context->root_certificate_file == NULL) {
-                ldap_context->root_certificate_file = strdup(val);
-                if (ldap_context->root_certificate_file == NULL) {
-                    free (opt);
-                    free (val);
-                    status = ENOMEM;
-                    goto cleanup;
-                }
-            } else {
-                char *newstr;
-
-                if (asprintf(&newstr, "%s %s",
-                             ldap_context->root_certificate_file, val) < 0) {
-                    free (opt);
-                    free (val);
-                    status = ENOMEM;
-                    goto cleanup;
-                }
-                ldap_context->root_certificate_file = newstr;
-            }
-#endif
         } else {
             /* ignore hash argument. Might have been passed from create */
             status = EINVAL;
@@ -313,51 +280,6 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
                                               &(ldap_context->lrparams),
                                               &mask)))
         goto cleanup;
-
-#ifdef HAVE_EDIRECTORY
-    if ((mask & LDAP_REALM_KDCSERVERS) || (mask & LDAP_REALM_ADMINSERVERS) ||
-        (mask & LDAP_REALM_PASSWDSERVERS)) {
-
-        rightsmask =0;
-        rightsmask |= LDAP_REALM_RIGHTS;
-        rightsmask |= LDAP_SUBTREE_RIGHTS;
-        if ((rparams != NULL) && (rparams->kdcservers != NULL)) {
-            for (i=0; (rparams->kdcservers[i] != NULL); i++) {
-                if ((status=krb5_ldap_add_service_rights(context,
-                                                         LDAP_KDC_SERVICE, rparams->kdcservers[i],
-                                                         rparams->realm_name, rparams->subtree, rparams->containerref, rightsmask)) != 0) {
-                    goto cleanup;
-                }
-            }
-        }
-
-        rightsmask = 0;
-        rightsmask |= LDAP_REALM_RIGHTS;
-        rightsmask |= LDAP_SUBTREE_RIGHTS;
-        if ((rparams != NULL) && (rparams->adminservers != NULL)) {
-            for (i=0; (rparams->adminservers[i] != NULL); i++) {
-                if ((status=krb5_ldap_add_service_rights(context,
-                                                         LDAP_ADMIN_SERVICE, rparams->adminservers[i],
-                                                         rparams->realm_name, rparams->subtree, rparams->containerref, rightsmask)) != 0) {
-                    goto cleanup;
-                }
-            }
-        }
-
-        rightsmask = 0;
-        rightsmask |= LDAP_REALM_RIGHTS;
-        rightsmask |= LDAP_SUBTREE_RIGHTS;
-        if ((rparams != NULL) && (rparams->passwdservers != NULL)) {
-            for (i=0; (rparams->passwdservers[i] != NULL); i++) {
-                if ((status=krb5_ldap_add_service_rights(context,
-                                                         LDAP_PASSWD_SERVICE, rparams->passwdservers[i],
-                                                         rparams->realm_name, rparams->subtree, rparams->containerref, rightsmask)) != 0) {
-                    goto cleanup;
-                }
-            }
-        }
-    }
-#endif
 
 cleanup:
 

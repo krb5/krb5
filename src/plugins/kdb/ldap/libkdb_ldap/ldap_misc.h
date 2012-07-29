@@ -36,8 +36,6 @@
 #ifndef _HAVE_LDAP_MISC_H
 #define _HAVE_LDAP_MISC_H 1
 
-#include "ldap_services.h"
-
 /* misc functions */
 
 krb5_error_code

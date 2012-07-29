@@ -1641,15 +1641,8 @@ AC_ARG_WITH([ldap],
 [case "$withval" in
     OPENLDAP) with_ldap=yes ;;
     yes | no) ;;
-    EDIRECTORY) AC_MSG_ERROR(Option --with-ldap=EDIRECTORY is deprecated; use --with-edirectory instead.) ;;
     *)  AC_MSG_ERROR(Invalid option value --with-ldap="$withval") ;;
 esac], with_ldap=no)dnl
-AC_ARG_WITH([edirectory],
-[  --with-edirectory       compile eDirectory database backend module],
-[case "$withval" in
-    yes | no) ;;
-    *)  AC_MSG_ERROR(Invalid option value --with-edirectory="$withval") ;;
-esac], with_edirectory=no)dnl
 
 if test $with_ldap = yes; then
   if test $with_edirectory = yes; then
@@ -1657,13 +1650,6 @@ if test $with_ldap = yes; then
   fi
   AC_MSG_NOTICE(enabling OpenLDAP database backend module support)
   OPENLDAP_PLUGIN=yes
-elif test $with_edirectory = yes; then
-  AC_MSG_NOTICE(enabling eDirectory database backend module support)
-  OPENLDAP_PLUGIN=yes
-  AC_DEFINE(HAVE_EDIRECTORY,1,[Define if LDAP KDB interface should assume eDirectory.])
-else
-  : # neither enabled
-dnl  AC_MSG_NOTICE(disabling ldap backend module support)
 fi
 ])dnl
 dnl

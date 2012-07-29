@@ -29,38 +29,11 @@
 
 #include "ldap_misc.h"
 
-#define MAX_DN_CHARS            256
-#define HOST_INFO_DELIMITER     '#'
-#define PROTOCOL_STR_LEN        3
-#define PROTOCOL_NUM_UDP        0
-#define PROTOCOL_NUM_TCP        1
-#define PROTOCOL_DEFAULT_KDC    PROTOCOL_NUM_UDP
-#define PROTOCOL_DEFAULT_ADM    PROTOCOL_NUM_TCP
-#define PROTOCOL_DEFAULT_PWD    PROTOCOL_NUM_UDP
-#define PORT_STR_LEN            5
-#define PORT_DEFAULT_KDC        88
-#define PORT_DEFAULT_ADM        749
-#define PORT_DEFAULT_PWD        464
-
 #define MAX_LEN                 1024
 #define MAX_SERVICE_PASSWD_LEN  256
-#define RANDOM_PASSWD_LEN       128
 
 #define DEF_SERVICE_PASSWD_FILE "/usr/local/var/service_passwd"
 
-struct data{
-    int len;
-    unsigned char *value;
-};
-
-extern int enc_password(struct data pwd, struct data *enc_key, struct data *enc_pass);
 extern int tohex(krb5_data, krb5_data *);
 
-extern void kdb5_ldap_create_service(int argc, char **argv);
-extern void kdb5_ldap_modify_service(int argc, char **argv);
-extern void kdb5_ldap_destroy_service(int argc, char **argv);
-extern void kdb5_ldap_list_services(int argc, char **argv);
-extern void kdb5_ldap_view_service(int argc, char **argv);
-extern int  kdb5_ldap_set_service_password(int argc, char **argv);
-extern void kdb5_ldap_set_service_certificate(int argc, char **argv);
 extern void kdb5_ldap_stash_service_password(int argc, char **argv);

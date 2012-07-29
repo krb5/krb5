@@ -389,17 +389,7 @@ krb5_ldap_modify_realm(krb5_context context, krb5_ldap_realm_params *rparams,
     LDAP                  *ld=NULL;
     krb5_error_code       st=0;
     char                  **strval=NULL, *strvalprc[5]={NULL};
-#ifdef HAVE_EDIRECTORY
-    char                  **values=NULL;
-    char                  **oldkdcservers=NULL, **oldadminservers=NULL, **oldpasswdservers=NULL;
-    LDAPMessage           *result=NULL, *ent=NULL;
-    int                   count=0;
-    char errbuf[1024];
-#endif
     LDAPMod               **mods = NULL;
-#ifdef HAVE_EDIRECTORY
-    int                   i=0;
-#endif
     int                   oldmask=0, objectmask=0,k=0;
     kdb5_dal_handle       *dal_handle=NULL;
     krb5_ldap_context     *ldap_context=NULL;
@@ -421,11 +411,6 @@ krb5_ldap_modify_realm(krb5_context context, krb5_ldap_realm_params *rparams,
         rparams->tl_data->tl_data_contents == NULL ||
         ((mask & LDAP_REALM_SUBTREE) && rparams->subtree == NULL) ||
         ((mask & LDAP_REALM_CONTREF) && rparams->containerref == NULL) ||
-#ifdef HAVE_EDIRECTORY
-        ((mask & LDAP_REALM_KDCSERVERS) && rparams->kdcservers == NULL) ||
-        ((mask & LDAP_REALM_ADMINSERVERS) && rparams->adminservers == NULL) ||
-        ((mask & LDAP_REALM_PASSWDSERVERS) && rparams->passwdservers == NULL) ||
-#endif
         0) {
         st = EINVAL;
         goto cleanup;
@@ -518,104 +503,6 @@ krb5_ldap_modify_realm(krb5_context context, krb5_ldap_realm_params *rparams,
     }
 
 
-#ifdef HAVE_EDIRECTORY
-
-    /* KDCSERVERS ATTRIBUTE */
-    if (mask & LDAP_REALM_KDCSERVERS) {
-        /* validate the server list */
-        for (i=0; rparams->kdcservers[i] != NULL; ++i) {
-            st = checkattributevalue(ld, rparams->kdcservers[i], "objectClass", kdcclass,
-                                     &objectmask);
-            CHECK_CLASS_VALIDITY(st, objectmask,
-                                 _("kdc service object value: "));
-        }
-
-        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbkdcservers", LDAP_MOD_REPLACE,
-                                          rparams->kdcservers)) != 0)
-            goto cleanup;
-    }
-
-    /* ADMINSERVERS ATTRIBUTE */
-    if (mask & LDAP_REALM_ADMINSERVERS) {
-        /* validate the server list */
-        for (i=0; rparams->adminservers[i] != NULL; ++i) {
-            st = checkattributevalue(ld, rparams->adminservers[i], "objectClass", adminclass,
-                                     &objectmask);
-            CHECK_CLASS_VALIDITY(st, objectmask,
-                                 _("admin service object value: "));
-        }
-
-        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbadmservers", LDAP_MOD_REPLACE,
-                                          rparams->adminservers)) != 0)
-            goto cleanup;
-    }
-
-    /* PASSWDSERVERS ATTRIBUTE */
-    if (mask & LDAP_REALM_PASSWDSERVERS) {
-        /* validate the server list */
-        for (i=0; rparams->passwdservers[i] != NULL; ++i) {
-            st = checkattributevalue(ld, rparams->passwdservers[i], "objectClass", pwdclass,
-                                     &objectmask);
-            CHECK_CLASS_VALIDITY(st, objectmask,
-                                 _("password service object value: "));
-        }
-
-        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdservers", LDAP_MOD_REPLACE,
-                                          rparams->passwdservers)) != 0)
-            goto cleanup;
-    }
-
-    /*
-     * Read the old values of the krbkdcservers, krbadmservers and
-     * krbpwdservers.  This information is later used to decided the
-     * deletions/additions to the list.
-     */
-    if (mask & LDAP_REALM_KDCSERVERS || mask & LDAP_REALM_ADMINSERVERS ||
-        mask & LDAP_REALM_PASSWDSERVERS) {
-        char *servers[] = {"krbKdcServers", "krbAdmServers", "krbPwdServers", NULL};
-
-        if ((st= ldap_search_ext_s(ld,
-                                   rparams->realmdn,
-                                   LDAP_SCOPE_BASE,
-                                   0,
-                                   servers,
-                                   0,
-                                   NULL,
-                                   NULL,
-                                   NULL,
-                                   0,
-                                   &result)) != LDAP_SUCCESS) {
-            st = set_ldap_error (context, st, OP_SEARCH);
-            goto cleanup;
-        }
-
-        ent = ldap_first_entry(ld, result);
-        if (ent) {
-            if ((values=ldap_get_values(ld, ent, "krbKdcServers")) != NULL) {
-                count = ldap_count_values(values);
-                if ((st=copy_arrays(values, &oldkdcservers, count)) != 0)
-                    goto cleanup;
-                ldap_value_free(values);
-            }
-
-            if ((values=ldap_get_values(ld, ent, "krbAdmServers")) != NULL) {
-                count = ldap_count_values(values);
-                if ((st=copy_arrays(values, &oldadminservers, count)) != 0)
-                    goto cleanup;
-                ldap_value_free(values);
-            }
-
-            if ((values=ldap_get_values(ld, ent, "krbPwdServers")) != NULL) {
-                count = ldap_count_values(values);
-                if ((st=copy_arrays(values, &oldpasswdservers, count)) != 0)
-                    goto cleanup;
-                ldap_value_free(values);
-            }
-        }
-        ldap_msgfree(result);
-    }
-#endif
-
     /* Realm modify opearation */
     if (mods != NULL) {
         if ((st=ldap_modify_ext_s(ld, rparams->realmdn, mods, NULL, NULL)) != LDAP_SUCCESS) {
@@ -624,147 +511,7 @@ krb5_ldap_modify_realm(krb5_context context, krb5_ldap_realm_params *rparams,
         }
     }
 
-#ifdef HAVE_EDIRECTORY
-    /* krbRealmReferences attribute is updated here, depending on the additions/deletions
-     * to the 4 servers' list.
-     */
-    if (mask & LDAP_REALM_KDCSERVERS) {
-        char **newkdcservers=NULL;
-
-        count = ldap_count_values(rparams->kdcservers);
-        if ((st=copy_arrays(rparams->kdcservers, &newkdcservers, count)) != 0)
-            goto cleanup;
-
-        /* find the deletions and additions to the server list */
-        if (oldkdcservers && newkdcservers)
-            disjoint_members(oldkdcservers, newkdcservers);
-
-        /* delete the krbRealmReferences attribute from the servers that are dis-associated. */
-        if (oldkdcservers)
-            for (i=0; oldkdcservers[i]; ++i)
-                if ((st=deleteAttribute(ld, oldkdcservers[i], "krbRealmReferences",
-                                        rparams->realmdn)) != 0) {
-                    snprintf(errbuf, sizeof(errbuf),
-                             _("Error removing 'krbRealmReferences' from "
-                               "%s: "), oldkdcservers[i]);
-                    prepend_err_str(context, errbuf, st, st);
-                    goto cleanup;
-                }
-
-        /* add the krbRealmReferences attribute from the servers that are associated. */
-        if (newkdcservers)
-            for (i=0; newkdcservers[i]; ++i)
-                if ((st=updateAttribute(ld, newkdcservers[i], "krbRealmReferences",
-                                        rparams->realmdn)) != 0) {
-                    snprintf(errbuf, sizeof(errbuf),
-                             _("Error adding 'krbRealmReferences' to %s: "),
-                             newkdcservers[i]);
-                    prepend_err_str(context, errbuf, st, st);
-                    goto cleanup;
-                }
-
-        if (newkdcservers)
-            ldap_value_free(newkdcservers);
-    }
-
-    if (mask & LDAP_REALM_ADMINSERVERS) {
-        char **newadminservers=NULL;
-
-        count = ldap_count_values(rparams->adminservers);
-        if ((st=copy_arrays(rparams->adminservers, &newadminservers, count)) != 0)
-            goto cleanup;
-
-        /* find the deletions and additions to the server list */
-        if (oldadminservers && newadminservers)
-            disjoint_members(oldadminservers, newadminservers);
-
-        /* delete the krbRealmReferences attribute from the servers that are dis-associated. */
-        if (oldadminservers)
-            for (i=0; oldadminservers[i]; ++i)
-                if ((st=deleteAttribute(ld, oldadminservers[i], "krbRealmReferences",
-                                        rparams->realmdn)) != 0) {
-                    snprintf(errbuf, sizeof(errbuf),
-                             _("Error removing 'krbRealmReferences' from "
-                               "%s: "), oldadminservers[i]);
-                    prepend_err_str(context, errbuf, st, st);
-                    goto cleanup;
-                }
-
-        /* add the krbRealmReferences attribute from the servers that are associated. */
-        if (newadminservers)
-            for (i=0; newadminservers[i]; ++i)
-                if ((st=updateAttribute(ld, newadminservers[i], "krbRealmReferences",
-                                        rparams->realmdn)) != 0) {
-                    snprintf(errbuf, sizeof(errbuf),
-                             _("Error adding 'krbRealmReferences' to %s: "),
-                             newadminservers[i]);
-                    prepend_err_str(context, errbuf, st, st);
-                    goto cleanup;
-                }
-        if (newadminservers)
-            ldap_value_free(newadminservers);
-    }
-
-    if (mask & LDAP_REALM_PASSWDSERVERS) {
-        char **newpasswdservers=NULL;
-
-        count = ldap_count_values(rparams->passwdservers);
-        if ((st=copy_arrays(rparams->passwdservers, &newpasswdservers, count)) != 0)
-            goto cleanup;
-
-        /* find the deletions and additions to the server list */
-        if (oldpasswdservers && newpasswdservers)
-            disjoint_members(oldpasswdservers, newpasswdservers);
-
-        /* delete the krbRealmReferences attribute from the servers that are dis-associated. */
-        if (oldpasswdservers)
-            for (i=0; oldpasswdservers[i]; ++i)
-                if ((st=deleteAttribute(ld, oldpasswdservers[i], "krbRealmReferences",
-                                        rparams->realmdn)) != 0) {
-                    snprintf(errbuf, sizeof(errbuf),
-                             _("Error removing 'krbRealmReferences' from "
-                               "%s: "), oldpasswdservers[i]);
-                    prepend_err_str(context, errbuf, st, st);
-                    goto cleanup;
-                }
-
-        /* add the krbRealmReferences attribute from the servers that are associated. */
-        if (newpasswdservers)
-            for (i=0; newpasswdservers[i]; ++i)
-                if ((st=updateAttribute(ld, newpasswdservers[i], "krbRealmReferences",
-                                        rparams->realmdn)) != 0) {
-                    snprintf(errbuf, sizeof(errbuf),
-                             _("Error adding 'krbRealmReferences' to %s: "),
-                             newpasswdservers[i]);
-                    prepend_err_str(context, errbuf, st, st);
-                    goto cleanup;
-                }
-        if (newpasswdservers)
-            ldap_value_free(newpasswdservers);
-    }
-#endif
-
 cleanup:
-
-#ifdef HAVE_EDIRECTORY
-    if (oldkdcservers) {
-        for (i=0; oldkdcservers[i]; ++i)
-            free(oldkdcservers[i]);
-        free(oldkdcservers);
-    }
-
-    if (oldadminservers) {
-        for (i=0; oldadminservers[i]; ++i)
-            free(oldadminservers[i]);
-        free(oldadminservers);
-    }
-
-    if (oldpasswdservers) {
-        for (i=0; oldpasswdservers[i]; ++i)
-            free(oldpasswdservers[i]);
-        free(oldpasswdservers);
-    }
-#endif
 
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
@@ -790,9 +537,6 @@ krb5_ldap_create_krbcontainer(krb5_context context,
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
-#ifdef HAVE_EDIRECTORY
-    int                         crmask=0;
-#endif
 
     SETUP_CONTEXT ();
 
@@ -802,15 +546,10 @@ krb5_ldap_create_krbcontainer(krb5_context context,
     if (krbcontparams != NULL && krbcontparams->DN != NULL) {
         kerberoscontdn = krbcontparams->DN;
     } else {
-        /* If the user has not given, use the default cn=Kerberos,cn=Security */
-#ifdef HAVE_EDIRECTORY
-        kerberoscontdn = KERBEROS_CONTAINER;
-#else
         st = EINVAL;
         krb5_set_error_message(context, st,
                                _("Kerberos Container information is missing"));
         goto cleanup;
-#endif
     }
 
     strval[0] = "krbContainer";
@@ -854,47 +593,6 @@ krb5_ldap_create_krbcontainer(krb5_context context,
         goto cleanup;
     }
 
-#ifdef HAVE_EDIRECTORY
-
-    /* free the mods array */
-    ldap_mods_free(mods, 1);
-    mods=NULL;
-
-    /* check whether the security container is bound to krbcontainerrefaux object class */
-    if ((st=checkattributevalue(ld, SECURITY_CONTAINER, "objectClass",
-                                krbContainerRefclass, &crmask)) != 0) {
-        prepend_err_str(context, _("Security Container read FAILED: "), st,
-                        st);
-        /* delete Kerberos Container, status ignored intentionally */
-        ldap_delete_ext_s(ld, kerberoscontdn, NULL, NULL);
-        goto cleanup;
-    }
-
-    if (crmask == 0) {
-        /* Security Container is extended with krbcontainerrefaux object class */
-        strval[0] = "krbContainerRefAux";
-        if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
-            goto cleanup;
-    }
-
-    strval[0] = kerberoscontdn;
-    strval[1] = NULL;
-    if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbcontainerreference", LDAP_MOD_ADD, strval)) != 0)
-        goto cleanup;
-
-    /* update the security container with krbContainerReference attribute */
-    if ((st=ldap_modify_ext_s(ld, SECURITY_CONTAINER, mods, NULL, NULL)) != LDAP_SUCCESS) {
-        int ost = st;
-        st = translate_ldap_error (st, OP_MOD);
-        krb5_set_error_message(context, st,
-                               _("Security Container update FAILED: %s"),
-                               ldap_err2string(ost));
-        /* delete Kerberos Container, status ignored intentionally */
-        ldap_delete_ext_s(ld, kerberoscontdn, NULL, NULL);
-        goto cleanup;
-    }
-#endif
-
 cleanup:
 
     if (rdns)
@@ -929,15 +627,10 @@ krb5_ldap_delete_krbcontainer(krb5_context context,
     if (krbcontparams != NULL && krbcontparams->DN != NULL) {
         kerberoscontdn = krbcontparams->DN;
     } else {
-        /* If the user has not given, use the default cn=Kerberos,cn=Security */
-#ifdef HAVE_EDIRECTORY
-        kerberoscontdn = KERBEROS_CONTAINER;
-#else
         st = EINVAL;
         krb5_set_error_message(context, st,
                                _("Kerberos Container information is missing"));
         goto cleanup;
-#endif
     }
 
     /* delete the kerberos container */
@@ -975,9 +668,6 @@ krb5_ldap_create_realm(krb5_context context, krb5_ldap_realm_params *rparams,
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
-#ifdef HAVE_EDIRECTORY
-    char errbuf[1024];
-#endif
     char                        *realm_name;
 
     SETUP_CONTEXT ();
@@ -990,11 +680,6 @@ krb5_ldap_create_realm(krb5_context context, krb5_ldap_realm_params *rparams,
         ((mask & LDAP_REALM_SUBTREE) && rparams->subtree  == NULL) ||
         ((mask & LDAP_REALM_CONTREF) && rparams->containerref == NULL) ||
         ((mask & LDAP_REALM_POLICYREFERENCE) && rparams->policyreference == NULL) ||
-#ifdef HAVE_EDIRECTORY
-        ((mask & LDAP_REALM_KDCSERVERS) && rparams->kdcservers == NULL) ||
-        ((mask & LDAP_REALM_ADMINSERVERS) && rparams->adminservers == NULL) ||
-        ((mask & LDAP_REALM_PASSWDSERVERS) && rparams->passwdservers == NULL) ||
-#endif
         0) {
         st = EINVAL;
         return st;
@@ -1096,99 +781,11 @@ krb5_ldap_create_realm(krb5_context context, krb5_ldap_realm_params *rparams,
     }
 
 
-#ifdef HAVE_EDIRECTORY
-
-    /* KDCSERVERS ATTRIBUTE */
-    if (mask & LDAP_REALM_KDCSERVERS) {
-        /* validate the server list */
-        for (i=0; rparams->kdcservers[i] != NULL; ++i) {
-            st = checkattributevalue(ld, rparams->kdcservers[i], "objectClass", kdcclass,
-                                     &objectmask);
-            CHECK_CLASS_VALIDITY(st, objectmask,
-                                 _("kdc service object value: "));
-
-        }
-
-        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbkdcservers", LDAP_MOD_ADD,
-                                          rparams->kdcservers)) != 0)
-            goto cleanup;
-    }
-
-    /* ADMINSERVERS ATTRIBUTE */
-    if (mask & LDAP_REALM_ADMINSERVERS) {
-        /* validate the server list */
-        for (i=0; rparams->adminservers[i] != NULL; ++i) {
-            st = checkattributevalue(ld, rparams->adminservers[i], "objectClass", adminclass,
-                                     &objectmask);
-            CHECK_CLASS_VALIDITY(st, objectmask,
-                                 _("admin service object value: "));
-
-        }
-
-        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbadmservers", LDAP_MOD_ADD,
-                                          rparams->adminservers)) != 0)
-            goto cleanup;
-    }
-
-    /* PASSWDSERVERS ATTRIBUTE */
-    if (mask & LDAP_REALM_PASSWDSERVERS) {
-        /* validate the server list */
-        for (i=0; rparams->passwdservers[i] != NULL; ++i) {
-            st = checkattributevalue(ld, rparams->passwdservers[i], "objectClass", pwdclass,
-                                     &objectmask);
-            CHECK_CLASS_VALIDITY(st, objectmask, "password service object value: ");
-
-        }
-
-        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdservers", LDAP_MOD_ADD,
-                                          rparams->passwdservers)) != 0)
-            goto cleanup;
-    }
-#endif
-
     /* realm creation operation */
     if ((st=ldap_add_ext_s(ld, dn, mods, NULL, NULL)) != LDAP_SUCCESS) {
         st = set_ldap_error (context, st, OP_ADD);
         goto cleanup;
     }
-
-#ifdef HAVE_EDIRECTORY
-    if (mask & LDAP_REALM_KDCSERVERS)
-        for (i=0; rparams->kdcservers[i]; ++i)
-            if ((st=updateAttribute(ld, rparams->kdcservers[i], "krbRealmReferences", dn)) != 0) {
-                snprintf(errbuf, sizeof(errbuf),
-                         _("Error adding 'krbRealmReferences' to %s: "),
-                         rparams->kdcservers[i]);
-                prepend_err_str (context, errbuf, st, st);
-                /* delete Realm, status ignored intentionally */
-                ldap_delete_ext_s(ld, dn, NULL, NULL);
-                goto cleanup;
-            }
-
-    if (mask & LDAP_REALM_ADMINSERVERS)
-        for (i=0; rparams->adminservers[i]; ++i)
-            if ((st=updateAttribute(ld, rparams->adminservers[i], "krbRealmReferences", dn)) != 0) {
-                snprintf(errbuf, sizeof(errbuf),
-                         _("Error adding 'krbRealmReferences' to %s: "),
-                         rparams->adminservers[i]);
-                prepend_err_str (context, errbuf, st, st);
-                /* delete Realm, status ignored intentionally */
-                ldap_delete_ext_s(ld, dn, NULL, NULL);
-                goto cleanup;
-            }
-
-    if (mask & LDAP_REALM_PASSWDSERVERS)
-        for (i=0; rparams->passwdservers[i]; ++i)
-            if ((st=updateAttribute(ld, rparams->passwdservers[i], "krbRealmReferences", dn)) != 0) {
-                snprintf(errbuf, sizeof(errbuf),
-                         _("Error adding 'krbRealmReferences' to %s: "),
-                         rparams->passwdservers[i]);
-                prepend_err_str (context, errbuf, st, st);
-                /* delete Realm, status ignored intentionally */
-                ldap_delete_ext_s(ld, dn, NULL, NULL);
-                goto cleanup;
-            }
-#endif
 
 cleanup:
 
@@ -1209,9 +806,6 @@ krb5_ldap_read_realm_params(krb5_context context, char *lrealm,
                             krb5_ldap_realm_params **rlparamp, int *mask)
 {
     char                   **values=NULL, *krbcontDN=NULL /*, *curr=NULL */;
-#ifdef HAVE_EDIRECTORY
-    unsigned int           count=0;
-#endif
     krb5_error_code        st=0, tempst=0;
     LDAP                   *ld=NULL;
     LDAPMessage            *result=NULL,*ent=NULL;
@@ -1349,32 +943,6 @@ krb5_ldap_read_realm_params(krb5_context context, char *lrealm,
             ldap_value_free(values);
         }
 
-#ifdef HAVE_EDIRECTORY
-
-        if ((values=ldap_get_values(ld, ent, "krbKdcServers")) != NULL) {
-            count = ldap_count_values(values);
-            if ((st=copy_arrays(values, &(rlparams->kdcservers), (int) count)) != 0)
-                goto cleanup;
-            *mask |= LDAP_REALM_KDCSERVERS;
-            ldap_value_free(values);
-        }
-
-        if ((values=ldap_get_values(ld, ent, "krbAdmServers")) != NULL) {
-            count = ldap_count_values(values);
-            if ((st=copy_arrays(values, &(rlparams->adminservers), (int) count)) != 0)
-                goto cleanup;
-            *mask |= LDAP_REALM_ADMINSERVERS;
-            ldap_value_free(values);
-        }
-
-        if ((values=ldap_get_values(ld, ent, "krbPwdServers")) != NULL) {
-            count = ldap_count_values(values);
-            if ((st=copy_arrays(values, &(rlparams->passwdservers), (int) count)) != 0)
-                goto cleanup;
-            *mask |= LDAP_REALM_PASSWDSERVERS;
-            ldap_value_free(values);
-        }
-#endif
     }
     ldap_msgfree(result);
 

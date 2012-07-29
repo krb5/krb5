@@ -47,8 +47,6 @@ SRCS= 	$(srcdir)/kdb_ldap.c \
 	$(srcdir)/ldap_misc.c \
 	$(srcdir)/ldap_handle.c \
 	$(srcdir)/ldap_tkt_policy.c \
-	$(srcdir)/ldap_services.c \
-	$(srcdir)/ldap_service_rights.c \
 	$(srcdir)/princ_xdr.c \
 	$(srcdir)/ldap_service_stash.c \
 	$(srcdir)/kdb_xdr.c \
@@ -67,8 +65,6 @@ STLIBOBJS= kdb_ldap.o \
 	ldap_misc.o \
 	ldap_handle.o \
 	ldap_tkt_policy.o \
-	ldap_services.o \
-	ldap_service_rights.o \
 	princ_xdr.o \
 	ldap_service_stash.o \
 	kdb_xdr.o \

@@ -422,38 +422,6 @@ krb5_ldap_open(krb5_context context, char *conf_section, char **db_args,
             }
 
             srv_cnt++;
-#ifdef HAVE_EDIRECTORY
-        } else if (opt && !strcmp(opt, "cert")) {
-            if (val == NULL) {
-                status = EINVAL;
-                krb5_set_error_message(context, status,
-                                       _("'cert' value missing"));
-                free(opt);
-                goto clean_n_exit;
-            }
-
-            if (ldap_context->root_certificate_file == NULL) {
-                ldap_context->root_certificate_file = strdup(val);
-                if (ldap_context->root_certificate_file == NULL) {
-                    free (opt);
-                    free (val);
-                    status = ENOMEM;
-                    goto clean_n_exit;
-                }
-            } else {
-                char *newstr;
-
-                if (asprintf(&newstr, "%s %s",
-                             ldap_context->root_certificate_file, val) < 0) {
-                    free (opt);
-                    free (val);
-                    status = ENOMEM;
-                    goto clean_n_exit;
-                }
-                free(ldap_context->root_certificate_file);
-                ldap_context->root_certificate_file = newstr;
-            }
-#endif
         } else {
             /* ignore hash argument. Might have been passed from create */
             status = EINVAL;

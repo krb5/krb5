@@ -265,21 +265,6 @@ krb5_ldap_read_server_params(krb5_context context, char *conf_section,
             goto cleanup;
     }
 
-#ifdef HAVE_EDIRECTORY
-    /*
-     * If root certificate file is not set read it from database
-     * module section of conf file this is the trusted root
-     * certificate of the Directory.
-     */
-    if (ldap_context->root_certificate_file == NULL) {
-        st = prof_get_string_def (context, conf_section,
-                                  KRB5_CONF_LDAP_ROOT_CERTIFICATE_FILE,
-                                  &ldap_context->root_certificate_file);
-        if (st)
-            goto cleanup;
-    }
-#endif
-
     /*
      * If the ldap server parameter is not set read the list of ldap
      * servers from the database module section of the conf file.
@@ -374,11 +359,6 @@ krb5_ldap_free_server_context_params(krb5_ldap_context *ldap_context)
             if (ldap_context->server_info_list[i]->server_name) {
                 free (ldap_context->server_info_list[i]->server_name);
             }
-#ifdef HAVE_EDIRECTORY
-            if (ldap_context->server_info_list[i]->root_certificate_file) {
-                free (ldap_context->server_info_list[i]->root_certificate_file);
-            }
-#endif
             if (ldap_context->server_info_list[i]->ldap_server_handles) {
                 ldap_server_handle = ldap_context->server_info_list[i]->ldap_server_handles;
                 while (ldap_server_handle) {
@@ -415,13 +395,6 @@ krb5_ldap_free_server_context_params(krb5_ldap_context *ldap_context)
         krb5_xfree(ldap_context->service_password_file);
         ldap_context->service_password_file = NULL;
     }
-
-#ifdef HAVE_EDIRECTORY
-    if (ldap_context->root_certificate_file != NULL) {
-        krb5_xfree(ldap_context->root_certificate_file);
-        ldap_context->root_certificate_file = NULL;
-    }
-#endif
 
     if (ldap_context->service_cert_path != NULL) {
         krb5_xfree(ldap_context->service_cert_path);
@@ -2089,37 +2062,6 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
         goto cleanup;
     if ((st=krb5_dbe_update_tl_data(context, entry, &userinfo_tl_data)) != 0)
         goto cleanup;
-
-#ifdef HAVE_EDIRECTORY
-    {
-        krb5_timestamp              expiretime=0;
-        char                        *is_login_disabled=NULL;
-
-        /* LOGIN EXPIRATION TIME */
-        if ((st=krb5_ldap_get_time(ld, ent, "loginexpirationtime", &expiretime,
-                                   &attr_present)) != 0)
-            goto cleanup;
-
-        if (attr_present == TRUE) {
-            if (mask & KDB_PRINC_EXPIRE_TIME_ATTR) {
-                if (expiretime < entry->expiration)
-                    entry->expiration = expiretime;
-            } else {
-                entry->expiration = expiretime;
-            }
-        }
-
-        /* LOGIN DISABLED */
-        if ((st=krb5_ldap_get_string(ld, ent, "logindisabled", &is_login_disabled,
-                                     &attr_present)) != 0)
-            goto cleanup;
-        if (attr_present == TRUE) {
-            if (strcasecmp(is_login_disabled, "TRUE")== 0)
-                entry->attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
-            free (is_login_disabled);
-        }
-    }
-#endif
 
     if ((st=krb5_read_tkt_policy (context, ldap_context, entry, tktpolname)) !=0)
         goto cleanup;

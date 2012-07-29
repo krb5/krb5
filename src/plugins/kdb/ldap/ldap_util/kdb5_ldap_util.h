@@ -39,16 +39,7 @@
 #define DESTROY_REALM         4
 #define LIST_REALM            5
 
-#ifdef HAVE_EDIRECTORY
-# define CREATE_SERVICE        6
-# define MODIFY_SERVICE        7
-# define VIEW_SERVICE          8
-# define DESTROY_SERVICE       9
-# define LIST_SERVICE          10
-# define SET_SRV_PW            16
-#else
-# define STASH_SRV_PW          17
-#endif
+#define STASH_SRV_PW          17
 
 #define CREATE_POLICY         11
 #define MODIFY_POLICY         12
