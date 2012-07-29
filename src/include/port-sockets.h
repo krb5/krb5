@@ -7,8 +7,8 @@
 #include <ws2tcpip.h>
 #include <errno.h>
 
-/* Some of our own infrastructure where the WinSock stuff was too hairy
-   to dump into a clean Unix program...  */
+/* Some of our own infrastructure where the Winsock stuff was too hairy
+ * to dump into a clean Unix program */
 
 typedef WSABUF sg_buf;
 
@@ -24,7 +24,7 @@ typedef WSABUF sg_buf;
 #define SOCKET_INITIALIZE()     0
 #define SOCKET_CLEANUP()
 #define SOCKET_ERRNO            (TranslatedWSAGetLastError())
-#define SOCKET_SET_ERRNO(x)     (WSASetLastError (x))
+#define SOCKET_SET_ERRNO(x)     (TranslatedWSASetLastError(x))
 #define SOCKET_NFDS(f)          (0)     /* select()'s first arg is ignored */
 #define SOCKET_READ(fd, b, l)   (recv(fd, b, l, 0))
 #define SOCKET_WRITE(fd, b, l)  (send(fd, b, l, 0))
@@ -33,9 +33,11 @@ typedef WSABUF sg_buf;
 #define SOCKET_CLOSE            close /* XXX */
 #define SOCKET_EINTR            WSAEINTR
 
-/* Return -1 for error or number of bytes written.
-   TMP is a temporary variable; must be declared by the caller, and
-   must be used by this macro (to avoid compiler warnings).  */
+/*
+ * Return -1 for error or number of bytes written.  TMP is a temporary
+ * variable; must be declared by the caller, and must be used by this macro (to
+ * avoid compiler warnings).
+ */
 /* WSASend returns 0 or SOCKET_ERROR.  */
 #define SOCKET_WRITEV_TEMP DWORD
 #define SOCKET_WRITEV(FD, SG, LEN, TMP)                         \
@@ -46,8 +48,8 @@ typedef WSABUF sg_buf;
 #define SHUTDOWN_BOTH   SD_BOTH
 
 /*
- * Define any missing Posix socket errors
- * This is for compatibiliy with older versions of msvc (pre-2010)
+ * Define any missing POSIX socket errors.  This is for compatibility with
+ * older versions of MSVC (pre-2010).
  */
 #ifndef EINPROGRESS
 #define EINPROGRESS WSAEINPROGRESS
@@ -71,15 +73,49 @@ typedef WSABUF sg_buf;
 #define ETIMEDOUT WSAETIMEDOUT
 #endif
 
+/* Translate posix_error to its Winsock counterpart and set the last Winsock
+ * error to the result. */
+static __inline void TranslatedWSASetLastError(int posix_error)
+{
+    int wsa_error;
+    switch (posix_error) {
+    case 0:
+        wsa_error = 0; break;
+    case EINPROGRESS:
+        wsa_error = WSAEINPROGRESS; break;
+    case EWOULDBLOCK:
+        wsa_error = WSAEWOULDBLOCK; break;
+    case ECONNRESET:
+        wsa_error = WSAECONNRESET; break;
+    case ECONNABORTED:
+        wsa_error = WSAECONNABORTED; break;
+    case ECONNREFUSED:
+        wsa_error = WSAECONNREFUSED; break;
+    case EHOSTUNREACH:
+        wsa_error = WSAEHOSTUNREACH; break;
+    case ETIMEDOUT:
+        wsa_error = WSAETIMEDOUT; break;
+    case EAFNOSUPPORT:
+        wsa_error = WSAEAFNOSUPPORT; break;
+    case EINVAL:
+        wsa_error = WSAEINVAL; break;
+    default:
+        /* Ideally, we would log via k5-trace here, but we have no context. */
+        wsa_error = WSAEINVAL; break;
+    }
+    WSASetLastError(wsa_error);
+}
+
 /*
- * Translate WinSock errors to their Posix counterparts.
- * This is necessary for msvc 2010+, where both WinSock and Posix errors
- * are defined.
+ * Translate Winsock errors to their POSIX counterparts.  This is necessary for
+ * MSVC 2010+, where both Winsock and POSIX errors are defined.
  */
 static __inline int TranslatedWSAGetLastError()
 {
     int err = WSAGetLastError();
     switch (err) {
+    case 0:
+        break;
     case WSAEINPROGRESS:
         err = EINPROGRESS; break;
     case WSAEWOULDBLOCK:
@@ -94,16 +130,21 @@ static __inline int TranslatedWSAGetLastError()
         err = EHOSTUNREACH; break;
     case WSAETIMEDOUT:
         err = ETIMEDOUT; break;
+    case WSAEAFNOSUPPORT:
+        err = EAFNOSUPPORT; break;
+    case WSAEINVAL:
+        err = EINVAL; break;
     default:
-        break;
+        /* Ideally, we would log via k5-trace here, but we have no context. */
+        err = EINVAL; break;
     }
     return err;
 }
 
 #elif defined(__palmos__)
 
-/* If this source file requires it, define struct sockaddr_in
-   (and possibly other things related to network I/O).  */
+/* If this source file requires it, define struct sockaddr_in (and possibly
+ * other things related to network I/O). */
 
 #include "autoconf.h"
 #include <netdb.h>
@@ -133,14 +174,15 @@ extern int h_errno;             /* In case it's missing, e.g., HP-UX 10.20. */
 #include <sys/filio.h>          /* For FIONBIO on Solaris.  */
 #endif
 
-/* Either size_t or int or unsigned int is probably right.  Under
-   SunOS 4, it looks like int is desired, according to the accept man
-   page.  */
+/*
+ * Either size_t or int or unsigned int is probably right.  Under
+ * SunOS 4, it looks like int is desired, according to the accept man
+ * page.
+ */
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif
 
-/* XXX should only be done if sockaddr_storage not found */
 #ifndef HAVE_STRUCT_SOCKADDR_STORAGE
 struct krb5int_sockaddr_storage {
     struct sockaddr_in s;
@@ -150,9 +192,7 @@ struct krb5int_sockaddr_storage {
 #define sockaddr_storage krb5int_sockaddr_storage
 #endif
 
-/*
- * Compatability with WinSock calls on MS-Windows...
- */
+/* Unix equivalents of Winsock calls */
 #define SOCKET          int
 #define INVALID_SOCKET  ((SOCKET)~0)
 #define closesocket     close
@@ -171,9 +211,6 @@ typedef struct iovec sg_buf;
 #define SG_BUF(SG)              ((char*)(SG)->iov_base + 0)
 #define SG_SET(SG, B, L)        ((SG)->iov_base = (char*)(B), (SG)->iov_len = (L))
 
-/* Some of our own infrastructure where the WinSock stuff was too hairy
-   to dump into a clean Unix program...  */
-
 #define SOCKET_INITIALIZE()     (0)     /* No error (or anything else) */
 #define SOCKET_CLEANUP()        /* nothing */
 #define SOCKET_ERRNO            errno
@@ -187,7 +224,7 @@ typedef struct iovec sg_buf;
 #define SOCKET_EINTR            EINTR
 #define SOCKET_WRITEV_TEMP int
 /* Use TMP to avoid compiler warnings and keep things consistent with
-   Windoze version.  */
+ * Windows version. */
 #define SOCKET_WRITEV(FD, SG, LEN, TMP)         \
     ((TMP) = writev((FD), (SG), (LEN)), (TMP))
 
