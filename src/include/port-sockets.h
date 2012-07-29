@@ -24,7 +24,7 @@ typedef WSABUF sg_buf;
 #define SOCKET_INITIALIZE()     0
 #define SOCKET_CLEANUP()
 #define SOCKET_ERRNO            (TranslatedWSAGetLastError())
-#define SOCKET_SET_ERRNO(x)     (WSASetLastError (x))
+#define SOCKET_SET_ERRNO(x)     (TranslatedWSASetLastError(x))
 #define SOCKET_NFDS(f)          (0)     /* select()'s first arg is ignored */
 #define SOCKET_READ(fd, b, l)   (recv(fd, b, l, 0))
 #define SOCKET_WRITE(fd, b, l)  (send(fd, b, l, 0))
@@ -73,6 +73,39 @@ typedef WSABUF sg_buf;
 #define ETIMEDOUT WSAETIMEDOUT
 #endif
 
+/* Translate posix_error to its Winsock counterpart and set the last Winsock
+ * error to the result. */
+static __inline void TranslatedWSASetLastError(int posix_error)
+{
+    int wsa_error;
+    switch (posix_error) {
+    case 0:
+        wsa_error = 0; break;
+    case EINPROGRESS:
+        wsa_error = WSAEINPROGRESS; break;
+    case EWOULDBLOCK:
+        wsa_error = WSAEWOULDBLOCK; break;
+    case ECONNRESET:
+        wsa_error = WSAECONNRESET; break;
+    case ECONNABORTED:
+        wsa_error = WSAECONNABORTED; break;
+    case ECONNREFUSED:
+        wsa_error = WSAECONNREFUSED; break;
+    case EHOSTUNREACH:
+        wsa_error = WSAEHOSTUNREACH; break;
+    case ETIMEDOUT:
+        wsa_error = WSAETIMEDOUT; break;
+    case EAFNOSUPPORT:
+        wsa_error = WSAEAFNOSUPPORT; break;
+    case EINVAL:
+        wsa_error = WSAEINVAL; break;
+    default:
+        /* Ideally, we would log via k5-trace here, but we have no context. */
+        wsa_error = WSAEINVAL; break;
+    }
+    WSASetLastError(wsa_error);
+}
+
 /*
  * Translate Winsock errors to their POSIX counterparts.  This is necessary for
  * MSVC 2010+, where both Winsock and POSIX errors are defined.
@@ -81,6 +114,8 @@ static __inline int TranslatedWSAGetLastError()
 {
     int err = WSAGetLastError();
     switch (err) {
+    case 0:
+        break;
     case WSAEINPROGRESS:
         err = EINPROGRESS; break;
     case WSAEWOULDBLOCK:
@@ -95,8 +130,13 @@ static __inline int TranslatedWSAGetLastError()
         err = EHOSTUNREACH; break;
     case WSAETIMEDOUT:
         err = ETIMEDOUT; break;
+    case WSAEAFNOSUPPORT:
+        err = EAFNOSUPPORT; break;
+    case WSAEINVAL:
+        err = EINVAL; break;
     default:
-        break;
+        /* Ideally, we would log via k5-trace here, but we have no context. */
+        err = EINVAL; break;
     }
     return err;
 }
