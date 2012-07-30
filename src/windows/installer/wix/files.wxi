@@ -462,7 +462,6 @@
       <Directory Id="APPDATAMITDIR" Name="MIT">
         <Directory Id="APPDATAKERBEROS5DIR" Name="Kerberos5">
           <Component Win64="$(var.Win64)" Id="cmf_krb5_ini" Guid="C1AF0670-BBF1-4AA6-B2A6-6C8B1584A1F4" NeverOverwrite="yes" Permanent="yes" DiskId="1">
-            <Condition>NOT SYSTEMKRB5INI</Condition>
             <File Id="fil_krb5_ini" Name="krb5.ini" src="$(var.ConfigDir)krb5.ini" KeyPath="yes" />
             <CreateFolder/>
           </Component>
