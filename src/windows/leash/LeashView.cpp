@@ -2558,7 +2558,7 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
 #ifndef NO_KRB5
             if ( m_ticketStatusKrb5 == TWENTY_MINUTES_LEFT &&
                  m_autoRenewTickets && !m_autoRenewalAttempted && ticketinfo.Krb5.renew_until &&
-                 (ticketinfo.Krb5.issued + ticketinfo.Krb5.renew_until - LeashTime() > 20 * 60))
+                 (ticketinfo.Krb5.renew_until - LeashTime() > 20 * 60))
             {
                 m_autoRenewalAttempted = 1;
                 ReleaseMutex(ticketinfo.lockObj);
