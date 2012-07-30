@@ -554,7 +554,6 @@ updateMechList(void)
 #endif /* !_WIN32 */
 } /* updateMechList */
 
-#ifdef _GSS_STATIC_LINK
 static void
 releaseMechInfo(gss_mech_info *pCf)
 {
@@ -578,11 +577,11 @@ releaseMechInfo(gss_mech_info *pCf)
 	if (cf->mech_type != GSS_C_NO_OID &&
 	    cf->mech_type != &cf->mech->mech_type)
 		generic_gss_release_oid(&minor_status, &cf->mech_type);
-	if (cf->mech != NULL) {
+	if (cf->mech != NULL && cf->freeMech) {
 		memset(cf->mech, 0, sizeof(*cf->mech));
 		free(cf->mech);
 	}
-	if (cf->mech_ext != NULL) {
+	if (cf->mech_ext != NULL && cf->freeMech) {
 		memset(cf->mech_ext, 0, sizeof(*cf->mech_ext));
 		free(cf->mech_ext);
 	}
@@ -595,6 +594,7 @@ releaseMechInfo(gss_mech_info *pCf)
 	*pCf = NULL;
 }
 
+#ifdef _GSS_STATIC_LINK
 /*
  * Register a mechanism.  Called with g_mechListLock held.
  */
@@ -811,27 +811,10 @@ static void
 freeMechList(void)
 {
 	gss_mech_info cf, next_cf;
-	OM_uint32 minor;
 
 	for (cf = g_mechList; cf != NULL; cf = next_cf) {
 		next_cf = cf->next;
-		if (cf->kmodName != NULL)
-			free(cf->kmodName);
-		if (cf->uLibName != NULL)
-			free(cf->uLibName);
-		if (cf->mechNameStr != NULL)
-			free(cf->mechNameStr);
-		if (cf->optionStr != NULL)
-			free(cf->optionStr);
-		if (cf->mech_type != &cf->mech->mech_type)
-			generic_gss_release_oid(&minor, &cf->mech_type);
-		if (cf->mech != NULL && cf->freeMech)
-			free(cf->mech);
-		if (cf->mech_ext != NULL && cf->freeMech)
-			free(cf->mech_ext);
-		if (cf->dl_handle != NULL)
-			(void) krb5int_close_plugin(cf->dl_handle);
-		free(cf);
+		releaseMechInfo(&cf);
 	}
 }
 
