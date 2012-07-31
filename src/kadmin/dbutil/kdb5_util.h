@@ -26,7 +26,6 @@
 
 #include <kdb_log.h>
 
-#define MAX_HEADER      1024
 #define REALM_SEP       '@'
 #define REALM_SEP_STR   "@"
 

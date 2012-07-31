@@ -448,7 +448,7 @@ name_matches(name, arglist)
              * name.
              */
             if ((match_match.rm_so == 0) &&
-                (match_match.rm_eo == strlen(name)))
+                ((size_t)match_match.rm_eo == strlen(name)))
                 match = 1;
         }
         regfree(&match_exp);
@@ -1598,6 +1598,12 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
                       &name_len, &mod_name_len, &key_len,
                       &alt_key_len, &salt_len, &alt_salt_len);
     if (nmatched == 6) {
+        if (name_len < 0 || mod_name_len < 0 || key_len < 0 ||
+            alt_key_len < 0 || salt_len < 0 || alt_salt_len < 0) {
+            fprintf(stderr, read_err_fmt, fname, *linenop, read_negint);
+            krb5_db_free_principal(kcontext, dbent);
+            return 1;
+        }
         pkey->key_data_length[0] = key_len;
         akey->key_data_length[0] = alt_key_len;
         pkey->key_data_length[1] = salt_len;
@@ -1945,6 +1951,10 @@ process_k5beta6_record(char *fname, krb5_context kcontext, FILE *filep,
     }
     if (nread != 5)
         goto cleanup;
+    if (t1 < 0 || t2 < 0 || t3 < 0 || t4 < 0 || t5 < 0) {
+        try2read = read_negint;
+        goto cleanup;
+    }
 
     /* Get memory for flattened principal name */
     if ((name = malloc(t2 + 1)) == NULL)
@@ -2071,6 +2081,10 @@ process_k5beta6_record(char *fname, krb5_context kcontext, FILE *filep,
                     try2read = read_ktypelen;
                     goto cleanup;
                 }
+                if (t4 < 0) {
+                    try2read = read_negint;
+                    goto cleanup;
+                }
                 kdatap->key_data_type[j] = t3;
                 kdatap->key_data_length[j] = t4;
                 if (!t4) {
@@ -2152,7 +2166,7 @@ process_k5beta7_policy(fname, kcontext, filep, flags, linenop)
     (*linenop)++;
     rec.name = namebuf;
 
-    nread = fscanf(filep, "%1024s\t%d\t%d\t%d\t%d\t%d\t%d", rec.name,
+    nread = fscanf(filep, "%1023s\t%d\t%d\t%d\t%d\t%d\t%d", rec.name,
                    &rec.pw_min_life, &rec.pw_max_life,
                    &rec.pw_min_length, &rec.pw_min_classes,
                    &rec.pw_history_num, &rec.policy_refcnt);
@@ -2195,11 +2209,7 @@ process_r1_8_policy(fname, kcontext, filep, flags, linenop)
     (*linenop)++;
     rec.name = namebuf;
 
-    /*
-     * To make this compatible with future policy extensions, we
-     * ignore any additional values.
-     */
-    nread = fscanf(filep, "%1024s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
+    nread = fscanf(filep, "%1023s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
                    rec.name,
                    &rec.pw_min_life, &rec.pw_max_life,
                    &rec.pw_min_length, &rec.pw_min_classes,
@@ -2208,7 +2218,7 @@ process_r1_8_policy(fname, kcontext, filep, flags, linenop)
                    &rec.pw_lockout_duration);
     if (nread == EOF)
         return -1;
-    else if (nread < 10) {
+    else if (nread != 10) {
         fprintf(stderr, "cannot parse policy on line %d (%d read)\n",
                 *linenop, nread);
         return 1;
@@ -2321,7 +2331,7 @@ process_k5beta7_record(fname, kcontext, filep, flags, linenop)
     int nread;
     char rectype[100];
 
-    nread = fscanf(filep, "%100s\t", rectype);
+    nread = fscanf(filep, "%99s\t", rectype);
     if (nread == EOF)
         return -1;
     else if (nread != 1)
@@ -2357,7 +2367,7 @@ process_ov_record(fname, kcontext, filep, flags, linenop)
     int nread;
     char rectype[100];
 
-    nread = fscanf(filep, "%100s\t", rectype);
+    nread = fscanf(filep, "%99s\t", rectype);
     if (nread == EOF)
         return -1;
     else if (nread != 1)
@@ -2395,7 +2405,7 @@ process_r1_8_record(fname, kcontext, filep, flags, linenop)
     int nread;
     char rectype[100];
 
-    nread = fscanf(filep, "%100s\t", rectype);
+    nread = fscanf(filep, "%99s\t", rectype);
     if (nread == EOF)
         return -1;
     else if (nread != 1)
@@ -2427,7 +2437,7 @@ process_r1_11_record(char *fname, krb5_context kcontext, FILE *filep,
     int nread;
     char rectype[100];
 
-    nread = fscanf(filep, "%100s\t", rectype);
+    nread = fscanf(filep, "%99s\t", rectype);
     if (nread == EOF)
         return -1;
     else if (nread != 1)
@@ -2502,7 +2512,7 @@ load_db(argc, argv)
     krb5_int32          crflags;
     int                 aindex;
     int                 db_locked = 0;
-    char                iheader[MAX_HEADER];
+    char                iheader[1024];
     kdb_log_context     *log_ctx;
     krb5_boolean        add_update = TRUE;
     uint32_t            caller, last_sno, last_seconds, last_useconds;
@@ -2731,11 +2741,11 @@ load_db(argc, argv)
                 unsigned int ipropx_version = IPROPX_VERSION_0;
 
                 if (!strncmp(buf, "ipropx ", sizeof("ipropx ") - 1))
-                    sscanf(buf, "%s %u %u %u %u", iheader,
+                    sscanf(buf, "%1023s %u %u %u %u", iheader,
                            &ipropx_version, &last_sno,
                            &last_seconds, &last_useconds);
                 else
-                    sscanf(buf, "%s %u %u %u", iheader, &last_sno,
+                    sscanf(buf, "%1023s %u %u %u", iheader, &last_sno,
                            &last_seconds, &last_useconds);
 
                 switch (ipropx_version) {
