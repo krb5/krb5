@@ -1034,7 +1034,7 @@ VOID CLeashView::OnMakeDefault()
 
 VOID CLeashView::OnChangePassword()
 {
-    krb5_context ctx;
+    krb5_context ctx = 0;
     krb5_ccache ccache = 0;
     krb5_principal princ = 0;
     char *pname = NULL;
