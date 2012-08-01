@@ -12,7 +12,7 @@ Normally, the kdc.conf file is found in the KDC state directory,
 |kdcdir|.  You can override the default location by setting the
 environment variable **KRB5_KDC_PROFILE**.
 
-Please note that you need to restart KDC daemon for any configuration
+Please note that you need to restart the KDC daemon for any configuration
 changes to take effect.
 
 Structure
@@ -124,8 +124,8 @@ subsection:
         tickets.
 
     **no-auth-data-required**
-        Enabling this flag prvents PAC data from being added to the
-        service tickets.
+        Enabling this flag prevents PAC data from being added to
+        service tickets for the principal.
 
     **ok-as-delegate**
         If this flag is enabled, it hints the client that credentials
@@ -133,7 +133,7 @@ subsection:
         service.
 
     **ok-to-auth-as-delegate**
-        Enabling this flag allows the principal to use S4USelf ticket.
+        Enabling this flag allows the principal to use S4USelf tickets.
 
     **postdateable**
         Enabling this flag allows the principal to obtain postdateable
@@ -145,7 +145,7 @@ subsection:
         receiving any tickets.  On a service principal, enabling this
         flag means that service tickets for this principal will only
         be issued to clients with a TGT that has the preauthenticated
-        ticket set.
+        bit set.
 
     **proxiable**
         Enabling this flag allows the principal to obtain proxy
