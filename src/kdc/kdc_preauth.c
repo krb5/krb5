@@ -1438,7 +1438,8 @@ etype_info_helper(krb5_context context, krb5_kdc_req *request,
                 continue;
 
             }
-            if (request_contains_enctype(context, request, db_etype)) {
+            if (krb5_is_permitted_enctype(context, db_etype) &&
+                request_contains_enctype(context, request, db_etype)) {
                 retval = _make_etype_info_entry(context, client->princ,
                                                 client_key, db_etype,
                                                 &entry[i], etype_info2);

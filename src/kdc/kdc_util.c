@@ -2461,6 +2461,7 @@ kdc_handle_protected_negotiation(krb5_data *req_pkt, krb5_kdc_req *request,
         return 0;
     pa.magic = KV5M_PA_DATA;
     pa.pa_type = KRB5_ENCPADATA_REQ_ENC_PA_REP;
+    memset(&checksum, 0, sizeof(checksum));
     retval = krb5_c_make_checksum(kdc_context,0, reply_key,
                                   KRB5_KEYUSAGE_AS_REQ, req_pkt, &checksum);
     if (retval != 0)
