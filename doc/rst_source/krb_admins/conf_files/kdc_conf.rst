@@ -220,7 +220,7 @@ subsection:
 **kadmind_port**
     (Port number.)  Specifies the port on which the :ref:`kadmind(8)`
     daemon is to listen for this realm.  The assigned port for kadmind
-    is 749.
+    is 749, which is used by default.
 
 **key_stash_file**
     (String.)  Specifies the location where the master key has been
