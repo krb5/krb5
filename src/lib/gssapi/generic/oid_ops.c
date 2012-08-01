@@ -58,6 +58,13 @@
 #include <errno.h>
 #include <ctype.h>
 
+/*
+ * The functions for allocating and releasing individual OIDs use malloc and
+ * free instead of the gssalloc wrappers, because the mechglue currently mixes
+ * generic_gss_copy_oid() with hand-freeing of OIDs.  We do not need to free
+ * free OIDs allocated by mechanisms, so this should not be a problem.
+ */
+
 OM_uint32
 generic_gss_release_oid(OM_uint32 *minor_status, gss_OID *oid)
 {
