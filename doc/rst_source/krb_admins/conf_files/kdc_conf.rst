@@ -12,6 +12,8 @@ Normally, the kdc.conf file is found in the KDC state directory,
 |kdcdir|.  You can override the default location by setting the
 environment variable **KRB5_KDC_PROFILE**.
 
+Please note that you need to restart KDC daemon for any configuration
+changes to take effect.
 
 Structure
 ---------
