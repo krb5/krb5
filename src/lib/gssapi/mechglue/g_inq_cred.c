@@ -123,29 +123,23 @@ gss_OID_set *		mechanisms;
      */
 
     if(mechanisms != NULL) {
-	status = GSS_S_FAILURE;
-	mechs = (gss_OID_set) malloc(sizeof(gss_OID_set_desc));
-	if (mechs == NULL)
-	    goto error;
-	mechs->count = 0;
-	mechs->elements = malloc(sizeof(gss_OID_desc) *
-					 (union_cred ? union_cred->count : 1));
-	if (mechs->elements == NULL)
+	status = gss_create_empty_oid_set(minor_status, &mechs);
+	if (GSS_ERROR(status))
 	    goto error;
 
 	if (union_cred) {
 	    for (i = 0; i < union_cred->count; i++) {
-		mechs->elements[i].elements =
-		    malloc(union_cred->mechs_array[i].length);
-		if (mechs->elements[i].elements == NULL)
+		status = gss_add_oid_set_member(minor_status,
+						&union_cred->mechs_array[i],
+						&mechs);
+		if (GSS_ERROR(status))
 		    goto error;
-		g_OID_copy(&mechs->elements[i], &union_cred->mechs_array[i]);
-		mechs->count++;
 	    }
 	} else {
-	    mechs->elements[0].elements = malloc(mech->mech_type.length);
-	    g_OID_copy(&mechs->elements[0], &mech->mech_type);
-	    mechs->count++;
+	    status = gss_add_oid_set_member(minor_status,
+					    &mech->mech_type, &mechs);
+	    if (GSS_ERROR(status))
+		goto error;
 	}
 	*mechanisms = mechs;
     }
@@ -153,12 +147,6 @@ gss_OID_set *		mechanisms;
     return(GSS_S_COMPLETE);
 
 error:
-    /*
-     * cleanup any allocated memory - we can just call
-     * gss_release_oid_set, because the set is constructed so that
-     * count always references the currently copied number of
-     * elements.
-     */
     if (mechs != NULL)
 	(void) gss_release_oid_set(&temp_minor_status, &mechs);
 
