@@ -991,6 +991,7 @@ to be expanded.  Valid parameters are:
     %{LIBDIR}          Installation library directory
     %{BINDIR}          Installation binary directory
     %{SBINDIR}         Installation admin binary directory
+    %{username}        (Unix) Username of effective user ID
     %{APPDATA}         (Windows) Roaming application data for current user
     %{COMMON_APPDATA}  (Windows) Application data for all users
     %{LOCAL_APPDATA}   (Windows) Local application data for current user

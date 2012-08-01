@@ -264,7 +264,8 @@ expand_csidl(krb5_context context, PTYPE folder, const char *postfix,
     return 0;
 }
 
-#else
+#else /* not _WIN32 */
+#include <pwd.h>
 
 static krb5_error_code
 expand_path(krb5_context context, PTYPE param, const char *postfix, char **ret)
@@ -302,6 +303,26 @@ static krb5_error_code
 expand_euid(krb5_context context, PTYPE param, const char *postfix, char **str)
 {
     if (asprintf(str, "%lu", (unsigned long)geteuid()) < 0)
+        return ENOMEM;
+    return 0;
+}
+
+static krb5_error_code
+expand_username(krb5_context context, PTYPE param, const char *postfix,
+                char **str)
+{
+    uid_t euid = geteuid();
+    struct passwd *pw, pwx;
+    char pwbuf[BUFSIZ];
+
+    if (k5_getpwuid_r(euid, &pwx, pwbuf, sizeof(pwbuf), &pw) != 0) {
+        krb5_set_error_message(context, ENOENT,
+                               _("Can't find username for uid %lu"),
+                               (unsigned long)euid);
+        return ENOENT;
+    }
+    *str = strdup(pw->pw_name);
+    if (*str == NULL)
         return ENOMEM;
     return 0;
 }
@@ -366,6 +387,7 @@ static const struct token {
     {"BINDIR", 0, BINDIR, expand_path},
     {"SBINDIR", 0, SBINDIR, expand_path},
     {"euid", 0, NULL, expand_euid},
+    {"username", 0, NULL, expand_username},
 #endif
     {"TEMP", 0, NULL, expand_temp_folder},
     {"USERID", 0, NULL, expand_userid},
