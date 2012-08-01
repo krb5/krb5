@@ -971,6 +971,11 @@ BEGIN
     ID_VALID_UNTIL          "Display ticket valid until time column"
 END
 
+STRINGTABLE
+BEGIN
+    ID_MAKE_DEFAULT         "Make the selected principal the default principal"
+END
+
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
