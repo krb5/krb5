@@ -33,10 +33,16 @@ discussion and support.
 
 For more information about freenode, see http://freenode.net/.
 
-The `#krbdev` channel is logged by lopbot, courtesy of Brandon Allbery.
-The logs are at http://www.kf8nh.com/lambdabot/logs/krbdev/.
-Despite the existence of logging, please summarize important conversations
-to more permanent places, such as an appropriate mailing list or wiki page.
+The `#krbdev` channel is logged at
+http://colabti.org/irclogger/irclogger_logs/krbdev using the
+colabti.org service, which generously offers IRC logging
+to Free / Open Source projects.
+
+The `#krbdev` channel was previously logged by lopbot, courtesy
+of Brandon Allbery. These logs are no longer readily available online.
+Despite the possible existence of logging, please summarize important
+conversations to more permanent places, such as an appropriate
+mailing list or wiki page.
 
 
 Archives
