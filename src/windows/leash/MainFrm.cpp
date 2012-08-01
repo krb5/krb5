@@ -87,6 +87,22 @@ CMainFrame::~CMainFrame()
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
+    if (CLeashApp::m_useRibbon) {
+		CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows7));
+		CDockingManager::SetDockingMode(DT_SMART);
+		m_wndRibbonBar.SetWindows7Look(TRUE);
+
+        // Create the ribbon bar
+        if (!m_wndRibbonBar.Create(this))
+            return -1;   // Failed to create ribbon bar
+
+        m_wndRibbonBar.LoadFromResource(IDR_RIBBON1);
+
+        m_wndApplicationButton.SetVisible(FALSE);
+        // Uncomment the next line to hide the application button
+        //m_wndRibbonBar.SetApplicationButton(&m_wndApplicationButton, CSize());
+    }
+
 	if (CLeashFrame::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
@@ -135,8 +151,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	// TODO: Remove this if you don't want tool tips or a resizeable toolbar
-	m_wndToolBar.SetPaneStyle(m_wndToolBar.GetPaneStyle() |
-		                     CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
+	//m_wndToolBar.SetPaneStyle(m_wndToolBar.GetPaneStyle() |
+	//	                     CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 
 	// TODO: Delete these three lines if you don't want the toolbar to
 	//  be dockable
@@ -160,11 +176,11 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// Use the specific class name we established earlier
     // Remove the Minimize and Maximize buttons
-    cs.style &= ~WS_MINIMIZEBOX;
+//    cs.style &= ~WS_MINIMIZEBOX;
     cs.style &= ~WS_MAXIMIZEBOX;
     // Initialize the extended window style to display a TaskBar entry with WS_EX_APPWINDOW
     cs.dwExStyle |= WS_EX_APPWINDOW;
-    cs.dwExStyle |= WS_EX_OVERLAPPEDWINDOW ;
+//    cs.dwExStyle |= WS_EX_OVERLAPPEDWINDOW ;
 	cs.lpszClass = _T("LEASH.0WNDCLASS");
     cs.lpszName = _T("Leash32");
 
@@ -364,8 +380,12 @@ void CMainFrame::OnClose(void)
 LRESULT CMainFrame::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
     BOOL oldMin = m_isMinimum;
+    printf("CMainFrame::WindowProc() Msg: %x, WPARAM: %x, LPARAM: %x\n", message, wParam, lParam);
 	switch(message)
 	{
+    case WM_CLOSE:
+        printf("received WM_CLOSE!");
+        break;
     case WM_SIZE:
         switch ( wParam ) {
         case SIZE_MINIMIZED:

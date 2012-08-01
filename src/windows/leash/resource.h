@@ -90,6 +90,7 @@
 #define IDR_RIBBON1                     265
 #define IDB_HOMESMALL                   266
 #define IDB_HOMELARGE                   267
+#define IDB_BITMAP2                     268
 #define IDC_PROGRESS1                   1000
 #define IDC_TRACKBAR1                   1001
 #define IDC_TRACKBAR2                   1002
@@ -290,6 +291,8 @@
 #define IDC_RADIO_MSLSA_IMPORT_ON       1204
 #define IDC_RADIO_MSLSA_IMPORT_MATCH    1205
 #define IDC_STATIC_LEASH_MSLSA          1206
+#define IDC_LEASH_MAINVIEW              1207
+#define IDC_LIST3                       1208
 #define IDD_FILESPECIAL                 1536
 #define IDD_LEASH_FILESPECIAL           1536
 #define IDD_KRB_PROP_MISC               1537
@@ -333,7 +336,8 @@
 #define ID_BUTTON4                      32818
 #define ID_ENCRYPTION_TYPE              32826
 #define ID_VALID_UNTIL                  32828
-#define ID_BUTTON9                      32834
+#define ID_BUTTON3                      32835
+#define ID_MAKE_DEFAULT                 32835
 
 // Next default values for new objects
 //
@@ -341,8 +345,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        269
-#define _APS_NEXT_COMMAND_VALUE         32835
-#define _APS_NEXT_CONTROL_VALUE         1207
+#define _APS_NEXT_COMMAND_VALUE         32836
+#define _APS_NEXT_CONTROL_VALUE         1209
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
