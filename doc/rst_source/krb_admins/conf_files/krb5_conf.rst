@@ -999,8 +999,7 @@ to be expanded.  Valid parameters are:
     %{WINDOWS}         (Windows) Windows folder
     %{USERCONFIG}      (Windows) Per-user MIT krb5 config file directory
     %{COMMONCONFIG}    (Windows) Common MIT krb5 config file directory
-    ================   ===================================================
-
+    =================  ===================================================
 
 Sample krb5.conf file
 ---------------------
