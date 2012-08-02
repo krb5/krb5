@@ -62,17 +62,16 @@ subsection does not contain a relation for the tag.  See the
 [realms]
 ~~~~~~~~
 
-Each tag in the [realms] section of the file names a Kerberos realm.
-The value of the tag is a subsection where the relations in that
-subsection define KDC parameters for that particular realm.
+Each tag in the [realms] section is the name of a Kerberos realm.
+The value of the tag is a subsection where the relations define KDC
+parameters for that particular realm.
 
-For each realm, the following tags may be specified in the [realms]
-subsection:
+For each realm, the following tags may be specified:
 
 **acl_file**
     (String.)  Location of the access control list file that
     :ref:`kadmind(8)` uses to determine which principals are allowed
-    which permissions on the database.  The default value is
+    which permissions on the Kerberos database.  The default value is
     |kdcdir|\ ``/kadm5.acl``.
 
 **database_module**
