@@ -66,7 +66,11 @@ Libraries and plugins       LIBDIR         ``/usr/local/lib``           ``/usr/l
 Parent of KDC state dir     LOCALSTATEDIR  ``/usr/local/var``           ``/var``
 Administrative programs     SBINDIR        ``/usr/local/sbin``          ``/usr/sbin``
 Alternate krb5.conf dir     SYSCONFDIR     ``/usr/local/etc``           ``/etc``
-Default ccache name         DEFCCNAME      ``/tmp/krb5cc_%{UID}``       ``/tmp/krb5cc_%{UID}``
-Default keytab name         DEFKTNAME      ``/etc/krb5.keytab``         ``/etc/krb5.keytab``
-Default client keytab name  DEFCKTNAME     ``/etc/krb5.client-keytab``  ``/etc/krb5.client-keytab``
+Default ccache name         DEFCCNAME      ``FILE:/tmp/krb5cc_%{uid}``  ``FILE:/tmp/krb5cc_%{uid}``
+Default keytab name         DEFKTNAME      ``FILE:/etc/krb5.keytab``    ``FILE:/etc/krb5.keytab``
 ==========================  =============  ===========================  ===========================
+
+The default client keytab name (DEFCKTNAME) typically defaults to
+``FILE:/usr/local/var/krb5/user/%{euid}/client.keytab`` for a custom
+build.  A native build will typically use a path which will vary
+according to the operating system's layout of ``/var``.

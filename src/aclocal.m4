@@ -1630,6 +1630,7 @@ fi])
 dnl
 dnl
 m4_include(config/ac-archive/acx_pthread.m4)
+m4_include(config/ac-archive/relpaths.m4)
 dnl
 dnl
 dnl
