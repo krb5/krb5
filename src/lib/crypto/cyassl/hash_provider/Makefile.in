@@ -1,0 +1,34 @@
+mydir=lib$(S)crypto$(S)cyassl$(S)hash_provider
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/../../krb -I$(srcdir)/..
+DEFS=
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+STLIBOBJS= \
+	hash_crc32.o 	\
+	hash_md4.o 	\
+	hash_md5.o 	\
+	hash_sha1.o
+
+OBJS=   $(OUTPRE)hash_crc32.$(OBJEXT) 	\
+	$(OUTPRE)hash_md4.$(OBJEXT) 	\
+	$(OUTPRE)hash_md5.$(OBJEXT) 	\
+	$(OUTPRE)hash_sha1.$(OBJEXT)
+
+SRCS=	$(srcdir)/hash_crc32.c	\
+	$(srcdir)/hash_md4.c 	\
+	$(srcdir)/hash_md5.c 	\
+	$(srcdir)/hash_sha1.c
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+
