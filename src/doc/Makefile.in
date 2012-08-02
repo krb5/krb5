@@ -7,6 +7,9 @@ DOXYGEN=doxygen
 docsrc=$(top_srcdir)/../doc
 localstatedir=@localstatedir@
 sysconfdir=@sysconfdir@
+DEFCCNAME=@DEFCCNAME@
+DEFKTNAME=@DEFKTNAME@
+DEFCKTNAME=@DEFCKTNAME@
 
 # Create HTML documentation in $(docsrc)/rst_html suitable for a
 # release tarball or the web site (that is, without substitutions for
@@ -52,6 +55,9 @@ paths.py:
 	echo 'libdir = "``$(KRB5_LIBDIR)``"' >> $@
 	echo 'localstatedir = "``$(localstatedir)``"' >> $@
 	echo 'sysconfdir = "``$(sysconfdir)``"' >> $@
+	echo 'ccache = "``$(DEFCCNAME)``"' >> $@
+	echo 'keytab = "``$(DEFKTNAME)``"' >> $@
+	echo 'ckeytab = "``$(DEFCKTNAME)``"' >> $@
 
 clean::
 	rm -rf doxy rst_apiref rst_composite rst_html_subst Doxyfile paths.py

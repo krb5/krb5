@@ -40,7 +40,7 @@ determined by the following, in decreasing order of preference:
 
 #. The **default_keytab_name** profile variable in :ref:`libdefaults`.
 
-#. The hardcoded default, ``FILE:``\ |keytab|.
+#. The hardcoded default, |keytab|.
 
 
 Default client keytab
@@ -58,4 +58,4 @@ decreasing order of preference:
 #. The **default_client_keytab_name** profile variable in
    :ref:`libdefaults`.
 
-#. The hardcoded default, ``FILE:``\ |ckeytab|.
+#. The hardcoded default, |ckeytab|.
