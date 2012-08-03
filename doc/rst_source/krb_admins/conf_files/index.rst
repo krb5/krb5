@@ -2,7 +2,8 @@ Configuration Files
 ===================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   krb5_conf.rst
-   kdc_conf.rst
+   krb5_conf
+   kdc_conf
+   kadm5_acl
