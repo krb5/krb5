@@ -3,11 +3,6 @@
 .k5identity
 ===========
 
-SYNOPSIS
---------
-
-**~/.k5identity**
-
 DESCRIPTION
 -----------
 

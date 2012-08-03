@@ -3,11 +3,6 @@
 .k5login
 ========
 
-SYNOPSIS
---------
-**~/.k5login**
-
-
 DESCRIPTION
 -----------
 
