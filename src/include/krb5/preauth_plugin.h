@@ -38,7 +38,7 @@
  *
  *
  * The clpreauth interface has a single supported major version, which is
- * 1.  Major version 1 has a current minor version of 1.  clpreauth modules
+ * 1.  Major version 1 has a current minor version of 2.  clpreauth modules
  * should define a function named clpreauth_<modulename>_initvt, matching
  * the signature:
  *
@@ -193,6 +193,16 @@ typedef struct krb5_clpreauth_callbacks_st {
                                         krb5_timestamp *time_out,
                                         krb5_int32 *usec_out);
 
+    /* Set an item in the response set to be answered by the responder. */
+    krb5_error_code (*set_response_item)(krb5_context context,
+                                         krb5_clpreauth_rock rock,
+                                         const char *name, void *item,
+                                         void (*free)(void *item));
+
+    /* Get an item from the response set, or NULL if it is not present. */
+    void *(*get_response_item)(krb5_context context, krb5_clpreauth_rock rock,
+                               const char *name);
+
     /* End of version 2 clpreauth callbacks (added in 1.11). */
 } *krb5_clpreauth_callbacks;
 
@@ -233,6 +243,24 @@ typedef void
 (*krb5_clpreauth_request_fini_fn)(krb5_context context,
                                   krb5_clpreauth_moddata moddata,
                                   krb5_clpreauth_modreq modreq);
+
+/*
+ * Optional: process server-supplied data in pa_data and set response items.
+ *
+ * encoded_previous_request may be NULL if there has been no previous request
+ * in the AS exchange.
+ */
+typedef krb5_error_code
+(*krb5_clpreauth_fill_rset_fn)(krb5_context context,
+                               krb5_clpreauth_moddata moddata,
+                               krb5_clpreauth_modreq modreq,
+                               krb5_get_init_creds_opt *opt,
+                               krb5_clpreauth_callbacks cb,
+                               krb5_clpreauth_rock rock,
+                               krb5_kdc_req *request,
+                               krb5_data *encoded_request_body,
+                               krb5_data *encoded_previous_request,
+                               krb5_pa_data *pa_data);
 
 /*
  * Mandatory: process server-supplied data in pa_data and return created data
@@ -317,6 +345,9 @@ typedef struct krb5_clpreauth_vtable_st {
     krb5_clpreauth_tryagain_fn tryagain;
     krb5_clpreauth_supply_gic_opts_fn gic_opts;
     /* Minor version 1 ends here. */
+
+    krb5_clpreauth_fill_rset_fn fill_rset;
+    /* Minor version 2 ends here. */
 } *krb5_clpreauth_vtable;
 
 /*

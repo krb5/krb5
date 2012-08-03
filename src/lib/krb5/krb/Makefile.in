@@ -91,6 +91,7 @@ STLIBOBJS= \
 	rd_req_dec.o	\
 	rd_safe.o	\
 	recvauth.o	\
+	response_set.o	\
 	s4u_authdata.o	\
 	s4u_creds.o	\
 	sendauth.o	\
@@ -197,6 +198,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)rd_req_dec.$(OBJEXT)	\
 	$(OUTPRE)rd_safe.$(OBJEXT)	\
 	$(OUTPRE)recvauth.$(OBJEXT)	\
+	$(OUTPRE)response_set.$(OBJEXT)	\
 	$(OUTPRE)s4u_authdata.$(OBJEXT)	\
 	$(OUTPRE)s4u_creds.$(OBJEXT)	\
 	$(OUTPRE)sendauth.$(OBJEXT)	\
@@ -302,6 +304,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/rd_req_dec.c	\
 	$(srcdir)/rd_safe.c	\
 	$(srcdir)/recvauth.c	\
+	$(srcdir)/response_set.c\
 	$(srcdir)/s4u_authdata.c\
 	$(srcdir)/s4u_creds.c	\
 	$(srcdir)/sendauth.c	\
@@ -408,8 +411,11 @@ t_expire_warn: t_expire_warn.o $(KRB5_BASE_DEPLIBS)
 t_vfy_increds: t_vfy_increds.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_vfy_increds.o $(KRB5_BASE_LIBS)
 
+t_response_set: t_response_set.o response_set.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_response_set.o response_set.o $(KRB5_BASE_LIBS)
+
 TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
-	t_princ t_etypes t_vfy_increds
+	t_princ t_etypes t_vfy_increds t_response_set
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
@@ -447,6 +453,7 @@ check-unix:: $(TEST_PROGS)
 	$(RUN_SETUP) $(VALGRIND) ./t_pac
 	$(RUN_SETUP) $(VALGRIND) ./t_princ
 	$(RUN_SETUP) $(VALGRIND) ./t_etypes
+	$(RUN_SETUP) $(VALGRIND) ./t_response_set
 
 check-pytests:: t_expire_warn t_vfy_increds
 	$(RUNPYTEST) $(srcdir)/t_expire_warn.py $(PYTESTFLAGS)
@@ -463,7 +470,8 @@ clean::
 		$(OUTPRE)t_pac$(EXEEXT) $(OUTPRE)t_pac.$(OBJEXT)	\
 		$(OUTPRE)t_princ$(EXEEXT) $(OUTPRE)t_princ.$(OBJEXT)	\
 	$(OUTPRE)t_authdata$(EXEEXT) $(OUTPRE)t_authdata.$(OBJEXT)	\
-	$(OUTPRE)t_vfy_increds$(EXEEXT) $(OUTPRE)t_vfy_increds.$(OBJEXT)
+	$(OUTPRE)t_vfy_increds$(EXEEXT) $(OUTPRE)t_vfy_increds.$(OBJEXT) \
+	$(OUTPRE)t_response_set$(EXEEXT) $(OUTPRE)t_response_set.$(OBJEXT)
 
 @libobj_frag@
 

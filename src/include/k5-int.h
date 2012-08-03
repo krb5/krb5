@@ -770,6 +770,7 @@ struct krb5_clpreauth_rock_st {
     krb5_timestamp pa_offset;
     krb5_int32 pa_offset_usec;
     enum { NO_OFFSET = 0, UNAUTH_OFFSET, AUTH_OFFSET } pa_offset_state;
+    krb5_response_set *rset;
 };
 
 typedef struct _krb5_pa_enc_ts {
@@ -964,6 +965,8 @@ typedef struct _krb5_gic_opt_private {
     krb5_flags fast_flags;
     krb5_expire_callback_func expire_cb;
     void *expire_data;
+    krb5_responder_fn responder;
+    void *responder_data;
 } krb5_gic_opt_private;
 
 /*

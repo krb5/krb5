@@ -523,3 +523,20 @@ krb5_get_init_creds_opt_set_expire_callback(krb5_context context,
     opte->opt_private->expire_data = data;
     return retval;
 }
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_set_responder(krb5_context context,
+                                      krb5_get_init_creds_opt *opt,
+                                      krb5_responder_fn responder, void *data)
+{
+    krb5_error_code ret;
+    krb5_gic_opt_ext *opte;
+
+    ret = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
+                                  "krb5_get_init_creds_opt_set_responder");
+    if (ret)
+        return ret;
+    opte->opt_private->responder = responder;
+    opte->opt_private->responder_data = data;
+    return 0;
+}

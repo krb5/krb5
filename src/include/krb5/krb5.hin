@@ -6349,6 +6349,43 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
                     const char *banner, int num_prompts,
                     krb5_prompt prompts[]);
 
+typedef struct krb5_response_set_st krb5_response_set;
+
+/**
+ * krb5_responder_fn callback to retrieve an item from a response set.
+ *
+ * @param [in] context          Library context
+ * @param [in] rset             Response set
+ * @param [in] name             Item name
+ */
+typedef void *
+(*krb5_response_set_get_item_fn)(krb5_context context, krb5_response_set *rset,
+                                 const char *name);
+
+/**
+ * Responder function for an initial credential exchange.
+ *
+ * @param [in] context          Library context
+ * @param [in] data             Callback data
+ * @param [in] rset             Response set
+ * @param [in] get_item         Callback to query response set
+ *
+ * A responder function is like a prompter function, but responds to structured
+ * data rather than textual prompts.  Client preauthentication modules will
+ * create a response set consisting of named structured data items.  When the
+ * responder is called, it should "answer" the items it understands.  Precisely
+ * what this means depends on the data type involved, but usually this involves
+ * modifying a struct that is referenced by the pointer returned by @a
+ * get_item.  The format for this struct will usually be defined in a public
+ * header installed by the preauthentication module.
+ *
+ * If a module's response item is not answered, it may fall back to the
+ * prompter function.
+ */
+typedef krb5_error_code
+(*krb5_responder_fn)(krb5_context context, void *data, krb5_response_set *rset,
+                     krb5_response_set_get_item_fn get_item);
+
 /** Store options for @c _krb5_get_init_creds */
 typedef struct _krb5_get_init_creds_opt {
     krb5_flags flags;
@@ -6706,6 +6743,19 @@ krb5_get_init_creds_opt_set_expire_callback(krb5_context context,
                                             krb5_get_init_creds_opt *opt,
                                             krb5_expire_callback_func cb,
                                             void *data);
+
+/**
+ * Set the responder function in initial credential options.
+ *
+ * @param [in] context          Library context
+ * @param [in] opt              Options structure
+ * @param [in] responder        Responder function
+ * @param [in] data             Responder data argument
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_set_responder(krb5_context context,
+                                      krb5_get_init_creds_opt *opt,
+                                      krb5_responder_fn responder, void *data);
 
 /**
  * Get initial credentials using a password.

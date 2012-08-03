@@ -199,4 +199,23 @@ krb5_error_code
 k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
                   int *use_master);
 
+krb5_error_code
+k5_response_set_new(krb5_response_set **rset_out);
+
+void
+k5_response_set_free(krb5_response_set *rset);
+
+void
+k5_response_set_reset(krb5_response_set *rset);
+
+krb5_boolean
+k5_response_set_empty(krb5_response_set *rset);
+
+krb5_error_code
+k5_response_set_set_item(krb5_response_set *rset, const char *name, void *item,
+                         void (*free_item)(void *item));
+
+void *
+k5_response_set_get_item(krb5_response_set *rset, const char *name);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */
