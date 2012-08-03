@@ -49,6 +49,9 @@
 #define KRB5_PLUGIN_BUNDLE_DIR       "/System/Library/KerberosPlugins/KerberosFrameworkPlugins"
 #define KDB5_PLUGIN_BUNDLE_DIR       "/System/Library/KerberosPlugins/KerberosDatabasePlugins"
 #define KRB5_AUTHDATA_PLUGIN_BUNDLE_DIR  "/System/Library/KerberosPlugins/KerberosAuthDataPlugins"
+#elif ANDROID /* Android Build */
+#define DEFAULT_SECURE_PROFILE_PATH     "/data/local/kerberos/krb5.conf"
+#define DEFAULT_PROFILE_PATH        DEFAULT_SECURE_PROFILE_PATH
 #else
 #define DEFAULT_SECURE_PROFILE_PATH     "/etc/krb5.conf:@SYSCONFDIR/krb5.conf"
 #define DEFAULT_PROFILE_PATH        DEFAULT_SECURE_PROFILE_PATH

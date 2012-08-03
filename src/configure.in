@@ -150,6 +150,16 @@ builtin)
 openssl)
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
   ;;
+cyassl)
+  CYASSL_URL="http://www.yassl.com/download.html"
+  LIBS="$LIBS -lcyassl"
+  AC_CHECK_LIB([cyassl], [CyaSSL_Init],
+     [ cyassl_linked=yes ], [ cyassl_linked=no ])
+  if test "x$cyassl_linked" == "xno" ; then
+     AC_MSG_ERROR([CyaSSL isn't found. You can get it from $CYASSL_URL
+     If it's already installed, please check that it is installed in the correct location.])
+  fi
+  ;;
 nss)
   if test "${CRYPTO_IMPL_CFLAGS+set}" != set; then
     CRYPTO_IMPL_CFLAGS=`pkg-config --cflags nss`
@@ -204,6 +214,9 @@ case "$withval" in
 builtin|openssl)
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info, PKINIT_CRYPTO_IMPL_LIBS=-lcrypto)
   PKINIT_CRYPTO_IMPL=openssl
+  ;;
+cyassl)
+#PKINIT_CRYPTO_IMPL=
   ;;
 nss)
   if test "${PKINIT_CRYPTO_IMPL_CFLAGS+set}" != set; then
