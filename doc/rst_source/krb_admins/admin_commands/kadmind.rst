@@ -34,15 +34,11 @@ for it to work:
     **acl_file**, **dict_file**, **kadmind_port**, and iprop-related
     settings.
 
-ACL file
+:ref:`kadm5.acl(5)`
     kadmind's ACL (access control list) tells it which principals are
     allowed to perform administration actions.  The pathname to the
-    ACL file can be specified with the **acl_file** kdc.conf variable;
-    by default, it is |kdcdir|\ ``/kadm5.acl``.  The syntax of the ACL
-    file is specified in the ACL FILE SYNTAX section below.
-
-    If the kadmind ACL file is modified, the kadmind daemon needs to
-    be restarted for changes to take effect.
+    ACL file can be specified with the **acl_file** :ref:`kdc.conf(5)`
+    variable; by default, it is |kdcdir|\ ``/kadm5.acl``.
 
 After the server begins running, it puts itself in the background and
 disassociates itself from its controlling terminal.
@@ -112,84 +108,8 @@ OPTIONS
             stash the password using the **stashsrvpw** command of
             :ref:`kdb5_ldap_util(8)`.
 
-
-ACL FILE SYNTAX
----------------
-
-The ACL file controls which principals can or cannot perform which
-administrative functions.  For operations that affect principals, the
-ACL file also controls which principals can operate on which other
-principals.  Empty lines and lines starting with the sharp sign
-(``#``) are ignored.  Lines containing ACL entries have the format:
-
- ::
-
-    principal operation-mask [operation-target]
-
-Ordering is important.  The first matching entry will control access
-for an actor principal on a target principal.
-
-*principal*
-    may specify a partially or fully qualified Kerberos version 5
-    principal name.  Each component of the name may be wildcarded
-    using the ``*`` character.
-
-*operation-target*
-    [Optional] may specify a partially or fully qualified Kerberos
-    version 5 principal name.  Each component of the name may be
-    wildcarded using the ``*`` character.
-
-*operation-mask*
-    Specifies what operations may or may not be performed by a
-    principal matching a particular entry.  This is a string of one or
-    more of the following list of characters or their upper-case
-    counterparts.  If the character is upper-case, then the operation
-    is disallowed.  If the character is lower-case, then the operation
-    is permitted.
-
-    == ======================================================
-    a  [Dis]allows the addition of principals or policies
-    d  [Dis]allows the deletion of principals or policies
-    m  [Dis]allows the modification of principals or policies
-    c  [Dis]allows the changing of passwords for principals
-    i  [Dis]allows inquiries about principals or policies
-    l  [Dis]allows the listing of principals or policies
-    p  [Dis]allows the propagation of the principal database
-    x  Short for admcil.
-    \* Same as x.
-    == ======================================================
-
-    Some examples of valid entries here are:
-
-    ``user/instance@realm adm``
-        A standard fully qualified name.  The *operation-mask* only
-        applies to this principal and specifies that [s]he may add,
-        delete, or modify principals and policies, but not change
-        anybody else's password.
-
-    ``user/instance@realm cim service/instance@realm``
-        A standard fully qualified name and a standard fully qualified
-        target.  The *operation-mask* only applies to this principal
-        operating on this target and specifies that [s]he may change
-        the target's password, request information about the target,
-        and modify it.
-
-    ``user/*@realm ac``
-        A wildcarded name.  The *operation-mask* applies to all
-        principals in realm ``realm`` whose first component is
-        ``user`` and specifies that [s]he may add principals and
-        change anybody's password.
-
-    ``user/*@realm i */instance@realm``
-        A wildcarded name and target.  The *operation-mask* applies to
-        all principals in realm ``realm`` whose first component is
-        ``user`` and specifies that [s]he may perform inquiries on
-        principals whose second component is ``instance`` and realm is
-        ``realm``.
-
-
 SEE ALSO
 --------
 
 :ref:`kpasswd(1)`, :ref:`kadmin(1)`, :ref:`kdb5_util(8)`,
-:ref:`kdb5_ldap_util(8)`
+:ref:`kdb5_ldap_util(8)`, :ref:`kadm5.acl(5)`

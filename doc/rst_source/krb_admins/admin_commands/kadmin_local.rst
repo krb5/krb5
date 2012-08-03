@@ -165,8 +165,8 @@ COMMANDS
 --------
 
 When using the remote client, available commands may be restricted
-according to the privileges specified in the kadm5.acl file on the
-admin server.
+according to the privileges specified in the :ref:`kadm5.acl(5)` file
+on the admin server.
 
 .. _add_principal:
 
