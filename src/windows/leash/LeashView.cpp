@@ -866,6 +866,8 @@ cleanup:
         pkrb5_free_context(ctx);
     if (ccache_name != NULL)
         free(ccache_name);
+
+    CLeashApp::m_bUpdateDisplay = TRUE;
     return 0;
 }
 
