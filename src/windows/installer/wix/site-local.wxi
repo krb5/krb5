@@ -52,7 +52,7 @@
     <!--<?define Release?>-->
 
     <!-- Optional defines -->
-    <?define Beta="4"?> <!-- Numeric Beta identifier -->
+    <?define Beta="5"?> <!-- Numeric Beta identifier -->
     <!-- <?define OldHelp?> --> <!-- Specifies the use of the old leash32.hlp file
                            instead of the new leash32.chm file -->
 
