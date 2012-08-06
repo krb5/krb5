@@ -64,18 +64,6 @@ typedef struct gss_cred_id_struct {
 	gss_cred_id_t		*cred_array;
 } gss_union_cred_desc, *gss_union_cred_t;
 
-typedef	OM_uint32 (KRB5_CALLCONV *gss_acquire_cred_with_password_sfct)(
-		    OM_uint32 *,	/* minor_status */
-		    const gss_name_t,	/* desired_name */
-		    const gss_buffer_t, /* password */
-		    OM_uint32,		/* time_req */
-		    const gss_OID_set,	/* desired_mechs */
-		    int,		/* cred_usage */
-		    gss_cred_id_t *,	/* output_cred_handle */
-		    gss_OID_set *,	/* actual_mechs */
-		    OM_uint32 *		/* time_rec */
-	/* */);
-
 /*
  * Rudimentary pointer validation macro to check whether the
  * "loopback" field of an opaque struct points back to itself.  This
@@ -633,12 +621,20 @@ typedef struct gss_config {
 	    gss_cred_usage_t *		/* cred_usage_stored */
 	/* */);
 
-} *gss_mechanism;
+	OM_uint32       (KRB5_CALLCONV *gssspi_acquire_cred_with_password)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    const gss_name_t,		/* desired_name */
+	    const gss_buffer_t,	 /* password */
+	    OM_uint32,			/* time_req */
+	    const gss_OID_set,		/* desired_mechs */
+	    int,			/* cred_usage */
+	    gss_cred_id_t *,		/* output_cred_handle */
+	    gss_OID_set *,		/* actual_mechs */
+	    OM_uint32 *			/* time_rec */
+	/* */);
 
-/* This structure MUST NOT be used by any code outside libgss */
-typedef struct gss_config_ext {
-    gss_acquire_cred_with_password_sfct	gssspi_acquire_cred_with_password;
-} *gss_mechanism_ext;
+} *gss_mechanism;
 
 /*
  * In the user space we use a wrapper structure to encompass the
@@ -655,7 +651,6 @@ typedef struct gss_mech_config {
 	void *dl_handle;		/* RTLD object handle for the mech */
 	gss_OID mech_type;		/* mechanism oid */
 	gss_mechanism mech;		/* mechanism initialization struct */
- 	gss_mechanism_ext mech_ext;	/* extensions */
  	int priority;			/* mechanism preference order */
 	int freeMech;			/* free mech table */
 	struct gss_mech_config *next;	/* next element in the list */
@@ -670,7 +665,6 @@ void gssint_mechglue_fini(void);
 #endif
 
 gss_mechanism gssint_get_mechanism (gss_const_OID);
-gss_mechanism_ext gssint_get_mechanism_ext(const gss_OID);
 OM_uint32 gssint_get_mech_type (gss_OID, gss_buffer_t);
 char *gssint_get_kmodName(const gss_OID);
 char *gssint_get_modOptions(const gss_OID);

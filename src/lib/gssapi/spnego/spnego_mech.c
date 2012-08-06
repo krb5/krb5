@@ -276,10 +276,6 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_inquire_attrs_for_mech,
 	spnego_gss_acquire_cred_from,
 	NULL,				/* gss_store_cred_into */
-};
-
-static struct gss_config_ext spnego_mechanism_ext =
-{
 	spnego_gss_acquire_cred_with_password
 };
 
@@ -292,7 +288,6 @@ static int gss_spnegomechglue_init(void)
 
 	memset(&mech_spnego, 0, sizeof(mech_spnego));
 	mech_spnego.mech = &spnego_mechanism;
-	mech_spnego.mech_ext = &spnego_mechanism_ext;
 	mech_spnego.mechNameStr = "spnego";
 	mech_spnego.mech_type = GSS_C_NO_OID;
 

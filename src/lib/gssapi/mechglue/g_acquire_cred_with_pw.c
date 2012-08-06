@@ -335,7 +335,6 @@ gss_add_cred_with_password(minor_status, input_cred_handle,
     gss_name_t		internal_name = GSS_C_NO_NAME;
     gss_name_t		allocated_name = GSS_C_NO_NAME;
     gss_mechanism       mech;
-    gss_mechanism_ext	mech_ext;
     gss_cred_id_t	cred = NULL;
     gss_OID		new_mechs_array = NULL;
     gss_cred_id_t *	new_cred_array = NULL;
@@ -359,9 +358,7 @@ gss_add_cred_with_password(minor_status, input_cred_handle,
     mech = gssint_get_mechanism(desired_mech);
     if (!mech)
 	return GSS_S_BAD_MECH;
-
-    mech_ext = gssint_get_mechanism_ext(desired_mech);
-    if (!mech_ext || !mech_ext->gssspi_acquire_cred_with_password)
+    if (!mech->gssspi_acquire_cred_with_password)
 	return GSS_S_UNAVAILABLE;
 
     if (input_cred_handle == GSS_C_NO_CREDENTIAL) {
@@ -412,15 +409,15 @@ gss_add_cred_with_password(minor_status, input_cred_handle,
     if (status != GSS_S_COMPLETE)
 	goto errout;
 
-    status = mech_ext->gssspi_acquire_cred_with_password(minor_status,
-							 internal_name,
-							 password,
-							 time_req,
-							 target_mechs,
-							 cred_usage,
-							 &cred,
-							 NULL,
-							 &time_rec);
+    status = mech->gssspi_acquire_cred_with_password(minor_status,
+						     internal_name,
+						     password,
+						     time_req,
+						     target_mechs,
+						     cred_usage,
+						     &cred,
+						     NULL,
+						     &time_rec);
     if (status != GSS_S_COMPLETE) {
 	map_error(minor_status, mech);
 	goto errout;

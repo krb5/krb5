@@ -581,10 +581,6 @@ releaseMechInfo(gss_mech_info *pCf)
 		memset(cf->mech, 0, sizeof(*cf->mech));
 		free(cf->mech);
 	}
-	if (cf->mech_ext != NULL && cf->freeMech) {
-		memset(cf->mech_ext, 0, sizeof(*cf->mech_ext));
-		free(cf->mech_ext);
-	}
 	if (cf->dl_handle != NULL)
 		krb5int_close_plugin(cf->dl_handle);
 
@@ -622,16 +618,6 @@ gssint_register_mechinfo(gss_mech_info template)
 	new_cf->priority = template->priority;
 	new_cf->freeMech = 1;
 	new_cf->next = NULL;
-
-	if (template->mech_ext != NULL) {
-		new_cf->mech_ext = (gss_mechanism_ext)calloc(1,
-						sizeof(struct gss_config_ext));
-		if (new_cf->mech_ext == NULL) {
-			releaseMechInfo(&new_cf);
-			return ENOMEM;
-		}
-		*new_cf->mech_ext = *template->mech_ext;
-	}
 
 	if (template->kmodName != NULL) {
 		new_cf->kmodName = strdup(template->kmodName);
@@ -784,27 +770,13 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
         GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_mech_for_saslname);
         /* RFC 5587 */
         GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_attrs_for_mech);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_acquire_cred_with_password);
 
 	assert(mech_type != GSS_C_NO_OID);
 
 	mech->mech_type = *(mech_type);
 
 	return mech;
-}
-
-static gss_mechanism_ext
-build_dynamicMechExt(void *dl, const gss_OID mech_type)
-{
-	gss_mechanism_ext mech_ext;
-
-	mech_ext = (gss_mechanism_ext)calloc(1, sizeof(*mech_ext));
-	if (mech_ext == NULL) {
-		return NULL;
-	}
-
-	GSS_ADD_DYNAMIC_METHOD(dl, mech_ext, gssspi_acquire_cred_with_password);
-
-	return mech_ext;
 }
 
 static void
@@ -904,55 +876,6 @@ gssint_get_mechanism(gss_const_OID oid)
 	(void) k5_mutex_unlock(&g_mechListLock);
 	return (aMech->mech);
 } /* gssint_get_mechanism */
-
-gss_mechanism_ext
-gssint_get_mechanism_ext(oid)
-const gss_OID oid;
-{
-	gss_mech_info aMech;
-
-	if (gssint_mechglue_initialize_library() != 0)
-		return (NULL);
-
-	if (k5_mutex_lock(&g_mechListLock) != 0)
-		return NULL;
-	/* check if the mechanism is already loaded */
-	if ((aMech = searchMechList(oid)) != NULL && aMech->mech_ext) {
-		(void) k5_mutex_unlock(&g_mechListLock);
-		return (aMech->mech_ext);
-	}
-
-	/*
-	 * might need to re-read the configuration file before loading
-	 * the mechanism to ensure we have the latest info.
-	 */
-	updateMechList();
-
-	aMech = searchMechList(oid);
-
-	/* is the mechanism present in the list ? */
-	if (aMech == NULL || aMech->dl_handle == NULL) {
-		(void) k5_mutex_unlock(&g_mechListLock);
-		return ((gss_mechanism_ext)NULL);
-	}
-
-	/* has another thread loaded the mech */
-	if (aMech->mech_ext) {
-		(void) k5_mutex_unlock(&g_mechListLock);
-		return (aMech->mech_ext);
-	}
-
-	/* Try dynamic dispatch table */
-	aMech->mech_ext = build_dynamicMechExt(aMech->dl_handle,
-                                               aMech->mech_type);
-	if (aMech->mech_ext == NULL) {
-		(void) k5_mutex_unlock(&g_mechListLock);
-		return ((gss_mechanism_ext)NULL);
-	}
-
-	(void) k5_mutex_unlock(&g_mechListLock);
-	return (aMech->mech_ext);
-} /* gssint_get_mechanism_ext */
 
 /*
  * this routine is used for searching the list of mechanism data.
