@@ -30,9 +30,9 @@ The kdc.conf file may contain the following sections:
 ==================== =================================================
 :ref:`kdcdefaults`   Default values for KDC behavior
 :ref:`kdc_realms`    Realm-specific database configuration and settings
-:ref:`logging`       Controls how Kerberos daemons perform logging
 :ref:`dbdefaults`    Default database settings
 :ref:`dbmodules`     Per-database settings
+:ref:`logging`       Controls how Kerberos daemons perform logging
 ==================== =================================================
 
 
@@ -315,6 +315,102 @@ For each realm, the following tags may be specified:
     possible values, see :ref:`Encryption_and_salt_types`.
 
 
+.. _dbdefaults:
+
+[dbdefaults]
+~~~~~~~~~~~~
+
+The [dbdefaults] section specifies default values for some database
+parameters, to be used if the [dbmodules] subsection does not contain
+a relation for the tag.  See the :ref:`dbmodules` section for the
+definitions of these relations.
+
+* **ldap_kerberos_container_dn**
+* **ldap_kdc_dn**
+* **ldap_kadmind_dn**
+* **ldap_service_password_file**
+* **ldap_servers**
+* **ldap_conns_per_server**
+
+
+.. _dbmodules:
+
+[dbmodules]
+~~~~~~~~~~~
+
+The [dbmodules] section contains parameters used by the KDC database
+library and database modules.
+
+The following tag may be specified in the [dbmodules] section:
+
+**db_module_dir**
+    This tag controls where the plugin system looks for modules.  The
+    value should be an absolute path.
+
+Other tags in the [dbmodules] section name a configuration subsection
+for parameters which can be referred to by a realm's
+**database_module** parameter.  The following tags may be specified in
+the subsection:
+
+**database_name**
+    This DB2-specific tag indicates the location of the database in
+    the filesystem.  The default is |kdcdir|\ ``/principal``.
+
+**db_library**
+    This tag indicates the name of the loadable database module.  The
+    value should be ``db2`` for the DB2 module and ``kldap`` for the
+    LDAP module.
+
+**disable_last_success**
+    If set to ``true``, suppresses KDC updates to the "Last successful
+    authentication" field of principal entries requiring
+    preauthentication.  Setting this flag may improve performance.
+    (Principal entries which do not require preauthentication never
+    update the "Last successful authentication" field.).  First
+    introduced in version 1.9.
+
+**disable_lockout**
+    If set to ``true``, suppresses KDC updates to the "Last failed
+    authentication" and "Failed password attempts" fields of principal
+    entries requiring preauthentication.  Setting this flag may
+    improve performance, but also disables account lockout.  First
+    introduced in version 1.9.
+
+**ldap_conns_per_server**
+    This LDAP-specific tag indicates the number of connections to be
+    maintained per LDAP server.
+
+**ldap_kadmind_dn**
+    This LDAP-specific tag indicates the default bind DN for the
+    :ref:`kadmind(8)` daemon.  kadmind does a login to the directory
+    as this object.  This object should have the rights to read and
+    write the Kerberos data in the LDAP database.
+
+**ldap_kdc_dn**
+    This LDAP-specific tag indicates the default bind DN for the
+    :ref:`krb5kdc(8)` daemon.  The KDC does a login to the directory
+    as this object.  This object should have the rights to read the
+    Kerberos data in the LDAP database, and to write data unless
+    **disable_lockout** and **disable_last_success** are true.
+
+**ldap_kerberos_container_dn**
+    This LDAP-specific tag indicates the DN of the container object
+    where the realm objects will be located.
+
+**ldap_servers**
+    This LDAP-specific tag indicates the list of LDAP servers that the
+    Kerberos servers can connect to.  The list of LDAP servers is
+    whitespace-separated.  The LDAP server is specified by a LDAP URI.
+    It is recommended to use ``ldapi:`` or ``ldaps:`` URLs to connect
+    to the LDAP server.
+
+**ldap_service_password_file**
+    This LDAP-specific tag indicates the file containing the stashed
+    passwords (created by ``kdb5_ldap_util stashsrvpw``) for the
+    **ldap_kadmind_dn** and **ldap_kdc_dn** objects.  This file must
+    be kept secure.
+
+
 .. _logging:
 
 [logging]
@@ -384,99 +480,6 @@ administrative server will be appended to the file
         kdc = SYSLOG:INFO:DAEMON
         admin_server = FILE:/var/adm/kadmin.log
         admin_server = DEVICE=/dev/tty04
-
-
-.. _dbdefaults:
-
-[dbdefaults]
-~~~~~~~~~~~~
-
-The [dbdefaults] section specifies default values for some database
-parameters, to be used if the [dbmodules] subsection does not contain
-a relation for the tag.  See the :ref:`dbmodules` section for the
-definitions of these relations.
-
-* **ldap_kerberos_container_dn**
-* **ldap_kdc_dn**
-* **ldap_kadmind_dn**
-* **ldap_service_password_file**
-* **ldap_servers**
-* **ldap_conns_per_server**
-
-
-.. _dbmodules:
-
-[dbmodules]
-~~~~~~~~~~~
-
-The [dbmodules] section contains parameters used by the KDC database
-library and database modules.  The following tag may be specified
-in the [dbmodules] section:
-
-**db_module_dir**
-    This tag controls where the plugin system looks for modules.  The
-    value should be an absolute path.
-
-Other tags in the [dbmodules] section name a configuration subsection
-for parameters which can be referred to by a realm's
-**database_module** parameter.  The following tags may be specified in
-the subsection:
-
-**database_name**
-    This DB2-specific tag indicates the location of the database in
-    the filesystem.  The default is |kdcdir|\ ``/principal``.
-
-**db_library**
-    This tag indicates the name of the loadable database module.  The
-    value should be ``db2`` for the DB2 module and ``kldap`` for the
-    LDAP module.
-
-**disable_last_success**
-    If set to ``true``, suppresses KDC updates to the "Last successful
-    authentication" field of principal entries requiring
-    preauthentication.  Setting this flag may improve performance.
-    (Principal entries which do not require preauthentication never
-    update the "Last successful authentication" field.).
-
-**disable_lockout**
-    If set to ``true``, suppresses KDC updates to the "Last failed
-    authentication" and "Failed password attempts" fields of principal
-    entries requiring preauthentication.  Setting this flag may
-    improve performance, but also disables account lockout.
-
-**ldap_conns_per_server**
-    This LDAP-specific tag indicates the number of connections to be
-    maintained per LDAP server.
-
-**ldap_kadmind_dn**
-    This LDAP-specific tag indicates the default bind DN for the
-    :ref:`kadmind(8)` daemon.  kadmind does a login to the directory
-    as this object.  This object should have the rights to read and
-    write the Kerberos data in the LDAP database.
-
-**ldap_kdc_dn**
-    This LDAP-specific tag indicates the default bind DN for the
-    :ref:`krb5kdc(8)` daemon.  The KDC does a login to the directory
-    as this object.  This object should have the rights to read the
-    Kerberos data in the LDAP database, and to write data unless
-    **disable_lockout** and **disable_last_success** are true.
-
-**ldap_kerberos_container_dn**
-    This LDAP-specific tag indicates the DN of the container object
-    where the realm objects will be located.
-
-**ldap_servers**
-    This LDAP-specific tag indicates the list of LDAP servers that the
-    Kerberos servers can connect to.  The list of LDAP servers is
-    whitespace-separated.  The LDAP server is specified by a LDAP URI.
-    It is recommended to use ``ldapi:`` or ``ldaps:`` URLs to connect
-    to the LDAP server.
-
-**ldap_service_password_file**
-    This LDAP-specific tag indicates the file containing the stashed
-    passwords (created by ``kdb5_ldap_util stashsrvpw``) for the
-    **ldap_kadmind_dn** and **ldap_kdc_dn** objects.  This file must
-    be kept secure.
 
 
 PKINIT options
