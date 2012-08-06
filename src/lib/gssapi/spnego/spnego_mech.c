@@ -2531,7 +2531,7 @@ spnego_gss_acquire_cred_with_password(OM_uint32 *minor_status,
 				      OM_uint32 *time_rec)
 {
 	OM_uint32 status, tmpmin;
-	gss_OID_set amechs = GSS_C_NULL_OID_SET, dmechs;
+	gss_OID_set amechs = GSS_C_NULL_OID_SET;
 	gss_cred_id_t mcred = NULL;
 	spnego_gss_cred_id_t spcred = NULL;
 
@@ -2543,16 +2543,14 @@ spnego_gss_acquire_cred_with_password(OM_uint32 *minor_status,
 	if (time_rec)
 		*time_rec = 0;
 
-	dmechs = desired_mechs;
-	if (desired_mechs == GSS_C_NULL_OID_SET) {
-		status = get_available_mechs(minor_status, desired_name,
-					     cred_usage, GSS_C_NO_CRED_STORE,
-					     NULL, &amechs);
-		dmechs = amechs;
-	}
+	status = get_available_mechs(minor_status, desired_name,
+				     cred_usage, GSS_C_NO_CRED_STORE,
+				     NULL, &amechs);
+	if (status != GSS_S_COMPLETE)
+	    goto cleanup;
 
 	status = gss_acquire_cred_with_password(minor_status, desired_name,
-						password, time_req, dmechs,
+						password, time_req, amechs,
 						cred_usage, &mcred,
 						actual_mechs, time_rec);
 	if (status != GSS_S_COMPLETE)
