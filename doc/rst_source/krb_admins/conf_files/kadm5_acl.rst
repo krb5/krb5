@@ -108,12 +108,12 @@ Here is an example of a kadm5.acl file.
 (line 1) Any principal in the ``ATHENA.MIT.EDU`` realm with
 an ``admin`` instance has all administrative privileges.
 
-(lines 2-3) The user ``joeadmin`` has all permissions with his
+(lines 1-3) The user ``joeadmin`` has all permissions with his
 ``admin`` instance, ``joeadmin/admin@ATHENA.MIT.EDU`` (matches line
-2).  He has no permissions at all with his null instance,
-``joeadmin@ATHENA.MIT.EDU`` (matches line 3).  His root instance has
+1).  He has no permissions at all with his null instance,
+``joeadmin@ATHENA.MIT.EDU`` (matches line 2).  His root instance has
 inquire and list permissions with any other principal that has the
-instance root.
+instance root (matches line 3).
 
 (line 4) Any principal in ``ATHENA.MIT.EDU`` can inquire, list,
 or change the password of their ``admin`` instance, but not any other
