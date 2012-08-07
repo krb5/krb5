@@ -208,6 +208,7 @@ krb5_parse_name_flags(krb5_context context, const char *name,
             ret = krb5_get_default_realm(context, &default_realm);
             if (ret)
                 goto cleanup;
+            krb5_free_data_contents(context, &princ->realm);
             princ->realm = string2data(default_realm);
         }
     } else if (no_realm) {
