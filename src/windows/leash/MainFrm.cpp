@@ -186,10 +186,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
-    if ( pMsg->message == WM_SYSCOMMAND && (pMsg->wParam & 0xfff0) == SC_CLOSE )
-    {
-        return TRUE;
-    }
     return CLeashFrame::PreTranslateMessage(pMsg);
 }
 
@@ -197,7 +193,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// Use the specific class name we established earlier
     // Remove the Minimize and Maximize buttons
-//    cs.style &= ~WS_MINIMIZEBOX;
+    cs.style &= ~WS_MINIMIZEBOX;
     cs.style &= ~WS_MAXIMIZEBOX;
     // Initialize the extended window style to display a TaskBar entry with WS_EX_APPWINDOW
     cs.dwExStyle |= WS_EX_APPWINDOW;
