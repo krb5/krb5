@@ -562,7 +562,7 @@ install-windows::
 	copy windows\kfwlogon\$(OUTPRE)*.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy windows\kfwlogon\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
 	copy windows\kfwlogon\$(OUTPRE)*.pdb "$(KRB_INSTALL_DIR)\bin\."
-	copy util\windows\$(OUTPRE)*.lib $(KRB_INSTALL_DIR)\lib\."
+	copy util\windows\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
 	copy util\wshelper\$(OUTPRE)$(DLIB).lib "$(KRB_INSTALL_DIR)\lib\."
 	copy util\wshelper\$(OUTPRE)$(DLIB).dll "$(KRB_INSTALL_DIR)\bin\."
 	copy util\wshelper\$(OUTPRE)$(DLIB).pdb "$(KRB_INSTALL_DIR)\bin\."
