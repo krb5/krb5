@@ -70,6 +70,46 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.10.3
+-----------------------
+
+This is a bugfix release.
+
+* Fix KDC uninitialized pointer vulnerabilities that could lead to a
+  denial of service [CVE-2012-1014] or remote code execution
+  [CVE-2012-1015].
+
+* Correctly use default_tgs_enctypes instead of default_tkt_enctypes
+  for TGS requests.
+
+krb5-1.10.3 changes by ticket ID
+--------------------------------
+
+7150    Does not build when CPPFLAGS=-DDEBUG is set.
+7155    default_tgs_enctypes not used for client TGS enctypes
+7185    Fix crash on invalid DIR ccache primary file
+7197    Translate WinSock errors to Posix counterparts
+7198    Implement switch_to for ccapiv3
+7199    Add krb5int_cc_user_set_default_name
+7200    Always recreate acl files during dejagnu tests
+7201    Handle huge /bin directories in libdb2 test
+7203    kfw add preauth_sam2 to OBJS for windows build
+7204    KFW win-mac.h fixes
+7206    Use %i, not %s to Tprintf GetLastError()
+7207    Don't use syslog / LOG_DEBUG when they don't exist
+7208    __func__ -> __FUNCTION__ in disp_status.c
+7209    Define USE_CCAPI_V3 in krb5/ccache on windows
+7210    Remove the UNICODE defines from wshelper
+7212    MSLSA Don't use lstrcpy on ANSI strings
+7213    Implement cccol iterators for mslsa
+7214    krb5_stdccv3_get_principal error handling fixup
+7215    Remove DISABLE_TRACING from windows build
+7226    Fix KDC uninit ptrs [CVE-2012-1014 CVE-2012-1015]
+7227    Fix oid set construction in gss_inquire_cred()
+7228    Further fixes for WSA/Posix error translation
+7230    Add missing quote to install-windows
+7231    Regression tests for CVE-2012-1014, CVE-2012-1015
+
 Major changes in 1.10.2
 -----------------------
 
@@ -490,6 +530,7 @@ reports, suggestions, and valuable resources:
     Mikkel Kruse
     Volker Lendecke
     Jan iankko Lieskovsky
+    Oliver Loch
     Kevin Longfellow
     Ryan Lynch
     Nathaniel McCallum
