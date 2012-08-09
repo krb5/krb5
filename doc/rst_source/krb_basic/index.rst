@@ -1,7 +1,7 @@
 .. _basic_concepts:
 
-Basic Kerberos V5 concepts
-==========================
+Kerberos V5 concepts
+====================
 
 
 .. toctree::
