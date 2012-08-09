@@ -421,12 +421,18 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 # endif
 # define INT64_TYPE int64_t
 # define UINT64_TYPE uint64_t
+# define INT64_FMT PRId64
+# define UINT64_FMT PRIu64
 #elif defined(_WIN32)
 # define INT64_TYPE signed __int64
 # define UINT64_TYPE unsigned __int64
+# define INT64_FMT "I64d"
+# define UINT64_FMT "I64u"
 #else /* not Windows, and neither stdint.h nor inttypes.h */
 # define INT64_TYPE signed long long
 # define UINT64_TYPE unsigned long long
+# define INT64_FMT "lld"
+# define UINT64_FMT "llu"
 #endif
 
 #ifndef SIZE_MAX

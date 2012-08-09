@@ -75,6 +75,7 @@ STLIBOBJS= \
 	zap.o \
 	path.o \
 	base64.o \
+	json.o \
 	$(GETTIMEOFDAY_ST_OBJ) \
 	$(IPC_ST_OBJ) \
 	$(STRLCPY_ST_OBJ) \
@@ -95,6 +96,7 @@ LIBOBJS= \
 	$(OUTPRE)zap.$(OBJEXT) \
 	$(OUTPRE)path.$(OBJEXT) \
 	$(OUTPRE)base64.$(OBJECT) \
+	$(OUTPRE)json.$(OBJEXT) \
 	$(GETTIMEOFDAY_OBJ) \
 	$(IPC_OBJ) \
 	$(STRLCPY_OBJ) \
@@ -124,9 +126,12 @@ SRCS=\
 	$(srcdir)/mkstemp.c \
 	$(srcdir)/t_k5buf.c \
 	$(srcdir)/t_unal.c \
+	$(srcdir)/t_path.c \
+	$(srcdir)/t_json.c \
 	$(srcdir)/zap.c \
 	$(srcdir)/path.c \
-	$(srcdir)/base64.c
+	$(srcdir)/base64.c \
+	$(srcdir)/json.c
 
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
@@ -192,16 +197,22 @@ path_win.o: $(srcdir)/path.c
 t_base64: t_base64.o base64.o
 	$(CC_LINK) -o $@ t_base64.o base64.o
 
+T_JSON_OBJS= t_json.o json.o base64.o k5buf.o $(PRINTF_ST_OBJ)
+
+t_json: $(T_JSON_OBJS)
+	$(CC_LINK) -o $@ $(T_JSON_OBJS)
+
 t_unal: t_unal.o
 	$(CC_LINK) -o t_unal t_unal.o
 
-TEST_PROGS= t_k5buf t_path t_path_win t_base64 t_unal
+TEST_PROGS= t_k5buf t_path t_path_win t_base64 t_json t_unal
 
 check-unix:: $(TEST_PROGS)
 	./t_k5buf
 	./t_path
 	./t_path_win
 	./t_base64
+	./t_json
 	./t_unal
 
 clean::
