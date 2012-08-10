@@ -113,4 +113,47 @@ output = realm.run_as_client(['./t_accname', 'host/-nomatch-',
 if 'host/-nomatch-' not in output:
     fail('Expected host/-nomatch- in t_accname output')
 
+realm.stop()
+
+### Test gss_inquire_cred behavior.
+
+realm = K5Realm()
+
+# Test deferred resolution of the default ccache for initiator creds.
+output = realm.run_as_client(['./t_inq_cred'])
+if realm.user_princ not in output:
+    fail('Expected %s in t_inq_cred output' % realm.user_princ)
+output = realm.run_as_client(['./t_inq_cred', '-k'])
+if realm.user_princ not in output:
+    fail('Expected %s in t_inq_cred output' % realm.user_princ)
+output = realm.run_as_client(['./t_inq_cred', '-s'])
+if realm.user_princ not in output:
+    fail('Expected %s in t_inq_cred output' % realm.user_princ)
+
+# Test picking a name from the keytab for acceptor creds.
+output = realm.run_as_client(['./t_inq_cred', '-a'])
+if realm.host_princ not in output:
+    fail('Expected %s in t_inq_cred output' % realm.host_princ)
+output = realm.run_as_client(['./t_inq_cred', '-k', '-a'])
+if realm.host_princ not in output:
+    fail('Expected %s in t_inq_cred output' % realm.host_princ)
+output = realm.run_as_client(['./t_inq_cred', '-s', '-a'])
+if realm.host_princ not in output:
+    fail('Expected %s in t_inq_cred output' % realm.host_princ)
+
+# Test client keytab initiation (non-deferred) with a specified name.
+realm.extract_keytab(realm.user_princ, realm.client_keytab)
+os.remove(realm.ccache)
+output = realm.run_as_client(['./t_inq_cred', '-k'])
+if realm.user_princ not in output:
+    fail('Expected %s in t_inq_cred output' % realm.user_princ)
+
+# Test deferred client keytab initiation and GSS_C_BOTH cred usage.
+os.remove(realm.client_keytab)
+os.remove(realm.ccache)
+shutil.copyfile(realm.keytab, realm.client_keytab)
+output = realm.run_as_client(['./t_inq_cred', '-k', '-b'])
+if realm.host_princ not in output:
+    fail('Expected %s in t_inq_cred output' % realm.host_princ)
+
 success('GSSAPI tests')
