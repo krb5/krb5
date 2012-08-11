@@ -156,4 +156,18 @@ output = realm.run_as_client(['./t_inq_cred', '-k', '-b'])
 if realm.host_princ not in output:
     fail('Expected %s in t_inq_cred output' % realm.host_princ)
 
+# Test gss_export_name behavior.
+out = realm.run_as_client(['./t_export_name', 'user:x'])
+if out != '0401000B06092A864886F7120102020000000D78404B5242544553542E434F4D\n':
+    fail('Unexpected output from t_export_name (krb5 username)')
+output = realm.run_as_client(['./t_export_name', '-s', 'user:xyz'])
+if output != '0401000806062B06010505020000000378797A\n':
+    fail('Unexpected output from t_export_name (SPNEGO username)')
+output = realm.run_as_client(['./t_export_name', 'krb5:a@b'])
+if output != '0401000B06092A864886F71201020200000003614062\n':
+    fail('Unexpected output from t_export_name (krb5 principal)')
+output = realm.run_as_client(['./t_export_name', '-s', 'krb5:a@b'])
+if output != '0401000806062B060105050200000003614062\n':
+    fail('Unexpected output from t_export_name (SPNEGO krb5 principal)')
+
 success('GSSAPI tests')
