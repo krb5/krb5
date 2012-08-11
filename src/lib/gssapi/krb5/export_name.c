@@ -61,7 +61,7 @@ krb5_gss_export_name(OM_uint32 *minor_status, const gss_name_t input_name,
     krb5_free_context(context);
     length = strlen(str);
     exported_name->length = 10 + length + gss_mech_krb5->length;
-    exported_name->value = malloc(exported_name->length);
+    exported_name->value = gssalloc_malloc(exported_name->length);
     if (!exported_name->value) {
         free(str);
         if (minor_status)
