@@ -110,7 +110,7 @@ read_wrap_token(gss_ctx_id_t ctx)
     major = krb5_gss_unwrap(&minor, ctx, &wrapped, &buf, NULL, NULL);
     check(major, minor, "krb5_gss_unwrap");
     assert(buf.length == 8 && memcmp(buf.value, "userwrap", 8) == 0);
-    free(buf.value);
+    gssalloc_free(buf.value);
     free(wrapped.value);
 }
 
@@ -178,7 +178,7 @@ send_wrap_token(gss_ctx_id_t ctx)
                           &wrapped);
     check(major, minor, "krb5_gss_wrap");
     send_data(STDOUT_FILENO, wrapped.value, wrapped.length);
-    free(wrapped.value);
+    gssalloc_free(wrapped.value);
 }
 
 /* Create a wrap token for the text "kernelmic" and send it to stdout. */
@@ -193,7 +193,7 @@ send_mic_token(gss_ctx_id_t ctx)
     major = krb5_gss_get_mic(&minor, ctx, GSS_C_QOP_DEFAULT, &buf, &mic);
     check(major, minor, "krb5_gss_get_mic");
     send_data(STDOUT_FILENO, mic.value, mic.length);
-    free(mic.value);
+    gssalloc_free(mic.value);
 }
 
 /* Create an IOV token for "kernelwrapmic", wrapping only the "wrap" part, and

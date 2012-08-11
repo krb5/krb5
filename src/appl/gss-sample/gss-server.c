@@ -382,7 +382,7 @@ test_import_export_context(gss_ctx_id_t *context)
     if (verbose && logfile)
         fprintf(logfile, "Importing context: %7.4f seconds\n",
                 timeval_subtract(&tm1, &tm2));
-    (void) gss_release_buffer(&min_stat, &context_token);
+    free(context_token.value);
     return 0;
 }
 
