@@ -432,7 +432,8 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 
 		log_status("gss_init_sec_context", maj_stat, min_stat);
 		if (recv_tokenp != GSS_C_NO_BUFFER) {
-			gss_release_buffer(&min_stat, &gr.gr_token);
+			free(gr.gr_token.value);
+			gr.gr_token.value = NULL;
 			recv_tokenp = GSS_C_NO_BUFFER;
 		}
 		if (maj_stat != GSS_S_COMPLETE &&
@@ -459,9 +460,7 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 				break;
 
 			if (gr.gr_ctx.length != 0) {
-				if (gd->gc.gc_ctx.value)
-					gss_release_buffer(&min_stat,
-							   &gd->gc.gc_ctx);
+				free(gd->gc.gc_ctx.value);
 				gd->gc.gc_ctx = gr.gr_ctx;
 			}
 			if (gr.gr_token.length != 0) {
@@ -490,17 +489,18 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 			log_debug("authgss_refresh: GSS_S_COMPLETE: calling verify_mic");
 			maj_stat = gss_verify_mic(&min_stat,gd->ctx,
 				&bufin, &bufout, &qop_state);
+			free(gd->gc_wire_verf.value);
+			gd->gc_wire_verf.length = 0;
+			gd->gc_wire_verf.value = NULL;
 
 			if (maj_stat != GSS_S_COMPLETE || qop_state != gd->sec.qop) {
 				log_status("gss_verify_mic", maj_stat, min_stat);
-				gss_release_buffer(&min_stat, &gd->gc_wire_verf);
 				if (maj_stat == GSS_S_CONTEXT_EXPIRED) {
 					gd->established = FALSE;
 					authgss_destroy_context(auth);
 				}
 				return (FALSE);
 			}
-			gss_release_buffer(&min_stat, &gd->gc_wire_verf);
 			gd->established = TRUE;
 			gd->inprogress = FALSE;
 			gd->gc.gc_proc = RPCSEC_GSS_DATA;
@@ -513,9 +513,7 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 	/* End context negotiation loop. */
 	if (gd->gc.gc_proc != RPCSEC_GSS_DATA) {
 		log_debug("authgss_refresh: returning ERROR (gc_proc %d)", gd->gc.gc_proc);
-		if (gr.gr_token.length != 0)
-			gss_release_buffer(&min_stat, &gr.gr_token);
-
+		free(gr.gr_token.value);
 		authgss_destroy(auth);
 		auth = NULL;
 		rpc_createerr.cf_stat = RPC_AUTHERROR;
@@ -565,7 +563,7 @@ authgss_destroy_context(AUTH *auth)
 				  clnt_sperror(gd->clnt,
 					       "authgss_destroy_context"));
 		}
-		gss_release_buffer(&min_stat, &gd->gc.gc_ctx);
+		free(gd->gc.gc_ctx.value);
 		/* XXX ANDROS check size of context  - should be 8 */
 		memset(&gd->gc.gc_ctx, 0, sizeof(gd->gc.gc_ctx));
 	}

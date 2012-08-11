@@ -212,7 +212,7 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 		/* Verify checksum and QOP. */
 		maj_stat = gss_verify_mic(&min_stat, ctx, &databuf,
 					  &wrapbuf, &qop_state);
-		gss_release_buffer(&min_stat, &wrapbuf);
+		free(wrapbuf.value);
 
 		if (maj_stat != GSS_S_COMPLETE || qop_state != qop) {
 			gss_release_buffer(&min_stat, &databuf);
@@ -230,7 +230,7 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 		maj_stat = gss_unwrap(&min_stat, ctx, &wrapbuf, &databuf,
 				      &conf_state, &qop_state);
 
-		gss_release_buffer(&min_stat, &wrapbuf);
+		free(wrapbuf.value);
 
 		/* Verify encryption and QOP. */
 		if (maj_stat != GSS_S_COMPLETE || qop_state != qop ||
