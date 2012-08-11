@@ -79,7 +79,7 @@ static void
 usage(const char *progname)
 {
     fprintf(stderr,
-            "Usage: %s [-k|-s] [-a|-b|-i] [princ|gss:service@host|-]\n",
+            "Usage: %s [-k|-s] [-a|-b|-i] [princ|gss:service@host]\n",
             progname);
     exit(1);
 }
@@ -95,7 +95,7 @@ main(int argc, char *argv[])
     gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
     gss_name_t name = GSS_C_NO_NAME;
     gss_buffer_desc buf;
-    const char *name_arg = NULL;
+    const char *name_arg = NULL, *progname = argv[0];
     char opt;
 
     while (argc > 1 && argv[1][0] == '-') {
@@ -112,10 +112,10 @@ main(int argc, char *argv[])
         else if (opt == 's')
             mech = &spnego_mech;
         else
-            usage(argv[0]);
+            usage(progname);
     }
     if (argc > 2)
-        usage(argv[0]);
+        usage(progname);
     if (argc > 1)
         name_arg = argv[1];
 
@@ -124,8 +124,8 @@ main(int argc, char *argv[])
         /* Import as host-based service. */
         buf.value = (char *)name_arg + 4;
         buf.length = strlen((char *)buf.value);
-        major = gss_import_name(&minor, &buf,
-                                (gss_OID)GSS_C_NT_HOSTBASED_SERVICE, &name);
+        major = gss_import_name(&minor, &buf, GSS_C_NT_HOSTBASED_SERVICE,
+                                &name);
         if (GSS_ERROR(major))
             gsserr("gss_import_name", major, minor);
     } else if (name_arg != NULL) {
