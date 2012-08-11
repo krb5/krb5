@@ -1205,7 +1205,7 @@ make_NegHints(OM_uint32 *minor_status,
 	tlen += 1 + gssint_der_length_size(hintNameSize);
 	negHintsSize = tlen;
 
-	t = (unsigned char *)malloc(tlen);
+	t = gssalloc_malloc(tlen);
 	if (t == NULL) {
 		*minor_status = ENOMEM;
 		goto errout;
@@ -3071,7 +3071,7 @@ get_input_token(unsigned char **buff_in, unsigned int buff_length)
 		return (NULL);
 
 	input_token->length = len;
-	input_token->value = malloc(input_token->length);
+	input_token->value = gssalloc_malloc(input_token->length);
 
 	if (input_token->value == NULL) {
 		free(input_token);
@@ -3184,7 +3184,7 @@ put_mech_set(gss_OID_set mechSet, gss_buffer_t buf)
 	 * 0x30 [DER LEN]
 	 */
 	tlen = 1 + gssint_der_length_size(ilen) + ilen;
-	ptr = malloc(tlen);
+	ptr = gssalloc_malloc(tlen);
 	if (ptr == NULL)
 		return -1;
 
@@ -3282,7 +3282,7 @@ get_negTokenInit(OM_uint32 *minor_status,
 		return GSS_S_FAILURE;
 
 	tmpbuf.length = ptr - (unsigned char *)tmpbuf.value;
-	der_mechSet->value = malloc(tmpbuf.length);
+	der_mechSet->value = gssalloc_malloc(tmpbuf.length);
 	if (der_mechSet->value == NULL)
 		return GSS_S_FAILURE;
 	memcpy(der_mechSet->value, tmpbuf.value, tmpbuf.length);
@@ -3593,7 +3593,7 @@ make_spnego_tokenInit_msg(spnego_gss_ctx_id_t spnego_ctx,
 
 	tlen = g_token_size(gss_mech_spnego, negTokenInitSize);
 
-	t = (unsigned char *) malloc(tlen);
+	t = (unsigned char *) gssalloc_malloc(tlen);
 
 	if (t == NULL) {
 		return (-1);
@@ -3769,7 +3769,7 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 	dataLen += 1 + gssint_der_length_size(NegTokenSize);
 
 	tlen = dataLen;
-	t = (unsigned char *) malloc(tlen);
+	t = (unsigned char *) gssalloc_malloc(tlen);
 
 	if (t == NULL) {
 		ret = GSS_S_DEFECTIVE_TOKEN;

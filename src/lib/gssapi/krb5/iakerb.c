@@ -284,9 +284,11 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
     else
         tokenSize = 2 + data->length;
 
-    token->value = q = k5alloc(tokenSize, &code);
-    if (code != 0)
+    token->value = q = gssalloc_malloc(tokenSize);
+    if (q == NULL) {
+        code = ENOMEM;
         goto cleanup;
+    }
     token->length = tokenSize;
 
     if (initialContextToken) {

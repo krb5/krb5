@@ -119,7 +119,7 @@ gss_OID *		output_name_type;
     }
 
     if ((output_name_buffer->value =
-	 malloc(union_name->external_name->length + 1)) == NULL) {
+	 gssalloc_malloc(union_name->external_name->length + 1)) == NULL) {
 	if (output_name_type && *output_name_type != GSS_C_NULL_OID) {
 	    (void) generic_gss_release_oid(minor_status,
 					   output_name_type);
