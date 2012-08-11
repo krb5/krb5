@@ -57,7 +57,7 @@ krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
         goto error_out;
 
     /* Allocate the buffer */
-    if ((obuffer = (krb5_octet *) xmalloc(bufsize)) == NULL) {
+    if ((obuffer = gssalloc_malloc(bufsize)) == NULL) {
         kret = ENOMEM;
         goto error_out;
     }
