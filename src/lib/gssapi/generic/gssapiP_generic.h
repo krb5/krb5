@@ -278,7 +278,7 @@ k5buf_to_gss(OM_uint32 *minor,
     OM_uint32 status = GSS_S_COMPLETE;
     char *bp = krb5int_buf_data(input_k5buf);
     output_buffer->length = krb5int_buf_len(input_k5buf)+1;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(DEBUG_GSSALLOC)
     if (output_buffer->length > 0) {
         output_buffer->value = gssalloc_malloc(output_buffer->length);
         if (output_buffer->value) {

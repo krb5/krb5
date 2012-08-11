@@ -9,53 +9,109 @@
 
 #ifdef _WIN32
 #include "winbase.h"
-#define USE_HEAPALLOC 1
-#else
-#define USE_HEAPALLOC 0
 #endif
 #include <string.h>
 
+#if defined(_WIN32)
+
 static inline void
-gssalloc_free(void * value)
+gssalloc_free(void *value)
 {
-    if (value) {
-#if USE_HEAPALLOC
+    if (value)
         HeapFree(GetProcessHeap(), 0, value);
-#else
-        free(value);
-#endif
-    }
 }
 
 static inline void *
 gssalloc_malloc(size_t size)
 {
-#if USE_HEAPALLOC
     return HeapAlloc(GetProcessHeap(), 0, size);
-#else
-    return malloc(size);
-#endif
 }
 
 static inline void *
 gssalloc_calloc(size_t count, size_t size)
 {
-#if USE_HEAPALLOC
     return HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, count * size);
-#else
-    return calloc(count, size);
-#endif
 }
 
 static inline void *
 gssalloc_realloc(void *value, size_t size)
 {
-#if USE_HEAPALLOC
     return HeapReAlloc(GetProcessHeap(), 0, value, size);
-#else
-    return realloc(value, size);
-#endif
 }
+
+#elif defined(DEBUG_GSSALLOC)
+
+/* Be deliberately incompatible with malloc and free, to allow us to detect
+ * mismatched malloc/gssalloc usage on Unix. */
+
+static inline void
+gssalloc_free(void *value)
+{
+    char *p = (char *)value - 8;
+
+    if (value == NULL)
+        return;
+    if (memcmp(p, "gssalloc", 8) != 0)
+        abort();
+    free(p);
+}
+
+static inline void *
+gssalloc_malloc(size_t size)
+{
+    char *p = calloc(size + 8, 1);
+
+    memcpy(p, "gssalloc", 8);
+    return p + 8;
+}
+
+static inline void *
+gssalloc_calloc(size_t count, size_t size)
+{
+    return gssalloc_malloc(count * size);
+}
+
+static inline void *
+gssalloc_realloc(void *value, size_t size)
+{
+    char *p = (char *)value - 8;
+
+    if (value == NULL)
+        return gssalloc_malloc(size);
+    if (memcmp(p, "gssalloc", 8) != 0)
+        abort();
+    return (char *)realloc(p, size) + 8;
+}
+
+#else /* not _WIN32 or DEBUG_GSSALLOC */
+
+/* Normal Unix case, just use free/malloc/calloc/realloc. */
+
+static inline void
+gssalloc_free(void *value)
+{
+    free(value);
+}
+
+static inline void *
+gssalloc_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+static inline void *
+gssalloc_calloc(size_t count, size_t size)
+{
+    return calloc(count, size);
+}
+
+static inline void *
+gssalloc_realloc(void *value, size_t size)
+{
+    return realloc(value, size);
+}
+
+#endif /* not _WIN32 or DEBUG_GSSALLOC */
 
 static inline char *
 gssalloc_strdup(const char *str)
