@@ -199,7 +199,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
     cs.dwExStyle |= WS_EX_APPWINDOW;
 //    cs.dwExStyle |= WS_EX_OVERLAPPEDWINDOW ;
 	cs.lpszClass = _T("LEASH.0WNDCLASS");
-    cs.lpszName = _T("Leash32");
+    cs.lpszName = _T("MIT Kerberos");
 
     CString strText = AfxGetApp()->GetProfileString(CLeashFrame::s_profileHeading,
                                                     CLeashFrame::s_profileRect);

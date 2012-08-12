@@ -386,7 +386,7 @@ BOOL CLeashApp::InitInstance()
     // Registry key under which our settings are stored.
     if (m_pszAppName)
         free((void*)m_pszAppName);
-    m_pszAppName = _tcsdup("Leash32");
+    m_pszAppName = _tcsdup("MIT Kerberos");
     SetRegistryKey(_T("MIT"));
 
     LoadStdProfileSettings(); // Load standard INI file options (including MRU)
