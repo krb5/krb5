@@ -169,7 +169,7 @@
 	<AdminExecuteSequence />
         <InstallExecuteSequence>
 	<Custom Action="KillRunningProcesses" After="InstallValidate"/>
-	<RemoveExistingProducts After="KillRunningProcesses">(Not Installed) And (UPGRADEPISMERE Or UPGRADEKFW)</RemoveExistingProducts>
+	<RemoveExistingProducts After="KillRunningProcesses">(Not Installed) And (UPGRADEPISMERE Or UPGRADEKFW Or UPGRADEKFW64)</RemoveExistingProducts>
 	<Custom Action="RenameKrb5Ini_Cmd" Before="RenameKrb5Ini"/>
 	<Custom Action="RenameKrb5Ini" Before="InstallFinalize">SYSTEMKRB5INI &lt;&gt; ""</Custom>
 	<!-- When running with a UI, CCP_Success property is not passed down to the server. -->
@@ -196,7 +196,12 @@
         <Upgrade Id="61211594-AAA1-4A98-A299-757326763CC7">
             <UpgradeVersion IgnoreRemoveFailure="no" IncludeMinimum="no" Maximum="$(var.VersionString)" IncludeMaximum="yes" MigrateFeatures="yes" Property="UPGRADEKFW" />
         </Upgrade>
-       
+
+        <!-- KfW 64-bit MSI -->
+        <Upgrade Id="6DA9CD86-6028-4852-8C94-452CAC229244">
+            <UpgradeVersion IgnoreRemoveFailure="no" IncludeMinimum="no" Maximum="$(var.VersionString)" IncludeMaximum="yes" MigrateFeatures="yes" Property="UPGRADEKFW64" />
+        </Upgrade>
+
         <!-- NSIS installation -->
         <!-- The NSIS installation, being non-MSI, is detected and removed through other means. -->
         
