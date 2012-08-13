@@ -97,7 +97,7 @@ int
 main(int argc, char *argv[])
 {
     OM_uint32 minor, major;
-    gss_OID mech = (gss_OID)gss_mech_krb5, nametype;
+    gss_OID mech = (gss_OID)gss_mech_krb5, nametype = NULL;
     gss_name_t name, mechname, impname;
     gss_buffer_desc buf, buf2;
     const char *name_arg, *progname = argv[0];
