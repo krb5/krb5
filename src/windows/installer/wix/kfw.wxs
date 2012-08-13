@@ -194,7 +194,7 @@
         
         <!-- KfW MSI -->
         <Upgrade Id="61211594-AAA1-4A98-A299-757326763CC7">
-            <UpgradeVersion IgnoreRemoveFailure="no" IncludeMinimum="no" Maximum="3.9.9" IncludeMaximum="yes" MigrateFeatures="yes" Property="UPGRADEKFW" />
+            <UpgradeVersion IgnoreRemoveFailure="no" IncludeMinimum="no" Maximum="$(var.VersionString)" IncludeMaximum="yes" MigrateFeatures="yes" Property="UPGRADEKFW" />
         </Upgrade>
        
         <!-- NSIS installation -->
