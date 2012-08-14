@@ -497,29 +497,6 @@ krb5_free_config_files(char **filenames)
     free_filespecs(filenames);
 }
 
-
-krb5_error_code
-krb5_secure_config_files(krb5_context ctx)
-{
-    /* Obsolete interface; always return an error.
-     *  This function should be removed next time a major version
-     *  number change happens.
-     */
-    krb5_error_code retval = 0;
-
-    if (ctx->profile) {
-        profile_release(ctx->profile);
-        ctx->profile = 0;
-    }
-
-    ctx->profile_secure = TRUE;
-    retval = os_init_paths(ctx, FALSE);
-    if (retval)
-        return retval;
-
-    return KRB5_OBSOLETE_FN;
-}
-
 void
 krb5_os_free_context(krb5_context ctx)
 {
