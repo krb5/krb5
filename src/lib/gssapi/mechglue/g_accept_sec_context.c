@@ -236,12 +236,10 @@ gss_cred_id_t *		d_cred;
 			    &temp_minor_status, mech,
 			    internal_name, &tmp_src_name);
 		    if (temp_status != GSS_S_COMPLETE) {
+			status = temp_status;
 			*minor_status = temp_minor_status;
 			map_error(minor_status, mech);
-			if (output_token->length)
-			    (void) gss_release_buffer(&temp_minor_status,
-						      output_token);
-			return (temp_status);
+			goto error_out;
 		    }
 		    *src_name = tmp_src_name;
 		} else
@@ -328,6 +326,9 @@ error_out:
     if (tmp_src_name != GSS_C_NO_NAME)
 	(void) gss_release_buffer(&temp_minor_status,
 				  (gss_buffer_t)tmp_src_name);
+
+    if (output_token->length)
+	(void) gss_release_buffer(&temp_minor_status, output_token);
 
     return (status);
 }
