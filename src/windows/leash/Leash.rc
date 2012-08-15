@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -200,7 +198,7 @@ FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         "Tree1",IDC_TREEVIEW,"SysTreeView32",TVS_HASBUTTONS |
                     TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP |
-                    WS_TABSTOP | 0x800,0,19,164,13
+                    TVS_INFOTIP | WS_TABSTOP,0,19,164,13
     LTEXT           "Your Kerberos Tickets and AFS Tokens (Issued/Expires/[Renew]/Principal)",
                     IDC_LABEL_KERB_TICKETS,6,5,280,12
 END
@@ -878,6 +876,16 @@ END
 //
 
 IDR_MAINFRAME           BITMAP                  "res\\Leash_toolbar.bmp"
+IDB_HOMESMALL           BITMAP                  "res\\homesmall.bmp"
+IDB_HOMELARGE           BITMAP                  "res\\homelarge.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Ribbon
+//
+
+IDR_RIBBON1             RT_RIBBON_XML           "res\\ribbon1.mfcribbon-ms"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -925,6 +933,9 @@ BEGIN
     ID_IMPORT_TICKET        "Convert MS Windows credentials into tickets/tokens\n Import Ticket(s) "
     ID_INIT_TICKET          "Activate all tickets/tokens\n Initialize Ticket(s) "
     ID_AUTO_RENEW           "Automatically attempt to renew tickets"
+    ID_TIME_ISSUED          "Display ticket time issued column"
+    ID_RENEWABLE_UNTIL      "Display ticket renewable until time column"
+    ID_SHOW_TICKET_FLAGS    "Display ticket flags column"
 END
 
 STRINGTABLE
@@ -951,9 +962,6 @@ BEGIN
     ID_OPTIONS_LOWTICKETALARMSOUND
                             "Turn alarm off or on,  when ticket time is low"
     ID_LOW_TICKET_ALARM     "Turn alarm on or off, on low ticket(s)/token(s) times"
-    ID_TIME_ISSUED          "Display ticket time issued column"
-    ID_RENEWABLE_UNTIL      "Display ticket renewable until time column"
-    ID_SHOW_TICKET_FLAGS    "Display ticket flags column"
 END
 
 STRINGTABLE
@@ -962,7 +970,7 @@ BEGIN
     ID_VALID_UNTIL          "Display ticket valid until time column"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
