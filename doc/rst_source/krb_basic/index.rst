@@ -7,6 +7,7 @@ Kerberos V5 concepts
 .. toctree::
    :maxdepth: 1
 
-   keytab_def.rst
-   stash_file_def.rst
-   date_format.rst
+   keytab_def
+   rcache_def
+   stash_file_def
+   date_format
