@@ -6,27 +6,27 @@ MIT Kerberos defaults
 General defaults
 ----------------
 
-==========================  =============================  ====================
-Description                 Default                        Environment
-==========================  =============================  ====================
-Keytab file                 |keytab|                       **KRB5_KTNAME**
-Client keytab file          |ckeytab|                      **KRB5_CLIENT_KTNAME**
-Kerberos config file        |krb5conf|\ ``:``\             **KRB5_CONFIG**
-                            |sysconfdir|\ ``/krb5.conf``
-KDC config file             |kdcdir|\ ``/kdc.conf``        **KRB5_KDC_PROFILE**
-KDC database path (DB2)     |kdcdir|\ ``/principal``
-Master key stash file       |kdcdir|\ ``/.k5.``\ *realm*
-Admin server ACL file       |kdcdir|\ ``/kadm5.acl``
-Plugin base directory       |libdir|\ ``/krb5/plugins``
-Replay cache directory      ``/var/tmp``                   **KRB5RCACHEDIR**
-Master key default enctype  |defmkey|
-Supported enc/salt types    |defkeysalts|
-Permitted enctypes          |defetypes|
-KDC default port            88
-Second KDC default port     750
-Admin server port           749
-Password change port        464
-==========================  =============================  ====================
+========================================== =============================  ====================
+Description                                   Default                        Environment
+========================================== =============================  ====================
+:ref:`keytab_definition` file               |keytab|                       **KRB5_KTNAME**
+Client :ref:`keytab_definition` file        |ckeytab|                      **KRB5_CLIENT_KTNAME**
+Kerberos config file :ref:`krb5.conf(5)`    |krb5conf|\ ``:``\             **KRB5_CONFIG**
+                                            |sysconfdir|\ ``/krb5.conf``
+KDC config file :ref:`kdc.conf(5)`          |kdcdir|\ ``/kdc.conf``        **KRB5_KDC_PROFILE**
+KDC database path (DB2)                     |kdcdir|\ ``/principal``
+Master key :ref:`stash_definition`          |kdcdir|\ ``/.k5.``\ *realm*
+Admin server ACL file :ref:`kadm5.acl(5)`   |kdcdir|\ ``/kadm5.acl``
+Plugin base directory                       |libdir|\ ``/krb5/plugins``
+:ref:`rcache_definition` directory          ``/var/tmp``                   **KRB5RCACHEDIR**
+Master key default enctype                  |defmkey|
+Supported :ref:`Encryption_and_salt_types`  |defkeysalts|
+Permitted enctypes                          |defetypes|
+KDC default port                            88
+Second KDC default port                     750
+Admin server port                           749
+Password change port                        464
+========================================== =============================  ====================
 
 
 Slave KDC propagation defaults
