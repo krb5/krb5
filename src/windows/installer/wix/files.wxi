@@ -493,6 +493,20 @@
         <Registry Id="reg_common7" Root="HKLM" Key="$(var.KfwRegRoot)\CurrentVersion" Action="removeKeyOnInstall"/>
         <Registry Id="reg_common8" Root="HKLM" Key="$(var.KfwRegRoot)\$(var.VersionString)" Action="removeKeyOnInstall"/>
     <?endif?>
+    <?if $(var.Platform) = "x64"?>
+        <Registry Id="reg_common0_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)" Action="createKeyAndRemoveKeyOnUninstall" />
+        <!-- Cannot set KeyPath twice in one Component -->
+        <Registry Id="reg_common2_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)" Name="InstallDir" Type="string" Value="[KERBEROSDIR]"/>
+    <?ifdef Debug?>
+        <Registry Id="reg_common3_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <Registry Id="reg_common4_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\CurrentVersion" Name="Debug" Type="integer" Value="1"/>
+        <Registry Id="reg_common5_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\$(var.VersionString)" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <Registry Id="reg_common6_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\$(var.VersionString)" Name="Debug" Type="integer" Value="1"/>
+    <?else?>
+        <Registry Id="reg_common7_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\CurrentVersion" Action="removeKeyOnInstall"/>
+        <Registry Id="reg_common8_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\$(var.VersionString)" Action="removeKeyOnInstall"/>
+    <?endif?>
+    <?endif?>
     </Component>
     
     <Component Win64="$(var.Win64)" Id="rcm_client" Guid="901179B2-7369-43b1-ACF3-4C7F37482CC7">
