@@ -224,7 +224,7 @@ apply_keysalt_policy(kadm5_server_handle_t handle, const char *policy,
             goto cleanup;
     }
 
-    if (polent.allowed_keysalts == NULL && new_n_kstp != NULL) {
+    if (polent.allowed_keysalts == NULL) {
         /* Requested keysalts allowed or default to supported_enctypes. */
         if (n_ks_tuple == 0) {
             /* Default to supported_enctypes. */
