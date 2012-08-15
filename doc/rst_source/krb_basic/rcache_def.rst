@@ -3,9 +3,9 @@
 replay cache
 ============
 
-A replay cache or "rcache" keeps track of all athenticators recently
-presented to a given service.  If the duplicate authentication
-requests are detected in the rcache, the error message is sent to
+A replay cache (or "rcache") keeps track of all authenticators
+recently presented to a service.  If a duplicate authentication
+request is detected in the replay cache, an error message is sent to
 the application program.
 
 The replay cache interface, like the credential cache and
@@ -17,9 +17,9 @@ Background information
 ----------------------
 
 Some Kerberos or GSSAPI services use a simple authentication mechanism
-where a message is sent containing an authenticator, and that
-establishes the encryption key that the client will use for talking to
-the service.  But nothing about that prevents an eavesdropper from
+where a message is sent containing an authenticator, which establishes
+the encryption key that the client will use for talking to the
+service.  But nothing about that prevents an eavesdropper from
 recording the messages sent by the client, establishing a new
 connection, and re-sending or "replaying" the same messages; the
 replayed authenticator will establish the same encryption key for the
@@ -61,13 +61,13 @@ Default rcache type
 -------------------
 
 There is currently only one implemented kind of replay cache, called
-**dfl**.  It stores data in one large file, occasionally rewriting it
+**dfl**.  It stores replay data in one file, occasionally rewriting it
 to purge old, expired entries.
 
-The default type can be overridden by **KRB5RCACHETYPE** environment
-variable.
+The default type can be overridden by the **KRB5RCACHETYPE**
+environment variable.
 
-The placement of rcache file is determined by the following:
+The placement of the replay cache file is determined by the following:
 
 #. The **KRB5RCACHEDIR** environment variable;
 
