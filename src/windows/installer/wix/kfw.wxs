@@ -168,8 +168,9 @@
 	<!-- Installation Sequences -->
 	<AdminExecuteSequence />
         <InstallExecuteSequence>
-	<Custom Action="KillRunningProcesses" After="InstallValidate"/>
-	<RemoveExistingProducts After="KillRunningProcesses">(Not Installed) And (UPGRADEPISMERE Or UPGRADEKFW Or UPGRADEKFW64)</RemoveExistingProducts>
+	<Custom Action="ListRunningProcesses" Before="KillRunningProcesses" />
+	<Custom Action="KillRunningProcesses" Before="InstallValidate"/>
+	<RemoveExistingProducts After="InstallValidate">(Not Installed) And (UPGRADEPISMERE Or UPGRADEKFW Or UPGRADEKFW64)</RemoveExistingProducts>
 	<Custom Action="RenameKrb5Ini_Cmd" Before="RenameKrb5Ini"/>
 	<Custom Action="RenameKrb5Ini" Before="InstallFinalize">SYSTEMKRB5INI &lt;&gt; ""</Custom>
 	<!-- When running with a UI, CCP_Success property is not passed down to the server. -->
@@ -237,6 +238,11 @@
                 <Data Column="Desc">Kerberos Credential Cache</Data>
             </Row>
             <Row>
+                <Data Column="Id">kpKrbcc64</Data>
+                <Data Column="Image">krbcc64s.exe</Data>
+                <Data Column="Desc">Kerberos Credential Cache</Data>
+            </Row>
+            <Row>
                 <Data Column="Id">kpK95</Data>
                 <Data Column="Image">k95.exe</Data>
                 <Data Column="Desc">Kermit 95</Data>
@@ -260,6 +266,16 @@
                 <Data Column="Id">kpafscreds</Data>
                 <Data Column="Image">afscreds.exe</Data>
                 <Data Column="Desc">AFS Credentials Manager</Data>
+            </Row>
+            <Row>
+                <Data Column="Id">kccapiserver</Data>
+                <Data Column="Image">ccapiserver.exe</Data>
+                <Data Column="Desc">Credentials Cache API Server</Data>
+            </Row>
+            <Row>
+                <Data Column="Id">kMITKerberos</Data>
+                <Data Column="Image">MIT Kerberos.exe</Data>
+                <Data Column="Desc">MIT Kerberos Ticket Manager</Data>
             </Row>
         </CustomTable>
     </Product>
