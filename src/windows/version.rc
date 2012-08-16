@@ -108,6 +108,17 @@
 #endif
 #endif /* GSSAPI */
 
+#ifdef CCAPI_LIB
+#define K5_DESCRIPTION "Kerberos Credentials Cache DLL\0"
+#define K5_INTERNAL_NAME "krbcc\0"
+#define K5_FILETYPE	VFT_DLL
+#if defined(_WIN64)
+#define K5_ORIGINAL_NAME "krbcc64.dll\0"
+#else
+#define K5_ORIGINAL_NAME "krbcc32.dll\0"
+#endif
+#endif /* CCAPI_LIB */
+
 #ifdef LEASH_APP
 #define K5_DESCRIPTION "MIT Kerberos Ticket Manager - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_FILETYPE	VFT_APP
