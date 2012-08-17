@@ -123,6 +123,8 @@ typedef struct _dump_version {
     char *header;
     int updateonly;
     int create_kadm5;
+    int iprop;
+    int ipropx;
     dump_func dump_princ;
     osa_adb_iter_policy_func dump_policy;
     load_func load_record;
@@ -133,6 +135,8 @@ dump_version old_version = {
     "kdb5_edit load_dump version 2.0\n",
     0,
     1,
+    0,
+    0,
     dump_k5beta_iterator,
     NULL,
     process_k5beta_record,
@@ -142,6 +146,8 @@ dump_version beta6_version = {
     "kdb5_edit load_dump version 3.0\n",
     0,
     1,
+    0,
+    0,
     dump_k5beta6_iterator,
     NULL,
     process_k5beta6_record,
@@ -149,6 +155,8 @@ dump_version beta6_version = {
 dump_version beta7_version = {
     "Kerberos version 5",
     "kdb5_util load_dump version 4\n",
+    0,
+    0,
     0,
     0,
     dump_k5beta7_princ,
@@ -160,6 +168,8 @@ dump_version iprop_version = {
     "iprop",
     0,
     0,
+    1,
+    0,
     dump_k5beta7_princ_withpolicy,
     dump_k5beta7_policy,
     process_k5beta7_record,
@@ -169,6 +179,8 @@ dump_version ov_version = {
     "OpenV*Secure V1.0\t",
     1,
     1,
+    0,
+    0,
     dump_ov_princ,
     dump_k5beta7_policy,
     process_ov_record
@@ -177,6 +189,8 @@ dump_version ov_version = {
 dump_version r1_3_version = {
     "Kerberos version 5 release 1.3",
     "kdb5_util load_dump version 5\n",
+    0,
+    0,
     0,
     0,
     dump_k5beta7_princ_withpolicy,
@@ -188,6 +202,8 @@ dump_version r1_8_version = {
     "kdb5_util load_dump version 6\n",
     0,
     0,
+    0,
+    0,
     dump_k5beta7_princ_withpolicy,
     dump_r1_8_policy,
     process_r1_8_record,
@@ -195,6 +211,8 @@ dump_version r1_8_version = {
 dump_version r1_11_version = {
     "Kerberos version 5 release 1.11",
     "kdb5_util load_dump version 7\n",
+    0,
+    0,
     0,
     0,
     dump_k5beta7_princ_withpolicy,
@@ -206,6 +224,8 @@ dump_version ipropx_1_version = {
     "ipropx",
     0,
     0,
+    1,
+    1,
     dump_k5beta7_princ_withpolicy,
     dump_r1_11_policy,
     process_r1_11_record,
@@ -281,6 +301,7 @@ static const char oldoption[] = "-old";
 static const char b6option[] = "-b6";
 static const char b7option[] = "-b7";
 static const char ipropoption[] = "-i";
+static const char conditionaloption[] = "-c";
 static const char verboseoption[] = "-verbose";
 static const char updateoption[] = "-update";
 static const char hashoption[] = "-hash";
@@ -347,6 +368,126 @@ krb5_error_code master_key_convert(context, db_entry)
             return retval;
     }
     return 0;
+}
+
+/* Create temp file for new dump to be named ofile. */
+static FILE *
+create_ofile(char *ofile, char **tmpname)
+{
+    int fd = -1;
+    FILE *f;
+
+    *tmpname = NULL;
+    if (asprintf(tmpname, "%s-XXXXXX", ofile) < 0)
+        goto error;
+
+    fd = mkstemp(*tmpname);
+    if (fd == -1)
+        goto error;
+
+    f = fdopen(fd, "w+");
+    if (f != NULL)
+        return f;
+
+error:
+    com_err(progname, errno,
+            _("while allocating temporary filename dump"));
+    if (fd >= 0)
+        unlink(*tmpname);
+    exit(1);
+}
+
+/* Rename new dump file into place */
+static void
+finish_ofile(char *ofile, char **tmpname)
+{
+    if (rename(*tmpname, ofile) == -1) {
+        com_err(progname, errno, _("while renaming dump file into place"));
+        exit(1);
+    }
+    free(*tmpname);
+    *tmpname = NULL;
+}
+
+/*
+ * Read the dump header.  Returns 1 on success, 0 if the file is not a
+ * recognized iprop dump format.
+ */
+static int
+parse_iprop_header(char *buf, dump_version **dv, uint32_t *last_sno,
+                   uint32_t *last_seconds, uint32_t *last_useconds)
+{
+    char head[128];
+    int nread;
+    uint32_t u[4];
+    uint32_t *up = &u[0];
+
+    nread = sscanf(buf, "%127s %u %u %u %u", head, &u[0], &u[1], &u[2], &u[3]);
+    if (nread < 1)
+        return 0;
+
+    if (!strcmp(head, ipropx_1_version.header)) {
+        if (nread != 5)
+            return 0;
+        if (u[0] == IPROPX_VERSION_0)
+            *dv = &iprop_version;
+        else if (u[0] == IPROPX_VERSION_1)
+            *dv = &ipropx_1_version;
+        else {
+            fprintf(stderr, _("%s: Unknown iprop dump version %d\n"),
+                    progname, u[0]);
+            return 0;
+        }
+        up = &u[1];
+    } else if (!strcmp(head, iprop_version.header)) {
+        if (nread != 4)
+            return 0;
+        *dv = &iprop_version;
+    } else {
+        fprintf(stderr, "Invalid iprop header\n");
+        return 0;
+    }
+
+    *last_sno = *(up++);
+    *last_seconds = *(up++);
+    *last_useconds = *(up++);
+    return 1;
+}
+
+/*
+ * Return 1 if the {sno, timestamp} in an existing dump file is in the
+ * ulog, else return 0.
+ */
+static int
+current_dump_sno_in_ulog(char *ifile, kdb_hlog_t *ulog)
+{
+    dump_version *junk;
+    uint32_t last_sno, last_seconds, last_useconds;
+    char buf[BUFSIZ];
+    FILE *f;
+
+    if (ulog->kdb_last_sno == 0)
+        return 0;              /* nothing in ulog */
+
+    f = fopen(ifile, "r");
+    if (f == NULL)
+        return 0;              /* aliasing other errors to ENOENT here is OK */
+
+    if (fgets(buf, sizeof(buf), f) == NULL)
+        return errno ? -1 : 0;
+    fclose(f);
+
+    if (!parse_iprop_header(buf, &junk, &last_sno, &last_seconds,
+                            &last_useconds))
+        return 0;
+
+    if (ulog->kdb_first_sno > last_sno ||
+        ulog->kdb_first_time.seconds > last_seconds ||
+        (ulog->kdb_first_time.seconds == last_seconds &&
+        ulog->kdb_first_time.useconds > last_useconds))
+        return 0;
+
+    return 1;
 }
 
 /*
@@ -1128,10 +1269,11 @@ dump_db(argc, argv)
     FILE                *f;
     struct dump_args    arglist;
     char                *ofile;
+    char                *tmpofile = NULL;
     krb5_error_code     kret, retval;
     dump_version        *dump;
     int                 aindex;
-    krb5_boolean        locked;
+    int                 conditional = 0;
     char                *new_mkey_file = 0;
     bool_t              dump_sno = FALSE;
     kdb_log_context     *log_ctx;
@@ -1187,7 +1329,9 @@ dump_db(argc, argv)
                 exit_status++;
                 return;
             }
-        } else if (!strcmp(argv[aindex], verboseoption))
+        } else if (!strcmp(argv[aindex], conditionaloption))
+            conditional = 1;
+        else if (!strcmp(argv[aindex], verboseoption))
             arglist.flags |= FLAG_VERBOSE;
         else if (!strcmp(argv[aindex], "-mkey_convert"))
             mkey_convert = 1;
@@ -1211,6 +1355,22 @@ dump_db(argc, argv)
             arglist.names = &argv[aindex];
             arglist.nnames = argc - aindex;
         }
+    }
+
+    /*
+     * If a conditional ipropx dump we check if the existing dump is
+     * good enough.
+     */
+    if (ofile != NULL && conditional) {
+        if (!dump->iprop) {
+            com_err(progname, 0,
+                    _("Conditional dump is an undocumented option for "
+                      "use only for iprop dumps"));
+            exit_status++;
+            return;
+        }
+        if (current_dump_sno_in_ulog(ofile, log_ctx->ulog))
+            return;
     }
 
     /*
@@ -1290,40 +1450,20 @@ dump_db(argc, argv)
     }
 
     kret = 0;
-    locked = 0;
+
     if (ofile && strcmp(ofile, "-")) {
         /*
          * Discourage accidental dumping to filenames beginning with '-'.
          */
         if (ofile[0] == '-')
             usage();
-        /*
-         * Make sure that we don't open and truncate on the fopen,
-         * since that may hose an on-going kprop process.
-         *
-         * We could also control this by opening for read and
-         * write, doing an flock with LOCK_EX, and then
-         * truncating the file once we have gotten the lock,
-         * but that would involve more OS dependencies than I
-         * want to get into.
-         */
-        unlink(ofile);
-        if (!(f = fopen(ofile, "w"))) {
+        f = create_ofile(ofile, &tmpofile);
+        if (f == NULL) {
             fprintf(stderr, ofopen_error,
                     progname, ofile, error_message(errno));
             exit_status++;
             return;
         }
-        if ((kret = krb5_lock_file(util_context,
-                                   fileno(f),
-                                   KRB5_LOCKMODE_EXCLUSIVE))) {
-            fprintf(stderr, oflock_error,
-                    progname, ofile, error_message(kret));
-            fclose(f);
-            exit_status++;
-        }
-        else
-            locked = 1;
     } else {
         f = stdout;
     }
@@ -1341,8 +1481,11 @@ dump_db(argc, argv)
             if (krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED)) {
                 fprintf(stderr,
                         _("%s: Couldn't grab lock\n"), progname);
+                if (tmpofile != NULL)
+                    unlink(tmpofile);
+                free(tmpofile);
                 exit_status++;
-                goto unlock_and_return;
+                return;
             }
 
             if (ipropx_version)
@@ -1373,17 +1516,15 @@ dump_db(argc, argv)
             exit_status++;
         }
         if (ofile && f != stdout && !exit_status) {
-            if (locked) {
-                (void) krb5_lock_file(util_context, fileno(f), KRB5_LOCKMODE_UNLOCK);
-                locked = 0;
-            }
             fclose(f);
+            finish_ofile(ofile, &tmpofile);
             update_ok_file(ofile);
         }
+        if (tmpofile != NULL)
+            unlink(tmpofile);
+        free(tmpofile);
+        return;
     }
-unlock_and_return:
-    if (locked)
-        (void) krb5_lock_file(util_context, fileno(f), KRB5_LOCKMODE_UNLOCK);
 }
 
 /*
@@ -2512,7 +2653,6 @@ load_db(argc, argv)
     krb5_int32          crflags;
     int                 aindex;
     int                 db_locked = 0;
-    char                iheader[1024];
     kdb_log_context     *log_ctx;
     krb5_boolean        add_update = TRUE;
     uint32_t            caller, last_sno, last_seconds, last_useconds;
@@ -2738,26 +2878,9 @@ load_db(argc, argv)
             log_ctx->iproprole = IPROP_NULL;
 
             if (!add_update) {
-                unsigned int ipropx_version = IPROPX_VERSION_0;
-
-                if (!strncmp(buf, "ipropx ", sizeof("ipropx ") - 1))
-                    sscanf(buf, "%1023s %u %u %u %u", iheader,
-                           &ipropx_version, &last_sno,
-                           &last_seconds, &last_useconds);
-                else
-                    sscanf(buf, "%1023s %u %u %u", iheader, &last_sno,
-                           &last_seconds, &last_useconds);
-
-                switch (ipropx_version) {
-                case IPROPX_VERSION_0:
-                    load = &iprop_version;
-                    break;
-                case IPROPX_VERSION_1:
-                    load = &ipropx_1_version;
-                    break;
-                default:
-                    fprintf(stderr, _("%s: Unknown iprop dump version %d\n"),
-                            progname, ipropx_version);
+                if (!parse_iprop_header(buf, &load, &last_sno,
+                                           &last_seconds,
+                                           &last_useconds)) {
                     exit_status++;
                     goto error;
                 }

@@ -88,6 +88,7 @@ krb5_db_promote
 ulog_map
 ulog_set_role
 ulog_free_entries
+ulog_sync_header
 xdr_kdb_last_t
 xdr_kdb_incr_result_t
 xdr_kdb_fullresync_result_t

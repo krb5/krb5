@@ -89,7 +89,7 @@ ulog_sync_update(kdb_hlog_t *ulog, kdb_ent_header_t *upd)
 /*
  * Sync memory to disk for the update log header.
  */
-static void
+void
 ulog_sync_header(kdb_hlog_t *ulog)
 {
 

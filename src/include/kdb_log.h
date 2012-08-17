@@ -108,6 +108,8 @@ typedef struct kdb_hlog {
     uint16_t        kdb_block;      /* Block size of each element */
 } kdb_hlog_t;
 
+extern void ulog_sync_header(kdb_hlog_t *);
+
 typedef struct kdb_ent_header {
     uint32_t        kdb_umagic;     /* Update entry magic # */
     kdb_sno_t       kdb_entry_sno;  /* Serial # of entry */
