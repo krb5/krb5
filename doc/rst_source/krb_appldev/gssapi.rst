@@ -164,6 +164,54 @@ If the *desired_name* is a krb5 principal name or a local system name
 type which is mapped to a krb5 principal name, clients will only be
 allowed to authenticate to that principal in the default keytab.
 
+
+Importing and exporting credentials
+-----------------------------------
+
+The following GSSAPI extensions can be used to import and export
+credentials (declared in ``<gssapi/gssapi_ext.h>``)::
+
+    OM_uint32 gss_export_cred(OM_uint32 *minor_status,
+                              gss_cred_id_t cred_handle,
+                              gss_buffer_t token);
+
+    OM_uint32 gss_import_cred(OM_uint32 *minor_status,
+                              gss_buffer_t token,
+                              gss_cred_id_t *cred_handle);
+
+The first function serializes a GSSAPI credential handle into a
+buffer; the second unseralizes a buffer into a GSSAPI credential
+handle.  Serializing a credential does not destroy it.  If any of the
+mechanisms used in *cred_handle* do not support serialization,
+gss_export_cred will return **GSS_S_UNAVAILABLE**.  As with other
+GSSAPI serialization functions, these extensions are only intended to
+work with a matching implementation on the other side; they do not
+serialize credentials in a standardized format.
+
+A serialized credential may contain secret information such as ticket
+session keys.  The serialization format does not protect this
+information from eavesdropping or tampering.  The calling application
+must take care to protect the serialized credential when communicating
+it over an insecure channel or to an untrusted party.
+
+A krb5 GSSAPI credential may contain references to a credential cache,
+a client keytab, an acceptor keytab, and a replay cache.  These
+resources are normally serialized as references to their external
+locations (such as the filename of the credential cache).  Because of
+this, a serialized krb5 credential can only be imported by a process
+with similar privileges to the exporter.  A serialized credential
+should not be trusted if it originates from a source with lower
+privileges than the importer, as it may contain references to external
+credential cache, keytab, or replay cache resources not accessible to
+the originator.
+
+An exception to the above rule applies when a krb5 GSSAPI credential
+refers to a memory credential cache, as is normally the case for
+delegated credentials received by gss_accept_sec_context_.  In this
+case, the contents of the credential cache are serialized, so that the
+resulting token may be imported even if the original memory credential
+cache no longer exists.
+
 .. _gss_accept_sec_context: http://tools.ietf.org/html/rfc2744.html#section-5.1
 .. _gss_acquire_cred: http://tools.ietf.org/html/rfc2744.html#section-5.2
 .. _gss_export_name: http://tools.ietf.org/html/rfc2744.html#section-5.13

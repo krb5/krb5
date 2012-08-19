@@ -174,3 +174,5 @@ EXPORTS
 	gss_acquire_cred_from				@139
 	gss_add_cred_from				@140
 	gss_store_cred_into				@141
+	gss_export_cred					@142
+	gss_import_cred					@143

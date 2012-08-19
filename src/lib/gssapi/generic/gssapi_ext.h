@@ -518,6 +518,18 @@ gss_store_cred_into(
     gss_OID_set *,             /* elements_stored */
     gss_cred_usage_t *);       /* cred_usage_stored */
 
+OM_uint32 KRB5_CALLCONV
+gss_export_cred(
+    OM_uint32 *,               /* minor_status */
+    gss_cred_id_t,             /* cred_handle */
+    gss_buffer_t);             /* token */
+
+OM_uint32 KRB5_CALLCONV
+gss_import_cred(
+    OM_uint32 *,               /* minor_status */
+    gss_buffer_t,              /* token */
+    gss_cred_id_t *);          /* cred_handle */
+
 #ifdef __cplusplus
 }
 #endif

@@ -60,11 +60,13 @@ gss_display_name_ext
 gss_display_status
 gss_duplicate_name
 gss_encapsulate_token
+gss_export_cred
 gss_export_name
 gss_export_name_composite
 gss_export_sec_context
 gss_get_mic
 gss_get_name_attribute
+gss_import_cred
 gss_import_name
 gss_import_sec_context
 gss_indicate_mechs
