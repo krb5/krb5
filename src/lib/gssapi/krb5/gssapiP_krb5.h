@@ -1258,4 +1258,16 @@ krb5_gss_store_cred_into(
     gss_OID_set *,             /* elements_stored */
     gss_cred_usage_t *);       /* cred_usage_stored */
 
+OM_uint32 KRB5_CALLCONV
+krb5_gss_export_cred(OM_uint32 *minor_status, gss_cred_id_t cred_handle,
+                     gss_buffer_t token);
+
+OM_uint32 KRB5_CALLCONV
+krb5_gss_import_cred(OM_uint32 *minor_status, gss_buffer_t token,
+                     gss_cred_id_t *cred_handle);
+
+/* Magic string to identify exported krb5 GSS credentials.  Increment this if
+ * the format changes. */
+#define CRED_EXPORT_MAGIC "K5C1"
+
 #endif /* _GSSAPIP_KRB5_H_ */

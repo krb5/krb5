@@ -900,6 +900,8 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_acquire_cred_from,
     krb5_gss_store_cred_into,
     krb5_gss_acquire_cred_with_password,
+    krb5_gss_export_cred,
+    krb5_gss_import_cred,
 };
 
 #ifdef _GSS_STATIC_LINK

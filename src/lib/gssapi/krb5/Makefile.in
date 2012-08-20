@@ -48,11 +48,13 @@ SRCS = \
 	$(srcdir)/disp_name.c \
 	$(srcdir)/disp_status.c \
 	$(srcdir)/duplicate_name.c \
+	$(srcdir)/export_cred.c \
 	$(srcdir)/export_name.c \
 	$(srcdir)/export_sec_context.c \
 	$(srcdir)/get_tkt_flags.c \
 	$(srcdir)/gssapi_krb5.c \
 	$(srcdir)/iakerb.c \
+	$(srcdir)/import_cred.c \
 	$(srcdir)/import_name.c \
 	$(srcdir)/import_sec_context.c \
 	$(srcdir)/indicate_mechs.c \
@@ -99,11 +101,13 @@ OBJS = \
 	$(OUTPRE)disp_name.$(OBJEXT) \
 	$(OUTPRE)disp_status.$(OBJEXT) \
 	$(OUTPRE)duplicate_name.$(OBJEXT) \
+	$(OUTPRE)export_cred.$(OBJEXT) \
 	$(OUTPRE)export_name.$(OBJEXT) \
 	$(OUTPRE)export_sec_context.$(OBJEXT) \
 	$(OUTPRE)get_tkt_flags.$(OBJEXT) \
 	$(OUTPRE)gssapi_krb5.$(OBJEXT) \
 	$(OUTPRE)iakerb.$(OBJEXT) \
+	$(OUTPRE)import_cred.$(OBJEXT) \
 	$(OUTPRE)import_name.$(OBJEXT) \
 	$(OUTPRE)import_sec_context.$(OBJEXT) \
 	$(OUTPRE)indicate_mechs.$(OBJEXT) \
@@ -153,11 +157,13 @@ STLIBOBJS = \
 	disp_name.o \
 	disp_status.o \
 	duplicate_name.o \
+	export_cred.o \
 	export_name.o \
 	export_sec_context.o \
 	get_tkt_flags.o \
 	gssapi_krb5.o \
 	iakerb.o \
+	import_cred.o \
 	import_name.o \
 	import_sec_context.o \
 	indicate_mechs.o \
