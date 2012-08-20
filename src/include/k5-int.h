@@ -479,6 +479,12 @@ typedef struct _krb5_enc_sam_response_enc_2 {
 #define KRB5_OTP_FLAG_SEPARATE_PIN   0x02000000
 #define KRB5_OTP_FLAG_CHECK_DIGIT    0x01000000
 
+#define KRB5_OTP_FORMAT_DECIMAL      0x00000000
+#define KRB5_OTP_FORMAT_HEXADECIMAL  0x00000001
+#define KRB5_OTP_FORMAT_ALPHANUMERIC 0x00000002
+#define KRB5_OTP_FORMAT_BINARY       0x00000003
+#define KRB5_OTP_FORMAT_BASE64       0x00000004
+
 typedef struct _krb5_otp_tokeninfo {
     krb5_flags flags;
     krb5_data vendor;

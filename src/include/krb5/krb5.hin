@@ -970,6 +970,7 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_AD_SIGNEDPATH             -21
 #define KRB5_KEYUSAGE_IAKERB_FINISHED           42
 #define KRB5_KEYUSAGE_PA_PKINIT_KX              44
+#define KRB5_KEYUSAGE_PA_OTP_REQUEST            45
 /* define in draft-ietf-krb-wg-preauth-framework*/
 #define KRB5_KEYUSAGE_FAST_REQ_CHKSUM 50
 #define KRB5_KEYUSAGE_FAST_ENC 51
@@ -1812,6 +1813,10 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_PADATA_FX_FAST             136
 #define KRB5_PADATA_FX_ERROR            137
 #define KRB5_PADATA_ENCRYPTED_CHALLENGE 138
+#define KRB5_PADATA_OTP_CHALLENGE       141
+#define KRB5_PADATA_OTP_REQUEST         142
+#define KRB5_PADATA_OTP_CONFIRM         143
+#define KRB5_PADATA_OTP_PIN_CHANGE      144
 #define KRB5_PADATA_PKINIT_KX 147
 #define KRB5_ENCPADATA_REQ_ENC_PA_REP 149
 

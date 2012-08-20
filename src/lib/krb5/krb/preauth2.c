@@ -127,6 +127,8 @@ krb5_init_preauth_context(krb5_context kcontext)
                        clpreauth_encrypted_timestamp_initvt);
     k5_plugin_register(kcontext, PLUGIN_INTERFACE_CLPREAUTH, "sam2",
                        clpreauth_sam2_initvt);
+    k5_plugin_register(kcontext, PLUGIN_INTERFACE_CLPREAUTH, "otp",
+                       clpreauth_otp_initvt);
 
     /* Get all available clpreauth vtables. */
     if (k5_plugin_load_all(kcontext, PLUGIN_INTERFACE_CLPREAUTH, &plugins))
