@@ -100,7 +100,13 @@ BOOL WINAPI GetTspData(DWORD dwTlsIndex, struct tspdata**  pdw) {
     struct tspdata*  pData;      // The stored memory pointer
 
     pData = (struct tspdata*)TlsGetValue(dwTlsIndex);
-    if (pData == NULL) return FALSE;
+    if (pData == NULL) {
+        pData = malloc(sizeof(*pData));
+        if (pData == NULL)
+            return FALSE;
+        memset(pData, 0, sizeof(*pData));
+        TlsSetValue(dwTlsIndex, pData);
+    }
     (*pdw) = pData;
     return TRUE;
     }
