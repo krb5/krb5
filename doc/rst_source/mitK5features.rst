@@ -12,8 +12,8 @@ Quick facts
 -----------
 
    ====================================================== ======================================= =============================================================================
-    Latest stable  version                                 1.10.1
-    Supported versions                                     1.8.6, 1.9.3, 1.10.1
+    Latest stable  version                                 1.10.3                                   http://web.mit.edu/kerberos/krb5-1.10/
+    Supported versions                                     1.9.4, 1.10.3                            http://web.mit.edu/kerberos/krb5-1.9/
     Release cycle                                          9 - 12 months
     Supported platforms/OS distributions                   Solaris
                                                                - SPARC
