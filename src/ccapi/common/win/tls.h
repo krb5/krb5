@@ -50,9 +50,6 @@ struct tspdata {
     char                _uuid[UUID_SIZE];
     };
 
-struct tspdata* new_tspdata          (char* uuid, time_t sst);
-void            delete_tspdata       (struct tspdata* p);
-
 void            tspdata_setListening (struct tspdata* p, BOOL b);
 void            tspdata_setConnected (struct tspdata* p, BOOL b);
 void            tspdata_setReplyEvent(struct tspdata* p, HANDLE h);
@@ -69,7 +66,6 @@ time_t           tspdata_getSST      (const struct tspdata* p);
 k5_ipc_stream     tspdata_getStream   (const struct tspdata* p);
 char*            tspdata_getUUID     (const struct tspdata* p);
 
-BOOL WINAPI PutTspData(DWORD tlsIndex, struct tspdata*  dw);
 BOOL WINAPI GetTspData(DWORD tlsIndex, struct tspdata** pdw);
 
 #endif _tls_h

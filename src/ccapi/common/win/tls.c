@@ -29,20 +29,6 @@
 
 #include "tls.h"
 
-struct tspdata* new_tspdata(char* uuid, time_t sst) {
-    struct tspdata* p   = (struct tspdata*)malloc(sizeof(struct tspdata));
-    if (p) {
-        memset(p, 0, sizeof(struct tspdata));
-        p->_sst = sst;
-        if (uuid) {strncpy(p->_uuid, uuid, UUID_SIZE-1);}
-        }
-    return p;
-    }
-
-void delete_tspdata(struct tspdata* p) {
-    if (p)          free(p);
-    }
-
 void tspdata_setUUID(struct tspdata* p, unsigned char __RPC_FAR* uuidString) {
     strncpy(p->_uuid, uuidString, UUID_SIZE-1);
     };
@@ -74,27 +60,6 @@ char*        tspdata_getUUID      (const struct tspdata* p)         {return p->_
 
 RPC_ASYNC_STATE* tspdata_getRpcAState (const struct tspdata* p)     {return p->_rpcState;}
 
-BOOL WINAPI PutTspData(DWORD dwTlsIndex, struct tspdata* dw) {
-    LPVOID              lpvData;
-    struct tspdata**    pData;  // The stored memory pointer
-
-    // Retrieve a data pointer for the current thread:
-    lpvData = TlsGetValue(dwTlsIndex);
-
-    // If NULL, allocate memory for the TLS slot for this thread:
-    if (lpvData == NULL) {
-        lpvData = (LPVOID) LocalAlloc(LPTR, sizeof(struct tspdata));
-        if (lpvData == NULL)                      return FALSE;
-        if (!TlsSetValue(dwTlsIndex, lpvData))    return FALSE;
-        }
-
-    pData = (struct tspdata**) lpvData; // Cast to my data type.
-    // In this example, it is only a pointer to a DWORD
-    // but it can be a structure pointer to contain more complicated data.
-
-    (*pData) = dw;
-    return TRUE;
-    }
 
 BOOL WINAPI GetTspData(DWORD dwTlsIndex, struct tspdata**  pdw) {
     struct tspdata*  pData;      // The stored memory pointer
