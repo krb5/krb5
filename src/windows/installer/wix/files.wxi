@@ -191,11 +191,10 @@
 	                    <Registry Id="reg_leash_6" Root="HKLM" Key="Software\MIT\Leash" Name="MsLsaImport" Type="integer" Value="[LEASHMSLSAIMPORT]" KeyPath="yes"/>
 	                    <Condition>LEASHMSLSAIMPORT</Condition>
                     </Component>
-<!--                    <Component Win64="$(var.Win64)" Id="csc_LeashStartup" Guid="$(var.csc_LeashStartup_guid)" DiskId="1">
-                        <Registry Id="reg_sc_leash_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
-                        <Shortcut Id="sc_leash_exe_startup" Advertise="no" Directory="StartupFolder" Name="Leash Credentials Manager.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]leash32.exe" Show="minimized" />
-                        <Condition>USELEASH</Condition>
-                    </Component> -->
+                    <Component Win64="$(var.Win64)" Id="csc_LeashStartup" Guid="$(var.csc_LeashStartup_guid)" DiskId="1">
+                        <Registry Id="reg_sc_leash_marker" Root="HKCU" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
+                        <Shortcut Id="sc_leash_exe_startup" Advertise="no" Directory="StartupFolder" Name="MIT Kerberos.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]MIT Kerberos.exe" Show="minimized" />
+                    </Component>
 
                     <Component Win64="$(var.Win64)" Id="cmf_leash32_chm" Guid="$(var.cmf_leash32_chm_guid)" DiskId="1">
 	                    <File Id="fil_leash32_chm" Name="MIT Kerberos.chm" KeyPath="yes" />
