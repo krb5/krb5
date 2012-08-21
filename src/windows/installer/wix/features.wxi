@@ -133,9 +133,7 @@
             
             <Feature Id="feaKfwLeashStartup" AllowAdvertise="no" Display="hidden" Level="130">
                 <Condition Level="30">LEASHAUTOSTART = 1</Condition>
-                <?if $(var.Platform) = "Intel"?>
-<!--                        <ComponentRef Id="csc_LeashStartup" /> -->
-                <?endif?>
+                <ComponentRef Id="csc_LeashStartup" />
             </Feature>
             <ComponentRef Id="cmf_remove_folder" />
             <?include runtime.wxi?>
