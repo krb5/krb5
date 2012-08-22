@@ -262,6 +262,7 @@ testlog
 /src/tests/gssapi/ccrefresh
 /src/tests/gssapi/t_accname
 /src/tests/gssapi/t_ccselect
+/src/tests/gssapi/t_export_cred
 /src/tests/gssapi/t_gssexts
 /src/tests/gssapi/t_imp_cred
 /src/tests/gssapi/t_imp_name
