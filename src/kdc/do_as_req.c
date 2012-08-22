@@ -563,18 +563,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         goto errout;
     }
 
-#if 0
-    /*
-     * Turn off canonicalization if client is marked DES only
-     * (unless enterprise principal name was requested)
-     */
-    if (isflagset(client->attributes, KRB5_KDB_NON_MS_PRINCIPAL) &&
-        krb5_princ_type(kdc_context,
-                        request->client) != KRB5_NT_ENTERPRISE_PRINCIPAL) {
-        clear(c_flags, KRB5_KDB_FLAG_CANONICALIZE);
-    }
-#endif
-
     s_flags = 0;
     setflag(s_flags, KRB5_KDB_FLAG_ALIAS_OK);
     if (isflagset(state->request->kdc_options, KDC_OPT_CANONICALIZE)) {
