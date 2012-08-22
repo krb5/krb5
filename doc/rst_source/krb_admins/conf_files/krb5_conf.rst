@@ -157,8 +157,9 @@ The libdefaults section may contain any of the following relations:
 
 **default_tgs_enctypes**
     Identifies the supported list of session key encryption types that
-    should be returned by the KDC.  The list may be delimited with
-    commas or whitespace.  See :ref:`Encryption_and_salt_types` in
+    should be returned by the KDC, in order of preference from
+    highest to lowest.  The list may be delimited with commas or
+    whitespace.  See :ref:`Encryption_and_salt_types` in
     :ref:`kdc.conf(5)` for a list of the accepted values for this tag.
     The default value is |defetypes|, but single-DES encryption types
     will be implicitly removed from this list if the value of
@@ -166,7 +167,8 @@ The libdefaults section may contain any of the following relations:
 
 **default_tkt_enctypes**
     Identifies the supported list of session key encryption types that
-    should be requested by the client.  The format is the same as for
+    should be requested by the client, in order of preference from
+    highest to lowest.  The format is the same as for
     default_tgs_enctypes.  The default value for this tag is
     |defetypes|, but single-DES encryption types will be implicitly
     removed from this list if the value of **allow_weak_crypto** is
