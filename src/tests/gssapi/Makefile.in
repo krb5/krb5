@@ -7,7 +7,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 SRCS=	$(srcdir)/t_accname.c $(srcdir)/t_ccselect.c $(srcdir)/t_imp_cred.c \
 	$(srcdir)/t_imp_name.c $(srcdir)/t_s4u.c $(srcdir)/t_s4u2proxy_krb5.c \
 	$(srcdir)/t_namingexts.c $(srcdir)/t_gssexts.c $(srcdir)/t_saslname.c \
-	$(srcdir)/t_credstore.c $(srcdir)/export_name.c
+	$(srcdir)/t_credstore.c $(srcdir)/t_export_name.c
 
 OBJS=	t_accname.o t_ccselect.o t_imp_cred.o t_imp_name.o t_s4u.o \
 	t_s4u2proxy_krb5.o t_namingexts.o t_gssexts.o t_spnego.o t_saslname.o \

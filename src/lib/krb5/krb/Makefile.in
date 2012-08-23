@@ -294,6 +294,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/preauth_ec.c	\
 	$(srcdir)/preauth_encts.c	\
 	$(srcdir)/preauth_otp.c	\
+	$(srcdir)/preauth_sam2.c	\
 	$(srcdir)/gic_opt_set_pa.c	\
 	$(srcdir)/princ_comp.c	\
 	$(srcdir)/privsafe.c	\
