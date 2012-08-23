@@ -92,6 +92,21 @@ copy_ccache.so copy_ccache.po $(OUTPRE)copy_ccache.$(OBJEXT): \
   $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h ../generic/gssapi_err_generic.h \
   copy_ccache.c gssapiP_krb5.h gssapi_err_krb5.h gssapi_krb5.h
+cred_store.so cred_store.po $(OUTPRE)cred_store.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_alloc.h $(BUILDTOP)/include/gssapi/gssapi_ext.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_ext.h $(srcdir)/../generic/gssapi_generic.h \
+  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
+  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
+  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
+  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h ../generic/gssapi_err_generic.h \
+  cred_store.c gssapiP_krb5.h gssapi_err_krb5.h gssapi_krb5.h
 delete_sec_context.so delete_sec_context.po $(OUTPRE)delete_sec_context.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_alloc.h $(BUILDTOP)/include/gssapi/gssapi_ext.h \

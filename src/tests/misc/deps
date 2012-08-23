@@ -4,6 +4,9 @@
 $(OUTPRE)test_getpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   test_getpw.c
+$(OUTPRE)test_chpw_message.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/include/krb5.h \
+  test_chpw_message.c
 $(OUTPRE)test_getsockname.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   test_getsockname.c
 $(OUTPRE)test_cxx_krb5.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
