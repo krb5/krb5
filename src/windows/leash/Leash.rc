@@ -937,18 +937,18 @@ END
 STRINGTABLE
 BEGIN
     ID_PROPERTIES           "Enables you to change settings"
-    ID_IMPORT_TICKET        "Convert MS Windows credentials into tickets/tokens\n Import Ticket(s) "
-    ID_INIT_TICKET          "Acquire Ticket from KDC\n Get Ticket"
+    ID_IMPORT_TICKET        "Convert MS Windows credentials into tickets\n Import Ticket(s) "
+    ID_INIT_TICKET          "Obtain a new ticket\n Get Ticket"
     ID_AUTO_RENEW           "Automatically attempt to renew tickets.\n Automatic Ticket Renewal"
-    ID_TIME_ISSUED          "Display ticket time issued column.\n Issued"
-    ID_RENEWABLE_UNTIL      "Display ticket renewable until time column.\n Renewable Until"
-    ID_SHOW_TICKET_FLAGS    "Display ticket flags column.\n Flags"
+    ID_TIME_ISSUED          "Display column showing when your tickets will expire.\n Issued"
+    ID_RENEWABLE_UNTIL      "Display column showing the date and time each renewable ticket can no longer be renewed.\n Renewable Until"
+    ID_SHOW_TICKET_FLAGS    "Display column showing how your tickets were flagged when you obtained them.\n Flags"
 END
 
 STRINGTABLE
 BEGIN
-    ID_RENEW_TICKET         "Re-activate tickets for the selected principal(s)\n Renew Tickets(s) "
-    ID_DESTROY_TICKET       "Dispose of all tickets/tokens\n Destroy Ticket(s) "
+    ID_RENEW_TICKET         "Extend the tickets' valid lifetime, resetting it to the length of the original ticket, for the selected principal(s).\n Renew Tickets(s) "
+    ID_DESTROY_TICKET       "Dispose of all tickets for the selected principal(s).\n Destroy Ticket(s) "
     ID_SYN_TIME             "Synchronize Time\n Synchronize Time  "
     ID_CHANGE_PASSWORD      "Modify password\n Change Password "
     ID_UPDATE_DISPLAY       "Refresh ticket tree display\n Update Display "
@@ -958,9 +958,9 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_KILL_TIX_ONEXIT      "Dispose of tickets on exit.\n Destroy Tickets on Exit"
+    ID_KILL_TIX_ONEXIT      "Automatically dispose of tickets on exit.\n Destroy Tickets on Exit"
     ID_LARGE_ICONS          "Show large or small tree icons"
-    ID_UPPERCASE_REALM      "Allow mixed case or force upper case realm name.\n Allow Mixed Case Realm Name"
+    ID_UPPERCASE_REALM      "Allow realm names that include lower case letters.\n Allow Mixed Case Realm Name"
     ID_OPTIONS_RESETWINDOWSIZE
                             "Puts Leash's main window back to it's default size "
     ID_RESET_WINDOW_SIZE    "Refresh Leash window to it's default size/position"
@@ -968,19 +968,19 @@ BEGIN
     ID_SYSTEM_CONTROL_PANEL "Open your System Properties window"
     ID_OPTIONS_LOWTICKETALARMSOUND
                             "Turn alarm off or on,  when ticket time is low"
-    ID_LOW_TICKET_ALARM     "Turn alarm on or off, on low ticket(s)/token(s) times.\n Expiration Alarm"
+    ID_LOW_TICKET_ALARM     "Provide an audible alarm 15, 10, and 5 minutes before tickets expire.\n Expiration Alarm"
 END
 
 STRINGTABLE
 BEGIN
-    ID_ENCRYPTION_TYPE      "Display ticket encryption type column.\n Encryption Type"
-    ID_VALID_UNTIL          "Display ticket valid until time column.\n Valid Until"
+    ID_ENCRYPTION_TYPE      "Display column showing the encryption type for your tickets and session keys.\n Encryption Type"
+    ID_VALID_UNTIL          "Display column showing when your tickets will expire.\n Valid Until"
 END
 
 STRINGTABLE
 BEGIN
     ID_MAKE_DEFAULT         "Make the selected principal the default principal.\n Make Default"
-    ID_IMPORT_TICKETS       "Automatically import tickets from MSLSA cache\n Import Tickets"
+    ID_IMPORT_TICKETS       "Automatically import tickets from your Windows Logon Session.\n Import Tickets"
 END
 
 #endif    // English (United States) resources
