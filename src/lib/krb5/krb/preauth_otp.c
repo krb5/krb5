@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include <unistd.h>
 #include <ctype.h>
 #include <string.h>
 
@@ -168,8 +167,7 @@ choose_token(krb5_context context, krb5_prompter_fct prompter,
         if (asprintf(&tmp, "%s\t%d. %s %.*s\n",
                      banner ? banner :
                          _("Please choose from the following:\n"),
-                     i + 1, tis[i]->vendor.length,
-                     _("Vendor:"),
+                     i + 1, _("Vendor:"), tis[i]->vendor.length,
                      tis[i]->vendor.data) < 0) {
             free(banner);
             return ENOMEM;
