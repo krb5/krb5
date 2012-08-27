@@ -74,6 +74,7 @@ STLIBOBJS= \
 	utf8_conv.o \
 	zap.o \
 	path.o \
+	base64.o \
 	$(GETTIMEOFDAY_ST_OBJ) \
 	$(IPC_ST_OBJ) \
 	$(STRLCPY_ST_OBJ) \
@@ -93,6 +94,7 @@ LIBOBJS= \
 	$(OUTPRE)utf8_conv.$(OBJEXT) \
 	$(OUTPRE)zap.$(OBJEXT) \
 	$(OUTPRE)path.$(OBJEXT) \
+	$(OUTPRE)base64.$(OBJECT) \
 	$(GETTIMEOFDAY_OBJ) \
 	$(IPC_OBJ) \
 	$(STRLCPY_OBJ) \
@@ -123,7 +125,8 @@ SRCS=\
 	$(srcdir)/t_k5buf.c \
 	$(srcdir)/t_unal.c \
 	$(srcdir)/zap.c \
-	$(srcdir)/path.c
+	$(srcdir)/path.c \
+	$(srcdir)/base64.c
 
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
@@ -186,20 +189,25 @@ t_path_win.o: $(srcdir)/t_path.c
 path_win.o: $(srcdir)/path.c
 	$(CC) $(ALL_CFLAGS) -DWINDOWS_PATHS -c $(srcdir)/path.c -o $@
 
+t_base64: t_base64.o base64.o
+	$(CC_LINK) -o $@ t_base64.o base64.o
+
 t_unal: t_unal.o
 	$(CC_LINK) -o t_unal t_unal.o
 
-TEST_PROGS= t_k5buf t_path t_path_win t_unal
+TEST_PROGS= t_k5buf t_path t_path_win t_base64 t_unal
 
 check-unix:: $(TEST_PROGS)
 	./t_k5buf
 	./t_path
 	./t_path_win
+	./t_base64
 	./t_unal
 
 clean::
 	$(RM) t_k5buf.o t_k5buf t_unal.o t_unal path_win.o path_win
-	$(RM) t_path_win.o t_path_win t_path.o t_path libkrb5support.exports
+	$(RM) t_path_win.o t_path_win t_path.o t_path t_base64.o t_base64
+	$(RM) libkrb5support.exports
 
 @lib_frag@
 @libobj_frag@

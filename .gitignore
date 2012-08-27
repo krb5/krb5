@@ -340,6 +340,7 @@ testlog
 /src/util/ss/std_rqs.c
 
 /src/util/support/libkrb5support.exports
+/src/util/support/t_base64
 /src/util/support/t_k5buf
 /src/util/support/t_path
 /src/util/support/t_path_win
