@@ -368,6 +368,7 @@ gss_add_cred_impersonate_name(
  * Naming extensions
  */
 GSS_DLLIMP extern gss_buffer_t GSS_C_ATTR_LOCAL_LOGIN_USER;
+GSS_DLLIMP extern gss_OID GSS_C_NT_COMPOSITE_EXPORT;
 
 OM_uint32 KRB5_CALLCONV gss_display_name_ext
 (

@@ -218,7 +218,8 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             uid = atoi(tmp);
             goto do_getpwuid;
 #endif
-        } else if (g_OID_equal(input_name_type, gss_nt_exported_name)) {
+        } else if (g_OID_equal(input_name_type, gss_nt_exported_name) ||
+                   g_OID_equal(input_name_type, GSS_C_NT_COMPOSITE_EXPORT)) {
 #define BOUNDS_CHECK(cp, end, n)                                        \
             do { if ((end) - (cp) < (n)) goto fail_name; } while (0)
             cp = (unsigned char *)tmp;
@@ -231,7 +232,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             case 0x01:
                 break;
             case 0x02:
-                has_ad++;
+                has_ad++; /* is composite name */
                 break;
             default:
                 goto fail_name;

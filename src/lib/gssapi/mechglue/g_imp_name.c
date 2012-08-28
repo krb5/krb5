@@ -209,7 +209,7 @@ importExportName(minor, unionName)
     buf = (unsigned char *)expName.value;
     if (buf[0] != 0x04)
 	return (GSS_S_DEFECTIVE_TOKEN);
-    if (buf[1] != 0x01 && buf[1] != 0x02)
+    if (buf[1] != 0x01 && buf[1] != 0x02) /* allow composite names */
 	return (GSS_S_DEFECTIVE_TOKEN);
 
     buf += expNameTokIdLen;
