@@ -82,8 +82,10 @@ gss_ctx_id_t *		context_handle;
     OM_uint32		status;
     char		*p;
     gss_union_ctx_id_t	ctx;
+    gss_ctx_id_t	mctx;
     gss_buffer_desc	token;
     gss_OID		selected_mech = GSS_C_NO_OID;
+    gss_OID		public_mech;
     gss_mechanism	mech;
 
     status = val_imp_sec_ctx_args(minor_status,
@@ -144,15 +146,22 @@ gss_ctx_id_t *		context_handle;
 	status = GSS_S_BAD_MECH;
 	goto error_out;
     }
-    if (!mech->gss_import_sec_context) {
+    if (!mech->gssspi_import_sec_context_by_mech &&
+	!mech->gss_import_sec_context) {
 	status = GSS_S_UNAVAILABLE;
 	goto error_out;
     }
 
-    status = mech->gss_import_sec_context(minor_status,
-					  &token, &ctx->internal_ctx_id);
-
+    if (mech->gssspi_import_sec_context_by_mech) {
+	public_mech = gssint_get_public_oid(selected_mech);
+	status = mech->gssspi_import_sec_context_by_mech(minor_status,
+							 public_mech,
+							 &token, &mctx);
+    } else {
+	status = mech->gss_import_sec_context(minor_status, &token, &mctx);
+    }
     if (status == GSS_S_COMPLETE) {
+	ctx->internal_ctx_id = mctx;
 	ctx->loopback = ctx;
 	*context_handle = (gss_ctx_id_t)ctx;
 	return (GSS_S_COMPLETE);

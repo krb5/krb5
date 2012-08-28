@@ -649,6 +649,31 @@ typedef struct gss_config {
 		gss_cred_id_t *		/* cred_handle */
 	/* */);
 
+	OM_uint32       (KRB5_CALLCONV *gssspi_import_sec_context_by_mech)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_OID,			/* desired_mech */
+	    gss_buffer_t,		/* interprocess_token */
+	    gss_ctx_id_t *		/* context_handle */
+	/* */);
+
+	OM_uint32       (KRB5_CALLCONV *gssspi_import_name_by_mech)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_OID,			/* mech_type */
+	    gss_buffer_t,		/* input_name_buffer */
+	    gss_OID,			/* input_name_type */
+	    gss_name_t*			/* output_name */
+	/* */);
+
+	OM_uint32       (KRB5_CALLCONV *gssspi_import_cred_by_mech)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_OID,			/* mech_type */
+	    gss_buffer_t,		/* token */
+	    gss_cred_id_t *		/* cred_handle */
+	/* */);
+
 } *gss_mechanism;
 
 /*

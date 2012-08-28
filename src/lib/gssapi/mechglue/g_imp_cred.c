@@ -134,11 +134,19 @@ gss_import_cred(OM_uint32 *minor_status, gss_buffer_t token,
         if (status != GSS_S_COMPLETE)
             goto error;
         mech = gssint_get_mechanism(selected_mech);
-        if (mech == NULL || mech->gss_import_cred == NULL) {
+        if (mech == NULL || (mech->gss_import_cred == NULL &&
+                             mech->gssspi_import_cred_by_mech == NULL)) {
             status = GSS_S_DEFECTIVE_TOKEN;
             goto error;
         }
-        status = mech->gss_import_cred(minor_status, &mech_token, &mech_cred);
+        if (mech->gssspi_import_cred_by_mech) {
+            status = mech->gssspi_import_cred_by_mech(minor_status,
+                                        gssint_get_public_oid(selected_mech),
+                                        &mech_token, &mech_cred);
+        } else {
+            status = mech->gss_import_cred(minor_status, &mech_token,
+                                           &mech_cred);
+        }
         if (status != GSS_S_COMPLETE) {
             map_error(minor_status, mech);
             goto error;
