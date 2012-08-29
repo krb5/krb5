@@ -110,6 +110,9 @@ typedef struct _krb5_mcc_data {
     krb5_principal prin;
     krb5_mcc_cursor link;
     krb5_timestamp changetime;
+    /* Time offsets for clock-skewed clients.  */
+    krb5_int32 time_offset;
+    krb5_int32 usec_offset;
 } krb5_mcc_data;
 
 /* List of memory caches.  */
@@ -144,6 +147,7 @@ static void krb5_mcc_free (krb5_context context, krb5_ccache id);
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
+    krb5_os_context os_ctx = &context->os_context;
     krb5_error_code ret;
     krb5_mcc_data *d;
 
@@ -158,6 +162,12 @@ krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
     ret = krb5_copy_principal(context, princ,
                               &d->prin);
     update_mcc_change_time(d);
+
+    if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
+        /* Store client time offsets in the cache */
+        d->time_offset = os_ctx->time_offset;
+        d->usec_offset = os_ctx->usec_offset;
+    }
 
     k5_cc_mutex_unlock(context, &d->lock);
     if (ret == KRB5_OK)
@@ -265,6 +275,7 @@ static krb5_error_code new_mcc_data (const char *, krb5_mcc_data **);
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 {
+    krb5_os_context os_ctx = &context->os_context;
     krb5_ccache lid;
     krb5_mcc_list_node *ptr;
     krb5_error_code err;
@@ -290,6 +301,15 @@ krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
     if (lid == NULL)
         return KRB5_CC_NOMEM;
+
+    if ((context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) &&
+        !(os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)) {
+        /* Use the time offset from the cache entry */
+        os_ctx->time_offset = d->time_offset;
+        os_ctx->usec_offset = d->usec_offset;
+        os_ctx->os_flags = ((os_ctx->os_flags & ~KRB5_OS_TOFFSET_TIME) |
+                            KRB5_OS_TOFFSET_VALID);
+    }
 
     lid->ops = &krb5_mcc_ops;
     lid->data = d;
@@ -421,6 +441,8 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
     d->link = NULL;
     d->prin = NULL;
     d->changetime = 0;
+    d->time_offset = 0;
+    d->usec_offset = 0;
     update_mcc_change_time(d);
 
     n = malloc(sizeof(krb5_mcc_list_node));
