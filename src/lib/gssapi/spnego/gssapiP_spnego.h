@@ -615,6 +615,20 @@ spnego_gss_acquire_cred_from
 	OM_uint32 *time_rec
 );
 
+OM_uint32 KRB5_CALLCONV
+spnego_gss_export_cred(
+	OM_uint32 *minor_status,
+	gss_cred_id_t cred_handle,
+	gss_buffer_t token
+);
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_import_cred(
+	OM_uint32 *minor_status,
+	gss_buffer_t token,
+	gss_cred_id_t *cred_handle
+);
+
 #ifdef	__cplusplus
 }
 #endif

@@ -276,7 +276,9 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_inquire_attrs_for_mech,
 	spnego_gss_acquire_cred_from,
 	NULL,				/* gss_store_cred_into */
-	spnego_gss_acquire_cred_with_password
+	spnego_gss_acquire_cred_with_password,
+	spnego_gss_export_cred,
+	spnego_gss_import_cred,
 };
 
 #ifdef _GSS_STATIC_LINK
@@ -2804,6 +2806,40 @@ cleanup:
 		gss_release_oid_set(&tmpMinor, mech_attrs);
 
 	return (major);
+}
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_export_cred(OM_uint32 *minor_status,
+		       gss_cred_id_t cred_handle,
+		       gss_buffer_t token)
+{
+	spnego_gss_cred_id_t spcred = (spnego_gss_cred_id_t)cred_handle;
+
+	return (gss_export_cred(minor_status, spcred->mcred, token));
+}
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_import_cred(OM_uint32 *minor_status,
+		       gss_buffer_t token,
+		       gss_cred_id_t *cred_handle)
+{
+	OM_uint32 ret;
+	spnego_gss_cred_id_t spcred;
+	gss_cred_id_t mcred;
+
+	ret = gss_import_cred(minor_status, token, &mcred);
+	if (GSS_ERROR(ret))
+		return (ret);
+	spcred = malloc(sizeof(*spcred));
+	if (spcred == NULL) {
+		gss_release_cred(minor_status, &mcred);
+		*minor_status = ENOMEM;
+		return (GSS_S_FAILURE);
+	}
+	spcred->mcred = mcred;
+	spcred->neg_mechs = GSS_C_NULL_OID_SET;
+	*cred_handle = (gss_cred_id_t)spcred;
+	return (ret);
 }
 
 /*
