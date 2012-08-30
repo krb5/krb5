@@ -540,6 +540,7 @@ gss_add_cred_from(minor_status, input_cred_handle,
 	(void) gssint_release_internal_name(&temp_minor_status,
 					   &mech->mech_type,
 					   &allocated_name);
+    (void) generic_gss_release_oid_set(&temp_minor_status, &target_mechs);
 
     return (GSS_S_COMPLETE);
 
@@ -559,6 +560,8 @@ errout:
 
     if (input_cred_handle == GSS_C_NO_CREDENTIAL && union_cred)
 	free(union_cred);
+
+    (void) generic_gss_release_oid_set(&temp_minor_status, &target_mechs);
 
     return (status);
 }
