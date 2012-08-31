@@ -2489,7 +2489,8 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
 
     /* first try to find out if we have an existing ticket which meets the requirements */
     kret = krb5_cc_retrieve_cred_default (context, id, whichfields, mcreds, creds);
-    if ( !kret )
+    /* This sometimes returns a zero-length ticket; work around it. */
+    if ( !kret && creds->ticket.length > 0 )
         return KRB5_OK;
 
     /* if not, we must try to get a ticket without specifying any flags or etypes */
@@ -2506,7 +2507,8 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
 
     /* try again to find out if we have an existing ticket which meets the requirements */
     kret = krb5_cc_retrieve_cred_default (context, id, whichfields, mcreds, creds);
-    if ( !kret )
+    /* This sometimes returns a zero-length ticket; work around it. */
+    if ( !kret && creds->ticket.length > 0 )
         goto cleanup;
 
     /* if not, obtain a ticket using the request flags and enctype even though it may not
