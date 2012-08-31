@@ -135,7 +135,8 @@
                 <Condition Level="30">LEASHAUTOSTART = 1</Condition>
                 <ComponentRef Id="csc_LeashStartup" />
             </Feature>
-            <ComponentRef Id="cmf_remove_folder" />
+            <ComponentRef Id="SMshortcut" />
+            <ComponentRef Id="Dshortcut" />
             <?include runtime.wxi?>
         </Feature> <!-- /feaKfwClient -->
         

@@ -153,8 +153,6 @@
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_leash_exe" Guid="$(var.cmf_leash_exe_guid)" DiskId="1">
                       <File Id="fil_leash_exe" Name="MIT Kerberos.exe" KeyPath="yes">
-                        <Shortcut Id="sc_leash_exe" Advertise="yes" Directory="dirShortcut" Name="MIT Kerberos Ticket Manager.lnk" Arguments="[LEASHAUTOINIT]" />
-                        <Shortcut Id="sc_leash_desktop_exe" Advertise="yes" Directory="DesktopFolder" Name="MIT Kerberos Ticket Manager.lnk" Arguments="[LEASHAUTOINIT]" />
                       </File>
                       <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_leash32_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Name="Flags" Type="integer" Value="1032" />
@@ -468,14 +466,11 @@
       </Directory>
     </Directory>
     
+    <!-- Start Menu shortcut -->
     <Directory Id="ProgramMenuFolder">
-        <Directory Id="dirShortcut" Name="$(var.BaseProductName)">
-          <Component Id="cmf_remove_folder" Guid="BAE73197-1894-4fff-86B9-EFFB78A24CA2">
-            <Registry Id="reg_bogus" Root="HKCU" Key="Software\MIT\Kerberos5" Name="omfg" Type="string" Value="sigh" KeyPath="yes"/>
-            <RemoveFolder Id="removeFolder" On ="uninstall" />
-          </Component>
-        </Directory>
+        <Directory Id="dirShortcut" Name="$(var.BaseProductName)" />
     </Directory>
+
     <Directory Id="StartupFolder">
     </Directory>
     
@@ -624,4 +619,22 @@
     <?endif?>
 
 </Directory>
+
+<!-- Start Menu shortcut -->
+<DirectoryRef Id="dirShortcut">
+    <Component Id="SMshortcut" Guid="FBB3BCED-16B7-4C5F-AE39-425B3E62503A">
+        <Shortcut Id="sc_leash_exe" Name="MIT Kerberos Ticket Manager.lnk" Target="[KERBEROSDIR]\bin\MIT Kerberos.exe" WorkingDirectory="dirbin" Arguments="[LEASHAUTOINIT]" />
+        <RemoveFolder Id="removeFolder" On ="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\MIT\Kerberos5" Name="installedStartMenu" Type="integer" Value="1" KeyPath="yes"/>
+    </Component>
+</DirectoryRef>
+<!-- Desktop shortcut -->
+<DirectoryRef Id="DesktopFolder">
+    <Component Id="Dshortcut" Guid="B1713C3F-956D-4301-A38E-3E3EFFCF6990">
+        <Shortcut Id="sc_leash_desktop_exe" Name="MIT Kerberos Ticket Manager.lnk" Target="[KERBEROSDIR]\bin\MIT Kerberos.exe" WorkingDirectory="dirbin" Arguments="[LEASHAUTOINIT]" />
+        <RemoveFolder Id="rem_fol_desktop" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\MIT\Kerberos5" Name="installedDesktop" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+</DirectoryRef>
+
 </Include>
