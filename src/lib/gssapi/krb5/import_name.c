@@ -57,6 +57,9 @@ import_name_composite(krb5_context context,
     krb5_error_code code;
     krb5_data data;
 
+    if (enc_length == 0)
+        return 0;
+
     code = krb5_authdata_context_init(context, &ad_context);
     if (code != 0)
         return code;
@@ -133,7 +136,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 #ifndef NO_PASSWORD
     struct passwd *pw;
 #endif
-    int has_ad = 0;
+    int is_composite = 0;
     krb5_authdata_context ad_context = NULL;
     OM_uint32 status = GSS_S_FAILURE;
     krb5_gss_name_t name;
@@ -232,7 +235,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             case 0x01:
                 break;
             case 0x02:
-                has_ad++; /* is composite name */
+                is_composite++;
                 break;
             default:
                 goto fail_name;
@@ -272,7 +275,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             stringrep = tmp2;
             cp += length;
 
-            if (has_ad) {
+            if (is_composite) {
                 BOUNDS_CHECK(cp, end, 4);
                 length = *cp++;
                 length = (length << 8) | *cp++;

@@ -673,8 +673,9 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
     /* 04 02 OID Name AuthData */
 
     exp_composite_name->length = 10 + gss_mech_krb5->length + princlen;
+    exp_composite_name->length += 4; /* length of encoded attributes */
     if (attrs != NULL)
-        exp_composite_name->length += 4 + attrs->length;
+        exp_composite_name->length += attrs->length;
     exp_composite_name->value = malloc(exp_composite_name->length);
     if (exp_composite_name->value == NULL) {
         code = ENOMEM;
@@ -685,10 +686,7 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
 
     /* Note: we assume the OID will be less than 128 bytes... */
     *cp++ = 0x04;
-    if (attrs != NULL)
-        *cp++ = 0x02;
-    else
-        *cp++ = 0x01;
+    *cp++ = 0x02;
 
     store_16_be(gss_mech_krb5->length + 2, cp);
     cp += 2;
@@ -702,9 +700,10 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
     memcpy(cp, princstr, princlen);
     cp += princlen;
 
+    store_32_be(attrs != NULL ? attrs->length : 0, cp);
+    cp += 4;
+
     if (attrs != NULL) {
-        store_32_be(attrs->length, cp);
-        cp += 4;
         memcpy(cp, attrs->data, attrs->length);
         cp += attrs->length;
     }
