@@ -37,7 +37,8 @@
 #include "rename.h"
 #include "autoconf.h"
 #define EV_STANDALONE 1
-/* Avoids using clock_gettime; we probably shouldn't have to do this. */
+/* Avoid using clock_gettime, which would create a dependency on librt. */
+#define EV_USE_MONOTONIC 0
 #define EV_USE_REALTIME 0
 #define EV_FEATURES 0x5f        /* Everything but back ends */
 #ifdef HAVE_POLL_H
