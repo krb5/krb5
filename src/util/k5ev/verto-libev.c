@@ -78,10 +78,38 @@ libev_ctx_reinitialize(verto_mod_ctx *ctx)
 static void
 libev_callback(EV_P_ ev_watcher *w, int revents)
 {
-    if (verto_get_type(w->data) == VERTO_EV_TYPE_CHILD)
+    verto_ev_flag state = VERTO_EV_FLAG_NONE;
+
+    if (verto_get_type(w->data)== VERTO_EV_TYPE_CHILD)
         verto_set_proc_status(w->data, ((ev_child*) w)->rstatus);
 
+    if (revents & EV_READ)
+        state |= VERTO_EV_FLAG_IO_READ;
+    if (revents & EV_WRITE)
+        state |= VERTO_EV_FLAG_IO_WRITE;
+    if (revents & EV_ERROR)
+        state |= VERTO_EV_FLAG_IO_ERROR;
+
+    verto_set_fd_state(w->data, state);
     verto_fire(w->data);
+}
+
+static void
+libev_ctx_set_flags(verto_mod_ctx *ctx, const verto_ev *ev,
+                    verto_mod_ev *evpriv)
+{
+    if (verto_get_type(ev) == VERTO_EV_TYPE_IO) {
+        int events = EV_NONE;
+
+        if (verto_get_flags(ev) & VERTO_EV_FLAG_IO_READ)
+            events |= EV_READ;
+        if (verto_get_flags(ev) & VERTO_EV_FLAG_IO_WRITE)
+            events |= EV_WRITE;
+
+        ev_io_stop(ctx, (ev_io*) evpriv);
+        ev_io_set(((ev_io*) evpriv), verto_get_fd(ev), events);
+        ev_io_start(ctx, (ev_io*) evpriv);
+    }
 }
 
 #define setuptype(type, ...) \
@@ -104,17 +132,12 @@ libev_ctx_add(verto_mod_ctx *ctx, const verto_ev *ev, verto_ev_flag *flags)
        ev_child *child;
     } w;
     ev_tstamp interval;
-    int events = EV_NONE;
 
     w.watcher = NULL;
     *flags |= VERTO_EV_FLAG_PERSIST;
     switch (verto_get_type(ev)) {
         case VERTO_EV_TYPE_IO:
-            if (verto_get_flags(ev) & VERTO_EV_FLAG_IO_READ)
-                events |= EV_READ;
-            if (verto_get_flags(ev) & VERTO_EV_FLAG_IO_WRITE)
-                events |= EV_WRITE;
-            setuptype(io, libev_callback, verto_get_fd(ev), events);
+            setuptype(io, libev_callback, verto_get_fd(ev), EV_NONE);
         case VERTO_EV_TYPE_TIMEOUT:
             interval = ((ev_tstamp) verto_get_interval(ev)) / 1000.0;
             setuptype(timer, libev_callback, interval, interval);
@@ -129,8 +152,10 @@ libev_ctx_add(verto_mod_ctx *ctx, const verto_ev *ev, verto_ev_flag *flags)
             break; /* Not supported */
     }
 
-    if (w.watcher)
+    if (w.watcher) {
         w.watcher->data = (void*) ev;
+        libev_ctx_set_flags(ctx, ev, w.watcher);
+    }
     return w.watcher;
 }
 

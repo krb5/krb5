@@ -35,7 +35,7 @@ typedef void verto_mod_ctx;
 typedef void verto_mod_ev;
 #endif
 
-#define VERTO_MODULE_VERSION 2
+#define VERTO_MODULE_VERSION 3
 #define VERTO_MODULE_TABLE(name) verto_module_table_ ## name
 #define VERTO_MODULE(name, symb, types) \
     static verto_ctx_funcs name ## _funcs = { \
@@ -46,6 +46,7 @@ typedef void verto_mod_ev;
         name ## _ctx_run_once, \
         name ## _ctx_break, \
         name ## _ctx_reinitialize, \
+        name ## _ctx_set_flags, \
         name ## _ctx_add, \
         name ## _ctx_del \
     }; \
@@ -75,6 +76,9 @@ typedef struct {
     /* Required */ void (*ctx_run_once)(verto_mod_ctx *ctx);
     /* Optional */ void (*ctx_break)(verto_mod_ctx *ctx);
     /* Optional */ void (*ctx_reinitialize)(verto_mod_ctx *ctx);
+    /* Optional */ void (*ctx_set_flags)(verto_mod_ctx *ctx,
+                                         const verto_ev *ev,
+                                         verto_mod_ev *modev);
     /* Required */ verto_mod_ev *(*ctx_add)(verto_mod_ctx *ctx,
                                             const verto_ev *ev,
                                             verto_ev_flag *flags);
@@ -165,5 +169,20 @@ verto_fire(verto_ev *ev);
  */
 void
 verto_set_proc_status(verto_ev *ev, verto_proc_status status);
+
+/**
+ * Sets the state of the fd which caused this event to fire.
+ *
+ * This function does nothing if the verto_ev is not a io type.
+ *
+ * Only the flags VERTO_EV_FLAG_IO_(READ|WRITE|ERROR) are supported. All other
+ * flags are unset.
+ *
+ * @see verto_add_io()
+ * @param ev The verto_ev to set the state in.
+ * @param state The fd state.
+ */
+void
+verto_set_fd_state(verto_ev *ev, verto_ev_flag state);
 
 #endif /* VERTO_MODULE_H_ */

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#define _GNU_SOURCE /* For dladdr(), asprintf() */
+#define _GNU_SOURCE /* For asprintf() */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +45,9 @@
 #define  _str(s) # s
 #define __str(s) _str(s)
 
+/* Remove flags we can emulate */
+#define make_actual(flags) ((flags) & ~(VERTO_EV_FLAG_PERSIST|VERTO_EV_FLAG_IO_CLOSE_FD))
+
 struct verto_ctx {
     size_t ref;
     verto_mod_ctx *ctx;
@@ -59,6 +62,11 @@ typedef struct {
     verto_proc_status status;
 } verto_child;
 
+typedef struct {
+    int fd;
+    verto_ev_flag state;
+} verto_io;
+
 struct verto_ev {
     verto_ev *next;
     verto_ctx *ctx;
@@ -72,7 +80,7 @@ struct verto_ev {
     size_t depth;
     int deleted;
     union {
-        int fd;
+        verto_io io;
         int signal;
         time_t interval;
         verto_child child;
@@ -88,7 +96,27 @@ struct module_record {
     verto_ctx *defctx;
 };
 
+
+#ifdef BUILTIN_MODULE
+#define _MODTABLE(n) verto_module_table_ ## n
+#define MODTABLE(n) _MODTABLE(n)
+/*
+ * This symbol can be used when embedding verto.c in a library along with a
+ * built-in private module, to preload the module instead of dynamically
+ * linking it in later.  Define to verto_module_table_<modulename>.
+ */
+extern verto_module MODTABLE(BUILTIN_MODULE);
+static module_record builtin_record = {
+    NULL, &MODTABLE(BUILTIN_MODULE), NULL, "", NULL
+};
+static module_record *loaded_modules = &builtin_record;
+#else
 static module_record *loaded_modules;
+#endif
+
+static void *(*resize_cb)(void *mem, size_t size);
+static int resize_cb_hierarchical;
+
 #ifdef HAVE_PTHREAD
 static pthread_mutex_t loaded_modules_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define mutex_lock(x) pthread_mutex_lock(x)
@@ -98,6 +126,16 @@ static pthread_mutex_t loaded_modules_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define mutex_unlock(x)
 #endif
 
+#define vfree(mem) vresize(mem, 0)
+static void *
+vresize(void *mem, size_t size)
+{
+    if (!resize_cb)
+        resize_cb = &realloc;
+    return (*resize_cb)(mem, size);
+}
+
+#ifndef BUILTIN_MODULE
 static int
 int_vasprintf(char **strp, const char *fmt, va_list ap) {
     va_list apc;
@@ -125,19 +163,6 @@ int_asprintf(char **strp, const char *fmt, ...) {
 }
 
 static char *
-int_get_table_name(const char *suffix)
-{
-    char *tmp;
-
-    tmp = malloc(strlen(suffix) + strlen(__str(VERTO_MODULE_TABLE())) + 1);
-    if (tmp) {
-        strcpy(tmp, __str(VERTO_MODULE_TABLE()));
-        strcat(tmp, suffix);
-    }
-    return tmp;
-}
-
-static char *
 int_get_table_name_from_filename(const char *filename)
 {
     char *bn = NULL, *tmp = NULL;
@@ -160,7 +185,8 @@ int_get_table_name_from_filename(const char *filename)
     if (tmp) {
         if (strchr(tmp+1, '.')) {
             *strchr(tmp+1, '.') = '\0';
-            tmp = int_get_table_name(tmp + 1);
+            if (int_asprintf(&tmp, "%s%s", __str(VERTO_MODULE_TABLE()), tmp + 1) < 0)
+                tmp = NULL;
         } else
             tmp = NULL;
     }
@@ -225,13 +251,13 @@ do_load_file(const char *filename, int reqsym, verto_ev_type reqtypes,
     mutex_unlock(&loaded_modules_mutex);
 
     /* Create our module record */
-    tmp = *record = malloc(sizeof(module_record));
+    tmp = *record = vresize(NULL, sizeof(module_record));
     if (!tmp)
         return 0;
     memset(tmp, 0, sizeof(module_record));
     tmp->filename = strdup(filename);
     if (!tmp->filename) {
-        free(tmp);
+        vfree(tmp);
         return 0;
     }
 
@@ -239,7 +265,7 @@ do_load_file(const char *filename, int reqsym, verto_ev_type reqtypes,
     tblname = int_get_table_name_from_filename(filename);
     if (!tblname) {
         free(tblname);
-        free(tmp);
+        vfree(tmp);
         return 0;
     }
 
@@ -252,7 +278,7 @@ do_load_file(const char *filename, int reqsym, verto_ev_type reqtypes,
         free(error);
         module_close(tmp->dll);
         free(tblname);
-        free(tmp);
+        vfree(tmp);
         return 0;
     }
 
@@ -311,14 +337,17 @@ do_load_dir(const char *dirname, const char *prefix, const char *suffix,
     closedir(dir);
     return *record != NULL;
 }
+#endif
 
 static int
 load_module(const char *impl, verto_ev_type reqtypes, module_record **record)
 {
     int success = 0;
+#ifndef BUILTIN_MODULE
     char *prefix = NULL;
     char *suffix = NULL;
     char *tmp = NULL;
+#endif
 
     /* Check the cache */
     mutex_lock(&loaded_modules_mutex);
@@ -341,6 +370,7 @@ load_module(const char *impl, verto_ev_type reqtypes, module_record **record)
     }
     mutex_unlock(&loaded_modules_mutex);
 
+#ifndef BUILTIN_MODULE
     if (!module_get_filename_for_symbol(verto_convert_module, &prefix))
         return 0;
 
@@ -394,14 +424,14 @@ load_module(const char *impl, verto_ev_type reqtypes, module_record **record)
                 success = do_load_dir(dname, prefix, suffix, 1, reqtypes,
                                       record);
                 if (!success) {
-#ifdef DEFAULT_LIBRARY
+#ifdef DEFAULT_MODULE
                     /* Attempt to find the default module */
-                    success = load_module(DEFAULT_LIBRARY, reqtypes, record);
+                    success = load_module(DEFAULT_MODULE, reqtypes, record);
                     if (!success)
-#endif /* DEFAULT_LIBRARY */
-                    /* Attempt to load any plugin (we're desperate) */
-                    success = do_load_dir(dname, prefix, suffix, 0,
-                                          reqtypes, record);
+#endif /* DEFAULT_MODULE */
+                        /* Attempt to load any plugin (we're desperate) */
+                        success = do_load_dir(dname, prefix, suffix, 0,
+                                              reqtypes, record);
                 }
             }
 
@@ -411,6 +441,7 @@ load_module(const char *impl, verto_ev_type reqtypes, module_record **record)
 
     free(suffix);
     free(prefix);
+#endif /* BUILTIN_MODULE */
     return success;
 }
 
@@ -423,7 +454,7 @@ make_ev(verto_ctx *ctx, verto_callback *callback,
     if (!ctx || !callback)
         return NULL;
 
-    ev = malloc(sizeof(verto_ev));
+    ev = vresize(NULL, sizeof(verto_ev));
     if (ev) {
         memset(ev, 0, sizeof(verto_ev));
         ev->ctx        = ctx;
@@ -502,6 +533,17 @@ verto_set_default(const char *impl, verto_ev_type reqtypes)
     return load_module(impl, reqtypes, &mr);
 }
 
+int
+verto_set_allocator(void *(*resize)(void *mem, size_t size),
+                    int hierarchical)
+{
+    if (resize_cb || !resize)
+        return 0;
+    resize_cb = resize;
+    resize_cb_hierarchical = hierarchical;
+    return 1;
+}
+
 void
 verto_free(verto_ctx *ctx)
 {
@@ -520,7 +562,7 @@ verto_free(verto_ctx *ctx)
     if (!ctx->deflt || !ctx->module->funcs->ctx_default)
         ctx->module->funcs->ctx_free(ctx->ctx);
 
-    free(ctx);
+    vfree(ctx);
 }
 
 void
@@ -583,7 +625,7 @@ verto_reinitialize(verto_ctx *ctx)
 
     /* Recreate events that were marked forkable */
     for (tmp = ctx->events; tmp; tmp = tmp->next) {
-        tmp->actual = tmp->flags;
+        tmp->actual = make_actual(tmp->flags);
         tmp->ev = ctx->module->funcs->ctx_add(ctx->ctx, tmp, &tmp->actual);
         if (!tmp->ev)
             error = 0;
@@ -596,10 +638,10 @@ verto_reinitialize(verto_ctx *ctx)
     ev = make_ev(ctx, callback, type, flags); \
     if (ev) { \
         set; \
-        ev->actual = ev->flags; \
+        ev->actual = make_actual(ev->flags); \
         ev->ev = ctx->module->funcs->ctx_add(ctx->ctx, ev, &ev->actual); \
         if (!ev->ev) { \
-            free(ev); \
+            vfree(ev); \
             return NULL; \
         } \
         push_ev(ctx, ev); \
@@ -614,7 +656,7 @@ verto_add_io(verto_ctx *ctx, verto_ev_flag flags,
     if (fd < 0 || !(flags & (VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_IO_WRITE)))
         return NULL;
 
-    doadd(ev, ev->option.fd = fd, VERTO_EV_TYPE_IO);
+    doadd(ev, ev->option.io.fd = fd, VERTO_EV_TYPE_IO);
     return ev;
 }
 
@@ -704,12 +746,41 @@ verto_get_flags(const verto_ev *ev)
     return ev->flags;
 }
 
+void
+verto_set_flags(verto_ev *ev, verto_ev_flag flags)
+{
+    if (!ev)
+        return;
+
+    ev->flags  &= ~_VERTO_EV_FLAG_MUTABLE_MASK;
+    ev->flags  |= flags & _VERTO_EV_FLAG_MUTABLE_MASK;
+
+    /* If setting flags isn't supported, just rebuild the event */
+    if (!ev->ctx->module->funcs->ctx_set_flags) {
+        ev->ctx->module->funcs->ctx_del(ev->ctx->ctx, ev, ev->ev);
+        ev->actual = make_actual(ev->flags);
+        ev->ev = ev->ctx->module->funcs->ctx_add(ev->ctx->ctx, ev, &ev->actual);
+        assert(ev->ev); /* Here is the main reason why modules should */
+        return;         /* implement set_flags(): we cannot fail gracefully. */
+    }
+
+    ev->actual &= ~_VERTO_EV_FLAG_MUTABLE_MASK;
+    ev->actual |= flags & _VERTO_EV_FLAG_MUTABLE_MASK;
+    ev->ctx->module->funcs->ctx_set_flags(ev->ctx->ctx, ev, ev->ev);
+}
+
 int
 verto_get_fd(const verto_ev *ev)
 {
     if (ev && (ev->type == VERTO_EV_TYPE_IO))
-        return ev->option.fd;
+        return ev->option.io.fd;
     return -1;
+}
+
+verto_ev_flag
+verto_get_fd_state(const verto_ev *ev)
+{
+    return ev->option.io.state;
 }
 
 time_t
@@ -741,6 +812,12 @@ verto_get_proc_status(const verto_ev *ev)
     return ev->option.child.status;
 }
 
+verto_ctx *
+verto_get_ctx(const verto_ev *ev)
+{
+    return ev->ctx;
+}
+
 void
 verto_del(verto_ev *ev)
 {
@@ -760,7 +837,13 @@ verto_del(verto_ev *ev)
         ev->onfree(ev->ctx, ev);
     ev->ctx->module->funcs->ctx_del(ev->ctx->ctx, ev, ev->ev);
     remove_ev(&(ev->ctx->events), ev);
-    free(ev);
+
+    if ((ev->type == VERTO_EV_TYPE_IO) &&
+        (ev->flags & VERTO_EV_FLAG_IO_CLOSE_FD) &&
+        !(ev->actual & VERTO_EV_FLAG_IO_CLOSE_FD))
+        close(ev->option.io.fd);
+
+    vfree(ev);
 }
 
 verto_ev_type
@@ -806,7 +889,7 @@ verto_convert_module(const verto_module *module, int deflt, verto_mod_ctx *mctx)
             goto error;
     }
 
-    ctx = malloc(sizeof(verto_ctx));
+    ctx = vresize(NULL, sizeof(verto_ctx));
     if (!ctx)
         goto error;
     memset(ctx, 0, sizeof(verto_ctx));
@@ -836,9 +919,9 @@ verto_convert_module(const verto_module *module, int deflt, verto_mod_ctx *mctx)
         }
         mutex_unlock(&loaded_modules_mutex);
 
-        *tmp = malloc(sizeof(module_record));
+        *tmp = vresize(NULL, sizeof(module_record));
         if (!*tmp) {
-            free(ctx);
+            vfree(ctx);
             goto error;
         }
 
@@ -867,12 +950,19 @@ verto_fire(verto_ev *ev)
     if (ev->depth == 0) {
         if (!(ev->flags & VERTO_EV_FLAG_PERSIST) || ev->deleted)
             verto_del(ev);
-        else if (!ev->actual & VERTO_EV_FLAG_PERSIST) {
-            ev->actual = ev->flags;
-            priv = ev->ctx->module->funcs->ctx_add(ev->ctx->ctx, ev, &ev->actual);
-            assert(priv); /* TODO: create an error callback */
-            ev->ctx->module->funcs->ctx_del(ev->ctx->ctx, ev, ev->ev);
-            ev->ev = priv;
+        else {
+            if (!(ev->actual & VERTO_EV_FLAG_PERSIST)) {
+                ev->actual = make_actual(ev->flags);
+                priv = ev->ctx->module->funcs->ctx_add(ev->ctx->ctx, ev, &ev->actual);
+                assert(priv); /* TODO: create an error callback */
+                ev->ctx->module->funcs->ctx_del(ev->ctx->ctx, ev, ev->ev);
+                ev->ev = priv;
+            }
+
+            if (ev->type == VERTO_EV_TYPE_IO)
+                ev->option.io.state = VERTO_EV_FLAG_NONE;
+            if (ev->type == VERTO_EV_TYPE_CHILD)
+                ev->option.child.status = 0;
         }
     }
 }
@@ -882,4 +972,20 @@ verto_set_proc_status(verto_ev *ev, verto_proc_status status)
 {
     if (ev && ev->type == VERTO_EV_TYPE_CHILD)
         ev->option.child.status = status;
+}
+
+void
+verto_set_fd_state(verto_ev *ev, verto_ev_flag state)
+{
+    /* Filter out only the io flags */
+    state = state & (VERTO_EV_FLAG_IO_READ |
+                     VERTO_EV_FLAG_IO_WRITE |
+                     VERTO_EV_FLAG_IO_ERROR);
+
+    /* Don't report read/write if the socket is closed */
+    if (state & VERTO_EV_FLAG_IO_ERROR)
+        state = VERTO_EV_FLAG_IO_ERROR;
+
+    if (ev && ev->type == VERTO_EV_TYPE_IO)
+        ev->option.io.state = state;
 }

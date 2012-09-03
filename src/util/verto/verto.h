@@ -39,6 +39,11 @@ typedef int verto_proc_status;
 
 #define VERTO_SIG_IGN ((verto_callback *) 1)
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
 typedef struct verto_ctx verto_ctx;
 typedef struct verto_ev verto_ev;
 
@@ -59,8 +64,15 @@ typedef enum {
     VERTO_EV_FLAG_PRIORITY_HIGH = 1 << 3,
     VERTO_EV_FLAG_IO_READ = 1 << 4,
     VERTO_EV_FLAG_IO_WRITE = 1 << 5,
+    VERTO_EV_FLAG_IO_ERROR = 1 << 7,
+    VERTO_EV_FLAG_IO_CLOSE_FD = 1 << 8,
     VERTO_EV_FLAG_REINITIABLE = 1 << 6,
-    _VERTO_EV_FLAG_MAX = VERTO_EV_FLAG_REINITIABLE
+    _VERTO_EV_FLAG_MUTABLE_MASK = VERTO_EV_FLAG_PRIORITY_LOW
+                                  | VERTO_EV_FLAG_PRIORITY_MEDIUM
+                                  | VERTO_EV_FLAG_PRIORITY_HIGH
+                                  | VERTO_EV_FLAG_IO_READ
+                                  | VERTO_EV_FLAG_IO_WRITE,
+    _VERTO_EV_FLAG_MAX = VERTO_EV_FLAG_IO_CLOSE_FD
 } verto_ev_flag;
 
 typedef void (verto_callback)(verto_ctx *ctx, verto_ev *ev);
@@ -171,6 +183,25 @@ int
 verto_set_default(const char *impl, verto_ev_type reqtypes);
 
 /**
+ * Sets the allocator to use for verto_ctx and verto_ev objects.
+ *
+ * If you plan to set the allocator, you MUST call this function before any
+ * other verto_*() calls.
+ *
+ * @see verto_new()
+ * @see verto_default()
+ * @see verto_add_io()
+ * @see verto_add_timeout()
+ * @see verto_add_idle()
+ * @see verto_add_signal()
+ * @see verto_add_child()
+ * @param resize The allocator to use (behaves like realloc())
+ * @param hierarchical Zero if the allocator is not hierarchical
+ */
+int
+verto_set_allocator(void *(*resize)(void *mem, size_t size), int hierarchical);
+
+/**
  * Frees a verto_ctx.
  *
  * When called on a default verto_ctx, the reference will be freed but the
@@ -237,6 +268,8 @@ verto_reinitialize(verto_ctx *ctx);
  * VERTO_EV_FLAG_PERSIST is not provided, the event will be freed automatically
  * after its execution. In either case, you may call verto_del() at any time
  * to prevent the event from executing.
+ * If VERTO_EV_FLAG_IO_CLOSE_FD is provided the passed in fd is automatically
+ * closed when the event is freed with verto_del()
  *
  * NOTE: On Windows, the underlying select() only works with sockets. As such,
  * any attempt to add a non-socket io event on Windows will produce undefined
@@ -400,11 +433,30 @@ verto_get_type(const verto_ev *ev);
  * @see verto_add_idle()
  * @see verto_add_signal()
  * @see verto_add_child()
+ * @see verto_set_flags()
  * @param ev The verto_ev
  * @return The verto_ev type
  */
 verto_ev_flag
 verto_get_flags(const verto_ev *ev);
+
+/**
+ * Sets the flags associated with the given verto_ev.
+ *
+ * See _VERTO_EV_FLAG_MUTABLE_MASK for the flags that can be changed
+ * with this function. All others will be ignored.
+ *
+ * @see verto_add_io()
+ * @see verto_add_timeout()
+ * @see verto_add_idle()
+ * @see verto_add_signal()
+ * @see verto_add_child()
+ * @see verto_get_flags()
+ * @param ev The verto_ev
+ * @param flags The flags for the event
+ */
+void
+verto_set_flags(verto_ev *ev, verto_ev_flag flags);
 
 /**
  * Gets the file descriptor associated with a read/write verto_ev.
@@ -415,6 +467,16 @@ verto_get_flags(const verto_ev *ev);
  */
 int
 verto_get_fd(const verto_ev *ev);
+
+/**
+ * Gets the file descriptor state from when the event fires.
+ *
+ * @see verto_add_io()
+ * @param ev The verto_ev to retrieve the fd state from.
+ * @return The fd state.
+ */
+verto_ev_flag
+verto_get_fd_state(const verto_ev *ev);
 
 /**
  * Gets the interval associated with a timeout verto_ev.
@@ -457,6 +519,17 @@ verto_proc_status
 verto_get_proc_status(const verto_ev *ev);
 
 /**
+ * Gets the verto_ctx associated with a verto_ev.
+ *
+ * This is a borrowed reference, don't attempt to free it!
+ *
+ * @param ev The verto_ev to retrieve the verto_ctx from.
+ * @return The verto_ctx.
+ */
+verto_ctx *
+verto_get_ctx(const verto_ev *ev);
+
+/**
  * Removes an event from from the event context and frees it.
  *
  * The event and its contents cannot be used after this call.
@@ -480,4 +553,7 @@ verto_del(verto_ev *ev);
 verto_ev_type
 verto_get_supported_types(verto_ctx *ctx);
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* __cplusplus */
 #endif /* VERTO_H_ */

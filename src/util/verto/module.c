@@ -40,6 +40,51 @@ dllerror(void) {
     LocalFree(msg);
     return amsg;
 }
+#elif defined(aix)
+#include "sys/ldr.h"
+
+struct Dl_info {
+  const char* dli_fname;
+};
+
+static int
+dladdr(void* s, Dl_info* i)
+{
+    static const size_t bufSize = 4096;
+    G__FastAllocString buf(bufSize);
+    char* pldi = buf;
+    int r;
+
+    r = loadquery(L_GETINFO, pldi, bufSize);
+    if (r == -1) {
+        i->dli_fname = NULL;
+        return 0;
+    }
+
+    for (ld_info* ldi = (ld_info*) buf;
+         ldi->ldinfo_next;
+         ldi += ldi->ldinfo_next) {
+        char* textBegin = (char*) ldi->ldinfo_textorg;
+        if (textBegin < s) {
+            char* textEnd = textBegin + ldi->ldinfo_textsize;
+            if (textEnd > s) {
+                i->dli_fname = ldi->ldinfo_filename;
+                return 1;
+            }
+        }
+    }
+
+    // First is main(), skip.
+    ld_info* ldi = (ld_info*) pldi;
+    while (ldi->ldinfo_next) {
+        pldi += ldi->ldinfo_next;
+        ldi = (ld_info*) pldi;
+
+    }
+
+    i->dli_fname = NULL;
+    return 0;
+}
 #else
 #define _GNU_SOURCE
 #include <stdlib.h>
@@ -80,14 +125,14 @@ module_get_filename_for_symbol(void *addr, char **filename)
 
     if (!GetModuleFileNameA(mod, tmp, MAX_PATH))
         return 0;
-#else  /* WIN32 */
+#else
     const char *tmp;
     Dl_info dlinfo;
 
     if (!dladdr(addr, &dlinfo))
         return 0;
     tmp = dlinfo.dli_fname;
-#endif /* WIN32 */
+#endif
 
     if (filename) {
         *filename = strdup(tmp);
