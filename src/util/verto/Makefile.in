@@ -8,6 +8,7 @@ LIBMINOR=0
 
 LOCALINCLUDES=-I$(srcdir) -I.
 DEFINES=-DDEFAULT_LIBRARY=\"k5ev\" -DBUILTIN_MODULE=k5ev
+SED=sed
 
 # Turn off extra warnings since we're not going to clean up libverto's code.
 WARN_CFLAGS=
