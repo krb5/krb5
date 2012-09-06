@@ -7,6 +7,7 @@ SYNOPSIS
 --------
 
 **kproplog** [**-h**] [**-e** *num*] [-v]
+**kproplog** [-R]
 
 
 DESCRIPTION
@@ -34,6 +35,11 @@ last update received and the associated time stamp of the last update.
 
 OPTIONS
 -------
+
+**-R**
+    Reset the update log.  This forces full resynchronization.  If used
+    on a slave then that slave will request a full resync.  If used on
+    the master then all slaves will request full resyncs.
 
 **-h**
     Display a summary of the update log.  This information includes

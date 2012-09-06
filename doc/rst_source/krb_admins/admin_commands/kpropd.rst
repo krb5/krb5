@@ -55,6 +55,9 @@ enabled, the principal ``kiprop/slavehostname@REALM`` (where
 name of the Kerberos realm) must be present in the slave's keytab
 file.
 
+:ref:`kproplog(8)` can be used to force full replication when iprop is
+enabled.
+
 
 OPTIONS
 --------
