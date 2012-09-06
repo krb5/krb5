@@ -31,6 +31,10 @@
  * are only generated for OTP preauth objects.
  */
 
+#include <PrincipalName.h>
+#include <KRB5PrincipalName.h>
+#include <OtherInfo.h>
+#include <PkinitSuppPubInfo.h>
 #include <OTP-TOKENINFO.h>
 #include <PA-OTP-CHALLENGE.h>
 #include <PA-OTP-REQUEST.h>
@@ -38,6 +42,26 @@
 
 static unsigned char buf[8192];
 static size_t buf_pos;
+
+/* PrincipalName and KRB5PrincipalName */
+static KerberosString_t comp_1 = { "hftsai", 6 };
+static KerberosString_t comp_2 = { "extra", 5 };
+static KerberosString_t *comps[] = { &comp_1, &comp_2 };
+static PrincipalName_t princ = { 1, { comps, 2, 2 } };
+static KRB5PrincipalName_t krb5princ = { { "ATHENA.MIT.EDU", 14 },
+                                         { 1, { comps, 2, 2 } } };
+
+/* OtherInfo */
+static unsigned int krb5_arcs[] = { 1, 2, 840, 113554, 1, 2, 2 };
+static OCTET_STRING_t krb5data_ostring = { "krb5data", 8 };
+static OtherInfo_t other_info = {
+    { 0 }, { 0 }, { 0 },        /* Initialized in main() */
+    &krb5data_ostring, NULL
+};
+
+/* PkinitSuppPubInfo */
+static PkinitSuppPubInfo_t supp_pub_info = { 1, { "krb5data", 8 },
+                                             { "krb5data", 8 } };
 
 /* Minimal OTP-TOKENINFO */
 static OTP_TOKENINFO_t token_info_1 = { { "\0\0\0\0", 4, 0 } };
@@ -136,8 +160,33 @@ main()
     OBJECT_IDENTIFIER_set_arcs(&alg_sha1.algorithm, sha1_arcs,
                                sizeof(*sha1_arcs),
                                sizeof(sha1_arcs) / sizeof(*sha1_arcs));
+    OBJECT_IDENTIFIER_set_arcs(&other_info.algorithmID.algorithm, krb5_arcs,
+                               sizeof(*krb5_arcs),
+                               sizeof(krb5_arcs) / sizeof(*krb5_arcs));
 
-    printf("Minimal OTP-TOKEN-INFO:\n");
+    printf("PrincipalName:\n");
+    der_encode(&asn_DEF_PrincipalName, &princ, consume, NULL);
+    printbuf();
+
+    /* Print this encoding and also use it to initialize two fields of
+     * other_info. */
+    printf("\nKRB5PrincipalName:\n");
+    der_encode(&asn_DEF_KRB5PrincipalName, &krb5princ, consume, NULL);
+    OCTET_STRING_fromBuf(&other_info.partyUInfo, buf, buf_pos);
+    OCTET_STRING_fromBuf(&other_info.partyVInfo, buf, buf_pos);
+    printbuf();
+
+    printf("\nOtherInfo:\n");
+    der_encode(&asn_DEF_OtherInfo, &other_info, consume, NULL);
+    printbuf();
+    free(other_info.partyUInfo.buf);
+    free(other_info.partyVInfo.buf);
+
+    printf("\nPkinitSuppPubInfo:\n");
+    der_encode(&asn_DEF_PkinitSuppPubInfo, &supp_pub_info, consume, NULL);
+    printbuf();
+
+    printf("\nMinimal OTP-TOKEN-INFO:\n");
     der_encode(&asn_DEF_OTP_TOKENINFO, &token_info_1, consume, NULL);
     printbuf();
 

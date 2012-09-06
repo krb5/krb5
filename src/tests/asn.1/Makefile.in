@@ -11,7 +11,8 @@ SRCS= $(srcdir)/krb5_encode_test.c $(srcdir)/krb5_decode_test.c \
 	$(srcdir)/ktest_equal.c $(srcdir)/utility.c \
 	$(srcdir)/trval.c $(srcdir)/t_trval.c
 
-ASN1SRCS= $(srcdir)/krb5.asn1 $(srcdir)/pkix.asn1 $(srcdir)/otp.asn1
+ASN1SRCS= $(srcdir)/krb5.asn1 $(srcdir)/pkix.asn1 $(srcdir)/otp.asn1 \
+	$(srcdir)/pkinit.asn1 $(srcdir)/pkinit-agility.asn1
 
 all:: krb5_encode_test krb5_decode_test krb5_decode_leak t_trval
 
