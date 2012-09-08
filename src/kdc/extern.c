@@ -31,11 +31,11 @@
 #include "k5-int.h"
 #include "kdb.h"
 #include "extern.h"
+#include "realm_data.h"
 
 /* real declarations of KDC's externs */
 kdc_realm_t     **kdc_realmlist = (kdc_realm_t **) NULL;
 int             kdc_numrealms = 0;
-kdc_realm_t     *kdc_active_realm = (kdc_realm_t *) NULL;
 krb5_data empty_string = {0, 0, ""};
 krb5_timestamp kdc_infinity = KRB5_INT32_MAX; /* XXX */
 krb5_keyblock   psr_key;

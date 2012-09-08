@@ -119,6 +119,8 @@ struct as_req_state {
     const krb5_fulladdr *from;
 
     krb5_error_code preauth_err;
+
+    kdc_realm_t *active_realm;
 };
 
 static void
@@ -134,6 +136,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     krb5_enctype useenctype;
     loop_respond_fn oldrespond;
     void *oldarg;
+    kdc_realm_t *kdc_active_realm = state->active_realm;
 
     assert(state);
     oldrespond = state->respond;
@@ -315,7 +318,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
            state->reply.enc_part.ciphertext.length);
     free(state->reply.enc_part.ciphertext.data);
 
-    log_as_req(state->from, state->request, &state->reply,
+    log_as_req(kdc_context, state->from, state->request, &state->reply,
                state->client, state->cname, state->server,
                state->sname, state->authtime, 0, 0, 0);
     did_log = 1;
@@ -330,7 +333,8 @@ egress:
         emsg = krb5_get_error_message(kdc_context, errcode);
 
     if (state->status) {
-        log_as_req(state->from, state->request, &state->reply, state->client,
+        log_as_req(kdc_context,
+                   state->from, state->request, &state->reply, state->client,
                    state->cname, state->server, state->sname, state->authtime,
                    state->status, errcode, emsg);
         did_log = 1;
@@ -438,8 +442,8 @@ finish_preauth(void *arg, krb5_error_code code)
 /*ARGSUSED*/
 void
 process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
-               const krb5_fulladdr *from, verto_ctx *vctx,
-               loop_respond_fn respond, void *arg)
+               const krb5_fulladdr *from, kdc_realm_t *kdc_active_realm,
+               verto_ctx *vctx, loop_respond_fn respond, void *arg)
 {
     krb5_error_code errcode;
     krb5_timestamp rtime;
@@ -458,15 +462,16 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->request = request;
     state->req_pkt = req_pkt;
     state->from = from;
+    state->active_realm = kdc_active_realm;
 
+    errcode = kdc_make_rstate(kdc_active_realm, &state->rstate);
+    if (errcode != 0) {
+        (*respond)(arg, errcode, NULL);
+        return;
+    }
     if (state->request->msg_type != KRB5_AS_REQ) {
         state->status = "msg_type mismatch";
         errcode = KRB5_BADMSGTYPE;
-        goto errout;
-    }
-    errcode = kdc_make_rstate(&state->rstate);
-    if (errcode != 0) {
-        state->status = "constructing state";
         goto errout;
     }
     if (fetch_asn1_field((unsigned char *) req_pkt->data,
@@ -558,7 +563,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
      * If the backend returned a principal that is not in the local
      * realm, then we need to refer the client to that realm.
      */
-    if (!is_local_principal(state->client->princ)) {
+    if (!is_local_principal(kdc_active_realm, state->client->princ)) {
         /* Entry is a referral to another realm */
         state->status = "REFERRAL";
         errcode = KRB5KDC_ERR_WRONG_REALM;
@@ -589,7 +594,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
     state->authtime = state->kdc_time; /* for audit_as_request() */
 
-    if ((errcode = validate_as_request(state->request, *state->client,
+    if ((errcode = validate_as_request(kdc_active_realm,
+                                       state->request, *state->client,
                                        *state->server, state->kdc_time,
                                        &state->status, &state->e_data))) {
         if (!state->status)
@@ -601,7 +607,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     /*
      * Select the keytype for the ticket session key.
      */
-    if ((useenctype = select_session_keytype(kdc_context, state->server,
+    if ((useenctype = select_session_keytype(kdc_active_realm, state->server,
                                              state->request->nktypes,
                                              state->request->ktype)) == 0) {
         /* unsupported ktype */
@@ -669,7 +675,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     } else
         state->enc_tkt_reply.times.starttime = state->kdc_time;
 
-    kdc_get_ticket_endtime(kdc_context, state->enc_tkt_reply.times.starttime,
+    kdc_get_ticket_endtime(kdc_active_realm,
+                           state->enc_tkt_reply.times.starttime,
                            kdc_infinity, state->request->till, state->client,
                            state->server, &state->enc_tkt_reply.times.endtime);
 
@@ -759,6 +766,7 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
     krb5_error errpkt;
     krb5_error_code retval;
     krb5_data *scratch = NULL, *e_data_asn1 = NULL, *fast_edata = NULL;
+    kdc_realm_t *kdc_active_realm = rstate->realm_data;
 
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;

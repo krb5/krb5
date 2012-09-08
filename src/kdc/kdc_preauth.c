@@ -269,23 +269,23 @@ cleanup:
 /* Make a list of realm names.  The caller should free the list container but
  * not the list elements (which are aliases into kdc_realmlist). */
 static krb5_error_code
-get_realm_names(const char ***list_out)
+get_realm_names(struct server_handle *handle, const char ***list_out)
 {
     const char **list;
     int i;
 
-    list = calloc(kdc_numrealms + 1, sizeof(*list));
+    list = calloc(handle->kdc_numrealms + 1, sizeof(*list));
     if (list == NULL)
         return ENOMEM;
-    for (i = 0; i < kdc_numrealms; i++)
-        list[i] = kdc_realmlist[i]->realm_name;
+    for (i = 0; i < handle->kdc_numrealms; i++)
+        list[i] = handle->kdc_realmlist[i]->realm_name;
     list[i] = NULL;
     *list_out = list;
     return 0;
 }
 
 void
-load_preauth_plugins(krb5_context context)
+load_preauth_plugins(struct server_handle *handle, krb5_context context)
 {
     krb5_error_code ret;
     struct krb5_kdcpreauth_vtable_st *vtables = NULL, *vt;
@@ -303,7 +303,7 @@ load_preauth_plugins(krb5_context context)
     if (preauth_systems == NULL)
         goto cleanup;
 
-    if (get_realm_names(&realm_names))
+    if (get_realm_names(handle, &realm_names))
         goto cleanup;
 
     /* Add the static system to the list first.  No static systems require
@@ -718,6 +718,7 @@ hint_list_finish(struct hint_state *state, krb5_error_code code)
 {
     kdc_hint_respond_fn oldrespond = state->respond;
     void *oldarg = state->arg;
+    kdc_realm_t *kdc_active_realm = state->realm;
 
     if (!code) {
         if (state->pa_data[0] == 0) {
@@ -746,7 +747,6 @@ finish_get_edata(void *arg, krb5_error_code code, krb5_pa_data *pa)
 {
     struct hint_state *state = arg;
 
-    kdc_active_realm = state->realm;
     if (code == 0) {
         if (pa == NULL) {
             /* Include an empty value of the current type. */
@@ -765,6 +765,7 @@ static void
 hint_list_next(struct hint_state *state)
 {
     preauth_system *ap = state->ap;
+    kdc_realm_t *kdc_active_realm = state->realm;
 
     if (ap->type == -1) {
         hint_list_finish(state, 0);
@@ -810,7 +811,7 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
     state->arg = arg;
     state->request = request;
     state->rock = rock;
-    state->realm = kdc_active_realm;
+    state->realm = rock->rstate->realm_data;
     state->e_data_out = e_data_out;
 
     /* Allocate two extra entries for the cookie and the terminator. */
@@ -986,7 +987,6 @@ finish_verify_padata(void *arg, krb5_error_code code,
     krb5_boolean typed_e_data_flag;
 
     assert(state);
-    kdc_active_realm = state->realm; /* Restore the realm. */
     *state->modreq_ptr = modreq;
 
     if (code) {
@@ -1135,7 +1135,7 @@ check_padata(krb5_context context, krb5_kdcpreauth_rock rock,
     state->padata_context = padata_context;
     state->e_data_out = e_data;
     state->typed_e_data_out = typed_e_data;
-    state->realm = kdc_active_realm;
+    state->realm = rock->rstate->realm_data;
 
 #ifdef DEBUG
     krb5_klog_syslog (LOG_DEBUG, "checking padata");
@@ -1663,7 +1663,7 @@ return_enc_padata(krb5_context context, krb5_data *req_pkt,
         if (code)
             return code;
     }
-    code = kdc_handle_protected_negotiation(req_pkt, request, reply_key,
+    code = kdc_handle_protected_negotiation(context, req_pkt, request, reply_key,
                                             &reply_encpart->enc_padata);
     if (code)
         goto cleanup;

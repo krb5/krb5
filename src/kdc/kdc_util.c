@@ -68,12 +68,14 @@ const int vague_errors = 1;
 const int vague_errors = 0;
 #endif
 
-static krb5_error_code kdc_rd_ap_req(krb5_ap_req *apreq,
+static krb5_error_code kdc_rd_ap_req(kdc_realm_t *kdc_active_realm,
+                                     krb5_ap_req *apreq,
                                      krb5_auth_context auth_context,
                                      krb5_db_entry **server,
                                      krb5_keyblock **tgskey,
                                      krb5_ticket **ticket);
-static krb5_error_code find_server_key(krb5_db_entry *, krb5_enctype,
+static krb5_error_code find_server_key(krb5_context,
+                                       krb5_db_entry *, krb5_enctype,
                                        krb5_kvno, krb5_keyblock **,
                                        krb5_kvno *);
 
@@ -82,7 +84,8 @@ static krb5_error_code find_server_key(krb5_db_entry *, krb5_enctype,
  * The replacement should be freed with krb5_free_authdata().
  */
 krb5_error_code
-concat_authorization_data(krb5_authdata **first, krb5_authdata **second,
+concat_authorization_data(krb5_context context,
+                          krb5_authdata **first, krb5_authdata **second,
                           krb5_authdata ***output)
 {
     register int i, j;
@@ -106,7 +109,7 @@ concat_authorization_data(krb5_authdata **first, krb5_authdata **second,
             /* now walk & copy */
             retdata[i] = (krb5_authdata *)malloc(sizeof(*retdata[i]));
             if (!retdata[i]) {
-                krb5_free_authdata(kdc_context, retdata);
+                krb5_free_authdata(context, retdata);
                 return ENOMEM;
             }
             *retdata[i] = **ptr;
@@ -114,7 +117,7 @@ concat_authorization_data(krb5_authdata **first, krb5_authdata **second,
                   (krb5_octet *)malloc(retdata[i]->length))) {
                 free(retdata[i]);
                 retdata[i] = 0;
-                krb5_free_authdata(kdc_context, retdata);
+                krb5_free_authdata(context, retdata);
                 return ENOMEM;
             }
             memcpy(retdata[i]->contents, (*ptr)->contents, retdata[i]->length);
@@ -127,13 +130,7 @@ concat_authorization_data(krb5_authdata **first, krb5_authdata **second,
 }
 
 krb5_boolean
-realm_compare(krb5_const_principal princ1, krb5_const_principal princ2)
-{
-    return krb5_realm_compare(kdc_context, princ1, princ2);
-}
-
-krb5_boolean
-is_local_principal(krb5_const_principal princ1)
+is_local_principal(kdc_realm_t *kdc_active_realm, krb5_const_principal princ1)
 {
     return krb5_realm_compare(kdc_context, princ1, tgs_server);
 }
@@ -197,14 +194,9 @@ comp_cksum(krb5_context kcontext, krb5_data *source, krb5_ticket *ticket,
     return(0);
 }
 
-krb5_pa_data *
-find_pa_data(krb5_pa_data **padata, krb5_preauthtype pa_type)
-{
-    return krb5int_find_pa_data(kdc_context, padata, pa_type);
-}
-
 krb5_error_code
-kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
+kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
+                    krb5_kdc_req *request, const krb5_fulladdr *from,
                     krb5_data *pkt, krb5_ticket **ticket,
                     krb5_db_entry **krbtgt_ptr,
                     krb5_keyblock **tgskey,
@@ -226,7 +218,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     *krbtgt_ptr = NULL;
     *tgskey = NULL;
 
-    tmppa = find_pa_data(request->padata, KRB5_PADATA_AP_REQ);
+    tmppa = krb5int_find_pa_data(kdc_context,
+                                 request->padata, KRB5_PADATA_AP_REQ);
     if (!tmppa)
         return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
 
@@ -252,7 +245,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 
        we set a flag here for checking below.
     */
-    foreign_server = !is_local_principal(apreq->ticket->server);
+    foreign_server = !is_local_principal(kdc_active_realm,
+                                         apreq->ticket->server);
 
     if ((retval = krb5_auth_con_init(kdc_context, &auth_context)))
         goto cleanup;
@@ -265,7 +259,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
                                          from->address)) )
         goto cleanup_auth_context;
 
-    retval = kdc_rd_ap_req(apreq, auth_context, &krbtgt, tgskey, ticket);
+    retval = kdc_rd_ap_req(kdc_active_realm,
+                           apreq, auth_context, &krbtgt, tgskey, ticket);
     if (retval)
         goto cleanup_auth_context;
 
@@ -308,8 +303,10 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 
     /* make sure the client is of proper lineage (see above) */
     if (foreign_server &&
-        !find_pa_data(request->padata, KRB5_PADATA_FOR_USER)) {
-        if (is_local_principal((*ticket)->enc_part2->client)) {
+        !krb5int_find_pa_data(kdc_context,
+                              request->padata, KRB5_PADATA_FOR_USER)) {
+        if (is_local_principal(kdc_active_realm,
+                               (*ticket)->enc_part2->client)) {
             /* someone in a foreign realm claiming to be local */
             krb5_klog_syslog(LOG_INFO, _("PROCESS_TGS: failed lineage check"));
             retval = KRB5KDC_ERR_POLICY;
@@ -369,7 +366,8 @@ cleanup:
  */
 static
 krb5_error_code
-kdc_rd_ap_req(krb5_ap_req *apreq, krb5_auth_context auth_context,
+kdc_rd_ap_req(kdc_realm_t *kdc_active_realm,
+              krb5_ap_req *apreq, krb5_auth_context auth_context,
               krb5_db_entry **server, krb5_keyblock **tgskey,
               krb5_ticket **ticket)
 {
@@ -391,7 +389,8 @@ kdc_rd_ap_req(krb5_ap_req *apreq, krb5_auth_context auth_context,
         match_enctype = 0;
     }
 
-    retval = kdc_get_server_key(apreq->ticket, 0, match_enctype, server, NULL,
+    retval = kdc_get_server_key(kdc_context,
+                                apreq->ticket, 0, match_enctype, server, NULL,
                                 NULL);
     if (retval)
         return retval;
@@ -400,7 +399,8 @@ kdc_rd_ap_req(krb5_ap_req *apreq, krb5_auth_context auth_context,
     kvno = apreq->ticket->enc_part.kvno;
     do {
         krb5_free_keyblock(kdc_context, *tgskey);
-        retval = find_server_key(*server, search_enctype, kvno, tgskey, &kvno);
+        retval = find_server_key(kdc_context,
+                                 *server, search_enctype, kvno, tgskey, &kvno);
         if (retval)
             continue;
 
@@ -429,7 +429,8 @@ kdc_rd_ap_req(krb5_ap_req *apreq, krb5_auth_context auth_context,
  * This is also used by do_tgs_req() for u2u auth.
  */
 krb5_error_code
-kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
+kdc_get_server_key(krb5_context context,
+                   krb5_ticket *ticket, unsigned int flags,
                    krb5_boolean match_enctype, krb5_db_entry **server_ptr,
                    krb5_keyblock **key, krb5_kvno *kvno)
 {
@@ -445,11 +446,11 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
 
     *server_ptr = NULL;
 
-    retval = krb5_db_get_principal(kdc_context, ticket->server, flags,
+    retval = krb5_db_get_principal(context, ticket->server, flags,
                                    &server);
     if (retval == KRB5_KDB_NOENTRY) {
         char *sname;
-        if (!krb5_unparse_name(kdc_context, ticket->server, &sname)) {
+        if (!krb5_unparse_name(context, ticket->server, &sname)) {
             limit_string(sname);
             krb5_klog_syslog(LOG_ERR,
                              _("TGS_REQ: UNKNOWN SERVER: server='%s'"), sname);
@@ -465,7 +466,8 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
     }
 
     if (key) {
-        retval = find_server_key(server, search_enctype, search_kvno, key, kvno);
+        retval = find_server_key(context, server, search_enctype, search_kvno,
+                                 key, kvno);
         if (retval)
             goto errout;
     }
@@ -474,7 +476,7 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
     return 0;
 
 errout:
-    krb5_db_free_principal(kdc_context, server);
+    krb5_db_free_principal(context, server);
     return retval;
 }
 
@@ -484,7 +486,8 @@ errout:
  */
 static
 krb5_error_code
-find_server_key(krb5_db_entry *server, krb5_enctype enctype, krb5_kvno kvno,
+find_server_key(krb5_context context,
+                krb5_db_entry *server, krb5_enctype enctype, krb5_kvno kvno,
                 krb5_keyblock **key_out, krb5_kvno *kvno_out)
 {
     krb5_error_code       retval;
@@ -492,7 +495,7 @@ find_server_key(krb5_db_entry *server, krb5_enctype enctype, krb5_kvno kvno,
     krb5_keyblock       * key;
 
     *key_out = NULL;
-    retval = krb5_dbe_find_enctype(kdc_context, server, enctype, -1,
+    retval = krb5_dbe_find_enctype(context, server, enctype, -1,
                                    kvno ? (krb5_int32)kvno : -1, &server_key);
     if (retval)
         return retval;
@@ -500,13 +503,13 @@ find_server_key(krb5_db_entry *server, krb5_enctype enctype, krb5_kvno kvno,
         return KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
     if ((key = (krb5_keyblock *)malloc(sizeof *key)) == NULL)
         return ENOMEM;
-    retval = krb5_dbe_decrypt_key_data(kdc_context, NULL, server_key,
+    retval = krb5_dbe_decrypt_key_data(context, NULL, server_key,
                                        key, NULL);
     if (retval)
         goto errout;
     if (enctype != -1) {
         krb5_boolean similar;
-        retval = krb5_c_enctype_compare(kdc_context, enctype, key->enctype,
+        retval = krb5_c_enctype_compare(context, enctype, key->enctype,
                                         &similar);
         if (retval)
             goto errout;
@@ -521,7 +524,7 @@ find_server_key(krb5_db_entry *server, krb5_enctype enctype, krb5_kvno kvno,
     if (kvno_out)
         *kvno_out = server_key->key_data_kvno;
 errout:
-    krb5_free_keyblock(kdc_context, key);
+    krb5_free_keyblock(context, key);
     return retval;
 }
 
@@ -940,14 +943,15 @@ errcode_to_protocol(krb5_error_code code)
 /* Return -1 if the AS or TGS request is disallowed due to KDC policy on
  * anonymous tickets. */
 static int
-check_anon(krb5_context context, krb5_principal client, krb5_principal server)
+check_anon(kdc_realm_t *kdc_active_realm,
+           krb5_principal client, krb5_principal server)
 {
     /* If restrict_anon is set, reject requests from anonymous to principals
      * other than the local TGT. */
     if (restrict_anon &&
-        krb5_principal_compare_any_realm(context, client,
+        krb5_principal_compare_any_realm(kdc_context, client,
                                          krb5_anonymous_principal()) &&
-        !krb5_principal_compare(context, server, tgs_server))
+        !krb5_principal_compare(kdc_context, server, tgs_server))
         return -1;
     return 0;
 }
@@ -962,7 +966,8 @@ check_anon(krb5_context context, krb5_principal client, krb5_principal server)
                             KDC_OPT_VALIDATE | KDC_OPT_RENEW |          \
                             KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)
 int
-validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
+validate_as_request(kdc_realm_t *kdc_active_realm,
+                    register krb5_kdc_req *request, krb5_db_entry client,
                     krb5_db_entry server, krb5_timestamp kdc_time,
                     const char **status, krb5_pa_data ***e_data)
 {
@@ -1071,7 +1076,7 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
         return(KDC_ERR_MUST_USE_USER2USER);
     }
 
-    if (check_anon(kdc_context, request->client, request->server) != 0) {
+    if (check_anon(kdc_active_realm, request->client, request->server) != 0) {
         *status = "ANONYMOUS NOT ALLOWED";
         return(KDC_ERR_POLICY);
     }
@@ -1265,7 +1270,8 @@ fetch_asn1_field(unsigned char *astream, unsigned int level,
                        KDC_OPT_VALIDATE)
 
 int
-validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
+validate_tgs_request(kdc_realm_t *kdc_active_realm,
+                     register krb5_kdc_req *request, krb5_db_entry server,
                      krb5_ticket *ticket, krb5_timestamp kdc_time,
                      const char **status, krb5_pa_data ***e_data)
 {
@@ -1498,7 +1504,7 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
         return KRB_ERR_GENERIC;
     }
 
-    if (check_anon(kdc_context, ticket->enc_part2->client,
+    if (check_anon(kdc_active_realm, ticket->enc_part2->client,
                    request->server) != 0) {
         *status = "ANONYMOUS NOT ALLOWED";
         return(KDC_ERR_POLICY);
@@ -1522,7 +1528,7 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
 
 /* Return true if we believe server can support enctype as a session key. */
 static krb5_boolean
-dbentry_supports_enctype(krb5_context context, krb5_db_entry *server,
+dbentry_supports_enctype(kdc_realm_t *kdc_active_realm, krb5_db_entry *server,
                          krb5_enctype enctype)
 {
     krb5_error_code     retval;
@@ -1533,11 +1539,12 @@ dbentry_supports_enctype(krb5_context context, krb5_db_entry *server,
     krb5_boolean        in_list;
 
     /* Look up the supported session key enctypes list in the KDB. */
-    retval = krb5_dbe_get_string(context, server, KRB5_KDB_SK_SESSION_ENCTYPES,
+    retval = krb5_dbe_get_string(kdc_context, server,
+                                 KRB5_KDB_SK_SESSION_ENCTYPES,
                                  &etypes_str);
     if (retval == 0 && etypes_str != NULL && *etypes_str != '\0') {
         /* Pass a fake profile key for tracing of unrecognized tokens. */
-        retval = krb5int_parse_enctype_list(context, "KDB-session_etypes",
+        retval = krb5int_parse_enctype_list(kdc_context, "KDB-session_etypes",
                                             etypes_str, default_enctypes,
                                             &etypes);
         if (retval == 0 && etypes != NULL && etypes[0]) {
@@ -1562,7 +1569,7 @@ dbentry_supports_enctype(krb5_context context, krb5_db_entry *server,
         return FALSE;
 
     /* Assume the server supports any enctype it has a long-term key for. */
-    return !krb5_dbe_find_enctype(context, server, enctype, -1, 0, &datap);
+    return !krb5_dbe_find_enctype(kdc_context, server, enctype, -1, 0, &datap);
 }
 
 /*
@@ -1571,7 +1578,7 @@ dbentry_supports_enctype(krb5_context context, krb5_db_entry *server,
  * requested, and what the KDC and the application server can support.
  */
 krb5_enctype
-select_session_keytype(krb5_context context, krb5_db_entry *server,
+select_session_keytype(kdc_realm_t *kdc_active_realm, krb5_db_entry *server,
                        int nktypes, krb5_enctype *ktype)
 {
     int         i;
@@ -1580,10 +1587,10 @@ select_session_keytype(krb5_context context, krb5_db_entry *server,
         if (!krb5_c_valid_enctype(ktype[i]))
             continue;
 
-        if (!krb5_is_permitted_enctype(context, ktype[i]))
+        if (!krb5_is_permitted_enctype(kdc_context, ktype[i]))
             continue;
 
-        if (dbentry_supports_enctype(context, server, ktype[i]))
+        if (dbentry_supports_enctype(kdc_active_realm, server, ktype[i]))
             return ktype[i];
     }
 
@@ -1765,7 +1772,7 @@ verify_for_user_checksum(krb5_context context,
  * Legacy protocol transition (Windows 2003 and above)
  */
 static krb5_error_code
-kdc_process_for_user(krb5_context context,
+kdc_process_for_user(kdc_realm_t *kdc_active_realm,
                      krb5_pa_data *pa_data,
                      krb5_keyblock *tgs_session,
                      krb5_pa_s4u_x509_user **s4u_x509_user,
@@ -1782,7 +1789,7 @@ kdc_process_for_user(krb5_context context,
     if (code)
         return code;
 
-    code = verify_for_user_checksum(context, tgs_session, for_user);
+    code = verify_for_user_checksum(kdc_context, tgs_session, for_user);
     if (code) {
         *status = "INVALID_S4U2SELF_CHECKSUM";
         krb5_free_pa_for_user(kdc_context, for_user);
@@ -1797,7 +1804,7 @@ kdc_process_for_user(krb5_context context,
 
     (*s4u_x509_user)->user_id.user = for_user->user;
     for_user->user = NULL;
-    krb5_free_pa_for_user(context, for_user);
+    krb5_free_pa_for_user(kdc_context, for_user);
 
     return 0;
 }
@@ -2008,7 +2015,7 @@ cleanup:
  * Protocol transition (S4U2Self)
  */
 krb5_error_code
-kdc_process_s4u2self_req(krb5_context context,
+kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
                          krb5_kdc_req *request,
                          krb5_const_principal client_princ,
                          const krb5_db_entry *server,
@@ -2026,9 +2033,10 @@ kdc_process_s4u2self_req(krb5_context context,
 
     *princ_ptr = NULL;
 
-    pa_data = find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER);
+    pa_data = krb5int_find_pa_data(kdc_context,
+                                   request->padata, KRB5_PADATA_S4U_X509_USER);
     if (pa_data != NULL) {
-        code = kdc_process_s4u_x509_user(context,
+        code = kdc_process_s4u_x509_user(kdc_context,
                                          request,
                                          pa_data,
                                          tgs_subkey,
@@ -2038,9 +2046,10 @@ kdc_process_s4u2self_req(krb5_context context,
         if (code != 0)
             return code;
     } else {
-        pa_data = find_pa_data(request->padata, KRB5_PADATA_FOR_USER);
+        pa_data = krb5int_find_pa_data(kdc_context,
+                                       request->padata, KRB5_PADATA_FOR_USER);
         if (pa_data != NULL) {
-            code = kdc_process_for_user(context,
+            code = kdc_process_for_user(kdc_active_realm,
                                         pa_data,
                                         tgs_session,
                                         s4u_x509_user,
@@ -2078,9 +2087,9 @@ kdc_process_s4u2self_req(krb5_context context,
      * the TGT and that we have a global name service.
      */
     flags = 0;
-    switch (krb5_princ_type(context, request->server)) {
+    switch (krb5_princ_type(kdc_context, request->server)) {
     case KRB5_NT_SRV_HST:                   /* (1) */
-        if (krb5_princ_size(context, request->server) == 2)
+        if (krb5_princ_size(kdc_context, request->server) == 2)
             flags |= KRB5_PRINCIPAL_COMPARE_IGNORE_REALM;
         break;
     case KRB5_NT_ENTERPRISE_PRINCIPAL:      /* (2) */
@@ -2090,7 +2099,7 @@ kdc_process_s4u2self_req(krb5_context context,
         break;
     }
 
-    if (!krb5_principal_compare_flags(context,
+    if (!krb5_principal_compare_flags(kdc_context,
                                       request->server,
                                       client_princ,
                                       flags)) {
@@ -2114,11 +2123,13 @@ kdc_process_s4u2self_req(krb5_context context,
     /*
      * Do not attempt to lookup principals in foreign realms.
      */
-    if (is_local_principal((*s4u_x509_user)->user_id.user)) {
+    if (is_local_principal(kdc_active_realm,
+                           (*s4u_x509_user)->user_id.user)) {
         krb5_db_entry no_server;
         krb5_pa_data **e_data = NULL;
 
-        code = krb5_db_get_principal(context, (*s4u_x509_user)->user_id.user,
+        code = krb5_db_get_principal(kdc_context,
+                                     (*s4u_x509_user)->user_id.user,
                                      KRB5_KDB_FLAG_INCLUDE_PAC, &princ);
         if (code == KRB5_KDB_NOENTRY) {
             *status = "UNKNOWN_S4U2SELF_PRINCIPAL";
@@ -2130,11 +2141,11 @@ kdc_process_s4u2self_req(krb5_context context,
 
         memset(&no_server, 0, sizeof(no_server));
 
-        code = validate_as_request(request, *princ,
+        code = validate_as_request(kdc_active_realm, request, *princ,
                                    no_server, kdc_time, status, &e_data);
         if (code) {
-            krb5_db_free_principal(context, princ);
-            krb5_free_pa_data(context, e_data);
+            krb5_db_free_principal(kdc_context, princ);
+            krb5_free_pa_data(kdc_context, e_data);
             return code;
         }
 
@@ -2161,7 +2172,7 @@ check_allowed_to_delegate_to(krb5_context context, krb5_const_principal client,
 }
 
 krb5_error_code
-kdc_process_s4u2proxy_req(krb5_context context,
+kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm,
                           krb5_kdc_req *request,
                           const krb5_enc_tkt_part *t2enc,
                           const krb5_db_entry *server,
@@ -2206,7 +2217,7 @@ kdc_process_s4u2proxy_req(krb5_context context,
 }
 
 krb5_error_code
-kdc_check_transited_list(krb5_context context,
+kdc_check_transited_list(kdc_realm_t *kdc_active_realm,
                          const krb5_data *trans,
                          const krb5_data *realm1,
                          const krb5_data *realm2)
@@ -2219,7 +2230,7 @@ kdc_check_transited_list(krb5_context context,
         return code;
 
     /* Check against the KDB module. */
-    code = krb5_db_check_transited_realms(context, trans, realm1, realm2);
+    code = krb5_db_check_transited_realms(kdc_context, trans, realm1, realm2);
     if (code == KRB5_PLUGIN_OP_NOTSUPP)
         code = 0;
     return code;
@@ -2258,7 +2269,7 @@ validate_transit_path(krb5_context context,
 /* Someday, pass local address/port as well.  */
 /* Currently no info about name canonicalization is logged.  */
 void
-log_as_req(const krb5_fulladdr *from,
+log_as_req(krb5_context context, const krb5_fulladdr *from,
            krb5_kdc_req *request, krb5_kdc_rep *reply,
            krb5_db_entry *client, const char *cname,
            krb5_db_entry *server, const char *sname,
@@ -2293,7 +2304,7 @@ log_as_req(const krb5_fulladdr *from,
                          ktypestr, fromstring, status,
                          cname2, sname2, emsg ? ", " : "", emsg ? emsg : "");
     }
-    krb5_db_audit_as_req(kdc_context, request, client, server, authtime,
+    krb5_db_audit_as_req(context, request, client, server, authtime,
                          errcode);
 #if 0
     /* Sun (OpenSolaris) version would probably something like this.
@@ -2369,10 +2380,10 @@ log_tgs_req(const krb5_fulladdr *from,
 }
 
 void
-log_tgs_alt_tgt(krb5_principal p)
+log_tgs_alt_tgt(krb5_context context, krb5_principal p)
 {
     char *sname;
-    if (krb5_unparse_name(kdc_context, p, &sname)) {
+    if (krb5_unparse_name(context, p, &sname)) {
         krb5_klog_syslog(LOG_INFO,
                          _("TGS_REQ: issuing alternate <un-unparseable> TGT"));
     } else {
@@ -2444,7 +2455,7 @@ add_pa_data_element(krb5_context context,
 }
 
 void
-kdc_get_ticket_endtime(krb5_context context,
+kdc_get_ticket_endtime(kdc_realm_t *kdc_active_realm,
                        krb5_timestamp starttime,
                        krb5_timestamp endtime,
                        krb5_timestamp till,
@@ -2480,7 +2491,8 @@ kdc_get_ticket_endtime(krb5_context context,
  * @param index in/out index into @c out_enc_padata for next item
  */
 krb5_error_code
-kdc_handle_protected_negotiation(krb5_data *req_pkt, krb5_kdc_req *request,
+kdc_handle_protected_negotiation(krb5_context context,
+                                 krb5_data *req_pkt, krb5_kdc_req *request,
                                  const krb5_keyblock *reply_key,
                                  krb5_pa_data ***out_enc_padata)
 {
@@ -2488,14 +2500,14 @@ kdc_handle_protected_negotiation(krb5_data *req_pkt, krb5_kdc_req *request,
     krb5_checksum checksum;
     krb5_data *out = NULL;
     krb5_pa_data pa, *pa_in;
-    pa_in = krb5int_find_pa_data(kdc_context, request->padata,
+    pa_in = krb5int_find_pa_data(context, request->padata,
                                  KRB5_ENCPADATA_REQ_ENC_PA_REP);
     if (pa_in == NULL)
         return 0;
     pa.magic = KV5M_PA_DATA;
     pa.pa_type = KRB5_ENCPADATA_REQ_ENC_PA_REP;
     memset(&checksum, 0, sizeof(checksum));
-    retval = krb5_c_make_checksum(kdc_context,0, reply_key,
+    retval = krb5_c_make_checksum(context,0, reply_key,
                                   KRB5_KEYUSAGE_AS_REQ, req_pkt, &checksum);
     if (retval != 0)
         goto cleanup;
@@ -2504,7 +2516,7 @@ kdc_handle_protected_negotiation(krb5_data *req_pkt, krb5_kdc_req *request,
         goto cleanup;
     pa.contents = (krb5_octet *) out->data;
     pa.length = out->length;
-    retval = add_pa_data_element(kdc_context, &pa, out_enc_padata, FALSE);
+    retval = add_pa_data_element(context, &pa, out_enc_padata, FALSE);
     if (retval)
         goto cleanup;
     out->data = NULL;
@@ -2512,12 +2524,12 @@ kdc_handle_protected_negotiation(krb5_data *req_pkt, krb5_kdc_req *request,
     pa.pa_type = KRB5_PADATA_FX_FAST;
     pa.length = 0;
     pa.contents = NULL;
-    retval = add_pa_data_element(kdc_context, &pa, out_enc_padata, FALSE);
+    retval = add_pa_data_element(context, &pa, out_enc_padata, FALSE);
 cleanup:
     if (checksum.contents)
-        krb5_free_checksum_contents(kdc_context, &checksum);
+        krb5_free_checksum_contents(context, &checksum);
     if (out != NULL)
-        krb5_free_data(kdc_context, out);
+        krb5_free_data(context, out);
     return retval;
 }
 
@@ -2590,12 +2602,14 @@ make_toolong_error (void *handle, krb5_data **out)
     krb5_error errpkt;
     krb5_error_code retval;
     krb5_data *scratch;
+    struct server_handle *h = handle;
 
-    retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);
+    retval = krb5_us_timeofday(h->kdc_err_context,
+                               &errpkt.stime, &errpkt.susec);
     if (retval)
         return retval;
     errpkt.error = KRB_ERR_FIELD_TOOLONG;
-    errpkt.server = tgs_server;
+    errpkt.server = h->kdc_realmlist[0]->realm_tgsprinc;
     errpkt.client = NULL;
     errpkt.cusec = 0;
     errpkt.ctime = 0;
@@ -2606,7 +2620,7 @@ make_toolong_error (void *handle, krb5_data **out)
     scratch = malloc(sizeof(*scratch));
     if (scratch == NULL)
         return ENOMEM;
-    retval = krb5_mk_error(kdc_context, &errpkt, scratch);
+    retval = krb5_mk_error(h->kdc_err_context, &errpkt, scratch);
     if (retval) {
         free(scratch);
         return retval;
@@ -2616,15 +2630,11 @@ make_toolong_error (void *handle, krb5_data **out)
     return 0;
 }
 
-krb5_context get_context(void *handle)
-{
-    return kdc_context;
-}
-
-void reset_for_hangup()
+void reset_for_hangup(void *ctx)
 {
     int k;
+    struct server_handle *h = ctx;
 
-    for (k = 0; k < kdc_numrealms; k++)
-        krb5_db_refresh_config(kdc_realmlist[k]->realm_context);
+    for (k = 0; k < h->kdc_numrealms; k++)
+        krb5_db_refresh_config(h->kdc_realmlist[k]->realm_context);
 }

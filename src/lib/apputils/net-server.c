@@ -277,7 +277,7 @@ do_break(verto_ctx *ctx, verto_ev *ev)
 
 struct sighup_context {
     void *handle;
-    void (*reset)();
+    void (*reset)(void *);
 };
 
 static void
@@ -288,7 +288,7 @@ do_reset(verto_ctx *ctx, verto_ev *ev)
     krb5_klog_syslog(LOG_DEBUG, _("Got signal to reset"));
     krb5_klog_reopen(get_context(sc->handle));
     if (sc->reset)
-        sc->reset();
+        sc->reset(sc->handle);
 }
 
 static void

@@ -157,13 +157,14 @@ kdc_remove_lookaside(krb5_context kcontext, krb5_data *req_packet)
 
     e = find_entry(req_packet);
     if (e != NULL)
-        discard_entry(kdc_context, e);
+        discard_entry(kcontext, e);
 }
 
 /* Return true and fill in reply_packet_out if req_packet is in the lookaside
  * cache; otherwise return false.  Also discard old entries in the cache. */
 krb5_boolean
-kdc_check_lookaside(krb5_data *req_packet, krb5_data **reply_packet_out)
+kdc_check_lookaside(krb5_context kcontext, krb5_data *req_packet,
+                    krb5_data **reply_packet_out)
 {
     struct entry *e;
 
@@ -176,21 +177,22 @@ kdc_check_lookaside(krb5_data *req_packet, krb5_data **reply_packet_out)
 
     e->num_hits++;
     hits++;
-    return (krb5_copy_data(kdc_context, &e->reply_packet,
+    return (krb5_copy_data(kcontext, &e->reply_packet,
                            reply_packet_out) == 0);
 }
 
 /* Insert a request and reply into the lookaside cache.  Assumes it's not
  * already there, and can fail silently on memory exhaustion. */
 void
-kdc_insert_lookaside(krb5_data *req_packet, krb5_data *reply_packet)
+kdc_insert_lookaside(krb5_context kcontext, krb5_data *req_packet,
+                     krb5_data *reply_packet)
 {
     struct entry *e, *next;
     krb5_timestamp timenow;
     krb5_ui_4 hash = murmurhash3(req_packet);
     size_t esize = entry_size(req_packet, reply_packet);
 
-    if (krb5_timeofday(kdc_context, &timenow))
+    if (krb5_timeofday(kcontext, &timenow))
         return;
 
     /* Purge stale entries and limit the total size of the entries. */
@@ -198,7 +200,7 @@ kdc_insert_lookaside(krb5_data *req_packet, krb5_data *reply_packet)
         if (!STALE(e, timenow) && total_size + esize <= LOOKASIDE_MAX_SIZE)
             break;
         max_hits_per_entry = max(max_hits_per_entry, e->num_hits);
-        discard_entry(kdc_context, e);
+        discard_entry(kcontext, e);
     }
 
     /* Create a new entry for this request and reply. */
@@ -206,14 +208,14 @@ kdc_insert_lookaside(krb5_data *req_packet, krb5_data *reply_packet)
     if (e == NULL)
         return;
     e->timein = timenow;
-    if (krb5int_copy_data_contents(kdc_context, req_packet, &e->req_packet)) {
+    if (krb5int_copy_data_contents(kcontext, req_packet, &e->req_packet)) {
         free(e);
         return;
     }
     if (reply_packet != NULL &&
-        krb5int_copy_data_contents(kdc_context, reply_packet,
+        krb5int_copy_data_contents(kcontext, reply_packet,
                                    &e->reply_packet)) {
-        krb5_free_data_contents(kdc_context, &e->req_packet);
+        krb5_free_data_contents(kcontext, &e->req_packet);
         free(e);
         return;
     }

@@ -109,4 +109,9 @@ main(int argc, char **argv)
 }
 
 void krb5_klog_syslog(void) {}
-kdc_realm_t *find_realm_data (char *rname, krb5_ui_4 rsize) { return 0; }
+kdc_realm_t *
+find_realm_data(struct server_handle *handle,
+                char *rname, krb5_ui_4 rsize)
+{
+    return 0;
+}
