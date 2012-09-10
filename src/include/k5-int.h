@@ -675,6 +675,16 @@ zapfree(void *ptr, size_t len)
     }
 }
 
+/* Convenience function: zap and free zero-terminated str if it is non-NULL. */
+static inline void
+zapfreestr(void *str)
+{
+    if (str != NULL) {
+        zap(str, strlen((char *)str));
+        free(str);
+    }
+}
+
 /*
  * Combine two keys (normally used by the hardware preauth mechanism)
  */
