@@ -792,6 +792,11 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
 
 #include <krb5/preauth_plugin.h>
 
+typedef struct k5_response_items_st k5_response_items;
+struct krb5_responder_context_st {
+    k5_response_items *items;
+};
+
 typedef krb5_error_code
 (*krb5_gic_get_as_key_fct)(krb5_context, krb5_principal, krb5_enctype,
                            krb5_prompter_fct, void *prompter_data,
@@ -831,6 +836,7 @@ struct krb5_clpreauth_rock_st {
     krb5_timestamp pa_offset;
     krb5_int32 pa_offset_usec;
     enum { NO_OFFSET = 0, UNAUTH_OFFSET, AUTH_OFFSET } pa_offset_state;
+    struct krb5_responder_context_st rctx;
 };
 
 typedef struct _krb5_pa_enc_ts {
@@ -1025,6 +1031,8 @@ typedef struct _krb5_gic_opt_private {
     krb5_flags fast_flags;
     krb5_expire_callback_func expire_cb;
     void *expire_data;
+    krb5_responder_fn responder;
+    void *responder_data;
 } krb5_gic_opt_private;
 
 /*

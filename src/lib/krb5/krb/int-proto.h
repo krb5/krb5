@@ -203,4 +203,35 @@ krb5_error_code
 k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
                   int *use_master);
 
+krb5_error_code
+k5_response_items_new(k5_response_items **ri_out);
+
+void
+k5_response_items_free(k5_response_items *ri);
+
+void
+k5_response_items_reset(k5_response_items *ri);
+
+krb5_boolean
+k5_response_items_empty(const k5_response_items *ri);
+
+const char * const *
+k5_response_items_list_questions(const k5_response_items *ri);
+
+krb5_error_code
+k5_response_items_ask_question(k5_response_items *ri, const char *question,
+                               const char *challenge);
+
+const char *
+k5_response_items_get_challenge(const k5_response_items *ri,
+                                const char *question);
+
+krb5_error_code
+k5_response_items_set_answer(k5_response_items *ri, const char *question,
+                             const char *answer);
+
+const char *
+k5_response_items_get_answer(const k5_response_items *ri,
+                             const char *question);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */

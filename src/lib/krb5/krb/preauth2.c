@@ -60,6 +60,7 @@ struct krb5_preauth_context_st {
          * convenience when we populated the list. */
         const char *name;
         int flags, use_count;
+        krb5_clpreauth_prep_questions_fn client_prep_questions;
         krb5_clpreauth_process_fn client_process;
         krb5_clpreauth_tryagain_fn client_tryagain;
         krb5_clpreauth_supply_gic_opts_fn client_supply_gic_opts;
@@ -138,7 +139,7 @@ krb5_init_preauth_context(krb5_context kcontext)
     if (vtables == NULL)
         goto cleanup;
     for (pl = plugins, n_tables = 0; *pl != NULL; pl++) {
-        if ((*pl)(kcontext, 1, 1, (krb5_plugin_vtable)&vtables[n_tables]) == 0)
+        if ((*pl)(kcontext, 1, 2, (krb5_plugin_vtable)&vtables[n_tables]) == 0)
             n_tables++;
     }
 
@@ -188,6 +189,7 @@ krb5_init_preauth_context(krb5_context kcontext)
                 mod->name = vt->name;
                 mod->flags = (*vt->flags)(kcontext, pa_type);
                 mod->use_count = 0;
+                mod->client_prep_questions = vt->prep_questions;
                 mod->client_process = vt->process;
                 mod->client_tryagain = vt->tryagain;
                 mod->client_supply_gic_opts = first ? vt->gic_opts : NULL;
@@ -404,13 +406,30 @@ get_preauth_time(krb5_context context, krb5_clpreauth_rock rock,
     }
 }
 
+static krb5_error_code
+responder_ask_question(krb5_context context, krb5_clpreauth_rock rock,
+                       const char *question, const char *challenge)
+{
+    return k5_response_items_ask_question(rock->rctx.items, question,
+                                          challenge);
+}
+
+static const char *
+responder_get_answer(krb5_context context, krb5_clpreauth_rock rock,
+                     const char *question)
+{
+    return k5_response_items_get_answer(rock->rctx.items, question);
+}
+
 static struct krb5_clpreauth_callbacks_st callbacks = {
     2,
     get_etype,
     fast_armor,
     get_as_key,
     set_as_key,
-    get_preauth_time
+    get_preauth_time,
+    responder_ask_question,
+    responder_get_answer
 };
 
 /* Tweak the request body, for now adding any enctypes which the module claims
@@ -438,6 +457,32 @@ krb5_preauth_prepare_request(krb5_context kcontext,
             }
         }
     }
+}
+
+const char * const * KRB5_CALLCONV
+krb5_responder_list_questions(krb5_context ctx, krb5_responder_context rctx)
+{
+    return k5_response_items_list_questions(rctx->items);
+}
+
+const char * KRB5_CALLCONV
+krb5_responder_get_challenge(krb5_context ctx, krb5_responder_context rctx,
+                             const char *question)
+{
+    if (rctx == NULL)
+        return NULL;
+
+    return k5_response_items_get_challenge(rctx->items, question);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_responder_set_answer(krb5_context ctx, krb5_responder_context rctx,
+                          const char *question, const char *answer)
+{
+    if (rctx == NULL)
+        return EINVAL;
+
+    return k5_response_items_set_answer(rctx->items, question, answer);
 }
 
 /* Find the first module which provides for the named preauth type which also
@@ -789,6 +834,42 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
     return ret;
 }
 
+/* Compile the set of response items for in_padata by invoke each module's
+ * prep_questions method. */
+static krb5_error_code
+fill_response_items(krb5_context context, krb5_kdc_req *request,
+                    krb5_data *encoded_request_body,
+                    krb5_data *encoded_previous_request,
+                    krb5_pa_data **in_padata, krb5_clpreauth_rock rock,
+                    krb5_gic_opt_ext *opte)
+{
+    krb5_error_code ret;
+    krb5_pa_data *pa;
+    struct krb5_preauth_context_module_st *module;
+    krb5_clpreauth_prep_questions_fn prep_questions;
+    int i, j;
+
+    k5_response_items_reset(rock->rctx.items);
+    for (i = 0; in_padata[i] != NULL; i++) {
+        pa = in_padata[i];
+        for (j = 0; j < context->preauth_context->n_modules; j++) {
+            module = &context->preauth_context->modules[j];
+            prep_questions = module->client_prep_questions;
+            if (module->pa_type != pa->pa_type || prep_questions == NULL)
+                continue;
+            ret = (*prep_questions)(context, module->moddata,
+                                    *module->modreq_p,
+                                    (krb5_get_init_creds_opt *)opte,
+                                    &callbacks, rock, request,
+                                    encoded_request_body,
+                                    encoded_previous_request, pa);
+            if (ret)
+                return ret;
+        }
+    }
+    return 0;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
                 krb5_data *encoded_request_body,
@@ -802,6 +883,7 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
     int out_pa_list_size = 0;
     krb5_pa_data **out_pa_list = NULL;
     krb5_error_code ret, module_ret;
+    krb5_responder_fn responder = opte->opt_private->responder;
     static const int paorder[] = { PA_INFO, PA_REAL };
 
     *out_padata = NULL;
@@ -839,7 +921,22 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
         goto error;
     }
 
-    /* First do all the informational preauths, then the first real one. */
+    /* Get a list of response items for in_padata from the preauth modules. */
+    ret = fill_response_items(context, request, encoded_request_body,
+                              encoded_previous_request, in_padata, rock, opte);
+    if (ret)
+        goto error;
+
+    /* Call the responder to answer response items. */
+    if (responder != NULL && !k5_response_items_empty(rock->rctx.items)) {
+        ret = (*responder)(context, opte->opt_private->responder_data,
+                           &rock->rctx);
+        if (ret)
+            goto error;
+    }
+
+    /* Produce output padata, first from all the informational preauths, then
+     * the from first real one. */
     for (h = 0; h < sizeof(paorder) / sizeof(paorder[0]); h++) {
         for (i = 0; in_padata[i] != NULL; i++) {
 #ifdef DEBUG

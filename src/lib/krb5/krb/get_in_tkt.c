@@ -495,6 +495,7 @@ krb5_init_creds_free(krb5_context context,
         krb5_get_init_creds_opt_free(context,
                                      (krb5_get_init_creds_opt *)ctx->opte);
     }
+    k5_response_items_free(ctx->rctx.items);
     free(ctx->in_tkt_service);
     zap(ctx->password.data, ctx->password.length);
     krb5_free_data_contents(context, &ctx->password);
@@ -811,6 +812,10 @@ krb5_init_creds_init(krb5_context context,
     if (code != 0)
         goto cleanup;
 
+    code = k5_response_items_new(&ctx->rctx.items);
+    if (code != 0)
+        goto cleanup;
+
     opte = ctx->opte;
 
     ctx->preauth_rock.magic = CLIENT_ROCK_MAGIC;
@@ -821,6 +826,7 @@ krb5_init_creds_init(krb5_context context,
     ctx->preauth_rock.default_salt = &ctx->default_salt;
     ctx->preauth_rock.salt = &ctx->salt;
     ctx->preauth_rock.s2kparams = &ctx->s2kparams;
+    ctx->preauth_rock.rctx = ctx->rctx;
     ctx->preauth_rock.client = client;
     ctx->preauth_rock.prompter = prompter;
     ctx->preauth_rock.prompter_data = data;

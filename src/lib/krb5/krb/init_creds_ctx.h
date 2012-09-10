@@ -46,6 +46,7 @@ struct _krb5_init_creds_context {
     krb5_boolean have_restarted;
     krb5_boolean sent_nontrivial_preauth;
     krb5_boolean preauth_required;
+    struct krb5_responder_context_st rctx;
 };
 
 krb5_error_code

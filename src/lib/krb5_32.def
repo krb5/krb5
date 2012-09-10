@@ -431,3 +431,7 @@ EXPORTS
 	krb5_cccol_have_content				@402
 	krb5_kt_client_default				@403
 	krb5int_cc_user_set_default_name		@404 ; PRIVATE LEASH
+	krb5_get_init_creds_opt_set_responder		@405
+	krb5_responder_get_challenge			@406
+	krb5_responder_list_questions			@407
+	krb5_responder_set_answer			@408

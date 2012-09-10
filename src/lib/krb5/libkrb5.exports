@@ -373,6 +373,7 @@ krb5_get_init_creds_opt_set_pa
 krb5_get_init_creds_opt_set_preauth_list
 krb5_get_init_creds_opt_set_proxiable
 krb5_get_init_creds_opt_set_renew_life
+krb5_get_init_creds_opt_set_responder
 krb5_get_init_creds_opt_set_salt
 krb5_get_init_creds_opt_set_tkt_life
 krb5_get_init_creds_password
@@ -524,6 +525,9 @@ krb5_realm_compare
 krb5_recvauth
 krb5_recvauth_version
 krb5_register_serializer
+krb5_responder_get_challenge
+krb5_responder_list_questions
+krb5_responder_set_answer
 krb5_salttype_to_string
 krb5_sendauth
 krb5_sendto_kdc
