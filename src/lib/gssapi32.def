@@ -170,3 +170,7 @@ EXPORTS
 	gss_nt_service_name_v2				@137	DATA
 ; Added in 1.10
 	gss_localname					@138
+; Added in 1.11
+	gss_acquire_cred_from				@139
+	gss_add_cred_from				@140
+	gss_store_cred_into				@141
