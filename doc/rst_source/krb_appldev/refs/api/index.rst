@@ -52,6 +52,7 @@ Frequently used public interfaces
    krb5_get_init_creds_opt_set_preauth_list.rst
    krb5_get_init_creds_opt_set_proxiable.rst
    krb5_get_init_creds_opt_set_renew_life.rst
+   krb5_get_init_creds_opt_set_responder.rst
    krb5_get_init_creds_opt_set_salt.rst
    krb5_get_init_creds_opt_set_tkt_life.rst
    krb5_get_init_creds_password.rst
@@ -78,6 +79,9 @@ Frequently used public interfaces
    krb5_principal_compare_flags.rst
    krb5_prompter_posix.rst
    krb5_realm_compare.rst
+   krb5_responder_get_challenge.rst
+   krb5_responder_list_questions.rst
+   krb5_responder_set_answer.rst
    krb5_set_default_realm.rst
    krb5_set_password.rst
    krb5_set_password_using_ccache.rst

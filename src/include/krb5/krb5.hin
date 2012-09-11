@@ -1994,7 +1994,7 @@ typedef struct _krb5_kdc_req {
     krb5_timestamp from;        /**< Requested start time */
     krb5_timestamp till;        /**< Requested end time */
     krb5_timestamp rtime;       /**< Requested renewable end time */
-    krb5_int32 nonce;           /**< Nonce to match request andresponse */
+    krb5_int32 nonce;           /**< Nonce to match request and response */
     int nktypes;                /**< Number of enctypes */
     krb5_enctype *ktype;        /**< Requested enctypes */
     krb5_address **addresses;   /**< Requested addresses (optional) */
@@ -6360,6 +6360,8 @@ typedef struct krb5_responder_context_st *krb5_responder_context;
  *
  * @param [in] ctx              Library context
  * @param [in] rctx             Responder context
+ *
+ * @version First introduced in 1.11
  */
 const char * const * KRB5_CALLCONV
 krb5_responder_list_questions(krb5_context ctx, krb5_responder_context rctx);
@@ -6370,6 +6372,8 @@ krb5_responder_list_questions(krb5_context ctx, krb5_responder_context rctx);
  * @param [in] ctx              Library context
  * @param [in] rctx             Responder context
  * @param [in] question         Question name
+ *
+ * @version First introduced in 1.11
  */
 const char * KRB5_CALLCONV
 krb5_responder_get_challenge(krb5_context ctx, krb5_responder_context rctx,
@@ -6382,6 +6386,8 @@ krb5_responder_get_challenge(krb5_context ctx, krb5_responder_context rctx,
  * @param [in] rctx             Responder context
  * @param [in] question         Question name
  * @param [in] answer           The string to set (MUST be printable UTF-8)
+ *
+ * @version First introduced in 1.11
  */
 krb5_error_code KRB5_CALLCONV
 krb5_responder_set_answer(krb5_context ctx, krb5_responder_context rctx,
@@ -6776,6 +6782,8 @@ krb5_get_init_creds_opt_set_expire_callback(krb5_context context,
  * @param [in] opt              Options structure
  * @param [in] responder        Responder function
  * @param [in] data             Responder data argument
+ *
+ * @version First introduced in 1.11
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_responder(krb5_context context,
