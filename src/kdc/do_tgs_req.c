@@ -215,6 +215,8 @@ ref_tgt_again:
 
     errcode = krb5_db_get_principal(kdc_context, request->server,
                                     s_flags, &server);
+    if (errcode == KRB5_KDB_CANTLOCK_DB)
+        errcode = KRB5KDC_ERR_SVC_UNAVAILABLE;
     if (errcode && errcode != KRB5_KDB_NOENTRY) {
         status = "LOOKING_UP_SERVER";
         goto cleanup;
@@ -1078,6 +1080,8 @@ find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry **server_ptr)
         krb5_princ_set_realm(kdc_context, *pl2,
                              krb5_princ_realm(kdc_context, tgs_server));
         retval = krb5_db_get_principal(kdc_context, *pl2, 0, &server);
+        if (retval == KRB5_KDB_CANTLOCK_DB)
+            retval = KRB5KDC_ERR_SVC_UNAVAILABLE;
         krb5_princ_set_realm(kdc_context, *pl2, &tmp);
         if (retval == KRB5_KDB_NOENTRY)
             continue;

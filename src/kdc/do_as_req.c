@@ -539,6 +539,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
     errcode = krb5_db_get_principal(kdc_context, state->request->client,
                                     state->c_flags, &state->client);
+    if (errcode == KRB5_KDB_CANTLOCK_DB)
+        errcode = KRB5KDC_ERR_SVC_UNAVAILABLE;
     if (errcode == KRB5_KDB_NOENTRY) {
         state->status = "CLIENT_NOT_FOUND";
         if (vague_errors)
@@ -570,6 +572,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
     errcode = krb5_db_get_principal(kdc_context, state->request->server,
                                     s_flags, &state->server);
+    if (errcode == KRB5_KDB_CANTLOCK_DB)
+        errcode = KRB5KDC_ERR_SVC_UNAVAILABLE;
     if (errcode == KRB5_KDB_NOENTRY) {
         state->status = "SERVER_NOT_FOUND";
         errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
