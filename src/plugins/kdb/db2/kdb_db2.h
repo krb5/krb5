@@ -49,8 +49,6 @@ typedef struct _krb5_db2_context {
     krb5_boolean        disable_lockout;
 } krb5_db2_context;
 
-#define KRB5_DB2_MAX_RETRY 5
-
 krb5_error_code krb5_db2_init(krb5_context);
 krb5_error_code krb5_db2_fini(krb5_context);
 krb5_error_code krb5_db2_get_age(krb5_context, char *, time_t *);
