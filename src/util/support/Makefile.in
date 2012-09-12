@@ -95,7 +95,7 @@ LIBOBJS= \
 	$(OUTPRE)utf8_conv.$(OBJEXT) \
 	$(OUTPRE)zap.$(OBJEXT) \
 	$(OUTPRE)path.$(OBJEXT) \
-	$(OUTPRE)base64.$(OBJECT) \
+	$(OUTPRE)base64.$(OBJEXT) \
 	$(OUTPRE)json.$(OBJEXT) \
 	$(GETTIMEOFDAY_OBJ) \
 	$(IPC_OBJ) \
