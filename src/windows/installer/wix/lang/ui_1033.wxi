@@ -731,7 +731,7 @@
         </Control>
         
         <Control Id="koAutoInitText" Type="CheckBox" X="25" Y="130" Width="280" Height="30" CheckBoxValue="-autoinit" Property="LEASHAUTOINIT" >
-			<Text>Ensure that the Kerberos tickets are available throughout the Windows login session</Text>
+			<Text>Get tickets (if there are no existing tickets) when MIT Kerberos is started</Text>
         </Control>
 
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="[ButtonText_Back]">
