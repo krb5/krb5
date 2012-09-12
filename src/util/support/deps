@@ -53,9 +53,20 @@ t_k5buf.so t_k5buf.po $(OUTPRE)t_k5buf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
 t_unal.so t_unal.po $(OUTPRE)t_unal.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   t_unal.c
+t_path.so t_path.po $(OUTPRE)t_path.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  t_path.c
+t_json.so t_json.po $(OUTPRE)t_json.$(OBJEXT): $(top_srcdir)/include/k5-json.h \
+  t_json.c
 zap.so zap.po $(OUTPRE)zap.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   zap.c
 path.so path.po $(OUTPRE)path.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   path.c
+base64.so base64.po $(OUTPRE)base64.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(top_srcdir)/include/k5-base64.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-thread.h base64.c
+json.so json.po $(OUTPRE)json.$(OBJEXT): $(top_srcdir)/include/k5-base64.h \
+  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-json.h \
+  json.c
