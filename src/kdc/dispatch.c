@@ -90,6 +90,34 @@ finish_dispatch_cache(void *arg, krb5_error_code code, krb5_data *response)
     finish_dispatch(state, code, response);
 }
 
+static void
+reseed_random(krb5_context kdc_err_context)
+{
+    krb5_error_code retval;
+    krb5_int32 now, now_usec;
+    krb5_int32 usec_difference;
+    krb5_data data;
+
+    retval = krb5_crypto_us_timeofday(&now, &now_usec);
+    if (retval == 0) {
+        usec_difference = now_usec - last_usec;
+        if (last_os_random == 0)
+            last_os_random = now;
+        /* Grab random data from OS every hour*/
+        if (now-last_os_random >= 60 * 60) {
+            krb5_c_random_os_entropy(kdc_err_context, 0, NULL);
+            last_os_random = now;
+        }
+
+        data.length = sizeof(krb5_int32);
+        data.data = (void *)&usec_difference;
+
+        krb5_c_random_add_entropy(kdc_err_context,
+                                  KRB5_C_RANDSOURCE_TIMING, &data);
+        last_usec = now_usec;
+    }
+}
+
 void
 dispatch(void *cb, struct sockaddr *local_saddr,
          const krb5_fulladdr *from, krb5_data *pkt, int is_tcp,
@@ -97,7 +125,6 @@ dispatch(void *cb, struct sockaddr *local_saddr,
 {
     krb5_error_code retval;
     krb5_kdc_req *as_req;
-    krb5_int32 now, now_usec;
     krb5_data *response = NULL;
     struct dispatch_state *state;
     struct server_handle *handle = cb;
@@ -145,26 +172,8 @@ dispatch(void *cb, struct sockaddr *local_saddr,
      * is currently being processed. */
     kdc_insert_lookaside(kdc_err_context, pkt, NULL);
 #endif
+    reseed_random(kdc_err_context);
 
-    retval = krb5_crypto_us_timeofday(&now, &now_usec);
-    if (retval == 0) {
-        krb5_int32 usec_difference = now_usec-last_usec;
-        krb5_data data;
-        if(last_os_random == 0)
-            last_os_random = now;
-        /* Grab random data from OS every hour*/
-        if(now-last_os_random >= 60*60) {
-            krb5_c_random_os_entropy(kdc_err_context, 0, NULL);
-            last_os_random = now;
-        }
-
-        data.length = sizeof(krb5_int32);
-        data.data = (void *) &usec_difference;
-
-        krb5_c_random_add_entropy(kdc_err_context,
-                                  KRB5_C_RANDSOURCE_TIMING, &data);
-        last_usec = now_usec;
-    }
     /* try TGS_REQ first; they are more common! */
 
     if (krb5_is_tgs_req(pkt)) {
