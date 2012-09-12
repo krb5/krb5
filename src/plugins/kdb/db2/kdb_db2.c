@@ -383,12 +383,10 @@ done:
 static krb5_error_code
 ctx_unlock(krb5_context context, krb5_db2_context *dbc)
 {
-    krb5_error_code retval;
+    krb5_error_code retval, retval2;
     DB *db;
 
     retval = osa_adb_release_lock(dbc->policy_db);
-    if (retval)
-        return retval;
 
     if (!dbc->db_locks_held) /* lock already unlocked */
         return KRB5_KDB_NOTLOCKED;
@@ -399,9 +397,15 @@ ctx_unlock(krb5_context context, krb5_db2_context *dbc)
         dbc->db = NULL;
         dbc->db_lock_mode = 0;
 
-        retval = krb5_lock_file(context, dbc->db_lf_file,
+        retval2 = krb5_lock_file(context, dbc->db_lf_file,
                                 KRB5_LOCKMODE_UNLOCK);
+        if (retval2)
+            return retval2;
     }
+
+    /* We may be unlocking because osa_adb_get_lock() failed. */
+    if (retval == OSA_ADB_NOTLOCKED)
+        return 0;
     return retval;
 }
 
