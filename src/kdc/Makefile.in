@@ -26,7 +26,8 @@ SRCS= \
 	$(srcdir)/policy.c \
 	$(srcdir)/extern.c \
 	$(srcdir)/replay.c \
-	$(srcdir)/kdc_authdata.c
+	$(srcdir)/kdc_authdata.c \
+	$(srcdir)/kdc_transit.c
 
 OBJS= \
 	kdc5_err.o \
@@ -42,12 +43,11 @@ OBJS= \
 	policy.o \
 	extern.o \
 	replay.o \
-	kdc_authdata.o
+	kdc_authdata.o \
+	kdc_transit.o
 
 RT_OBJS= rtest.o \
-	kdc_util.o \
-	policy.o \
-	extern.o
+	kdc_transit.o
 
 depend:: kdc5_err.c kdc5_err.h
 
