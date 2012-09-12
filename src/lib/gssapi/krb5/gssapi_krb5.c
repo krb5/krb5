@@ -1026,6 +1026,7 @@ void gss_krb5int_lib_fini(void)
 
     k5_key_delete(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME);
     k5_key_delete(K5_KEY_GSS_KRB5_CCACHE_NAME);
+    k5_key_delete(K5_KEY_GSS_KRB5_ERROR_MESSAGE);
     k5_mutex_destroy(&kg_vdb.mutex);
 #ifndef _WIN32
     k5_mutex_destroy(&kg_kdc_flag_mutex);
