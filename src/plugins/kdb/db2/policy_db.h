@@ -74,8 +74,6 @@ typedef struct _osa_adb_db_ent_t {
 
 krb5_error_code osa_adb_create_db(char *filename, char *lockfile, int magic);
 krb5_error_code osa_adb_destroy_db(char *filename, char *lockfile, int magic);
-krb5_error_code osa_adb_rename_db(char *filefrom, char *lockfrom,
-                                  char *fileto, char *lockto, int magic);
 krb5_error_code osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
                                 char *lockfile, int magic);
 krb5_error_code osa_adb_fini_db(osa_adb_db_t db, int magic);
@@ -83,7 +81,6 @@ krb5_error_code osa_adb_get_lock(osa_adb_db_t db, int mode);
 krb5_error_code osa_adb_release_lock(osa_adb_db_t db);
 krb5_error_code osa_adb_open_and_lock(osa_adb_princ_t db, int locktype);
 krb5_error_code osa_adb_close_and_unlock(osa_adb_princ_t db);
-krb5_error_code osa_adb_close_policy(osa_adb_policy_t db);
 krb5_error_code osa_adb_create_policy(osa_adb_policy_t db,
                                       osa_policy_ent_t entry);
 krb5_error_code osa_adb_destroy_policy(osa_adb_policy_t db,
