@@ -3,7 +3,7 @@ from k5test import *
 
 # Test krb5 negotiation under SPNEGO for all enctype configurations.
 for realm in multipass_realms():
-    realm.run_as_client(['./t_spnego', realm.host_princ, realm.keytab])
+    realm.run_as_client(['./t_spnego','p:' + realm.host_princ, realm.keytab])
 
 ### Test acceptor name behavior.
 
@@ -24,16 +24,16 @@ realm.run_kadminl('renprinc -force service1/abraham service1/andrew')
 
 # Test with no acceptor name, including client/keytab principal
 # mismatch (non-fatal) and missing keytab entry (fatal).
-output = realm.run_as_client(['./t_accname', 'service1/andrew'])
+output = realm.run_as_client(['./t_accname', 'p:service1/andrew'])
 if 'service1/abraham' not in output:
     fail('Expected service1/abraham in t_accname output')
-output = realm.run_as_client(['./t_accname', 'service1/barack'])
+output = realm.run_as_client(['./t_accname', 'p:service1/barack'])
 if 'service1/barack' not in output:
     fail('Expected service1/barack in t_accname output')
-output = realm.run_as_client(['./t_accname', 'service2/calvin'])
+output = realm.run_as_client(['./t_accname', 'p:service2/calvin'])
 if 'service2/calvin' not in output:
     fail('Expected service1/barack in t_accname output')
-output = realm.run_as_client(['./t_accname', 'service2/dwight'],
+output = realm.run_as_client(['./t_accname', 'p:service2/dwight'],
                              expected_code=1)
 if 'Wrong principal in request' not in output:
     fail('Expected error message not seen in t_accname output')
@@ -41,39 +41,41 @@ if 'Wrong principal in request' not in output:
 # Test with acceptor name containing service only, including
 # client/keytab hostname mismatch (non-fatal) and service name
 # mismatch (fatal).
-output = realm.run_as_client(['./t_accname', 'service1/andrew', 'service1'])
+output = realm.run_as_client(['./t_accname', 'p:service1/andrew',
+                              'h:service1'])
 if 'service1/abraham' not in output:
     fail('Expected service1/abraham in t_accname output')
-output = realm.run_as_client(['./t_accname', 'service1/andrew', 'service2'],
-                             expected_code=1)
+output = realm.run_as_client(['./t_accname', 'p:service1/andrew',
+                              'h:service2'], expected_code=1)
 if 'Wrong principal in request' not in output:
     fail('Expected error message not seen in t_accname output')
-output = realm.run_as_client(['./t_accname', 'service2/calvin', 'service2'])
+output = realm.run_as_client(['./t_accname', 'p:service2/calvin',
+                              'h:service2'])
 if 'service2/calvin' not in output:
     fail('Expected service2/calvin in t_accname output')
-output = realm.run_as_client(['./t_accname', 'service2/calvin', 'service1'],
-                             expected_code=1)
+output = realm.run_as_client(['./t_accname', 'p:service2/calvin',
+                              'h:service1'], expected_code=1)
 if 'Wrong principal in request' not in output:
     fail('Expected error message not seen in t_accname output')
 
 # Test with acceptor name containing service and host.  Use the
 # client's un-canonicalized hostname as acceptor input to mirror what
 # many servers do.
-output = realm.run_as_client(['./t_accname', realm.host_princ,
-                              'host@%s' % socket.gethostname()])
+output = realm.run_as_client(['./t_accname', 'p:' + realm.host_princ,
+                              'h:host@%s' % socket.gethostname()])
 if realm.host_princ not in output:
     fail('Expected %s in t_accname output' % realm.host_princ)
-output = realm.run_as_client(['./t_accname', 'host/-nomatch-',
-                              'host@%s' % socket.gethostname()],
+output = realm.run_as_client(['./t_accname', 'p:host/-nomatch-',
+                              'h:host@%s' % socket.gethostname()],
                              expected_code=1)
 if 'Wrong principal in request' not in output:
     fail('Expected error message not seen in t_accname output')
 
 # Test krb5_gss_import_cred.
-realm.run_as_client(['./t_imp_cred', 'service1/barack'])
-realm.run_as_client(['./t_imp_cred', 'service1/barack', 'service1/barack'])
-realm.run_as_client(['./t_imp_cred', 'service1/andrew', 'service1/abraham'])
-output = realm.run_as_client(['./t_imp_cred', 'service2/dwight'],
+realm.run_as_client(['./t_imp_cred', 'p:service1/barack'])
+realm.run_as_client(['./t_imp_cred', 'p:service1/barack', 'service1/barack'])
+realm.run_as_client(['./t_imp_cred', 'p:service1/andrew', 'service1/abraham'])
+output = realm.run_as_client(['./t_imp_cred', 'p:service2/dwight'],
                              expected_code=1)
 if 'Wrong principal in request' not in output:
     fail('Expected error message not seen in t_imp_cred output')
@@ -94,7 +96,7 @@ if 'Cred Store Success' not in output:
 
 # Verify that we can't acquire acceptor creds without a keytab.
 os.remove(realm.keytab)
-output = realm.run_as_client(['./t_accname', 'abc'], expected_code=1)
+output = realm.run_as_client(['./t_accname', 'p:abc'], expected_code=1)
 if ('gss_acquire_cred: Keytab' not in output or
     'nonexistent or empty' not in output):
     fail('Expected error message not seen for nonexistent keytab')
@@ -108,8 +110,8 @@ ignore_conf = { 'all' : { 'libdefaults' : {
 realm = K5Realm(krb5_conf=ignore_conf)
 realm.run_kadminl('addprinc -randkey host/-nomatch-')
 realm.run_kadminl('xst host/-nomatch-')
-output = realm.run_as_client(['./t_accname', 'host/-nomatch-',
-                              'host@%s' % socket.gethostname()])
+output = realm.run_as_client(['./t_accname', 'p:host/-nomatch-',
+                              'h:host@%s' % socket.gethostname()])
 if 'host/-nomatch-' not in output:
     fail('Expected host/-nomatch- in t_accname output')
 
@@ -157,16 +159,16 @@ if realm.host_princ not in output:
     fail('Expected %s in t_inq_cred output' % realm.host_princ)
 
 # Test gss_export_name behavior.
-out = realm.run_as_client(['./t_export_name', 'user:x'])
+out = realm.run_as_client(['./t_export_name', 'u:x'])
 if out != '0401000B06092A864886F7120102020000000D78404B5242544553542E434F4D\n':
     fail('Unexpected output from t_export_name (krb5 username)')
-output = realm.run_as_client(['./t_export_name', '-s', 'user:xyz'])
+output = realm.run_as_client(['./t_export_name', '-s', 'u:xyz'])
 if output != '0401000806062B06010505020000000378797A\n':
     fail('Unexpected output from t_export_name (SPNEGO username)')
-output = realm.run_as_client(['./t_export_name', 'krb5:a@b'])
+output = realm.run_as_client(['./t_export_name', 'p:a@b'])
 if output != '0401000B06092A864886F71201020200000003614062\n':
     fail('Unexpected output from t_export_name (krb5 principal)')
-output = realm.run_as_client(['./t_export_name', '-s', 'krb5:a@b'])
+output = realm.run_as_client(['./t_export_name', '-s', 'p:a@b'])
 if output != '0401000806062B060105050200000003614062\n':
     fail('Unexpected output from t_export_name (SPNEGO krb5 principal)')
 

@@ -41,55 +41,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <gssapi/gssapi_krb5.h>
-
-static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
+#include "common.h"
 
 static void
-display_status_1(const char *m, OM_uint32 code, int type)
+usage(void)
 {
-    OM_uint32 maj_stat, min_stat;
-    gss_buffer_desc msg;
-    OM_uint32 msg_ctx;
-
-    msg_ctx = 0;
-    while (1) {
-        maj_stat = gss_display_status(&min_stat, code,
-                                      type, GSS_C_NULL_OID,
-                                      &msg_ctx, &msg);
-        fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
-        (void) gss_release_buffer(&min_stat, &msg);
-
-        if (!msg_ctx)
-            break;
-    }
-}
-
-static void
-gsserr(const char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
-{
-    display_status_1(msg, maj_stat, GSS_C_GSS_CODE);
-    display_status_1(msg, min_stat, GSS_C_MECH_CODE);
-    exit(1);
-}
-
-static void
-print_hex(FILE *fp, gss_buffer_t buf)
-{
-    size_t i;
-    const unsigned char *bytes = buf->value;
-
-    for (i = 0; i < buf->length; i++)
-        printf("%02X", bytes[i]);
-    printf("\n");
-}
-
-static void
-usage(const char *progname)
-{
-    fprintf(stderr,
-            "Usage: %s [-k|-s] user:username|krb5:princ|gss:service@host\n",
-            progname);
+    fprintf(stderr, "Usage: t_export_name [-k|-s] name\n");
     exit(1);
 }
 
@@ -97,60 +54,41 @@ int
 main(int argc, char *argv[])
 {
     OM_uint32 minor, major;
-    gss_OID mech = (gss_OID)gss_mech_krb5, nametype = NULL;
+    gss_OID mech = (gss_OID)gss_mech_krb5;
     gss_name_t name, mechname, impname;
     gss_buffer_desc buf, buf2;
-    const char *name_arg, *progname = argv[0];
+    const char *name_arg;
     char opt;
 
+    /* Parse arguments. */
     while (argc > 1 && argv[1][0] == '-') {
         opt = argv[1][1];
         argc--, argv++;
         if (opt == 'k')
-            mech = (gss_OID)gss_mech_krb5;
+            mech = &mech_krb5;
         else if (opt == 's')
-            mech = &spnego_mech;
+            mech = &mech_spnego;
         else
-            usage(progname);
+            usage();
     }
     if (argc != 2)
-        usage(progname);
+        usage();
     name_arg = argv[1];
 
     /* Import the name. */
-    if (strncmp(name_arg, "user:", 5) == 0) {
-        nametype = GSS_C_NT_USER_NAME;
-        name_arg += 5;
-    } else if (strncmp(name_arg, "krb5:", 5) == 0) {
-        nametype = (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME;
-        name_arg += 5;
-    } else if (strncmp(name_arg, "host:", 5) == 0) {
-        nametype = GSS_C_NT_HOSTBASED_SERVICE;
-        name_arg += 5;
-    } else {
-        usage(progname);
-    }
-    buf.value = (char *)name_arg;
-    buf.length = strlen(name_arg);
-    major = gss_import_name(&minor, &buf, nametype, &name);
-    if (GSS_ERROR(major))
-        gsserr("gss_import_name", major, minor);
+    name = import_name(name_arg);
 
     /* Canonicalize and export the name. */
     major = gss_canonicalize_name(&minor, name, mech, &mechname);
-    if (GSS_ERROR(major))
-        gsserr("gss_canonicalize_name", major, minor);
+    check_gsserr("gss_canonicalize_name", major, minor);
     major = gss_export_name(&minor, mechname, &buf);
-    if (GSS_ERROR(major))
-        gsserr("gss_export_name", major, minor);
+    check_gsserr("gss_export_name", major, minor);
 
     /* Import and re-export the name, and compare the results. */
     major = gss_import_name(&minor, &buf, GSS_C_NT_EXPORT_NAME, &impname);
-    if (GSS_ERROR(major))
-        gsserr("gss_export_name", major, minor);
+    check_gsserr("gss_export_name", major, minor);
     major = gss_export_name(&minor, impname, &buf2);
-    if (GSS_ERROR(major))
-        gsserr("gss_export_name", major, minor);
+    check_gsserr("gss_export_name", major, minor);
     if (buf.length != buf2.length ||
         memcmp(buf.value, buf2.value, buf.length) != 0) {
         fprintf(stderr, "Mismatched results:\n");

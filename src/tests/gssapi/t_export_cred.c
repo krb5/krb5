@@ -25,80 +25,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 
-#include <gssapi/gssapi_krb5.h>
-
-static gss_OID_desc mech_krb5 = { 9, "\052\206\110\206\367\022\001\002\002" };
-static gss_OID_desc mech_spnego = { 6, "\053\006\001\005\005\002" };
-static gss_OID_set_desc mechset_krb5 = { 1, &mech_krb5 };
-static gss_OID_set_desc mechset_spnego = { 1, &mech_spnego };
-
-static void
-display_status_1(const char *m, OM_uint32 code, int type)
-{
-    OM_uint32 maj_stat, min_stat;
-    gss_buffer_desc msg;
-    OM_uint32 msg_ctx;
-
-    msg_ctx = 0;
-    while (1) {
-        maj_stat = gss_display_status(&min_stat, code,
-                                      type, GSS_C_NULL_OID,
-                                      &msg_ctx, &msg);
-        fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
-        (void) gss_release_buffer(&min_stat, &msg);
-
-        if (!msg_ctx)
-            break;
-    }
-}
-
-/* If maj_stat indicates an error, display an error message (containing msg)
- * and exit. */
-static void
-check_gsserr(const char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
-{
-    if (GSS_ERROR(maj_stat)) {
-        display_status_1(msg, maj_stat, GSS_C_GSS_CODE);
-        display_status_1(msg, min_stat, GSS_C_MECH_CODE);
-        exit(1);
-    }
-}
-
-/* Display an error message and exit. */
-static void
-errout(const char *msg)
-{
-    fprintf(stderr, "%s\n", msg);
-    exit(1);
-}
-
-/* Import a GSSAPI name based on a string of the form 'u:username',
- * 'p:principalname', or 'h:host@service' (or just 'h:service'). */
-static gss_name_t
-import_name(const char *str)
-{
-    OM_uint32 major, minor;
-    gss_name_t name;
-    gss_buffer_desc buf;
-    gss_OID nametype = NULL;
-
-    if (*str == 'u')
-        nametype = GSS_C_NT_USER_NAME;
-    else if (*str == 'p')
-        nametype = (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME;
-    else if (*str == 'h')
-        nametype = GSS_C_NT_HOSTBASED_SERVICE;
-    if (nametype == NULL || str[1] != ':')
-        errout("names must begin with u: or p: or h:");
-    buf.value = (char *)str + 2;
-    buf.length = strlen(str) - 2;
-    major = gss_import_name(&minor, &buf, nametype, &name);
-    check_gsserr("gss_import_name", major, minor);
-    return name;
-}
+#include "common.h"
 
 /* Display a usage error message and exit. */
 static void

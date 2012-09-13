@@ -27,41 +27,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <gssapi/gssapi_ext.h>
-#include <gssapi/gssapi_krb5.h>
+#include "common.h"
 
 static void
-print_gss_status(int type, OM_uint32 code)
-{
-    OM_uint32 major, minor;
-    gss_buffer_desc msg;
-    OM_uint32 msg_ctx = 0;
-
-    do {
-        major = gss_display_status(&minor, code, type,
-                                   GSS_C_NULL_OID, &msg_ctx, &msg);
-        if (major == 0) {
-            fprintf(stdout, "%s. ", (char *)msg.value);
-            major = gss_release_buffer(&minor, &msg);
-        }
-    } while (msg_ctx);
-}
-
-static void
-print_status(char *msg, OM_uint32 major, OM_uint32 minor)
-{
-    fprintf(stdout, "%s: ", msg);
-    print_gss_status(GSS_C_GSS_CODE, major);
-    print_gss_status(GSS_C_MECH_CODE, minor);
-    fprintf(stdout, "\n");
-}
-
-static void
-usage(const char *name)
+usage(void)
 {
     fprintf(stderr,
-            "Usage: %s <principal> [--cred_store {<key> <value>} ...]\n",
-            name);
+            "Usage: t_credstore principal [--cred_store {key value} ...]\n");
+    exit(1);
 }
 
 int
@@ -74,10 +47,8 @@ main(int argc, char *argv[])
     gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
     int i, e;
 
-    if (argc < 2 || ((argc - 3) % 2)) {
-        usage(argv[0]);
-        exit(1);
-    }
+    if (argc < 2 || ((argc - 3) % 2))
+        usage();
 
     store.count = (argc - 3) / 2;
     store.elements = calloc(store.count,
@@ -88,10 +59,8 @@ main(int argc, char *argv[])
     }
 
     if (argc > 2) {
-        if (strcmp(argv[2], "--cred_store") != 0) {
-            usage(argv[0]);
-            exit(1);
-        }
+        if (strcmp(argv[2], "--cred_store") != 0)
+            usage();
 
         for (i = 3, e = 0; i < argc; i += 2, e++) {
             store.elements[e].key = argv[i];
@@ -104,19 +73,11 @@ main(int argc, char *argv[])
 
     major = gss_acquire_cred(&minor, GSS_C_NO_NAME, 0, GSS_C_NO_OID_SET,
                              GSS_C_INITIATE, &cred, NULL, NULL);
-    if (major) {
-        print_status("gss_acquire_cred(default user creds) failed",
-                     major, minor);
-        goto out;
-    }
+    check_gsserr("gss_acquire_cred", major, minor);
 
     major = gss_store_cred_into(&minor, cred, GSS_C_INITIATE,
                                 GSS_C_NO_OID, 1, 0, &store, NULL, NULL);
-    if (major) {
-        print_status("gss_store_cred_in_store(default user creds) failed",
-                     major, minor);
-        goto out;
-    }
+    check_gsserr("gss_store_cred_into", major, minor);
 
     gss_release_cred(&minor, &cred);
 
@@ -128,27 +89,17 @@ main(int argc, char *argv[])
     major = gss_import_name(&minor, &buf,
                             (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME,
                             &service);
-    if (major) {
-        print_status("gss_import_name(principal) failed", major, minor);
-        goto out;
-    }
+    check_gsserr("gss_import_name", major, minor);
 
     major = gss_acquire_cred_from(&minor, service,
                                   0, GSS_C_NO_OID_SET, GSS_C_BOTH,
                                   &store, &cred, NULL, NULL);
-    if (major) {
-        print_status("gss_acquire_cred_from_store(principal) failed",
-                     major, minor);
-        goto out;
-    }
+    check_gsserr("gss_acquire_cred_from", major, minor);
 
     fprintf(stdout, "Cred Store Success\n");
 
-    major = 0;
-
-out:
     gss_release_name(&minor, &service);
     gss_release_cred(&minor, &cred);
     free(store.elements);
-    return major;
+    return 0;
 }

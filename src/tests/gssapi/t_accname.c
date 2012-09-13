@@ -25,9 +25,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-#include <gssapi/gssapi_krb5.h>
+#include "common.h"
 
 /*
  * Test program for acceptor names, intended to be run from a Python test
@@ -42,39 +41,11 @@
  * Usage: ./t_accname targetname [acceptorname]
  */
 
-static void
-display_status_1(const char *m, OM_uint32 code, int type)
-{
-    OM_uint32 maj_stat, min_stat;
-    gss_buffer_desc msg;
-    OM_uint32 msg_ctx;
-
-    msg_ctx = 0;
-    while (1) {
-        maj_stat = gss_display_status(&min_stat, code,
-                                      type, GSS_C_NULL_OID,
-                                      &msg_ctx, &msg);
-        fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
-        (void) gss_release_buffer(&min_stat, &msg);
-
-        if (!msg_ctx)
-            break;
-    }
-}
-
-static void
-display_status(const char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
-{
-    display_status_1(msg, maj_stat, GSS_C_GSS_CODE);
-    display_status_1(msg, min_stat, GSS_C_MECH_CODE);
-}
-
 int
 main(int argc, char *argv[])
 {
     OM_uint32 minor, major;
     gss_cred_id_t acceptor_cred;
-    gss_buffer_desc buf;
     gss_name_t target_name, acceptor_name = GSS_C_NO_NAME, real_acceptor_name;
     gss_buffer_desc token, tmp, namebuf;
     gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
@@ -85,37 +56,16 @@ main(int argc, char *argv[])
         return 1;
     }
 
-    /* Import the target name as a krb5 principal name. */
-    buf.value = argv[1];
-    buf.length = strlen((char *)buf.value);
-    major = gss_import_name(&minor, &buf, (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME,
-                            &target_name);
-    if (GSS_ERROR(major)) {
-        display_status("gss_import_name(target_name)", major, minor);
-        return 1;
-    }
-
-    /* Import the acceptor name as a host-based name. */
-    if (argc >= 3) {
-        buf.value = argv[2];
-        buf.length = strlen((char *)buf.value);
-        major = gss_import_name(&minor, &buf,
-                                (gss_OID)GSS_C_NT_HOSTBASED_SERVICE,
-                                &acceptor_name);
-        if (GSS_ERROR(major)) {
-            display_status("gss_import_name(acceptor_name)", major, minor);
-            return 1;
-        }
-    }
+    /* Import target and acceptor names. */
+    target_name = import_name(argv[1]);
+    if (argc >= 3)
+        acceptor_name = import_name(argv[2]);
 
     /* Get acceptor cred. */
     major = gss_acquire_cred(&minor, acceptor_name, GSS_C_INDEFINITE,
                              GSS_C_NO_OID_SET, GSS_C_ACCEPT,
                              &acceptor_cred, NULL, NULL);
-    if (GSS_ERROR(major)) {
-        display_status("gss_acquire_cred", major, minor);
-        return 1;
-    }
+    check_gsserr("gss_acquire_cred", major, minor);
 
     /* Create krb5 initiator context and get the first token. */
     token.value = NULL;
@@ -126,10 +76,7 @@ main(int argc, char *argv[])
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
                                  GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
                                  GSS_C_NO_BUFFER, NULL, &token, NULL, NULL);
-    if (GSS_ERROR(major)) {
-        display_status("gss_init_sec_context", major, minor);
-        return 1;
-    }
+    check_gsserr("gss_init_sec_context", major, minor);
 
     /* Pass the token to gss_accept_sec_context. */
     tmp.value = NULL;
@@ -137,26 +84,17 @@ main(int argc, char *argv[])
     major = gss_accept_sec_context(&minor, &acceptor_context, acceptor_cred,
                                    &token, GSS_C_NO_CHANNEL_BINDINGS,
                                    NULL, NULL, &tmp, NULL, NULL, NULL);
-    if (major != GSS_S_COMPLETE) {
-        display_status("gss_accept_sec_context", major, minor);
-        return 1;
-    }
+    check_gsserr("gss_accept_sec_context", major, minor);
 
     major = gss_inquire_context(&minor, acceptor_context, NULL,
                                 &real_acceptor_name, NULL, NULL, NULL, NULL,
                                 NULL);
-    if (GSS_ERROR(major)) {
-        display_status("gss_inquire_context", major, minor);
-        return 1;
-    }
+    check_gsserr("gss_inquire_context", major, minor);
 
     namebuf.value = NULL;
     namebuf.length = 0;
     major = gss_display_name(&minor, real_acceptor_name, &namebuf, NULL);
-    if (GSS_ERROR(major)) {
-        display_status("gss_display_name", major, minor);
-        return 1;
-    }
+    check_gsserr("gss_display_name", major, minor);
 
     printf("%.*s\n", (int)namebuf.length, (char *)namebuf.value);
 

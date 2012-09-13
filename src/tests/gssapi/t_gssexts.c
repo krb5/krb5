@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <gssapi/gssapi_krb5.h>
+#include "common.h"
 
 /*
  * Test program for protocol transition (S4U2Self) and constrained delegation
@@ -53,94 +53,17 @@
  * Usage eg:
  *
  * kinit -k -t test.keytab -f 'host/test.win.mit.edu@WIN.MIT.EDU'
- * ./t_s4u delegtest@WIN.MIT.EDU HOST/WIN-EQ7E4AA2WR8.win.mit.edu@WIN.MIT.EDU test.keytab
+ * ./t_s4u p:delegtest@WIN.MIT.EDU p:HOST/WIN-EQ7E4AA2WR8.win.mit.edu@WIN.MIT.EDU test.keytab
  */
-
-static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
 
 static int use_spnego = 0;
 
 static void
-displayStatus_1(char *m, OM_uint32 code, int type)
-{
-    OM_uint32 maj_stat, min_stat;
-    gss_buffer_desc msg;
-    OM_uint32 msg_ctx;
-
-    msg_ctx = 0;
-    while (1) {
-        maj_stat = gss_display_status(&min_stat, code,
-                                      type, GSS_C_NULL_OID,
-                                      &msg_ctx, &msg);
-        fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
-        (void) gss_release_buffer(&min_stat, &msg);
-
-        if (!msg_ctx)
-            break;
-    }
-}
-
-static void
-displayStatus(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
-{
-    displayStatus_1(msg, maj_stat, GSS_C_GSS_CODE);
-    displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
-}
-
-static OM_uint32
-displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
-{
-    gss_name_t canon;
-    OM_uint32 major, tmp_minor;
-    gss_buffer_desc buf;
-
-    major = gss_canonicalize_name(minor, name,
-                                  (gss_OID)gss_mech_krb5, &canon);
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_canonicalize_name", major, *minor);
-        return major;
-    }
-
-    major = gss_display_name(minor, canon, &buf, NULL);
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_display_name", major, *minor);
-        gss_release_name(&tmp_minor, &canon);
-        return major;
-    }
-
-    printf("%s:\t%s\n", tag, (char *)buf.value);
-
-    gss_release_buffer(&tmp_minor, &buf);
-    gss_release_name(&tmp_minor, &canon);
-
-    return GSS_S_COMPLETE;
-}
-
-static OM_uint32
-displayOID(OM_uint32 *minor, gss_OID oid, char *tag)
-{
-    OM_uint32 major, tmp_minor;
-    gss_buffer_desc buf;
-
-    major = gss_oid_to_str(minor, oid, &buf);
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_oid_to_str", major, *minor);
-        return major;
-    }
-
-    printf("%s:\t%s\n", tag, (char *)buf.value);
-
-    gss_release_buffer(&tmp_minor, &buf);
-
-    return GSS_S_COMPLETE;
-}
-
-static OM_uint32
-testPrf(OM_uint32 *minor, gss_ctx_id_t initiatorContext,
-        gss_ctx_id_t acceptorContext, int flags)
+test_prf(gss_ctx_id_t initiatorContext, gss_ctx_id_t acceptorContext,
+         int flags)
 {
     gss_buffer_desc constant;
-    OM_uint32 major, tmp_minor;
+    OM_uint32 major, minor;
     unsigned int i;
     gss_buffer_desc initiatorPrf;
     gss_buffer_desc acceptorPrf;
@@ -151,207 +74,124 @@ testPrf(OM_uint32 *minor, gss_ctx_id_t initiatorContext,
     initiatorPrf.value = NULL;
     acceptorPrf.value = NULL;
 
-    major = gss_pseudo_random(minor, initiatorContext, flags,
-                              &constant, 19, &initiatorPrf);
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_pseudo_random", major, *minor);
-        return major;
-    }
+    major = gss_pseudo_random(&minor, initiatorContext, flags, &constant, 19,
+                              &initiatorPrf);
+    check_gsserr("gss_pseudo_random", major, minor);
 
     printf("%s\n", flags == GSS_C_PRF_KEY_FULL ?
            "PRF_KEY_FULL" : "PRF_KEY_PARTIAL");
 
     printf("Initiator PRF: ");
-    for (i = 0; i < initiatorPrf.length; i++) {
+    for (i = 0; i < initiatorPrf.length; i++)
         printf("%02x ", ((char *)initiatorPrf.value)[i] & 0xFF);
-    }
     printf("\n");
 
-    major = gss_pseudo_random(minor, acceptorContext, flags,
-                              &constant, 19, &acceptorPrf);
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_pseudo_random", major, *minor);
-        gss_release_buffer(&tmp_minor, &initiatorPrf);
-        return major;
-    }
+    major = gss_pseudo_random(&minor, acceptorContext, flags, &constant, 19,
+                              &acceptorPrf);
+    check_gsserr("gss_pseudo_random", major, minor);
 
     printf("Acceptor  PRF: ");
-    for (i = 0; i < acceptorPrf.length; i++) {
+    for (i = 0; i < acceptorPrf.length; i++)
         printf("%02x ", ((char *)acceptorPrf.value)[i] & 0xFF);
-    }
     printf("\n");
 
     if (acceptorPrf.length != initiatorPrf.length ||
         memcmp(acceptorPrf.value, initiatorPrf.value, initiatorPrf.length)) {
         fprintf(stderr, "Initiator and acceptor PRF output does not match\n");
-        major = GSS_S_FAILURE;
+        exit(1);
     }
 
-    gss_release_buffer(&tmp_minor, &initiatorPrf);
-    gss_release_buffer(&tmp_minor, &acceptorPrf);
-
-    return major;
+    (void)gss_release_buffer(&minor, &initiatorPrf);
+    (void)gss_release_buffer(&minor, &acceptorPrf);
 }
 
-static OM_uint32
-initAcceptSecContext(OM_uint32 *minor, gss_cred_id_t claimant_cred_handle,
-                     gss_cred_id_t verifier_cred_handle,
-                     gss_cred_id_t *deleg_cred_handle)
+static void
+init_accept_sec_context(gss_cred_id_t claimant_cred_handle,
+                        gss_cred_id_t verifier_cred_handle,
+                        gss_cred_id_t *deleg_cred_handle)
 {
-    OM_uint32 major, tmp_minor;
-    gss_buffer_desc token, tmp;
+    OM_uint32 major, minor;
+    gss_buffer_desc token = GSS_C_EMPTY_BUFFER, tmp = GSS_C_EMPTY_BUFFER;
+    gss_name_t source_name = GSS_C_NO_NAME, target_name = GSS_C_NO_NAME;
     gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
     gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
-    gss_name_t source_name = GSS_C_NO_NAME;
-    gss_name_t target_name = GSS_C_NO_NAME;
     OM_uint32 time_rec;
-    gss_OID mech = GSS_C_NO_OID;
-
-    token.value = NULL;
-    token.length = 0;
-
-    tmp.value = NULL;
-    tmp.length = 0;
+    gss_OID mech;
 
     *deleg_cred_handle = GSS_C_NO_CREDENTIAL;
 
-    major = gss_inquire_cred(minor, verifier_cred_handle,
-                             &target_name, NULL, NULL, NULL);
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_inquire_cred", major, *minor);
-        return major;
-    }
+    major = gss_inquire_cred(&minor, verifier_cred_handle, &target_name, NULL,
+                             NULL, NULL);
+    check_gsserr("gss_inquire_cred", major, minor);
+    display_canon_name("Target name", target_name, &mech_krb5);
 
-    displayCanonName(minor, target_name, "Target name");
+    mech = use_spnego ? &mech_spnego : &mech_krb5;
+    display_oid("Target mech", mech);
 
-    mech = use_spnego ? (gss_OID)&spnego_mech : (gss_OID)gss_mech_krb5;
-    displayOID(minor, mech, "Target mech");
-
-    major = gss_init_sec_context(minor,
-                                 claimant_cred_handle,
-                                 &initiator_context,
-                                 target_name,
-                                 mech,
+    major = gss_init_sec_context(&minor, claimant_cred_handle,
+                                 &initiator_context, target_name, mech,
                                  GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
-                                 GSS_C_INDEFINITE,
-                                 GSS_C_NO_CHANNEL_BINDINGS,
-                                 GSS_C_NO_BUFFER,
-                                 NULL,
-                                 &token,
-                                 NULL,
+                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
+                                 GSS_C_NO_BUFFER, NULL, &token, NULL,
                                  &time_rec);
+    (void)gss_release_name(&minor, &target_name);
+    check_gsserr("gss_init_sec_context", major, minor);
 
-    if (target_name != GSS_C_NO_NAME)
-        (void) gss_release_name(&tmp_minor, &target_name);
-
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_init_sec_context", major, *minor);
-        return major;
-    }
-
-    mech = GSS_C_NO_OID;
-
-    major = gss_accept_sec_context(minor,
-                                   &acceptor_context,
-                                   verifier_cred_handle,
-                                   &token,
-                                   GSS_C_NO_CHANNEL_BINDINGS,
-                                   &source_name,
-                                   &mech,
-                                   &tmp,
-                                   NULL,
-                                   &time_rec,
+    major = gss_accept_sec_context(&minor, &acceptor_context,
+                                   verifier_cred_handle, &token,
+                                   GSS_C_NO_CHANNEL_BINDINGS, &source_name,
+                                   NULL, &tmp, NULL, &time_rec,
                                    deleg_cred_handle);
+    check_gsserr("gss_accept_sec_context", major, minor);
 
-    if (GSS_ERROR(major))
-        displayStatus("gss_accept_sec_context", major, *minor);
-    else {
-        testPrf(minor, initiator_context, acceptor_context, GSS_C_PRF_KEY_FULL);
-        testPrf(minor, initiator_context, acceptor_context, GSS_C_PRF_KEY_PARTIAL);
-    }
+    test_prf(initiator_context, acceptor_context, GSS_C_PRF_KEY_FULL);
+    test_prf(initiator_context, acceptor_context, GSS_C_PRF_KEY_PARTIAL);
 
-    (void) gss_release_name(&tmp_minor, &source_name);
-    (void) gss_delete_sec_context(&tmp_minor, &acceptor_context, NULL);
-    (void) gss_delete_sec_context(minor, &initiator_context, NULL);
-    (void) gss_release_buffer(&tmp_minor, &token);
-    (void) gss_release_buffer(&tmp_minor, &tmp);
-    (void) gss_release_oid(&tmp_minor, &mech);
-
-    return major;
+    (void)gss_release_name(&minor, &source_name);
+    (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);
+    (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
+    (void)gss_release_buffer(&minor, &token);
+    (void)gss_release_buffer(&minor, &tmp);
 }
 
-static OM_uint32
-getDefaultCred(OM_uint32 *minor, const char *keytab_name, gss_OID_set mechs,
-               gss_cred_id_t *impersonator_cred_handle)
+static void
+get_default_cred(const char *keytab_name, gss_OID_set mechs,
+                 gss_cred_id_t *impersonator_cred_handle)
 {
-    OM_uint32 major = GSS_S_FAILURE, tmp_minor;
+    OM_uint32 major = GSS_S_FAILURE, minor;
+    krb5_error_code ret;
+    krb5_context context = NULL;
+    krb5_keytab keytab = NULL;
+    krb5_principal keytab_principal = NULL;
+    krb5_ccache ccache = NULL;
 
-    if (keytab_name) {
-        krb5_error_code code;
-        krb5_context context = NULL;
-        krb5_keytab keytab = NULL;
-        krb5_principal keytab_principal = NULL;
-        krb5_ccache ccache = NULL;
+    if (keytab_name != NULL) {
+        ret = krb5_init_context(&context);
+        check_k5err(context, "krb5_init_context", ret);
 
-        code = krb5_init_context(&context);
-        if (code) {
-            displayStatus("krb5_init_context", major, code);
-            return major;
-        }
+        ret = krb5_kt_resolve(context, keytab_name, &keytab);
+        check_k5err(context, "krb5_kt_resolve", ret);
 
-        code = krb5_kt_resolve(context, keytab_name, &keytab);
-        if (code) {
-            displayStatus("krb5_kt_resolve", major, code);
-            goto out;
-        }
+        ret = krb5_cc_default(context, &ccache);
+        check_k5err(context, "krb5_cc_default", ret);
 
-        code = krb5_cc_default(context, &ccache);
-        if (code) {
-            displayStatus("krb5_cc_default", major, code);
-            goto out;
-        }
+        ret = krb5_cc_get_principal(context, ccache, &keytab_principal);
+        check_k5err(context, "krb5_cc_get_principal", ret);
 
-        code = krb5_cc_get_principal(context, ccache, &keytab_principal);
-        if (code) {
-            displayStatus("krb5_cc_get_principal", major, code);
-            goto out;
-        }
-
-        major = gss_krb5_import_cred(minor,
-                                     ccache,
-                                     keytab_principal,
-                                     keytab,
+        major = gss_krb5_import_cred(&minor, ccache, keytab_principal, keytab,
                                      impersonator_cred_handle);
-        if (GSS_ERROR(major)) {
-            displayStatus("gss_krb5_import_cred", major, *minor);
-            goto out;
-        }
+        check_gsserr("gss_krb5_import_cred", major, minor);
 
-    out:
-        if (code)
-            *minor = code;
         krb5_free_principal(context, keytab_principal);
         krb5_cc_close(context, ccache);
         krb5_kt_close(context, keytab);
         krb5_free_context(context);
     } else {
-        gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
-
-        major = gss_acquire_cred(minor,
-                                 GSS_C_NO_NAME,
-                                 GSS_C_INDEFINITE,
-                                 mechs,
-                                 GSS_C_BOTH,
-                                 impersonator_cred_handle,
-                                 &actual_mechs,
-                                 NULL);
-        if (GSS_ERROR(major)) {
-            displayStatus("gss_acquire_cred", major, *minor);
-        }
-        (void) gss_release_oid_set(&tmp_minor, &actual_mechs);
+        major = gss_acquire_cred(&minor, GSS_C_NO_NAME, GSS_C_INDEFINITE,
+                                 mechs, GSS_C_BOTH, impersonator_cred_handle,
+                                 NULL, NULL);
+        check_gsserr("gss_acquire_cred", major, minor);
     }
-
-    return major;
 }
 
 int
@@ -362,9 +202,7 @@ main(int argc, char *argv[])
     gss_cred_id_t user_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t delegated_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_name_t user = GSS_C_NO_NAME, target = GSS_C_NO_NAME;
-    gss_OID_set_desc mechs;
-    gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
-    gss_buffer_desc buf;
+    gss_OID_set mechs, actual_mechs = GSS_C_NO_OID_SET;
     uid_t uid;
 
     if (argc < 2 || argc > 5) {
@@ -380,93 +218,45 @@ main(int argc, char *argv[])
         argv++;
     }
 
-    buf.value = argv[1];
-    buf.length = strlen((char *)buf.value);
-
-    major = gss_import_name(&minor, &buf,
-                            (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME,
-                            &user);
+    user = import_name(argv[1]);
 
     major = gss_pname_to_uid(&minor, user, NULL, &uid);
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_pname_to_uid(user)", major, minor);
-        goto out;
-    }
+    check_gsserr("gss_pname_to_uid(user)", major, minor);
 
-    if (argc > 2 && strcmp(argv[2], "-")) {
-        buf.value = argv[2];
-        buf.length = strlen((char *)buf.value);
+    if (argc > 2 && strcmp(argv[2], "-") != 0)
+        target = import_name(argv[2]);
 
-        major = gss_import_name(&minor, &buf,
-                                (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME,
-                                &target);
-        if (GSS_ERROR(major)) {
-            displayStatus("gss_import_name(target)", major, minor);
-            goto out;
-        }
-    } else {
-        target = GSS_C_NO_NAME;
-    }
+    mechs = use_spnego ? &mechset_spnego : &mechset_krb5;
 
-    mechs.elements = use_spnego ? (gss_OID)&spnego_mech :
-        (gss_OID)gss_mech_krb5;
-    mechs.count = 1;
-
-    major = getDefaultCred(&minor,
-                           argc > 3 ? argv[3] : NULL,
-                           &mechs,
-                           &impersonator_cred_handle);
-    if (GSS_ERROR(major))
-        goto out;
+    get_default_cred((argc > 3) ? argv[3] : NULL, mechs,
+                     &impersonator_cred_handle);
 
     printf("Protocol transition tests follow\n");
     printf("-----------------------------------\n\n");
 
     /* get S4U2Self cred */
-    major = gss_acquire_cred_impersonate_name(&minor,
-                                              impersonator_cred_handle,
-                                              user,
-                                              GSS_C_INDEFINITE,
-                                              &mechs,
+    major = gss_acquire_cred_impersonate_name(&minor, impersonator_cred_handle,
+                                              user, GSS_C_INDEFINITE, mechs,
                                               GSS_C_INITIATE,
-                                              &user_cred_handle,
-                                              &actual_mechs,
+                                              &user_cred_handle, &actual_mechs,
                                               NULL);
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_acquire_cred_impersonate_name", major, minor);
-        goto out;
-    }
+    check_gsserr("gss_acquire_cred_impersonate_name", major, minor);
 
     /* Try to store it in default ccache */
-    major = gss_store_cred(&minor,
-                           user_cred_handle,
-                           GSS_C_INITIATE,
-                           &mechs.elements[0],
-                           1,
-                           1,
-                           NULL,
-                           NULL);
-    if (GSS_ERROR(major)) {
-        displayStatus("gss_store_cred", major, minor);
-        goto out;
-    }
+    major = gss_store_cred(&minor, user_cred_handle, GSS_C_INITIATE,
+                           &mechs->elements[0], 1, 1, NULL, NULL);
+    check_gsserr("gss_store_cred", major, minor);
 
-    major = initAcceptSecContext(&minor,
-                                 user_cred_handle,
-                                 impersonator_cred_handle,
-                                 &delegated_cred_handle);
-    if (GSS_ERROR(major))
-        goto out;
+    init_accept_sec_context(user_cred_handle, impersonator_cred_handle,
+                            &delegated_cred_handle);
 
     printf("\n");
 
-out:
-    (void) gss_release_name(&minor, &user);
-    (void) gss_release_name(&minor, &target);
-    (void) gss_release_cred(&minor, &delegated_cred_handle);
-    (void) gss_release_cred(&minor, &impersonator_cred_handle);
-    (void) gss_release_cred(&minor, &user_cred_handle);
-    (void) gss_release_oid_set(&minor, &actual_mechs);
-
-    return GSS_ERROR(major) ? 1 : 0;
+    (void)gss_release_name(&minor, &user);
+    (void)gss_release_name(&minor, &target);
+    (void)gss_release_cred(&minor, &delegated_cred_handle);
+    (void)gss_release_cred(&minor, &impersonator_cred_handle);
+    (void)gss_release_cred(&minor, &user_cred_handle);
+    (void)gss_release_oid_set(&minor, &actual_mechs);
+    return 0;
 }

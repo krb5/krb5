@@ -4,61 +4,68 @@ DEFINES = -DUSE_AUTOCONF_H
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-SRCS=	$(srcdir)/t_accname.c $(srcdir)/t_ccselect.c $(srcdir)/t_imp_cred.c \
-	$(srcdir)/t_imp_name.c $(srcdir)/t_s4u.c $(srcdir)/t_s4u2proxy_krb5.c \
-	$(srcdir)/t_namingexts.c $(srcdir)/t_gssexts.c $(srcdir)/t_saslname.c \
-	$(srcdir)/t_credstore.c $(srcdir)/t_export_name.c
+SRCS=	$(srcdir)/t_accname.c $(srcdir)/t_ccselect.c $(srcdir)/t_credstore.c \
+	$(srcdir)/t_export_cred.c $(srcdir)/t_export_name.c \
+	$(srcdir)/t_gssexts.c $(srcdir)/t_imp_cred.c $(srcdir)/t_imp_name.c \
+	$(srcdir)/t_inq_cred.c $(srcdir)/t_namingexts.c $(srcdir)/t_s4u.c \
+	$(srcdir)/t_s4u2proxy_krb5.c $(srcdir)/t_saslname.c \
+	$(srcdir)/t_spnego.c
 
-OBJS=	t_accname.o t_ccselect.o t_imp_cred.o t_imp_name.o t_s4u.o \
-	t_s4u2proxy_krb5.o t_namingexts.o t_gssexts.o t_spnego.o t_saslname.o \
-	t_credstore.o t_export_name.o t_export_cred.o
+OBJS=	ccinit.o ccrefresh.o common.o t_accname.o t_ccselect.o t_credstore.o \
+	t_export_cred.o t_export_name.o t_gssexts.o t_imp_cred.o t_imp_name.o \
+	t_inq_cred.o t_namingexts.o t_s4u.o t_s4u2proxy_krb5.o t_saslname.o \
+	t_spnego.o
 
-all:: t_accname t_ccselect t_imp_cred t_imp_name t_s4u t_s4u2proxy_krb5 \
-	t_namingexts t_gssexts t_spnego t_saslname t_credstore t_export_name \
-	t_export_cred
+COMMON_DEPS= common.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+COMMON_LIBS= common.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
-check-pytests:: t_accname t_ccselect t_imp_cred t_inq_cred t_spnego \
-	t_s4u2proxy_krb5 t_s4u t_export_name t_export_cred ccinit ccrefresh
+all:: ccinit ccrefresh t_accname t_ccselect t_credstore t_export_cred \
+	t_export_name t_gssexts t_imp_cred t_imp_name t_inq_cred t_namingexts \
+	t_s4u t_s4u2proxy_krb5 t_saslname t_spnego
+
+check-pytests:: ccinit ccrefresh t_accname t_ccselect t_credstore \
+	t_export_cred t_export_name t_imp_cred t_inq_cred t_s4u \
+	t_s4u2proxy_krb5 t_spnego
 	$(RUNPYTEST) $(srcdir)/t_gssapi.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_ccselect.py $(PYTESTFLAGS)
-	$(RUNPYTEST) $(srcdir)/t_s4u.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_client_keytab.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_export_cred.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_s4u.py $(PYTESTFLAGS)
 
 ccinit: ccinit.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o ccinit ccinit.o $(KRB5_BASE_LIBS)
 ccrefresh: ccrefresh.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o ccrefresh ccrefresh.o $(KRB5_BASE_LIBS)
-t_accname: t_accname.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_accname t_accname.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_ccselect: t_ccselect.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_ccselect t_ccselect.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_imp_cred: t_imp_cred.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_imp_cred t_imp_cred.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_imp_name: t_imp_name.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_imp_name t_imp_name.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_inq_cred: t_inq_cred.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_inq_cred t_inq_cred.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_s4u: t_s4u.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_s4u t_s4u.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_s4u2proxy_krb5: t_s4u2proxy_krb5.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ t_s4u2proxy_krb5.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_namingexts: t_namingexts.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_namingexts t_namingexts.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_gssexts: t_gssexts.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_gssexts t_gssexts.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_spnego: t_spnego.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_spnego t_spnego.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_saslname: t_saslname.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_saslname t_saslname.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_credstore: t_credstore.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_credstore t_credstore.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_export_name: t_export_name.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ t_export_name.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_export_cred: t_export_cred.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ t_export_cred.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
+t_accname: t_accname.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_accname.o $(COMMON_LIBS)
+t_ccselect: t_ccselect.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_ccselect.o $(COMMON_LIBS)
+t_credstore: t_credstore.o $(COMMON_DEPLIBS)
+	$(CC_LINK) -o $@ t_credstore.o $(COMMON_LIBS)
+t_export_cred: t_export_cred.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_export_cred.o $(COMMON_LIBS)
+t_export_name: t_export_name.o $(COMMON_DEPLIBS)
+	$(CC_LINK) -o $@ t_export_name.o $(COMMON_LIBS)
+t_gssexts: t_gssexts.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_gssexts.o $(COMMON_LIBS)
+t_imp_cred: t_imp_cred.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_imp_cred.o $(COMMON_LIBS)
+t_imp_name: t_imp_name.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_imp_name.o $(COMMON_LIBS)
+t_inq_cred: t_inq_cred.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_inq_cred.o $(COMMON_LIBS)
+t_namingexts: t_namingexts.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_namingexts.o $(COMMON_LIBS)
+t_s4u: t_s4u.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_s4u.o $(COMMON_LIBS)
+t_s4u2proxy_krb5: t_s4u2proxy_krb5.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_s4u2proxy_krb5.o $(COMMON_LIBS)
+t_saslname: t_saslname.o $(COMMON_DEPLIBS)
+	$(CC_LINK) -o $@ t_saslname.o $(COMMON_LIBS)
+t_spnego: t_spnego.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_spnego.o $(COMMON_LIBS)
 
 clean::
-	$(RM) t_accname t_ccselect t_imp_cred t_imp_name t_inq_cred t_s4u \
-		t_s4u2proxy_krb5 t_namingexts t_gssexts t_spnego \
-		t_saslname t_credstore t_export_name t_export_cred
+	$(RM) ccinit ccrefresh t_accname t_ccselect t_credstore t_export_cred \
+	$(RM) t_export_name t_gssexts t_imp_cred t_imp_name t_inq_cred
+	$(RM) t_namingexts t_s4u t_s4u2proxy_krb5 t_saslname t_spnego

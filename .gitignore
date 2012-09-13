@@ -262,10 +262,13 @@ testlog
 /src/tests/gssapi/ccrefresh
 /src/tests/gssapi/t_accname
 /src/tests/gssapi/t_ccselect
+/src/tests/gssapi/t_credstore
 /src/tests/gssapi/t_export_cred
+/src/tests/gssapi/t_export_name
 /src/tests/gssapi/t_gssexts
 /src/tests/gssapi/t_imp_cred
 /src/tests/gssapi/t_imp_name
+/src/tests/gssapi/t_inq_cred
 /src/tests/gssapi/t_namingexts
 /src/tests/gssapi/t_s4u
 /src/tests/gssapi/t_s4u2proxy_krb5
