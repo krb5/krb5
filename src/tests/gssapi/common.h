@@ -35,12 +35,12 @@
 
 #include <gssapi/gssapi_krb5.h>
 
-gss_OID_desc mech_krb5;
-gss_OID_desc mech_spnego;
-gss_OID_desc mech_iakerb;
-gss_OID_set_desc mechset_krb5;
-gss_OID_set_desc mechset_spnego;
-gss_OID_set_desc mechset_iakerb;
+extern gss_OID_desc mech_krb5;
+extern gss_OID_desc mech_spnego;
+extern gss_OID_desc mech_iakerb;
+extern gss_OID_set_desc mechset_krb5;
+extern gss_OID_set_desc mechset_spnego;
+extern gss_OID_set_desc mechset_iakerb;
 
 /* Display an error message (containing msg) and exit if major is an error. */
 void check_gsserr(const char *msg, OM_uint32 major, OM_uint32 minor);
