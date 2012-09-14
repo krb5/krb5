@@ -880,14 +880,268 @@ fetch_asn1_field(unsigned char *astream, unsigned int level,
  * Returns a Kerberos protocol error number, which is _not_ the same
  * as a com_err error number!
  */
-#define TGS_OPTIONS_HANDLED (KDC_OPT_FORWARDABLE | KDC_OPT_FORWARDED |  \
-                             KDC_OPT_PROXIABLE | KDC_OPT_PROXY |        \
-                             KDC_OPT_ALLOW_POSTDATE | KDC_OPT_POSTDATED | \
-                             KDC_OPT_RENEWABLE | KDC_OPT_RENEWABLE_OK | \
-                             KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_RENEW |  \
-                             KDC_OPT_VALIDATE | KDC_OPT_CANONICALIZE | KDC_OPT_CNAME_IN_ADDL_TKT)
-#define NO_TGT_OPTION (KDC_OPT_FORWARDED | KDC_OPT_PROXY | KDC_OPT_RENEW | \
-                       KDC_OPT_VALIDATE)
+
+struct tgsflagrule {
+    krb5_flags reqflags;        /* Flag(s) in TGS-REQ */
+    krb5_flags checkflag;       /* Flags to check against */
+    char *status;               /* Status string */
+    int err;                    /* Protocol error code */
+};
+
+/* Service principal TGS policy checking functions */
+typedef int (check_tgs_svc_pol_fn)(krb5_kdc_req *, krb5_db_entry,
+                                   krb5_ticket *, const char **);
+
+static check_tgs_svc_pol_fn check_tgs_svc_deny_opts;
+static check_tgs_svc_pol_fn check_tgs_svc_deny_all;
+static check_tgs_svc_pol_fn check_tgs_svc_reqd_flags;
+
+static const struct tgsflagrule tgsflagrules[] = {
+    { (KDC_OPT_FORWARDED | KDC_OPT_FORWARDABLE), TKT_FLG_FORWARDABLE,
+      "TGT NOT FORWARDABLE", KDC_ERR_BADOPTION },
+    { (KDC_OPT_PROXY | KDC_OPT_PROXIABLE), TKT_FLG_PROXIABLE,
+      "TGT NOT PROXIABLE", KDC_ERR_BADOPTION },
+    { (KDC_OPT_ALLOW_POSTDATE | KDC_OPT_POSTDATED), TKT_FLG_MAY_POSTDATE,
+      "TGT NOT POSTDATABLE", KDC_ERR_BADOPTION },
+    { KDC_OPT_VALIDATE, TKT_FLG_INVALID,
+      "VALIDATE VALID TICKET", KDC_ERR_BADOPTION },
+    { (KDC_OPT_RENEW | KDC_OPT_RENEWABLE), TKT_FLG_RENEWABLE,
+      "TICKET NOT RENEWABLE", KDC_ERR_BADOPTION }
+};
+
+/*
+ * Check that TGS-REQ options are consistent with the ticket flags.
+ */
+static int
+check_tgs_opts(krb5_kdc_req *req, krb5_ticket *tkt, const char **status)
+{
+    size_t i;
+    size_t nrules = sizeof(tgsflagrules) / sizeof(tgsflagrules[0]);
+    const struct tgsflagrule *r;
+
+    for (i = 0; i < nrules; i++) {
+        r = &tgsflagrules[i];
+        if (!(r->reqflags & req->kdc_options))
+            continue;
+        if (!(r->checkflag & tkt->enc_part2->flags)) {
+            *status = r->status;
+            return r->err;
+        }
+    }
+    return 0;
+}
+
+static const struct tgsflagrule svcdenyrules[] = {
+    { KDC_OPT_FORWARDABLE, KRB5_KDB_DISALLOW_FORWARDABLE,
+      "NON-FORWARDABLE TICKET", KDC_ERR_POLICY },
+    { KDC_OPT_RENEWABLE, KRB5_KDB_DISALLOW_RENEWABLE,
+      "NON-RENEWABLE TICKET", KDC_ERR_POLICY },
+    { KDC_OPT_PROXIABLE, KRB5_KDB_DISALLOW_PROXIABLE,
+      "NON-PROXIABLE TICKET", KDC_ERR_POLICY },
+    { KDC_OPT_ALLOW_POSTDATE, KRB5_KDB_DISALLOW_POSTDATED,
+      "NON-POSTDATABLE TICKET", KDC_ERR_CANNOT_POSTDATE },
+    { KDC_OPT_ENC_TKT_IN_SKEY, KRB5_KDB_DISALLOW_DUP_SKEY,
+      "DUP_SKEY DISALLOWED", KDC_ERR_POLICY }
+};
+
+/*
+ * A service principal can forbid some TGS-REQ options.
+ */
+static int
+check_tgs_svc_deny_opts(krb5_kdc_req *req, krb5_db_entry server,
+                        krb5_ticket *tkt, const char **status)
+{
+    size_t i;
+    size_t nrules = sizeof(svcdenyrules) / sizeof(svcdenyrules[0]);
+    const struct tgsflagrule *r;
+
+    for (i = 0; i < nrules; i++) {
+        r = &svcdenyrules[i];
+        if (!(r->reqflags & req->kdc_options))
+            continue;
+        if (r->checkflag & server.attributes) {
+            *status = r->status;
+            return r->err;
+        }
+    }
+    return 0;
+}
+
+static int
+check_tgs_svc_deny_all(krb5_kdc_req *req, krb5_db_entry server,
+                       krb5_ticket *tkt, const char **status)
+{
+    if (server.attributes & KRB5_KDB_DISALLOW_ALL_TIX) {
+        *status = "SERVER LOCKED OUT";
+        return KDC_ERR_S_PRINCIPAL_UNKNOWN;
+    }
+    if (server.attributes & KRB5_KDB_DISALLOW_SVR) {
+        *status = "SERVER NOT ALLOWED";
+        return KDC_ERR_MUST_USE_USER2USER;
+    }
+    return 0;
+}
+
+/*
+ * A service principal can require certain TGT flags.
+ */
+static int
+check_tgs_svc_reqd_flags(krb5_kdc_req *req, krb5_db_entry server,
+                         krb5_ticket *tkt, const char **status)
+{
+    if (server.attributes & KRB5_KDB_REQUIRES_HW_AUTH &&
+        !(tkt->enc_part2->flags & TKT_FLG_HW_AUTH)) {
+        *status = "NO HW PREAUTH";
+        return KRB_ERR_GENERIC;
+    }
+    if (server.attributes & KRB5_KDB_REQUIRES_PRE_AUTH &&
+        !(tkt->enc_part2->flags & TKT_FLG_PRE_AUTH)) {
+        *status = "NO PREAUTH";
+        return KRB_ERR_GENERIC;
+    }
+    return 0;
+}
+
+static check_tgs_svc_pol_fn *svc_pol_fns[] = {
+    check_tgs_svc_deny_opts, check_tgs_svc_deny_all, check_tgs_svc_reqd_flags
+};
+
+static int
+check_tgs_svc_policy(krb5_kdc_req *req, krb5_db_entry server,
+                     krb5_ticket *tkt, const char **status)
+{
+    int errcode;
+    size_t i;
+    size_t nfns = sizeof(svc_pol_fns) / sizeof(svc_pol_fns[0]);
+
+    for (i = 0; i < nfns; i++) {
+        errcode = svc_pol_fns[i](req, server, tkt, status);
+        if (errcode != 0)
+            return errcode;
+    }
+    return 0;
+}
+
+/*
+ * Check some timestamps in the TGS-REQ.
+ */
+static int
+check_tgs_times(krb5_kdc_req *req, krb5_db_entry server, krb5_ticket *tkt,
+                krb5_timestamp kdc_time, const char **status)
+{
+
+    /* Check to see if service principal has expired. */
+    if (server.expiration && server.expiration < kdc_time) {
+        *status = "SERVICE EXPIRED";
+        return KDC_ERR_SERVICE_EXP;
+    }
+    /* For validating a postdated ticket, check the start time vs. the
+       KDC time. */
+    if (req->kdc_options & KDC_OPT_VALIDATE) {
+        if (tkt->enc_part2->times.starttime > kdc_time) {
+            *status = "NOT_YET_VALID";
+            return KRB_AP_ERR_TKT_NYV;
+        }
+    }
+    /*
+     * Check the renew_till time.  The endtime was already
+     * been checked in the initial authentication check.
+     */
+    if ((req->kdc_options & KDC_OPT_RENEW) &&
+        (tkt->enc_part2->times.renew_till < kdc_time)) {
+        *status = "TKT_EXPIRED";
+        return KRB_AP_ERR_TKT_EXPIRED;
+    }
+    return 0;
+}
+
+/*
+ * Check second ticket, if required by TGS-REQ options.
+ */
+static int
+check_2nd_tkt(kdc_realm_t *kdc_active_realm,
+              krb5_kdc_req *req, const char **status)
+{
+    /* user-to-user */
+    if (req->kdc_options & KDC_OPT_ENC_TKT_IN_SKEY) {
+        /* Check that second ticket is in request. */
+        if (!req->second_ticket || !req->second_ticket[0]) {
+            *status = "NO_2ND_TKT";
+            return KDC_ERR_BADOPTION;
+        }
+        /* Check that second ticket is a TGT. */
+        if (!krb5_principal_compare(kdc_context,
+                                    req->second_ticket[0]->server,
+                                    tgs_server)) {
+            *status = "2ND_TKT_NOT_TGS";
+            return KDC_ERR_POLICY;
+        }
+    }
+    /* S4U2Proxy */
+    if (req->kdc_options & KDC_OPT_CNAME_IN_ADDL_TKT) {
+        /* Check that second ticket is in request. */
+        if (!req->second_ticket || !req->second_ticket[0]) {
+            *status = "NO_2ND_TKT";
+            return KDC_ERR_BADOPTION;
+        }
+    }
+    return 0;
+}
+
+/*
+ * Some TGS-REQ options allow for a non-TGS principal in the ticket.  Do some
+ * checks that are peculiar to these cases.  (e.g., ticket service principal
+ * matches requested service principal)
+ */
+static int
+check_tgs_nontgt(kdc_realm_t *kdc_active_realm,
+                 krb5_kdc_req *req, krb5_ticket *tkt, const char **status)
+{
+
+    if (!krb5_principal_compare(kdc_context, tkt->server, req->server)) {
+        *status = "SERVER DIDN'T MATCH TICKET FOR RENEW/FORWARD/ETC";
+        return KDC_ERR_SERVER_NOMATCH;
+    }
+    /* Cannot proxy ticket granting tickets. */
+    if ((req->kdc_options & KDC_OPT_PROXY) &&
+        krb5_is_tgs_principal(req->server)) {
+        *status = "CAN'T PROXY TGT";
+        return KDC_ERR_BADOPTION;
+    }
+    return 0;
+}
+
+/*
+ * Do some checks for a normal TGS-REQ (where the ticket service must be a TGS
+ * principal).
+ */
+static int
+check_tgs_tgt(kdc_realm_t *kdc_active_realm,
+              krb5_kdc_req *req, krb5_db_entry server,
+              krb5_ticket *tkt, const char **status)
+{
+    /* Make sure it's a TGS principal. */
+    if (!krb5_is_tgs_principal(tkt->server)) {
+        *status = "BAD TGS SERVER NAME";
+        return KRB_AP_ERR_NOT_US;
+    }
+    /* TGS principal second component must match service realm. */
+    if (!data_eq(*krb5_princ_component(kdc_context, tkt->server, 1),
+                 *krb5_princ_realm(kdc_context, req->server))) {
+        *status = "BAD TGS SERVER INSTANCE";
+        return KRB_AP_ERR_NOT_US;
+    }
+    /* Server must allow TGS based issuances */
+    if (server.attributes & KRB5_KDB_DISALLOW_TGT_BASED) {
+        *status = "TGT BASED NOT ALLOWED";
+        return KDC_ERR_POLICY;
+    }
+    return 0;
+}
+
+/* TGS-REQ options where the service can be a non-TGS principal  */
+#define NON_TGT_OPTION (KDC_OPT_FORWARDED | KDC_OPT_PROXY | KDC_OPT_RENEW | \
+                        KDC_OPT_VALIDATE)
 
 int
 validate_tgs_request(kdc_realm_t *kdc_active_realm,
@@ -896,167 +1150,27 @@ validate_tgs_request(kdc_realm_t *kdc_active_realm,
                      const char **status, krb5_pa_data ***e_data)
 {
     int errcode;
-    int st_idx = 0;
     krb5_error_code ret;
 
-    /*
-     * If an illegal option is set, ignore it.
-     */
-    request->kdc_options &= TGS_OPTIONS_HANDLED;
+    errcode = check_tgs_times(request, server, ticket, kdc_time, status);
+    if (errcode != 0)
+        return errcode;
 
-    /* Check to see if server has expired */
-    if (server.expiration && server.expiration < kdc_time) {
-        *status = "SERVICE EXPIRED";
-        return(KDC_ERR_SERVICE_EXP);
-    }
+    errcode = check_tgs_opts(request, ticket, status);
+    if (errcode != 0)
+        return errcode;
 
-    /*
-     * Verify that the server principal in authdat->ticket is correct
-     * (either the ticket granting service or the service that was
-     * originally requested)
-     */
-    if (request->kdc_options & NO_TGT_OPTION) {
-        if (!krb5_principal_compare(kdc_context, ticket->server, request->server)) {
-            *status = "SERVER DIDN'T MATCH TICKET FOR RENEW/FORWARD/ETC";
-            return(KDC_ERR_SERVER_NOMATCH);
-        }
-    } else {
-        /*
-         * OK, we need to validate the krbtgt service in the ticket.
-         *
-         * The krbtgt service is of the form:
-         *              krbtgt/realm-A@realm-B
-         *
-         * Realm A is the "server realm"; the realm of the
-         * server of the requested ticket must match this realm.
-         * Of course, it should be a realm serviced by this KDC.
-         *
-         * Realm B is the "client realm"; this is what should be
-         * added to the transited field.  (which is done elsewhere)
-         */
+    errcode = check_tgs_svc_policy(request, server, ticket, status);
+    if (errcode != 0)
+        return errcode;
 
-        /* Make sure there are two components... */
-        if (krb5_princ_size(kdc_context, ticket->server) != 2) {
-            *status = "BAD TGS SERVER LENGTH";
-            return KRB_AP_ERR_NOT_US;
-        }
-        /* ...that the first component is krbtgt... */
-        if (!krb5_is_tgs_principal(ticket->server)) {
-            *status = "BAD TGS SERVER NAME";
-            return KRB_AP_ERR_NOT_US;
-        }
-        /* ...and that the second component matches the server realm... */
-        if ((krb5_princ_size(kdc_context, ticket->server) <= 1) ||
-            !data_eq(*krb5_princ_component(kdc_context, ticket->server, 1),
-                     *krb5_princ_realm(kdc_context, request->server))) {
-            *status = "BAD TGS SERVER INSTANCE";
-            return KRB_AP_ERR_NOT_US;
-        }
-        /* XXX add check that second component must match locally
-         * supported realm?
-         */
-
-        /* Server must allow TGS based issuances */
-        if (isflagset(server.attributes, KRB5_KDB_DISALLOW_TGT_BASED)) {
-            *status = "TGT BASED NOT ALLOWED";
-            return(KDC_ERR_POLICY);
-        }
-    }
-
-    /* TGS must be forwardable to get forwarded or forwardable ticket */
-    if ((isflagset(request->kdc_options, KDC_OPT_FORWARDED) ||
-         isflagset(request->kdc_options, KDC_OPT_FORWARDABLE)) &&
-        !isflagset(ticket->enc_part2->flags, TKT_FLG_FORWARDABLE)) {
-        *status = "TGT NOT FORWARDABLE";
-
-        return KDC_ERR_BADOPTION;
-    }
-
-    /* TGS must be proxiable to get proxiable ticket */
-    if ((isflagset(request->kdc_options, KDC_OPT_PROXY) ||
-         isflagset(request->kdc_options, KDC_OPT_PROXIABLE)) &&
-        !isflagset(ticket->enc_part2->flags, TKT_FLG_PROXIABLE)) {
-        *status = "TGT NOT PROXIABLE";
-        return KDC_ERR_BADOPTION;
-    }
-
-    /* TGS must allow postdating to get postdated ticket */
-    if ((isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE) ||
-         isflagset(request->kdc_options, KDC_OPT_POSTDATED)) &&
-        !isflagset(ticket->enc_part2->flags, TKT_FLG_MAY_POSTDATE)) {
-        *status = "TGT NOT POSTDATABLE";
-        return KDC_ERR_BADOPTION;
-    }
-
-    /* can only validate invalid tix */
-    if (isflagset(request->kdc_options, KDC_OPT_VALIDATE) &&
-        !isflagset(ticket->enc_part2->flags, TKT_FLG_INVALID)) {
-        *status = "VALIDATE VALID TICKET";
-        return KDC_ERR_BADOPTION;
-    }
-
-    /* can only renew renewable tix */
-    if ((isflagset(request->kdc_options, KDC_OPT_RENEW) ||
-         isflagset(request->kdc_options, KDC_OPT_RENEWABLE)) &&
-        !isflagset(ticket->enc_part2->flags, TKT_FLG_RENEWABLE)) {
-        *status = "TICKET NOT RENEWABLE";
-        return KDC_ERR_BADOPTION;
-    }
-
-    /* can not proxy ticket granting tickets */
-    if (isflagset(request->kdc_options, KDC_OPT_PROXY) &&
-        (!request->server->data ||
-         !data_eq_string(request->server->data[0], KRB5_TGS_NAME))) {
-        *status = "CAN'T PROXY TGT";
-        return KDC_ERR_BADOPTION;
-    }
-
-    /* Server must allow forwardable tickets */
-    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE) &&
-        isflagset(server.attributes, KRB5_KDB_DISALLOW_FORWARDABLE)) {
-        *status = "NON-FORWARDABLE TICKET";
-        return(KDC_ERR_POLICY);
-    }
-
-    /* Server must allow renewable tickets */
-    if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE) &&
-        isflagset(server.attributes, KRB5_KDB_DISALLOW_RENEWABLE)) {
-        *status = "NON-RENEWABLE TICKET";
-        return(KDC_ERR_POLICY);
-    }
-
-    /* Server must allow proxiable tickets */
-    if (isflagset(request->kdc_options, KDC_OPT_PROXIABLE) &&
-        isflagset(server.attributes, KRB5_KDB_DISALLOW_PROXIABLE)) {
-        *status = "NON-PROXIABLE TICKET";
-        return(KDC_ERR_POLICY);
-    }
-
-    /* Server must allow postdated tickets */
-    if (isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE) &&
-        isflagset(server.attributes, KRB5_KDB_DISALLOW_POSTDATED)) {
-        *status = "NON-POSTDATABLE TICKET";
-        return(KDC_ERR_CANNOT_POSTDATE);
-    }
-
-    /* Server must allow DUP SKEY requests */
-    if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY) &&
-        isflagset(server.attributes, KRB5_KDB_DISALLOW_DUP_SKEY)) {
-        *status = "DUP_SKEY DISALLOWED";
-        return(KDC_ERR_POLICY);
-    }
-
-    /* Server must not be locked out */
-    if (isflagset(server.attributes, KRB5_KDB_DISALLOW_ALL_TIX)) {
-        *status = "SERVER LOCKED OUT";
-        return(KDC_ERR_S_PRINCIPAL_UNKNOWN);
-    }
-
-    /* Server must be allowed to be a service */
-    if (isflagset(server.attributes, KRB5_KDB_DISALLOW_SVR)) {
-        *status = "SERVER NOT ALLOWED";
-        return(KDC_ERR_MUST_USE_USER2USER);
-    }
+    if (request->kdc_options & NON_TGT_OPTION)
+        errcode = check_tgs_nontgt(kdc_active_realm, request, ticket, status);
+    else
+        errcode = check_tgs_tgt(kdc_active_realm, request, server, ticket,
+                                status);
+    if (errcode != 0)
+        return errcode;
 
     /* Check the hot list */
     if (check_hot_list(ticket)) {
@@ -1064,65 +1178,9 @@ validate_tgs_request(kdc_realm_t *kdc_active_realm,
         return(KRB_AP_ERR_REPEAT);
     }
 
-    /* Check the start time vs. the KDC time */
-    if (isflagset(request->kdc_options, KDC_OPT_VALIDATE)) {
-        if (ticket->enc_part2->times.starttime > kdc_time) {
-            *status = "NOT_YET_VALID";
-            return(KRB_AP_ERR_TKT_NYV);
-        }
-    }
-
-    /*
-     * Check the renew_till time.  The endtime was already
-     * been checked in the initial authentication check.
-     */
-    if (isflagset(request->kdc_options, KDC_OPT_RENEW) &&
-        (ticket->enc_part2->times.renew_till < kdc_time)) {
-        *status = "TKT_EXPIRED";
-        return(KRB_AP_ERR_TKT_EXPIRED);
-    }
-
-    /*
-     * Checks for ENC_TKT_IN_SKEY:
-     *
-     * (1) Make sure the second ticket exists
-     * (2) Make sure it is a ticket granting ticket
-     */
-    if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
-        if (!request->second_ticket ||
-            !request->second_ticket[st_idx]) {
-            *status = "NO_2ND_TKT";
-            return(KDC_ERR_BADOPTION);
-        }
-        if (!krb5_principal_compare(kdc_context, request->second_ticket[st_idx]->server,
-                                    tgs_server)) {
-            *status = "2ND_TKT_NOT_TGS";
-            return(KDC_ERR_POLICY);
-        }
-        st_idx++;
-    }
-    if (isflagset(request->kdc_options, KDC_OPT_CNAME_IN_ADDL_TKT)) {
-        if (!request->second_ticket ||
-            !request->second_ticket[st_idx]) {
-            *status = "NO_2ND_TKT";
-            return(KDC_ERR_BADOPTION);
-        }
-        st_idx++;
-    }
-
-    /* Check for hardware preauthentication */
-    if (isflagset(server.attributes, KRB5_KDB_REQUIRES_HW_AUTH) &&
-        !isflagset(ticket->enc_part2->flags,TKT_FLG_HW_AUTH)) {
-        *status = "NO HW PREAUTH";
-        return KRB_ERR_GENERIC;
-    }
-
-    /* Check for any kind of preauthentication */
-    if (isflagset(server.attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
-        !isflagset(ticket->enc_part2->flags, TKT_FLG_PRE_AUTH)) {
-        *status = "NO PREAUTH";
-        return KRB_ERR_GENERIC;
-    }
+    errcode = check_2nd_tkt(kdc_active_realm, request, status);
+    if (errcode != 0)
+        return errcode;
 
     if (check_anon(kdc_active_realm, ticket->enc_part2->client,
                    request->server) != 0) {
@@ -1807,7 +1865,7 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm,
      * We can assert from this check that the header ticket was a TGT, as
      * that is validated previously in validate_tgs_request().
      */
-    if (request->kdc_options & (NO_TGT_OPTION | KDC_OPT_ENC_TKT_IN_SKEY)) {
+    if (request->kdc_options & (NON_TGT_OPTION | KDC_OPT_ENC_TKT_IN_SKEY)) {
         return KRB5KDC_ERR_BADOPTION;
     }
 
