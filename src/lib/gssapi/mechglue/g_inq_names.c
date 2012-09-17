@@ -108,84 +108,61 @@ val_inq_mechs4name_args(
     return (GSS_S_COMPLETE);
 }
 
+static int
+mech_supports_nametype(gss_OID mech_oid, gss_OID name_type)
+{
+    OM_uint32		status, minor;
+    gss_OID_set		types = GSS_C_NO_OID_SET;
+    int 		present;
+
+    status = gss_inquire_names_for_mech(&minor, mech_oid, &types);
+    if (status != GSS_S_COMPLETE)
+	return (0);
+    status = gss_test_oid_set_member(&minor, name_type, types, &present);
+    (void) gss_release_oid_set(&minor, &types);
+    return (status == GSS_S_COMPLETE && present);
+}
 
 OM_uint32 KRB5_CALLCONV
-gss_inquire_mechs_for_name(minor_status, input_name, mech_set)
-
-    OM_uint32 *		minor_status;
-    const gss_name_t	input_name;
-    gss_OID_set *		mech_set;
-
+gss_inquire_mechs_for_name(OM_uint32 *minor_status,
+			   const gss_name_t input_name, gss_OID_set *mech_set)
 {
-    OM_uint32		status;
-    static char		*mech_list[MAX_MECH_OID_PAIRS+1];
-    gss_OID_set		mech_name_types;
-    int			present;
-    char 			*mechanism;
-    gss_OID 		mechOid;
-    gss_OID 		name_type;
-    gss_buffer_desc		name_buffer;
-    int			i;
+    OM_uint32		status, tmpmin;
+    gss_OID_set		all_mechs = GSS_C_NO_OID_SET;
+    gss_OID_set		mechs = GSS_C_NO_OID_SET;
+    gss_OID 		mech_oid, name_type;
+    gss_buffer_desc	name_buffer = GSS_C_EMPTY_BUFFER;
+    size_t		i;
 
     status = val_inq_mechs4name_args(minor_status, input_name, mech_set);
     if (status != GSS_S_COMPLETE)
 	return (status);
 
-    status = gss_create_empty_oid_set(minor_status, mech_set);
+    status = gss_display_name(minor_status, input_name, &name_buffer,
+			      &name_type);
     if (status != GSS_S_COMPLETE)
-	return (status);
-    *mech_list = NULL;
-    status = gssint_get_mechanisms(mech_list, MAX_MECH_OID_PAIRS+1);
+	goto cleanup;
+    status = gss_indicate_mechs(minor_status, &all_mechs);
     if (status != GSS_S_COMPLETE)
-	return (status);
-    for (i = 0; i < MAX_MECH_OID_PAIRS && mech_list[i] != NULL; i++) {
-	mechanism = mech_list[i];
-	if (gssint_mech_to_oid(mechanism, &mechOid) == GSS_S_COMPLETE) {
-	    status = gss_inquire_names_for_mech(
-		minor_status,
-		mechOid,
-		&mech_name_types);
-	    if (status == GSS_S_COMPLETE) {
-		status = gss_display_name(minor_status,
-					  input_name,
-					  &name_buffer,
-					  &name_type);
-
-		(void) gss_release_buffer(NULL, &name_buffer);
-
-		if (status == GSS_S_COMPLETE && name_type) {
-		    status = gss_test_oid_set_member(
-			minor_status,
-			name_type,
-			mech_name_types,
-			&present);
-		    if (status == GSS_S_COMPLETE &&
-			present) {
-			status = gss_add_oid_set_member(
-			    minor_status,
-			    mechOid,
-			    mech_set);
-			if (status != GSS_S_COMPLETE) {
-			    (void) gss_release_oid_set(
-				minor_status,
-				&mech_name_types);
-			    (void) gss_release_oid_set(
-				minor_status,
-				mech_set);
-			    return (status);
-			}
-		    }
-		}
-		(void) gss_release_oid_set(
-		    minor_status,
-		    &mech_name_types);
-	    }
-	} else {
-	    (void) gss_release_oid_set(
-		minor_status,
-		mech_set);
-	    return (GSS_S_FAILURE);
+	goto cleanup;
+    status = gss_create_empty_oid_set(minor_status, &mechs);
+    if (status != GSS_S_COMPLETE)
+	goto cleanup;
+    for (i = 0; i < all_mechs->count; i++) {
+	mech_oid = &all_mechs->elements[i];
+	if (mech_supports_nametype(mech_oid, name_type)) {
+	    status = gss_add_oid_set_member(minor_status, mech_oid, &mechs);
+	    if (status != GSS_S_COMPLETE)
+		goto cleanup;
 	}
     }
-    return (GSS_S_COMPLETE);
+
+    *mech_set = mechs;
+    mechs = GSS_C_NO_OID_SET;
+
+cleanup:
+    (void) gss_release_buffer(&tmpmin, &name_buffer);
+    (void) gss_release_oid_set(&tmpmin, &all_mechs);
+    (void) gss_release_oid_set(&tmpmin, &mechs);
+    return (status);
 }
