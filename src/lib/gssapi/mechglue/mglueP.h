@@ -730,23 +730,6 @@ OM_uint32 gss_add_mech_name_type
  * Sun extensions to GSS-API v2
  */
 
-OM_uint32
-gssint_mech_to_oid(
-	const char *mech,		/* mechanism string name */
-	gss_OID *oid			/* mechanism oid */
-);
-
-const char *
-gssint_oid_to_mech(
-	const gss_OID oid		/* mechanism oid */
-);
-
-OM_uint32
-gssint_get_mechanisms(
-	char *mechArray[],		/* array to populate with mechs */
-	int arrayLen			/* length of passed in array */
-);
-
 int
 gssint_get_der_length(
 	unsigned char **,	/* buf */
