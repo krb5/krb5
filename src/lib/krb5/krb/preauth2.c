@@ -31,10 +31,12 @@
  */
 
 #include "k5-int.h"
+#include "k5-json.h"
 #include "osconf.h"
 #include <krb5/preauth_plugin.h>
 #include "int-proto.h"
 #include "fast.h"
+#include "init_creds_ctx.h"
 
 #if !defined(_WIN32)
 #include <unistd.h>
@@ -436,6 +438,46 @@ need_as_key(krb5_context context, krb5_clpreauth_rock rock)
                      NULL, NULL, *rock->gak_data, rock->rctx.items);
 }
 
+static const char *
+get_cc_config(krb5_context context, krb5_clpreauth_rock rock, const char *key)
+{
+    k5_json_value value;
+
+    if (rock->cc_config_in == NULL || *rock->cc_config_in == NULL)
+        return NULL;
+
+    value = k5_json_object_get(*rock->cc_config_in, key);
+    if (value == NULL)
+        return NULL;
+
+    if (k5_json_get_tid(value) != K5_JSON_TID_STRING)
+        return NULL;
+
+    return k5_json_string_utf8(value);
+}
+
+static krb5_error_code
+set_cc_config(krb5_context context, krb5_clpreauth_rock rock,
+              const char *key, const char *data)
+{
+    k5_json_value value;
+    int i;
+
+    if (rock->cc_config_out == NULL || *rock->cc_config_out == NULL)
+        return ENOENT;
+
+    value = k5_json_string_create(data);
+    if (value == NULL)
+        return ENOMEM;
+
+    i = k5_json_object_set(*rock->cc_config_out, key, value);
+    k5_json_release(value);
+    if (i < 0)
+        return ENOMEM;
+
+    return 0;
+}
+
 static struct krb5_clpreauth_callbacks_st callbacks = {
     2,
     get_etype,
@@ -445,7 +487,9 @@ static struct krb5_clpreauth_callbacks_st callbacks = {
     get_preauth_time,
     responder_ask_question,
     responder_get_answer,
-    need_as_key
+    need_as_key,
+    get_cc_config,
+    set_cc_config
 };
 
 /* Tweak the request body, for now adding any enctypes which the module claims

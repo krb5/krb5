@@ -283,6 +283,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_PROXY_IMPERSONATOR          "proxy_impersonator"
 #define KRB5_CONF_REFRESH_TIME                "refresh_time"
 #define KRB5_CONF_PA_TYPE                     "pa_type"
+#define KRB5_CONF_PA_CONFIG_DATA              "pa_config_data"
 
 /* Error codes used in KRB_ERROR protocol messages.
    Return values of library routines are based on a different error table
@@ -805,53 +806,6 @@ typedef krb5_error_code
                            krb5_data *salt, krb5_data *s2kparams,
                            krb5_keyblock *as_key, void *gak_data,
                            k5_response_items *ritems);
-
-#define CLIENT_ROCK_MAGIC 0x4352434b
-/*
- * This structure is passed into the clpreauth methods and passed back to
- * clpreauth callbacks so that they can locate the requested information.  It
- * is opaque to the plugin code and can be expanded in the future as new types
- * of requests are defined which may require other things to be passed through.
- * All pointer fields are aliases and should not be freed.
- */
-struct krb5int_fast_request_state;
-struct krb5_clpreauth_rock_st {
-    krb5_magic magic;
-    krb5_enctype *etype;
-    struct krb5int_fast_request_state *fast_state;
-
-    /*
-     * These fields allow gak_fct to be called via the rock.  The
-     * gak_fct and gak_data fields have an extra level of indirection
-     * since they can change in the init_creds context.
-     */
-    krb5_keyblock *as_key;
-    krb5_gic_get_as_key_fct *gak_fct;
-    void **gak_data;
-    krb5_boolean *default_salt;
-    krb5_data *salt;
-    krb5_data *s2kparams;
-    krb5_principal client;
-    krb5_prompter_fct prompter;
-    void *prompter_data;
-
-    /* Discovered offset of server time during preauth */
-    krb5_timestamp pa_offset;
-    krb5_int32 pa_offset_usec;
-    enum { NO_OFFSET = 0, UNAUTH_OFFSET, AUTH_OFFSET } pa_offset_state;
-    struct krb5_responder_context_st rctx;
-
-    /*
-     * Configuration information read from an in_ccache, actually stored in the
-     * containing context structure, but needed by callbacks which currently
-     * only get a pointer to the rock
-     */
-
-    /* The allowed preauth type (number) that we might use, equal to
-     * KRB5_PADATA_NONE if none was set. */
-    krb5_preauthtype *allowed_preauth_type;
-    krb5_preauthtype *selected_preauth_type;
-};
 
 typedef struct _krb5_pa_enc_ts {
     krb5_timestamp      patimestamp;

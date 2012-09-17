@@ -209,6 +209,22 @@ typedef struct krb5_clpreauth_callbacks_st {
     /* Indicate interest in the AS key through the responder interface. */
     void (*need_as_key)(krb5_context context, krb5_clpreauth_rock rock);
 
+    /*
+     * Get a configuration/state item from an input ccache, which may allow it
+     * to retrace the steps it took last time.  The returned data string is an
+     * alias and should not be freed.
+     */
+    const char *(*get_cc_config)(krb5_context context,
+                                 krb5_clpreauth_rock rock, const char *key);
+
+    /*
+     * Set a configuration/state item which will be recorded to an output
+     * ccache, if the calling application supplied one.  Both key and data
+     * should be valid UTF-8 text.
+     */
+    krb5_error_code (*set_cc_config)(krb5_context context,
+                                     krb5_clpreauth_rock rock,
+                                     const char *key, const char *data);
     /* End of version 2 clpreauth callbacks (added in 1.11). */
 } *krb5_clpreauth_callbacks;
 

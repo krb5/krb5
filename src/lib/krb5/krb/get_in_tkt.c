@@ -832,6 +832,8 @@ krb5_init_creds_init(krb5_context context,
     ctx->preauth_rock.prompter_data = data;
     ctx->preauth_rock.allowed_preauth_type = &ctx->allowed_preauth_type;
     ctx->preauth_rock.selected_preauth_type = &ctx->selected_preauth_type;
+    ctx->preauth_rock.cc_config_in = &ctx->cc_config_in;
+    ctx->preauth_rock.cc_config_out = &ctx->cc_config_out;
 
     /* Initialise request parameters as per krb5_get_init_creds() */
     ctx->request->kdc_options = context->kdc_default_options;
@@ -1138,6 +1140,77 @@ save_selected_preauth_type(krb5_context context, krb5_ccache ccache,
 }
 
 static krb5_error_code
+clear_cc_config_out_data(krb5_context context, krb5_init_creds_context ctx)
+{
+    if (ctx->cc_config_out != NULL)
+        k5_json_release(ctx->cc_config_out);
+    ctx->cc_config_out = k5_json_object_create();
+    if (ctx->cc_config_out == NULL)
+        return ENOMEM;
+    return 0;
+}
+
+static krb5_error_code
+read_cc_config_in_data(krb5_context context, krb5_init_creds_context ctx)
+{
+    krb5_data config;
+    char *encoded;
+    krb5_error_code code;
+    int i;
+
+    if (ctx->cc_config_in != NULL)
+        k5_json_release(ctx->cc_config_in);
+    ctx->cc_config_in = NULL;
+
+    if (ctx->opte->opt_private->in_ccache == NULL)
+        return 0;
+
+    memset(&config, 0, sizeof(config));
+    code = krb5_cc_get_config(context, ctx->opte->opt_private->in_ccache,
+                              ctx->request->server,
+                              KRB5_CONF_PA_CONFIG_DATA, &config);
+    if (code)
+        return code;
+
+    i = asprintf(&encoded, "%.*s", (int)config.length, config.data);
+    krb5_free_data_contents(context, &config);
+    if (i < 0)
+        return ENOMEM;
+
+    ctx->cc_config_in = k5_json_decode(encoded);
+    free(encoded);
+    if (ctx->cc_config_in == NULL)
+        return ENOMEM;
+    if (k5_json_get_tid(ctx->cc_config_in) != K5_JSON_TID_OBJECT) {
+        k5_json_release(ctx->cc_config_in);
+        ctx->cc_config_in = NULL;
+        return EINVAL;
+    }
+
+    return 0;
+}
+
+static krb5_error_code
+save_cc_config_out_data(krb5_context context, krb5_ccache ccache,
+                        krb5_init_creds_context ctx)
+{
+    krb5_data config;
+    char *encoded;
+    krb5_error_code code;
+
+    if (ctx->cc_config_out == NULL)
+        return 0;
+    encoded = k5_json_encode(ctx->cc_config_out);
+    if (encoded == NULL)
+        return ENOMEM;
+    config = string2data(encoded);
+    code = krb5_cc_set_config(context, ccache, ctx->cred.server,
+                              KRB5_CONF_PA_CONFIG_DATA, &config);
+    free(encoded);
+    return code;
+}
+
+static krb5_error_code
 init_creds_step_request(krb5_context context,
                         krb5_init_creds_context ctx,
                         krb5_data *out)
@@ -1176,6 +1249,14 @@ init_creds_step_request(krb5_context context,
      * if the application supplied one. */
     read_allowed_preauth_type(context, ctx);
     ctx->selected_preauth_type = KRB5_PADATA_NONE;
+
+    /*
+     * Read cached preauth configuration data for this server principal from
+     * the in_ccache, if the application supplied one, and delete any that was
+     * stored by a previous (clearly failed) module.
+     */
+    read_cc_config_in_data(context, ctx);
+    clear_cc_config_out_data(context, ctx);
 
     if (ctx->err_reply == NULL) {
         /* either our first attempt, or retrying after PREAUTH_NEEDED */
@@ -1574,6 +1655,9 @@ init_creds_step_reply(krb5_context context,
                 goto cc_cleanup;
         }
         code = save_selected_preauth_type(context, out_ccache, ctx);
+        if (code != 0)
+            goto cc_cleanup;
+        code = save_cc_config_out_data(context, out_ccache, ctx);
     cc_cleanup:
         if (code !=0) {
             const char *msg;

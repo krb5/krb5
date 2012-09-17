@@ -28,6 +28,7 @@
 #include <k5-int.h>
 #include <krb5/preauth_plugin.h>
 #include "int-proto.h"
+#include "init_creds_ctx.h"
 
 static int
 sam2_flags(krb5_context context, krb5_preauthtype pa_type)
