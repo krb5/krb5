@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* tests/gssapi/common.h - Declarations for GSSAPI test utility functions */
+/* tests/gssapi/t_inq_mechs_name.c - Exercise gss_inquire_mechs_for_name */
 /*
  * Copyright (C) 2012 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -30,41 +30,33 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+/*
+ * Test program to exercise gss_inquire_mechs_for_name by importing a name and
+ * reporting the mech OIDs which are reported as being able to process it.
+ *
+ * Usage: ./t_inq_mechs_name name
+ */
 
-#include <gssapi/gssapi_krb5.h>
+#include <stdio.h>
 
-extern gss_OID_desc mech_krb5;
-extern gss_OID_desc mech_spnego;
-extern gss_OID_desc mech_iakerb;
-extern gss_OID_set_desc mechset_krb5;
-extern gss_OID_set_desc mechset_spnego;
-extern gss_OID_set_desc mechset_iakerb;
+#include "common.h"
 
-/* Display an error message (containing msg) and exit if major is an error. */
-void check_gsserr(const char *msg, OM_uint32 major, OM_uint32 minor);
+int
+main(int argc, char *argv[])
+{
+    OM_uint32 minor, major;
+    gss_name_t name;
+    gss_OID_set mechs;
+    size_t i;
 
-/* Display an error message (containing msg) and exit if code is an error. */
-void check_k5err(krb5_context context, const char *msg, krb5_error_code code);
-
-/* Display an error message containing msg and exit. */
-void errout(const char *msg);
-
-/* Import a GSSAPI name based on a string of the form 'u:username',
- * 'p:principalname', or 'h:host@service' (or just 'h:service'). */
-gss_name_t import_name(const char *str);
-
-/* Display name as canonicalized to mech, preceded by tag. */
-void display_canon_name(const char *tag, gss_name_t name, gss_OID mech);
-
-/* Display oid in printable form, preceded by tag (if not NULL). */
-void display_oid(const char *tag, gss_OID oid);
-
-/* Display attributes of name, including hex value if noisy is true. */
-void enumerate_attributes(gss_name_t name, int noisy);
-
-/* Display the contents of buf to fp in hex, followed by a newline. */
-void print_hex(FILE *fp, gss_buffer_t buf);
-
-#endif /* COMMON_H */
+    if (argc != 2) {
+        fprintf(stderr, "Usage: t_inq_mechs_for_name name\n");
+        return 1;
+    }
+    name = import_name(argv[1]);
+    major = gss_inquire_mechs_for_name(&minor, name, &mechs);
+    check_gsserr("gss_inquire_mechs_for_name", major, minor);
+    for (i = 0; i < mechs->count; i++)
+        display_oid(NULL, &mechs->elements[i]);
+    return 0;
+}

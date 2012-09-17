@@ -135,7 +135,9 @@ display_oid(const char *tag, gss_OID oid)
 
     major = gss_oid_to_str(&minor, oid, &buf);
     check_gsserr("gss_oid_to_str", major, minor);
-    printf("%s:\t%.*s\n", tag, (int)buf.length, (char *)buf.value);
+    if (tag != NULL)
+        printf("%s:\t", tag);
+    printf("%.*s\n", (int)buf.length, (char *)buf.value);
     (void)gss_release_buffer(&minor, &buf);
 }
 

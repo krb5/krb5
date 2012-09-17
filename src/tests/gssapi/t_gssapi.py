@@ -172,4 +172,17 @@ output = realm.run_as_client(['./t_export_name', '-s', 'p:a@b'])
 if output != '0401000806062B060105050200000003614062\n':
     fail('Unexpected output from t_export_name (SPNEGO krb5 principal)')
 
+# Test gss_inquire_mechs_for_name behavior.
+krb5_mech = '{ 1 2 840 113554 1 2 2 }'
+spnego_mech = '{ 1 3 6 1 5 5 2 }'
+out = realm.run_as_client(['./t_inq_mechs_name', 'p:a@b'])
+if krb5_mech not in out:
+    fail('t_inq_mechs_name (principal)')
+out = realm.run_as_client(['./t_inq_mechs_name', 'u:x'])
+if krb5_mech not in out or spnego_mech not in out:
+    fail('t_inq_mecs_name (user)')
+out = realm.run_as_client(['./t_inq_mechs_name', 'h:host'])
+if krb5_mech not in out or spnego_mech not in out:
+    fail('t_inq_mecs_name (hostbased)')
+
 success('GSSAPI tests')
