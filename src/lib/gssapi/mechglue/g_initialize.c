@@ -792,16 +792,49 @@ static gss_mech_info searchMechList(gss_const_OID oid)
 	return ((gss_mech_info) NULL);
 } /* searchMechList */
 
+/* Return the first non-whitespace character starting from str. */
+static char *
+skip_whitespace(char *str)
+{
+	while (isspace(*str))
+		str++;
+	return str;
+}
+
+/* Truncate str at the first whitespace character and return the first
+ * non-whitespace character after that point. */
+static char *
+delimit_ws(char *str)
+{
+	while (*str != '\0' && !isspace(*str))
+		str++;
+	if (*str != '\0')
+		*str++ = '\0';
+	return skip_whitespace(str);
+}
+
+/* Truncate str at the first occurrence of delimiter and return the first
+ * non-whitespace character after that point. */
+static char *
+delimit(char *str, char delimiter)
+{
+	while (*str != '\0' && *str != delimiter)
+		str++;
+	if (*str != '\0')
+		*str++ = '\0';
+	return skip_whitespace(str);
+}
+
 /*
  * loads the configuration file
  * this is called while having a mutex lock on the mechanism list
  * entries for libraries that have been loaded can't be modified
  * mechNameStr and mech_type fields are not updated during updates
  */
-static void loadConfigFile(fileName)
-const char *fileName;
+static void
+loadConfigFile(const char *fileName)
 {
-	char *sharedLib, *kernMod, *modOptions, *oid, *endp;
+	char *sharedLib, *kernMod, *modOptions, *oid, *next;
 	char buffer[BUFSIZ], *oidStr;
 	FILE *confFile;
 
@@ -816,93 +849,28 @@ const char *fileName;
 		if (*buffer == '#')
 			continue;
 
-		/*
-		 * find the first white-space character after
-		 * the mechanism name
-		 */
+		/* Parse out the name, oid, and shared library path. */
 		oidStr = buffer;
-		for (endp = buffer; *endp && !isspace(*endp); endp++);
-
-		/* Now find the first non-white-space character */
-		if (*endp) {
-			*endp = '\0';
-			endp++;
-			while (*endp && isspace(*endp))
-				endp++;
-		}
-
-		/*
-		 * If that's all, then this is a corrupt entry. Skip it.
-		 */
-		if (! *endp)
+		oid = delimit_ws(oidStr);
+		if (*oid == '\0')
 			continue;
+		sharedLib = delimit_ws(oid);
+		if (*sharedLib == '\0')
+			continue;
+		next = delimit_ws(sharedLib);
 
-		/* Find the end of the oid and make sure it is NULL-ended */
-		for (oid = endp; *endp && !isspace(*endp); endp++)
-			;
-
-		if (*endp) {
-			*endp = '\0';
-			endp++;
-		}
-
-		/* Find the start of the shared lib name */
-		for (sharedLib = endp; *sharedLib && isspace(*sharedLib);
-		     sharedLib++)
-			;
-
-		/*
-		 * Find the end of the shared lib name and make sure it is
-		 *  NULL-terminated.
-		 */
-		for (endp = sharedLib; *endp && !isspace(*endp); endp++)
-			;
-
-		if (*endp) {
-			*endp = '\0';
-			endp++;
-		}
-
-		/* Find the start of the optional kernel module lib name */
-		for (kernMod = endp; *kernMod && isspace(*kernMod);
-		     kernMod++)
-			;
-
-		/*
-		 * If this item starts with a bracket "[", then
-		 * it is not a kernel module, but is a list of
-		 * options for the user module to parse later.
-		 */
-		if (*kernMod && *kernMod != '[') {
-			/*
-			 * Find the end of the shared lib name and make sure
-			 * it is NULL-terminated.
-			 */
-			for (endp = kernMod; *endp && !isspace(*endp); endp++)
-				;
-
-			if (*endp) {
-				*endp = '\0';
-				endp++;
-			}
-		} else
+		/* Parse out the kernel module name if present. */
+		if (*next != '\0' && *next != '[') {
+			kernMod = next;
+			next = delimit_ws(kernMod);
+		} else {
 			kernMod = NULL;
+		}
 
-		/* Find the start of the optional module options list */
-		for (modOptions = endp; *modOptions && isspace(*modOptions);
-		     modOptions++);
-
-		if (*modOptions == '[')  {
-			/* move past the opening bracket */
-			for (modOptions = modOptions+1;
-			     *modOptions && isspace(*modOptions);
-			     modOptions++);
-
-			/* Find the closing bracket */
-			for (endp = modOptions;
-			     *endp && *endp != ']'; endp++);
-
-			*endp = '\0';
+		/* Parse out the module options if present. */
+		if (*next == '[') {
+			modOptions = next + 1;
+			next = delimit(modOptions, ']');
 		} else {
 			modOptions = NULL;
 		}
