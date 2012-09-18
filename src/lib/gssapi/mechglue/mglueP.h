@@ -25,6 +25,7 @@ do {								\
  */
 typedef struct gss_union_ctx_id_struct {
 	struct gss_union_ctx_id_struct *loopback;
+	struct gss_union_ctx_id_struct *interposer;
 	gss_OID			mech_type;
 	gss_ctx_id_t		internal_ctx_id;
 } gss_union_ctx_id_desc, *gss_union_ctx_id_t;
@@ -667,6 +668,9 @@ typedef struct gss_mech_config {
 	gss_mechanism mech;		/* mechanism initialization struct */
  	int priority;			/* mechanism preference order */
 	int freeMech;			/* free mech table */
+	int is_interposer;		/* interposer mechanism flag */
+	gss_OID int_mech_type;		/* points to the interposer OID */
+	gss_mechanism int_mech;		/* points to the interposer mech */
 	struct gss_mech_config *next;	/* next element in the list */
 } *gss_mech_info;
 

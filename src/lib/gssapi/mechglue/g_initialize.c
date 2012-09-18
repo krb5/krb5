@@ -53,13 +53,16 @@
 #endif
 
 #define MECH_SYM "gss_mech_initialize"
+#define MECH_INTERPOSER_SYM "gss_mech_interposer"
 
 #ifndef MECH_CONF
 #define	MECH_CONF "/etc/gss/mech"
 #endif
 
 /* Local functions */
-static void addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib, const char *kernMod, const char *modOptions);
+static void addConfigEntry(const char *oidStr, const char *oid,
+			   const char *sharedLib, const char *kernMod,
+			   const char *modOptions, const char *modType);
 static gss_mech_info searchMechList(gss_const_OID);
 static void loadConfigFile(const char *);
 #if defined(_WIN32)
@@ -72,6 +75,7 @@ static void getRegKeyValue(HKEY key, const char *keyPath, const char *valueName,
 static void loadConfigFromRegistry(HKEY keyBase, const char *keyPath);
 #endif
 static void updateMechList(void);
+static void loadInterMech(gss_mech_info aMech);
 static void freeMechList(void);
 
 static OM_uint32 build_mechSet(void);
@@ -339,10 +343,11 @@ build_mechSet(void)
 			      count * sizeof (gss_OID_desc));
 
 		/* now copy each oid element */
-		g_mechSet.count = count;
 		count = 0;
-		mList = g_mechList;
-		while (mList != NULL) {
+		for (mList = g_mechList; mList != NULL; mList = mList->next) {
+			/* Don't expose interposer mechanisms. */
+			if (mList->is_interposer)
+				continue;
 			curItem = &(g_mechSet.elements[count]);
 			curItem->elements = (void*)
 				malloc(mList->mech_type->length);
@@ -364,8 +369,8 @@ build_mechSet(void)
 			}
 			g_OID_copy(curItem, mList->mech_type);
 			count++;
-			mList = mList->next;
 		}
+		g_mechSet.count = count;
 	}
 
 #if 0
@@ -421,13 +426,15 @@ const gss_OID oid;
 static void
 updateMechList(void)
 {
+	gss_mech_info minfo;
+
 #if defined(_WIN32)
 	time_t lastConfModTime = getRegConfigModTime(MECH_KEY);
-	if (g_confFileModTime < lastConfModTime) {
-		g_confFileModTime = lastConfModTime;
-		loadConfigFromRegistry(HKEY_CURRENT_USER, MECH_KEY);
-		loadConfigFromRegistry(HKEY_LOCAL_MACHINE, MECH_KEY);
-	}
+	if (g_confFileModTime >= lastConfModTime)
+		return;
+	g_confFileModTime = lastConfModTime;
+	loadConfigFromRegistry(HKEY_CURRENT_USER, MECH_KEY);
+	loadConfigFromRegistry(HKEY_LOCAL_MACHINE, MECH_KEY);
 #else /* _WIN32 */
 	char *fileName;
 	struct stat fileInfo;
@@ -435,15 +442,19 @@ updateMechList(void)
 	fileName = MECH_CONF;
 
 	/* check if mechList needs updating */
-	if (stat(fileName, &fileInfo) == 0 &&
-		(fileInfo.st_mtime > g_confFileModTime)) {
-		loadConfigFile(fileName);
-		g_confFileModTime = fileInfo.st_mtime;
-	}
-#if 0
-	init_hardcoded();
-#endif
+	if (stat(fileName, &fileInfo) != 0 ||
+	    g_confFileModTime >= fileInfo.st_mtime)
+		return;
+	g_confFileModTime = fileInfo.st_mtime;
+	loadConfigFile(fileName);
 #endif /* !_WIN32 */
+
+	/* Load any unloaded interposer mechanisms immediately, to make sure we
+	 * interpose other mechanisms before they are used. */
+	for (minfo = g_mechList; minfo != NULL; minfo = minfo->next) {
+		if (minfo->is_interposer && minfo->mech == NULL)
+			loadInterMech(minfo);
+	}
 } /* updateMechList */
 
 static void
@@ -475,6 +486,8 @@ releaseMechInfo(gss_mech_info *pCf)
 	}
 	if (cf->dl_handle != NULL)
 		krb5int_close_plugin(cf->dl_handle);
+	if (cf->int_mech_type != GSS_C_NO_OID)
+		generic_gss_release_oid(&minor_status, &cf->int_mech_type);
 
 	memset(cf, 0, sizeof(*cf));
 	free(cf);
@@ -671,6 +684,195 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	return mech;
 }
 
+#define RESOLVE_GSSI_SYMBOL(_dl, _mech, _psym, _nsym)			\
+	do {								\
+		struct errinfo errinfo;					\
+		memset(&errinfo, 0, sizeof(errinfo));			\
+		if (krb5int_get_plugin_func(_dl,			\
+					    "gssi" #_nsym,		\
+					    (void (**)())&(_mech)->_psym \
+					    ## _nsym,			\
+					    &errinfo) || errinfo.code)	\
+			(_mech)->_psym ## _nsym = NULL;			\
+	} while (0)
+
+/* Build an interposer mechanism function table from dl. */
+static gss_mechanism
+build_interMech(void *dl, const gss_OID mech_type)
+{
+	gss_mechanism mech;
+
+	mech = calloc(1, sizeof(*mech));
+	if (mech == NULL) {
+		return NULL;
+	}
+
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _acquire_cred);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _release_cred);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _init_sec_context);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _accept_sec_context);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _process_context_token);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _delete_sec_context);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _context_time);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _get_mic);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _verify_mic);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _wrap);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _unwrap);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _display_status);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _indicate_mechs);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _compare_name);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _display_name);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _import_name);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _release_name);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_cred);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _add_cred);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _export_sec_context);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _import_sec_context);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_cred_by_mech);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_names_for_mech);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_context);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _internal_release_oid);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _wrap_size_limit);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _localname);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _authorize_localname);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _export_name);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _duplicate_name);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _store_cred);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_sec_context_by_oid);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_cred_by_oid);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _set_sec_context_option);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _set_cred_option);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _mech_invoke);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _wrap_aead);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _unwrap_aead);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _wrap_iov);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _unwrap_iov);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _wrap_iov_length);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _complete_auth_token);
+	/* Services4User (introduced in 1.8) */
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _acquire_cred_impersonate_name);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _add_cred_impersonate_name);
+	/* Naming extensions (introduced in 1.8) */
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _display_name_ext);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_name);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _get_name_attribute);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _set_name_attribute);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _delete_name_attribute);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _export_name_composite);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _map_name_to_any);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _release_any_name_mapping);
+	/* RFC 4401 (introduced in 1.8) */
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _pseudo_random);
+	/* RFC 4178 (introduced in 1.8; get_neg_mechs not implemented) */
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _set_neg_mechs);
+	/* draft-ietf-sasl-gs2 */
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_saslname_for_mech);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_mech_for_saslname);
+	/* RFC 5587 */
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_attrs_for_mech);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _acquire_cred_with_password);
+
+	mech->mech_type = *mech_type;
+	return mech;
+}
+
+/*
+ * Concatenate an interposer mech OID and a real mech OID to create an
+ * identifier for the interposed mech.  (The concatenation will not be a valid
+ * DER OID encoding, but the OID is only used internally.)
+ */
+static gss_OID
+interposed_oid(gss_OID pre, gss_OID real)
+{
+	gss_OID o;
+
+	o = (gss_OID)malloc(sizeof(gss_OID_desc));
+	if (!o)
+		return NULL;
+
+	o->length = pre->length + real->length;
+	o->elements = malloc(o->length);
+	if (!o->elements) {
+		free(o);
+		return NULL;
+	}
+
+	memcpy(o->elements, pre->elements, pre->length);
+	memcpy(o->elements + pre->length, real->elements, real->length);
+
+	return o;
+}
+
+static void
+loadInterMech(gss_mech_info minfo)
+{
+	struct plugin_file_handle *dl = NULL;
+	struct errinfo errinfo;
+	gss_OID_set (*isym)(const gss_OID);
+	gss_OID_set list;
+	gss_OID oid;
+	OM_uint32 min;
+	gss_mech_info mi;
+	size_t i;
+
+	memset(&errinfo, 0, sizeof(errinfo));
+
+	if (krb5int_open_plugin(minfo->uLibName, &dl, &errinfo) != 0 ||
+	    errinfo.code != 0) {
+#if 0
+		(void) syslog(LOG_INFO, "libgss dlopen(%s): %s\n",
+				aMech->uLibName, dlerror());
+#endif
+		return;
+	}
+
+	if (krb5int_get_plugin_func(dl, MECH_INTERPOSER_SYM,
+				    (void (**)())&isym, &errinfo) != 0)
+		goto cleanup;
+
+	/* Get a list of mechs to interpose. */
+	list = (*isym)(minfo->mech_type);
+	if (!list)
+		goto cleanup;
+	minfo->mech = build_interMech(dl, minfo->mech_type);
+	if (minfo->mech == NULL)
+		goto cleanup;
+	minfo->freeMech = 1;
+
+	/* Add interposer fields for each interposed mech. */
+	for (i = 0; i < list->count; i++) {
+		/* Skip this mech if it doesn't exist or is already
+		 * interposed. */
+		oid = &list->elements[i];
+		mi = searchMechList(oid);
+		if (mi == NULL || mi->int_mech_type != NULL)
+			continue;
+
+		/* Construct a special OID to represent the interposed mech. */
+		mi->int_mech_type = interposed_oid(minfo->mech_type, oid);
+		if (mi->int_mech_type == NULL)
+			continue;
+
+		/* Save an alias to the interposer's function table. */
+		mi->int_mech = minfo->mech;
+	}
+	(void)gss_release_oid_set(&min, &list);
+
+	minfo->dl_handle = dl;
+	dl = NULL;
+
+cleanup:
+#if 0
+	if (aMech->mech == NULL) {
+		(void) syslog(LOG_INFO, "unable to initialize mechanism"
+				" library [%s]\n", aMech->uLibName);
+	}
+#endif
+	if (dl != NULL)
+		krb5int_close_plugin(dl);
+	krb5int_clear_error(&errinfo);
+}
+
 static void
 freeMechList(void)
 {
@@ -834,7 +1036,7 @@ delimit(char *str, char delimiter)
 static void
 loadConfigFile(const char *fileName)
 {
-	char *sharedLib, *kernMod, *modOptions, *oid, *next;
+	char *sharedLib, *kernMod, *modOptions, *modType, *oid, *next;
 	char buffer[BUFSIZ], *oidStr;
 	FILE *confFile;
 
@@ -860,7 +1062,7 @@ loadConfigFile(const char *fileName)
 		next = delimit_ws(sharedLib);
 
 		/* Parse out the kernel module name if present. */
-		if (*next != '\0' && *next != '[') {
+		if (*next != '\0' && *next != '[' && *next != '<') {
 			kernMod = next;
 			next = delimit_ws(kernMod);
 		} else {
@@ -875,7 +1077,16 @@ loadConfigFile(const char *fileName)
 			modOptions = NULL;
 		}
 
-		addConfigEntry(oidStr, oid, sharedLib, kernMod, modOptions);
+		/* Parse out the module type if present. */
+		if (*next == '<') {
+			modType = next + 1;
+			next = delimit(modType, '>');
+		} else {
+			modType = NULL;
+		}
+
+		addConfigEntry(oidStr, oid, sharedLib, kernMod, modOptions,
+			       modType);
 	} /* while */
 	(void) fclose(confFile);
 } /* loadConfigFile */
@@ -971,7 +1182,7 @@ loadConfigFromRegistry(HKEY hBaseKey, const char *keyPath)
 	HKEY hConfigKey;
 	DWORD iSubKey, nSubKeys, maxSubKeyNameLen;
 	char *oidStr = NULL, *oid = NULL, *sharedLib = NULL, *kernMod = NULL;
-	char *modOptions = NULL;
+	char *modOptions = NULL, *modType = NULL;
 	DWORD oidStrLen = 0, oidLen = 0, sharedLibLen = 0, kernModLen = 0;
 	DWORD modOptionsLen = 0;
 	HRESULT rc;
@@ -1016,7 +1227,10 @@ loadConfigFromRegistry(HKEY hBaseKey, const char *keyPath)
 			       &kernModLen);
 		getRegKeyValue(hConfigKey, oidStr, "Options", &modOptions,
 			       &modOptionsLen);
-		addConfigEntry(oidStr, oid, sharedLib, kernMod, modOptions);
+		getRegKeyValue(hConfigKey, oidStr, "Type", &modType,
+			       &modTypeLen);
+		addConfigEntry(oidStr, oid, sharedLib, kernMod, modOptions,
+			       modType);
 	}
 cleanup:
 	RegCloseKey(hConfigKey);
@@ -1040,7 +1254,8 @@ cleanup:
 
 static void
 addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib,
-	       const char *kernMod, const char *modOptions)
+	       const char *kernMod, const char *modOptions,
+	       const char *modType)
 {
 #if defined(_WIN32)
 	const char *sharedPath;
@@ -1156,6 +1371,10 @@ addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib,
 
 	if (modOptions)
 		aMech->optionStr = strdup(modOptions);
+
+	if (modType && strcmp(modType, "interposer") == 0)
+		aMech->is_interposer = 1;
+
 	/*
 	 * add the new entry to the end of the list - make sure
 	 * that only complete entries are added because other
