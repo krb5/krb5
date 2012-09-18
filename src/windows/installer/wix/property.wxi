@@ -41,11 +41,11 @@
     <Property Id="ComponentDownload">http://web.mit.edu/kerberos</Property>
 
     <Property Id="UPGRADENSIS">
-        <RegistrySearch Win64="$(var.Win64)" Id="regsrch_NSIS" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="UninstallString" Type="raw"/>
+        <RegistrySearch Win64="no" Id="regsrch_NSIS" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="UninstallString" Type="raw"/>
     </Property>
     
     <Property Id="NSISVERSION">
-        <RegistrySearch Win64="$(var.Win64)" Id="regsrch_NSISV" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="DisplayVersion" Type="raw" />
+        <RegistrySearch Win64="no" Id="regsrch_NSISV" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="DisplayVersion" Type="raw" />
     </Property>
 
     <Property Id="CantRemoveNSISError">$(loc.CantRemoveNSIS)</Property>
