@@ -418,15 +418,6 @@ dos-Makefile:
 
 prep-windows: dos-Makefile awk-windows-mac
 
-krbsrc83.zip: krbsrc83-is-obsolete
-
-krbsrc83-is-obsolete:
-	@echo "Win16 and krbsrc83.zip are no longer supported."
-	@echo "We don't support building under 8.3 restricted filesystems"
-	@echo "anymore.  You can still build for Win32 on filesystems"
-	@echo "without 8.3 restrictions using kerbsrc.zip"
-	@echo " "
-
 kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
 	$(ZIP) -@Dl kerbsrc.zip < winfile.list
