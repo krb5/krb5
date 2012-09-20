@@ -726,10 +726,9 @@ ulog_get_entries(krb5_context context,          /* input - krb5 lib config */
     XDR                 xdrs;
     kdb_ent_header_t    *indx_log;
     kdb_incr_update_t   *upd;
-    uint_t              indx, count, tdiff;
+    uint_t              indx, count;
     uint32_t            sno;
     krb5_error_code     retval;
-    struct timeval      timestamp;
     kdb_log_context     *log_ctx;
     kdb_hlog_t          *ulog = NULL;
     uint32_t            ulogentries;
@@ -748,15 +747,6 @@ ulog_get_entries(krb5_context context,          /* input - krb5 lib config */
         ulog_handle->ret = UPDATE_ERROR;
         (void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
         return (KRB5_LOG_CORRUPT);
-    }
-
-    gettimeofday(&timestamp, NULL);
-
-    tdiff = timestamp.tv_sec - ulog->kdb_last_time.seconds;
-    if (tdiff <= ULOG_IDLE_TIME) {
-        ulog_handle->ret = UPDATE_BUSY;
-        (void) ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
-        return (0);
     }
 
     /*
