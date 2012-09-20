@@ -334,7 +334,7 @@ ZIP=zip
 FILES= ./* appl/* appl/gss-sample/* \
 	clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
 	clients/kpasswd/* clients/kvno/* clients/kcpytkt/* clients/kdeltkt/* \
-	config/* include/* \
+	clients/kswitch/* config/* include/* \
 	include/krb5/* lib/* lib/crypto/* lib/crypto/krb/* \
 	lib/crypto/krb/prf/* lib/crypto/krb/checksum/* lib/crypto/krb/old/* \
 	lib/crypto/krb/raw/* lib/crypto/krb/arcfour/* lib/crypto/krb/dk/* \
@@ -352,14 +352,19 @@ FILES= ./* appl/* appl/gss-sample/* \
 	lib/krb5/keytab/* lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* \
 	lib/krb5/unicode/* lib/krb5/unicode/utbm/* lib/krb5/unicode/ure/* \
 	lib/krb5/unicode/ucdata/* \
-	util/* util/et/* util/profile/* util/support/*
+	util/* util/et/* util/profile/* util/profile/testmod/* util/support/*
 
 WINFILES= \
 	ccapi/* ccapi/common/* ccapi/common/win/* ccapi/common/win/OldCC/* \
 	ccapi/lib/* ccapi/lib/win/* ccapi/lib/win/OldCC/* \
 	ccapi/server/* ccapi/server/win/* \
 	ccapi/test/* \
-	util/windows/* windows/* windows/wshelper/* windows/lib/* windows/cns/* \
+	util/windows/* util/wshelper/* windows/* \
+	windows/leash/htmlhelp/* windows/leash/htmlhtlp/html/* \
+	windows/leash/res/* \
+	windows/leashdll/res/* \
+	windows/include/* windows/include/arpa/* \
+	windows/lib/* windows/cns/* \
 	windows/wintel/* windows/gina/* windows/ms2mit/* \
 	windows/kfwlogon/* windows/leashdll/* windows/leash/*
 
