@@ -27,7 +27,8 @@ SRCS= \
 	$(srcdir)/extern.c \
 	$(srcdir)/replay.c \
 	$(srcdir)/kdc_authdata.c \
-	$(srcdir)/kdc_transit.c
+	$(srcdir)/kdc_transit.c \
+	$(srcdir)/tgs_policy.c
 
 OBJS= \
 	kdc5_err.o \
@@ -44,7 +45,8 @@ OBJS= \
 	extern.o \
 	replay.o \
 	kdc_authdata.o \
-	kdc_transit.o
+	kdc_transit.o \
+	tgs_policy.o
 
 RT_OBJS= rtest.o \
 	kdc_transit.o

@@ -392,5 +392,12 @@ struct krb5_kdcpreauth_rock_st {
 /* RFC 4120: KRB5KDC_ERR_KEY_TOO_WEAK
  * RFC 4556: KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED */
 #define KRB5KDC_ERR_KEY_TOO_WEAK KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED
+/* TGS-REQ options where the service can be a non-TGS principal  */
+
+#define NON_TGT_OPTION (KDC_OPT_FORWARDED | KDC_OPT_PROXY | KDC_OPT_RENEW | \
+                        KDC_OPT_VALIDATE)
+int check_anon(kdc_realm_t *kdc_active_realm,
+               krb5_principal client, krb5_principal server);
+int errcode_to_protocol(krb5_error_code code);
 
 #endif /* __KRB5_KDC_UTIL__ */
