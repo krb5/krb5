@@ -29,7 +29,7 @@ DLL_FILE_DEF=/DKRB5_DLL_FILE
 
 # Build the Makefile unless we are in the top-level
 #(where there is already an explicit rule).
-!if !defined(ZIP) && !defined(WINFILES)
+!if !defined(TOPLEVEL)
 Makefile: Makefile.in $(BUILDTOP)\config\win-pre.in $(BUILDTOP)\config\win-post.in
 	$(WCONFIG) $(BUILDTOP)\config < Makefile.in > Makefile
 !endif

@@ -327,53 +327,12 @@ ren2long:
 	-sh config/ren2long
 
 #
-# Builds the file that distributes Kerberos sources for DOS and 
-# Macintosh sites from the source tree on Unix.
+# Helper for the windows build
 #
-ZIP=zip
-FILES= ./* appl/* appl/gss-sample/* \
-	clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
-	clients/kpasswd/* clients/kvno/* clients/kcpytkt/* clients/kdeltkt/* \
-	clients/kswitch/* config/* include/* \
-	include/krb5/* lib/* lib/crypto/* lib/crypto/krb/* \
-	lib/crypto/krb/prf/* lib/crypto/krb/checksum/* lib/crypto/krb/old/* \
-	lib/crypto/krb/raw/* lib/crypto/krb/arcfour/* lib/crypto/krb/dk/* \
-	lib/crypto/builtin/aes/* lib/crypto/builtin/enc_provider/* \
-	lib/crypto/builtin/des/* lib/crypto/builtin/md5/* \
-	lib/crypto/builtin/camellia/* lib/crypto/builtin/md4/* \
-	lib/crypto/builtin/hash_provider/* lib/crypto/builtin/sha2/* \
-	lib/crypto/builtin/sha1/* lib/crypto/builtin/* \
-	lib/crypto/crypto_tests/* \
-	lib/gssapi/* lib/gssapi/generic/* lib/gssapi/krb5/* \
-	lib/gssapi/mechglue/* lib/gssapi/spnego/* \
-	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
-	lib/krb5/ccache/* lib/krb5/ccache/ccapi/* \
-	lib/krb5/error_tables/* \
-	lib/krb5/keytab/* lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* \
-	lib/krb5/unicode/* lib/krb5/unicode/utbm/* lib/krb5/unicode/ure/* \
-	lib/krb5/unicode/ucdata/* \
-	util/* util/et/* util/profile/* util/profile/testmod/* util/support/*
-
-WINFILES= \
-	ccapi/* ccapi/common/* ccapi/common/win/* ccapi/common/win/OldCC/* \
-	ccapi/lib/* ccapi/lib/win/* ccapi/lib/win/OldCC/* \
-	ccapi/server/* ccapi/server/win/* \
-	ccapi/test/* \
-	util/windows/* util/wshelper/* windows/* \
-	windows/leash/htmlhelp/* windows/leash/htmlhtlp/html/* \
-	windows/leash/res/* \
-	windows/leashdll/res/* \
-	windows/include/* windows/include/arpa/* \
-	windows/lib/* windows/cns/* \
-	windows/wintel/* windows/gina/* windows/ms2mit/* \
-	windows/kfwlogon/* windows/leashdll/* windows/leash/*
-
-WINBINARYFILES=	windows/*/*.ico windows/*/*.doc windows/*/*.hlp \
-	windows/*/*.hpj
+TOPLEVEL=dummy
 
 #
-# Part of building the PC release has to be done on Unix. This includes
-# anything the requires awk.
+# Building error tables requires awk.
 #
 AWK = awk
 AH  = util/et/et_h.awk
@@ -401,15 +360,16 @@ ETOUT =	\
 HOUT =	$(INC)krb5/krb5.h $(GG)gssapi.h $(PR)profile.h
 
 CLEANUP= Makefile $(ETOUT) $(HOUT) \
-	include/profile.h include/osconf.h \
-	winfile.list
+	include/profile.h include/osconf.h
 
 
-kerbsrc.win: kerbsrc.zip
+kerbsrc.win: kerbsrc-is-obsolete
 
-winfile.list:
-	echo $(FILES) $(WINFILES) | tr ' ' \\012 | \
-		sed -f config/winexclude.sed > winfile.list
+kerbsrc-is-obsolete:
+	@echo "kerbsrc.zip is no longer supported.  It was intended to avoid"
+	@echo "needing Unix utilities on Windows, but these utilities are now"
+	@echo "available through the Utilities and SDK for UNIX-based"
+	@echo "Applications."
 
 dos-Makefile:
 	cat config/win-pre.in Makefile.in config/win-post.in | \
@@ -418,11 +378,6 @@ dos-Makefile:
 
 prep-windows: dos-Makefile awk-windows-mac
 
-kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
-	rm -f kerbsrc.zip
-	$(ZIP) -@Dl kerbsrc.zip < winfile.list
-	$(ZIP) -D kerbsrc.zip $(WINBINARYFILES)
-	rm -f $(CLEANUP)
 
 $(INC)asn1_err.h: $(AH) $(ET)asn1_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)asn1_err.et
