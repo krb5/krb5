@@ -464,7 +464,7 @@ kg_accept_krb5(minor_status, context_handle,
     OM_uint32 tmp_minor_status;
     krb5_error krb_error_data;
     krb5_data scratch;
-    gss_cred_id_t cred_handle = NULL;
+    gss_cred_id_t defcred = GSS_C_NO_CREDENTIAL;
     krb5_gss_cred_id_t deleg_cred = NULL;
     krb5int_access kaccess;
     int cred_rcache = 0;
@@ -507,24 +507,23 @@ kg_accept_krb5(minor_status, context_handle,
     if (verifier_cred_handle == GSS_C_NO_CREDENTIAL) {
         major_status = krb5_gss_acquire_cred(minor_status, GSS_C_NO_NAME,
                                              GSS_C_INDEFINITE, GSS_C_NO_OID_SET,
-                                             GSS_C_ACCEPT, &cred_handle,
+                                             GSS_C_ACCEPT, &defcred,
                                              NULL, NULL);
         if (major_status != GSS_S_COMPLETE) {
             code = *minor_status;
             goto fail;
         }
-    } else {
-        major_status = kg_cred_resolve(minor_status, context,
-                                       verifier_cred_handle, GSS_C_NO_NAME);
-        if (GSS_ERROR(major_status)) {
-            code = *minor_status;
-            goto fail;
-        }
-        cred_handle = verifier_cred_handle;
-        k5_mutex_unlock(&((krb5_gss_cred_id_t)cred_handle)->lock);
+        verifier_cred_handle = defcred;
     }
 
-    cred = (krb5_gss_cred_id_t) cred_handle;
+    /* Resolve any initiator state in the verifier cred and lock it. */
+    major_status = kg_cred_resolve(minor_status, context, verifier_cred_handle,
+                                   GSS_C_NO_NAME);
+    if (GSS_ERROR(major_status)) {
+        code = *minor_status;
+        goto fail;
+    }
+    cred = (krb5_gss_cred_id_t)verifier_cred_handle;
 
     /* make sure the supplied credentials are valid for accept */
 
@@ -1265,9 +1264,10 @@ fail:
     }
 
 done:
-    if (!verifier_cred_handle && cred_handle) {
-        krb5_gss_release_cred(&tmp_minor_status, &cred_handle);
-    }
+    if (cred)
+        k5_mutex_unlock(&cred->lock);
+    if (defcred)
+        krb5_gss_release_cred(&tmp_minor_status, &defcred);
     if (context) {
         if (major_status && *minor_status)
             save_error_info(*minor_status, context);
