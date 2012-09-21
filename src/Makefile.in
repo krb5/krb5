@@ -424,14 +424,6 @@ kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
 	$(ZIP) -D kerbsrc.zip $(WINBINARYFILES)
 	rm -f $(CLEANUP)
 
-kerbsrc-nt.zip: kerbsrc-nt-is-obsolete
-
-kerbsrc-nt-is-obsolete:
-	@echo "kerbsrc-nt.zip is now obsolete.  Just use and build kerbsrc.zip"
-	@echo "We don't support building under 8.3 restricted filesystems"
-	@echo "anymore, so what was kerbsrc-nt.zip is now kerbsrc.zip."
-	@echo " "
-
 $(INC)asn1_err.h: $(AH) $(ET)asn1_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)asn1_err.et
 $(INC)kdb5_err.h: $(AH) $(ET)kdb5_err.et
