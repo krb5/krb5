@@ -69,16 +69,23 @@
 #include <ctype.h>
 
 static krb5_error_code
-find_alternate_tgs(struct kdc_request_state *, krb5_kdc_req *,
-                   krb5_db_entry **);
+find_alternate_tgs(kdc_realm_t *, krb5_principal, krb5_db_entry **,
+                   const char**);
 
 static krb5_error_code
 prepare_error_tgs(struct kdc_request_state *, krb5_kdc_req *,krb5_ticket *,int,
                   krb5_principal,krb5_data **,const char *, krb5_pa_data **);
 
 static krb5_int32
-prep_reprocess_req(struct kdc_request_state *, krb5_kdc_req *,
-                   krb5_principal *);
+prep_reprocess_req(kdc_realm_t *, krb5_kdc_req *, krb5_principal *);
+
+static krb5_error_code
+db_get_svc_princ(krb5_context, krb5_principal, krb5_flags,
+                 krb5_db_entry **, const char **);
+
+static krb5_error_code
+search_sprinc(kdc_realm_t *, krb5_kdc_req *, krb5_flags,
+              krb5_db_entry **, const char **);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -108,7 +115,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_enctype useenctype;
     int errcode, errcode2;
     register int i;
-    int firstpass = 1;
     const char        *status = 0;
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* TGT */
     krb5_enc_tkt_part *subject_tkt = NULL; /* TGT or evidence ticket */
@@ -117,10 +123,8 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_authdata **kdc_issued_auth_data = NULL; /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;       /* client/server KDB flags */
     char *s4u_name = NULL;
-    krb5_boolean is_referral, db_ref_done = FALSE;
+    krb5_boolean is_referral;
     const char *emsg = NULL;
-    krb5_data *tgs_1 =NULL, *server_1 = NULL;
-    krb5_principal krbtgt_princ;
     krb5_kvno ticket_kvno = 0;
     struct kdc_request_state *state = NULL;
     krb5_pa_data *pa_tgs_req; /*points into request*/
@@ -210,70 +214,25 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
     }
 
-    db_ref_done = FALSE;
-ref_tgt_again:
-    if ((errcode = krb5_unparse_name(kdc_context, request->server, &sname))) {
+    errcode = search_sprinc(kdc_active_realm, request, s_flags, &server,
+                            &status);
+    if (errcode != 0)
+        goto cleanup;
+    /* XXX until nothing depends on request being mutated */
+    krb5_free_principal(kdc_context, request->server);
+    request->server = NULL;
+    errcode = krb5_copy_principal(kdc_context, server->princ,
+                                  &request->server);
+    if (errcode != 0) {
+        status = "COPYING RESOLVED SERVER";
+        goto cleanup;
+    }
+
+    if ((errcode = krb5_unparse_name(kdc_context, server->princ, &sname))) {
         status = "UNPARSING SERVER";
         goto cleanup;
     }
     limit_string(sname);
-
-    errcode = krb5_db_get_principal(kdc_context, request->server,
-                                    s_flags, &server);
-    if (errcode == KRB5_KDB_CANTLOCK_DB)
-        errcode = KRB5KDC_ERR_SVC_UNAVAILABLE;
-    if (errcode && errcode != KRB5_KDB_NOENTRY) {
-        status = "LOOKING_UP_SERVER";
-        goto cleanup;
-    }
-tgt_again:
-    if (errcode == KRB5_KDB_NOENTRY) {
-        /*
-         * might be a request for a TGT for some other realm; we
-         * should do our best to find such a TGS in this db
-         */
-        if (firstpass ) {
-
-            if ( krb5_is_tgs_principal(request->server) == TRUE) {
-                /* Principal is a name of krb ticket service */
-                if (krb5_princ_size(kdc_context, request->server) == 2) {
-
-                    server_1 = krb5_princ_component(kdc_context,
-                                                    request->server, 1);
-                    tgs_1 = krb5_princ_component(kdc_context, tgs_server, 1);
-
-                    if (!tgs_1 || !data_eq(*server_1, *tgs_1)) {
-                        errcode = find_alternate_tgs(state, request, &server);
-                        firstpass = 0;
-                        if (errcode == 0)
-                            goto tgt_again;
-                    }
-                }
-                status = "UNKNOWN_SERVER";
-                errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
-                goto cleanup;
-
-            } else if ( db_ref_done == FALSE) {
-                retval = prep_reprocess_req(state, request, &krbtgt_princ);
-                if (!retval) {
-                    krb5_free_principal(kdc_context, request->server);
-                    request->server = NULL;
-                    retval = krb5_copy_principal(kdc_context, krbtgt_princ,
-                                                 &(request->server));
-                    if (!retval) {
-                        db_ref_done = TRUE;
-                        if (sname != NULL)
-                            free(sname);
-                        goto ref_tgt_again;
-                    }
-                }
-            }
-        }
-
-        status = "UNKNOWN_SERVER";
-        errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
-        goto cleanup;
-    }
 
     if ((errcode = krb5_timeofday(kdc_context, &kdc_time))) {
         status = "TIME_OF_DAY";
@@ -1060,29 +1019,22 @@ prepare_error_tgs (struct kdc_request_state *state,
  * some intermediate realm.
  */
 static krb5_error_code
-find_alternate_tgs(struct kdc_request_state *state,
-                   krb5_kdc_req *request, krb5_db_entry **server_ptr)
+find_alternate_tgs(kdc_realm_t *kdc_active_realm, krb5_principal princ,
+                   krb5_db_entry **server_ptr, const char **status)
 {
     krb5_error_code retval;
-    krb5_principal *plist = NULL, *pl2, tmpprinc;
+    krb5_principal *plist = NULL, *pl2;
     krb5_data tmp;
     krb5_db_entry *server = NULL;
-    kdc_realm_t *kdc_active_realm = state->realm_data;
 
     *server_ptr = NULL;
-
-    /*
-     * Call to krb5_princ_component is normally not safe but is so
-     * here only because find_alternate_tgs() is only called from
-     * somewhere that has already checked the number of components in
-     * the principal.
-     */
+    assert(is_cross_tgs_principal(princ));
     if ((retval = krb5_walk_realm_tree(kdc_context,
-                                       krb5_princ_realm(kdc_context, request->server),
-                                       krb5_princ_component(kdc_context, request->server, 1),
-                                       &plist, KRB5_REALM_BRANCH_CHAR)))
-        return retval;
-
+                                       krb5_princ_realm(kdc_context, princ),
+                                       krb5_princ_component(kdc_context, princ, 1),
+                                       &plist, KRB5_REALM_BRANCH_CHAR))) {
+        goto cleanup;
+    }
     /* move to the end */
     for (pl2 = plist; *pl2; pl2++);
 
@@ -1092,48 +1044,35 @@ find_alternate_tgs(struct kdc_request_state *state,
         tmp = *krb5_princ_realm(kdc_context, *pl2);
         krb5_princ_set_realm(kdc_context, *pl2,
                              krb5_princ_realm(kdc_context, tgs_server));
-        retval = krb5_db_get_principal(kdc_context, *pl2, 0, &server);
-        if (retval == KRB5_KDB_CANTLOCK_DB)
-            retval = KRB5KDC_ERR_SVC_UNAVAILABLE;
+        retval = db_get_svc_princ(kdc_context, *pl2, 0, &server, status);
         krb5_princ_set_realm(kdc_context, *pl2, &tmp);
         if (retval == KRB5_KDB_NOENTRY)
             continue;
         else if (retval)
             goto cleanup;
 
-        /* Found it. */
-        tmp = *krb5_princ_realm(kdc_context, *pl2);
-        krb5_princ_set_realm(kdc_context, *pl2,
-                             krb5_princ_realm(kdc_context, tgs_server));
-        retval = krb5_copy_principal(kdc_context, *pl2, &tmpprinc);
-        if (retval)
-            goto cleanup;
-        krb5_princ_set_realm(kdc_context, *pl2, &tmp);
-
-        krb5_free_principal(kdc_context, request->server);
-        request->server = tmpprinc;
-        log_tgs_alt_tgt(kdc_context, request->server);
+        log_tgs_alt_tgt(kdc_context, server->princ);
         *server_ptr = server;
         server = NULL;
         goto cleanup;
     }
-    retval = KRB5_KDB_NOENTRY;
-
 cleanup:
+    if (retval != 0)
+        *status = "UNKNOWN_SERVER";
+
     krb5_free_realm_tree(kdc_context, plist);
     krb5_db_free_principal(kdc_context, server);
     return retval;
 }
 
 static krb5_int32
-prep_reprocess_req(struct kdc_request_state *state, krb5_kdc_req *request,
+prep_reprocess_req(kdc_realm_t *kdc_active_realm, krb5_kdc_req *request,
                    krb5_principal *krbtgt_princ)
 {
     krb5_error_code retval = KRB5KRB_AP_ERR_BADMATCH;
     char **realms, **cpp, *temp_buf=NULL;
     krb5_data *comp1 = NULL, *comp2 = NULL;
     char *comp1_str = NULL;
-    kdc_realm_t *kdc_active_realm = state->realm_data;
 
     /* By now we know that server principal name is unknown.
      * If CANONICALIZE flag is set in the request
@@ -1216,4 +1155,55 @@ cleanup:
     free(comp1_str);
 
     return retval;
+}
+
+static krb5_error_code
+db_get_svc_princ(krb5_context ctx, krb5_principal princ,
+                 krb5_flags flags, krb5_db_entry **server,
+                 const char **status)
+{
+    krb5_error_code ret;
+
+    ret = krb5_db_get_principal(ctx, princ, flags, server);
+    if (ret == KRB5_KDB_CANTLOCK_DB)
+        ret = KRB5KDC_ERR_SVC_UNAVAILABLE;
+    if (ret != 0) {
+        *status = "LOOKING_UP_SERVER";
+    }
+    return ret;
+}
+
+static krb5_error_code
+search_sprinc(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
+              krb5_flags flags, krb5_db_entry **server, const char **status)
+{
+    krb5_error_code ret;
+    krb5_principal princ = req->server;
+    krb5_principal reftgs = NULL;
+
+    ret = db_get_svc_princ(kdc_context, princ, flags, server, status);
+    if (ret == 0 || ret != KRB5_KDB_NOENTRY)
+        goto cleanup;
+
+    if (!is_cross_tgs_principal(req->server)) {
+        /* domain->realm referral */
+        ret = prep_reprocess_req(kdc_active_realm, req, &reftgs);
+        if (ret != 0)
+            goto cleanup;
+        ret = db_get_svc_princ(kdc_context, reftgs, flags, server, status);
+        if (ret == 0 || ret != KRB5_KDB_NOENTRY)
+            goto cleanup;
+
+        princ = reftgs;
+    }
+    ret = find_alternate_tgs(kdc_active_realm, princ, server, status);
+
+cleanup:
+    if (ret != 0 && ret != KRB5KDC_ERR_SVC_UNAVAILABLE) {
+        ret = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+        if (*status == NULL)
+            *status = "LOOKING_UP_SERVER";
+    }
+    krb5_free_principal(kdc_context, reftgs);
+    return ret;
 }
