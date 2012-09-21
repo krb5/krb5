@@ -514,13 +514,14 @@ kg_accept_krb5(minor_status, context_handle,
             goto fail;
         }
     } else {
-        major_status = krb5_gss_validate_cred(minor_status,
-                                              verifier_cred_handle);
+        major_status = kg_cred_resolve(minor_status, context,
+                                       verifier_cred_handle, GSS_C_NO_NAME);
         if (GSS_ERROR(major_status)) {
             code = *minor_status;
             goto fail;
         }
         cred_handle = verifier_cred_handle;
+        k5_mutex_unlock(&((krb5_gss_cred_id_t)cred_handle)->lock);
     }
 
     cred = (krb5_gss_cred_id_t) cred_handle;

@@ -32,7 +32,7 @@
 
 /*
  * Usage: ./t_s4u2proxy_krb5 [--spnego] client_cache storage_cache
- *                                      service1 service2
+ *                                      [accname|-] service1 service2
  *
  * This program performs a regular Kerberos or SPNEGO authentication from the
  * default principal of client_cache to service1.  If that authentication
@@ -48,7 +48,7 @@
 int
 main(int argc, char *argv[])
 {
-    const char *client_ccname, *storage_ccname, *service1, *service2;
+    const char *client_ccname, *storage_ccname, *accname, *service1, *service2;
     krb5_context context = NULL;
     krb5_error_code ret;
     krb5_boolean use_spnego = FALSE;
@@ -58,9 +58,7 @@ main(int argc, char *argv[])
     gss_buffer_desc buf = GSS_C_EMPTY_BUFFER, token = GSS_C_EMPTY_BUFFER;
     gss_OID mech;
     gss_OID_set mechs;
-    gss_name_t service1_name = GSS_C_NO_NAME;
-    gss_name_t service2_name = GSS_C_NO_NAME;
-    gss_name_t client_name = GSS_C_NO_NAME;
+    gss_name_t acceptor_name, service1_name, service2_name, client_name;
     gss_cred_id_t service1_cred = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t deleg_cred = GSS_C_NO_CREDENTIAL;
     gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
@@ -72,33 +70,33 @@ main(int argc, char *argv[])
         argc--;
         argv++;
     }
-    if (argc != 5) {
-        fprintf(stderr, "./t_s4u2proxy_krb5 [--spnego] client_cache "
-                "storage_ccache service1 service2\n");
+    if (argc != 6) {
+        fprintf(stderr, "./t_s4u2proxy_krb5 [--spnego] client_ccache "
+                "storage_ccache [accname|-] service1 service2\n");
         return 1;
     }
     client_ccname = argv[1];
     storage_ccname = argv[2];
-    service1 = argv[3];
-    service2 = argv[4];
+    accname = argv[3];
+    service1 = argv[4];
+    service2 = argv[5];
 
     mech = use_spnego ? &mech_spnego : &mech_krb5;
     mechs = use_spnego ? &mechset_spnego : &mechset_krb5;
     ret = krb5_init_context(&context);
     check_k5err(context, "krb5_init_context", ret);
 
-    /* Get GSS name and GSS_C_BOTH cred for service1, using the default
-     * ccache. */
-    service1_name = import_name(service1);
-    major = gss_acquire_cred(&minor, service1_name, GSS_C_INDEFINITE,
+    /* Get GSS_C_BOTH acceptor credentials, using the default ccache. */
+    acceptor_name = GSS_C_NO_NAME;
+    if (strcmp(accname, "-") != 0)
+        acceptor_name = import_name(service1);
+    major = gss_acquire_cred(&minor, acceptor_name, GSS_C_INDEFINITE,
                              mechs, GSS_C_BOTH, &service1_cred, NULL, NULL);
     check_gsserr("gss_acquire_cred(service1)", major, minor);
 
-    /* Get GSS name for service2. */
-    service2_name = import_name(service2);
-
     /* Create initiator context and get the first token, using the client
      * ccache. */
+    service1_name = import_name(service1);
     major = gss_krb5_ccache_name(&minor, client_ccname, NULL);
     check_gsserr("gss_krb5_ccache_name(1)", major, minor);
     major = gss_init_sec_context(&minor, GSS_C_NO_CREDENTIAL,
@@ -146,6 +144,7 @@ main(int argc, char *argv[])
 
     /* Create initiator context and get the first token, using the storage
      * ccache. */
+    service2_name = import_name(service2);
     major = gss_krb5_ccache_name(&minor, storage_ccname, NULL);
     check_gsserr("gss_krb5_ccache_name(2)", major, minor);
     major = gss_init_sec_context(&minor, GSS_C_NO_CREDENTIAL,

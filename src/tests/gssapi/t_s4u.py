@@ -25,7 +25,7 @@ realm.kinit(service1, None, ['-f', '-k'])
 # support for allowing it.
 realm.kinit(realm.user_princ, password('user'), ['-f', '-c', usercache])
 output = realm.run_as_server(['./t_s4u2proxy_krb5', usercache, storagecache,
-                              pservice1, pservice2], expected_code=1)
+                              '-', pservice1, pservice2], expected_code=1)
 if ('auth1: ' + realm.user_princ not in output or
     'NOT_ALLOWED_TO_DELEGATE' not in output):
     fail('krb5 -> s4u2proxy')
@@ -33,7 +33,7 @@ if ('auth1: ' + realm.user_princ not in output or
 # Again with SPNEGO.  Bug #7045 prevents us from checking the error
 # message, but we can at least exercise the code.
 output = realm.run_as_server(['./t_s4u2proxy_krb5', '--spnego', usercache,
-                              storagecache, pservice1, pservice2],
+                              storagecache, '-', pservice1, pservice2],
                              expected_code=1)
 if ('auth1: ' + realm.user_princ not in output):
     fail('krb5 -> s4u2proxy (SPNEGO)')
@@ -43,7 +43,7 @@ if ('auth1: ' + realm.user_princ not in output):
 # accept_sec_context.
 realm.kinit(realm.user_princ, password('user'), ['-c', usercache])
 output = realm.run_as_server(['./t_s4u2proxy_krb5', usercache, storagecache,
-                              pservice1, pservice2])
+                              pservice1, pservice1, pservice2])
 if 'no credential delegated' not in output:
     fail('krb5 -> no delegated cred')
 
