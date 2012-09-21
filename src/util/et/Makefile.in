@@ -33,16 +33,6 @@ LIBOBJS=$(OUTPRE)com_err.$(OBJEXT) \
 # for et_lex.lex.c include in error_table.y
 LOCALINCLUDES=-I. -I$(srcdir)
 
-FILES=	Makefile et_name.c error_message.c compile_et.c \
-		et_lex.lex.l error_table.y init_et.c \
-		com_err.c com_err.h \
-		error_table.h mit-sipb-copyright.h \
-		test_et.c test1.et test2.et \
-		t_com_err.c et1.et et2.et \
-		compiler.h internal.h \
-		com_err.texinfo texinfo.tex
-#SRCS=	compile_et.c error_table.c error_message.c et_name.c \
-#	init_et.c com_err.c
 SRCS= $(srcdir)/error_message.c \
 	$(srcdir)/et_name.c \
 	$(srcdir)/com_err.c

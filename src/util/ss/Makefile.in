@@ -52,27 +52,7 @@ depend-dependencies: ss_err.h includes
 
 std_rqs.o: std_rqs.c ss_err.h
 
-CODE= $(SRCS) $(MKCMDSFILES)
-
 MKCMDSOBJS=	mk_cmds.o utils.o options.o ct.tab.o cmd_tbl.lex.o
-
-MKCMDSFILES=	mk_cmds.c utils.c options.c ct.y cmd_tbl.lex.l
-
-MKCMDSCSRCS=	mk_cmds.c utils.c options.c ct.tab.c cmd_tbl.lex.c
-
-
-HFILES=	ss.h mit-sipb-copyright.h
-BUILT_HFILES = ss_err.h
-
-# for 'tags' and dependencies
-
-CFILES=	$(SRCS) $(MKCMDSCSRCS) test_ss.c
-
-# for building archives
-
-FILES=	$(SRCS) $(MKCMDSFILES) $(HFILES) \
-	ss_err.et std_rqs.ct Makefile \
-	test_ss.c ss mit-sipb-copyright.h copyright.h
 
 #
 # stuff to build
