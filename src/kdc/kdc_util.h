@@ -400,4 +400,6 @@ int check_anon(kdc_realm_t *kdc_active_realm,
                krb5_principal client, krb5_principal server);
 int errcode_to_protocol(krb5_error_code code);
 
+char *data2string(krb5_data *d);
+
 #endif /* __KRB5_KDC_UTIL__ */

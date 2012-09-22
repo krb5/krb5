@@ -129,7 +129,7 @@ subrealm(char *r1, char *r2)
  *        names.
  */
 
-static char *
+char *
 data2string (krb5_data *d)
 {
     char *s;
