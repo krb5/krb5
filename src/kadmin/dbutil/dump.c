@@ -2656,7 +2656,8 @@ load_db(argc, argv)
     int                 db_locked = 0;
     kdb_log_context     *log_ctx;
     krb5_boolean        add_update = TRUE;
-    uint32_t            caller, last_sno, last_seconds, last_useconds;
+    uint32_t            caller = FKCOMMAND;
+    uint32_t            last_sno, last_seconds, last_useconds;
 
     /*
      * Parse the arguments.
@@ -2686,6 +2687,7 @@ load_db(argc, argv)
             if (log_ctx && log_ctx->iproprole) {
                 load = &iprop_version;
                 add_update = FALSE;
+                caller = FKPROPD;
             } else {
                 fprintf(stderr, _("Iprop not enabled\n"));
                 exit_status++;
@@ -2746,7 +2748,12 @@ load_db(argc, argv)
      * Auto-detect dump version if we weren't told, verify if we
      * were told.
      */
-    fgets(buf, sizeof(buf), f);
+    if (fgets(buf, sizeof(buf), f) == NULL) {
+        exit_status++;
+        if (dumpfile)
+            fclose(f);
+        return;
+    }
     if (load) {
         /* only check what we know; some headers only contain a prefix */
         /* NB: this should work for ipropx even though load is iprop */
@@ -2780,6 +2787,33 @@ load_db(argc, argv)
             return;
         }
     }
+
+    /*
+     * Fail if the dump is not in iprop format and iprop is enabled and
+     * we have a ulog -- we don't want an accidental stepping on our
+     * toes by a sysadmin or wayward cronjob left over from before
+     * enabling iprop.
+     */
+    if (global_params.iprop_enabled &&
+        ulog_map(kcontext, global_params.iprop_logfile,
+                 global_params.iprop_ulogsize, caller, db5util_db_args)) {
+        fprintf(stderr, "Could not open iprop ulog\n");
+        exit_status++;
+        if (dumpfile)
+            fclose(f);
+        return;
+    }
+    if (global_params.iprop_enabled && !load->iprop) {
+        if (log_ctx->ulog != NULL && log_ctx->ulog->kdb_first_time.seconds &&
+            (log_ctx->ulog->kdb_first_sno || log_ctx->ulog->kdb_last_sno)) {
+            fprintf(stderr, _("%s: Loads disallowed when iprop is enabled "
+                              "and a ulog is present"),
+                    progname);
+            exit_status++;
+            goto error;
+        }
+    }
+
     if (load->updateonly && !(flags & FLAG_UPDATE)) {
         fprintf(stderr, _("%s: dump version %s can only be loaded with the "
                           "-update flag\n"), progname, load->name);
@@ -2838,19 +2872,6 @@ load_db(argc, argv)
     }
 
     if (log_ctx && log_ctx->iproprole) {
-        if (add_update)
-            caller = FKCOMMAND;
-        else
-            caller = FKPROPD;
-
-        if (ulog_map(kcontext, global_params.iprop_logfile,
-                     global_params.iprop_ulogsize, caller, db5util_db_args)) {
-            fprintf(stderr, _("%s: Could not map log\n"),
-                    progname);
-            exit_status++;
-            goto error;
-        }
-
         /*
          * We don't want to take out the ulog out from underneath
          * kadmind so we reinit the header log.
