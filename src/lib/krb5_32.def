@@ -436,3 +436,6 @@ EXPORTS
 	krb5_responder_list_questions			@407
 	krb5_responder_set_answer			@408
 	krb5_rc_recover_or_initialize			@409 ; PRIVATE GSSAPI
+	krb5_rc_resolve_full				@410 ; PRIVATE GSSAPI
+	krb5_rc_resolve_get_name			@411 ; PRIVATE GSSAPI
+	krb5_rc_resolve_get_type			@412 ; PRIVATE GSSAPI
