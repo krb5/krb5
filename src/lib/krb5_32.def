@@ -435,3 +435,4 @@ EXPORTS
 	krb5_responder_get_challenge			@406
 	krb5_responder_list_questions			@407
 	krb5_responder_set_answer			@408
+	krb5_rc_recover_or_initialize			@409 ; PRIVATE GSSAPI
