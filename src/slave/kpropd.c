@@ -50,15 +50,6 @@
  * or implied warranty.
  */
 
-/*
- * XXX We need to modify the protocol so that an acknowledge is set
- * after each block, instead after the entire series is sent over.
- * The reason for this is so that error packets can get interpreted
- * right away.  If you don't do this, the sender may never get the
- * error packet, because it will die an EPIPE trying to complete the
- * write...
- */
-
 
 #include <locale.h>
 #include <stdio.h>
