@@ -817,9 +817,7 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     } else {
         if (aprofile && !krb5_aprof_get_int32(aprofile, hierarchy,
                                               TRUE, &ivalue)) {
-            if (ivalue > MAX_ULOGENTRIES)
-                params.iprop_ulogsize = MAX_ULOGENTRIES;
-            else if (ivalue <= 0)
+            if (ivalue <= 0)
                 params.iprop_ulogsize = DEF_ULOGENTRIES;
             else
                 params.iprop_ulogsize = ivalue;

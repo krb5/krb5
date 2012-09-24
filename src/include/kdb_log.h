@@ -53,7 +53,6 @@ extern "C" {
 /*
  * Default ulog file attributes
  */
-#define MAX_ULOGENTRIES 2500
 #define DEF_ULOGENTRIES 1000
 #define ULOG_IDLE_TIME  10              /* in seconds */
 /*
