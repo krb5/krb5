@@ -58,7 +58,8 @@ main(int argc, char *argv[])
     gss_buffer_desc buf = GSS_C_EMPTY_BUFFER, token = GSS_C_EMPTY_BUFFER;
     gss_OID mech;
     gss_OID_set mechs;
-    gss_name_t acceptor_name, service1_name, service2_name, client_name;
+    gss_name_t acceptor_name = GSS_C_NO_NAME, client_name = GSS_C_NO_NAME;
+    gss_name_t service1_name = GSS_C_NO_NAME, service2_name = GSS_C_NO_NAME;
     gss_cred_id_t service1_cred = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t deleg_cred = GSS_C_NO_CREDENTIAL;
     gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
@@ -168,6 +169,7 @@ main(int argc, char *argv[])
     (void)gss_release_buffer(&minor, &buf);
 
 cleanup:
+    (void)gss_release_name(&minor, &acceptor_name);
     (void)gss_release_name(&minor, &client_name);
     (void)gss_release_name(&minor, &service1_name);
     (void)gss_release_name(&minor, &service2_name);
