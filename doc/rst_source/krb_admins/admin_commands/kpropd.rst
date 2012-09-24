@@ -32,16 +32,17 @@ Kerberos server to use :ref:`kprop(8)` to propagate its database to
 the slave servers.  Upon a successful download of the KDC database
 file, the slave Kerberos server will have an up-to-date KDC database.
 
-Normally, kpropd is invoked out of inetd(8).  This is done by adding
-a line to the ``/etc/inetd.conf`` file which looks like this:
+Where incremental propagation is not used, kpropd is commonly invoked
+out of inetd(8) as a nowait service.  This is done by adding a line to
+the ``/etc/inetd.conf`` file which looks like this:
 
  ::
 
     kprop  stream  tcp  nowait  root  /usr/local/sbin/kpropd  kpropd
 
-kpropd can also run as a standalone daemon by specifying the **-S**
-option.  This is done for debugging purposes, or if for some reason
-the system administrator just doesn't want to run it out of inetd(8).
+kpropd can also run as a standalone daemon.  This is required for
+incremental propagation.  But this is also useful for debugging
+purposes.
 
 Incremental propagation may be enabled with the **iprop_enable**
 variable in :ref:`kdc.conf(5)`.  If incremental propagation is

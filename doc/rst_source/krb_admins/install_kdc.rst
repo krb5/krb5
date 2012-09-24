@@ -378,8 +378,8 @@ used)::
 
 Restart inetd daemon.
 
-Alternatively, start :ref:`kpropd(8)` as a stand-alone daemon with
-``kpropd -S``.
+Alternatively, start :ref:`kpropd(8)` as a stand-alone daemon.  This is
+required when incremental propagation is enabled.
 
 Now that the slave KDC is able to accept database propagation, you’ll
 need to propagate the database from the master server.
