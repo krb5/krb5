@@ -14,7 +14,6 @@ SYNOPSIS
 [**-p** *kdb5_util_prog*]
 [**-P** *port*]
 [**-d**]
-[**-S**]
 
 DESCRIPTION
 -----------
@@ -74,11 +73,12 @@ OPTIONS
     ``/kdb5_util``.
 
 **-S**
-    Turn on standalone mode.  Normally, kpropd is invoked out of
+    [DEPRECATED] Enable standalone mode.  Normally kpropd is invoked by
     inetd(8) so it expects a network connection to be passed to it
-    from inetd(8).  If the **-S** option is specified, kpropd will put
-    itself into the background, and wait for connections on port 754
-    (or the port specified with the **-P** option if given).
+    from inetd(8).  If the **-S** option is specified, or if standard
+    input is not a socket, kpropd will put itself into the background,
+    and wait for connections on port 754 (or the port specified with the
+    **-P** option if given).
 
 **-d**
     Turn on debug mode.  In this mode, if the **-S** option is

@@ -236,9 +236,20 @@ main(argc, argv)
     krb5_error_code retval;
     kdb_log_context *log_ctx;
     int devnull, sock;
+    struct stat st;
 
     setlocale(LC_ALL, "");
     PRS(argv);
+
+    if (fstat(0, &st) == -1) {
+        com_err(progname, errno, _("while checking if stdin is a socket"));
+        exit(1);
+    }
+    /*
+     * Detect whether we're running from inetd; if not then we're in
+     * standalone mode.
+     */
+    standalone = !S_ISSOCK(st.st_mode);
 
     log_ctx = kpropd_context->kdblog_context;
 
@@ -1143,7 +1154,7 @@ void PRS(argv)
                     debug++;
                     break;
                 case 'S':
-                    standalone++;
+                    /* Standalone mode is now auto-detected; see main(). */
                     break;
                 case 'a':
                     if (*word)
