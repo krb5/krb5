@@ -35,6 +35,9 @@ extern gss_name_t rqst2name(struct svc_req *rqstp);
 extern void *global_server_handle;
 extern int nofork;
 extern short l_port;
+extern char *kdb5_util;
+extern char *kprop;
+extern char *dump_file;
 static char abuf[33];
 
 /* Result is stored in a static buffer and is invalidated by the next call. */
@@ -57,12 +60,12 @@ static char *reply_unknown_str	= "<UNKNOWN_CODE>";
 #ifdef	DPRINT
 #undef	DPRINT
 #endif
-#define	DPRINT(i, ...)		    \
-    do {				  \
-	if (nofork) {		     \
-	    fprintf(stderr, __VA_ARGS__); \
-	    fflush(stderr);	       \
-	}				 \
+#define	DPRINT(i, ...)				\
+    do {					\
+	if (nofork) {				\
+	    fprintf(stderr, __VA_ARGS__);	\
+	    fflush(stderr);			\
+	}					\
     } while (0)
 
 
@@ -351,7 +354,7 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
      * subsequent updates very iprop).
      */
     if (asprintf(&ubuf, "%s dump -i%d -c %s",
-		 KPROPD_DEFAULT_KDB5_UTIL, vers, KPROP_DEFAULT_FILE) < 0) {
+		 kdb5_util, vers, dump_file) < 0) {
 	krb5_klog_syslog(LOG_ERR,
 			 _("%s: cannot construct kdb5 util dump string too long; out of memory"),
 			 whoami);
@@ -406,15 +409,13 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 	}
 
 	DPRINT("%s: exec `kprop -f %s %s' ...\n",
-		whoami, KPROP_DEFAULT_FILE, clhost);
+		whoami, dump_file, clhost);
 	/* XXX Yuck!  */
 	if (getenv("KPROP_PORT")) {
-	    pret = execl(KPROP_DEFAULT_FILE, "kprop", "-f",
-			 KPROP_DEFAULT_FILE, "-P", getenv("KPROP_PORT"),
-			 clhost, NULL);
+	    pret = execl(kprop, "kprop", "-f", dump_file, "-P",
+			 getenv("KPROP_PORT"), clhost, NULL);
 	} else {
-	    pret = execl(KPROP_DEFAULT_FILE, "kprop", "-f",
-			 KPROP_DEFAULT_FILE, clhost, NULL);
+	    pret = execl(kprop, "kprop", "-f", dump_file, clhost, NULL);
 	}
 	perror(whoami);
 	krb5_klog_syslog(LOG_ERR,
