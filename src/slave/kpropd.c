@@ -101,15 +101,9 @@ extern int daemon(int, int);
 #endif
 
 #define SYSLOG_CLASS LOG_DAEMON
-#define INITIAL_TIMER 10
 
 char *def_realm = NULL;
 int runonce = 0;
-
-/*
- * Global fd to close upon alarm time-out.
- */
-volatile int gfd = -1;
 
 /*
  * This struct simulates the use of _kadm5_server_handle_t
@@ -132,10 +126,15 @@ typedef struct _kadm5_iprop_handle_t {
 
 static char *kprop_version = KPROP_PROT_VERSION;
 
+static kadm5_config_params params;
+
 char    *progname;
 int     debug = 0;
+int     nodaemon = 0;
 char    *srvtab = 0;
 int     standalone = 0;
+
+pid_t fullprop_child = (pid_t)-1;
 
 krb5_principal  server;         /* This is our server principal name */
 krb5_principal  client;         /* This is who we're talking to */
@@ -156,7 +155,7 @@ char **db_args = NULL;
 int db_args_size = 0;
 
 void    PRS(char**);
-int     do_standalone(iprop_role iproprole);
+void    do_standalone(void);
 void    doit(int);
 krb5_error_code do_iprop(kdb_log_context *log_ctx);
 void    kerberos_authenticate(krb5_context, int, krb5_principal *,
@@ -183,59 +182,142 @@ static void usage()
     exit(1);
 }
 
+typedef void (*sig_handler_fn)(int sig);
+
+static void
+signal_wrapper(int sig, sig_handler_fn handler)
+{
+#ifdef POSIX_SIGNALS
+    struct sigaction s_action;
+    memset(&s_action, 0, sizeof(s_action));
+    sigemptyset(&s_action.sa_mask);
+    s_action.sa_handler = handler;
+    sigaction(sig, &s_action, NULL);
+#else
+    signal(sig, handler);
+#endif
+}
+
+static void
+alarm_handler(int sig)
+{
+    static char *timeout_msg = "Full propagation timed out\n";
+    write(STDERR_FILENO, timeout_msg, strlen(timeout_msg));
+    exit(1);
+}
+
+static void
+kill_do_standalone(int sig)
+{
+    if (fullprop_child > 0) {
+        if (debug) {
+            fprintf(stderr, _("Killing fullprop child (%d)\n"),
+                    (int)fullprop_child);
+        }
+        kill(fullprop_child, sig);
+    }
+    /* Make sure our exit status code reflects our having been signaled */
+    signal_wrapper(sig, SIG_DFL);
+    kill(getpid(), sig);
+}
+
+static void
+atexit_kill_do_standalone(void)
+{
+    if (fullprop_child > 0)
+        kill(fullprop_child, SIGHUP);
+}
+
 int
 main(argc, argv)
     int     argc;
     char    **argv;
 {
     krb5_error_code retval;
-    int ret = 0;
     kdb_log_context *log_ctx;
+    int devnull, sock;
 
     setlocale(LC_ALL, "");
     PRS(argv);
 
     log_ctx = kpropd_context->kdblog_context;
 
-    {
-#ifdef POSIX_SIGNALS
-        struct sigaction s_action;
-        memset(&s_action, 0, sizeof(s_action));
-        sigemptyset(&s_action.sa_mask);
-        s_action.sa_handler = SIG_IGN;
-        sigaction(SIGPIPE, &s_action, NULL);
-#else
-        signal(SIGPIPE, SIG_IGN);
-#endif
-    }
+    signal_wrapper(SIGPIPE, SIG_IGN);
 
-    if (log_ctx && (log_ctx->iproprole == IPROP_SLAVE)) {
+    if (standalone) {
+        /* "ready" is a sentinel for the test framework. */
+        if (!debug && !nodaemon) {
+            daemon(0, 0);
+        } else {
+            printf(_("ready\n"));
+            fflush(stdout);
+        }
+    } else {
         /*
-         * We wanna do iprop !
+         * We're an inetd nowait service.  Let's not risk anything
+         * read/write from/to the inetd socket unintentionally.
          */
-        retval = do_iprop(log_ctx);
-        if (retval) {
-            com_err(progname, retval,
-                    _("do_iprop failed.\n"));
+        devnull = open("/dev/null", O_RDWR);
+        if (devnull == -1) {
+            syslog(LOG_ERR, _("Could not open /dev/null: %s"),
+                   strerror(errno));
             exit(1);
         }
 
-    } else {
-        if (standalone)
-            ret = do_standalone(IPROP_NULL);
-        else
-            doit(0);
+        sock = dup(0);
+        if (sock == -1) {
+            syslog(LOG_ERR, _("Could not dup the inetd socket: %s"),
+                   strerror(errno));
+            exit(1);
+        }
+
+        dup2(devnull, STDIN_FILENO);
+        dup2(devnull, STDOUT_FILENO);
+        dup2(devnull, STDERR_FILENO);
+        close(devnull);
+        doit(sock);
+        exit(0);
     }
 
-    exit(ret);
-}
+    if (log_ctx == NULL || log_ctx->iproprole != IPROP_SLAVE) {
+        do_standalone();
+        /* do_standalone() should never return */
+        assert(0);
+    }
 
-static void resync_alarm(int sn)
-{
-    close (gfd);
-    if (debug)
-        fprintf(stderr, _("resync_alarm: closing fd: %d\n"), gfd);
-    gfd = -1;
+    /*
+     * This is the iprop case.  We'll fork a child to run do_standalone().
+     * The parent will run do_iprop().  We try to kill the child if we
+     * get killed.
+     */
+    signal_wrapper(SIGHUP, kill_do_standalone);
+    signal_wrapper(SIGINT, kill_do_standalone);
+    signal_wrapper(SIGQUIT, kill_do_standalone);
+    signal_wrapper(SIGTERM, kill_do_standalone);
+    signal_wrapper(SIGSEGV, kill_do_standalone);
+    atexit(atexit_kill_do_standalone);
+    fullprop_child = fork();
+    switch (fullprop_child) {
+    case -1:
+        com_err(progname, errno, _("do_iprop failed.\n"));
+        break;
+    case 0:
+        do_standalone();
+        /* do_standalone() should never return */
+        /* NOTREACHED */
+        break;
+    default:
+        retval = do_iprop(log_ctx);
+        /* do_iprop() can return due to failures and runonce. */
+        kill(fullprop_child, SIGHUP);
+        wait(NULL);
+        if (retval)
+            com_err(progname, retval, _("do_iprop failed.\n"));
+        else
+            exit(0);
+    }
+
+    exit(1);
 }
 
 /* Use getaddrinfo to determine a wildcard listener address, preferring
@@ -257,19 +339,16 @@ get_wildcard_addr(struct addrinfo **res)
     return getaddrinfo(NULL, port, &hints, res);
 }
 
-int do_standalone(iprop_role iproprole)
+void
+do_standalone()
 {
     struct  sockaddr_in     frominet;
     struct addrinfo *res;
     int     finet, s;
     GETPEERNAME_ARG3_TYPE fromlen;
-    int ret, error, val;
-    /*
-     * Timer for accept/read calls, in case of network type errors.
-     */
-    int backoff_timer = INITIAL_TIMER;
-
-retry:
+    int ret, error, val, status;
+    pid_t child_pid;
+    pid_t wait_pid;
 
     error = get_wildcard_addr(&res);
     if (error != 0) {
@@ -296,60 +375,15 @@ retry:
         com_err(progname, errno, _("while unsetting IPV6_V6ONLY option"));
 #endif
 
-    /*
-     * We need to close the socket immediately if iprop is enabled,
-     * since back-to-back full resyncs are possible, so we do not
-     * linger around for too long
-     */
-    if (iproprole == IPROP_SLAVE) {
-        struct linger linger;
-
-        linger.l_onoff = 1;
-        linger.l_linger = 2;
-        if (setsockopt(finet, SOL_SOCKET, SO_LINGER,
-                       (void *)&linger, sizeof(linger)) < 0)
-            com_err(progname, errno,
-                    _("while setting socket option (SO_LINGER)"));
-        /*
-         * We also want to set a timer so that the slave is not waiting
-         * until infinity for an update from the master.
-         */
-        gfd = finet;
-        signal(SIGALRM, resync_alarm);
-        if (debug) {
-            fprintf(stderr, "do_standalone: setting resync alarm to %d\n",
-                    backoff_timer);
-        }
-        if (alarm(backoff_timer) != 0) {
-            if (debug) {
-                fprintf(stderr,
-                        _("%s: alarm already set\n"), progname);
-            }
-        }
-        backoff_timer *= 2;
-    }
     if ((ret = bind(finet, res->ai_addr, res->ai_addrlen)) < 0) {
         com_err(progname, errno, _("while binding listener socket"));
         exit(1);
     }
-    if (!debug && iproprole != IPROP_SLAVE)
-        daemon(1, 0);
-#ifdef PID_FILE
-    if ((pidfile = fopen(PID_FILE, "w")) != NULL) {
-        fprintf(pidfile, "%d\n", getpid());
-        fclose(pidfile);
-    } else
-        com_err(progname, errno,
-                _("while opening pid file %s for writing"), PID_FILE);
-#endif
     if (listen(finet, 5) < 0) {
         com_err(progname, errno, "in listen call");
         exit(1);
     }
     while (1) {
-        int child_pid;
-        int status;
-
         memset(&frominet, 0, sizeof(frominet));
         fromlen = sizeof(frominet);
         if (debug)
@@ -361,30 +395,9 @@ retry:
             if (e != EINTR) {
                 com_err(progname, e,
                         _("while accepting connection"));
-                if (e != EBADF)
-                    backoff_timer = INITIAL_TIMER;
             }
-            /*
-             * If we got EBADF, an alarm signal handler closed
-             * the file descriptor on us.
-             */
-            if (e != EBADF)
-                close(finet);
-            /*
-             * An alarm could have been set and the fd closed, we
-             * should retry in case of transient network error for
-             * up to a couple of minutes.
-             */
-            if (backoff_timer > 120)
-                return EINTR;
-            goto retry;
         }
-        alarm(0);
-        gfd = -1;
-        if (debug && iproprole != IPROP_SLAVE)
-            child_pid = 0;
-        else
-            child_pid = fork();
+        child_pid = fork();
         switch (child_pid) {
         case -1:
             com_err(progname, errno, _("while forking"));
@@ -396,31 +409,22 @@ retry:
             close(s);
             _exit(0);
         default:
-            /*
-             * Errors should not be considered fatal in the
-             * iprop case as we could have transient type
-             * errors, such as network outage, etc.  Sleeping
-             * 3s for 2s linger interval.
-             */
-            if (wait(&status) < 0) {
+            do {
+                wait_pid = waitpid(child_pid, &status, 0);
+            } while (wait_pid == -1 && errno == EINTR);
+            if (wait_pid == -1) {
                 com_err(progname, errno,
                         _("while waiting to receive database"));
-                if (iproprole != IPROP_SLAVE)
-                    exit(1);
-                sleep(3);
+                exit(1);
             }
 
             close(s);
-            if (iproprole == IPROP_SLAVE) {
-                close(finet);
-                if ((ret = WEXITSTATUS(status)) != 0)
-                    return (ret);
-            }
+
+            if (runonce)
+                break;
         }
-        if (iproprole == IPROP_SLAVE)
-            break;
     }
-    return 0;
+    exit(0);
 }
 
 void doit(fd)
@@ -437,23 +441,8 @@ void doit(fd)
     int database_fd;
     char host[INET6_ADDRSTRLEN+1];
 
-    if (kpropd_context->kdblog_context &&
-        kpropd_context->kdblog_context->iproprole == IPROP_SLAVE) {
-        /*
-         * We also want to set a timer so that the slave is not waiting
-         * until infinity for an update from the master.
-         */
-        if (debug)
-            fprintf(stderr, "doit: setting resync alarm to 5s\n");
-        signal(SIGALRM, resync_alarm);
-        gfd = fd;
-        if (alarm(INITIAL_TIMER) != 0) {
-            if (debug) {
-                fprintf(stderr,
-                        _("%s: alarm already set\n"), progname);
-            }
-        }
-    }
+    signal_wrapper(SIGALRM, alarm_handler);
+    alarm(params.iprop_resync_timeout);
     fromlen = sizeof (from);
     if (getpeername(fd, (struct sockaddr *) &from, &fromlen) < 0) {
 #ifdef ENOTSOCK
@@ -487,12 +476,6 @@ void doit(fd)
      * Now do the authentication
      */
     kerberos_authenticate(kpropd_context, fd, &client, &etype, &from);
-
-    /*
-     * Turn off alarm upon successful authentication from master.
-     */
-    alarm(0);
-    gfd = -1;
 
     if (!authorized_principal(kpropd_context, client, etype)) {
         char    *name;
@@ -601,10 +584,13 @@ full_resync(CLIENT *clnt)
 }
 
 /*
- * Routine to handle incremental update transfer(s) from master KDC
+ * Beg for incrementals from the KDC.
+ *
+ * Returns 0 on success IFF runonce is true.
+ * Returns non-zero on failure due to errors.
  */
-kadm5_config_params params;
-krb5_error_code do_iprop(kdb_log_context *log_ctx)
+krb5_error_code
+do_iprop(kdb_log_context *log_ctx)
 {
     kadm5_ret_t retval;
     krb5_ccache cc;
@@ -615,24 +601,21 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
     unsigned int pollin, backoff_time;
     int backoff_cnt = 0;
     int reinit_cnt = 0;
-    int ret;
-    int frdone = 0;
+    time_t frrequested = 0;
+    time_t now;
 
     kdb_incr_result_t *incr_ret;
-    static kdb_last_t mylast;
+    kdb_last_t mylast;
 
     kdb_fullresync_result_t *full_ret;
 
     kadm5_iprop_handle_t handle;
     kdb_hlog_t *ulog;
 
-    if (!debug)
-        daemon(0, 0);
-
     ulog = log_ctx->ulog;
 
     pollin = params.iprop_poll_time;
-    if (pollin < 10)
+    if (pollin == 0)
         pollin = 10;
 
     /*
@@ -643,7 +626,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
         if (retval) {
             com_err(progname, retval,
                     _("Unable to get default realm"));
-            exit(1);
+            return retval;
         }
     }
 
@@ -658,7 +641,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
                     _("%s: unable to get kiprop host based "
                       "service name for realm %s\n"),
                     progname, def_realm);
-            exit(1);
+            return retval;
         }
     }
 
@@ -669,7 +652,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
         com_err(progname, retval,
                 _("while opening default "
                   "credentials cache"));
-        exit(1);
+        return retval;
     }
 
     retval = krb5_sname_to_principal(kpropd_context, NULL, KIPROP_SVC_NAME,
@@ -677,7 +660,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
     if (retval) {
         com_err(progname, retval,
                 _("while trying to construct host service principal"));
-        exit(1);
+        return retval;
     }
 
     /* XXX referrals? */
@@ -691,7 +674,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
         if (r->data == NULL) {
             com_err(progname, retval,
                     _("while determining local service principal name"));
-            exit(1);
+            return retval;
         }
         /* XXX Memory leak: Old r->data value.  */
     }
@@ -700,7 +683,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
         com_err(progname, retval,
                 _("while canonicalizing principal name"));
         krb5_free_principal(kpropd_context, iprop_svc_principal);
-        exit(1);
+        return retval;
     }
     krb5_free_principal(kpropd_context, iprop_svc_principal);
 
@@ -792,14 +775,19 @@ reinit:
 
         case UPDATE_FULL_RESYNC_NEEDED:
             /*
-             * We dont do a full resync again, if the last
-             * X'fer was a resync and if the master sno is
-             * still "0", i.e. no updates so far.
+             * If we're already asked for a full resync and we still
+             * need one and the last one hasn't timed out then just keep
+             * asking for updates as eventually the resync will finish
+             * (or, if it times out we'll just try again).  Note that
+             * doit() also applies a timeout to the full resync, thus
+             * it's OK for us to do the same here.
              */
-            if ((frdone == 1) && (incr_ret->lastentry.last_sno
-                                  == 0)) {
+            now = time(NULL);
+            if (frrequested &&
+                (now - frrequested) < params.iprop_resync_timeout) {
                 break;
             } else {
+                frrequested = now;
                 full_ret = full_resync(handle->clnt);
                 if (full_ret == (kdb_fullresync_result_t *)
                     NULL) {
@@ -817,28 +805,6 @@ reinit:
             switch (full_ret->ret) {
             case UPDATE_OK:
                 backoff_cnt = 0;
-                /*
-                 * We now listen on the kprop port for
-                 * the full dump
-                 */
-                ret = do_standalone(log_ctx->iproprole);
-                if (debug) {
-                    if (ret)
-                        fprintf(stderr,
-                                _("Full resync "
-                                  "was unsuccessful\n"));
-                    else
-                        fprintf(stderr,
-                                _("Full resync "
-                                  "was successful\n"));
-                }
-                if (ret) {
-                    syslog(LOG_WARNING,
-                           _("kpropd: Full resync, invalid return."));
-                    frdone = 0;
-                    backoff_cnt++;
-                } else
-                    frdone = 1;
                 break;
 
             case UPDATE_BUSY:
@@ -852,7 +818,6 @@ reinit:
             case UPDATE_NIL:
             default:
                 backoff_cnt = 0;
-                frdone = 0;
                 syslog(LOG_ERR, _("kpropd: Full resync,"
                                   " invalid return from master KDC."));
                 break;
@@ -871,7 +836,7 @@ reinit:
 
         case UPDATE_OK:
             backoff_cnt = 0;
-            frdone = 0;
+            frrequested = 0;
 
             /*
              * ulog_replay() will convert the ulog updates to db
@@ -920,7 +885,7 @@ reinit:
                 fprintf(stderr, _("Master, slave KDC's "
                                   "are in-sync, no updates\n"));
             backoff_cnt = 0;
-            frdone = 0;
+            frrequested = 0;
             break;
 
         default:
@@ -965,7 +930,7 @@ done:
     if ((retval = krb5_cc_close(kpropd_context, cc))) {
         com_err(progname, retval,
                 _("while closing default ccache"));
-        exit(1);
+        return retval;
     }
     if (def_realm && kpropd_context)
         krb5_free_default_realm(kpropd_context, def_realm);
@@ -977,7 +942,7 @@ done:
     if (runonce == 1)
         return (0);
     else
-        exit(1);
+        return 1;
 }
 
 
@@ -1096,6 +1061,9 @@ void PRS(argv)
                         usage();
                     word = 0;
                     break;
+                case 'D':
+                    nodaemon++;
+                    break;
                 case 'd':
                     debug++;
                     break;
@@ -1117,7 +1085,7 @@ void PRS(argv)
                      * Undocumented option - for testing only.
                      *
                      * Option to run the kpropd server exactly
-                     * once (this is true only if iprop is enabled).
+                     * once.
                      */
                     runonce = 1;
                     break;
@@ -1580,7 +1548,7 @@ load_database(context, kdb_util, database_file_name)
     char *database_file_name;
 {
     static char     *edit_av[10];
-    int     error_ret, save_stderr = -1;
+    int     error_ret;
     int     child_pid;
     int     count;
 
@@ -1594,7 +1562,6 @@ load_database(context, kdb_util, database_file_name)
 #else
     int     waitb;
 #endif
-    krb5_error_code retval;
     kdb_log_context *log_ctx;
 
     if (debug)
@@ -1624,23 +1591,8 @@ load_database(context, kdb_util, database_file_name)
         com_err(progname, errno, _("while trying to fork %s"), kdb_util);
         exit(1);
     case 0:
-        if (!debug) {
-            save_stderr = dup(2);
-            close(0);
-            close(1);
-            close(2);
-            open("/dev/null", O_RDWR);
-            dup(0);
-            dup(0);
-        }
-
-        if (execv(kdb_util, edit_av) < 0)
-            retval = errno;
-        else
-            retval = 0;
-        if (!debug)
-            dup2(save_stderr, 2);
-        com_err(progname, retval, _("while trying to exec %s"), kdb_util);
+        execv(kdb_util, edit_av);
+        com_err(progname, errno, _("while trying to exec %s"), kdb_util);
         _exit(1);
         /*NOTREACHED*/
     default:

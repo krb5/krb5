@@ -802,6 +802,10 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     GET_PORT_PARAM(iprop_port, KADM5_CONFIG_IPROP_PORT,
                    KRB5_CONF_IPROP_PORT, 0);
 
+    /* 5 min for large KDBs */
+    GET_DELTAT_PARAM(iprop_resync_timeout, KADM5_CONFIG_IPROP_RESYNC_TIMEOUT,
+                     KRB5_CONF_IPROP_RESYNC_TIMEOUT, 60 * 5);
+
     hierarchy[2] = KRB5_CONF_IPROP_MASTER_ULOGSIZE;
 
     params.iprop_ulogsize = DEF_ULOGENTRIES;

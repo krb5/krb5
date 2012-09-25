@@ -206,6 +206,12 @@ For each realm, the following tags may be specified:
     incremental propagation.  This is required in both master and
     slave configuration files.
 
+**iprop_resync_timeout**
+    (Delta time string.)  Specifies the amount of time to wait for a
+    full propagation to complete.  This is optional in configuration
+    files, and is used by slave KDCs only.  The default value is 5
+    minutes (``5m``).
+
 **iprop_logfile**
     (File name.)  Specifies where the update log file for the realm
     database is to be stored.  The default is to use the

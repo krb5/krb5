@@ -701,6 +701,7 @@ iprop_enable           *boolean*       If *true*, then incremental propagation i
 iprop_master_ulogsize  *integer*       Indicates the number of entries that should be retained in the update log. The default is 1000; the maximum number is 2500.
 iprop_slave_poll       *time interval* Indicates how often the slave should poll the master KDC for changes to the database. The default is two minutes.
 iprop_port             *integer*       Specifies the port number to be used for incremental propagation. This is required in both master and slave configuration files.
+iprop_resync_timeout   *integer*       Specifies the number of seconds to wait for a full propagation to complete. This is optional on slave configurations.  Defaults to 300 seconds (5 minutes).
 iprop_logfile          *file name*     Specifies where the update log file for the realm database is to be stored. The default is to use the *database_name* entry from the realms section of the config file :ref:`kdc.conf(5)`, with *.ulog* appended. (NOTE: If database_name isn't specified in the realms section, perhaps because the LDAP database back end is being used, or the file name is specified in the *dbmodules* section, then the hard-coded default for *database_name* is used. Determination of the *iprop_logfile*  default value will not use values from the *dbmodules* section.)
 ====================== =============== ===========================================
 

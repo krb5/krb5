@@ -224,6 +224,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_IPROP_PORT                  "iprop_port"
 #define KRB5_CONF_IPROP_SLAVE_POLL            "iprop_slave_poll"
 #define KRB5_CONF_IPROP_LOGFILE               "iprop_logfile"
+#define KRB5_CONF_IPROP_RESYNC_TIMEOUT        "iprop_resync_timeout"
 #define KRB5_CONF_K5LOGIN_AUTHORITATIVE       "k5login_authoritative"
 #define KRB5_CONF_K5LOGIN_DIRECTORY           "k5login_directory"
 #define KRB5_CONF_KADMIND_PORT                "kadmind_port"
