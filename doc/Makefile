@@ -18,7 +18,7 @@ ADMIN_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
 ADMIN_DEPS=admin.texinfo $(ADMIN_INCLUDES)
 
 INSTALL_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
-	dnstxt.texinfo dnssrv.texinfo build.texinfo bug-report.texinfo \
+	dnstxt.texinfo dnssrv.texinfo build.texinfo \
 	krb5conf.texinfo kdcconf.texinfo send-pr.texinfo
 INSTALL_DEPS=install.texinfo $(INSTALL_INCLUDES)
 
