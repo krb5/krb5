@@ -1326,8 +1326,7 @@ dump_db(argc, argv)
                 arglist.flags |= FLAG_OMIT_NRA;
             } else {
                 fprintf(stderr, _("Iprop not enabled\n"));
-                exit_status++;
-                return;
+                goto error;
             }
         } else if (!strcmp(argv[aindex], conditionaloption))
             conditional = 1;
@@ -1366,8 +1365,7 @@ dump_db(argc, argv)
             com_err(progname, 0,
                     _("Conditional dump is an undocumented option for "
                       "use only for iprop dumps"));
-            exit_status++;
-            return;
+            goto error;
         }
         if (current_dump_sno_in_ulog(ofile, log_ctx->ulog))
             return;
@@ -1379,8 +1377,7 @@ dump_db(argc, argv)
      */
     if (!dbactive) {
         com_err(progname, 0, _("Database not currently opened!"));
-        exit_status++;
-        return;
+        goto error;
     }
 
     /*
@@ -1461,7 +1458,6 @@ dump_db(argc, argv)
         if (f == NULL) {
             fprintf(stderr, ofopen_error,
                     progname, ofile, error_message(errno));
-            exit_status++;
             return;
         }
     } else {
@@ -1481,11 +1477,7 @@ dump_db(argc, argv)
             if (krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED)) {
                 fprintf(stderr,
                         _("%s: Couldn't grab lock\n"), progname);
-                if (tmpofile != NULL)
-                    unlink(tmpofile);
-                free(tmpofile);
-                exit_status++;
-                return;
+                goto error;
             }
 
             if (ipropx_version)
@@ -1504,27 +1496,29 @@ dump_db(argc, argv)
                                     (krb5_pointer) &arglist))) { /* TBD: backwards and recursive not supported */
             fprintf(stderr, dumprec_err,
                     progname, dump->name, error_message(kret));
-            exit_status++;
-            if (dump_sno)
-                (void) krb5_db_unlock(util_context);
+            goto error;
         }
         if (dump->dump_policy &&
             (kret = krb5_db_iter_policy( util_context, "*", dump->dump_policy,
                                          &arglist))) {
             fprintf(stderr, dumprec_err, progname, dump->name,
                     error_message(kret));
-            exit_status++;
+            goto error;
         }
-        if (ofile && f != stdout && !exit_status) {
+        if (ofile && f != stdout) {
             fclose(f);
             finish_ofile(ofile, &tmpofile);
             update_ok_file(ofile);
         }
-        if (tmpofile != NULL)
-            unlink(tmpofile);
-        free(tmpofile);
         return;
     }
+
+error:
+    krb5_db_unlock(util_context);
+    if (tmpofile != NULL)
+        unlink(tmpofile);
+    free(tmpofile);
+    exit_status++;
 }
 
 /*
