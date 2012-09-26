@@ -490,41 +490,45 @@ current_dump_sno_in_ulog(char *ifile, kdb_hlog_t *ulog)
     return 1;
 }
 
+
+/* Create the .dump_ok file. */
+static int
+prep_ok_file(krb5_context context, char *file_name, int *fd)
+{
+    static char ok[]=".dump_ok";
+    krb5_error_code retval;
+    char *file_ok;
+
+    if (asprintf(&file_ok, "%s%s", file_name, ok) < 0) {
+        com_err(progname, ENOMEM, _("while allocating dump_ok filename"));
+        exit_status++;
+        return 0;
+    }
+
+    *fd = open(file_ok, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (*fd == -1) {
+        com_err(progname, errno, _("while creating 'ok' file, '%s'"), file_ok);
+        exit_status++;
+        free(file_ok);
+        return 0;
+    }
+    retval = krb5_lock_file(context, *fd, KRB5_LOCKMODE_EXCLUSIVE);
+    if (retval) {
+        com_err(progname, retval, _("while locking 'ok' file, '%s'"), file_ok);
+        return 0;
+    }
+    return 1;
+}
+
 /*
  * Update the "ok" file.
  */
-void update_ok_file (file_name)
-    char *file_name;
+static void
+update_ok_file(krb5_context context, int fd)
 {
-    /* handle slave locking/failure stuff */
-    char *file_ok;
-    int fd;
-    static char ok[]=".dump_ok";
-
-    if (asprintf(&file_ok, "%s%s", file_name, ok) < 0) {
-        com_err(progname, ENOMEM,
-                _("while allocating filename for update_ok_file"));
-        exit_status++;
-        return;
-    }
-    if ((fd = open(file_ok, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
-        com_err(progname, errno, _("while creating 'ok' file, '%s'"),
-                file_ok);
-        exit_status++;
-        free(file_ok);
-        return;
-    }
-    if (write(fd, "", 1) != 1) {
-        com_err(progname, errno, _("while writing to 'ok' file, '%s'"),
-                file_ok);
-        exit_status++;
-        free(file_ok);
-        return;
-    }
-
-    free(file_ok);
+    write(fd, "", 1);
+    krb5_lock_file(context, fd, KRB5_LOCKMODE_UNLOCK);
     close(fd);
-    return;
 }
 
 /*
@@ -1274,6 +1278,7 @@ dump_db(argc, argv)
     dump_version        *dump;
     int                 aindex;
     int                 conditional = 0;
+    int                 ok_fd = -1;
     char                *new_mkey_file = 0;
     bool_t              dump_sno = FALSE;
     kdb_log_context     *log_ctx;
@@ -1454,11 +1459,13 @@ dump_db(argc, argv)
          */
         if (ofile[0] == '-')
             usage();
+        if (!prep_ok_file(util_context, ofile, &ok_fd))
+            return;            /* prep_ok_file() bumps exit_status */
         f = create_ofile(ofile, &tmpofile);
         if (f == NULL) {
             fprintf(stderr, ofopen_error,
                     progname, ofile, error_message(errno));
-            return;
+            goto error;
         }
     } else {
         f = stdout;
@@ -1508,7 +1515,7 @@ dump_db(argc, argv)
         if (ofile && f != stdout) {
             fclose(f);
             finish_ofile(ofile, &tmpofile);
-            update_ok_file(ofile);
+            update_ok_file(util_context, ok_fd);
         }
         return;
     }
@@ -2729,13 +2736,6 @@ load_db(argc, argv)
         if ((f = fopen(dumpfile, "r")) == NULL) {
             fprintf(stderr, dfile_err_fmt, progname, dumpfile,
                     error_message(errno));
-            exit_status++;
-            return;
-        }
-        if ((kret = krb5_lock_file(kcontext, fileno(f),
-                                   KRB5_LOCKMODE_SHARED))) {
-            fprintf(stderr, _("%s: Cannot lock %s: %s\n"), progname,
-                    dumpfile, error_message(errno));
             exit_status++;
             return;
         }

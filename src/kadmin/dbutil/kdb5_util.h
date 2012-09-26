@@ -87,8 +87,6 @@ extern krb5_error_code master_key_convert(krb5_context context,
                                           krb5_db_entry *db_entry);
 extern void kdb5_purge_mkeys (int argc, char **argv);
 
-extern void update_ok_file (char *file_name);
-
 extern int kadm5_create (kadm5_config_params *params);
 
 extern krb5_error_code add_new_mkey(krb5_context, krb5_db_entry *,
