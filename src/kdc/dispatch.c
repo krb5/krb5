@@ -178,7 +178,7 @@ dispatch(void *cb, struct sockaddr *local_saddr,
     } else
         retval = KRB5KRB_AP_ERR_MSG_TYPE;
 
-    finish_dispatch(state, retval, response);
+    finish_dispatch_cache(state, retval, response);
 }
 
 static krb5_error_code
