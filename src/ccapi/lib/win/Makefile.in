@@ -90,7 +90,7 @@ copysrc :
 midl : ccs_request.h ccs_reply.h
 
 VERSIONRC = $(BUILDTOP)\..\windows\version.rc
-CCLIBRES = (OUTPRE)$(CCLIB).res
+CCLIBRES = $(OUTPRE)$(CCLIB).res
 # Main program:
 $(CCLIBRES): $(VERSIONRC)
 	$(RC) $(RCFLAGS) -DCCAPI_LIB -fo $@ -r $**
