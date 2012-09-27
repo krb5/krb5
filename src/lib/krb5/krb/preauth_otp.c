@@ -925,6 +925,58 @@ filter_supported_tokeninfos(krb5_context context, krb5_otp_tokeninfo **tis)
     return KRB5_PREAUTH_FAILED; /* We have no supported tokeninfos. */
 }
 
+/*
+ * Try to find tokeninfos which match configuration data recorded in the input
+ * ccache, and if exactly one is found, drop the rest.
+ */
+static krb5_error_code
+filter_config_tokeninfos(krb5_context context,
+                         krb5_clpreauth_callbacks cb,
+                         krb5_clpreauth_rock rock,
+                         krb5_otp_tokeninfo **tis)
+{
+    krb5_otp_tokeninfo *match = NULL;
+    size_t i, j;
+    const char *vendor, *alg_id, *token_id;
+
+    /* Pull up what we know about the token we want to use. */
+    vendor = cb->get_cc_config(context, rock, "vendor");
+    alg_id = cb->get_cc_config(context, rock, "algID");
+    token_id = cb->get_cc_config(context, rock, "tokenID");
+
+    /* Look for a single matching entry. */
+    for (i = 0; tis[i] != NULL; i++) {
+        if (vendor != NULL && tis[i]->vendor.length > 0 &&
+            !data_eq_string(tis[i]->vendor, vendor))
+            continue;
+        if (alg_id != NULL && tis[i]->alg_id.length > 0 &&
+            !data_eq_string(tis[i]->alg_id, alg_id))
+            continue;
+        if (token_id != NULL && tis[i]->token_id.length > 0 &&
+            !data_eq_string(tis[i]->token_id, token_id))
+            continue;
+        /* Oh, we already had a matching entry. More than one -> no change. */
+        if (match != NULL)
+            return 0;
+        match = tis[i];
+    }
+
+    /* No matching entry -> no change. */
+    if (match == NULL)
+        return 0;
+
+    /* Prune out everything except the best match. */
+    for (i = 0, j = 0; tis[i] != NULL; i++) {
+        if (tis[i] != match)
+            k5_free_otp_tokeninfo(context, tis[i]);
+        else
+            tis[j++] = tis[i];
+    }
+    tis[j] = NULL;
+
+    return 0;
+}
+
 static int
 otp_client_get_flags(krb5_context context, krb5_preauthtype pa_type)
 {
@@ -969,6 +1021,12 @@ otp_client_prep_questions(krb5_context context, krb5_clpreauth_moddata moddata,
     if (retval != 0)
         return retval;
 
+    /* Remove tokeninfos that don't match the recorded description, if that
+     * results in there being only one that does. */
+    retval = filter_config_tokeninfos(context, cb, rock, chl->tokeninfo);
+    if (retval != 0)
+        return retval;
+
     /* Make the JSON representation. */
     retval = codec_encode_challenge(context, chl, &json);
     if (retval != 0)
@@ -980,6 +1038,35 @@ otp_client_prep_questions(krb5_context context, krb5_clpreauth_moddata moddata,
                                         json);
     free(json);
     return retval;
+}
+
+/*
+ * Save the vendor, algID, and tokenID values for the selected token to the
+ * out_ccache, so that later we can try to use them to select the right one
+ * without having ot ask the user.
+ */
+static void
+save_config_tokeninfo(krb5_context context,
+                      krb5_clpreauth_callbacks cb,
+                      krb5_clpreauth_rock rock,
+                      krb5_otp_tokeninfo *ti)
+{
+    char *tmp;
+    if (ti->vendor.length > 0 &&
+        asprintf(&tmp, "%.*s", ti->vendor.length, ti->vendor.data) >= 0) {
+        cb->set_cc_config(context, rock, "vendor", tmp);
+        free(tmp);
+    }
+    if (ti->alg_id.length > 0 &&
+        asprintf(&tmp, "%.*s", ti->alg_id.length, ti->alg_id.data) >= 0) {
+        cb->set_cc_config(context, rock, "algID", tmp);
+        free(tmp);
+    }
+    if (ti->token_id.length > 0 &&
+        asprintf(&tmp, "%.*s", ti->token_id.length, ti->token_id.data) >= 0) {
+        cb->set_cc_config(context, rock, "tokenID", tmp);
+        free(tmp);
+    }
 }
 
 static krb5_error_code
@@ -1035,6 +1122,9 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     retval = make_request(context, ti, &value, &pin, &req);
     if (retval != 0)
         goto error;
+
+    /* Save information about the token which was used. */
+    save_config_tokeninfo(context, cb, rock, ti);
 
     /* Encrypt the challenge's nonce and set it in the request. */
     retval = encrypt_nonce(context, as_key, chl, req);
