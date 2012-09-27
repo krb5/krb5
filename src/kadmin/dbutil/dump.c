@@ -1476,17 +1476,17 @@ dump_db(argc, argv)
         arglist.kcontext = util_context;
         fprintf(arglist.ofile, "%s", dump->header);
 
-        if (dump_sno) {
-            /*
-             * We grab the lock twice (once again in the iterator call),
-             * but that's ok since the lock func handles incr locks held.
-             */
-            if (krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED)) {
-                fprintf(stderr,
-                        _("%s: Couldn't grab lock\n"), progname);
-                goto error;
-            }
+        /*
+         * We grab the lock twice (once again in the iterator call),
+         * but that's ok since the lock func handles incr locks held.
+         */
+        if (krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED)) {
+            fprintf(stderr,
+                    _("%s: Couldn't grab lock\n"), progname);
+            goto error;
+        }
 
+        if (dump_sno) {
             if (ipropx_version)
                 fprintf(f, " %u", IPROPX_VERSION);
             fprintf(f, " %u", log_ctx->ulog->kdb_last_sno);
