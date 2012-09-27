@@ -434,6 +434,17 @@ parse_options(argc, argv, opts)
         fprintf(stderr, _("Only one of -a and -A allowed\n"));
         errflg++;
     }
+    if (opts->keytab_name != NULL && opts->use_client_keytab == 1)
+    {
+        fprintf(stderr, _("Only one of -t and -i allowed\n"));
+        errflg++;
+    }
+    if ((opts->keytab_name != NULL || opts->use_client_keytab == 1) &&
+        opts->action != INIT_KT)
+    {
+        opts->action = INIT_KT;
+        fprintf(stderr, _("keytab specified, forcing -k\n"));
+    }
 
     if (argc - optind > 1) {
         fprintf(stderr, _("Extra arguments (starting with \"%s\").\n"),
