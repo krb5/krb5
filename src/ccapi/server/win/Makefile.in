@@ -92,8 +92,13 @@ copysrc :
 
 midl : ccs_request.h ccs_reply.h
 
-$(OUTPRE)ccapiserver.exe: $(OBJS)
-	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(LIBS) $(conlibsdll) $(conflags)
+VERSIONRC = $(BUILDTOP)\..\windows\version.rc
+CCAPISERVERRES = $(OUTPRE)ccapiserver.res
+$(CCAPISERVERRES): $(VERSIONRC)
+	$(RC) $(RCFLAGS) -DCCAPISERVER_APP -fo $@ -r $**
+
+$(OUTPRE)ccapiserver.exe: $(OBJS) $(CCAPISERVERRES)
+	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(LIBS) $(CCAPISERVERRES) $(conlibsdll) $(conflags)
 
 finish :
     @echo "Finished building ccapiserver.exe"
