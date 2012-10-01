@@ -603,6 +603,7 @@ krb5_vset_error_message
 krb5_walk_realm_tree
 krb5_write_message
 krb5int_accessor
+krb5int_build_conf_principals
 krb5int_cc_default
 krb5int_cleanup_library
 krb5int_clean_hostname

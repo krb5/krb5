@@ -415,10 +415,17 @@ t_expire_warn: t_expire_warn.o $(KRB5_BASE_DEPLIBS)
 t_vfy_increds: t_vfy_increds.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_vfy_increds.o $(KRB5_BASE_LIBS)
 
+t_in_ccache: t_in_ccache.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_in_ccache.o $(KRB5_BASE_LIBS)
+
+t_cc_config: t_cc_config.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_cc_config.o $(KRB5_BASE_LIBS)
+
 t_response_items: t_response_items.o response_items.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_response_items.o response_items.o $(KRB5_BASE_LIBS)
 
 TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
+	t_in_ccache t_cc_config \
 	t_princ t_etypes t_vfy_increds t_response_items
 
 check-unix:: $(TEST_PROGS)
@@ -462,6 +469,7 @@ check-unix:: $(TEST_PROGS)
 check-pytests:: t_expire_warn t_vfy_increds
 	$(RUNPYTEST) $(srcdir)/t_expire_warn.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_vfy_increds.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_in_ccache_patypes.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT) \
