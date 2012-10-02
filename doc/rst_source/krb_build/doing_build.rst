@@ -137,6 +137,10 @@ However, there are several prerequisites that must be satisfied first:
   the test suite.  This often means passing **-**\ **-with-tcl** to
   configure to tell it the location of the Tcl configuration
   script. (See :ref:`options2configure`.)
+* In addition to Tcl, DejaGnu must be available on the system for some
+  of the tests to run.  The test suite will still run the other tests
+  if DejaGnu is not present, but the test coverage will be reduced
+  accordingly.
 * On some operating systems, you have to run ``make install`` before
   running ``make check``, or the test suite will pick up installed
   versions of Kerberos libraries rather than the newly built ones.
@@ -148,6 +152,13 @@ However, there are several prerequisites that must be satisfied first:
 * In order to test the RPC layer, the local system has to be running
   the portmap daemon and it has to be listening to the regular network
   interface (not just localhost).
+
+There are additional regression tests available, which are not run
+by ``make check``.  These tests require manual setup and teardown of
+support infrastructure which is not easily automated, or require
+excessive resources for ordinary use.  The procedure for running
+the manual tests is documented at
+http://k5wiki.kerberos.org/wiki/Manual_Testing.
 
 
 Cleaning up the build
