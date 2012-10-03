@@ -370,6 +370,8 @@ To restore a Kerberos database dump from a file, use the
 Examples
 ########
 
+To load a single principal, either replacing or updating the database:
+
 ::
 
      shell% kdb5_util load dumpfile principal
@@ -381,6 +383,24 @@ Examples
 
 .. note:: If the database file exists, and the *-update* flag was not
           given, *kdb5_util* will overwrite the existing database.
+
+Using kdb5_util to upgrade a master KDC from krb5 1.1.x:
+
+::
+
+    shell% kdb5_util dump old-kdb-dump
+    shell% kdb5_util dump -ov old-kdb-dump.ov
+      [Create a new KDC installation, using the old stash file/master password]
+    shell% kdb5_util load old-kdb-dump
+    shell% kdb5_util load -update old-kdb-dump.ov
+
+The use of old-kdb-dump.ov for an extra dump and load is necessary
+to preserve per-principal policy information, which is not included in
+the default dump format of krb5 1.1.x.
+
+.. note:: Using kdb5_util to dump and reload the principal database is
+          only necessary when upgrading from versions of krb5 prior
+          to 1.2.0---newer versions will use the existing database as-is.
 
 
 .. _create_stash:
