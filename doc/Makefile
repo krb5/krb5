@@ -17,10 +17,6 @@ ADMIN_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
 	kdcconf.texinfo dnstxt.texinfo dnssrv.texinfo send-pr.texinfo
 ADMIN_DEPS=admin.texinfo $(ADMIN_INCLUDES)
 
-INSTALL_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
-	dnstxt.texinfo dnssrv.texinfo build.texinfo \
-	krb5conf.texinfo kdcconf.texinfo send-pr.texinfo
-INSTALL_DEPS=install.texinfo $(INSTALL_INCLUDES)
 
 MANPAGES=$(SRCDIR)/clients/kdestroy/kdestroy.M $(SRCDIR)/clients/kinit/kinit.M $(SRCDIR)/clients/klist/klist.M $(SRCDIR)/clients/ksu/ksu.M $(SRCDIR)/clients/kpasswd/kpasswd.M
 
@@ -54,31 +50,6 @@ admin-guide-info:: krb5-admin.info
 
 krb5-admin.info: $(ADMIN_DEPS)
 	$(INFO) admin.texinfo
-
-.PHONY: install-guide-full
-install-guide-full:: install-guide install-guide-info install-guide-html
-
-.PHONY: install-guide
-install-guide:: install-guide.ps install-guide.pdf
-
-install-guide.ps: $(INSTALL_DEPS)
-	$(DVI) install.texinfo
-	$(DVIPS) install
-
-install-guide.pdf: install-guide.ps
-	$(PSPDF) install-guide.ps install-guide.pdf
-
-.PHONY: install-guide-html
-install-guide-html:: install.html
-
-install.html:: $(INSTALL_DEPS)
-	$(HTML) install.texinfo		
-
-.PHONY: install-guide-info
-install-guide-info:: krb5-install.info
-
-krb5-install.info: $(INSTALL_DEPS)
-	$(INFO) install.texinfo
 
 .PHONY: user-guide-full
 user-guide-full:: user-guide user-guide-info user-guide-html
@@ -149,7 +120,7 @@ clean-temp-ps::
 
 .PHONY: tgz
 tgz::
-	$(TAR) krb5-docs.tar admin.texinfo build.texinfo copyright.texinfo definitions.texinfo document-list.texinfo glossary.texinfo install.texinfo texinfo.tex user-guide.texinfo *-guide.ps *.info *.info-? *.html
+	$(TAR) krb5-docs.tar admin.texinfo build.texinfo copyright.texinfo definitions.texinfo document-list.texinfo glossary.texinfo  texinfo.tex user-guide.texinfo *-guide.ps *.info *.info-? *.html
 	$(GZIP) krb5-docs.tar
 	$(MV) krb5-docs.tar.gz krb5-docs.tgz
 
