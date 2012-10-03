@@ -986,8 +986,10 @@ krb5_db_delete_principal(krb5_context kcontext, krb5_principal search_for)
         free(princ_name);
     }
 
-    if (v->delete_principal == NULL)
+    if (v->delete_principal == NULL) {
+        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
         return KRB5_PLUGIN_OP_NOTSUPP;
+    }
 
     status = v->delete_principal(kcontext, search_for);
 
