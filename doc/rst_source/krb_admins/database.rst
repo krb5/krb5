@@ -660,6 +660,8 @@ commands on the KDCs in both realms::
           at least 26 characters of random ASCII text.
 
 
+.. _changing_krbtgt_key:
+
 Changing the krbtgt key
 -----------------------
 

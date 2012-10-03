@@ -6,5 +6,5 @@ Advanced topics
    :maxdepth: 1
 
    ldapbackend.rst
-
+   retiring-des.rst
 
