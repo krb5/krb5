@@ -120,7 +120,7 @@ clean-temp-ps::
 
 .PHONY: tgz
 tgz::
-	$(TAR) krb5-docs.tar admin.texinfo build.texinfo copyright.texinfo definitions.texinfo document-list.texinfo glossary.texinfo  texinfo.tex user-guide.texinfo *-guide.ps *.info *.info-? *.html
+	$(TAR) krb5-docs.tar admin.texinfo copyright.texinfo definitions.texinfo document-list.texinfo glossary.texinfo  texinfo.tex user-guide.texinfo *-guide.ps *.info *.info-? *.html
 	$(GZIP) krb5-docs.tar
 	$(MV) krb5-docs.tar.gz krb5-docs.tgz
 
