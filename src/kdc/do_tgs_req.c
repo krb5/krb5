@@ -76,6 +76,14 @@ static krb5_error_code
 prepare_error_tgs(struct kdc_request_state *, krb5_kdc_req *,krb5_ticket *,int,
                   krb5_principal,krb5_data **,const char *, krb5_pa_data **);
 
+static krb5_error_code
+decrypt_2ndtkt(kdc_realm_t *, krb5_kdc_req *, krb5_flags, krb5_db_entry **,
+               const char **);
+
+static krb5_error_code
+gen_session_key(kdc_realm_t *, krb5_kdc_req *, krb5_db_entry *,
+                krb5_keyblock *, const char **);
+
 static krb5_int32
 find_referral_tgs(kdc_realm_t *, krb5_kdc_req *, krb5_principal *);
 
@@ -96,6 +104,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_keyblock * tgskey = 0;
     krb5_kdc_req *request = 0;
     krb5_db_entry *server = NULL;
+    krb5_db_entry *stkt_server = NULL;
     krb5_kdc_rep reply;
     krb5_enc_kdc_rep_part reply_encpart;
     krb5_ticket ticket_reply, *header_ticket = 0;
@@ -112,9 +121,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_key_data  *server_key;
     char *cname = 0, *sname = 0, *altcname = 0;
     krb5_last_req_entry *nolrarray[2], nolrentry;
-    krb5_enctype useenctype;
     int errcode, errcode2;
-    register int i;
     const char        *status = 0;
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* TGT */
     krb5_enc_tkt_part *subject_tkt = NULL; /* TGT or evidence ticket */
@@ -270,106 +277,40 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     if (s4u_x509_user != NULL)
         setflag(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION);
 
-    /*
-     * We pick the session keytype here....
-     *
-     * Some special care needs to be taken in the user-to-user
-     * case, since we don't know what keytypes the application server
-     * which is doing user-to-user authentication can support.  We
-     * know that it at least must be able to support the encryption
-     * type of the session key in the TGT, since otherwise it won't be
-     * able to decrypt the U2U ticket!  So we use that in preference
-     * to anything else.
-     */
-    useenctype = 0;
-    if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY |
-                  KDC_OPT_CNAME_IN_ADDL_TKT)) {
-        krb5_keyblock  * st_sealing_key;
-        krb5_kvno        st_srv_kvno;
-        krb5_enctype     etype;
-        krb5_db_entry    *st_client;
-
-        /*
-         * Get the key for the second ticket, and decrypt it.
-         */
-        if ((errcode = kdc_get_server_key(kdc_context,
-                                          request->second_ticket[st_idx],
-                                          c_flags,
-                                          TRUE, /* match_enctype */
-                                          &st_client,
-                                          &st_sealing_key,
-                                          &st_srv_kvno))) {
-            status = "2ND_TKT_SERVER";
-            goto cleanup;
-        }
-        errcode = krb5_decrypt_tkt_part(kdc_context, st_sealing_key,
-                                        request->second_ticket[st_idx]);
-        krb5_free_keyblock(kdc_context, st_sealing_key);
-        if (errcode) {
-            status = "2ND_TKT_DECRYPT";
-            krb5_db_free_principal(kdc_context, st_client);
-            goto cleanup;
-        }
-
-        etype = request->second_ticket[st_idx]->enc_part2->session->enctype;
-        if (!krb5_c_valid_enctype(etype)) {
-            status = "BAD_ETYPE_IN_2ND_TKT";
-            errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
-            krb5_db_free_principal(kdc_context, st_client);
-            goto cleanup;
-        }
-
-        for (i = 0; i < request->nktypes; i++) {
-            if (request->ktype[i] == etype) {
-                useenctype = etype;
-                break;
-            }
-        }
-
-        if (isflagset(request->kdc_options, KDC_OPT_CNAME_IN_ADDL_TKT)) {
-            /* Do constrained delegation protocol and authorization checks */
-            errcode = kdc_process_s4u2proxy_req(kdc_active_realm,
-                                                request,
-                                                request->second_ticket[st_idx]->enc_part2,
-                                                st_client,
-                                                header_ticket->enc_part2->client,
-                                                request->server,
-                                                &status);
-            if (errcode)
-                goto cleanup;
-
-            setflag(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
-
-            assert(krb5_is_tgs_principal(header_ticket->server));
-
-            assert(client == NULL); /* assured by kdc_process_s4u2self_req() */
-            client = st_client;
-        } else {
-            /* "client" is not used for user2user */
-            krb5_db_free_principal(kdc_context, st_client);
-        }
-    }
-
-    /*
-     * Select the keytype for the ticket session key.
-     */
-    if ((useenctype == 0) &&
-        (useenctype = select_session_keytype(kdc_active_realm, server,
-                                             request->nktypes,
-                                             request->ktype)) == 0) {
-        /* unsupported ktype */
-        status = "BAD_ENCRYPTION_TYPE";
-        errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
+    errcode = decrypt_2ndtkt(kdc_active_realm, request, c_flags,
+                             &stkt_server, &status);
+    if (errcode)
         goto cleanup;
-    }
 
-    errcode = krb5_c_make_random_key(kdc_context, useenctype, &session_key);
+    if (isflagset(request->kdc_options, KDC_OPT_CNAME_IN_ADDL_TKT)) {
+        /* Do constrained delegation protocol and authorization checks */
+        errcode = kdc_process_s4u2proxy_req(kdc_active_realm,
+                                            request,
+                                            request->second_ticket[st_idx]->enc_part2,
+                                            stkt_server,
+                                            header_ticket->enc_part2->client,
+                                            request->server,
+                                            &status);
+        if (errcode)
+            goto cleanup;
 
-    if (errcode) {
-        /* random key failed */
-        status = "RANDOM_KEY_FAILED";
+        setflag(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
+
+        assert(krb5_is_tgs_principal(header_ticket->server));
+
+        assert(client == NULL); /* assured by kdc_process_s4u2self_req() */
+        client = stkt_server;
+        stkt_server = NULL;
+    } else if (request->kdc_options & KDC_OPT_ENC_TKT_IN_SKEY) {
+        krb5_db_free_principal(kdc_context, stkt_server);
+        stkt_server = NULL;
+    } else
+        assert(stkt_server == NULL);
+
+    errcode = gen_session_key(kdc_active_realm, request, server, &session_key,
+                              &status);
+    if (errcode)
         goto cleanup;
-    }
 
     /*
      * subject_tkt will refer to the evidence ticket (for constrained
@@ -1010,6 +951,114 @@ prepare_error_tgs (struct kdc_request_state *state,
     else
         *response = scratch;
 
+    return retval;
+}
+
+/* KDC options that require a second ticket */
+#define STKT_OPTIONS (KDC_OPT_CNAME_IN_ADDL_TKT | KDC_OPT_ENC_TKT_IN_SKEY)
+/*
+ * Get the key for the second ticket, if any, and decrypt it.
+ */
+static krb5_error_code
+decrypt_2ndtkt(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
+               krb5_flags flags, krb5_db_entry **server_out,
+               const char **status)
+{
+    krb5_error_code retval;
+    krb5_db_entry *server;
+    krb5_keyblock *key;
+    krb5_kvno kvno;
+    krb5_ticket *stkt;
+
+    if (!(req->kdc_options & STKT_OPTIONS))
+        return 0;
+
+    stkt = req->second_ticket[0];
+    retval = kdc_get_server_key(kdc_context, stkt,
+                                flags,
+                                TRUE, /* match_enctype */
+                                &server,
+                                &key,
+                                &kvno);
+    if (retval != 0) {
+        *status = "2ND_TKT_SERVER";
+        goto cleanup;
+    }
+    retval = krb5_decrypt_tkt_part(kdc_context, key,
+                                   req->second_ticket[0]);
+    krb5_free_keyblock(kdc_context, key);
+    if (retval != 0) {
+        *status = "2ND_TKT_DECRYPT";
+        goto cleanup;
+    }
+    *server_out = server;
+cleanup:
+    return retval;
+}
+
+static krb5_error_code
+get_2ndtkt_enctype(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
+                   krb5_enctype *useenctype, const char **status)
+{
+    krb5_enctype etype;
+    krb5_ticket *stkt = req->second_ticket[0];
+    int i;
+
+    etype = stkt->enc_part2->session->enctype;
+    if (!krb5_c_valid_enctype(etype)) {
+        *status = "BAD_ETYPE_IN_2ND_TKT";
+        return KRB5KDC_ERR_ETYPE_NOSUPP;
+    }
+    for (i = 0; i < req->nktypes; i++) {
+        if (req->ktype[i] == etype) {
+            *useenctype = etype;
+            break;
+        }
+    }
+    return 0;
+}
+
+static krb5_error_code
+gen_session_key(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
+                krb5_db_entry *server, krb5_keyblock *skey,
+                const char **status)
+{
+    krb5_error_code retval;
+    krb5_enctype useenctype = 0;
+
+    /*
+     * Some special care needs to be taken in the user-to-user
+     * case, since we don't know what keytypes the application server
+     * which is doing user-to-user authentication can support.  We
+     * know that it at least must be able to support the encryption
+     * type of the session key in the TGT, since otherwise it won't be
+     * able to decrypt the U2U ticket!  So we use that in preference
+     * to anything else.
+     */
+    if (req->kdc_options & KDC_OPT_ENC_TKT_IN_SKEY) {
+        retval = get_2ndtkt_enctype(kdc_active_realm, req, &useenctype,
+                                    status);
+        if (retval != 0)
+            goto cleanup;
+    }
+    if (useenctype == 0) {
+        useenctype = select_session_keytype(kdc_active_realm, server,
+                                            req->nktypes,
+                                            req->ktype);
+    }
+    if (useenctype == 0) {
+        /* unsupported ktype */
+        *status = "BAD_ENCRYPTION_TYPE";
+        retval = KRB5KDC_ERR_ETYPE_NOSUPP;
+        goto cleanup;
+    }
+    retval = krb5_c_make_random_key(kdc_context, useenctype, skey);
+    if (retval != 0) {
+        /* random key failed */
+        *status = "RANDOM_KEY_FAILED";
+        goto cleanup;
+    }
+cleanup:
     return retval;
 }
 
