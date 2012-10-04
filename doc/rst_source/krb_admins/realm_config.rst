@@ -186,11 +186,12 @@ following records in your (BIND-style) zone file::
     _kerberos-adm._tcp      SRV       0 0 749 daisy
     _kpasswd._udp           SRV       0 0 464 daisy
 
-Clients can also locate services using the **kdc**, **master_kdc**,
-**admin_server**, and **kpasswd_server** variables in the
-:ref:`realms` section of :ref:`krb5.conf(5)`.  However, providing SRV
-records may still be useful for use by other sites or by unconfigured
-client hosts.
+Clients can also be configured with the explicit location of services
+using the **kdc**, **master_kdc**, **admin_server**, and
+**kpasswd_server** variables in the :ref:`realms` section of
+:ref:`krb5.conf(5)`.  Even if some clients will be configured with
+explicit server locations, providing SRV records will still benefit
+unconfigured clients, and be useful for other sites.
 
 
 .. _db_prop:
