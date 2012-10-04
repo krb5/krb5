@@ -25,8 +25,8 @@ ignored.  Lines containing ACL entries have the format:
 
     principal  permissions  [target_principal]  [restrictions]
 
-Line order in the ACL file is important.  The first matching entry
-will control access for an actor principal on a target principal.
+.. note:: Line order in the ACL file is important.  The first matching entry
+          will control access for an actor principal on a target principal.
 
 *principal*
     (Partially or fully qualified Kerberos principal name.) Specifies
