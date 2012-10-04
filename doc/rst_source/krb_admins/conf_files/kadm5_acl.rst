@@ -70,12 +70,12 @@ will control access for an actor principal on a target principal.
     (Optional) A string of flags. Allowed restrictions are:
 
         {+\|-}\ *flagname*
-            flag is forced to indicated value.  The permissible flags
+            flag is forced to the indicated value.  The permissible flags
             are the same as the + and - flags for the kadmin
             :ref:`add_principal` and :ref:`modify_principal` commands.
 
         *-clearpolicy*
-            policy is forced to clear.
+            policy is forced to be empty.
 
         *-policy pol*
             policy is forced to be *pol*.
