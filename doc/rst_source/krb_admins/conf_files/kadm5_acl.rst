@@ -101,9 +101,9 @@ Here is an example of a kadm5.acl file.
     */admin@ATHENA.MIT.EDU        *                           # line 1
     joeadmin@ATHENA.MIT.EDU   ADMCIL                          # line 2
     joeadmin/*@ATHENA.MIT.EDU il  */root@ATHENA.MIT.EDU       # line 3
-    *@ATHENA.MIT.EDU          cil *1/admin@ATHENA.MIT.EDU     # line 4
+    */root@ATHENA.MIT.EDU     cil *1@ATHENA.MIT.EDU           # line 4
     */*@ATHENA.MIT.EDU        i                               # line 5
-    */admin@EXAMPLE.COM       * -maxlife 9h -postdateable     # line 6
+    */admin@EXAMPLE.COM       x   * -maxlife 9h -postdateable # line 6
 
 (line 1) Any principal in the ``ATHENA.MIT.EDU`` realm with
 an ``admin`` instance has all administrative privileges.
@@ -111,13 +111,14 @@ an ``admin`` instance has all administrative privileges.
 (lines 1-3) The user ``joeadmin`` has all permissions with his
 ``admin`` instance, ``joeadmin/admin@ATHENA.MIT.EDU`` (matches line
 1).  He has no permissions at all with his null instance,
-``joeadmin@ATHENA.MIT.EDU`` (matches line 2).  His root instance has
-inquire and list permissions with any other principal that has the
-instance root (matches line 3).
+``joeadmin@ATHENA.MIT.EDU`` (matches line 2).  His ``root`` and other
+non-``admin``, non-null instances (e.g., ``extra`` or ``dbadmin``) have
+inquire and list permissions with any principal that has the
+instance ``root`` (matches line 3).
 
-(line 4) Any principal in ``ATHENA.MIT.EDU`` can inquire, list,
-or change the password of their ``admin`` instance, but not any other
-admin instance.  (Here, "\*1" denotes a back-reference to the first
+(line 4) Any ``root`` principal in ``ATHENA.MIT.EDU`` can inquire, list,
+or change the password of their null instance, but not any other
+null instance.  (Here, "\*1" denotes a back-reference to the first
 component of the actor principal.)
 
 (line 5) Any principal in the realm ``ATHENA.MIT.EDU`` (except for
