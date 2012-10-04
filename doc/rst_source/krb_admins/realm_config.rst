@@ -38,7 +38,7 @@ descriptive names which end with your domain name, such as::
 Mapping hostnames onto Kerberos realms
 --------------------------------------
 
-Mapping hostnames onto Kerberos realms is done in one of two ways.
+Mapping hostnames onto Kerberos realms is done in one of three ways.
 
 The first mechanism works through a set of rules in the
 :ref:`domain_realm` section of :ref:`krb5.conf(5)`.  You can specify
@@ -59,6 +59,27 @@ the KDC must be running MIT krb5 1.7 or later.  The
 **host_based_services** and **no_host_referral** variables in the
 :ref:`kdc_realms` section of :ref:`kdc.conf(5)` can be used to
 fine-tune referral behavior on the KDC.
+
+It is also possible for clients to use DNS TXT records, if
+**dns_lookup_realm** is enabled in :ref:`krb5.conf(5)`.  Such lookups
+are disabled by default because DNS is an insecure protocol and security
+holes could result if DNS records are spoofed.  If enabled, the client
+will try to look up a TXT record formed by prepending the prefix
+``_kerberos`` to the hostname in question.  If that record is not
+found, the client will attempt a lookup by prepending ``_kerberos`` to the
+host's domain name, then its parent domain, up to the top-level domain.
+For the hostname ``boston.engineering.example.com``, the names looked up
+would be::
+
+    _kerberos.boston.engineering.example.com
+    _kerberos.engineering.example.com
+    _kerberos.example.com
+    _kerberos.com
+
+The value of the first TXT record found is taken as the realm name.
+
+Even if you do not choose to use this mechanism within your site,
+you may wish to set it up anyway, for use when interacting with other sites.
 
 
 Ports for the KDC and admin services
