@@ -216,8 +216,8 @@ To delete a policy, use the kadmin **delete_policy** command.
    :end-before: _delete_policy_end:
 
 .. note:: You must cancel the policy from *all* principals before
-          deleting it.  The *delete_policy* command will fail if it is
-          in use by any principals.
+          deleting it.  The *delete_policy* command will fail if the policy
+          is in use by any principals.
 
 
 Retrieving policies
