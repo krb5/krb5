@@ -142,17 +142,17 @@ OPTIONS
     the LDAP database module are:
 
     **-x host=**\ *hostname*
-        specifies the LDAP server to connect to by a LDAP URI.
+        Specifies the LDAP server to connect to by a LDAP URI.
 
     **-x binddn=**\ *bind_dn*
-        specifies the DN of the object used by the administration
+        Specifies the DN of the object used by the administration
         server to bind to the LDAP server.  This object should have
         the read and write privileges on the realm container, the
         principal container, and the subtree that is referenced by the
         realm.
 
     **-x bindpwd=**\ *bind_password*
-        specifies the password for the above mentioned binddn.  Using
+        Specifies the password for the above mentioned binddn.  Using
         this option may expose the password to other users on the
         system via the process list; to avoid this, instead stash the
         password using the **stashsrvpw** command of
@@ -189,27 +189,28 @@ Aliases: **addprinc**, **ank**
 Options:
 
 **-expire** *expdate*
-    (:ref:`getdate` string) expiration date of the principal
+    (:ref:`getdate` string) The expiration date of the principal.
 
 **-pwexpire** *pwexpdate*
-    (:ref:`getdate` string) password expiration date
+    (:ref:`getdate` string) The password expiration date.
 
 **-maxlife** *maxlife*
-    (:ref:`getdate` string) maximum ticket life for the principal
+    (:ref:`getdate` string) The maximum ticket life for the principal.
 
 **-maxrenewlife** *maxrenewlife*
-    (:ref:`getdate` string) maximum renewable life of tickets for the principal
+    (:ref:`getdate` string) The maximum renewable life of tickets for
+    the principal.
 
 **-kvno** *kvno*
-    initial key version number
+    The initial key version number.
 
 **-policy** *policy*
-    password policy used by this principal.  If not specified, the
+    The password policy used by this principal.  If not specified, the
     policy ``default`` is used if it exists (unless **-clearpolicy**
     is specified).
 
 **-clearpolicy**
-    prevents any policy from being assigned when **-policy** is not
+    Prevents any policy from being assigned when **-policy** is not
     specified.
 
 {-\|+}\ **allow_postdated**
@@ -273,36 +274,36 @@ Options:
     change service principal.
 
 **-randkey**
-    sets the key of the principal to a random value
+    Sets the key of the principal to a random value.
 
 **-pw** *password*
-    sets the password of the principal to the specified string and
+    Sets the password of the principal to the specified string and
     does not prompt for a password.  Note: using this option in a
     shell script may expose the password to other users on the system
     via the process list.
 
 **-e** *enc*:*salt*,...
-    uses the specified list of enctype-salttype pairs for setting the
+    Uses the specified list of enctype-salttype pairs for setting the
     key of the principal.
 
 **-x** *db_princ_args*
-    indicates database-specific options.  The options for the LDAP
+    Indicates database-specific options.  The options for the LDAP
     database module are:
 
     **-x dn=**\ *dn*
-        specifies the LDAP object that will contain the Kerberos
+        Specifies the LDAP object that will contain the Kerberos
         principal being created.
 
     **-x linkdn=**\ *dn*
-        specifies the LDAP object to which the newly created Kerberos
+        Specifies the LDAP object to which the newly created Kerberos
         principal object will point.
 
     **-x containerdn=**\ *container_dn*
-        specifies the container object under which the Kerberos
+        Specifies the container object under which the Kerberos
         principal is to be created.
 
     **-x tktpolicy=**\ *policy*
-        associates a ticket policy to the Kerberos principal.
+        Associates a ticket policy to the Kerberos principal.
 
     .. note::
         - The **containerdn** and **linkdn** options cannot be
@@ -405,7 +406,7 @@ Alias: **cpw**
 The following options are available:
 
 **-randkey**
-    Sets the key of the principal to a random value
+    Sets the key of the principal to a random value.
 
 **-pw** *password*
     Set the password to the specified string.  Using this option in a
@@ -592,36 +593,36 @@ Alias: **addpol**
 The following options are available:
 
 **-maxlife** *time*
-    (:ref:`getdate` string) sets the maximum lifetime of a password
+    (:ref:`getdate` string) Sets the maximum lifetime of a password.
 
 **-minlife** *time*
-    (:ref:`getdate` string) sets the minimum lifetime of a password
+    (:ref:`getdate` string) Sets the minimum lifetime of a password.
 
 **-minlength** *length*
-    sets the minimum length of a password
+    Sets the minimum length of a password.
 
 **-minclasses** *number*
-    sets the minimum number of character classes required in a
+    Sets the minimum number of character classes required in a
     password.  The five character classes are lower case, upper case,
     numbers, punctuation, and whitespace/unprintable characters.
 
 **-history** *number*
-    sets the number of past keys kept for a principal.  This option is
+    Sets the number of past keys kept for a principal.  This option is
     not supported with the LDAP KDC database module.
 
 **-maxfailure** *maxnumber*
-    sets the maximum number of authentication failures before the
+    Sets the maximum number of authentication failures before the
     principal is locked.  Authentication failures are only tracked for
     principals which require preauthentication.
 
 **-failurecountinterval** *failuretime*
-    (:ref:`getdate` string) sets the allowable time between
+    (:ref:`getdate` string) Sets the allowable time between
     authentication failures.  If an authentication failure happens
     after *failuretime* has elapsed since the previous failure,
     the number of authentication failures is reset to 1.
 
 **-lockoutduration** *lockouttime*
-    (:ref:`getdate` string) sets the duration for which the principal
+    (:ref:`getdate` string) Sets the duration for which the principal
     is locked from authenticating if too many authentication failures
     occur without the specified failure count interval elapsing.
     A duration of 0 means forever.
