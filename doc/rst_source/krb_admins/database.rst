@@ -140,16 +140,6 @@ type the following::
     Principal "david@ATHENA.MIT.EDU" created.
     kadmin:
 
-If you need cross-realm authentication, you will need to add
-principals for the other realm's TGT to each realm. For example, if
-you need to do cross-realm authentication between the realms
-``ATHENA.MIT.EDU`` and ``EXAMPLE.COM``, you would need to add the
-principals ``krbtgt/EXAMPLE.COM@ATHENA.MIT.EDU`` and
-``krbtgt/ATHENA.MIT.EDU@EXAMPLE.COM`` to both databases. You need to
-be sure the passwords and the key version numbers (kvno) are the same
-in both databases. This may require explicitly setting the kvno with
-the **-kvno** option. See :ref:`xrealm_authn` for more details.
-
 If you want to delete a principal ::
 
     kadmin: delprinc jennifer
@@ -631,15 +621,19 @@ Cross-realm authentication
 
 In order for a KDC in one realm to authenticate Kerberos users in a
 different realm, it must share a key with the KDC in the other realm.
-In both databases, there must be krbtgt service principals for realms.
+In both databases, there must be krbtgt service principals for both realms.
+For example, if you need to do cross-realm authentication between the realms
+``ATHENA.MIT.EDU`` and ``EXAMPLE.COM``, you would need to add the
+principals ``krbtgt/EXAMPLE.COM@ATHENA.MIT.EDU`` and
+``krbtgt/ATHENA.MIT.EDU@EXAMPLE.COM`` to both databases.
 These principals must all have the same passwords, key version
-numbers, and encryption types.
+numbers, and encryption types; this may require explicitly setting
+the key version number with the **-kvno** option.
 
-For example, if the administrators of ATHENA.MIT.EDU and EXAMPLE.COM
-wanted to authenticate across the realms, they would run the following
-commands on the KDCs in both realms::
+In the ATHENA.MIT.EDU and EXAMPLE.COM cross-realm case, the administrators
+would run the following commands on the KDCs in both realms::
 
-    shell%: kadmin.local -e "des3-hmac-sha1:normal des-cbc-crc:v4"
+    shell%: kadmin.local -e "aes256-cts:normal"
     kadmin: addprinc -requires_preauth krbtgt/ATHENA.MIT.EDU@EXAMPLE.COM
     Enter password for principal krbtgt/ATHENA.MIT.EDU@EXAMPLE.COM:
     Re-enter password for principal krbtgt/ATHENA.MIT.EDU@EXAMPLE.COM:
