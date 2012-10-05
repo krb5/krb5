@@ -553,8 +553,8 @@ KDC and Administration server uses this password to authenticate to
 the LDAP server.
 
 .. include:: admin_commands/kdb5_ldap_util.rst
-   :start-after:  _kdb5_ldap_util_list:
-   :end-before: _kdb5_ldap_util_list_end:
+   :start-after:  _kdb5_ldap_util_stashsrvpw:
+   :end-before: _kdb5_ldap_util_stashsrvpw_end:
 
 
 Ticket Policy operations
@@ -612,8 +612,8 @@ To list the name of ticket policies in a realm, use the
 :ref:`kdb5_ldap_util(8)` **list_policy** command.
 
 .. include:: admin_commands/kdb5_ldap_util.rst
-   :start-after:  _kdb5_ldap_util_destroy_policy:
-   :end-before: _kdb5_ldap_util_destroy_policy_end:
+   :start-after:  _kdb5_ldap_util_list_policy:
+   :end-before: _kdb5_ldap_util_list_policy_end:
 
 
 .. _xrealm_authn:
