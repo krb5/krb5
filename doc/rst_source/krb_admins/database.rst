@@ -446,7 +446,7 @@ Examples
 ::
 
     shell% kdb5_util -r ATHENA.MIT.EDU create -s
-    kdb5_util: No such file or directory while setting active database to'/usr/local/var/krb5kdc/principal'
+    Loading random data
     Initializing database '/usr/local/var/krb5kdc/principal' for realm 'ATHENA.MIT.EDU',
     master key name 'K/M@ATHENA.MIT.EDU'
     You will be prompted for the database Master Password.
@@ -456,8 +456,10 @@ Examples
     shell%
 
     shell% kdb5_util -r ATHENA.MIT.EDU destroy
-    kdb5_util: Deleting KDC database stored in /usr/local/var/krb5kdc/principal, are you sure (type yes to confirm)? <== yes
+    Deleting KDC database stored in '/usr/local/var/krb5kdc/principal', are you sure?
+    (type 'yes' to confirm)?  <= yes
     OK, deleting database '/usr/local/var/krb5kdc/principal'...
+    ** Database '/usr/local/var/krb5kdc/principal' destroyed.
     shell%
 
 
