@@ -2905,6 +2905,16 @@ load_db(argc, argv)
                     last_seconds;
                 log_ctx->ulog->kdb_last_time.useconds =
                     last_useconds;
+
+                /*
+                 * Sync'ing the header is not necessary on any OS and
+                 * filesystem where the filesystem and virtual memory block
+                 * cache are unified, which is pretty much all cases that we
+                 * care about.  However, technically speaking we must msync()
+                 * in order for our writes here to be visible to a running
+                 * kpropd.
+                 */
+                ulog_sync_header(log_ctx->ulog);
             }
         }
     }
