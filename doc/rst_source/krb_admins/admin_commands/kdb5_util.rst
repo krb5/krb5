@@ -120,7 +120,8 @@ stash
     **stash** [**-f** *keyfile*]
 
 Stores the master principal's keys in a stash file.  The **-f**
-argument can be used to override the *keyfile* specified at startup.
+argument can be used to override the *keyfile* specified in
+:ref:`kdc.conf(5)`.
 
 .. _kdb5_util_stash_end:
 
