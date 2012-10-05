@@ -413,9 +413,18 @@ do_standalone()
                 wait_pid = waitpid(child_pid, &status, 0);
             } while (wait_pid == -1 && errno == EINTR);
             if (wait_pid == -1) {
+                /* Something bad happened; panic. */
+                if (debug) {
+                    fprintf(stderr, _("waitpid() failed to wait for doit() "
+                                      "(%d %s)\n"), errno, strerror(errno));
+                }
                 com_err(progname, errno,
                         _("while waiting to receive database"));
                 exit(1);
+            }
+            if (debug) {
+                fprintf(stderr, _("Database load process for full propagation "
+                                  "completed.\n"));
             }
 
             close(s);
@@ -601,6 +610,8 @@ do_iprop(kdb_log_context *log_ctx)
     unsigned int pollin, backoff_time;
     int backoff_cnt = 0;
     int reinit_cnt = 0;
+    struct timeval iprop_start, iprop_end;
+    unsigned long usec;
     time_t frrequested = 0;
     time_t now;
 
@@ -611,6 +622,9 @@ do_iprop(kdb_log_context *log_ctx)
 
     kadm5_iprop_handle_t handle;
     kdb_hlog_t *ulog;
+
+    if (debug)
+        fprintf(stderr, _("Incremental propagation enabled\n"));
 
     ulog = log_ctx->ulog;
 
@@ -691,6 +705,10 @@ reinit:
     /*
      * Authentication, initialize rpcsec_gss handle etc.
      */
+    if (debug) {
+        fprintf(stderr, _("Initializing kadm5 as client %s\n"),
+                iprop_svc_princstr);
+    }
     retval = kadm5_init_with_skey(kpropd_context, iprop_svc_princstr,
                                   srvtab,
                                   master_svc_princstr,
@@ -701,6 +719,8 @@ reinit:
                                   &server_handle);
 
     if (retval) {
+        if (debug)
+            fprintf(stderr, _("kadm5 initialization failed!\n"));
         if (retval == KADM5_RPC_ERROR) {
             reinit_cnt++;
             if (server_handle)
@@ -712,6 +732,10 @@ reinit:
                         "while attempting to connect"
                         " to master KDC ... retrying"));
             backoff_time = backoff_from_master(&reinit_cnt);
+            if (debug) {
+                fprintf(stderr, _("Sleeping %d seconds to re-initialize "
+                                  "kadm5 (RPC ERROR)\n"), backoff_time);
+            }
             (void) sleep(backoff_time);
             goto reinit;
         } else {
@@ -728,10 +752,18 @@ reinit:
                     _("while initializing %s interface, retrying"),
                     progname);
             backoff_time = backoff_from_master(&reinit_cnt);
+            if (debug) {
+                fprintf(stderr, _("Sleeping %d seconds to re-initialize "
+                                  "kadm5 (krb5kdc not running?)\n"),
+                        backoff_time);
+            }
             sleep(backoff_time);
             goto reinit;
         }
     }
+
+    if (debug)
+        fprintf(stderr, _("kadm5 initialization succeeded\n"));
 
     /*
      * Reset re-initialization count to zero now.
@@ -760,6 +792,9 @@ reinit:
          * or (if needed) do a full resync of the krb5 db.
          */
 
+        if (debug)
+            fprintf(stderr, _("Calling iprop_get_updates_1()\n"));
+        gettimeofday(&iprop_start, NULL);
         incr_ret = iprop_get_updates_1(&mylast, handle->clnt);
         if (incr_ret == (kdb_incr_result_t *)NULL) {
             clnt_perror(handle->clnt,
@@ -768,6 +803,10 @@ reinit:
                 kadm5_destroy((void *)server_handle);
             server_handle = (void *)NULL;
             handle = (kadm5_iprop_handle_t)NULL;
+            if (debug) {
+                fprintf(stderr, _("Reinitializing iprop because get updates "
+                                  "failed\n"));
+            }
             goto reinit;
         }
 
@@ -788,6 +827,10 @@ reinit:
                 break;
             } else {
                 frrequested = now;
+                if (debug)
+                    fprintf(stderr, _("Full resync needed\n"));
+                syslog(LOG_INFO, _("kpropd: Full resync needed."));
+
                 full_ret = full_resync(handle->clnt);
                 if (full_ret == (kdb_fullresync_result_t *)
                     NULL) {
@@ -804,6 +847,9 @@ reinit:
 
             switch (full_ret->ret) {
             case UPDATE_OK:
+                if (debug)
+                    fprintf(stderr, _("Full resync request granted\n"));
+                syslog(LOG_INFO, _("Full resync request granted."));
                 backoff_cnt = 0;
                 break;
 
@@ -811,26 +857,33 @@ reinit:
                 /*
                  * Exponential backoff
                  */
+                if (debug)
+                    fprintf(stderr, _("Exponential backoff\n"));
                 backoff_cnt++;
                 break;
 
-            case UPDATE_FULL_RESYNC_NEEDED:
-            case UPDATE_NIL:
-            default:
-                backoff_cnt = 0;
-                syslog(LOG_ERR, _("kpropd: Full resync,"
-                                  " invalid return from master KDC."));
-                break;
-
             case UPDATE_PERM_DENIED:
-                syslog(LOG_ERR, _("kpropd: Full resync,"
-                                  " permission denied."));
+                if (debug)
+                    fprintf(stderr, _("Full resync permission denied\n"));
+                syslog(LOG_ERR, _("Full resync, permission denied."));
                 goto error;
 
             case UPDATE_ERROR:
-                syslog(LOG_ERR, _("kpropd: Full resync,"
-                                  " error returned from master KDC."));
+                if (debug)
+                    fprintf(stderr, _("Full resync error from master\n"));
+                syslog(LOG_ERR, _(" Full resync, "
+                       "error returned from master KDC."));
                 goto error;
+
+            default:
+                backoff_cnt = 0;
+                if (debug) {
+                    fprintf(stderr,
+                            _("Full resync invalid result from master\n"));
+                }
+                syslog(LOG_ERR, _("Full resync, "
+                                  "invalid return from master KDC."));
+                break;
             }
             break;
 
@@ -843,37 +896,56 @@ reinit:
              * entries using the kdb conv api and will commit
              * the entries to the slave kdc database
              */
+            if (debug) {
+                fprintf(stderr,
+                        _("Got incremental updates from the master\n"));
+            }
             retval = ulog_replay(kpropd_context, incr_ret,
                                  db_args);
 
             if (retval) {
                 const char *msg =
                     krb5_get_error_message(kpropd_context, retval);
-                syslog(LOG_ERR,
-                       _("kpropd: ulog_replay failed (%s), updates not registered."), msg);
+                if (debug) {
+                    fprintf(stderr, _("ulog_replay failed (%s), updates not "
+                                      "registered\n"), msg);
+                }
+                syslog(LOG_ERR, _("ulog_replay failed (%s), updates "
+                       "not registered."), msg);
                 krb5_free_error_message(kpropd_context, msg);
                 break;
             }
 
-            if (debug)
-                fprintf(stderr, _("Update transfer "
-                                  "from master was OK\n"));
+            gettimeofday(&iprop_end, NULL);
+            usec = (iprop_end.tv_sec - iprop_start.tv_sec) * 1000000 +
+                iprop_end.tv_usec - iprop_start.tv_usec;
+            syslog(LOG_INFO, _("Incremental updates: %d updates / %lu us"),
+                   incr_ret->updates.kdb_ulog_t_len, usec);
+            if (debug) {
+                fprintf(stderr, _("Incremental updates: %d updates / "
+                                  "%lu us\n"),
+                        incr_ret->updates.kdb_ulog_t_len, usec);
+            }
             break;
 
         case UPDATE_PERM_DENIED:
-            syslog(LOG_ERR, _("kpropd: get_updates,"
-                              " permission denied."));
+            if (debug)
+                fprintf(stderr, _("get_updates permission denied\n"));
+            syslog(LOG_ERR, _("get_updates, permission denied."));
             goto error;
 
         case UPDATE_ERROR:
-            syslog(LOG_ERR, _("kpropd: get_updates, error "
-                              "returned from master KDC."));
+            if (debug)
+                fprintf(stderr, _("get_updates error from master\n"));
+            syslog(LOG_ERR, _("get_updates, error returned from master KDC."));
             goto error;
 
         case UPDATE_BUSY:
             /*
              * Exponential backoff
              */
+            if (debug)
+                fprintf(stderr, _("get_updates master busy; backoff\n"));
             backoff_cnt++;
             break;
 
@@ -882,16 +954,16 @@ reinit:
              * Master-slave are in sync
              */
             if (debug)
-                fprintf(stderr, _("Master, slave KDC's "
-                                  "are in-sync, no updates\n"));
+                fprintf(stderr, _("KDC is synchronized with master.\n"));
             backoff_cnt = 0;
             frrequested = 0;
             break;
 
         default:
             backoff_cnt = 0;
-            syslog(LOG_ERR, _("kpropd: get_updates,"
-                              " invalid return from master KDC."));
+            if (debug)
+                fprintf(stderr, _("get_updates invalid result from master\n"));
+            syslog(LOG_ERR, _("get_updates, invalid return from master KDC."));
             break;
         }
 
@@ -905,14 +977,19 @@ reinit:
          */
         if (backoff_cnt > 0) {
             backoff_time = backoff_from_master(&backoff_cnt);
-            if (debug)
+            if (debug) {
                 fprintf(stderr, _("Busy signal received "
                                   "from master, backoff for %d secs\n"),
                         backoff_time);
+            }
             (void) sleep(backoff_time);
-        }
-        else
+        } else {
+            if (debug) {
+                fprintf(stderr, _("Waiting for %d seconds before checking "
+                                  "for updates again\n"), pollin);
+            }
             (void) sleep(pollin);
+        }
 
     }
 
@@ -920,16 +997,14 @@ reinit:
 error:
     if (debug)
         fprintf(stderr, _("ERROR returned by master, bailing\n"));
-    syslog(LOG_ERR, _("kpropd: ERROR returned by master KDC,"
-                      " bailing.\n"));
+    syslog(LOG_ERR, _("ERROR returned by master KDC, bailing.\n"));
 done:
     if(iprop_svc_princstr)
         free(iprop_svc_princstr);
     if (master_svc_princstr)
         free(master_svc_princstr);
     if ((retval = krb5_cc_close(kpropd_context, cc))) {
-        com_err(progname, retval,
-                _("while closing default ccache"));
+        com_err(progname, retval, _("while closing default ccache"));
         return retval;
     }
     if (def_realm && kpropd_context)
@@ -1120,13 +1195,9 @@ void PRS(argv)
             /* We don't take any arguments, only options */
             usage();
     }
-    /*
-     * If not in debug mode, switch com_err reporting to syslog
-     */
-    if (! debug) {
-        openlog("kpropd", LOG_PID | LOG_ODELAY, SYSLOG_CLASS);
+    openlog("kpropd", LOG_PID | LOG_ODELAY, SYSLOG_CLASS);
+    if (!debug)
         set_com_err_hook(kpropd_com_err_proc);
-    }
     /*
      * Get my hostname, so we can construct my service name
      */
@@ -1215,7 +1286,8 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
             com_err(progname, retval, _("while unparsing client name"));
             exit(1);
         }
-        printf("krb5_recvauth(%d, %s, %s, ...)\n", fd, kprop_version, name);
+        fprintf(stderr, "krb5_recvauth(%d, %s, %s, ...)\n", fd, kprop_version,
+                name);
         free(name);
     }
 
@@ -1399,6 +1471,9 @@ recv_database(context, fd, database_fd, confmsg)
         exit(1);
     }
 
+    if (debug)
+        fprintf(stderr, _("Full propagation transfer started.\n"));
+
     /*
      * Now start receiving the database from the net
      */
@@ -1451,6 +1526,10 @@ recv_database(context, fd, database_fd, confmsg)
                  received_size, database_size);
         send_error(context, fd, KRB5KRB_ERR_GENERIC, buf);
     }
+
+    if (debug)
+        fprintf(stderr, _("Full propagation transfer finished.\n"));
+
     /*
      * Create message acknowledging number of bytes received, but
      * don't send it until kdb5_util returns successfully.
@@ -1602,6 +1681,11 @@ load_database(context, kdb_util, database_file_name)
             com_err(progname, errno, _("while waiting for %s"), kdb_util);
             exit(1);
         }
+    }
+
+    if (!WIFEXITED(waitb)) {
+        com_err(progname, 0, _("%s load terminated"), kdb_util);
+        exit(1);
     }
 
     error_ret = WEXITSTATUS(waitb);
