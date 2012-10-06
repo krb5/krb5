@@ -1664,22 +1664,38 @@ log_as_req(krb5_context context, const krb5_fulladdr *from,
 #endif
 }
 
+/*
+ * Unparse a principal for logging purposes and limit the string length.
+ * Ignore errors because the most likely errors are memory exhaustion, and many
+ * other things will fail in the logging functions in that case.
+ */
+static void
+unparse_and_limit(krb5_context ctx, krb5_principal princ, char **str)
+{
+    /* Ignore errors */
+    krb5_unparse_name(ctx, princ, str);
+    limit_string(*str);
+}
+
 /* Here "status" must be non-null.  Error code
    KRB5KDC_ERR_SERVER_NOMATCH is handled specially.
 
    Currently no info about name canonicalization is logged.  */
 void
-log_tgs_req(const krb5_fulladdr *from,
+log_tgs_req(krb5_context ctx, const krb5_fulladdr *from,
             krb5_kdc_req *request, krb5_kdc_rep *reply,
-            const char *cname, const char *sname, const char *altcname,
+            krb5_principal cprinc, krb5_principal sprinc,
+            krb5_principal altcprinc,
             krb5_timestamp authtime,
-            unsigned int c_flags, const char *s4u_name,
+            unsigned int c_flags,
             const char *status, krb5_error_code errcode, const char *emsg)
 {
     char ktypestr[128];
     const char *fromstring = 0;
     char fromstringbuf[70];
     char rep_etypestr[128];
+    char *cname = NULL, *sname = NULL, *altcname = NULL;
+    char *logcname = NULL, *logsname = NULL, *logaltcname = NULL;
 
     fromstring = inet_ntop(ADDRTYPE2FAMILY(from->address->addrtype),
                            from->address->contents,
@@ -1692,6 +1708,13 @@ log_tgs_req(const krb5_fulladdr *from,
     else
         rep_etypestr[0] = 0;
 
+    unparse_and_limit(ctx, cprinc, &cname);
+    logcname = (cname != NULL) ? cname : "<unknown client>";
+    unparse_and_limit(ctx, sprinc, &sname);
+    logsname = (sname != NULL) ? sname : "<unknown server>";
+    unparse_and_limit(ctx, altcprinc, &altcname);
+    logaltcname = (altcname != NULL) ? altcname : "<unknown>";
+
     /* Differences: server-nomatch message logs 2nd ticket's client
        name (useful), and doesn't log ktypestr (probably not
        important).  */
@@ -1699,32 +1722,68 @@ log_tgs_req(const krb5_fulladdr *from,
         krb5_klog_syslog(LOG_INFO, _("TGS_REQ (%s) %s: %s: authtime %d, %s%s "
                                      "%s for %s%s%s"),
                          ktypestr, fromstring, status, authtime, rep_etypestr,
-                         !errcode ? "," : "",
-                         cname ? cname : "<unknown client>",
-                         sname ? sname : "<unknown server>",
+                         !errcode ? "," : "", logcname, logsname,
                          errcode ? ", " : "", errcode ? emsg : "");
-        if (s4u_name) {
-            assert(isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) ||
-                   isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION));
-            if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION))
-                krb5_klog_syslog(LOG_INFO,
-                                 _("... PROTOCOL-TRANSITION s4u-client=%s"),
-                                 s4u_name);
-            else if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))
-                krb5_klog_syslog(LOG_INFO,
-                                 _("... CONSTRAINED-DELEGATION s4u-client=%s"),
-                                 s4u_name);
-        }
+        if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION))
+            krb5_klog_syslog(LOG_INFO,
+                             _("... PROTOCOL-TRANSITION s4u-client=%s"),
+                             logaltcname);
+        else if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))
+            krb5_klog_syslog(LOG_INFO,
+                             _("... CONSTRAINED-DELEGATION s4u-client=%s"),
+                             logaltcname);
+
     } else
         krb5_klog_syslog(LOG_INFO, _("TGS_REQ %s: %s: authtime %d, %s for %s, "
                                      "2nd tkt client %s"),
                          fromstring, status, authtime,
-                         cname ? cname : "<unknown client>",
-                         sname ? sname : "<unknown server>",
-                         altcname ? altcname : "<unknown>");
+                         logcname, logsname, logaltcname);
 
     /* OpenSolaris: audit_krb5kdc_tgs_req(...)  or
        audit_krb5kdc_tgs_req_2ndtktmm(...) */
+
+    krb5_free_unparsed_name(ctx, cname);
+    krb5_free_unparsed_name(ctx, sname);
+    krb5_free_unparsed_name(ctx, altcname);
+}
+
+void
+log_tgs_badtrans(krb5_context ctx, krb5_principal cprinc,
+                 krb5_principal sprinc, krb5_data *trcont,
+                 krb5_error_code errcode)
+{
+    unsigned int tlen;
+    char *tdots;
+    const char *emsg = NULL;
+    char *cname = NULL, *sname = NULL;
+    char *logcname = NULL, *logsname = NULL;
+
+    unparse_and_limit(ctx, cprinc, &cname);
+    logcname = (cname != NULL) ? cname : "<unknown client>";
+    unparse_and_limit(ctx, sprinc, &sname);
+    logsname = (sname != NULL) ? sname : "<unknown server>";
+
+    tlen = trcont->length;
+    tdots = tlen > 125 ? "..." : "";
+    tlen = tlen > 125 ? 125 : tlen;
+
+    if (errcode == KRB5KRB_AP_ERR_ILL_CR_TKT)
+        krb5_klog_syslog(LOG_INFO, _("bad realm transit path from '%s' "
+                                     "to '%s' via '%.*s%s'"),
+                         logcname, logsname, tlen,
+                         trcont->data, tdots);
+    else {
+        emsg = krb5_get_error_message(ctx, errcode);
+        krb5_klog_syslog(LOG_ERR, _("unexpected error checking transit "
+                                    "from '%s' to '%s' via '%.*s%s': %s"),
+                         logcname, logsname, tlen,
+                         trcont->data, tdots,
+                         emsg);
+        krb5_free_error_message(ctx, emsg);
+        emsg = NULL;
+    }
+    krb5_free_unparsed_name(ctx, cname);
+    krb5_free_unparsed_name(ctx, sname);
 }
 
 void

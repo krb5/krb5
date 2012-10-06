@@ -119,9 +119,9 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_timestamp rtime;
     krb5_keyblock *reply_key = NULL;
     krb5_key_data  *server_key;
-    char *cname = 0, *sname = 0, *altcname = 0;
+    krb5_principal cprinc = NULL, sprinc = NULL, altcprinc = NULL;
     krb5_last_req_entry *nolrarray[2], nolrentry;
-    int errcode, errcode2;
+    int errcode;
     const char        *status = 0;
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* TGT */
     krb5_enc_tkt_part *subject_tkt = NULL; /* TGT or evidence ticket */
@@ -129,7 +129,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_pa_s4u_x509_user *s4u_x509_user = NULL; /* protocol transition request */
     krb5_authdata **kdc_issued_auth_data = NULL; /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;       /* client/server KDB flags */
-    char *s4u_name = NULL;
     krb5_boolean is_referral;
     const char *emsg = NULL;
     krb5_kvno ticket_kvno = 0;
@@ -169,15 +168,8 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     errcode = kdc_process_tgs_req(kdc_active_realm,
                                   request, from, pkt, &header_ticket,
                                   &krbtgt, &tgskey, &subkey, &pa_tgs_req);
-    if (header_ticket && header_ticket->enc_part2 &&
-        (errcode2 = krb5_unparse_name(kdc_context,
-                                      header_ticket->enc_part2->client,
-                                      &cname))) {
-        status = "UNPARSING CLIENT";
-        errcode = errcode2;
-        goto cleanup;
-    }
-    limit_string(cname);
+    if (header_ticket && header_ticket->enc_part2)
+        cprinc = header_ticket->enc_part2->client;
 
     if (errcode) {
         status = "PROCESS_TGS";
@@ -225,6 +217,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
                             &status);
     if (errcode != 0)
         goto cleanup;
+    sprinc = server->princ;
     /* XXX until nothing depends on request being mutated */
     krb5_free_principal(kdc_context, request->server);
     request->server = NULL;
@@ -234,12 +227,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         status = "COPYING RESOLVED SERVER";
         goto cleanup;
     }
-
-    if ((errcode = krb5_unparse_name(kdc_context, server->princ, &sname))) {
-        status = "UNPARSING SERVER";
-        goto cleanup;
-    }
-    limit_string(sname);
 
     if ((errcode = krb5_timeofday(kdc_context, &kdc_time))) {
         status = "TIME_OF_DAY";
@@ -501,19 +488,12 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         enc_tkt_reply.times.starttime = 0;
 
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
-        errcode = krb5_unparse_name(kdc_context, s4u_x509_user->user_id.user,
-                                    &s4u_name);
+        altcprinc = s4u_x509_user->user_id.user;
     } else if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION)) {
-        errcode = krb5_unparse_name(kdc_context, subject_tkt->client,
-                                    &s4u_name);
+        altcprinc = subject_tkt->client;
     } else {
-        errcode = 0;
+        altcprinc = NULL;
     }
-    if (errcode) {
-        status = "UNPARSING S4U CLIENT";
-        goto cleanup;
-    }
-
     if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
         krb5_enc_tkt_part *t2enc = request->second_ticket[st_idx]->enc_part2;
         encrypting_key = *(t2enc->session);
@@ -649,35 +629,15 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         }
     }
     if (!isflagset (request->kdc_options, KDC_OPT_DISABLE_TRANSITED_CHECK)) {
-        unsigned int tlen;
-        char *tdots;
-
         errcode = kdc_check_transited_list (kdc_active_realm,
                                             &enc_tkt_reply.transited.tr_contents,
                                             krb5_princ_realm (kdc_context, header_enc_tkt->client),
                                             krb5_princ_realm (kdc_context, request->server));
-        tlen = enc_tkt_reply.transited.tr_contents.length;
-        tdots = tlen > 125 ? "..." : "";
-        tlen = tlen > 125 ? 125 : tlen;
-
         if (errcode == 0) {
             setflag (enc_tkt_reply.flags, TKT_FLG_TRANSIT_POLICY_CHECKED);
-        } else if (errcode == KRB5KRB_AP_ERR_ILL_CR_TKT)
-            krb5_klog_syslog(LOG_INFO, _("bad realm transit path from '%s' "
-                                         "to '%s' via '%.*s%s'"),
-                             cname ? cname : "<unknown client>",
-                             sname ? sname : "<unknown server>", tlen,
-                             enc_tkt_reply.transited.tr_contents.data, tdots);
-        else {
-            emsg = krb5_get_error_message(kdc_context, errcode);
-            krb5_klog_syslog(LOG_ERR, _("unexpected error checking transit "
-                                        "from '%s' to '%s' via '%.*s%s': %s"),
-                             cname ? cname : "<unknown client>",
-                             sname ? sname : "<unknown server>", tlen,
-                             enc_tkt_reply.transited.tr_contents.data, tdots,
-                             emsg);
-            krb5_free_error_message(kdc_context, emsg);
-            emsg = NULL;
+        } else {
+            log_tgs_badtrans(kdc_context, cprinc, sprinc,
+                             &enc_tkt_reply.transited.tr_contents, errcode);
         }
     } else
         krb5_klog_syslog(LOG_INFO, _("not checking transit path"));
@@ -704,11 +664,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         krb5_enc_tkt_part *t2enc = request->second_ticket[st_idx]->enc_part2;
         krb5_principal client2 = t2enc->client;
         if (!krb5_principal_compare(kdc_context, request->server, client2)) {
-            if ((errcode = krb5_unparse_name(kdc_context, client2, &altcname)))
-                altcname = 0;
-            if (altcname != NULL)
-                limit_string(altcname);
-
+            altcprinc = client2;
             errcode = KRB5KDC_ERR_SERVER_NOMATCH;
             status = "2ND_TKT_MISMATCH";
             goto cleanup;
@@ -822,8 +778,9 @@ cleanup:
         krb5_free_keyblock(kdc_context, reply_key);
     if (errcode)
         emsg = krb5_get_error_message (kdc_context, errcode);
-    log_tgs_req(from, request, &reply, cname, sname, altcname, authtime,
-                c_flags, s4u_name, status, errcode, emsg);
+    log_tgs_req(kdc_context, from, request, &reply, cprinc,
+                sprinc, altcprinc, authtime,
+                c_flags, status, errcode, emsg);
     if (errcode) {
         krb5_free_error_message (kdc_context, emsg);
         emsg = NULL;
@@ -854,10 +811,6 @@ cleanup:
         krb5_free_kdc_req(kdc_context, request);
     if (state)
         kdc_free_rstate(state);
-    if (cname != NULL)
-        free(cname);
-    if (sname != NULL)
-        free(sname);
     krb5_db_free_principal(kdc_context, server);
     krb5_db_free_principal(kdc_context, krbtgt);
     krb5_db_free_principal(kdc_context, client);
@@ -869,8 +822,6 @@ cleanup:
         krb5_free_pa_s4u_x509_user(kdc_context, s4u_x509_user);
     if (kdc_issued_auth_data != NULL)
         krb5_free_authdata(kdc_context, kdc_issued_auth_data);
-    if (s4u_name != NULL)
-        free(s4u_name);
     if (subkey != NULL)
         krb5_free_keyblock(kdc_context, subkey);
     if (tgskey != NULL)

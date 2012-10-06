@@ -310,12 +310,18 @@ log_as_req(krb5_context context, const krb5_fulladdr *from,
            krb5_timestamp authtime,
            const char *status, krb5_error_code errcode, const char *emsg);
 void
-log_tgs_req(const krb5_fulladdr *from,
+log_tgs_req(krb5_context ctx, const krb5_fulladdr *from,
             krb5_kdc_req *request, krb5_kdc_rep *reply,
-            const char *cname, const char *sname, const char *altcname,
+            krb5_principal cprinc, krb5_principal sprinc,
+            krb5_principal altcprinc,
             krb5_timestamp authtime,
-            unsigned int c_flags, const char *s4u_name,
+            unsigned int c_flags,
             const char *status, krb5_error_code errcode, const char *emsg);
+void
+log_tgs_badtrans(krb5_context ctx, krb5_principal cprinc,
+                 krb5_principal sprinc, krb5_data *trcont,
+                 krb5_error_code errcode);
+
 void
 log_tgs_alt_tgt(krb5_context context, krb5_principal p);
 
