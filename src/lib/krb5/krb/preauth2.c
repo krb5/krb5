@@ -929,8 +929,8 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
 
     /* Call the responder to answer response items. */
     if (responder != NULL && !k5_response_items_empty(rock->rctx.items)) {
-        ret = (*responder)(context, opte->opt_private->responder_data,
-                           &rock->rctx);
+        ret = (*responder)(context, &rock->rctx,
+                           opte->opt_private->responder_data);
         if (ret)
             goto error;
     }
