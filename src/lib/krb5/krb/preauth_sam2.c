@@ -82,12 +82,12 @@ sam_challenge_banner(krb5_int32 sam_type)
 
 static krb5_error_code
 sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
-	     krb5_clpreauth_modreq modreq, krb5_get_init_creds_opt *opt,
-	     krb5_clpreauth_callbacks cb, krb5_clpreauth_rock rock,
-	     krb5_kdc_req *request, krb5_data *encoded_request_body,
-	     krb5_data *encoded_previous_request, krb5_pa_data *padata,
-	     krb5_prompter_fct prompter, void *prompter_data,
-	     krb5_pa_data ***out_padata)
+             krb5_clpreauth_modreq modreq, krb5_get_init_creds_opt *opt,
+             krb5_clpreauth_callbacks cb, krb5_clpreauth_rock rock,
+             krb5_kdc_req *request, krb5_data *encoded_request_body,
+             krb5_data *encoded_previous_request, krb5_pa_data *padata,
+             krb5_prompter_fct prompter, void *prompter_data,
+             krb5_pa_data ***out_padata)
 {
     krb5_error_code retval;
     krb5_sam_challenge_2 *sc2 = NULL;
@@ -153,9 +153,9 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
         /* prompts for the user.                                */
 
         retval = (*rock->gak_fct)(context, request->client, sc2b->sam_etype,
-				  prompter, prompter_data, rock->salt,
-				  rock->s2kparams, rock->as_key,
-				  *rock->gak_data);
+                                  prompter, prompter_data, rock->salt,
+                                  rock->s2kparams, rock->as_key,
+                                  *rock->gak_data);
         if (retval) {
             krb5_free_sam_challenge_2(context, sc2);
             krb5_free_sam_challenge_2_body(context, sc2b);
@@ -222,8 +222,8 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
 
         /* generate a key using the supplied password */
         retval = krb5_c_string_to_key(context, sc2b->sam_etype,
-				      (krb5_data *)*rock->gak_data, salt,
-				      rock->as_key);
+                                      (krb5_data *)*rock->gak_data, salt,
+                                      rock->as_key);
 
         if (retval) {
             krb5_free_sam_challenge_2(context, sc2);
@@ -249,7 +249,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
             /* This should be a call to the crypto library some day */
             /* key types should already match the sam_etype */
             retval = krb5int_c_combine_keys(context, rock->as_key, &tmp_kb,
-					    rock->as_key);
+                                            rock->as_key);
 
             if (retval) {
                 krb5_free_sam_challenge_2(context, sc2);
@@ -348,7 +348,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     /* enc_sam_response_enc_2 from above */
 
     retval = krb5_c_encrypt_length(context, rock->as_key->enctype,
-				   scratch->length, &ciph_len);
+                                   scratch->length, &ciph_len);
     if (retval) {
         krb5_free_sam_challenge_2(context, sc2);
         krb5_free_sam_challenge_2_body(context, sc2b);
@@ -368,8 +368,8 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     }
 
     retval = krb5_c_encrypt(context, rock->as_key,
-			    KRB5_KEYUSAGE_PA_SAM_RESPONSE, NULL, scratch,
-			    &sr2.sam_enc_nonce_or_sad);
+                            KRB5_KEYUSAGE_PA_SAM_RESPONSE, NULL, scratch,
+                            &sr2.sam_enc_nonce_or_sad);
     if (retval) {
         krb5_free_sam_challenge_2(context, sc2);
         krb5_free_sam_challenge_2_body(context, sc2b);
@@ -399,7 +399,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     sam_padata[0] = malloc(sizeof(krb5_pa_data));
     if (sam_padata[0] == NULL) {
         krb5_free_data(context, scratch);
-	free(sam_padata);
+        free(sam_padata);
         return(ENOMEM);
     }
 
@@ -420,7 +420,7 @@ static krb5_preauthtype sam2_pa_types[] = {
 
 krb5_error_code
 clpreauth_sam2_initvt(krb5_context context, int maj_ver, int min_ver,
-		      krb5_plugin_vtable vtable)
+                      krb5_plugin_vtable vtable)
 {
     krb5_clpreauth_vtable vt;
 
