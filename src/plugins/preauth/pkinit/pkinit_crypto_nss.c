@@ -2402,6 +2402,7 @@ crypto_load_files(krb5_context context,
     CERTCertificate *cert;
     CERTCertList *before, *after;
     CERTCertListNode *anode, *bnode;
+    SECKEYPrivateKey *key;
     CK_ATTRIBUTE attrs[4];
     CK_BBOOL cktrue = CK_TRUE, cktrust;
     CK_OBJECT_CLASS keyclass = CKO_PRIVATE_KEY, certclass = CKO_CERTIFICATE;
@@ -2554,6 +2555,20 @@ crypto_load_files(krb5_context context,
         }
         if (before != NULL) {
             CERT_DestroyCertList(before);
+        }
+        if ((keyfile != NULL) && (obj->cert != NULL)) {
+            key = PK11_FindPrivateKeyFromCert(slot, obj->cert,
+                                              crypto_pwcb_prep(id_cryptoctx,
+                                                               context));
+            if (key == NULL) {
+                pkiDebug("%s: no key private found for \"%s\"(%s), "
+                         "even though we just loaded that key?\n",
+                         __FUNCTION__,
+                         obj->cert->nickname ?
+                         obj->cert->nickname : "(no name)",
+                         certfile);
+            } else
+                SECKEY_DestroyPrivateKey(req_cryptoctx->client_dh_privkey);
         }
     }
 
