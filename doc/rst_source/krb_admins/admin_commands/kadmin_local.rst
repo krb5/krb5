@@ -763,7 +763,8 @@ Examples:
 ktadd
 ~~~~~
 
-    **ktadd** [[*principal*\|\ **-glob** *princ-exp*]
+    | **ktadd** [options] *principal*
+    | **ktadd** [options] **-glob** *princ-exp*
 
 Adds a *principal*, or all principals matching *princ-exp*, to a
 keytab file.  Each principal's keys are randomized in the process.
@@ -771,7 +772,7 @@ The rules for *princ-exp* are described in the **list_principals**
 command.
 
 This command requires the **inquire** and **changepw** privileges.
-With the **-glob** option, it also requires the **list** privilege.
+With the **-glob** form, it also requires the **list** privilege.
 
 The options are:
 
@@ -812,7 +813,7 @@ Example:
 ktremove
 ~~~~~~~~
 
-    **ktremove** *principal* [*kvno*\|\ *all*\| *old*]
+    **ktremove** [options] *principal* [*kvno* | *all* | *old*]
 
 Removes entries for the specified *principal* from a keytab.  Requires
 no permissions, since this does not require database access.
