@@ -603,6 +603,7 @@ crypto_pwfn(const char *what, PRBool retry, void *arg)
     ret = (*id->pwcb_args.prompter)(id->pwcb_args.context,
                                     id->pwcb_args.prompter_data,
                                     what, answer, 1, &prompt);
+    (*k5int_set_prompt_types)(id->pwcb_args.context, NULL);
     answer = NULL;
     if ((ret == 0) && (reply.data != NULL)) {
         /* The result will be freed with PR_Free, so return a copy. */
