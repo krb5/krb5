@@ -3702,6 +3702,7 @@ pkinit_octetstring_hkdf(krb5_context context,
     size_t kbyte, klength;
     krb5_data rnd_data;
     krb5_error_code result;
+    NSSInitContext *ncontext;
 
     if (counter_length > sizeof(counter))
         return EINVAL;
@@ -3717,6 +3718,17 @@ pkinit_octetstring_hkdf(krb5_context context,
         counter[i] = (counter_start >> (8 * (counter_length - 1 - i))) & 0xff;
     rnd_len = kbyte;
     left = rnd_len;
+    ncontext = NSS_InitContext(DEFAULT_CONFIGDIR,
+                               NULL,
+                               NULL,
+                               NULL,
+                               NULL,
+                               NSS_INIT_READONLY |
+                               NSS_INIT_NOCERTDB |
+                               NSS_INIT_NOMODDB |
+                               NSS_INIT_FORCEOPEN |
+                               NSS_INIT_NOROOTINIT |
+                               NSS_INIT_PK11RELOAD);
     while (left > 0) {
         ctx = PK11_CreateDigestContext(hash_alg);
         if (ctx == NULL) {
@@ -3774,6 +3786,9 @@ pkinit_octetstring_hkdf(krb5_context context,
                 break;
         }
     }
+
+    if (NSS_ShutdownContext(ncontext) != SECSuccess)
+        pkiDebug("%s: error shutting down context\n", __FUNCTION__);
 
     krb5key->contents = malloc(klength);
     if (krb5key->contents == NULL) {
