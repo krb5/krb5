@@ -4307,45 +4307,46 @@ crypto_signeddata_common_create(krb5_context context,
                                 pkinit_identity_crypto_context id_cryptoctx,
                                 NSSCMSMessage *msg,
                                 SECOidTag digest,
-                                enum sdcc_include_certchain include_certchain,
+                                enum sdcc_include_certchain certchain_mode,
                                 enum sdcc_include_signed_attrs add_signedattrs,
                                 NSSCMSSignedData **signed_data_out)
 {
     NSSCMSSignedData *sdata;
     NSSCMSSignerInfo *signer;
-
-    if (id_cryptoctx->id_cert == NULL) {
-        pkiDebug("%s: no signer identity\n", __FUNCTION__);
-        return ENOENT;
-    }
+    NSSCMSCertChainMode chainmode;
 
     /* Create a signed-data object. */
     sdata = NSS_CMSSignedData_Create(msg);
     if (sdata == NULL)
         return ENOMEM;
 
-    /* Create a signer and add it to the signed-data pointer. */
-    signer = NSS_CMSSignerInfo_Create(msg, id_cryptoctx->id_cert, digest);
-    if (signer == NULL)
-        return ENOMEM;
-    if (NSS_CMSSignerInfo_IncludeCerts(signer,
-                                       (include_certchain ==
-                                        signeddata_common_create_with_chain) ?
-                                       NSSCMSCM_CertChain : NSSCMSCM_CertOnly,
-                                       certUsageAnyCA) != SECSuccess) {
-        pkiDebug("%s: error setting IncludeCerts\n", __FUNCTION__);
-        return ENOMEM;
-    }
-    if (NSS_CMSSignedData_AddSignerInfo(sdata, signer) != SECSuccess)
-        return ENOMEM;
-
-    if (add_signedattrs == signeddata_common_create_with_signed_attrs)
-        /* The presence of any signed attribute means the digest
-         * becomes a signed attribute, too. */
-        if (NSS_CMSSignerInfo_AddSigningTime(signer, PR_Now()) != SECSuccess) {
-            pkiDebug("%s: error adding signing time\n", __FUNCTION__);
+    if (id_cryptoctx->id_cert != NULL) {
+        /* Create a signer and add it to the signed-data pointer. */
+        signer = NSS_CMSSignerInfo_Create(msg, id_cryptoctx->id_cert, digest);
+        if (signer == NULL)
+            return ENOMEM;
+        chainmode = (certchain_mode == signeddata_common_create_with_chain) ?
+                    NSSCMSCM_CertChain :
+                    NSSCMSCM_CertOnly;
+        if (NSS_CMSSignerInfo_IncludeCerts(signer,
+                                           chainmode,
+                                           certUsageAnyCA) != SECSuccess) {
+            pkiDebug("%s: error setting IncludeCerts\n", __FUNCTION__);
             return ENOMEM;
         }
+        if (NSS_CMSSignedData_AddSignerInfo(sdata, signer) != SECSuccess)
+            return ENOMEM;
+
+        if (add_signedattrs == signeddata_common_create_with_signed_attrs) {
+            /* The presence of any signed attribute means the digest
+             * becomes a signed attribute, too. */
+            if (NSS_CMSSignerInfo_AddSigningTime(signer,
+                                                 PR_Now()) != SECSuccess) {
+                pkiDebug("%s: error adding signing time\n", __FUNCTION__);
+                return ENOMEM;
+            }
+        }
+    }
 
     *signed_data_out = sdata;
     return 0;
@@ -5282,7 +5283,7 @@ cms_signeddata_verify(krb5_context context,
                                               cms_msg_type,
                                               &plain,
                                               &was_signed);
-        if ((ret != 0) || (plain == NULL) || !was_signed) {
+        if ((ret != 0) || (plain == NULL)) {
             NSS_CMSMessage_Destroy(msg);
             PORT_FreeArena(pool, PR_TRUE);
             return ret ? ret : ENOMEM;
