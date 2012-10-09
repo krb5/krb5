@@ -26,8 +26,6 @@
 
 #include "crypto_int.h"
 
-#ifdef CAMELLIA
-
 krb5_error_code
 krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp, krb5_key key,
                     const krb5_data *in, krb5_data *out)
@@ -58,5 +56,3 @@ cleanup:
     krb5_k_free_key(NULL, kp);
     return ret;
 }
-
-#endif /* CAMELLIA */

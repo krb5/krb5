@@ -27,8 +27,6 @@
 
 #include "crypto_int.h"
 
-#ifdef CAMELLIA
-
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
 /* AEAD */
@@ -182,5 +180,3 @@ cleanup:
     zapfree(cksum.data, cksum.length);
     return ret;
 }
-
-#endif /* CAMELLIA */

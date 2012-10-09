@@ -36,9 +36,6 @@
 
 #include "camellia.h"
 
-#include "k5-int.h" /* Only for CAMELLIA; remove later. */
-#ifdef CAMELLIA
-
 /* key constants */
 
 #define CAMELLIA_SIGMA1L (0xA09E667FL)
@@ -1540,5 +1537,3 @@ camellia_dec_blk(const unsigned char in_blk[],  unsigned char out_blk[],
     Camellia_DecryptBlock(cx->keybitlen, in_blk, cx->k_sch, out_blk);
     return camellia_good;
 }
-
-#endif /* CAMELLIA */

@@ -321,11 +321,8 @@ krb5_error_code krb5int_confounder_verify(const struct krb5_cksumtypes *ctp,
 /*** Key derivation functions ***/
 
 enum deriv_alg {
-    DERIVE_RFC3961              /* RFC 3961 section 5.1 */
-#ifdef CAMELLIA
-    ,                           /* C90 doesn't let enum list end w/comma */
+    DERIVE_RFC3961,             /* RFC 3961 section 5.1 */
     DERIVE_SP800_108_CMAC       /* NIST SP 800-108 with CMAC as PRF */
-#endif
 };
 
 krb5_error_code krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
@@ -421,10 +418,8 @@ extern const struct krb5_enc_provider krb5int_enc_aes128;
 extern const struct krb5_enc_provider krb5int_enc_aes256;
 extern const struct krb5_enc_provider krb5int_enc_aes128_ctr;
 extern const struct krb5_enc_provider krb5int_enc_aes256_ctr;
-#ifdef CAMELLIA
 extern const struct krb5_enc_provider krb5int_enc_camellia128;
 extern const struct krb5_enc_provider krb5int_enc_camellia256;
-#endif
 
 extern const struct krb5_hash_provider krb5int_hash_crc32;
 extern const struct krb5_hash_provider krb5int_hash_md4;
@@ -462,8 +457,7 @@ krb5_error_code krb5int_pbkdf2_hmac_sha1(const krb5_data *out,
                                          const krb5_data *salt);
 
 /* The following are used by test programs and are just handler functions from
- * the AES and Camellia enc providers.  Define a stub krb5int_camellia_cbc_mac
- * even if CAMELLIA isn't defined, since it's in the export list. */
+ * the AES and Camellia enc providers. */
 krb5_error_code krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec,
                                     krb5_crypto_iov *data, size_t num_data);
 krb5_error_code krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec,

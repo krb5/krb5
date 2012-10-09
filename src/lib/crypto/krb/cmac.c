@@ -41,8 +41,6 @@
 
 #include "crypto_int.h"
 
-#ifdef CAMELLIA
-
 #define BLOCK_SIZE 16
 
 static unsigned char const_Rb[BLOCK_SIZE] = {
@@ -221,17 +219,3 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
 
     return 0;
 }
-
-#else /* CAMELLIA */
-
-/* This won't be used, but is still in the export table. */
-
-krb5_error_code
-krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
-                      const krb5_crypto_iov *data, size_t num_data,
-                      krb5_data *output)
-{
-    return EINVAL;
-}
-
-#endif /* CAMELLIA */

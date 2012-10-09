@@ -2383,28 +2383,6 @@ krb5int_c_mandatory_cksumtype(krb5_context, krb5_enctype, krb5_cksumtype *);
 krb5_error_code
 krb5int_clean_hostname(krb5_context, const char *, char *, size_t);
 
-#if 0
-/*
- * There are no IANA assignments for these enctypes or cksumtypes yet.  They
- * must be defined to local-use negative numbers at build time for Camellia
- * support to function at the moment.  If one is defined, they should all be
- * defined.  When IANA assignments exist, these definitions should move to the
- * appropriate places in krb5.hin and all CAMELLIA conditional code should be
- * made unconditional.
- *
- * The present code is experimental and may not be compatible with the
- * standardized version.
- */
-#define ENCTYPE_CAMELLIA128_CTS_CMAC -XXX /* Camellia CTS mode, 128-bit key */
-#define ENCTYPE_CAMELLIA256_CTS_CMAC -YYY /* Camellia CTS mode, 256-bit key */
-#define CKSUMTYPE_CMAC_CAMELLIA128 -XXX   /* CMAC, 128-bit Camellia key */
-#define CKSUMTYPE_CMAC_CAMELLIA256 -YYY   /* CMAC, 256-bit Camellia key */
-#endif
-
-#ifdef ENCTYPE_CAMELLIA128_CTS_CMAC
-#define CAMELLIA
-#endif
-
 struct _krb5_kt {       /* should move into k5-int.h */
     krb5_magic magic;
     const struct _krb5_kt_ops *ops;

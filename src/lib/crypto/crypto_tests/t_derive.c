@@ -137,7 +137,6 @@ struct test {
           "\xD7\xBB\xA9\x07\x76\xD8\x12\x6D\x91\xF3\x4F\x31\x01\xAE\xA8\xBA" }
     },
 
-#ifdef CAMELLIA
     /* Kc, Ke, Ki for a Camellia-128 key */
     {
         ENCTYPE_CAMELLIA128_CTS_CMAC,
@@ -201,7 +200,6 @@ struct test {
           "\xFA\x62\x4F\xA0\xE5\x23\x99\x3F\xA3\x88\xAE\xFD\xC6\x7E\x67\xEB"
           "\xCD\x8C\x08\xE8\xA0\x24\x6B\x1D\x73\xB0\xD1\xDD\x9F\xC5\x82\xB0" }
     },
-#endif
 };
 
 static void
@@ -231,10 +229,8 @@ get_enc_provider(krb5_enctype enctype)
     case ENCTYPE_DES3_CBC_SHA1:           return &krb5int_enc_des3;
     case ENCTYPE_AES128_CTS_HMAC_SHA1_96: return &krb5int_enc_aes128;
     case ENCTYPE_AES256_CTS_HMAC_SHA1_96: return &krb5int_enc_aes256;
-#ifdef CAMELLIA
     case ENCTYPE_CAMELLIA128_CTS_CMAC:    return &krb5int_enc_camellia128;
     case ENCTYPE_CAMELLIA256_CTS_CMAC:    return &krb5int_enc_camellia256;
-#endif
     }
     abort();
 }

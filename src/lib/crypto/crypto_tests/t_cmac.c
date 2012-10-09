@@ -40,8 +40,6 @@
 
 #include "crypto_int.h"
 
-#ifdef CAMELLIA
-
 /* All examples use the following Camellia-128 key. */
 static unsigned char keybytes[] = {
     0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
@@ -98,12 +96,9 @@ check_result(const char *name, const unsigned char *result,
     }
 }
 
-#endif /* CAMELLIA */
-
 int
 main(int argc, char **argv)
 {
-#ifdef CAMELLIA
     krb5_context context = NULL;
     krb5_keyblock keyblock;
     krb5_key key;
@@ -142,6 +137,5 @@ main(int argc, char **argv)
 
     printf("All CMAC tests passed.\n");
     krb5_k_free_key(context, key);
-#endif /* CAMELLIA */
     return 0;
 }

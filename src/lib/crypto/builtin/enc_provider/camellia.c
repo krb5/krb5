@@ -27,8 +27,6 @@
 #include "crypto_int.h"
 #include "camellia.h"
 
-#ifdef CAMELLIA
-
 /*
  * Private per-key data to cache after first generation.  We don't want to mess
  * with the imported Cemallia implementation too much, so we'll just use two
@@ -339,25 +337,3 @@ const struct krb5_enc_provider krb5int_enc_camellia256 = {
     camellia_init_state,
     krb5int_default_free_state
 };
-
-#else /* CAMELLIA */
-
-/* These won't be used, but are still in the export table. */
-
-krb5_error_code
-krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
-                         size_t num_data, const krb5_data *iv,
-                         krb5_data *output)
-{
-    return EINVAL;
-}
-
-const struct krb5_enc_provider krb5int_enc_camellia128 = {
-    0
-};
-
-const struct krb5_enc_provider krb5int_enc_camellia256 = {
-    0
-};
-
-#endif /* CAMELLIA */

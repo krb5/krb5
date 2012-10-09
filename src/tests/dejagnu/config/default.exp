@@ -189,6 +189,30 @@ set passes {
 	{dummy=[verbose -log "AES enctypes"]}
     }
     {
+	camellia-only
+	mode=udp
+	des3_krbtgt=0
+	{supported_enctypes=camellia256-cts:normal}
+	{permitted_enctypes(kdc)=camellia256-cts}
+	{permitted_enctypes(slave)=camellia256-cts}
+	{permitted_enctypes(client)=camellia256-cts}
+	{permitted_enctypes(server)=camellia256-cts}
+	{default_tgs_enctypes(kdc)=camellia256-cts}
+	{default_tgs_enctypes(slave)=camellia256-cts}
+	{default_tgs_enctypes(client)=camellia256-cts}
+	{default_tgs_enctypes(server)=camellia256-cts}
+	{default_tkt_enctypes(kdc)=camellia256-cts}
+	{default_tkt_enctypes(slave)=camellia256-cts}
+	{default_tkt_enctypes(client)=camellia256-cts}
+	{default_tkt_enctypes(server)=camellia256-cts}
+	{allow_weak_crypto(kdc)=false}
+	{allow_weak_crypto(slave)=false}
+	{allow_weak_crypto(client)=false}
+	{allow_weak_crypto(server)=false}
+	{master_key_type=camellia256-cts}
+	{dummy=[verbose -log "Camellia-256 enctype"]}
+    }
+    {
 	aes-des3
 	mode=udp
 	des3_krbtgt=0
@@ -262,32 +286,6 @@ set passes {
 		"DES3 TGT, KDC permitting only des-cbc-crc"]}
     }
 }
-
-# Add to above when Camellia support becomes unconditional.
-#    {
-#	camellia-only
-#	mode=udp
-#	des3_krbtgt=0
-#	{supported_enctypes=camellia256-cts:normal}
-#	{permitted_enctypes(kdc)=camellia256-cts}
-#	{permitted_enctypes(slave)=camellia256-cts}
-#	{permitted_enctypes(client)=camellia256-cts}
-#	{permitted_enctypes(server)=camellia256-cts}
-#	{default_tgs_enctypes(kdc)=camellia256-cts}
-#	{default_tgs_enctypes(slave)=camellia256-cts}
-#	{default_tgs_enctypes(client)=camellia256-cts}
-#	{default_tgs_enctypes(server)=camellia256-cts}
-#	{default_tkt_enctypes(kdc)=camellia256-cts}
-#	{default_tkt_enctypes(slave)=camellia256-cts}
-#	{default_tkt_enctypes(client)=camellia256-cts}
-#	{default_tkt_enctypes(server)=camellia256-cts}
-#	{allow_weak_crypto(kdc)=false}
-#	{allow_weak_crypto(slave)=false}
-#	{allow_weak_crypto(client)=false}
-#	{allow_weak_crypto(server)=false}
-#	{master_key_type=camellia256-cts}
-#	{dummy=[verbose -log "Camellia-256 enctype"]}
-#    }
 
 # des.md5-tgt is set as unused, since it won't trigger the error case
 # if SUPPORT_DESMD5 isn't honored.

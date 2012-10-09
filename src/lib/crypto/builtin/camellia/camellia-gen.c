@@ -8,8 +8,6 @@
 #include <unistd.h>
 #include "camellia.h"
 
-#ifdef CAMELLIA
-
 #define B 16U
 unsigned char key[16];
 unsigned char test_case_len[] = { B+1, 2*B-1, 2*B, 2*B+1, 3*B-1, 3*B, 4*B, };
@@ -316,18 +314,14 @@ static void cts_test ()
     printf ("\n");
 }
 
-#endif /* CAMELLIA */
-
 int main ()
 {
-#ifdef CAMELLIA
     init ();
     fips_test ();
 
     ecb_test();
     cbc_test();
     cts_test();
-#endif
 
     return 0;
 }

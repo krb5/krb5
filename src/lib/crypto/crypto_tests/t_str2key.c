@@ -410,7 +410,6 @@ struct test {
           "\x57\x18\x48\xB7\x84\xA3\xD6\xBD\xC3\x46\x58\x9A\x3E\x39\x3F\x9E" }
     },
 
-#ifdef CAMELLIA
     /* The same inputs applied to Camellia enctypes. */
     {
         ENCTYPE_CAMELLIA128_CTS_CMAC,
@@ -531,7 +530,6 @@ struct test {
           "\x16\x3B\x76\x8C\x6D\xB1\x48\xB4\xEE\xC7\x16\x3D\xF5\xAE\xD7\x0E"
           "\x20\x6B\x68\xCE\xC0\x78\xBC\x06\x9E\xD6\x8A\x7E\xD3\x6B\x1E\xCC" }
     }
-#endif /* CAMELLIA */
 };
 
 static void

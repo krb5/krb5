@@ -28,8 +28,6 @@
 
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
-#ifdef CAMELLIA
-
 krb5_error_code
 krb5int_dk_cmac_checksum(const struct krb5_cksumtypes *ctp,
                          krb5_key key, krb5_keyusage usage,
@@ -58,5 +56,3 @@ krb5int_dk_cmac_checksum(const struct krb5_cksumtypes *ctp,
     krb5_k_free_key(NULL, kc);
     return ret;
 }
-
-#endif /* CAMELLIA */

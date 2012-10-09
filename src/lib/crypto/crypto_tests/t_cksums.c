@@ -108,7 +108,6 @@ struct test {
         { KV5M_DATA, 16,
           "\xEB\x38\xCC\x97\xE2\x23\x0F\x59\xDA\x41\x17\xDC\x58\x59\xD7\xEC" }
     },
-#ifdef CAMELLIA
     {
         "abcdefghijk",
         CKSUMTYPE_CMAC_CAMELLIA128, ENCTYPE_CAMELLIA128_CTS_CMAC, 7,
@@ -143,7 +142,6 @@ struct test {
         { KV5M_DATA, 16,
           "\x3F\xA0\xB4\x23\x55\xE5\x2B\x18\x91\x87\x29\x4A\xA2\x52\xAB\x64" }
     },
-#endif
 };
 
 static void
