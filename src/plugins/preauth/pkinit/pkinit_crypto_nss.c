@@ -3775,8 +3775,6 @@ pkinit_octetstring_hkdf(krb5_context context,
         }
     }
 
-    krb5_free_keyblock_contents(context, krb5key);
-
     krb5key->contents = malloc(klength);
     if (krb5key->contents == NULL) {
         krb5key->length = 0;
