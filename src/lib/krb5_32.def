@@ -442,3 +442,4 @@ EXPORTS
 	krb5_responder_otp_get_challenge		@413
 	krb5_responder_otp_set_answer			@414
 	krb5_responder_otp_challenge_free		@415
+	krb5_cc_move					@416
