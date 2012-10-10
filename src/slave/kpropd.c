@@ -432,7 +432,7 @@ do_standalone()
             close(s);
 
             if (runonce)
-                break;
+                exit(0);
         }
     }
     exit(0);

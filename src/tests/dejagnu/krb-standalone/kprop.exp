@@ -24,13 +24,11 @@ proc setup_slave {} {
 proc scan_kpropd_output {} {
     global kpropd_spawn_id kpropd_pid
 
-    # See if kpropd logged anything.
+    # See if kpropd logged anything.  It should exit after processing
+    # one kprop connection.
     expect {
 	-i $kpropd_spawn_id
 	eof {
-	    # I think kpropd is supposed to run a loop in standalone
-	    # mode, but exiting seems to be normal behavior.
-#	    fail "kprop (server exited)"
 	    wait -i $kpropd_spawn_id
 	    unset kpropd_spawn_id kpropd_pid
 	}

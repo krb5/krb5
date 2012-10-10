@@ -1510,7 +1510,7 @@ proc start_kpropd {} {
 
     envstack_push
     setup_kerberos_env slave
-    spawn $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl
+    spawn $KPROPD -S -d -t -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl
     set kpropd_pid [exp_pid]
     set kpropd_spawn_id $spawn_id
 #    send_user [list $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl]\n
