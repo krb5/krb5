@@ -12,10 +12,6 @@ MANTXT=nroff -man
 PERL=perl
 MANHTML=$(PERL) man2html
 
-ADMIN_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
-	glossary.texinfo support-enc.texinfo salts.texinfo krb5conf.texinfo \
-	kdcconf.texinfo dnstxt.texinfo dnssrv.texinfo send-pr.texinfo
-ADMIN_DEPS=admin.texinfo $(ADMIN_INCLUDES)
 
 
 MANPAGES=$(SRCDIR)/clients/kdestroy/kdestroy.M $(SRCDIR)/clients/kinit/kinit.M $(SRCDIR)/clients/klist/klist.M $(SRCDIR)/clients/ksu/ksu.M $(SRCDIR)/clients/kpasswd/kpasswd.M
@@ -25,31 +21,6 @@ USER_GUIDE_DEPS=user-guide.texinfo $(USER_GUIDE_INCLUDES)
 
 .PHONY: all
 all:: user-guide-full clean-temp-ps clean-tex
-
-.PHONY: admin-guide-full
-admin-guide-full:: admin-guide admin-guide-info admin-guide-html
-
-.PHONY: admin-guide
-admin-guide:: admin-guide.ps admin-guide.pdf
-
-admin-guide.ps: $(ADMIN_DEPS)
-	$(DVI) admin.texinfo
-	$(DVIPS) admin
-
-admin-guide.pdf: admin-guide.ps
-	$(PSPDF) admin-guide.ps admin-guide.pdf
-
-.PHONY: admin-guide-html
-admin-guide-html:: admin.html
-
-admin.html: $(ADMIN_DEPS)
-	$(HTML) admin.texinfo
-
-.PHONY: admin-guide-info
-admin-guide-info:: krb5-admin.info
-
-krb5-admin.info: $(ADMIN_DEPS)
-	$(INFO) admin.texinfo
 
 .PHONY: user-guide-full
 user-guide-full:: user-guide user-guide-info user-guide-html
@@ -120,7 +91,7 @@ clean-temp-ps::
 
 .PHONY: tgz
 tgz::
-	$(TAR) krb5-docs.tar admin.texinfo copyright.texinfo definitions.texinfo document-list.texinfo glossary.texinfo  texinfo.tex user-guide.texinfo *-guide.ps *.info *.info-? *.html
+	$(TAR) krb5-docs.tar copyright.texinfo definitions.texinfo glossary.texinfo  texinfo.tex user-guide.texinfo *-guide.ps *.info *.info-? *.html
 	$(GZIP) krb5-docs.tar
 	$(MV) krb5-docs.tar.gz krb5-docs.tgz
 
