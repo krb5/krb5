@@ -141,7 +141,7 @@ def check_cast(line, ln):
     # multiplication operator.  We will get false positives from
     # "(*fp) (args)" and "if (condition) statement", but both of those
     # are erroneous anyway.
-    for m in re.finditer(r'\(([^(]+)\)(\s+)[a-zA-Z_]', line):
+    for m in re.finditer(r'\(([^(]+)\)(\s*)[a-zA-Z_(]', line):
         if m.group(2):
             warn(ln, 'Space after cast operator (or inline if/while body)')
         # Check for casts like (char*) which should have a space.
