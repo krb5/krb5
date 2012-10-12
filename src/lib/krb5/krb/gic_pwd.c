@@ -2,6 +2,7 @@
 #include "k5-int.h"
 #include "com_err.h"
 #include "init_creds_ctx.h"
+#include "int-proto.h"
 
 krb5_error_code
 krb5_get_as_key_password(krb5_context context,
@@ -12,7 +13,8 @@ krb5_get_as_key_password(krb5_context context,
                          krb5_data *salt,
                          krb5_data *params,
                          krb5_keyblock *as_key,
-                         void *gak_data)
+                         void *gak_data,
+                         k5_response_items *ritems)
 {
     krb5_data *password;
     krb5_error_code ret;
@@ -21,8 +23,21 @@ krb5_get_as_key_password(krb5_context context,
     char promptstr[1024];
     krb5_prompt prompt;
     krb5_prompt_type prompt_type;
+    const char *rpass;
 
     password = (krb5_data *) gak_data;
+    assert(password->length > 0);
+
+    /* If we need to get the AS key via the responder, ask for it. */
+    if (as_key == NULL) {
+        /* However, if we already have a password, don't ask. */
+        if (password->data[0] != '\0')
+            return 0;
+
+        return k5_response_items_ask_question(ritems,
+                                              KRB5_RESPONDER_QUESTION_PASSWORD,
+                                              NULL );
+    }
 
     /* If there's already a key of the correct etype, we're done.
        If the etype is wrong, free the existing key, and make
@@ -39,7 +54,17 @@ krb5_get_as_key_password(krb5_context context,
         }
     }
 
-    if (password->length == 0 || password->data[0] == '\0') {
+    if (password->data[0] == '\0') {
+        /* Check the responder for the password. */
+        rpass = k5_response_items_get_answer(ritems,
+                                             KRB5_RESPONDER_QUESTION_PASSWORD);
+        if (rpass != NULL) {
+            strlcpy(password->data, rpass, password->length);
+            password->length = strlen(password->data);
+        }
+    }
+
+    if (password->data[0] == '\0') {
         if (prompter == NULL)
             return(EIO);
 

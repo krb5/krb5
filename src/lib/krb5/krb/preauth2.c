@@ -372,7 +372,8 @@ get_as_key(krb5_context context, krb5_clpreauth_rock rock,
         salt = (*rock->default_salt) ? NULL : rock->salt;
         ret = (*rock->gak_fct)(context, rock->client, *rock->etype,
                                rock->prompter, rock->prompter_data, salt,
-                               rock->s2kparams, rock->as_key, *rock->gak_data);
+                               rock->s2kparams, rock->as_key, *rock->gak_data,
+                               rock->rctx.items);
         if (ret)
             return ret;
     }
@@ -410,6 +411,9 @@ static krb5_error_code
 responder_ask_question(krb5_context context, krb5_clpreauth_rock rock,
                        const char *question, const char *challenge)
 {
+    /* Force plugins to use need_as_key(). */
+    if (strcmp(KRB5_RESPONDER_QUESTION_PASSWORD, question) == 0)
+        return EINVAL;
     return k5_response_items_ask_question(rock->rctx.items, question,
                                           challenge);
 }
@@ -418,7 +422,18 @@ static const char *
 responder_get_answer(krb5_context context, krb5_clpreauth_rock rock,
                      const char *question)
 {
+    /* Don't let plugins get the raw password. */
+    if (question && strcmp(KRB5_RESPONDER_QUESTION_PASSWORD, question) == 0)
+        return NULL;
     return k5_response_items_get_answer(rock->rctx.items, question);
+}
+
+static void
+need_as_key(krb5_context context, krb5_clpreauth_rock rock)
+{
+    /* Calling gac_fct() with NULL as_key indicates desire for the AS key. */
+    (*rock->gak_fct)(context, rock->client, *rock->etype, NULL, NULL, NULL,
+                     NULL, NULL, *rock->gak_data, rock->rctx.items);
 }
 
 static struct krb5_clpreauth_callbacks_st callbacks = {
@@ -429,7 +444,8 @@ static struct krb5_clpreauth_callbacks_st callbacks = {
     set_as_key,
     get_preauth_time,
     responder_ask_question,
-    responder_get_answer
+    responder_get_answer,
+    need_as_key
 };
 
 /* Tweak the request body, for now adding any enctypes which the module claims

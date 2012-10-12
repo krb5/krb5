@@ -802,7 +802,8 @@ typedef krb5_error_code
 (*krb5_gic_get_as_key_fct)(krb5_context, krb5_principal, krb5_enctype,
                            krb5_prompter_fct, void *prompter_data,
                            krb5_data *salt, krb5_data *s2kparams,
-                           krb5_keyblock *as_key, void *gak_data);
+                           krb5_keyblock *as_key, void *gak_data,
+                           k5_response_items *ritems);
 
 #define CLIENT_ROCK_MAGIC 0x4352434b
 /*

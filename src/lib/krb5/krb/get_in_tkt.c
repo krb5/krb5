@@ -1458,7 +1458,7 @@ init_creds_step_reply(krb5_context context,
                                ctx->reply->enc_part.enctype,
                                ctx->prompter, ctx->prompter_data,
                                &ctx->salt, &ctx->s2kparams,
-                               &ctx->as_key, ctx->gak_data);
+                               &ctx->as_key, ctx->gak_data, NULL);
         if (code != 0)
             goto cleanup;
         TRACE_INIT_CREDS_AS_KEY_GAK(context, &ctx->as_key);

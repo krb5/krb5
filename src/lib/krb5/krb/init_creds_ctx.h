@@ -58,6 +58,7 @@ krb5_get_as_key_password(krb5_context context,
                          krb5_data *salt,
                          krb5_data *params,
                          krb5_keyblock *as_key,
-                         void *gak_data);
+                         void *gak_data,
+                         k5_response_items *ritems);
 
 #endif /* !KRB5_INIT_CREDS_CONTEXT */

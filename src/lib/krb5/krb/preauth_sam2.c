@@ -155,7 +155,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
         retval = (*rock->gak_fct)(context, request->client, sc2b->sam_etype,
                                   prompter, prompter_data, rock->salt,
                                   rock->s2kparams, rock->as_key,
-                                  *rock->gak_data);
+                                  *rock->gak_data, rock->rctx.items);
         if (retval) {
             krb5_free_sam_challenge_2(context, sc2);
             krb5_free_sam_challenge_2_body(context, sc2b);

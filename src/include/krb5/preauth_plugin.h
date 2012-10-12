@@ -206,6 +206,9 @@ typedef struct krb5_clpreauth_callbacks_st {
                                         krb5_clpreauth_rock rock,
                                         const char *question);
 
+    /* Indicate interest in the AS key through the responder interface. */
+    void (*need_as_key)(krb5_context context, krb5_clpreauth_rock rock);
+
     /* End of version 2 clpreauth callbacks (added in 1.11). */
 } *krb5_clpreauth_callbacks;
 

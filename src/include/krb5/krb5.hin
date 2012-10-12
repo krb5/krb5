@@ -6357,6 +6357,16 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
                     const char *banner, int num_prompts,
                     krb5_prompt prompts[]);
 
+/**
+ * Long-term password responder question
+ *
+ * This question is asked when the long-term password is needed. It has no
+ * challenge and the response is simply the password string.
+ *
+ * @version First introduced in 1.11
+ */
+#define KRB5_RESPONDER_QUESTION_PASSWORD "password"
+
 typedef struct krb5_responder_context_st *krb5_responder_context;
 
 /**

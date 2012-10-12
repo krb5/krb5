@@ -38,12 +38,17 @@ get_as_key_keytab(krb5_context context,
                   krb5_data *salt,
                   krb5_data *params,
                   krb5_keyblock *as_key,
-                  void *gak_data)
+                  void *gak_data,
+                  k5_response_items *ritems)
 {
     krb5_keytab keytab = (krb5_keytab) gak_data;
     krb5_error_code ret;
     krb5_keytab_entry kt_ent;
     krb5_keyblock *kt_key;
+
+    /* We don't need the password from the responder to create the AS key. */
+    if (as_key == NULL)
+        return 0;
 
     /* if there's already a key of the correct etype, we're done.
        if the etype is wrong, free the existing key, and make
