@@ -19,15 +19,6 @@ MANPAGES=$(SRCDIR)/clients/kdestroy/kdestroy.M $(SRCDIR)/clients/kinit/kinit.M $
 .PHONY: all
 all:: clean-temp-ps clean-tex
 
-.PHONY: implementor.ps implementor.pdf implementor.info
-implementor.pdf: implementor.ps
-	$(PSPDF) implementor.ps
-implementor.ps: implementor.texinfo
-	$(DVI) implementor.texinfo
-	$(DVIPS) implementor
-implementor.info: implementor.texinfo
-	$(INFO) implementor.texinfo
-
 .PHONY: clean
 clean:: clean-all
 
