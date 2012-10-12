@@ -53,6 +53,9 @@ k5_response_items_reset(k5_response_items *ri)
 {
     size_t i;
 
+    if (ri == NULL)
+        return;
+
     for (i = 0; i < ri->count; i++)
         free(ri->questions[i]);
     free(ri->questions);
@@ -74,12 +77,14 @@ k5_response_items_reset(k5_response_items *ri)
 krb5_boolean
 k5_response_items_empty(const k5_response_items *ri)
 {
-    return ri->count == 0;
+    return ri == NULL ? TRUE : ri->count == 0;
 }
 
 const char * const *
 k5_response_items_list_questions(const k5_response_items *ri)
 {
+    if (ri == NULL)
+        return NULL;
     return (const char * const *)ri->questions;
 }
 
@@ -87,6 +92,9 @@ static ssize_t
 find_question(const k5_response_items *ri, const char *question)
 {
     size_t i;
+
+    if (ri == NULL)
+        return -1;
 
     for (i = 0; i < ri->count; i++) {
         if (strcmp(ri->questions[i], question) == 0)
@@ -101,8 +109,12 @@ push_question(k5_response_items *ri, const char *question,
               const char *challenge)
 {
     char **tmp;
-    const size_t size = sizeof(char*) * (ri->count + 2);
+    size_t size;
 
+    if (ri == NULL)
+        return EINVAL;
+
+    size = sizeof(char *) * (ri->count + 2);
     tmp = realloc(ri->questions, size);
     if (tmp == NULL)
         return ENOMEM;
