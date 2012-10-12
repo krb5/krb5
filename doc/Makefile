@@ -20,7 +20,7 @@ USER_GUIDE_INCLUDES=definitions.texinfo copyright.texinfo glossary.texinfo
 USER_GUIDE_DEPS=user-guide.texinfo $(USER_GUIDE_INCLUDES)
 
 .PHONY: all
-all:: user-guide-full clean-temp-ps clean-tex
+all:: clean-temp-ps clean-tex
 
 .PHONY: user-guide-full
 user-guide-full:: user-guide user-guide-info user-guide-html
