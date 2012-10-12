@@ -32,7 +32,8 @@ static krb5_error_code
 get_as_key_skey(krb5_context context, krb5_principal client,
                 krb5_enctype etype, krb5_prompter_fct prompter,
                 void *prompter_data, krb5_data *salt, krb5_data *params,
-                krb5_keyblock *as_key, void *gak_data)
+                krb5_keyblock *as_key, void *gak_data,
+                k5_response_items *ritems)
 {
     const krb5_keyblock *key = gak_data;
 

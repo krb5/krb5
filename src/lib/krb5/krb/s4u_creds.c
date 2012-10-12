@@ -45,7 +45,8 @@ krb5_get_as_key_noop(
     krb5_data *salt,
     krb5_data *params,
     krb5_keyblock *as_key,
-    void *gak_data)
+    void *gak_data,
+    k5_response_items *ritems)
 {
     /* force a hard error, we don't actually have the key */
     return KRB5_PREAUTH_FAILED;
