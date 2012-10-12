@@ -3,5 +3,4 @@
 MIT Kerberos License information
 ================================
 
-.. include::  NOTICE
-   :literal:
+.. include::  notice.rst
