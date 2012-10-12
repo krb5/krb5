@@ -251,14 +251,26 @@ Scripts may use the following realm methods and attributes:
 * realm.start_kadmind(): Start a kadmind with the realm's master KDC
   environment.  Errors if a kadmind is already running.
 
-* realm.start_kpropd(): Start a kpropd with the realm's slave KDC
-  environment.  Errors if a kpropd is already running.
-
 * realm.stop_kadmind(): Stop the kadmind process.  Errors if no
   kadmind is running.
 
-* realm.stop(): Stop any KDC and kadmind processes running on behalf
-  of the realm.
+* realm.start_kpropd(args=[]): Start a kpropd with the realm's slave
+  KDC environment.  Errors if a kpropd is already running.  If args is
+  given, it contains a list of additional kpropd arguments.
+
+* realm.stop_kpropd(): Stop the kpropd process.  Errors if no kpropd
+  is running.
+
+* realm.read_from_kpropd(): Read a line from the stdout or stderr of
+  the kpropd process.  Most useful if kpropd is started with the -d
+  option.
+
+* realm.prod_kpropd(): Send a USR1 signal to a kpropd to make it stop
+  sleeping and perform an iprop request.  kpropd must be running in
+  iprop mode or a USR1 will simply terminate it.
+
+* realm.stop(): Stop any daemon processes running on behalf of the
+  realm.
 
 * realm.addprinc(princname, password=None): Using kadmin.local, create
   a principle in the KDB named princname, with either a random or
@@ -910,7 +922,7 @@ class K5Realm(object):
         stop_daemon(self._kadmind_proc)
         self._kadmind_proc = None
 
-    def start_kpropd(self):
+    def start_kpropd(self, args=[]):
         global krb5kdc
         assert(self._kpropd_proc is None)
         slavedump_path = os.path.join(self.testdir, 'incoming-slave-datatrans')
@@ -919,13 +931,21 @@ class K5Realm(object):
                                            str(self.portbase + 3),
                                            '-f', slavedump_path,
                                            '-p', kdb5_util,
-                                           '-a', kpropdacl_path],
+                                           '-a', kpropdacl_path] + args,
                                           self.env_slave, 'ready')
 
     def stop_kpropd(self):
         assert(self._kpropd_proc is not None)
         stop_daemon(self._kpropd_proc)
         self._kpropd_proc = None
+
+    def read_from_kpropd(self):
+        assert(self._kpropd_proc is not None)
+        return self._kpropd_proc.stdout.readline()
+
+    def prod_kpropd(self):
+        assert(self._kpropd_proc is not None)
+        self._kpropd_proc.send_signal(signal.SIGUSR1)
 
     def stop(self):
         if self._kdc_proc:

@@ -198,6 +198,12 @@ alarm_handler(int sig)
 }
 
 static void
+usr1_handler(int sig)
+{
+    /* Nothing to do, just let the signal interrupt sleep(). */
+}
+
+static void
 kill_do_standalone(int sig)
 {
     if (fullprop_child > 0) {
@@ -288,15 +294,17 @@ main(argc, argv)
     }
 
     /*
-     * This is the iprop case.  We'll fork a child to run do_standalone().
-     * The parent will run do_iprop().  We try to kill the child if we
-     * get killed.
+     * This is the iprop case.  We'll fork a child to run do_standalone().  The
+     * parent will run do_iprop().  We try to kill the child if we get killed.
+     * Catch SIGUSR1 so tests can use it to interrupt the sleep timer and force
+     * an iprop request.
      */
     signal_wrapper(SIGHUP, kill_do_standalone);
     signal_wrapper(SIGINT, kill_do_standalone);
     signal_wrapper(SIGQUIT, kill_do_standalone);
     signal_wrapper(SIGTERM, kill_do_standalone);
     signal_wrapper(SIGSEGV, kill_do_standalone);
+    signal_wrapper(SIGUSR1, usr1_handler);
     atexit(atexit_kill_do_standalone);
     fullprop_child = fork();
     switch (fullprop_child) {
