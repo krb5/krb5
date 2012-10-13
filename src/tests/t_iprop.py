@@ -5,12 +5,12 @@ import time
 
 from k5test import *
 
-def wait_for_prop(realm):
-    # Make kpropd go if it's sleeping.
-    realm.prod_kpropd()
-
-    # Read lines from kpropd output until we are synchronized.
+# Read lines from kpropd output until we are synchronized.  Error if
+# full_expected is true and we didn't see a full propagation or vice
+# versa.
+def wait_for_prop(realm, full_expected):
     output('*** Waiting for sync from kpropd\n')
+    full_seen = False
     while True:
         line = realm.read_from_kpropd()
         if line == '':
@@ -19,9 +19,14 @@ def wait_for_prop(realm):
 
         if 'KDC is synchronized' in line or 'Got incremental updates' in line:
             output('*** Sync complete\n')
+            if full_expected and not full_seen:
+                fail('Expected full dump but saw only incremental')
+            if full_seen and not full_expected:
+                fail('Expected incremental prop but saw full dump')
             return
 
         if 'load process for full propagation completed' in line:
+            full_seen = True
             # kpropd's child process has finished a DB load; make the parent
             # do another iprop request.  This will be unnecessary if kpropd
             # is simplified to use a single process.
@@ -44,7 +49,7 @@ iprop_kdc_conf = {
     'all' : { 'libdefaults' : { 'default_realm' : 'KRBTEST.COM'},
               'realms' : { '$realm' : {
                 'iprop_enable' : 'true',
-                'iprop_slave_poll' : '1'
+                'iprop_slave_poll' : '600'
                 }}},
     'master' : { 'realms' : { '$realm' : {
                 'iprop_logfile' : '$testdir/db.ulog'
@@ -93,14 +98,18 @@ acl = open(acl_file, 'w')
 acl.write(realm.host_princ + '\n')
 acl.close()
 
+# Start kpropd and get a full dump from master.
 realm.start_kpropd(['-d'])
+wait_for_prop(realm, True)
+
 realm.run_kadminl('modprinc -allow_tix w')
 out = realm.run_as_master([kproplog, '-h'])
 if 'Last serial # : 8' not in out:
     fail('Update log on master has incorrect last serial number')
 
-# Check that iprop happened.
-wait_for_prop(realm)
+# Get an incremental update and check that it happened.
+realm.prod_kpropd()
+wait_for_prop(realm, False)
 out = realm.run_as_slave([kproplog, '-h'])
 if 'Last serial # : 8' not in out:
     fail('Update log on slave has incorrect last serial number')
@@ -111,8 +120,9 @@ out = realm.run_as_master([kproplog, '-h'])
 if 'Last serial # : 9' not in out:
     fail('Update log on master has incorrect last serial number')
 
-# Check that we're at sno 9 on the slave side too.
-wait_for_prop(realm)
+# Get an update and check that we're at sno 9 on the slave side too.
+realm.prod_kpropd()
+wait_for_prop(realm, False)
 out = realm.run_as_slave([kproplog, '-h'])
 if 'Last serial # : 9' not in out:
     fail('Update log on slave has incorrect last serial number')
@@ -122,8 +132,10 @@ realm.run_as_slave([kproplog, '-R'])
 out = realm.run_as_slave([kproplog, '-h'])
 if 'Last serial # : None' not in out:
     fail('Reset of update log on slave failed')
-wait_for_prop(realm)
-# Check that a full resync happened.
+
+# Get a full resync and check the result.
+realm.prod_kpropd()
+wait_for_prop(realm, True)
 out = realm.run_as_slave([kproplog, '-h'])
 if 'Last serial # : 9' not in out:
     fail('Update log on slave has incorrect last serial number')
@@ -134,7 +146,9 @@ out = realm.run_as_master([kproplog, '-h'])
 if 'Last serial # : 10' not in out:
     fail('Update log on master has incorrect last serial number')
 
-wait_for_prop(realm)
+# Get and check an incremental update.
+realm.prod_kpropd()
+wait_for_prop(realm, False)
 out = realm.run_as_slave([kproplog, '-h'])
 if 'Last serial # : 10' not in out:
     fail('Update log on slave has incorrect last serial number')
@@ -150,8 +164,10 @@ realm.run_kadminl('modprinc -allow_tix w')
 out = realm.run_as_master([kproplog, '-h'])
 if 'Last serial # : 1' not in out:
     fail('Update log on master has incorrect last serial number')
-wait_for_prop(realm)
-# Check that a full resync happened.
+
+# Get and check a full resync.
+realm.prod_kpropd()
+wait_for_prop(realm, True)
 out = realm.run_as_slave([kproplog, '-h'])
 if 'Last serial # : 1' not in out:
     fail('Update log on slave has incorrect last serial number')
