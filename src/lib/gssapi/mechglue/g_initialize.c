@@ -818,7 +818,8 @@ interposed_oid(gss_OID pre, gss_OID real)
 	}
 
 	memcpy(o->elements, pre->elements, pre->length);
-	memcpy(o->elements + pre->length, real->elements, real->length);
+	memcpy((char *)o->elements + pre->length, real->elements,
+	       real->length);
 
 	return o;
 }
