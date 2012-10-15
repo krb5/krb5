@@ -20,7 +20,7 @@ To test simple changes to the RST sources, you can build the
 documentation without the Doxygen reference by running, from the doc
 directory::
 
-    sphinx-build rst_source test_html
+    sphinx-build . test_html
 
 You will see a number of warnings about missing files.  This is
 expected.
@@ -47,10 +47,10 @@ files when rebuilding the man pages.
 Building for a release tarball or web site
 ------------------------------------------
 
-To generate documentation in HTML format, run ``make rsthtml`` in the
+To generate documentation in HTML format, run ``make html`` in the
 ``doc`` subdirectory of a configured build tree (the build directory
 corresponding to ``src/doc``, not the top-level ``doc`` directory).
-The output will be placed in the top-level ``doc/rst_html`` directory.
+The output will be placed in the top-level ``doc/html`` directory.
 This build will include the API reference generated from Doxygen
 markup in the source tree.
 
@@ -73,7 +73,7 @@ To generate documentation specific to a build of MIT krb5 as you have
 configured it, run ``make substhtml`` in the ``doc`` subdirectory of a
 configured build tree (the build directory corresponding to
 ``src/doc``, not the top-level ``doc`` directory).  The output will be
-placed in the ``rst_html_subst`` subdirectory of that build directory.
+placed in the ``html_subst`` subdirectory of that build directory.
 This build will include the API reference.
 
 Documentation generated this way will use concrete paths (like

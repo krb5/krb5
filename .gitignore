@@ -13,7 +13,7 @@ obj/
 testdir/
 testlog
 
-/doc/rst_html/
+/doc/html/
 
 /src/config.log
 /src/config.status
@@ -57,7 +57,7 @@ testlog
 /src/doc/paths.py
 /src/doc/rst_apiref/
 /src/doc/rst_composite/
-/src/doc/rst_html_subst/
+/src/doc/html_subst/
 
 /src/include/autoconf.h
 /src/include/autoconf.h.in
