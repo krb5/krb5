@@ -723,6 +723,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         }
         setflag(state->enc_tkt_reply.flags, TKT_FLG_ANONYMOUS);
         krb5_free_principal(kdc_context, state->request->client);
+        state->request->client = NULL;
         errcode = krb5_copy_principal(kdc_context, krb5_anonymous_principal(),
                                       &state->request->client);
         if (errcode) {

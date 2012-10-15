@@ -252,6 +252,7 @@ tgt_again:
                 retval = prep_reprocess_req(request, &krbtgt_princ);
                 if (!retval) {
                     krb5_free_principal(kdc_context, request->server);
+                    request->server = NULL;
                     retval = krb5_copy_principal(kdc_context, krbtgt_princ,
                                                  &(request->server));
                     if (!retval) {
