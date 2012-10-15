@@ -32,12 +32,7 @@
 #include "int-proto.h"
 
 #include <krb5/preauth_plugin.h>
-
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
 #include <ctype.h>
-#include <string.h>
 
 static krb5_preauthtype otp_client_supported_pa_types[] =
     { KRB5_PADATA_OTP_CHALLENGE, 0 };
@@ -63,9 +58,7 @@ encrypt_nonce(krb5_context ctx, krb5_keyblock *key,
     if (retval != 0)
         return retval;
 
-    free(req->enc_data.ciphertext.data);
     req->enc_data = encdata;
-
     return 0;
 }
 
@@ -90,23 +83,6 @@ otpvalue_matches_tokeninfo(const char *otpvalue, krb5_otp_tokeninfo *ti)
     }
 
     return 1;
-}
-
-/* Removes the indexed tokeninfo from the array. */
-static void
-remove_tokeninfo(krb5_context ctx, krb5_otp_tokeninfo **tis, unsigned int i)
-{
-    unsigned int j = 0;
-
-    if (tis == NULL)
-        return;
-
-    for (j = 0; tis[j]; j++) {
-        if (j == i)
-            k5_free_otp_tokeninfo(ctx, tis[j]);
-        if (j >= i)
-            tis[j] = tis[j+1];
-    }
 }
 
 /* Performs a prompt and saves the response in the out parameter. */
@@ -135,11 +111,11 @@ doprompt(krb5_context context, krb5_prompter_fct prompter, void *prompter_data,
     return 0;
 }
 
-/* Forces the user to choose a single tokeninfo via prompting.
- * Removes all other tokeninfos from the array. */
+/* Forces the user to choose a single tokeninfo via prompting. */
 static krb5_error_code
-choose_token(krb5_context context, krb5_prompter_fct prompter,
-             void *prompter_data, krb5_otp_tokeninfo **tis)
+prompt_for_tokeninfo(krb5_context context, krb5_prompter_fct prompter,
+                     void *prompter_data, krb5_otp_tokeninfo **tis,
+                     krb5_otp_tokeninfo **out_ti)
 {
     char *banner = NULL, *tmp, response[1024];
     krb5_otp_tokeninfo *ti = NULL;
@@ -178,45 +154,11 @@ choose_token(krb5_context context, krb5_prompter_fct prompter,
             continue;
 
         ti = tis[--j];
-        for (i = 0; tis[i] != NULL; i++) {
-            if (tis[i] != ti)
-                remove_tokeninfo(context, tis, i--);
-        }
     } while (ti == NULL);
 
     free(banner);
+    *out_ti = ti;
     return 0;
-}
-
-/* Like asprintf() but saves output into a krb5_data structure. */
-static krb5_error_code
-data_printf(krb5_data *data, const char *fmt, ...)
-{
-    va_list ap;
-    char *tmp = NULL;
-
-    if (data == NULL)
-        return EINVAL;
-
-    va_start(ap, fmt);
-    if (vasprintf(&tmp, fmt, ap) < 0) {
-        va_end(ap);
-        return errno;
-    }
-    va_end(ap);
-
-    free(data->data);
-    data->data = tmp;
-    data->length = strlen(tmp);
-
-    return 0;
-}
-
-/* Takes the otp value in the request and base64 encodes it. */
-static krb5_error_code
-base64_encode_request(krb5_pa_otp_req *req)
-{
-    return ENOTSUP;
 }
 
 /* Builds a challenge string from the given tokeninfo. */
@@ -240,26 +182,22 @@ make_challenge(const krb5_otp_tokeninfo *ti, char **challenge)
     return 0;
 }
 
-/* Sets the otp value into the request. Similarly, collects and sets
- * the pin if necessary. */
-static krb5_error_code
-set_value_and_collect_pin(krb5_context context, krb5_prompter_fct prompter,
-                          void *prompter_data, const krb5_otp_tokeninfo *ti,
-                          const char *otpvalue, krb5_pa_otp_req *req)
+/* Determines if a pin is required. If it is, it will be prompted for. */
+static inline krb5_error_code
+collect_pin(krb5_context context, krb5_prompter_fct prompter,
+            void *prompter_data, const krb5_otp_tokeninfo *ti,
+            krb5_data *out_pin)
 {
     krb5_error_code retval;
     char otppin[1024];
-    krb5_flags pin;
+    krb5_flags collect;
+    krb5_data pin;
 
-    pin = ti->flags & (KRB5_OTP_FLAG_COLLECT_PIN | KRB5_OTP_FLAG_SEPARATE_PIN);
-
-    /* If no PIN will be collected, just set the otp value. */
-    if (pin == 0) {
-        retval = data_printf(&req->otp_value, "%s", otpvalue);
-        if (retval != 0)
-            return retval;
-
-        req->pin = empty_data();
+    /* If no PIN will be collected, don't prompt. */
+    collect = ti->flags & (KRB5_OTP_FLAG_COLLECT_PIN |
+                           KRB5_OTP_FLAG_SEPARATE_PIN);
+    if (collect == 0) {
+        *out_pin = empty_data();
         return 0;
     }
 
@@ -269,44 +207,154 @@ set_value_and_collect_pin(krb5_context context, krb5_prompter_fct prompter,
     if (retval != 0)
         return retval;
 
-    /* Set the separate PIN and Value fields. */
-    if (pin & KRB5_OTP_FLAG_SEPARATE_PIN) {
-        retval = data_printf(&req->otp_value, "%s", otpvalue);
-        if (retval != 0)
-            return retval;
+    /* Set the PIN. */
+    pin = make_data(strdup(otppin), strlen(otppin));
+    if (pin.data == NULL)
+        return ENOMEM;
 
-        retval = data_printf(&req->pin, "%s", otppin);
-        if (retval != 0)
-            return retval;
-
-    /* Prepend PIN to the Value field. */
-    } else {
-        retval = data_printf(&req->otp_value, "%s%s", otppin, otpvalue);
-        if (retval != 0)
-            return retval;
-
-        req->pin = empty_data();
-    }
-
+    *out_pin = pin;
     return 0;
 }
 
-/* Builds a request object to send to the KDC, prompting the user if
- * necessary. */
+/* Builds a request using the specified tokeninfo, value and pin. */
 static krb5_error_code
-make_request(krb5_context context, krb5_prompter_fct prompter,
-             void *prompter_data, krb5_otp_tokeninfo **tis,
-             krb5_pa_otp_req **request)
+make_request(krb5_context ctx, krb5_otp_tokeninfo *ti, const krb5_data *value,
+             const krb5_data *pin, krb5_pa_otp_req **out_req)
 {
+    krb5_pa_otp_req *req = NULL;
+    krb5_error_code retval = 0;
+
+    if (ti == NULL)
+        return 0;
+
+    if (ti->format == KRB5_OTP_FORMAT_BASE64)
+        return ENOTSUP;
+
+    req = calloc(1, sizeof(krb5_pa_otp_req));
+    if (req == NULL)
+        return ENOMEM;
+
+    req->flags = ti->flags & KRB5_OTP_FLAG_NEXTOTP;
+
+    retval = krb5int_copy_data_contents(ctx, &ti->vendor, &req->vendor);
+    if (retval != 0)
+        goto error;
+
+    req->format = ti->format;
+
+    retval = krb5int_copy_data_contents(ctx, &ti->token_id, &req->token_id);
+    if (retval != 0)
+        goto error;
+
+    retval = krb5int_copy_data_contents(ctx, &ti->alg_id, &req->alg_id);
+    if (retval != 0)
+        goto error;
+
+    retval = krb5int_copy_data_contents(ctx, value, &req->otp_value);
+    if (retval != 0)
+        goto error;
+
+    if (ti->flags & KRB5_OTP_FLAG_COLLECT_PIN) {
+        if (pin == NULL || pin->data == NULL) {
+            retval = EINVAL; /* No pin found! */
+            goto error;
+        }
+
+        if (ti->flags & KRB5_OTP_FLAG_SEPARATE_PIN) {
+            retval = krb5int_copy_data_contents(ctx, pin, &req->pin);
+            if (retval != 0)
+                goto error;
+        } else {
+            krb5_free_data_contents(ctx, &req->otp_value);
+            retval = asprintf(&req->otp_value.data, "%.*s%.*s",
+                              pin->length, pin->data,
+                              value->length, value->data);
+            if (retval < 0) {
+                retval = ENOMEM;
+                req->otp_value = empty_data();
+                goto error;
+            }
+            req->otp_value.length = req->pin.length + req->otp_value.length;
+        }
+    }
+
+    *out_req = req;
+    return 0;
+
+error:
+    k5_free_pa_otp_req(ctx, req);
+    return retval;
+}
+
+/*
+ * Filters a set of tokeninfos given an otp value.  If the set is reduced to
+ * a single tokeninfo, it will be set in out_ti.  Otherwise, a new shallow copy
+ * will be allocated in out_filtered.
+ */
+static inline krb5_error_code
+filter_tokeninfos(krb5_context context, const char *otpvalue,
+                  krb5_otp_tokeninfo **tis,
+                  krb5_otp_tokeninfo ***out_filtered,
+                  krb5_otp_tokeninfo **out_ti)
+{
+    krb5_otp_tokeninfo **filtered;
+    size_t i = 0, j = 0;
+
+    while (tis[i] != NULL)
+        i++;
+
+    filtered = calloc(i + 1, sizeof(const krb5_otp_tokeninfo *));
+    if (filtered == NULL)
+        return ENOMEM;
+
+    /* Make a list of tokeninfos that match the value. */
+    for (i = 0, j = 0; tis[i] != NULL; i++) {
+        if (otpvalue_matches_tokeninfo(otpvalue, tis[i]))
+            filtered[j++] = tis[i];
+    }
+
+    /* It is an error if we have no matching tokeninfos. */
+    if (filtered[0] == NULL) {
+        free(filtered);
+        krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+                               _("OTP value doesn't match "
+                                 "any token formats"));
+        return KRB5_PREAUTH_FAILED; /* We have no supported tokeninfos. */
+    }
+
+    /* Otherwise, if we have just one tokeninfo, choose it. */
+    if (filtered[1] == NULL) {
+        *out_ti = filtered[0];
+        *out_filtered = NULL;
+        free(filtered);
+        return 0;
+    }
+
+    /* Otherwise, we'll return the remaining list. */
+    *out_ti = NULL;
+    *out_filtered = filtered;
+    return 0;
+}
+
+/* Outputs the selected tokeninfo and possibly a value and pin.
+ * Prompting may occur. */
+static krb5_error_code
+prompt_for_token(krb5_context context, krb5_prompter_fct prompter,
+                 void *prompter_data, krb5_otp_tokeninfo **tis,
+                 krb5_otp_tokeninfo **out_ti, krb5_data *out_value,
+                 krb5_data *out_pin)
+{
+    krb5_otp_tokeninfo **filtered = NULL;
+    krb5_otp_tokeninfo *ti = NULL;
     krb5_error_code retval;
     int i, challengers = 0;
     char *challenge = NULL;
     char otpvalue[1024];
-    krb5_pa_otp_req *req;
+    krb5_data value, pin;
 
     memset(otpvalue, 0, sizeof(otpvalue));
 
-    if (request == NULL || tis == NULL || tis[0] == NULL)
+    if (tis == NULL || tis[0] == NULL || out_ti == NULL)
         return EINVAL;
 
     /* Count how many challenges we have. */
@@ -315,17 +363,22 @@ make_request(krb5_context context, krb5_prompter_fct prompter,
             challengers++;
     }
 
+    /* If we have only one tokeninfo as input, choose it. */
+    if (i == 1)
+        ti = tis[0];
+
     /* Setup our challenge, if present. */
     if (challengers > 0) {
         /* If we have multiple tokeninfos still, choose now. */
-        if (tis[1] != NULL) {
-            retval = choose_token(context, prompter, prompter_data, tis);
+        if (ti == NULL) {
+            retval = prompt_for_tokeninfo(context, prompter, prompter_data,
+                                          tis, &ti);
             if (retval != 0)
                 return retval;
         }
 
         /* Create the challenge prompt. */
-        retval = make_challenge(tis[0], &challenge);
+        retval = make_challenge(ti, &challenge);
         if (retval != 0)
             return retval;
     }
@@ -337,57 +390,39 @@ make_request(krb5_context context, krb5_prompter_fct prompter,
     if (retval != 0)
         return retval;
 
-    /* Filter out tokeninfos that don't match our token value. */
-    for (i = 0; tis[i] != NULL; i++) {
-        if (!otpvalue_matches_tokeninfo(otpvalue, tis[i]))
-            remove_tokeninfo(context, tis, i--);
-    }
-
-    /* If we still have multiple tokeninfos, choose now. */
-    if (tis[0] != NULL && tis[1] != NULL) {
-        retval = choose_token(context, prompter, prompter_data, tis);
+    if (ti == NULL) {
+        /* Filter out tokeninfos that don't match our token value. */
+        retval = filter_tokeninfos(context, otpvalue, tis, &filtered, &ti);
         if (retval != 0)
             return retval;
-    }
-    if (tis == NULL || tis[0] == NULL) {
-        krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
-                               _("OTP value doesn't match any token formats"));
-        return KRB5_PREAUTH_FAILED; /* We have no supported tokeninfos. */
-    }
 
-    /* Create the request. */
-    req = calloc(1, sizeof(krb5_pa_otp_req));
-    if (req == NULL)
-        return ENOMEM;
-
-    /* Collect the PIN, if necessary. */
-    retval = set_value_and_collect_pin(context, prompter, prompter_data,
-                                       tis[0], otpvalue, req);
-    if (retval != 0) {
-        k5_free_pa_otp_req(context, req);
-        return retval;
-    }
-
-    /* Do Base64 encoding, if necessary. */
-    if (tis[0]->format == KRB5_OTP_FORMAT_BASE64) {
-        retval = base64_encode_request(req);
-        if (retval != 0) {
-            k5_free_pa_otp_req(context, req);
-            return retval;
+        /* If we still don't have a single tokeninfo, choose now. */
+        if (filtered != NULL) {
+            retval = prompt_for_tokeninfo(context, prompter, prompter_data,
+                                          filtered, &ti);
+            free(filtered);
+            if (retval != 0)
+                return retval;
         }
     }
 
-    /* Steal values from the tokeninfo. */
-    req->flags = tis[0]->flags;
-    req->alg_id = tis[0]->alg_id;
-    req->format = tis[0]->format;
-    req->token_id = tis[0]->token_id;
-    req->vendor = tis[0]->vendor;
-    tis[0]->alg_id = empty_data();
-    tis[0]->token_id = empty_data();
-    tis[0]->vendor = empty_data();
+    assert(ti != NULL);
 
-    *request = req;
+    /* Set the value. */
+    value = make_data(strdup(otpvalue), strlen(otpvalue));
+    if (value.data == NULL)
+        return ENOMEM;
+
+    /* Collect the PIN, if necessary. */
+    retval = collect_pin(context, prompter, prompter_data, ti, &pin);
+    if (retval != 0) {
+        krb5_free_data_contents(context, &value);
+        return retval;
+    }
+
+    *out_value = value;
+    *out_pin = pin;
+    *out_ti = ti;
     return 0;
 }
 
@@ -516,10 +551,11 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
                    krb5_pa_data ***pa_data_out)
 {
     krb5_pa_otp_challenge *chl = NULL;
+    krb5_otp_tokeninfo *ti = NULL;
     krb5_keyblock *as_key = NULL;
     krb5_pa_otp_req *req = NULL;
     krb5_error_code retval = 0;
-    krb5_data tmp;
+    krb5_data tmp, value, pin;
 
     *pa_data_out = NULL;
 
@@ -544,9 +580,14 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     if (retval != 0)
         goto error;
 
-    /* Fill in the request info from the TokenInfo structs .*/
-    retval = make_request(context, prompter, prompter_data,
-                          chl->tokeninfo, &req);
+    /* Have the user select a tokeninfo and enter a password/pin. */
+    retval = prompt_for_token(context, prompter, prompter_data,
+                              chl->tokeninfo, &ti, &value, &pin);
+    if (retval != 0)
+        goto error;
+
+    /* Make the request. */
+    retval = make_request(context, ti, &value, &pin, &req);
     if (retval != 0)
         goto error;
 
@@ -558,6 +599,8 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     /* Encode the request into the pa_data output. */
     retval = set_pa_data(req, pa_data_out);
 error:
+    krb5_free_data_contents(context, &value);
+    krb5_free_data_contents(context, &pin);
     k5_free_pa_otp_challenge(context, chl);
     k5_free_pa_otp_req(context, req);
     return retval;
