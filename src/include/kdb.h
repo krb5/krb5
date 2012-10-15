@@ -69,7 +69,7 @@
 
 /* This version will be incremented when incompatible changes are made to the
  * KDB API, and will be kept in sync with the libkdb major version. */
-#define KRB5_KDB_API_VERSION 6
+#define KRB5_KDB_API_VERSION 7
 
 /* Salt types */
 #define KRB5_KDB_SALTTYPE_NORMAL        0
@@ -810,7 +810,7 @@ krb5_dbe_free_string(krb5_context, char *);
  * This number indicates the date of the last incompatible change to the DAL.
  * The maj_ver field of the module's vtable structure must match this version.
  */
-#define KRB5_KDB_DAL_MAJOR_VERSION 3
+#define KRB5_KDB_DAL_MAJOR_VERSION 4
 
 /*
  * A krb5_context can hold one database object.  Modules should use
