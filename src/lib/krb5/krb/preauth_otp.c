@@ -452,6 +452,41 @@ make_request(krb5_context context, krb5_prompter_fct prompter,
     return 0;
 }
 
+/* Encode the OTP request into a krb5_pa_data buffer. */
+static krb5_error_code
+set_pa_data(const krb5_pa_otp_req *req, krb5_pa_data ***pa_data_out)
+{
+    krb5_pa_data **out = NULL;
+    krb5_data *tmp;
+
+    /* Allocate the preauth data array and one item. */
+    out = calloc(2, sizeof(krb5_pa_data *));
+    if (out == NULL)
+        goto error;
+    out[0] = calloc(1, sizeof(krb5_pa_data));
+    out[1] = NULL;
+    if (out[0] == NULL)
+        goto error;
+
+    /* Encode our request into the preauth data item. */
+    memset(out[0], 0, sizeof(krb5_pa_data));
+    out[0]->pa_type = KRB5_PADATA_OTP_REQUEST;
+    if (encode_krb5_pa_otp_req(req, &tmp) != 0)
+        goto error;
+    out[0]->contents = (krb5_octet *)tmp->data;
+    out[0]->length = tmp->length;
+
+    *pa_data_out = out;
+    return 0;
+
+error:
+    if (out != NULL) {
+        free(out[0]);
+        free(out);
+    }
+    return ENOMEM;
+}
+
 static int
 otp_client_get_flags(krb5_context context, krb5_preauthtype pa_type)
 {
@@ -468,11 +503,10 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
                    krb5_pa_data ***pa_data_out)
 {
     krb5_pa_otp_challenge *chl = NULL;
-    krb5_pa_data **out_data = NULL;
     krb5_keyblock *as_key = NULL;
     krb5_pa_otp_req *req = NULL;
     krb5_error_code retval = 0;
-    krb5_data tmp, *tmpp;
+    krb5_data tmp;
 
     *pa_data_out = NULL;
 
@@ -495,48 +529,20 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     /* Fill in the request info from the TokenInfo structs .*/
     retval = make_request(context, prompter, prompter_data,
                           chl->tokeninfo, &req);
-    if (retval != 0) {
-        k5_free_pa_otp_challenge(context, chl);
-        return retval;
-    }
+    if (retval != 0)
+        goto error;
 
     /* Encrypt the challenge's nonce and set it in the request. */
     retval = encrypt_nonce(context, as_key, chl, req);
+    if (retval != 0)
+        goto error;
+
+    /* Encode the request into the pa_data output. */
+    retval = set_pa_data(req, pa_data_out);
+error:
     k5_free_pa_otp_challenge(context, chl);
-    if (retval != 0) {
-        k5_free_pa_otp_req(context, req);
-        return retval;
-    }
-
-    /* Allocate the preauth data array and one item. */
-    out_data = calloc(2, sizeof(krb5_pa_data *));
-    if (out_data == NULL) {
-        k5_free_pa_otp_req(context, req);
-        return ENOMEM;
-    }
-    out_data[0] = calloc(1, sizeof(krb5_pa_data));
-    out_data[1] = NULL;
-    if (out_data[0] == NULL) {
-        free(out_data);
-        k5_free_pa_otp_req(context, req);
-        return ENOMEM;
-    }
-
-    /* Encode our request into the preauth data item. */
-    memset(out_data[0], 0, sizeof(krb5_pa_data));
-    out_data[0]->pa_type = KRB5_PADATA_OTP_REQUEST;
-    retval = encode_krb5_pa_otp_req(req, &tmpp);
     k5_free_pa_otp_req(context, req);
-    if (retval != 0) {
-        free(out_data[0]);
-        free(out_data);
-        return ENOMEM;
-    }
-    out_data[0]->contents = (krb5_octet*)tmpp->data;
-    out_data[0]->length = tmpp->length;
-
-    *pa_data_out = out_data;
-    return 0;
+    return retval;
 }
 
 krb5_error_code
