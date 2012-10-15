@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import os
-import time
 
 from k5test import *
 
@@ -17,7 +16,7 @@ def wait_for_prop(realm, full_expected):
             fail('kpropd process exited unexpectedly')
         output('kpropd: ' + line)
 
-        if 'KDC is synchronized' in line or 'Got incremental updates' in line:
+        if 'KDC is synchronized' in line or 'Incremental updates:' in line:
             output('*** Sync complete\n')
             if full_expected and not full_seen:
                 fail('Expected full dump but saw only incremental')
