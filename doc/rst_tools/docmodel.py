@@ -34,13 +34,13 @@ class Attribute(object):
         self.short_description = argkw.get('short_description')
         self.long_description = argkw.get('long_description')
         self.version = argkw.get('version')
-                
+
     def __repr__(self):
         result = list()
         for (attr,value) in self.__dict__.iteritems():
             result.append('%s=%s' % (attr,value))
         return 'Attribute: %s' % ','.join(result)
-    
+
 
 class CompositeType():
     def __init__(self, **argkw):
@@ -58,7 +58,7 @@ class CompositeType():
         self.friends = argkw.get('friends')
         self.type = argkw.get('type')
         self.attributes = self._setAttributes(argkw.get('attributes'))
-        
+
     def __repr__(self):
         result = list()
         for (attr,value) in self.__dict__.iteritems():
@@ -66,10 +66,10 @@ class CompositeType():
                 if value is not None:
                     attributes = ['%s' % a for a in value]
                     value = '\n  %s' % '\n  '.join(attributes)
-                
-            result.append('%s: %s' % (attr,value))        
+
+            result.append('%s: %s' % (attr,value))
         result = '\n'.join(result)
-        
+
         return result
 
     def _setAttributes(self, attributes):
@@ -78,19 +78,19 @@ class CompositeType():
             result = list()
             for a in attributes:
                 result.append(Attribute(**a))
-                
+
         return result
 
     def struct_reference(self, name):
         result = re.sub(r'_', '-', name)
         result = '_%s-struct' % result
-        
+
         return result
 
     def macro_reference(self, name):
         result = re.sub(r'_', '-', name)
         result = '_%s-data' % result
-        
+
         return result
 
 class Parameter(object):
@@ -102,11 +102,11 @@ class Parameter(object):
         self.typeId = argkw.get('typeId')
         self.description = argkw.get('description')
         self.version = argkw.get('version')
-        
+
     def __repr__(self):
         content = (self.name,self.direction,self.seqno,self.type,self.typeId,self.description)
         return 'Parameter: name=%s,direction=%s,seqno=%s,type=%s,typeId=%s,descr=%s' % content
-  
+
 class Function(object):
     def __init__(self, **argkw):
         self.category = 'function'
@@ -126,27 +126,27 @@ class Function(object):
         self.long_description = argkw.get('long_description')
         self.deprecated_description = argkw.get('deprecated_description')
         self.friends = argkw.get('friends')
-        
+
     def _setParameters(self, parameters):
         result = None
         if parameters is not None:
             result = list()
             for p in parameters:
                 result.append(Parameter(**p))
-        
+
         return result
-    
+
     def getObjectRow(self):
-        result = [str(self.Id), 
+        result = [str(self.Id),
                   self.name,
                   self.category]
-        
+
         return ','.join(result)
-    
+
     def getObjectDescriptionRow(self):
-        result = [self.Id, 
-                  self.active, 
-                  self.version, 
+        result = [self.Id,
+                  self.active,
+                  self.version,
                   self.short_description,
                   self.long_description]
 
@@ -177,14 +177,14 @@ class Function(object):
         lines.append('Function return type description:\n%s' % self.return_description)
         lines.append('Function retval description:\n%s' % self.retval_description)
         lines.append('Function short description:\n%s' % self.short_description)
-        lines.append('Function long description:\n%s' % self.long_description) 
+        lines.append('Function long description:\n%s' % self.long_description)
         lines.append('Warning description:\n%s' % self.warn_description)
         lines.append('See also description:\n%s' % self.sa_description)
-        lines.append('NOTE description:\n%s' % self.notes_description) 
+        lines.append('NOTE description:\n%s' % self.notes_description)
         lines.append('Version introduced:\n%s' % self.version_num)
         lines.append('Deprecated description:\n%s' % self.deprecated_description)
         result = '\n'.join(lines)
-        
+
         return result
 
 
@@ -197,13 +197,13 @@ class DocModel(object):
                 self.function = Function(**argkw)
             elif argkw['category'] == 'composite':
                 self.category = 'composite'
-                self.composite = CompositeType(**argkw) 
+                self.composite = CompositeType(**argkw)
 
     def __repr__(self):
         obj = getattr(self,self.category)
         print type(obj)
         return str(obj)
-                
+
     def signature(self):
         param_list = list()
         for p in self.function.parameters:
@@ -214,9 +214,9 @@ class DocModel(object):
         param_list = ', '.join(param_list)
         result = '%s %s(%s)' % (self.function.return_type,
                                 self.function.name, param_list)
-        
+
         return result
-    
+
     def save(self, path, template_path):
         f = open(template_path, 'r')
         t = Template(f.read(),self)
@@ -231,22 +231,22 @@ class DocModelTest(DocModel):
         doc_path = '../docutil/example.yml'
         argkw = yaml.load(open(doc_path,'r'))
         super(DocModelTest,self).__init__(**argkw)
-    
+
     def run_tests(self):
         self.test_save()
 
     def test_print(self):
         print 'testing'
         print self
-        
+
 
     def test_save(self):
         template_path = '../docutil/function2edit.html'
-        
+
         path = '/var/tsitkova/Sources/v10/trunk/documentation/test_doc.html'
 
-        self.save(path, template_path)       
-        
+        self.save(path, template_path)
+
 if __name__ == '__main__':
     tester = DocModelTest()
     tester.run_tests()

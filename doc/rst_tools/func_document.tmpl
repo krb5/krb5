@@ -14,7 +14,7 @@ $title
 
 
 :param:
-	 
+
 #for $param in $function.parameters:
 	#if $param.name is ''
 		#continue
@@ -25,34 +25,34 @@ $title
 	   #set name_description = '**%s**' % $param.name
 	#end if
 	#if $param.description is not None
-	   #set $description= ' - ' + $param.description		     
+	   #set $description= ' - ' + $param.description
 	#else
-	   #set $description=''		
+	   #set $description=''
 	#end if
 	          $name_description$description
-	          
+
 #end for
 
 ..
 
-#if len($function.retval_description) > 0 
+#if len($function.retval_description) > 0
 
 :retval:
-#for $retval in $function.retval_description:	
-         - $retval		
+#for $retval in $function.retval_description:
+         - $retval
 #end for
 #end if
 
 #if len($function.return_description) > 0
 
 :return:
-#for $retval in $function.return_description:	
-         - $retval		
+#for $retval in $function.return_description:
+         - $retval
 #end for
 #end if
-  
+
 ..
-	 
+
 #if $function.deprecated_description is not None
 
 $function.deprecated_description
@@ -72,7 +72,7 @@ $function.long_description
 ..
 
 #if $function.sa_description is not None
-.. seealso:: 
+.. seealso::
         $function.sa_description
 #end if
 

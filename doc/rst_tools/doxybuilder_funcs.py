@@ -1,12 +1,12 @@
 '''
   Copyright 2011 by the Massachusetts
   Institute of Technology.  All Rights Reserved.
- 
+
   Export of this software from the United States of America may
   require a specific license from the United States Government.
   It is the responsibility of any person or organization contemplating
   export to obtain such a license before exporting.
- 
+
   WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
   distribute this software and its documentation for any purpose and
   without fee is hereby granted, provided that the above copyright
@@ -25,7 +25,7 @@ import sys
 import re
 
 from collections import defaultdict
-from xml.sax import make_parser 
+from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 from docmodel import *
 
@@ -37,18 +37,18 @@ class DocNode(object):
         """
         @param node: name - the name of a node.
         @param attributes: a dictionary populated with attributes of a node
-        @param children: a dictionary with lists of children nodes. Nodes 
+        @param children: a dictionary with lists of children nodes. Nodes
             in lists are ordered as they appear in a document.
-        @param content: a content of xml node represented as a list of 
+        @param content: a content of xml node represented as a list of
             tuples [(type,value)] with type = ['char'|'element'].
-            If type is 'char' then the value is a character string otherwise 
+            If type is 'char' then the value is a character string otherwise
             it is a reference to a child node.
         """
         self.name = name
         self.content = list()
         self.attributes = dict()
         self.children = defaultdict(list)
-        
+
     def walk(self, decorators, sub_ws, stack=[]):
         result = list()
         decorator = decorators.get(self.name, decorators['default'])
@@ -78,7 +78,7 @@ class DocNode(object):
         result = self.walk(decorators, 1)
         if len(result) == 0:
             result = None
-        
+
         return result
 
     def __repr__(self):
@@ -88,7 +88,7 @@ class DocNode(object):
             result.append('Attr: %s = %s' % (key,value))
         for (key,value) in self.children.iteritems():
             result.append('Child: %s,%i' % (key,len(value)))
-                          
+
         return '\n'.join(result)
 
 class DoxyContenHandler(object, ContentHandler):
@@ -97,17 +97,17 @@ class DoxyContenHandler(object, ContentHandler):
         self.counters = defaultdict(int)
         self._nodes = None
         self._current = None
-        
+
     def startDocument(self):
         pass
-    
+
     def endDocument(self):
         import sys
-        
+
     def startElement(self, name, attrs):
         if name == self.builder.toplevel:
             self._nodes = []
-            
+
         if name == 'memberdef':
             kind = attrs.get('kind')
             if kind is None:
@@ -116,7 +116,7 @@ class DoxyContenHandler(object, ContentHandler):
 
         if self._nodes is None:
             return
-        
+
         node = DocNode(name)
         for (key,value) in attrs.items():
             node.attributes[key] = value
@@ -124,12 +124,12 @@ class DoxyContenHandler(object, ContentHandler):
             self._current.children[name].append(node)
             self._nodes.append(self._current)
         self._current = node
-            
+
     def characters(self, content):
-            
+
         if self._current is not None:
             self._current.content.append(('char',content.strip()))
-                        
+
     def endElement(self, name):
         if name == self.builder.toplevel:
             assert(len(self._nodes) == 0)
@@ -158,7 +158,7 @@ class XML2AST(object):
         filepath = '%s/%s' % (xmlpath,filename)
         self.parser.parse(open(filepath,'r'))
 
-        
+
 class DoxyFuncs(XML2AST):
     def __init__(self, path):
         super(DoxyFuncs, self).__init__(path,toplevel='memberdef')
@@ -176,9 +176,9 @@ class DoxyFuncs(XML2AST):
         else:
             print 'not processing node: %s' % node_type
             return
-        
+
         self.objects.append(DocModel(**data))
-             
+
     def save(self, templates, target_dir):
         for obj in self.objects:
             template_path = templates[obj.category]
@@ -223,16 +223,16 @@ class DoxyFuncs(XML2AST):
         parameters = function_descr['parameters']
         for (i,p) in enumerate(node.children['param']):
             type_node = p.children['type'][0]
-            p_type = self._process_type_node(type_node)            
+            p_type = self._process_type_node(type_node)
             if p_type[1].find('...') > -1 :
                 p_name = ''
             else:
                 p_name = None
             p_name_node = p.children.get('declname')
             if p_name_node is not None:
-                p_name = p_name_node[0].getContent()            
+                p_name = p_name_node[0].getContent()
             (p_direction,p_descr) = param_description_map.get(p_name,(None,None))
-            
+
             param_descr = {'seqno': i,
                            'name': p_name,
                            'direction': p_direction,
@@ -242,16 +242,16 @@ class DoxyFuncs(XML2AST):
             parameters.append(param_descr)
         result = Function(**function_descr)
         print >> self.tmp, result
-        
+
         return function_descr
 
     def _process_type_node(self, type_node):
         """
-        Type node has form 
+        Type node has form
             <type>type_string</type>
         for build in types and
             <type>
-              <ref refid='reference',kindref='member|compound'> 
+              <ref refid='reference',kindref='member|compound'>
                   'type_name'
               </ref></type>
               postfix (ex. *, **m, etc.)
@@ -270,7 +270,7 @@ class DoxyFuncs(XML2AST):
         p_type = re.sub('KRB5_CALLCONV_WRONG', '', p_type)
         p_type = re.sub('KRB5_CALLCONV', '', p_type)
         p_type = p_type.strip()
-        
+
         return (p_type_id, p_type)
 
     def _process_description_node(self, node):
@@ -280,7 +280,7 @@ class DoxyFuncs(XML2AST):
         para = node.children.get('para')
         result = list()
         if para is not None:
-            decorators = {'default': self.paragraph_content_decorator}        
+            decorators = {'default': self.paragraph_content_decorator}
             for e in para:
                 result.append(str(e.walk(decorators, 1)))
                 result.append('\n')
@@ -296,7 +296,7 @@ class DoxyFuncs(XML2AST):
                 return  value
         else:
             return None
- 
+
     def paragraph_content_decorator(self, node, value):
         if node.name == 'para':
             return value + '\n'
@@ -332,7 +332,7 @@ class DoxyFuncs(XML2AST):
             return None
         else:
             return value
-        
+
     def parameter_description_decorator(self, node, value):
         if node.name == 'parameterdescription':
             return value
@@ -340,7 +340,7 @@ class DoxyFuncs(XML2AST):
             return None
         else:
             return value
-            
+
     def process_parameter_description(self, node):
         """
         Parameter descriptions reside inside detailed description section.
@@ -349,7 +349,7 @@ class DoxyFuncs(XML2AST):
         result = dict()
         if para is not None:
             for e in para:
-                
+
                 param_list = e.children.get('parameterlist')
                 if param_list is None:
                     continue
@@ -357,17 +357,17 @@ class DoxyFuncs(XML2AST):
                 if param_items is None:
                     continue
                 for it in param_items:
-                    decorators = {'default': self.parameter_name_decorator}        
+                    decorators = {'default': self.parameter_name_decorator}
                     direction = None
                     name = it.walk(decorators,0).split(':')
                     if len(name) == 2:
                         direction = name[1]
-                    
+
                     decorators = {'default': self.parameter_description_decorator,
-                                  'para': self.paragraph_content_decorator}        
-                    description = it.walk(decorators, 0)                  
+                                  'para': self.paragraph_content_decorator}
+                    description = it.walk(decorators, 0)
                     result[name[0]] = (direction,description)
-        return result                    
+        return result
 
 
     def _process_return_value_description(self, node):
@@ -380,9 +380,9 @@ class DoxyFuncs(XML2AST):
                 simplesect_list = p.children.get('simplesect')
                 if simplesect_list is None:
                     continue
-                for it in simplesect_list:                    
+                for it in simplesect_list:
                     decorators = {'default': self.return_value_description_decorator,
-                                  'para': self.parameter_name_decorator}        
+                                  'para': self.parameter_name_decorator}
                     result = it.walk(decorators, 1)
                     if result is not None:
                         ret.append(result)
@@ -431,7 +431,7 @@ class DoxyFuncs(XML2AST):
                             result = " %s  %s" % (val, val_descr)
                             ret.append (result)
         return ret
-        
+
     def return_warning_decorator(self, node, value):
         if node.name == 'simplesect':
             if node.attributes['kind'] == 'warning':
@@ -556,9 +556,9 @@ class DoxyFuncs(XML2AST):
         for (start,end) in zip(breaks[:-1],breaks[1:]):
             result.append(value[start:end])
         result = '\n'.join(result)
-        
+
         return result
-        
+
     def _save(self, table, path = None):
         if path is None:
             f = sys.stdout
@@ -568,9 +568,9 @@ class DoxyFuncs(XML2AST):
             f.write('%s\n' % ','.join(l))
         if path is not None:
             f.close()
-        
 
-    
+
+
 class DoxyFuncsTest(DoxyFuncs):
     def __init__(self, xmlpath, rstpath):
         super(DoxyFuncsTest,self).__init__(xmlpath)
@@ -580,16 +580,16 @@ class DoxyFuncsTest(DoxyFuncs):
 
     def run_tests(self):
         self.test_save()
-    
+
     def test_run(self):
         self.run()
-        
+
     def test_save(self):
         self.run()
         templates = {'function': 'func_document.tmpl'}
         self.save(templates, self.target_dir)
-        
+
 if __name__ == '__main__':
     tester = DoxyFuncsTest(xmlpath, rstpath)
     tester.run_tests()
-        
+

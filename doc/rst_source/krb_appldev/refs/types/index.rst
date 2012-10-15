@@ -41,7 +41,7 @@ Public
    krb5_int32.rst
    krb5_kdc_rep.rst
    krb5_kdc_req.rst
-   krb5_keyblock.rst 
+   krb5_keyblock.rst
    krb5_keytab_entry.rst
    krb5_keyusage.rst
    krb5_kt_cursor.rst
@@ -72,7 +72,7 @@ Public
    krb5_timestamp.rst
    krb5_tkt_authent.rst
    krb5_trace_callback.rst
-   krb5_trace_info.rst 
+   krb5_trace_info.rst
    krb5_transited.rst
    krb5_typed_data.rst
    krb5_ui_4.rst

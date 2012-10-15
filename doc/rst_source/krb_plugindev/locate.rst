@@ -25,7 +25,7 @@ addresses for the realm, KRB5_PLUGIN_NO_HANDLE if it wants to let
 other location mechanisms determine the server addresses, or another
 code if it experienced a failure which should abort the location
 process.
- 
+
 A module can create and destroy per-library-context state objects by
 implementing the **init** and **fini** methods.  State objects have
 the type void \*, and should be cast to an internal type for the state

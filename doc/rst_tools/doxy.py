@@ -1,12 +1,12 @@
 '''
   Copyright 2011 by the Massachusetts
   Institute of Technology.  All Rights Reserved.
- 
+
   Export of this software from the United States of America may
   require a specific license from the United States Government.
   It is the responsibility of any person or organization contemplating
   export to obtain such a license before exporting.
- 
+
   WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
   distribute this software and its documentation for any purpose and
   without fee is hereby granted, provided that the above copyright
@@ -48,7 +48,7 @@ def processOptions():
 
     if in_dir is None or out_dir is None:
        parser.error("Input and output directories are required")
- 
+
     if action == "all" or action == "typedef":
         tester = DoxyTypesTest(in_dir, out_dir)
         tester.run_tests()
