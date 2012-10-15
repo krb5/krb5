@@ -42,23 +42,6 @@
 static krb5_preauthtype otp_client_supported_pa_types[] =
     { KRB5_PADATA_OTP_CHALLENGE, 0 };
 
-/* Tests krb5_data to see if it is printable. */
-static krb5_boolean
-is_printable_string(const krb5_data *data)
-{
-    unsigned int i;
-
-    if (data == NULL)
-        return FALSE;
-
-    for (i = 0; i < data->length; i++) {
-        if (!isprint((unsigned char)data->data[i]))
-            return FALSE;
-    }
-
-    return TRUE;
-}
-
 /* Takes the nonce from the challenge and encrypts it into the request. */
 static krb5_error_code
 encrypt_nonce(krb5_context ctx, krb5_keyblock *key,
@@ -236,32 +219,6 @@ base64_encode_request(krb5_pa_otp_req *req)
     return ENOTSUP;
 }
 
-static int
-is_tokeninfo_supported(krb5_otp_tokeninfo *ti)
-{
-    krb5_flags supported_flags = KRB5_OTP_FLAG_COLLECT_PIN |
-                                 KRB5_OTP_FLAG_NO_COLLECT_PIN |
-                                 KRB5_OTP_FLAG_SEPARATE_PIN;
-
-    /* Flags we don't support... */
-    if (ti->flags & ~supported_flags)
-        return 0;
-
-    /* We don't currently support hashing. */
-    if (ti->supported_hash_alg != NULL || ti->iteration_count >= 0)
-        return 0;
-
-    /* Remove tokeninfos with invalid vendor strings. */
-    if (!is_printable_string(&ti->vendor))
-        return 0;
-
-    /* We don't currently support base64. */
-    if (ti->format == KRB5_OTP_FORMAT_BASE64)
-        return 0;
-
-    return 1;
-}
-
 /* Builds a challenge string from the given tokeninfo. */
 static krb5_error_code
 make_challenge(const krb5_otp_tokeninfo *ti, char **challenge)
@@ -273,14 +230,6 @@ make_challenge(const krb5_otp_tokeninfo *ti, char **challenge)
 
     if (ti == NULL || ti->challenge.data == NULL)
         return 0;
-
-    /*
-     * If the challenge isn't printable, then we have some kind of binary
-     * challenge which we cannot properly handle. So error out. Ideally there
-     * would be some mechanism to handle binary challenges to hardware tokens.
-     */
-    if (!is_printable_string(&ti->challenge))
-        return KRB5_PREAUTH_FAILED;
 
     if (asprintf(challenge, "%s %.*s\n",
                  _("OTP Challenge:"),
@@ -360,20 +309,10 @@ make_request(krb5_context context, krb5_prompter_fct prompter,
     if (request == NULL || tis == NULL || tis[0] == NULL)
         return EINVAL;
 
-    /* Filter out any tokeninfos we don't support. */
+    /* Count how many challenges we have. */
     for (i = 0; tis[i] != NULL; i++) {
-        if (!is_tokeninfo_supported(tis[i])) {
-            remove_tokeninfo(context, tis, i--);
-            continue;
-        }
-
         if (tis[i]->challenge.data != NULL)
-            challengers++; /* Count how many challenges we have. */
-    }
-    if (tis[0] == NULL) {
-        krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
-                               _("No supported tokens"));
-        return KRB5_PREAUTH_FAILED; /* We have no supported tokeninfos. */
+            challengers++;
     }
 
     /* Setup our challenge, if present. */
@@ -487,6 +426,80 @@ error:
     return ENOMEM;
 }
 
+/* Tests krb5_data to see if it is printable. */
+static krb5_boolean
+is_printable_string(const krb5_data *data)
+{
+    unsigned int i;
+
+    if (data == NULL)
+        return FALSE;
+
+    for (i = 0; i < data->length; i++) {
+        if (!isprint((unsigned char)data->data[i]))
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+/* Returns TRUE when the given tokeninfo contains the subset of features we
+ * support. */
+static krb5_boolean
+is_tokeninfo_supported(krb5_otp_tokeninfo *ti)
+{
+    krb5_flags supported_flags = KRB5_OTP_FLAG_COLLECT_PIN |
+                                 KRB5_OTP_FLAG_NO_COLLECT_PIN |
+                                 KRB5_OTP_FLAG_SEPARATE_PIN;
+
+    /* Flags we don't support... */
+    if (ti->flags & ~supported_flags)
+        return FALSE;
+
+    /* We don't currently support hashing. */
+    if (ti->supported_hash_alg != NULL || ti->iteration_count >= 0)
+        return FALSE;
+
+    /* Remove tokeninfos with invalid vendor strings. */
+    if (!is_printable_string(&ti->vendor))
+        return FALSE;
+
+    /* Remove tokeninfos with non-printable challenges. */
+    if (!is_printable_string(&ti->challenge))
+        return FALSE;
+
+    /* We don't currently support base64. */
+    if (ti->format == KRB5_OTP_FORMAT_BASE64)
+        return FALSE;
+
+    return TRUE;
+}
+
+/* Removes unsupported tokeninfos. Returns an error if no tokeninfos remain. */
+static krb5_error_code
+filter_supported_tokeninfos(krb5_context context, krb5_otp_tokeninfo **tis)
+{
+    size_t i, j;
+
+    /* Filter out any tokeninfos we don't support. */
+    for (i = 0, j = 0; tis[i] != NULL; i++) {
+        if (!is_tokeninfo_supported(tis[i]))
+            k5_free_otp_tokeninfo(context, tis[i]);
+        else
+            tis[j++] = tis[i];
+    }
+
+    /* Terminate the array. */
+    tis[j] = NULL;
+
+    if (tis[0] != NULL)
+        return 0;
+
+    krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+                           _("No supported tokens"));
+    return KRB5_PREAUTH_FAILED; /* We have no supported tokeninfos. */
+}
+
 static int
 otp_client_get_flags(krb5_context context, krb5_preauthtype pa_type)
 {
@@ -525,6 +538,11 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     retval = decode_krb5_pa_otp_challenge(&tmp, &chl);
     if (retval != 0)
         return retval;
+
+    /* Remove unsupported tokeninfos. */
+    retval = filter_supported_tokeninfos(context, chl->tokeninfo);
+    if (retval != 0)
+        goto error;
 
     /* Fill in the request info from the TokenInfo structs .*/
     retval = make_request(context, prompter, prompter_data,
