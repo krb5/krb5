@@ -82,6 +82,9 @@ Frequently used public interfaces
    krb5_responder_get_challenge.rst
    krb5_responder_list_questions.rst
    krb5_responder_set_answer.rst
+   krb5_responder_otp_get_challenge.rst
+   krb5_responder_otp_set_answer.rst
+   krb5_responder_otp_challenge_free.rst
    krb5_set_default_realm.rst
    krb5_set_password.rst
    krb5_set_password_using_ccache.rst

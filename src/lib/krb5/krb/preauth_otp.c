@@ -29,6 +29,7 @@
  */
 
 #include "k5-int.h"
+#include "k5-json.h"
 #include "int-proto.h"
 
 #include <krb5/preauth_plugin.h>
@@ -36,6 +37,392 @@
 
 static krb5_preauthtype otp_client_supported_pa_types[] =
     { KRB5_PADATA_OTP_CHALLENGE, 0 };
+
+/* Frees a tokeninfo. */
+static void
+free_tokeninfo(krb5_responder_otp_tokeninfo *ti)
+{
+    if (ti == NULL)
+        return;
+
+    free(ti->alg_id);
+    free(ti->challenge);
+    free(ti->token_id);
+    free(ti->vendor);
+    free(ti);
+}
+
+/* Converts a property of a json object into a char*. */
+static krb5_error_code
+codec_value_to_string(k5_json_object obj, const char *key, char **string)
+{
+    k5_json_value val;
+    char *str;
+
+    val = k5_json_object_get(obj, key);
+    if (val == NULL)
+        return ENOENT;
+
+    if (k5_json_get_tid(val) != K5_JSON_TID_STRING)
+        return EINVAL;
+
+    str = strdup(k5_json_string_utf8(val));
+    if (str == NULL)
+        return ENOMEM;
+
+    *string = str;
+    return 0;
+}
+
+/* Converts a property of a json object into a krb5_data struct. */
+static krb5_error_code
+codec_value_to_data(k5_json_object obj, const char *key, krb5_data *data)
+{
+    krb5_error_code retval;
+    char *tmp;
+
+    retval = codec_value_to_string(obj, key, &tmp);
+    if (retval != 0)
+        return retval;
+
+    *data = string2data(tmp);
+    return 0;
+}
+
+/* Converts a krb5_data struct into a property of a JSON object. */
+static krb5_error_code
+codec_data_to_value(krb5_data *data, k5_json_object obj, const char *key)
+{
+    krb5_error_code retval;
+    k5_json_string str;
+
+    if (data->data == NULL)
+        return 0;
+
+    str = k5_json_string_create_len(data->data, data->length);
+    if (str == NULL)
+        return ENOMEM;
+
+    retval = k5_json_object_set(obj, key, str);
+    k5_json_release(str);
+    return retval == 0 ? 0 : ENOMEM;
+}
+
+/* Converts a property of a json object into a krb5_int32. */
+static krb5_error_code
+codec_value_to_int32(k5_json_object obj, const char *key, krb5_int32 *int32)
+{
+    k5_json_value val;
+
+    val = k5_json_object_get(obj, key);
+    if (val == NULL)
+        return ENOENT;
+
+    if (k5_json_get_tid(val) != K5_JSON_TID_NUMBER)
+        return EINVAL;
+
+    *int32 = k5_json_number_value(val);
+    return 0;
+}
+
+/* Converts a krb5_int32 into a property of a JSON object. */
+static krb5_error_code
+codec_int32_to_value(krb5_int32 int32, k5_json_object obj, const char *key)
+{
+    krb5_error_code retval;
+    k5_json_number num;
+
+    if (int32 == -1)
+        return 0;
+
+    num = k5_json_number_create(int32);
+    if (num == NULL)
+        return ENOMEM;
+
+    retval = k5_json_object_set(obj, key, num);
+    k5_json_release(num);
+    return retval == 0 ? 0 : ENOMEM;
+}
+
+/* Converts a krb5_otp_tokeninfo into a JSON object. */
+static krb5_error_code
+codec_encode_tokeninfo(krb5_otp_tokeninfo *ti, k5_json_object *out)
+{
+    krb5_error_code retval = 0;
+    k5_json_object obj;
+    krb5_flags flags;
+
+    obj = k5_json_object_create();
+    if (obj == NULL)
+        goto error;
+
+    flags = KRB5_RESPONDER_OTP_FLAGS_COLLECT_TOKEN;
+    if (ti->flags & KRB5_OTP_FLAG_COLLECT_PIN)
+        flags |= KRB5_RESPONDER_OTP_FLAGS_COLLECT_PIN;
+    if (ti->flags & KRB5_OTP_FLAG_NEXTOTP)
+        flags |= KRB5_RESPONDER_OTP_FLAGS_NEXTOTP;
+
+    retval = codec_int32_to_value(flags, obj, "flags");
+    if (retval != 0)
+        goto error;
+
+    retval = codec_data_to_value(&ti->vendor, obj, "vendor");
+    if (retval != 0)
+        goto error;
+
+    retval = codec_data_to_value(&ti->challenge, obj, "challenge");
+    if (retval != 0)
+        goto error;
+
+    retval = codec_int32_to_value(ti->length, obj, "length");
+    if (retval != 0)
+        goto error;
+
+    if (ti->format != KRB5_OTP_FORMAT_BASE64) {
+        retval = codec_int32_to_value(ti->format, obj, "format");
+        if (retval != 0)
+            goto error;
+    }
+
+    retval = codec_data_to_value(&ti->token_id, obj, "tokenID");
+    if (retval != 0)
+        goto error;
+
+    retval = codec_data_to_value(&ti->alg_id, obj, "algID");
+    if (retval != 0)
+        goto error;
+
+    *out = obj;
+    return 0;
+
+error:
+    k5_json_release(obj);
+    return retval;
+}
+
+/* Converts a krb5_pa_otp_challenge into a JSON object. */
+static krb5_error_code
+codec_encode_challenge(krb5_context ctx, krb5_pa_otp_challenge *chl,
+                       char **json)
+{
+    k5_json_object obj = NULL, tmp = NULL;
+    k5_json_string str = NULL;
+    k5_json_array arr = NULL;
+    krb5_error_code retval = 0;
+    int i;
+
+    obj = k5_json_object_create();
+    if (obj == NULL)
+        goto error;
+
+    if (chl->service.data) {
+        str = k5_json_string_create_len(chl->service.data,
+                                        chl->service.length);
+        if (str == NULL)
+            goto error;
+        retval = k5_json_object_set(obj, "service", str);
+        k5_json_release(str);
+        if (retval != 0) {
+            retval = ENOMEM;
+            goto error;
+        }
+    }
+
+    arr = k5_json_array_create();
+    if (arr == NULL)
+        goto error;
+
+    for (i = 0; chl->tokeninfo[i] != NULL ; i++) {
+        retval = codec_encode_tokeninfo(chl->tokeninfo[i], &tmp);
+        if (retval != 0)
+            goto error;
+
+        retval = k5_json_array_add(arr, tmp);
+        k5_json_release(tmp);
+        if (retval != 0) {
+            retval = ENOMEM;
+            goto error;
+        }
+    }
+
+    if (k5_json_object_set(obj, "tokenInfo", arr) != 0) {
+        retval = ENOMEM;
+        goto error;
+    }
+
+    *json = k5_json_encode(obj);
+    if (*json == NULL)
+        goto error;
+
+    k5_json_release(arr);
+    k5_json_release(obj);
+    return 0;
+
+error:
+    k5_json_release(arr);
+    k5_json_release(obj);
+    return retval == 0 ? ENOMEM : retval;
+}
+
+/* Converts a JSON object into a krb5_responder_otp_tokeninfo. */
+static krb5_responder_otp_tokeninfo *
+codec_decode_tokeninfo(k5_json_object obj)
+{
+    krb5_responder_otp_tokeninfo *ti = NULL;
+    krb5_error_code retval;
+
+    ti = calloc(1, sizeof(krb5_responder_otp_tokeninfo));
+    if (ti == NULL)
+        goto error;
+
+    retval = codec_value_to_int32(obj, "flags", &ti->flags);
+    if (retval != 0)
+        goto error;
+
+    retval = codec_value_to_string(obj, "vendor", &ti->vendor);
+    if (retval != 0 && retval != ENOENT)
+        goto error;
+
+    retval = codec_value_to_string(obj, "challenge", &ti->challenge);
+    if (retval != 0 && retval != ENOENT)
+        goto error;
+
+    retval = codec_value_to_int32(obj, "length", &ti->length);
+    if (retval == ENOENT)
+        ti->length = -1;
+    else if (retval != 0)
+        goto error;
+
+    retval = codec_value_to_int32(obj, "format", &ti->format);
+    if (retval == ENOENT)
+        ti->format = -1;
+    else if (retval != 0)
+        goto error;
+
+    retval = codec_value_to_string(obj, "tokenID", &ti->token_id);
+    if (retval != 0 && retval != ENOENT)
+        goto error;
+
+    retval = codec_value_to_string(obj, "algID", &ti->alg_id);
+    if (retval != 0 && retval != ENOENT)
+        goto error;
+
+    return ti;
+
+error:
+    free_tokeninfo(ti);
+    return NULL;
+}
+
+/* Converts a JSON object into a krb5_responder_otp_challenge. */
+static krb5_responder_otp_challenge *
+codec_decode_challenge(krb5_context ctx, const char *json)
+{
+    krb5_responder_otp_challenge *chl = NULL;
+    k5_json_value obj = NULL, arr = NULL, tmp = NULL;
+    krb5_error_code retval;
+    size_t i;
+
+    obj = k5_json_decode(json);
+    if (obj == NULL)
+        goto error;
+
+    if (k5_json_get_tid(obj) != K5_JSON_TID_OBJECT)
+        goto error;
+
+    arr = k5_json_object_get(obj, "tokenInfo");
+    if (arr == NULL)
+        goto error;
+
+    if (k5_json_get_tid(arr) != K5_JSON_TID_ARRAY)
+        goto error;
+
+    chl = calloc(1, sizeof(krb5_responder_otp_challenge));
+    if (chl == NULL)
+        goto error;
+
+    chl->tokeninfo = calloc(k5_json_array_length(arr) + 1,
+                            sizeof(krb5_responder_otp_tokeninfo*));
+    if (chl->tokeninfo == NULL)
+        goto error;
+
+    retval = codec_value_to_string(obj, "service", &chl->service);
+    if (retval != 0 && retval != ENOENT)
+        goto error;
+
+    for (i = 0; i < k5_json_array_length(arr); i++) {
+        tmp = k5_json_array_get(arr, i);
+        if (k5_json_get_tid(tmp) != K5_JSON_TID_OBJECT)
+            goto error;
+
+        chl->tokeninfo[i] = codec_decode_tokeninfo(tmp);
+        if (chl->tokeninfo[i] == NULL)
+            goto error;
+    }
+
+    k5_json_release(obj);
+    return chl;
+
+error:
+    if (chl != NULL) {
+        for (i = 0; chl->tokeninfo != NULL && chl->tokeninfo[i] != NULL; i++)
+            free_tokeninfo(chl->tokeninfo[i]);
+        free(chl->tokeninfo);
+        free(chl);
+    }
+    k5_json_release(obj);
+    return NULL;
+}
+
+/* Decode the responder answer into a tokeninfo, a value and a pin. */
+static krb5_error_code
+codec_decode_answer(krb5_context context, const char *answer,
+                    krb5_otp_tokeninfo **tis, krb5_otp_tokeninfo **ti,
+                    krb5_data *value, krb5_data *pin)
+{
+    krb5_error_code retval = EBADMSG;
+    k5_json_value val = NULL;
+    krb5_int32 indx, i;
+    krb5_data tmp;
+
+    if (answer == NULL)
+        return EBADMSG;
+
+    val = k5_json_decode(answer);
+    if (val == NULL)
+        goto cleanup;
+
+    if (k5_json_get_tid(val) != K5_JSON_TID_OBJECT)
+        goto cleanup;
+
+    retval = codec_value_to_int32(val, "tokeninfo", &indx);
+    if (retval != 0)
+        goto cleanup;
+
+    for (i = 0; tis[i] != NULL; i++) {
+        if (i == indx) {
+            retval = codec_value_to_data(val, "value", &tmp);
+            if (retval != 0 && retval != ENOENT)
+                goto cleanup;
+
+            retval = codec_value_to_data(val, "pin", pin);
+            if (retval != 0 && retval != ENOENT) {
+                krb5_free_data_contents(context, &tmp);
+                goto cleanup;
+            }
+
+            *value = tmp;
+            *ti = tis[i];
+            retval = 0;
+            goto cleanup;
+        }
+    }
+    retval = EINVAL;
+
+cleanup:
+    k5_json_release(val);
+    return retval;
+}
 
 /* Takes the nonce from the challenge and encrypts it into the request. */
 static krb5_error_code
@@ -541,6 +928,57 @@ otp_client_get_flags(krb5_context context, krb5_preauthtype pa_type)
     return PA_REAL;
 }
 
+static void
+otp_client_request_init(krb5_context context, krb5_clpreauth_moddata moddata,
+                        krb5_clpreauth_modreq *modreq_out)
+{
+    *modreq_out = calloc(1, sizeof(krb5_pa_otp_challenge *));
+}
+
+static krb5_error_code
+otp_client_prep_questions(krb5_context context, krb5_clpreauth_moddata moddata,
+                          krb5_clpreauth_modreq modreq,
+                          krb5_get_init_creds_opt *opt,
+                          krb5_clpreauth_callbacks cb,
+                          krb5_clpreauth_rock rock, krb5_kdc_req *request,
+                          krb5_data *encoded_request_body,
+                          krb5_data *encoded_previous_request,
+                          krb5_pa_data *pa_data)
+{
+    krb5_pa_otp_challenge *chl;
+    krb5_error_code retval;
+    krb5_data tmp;
+    char *json;
+
+    if (modreq == NULL)
+        return ENOMEM;
+
+    /* Decode the challenge. */
+    tmp = make_data(pa_data->contents, pa_data->length);
+    retval = decode_krb5_pa_otp_challenge(&tmp,
+                                          (krb5_pa_otp_challenge **)modreq);
+    if (retval != 0)
+        return retval;
+    chl = *(krb5_pa_otp_challenge **)modreq;
+
+    /* Remove unsupported tokeninfos. */
+    retval = filter_supported_tokeninfos(context, chl->tokeninfo);
+    if (retval != 0)
+        return retval;
+
+    /* Make the JSON representation. */
+    retval = codec_encode_challenge(context, chl, &json);
+    if (retval != 0)
+        return retval;
+
+    /* Ask the question. */
+    retval = cb->ask_responder_question(context, rock,
+                                        KRB5_RESPONDER_QUESTION_OTP,
+                                        json);
+    free(json);
+    return retval;
+}
+
 static krb5_error_code
 otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
                    krb5_clpreauth_modreq modreq, krb5_get_init_creds_opt *opt,
@@ -555,7 +993,12 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     krb5_keyblock *as_key = NULL;
     krb5_pa_otp_req *req = NULL;
     krb5_error_code retval = 0;
-    krb5_data tmp, value, pin;
+    krb5_data value, pin;
+    const char *answer;
+
+    if (modreq == NULL)
+        return ENOMEM;
+    chl = *(krb5_pa_otp_challenge **)modreq;
 
     *pa_data_out = NULL;
 
@@ -569,22 +1012,21 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     if (retval != 0)
         return retval;
 
-    /* Decode the challenge. */
-    tmp = make_data(pa_data->contents, pa_data->length);
-    retval = decode_krb5_pa_otp_challenge(&tmp, &chl);
-    if (retval != 0)
-        return retval;
-
-    /* Remove unsupported tokeninfos. */
-    retval = filter_supported_tokeninfos(context, chl->tokeninfo);
-    if (retval != 0)
-        goto error;
-
-    /* Have the user select a tokeninfo and enter a password/pin. */
-    retval = prompt_for_token(context, prompter, prompter_data,
-                              chl->tokeninfo, &ti, &value, &pin);
-    if (retval != 0)
-        goto error;
+    /* Attempt to get token selection from the responder. */
+    pin = empty_data();
+    value = empty_data();
+    answer = cb->get_responder_answer(context, rock,
+                                      KRB5_RESPONDER_QUESTION_OTP);
+    retval = codec_decode_answer(context, answer, chl->tokeninfo, &ti, &value,
+                                 &pin);
+    if (retval != 0) {
+        /* If the responder doesn't have a token selection,
+         * we need to select the token via prompting. */
+        retval = prompt_for_token(context, prompter, prompter_data,
+                                  chl->tokeninfo, &ti, &value, &pin);
+        if (retval != 0)
+            goto error;
+    }
 
     /* Make the request. */
     retval = make_request(context, ti, &value, &pin, &req);
@@ -601,9 +1043,19 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
 error:
     krb5_free_data_contents(context, &value);
     krb5_free_data_contents(context, &pin);
-    k5_free_pa_otp_challenge(context, chl);
     k5_free_pa_otp_req(context, req);
     return retval;
+}
+
+static void
+otp_client_request_fini(krb5_context context, krb5_clpreauth_moddata moddata,
+                        krb5_clpreauth_modreq modreq)
+{
+    if (modreq == NULL)
+        return;
+
+    k5_free_pa_otp_challenge(context, *(krb5_pa_otp_challenge **)modreq);
+    free(modreq);
 }
 
 krb5_error_code
@@ -619,8 +1071,110 @@ clpreauth_otp_initvt(krb5_context context, int maj_ver, int min_ver,
     vt->name = "otp";
     vt->pa_type_list = otp_client_supported_pa_types;
     vt->flags = otp_client_get_flags;
+    vt->request_init = otp_client_request_init;
+    vt->prep_questions = otp_client_prep_questions;
     vt->process = otp_client_process;
+    vt->request_fini = otp_client_request_fini;
     vt->gic_opts = NULL;
 
     return 0;
+}
+
+krb5_error_code
+krb5_responder_otp_get_challenge(krb5_context ctx,
+                                 krb5_responder_context rctx,
+                                 krb5_responder_otp_challenge **chl)
+{
+    const char *answer;
+    krb5_responder_otp_challenge *challenge;
+
+    answer = krb5_responder_get_challenge(ctx, rctx,
+                                          KRB5_RESPONDER_QUESTION_OTP);
+    if (answer == NULL) {
+        *chl = NULL;
+        return 0;
+    }
+
+    challenge = codec_decode_challenge(ctx, answer);
+    if (challenge == NULL)
+        return ENOMEM;
+
+    *chl = challenge;
+    return 0;
+}
+
+krb5_error_code
+krb5_responder_otp_set_answer(krb5_context ctx, krb5_responder_context rctx,
+                              size_t ti, const char *value, const char *pin)
+{
+    krb5_error_code retval;
+    k5_json_object obj = NULL;
+    k5_json_value val = NULL;
+    char *tmp;
+
+    obj = k5_json_object_create();
+    if (obj == NULL)
+        goto error;
+
+    val = k5_json_number_create(ti);
+    if (val == NULL)
+        goto error;
+
+    retval = k5_json_object_set(obj, "tokeninfo", val);
+    k5_json_release(val);
+    if (retval != 0)
+        goto error;
+
+    if (value != NULL) {
+        val = k5_json_string_create(value);
+        if (val == NULL)
+            goto error;
+
+        retval = k5_json_object_set(obj, "value", val);
+        k5_json_release(val);
+        if (retval != 0)
+            goto error;
+    }
+
+    if (pin != NULL) {
+        val = k5_json_string_create(pin);
+        if (val == NULL)
+            goto error;
+
+        retval = k5_json_object_set(obj, "pin", val);
+        k5_json_release(val);
+        if (retval != 0)
+            goto error;
+    }
+
+    tmp = k5_json_encode(obj);
+    k5_json_release(obj);
+    if (tmp == NULL)
+        goto error;
+
+    retval = krb5_responder_set_answer(ctx, rctx, KRB5_RESPONDER_QUESTION_OTP,
+                                       tmp);
+    free(tmp);
+    return retval;
+
+error:
+    k5_json_release(obj);
+    return ENOMEM;
+}
+
+void
+krb5_responder_otp_challenge_free(krb5_context ctx,
+                                  krb5_responder_context rctx,
+                                  krb5_responder_otp_challenge *chl)
+{
+    size_t i;
+
+    if (chl == NULL)
+        return;
+
+    for (i = 0; chl->tokeninfo[i]; i++)
+        free_tokeninfo(chl->tokeninfo[i]);
+    free(chl->service);
+    free(chl->tokeninfo);
+    free(chl);
 }

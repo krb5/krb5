@@ -528,6 +528,9 @@ krb5_register_serializer
 krb5_responder_get_challenge
 krb5_responder_list_questions
 krb5_responder_set_answer
+krb5_responder_otp_get_challenge
+krb5_responder_otp_set_answer
+krb5_responder_otp_challenge_free
 krb5_salttype_to_string
 krb5_sendauth
 krb5_sendto_kdc

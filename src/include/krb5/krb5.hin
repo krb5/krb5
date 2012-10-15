@@ -6367,6 +6367,66 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
  */
 #define KRB5_RESPONDER_QUESTION_PASSWORD "password"
 
+/**
+ * OTP responder question
+ *
+ * The OTP responder question is asked when the KDC indicates that an OTP
+ * value is required in order to complete the authentication.  The JSON format
+ * of the challenge is:
+ *   {
+ *     "service": <string (optional)>,
+ *     "tokenInfo": [
+ *       {
+ *         "flags":     <number>,
+ *         "vendor":    <string (optional)>,
+ *         "challenge": <string (optional)>,
+ *         "length":    <number (optional)>,
+ *         "format":    <number (optional)>,
+ *         "tokenID":   <string (optional)>,
+ *         "algID":     <string (optional)>,
+ *       },
+ *       ...
+ *     ]
+ *   }
+ *
+ * The answer to the question MUST be JSON formatted:
+ *   {
+ *     "tokeninfo": <number>,
+ *     "value":     <string (optional)>,
+ *     "pin":       <string (optional)>,
+ *   }
+ *
+ * For more detail, please see RFC 6560.
+ *
+ * @version First introduced in 1.11
+ */
+#define KRB5_RESPONDER_QUESTION_OTP "otp"
+
+/**
+ * These format constants identify the format of the token value.
+ */
+#define KRB5_RESPONDER_OTP_FORMAT_DECIMAL 0
+#define KRB5_RESPONDER_OTP_FORMAT_HEXADECIMAL 1
+#define KRB5_RESPONDER_OTP_FORMAT_ALPHANUMERIC 2
+#define KRB5_RESPONDER_OTP_FORMAT_BINARY 3
+
+/**
+ * This flag indicates that the token value MUST be collected.
+ */
+#define KRB5_RESPONDER_OTP_FLAGS_COLLECT_TOKEN (1 << 0)
+
+/**
+ * This flag indicates that the PIN value MUST be collected.
+ */
+#define KRB5_RESPONDER_OTP_FLAGS_COLLECT_PIN   (1 << 1)
+
+/**
+ * This flag indicates that the token is now in re-synchronization mode with
+ * the server.  The user is expected to reply with the next code displayed on
+ * the token.
+ */
+#define KRB5_RESPONDER_OTP_FLAGS_NEXTOTP       (1 << 2)
+
 typedef struct krb5_responder_context_st *krb5_responder_context;
 
 /**
@@ -6430,6 +6490,72 @@ krb5_responder_set_answer(krb5_context ctx, krb5_responder_context rctx,
 typedef krb5_error_code
 (*krb5_responder_fn)(krb5_context ctx, krb5_responder_context rctx,
                      void *data);
+
+typedef struct _krb5_responder_otp_tokeninfo {
+    krb5_flags flags;
+    krb5_int32 format; /* -1 when not specified. */
+    krb5_int32 length; /* -1 when not specified. */
+    char *vendor;
+    char *challenge;
+    char *token_id;
+    char *alg_id;
+} krb5_responder_otp_tokeninfo;
+
+typedef struct _krb5_responder_otp_challenge {
+    char *service;
+    krb5_responder_otp_tokeninfo **tokeninfo;
+} krb5_responder_otp_challenge;
+
+/**
+ * Decode the KRB5_RESPONDER_QUESTION_OTP to a C struct.
+ *
+ * A convenience function which parses the KRB5_RESPONDER_QUESTION_OTP
+ * question challenge data, making it available in native C.  The main feature
+ * of this function is the ability to interact with OTP tokens without parsing
+ * the JSON.
+ *
+ * The returned value must be passed to krb5_responder_otp_challenge_free() to
+ * be freed.
+ *
+ * @param [in]  ctx             Library context
+ * @param [in]  rctx            Responder context
+ * @param [out] chl             Challenge structure
+ *
+ * @version First introduced in 1.11
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_responder_otp_get_challenge(krb5_context ctx,
+                                 krb5_responder_context rctx,
+                                 krb5_responder_otp_challenge **chl);
+
+/**
+ * Answer the KRB5_RESPONDER_QUESTION_OTP question.
+ *
+ * @param [in] ctx              Library context
+ * @param [in] rctx             Responder context
+ * @param [in] ti               The index of the tokeninfo selected
+ * @param [in] value            The value to set, or NULL for none
+ * @param [in] pin              The pin to set, or NULL for none
+ *
+ * @version First introduced in 1.11
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_responder_otp_set_answer(krb5_context ctx, krb5_responder_context rctx,
+                              size_t ti, const char *value, const char *pin);
+
+/**
+ * Free the value returned by krb5_responder_otp_get_challenge().
+ *
+ * @param [in] ctx              Library context
+ * @param [in] rctx             Responder context
+ * @param [in] chl              The challenge to free
+ *
+ * @version First introduced in 1.11
+ */
+void KRB5_CALLCONV
+krb5_responder_otp_challenge_free(krb5_context ctx,
+                                  krb5_responder_context rctx,
+                                  krb5_responder_otp_challenge *chl);
 
 /** Store options for @c _krb5_get_init_creds */
 typedef struct _krb5_get_init_creds_opt {

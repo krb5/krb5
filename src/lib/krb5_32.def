@@ -439,3 +439,6 @@ EXPORTS
 	krb5_rc_resolve_full				@410 ; PRIVATE GSSAPI
 	krb5_rc_get_name				@411 ; PRIVATE GSSAPI
 	krb5_rc_get_type				@412 ; PRIVATE GSSAPI
+	krb5_responder_otp_get_challenge		@413
+	krb5_responder_otp_set_answer			@414
+	krb5_responder_otp_challenge_free		@415
