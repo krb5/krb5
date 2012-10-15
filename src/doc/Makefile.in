@@ -29,10 +29,16 @@ substhtml: composite paths.py
 	cp paths.py rst_composite
 	$(SPHINX_BUILD) -t pathsubs -q rst_composite rst_html_subst
 
+# Create an ASCII (okay, UTF-8) version of the NOTICE file
+notice.txt: rst_notice
+	$(SPHINX_BUILD) -b text -q rst_notice .
+
+NOTICE: notice.txt
+	cp notice.txt $(top_srcdir)/../NOTICE
+
 # Use doxygen to generate API documentation, translate it into RST
-# format, and then create a composite of $(docsrc)/rst_source, the
-# generated files, and the NOTICE file in rst_composite.  Used by the
-# rsthtml and substhtml targets.
+# format, and then create a composite of $(docsrc)/rst_source and the
+# generated files in rst_composite.  Used by the rsthtml and substhtml targets.
 composite: Doxyfile
 	rm -rf doxy rst_apiref rst_composite
 	$(DOXYGEN)
@@ -42,7 +48,15 @@ composite: Doxyfile
 	cp rst_apiref/*.rst rst_composite/krb_appldev/refs/api
 	cp rst_apiref/types/*.rst rst_composite/krb_appldev/refs/types
 	cp rst_apiref/macros/*.rst rst_composite/krb_appldev/refs/macros
-	cp $(top_srcdir)/../NOTICE rst_composite
+
+# Must use a separate source dir for sphinx text builds, since the text
+# engine cannot handle the row spanning cells in fancy tables that we use
+rst_notice: $(docsrc)/notice.rst $(docsrc)/txt_conf.py
+	mkdir -p rst_notice
+	# reST needs backslashes before parens in this macro definition.
+	sed -e 's/include:: <isonum.txt>/|copy| replace:: \\(C\\)/' \
+		< $(docsrc)/rst_source/notice.rst > rst_notice/notice.rst
+	cp $(docsrc)/rst_source/txt_conf.py rst_notice/conf.py
 
 Doxyfile: $(srcdir)/Doxyfile.in
 	sed -e 's|@SRC@|$(top_srcdir)|g' \
@@ -60,4 +74,5 @@ paths.py:
 	echo 'ckeytab = "``$(DEFCKTNAME)``"' >> $@
 
 clean::
-	rm -rf doxy rst_apiref rst_composite rst_html_subst Doxyfile paths.py
+	rm -rf doxy rst_apiref rst_composite rst_notice rst_html_subst \
+		Doxyfile paths.py
