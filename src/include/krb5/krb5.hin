@@ -6413,19 +6413,19 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
 /**
  * This flag indicates that the token value MUST be collected.
  */
-#define KRB5_RESPONDER_OTP_FLAGS_COLLECT_TOKEN (1 << 0)
+#define KRB5_RESPONDER_OTP_FLAGS_COLLECT_TOKEN 0x0001
 
 /**
  * This flag indicates that the PIN value MUST be collected.
  */
-#define KRB5_RESPONDER_OTP_FLAGS_COLLECT_PIN   (1 << 1)
+#define KRB5_RESPONDER_OTP_FLAGS_COLLECT_PIN   0x0002
 
 /**
  * This flag indicates that the token is now in re-synchronization mode with
  * the server.  The user is expected to reply with the next code displayed on
  * the token.
  */
-#define KRB5_RESPONDER_OTP_FLAGS_NEXTOTP       (1 << 2)
+#define KRB5_RESPONDER_OTP_FLAGS_NEXTOTP       0x0004
 
 /**
  * This flag indicates that the PIN MUST be returned as a separate item. This
@@ -6434,7 +6434,7 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
  * and store it as "value" in the answer or it may return them separately. If
  * they are returned separately, they will be concatenated internally.
  */
-#define KRB5_RESPONDER_OTP_FLAGS_SEPARATE_PIN  (1 << 3)
+#define KRB5_RESPONDER_OTP_FLAGS_SEPARATE_PIN  0x0008
 
 typedef struct krb5_responder_context_st *krb5_responder_context;
 
@@ -6871,7 +6871,7 @@ krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
                                        krb5_flags *out_flags);
 
 /* Fast flags*/
-#define KRB5_FAST_REQUIRED 1l<<0 /**< Require KDC to support FAST*/
+#define KRB5_FAST_REQUIRED 0x0001 /**< Require KDC to support FAST*/
 
 typedef void
 (KRB5_CALLCONV *krb5_expire_callback_func)(krb5_context context, void *data,
