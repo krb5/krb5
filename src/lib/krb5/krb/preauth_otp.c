@@ -157,8 +157,11 @@ codec_encode_tokeninfo(krb5_otp_tokeninfo *ti, k5_json_object *out)
         goto error;
 
     flags = KRB5_RESPONDER_OTP_FLAGS_COLLECT_TOKEN;
-    if (ti->flags & KRB5_OTP_FLAG_COLLECT_PIN)
+    if (ti->flags & KRB5_OTP_FLAG_COLLECT_PIN) {
         flags |= KRB5_RESPONDER_OTP_FLAGS_COLLECT_PIN;
+        if (ti->flags & KRB5_OTP_FLAG_SEPARATE_PIN)
+            flags |= KRB5_RESPONDER_OTP_FLAGS_NEXTOTP;
+    }
     if (ti->flags & KRB5_OTP_FLAG_NEXTOTP)
         flags |= KRB5_RESPONDER_OTP_FLAGS_NEXTOTP;
 
@@ -642,16 +645,16 @@ make_request(krb5_context ctx, krb5_otp_tokeninfo *ti, const krb5_data *value,
         goto error;
 
     if (ti->flags & KRB5_OTP_FLAG_COLLECT_PIN) {
-        if (pin == NULL || pin->data == NULL) {
-            retval = EINVAL; /* No pin found! */
-            goto error;
-        }
-
         if (ti->flags & KRB5_OTP_FLAG_SEPARATE_PIN) {
+            if (pin == NULL || pin->data == NULL) {
+                retval = EINVAL; /* No pin found! */
+                goto error;
+            }
+
             retval = krb5int_copy_data_contents(ctx, pin, &req->pin);
             if (retval != 0)
                 goto error;
-        } else {
+        } else if (pin != NULL && pin->data != NULL) {
             krb5_free_data_contents(ctx, &req->otp_value);
             retval = asprintf(&req->otp_value.data, "%.*s%.*s",
                               pin->length, pin->data,
@@ -662,7 +665,7 @@ make_request(krb5_context ctx, krb5_otp_tokeninfo *ti, const krb5_data *value,
                 goto error;
             }
             req->otp_value.length = req->pin.length + req->otp_value.length;
-        }
+        } /* Otherwise, the responder has already combined them. */
     }
 
     *out_req = req;
