@@ -32,12 +32,12 @@ Updating man pages
 Man pages are generated from the RST sources and checked into the
 ``src/man`` directory of the repository.  This allows man pages to be
 installed without requiring Sphinx when using a source checkout.  To
-regenerate these files, run ``make rstman`` from the man subdirectory
+regenerate these files, run ``make man`` from the man subdirectory
 of a configured build tree.  You can also do this from an unconfigured
 source tree with::
 
     cd src/man
-    make -f Makefile.in top_srcdir=.. srcdir=. rstman
+    make -f Makefile.in top_srcdir=.. srcdir=. man
     make clean
 
 As with the simple build, it is normal to see warnings about missing

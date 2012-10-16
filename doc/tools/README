@@ -31,14 +31,14 @@ Part A:    Transforming Doxygen XML output into reStructuredText (rst)  without 
       python doxy.py –i  doxy_xml_dir –o rst_dir -t all
       converts Doxygen XML output into reStructuredText format files both for API functions and data types;
 
-4.    In krb_appldev/index.rst add the following section to point to the API references:
+4.    In appldev/index.rst add the following section to point to the API references:
 
       .. toctree::
           :maxdepth: 1
 
           refs/index.rst
 
-5.    Copy the content of rst_dir into krb_appldev/refs/api/ directory and rst_dir/types into krb_appldev/refs/types directory;
+5.    Copy the content of rst_dir into appldev/refs/api/ directory and rst_dir/types into appldev/refs/types directory;
 
 6.    Rebuild Sphinx source:
       sphinx-build source_dir build_dir
