@@ -12,8 +12,9 @@ Quick facts
 -----------
 
    ====================================================== ======================================= =============================================================================
-    Latest stable  version                                 1.10.3                                   http://web.mit.edu/kerberos/krb5-1.10/
-    Supported versions                                     1.9.4, 1.10.3                            http://web.mit.edu/kerberos/krb5-1.9/
+    License                                                :ref:`mitK5license`
+    Latest stable  version                                                                          http://web.mit.edu/kerberos/krb5-1.10/
+    Supported versions                                                                              http://web.mit.edu/kerberos/krb5-1.9/
     Release cycle                                          9 - 12 months
     Supported platforms/OS distributions                   Solaris
                                                                - SPARC
@@ -24,6 +25,7 @@ Quick facts
                                                                - RedHat       x86_64/x86
                                                            BSD
                                                                - NetBSD x86_64/x86
+                                                           Windows 7, Vista, XP                     KFW 4.0 - available 1.11+
     Crypto backends                                        - OpenSSL 1.0\+                          - http://www.openssl.org
                                                            - builtin                                - MIT Kerberos native crypto library
                                                            - NSS 3.12.9\+                           - Mozilla's Network Security Services.
@@ -39,7 +41,6 @@ Quick facts
 
     GSS-API extensions for storing delegated credentials   1.8+                                     :rfc:`5588`
 
-    License                                                :ref:`mitK5license`
    ====================================================== ======================================= =============================================================================
 
 
