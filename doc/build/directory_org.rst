@@ -10,7 +10,6 @@ ccapi            Credential cache services
 clients          Kerberos V5 user programs (See :ref:`user_commands`)
 config           Configure scripts
 config-files     Sample Kerberos configuration files
-gen-manpages     manpages for Kerberos V5 and the Kerberos V5 login program
 include          include files needed to build the Kerberos system
 kadmin           Administrative interface to the Kerberos master database: :ref:`kadmin(1)`, :ref:`kdb5_util(8)`, :ref:`ktutil(1)`.
 kdc              Kerberos V5 Authentication Service and Key Distribution Center
