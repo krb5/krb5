@@ -233,7 +233,7 @@ The libdefaults section may contain any of the following relations:
     (KDC_OPT_RENEWABLE_OK).
 
 **kdc_timesync**
-    The value of this relation must be an integer.  If it is nonzero,
+    Accepted values for this relation are 1 or 0.  If it is nonzero,
     client machines will compute the difference between their time and
     the time returned by the KDC in the timestamps in the tickets and
     use this value to correct for an inaccurate system clock when
