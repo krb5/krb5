@@ -28,7 +28,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.\" Man page generated from reStructeredText.
+.\" Man page generated from reStructuredText.
 .
 .SH SYNOPSIS
 .sp
@@ -45,17 +45,14 @@ services and ticket policies.
 .INDENT 0.0
 .TP
 .B \fB\-D\fP \fIuser_dn\fP
-.sp
 Specifies the Distinguished Name (DN) of the user who has
 sufficient rights to perform the operation on the LDAP server.
 .TP
 .B \fB\-w\fP \fIpasswd\fP
-.sp
 Specifies the password of \fIuser_dn\fP.  This option is not
 recommended.
 .TP
 .B \fB\-H\fP \fIldapuri\fP
-.sp
 Specifies the URI of the LDAP server.  It is recommended to use
 \fBldapi://\fP or \fBldaps://\fP to connect to the LDAP server.
 .UNINDENT
@@ -63,7 +60,6 @@ Specifies the URI of the LDAP server.  It is recommended to use
 .SS create
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBcreate\fP
 [\fB\-subtrees\fP \fIsubtree_dn_list\fP]
 [\fB\-sscope\fP \fIsearch_scope\fP]
@@ -73,8 +69,6 @@ Specifies the URI of the LDAP server.  It is recommended to use
 [\fB\-m|\-P\fP \fIpassword\fP|\fB\-sf\fP \fIstashfilename\fP]
 [\fB\-s\fP]
 [\fB\-r\fP \fIrealm\fP]
-[\fB\-kdcdn\fP \fIkdc_service_list\fP]
-[\fB\-admindn\fP \fIadmin_service_list\fP]
 [\fB\-maxtktlife\fP \fImax_ticket_life\fP]
 [\fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP]
 [\fIticket_flags\fP]
@@ -85,68 +79,56 @@ Creates realm in directory. Options:
 .INDENT 0.0
 .TP
 .B \fB\-subtrees\fP \fIsubtree_dn_list\fP
-.sp
 Specifies the list of subtrees containing the principals of a
 realm.  The list contains the DNs of the subtree objects separated
 by colon (\fB:\fP).
 .TP
 .B \fB\-sscope\fP \fIsearch_scope\fP
-.sp
 Specifies the scope for searching the principals under the
 subtree.  The possible values are 1 or one (one level), 2 or sub
 (subtrees).
 .TP
 .B \fB\-containerref\fP \fIcontainer_reference_dn\fP
-.sp
 Specifies the DN of the container object in which the principals
 of a realm will be created.  If the container reference is not
 configured for a realm, the principals will be created in the
 realm container.
 .TP
 .B \fB\-k\fP \fImkeytype\fP
-.sp
 Specifies the key type of the master key in the database.  The
 default is given by the \fBmaster_key_type\fP variable in
 \fIkdc.conf(5)\fP.
 .TP
 .B \fB\-kv\fP \fImkeyVNO\fP
-.sp
 Specifies the version number of the master key in the database;
 the default is 1.  Note that 0 is not allowed.
 .TP
 .B \fB\-m\fP
-.sp
 Specifies that the master database password should be read from
 the TTY rather than fetched from a file on the disk.
 .TP
 .B \fB\-P\fP \fIpassword\fP
-.sp
 Specifies the master database password. This option is not
 recommended.
 .TP
 .B \fB\-r\fP \fIrealm\fP
-.sp
 Specifies the Kerberos realm of the database.
 .TP
 .B \fB\-sf\fP \fIstashfilename\fP
-.sp
 Specifies the stash file of the master database password.
 .TP
 .B \fB\-s\fP
-.sp
 Specifies that the stash file is to be created.
 .TP
 .B \fB\-maxtktlife\fP \fImax_ticket_life\fP
-.sp
-Specifies maximum ticket life for principals in this realm.
+(\fIgetdate\fP string) Specifies maximum ticket life for
+principals in this realm.
 .TP
 .B \fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP
-.sp
-Specifies maximum renewable life of tickets for principals in this
-realm.
+(\fIgetdate\fP string) Specifies maximum renewable life of
+tickets for principals in this realm.
 .TP
 .B \fIticket_flags\fP
-.sp
 Specifies global ticket flags for the realm.  Allowable flags are
 documented in the description of the \fBadd_principal\fP command in
 \fIkadmin(1)\fP.
@@ -173,14 +155,11 @@ Re\-enter KDC database master key to verify:
 .SS modify
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBmodify\fP
 [\fB\-subtrees\fP \fIsubtree_dn_list\fP]
 [\fB\-sscope\fP \fIsearch_scope\fP]
 [\fB\-containerref\fP \fIcontainer_reference_dn\fP]
 [\fB\-r\fP \fIrealm\fP]
-[\fB\-kdcdn\fP \fIkdc_service_list\fP | [\fB\-clearkdcdn\fP \fIkdc_service_list\fP] [\fB\-addkdcdn\fP \fIkdc_service_list\fP]]
-[\fB\-admindn\fP \fIadmin_service_list\fP | [\fB\-clearadmindn\fP \fIadmin_service_list\fP] [\fB\-addadmindn\fP \fIadmin_service_list\fP]]
 [\fB\-maxtktlife\fP \fImax_ticket_life\fP]
 [\fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP]
 [\fIticket_flags\fP]
@@ -191,37 +170,31 @@ Modifies the attributes of a realm.  Options:
 .INDENT 0.0
 .TP
 .B \fB\-subtrees\fP \fIsubtree_dn_list\fP
-.sp
 Specifies the list of subtrees containing the principals of a
 realm.  The list contains the DNs of the subtree objects separated
 by colon (\fB:\fP).  This list replaces the existing list.
 .TP
 .B \fB\-sscope\fP \fIsearch_scope\fP
-.sp
 Specifies the scope for searching the principals under the
 subtrees.  The possible values are 1 or one (one level), 2 or sub
 (subtrees).
 .TP
 .B \fB\-containerref\fP \fIcontainer_reference_dn\fP Specifies the DN of the
-.sp
 container object in which the principals of a realm will be
 created.
 .TP
 .B \fB\-r\fP \fIrealm\fP
-.sp
 Specifies the Kerberos realm of the database.
 .TP
 .B \fB\-maxtktlife\fP \fImax_ticket_life\fP
-.sp
-Specifies maximum ticket life for principals in this realm.
+(\fIgetdate\fP string) Specifies maximum ticket life for
+principals in this realm.
 .TP
 .B \fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP
-.sp
-Specifies maximum renewable life of tickets for principals in this
-realm.
+(\fIgetdate\fP string) Specifies maximum renewable life of
+tickets for principals in this realm.
 .TP
 .B \fIticket_flags\fP
-.sp
 Specifies global ticket flags for the realm.  Allowable flags are
 documented in the description of the \fBadd_principal\fP command in
 \fIkadmin(1)\fP.
@@ -245,7 +218,6 @@ shell%
 .SS view
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBview\fP [\fB\-r\fP \fIrealm\fP]
 .UNINDENT
 .UNINDENT
@@ -254,7 +226,6 @@ Displays the attributes of a realm.  Options:
 .INDENT 0.0
 .TP
 .B \fB\-r\fP \fIrealm\fP
-.sp
 Specifies the Kerberos realm of the database.
 .UNINDENT
 .sp
@@ -281,7 +252,6 @@ Ticket flags: DISALLOW_FORWARDABLE REQUIRES_PWCHANGE
 .SS destroy
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBdestroy\fP [\fB\-f\fP] [\fB\-r\fP \fIrealm\fP]
 .UNINDENT
 .UNINDENT
@@ -290,11 +260,9 @@ Destroys an existing realm. Options:
 .INDENT 0.0
 .TP
 .B \fB\-f\fP
-.sp
 If specified, will not prompt the user for confirmation.
 .TP
 .B \fB\-r\fP \fIrealm\fP
-.sp
 Specifies the Kerberos realm of the database.
 .UNINDENT
 .sp
@@ -318,7 +286,6 @@ shell%
 .SS list
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBlist\fP
 .UNINDENT
 .UNINDENT
@@ -345,7 +312,6 @@ shell%
 .SS stashsrvpw
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBstashsrvpw\fP
 [\fB\-f\fP \fIfilename\fP]
 \fIservicedn\fP
@@ -358,12 +324,10 @@ to the LDAP server.  Options:
 .INDENT 0.0
 .TP
 .B \fB\-f\fP \fIfilename\fP
-.sp
 Specifies the complete path of the service password file. By
 default, \fB/usr/local/var/service_passwd\fP is used.
 .TP
 .B \fIservicedn\fP
-.sp
 Specifies Distinguished Name (DN) of the service object whose
 password is to be stored in file.
 .UNINDENT
@@ -385,7 +349,6 @@ Re\-enter password for "cn=service\-kdc,o=org":
 .SS create_policy
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBcreate_policy\fP
 [\fB\-r\fP \fIrealm\fP]
 [\fB\-maxtktlife\fP \fImax_ticket_life\fP]
@@ -399,26 +362,23 @@ Creates a ticket policy in the directory.  Options:
 .INDENT 0.0
 .TP
 .B \fB\-r\fP \fIrealm\fP
-.sp
 Specifies the Kerberos realm of the database.
 .TP
 .B \fB\-maxtktlife\fP \fImax_ticket_life\fP
-.sp
-Specifies maximum ticket life for principals.
+(\fIgetdate\fP string) Specifies maximum ticket life for
+principals.
 .TP
 .B \fB\-maxrenewlife\fP \fImax_renewable_ticket_life\fP
-.sp
-Specifies maximum renewable life of tickets for principals.
+(\fIgetdate\fP string) Specifies maximum renewable life of
+tickets for principals.
 .TP
 .B \fIticket_flags\fP
-.sp
 Specifies the ticket flags.  If this option is not specified, by
 default, no restriction will be set by the policy.  Allowable
 flags are documented in the description of the \fBadd_principal\fP
 command in \fIkadmin(1)\fP.
 .TP
 .B \fIpolicy_name\fP
-.sp
 Specifies the name of the ticket policy.
 .UNINDENT
 .sp
@@ -440,7 +400,6 @@ Password for "cn=admin,o=org":
 .SS modify_policy
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBmodify_policy\fP
 [\fB\-r\fP \fIrealm\fP]
 [\fB\-maxtktlife\fP \fImax_ticket_life\fP]
@@ -471,7 +430,6 @@ Password for "cn=admin,o=org":
 .SS view_policy
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBview_policy\fP
 [\fB\-r\fP \fIrealm\fP]
 \fIpolicy_name\fP
@@ -482,7 +440,6 @@ Displays the attributes of a ticket policy.  Options:
 .INDENT 0.0
 .TP
 .B \fIpolicy_name\fP
-.sp
 Specifies the name of the ticket policy.
 .UNINDENT
 .sp
@@ -506,7 +463,6 @@ Ticket flags: DISALLOW_FORWARDABLE REQUIRES_PWCHANGE
 .SS destroy_policy
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBdestroy_policy\fP
 [\fB\-r\fP \fIrealm\fP]
 [\fB\-force\fP]
@@ -518,16 +474,13 @@ Destroys an existing ticket policy.  Options:
 .INDENT 0.0
 .TP
 .B \fB\-r\fP \fIrealm\fP
-.sp
 Specifies the Kerberos realm of the database.
 .TP
 .B \fB\-force\fP
-.sp
 Forces the deletion of the policy object.  If not specified, the
 user will be prompted for confirmation before deleting the policy.
 .TP
 .B \fIpolicy_name\fP
-.sp
 Specifies the name of the ticket policy.
 .UNINDENT
 .sp
@@ -550,7 +503,6 @@ This will delete the policy object \(aqtktpolicy\(aq, are you sure?
 .SS list_policy
 .INDENT 0.0
 .INDENT 3.5
-.sp
 \fBlist_policy\fP
 [\fB\-r\fP \fIrealm\fP]
 .UNINDENT
@@ -561,7 +513,6 @@ realm.  Options:
 .INDENT 0.0
 .TP
 .B \fB\-r\fP \fIrealm\fP
-.sp
 Specifies the Kerberos realm of the database.
 .UNINDENT
 .sp
@@ -587,6 +538,6 @@ userpolicy
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
-2011, MIT
+2012, MIT
 .\" Generated by docutils manpage writer.
 .

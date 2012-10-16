@@ -28,7 +28,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.\" Man page generated from reStructeredText.
+.\" Man page generated from reStructuredText.
 .
 .SH SYNOPSIS
 .sp
@@ -60,110 +60,82 @@ kinit obtains and caches an initial ticket\-granting ticket for
 .INDENT 0.0
 .TP
 .B \fB\-V\fP
-.sp
 display verbose output.
 .TP
 .B \fB\-l\fP \fIlifetime\fP
+(\fIduration\fP string.)  Requests a ticket with the lifetime
+\fIlifetime\fP.
 .sp
-requests a ticket with the lifetime \fIlifetime\fP.  The integer value
-for \fIlifetime\fP must be followed immediately by one of the
-following delimiters:
-.INDENT 7.0
-.INDENT 3.5
-.sp
-.nf
-.ft C
-s  seconds
-m  minutes
-h  hours
-d  days
-.ft P
-.fi
-.UNINDENT
-.UNINDENT
-.sp
-as in \fBkinit \-l 90m\fP.  You cannot mix units; a value of
-\fB3h30m\fP will result in an error.
+For example, \fBkinit \-l 5:30\fP or \fBkinit \-l 5h30m\fP.
 .sp
 If the \fB\-l\fP option is not specified, the default ticket lifetime
 (configured by each site) is used.  Specifying a ticket lifetime
 longer than the maximum ticket lifetime (configured by each site)
-results in a ticket with the maximum lifetime.
+will not override the configured maximum ticket lifetime.
 .TP
 .B \fB\-s\fP \fIstart_time\fP
+(\fIduration\fP string.)  Requests a postdated ticket.  Postdated
+tickets are issued with the \fBinvalid\fP flag set, and need to be
+resubmitted to the KDC for validation before use.
 .sp
-requests a postdated ticket, valid starting at \fIstart_time\fP.
-Postdated tickets are issued with the \fBinvalid\fP flag set, and
-need to be resubmitted to the KDC for validation before use.
+\fIstart_time\fP specifies the duration of the delay before the ticket
+can become valid.
 .TP
 .B \fB\-r\fP \fIrenewable_life\fP
-.sp
-requests renewable tickets, with a total lifetime of
-\fIrenewable_life\fP.  The duration is in the same format as the
-\fB\-l\fP option, with the same delimiters.
+(\fIduration\fP string.)  Requests renewable tickets, with a total
+lifetime of \fIrenewable_life\fP.
 .TP
 .B \fB\-f\fP
-.sp
 requests forwardable tickets.
 .TP
 .B \fB\-F\fP
-.sp
 requests non\-forwardable tickets.
 .TP
 .B \fB\-p\fP
-.sp
 requests proxiable tickets.
 .TP
 .B \fB\-P\fP
-.sp
 requests non\-proxiable tickets.
 .TP
 .B \fB\-a\fP
-.sp
 requests tickets restricted to the host\(aqs local address[es].
 .TP
 .B \fB\-A\fP
-.sp
 requests tickets not restricted by address.
 .TP
 .B \fB\-C\fP
-.sp
 requests canonicalization of the principal name, and allows the
 KDC to reply with a different client principal from the one
 requested.
 .TP
 .B \fB\-E\fP
-.sp
 treats the principal name as an enterprise name (implies the
 \fB\-C\fP option).
 .TP
 .B \fB\-v\fP
-.sp
 requests that the ticket\-granting ticket in the cache (with the
 \fBinvalid\fP flag set) be passed to the KDC for validation.  If the
 ticket is within its requested time range, the cache is replaced
 with the validated ticket.
 .TP
 .B \fB\-R\fP
-.sp
 requests renewal of the ticket\-granting ticket.  Note that an
 expired ticket cannot be renewed, even if the ticket is still
 within its renewable life.
 .TP
-.B \fB\-k\fP [\fB\-t\fP \fIkeytab_file\fP]
-.sp
+.B \fB\-k\fP [\fB\-i\fP | \fB\-t\fP \fIkeytab_file\fP]
 requests a ticket, obtained from a key in the local host\(aqs keytab.
 The location of the keytab may be specified with the \fB\-t\fP
-\fIkeytab_file\fP option; otherwise the default keytab will be used.
-By default, a host ticket for the local host is requested, but any
-principal may be specified.  On a KDC, the special keytab location
-\fBKDB:\fP can be used to indicate that kinit should open the KDC
-database and look up the key directly.  This permits an
+\fIkeytab_file\fP option, or with the \fB\-i\fP option to specify the use
+of the default client keytab; otherwise the default keytab will be
+used.  By default, a host ticket for the local host is requested,
+but any principal may be specified.  On a KDC, the special keytab
+location \fBKDB:\fP can be used to indicate that kinit should open
+the KDC database and look up the key directly.  This permits an
 administrator to obtain tickets as any principal that supports
 authentication based on the key.
 .TP
 .B \fB\-n\fP
-.sp
 Requests anonymous processing.  Two types of anonymous principals
 are supported.
 .sp
@@ -184,7 +156,6 @@ As of release 1.8, the MIT Kerberos KDC only supports fully
 anonymous operation.
 .TP
 .B \fB\-T\fP \fIarmor_ccache\fP
-.sp
 Specifies the name of a credentials cache that already contains a
 ticket.  If supported by the KDC, this cache will be used to armor
 the request, preventing offline dictionary attacks and allowing
@@ -193,7 +164,6 @@ makes sure that the response from the KDC is not modified in
 transit.
 .TP
 .B \fB\-c\fP \fIcache_name\fP
-.sp
 use \fIcache_name\fP as the Kerberos 5 credentials (ticket) cache
 location.  If this option is not used, the default cache location
 is used.
@@ -208,12 +178,10 @@ primary cache.  Otherwise, any existing contents of the default
 cache are destroyed by kinit.
 .TP
 .B \fB\-S\fP \fIservice_name\fP
-.sp
 specify an alternate service name to use when getting initial
 tickets.
 .TP
 .B \fB\-X\fP \fIattribute\fP[=\fIvalue\fP]
-.sp
 specify a pre\-authentication \fIattribute\fP and \fIvalue\fP to be
 interpreted by pre\-authentication modules.  The acceptable
 attribute and value values vary from module to module.  This
@@ -225,15 +193,12 @@ pre\-authentication mechanism:
 .INDENT 7.0
 .TP
 .B \fBX509_user_identity\fP=\fIvalue\fP
-.sp
 specify where to find user\(aqs X509 identity information
 .TP
 .B \fBX509_anchors\fP=\fIvalue\fP
-.sp
 specify where to find trusted X509 anchor information
 .TP
 .B \fBflag_RSA_PROTOCOL\fP[\fB=yes\fP]
-.sp
 specify use of RSA, rather than the default Diffie\-Hellman
 protocol
 .UNINDENT
@@ -244,7 +209,6 @@ kinit uses the following environment variables:
 .INDENT 0.0
 .TP
 .B \fBKRB5CCNAME\fP
-.sp
 Location of the default Kerberos 5 credentials cache, in the form
 \fItype\fP:\fIresidual\fP.  If no \fItype\fP prefix is present, the \fBFILE\fP
 type is assumed.  The type of the default cache may determine the
@@ -255,13 +219,10 @@ in the collection.
 .SH FILES
 .INDENT 0.0
 .TP
-.B \fB/tmp/krb5cc_[uid]\fP
-.sp
-default location of Kerberos 5 credentials cache ([\fIuid\fP] is the
-decimal UID of the user).
+.B \fB@CCNAME@\fP
+default location of Kerberos 5 credentials cache
 .TP
-.B \fB/etc/krb5.keytab\fP
-.sp
+.B \fB@KTNAME@\fP
 default location for the local host\(aqs keytab.
 .UNINDENT
 .SH SEE ALSO
@@ -270,6 +231,6 @@ default location for the local host\(aqs keytab.
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
-2011, MIT
+2012, MIT
 .\" Generated by docutils manpage writer.
 .
