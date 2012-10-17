@@ -57,7 +57,7 @@ NOTICE: notice.txt
 # Use doxygen to generate API documentation, translate it into RST
 # format, and then create a composite of $(docsrc)'s RST and the
 # generated files in rst_composite.  Used by the html and substhtml targets.
-composite: Doxyfile
+composite: Doxyfile $(docsrc)/version.py
 	rm -rf doxy rst_apiref rst_composite
 	$(DOXYGEN)
 	cwd=`pwd`; cd $(docsrc)/tools && \
@@ -70,15 +70,17 @@ composite: Doxyfile
 	cp rst_apiref/*.rst rst_composite/appldev/refs/api
 	cp rst_apiref/types/*.rst rst_composite/appldev/refs/types
 	cp rst_apiref/macros/*.rst rst_composite/appldev/refs/macros
+	cp $(docsrc)/version.py rst_composite
 
 # Must use a separate source dir for sphinx text builds, since the text
 # engine cannot handle the row spanning cells in fancy tables that we use
-rst_notice: $(docsrc)/notice.rst $(docsrc)/txt_conf.py
+rst_notice: $(docsrc)/notice.rst $(docsrc)/txt_conf.py $(docsrc)/version.py
 	mkdir -p rst_notice
 	# reST needs backslashes before parens in this macro definition.
 	sed -e 's/include:: <isonum.txt>/|copy| replace:: \\(C\\)/' \
 		< $(docsrc)/notice.rst > rst_notice/notice.rst
 	cp $(docsrc)/txt_conf.py rst_notice/conf.py
+	cp $(docsrc)/version.py rst_notice
 
 Doxyfile: $(srcdir)/Doxyfile.in
 	sed -e 's|@SRC@|$(top_srcdir)|g' \
@@ -95,6 +97,13 @@ paths.py:
 	echo 'keytab = "``$(DEFKTNAME)``"' >> $@
 	echo 'ckeytab = "``$(DEFCKTNAME)``"' >> $@
 
+# Dummy rule that man/Makefile can invoke
+version.py: $(docsrc)/version.py
+
+$(docsrc)/version.py: $(top_srcdir)/patchlevel.h $(srcdir)/version.py.in
+	$(RM) $@
+	$(CC) -E -I$(top_srcdir) - < $(srcdir)/version.py.in > $@
+
 clean::
 	rm -rf doxy rst_apiref rst_composite rst_notice html_subst \
-		Doxyfile paths.py
+		Doxyfile paths.py $(docsrc)/version.py
