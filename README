@@ -1,4 +1,4 @@
-                   Kerberos Version 5, Release 1.10
+                   Kerberos Version 5, Release 1.12
 
                             Release Notes
                         The MIT Kerberos Team
@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2010 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2012 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -57,10 +57,10 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.10
+Major changes in 1.12
 ---------------------
 
-krb5-1.10 changes by ticket ID
+krb5-1.12 changes by ticket ID
 ------------------------------
 
 Acknowledgements
