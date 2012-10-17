@@ -23,6 +23,7 @@ SYNOPSIS
 [**-c** *cache_name*]
 [**-n**]
 [**-S** *service_name*]
+[**-I** *input_ccache*]
 [**-T** *armor_ccache*]
 [**-X** *attribute*\ [=\ *value*]]
 [*principal*]
@@ -133,6 +134,14 @@ OPTIONS
 
     As of release 1.8, the MIT Kerberos KDC only supports fully
     anonymous operation.
+
+**-I** *input_ccache*
+
+    Specifies the name of a credentials cache that already contains a
+    ticket.  When obtaining that ticket, if information about how that
+    ticket was obtained was also stored to the cache, that information
+    will be used to affect how new credentials are obtained, including
+    preselecting the same methods of authenticating to the KDC.
 
 **-T** *armor_ccache*
     Specifies the name of a credentials cache that already contains a
