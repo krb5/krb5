@@ -348,7 +348,6 @@ extern char *krb5_mkey_pwd_prompt2;
 
 #define KRB5_DB_LOCKMODE_SHARED       0x0001
 #define KRB5_DB_LOCKMODE_EXCLUSIVE    0x0002
-#define KRB5_DB_LOCKMODE_DONTBLOCK    0x0004
 #define KRB5_DB_LOCKMODE_PERMANENT    0x0008
 
 /* libkdb.spec */
@@ -902,7 +901,6 @@ typedef struct _kdb_vftabl {
      * KRB5_DB_LOCKMODE_SHARED: Lock may coexist with other shared locks.
      * KRB5_DB_LOCKMODE_EXCLUSIVE: Lock may not coexist with other locks.
      * KRB5_DB_LOCKMODE_PERMANENT: Exclusive lock surviving process exit.
-     * (KRB5_DB_LOCKMODE_DONTBLOCK is unused and unimplemented.)
      *
      * Used by the "kadmin lock" command, incremental propagation, and
      * kdb5_util dump.  Incremental propagation support requires shared locks
