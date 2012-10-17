@@ -64,6 +64,7 @@ install-clientman::
 	$(INSTALL_DATA) kswitch.sub $(DESTDIR)$(CLIENT_MANDIR)/kswitch.1
 	$(INSTALL_DATA) ktutil.sub $(DESTDIR)$(CLIENT_MANDIR)/ktutil.1
 	$(INSTALL_DATA) kvno.sub $(DESTDIR)$(CLIENT_MANDIR)/kvno.1
+	$(INSTALL_DATA) sclient.sub $(DESTDIR)$(CLIENT_MANDIR)/sclient.1
 
 install-fileman::
 	$(INSTALL_DATA) $(srcdir)/dot.k5identity.5 \
@@ -72,6 +73,7 @@ install-fileman::
 	$(INSTALL_DATA) $(srcdir)/dot.k5login.5 \
 		$(DESTDIR)$(FILE_MANDIR)/.k5login.5
 	$(INSTALL_DATA) k5login.sub $(DESTDIR)$(FILE_MANDIR)/k5login.5
+	$(INSTALL_DATA) kadm5.acl.sub $(DESTDIR)$(FILE_MANDIR)/kadm5.acl.5
 	$(INSTALL_DATA) kdc.conf.sub $(DESTDIR)$(FILE_MANDIR)/kdc.conf.5
 	$(INSTALL_DATA) krb5.conf.sub $(DESTDIR)$(FILE_MANDIR)/krb5.conf.5
 
@@ -88,6 +90,7 @@ install-serverman::
 	$(INSTALL_DATA) kadmind.sub $(DESTDIR)$(SERVER_MANDIR)/kadmind.8
 	$(INSTALL_DATA) kpropd.sub $(DESTDIR)$(SERVER_MANDIR)/kpropd.8
 	$(INSTALL_DATA) krb5kdc.sub $(DESTDIR)$(SERVER_MANDIR)/krb5kdc.8
+	$(INSTALL_DATA) sserver.sub $(DESTDIR)$(SERVER_MANDIR)/sserver.8
 
 install-clientcat::
 	$(GROFF_MAN) k5srvutil.sub > $(DESTDIR)$(CLIENT_CATDIR)/k5srvutil.1
@@ -100,6 +103,7 @@ install-clientcat::
 	$(GROFF_MAN) kswitch.sub > $(DESTDIR)$(CLIENT_CATDIR)/kswitch.1
 	$(GROFF_MAN) ktutil.sub > $(DESTDIR)$(CLIENT_CATDIR)/ktutil.1
 	$(GROFF_MAN) kvno.sub > $(DESTDIR)$(CLIENT_CATDIR)/kvno.1
+	$(GROFF_MAN) sclient.sub > $(DESTDIR)$(CLIENT_CATDIR)/sclient.1
 
 install-filecat::
 	$(GROFF_MAN) k5identity.sub > $(DESTDIR)$(FILE_CATDIR)/k5identity.5
@@ -110,6 +114,7 @@ install-filecat::
 	($(RM) $(DESTDIR)$(FILE_CATDIR)/.k5login.5; \
 		$(LN_S) $(FILE_CATDIR)/k5login.5 \
 		$(DESTDIR)$(FILE_CATDIR)/.k5login.5)
+	$(GROFF_MAN) kadm5.acl.sub > $(DESTDIR)$(FILE_CATDIR)/kadm5.acl.5
 	$(GROFF_MAN) kdc.conf.sub > $(DESTDIR)$(FILE_CATDIR)/kdc.conf.5
 	$(GROFF_MAN) krb5.conf.sub > $(DESTDIR)$(FILE_CATDIR)/krb5.conf.5
 
@@ -122,3 +127,9 @@ install-admincat::
 	$(GROFF_MAN) kdb5_util.sub > $(DESTDIR)$(ADMIN_CATDIR)/kdb5_util.8
 	$(GROFF_MAN) kprop.sub > $(DESTDIR)$(ADMIN_CATDIR)/kprop.8
 	$(GROFF_MAN) kproplog.sub > $(DESTDIR)$(ADMIN_CATDIR)/kproplog.8
+
+install-servercat::
+	$(GROFF_MAN) kadmind.sub > $(DESTDIR)$(SERVER_CATDIR)/kadmind.8
+	$(GROFF_MAN) kpropd.sub > $(DESTDIR)$(SERVER_CATDIR)/kpropd.8
+	$(GROFF_MAN) krb5kdc.sub > $(DESTDIR)$(SERVER_CATDIR)/krb5kdc.8
+	$(GROFF_MAN) sserver.sub > $(DESTDIR)$(SERVER_CATDIR)/sserver.8
