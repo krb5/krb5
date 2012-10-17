@@ -49,6 +49,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 [\fB\-c\fP \fIcache_name\fP]
 [\fB\-n\fP]
 [\fB\-S\fP \fIservice_name\fP]
+[\fB\-I\fP \fIinput_ccache\fP]
 [\fB\-T\fP \fIarmor_ccache\fP]
 [\fB\-X\fP \fIattribute\fP[=\fIvalue\fP]]
 [\fIprincipal\fP]
@@ -154,6 +155,19 @@ realm) will be replaced by the anonymous principal.
 .sp
 As of release 1.8, the MIT Kerberos KDC only supports fully
 anonymous operation.
+.UNINDENT
+.sp
+\fB\-I\fP \fIinput_ccache\fP
+.INDENT 0.0
+.INDENT 3.5
+Specifies the name of a credentials cache that already contains a
+ticket.  When obtaining that ticket, if information about how that
+ticket was obtained was also stored to the cache, that information
+will be used to affect how new credentials are obtained, including
+preselecting the same methods of authenticating to the KDC.
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
 .TP
 .B \fB\-T\fP \fIarmor_ccache\fP
 Specifies the name of a credentials cache that already contains a
