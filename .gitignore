@@ -16,6 +16,7 @@ testlog
 /doc/version.py
 
 /doc/html/
+/doc/pdf/
 
 /src/config.log
 /src/config.status
