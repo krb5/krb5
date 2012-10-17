@@ -33,12 +33,6 @@ install::
 		$(DESTDIR)$(SERVER_BINDIR)/`echo $$f|sed '$(transform)'`; \
 	done
 
-install-oldman::
-	for f in kprop kpropd kproplog; do \
-	  $(INSTALL_DATA) $(srcdir)/$$f.M \
-		${DESTDIR}$(SERVER_MANDIR)/`echo $$f|sed '$(transform)'`.8; \
-	done
-
 clean::
 	$(RM) $(CLIENTOBJS) $(SERVEROBJS) $(LOGOBJS)
 

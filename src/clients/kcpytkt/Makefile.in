@@ -32,6 +32,4 @@ install-unix::
 	for f in kcpytkt; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
-	  $(INSTALL_DATA) $(srcdir)/$$f.M \
-		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
 	done

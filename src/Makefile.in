@@ -536,7 +536,6 @@ install-windows::
 install-unix:: 
 	$(INSTALL_SCRIPT) krb5-config \
 		$(DESTDIR)$(CLIENT_BINDIR)/krb5-config
-	$(INSTALL_DATA) $(srcdir)/krb5-config.M $(DESTDIR)$(CLIENT_MANDIR)/krb5-config.1
 
 krb5-config: $(srcdir)/krb5-config.in config.status
 	$(SHELL) config.status krb5-config
