@@ -13,8 +13,6 @@
 #include        <stdlib.h>
 #include        <db.h>
 
-#define MAX_LOCK_TRIES 5
-
 struct _locklist {
     osa_adb_lock_ent lockinfo;
     struct _locklist *next;
@@ -212,7 +210,7 @@ osa_adb_fini_db(osa_adb_db_t db, int magic)
 krb5_error_code
 osa_adb_get_lock(osa_adb_db_t db, int mode)
 {
-    int tries, gotlock, perm, krb5_mode, ret = 0;
+    int perm, krb5_mode, ret = 0;
 
     if (db->lock->lockmode >= mode) {
         /* No need to upgrade lock, just incr refcnt and return */
@@ -234,22 +232,11 @@ osa_adb_get_lock(osa_adb_db_t db, int mode)
         return(EINVAL);
     }
 
-    for (gotlock = tries = 0; tries < MAX_LOCK_TRIES; tries++) {
-        if ((ret = krb5_lock_file(db->lock->context,
-                                  fileno(db->lock->lockfile),
-                                  krb5_mode|KRB5_LOCKMODE_DONTBLOCK)) == 0) {
-            gotlock++;
-            break;
-        } else if (ret == EBADF && mode == KRB5_DB_LOCKMODE_EXCLUSIVE)
-            /* tried to exclusive-lock something we don't have */
-            /* write access to */
-            return OSA_ADB_NOEXCL_PERM;
-
-        sleep(1);
-    }
-
-    /* test for all the likely "can't get lock" error codes */
-    if (ret == EACCES || ret == EAGAIN || ret == EWOULDBLOCK)
+    ret = krb5_lock_file(db->lock->context, fileno(db->lock->lockfile),
+                         krb5_mode);
+    if (ret == EBADF && mode == KRB5_DB_LOCKMODE_EXCLUSIVE)
+        return OSA_ADB_NOEXCL_PERM;
+    else if (ret == EACCES || ret == EAGAIN || ret == EWOULDBLOCK)
         return OSA_ADB_CANTLOCK_DB;
     else if (ret != 0)
         return ret;
