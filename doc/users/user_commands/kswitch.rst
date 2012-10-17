@@ -4,7 +4,7 @@ kswitch
 =======
 
 SYNOPSIS
-~~~~~~~~
+--------
 
 **kswitch**
 {**-c** *cachename*\|\ **-p** *principal*}
