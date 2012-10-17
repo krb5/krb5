@@ -13,6 +13,8 @@ obj/
 testdir/
 testlog
 
+/doc/version.py
+
 /doc/html/
 
 /src/config.log
