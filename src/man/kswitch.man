@@ -34,11 +34,11 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .sp
 \fBkswitch\fP
 {\fB\-c\fP \fIcachename\fP|\fB\-p\fP \fIprincipal\fP}
-.SS DESCRIPTION
+.SH DESCRIPTION
 .sp
 kswitch makes the specified credential cache the primary cache for the
 collection, if a cache collection is available.
-.SS OPTIONS
+.SH OPTIONS
 .INDENT 0.0
 .TP
 .B \fB\-c\fP \fIcachename\fP
@@ -49,7 +49,7 @@ Causes the cache collection to be searched for a cache containing
 credentials for \fIprincipal\fP.  If one is found, that collection is
 made primary.
 .UNINDENT
-.SS ENVIRONMENT
+.SH ENVIRONMENT
 .sp
 kswitch uses the following environment variables:
 .INDENT 0.0
@@ -62,13 +62,13 @@ determine the availability of a cache collection; for instance, a
 default cache of type \fBDIR\fP causes caches within the directory
 to be present in the collection.
 .UNINDENT
-.SS FILES
+.SH FILES
 .INDENT 0.0
 .TP
 .B \fB@CCNAME@\fP
 Default location of Kerberos 5 credentials cache
 .UNINDENT
-.SS SEE ALSO
+.SH SEE ALSO
 .sp
 \fIkinit(1)\fP, \fIkdestroy(1)\fP, \fIklist(1)\fP), kerberos(1)
 .SH AUTHOR
