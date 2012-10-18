@@ -153,6 +153,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
         /* Go ahead and get it now, preserving the ordering of  */
         /* prompts for the user.                                */
 
+        salt = (*rock->default_salt) ? NULL : rock->salt;
         retval = (*rock->gak_fct)(context, request->client, sc2b->sam_etype,
                                   prompter, prompter_data, rock->salt,
                                   rock->s2kparams, rock->as_key,
@@ -199,8 +200,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     krb5int_set_prompt_types(context, (krb5_prompt_type *)NULL);
 
     /* Generate salt used by string_to_key() */
-    salt = rock->salt;
-    if (((int) salt->length == -1) && (salt->data == NULL)) {
+    if (*rock->default_salt) {
         if ((retval =
              krb5_principal2salt(context, request->client, &defsalt))) {
             krb5_free_sam_challenge_2(context, sc2);
@@ -209,6 +209,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
         }
         salt = &defsalt;
     } else {
+        salt = rock->salt;
         defsalt.length = 0;
     }
 
