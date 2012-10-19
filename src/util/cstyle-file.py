@@ -111,17 +111,22 @@ def check_braces(line, ln):
         warn(ln, 'Code on line before close brace')
 
 
-# This test gives false positives on function pointer type
+# This test gives false positives on some function pointer type
 # declarations or casts.  Avoid this by using typedefs.
 def check_space_before_paren(line, ln):
     for m in re.finditer(r'([\w]+)(\s*)\(', line):
         ident, ws = m.groups()
-        if ident in ('if', 'for', 'while', 'switch'):
+        if ident in ('void', 'char', 'int', 'long', 'unsigned'):
+            pass
+        elif ident in ('if', 'for', 'while', 'switch'):
             if not ws:
                 warn(ln, 'No space after flow control keyword')
         elif ident != 'return':
             if ws:
-                warn(ln, 'Space before paren in function call')
+                warn(ln, 'Space before parenthesis in function call')
+
+    if re.search(r' \)', line):
+        warn(ln, 'Space before close parenthesis')
 
 
 def check_parenthesized_return(line, ln):
@@ -153,8 +158,14 @@ def check_binary_operator(line, ln):
     binop = r'(\+|-|\*|/|%|\^|==|=|!=|<=|<|>=|>|&&|&|\|\||\|)'
     if re.match(r'\s*' + binop + r'\s', line):
         warn(ln - 1, 'Line broken before binary operator')
-    if re.search(r'\w' + binop + r'\w', line):
-        warn(ln, 'No space before or after binary operator')
+    for m in re.finditer(r'(\s|\w)' + binop + r'(\s|\w)', line):
+        before, op, after = m.groups()
+        if not before.isspace() and not after.isspace():
+            warn(ln, 'No space before or after binary operator')
+        elif not before.isspace():
+            warn(ln, 'No space before binary operator')
+        elif op not in ('-', '*', '&') and not after.isspace():
+            warn(ln, 'No space after binary operator')
 
 
 def check_assignment_in_conditional(line, ln):
@@ -164,9 +175,25 @@ def check_assignment_in_conditional(line, ln):
         warn(ln, 'Assignment in if conditional')
 
 
-def check_unbraced_do(line, ln):
+def indent(line):
+    return len(re.match('\s*', line).group(0).expandtabs())
+
+
+def check_unbraced_flow_body(line, ln, lines):
     if re.match(r'\s*do$', line):
         warn(ln, 'do statement without braces')
+        return
+
+    m = re.match(r'\s*(})?\s*else(\s*if\s*\(.*\))?\s*({)?\s*$', line)
+    if m and (m.group(1) is None) != (m.group(3) is None):
+        warn(ln, 'One arm of if/else statement braced but not the other')
+
+    if (re.match('\s*(if|else if|for|while)\s*\(.*\)$', line) or
+        re.match('\s*else$', line)):
+        base = indent(line)
+        # Look at the next two lines (ln is 1-based so lines[ln] is next).
+        if indent(lines[ln]) > base and indent(lines[ln + 1]) > base:
+            warn(ln, 'Body is 2+ lines but has no braces')
 
 
 def check_bad_string_fn(line, ln):
@@ -183,13 +210,11 @@ def check_file(lines):
     seen_tab = False
 
     in_function = False
-    unbraced_flow_body_count = -1
     comment = []
     ln = 0
     for line in lines:
         ln += 1
         line = line.rstrip('\r\n')
-        indent = len(re.match('\s*', line).group(0).expandtabs())
         seen_tab = seen_tab or ('\t' in line)
 
         # Check line structure issues before altering the line.
@@ -229,21 +254,8 @@ def check_file(lines):
             check_cast(line, ln)
             check_binary_operator(line, ln)
             check_assignment_in_conditional(line, ln)
-            check_unbraced_do(line, ln)
+            check_unbraced_flow_body(line, ln, lines)
             check_bad_string_fn(line, ln)
-
-            # Check for unbraced flow statement bodies.
-            if unbraced_flow_body_count != -1:
-                if indent > flow_statement_indent:
-                    unbraced_flow_body_count += 1
-                else:
-                    if unbraced_flow_body_count > 1:
-                        warn(ln - 1, 'Body is 2+ lines but has no braces')
-                    unbraced_flow_body_count = -1
-            if (re.match('(\s*)(if|else if|for|while)\s*\(.*\)$', line) or
-                re.match('(\s*)else$', line)):
-                unbraced_flow_body_count = 0
-                flow_statement_indent = indent
 
     if lines[-1] == '':
         warn(ln, 'Blank line at end of file')
