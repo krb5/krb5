@@ -6408,7 +6408,6 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
 #define KRB5_RESPONDER_OTP_FORMAT_DECIMAL 0
 #define KRB5_RESPONDER_OTP_FORMAT_HEXADECIMAL 1
 #define KRB5_RESPONDER_OTP_FORMAT_ALPHANUMERIC 2
-#define KRB5_RESPONDER_OTP_FORMAT_BINARY 3
 
 /**
  * This flag indicates that the token value MUST be collected.

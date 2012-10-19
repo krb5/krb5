@@ -181,7 +181,8 @@ codec_encode_tokeninfo(krb5_otp_tokeninfo *ti, k5_json_object *out)
     if (retval != 0)
         goto error;
 
-    if (ti->format != KRB5_OTP_FORMAT_BASE64) {
+    if (ti->format != KRB5_OTP_FORMAT_BASE64 &&
+        ti->format != KRB5_OTP_FORMAT_BINARY) {
         retval = codec_int32_to_value(ti->format, obj, "format");
         if (retval != 0)
             goto error;
