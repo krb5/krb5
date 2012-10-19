@@ -1,5 +1,3 @@
-.. include:: <isonum.txt>
-
 Copyright |copy| 1985-2012 by the Massachusetts Institute of Technology.
 
 All rights reserved.

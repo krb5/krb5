@@ -26,8 +26,7 @@ RST_SOURCES= _static \
 	mitK5license.rst \
 	notice.rst \
 	relay \
-	resources.rst \
-	txt_conf.py
+	resources.rst
 
 # Create HTML documentation in $(docsrc)/html suitable for a
 # release tarball or the web site (that is, without substitutions for
@@ -48,8 +47,8 @@ substhtml: composite paths.py
 	$(SPHINX_BUILD) -t pathsubs -q rst_composite html_subst
 
 # Create an ASCII (okay, UTF-8) version of the NOTICE file
-notice.txt: rst_notice
-	$(SPHINX_BUILD) -b text -q rst_notice .
+notice.txt: $(docsrc)/conf.py $(docsrc)/notice.rst
+	$(SPHINX_BUILD) -b text -t notice -q $(docsrc) .
 
 NOTICE: notice.txt
 	cp notice.txt $(top_srcdir)/../NOTICE
@@ -71,16 +70,6 @@ composite: Doxyfile $(docsrc)/version.py
 	cp rst_apiref/types/*.rst rst_composite/appldev/refs/types
 	cp rst_apiref/macros/*.rst rst_composite/appldev/refs/macros
 	cp $(docsrc)/version.py rst_composite
-
-# Must use a separate source dir for sphinx text builds, since the text
-# engine cannot handle the row spanning cells in fancy tables that we use
-rst_notice: $(docsrc)/notice.rst $(docsrc)/txt_conf.py $(docsrc)/version.py
-	mkdir -p rst_notice
-	# reST needs backslashes before parens in this macro definition.
-	sed -e 's/include:: <isonum.txt>/|copy| replace:: \\(C\\)/' \
-		< $(docsrc)/notice.rst > rst_notice/notice.rst
-	cp $(docsrc)/txt_conf.py rst_notice/conf.py
-	cp $(docsrc)/version.py rst_notice
 
 Doxyfile: $(srcdir)/Doxyfile.in
 	sed -e 's|@SRC@|$(top_srcdir)|g' \
@@ -106,4 +95,4 @@ $(docsrc)/version.py: $(top_srcdir)/patchlevel.h $(srcdir)/version.py.in
 
 clean::
 	rm -rf doxy rst_apiref rst_composite rst_notice html_subst \
-		Doxyfile paths.py $(docsrc)/version.py
+		Doxyfile paths.py $(docsrc)/version.py notice.txt

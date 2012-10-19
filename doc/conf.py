@@ -38,7 +38,10 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+if 'notice' in tags:
+    master_doc = 'notice'
+else:
+    master_doc = 'index'
 
 # General information about the project.
 project = u'MIT Kerberos'
@@ -238,19 +241,27 @@ else:
     ckeytab = ':ref:`DEFCKTNAME <paths>`'
 
 rst_epilog = '\n'
-rst_epilog += '.. |bindir| replace:: %s\n' % bindir
-rst_epilog += '.. |sbindir| replace:: %s\n' % sbindir
-rst_epilog += '.. |libdir| replace:: %s\n' % libdir
-rst_epilog += '.. |kdcdir| replace:: %s\\ ``/krb5kdc``\n' % localstatedir
-rst_epilog += '.. |sysconfdir| replace:: %s\n' % sysconfdir
-rst_epilog += '.. |ccache| replace:: %s\n' % ccache
-rst_epilog += '.. |keytab| replace:: %s\n' % keytab
-rst_epilog += '.. |ckeytab| replace:: %s\n' % ckeytab
-rst_epilog += '''
+
+if 'notice' in tags:
+    exclude_patterns = [ 'admins', 'appldev', 'basic', 'build',
+                         'plugindev', 'relay', 'users' ]
+    exclude_patterns += [ 'index.rst', 'mitK5*.rst', 'resources.rst' ]
+    rst_epilog += '.. |copy| replace:: \(C\)'
+else:
+    rst_epilog += '.. |bindir| replace:: %s\n' % bindir
+    rst_epilog += '.. |sbindir| replace:: %s\n' % sbindir
+    rst_epilog += '.. |libdir| replace:: %s\n' % libdir
+    rst_epilog += '.. |kdcdir| replace:: %s\\ ``/krb5kdc``\n' % localstatedir
+    rst_epilog += '.. |sysconfdir| replace:: %s\n' % sysconfdir
+    rst_epilog += '.. |ccache| replace:: %s\n' % ccache
+    rst_epilog += '.. |keytab| replace:: %s\n' % keytab
+    rst_epilog += '.. |ckeytab| replace:: %s\n' % ckeytab
+    rst_epilog += '''
 .. |krb5conf| replace:: ``/etc/krb5.conf``
 .. |defkeysalts| replace:: ``aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal des3-cbc-sha1:normal arcfour-hmac-md5:normal``
 .. |defetypes| replace:: ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4``
 .. |defmkey| replace:: ``aes256-cts-hmac-sha1-96``
+.. |copy| unicode:: U+000A9
 '''
 
 # -- Options for manual page output --------------------------------------------
