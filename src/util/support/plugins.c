@@ -174,8 +174,8 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
         if (stat (filepath, &statbuf) < 0) {
             err = errno;
             Tprintf ("stat(%s): %s\n", filepath, strerror (err));
-            krb5int_set_error(ep, err, _("unable to find plugin [%s]: %s"),
-                              filepath, strerror(err));
+            k5_set_error(ep, err, _("unable to find plugin [%s]: %s"),
+                         filepath, strerror(err));
         }
     }
 
@@ -270,8 +270,8 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
                     e = _("unknown failure");
                 Tprintf ("dlopen(%s): %s\n", filepath, e);
                 err = ENOENT; /* XXX */
-                krb5int_set_error(ep, err, _("unable to load plugin [%s]: %s"),
-                                  filepath, e);
+                k5_set_error(ep, err, _("unable to load plugin [%s]: %s"),
+                             filepath, e);
             }
         }
 
@@ -293,7 +293,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
         if (handle == NULL) {
             Tprintf ("Unable to load dll: %s\n", filepath);
             err = ENOENT; /* XXX */
-            krb5int_set_error(ep, err, _("unable to load DLL [%s]"), filepath);
+            k5_set_error(ep, err, _("unable to load DLL [%s]"), filepath);
         }
 
         if (!err) {
@@ -309,7 +309,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
 
     if (!err && !got_plugin) {
         err = ENOENT;  /* no plugin or no way to load plugins */
-        krb5int_set_error(ep, err, _("plugin unavailable: %s"), strerror(err));
+        k5_set_error(ep, err, _("plugin unavailable: %s"), strerror(err));
     }
 
     if (!err) {
@@ -341,7 +341,7 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
                 e = "unknown failure";
             Tprintf ("dlsym(%s): %s\n", csymname, e);
             err = ENOENT; /* XXX */
-            krb5int_set_error(ep, err, "%s", e);
+            k5_set_error(ep, err, "%s", e);
         }
     }
 #endif
@@ -356,7 +356,7 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
             const char *e = "unable to get dll symbol"; /* XXX copy and save away */
             Tprintf ("GetProcAddress(%s): %i\n", csymname, GetLastError());
             err = ENOENT; /* XXX */
-            krb5int_set_error(ep, err, "%s", e);
+            k5_set_error(ep, err, "%s", e);
 
             dw = GetLastError();
             if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |

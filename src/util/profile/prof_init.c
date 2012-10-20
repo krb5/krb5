@@ -156,7 +156,7 @@ init_load_module(const char *modspec, profile_t *ret_profile)
 cleanup:
     free(modpath);
     free(residual);
-    krb5int_clear_error(&einfo);
+    k5_clear_error(&einfo);
     if (err) {
         if (have_cbdata && vtable.cleanup)
             vtable.cleanup(cbdata);

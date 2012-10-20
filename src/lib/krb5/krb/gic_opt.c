@@ -176,8 +176,6 @@ gic_opte_alloc(krb5_context context)
 
     code = gic_opte_private_alloc(context, opte);
     if (code) {
-        krb5int_set_error(&context->err, code,
-                          "gic_opte_alloc: gic_opte_private_alloc failed");
         free(opte);
         return NULL;
     }
@@ -287,9 +285,9 @@ krb5int_gic_opt_to_opte(krb5_context context,
         if (force) {
             return gic_opte_copy(context, opt, opte);
         } else {
-            krb5int_set_error(&context->err, EINVAL,
-                              _("%s: attempt to convert non-extended "
-                                "krb5_get_init_creds_opt"), where);
+            krb5_set_error_message(context, EINVAL,
+                                   _("%s: attempt to convert non-extended "
+                                     "krb5_get_init_creds_opt"), where);
             return EINVAL;
         }
     }

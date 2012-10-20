@@ -891,7 +891,7 @@ cleanup:
 #endif
 	if (dl != NULL)
 		krb5int_close_plugin(dl);
-	krb5int_clear_error(&errinfo);
+	k5_clear_error(&errinfo);
 }
 
 static void

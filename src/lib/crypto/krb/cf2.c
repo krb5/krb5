@@ -110,9 +110,10 @@ krb5_c_fx_cf2_simple(krb5_context context,
     out_enctype = find_enctype(out_enctype_num);
     assert(out_enctype != NULL);
     if (out_enctype->prf == NULL) {
-        if (context)
-            krb5int_set_error(&(context->err), KRB5_CRYPTO_INTERNAL,
-                              _("Enctype %d has no PRF"), out_enctype_num);
+        if (context) {
+            k5_set_error(&(context->err), KRB5_CRYPTO_INTERNAL,
+                         _("Enctype %d has no PRF"), out_enctype_num);
+        }
         return KRB5_CRYPTO_INTERNAL;
     }
     keybytes = out_enctype->enc->keybytes;

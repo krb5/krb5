@@ -48,49 +48,41 @@ struct errinfo {
     char scratch_buf[1024];
 };
 
-void
-krb5int_set_error (struct errinfo *ep,
-                   long code,
-                   const char *fmt, ...)
+void k5_set_error(struct errinfo *ep, long code, const char *fmt, ...)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 3, 4)))
 #endif
     ;
-void
-krb5int_vset_error (struct errinfo *ep, long code,
-                    const char *fmt, va_list args)
+
+void k5_vset_error(struct errinfo *ep, long code, const char *fmt,
+                   va_list args)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 3, 0)))
 #endif
     ;
-void
-krb5int_set_error_fl (struct errinfo *ep, long code,
-                      const char *file, int line,
-                      const char *fmt, ...)
+
+void k5_set_error_fl(struct errinfo *ep, long code, const char *file, int line,
+                     const char *fmt, ...)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 5, 6)))
 #endif
     ;
-void
-krb5int_vset_error_fl (struct errinfo *ep, long code,
-                       const char *file, int line,
-                       const char *fmt, va_list args)
+
+void k5_vset_error_fl(struct errinfo *ep, long code, const char *file,
+                      int line, const char *fmt, va_list args)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 5, 0)))
 #endif
     ;
-const char *
-krb5int_get_error (struct errinfo *ep, long code);
-void
-krb5int_free_error (struct errinfo *ep, const char *msg);
-void
-krb5int_clear_error (struct errinfo *ep);
-void
-krb5int_set_error_info_callout_fn (const char *(KRB5_CALLCONV *f)(long));
+
+const char *k5_get_error(struct errinfo *ep, long code);
+void k5_free_error(struct errinfo *ep, const char *msg);
+void k5_clear_error(struct errinfo *ep);
+void k5_set_error_info_callout_fn(const char *(KRB5_CALLCONV *f)(long));
 
 #ifdef DEBUG_ERROR_LOCATIONS
-#define krb5int_set_error(ep, code, ...)                                \
-    krb5int_set_error_fl(ep, code, __FILE__, __LINE__, __VA_ARGS__)
+#define k5_set_error(ep, code, ...)                             \
+    k5_set_error_fl(ep, code, __FILE__, __LINE__, __VA_ARGS__)
 #endif
 
 #endif /* K5_ERR_H */
