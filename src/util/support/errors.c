@@ -28,6 +28,9 @@ static k5_mutex_t krb5int_error_info_support_mutex =
     K5_MUTEX_PARTIAL_INITIALIZER;
 static const char *(KRB5_CALLCONV *fptr)(long); /* = &error_message */
 
+/* Fallback error message if we cannot allocate a copy of the real one. */
+static char *oom_msg = "Out of memory";
+
 int
 krb5int_err_init (void)
 {
@@ -69,98 +72,52 @@ void
 k5_vset_error_fl(struct errinfo *ep, long code, const char *file, int line,
                  const char *fmt, va_list args)
 {
-    va_list args2;
-    char *str = NULL, *str2, *slash;
+    char *str, *slash;
 
-    /* Try vasprintf first. */
-    va_copy(args2, args);
-    if (vasprintf(&str, fmt, args2) < 0)
-        str = NULL;
-    va_end(args2);
+    k5_clear_error(ep);
+    ep->code = code;
 
-    if (str != NULL && line) {
+    if (vasprintf(&str, fmt, args) < 0)
+        return;
+    ep->msg = str;
+
+    if (line) {
         /* Try to add file and line suffix. */
         slash = strrchr(file, '/');
         if (slash)
             file = slash + 1;
-        if (asprintf(&str2, "%s (%s: %d)", str, file, line) > 0) {
-            free(str);
-            str = str2;
+        if (asprintf(&str, "%s (%s: %d)", ep->msg, file, line) > 0) {
+            free(ep->msg);
+            ep->msg = str;
         }
     }
+}
 
-    /* If vasprintf failed, try using scratch_buf. */
-    if (str == NULL) {
-        vsnprintf(ep->scratch_buf, sizeof(ep->scratch_buf), fmt, args);
-        str = strdup(ep->scratch_buf); /* try allocating again */
-    }
-
-    /* Free old string before setting new one. */
-    k5_clear_error(ep);
-    ep->code = code;
-    ep->msg = (str != NULL) ? str : ep->scratch_buf;
+static inline const char *
+oom_check(const char *str)
+{
+    return (str == NULL) ? oom_msg : str;
 }
 
 const char *
 k5_get_error(struct errinfo *ep, long code)
 {
-    const char *r, *r2;
-    char *p;
+    const char *r;
+    char buf[128];
 
-    if (code == ep->code && ep->msg != NULL) {
-        r = strdup(ep->msg);
-        if (r == NULL) {
-            strlcpy(ep->scratch_buf, _("Out of memory"),
-                    sizeof(ep->scratch_buf));
-            r = ep->scratch_buf;
-        }
-        return r;
-    }
-    if (initialize() != 0) {
-        strncpy(ep->scratch_buf, _("Kerberos library initialization failure"),
-                sizeof(ep->scratch_buf));
-        ep->scratch_buf[sizeof(ep->scratch_buf)-1] = 0;
-        ep->msg = NULL;
-        return ep->scratch_buf;
-    }
-    if (lock())
-        goto no_fptr;
+    if (code == ep->code && ep->msg != NULL)
+        return oom_check(strdup(ep->msg));
+
+    if (initialize() || lock())
+        return oom_check(strdup(_("Kerberos library initialization failure")));
+
     if (fptr == NULL) {
         unlock();
-    no_fptr:
-        /*
-         * Theoretically, according to ISO C, strerror should be able
-         * to give us a message back for any int value.  However, on
-         * UNIX at least, the errno codes strerror will actually be
-         * useful for are positive, so a negative value here would be
-         * kind of weird.
-         *
-         * Coverity Prevent thinks we shouldn't be passing negative
-         * values to strerror, and it's not likely to be useful, so
-         * let's not do it.
-         *
-         * Besides, normally we shouldn't get here; fptr should take
-         * us to a callback function in the com_err library.
-         */
-        if (code < 0)
-            goto format_number;
 #ifdef HAVE_STRERROR_R
-        if (strerror_r(code, ep->scratch_buf, sizeof(ep->scratch_buf)) == 0) {
-            p = strdup(ep->scratch_buf);
-            if (p != NULL)
-                return p;
-            return ep->scratch_buf;
-        }
+        if (strerror_r(code, buf, sizeof(buf)) == 0)
+            return oom_check(strdup(buf));
 #endif
-        r = strerror(code);
-        if (r != NULL) {
-            strlcpy(ep->scratch_buf, r, sizeof(ep->scratch_buf));
-            return ep->scratch_buf;
-        }
-    format_number:
-        snprintf(ep->scratch_buf, sizeof(ep->scratch_buf), _("error %ld"),
-                 code);
-        return ep->scratch_buf;
+        return oom_check(strdup(strerror(code)));
     }
     r = fptr(code);
 #ifndef HAVE_COM_ERR_INTL
@@ -169,24 +126,19 @@ k5_get_error(struct errinfo *ep, long code)
 #endif
     if (r == NULL) {
         unlock();
-        goto format_number;
+        snprintf(buf, sizeof(buf), _("error %ld"), code);
+        return oom_check(strdup(buf));
     }
 
-    r2 = strdup(r);
-    if (r2 == NULL) {
-        strlcpy(ep->scratch_buf, r, sizeof(ep->scratch_buf));
-        unlock();
-        return ep->scratch_buf;
-    } else {
-        unlock();
-        return r2;
-    }
+    r = strdup(r);
+    unlock();
+    return oom_check(r);
 }
 
 void
 k5_free_error(struct errinfo *ep, const char *msg)
 {
-    if (msg != ep->scratch_buf)
+    if (msg != oom_msg)
         free((char *)msg);
 }
 

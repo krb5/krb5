@@ -45,7 +45,6 @@
 struct errinfo {
     long code;
     char *msg;
-    char scratch_buf[1024];
 };
 
 void k5_set_error(struct errinfo *ep, long code, const char *fmt, ...)
