@@ -33,7 +33,7 @@
 #include "k5-int.h"
 #include "k5-json.h"
 #include "osconf.h"
-#include <krb5/preauth_plugin.h>
+#include <krb5/clpreauth_plugin.h>
 #include "int-proto.h"
 #include "fast.h"
 #include "init_creds_ctx.h"

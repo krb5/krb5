@@ -793,7 +793,7 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
 #ifndef KRB5_PREAUTH__
 #define KRB5_PREAUTH__
 
-#include <krb5/preauth_plugin.h>
+#include <krb5/clpreauth_plugin.h>
 
 typedef struct k5_response_items_st k5_response_items;
 struct krb5_responder_context_st {

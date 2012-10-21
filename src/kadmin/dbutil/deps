@@ -19,7 +19,7 @@ $(OUTPRE)kdb5_util.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/kdb.h $(top_srcdir)/include/kdb_log.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   kdb5_util.c kdb5_util.h
 $(OUTPRE)kdb5_create.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -41,7 +41,7 @@ $(OUTPRE)kdb5_create.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/kdb.h $(top_srcdir)/include/kdb_log.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   kdb5_create.c kdb5_util.h
 $(OUTPRE)kadm5_create.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -62,8 +62,8 @@ $(OUTPRE)kadm5_create.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/kdb.h \
   $(top_srcdir)/include/kdb_log.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/clpreauth_plugin.h \
+  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h kadm5_create.c \
   kdb5_util.h
 $(OUTPRE)kdb5_destroy.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -84,7 +84,7 @@ $(OUTPRE)kdb5_destroy.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/kdb.h $(top_srcdir)/include/kdb_log.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   kdb5_destroy.c kdb5_util.h
 $(OUTPRE)kdb5_stash.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -105,7 +105,7 @@ $(OUTPRE)kdb5_stash.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/kdb.h $(top_srcdir)/include/kdb_log.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   kdb5_stash.c kdb5_util.h
 $(OUTPRE)import_err.$(OBJEXT): $(COM_ERR_DEPS) import_err.c
@@ -129,7 +129,7 @@ $(OUTPRE)dump.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/kdb.h $(top_srcdir)/include/kdb_log.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   dump.c kdb5_util.h
 $(OUTPRE)ovload.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -151,7 +151,7 @@ $(OUTPRE)ovload.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/kdb.h $(top_srcdir)/include/kdb_log.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   import_err.h kdb5_util.h nstrtok.h ovload.c
 $(OUTPRE)kdb5_mkey.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -173,6 +173,6 @@ $(OUTPRE)kdb5_mkey.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/kdb.h $(top_srcdir)/include/kdb_log.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   kdb5_mkey.c kdb5_util.h

@@ -9,8 +9,8 @@ asn1_encode.so asn1_encode.po $(OUTPRE)asn1_encode.$(OBJEXT): \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/clpreauth_plugin.h \
+  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h asn1_encode.c \
   asn1_encode.h asn1buf.h krbasn1.h
 asn1buf.so asn1buf.po $(OUTPRE)asn1buf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -21,7 +21,7 @@ asn1buf.so asn1buf.po $(OUTPRE)asn1buf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   asn1buf.c asn1buf.h krbasn1.h
 asn1_k_encode.so asn1_k_encode.po $(OUTPRE)asn1_k_encode.$(OBJEXT): \
@@ -32,8 +32,8 @@ asn1_k_encode.so asn1_k_encode.po $(OUTPRE)asn1_k_encode.$(OBJEXT): \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/clpreauth_plugin.h \
+  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h asn1_encode.h \
   asn1_k_encode.c asn1buf.h krbasn1.h
 ldap_key_seq.so ldap_key_seq.po $(OUTPRE)ldap_key_seq.$(OBJEXT): \
@@ -45,6 +45,6 @@ ldap_key_seq.so ldap_key_seq.po $(OUTPRE)ldap_key_seq.$(OBJEXT): \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/kdb.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   asn1_encode.h asn1buf.h krbasn1.h ldap_key_seq.c

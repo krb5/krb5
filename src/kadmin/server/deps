@@ -58,8 +58,8 @@ $(OUTPRE)ovsec_kadmd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/kdb.h $(top_srcdir)/include/kdb_kt.h \
   $(top_srcdir)/include/kdb_log.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/net-server.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/clpreauth_plugin.h \
+  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/net-server.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   $(top_srcdir)/lib/gssapi/generic/gssapiP_generic.h \
   $(top_srcdir)/lib/gssapi/generic/gssapi_ext.h $(top_srcdir)/lib/gssapi/generic/gssapi_generic.h \
@@ -83,7 +83,7 @@ $(OUTPRE)schpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/kdb.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/net-server.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h misc.h schpw.c
 $(OUTPRE)misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -104,7 +104,7 @@ $(OUTPRE)misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/kdb.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/net-server.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h misc.c misc.h
 $(OUTPRE)ipropd_svc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

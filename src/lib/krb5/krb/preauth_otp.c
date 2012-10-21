@@ -32,7 +32,7 @@
 #include "k5-json.h"
 #include "int-proto.h"
 
-#include <krb5/preauth_plugin.h>
+#include <krb5/clpreauth_plugin.h>
 #include <ctype.h>
 
 static krb5_preauthtype otp_client_supported_pa_types[] =

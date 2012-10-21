@@ -80,7 +80,7 @@ HEADERS= \
 	socket-utils.h \
 	krb5/krb5.h \
 	krb5/plugin.h \
-	krb5/preauth_plugin.h \
+	krb5/clpreauth_plugin.h \
 	krb5/authdata_plugin.h \
 	profile.h \
 	$(COM_ERR_DEPS)
@@ -199,8 +199,8 @@ krb5/krb5.h: krb5 $(INCLUDE_BUILD)/krb5/krb5.h
 	$(CP) $(INCLUDE_BUILD)/krb5/krb5.h $@
 krb5/plugin.h: krb5 $(INCLUDE)/krb5/plugin.h
 	$(CP) $(INCLUDE)/krb5/plugin.h $@
-krb5/preauth_plugin.h: krb5 $(INCLUDE)/krb5/preauth_plugin.h
-	$(CP) $(INCLUDE)/krb5/preauth_plugin.h $@
+krb5/clpreauth_plugin.h: krb5 $(INCLUDE)/krb5/clpreauth_plugin.h
+	$(CP) $(INCLUDE)/krb5/clpreauth_plugin.h $@
 krb5/authdata_plugin.h: krb5 $(INCLUDE)/krb5/authdata_plugin.h
 	$(CP) $(INCLUDE)/krb5/authdata_plugin.h $@
 profile.h: $(INCLUDE_BUILD)/profile.h

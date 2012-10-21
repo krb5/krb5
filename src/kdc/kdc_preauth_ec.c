@@ -30,7 +30,7 @@
  */
 
 #include <k5-int.h>
-#include <krb5/preauth_plugin.h>
+#include <krb5/kdcpreauth_plugin.h>
 #include "kdc_util.h"
 
 static void

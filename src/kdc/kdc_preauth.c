@@ -85,7 +85,7 @@
 #include <syslog.h>
 
 #include <assert.h>
-#include "../include/krb5/preauth_plugin.h"
+#include <krb5/kdcpreauth_plugin.h>
 
 typedef struct preauth_system_st {
     const char *name;

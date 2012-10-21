@@ -30,6 +30,7 @@
 #ifndef __KRB5_KDC_UTIL__
 #define __KRB5_KDC_UTIL__
 
+#include <krb5/kdcpreauth_plugin.h>
 #include "kdb.h"
 #include "net-server.h"
 #include "realm_data.h"
