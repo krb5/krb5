@@ -148,8 +148,8 @@ SRCS= \
 	$(srcdir)/write_msg.c
 
 EXTRADEPSRCS = \
-	t_an_to_ln.c t_expand_path.c t_gifconf.c t_locate_kdc.c \
-	t_std_conf.c
+	t_an_to_ln.c t_expand_path.c t_gifconf.c t_kuserok.c t_locate_kdc.c \
+	t_std_conf.c t_trace.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
