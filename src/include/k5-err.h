@@ -46,6 +46,7 @@ struct errinfo {
     long code;
     char *msg;
 };
+#define EMPTY_ERRINFO { 0, NULL }
 
 void k5_set_error(struct errinfo *ep, long code, const char *fmt, ...)
 #if !defined(__cplusplus) && (__GNUC__ > 2)

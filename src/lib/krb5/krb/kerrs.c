@@ -26,6 +26,7 @@
 
 #include <stdarg.h>
 #include "k5-int.h"
+#include "int-proto.h"
 
 #ifdef DEBUG
 static int error_message_debug = 0;
@@ -150,4 +151,32 @@ krb5_clear_error_message(krb5_context ctx)
     if (ctx == NULL)
         return;
     k5_clear_error(&ctx->err);
+}
+
+void
+k5_save_ctx_error(krb5_context ctx, krb5_error_code code, struct errinfo *out)
+{
+    out->code = code;
+    out->msg = NULL;
+    if (ctx != NULL && ctx->err.code == code) {
+        out->msg = ctx->err.msg;
+        ctx->err.code = 0;
+        ctx->err.msg = NULL;
+    }
+}
+
+krb5_error_code
+k5_restore_ctx_error(krb5_context ctx, struct errinfo *in)
+{
+    krb5_error_code code = in->code;
+
+    if (ctx != NULL) {
+        k5_clear_error(&ctx->err);
+        ctx->err.code = in->code;
+        ctx->err.msg = in->msg;
+        in->msg = NULL;
+    } else {
+        k5_clear_error(in);
+    }
+    return code;
 }

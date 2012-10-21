@@ -234,4 +234,12 @@ const char *
 k5_response_items_get_answer(const k5_response_items *ri,
                              const char *question);
 
+/* Save code and its extended message (if any) in out. */
+void
+k5_save_ctx_error(krb5_context ctx, krb5_error_code code, struct errinfo *out);
+
+/* Return the code from in and restore its extended message (if any). */
+krb5_error_code
+k5_restore_ctx_error(krb5_context ctx, struct errinfo *in);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */
