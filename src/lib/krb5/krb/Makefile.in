@@ -343,7 +343,12 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/t_pac.c	\
 	$(srcdir)/t_princ.c	\
 	$(srcdir)/t_etypes.c    \
-	$(srcdir)/t_expire_warn.c
+	$(srcdir)/t_expire_warn.c \
+	$(srcdir)/t_authdata.c	\
+	$(srcdir)/t_cc_config.c	\
+	$(srcdir)/t_in_ccache.c	\
+	$(srcdir)/t_response_items.c \
+	$(srcdir)/t_vfy_increds.c
 
 # Someday, when we have a "maintainer mode", do this right:
 BISON=bison
