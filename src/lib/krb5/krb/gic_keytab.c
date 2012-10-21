@@ -263,9 +263,10 @@ krb5_get_init_creds_keytab(krb5_context context,
                            const char *in_tkt_service,
                            krb5_get_init_creds_opt *options)
 {
-    krb5_error_code ret, ret2;
+    krb5_error_code ret;
     int use_master;
     krb5_keytab keytab;
+    struct errinfo errsave = EMPTY_ERRINFO;
 
     if (arg_keytab == NULL) {
         if ((ret = krb5_kt_default(context, &keytab)))
@@ -297,24 +298,18 @@ krb5_get_init_creds_keytab(krb5_context context,
     if (!use_master) {
         use_master = 1;
 
-        ret2 = get_init_creds_keytab(context, creds, client, keytab,
-                                     start_time, in_tkt_service, options,
-                                     &use_master);
-
-        if (ret2 == 0) {
-            ret = 0;
-            goto cleanup;
-        }
-
-        /* if the master is unreachable, return the error from the
-           slave we were able to contact */
-
-        if ((ret2 == KRB5_KDC_UNREACH) ||
-            (ret2 == KRB5_REALM_CANT_RESOLVE) ||
-            (ret2 == KRB5_REALM_UNKNOWN))
+        k5_save_ctx_error(context, ret, &errsave);
+        ret = get_init_creds_keytab(context, creds, client, keytab,
+                                    start_time, in_tkt_service, options,
+                                    &use_master);
+        if (ret == 0)
             goto cleanup;
 
-        ret = ret2;
+        /* If the master is unreachable, return the error from the slave we
+         * were able to contact. */
+        if (ret == KRB5_KDC_UNREACH || ret == KRB5_REALM_CANT_RESOLVE ||
+            ret == KRB5_REALM_UNKNOWN)
+            ret = k5_restore_ctx_error(context, &errsave);
     }
 
     /* at this point, we have a response from the master.  Since we don't
@@ -323,6 +318,7 @@ krb5_get_init_creds_keytab(krb5_context context,
 cleanup:
     if (arg_keytab == NULL)
         krb5_kt_close(context, keytab);
+    k5_clear_error(&errsave);
 
     return(ret);
 }

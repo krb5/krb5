@@ -250,7 +250,7 @@ krb5_get_init_creds_password(krb5_context context,
                              const char *in_tkt_service,
                              krb5_get_init_creds_opt *options)
 {
-    krb5_error_code ret, ret2;
+    krb5_error_code ret;
     int use_master;
     krb5_kdc_rep *as_reply;
     int tries;
@@ -260,6 +260,7 @@ krb5_get_init_creds_password(krb5_context context,
     char banner[1024], pw0array[1024], pw1array[1024];
     krb5_prompt prompt[2];
     krb5_prompt_type prompt_types[sizeof(prompt)/sizeof(prompt[0])];
+    struct errinfo errsave = EMPTY_ERRINFO;
     char *message;
 
     use_master = 0;
@@ -310,29 +311,26 @@ krb5_get_init_creds_password(krb5_context context,
         TRACE_GIC_PWD_MASTER(context);
         use_master = 1;
 
+        k5_save_ctx_error(context, ret, &errsave);
         if (as_reply) {
             krb5_free_kdc_rep( context, as_reply);
             as_reply = NULL;
         }
-        ret2 = krb5int_get_init_creds(context, creds, client, prompter, data,
-                                      start_time, in_tkt_service, options,
-                                      krb5_get_as_key_password, (void *) &pw0,
-                                      &use_master, &as_reply);
+        ret = krb5int_get_init_creds(context, creds, client, prompter, data,
+                                     start_time, in_tkt_service, options,
+                                     krb5_get_as_key_password, (void *) &pw0,
+                                     &use_master, &as_reply);
 
-        if (ret2 == 0) {
-            ret = 0;
+        if (ret == 0)
             goto cleanup;
-        }
 
-        /* if the master is unreachable, return the error from the
-           slave we were able to contact or reset the use_master flag */
-
-        if ((ret2 != KRB5_KDC_UNREACH) &&
-            (ret2 != KRB5_REALM_CANT_RESOLVE) &&
-            (ret2 != KRB5_REALM_UNKNOWN))
-            ret = ret2;
-        else
+        /* If the master is unreachable, return the error from the slave we
+         * were able to contact and reset the use_master flag. */
+        if (ret == KRB5_KDC_UNREACH || ret == KRB5_REALM_CANT_RESOLVE ||
+            ret == KRB5_REALM_UNKNOWN) {
+            ret = k5_restore_ctx_error(context, &errsave);
             use_master = 0;
+        }
     }
 
     /* at this point, we have an error from the master.  if the error
@@ -481,6 +479,7 @@ cleanup:
     krb5_free_cred_contents(context, &chpw_creds);
     if (as_reply)
         krb5_free_kdc_rep(context, as_reply);
+    k5_clear_error(&errsave);
 
     return(ret);
 }
