@@ -1230,7 +1230,7 @@ static int
 pkinit_client_get_flags(krb5_context kcontext, krb5_preauthtype patype)
 {
     if (patype == KRB5_PADATA_PKINIT_KX)
-        return PA_INFO|PA_PSEUDO;
+        return PA_INFO;
     return PA_REAL;
 }
 
