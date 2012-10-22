@@ -34,6 +34,91 @@ parameter (which can be a null pointer).  Use the function
 :c:func:`krb5_get_init_creds_opt_alloc` to allocate an options
 structure, and :c:func:`krb5_get_init_creds_opt_free` to free it.
 
+User interaction
+----------------
+
+Authenticating a user usually requires the entry of secret
+information, such as a password.  A password can be supplied directly
+to :c:func:`krb5_get_init_creds_password` via the *password*
+parameter, or the application can supply prompter and/or responder
+callbacks instead.  If callbacks are used, the user can also be
+queried for other secret information such as a PIN, informed of
+impending password expiration, or prompted to change a password which
+has expired.
+
+Prompter callback
+~~~~~~~~~~~~~~~~~
+
+A prompter callback can be specified via the *prompter* and *data*
+parameters to :c:func:`krb5_get_init_creds_password`.  The prompter
+will be invoked each time the krb5 library has a question to ask or
+information to present.  When the prompter callback is invoked, the
+*banner* argument (if not null) is intended to be displayed to the
+user, and the questions to be answered are specified in the *prompts*
+array.  Each prompt contains a text question in the *prompt* field, a
+*hidden* bit to indicate whether the answer should be hidden from
+display, and a storage area for the answer in the *reply* field.  The
+callback should fill in each question's ``reply->data`` with the
+answer, up to a maximum number of ``reply->length`` bytes, and then
+reset ``reply->length`` to the length of the answer.
+
+A prompter callback can call :c:func:`krb5_get_prompt_types` to get an
+array of type constants corresponding to the prompts, to get
+programmatic information about the semantic meaning of the questions.
+:c:func:`krb5_get_prompt_types` may return a null pointer if no prompt
+type information is available.
+
+Text-based applications can use a built-in text prompter
+implementation by supplying :c:func:`krb5_prompter_posix` as the
+*prompter* parameter and a null pointer as the *data* parameter.
+
+Responder callback
+~~~~~~~~~~~~~~~~~~
+
+A responder callback can be specified through the init_creds options
+using the :c:func:`krb5_get_init_creds_opt_set_responder` function.
+Responder callbacks can present a more sophisticated user interface
+for authentication secrets.  The responder callback is usually invoked
+only once per authentication, with a list of questions produced by all
+of the allowed preauthentication mechanisms.
+
+When the responder callback is invoked, the *rctx* argument can be
+accessed to obtain the list of questions and to answer them.  The
+:c:func:`krb5_responder_list_questions` function retrieves an array of
+question types.  For each question type, the
+:c:func:`krb5_responder_get_challenge` function retrieves additional
+information about the question, if applicable, and the
+:c:func:`krb5_responder_set_answer` function sets the answer.
+
+Responder question types, challenges, and answers are UTF-8 strings.
+The question type is a well-known string; the meaning of the challenge
+and answer depend on the question type.  If an application does not
+understand a question type, it cannot interpret the challenge or
+provide an answer.  Failing to answer a question typically results in
+the prompter callback being used as a fallback.
+
+Password question
+#################
+
+The :c:macro:`KRB5_RESPONDER_QUESTION_PASSWORD` (or ``"password"``)
+question type requests the user's password.  This question does not
+have a challenge, and the response is simply the password string.
+
+One-time password question
+##########################
+
+The :c:macro:`KRB5_RESPONDER_QUESTION_OTP` (or ``"otp"``) question
+type requests a choice among one-time password tokens and the PIN and
+value for the chosen token.  The challenge and answer are JSON-encoded
+strings, but an application can use convenience functions to avoid
+doing any JSON processing itself.
+
+The :c:func:`krb5_responder_otp_get_challenge` function decodes the
+challenge into a krb5_responder_otp_challenge structure.  The
+:c:func:`krb5_responder_otp_set_answer` function selects one of the
+token information elements from the challenge and supplies the value
+and pin for that token.
+
 Verifying initial credentials
 -----------------------------
 
