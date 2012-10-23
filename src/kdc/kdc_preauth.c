@@ -98,6 +98,7 @@ typedef struct preauth_system_st {
     krb5_kdcpreauth_verify_fn verify_padata;
     krb5_kdcpreauth_return_fn return_padata;
     krb5_kdcpreauth_free_modreq_fn free_modreq;
+    krb5_kdcpreauth_loop_fn loop;
 } preauth_system;
 
 static void
@@ -251,7 +252,7 @@ get_plugin_vtables(krb5_context context,
     if (vtables == NULL)
         goto cleanup;
     for (pl = plugins, n_tables = 0; *pl != NULL; pl++) {
-        if ((*pl)(context, 1, 1, (krb5_plugin_vtable)&vtables[n_tables]) == 0)
+        if ((*pl)(context, 1, 2, (krb5_plugin_vtable)&vtables[n_tables]) == 0)
             n_tables++;
     }
     for (i = 0, n_systems = 0; i < n_tables; i++) {
@@ -285,7 +286,8 @@ get_realm_names(struct server_handle *handle, const char ***list_out)
 }
 
 void
-load_preauth_plugins(struct server_handle *handle, krb5_context context)
+load_preauth_plugins(struct server_handle *handle, krb5_context context,
+                     verto_ctx *ctx)
 {
     krb5_error_code ret;
     struct krb5_kdcpreauth_vtable_st *vtables = NULL, *vt;
@@ -327,6 +329,20 @@ load_preauth_plugins(struct server_handle *handle, krb5_context context)
                 continue;
             }
         }
+
+        if (vt->loop) {
+            ret = vt->loop(context, moddata, ctx);
+            if (ret) {
+                emsg = krb5_get_error_message(context, ret);
+                krb5_klog_syslog(LOG_ERR, _("preauth %s failed to setup "
+                                            "loop: %s"), vt->name, emsg);
+                krb5_free_error_message(context, emsg);
+                if (vt->fini)
+                    vt->fini(context, moddata);
+                continue;
+            }
+        }
+
         /* Add this module to the systems list once for each pa type. */
         for (j = 0; vt->pa_type_list[j] > 0; j++) {
             sys = &preauth_systems[n_systems];
@@ -341,6 +357,7 @@ load_preauth_plugins(struct server_handle *handle, krb5_context context)
             sys->verify_padata = vt->verify;
             sys->return_padata = vt->return_padata;
             sys->free_modreq = vt->free_modreq;
+            sys->loop = vt->loop;
             n_systems++;
         }
     }

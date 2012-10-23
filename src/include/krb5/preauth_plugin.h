@@ -47,7 +47,7 @@
  *                            int min_ver, krb5_plugin_vtable vtable);
  *
  * The kdcpreauth interface has a single supported major version, which is 1.
- * Major version 1 has a current minor version of 1.  kdcpreauth modules should
+ * Major version 1 has a current minor version of 2.  kdcpreauth modules should
  * define a function named kdcpreauth_<modulename>_initvt, matching the
  * signature:
  *
@@ -578,6 +578,13 @@ typedef void
                                   krb5_kdcpreauth_moddata moddata,
                                   krb5_kdcpreauth_modreq modreq);
 
+/* Optional: invoked after init_fn to provide the module with a pointer to the
+ * verto main loop. */
+typedef krb5_error_code
+(*krb5_kdcpreauth_loop_fn)(krb5_context context,
+                           krb5_kdcpreauth_moddata moddata,
+                           struct verto_ctx *ctx);
+
 typedef struct krb5_kdcpreauth_vtable_st {
     /* Mandatory: name of module. */
     char *name;
@@ -593,6 +600,10 @@ typedef struct krb5_kdcpreauth_vtable_st {
     krb5_kdcpreauth_verify_fn verify;
     krb5_kdcpreauth_return_fn return_padata;
     krb5_kdcpreauth_free_modreq_fn free_modreq;
+    /* Minor 1 ends here. */
+
+    krb5_kdcpreauth_loop_fn loop;
+    /* Minor 2 ends here. */
 } *krb5_kdcpreauth_vtable;
 
 #endif /* KRB5_PREAUTH_PLUGIN_H_INCLUDED */

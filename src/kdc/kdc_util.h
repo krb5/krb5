@@ -160,7 +160,8 @@ get_preauth_hint_list(krb5_kdc_req *request,
                       krb5_kdcpreauth_rock rock, krb5_pa_data ***e_data_out,
                       kdc_hint_respond_fn respond, void *arg);
 void
-load_preauth_plugins(struct server_handle * handle, krb5_context context);
+load_preauth_plugins(struct server_handle * handle, krb5_context context,
+                     verto_ctx *ctx);
 void
 unload_preauth_plugins(krb5_context context);
 
