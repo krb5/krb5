@@ -6479,8 +6479,8 @@ krb5_responder_set_answer(krb5_context ctx, krb5_responder_context rctx,
  * Responder function for an initial credential exchange.
  *
  * @param [in] ctx              Library context
- * @param [in] rctx             Responder context
  * @param [in] data             Callback data
+ * @param [in] rctx             Responder context
  *
  * A responder function is like a prompter function, but is used for handling
  * questions and answers as potentially complex data types.  Client
@@ -6496,8 +6496,8 @@ krb5_responder_set_answer(krb5_context ctx, krb5_responder_context rctx,
  * If a required question is unanswered, the prompter may be called.
  */
 typedef krb5_error_code
-(*krb5_responder_fn)(krb5_context ctx, krb5_responder_context rctx,
-                     void *data);
+(KRB5_CALLCONV *krb5_responder_fn)(krb5_context ctx, void *data,
+                                   krb5_responder_context rctx);
 
 typedef struct _krb5_responder_otp_tokeninfo {
     krb5_flags flags;
