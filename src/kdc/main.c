@@ -1011,7 +1011,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    load_preauth_plugins(&shandle, kcontext);
+    load_preauth_plugins(&shandle, kcontext, ctx);
     load_authdata_plugins(kcontext);
 
     retval = setup_sam();
