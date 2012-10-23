@@ -235,6 +235,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_MSPAC_DISCARD_UNVERF(c)           \
     TRACE(c, "Filtering out unverified MS PAC")
 
+#define TRACE_PREAUTH_CONFLICT(c, name1, name2, patype)                 \
+    TRACE(c, "Preauth module {str} conflicts with module {str} for pa " \
+          "type {int}", name1, name2, (int) patype)
 #define TRACE_PREAUTH_COOKIE(c, len, data)                      \
     TRACE(c, "Received cookie: {lenstr}", (size_t) len, data)
 #define TRACE_PREAUTH_ENC_TS_KEY_GAK(c, keyblock)                       \
@@ -252,9 +255,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Processing preauth types: {patypes}", padata)
 #define TRACE_PREAUTH_OUTPUT(c, padata)                                 \
     TRACE(c, "Produced preauth for next request: {patypes}", padata)
-#define TRACE_PREAUTH_PROCESS(c, name, patype, flags, code)          \
-    TRACE(c, "Preauth module {str} ({int}) (flags={int}) returned: " \
-          "{kerr}", name, (int) patype, flags, code)
+#define TRACE_PREAUTH_PROCESS(c, name, patype, real, code)              \
+    TRACE(c, "Preauth module {str} ({int}) ({str}) returned: "          \
+          "{kerr}", name, (int) patype, real ? "real" : "info", code)
 #define TRACE_PREAUTH_SAM_KEY_GAK(c, keyblock)                  \
     TRACE(c, "AS key obtained for SAM: {keyblock}", keyblock)
 #define TRACE_PREAUTH_SALT(c, salt, patype)                          \
