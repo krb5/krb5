@@ -235,8 +235,6 @@ check_princ(context, str_princ)
 
     snprintf(princ_name, sizeof(princ_name), "%s@%s", str_princ, cur_realm);
 
-    fprintf(stderr, "\t%s ...\n", princ_name);
-
     if ((retval = krb5_parse_name(context, princ_name, &princ))) {
         com_err(progname, retval, "while parsing '%s'", princ_name);
         goto out;

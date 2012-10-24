@@ -312,8 +312,6 @@ add_princ(context, str_newprinc)
         goto error;
     }
 
-    fprintf(stdout, "Added %s to database\n", princ_name);
-
 error: /* Do cleanup of newentry regardless of error */
     krb5_db_free_principal(context, newentry);
     return;
