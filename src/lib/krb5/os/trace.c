@@ -51,7 +51,7 @@ buf_is_printable(const char *p, size_t len)
     size_t i;
 
     for (i = 0; i < len; i++) {
-        if (p[i] < 32 || p[i] > 127)
+        if (p[i] < 32 || p[i] > 126)
             break;
     }
     return i == len;
