@@ -5132,7 +5132,7 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
  *
  * If a replay cache handle is provided in the @a auth_context, the
  * authenticator and ticket are verified against it.  If no conflict is found,
- * the new authenticator is then stored in the replay cash of @a auth_context.
+ * the new authenticator is then stored in the replay cache of @a auth_context.
  *
  * Various other checks are performed on the decoded data, including
  * cross-realm policy, clockskew, and ticket validation times.
