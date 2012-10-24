@@ -295,6 +295,12 @@ k5_json_object_create(void)
     return alloc_value(&object_type, sizeof(struct k5_json_object_st));
 }
 
+size_t
+k5_json_object_count(k5_json_object obj)
+{
+    return obj->len;
+}
+
 /* Return the entry for key within obj, or NULL if none exists. */
 static struct entry *
 object_search(k5_json_object obj, const char *key)
