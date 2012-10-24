@@ -407,7 +407,7 @@ typedef struct krb5_kdcpreauth_modreq_st *krb5_kdcpreauth_modreq;
 
 /* The verto context structure type (typedef is in verto.h; we want to avoid a
  * header dependency for the moment). */
-struct verto_context;
+struct verto_ctx;
 
 /* Before using a callback after version 1, modules must check the vers
  * field of the callback structure. */
