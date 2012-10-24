@@ -11,6 +11,7 @@ k5_json_get_tid
 k5_json_null_create
 k5_json_number_create
 k5_json_number_value
+k5_json_object_count
 k5_json_object_create
 k5_json_object_get
 k5_json_object_iterate

@@ -148,6 +148,8 @@ k5_json_object k5_json_object_create(void);
 void k5_json_object_iterate(k5_json_object obj,
                             k5_json_object_iterator_fn func, void *arg);
 
+/* Return the number of mappings in an object. */
+size_t k5_json_object_count(k5_json_object obj);
 
 /* Store val into object at key, incrementing val's reference count. */
 int k5_json_object_set(k5_json_object obj, const char *key, k5_json_value val);

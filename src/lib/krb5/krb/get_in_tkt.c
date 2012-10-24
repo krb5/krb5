@@ -1198,7 +1198,8 @@ save_cc_config_out_data(krb5_context context, krb5_ccache ccache,
     char *encoded;
     krb5_error_code code;
 
-    if (ctx->cc_config_out == NULL)
+    if (ctx->cc_config_out == NULL ||
+        k5_json_object_count(ctx->cc_config_out) == 0)
         return 0;
     encoded = k5_json_encode(ctx->cc_config_out);
     if (encoded == NULL)
