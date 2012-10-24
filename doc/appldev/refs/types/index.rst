@@ -65,6 +65,9 @@ Public
    krb5_prompt_type.rst
    krb5_prompter_fct.rst
    krb5_pwd_data.rst
+   krb5_responder_fn.rst
+   krb5_responder_otp_challenge.rst
+   krb5_responder_otp_tokeninfo.rst
    krb5_response.rst
    krb5_replay_data.rst
    krb5_ticket.rst
