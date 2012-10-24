@@ -618,9 +618,6 @@ run_preauth_plugins(krb5_context kcontext,
             if (ret != 0)
                 return ret;
         }
-        /* Record which pa_type we answered a call for. */
-        if (preauth_rock->selected_preauth_type != NULL)
-            *preauth_rock->selected_preauth_type = in_padata->pa_type;
         break;
     }
     if (i >= kcontext->preauth_context->n_modules) {
@@ -1027,6 +1024,9 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
                                       &out_pa_list, &out_pa_list_size,
                                       &module_ret, opte);
             if (ret == 0 && module_ret == 0 && paorder[h] == PA_REAL) {
+                /* Record which real padata type we answered. */
+                if (rock->selected_preauth_type != NULL)
+                    *rock->selected_preauth_type = in_padata[i]->pa_type;
                 *got_real_out = TRUE;
                 break;
             }
