@@ -80,18 +80,23 @@ locator plugin would be registered by placing its shared object in
 |libdir|\ ``/krb5/plugins/libkrb5/winbind_krb5_locator.so``.
 
 
+.. _gssapi_plugin_config:
+
 GSSAPI mechanism modules
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 GSSAPI mechanism module are registered using the file
 ``/etc/gss/mech``.  Each line in this file has the form::
 
-    oid  pathname  [options]
+    oid  pathname  [options]  <type>
 
-where *oid* is the object identifier of the GSSAPI mechanism to be
-registered, *pathname* is a path to the module shared object or DLL,
-and *options* (if present) are options provided to the plugin module,
-surrounded in square brackets.
+Only the oid and pathname are required.  *oid* is the object
+identifier of the GSSAPI mechanism to be registered.  *pathname* is a
+path to the module shared object or DLL.  *options* (if present) are
+options provided to the plugin module, surrounded in square brackets.
+*type* (if present) can be used to indicate a special type of module.
+Currently the only special module type is "interposer", for a module
+designed to intercept calls to other mechanisms.
 
 
 .. _profile_plugin_config:
