@@ -35,14 +35,14 @@ RST_SOURCES= _static \
 # with:
 #     make -f Makefile.in srcdir=. top_srcdir=.. PYTHON=python html
 #     make -f Makefile.in clean
-html: rst_composite
+html: composite
 	rm -rf $(docsrc)/html
 	$(SPHINX_BUILD) -q rst_composite $(docsrc)/html
 
 # Create HTML documentation in html_subst suitable for
 # installation by an OS package, with substitutions for configured
 # paths.
-substhtml: rst_composite paths.py
+substhtml: composite paths.py
 	rm -rf html_subst
 	cp paths.py rst_composite
 	$(SPHINX_BUILD) -t pathsubs -q rst_composite html_subst
@@ -57,7 +57,7 @@ NOTICE: notice.txt
 # Use doxygen to generate API documentation, translate it into RST
 # format, and then create a composite of $(docsrc)'s RST and the
 # generated files in rst_composite.  Used by the html and substhtml targets.
-rst_composite: Doxyfile
+composite: Doxyfile
 	rm -rf doxy rst_apiref rst_composite
 	$(DOXYGEN)
 	cwd=`pwd`; cd $(docsrc)/tools && \
