@@ -1441,8 +1441,8 @@ recv_database(context, fd, database_fd, confmsg)
     int database_fd;
     krb5_data *confmsg;
 {
-    krb5_ui_4       database_size; /* This must be 4 bytes */
-    int     received_size, n;
+    krb5_ui_4       database_size, received_size;
+    int             n;
     char            buf[1024];
     krb5_data       inbuf, outbuf;
     krb5_error_code retval;
@@ -1522,7 +1522,7 @@ recv_database(context, fd, database_fd, confmsg)
                      "while writing database block starting at offset %d",
                      received_size);
             send_error(context, fd, errno, buf);
-        } else if (n != outbuf.length) {
+        } else if ((unsigned int)n != outbuf.length) {
             snprintf(buf, sizeof(buf),
                      "incomplete write while writing database block starting at \noffset %d (%d written, %d expected)",
                      received_size, n, outbuf.length);
