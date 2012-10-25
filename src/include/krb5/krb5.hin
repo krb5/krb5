@@ -3507,13 +3507,19 @@ krb5_unparse_name(krb5_context context, krb5_const_principal principal,
 /**
  * Convert krb5_principal structure to string and length.
  *
- * @param [in]  context         Library context
- * @param [in]  principal       Principal
- * @param [out] name            String representation of principal name
- * @param [out] size            Size of unparsed name
+ * @param [in]     context      Library context
+ * @param [in]     principal    Principal
+ * @param [in,out] name         String representation of principal name
+ * @param [in,out] size         Size of unparsed name
  *
- * This function is similar to krb5_unparse_name(), but also returns the length
- * of the string representation.
+ * This function is similar to krb5_unparse_name(), but allows the use of an
+ * existing buffer for the result.  If size is not NULL, then *name must be
+ * either NULL or an existing buffer of at least size *size.  The buffer will
+ * be allocated or resized if necessary, with the new pointer stored into
+ * *name.  Whether or not the buffer is resized, the necessary space for the
+ * result, including null terminator, will be stored into *size.
+ *
+ * If size is NULL, this function behaves exactly as krb5_unparse_name().
  *
  * @retval
  * 0 Success
