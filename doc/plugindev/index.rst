@@ -27,6 +27,7 @@ Contents
    kadm5_hook.rst
    locate.rst
    profile.rst
+   gssapi.rst
    internal.rst
 
 .. TODO: GSSAPI mechanism plugins
