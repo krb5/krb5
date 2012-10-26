@@ -18,5 +18,5 @@ MIT Kerberos Documentation
 
 .. _reference:
 
-:Release: |version|
+:Release: |release|
 
