@@ -28,6 +28,7 @@
 
 #include "k5-int.h"
 #include "os-proto.h"
+#include "../krb/int-proto.h"
 #include "prof_int.h"        /* XXX for profile_copy, not public yet */
 
 #if defined(_WIN32)
@@ -517,7 +518,7 @@ krb5_os_free_context(krb5_context ctx)
     }
 
     if (ctx->preauth_context) {
-        krb5_free_preauth_context(ctx);
+        k5_free_preauth_context(ctx);
         ctx->preauth_context = NULL;
     }
     krb5int_close_plugin_dirs (&ctx->libkrb5_plugins);

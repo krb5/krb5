@@ -1066,33 +1066,6 @@ krb5int_populate_gic_opt (krb5_context, krb5_get_init_creds_opt **,
                           krb5_preauthtype *pre_auth_types, krb5_creds *creds);
 
 
-krb5_error_code KRB5_CALLCONV
-krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
-                krb5_data *encoded_request_body,
-                krb5_data *encoded_previous_request, krb5_pa_data **in_padata,
-                krb5_pa_data ***out_padata, krb5_prompter_fct prompter,
-                void *prompter_data, krb5_clpreauth_rock preauth_rock,
-                krb5_gic_opt_ext *opte, krb5_boolean *got_real_out);
-
-krb5_error_code KRB5_CALLCONV
-krb5_do_preauth_tryagain(krb5_context context, krb5_kdc_req *request,
-                         krb5_data *encoded_request_body,
-                         krb5_data *encoded_previous_request,
-                         krb5_pa_data **in_padata, krb5_pa_data ***out_padata,
-                         krb5_error *err_reply, krb5_pa_data **err_padata,
-                         krb5_prompter_fct prompter, void *prompter_data,
-                         krb5_clpreauth_rock preauth_rock,
-                         krb5_gic_opt_ext *opte);
-
-void KRB5_CALLCONV krb5_init_preauth_context(krb5_context);
-void KRB5_CALLCONV krb5_free_preauth_context(krb5_context);
-void KRB5_CALLCONV krb5_clear_preauth_context_use_counts(krb5_context);
-void KRB5_CALLCONV krb5_preauth_prepare_request(krb5_context,
-                                                krb5_gic_opt_ext *,
-                                                krb5_kdc_req *);
-void KRB5_CALLCONV krb5_preauth_request_context_init(krb5_context);
-void KRB5_CALLCONV krb5_preauth_request_context_fini(krb5_context);
-
 void KRB5_CALLCONV
 krb5_free_sam_challenge_2(krb5_context, krb5_sam_challenge_2 *);
 
