@@ -178,9 +178,11 @@ typedef void
                           krb5_clpreauth_moddata moddata);
 
 /*
- * Mandatory: Return flags indicating if the module is a "real" or an "info"
- * mechanism, and so on.  This function is called for each entry in the
- * client_pa_type_list.
+ * Optional (mandatory before MIT krb5 1.12): pa_type will be a member of the
+ * vtable's pa_type_list.  Return PA_REAL if pa_type is a real
+ * preauthentication type or PA_INFO if it is an informational type.  If this
+ * function is not defined in 1.12 or later, all pa_type values advertised by
+ * the module will be assumed to be real.
  */
 typedef int
 (*krb5_clpreauth_get_flags_fn)(krb5_context context, krb5_preauthtype pa_type);

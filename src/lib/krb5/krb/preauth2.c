@@ -249,6 +249,8 @@ static int
 clpreauth_is_real(krb5_context context, clpreauth_handle h,
                   krb5_preauthtype pa_type)
 {
+    if (h->vt.flags == NULL)
+        return 1;
     return (h->vt.flags(context, pa_type) & PA_REAL) != 0;
 }
 

@@ -30,12 +30,6 @@
 #include "int-proto.h"
 #include "init_creds_ctx.h"
 
-static int
-sam2_flags(krb5_context context, krb5_preauthtype pa_type)
-{
-    return PA_REAL;
-}
-
 /* this macro expands to the int,ptr necessary for "%.*s" in an sprintf */
 
 #define SAMDATA(kdata, str, maxsize)                                    \
@@ -431,7 +425,6 @@ clpreauth_sam2_initvt(krb5_context context, int maj_ver, int min_ver,
     vt = (krb5_clpreauth_vtable)vtable;
     vt->name = "sam2";
     vt->pa_type_list = sam2_pa_types;
-    vt->flags = sam2_flags;
     vt->process = sam2_process;
     return 0;
 }

@@ -33,12 +33,6 @@
 #include <krb5/clpreauth_plugin.h>
 #include "int-proto.h"
 
-static int
-ec_flags(krb5_context context, krb5_preauthtype pa_type)
-{
-    return PA_REAL;
-}
-
 static krb5_error_code
 ec_prep_questions(krb5_context context, krb5_clpreauth_moddata moddata,
                   krb5_clpreauth_modreq modreq, krb5_get_init_creds_opt *opt,
@@ -166,7 +160,6 @@ clpreauth_encrypted_challenge_initvt(krb5_context context, int maj_ver,
     vt = (krb5_clpreauth_vtable)vtable;
     vt->name = "encrypted_challenge";
     vt->pa_type_list = ec_types;
-    vt->flags = ec_flags;
     vt->prep_questions = ec_prep_questions;
     vt->process = ec_process;
     return 0;

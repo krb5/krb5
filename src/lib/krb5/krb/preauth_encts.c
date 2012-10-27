@@ -29,12 +29,6 @@
 #include <krb5/clpreauth_plugin.h>
 #include "int-proto.h"
 
-static int
-encts_flags(krb5_context context, krb5_preauthtype pa_type)
-{
-    return PA_REAL;
-}
-
 static krb5_error_code
 encts_prep_questions(krb5_context context, krb5_clpreauth_moddata moddata,
                      krb5_clpreauth_modreq modreq,
@@ -137,7 +131,6 @@ clpreauth_encrypted_timestamp_initvt(krb5_context context, int maj_ver,
     vt = (krb5_clpreauth_vtable)vtable;
     vt->name = "encrypted_timestamp";
     vt->pa_type_list = encts_pa_types;
-    vt->flags = encts_flags;
     vt->prep_questions = encts_prep_questions;
     vt->process = encts_process;
     return 0;

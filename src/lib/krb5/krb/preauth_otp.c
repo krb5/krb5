@@ -978,12 +978,6 @@ filter_config_tokeninfos(krb5_context context,
     return 0;
 }
 
-static int
-otp_client_get_flags(krb5_context context, krb5_preauthtype pa_type)
-{
-    return PA_REAL;
-}
-
 static void
 otp_client_request_init(krb5_context context, krb5_clpreauth_moddata moddata,
                         krb5_clpreauth_modreq *modreq_out)
@@ -1164,7 +1158,6 @@ clpreauth_otp_initvt(krb5_context context, int maj_ver, int min_ver,
     vt = (krb5_clpreauth_vtable)vtable;
     vt->name = "otp";
     vt->pa_type_list = otp_client_supported_pa_types;
-    vt->flags = otp_client_get_flags;
     vt->request_init = otp_client_request_init;
     vt->prep_questions = otp_client_prep_questions;
     vt->process = otp_client_process;
