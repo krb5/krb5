@@ -208,7 +208,7 @@ k5_preauth(krb5_context context, krb5_gic_opt_ext *opte,
            krb5_clpreauth_rock rock, krb5_kdc_req *req,
            krb5_data *req_body, krb5_data *prev_req, krb5_pa_data **in_padata,
            krb5_prompter_fct prompter, void *prompter_data,
-           krb5_pa_data ***padata_out, krb5_boolean *got_real_out);
+           krb5_boolean must_preauth, krb5_pa_data ***padata_out);
 
 krb5_error_code
 k5_preauth_tryagain(krb5_context context, krb5_gic_opt_ext *opte,

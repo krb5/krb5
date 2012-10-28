@@ -580,10 +580,11 @@ process_pa_data(krb5_context context, krb5_get_init_creds_opt *opt,
                 krb5_clpreauth_rock rock, krb5_kdc_req *req,
                 krb5_data *req_body, krb5_data *prev_req,
                 krb5_pa_data **in_pa_list, krb5_prompter_fct prompter,
-                void *prompter_data, krb5_pa_data ***out_pa_list,
-                int *out_pa_list_size, krb5_boolean *got_real_out)
+                void *prompter_data, krb5_boolean must_preauth,
+                krb5_pa_data ***out_pa_list, int *out_pa_list_size)
 {
     struct krb5_preauth_context_st *pctx = context->preauth_context;
+    struct errinfo save = EMPTY_ERRINFO;
     krb5_pa_data *pa, **pa_ptr, **mod_pa;
     krb5_error_code ret;
     clpreauth_handle h;
@@ -620,20 +621,31 @@ process_pa_data(krb5_context context, krb5_get_init_creds_opt *opt,
                 ret = grow_pa_list(out_pa_list, out_pa_list_size, mod_pa, i);
                 if (ret) {
                     krb5_free_pa_data(context, mod_pa);
-                    return ret;
+                    goto cleanup;
                 }
                 free(mod_pa);
             }
             if (ret == 0 && real) {
-                /* Record which real padata type we answered. */
+                /* Stop now and record which real padata type we answered. */
                 if (rock->selected_preauth_type != NULL)
                     *rock->selected_preauth_type = pa->pa_type;
-                *got_real_out = TRUE;
-                break;
+                goto cleanup;
+            } else if (real && save.code == 0) {
+                /* Save the first error we get from a real preauth type. */
+                k5_save_ctx_error(context, ret, &save);
             }
         }
     }
-    return 0;
+
+    if (must_preauth) {
+        /* No real preauth types succeeded and we needed to preauthenticate. */
+        ret = (save.code != 0) ? k5_restore_ctx_error(context, &save) :
+            KRB5_PREAUTH_FAILED;
+    }
+
+cleanup:
+    k5_clear_error(&save);
+    return ret;
 }
 
 static inline krb5_data
@@ -915,7 +927,7 @@ k5_preauth(krb5_context context, krb5_gic_opt_ext *opte,
            krb5_clpreauth_rock rock, krb5_kdc_req *req,
            krb5_data *req_body, krb5_data *prev_req, krb5_pa_data **in_padata,
            krb5_prompter_fct prompter, void *prompter_data,
-           krb5_pa_data ***padata_out, krb5_boolean *got_real_out)
+           krb5_boolean must_preauth, krb5_pa_data ***padata_out)
 {
     int out_pa_list_size = 0;
     krb5_pa_data **out_pa_list = NULL;
@@ -924,7 +936,6 @@ k5_preauth(krb5_context context, krb5_gic_opt_ext *opte,
     krb5_get_init_creds_opt *opt = (krb5_get_init_creds_opt *)opte;
 
     *padata_out = NULL;
-    *got_real_out = FALSE;
 
     if (in_padata == NULL)
         return 0;
@@ -973,8 +984,8 @@ k5_preauth(krb5_context context, krb5_gic_opt_ext *opte,
     }
 
     ret = process_pa_data(context, opt, rock, req, req_body, prev_req,
-                          in_padata, prompter, prompter_data, &out_pa_list,
-                          &out_pa_list_size, got_real_out);
+                          in_padata, prompter, prompter_data, must_preauth,
+                          &out_pa_list, &out_pa_list_size);
     if (ret)
         goto error;
 

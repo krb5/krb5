@@ -1219,7 +1219,6 @@ init_creds_step_request(krb5_context context,
                         krb5_data *out)
 {
     krb5_error_code code;
-    krb5_boolean got_real;
     char random_buf[4];
     krb5_data random_data;
 
@@ -1267,9 +1266,7 @@ init_creds_step_request(krb5_context context,
                           ctx->inner_request_body,
                           ctx->encoded_previous_request, ctx->preauth_to_use,
                           ctx->prompter, ctx->prompter_data,
-                          &ctx->request->padata, &got_real);
-        if (code == 0 && !got_real && ctx->preauth_required)
-            code = KRB5_PREAUTH_FAILED;
+                          ctx->preauth_required, &ctx->request->padata);
         if (code != 0)
             goto cleanup;
     } else {
@@ -1419,7 +1416,7 @@ init_creds_step_reply(krb5_context context,
     int canon_flag = 0;
     krb5_keyblock *strengthen_key = NULL;
     krb5_keyblock encrypting_key;
-    krb5_boolean fast_avail, got_real;
+    krb5_boolean fast_avail;
 
     encrypting_key.length = 0;
     encrypting_key.contents = NULL;
@@ -1535,7 +1532,7 @@ init_creds_step_reply(krb5_context context,
     code = k5_preauth(context, ctx->opte, &ctx->preauth_rock, ctx->request,
                       ctx->inner_request_body, ctx->encoded_previous_request,
                       ctx->reply->padata, ctx->prompter, ctx->prompter_data,
-                      &kdc_padata, &got_real);
+                      FALSE, &kdc_padata);
     if (code != 0)
         goto cleanup;
 
