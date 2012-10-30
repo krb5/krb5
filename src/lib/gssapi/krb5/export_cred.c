@@ -44,12 +44,51 @@ add(k5_json_array array, k5_json_value v)
     return 0;
 }
 
+static inline k5_json_number
+number(long long nval)
+{
+    k5_json_number num;
+
+    return k5_json_number_create(nval, &num) ? NULL : num;
+}
+
+static inline k5_json_string
+string(const char *cstring)
+{
+    k5_json_string str;
+
+    return k5_json_string_create(cstring, &str) ? NULL : str;
+}
+
+static inline k5_json_string
+base64string(const void *data, size_t len)
+{
+    k5_json_string str;
+
+    return k5_json_string_create_base64(data, len, &str) ? NULL : str;
+}
+
+static inline k5_json_null
+null(void)
+{
+    k5_json_null n;
+
+    return k5_json_null_create(&n) ? NULL : n;
+}
+
+static inline k5_json_bool
+bool(int truth)
+{
+    k5_json_bool b;
+
+    return k5_json_bool_create(truth, &b) ? NULL : b;
+}
+
 /* Return a JSON null or string value representing str. */
 static k5_json_value
 json_optional_string(const char *str)
 {
-    return (str == NULL) ? (k5_json_value)k5_json_null_create() :
-        (k5_json_value)k5_json_string_create(str);
+    return (str == NULL) ? (k5_json_value)null() : string(str);
 }
 
 /* Return a JSON null or array value representing princ. */
@@ -60,10 +99,10 @@ json_principal(krb5_context context, krb5_principal princ)
     k5_json_string str;
 
     if (princ == NULL)
-        return k5_json_null_create();
+        return null();
     if (krb5_unparse_name(context, princ, &princname))
         return NULL;
-    str = k5_json_string_create(princname);
+    str = string(princname);
     krb5_free_unparsed_name(context, princname);
     return str;
 }
@@ -75,12 +114,11 @@ json_etypes(krb5_enctype *etypes)
     k5_json_array array;
 
     if (etypes == NULL)
-        return k5_json_null_create();
-    array = k5_json_array_create();
-    if (array == NULL)
+        return null();
+    if (k5_json_array_create(&array))
         return NULL;
     for (; *etypes != 0; etypes++) {
-        if (add(array, k5_json_number_create(*etypes)))
+        if (add(array, number(*etypes)))
             goto oom;
     }
     return array;
@@ -96,9 +134,8 @@ json_kgname(krb5_context context, krb5_gss_name_t name)
     k5_json_array array;
 
     if (name == NULL)
-        return k5_json_null_create();
-    array = k5_json_array_create();
-    if (array == NULL)
+        return null();
+    if (k5_json_array_create(&array))
         return NULL;
     if (add(array, json_principal(context, name->princ)))
         goto oom;
@@ -119,10 +156,10 @@ json_keytab(krb5_context context, krb5_keytab keytab)
     char name[1024];
 
     if (keytab == NULL)
-        return k5_json_null_create();
+        return null();
     if (krb5_kt_get_name(context, keytab, name, sizeof(name)))
         return NULL;
-    return k5_json_string_create(name);
+    return string(name);
 }
 
 /* Return a JSON null or string value representing rcache. */
@@ -133,11 +170,11 @@ json_rcache(krb5_context context, krb5_rcache rcache)
     k5_json_string str;
 
     if (rcache == NULL)
-        return k5_json_null_create();
+        return null();
     if (asprintf(&name, "%s:%s", krb5_rc_get_type(context, rcache),
                  krb5_rc_get_name(context, rcache)) < 0)
         return NULL;
-    str = k5_json_string_create(name);
+    str = string(name);
     free(name);
     return str;
 }
@@ -148,13 +185,11 @@ json_keyblock(krb5_keyblock *keyblock)
 {
     k5_json_array array;
 
-    array = k5_json_array_create();
-    if (array == NULL)
+    if (k5_json_array_create(&array))
         return NULL;
-    if (add(array, k5_json_number_create(keyblock->enctype)))
+    if (add(array, number(keyblock->enctype)))
         goto oom;
-    if (add(array, k5_json_string_create_base64(keyblock->contents,
-                                                keyblock->length)))
+    if (add(array, base64string(keyblock->contents, keyblock->length)))
         goto oom;
     return array;
 oom:
@@ -168,12 +203,11 @@ json_address(krb5_address *addr)
 {
     k5_json_array array;
 
-    array = k5_json_array_create();
-    if (array == NULL)
+    if (k5_json_array_create(&array))
         return NULL;
-    if (add(array, k5_json_number_create(addr->addrtype)))
+    if (add(array, number(addr->addrtype)))
         goto oom;
-    if (add(array, k5_json_string_create_base64(addr->contents, addr->length)))
+    if (add(array, base64string(addr->contents, addr->length)))
         goto oom;
     return array;
 oom:
@@ -188,9 +222,8 @@ json_addresses(krb5_address **addrs)
     k5_json_array array;
 
     if (addrs == NULL)
-        return k5_json_null_create();
-    array = k5_json_array_create();
-    if (array == NULL)
+        return null();
+    if (k5_json_array_create(&array))
         return NULL;
     for (; *addrs != NULL; addrs++) {
         if (add(array, json_address(*addrs))) {
@@ -207,12 +240,11 @@ json_authdata_element(krb5_authdata *ad)
 {
     k5_json_array array;
 
-    array = k5_json_array_create();
-    if (array == NULL)
+    if (k5_json_array_create(&array))
         return NULL;
-    if (add(array, k5_json_number_create(ad->ad_type)))
+    if (add(array, number(ad->ad_type)))
         goto oom;
-    if (add(array, k5_json_string_create_base64(ad->contents, ad->length)))
+    if (add(array, base64string(ad->contents, ad->length)))
         goto oom;
     return array;
 oom:
@@ -227,9 +259,8 @@ json_authdata(krb5_authdata **authdata)
     k5_json_array array;
 
     if (authdata == NULL)
-        return k5_json_null_create();
-    array = k5_json_array_create();
-    if (array == NULL)
+        return null();
+    if (k5_json_array_create(&array))
         return NULL;
     for (; *authdata != NULL; authdata++) {
         if (add(array, json_authdata_element(*authdata))) {
@@ -246,8 +277,7 @@ json_creds(krb5_context context, krb5_creds *creds)
 {
     k5_json_array array;
 
-    array = k5_json_array_create();
-    if (array == NULL)
+    if (k5_json_array_create(&array))
         return NULL;
     if (add(array, json_principal(context, creds->client)))
         goto eom;
@@ -255,25 +285,24 @@ json_creds(krb5_context context, krb5_creds *creds)
         goto eom;
     if (add(array, json_keyblock(&creds->keyblock)))
         goto eom;
-    if (add(array, k5_json_number_create(creds->times.authtime)))
+    if (add(array, number(creds->times.authtime)))
         goto eom;
-    if (add(array, k5_json_number_create(creds->times.starttime)))
+    if (add(array, number(creds->times.starttime)))
         goto eom;
-    if (add(array, k5_json_number_create(creds->times.endtime)))
+    if (add(array, number(creds->times.endtime)))
         goto eom;
-    if (add(array, k5_json_number_create(creds->times.renew_till)))
+    if (add(array, number(creds->times.renew_till)))
         goto eom;
-    if (add(array, k5_json_bool_create(creds->is_skey)))
+    if (add(array, bool(creds->is_skey)))
         goto eom;
-    if (add(array, k5_json_number_create(creds->ticket_flags)))
+    if (add(array, number(creds->ticket_flags)))
         goto eom;
     if (add(array, json_addresses(creds->addresses)))
         goto eom;
-    if (add(array, k5_json_string_create_base64(creds->ticket.data,
-                                                creds->ticket.length)))
+    if (add(array, base64string(creds->ticket.data, creds->ticket.length)))
         goto eom;
-    if (add(array, k5_json_string_create_base64(creds->second_ticket.data,
-                                                creds->second_ticket.length)))
+    if (add(array, base64string(creds->second_ticket.data,
+                                creds->second_ticket.length)))
         goto eom;
     if (add(array, json_authdata(creds->authdata)))
         goto eom;
@@ -294,8 +323,7 @@ json_ccache_contents(krb5_context context, krb5_ccache ccache)
     k5_json_array array;
     int st;
 
-    array = k5_json_array_create();
-    if (array == NULL)
+    if (k5_json_array_create(&array))
         return NULL;
 
     /* Put the principal in the first array entry. */
@@ -334,13 +362,13 @@ json_ccache(krb5_context context, krb5_ccache ccache)
     k5_json_string str;
 
     if (ccache == NULL)
-        return k5_json_null_create();
+        return null();
     if (strcmp(krb5_cc_get_type(context, ccache), "MEMORY") == 0) {
         return json_ccache_contents(context, ccache);
     } else {
         if (krb5_cc_get_full_name(context, ccache, &name))
             return NULL;
-        str = k5_json_string_create(name);
+        str = string(name);
         free(name);
         return str;
     }
@@ -352,18 +380,17 @@ json_kgcred(krb5_context context, krb5_gss_cred_id_t cred)
 {
     k5_json_array array;
 
-    array = k5_json_array_create();
-    if (array == NULL)
+    if (k5_json_array_create(&array))
         return NULL;
-    if (add(array, k5_json_number_create(cred->usage)))
+    if (add(array, number(cred->usage)))
         goto oom;
     if (add(array, json_kgname(context, cred->name)))
         goto oom;
     if (add(array, json_principal(context, cred->impersonator)))
         goto oom;
-    if (add(array, k5_json_bool_create(cred->default_identity)))
+    if (add(array, bool(cred->default_identity)))
         goto oom;
-    if (add(array, k5_json_bool_create(cred->iakerb_mech)))
+    if (add(array, bool(cred->iakerb_mech)))
         goto oom;
     /* Don't marshal cred->destroy_ccache. */
     if (add(array, json_keytab(context, cred->keytab)))
@@ -374,11 +401,11 @@ json_kgcred(krb5_context context, krb5_gss_cred_id_t cred)
         goto oom;
     if (add(array, json_keytab(context, cred->client_keytab)))
         goto oom;
-    if (add(array, k5_json_bool_create(cred->have_tgt)))
+    if (add(array, bool(cred->have_tgt)))
         goto oom;
-    if (add(array, k5_json_number_create(cred->expire)))
+    if (add(array, number(cred->expire)))
         goto oom;
-    if (add(array, k5_json_number_create(cred->refresh_time)))
+    if (add(array, number(cred->refresh_time)))
         goto oom;
     if (add(array, json_etypes(cred->req_enctypes)))
         goto oom;
@@ -414,16 +441,14 @@ krb5_gss_export_cred(OM_uint32 *minor_status, gss_cred_id_t cred_handle,
         return status;
     cred = (krb5_gss_cred_id_t)cred_handle;
 
-    array = k5_json_array_create();
-    if (array == NULL)
+    if (k5_json_array_create(&array))
         goto oom;
-    if (add(array, k5_json_string_create(CRED_EXPORT_MAGIC)))
+    if (add(array, string(CRED_EXPORT_MAGIC)))
         goto oom;
     if (add(array, json_kgcred(context, cred)))
         goto oom;
 
-    str = k5_json_encode(array);
-    if (str == NULL)
+    if (k5_json_encode(array, &str))
         goto oom;
     d = string2data(str);
     if (data_to_gss(&d, token))

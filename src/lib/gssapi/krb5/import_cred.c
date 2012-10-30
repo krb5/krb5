@@ -205,8 +205,7 @@ json_to_keyblock(k5_json_value v, krb5_keyblock *keyblock)
     s = check_element(array, 1, K5_JSON_TID_STRING);
     if (s == NULL)
         return -1;
-    keyblock->contents = k5_json_string_unbase64(s, &len);
-    if (keyblock->contents == NULL)
+    if (k5_json_string_unbase64(s, &keyblock->contents, &len))
         return -1;
     keyblock->length = len;
     keyblock->magic = KV5M_KEYBLOCK;
@@ -241,8 +240,7 @@ json_to_address(k5_json_value v, krb5_address **addr_out)
     if (addr == NULL)
         return -1;
     addr->addrtype = k5_json_number_value(n);
-    addr->contents = k5_json_string_unbase64(s, &len);
-    if (addr->contents == NULL) {
+    if (k5_json_string_unbase64(s, &addr->contents, &len)) {
         free(addr);
         return -1;
     }
@@ -311,8 +309,7 @@ json_to_authdata_element(k5_json_value v, krb5_authdata **ad_out)
     if (ad == NULL)
         return -1;
     ad->ad_type = k5_json_number_value(n);
-    ad->contents = k5_json_string_unbase64(s, &len);
-    if (ad->contents == NULL) {
+    if (k5_json_string_unbase64(s, &ad->contents, &len)) {
         free(ad);
         return -1;
     }
@@ -361,6 +358,7 @@ json_to_creds(krb5_context context, k5_json_value v, krb5_creds *creds)
     k5_json_number n;
     k5_json_bool b;
     k5_json_string s;
+    unsigned char *data;
     size_t len;
 
     memset(creds, 0, sizeof(*creds));
@@ -418,17 +416,17 @@ json_to_creds(krb5_context context, k5_json_value v, krb5_creds *creds)
     s = check_element(array, 10, K5_JSON_TID_STRING);
     if (s == NULL)
         goto invalid;
-    creds->ticket.data = k5_json_string_unbase64(s, &len);
-    if (creds->ticket.data == NULL)
+    if (k5_json_string_unbase64(s, &data, &len))
         goto invalid;
+    creds->ticket.data = (char *)data;
     creds->ticket.length = len;
 
     s = check_element(array, 11, K5_JSON_TID_STRING);
     if (s == NULL)
         goto invalid;
-    creds->second_ticket.data = k5_json_string_unbase64(s, &len);
-    if (creds->second_ticket.data == NULL)
+    if (k5_json_string_unbase64(s, &data, &len))
         goto invalid;
+    creds->second_ticket.data = (char *)data;
     creds->second_ticket.length = len;
 
     if (json_to_authdata(context, k5_json_array_get(array, 12),
@@ -620,8 +618,7 @@ krb5_gss_import_cred(OM_uint32 *minor_status, gss_buffer_t token,
         *minor_status = ret;
         goto cleanup;
     }
-    v = k5_json_decode(copy);
-    if (v == NULL)
+    if (k5_json_decode(copy, &v))
         goto invalid;
 
     /* Decode the CRED_EXPORT_MAGIC array wrapper. */

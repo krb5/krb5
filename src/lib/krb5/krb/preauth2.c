@@ -469,22 +469,19 @@ set_cc_config(krb5_context context, krb5_clpreauth_rock rock,
               const char *key, const char *data)
 {
     krb5_init_creds_context ctx = (krb5_init_creds_context)rock;
-    k5_json_value value;
-    int i;
+    krb5_error_code ret;
+    k5_json_string str;
 
     if (ctx->cc_config_out == NULL)
         return ENOENT;
 
-    value = k5_json_string_create(data);
-    if (value == NULL)
-        return ENOMEM;
+    ret = k5_json_string_create(data, &str);
+    if (ret)
+        return ret;
 
-    i = k5_json_object_set(ctx->cc_config_out, key, value);
-    k5_json_release(value);
-    if (i < 0)
-        return ENOMEM;
-
-    return 0;
+    ret = k5_json_object_set(ctx->cc_config_out, key, str);
+    k5_json_release(str);
+    return ret;
 }
 
 static struct krb5_clpreauth_callbacks_st callbacks = {

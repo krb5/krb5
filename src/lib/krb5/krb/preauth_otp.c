@@ -99,13 +99,13 @@ codec_data_to_value(krb5_data *data, k5_json_object obj, const char *key)
     if (data->data == NULL)
         return 0;
 
-    str = k5_json_string_create_len(data->data, data->length);
-    if (str == NULL)
-        return ENOMEM;
+    retval = k5_json_string_create_len(data->data, data->length, &str);
+    if (retval)
+        return retval;
 
     retval = k5_json_object_set(obj, key, str);
     k5_json_release(str);
-    return retval == 0 ? 0 : ENOMEM;
+    return retval;
 }
 
 /* Converts a property of a json object into a krb5_int32. */
@@ -135,25 +135,25 @@ codec_int32_to_value(krb5_int32 int32, k5_json_object obj, const char *key)
     if (int32 == -1)
         return 0;
 
-    num = k5_json_number_create(int32);
-    if (num == NULL)
-        return ENOMEM;
+    retval = k5_json_number_create(int32, &num);
+    if (retval)
+        return retval;
 
     retval = k5_json_object_set(obj, key, num);
     k5_json_release(num);
-    return retval == 0 ? 0 : ENOMEM;
+    return retval;
 }
 
 /* Converts a krb5_otp_tokeninfo into a JSON object. */
 static krb5_error_code
 codec_encode_tokeninfo(krb5_otp_tokeninfo *ti, k5_json_object *out)
 {
-    krb5_error_code retval = 0;
+    krb5_error_code retval;
     k5_json_object obj;
     krb5_flags flags;
 
-    obj = k5_json_object_create();
-    if (obj == NULL)
+    retval = k5_json_object_create(&obj);
+    if (retval != 0)
         goto error;
 
     flags = KRB5_RESPONDER_OTP_FLAGS_COLLECT_TOKEN;
@@ -212,60 +212,51 @@ codec_encode_challenge(krb5_context ctx, krb5_pa_otp_challenge *chl,
     k5_json_object obj = NULL, tmp = NULL;
     k5_json_string str = NULL;
     k5_json_array arr = NULL;
-    krb5_error_code retval = 0;
+    krb5_error_code retval;
     int i;
 
-    obj = k5_json_object_create();
-    if (obj == NULL)
-        goto error;
+    retval = k5_json_object_create(&obj);
+    if (retval != 0)
+        goto cleanup;
 
     if (chl->service.data) {
-        str = k5_json_string_create_len(chl->service.data,
-                                        chl->service.length);
-        if (str == NULL)
-            goto error;
+        retval = k5_json_string_create_len(chl->service.data,
+                                           chl->service.length, &str);
+        if (retval != 0)
+            goto cleanup;
         retval = k5_json_object_set(obj, "service", str);
         k5_json_release(str);
-        if (retval != 0) {
-            retval = ENOMEM;
-            goto error;
-        }
+        if (retval != 0)
+            goto cleanup;
     }
 
-    arr = k5_json_array_create();
-    if (arr == NULL)
-        goto error;
+    retval = k5_json_array_create(&arr);
+    if (retval != 0)
+        goto cleanup;
 
     for (i = 0; chl->tokeninfo[i] != NULL ; i++) {
         retval = codec_encode_tokeninfo(chl->tokeninfo[i], &tmp);
         if (retval != 0)
-            goto error;
+            goto cleanup;
 
         retval = k5_json_array_add(arr, tmp);
         k5_json_release(tmp);
-        if (retval != 0) {
-            retval = ENOMEM;
-            goto error;
-        }
+        if (retval != 0)
+            goto cleanup;
     }
 
-    if (k5_json_object_set(obj, "tokenInfo", arr) != 0) {
-        retval = ENOMEM;
-        goto error;
-    }
+    retval = k5_json_object_set(obj, "tokenInfo", arr);
+    if (retval != 0)
+        goto cleanup;
 
-    *json = k5_json_encode(obj);
-    if (*json == NULL)
-        goto error;
+    retval = k5_json_encode(obj, json);
+    if (retval)
+        goto cleanup;
 
+cleanup:
     k5_json_release(arr);
     k5_json_release(obj);
-    return 0;
-
-error:
-    k5_json_release(arr);
-    k5_json_release(obj);
-    return retval == 0 ? ENOMEM : retval;
+    return retval;
 }
 
 /* Converts a JSON object into a krb5_responder_otp_tokeninfo. */
@@ -327,8 +318,8 @@ codec_decode_challenge(krb5_context ctx, const char *json)
     krb5_error_code retval;
     size_t i;
 
-    obj = k5_json_decode(json);
-    if (obj == NULL)
+    retval = k5_json_decode(json, &obj);
+    if (retval != 0)
         goto error;
 
     if (k5_json_get_tid(obj) != K5_JSON_TID_OBJECT)
@@ -384,7 +375,7 @@ codec_decode_answer(krb5_context context, const char *answer,
                     krb5_otp_tokeninfo **tis, krb5_otp_tokeninfo **ti,
                     krb5_data *value, krb5_data *pin)
 {
-    krb5_error_code retval = EBADMSG;
+    krb5_error_code retval;
     k5_json_value val = NULL;
     krb5_int32 indx, i;
     krb5_data tmp;
@@ -392,8 +383,8 @@ codec_decode_answer(krb5_context context, const char *answer,
     if (answer == NULL)
         return EBADMSG;
 
-    val = k5_json_decode(answer);
-    if (val == NULL)
+    retval = k5_json_decode(answer, &val);
+    if (retval != 0)
         goto cleanup;
 
     if (k5_json_get_tid(val) != K5_JSON_TID_OBJECT)
@@ -1196,48 +1187,49 @@ krb5_responder_otp_set_answer(krb5_context ctx, krb5_responder_context rctx,
 {
     krb5_error_code retval;
     k5_json_object obj = NULL;
-    k5_json_value val = NULL;
+    k5_json_number num;
+    k5_json_string str;
     char *tmp;
 
-    obj = k5_json_object_create();
-    if (obj == NULL)
+    retval = k5_json_object_create(&obj);
+    if (retval != 0)
         goto error;
 
-    val = k5_json_number_create(ti);
-    if (val == NULL)
+    retval = k5_json_number_create(ti, &num);
+    if (retval != 0)
         goto error;
 
-    retval = k5_json_object_set(obj, "tokeninfo", val);
-    k5_json_release(val);
+    retval = k5_json_object_set(obj, "tokeninfo", num);
+    k5_json_release(num);
     if (retval != 0)
         goto error;
 
     if (value != NULL) {
-        val = k5_json_string_create(value);
-        if (val == NULL)
+        retval = k5_json_string_create(value, &str);
+        if (retval != 0)
             goto error;
 
-        retval = k5_json_object_set(obj, "value", val);
-        k5_json_release(val);
+        retval = k5_json_object_set(obj, "value", str);
+        k5_json_release(str);
         if (retval != 0)
             goto error;
     }
 
     if (pin != NULL) {
-        val = k5_json_string_create(pin);
-        if (val == NULL)
+        retval = k5_json_string_create(pin, &str);
+        if (retval != 0)
             goto error;
 
-        retval = k5_json_object_set(obj, "pin", val);
-        k5_json_release(val);
+        retval = k5_json_object_set(obj, "pin", str);
+        k5_json_release(str);
         if (retval != 0)
             goto error;
     }
 
-    tmp = k5_json_encode(obj);
-    k5_json_release(obj);
-    if (tmp == NULL)
+    retval = k5_json_encode(obj, &tmp);
+    if (retval != 0)
         goto error;
+    k5_json_release(obj);
 
     retval = krb5_responder_set_answer(ctx, rctx, KRB5_RESPONDER_QUESTION_OTP,
                                        tmp);
@@ -1246,7 +1238,7 @@ krb5_responder_otp_set_answer(krb5_context ctx, krb5_responder_context rctx,
 
 error:
     k5_json_release(obj);
-    return ENOMEM;
+    return retval;
 }
 
 void KRB5_CALLCONV

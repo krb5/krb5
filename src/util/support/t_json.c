@@ -88,14 +88,18 @@ check(int pred, const char *str)
 static void
 test_array()
 {
-    k5_json_string v1 = k5_json_string_create("abc");
-    k5_json_number v2 = k5_json_number_create(2);
-    k5_json_null v3 = k5_json_null_create();
-    k5_json_array a = k5_json_array_create();
+    k5_json_string v1;
+    k5_json_number v2;
+    k5_json_null v3;
+    k5_json_array a;
     k5_json_value v;
 
+    k5_json_array_create(&a);
+    k5_json_string_create("abc", &v1);
     k5_json_array_add(a, v1);
+    k5_json_number_create(2, &v2);
     k5_json_array_add(a, v2);
+    k5_json_null_create(&v3);
     k5_json_array_add(a, v3);
 
     check(k5_json_array_length(a) == 3, "array length");
@@ -118,11 +122,13 @@ static void
 test_object(void)
 {
     k5_json_object object;
-    k5_json_number n, v1 = k5_json_number_create(1);
-    k5_json_string s, v2 = k5_json_string_create("hejsan");
+    k5_json_number n, v1;
+    k5_json_string s, v2;
 
-    object = k5_json_object_create();
+    k5_json_object_create(&object);
+    k5_json_number_create(1, &v1);
     k5_json_object_set(object, "key1", v1);
+    k5_json_string_create("hejsan", &v2);
     k5_json_object_set(object, "key2", v2);
 
     n = k5_json_object_get(object, "key1");
@@ -142,20 +148,21 @@ static void
 test_string(void)
 {
     k5_json_string s1, s2, s3;
-    void *data;
+    unsigned char *data;
     size_t len;
 
-    s1 = k5_json_string_create("hejsan");
-    s2 = k5_json_string_create("hejsan");
-    s3 = k5_json_string_create_base64("55555", 5);
+    k5_json_string_create("hejsan", &s1);
+    k5_json_string_create("hejsan", &s2);
+    k5_json_string_create_base64("55555", 5, &s3);
 
     if (strcmp(k5_json_string_utf8(s1), k5_json_string_utf8(s2)) != 0)
         err("Identical strings are not identical");
     if (strcmp(k5_json_string_utf8(s3), "NTU1NTU=") != 0)
         err("base64 string has incorrect value");
-    data = k5_json_string_unbase64(s3, &len);
-    if (data == NULL || len != 5 || memcmp(data, "55555", 5) != 0)
+    k5_json_string_unbase64(s3, &data, &len);
+    if (len != 5 || memcmp(data, "55555", 5) != 0)
         err("base64 string doesn't decode to correct value");
+    free(data);
 
     k5_json_release(s1);
     k5_json_release(s2);
@@ -181,20 +188,17 @@ test_json(void)
     int i;
     k5_json_value v, v2;
 
-    v = k5_json_decode("\"string\"");
-    check(v != NULL, "string1");
+    check(k5_json_decode("\"string\"", &v) == 0, "string1");
     check(k5_json_get_tid(v) == K5_JSON_TID_STRING, "string1 tid");
     check(strcmp(k5_json_string_utf8(v), "string") == 0, "string1 utf8");
     k5_json_release(v);
 
-    v = k5_json_decode("\t \"foo\\\"bar\" ");
-    check(v != NULL, "string2");
+    check(k5_json_decode("\t \"foo\\\"bar\" ", &v) == 0, "string2");
     check(k5_json_get_tid(v) == K5_JSON_TID_STRING, "string2 tid");
     check(strcmp(k5_json_string_utf8(v), "foo\"bar") == 0, "string2 utf8");
     k5_json_release(v);
 
-    v = k5_json_decode(" { \"key\" : \"value\" }");
-    check(v != NULL, "object1");
+    check(k5_json_decode(" { \"key\" : \"value\" }", &v) == 0, "object1");
     check(k5_json_get_tid(v) == K5_JSON_TID_OBJECT, "object1 tid");
     v2 = k5_json_object_get(v, "key");
     check(v2 != NULL, "object[key]");
@@ -202,9 +206,8 @@ test_json(void)
     check(strcmp(k5_json_string_utf8(v2), "value") == 0, "object1[key] utf8");
     k5_json_release(v);
 
-    v = k5_json_decode("{ \"k1\" : { \"k2\" : \"s2\", \"k3\" : \"s3\" }, "
-                       "\"k4\" : \"s4\" }");
-    check(v != NULL, "object2");
+    check(k5_json_decode("{ \"k1\" : { \"k2\" : \"s2\", \"k3\" : \"s3\" }, "
+                         "\"k4\" : \"s4\" }", &v) == 0, "object2");
     v2 = k5_json_object_get(v, "k1");
     check(v2 != NULL, "object2[k1]");
     check(k5_json_get_tid(v2) == K5_JSON_TID_OBJECT, "object2[k1] tid");
@@ -214,28 +217,24 @@ test_json(void)
     check(strcmp(k5_json_string_utf8(v2), "s3") == 0, "object2[k1][k3] utf8");
     k5_json_release(v);
 
-    v = k5_json_decode("{ \"k1\" : 1 }");
-    check(v != NULL, "object3");
+    check(k5_json_decode("{ \"k1\" : 1 }", &v) == 0, "object3");
     check(k5_json_get_tid(v) == K5_JSON_TID_OBJECT, "object3 id");
     v2 = k5_json_object_get(v, "k1");
     check(k5_json_get_tid(v2) == K5_JSON_TID_NUMBER, "object3[k1] tid");
     check(k5_json_number_value(v2) == 1, "object3[k1] value");
     k5_json_release(v);
 
-    v = k5_json_decode("-10");
-    check(v != NULL, "number1");
+    check(k5_json_decode("-10", &v) == 0, "number1");
     check(k5_json_get_tid(v) == K5_JSON_TID_NUMBER, "number1 tid");
     check(k5_json_number_value(v) == -10, "number1 value");
     k5_json_release(v);
 
-    v = k5_json_decode("99");
-    check(v != NULL, "number2");
+    check(k5_json_decode("99", &v) == 0, "number2");
     check(k5_json_get_tid(v) == K5_JSON_TID_NUMBER, "number2 tid");
     check(k5_json_number_value(v) == 99, "number2 value");
     k5_json_release(v);
 
-    v = k5_json_decode(" [ 1 ]");
-    check(v != NULL, "array1");
+    check(k5_json_decode(" [ 1 ]", &v) == 0, "array1");
     check(k5_json_get_tid(v) == K5_JSON_TID_ARRAY, "array1 tid");
     check(k5_json_array_length(v) == 1, "array1 len");
     v2 = k5_json_array_get(v, 0);
@@ -244,8 +243,7 @@ test_json(void)
     check(k5_json_number_value(v2) == 1, "array1[0] value");
     k5_json_release(v);
 
-    v = k5_json_decode(" [ -1 ]");
-    check(v != NULL, "array2");
+    check(k5_json_decode(" [ -1 ]", &v) == 0, "array2");
     check(k5_json_get_tid(v) == K5_JSON_TID_ARRAY, "array2 tid");
     check(k5_json_array_length(v) == 1, "array2 len");
     v2 = k5_json_array_get(v, 0);
@@ -254,20 +252,18 @@ test_json(void)
     check(k5_json_number_value(v2) == -1, "array2[0] value");
     k5_json_release(v);
 
-    v = k5_json_decode("18446744073709551616");
-    check(v == NULL, "unsigned 64-bit overflow");
-    v = k5_json_decode("9223372036854775808");
-    check(v == NULL, "signed 64-bit positive overflow");
-    v = k5_json_decode("-9223372036854775809");
-    check(v == NULL, "signed 64-bit negative overflow");
+    check(k5_json_decode("18446744073709551616", &v) == EOVERFLOW,
+          "unsigned 64-bit overflow");
+    check(k5_json_decode("9223372036854775808", &v) == EOVERFLOW,
+          "signed 64-bit positive overflow");
+    check(k5_json_decode("-9223372036854775809", &v) == EOVERFLOW,
+          "signed 64-bit negative overflow");
 
     for (tptr = tests; *tptr != NULL; tptr++) {
         s = strdup(*tptr);
-        v = k5_json_decode(s);
-        if (v == NULL)
+        if (k5_json_decode(s, &v))
             err(s);
-        enc = k5_json_encode(v);
-        if (enc == NULL || strcmp(enc, s) != 0)
+        if (k5_json_encode(v, &enc) || strcmp(enc, s) != 0)
             err(s);
         free(enc);
         k5_json_release(v);
@@ -278,7 +274,8 @@ test_json(void)
             orig = *p;
             for (i = 0; i <= 255; i++) {
                 *p = i;
-                k5_json_release(k5_json_decode(s));
+                k5_json_decode(s, &v);
+                k5_json_release(v);
             }
             *p = orig;
         }

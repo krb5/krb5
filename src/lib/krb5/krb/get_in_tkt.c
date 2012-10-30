@@ -1124,24 +1124,21 @@ save_selected_preauth_type(krb5_context context, krb5_ccache ccache,
 static krb5_error_code
 clear_cc_config_out_data(krb5_context context, krb5_init_creds_context ctx)
 {
-    if (ctx->cc_config_out != NULL)
-        k5_json_release(ctx->cc_config_out);
-    ctx->cc_config_out = k5_json_object_create();
-    if (ctx->cc_config_out == NULL)
-        return ENOMEM;
-    return 0;
+    k5_json_release(ctx->cc_config_out);
+    ctx->cc_config_out = NULL;
+    return k5_json_object_create(&ctx->cc_config_out);
 }
 
 static krb5_error_code
 read_cc_config_in_data(krb5_context context, krb5_init_creds_context ctx)
 {
+    k5_json_value val;
     krb5_data config;
     char *encoded;
     krb5_error_code code;
     int i;
 
-    if (ctx->cc_config_in != NULL)
-        k5_json_release(ctx->cc_config_in);
+    k5_json_release(ctx->cc_config_in);
     ctx->cc_config_in = NULL;
 
     if (ctx->opte->opt_private->in_ccache == NULL)
@@ -1159,16 +1156,15 @@ read_cc_config_in_data(krb5_context context, krb5_init_creds_context ctx)
     if (i < 0)
         return ENOMEM;
 
-    ctx->cc_config_in = k5_json_decode(encoded);
+    code = k5_json_decode(encoded, &val);
     free(encoded);
-    if (ctx->cc_config_in == NULL)
-        return ENOMEM;
-    if (k5_json_get_tid(ctx->cc_config_in) != K5_JSON_TID_OBJECT) {
-        k5_json_release(ctx->cc_config_in);
-        ctx->cc_config_in = NULL;
+    if (code)
+        return code;
+    if (k5_json_get_tid(val) != K5_JSON_TID_OBJECT) {
+        k5_json_release(val);
         return EINVAL;
     }
-
+    ctx->cc_config_in = val;
     return 0;
 }
 
@@ -1183,9 +1179,9 @@ save_cc_config_out_data(krb5_context context, krb5_ccache ccache,
     if (ctx->cc_config_out == NULL ||
         k5_json_object_count(ctx->cc_config_out) == 0)
         return 0;
-    encoded = k5_json_encode(ctx->cc_config_out);
-    if (encoded == NULL)
-        return ENOMEM;
+    code = k5_json_encode(ctx->cc_config_out, &encoded);
+    if (code)
+        return code;
     config = string2data(encoded);
     code = krb5_cc_set_config(context, ccache, ctx->cred.server,
                               KRB5_CC_CONF_PA_CONFIG_DATA, &config);

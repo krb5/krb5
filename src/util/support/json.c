@@ -96,7 +96,7 @@ struct value_base {
 #define PTR2BASE(ptr) (((struct value_base *)ptr) - 1)
 #define BASE2PTR(ptr) ((void *)(((struct value_base *)ptr) + 1))
 
-void *
+k5_json_value
 k5_json_retain(k5_json_value val)
 {
     struct value_base *p;
@@ -160,24 +160,29 @@ alloc_value(json_type type, size_t size)
 
 static struct json_type_st null_type = { K5_JSON_TID_NULL, "null", NULL };
 
-k5_json_null
-k5_json_null_create(void)
+int
+k5_json_null_create(k5_json_null *val_out)
 {
-    return alloc_value(&null_type, 0);
+    *val_out = alloc_value(&null_type, 0);
+    return (*val_out == NULL) ? ENOMEM : 0;
 }
 
 /*** Boolean type ***/
 
 static struct json_type_st bool_type = { K5_JSON_TID_BOOL, "bool", NULL };
 
-k5_json_bool
-k5_json_bool_create(int truth)
+int
+k5_json_bool_create(int truth, k5_json_bool *val_out)
 {
     k5_json_bool b;
 
+    *val_out = NULL;
     b = alloc_value(&bool_type, 1);
+    if (b == NULL)
+        return ENOMEM;
     *(unsigned char *)b = !!truth;
-    return b;
+    *val_out = b;
+    return 0;
 }
 
 int
@@ -209,10 +214,11 @@ static struct json_type_st array_type = {
     K5_JSON_TID_ARRAY, "array", array_dealloc
 };
 
-k5_json_array
-k5_json_array_create(void)
+int
+k5_json_array_create(k5_json_array *val_out)
 {
-    return alloc_value(&array_type, sizeof(struct k5_json_array_st));
+    *val_out = alloc_value(&array_type, sizeof(struct k5_json_array_st));
+    return (*val_out == NULL) ? ENOMEM : 0;
 }
 
 int
@@ -289,10 +295,11 @@ static struct json_type_st object_type = {
     K5_JSON_TID_OBJECT, "object", object_dealloc
 };
 
-k5_json_object
-k5_json_object_create(void)
+int
+k5_json_object_create(k5_json_object *val_out)
 {
-    return alloc_value(&object_type, sizeof(struct k5_json_object_st));
+    *val_out = alloc_value(&object_type, sizeof(struct k5_json_object_st));
+    return (*val_out == NULL) ? ENOMEM : 0;
 }
 
 size_t
@@ -373,37 +380,42 @@ static struct json_type_st string_type = {
     K5_JSON_TID_STRING, "string", NULL
 };
 
-k5_json_string
-k5_json_string_create(const char *string)
+int
+k5_json_string_create(const char *cstring, k5_json_string *val_out)
 {
-    return k5_json_string_create_len(string, strlen(string));
+    return k5_json_string_create_len(cstring, strlen(cstring), val_out);
 }
 
-k5_json_string
-k5_json_string_create_len(const void *data, size_t len)
+int
+k5_json_string_create_len(const void *data, size_t len,
+                          k5_json_string *val_out)
 {
     char *s;
 
+    *val_out = NULL;
     s = alloc_value(&string_type, len + 1);
     if (s == NULL)
-        return NULL;
+        return ENOMEM;
     memcpy(s, data, len);
     s[len] = '\0';
-    return (k5_json_string)s;
+    *val_out = (k5_json_string)s;
+    return 0;
 }
 
-k5_json_string
-k5_json_string_create_base64(const void *data, size_t len)
+int
+k5_json_string_create_base64(const void *data, size_t len,
+                             k5_json_string *val_out)
 {
     char *base64;
-    k5_json_string s;
+    int ret;
 
+    *val_out = NULL;
     base64 = k5_base64_encode(data, len);
     if (base64 == NULL)
-        return NULL;
-    s = k5_json_string_create(base64);
+        return ENOMEM;
+    ret = k5_json_string_create(base64, val_out);
     free(base64);
-    return s;
+    return ret;
 }
 
 const char *
@@ -412,10 +424,21 @@ k5_json_string_utf8(k5_json_string string)
     return (const char *)string;
 }
 
-void *
-k5_json_string_unbase64(k5_json_string string, size_t *len_out)
+int
+k5_json_string_unbase64(k5_json_string string, unsigned char **data_out,
+                        size_t *len_out)
 {
-    return k5_base64_decode((const char *)string, len_out);
+    unsigned char *data;
+    size_t len;
+
+    *data_out = NULL;
+    *len_out = 0;
+    data = k5_base64_decode((const char *)string, &len);
+    if (data == NULL)
+        return (len == 0) ? ENOMEM : EINVAL;
+    *data_out = data;
+    *len_out = len;
+    return 0;
 }
 
 /*** Number type ***/
@@ -424,15 +447,18 @@ static struct json_type_st number_type = {
     K5_JSON_TID_NUMBER, "number", NULL
 };
 
-k5_json_number
-k5_json_number_create(long long number)
+int
+k5_json_number_create(long long number, k5_json_number *val_out)
 {
     k5_json_number n;
 
+    *val_out = NULL;
     n = alloc_value(&number_type, sizeof(long long));
-    if (n)
-        *((long long *)n) = number;
-    return n;
+    if (n == NULL)
+        return ENOMEM;
+    *((long long *)n) = number;
+    *val_out = n;
+    return 0;
 }
 
 long long
@@ -448,62 +474,61 @@ static const char quotemap_c[] = "\"\\/\b\f\n\r\t";
 static const char needs_quote[] = "\\\"\1\2\3\4\5\6\7\10\11\12\13\14\15\16\17"
     "\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37";
 
-struct encode_ctx {
-    struct k5buf buf;
-    int ret;
-    int first;
-};
-
-static int encode_value(struct encode_ctx *j, k5_json_value val);
+static int encode_value(struct k5buf *buf, k5_json_value val);
 
 static void
-encode_string(struct encode_ctx *j, const char *str)
+encode_string(struct k5buf *buf, const char *str)
 {
     size_t n;
     const char *p;
 
-    krb5int_buf_add(&j->buf, "\"");
+    krb5int_buf_add(buf, "\"");
     while (*str != '\0') {
         n = strcspn(str, needs_quote);
-        krb5int_buf_add_len(&j->buf, str, n);
+        krb5int_buf_add_len(buf, str, n);
         str += n;
         if (*str == '\0')
             break;
-        krb5int_buf_add(&j->buf, "\\");
+        krb5int_buf_add(buf, "\\");
         p = strchr(quotemap_c, *str);
         if (p != NULL)
-            krb5int_buf_add_len(&j->buf, quotemap_json + (p - quotemap_c), 1);
+            krb5int_buf_add_len(buf, quotemap_json + (p - quotemap_c), 1);
         else
-            krb5int_buf_add_fmt(&j->buf, "u00%02X", (unsigned int)*str);
+            krb5int_buf_add_fmt(buf, "u00%02X", (unsigned int)*str);
         str++;
     }
-    krb5int_buf_add(&j->buf, "\"");
+    krb5int_buf_add(buf, "\"");
 }
 
+struct obj_ctx {
+    struct k5buf *buf;
+    int ret;
+    int first;
+};
+
 static void
-encode_dict_entry(void *ctx, const char *key, k5_json_value value)
+encode_obj_entry(void *ctx, const char *key, k5_json_value value)
 {
-    struct encode_ctx *j = ctx;
+    struct obj_ctx *j = ctx;
 
     if (j->ret)
         return;
     if (j->first)
         j->first = 0;
     else
-        krb5int_buf_add(&j->buf, ",");
-    encode_string(j, key);
-    krb5int_buf_add(&j->buf, ":");
-    j->ret = encode_value(j, value);
-    if (j->ret)
-        return;
+        krb5int_buf_add(j->buf, ",");
+    encode_string(j->buf, key);
+    krb5int_buf_add(j->buf, ":");
+    j->ret = encode_value(j->buf, value);
 }
 
 static int
-encode_value(struct encode_ctx *j, k5_json_value val)
+encode_value(struct k5buf *buf, k5_json_value val)
 {
     k5_json_tid type;
-    int first = 0, ret;
+    int ret;
     size_t i, len;
+    struct obj_ctx ctx;
 
     if (val == NULL)
         return EINVAL;
@@ -511,62 +536,63 @@ encode_value(struct encode_ctx *j, k5_json_value val)
     type = k5_json_get_tid(val);
     switch (type) {
     case K5_JSON_TID_ARRAY:
-        krb5int_buf_add(&j->buf, "[");
+        krb5int_buf_add(buf, "[");
         len = k5_json_array_length(val);
         for (i = 0; i < len; i++) {
             if (i != 0)
-                krb5int_buf_add(&j->buf, ",");
-            ret = encode_value(j, k5_json_array_get(val, i));
+                krb5int_buf_add(buf, ",");
+            ret = encode_value(buf, k5_json_array_get(val, i));
             if (ret)
                 return ret;
         }
-        krb5int_buf_add(&j->buf, "]");
-        break;
+        krb5int_buf_add(buf, "]");
+        return 0;
 
     case K5_JSON_TID_OBJECT:
-        krb5int_buf_add(&j->buf, "{");
-        first = j->first;
-        j->first = 1;
-        k5_json_object_iterate(val, encode_dict_entry, j);
-        krb5int_buf_add(&j->buf, "}");
-        j->first = first;
-        break;
+        krb5int_buf_add(buf, "{");
+        ctx.buf = buf;
+        ctx.ret = 0;
+        ctx.first = 1;
+        k5_json_object_iterate(val, encode_obj_entry, &ctx);
+        krb5int_buf_add(buf, "}");
+        return ctx.ret;
 
     case K5_JSON_TID_STRING:
-        encode_string(j, k5_json_string_utf8(val));
-        break;
+        encode_string(buf, k5_json_string_utf8(val));
+        return 0;
 
     case K5_JSON_TID_NUMBER:
-        krb5int_buf_add_fmt(&j->buf, "%lld", k5_json_number_value(val));
-        break;
+        krb5int_buf_add_fmt(buf, "%lld", k5_json_number_value(val));
+        return 0;
 
     case K5_JSON_TID_NULL:
-        krb5int_buf_add(&j->buf, "null");
-        break;
+        krb5int_buf_add(buf, "null");
+        return 0;
 
     case K5_JSON_TID_BOOL:
-        krb5int_buf_add(&j->buf, k5_json_bool_value(val) ? "true" : "false");
-        break;
+        krb5int_buf_add(buf, k5_json_bool_value(val) ? "true" : "false");
+        return 0;
 
     default:
-        return 1;
+        return EINVAL;
     }
-    return 0;
 }
 
-char *
-k5_json_encode(k5_json_value val)
+int
+k5_json_encode(k5_json_value val, char **json_out)
 {
-    struct encode_ctx j;
+    struct k5buf buf;
+    int ret;
 
-    j.ret = 0;
-    j.first = 1;
-    krb5int_buf_init_dynamic(&j.buf);
-    if (encode_value(&j, val)) {
-        krb5int_free_buf(&j.buf);
-        return NULL;
+    *json_out = NULL;
+    krb5int_buf_init_dynamic(&buf);
+    ret = encode_value(&buf, val);
+    if (ret) {
+        krb5int_free_buf(&buf);
+        return ret;
     }
-    return krb5int_buf_data(&j.buf);
+    *json_out = krb5int_buf_data(&buf);
+    return (*json_out == NULL) ? ENOMEM : 0;
 }
 
 /*** JSON decoding ***/
@@ -576,8 +602,7 @@ struct decode_ctx {
     size_t depth;
 };
 
-static k5_json_value
-parse_value(struct decode_ctx *ctx);
+static int parse_value(struct decode_ctx *ctx, k5_json_value *val_out);
 
 /* Consume whitespace.  Return 0 if there is anything left to parse after the
  * whitespace, -1 if not. */
@@ -621,12 +646,14 @@ hexval(unsigned char c)
 
 /* Parse a JSON number (which must be an integer in the signed 64-bit range; we
  * do not allow floating-point numbers). */
-static k5_json_number
-parse_number(struct decode_ctx *ctx)
+static int
+parse_number(struct decode_ctx *ctx, k5_json_number *val_out)
 {
     const unsigned long long umax = ~0ULL, smax = (1ULL << 63) - 1;
     unsigned long long number = 0;
     int neg = 1;
+
+    *val_out = NULL;
 
     if (*ctx->p == '-') {
         neg = -1;
@@ -634,53 +661,55 @@ parse_number(struct decode_ctx *ctx)
     }
 
     if (!is_digit(*ctx->p))
-        return NULL;
+        return EINVAL;
 
     /* Read the number into an unsigned 64-bit container, ensuring that we
      * don't overflow it. */
     while (is_digit(*ctx->p)) {
         if (number + 1 > umax / 10)
-            return NULL;
+            return EOVERFLOW;
         number = (number * 10) + (*ctx->p - '0');
         ctx->p++;
     }
 
     /* Make sure the unsigned 64-bit value fits in the signed 64-bit range. */
     if (number > smax + 1 || (number > smax && neg == 1))
-        return NULL;
+        return EOVERFLOW;
 
-    return k5_json_number_create(number * neg);
+    return k5_json_number_create(number * neg, val_out);
 }
 
 /* Parse a JSON string (which must not quote Unicode code points above 256). */
-static char *
-parse_string(struct decode_ctx *ctx)
+static int
+parse_string(struct decode_ctx *ctx, char **str_out)
 {
     const unsigned char *p, *start, *end = NULL;
     const char *q;
     char *buf, *pos;
     unsigned int code;
 
+    *str_out = NULL;
+
     /* Find the start and end of the string. */
     if (*ctx->p != '"')
-        return NULL;
+        return EINVAL;
     start = ++ctx->p;
     for (; *ctx->p != '\0'; ctx->p++) {
         if (*ctx->p == '\\') {
             ctx->p++;
             if (*ctx->p == '\0')
-                return NULL;
+                return EINVAL;
         } else if (*ctx->p == '"') {
             end = ctx->p++;
             break;
         }
     }
     if (end == NULL)
-        return NULL;
+        return EINVAL;
 
     pos = buf = malloc(end - start + 1);
     if (buf == NULL)
-        return NULL;
+        return ENOMEM;
     for (p = start; p < end;) {
         if (*p == '\\') {
             p++;
@@ -694,7 +723,7 @@ parse_string(struct decode_ctx *ctx)
                     /* Code points above 0xff don't need to be quoted, so we
                      * don't implement translating those into UTF-8. */
                     free(buf);
-                    return NULL;
+                    return EINVAL;
                 }
                 p += 5;
             } else {
@@ -703,7 +732,7 @@ parse_string(struct decode_ctx *ctx)
                     *pos++ = quotemap_c[q - quotemap_json];
                 } else {
                     free(buf);
-                    return NULL;
+                    return EINVAL;
                 }
                 p++;
             }
@@ -712,198 +741,245 @@ parse_string(struct decode_ctx *ctx)
         }
     }
     *pos = '\0';
-    return buf;
+    *str_out = buf;
+    return 0;
 }
 
-/*
- * Parse an object association and the following comma.  Return 1 if an
- * association was parsed, 0 if the end of the object was reached, and -1 on
- * error.
- */
+/* Parse an object association and place it into obj. */
 static int
-parse_pair(k5_json_object obj, struct decode_ctx *ctx)
+parse_object_association(k5_json_object obj, struct decode_ctx *ctx)
 {
     char *key = NULL;
-    k5_json_value value;
-
-    if (white_spaces(ctx))
-        goto err;
-
-    /* Check for the end of the object. */
-    if (*ctx->p == '}') {
-        ctx->p++;
-        return 0;
-    }
+    k5_json_value val;
+    int ret;
 
     /* Parse the key and value. */
-    key = parse_string(ctx);
-    if (key == NULL)
-        goto err;
+    ret = parse_string(ctx, &key);
+    if (ret)
+        return ret;
     if (white_spaces(ctx))
-        goto err;
+        goto invalid;
     if (*ctx->p != ':')
-        goto err;
+        goto invalid;
     ctx->p++;
     if (white_spaces(ctx))
-        goto err;
-    value = parse_value(ctx);
-    if (value == NULL) {
+        goto invalid;
+    ret = parse_value(ctx, &val);
+    if (ret) {
         free(key);
-        return -1;
+        return ret;
     }
 
-    /* Add the key and value to the object. */
-    k5_json_object_set(obj, key, value);
+    /* Add the key and value to obj. */
+    ret = k5_json_object_set(obj, key, val);
     free(key);
-    key = NULL;
-    k5_json_release(value);
+    k5_json_release(val);
+    return ret;
 
-    /* Consume the following comma if this isn't the last item. */
-    if (white_spaces(ctx))
-        goto err;
-    if (*ctx->p == ',')
-        ctx->p++;
-    else if (*ctx->p != '}')
-        goto err;
-
-    return 1;
-
-err:
+invalid:
     free(key);
-    return -1;
+    return EINVAL;
 }
 
 /* Parse a JSON object. */
-static k5_json_object
-parse_object(struct decode_ctx *ctx)
+static int
+parse_object(struct decode_ctx *ctx, k5_json_object *val_out)
 {
-    k5_json_object obj;
+    k5_json_object obj = NULL;
     int ret;
 
-    obj = k5_json_object_create();
-    if (obj == NULL)
-        return NULL;
+    *val_out = NULL;
 
+    /* Parse past the opening brace. */
+    if (*ctx->p != '{')
+        return EINVAL;
     ctx->p++;
-    while ((ret = parse_pair(obj, ctx)) > 0)
-        ;
-    if (ret < 0) {
-        k5_json_release(obj);
-        return NULL;
+    if (white_spaces(ctx))
+        return EINVAL;
+
+    ret = k5_json_object_create(&obj);
+    if (ret)
+        return ret;
+
+    /* Pairs associations until we reach the terminating brace. */
+    if (*ctx->p != '}') {
+        while (1) {
+            ret = parse_object_association(obj, ctx);
+            if (ret) {
+                k5_json_release(obj);
+                return ret;
+            }
+            if (white_spaces(ctx))
+                goto invalid;
+            if (*ctx->p == '}')
+                break;
+            if (*ctx->p != ',')
+                goto invalid;
+            ctx->p++;
+            if (white_spaces(ctx))
+                goto invalid;
+        }
     }
-    return obj;
+    ctx->p++;
+    *val_out = obj;
+    return 0;
+
+invalid:
+    k5_json_release(obj);
+    return EINVAL;
 }
 
-/* Parse a JSON array item and the following comma.  Return 1 if an item was
- * parsed, 0 if the end of the array was reached, and -1 on error. */
+/* Parse an value and place it into array. */
 static int
-parse_item(k5_json_array array, struct decode_ctx *ctx)
+parse_array_item(k5_json_array array, struct decode_ctx *ctx)
 {
-    k5_json_value value;
+    k5_json_value val;
+    int ret;
 
-    if (white_spaces(ctx))
-        return -1;
-
-    if (*ctx->p == ']') {
-        ctx->p++;
-        return 0;
-    }
-
-    value = parse_value(ctx);
-    if (value == NULL)
-        return -1;
-
-    k5_json_array_add(array, value);
-    k5_json_release(value);
-
-    if (white_spaces(ctx))
-        return -1;
-
-    if (*ctx->p == ',')
-        ctx->p++;
-    else if (*ctx->p != ']')
-        return -1;
-    return 1;
+    ret = parse_value(ctx, &val);
+    if (ret)
+        return ret;
+    ret = k5_json_array_add(array, val);
+    k5_json_release(val);
+    return ret;
 }
 
 /* Parse a JSON array. */
-static k5_json_array
-parse_array(struct decode_ctx *ctx)
+static int
+parse_array(struct decode_ctx *ctx, k5_json_array *val_out)
 {
-    k5_json_array array = k5_json_array_create();
+    k5_json_array array = NULL;
     int ret;
 
-    assert(*ctx->p == '[');
-    ctx->p += 1;
+    *val_out = NULL;
 
-    while ((ret = parse_item(array, ctx)) > 0)
-        ;
-    if (ret < 0) {
-        k5_json_release(array);
-        return NULL;
+    /* Parse past the opening bracket. */
+    if (*ctx->p != '[')
+        return EINVAL;
+    ctx->p++;
+    if (white_spaces(ctx))
+        return EINVAL;
+
+    ret = k5_json_array_create(&array);
+    if (ret)
+        return ret;
+
+    /* Pairs values until we reach the terminating bracket. */
+    if (*ctx->p != ']') {
+        while (1) {
+            ret = parse_array_item(array, ctx);
+            if (ret) {
+                k5_json_release(array);
+                return ret;
+            }
+            if (white_spaces(ctx))
+                goto invalid;
+            if (*ctx->p == ']')
+                break;
+            if (*ctx->p != ',')
+                goto invalid;
+            ctx->p++;
+            if (white_spaces(ctx))
+                goto invalid;
+        }
     }
-    return array;
+    ctx->p++;
+    *val_out = array;
+    return 0;
+
+invalid:
+    k5_json_release(array);
+    return EINVAL;
 }
 
 /* Parse a JSON value of any type. */
-static k5_json_value
-parse_value(struct decode_ctx *ctx)
+static int
+parse_value(struct decode_ctx *ctx, k5_json_value *val_out)
 {
-    k5_json_value v;
-    char *str;
+    k5_json_null null;
+    k5_json_bool bval;
+    k5_json_number num;
+    k5_json_string str;
+    k5_json_object obj;
+    k5_json_array array;
+    char *cstring;
+    int ret;
+
+    *val_out = NULL;
 
     if (white_spaces(ctx))
-        return NULL;
+        return EINVAL;
 
     if (*ctx->p == '"') {
-        str = parse_string(ctx);
-        if (str == NULL)
-            return NULL;
-        v = k5_json_string_create(str);
-        free(str);
-        return v;
+        ret = parse_string(ctx, &cstring);
+        if (ret)
+            return ret;
+        ret = k5_json_string_create(cstring, &str);
+        free(cstring);
+        if (ret)
+            return ret;
+        *val_out = str;
     } else if (*ctx->p == '{') {
         if (ctx->depth-- == 1)
-            return NULL;
-        v = parse_object(ctx);
+            return EINVAL;
+        ret = parse_object(ctx, &obj);
+        if (ret)
+            return ret;
         ctx->depth++;
-        return v;
+        *val_out = obj;
     } else if (*ctx->p == '[') {
         if (ctx->depth-- == 1)
-            return NULL;
-        v = parse_array(ctx);
+            return EINVAL;
+        ret = parse_array(ctx, &array);
         ctx->depth++;
-        return v;
+        *val_out = array;
     } else if (is_digit(*ctx->p) || *ctx->p == '-') {
-        return parse_number(ctx);
-    }
-
-    if (strncmp((char *)ctx->p, "null", 4) == 0) {
+        ret = parse_number(ctx, &num);
+        if (ret)
+            return ret;
+        *val_out = num;
+    } else if (strncmp((char *)ctx->p, "null", 4) == 0) {
         ctx->p += 4;
-        return k5_json_null_create();
+        ret = k5_json_null_create(&null);
+        if (ret)
+            return ret;
+        *val_out = null;
     } else if (strncmp((char *)ctx->p, "true", 4) == 0) {
         ctx->p += 4;
-        return k5_json_bool_create(1);
+        ret = k5_json_bool_create(1, &bval);
+        if (ret)
+            return ret;
+        *val_out = bval;
     } else if (strncmp((char *)ctx->p, "false", 5) == 0) {
         ctx->p += 5;
-        return k5_json_bool_create(0);
+        ret = k5_json_bool_create(0, &bval);
+        if (ret)
+            return ret;
+        *val_out = bval;
+    } else {
+        return EINVAL;
     }
 
-    return NULL;
+    return 0;
 }
 
-k5_json_value
-k5_json_decode(const char *string)
+int
+k5_json_decode(const char *string, k5_json_value *val_out)
 {
     struct decode_ctx ctx;
-    k5_json_value v;
+    k5_json_value val;
+    int ret;
 
+    *val_out = NULL;
     ctx.p = (unsigned char *)string;
     ctx.depth = MAX_DECODE_DEPTH;
-    v = parse_value(&ctx);
+    ret = parse_value(&ctx, &val);
+    if (ret)
+        return ret;
     if (white_spaces(&ctx) == 0) {
-        k5_json_release(v);
-        return NULL;
+        k5_json_release(val);
+        return EINVAL;
     }
-    return v;
+    *val_out = val;
+    return 0;
 }

@@ -50,8 +50,8 @@ struct _krb5_init_creds_context {
     struct krb5_responder_context_st rctx;
     krb5_preauthtype selected_preauth_type;
     krb5_preauthtype allowed_preauth_type;
-    void *cc_config_in;
-    void *cc_config_out;
+    k5_json_object cc_config_in;
+    k5_json_object cc_config_out;
     /* Discovered offset of server time during preauth */
     krb5_timestamp pa_offset;
     krb5_int32 pa_offset_usec;
