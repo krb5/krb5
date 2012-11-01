@@ -105,7 +105,7 @@ Feature list
     IAKERB                                         1.8          http://tools.ietf.org/html/draft-ietf-krb-wg-iakerb-02
     Heimdal bridge plugin for KDC backend          1.8
     Advance warning on password expiry             1.9
-    Camellia encryption (CTS-CMAC mode)            1.9          experimental http://tools.ietf.org/html/draft-ietf-krb-wg-camellia-cts-00
+    Camellia encryption (CTS-CMAC mode)            1.9          http://tools.ietf.org/html/draft-ietf-krb-wg-camellia-cts-02
     KDC support for SecurID preauthentication      1.9          http://k5wiki.kerberos.org/wiki/Projects/SecurID_SAM_support
     kadmin over IPv6                               1.9
     Trace logging                                  1.9          http://k5wiki.kerberos.org/wiki/Projects/Trace_logging
