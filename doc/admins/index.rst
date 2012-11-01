@@ -12,6 +12,7 @@ For administrators
    appl_servers.rst
    host_config.rst
    backup_host.rst
+   pkinit.rst
 
 .. toctree::
    :maxdepth: 1
