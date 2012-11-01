@@ -272,8 +272,7 @@ Protocol evolution:
   services even when the clients cannot directly reach the KDC that
   serves the services.
 
-* Add support for Camellia encryption (experimental; disabled by
-  default).
+* Add support for Camellia encryption (disabled by default).
 
 * Add GSS-API support for implementors of the SASL GS2 bridge
   mechanism.
