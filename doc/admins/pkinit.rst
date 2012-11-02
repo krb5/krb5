@@ -88,7 +88,7 @@ Generating client certificates
 
 PKINIT client certificates also must have some unusual certificate
 fields.  To generate a client certificate with OpenSSL, you will need
-a extensions file (different from the KDC extensions file above)
+an extensions file (different from the KDC extensions file above)
 containing::
 
     [client_cert]
