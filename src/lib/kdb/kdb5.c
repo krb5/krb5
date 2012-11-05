@@ -306,7 +306,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library *libptr)
     if (strcmp(lib_name, "db2") == 0)
         vftabl_addr = &krb5_db2_kdb_function_table;
 #ifdef ENABLE_LDAP
-    if (strcmp(lib_name, "ldap") == 0)
+    if (strcmp(lib_name, "kldap") == 0)
         vftabl_addr = &krb5_ldap_kdb_function_table;
 #endif
     if (!vftabl_addr) {
