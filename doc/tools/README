@@ -6,7 +6,7 @@ The text below is meant to give the instructions on how to incorporate MIT Kerbe
 Pre-requisites:
 - python 2.5+ with Cheetah, lxml and  xml extension modules installed;
 - For part B only:
-    -    Sphinx “doxylink” extension;
+    -    Sphinx "doxylink" extension;
     -    Doxygen HTML output
 
 
@@ -18,17 +18,17 @@ Part A:    Transforming Doxygen XML output into reStructuredText (rst)  without 
 
 3.    Suppose the Doxygen XML output is located in doxy_xml_dir  and the desired output directory is rst_dir.
       Run:
-      python doxy.py –i  doxy_xml_dir –o rst_dir –t func
+      python doxy.py -i  doxy_xml_dir -o rst_dir -t func
       This will result in the storing of the API function documentation files in rst format in the rst_dir. The file names are constructed based on the function name. For example, the file for krb5_build_principal() will be krb5_build_principal.rst
 
       Run:
-      python doxy.py –i  doxy_xml_dir –o rst_dir –t typedef
+      python doxy.py -i  doxy_xml_dir -o rst_dir -t typedef
       It is similar to the API function conversion, but for data types. The result will be stored under rst_dir/types directory
 
       Alternatively, running
-      python doxy.py –i  doxy_xml_dir –o rst_dir
+      python doxy.py -i  doxy_xml_dir -o rst_dir
       or
-      python doxy.py –i  doxy_xml_dir –o rst_dir -t all
+      python doxy.py -i  doxy_xml_dir -o rst_dir -t all
       converts Doxygen XML output into reStructuredText format files both for API functions and data types;
 
 4.    In appdev/index.rst add the following section to point to the API references:
@@ -53,7 +53,7 @@ Part B:    Bridge to Doxygen HTML output.
        GENERATE_TAGFILE       = krb5doxy.tag
        GENERATE_XML           = YES
 
-2. Modify Sphinx conf.py file to point to the “doxylink” extension and Doxygen tag file:
+2. Modify Sphinx conf.py file to point to the "doxylink" extension and Doxygen tag file:
       extensions = ['sphinx.ext.autodoc', 'sphinxcontrib.doxylink']
       doxylink = { ' krb5doxy' : ('/tmp/krb5doxy.tag, ' doxy_html_dir ') }
 
