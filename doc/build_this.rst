@@ -1,15 +1,15 @@
 How to build this documentation from the source
 ===============================================
 
-Pre-requisites for the simple build, or to update man pages:
+Pre-requisites for a simple build, or to update man pages:
 
-* Sphinx 1.0.4 or higher (See http://sphinx.pocoo.org) with “autodoc”
+* Sphinx 1.0.4 or higher (See http://sphinx.pocoo.org) with the autodoc
   extension installed.
 
 Additional prerequisites to include the API reference based on Doxygen
 markup:
 
-* python 2.5 with the Cheetah, lxml, and xml modules
+* Python 2.5 with the Cheetah, lxml, and xml modules
 * Doxygen
 
 
@@ -62,7 +62,7 @@ paths.
 You can also do this from an unconfigured source tree with::
 
     cd src/doc
-    make -f Makefile.in top_srcdir=.. PYTHON=python rsthml
+    make -f Makefile.in top_srcdir=.. srcdir=. PYTHON=python html
     make -f Makefile.in clean
 
 
