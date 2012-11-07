@@ -191,15 +191,15 @@ pointsize = '10pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('admins/index', 'admin.tex', u"Administration Guide", u'MIT',
+  ('admin/index', 'admin.tex', u"Administration Guide", u'MIT',
    'manual'),
-  ('appldev/index', 'appdev.tex', u"Application Developer Guide",
+  ('appdev/index', 'appdev.tex', u"Application Developer Guide",
    u'MIT', 'manual'),
   ('basic/index', 'basic.tex', u"Kerberos Concepts", u'MIT', 'manual'),
   ('build/index', 'build.tex', u"Building MIT Kerberos", u'MIT', 'manual'),
   ('plugindev/index', 'plugindev.tex', u"Plugin Module Developer Guide",
    u'MIT', 'manual'),
-  ('users/index', 'user.tex', u"User Guide", u'MIT', 'manual')
+  ('user/index', 'user.tex', u"User Guide", u'MIT', 'manual')
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -250,9 +250,10 @@ else:
 rst_epilog = '\n'
 
 if 'notice' in tags:
-    exclude_patterns = [ 'admins', 'appldev', 'basic', 'build',
-                         'plugindev', 'relay', 'users' ]
-    exclude_patterns += [ 'index.rst', 'mitK5*.rst', 'resources.rst' ]
+    exclude_patterns = [ 'admin', 'appdev', 'basic', 'build',
+                         'plugindev', 'user' ]
+    exclude_patterns += [ 'about.rst', 'build_this.rxt', 'index.rst',
+                          'mitK5*.rst', 'resources.rst' ]
     rst_epilog += '.. |copy| replace:: \(C\)'
 else:
     rst_epilog += '.. |bindir| replace:: %s\n' % bindir
@@ -276,28 +277,28 @@ else:
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('users/user_commands/kinit', 'kinit', u'obtain and cache Kerberos ticket-granting ticket', [u'MIT'], 1),
-    ('users/user_commands/klist', 'klist', u'list cached Kerberos tickets', [u'MIT'], 1),
-    ('users/user_commands/kdestroy', 'kdestroy', u'destroy Kerberos tickets', [u'MIT'], 1),
-    ('users/user_commands/kswitch', 'kswitch', u'switch primary ticket cache', [u'MIT'], 1),
-    ('users/user_commands/kpasswd', 'kpasswd', u'change a user\'s Kerberos password', [u'MIT'], 1),
-    ('users/user_commands/kvno', 'kvno', u'print key version numbers of Kerberos principals', [u'MIT'], 1),
-    ('users/user_commands/ksu', 'ksu', u'Kerberized super-user', [u'MIT'], 1),
-    ('users/user_config/k5login', 'k5login', u'Kerberos V5 acl file for host access', [u'MIT'], 5),
-    ('users/user_config/k5identity', 'k5identity', u'Kerberos V5 client principal selection rules', [u'MIT'], 5),
-    ('admins/admin_commands/krb5kdc', 'krb5kdc', u'Kerberos V5 KDC', [u'MIT'], 8),
-    ('admins/admin_commands/kadmin_local', 'kadmin', u'Kerberos V5 database administration program', [u'MIT'], 1),
-    ('admins/admin_commands/kprop', 'kprop', u'propagate a Kerberos V5 principal database to a slave server', [u'MIT'], 8),
-    ('admins/admin_commands/kproplog', 'kproplog', u'display the contents of the Kerberos principal update log', [u'MIT'], 8),
-    ('admins/admin_commands/kpropd', 'kpropd', u'Kerberos V5 slave KDC update server', [u'MIT'], 8),
-    ('admins/admin_commands/kdb5_util', 'kdb5_util', u'Kerberos database maintenance utility', [u'MIT'], 8),
-    ('admins/admin_commands/ktutil', 'ktutil', u'Kerberos keytab file maintenance utility', [u'MIT'], 1),
-    ('admins/admin_commands/k5srvutil', 'k5srvutil', u'host key table (keytab) manipulation utility', [u'MIT'], 1),
-    ('admins/admin_commands/kadmind', 'kadmind', u'KADM5 administration server', [u'MIT'], 8),
-    ('admins/admin_commands/kdb5_ldap_util', 'kdb5_ldap_util', u'Kerberos configuration utility', [u'MIT'], 8),
-    ('admins/conf_files/krb5_conf', 'krb5.conf', u'Kerberos configuration file', [u'MIT'], 5),
-    ('admins/conf_files/kdc_conf', 'kdc.conf', u'Kerberos V5 KDC configuration file', [u'MIT'], 5),
-    ('admins/conf_files/kadm5_acl', 'kadm5.acl', u'Kerberos ACL file', [u'MIT'], 5),
-    ('users/user_commands/sclient', 'sclient', u'sample Kerberos version 5 client', [u'MIT'], 1),
-    ('admins/admin_commands/sserver', 'sserver', u'sample Kerberos version 5 server', [u'MIT'], 8),
+    ('user/user_commands/kinit', 'kinit', u'obtain and cache Kerberos ticket-granting ticket', [u'MIT'], 1),
+    ('user/user_commands/klist', 'klist', u'list cached Kerberos tickets', [u'MIT'], 1),
+    ('user/user_commands/kdestroy', 'kdestroy', u'destroy Kerberos tickets', [u'MIT'], 1),
+    ('user/user_commands/kswitch', 'kswitch', u'switch primary ticket cache', [u'MIT'], 1),
+    ('user/user_commands/kpasswd', 'kpasswd', u'change a user\'s Kerberos password', [u'MIT'], 1),
+    ('user/user_commands/kvno', 'kvno', u'print key version numbers of Kerberos principals', [u'MIT'], 1),
+    ('user/user_commands/ksu', 'ksu', u'Kerberized super-user', [u'MIT'], 1),
+    ('user/user_config/k5login', 'k5login', u'Kerberos V5 acl file for host access', [u'MIT'], 5),
+    ('user/user_config/k5identity', 'k5identity', u'Kerberos V5 client principal selection rules', [u'MIT'], 5),
+    ('admin/admin_commands/krb5kdc', 'krb5kdc', u'Kerberos V5 KDC', [u'MIT'], 8),
+    ('admin/admin_commands/kadmin_local', 'kadmin', u'Kerberos V5 database administration program', [u'MIT'], 1),
+    ('admin/admin_commands/kprop', 'kprop', u'propagate a Kerberos V5 principal database to a slave server', [u'MIT'], 8),
+    ('admin/admin_commands/kproplog', 'kproplog', u'display the contents of the Kerberos principal update log', [u'MIT'], 8),
+    ('admin/admin_commands/kpropd', 'kpropd', u'Kerberos V5 slave KDC update server', [u'MIT'], 8),
+    ('admin/admin_commands/kdb5_util', 'kdb5_util', u'Kerberos database maintenance utility', [u'MIT'], 8),
+    ('admin/admin_commands/ktutil', 'ktutil', u'Kerberos keytab file maintenance utility', [u'MIT'], 1),
+    ('admin/admin_commands/k5srvutil', 'k5srvutil', u'host key table (keytab) manipulation utility', [u'MIT'], 1),
+    ('admin/admin_commands/kadmind', 'kadmind', u'KADM5 administration server', [u'MIT'], 8),
+    ('admin/admin_commands/kdb5_ldap_util', 'kdb5_ldap_util', u'Kerberos configuration utility', [u'MIT'], 8),
+    ('admin/conf_files/krb5_conf', 'krb5.conf', u'Kerberos configuration file', [u'MIT'], 5),
+    ('admin/conf_files/kdc_conf', 'kdc.conf', u'Kerberos V5 KDC configuration file', [u'MIT'], 5),
+    ('admin/conf_files/kadm5_acl', 'kadm5.acl', u'Kerberos ACL file', [u'MIT'], 5),
+    ('user/user_commands/sclient', 'sclient', u'sample Kerberos version 5 client', [u'MIT'], 1),
+    ('admin/admin_commands/sserver', 'sserver', u'sample Kerberos version 5 server', [u'MIT'], 8),
 ]

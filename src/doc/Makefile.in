@@ -15,17 +15,18 @@ RST_SOURCES= _static \
 	_templates \
 	conf.py \
 	index.rst \
-	admins \
-	appldev \
+	admin \
+	appdev \
 	basic \
 	build \
 	plugindev \
-	users \
+	user \
+	about.rst \
+	build_this.rst \
 	mitK5defaults.rst \
 	mitK5features.rst \
 	mitK5license.rst \
 	notice.rst \
-	relay \
 	resources.rst
 
 PDFDIR=$(docsrc)/pdf
@@ -92,9 +93,9 @@ composite: Doxyfile $(docsrc)/version.py
 	for i in $$do_subdirs; do \
 		cp -r $(docsrc)/$$i rst_composite; \
 	done
-	cp rst_apiref/*.rst rst_composite/appldev/refs/api
-	cp rst_apiref/types/*.rst rst_composite/appldev/refs/types
-	cp rst_apiref/macros/*.rst rst_composite/appldev/refs/macros
+	cp rst_apiref/*.rst rst_composite/appdev/refs/api
+	cp rst_apiref/types/*.rst rst_composite/appdev/refs/types
+	cp rst_apiref/macros/*.rst rst_composite/appdev/refs/macros
 	cp $(docsrc)/version.py rst_composite
 
 Doxyfile: $(srcdir)/Doxyfile.in
