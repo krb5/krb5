@@ -194,6 +194,7 @@ Scripts may use the following functions and variables:
   - kadmind
   - kadmin
   - kadmin_local
+  - kdb5_ldap_util
   - kdb5_util
   - ktutil
   - kinit
@@ -1238,6 +1239,8 @@ krb5kdc = os.path.join(buildtop, 'kdc', 'krb5kdc')
 kadmind = os.path.join(buildtop, 'kadmin', 'server', 'kadmind')
 kadmin = os.path.join(buildtop, 'kadmin', 'cli', 'kadmin')
 kadmin_local = os.path.join(buildtop, 'kadmin', 'cli', 'kadmin.local')
+kdb5_ldap_util = os.path.join(buildtop, 'plugins', 'kdb', 'ldap', 'ldap_util',
+                              'kdb5_ldap_util')
 kdb5_util = os.path.join(buildtop, 'kadmin', 'dbutil', 'kdb5_util')
 ktutil = os.path.join(buildtop, 'kadmin', 'ktutil', 'ktutil')
 kinit = os.path.join(buildtop, 'clients', 'kinit', 'kinit')
