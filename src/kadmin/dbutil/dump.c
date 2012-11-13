@@ -1480,7 +1480,8 @@ dump_db(argc, argv)
          * We grab the lock twice (once again in the iterator call),
          * but that's ok since the lock func handles incr locks held.
          */
-        if (krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED)) {
+        kret = krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED);
+        if (kret != 0 && kret != KRB5_PLUGIN_OP_NOTSUPP) {
             fprintf(stderr,
                     _("%s: Couldn't grab lock\n"), progname);
             goto error;
