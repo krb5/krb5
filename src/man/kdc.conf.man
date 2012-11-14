@@ -745,6 +745,18 @@ Exportable RC4 with HMAC/MD5 (weak)
 T}
 _
 T{
+camellia256\-cts\-cmac camellia256\-cts
+T}	T{
+Camellia\-256 CTS mode with CMAC
+T}
+_
+T{
+camellia128\-cts\-cmac camellia128\-cts
+T}	T{
+Camellia\-128 CTS mode with CMAC
+T}
+_
+T{
 des
 T}	T{
 The DES family: des\-cbc\-crc, des\-cbc\-md5, and des\-cbc\-md4 (weak)
@@ -766,6 +778,12 @@ T{
 rc4
 T}	T{
 The RC4 family: arcfour\-hmac
+T}
+_
+T{
+camellia
+T}	T{
+The Camellia family: camellia256\-cts\-cmac and camellia128\-cts\-cmac
 T}
 _
 .TE
