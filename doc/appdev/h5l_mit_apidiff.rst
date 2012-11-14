@@ -1,6 +1,9 @@
 Differences between Heimdal and MIT Kerberos API
 ================================================
 
+.. tabularcolumns:: |l|l|
+
+.. table::
 
  ======================================== =================================================
   :c:func:`krb5_auth_con_getaddrs()`       H5l: If either of the pointers to local_addr
