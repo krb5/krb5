@@ -7,4 +7,3 @@ Advanced topics
 
    ldapbackend.rst
    retiring-des.rst
-

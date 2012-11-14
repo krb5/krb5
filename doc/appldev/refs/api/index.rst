@@ -395,4 +395,3 @@ Deprecated public interfaces
    krb5_string_to_key.rst
    krb5_use_enctype.rst
    krb5_verify_checksum.rst
-

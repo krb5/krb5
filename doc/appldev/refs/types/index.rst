@@ -101,5 +101,3 @@ Internal
    krb5_pac.rst
    krb5_rcache.rst
    krb5_tkt_creds_context.rst
-
-

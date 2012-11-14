@@ -7,4 +7,3 @@ Complete reference - API and datatypes
    api/index.rst
    types/index.rst
    macros/index.rst
-
