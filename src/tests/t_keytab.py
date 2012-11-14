@@ -26,6 +26,18 @@ out = realm.run_as_client([klist, '-k', '-i'])
 if realm.client_keytab not in out or realm.user_princ not in out:
     fail('Expected output not seen from klist -k -i')
 
+# Test implicit request for keytab (-i or -t without -k)
+realm.run_as_client([kdestroy])
+output = realm.kinit(realm.host_princ, flags=['-t', realm.keytab])
+if 'keytab specified, forcing -k' not in output:
+    fail('Expected output not seen from kinit -t keytab')
+realm.klist(realm.host_princ)
+realm.run_as_client([kdestroy])
+output = realm.kinit(realm.user_princ, flags=['-i'])
+if 'keytab specified, forcing -k' not in output:
+    fail('Expected output not seen from kinit -i')
+realm.klist(realm.user_princ)
+
 # Test handling of kvno values beyond 255.
 princ = 'foo/bar@%s' % realm.realm
 realm.addprinc(princ)
