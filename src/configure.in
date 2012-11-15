@@ -1265,7 +1265,7 @@ if test "x$with_krb5_config" != xno; then
 	if test "x$with_krb5_config" = xyes; then
 		with_krb5_config=krb5-config
 	fi
-	if $with_krb5_config --help 2>&1 | grep -q defccname; then
+	if $with_krb5_config --help 2>&1 | grep defccname >/dev/null; then
 		AC_MSG_NOTICE([Using $with_krb5_config for build defaults])
 		: "${DEFCCNAME=`$with_krb5_config --defccname`}"
 		: "${DEFKTNAME=`$with_krb5_config --defktname`}"
