@@ -503,7 +503,8 @@ class DoxyFuncs(XML2AST):
     def return_notes_decorator(self, node, value):
         if node.name == 'simplesect':
             if node.attributes['kind'] == 'note':
-                return value
+                # We indent notes with an extra tab.  Do it for all paragraphs.
+                return value.replace("\n  ", "\n\n\t  ");
         else:
             return None
 
