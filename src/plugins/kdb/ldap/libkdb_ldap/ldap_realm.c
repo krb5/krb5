@@ -70,72 +70,25 @@ char  *krbContainerRefclass[] = { "krbContainerRefAux", NULL};
  * list realms from eDirectory
  */
 
-/*
- * Function to remove all special characters from a string (rfc2254).
- * Use whenever exact matching is to be done ...
- */
+/* Return a copy of in, quoting all characters which are special in an LDAP
+ * filter (RFC 4515) or DN string (RFC 4514).  Return NULL on failure. */
 char *
 ldap_filter_correct (char *in)
 {
-    size_t i, count;
-    char *out, *ptr;
-    size_t len = strlen(in);
+    size_t count;
+    const char special[] = "*()\\ #\"+,;<>";
+    struct k5buf buf;
 
-    for (i = 0, count = 0; i < len; i++)
-        switch (in[i]) {
-        case '*':
-        case '(':
-        case ')':
-        case '\\':
-        case '\0':
-            count ++;
-        }
-
-    out = (char *)malloc((len + (count * 2) + 1) * sizeof (char));
-    assert (out != NULL);
-    memset(out, 0, len + (count * 2) + 1);
-
-    for (i = 0, ptr = out; i < len; i++)
-        switch (in[i]) {
-        case '*':
-            ptr[0] = '\\';
-            ptr[1] = '2';
-            ptr[2] = 'a';
-            ptr += 3;
+    krb5int_buf_init_dynamic(&buf);
+    while (TRUE) {
+        count = strcspn(in, special);
+        krb5int_buf_add_len(&buf, in, count);
+        in += count;
+        if (*in == '\0')
             break;
-        case '(':
-            ptr[0] = '\\';
-            ptr[1] = '2';
-            ptr[2] = '8';
-            ptr += 3;
-            break;
-        case ')':
-            ptr[0] = '\\';
-            ptr[1] = '2';
-            ptr[2] = '9';
-            ptr += 3;
-            break;
-        case '\\':
-            ptr[0] = '\\';
-            ptr[1] = '5';
-            ptr[2] = 'c';
-            ptr += 3;
-            break;
-        case '\0':
-            ptr[0] = '\\';
-            ptr[1] = '0';
-            ptr[2] = '0';
-            ptr += 3;
-            break;
-        default:
-            ptr[0] = in[i];
-            ptr += 1;
-            break;
-        }
-
-    /* ptr[count - 1] = '\0'; */
-
-    return out;
+        krb5int_buf_add_fmt(&buf, "\\%2x", (unsigned char)*in++);
+    }
+    return krb5int_buf_data(&buf);
 }
 
 static int

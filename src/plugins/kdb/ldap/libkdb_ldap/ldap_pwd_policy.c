@@ -140,7 +140,7 @@ krb5_ldap_create_password_policy(krb5_context context, osa_policy_ent_t policy)
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
-    char                        **rdns=NULL, *strval[2]={NULL}, *policy_dn;
+    char                        *strval[2]={NULL}, *policy_dn;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -156,16 +156,7 @@ krb5_ldap_create_password_policy(krb5_context context, osa_policy_ent_t policy)
     if (st != 0)
         goto cleanup;
 
-    /* get the first component of the dn to set the cn attribute */
-    rdns = ldap_explode_dn(policy_dn, 1);
-    if (rdns == NULL) {
-        st = EINVAL;
-        krb5_set_error_message(context, st,
-                               _("Invalid password policy DN syntax"));
-        goto cleanup;
-    }
-
-    strval[0] = rdns[0];
+    strval[0] = policy->name;
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "cn", LDAP_MOD_ADD, strval)) != 0)
         goto cleanup;
 
@@ -184,9 +175,6 @@ krb5_ldap_create_password_policy(krb5_context context, osa_policy_ent_t policy)
     }
 
 cleanup:
-    if (rdns)
-        ldap_value_free(rdns);
-
     if (policy_dn != NULL)
         free (policy_dn);
     ldap_mods_free(mods, 1);

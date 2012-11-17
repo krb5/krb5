@@ -264,8 +264,6 @@ if out:
 # We could still use tests to exercise:
 # * DB arg handling in krb5_ldap_create
 # * krbAllowedToDelegateTo attribute processing
-# * Special character handling in ldap_filter_correct (some bugs to
-#   fix first, see #7296 and September 2012 krbdev discussion)
 # * A load operation overwriting a standalone principal entry which
 #   already exists but doesn't have a krbPrincipalName attribute
 #   matching the principal name.

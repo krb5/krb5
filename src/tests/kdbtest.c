@@ -67,8 +67,8 @@ check_cond(int value, int lineno)
 }
 
 static krb5_data princ_data[2] = {
-    { KV5M_DATA, 3, "xyz" },
-    { KV5M_DATA, 3, "abc" }
+    { KV5M_DATA, 6, "xy*(z)" },
+    { KV5M_DATA, 12, "+<> *()\\#\",;" }
 };
 
 static krb5_principal_data sample_princ = {
@@ -88,14 +88,14 @@ static krb5_principal_data xrealm_princ = {
 /*
  * tl1 through tl4 are normalized to attributes in the LDAP back end.  tl5 is
  * stored as untranslated tl-data.  tl3 contains an encoded osa_princ_ent with
- * a policy reference to "testpol".
+ * a policy reference to "<test*>".
  */
 static krb5_tl_data tl5 = { NULL, KRB5_TL_MKVNO, 2, U("\0\1") };
 static krb5_tl_data tl4 = { &tl5, KRB5_TL_LAST_ADMIN_UNLOCK, 4,
                             U("\6\0\0\0") };
 static krb5_tl_data tl3 = { &tl4, KRB5_TL_KADM_DATA, 32,
                             U("\x12\x34\x5C\x01\x00\x00\x00\x08"
-                              "\x74\x65\x73\x74\x70\x6F\x6C\x00"
+                              "\x3C\x74\x65\x73\x74\x2A\x3E\x00"
                               "\x00\x00\x08\x00\x00\x00\x00\x00"
                               "\x00\x00\x00\x02\x00\x00\x00\x00") };
 static krb5_tl_data tl2 = { &tl3, KRB5_TL_MOD_PRINC, 8, U("\5\6\7\0x@Y\0") };
@@ -131,6 +131,8 @@ static krb5_key_data keys[] = {
 };
 #undef U
 
+static char polname[] = "<test*>";
+
 static krb5_db_entry sample_entry = {
     0,
     KRB5_KDB_V1_BASE_LENGTH,
@@ -159,7 +161,7 @@ static krb5_db_entry sample_entry = {
 
 static osa_policy_ent_rec sample_policy = {
     0,                          /* version */
-    "testpol",                  /* name */
+    polname,                    /* name */
     1357,                       /* pw_min_life */
     100,                        /* pw_max_life */
     6,                          /* pw_min_length */
@@ -294,24 +296,24 @@ main()
     CHECK(krb5_db_open(ctx, NULL, KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN));
     CHECK(krb5_db_inited(ctx));
 
-    /* Manipulate a policy, leaving testpol in place at the end. */
+    /* Manipulate a policy, leaving it in place at the end. */
     CHECK_COND(krb5_db_put_policy(ctx, &sample_policy) != 0);
-    CHECK_COND(krb5_db_delete_policy(ctx, "testpol") != 0);
-    CHECK_COND(krb5_db_get_policy(ctx, "testpol", &pol) == KRB5_KDB_NOENTRY);
+    CHECK_COND(krb5_db_delete_policy(ctx, polname) != 0);
+    CHECK_COND(krb5_db_get_policy(ctx, polname, &pol) == KRB5_KDB_NOENTRY);
     CHECK(krb5_db_create_policy(ctx, &sample_policy));
     CHECK_COND(krb5_db_create_policy(ctx, &sample_policy) != 0);
-    CHECK(krb5_db_get_policy(ctx, "testpol", &pol));
+    CHECK(krb5_db_get_policy(ctx, polname, &pol));
     check_policy(pol);
     pol->pw_min_length--;
     CHECK(krb5_db_put_policy(ctx, pol));
     krb5_db_free_policy(ctx, pol);
-    CHECK(krb5_db_get_policy(ctx, "testpol", &pol));
+    CHECK(krb5_db_get_policy(ctx, polname, &pol));
     CHECK_COND(pol->pw_min_length == sample_policy.pw_min_length - 1);
     krb5_db_free_policy(ctx, pol);
-    CHECK(krb5_db_delete_policy(ctx, "testpol"));
+    CHECK(krb5_db_delete_policy(ctx, polname));
     CHECK_COND(krb5_db_put_policy(ctx, &sample_policy) != 0);
-    CHECK_COND(krb5_db_delete_policy(ctx, "testpol") != 0);
-    CHECK_COND(krb5_db_get_policy(ctx, "testpol", &pol) == KRB5_KDB_NOENTRY);
+    CHECK_COND(krb5_db_delete_policy(ctx, polname) != 0);
+    CHECK_COND(krb5_db_get_policy(ctx, polname, &pol) == KRB5_KDB_NOENTRY);
     CHECK(krb5_db_create_policy(ctx, &sample_policy));
     count = 0;
     CHECK(krb5_db_iter_policy(ctx, NULL, iter_pol_handler, &count));
@@ -375,8 +377,8 @@ main()
     CHECK(krb5_dbe_update_tl_data(ctx, ent, &tl_no_policy));
     ent->mask = KADM5_POLICY_CLR | KADM5_KEY_DATA;
     CHECK(krb5_db_put_principal(ctx, ent));
-    /* Deleting testpol should work now that the reference is gone. */
-    CHECK(krb5_db_delete_policy(ctx, "testpol"));
+    /* Deleting polname should work now that the reference is gone. */
+    CHECK(krb5_db_delete_policy(ctx, polname));
 
     /* Put the modified entry again (with KDB_TL_USER_INFO tl-data for LDAP) as
      * from a load operation. */
@@ -391,7 +393,7 @@ main()
 
     /* Exercise principal iteration code. */
     count = 0;
-    CHECK(krb5_db_iterate(ctx, "xyz*", iter_princ_handler, &count));
+    CHECK(krb5_db_iterate(ctx, "xy*", iter_princ_handler, &count));
     CHECK_COND(count == 1);
 
     CHECK(krb5_db_fini(ctx));

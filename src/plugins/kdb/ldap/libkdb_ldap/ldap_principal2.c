@@ -496,6 +496,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     LDAPMessage                 *result=NULL, *ent=NULL;
     char                        *user=NULL, *subtree=NULL, *principal_dn=NULL;
     char                        **values=NULL, *strval[10]={NULL}, errbuf[1024];
+    char                        *filtuser=NULL;
     struct berval               **bersecretkey=NULL;
     LDAPMod                     **mods=NULL;
     krb5_boolean                create_standalone_prinicipal=FALSE;
@@ -534,6 +535,11 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         if (((st=krb5_unparse_name(context, entry->princ, &user)) != 0) ||
             ((st=krb5_ldap_unparse_principal_name(user)) != 0))
             goto cleanup;
+        filtuser = ldap_filter_correct(user);
+        if (filtuser == NULL) {
+            st = ENOMEM;
+            goto cleanup;
+        }
     }
 
     /* Identity the type of operation, it can be
@@ -554,7 +560,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         goto cleanup;
 
     if (entry->mask & KADM5_LOAD) {
-        int              tree = 0, ntrees = 0, princlen = 0, numlentries = 0;
+        int              tree = 0, ntrees = 0, numlentries = 0;
         char             **subtreelist = NULL, *filter = NULL;
 
         /*  A load operation is special, will do a mix-in (add krbprinc
@@ -572,12 +578,11 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                                      "name not found"));
             goto cleanup;
         }
-        princlen = strlen(FILTER) + strlen(user) + 2 + 1;      /* 2 for closing brackets */
-        if ((filter = malloc(princlen)) == NULL) {
+        if (asprintf(&filter, FILTER"%s))", filtuser) < 0) {
+            filter = NULL;
             st = ENOMEM;
             goto cleanup;
         }
-        snprintf(filter, princlen, FILTER"%s))", user);
 
         /* get the current subtree list */
         if ((st = krb5_get_subtree_info(ldap_context, &subtreelist, &ntrees)) != 0)
@@ -684,7 +689,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         CHECK_NULL(subtree);
 
         if (asprintf(&standalone_principal_dn, "krbprincipalname=%s,%s",
-                     user, subtree) < 0)
+                     filtuser, subtree) < 0)
             standalone_principal_dn = NULL;
         CHECK_NULL(standalone_principal_dn);
         /*
@@ -1261,6 +1266,9 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
 cleanup:
     if (user)
         free(user);
+
+    if (filtuser)
+        free(filtuser);
 
     free_xargs(xargs);
 
