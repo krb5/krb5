@@ -195,7 +195,7 @@ class DoxyTypes(object):
             if prm_list is not None:
                 prm_str = prm_str.join(prm_list)
             d_signature = " %s (%s) " % (d_name , prm_str)
-            d_signature = re.sub(', \)', ')', d_signature)
+            d_signature = re.sub(', \)', ')', d_signature).strip()
 
         if len(node.xpath('./initializer')) > 0:
             len_ref = len(node.xpath('./initializer/ref'))
