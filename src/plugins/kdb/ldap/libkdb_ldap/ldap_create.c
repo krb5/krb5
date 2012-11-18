@@ -59,7 +59,6 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
     krb5_ldap_context *ldap_context=NULL;
     krb5_boolean realm_obj_created = FALSE;
     krb5_boolean krbcontainer_obj_created = FALSE;
-    krb5_ldap_krbcontainer_params kparams = {0};
     int srv_cnt = 0;
     int mask = 0;
 
@@ -218,43 +217,15 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
     }
 
     /* read the kerberos container */
-    if ((status = krb5_ldap_read_krbcontainer_params(context,
-                                                     &(ldap_context->krbcontainer))) == KRB5_KDB_NOENTRY) {
-
-        /* Read the kerberos container location from configuration file */
-        if (ldap_context->conf_section) {
-            if ((status = profile_get_string(context->profile,
-                                             KDB_MODULE_SECTION, ldap_context->conf_section,
-                                             KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
-                                             &kparams.DN)) != 0) {
-                goto cleanup;
-            }
-        }
-        if (kparams.DN == NULL) {
-            if ((status = profile_get_string(context->profile,
-                                             KDB_MODULE_DEF_SECTION,
-                                             KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
-                                             NULL, &kparams.DN)) != 0) {
-                goto cleanup;
-            }
-        }
-
-        /* create the kerberos container */
-        status = krb5_ldap_create_krbcontainer(context,
-                                               ((kparams.DN != NULL) ? &kparams : NULL));
-        if (status)
-            goto cleanup;
-
-        krbcontainer_obj_created = TRUE;
-
-        status = krb5_ldap_read_krbcontainer_params(context,
-                                                    &(ldap_context->krbcontainer));
-        if (status)
-            goto cleanup;
-
-    } else if (status) {
+    status = krb5_ldap_read_krbcontainer_dn(context,
+                                            &ldap_context->container_dn);
+    if (status)
         goto cleanup;
-    }
+
+    status = krb5_ldap_create_krbcontainer(context,
+                                           ldap_context->container_dn);
+    if (status)
+        goto cleanup;
 
     rparams = (krb5_ldap_realm_params *) malloc(sizeof(krb5_ldap_realm_params));
     if (rparams == NULL) {
@@ -287,15 +258,11 @@ cleanup:
     if ((krbcontainer_obj_created) && (!realm_obj_created)) {
         int rc;
         rc = krb5_ldap_delete_krbcontainer(context,
-                                           ((kparams.DN != NULL) ? &kparams : NULL));
+                                           ldap_context->container_dn);
         krb5_set_error_message(context, rc,
                                _("could not complete roll-back, error "
                                  "deleting Kerberos Container"));
     }
-
-    /* should call krb5_ldap_free_krbcontainer_params() but can't */
-    if (kparams.DN != NULL)
-        krb5_xfree(kparams.DN);
 
     if (rparams)
         krb5_ldap_free_realm_params(rparams);

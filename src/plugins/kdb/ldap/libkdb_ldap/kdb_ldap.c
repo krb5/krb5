@@ -113,7 +113,7 @@ krb5_ldap_read_startup_information(krb5_context context)
     int                  mask = 0;
 
     SETUP_CONTEXT();
-    if ((retval=krb5_ldap_read_krbcontainer_params(context, &(ldap_context->krbcontainer)))) {
+    if ((retval=krb5_ldap_read_krbcontainer_dn(context, &(ldap_context->container_dn)))) {
         prepend_err_str(context, _("Unable to read Kerberos container"),
                         retval, retval);
         goto cleanup;

@@ -517,7 +517,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     krb5_clear_error_message(context);
 
     SETUP_CONTEXT();
-    if (ldap_context->lrparams == NULL || ldap_context->krbcontainer == NULL)
+    if (ldap_context->lrparams == NULL || ldap_context->container_dn == NULL)
         return EINVAL;
 
     /* get ldap handle */

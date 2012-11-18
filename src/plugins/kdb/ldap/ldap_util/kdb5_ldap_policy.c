@@ -63,9 +63,9 @@ init_ldap_realm(int argc, char *argv[])
         goto cleanup;
     }
 
-    if (ldap_context->krbcontainer == NULL) {
-        retval = krb5_ldap_read_krbcontainer_params (util_context,
-                                                     &(ldap_context->krbcontainer));
+    if (ldap_context->container_dn == NULL) {
+        retval = krb5_ldap_read_krbcontainer_dn(util_context,
+                                                &ldap_context->container_dn);
         if (retval != 0) {
             com_err(progname, retval,
                     _("while reading kerberos container information"));

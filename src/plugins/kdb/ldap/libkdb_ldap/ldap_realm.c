@@ -130,9 +130,9 @@ krb5_ldap_list_realm(krb5_context context, char ***realms)
     SETUP_CONTEXT ();
 
     /* get the kerberos container DN information */
-    if (ldap_context->krbcontainer == NULL) {
-        if ((st = krb5_ldap_read_krbcontainer_params(context,
-                                                     &(ldap_context->krbcontainer))) != 0)
+    if (ldap_context->container_dn == NULL) {
+        if ((st = krb5_ldap_read_krbcontainer_dn(context,
+                                                 &(ldap_context->container_dn))) != 0)
             goto cleanup;
     }
 
@@ -141,7 +141,7 @@ krb5_ldap_list_realm(krb5_context context, char ***realms)
 
     {
         char *cn[] = {"cn", NULL};
-        LDAP_SEARCH(ldap_context->krbcontainer->DN,
+        LDAP_SEARCH(ldap_context->container_dn,
                     LDAP_SCOPE_ONELEVEL,
                     "(objectclass=krbRealmContainer)",
                     cn);
@@ -359,7 +359,7 @@ krb5_ldap_modify_realm(krb5_context context, krb5_ldap_realm_params *rparams,
     SETUP_CONTEXT ();
 
     /* Check validity of arguments */
-    if (ldap_context->krbcontainer == NULL ||
+    if (ldap_context->container_dn == NULL ||
         rparams->tl_data == NULL ||
         rparams->tl_data->tl_data_contents == NULL ||
         ((mask & LDAP_REALM_SUBTREE) && rparams->subtree == NULL) ||
@@ -474,17 +474,14 @@ cleanup:
 
 
 /*
- * Create the Kerberos container in the Directory
+ * Create the Kerberos container in the Directory if it does not exist
  */
 
 krb5_error_code
-krb5_ldap_create_krbcontainer(krb5_context context,
-                              const
-                              krb5_ldap_krbcontainer_params *krbcontparams)
+krb5_ldap_create_krbcontainer(krb5_context context, const char *dn)
 {
     LDAP                        *ld=NULL;
-    char                        *strval[2]={NULL}, *kerberoscontdn=NULL, **rdns=NULL;
-    int                         pmask=0;
+    char                        *strval[2]={NULL}, **rdns=NULL;
     LDAPMod                     **mods = NULL;
     krb5_error_code             st=0;
     kdb5_dal_handle             *dal_handle=NULL;
@@ -496,9 +493,7 @@ krb5_ldap_create_krbcontainer(krb5_context context,
     /* get ldap handle */
     GET_HANDLE ();
 
-    if (krbcontparams != NULL && krbcontparams->DN != NULL) {
-        kerberoscontdn = krbcontparams->DN;
-    } else {
+    if (dn == NULL) {
         st = EINVAL;
         krb5_set_error_message(context, st,
                                _("Kerberos Container information is missing"));
@@ -510,7 +505,7 @@ krb5_ldap_create_krbcontainer(krb5_context context,
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
         goto cleanup;
 
-    rdns = ldap_explode_dn(kerberoscontdn, 1);
+    rdns = ldap_explode_dn(dn, 1);
     if (rdns == NULL) {
         st = EINVAL;
         krb5_set_error_message(context, st,
@@ -523,21 +518,11 @@ krb5_ldap_create_krbcontainer(krb5_context context,
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "cn", LDAP_MOD_ADD, strval)) != 0)
         goto cleanup;
 
-    /* check if the policy reference value exists and is of krbticketpolicyreference object class */
-    if (krbcontparams && krbcontparams->policyreference) {
-        st = checkattributevalue(ld, krbcontparams->policyreference, "objectclass", policyclass,
-                                 &pmask);
-        CHECK_CLASS_VALIDITY(st, pmask, _("ticket policy object value: "));
-
-        strval[0] = krbcontparams->policyreference;
-        strval[1] = NULL;
-        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbticketpolicyreference", LDAP_MOD_ADD,
-                                          strval)) != 0)
-            goto cleanup;
-    }
-
     /* create the kerberos container */
-    if ((st = ldap_add_ext_s(ld, kerberoscontdn, mods, NULL, NULL)) != LDAP_SUCCESS) {
+    st = ldap_add_ext_s(ld, dn, mods, NULL, NULL);
+    if (st == LDAP_ALREADY_EXISTS)
+        st = LDAP_SUCCESS;
+    if (st != LDAP_SUCCESS) {
         int ost = st;
         st = translate_ldap_error (st, OP_ADD);
         krb5_set_error_message(context, st,
@@ -561,12 +546,9 @@ cleanup:
  */
 
 krb5_error_code
-krb5_ldap_delete_krbcontainer(krb5_context context,
-                              const
-                              krb5_ldap_krbcontainer_params *krbcontparams)
+krb5_ldap_delete_krbcontainer(krb5_context context, const char *dn)
 {
     LDAP                        *ld=NULL;
-    char                        *kerberoscontdn=NULL;
     krb5_error_code             st=0;
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
@@ -577,9 +559,7 @@ krb5_ldap_delete_krbcontainer(krb5_context context,
     /* get ldap handle */
     GET_HANDLE ();
 
-    if (krbcontparams != NULL && krbcontparams->DN != NULL) {
-        kerberoscontdn = krbcontparams->DN;
-    } else {
+    if (dn == NULL) {
         st = EINVAL;
         krb5_set_error_message(context, st,
                                _("Kerberos Container information is missing"));
@@ -587,7 +567,7 @@ krb5_ldap_delete_krbcontainer(krb5_context context,
     }
 
     /* delete the kerberos container */
-    if ((st = ldap_delete_ext_s(ld, kerberoscontdn, NULL, NULL)) != LDAP_SUCCESS) {
+    if ((st = ldap_delete_ext_s(ld, dn, NULL, NULL)) != LDAP_SUCCESS) {
         int ost = st;
         st = translate_ldap_error (st, OP_ADD);
         krb5_set_error_message(context, st,
@@ -626,8 +606,7 @@ krb5_ldap_create_realm(krb5_context context, krb5_ldap_realm_params *rparams,
     SETUP_CONTEXT ();
 
     /* Check input validity ... */
-    if (ldap_context->krbcontainer == NULL ||
-        ldap_context->krbcontainer->DN == NULL ||
+    if (ldap_context->container_dn == NULL ||
         rparams == NULL ||
         rparams->realm_name == NULL ||
         ((mask & LDAP_REALM_SUBTREE) && rparams->subtree  == NULL) ||
@@ -638,19 +617,12 @@ krb5_ldap_create_realm(krb5_context context, krb5_ldap_realm_params *rparams,
         return st;
     }
 
-    if (ldap_context->krbcontainer == NULL) {
-        if ((st = krb5_ldap_read_krbcontainer_params(context,
-                                                     &(ldap_context->krbcontainer))) != 0)
-            goto cleanup;
-    }
-
     /* get ldap handle */
     GET_HANDLE ();
 
     realm_name = rparams->realm_name;
 
-    if (asprintf(&dn, "cn=%s,%s", realm_name,
-                 ldap_context->krbcontainer->DN) < 0)
+    if (asprintf(&dn, "cn=%s,%s", realm_name, ldap_context->container_dn) < 0)
         dn = NULL;
     CHECK_NULL(dn);
 
@@ -758,7 +730,7 @@ krb5_error_code
 krb5_ldap_read_realm_params(krb5_context context, char *lrealm,
                             krb5_ldap_realm_params **rlparamp, int *mask)
 {
-    char                   **values=NULL, *krbcontDN=NULL /*, *curr=NULL */;
+    char                   **values=NULL;
     krb5_error_code        st=0, tempst=0;
     LDAP                   *ld=NULL;
     LDAPMessage            *result=NULL,*ent=NULL;
@@ -771,19 +743,11 @@ krb5_ldap_read_realm_params(krb5_context context, char *lrealm,
     SETUP_CONTEXT ();
 
     /* validate the input parameter */
-    if (lrealm == NULL ||
-        ldap_context->krbcontainer == NULL ||
-        ldap_context->krbcontainer->DN == NULL) {
+    if (lrealm == NULL || ldap_context->container_dn == NULL) {
         st = EINVAL;
         goto cleanup;
     }
 
-    /* read kerberos container, if not read already */
-    if (ldap_context->krbcontainer == NULL) {
-        if ((st = krb5_ldap_read_krbcontainer_params(context,
-                                                     &(ldap_context->krbcontainer))) != 0)
-            goto cleanup;
-    }
     /* get ldap handle */
     GET_HANDLE ();
 
@@ -807,9 +771,8 @@ krb5_ldap_read_realm_params(krb5_context context, char *lrealm,
     /* set default values */
     rlparams->search_scope = LDAP_SCOPE_SUBTREE;
 
-    krbcontDN = ldap_context->krbcontainer->DN;
-
-    if (asprintf(&rlparams->realmdn, "cn=%s,%s", lrealm, krbcontDN) < 0) {
+    if (asprintf(&rlparams->realmdn, "cn=%s,%s", lrealm,
+                 ldap_context->container_dn) < 0) {
         rlparams->realmdn = NULL;
         st = ENOMEM;
         goto cleanup;

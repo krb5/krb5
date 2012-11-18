@@ -35,28 +35,13 @@
 
 /* kerberos container structure */
 
-typedef struct _krb5_ldap_krbcontainer_params {
-    char            *parent;
-    char            *DN;
-    char            *policyreference;
-    krb5_int32      max_life;
-    krb5_int32      max_renewable_life;
-    krb5_int32      tktflags;
-} krb5_ldap_krbcontainer_params;
-
-void
-krb5_ldap_free_krbcontainer_params(krb5_ldap_krbcontainer_params *);
+krb5_error_code
+krb5_ldap_read_krbcontainer_dn(krb5_context, char **);
 
 krb5_error_code
-krb5_ldap_read_krbcontainer_params(krb5_context,
-                                   krb5_ldap_krbcontainer_params **);
+krb5_ldap_create_krbcontainer(krb5_context, const char *);
 
 krb5_error_code
-krb5_ldap_create_krbcontainer(krb5_context,
-                              const krb5_ldap_krbcontainer_params *);
-
-krb5_error_code
-krb5_ldap_delete_krbcontainer(krb5_context,
-                              const krb5_ldap_krbcontainer_params *);
+krb5_ldap_delete_krbcontainer(krb5_context, const char *);
 
 #endif

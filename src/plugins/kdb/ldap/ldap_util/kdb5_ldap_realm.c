@@ -467,70 +467,35 @@ kdb5_ldap_create(int argc, char *argv[])
     }
 
     /* read the kerberos container */
-    if ((retval=krb5_ldap_read_krbcontainer_params (util_context,
-                                                    &(ldap_context->krbcontainer))) == KRB5_KDB_NOENTRY) {
+    retval = krb5_ldap_read_krbcontainer_dn(util_context,
+                                            &ldap_context->container_dn);
+    if (retval) {
         /* Prompt the user for entering the DN of Kerberos container */
         char krb_location[MAX_KRB_CONTAINER_LEN];
-        krb5_ldap_krbcontainer_params kparams;
         int krb_location_len = 0;
-        memset(&kparams, 0, sizeof(kparams));
 
-        /* Read the kerberos container location from configuration file */
-        if (ldap_context->conf_section) {
-            if ((retval=profile_get_string(util_context->profile,
-                                           KDB_MODULE_SECTION, ldap_context->conf_section,
-                                           KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
-                                           &kparams.DN)) != 0) {
+        printf(_("Enter DN of Kerberos container: "));
+        if (fgets(krb_location, MAX_KRB_CONTAINER_LEN, stdin) != NULL) {
+            /* Remove the newline character at the end */
+            krb_location_len = strlen(krb_location);
+            if ((krb_location[krb_location_len - 1] == '\n') ||
+                (krb_location[krb_location_len - 1] == '\r')) {
+                krb_location[krb_location_len - 1] = '\0';
+                krb_location_len--;
+            }
+            ldap_context->container_dn = strdup(krb_location);
+            if (ldap_context->container_dn == NULL) {
+                retval = ENOMEM;
                 goto cleanup;
             }
         }
-        if (kparams.DN == NULL) {
-            if ((retval=profile_get_string(util_context->profile,
-                                           KDB_MODULE_DEF_SECTION,
-                                           KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
-                                           NULL, &kparams.DN)) != 0) {
-                goto cleanup;
-            }
-        }
-
-        printf(_("\nKerberos container is missing. Creating now...\n"));
-        if (kparams.DN == NULL) {
-            printf(_("Enter DN of Kerberos container: "));
-            if (fgets(krb_location, MAX_KRB_CONTAINER_LEN, stdin) != NULL) {
-                /* Remove the newline character at the end */
-                krb_location_len = strlen(krb_location);
-                if ((krb_location[krb_location_len - 1] == '\n') ||
-                    (krb_location[krb_location_len - 1] == '\r')) {
-                    krb_location[krb_location_len - 1] = '\0';
-                    krb_location_len--;
-                }
-                /* If the user has not given any input, take the default location */
-                else if (krb_location[0] == '\0')
-                    kparams.DN = NULL;
-                else
-                    kparams.DN = krb_location;
-            } else
-                kparams.DN = NULL;
-        }
-
-        /* create the kerberos container */
-        retval = krb5_ldap_create_krbcontainer(util_context,
-                                               ((kparams.DN != NULL) ? &kparams : NULL));
-        if (retval)
-            goto cleanup;
-
-        retval = krb5_ldap_read_krbcontainer_params(util_context,
-                                                    &(ldap_context->krbcontainer));
-        if (retval) {
-            com_err(progname, retval,
-                    _("while reading kerberos container information"));
-            goto cleanup;
-        }
-    } else if (retval) {
-        com_err(progname, retval,
-                _("while reading kerberos container information"));
-        goto cleanup;
     }
+
+    /* create the kerberos container if it doesn't exist */
+    retval = krb5_ldap_create_krbcontainer(util_context,
+                                           ldap_context->container_dn);
+    if (retval)
+        goto cleanup;
 
     if ((retval = krb5_ldap_create_realm(util_context,
                                          /* global_params.realm, */ rparams, mask))) {
@@ -812,8 +777,9 @@ kdb5_ldap_modify(int argc, char *argv[])
         goto cleanup;
     }
 
-    if ((retval = krb5_ldap_read_krbcontainer_params(util_context,
-                                                     &(ldap_context->krbcontainer)))) {
+    retval = krb5_ldap_read_krbcontainer_dn(util_context,
+                                            &ldap_context->container_dn);
+    if (retval) {
         com_err(progname, retval,
                 _("while reading Kerberos container information"));
         goto err_nomsg;
@@ -965,8 +931,9 @@ kdb5_ldap_view(int argc, char *argv[])
     }
 
     /* Read the kerberos container information */
-    if ((retval = krb5_ldap_read_krbcontainer_params(util_context,
-                                                     &(ldap_context->krbcontainer))) != 0) {
+    retval = krb5_ldap_read_krbcontainer_dn(util_context,
+                                            &ldap_context->container_dn);
+    if (retval) {
         com_err(progname, retval,
                 _("while reading kerberos container information"));
         exit_status++;
@@ -1165,8 +1132,9 @@ kdb5_ldap_list(int argc, char *argv[])
     }
 
     /* Read the kerberos container information */
-    if ((retval = krb5_ldap_read_krbcontainer_params(util_context,
-                                                     &(ldap_context->krbcontainer))) != 0) {
+    retval = krb5_ldap_read_krbcontainer_dn(util_context,
+                                            &ldap_context->container_dn);
+    if (retval) {
         com_err(progname, retval,
                 _("while reading kerberos container information"));
         exit_status++;
@@ -1175,24 +1143,17 @@ kdb5_ldap_list(int argc, char *argv[])
 
     retval = krb5_ldap_list_realm(util_context, &list);
     if (retval != 0) {
-        krb5_ldap_free_krbcontainer_params(ldap_context->krbcontainer);
-        ldap_context->krbcontainer = NULL;
         com_err(progname, retval, _("while listing realms"));
         exit_status++;
         return;
     }
     /* This is to handle the case of realm not present */
-    if (list == NULL) {
-        krb5_ldap_free_krbcontainer_params(ldap_context->krbcontainer);
-        ldap_context->krbcontainer = NULL;
+    if (list == NULL)
         return;
-    }
 
     for (plist = list; *plist != NULL; plist++) {
         printf("%s\n", *plist);
     }
-    krb5_ldap_free_krbcontainer_params(ldap_context->krbcontainer);
-    ldap_context->krbcontainer = NULL;
     krb5_free_list_entries(list);
     free(list);
 
@@ -1589,9 +1550,10 @@ kdb5_ldap_destroy(int argc, char *argv[])
         return;
     }
 
-    /* Read the kerberos container from the LDAP Server */
-    if ((retval = krb5_ldap_read_krbcontainer_params(util_context,
-                                                     &(ldap_context->krbcontainer))) != 0) {
+    /* Read the kerberos container DN */
+    retval = krb5_ldap_read_krbcontainer_dn(util_context,
+                                            &ldap_context->container_dn);
+    if (retval) {
         com_err(progname, retval,
                 _("while reading kerberos container information"));
         exit_status++;

@@ -334,8 +334,8 @@ krb5_ldap_free_ldap_context(krb5_ldap_context *ldap_context)
     if (ldap_context == NULL)
         return 0;
 
-    krb5_ldap_free_krbcontainer_params(ldap_context->krbcontainer);
-    ldap_context->krbcontainer = NULL;
+    free(ldap_context->container_dn);
+    ldap_context->container_dn = NULL;
 
     krb5_ldap_free_realm_params(ldap_context->lrparams);
     ldap_context->lrparams = NULL;

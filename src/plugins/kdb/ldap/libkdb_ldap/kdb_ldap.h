@@ -212,7 +212,7 @@ typedef struct _krb5_ldap_context {
     krb5_ldap_certificates        **certificates;
     krb5_ui_4                     cert_count; /* certificate count */
     k5_mutex_t                    hndl_lock;
-    krb5_ldap_krbcontainer_params *krbcontainer;
+    char                          *container_dn;
     krb5_ldap_realm_params        *lrparams;
     krb5_boolean                  disable_last_success;
     krb5_boolean                  disable_lockout;

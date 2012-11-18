@@ -32,67 +32,29 @@
 #include "kdb_ldap.h"
 #include "ldap_err.h"
 
-char    *policyrefattribute[] = {"krbTicketPolicyReference",NULL};
-char    *krbcontainerrefattr[] = {"krbContainerReference", NULL};
-
 /*
- *  Free the krb5_ldap_krbcontainer_params
- */
-
-void
-krb5_ldap_free_krbcontainer_params(krb5_ldap_krbcontainer_params *cparams)
-{
-    if (cparams == NULL)
-        return;
-
-    if (cparams->policyreference)
-        krb5_xfree(cparams->policyreference);
-
-    if (cparams->parent)
-        krb5_xfree(cparams->parent);
-
-    if (cparams->DN)
-        krb5_xfree(cparams->DN);
-
-    krb5_xfree(cparams);
-
-    return;
-}
-
-/*
- * Read the kerberos container. Kerberos container dn is read from the krb5.conf file.
- * In case of eDirectory, if the dn is not present in the conf file, refer Security Container
- * to fetch the dn information.
- *
- * Reading kerberos container includes reading the policyreference attribute and the policy
- * object to read the attributes associated with it.
+ * Read the kerberos container location from krb5.conf.
  */
 
 krb5_error_code
-krb5_ldap_read_krbcontainer_params(krb5_context context,
-                                   krb5_ldap_krbcontainer_params **cparamp)
-
+krb5_ldap_read_krbcontainer_dn(krb5_context context, char **container_dn)
 {
-    krb5_error_code                 st=0, tempst=0;
+    krb5_error_code                 st=0;
     LDAP                            *ld=NULL;
-    LDAPMessage                     *result=NULL, *ent=NULL;
-    krb5_ldap_krbcontainer_params   *cparams=NULL;
+    char                            *dn=NULL;
     kdb5_dal_handle                 *dal_handle=NULL;
     krb5_ldap_context               *ldap_context=NULL;
     krb5_ldap_server_handle         *ldap_server_handle=NULL;
 
+    *container_dn = NULL;
     SETUP_CONTEXT();
     GET_HANDLE();
-
-    cparams =(krb5_ldap_krbcontainer_params *) malloc(sizeof(krb5_ldap_krbcontainer_params));
-    CHECK_NULL(cparams);
-    memset(cparams, 0, sizeof(krb5_ldap_krbcontainer_params));
 
     /* read kerberos containter location from [dbmodules] section of krb5.conf file */
     if (ldap_context->conf_section) {
         if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, ldap_context->conf_section,
                                    KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
-                                   &cparams->DN)) != 0) {
+                                   &dn)) != 0) {
             krb5_set_error_message(context, st,
                                    _("Error reading kerberos container "
                                      "location from krb5.conf"));
@@ -101,10 +63,10 @@ krb5_ldap_read_krbcontainer_params(krb5_context context,
     }
 
     /* read kerberos containter location from [dbdefaults] section of krb5.conf file */
-    if (cparams->DN == NULL) {
+    if (dn == NULL) {
         if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
                                    KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
-                                   NULL, &cparams->DN)) != 0) {
+                                   NULL, &dn)) != 0) {
             krb5_set_error_message(context, st,
                                    _("Error reading kerberos container "
                                      "location from krb5.conf"));
@@ -112,57 +74,16 @@ krb5_ldap_read_krbcontainer_params(krb5_context context,
         }
     }
 
-    if (cparams->DN == NULL) {
+    if (dn == NULL) {
         st = KRB5_KDB_SERVER_INTERNAL_ERR;
         krb5_set_error_message(context, st,
                                _("Kerberos container location not specified"));
         goto cleanup;
     }
 
-    /* NOTE: krbmaxtktlife, krbmaxrenewableage ... present on Kerberos Container is
-     * not read
-     */
-    LDAP_SEARCH_1(cparams->DN, LDAP_SCOPE_BASE, "(objectclass=krbContainer)", policyrefattribute, IGNORE_STATUS);
-    if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_OBJECT) {
-        st = set_ldap_error(context, st, OP_SEARCH);
-        goto cleanup;
-    }
-
-    if (st == LDAP_NO_SUCH_OBJECT) {
-        st = KRB5_KDB_NOENTRY;
-        goto cleanup;
-    }
-
-    if ((ent = ldap_first_entry(ld, result))) {
-        if ((st=krb5_ldap_get_string(ld, ent, "krbticketpolicyreference",
-                                     &(cparams->policyreference), NULL)) != 0)
-            goto cleanup;
-    }
-    ldap_msgfree(result);
-
-    if (cparams->policyreference != NULL) {
-        LDAP_SEARCH_1(cparams->policyreference, LDAP_SCOPE_BASE, NULL, policy_attributes, IGNORE_STATUS);
-        if (st != LDAP_SUCCESS && st!= LDAP_NO_SUCH_OBJECT) {
-            st = set_ldap_error(context, st, OP_SEARCH);
-            goto cleanup;
-        }
-        st = LDAP_SUCCESS; /* reset the return status in case it is LDAP_NO_SUCH_OBJECT */
-
-        ent=ldap_first_entry(ld, result);
-        if (ent != NULL) {
-            krb5_ldap_get_value(ld, ent, "krbmaxtktlife", &(cparams->max_life));
-            krb5_ldap_get_value(ld, ent, "krbmaxrenewableage", &(cparams->max_renewable_life));
-            krb5_ldap_get_value(ld, ent, "krbticketflags", &(cparams->tktflags));
-        }
-        ldap_msgfree(result);
-    }
-    *cparamp=cparams;
+    *container_dn = dn;
 
 cleanup:
-    if (st != 0) {
-        krb5_ldap_free_krbcontainer_params(cparams);
-        *cparamp=NULL;
-    }
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
 }
