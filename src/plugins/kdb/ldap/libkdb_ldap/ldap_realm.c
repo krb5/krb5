@@ -43,7 +43,6 @@
 char  *realm_attributes[] = {"krbSearchScope","krbSubTrees", "krbPrincContainerRef",
                              "krbMaxTicketLife", "krbMaxRenewableAge",
                              "krbTicketFlags", "krbUpEnabled",
-                             "krbTicketPolicyReference",
                              "krbLdapServers",
                              "krbKdcServers",  "krbAdmServers",
                              "krbPwdServers", NULL};
@@ -611,7 +610,6 @@ krb5_ldap_create_realm(krb5_context context, krb5_ldap_realm_params *rparams,
         rparams->realm_name == NULL ||
         ((mask & LDAP_REALM_SUBTREE) && rparams->subtree  == NULL) ||
         ((mask & LDAP_REALM_CONTREF) && rparams->containerref == NULL) ||
-        ((mask & LDAP_REALM_POLICYREFERENCE) && rparams->policyreference == NULL) ||
         0) {
         st = EINVAL;
         return st;
@@ -861,53 +859,6 @@ krb5_ldap_read_realm_params(krb5_context context, char *lrealm,
 
     }
     ldap_msgfree(result);
-
-    /*
-     * If all of maxtktlife, maxrenewlife and ticketflags are not directly
-     * available, use the policy dn from the policy reference attribute, if
-     * available, to fetch the missing.
-     */
-
-    if ((!(*mask & LDAP_REALM_MAXTICKETLIFE && *mask & LDAP_REALM_MAXRENEWLIFE &&
-           *mask & LDAP_REALM_KRBTICKETFLAGS)) && rlparams->policyreference) {
-
-        LDAP_SEARCH_1(rlparams->policyreference, LDAP_SCOPE_BASE, NULL, policy_attributes, IGNORE_STATUS);
-        if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_OBJECT) {
-            int ost = st;
-            st = translate_ldap_error (st, OP_SEARCH);
-            krb5_set_error_message(context, st,
-                                   _("Policy object read failed: %s"),
-                                   ldap_err2string(ost));
-            goto cleanup;
-        }
-        ent = ldap_first_entry (ld, result);
-        if (ent != NULL) {
-            if ((*mask & LDAP_REALM_MAXTICKETLIFE) == 0) {
-                if ((values=ldap_get_values(ld, ent, "krbmaxticketlife")) != NULL) {
-                    rlparams->max_life = atoi(values[0]);
-                    *mask |= LDAP_REALM_MAXTICKETLIFE;
-                    ldap_value_free(values);
-                }
-            }
-
-            if ((*mask & LDAP_REALM_MAXRENEWLIFE) == 0) {
-                if ((values=ldap_get_values(ld, ent, "krbmaxrenewableage")) != NULL) {
-                    rlparams->max_renewable_life = atoi(values[0]);
-                    *mask |= LDAP_REALM_MAXRENEWLIFE;
-                    ldap_value_free(values);
-                }
-            }
-
-            if ((*mask & LDAP_REALM_KRBTICKETFLAGS) == 0) {
-                if ((values=ldap_get_values(ld, ent, "krbticketflags")) != NULL) {
-                    rlparams->tktflags = atoi(values[0]);
-                    *mask |= LDAP_REALM_KRBTICKETFLAGS;
-                    ldap_value_free(values);
-                }
-            }
-        }
-        ldap_msgfree(result);
-    }
 
     rlparams->mask = *mask;
     *rlparamp = rlparams;

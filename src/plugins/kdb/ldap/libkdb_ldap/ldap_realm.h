@@ -34,7 +34,7 @@
 /* realm specific mask */
 #define LDAP_REALM_SUBTREE            0x0001
 #define LDAP_REALM_SEARCHSCOPE        0x0002
-#define LDAP_REALM_POLICYREFERENCE    0x0004
+/* 0x0004 was LDAP_REALM_POLICYREFERENCE but it was unused */
 #define LDAP_REALM_UPENABLED          0x0008
 #define LDAP_REALM_LDAPSERVERS        0x0010
 #define LDAP_REALM_KDCSERVERS         0x0020
@@ -56,7 +56,6 @@ typedef struct _krb5_ldap_realm_params {
     char          *realm_name;
     char          **subtree;
     char          *containerref;
-    char          *policyreference;
     int           search_scope;
     int           upenabled;
     int           subtreecount;
