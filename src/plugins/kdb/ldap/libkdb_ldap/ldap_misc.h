@@ -39,18 +39,6 @@
 /* misc functions */
 
 krb5_error_code
-updateAttribute (LDAP *, char *, char *, char  *);
-
-krb5_error_code
-deleteAttribute (LDAP *, char *, char *, char *);
-
-krb5_error_code
-populateServers(LDAP *, char **, char ***, char *, char **);
-
-krb5_error_code
-disjoint_members(char **, char **);
-
-krb5_error_code
 is_principal_in_realm(krb5_ldap_context *, krb5_const_principal);
 
 krb5_error_code
@@ -93,9 +81,6 @@ krb5_error_code
 krb5_ldap_free_server_params(krb5_ldap_context *);
 
 krb5_error_code
-copy_arrays(char **, char ***, int);
-
-krb5_error_code
 krb5_ldap_list(krb5_context, char ***, char *, char *);
 
 krb5_error_code
@@ -118,9 +103,6 @@ krb5_add_str_mem_ldap_mod(LDAPMod  ***, char *, int, char **);
 
 krb5_error_code
 krb5_add_ber_mem_ldap_mod(LDAPMod  ***, char *, int, struct berval **);
-
-krb5_error_code
-krb5_add_int_arr_mem_ldap_mod(LDAPMod  ***, char *, int, int *);
 
 krb5_error_code
 krb5_add_int_mem_ldap_mod(LDAPMod  ***, char *, int , int);

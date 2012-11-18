@@ -37,7 +37,6 @@ krb5_ldap_free_server_context_params
 krb5_ldap_free_krbcontainer_params
 krb5_ldap_alloc
 krb5_ldap_free
-disjoint_members
 krb5_ldap_delete_realm_1
 krb5_ldap_lock
 krb5_ldap_unlock

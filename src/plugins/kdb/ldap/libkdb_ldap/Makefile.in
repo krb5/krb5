@@ -9,10 +9,8 @@ PROG_RPATH=$(KRB5_LIBDIR)
 # is keeping them separate important?
 DEFINES = \
 	-Dkrb5_dbe_lookup_last_pwd_change=kdb_ldap_dbe_lookup_last_pwd_change \
-	-Dkrb5_dbe_lookup_mod_princ_data=kdb_ldap_dbe_lookup_mod_princ_data \
 	-Dkrb5_dbe_lookup_tl_data=kdb_ldap_dbe_lookup_tl_data \
 	-Dkrb5_dbe_update_last_pwd_change=kdb_ldap_dbe_update_last_pwd_change \
-	-Dkrb5_dbe_update_mod_princ_data=kdb_ldap_dbe_update_mod_princ_data \
 	-Dkrb5_dbe_update_tl_data=kdb_ldap_dbe_update_tl_data
 DEFS=
 
