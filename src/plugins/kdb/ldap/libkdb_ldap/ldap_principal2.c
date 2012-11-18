@@ -531,15 +531,13 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     }
 
     /* get the principal information to act on */
-    if (entry->princ) {
-        if (((st=krb5_unparse_name(context, entry->princ, &user)) != 0) ||
-            ((st=krb5_ldap_unparse_principal_name(user)) != 0))
-            goto cleanup;
-        filtuser = ldap_filter_correct(user);
-        if (filtuser == NULL) {
-            st = ENOMEM;
-            goto cleanup;
-        }
+    if (((st=krb5_unparse_name(context, entry->princ, &user)) != 0) ||
+        ((st=krb5_ldap_unparse_principal_name(user)) != 0))
+        goto cleanup;
+    filtuser = ldap_filter_correct(user);
+    if (filtuser == NULL) {
+        st = ENOMEM;
+        goto cleanup;
     }
 
     /* Identity the type of operation, it can be
@@ -570,14 +568,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
          *  krbprincipalname attribute is unique (only one object entry has
          *  a particular krbprincipalname attribute).
          */
-        if (user == NULL) {
-            /* must have principal name for search */
-            st = EINVAL;
-            krb5_set_error_message(context, st,
-                                   _("operation can not continue, principal "
-                                     "name not found"));
-            goto cleanup;
-        }
         if (asprintf(&filter, FILTER"%s))", filtuser) < 0) {
             filter = NULL;
             st = ENOMEM;
