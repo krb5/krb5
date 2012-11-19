@@ -342,7 +342,7 @@ void
 krb5int_trace(krb5_context context, const char *fmt, ...)
 {
     va_list ap;
-    struct krb5_trace_info info;
+    krb5_trace_info info;
     char *str = NULL, *msg = NULL;
     krb5_int32 sec, usec;
 
@@ -378,7 +378,7 @@ krb5_set_trace_callback(krb5_context context, krb5_trace_callback fn,
 }
 
 static void KRB5_CALLCONV
-file_trace_cb(krb5_context context, const struct krb5_trace_info *info, void *data)
+file_trace_cb(krb5_context context, const krb5_trace_info *info, void *data)
 {
     int *fd = data;
 
