@@ -191,15 +191,15 @@ pointsize = '10pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('admin/index', 'admin.tex', u"Administration Guide", u'MIT',
+  ('admin/index', 'admin.tex', u"Kerberos Administration Guide", u'MIT',
    'manual'),
-  ('appdev/index', 'appdev.tex', u"Application Developer Guide",
+  ('appdev/index', 'appdev.tex', u"Kerberos Application Developer Guide",
    u'MIT', 'manual'),
   ('basic/index', 'basic.tex', u"Kerberos Concepts", u'MIT', 'manual'),
   ('build/index', 'build.tex', u"Building MIT Kerberos", u'MIT', 'manual'),
-  ('plugindev/index', 'plugindev.tex', u"Plugin Module Developer Guide",
+  ('plugindev/index', 'plugindev.tex', u"Kerberos Plugin Module Developer Guide",
    u'MIT', 'manual'),
-  ('user/index', 'user.tex', u"User Guide", u'MIT', 'manual')
+  ('user/index', 'user.tex', u"Kerberos User Guide", u'MIT', 'manual')
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
