@@ -241,8 +241,6 @@ krb5_ldap_read_server_params(krb5_context context, char *conf_section,
             name = KRB5_CONF_LDAP_KDC_DN;
         else if (srv_type == KRB5_KDB_SRV_TYPE_ADMIN)
             name = KRB5_CONF_LDAP_KADMIN_DN;
-        else if (srv_type == KRB5_KDB_SRV_TYPE_PASSWD)
-            name = KRB5_CONF_LDAP_KPASSWDD_DN;
 
         if (name) {
             st = prof_get_string_def (context, conf_section, name,

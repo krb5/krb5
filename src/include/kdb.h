@@ -335,9 +335,7 @@ extern char *krb5_mkey_pwd_prompt2;
 #define KRB5_KDB_SRV_TYPE_ADMIN         0x0200
 #endif
 
-#ifndef KRB5_KDB_SRV_TYPE_PASSWD
-#define KRB5_KDB_SRV_TYPE_PASSWD        0x0300
-#endif
+/* 0x0300 was KRB5_KDB_SRV_TYPE_PASSWD but it is no longer used. */
 
 #ifndef KRB5_KDB_SRV_TYPE_OTHER
 #define KRB5_KDB_SRV_TYPE_OTHER         0x0400

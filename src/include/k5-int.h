@@ -244,7 +244,6 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_LDAP_KADMIN_DN              "ldap_kadmind_dn"
 #define KRB5_CONF_LDAP_KDC_DN                 "ldap_kdc_dn"
 #define KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN  "ldap_kerberos_container_dn"
-#define KRB5_CONF_LDAP_KPASSWDD_DN            "ldap_kpasswdd_dn"
 #define KRB5_CONF_LDAP_SERVERS                "ldap_servers"
 #define KRB5_CONF_LDAP_SERVICE_PASSWORD_FILE  "ldap_service_password_file"
 #define KRB5_CONF_LIBDEFAULTS                 "libdefaults"
