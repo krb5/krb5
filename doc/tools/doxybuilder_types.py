@@ -217,6 +217,8 @@ class DoxyTypes(object):
         d_brief = self._get_brief_description(brief_node)
         details_node = node.xpath('./detaileddescription')[0]
         detailed_description = self._get_detailed_description(details_node)
+        # Condense multiline macros, stripping leading whitespace.
+        d_initializer = re.sub("  *\\\\\n *", " ", d_initializer)
 
         define_descr = {'category': 'composite',
                         'definition': '',
