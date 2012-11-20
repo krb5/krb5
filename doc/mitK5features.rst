@@ -1,5 +1,10 @@
 .. highlight:: rst
 
+.. toctree::
+    :hidden:
+
+    mitK5license.rst
+
 .. _mitK5features:
 
 MIT Kerberos features

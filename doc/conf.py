@@ -256,6 +256,7 @@ if 'notice' in tags:
                           'mitK5*.rst', 'resources.rst' ]
     rst_epilog += '.. |copy| replace:: \(C\)'
 else:
+    exclude_patterns += [ 'notice.rst' ]
     rst_epilog += '.. |bindir| replace:: %s\n' % bindir
     rst_epilog += '.. |sbindir| replace:: %s\n' % sbindir
     rst_epilog += '.. |libdir| replace:: %s\n' % libdir
