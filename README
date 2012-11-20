@@ -60,6 +60,108 @@ beginning with krb5-1.8.
 Major changes in 1.11
 ---------------------
 
+Additional background information on these changes may be found at
+
+    http://k5wiki.kerberos.org/wiki/Release_1.11
+
+and
+
+    http://k5wiki.kerberos.org/wiki/Category:Release_1.11_projects
+
+Code quality:
+
+* Improve ASN.1 support code, making it table-driven for decoding as
+  well as encoding
+
+* Refactor parts of KDC
+
+Developer experience:
+
+* Documentation consolidation
+
+* Add a new API krb5_kt_have_content() to determine whether a keytab
+  exists and contains any entries.
+
+* Add a new API krb5_cccol_have_content() to determine whether the
+  ccache collection contains any credentials.
+
+* Add a new API krb5_kt_client_default() to resolve the default client
+  keytab.
+
+* Add new APIs gss_export_cred and gss_import_cred to serialize and
+  unserialize GSSAPI credentials.
+
+* Add a krb5_get_init_creds_opt_set_in_ccache() option.
+
+* Add get_cc_config() and set_cc_config() clpreauth callbacks for
+  getting string attribute values from an in_ccache and storing them
+  in an out_ccache, respectively.
+
+* Add a plugin interface for GSSAPI interposer mechanisms.
+
+* Add an optional responder callback to the krb5_get_init_creds
+  functions. The responder callback can consider and answer all
+  preauth-related questions at once, and can process more complicated
+  questions than the prompter.
+
+* Add a method to the clpreauth interface to allow modules to supply
+  response items for consideration by the responder callback.
+
+* Projects/Password_response_item
+
+* Add GSSAPI extensions to allow callers to specify credential store
+  locations when acquiring or storing credentials
+
+* Add a new API krb5_kt_client_default() to resolve the default client
+  keytab.
+
+Administrator experience:
+
+* Documentation consolidation
+
+* Add parameter expansion for default_keytab_name and
+  default_client_keytab_name profile variables.
+
+* Add new default_ccache_name profile variable to override the
+  built-in default credential cache name.
+
+* Add configure-time support for changing the built-in ccache and
+  keytab names.
+
+* Add krb5-config options for displaying the built-in ccache and
+  keytab names.
+
+* In the default build, use the system's built-in ccache and keytab
+  names if they can be discovered using krb5-config.
+
+* Add support for a "default client keytab". Its location is
+  determined by the KRB5_CLIENT_KTNAME environment variable, the
+  default_client_keytab profile relation, or a hardcoded path (TBD).
+
+* GSSAPI initiator applications can now acquire credentials
+  automatically from the default client keytab, if one is available.
+
+* Add client support for FAST OTP (RFC 6560)
+
+End-user experience:
+
+* Documentation consolidation
+
+* Store metadata in the ccache about how a credential was acquired, to
+  improve the user's experience when reacquiring
+
+* Projects/Extensible_Policy
+
+Performance:
+
+* Improve KDC lookaside cache performance
+
+Protocol evolution:
+
+* Add client support for FAST OTP (RFC 6560)
+
+* Build Camellia encryption support by default
+
 krb5-1.11 changes by ticket ID
 ------------------------------
 
