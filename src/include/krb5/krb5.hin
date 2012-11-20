@@ -3513,11 +3513,12 @@ krb5_unparse_name(krb5_context context, krb5_const_principal principal,
  * @param [in,out] size         Size of unparsed name
  *
  * This function is similar to krb5_unparse_name(), but allows the use of an
- * existing buffer for the result.  If size is not NULL, then *name must be
- * either NULL or an existing buffer of at least size *size.  The buffer will
- * be allocated or resized if necessary, with the new pointer stored into
- * *name.  Whether or not the buffer is resized, the necessary space for the
- * result, including null terminator, will be stored into *size.
+ * existing buffer for the result.  If size is not NULL, then @a name must
+ * point to either NULL or an existing buffer of at least the size pointed to
+ * by @a size.  The buffer will be allocated or resized if necessary, with the
+ * new pointer stored into @a name.  Whether or not the buffer is resized, the
+ * necessary space for the result, including null terminator, will be stored
+ * into @a size.
  *
  * If size is NULL, this function behaves exactly as krb5_unparse_name().
  *
