@@ -353,6 +353,7 @@ Past and present members of the Kerberos Team at MIT:
     Mark Colan
     Don Davis
     Alexandra Ellwood
+    Carlos Garay
     Dan Geer
     Nancy Gilman
     Matt Hancher
@@ -368,6 +369,7 @@ Past and present members of the Kerberos Team at MIT:
     Kevin Koch
     John Kohl
     HaoQi Li
+    Jonathan Lin
     Peter Litwack
     Scott McGuire
     Steve Miller
@@ -394,18 +396,23 @@ Past and present members of the Kerberos Team at MIT:
 The following external contributors have provided code, patches, bug
 reports, suggestions, and valuable resources:
 
+    Ian Abbott
     Brandon Allbery
     Russell Allbery
     Brian Almeida
     Michael B Allen
+    Heinz-Ado Arnolds
     Derek Atkins
+    Mark Bannister
     David Bantz
     Alex Baule
+    Adam Bernstein
     Arlene Berry
     Jeff Blaine
     Radoslav Bodo
     Emmanuel Bouillon
     Michael Calmer
+    Julien Chaffraix
     Ravi Channavajhala
     Srinivas Cheruku
     Leonardo Chiquitto
@@ -416,17 +423,22 @@ reports, suggestions, and valuable resources:
     Simon Cooper
     Sylvain Cortes
     Nalin Dahyabhai
+    Mark Davies
+    Dennis Davis
+    Mark Deneen
     Roland Dowdeswell
     Jason Edgecombe
     Mark Eichin
     Shawn M. Emery
     Douglas E. Engert
     Peter Eriksson
+    Juha Erkkilä
     Ronni Feldt
     Bill Fellows
     JC Ferguson
     William Fiveash
     Ákos Frohner
+    Sebastian Galiano
     Marcus Granado
     Scott Grizzard
     Helmut Grohne
@@ -434,7 +446,9 @@ reports, suggestions, and valuable resources:
     Philip Guenther
     Dominic Hargreaves
     Jakob Haufe
+    Paul B. Henson
     Jeff Hodges
+    Christopher Hogan
     Love Hörnquist Åstrand
     Ken Hornstein
     Henry B. Hotz
@@ -446,21 +460,35 @@ reports, suggestions, and valuable resources:
     Holger Isenberg
     Pavel Jindra
     Joel Johnson
+    W. Trevor King
     Mikkel Kruse
     Volker Lendecke
     Jan iankko Lieskovsky
+    Oliver Loch
+    Kevin Longfellow
     Ryan Lynch
+    Nathaniel McCallum
+    Greg McClement
+    Cameron Meadors
+    Alexey Melnikov
     Franklyn Mendez
     Markus Moeller
+    Kyle Moffett
     Paul Moore
+    Keiichi Mori
+    Michael Morony
     Zbysek Mraz
     Edward Murrell
     Nikos Nikoleris
+    Felipe Ortega
+    Andrej Ota
     Dmitri Pal
     Javier Palacios
+    Tom Parker
     Ezra Peisach
     W. Michael Petullo
     Mark Phalan
+    Jonathan Reams
     Robert Relyea
     Martin Rex
     Jason Rogers
@@ -469,12 +497,16 @@ reports, suggestions, and valuable resources:
     Tom Shaw
     Peter Shoults
     Simo Sorce
+    Michael Spang
     Michael Ströder
     Bjørn Tore Sund
     Rathor Vipin
     Jorgen Wahlsten
+    Stef Walter
     Max (Weijun) Wang
     John Washington
+    Kevin Wasserman
+    Margaret Wasserman
     Marcus Watts
     Simon Wilkinson
     Nicolas Williams
