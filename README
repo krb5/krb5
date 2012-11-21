@@ -165,6 +165,148 @@ Protocol evolution:
 krb5-1.11 changes by ticket ID
 ------------------------------
 
+2131    krb5_get_init_creds_keytab() doesn't restrict requested
+        enctypes to those in keytab entry
+2545    AFS string_to_key broken for passwords > 8 chars
+5126    krb5_verify_init_creds behaves badly with a ticket cache
+6973    error reporting made worse in gss_acquire_creds
+7025    FAST: error handling and const keyblock
+7026    FAST TGS
+7046    Allow S4U2Proxy delegated credentials to be saved
+7047    Allow S4U2Proxy service tickets to be cached
+7048    Allow null server key to krb5_pac_verify
+7054    Test suite requires python 2.6 or better...
+7061    Fix PKINIT serverDHNonce encoding
+7063    Prompter delay can cause spurious clock skew
+7064    install sphinx-generated manpages
+7072    PKINIT pk_as_rep_draft9 encoding issues
+7073    kadmin.local.8 belongs in ADMIN_mandir
+7080    failures to compile src/lib/krb5/krb/x-deltat.y with GCC 4.7
+7085    Better short/long descs in gss_display_mech_attr
+7086    potential memory leak in krb5int_get_fq_hostname
+7091    Report profile errors when initializing krb5 context
+7094    Fail during configure if unable to find ar
+7097    improve kadm5 acl testing coverage
+7100    trunk a86e885 does not deal with default salt
+7105    side effects in assertions
+7106    documentation nit in tkt_mgmt.rst
+7107    Suppress some gcc uninitialized variable warnings
+7109    Key rollover for MIT/AD cross TGT principals fails due to kvno 0
+7110    Fix password reuse check with cpw -keepold
+7111    Incorrect ASN.1 tag for EncASRepPart in svn trunk
+7112    KRB5_TRACE is broken in trunk
+7113    add tests for trace logging
+7114    Support using kdc time during encrypted timestamp preauth
+7121    password argument to krb5_get_init_creds_password not const
+7125    krb5_verify_init_creds should try all host principals in
+        keytab by default
+7126    Documentation__Building Kerberos V5
+7128    Add API to interpret changepw result strings
+7129    Add krb5_parse_name flag to ignore realm
+7130    kinit to AD server should be more tolerant of clock skew
+7131    [PATCH 1/1] sn2princ.c: add terminal newline to "failed to
+        canonicalize" debug message.
+7133    [PATCH 1/1] trace.c: rename k5trace to krb5int_trace in
+        comments.
+7134    Fix "(null" typo in "{key}" handler in trace.c
+7137    Fix "(empty" typo in "{etypes}" handler in trace.c
+7138    [PATCH] Add missing $(LIBS) to Makefile.in in several
+        directories.
+7139    Remove mention of util/autoconf
+7147    Make doc/coding-style point to wiki page
+7151    Convert DEBUG_REFERRALS to TRACE_* framework
+7158    Add krb5_kt_have_content API
+7159    Fail from gss_acquire_cred if we have no keytab
+7160    gss_acquire_cred for krb5 initiator creds should fail if no
+        tickets exist
+7161    Minor memory leak in default_an_to_ln on error
+7162    krb5_verify_init_creds frees its input argument
+7166    Remove big-endian gss-krb5 support
+7173    Add krb5_cccol_have_content API
+7179    krb5_cc_get_full_name() does not document how to free
+        fullname_out
+7183    PKINIT should handle CMS SignedData without certificates
+7187    ReST html docs render '--' as &#8211 (en dash)
+7188    Add krb5_kt_client_default API
+7189    Add client keytab initiation support
+7190    Try harder to make keytab-based AS requests work
+7192    klist does not use localized time formatting
+7196    Automatically create DIR ccache directories
+7205    Rename 'free' -> 'free_func' in asn1_encode.c/.h
+7211    define USE_HEAPALLOC in gssapi_alloc.h
+7216    Add kinit/klist -i options to use client keytab
+7217    Introduce credential store extensions
+7218    Do something reasonable if "kinit -t" without "-k"
+7219    Add token expansion for keytab names
+7220    Add default_ccache_name profile variable
+7221    Support changing the built-in ccache/keytab names
+7223    Policy extensions + new policy: allowed ks types
+7224    Fix edge-case bugs in kdb5_util load
+7229    Turn off replay cache in krb5_verify_init_creds()
+7242    Add otp client preauth plugin
+7346    Support kdc_timesync offsets in memory ccache
+7347    Add support for GSS_C_NT_COMPOSITE_EXPORT
+7351    Avoid libdl dependencies in bundled libverto
+7354    Introduce gss_export_cred and gss_import_cred
+7355    Add responder feature for initial cred exchanges
+7356    GSSAPI constrained delegation fails with default initiator
+        cred
+7358    Map CANTLOCK_DB to SVC_UNAVAILABLE in krb5kdc
+7359    Use blocking locks in krb5kdc and libkadm5srv
+7360    Fix lock inconsistency in ctx_unlock()
+7364    Update FILES and WINFILES for kerbsrc.zip
+7366    Keep verifier cred locked in accept_sec_context
+7367    Remove kerbsrc.win
+7368    MAX_ULOGENTRIES is too low
+7369    iprop can block for extended periods due to UPDATE_BUSY
+7370    kdb5_util load needs an iprop safety net
+7371    kadmind per-slave ipropd dumps are wasteful
+7372    kadmind hardcodes paths to kdb5_util, kprop, and dump file
+7373    kpropd handling of full resyncs is racy
+7374    iprop full resyncs need testing
+7375    feature request: kproplog -R to reset ulog, force full resync
+7376    kpropd -S option is superfluous
+7377    kdb5_util dump is racy
+7378    k5test.py needs a start_kpropd() method
+7379    kpropd docs are out of date regarding iprop
+7384    kdb5_util dump race can leave policy refcounts incorrect
+7399    Race in kdb5_util load completion
+7400    GENC should always export composite names
+7403    krb5_db_delete_principal() can fail to unlock ulog
+7407    Import remaining content from texinfo to reST
+7408    Remove obsolete texinfo documentation
+7409    rework documentation tree layout
+7413    Add an input ccache get_init_creds option
+7414    Add "pa_type" configuration to ccaches
+7415    Fix sam2 client preauth after salt changes
+7416    Use config storage for client OTP token selection
+7417    Don't expose binary format in preauth otp
+7418    Add dependencies for some test programs
+7419    Alter responder function signature for consistency
+7421    Documentation__krb5_rd_req - Parse and decrypt a KRB_AP_REQ
+        message.
+7422    Only record real selected preauth type
+7423    Document prompter and responder callbacks
+7424    Add missing macro and type index.rst entries
+7425    Fix verto_ctx declaration in preauth_plugin.h
+7426    Add loop() kdcpreauth method
+7427    Don't save empty cc_config_out in ccache
+7428    Don't leak new fields of krb5_init_creds_context
+7429    Document GSSAPI loadable module interface
+7431    Improve documentation for krb5_unparse_name_ext()
+7433    Documentation build system improvements
+7435    Always rebuild rst_composite in src/doc
+7436    Document PKINIT and anonymos PKINIT configuration
+7437    Update Camellia feature description
+7439    Add Camellia to enctype table in documentation
+7444    De-conditionalize Camellia code
+7445    Make kdb5_util dump work with LDAP again
+7446    Add Camellia enctypes to default enctype lists
+7448    Avoid using grep -q in configure.in
+7451    Add "Kerberos" to PDF titles
+7452    Reword krb5_unparse_name_ext doxygen markup
+7453    Update mkrel for new doc build process
+
 Acknowledgements
 ----------------
 
