@@ -29,6 +29,8 @@ from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 from docmodel import *
 
+exclude_funcs = []
+
 class DocNode(object):
     """
     Represents the structure of xml node.
@@ -177,6 +179,8 @@ class DoxyFuncs(XML2AST):
             print 'not processing node: %s' % node_type
             return
 
+        if 'name' in data and data['name'] in exclude_funcs:
+            return
         self.objects.append(DocModel(**data))
 
     def save(self, templates, target_dir):

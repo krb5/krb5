@@ -30,6 +30,11 @@ from lxml import etree
 
 from docmodel import *
 
+exclude_types = [ 'TRUE', 'FALSE', 'KRB5_ATTR_DEPRECATED',
+                  'KRB5_CALLCONV', 'KRB5_CALLCONV_C', 'KRB5_CALLCONV_WRONG',
+                  'KRB5_GENERAL__', 'KRB5_OLD_CRYPTO',
+                  'KRB5INT_BEGIN_DECLS', 'KRB5INT_END_DECLS',
+                  'krb5_cc_ops', 'krb5_responder_context' ]
 
 class DoxyTypes(object):
     def __init__(self, xmlpath):
@@ -85,6 +90,8 @@ class DoxyTypes(object):
                     data = self._process_variable_node(node)
                 elif kind == 'define':
                     data = self._process_define_node(node)
+                if 'name' in data and data['name'] in exclude_types:
+                    continue
                 result.append(data)
         print "\nnumber of types processed ==> " , len(result)
         return result
