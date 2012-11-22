@@ -318,6 +318,12 @@ camellia_init_state(const krb5_keyblock *key, krb5_keyusage usage,
     return 0;
 }
 
+static void
+camellia_key_cleanup(krb5_key key)
+{
+    zapfree(key->cache, sizeof(struct camellia_key_info_cache));
+}
+
 const struct krb5_enc_provider krb5int_enc_camellia128 = {
     16,
     16, 16,
@@ -326,6 +332,7 @@ const struct krb5_enc_provider krb5int_enc_camellia128 = {
     krb5int_camellia_cbc_mac,
     camellia_init_state,
     krb5int_default_free_state,
+    camellia_key_cleanup
 };
 
 const struct krb5_enc_provider krb5int_enc_camellia256 = {
@@ -335,5 +342,6 @@ const struct krb5_enc_provider krb5int_enc_camellia256 = {
     krb5int_camellia_decrypt,
     krb5int_camellia_cbc_mac,
     camellia_init_state,
-    krb5int_default_free_state
+    krb5int_default_free_state,
+    camellia_key_cleanup
 };
