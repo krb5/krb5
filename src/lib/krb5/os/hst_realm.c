@@ -375,7 +375,6 @@ krb5int_clean_hostname(krb5_context context,
     int l;
 
     local_host[0]=0;
-    TRACE_CLEAN_HOSTNAME(context, host, lhsize, local_host);
     if (host) {
         /* Filter out numeric addresses if the caller utterly failed to
            convert them to names.  */
@@ -418,7 +417,6 @@ krb5int_clean_hostname(krb5_context context,
     if (l && local_host[l-1] == '.')
         local_host[l-1] = 0;
 
-    TRACE_CLEAN_HOSTNAME_RETURN(context, host, lhsize, local_host);
     return 0;
 }
 
