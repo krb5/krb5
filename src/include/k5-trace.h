@@ -402,13 +402,6 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_GET_FALLBACK_HOST_REALM_RETURN(c, host, realm) \
     TRACE(c, "Got fallback realm {str} for host {str}", realm, host)
 
-#define TRACE_CLEAN_HOSTNAME(c, host, size, localhost) \
-    TRACE(c, "Clean host {str} with local host {lenstr}", \
-          host, size, localhost)
-#define TRACE_CLEAN_HOSTNAME_RETURN(c, host, size, localhost)  \
-    TRACE(c, "Cleaned host {str} to local host {lenstr}", \
-          host, size, localhost)
-
 #define TRACE_SNAME_TO_PRINCIPAL(c, host, sname, type) \
     TRACE(c, "Convert service {str} ({ptype}) on host {str} to principal", \
           sname, type, host)
