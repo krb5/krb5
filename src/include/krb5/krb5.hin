@@ -6838,6 +6838,8 @@ krb5_get_init_creds_opt_set_fast_ccache(krb5_context context,
  * same preauthentication mechanisms, and making the same non-security-
  * sensitive choices) as the previous authentication attempt, which stored
  * information in the passed-in ccache.
+ *
+ * @version First introduced in 1.11
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_in_ccache(krb5_context context,
