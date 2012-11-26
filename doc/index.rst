@@ -15,9 +15,3 @@ MIT Kerberos Documentation
    build_this.rst
    about.rst
    resources
-
-
-.. _reference:
-
-:Release: |release|
-
