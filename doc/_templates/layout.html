@@ -8,6 +8,8 @@
 {% macro feedback_rellinks() %}
     <div class="footer-wrapper" >
         <div class="footer" >
+            <div class="right" ><i>Release: {{ release }} </i>
+            </div>
             <div class="left" >
                 {%- for rellink in rellinks|reverse %}
                     <a href="{{ pathto(rellink[0]) }}"
