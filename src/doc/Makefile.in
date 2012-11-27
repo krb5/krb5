@@ -1,7 +1,8 @@
 mydir=doc
 BUILDTOP=$(REL)..
 
-SPHINX_BUILD=sphinx-build
+SPHINX_ARGS=@MAINT@-W
+SPHINX_BUILD=sphinx-build $(SPHINX_ARGS)
 DOXYGEN=doxygen
 
 docsrc=$(top_srcdir)/../doc
@@ -37,7 +38,7 @@ LATEXOPTS=
 # release tarball or the web site (that is, without substitutions for
 # configured paths).  This can be done in an unconfigured source tree
 # as:
-#     make -f Makefile.in htmlsrc
+#     make -f Makefile.in SPHINX_ARGS= htmlsrc
 html: composite
 	rm -rf $(docsrc)/html
 	$(SPHINX_BUILD) -q rst_composite $(docsrc)/html

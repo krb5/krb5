@@ -62,7 +62,7 @@ paths.
 You can also do this from an unconfigured source tree with::
 
     cd src/doc
-    make -f Makefile.in htmlsrc
+    make -f Makefile.in SPHINX_ARGS= htmlsrc
 
 
 Building for an OS package or site documentation
