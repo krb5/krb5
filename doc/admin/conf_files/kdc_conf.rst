@@ -491,7 +491,9 @@ administrative server will be appended to the file
 PKINIT options
 --------------
 
-.. note:: The following are pkinit-specific options.  These values may
+.. note::
+
+          The following are pkinit-specific options.  These values may
           be specified in [kdcdefaults] as global defaults, or within
           a realm-specific subsection of [realms].  Also note that a
           realm-specific value over-rides, does not add to, a generic

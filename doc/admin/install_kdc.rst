@@ -16,6 +16,7 @@ one of the slaves if necessary (see :ref:`switch_master_slave`).  This
 installation procedure is based on that recommendation.
 
 .. warning::
+
     - The Kerberos system relies on the availability of correct time
       information.  Ensure that the master and all slave KDCs have
       properly synchronized clocks.
@@ -34,7 +35,9 @@ Install and configure the master KDC
 Install Kerberos either from the OS-provided packages or from the
 source (See :ref:`do_build`).
 
-.. note:: For the purpose of this document we will use the following
+.. note::
+
+          For the purpose of this document we will use the following
           names::
 
              kerberos.mit.edu    - master KDC
@@ -131,7 +134,9 @@ An example kdc.conf file::
 Replace ``ATHENA.MIT.EDU`` and ``kerberos.mit.edu`` with the name of
 your Kerberos realm and server respectively.
 
-.. note:: You have to have write permission on the target directories
+.. note::
+
+          You have to have write permission on the target directories
           (these directories must exist) used by **database_name**,
           **key_stash_file**, and **acl_file**.
 
@@ -144,7 +149,9 @@ Create the KDC database
 You will use the :ref:`kdb5_util(8)` command on the master KDC to
 create the Kerberos database and the optional :ref:`stash_definition`.
 
-.. note:: If you choose not to install a stash file, the KDC will
+.. note::
+
+          If you choose not to install a stash file, the KDC will
           prompt you for the master key each time it starts up.  This
           means that the KDC will not be able to start automatically,
           such as after a system reboot.
@@ -251,7 +258,9 @@ do so, type::
 
 Each server daemon will fork and run in the background.
 
-.. note:: Assuming you want these daemons to start up automatically at
+.. note::
+
+          Assuming you want these daemons to start up automatically at
           boot time, you can add them to the KDC's ``/etc/rc`` or
           ``/etc/inittab`` file.  You need to have a
           :ref:`stash_definition` in order to do this.
@@ -280,7 +289,9 @@ Install the slave KDCs
 
 You are now ready to start configuring the slave KDCs.
 
-.. note:: Assuming you are setting the KDCs up so that you can easily
+.. note::
+
+          Assuming you are setting the KDCs up so that you can easily
           switch the master KDC with one of the slaves, you should
           perform each of these steps on the master KDC as well as the
           slave KDCs, unless these instructions specify otherwise.
@@ -358,7 +369,9 @@ the KDCs::
     host/kerberos.mit.edu@ATHENA.MIT.EDU
     host/kerberos-1.mit.edu@ATHENA.MIT.EDU
 
-.. note:: If you expect that the master and slave KDCs will be
+.. note::
+
+          If you expect that the master and slave KDCs will be
           switched at some point of time, list the host principals
           from all participating KDC servers in kpropd.acl files on
           all of the KDCs.  Otherwise, you only need to list the
@@ -408,7 +421,9 @@ following example::
 You will need a script to dump and propagate the database. The
 following is an example of a Bourne shell script that will do this.
 
-.. note:: Remember that you need to replace ``/usr/local/var/krb5kdc``
+.. note::
+
+          Remember that you need to replace ``/usr/local/var/krb5kdc``
           with the name of the KDC state directory.
 
 ::
@@ -442,13 +457,17 @@ Propagation failed?
 
 .. _prop_failed_start:
 
-.. error:: kprop: No route to host while connecting to server
+.. error::
+
+           kprop: No route to host while connecting to server
 
 Make sure that the hostname of the slave (as given to kprop) is
 correct, and that any firewalls beween the master and the slave allow
 a connection on port 754.
 
-.. error:: kprop: Connection refused in call to connect while opening
+.. error::
+
+           kprop: Connection refused in call to connect while opening
            connection
 
 If the slave is intended to run kpropd out of inetd, make sure that
@@ -457,7 +476,9 @@ to be restarted or sent a SIGHUP to recognize the new configuration.
 If the slave is intended to run kpropd in standalone mode, make sure
 that it is running.
 
-.. error:: kprop: Server rejected authentication while authenticating
+.. error::
+
+           kprop: Server rejected authentication while authenticating
            to server
 
 Make sure that:

@@ -17,7 +17,9 @@ The file should not be part of any backup of the machine, unless
 access to the backup data is secured as tightly as access to the
 master password itself.
 
-.. note:: If you choose not to install a stash file, the KDC will prompt you for the master key each time it starts up.
+.. note::
+
+          If you choose not to install a stash file, the KDC will prompt you for the master key each time it starts up.
           This means that the KDC will not be able to start automatically, such as after a system reboot.
 
 

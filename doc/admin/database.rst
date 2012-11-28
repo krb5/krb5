@@ -179,7 +179,9 @@ To change a principal's password use the :ref:`kadmin(1)`
    :start-after:  _change_password:
    :end-before: _change_password_end:
 
-.. note:: Password changes through kadmin are subject to the same
+.. note::
+
+          Password changes through kadmin are subject to the same
           password policies as would apply to password changes through
           :ref:`kpasswd(1)`.
 
@@ -217,7 +219,9 @@ To delete a policy, use the kadmin **delete_policy** command.
    :start-after:  _delete_policy:
    :end-before: _delete_policy_end:
 
-.. note:: You must cancel the policy from *all* principals before
+.. note::
+
+          You must cancel the policy from *all* principals before
           deleting it.  The *delete_policy* command will fail if the policy
           is in use by any principals.
 
@@ -270,7 +274,9 @@ Privileges
 Administrative privileges for the Kerberos database are stored in the
 file :ref:`kadm5.acl(5)`.
 
-.. note:: A common use of an admin instance is so you can grant
+.. note::
+
+          A common use of an admin instance is so you can grant
           separate permissions (such as administrator access to the
           Kerberos database) to a separate Kerberos principal. For
           example, the user ``joeadmin`` might have a principal for
@@ -373,7 +379,9 @@ To load a single principal, either replacing or updating the database:
      shell%
 
 
-.. note:: If the database file exists, and the *-update* flag was not
+.. note::
+
+          If the database file exists, and the *-update* flag was not
           given, *kdb5_util* will overwrite the existing database.
 
 Using kdb5_util to upgrade a master KDC from krb5 1.1.x:
@@ -390,7 +398,9 @@ The use of old-kdb-dump.ov for an extra dump and load is necessary
 to preserve per-principal policy information, which is not included in
 the default dump format of krb5 1.1.x.
 
-.. note:: Using kdb5_util to dump and reload the principal database is
+.. note::
+
+          Using kdb5_util to dump and reload the principal database is
           only necessary when upgrading from versions of krb5 prior
           to 1.2.0---newer versions will use the existing database as-is.
 
@@ -646,14 +656,18 @@ would run the following commands on the KDCs in both realms::
     Enter password for principal krbtgt/EXAMPLE.COM@ATHENA.MIT.EDU:
     kadmin:
 
-.. note:: Even if most principals in a realm are generally created
+.. note::
+
+          Even if most principals in a realm are generally created
           with the **requires_preauth** flag enabled, this flag is not
           desirable on cross-realm authentication keys because doing
           so makes it impossible to disable preauthentication on a
           service-by-service basis.  Disabling it as in the example
           above is recommended.
 
-.. note:: It is very important that these principals have good
+.. note::
+
+          It is very important that these principals have good
           passwords.  MIT recommends that TGT principal passwords be
           at least 26 characters of random ASCII text.
 
@@ -678,7 +692,9 @@ database as well as the new key.  For example::
 
     kadmin: change_password -randkey -keepold krbtgt/ATHENA.MIT.EDU@ATHENA.MIT.EDU
 
-.. warning:: After issuing this command, the old key is still valid
+.. warning::
+
+             After issuing this command, the old key is still valid
              and is still vulnerable to (for instance) brute force
              attacks.  To completely retire an old key or encryption
              type, run the kadmin **purgekeys** command to delete keys

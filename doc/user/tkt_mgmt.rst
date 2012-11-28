@@ -161,7 +161,9 @@ type::
     Password for david@EXAMPLE.COM: <-- [Type david's password here.]
     shell%
 
-.. note:: You cannot mix units; specifying a lifetime of 3h30m would
+.. note::
+
+          You cannot mix units; specifying a lifetime of 3h30m would
           result in an error.  Note also that most systems specify a
           maximum ticket lifetime.  If you request a longer ticket
           lifetime, it will be automatically truncated to the maximum
