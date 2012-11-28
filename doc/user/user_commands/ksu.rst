@@ -34,7 +34,9 @@ ksu is a Kerberized version of the su program that has two missions:
 one is to securely change the real and effective user ID to that of
 the target user, and the other is to create a new security context.
 
-.. note:: For the sake of clarity, all references to and attributes of
+.. note::
+
+          For the sake of clarity, all references to and attributes of
           the user invoking the program will start with "source"
           (e.g., "source user", "source cache", etc.).
 
@@ -151,7 +153,9 @@ not provided (user hit return) ksu continues in a normal mode of
 operation (the target cache will not contain the desired TGT).  If the
 wrong password is typed in, ksu fails.
 
-.. note:: During authentication, only the tickets that could be
+.. note::
+
+          During authentication, only the tickets that could be
           obtained without providing a password are cached in in the
           source cache.
 

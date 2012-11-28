@@ -31,10 +31,14 @@ of the :ref:`kvno(1)` command::
 List
 ----
 
-.. error:: KDC has no support for encryption type while getting
+.. error::
+
+           KDC has no support for encryption type while getting
            initial credentials
 
-.. error:: credential verification failed: KDC has no support for
+.. error::
+
+           credential verification failed: KDC has no support for
            encryption type
 
 This most commonly happens when trying to use a principal with only

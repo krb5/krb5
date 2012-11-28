@@ -72,7 +72,9 @@ will relay SIGHUP signals to the worker subprocesses, and will
 terminate the worker subprocess if the it is itself terminated or if
 any other worker process exits.
 
-.. note:: On operating systems which do not have *pktinfo* support,
+.. note::
+
+          On operating systems which do not have *pktinfo* support,
           using worker processes will prevent the KDC from listening
           for UDP packets on network interfaces created after the KDC
           starts.

@@ -145,16 +145,22 @@ the default keytab.  If the input name contains both a *service* and a
 *hostname*, clients will be allowed to authenticate to any host-based
 principal for the named service and hostname, regardless of realm.
 
-.. note:: If a *hostname* is specified, it will be canonicalized
+.. note::
+
+          If a *hostname* is specified, it will be canonicalized
           using forward name resolution, and possibly also using
           reverse name resolution depending on the value of the
           **rdns** variable in :ref:`libdefaults`.
 
-.. note:: If the **ignore_acceptor_hostname** variable in
+.. note::
+
+          If the **ignore_acceptor_hostname** variable in
           :ref:`libdefaults` is enabled, then *hostname* will be
           ignored even if one is specified in the input name.
 
-.. note:: In MIT krb5 versions prior to 1.10, and in Heimdal's
+.. note::
+
+          In MIT krb5 versions prior to 1.10, and in Heimdal's
           implementation of the krb5 mechanism, an input name with
           just a *service* is treated like an input name of
           ``service@localhostname``, where *localhostname* is the

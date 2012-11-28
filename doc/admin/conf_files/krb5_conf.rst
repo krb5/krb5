@@ -724,7 +724,9 @@ built-in modules exist for these interfaces:
 PKINIT options
 --------------
 
-.. note:: The following are PKINIT-specific options.  These values may
+.. note::
+
+          The following are PKINIT-specific options.  These values may
           be specified in [libdefaults] as global defaults, or within
           a realm-specific subsection of [libdefaults], or may be
           specified as realm-specific values in the [realms] section.

@@ -306,6 +306,7 @@ Options:
         Associates a ticket policy to the Kerberos principal.
 
     .. note::
+
         - The **containerdn** and **linkdn** options cannot be
           specified with the **dn** option.
         - If the *dn* or *containerdn* options are not specified while

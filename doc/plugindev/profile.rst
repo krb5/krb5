@@ -6,7 +6,9 @@ configuration information is obtained by the Kerberos library and
 applications.  For a detailed description of the profile interface,
 see the header file ``<profile.h>``.
 
-.. note:: The profile interface does not follow the normal conventions
+.. note::
+
+          The profile interface does not follow the normal conventions
           for MIT krb5 pluggable interfaces, because it is part of a
           lower-level component of the krb5 library.
 

@@ -23,6 +23,7 @@ Here *N* denotes a number, *d* - days, *h* - hours, *m* - minutes,
 *s* - seconds.
 
 .. note::
+
     The time interval should not exceed 2147483647 seconds.
 
 Examples::
@@ -133,6 +134,7 @@ Abbreviations used in this document
 | *z*    : numeric time zone;
 
 .. note::
+
      - If the date specification contains spaces, you may need to
        enclose it in double quotes;
      - All keywords are case-insensitive.
