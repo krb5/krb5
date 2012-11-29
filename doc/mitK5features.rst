@@ -16,7 +16,7 @@ http://web.mit.edu/kerberos
 Quick facts
 -----------
 
-   ========================================= ========================== ====================================================================
+   ========================================= ========================== ====================================================
     License                                  :ref:`mitK5license`
     Latest stable  version                                               http://web.mit.edu/kerberos/krb5-1.10/
     Supported versions                                                   http://web.mit.edu/kerberos/krb5-1.9/
@@ -42,7 +42,7 @@ Quick facts
                                              - DB2
     krb4 support                             < 1.8
     DES support                              configurable               http://k5wiki.kerberos.org/wiki/Projects/Disable_DES
-   ========================================= ========================== ====================================================================
+   ========================================= ========================== ====================================================
 
 Interoperabiity
 ---------------
@@ -105,26 +105,30 @@ Feature list
     IAKERB                                               1.8       http://tools.ietf.org/html/draft-ietf-krb-wg-iakerb-02
     Heimdal bridge plugin for KDC backend                1.8
     GSS-API S4U extensions                               1.8       http://msdn.microsoft.com/en-us/library/cc246071
-    GSS-API naming extensions                            1.8          :rfc:`6680`
-    GSS-API extensions for storing delegated credentials 1.8          :rfc:`5588`
+    GSS-API naming extensions                            1.8       :rfc:`6680`
+    GSS-API extensions for storing delegated credentials 1.8       :rfc:`5588`
     Advance warning on password expiry                   1.9
-    Camellia encryption (CTS-CMAC mode)                  1.9          http://tools.ietf.org/html/draft-ietf-krb-wg-camellia-cts-02
-    KDC support for SecurID preauthentication            1.9          http://k5wiki.kerberos.org/wiki/Projects/SecurID_SAM_support
+    Camellia encryption (CTS-CMAC mode)                  1.9       :rfc:`6803`
+    KDC support for SecurID preauthentication            1.9       http://k5wiki.kerberos.org/wiki/Projects/SecurID_SAM_support
     kadmin over IPv6                                     1.9
-    Trace logging                                        1.9          http://k5wiki.kerberos.org/wiki/Projects/Trace_logging
+    Trace logging                                        1.9       http://k5wiki.kerberos.org/wiki/Projects/Trace_logging
     GSSAPI/KRB5 multi-realm support
-    Plugin to test password quality                      1.9          http://k5wiki.kerberos.org/wiki/Projects/Password_quality_pluggable_interface
+    Plugin to test password quality                      1.9       http://k5wiki.kerberos.org/wiki/Projects/Password_quality_pluggable_interface
     Plugin to synchronize password changes               1.9
     Parallel KDC                                         1.9
-    GSS-API extentions for SASL GS2 bridge               1.9          :rfc:`5801` :rfc:`5587` http://k5wiki.kerberos.org/wiki/Projects/GS2
+    GSS-API extentions for SASL GS2 bridge               1.9       :rfc:`5801` :rfc:`5587` http://k5wiki.kerberos.org/wiki/Projects/GS2
     Purging old keys                                     1.9
     Naming extensions for delegation chain               1.9
     Password expiration API                              1.9
     Windows client support   (build-only)                1.9
     Zero configuration
     IPv6 support in iprop
-    Plugin interface for configuration                   1.10         http://k5wiki.kerberos.org/wiki/Projects/Pluggable_configuration
-    Credentials for multiple identities                  1.10         http://k5wiki.kerberos.org/wiki/Projects/Client_principal_selection
+    Plugin interface for configuration                   1.10      http://k5wiki.kerberos.org/wiki/Projects/Pluggable_configuration
+    Credentials for multiple identities                  1.10      http://k5wiki.kerberos.org/wiki/Projects/Client_principal_selection
+    Client support for FAST OTP                          1.11      :rfc:`6560`
+    GSS-API extensions for credential locations          1.11      http://k5wiki.kerberos.org/wiki/Projects/Credential_Store_extensions
+    Responder mechanism                                  1.11      http://k5wiki.kerberos.org/wiki/Projects/Responder \
+                                                                   http://k5wiki.kerberos.org/wiki/Projects/Password_response_item
    ===================================================== ========= ============================================
 
 \
