@@ -1287,7 +1287,7 @@ k5_sendto(krb5_context context, const krb5_data *message,
             continue;
         if (maybe_send(context, state, sel_state, callback_info))
             continue;
-        done = service_fds(context, sel_state, 1, state, seltemp, msg_handler,
+        done = service_fds(context, sel_state, 1, conns, seltemp, msg_handler,
                            msg_handler_data, &winner);
     }
 
