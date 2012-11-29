@@ -52,7 +52,7 @@ substhtml: composite paths.py
 	$(SPHINX_BUILD) -t pathsubs -q rst_composite html_subst
 
 # Create an ASCII (okay, UTF-8) version of the NOTICE file
-notice.txt: $(docsrc)/conf.py $(docsrc)/notice.rst
+notice.txt: $(docsrc)/conf.py $(docsrc)/notice.rst $(docsrc)/version.py
 	$(SPHINX_BUILD) -b text -t notice -q $(docsrc) .
 
 NOTICE: notice.txt
