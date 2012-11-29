@@ -48,8 +48,7 @@ Most commonly used options
 **-**\ **-enable-dns-for-realm**
     Enable the use of DNS to look up a host's Kerberos realm,
     if the information is not provided in
-    :ref:`krb5.conf(5)`.  See
-    :ref:`mapping_hostnames`
+    :ref:`krb5.conf(5)`.  See :ref:`mapping_hostnames`
     for information about using DNS to determine the default realm.
     DNS lookups for realm names are disabled by default.
 
@@ -120,12 +119,17 @@ Environment variables
 
 **DEFCCNAME=**\ *ccachename*
     Override the built-in default credential cache name.
+    For example, ``DEFCCNAME=DIR:/var/run/user/%{USERID}/ccache``
+    See :ref:`parameter_expansion` for information about supported
+    parameter expansions.
 
 **DEFCKTNAME=**\ *keytabname*
     Override the built-in default client keytab name.
+    The format is the same as for *DEFCCNAME*.
 
 **DEFKTNAME=**\ *keytabname*
     Override the built-in default keytab name.
+    The format is the same as for *DEFCCNAME*.
 
 **LD=**\ *LINKER*
     Use *LINKER* as the default loader if it should be different from

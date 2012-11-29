@@ -981,8 +981,9 @@ PKINIT krb5.conf options
 Parameter expansion
 -------------------
 
-Several variables, such as **default_keytab_name**, allow parameters
-to be expanded.  Valid parameters are:
+Starting with release 1.11, several variables, such as
+**default_keytab_name**, allow parameters to be expanded.
+Valid parameters are:
 
     =================  ===================================================
     %{TEMP}            Temporary directory
