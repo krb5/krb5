@@ -963,10 +963,6 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
         kill_conn:
             TRACE_SENDTO_KDC_TCP_DISCONNECT(context, conn);
             kill_conn(conn, selstate, e);
-            if (e == EINVAL) {
-                closesocket(conn->fd);
-                conn->fd = INVALID_SOCKET;
-            }
             return e == 0;
         }
         if (ssflags & SSF_EXCEPTION) {
