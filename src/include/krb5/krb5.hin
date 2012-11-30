@@ -954,22 +954,21 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_GSS_TOK_WRAP_INTEG        23
 #define KRB5_KEYUSAGE_GSS_TOK_WRAP_PRIV         24
 
-/* Defined in hardware preauth draft */
-
+/* Defined in Integrating SAM Mechanisms with Kerberos draft */
 #define KRB5_KEYUSAGE_PA_SAM_CHALLENGE_CKSUM    25
+/** Note conflict with @ref KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST */
 #define KRB5_KEYUSAGE_PA_SAM_CHALLENGE_TRACKID  26
+/** Note conflict with @ref KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY */
 #define KRB5_KEYUSAGE_PA_SAM_RESPONSE           27
 
-/* Defined in KDC referrals draft */
-/*
- * @note There is a conflict with the value of @c KRB5_KEYUSAGE_PA_REFERRAL:
- * it is used for hardware Pre-athentication @a and KDC referrals.
- */
-#define KRB5_KEYUSAGE_PA_REFERRAL               26 /**< XXX note conflict */
-
 /* Defined in [MS-SFU] */
-#define KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST  26 /**< XXX note conflict */
-#define KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY    27 /**< XXX note conflict */
+/** Note conflict with @ref KRB5_KEYUSAGE_PA_SAM_CHALLENGE_TRACKID */
+#define KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST  26
+/** Note conflict with @ref KRB5_KEYUSAGE_PA_SAM_RESPONSE */
+#define KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY    27
+
+/* unused */
+#define KRB5_KEYUSAGE_PA_REFERRAL               26
 
 #define KRB5_KEYUSAGE_AD_SIGNEDPATH             -21
 #define KRB5_KEYUSAGE_IAKERB_FINISHED           42
