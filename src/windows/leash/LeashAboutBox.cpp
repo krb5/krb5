@@ -268,7 +268,7 @@ BOOL CLeashAboutBox::OnInitDialog()
         GetDlgItem(IDC_STATIC_NO_OF_MODULES)->ShowWindow(SW_HIDE);
         m_LB_DLLsLoaded.ShowWindow(SW_HIDE);
         // shrink window, move 'OK' button
-        const int hideDiff = 175;
+        const int hideDiff = 150;
         RECT okRect;
         CWnd* pOK = GetDlgItem(IDOK);
         pOK->GetWindowRect(&okRect);
