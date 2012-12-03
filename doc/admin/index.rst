@@ -8,6 +8,7 @@ For administrators
    conf_files/index.rst
    realm_config.rst
    database.rst
+   lockout.rst
    conf_ldap.rst
    appl_servers.rst
    host_config.rst
