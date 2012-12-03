@@ -16,6 +16,7 @@
         <NAME>ID_BUTTON2</NAME>
         <VALUE>32813</VALUE>
       </ID>
+      <KEYS>f</KEYS>
       <PALETTE_TOP>FALSE</PALETTE_TOP>
       <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
       <INDEX_SMALL>-1</INDEX_SMALL>
@@ -39,6 +40,7 @@
             <VALUE>32784</VALUE>
           </ID>
           <TEXT>&amp;Help</TEXT>
+          <KEYS>h</KEYS>
           <PALETTE_TOP>FALSE</PALETTE_TOP>
           <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
           <INDEX_SMALL>-1</INDEX_SMALL>
@@ -53,6 +55,7 @@
             <VALUE>57664</VALUE>
           </ID>
           <TEXT>&amp;About</TEXT>
+          <KEYS>a</KEYS>
           <PALETTE_TOP>FALSE</PALETTE_TOP>
           <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
           <INDEX_SMALL>-1</INDEX_SMALL>
@@ -67,6 +70,7 @@
             <VALUE>57665</VALUE>
           </ID>
           <TEXT>E&amp;xit</TEXT>
+          <KEYS>x</KEYS>
           <PALETTE_TOP>FALSE</PALETTE_TOP>
           <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
           <INDEX_SMALL>-1</INDEX_SMALL>
@@ -85,6 +89,7 @@
       <CATEGORY>
         <ELEMENT_NAME>Category</ELEMENT_NAME>
         <NAME>Home</NAME>
+        <KEYS>h</KEYS>
         <IMAGE_SMALL>
           <ID>
             <NAME>IDB_HOMESMALL</NAME>
@@ -111,6 +116,7 @@
                   <VALUE>32807</VALUE>
                 </ID>
                 <TEXT>Get &amp;Ticket</TEXT>
+                <KEYS>t</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>TRUE</ALWAYS_LARGE>
                 <INDEX_SMALL>2</INDEX_SMALL>
@@ -125,6 +131,7 @@
                   <VALUE>32776</VALUE>
                 </ID>
                 <TEXT>&amp;Renew Ticket</TEXT>
+                <KEYS>r</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>TRUE</ALWAYS_LARGE>
                 <INDEX_SMALL>3</INDEX_SMALL>
@@ -139,6 +146,7 @@
                   <VALUE>32777</VALUE>
                 </ID>
                 <TEXT>&amp;Destroy Ticket</TEXT>
+                <KEYS>d</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>TRUE</ALWAYS_LARGE>
                 <INDEX_SMALL>1</INDEX_SMALL>
@@ -152,7 +160,8 @@
                   <NAME>ID_MAKE_DEFAULT</NAME>
                   <VALUE>32835</VALUE>
                 </ID>
-                <TEXT>Make Default</TEXT>
+                <TEXT>&amp;Make Default</TEXT>
+                <KEYS>m</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>TRUE</ALWAYS_LARGE>
                 <INDEX_SMALL>6</INDEX_SMALL>
@@ -174,7 +183,8 @@
                   <NAME>ID_CHANGE_PASSWORD</NAME>
                   <VALUE>32779</VALUE>
                 </ID>
-                <TEXT>Change Password</TEXT>
+                <TEXT>Change &amp;Password</TEXT>
+                <KEYS>p</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
                 <INDEX_SMALL>5</INDEX_SMALL>
@@ -189,6 +199,7 @@
       <CATEGORY>
         <ELEMENT_NAME>Category</ELEMENT_NAME>
         <NAME>Options</NAME>
+        <KEYS>o</KEYS>
         <PANELS>
           <PANEL>
             <ELEMENT_NAME>Panel</ELEMENT_NAME>
@@ -204,6 +215,7 @@
                   <VALUE>32810</VALUE>
                 </ID>
                 <TEXT>&amp;Issued</TEXT>
+                <KEYS>i</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
                 <INDEX_SMALL>-1</INDEX_SMALL>
@@ -217,6 +229,7 @@
                   <VALUE>32811</VALUE>
                 </ID>
                 <TEXT>&amp;Renewable Until</TEXT>
+                <KEYS>r</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
                 <INDEX_SMALL>-1</INDEX_SMALL>
@@ -230,6 +243,7 @@
                   <VALUE>32828</VALUE>
                 </ID>
                 <TEXT>&amp;Valid Until</TEXT>
+                <KEYS>v</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
                 <INDEX_SMALL>-1</INDEX_SMALL>
@@ -243,6 +257,7 @@
                   <VALUE>32826</VALUE>
                 </ID>
                 <TEXT>&amp;Encryption Type</TEXT>
+                <KEYS>e</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
                 <INDEX_SMALL>-1</INDEX_SMALL>
@@ -256,6 +271,7 @@
                   <VALUE>32812</VALUE>
                 </ID>
                 <TEXT>&amp;Flags</TEXT>
+                <KEYS>f</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
                 <INDEX_SMALL>-1</INDEX_SMALL>
@@ -277,7 +293,8 @@
                   <NAME>ID_AUTO_RENEW</NAME>
                   <VALUE>32808</VALUE>
                 </ID>
-                <TEXT>Automatic Ticket &amp;Renewal</TEXT>
+                <TEXT>Automatic &amp;Ticket Renewal</TEXT>
+                <KEYS>t</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
                 <INDEX_SMALL>-1</INDEX_SMALL>
@@ -291,6 +308,7 @@
                   <VALUE>32798</VALUE>
                 </ID>
                 <TEXT>Expiration &amp;Alarm</TEXT>
+                <KEYS>a</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
                 <INDEX_SMALL>-1</INDEX_SMALL>
@@ -304,6 +322,7 @@
                   <VALUE>32785</VALUE>
                 </ID>
                 <TEXT>&amp;Destroy Tickets on Exit</TEXT>
+                <KEYS>d</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
                 <INDEX_SMALL>-1</INDEX_SMALL>
@@ -317,6 +336,7 @@
                   <VALUE>32787</VALUE>
                 </ID>
                 <TEXT>Allow &amp;Mixed Case Realm Name</TEXT>
+                <KEYS>m</KEYS>
                 <PALETTE_TOP>FALSE</PALETTE_TOP>
                 <ALWAYS_LARGE>FALSE</ALWAYS_LARGE>
                 <INDEX_SMALL>-1</INDEX_SMALL>
