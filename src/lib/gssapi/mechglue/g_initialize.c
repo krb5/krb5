@@ -1330,7 +1330,7 @@ static void
 loadConfigFromRegistry(HKEY hBaseKey, const char *keyPath)
 {
 	HKEY hConfigKey;
-	DWORD iSubKey, nSubKeys, maxSubKeyNameLen;
+	DWORD iSubKey, nSubKeys, maxSubKeyNameLen, modTypeLen;
 	char *oidStr = NULL, *oid = NULL, *sharedLib = NULL, *kernMod = NULL;
 	char *modOptions = NULL, *modType = NULL;
 	DWORD oidStrLen = 0, oidLen = 0, sharedLibLen = 0, kernModLen = 0;
