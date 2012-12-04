@@ -1174,7 +1174,7 @@ clpreauth_otp_initvt(krb5_context context, int maj_ver, int min_ver,
     return 0;
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_responder_otp_get_challenge(krb5_context ctx,
                                  krb5_responder_context rctx,
                                  krb5_responder_otp_challenge **chl)
@@ -1197,7 +1197,7 @@ krb5_responder_otp_get_challenge(krb5_context ctx,
     return 0;
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_responder_otp_set_answer(krb5_context ctx, krb5_responder_context rctx,
                               size_t ti, const char *value, const char *pin)
 {
@@ -1256,7 +1256,7 @@ error:
     return ENOMEM;
 }
 
-void
+void KRB5_CALLCONV
 krb5_responder_otp_challenge_free(krb5_context ctx,
                                   krb5_responder_context rctx,
                                   krb5_responder_otp_challenge *chl)
