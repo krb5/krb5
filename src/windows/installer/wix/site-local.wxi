@@ -49,11 +49,10 @@
 
     <!-- At most one of the following could be defined and must correspond
          to the type of build performed. -->
-    <?define Release?>
+    <!-- <?define Release?> -->
 
     <!-- Optional defines -->
-    <!-- Numeric Beta identifier -->
-    <!--<?define Beta="1"?> -->
+    <?define Beta="1"?> <!-- Numeric Beta identifier -->
     <!-- <?define OldHelp?> --> <!-- Specifies the use of the old leash32.hlp file
                            instead of the new leash32.chm file -->
 
@@ -70,7 +69,7 @@
     <?ifndef VersionMajor?>
         <?define VersionMajor="4"?>
         <?define VersionMinor="0"?>
-        <?define VersionPatch="0"?>
+        <?define VersionPatch="1"?>
     <?else?>
         <?if Not ($(var.VersionMinor) And $(var.VersionPatch))?>
             <?error VersionMajor, VersionMinor and VersionPatch should be specified together?>
