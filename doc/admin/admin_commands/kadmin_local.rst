@@ -610,22 +610,33 @@ The following options are available:
     Sets the number of past keys kept for a principal.  This option is
     not supported with the LDAP KDC database module.
 
+.. _policy_maxfailure:
+
 **-maxfailure** *maxnumber*
-    Sets the maximum number of authentication failures before the
-    principal is locked.  Authentication failures are only tracked for
-    principals which require preauthentication.
+    Sets the number of authentication failures before the principal is
+    locked.  Authentication failures are only tracked for principals
+    which require preauthentication.  The counter of failed attempts
+    resets to 0 after a successful attempt to authenticate.  A
+    *maxnumber* value of 0 (the default) disables lockout.
+
+.. _policy_failurecountinterval:
 
 **-failurecountinterval** *failuretime*
     (:ref:`getdate` string) Sets the allowable time between
     authentication failures.  If an authentication failure happens
     after *failuretime* has elapsed since the previous failure,
-    the number of authentication failures is reset to 1.
+    the number of authentication failures is reset to 1.  A
+    *failuretime* value of 0 (the default) means forever.
+
+.. _policy_lockoutduration:
 
 **-lockoutduration** *lockouttime*
     (:ref:`getdate` string) Sets the duration for which the principal
     is locked from authenticating if too many authentication failures
     occur without the specified failure count interval elapsing.
-    A duration of 0 means forever.
+    A duration of 0 (the default) means the principal remains locked
+    out until it is administratively unlocked with ``modprinc
+    -unlock``.
 
 **-allowedkeysalts**
     Specifies the key/salt tuples supported for long-term keys when

@@ -184,6 +184,8 @@ To change a principal's password use the :ref:`kadmin(1)`
           :ref:`kpasswd(1)`.
 
 
+.. _policies:
+
 Policies
 --------
 
