@@ -21,27 +21,21 @@ through a TGS request.  You can set these flags on a principal with
 
     kadmin: modprinc +requires_preauth -allow_svr PRINCNAME
 
-Account lockout parameters are configured via password policies.  The
-policy parameters are:
+Account lockout parameters are configured via :ref:`policy objects
+<policies>`.  There may be an existing policy associated with user
+principals (such as the "default" policy), or you may need to create a
+new one and associate it with each user principal.
 
-* **maxfailure**: the maximum number of failed attempts before the
-  principal is locked out.  For example, if **maxfailure** is set to
-  10, the principal would be locked out after ten failed attempts.
-  The counter of failed attempts resets to 0 after a successful
-  attempt to authenticate.  A **maxfailure** value of 0 (the default)
-  disables account lockout.
+The policy parameters related to account lockout are:
 
-* **failurecountinterval**: if this interval elapses between failed
-  attempts, the counter of failed attempts resets to 1 for the most
-  recent failure.  A **failurecountinterval** of 0 (the default) means
-  the counter only resets on a successful attempt to authenticate.
+* :ref:`maxfailure <policy_maxfailure>`: the number of failed attempts
+  before the principal is locked out
+* :ref:`failurecountinterval <policy_failurecountinterval>`: the
+  allowable interval between failed attempts
+* :ref:`lockoutduration <policy_lockoutduration>`: the amount of time
+  a principal is locked out for
 
-* **lockoutduration**: if a principal is locked out, it remains locked
-  out for this amount of time.  A **lockoutduration** of 0 (the
-  default) means the principal remains locked out until it is
-  administratively unlocked.
-
-Here is an example of setting these attributes on a new policy and
+Here is an example of setting these parameters on a new policy and
 associating it with a principal::
 
     kadmin: addpol -maxfailure 10 -failurecountinterval 180
