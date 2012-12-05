@@ -155,8 +155,10 @@ BEGIN
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "D",            ID_DESTROY_TICKET,      VIRTKEY, CONTROL, NOINVERT
     "I",            ID_IMPORT_TICKET,       VIRTKEY, CONTROL, NOINVERT
+    "M",            ID_MAKE_DEFAULT,        VIRTKEY, CONTROL, NOINVERT
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_CHANGE_PASSWORD,     VIRTKEY, CONTROL, NOINVERT
     "R",            ID_RENEW_TICKET,        VIRTKEY, CONTROL, NOINVERT
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     "T",            ID_INIT_TICKET,         VIRTKEY, CONTROL, NOINVERT
