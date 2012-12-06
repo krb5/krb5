@@ -25,31 +25,29 @@ Mailing lists
 IRC channels
 ------------
 
-The main IRC channel for MIT Kerberos development is #krbdev on
-irc.freenode.net.
+The IRC channel `#kerberos` on irc.freenode.net is a community
+resource for general Kerberos discussion and support.
 
-There is a separate channel, `#kerberos`, for general Kerberos
-discussion and support.
+The main IRC channel for MIT Kerberos development is `#krbdev` on
+freenode.
 
 For more information about freenode, see http://freenode.net/.
-
-The `#krbdev` channel is logged at
-http://colabti.org/irclogger/irclogger_logs/krbdev using the
-colabti.org service, which generously offers IRC logging
-to Free / Open Source projects.
-
-The `#krbdev` channel was previously logged by lopbot, courtesy
-of Brandon Allbery. These logs are no longer readily available online.
-Despite the possible existence of logging, please summarize important
-conversations to more permanent places, such as an appropriate
-mailing list or wiki page.
 
 
 Archives
 --------
 
 * The archive http://mailman.mit.edu/pipermail/kerberos/ contains past
-  posting from `kerberos@mit.edu` list.
+  postings from the `kerberos@mit.edu` list.
 
 * The http://mailman.mit.edu/pipermail/krbdev/ contains past
-  posting from `krbdev@mit.edu` list.
+  postings from the `krbdev@mit.edu` list.
+
+
+Wiki
+----
+
+The wiki at http://k5wiki.kerberos.org/ contains useful information
+for developers working on the MIT Kerberos source code.  Some of the
+information on the wiki may be useful for advanced users or system
+administrators.
