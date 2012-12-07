@@ -1176,7 +1176,11 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
                 retval = KRB5KRB_AP_ERR_BADMATCH;
                 goto cleanup;
             }
-            if (realms[0] == 0) {
+            /* Don't return a referral to the null realm or the service
+             * realm. */
+            if (realms[0] == 0 ||
+                data_eq_string(request->server->realm, realms[0])) {
+                free(realms[0]);
                 free(realms);
                 retval = KRB5KRB_AP_ERR_BADMATCH;
                 goto cleanup;
