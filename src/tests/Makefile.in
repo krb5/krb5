@@ -82,6 +82,7 @@ check-pytests:: hist kdbtest
 	$(RUNPYTEST) $(srcdir)/t_stringattr.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_sesskeynego.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_crossrealm.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_referral.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_skew.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_keytab.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_pwhist.py $(PYTESTFLAGS)
