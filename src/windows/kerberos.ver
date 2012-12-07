@@ -48,6 +48,6 @@
 #define KRB5_MAJOR_RELEASE 4
 #define KRB5_MINOR_RELEASE 0
 #define KRB5_PATCHLEVEL 1
-#define KRB5_RELTAIL "beta1"
+/* #undef KRB5_RELTAIL */
 
 #define KRB5_PRODUCTNAME_STR "MIT Kerberos for Windows"
