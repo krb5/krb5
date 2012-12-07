@@ -49,7 +49,7 @@
 
     <!-- At most one of the following could be defined and must correspond
          to the type of build performed. -->
-    <?define Release?>
+    <!-- <?define Release?> -->
 
     <!-- Optional defines -->
     <!-- Numeric Beta identifier -->
