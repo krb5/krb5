@@ -1074,6 +1074,21 @@ krb5_read_realm_params(kcontext, realm, rparamp)
             host_based_srvcs = 0;
     }
 
+    /* default referral realm */
+    hierarchy[2] = KRB5_CONF_DEFAULT_REFERRAL_REALM;
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+        rparams->realm_default_referral_realm = svalue;
+        rparams->realm_default_referral_realm_valid = 1;
+    } else
+        rparams->realm_default_referral_realm = NULL;
+
+    /* cross-realm default referral */
+    hierarchy[2] = KRB5_CONF_CROSS_REALM_DEFAULT_REFERRAL;
+    if (!krb5_aprof_get_boolean(aprofile, hierarchy, TRUE, &bvalue)) {
+        rparams->realm_cross_realm_default_referral = bvalue;
+        rparams->realm_cross_realm_default_referral_valid = 1;
+    }
+
     /* Get the value for the default principal flags */
     hierarchy[2] = KRB5_CONF_DEFAULT_PRINCIPAL_FLAGS;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {

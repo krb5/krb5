@@ -273,6 +273,18 @@ specifies whether or not the list of transited realms for cross-realm
 tickets should be checked against the transit path computed from the
 realm names and the [capaths] section of its krb5.conf file
 
+.IP default_referral_realm
+This
+.B string
+specifies a realm to which the KDC will issue referrals for TGS requests
+otherwise qualifying for a referral but lacking a static realm mapping, as
+long as the presented TGT is not cross-realm (setting
+cross_realm_default_referral omits that check).
+
+.IP cross_realm_default_referral
+.B boolean
+(see default_referral_realm)
+
 .SH FILES 
 /usr/local/var/krb5kdc/kdc.conf
 

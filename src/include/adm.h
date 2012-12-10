@@ -201,6 +201,7 @@ typedef struct __krb5_realm_params {
     char *              realm_acl_file;
     char *              realm_host_based_services;
     char *              realm_no_host_referral;
+    char *              realm_default_referral_realm;
     krb5_int32          realm_kadmind_port;
     krb5_enctype        realm_enctype;
     krb5_deltat         realm_max_life;
@@ -208,8 +209,11 @@ typedef struct __krb5_realm_params {
     krb5_timestamp      realm_expiration;
     krb5_flags          realm_flags;
     krb5_key_salt_tuple *realm_keysalts;
+    unsigned int        realm_cross_realm_default_referral:1;
     unsigned int        realm_reject_bad_transit:1;
     unsigned int        realm_restrict_anon:1;
+    unsigned int        realm_default_referral_realm_valid:1;
+    unsigned int        realm_cross_realm_default_referral_valid:1;
     unsigned int        realm_kadmind_port_valid:1;
     unsigned int        realm_enctype_valid:1;
     unsigned int        realm_max_life_valid:1;

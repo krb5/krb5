@@ -43,6 +43,8 @@ typedef struct __kdc_realm_data {
     char *              realm_no_host_referral; /* no referral for these services.
                                                  * If '*' - disallow all referrals and
                                                  * ignore realm_host_based_services */
+    char *              realm_default_referral_realm; /* target realm for default referrals */
+    krb5_boolean        realm_cross_realm_default_referral; /* do x-realm default referrals? */
     /*
      * Database per-realm data.
      */
@@ -93,6 +95,8 @@ kdc_realm_t *find_realm_data (char *, krb5_ui_4);
 #define tgs_server                      kdc_active_realm->realm_tgsprinc
 #define reject_bad_transit              kdc_active_realm->realm_reject_bad_transit
 #define restrict_anon                   kdc_active_realm->realm_restrict_anon
+#define default_referral_realm          kdc_active_realm->realm_default_referral_realm
+#define cross_realm_default_referral    kdc_active_realm->realm_cross_realm_default_referral
 
 /* various externs for KDC */
 extern krb5_data        empty_string;   /* an empty string */
