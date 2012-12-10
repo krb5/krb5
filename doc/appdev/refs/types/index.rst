@@ -51,7 +51,6 @@ Public
    krb5_mk_req_checksum_func.rst
    krb5_msgtype.rst
    krb5_octet.rst
-   krb5_octet_data.rst
    krb5_pa_pac_req.rst
    krb5_pa_server_referral_data.rst
    krb5_pa_svr_referral_data.rst

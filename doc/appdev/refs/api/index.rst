@@ -202,7 +202,6 @@ Rarely used public interfaces
    krb5_free_keyblock.rst
    krb5_free_keyblock_contents.rst
    krb5_free_keytab_entry_contents.rst
-   krb5_free_octet_data.rst
    krb5_free_string.rst
    krb5_free_ticket.rst
    krb5_free_unparsed_name.rst

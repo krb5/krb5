@@ -29,7 +29,7 @@ from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 from docmodel import *
 
-exclude_funcs = []
+exclude_funcs = ['krb5_free_octet_data']
 
 class DocNode(object):
     """

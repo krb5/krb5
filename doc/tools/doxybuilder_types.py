@@ -32,9 +32,10 @@ from docmodel import *
 
 exclude_types = [ 'TRUE', 'FALSE', 'KRB5_ATTR_DEPRECATED',
                   'KRB5_CALLCONV', 'KRB5_CALLCONV_C', 'KRB5_CALLCONV_WRONG',
-                  'KRB5_GENERAL__', 'KRB5_OLD_CRYPTO',
+                  'KRB5_GENERAL__', 'KRB5_KEYUSAGE_PA_REFERRAL',
+                  'KRB5_OLD_CRYPTO',
                   'KRB5INT_BEGIN_DECLS', 'KRB5INT_END_DECLS',
-                  'krb5_cc_ops', 'krb5_responder_context' ]
+                  'krb5_cc_ops', 'krb5_octet_data', 'krb5_responder_context' ]
 
 class DoxyTypes(object):
     def __init__(self, xmlpath):
