@@ -1406,40 +1406,21 @@ pkinit_client_plugin_fini(krb5_context context, krb5_clpreauth_moddata moddata)
 static krb5_error_code
 add_string_to_array(krb5_context context, char ***array, const char *addition)
 {
-    char **out = NULL;
+    char **a = *array;
+    size_t len;
 
-    if (*array == NULL) {
-        out = malloc(2 * sizeof(char *));
-        if (out == NULL)
-            return ENOMEM;
-        out[1] = NULL;
-        out[0] = strdup(addition);
-        if (out[0] == NULL) {
-            free(out);
-            return ENOMEM;
-        }
-    } else {
-        int i;
-        char **a = *array;
-        for (i = 0; a[i] != NULL; i++);
-        out = malloc( (i + 2) * sizeof(char *));
-        if (out == NULL)
-            return ENOMEM;
-        for (i = 0; a[i] != NULL; i++) {
-            out[i] = a[i];
-        }
-        out[i++] = strdup(addition);
-        if (out == NULL) {
-            free(out);
-            return ENOMEM;
-        }
-        out[i] = NULL;
-        free(*array);
-    }
-    *array = out;
-
+    for (len = 0; a != NULL && a[len] != NULL; len++);
+    a = realloc(a, (len + 2) * sizeof(char *));
+    if (a == NULL)
+        return ENOMEM;
+    *array = a;
+    a[len] = strdup(addition);
+    if (a[len] == NULL)
+        return ENOMEM;
+    a[len + 1] = NULL;
     return 0;
 }
+
 static krb5_error_code
 handle_gic_opt(krb5_context context,
                pkinit_context plgctx,
