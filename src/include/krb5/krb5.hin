@@ -1858,9 +1858,10 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_KPASSWD_SOFTERROR          4  /**< Password change rejected */
 /* These are Microsoft's extensions in RFC 3244, and it looks like
    they'll become standardized, possibly with other additions.  */
-#define KRB5_KPASSWD_ACCESSDENIED       5       /**< unused */
-#define KRB5_KPASSWD_BAD_VERSION        6
-#define KRB5_KPASSWD_INITIAL_FLAG_NEEDED 7      /**< unused */
+#define KRB5_KPASSWD_ACCESSDENIED       5  /**< Not authorized */
+#define KRB5_KPASSWD_BAD_VERSION        6  /**< Unknown RPC version */
+/** The presented credentials were not obtained using a password directly */
+#define KRB5_KPASSWD_INITIAL_FLAG_NEEDED 7
 
 /*
  * end "proto.h"
