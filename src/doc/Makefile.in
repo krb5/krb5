@@ -117,7 +117,7 @@ paths.py:
 version.py: $(docsrc)/version.py
 
 $(docsrc)/version.py: $(top_srcdir)/patchlevel.h $(srcdir)/version.py.in
-	$(RM) $@
+	rm -f $@
 	$(CC) -E -I$(top_srcdir) - < $(srcdir)/version.py.in > $@
 
 clean::
