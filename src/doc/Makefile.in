@@ -36,12 +36,15 @@ LATEXOPTS=
 # Create HTML documentation in $(docsrc)/html suitable for a
 # release tarball or the web site (that is, without substitutions for
 # configured paths).  This can be done in an unconfigured source tree
-# with:
-#     make -f Makefile.in srcdir=. top_srcdir=.. PYTHON=python html
-#     make -f Makefile.in clean
+# as:
+#     make -f Makefile.in htmlsrc
 html: composite
 	rm -rf $(docsrc)/html
 	$(SPHINX_BUILD) -q rst_composite $(docsrc)/html
+
+# Dummy target for use in an unconfigured source tree.
+htmlsrc:
+	$(MAKE) -f Makefile.in srcdir=. top_srcdir=.. PYTHON=python html clean
 
 # Create HTML documentation in html_subst suitable for
 # installation by an OS package, with substitutions for configured
