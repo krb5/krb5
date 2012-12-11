@@ -62,8 +62,7 @@ paths.
 You can also do this from an unconfigured source tree with::
 
     cd src/doc
-    make -f Makefile.in top_srcdir=.. srcdir=. PYTHON=python html
-    make -f Makefile.in clean
+    make -f Makefile.in htmlsrc
 
 
 Building for an OS package or site documentation
