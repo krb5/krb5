@@ -628,23 +628,34 @@ numbers, punctuation, and whitespace/unprintable characters.
 .B \fB\-history\fP \fInumber\fP
 Sets the number of past keys kept for a principal.  This option is
 not supported with the LDAP KDC database module.
+.UNINDENT
+.INDENT 0.0
 .TP
 .B \fB\-maxfailure\fP \fImaxnumber\fP
-Sets the maximum number of authentication failures before the
-principal is locked.  Authentication failures are only tracked for
-principals which require preauthentication.
+Sets the number of authentication failures before the principal is
+locked.  Authentication failures are only tracked for principals
+which require preauthentication.  The counter of failed attempts
+resets to 0 after a successful attempt to authenticate.  A
+\fImaxnumber\fP value of 0 (the default) disables lockout.
+.UNINDENT
+.INDENT 0.0
 .TP
 .B \fB\-failurecountinterval\fP \fIfailuretime\fP
 (\fIgetdate\fP string) Sets the allowable time between
 authentication failures.  If an authentication failure happens
 after \fIfailuretime\fP has elapsed since the previous failure,
-the number of authentication failures is reset to 1.
+the number of authentication failures is reset to 1.  A
+\fIfailuretime\fP value of 0 (the default) means forever.
+.UNINDENT
+.INDENT 0.0
 .TP
 .B \fB\-lockoutduration\fP \fIlockouttime\fP
 (\fIgetdate\fP string) Sets the duration for which the principal
 is locked from authenticating if too many authentication failures
 occur without the specified failure count interval elapsing.
-A duration of 0 means forever.
+A duration of 0 (the default) means the principal remains locked
+out until it is administratively unlocked with \fBmodprinc
+\-unlock\fP.
 .TP
 .B \fB\-allowedkeysalts\fP
 Specifies the key/salt tuples supported for long\-term keys when

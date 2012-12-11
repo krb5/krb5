@@ -1146,8 +1146,9 @@ The default is false.
 .UNINDENT
 .SH PARAMETER EXPANSION
 .sp
-Several variables, such as \fBdefault_keytab_name\fP, allow parameters
-to be expanded.  Valid parameters are:
+Starting with release 1.11, several variables, such as
+\fBdefault_keytab_name\fP, allow parameters to be expanded.
+Valid parameters are:
 .INDENT 0.0
 .INDENT 3.5
 .TS
