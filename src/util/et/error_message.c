@@ -81,6 +81,7 @@ void com_err_terminate(void)
         enext = e->next;
         free(e);
     }
+    et_list = NULL;
     k5_mutex_unlock(&et_list_lock);
     k5_mutex_destroy(&et_list_lock);
     terminated = 1;
