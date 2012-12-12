@@ -573,25 +573,22 @@ class DoxyFuncs(XML2AST):
 
 
 
-class DoxyFuncsTest(DoxyFuncs):
+class DoxyBuilderFuncs(DoxyFuncs):
     def __init__(self, xmlpath, rstpath):
-        super(DoxyFuncsTest,self).__init__(xmlpath)
+        super(DoxyBuilderFuncs,self).__init__(xmlpath)
         self.target_dir = rstpath
         outfile = '%s/%s' % (self.target_dir, 'out.txt')
         self.tmp = open(outfile, 'w')
 
-    def run_tests(self):
-        self.test_save()
-
-    def test_run(self):
-        self.run()
-
-    def test_save(self):
+    def run_all(self):
         self.run()
         templates = {'function': 'func_document.tmpl'}
         self.save(templates, self.target_dir)
 
+    def test_run(self):
+        self.run()
+
 if __name__ == '__main__':
-    tester = DoxyFuncsTest(xmlpath, rstpath)
-    tester.run_tests()
+    builder = DoxyBuilderFuncs(xmlpath, rstpath)
+    builder.run_all()
 

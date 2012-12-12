@@ -326,26 +326,26 @@ class DoxyTypes(object):
 
 
 
-class DoxyTypesTest(DoxyTypes):
+class DoxyBuilderTypes(DoxyTypes):
     def __init__(self, xmlpath, rstpath):
         self.templates = { 'composite': 'type_document.tmpl'}
         self.target_dir = rstpath
 
-        super(DoxyTypesTest,self).__init__(xmlpath)
+        super(DoxyBuilderTypes,self).__init__(xmlpath)
 
-    def run_tests(self):
-        self.test_process_typedef_node()
-        self.test_process_define_node()
+    def run_all(self):
+        self.process_typedef_nodes()
+        self.process_define_nodes()
 
     def test_run(self):
         filename = 'krb5_8hin.xml'
         self.run(filename)
 
-    def test_process_variable_node(self):
+    def process_variable_nodes(self):
         filename = 'struct__krb5__octet__data.xml'
         result = self.run(filename, include=['variable'])
 
-    def test_process_typedef_node(self):
+    def process_typedef_nodes(self):
         # run parser for typedefs
         filename = 'krb5_8hin.xml'
         result = self.run(filename, include=['typedef'])
@@ -356,7 +356,7 @@ class DoxyTypesTest(DoxyTypes):
             obj = DocModel(**t)
             self.save(obj, self.templates, target_dir)
 
-    def test_process_define_node(self):
+    def process_define_nodes(self):
         # run parser for define's
         filename = 'krb5_8hin.xml'
         result = self.run(filename, include=['define'])
@@ -370,5 +370,5 @@ class DoxyTypesTest(DoxyTypes):
 
 if __name__ == '__main__':
 
-    tester = DoxyTypesTest( xml_inpath, rst_outpath)
-    tester.run_tests()
+    builder = DoxyBuilderTypes( xml_inpath, rst_outpath)
+    builder.run_all()
