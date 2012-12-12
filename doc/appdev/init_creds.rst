@@ -34,6 +34,32 @@ parameter (which can be a null pointer).  Use the function
 :c:func:`krb5_get_init_creds_opt_alloc` to allocate an options
 structure, and :c:func:`krb5_get_init_creds_opt_free` to free it.
 
+Getting anonymous credentials
+-----------------------------
+
+As of release 1.8, it is possible to obtain fully anonymous or
+partially anonymous (realm-exposed) credentials, if the KDC supports
+it.  The MIT KDC supports issuing fully anonymous credentials as of
+release 1.8 if configured appropriately (see :ref:`anonymous_pkinit`),
+but does not support issuing realm-exposed anonymous credentials at
+this time.
+
+To obtain fully anonymous credentials, call
+:c:func:`krb5_get_init_creds_opt_set_anonymous` on the options
+structure to set the anonymous flag, and specify a client principal
+with the KDC's realm and a single empty data component (the principal
+obtained by parsing ``@``\ *realmname*).  Authentication will take
+place using anonymous PKINIT; if successful, the client principal of
+the resulting tickets will be
+``WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS``.
+
+To obtain realm-exposed anonymous credentials, set the anonymous flag
+on the options structure as above, but specify a normal client
+principal in order to prove membership in the realm.  Authentication
+will take place as it normally does; if successful, the client
+principal of the resulting tickets will be ``WELLKNOWN/ANONYMOUS@``\
+*realmname*.
+
 User interaction
 ----------------
 

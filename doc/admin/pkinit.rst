@@ -181,6 +181,8 @@ If the KDC and client are properly configured, it should now be
 possible to run ``kinit username`` without entering a password.
 
 
+.. _anonymous_pkinit:
+
 Anonymous PKINIT
 ----------------
 
