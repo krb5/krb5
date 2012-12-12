@@ -2109,7 +2109,7 @@ process_k5beta6_record(char *fname, krb5_context kcontext, FILE *filep,
     dbentry->n_tl_data = t3;
 
     /* Get memory for key list */
-    if (t4 && (kp = malloc(t4*sizeof(krb5_key_data))) == NULL)
+    if (t4 && (kp = calloc(t4, sizeof(krb5_key_data))) == NULL)
         goto cleanup;
 
     /* Get memory for extra data */
@@ -2121,7 +2121,6 @@ process_k5beta6_record(char *fname, krb5_context kcontext, FILE *filep,
     dbentry->e_length = t5;
 
     if (kp != NULL) {
-        memset(kp, 0, t4*sizeof(krb5_key_data));
         dbentry->key_data = kp;
         kp = NULL;
     }
