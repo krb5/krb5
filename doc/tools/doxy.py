@@ -50,12 +50,12 @@ def processOptions():
        parser.error("Input and output directories are required")
 
     if action == "all" or action == "typedef":
-        tester = DoxyTypesTest(in_dir, out_dir)
-        tester.run_tests()
+        builder = DoxyBuilderTypes(in_dir, out_dir)
+        builder.run_all()
 
     if action == "all" or action == "func" or action == "function":
-        tester = DoxyFuncsTest(in_dir, out_dir)
-        tester.run_tests()
+        builder = DoxyBuilderFuncs(in_dir, out_dir)
+        builder.run_all()
 
 
 if __name__ == '__main__':
