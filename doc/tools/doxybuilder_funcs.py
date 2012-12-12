@@ -169,14 +169,12 @@ class DoxyFuncs(XML2AST):
     def run(self):
         for node in self.document:
             self.process(node)
-        print "\nnumber of functions processed ===> ",len(self.objects)
 
     def process(self, node):
         node_type = node.attributes['kind']
         if node_type == 'function':
             data = self._process_function_node(node)
         else:
-            print 'not processing node: %s' % node_type
             return
 
         if 'name' in data and data['name'] in exclude_funcs:
@@ -192,7 +190,6 @@ class DoxyFuncs(XML2AST):
 
     def _process_function_node(self, node):
         f_name = node.children['name'][0].getContent()
-        print f_name
         f_Id = node.attributes['id']
         f_ret_type = self._process_type_node(node.children['type'][0])
         f_brief = node.children['briefdescription'][0].getContent()

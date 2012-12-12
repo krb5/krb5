@@ -94,14 +94,11 @@ class DoxyTypes(object):
                 if 'name' in data and data['name'] in exclude_types:
                     continue
                 result.append(data)
-        print "\nnumber of types processed ==> " , len(result)
         return result
 
 
     def _process_typedef_node(self, node):
         t_name = node.xpath('./name/text()')[0]
-
-        print  t_name
 
         t_Id = node.attrib['id']
         t_definition = node.xpath('./definition/text()')[0]
@@ -180,7 +177,6 @@ class DoxyTypes(object):
 
     def _process_define_node(self, node):
         d_name = node.xpath('./name/text()')[0]
-        print  d_name
         d_initializer = ''
         d_type = ''
         d_signature = ''
@@ -338,9 +334,7 @@ class DoxyTypesTest(DoxyTypes):
         super(DoxyTypesTest,self).__init__(xmlpath)
 
     def run_tests(self):
-        print "Process typedef's"
         self.test_process_typedef_node()
-        print "Process define's"
         self.test_process_define_node()
 
     def test_run(self):
