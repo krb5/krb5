@@ -25,6 +25,30 @@ design goals of Kerberos.
 The function :c:func:`krb5_get_init_creds_password` will get initial
 credentials for a client using a password.  An application that needs
 to verify the credentials can call :c:func:`krb5_verify_init_creds`.
+Here is an example of code to obtain and verify TGT credentials, given
+strings *princname* and *password* for the client principal name and
+password:
+
+  ::
+
+    krb5_error_code ret;
+    krb5_creds creds;
+    krb5_principal client_princ = NULL;
+
+    memset(&creds, 0, sizeof(creds));
+    ret = krb5_parse_name(context, princname, &client_princ);
+    if (ret)
+        goto cleanup;
+    ret = krb5_get_init_creds_password(context, &creds, client_princ,
+                                       password, NULL, NULL, 0, NULL, NULL);
+    if (ret)
+        goto cleanup;
+    ret = krb5_verify_init_creds(context, &creds, NULL, NULL, NULL, NULL);
+
+    cleanup:
+    krb5_free_principal(context, client_princ);
+    krb5_free_cred_contents(context, &creds);
+    return ret;
 
 Options for get_init_creds
 --------------------------
@@ -32,7 +56,29 @@ Options for get_init_creds
 The function :c:func:`krb5_get_init_creds_password` takes an options
 parameter (which can be a null pointer).  Use the function
 :c:func:`krb5_get_init_creds_opt_alloc` to allocate an options
-structure, and :c:func:`krb5_get_init_creds_opt_free` to free it.
+structure, and :c:func:`krb5_get_init_creds_opt_free` to free it.  For
+example:
+
+  ::
+
+    krb5_error_code ret;
+    krb5_get_init_creds_opt *opt = NULL;
+    krb5_creds creds;
+
+    memset(&creds, 0, sizeof(creds));
+    ret = krb5_get_init_creds_opt_alloc(context, &opt);
+    if (ret)
+        goto cleanup;
+    krb5_get_init_creds_opt_set_tkt_life(opt, 24 * 60 * 60);
+    ret = krb5_get_init_creds_password(context, &creds, client_princ,
+                                       password, NULL, NULL, 0, NULL, opt);
+    if (ret)
+        goto cleanup;
+
+    cleanup:
+    krb5_get_init_creds_opt_free(context, opt);
+    krb5_free_cred_contents(context, &creds);
+    return ret;
 
 Getting anonymous credentials
 -----------------------------
@@ -51,7 +97,19 @@ with the KDC's realm and a single empty data component (the principal
 obtained by parsing ``@``\ *realmname*).  Authentication will take
 place using anonymous PKINIT; if successful, the client principal of
 the resulting tickets will be
-``WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS``.
+``WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS``.  Here is an example:
+
+  ::
+
+    krb5_get_init_creds_opt_set_anonymous(opt, 1);
+    ret = krb5_build_principal(context, &client_princ, strlen(myrealm),
+                               myrealm, "", (char *)NULL);
+    if (ret)
+        goto cleanup;
+    ret = krb5_get_init_creds_password(context, &creds, client_princ,
+                                       password, NULL, NULL, 0, NULL, opt);
+    if (ret)
+        goto cleanup;
 
 To obtain realm-exposed anonymous credentials, set the anonymous flag
 on the options structure as above, but specify a normal client
@@ -96,7 +154,14 @@ type information is available.
 
 Text-based applications can use a built-in text prompter
 implementation by supplying :c:func:`krb5_prompter_posix` as the
-*prompter* parameter and a null pointer as the *data* parameter.
+*prompter* parameter and a null pointer as the *data* parameter.  For
+example:
+
+  ::
+
+    ret = krb5_get_init_creds_password(context, &creds, client_princ,
+                                       NULL, krb5_prompter_posix, NULL, 0,
+                                       NULL, NULL);
 
 Responder callback
 ~~~~~~~~~~~~~~~~~~
@@ -145,6 +210,63 @@ challenge into a krb5_responder_otp_challenge structure.  The
 token information elements from the challenge and supplies the value
 and pin for that token.
 
+Example
+#######
+
+Here is an example of using a responder callback:
+
+  ::
+
+    static krb5_error_code
+    my_responder(krb5_context context, void *data,
+                 krb5_responder_context rctx)
+    {
+        krb5_error_code ret;
+        krb5_responder_otp_challenge *chl;
+
+        if (krb5_responder_get_challenge(context, rctx,
+                                         KRB5_RESPONDER_QUESTION_PASSWORD)) {
+            ret = krb5_responder_set_answer(context, rctx,
+                                            KRB5_RESPONDER_QUESTION_PASSWORD,
+                                            "open sesame");
+            if (ret)
+                return ret;
+        }
+        ret = krb5_responder_otp_get_challenge(context, rctx, &chl);
+        if (ret == 0 && chl != NULL) {
+            ret = krb5_responder_otp_set_answer(context, rctx, 0, "1234",
+                                                NULL);
+            krb5_responder_otp_challenge_free(context, rctx, chl);
+            if (ret)
+                return ret;
+        }
+        return 0;
+    }
+
+    static krb5_error_code
+    get_creds(krb5_context context, krb5_principal client_princ)
+    {
+        krb5_error_code ret;
+        krb5_get_init_creds_opt *opt = NULL;
+        krb5_creds creds;
+
+        memset(&creds, 0, sizeof(creds));
+        ret = krb5_get_init_creds_opt_alloc(context, &opt);
+        if (ret)
+            goto cleanup;
+        ret = krb5_get_init_creds_opt_set_responder(context, opt, my_responder,
+                                                    NULL);
+        if (ret)
+            goto cleanup;
+        ret = krb5_get_init_creds_password(context, &creds, client_princ,
+                                           NULL, NULL, NULL, 0, NULL, opt);
+
+    cleanup:
+        krb5_get_init_creds_opt_free(context, opt);
+        krb5_free_cred_contents(context, &creds);
+        return ret;
+    }
+
 Verifying initial credentials
 -----------------------------
 
@@ -153,7 +275,15 @@ credentials.  It takes an options structure (which can be a null
 pointer).  Use :c:func:`krb5_verify_init_creds_opt_init` to initialize
 the caller-allocated options structure, and
 :c:func:`krb5_verify_init_creds_opt_set_ap_req_nofail` to set the
-"nofail" option.
+"nofail" option.  For example:
+
+  ::
+
+    krb5_verify_init_creds_opt vopt;
+
+    krb5_verify_init_creds_opt_init(&vopt);
+    krb5_verify_init_creds_opt_set_ap_req_nofail(&vopt, 1);
+    ret = krb5_verify_init_creds(context, &creds, NULL, NULL, NULL, &vopt);
 
 The confusingly named "nofail" option, when set, means that the
 verification must actually succeed in order for
