@@ -106,8 +106,8 @@ html_theme = 'agogo'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = { "linkcolor": "#a63019", "footerbg":  "#59121e",
-                       "bgcolor": "#59121e", "documentwidth": "80%",
+html_theme_options = { "linkcolor": "#881f0d", "footerbg":  "#5d1509",
+                       "bgcolor": "#5d1509", "documentwidth": "80%",
                        "pagewidth": "auto", "sidebarwidth": "20%" }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -122,7 +122,8 @@ html_title = "MIT Kerberos Documentation"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = ""
+if os.environ.get('HTML_LOGO'):
+    html_logo = os.environ['HTML_LOGO']
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
