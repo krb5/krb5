@@ -36,7 +36,7 @@ krb5_get_as_key_password(krb5_context context,
 
         return k5_response_items_ask_question(ritems,
                                               KRB5_RESPONDER_QUESTION_PASSWORD,
-                                              NULL );
+                                              "");
     }
 
     /* If there's already a key of the correct etype, we're done.
