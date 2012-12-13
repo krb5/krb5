@@ -16,6 +16,9 @@ div.body {
 div.header, div.content, div.footer {
   margin-left: auto;
   margin-right: auto;
+  padding-left: 1em;
+  padding-right: 1em;
+  max-width: 60em;
 }
 
 div.header-wrapper {
@@ -105,6 +108,10 @@ div.sidebar li.toctree-l3.current a {
 
 div.sidebar li.toctree-l4 a {
   display: none;
+}
+
+div.sidebar input[type=text] {
+  width: auto;
 }
 
 /* Other body styles */
