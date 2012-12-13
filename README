@@ -191,7 +191,8 @@ krb5-1.11 changes by ticket ID
 7105    side effects in assertions
 7106    documentation nit in tkt_mgmt.rst
 7107    Suppress some gcc uninitialized variable warnings
-7109    Key rollover for MIT/AD cross TGT principals fails due to kvno 0
+7109    Key rollover for MIT/AD cross TGT principals fails due to
+        kvno 0
 7110    Fix password reuse check with cpw -keepold
 7111    Incorrect ASN.1 tag for EncASRepPart in svn trunk
 7112    KRB5_TRACE is broken in trunk
@@ -302,10 +303,41 @@ krb5-1.11 changes by ticket ID
 7444    De-conditionalize Camellia code
 7445    Make kdb5_util dump work with LDAP again
 7446    Add Camellia enctypes to default enctype lists
+7447    Fix warnings in doc build
 7448    Avoid using grep -q in configure.in
 7451    Add "Kerberos" to PDF titles
 7452    Reword krb5_unparse_name_ext doxygen markup
 7453    Update mkrel for new doc build process
+7455    Documentation: table formating and ref correction in MIT
+        features
+7456    Documentation: Update 1.11 feature list
+7457    camellia needs key_cleanup() routine
+7459    Remove broken clean_hostname trace messages
+7460    Add first-introduced version for
+        krb5_get_init_creds_opt_set_in_ccache() in doxygen markup
+7461    Remove .doctrees when cleaning src/doc
+7462    Move Release tag to the footer in Sphinx html documentation
+7464    Remove "Test coverage" topic from Sphinx documentation
+7466    Do not generate unused parts of toctree
+7467    Do not include hidden files in the sidebar
+7468    Make sphinx warnings fatal for doc build
+7469    Reformat RST to avoid sphinx warnings
+7470    Note notice.txt's dependency on version.py
+7471    Fix typo
+7472    Document parameter expansion for keytab and ccache
+        configuration options
+7474    Update comments about conflicting KRB5_KEYUSAGE_PA types
+7477    Document account lockout configuration
+7479    Build fixes for windows
+7480    Cross-reference account lockout documentation
+7482    Make resources.rst more useful to non-devs
+7483    KDC can return host referral to its own realm
+7488    Various nits in krb5-1.10.3
+7489    Do not document unused symbols
+7490    Update comments for RFC 3244 kpasswd extensions
+7491    Make building docs easier in an unconfigured tree
+7494    Regenerate checked-in man pages
+7496    Document API for getting anonymous tickets
 
 Acknowledgements
 ----------------
