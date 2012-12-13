@@ -107,8 +107,8 @@ html_theme = 'agogo'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = { "linkcolor": "#a63019", "footerbg":  "#59121e",
-                       "bgcolor": "#59121e", "documentwidth": "900px",
-                       "pagewidth": "960px", "sidebarwidth": "40px" }
+                       "bgcolor": "#59121e", "documentwidth": "80%",
+                       "pagewidth": "auto", "sidebarwidth": "20%" }
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
