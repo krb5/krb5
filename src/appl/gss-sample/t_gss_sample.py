@@ -35,8 +35,8 @@ def server_client_test(realm, options):
     portstr = str(realm.server_port())
     server = realm.start_server([gss_server, '-port', portstr, 'host'],
                                 'starting...')
-    output = realm.run_as_client([gss_client, '-port', portstr] + options +
-                                 [hostname, 'host', 'testmsg'])
+    output = realm.run([gss_client, '-port', portstr] + options +
+                       [hostname, 'host', 'testmsg'])
     if 'Signature verified.' not in output:
         fail('Expected message not seen in gss-client output')
     stop_daemon(server)

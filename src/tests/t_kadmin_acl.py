@@ -14,7 +14,7 @@ def make_client(name):
 
 def kadmin_as(client, query):
     global realm
-    return realm.run_as_client([kadmin, '-c', client, '-q', query])
+    return realm.run([kadmin, '-c', client, '-q', query])
 
 def delprinc(name):
     global realm

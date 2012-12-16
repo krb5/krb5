@@ -6,12 +6,12 @@ from k5test import *
 # have a regression test for #7483.
 
 # A KDC should not return a host referral to its own realm.
-krb5_conf = {'master': {'domain_realm': {'y': 'KRBTEST.COM'}}}
-kdc_conf = {'master': {'realms': {'$realm': {'host_based_services': 'x'}}}}
+krb5_conf = {'domain_realm': {'y': 'KRBTEST.COM'}}
+kdc_conf = {'realms': {'$realm': {'host_based_services': 'x'}}}
 realm = K5Realm(krb5_conf=krb5_conf, kdc_conf=kdc_conf, create_host=False)
 tracefile = os.path.join(realm.testdir, 'trace')
-realm.run_as_client(['env', 'KRB5_TRACE=' + tracefile, kvno, '-u', 'x/z.y@'],
-                    expected_code=1)
+realm.run(['env', 'KRB5_TRACE=' + tracefile, kvno, '-u', 'x/z.y@'],
+          expected_code=1)
 f = open(tracefile, 'r')
 trace = f.read()
 f.close()

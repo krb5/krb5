@@ -34,28 +34,28 @@ realm.run_kadminl('addprinc -pw pass -pwexpire "12 hours" hours')
 realm.run_kadminl('addprinc -pw pass -pwexpire "3 days" days')
 
 # Check for expected prompter warnings when no expire callback is used.
-output = realm.run_as_client(['./t_expire_warn', 'noexpire', 'pass', '0'])
+output = realm.run(['./t_expire_warn', 'noexpire', 'pass', '0'])
 if output:
     fail('Unexpected output for noexpire')
-output = realm.run_as_client(['./t_expire_warn', 'minutes', 'pass', '0'])
+output = realm.run(['./t_expire_warn', 'minutes', 'pass', '0'])
 if ' less than one hour on ' not in output:
     fail('Expected warning not seen for minutes')
-output = realm.run_as_client(['./t_expire_warn', 'hours', 'pass', '0'])
+output = realm.run(['./t_expire_warn', 'hours', 'pass', '0'])
 if ' hours on ' not in output:
     fail('Expected warning not seen for hours')
-output = realm.run_as_client(['./t_expire_warn', 'days', 'pass', '0'])
+output = realm.run(['./t_expire_warn', 'days', 'pass', '0'])
 if ' days on ' not in output:
     fail('Expected warning not seen for days')
 
 # Check for expected expire callback behavior.  These tests are
 # carefully agnostic about whether the KDC supports last_req fields,
 # and could be made more specific if last_req support is added.
-output = realm.run_as_client(['./t_expire_warn', 'noexpire', 'pass', '1'])
+output = realm.run(['./t_expire_warn', 'noexpire', 'pass', '1'])
 if 'password_expiration = 0\n' not in output or \
         'account_expiration = 0\n' not in output or \
         'is_last_req = ' not in output:
     fail('Expected callback output not seen for noexpire')
-output = realm.run_as_client(['./t_expire_warn', 'days', 'pass', '1'])
+output = realm.run(['./t_expire_warn', 'days', 'pass', '1'])
 if 'password_expiration = ' not in output or \
         'password_expiration = 0\n' in output:
     fail('Expected non-zero password expiration not seen for days')

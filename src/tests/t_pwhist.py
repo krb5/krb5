@@ -6,12 +6,12 @@ from k5test import *
 # first one to create history entries.
 realm = K5Realm(start_kdc=False)
 # Create a history principal with two keys.
-realm.run_as_master(['./hist', 'make'])
+realm.run(['./hist', 'make'])
 realm.run_kadminl('addpol -history 2 pol')
 realm.run_kadminl('modprinc -policy pol user')
 realm.run_kadminl('cpw -pw pw2 user')
 # Swap the keys, simulating older kadmin having chosen the second entry.
-realm.run_as_master(['./hist', 'swap'])
+realm.run(['./hist', 'swap'])
 # Make sure we can read the history entry.
 output = realm.run_kadminl('cpw -pw %s user' % password('user'))
 if 'Cannot reuse password' not in output:

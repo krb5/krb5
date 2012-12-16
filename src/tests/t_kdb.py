@@ -13,7 +13,7 @@ def which(progname):
 
 # Run kdbtest against the BDB module.
 realm = K5Realm(create_kdb=False)
-realm.run_as_master(['./kdbtest'])
+realm.run(['./kdbtest'])
 
 # Set up an OpenLDAP test server if we can.
 
@@ -87,24 +87,22 @@ output('*** Started slapd (pid %d, output in %s)\n' % (slapd_pid, slapd_out))
 time.sleep(1)
 
 # Run kdbtest against the LDAP module.
-kdc_conf = {'all': {
-                'realms': {'$realm': {'database_module': 'ldap'}},
-                'dbmodules': {'ldap': {
-                        'db_library': 'kldap',
-                        'ldap_kerberos_container_dn': top_dn,
-                        'ldap_kdc_dn': admin_dn,
-                        'ldap_kadmind_dn': admin_dn,
-                        'ldap_service_password_file': ldap_pwfile,
-                        'ldap_servers': ldap_uri}}}}
-realm = K5Realm(create_kdb=False, kdc_conf=kdc_conf)
+conf = {'realms': {'$realm': {'database_module': 'ldap'}},
+        'dbmodules': {'ldap': {'db_library': 'kldap',
+                               'ldap_kerberos_container_dn': top_dn,
+                               'ldap_kdc_dn': admin_dn,
+                               'ldap_kadmind_dn': admin_dn,
+                               'ldap_service_password_file': ldap_pwfile,
+                               'ldap_servers': ldap_uri}}}
+realm = K5Realm(create_kdb=False, kdc_conf=conf)
 input = admin_pw + '\n' + admin_pw + '\n'
-realm.run_as_master([kdb5_ldap_util, 'stashsrvpw', admin_dn], input=input)
-realm.run_as_master(['./kdbtest'])
+realm.run([kdb5_ldap_util, 'stashsrvpw', admin_dn], input=input)
+realm.run(['./kdbtest'])
 
 # Run a kdb5_ldap_util command using the test server's admin DN and password.
 def kldaputil(args, **kw):
-    return realm.run_as_master([kdb5_ldap_util, '-D', admin_dn, '-w',
-                                admin_pw] + args, **kw)
+    return realm.run([kdb5_ldap_util, '-D', admin_dn, '-w', admin_pw] + args,
+                     **kw)
 
 # kdbtest can't currently clean up after itself since the LDAP module
 # doesn't support krb5_db_destroy.  So clean up after it with
@@ -243,17 +241,17 @@ realm.addprinc(realm.user_princ, password('user'))
 realm.addprinc(realm.host_princ)
 realm.extract_keytab(realm.host_princ, realm.keytab)
 realm.kinit(realm.user_princ, password('user'))
-realm.run_as_client([kvno, realm.host_princ])
+realm.run([kvno, realm.host_princ])
 realm.klist(realm.user_princ, realm.host_princ)
 realm.stop()
 
 # Briefly test dump and load.
 dumpfile = os.path.join(realm.testdir, 'dump')
-realm.run_as_master([kdb5_util, 'dump', dumpfile])
-out = realm.run_as_master([kdb5_util, 'load', dumpfile], expected_code=1)
+realm.run([kdb5_util, 'dump', dumpfile])
+out = realm.run([kdb5_util, 'load', dumpfile], expected_code=1)
 if 'plugin requires -update argument' not in out:
     fail('Unexpected error from kdb5_util load without -update')
-realm.run_as_master([kdb5_util, 'load', '-update', dumpfile])
+realm.run([kdb5_util, 'load', '-update', dumpfile])
 
 # Destroy the realm.
 kldaputil(['destroy', '-f'])

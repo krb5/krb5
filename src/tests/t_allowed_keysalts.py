@@ -2,8 +2,7 @@
 from k5test import *
 import re
 
-krb5_conf1 = {'all': {'libdefaults': {
-            'supported_enctypes': 'aes256-cts'}}}
+krb5_conf1 = {'libdefaults': {'supported_enctypes': 'aes256-cts'}}
 
 realm = K5Realm(krb5_conf=krb5_conf1, create_host=False, get_creds=False)
 

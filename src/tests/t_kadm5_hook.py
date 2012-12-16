@@ -4,15 +4,7 @@ from k5test import *
 plugin = os.path.join(buildtop, "plugins", "kadm5_hook", "test",
                       "kadm5_hook_test.so")
 
-hook_krb5_conf = {
-    'all' : {
-        "plugins" : {
-            "kadm5_hook" : {
-                "module" : "test:" + plugin
-            }
-        }
-    }
-}
+hook_krb5_conf = {'plugins': {'kadm5_hook': { 'module': 'test:' + plugin}}}
 
 realm = K5Realm(krb5_conf=hook_krb5_conf, create_user=False, create_host=False)
 output = realm.run_kadminl ('addprinc -randkey test')

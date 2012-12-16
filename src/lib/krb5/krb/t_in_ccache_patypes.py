@@ -33,58 +33,52 @@ realm.run_kadminl('addprinc -pw pass +requires_preauth preauth')
 
 # Check that we can get creds without preauth without an in_ccache.  This is
 # the default behavior for kinit.
-realm.run_as_client(['./t_in_ccache', 'nopreauth', 'pass'])
+realm.run(['./t_in_ccache', 'nopreauth', 'pass'])
 
 # Check that we can get creds with preauth without an in_ccache.  This is the
 # default behavior for kinit.
-realm.run_as_client(['./t_in_ccache', 'preauth', 'pass'])
+realm.run(['./t_in_ccache', 'preauth', 'pass'])
 
 # Check that we can get creds while supplying a now-populated input ccache that
 # doesn't contain any relevant configuration.
-realm.run_as_client(['./t_in_ccache', 'nopreauth', 'pass'])
-realm.run_as_client(['./t_in_ccache', '-I', realm.ccache, 'preauth', 'pass'])
+realm.run(['./t_in_ccache', 'nopreauth', 'pass'])
+realm.run(['./t_in_ccache', '-I', realm.ccache, 'preauth', 'pass'])
 
 # Check that we can get creds while supplying a now-populated input ccache.
-realm.run_as_client(['./t_in_ccache', 'preauth', 'pass'])
-realm.run_as_client(['./t_in_ccache', '-I', realm.ccache, 'preauth', 'pass'])
+realm.run(['./t_in_ccache', 'preauth', 'pass'])
+realm.run(['./t_in_ccache', '-I', realm.ccache, 'preauth', 'pass'])
 
 # Check that we can't get creds while specifying patypes that aren't available
 # in a FAST tunnel while using a FAST tunnel.  Expect the client-end
 # preauth-failed error.
-realm.run_as_client(['./t_in_ccache', 'nopreauth', 'pass'])
-realm.run_as_client(['./t_cc_config', '-p', realm.krbtgt_princ,
-                     'pa_type', '2'])
-realm.run_as_client(['./t_in_ccache', '-A', realm.ccache, '-I', realm.ccache,
-                     'preauth', 'pass'], expected_code=210)
+realm.run(['./t_in_ccache', 'nopreauth', 'pass'])
+realm.run(['./t_cc_config', '-p', realm.krbtgt_princ, 'pa_type', '2'])
+realm.run(['./t_in_ccache', '-A', realm.ccache, '-I', realm.ccache,
+           'preauth', 'pass'], expected_code=210)
 
 # Check that we can't get creds while specifying patypes that are only
 # available in a FAST tunnel while not using a FAST tunnel.  Expect the
 # client-end preauth-failed error.
-realm.run_as_client(['./t_in_ccache', 'nopreauth', 'pass'])
-realm.run_as_client(['./t_cc_config', '-p', realm.krbtgt_princ,
-                     'pa_type', '138'])
-realm.run_as_client(['./t_in_ccache', '-I', realm.ccache, 'preauth', 'pass'],
-                    expected_code=210)
+realm.run(['./t_in_ccache', 'nopreauth', 'pass'])
+realm.run(['./t_cc_config', '-p', realm.krbtgt_princ, 'pa_type', '138'])
+realm.run(['./t_in_ccache', '-I', realm.ccache, 'preauth', 'pass'],
+          expected_code=210)
 
 # Check that we can get creds using FAST, and that we end up using
 # encrypted_challenge when we do.
-realm.run_as_client(['./t_in_ccache', 'preauth', 'pass'])
-realm.run_as_client(['./t_cc_config', '-p', realm.krbtgt_princ,
-                     'pa_type', '138'])
-realm.run_as_client(['./t_in_ccache', '-A', realm.ccache, 'preauth', 'pass'])
-output = realm.run_as_client(['./t_cc_config', '-p', realm.krbtgt_princ,
-                              'pa_type'])
+realm.run(['./t_in_ccache', 'preauth', 'pass'])
+realm.run(['./t_cc_config', '-p', realm.krbtgt_princ, 'pa_type', '138'])
+realm.run(['./t_in_ccache', '-A', realm.ccache, 'preauth', 'pass'])
+output = realm.run(['./t_cc_config', '-p', realm.krbtgt_princ, 'pa_type'])
 # We should have selected and used encrypted_challenge.
 if output != '138':
     fail('Unexpected pa_type value in out_ccache: "%s"' % output)
 
 # Check that we can get creds while specifying the right patypes.
-realm.run_as_client(['./t_in_ccache', 'nopreauth', 'pass'])
-realm.run_as_client(['./t_cc_config', '-p', realm.krbtgt_princ,
-                     'pa_type', '2'])
-realm.run_as_client(['./t_in_ccache', '-I', realm.ccache, 'preauth', 'pass'])
-output = realm.run_as_client(['./t_cc_config', '-p', realm.krbtgt_princ,
-                              'pa_type'])
+realm.run(['./t_in_ccache', 'nopreauth', 'pass'])
+realm.run(['./t_cc_config', '-p', realm.krbtgt_princ, 'pa_type', '2'])
+realm.run(['./t_in_ccache', '-I', realm.ccache, 'preauth', 'pass'])
+output = realm.run(['./t_cc_config', '-p', realm.krbtgt_princ, 'pa_type'])
 # We should have selected and used encrypted_timestamp.
 if output != '2':
     fail('Unexpected pa_type value in out_ccache')

@@ -60,7 +60,7 @@ if args:
     realm = realms[0]
 else:
     realm = K5Realm(start_kadmind=True)
-env = realm.env_master.copy()
+env = realm.env.copy()
 supplement_path(env)
 
 pwfilename = os.path.join('testdir', 'passwords')

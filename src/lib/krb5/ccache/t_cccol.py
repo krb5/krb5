@@ -16,7 +16,7 @@ realm.kinit('alice', password('alice'), flags=['-c', dalice])
 realm.kinit('bob', password('bob'), flags=['-c', dbob])
 
 def cursor_test(testname, args, expected):
-    outlines = realm.run_as_client(['./t_cccursor'] + args).splitlines()
+    outlines = realm.run(['./t_cccursor'] + args).splitlines()
     outlines.sort()
     expected.sort()
     if outlines != expected:
@@ -37,14 +37,14 @@ cursor_test('filemem', [fccname, mfoo, mbar], [fccname, mfoo, mbar])
 cursor_test('dirmem', [dccname, mfoo], [duser, dalice, dbob, mfoo])
 
 # Test krb5_cccol_have_content.
-realm.run_as_client(['./t_cccursor', dccname, 'CONTENT'])
-realm.run_as_client(['./t_cccursor', fccname, 'CONTENT'])
-realm.run_as_client(['./t_cccursor', realm.ccache, 'CONTENT'])
-realm.run_as_client(['./t_cccursor', mfoo, 'CONTENT'], expected_code=1)
+realm.run(['./t_cccursor', dccname, 'CONTENT'])
+realm.run(['./t_cccursor', fccname, 'CONTENT'])
+realm.run(['./t_cccursor', realm.ccache, 'CONTENT'])
+realm.run(['./t_cccursor', mfoo, 'CONTENT'], expected_code=1)
 
 # Make sure FILE doesn't yield a nonexistent default cache.
-realm.run_as_client([kdestroy])
+realm.run([kdestroy])
 cursor_test('noexist', [], [])
-realm.run_as_client(['./t_cccursor', fccname, 'CONTENT'], expected_code=1)
+realm.run(['./t_cccursor', fccname, 'CONTENT'], expected_code=1)
 
 success('Renewing credentials')

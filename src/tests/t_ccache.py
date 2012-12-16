@@ -26,66 +26,65 @@ from k5test import *
 realm = K5Realm(create_host=False)
 
 # Test kdestroy and klist of a non-existent ccache.
-realm.run_as_client([kdestroy])
-output = realm.run_as_client([klist], expected_code=1)
+realm.run([kdestroy])
+output = realm.run([klist], expected_code=1)
 if 'No credentials cache found' not in output:
     fail('Expected error message not seen in klist output')
 
 # Make a directory collection and use it for client commands.
 ccname = 'DIR:' + os.path.join(realm.testdir, 'cc')
-realm.env_client['KRB5CCNAME'] = ccname
+realm.env['KRB5CCNAME'] = ccname
 
 realm.addprinc('alice', password('alice'))
 realm.addprinc('bob', password('bob'))
 realm.addprinc('carol', password('carol'))
 
 realm.kinit('alice', password('alice'))
-output = realm.run_as_client([klist])
+output = realm.run([klist])
 if 'Default principal: alice@' not in output:
     fail('Initial kinit failed to get credentials for alice.')
-realm.run_as_client([kdestroy])
-output = realm.run_as_client([klist], expected_code=1)
+realm.run([kdestroy])
+output = realm.run([klist], expected_code=1)
 if 'No credentials cache found' not in output:
     fail('Initial kdestroy failed to destroy primary cache.')
-output = realm.run_as_client([klist, '-l'], expected_code=1)
+output = realm.run([klist, '-l'], expected_code=1)
 if not output.endswith('---\n') or output.count('\n') != 2:
     fail('Initial kdestroy failed to empty cache collection.')
 
 realm.kinit('alice', password('alice'))
 realm.kinit('carol', password('carol'))
-output = realm.run_as_client([klist, '-l'])
+output = realm.run([klist, '-l'])
 if '---\ncarol@' not in output or '\nalice@' not in output:
     fail('klist -l did not show expected output after two kinits.')
 realm.kinit('alice', password('alice'))
-output = realm.run_as_client([klist, '-l'])
+output = realm.run([klist, '-l'])
 if '---\nalice@' not in output or output.count('\n') != 4:
     fail('klist -l did not show expected output after re-kinit for alice.')
 realm.kinit('bob', password('bob'))
-output = realm.run_as_client([klist, '-A'])
+output = realm.run([klist, '-A'])
 if 'bob@' not in output.splitlines()[1] or 'alice@' not in output or \
         'carol' not in output or output.count('Default principal:') != 3:
     fail('klist -A did not show expected output after kinit for bob.')
-realm.run_as_client([kswitch, '-p', 'carol'])
-output = realm.run_as_client([klist, '-l'])
+realm.run([kswitch, '-p', 'carol'])
+output = realm.run([klist, '-l'])
 if '---\ncarol@' not in output or output.count('\n') != 5:
     fail('klist -l did not show expected output after kswitch to carol.')
-realm.run_as_client([kdestroy])
-output = realm.run_as_client([klist, '-l'])
+realm.run([kdestroy])
+output = realm.run([klist, '-l'])
 if 'carol@' in output or 'bob@' not in output or output.count('\n') != 4:
     fail('kdestroy failed to remove only primary ccache.')
-realm.run_as_client([kdestroy, '-A'])
-output = realm.run_as_client([klist, '-l'], expected_code=1)
+realm.run([kdestroy, '-A'])
+output = realm.run([klist, '-l'], expected_code=1)
 if not output.endswith('---\n') or output.count('\n') != 2:
     fail('kdestroy -a failed to empty cache collection.')
 
 # Test parameter expansion in default_ccache_name
 realm.stop()
-conf = {'client': {'libdefaults': {
-            'default_ccache_name': 'testdir/%{null}abc%{uid}'}}}
+conf = {'libdefaults': {'default_ccache_name': 'testdir/%{null}abc%{uid}'}}
 realm = K5Realm(krb5_conf=conf, create_kdb=False)
-del realm.env_client['KRB5CCNAME']
+del realm.env['KRB5CCNAME']
 uidstr = str(os.getuid())
-out = realm.run_as_client([klist], expected_code=1)
+out = realm.run([klist], expected_code=1)
 if 'FILE:testdir/abc%s' % uidstr not in out:
     fail('Wrong ccache in klist')
 

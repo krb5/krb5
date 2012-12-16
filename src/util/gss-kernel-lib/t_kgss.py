@@ -25,6 +25,6 @@ from k5test import *
 
 # Test krb5 negotiation under SPNEGO for all enctype configurations.
 for realm in multipass_realms():
-    realm.run_as_client(['./t_kgss_user', realm.host_princ])
+    realm.run(['./t_kgss_user', realm.host_princ])
 
 success('Kernel GSSAPI subset tests')

@@ -19,8 +19,8 @@ def ccache_restore(realm):
 # forwarded cred into the default ccache.
 def check(realm, args):
     ccache_restore(realm)
-    realm.run_as_client(['./t_export_cred'] + args)
-    output = realm.run_as_client([klist, '-f'])
+    realm.run(['./t_export_cred'] + args)
+    output = realm.run([klist, '-f'])
     if 'Flags: Ff' not in output:
         fail('Forwarded tickets not found in ccache after t_export_cred')
 

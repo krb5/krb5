@@ -24,8 +24,8 @@
 
 from k5test import *
 
-def test_kvno(r, princ, test):
-    output = r.run_as_client([kvno, princ])
+def test_kvno(r, princ, test, env=None):
+    output = r.run([kvno, princ], env=env)
     if princ not in output:
         fail('%s: principal %s not in kvno output' % (test, princ))
 
@@ -58,26 +58,23 @@ stop(r1, r2, r3)
 # transited checks, including a capaths for A->C.
 capaths = {'capaths': {'A': {'D': ['B', 'C'], 'C': 'B'}}}
 r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
-                              args=({'realm': 'A',
-                                     'krb5_conf': {'client': capaths}},
+                              args=({'realm': 'A'},
                                     {'realm': 'B'},
-                                    {'realm': 'C',
-                                     'krb5_conf': {'master': capaths}},
-                                    {'realm': 'D',
-                                     'krb5_conf': {'master': capaths}}))
-test_kvno(r1, r4.host_princ, 'client capaths')
+                                    {'realm': 'C', 'krb5_conf': capaths},
+                                    {'realm': 'D', 'krb5_conf': capaths}))
+r1client = r1.special_env('client', False, krb5_conf=capaths)
+test_kvno(r1, r4.host_princ, 'client capaths', r1client)
 stop(r1, r2, r3, r4)
 
 # Test KDC capaths.  The KDCs for A and B have appropriate capaths
 # settings to determine intermediate TGTs to return, but the client
 # has no idea.
 capaths = {'capaths': {'A': {'D': ['B', 'C'], 'C': 'B'}, 'B': {'D': 'C'}}}
-conf = {'master': capaths}
 r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
-                              args=({'realm': 'A', 'krb5_conf': conf},
-                                    {'realm': 'B', 'krb5_conf': conf},
-                                    {'realm': 'C', 'krb5_conf': conf},
-                                    {'realm': 'D', 'krb5_conf': conf}))
+                              args=({'realm': 'A', 'krb5_conf': capaths},
+                                    {'realm': 'B', 'krb5_conf': capaths},
+                                    {'realm': 'C', 'krb5_conf': capaths},
+                                    {'realm': 'D', 'krb5_conf': capaths}))
 test_kvno(r1, r4.host_princ, 'KDC capaths')
 stop(r1, r2, r3, r4)
 
@@ -86,10 +83,9 @@ stop(r1, r2, r3, r4)
 # ticket.
 capaths = {'capaths': {'A': {'C': 'B'}}}
 r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)),
-                          args=({'realm': 'A',
-                                 'krb5_conf': {'client': capaths}},
+                          args=({'realm': 'A', 'krb5_conf': capaths},
                                 {'realm': 'B'}, {'realm': 'C'}))
-output = r1.run_as_client([kvno, r3.host_princ], expected_code=1)
+output = r1.run([kvno, r3.host_princ], expected_code=1)
 if 'KDC policy rejects request' not in output:
     fail('transited 1: Expected error message not in output')
 stop(r1, r2, r3)
@@ -98,13 +94,12 @@ stop(r1, r2, r3)
 # recognize B as an intermediate realm for A->C, so it refuses to
 # verify the krbtgt/C@B ticket in the TGS AP-REQ.
 capaths = {'capaths': {'A': {'D': ['B', 'C'], 'C': 'B'}, 'B': {'D': 'C'}}}
-conf = {'master': capaths}
 r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
-                              args=({'realm': 'A', 'krb5_conf': conf},
-                                    {'realm': 'B', 'krb5_conf': conf},
-                                    {'realm': 'C', 'krb5_conf': conf},
+                              args=({'realm': 'A', 'krb5_conf': capaths},
+                                    {'realm': 'B', 'krb5_conf': capaths},
+                                    {'realm': 'C', 'krb5_conf': capaths},
                                     {'realm': 'D'}))
-output = r1.run_as_client([kvno, r4.host_princ], expected_code=1)
+output = r1.run([kvno, r4.host_princ], expected_code=1)
 if 'Illegal cross-realm ticket' not in output:
     fail('transited 2: Expected error message not in output')
 stop(r1, r2, r3, r4)

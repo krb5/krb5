@@ -24,17 +24,17 @@ realm.kinit(service1, None, ['-f', '-k'])
 # at the S4U2Proxy step since the DB2 back end currently has no
 # support for allowing it.
 realm.kinit(realm.user_princ, password('user'), ['-f', '-c', usercache])
-output = realm.run_as_server(['./t_s4u2proxy_krb5', usercache, storagecache,
-                              '-', pservice1, pservice2], expected_code=1)
+output = realm.run(['./t_s4u2proxy_krb5', usercache, storagecache, '-',
+                    pservice1, pservice2], expected_code=1)
 if ('auth1: ' + realm.user_princ not in output or
     'NOT_ALLOWED_TO_DELEGATE' not in output):
     fail('krb5 -> s4u2proxy')
 
 # Again with SPNEGO.  Bug #7045 prevents us from checking the error
 # message, but we can at least exercise the code.
-output = realm.run_as_server(['./t_s4u2proxy_krb5', '--spnego', usercache,
-                              storagecache, '-', pservice1, pservice2],
-                             expected_code=1)
+output = realm.run(['./t_s4u2proxy_krb5', '--spnego', usercache, storagecache,
+                    '-', pservice1, pservice2],
+                   expected_code=1)
 if ('auth1: ' + realm.user_princ not in output):
     fail('krb5 -> s4u2proxy (SPNEGO)')
 
@@ -42,18 +42,18 @@ if ('auth1: ' + realm.user_princ not in output):
 # result in no delegated credential being created by
 # accept_sec_context.
 realm.kinit(realm.user_princ, password('user'), ['-c', usercache])
-output = realm.run_as_server(['./t_s4u2proxy_krb5', usercache, storagecache,
-                              pservice1, pservice1, pservice2])
+output = realm.run(['./t_s4u2proxy_krb5', usercache, storagecache, pservice1,
+                    pservice1, pservice2])
 if 'no credential delegated' not in output:
     fail('krb5 -> no delegated cred')
 
 # Try S4U2Self.  Ask for an S4U2Proxy step; this won't happen because
 # service/1 isn't allowed to get a forwardable S4U2Self ticket.
-output = realm.run_as_server(['./t_s4u', puser, pservice2])
+output = realm.run(['./t_s4u', puser, pservice2])
 if ('Warning: no delegated cred handle' not in output or
     'Source name:\t' + realm.user_princ not in output):
     fail('s4u2self')
-output = realm.run_as_server(['./t_s4u', '--spnego', puser, pservice2])
+output = realm.run(['./t_s4u', '--spnego', puser, pservice2])
 if ('Warning: no delegated cred handle' not in output or
     'Source name:\t' + realm.user_princ not in output):
     fail('s4u2self (SPNEGO)')
@@ -61,7 +61,7 @@ if ('Warning: no delegated cred handle' not in output or
 # Correct that problem and try again.  As above, the S4U2Proxy step
 # won't actually succeed since we don't support that in DB2.
 realm.run_kadminl('modprinc +ok_to_auth_as_delegate ' + service1)
-output = realm.run_as_server(['./t_s4u', puser, pservice2], expected_code=1)
+output = realm.run(['./t_s4u', puser, pservice2], expected_code=1)
 if 'NOT_ALLOWED_TO_DELEGATE' not in output:
     fail('s4u2self')
 
@@ -70,8 +70,7 @@ if 'NOT_ALLOWED_TO_DELEGATE' not in output:
 # a krb5 cred, not a SPNEGO cred, and t_s4u uses the delegated cred
 # directly rather than saving and reacquiring it) so bug #7045 does
 # not apply and we can verify the error message.
-output = realm.run_as_server(['./t_s4u', '--spnego', puser, pservice2],
-                             expected_code=1)
+output = realm.run(['./t_s4u', '--spnego', puser, pservice2], expected_code=1)
 if 'NOT_ALLOWED_TO_DELEGATE' not in output:
     fail('s4u2self')
 

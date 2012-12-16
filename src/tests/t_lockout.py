@@ -29,17 +29,15 @@ realm.run_kadminl('addpol -maxfailure 2 -failurecountinterval 5m lockout')
 realm.run_kadminl('modprinc +requires_preauth -policy lockout user')
 
 # kinit twice with the wrong password.
-output = realm.run_as_client([kinit, realm.user_princ], input='wrong\n',
-                             expected_code=1)
+output = realm.run([kinit, realm.user_princ], input='wrong\n', expected_code=1)
 if 'Password incorrect while getting initial credentials' not in output:
     fail('Expected error message not seen in kinit output')
-output = realm.run_as_client([kinit, realm.user_princ], input='wrong\n',
-                             expected_code=1)
+output = realm.run([kinit, realm.user_princ], input='wrong\n', expected_code=1)
 if 'Password incorrect while getting initial credentials' not in output:
     fail('Expected error message not seen in kinit output')
 
 # Now the account should be locked out.
-output = realm.run_as_client([kinit, realm.user_princ], expected_code=1)
+output = realm.run([kinit, realm.user_princ], expected_code=1)
 if 'Clients credentials have been revoked while getting initial credentials' \
         not in output:
     fail('Expected lockout error message not seen in kinit output')

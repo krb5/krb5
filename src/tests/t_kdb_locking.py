@@ -12,15 +12,11 @@ import os
 
 from k5test import *
 
-kdc_conf = {
-    'all' : { 'libdefaults' : { 'default_realm' : 'KRBTEST.COM'}}
-}
-
 p = 'foo'
-realm = K5Realm(kdc_conf=kdc_conf, create_user=False)
+realm = K5Realm(create_user=False)
 realm.addprinc(p, p)
 
-kadm5_lock = os.path.join(realm.testdir, 'master-db.kadm5.lock')
+kadm5_lock = os.path.join(realm.testdir, 'db.kadm5.lock')
 if not os.path.exists(kadm5_lock):
     fail('kadm5 lock file not created: ' + kadm5_lock)
 os.unlink(kadm5_lock)
