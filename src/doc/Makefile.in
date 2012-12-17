@@ -24,6 +24,7 @@ RST_SOURCES= _static \
 	user \
 	about.rst \
 	build_this.rst \
+	copyright.rst \
 	mitK5defaults.rst \
 	mitK5features.rst \
 	mitK5license.rst \
