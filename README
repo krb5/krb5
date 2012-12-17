@@ -11,21 +11,41 @@ and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
 
+Documentation
+-------------
+
+Unified documentation for Kerberos V5 is available in both HTML and
+PDF formats.  The table of contents of the HTML format documentation
+is at doc/html/index.html, and the PDF format documentation is in the
+doc/pdf directory.
+
+Additionally, you may find copies of the HTML format documentation
+online at
+
+    http://web.mit.edu/kerberos/krb5-latest/doc/
+
+for the most recent supported release, or at
+
+    http://web.mit.edu/kerberos/krb5-devel/doc/
+
+for the release under development.
+
+More information about Kerberos may be found at
+
+    http://web.mit.edu/kerberos/
+
+and at the MIT Kerberos Consortium web site
+
+    http://kerberos.org/
+
 Building and Installing Kerberos 5
 ----------------------------------
 
-The first file you should look at is doc/install-guide.ps; it contains
-the notes for building and installing Kerberos 5.  The info file
-krb5-install.info has the same information in info file format.  You
-can view this using the GNU emacs info-mode, or by using the
-standalone info file viewer from the Free Software Foundation.  This
-is also available as an HTML file, install.html.
+Build documentation is in doc/html/build/index.html or
+doc/pdf/build.pdf.
 
-Other good files to look at are admin-guide.ps and user-guide.ps,
-which contain the system administrator's guide, and the user's guide,
-respectively.  They are also available as info files
-kerberos-admin.info and krb5-user.info, respectively.  These files are
-also available as HTML files.
+The installation guide is in doc/html/admin/install.html or
+doc/pdf/install.pdf.
 
 If you are attempting to build under Windows, please see the
 src/windows/README file.
