@@ -3,4 +3,9 @@
 MIT Kerberos License information
 ================================
 
+.. toctree::
+    :hidden:
+
+    copyright.rst
+
 .. include::  notice.rst

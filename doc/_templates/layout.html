@@ -8,7 +8,14 @@
 {% macro feedback_rellinks() %}
     <div class="footer-wrapper" >
         <div class="footer" >
-            <div class="right" ><i>Release: {{ release }} </i>
+            <div class="right" ><i>Release: {{ release }}</i><br />
+            {%- if show_copyright %}
+              {%- if hasdoc('copyright') %}
+                {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
+              {%- else %}
+                {% trans copyright=copyright|e %}&copy; Copyright {{ copyright }}.{% endtrans %}
+              {%- endif %}
+            {%- endif %}
             </div>
             <div class="left" >
                 {%- for rellink in rellinks|reverse %}
