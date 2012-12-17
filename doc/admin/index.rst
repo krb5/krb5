@@ -15,6 +15,7 @@ For administrators
    backup_host.rst
    pkinit.rst
    princ_dns.rst
+   enctypes.rst
 
 .. toctree::
    :maxdepth: 1
