@@ -1,5 +1,5 @@
-MIT Kerberos Documentation
-==========================
+MIT Kerberos Documentation (|release|)
+======================================
 
 
 .. toctree::
