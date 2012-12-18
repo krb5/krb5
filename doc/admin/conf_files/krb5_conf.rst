@@ -157,22 +157,32 @@ The libdefaults section may contain any of the following relations:
 
 **default_tgs_enctypes**
     Identifies the supported list of session key encryption types that
-    should be returned by the KDC, in order of preference from
-    highest to lowest.  The list may be delimited with commas or
-    whitespace.  See :ref:`Encryption_and_salt_types` in
+    the client should request when making a TGS-REQ, in order of
+    preference from highest to lowest.  The list may be delimited with
+    commas or whitespace.  See :ref:`Encryption_and_salt_types` in
     :ref:`kdc.conf(5)` for a list of the accepted values for this tag.
     The default value is |defetypes|, but single-DES encryption types
     will be implicitly removed from this list if the value of
     **allow_weak_crypto** is false.
 
+    Do not set this unless required for specific backward
+    compatibility purposes; stale values of this setting can prevent
+    clients from taking advantage of new stronger enctypes when the
+    libraries are upgraded.
+
 **default_tkt_enctypes**
     Identifies the supported list of session key encryption types that
-    should be requested by the client, in order of preference from
-    highest to lowest.  The format is the same as for
+    the client should request when making an AS-REQ, in order of
+    preference from highest to lowest.  The format is the same as for
     default_tgs_enctypes.  The default value for this tag is
     |defetypes|, but single-DES encryption types will be implicitly
     removed from this list if the value of **allow_weak_crypto** is
     false.
+
+    Do not set this unless required for specific backward
+    compatibility purposes; stale values of this setting can prevent
+    clients from taking advantage of new stronger enctypes when the
+    libraries are upgraded.
 
 **dns_lookup_kdc**
     Indicate whether DNS SRV records should be used to locate the KDCs
