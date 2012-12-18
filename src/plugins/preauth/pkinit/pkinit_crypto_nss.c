@@ -573,7 +573,7 @@ cmsdump(unsigned char *data, unsigned int length)
 
 /* A password-prompt callback for NSS that calls the libkrb5 callback. */
 static char *
-crypto_pwfn(const char *what, PRBool retry, void *arg)
+crypto_pwfn(const char *what, PRBool is_hardware, PRBool retry, void *arg)
 {
     int ret;
     pkinit_identity_crypto_context id;
@@ -601,7 +601,10 @@ crypto_pwfn(const char *what, PRBool retry, void *arg)
         pkiDebug("out of memory");
         return NULL;
     }
-    snprintf(text, text_size, "Password for %s", what);
+    if (is_hardware)
+        snprintf(text, text_size, "%s PIN", what);
+    else
+        snprintf(text, text_size, "%s %s", _("Pass phrase for"), what);
     memset(&prompt, 0, sizeof(prompt));
     prompt.prompt = text;
     prompt.hidden = 1;
@@ -646,7 +649,7 @@ crypto_pwfn(const char *what, PRBool retry, void *arg)
 static char *
 crypto_pwcb(PK11SlotInfo *slot, PRBool retry, void *arg)
 {
-    return crypto_pwfn(PK11_GetTokenName(slot), retry, arg);
+    return crypto_pwfn(PK11_GetTokenName(slot), PK11_IsHW(slot), retry, arg);
 }
 
 /* Make sure we're using our callback, and set up the callback data. */
@@ -2390,7 +2393,8 @@ crypto_load_pkcs12(krb5_context context,
             case SEC_ERROR_BAD_PASSWORD:
                 pkiDebug("%s: prompting for password for %s\n",
                          __FUNCTION__, name);
-                newpass = crypto_pwfn(name, (attempt > 0), id_cryptoctx);
+                newpass = crypto_pwfn(name, PR_FALSE, (attempt > 0),
+                                      id_cryptoctx);
                 attempt++;
                 if (newpass != NULL) {
                     /* convert to 16-bit big-endian */
