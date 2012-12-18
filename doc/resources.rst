@@ -51,3 +51,10 @@ The wiki at http://k5wiki.kerberos.org/ contains useful information
 for developers working on the MIT Kerberos source code.  Some of the
 information on the wiki may be useful for advanced users or system
 administrators.
+
+Web pages
+---------
+
+* http://web.mit.edu/kerberos/ is the MIT Kerberos software web page.
+
+* http://kerberos.org/ is the MIT Kerberos Consortium web page.
