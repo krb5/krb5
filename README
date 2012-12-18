@@ -356,8 +356,25 @@ krb5-1.11 changes by ticket ID
 7489    Do not document unused symbols
 7490    Update comments for RFC 3244 kpasswd extensions
 7491    Make building docs easier in an unconfigured tree
+7492    Doc build in unconfigured tree broken on some platforms
 7494    Regenerate checked-in man pages
+7495    Make the doc build quieter
 7496    Document API for getting anonymous tickets
+7497    Update mkrel for SPHINX_ARGS
+7498    Document principal name interactions with DNS
+7499    Use an empty challenge for the password question
+7500    Add examples to init_creds.rst
+7501    Update retiring-des with real-world experience
+7503    Fix documentation browser resizing behavior
+7504    Conditionally include MITKC logo in HTML doc
+7505    Better names for doxygen-Sphinx bridge functions
+7506    PKINIT (draft9) null ptr deref [CVE-2012-1016]
+7507    Document enctypes
+7509    Update README for Sphinx documentation
+7510    Add copyright footer to HTML docs
+7512    Add web pages to resources.rst
+7513    Clarify enctype settings in krb5_conf.rst
+7515    Add release string to index.rst page heading
 
 Acknowledgements
 ----------------
