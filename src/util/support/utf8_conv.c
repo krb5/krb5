@@ -276,10 +276,8 @@ k5_ucs2s_to_utf8s(char *utf8str, const krb5_ucs2 *ucs2str,
 #endif
 
             n = krb5int_ucs2_to_utf8(ch, NULL);
-            if (n < 1)
+            if (n < 1 || n > INT_MAX - len)
                 return -1;
-            if (len + n < len)
-                return -1; /* overflow */
             len += n;
         }
 
