@@ -2414,7 +2414,6 @@ crypto_load_pkcs12(krb5_context context,
                 }
                 break;
             default:
-                SEC_PKCS12DecoderFinish(ctx);
                 break;
             }
             pkiDebug("%s: skipping identity PKCS12 bundle \"%s\": "
