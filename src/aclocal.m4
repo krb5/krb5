@@ -1645,10 +1645,7 @@ AC_ARG_WITH([ldap],
     *)  AC_MSG_ERROR(Invalid option value --with-ldap="$withval") ;;
 esac], with_ldap=no)dnl
 
-if test $with_ldap = yes; then
-  if test $with_edirectory = yes; then
-    AC_MSG_ERROR(Cannot enable both OpenLDAP and eDirectory backends; choose one.)
-  fi
+if test "$with_ldap" = yes; then
   AC_MSG_NOTICE(enabling OpenLDAP database backend module support)
   OPENLDAP_PLUGIN=yes
 fi
