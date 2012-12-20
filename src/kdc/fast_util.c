@@ -297,8 +297,6 @@ kdc_free_rstate (struct kdc_request_state *s)
 {
     kdc_realm_t *kdc_active_realm = s->realm_data;
 
-    if (s == NULL)
-        return;
     if (s->armor_key)
         krb5_free_keyblock(kdc_context, s->armor_key);
     if (s->strengthen_key)
@@ -418,7 +416,7 @@ kdc_fast_handle_error(krb5_context context,
 
     *fast_edata_out = NULL;
     memset(outer_pa, 0, sizeof(outer_pa));
-    if (!state || !state->armor_key)
+    if (state->armor_key == NULL)
         return 0;
     fx_error = *err;
     fx_error.e_data.data = NULL;

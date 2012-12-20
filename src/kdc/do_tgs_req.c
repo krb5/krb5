@@ -881,10 +881,8 @@ prepare_error_tgs (struct kdc_request_state *state,
     } else
         errpkt.e_data = empty_data();
 
-    if (state) {
-        retval = kdc_fast_handle_error(kdc_context, state, request, e_data,
-                                       &errpkt, &fast_edata);
-    }
+    retval = kdc_fast_handle_error(kdc_context, state, request, e_data,
+                                   &errpkt, &fast_edata);
     if (retval) {
         free(scratch);
         free(errpkt.text.data);
