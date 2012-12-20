@@ -90,17 +90,19 @@ clntraw_create(
 	rpcprog_t prog,
 	rpcvers_t vers)
 {
-	register struct clntraw_private *clp = clntraw_private;
+	struct clntraw_private *clp;
 	struct rpc_msg call_msg;
-	XDR *xdrs = &clp->xdr_stream;
-	CLIENT	*client = &clp->client_object;
+	XDR *xdrs;
+	CLIENT *client;
 
-	if (clp == 0) {
-		clp = (struct clntraw_private *)calloc(1, sizeof (*clp));
-		if (clp == 0)
-			return (0);
-		clntraw_private = clp;
+	if (clntraw_private == NULL) {
+		clntraw_private = calloc(1, sizeof(*clp));
+		if (clntraw_private == NULL)
+			return (NULL);
 	}
+	clp = clntraw_private;
+	xdrs = &clp->xdr_stream;
+	client = &clp->client_object;
 	/*
 	 * pre-serialize the staic part of the call msg and stash it away
 	 */
