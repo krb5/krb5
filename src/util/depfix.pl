@@ -187,7 +187,7 @@ sub split_lines {
 }
 
 print <<EOH ;
-# 
+#
 # Generated makefile dependencies follow.
 #
 EOH
