@@ -259,15 +259,6 @@ krb5_timestamp_to_sfstring(krb5_timestamp timestamp, char *buffer, size_t buflen
         if ((ndone = strftime(buffer, buflen, sftime_format_table[i], tmp)))
             break;
     }
-    if (!ndone) {
-#define sftime_default_len      2+1+2+1+4+1+2+1+2+1
-        if (buflen >= sftime_default_len) {
-            snprintf(buffer, buflen, "%02d/%02d/%4d %02d:%02d",
-                     tmp->tm_mday, tmp->tm_mon+1, 1900+tmp->tm_year,
-                     tmp->tm_hour, tmp->tm_min);
-            ndone = strlen(buffer);
-        }
-    }
     if (ndone && pad) {
         for (i=ndone; i<buflen-1; i++)
             buffer[i] = *pad;
