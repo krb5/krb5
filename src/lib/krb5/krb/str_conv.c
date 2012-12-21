@@ -239,7 +239,12 @@ krb5_timestamp_to_sfstring(krb5_timestamp timestamp, char *buffer, size_t buflen
         "%c",                   /* Default locale-dependent date and time */
         "%d %b %Y %T",          /* dd mon yyyy hh:mm:ss                 */
         "%x %X",                /* locale-dependent short format        */
-        "%d/%m/%Y %R"           /* dd/mm/yyyy hh:mm                     */
+        "%x %T",                /* locale-dependent date + hh:mm:ss     */
+        "%x %R",                /* locale-dependent date + hh:mm        */
+        "%Y-%m-%dT%H:%M:%S",    /* ISO 8601 date + time                 */
+        "%Y-%m-%dT%H:%M",       /* ISO 8601 date + hh:mm                */
+        "%Y%m%d%H%M%S",         /* ISO 8601 date + time, basic          */
+        "%Y%m%d%H%M"            /* ISO 8601 date + hh:mm, basic         */
     };
     static const unsigned int sftime_format_table_nents =
         sizeof(sftime_format_table)/sizeof(sftime_format_table[0]);
