@@ -586,7 +586,7 @@ process_pa_data(krb5_context context, krb5_get_init_creds_opt *opt,
     struct krb5_preauth_context_st *pctx = context->preauth_context;
     struct errinfo save = EMPTY_ERRINFO;
     krb5_pa_data *pa, **pa_ptr, **mod_pa;
-    krb5_error_code ret;
+    krb5_error_code ret = 0;
     clpreauth_handle h;
     int real, i;
 
