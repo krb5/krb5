@@ -84,6 +84,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
              krb5_prompter_fct prompter, void *prompter_data,
              krb5_pa_data ***out_padata)
 {
+    krb5_init_creds_context ctx = (krb5_init_creds_context)rock;
     krb5_error_code retval;
     krb5_sam_challenge_2 *sc2 = NULL;
     krb5_sam_challenge_2_body *sc2b = NULL;
@@ -147,11 +148,11 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
         /* Go ahead and get it now, preserving the ordering of  */
         /* prompts for the user.                                */
 
-        salt = (*rock->default_salt) ? NULL : rock->salt;
-        retval = (*rock->gak_fct)(context, request->client, sc2b->sam_etype,
-                                  prompter, prompter_data, rock->salt,
-                                  rock->s2kparams, rock->as_key,
-                                  *rock->gak_data, rock->rctx.items);
+        salt = ctx->default_salt ? NULL : &ctx->salt;
+        retval = ctx->gak_fct(context, request->client, sc2b->sam_etype,
+                              prompter, prompter_data, &ctx->salt,
+                              &ctx->s2kparams, &ctx->as_key,
+                              ctx->gak_data, ctx->rctx.items);
         if (retval) {
             krb5_free_sam_challenge_2(context, sc2);
             krb5_free_sam_challenge_2_body(context, sc2b);
@@ -194,7 +195,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     krb5int_set_prompt_types(context, (krb5_prompt_type *)NULL);
 
     /* Generate salt used by string_to_key() */
-    if (*rock->default_salt) {
+    if (ctx->default_salt) {
         if ((retval =
              krb5_principal2salt(context, request->client, &defsalt))) {
             krb5_free_sam_challenge_2(context, sc2);
@@ -203,7 +204,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
         }
         salt = &defsalt;
     } else {
-        salt = rock->salt;
+        salt = &ctx->salt;
         defsalt.length = 0;
     }
 
@@ -211,15 +212,15 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     if (!(sc2b->sam_flags & KRB5_SAM_USE_SAD_AS_KEY)) {
         /* as_key = string_to_key(password) */
 
-        if (rock->as_key->length) {
-            krb5_free_keyblock_contents(context, rock->as_key);
-            rock->as_key->length = 0;
+        if (ctx->as_key.length) {
+            krb5_free_keyblock_contents(context, &ctx->as_key);
+            ctx->as_key.length = 0;
         }
 
         /* generate a key using the supplied password */
         retval = krb5_c_string_to_key(context, sc2b->sam_etype,
-                                      (krb5_data *)*rock->gak_data, salt,
-                                      rock->as_key);
+                                      (krb5_data *)ctx->gak_data, salt,
+                                      &ctx->as_key);
 
         if (retval) {
             krb5_free_sam_challenge_2(context, sc2);
@@ -244,8 +245,8 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
 
             /* This should be a call to the crypto library some day */
             /* key types should already match the sam_etype */
-            retval = krb5int_c_combine_keys(context, rock->as_key, &tmp_kb,
-                                            rock->as_key);
+            retval = krb5int_c_combine_keys(context, &ctx->as_key, &tmp_kb,
+                                            &ctx->as_key);
 
             if (retval) {
                 krb5_free_sam_challenge_2(context, sc2);
@@ -262,14 +263,14 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     } else {
         /* as_key = string_to_key(SAD) */
 
-        if (rock->as_key->length) {
-            krb5_free_keyblock_contents(context, rock->as_key);
-            rock->as_key->length = 0;
+        if (ctx->as_key.length) {
+            krb5_free_keyblock_contents(context, &ctx->as_key);
+            ctx->as_key.length = 0;
         }
 
         /* generate a key using the supplied password */
         retval = krb5_c_string_to_key(context, sc2b->sam_etype,
-                                      &response_data, salt, rock->as_key);
+                                      &response_data, salt, &ctx->as_key);
 
         if (defsalt.length)
             free(defsalt.data);
@@ -289,7 +290,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
         if (!krb5_c_is_keyed_cksum((*cksum)->checksum_type))
             continue;
         /* Check this cksum */
-        retval = krb5_c_verify_checksum(context, rock->as_key,
+        retval = krb5_c_verify_checksum(context, &ctx->as_key,
                                         KRB5_KEYUSAGE_PA_SAM_CHALLENGE_CKSUM,
                                         &sc2->sam_challenge_2_body,
                                         *cksum, &valid_cksum);
@@ -343,7 +344,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     /* Now take care of sr2.sam_enc_nonce_or_sad by encrypting encoded   */
     /* enc_sam_response_enc_2 from above */
 
-    retval = krb5_c_encrypt_length(context, rock->as_key->enctype,
+    retval = krb5_c_encrypt_length(context, ctx->as_key.enctype,
                                    scratch->length, &ciph_len);
     if (retval) {
         krb5_free_sam_challenge_2(context, sc2);
@@ -363,7 +364,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
         return(ENOMEM);
     }
 
-    retval = krb5_c_encrypt(context, rock->as_key,
+    retval = krb5_c_encrypt(context, &ctx->as_key,
                             KRB5_KEYUSAGE_PA_SAM_RESPONSE, NULL, scratch,
                             &sr2.sam_enc_nonce_or_sad);
     if (retval) {

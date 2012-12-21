@@ -684,7 +684,6 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
     code = krb5int_fast_make_state(context, &ctx->fast_state);
     if (code != 0)
         goto cleanup;
-    ctx->preauth_rock.fast_state = ctx->fast_state;
     k5_preauth_request_context_init(context);
     if (ctx->outer_request_body) {
         krb5_free_data(context, ctx->outer_request_body);
@@ -819,23 +818,6 @@ krb5_init_creds_init(krb5_context context,
         goto cleanup;
 
     opte = ctx->opte;
-
-    ctx->preauth_rock.magic = CLIENT_ROCK_MAGIC;
-    ctx->preauth_rock.etype = &ctx->etype;
-    ctx->preauth_rock.as_key = &ctx->as_key;
-    ctx->preauth_rock.gak_fct = &ctx->gak_fct;
-    ctx->preauth_rock.gak_data = &ctx->gak_data;
-    ctx->preauth_rock.default_salt = &ctx->default_salt;
-    ctx->preauth_rock.salt = &ctx->salt;
-    ctx->preauth_rock.s2kparams = &ctx->s2kparams;
-    ctx->preauth_rock.rctx = ctx->rctx;
-    ctx->preauth_rock.client = client;
-    ctx->preauth_rock.prompter = prompter;
-    ctx->preauth_rock.prompter_data = data;
-    ctx->preauth_rock.allowed_preauth_type = &ctx->allowed_preauth_type;
-    ctx->preauth_rock.selected_preauth_type = &ctx->selected_preauth_type;
-    ctx->preauth_rock.cc_config_in = &ctx->cc_config_in;
-    ctx->preauth_rock.cc_config_out = &ctx->cc_config_out;
 
     /* Initialise request parameters as per krb5_get_init_creds() */
     ctx->request->kdc_options = context->kdc_default_options;
@@ -1262,11 +1244,9 @@ init_creds_step_request(krb5_context context,
 
     if (ctx->err_reply == NULL) {
         /* either our first attempt, or retrying after PREAUTH_NEEDED */
-        code = k5_preauth(context, ctx->opte, &ctx->preauth_rock, ctx->request,
-                          ctx->inner_request_body,
-                          ctx->encoded_previous_request, ctx->preauth_to_use,
-                          ctx->prompter, ctx->prompter_data,
-                          ctx->preauth_required, &ctx->request->padata);
+        code = k5_preauth(context, ctx, ctx->preauth_to_use,
+                          ctx->preauth_required, &ctx->request->padata,
+                          &ctx->selected_preauth_type);
         if (code != 0)
             goto cleanup;
     } else {
@@ -1275,12 +1255,7 @@ init_creds_step_request(krb5_context context,
              * Retry after an error other than PREAUTH_NEEDED,
              * using ctx->err_padata to figure out what to change.
              */
-            code = k5_preauth_tryagain(context, ctx->opte, &ctx->preauth_rock,
-                                       ctx->request, ctx->inner_request_body,
-                                       ctx->encoded_previous_request,
-                                       ctx->preauth_to_use, ctx->err_reply,
-                                       ctx->err_padata, ctx->prompter,
-                                       ctx->prompter_data,
+            code = k5_preauth_tryagain(context, ctx, ctx->preauth_to_use,
                                        &ctx->request->padata);
         } else {
             /* No preauth supplied, so can't query the plugins. */
@@ -1391,7 +1366,7 @@ check_reply_enctype(krb5_init_creds_context ctx)
 /* Note the difference between the KDC's time, as reported to us in a
  * preauth-required error, and the current time. */
 static void
-note_req_timestamp(krb5_context kcontext, krb5_clpreauth_rock rock,
+note_req_timestamp(krb5_context context, krb5_init_creds_context ctx,
                    krb5_timestamp kdc_time, krb5_int32 kdc_usec)
 {
     krb5_timestamp now;
@@ -1399,9 +1374,9 @@ note_req_timestamp(krb5_context kcontext, krb5_clpreauth_rock rock,
 
     if (k5_time_with_offset(0, 0, &now, &usec) != 0)
         return;
-    rock->pa_offset = kdc_time - now;
-    rock->pa_offset_usec = kdc_usec - usec;
-    rock->pa_offset_state = (rock->fast_state->armor_key != NULL) ?
+    ctx->pa_offset = kdc_time - now;
+    ctx->pa_offset_usec = kdc_usec - usec;
+    ctx->pa_offset_state = (ctx->fast_state->armor_key != NULL) ?
         AUTH_OFFSET : UNAUTH_OFFSET;
 }
 
@@ -1412,6 +1387,7 @@ init_creds_step_reply(krb5_context context,
 {
     krb5_error_code code;
     krb5_pa_data **kdc_padata = NULL;
+    krb5_preauthtype kdc_pa_type;
     krb5_boolean retry = FALSE;
     int canon_flag = 0;
     krb5_keyblock *strengthen_key = NULL;
@@ -1452,8 +1428,8 @@ init_creds_step_reply(krb5_context context,
             krb5_free_pa_data(context, ctx->preauth_to_use);
             ctx->preauth_to_use = ctx->err_padata;
             ctx->err_padata = NULL;
-            note_req_timestamp(context, &ctx->preauth_rock,
-                               ctx->err_reply->stime, ctx->err_reply->susec);
+            note_req_timestamp(context, ctx, ctx->err_reply->stime,
+                               ctx->err_reply->susec);
             /* This will trigger a new call to k5_preauth(). */
             krb5_free_error(context, ctx->err_reply);
             ctx->err_reply = NULL;
@@ -1520,19 +1496,11 @@ init_creds_step_reply(krb5_context context,
 
     ctx->etype = ctx->reply->enc_part.enctype;
 
-    /*
-     * At this point, allow whichever preauth plugin that can handle the KDC's
-     * reply padata to do so, regardless of that data's padata type.  We don't
-     * want to record the type of padata in the reply, so set the pointer for
-     * that data to NULL.
-     */
+    /* Process the final reply padata.  Don't restrict the preauth types or
+     * record a selected preauth type. */
     ctx->allowed_preauth_type = KRB5_PADATA_NONE;
-    ctx->preauth_rock.selected_preauth_type = NULL;
-
-    code = k5_preauth(context, ctx->opte, &ctx->preauth_rock, ctx->request,
-                      ctx->inner_request_body, ctx->encoded_previous_request,
-                      ctx->reply->padata, ctx->prompter, ctx->prompter_data,
-                      FALSE, &kdc_padata);
+    code = k5_preauth(context, ctx, ctx->reply->padata, FALSE, &kdc_padata,
+                      &kdc_pa_type);
     if (code != 0)
         goto cleanup;
 

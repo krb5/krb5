@@ -204,19 +204,13 @@ k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
                   int *use_master);
 
 krb5_error_code
-k5_preauth(krb5_context context, krb5_gic_opt_ext *opte,
-           krb5_clpreauth_rock rock, krb5_kdc_req *req,
-           krb5_data *req_body, krb5_data *prev_req, krb5_pa_data **in_padata,
-           krb5_prompter_fct prompter, void *prompter_data,
-           krb5_boolean must_preauth, krb5_pa_data ***padata_out);
+k5_preauth(krb5_context context, krb5_init_creds_context ctx,
+           krb5_pa_data **in_padata, krb5_boolean must_preauth,
+           krb5_pa_data ***padata_out, krb5_preauthtype *pa_type_out);
 
 krb5_error_code
-k5_preauth_tryagain(krb5_context context, krb5_gic_opt_ext *opte,
-                    krb5_clpreauth_rock rock, krb5_kdc_req *req,
-                    krb5_data *req_body, krb5_data *prev_req,
-                    krb5_pa_data **in_padata, krb5_error *err_reply,
-                    krb5_pa_data **err_padata, krb5_prompter_fct prompter,
-                    void *prompter_data, krb5_pa_data ***padata_out);
+k5_preauth_tryagain(krb5_context context, krb5_init_creds_context ctx,
+                    krb5_pa_data **in_padata, krb5_pa_data ***padata_out);
 
 void
 k5_init_preauth_context(krb5_context context);
