@@ -339,10 +339,10 @@ generic_gss_str_to_oid(OM_uint32 *minor_status,
         if (sscanf((char *)bp, "%ld", &numbuf) != 1) {
             return(GSS_S_FAILURE);
         }
-        while (numbuf) {
+        do {
             nbytes++;
             numbuf >>= 7;
-        }
+        } while (numbuf);
         while ((bp < &cp[oid_str->length]) && isdigit(*bp))
             bp++;
         while ((bp < &cp[oid_str->length]) &&
@@ -380,20 +380,20 @@ generic_gss_str_to_oid(OM_uint32 *minor_status,
                 nbytes = 0;
                 /* Have to fill in the bytes msb-first */
                 onumbuf = numbuf;
-                while (numbuf) {
+                do {
                     nbytes++;
                     numbuf >>= 7;
-                }
+                } while (numbuf);
                 numbuf = onumbuf;
                 op += nbytes;
                 i = -1;
-                while (numbuf) {
+                do {
                     op[i] = (unsigned char) numbuf & 0x7f;
                     if (i != -1)
                         op[i] |= 0x80;
                     i--;
                     numbuf >>= 7;
-                }
+                } while (numbuf);
                 while (isdigit(*bp))
                     bp++;
                 while (isspace(*bp) || *bp == '.')
