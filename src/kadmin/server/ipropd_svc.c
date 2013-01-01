@@ -60,7 +60,7 @@ static char *reply_unknown_str	= "<UNKNOWN_CODE>";
 #ifdef	DPRINT
 #undef	DPRINT
 #endif
-#define	DPRINT(i, ...)				\
+#define	DPRINT(...)				\
     do {					\
 	if (nofork) {				\
 	    fprintf(stderr, __VA_ARGS__);	\
