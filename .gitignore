@@ -274,6 +274,7 @@ testlog
 /src/tests/gssapi/t_inq_cred
 /src/tests/gssapi/t_inq_mechs_name
 /src/tests/gssapi/t_namingexts
+/src/tests/gssapi/t_oid
 /src/tests/gssapi/t_s4u
 /src/tests/gssapi/t_s4u2proxy_krb5
 /src/tests/gssapi/t_saslname

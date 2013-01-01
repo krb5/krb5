@@ -23,7 +23,10 @@ COMMON_LIBS= common.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 all:: ccinit ccrefresh t_accname t_ccselect t_credstore t_export_cred \
 	t_export_name t_gssexts t_imp_cred t_imp_name t_inq_cred \
 	t_inq_mechs_name t_namingexts t_s4u t_s4u2proxy_krb5 t_saslname \
-	t_spnego
+	t_spnego t_oid
+
+check-unix:: t_oid
+	$(KRB5_RUN_ENV) $(VALGRIND) ./t_oid
 
 check-pytests:: ccinit ccrefresh t_accname t_ccselect t_credstore \
 	t_export_cred t_export_name t_imp_cred t_inq_cred t_inq_mechs_name \
@@ -68,9 +71,11 @@ t_saslname: t_saslname.o $(COMMON_DEPLIBS)
 	$(CC_LINK) -o $@ t_saslname.o $(COMMON_LIBS)
 t_spnego: t_spnego.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_spnego.o $(COMMON_LIBS)
+t_oid: t_oid.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_oid.o $(COMMON_LIBS)
 
 clean::
 	$(RM) ccinit ccrefresh t_accname t_ccselect t_credstore t_export_cred \
 	$(RM) t_export_name t_gssexts t_imp_cred t_imp_name t_inq_cred
 	$(RM) t_inq_mechs_name t_namingexts t_s4u t_s4u2proxy_krb5 t_saslname
-	$(RM) t_spnego
+	$(RM) t_spnego t_oid
