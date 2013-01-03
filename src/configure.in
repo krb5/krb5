@@ -1290,7 +1290,15 @@ AC_DEFINE_UNQUOTED(DEFKTNAME, ["$DEFKTNAME"], [Define to default keytab name])
 AC_DEFINE_UNQUOTED(DEFCKTNAME, ["$DEFCKTNAME"],
                    [Define to default client keytab name])
 
-AC_CONFIG_FILES(build-tools/krb5-config, [chmod +x build-tools/krb5-config])
+AC_CONFIG_FILES([build-tools/krb5-config], [chmod +x build-tools/krb5-config])
+AC_CONFIG_FILES([build-tools/kadm-server.pc
+	build-tools/kadm-client.pc
+	build-tools/kdb.pc
+	build-tools/krb5.pc
+	build-tools/krb5-gssapi.pc
+	build-tools/mit-krb5.pc
+	build-tools/mit-krb5-gssapi.pc
+])
 V5_AC_OUTPUT_MAKEFILE(.
 
 	util util/support util/profile util/profile/testmod util/send-pr

@@ -2,6 +2,7 @@
 *.a
 *.dylib
 *.o
+*.pc
 *.pyc
 *.so
 binutils.versions
