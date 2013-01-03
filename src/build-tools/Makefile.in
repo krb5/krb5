@@ -1,0 +1,15 @@
+mydir=build-tools
+BUILDTOP=$(REL)..
+
+all-unix:: krb5-config
+
+krb5-config: $(srcdir)/krb5-config.in $(BUILDTOP)/config.status
+	cd $(BUILDTOP) && $(SHELL) config.status $(mydir)/$@
+
+install-unix::
+	$(INSTALL_SCRIPT) krb5-config $(DESTDIR)$(CLIENT_BINDIR)/krb5-config
+
+# Test to ensure that krb5-config does not spit out things like
+# $(PURE) or $(LDFLAGS) in case someone changes config/shlib.conf
+check-unix:: krb5-config
+	$(SHELL) $(srcdir)/t_krbconf

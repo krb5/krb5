@@ -1290,7 +1290,7 @@ AC_DEFINE_UNQUOTED(DEFKTNAME, ["$DEFKTNAME"], [Define to default keytab name])
 AC_DEFINE_UNQUOTED(DEFCKTNAME, ["$DEFCKTNAME"],
                    [Define to default client keytab name])
 
-AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
+AC_CONFIG_FILES(build-tools/krb5-config, [chmod +x build-tools/krb5-config])
 V5_AC_OUTPUT_MAKEFILE(.
 
 	util util/support util/profile util/profile/testmod util/send-pr
@@ -1323,7 +1323,7 @@ dnl	lib/krb5/ccache/ccapi
 
 dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 
-	kdc slave config-files man doc include
+	kdc slave config-files build-tools man doc include
 
 	plugins/locate/python
 	plugins/kadm5_hook/test

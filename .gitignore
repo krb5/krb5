@@ -21,7 +21,6 @@ testlog
 /src/config.log
 /src/config.status
 /src/configure
-/src/krb5-config
 /src/pyrunenv.vals
 /src/runenv.py
 
@@ -38,6 +37,8 @@ testlog
 
 /src/appl/user_user/uuclient
 /src/appl/user_user/uuserver
+
+/src/build-tools/krb5-config
 
 /src/clients/kdestroy/kdestroy
 
