@@ -3619,7 +3619,7 @@ prepare_enc_data(unsigned char *indata,
     asn1_const_Finish(&c);
 
     *outdata = malloc((size_t)Tlen);
-    if (outdata == NULL) {
+    if (*outdata == NULL) {
         retval = ENOMEM;
         goto cleanup;
     }
