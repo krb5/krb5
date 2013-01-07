@@ -1991,7 +1991,7 @@ make_ks_from_keys(krb5_context context, int n_keys, krb5_keyblock *keyblocks,
     int i;
 
     *ks_tuple = calloc(n_keys, sizeof(**ks_tuple));
-    if (ks_tuple == NULL)
+    if (*ks_tuple == NULL)
         return ENOMEM;
 
     for (i = 0; i < n_keys; i++) {
