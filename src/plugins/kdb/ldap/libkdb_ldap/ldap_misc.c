@@ -1817,30 +1817,6 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
     if ((st=krb5_read_tkt_policy (context, ldap_context, entry, tktpolname)) !=0)
         goto cleanup;
 
-    /* We already know that the policy is inside the realm container. */
-    if (polname) {
-        osa_policy_ent_t   pwdpol;
-        krb5_timestamp     last_pw_changed;
-        krb5_ui_4          pw_max_life;
-
-        memset(&pwdpol, 0, sizeof(pwdpol));
-
-        if ((st=krb5_ldap_get_password_policy(context, polname, &pwdpol)) != 0)
-            goto cleanup;
-        pw_max_life = pwdpol->pw_max_life;
-        krb5_ldap_free_password_policy(context, pwdpol);
-
-        if (pw_max_life > 0) {
-            if ((st=krb5_dbe_lookup_last_pwd_change(context, entry, &last_pw_changed)) != 0)
-                goto cleanup;
-
-            if (mask & KDB_PWD_EXPIRE_TIME_ATTR) {
-                if ((last_pw_changed + pw_max_life) < entry->pw_expiration)
-                    entry->pw_expiration = last_pw_changed + pw_max_life;
-            } else
-                entry->pw_expiration = last_pw_changed + pw_max_life;
-        }
-    }
     /* XXX so krb5_encode_princ_contents() will be happy */
     entry->len = KRB5_KDB_V1_BASE_LENGTH;
 
