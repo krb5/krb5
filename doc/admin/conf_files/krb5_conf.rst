@@ -137,12 +137,13 @@ The libdefaults section may contain any of the following relations:
 **default_ccache_name**
     This relation specifies the name of the default credential cache.
     The default is |ccache|.  This relation is subject to parameter
-    expansion (see below).
+    expansion (see below).  First introduced in release 1.11.
 
 **default_client_keytab_name**
     This relation specifies the name of the default keytab for
     obtaining client credentials.  The default is |ckeytab|.  This
     relation is subject to parameter expansion (see below).
+    First introduced in release 1.11.
 
 **default_keytab_name**
     This relation specifies the default keytab name to be used by
@@ -219,7 +220,7 @@ The libdefaults section may contain any of the following relations:
     (if given).  This option can improve the administrative
     flexibility of server applications on multihomed hosts, but could
     compromise the security of virtual hosting environments.  The
-    default value is false.
+    default value is false.  First introduced in release 1.10.
 
 **k5login_authoritative**
     If this flag is true, principals must be listed in a local user's
@@ -634,6 +635,8 @@ Tags in the [plugins] section can be used to register dynamic plugin
 modules and to turn modules on and off.  Not every krb5 pluggable
 interface uses the [plugins] section; the ones that do are documented
 here.
+
+First introduced in release 1.9.
 
 Each pluggable interface corresponds to a subsection of [plugins].
 All subsections support the same tags:

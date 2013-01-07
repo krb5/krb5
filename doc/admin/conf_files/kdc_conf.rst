@@ -210,7 +210,7 @@ For each realm, the following tags may be specified:
     (Delta time string.)  Specifies the amount of time to wait for a
     full propagation to complete.  This is optional in configuration
     files, and is used by slave KDCs only.  The default value is 5
-    minutes (``5m``).
+    minutes (``5m``).  First introduced in release 1.11.
 
 **iprop_logfile**
     (File name.)  Specifies where the update log file for the realm
@@ -283,6 +283,7 @@ For each realm, the following tags may be specified:
     purposes.  If **allow_weak_crypto** in :ref:`libdefaults` is
     false, or if des-cbc-crc is not a permitted enctype, then this
     variable has no effect.  Defaults to true.
+    First introduced in release 1.11.
 
 **reject_bad_transit**
     (Boolean value.)  If set to true, the KDC will check the list of
@@ -311,7 +312,7 @@ For each realm, the following tags may be specified:
     than the realm's ticket-granting service.  This option allows
     anonymous PKINIT to be enabled for use as FAST armor tickets
     without allowing anonymous authentication to services.  The
-    default value is false.
+    default value is false.  First introduced in release 1.9.
 
 **supported_enctypes**
     (List of *key*:*salt* strings.)  Specifies the default key/salt
@@ -373,14 +374,14 @@ the subsection:
     preauthentication.  Setting this flag may improve performance.
     (Principal entries which do not require preauthentication never
     update the "Last successful authentication" field.).  First
-    introduced in version 1.9.
+    introduced in release 1.9.
 
 **disable_lockout**
     If set to ``true``, suppresses KDC updates to the "Last failed
     authentication" and "Failed password attempts" fields of principal
     entries requiring preauthentication.  Setting this flag may
     improve performance, but also disables account lockout.  First
-    introduced in version 1.9.
+    introduced in release 1.9.
 
 **ldap_conns_per_server**
     This LDAP-specific tag indicates the number of connections to be
