@@ -80,6 +80,7 @@ svcraw_create(void)
 		srp = (struct svcraw_private *)calloc(1, sizeof (*srp));
 		if (srp == 0)
 			return (0);
+		svcraw_private = srp;
 	}
 	srp->server.xp_sock = 0;
 	srp->server.xp_port = 0;
