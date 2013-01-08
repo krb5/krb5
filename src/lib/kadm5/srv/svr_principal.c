@@ -188,6 +188,23 @@ ks_tuple_present(int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
     return FALSE;
 }
 
+/* Fetch a policy if it exists; set *have_pol_out appropriately.  Return
+ * success whether or not the policy exists. */
+static kadm5_ret_t
+get_policy(kadm5_server_handle_t handle, const char *name,
+           kadm5_policy_ent_t policy_out, krb5_boolean *have_pol_out)
+{
+    kadm5_ret_t ret;
+
+    *have_pol_out = FALSE;
+    if (name == NULL)
+        return 0;
+    ret = kadm5_get_policy(handle->lhandle, (char *)name, policy_out);
+    if (ret == 0)
+        *have_pol_out = TRUE;
+    return (ret == KADM5_UNK_POLICY) ? 0 : ret;
+}
+
 /*
  * Apply the -allowedkeysalts policy (see kadmin(1)'s addpol/modpol
  * commands).  We use the allowed key/salt tuple list as a default if
@@ -202,6 +219,7 @@ apply_keysalt_policy(kadm5_server_handle_t handle, const char *policy,
 {
     kadm5_ret_t ret;
     kadm5_policy_ent_rec polent;
+    krb5_boolean have_polent;
     int ak_n_ks_tuple = 0;
     int new_n_ks_tuple = 0;
     krb5_key_salt_tuple *ak_ks_tuple = NULL;
@@ -215,14 +233,9 @@ apply_keysalt_policy(kadm5_server_handle_t handle, const char *policy,
     }
 
     memset(&polent, 0, sizeof(polent));
-    if (policy != NULL &&
-        (ret = kadm5_get_policy(handle->lhandle, (char *)policy,
-                                &polent)) != KADM5_OK) {
-        if (ret == EINVAL)
-            ret = KADM5_BAD_POLICY;
-        if (ret)
-            goto cleanup;
-    }
+    ret = get_policy(handle, policy, &polent, &have_polent);
+    if (ret)
+        goto cleanup;
 
     if (polent.allowed_keysalts == NULL) {
         /* Requested keysalts allowed or default to supported_enctypes. */
@@ -292,7 +305,8 @@ apply_keysalt_policy(kadm5_server_handle_t handle, const char *policy,
     ret = 0;
 
 cleanup:
-    kadm5_free_policy_ent(handle->lhandle, &polent);
+    if (have_polent)
+        kadm5_free_policy_ent(handle->lhandle, &polent);
     free(ak_ks_tuple);
 
     if (new_n_kstp != NULL) {
@@ -407,14 +421,9 @@ kadm5_create_principal_3(void *server_handle,
      * If we can not find the one specified return an error
      */
     if ((mask & KADM5_POLICY)) {
-        if ((ret = kadm5_get_policy(handle->lhandle, entry->policy,
-                                    &polent)) != KADM5_OK) {
-            if (ret == EINVAL)
-                ret = KADM5_BAD_POLICY;
-            if (ret)
-                goto cleanup;
-        }
-        have_polent = TRUE;
+        ret = get_policy(handle, entry->policy, &polent, &have_polent);
+        if (ret)
+            goto cleanup;
     }
     if (password) {
         ret = passwd_check(handle, password, have_polent ? &polent : NULL,
@@ -538,7 +547,7 @@ kadm5_create_principal_3(void *server_handle,
        single tl_data record, */
 
     adb.admin_history_kvno = INITIAL_HIST_KVNO;
-    if (have_polent) {
+    if (mask & KADM5_POLICY) {
         adb.aux_attributes = KADM5_POLICY;
 
         /* this does *not* need to be strdup'ed, because adb is xdr */
@@ -547,36 +556,11 @@ kadm5_create_principal_3(void *server_handle,
         adb.policy = entry->policy;
     }
 
-    /* increment the policy ref count, if any */
-
-    if (have_polent) {
-        polent.policy_refcnt++;
-        if ((ret = kadm5_modify_policy_internal(handle->lhandle, &polent,
-                                                KADM5_REF_COUNT))
-            != KADM5_OK)
-            goto cleanup;
-    }
-
     /* In all cases key and the principal data is set, let the database provider know */
     kdb->mask = mask | KADM5_KEY_DATA | KADM5_PRINCIPAL ;
 
     /* store the new db entry */
     ret = kdb_put_entry(handle, kdb, &adb);
-
-
-    if (ret) {
-        if (have_polent) {
-            /* decrement the policy ref count */
-
-            polent.policy_refcnt--;
-            /*
-             * if this fails, there's nothing we can do anyway.  the
-             * policy refcount wil be too high.
-             */
-            (void) kadm5_modify_policy_internal(handle->lhandle, &polent,
-                                                KADM5_REF_COUNT);
-        }
-    }
 
     (void) k5_kadm5_hook_create(handle->context, handle->hook_handles,
                                 KADM5_HOOK_STAGE_POSTCOMMIT, entry, mask,
@@ -595,7 +579,6 @@ kadm5_ret_t
 kadm5_delete_principal(void *server_handle, krb5_principal principal)
 {
     unsigned int                ret;
-    kadm5_policy_ent_rec        polent;
     krb5_db_entry               *kdb;
     osa_princ_ent_rec           adb;
     kadm5_server_handle_t handle = server_handle;
@@ -616,25 +599,6 @@ kadm5_delete_principal(void *server_handle, krb5_principal principal)
         return ret;
     }
 
-    if ((adb.aux_attributes & KADM5_POLICY)) {
-        if ((ret = kadm5_get_policy(handle->lhandle,
-                                    adb.policy, &polent))
-            == KADM5_OK) {
-            polent.policy_refcnt--;
-            if ((ret = kadm5_modify_policy_internal(handle->lhandle, &polent,
-                                                    KADM5_REF_COUNT))
-                != KADM5_OK) {
-                (void) kadm5_free_policy_ent(handle->lhandle, &polent);
-                kdb_free_entry(handle, kdb, &adb);
-                return(ret);
-            }
-        }
-        if ((ret = kadm5_free_policy_ent(handle->lhandle, &polent))) {
-            kdb_free_entry(handle, kdb, &adb);
-            return ret;
-        }
-    }
-
     ret = kdb_delete_entry(handle, principal);
 
     kdb_free_entry(handle, kdb, &adb);
@@ -652,8 +616,8 @@ kadm5_modify_principal(void *server_handle,
                        kadm5_principal_ent_t entry, long mask)
 {
     int                     ret, ret2, i;
-    kadm5_policy_ent_rec    npol, opol;
-    int                     have_npol = 0, have_opol = 0;
+    kadm5_policy_ent_rec    pol;
+    krb5_boolean            have_pol = FALSE;
     krb5_db_entry           *kdb;
     krb5_tl_data            *tl_data_orig;
     osa_princ_ent_rec       adb;
@@ -693,98 +657,35 @@ kadm5_modify_principal(void *server_handle,
      */
 
     if ((mask & KADM5_POLICY)) {
-        /* get the new policy */
-        ret = kadm5_get_policy(handle->lhandle, entry->policy, &npol);
-        if (ret) {
-            switch (ret) {
-            case EINVAL:
-                ret = KADM5_BAD_POLICY;
-                break;
-            case KADM5_UNK_POLICY:
-            case KADM5_BAD_POLICY:
-                ret =  KADM5_UNK_POLICY;
-                break;
-            }
+        ret = get_policy(handle, entry->policy, &pol, &have_pol);
+        if (ret)
             goto done;
-        }
-        have_npol = 1;
-
-        /* if we already have a policy, get it to decrement the refcnt */
-        if(adb.aux_attributes & KADM5_POLICY) {
-            /* ... but not if the old and new are the same */
-            if(strcmp(adb.policy, entry->policy)) {
-                ret = kadm5_get_policy(handle->lhandle,
-                                       adb.policy, &opol);
-                switch(ret) {
-                case EINVAL:
-                case KADM5_BAD_POLICY:
-                case KADM5_UNK_POLICY:
-                    break;
-                case KADM5_OK:
-                    have_opol = 1;
-                    opol.policy_refcnt--;
-                    break;
-                default:
-                    goto done;
-                    break;
-                }
-                npol.policy_refcnt++;
-            }
-        } else npol.policy_refcnt++;
 
         /* set us up to use the new policy */
         adb.aux_attributes |= KADM5_POLICY;
         if (adb.policy)
             free(adb.policy);
         adb.policy = strdup(entry->policy);
-
+    }
+    if (have_pol) {
         /* set pw_max_life based on new policy */
-        if (npol.pw_max_life) {
+        if (pol.pw_max_life) {
             ret = krb5_dbe_lookup_last_pwd_change(handle->context, kdb,
                                                   &(kdb->pw_expiration));
             if (ret)
                 goto done;
-            kdb->pw_expiration += npol.pw_max_life;
+            kdb->pw_expiration += pol.pw_max_life;
         } else {
             kdb->pw_expiration = 0;
         }
     }
 
-    if ((mask & KADM5_POLICY_CLR) &&
-        (adb.aux_attributes & KADM5_POLICY)) {
-        ret = kadm5_get_policy(handle->lhandle, adb.policy, &opol);
-        switch(ret) {
-        case EINVAL:
-        case KADM5_BAD_POLICY:
-        case KADM5_UNK_POLICY:
-            ret = KADM5_BAD_DB;
-            goto done;
-            break;
-        case KADM5_OK:
-            have_opol = 1;
-            if (adb.policy)
-                free(adb.policy);
-            adb.policy = NULL;
-            adb.aux_attributes &= ~KADM5_POLICY;
-            kdb->pw_expiration = 0;
-            opol.policy_refcnt--;
-            break;
-        default:
-            goto done;
-            break;
-        }
+    if ((mask & KADM5_POLICY_CLR) && (adb.aux_attributes & KADM5_POLICY)) {
+        free(adb.policy);
+        adb.policy = NULL;
+        adb.aux_attributes &= ~KADM5_POLICY;
+        kdb->pw_expiration = 0;
     }
-
-    if (((mask & KADM5_POLICY) || (mask & KADM5_POLICY_CLR)) &&
-        (((have_opol) &&
-          (ret =
-           kadm5_modify_policy_internal(handle->lhandle, &opol,
-                                        KADM5_REF_COUNT))) ||
-         ((have_npol) &&
-          (ret =
-           kadm5_modify_policy_internal(handle->lhandle, &npol,
-                                        KADM5_REF_COUNT)))))
-        goto done;
 
     if ((mask & KADM5_ATTRIBUTES))
         kdb->attributes = entry->attributes;
@@ -847,12 +748,8 @@ kadm5_modify_principal(void *server_handle,
 
     ret = KADM5_OK;
 done:
-    if (have_opol) {
-        ret2 = kadm5_free_policy_ent(handle->lhandle, &opol);
-        ret = ret ? ret : ret2;
-    }
-    if (have_npol) {
-        ret2 = kadm5_free_policy_ent(handle->lhandle, &npol);
+    if (have_pol) {
+        ret2 = kadm5_free_policy_ent(handle->lhandle, &pol);
         ret = ret ? ret : ret2;
     }
     kdb_free_entry(handle, kdb, &adb);
@@ -1480,7 +1377,7 @@ kadm5_chpass_principal_3(void *server_handle,
     osa_princ_ent_rec           adb;
     krb5_db_entry               *kdb;
     int                         ret, ret2, last_pwd, hist_added;
-    int                         have_pol = 0;
+    krb5_boolean                have_pol = FALSE;
     kadm5_server_handle_t       handle = server_handle;
     osa_pw_hist_ent             hist;
     krb5_keyblock               *act_mkey, *hist_keyblocks = NULL;
@@ -1510,10 +1407,11 @@ kadm5_chpass_principal_3(void *server_handle,
         goto done;
 
     if ((adb.aux_attributes & KADM5_POLICY)) {
-        if ((ret = kadm5_get_policy(handle->lhandle, adb.policy, &pol)))
+        ret = get_policy(handle, adb.policy, &pol, &have_pol);
+        if (ret)
             goto done;
-        have_pol = 1;
-
+    }
+    if (have_pol) {
         /* Create a password history entry before we change kdb's key_data. */
         ret = kdb_get_hist_key(handle, &hist_keyblocks, &hist_kvno);
         if (ret)
@@ -1693,7 +1591,8 @@ kadm5_randkey_principal_3(void *server_handle,
     osa_princ_ent_rec           adb;
     krb5_int32                  now;
     kadm5_policy_ent_rec        pol;
-    int                         ret, last_pwd, have_pol = 0;
+    int                         ret, last_pwd;
+    krb5_boolean                have_pol = FALSE;
     kadm5_server_handle_t       handle = server_handle;
     krb5_keyblock               *act_mkey;
     int                         new_n_ks_tuple = 0;
@@ -1742,11 +1641,11 @@ kadm5_randkey_principal_3(void *server_handle,
         goto done;
 
     if ((adb.aux_attributes & KADM5_POLICY)) {
-        if ((ret = kadm5_get_policy(handle->lhandle, adb.policy,
-                                    &pol)) != KADM5_OK)
+        ret = get_policy(handle, adb.policy, &pol, &have_pol);
+        if (ret)
             goto done;
-        have_pol = 1;
-
+    }
+    if (have_pol) {
         ret = krb5_dbe_lookup_last_pwd_change(handle->context, kdb, &last_pwd);
         if (ret)
             goto done;
@@ -1830,7 +1729,8 @@ kadm5_setv4key_principal(void *server_handle,
     krb5_int32                  now;
     kadm5_policy_ent_rec        pol;
     krb5_keysalt                keysalt;
-    int                         i, k, kvno, ret, have_pol = 0;
+    int                         i, k, kvno, ret;
+    krb5_boolean                have_pol = FALSE;
 #if 0
     int                         last_pwd;
 #endif
@@ -1915,11 +1815,11 @@ kadm5_setv4key_principal(void *server_handle,
         goto done;
 
     if ((adb.aux_attributes & KADM5_POLICY)) {
-        if ((ret = kadm5_get_policy(handle->lhandle, adb.policy,
-                                    &pol)) != KADM5_OK)
+        ret = get_policy(handle, adb.policy, &pol, &have_pol);
+        if (ret)
             goto done;
-        have_pol = 1;
-
+    }
+    if (have_pol) {
 #if 0
         /*
          * The spec says this check is overridden if the caller has
@@ -2015,7 +1915,8 @@ kadm5_setkey_principal_3(void *server_handle,
     kadm5_policy_ent_rec        pol;
     krb5_key_data               *old_key_data;
     int                         n_old_keys;
-    int                         i, j, k, kvno, ret, have_pol = 0;
+    int                         i, j, k, kvno, ret;
+    krb5_boolean                have_pol = FALSE;
 #if 0
     int                         last_pwd;
 #endif
@@ -2178,11 +2079,11 @@ kadm5_setkey_principal_3(void *server_handle,
         goto done;
 
     if ((adb.aux_attributes & KADM5_POLICY)) {
-        if ((ret = kadm5_get_policy(handle->lhandle, adb.policy,
-                                    &pol)) != KADM5_OK)
+        ret = get_policy(handle, adb.policy, &pol, &have_pol);
+        if (ret)
             goto done;
-        have_pol = 1;
-
+    }
+    if (have_pol) {
 #if 0
         /*
          * The spec says this check is overridden if the caller has

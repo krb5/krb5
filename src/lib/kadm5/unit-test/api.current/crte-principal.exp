@@ -536,11 +536,11 @@ proc test21 {} {
 	perror "$test: unexpected failure in init"
 	return
     }
-    one_line_fail_test [format {
+    one_line_succeed_test [format {
 	kadm5_create_principal $server_handle \
 		[princ_w_pol "%s/a" non-existant-pol] \
 		{KADM5_PRINCIPAL KADM5_POLICY} NotinTheDictionary
-    } $test] "UNK_POLICY"
+    } $test]
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 	perror "$test: unexpected failure in destroy"
 	return

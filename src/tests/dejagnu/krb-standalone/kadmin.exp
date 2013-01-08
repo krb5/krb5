@@ -711,7 +711,6 @@ proc kadmin_addpol { pname } {
     expect "Minimum number of password character classes:" {
         verbose "got min pw character classes" }
     expect "Number of old keys kept:" { verbose "got num old keys kept" }
-    expect "Reference count:" { verbose "got refcount" }
     expect "kadmin.local: " { send "q\r" }
 
     expect_after
@@ -924,7 +923,7 @@ proc kadmin_showpol { pname } {
     }
     expect -re "assword\[^\r\n\]*: *"
     send "adminpass$KEY\r"
-    expect -re "\r.*Policy: $pname.*Number of old keys kept: .*Reference count: .*\r"
+    expect -re "\r.*Policy: $pname.*Number of old keys kept: .*\r"
     expect_after
     expect eof
     set k_stat [wait -i $spawn_id]

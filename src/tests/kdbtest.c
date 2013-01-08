@@ -167,7 +167,7 @@ static osa_policy_ent_rec sample_policy = {
     6,                          /* pw_min_length */
     2,                          /* pw_min_classes */
     3,                          /* pw_history_num */
-    1,                          /* policy_refcnt */
+    0,                          /* policy_refcnt */
     2,                          /* pw_max_fail */
     60,                         /* pw_failcnt_interval */
     120,                        /* pw_lockout_duration */
@@ -377,7 +377,6 @@ main()
     CHECK(krb5_dbe_update_tl_data(ctx, ent, &tl_no_policy));
     ent->mask = KADM5_POLICY_CLR | KADM5_KEY_DATA;
     CHECK(krb5_db_put_principal(ctx, ent));
-    /* Deleting polname should work now that the reference is gone. */
     CHECK(krb5_db_delete_policy(ctx, polname));
 
     /* Put the modified entry again (with KDB_TL_USER_INFO tl-data for LDAP) as

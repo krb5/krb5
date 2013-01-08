@@ -219,7 +219,7 @@ typedef struct _kadm5_policy_ent_t {
     long            pw_min_length;
     long            pw_min_classes;
     long            pw_history_num;
-    long            policy_refcnt;
+    long            policy_refcnt;  /* no longer used */
 
     /* version 3 fields */
     krb5_kvno       pw_max_fail;

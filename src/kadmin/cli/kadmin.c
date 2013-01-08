@@ -232,6 +232,17 @@ randkey_princ(krb5_principal princ, krb5_boolean keepold, int n_ks,
         return kadm5_randkey_principal(handle, princ, NULL, NULL);
 }
 
+static krb5_boolean
+policy_exists(const char *name)
+{
+    kadm5_policy_ent_rec pol;
+
+    if (kadm5_get_policy(handle, (char *)name, &pol) != 0)
+        return FALSE;
+    kadm5_free_policy_ent(handle, &pol);
+    return TRUE;
+}
+
 char *
 kadmin_startup(int argc, char *argv[])
 {
@@ -1158,7 +1169,6 @@ void
 kadmin_addprinc(int argc, char *argv[])
 {
     kadm5_principal_ent_rec princ;
-    kadm5_policy_ent_rec defpol;
     long mask;
     krb5_boolean randkey = FALSE, old_style_randkey = FALSE;
     int n_ks_tuple;
@@ -1184,23 +1194,24 @@ kadmin_addprinc(int argc, char *argv[])
         goto cleanup;
     }
 
-    /*
-     * If -policy was not specified, and -clearpolicy was not
-     * specified, and the policy "default" exists, assign it.  If
-     * -clearpolicy was specified, then KADM5_POLICY_CLR should be
-     * unset, since it is never valid for kadm5_create_principal.
-     */
-    if (!(mask & KADM5_POLICY) && !(mask & KADM5_POLICY_CLR)) {
-        if (!kadm5_get_policy(handle, "default", &defpol)) {
+    if (mask & KADM5_POLICY) {
+        /* Warn if the specified policy does not exist. */
+        if (!policy_exists(princ.policy)) {
+            fprintf(stderr, _("WARNING: policy \"%s\" does not exist\n"),
+                    princ.policy);
+        }
+    } else if (!(mask & KADM5_POLICY_CLR)) {
+        /* If the policy "default" exists, assign it. */
+        if (policy_exists("default")) {
             fprintf(stderr, _("NOTICE: no policy specified for %s; "
                               "assigning \"default\"\n"), canon);
             princ.policy = "default";
             mask |= KADM5_POLICY;
-            kadm5_free_policy_ent(handle, &defpol);
         } else
             fprintf(stderr, _("WARNING: no policy specified for %s; "
                               "defaulting to no policy\n"), canon);
     }
+    /* Don't send KADM5_POLICY_CLR to the server. */
     mask &= ~KADM5_POLICY_CLR;
 
     if (randkey) {
@@ -1312,6 +1323,13 @@ kadmin_modprinc(int argc, char *argv[])
         kadmin_modprinc_usage();
         goto cleanup;
     }
+    if (mask & KADM5_POLICY) {
+        /* Warn if the specified policy does not exist. */
+        if (!policy_exists(princ.policy)) {
+            fprintf(stderr, _("WARNING: policy \"%s\" does not exist\n"),
+                    princ.policy);
+        }
+    }
     if (mask) {
         /* Skip this if all we're doing is setting certhash. */
         retval = kadm5_modify_principal(handle, &princ, mask);
@@ -1336,6 +1354,7 @@ kadmin_getprinc(int argc, char *argv[])
     kadm5_principal_ent_rec dprinc;
     krb5_principal princ = NULL;
     krb5_error_code retval;
+    const char *polname, *noexist;
     char *canon = NULL, *princstr = NULL, *modprincstr = NULL;
     int i;
     size_t j;
@@ -1422,7 +1441,10 @@ kadmin_getprinc(int argc, char *argv[])
                 printf(" %s", prflags[j]);
         }
         printf("\n");
-        printf(_("Policy: %s\n"), dprinc.policy ? dprinc.policy : _("[none]"));
+        polname = (dprinc.policy != NULL) ? dprinc.policy : _("[none]");
+        noexist = (dprinc.policy != NULL && !policy_exists(dprinc.policy)) ?
+            _(" [does not exist]") : "";
+        printf(_("Policy: %s%s\n"), polname, noexist);
     } else {
         printf("\"%s\"\t%d\t%d\t%d\t%d\t\"%s\"\t%d\t%d\t%d\t%d\t\"%s\""
                "\t%d\t%d\t%d\t%d\t%d",
@@ -1699,7 +1721,6 @@ kadmin_getpol(int argc, char *argv[])
         printf(_("Minimum number of password character classes: %ld\n"),
                policy.pw_min_classes);
         printf(_("Number of old keys kept: %ld\n"), policy.pw_history_num);
-        printf(_("Reference count: %ld\n"), policy.policy_refcnt);
         printf(_("Maximum password failures before lockout: %lu\n"),
                (unsigned long)policy.pw_max_fail);
         printf(_("Password failure count reset interval: %s\n"),
@@ -1709,11 +1730,11 @@ kadmin_getpol(int argc, char *argv[])
         if (policy.allowed_keysalts != NULL)
             printf(_("Allowed key/salt types: %s\n"), policy.allowed_keysalts);
     } else {
+        /* Output 0 where we used to output policy_refcnt. */
         printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%lu\t%ld\t%ld\t%s\n",
                policy.policy, policy.pw_max_life, policy.pw_min_life,
                policy.pw_min_length, policy.pw_min_classes,
-               policy.pw_history_num, policy.policy_refcnt,
-               (unsigned long)policy.pw_max_fail,
+               policy.pw_history_num, 0, (unsigned long)policy.pw_max_fail,
                (long)policy.pw_failcnt_interval,
                (long)policy.pw_lockout_duration,
                (policy.allowed_keysalts == NULL) ? "-" :

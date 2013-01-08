@@ -215,7 +215,7 @@ typedef struct _osa_policy_ent_t {
     krb5_ui_4       pw_min_length;
     krb5_ui_4       pw_min_classes;
     krb5_ui_4       pw_history_num;
-    krb5_ui_4       policy_refcnt;
+    krb5_ui_4       policy_refcnt;              /* no longer used */
     /* Only valid if version > 1 */
     krb5_ui_4       pw_max_fail;                /* pwdMaxFailure */
     krb5_ui_4       pw_failcnt_interval;        /* pwdFailureCountInterval */

@@ -158,10 +158,6 @@ kadm5_create_policy_internal(void *server_handle,
         else
             pent.pw_history_num = entry->pw_history_num;
     }
-    if (!(mask & KADM5_REF_COUNT))
-        pent.policy_refcnt = 0;
-    else
-        pent.policy_refcnt = entry->policy_refcnt;
 
     if (handle->api_version >= KADM5_API_VERSION_4) {
         if (!(mask & KADM5_POLICY_ATTRIBUTES))
@@ -230,10 +226,6 @@ kadm5_delete_policy(void *server_handle, kadm5_policy_t name)
     else if (ret)
         return ret;
 
-    if(entry->policy_refcnt != 0) {
-        krb5_db_free_policy(handle->context, entry);
-        return KADM5_POLICY_REF;
-    }
     krb5_db_free_policy(handle->context, entry);
     ret = krb5_db_delete_policy(handle->context, name);
     if (ret == KRB5_KDB_POLICY_REF)
@@ -368,8 +360,6 @@ kadm5_modify_policy_internal(void *server_handle,
         }
         p->pw_history_num = entry->pw_history_num;
     }
-    if ((mask & KADM5_REF_COUNT))
-        p->policy_refcnt = entry->policy_refcnt;
     if (handle->api_version >= KADM5_API_VERSION_3) {
         if ((mask & KADM5_PW_MAX_FAILURE))
             p->pw_max_fail = entry->pw_max_fail;
@@ -448,7 +438,6 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
     entry->pw_min_length = t->pw_min_length;
     entry->pw_min_classes = t->pw_min_classes;
     entry->pw_history_num = t->pw_history_num;
-    entry->policy_refcnt = t->policy_refcnt;
     if (handle->api_version >= KADM5_API_VERSION_3) {
         entry->pw_max_fail = t->pw_max_fail;
         entry->pw_failcnt_interval = t->pw_failcnt_interval;

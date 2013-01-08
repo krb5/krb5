@@ -181,8 +181,9 @@ proc test12 {} {
 	perror "$test: unexpected failure in init"
 	return
     }
-    one_line_fail_test \
-	    {kadm5_delete_policy $server_handle test-pol} "POLICY_REF"
+    one_line_succeed_test [format {
+	kadm5_delete_policy $server_handle "%s/a"
+    } $test]
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 	perror "$test: unexpected failure in destroy"
 	return

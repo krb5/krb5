@@ -1112,8 +1112,7 @@ void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
     arg = (struct dump_args *) data;
     fprintf(arg->ofile, "policy\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", entry->name,
             entry->pw_min_life, entry->pw_max_life, entry->pw_min_length,
-            entry->pw_min_classes, entry->pw_history_num,
-            entry->policy_refcnt);
+            entry->pw_min_classes, entry->pw_history_num, 0);
 }
 
 void dump_r1_8_policy(void *data, osa_policy_ent_t entry)
@@ -1124,9 +1123,9 @@ void dump_r1_8_policy(void *data, osa_policy_ent_t entry)
     fprintf(arg->ofile, "policy\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
             entry->name,
             entry->pw_min_life, entry->pw_max_life, entry->pw_min_length,
-            entry->pw_min_classes, entry->pw_history_num,
-            entry->policy_refcnt, entry->pw_max_fail,
-            entry->pw_failcnt_interval, entry->pw_lockout_duration);
+            entry->pw_min_classes, entry->pw_history_num, 0,
+            entry->pw_max_fail, entry->pw_failcnt_interval,
+            entry->pw_lockout_duration);
 }
 
 void
@@ -1140,10 +1139,10 @@ dump_r1_11_policy(void *data, osa_policy_ent_t entry)
             "%d\t%d\t%d\t%s\t%d",
             entry->name,
             entry->pw_min_life, entry->pw_max_life, entry->pw_min_length,
-            entry->pw_min_classes, entry->pw_history_num,
-            entry->policy_refcnt, entry->pw_max_fail,
-            entry->pw_failcnt_interval, entry->pw_lockout_duration,
-            entry->attributes, entry->max_life, entry->max_renewable_life,
+            entry->pw_min_classes, entry->pw_history_num, 0,
+            entry->pw_max_fail, entry->pw_failcnt_interval,
+            entry->pw_lockout_duration, entry->attributes, entry->max_life,
+            entry->max_renewable_life,
             entry->allowed_keysalts ? entry->allowed_keysalts : "-",
             entry->n_tl_data);
 
@@ -2301,7 +2300,7 @@ process_k5beta7_policy(fname, kcontext, filep, flags, linenop)
 {
     osa_policy_ent_rec rec;
     char namebuf[1024];
-    int nread, ret;
+    int nread, refcnt, ret;
 
     memset(&rec, 0, sizeof(rec));
 
@@ -2311,7 +2310,7 @@ process_k5beta7_policy(fname, kcontext, filep, flags, linenop)
     nread = fscanf(filep, "%1023s\t%d\t%d\t%d\t%d\t%d\t%d", rec.name,
                    &rec.pw_min_life, &rec.pw_max_life,
                    &rec.pw_min_length, &rec.pw_min_classes,
-                   &rec.pw_history_num, &rec.policy_refcnt);
+                   &rec.pw_history_num, &refcnt);
     if (nread == EOF)
         return -1;
     else if (nread != 7) {
@@ -2344,7 +2343,7 @@ process_r1_8_policy(fname, kcontext, filep, flags, linenop)
 {
     osa_policy_ent_rec rec;
     char namebuf[1024];
-    int nread, ret;
+    int nread, refcnt, ret;
 
     memset(&rec, 0, sizeof(rec));
 
@@ -2355,7 +2354,7 @@ process_r1_8_policy(fname, kcontext, filep, flags, linenop)
                    rec.name,
                    &rec.pw_min_life, &rec.pw_max_life,
                    &rec.pw_min_length, &rec.pw_min_classes,
-                   &rec.pw_history_num, &rec.policy_refcnt,
+                   &rec.pw_history_num, &refcnt,
                    &rec.pw_max_fail, &rec.pw_failcnt_interval,
                    &rec.pw_lockout_duration);
     if (nread == EOF)
@@ -2388,7 +2387,7 @@ process_r1_11_policy(char *fname, krb5_context kcontext, FILE *filep,
     krb5_tl_data         *tl, *tl_next;
     char                  namebuf[1024];
     char                  keysaltbuf[KRB5_KDB_MAX_ALLOWED_KS_LEN + 1];
-    int                   nread;
+    int                   nread, refcnt;
     int                   ret = 0;
     const char           *try2read = NULL;
 
@@ -2406,7 +2405,7 @@ process_r1_11_policy(char *fname, krb5_context kcontext, FILE *filep,
                    rec.name,
                    &rec.pw_min_life, &rec.pw_max_life,
                    &rec.pw_min_length, &rec.pw_min_classes,
-                   &rec.pw_history_num, &rec.policy_refcnt,
+                   &rec.pw_history_num, &refcnt,
                    &rec.pw_max_fail, &rec.pw_failcnt_interval,
                    &rec.pw_lockout_duration,
                    &rec.attributes, &rec.max_life, &rec.max_renewable_life,

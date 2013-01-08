@@ -384,13 +384,6 @@ krb5_ldap_delete_password_policy(krb5_context context, char *policy)
     if (st != 0)
         goto cleanup;
 
-    st = krb5_ldap_get_reference_count(context, policy_dn,
-                                       "krbPwdPolicyReference", &refcount, ld);
-    if (st == 0 && refcount != 0)
-        st = KRB5_KDB_POLICY_REF;
-    if (st != 0)
-        goto cleanup;
-
     /* Ensure that the object is a password policy */
     if ((st=checkattributevalue(ld, policy_dn, "objectclass", class, &mask)) != 0)
         goto cleanup;
