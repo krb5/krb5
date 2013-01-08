@@ -18,8 +18,9 @@ Quick facts
 
    ========================================= ========================== ====================================================
     License                                  :ref:`mitK5license`
-    Latest stable  version                                               http://web.mit.edu/kerberos/krb5-1.10/
-    Supported versions                                                   http://web.mit.edu/kerberos/krb5-1.9/
+    Latest stable  version                                               http://web.mit.edu/kerberos/krb5-1.11/
+    Supported versions                                                   http://web.mit.edu/kerberos/krb5-1.10/ \
+                                                                         http://web.mit.edu/kerberos/krb5-1.9/
     Release cycle                            9--12 months
     Supported platforms \/ OS distributions  Windows (KfW 4.0)
                                               - Windows 7
@@ -41,10 +42,10 @@ Quick facts
     Database backends                        - LDAP
                                              - DB2
     krb4 support                             < 1.8
-    DES support                              configurable               http://k5wiki.kerberos.org/wiki/Projects/Disable_DES
+    DES support                              configurable                :ref:`retiring-des`
    ========================================= ========================== ====================================================
 
-Interoperabiity
+Interoperability
 ---------------
 
 Microsoft
@@ -71,7 +72,7 @@ Starting from version 1.7:
 * KDC support for principal aliases, if the back end supports them.
   Currently, only the LDAP back end supports aliases.
 
-* Support Microsoft set/change password (RFC 3244) protocol in
+* Support Microsoft set/change password (:rfc:`3244`) protocol in
   kadmind.
 
 * Implement client and KDC support for GSS_C_DELEG_POLICY_FLAG, which
@@ -97,10 +98,10 @@ Feature list
     \                                                    Available    Additional information
    ===================================================== ========= ============================================
     Credentials delegation                               1.7       :rfc:`5896`
-    Cross-realm authentication and referrals             1.7       http://tools.ietf.org/html/draft-ietf-krb-wg-kerberos-referrals-12
+    Cross-realm authentication and referrals             1.7       :rfc:`6806`
     Master key migration                                 1.7       http://k5wiki.kerberos.org/wiki/Projects/Master_Key_Migration
     PKINIT                                               1.7       :rfc:`4556`
-    Anonymous PKINIT                                     1.8       :rfc:`6112` http://k5wiki.kerberos.org/wiki/Projects/Anonymous_pkinit
+    Anonymous PKINIT                                     1.8       :rfc:`6112`
     Constrained delegation                               1.8       http://k5wiki.kerberos.org/wiki/Projects/ConstrainedDelegation
     IAKERB                                               1.8       http://tools.ietf.org/html/draft-ietf-krb-wg-iakerb-02
     Heimdal bridge plugin for KDC backend                1.8
