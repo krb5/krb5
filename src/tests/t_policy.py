@@ -4,6 +4,79 @@ import re
 
 realm = K5Realm(create_host=False)
 
+# Test password quality enforcement.
+realm.run_kadminl('addpol -minlength 6 -minclasses 2 pwpol')
+realm.run_kadminl('addprinc -randkey -policy pwpol pwuser')
+out = realm.run_kadminl('cpw -pw sh0rt pwuser')
+if 'Password is too short' not in out:
+    fail('short password')
+out = realm.run_kadminl('cpw -pw longenough pwuser')
+if 'Password does not contain enough character classes' not in out:
+    fail('insufficient character classes')
+out = realm.run_kadminl('cpw -pw l0ngenough pwuser')
+if ' changed.' not in out:
+    fail('acceptable password')
+
+# Test some password history enforcement.  Even with no history value,
+# the current password should be denied.
+out = realm.run_kadminl('cpw -pw l0ngenough pwuser')
+if 'Cannot reuse password' not in out:
+    fail('reuse of current password')
+realm.run_kadminl('modpol -history 2 pwpol')
+realm.run_kadminl('cpw -pw an0therpw pwuser')
+out = realm.run_kadminl('cpw -pw l0ngenough pwuser')
+if 'Cannot reuse password' not in out:
+    fail('reuse of old password')
+realm.run_kadminl('cpw -pw 3rdpassword pwuser')
+out = realm.run_kadminl('cpw -pw l0ngenough pwuser')
+if ' changed.' not in out:
+    fail('reuse of third-oldest password with history 2')
+
+# Test references to nonexistent policies.
+out = realm.run_kadminl('addprinc -randkey -policy newpol newuser')
+if ('WARNING: policy "newpol" does not exist' not in out or
+    ' created.' not in out):
+    fail('creation with nonexistent policy')
+out = realm.run_kadminl('getprinc newuser')
+if 'Policy: newpol [does not exist]\n' not in out:
+    fail('getprinc output for principal referencing nonexistent policy')
+out = realm.run_kadminl('modprinc -policy newpol pwuser')
+if ('WARNING: policy "newpol" does not exist' not in out or
+    ' modified.' not in out):
+    fail('modification to nonexistent policy')
+# pwuser should allow reuse of the current password since newpol doesn't exist.
+out = realm.run_kadminl('cpw -pw 3rdpassword pwuser')
+if ' changed.' not in out:
+    fail('reuse of current password with nonexistent policy')
+
+# Create newpol and verify that it is enforced.
+realm.run_kadminl('addpol -minlength 3 newpol')
+out = realm.run_kadminl('getprinc pwuser')
+if 'Policy: newpol\n' not in out:
+    fail('getprinc after creating policy (pwuser)')
+out = realm.run_kadminl('cpw -pw aa pwuser')
+if 'Password is too short' not in out:
+    fail('short password after creating policy (pwuser)')
+out = realm.run_kadminl('cpw -pw 3rdpassword pwuser')
+if 'Cannot reuse password' not in out:
+    fail('reuse of current password after creating policy')
+
+out = realm.run_kadminl('getprinc newuser')
+if 'Policy: newpol\n' not in out:
+    fail('getprinc after creating policy (newuser)')
+out = realm.run_kadminl('cpw -pw aa newuser')
+if 'Password is too short' not in out:
+    fail('short password after creating policy (newuser)')
+
+# Delete the policy and verify that it is no longer enforced.
+realm.run_kadminl('delpol -force newpol')
+out = realm.run_kadminl('getpol newpol')
+if 'Policy does not exist' not in out:
+    fail('deletion of referenced policy')
+out = realm.run_kadminl('cpw -pw aa pwuser')
+if ' changed.' not in out:
+    fail('short password after deleting policy')
+
 # Test basic password lockout support.
 
 realm.run_kadminl('addpol -maxfailure 2 -failurecountinterval 5m lockout')
@@ -25,6 +98,10 @@ if 'Clients credentials have been revoked while getting initial credentials' \
 
 # Check that modprinc -unlock allows a further attempt.
 output = realm.run_kadminl('modprinc -unlock user')
+realm.kinit(realm.user_princ, password('user'))
+
+# Make sure a nonexistent policy reference doesn't prevent authentication.
+realm.run_kadminl('delpol -force lockout')
 realm.kinit(realm.user_princ, password('user'))
 
 # Regression test for issue #7099: databases created prior to krb5 1.3 have
