@@ -1088,7 +1088,7 @@ read_allowed_preauth_type(krb5_context context, krb5_init_creds_context ctx)
     memset(&config, 0, sizeof(config));
     if (krb5_cc_get_config(context, ctx->opte->opt_private->in_ccache,
                            ctx->request->server,
-                           KRB5_CONF_PA_TYPE, &config) != 0)
+                           KRB5_CC_CONF_PA_TYPE, &config) != 0)
         return;
     tmp = malloc(config.length + 1);
     if (tmp == NULL) {
@@ -1118,7 +1118,7 @@ save_selected_preauth_type(krb5_context context, krb5_ccache ccache,
         return ENOMEM;
     config_data = string2data(tmp);
     code = krb5_cc_set_config(context, ccache, ctx->cred.server,
-                              KRB5_CONF_PA_TYPE, &config_data);
+                              KRB5_CC_CONF_PA_TYPE, &config_data);
     free(tmp);
     return code;
 }
@@ -1152,7 +1152,7 @@ read_cc_config_in_data(krb5_context context, krb5_init_creds_context ctx)
     memset(&config, 0, sizeof(config));
     code = krb5_cc_get_config(context, ctx->opte->opt_private->in_ccache,
                               ctx->request->server,
-                              KRB5_CONF_PA_CONFIG_DATA, &config);
+                              KRB5_CC_CONF_PA_CONFIG_DATA, &config);
     if (code)
         return code;
 
@@ -1190,7 +1190,7 @@ save_cc_config_out_data(krb5_context context, krb5_ccache ccache,
         return ENOMEM;
     config = string2data(encoded);
     code = krb5_cc_set_config(context, ccache, ctx->cred.server,
-                              KRB5_CONF_PA_CONFIG_DATA, &config);
+                              KRB5_CC_CONF_PA_CONFIG_DATA, &config);
     free(encoded);
     return code;
 }
@@ -1600,7 +1600,7 @@ init_creds_step_reply(krb5_context context,
             config_data.data = "yes";
             config_data.length = strlen(config_data.data);
             code = krb5_cc_set_config(context, out_ccache, ctx->cred.server,
-                                      KRB5_CONF_FAST_AVAIL, &config_data);
+                                      KRB5_CC_CONF_FAST_AVAIL, &config_data);
             if (code != 0)
                 goto cc_cleanup;
         }

@@ -193,7 +193,7 @@ make_proxy_cred(krb5_context context, krb5_gss_cred_id_t cred,
 
     data = string2data(str);
     code = krb5_cc_set_config(context, cred->ccache, NULL,
-                              KRB5_CONF_PROXY_IMPERSONATOR, &data);
+                              KRB5_CC_CONF_PROXY_IMPERSONATOR, &data);
     krb5_free_unparsed_name(context, str);
     if (code)
         return code;

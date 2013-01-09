@@ -310,8 +310,8 @@ scan_cc_config(krb5_context context, krb5_gss_cred_id_rec *cred,
 
     if (config_princ->length != 2)
         return 0;
-    if (data_eq_string(config_princ->data[1], KRB5_CONF_PROXY_IMPERSONATOR) &&
-        cred->impersonator == NULL) {
+    if (data_eq_string(config_princ->data[1], KRB5_CC_CONF_PROXY_IMPERSONATOR)
+        && cred->impersonator == NULL) {
         code = krb5int_copy_data_contents_add0(context, value, &data0);
         if (code)
             return code;
@@ -319,8 +319,8 @@ scan_cc_config(krb5_context context, krb5_gss_cred_id_rec *cred,
         krb5_free_data_contents(context, &data0);
         if (code)
             return code;
-    } else if (data_eq_string(config_princ->data[1], KRB5_CONF_REFRESH_TIME) &&
-               cred->refresh_time == 0) {
+    } else if (data_eq_string(config_princ->data[1], KRB5_CC_CONF_REFRESH_TIME)
+               && cred->refresh_time == 0) {
         code = krb5int_copy_data_contents_add0(context, value, &data0);
         if (code)
             return code;
@@ -539,7 +539,7 @@ set_refresh_time(krb5_context context, krb5_ccache ccache,
 
     snprintf(buf, sizeof(buf), "%ld", (long)refresh_time);
     d = string2data(buf);
-    (void)krb5_cc_set_config(context, ccache, NULL, KRB5_CONF_REFRESH_TIME,
+    (void)krb5_cc_set_config(context, ccache, NULL, KRB5_CC_CONF_REFRESH_TIME,
                              &d);
     krb5_clear_error_message(context);
 }

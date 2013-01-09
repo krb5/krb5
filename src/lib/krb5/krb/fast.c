@@ -193,7 +193,7 @@ krb5int_fast_as_armor(krb5_context context,
             krb5_data config_data;
             config_data.data = NULL;
             retval = krb5_cc_get_config(context, ccache, target_principal,
-                                        KRB5_CONF_FAST_AVAIL, &config_data);
+                                        KRB5_CC_CONF_FAST_AVAIL, &config_data);
             if ((retval == 0) && config_data.data) {
                 TRACE_FAST_CCACHE_CONFIG(context);
                 state->fast_state_flags |= KRB5INT_FAST_DO_FAST;

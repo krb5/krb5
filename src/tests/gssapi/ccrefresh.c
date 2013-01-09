@@ -66,11 +66,11 @@ main(int argc, char **argv)
     check(krb5_cc_resolve(context, ccname, &ccache));
     if (value != NULL) {
         d = string2data((char *)value);
-        check(krb5_cc_set_config(context, ccache, NULL, KRB5_CONF_REFRESH_TIME,
-                                 &d));
+        check(krb5_cc_set_config(context, ccache, NULL,
+                                 KRB5_CC_CONF_REFRESH_TIME, &d));
     } else {
-        check(krb5_cc_get_config(context, ccache, NULL, KRB5_CONF_REFRESH_TIME,
-                                 &d));
+        check(krb5_cc_get_config(context, ccache, NULL,
+                                 KRB5_CC_CONF_REFRESH_TIME, &d));
         printf("%.*s\n", (int)d.length, d.data);
         krb5_free_data_contents(context, &d);
     }

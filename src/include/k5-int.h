@@ -278,11 +278,11 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_ASTERISK                    "*"
 
 /* Cache configuration variables */
-#define KRB5_CONF_FAST_AVAIL                  "fast_avail"
-#define KRB5_CONF_PROXY_IMPERSONATOR          "proxy_impersonator"
-#define KRB5_CONF_REFRESH_TIME                "refresh_time"
-#define KRB5_CONF_PA_TYPE                     "pa_type"
-#define KRB5_CONF_PA_CONFIG_DATA              "pa_config_data"
+#define KRB5_CC_CONF_FAST_AVAIL                  "fast_avail"
+#define KRB5_CC_CONF_PROXY_IMPERSONATOR          "proxy_impersonator"
+#define KRB5_CC_CONF_REFRESH_TIME                "refresh_time"
+#define KRB5_CC_CONF_PA_TYPE                     "pa_type"
+#define KRB5_CC_CONF_PA_CONFIG_DATA              "pa_config_data"
 
 /* Error codes used in KRB_ERROR protocol messages.
    Return values of library routines are based on a different error table
