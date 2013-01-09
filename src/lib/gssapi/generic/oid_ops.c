@@ -406,7 +406,7 @@ generic_gss_str_to_oid(OM_uint32 *minor_status,
     p = arc3_start;
     while (get_arc(&p, end, &arc))
         arc_encode(arc, &out);
-    assert(out == oid->elements + nbytes);
+    assert(out - nbytes == oid->elements);
     *oid_out = oid;
     return(GSS_S_COMPLETE);
 }
