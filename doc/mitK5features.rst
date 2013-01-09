@@ -19,8 +19,8 @@ Quick facts
    ========================================= ========================== ====================================================
     License                                  :ref:`mitK5license`
     Latest stable  version                                               http://web.mit.edu/kerberos/krb5-1.11/
-    Supported versions                                                   http://web.mit.edu/kerberos/krb5-1.10/ \
-                                                                         http://web.mit.edu/kerberos/krb5-1.9/
+    Supported versions                                                   - http://web.mit.edu/kerberos/krb5-1.10/
+                                                                         - http://web.mit.edu/kerberos/krb5-1.9/
     Release cycle                            9--12 months
     Supported platforms \/ OS distributions  Windows (KfW 4.0)
                                               - Windows 7
@@ -46,7 +46,7 @@ Quick facts
    ========================================= ========================== ====================================================
 
 Interoperability
----------------
+----------------
 
 Microsoft
 ~~~~~~~~~
