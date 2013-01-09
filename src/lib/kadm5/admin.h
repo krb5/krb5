@@ -454,29 +454,11 @@ kadm5_ret_t    kadm5_decrypt_key(void *server_handle,
 kadm5_ret_t    kadm5_create_policy(void *server_handle,
                                    kadm5_policy_ent_t ent,
                                    long mask);
-/*
- * kadm5_create_policy_internal is not part of the supported,
- * exposed API.  It is available only in the server library, and you
- * shouldn't use it unless you know why it's there and how it's
- * different from kadm5_create_policy.
- */
-kadm5_ret_t    kadm5_create_policy_internal(void *server_handle,
-                                            kadm5_policy_ent_t
-                                            entry, long mask);
 kadm5_ret_t    kadm5_delete_policy(void *server_handle,
                                    kadm5_policy_t policy);
 kadm5_ret_t    kadm5_modify_policy(void *server_handle,
                                    kadm5_policy_ent_t ent,
                                    long mask);
-/*
- * kadm5_modify_policy_internal is not part of the supported,
- * exposed API.  It is available only in the server library, and you
- * shouldn't use it unless you know why it's there and how it's
- * different from kadm5_modify_policy.
- */
-kadm5_ret_t    kadm5_modify_policy_internal(void *server_handle,
-                                            kadm5_policy_ent_t
-                                            entry, long mask);
 kadm5_ret_t    kadm5_get_policy(void *server_handle,
                                 kadm5_policy_t policy,
                                 kadm5_policy_ent_t ent);

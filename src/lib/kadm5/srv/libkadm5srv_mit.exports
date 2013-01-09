@@ -13,7 +13,6 @@ kadm5_chpass_principal
 kadm5_chpass_principal_3
 kadm5_chpass_principal_util
 kadm5_create_policy
-kadm5_create_policy_internal
 kadm5_create_principal
 kadm5_create_principal_3
 kadm5_decrypt_key
@@ -43,7 +42,6 @@ kadm5_init_with_password
 kadm5_init_with_skey
 kadm5_lock
 kadm5_modify_policy
-kadm5_modify_policy_internal
 kadm5_modify_principal
 kadm5_purgekeys
 kadm5_randkey_principal

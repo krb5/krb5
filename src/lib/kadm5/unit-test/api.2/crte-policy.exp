@@ -88,35 +88,6 @@ proc test3 {} {
 }
 test3
 
-# Description: (4) Fails for mask with REF_COUNT bit set.
-test "create-policy 4"
-proc test4 {} {
-    global test
-    
-    if {! (( ! [policy_exists "$test/a"]) ||
-           [delete_policy "$test/a"])} {
-            error_and_restart "$test: couldn't delete policy \"$test/a\""
-            return
-    }
-    if {! [cmd {
-	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
-		server_handle
-    }]} {
-	perror "$test: unexpected failure in init"
-	return
-    }
-    one_line_fail_test [format {
-	kadm5_create_policy $server_handle [simple_policy "%s/a"] \
-		{KADM5_POLICY KADM5_REF_COUNT}
-    } $test] "BAD_MASK"
-    if { ! [cmd {kadm5_destroy $server_handle}]} {
-        perror "$test: unexpected failure in destroy"
-        return
-    }
-}
-test4
-
 # Description: (5) Fails for invalid policy name.
 # 01/24/94: pshuang: untried.
 test "create-policy 5"
