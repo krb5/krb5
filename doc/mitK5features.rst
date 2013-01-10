@@ -16,42 +16,36 @@ http://web.mit.edu/kerberos
 Quick facts
 -----------
 
-   ========================================= ========================== ====================================================
-    License                                  :ref:`mitK5license`
-    Latest stable  version                                               http://web.mit.edu/kerberos/krb5-1.11/
-    Supported versions                                                   - http://web.mit.edu/kerberos/krb5-1.10/
-                                                                         - http://web.mit.edu/kerberos/krb5-1.9/
-    Release cycle                            9--12 months
-    Supported platforms \/ OS distributions  Windows (KfW 4.0)
-                                              - Windows 7
-                                              - Vista
-                                              - XP
-                                             Solaris
-                                              - SPARC
-                                              - x86_64/x86
-                                             GNU/Linux
-                                              - Debian x86_64/x86
-                                              - Ubuntu x86_64/x86
-                                              - RedHat x86_64/x86
-                                             BSD
-                                              - NetBSD x86_64/x86
-    Crypto backends                          - builtin                  - MIT Kerberos native crypto library
-                                             - OpenSSL 1.0\+            - http://www.openssl.org
-                                             - NSS 3.12.9\+             - Mozilla's Network Security Services \
-                                                                          http://www.mozilla.org/projects/security/pki/nss
-    Database backends                        - LDAP
-                                             - DB2
-    krb4 support                             < 1.8
-    DES support                              configurable                :ref:`retiring-des`
-   ========================================= ========================== ====================================================
+License - :ref:`mitK5license`
+
+Releases:
+    - Latest stable: http://web.mit.edu/kerberos/krb5-1.11/
+    - Supported: http://web.mit.edu/kerberos/krb5-1.10/ http://web.mit.edu/kerberos/krb5-1.9/
+    - Release cycle: 9 -- 12 months
+
+Supported platforms \/ OS distributions:
+    - Windows (KfW 4.0): Windows 7, Vista, XP
+    - Solaris: SPARC, x86_64/x86
+    - GNU/Linux: Debian x86_64/x86, Ubuntu x86_64/x86, RedHat x86_64/x86
+    - BSD: NetBSD x86_64/x86
+
+Crypto backends:
+    - builtin - MIT Kerberos native crypto library
+    - OpenSSL (1.0\+) - http://www.openssl.org
+    - NSS (3.12.9\+) - http://www.mozilla.org/projects/security/pki/nss
+
+Database backends: LDAP, DB2
+
+krb4 support: Kerberos 5 release < 1.8
+
+DES support: configurable (See :ref:`retiring-des`)
 
 Interoperability
 ----------------
 
-Microsoft
-~~~~~~~~~
+`Microsoft`
 
-Starting from version 1.7:
+Starting from release 1.7:
 
 * Follow client principal referrals in the client library when
   obtaining initial tickets.
@@ -80,78 +74,76 @@ Starting from version 1.7:
   permitted by KDC policy.
 
 
-Starting from version 1.8:
+Starting from release 1.8:
 
 * Microsoft Services for User (S4U) compatibility
 
 
-Heimdal
-~~~~~~~
+`Heimdal`
 
-* Support for reading Heimdal database starting from version 1.8
+* Support for reading Heimdal database starting from release 1.8
 
 
 Feature list
 ------------
 
-   ===================================================== ========= ============================================
-    \                                                    Available    Additional information
-   ===================================================== ========= ============================================
-    Credentials delegation                               1.7       :rfc:`5896`
-    Cross-realm authentication and referrals             1.7       :rfc:`6806`
-    Master key migration                                 1.7       http://k5wiki.kerberos.org/wiki/Projects/Master_Key_Migration
-    PKINIT                                               1.7       :rfc:`4556`
-    Anonymous PKINIT                                     1.8       :rfc:`6112`
-    Constrained delegation                               1.8       http://k5wiki.kerberos.org/wiki/Projects/ConstrainedDelegation
-    IAKERB                                               1.8       http://tools.ietf.org/html/draft-ietf-krb-wg-iakerb-02
-    Heimdal bridge plugin for KDC backend                1.8
-    GSS-API S4U extensions                               1.8       http://msdn.microsoft.com/en-us/library/cc246071
-    GSS-API naming extensions                            1.8       :rfc:`6680`
-    GSS-API extensions for storing delegated credentials 1.8       :rfc:`5588`
-    Advance warning on password expiry                   1.9
-    Camellia encryption (CTS-CMAC mode)                  1.9       :rfc:`6803`
-    KDC support for SecurID preauthentication            1.9       http://k5wiki.kerberos.org/wiki/Projects/SecurID_SAM_support
-    kadmin over IPv6                                     1.9
-    Trace logging                                        1.9       http://k5wiki.kerberos.org/wiki/Projects/Trace_logging
-    GSSAPI/KRB5 multi-realm support
-    Plugin to test password quality                      1.9       http://k5wiki.kerberos.org/wiki/Projects/Password_quality_pluggable_interface
-    Plugin to synchronize password changes               1.9
-    Parallel KDC                                         1.9
-    GSS-API extentions for SASL GS2 bridge               1.9       :rfc:`5801` :rfc:`5587` http://k5wiki.kerberos.org/wiki/Projects/GS2
-    Purging old keys                                     1.9
-    Naming extensions for delegation chain               1.9
-    Password expiration API                              1.9
-    Windows client support   (build-only)                1.9
-    Zero configuration
-    IPv6 support in iprop
-    Plugin interface for configuration                   1.10      http://k5wiki.kerberos.org/wiki/Projects/Pluggable_configuration
-    Credentials for multiple identities                  1.10      http://k5wiki.kerberos.org/wiki/Projects/Client_principal_selection
-    Client support for FAST OTP                          1.11      :rfc:`6560`
-    GSS-API extensions for credential locations          1.11      http://k5wiki.kerberos.org/wiki/Projects/Credential_Store_extensions
-    Responder mechanism                                  1.11      http://k5wiki.kerberos.org/wiki/Projects/Responder \
-                                                                   http://k5wiki.kerberos.org/wiki/Projects/Password_response_item
-   ===================================================== ========= ============================================
+For more information on the specific project see http://k5wiki.kerberos.org/wiki/Projects
 
-\
-   Pre-auth mechanisms
+Release 1.7
+ -   Credentials delegation                   :rfc:`5896`
+ -   Cross-realm authentication and referrals :rfc:`6806`
+ -   Master key migration
+ -   PKINIT                                   :rfc:`4556` :ref:`pkinit`
 
-   ============================= ======= ====================================================
-    PW-SALT                               :rfc:`4120#section-5.2.7.3`
-    ENC-TIMESTAMP                         :rfc:`4120#section-5.2.7.2`
-    SAM-2
-    FAST negotiation framework    1.8     :rfc:`6113`
-    PKINIT with FAST on client    1.10    :rfc:`6113`
-    PKINIT                                :rfc:`4556`
-    FX-COOKIE                             :rfc:`6113#section-5.2`
-    S4U-X509-USER                 1.8     http://msdn.microsoft.com/en-us/library/cc246091
-   ============================= ======= ====================================================
+Release 1.8
+ -   Anonymous PKINIT         :rfc:`6112` :ref:`anonymous_pkinit`
+ -   Constrained delegation
+ -   IAKERB                   http://tools.ietf.org/html/draft-ietf-krb-wg-iakerb-02
+ -   Heimdal bridge plugin for KDC backend
+ -   GSS-API S4U extensions   http://msdn.microsoft.com/en-us/library/cc246071
+ -   GSS-API naming extensions                            :rfc:`6680`
+ -   GSS-API extensions for storing delegated credentials :rfc:`5588`
 
-\
-   PRNG
+Release 1.9
+ -   Advance warning on password expiry
+ -   Camellia encryption (CTS-CMAC mode)       :rfc:`6803`
+ -   KDC support for SecurID preauthentication
+ -   kadmin over IPv6
+ -   Trace logging                             :ref:`trace_logging`
+ -   GSSAPI/KRB5 multi-realm support
+ -   Plugin to test password quality           :ref:`pwqual`
+ -   Plugin to synchronize password changes    :ref:`kadm5_hook`
+ -   Parallel KDC
+ -   GSS-API extentions for SASL GS2 bridge    :rfc:`5801` :rfc:`5587`
+ -   Purging old keys
+ -   Naming extensions for delegation chain
+ -   Password expiration API
+ -   Windows client support   (build-only)
+ -   IPv6 support in iprop
 
-   =============== ========= ==============================================
-    modularity       1.9
-    Yarrow PRNG      < 1.10
-    Fortuna PRNG     1.9       http://www.schneier.com/book-practical.html
-    OS PRNG          1.10      OS's native PRNG
-   =============== ========= ==============================================
+Release 1.10
+ -   Plugin interface for configuration        :ref:`profile`
+ -   Credentials for multiple identities       :ref:`ccselect`
+
+Release 1.11
+ -   Client support for FAST OTP               :rfc:`6560`
+ -   GSS-API extensions for credential locations
+ -   Responder mechanism
+
+`Pre-authentication mechanisms`
+
+- PW-SALT                                         :rfc:`4120#section-5.2.7.3`
+- ENC-TIMESTAMP                                   :rfc:`4120#section-5.2.7.2`
+- SAM-2
+- FAST negotiation framework   (release 1.8)      :rfc:`6113`
+- PKINIT with FAST on client   (release 1.10)     :rfc:`6113`
+- PKINIT                                          :rfc:`4556`
+- FX-COOKIE                                       :rfc:`6113#section-5.2`
+- S4U-X509-USER                (release 1.8)      http://msdn.microsoft.com/en-us/library/cc246091
+
+`PRNG`
+
+- modularity       (release 1.9)
+- Yarrow PRNG      (release < 1.10)
+- Fortuna PRNG     (release 1.9)       http://www.schneier.com/book-practical.html
+- OS PRNG          (release 1.10)      OS's native PRNG

@@ -1,3 +1,5 @@
+.. _pwqual:
+
 Password quality interface (pwqual)
 ===================================
 

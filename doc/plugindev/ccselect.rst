@@ -1,3 +1,5 @@
+.. _ccselect:
+
 Credential cache selection interface (ccselect)
 ===============================================
 

@@ -1,3 +1,5 @@
+.. _pkinit:
+
 PKINIT configuration
 ====================
 

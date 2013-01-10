@@ -1,3 +1,5 @@
+.. _kadm5_hook:
+
 KADM5 hook interface (kadm5_hook)
 =================================
 

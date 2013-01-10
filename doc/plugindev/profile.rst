@@ -1,3 +1,5 @@
+.. _profile:
+
 Configuration interface (profile)
 =================================
 
