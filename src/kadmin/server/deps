@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 $(OUTPRE)kadm_rpc_svc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 clnt_policy.so clnt_policy.po $(OUTPRE)clnt_policy.$(OBJEXT): \

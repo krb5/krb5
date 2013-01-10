@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 $(OUTPRE)kdc5_err.$(OBJEXT): $(COM_ERR_DEPS) kdc5_err.c

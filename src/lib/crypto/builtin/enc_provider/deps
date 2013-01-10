@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 des.so des.po $(OUTPRE)des.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

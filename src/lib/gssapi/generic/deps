@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 disp_com_err_status.so disp_com_err_status.po $(OUTPRE)disp_com_err_status.$(OBJEXT): \

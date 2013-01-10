@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 bt_close.so bt_close.po $(OUTPRE)bt_close.$(OBJEXT): \

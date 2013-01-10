@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 ucstr.so ucstr.po $(OUTPRE)ucstr.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

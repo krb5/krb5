@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 $(OUTPRE)k5seal.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \

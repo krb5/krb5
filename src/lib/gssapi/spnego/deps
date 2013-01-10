@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 spnego_mech.so spnego_mech.po $(OUTPRE)spnego_mech.$(OBJEXT): \

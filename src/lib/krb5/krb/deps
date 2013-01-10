@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 addr_comp.so addr_comp.po $(OUTPRE)addr_comp.$(OBJEXT): \
@@ -565,7 +565,7 @@ kerrs.so kerrs.po $(OUTPRE)kerrs.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/clpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  kerrs.c
+  int-proto.h kerrs.c
 kfree.so kfree.po $(OUTPRE)kfree.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \

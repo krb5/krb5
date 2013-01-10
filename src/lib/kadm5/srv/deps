@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 pwqual.so pwqual.po $(OUTPRE)pwqual.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

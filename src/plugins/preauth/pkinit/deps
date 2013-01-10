@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 pkinit_accessor.so pkinit_accessor.po $(OUTPRE)pkinit_accessor.$(OBJEXT): \

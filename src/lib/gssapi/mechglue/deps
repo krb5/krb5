@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 g_accept_sec_context.so g_accept_sec_context.po $(OUTPRE)g_accept_sec_context.$(OBJEXT): \

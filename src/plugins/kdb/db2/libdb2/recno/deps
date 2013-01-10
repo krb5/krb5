@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 rec_close.so rec_close.po $(OUTPRE)rec_close.$(OBJEXT): \

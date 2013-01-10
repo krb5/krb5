@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 hash_crc32.so hash_crc32.po $(OUTPRE)hash_crc32.$(OBJEXT): \

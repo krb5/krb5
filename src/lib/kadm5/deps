@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 kadm_err.so kadm_err.po $(OUTPRE)kadm_err.$(OBJEXT): \

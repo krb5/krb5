@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 asn1_encode.so asn1_encode.po $(OUTPRE)asn1_encode.$(OBJEXT): \

@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 auth_none.so auth_none.po $(OUTPRE)auth_none.$(OBJEXT): \

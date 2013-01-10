@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 $(OUTPRE)client.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 krb5_libinit.so krb5_libinit.po $(OUTPRE)krb5_libinit.$(OBJEXT): \

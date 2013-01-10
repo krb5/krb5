@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 $(OUTPRE)resolve.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 kdb5.so kdb5.po $(OUTPRE)kdb5.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

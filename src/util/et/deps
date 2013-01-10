@@ -1,4 +1,4 @@
-# 
+#
 # Generated makefile dependencies follow.
 #
 error_message.so error_message.po $(OUTPRE)error_message.$(OBJEXT): \
