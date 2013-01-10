@@ -35,7 +35,7 @@
 
 #include "k5-int.h"
 #include "com_err.h"
-#include "adm.h"
+#include <kadm5/admin.h>
 #include "adm_proto.h"
 #include "kdc_util.h"
 #include "extern.h"

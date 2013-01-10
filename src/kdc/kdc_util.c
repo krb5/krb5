@@ -57,7 +57,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <syslog.h>
-#include "adm.h"
+#include <kadm5/admin.h>
 #include "adm_proto.h"
 #include "net-server.h"
 #include <limits.h>
