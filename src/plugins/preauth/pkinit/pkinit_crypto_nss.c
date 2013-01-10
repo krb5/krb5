@@ -2098,7 +2098,7 @@ crypto_load_pkcs11(krb5_context context,
     PK11SlotInfo *slot;
     char *spec;
     size_t spec_size;
-    const char *label, *id, *slotname, *tokenname;
+    const char *label, *id, *tokenname;
     SECStatus status;
     int i, j;
 
@@ -2166,21 +2166,16 @@ crypto_load_pkcs11(krb5_context context,
          (i < module->module->slotCount) &&
          ((slot = module->module->slots[i]) != NULL);
          i++) {
+        if (idopts->slotid != PK_NOSLOT) {
+            if (idopts->slotid != PK11_GetSlotID(slot))
+                continue;
+        }
+        tokenname = PK11_GetTokenName(slot);
+        if (tokenname == NULL || strlen(tokenname) == 0)
+            continue;
         if (idopts->token_label != NULL) {
-            label = idopts->token_label;
-            slotname = PK11_GetSlotName(slot);
-            tokenname = PK11_GetTokenName(slot);
-            if ((slotname != NULL) && (tokenname != NULL)) {
-                if ((strcmp(label, slotname) != 0) &&
-                    (strcmp(label, tokenname) != 0))
-                    continue;
-            } else if (slotname != NULL) {
-                if (strcmp(label, slotname) != 0)
-                    continue;
-            } else if (tokenname != NULL) {
-                if (strcmp(label, tokenname) != 0)
-                    continue;
-            }
+            if (strcmp(idopts->cert_label, tokenname) != 0)
+                continue;
         }
         /* Load private keys and their certs from this slot. */
         label = idopts->cert_label;
@@ -2188,6 +2183,10 @@ crypto_load_pkcs11(krb5_context context,
         if (cert_load_certs_with_keys_from_slot(context, id_cryptoctx,
                                                 slot, label, id) == 0)
             status = SECSuccess;
+        /* If no label was specified, then we've looked at a token, so we're
+         * done. */
+        if (idopts->token_label == NULL)
+            break;
     }
     return status;
 }
