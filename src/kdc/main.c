@@ -189,12 +189,13 @@ handle_referral_params(krb5_realm_params *rparams,
                 rdp->realm_no_host_referral = strdup(KRB5_CONF_ASTERISK);
                 if (!rdp->realm_no_host_referral)
                     retval = ENOMEM;
-            } else if  (no_refrls && (asprintf(&(rdp->realm_no_host_referral),
-                                               "%s%s%s%s%s", " ", no_refrls," ",
-                                               rparams->realm_no_host_referral, " ") < 0))
-                retval = ENOMEM;
-            else if (asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ",
-                              rparams->realm_no_host_referral, " ") < 0)
+            } else if (no_refrls) {
+                if (asprintf(&(rdp->realm_no_host_referral),
+                             "%s%s%s%s%s", " ", no_refrls," ",
+                             rparams->realm_no_host_referral, " ") < 0)
+                    retval = ENOMEM;
+            } else if (asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ",
+                                rparams->realm_no_host_referral, " ") < 0)
                 retval = ENOMEM;
         } else if( no_refrls != NULL) {
             if ( asprintf(&(rdp->realm_no_host_referral),
