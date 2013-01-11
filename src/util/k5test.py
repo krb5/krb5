@@ -227,15 +227,15 @@ Scripts may use the following realm methods and attributes:
 
 * realm.create_kdb(): Create a new KDB.
 
-* realm.start_kdc(args=[]): Start a krb5kdc process.  Errors if a KDC
-  is already running.  If args is given, it contains a list of
-  additional krb5kdc arguments.
+* realm.start_kdc(args=[], env=None): Start a krb5kdc process.  Errors
+  if a KDC is already running.  If args is given, it contains a list
+  of additional krb5kdc arguments.
 
 * realm.stop_kdc(): Stop the krb5kdc process.  Errors if no KDC is
   running.
 
-* realm.start_kadmind(): Start a kadmind process.  Errors if a kadmind
-  is already running.
+* realm.start_kadmind(env=None): Start a kadmind process.  Errors if a
+  kadmind is already running.
 
 * realm.stop_kadmind(): Stop the kadmind process.  Errors if no
   kadmind is running.
@@ -852,25 +852,29 @@ class K5Realm(object):
         global kdb5_util
         self.run([kdb5_util, 'create', '-W', '-s', '-P', 'master'])
 
-    def start_kdc(self, args=[]):
+    def start_kdc(self, args=[], env=None):
         global krb5kdc
+        if env is None:
+            env = self.env
         assert(self._kdc_proc is None)
-        self._kdc_proc = _start_daemon([krb5kdc, '-n'] + args, self.env,
-                                        'starting...')
+        self._kdc_proc = _start_daemon([krb5kdc, '-n'] + args, env,
+                                       'starting...')
 
     def stop_kdc(self):
         assert(self._kdc_proc is not None)
         stop_daemon(self._kdc_proc)
         self._kdc_proc = None
 
-    def start_kadmind(self):
+    def start_kadmind(self, env=None):
         global krb5kdc
+        if env is None:
+            env = self.env
         assert(self._kadmind_proc is None)
         dump_path = os.path.join(self.testdir, 'dump')
         self._kadmind_proc = _start_daemon([kadmind, '-nofork', '-W',
                                             '-p', kdb5_util, '-K', kprop,
-                                            '-F', dump_path],
-                                           self.env, 'starting...')
+                                            '-F', dump_path], env,
+                                           'starting...')
 
     def stop_kadmind(self):
         assert(self._kadmind_proc is not None)
