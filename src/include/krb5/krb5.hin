@@ -2342,9 +2342,9 @@ krb5_cc_close(krb5_context context, krb5_ccache cache);
 /**
  * Store credentials in a credential cache.
  *
- * @param [in]     context      Library context
- * @param [in,out] cache        Credential cache handle
- * @param [in]     creds        Credentials to be stored in cache
+ * @param [in] context          Library context
+ * @param [in] cache            Credential cache handle
+ * @param [in] creds            Credentials to be stored in cache
  *
  * This function stores @a creds into @a cache.  If @a creds->server and the
  * server in the decoded ticket @a creds->ticket differ, the credentials will
@@ -2437,10 +2437,10 @@ krb5_cc_start_seq_get(krb5_context context, krb5_ccache cache,
 /**
  * Retrieve the next entry from the credential cache.
  *
- * @param [in]     context      Library context
- * @param [in]     cache        Credential cache handle
- * @param [in,out] cursor       Cursor
- * @param [out]    creds        Next credential cache entry
+ * @param [in]  context         Library context
+ * @param [in]  cache           Credential cache handle
+ * @param [in]  cursor          Cursor
+ * @param [out] creds           Next credential cache entry
  *
  * This function fills in @a creds with the next entry in @a cache and advances
  * @a cursor.
@@ -2458,9 +2458,9 @@ krb5_cc_next_cred(krb5_context context, krb5_ccache cache,
 /**
  * Finish a series of sequential processing credential cache entries.
  *
- * @param [in]     context      Library context
- * @param [in]     cache        Credential cache handle
- * @param [in,out] cursor       Cursor
+ * @param [in] context          Library context
+ * @param [in] cache            Credential cache handle
+ * @param [in] cursor           Cursor
  *
  * This function finishes processing credential cache entries and invalidates
  * @a cursor.
@@ -2495,9 +2495,9 @@ krb5_cc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
 /**
  * Set options flags on a credential cache.
  *
- * @param [in]     context      Library context
- * @param [in,out] cache        Credential cache handle
- * @param [in]     flags        Flag bit mask
+ * @param [in] context          Library context
+ * @param [in] cache            Credential cache handle
+ * @param [in] flags            Flag bit mask
  *
  * This function resets @a cache flags to @a flags.
  *
@@ -2592,8 +2592,8 @@ krb5_cc_unlock(krb5_context context, krb5_ccache ccache);
 /**
  * Prepare to iterate over the collection of known credential caches.
  *
- * @param [in]     context      Library context
- * @param [in,out] cursor       Cursor
+ * @param [in]  context         Library context
+ * @param [out] cursor          Cursor
  *
  * Get a new cache iteration @a cursor that will iterate over all known
  * credential caches independent of type.
@@ -2611,9 +2611,9 @@ krb5_cccol_cursor_new(krb5_context context, krb5_cccol_cursor *cursor);
 /**
  * Get the next credential cache in the collection.
  *
- * @param [in]     context      Library context
- * @param [in,out] cursor       Cursor
- * @param [out]    ccache       Credential cache handle
+ * @param [in]  context         Library context
+ * @param [in]  cursor          Cursor
+ * @param [out] ccache          Credential cache handle
  *
  * @note When all caches are iterated over and the end of the list is reached,
  * @a ccache is set to NULL.
@@ -2859,7 +2859,7 @@ krb5_kt_start_seq_get(krb5_context context, krb5_keytab keytab,
  * @param [in]  context         Library context
  * @param [in]  keytab          Key table handle
  * @param [out] entry           Returned key table entry
- * @param [in,out] cursor       Key table cursor
+ * @param [in]  cursor          Key table cursor
  *
  * Return the next sequential entry in @a keytab and advance @a cursor.
  *
@@ -3010,8 +3010,8 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out);
 /**
  * Set default TGS encryption types in a krb5_context structure.
  *
- * @param [in,out] context      Library context
- * @param [in]     etypes       Encryption type(s) to set
+ * @param [in] context          Library context
+ * @param [in] etypes           Encryption type(s) to set
  *
  * This function sets the default enctype list for TGS requests
  * made using @a context to @a etypes.
@@ -3057,9 +3057,9 @@ krb5_is_thread_safe(void);
 /**
  * Decrypt a ticket using the specified key table.
  *
- * @param [in]     context      Library context
- * @param [in]     kt           Key table
- * @param [in,out] ticket       Ticket to be decrypted
+ * @param [in] context          Library context
+ * @param [in] kt               Key table
+ * @param [in] ticket           Ticket to be decrypted
  *
  * This function takes a @a ticket as input and decrypts it using
  * key data from @a kt.  The result is placed into @a ticket->enc_part2.
@@ -3096,11 +3096,11 @@ krb5_free_tgt_creds(krb5_context context, krb5_creds **tgts);
 /**
  * Get an additional ticket.
  *
- * @param [in]     context      Library context
- * @param [in]     options      Options
- * @param [in,out] ccache       Credential cache handle
- * @param [in]     in_creds     Input credentials
- * @param [out]    out_creds    Output updated credentials
+ * @param [in]  context         Library context
+ * @param [in]  options         Options
+ * @param [in]  ccache          Credential cache handle
+ * @param [in]  in_creds        Input credentials
+ * @param [out] out_creds       Output updated credentials
  *
  * Use @a ccache or a TGS exchange to get a service ticket matching @a
  * in_creds.
@@ -3221,9 +3221,9 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 /**
  * Format and encrypt a @c KRB_AP_REP message.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
- * @param [out]    outbuf       @c AP-REP message
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ * @param [out] outbuf          @c AP-REP message
  *
  * This function fills in @a outbuf with an AP-REP message using information
  * from @a auth_context.
@@ -3244,9 +3244,9 @@ krb5_mk_rep(krb5_context context, krb5_auth_context auth_context, krb5_data *out
 /**
  * Format and encrypt a @c KRB_AP_REP message for DCE RPC.
  *
- * @param [in]     context           Library context
- * @param [in,out] auth_context      Authentication context
- * @param [out]    outbuf            @c AP-REP message
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ * @param [out] outbuf          @c AP-REP message
  *
  * Use krb5_free_data_contents() to free @a outbuf when it is no longer needed.
  *
@@ -3258,10 +3258,10 @@ krb5_mk_rep_dce(krb5_context context, krb5_auth_context auth_context, krb5_data 
 /**
  * Parse and decrypt a @c KRB_AP_REP message.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
- * @param [in]     inbuf        AP-REP message
- * @param [out]    repl         Decrypted reply message
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ * @param [in]  inbuf           AP-REP message
+ * @param [out] repl            Decrypted reply message
  *
  * This function parses, decrypts and verifies a message from @a inbuf and
  * fills in @a repl with a pointer to allocated memory containing the fields
@@ -3278,10 +3278,10 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context,
 /**
  * Parse and decrypt a @c KRB_AP_REP message for DCE RPC.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
- * @param [in]     inbuf        AP-REP message
- * @param [out]    nonce        Sequence number from the decrypted reply
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ * @param [in]  inbuf           AP-REP message
+ * @param [out] nonce           Sequence number from the decrypted reply
  *
  * This function parses, decrypts and verifies a message from @a inbuf and
  * fills in @a nonce with a decrypted reply sequence number.
@@ -3328,11 +3328,11 @@ krb5_rd_error(krb5_context context, const krb5_data *enc_errbuf,
 /**
  * Process @c KRB-SAFE message.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication structure
- * @param [in]     inbuf        @c KRB-SAFE message to be parsed
- * @param [out]    outbuf       Data parsed from @c KRB-SAFE message
- * @param [out]    outdata      Replay data. Specify NULL if not needed
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ * @param [in]  inbuf           @c KRB-SAFE message to be parsed
+ * @param [out] outbuf          Data parsed from @c KRB-SAFE message
+ * @param [out] outdata         Replay data. Specify NULL if not needed
  *
  * This function parses a @c KRB-SAFE message, verifies its integrity, and
  * stores its data into @a outbuf.
@@ -3369,11 +3369,11 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
 /**
  * Process a @c KRB-PRIV message.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication structure
- * @param [in]     inbuf        @c KRB-PRIV message to be parsed
- * @param [out]    outbuf       Data parsed from @c KRB-PRIV message
- * @param [out]    outdata      Replay data. Specify NULL if not needed
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication structure
+ * @param [in]  inbuf           @c KRB-PRIV message to be parsed
+ * @param [out] outbuf          Data parsed from @c KRB-PRIV message
+ * @param [out] outdata         Replay data. Specify NULL if not needed
  *
  * This function parses a @c KRB-PRIV message, verifies its integrity, and
  * stores its unencrypted data into @a outbuf.
@@ -3585,9 +3585,9 @@ krb5_unparse_name_flags_ext(krb5_context context, krb5_const_principal principal
 /**
  * Set the realm field of a principal
  *
- * @param [in,out] context      Library context
- * @param [in]     principal    Principal name
- * @param [in]     realm        Realm name
+ * @param [in] context          Library context
+ * @param [in] principal        Principal name
+ * @param [in] realm            Realm name
  *
  * Set the realm name part of @a principal to @a realm, overwriting the
  * previous realm.
@@ -4368,8 +4368,8 @@ krb5_cc_default_name(krb5_context context);
 /**
  * Set the default credential cache name.
  *
- * @param [in,out]  context     Library context
- * @param [in]      name        Default credential cache name
+ * @param [in] context          Library context
+ * @param [in] name             Default credential cache name
  *
  * This function frees the old default credential cache name and then sets it
  * to @a name.
@@ -4387,8 +4387,8 @@ krb5_cc_set_default_name(krb5_context context, const char *name);
 /**
  * Resolve the default crendentials cache name.
  *
- * @param [in,out] context      Library context
- * @param [out]    ccache       Pointer to credential cache name
+ * @param [in]  context         Library context
+ * @param [out] ccache          Pointer to credential cache name
  *
  * @retval
  * 0  Success
@@ -4790,8 +4790,8 @@ krb5_us_timeofday(krb5_context context,
 /**
  * Retrieve the current time with context specific time offset adjustment.
  *
- * @param [in]     context      Library context
- * @param [in,out] timeret      Timestamp to fill in
+ * @param [in]  context         Library context
+ * @param [out] timeret         Timestamp to fill in
  *
  * This function retrieves the system time of day with the context specific
  * time offset adjustment.
@@ -5189,11 +5189,11 @@ krb5_kt_read_service_key(krb5_context context, krb5_pointer keyprocarg,
 /**
  * Format a @c KRB-SAFE message.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
- * @param [in]     userdata     User data in the message
- * @param [out]    outbuf       Formatted @c KRB-SAFE buffer
- * @param [out]    outdata      Replay data. Specify NULL if not needed
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ * @param [in]  userdata        User data in the message
+ * @param [out] outbuf          Formatted @c KRB-SAFE buffer
+ * @param [out] outdata         Replay data. Specify NULL if not needed
  *
  * This function creates an integrity protected @c KRB-SAFE message
  * using data supplied by the application.
@@ -5232,11 +5232,11 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
 /**
  * Format a @c KRB-PRIV message.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
- * @param [in]     userdata     User data for @c KRB-PRIV message
- * @param [out]    outbuf       Formatted @c KRB-PRIV message
- * @param [out]    outdata      Replay cache handle (NULL if not needed)
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ * @param [in]  userdata        User data for @c KRB-PRIV message
+ * @param [out] outbuf          Formatted @c KRB-PRIV message
+ * @param [out] outdata         Replay cache handle (NULL if not needed)
  *
  * This function is similar to krb5_mk_safe(), but the message is encrypted and
  * integrity-protected, not just integrity-protected.
@@ -5272,7 +5272,7 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
  * Client function for @c sendauth protocol.
  *
  * @param [in]     context        Library context
- * @param [in,out] auth_context   Authentication context
+ * @param [in,out] auth_context   Pre-existing or newly created auth context
  * @param [in]     fd             File descriptor that describes network socket
  * @param [in]     appl_version   Application protocol version to be matched
  *                                with the receiver's application version
@@ -5329,7 +5329,7 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
  * Server function for @a sendauth protocol.
  *
  * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
+ * @param [in,out] auth_context Pre-existing or newly created auth context
  * @param [in]     fd           File descriptor
  * @param [in]     appl_version Application protocol version to be matched
  *                              against the client's application version
@@ -5338,7 +5338,7 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
  * @param [in]     keytab       Key table containing service keys
  * @param [out]    ticket       Ticket (NULL if not needed)
  *
- * This function performs the srever side of a sendauth/recvauth exchange by
+ * This function performs the server side of a sendauth/recvauth exchange by
  * sending and receiving messages over @a fd.
  *
  * Use krb5_free_ticket() to free @a ticket when it is no longer needed.
@@ -5356,7 +5356,7 @@ krb5_recvauth(krb5_context context, krb5_auth_context *auth_context,
  * Server function for @a sendauth protocol with version parameter.
  *
  * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
+ * @param [in,out] auth_context Pre-existing or newly created auth context
  * @param [in]     fd           File descriptor
  * @param [in]     server       Server principal (NULL for any in @a keytab)
  * @param [in]     flags        Additional specifications
@@ -5382,11 +5382,11 @@ krb5_recvauth_version(krb5_context context,
 /**
  * Format a @c KRB-CRED message for an array of credentials.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
- * @param [in]     ppcreds      Null-terminated array of credentials
- * @param [out]    ppdata       Encoded credentials
- * @param [out]    outdata      Replay cache information (NULL if not needed)
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ * @param [in]  ppcreds         Null-terminated array of credentials
+ * @param [out] ppdata          Encoded credentials
+ * @param [out] outdata         Replay cache information (NULL if not needed)
  *
  * This function takes an array of credentials @a ppcreds and formats
  * a @c KRB-CRED message @a ppdata to pass to krb5_rd_cred().
@@ -5414,11 +5414,11 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
 /**
  * Format a @c KRB-CRED message for a single set of credentials.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
- * @param [in]     pcreds       Pointer to credentials
- * @param [out]    ppdata       Encoded credentials
- * @param [out]    outdata      Replay cache data (NULL if not needed)
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ * @param [in]  pcreds          Pointer to credentials
+ * @param [out] ppdata          Encoded credentials
+ * @param [out] outdata         Replay cache data (NULL if not needed)
  *
  * This is a convenience function that calls krb5_mk_ncred() with a single set
  * of credentials.
@@ -5440,11 +5440,11 @@ krb5_mk_1cred(krb5_context context, krb5_auth_context auth_context,
 /**
  * Read and validate a @c KRB-CRED message.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
- * @param [in]     pcreddata    @c KRB-CRED message
- * @param [out]    pppcreds     Null-terminated array of forwarded credentials
- * @param [out]    outdata      Replay data (NULL if not needed)
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ * @param [in]  pcreddata       @c KRB-CRED message
+ * @param [out] pppcreds        Null-terminated array of forwarded credentials
+ * @param [out] outdata         Replay data (NULL if not needed)
  *
  * @note The @a outdata argument is required if #KRB5_AUTH_CONTEXT_RET_TIME or
  *       #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.`
@@ -5534,9 +5534,9 @@ krb5_auth_con_free(krb5_context context, krb5_auth_context auth_context);
 /**
  * Set a flags field in a krb5_auth_context structure.
  *
- * @param [in]     context      Library context
- * @param [in,out] auth_context Authentication context
- * @param [in]     flags        Flags bit mask
+ * @param [in] context          Library context
+ * @param [in] auth_context     Authentication context
+ * @param [in] flags            Flags bit mask
  *
  * Valid values for @a flags are:
  * @li #KRB5_AUTH_CONTEXT_DO_TIME Use timestamps
@@ -6337,12 +6337,12 @@ typedef krb5_error_code
 /**
  * Prompt user for password.
  *
- * @param [in]     context      Library context
- * @param          data         Unused (callback argument)
- * @param [in]     name         Name to output during prompt
- * @param [in]     banner       Banner to output during prompt
- * @param [in]     num_prompts  Number of prompts in @a prompts
- * @param [in,out] prompts      Array of output prompts and replies
+ * @param [in] context          Library context
+ * @param      data             Unused (callback argument)
+ * @param [in] name             Name to output during prompt
+ * @param [in] banner           Banner to output during prompt
+ * @param [in] num_prompts      Number of prompts in @a prompts
+ * @param [in] prompts          Array of prompts and replies
  *
  * This function is intended to be used as a prompter callback for
  * krb5_get_init_creds_password() or krb5_init_creds_init().
@@ -6474,7 +6474,7 @@ krb5_responder_get_challenge(krb5_context ctx, krb5_responder_context rctx,
  * Answer a named question in the responder context.
  *
  * @param [in] ctx              Library context
- * @param [in,out] rctx         Responder context
+ * @param [in] rctx             Responder context
  * @param [in] question         Question name
  * @param [in] answer           The string to set (MUST be printable UTF-8)
  *
@@ -7399,12 +7399,12 @@ krb5_verify_init_creds_opt_set_ap_req_nofail(krb5_verify_init_creds_opt * k5_vic
 /**
  * Verify initial credentials against a keytab.
  *
- * @param [in]     context      Library context
- * @param [in]     creds        Initial credentials to be verified
- * @param [in]     server       Server principal (or NULL)
- * @param [in]     keytab       Key table (NULL to use default keytab)
- * @param [in,out] ccache       Credential cache for fetched creds (or NULL)
- * @param [in]     options      Verification options (NULL for default options)
+ * @param [in] context          Library context
+ * @param [in] creds            Initial credentials to be verified
+ * @param [in] server           Server principal (or NULL)
+ * @param [in] keytab           Key table (NULL to use default keytab)
+ * @param [in] ccache           Credential cache for fetched creds (or NULL)
+ * @param [in] options          Verification options (NULL for default options)
  *
  * This function attempts to verify that @a creds were obtained from a KDC with
  * knowledge of a key in @a keytab, or the default keytab if @a keytab is NULL.
