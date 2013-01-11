@@ -1118,9 +1118,10 @@ fetch_asn1_field(unsigned char *astream, unsigned int level,
                     /* return length and data */
                     astream++;
                     savelen = *astream;
-                    if ((data->length = asn1length(&astream)) < 0) {
+                    if ((length = asn1length(&astream)) < 0) {
                         return(-1);
                     }
+                    data->length = length;
                     /* if the field length is indefinite, we will have to subtract two
                        (terminating octets) from the length returned since we don't want
                        to pass any info from the "wrapper" back.  asn1length will always return

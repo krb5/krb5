@@ -507,11 +507,10 @@ client_keys(krb5_context context, krb5_kdcpreauth_rock rock,
     krb5_key_data *entry_key;
     int i, k;
 
-    keys = malloc(sizeof(krb5_keyblock) * (request->nktypes + 1));
+    keys = calloc(request->nktypes + 1, sizeof(krb5_keyblock));
     if (keys == NULL)
         return ENOMEM;
 
-    memset(keys, 0, sizeof(krb5_keyblock) * (request->nktypes + 1));
     k = 0;
     for (i = 0; i < request->nktypes; i++) {
         entry_key = NULL;

@@ -3957,7 +3957,7 @@ g_verify_neg_token_init(unsigned char **buf_in, unsigned int cur_size)
 {
 	unsigned char *buf = *buf_in;
 	unsigned char *endptr = buf + cur_size;
-	unsigned int seqsize;
+	int seqsize;
 	int ret = 0;
 	unsigned int bytes;
 
@@ -3981,7 +3981,7 @@ g_verify_neg_token_init(unsigned char **buf_in, unsigned int cur_size)
 		/*
 		 * Make sure we have the entire buffer as described
 		 */
-		if (buf + seqsize > endptr)
+		if (seqsize > endptr - buf)
 			return (G_BAD_TOK_HEADER);
 	} else {
 		return (G_BAD_TOK_HEADER);
@@ -3998,7 +3998,7 @@ g_verify_neg_token_init(unsigned char **buf_in, unsigned int cur_size)
 		/*
 		 * Make sure we have the entire buffer as described
 		 */
-		if (buf + bytes > endptr)
+		if (seqsize > endptr - buf)
 			return (G_BAD_TOK_HEADER);
 	} else {
 		return (G_BAD_TOK_HEADER);
