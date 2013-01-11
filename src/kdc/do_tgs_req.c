@@ -1063,6 +1063,24 @@ cleanup:
     return retval;
 }
 
+/* Return true if item is an element of the space/comma-separated list. */
+static krb5_boolean
+in_list(const char *list, const char *item)
+{
+    const char *p;
+    int len = strlen(item);
+
+    if (list == NULL)
+        return FALSE;
+    for (p = strstr(list, item); p != NULL; p = strstr(p + 1, item)) {
+        if ((p == list || isspace((unsigned char)p[-1]) || p[-1] == ',') &&
+            (p[len] == '\0' || isspace((unsigned char)p[len]) ||
+             p[len] == ','))
+                return TRUE;
+    }
+    return FALSE;
+}
+
 /*
  * Check whether the request satisfies the conditions for generating a referral
  * TGT.  The caller checks whether the hostname component looks like a FQDN.
@@ -1072,8 +1090,8 @@ is_referral_req(kdc_realm_t *kdc_active_realm, krb5_kdc_req *request)
 {
     krb5_boolean ret = FALSE;
     char *stype = NULL;
-    char *ref_services = kdc_active_realm->realm_host_based_services;
-    char *nonref_services = kdc_active_realm->realm_no_host_referral;
+    char *hostbased = kdc_active_realm->realm_hostbased;
+    char *no_referral = kdc_active_realm->realm_no_referral;
 
     if (!(request->kdc_options & KDC_OPT_CANONICALIZE))
         return FALSE;
@@ -1090,22 +1108,14 @@ is_referral_req(kdc_realm_t *kdc_active_realm, krb5_kdc_req *request)
     switch (krb5_princ_type(kdc_context, request->server)) {
     case KRB5_NT_UNKNOWN:
         /* Allow referrals for NT-UNKNOWN principals, if configured. */
-        if (kdc_active_realm->realm_host_based_services != NULL) {
-            if (!krb5_match_config_pattern(ref_services, stype) &&
-                !krb5_match_config_pattern(ref_services, KRB5_CONF_ASTERISK))
-                goto cleanup;
-        } else
+        if (!in_list(hostbased, stype) && !in_list(hostbased, "*"))
             goto cleanup;
         /* FALLTHROUGH */
     case KRB5_NT_SRV_HST:
     case KRB5_NT_SRV_INST:
         /* Deny referrals for specific service types, if configured. */
-        if (kdc_active_realm->realm_no_host_referral != NULL) {
-            if (krb5_match_config_pattern(nonref_services, stype))
-                goto cleanup;
-            if (krb5_match_config_pattern(nonref_services, KRB5_CONF_ASTERISK))
-                goto cleanup;
-        }
+        if (in_list(no_referral, stype) || in_list(no_referral, "*"))
+            goto cleanup;
         ret = TRUE;
         break;
     default:

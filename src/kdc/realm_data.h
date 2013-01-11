@@ -45,11 +45,8 @@ typedef struct __kdc_realm_data {
     krb5_context        realm_context;  /* Context to be used for realm     */
     krb5_keytab         realm_keytab;   /* keytab to be used for this realm */
     char *              realm_profile;  /* Profile file for this realm      */
-    char *              realm_host_based_services; /* do referral processing for these services
-                                                    * If '*' - allow all referrals */
-    char *              realm_no_host_referral; /* no referral for these services.
-                                                 * If '*' - disallow all referrals and
-                                                 * ignore realm_host_based_services */
+    char *              realm_hostbased; /* referral services for NT-UNKNOWN */
+    char *              realm_no_referral; /* non-referral services         */
     /*
      * Database per-realm data.
      */

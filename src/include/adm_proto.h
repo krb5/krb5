@@ -79,7 +79,6 @@ krb5_error_code krb5_aprof_finish(krb5_pointer);
 krb5_error_code krb5_read_realm_params(krb5_context, char *,
                                        krb5_realm_params **);
 krb5_error_code krb5_free_realm_params(krb5_context, krb5_realm_params *);
-krb5_boolean krb5_match_config_pattern(const char *, const char *);
 
 /* str_conv.c */
 krb5_error_code krb5_string_to_flags(char *, const char *, const char *,

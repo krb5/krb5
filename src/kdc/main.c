@@ -151,10 +151,10 @@ finish_realm(kdc_realm_t *rdp)
         free(rdp->realm_tcp_ports);
     if (rdp->realm_keytab)
         krb5_kt_close(rdp->realm_context, rdp->realm_keytab);
-    if (rdp->realm_host_based_services)
-        free(rdp->realm_host_based_services);
-    if (rdp->realm_no_host_referral)
-        free(rdp->realm_no_host_referral);
+    if (rdp->realm_hostbased)
+        free(rdp->realm_hostbased);
+    if (rdp->realm_no_referral)
+        free(rdp->realm_no_referral);
     if (rdp->realm_context) {
         if (rdp->realm_mprinc)
             krb5_free_principal(rdp->realm_context, rdp->realm_mprinc);
@@ -172,75 +172,24 @@ finish_realm(kdc_realm_t *rdp)
     free(rdp);
 }
 
+/* Set *val_out to an allocated string containing val1 and/or val2, separated
+ * by a space if both are set, or NULL if neither is set. */
 static krb5_error_code
-handle_referral_params(krb5_realm_params *rparams,
-                       char *no_refrls, char *host_based_srvcs,
-                       kdc_realm_t *rdp )
+combine(const char *val1, const char *val2, char **val_out)
 {
-    krb5_error_code retval = 0;
-    if (no_refrls && krb5_match_config_pattern(no_refrls, KRB5_CONF_ASTERISK) == TRUE) {
-        rdp->realm_no_host_referral = strdup(KRB5_CONF_ASTERISK);
-        if (!rdp->realm_no_host_referral)
-            retval = ENOMEM;
+    if (val1 == NULL && val2 == NULL) {
+        *val_out = NULL;
+    } else if (val1 != NULL && val2 != NULL) {
+        if (asprintf(val_out, "%s %s", val1, val2) < 0) {
+            *val_out = NULL;
+            return ENOMEM;
+        }
     } else {
-        if (rparams && rparams->realm_no_host_referral) {
-            if (krb5_match_config_pattern(rparams->realm_no_host_referral,
-                                          KRB5_CONF_ASTERISK) == TRUE) {
-                rdp->realm_no_host_referral = strdup(KRB5_CONF_ASTERISK);
-                if (!rdp->realm_no_host_referral)
-                    retval = ENOMEM;
-            } else if (no_refrls) {
-                if (asprintf(&(rdp->realm_no_host_referral),
-                             "%s%s%s%s%s", " ", no_refrls," ",
-                             rparams->realm_no_host_referral, " ") < 0)
-                    retval = ENOMEM;
-            } else if (asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ",
-                                rparams->realm_no_host_referral, " ") < 0)
-                retval = ENOMEM;
-        } else if( no_refrls != NULL) {
-            if ( asprintf(&(rdp->realm_no_host_referral),
-                          "%s%s%s", " ", no_refrls, " ") < 0)
-                retval = ENOMEM;
-        } else
-            rdp->realm_no_host_referral = NULL;
+        *val_out = strdup((val1 != NULL) ? val1 : val2);
+        if (*val_out == NULL)
+            return ENOMEM;
     }
-
-    if (rdp->realm_no_host_referral &&
-        krb5_match_config_pattern(rdp->realm_no_host_referral,
-                                  KRB5_CONF_ASTERISK) == TRUE) {
-        rdp->realm_host_based_services = NULL;
-        return 0;
-    }
-
-    if (host_based_srvcs &&
-        (krb5_match_config_pattern(host_based_srvcs, KRB5_CONF_ASTERISK) == TRUE)) {
-        rdp->realm_host_based_services = strdup(KRB5_CONF_ASTERISK);
-        if (!rdp->realm_host_based_services)
-            retval = ENOMEM;
-    } else {
-        if (rparams && rparams->realm_host_based_services) {
-            if (krb5_match_config_pattern(rparams->realm_host_based_services,
-                                          KRB5_CONF_ASTERISK) == TRUE) {
-                rdp->realm_host_based_services = strdup(KRB5_CONF_ASTERISK);
-                if (!rdp->realm_host_based_services)
-                    retval = ENOMEM;
-            } else if (host_based_srvcs) {
-                if (asprintf(&(rdp->realm_host_based_services), "%s%s%s%s%s",
-                             " ", host_based_srvcs," ",
-                             rparams->realm_host_based_services, " ") < 0)
-                    retval = ENOMEM;
-            } else if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ",
-                                rparams->realm_host_based_services, " ") < 0)
-                retval = ENOMEM;
-        } else if (host_based_srvcs) {
-            if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ",
-                         host_based_srvcs, " ") < 0)
-                retval = ENOMEM;
-        } else
-            rdp->realm_host_based_services = NULL;
-    }
-
-    return retval;
+    return 0;
 }
 
 /*
@@ -254,7 +203,7 @@ static krb5_error_code
 init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
            krb5_enctype def_enctype, char *def_udp_ports, char *def_tcp_ports,
            krb5_boolean def_manual, krb5_boolean def_restrict_anon,
-           char **db_args, char *no_refrls, char *host_based_srvcs)
+           char **db_args, char *no_referral, char *hostbased)
 {
     krb5_error_code     kret;
     krb5_boolean        manual;
@@ -368,8 +317,13 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
         rparams->realm_max_rlife : KRB5_KDB_MAX_RLIFE;
 
     /* Handle KDC referrals */
-    kret = handle_referral_params(rparams, no_refrls, host_based_srvcs, rdp);
-    if (kret == ENOMEM)
+    kret = combine(no_referral, rparams->realm_no_referral,
+                   &rdp->realm_no_referral);
+    if (kret)
+        goto whoops;
+
+    kret = combine(hostbased, rparams->realm_hostbased, &rdp->realm_hostbased);
+    if (kret)
         goto whoops;
 
     if (rparams)
@@ -673,8 +627,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     char                *default_tcp_ports = 0;
     krb5_pointer        aprof;
     const char          *hierarchy[3];
-    char                *no_refrls = NULL;
-    char                *host_based_srvcs = NULL;
+    char                *no_referral = NULL;
+    char                *hostbased = NULL;
     int                  db_args_size = 0;
     char                **db_args = NULL;
 
@@ -696,14 +650,11 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         if (krb5_aprof_get_boolean(aprof, hierarchy, TRUE, &def_restrict_anon))
             def_restrict_anon = FALSE;
         hierarchy[1] = KRB5_CONF_NO_HOST_REFERRAL;
-        if (krb5_aprof_get_string_all(aprof, hierarchy, &no_refrls))
-            no_refrls = 0;
-        if (!no_refrls ||
-            krb5_match_config_pattern(no_refrls, KRB5_CONF_ASTERISK) == FALSE) {
-            hierarchy[1] = KRB5_CONF_HOST_BASED_SERVICES;
-            if (krb5_aprof_get_string_all(aprof, hierarchy, &host_based_srvcs))
-                host_based_srvcs = 0;
-        }
+        if (krb5_aprof_get_string_all(aprof, hierarchy, &no_referral))
+            no_referral = 0;
+        hierarchy[1] = KRB5_CONF_HOST_BASED_SERVICES;
+        if (krb5_aprof_get_string_all(aprof, hierarchy, &hostbased))
+            hostbased = 0;
 
         krb5_aprof_finish(aprof);
     }
@@ -753,7 +704,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                                              menctype, default_udp_ports,
                                              default_tcp_ports, manual,
                                              def_restrict_anon, db_args,
-                                             no_refrls, host_based_srvcs))) {
+                                             no_referral, hostbased))) {
                         fprintf(stderr, _("%s: cannot initialize realm %s - "
                                           "see log file for details\n"),
                                 argv[0], optarg);
@@ -869,7 +820,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
             if ((retval = init_realm(rdatap, lrealm, mkey_name, menctype,
                                      default_udp_ports, default_tcp_ports,
                                      manual, def_restrict_anon, db_args,
-                                     no_refrls, host_based_srvcs))) {
+                                     no_referral, hostbased))) {
                 fprintf(stderr, _("%s: cannot initialize realm %s - see log "
                                   "file for details\n"), argv[0], lrealm);
                 exit(1);
@@ -888,10 +839,10 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         free(db_args);
     if (db_name)
         free(db_name);
-    if (host_based_srvcs)
-        free(host_based_srvcs);
-    if (no_refrls)
-        free(no_refrls);
+    if (hostbased)
+        free(hostbased);
+    if (no_referral)
+        free(no_referral);
 
     return;
 }
