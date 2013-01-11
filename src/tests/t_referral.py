@@ -34,14 +34,14 @@ test(realm, 'unknown', False, 'unknown, no variables')
 # With host_based_services matching the first server name component
 # ("a"), we should get a referral for an NT-UNKNOWN server name.
 # host_based_services can appear in either [kdcdefaults] or the realm
-# section, with the realm value supplementing the kdcdefaults value.
+# section, with the realm values supplementing the kdcdefaults values.
 # NT-SRV-HST server names should be unaffected by host_based_services,
 # and NT-PRINCIPAL server names shouldn't get a referral regardless.
 restart_kdc(realm, {'kdcdefaults': {'host_based_services': '*'}})
 test(realm, 'unknown', True, 'unknown, kdcdefaults hostbased *')
 test(realm, 'principal', False, 'principal, kdcdefaults hostbased *')
-restart_kdc(realm, {'kdcdefaults': {'host_based_services': 'b,a,c'}})
-test(realm, 'unknown', True, 'unknown, kdcdefaults hostbased b,a,c')
+restart_kdc(realm, {'kdcdefaults': {'host_based_services': ['b', 'a,c']}})
+test(realm, 'unknown', True, 'unknown, kdcdefaults hostbased b and a,c')
 restart_kdc(realm, {'realms': {'$realm': {'host_based_services': 'a b c'}}})
 test(realm, 'unknown', True, 'unknown, realm hostbased a b c')
 restart_kdc(realm, {'kdcdefaults': {'host_based_services': 'a'},
@@ -58,8 +58,8 @@ test(realm, 'srv-hst', True, 'srv-hst, kdcdefaults hostbased b,c')
 # should not get a referral even for NT-SRV-HOST server names
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': '*'}})
 test(realm, 'srv-hst', False, 'srv-hst, kdcdefaults nohost *')
-restart_kdc(realm, {'kdcdefaults': {'no_host_referral': 'b,a,c'}})
-test(realm, 'srv-hst', False, 'srv-hst, kdcdefaults nohost b,a,c')
+restart_kdc(realm, {'kdcdefaults': {'no_host_referral': ['b', 'a,c']}})
+test(realm, 'srv-hst', False, 'srv-hst, kdcdefaults nohost b and a,c')
 restart_kdc(realm, {'realms': {'$realm': {'no_host_referral': 'a b c'}}})
 test(realm, 'srv-hst', False, 'srv-hst, realm nohost a b c')
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': 'a'},
