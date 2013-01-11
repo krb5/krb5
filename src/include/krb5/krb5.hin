@@ -6380,28 +6380,30 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
  * The OTP responder question is asked when the KDC indicates that an OTP
  * value is required in order to complete the authentication.  The JSON format
  * of the challenge is:
- *   {
- *     "service": <string (optional)>,
- *     "tokenInfo": [
- *       {
- *         "flags":     <number>,
- *         "vendor":    <string (optional)>,
- *         "challenge": <string (optional)>,
- *         "length":    <number (optional)>,
- *         "format":    <number (optional)>,
- *         "tokenID":   <string (optional)>,
- *         "algID":     <string (optional)>,
- *       },
- *       ...
- *     ]
- *   }
+ *
+ *  @n {
+ *  @n   "service": <string (optional)>,
+ *  @n   "tokenInfo": [
+ *  @n      {
+ *  @n        "flags":     <number>,
+ *  @n        "vendor":    <string (optional)>,
+ *  @n        "challenge": <string (optional)>,
+ *  @n        "length":    <number (optional)>,
+ *  @n        "format":    <number (optional)>,
+ *  @n        "tokenID":   <string (optional)>,
+ *  @n        "algID":     <string (optional)>,
+ *  @n      },
+ *  @n      ...
+ *  @n    ]
+ *  @n  }
  *
  * The answer to the question MUST be JSON formatted:
- *   {
- *     "tokeninfo": <number>,
- *     "value":     <string (optional)>,
- *     "pin":       <string (optional)>,
- *   }
+ *
+ * @n  {
+ * @n    "tokeninfo": <number>,
+ * @n    "value":     <string (optional)>,
+ * @n    "pin":       <string (optional)>,
+ * @n  }
  *
  * For more detail, please see RFC 6560.
  *
@@ -6472,7 +6474,7 @@ krb5_responder_get_challenge(krb5_context ctx, krb5_responder_context rctx,
  * Answer a named question in the responder context.
  *
  * @param [in] ctx              Library context
- * @param [in] rctx             Responder context
+ * @param [in,out] rctx         Responder context
  * @param [in] question         Question name
  * @param [in] answer           The string to set (MUST be printable UTF-8)
  *
