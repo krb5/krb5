@@ -192,7 +192,7 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     const char  *realm_srv_names[4];
     char **hostlist, *host, *port, *cp;
     krb5_error_code code;
-    int i, count;
+    int i;
 
     Tprintf ("looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
              realm->data, name, ntohs (udpport), ntohs (sec_udpport));
@@ -216,19 +216,8 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
         Tprintf ("config file lookup failed: %s\n",
                  error_message(code));
         if (code == PROF_NO_SECTION || code == PROF_NO_RELATION)
-            code = KRB5_REALM_UNKNOWN;
+            code = 0;
         return code;
-    }
-
-    count = 0;
-    while (hostlist && hostlist[count])
-        count++;
-    Tprintf ("found %d entries under 'kdc'\n", count);
-
-    if (count == 0) {
-        profile_free_list(hostlist);
-        serverlist->nservers = 0;
-        return 0;
     }
 
     for (i=0; hostlist[i]; i++) {
@@ -527,7 +516,7 @@ dns_locate_server(krb5_context context, const krb5_data *realm,
     krb5_error_code code;
 
     if (!use_dns)
-        return KRB5_PLUGIN_NO_HANDLE;
+        return 0;
 
     switch (svc) {
     case locate_service_kdc:
@@ -546,7 +535,7 @@ dns_locate_server(krb5_context context, const krb5_data *realm,
         dnsname = "_kpasswd";
         break;
     default:
-        return KRB5_PLUGIN_NO_HANDLE;
+        return 0;
     }
 
     code = 0;
@@ -596,12 +585,8 @@ k5_locate_server(krb5_context context, const krb5_data *realm,
         code = prof_locate_server(context, realm, &al, svc, socktype);
 
 #ifdef KRB5_DNS_LOOKUP
-        if (code) {             /* Try DNS for all profile errors?  */
-            krb5_error_code code2;
-            code2 = dns_locate_server(context, realm, &al, svc, socktype);
-            if (code2 != KRB5_PLUGIN_NO_HANDLE)
-                code = code2;
-        }
+        if (code == 0 && al.nservers == 0)
+            code = dns_locate_server(context, realm, &al, svc, socktype);
 #endif /* KRB5_DNS_LOOKUP */
 
         /* We could put more heuristics here, like looking up a hostname
@@ -619,10 +604,10 @@ k5_locate_server(krb5_context context, const krb5_data *realm,
     }
     if (al.nservers == 0) {       /* No good servers */
         k5_free_serverlist(&al);
-        krb5_set_error_message(context, KRB5_REALM_CANT_RESOLVE,
-                               _("Cannot resolve servers for KDC in realm "
-                                 "\"%.*s\""), realm->length, realm->data);
-        return KRB5_REALM_CANT_RESOLVE;
+        krb5_set_error_message(context, KRB5_REALM_UNKNOWN,
+                               _("Cannot find KDC for realm \"%.*s\""),
+                               realm->length, realm->data);
+        return KRB5_REALM_UNKNOWN;
     }
     *serverlist = al;
     return 0;
