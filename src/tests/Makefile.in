@@ -91,7 +91,6 @@ check-pytests:: gcred hist kdbtest
 	$(RUNPYTEST) $(srcdir)/t_keytab.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadmin_acl.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kdb.py $(PYTESTFLAGS)
-#	$(RUNPYTEST) $(srcdir)/kdc_realm/kdcref.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2012-1014.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2012-1015.py $(PYTESTFLAGS)
 
