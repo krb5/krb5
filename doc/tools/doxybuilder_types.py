@@ -289,6 +289,9 @@ class DoxyTypes(object):
                     result.append('*%s*' % e.strip())
             elif  e.getparent().tag == 'defname':
                 result.append('%s, ' % e.strip())
+            elif  e.getparent().tag == 'linebreak':
+                result.append('\n*%s*\n' % e.strip())
+
         result = ' '.join(result)
 
         return result
