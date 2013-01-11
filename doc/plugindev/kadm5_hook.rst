@@ -1,4 +1,4 @@
-.. _kadm5_hook:
+.. _kadm5_hook_plugin:
 
 KADM5 hook interface (kadm5_hook)
 =================================

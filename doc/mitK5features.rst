@@ -111,8 +111,8 @@ Release 1.9
  -   kadmin over IPv6
  -   Trace logging                             :ref:`trace_logging`
  -   GSSAPI/KRB5 multi-realm support
- -   Plugin to test password quality           :ref:`pwqual`
- -   Plugin to synchronize password changes    :ref:`kadm5_hook`
+ -   Plugin to test password quality           :ref:`pwqual_plugin`
+ -   Plugin to synchronize password changes    :ref:`kadm5_hook_plugin`
  -   Parallel KDC
  -   GSS-API extentions for SASL GS2 bridge    :rfc:`5801` :rfc:`5587`
  -   Purging old keys
@@ -122,8 +122,8 @@ Release 1.9
  -   IPv6 support in iprop
 
 Release 1.10
- -   Plugin interface for configuration        :ref:`profile`
- -   Credentials for multiple identities       :ref:`ccselect`
+ -   Plugin interface for configuration        :ref:`profile_plugin`
+ -   Credentials for multiple identities       :ref:`ccselect_plugin`
 
 Release 1.11
  -   Client support for FAST OTP               :rfc:`6560`

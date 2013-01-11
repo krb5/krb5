@@ -1,4 +1,4 @@
-.. _pwqual:
+.. _pwqual_plugin:
 
 Password quality interface (pwqual)
 ===================================

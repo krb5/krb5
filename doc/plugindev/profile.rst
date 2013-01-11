@@ -1,4 +1,4 @@
-.. _profile:
+.. _profile_plugin:
 
 Configuration interface (profile)
 =================================

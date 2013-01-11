@@ -1,4 +1,4 @@
-.. _ccselect:
+.. _ccselect_plugin:
 
 Credential cache selection interface (ccselect)
 ===============================================
