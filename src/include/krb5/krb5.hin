@@ -6444,6 +6444,18 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
  */
 #define KRB5_RESPONDER_OTP_FLAGS_SEPARATE_PIN  0x0008
 
+/**
+ * A container for a set of preauthentication questions and answers
+ *
+ * A responder context is supplied by the krb5 authentication system to a @ref
+ * krb5_responder_fn callback.  It contains a list of questions and can receive
+ * answers.  Questions contained in a responder context can be listed using
+ * krb5_responder_list_questions(), retrieved using responder_get_challenge(),
+ * or answered using krb5_responder_set_answer().  The form of a question's
+ * challenge and answer depend on the question name.
+ *
+ * @version First introduced in 1.11
+ */
 typedef struct krb5_responder_context_st *krb5_responder_context;
 
 /**
@@ -6451,6 +6463,12 @@ typedef struct krb5_responder_context_st *krb5_responder_context;
  *
  * @param [in] ctx              Library context
  * @param [in] rctx             Responder context
+ *
+ * Return a pointer to a null-terminated list of question names which are
+ * present in @a rctx.  The pointer is an alias, valid only as long as the
+ * lifetime of @a rctx, and should not be modified or freed by the caller.  A
+ * question's challenge can be retrieved using krb5_responder_get_challenge()
+ * and answered using krb5_responder_set_answer().
  *
  * @version First introduced in 1.11
  */
@@ -6463,6 +6481,13 @@ krb5_responder_list_questions(krb5_context ctx, krb5_responder_context rctx);
  * @param [in] ctx              Library context
  * @param [in] rctx             Responder context
  * @param [in] question         Question name
+ *
+ * Return a pointer to a C string containing the challenge for @a question
+ * within @a rctx, or NULL if the question is not present in @a rctx.  The
+ * structure of the question depends on the question name, but will always be
+ * printable UTF-8 text.  The returned pointer is an alias, valid only as long
+ * as the lifetime of @a rctx, and should not be modified or freed by the
+ * caller.
  *
  * @version First introduced in 1.11
  */
@@ -6477,6 +6502,11 @@ krb5_responder_get_challenge(krb5_context ctx, krb5_responder_context rctx,
  * @param [in] rctx             Responder context
  * @param [in] question         Question name
  * @param [in] answer           The string to set (MUST be printable UTF-8)
+ *
+ * This function supplies an answer to @a question within @a rctx.  The
+ * appropriate form of the answer depends on the question name.
+ *
+ * @retval EINVAL @a question is not present within @a rctx
  *
  * @version First introduced in 1.11
  */
