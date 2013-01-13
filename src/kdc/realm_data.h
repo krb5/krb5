@@ -91,13 +91,6 @@ kdc_realm_t *setup_server_realm(struct server_handle *, krb5_principal);
  * properly declared in each function that uses these macros.
  */
 #define kdc_context                     kdc_active_realm->realm_context
-#define max_life_for_realm              kdc_active_realm->realm_maxlife
-#define max_renewable_life_for_realm    kdc_active_realm->realm_maxrlife
-#define master_keyblock                 kdc_active_realm->realm_mkey
-#define master_princ                    kdc_active_realm->realm_mprinc
 #define tgs_server                      kdc_active_realm->realm_tgsprinc
-#define reject_bad_transit              kdc_active_realm->realm_reject_bad_transit
-#define restrict_anon                   kdc_active_realm->realm_restrict_anon
-#define assume_des_crc_sess             kdc_active_realm->realm_assume_des_crc_sess
 
 #endif  /* REALM_DATA_H */

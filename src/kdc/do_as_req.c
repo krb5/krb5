@@ -702,7 +702,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
             min(rtime, state->enc_tkt_reply.times.starttime +
                 min(state->client->max_renewable_life,
                     min(state->server->max_renewable_life,
-                        max_renewable_life_for_realm)));
+                        kdc_active_realm->realm_maxrlife)));
     } else
         state->enc_tkt_reply.times.renew_till = 0; /* XXX */
 

@@ -568,7 +568,7 @@ check_anon(kdc_realm_t *kdc_active_realm,
 {
     /* If restrict_anon is set, reject requests from anonymous to principals
      * other than the local TGT. */
-    if (restrict_anon &&
+    if (kdc_active_realm->realm_restrict_anon &&
         krb5_principal_compare_any_realm(kdc_context, client,
                                          krb5_anonymous_principal()) &&
         !krb5_principal_compare(kdc_context, server, tgs_server))
@@ -909,7 +909,8 @@ dbentry_supports_enctype(kdc_realm_t *kdc_active_realm, krb5_db_entry *server,
 
     /* If configured to, assume every server without a session_enctypes
      * attribute supports DES_CBC_CRC. */
-    if (assume_des_crc_sess && enctype == ENCTYPE_DES_CBC_CRC)
+    if (kdc_active_realm->realm_assume_des_crc_sess &&
+        enctype == ENCTYPE_DES_CBC_CRC)
         return TRUE;
 
     /* Due to an ancient interop problem, assume nothing supports des-cbc-md5
@@ -1884,8 +1885,8 @@ kdc_get_ticket_endtime(kdc_realm_t *kdc_active_realm,
         life = min(life, client->max_life);
     if (server->max_life != 0)
         life = min(life, server->max_life);
-    if (max_life_for_realm != 0)
-        life = min(life, max_life_for_realm);
+    if (kdc_active_realm->realm_maxlife != 0)
+        life = min(life, kdc_active_realm->realm_maxlife);
 
     *out_endtime = starttime + life;
 }

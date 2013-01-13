@@ -462,7 +462,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
                 min(header_enc_tkt->times.renew_till,
                     enc_tkt_reply.times.starttime +
                     min(server->max_renewable_life,
-                        max_renewable_life_for_realm)));
+                        kdc_active_realm->realm_maxrlife)));
     } else {
         enc_tkt_reply.times.renew_till = 0;
     }
@@ -641,8 +641,8 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         }
     } else
         krb5_klog_syslog(LOG_INFO, _("not checking transit path"));
-    if (reject_bad_transit
-        && !isflagset (enc_tkt_reply.flags, TKT_FLG_TRANSIT_POLICY_CHECKED)) {
+    if (kdc_active_realm->realm_reject_bad_transit &&
+        !isflagset(enc_tkt_reply.flags, TKT_FLG_TRANSIT_POLICY_CHECKED)) {
         errcode = KRB5KDC_ERR_POLICY;
         status = "BAD_TRANSIT";
         goto cleanup;
