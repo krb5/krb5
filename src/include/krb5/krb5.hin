@@ -6450,9 +6450,10 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
  * A responder context is supplied by the krb5 authentication system to a @ref
  * krb5_responder_fn callback.  It contains a list of questions and can receive
  * answers.  Questions contained in a responder context can be listed using
- * krb5_responder_list_questions(), retrieved using responder_get_challenge(),
- * or answered using krb5_responder_set_answer().  The form of a question's
- * challenge and answer depend on the question name.
+ * krb5_responder_list_questions(), retrieved using
+ * krb5_responder_get_challenge(), or answered using
+ * krb5_responder_set_answer().  The form of a question's challenge and
+ * answer depend on the question name.
  *
  * @version First introduced in 1.11
  */
