@@ -3161,12 +3161,8 @@ crypto_cert_get_matching_data(krb5_context context,
     md->ku_bits = cert_get_ku_bits(context, cert_handle->cert);
     md->eku_bits = cert_get_eku_bits(context, cert_handle->cert, PR_FALSE);
     if (cert_retrieve_cert_sans(context, cert_handle->cert,
-                                &md->sans, &md->sans, NULL) != 0) {
-        free(md->subject_dn);
-        free(md->issuer_dn);
-        free(md);
-        return ENOMEM;
-    }
+                                &md->sans, &md->sans, NULL) != 0)
+        md->sans = NULL;
     *ret_data = md;
     return 0;
 }
