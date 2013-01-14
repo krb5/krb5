@@ -275,6 +275,10 @@ class DoxyTypes(object):
             elif e.getparent().tag == 'ref':
                 if e.is_tail:
                     result.append(e.strip())
+                elif e.strip().find('(') > 0:
+                    result.append(':c:func:`%s`' % e.strip())
+                elif e.isupper():
+                    result.append(':c:data:`%s`' % e.strip())
                 else:
                     result.append(':c:type:`%s`' % e.strip())
             elif e.getparent().tag == 'emphasis':
