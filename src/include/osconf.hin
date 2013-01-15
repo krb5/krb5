@@ -58,14 +58,15 @@
 #define DEFAULT_PLUGIN_BASE_DIR "@LIBDIR/krb5/plugins"
 #define PLUGIN_EXT              "@DYNOBJEXT"
 
-#define DEFAULT_KDB_FILE        "@LOCALSTATEDIR/krb5kdc/principal"
-#define DEFAULT_KEYFILE_STUB    "@LOCALSTATEDIR/krb5kdc/.k5."
-#define KRB5_DEFAULT_ADMIN_ACL  "@LOCALSTATEDIR/krb5kdc/krb5_adm.acl"
+#define KDC_DIR                 "@LOCALSTATEDIR/krb5kdc"
+#define DEFAULT_KDB_FILE        KDC_DIR "/principal"
+#define DEFAULT_KEYFILE_STUB    KDC_DIR "/.k5."
+#define KRB5_DEFAULT_ADMIN_ACL  KDC_DIR "/krb5_adm.acl"
 /* Used by old admin server */
-#define DEFAULT_ADMIN_ACL       "@LOCALSTATEDIR/krb5kdc/kadm_old.acl"
+#define DEFAULT_ADMIN_ACL       KDC_DIR "/kadm_old.acl"
 
 /* Location of KDC profile */
-#define DEFAULT_KDC_PROFILE     "@LOCALSTATEDIR/krb5kdc/kdc.conf"
+#define DEFAULT_KDC_PROFILE     KDC_DIR "/kdc.conf"
 #define KDC_PROFILE_ENV         "KRB5_KDC_PROFILE"
 
 #if TARGET_OS_MAC
@@ -93,8 +94,8 @@
 /*
  * Defaults for the KADM5 admin system.
  */
-#define DEFAULT_KADM5_KEYTAB    "@LOCALSTATEDIR/krb5kdc/kadm5.keytab"
-#define DEFAULT_KADM5_ACL_FILE  "@LOCALSTATEDIR/krb5kdc/kadm5.acl"
+#define DEFAULT_KADM5_KEYTAB    KDC_DIR "/kadm5.keytab"
+#define DEFAULT_KADM5_ACL_FILE  KDC_DIR "/kadm5.acl"
 #define DEFAULT_KADM5_PORT      749 /* assigned by IANA */
 
 #define KRB5_DEFAULT_SUPPORTED_ENCTYPES                 \
@@ -116,12 +117,12 @@
  * krb5 slave support follows
  */
 
-#define KPROP_DEFAULT_FILE "@LOCALSTATEDIR/krb5kdc/slave_datatrans"
-#define KPROPD_DEFAULT_FILE "@LOCALSTATEDIR/krb5kdc/from_master"
+#define KPROP_DEFAULT_FILE KDC_DIR "/slave_datatrans"
+#define KPROPD_DEFAULT_FILE KDC_DIR "/from_master"
 #define KPROPD_DEFAULT_KDB5_UTIL "@SBINDIR/kdb5_util"
 #define KPROPD_DEFAULT_KPROP "@SBINDIR/kprop"
 #define KPROPD_DEFAULT_KRB_DB DEFAULT_KDB_FILE
-#define KPROPD_ACL_FILE "@LOCALSTATEDIR/krb5kdc/kpropd.acl"
+#define KPROPD_ACL_FILE KDC_DIR "/kpropd.acl"
 
 /*
  * GSS mechglue
