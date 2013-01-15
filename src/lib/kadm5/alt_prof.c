@@ -883,12 +883,11 @@ krb5_error_code
 krb5_read_realm_params(krb5_context context, char *realm,
                        krb5_realm_params **rparamp)
 {
-    char *envname, *lrealm, *svalue, *sp, *ep, *tp;
+    char *envname, *lrealm, *svalue;
     char *no_referral = NULL, *hostbased = NULL;
     krb5_pointer aprofile = NULL;
     krb5_realm_params *rparams = NULL;
     const char *hierarchy[4];
-    krb5_int32 ivalue;
     krb5_boolean bvalue;
     krb5_deltat dtvalue;
     krb5_error_code ret;
@@ -925,18 +924,6 @@ krb5_read_realm_params(krb5_context context, char *realm,
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
         rparams->realm_kdc_tcp_ports = svalue;
 
-    /* Get the name of the acl file */
-    hierarchy[2] = KRB5_CONF_ACL_FILE;
-    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
-        rparams->realm_acl_file = svalue;
-
-    /* Get the value for the kadmind port */
-    hierarchy[2] = KRB5_CONF_KADMIND_PORT;
-    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-        rparams->realm_kadmind_port = ivalue;
-        rparams->realm_kadmind_port_valid = 1;
-    }
-
     /* Get the value for the master key name */
     hierarchy[2] = KRB5_CONF_MASTER_KEY_NAME;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
@@ -969,14 +956,6 @@ krb5_read_realm_params(krb5_context context, char *realm,
         rparams->realm_max_rlife_valid = 1;
     }
 
-    /* Get the value for the default principal expiration */
-    hierarchy[2] = KRB5_CONF_DEFAULT_PRINCIPAL_EXPIRATION;
-    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-        if (!krb5_string_to_timestamp(svalue, &rparams->realm_expiration))
-            rparams->realm_expiration_valid = 1;
-        free(svalue);
-    }
-
     hierarchy[2] = KRB5_CONF_REJECT_BAD_TRANSIT;
     if (!krb5_aprof_get_boolean(aprofile, hierarchy, TRUE, &bvalue)) {
         rparams->realm_reject_bad_transit = bvalue;
@@ -1003,40 +982,6 @@ krb5_read_realm_params(krb5_context context, char *realm,
     if (!krb5_aprof_get_string_all(aprofile, hierarchy, &hostbased))
         rparams->realm_hostbased = hostbased;
 
-    /* Get the value for the default principal flags. */
-    hierarchy[2] = KRB5_CONF_DEFAULT_PRINCIPAL_FLAGS;
-    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-        sp = svalue;
-        rparams->realm_flags = 0;
-        while (sp) {
-            if ((ep = strchr(sp, ',')) != NULL ||
-                (ep = strchr(sp, ' ')) != NULL||
-                (ep = strchr(sp, '\t')) != NULL) {
-                /* Fill in trailing whitespace of sp. */
-                tp = ep - 1;
-                while (isspace((unsigned char)*tp) && (tp < sp)) {
-                    *tp = '\0';
-                    tp--;
-                }
-                *ep = '\0';
-                ep++;
-                /* Skip over trailing whitespace of ep. */
-                while (isspace((unsigned char)*ep) && *ep != '\0')
-                    ep++;
-            }
-            /* Convert this flag. */
-            if (krb5_string_to_flags(sp, "+", "-", &rparams->realm_flags))
-                break;
-            sp = ep;
-        }
-        if (sp == NULL)
-            rparams->realm_flags_valid = 1;
-        free(svalue);
-    }
-
-    rparams->realm_keysalts = NULL;
-    rparams->realm_num_keysalts = 0;
-
 cleanup:
     if (aprofile)
         krb5_aprof_finish(aprofile);
@@ -1058,13 +1003,10 @@ krb5_free_realm_params(krb5_context context, krb5_realm_params *rparams)
 {
     if (rparams == NULL)
         return 0;
-    free(rparams->realm_profile);
     free(rparams->realm_mkey_name);
     free(rparams->realm_stash_file);
-    free(rparams->realm_keysalts);
     free(rparams->realm_kdc_ports);
     free(rparams->realm_kdc_tcp_ports);
-    free(rparams->realm_acl_file);
     free(rparams->realm_no_referral);
     free(rparams->realm_hostbased);
     free(rparams);

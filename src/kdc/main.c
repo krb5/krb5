@@ -237,15 +237,6 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
         goto whoops;
     }
 
-    /* Handle profile file name */
-    if (rparams && rparams->realm_profile) {
-        rdp->realm_profile = strdup(rparams->realm_profile);
-        if (!rdp->realm_profile) {
-            kret = ENOMEM;
-            goto whoops;
-        }
-    }
-
     /* Handle master key name */
     if (rparams && rparams->realm_mkey_name)
         rdp->realm_mpname = strdup(rparams->realm_mkey_name);

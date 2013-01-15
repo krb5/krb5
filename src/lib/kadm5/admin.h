@@ -288,34 +288,24 @@ typedef struct _kadm5_config_params {
  * Data structure returned by krb5_read_realm_params()
  */
 typedef struct __krb5_realm_params {
-    char *              realm_profile;
     char *              realm_mkey_name;
     char *              realm_stash_file;
     char *              realm_kdc_ports;
     char *              realm_kdc_tcp_ports;
-    char *              realm_acl_file;
     char *              realm_hostbased;
     char *              realm_no_referral;
-    krb5_int32          realm_kadmind_port;
     krb5_enctype        realm_enctype;
     krb5_deltat         realm_max_life;
     krb5_deltat         realm_max_rlife;
-    krb5_timestamp      realm_expiration;
-    krb5_flags          realm_flags;
-    krb5_key_salt_tuple *realm_keysalts;
     unsigned int        realm_reject_bad_transit:1;
     unsigned int        realm_restrict_anon:1;
-    unsigned int        realm_kadmind_port_valid:1;
     unsigned int        realm_enctype_valid:1;
     unsigned int        realm_max_life_valid:1;
     unsigned int        realm_max_rlife_valid:1;
-    unsigned int        realm_expiration_valid:1;
-    unsigned int        realm_flags_valid:1;
     unsigned int        realm_reject_bad_transit_valid:1;
     unsigned int        realm_restrict_anon_valid:1;
     unsigned int        realm_assume_des_crc_sess:1;
     unsigned int        realm_assume_des_crc_sess_valid:1;
-    krb5_int32          realm_num_keysalts;
 } krb5_realm_params;
 
 /*

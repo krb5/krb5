@@ -44,7 +44,6 @@ typedef struct __kdc_realm_data {
  * cannot span multiple realms -- proven */
     krb5_context        realm_context;  /* Context to be used for realm     */
     krb5_keytab         realm_keytab;   /* keytab to be used for this realm */
-    char *              realm_profile;  /* Profile file for this realm      */
     char *              realm_hostbased; /* referral services for NT-UNKNOWN */
     char *              realm_no_referral; /* non-referral services         */
     /*
