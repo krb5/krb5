@@ -278,36 +278,6 @@ typedef struct _kadm5_config_params {
     int                 iprop_resync_timeout;
 } kadm5_config_params;
 
-/***********************************************************************
- * This is the old krb5_realm_read_params, which I mutated into
- * kadm5_get_config_params but which old code (kdb5_* and krb5kdc)
- * still uses.
- ***********************************************************************/
-
-/*
- * Data structure returned by krb5_read_realm_params()
- */
-typedef struct __krb5_realm_params {
-    char *              realm_mkey_name;
-    char *              realm_stash_file;
-    char *              realm_kdc_ports;
-    char *              realm_kdc_tcp_ports;
-    char *              realm_hostbased;
-    char *              realm_no_referral;
-    krb5_enctype        realm_enctype;
-    krb5_deltat         realm_max_life;
-    krb5_deltat         realm_max_rlife;
-    unsigned int        realm_reject_bad_transit:1;
-    unsigned int        realm_restrict_anon:1;
-    unsigned int        realm_enctype_valid:1;
-    unsigned int        realm_max_life_valid:1;
-    unsigned int        realm_max_rlife_valid:1;
-    unsigned int        realm_reject_bad_transit_valid:1;
-    unsigned int        realm_restrict_anon_valid:1;
-    unsigned int        realm_assume_des_crc_sess:1;
-    unsigned int        realm_assume_des_crc_sess_valid:1;
-} krb5_realm_params;
-
 /*
  * functions
  */
@@ -319,9 +289,6 @@ krb5_error_code kadm5_get_config_params(krb5_context context,
 
 krb5_error_code kadm5_free_config_params(krb5_context context,
                                          kadm5_config_params *params);
-
-krb5_error_code kadm5_free_realm_params(krb5_context kcontext,
-                                        kadm5_config_params *params);
 
 krb5_error_code kadm5_get_admin_service_name(krb5_context, char *,
                                              char *, size_t);

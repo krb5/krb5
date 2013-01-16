@@ -52,7 +52,6 @@ krb5_aprof_getvals
 krb5_aprof_init
 krb5_flags_to_string
 krb5_free_key_data_contents
-krb5_free_realm_params
 krb5_input_flag_to_string
 krb5_keysalt_is_present
 krb5_keysalt_iterate
@@ -60,7 +59,6 @@ krb5_klog_close
 krb5_klog_init
 krb5_klog_reopen
 krb5_klog_syslog
-krb5_read_realm_params
 krb5_string_to_flags
 krb5_string_to_keysalts
 xdr_chpass3_arg

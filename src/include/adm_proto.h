@@ -37,11 +37,6 @@ typedef struct _krb5_db_entry krb5_db_entry;
 
 /* Ditto for admin.h */
 
-#if !defined(__KADM5_ADMIN_H__)
-struct ___krb5_realm_params;
-typedef struct ___krb5_realm_params krb5_realm_params;
-#endif  /* KRB5_ADM_H__ */
-
 #ifndef KRB5_KDB5__
 struct ___krb5_key_salt_tuple;
 typedef struct ___krb5_key_salt_tuple krb5_key_salt_tuple;
@@ -75,10 +70,6 @@ krb5_error_code krb5_aprof_get_string_all(krb5_pointer, const char **,
 krb5_error_code krb5_aprof_get_int32(krb5_pointer, const char **,
                                      krb5_boolean, krb5_int32 *);
 krb5_error_code krb5_aprof_finish(krb5_pointer);
-
-krb5_error_code krb5_read_realm_params(krb5_context, char *,
-                                       krb5_realm_params **);
-krb5_error_code krb5_free_realm_params(krb5_context, krb5_realm_params *);
 
 /* str_conv.c */
 krb5_error_code krb5_string_to_flags(char *, const char *, const char *,
