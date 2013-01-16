@@ -31,12 +31,13 @@ div.header-wrapper {
 
 div.header {
   padding-top: 10px;
-  padding-bottom: 10px;
+  padding-bottom: 0px;
 }
 
-div.header h1 {
-  font-family: "Georgia", "Times New Roman", serif,  black;
-  font-weight: normal;
+div.header  h1 a {
+  color: #5d1509;
+  font-size: 120%;
+  padding-top: 10px;
 }
 
 div.header div.right a {
@@ -44,6 +45,11 @@ div.header div.right a {
   letter-spacing: .1em;
   text-transform: lowercase;
   float: right;
+}
+
+div.header div.rel{
+  font-size: 50%;
+  padding-bottom: 0px;
 }
 
 /* Content */
@@ -78,7 +84,7 @@ div.sidebar {
   width: 20%;
   margin: 0;
   padding: 0;
-  background-color: white;
+  background: #F9F9F9;
 }
 
 div.sidebar ul {
