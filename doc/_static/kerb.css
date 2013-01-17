@@ -46,6 +46,12 @@ div.header div.right a {
   float: right;
 }
 
+div.header div.rel {
+  font-family: "Georgia", "Times New Roman", serif, black;
+  font-weight: normal;
+  margin-bottom: 1.6em;
+}
+
 /* Content */
 
 div.document {

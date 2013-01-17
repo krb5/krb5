@@ -47,9 +47,9 @@
             {% block headertitle %}
                 <h1><a href="{{ pathto (master_doc) }}"
                 style="color: {{ theme_bgcolor }}; font-size: 120%;
-                padding-top: 10px;">{{ shorttitle|e }}</a><h1>
+                padding-top: 10px;">{{ shorttitle|e }}</a></h1>
             {% endblock %}
-            <div class="rel" style="font-size: 50%; padding-bottom: 0px;" >
+            <div class="rel">
                 {%- for rellink in rellinks|reverse %}
                     <a href="{{ pathto(rellink[0]) }}"
                     title="{{ rellink[1]|striptags }}"
