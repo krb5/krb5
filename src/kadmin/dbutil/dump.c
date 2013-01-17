@@ -2806,10 +2806,12 @@ load_db(argc, argv)
         if (log_ctx->ulog != NULL && log_ctx->ulog->kdb_first_time.seconds &&
             (log_ctx->ulog->kdb_first_sno || log_ctx->ulog->kdb_last_sno)) {
             fprintf(stderr, _("%s: Loads disallowed when iprop is enabled "
-                              "and a ulog is present"),
+                              "and a ulog is present\n"),
                     progname);
             exit_status++;
-            goto error;
+            if (dumpfile)
+                fclose(f);
+            return;
         }
     }
 
