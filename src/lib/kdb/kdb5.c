@@ -105,6 +105,16 @@ kdb_unlock_list()
     return k5_mutex_unlock(&db_lock);
 }
 
+/* Return true if the ulog is mapped in the master role. */
+static inline krb5_boolean
+logging(krb5_context context)
+{
+    kdb_log_context *log_ctx = context->kdblog_context;
+
+    return log_ctx != NULL && log_ctx->iproprole == IPROP_MASTER &&
+        log_ctx->ulogfd >= 0;
+}
+
 /*
  * XXX eventually this should be consolidated with krb5_free_key_data_contents
  * so there is only a single version.
@@ -874,10 +884,7 @@ krb5_db_put_principal(krb5_context kcontext, krb5_db_entry *entry)
     char  **db_args = NULL;
     kdb_incr_update_t *upd = NULL;
     char *princ_name = NULL;
-    kdb_log_context *log_ctx;
     int ulog_locked = 0;
-
-    log_ctx = kcontext->kdblog_context;
 
     status = get_vftabl(kcontext, &v);
     if (status)
@@ -889,42 +896,38 @@ krb5_db_put_principal(krb5_context kcontext, krb5_db_entry *entry)
                                           &entry->n_tl_data,
                                           &db_args);
     if (status)
-        goto clean_n_exit;
+        goto cleanup;
 
-    if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
+    if (logging(kcontext)) {
         upd = k5alloc(sizeof(*upd), &status);
         if (upd == NULL)
-            goto clean_n_exit;
+            goto cleanup;
         if ((status = ulog_conv_2logentry(kcontext, entry, upd)))
-            goto clean_n_exit;
-    }
+            goto cleanup;
 
-    status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
-    if (status != 0)
-        goto err_lock;
-    ulog_locked = 1;
+        status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
+        if (status != 0)
+            goto cleanup;
+        ulog_locked = 1;
 
-    if (upd != NULL) {
         status = krb5_unparse_name(kcontext, entry->princ, &princ_name);
         if (status != 0)
-            goto err_lock;
+            goto cleanup;
 
         upd->kdb_princ_name.utf8str_t_val = princ_name;
         upd->kdb_princ_name.utf8str_t_len = strlen(princ_name);
 
         if ((status = ulog_add_update(kcontext, upd)) != 0)
-            goto err_lock;
+            goto cleanup;
     }
 
     status = v->put_principal(kcontext, entry, db_args);
-    if (status == 0 && upd != NULL)
+    if (status == 0 && ulog_locked)
         (void) ulog_finish_update(kcontext, upd);
 
-err_lock:
+cleanup:
     if (ulog_locked)
         ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
-
-clean_n_exit:
     free_db_args(kcontext, db_args);
     ulog_free_entries(upd, 1);
     return status;
@@ -952,56 +955,42 @@ krb5_db_delete_principal(krb5_context kcontext, krb5_principal search_for)
     kdb_vftabl *v;
     kdb_incr_update_t upd;
     char *princ_name = NULL;
-    kdb_log_context *log_ctx;
-
-    log_ctx = kcontext->kdblog_context;
+    int ulog_locked = 0;
 
     status = get_vftabl(kcontext, &v);
     if (status)
         return status;
-    status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
-    if (status)
-        return status;
+    if (v->delete_principal == NULL)
+        return KRB5_PLUGIN_OP_NOTSUPP;
 
-    /*
-     * We'll be sharing the same locks as db for logging
-     */
-    if (log_ctx && (log_ctx->iproprole == IPROP_MASTER)) {
-        if ((status = krb5_unparse_name(kcontext, search_for, &princ_name))) {
-            ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
+    if (logging(kcontext)) {
+        status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
+        if (status)
             return status;
-        }
+        ulog_locked = 1;
+
+        status = krb5_unparse_name(kcontext, search_for, &princ_name);
+        if (status)
+            goto cleanup;
 
         (void) memset(&upd, 0, sizeof (kdb_incr_update_t));
 
         upd.kdb_princ_name.utf8str_t_val = princ_name;
         upd.kdb_princ_name.utf8str_t_len = strlen(princ_name);
 
-        if ((status = ulog_delete_update(kcontext, &upd)) != 0) {
-            ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
-            free(princ_name);
-            return status;
-        }
-
-        free(princ_name);
-    }
-
-    if (v->delete_principal == NULL) {
-        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
-        return KRB5_PLUGIN_OP_NOTSUPP;
+        status = ulog_delete_update(kcontext, &upd);
+        if (status)
+            goto cleanup;
     }
 
     status = v->delete_principal(kcontext, search_for);
+    if (status == 0 && ulog_locked)
+        (void) ulog_finish_update(kcontext, &upd);
 
-    /*
-     * We need to commit our update upon success
-     */
-    if (!status)
-        if (log_ctx && (log_ctx->iproprole == IPROP_MASTER))
-            (void) ulog_finish_update(kcontext, &upd);
-
-    ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
-
+cleanup:
+    if (ulog_locked)
+        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
+    free(princ_name);
     return status;
 }
 
