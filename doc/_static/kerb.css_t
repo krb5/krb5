@@ -31,12 +31,18 @@ div.header-wrapper {
 
 div.header {
   padding-top: 10px;
-  padding-bottom: 10px;
+  padding-bottom: 0px;
 }
 
 div.header h1 {
   font-family: "Georgia", "Times New Roman", serif,  black;
   font-weight: normal;
+}
+
+div.header h1 a {
+  color: {{ theme_bgcolor }};
+  font-size: 120%;
+  padding-top: 10px;
 }
 
 div.header div.right a {
@@ -84,7 +90,7 @@ div.sidebar {
   width: 20%;
   margin: 0;
   padding: 0;
-  background-color: white;
+  background-color: #F9F9F9;
 }
 
 div.sidebar ul {

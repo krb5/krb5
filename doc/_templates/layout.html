@@ -36,7 +36,7 @@
 
 {% block header %}
     <div class="header-wrapper">
-        <div class="header" style="padding-bottom: 0px;">
+        <div class="header">
             {% if logo %}
                 <p class="logo">
                     {# Link logo to kerberos.org #}
@@ -45,9 +45,7 @@
                 </p>
             {% endif %}
             {% block headertitle %}
-                <h1><a href="{{ pathto (master_doc) }}"
-                style="color: {{ theme_bgcolor }}; font-size: 120%;
-                padding-top: 10px;">{{ shorttitle|e }}</a></h1>
+            <h1><a href="{{ pathto(master_doc) }}">{{ shorttitle|e }}</a></h1>
             {% endblock %}
             <div class="rel">
                 {%- for rellink in rellinks|reverse %}
@@ -67,8 +65,7 @@
         <div class="content">
             {%- block sidebar2 %} {%- endblock %}
             {%- block sidebar1 %}
-                <div class="sidebar"
-                    style="float: right; background: #F9F9F9">
+                <div class="sidebar">
                     <h2>{{ _('On this page') }} </h2>
                     {{ toc }}
                     <br/>
