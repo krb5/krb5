@@ -60,33 +60,23 @@
     </div>
 {% endblock %}
 
-{%- block content %}
-    <div class="content-wrapper">
-        <div class="content">
-            {%- block sidebar2 %} {%- endblock %}
-            {%- block sidebar1 %}
-                <div class="sidebar">
-                    <h2>{{ _('On this page') }} </h2>
-                    {{ toc }}
-                    <br/>
-                    <h2>{{ _('Table of contents') }}</h2>
-                    {{ toctree(collapse=true, maxdepth=3, titles_only=true, includehidden=false) }}
-                    <br/>
-                    <h4><a href="{{ pathto('index') }}">Full Table of Contents
-                    </a></h4>
-                    <h4>{{ _('Search') }}</h4>
-                    <form class="search" action="{{ pathto('search') }}" method="get">
-                        <input type="text" name="q" size="18" />
-                        <input type="submit" value="{{ _('Go') }}" />
-                        <input type="hidden" name="check_keywords" value="yes" />
-                        <input type="hidden" name="area" value="default" />
-                    </form>
-                </div>
-            {%- endblock %}
-            <div class="document">
-                 {%- block document %}{{ super() }}{%- endblock %}
-            </div>
-            <div class="clearer" ></div>
-        </div>
-    </div>
-{% endblock %}
+{%- block sidebartoc %}
+    <h2>{{ _('On this page') }}</h2>
+    {{ toc }}
+    <br/>
+    <h2>{{ _('Table of contents') }}</h2>
+    {{ toctree(collapse=true, maxdepth=3, titles_only=true,
+               includehidden=false) }}
+    <br/>
+    <h4><a href="{{ pathto('index') }}">Full Table of Contents</a></h4>
+{%- endblock %}
+
+{%- block sidebarsearch %}
+    <h4>{{ _('Search') }}</h4>
+    <form class="search" action="{{ pathto('search') }}" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="{{ _('Go') }}" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+{%- endblock %}
