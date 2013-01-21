@@ -41,6 +41,9 @@ request ktutil_write_v5, "Write the current keylist to a krb5 keytab.",
 request ktutil_write_v4, "Write the current keylist to a krb4 srvtab.",
 	write_st, wst;
 
+request ktutil_upgrade_v5, "Upgrade a krb5 keytab (or a principal of) into the current keylist.",
+	upgrade_kt, ukt;
+
 request ktutil_add_entry, "Add an entry to the current keylist.",
 	add_entry, addent;
 

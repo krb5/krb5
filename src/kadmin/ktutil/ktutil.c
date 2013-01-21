@@ -94,6 +94,28 @@ void ktutil_read_v5(argc, argv)
         com_err(argv[0], retval, _("while reading keytab \"%s\""), argv[1]);
 }
 
+void ktutil_upgrade_v5(argc, argv)
+    int argc;
+    char *argv[];
+{
+    krb5_error_code retval;
+    char* princ_str;
+
+    if (argc < 2) {
+        fprintf(stderr, _("%s: must specify keytab to upgrade\n"
+                          "\tusage: %s keytab [principal]\n"),
+                argv[0],argv[0]);
+        return;
+    } else if (argc == 3)
+        princ_str = argv[2];
+    else
+        princ_str = NULL;
+
+    retval = ktutil_upgrade_keytab(kcontext, argv[1], princ_str, &ktlist);
+    if (retval)
+        com_err(argv[0], retval, _("while upgrading keytab \"%s\""), argv[1]);
+}
+
 void ktutil_read_v4(argc, argv)
     int argc;
     char *argv[];
