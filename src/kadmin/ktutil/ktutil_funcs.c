@@ -151,7 +151,12 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     lp->next = NULL;
     lp->entry = entry;
 
-    if (use_pass) {
+    if (use_pass < 0) {
+        retval = krb5_c_make_random_key(context,enctype,&(lp->entry->key));
+        if (retval)
+            goto cleanup;
+        
+    } else if (use_pass > 0) {
         password.length = pwsize;
         password.data = (char *) malloc(pwsize);
         if (!password.data) {

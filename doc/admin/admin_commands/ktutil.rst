@@ -86,10 +86,10 @@ Alias: **delent**
 add_entry
 ~~~~~~~~~
 
-    **add_entry** {**-key**\|\ **-password**} **-p** *principal*
+    **add_entry** {**-key**\|\ **-password** \|\ **-randkey**} **-p** *principal*
     **-k** *kvno* **-e** *enctype*
 
-Add *principal* to keylist using key or password.
+Add *principal* to keylist using key, password or a randomly generated key.
 
 Alias: **addent**
 
