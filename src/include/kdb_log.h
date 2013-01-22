@@ -71,6 +71,7 @@ extern krb5_error_code ulog_map(krb5_context context,
                                 const char *logname, uint32_t entries,
                                 int caller,
                                 char **db_args);
+extern void ulog_init_header(krb5_context context);
 extern krb5_error_code ulog_add_update(krb5_context context,
                                        kdb_incr_update_t *upd);
 extern krb5_error_code ulog_delete_update(krb5_context context,

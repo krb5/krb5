@@ -834,6 +834,8 @@ reinit:
             now = time(NULL);
             if (frrequested &&
                 (now - frrequested) < params.iprop_resync_timeout) {
+                if (debug)
+                    fprintf(stderr, _("Still waiting for full resync\n"));
                 break;
             } else {
                 frrequested = now;

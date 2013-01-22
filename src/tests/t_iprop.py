@@ -32,6 +32,8 @@ def wait_for_prop(kpropd, full_expected):
             kpropd.send_signal(signal.SIGUSR1)
 
         # Detect some failure conditions.
+        if 'Still waiting for full resync' in line:
+            fail('kadmind gave consecutive full resyncs')
         if 'Rejected connection' in line:
             fail('kpropd rejected kprop connection')
         if 'get updates failed' in line:
@@ -156,16 +158,12 @@ realm.run([kproplog, '-R'])
 out = realm.run([kproplog, '-h'])
 if 'Last serial # : None' not in out:
     fail('Reset of update log on master failed')
-realm.run_kadminl('modprinc -allow_tix w')
-out = realm.run([kproplog, '-h'])
-if 'Last serial # : 1' not in out:
-    fail('Update log on master has incorrect last serial number')
 
 # Get and check a full resync.
 kpropd.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd, True)
 out = realm.run([kproplog, '-h'], slave)
-if 'Last serial # : 1' not in out:
+if 'Last serial # : None' not in out:
     fail('Update log on slave has incorrect last serial number')
 
 success('iprop tests')

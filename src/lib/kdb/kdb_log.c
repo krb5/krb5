@@ -36,6 +36,22 @@ static int pagesize = 0;
 
 static int extend_file_to(int fd, unsigned int new_size);
 
+static inline krb5_boolean
+time_equal(const kdbe_time_t *a, const kdbe_time_t *b)
+{
+    return a->seconds == b->seconds && a->useconds == b->useconds;
+}
+
+static void
+time_current(kdbe_time_t *out)
+{
+    struct timeval timestamp;
+
+    (void)gettimeofday(&timestamp, NULL);
+    out->seconds = timestamp.tv_sec;
+    out->useconds = timestamp.tv_usec;
+}
+
 krb5_error_code
 ulog_lock(krb5_context ctx, int mode)
 {
@@ -135,7 +151,6 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
 {
     XDR xdrs;
     kdbe_time_t ktime;
-    struct timeval timestamp;
     kdb_ent_header_t *indx_log;
     unsigned int i, recsize;
     unsigned long upd_size;
@@ -153,9 +168,7 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
     if (upd == NULL)
         return KRB5_LOG_ERROR;
 
-    (void)gettimeofday(&timestamp, NULL);
-    ktime.seconds = timestamp.tv_sec;
-    ktime.useconds = timestamp.tv_usec;
+    time_current(&ktime);
 
     upd_size = xdr_sizeof((xdrproc_t)xdr_kdb_incr_update_t, upd);
 
@@ -452,6 +465,19 @@ ulog_reset(kdb_hlog_t *ulog)
     ulog->db_version_num = KDB_VERSION;
     ulog->kdb_state = KDB_STABLE;
     ulog->kdb_block = ULOG_BLOCK;
+    time_current(&ulog->kdb_last_time);
+}
+
+/* Reinitialize the log header.  Locking is the caller's responsibility. */
+void
+ulog_init_header(krb5_context context)
+{
+    kdb_log_context *log_ctx;
+    kdb_hlog_t *ulog;
+
+    INIT_ULOG(context);
+    ulog_reset(ulog);
+    ulog_sync_header(ulog);
 }
 
 /*
@@ -669,10 +695,18 @@ ulog_get_entries(krb5_context context, kdb_last_t last,
         return retval;
     }
 
+    /* If we have the same sno and timestamp, return a nil update.  If a
+     * different timestamp, the sno was reused and we need a full resync. */
+    if (last.last_sno == ulog->kdb_last_sno) {
+        ulog_handle->ret = time_equal(&last.last_time, &ulog->kdb_last_time) ?
+            UPDATE_NIL : UPDATE_FULL_RESYNC_NEEDED;
+        goto cleanup;
+    }
+
     /* We may have overflowed the update log or shrunk the log, or the client
      * may have created its ulog. */
     if (last.last_sno > ulog->kdb_last_sno ||
-        last.last_sno < ulog->kdb_first_sno || last.last_sno == 0) {
+        last.last_sno < ulog->kdb_first_sno) {
         ulog_handle->lastentry.last_sno = ulog->kdb_last_sno;
         ulog_handle->ret = UPDATE_FULL_RESYNC_NEEDED;
         goto cleanup;
@@ -682,17 +716,10 @@ ulog_get_entries(krb5_context context, kdb_last_t last,
     indx = (sno - 1) % ulogentries;
     indx_log = (kdb_ent_header_t *)INDEX(ulog, indx);
 
-    if (indx_log->kdb_time.seconds != last.last_time.seconds ||
-        indx_log->kdb_time.useconds != last.last_time.useconds) {
+    if (!time_equal(&indx_log->kdb_time, &last.last_time)) {
         /* We have time stamp mismatch or we no longer have the slave's last
          * sno, so we brute force it. */
         ulog_handle->ret = UPDATE_FULL_RESYNC_NEEDED;
-        goto cleanup;
-    }
-
-    /* If we have the same sno we return success. */
-    if (last.last_sno == ulog->kdb_last_sno) {
-        ulog_handle->ret = UPDATE_NIL;
         goto cleanup;
     }
 
