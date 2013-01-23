@@ -939,9 +939,9 @@ class K5Realm(object):
             princ not in output):
             fail('Unexpected klist output.')
 
-    def run_kadminl(self, query):
+    def run_kadminl(self, query, env=None):
         global kadmin_local
-        return self.run([kadmin_local, '-q', query])
+        return self.run([kadmin_local, '-q', query], env=env)
 
     def prep_kadmin(self, princname=None, pw=None, flags=[]):
         if princname is None:

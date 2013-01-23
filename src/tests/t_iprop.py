@@ -45,6 +45,15 @@ def wait_for_prop(kpropd, full_expected):
         if 'invalid return' in line:
             fail('kadmind returned invalid result')
 
+
+# Verify the iprop log last serial number against an expected value,
+# on either the master or slave.
+def check_serial(realm, expected, env=None):
+    out = realm.run([kproplog, '-h'], env=env)
+    if 'Last serial # : ' not in out:
+        fail('Unexpected serial number')
+
+
 conf = {
     'realms': {'$realm': {
             'iprop_enable': 'true',
@@ -86,9 +95,7 @@ realm.addprinc('w')
 realm.run_kadminl('modprinc -allow_tix w')
 realm.run_kadminl('modprinc +allow_tix w')
 
-out = realm.run([kproplog, '-h'])
-if 'Last serial # : 7' not in out:
-    fail('Update log on master has incorrect last serial number')
+check_serial(realm, '7')
 
 # Set up the kpropd acl file.
 acl_file = os.path.join(realm.testdir, 'kpropd-acl')
@@ -99,71 +106,54 @@ acl.close()
 # Start kpropd and get a full dump from master.
 kpropd = realm.start_kpropd(slave, ['-d'])
 wait_for_prop(kpropd, True)
+out = realm.run_kadminl('listprincs', slave)
+if longname not in out or 'wakawaka' not in out or 'w@' not in out:
+    fail('Slave does not have all principals from master')
 
+# Make a change and check that it propagates incrementally.
 realm.run_kadminl('modprinc -allow_tix w')
-out = realm.run([kproplog, '-h'])
-if 'Last serial # : 8' not in out:
-    fail('Update log on master has incorrect last serial number')
-
-# Get an incremental update and check that it happened.
+check_serial(realm, '8')
 kpropd.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd, False)
-out = realm.run([kproplog, '-h'], slave)
-if 'Last serial # : 8' not in out:
-    fail('Update log on slave has incorrect last serial number')
+check_serial(realm, '8', slave)
+out = realm.run_kadminl('getprinc w', slave)
+if 'Attributes: DISALLOW_ALL_TIX' not in out:
+    fail('Slave does not have modification from master')
 
-# Make another change.
+# Make another change and check that it propagates incrementally.
 realm.run_kadminl('modprinc +allow_tix w')
-out = realm.run([kproplog, '-h'])
-if 'Last serial # : 9' not in out:
-    fail('Update log on master has incorrect last serial number')
-
-# Get an update and check that we're at sno 9 on the slave side too.
+check_serial(realm, '9')
 kpropd.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd, False)
-out = realm.run([kproplog, '-h'], slave)
-if 'Last serial # : 9' not in out:
-    fail('Update log on slave has incorrect last serial number')
+check_serial(realm, '9', slave)
+out = realm.run_kadminl('getprinc w', slave)
+if 'Attributes:\n' not in out:
+    fail('Slave does not have modification from master')
 
 # Reset the ulog on the slave side to force a full resync to the slave.
 realm.run([kproplog, '-R'], slave)
-out = realm.run([kproplog, '-h'], slave)
-if 'Last serial # : None' not in out:
-    fail('Reset of update log on slave failed')
-
-# Get a full resync and check the result.
+check_serial(realm, 'None', slave)
 kpropd.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd, True)
-out = realm.run([kproplog, '-h'], slave)
-if 'Last serial # : 9' not in out:
-    fail('Update log on slave has incorrect last serial number')
+check_serial(realm, '9', slave)
 
-# Make another change.
+# Make another change and check that it propagates incrementally.
 realm.run_kadminl('modprinc +allow_tix w')
-out = realm.run([kproplog, '-h'])
-if 'Last serial # : 10' not in out:
-    fail('Update log on master has incorrect last serial number')
-
-# Get and check an incremental update.
+check_serial(realm, '10')
 kpropd.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd, False)
-out = realm.run([kproplog, '-h'], slave)
-if 'Last serial # : 10' not in out:
-    fail('Update log on slave has incorrect last serial number')
+check_serial(realm, '10', slave)
+out = realm.run_kadminl('getprinc w', slave)
+if 'Attributes:\n' not in out:
+    fail('Slave has different state from master')
 
 # Reset the ulog on the master side to force a full resync to all slaves.
 # XXX Note that we only have one slave in this test, so we can't really
 # test this.
 realm.run([kproplog, '-R'])
-out = realm.run([kproplog, '-h'])
-if 'Last serial # : None' not in out:
-    fail('Reset of update log on master failed')
-
-# Get and check a full resync.
+check_serial(realm, 'None')
 kpropd.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd, True)
-out = realm.run([kproplog, '-h'], slave)
-if 'Last serial # : None' not in out:
-    fail('Update log on slave has incorrect last serial number')
+check_serial(realm, 'None', slave)
 
 success('iprop tests')
