@@ -147,6 +147,36 @@ out = realm.run_kadminl('getprinc w', slave)
 if 'Attributes:\n' not in out:
     fail('Slave has different state from master')
 
+# Create a policy and check that it propagates via full resync.
+realm.run_kadminl('addpol -minclasses 2 testpol')
+check_serial(realm, 'None')
+kpropd.send_signal(signal.SIGUSR1)
+wait_for_prop(kpropd, True)
+check_serial(realm, 'None', slave)
+out = realm.run_kadminl('getpol testpol', slave)
+if 'Minimum number of password character classes: 2' not in out:
+    fail('Slave does not have policy from master')
+
+# Modify the policy and test that it also propagates via full resync.
+realm.run_kadminl('modpol -minlength 17 testpol')
+check_serial(realm, 'None')
+kpropd.send_signal(signal.SIGUSR1)
+wait_for_prop(kpropd, True)
+check_serial(realm, 'None', slave)
+out = realm.run_kadminl('getpol testpol', slave)
+if 'Minimum password length: 17' not in out:
+    fail('Slave does not have policy change from master')
+
+# Delete the policy and test that it propagates via full resync.
+realm.run_kadminl('delpol -force testpol')
+check_serial(realm, 'None')
+kpropd.send_signal(signal.SIGUSR1)
+wait_for_prop(kpropd, True)
+check_serial(realm, 'None', slave)
+out = realm.run_kadminl('getpol testpol', slave)
+if 'Policy does not exist' not in out:
+    fail('Slave did not get policy deletion from master')
+
 # Reset the ulog on the master side to force a full resync to all slaves.
 # XXX Note that we only have one slave in this test, so we can't really
 # test this.

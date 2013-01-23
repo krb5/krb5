@@ -2310,13 +2310,29 @@ krb5_db_create_policy(krb5_context kcontext, osa_policy_ent_t policy)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
+    int ulog_locked = 0;
 
     status = get_vftabl(kcontext, &v);
     if (status)
         return status;
     if (v->create_policy == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->create_policy(kcontext, policy);
+
+    if (logging(kcontext)) {
+        status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
+        if (status != 0)
+            return status;
+        ulog_locked = 1;
+    }
+
+    status = v->create_policy(kcontext, policy);
+    /* iprop does not support policy mods; force full resync. */
+    if (!status && ulog_locked)
+        ulog_init_header(kcontext);
+
+    if (ulog_locked)
+        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
+    return status;
 }
 
 krb5_error_code
@@ -2338,13 +2354,29 @@ krb5_db_put_policy(krb5_context kcontext, osa_policy_ent_t policy)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
+    int ulog_locked = 0;
 
     status = get_vftabl(kcontext, &v);
     if (status)
         return status;
     if (v->put_policy == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->put_policy(kcontext, policy);
+
+    if (logging(kcontext)) {
+        status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
+        if (status)
+            return status;
+        ulog_locked = 1;
+    }
+
+    status = v->put_policy(kcontext, policy);
+    /* iprop does not support policy mods; force full resync. */
+    if (!status && ulog_locked)
+        ulog_init_header(kcontext);
+
+    if (ulog_locked)
+        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
+    return status;
 }
 
 krb5_error_code
@@ -2367,13 +2399,29 @@ krb5_db_delete_policy(krb5_context kcontext, char *policy)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
+    int ulog_locked = 0;
 
     status = get_vftabl(kcontext, &v);
     if (status)
         return status;
     if (v->delete_policy == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->delete_policy(kcontext, policy);
+
+    if (logging(kcontext)) {
+        status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
+        if (status)
+            return status;
+        ulog_locked = 1;
+    }
+
+    status = v->delete_policy(kcontext, policy);
+    /* iprop does not support policy mods; force full resync. */
+    if (!status && ulog_locked)
+        ulog_init_header(kcontext);
+
+    if (ulog_locked)
+        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
+    return status;
 }
 
 void
