@@ -112,7 +112,7 @@ logging(krb5_context context)
     kdb_log_context *log_ctx = context->kdblog_context;
 
     return log_ctx != NULL && log_ctx->iproprole == IPROP_MASTER &&
-        log_ctx->ulogfd >= 0;
+        log_ctx->ulog != NULL;
 }
 
 /*
