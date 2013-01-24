@@ -523,6 +523,11 @@ cm_select_or_poll(const struct select_state *in, struct select_state *out,
             return e;
         timeout = (in->end_time.tv_sec - now.tv_sec) * 1000 +
             (in->end_time.tv_usec - now.tv_usec) / 1000;
+        /* In case of deadline already reached, just use a default timeout
+         * of 100 ms instead of using a negative timeout, meaning wait
+         * indefinitely */
+        if ( timeout < 0 )
+            timeout = 100;
     }
     /* We don't need a separate copy of the selstate for poll, but use one
      * anyone for consistency with the select wrapper. */
