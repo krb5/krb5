@@ -158,6 +158,11 @@ OPTIONS
         password using the **stashsrvpw** command of
         :ref:`kdb5_ldap_util(8)`.
 
+    **-x debug=**\ *level*
+        sets the OpenLDAP client library debug level.  *level* is an
+        integer to be interpreted by the library.  Debugging messages
+        are printed to standard error.
+
 .. _kadmin_options_end:
 
 

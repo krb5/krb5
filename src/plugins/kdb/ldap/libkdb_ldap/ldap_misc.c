@@ -282,6 +282,8 @@ krb5_ldap_parse_db_params(krb5_context context, char **db_args)
             status = add_server_entry(context, val);
             if (status)
                 goto cleanup;
+        } else if (!strcmp(opt, "debug")) {
+            lctx->ldap_debug = atoi(val);
         } else {
             status = EINVAL;
             krb5_set_error_message(context, status, _("unknown option '%s'"),

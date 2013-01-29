@@ -102,6 +102,12 @@ Options supported for the LDAP database module are:
         password using the **stashsrvpw** command of
         :ref:`kdb5_ldap_util(8)`.
 
+    **-x debug=**\ *level*
+        sets the OpenLDAP client library debug level.  *level* is an
+        integer to be interpreted by the library.  Debugging messages
+        are printed to standard error, so this option must be used
+        with the **-n** option to be useful.
+
 The **-T** *offset* option specifies a time offset, in seconds, which
 the KDC will operate under.  It is intended only for testing purposes.
 

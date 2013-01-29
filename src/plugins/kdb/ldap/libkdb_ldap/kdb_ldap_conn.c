@@ -199,6 +199,7 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
     if ((st=krb5_validate_ldap_context(context, ldap_context)) != 0)
         goto err_out;
 
+    ldap_set_option(NULL, LDAP_OPT_DEBUG_LEVEL, &ldap_context->ldap_debug);
     ldap_set_option(NULL, LDAP_OPT_PROTOCOL_VERSION, &version);
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
     ldap_set_option(NULL, LDAP_OPT_NETWORK_TIMEOUT, &local_timelimit);
