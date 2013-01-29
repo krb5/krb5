@@ -307,9 +307,10 @@ prepend_err_str(krb5_context ctx, const char *str, krb5_error_code err,
                 krb5_error_code oerr)
 {
     const char *omsg;
-    if (oerr == 0) oerr = err;
-    omsg = krb5_get_error_message (ctx, err);
-    krb5_set_error_message (ctx, err, "%s %s", str, omsg);
+
+    omsg = krb5_get_error_message(ctx, oerr);
+    krb5_set_error_message(ctx, err, "%s %s", str, omsg);
+    krb5_free_error_message(ctx, omsg);
 }
 
 extern krb5int_access accessor;
