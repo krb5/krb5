@@ -128,6 +128,7 @@ OPTIONS
             an integer to be interpreted by the library.  Debugging
             messages are printed to standard error, so this option
             must be used with the **-nofork** option to be useful.
+            First introduced in release 1.12.
 
 SEE ALSO
 --------

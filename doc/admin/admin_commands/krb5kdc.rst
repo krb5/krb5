@@ -106,7 +106,8 @@ Options supported for the LDAP database module are:
         sets the OpenLDAP client library debug level.  *level* is an
         integer to be interpreted by the library.  Debugging messages
         are printed to standard error, so this option must be used
-        with the **-n** option to be useful.
+        with the **-n** option to be useful.  First introduced in
+        release 1.12.
 
 The **-T** *offset* option specifies a time offset, in seconds, which
 the KDC will operate under.  It is intended only for testing purposes.
