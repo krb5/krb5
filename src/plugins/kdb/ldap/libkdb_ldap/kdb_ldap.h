@@ -59,7 +59,6 @@
 
 extern struct timeval timelimit;
 
-#define  SERV_COUNT                  100
 #define  DEFAULT_CONNS_PER_SERVER    5
 #define  REALM_READ_REFRESH_INTERVAL (5 * 60)
 

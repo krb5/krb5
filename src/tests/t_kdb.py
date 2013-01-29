@@ -249,7 +249,7 @@ realm.stop()
 dumpfile = os.path.join(realm.testdir, 'dump')
 realm.run([kdb5_util, 'dump', dumpfile])
 out = realm.run([kdb5_util, 'load', dumpfile], expected_code=1)
-if 'plugin requires -update argument' not in out:
+if 'KDB module requires -update argument' not in out:
     fail('Unexpected error from kdb5_util load without -update')
 realm.run([kdb5_util, 'load', '-update', dumpfile])
 

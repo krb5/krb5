@@ -39,55 +39,6 @@
 #include <kdb5.h>
 #include <kadm5/admin.h>
 
-#if !defined(isblank) && defined(HAVE_ISBLANK)
-#if defined(NEED_ISBLANK_PROTO)
-extern int isblank();
-#endif
-#else /* isblank missing */
-#if !defined(isblank)
-#define isblank isspace
-#endif
-#endif
-
-krb5_error_code
-krb5_ldap_get_db_opt(char *input, char **opt, char **val)
-{
-    char *pos = strchr(input, '=');
-
-    *val = NULL;
-    if (pos == NULL) {
-        *opt = strdup(input);
-        if (*opt == NULL) {
-            return ENOMEM;
-        }
-    } else {
-        int len = pos - input;
-        *opt = malloc((unsigned) len + 1);
-        if (!*opt) {
-            return ENOMEM;
-        }
-        memcpy(*opt, input, (unsigned) len);
-        /* ignore trailing blanks */
-        while (isblank((*opt)[len-1]))
-            --len;
-        (*opt)[len] = '\0';
-
-        pos += 1; /* move past '=' */
-        while (isblank(*pos))  /* ignore leading blanks */
-            pos += 1;
-        if (*pos != '\0') {
-            *val = strdup (pos);
-            if (!*val) {
-                free (*opt);
-                return ENOMEM;
-            }
-        }
-    }
-    return (0);
-
-}
-
-
 /*
  * ldap get age
  */
@@ -302,161 +253,27 @@ krb5_ldap_open(krb5_context context, char *conf_section, char **db_args,
                int mode)
 {
     krb5_error_code status  = 0;
-    char **t_ptr = db_args;
     krb5_ldap_context *ldap_context=NULL;
-    int srv_cnt = 0;
-    kdb5_dal_handle *dal_handle=NULL;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
 
-    ldap_context = calloc(1, sizeof(krb5_ldap_context));
-    if (ldap_context == NULL) {
-        status = ENOMEM;
+    ldap_context = k5alloc(sizeof(krb5_ldap_context), &status);
+    if (ldap_context == NULL)
+        goto clean_n_exit;
+    context->dal_handle->db_context = ldap_context;
+    ldap_context->kcontext = context;
+
+    status = krb5_ldap_parse_db_params(context, db_args);
+    if (status) {
+        prepend_err_str(context, _("Error processing LDAP DB params:"),
+                        status, status);
         goto clean_n_exit;
     }
 
-    ldap_context->kcontext = context;
-
-    while (t_ptr && *t_ptr) {
-        char *opt = NULL, *val = NULL;
-
-        if ((status = krb5_ldap_get_db_opt(*t_ptr, &opt, &val)) != 0) {
-            goto clean_n_exit;
-        }
-        if (opt && !strcmp(opt, "binddn")) {
-            if (ldap_context->bind_dn) {
-                free (opt);
-                free (val);
-                status = EINVAL;
-                krb5_set_error_message(context, status, _("'binddn' missing"));
-                goto clean_n_exit;
-            }
-            if (val == NULL) {
-                status = EINVAL;
-                krb5_set_error_message(context, status,
-                                       _("'binddn' value missing"));
-                free(opt);
-                goto clean_n_exit;
-            }
-            ldap_context->bind_dn = strdup(val);
-            if (ldap_context->bind_dn == NULL) {
-                free (opt);
-                free (val);
-                status = ENOMEM;
-                goto clean_n_exit;
-            }
-        } else if (opt && !strcmp(opt, "nconns")) {
-            if (ldap_context->max_server_conns) {
-                free (opt);
-                free (val);
-                status = EINVAL;
-                krb5_set_error_message(context, status, _("'nconns' missing"));
-                goto clean_n_exit;
-            }
-            if (val == NULL) {
-                status = EINVAL;
-                krb5_set_error_message(context, status,
-                                       _("'nconns' value missing"));
-                free(opt);
-                goto clean_n_exit;
-            }
-            ldap_context->max_server_conns = atoi(val) ? atoi(val) : DEFAULT_CONNS_PER_SERVER;
-        } else if (opt && !strcmp(opt, "bindpwd")) {
-            if (ldap_context->bind_pwd) {
-                free (opt);
-                free (val);
-                status = EINVAL;
-                krb5_set_error_message(context, status,
-                                       _("'bindpwd' missing"));
-                goto clean_n_exit;
-            }
-            if (val == NULL) {
-                status = EINVAL;
-                krb5_set_error_message(context, status,
-                                       _("'bindpwd' value missing"));
-                free(opt);
-                goto clean_n_exit;
-            }
-            ldap_context->bind_pwd = strdup(val);
-            if (ldap_context->bind_pwd == NULL) {
-                free (opt);
-                free (val);
-                status = ENOMEM;
-                goto clean_n_exit;
-            }
-        } else if (opt && !strcmp(opt, "host")) {
-            if (val == NULL) {
-                status = EINVAL;
-                krb5_set_error_message(context, status,
-                                       _("'host' value missing"));
-                free(opt);
-                goto clean_n_exit;
-            }
-            if (ldap_context->server_info_list == NULL)
-                ldap_context->server_info_list = (krb5_ldap_server_info **) calloc (SERV_COUNT+1, sizeof (krb5_ldap_server_info *)) ;
-
-            if (ldap_context->server_info_list == NULL) {
-                free (opt);
-                free (val);
-                status = ENOMEM;
-                goto clean_n_exit;
-            }
-
-            ldap_context->server_info_list[srv_cnt] = (krb5_ldap_server_info *) calloc (1, sizeof (krb5_ldap_server_info));
-            if (ldap_context->server_info_list[srv_cnt] == NULL) {
-                free (opt);
-                free (val);
-                status = ENOMEM;
-                goto clean_n_exit;
-            }
-
-            ldap_context->server_info_list[srv_cnt]->server_status = NOTSET;
-
-            ldap_context->server_info_list[srv_cnt]->server_name = strdup(val);
-            if (ldap_context->server_info_list[srv_cnt]->server_name == NULL) {
-                free (opt);
-                free (val);
-                status = ENOMEM;
-                goto clean_n_exit;
-            }
-
-            srv_cnt++;
-        } else {
-            /* ignore hash argument. Might have been passed from create */
-            status = EINVAL;
-            if (opt && !strcmp(opt, "temporary")) {
-                /*
-                 * temporary is passed in when kdb5_util load without -update is done.
-                 * This is unsupported by the LDAP plugin.
-                 */
-                krb5_set_error_message(context, status,
-                                       _("open of LDAP directory aborted, "
-                                         "plugin requires -update argument"));
-            } else {
-                krb5_set_error_message (context, status,
-                                        _("unknown option \'%s\'"),
-                                        opt?opt:val);
-            }
-            free(opt);
-            free(val);
-            goto clean_n_exit;
-        }
-
-        free(opt);
-        free(val);
-        t_ptr++;
-    }
-
-    dal_handle = context->dal_handle;
-    dal_handle->db_context = ldap_context;
     status = krb5_ldap_read_server_params(context, conf_section, mode & 0x0300);
     if (status) {
-        if (ldap_context)
-            krb5_ldap_free_ldap_context(ldap_context);
-        ldap_context = NULL;
-        dal_handle->db_context = NULL;
-        prepend_err_str(context, _("Error reading LDAP server params: "),
+        prepend_err_str(context, _("Error reading LDAP server params:"),
                         status, status);
         goto clean_n_exit;
     }

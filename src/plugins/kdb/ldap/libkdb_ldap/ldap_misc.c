@@ -33,6 +33,7 @@
  */
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 #include "kdb_ldap.h"
 #include "ldap_misc.h"
 #include "ldap_handle.h"
@@ -53,7 +54,7 @@ remove_overlapping_subtrees(char **listin, char **listop, int *subtcount,
    But all the world's not Linux.  */
 #undef strndup
 #define strndup my_strndup
-#ifdef HAVE_LDAP_STR2DN
+
 static char *
 my_strndup(const char *input, size_t limit)
 {
@@ -69,7 +70,6 @@ my_strndup(const char *input, size_t limit)
     } else
         return strdup(input);
 }
-#endif
 
 /* Get integer or string values from the config section, falling back
    to the default section, then to hard-coded values.  */
@@ -164,7 +164,141 @@ prof_get_string_def(krb5_context ctx, const char *conf_section,
     return 0;
 }
 
+static krb5_error_code
+get_db_opt(const char *input, char **opt_out, char **val_out)
+{
+    const char *pos;
+    char *opt, *val = NULL;
+    size_t len;
 
+    *opt_out = *val_out = NULL;
+    pos = strchr(input, '=');
+    if (pos == NULL) {
+        opt = strdup(input);
+        if (opt == NULL)
+            return ENOMEM;
+    } else {
+        len = pos - input;
+        /* Ignore trailing spaces. */
+        while (len > 0 && isspace((unsigned char)input[len - 1]))
+            len--;
+        opt = strndup(input, len);
+
+        pos++;                  /* Move past '='. */
+        while (isspace(*pos))   /* Ignore leading spaces. */
+            pos++;
+        if (*pos != '\0') {
+            val = strdup(pos);
+            if (val == NULL) {
+                free(opt);
+                return ENOMEM;
+            }
+        }
+    }
+    *opt_out = opt;
+    *val_out = val;
+    return 0;
+}
+
+static krb5_error_code
+add_server_entry(krb5_context context, const char *name)
+{
+    krb5_ldap_context *lctx = context->dal_handle->db_context;
+    krb5_ldap_server_info **sp, **list, *server;
+    size_t count = 0;
+
+    /* Allocate list space for the new entry and null terminator. */
+    for (sp = lctx->server_info_list; sp != NULL && *sp != NULL; sp++)
+        count++;
+    list = realloc(lctx->server_info_list, (count + 2) * sizeof(*list));
+    if (list == NULL)
+        return ENOMEM;
+    lctx->server_info_list = list;
+
+    server = calloc(1, sizeof(krb5_ldap_server_info));
+    if (server == NULL)
+        return ENOMEM;
+    server->server_status = NOTSET;
+    server->server_name = strdup(name);
+    if (server->server_name == NULL) {
+        free(server);
+        return ENOMEM;
+    }
+    list[count] = server;
+    list[count + 1] = NULL;
+    return 0;
+}
+
+krb5_error_code
+krb5_ldap_parse_db_params(krb5_context context, char **db_args)
+{
+    char *opt = NULL, *val = NULL;
+    krb5_error_code status;
+    krb5_ldap_context *lctx = context->dal_handle->db_context;
+
+    if (db_args == NULL)
+        return 0;
+    for (; *db_args != NULL; db_args++) {
+        status = get_db_opt(*db_args, &opt, &val);
+        if (status)
+            goto cleanup;
+
+        /* Check for options which don't require values. */
+        if (!strcmp(opt, "temporary")) {
+            /* "temporary" is passed by kdb5_util load without -update,
+             * which we don't support. */
+            status = EINVAL;
+            krb5_set_error_message(context, status,
+                                   _("KDB module requires -update argument"));
+            goto cleanup;
+        }
+
+        if (val == NULL) {
+            status = EINVAL;
+            krb5_set_error_message(context, status, _("'%s' value missing"),
+                                   opt);
+            goto cleanup;
+        }
+
+        /* Check for options which do require arguments. */
+        if (!strcmp(opt, "binddn")) {
+            free(lctx->bind_dn);
+            lctx->bind_dn = strdup(val);
+            if (lctx->bind_dn == NULL) {
+                status = ENOMEM;
+                goto cleanup;
+            }
+        } else if (!strcmp(opt, "nconns")) {
+            lctx->max_server_conns = atoi(val) ? atoi(val) :
+                DEFAULT_CONNS_PER_SERVER;
+        } else if (!strcmp(opt, "bindpwd")) {
+            free(lctx->bind_pwd);
+            lctx->bind_pwd = strdup(val);
+            if (lctx->bind_pwd == NULL) {
+                status = ENOMEM;
+                goto cleanup;
+            }
+        } else if (!strcmp(opt, "host")) {
+            status = add_server_entry(context, val);
+            if (status)
+                goto cleanup;
+        } else {
+            status = EINVAL;
+            krb5_set_error_message(context, status, _("unknown option '%s'"),
+                                   opt);
+            goto cleanup;
+        }
+
+        free(opt);
+        free(val);
+        opt = val = NULL;
+    }
+
+cleanup:
+    free(opt);
+    free(val);
+    return status;
+}
 
 /*
  * This function reads the parameters from the krb5.conf file. The
@@ -175,12 +309,11 @@ krb5_error_code
 krb5_ldap_read_server_params(krb5_context context, char *conf_section,
                              int srv_type)
 {
-    char                        *tempval=NULL, *save_ptr=NULL;
+    char                        *tempval=NULL, *save_ptr=NULL, *item=NULL;
     const char                  *delims="\t\n\f\v\r ,";
     krb5_error_code             st=0;
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
-    krb5_ldap_server_info       ***server_info=NULL;
 
     dal_handle = context->dal_handle;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
@@ -269,17 +402,6 @@ krb5_ldap_read_server_params(krb5_context context, char *conf_section,
      */
 
     if (ldap_context->server_info_list == NULL) {
-        unsigned int ele=0;
-
-        server_info = &(ldap_context->server_info_list);
-        *server_info = (krb5_ldap_server_info **) calloc (SERV_COUNT+1,
-                                                          sizeof (krb5_ldap_server_info *));
-
-        if (*server_info == NULL) {
-            st = ENOMEM;
-            goto cleanup;
-        }
-
         if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
                                    KRB5_CONF_LDAP_SERVERS, NULL, &tempval)) != 0) {
             krb5_set_error_message(context, st, _("Error reading "
@@ -288,36 +410,16 @@ krb5_ldap_read_server_params(krb5_context context, char *conf_section,
         }
 
         if (tempval == NULL) {
-
-            (*server_info)[ele] = (krb5_ldap_server_info *)calloc(1,
-                                                                  sizeof(krb5_ldap_server_info));
-
-            (*server_info)[ele]->server_name = strdup("ldapi://");
-            if ((*server_info)[ele]->server_name == NULL) {
-                st = ENOMEM;
+            st = add_server_entry(context, "ldapi://");
+            if (st)
                 goto cleanup;
-            }
-            (*server_info)[ele]->server_status = NOTSET;
         } else {
-            char *item=NULL;
-
-            item = strtok_r(tempval,delims,&save_ptr);
-            while (item != NULL && ele<SERV_COUNT) {
-                (*server_info)[ele] = (krb5_ldap_server_info *)calloc(1,
-                                                                      sizeof(krb5_ldap_server_info));
-                if ((*server_info)[ele] == NULL) {
-                    st = ENOMEM;
+            item = strtok_r(tempval, delims, &save_ptr);
+            while (item != NULL) {
+                st = add_server_entry(context, item);
+                if (st)
                     goto cleanup;
-                }
-                (*server_info)[ele]->server_name = strdup(item);
-                if ((*server_info)[ele]->server_name == NULL) {
-                    st = ENOMEM;
-                    goto cleanup;
-                }
-
-                (*server_info)[ele]->server_status = NOTSET;
                 item = strtok_r(NULL,delims,&save_ptr);
-                ++ele;
             }
             profile_release_string(tempval);
         }
