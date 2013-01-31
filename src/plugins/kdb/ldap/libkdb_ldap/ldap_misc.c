@@ -498,16 +498,6 @@ krb5_ldap_free_server_context_params(krb5_ldap_context *ldap_context)
         ldap_context->service_password_file = NULL;
     }
 
-    if (ldap_context->service_cert_path != NULL) {
-        krb5_xfree(ldap_context->service_cert_path);
-        ldap_context->service_cert_path = NULL;
-    }
-
-    if (ldap_context->service_cert_pass != NULL) {
-        krb5_xfree(ldap_context->service_cert_pass);
-        ldap_context->service_cert_pass = NULL;
-    }
-
     if (ldap_context->certificates) {
         i=0;
         while (ldap_context->certificates[i] != NULL) {

@@ -42,6 +42,7 @@ krb5_ldap_readpassword(krb5_context context, krb5_ldap_context *ldap_context,
     char                        line[RECORDLEN]="0", *start=NULL, *file=NULL;
     char                        errbuf[1024];
     FILE                        *fptr=NULL;
+    struct data                 PT, CT;
 
     *password = NULL;
 
@@ -117,58 +118,36 @@ krb5_ldap_readpassword(krb5_context context, krb5_ldap_context *ldap_context,
         goto rp_exit;
     }
     ++ start;
-    /* Extract the plain password / certificate file information */
-    {
-        struct data PT, CT;
 
-        /* Check if the entry has the path of a certificate */
-        if (!strncmp(start, "{FILE}", strlen("{FILE}"))) {
-            /* Set *password = {FILE}<path to cert>\0<cert password> */
-            size_t len = strlen(start);
-
-            *password = (unsigned char *)malloc(len + 2);
-            if (*password == NULL) {
-                st = ENOMEM;
-                goto rp_exit;
-            }
-            memcpy(*password, start, len);
-            (*password)[len] = '\0';
-            (*password)[len + 1] = '\0';
-            goto got_password;
-        } else {
-            CT.value = (unsigned char *)start;
-            CT.len = strlen((char *)CT.value);
-            st = dec_password(CT, &PT);
-            if (st != 0) {
-                switch (st) {
-                case ERR_NO_MEM:
-                    st = ENOMEM;
-                    break;
-                case ERR_PWD_ZERO:
-                    st = EINVAL;
-                    krb5_set_error_message(context, st,
-                                           _("Password has zero length"));
-                    break;
-                case ERR_PWD_BAD:
-                    st = EINVAL;
-                    krb5_set_error_message(context, st,
-                                           _("Password corrupted"));
-                    break;
-                case ERR_PWD_NOT_HEX:
-                    st = EINVAL;
-                    krb5_set_error_message(context, st,
-                                           _("Not a hexadecimal password"));
-                    break;
-                default:
-                    st = KRB5_KDB_SERVER_INTERNAL_ERR;
-                    break;
-                }
-                goto rp_exit;
-            }
-            *password = PT.value;
+    /* Extract the plain password information. */
+    CT.value = (unsigned char *)start;
+    CT.len = strlen((char *)CT.value);
+    st = dec_password(CT, &PT);
+    if (st != 0) {
+        switch (st) {
+        case ERR_NO_MEM:
+            st = ENOMEM;
+            break;
+        case ERR_PWD_ZERO:
+            st = EINVAL;
+            krb5_set_error_message(context, st, _("Password has zero length"));
+            break;
+        case ERR_PWD_BAD:
+            st = EINVAL;
+            krb5_set_error_message(context, st, _("Password corrupted"));
+            break;
+        case ERR_PWD_NOT_HEX:
+            st = EINVAL;
+            krb5_set_error_message(context, st,
+                                   _("Not a hexadecimal password"));
+            break;
+        default:
+            st = KRB5_KDB_SERVER_INTERNAL_ERR;
+            break;
         }
+        goto rp_exit;
     }
-got_password:
+    *password = PT.value;
 
 rp_exit:
     if (st) {
