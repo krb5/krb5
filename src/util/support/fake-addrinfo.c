@@ -1242,19 +1242,19 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
                 ai->ai_canonname = 0;
             name2 = ai->ai_canonname ? ai->ai_canonname : name;
         } else {
-            /* Sometimes gethostbyname will be directed to /etc/hosts
-               first, and sometimes that file will have entries with
-               the unqualified name first.  So take the first entry
-               that looks like it could be a FQDN.  */
-            for (i = 0; hp->h_aliases[i]; i++) {
-                if (strchr(hp->h_aliases[i], '.') != 0) {
-                    name2 = hp->h_aliases[i];
+            /*
+             * Sometimes gethostbyname will be directed to /etc/hosts
+             * first, and sometimes that file will have entries with
+             * the unqualified name first.  So take the first entry
+             * that looks like it could be a FQDN. Starting with h_name
+             * and then all the aliases.
+             */
+            for (i = 0, name2 = hp->h_name; name2; i++) {
+                if (strchr(name2, '.') != 0)
                     break;
-                }
+                name2 = hp->h_aliases[i];
             }
-            /* Give up, just use the first name (h_name ==
-               h_aliases[0] on all systems I've seen).  */
-            if (hp->h_aliases[i] == 0)
+            if (name2 == 0)
                 name2 = hp->h_name;
         }
 
