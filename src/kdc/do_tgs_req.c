@@ -246,7 +246,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
 
     is_referral = krb5_is_tgs_principal(server->princ) &&
-        !krb5_principal_compare(kdc_context, request->server, server->princ);
+        !krb5_principal_compare(kdc_context, tgs_server, server->princ);
 
     /* Check for protocol transition */
     errcode = kdc_process_s4u2self_req(kdc_active_realm,
