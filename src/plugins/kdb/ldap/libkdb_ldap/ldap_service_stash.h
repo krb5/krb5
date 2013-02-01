@@ -32,18 +32,6 @@
 #define LDAP_SERVICE_STASH_H 1
 
 #define RECORDLEN 1024
-struct data{
-    int           len;
-    unsigned char *value;
-};
-
-#define ERR_NO_MEM      1
-#define ERR_PWD_ZERO    2
-#define ERR_PWD_BAD     3
-#define ERR_PWD_NOT_HEX 4
-
-int
-dec_password(struct data, struct data *);
 
 krb5_error_code
 krb5_ldap_readpassword(krb5_context, krb5_ldap_context *, unsigned char **);
