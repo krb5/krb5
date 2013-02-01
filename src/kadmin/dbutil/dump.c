@@ -1508,7 +1508,7 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
     int                 alt_key_len, salt_len, alt_salt_len;
     char                *name;
     char                *mod_name;
-    int                 tmpint1, tmpint2, tmpint3;
+    int                 tmpint1 = 0, tmpint2 = 0, tmpint3 = 0;
     int                 error;
     const char          *try2read;
     int                 i;
