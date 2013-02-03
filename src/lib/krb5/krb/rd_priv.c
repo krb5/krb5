@@ -51,9 +51,7 @@ rd_priv_basic(krb5_context context, krb5_auth_context ac,
     krb5_priv           * privmsg;
     krb5_data             scratch;
     krb5_priv_enc_part  * privmsg_enc_part;
-    size_t                blocksize;
-    krb5_data             ivdata, *iv = NULL;
-    krb5_enctype          enctype;
+    krb5_data             cstate, ivdata, *iv = NULL;
 
     if (!krb5_is_krb_priv(inbuf))
         return KRB5KRB_AP_ERR_MSG_TYPE;
@@ -63,11 +61,11 @@ rd_priv_basic(krb5_context context, krb5_auth_context ac,
         return retval;
 
     if (ac->i_vector != NULL) {
-        enctype = krb5_k_key_enctype(context, key);
-        if ((retval = krb5_c_block_size(context, enctype, &blocksize)))
+        if ((retval = krb5_c_init_state(context, &key->keyblock, 0, &cstate)))
             goto cleanup_privmsg;
-        ivdata = make_data(ac->i_vector, blocksize);
+        ivdata = make_data(ac->i_vector, cstate.length);
         iv = &ivdata;
+        krb5_c_free_state(context, &key->keyblock, &cstate);
     }
 
     scratch.length = privmsg->enc_part.ciphertext.length;
