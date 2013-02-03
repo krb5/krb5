@@ -70,6 +70,7 @@ krb5_auth_con_free(krb5_context context, krb5_auth_context auth_context)
         krb5_k_free_key(context, auth_context->send_subkey);
     if (auth_context->recv_subkey)
         krb5_k_free_key(context, auth_context->recv_subkey);
+    zapfree(auth_context->cstate.data, auth_context->cstate.length);
     if (auth_context->rcache)
         krb5_rc_close(context, auth_context->rcache);
     if (auth_context->permitted_etypes)
@@ -315,20 +316,27 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_initivector(krb5_context context, krb5_auth_context auth_context)
 {
     krb5_error_code ret;
-    krb5_data cstate;
+    krb5_enctype enctype;
 
-    if (auth_context->key) {
-        ret = krb5_c_init_state(context, &auth_context->key->keyblock, 0,
-                                &cstate);
-        if (ret)
-            return ret;
-        auth_context->i_vector = (krb5_pointer)calloc(1,cstate.length);
-        krb5_c_free_state(context, &auth_context->key->keyblock, &cstate);
-        if (auth_context->i_vector == NULL)
-            return ENOMEM;
-        return 0;
-    }
-    return EINVAL; /* XXX need an error for no keyblock */
+    if (auth_context->key == NULL)
+        return EINVAL;
+    ret = krb5_c_init_state(context, &auth_context->key->keyblock,
+                            KRB5_KEYUSAGE_KRB_PRIV_ENCPART,
+                            &auth_context->cstate);
+    if (ret)
+        return ret;
+
+    /*
+     * Historically we used a zero-filled buffer of the enctype block size.
+     * This matches every existing enctype except RC4 (which has a block size
+     * of 1) and des-cbc-crc (which uses the key instead of a zero-filled
+     * buffer).  Special-case des-cbc-crc to remain interoperable.
+     */
+    enctype = krb5_k_key_enctype(context, auth_context->key);
+    if (enctype == ENCTYPE_DES_CBC_CRC)
+        zap(auth_context->cstate.data, auth_context->cstate.length);
+
+    return 0;
 }
 
 krb5_error_code
@@ -345,7 +353,7 @@ krb5_auth_con_setivector(krb5_context context, krb5_auth_context auth_context, k
 krb5_error_code
 krb5_auth_con_getivector(krb5_context context, krb5_auth_context auth_context, krb5_pointer *ivector)
 {
-    *ivector = auth_context->i_vector;
+    *ivector = auth_context->cstate.data;
     return 0;
 }
 

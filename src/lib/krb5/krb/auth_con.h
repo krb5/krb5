@@ -19,7 +19,7 @@ struct _krb5_auth_context {
     krb5_authenticator *authentp;               /* mk_req, rd_req, mk_rep, ...*/
     krb5_cksumtype      req_cksumtype;          /* mk_safe, ... */
     krb5_cksumtype      safe_cksumtype;         /* mk_safe, ... */
-    krb5_pointer        i_vector;               /* mk_priv, rd_priv only */
+    krb5_data           cstate;                 /* mk_priv, rd_priv only */
     krb5_rcache         rcache;
     krb5_enctype      * permitted_etypes;       /* rd_req */
     krb5_mk_req_checksum_func checksum_func;

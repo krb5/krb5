@@ -71,7 +71,6 @@ krb5_auth_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     krb5_error_code     kret;
     krb5_auth_context   auth_context;
     size_t              required;
-    krb5_enctype        enctype;
 
     /*
      * krb5_auth_context requires at minimum:
@@ -88,14 +87,7 @@ krb5_auth_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     if ((auth_context = (krb5_auth_context) arg)) {
         kret = 0;
 
-        /* Calculate size required by i_vector - ptooey */
-        if (auth_context->i_vector && auth_context->key) {
-            enctype = krb5_k_key_enctype(kcontext, auth_context->key);
-            kret = krb5_c_block_size(kcontext, enctype, &required);
-        } else {
-            required = 0;
-        }
-
+        required = auth_context->cstate.length;
         required += sizeof(krb5_int32)*8;
 
         /* Calculate size required by remote_addr, if appropriate */
@@ -192,9 +184,6 @@ krb5_auth_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octe
     size_t              required;
     krb5_octet          *bp;
     size_t              remain;
-    size_t              obuf;
-    krb5_int32          obuf32;
-    krb5_enctype        enctype;
 
     required = 0;
     bp = *buffer;
@@ -218,28 +207,14 @@ krb5_auth_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octe
             (void) krb5_ser_pack_int32((krb5_int32) auth_context->safe_cksumtype,
                                        &bp, &remain);
 
+            /* Write the cipher state */
+            (void) krb5_ser_pack_int32(auth_context->cstate.length, &bp,
+                                       &remain);
+            (void) krb5_ser_pack_bytes((krb5_octet *)auth_context->cstate.data,
+                                       auth_context->cstate.length,
+                                       &bp, &remain);
+
             kret = 0;
-
-            /* Now figure out the number of bytes for i_vector and write it */
-            if (auth_context->i_vector) {
-                enctype = krb5_k_key_enctype(kcontext, auth_context->key);
-                kret = krb5_c_block_size(kcontext, enctype, &obuf);
-            } else {
-                obuf = 0;
-            }
-
-            /* Convert to signed 32 bit integer */
-            obuf32 = obuf;
-            if (kret == 0 && obuf > KRB5_INT32_MAX)
-                kret = EINVAL;
-            if (!kret)
-                (void) krb5_ser_pack_int32(obuf32, &bp, &remain);
-
-            /* Now copy i_vector */
-            if (!kret && auth_context->i_vector)
-                (void) krb5_ser_pack_bytes(auth_context->i_vector,
-                                           obuf,
-                                           &bp, &remain);
 
             /* Now handle remote_addr, if appropriate */
             if (!kret && auth_context->remote_addr) {
@@ -369,7 +344,7 @@ krb5_auth_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_oc
     krb5_int32          ibuf;
     krb5_octet          *bp;
     size_t              remain;
-    krb5_int32          ivlen;
+    krb5_int32          cstate_len;
     krb5_int32          tag;
 
     bp = *buffer;
@@ -406,18 +381,16 @@ krb5_auth_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_oc
             (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
             auth_context->safe_cksumtype = (krb5_cksumtype) ibuf;
 
-            /* Get length of i_vector */
-            (void) krb5_ser_unpack_int32(&ivlen, &bp, &remain);
+            /* Get length of cstate */
+            (void) krb5_ser_unpack_int32(&cstate_len, &bp, &remain);
 
-            if (ivlen) {
-                if ((auth_context->i_vector =
-                     (krb5_pointer) malloc((size_t)ivlen)))
-                    kret = krb5_ser_unpack_bytes(auth_context->i_vector,
-                                                 (size_t) ivlen,
-                                                 &bp,
-                                                 &remain);
-                else
-                    kret = ENOMEM;
+            if (cstate_len) {
+                kret = alloc_data(&auth_context->cstate, cstate_len);
+                if (!kret) {
+                    kret = krb5_ser_unpack_bytes((krb5_octet *)
+                                                 auth_context->cstate.data,
+                                                 cstate_len, &bp, &remain);
+                }
             }
             else
                 kret = 0;
