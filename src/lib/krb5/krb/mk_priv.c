@@ -38,8 +38,8 @@ mk_priv_basic(krb5_context context, const krb5_data *userdata,
     krb5_error_code     retval;
     krb5_priv           privmsg;
     krb5_priv_enc_part  privmsg_enc_part;
-    krb5_data           *scratch1, *scratch2, ivdata;
-    size_t              blocksize, enclen;
+    krb5_data           *scratch1, *scratch2, cstate, ivdata;
+    size_t              enclen;
 
     privmsg.enc_part.kvno = 0;  /* XXX allow user-set? */
     privmsg.enc_part.enctype = enctype;
@@ -71,11 +71,12 @@ mk_priv_basic(krb5_context context, const krb5_data *userdata,
 
     /* call the encryption routine */
     if (i_vector) {
-        if ((retval = krb5_c_block_size(context, enctype, &blocksize)))
+        if ((retval = krb5_c_init_state(context, &key->keyblock, 0, &cstate)))
             goto clean_encpart;
 
-        ivdata.length = blocksize;
+        ivdata.length = cstate.length;
         ivdata.data = i_vector;
+        krb5_c_free_state(context, &key->keyblock, &cstate);
     }
 
     if ((retval = krb5_k_encrypt(context, key,
