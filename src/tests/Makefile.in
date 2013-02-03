@@ -76,6 +76,7 @@ check-pytests:: gcred hist kdbtest
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_iprop.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_kprop.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_anonpkinit.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_policy.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadm5_hook.py $(PYTESTFLAGS)

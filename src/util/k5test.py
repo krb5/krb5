@@ -209,6 +209,9 @@ Scripts may use the following realm methods and attributes:
   send an input string to the command, and expected_code=N to expect a
   return code other than 0.
 
+* realm.kprop_port(): Returns a port number based on realm.portbase
+  intended for use by kprop and kpropd.
+
 * realm.server_port(): Returns a port number based on realm.portbase
   intended for use by server processes.
 
@@ -823,14 +826,17 @@ class K5Realm(object):
         env['KRB5_KTNAME'] = self.keytab
         env['KRB5_CLIENT_KTNAME'] = self.client_keytab
         env['KRB5RCACHEDIR'] = self.testdir
-        env['KPROPD_PORT'] = str(self.portbase + 3)
-        env['KPROP_PORT'] = str(self.portbase + 3)
+        env['KPROPD_PORT'] = str(self.kprop_port())
+        env['KPROP_PORT'] = str(self.kprop_port())
         return env
 
     def run(self, args, env=None, **keywords):
         if env is None:
             env = self.env
         return _run_cmd(args, env, **keywords)
+
+    def kprop_port(self):
+        return self.portbase + 3
 
     def server_port(self):
         return self.portbase + 5
@@ -885,7 +891,7 @@ class K5Realm(object):
         global krb5kdc
         slavedump_path = os.path.join(self.testdir, 'incoming-slave-datatrans')
         kpropdacl_path = os.path.join(self.testdir, 'kpropd-acl')
-        proc = _start_daemon([kpropd, '-D', '-P', str(self.portbase + 3),
+        proc = _start_daemon([kpropd, '-D', '-P', str(self.kprop_port()),
                               '-f', slavedump_path, '-p', kdb5_util,
                               '-a', kpropdacl_path] + args, env, 'ready')
         self._kpropd_procs.append(proc)
