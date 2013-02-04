@@ -24,31 +24,6 @@ for realm in multipass_realms(create_host=False):
 
 realm = K5Realm(create_host=False)
 
-# Create a policy and see if it survives a dump/load.
-realm.run_kadminl('addpol fred')
-dumpfile = os.path.join(realm.testdir, 'dump')
-realm.run([kdb5_util, 'dump', dumpfile])
-f = open('testdir/dump', 'a')
-f.write('policy	barney	0	0	1	1	1	0	'
-        '0	0	0	0	0	0	-	1	'
-        '2	28	'
-        'fd100f5064625f6372656174696f6e404b5242544553542e434f4d00')
-f.close()
-realm.run([kdb5_util, 'load', dumpfile])
-output = realm.run_kadminl('getpols')
-if 'fred\n' not in output:
-    fail('Policy not preserved across dump/load.')
-if 'barney\n' not in output:
-    fail('Policy not loaded.')
-
-realm.run([kdb5_util, 'dump', dumpfile])
-realm.run([kdb5_util, 'load', dumpfile])
-output = realm.run_kadminl('getpols')
-if 'fred\n' not in output:
-    fail('Policy not preserved across dump/load.')
-if 'barney\n' not in output:
-    fail('Policy not preserved across dump/load.')
-
 # Spot-check KRB5_TRACE output
 tracefile = os.path.join(realm.testdir, 'trace')
 realm.run(['env', 'KRB5_TRACE=' + tracefile, kinit, realm.user_princ],
@@ -67,4 +42,4 @@ for e in expected:
     if e not in trace:
         fail('Expected output not in kinit trace log')
 
-success('Dump/load, FAST kinit, kdestroy, trace logging')
+success('FAST kinit, trace logging')
