@@ -130,22 +130,14 @@ dump
 
 .. _kdb5_util_dump:
 
-    **dump** [**-old**\|\ **-b6**\|\ **-b7**\|\ **-ov**\|\ **-r13**]
-    [**-verbose**] [**-mkey_convert**] [**-new_mkey_file** *mkey_file*]
-    [**-rev**] [**-recurse**] [*filename* [*principals*...]]
+    **dump** [**-b7**\|\ **-ov**\|\ **-r13**] [**-verbose**]
+    [**-mkey_convert**] [**-new_mkey_file** *mkey_file*] [**-rev**]
+    [**-recurse**] [*filename* [*principals*...]]
 
 Dumps the current Kerberos and KADM5 database into an ASCII file.  By
 default, the database is dumped in current format, "kdb5_util
 load_dump version 6".  If filename is not specified, or is the string
 "-", the dump is sent to standard output.  Options:
-
-**-old**
-    causes the dump to be in the Kerberos 5 Beta 5 and earlier dump
-    format ("kdb5_edit load_dump version 2.0").
-
-**-b6**
-    causes the dump to be in the Kerberos 5 Beta 6 format ("kdb5_edit
-    load_dump version 3.0").
 
 **-b7**
     causes the dump to be in the Kerberos 5 Beta 7 format ("kdb5_util
@@ -197,8 +189,8 @@ load
 
 .. _kdb5_util_load:
 
-    **load** [**-old**\|\ **-b6**\|\ **-b7**\|\ **-ov**\|\ **-r13**]
-    [**-hash**] [**-verbose**] [**-update**] *filename* [*dbname*]
+    **load** [**-b7**\|\ **-ov**\|\ **-r13**] [**-hash**]
+    [**-verbose**] [**-update**] *filename* [*dbname*]
 
 Loads a database dump from the named file into the named database.  If
 no option is given to determine the format of the dump file, the
@@ -209,14 +201,6 @@ any previously existing database.  Note that when using the LDAP KDC
 database module, the **-update** flag is required.
 
 Options:
-
-**-old**
-    requires the database to be in the Kerberos 5 Beta 5 and earlier
-    format ("kdb5_edit load_dump version 2.0").
-
-**-b6**
-    requires the database to be in the Kerberos 5 Beta 6 format
-    ("kdb5_edit load_dump version 3.0").
 
 **-b7**
     requires the database to be in the Kerberos 5 Beta 7 format
