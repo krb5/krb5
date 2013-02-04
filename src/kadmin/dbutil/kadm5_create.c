@@ -291,39 +291,16 @@ int add_admin_princ(void *handle, krb5_context context,
         return(ERR);
     }
     ent.max_life = lifetime;
-    ent.attributes = attrs | KRB5_KDB_DISALLOW_ALL_TIX;
+    ent.attributes = attrs;
 
     ret = kadm5_create_principal(handle, &ent,
                                  (KADM5_PRINCIPAL | KADM5_MAX_LIFE |
-                                  KADM5_ATTRIBUTES),
-                                 "to-be-random");
-    if (ret) {
-        if (ret != KADM5_DUP) {
-            com_err(progname, ret, _("while creating principal %s"), fullname);
-            krb5_free_principal(context, ent.principal);
-            free(fullname);
-            return ERR;
-        }
-    } else {
-        /* only randomize key if we created the principal */
-        ret = kadm5_randkey_principal(handle, ent.principal, NULL, NULL);
-        if (ret) {
-            com_err(progname, ret, _("while randomizing principal %s"),
-                    fullname);
-            krb5_free_principal(context, ent.principal);
-            free(fullname);
-            return ERR;
-        }
-
-        ent.attributes = attrs;
-        ret = kadm5_modify_principal(handle, &ent, KADM5_ATTRIBUTES);
-        if (ret) {
-            com_err(progname, ret, _("while setting attributes on %s"),
-                    fullname);
-            krb5_free_principal(context, ent.principal);
-            free(fullname);
-            return ERR;
-        }
+                                  KADM5_ATTRIBUTES), NULL);
+    if (ret && ret != KADM5_DUP) {
+        com_err(progname, ret, _("while creating principal %s"), fullname);
+        krb5_free_principal(context, ent.principal);
+        free(fullname);
+        return ERR;
     }
 
     krb5_free_principal(context, ent.principal);
