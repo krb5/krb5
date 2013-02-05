@@ -71,44 +71,9 @@ static int      recursive;
 #define FLAG_UPDATE     0x2     /* processing an update */
 #define FLAG_OMIT_NRA   0x4     /* avoid dumping non-replicated attrs */
 
-struct dump_args {
-    char                *programname;
-    FILE                *ofile;
-    krb5_context        kcontext;
-    char                **names;
-    int                 nnames;
-    int                 flags;
-};
-
-static krb5_error_code dump_k5beta6_iterator_ext (krb5_pointer,
-                                                  krb5_db_entry *,
-                                                  int);
-static krb5_error_code dump_k5beta7_princ (krb5_pointer,
-                                           krb5_db_entry *);
-static krb5_error_code dump_k5beta7_princ_ext (krb5_pointer,
-                                               krb5_db_entry *,
-                                               int);
-static krb5_error_code dump_k5beta7_princ_withpolicy
-(krb5_pointer, krb5_db_entry *);
-static krb5_error_code dump_ov_princ (krb5_pointer,
-                                      krb5_db_entry *);
-static void dump_k5beta7_policy (void *, osa_policy_ent_t);
-static void dump_r1_8_policy (void *, osa_policy_ent_t);
-static void dump_r1_11_policy (void *, osa_policy_ent_t);
-
 typedef krb5_error_code (*dump_func)(krb5_pointer,
                                      krb5_db_entry *);
 
-static int process_k5beta6_record (char *, krb5_context,
-                                   FILE *, int, int *);
-static int process_k5beta7_record (char *, krb5_context,
-                                   FILE *, int, int *);
-static int process_r1_8_record (char *, krb5_context,
-                                FILE *, int, int *);
-static int process_r1_11_record (char *, krb5_context,
-                                FILE *, int, int *);
-static int process_ov_record (char *, krb5_context,
-                              FILE *, int, int *);
 typedef krb5_error_code (*load_func)(char *, krb5_context,
                                      FILE *, int, int *);
 
@@ -123,76 +88,13 @@ typedef struct _dump_version {
     load_func load_record;
 } dump_version;
 
-dump_version beta7_version = {
-    "Kerberos version 5",
-    "kdb5_util load_dump version 4\n",
-    0,
-    0,
-    0,
-    dump_k5beta7_princ,
-    dump_k5beta7_policy,
-    process_k5beta7_record,
-};
-dump_version iprop_version = {
-    "Kerberos iprop version",
-    "iprop",
-    0,
-    1,
-    0,
-    dump_k5beta7_princ_withpolicy,
-    dump_k5beta7_policy,
-    process_k5beta7_record,
-};
-dump_version ov_version = {
-    "OpenV*Secure V1.0",
-    "OpenV*Secure V1.0\t",
-    1,
-    0,
-    0,
-    dump_ov_princ,
-    dump_k5beta7_policy,
-    process_ov_record
-};
-
-dump_version r1_3_version = {
-    "Kerberos version 5 release 1.3",
-    "kdb5_util load_dump version 5\n",
-    0,
-    0,
-    0,
-    dump_k5beta7_princ_withpolicy,
-    dump_k5beta7_policy,
-    process_k5beta7_record,
-};
-dump_version r1_8_version = {
-    "Kerberos version 5 release 1.8",
-    "kdb5_util load_dump version 6\n",
-    0,
-    0,
-    0,
-    dump_k5beta7_princ_withpolicy,
-    dump_r1_8_policy,
-    process_r1_8_record,
-};
-dump_version r1_11_version = {
-    "Kerberos version 5 release 1.11",
-    "kdb5_util load_dump version 7\n",
-    0,
-    0,
-    0,
-    dump_k5beta7_princ_withpolicy,
-    dump_r1_11_policy,
-    process_r1_11_record,
-};
-dump_version ipropx_1_version = {
-    "Kerberos iprop extensible version",
-    "ipropx",
-    0,
-    1,
-    1,
-    dump_k5beta7_princ_withpolicy,
-    dump_r1_11_policy,
-    process_r1_11_record,
+struct dump_args {
+    char                *programname;
+    FILE                *ofile;
+    krb5_context        kcontext;
+    char                **names;
+    int                 nnames;
+    int                 flags;
 };
 
 /* External data */
@@ -370,88 +272,6 @@ finish_ofile(char *ofile, char **tmpname)
     free(*tmpname);
     *tmpname = NULL;
 }
-
-/*
- * Read the dump header.  Returns 1 on success, 0 if the file is not a
- * recognized iprop dump format.
- */
-static int
-parse_iprop_header(char *buf, dump_version **dv, uint32_t *last_sno,
-                   uint32_t *last_seconds, uint32_t *last_useconds)
-{
-    char head[128];
-    int nread;
-    uint32_t u[4];
-    uint32_t *up = &u[0];
-
-    nread = sscanf(buf, "%127s %u %u %u %u", head, &u[0], &u[1], &u[2], &u[3]);
-    if (nread < 1)
-        return 0;
-
-    if (!strcmp(head, ipropx_1_version.header)) {
-        if (nread != 5)
-            return 0;
-        if (u[0] == IPROPX_VERSION_0)
-            *dv = &iprop_version;
-        else if (u[0] == IPROPX_VERSION_1)
-            *dv = &ipropx_1_version;
-        else {
-            fprintf(stderr, _("%s: Unknown iprop dump version %d\n"),
-                    progname, u[0]);
-            return 0;
-        }
-        up = &u[1];
-    } else if (!strcmp(head, iprop_version.header)) {
-        if (nread != 4)
-            return 0;
-        *dv = &iprop_version;
-    } else {
-        fprintf(stderr, "Invalid iprop header\n");
-        return 0;
-    }
-
-    *last_sno = *(up++);
-    *last_seconds = *(up++);
-    *last_useconds = *(up++);
-    return 1;
-}
-
-/*
- * Return 1 if the {sno, timestamp} in an existing dump file is in the
- * ulog, else return 0.
- */
-static int
-current_dump_sno_in_ulog(char *ifile, kdb_hlog_t *ulog)
-{
-    dump_version *junk;
-    uint32_t last_sno, last_seconds, last_useconds;
-    char buf[BUFSIZ];
-    FILE *f;
-
-    if (ulog->kdb_last_sno == 0)
-        return 0;              /* nothing in ulog */
-
-    f = fopen(ifile, "r");
-    if (f == NULL)
-        return 0;              /* aliasing other errors to ENOENT here is OK */
-
-    if (fgets(buf, sizeof(buf), f) == NULL)
-        return errno ? -1 : 0;
-    fclose(f);
-
-    if (!parse_iprop_header(buf, &junk, &last_sno, &last_seconds,
-                            &last_useconds))
-        return 0;
-
-    if (ulog->kdb_first_sno > last_sno ||
-        ulog->kdb_first_time.seconds > last_seconds ||
-        (ulog->kdb_first_time.seconds == last_seconds &&
-        ulog->kdb_first_time.useconds > last_useconds))
-        return 0;
-
-    return 1;
-}
-
 
 /* Create the .dump_ok file. */
 static int
@@ -790,17 +610,6 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
     return(retval);
 }
 
-/*
- * dump_k5beta7_iterator()      - Output a dump record in krb5b7 format.
- */
-static krb5_error_code
-dump_k5beta7_princ(ptr, entry)
-    krb5_pointer        ptr;
-    krb5_db_entry       *entry;
-{
-    return dump_k5beta7_princ_ext(ptr, entry, 0);
-}
-
 static krb5_error_code
 dump_k5beta7_princ_ext(ptr, entry, kadm)
     krb5_pointer        ptr;
@@ -844,6 +653,17 @@ dump_k5beta7_princ_ext(ptr, entry, kadm)
     return retval;
 }
 
+/*
+ * dump_k5beta7_iterator()      - Output a dump record in krb5b7 format.
+ */
+static krb5_error_code
+dump_k5beta7_princ(ptr, entry)
+    krb5_pointer        ptr;
+    krb5_db_entry       *entry;
+{
+    return dump_k5beta7_princ_ext(ptr, entry, 0);
+}
+
 static krb5_error_code
 dump_k5beta7_princ_withpolicy(ptr, entry)
     krb5_pointer        ptr;
@@ -852,7 +672,7 @@ dump_k5beta7_princ_withpolicy(ptr, entry)
     return dump_k5beta7_princ_ext(ptr, entry, 1);
 }
 
-void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
+static void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
 {
     struct dump_args *arg;
 
@@ -862,7 +682,7 @@ void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
             entry->pw_min_classes, entry->pw_history_num, 0);
 }
 
-void dump_r1_8_policy(void *data, osa_policy_ent_t entry)
+static void dump_r1_8_policy(void *data, osa_policy_ent_t entry)
 {
     struct dump_args *arg;
 
@@ -875,7 +695,7 @@ void dump_r1_8_policy(void *data, osa_policy_ent_t entry)
             entry->pw_lockout_duration);
 }
 
-void
+static void
 dump_r1_11_policy(void *data, osa_policy_ent_t entry)
 {
     struct dump_args *arg;
@@ -1003,272 +823,6 @@ static krb5_error_code dump_ov_princ(krb5_pointer ptr, krb5_db_entry *kdb)
     fputc('\n', arg->ofile);
     free(princstr);
     return 0;
-}
-
-/*
- * usage is:
- *      dump_db [-b7] [-ov] [-r13] [-r18] [-verbose] [-mkey_convert]
- *              [-new_mkey_file mkey_file] [-rev] [-recurse]
- *              [filename [principals...]]
- */
-void
-dump_db(argc, argv)
-    int         argc;
-    char        **argv;
-{
-    FILE                *f;
-    struct dump_args    arglist;
-    char                *ofile;
-    char                *tmpofile = NULL;
-    krb5_error_code     kret, retval;
-    dump_version        *dump;
-    int                 aindex;
-    int                 conditional = 0;
-    int                 ok_fd = -1;
-    char                *new_mkey_file = 0;
-    bool_t              dump_sno = FALSE;
-    kdb_log_context     *log_ctx;
-    unsigned int        ipropx_version = IPROPX_VERSION_0;
-
-    /*
-     * Parse the arguments.
-     */
-    ofile = (char *) NULL;
-    dump = &r1_11_version;
-    arglist.flags = 0;
-    new_mkey_file = 0;
-    mkey_convert = 0;
-    backwards = 0;
-    recursive = 0;
-    log_ctx = util_context->kdblog_context;
-
-    /*
-     * Parse the qualifiers.
-     */
-    for (aindex = 1; aindex < argc; aindex++) {
-        if (!strcmp(argv[aindex], b7option))
-            dump = &beta7_version;
-        else if (!strcmp(argv[aindex], ovoption))
-            dump = &ov_version;
-        else if (!strcmp(argv[aindex], r13option))
-            dump = &r1_3_version;
-        else if (!strcmp(argv[aindex], r18option))
-            dump = &r1_8_version;
-        else if (!strncmp(argv[aindex], ipropoption, sizeof(ipropoption) - 1)) {
-            if (log_ctx && log_ctx->iproprole) {
-                /* Note: ipropx_version is the maximum version acceptable */
-                ipropx_version = atoi(argv[aindex] + sizeof(ipropoption) - 1);
-                dump = ipropx_version ? &ipropx_1_version : &iprop_version;
-                /*
-                 * dump_sno is used to indicate if the serial
-                 * # should be populated in the output
-                 * file to be used later by iprop for updating
-                 * the slave's update log when loading
-                 */
-                dump_sno = TRUE;
-                /*
-                 * FLAG_OMIT_NRA is set to indicate that non-replicated
-                 * attributes should be omitted.
-                 */
-                arglist.flags |= FLAG_OMIT_NRA;
-            } else {
-                fprintf(stderr, _("Iprop not enabled\n"));
-                goto error;
-            }
-        } else if (!strcmp(argv[aindex], conditionaloption))
-            conditional = 1;
-        else if (!strcmp(argv[aindex], verboseoption))
-            arglist.flags |= FLAG_VERBOSE;
-        else if (!strcmp(argv[aindex], "-mkey_convert"))
-            mkey_convert = 1;
-        else if (!strcmp(argv[aindex], "-new_mkey_file")) {
-            new_mkey_file = argv[++aindex];
-            mkey_convert = 1;
-        } else if (!strcmp(argv[aindex], "-rev"))
-            backwards = 1;
-        else if (!strcmp(argv[aindex], "-recurse"))
-            recursive = 1;
-        else
-            break;
-    }
-
-    arglist.names = (char **) NULL;
-    arglist.nnames = 0;
-    if (aindex < argc) {
-        ofile = argv[aindex];
-        aindex++;
-        if (aindex < argc) {
-            arglist.names = &argv[aindex];
-            arglist.nnames = argc - aindex;
-        }
-    }
-
-    /*
-     * If a conditional ipropx dump we check if the existing dump is
-     * good enough.
-     */
-    if (ofile != NULL && conditional) {
-        if (!dump->iprop) {
-            com_err(progname, 0,
-                    _("Conditional dump is an undocumented option for "
-                      "use only for iprop dumps"));
-            goto error;
-        }
-        if (current_dump_sno_in_ulog(ofile, log_ctx->ulog))
-            return;
-    }
-
-    /*
-     * Make sure the database is open.  The policy database only has
-     * to be opened if we try a dump that uses it.
-     */
-    if (!dbactive) {
-        com_err(progname, 0, _("Database not currently opened!"));
-        goto error;
-    }
-
-    /*
-     * If we're doing a master key conversion, set up for it.
-     */
-    if (mkey_convert) {
-        if (!valid_master_key) {
-            /* TRUE here means read the keyboard, but only once */
-            retval = krb5_db_fetch_mkey(util_context,
-                                        master_princ,
-                                        master_keyblock.enctype,
-                                        TRUE, FALSE,
-                                        (char *) NULL,
-                                        NULL, NULL,
-                                        &master_keyblock);
-            if (retval) {
-                com_err(progname, retval, _("while reading master key"));
-                exit(1);
-            }
-            retval = krb5_db_fetch_mkey_list(util_context, master_princ,
-                                             &master_keyblock);
-            if (retval) {
-                com_err(progname, retval, _("while verifying master key"));
-                exit(1);
-            }
-        }
-        new_master_keyblock.enctype = global_params.enctype;
-        if (new_master_keyblock.enctype == ENCTYPE_UNKNOWN)
-            new_master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
-
-        if (new_mkey_file) {
-            krb5_kvno kt_kvno;
-
-            if (global_params.mask & KADM5_CONFIG_KVNO)
-                kt_kvno = global_params.kvno;
-            else
-                kt_kvno = IGNORE_VNO;
-
-            if ((retval = krb5_db_fetch_mkey(util_context, master_princ,
-                                             new_master_keyblock.enctype,
-                                             FALSE,
-                                             FALSE,
-                                             new_mkey_file,
-                                             &kt_kvno,
-                                             NULL,
-                                             &new_master_keyblock))) {
-                com_err(progname, retval, _("while reading new master key"));
-                exit(1);
-            }
-        } else {
-            printf(_("Please enter new master key....\n"));
-            if ((retval = krb5_db_fetch_mkey(util_context, master_princ,
-                                             new_master_keyblock.enctype,
-                                             TRUE,
-                                             TRUE,
-                                             NULL, NULL, NULL,
-                                             &new_master_keyblock))) {
-                com_err(progname, retval, _("while reading new master key"));
-                exit(1);
-            }
-        }
-        /*
-         * get new master key vno that will be used to protect princs, used
-         * later on.
-         */
-        new_mkvno = get_next_kvno(util_context, master_entry);
-    }
-
-    kret = 0;
-
-    if (ofile && strcmp(ofile, "-")) {
-        /*
-         * Discourage accidental dumping to filenames beginning with '-'.
-         */
-        if (ofile[0] == '-')
-            usage();
-        if (!prep_ok_file(util_context, ofile, &ok_fd))
-            return;            /* prep_ok_file() bumps exit_status */
-        f = create_ofile(ofile, &tmpofile);
-        if (f == NULL) {
-            fprintf(stderr, ofopen_error,
-                    progname, ofile, error_message(errno));
-            goto error;
-        }
-    } else {
-        f = stdout;
-    }
-    if (f && !(kret)) {
-        arglist.programname = progname;
-        arglist.ofile = f;
-        arglist.kcontext = util_context;
-        fprintf(arglist.ofile, "%s", dump->header);
-
-        /*
-         * We grab the lock twice (once again in the iterator call),
-         * but that's ok since the lock func handles incr locks held.
-         */
-        kret = krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED);
-        if (kret != 0 && kret != KRB5_PLUGIN_OP_NOTSUPP) {
-            fprintf(stderr,
-                    _("%s: Couldn't grab lock\n"), progname);
-            goto error;
-        }
-
-        if (dump_sno) {
-            if (ipropx_version)
-                fprintf(f, " %u", IPROPX_VERSION);
-            fprintf(f, " %u", log_ctx->ulog->kdb_last_sno);
-            fprintf(f, " %u", log_ctx->ulog->kdb_last_time.seconds);
-            fprintf(f, " %u", log_ctx->ulog->kdb_last_time.useconds);
-        }
-
-        if (dump->header[strlen(dump->header)-1] != '\n')
-            fputc('\n', arglist.ofile);
-
-        if ((kret = krb5_db_iterate(util_context,
-                                    NULL,
-                                    dump->dump_princ,
-                                    (krb5_pointer) &arglist))) { /* TBD: backwards and recursive not supported */
-            fprintf(stderr, dumprec_err,
-                    progname, dump->name, error_message(kret));
-            goto error;
-        }
-        if (dump->dump_policy &&
-            (kret = krb5_db_iter_policy( util_context, "*", dump->dump_policy,
-                                         &arglist))) {
-            fprintf(stderr, dumprec_err, progname, dump->name,
-                    error_message(kret));
-            goto error;
-        }
-        if (ofile && f != stdout) {
-            fclose(f);
-            finish_ofile(ofile, &tmpofile);
-            update_ok_file(util_context, ok_fd);
-        }
-        return;
-    }
-
-error:
-    krb5_db_unlock(util_context);
-    if (tmpofile != NULL)
-        unlink(tmpofile);
-    free(tmpofile);
-    exit_status++;
 }
 
 /*
@@ -2026,6 +1580,424 @@ process_r1_11_record(char *fname, krb5_context kcontext, FILE *filep,
     }
 
     return 0;
+}
+
+dump_version beta7_version = {
+    "Kerberos version 5",
+    "kdb5_util load_dump version 4\n",
+    0,
+    0,
+    0,
+    dump_k5beta7_princ,
+    dump_k5beta7_policy,
+    process_k5beta7_record,
+};
+dump_version ov_version = {
+    "OpenV*Secure V1.0",
+    "OpenV*Secure V1.0\t",
+    1,
+    0,
+    0,
+    dump_ov_princ,
+    dump_k5beta7_policy,
+    process_ov_record
+};
+dump_version r1_3_version = {
+    "Kerberos version 5 release 1.3",
+    "kdb5_util load_dump version 5\n",
+    0,
+    0,
+    0,
+    dump_k5beta7_princ_withpolicy,
+    dump_k5beta7_policy,
+    process_k5beta7_record,
+};
+dump_version r1_8_version = {
+    "Kerberos version 5 release 1.8",
+    "kdb5_util load_dump version 6\n",
+    0,
+    0,
+    0,
+    dump_k5beta7_princ_withpolicy,
+    dump_r1_8_policy,
+    process_r1_8_record,
+};
+dump_version r1_11_version = {
+    "Kerberos version 5 release 1.11",
+    "kdb5_util load_dump version 7\n",
+    0,
+    0,
+    0,
+    dump_k5beta7_princ_withpolicy,
+    dump_r1_11_policy,
+    process_r1_11_record,
+};
+dump_version iprop_version = {
+    "Kerberos iprop version",
+    "iprop",
+    0,
+    1,
+    0,
+    dump_k5beta7_princ_withpolicy,
+    dump_k5beta7_policy,
+    process_k5beta7_record,
+};
+dump_version ipropx_1_version = {
+    "Kerberos iprop extensible version",
+    "ipropx",
+    0,
+    1,
+    1,
+    dump_k5beta7_princ_withpolicy,
+    dump_r1_11_policy,
+    process_r1_11_record,
+};
+
+/*
+ * Read the dump header.  Returns 1 on success, 0 if the file is not a
+ * recognized iprop dump format.
+ */
+static int
+parse_iprop_header(char *buf, dump_version **dv, uint32_t *last_sno,
+                   uint32_t *last_seconds, uint32_t *last_useconds)
+{
+    char head[128];
+    int nread;
+    uint32_t u[4];
+    uint32_t *up = &u[0];
+
+    nread = sscanf(buf, "%127s %u %u %u %u", head, &u[0], &u[1], &u[2], &u[3]);
+    if (nread < 1)
+        return 0;
+
+    if (!strcmp(head, ipropx_1_version.header)) {
+        if (nread != 5)
+            return 0;
+        if (u[0] == IPROPX_VERSION_0)
+            *dv = &iprop_version;
+        else if (u[0] == IPROPX_VERSION_1)
+            *dv = &ipropx_1_version;
+        else {
+            fprintf(stderr, _("%s: Unknown iprop dump version %d\n"),
+                    progname, u[0]);
+            return 0;
+        }
+        up = &u[1];
+    } else if (!strcmp(head, iprop_version.header)) {
+        if (nread != 4)
+            return 0;
+        *dv = &iprop_version;
+    } else {
+        fprintf(stderr, "Invalid iprop header\n");
+        return 0;
+    }
+
+    *last_sno = *(up++);
+    *last_seconds = *(up++);
+    *last_useconds = *(up++);
+    return 1;
+}
+
+/*
+ * Return 1 if the {sno, timestamp} in an existing dump file is in the
+ * ulog, else return 0.
+ */
+static int
+current_dump_sno_in_ulog(char *ifile, kdb_hlog_t *ulog)
+{
+    dump_version *junk;
+    uint32_t last_sno, last_seconds, last_useconds;
+    char buf[BUFSIZ];
+    FILE *f;
+
+    if (ulog->kdb_last_sno == 0)
+        return 0;              /* nothing in ulog */
+
+    f = fopen(ifile, "r");
+    if (f == NULL)
+        return 0;              /* aliasing other errors to ENOENT here is OK */
+
+    if (fgets(buf, sizeof(buf), f) == NULL)
+        return errno ? -1 : 0;
+    fclose(f);
+
+    if (!parse_iprop_header(buf, &junk, &last_sno, &last_seconds,
+                            &last_useconds))
+        return 0;
+
+    if (ulog->kdb_first_sno > last_sno ||
+        ulog->kdb_first_time.seconds > last_seconds ||
+        (ulog->kdb_first_time.seconds == last_seconds &&
+        ulog->kdb_first_time.useconds > last_useconds))
+        return 0;
+
+    return 1;
+}
+
+/*
+ * usage is:
+ *      dump_db [-b7] [-ov] [-r13] [-r18] [-verbose] [-mkey_convert]
+ *              [-new_mkey_file mkey_file] [-rev] [-recurse]
+ *              [filename [principals...]]
+ */
+void
+dump_db(argc, argv)
+    int         argc;
+    char        **argv;
+{
+    FILE                *f;
+    struct dump_args    arglist;
+    char                *ofile;
+    char                *tmpofile = NULL;
+    krb5_error_code     kret, retval;
+    dump_version        *dump;
+    int                 aindex;
+    int                 conditional = 0;
+    int                 ok_fd = -1;
+    char                *new_mkey_file = 0;
+    bool_t              dump_sno = FALSE;
+    kdb_log_context     *log_ctx;
+    unsigned int        ipropx_version = IPROPX_VERSION_0;
+
+    /*
+     * Parse the arguments.
+     */
+    ofile = (char *) NULL;
+    dump = &r1_11_version;
+    arglist.flags = 0;
+    new_mkey_file = 0;
+    mkey_convert = 0;
+    backwards = 0;
+    recursive = 0;
+    log_ctx = util_context->kdblog_context;
+
+    /*
+     * Parse the qualifiers.
+     */
+    for (aindex = 1; aindex < argc; aindex++) {
+        if (!strcmp(argv[aindex], b7option))
+            dump = &beta7_version;
+        else if (!strcmp(argv[aindex], ovoption))
+            dump = &ov_version;
+        else if (!strcmp(argv[aindex], r13option))
+            dump = &r1_3_version;
+        else if (!strcmp(argv[aindex], r18option))
+            dump = &r1_8_version;
+        else if (!strncmp(argv[aindex], ipropoption, sizeof(ipropoption) - 1)) {
+            if (log_ctx && log_ctx->iproprole) {
+                /* Note: ipropx_version is the maximum version acceptable */
+                ipropx_version = atoi(argv[aindex] + sizeof(ipropoption) - 1);
+                dump = ipropx_version ? &ipropx_1_version : &iprop_version;
+                /*
+                 * dump_sno is used to indicate if the serial
+                 * # should be populated in the output
+                 * file to be used later by iprop for updating
+                 * the slave's update log when loading
+                 */
+                dump_sno = TRUE;
+                /*
+                 * FLAG_OMIT_NRA is set to indicate that non-replicated
+                 * attributes should be omitted.
+                 */
+                arglist.flags |= FLAG_OMIT_NRA;
+            } else {
+                fprintf(stderr, _("Iprop not enabled\n"));
+                goto error;
+            }
+        } else if (!strcmp(argv[aindex], conditionaloption))
+            conditional = 1;
+        else if (!strcmp(argv[aindex], verboseoption))
+            arglist.flags |= FLAG_VERBOSE;
+        else if (!strcmp(argv[aindex], "-mkey_convert"))
+            mkey_convert = 1;
+        else if (!strcmp(argv[aindex], "-new_mkey_file")) {
+            new_mkey_file = argv[++aindex];
+            mkey_convert = 1;
+        } else if (!strcmp(argv[aindex], "-rev"))
+            backwards = 1;
+        else if (!strcmp(argv[aindex], "-recurse"))
+            recursive = 1;
+        else
+            break;
+    }
+
+    arglist.names = (char **) NULL;
+    arglist.nnames = 0;
+    if (aindex < argc) {
+        ofile = argv[aindex];
+        aindex++;
+        if (aindex < argc) {
+            arglist.names = &argv[aindex];
+            arglist.nnames = argc - aindex;
+        }
+    }
+
+    /*
+     * If a conditional ipropx dump we check if the existing dump is
+     * good enough.
+     */
+    if (ofile != NULL && conditional) {
+        if (!dump->iprop) {
+            com_err(progname, 0,
+                    _("Conditional dump is an undocumented option for "
+                      "use only for iprop dumps"));
+            goto error;
+        }
+        if (current_dump_sno_in_ulog(ofile, log_ctx->ulog))
+            return;
+    }
+
+    /*
+     * Make sure the database is open.  The policy database only has
+     * to be opened if we try a dump that uses it.
+     */
+    if (!dbactive) {
+        com_err(progname, 0, _("Database not currently opened!"));
+        goto error;
+    }
+
+    /*
+     * If we're doing a master key conversion, set up for it.
+     */
+    if (mkey_convert) {
+        if (!valid_master_key) {
+            /* TRUE here means read the keyboard, but only once */
+            retval = krb5_db_fetch_mkey(util_context,
+                                        master_princ,
+                                        master_keyblock.enctype,
+                                        TRUE, FALSE,
+                                        (char *) NULL,
+                                        NULL, NULL,
+                                        &master_keyblock);
+            if (retval) {
+                com_err(progname, retval, _("while reading master key"));
+                exit(1);
+            }
+            retval = krb5_db_fetch_mkey_list(util_context, master_princ,
+                                             &master_keyblock);
+            if (retval) {
+                com_err(progname, retval, _("while verifying master key"));
+                exit(1);
+            }
+        }
+        new_master_keyblock.enctype = global_params.enctype;
+        if (new_master_keyblock.enctype == ENCTYPE_UNKNOWN)
+            new_master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
+
+        if (new_mkey_file) {
+            krb5_kvno kt_kvno;
+
+            if (global_params.mask & KADM5_CONFIG_KVNO)
+                kt_kvno = global_params.kvno;
+            else
+                kt_kvno = IGNORE_VNO;
+
+            if ((retval = krb5_db_fetch_mkey(util_context, master_princ,
+                                             new_master_keyblock.enctype,
+                                             FALSE,
+                                             FALSE,
+                                             new_mkey_file,
+                                             &kt_kvno,
+                                             NULL,
+                                             &new_master_keyblock))) {
+                com_err(progname, retval, _("while reading new master key"));
+                exit(1);
+            }
+        } else {
+            printf(_("Please enter new master key....\n"));
+            if ((retval = krb5_db_fetch_mkey(util_context, master_princ,
+                                             new_master_keyblock.enctype,
+                                             TRUE,
+                                             TRUE,
+                                             NULL, NULL, NULL,
+                                             &new_master_keyblock))) {
+                com_err(progname, retval, _("while reading new master key"));
+                exit(1);
+            }
+        }
+        /*
+         * get new master key vno that will be used to protect princs, used
+         * later on.
+         */
+        new_mkvno = get_next_kvno(util_context, master_entry);
+    }
+
+    kret = 0;
+
+    if (ofile && strcmp(ofile, "-")) {
+        /*
+         * Discourage accidental dumping to filenames beginning with '-'.
+         */
+        if (ofile[0] == '-')
+            usage();
+        if (!prep_ok_file(util_context, ofile, &ok_fd))
+            return;            /* prep_ok_file() bumps exit_status */
+        f = create_ofile(ofile, &tmpofile);
+        if (f == NULL) {
+            fprintf(stderr, ofopen_error,
+                    progname, ofile, error_message(errno));
+            goto error;
+        }
+    } else {
+        f = stdout;
+    }
+    if (f && !(kret)) {
+        arglist.programname = progname;
+        arglist.ofile = f;
+        arglist.kcontext = util_context;
+        fprintf(arglist.ofile, "%s", dump->header);
+
+        /*
+         * We grab the lock twice (once again in the iterator call),
+         * but that's ok since the lock func handles incr locks held.
+         */
+        kret = krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED);
+        if (kret != 0 && kret != KRB5_PLUGIN_OP_NOTSUPP) {
+            fprintf(stderr,
+                    _("%s: Couldn't grab lock\n"), progname);
+            goto error;
+        }
+
+        if (dump_sno) {
+            if (ipropx_version)
+                fprintf(f, " %u", IPROPX_VERSION);
+            fprintf(f, " %u", log_ctx->ulog->kdb_last_sno);
+            fprintf(f, " %u", log_ctx->ulog->kdb_last_time.seconds);
+            fprintf(f, " %u", log_ctx->ulog->kdb_last_time.useconds);
+        }
+
+        if (dump->header[strlen(dump->header)-1] != '\n')
+            fputc('\n', arglist.ofile);
+
+        if ((kret = krb5_db_iterate(util_context,
+                                    NULL,
+                                    dump->dump_princ,
+                                    (krb5_pointer) &arglist))) { /* TBD: backwards and recursive not supported */
+            fprintf(stderr, dumprec_err,
+                    progname, dump->name, error_message(kret));
+            goto error;
+        }
+        if (dump->dump_policy &&
+            (kret = krb5_db_iter_policy( util_context, "*", dump->dump_policy,
+                                         &arglist))) {
+            fprintf(stderr, dumprec_err, progname, dump->name,
+                    error_message(kret));
+            goto error;
+        }
+        if (ofile && f != stdout) {
+            fclose(f);
+            finish_ofile(ofile, &tmpofile);
+            update_ok_file(util_context, ok_fd);
+        }
+        return;
+    }
+
+error:
+    krb5_db_unlock(util_context);
+    if (tmpofile != NULL)
+        unlink(tmpofile);
+    free(tmpofile);
+    exit_status++;
 }
 
 /*
