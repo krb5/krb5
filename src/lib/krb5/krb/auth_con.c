@@ -334,8 +334,12 @@ krb5_auth_con_initivector(krb5_context context, krb5_auth_context auth_context)
 krb5_error_code
 krb5_auth_con_setivector(krb5_context context, krb5_auth_context auth_context, krb5_pointer ivector)
 {
-    auth_context->i_vector = ivector;
-    return 0;
+    /*
+     * This function was part of the pre-1.2.2 API.  Because it aliased the
+     * caller's memory into auth_context, and doesn't provide the size of the
+     * cipher state, it's inconvenient to support now, so return an error.
+     */
+    return EINVAL;
 }
 
 krb5_error_code
