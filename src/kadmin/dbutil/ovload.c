@@ -96,9 +96,9 @@ done:
  *      [modifies]
  *
  */
-int process_ov_principal(fname, kcontext, filep, verbose, linenop)
-    char                *fname;
+int process_ov_principal(kcontext, fname, filep, verbose, linenop)
     krb5_context        kcontext;
+    const char          *fname;
     FILE                *filep;
     int                 verbose;
     int                 *linenop;

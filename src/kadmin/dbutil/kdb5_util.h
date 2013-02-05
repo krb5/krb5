@@ -70,7 +70,7 @@ extern int create_db_entry (krb5_principal, krb5_db_entry *);
 extern int kadm5_create_magic_princs (kadm5_config_params *params,
                                       krb5_context context);
 
-extern int process_ov_principal (char *fname, krb5_context kcontext,
+extern int process_ov_principal (krb5_context kcontext, const char *fname,
                                  FILE *filep, int verbose,
                                  int *linenop);
 

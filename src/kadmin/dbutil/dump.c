@@ -1,8 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* kadmin/dbutil/dump.c - Dump a KDC database */
 /*
- * Copyright 1990,1991,2001,2006,2008,2009 by the Massachusetts Institute of
- * Technology.  All Rights Reserved.
+ * Copyright 1990,1991,2001,2006,2008,2009,2013 by the Massachusetts Institute
+ * of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -39,43 +39,36 @@
 #include <regex.h>
 #endif  /* HAVE_REGEX_H */
 
-/*
- * Needed for master key conversion.
- */
-static int                      mkey_convert;
-krb5_keyblock                   new_master_keyblock;
-krb5_kvno                       new_mkvno;
+/* Needed for master key conversion. */
+static int mkey_convert;
+krb5_keyblock new_master_keyblock;
+krb5_kvno new_mkvno;
 
-static int      backwards;
-static int      recursive;
+#define K5Q1(x) #x
+#define K5Q(x) K5Q1(x)
+#define K5CONST_WIDTH_SCANF_STR(x) "%" K5Q(x) "s"
 
-#define K5Q1(x)                     #x
-#define K5Q(x)                      K5Q1(x)
-#define K5CONST_WIDTH_SCANF_STR(x)  "%" K5Q(x) "s"
-
-/*
- * Use compile(3) if no regcomp present.
- */
-#if     !defined(HAVE_REGCOMP) && defined(HAVE_REGEXP_H)
-#define INIT            char *sp = instring;
-#define GETC()          (*sp++)
-#define PEEKC()         (*sp)
-#define UNGETC(c)       (--sp)
-#define RETURN(c)       return(c)
+/* Use compile(3) if no regcomp present. */
+#if !defined(HAVE_REGCOMP) && defined(HAVE_REGEXP_H)
+#define INIT char *sp = instring;
+#define GETC() (*sp++)
+#define PEEKC() (*sp)
+#define UNGETC(c) (--sp)
+#define RETURN(c) return(c)
 #define ERROR(c)
-#define RE_BUF_SIZE     1024
+#define RE_BUF_SIZE 1024
 #include <regexp.h>
-#endif  /* !HAVE_REGCOMP && HAVE_REGEXP_H */
+#endif /* !HAVE_REGCOMP && HAVE_REGEXP_H */
 
 #define FLAG_VERBOSE    0x1     /* be verbose */
 #define FLAG_UPDATE     0x2     /* processing an update */
 #define FLAG_OMIT_NRA   0x4     /* avoid dumping non-replicated attrs */
 
-typedef krb5_error_code (*dump_func)(krb5_context, krb5_db_entry *,
-                                     const char *, FILE *, int);
-
-typedef krb5_error_code (*load_func)(char *, krb5_context,
-                                     FILE *, int, int *);
+typedef krb5_error_code (*dump_func)(krb5_context context,
+                                     krb5_db_entry *entry, const char *name,
+                                     FILE *fp, int flags);
+typedef int (*load_func)(krb5_context context, const char *dumpfile, FILE *fp,
+                         int flags, int *linenop);
 
 typedef struct _dump_version {
     char *name;
@@ -89,150 +82,67 @@ typedef struct _dump_version {
 } dump_version;
 
 struct dump_args {
-    char                *programname;
-    FILE                *ofile;
-    krb5_context        kcontext;
-    char                **names;
-    int                 nnames;
-    int                 flags;
-    dump_version        *dump;
+    FILE *ofile;
+    krb5_context context;
+    char **names;
+    int nnames;
+    int flags;
+    dump_version *dump;
 };
 
 /* External data */
-extern char             *current_dbname;
-extern krb5_boolean     dbactive;
-extern int              exit_status;
-extern krb5_context     util_context;
-extern kadm5_config_params global_params;
-extern krb5_db_entry      *master_entry;
-
-/* Strings */
-
-#define k5beta_dump_header      "kdb5_edit load_dump version 2.0\n"
-
-static const char null_mprinc_name[] = "kdb5_dump@MISSING";
-
-/* Message strings */
-#define regex_err         _("%s: regular expression error - %s\n")
-#define regex_merr        _("%s: regular expression match error - %s\n")
-#define pname_unp_err     _("%s: cannot unparse principal name (%s)\n")
-#define mname_unp_err     _("%s: cannot unparse modifier name (%s)\n")
-#define nokeys_err        _("%s: cannot find any standard key for %s\n")
-#define sdump_tl_inc_err  _("%s: tagged data list inconsistency for %s (counted %d, stored %d)\n")
-#define ofopen_error      _("%s: cannot open %s for writing (%s)\n")
-#define oflock_error      _("%s: cannot lock %s (%s)\n")
-#define dumprec_err       _("%s: error performing %s dump (%s)\n")
-#define trash_end_fmt     _("%s(%d): ignoring trash at end of line: ")
-#define read_nomem        _("entry (out of memory)")
-#define read_header       _("dump entry header")
-#define read_negint       _("dump entry (unexpected negative numeric field)")
-#define read_name_string  _("name string")
-#define read_key_type     _("key type")
-#define read_key_data     _("key data")
-#define read_pr_data1     _("first set of principal attributes")
-#define read_mod_name     _("modifier name")
-#define read_pr_data2     _("second set of principal attributes")
-#define read_salt_data    _("salt data")
-#define read_akey_type    _("alternate key type")
-#define read_akey_data    _("alternate key data")
-#define read_asalt_type   _("alternate salt type")
-#define read_asalt_data   _("alternate salt data")
-#define read_exp_data     _("expansion data")
-#define store_err_fmt     _("%s(%d): cannot store %s(%s)\n")
-#define add_princ_fmt     _("%s\n")
-#define parse_err_fmt     _("%s(%d): cannot parse %s (%s)\n")
-#define read_err_fmt      _("%s(%d): cannot read %s\n")
-#define no_mem_fmt        _("%s(%d): no memory for buffers\n")
-#define rhead_err_fmt     _("%s(%d): cannot match size tokens\n")
-#define err_line_fmt      _("%s: error processing line %d of %s\n")
-#define head_bad_fmt      _("%s: dump header bad in %s\n")
-#define read_nint_data    _("principal static attributes")
-#define read_tcontents    _("tagged data contents")
-#define read_ttypelen     _("tagged data type and length")
-#define read_kcontents    _("key data contents")
-#define read_ktypelen     _("key data type and length")
-#define read_econtents    _("extra data contents")
-#define no_name_mem_fmt   _("%s: cannot get memory for temporary name\n")
-#define ctx_err_fmt       _("%s: cannot initialize Kerberos context\n")
-#define stdin_name        _("standard input")
-#define remaster_err_fmt  _("while re-encoding keys for principal %s with new master key")
-#define restfail_fmt      _("%s: %s restore failed\n")
-#define close_err_fmt     _("%s: cannot close database (%s)\n")
-#define dbinit_err_fmt    _("%s: cannot initialize database (%s)\n")
-#define dbdelerr_fmt      _("%s: cannot delete bad database %s (%s)\n")
-#define dbunlockerr_fmt   _("%s: cannot unlock database %s (%s)\n")
-#define dbcreaterr_fmt    _("%s: cannot create database %s (%s)\n")
-#define dfile_err_fmt     _("%s: cannot open %s (%s)\n")
-
-static const char b7option[] = "-b7";
-static const char ipropoption[] = "-i";
-static const char conditionaloption[] = "-c";
-static const char verboseoption[] = "-verbose";
-static const char updateoption[] = "-update";
-static const char hashoption[] = "-hash";
-static const char ovoption[] = "-ov";
-static const char r13option[] = "-r13";
-static const char r18option[] = "-r18";
-static const char dump_tmptrail[] = "~";
+extern krb5_db_entry *master_entry;
 
 /*
  * Re-encrypt the key_data with the new master key...
  */
-krb5_error_code master_key_convert(context, db_entry)
-    krb5_context          context;
-    krb5_db_entry       * db_entry;
+krb5_error_code
+master_key_convert(krb5_context context, krb5_db_entry *db_entry)
 {
-    krb5_error_code     retval;
-    krb5_keyblock       v5plainkey, *key_ptr;
-    krb5_keysalt        keysalt;
-    int       i, j;
-    krb5_key_data       new_key_data, *key_data;
-    krb5_boolean        is_mkey;
-    krb5_kvno           kvno;
+    krb5_error_code retval;
+    krb5_keyblock v5plainkey, *key_ptr, *tmp_mkey;
+    krb5_keysalt keysalt;
+    krb5_key_data new_key_data, *key_data;
+    krb5_boolean is_mkey;
+    krb5_kvno kvno;
+    int i, j;
 
     is_mkey = krb5_principal_compare(context, master_princ, db_entry->princ);
 
     if (is_mkey) {
-        retval = add_new_mkey(context, db_entry, &new_master_keyblock, new_mkvno);
-        if (retval)
-            return retval;
-    } else {
-        for (i=0; i < db_entry->n_key_data; i++) {
-            krb5_keyblock   *tmp_mkey;
-
-            key_data = &db_entry->key_data[i];
-            retval = krb5_dbe_find_mkey(context, db_entry, &tmp_mkey);
-            if (retval)
-                return retval;
-            retval = krb5_dbe_decrypt_key_data(context, tmp_mkey, key_data,
-                                               &v5plainkey, &keysalt);
-            if (retval)
-                return retval;
-
-            memset(&new_key_data, 0, sizeof(new_key_data));
-
-            key_ptr = &v5plainkey;
-            kvno = (krb5_kvno) key_data->key_data_kvno;
-
-            retval = krb5_dbe_encrypt_key_data(context, &new_master_keyblock,
-                                               key_ptr, &keysalt, (int) kvno,
-                                               &new_key_data);
-            if (retval)
-                return retval;
-            krb5_free_keyblock_contents(context, &v5plainkey);
-            for (j = 0; j < key_data->key_data_ver; j++) {
-                if (key_data->key_data_length[j]) {
-                    free(key_data->key_data_contents[j]);
-                }
-            }
-            *key_data = new_key_data;
-        }
-        assert(new_mkvno > 0);
-        retval = krb5_dbe_update_mkvno(context, db_entry, new_mkvno);
-        if (retval)
-            return retval;
+        return add_new_mkey(context, db_entry, &new_master_keyblock,
+                            new_mkvno);
     }
-    return 0;
+
+    for (i = 0; i < db_entry->n_key_data; i++) {
+        key_data = &db_entry->key_data[i];
+        retval = krb5_dbe_find_mkey(context, db_entry, &tmp_mkey);
+        if (retval)
+            return retval;
+        retval = krb5_dbe_decrypt_key_data(context, tmp_mkey, key_data,
+                                           &v5plainkey, &keysalt);
+        if (retval)
+            return retval;
+
+        memset(&new_key_data, 0, sizeof(new_key_data));
+
+        key_ptr = &v5plainkey;
+        kvno = key_data->key_data_kvno;
+
+        retval = krb5_dbe_encrypt_key_data(context, &new_master_keyblock,
+                                           key_ptr, &keysalt, kvno,
+                                           &new_key_data);
+        if (retval)
+            return retval;
+        krb5_free_keyblock_contents(context, &v5plainkey);
+        for (j = 0; j < key_data->key_data_ver; j++) {
+            if (key_data->key_data_length[j])
+                free(key_data->key_data_contents[j]);
+        }
+        *key_data = new_key_data;
+    }
+    assert(new_mkvno > 0);
+    return krb5_dbe_update_mkvno(context, db_entry, new_mkvno);
 }
 
 /* Create temp file for new dump to be named ofile. */
@@ -255,14 +165,13 @@ create_ofile(char *ofile, char **tmpname)
         return f;
 
 error:
-    com_err(progname, errno,
-            _("while allocating temporary filename dump"));
+    com_err(progname, errno, _("while allocating temporary filename dump"));
     if (fd >= 0)
         unlink(*tmpname);
     exit(1);
 }
 
-/* Rename new dump file into place */
+/* Rename new dump file into place. */
 static void
 finish_ofile(char *ofile, char **tmpname)
 {
@@ -278,7 +187,7 @@ finish_ofile(char *ofile, char **tmpname)
 static int
 prep_ok_file(krb5_context context, char *file_name, int *fd)
 {
-    static char ok[]=".dump_ok";
+    static char ok[] = ".dump_ok";
     krb5_error_code retval;
     char *file_ok;
 
@@ -314,122 +223,74 @@ update_ok_file(krb5_context context, int fd)
     close(fd);
 }
 
-/*
- * name_matches()       - See if a principal name matches a regular expression
- *                        or string.
- */
+/* Return true if a principal name matches a regular expression or string. */
 static int
-name_matches(name, arglist)
-    char                *name;
-    struct dump_args    *arglist;
+name_matches(char *name, struct dump_args *args)
 {
-#if     HAVE_REGCOMP
-    regex_t     match_exp;
-    regmatch_t  match_match;
-    int         match_error;
-    char        match_errmsg[BUFSIZ];
-    size_t      errmsg_size;
+#if HAVE_REGCOMP
+    regex_t reg;
+    regmatch_t rmatch;
+    int st;
+    char errmsg[BUFSIZ];
 #elif   HAVE_REGEXP_H
-    char        regexp_buffer[RE_BUF_SIZE];
+    char regexp_buffer[RE_BUF_SIZE];
 #elif   HAVE_RE_COMP
     extern char *re_comp();
-    char        *re_result;
+    char *re_result;
 #endif  /* HAVE_RE_COMP */
-    int         i, match;
+    int i, match;
 
-    /*
-     * Plow, brute force, through the list of names/regular expressions.
-     */
-    match = (arglist->nnames) ? 0 : 1;
-    for (i=0; i<arglist->nnames; i++) {
-#if     HAVE_REGCOMP
-        /*
-         * Compile the regular expression.
-         */
-        match_error = regcomp(&match_exp, arglist->names[i], REG_EXTENDED);
-        if (match_error) {
-            errmsg_size = regerror(match_error,
-                                   &match_exp,
-                                   match_errmsg,
-                                   sizeof(match_errmsg));
-            fprintf(stderr, regex_err, arglist->programname, match_errmsg);
+    /* Check each regular expression in args. */
+    match = args->nnames ? 0 : 1;
+    for (i = 0; i < args->nnames && !match; i++) {
+#if HAVE_REGCOMP
+        /* Compile the regular expression. */
+        st = regcomp(&reg, args->names[i], REG_EXTENDED);
+        if (st) {
+            regerror(st, &reg, errmsg, sizeof(errmsg));
+            fprintf(stderr, _("%s: regular expression error: %s\n"), progname,
+                    errmsg);
             break;
         }
-        /*
-         * See if we have a match.
-         */
-        match_error = regexec(&match_exp, name, 1, &match_match, 0);
-        if (match_error) {
-            if (match_error != REG_NOMATCH) {
-                errmsg_size = regerror(match_error,
-                                       &match_exp,
-                                       match_errmsg,
-                                       sizeof(match_errmsg));
-                fprintf(stderr, regex_merr,
-                        arglist->programname, match_errmsg);
-                break;
-            }
-        }
-        else {
-            /*
-             * We have a match.  See if it matches the whole
-             * name.
-             */
-            if ((match_match.rm_so == 0) &&
-                ((size_t)match_match.rm_eo == strlen(name)))
+        /* See if we have a match. */
+        st = regexec(&reg, name, 1, &rmatch, 0);
+        if (st == 0) {
+            /* See if it matches the whole name. */
+            if (rmatch.rm_so == 0 && (size_t)rmatch.rm_eo == strlen(name))
                 match = 1;
+        } else if (st != REG_NOMATCH) {
+            regerror(st, &reg, errmsg, sizeof(errmsg));
+            fprintf(stderr, _("%s: regular expression match error: %s\n"),
+                    progname, errmsg);
+            break;
         }
-        regfree(&match_exp);
-#elif   HAVE_REGEXP_H
-        /*
-         * Compile the regular expression.
-         */
-        compile(arglist->names[i],
-                regexp_buffer,
-                &regexp_buffer[RE_BUF_SIZE],
+        regfree(&reg);
+#elif HAVE_REGEXP_H
+        /* Compile the regular expression. */
+        compile(args->names[i], regexp_buffer, &regexp_buffer[RE_BUF_SIZE],
                 '\0');
         if (step(name, regexp_buffer)) {
-            if ((loc1 == name) &&
-                (loc2 == &name[strlen(name)]))
+            if (loc1 == name && loc2 == &name[strlen(name)])
                 match = 1;
         }
-#elif   HAVE_RE_COMP
-        /*
-         * Compile the regular expression.
-         */
-        if (re_result = re_comp(arglist->names[i])) {
-            fprintf(stderr, regex_err, arglist->programname, re_result);
+#elif HAVE_RE_COMP
+        /* Compile the regular expression. */
+        re_result = re_comp(args->names[i]);
+        if (re_result) {
+            fprintf(stderr, _("%s: regular expression error: %s\n"), progname,
+                    re_result);
             break;
         }
         if (re_exec(name))
             match = 1;
-#else   /* HAVE_RE_COMP */
-        /*
-         * If no regular expression support, then just compare the strings.
-         */
-        if (!strcmp(arglist->names[i], name))
+#else /* HAVE_RE_COMP */
+        /* If no regular expression support, then just compare the strings. */
+        if (!strcmp(args->names[i], name))
             match = 1;
-#endif  /* HAVE_REGCOMP */
-        if (match)
-            break;
+#endif /* HAVE_REGCOMP */
     }
-    return(match);
+    return match;
 }
-
-#if 0
-/*
- * dump_k5beta_header() - Make a dump header that is recognizable by Kerberos
- *                        Version 5 Beta 5 and previous releases.
- */
-static krb5_error_code
-dump_k5beta_header(arglist)
-    struct dump_args *arglist;
-{
-    /* The old header consists of the leading string */
-    fprintf(arglist->ofile, k5beta_dump_header);
-    return(0);
-}
-#endif
 
 /* Output "-1" if len is 0; otherwise output len bytes of data in hex. */
 static void
@@ -444,7 +305,7 @@ dump_octets_or_minus1(FILE *fp, unsigned char *data, size_t len)
 }
 
 /*
- * Dumps TL data; common to principals and policies.
+ * Dump TL data; common to principals and policies.
  *
  * If filter_kadm then the KRB5_TL_KADM_DATA (where a principal's policy
  * name is stored) is filtered out.  This is for dump formats that don't
@@ -453,134 +314,100 @@ dump_octets_or_minus1(FILE *fp, unsigned char *data, size_t len)
 static void
 dump_tl_data(FILE *ofile, krb5_tl_data *tlp, krb5_boolean filter_kadm)
 {
-    for (; tlp; tlp = tlp->tl_data_next) {
+    for (; tlp != NULL; tlp = tlp->tl_data_next) {
         if (tlp->tl_data_type == KRB5_TL_KADM_DATA && filter_kadm)
             continue;
-        fprintf(ofile, "\t%d\t%d\t",
-                (int) tlp->tl_data_type,
-                (int) tlp->tl_data_length);
+        fprintf(ofile, "\t%d\t%d\t", (int)tlp->tl_data_type,
+                (int)tlp->tl_data_length);
         dump_octets_or_minus1(ofile, tlp->tl_data_contents,
                               tlp->tl_data_length);
     }
 }
 
+/* Dump a principal entry in krb5 beta 7 format.  Omit kadmin tl-data if kadm
+ * is false. */
 static krb5_error_code
 k5beta7_common(krb5_context context, krb5_db_entry *entry,
                const char *name, FILE *fp, int flags, krb5_boolean kadm)
 {
-    krb5_error_code     retval = 0;
-    krb5_tl_data        *tlp;
-    krb5_key_data       *kdata;
-    int                 counter, skip, i;
+    krb5_tl_data *tlp;
+    krb5_key_data *kdata;
+    int counter, skip, i;
 
     /*
-     * If we don't have any match strings, or if our name matches, then
-     * proceed with the dump, otherwise, just forget about it.
+     * The dump format is as follows:
+     *      len strlen(name) n_tl_data n_key_data e_length
+     *      name
+     *      attributes max_life max_renewable_life expiration
+     *      pw_expiration last_success last_failed fail_auth_count
+     *      n_tl_data*[type length <contents>]
+     *      n_key_data*[ver kvno ver*(type length <contents>)]
+     *      <e_data>
+     * Fields which are not encapsulated by angle-brackets are to appear
+     * verbatim.  A bracketed field's absence is indicated by a -1 in its
+     * place.
      */
-    if (TRUE) {
-        /*
-         * We'd like to just blast out the contents as they would appear in
-         * the database so that we can just suck it back in, but it doesn't
-         * lend itself to easy editing.
-         */
 
-        /*
-         * The dump format is as follows:
-         *      len strlen(name) n_tl_data n_key_data e_length
-         *      name
-         *      attributes max_life max_renewable_life expiration
-         *      pw_expiration last_success last_failed fail_auth_count
-         *      n_tl_data*[type length <contents>]
-         *      n_key_data*[ver kvno ver*(type length <contents>)]
-         *      <e_data>
-         * Fields which are not encapsulated by angle-brackets are to appear
-         * verbatim.  A bracketed field's absence is indicated by a -1 in its
-         * place
-         */
+    /* Make sure that the tagged list is reasonably correct. */
+    counter = skip = 0;
+    for (tlp = entry->tl_data; tlp; tlp = tlp->tl_data_next) {
+        /* Don't dump tl data types we know aren't understood by earlier
+         * versions. */
+        if (tlp->tl_data_type == KRB5_TL_KADM_DATA && !kadm)
+            skip++;
+        else
+            counter++;
+    }
 
-        /*
-         * Make sure that the tagged list is reasonably correct.
-         */
-        counter = skip = 0;
-        for (tlp = entry->tl_data; tlp; tlp = tlp->tl_data_next) {
-            /*
-             * don't dump tl data types we know aren't understood by
-             * earlier revisions [krb5-admin/89]
-             */
-            switch (tlp->tl_data_type) {
-            case KRB5_TL_KADM_DATA:
-                if (kadm)
-                    counter++;
-                else
-                    skip++;
-                break;
-            default:
-                counter++;
-                break;
-            }
-        }
+    if (counter + skip != entry->n_tl_data) {
+        fprintf(stderr, _("%s: tagged data list inconsistency for %s "
+                          "(counted %d, stored %d)\n"), progname, name,
+                counter + skip, (int)entry->n_tl_data);
+        return EINVAL;
+    }
 
-        if (counter + skip == entry->n_tl_data) {
-            /* Pound out header */
-            fprintf(fp, "princ\t%d\t%lu\t%d\t%d\t%d\t%s\t",
-                    (int) entry->len,
-                    (unsigned long) strlen(name),
-                    counter,
-                    (int) entry->n_key_data,
-                    (int) entry->e_length,
-                    name);
-            fprintf(fp, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
-                    entry->attributes,
-                    entry->max_life,
-                    entry->max_renewable_life,
-                    entry->expiration,
-                    entry->pw_expiration,
-                    (flags & FLAG_OMIT_NRA) ? 0 : entry->last_success,
-                    (flags & FLAG_OMIT_NRA) ? 0 : entry->last_failed,
-                    (flags & FLAG_OMIT_NRA) ? 0 : entry->fail_auth_count);
+    /* Write out header. */
+    fprintf(fp, "princ\t%d\t%lu\t%d\t%d\t%d\t%s\t", (int)entry->len,
+            (unsigned long)strlen(name), counter, (int)entry->n_key_data,
+            (int)entry->e_length, name);
+    fprintf(fp, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d", entry->attributes,
+            entry->max_life, entry->max_renewable_life, entry->expiration,
+            entry->pw_expiration,
+            (flags & FLAG_OMIT_NRA) ? 0 : entry->last_success,
+            (flags & FLAG_OMIT_NRA) ? 0 : entry->last_failed,
+            (flags & FLAG_OMIT_NRA) ? 0 : entry->fail_auth_count);
 
-            /* Pound out tagged data. */
-            dump_tl_data(fp, entry->tl_data, !kadm);
+    /* Write out tagged data. */
+    dump_tl_data(fp, entry->tl_data, !kadm);
+    fprintf(fp, "\t");
+
+    /* Write out key data. */
+    for (counter = 0; counter < entry->n_key_data; counter++) {
+        kdata = &entry->key_data[counter];
+        fprintf(fp, "%d\t%d\t", (int)kdata->key_data_ver,
+                (int)kdata->key_data_kvno);
+        for (i = 0; i < kdata->key_data_ver; i++) {
+            fprintf(fp, "%d\t%d\t", kdata->key_data_type[i],
+                    kdata->key_data_length[i]);
+            dump_octets_or_minus1(fp, kdata->key_data_contents[i],
+                                  kdata->key_data_length[i]);
             fprintf(fp, "\t");
-
-            /* Pound out key data */
-            for (counter=0; counter<entry->n_key_data; counter++) {
-                kdata = &entry->key_data[counter];
-                fprintf(fp, "%d\t%d\t",
-                        (int) kdata->key_data_ver,
-                        (int) kdata->key_data_kvno);
-                for (i=0; i<kdata->key_data_ver; i++) {
-                    fprintf(fp, "%d\t%d\t",
-                            kdata->key_data_type[i],
-                            kdata->key_data_length[i]);
-                    dump_octets_or_minus1(fp, kdata->key_data_contents[i],
-                                          kdata->key_data_length[i]);
-                    fprintf(fp, "\t");
-                }
-            }
-
-            /* Pound out extra data */
-            dump_octets_or_minus1(fp, entry->e_data, entry->e_length);
-
-            /* Print trailer */
-            fprintf(fp, ";\n");
-
-            if (flags & FLAG_VERBOSE)
-                fprintf(stderr, "%s\n", name);
-        }
-        else {
-            fprintf(stderr, sdump_tl_inc_err,
-                    progname, name, counter+skip,
-                    (int) entry->n_tl_data);
-            retval = EINVAL;
         }
     }
-    return(retval);
+
+    /* Write out extra data. */
+    dump_octets_or_minus1(fp, entry->e_data, entry->e_length);
+
+    /* Write trailer. */
+    fprintf(fp, ";\n");
+
+    if (flags & FLAG_VERBOSE)
+        fprintf(stderr, "%s\n", name);
+
+    return 0;
 }
 
-/*
- * dump_k5beta7_iterator()      - Output a dump record in krb5b7 format.
- */
+/* Output a dump record in krb5b7 format. */
 static krb5_error_code
 dump_k5beta7_princ(krb5_context context, krb5_db_entry *entry,
                    const char *name, FILE *fp, int flags)
@@ -595,44 +422,39 @@ dump_k5beta7_princ_withpolicy(krb5_context context, krb5_db_entry *entry,
     return k5beta7_common(context, entry, name, fp, flags, TRUE);
 }
 
-static void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
+static void
+dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
 {
-    struct dump_args *arg;
+    struct dump_args *arg = data;
 
-    arg = (struct dump_args *) data;
     fprintf(arg->ofile, "policy\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n", entry->name,
             entry->pw_min_life, entry->pw_max_life, entry->pw_min_length,
             entry->pw_min_classes, entry->pw_history_num, 0);
 }
 
-static void dump_r1_8_policy(void *data, osa_policy_ent_t entry)
+static void
+dump_r1_8_policy(void *data, osa_policy_ent_t entry)
 {
-    struct dump_args *arg;
+    struct dump_args *arg = data;
 
-    arg = (struct dump_args *) data;
     fprintf(arg->ofile, "policy\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
-            entry->name,
-            entry->pw_min_life, entry->pw_max_life, entry->pw_min_length,
-            entry->pw_min_classes, entry->pw_history_num, 0,
-            entry->pw_max_fail, entry->pw_failcnt_interval,
+            entry->name, entry->pw_min_life, entry->pw_max_life,
+            entry->pw_min_length, entry->pw_min_classes, entry->pw_history_num,
+            0, entry->pw_max_fail, entry->pw_failcnt_interval,
             entry->pw_lockout_duration);
 }
 
 static void
 dump_r1_11_policy(void *data, osa_policy_ent_t entry)
 {
-    struct dump_args *arg;
+    struct dump_args *arg = data;
 
-    arg = (struct dump_args *) data;
-    fprintf(arg->ofile,
-            "policy\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
-            "%d\t%d\t%d\t%s\t%d",
-            entry->name,
-            entry->pw_min_life, entry->pw_max_life, entry->pw_min_length,
-            entry->pw_min_classes, entry->pw_history_num, 0,
-            entry->pw_max_fail, entry->pw_failcnt_interval,
-            entry->pw_lockout_duration, entry->attributes, entry->max_life,
-            entry->max_renewable_life,
+    fprintf(arg->ofile, "policy\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
+            "%d\t%d\t%d\t%s\t%d", entry->name, entry->pw_min_life,
+            entry->pw_max_life, entry->pw_min_length, entry->pw_min_classes,
+            entry->pw_history_num, 0, entry->pw_max_fail,
+            entry->pw_failcnt_interval, entry->pw_lockout_duration,
+            entry->attributes, entry->max_life, entry->max_renewable_life,
             entry->allowed_keysalts ? entry->allowed_keysalts : "-",
             entry->n_tl_data);
 
@@ -640,42 +462,20 @@ dump_r1_11_policy(void *data, osa_policy_ent_t entry)
     fprintf(arg->ofile, "\n");
 }
 
-static void print_key_data(FILE *f, krb5_key_data *key_data)
+static void
+print_key_data(FILE *f, krb5_key_data *kd)
 {
     int c;
 
-    fprintf(f, "%d\t%d\t", key_data->key_data_type[0],
-            key_data->key_data_length[0]);
-    for(c = 0; c < key_data->key_data_length[0]; c++)
-        fprintf(f, "%02x ",
-                key_data->key_data_contents[0][c]);
+    fprintf(f, "%d\t%d\t", kd->key_data_type[0], kd->key_data_length[0]);
+    for (c = 0; c < kd->key_data_length[0]; c++)
+        fprintf(f, "%02x ", kd->key_data_contents[0][c]);
 }
 
-/*
- * Function: print_princ
- *
- * Purpose: output osa_adb_princ_ent data in a human
- *          readable format (which is a format suitable for
- *          ovsec_adm_import consumption)
- *
- * Arguments:
- *      data            (input) pointer to a structure containing a FILE *
- *                              and a record counter.
- *      entry           (input) entry to get dumped.
- *      <return value>  void
- *
- * Requires:
- *      nuttin
- *
- * Effects:
- *      writes data to the specified file pointerp.
- *
- * Modifies:
- *      nuttin
- *
- */
+/* Output osa_adb_princ_ent data in a printable serialized format, suitable for
+ * ovsec_adm_import consumption. */
 static krb5_error_code
-dump_ov_princ(krb5_context context, krb5_db_entry *kdb, const char *name,
+dump_ov_princ(krb5_context context, krb5_db_entry *entry, const char *name,
               FILE *fp, int flags)
 {
     char *princstr;
@@ -684,45 +484,35 @@ dump_ov_princ(krb5_context context, krb5_db_entry *kdb, const char *name,
     krb5_tl_data tl_data;
     osa_princ_ent_rec adb;
     XDR xdrs;
+    krb5_key_data *key_data;
 
-    /*
-     * XXX Currently, lookup_tl_data always returns zero; it sets
-     * tl_data->tl_data_length to zero if the type isn't found.
-     * This should be fixed...
-     */
-    /*
-     * XXX Should this function do nothing for a principal with no
-     * admin data, or print a record of "default" values?   See
-     * comment in server_kdb.c to help decide.
-     */
     tl_data.tl_data_type = KRB5_TL_KADM_DATA;
-    if (krb5_dbe_lookup_tl_data(context, kdb, &tl_data)
-        || (tl_data.tl_data_length == 0))
+    if (krb5_dbe_lookup_tl_data(context, entry, &tl_data) ||
+        tl_data.tl_data_length == 0)
         return 0;
 
     memset(&adb, 0, sizeof(adb));
     xdrmem_create(&xdrs, (caddr_t)tl_data.tl_data_contents,
                   tl_data.tl_data_length, XDR_DECODE);
-    if (! xdr_osa_princ_ent_rec(&xdrs, &adb)) {
+    if (!xdr_osa_princ_ent_rec(&xdrs, &adb)) {
         xdr_destroy(&xdrs);
-        return(KADM5_XDR_FAILURE);
+        return KADM5_XDR_FAILURE;
     }
     xdr_destroy(&xdrs);
 
-    krb5_unparse_name(context, kdb->princ, &princstr);
+    krb5_unparse_name(context, entry->princ, &princstr);
     fprintf(fp, "princ\t%s\t", princstr);
-    if(adb.policy == NULL)
+    if (adb.policy == NULL)
         fputc('\t', fp);
     else
         fprintf(fp, "%s\t", adb.policy);
-    fprintf(fp, "%lx\t%d\t%d\t%d", adb.aux_attributes,
-            adb.old_key_len,adb.old_key_next, adb.admin_history_kvno);
+    fprintf(fp, "%lx\t%d\t%d\t%d", adb.aux_attributes, adb.old_key_len,
+            adb.old_key_next, adb.admin_history_kvno);
 
     for (x = 0; x < adb.old_key_len; x++) {
         foundcrc = 0;
         for (y = 0; y < adb.old_keys[x].n_key_data; y++) {
-            krb5_key_data *key_data = &adb.old_keys[x].key_data[y];
-
+            key_data = &adb.old_keys[x].key_data[y];
             if (key_data->key_data_type[0] != ENCTYPE_DES_CBC_CRC)
                 continue;
             if (foundcrc) {
@@ -755,7 +545,7 @@ dump_iterator(void *ptr, krb5_db_entry *entry)
     struct dump_args *args = ptr;
     char *name;
 
-    ret = krb5_unparse_name(args->kcontext, entry->princ, &name);
+    ret = krb5_unparse_name(args->context, entry->princ, &name);
     if (ret) {
         com_err(progname, ret, _("while unparsing principal name"));
         return ret;
@@ -763,7 +553,7 @@ dump_iterator(void *ptr, krb5_db_entry *entry)
 
     /* Re-encode the keys in the new master key, if necessary. */
     if (mkey_convert) {
-        ret = master_key_convert(args->kcontext, entry);
+        ret = master_key_convert(args->context, entry);
         if (ret) {
             com_err(progname, ret, _("while converting %s to new master key"),
                     name);
@@ -775,7 +565,7 @@ dump_iterator(void *ptr, krb5_db_entry *entry)
     if (args->nnames > 0 && !name_matches(name, args))
         goto cleanup;
 
-    ret = args->dump->dump_princ(args->kcontext, entry, name, args->ofile,
+    ret = args->dump->dump_princ(args->context, entry, name, args->ofile,
                                  args->flags);
 
 cleanup:
@@ -783,70 +573,54 @@ cleanup:
     return ret;
 }
 
-/*
- * Read a string of bytes while counting the number of lines passed.
- */
-static int
-read_string(f, buf, len, lp)
-    FILE        *f;
-    char        *buf;
-    int         len;
-    int         *lp;
+static inline void
+load_err(const char *fname, int lineno, const char *msg)
 {
-    int c;
-    int i, retval;
+    fprintf(stderr, _("%s(%d): %s\n"), fname, lineno, msg);
+}
 
-    retval = 0;
-    for (i=0; i<len; i++) {
+/* Read a string of bytes.  Increment *lp for each newline.  Return 0 on
+ * success, 1 on failure. */
+static int
+read_string(FILE *f, char *buf, int len, int *lp)
+{
+    int c, i;
+
+    for (i = 0; i < len; i++) {
         c = fgetc(f);
-        if (c < 0) {
-            retval = 1;
-            break;
-        }
+        if (c < 0)
+            return 1;
         if (c == '\n')
             (*lp)++;
-        buf[i] = (char) c;
+        buf[i] = c;
     }
     buf[len] = '\0';
-    return(retval);
+    return 0;
 }
 
-/*
- * Read a string of two character representations of bytes.
- */
+/* Read a string of two-character representations of bytes. */
 static int
-read_octet_string(f, buf, len)
-    FILE        *f;
-    krb5_octet  *buf;
-    int         len;
+read_octet_string(FILE *f, unsigned char *buf, int len)
 {
-    int c;
-    int i, retval;
+    int c, i;
 
-    retval = 0;
-    for (i=0; i<len; i++) {
-        if (fscanf(f, "%02x", &c) != 1) {
-            retval = 1;
-            break;
-        }
-        buf[i] = (krb5_octet) c;
+    for (i = 0; i < len; i++) {
+        if (fscanf(f, "%02x", &c) != 1)
+            return 1;
+        buf[i] = c;
     }
-    return(retval);
+    return 0;
 }
 
-/*
- * Find the end of an old format record.
- */
+/* Read the end of a dumpfile record. */
 static void
-find_record_end(f, fn, lineno)
-    FILE        *f;
-    char        *fn;
-    int         lineno;
+read_record_end(FILE *f, const char *fn, int lineno)
 {
     int ch;
 
-    if (((ch = fgetc(f)) != ';') || ((ch = fgetc(f)) != '\n')) {
-        fprintf(stderr, trash_end_fmt, fn, lineno);
+    if ((ch = fgetc(f)) != ';' || (ch = fgetc(f)) != '\n') {
+        fprintf(stderr, _("%s(%d): ignoring trash at end of line: "), fn,
+                lineno);
         while (ch != '\n') {
             putc(ch, stderr);
             ch = fgetc(f);
@@ -854,93 +628,6 @@ find_record_end(f, fn, lineno)
         putc(ch, stderr);
     }
 }
-
-#if 0
-/*
- * update_tl_data()     - Generate the tl_data entries.
- */
-static krb5_error_code
-update_tl_data(kcontext, dbentp, mod_name, mod_date, last_pwd_change)
-    krb5_context        kcontext;
-    krb5_db_entry       *dbentp;
-    krb5_principal      mod_name;
-    krb5_timestamp      mod_date;
-    krb5_timestamp      last_pwd_change;
-{
-    krb5_error_code     kret;
-
-    kret = 0 ;
-
-    /*
-     * Handle modification principal.
-     */
-    if (mod_name) {
-        krb5_tl_mod_princ       mprinc;
-
-        memset(&mprinc, 0, sizeof(mprinc));
-        if (!(kret = krb5_copy_principal(kcontext,
-                                         mod_name,
-                                         &mprinc.mod_princ))) {
-            mprinc.mod_date = mod_date;
-            kret = krb5_dbe_encode_mod_princ_data(kcontext,
-                                                  &mprinc,
-                                                  dbentp);
-        }
-        if (mprinc.mod_princ)
-            krb5_free_principal(kcontext, mprinc.mod_princ);
-    }
-
-    /*
-     * Handle last password change.
-     */
-    if (!kret) {
-        krb5_tl_data    *pwchg;
-        krb5_boolean    linked;
-
-        /* Find a previously existing entry */
-        for (pwchg = dbentp->tl_data;
-             (pwchg) && (pwchg->tl_data_type != KRB5_TL_LAST_PWD_CHANGE);
-             pwchg = pwchg->tl_data_next);
-
-        /* Check to see if we found one. */
-        linked = 0;
-        if (!pwchg) {
-            /* No, allocate a new one */
-            if ((pwchg = (krb5_tl_data *) malloc(sizeof(krb5_tl_data)))) {
-                memset(pwchg, 0, sizeof(krb5_tl_data));
-                if (!(pwchg->tl_data_contents =
-                      (krb5_octet *) malloc(sizeof(krb5_timestamp)))) {
-                    free(pwchg);
-                    pwchg = (krb5_tl_data *) NULL;
-                }
-                else {
-                    pwchg->tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
-                    pwchg->tl_data_length =
-                        (krb5_int16) sizeof(krb5_timestamp);
-                }
-            }
-        }
-        else
-            linked = 1;
-
-        /* Do we have an entry? */
-        if (pwchg && pwchg->tl_data_contents) {
-            /* Encode it */
-            krb5_kdb_encode_int32(last_pwd_change, pwchg->tl_data_contents);
-            /* Link it in if necessary */
-            if (!linked) {
-                pwchg->tl_data_next = dbentp->tl_data;
-                dbentp->tl_data = pwchg;
-                dbentp->n_tl_data++;
-            }
-        }
-        else
-            kret = ENOMEM;
-    }
-
-    return(kret);
-}
-#endif
 
 /* Allocate and form a TL data list of a desired size. */
 static int
@@ -981,30 +668,28 @@ read_octets_or_minus1(FILE *fp, size_t len, unsigned char **out)
     return 0;
 }
 
-/* Read TL data; common to principals and policies */
+/* Read TL data for a principal or policy.  Print an error and return -1 on
+ * failure. */
 static int
-process_tl_data(const char *fname, FILE *filep, krb5_tl_data *tl_data,
-                const char **errstr)
+process_tl_data(const char *fname, FILE *filep, int lineno,
+                krb5_tl_data *tl_data)
 {
-    krb5_tl_data         *tl;
-    int                   nread;
-    krb5_int32            t1, t2;
+    krb5_tl_data *tl;
+    int nread, i1;
+    unsigned int u1;
 
     for (tl = tl_data; tl; tl = tl->tl_data_next) {
-        nread = fscanf(filep, "%d\t%d\t", &t1, &t2);
+        nread = fscanf(filep, "%d\t%u\t", &i1, &u1);
         if (nread != 2) {
-            *errstr = read_ttypelen;
+            load_err(fname, lineno,
+                     _("cannot read tagged data type and length"));
             return EINVAL;
         }
-        if (t2 < 0) {
-            *errstr = read_negint;
-            return EINVAL;
-        }
-        tl->tl_data_type = (krb5_int16) t1;
-        tl->tl_data_length = (krb5_int16) t2;
+        tl->tl_data_type = i1;
+        tl->tl_data_length = u1;
         if (read_octets_or_minus1(filep, tl->tl_data_length,
                                   &tl->tl_data_contents)) {
-            *errstr = read_tcontents;
+            load_err(fname, lineno, _("cannot read tagged data contents"));
             return EINVAL;
         }
     }
@@ -1012,123 +697,94 @@ process_tl_data(const char *fname, FILE *filep, krb5_tl_data *tl_data,
     return 0;
 }
 
-/*
- * process_k5beta6_record()     - Handle a dump record in krb5b6 format.
- *
- * Returns -1 for end of file, 0 for success and 1 for failure.
- */
+/* Read a beta 7 entry and add it to the database.  Return -1 for end of file,
+ * 0 for success and 1 for failure. */
 static int
-process_k5beta6_record(char *fname, krb5_context kcontext, FILE *filep,
-                       int flags, int *linenop)
+process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
+                      int flags, int *linenop)
 {
-    int                 retval = 1;
-    krb5_db_entry       *dbentry;
-    krb5_int32          t1, t2, t3, t4, t5, t6, t7, t8, t9;
-    int                 nread;
-    int                 i, j;
-    char                *name;
-    krb5_key_data       *kp, *kdatap;
-    krb5_tl_data        *tl;
-    krb5_octet          *op;
-    krb5_error_code     kret;
-    const char          *try2read = read_header;
+    int retval, nread, i, j;
+    krb5_db_entry *dbentry;
+    int t1, t2, t3, t4, t5, t6, t7;
+    unsigned int u1, u2, u3, u4, u5;
+    char *name = NULL;
+    krb5_key_data *kp = NULL, *kd;
+    krb5_tl_data *tl;
+    krb5_error_code ret;
 
-    dbentry = krb5_db_alloc(kcontext, NULL, sizeof(*dbentry));
+    dbentry = krb5_db_alloc(context, NULL, sizeof(*dbentry));
     if (dbentry == NULL)
         return 1;
     memset(dbentry, 0, sizeof(*dbentry));
     (*linenop)++;
-    name = NULL;
-    kp = NULL;
-    op = NULL;
-    nread = fscanf(filep, "%d\t%d\t%d\t%d\t%d\t", &t1, &t2, &t3, &t4, &t5);
+    nread = fscanf(filep, "%u\t%u\t%u\t%u\t%u\t", &u1, &u2, &u3, &u4, &u5);
     if (nread == EOF) {
         retval = -1;
         goto cleanup;
     }
-    if (nread != 5)
-        goto cleanup;
-    if (t1 < 0 || t2 < 0 || t3 < 0 || t4 < 0 || t5 < 0) {
-        try2read = read_negint;
-        goto cleanup;
+    if (nread != 5) {
+        load_err(fname, *linenop, _("cannot match size tokens"));
+        goto fail;
     }
 
     /* Get memory for flattened principal name */
-    if ((name = malloc(t2 + 1)) == NULL)
-        goto cleanup;
+    name = malloc(u2 + 1);
+    if (name == NULL)
+        goto fail;
 
     /* Get memory for and form tagged data linked list */
-    if (alloc_tl_data(t3, &dbentry->tl_data))
-        goto cleanup;
-    dbentry->n_tl_data = t3;
+    if (alloc_tl_data(u3, &dbentry->tl_data))
+        goto fail;
+    dbentry->n_tl_data = u3;
 
     /* Get memory for key list */
-    if (t4 && (kp = calloc(t4, sizeof(krb5_key_data))) == NULL)
-        goto cleanup;
+    if (u4 && (kp = calloc(u4, sizeof(krb5_key_data))) == NULL)
+        goto fail;
 
-    /* Get memory for extra data */
-    if (t5 && !(op = malloc(t5)))
-        goto cleanup;
-
-    dbentry->len = t1;
-    dbentry->n_key_data = t4;
-    dbentry->e_length = t5;
+    dbentry->len = u1;
+    dbentry->n_key_data = u4;
+    dbentry->e_length = u5;
 
     if (kp != NULL) {
         dbentry->key_data = kp;
         kp = NULL;
     }
-    if (op != NULL) {
-        memset(op, 0, t5);
-        dbentry->e_data = op;
-        op = NULL;
-    }
 
     /* Read in and parse the principal name */
-    if (read_string(filep, name, t2, linenop)) {
-        try2read = no_mem_fmt;
-        goto cleanup;
+    if (read_string(filep, name, u2, linenop)) {
+        load_err(fname, *linenop, _("cannot read name string"));
+        goto fail;
     }
-    if ((kret = krb5_parse_name(kcontext, name, &dbentry->princ))) {
-        fprintf(stderr, parse_err_fmt,
-                fname, *linenop, name, error_message(kret));
-        try2read = read_name_string;
-        goto cleanup;
+    ret = krb5_parse_name(context, name, &dbentry->princ);
+    if (ret) {
+        com_err(progname, ret, _("while parsing name %s"), name);
+        goto fail;
     }
 
     /* Get the fixed principal attributes */
     nread = fscanf(filep, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
-                   &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
+                   &t1, &t2, &t3, &t4, &t5, &t6, &t7, &u1);
     if (nread != 8) {
-        try2read = read_nint_data;
-        goto cleanup;
+        load_err(fname, *linenop, _("cannot read principal attributes"));
+        goto fail;
     }
-    dbentry->attributes = (krb5_flags) t2;
-    dbentry->max_life = (krb5_deltat) t3;
-    dbentry->max_renewable_life = (krb5_deltat) t4;
-    dbentry->expiration = (krb5_timestamp) t5;
-    dbentry->pw_expiration = (krb5_timestamp) t6;
-    dbentry->last_success = (krb5_timestamp) t7;
-    dbentry->last_failed = (krb5_timestamp) t8;
-    dbentry->fail_auth_count = (krb5_kvno) t9;
+    dbentry->attributes = t1;
+    dbentry->max_life = t2;
+    dbentry->max_renewable_life = t3;
+    dbentry->expiration = t4;
+    dbentry->pw_expiration = t5;
+    dbentry->last_success = t6;
+    dbentry->last_failed = t7;
+    dbentry->fail_auth_count = u1;
     dbentry->mask = KADM5_LOAD | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
         KADM5_MAX_LIFE | KADM5_MAX_RLIFE |
         KADM5_PRINC_EXPIRE_TIME | KADM5_LAST_SUCCESS |
         KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
 
-    /*
-     * Get the tagged data.
-     *
-     * Really, this code ought to discard tl data types
-     * that it knows are special to the current version
-     * and were not supported in the previous version.
-     * But it's a pain to implement that here, and doing
-     * it at dump time has almost as good an effect, so
-     * that's what I did.  [krb5-admin/89]
-     */
+    /* Read tagged data. */
     if (dbentry->n_tl_data) {
-        if (process_tl_data(fname, filep, dbentry->tl_data, &try2read))
-            goto cleanup;
+        if (process_tl_data(fname, filep, *linenop, dbentry->tl_data))
+            goto fail;
         for (tl = dbentry->tl_data; tl; tl = tl->tl_data_next) {
             /* test to set mask fields */
             if (tl->tl_data_type == KRB5_TL_KADM_DATA) {
@@ -1145,11 +801,10 @@ process_k5beta6_record(char *fname, krb5_context kcontext, FILE *filep,
                 memset(&osa_princ_ent, 0, sizeof(osa_princ_ent));
                 xdrmem_create(&xdrs, (char *)tl->tl_data_contents,
                               tl->tl_data_length, XDR_DECODE);
-                if (xdr_osa_princ_ent_rec(&xdrs, &osa_princ_ent) &&
-                    (osa_princ_ent.aux_attributes & KADM5_POLICY) &&
-                    osa_princ_ent.policy != NULL) {
-
-                    dbentry->mask |= KADM5_POLICY;
+                if (xdr_osa_princ_ent_rec(&xdrs, &osa_princ_ent)) {
+                    if ((osa_princ_ent.aux_attributes & KADM5_POLICY) &&
+                        osa_princ_ent.policy != NULL)
+                        dbentry->mask |= KADM5_POLICY;
                     kdb_free_entry(NULL, NULL, &osa_princ_ent);
                 }
                 xdr_destroy(&xdrs);
@@ -1158,108 +813,96 @@ process_k5beta6_record(char *fname, krb5_context kcontext, FILE *filep,
         dbentry->mask |= KADM5_TL_DATA;
     }
 
-    /* Get the key data */
-    if (dbentry->n_key_data) {
-        for (i = 0; i < dbentry->n_key_data; i++) {
-            kdatap = &dbentry->key_data[i];
-            nread = fscanf(filep, "%d\t%d\t", &t1, &t2);
+    /* Get the key data. */
+    for (i = 0; i < dbentry->n_key_data; i++) {
+        kd = &dbentry->key_data[i];
+        nread = fscanf(filep, "%d\t%d\t", &t1, &t2);
+        if (nread != 2) {
+            load_err(fname, *linenop, _("cannot read key size and version"));
+            goto fail;
+        }
+
+        kd->key_data_ver = t1;
+        kd->key_data_kvno = t2;
+
+        for (j = 0; j < t1; j++) {
+            nread = fscanf(filep, "%d\t%d\t", &t3, &t4);
             if (nread != 2) {
-                try2read = read_kcontents;
-                goto cleanup;
+                load_err(fname, *linenop,
+                         _("cannot read key type and length"));
+                goto fail;
             }
-
-            kdatap->key_data_ver = (krb5_int16) t1;
-            kdatap->key_data_kvno = (krb5_int16) t2;
-
-            for (j = 0; j < t1; j++) {
-                nread = fscanf(filep, "%d\t%d\t", &t3, &t4);
-                if (nread != 2) {
-                    try2read = read_ktypelen;
-                    goto cleanup;
-                }
-                if (t4 < 0) {
-                    try2read = read_negint;
-                    goto cleanup;
-                }
-                kdatap->key_data_type[j] = t3;
-                kdatap->key_data_length[j] = t4;
-                if (read_octets_or_minus1(filep, t4,
-                                          &kdatap->key_data_contents[j])) {
-                    try2read = read_kcontents;
-                    goto cleanup;
-                }
+            kd->key_data_type[j] = t3;
+            kd->key_data_length[j] = t4;
+            if (read_octets_or_minus1(filep, t4, &kd->key_data_contents[j])) {
+                load_err(fname, *linenop, _("cannot read key data"));
+                goto fail;
             }
         }
-        dbentry->mask |= KADM5_KEY_DATA;
     }
+    if (dbentry->n_key_data)
+        dbentry->mask |= KADM5_KEY_DATA;
 
     /* Get the extra data */
     if (read_octets_or_minus1(filep, dbentry->e_length, &dbentry->e_data)) {
-        try2read = read_econtents;
-        goto cleanup;
+        load_err(fname, *linenop, _("cannot read extra data"));
+        goto fail;
     }
 
     /* Finally, find the end of the record. */
-    find_record_end(filep, fname, *linenop);
+    read_record_end(filep, fname, *linenop);
 
-    if ((kret = krb5_db_put_principal(kcontext, dbentry))) {
-        fprintf(stderr, store_err_fmt, fname, *linenop, name,
-                error_message(kret));
-        goto cleanup;
+    ret = krb5_db_put_principal(context, dbentry);
+    if (ret) {
+        com_err(progname, ret, _("while storing %s"), name);
+        goto fail;
     }
 
     if (flags & FLAG_VERBOSE)
-        fprintf(stderr, add_princ_fmt, name);
+        fprintf(stderr, "%s\n", name);
     retval = 0;
 
 cleanup:
-    if (retval > 0)
-        fprintf(stderr, read_err_fmt, fname, *linenop, try2read);
-
-    free(op);
     free(kp);
     free(name);
-    krb5_db_free_principal(kcontext, dbentry);
-
+    krb5_db_free_principal(context, dbentry);
     return retval;
+
+fail:
+    retval = 1;
+    goto cleanup;
 }
 
 static int
-process_k5beta7_policy(fname, kcontext, filep, flags, linenop)
-    char                *fname;
-    krb5_context        kcontext;
-    FILE                *filep;
-    int                 flags;
-    int                 *linenop;
+process_k5beta7_policy(krb5_context context, const char *fname, FILE *filep,
+                       int flags, int *linenop)
 {
     osa_policy_ent_rec rec;
     char namebuf[1024];
-    int nread, refcnt, ret;
+    unsigned int refcnt;
+    int nread, ret;
 
     memset(&rec, 0, sizeof(rec));
 
     (*linenop)++;
     rec.name = namebuf;
 
-    nread = fscanf(filep, "%1023s\t%d\t%d\t%d\t%d\t%d\t%d", rec.name,
-                   &rec.pw_min_life, &rec.pw_max_life,
-                   &rec.pw_min_length, &rec.pw_min_classes,
-                   &rec.pw_history_num, &refcnt);
+    nread = fscanf(filep, "%1023s\t%u\t%u\t%u\t%u\t%u\t%u", rec.name,
+                   &rec.pw_min_life, &rec.pw_max_life, &rec.pw_min_length,
+                   &rec.pw_min_classes, &rec.pw_history_num, &refcnt);
     if (nread == EOF)
         return -1;
-    else if (nread != 7) {
-        fprintf(stderr, _("cannot parse policy on line %d (%d read)\n"),
-                *linenop, nread);
+    if (nread != 7) {
+        fprintf(stderr, _("cannot parse policy (%d read)\n"), nread);
         return 1;
     }
 
-    if ((ret = krb5_db_create_policy(kcontext, &rec))) {
-        if (ret &&
-            ((ret = krb5_db_put_policy(kcontext, &rec)))) {
-            fprintf(stderr, _("cannot create policy on line %d: %s\n"),
-                    *linenop, error_message(ret));
-            return 1;
-        }
+    ret = krb5_db_create_policy(context, &rec);
+    if (ret)
+        ret = krb5_db_put_policy(context, &rec);
+    if (ret) {
+        com_err(progname, ret, _("while creating policy"));
+        return 1;
     }
     if (flags & FLAG_VERBOSE)
         fprintf(stderr, _("created policy %s\n"), rec.name);
@@ -1268,44 +911,37 @@ process_k5beta7_policy(fname, kcontext, filep, flags, linenop)
 }
 
 static int
-process_r1_8_policy(fname, kcontext, filep, flags, linenop)
-    char                *fname;
-    krb5_context        kcontext;
-    FILE                *filep;
-    int                 flags;
-    int                 *linenop;
+process_r1_8_policy(krb5_context context, const char *fname, FILE *filep,
+                    int flags, int *linenop)
 {
     osa_policy_ent_rec rec;
     char namebuf[1024];
-    int nread, refcnt, ret;
+    unsigned int refcnt;
+    int nread, ret;
 
     memset(&rec, 0, sizeof(rec));
 
     (*linenop)++;
     rec.name = namebuf;
 
-    nread = fscanf(filep, "%1023s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
-                   rec.name,
-                   &rec.pw_min_life, &rec.pw_max_life,
+    nread = fscanf(filep, "%1023s\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u",
+                   rec.name, &rec.pw_min_life, &rec.pw_max_life,
                    &rec.pw_min_length, &rec.pw_min_classes,
-                   &rec.pw_history_num, &refcnt,
-                   &rec.pw_max_fail, &rec.pw_failcnt_interval,
-                   &rec.pw_lockout_duration);
+                   &rec.pw_history_num, &refcnt, &rec.pw_max_fail,
+                   &rec.pw_failcnt_interval, &rec.pw_lockout_duration);
     if (nread == EOF)
         return -1;
-    else if (nread != 10) {
-        fprintf(stderr, "cannot parse policy on line %d (%d read)\n",
-                *linenop, nread);
+    if (nread != 10) {
+        fprintf(stderr, _("cannot parse policy (%d read)\n"), nread);
         return 1;
     }
 
-    if ((ret = krb5_db_create_policy(kcontext, &rec))) {
-        if (ret &&
-            ((ret = krb5_db_put_policy(kcontext, &rec)))) {
-            fprintf(stderr, "cannot create policy on line %d: %s\n",
-                    *linenop, error_message(ret));
-            return 1;
-        }
+    ret = krb5_db_create_policy(context, &rec);
+    if (ret)
+        ret = krb5_db_put_policy(context, &rec);
+    if (ret) {
+        com_err(progname, ret, _("while creating policy"));
+        return 1;
     }
     if (flags & FLAG_VERBOSE)
         fprintf(stderr, "created policy %s\n", rec.name);
@@ -1314,16 +950,15 @@ process_r1_8_policy(fname, kcontext, filep, flags, linenop)
 }
 
 static int
-process_r1_11_policy(char *fname, krb5_context kcontext, FILE *filep,
+process_r1_11_policy(krb5_context context, const char *fname, FILE *filep,
                      int flags, int *linenop)
 {
-    osa_policy_ent_rec    rec;
-    krb5_tl_data         *tl, *tl_next;
-    char                  namebuf[1024];
-    char                  keysaltbuf[KRB5_KDB_MAX_ALLOWED_KS_LEN + 1];
-    int                   nread, refcnt;
-    int                   ret = 0;
-    const char           *try2read = NULL;
+    osa_policy_ent_rec rec;
+    krb5_tl_data *tl, *tl_next;
+    char namebuf[1024];
+    char keysaltbuf[KRB5_KDB_MAX_ALLOWED_KS_LEN + 1];
+    unsigned int refcnt;
+    int nread, ret = 0;
 
     memset(&rec, 0, sizeof(rec));
 
@@ -1331,24 +966,19 @@ process_r1_11_policy(char *fname, krb5_context kcontext, FILE *filep,
     rec.name = namebuf;
     rec.allowed_keysalts = keysaltbuf;
 
-    nread = fscanf(filep,
-                   "%1023s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
-                   "%d\t%d\t%d\t"
+    nread = fscanf(filep, "%1023s\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t"
+                   "%u\t%u\t%u\t"
                    K5CONST_WIDTH_SCANF_STR(KRB5_KDB_MAX_ALLOWED_KS_LEN)
-                   "\t%hd",
-                   rec.name,
-                   &rec.pw_min_life, &rec.pw_max_life,
+                   "\t%hd", rec.name, &rec.pw_min_life, &rec.pw_max_life,
                    &rec.pw_min_length, &rec.pw_min_classes,
-                   &rec.pw_history_num, &refcnt,
-                   &rec.pw_max_fail, &rec.pw_failcnt_interval,
-                   &rec.pw_lockout_duration,
+                   &rec.pw_history_num, &refcnt, &rec.pw_max_fail,
+                   &rec.pw_failcnt_interval, &rec.pw_lockout_duration,
                    &rec.attributes, &rec.max_life, &rec.max_renewable_life,
                    rec.allowed_keysalts, &rec.n_tl_data);
     if (nread == EOF)
         return -1;
-    else if (nread != 15) {
-        fprintf(stderr, "cannot parse policy on line %d (%d read)\n",
-                *linenop, nread);
+    if (nread != 15) {
+        fprintf(stderr, _("cannot parse policy (%d read)\n"), nread);
         return 1;
     }
 
@@ -1360,15 +990,15 @@ process_r1_11_policy(char *fname, krb5_context kcontext, FILE *filep,
     if (ret)
         goto cleanup;
 
-    ret = process_tl_data(fname, filep, rec.tl_data, &try2read);
+    ret = process_tl_data(fname, filep, *linenop, rec.tl_data);
     if (ret)
         goto cleanup;
 
-    if ((ret = krb5_db_create_policy(kcontext, &rec)) &&
-        (ret = krb5_db_put_policy(kcontext, &rec))) {
-        fprintf(stderr, "cannot create policy on line %d: %s\n",
-                *linenop, error_message(ret));
-        try2read = NULL;
+    ret = krb5_db_create_policy(context, &rec);
+    if (ret)
+        ret = krb5_db_put_policy(context, &rec);
+    if (ret) {
+        com_err(progname, ret, _("while creating policy"));
         goto cleanup;
     }
     if (flags & FLAG_VERBOSE)
@@ -1380,28 +1010,14 @@ cleanup:
         free(tl->tl_data_contents);
         free(tl);
     }
-    if (ret == ENOMEM)
-        try2read = no_mem_fmt;
-    if (ret) {
-        if (try2read)
-            fprintf(stderr, read_err_fmt, fname, *linenop, try2read);
-        return 1;
-    }
-    return 0;
+    return ret ? 1 : 0;
 }
 
-/*
- * process_k5beta7_record()     - Handle a dump record in krb5b7 format.
- *
- * Returns -1 for end of file, 0 for success and 1 for failure.
- */
+/* Read a record which is tagged with "princ" or "policy", calling princfn
+ * or policyfn as appropriate. */
 static int
-process_k5beta7_record(fname, kcontext, filep, flags, linenop)
-    char                *fname;
-    krb5_context        kcontext;
-    FILE                *filep;
-    int                 flags;
-    int                 *linenop;
+process_tagged(krb5_context context, const char *fname, FILE *filep, int flags,
+               int *linenop, load_func princfn, load_func policyfn)
 {
     int nread;
     char rectype[100];
@@ -1409,125 +1025,49 @@ process_k5beta7_record(fname, kcontext, filep, flags, linenop)
     nread = fscanf(filep, "%99s\t", rectype);
     if (nread == EOF)
         return -1;
-    else if (nread != 1)
+    if (nread != 1)
         return 1;
     if (strcmp(rectype, "princ") == 0)
-        process_k5beta6_record(fname, kcontext, filep, flags,
-                               linenop);
-    else if (strcmp(rectype, "policy") == 0)
-        process_k5beta7_policy(fname, kcontext, filep, flags,
-                               linenop);
-    else {
-        fprintf(stderr, _("unknown record type \"%s\" on line %d\n"),
-                rectype, *linenop);
-        return 1;
-    }
+        return (*princfn)(context, fname, filep, flags, linenop);
+    if (strcmp(rectype, "policy") == 0)
+        return (*policyfn)(context, fname, filep, flags, linenop);
+    if (strcmp(rectype, "End") == 0)  /* Only expected for OV format */
+        return -1;
 
-    return 0;
+    fprintf(stderr, _("unknown record type \"%s\"\n"), rectype);
+    return 1;
 }
 
-/*
- * process_ov_record()  - Handle a dump record in OpenV*Secure 1.0 format.
- *
- * Returns -1 for end of file, 0 for success and 1 for failure.
- */
 static int
-process_ov_record(fname, kcontext, filep, flags, linenop)
-    char                *fname;
-    krb5_context        kcontext;
-    FILE                *filep;
-    int                 flags;
-    int                 *linenop;
+process_k5beta7_record(krb5_context context, const char *fname, FILE *filep,
+                       int flags, int *linenop)
 {
-    int nread;
-    char rectype[100];
-
-    nread = fscanf(filep, "%99s\t", rectype);
-    if (nread == EOF)
-        return -1;
-    else if (nread != 1)
-        return 1;
-    if (strcmp(rectype, "princ") == 0)
-        process_ov_principal(fname, kcontext, filep, flags,
-                             linenop);
-    else if (strcmp(rectype, "policy") == 0)
-        process_k5beta7_policy(fname, kcontext, filep, flags,
-                               linenop);
-    else if (strcmp(rectype, "End") == 0)
-        return -1;
-    else {
-        fprintf(stderr, _("unknown record type \"%s\" on line %d\n"),
-                rectype, *linenop);
-        return 1;
-    }
-
-    return 0;
+    return process_tagged(context, fname, filep, flags, linenop,
+                          process_k5beta7_princ, process_k5beta7_policy);
 }
 
-/*
- * process_r1_8_record()        - Handle a dump record in krb5 1.8 format.
- *
- * Returns -1 for end of file, 0 for success and 1 for failure.
- */
 static int
-process_r1_8_record(fname, kcontext, filep, flags, linenop)
-    char                *fname;
-    krb5_context        kcontext;
-    FILE                *filep;
-    int                 flags;
-    int                 *linenop;
+process_ov_record(krb5_context context, const char *fname, FILE *filep,
+                  int flags, int *linenop)
 {
-    int nread;
-    char rectype[100];
-
-    nread = fscanf(filep, "%99s\t", rectype);
-    if (nread == EOF)
-        return -1;
-    else if (nread != 1)
-        return 1;
-    if (strcmp(rectype, "princ") == 0)
-        process_k5beta6_record(fname, kcontext, filep, flags,
-                               linenop);
-    else if (strcmp(rectype, "policy") == 0)
-        process_r1_8_policy(fname, kcontext, filep, flags,
-                            linenop);
-    else {
-        fprintf(stderr, _("unknown record type \"%s\" on line %d\n"),
-                rectype, *linenop);
-        return 1;
-    }
-
-    return 0;
+    return process_tagged(context, fname, filep, flags, linenop,
+                          process_ov_principal, process_k5beta7_policy);
 }
 
-/*
- * process_r1_11_record()        - Handle a dump record in krb5 1.11 format.
- *
- * Returns -1 for end of file, 0 for success and 1 for failure.
- */
 static int
-process_r1_11_record(char *fname, krb5_context kcontext, FILE *filep,
+process_r1_8_record(krb5_context context, const char *fname, FILE *filep,
+                    int flags, int *linenop)
+{
+    return process_tagged(context, fname, filep, flags, linenop,
+                          process_k5beta7_princ, process_r1_8_policy);
+}
+
+static int
+process_r1_11_record(krb5_context context, const char *fname, FILE *filep,
                      int flags, int *linenop)
 {
-    int nread;
-    char rectype[100];
-
-    nread = fscanf(filep, "%99s\t", rectype);
-    if (nread == EOF)
-        return -1;
-    else if (nread != 1)
-        return 1;
-    if (!strcmp(rectype, "princ"))
-        process_k5beta6_record(fname, kcontext, filep, flags, linenop);
-    else if (!strcmp(rectype, "policy"))
-        process_r1_11_policy(fname, kcontext, filep, flags, linenop);
-    else {
-        fprintf(stderr, _("unknown record type \"%s\" on line %d\n"),
-                rectype, *linenop);
-        return 1;
-    }
-
-    return 0;
+    return process_tagged(context, fname, filep, flags, linenop,
+                          process_k5beta7_princ, process_r1_11_policy);
 }
 
 dump_version beta7_version = {
@@ -1601,10 +1141,8 @@ dump_version ipropx_1_version = {
     process_r1_11_record,
 };
 
-/*
- * Read the dump header.  Returns 1 on success, 0 if the file is not a
- * recognized iprop dump format.
- */
+/* Read the dump header.  Return 1 on success, 0 if the file is not a
+ * recognized iprop dump format. */
 static int
 parse_iprop_header(char *buf, dump_version **dv, uint32_t *last_sno,
                    uint32_t *last_seconds, uint32_t *last_useconds)
@@ -1621,13 +1159,13 @@ parse_iprop_header(char *buf, dump_version **dv, uint32_t *last_sno,
     if (!strcmp(head, ipropx_1_version.header)) {
         if (nread != 5)
             return 0;
-        if (u[0] == IPROPX_VERSION_0)
+        if (u[0] == IPROPX_VERSION_0) {
             *dv = &iprop_version;
-        else if (u[0] == IPROPX_VERSION_1)
+        } else if (u[0] == IPROPX_VERSION_1) {
             *dv = &ipropx_1_version;
-        else {
-            fprintf(stderr, _("%s: Unknown iprop dump version %d\n"),
-                    progname, u[0]);
+        } else {
+            fprintf(stderr, _("%s: Unknown iprop dump version %d\n"), progname,
+                    u[0]);
             return 0;
         }
         up = &u[1];
@@ -1640,16 +1178,14 @@ parse_iprop_header(char *buf, dump_version **dv, uint32_t *last_sno,
         return 0;
     }
 
-    *last_sno = *(up++);
-    *last_seconds = *(up++);
-    *last_useconds = *(up++);
+    *last_sno = *up++;
+    *last_seconds = *up++;
+    *last_useconds = *up++;
     return 1;
 }
 
-/*
- * Return 1 if the {sno, timestamp} in an existing dump file is in the
- * ulog, else return 0.
- */
+/* Return 1 if the {sno, timestamp} in an existing dump file is in the
+ * ulog, else return 0. */
 static int
 current_dump_sno_in_ulog(char *ifile, kdb_hlog_t *ulog)
 {
@@ -1689,101 +1225,86 @@ current_dump_sno_in_ulog(char *ifile, kdb_hlog_t *ulog)
  *              [filename [principals...]]
  */
 void
-dump_db(argc, argv)
-    int         argc;
-    char        **argv;
+dump_db(int argc, char **argv)
 {
-    FILE                *f;
-    struct dump_args    arglist;
-    char                *ofile;
-    char                *tmpofile = NULL;
-    krb5_error_code     kret, retval;
-    dump_version        *dump;
-    int                 aindex;
-    int                 conditional = 0;
-    int                 ok_fd = -1;
-    char                *new_mkey_file = 0;
-    bool_t              dump_sno = FALSE;
-    kdb_log_context     *log_ctx;
-    unsigned int        ipropx_version = IPROPX_VERSION_0;
+    FILE *f;
+    struct dump_args args;
+    char *ofile = NULL, *tmpofile = NULL, *new_mkey_file = NULL;
+    krb5_error_code ret, retval;
+    dump_version *dump;
+    int aindex, conditional = 0, ok_fd = -1;
+    bool_t dump_sno = FALSE;
+    kdb_log_context *log_ctx;
+    unsigned int ipropx_version = IPROPX_VERSION_0;
+    krb5_kvno kt_kvno;
 
-    /*
-     * Parse the arguments.
-     */
-    ofile = (char *) NULL;
+    /* Parse the arguments. */
     dump = &r1_11_version;
-    arglist.flags = 0;
-    new_mkey_file = 0;
+    args.flags = 0;
     mkey_convert = 0;
-    backwards = 0;
-    recursive = 0;
     log_ctx = util_context->kdblog_context;
 
     /*
      * Parse the qualifiers.
      */
     for (aindex = 1; aindex < argc; aindex++) {
-        if (!strcmp(argv[aindex], b7option))
+        if (!strcmp(argv[aindex], "-b7")) {
             dump = &beta7_version;
-        else if (!strcmp(argv[aindex], ovoption))
+        } else if (!strcmp(argv[aindex], "-ov")) {
             dump = &ov_version;
-        else if (!strcmp(argv[aindex], r13option))
+        } else if (!strcmp(argv[aindex], "-r13")) {
             dump = &r1_3_version;
-        else if (!strcmp(argv[aindex], r18option))
+        } else if (!strcmp(argv[aindex], "-r18")) {
             dump = &r1_8_version;
-        else if (!strncmp(argv[aindex], ipropoption, sizeof(ipropoption) - 1)) {
+        } else if (!strncmp(argv[aindex], "-i", 2)) {
             if (log_ctx && log_ctx->iproprole) {
-                /* Note: ipropx_version is the maximum version acceptable */
-                ipropx_version = atoi(argv[aindex] + sizeof(ipropoption) - 1);
+                /* ipropx_version is the maximum version acceptable. */
+                ipropx_version = atoi(argv[aindex] + 2);
                 dump = ipropx_version ? &ipropx_1_version : &iprop_version;
                 /*
-                 * dump_sno is used to indicate if the serial
-                 * # should be populated in the output
-                 * file to be used later by iprop for updating
-                 * the slave's update log when loading
+                 * dump_sno is used to indicate if the serial number should be
+                 * populated in the output file to be used later by iprop for
+                 * updating the slave's update log when loading.
                  */
                 dump_sno = TRUE;
-                /*
-                 * FLAG_OMIT_NRA is set to indicate that non-replicated
-                 * attributes should be omitted.
-                 */
-                arglist.flags |= FLAG_OMIT_NRA;
+                /* FLAG_OMIT_NRA is set to indicate that non-replicated
+                 * attributes should be omitted. */
+                args.flags |= FLAG_OMIT_NRA;
             } else {
                 fprintf(stderr, _("Iprop not enabled\n"));
                 goto error;
             }
-        } else if (!strcmp(argv[aindex], conditionaloption))
+        } else if (!strcmp(argv[aindex], "-c")) {
             conditional = 1;
-        else if (!strcmp(argv[aindex], verboseoption))
-            arglist.flags |= FLAG_VERBOSE;
-        else if (!strcmp(argv[aindex], "-mkey_convert"))
+        } else if (!strcmp(argv[aindex], "-verbose")) {
+            args.flags |= FLAG_VERBOSE;
+        } else if (!strcmp(argv[aindex], "-mkey_convert")) {
             mkey_convert = 1;
-        else if (!strcmp(argv[aindex], "-new_mkey_file")) {
+        } else if (!strcmp(argv[aindex], "-new_mkey_file")) {
             new_mkey_file = argv[++aindex];
             mkey_convert = 1;
-        } else if (!strcmp(argv[aindex], "-rev"))
-            backwards = 1;
-        else if (!strcmp(argv[aindex], "-recurse"))
-            recursive = 1;
-        else
+        } else if (!strcmp(argv[aindex], "-rev") ||
+                   !strcmp(argv[aindex], "-recurse")) {
+            /* Accept these for compatibility, but do nothing since
+             * krb5_db_iterate doesn't support them. */
+        } else {
             break;
+        }
     }
 
-    arglist.names = (char **) NULL;
-    arglist.nnames = 0;
+    args.names = NULL;
+    args.nnames = 0;
     if (aindex < argc) {
         ofile = argv[aindex];
         aindex++;
         if (aindex < argc) {
-            arglist.names = &argv[aindex];
-            arglist.nnames = argc - aindex;
+            args.names = &argv[aindex];
+            args.nnames = argc - aindex;
         }
     }
 
-    /*
-     * If a conditional ipropx dump we check if the existing dump is
-     * good enough.
-     */
+    /* If a conditional ipropx dump we check if the existing dump is
+     * good enough. */
     if (ofile != NULL && conditional) {
         if (!dump->iprop) {
             com_err(progname, 0,
@@ -1810,13 +1331,9 @@ dump_db(argc, argv)
     if (mkey_convert) {
         if (!valid_master_key) {
             /* TRUE here means read the keyboard, but only once */
-            retval = krb5_db_fetch_mkey(util_context,
-                                        master_princ,
-                                        master_keyblock.enctype,
-                                        TRUE, FALSE,
-                                        (char *) NULL,
-                                        NULL, NULL,
-                                        &master_keyblock);
+            retval = krb5_db_fetch_mkey(util_context, master_princ,
+                                        master_keyblock.enctype, TRUE, FALSE,
+                                        NULL, NULL, NULL, &master_keyblock);
             if (retval) {
                 com_err(progname, retval, _("while reading master key"));
                 exit(1);
@@ -1833,113 +1350,95 @@ dump_db(argc, argv)
             new_master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
 
         if (new_mkey_file) {
-            krb5_kvno kt_kvno;
-
             if (global_params.mask & KADM5_CONFIG_KVNO)
                 kt_kvno = global_params.kvno;
             else
                 kt_kvno = IGNORE_VNO;
 
-            if ((retval = krb5_db_fetch_mkey(util_context, master_princ,
-                                             new_master_keyblock.enctype,
-                                             FALSE,
-                                             FALSE,
-                                             new_mkey_file,
-                                             &kt_kvno,
-                                             NULL,
-                                             &new_master_keyblock))) {
+            retval = krb5_db_fetch_mkey(util_context, master_princ,
+                                        new_master_keyblock.enctype, FALSE,
+                                        FALSE, new_mkey_file, &kt_kvno, NULL,
+                                        &new_master_keyblock);
+            if (retval) {
                 com_err(progname, retval, _("while reading new master key"));
                 exit(1);
             }
         } else {
             printf(_("Please enter new master key....\n"));
-            if ((retval = krb5_db_fetch_mkey(util_context, master_princ,
-                                             new_master_keyblock.enctype,
-                                             TRUE,
-                                             TRUE,
-                                             NULL, NULL, NULL,
-                                             &new_master_keyblock))) {
+            retval = krb5_db_fetch_mkey(util_context, master_princ,
+                                        new_master_keyblock.enctype, TRUE,
+                                        TRUE, NULL, NULL, NULL,
+                                        &new_master_keyblock);
+            if (retval) {
                 com_err(progname, retval, _("while reading new master key"));
                 exit(1);
             }
         }
-        /*
-         * get new master key vno that will be used to protect princs, used
-         * later on.
-         */
+        /* Get new master key vno that will be used to protect princs. */
         new_mkvno = get_next_kvno(util_context, master_entry);
     }
 
-    kret = 0;
+    ret = 0;
 
-    if (ofile && strcmp(ofile, "-")) {
-        /*
-         * Discourage accidental dumping to filenames beginning with '-'.
-         */
+    if (ofile != NULL && strcmp(ofile, "-")) {
+        /* Discourage accidental dumping to filenames beginning with '-'. */
         if (ofile[0] == '-')
             usage();
         if (!prep_ok_file(util_context, ofile, &ok_fd))
-            return;            /* prep_ok_file() bumps exit_status */
+            return;             /* prep_ok_file() bumps exit_status */
         f = create_ofile(ofile, &tmpofile);
         if (f == NULL) {
-            fprintf(stderr, ofopen_error,
-                    progname, ofile, error_message(errno));
+            com_err(progname, errno, _("while opening %s for writing"), ofile);
             goto error;
         }
     } else {
         f = stdout;
     }
-    if (f && !(kret)) {
-        arglist.programname = progname;
-        arglist.ofile = f;
-        arglist.kcontext = util_context;
-        arglist.dump = dump;
-        fprintf(arglist.ofile, "%s", dump->header);
 
-        /*
-         * We grab the lock twice (once again in the iterator call),
-         * but that's ok since the lock func handles incr locks held.
-         */
-        kret = krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED);
-        if (kret != 0 && kret != KRB5_PLUGIN_OP_NOTSUPP) {
-            fprintf(stderr,
-                    _("%s: Couldn't grab lock\n"), progname);
-            goto error;
-        }
+    args.ofile = f;
+    args.context = util_context;
+    args.dump = dump;
+    fprintf(args.ofile, "%s", dump->header);
 
-        if (dump_sno) {
-            if (ipropx_version)
-                fprintf(f, " %u", IPROPX_VERSION);
-            fprintf(f, " %u", log_ctx->ulog->kdb_last_sno);
-            fprintf(f, " %u", log_ctx->ulog->kdb_last_time.seconds);
-            fprintf(f, " %u", log_ctx->ulog->kdb_last_time.useconds);
-        }
-
-        if (dump->header[strlen(dump->header)-1] != '\n')
-            fputc('\n', arglist.ofile);
-
-        if ((kret = krb5_db_iterate(util_context,
-                                    NULL,
-                                    dump_iterator,
-                                    (krb5_pointer) &arglist))) { /* TBD: backwards and recursive not supported */
-            fprintf(stderr, dumprec_err,
-                    progname, dump->name, error_message(kret));
-            goto error;
-        }
-        if (dump->dump_policy &&
-            (kret = krb5_db_iter_policy( util_context, "*", dump->dump_policy,
-                                         &arglist))) {
-            fprintf(stderr, dumprec_err, progname, dump->name,
-                    error_message(kret));
-            goto error;
-        }
-        if (ofile && f != stdout) {
-            fclose(f);
-            finish_ofile(ofile, &tmpofile);
-            update_ok_file(util_context, ok_fd);
-        }
-        return;
+    /* We grab the lock twice (once again in the iterator call), but that's ok
+     * since krb5_db_lock handles recursive locks. */
+    ret = krb5_db_lock(util_context, KRB5_LOCKMODE_SHARED);
+    if (ret != 0 && ret != KRB5_PLUGIN_OP_NOTSUPP) {
+        fprintf(stderr, _("%s: Couldn't grab lock\n"), progname);
+        goto error;
     }
+
+    if (dump_sno) {
+        if (ipropx_version)
+            fprintf(f, " %u", IPROPX_VERSION);
+        fprintf(f, " %u", log_ctx->ulog->kdb_last_sno);
+        fprintf(f, " %u", log_ctx->ulog->kdb_last_time.seconds);
+        fprintf(f, " %u", log_ctx->ulog->kdb_last_time.useconds);
+    }
+
+    if (dump->header[strlen(dump->header)-1] != '\n')
+        fputc('\n', args.ofile);
+
+    ret = krb5_db_iterate(util_context, NULL, dump_iterator, &args);
+    if (ret) {
+        com_err(progname, ret, _("performing %s dump"), dump->name);
+        goto error;
+    }
+
+    if (dump->dump_policy != NULL) {
+        ret = krb5_db_iter_policy(util_context, "*", dump->dump_policy, &args);
+        if (ret) {
+            com_err(progname, ret, _("performing %s dump"), dump->name);
+            goto error;
+        }
+    }
+
+    if (f != stdout) {
+        fclose(f);
+        finish_ofile(ofile, &tmpofile);
+        update_ok_file(util_context, ok_fd);
+    }
+    return;
 
 error:
     krb5_db_unlock(util_context);
@@ -1949,39 +1448,22 @@ error:
     exit_status++;
 }
 
-/*
- * restore_dump()       - Restore the database from any version dump file.
- */
+/* Restore the database from any version dump file. */
 static int
-restore_dump(programname, kcontext, dumpfile, f, flags, dump)
-    char                *programname;
-    krb5_context        kcontext;
-    char                *dumpfile;
-    FILE                *f;
-    int                 flags;
-    dump_version        *dump;
+restore_dump(krb5_context context, char *dumpfile, FILE *f, int flags,
+             dump_version *dump)
 {
-    int         error;
-    int         lineno;
+    int error = 0;
+    int lineno = 1;
 
-    error = 0;
-    lineno = 1;
-
-    /*
-     * Process the records.
-     */
-    while (!(error = (*dump->load_record)(dumpfile,
-                                          kcontext,
-                                          f,
-                                          flags,
-                                          &lineno)))
-        ;
-    if (error != -1)
-        fprintf(stderr, err_line_fmt, programname, lineno, dumpfile);
-    else
-        error = 0;
-
-    return(error);
+    /* Process the records. */
+    while (!(error = dump->load_record(context, dumpfile, f, flags, &lineno)));
+    if (error != -1) {
+        fprintf(stderr, _("%s: error processing line %d of %s\n"), progname,
+                lineno, dumpfile);
+        return error;
+    }
+    return 0;
 }
 
 /*
@@ -1989,163 +1471,114 @@ restore_dump(programname, kcontext, dumpfile, f, flags, dump)
  *                filename
  */
 void
-load_db(argc, argv)
-    int         argc;
-    char        **argv;
+load_db(int argc, char **argv)
 {
-    krb5_error_code     kret;
-    krb5_context        kcontext;
-    FILE                *f;
-    extern char         *optarg;
-    extern int          optind;
-    char                *dumpfile;
-    char                *dbname;
-    char                buf[BUFSIZ];
-    dump_version        *load;
-    int                 flags;
-    krb5_int32          crflags;
-    int                 aindex;
-    int                 db_locked = 0;
-    kdb_log_context     *log_ctx;
-    krb5_boolean        add_update = TRUE;
-    uint32_t            caller = FKCOMMAND;
-    uint32_t            last_sno, last_seconds, last_useconds;
+    krb5_error_code ret;
+    FILE *f = NULL;
+    extern char *optarg;
+    extern int optind;
+    char *dumpfile = NULL, *dbname, buf[BUFSIZ];
+    dump_version *load = NULL;
+    int flags = 0, aindex;
+    kdb_log_context *log_ctx;
+    krb5_boolean add_update = TRUE, db_locked = FALSE, temp_db_created = FALSE;
+    uint32_t caller = FKCOMMAND, last_sno, last_seconds, last_useconds;
 
-    /*
-     * Parse the arguments.
-     */
-    dumpfile = (char *) NULL;
+    /* Parse the arguments. */
     dbname = global_params.dbname;
-    load = NULL;
-    flags = 0;
-    crflags = KRB5_KDB_CREATE_BTREE;
     exit_status = 0;
     log_ctx = util_context->kdblog_context;
 
     for (aindex = 1; aindex < argc; aindex++) {
-        if (!strcmp(argv[aindex], b7option))
+        if (!strcmp(argv[aindex], "-b7")){
             load = &beta7_version;
-        else if (!strcmp(argv[aindex], ovoption))
+        } else if (!strcmp(argv[aindex], "-ov")) {
             load = &ov_version;
-        else if (!strcmp(argv[aindex], r13option))
+        } else if (!strcmp(argv[aindex], "-r13")) {
             load = &r1_3_version;
-        else if (!strcmp(argv[aindex], r18option))
+        } else if (!strcmp(argv[aindex], "-r18")){
             load = &r1_8_version;
-        else if (!strcmp(argv[aindex], ipropoption)) {
+        } else if (!strcmp(argv[aindex], "-i")) {
             if (log_ctx && log_ctx->iproprole) {
                 load = &iprop_version;
                 add_update = FALSE;
                 caller = FKLOAD;
             } else {
                 fprintf(stderr, _("Iprop not enabled\n"));
-                exit_status++;
-                return;
+                goto error;
             }
-        } else if (!strcmp(argv[aindex], verboseoption))
+        } else if (!strcmp(argv[aindex], "-verbose")) {
             flags |= FLAG_VERBOSE;
-        else if (!strcmp(argv[aindex], updateoption))
+        } else if (!strcmp(argv[aindex], "-update")){
             flags |= FLAG_UPDATE;
-        else if (!strcmp(argv[aindex], hashoption)) {
+        } else if (!strcmp(argv[aindex], "-hash")) {
             if (!add_db_arg("hash=true")) {
-                com_err(progname, ENOMEM,
-                        _("while parsing command arguments\n"));
-                exit(1);
+                com_err(progname, ENOMEM, _("while parsing options"));
+                goto error;
             }
-        } else
+        } else {
             break;
+        }
     }
-    if ((argc - aindex) != 1) {
+    if (argc - aindex != 1)
         usage();
-        return;
-    }
     dumpfile = argv[aindex];
 
-    /*
-     * Initialize the Kerberos context and error tables.
-     */
-    if ((kret = kadm5_init_krb5_context(&kcontext))) {
-        fprintf(stderr, ctx_err_fmt, progname);
-        exit_status++;
-        return;
-    }
-
-    if( (kret = krb5_set_default_realm(kcontext, util_context->default_realm)) )
-    {
-        fprintf(stderr, _("%s: Unable to set the default realm\n"), progname);
-        exit_status++;
-        return;
-    }
-
-    if (log_ctx && log_ctx->iproprole)
-        kcontext->kdblog_context = log_ctx;
-
-    /*
-     * Open the dumpfile
-     */
-    if (dumpfile) {
-        if ((f = fopen(dumpfile, "r")) == NULL) {
-            fprintf(stderr, dfile_err_fmt, progname, dumpfile,
-                    error_message(errno));
-            exit_status++;
-            return;
-        }
-    } else
-        f = stdin;
-
-    /*
-     * Auto-detect dump version if we weren't told, verify if we
-     * were told.
-     */
-    if (fgets(buf, sizeof(buf), f) == NULL) {
-        exit_status++;
-        if (dumpfile)
-            fclose(f);
-        return;
-    }
-    if (load) {
-        /* only check what we know; some headers only contain a prefix */
-        /* NB: this should work for ipropx even though load is iprop */
-        if (strncmp(buf, load->header, strlen(load->header)) != 0) {
-            fprintf(stderr, head_bad_fmt, progname, dumpfile);
-            exit_status++;
-            if (dumpfile) fclose(f);
-            return;
+    /* Open the dumpfile. */
+    if (dumpfile != NULL) {
+        f = fopen(dumpfile, "r");
+        if (f == NULL) {
+            com_err(progname, errno, _("while opening %s"), dumpfile);
+            goto error;
         }
     } else {
-        /* perhaps this should be in an array, but so what? */
-        if (strcmp(buf, beta7_version.header) == 0)
+        f = stdin;
+        dumpfile = _("standard input");
+    }
+
+    /* Auto-detect dump version if we weren't told, or verify if we were. */
+    if (fgets(buf, sizeof(buf), f) == NULL) {
+        fprintf(stderr, _("%s: can't read dump header in %s\n"), progname,
+                dumpfile);
+        goto error;
+    }
+    if (load) {
+        /* Only check what we know; some headers only contain a prefix.
+         * NB: this should work for ipropx even though load is iprop */
+        if (strncmp(buf, load->header, strlen(load->header)) != 0) {
+            fprintf(stderr, _("%s: dump header bad in %s\n"), progname,
+                    dumpfile);
+            goto error;
+        }
+    } else {
+        if (strcmp(buf, beta7_version.header) == 0) {
             load = &beta7_version;
-        else if (strcmp(buf, r1_3_version.header) == 0)
+        } else if (strcmp(buf, r1_3_version.header) == 0) {
             load = &r1_3_version;
-        else if (strcmp(buf, r1_8_version.header) == 0)
+        } else if (strcmp(buf, r1_8_version.header) == 0) {
             load = &r1_8_version;
-        else if (strcmp(buf, r1_11_version.header) == 0)
+        } else if (strcmp(buf, r1_11_version.header) == 0) {
             load = &r1_11_version;
-        else if (strncmp(buf, ov_version.header,
-                         strlen(ov_version.header)) == 0)
+        } else if (strncmp(buf, ov_version.header,
+                           strlen(ov_version.header)) == 0) {
             load = &ov_version;
-        else {
-            fprintf(stderr, head_bad_fmt, progname, dumpfile);
-            exit_status++;
-            if (dumpfile) fclose(f);
-            return;
+        } else {
+            fprintf(stderr, _("%s: dump header bad in %s\n"), progname,
+                    dumpfile);
+            goto error;
         }
     }
 
     /*
-     * Fail if the dump is not in iprop format and iprop is enabled and
-     * we have a ulog -- we don't want an accidental stepping on our
-     * toes by a sysadmin or wayward cronjob left over from before
-     * enabling iprop.
+     * Fail if the dump is not in iprop format and iprop is enabled and we have
+     * a ulog -- we don't want an accidental stepping on our toes by a sysadmin
+     * or wayward cronjob left over from before enabling iprop.
      */
     if (global_params.iprop_enabled &&
-        ulog_map(kcontext, global_params.iprop_logfile,
+        ulog_map(util_context, global_params.iprop_logfile,
                  global_params.iprop_ulogsize, caller, db5util_db_args)) {
-        fprintf(stderr, "Could not open iprop ulog\n");
-        exit_status++;
-        if (dumpfile)
-            fclose(f);
-        return;
+        fprintf(stderr, _("Could not open iprop ulog\n"));
+        goto error;
     }
     if (global_params.iprop_enabled && !load->iprop) {
         if (log_ctx->ulog != NULL && log_ctx->ulog->kdb_first_time.seconds &&
@@ -2153,77 +1586,62 @@ load_db(argc, argv)
             fprintf(stderr, _("%s: Loads disallowed when iprop is enabled "
                               "and a ulog is present\n"),
                     progname);
-            exit_status++;
-            if (dumpfile)
-                fclose(f);
-            return;
+            goto error;
         }
     }
 
     if (load->updateonly && !(flags & FLAG_UPDATE)) {
         fprintf(stderr, _("%s: dump version %s can only be loaded with the "
                           "-update flag\n"), progname, load->name);
-        exit_status++;
-        return;
+        goto error;
     }
 
-    /*
-     * Cons up params for the new databases.  If we are not in update
-     * mode, we create an alternate database and then promote it to
-     * be the live db.
-     */
-    if (! (flags & FLAG_UPDATE)) {
+    /* If we are not in update mode, we create an alternate database and then
+     * promote it to be the live db. */
+    if (!(flags & FLAG_UPDATE)) {
         if (!add_db_arg("temporary")) {
             com_err(progname, ENOMEM, _("computing parameters for database"));
-            exit(1);
+            goto error;
         }
 
         if (!add_update && !add_db_arg("merge_nra")) {
             com_err(progname, ENOMEM, _("computing parameters for database"));
-            exit(1);
+            goto error;
         }
 
-        if((kret = krb5_db_create(kcontext, db5util_db_args))) {
-            const char *emsg = krb5_get_error_message(kcontext, kret);
-            fprintf(stderr, "%s: %s\n", progname, emsg);
-            krb5_free_error_message (kcontext, emsg);
-            exit_status++;
-            if (dumpfile) fclose(f);
-            return;
+        ret = krb5_db_create(util_context, db5util_db_args);
+        if (ret) {
+            com_err(progname, ret, _("while creating database"));
+            goto error;
         }
-    }
-    else {
+        temp_db_created = TRUE;
+    } else {
         /* Initialize the database. */
-        kret = krb5_db_open(kcontext, db5util_db_args,
-                            KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN);
-        if (kret) {
-            const char *emsg = krb5_get_error_message(kcontext, kret);
-            fprintf(stderr, "%s: %s\n", progname, emsg);
-            krb5_free_error_message (kcontext, emsg);
-            exit_status++;
+        ret = krb5_db_open(util_context, db5util_db_args,
+                           KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN);
+        if (ret) {
+            com_err(progname, ret, _("while opening database"));
             goto error;
         }
 
         /* Make sure the db is left unusable if the update fails, if the db
          * supports locking. */
-        kret = krb5_db_lock(kcontext, KRB5_DB_LOCKMODE_PERMANENT);
-        if (kret == 0)
-            db_locked = 1;
-        else if (kret != KRB5_PLUGIN_OP_NOTSUPP) {
-            fprintf(stderr, _("%s: %s while permanently locking database\n"),
-                    progname, error_message(kret));
-            exit_status++;
+        ret = krb5_db_lock(util_context, KRB5_DB_LOCKMODE_PERMANENT);
+        if (ret == 0) {
+            db_locked = TRUE;
+        } else if (ret != KRB5_PLUGIN_OP_NOTSUPP) {
+            com_err(progname, ret, _("while permanently locking database"));
             goto error;
         }
     }
 
-    if (log_ctx && log_ctx->iproprole) {
+    if (log_ctx != NULL && log_ctx->iproprole) {
         /*
-         * We don't want to take out the ulog out from underneath
-         * kadmind so we reinit the header log.
+         * We don't want to take out the ulog out from underneath kadmind so we
+         * reinit the header log.
          *
-         * We also don't want to add to the update log since we
-         * are doing a whole sale replace of the db, because:
+         * We also don't want to add to the update log since we are doing a
+         * whole sale replace of the db, because:
          *      we could easily exceed # of update entries
          *      we could implicity delete db entries during a replace
          *      no advantage in incr updates when entire db is replaced
@@ -2233,95 +1651,61 @@ load_db(argc, argv)
             log_ctx->iproprole = IPROP_NULL;
 
             if (!add_update) {
-                if (!parse_iprop_header(buf, &load, &last_sno,
-                                           &last_seconds,
-                                           &last_useconds)) {
-                    exit_status++;
+                if (!parse_iprop_header(buf, &load, &last_sno, &last_seconds,
+                                        &last_useconds))
                     goto error;
-                }
 
                 log_ctx->ulog->kdb_last_sno = last_sno;
-                log_ctx->ulog->kdb_last_time.seconds =
-                    last_seconds;
-                log_ctx->ulog->kdb_last_time.useconds =
-                    last_useconds;
+                log_ctx->ulog->kdb_last_time.seconds = last_seconds;
+                log_ctx->ulog->kdb_last_time.useconds = last_useconds;
 
-                /*
-                 * Sync'ing the header is not necessary on any OS and
-                 * filesystem where the filesystem and virtual memory block
-                 * cache are unified, which is pretty much all cases that we
-                 * care about.  However, technically speaking we must msync()
-                 * in order for our writes here to be visible to a running
-                 * kpropd.
-                 */
+                /* Technically we must msync() in order for our writes here to
+                 * be visible to a running kpropd. */
                 ulog_sync_header(log_ctx->ulog);
             }
         }
     }
 
-    if (restore_dump(progname, kcontext, (dumpfile) ? dumpfile : stdin_name,
+    if (restore_dump(util_context, dumpfile ? dumpfile : _("standard input"),
                      f, flags, load)) {
-        fprintf(stderr, restfail_fmt,
-                progname, load->name);
-        exit_status++;
+        fprintf(stderr, _("%s: %s restore failed\n"), progname, load->name);
+        goto error;
     }
 
-    if (db_locked && (kret = krb5_db_unlock(kcontext))) {
-        /* change this error? */
-        fprintf(stderr, dbunlockerr_fmt,
-                progname, dbname, error_message(kret));
-        exit_status++;
+    if (db_locked && (ret = krb5_db_unlock(util_context))) {
+        com_err(progname, ret, _("while unlocking database"));
+        goto error;
     }
 
-#if 0
-    if ((kret = krb5_db_fini(kcontext))) {
-        fprintf(stderr, close_err_fmt,
-                progname, error_message(kret));
-        exit_status++;
-    }
-#endif
-
-    /* close policy db below */
-
-    if (exit_status == 0 && !(flags & FLAG_UPDATE)) {
-        kret = krb5_db_promote(kcontext, db5util_db_args);
-        /*
-         * Ignore a not supported error since there is nothing to do about it
-         * anyway.
-         */
-        if (kret != 0 && kret != KRB5_PLUGIN_OP_NOTSUPP) {
-            fprintf(stderr, _("%s: cannot make newly loaded database live "
-                              "(%s)\n"), progname, error_message(kret));
-            exit_status++;
+    if (!(flags & FLAG_UPDATE)) {
+        ret = krb5_db_promote(util_context, db5util_db_args);
+        /* Ignore a not supported error since there is nothing to do about it
+         * anyway. */
+        if (ret != 0 && ret != KRB5_PLUGIN_OP_NOTSUPP) {
+            com_err(progname, ret,
+                    _("while making newly loaded database live"));
+            goto error;
         }
     }
+
+cleanup:
+    /* If we created a temporary DB but didn't succeed, destroy it. */
+    if (exit_status && temp_db_created) {
+        ret = krb5_db_destroy(util_context, db5util_db_args);
+        /* Ignore a not supported error since there is nothing to do about
+         * it anyway. */
+        if (ret != 0 && ret != KRB5_PLUGIN_OP_NOTSUPP) {
+            com_err(progname, ret, _("while deleting bad database %s"),
+                    dbname);
+        }
+    }
+
+    if (f != NULL && f != stdin)
+        fclose(f);
+
+    return;
 
 error:
-    /*
-     * If not an update: if there was an error, destroy the temp database,
-     * otherwise rename it into place.
-     *
-     * If an update: if there was no error, unlock the database.
-     */
-    if (!(flags & FLAG_UPDATE)) {
-        if (exit_status) {
-            kret = krb5_db_destroy(kcontext, db5util_db_args);
-            /*
-             * Ignore a not supported error since there is nothing to do about
-             * it anyway.
-             */
-            if (kret != 0 && kret != KRB5_PLUGIN_OP_NOTSUPP) {
-                fprintf(stderr, dbdelerr_fmt,
-                        progname, dbname, error_message(kret));
-                exit_status++;
-            }
-        }
-    }
-
-    if (dumpfile) {
-        (void) krb5_lock_file(kcontext, fileno(f), KRB5_LOCKMODE_UNLOCK);
-        fclose(f);
-    }
-
-    krb5_free_context(kcontext);
+    exit_status++;
+    goto cleanup;
 }
