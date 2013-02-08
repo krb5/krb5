@@ -277,12 +277,10 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
 
     krb5_free_keyblock(context, ctx->subkey);
     ctx->subkey = NULL;
-    code = krb5int_make_tgs_request(context, ctx->fast_state,
-                                    ctx->cur_tgt, ctx->kdcopt,
-                                    ctx->cur_tgt->addresses, NULL,
-                                    ctx->tgs_in_creds, NULL, NULL, &request,
-                                    &ctx->timestamp, &ctx->nonce,
-                                    &ctx->subkey);
+    code = k5_make_tgs_req(context, ctx->fast_state, ctx->cur_tgt, ctx->kdcopt,
+                           ctx->cur_tgt->addresses, NULL, ctx->tgs_in_creds,
+                           NULL, NULL, &request, &ctx->timestamp, &ctx->nonce,
+                           &ctx->subkey);
     if (code != 0)
         return code;
 

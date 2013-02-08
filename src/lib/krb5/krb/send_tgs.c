@@ -114,26 +114,13 @@ cleanup:
  * to amend the request padata after the nonce and subkey are determined.
  */
 krb5_error_code
-krb5int_make_tgs_request_ext(krb5_context context,
-                             struct krb5int_fast_request_state *fast_state,
-                             krb5_flags kdcoptions,
-                             const krb5_ticket_times *timestruct,
-                             const krb5_enctype *ktypes,
-                             krb5_const_principal sname,
-                             krb5_address *const *addrs,
-                             krb5_authdata *const *authorization_data,
-                             krb5_pa_data *const *in_padata,
-                             const krb5_data *second_ticket,
-                             krb5_creds *tgt,
-                             krb5_error_code (*pacb_fn)(krb5_context,
-                                                        krb5_keyblock *,
-                                                        krb5_kdc_req *,
-                                                        void *),
-                             void *pacb_data,
-                             krb5_data *req_asn1_out,
-                             krb5_timestamp *timestamp_out,
-                             krb5_int32 *nonce_out,
-                             krb5_keyblock **subkey_out)
+k5_make_tgs_req(krb5_context context,
+                struct krb5int_fast_request_state *fast_state,
+                krb5_creds *tgt, krb5_flags kdcoptions,
+                krb5_address *const *addrs, krb5_pa_data **in_padata,
+                krb5_creds *desired, k5_pacb_fn pacb_fn, void *pacb_data,
+                krb5_data *req_asn1_out, krb5_timestamp *timestamp_out,
+                krb5_int32 *nonce_out, krb5_keyblock **subkey_out)
 {
     krb5_error_code ret;
     krb5_kdc_req req;
@@ -145,7 +132,7 @@ krb5int_make_tgs_request_ext(krb5_context context,
     krb5_pa_data **padata = NULL, *pa;
     krb5_keyblock *subkey = NULL;
     krb5_enc_data authdata_enc;
-    krb5_enctype *defenctypes = NULL;
+    krb5_enctype enctypes[2], *defenctypes = NULL;
     size_t count, i;
 
     *req_asn1_out = empty_data();
@@ -155,16 +142,20 @@ krb5int_make_tgs_request_ext(krb5_context context,
     memset(&req, 0, sizeof(req));
     memset(&authdata_enc, 0, sizeof(authdata_enc));
 
+    /* tgt's client principal must match the desired client principal. */
+    if (!krb5_principal_compare(context, tgt->client, desired->client))
+        return KRB5_PRINC_NOMATCH;
+
     /* tgt must be an actual credential, not a template. */
     if (!tgt->ticket.length)
         return KRB5_NO_TKT_SUPPLIED;
 
     req.kdc_options = kdcoptions;
-    req.server = (krb5_principal)sname;
-    req.from = timestruct->starttime;
-    req.till = timestruct->endtime ? timestruct->endtime : tgt->times.endtime;
-    req.authorization_data.ciphertext.data = NULL;
-    req.rtime = timestruct->renew_till;
+    req.server = desired->server;
+    req.from = desired->times.starttime;
+    req.till = desired->times.endtime ? desired->times.endtime :
+        tgt->times.endtime;
+    req.rtime = desired->times.renew_till;
     ret = krb5_timeofday(context, &time_now);
     if (ret)
         return ret;
@@ -184,8 +175,8 @@ krb5int_make_tgs_request_ext(krb5_context context,
     if (ret)
         goto cleanup;
 
-    if (authorization_data != NULL) {
-        ret = encode_krb5_authdata(authorization_data, &authdata_asn1);
+    if (desired->authdata != NULL) {
+        ret = encode_krb5_authdata(desired->authdata, &authdata_asn1);
         if (ret)
             goto cleanup;
         ret = krb5_encrypt_helper(context, subkey,
@@ -196,27 +187,30 @@ krb5int_make_tgs_request_ext(krb5_context context,
         req.authorization_data = authdata_enc;
     }
 
-    /* Get the encryption types list. */
-    if (ktypes != NULL) {
-        /* Check passed enctypes and make sure they're valid. */
-        for (req.nktypes = 0; ktypes[req.nktypes]; req.nktypes++) {
-            if (!krb5_c_valid_enctype(ktypes[req.nktypes])) {
-                ret = KRB5_PROG_ETYPE_NOSUPP;
-                goto cleanup;
-            }
+    if (desired->keyblock.enctype != ENCTYPE_NULL) {
+        if (!krb5_c_valid_enctype(desired->keyblock.enctype)) {
+            ret = KRB5_PROG_ETYPE_NOSUPP;
+            goto cleanup;
         }
-        req.ktype = (krb5_enctype *)ktypes;
+        enctypes[0] = desired->keyblock.enctype;
+        enctypes[1] = ENCTYPE_NULL;
+        req.ktype = enctypes;
+        req.nktypes = 1;
     } else {
         /* Get the default TGS enctypes. */
-        krb5_get_tgs_ktypes(context, sname, &defenctypes);
+        krb5_get_tgs_ktypes(context, desired->server, &defenctypes);
         for (count = 0; defenctypes[count]; count++);
         req.ktype = defenctypes;
         req.nktypes = count;
     }
     TRACE_SEND_TGS_ETYPES(context, req.ktype);
 
-    if (second_ticket != NULL) {
-        ret = decode_krb5_ticket(second_ticket, &sec_ticket);
+    if (kdcoptions & (KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)) {
+        if (desired->second_ticket.length == 0) {
+            ret = KRB5_NO_2ND_TKT;
+            goto cleanup;
+        }
+        ret = decode_krb5_ticket(&desired->second_ticket, &sec_ticket);
         if (ret)
             goto cleanup;
         sec_ticket_arr[0] = sec_ticket;

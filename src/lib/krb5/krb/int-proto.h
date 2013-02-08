@@ -82,60 +82,26 @@ krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
     (krb5_princ_size((c), (p)) == 2 &&                                  \
      data_eq_string(*krb5_princ_component((c), (p), 0), KRB5_TGS_NAME))
 
-krb5_error_code
-krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
-                           krb5_flags kdcoptions, krb5_address *const *address,
-                           krb5_pa_data **in_padata,
-                           krb5_creds *in_cred,
-                           krb5_error_code (*gcvt_fct)(krb5_context,
-                                                       krb5_keyblock *,
-                                                       krb5_kdc_req *,
-                                                       void *),
-                           void *gcvt_data,
-                           krb5_pa_data ***out_padata,
-                           krb5_pa_data ***enc_padata,
-                           krb5_creds **out_cred,
-                           krb5_keyblock **out_subkey);
+typedef krb5_error_code
+(*k5_pacb_fn)(krb5_context context, krb5_keyblock *subkey, krb5_kdc_req *req,
+              void *arg);
 
 krb5_error_code
-krb5int_make_tgs_request_ext(krb5_context context,
-                             struct krb5int_fast_request_state *,
-                             krb5_flags kdcoptions,
-                             const krb5_ticket_times *timestruct,
-                             const krb5_enctype *ktypes,
-                             krb5_const_principal sname,
-                             krb5_address *const *addrs,
-                             krb5_authdata *const *authorization_data,
-                             krb5_pa_data *const *padata,
-                             const krb5_data *second_ticket,
-                             krb5_creds *in_cred,
-                             krb5_error_code (*pacb_fct)(krb5_context,
-                                                         krb5_keyblock *,
-                                                         krb5_kdc_req *,
-                                                         void *),
-                             void *pacb_data,
-                             krb5_data *request_data,
-                             krb5_timestamp *timestamp,
-                             krb5_int32 *nonce,
-                             krb5_keyblock **subkey);
+krb5_get_cred_via_tkt_ext(krb5_context context, krb5_creds *tkt,
+                          krb5_flags kdcoptions, krb5_address *const *address,
+                          krb5_pa_data **in_padata, krb5_creds *in_cred,
+                          k5_pacb_fn pacb_fn, void *pacb_data,
+                          krb5_pa_data ***out_padata,
+                          krb5_pa_data ***enc_padata, krb5_creds **out_cred,
+                          krb5_keyblock **out_subkey);
 
 krb5_error_code
-krb5int_make_tgs_request(krb5_context context,
-                         struct krb5int_fast_request_state *,
-                         krb5_creds *tkt,
-                         krb5_flags kdcoptions,
-                         krb5_address *const *address,
-                         krb5_pa_data **in_padata,
-                         krb5_creds *in_cred,
-                         krb5_error_code (*pacb_fct)(krb5_context,
-                                                     krb5_keyblock *,
-                                                     krb5_kdc_req *,
-                                                     void *),
-                         void *pacb_data,
-                         krb5_data *request_data,
-                         krb5_timestamp *timestamp,
-                         krb5_int32 *nonce,
-                         krb5_keyblock **subkey);
+k5_make_tgs_req(krb5_context context, struct krb5int_fast_request_state *,
+                krb5_creds *tkt, krb5_flags kdcoptions,
+                krb5_address *const *address, krb5_pa_data **in_padata,
+                krb5_creds *in_cred, k5_pacb_fn pacb_fn, void *pacb_data,
+                krb5_data *req_asn1_out, krb5_timestamp *timestamp_out,
+                krb5_int32 *nonce_out, krb5_keyblock **subkey_out);
 
 krb5_error_code
 krb5int_process_tgs_reply(krb5_context context,
