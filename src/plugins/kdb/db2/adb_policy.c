@@ -211,10 +211,9 @@ osa_adb_get_policy(osa_adb_policy_t db, char *name,
     entry = k5alloc(sizeof(*entry), &ret);
     if (entry == NULL)
         goto error;
-    aligned_data = k5alloc(dbdata.size, &ret);
+    aligned_data = k5memdup(dbdata.data, dbdata.size, &ret);
     if (aligned_data == NULL)
         goto error;
-    memcpy(aligned_data, dbdata.data, dbdata.size);
     xdrmem_create(&xdrs, aligned_data, dbdata.size, XDR_DECODE);
     if (!xdr_osa_policy_ent_rec(&xdrs, entry)) {
         ret = OSA_ADB_FAILURE;
@@ -343,11 +342,9 @@ osa_adb_iter_policy(osa_adb_policy_t db, osa_adb_iter_policy_func func,
             goto error;
         }
 
-        if(!(aligned_data = (char *) malloc(dbdata.size))) {
-            ret = ENOMEM;
+        aligned_data = k5memdup(dbdata.data, dbdata.size, &ret);
+        if (aligned_data == NULL)
             goto error;
-        }
-        memcpy(aligned_data, dbdata.data, dbdata.size);
 
         memset(entry, 0, sizeof(osa_policy_ent_rec));
         xdrmem_create(&xdrs, aligned_data, dbdata.size, XDR_DECODE);

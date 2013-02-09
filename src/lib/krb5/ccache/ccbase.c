@@ -221,13 +221,9 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
         resid = name;
     } else {
         resid = name + pfxlen + 1;
-
-        pfx = malloc (pfxlen+1);
-        if (!pfx)
-            return ENOMEM;
-
-        memcpy (pfx, name, pfxlen);
-        pfx[pfxlen] = '\0';
+        pfx = k5memdup0(name, pfxlen, &err);
+        if (pfx == NULL)
+            return err;
     }
 
     *cache = (krb5_ccache) 0;

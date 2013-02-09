@@ -239,10 +239,10 @@ k5_make_tgs_req(krb5_context context,
     if (padata[0] == NULL)
         goto cleanup;
     padata[0]->pa_type = KRB5_PADATA_AP_REQ;
-    padata[0]->contents = k5alloc(ap_req_asn1->length, &ret);
+    padata[0]->contents = k5memdup(ap_req_asn1->data, ap_req_asn1->length,
+                                   &ret);
     if (padata[0] == NULL)
         goto cleanup;
-    memcpy(padata[0]->contents, ap_req_asn1->data, ap_req_asn1->length);
     padata[0]->length = ap_req_asn1->length;
 
     /* Append copies of any other supplied padata. */
@@ -252,10 +252,10 @@ k5_make_tgs_req(krb5_context context,
             goto cleanup;
         pa->pa_type = in_padata[i]->pa_type;
         pa->length = in_padata[i]->length;
-        pa->contents = k5alloc(in_padata[i]->length, &ret);
+        pa->contents = k5memdup(in_padata[i]->contents, in_padata[i]->length,
+                                &ret);
         if (pa->contents == NULL)
             goto cleanup;
-        memcpy(pa->contents, in_padata[i]->contents, in_padata[i]->length);
         padata[i + 1] = pa;
     }
     req.padata = padata;

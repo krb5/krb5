@@ -188,13 +188,9 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
         resid = name;
     } else {
         resid = name + pfxlen + 1;
-
-        pfx = malloc (pfxlen+1);
-        if (!pfx)
-            return ENOMEM;
-
-        memcpy (pfx, name, pfxlen);
-        pfx[pfxlen] = '\0';
+        pfx = k5memdup0(name, pfxlen, &err);
+        if (pfx == NULL)
+            return err;
     }
 
     *ktid = (krb5_keytab) 0;

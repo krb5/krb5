@@ -196,13 +196,11 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
         stringrep = NULL;
 
-        tmp = k5alloc(input_name_buffer->length + 1, &code);
+        tmp = k5memdup0(input_name_buffer->value, input_name_buffer->length,
+                        &code);
         if (tmp == NULL)
             goto cleanup;
         tmp2 = NULL;
-
-        memcpy(tmp, input_name_buffer->value, input_name_buffer->length);
-        tmp[input_name_buffer->length] = '\0';
 
         /* Find the appropriate string rep to pass into parse_name. */
         if ((input_name_type == GSS_C_NULL_OID) ||

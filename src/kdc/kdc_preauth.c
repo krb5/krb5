@@ -1586,12 +1586,10 @@ return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
     padata->magic = KV5M_PA_DATA;
 
     if (salttype == KRB5_KDB_SALTTYPE_AFS3) {
-        padata->contents = k5alloc(salt->length + 1, &retval);
+        padata->contents = k5memdup0(salt->data, salt->length, &retval);
         if (padata->contents == NULL)
             goto cleanup;
-        memcpy(padata->contents, salt->data, salt->length);
         padata->pa_type = KRB5_PADATA_AFS3_SALT;
-        padata->contents[salt->length] = '\0';
         padata->length = salt->length + 1;
     } else {
         padata->pa_type = KRB5_PADATA_PW_SALT;

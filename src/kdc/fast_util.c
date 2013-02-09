@@ -256,15 +256,12 @@ kdc_find_fast(krb5_kdc_req **requestptr,
         } else {
             new_padata->pa_type = KRB5_PADATA_FX_COOKIE;
             new_padata->length = cookie_padata->length;
-            new_padata->contents = malloc(new_padata->length);
-            if (new_padata->contents == NULL) {
-                retval = ENOMEM;
+            new_padata->contents =
+                k5memdup(cookie_padata->contents, new_padata->length, &retval);
+            if (new_padata->contents == NULL)
                 free(new_padata);
-            } else {
-                memcpy(new_padata->contents, cookie_padata->contents,
-                       new_padata->length);
+            else
                 state->cookie = new_padata;
-            }
         }
     }
     if (retval == 0 && inner_body_out != NULL) {

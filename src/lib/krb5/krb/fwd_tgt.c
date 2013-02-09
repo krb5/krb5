@@ -130,14 +130,11 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context,
                 goto errout;
             }
 
-            rhost = malloc(server->data[1].length+1);
-            if (!rhost) {
-                retval = ENOMEM;
+            rhost = k5memdup0(server->data[1].data, server->data[1].length,
+                              &retval);
+            if (rhost == NULL)
                 goto errout;
-            }
             free_rhost = 1;
-            memcpy(rhost, server->data[1].data, server->data[1].length);
-            rhost[server->data[1].length] = '\0';
         }
 
         retval = krb5_os_hostaddr(context, rhost, &addrs);

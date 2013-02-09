@@ -310,10 +310,9 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
     /* Check for extra data */
     if (entry->len > KRB5_KDB_V1_BASE_LENGTH) {
         entry->e_length = entry->len - KRB5_KDB_V1_BASE_LENGTH;
-        entry->e_data = k5alloc(entry->e_length, &retval);
+        entry->e_data = k5memdup(nextloc, entry->e_length, &retval);
         if (entry->e_data == NULL)
             goto error_out;
-        memcpy(entry->e_data, nextloc, entry->e_length);
         nextloc += entry->e_length;
     }
 
@@ -363,12 +362,10 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
             retval = KRB5_KDB_TRUNCATED_RECORD;
             goto error_out;
         }
-        if (((*tl_data)->tl_data_contents = (krb5_octet *)
-             malloc((*tl_data)->tl_data_length)) == NULL) {
-            retval = ENOMEM;
+        (*tl_data)->tl_data_contents =
+            k5memdup(nextloc, (*tl_data)->tl_data_length, &retval);
+        if ((*tl_data)->tl_data_contents == NULL)
             goto error_out;
-        }
-        memcpy((*tl_data)->tl_data_contents,nextloc,(*tl_data)->tl_data_length);
         nextloc += (*tl_data)->tl_data_length;
         tl_data = &((*tl_data)->tl_data_next);
     }
@@ -411,13 +408,11 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
                     goto error_out;
                 }
                 if (key_data->key_data_length[j]) {
-                    if ((key_data->key_data_contents[j] = (krb5_octet *)
-                         malloc(key_data->key_data_length[j])) == NULL) {
-                        retval = ENOMEM;
+                    key_data->key_data_contents[j] =
+                        k5memdup(nextloc, key_data->key_data_length[j],
+                                 &retval);
+                    if (key_data->key_data_contents[j] == NULL)
                         goto error_out;
-                    }
-                    memcpy(key_data->key_data_contents[j], nextloc,
-                           key_data->key_data_length[j]);
                     nextloc += key_data->key_data_length[j];
                 }
             }

@@ -826,11 +826,9 @@ decode_tl_data(krb5_tl_data *tl_data, int tl_type, void **data)
                 UNSTORE16_INT(curr, sublen);
                 /* forward by 2 bytes */
                 curr += 2;
-                DN = malloc (sublen + 1);
+                DN = k5memdup0(curr, sublen, &st);
                 if (DN == NULL)
-                    return ENOMEM;
-                memcpy(DN, curr, sublen);
-                DN[sublen] = 0;
+                    return st;
                 *data = DN;
                 curr += sublen;
                 st = 0;
@@ -854,11 +852,9 @@ decode_tl_data(krb5_tl_data *tl_data, int tl_type, void **data)
                 UNSTORE16_INT(curr, sublen);
                 /* forward by 2 bytes */
                 curr += 2;
-                DNarr[i] = malloc (sublen + 1);
+                DNarr[i] = k5memdup0(curr, sublen, &st);
                 if (DNarr[i] == NULL)
-                    return ENOMEM;
-                memcpy(DNarr[i], curr, sublen);
-                DNarr[i][sublen] = 0;
+                    return st;
                 ++i;
                 curr += sublen;
                 *data = DNarr;
@@ -1292,12 +1288,10 @@ krb5_add_ber_mem_ldap_mod(LDAPMod ***mods, char *attribute, int op,
             return ENOMEM;
 
         (*mods)[i]->mod_bvalues[j]->bv_len = ber_values[j]->bv_len;
-        (*mods)[i]->mod_bvalues[j]->bv_val = malloc((*mods)[i]->mod_bvalues[j]->bv_len);
+        (*mods)[i]->mod_bvalues[j]->bv_val =
+            k5memdup(ber_values[j]->bv_val, ber_values[j]->bv_len, &st);
         if ((*mods)[i]->mod_bvalues[j]->bv_val == NULL)
             return ENOMEM;
-
-        memcpy((*mods)[i]->mod_bvalues[j]->bv_val, ber_values[j]->bv_val,
-               ber_values[j]->bv_len);
     }
     (*mods)[i]->mod_bvalues[j] = NULL;
     return 0;

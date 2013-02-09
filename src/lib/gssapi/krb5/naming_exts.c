@@ -162,11 +162,9 @@ kg_acceptor_princ(krb5_context context, krb5_gss_name_t name,
         /* If a host was given, we have to use the canonicalized form of it (as
          * given by krb5_sname_to_principal) for backward compatibility. */
         const krb5_data *d = &name->princ->data[1];
-        tmp = k5alloc(d->length + 1, &code);
+        tmp = k5memdup0(d->data, d->length, &code);
         if (tmp == NULL)
             return ENOMEM;
-        memcpy(tmp, d->data, d->length);
-        tmp[d->length] = '\0';
         host = tmp;
     } else                      /* No host was given; use an empty string. */
         host = "";

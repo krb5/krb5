@@ -802,10 +802,9 @@ copy_cookie(krb5_context context, krb5_pa_data **in_padata,
     if (pa == NULL)
         return ret;
     *pa = *cookie;
-    pa->contents = k5alloc(cookie->length, &ret);
+    pa->contents = k5memdup(cookie->contents, cookie->length, &ret);
     if (pa->contents == NULL)
         goto error;
-    memcpy(pa->contents, cookie->contents, cookie->length);
     ret = grow_pa_list(out_pa_list, out_pa_list_size, &pa, 1);
     if (ret)
         goto error;
@@ -841,12 +840,12 @@ add_s4u_x509_user_padata(krb5_context context, krb5_s4u_userid *userid,
 
         s4u_padata->magic = KV5M_PA_DATA;
         s4u_padata->pa_type = KRB5_PADATA_S4U_X509_USER;
-        s4u_padata->contents = malloc(userid->subject_cert.length);
+        s4u_padata->contents = k5memdup(userid->subject_cert.data,
+                                        userid->subject_cert.length, &code);
         if (s4u_padata->contents == NULL) {
             free(s4u_padata);
-            return ENOMEM;
+            return code;
         }
-        memcpy(s4u_padata->contents, userid->subject_cert.data, userid->subject_cert.length);
         s4u_padata->length = userid->subject_cert.length;
 
         code = grow_pa_list(out_pa_list, out_pa_list_size, &s4u_padata, 1);

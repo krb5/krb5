@@ -361,12 +361,12 @@ krb5_db_def_fetch_mkey_keytab(krb5_context   context,
          * kt_ent will be free'd so need to allocate and copy key contents for
          * output to caller.
          */
-        if (!(key->contents = (krb5_octet *)malloc(key->length))) {
-            retval = ENOMEM;
+        key->contents = k5memdup(kt_ent.key.contents, kt_ent.key.length,
+                                 &retval);
+        if (key->contents == NULL) {
             krb5_kt_free_entry(context, &kt_ent);
             goto errout;
         }
-        memcpy(key->contents, kt_ent.key.contents, kt_ent.key.length);
         krb5_kt_free_entry(context, &kt_ent);
     }
 

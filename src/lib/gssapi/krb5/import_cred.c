@@ -614,14 +614,12 @@ krb5_gss_import_cred(OM_uint32 *minor_status, gss_buffer_t token,
     }
 
     /* Decode token. */
-    copy = malloc(token->length + 1);
+    copy = k5memdup0(token->value, token->length, &ret);
     if (copy == NULL) {
         status = GSS_S_FAILURE;
-        *minor_status = ENOMEM;
+        *minor_status = ret;
         goto cleanup;
     }
-    memcpy(copy, token->value, token->length);
-    copy[token->length] = '\0';
     v = k5_json_decode(copy);
     if (v == NULL)
         goto invalid;

@@ -800,15 +800,12 @@ krb5_gss_authorize_localname(OM_uint32 *minor,
         return GSS_S_FAILURE;
     }
 
-    user = k5alloc(local_user->length + 1, &code);
+    user = k5memdup0(local_user->value, local_user->length, &code);
     if (user == NULL) {
         *minor = code;
         krb5_free_context(context);
         return GSS_S_FAILURE;
     }
-
-    memcpy(user, local_user->value, local_user->length);
-    user[local_user->length] = '\0';
 
     user_ok = krb5_kuserok(context, kname->princ, user);
 

@@ -160,13 +160,9 @@ krb5int_utf8_normalize(
 
 	    if (i == len) {
 		newdata->length = len;
-		newdata->data = malloc(newdata->length + 1);
-		if (newdata->data == NULL) {
-		    retval = ENOMEM;
+		newdata->data = k5memdup0(s, len, &retval);
+		if (newdata->data == NULL)
 		    goto cleanup;
-		}
-		memcpy(newdata->data, s, len);
-		newdata->data[len] = '\0';
 		*newdataptr = newdata;
 		return 0;
 	    }

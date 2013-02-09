@@ -257,13 +257,11 @@ krb5_pac_sign(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
     if (ret != 0)
         return ret;
 
-    data->data = malloc(pac->data.length);
+    data->data = k5memdup(pac->data.data, pac->data.length, &ret);
     if (data->data == NULL)
-        return ENOMEM;
-
+        return ret;
     data->length = pac->data.length;
 
-    memcpy(data->data, pac->data.data, pac->data.length);
     memset(pac->data.data, 0,
            PACTYPE_LENGTH + (pac->pac->cBuffers * PAC_INFO_BUFFER_LENGTH));
 

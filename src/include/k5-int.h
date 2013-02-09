@@ -2571,6 +2571,28 @@ k5alloc(size_t len, krb5_error_code *code)
     return ptr;
 }
 
+/* Return a copy of the len bytes of memory at in; set *code to 0 or ENOMEM. */
+static inline void *
+k5memdup(const void *in, size_t len, krb5_error_code *code)
+{
+    void *ptr = k5alloc(len, code);
+
+    if (ptr != NULL)
+        memcpy(ptr, in, len);
+    return ptr;
+}
+
+/* Like k5memdup, but add a final null byte. */
+static inline void *
+k5memdup0(const void *in, size_t len, krb5_error_code *code)
+{
+    void *ptr = k5alloc(len + 1, code);
+
+    if (ptr != NULL)
+        memcpy(ptr, in, len);
+    return ptr;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
                               krb5_ccache ccache,

@@ -419,11 +419,9 @@ check_hash_extension(krb5_donot_replay *rep)
     end = strchr(str, ' ');
     if (!end)
         return 0;
-    msghash = malloc(end - str + 1);
+    msghash = k5memdup0(str, end - str, &retval);
     if (!msghash)
         return KRB5_RC_MALLOC;
-    memcpy(msghash, str, end - str);
-    msghash[end - str] = '\0';
     str = end + 1;
 
     /* Parse out the client and server. */

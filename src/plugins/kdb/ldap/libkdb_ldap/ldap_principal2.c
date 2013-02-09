@@ -331,12 +331,9 @@ process_db_args(krb5_context context, char **db_args, xargs_t *xargs,
                                                       dptr)) != 0)
                     goto cleanup;
             } else {
-                *dptr = calloc (1, arg_val_len);
-                if (*dptr == NULL) {
-                    st = ENOMEM;
+                *dptr = k5memdup(arg_val, arg_val_len, &st);
+                if (*dptr == NULL)
                     goto cleanup;
-                }
-                memcpy(*dptr, arg_val, arg_val_len);
             }
         }
     }

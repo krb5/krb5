@@ -375,7 +375,6 @@ aname_replacer(char *string, char **contextp, char **result)
     krb5_error_code     kret;
     char                *in = NULL, *out = NULL, *rule = NULL, *repl = NULL;
     char                *cp, *ep, *tp;
-    size_t              rule_size, repl_size;
     int                 doglobal;
 
     *result = NULL;
@@ -418,24 +417,13 @@ aname_replacer(char *string, char **contextp, char **result)
             goto cleanup;
         }
 
-        /* Figure out sizes of strings and allocate them */
-        rule_size = (size_t) (ep - &cp[2]);
-        repl_size = (size_t) (tp - &ep[1]);
-        rule = malloc(rule_size + 1);
-        if (!rule) {
-            kret = ENOMEM;
+        /* Copy the rule and replacement strings. */
+        rule = k5memdup0(&cp[2], ep - &cp[2], &kret);
+        if (rule == NULL)
             goto cleanup;
-        }
-        repl = malloc(repl_size + 1);
-        if (!repl) {
-            kret = ENOMEM;
+        repl = k5memdup0(&ep[1], tp - &ep[1], &kret);
+        if (repl == NULL)
             goto cleanup;
-        }
-
-        /* Copy the strings */
-        memcpy(rule, &cp[2], rule_size);
-        memcpy(repl, &ep[1], repl_size);
-        rule[rule_size] = repl[repl_size] = '\0';
 
         /* Check for trailing "g" */
         doglobal = (tp[1] == 'g') ? 1 : 0;

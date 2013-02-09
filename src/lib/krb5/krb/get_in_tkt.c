@@ -891,13 +891,11 @@ krb5_init_creds_init(krb5_context context,
     /* enctypes */
     if (opte->flags & KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST) {
         ctx->request->ktype =
-            k5alloc((opte->etype_list_length * sizeof(krb5_enctype)),
-                    &code);
+            k5memdup(opte->etype_list,
+                     opte->etype_list_length * sizeof(krb5_enctype), &code);
         if (code != 0)
             goto cleanup;
         ctx->request->nktypes = opte->etype_list_length;
-        memcpy(ctx->request->ktype, opte->etype_list,
-               ctx->request->nktypes * sizeof(krb5_enctype));
     } else if (krb5_get_default_in_tkt_ktypes(context,
                                               &ctx->request->ktype) == 0) {
         ctx->request->nktypes = k5_count_etypes(ctx->request->ktype);

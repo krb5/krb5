@@ -41,10 +41,10 @@ mk_xorkey(krb5_key origkey, krb5_key *xorkey)
     krb5_keyblock xorkeyblock;
     size_t i = 0;
 
-    xorbytes = malloc(origkey->keyblock.length);
+    xorbytes = k5memdup(origkey->keyblock.contents, origkey->keyblock.length,
+                        &retval);
     if (xorbytes == NULL)
-        return ENOMEM;
-    memcpy(xorbytes, origkey->keyblock.contents, origkey->keyblock.length);
+        return retval;
     for (i = 0; i < origkey->keyblock.length; i++)
         xorbytes[i] ^= 0xf0;
 
@@ -118,7 +118,7 @@ krb5_error_code krb5int_confounder_verify(const struct krb5_cksumtypes *ctp,
     krb5_crypto_iov *hash_iov = NULL, iov;
     size_t blocksize = ctp->enc->block_size, hashsize = ctp->hash->hashsize;
 
-    plaintext = k5alloc(input->length, &ret);
+    plaintext = k5memdup(input->data, input->length, &ret);
     if (plaintext == NULL)
         return ret;
 
@@ -129,7 +129,6 @@ krb5_error_code krb5int_confounder_verify(const struct krb5_cksumtypes *ctp,
     /* Decrypt the input checksum. */
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
     iov.data = make_data(plaintext, input->length);
-    memcpy(plaintext, input->data, input->length);
     ret = ctp->enc->decrypt(xorkey, NULL, &iov, 1);
     if (ret != 0)
         goto cleanup;

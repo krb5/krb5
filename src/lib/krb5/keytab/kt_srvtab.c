@@ -430,12 +430,11 @@ krb5_ktsrvint_read_entry(krb5_context context, krb5_keytab id, krb5_keytab_entry
     ret_entry->key.enctype = ENCTYPE_DES_CBC_CRC;
     ret_entry->key.magic = KV5M_KEYBLOCK;
     ret_entry->key.length = sizeof(key);
-    ret_entry->key.contents = malloc(sizeof(key));
-    if (!ret_entry->key.contents) {
+    ret_entry->key.contents = k5memdup(key, sizeof(key), &kerror);
+    if (ret_entry->key.contents == NULL) {
         krb5_free_principal(context, ret_entry->principal);
-        return ENOMEM;
+        return kerror;
     }
-    memcpy(ret_entry->key.contents, key, sizeof(key));
 
     return 0;
 }

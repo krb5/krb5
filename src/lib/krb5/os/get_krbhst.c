@@ -103,13 +103,9 @@ krb5_get_krbhst(krb5_context context, const krb5_data *realm, char ***hostlist)
         goto cleanup;
     }
     for (i = 0; i < count; i++) {
-        unsigned int len = strlen (values[i]) + 1;
-        rethosts[i] = malloc(len);
-        if (!rethosts[i]) {
-            retval = ENOMEM;
+        rethosts[i] = k5memdup0(values[i], strlen(values[i]), &retval);
+        if (rethosts[i] == NULL)
             goto cleanup;
-        }
-        memcpy (rethosts[i], values[i], len);
     }
     rethosts[count] = 0;
 cleanup:

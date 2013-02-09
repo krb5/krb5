@@ -400,13 +400,11 @@ module_locate_server(krb5_context ctx, const krb5_data *realm,
         krb5int_free_plugin_dir_data(ptrs);
         return ENOMEM;
     }
-    realmz = malloc(realm->length + 1);
+    realmz = k5memdup0(realm->data, realm->length, &code);
     if (realmz == NULL) {
         krb5int_free_plugin_dir_data(ptrs);
-        return ENOMEM;
+        return code;
     }
-    memcpy(realmz, realm->data, realm->length);
-    realmz[realm->length] = '\0';
     for (i = 0; ptrs[i]; i++) {
         void *blob;
 

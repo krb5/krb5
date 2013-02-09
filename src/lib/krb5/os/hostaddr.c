@@ -101,12 +101,9 @@ krb5_os_hostaddr(krb5_context context, const char *name,
         addrs[i]->magic = KV5M_ADDRESS;
         addrs[i]->addrtype = atype;
         addrs[i]->length = addrlen;
-        addrs[i]->contents = malloc(addrs[i]->length);
-        if (!addrs[i]->contents) {
-            retval = ENOMEM;
+        addrs[i]->contents = k5memdup(ptr, addrlen, &retval);
+        if (addrs[i]->contents == NULL)
             goto errout;
-        }
-        memcpy (addrs[i]->contents, ptr, addrs[i]->length);
         i++;
     }
 

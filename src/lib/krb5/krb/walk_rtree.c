@@ -303,19 +303,13 @@ rtree_capath_vals(krb5_context context,
 
     *vals = NULL;
 
-    clientz = calloc(client->length + 1, 1);
-    if (clientz == NULL) {
-        retval = ENOMEM;
+    clientz = k5memdup0(client->data, client->length, &retval);
+    if (clientz == NULL)
         goto error;
-    }
-    memcpy(clientz, client->data, client->length);
 
-    serverz = calloc(server->length + 1, 1);
-    if (serverz == NULL) {
-        retval = ENOMEM;
+    serverz = k5memdup0(server->data, server->length, &retval);
+    if (serverz == NULL)
         goto error;
-    }
-    memcpy(serverz, server->data, server->length);
 
     key[0] = "capaths";
     key[1] = clientz;

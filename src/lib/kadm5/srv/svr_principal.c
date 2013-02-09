@@ -245,12 +245,10 @@ apply_keysalt_policy(kadm5_server_handle_t handle, const char *policy,
             ks_tuple = handle->params.keysalts;
         }
         /* Dup the requested or defaulted keysalt tuples. */
-        new_ks_tuple = malloc(n_ks_tuple * sizeof(*new_ks_tuple));
-        if (new_ks_tuple == NULL) {
-            ret = ENOMEM;
+        new_ks_tuple = k5memdup(ks_tuple, n_ks_tuple * sizeof(*new_ks_tuple),
+                                &ret);
+        if (new_ks_tuple == NULL)
             goto cleanup;
-        }
-        memcpy(new_ks_tuple, ks_tuple, n_ks_tuple * sizeof(*new_ks_tuple));
         new_n_ks_tuple = n_ks_tuple;
         ret = 0;
         goto cleanup;

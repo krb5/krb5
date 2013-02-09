@@ -321,13 +321,10 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
             continue;
 
         if (upd->kdb_deleted) {
-            dbprincstr = k5alloc(upd->kdb_princ_name.utf8str_t_len + 1,
-                                 &retval);
+            dbprincstr = k5memdup0(upd->kdb_princ_name.utf8str_t_val,
+                                   upd->kdb_princ_name.utf8str_t_len, &retval);
             if (dbprincstr == NULL)
                 goto cleanup;
-            memcpy(dbprincstr, (char *)upd->kdb_princ_name.utf8str_t_val,
-                   upd->kdb_princ_name.utf8str_t_len);
-            dbprincstr[upd->kdb_princ_name.utf8str_t_len] = '\0';
 
             retval = krb5_parse_name(context, dbprincstr, &dbprinc);
             free(dbprincstr);

@@ -186,12 +186,10 @@ krb5_pac_get_buffer(krb5_context context,
     if (ret != 0)
         return ret;
 
-    data->data = malloc(d.length);
+    data->data = k5memdup(d.data, d.length, &ret);
     if (data->data == NULL)
-        return ENOMEM;
-
+        return ret;
     data->length = d.length;
-    memcpy(data->data, d.data, d.length);
 
     return 0;
 }
@@ -275,13 +273,11 @@ k5_pac_copy(krb5_context context,
     if (pac == NULL)
         return ENOMEM;
 
-    pac->pac = (PACTYPE *)malloc(header_len);
+    pac->pac = k5memdup(src->pac, header_len, &code);
     if (pac->pac == NULL) {
         free(pac);
-        return ENOMEM;
+        return code;
     }
-
-    memcpy(pac->pac, src->pac, header_len);
 
     code = krb5int_copy_data_contents(context, &src->data, &pac->data);
     if (code != 0) {
@@ -538,11 +534,9 @@ k5_pac_verify_server_checksum(krb5_context context,
         return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     pac_data.length = pac->data.length;
-    pac_data.data = malloc(pac->data.length);
+    pac_data.data = k5memdup(pac->data.data, pac->data.length, &ret);
     if (pac_data.data == NULL)
-        return ENOMEM;
-
-    memcpy(pac_data.data, pac->data.data, pac->data.length);
+        return ret;
 
     /* Zero out both checksum buffers */
     ret = k5_pac_zero_signature(context, pac, KRB5_PAC_SERVER_CHECKSUM,

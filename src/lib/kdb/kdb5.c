@@ -1167,16 +1167,13 @@ krb5_db_fetch_mkey(krb5_context context, krb5_principal mname,
         if (retval)
             goto clean_n_exit;
 
-        key->contents = malloc(tmp_key.length);
-        if (key->contents == NULL) {
-            retval = ENOMEM;
+        key->contents = k5memdup(tmp_key.contents, tmp_key.length, &retval);
+        if (key->contents == NULL)
             goto clean_n_exit;
-        }
 
         key->magic = tmp_key.magic;
         key->enctype = tmp_key.enctype;
         key->length = tmp_key.length;
-        memcpy(key->contents, tmp_key.contents, tmp_key.length);
     }
 
 clean_n_exit:

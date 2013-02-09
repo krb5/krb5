@@ -52,7 +52,7 @@ add_cached_dkey(krb5_key key, const krb5_data *constant,
     dkent = malloc(sizeof(*dkent));
     if (dkent == NULL)
         goto cleanup;
-    data = malloc(constant->length);
+    data = k5memdup(constant->data, constant->length, &ret);
     if (data == NULL)
         goto cleanup;
     ret = krb5_k_create_key(NULL, dkeyblock, &dkey);
@@ -60,7 +60,6 @@ add_cached_dkey(krb5_key key, const krb5_data *constant,
         goto cleanup;
 
     /* Add the new entry to the list. */
-    memcpy(data, constant->data, constant->length);
     dkent->dkey = dkey;
     dkent->constant.data = data;
     dkent->constant.length = constant->length;

@@ -53,16 +53,14 @@ copy_enc_tkt_part(krb5_context context, const krb5_enc_tkt_part *partfrom,
         tempto->transited.tr_contents.data = 0;
     } else {
         tempto->transited.tr_contents.data =
-            malloc(partfrom->transited.tr_contents.length);
+            k5memdup(partfrom->transited.tr_contents.data,
+                     partfrom->transited.tr_contents.length, &retval);
         if (!tempto->transited.tr_contents.data) {
             krb5_free_principal(context, tempto->client);
             krb5_free_keyblock(context, tempto->session);
             free(tempto);
             return ENOMEM;
         }
-        memcpy(tempto->transited.tr_contents.data,
-               (char *)partfrom->transited.tr_contents.data,
-               partfrom->transited.tr_contents.length);
     }
 
     retval = krb5_copy_addresses(context, partfrom->caddrs, &tempto->caddrs);

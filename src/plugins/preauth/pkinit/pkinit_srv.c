@@ -639,11 +639,11 @@ pkinit_pick_kdf_alg(krb5_context context, krb5_data **kdf_list,
                 tmp_oid = k5alloc(sizeof(krb5_data), &retval);
                 if (retval)
                     goto cleanup;
-                tmp_oid->data = k5alloc(supp_oid->length, &retval);
+                tmp_oid->data = k5memdup(supp_oid->data, supp_oid->length,
+                                         &retval);
                 if (retval)
                     goto cleanup;
                 tmp_oid->length = supp_oid->length;
-                memcpy(tmp_oid->data, supp_oid->data, tmp_oid->length);
                 *alg_oid = tmp_oid;
                 /* don't free the OID in clean-up if we are returning it */
                 tmp_oid = NULL;

@@ -166,10 +166,9 @@ krb5int_old_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
 
     /* Save the checksum, then zero it out in the plaintext. */
     checksum = make_data(header->data.data + enc->block_size, hash->hashsize);
-    saved_checksum = k5alloc(hash->hashsize, &ret);
+    saved_checksum = k5memdup(checksum.data, checksum.length, &ret);
     if (saved_checksum == NULL)
         goto cleanup;
-    memcpy(saved_checksum, checksum.data, checksum.length);
     memset(checksum.data, 0, checksum.length);
 
     /*
