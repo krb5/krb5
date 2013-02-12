@@ -8,6 +8,7 @@ k5_clear_error
 k5_set_error_info_callout_fn
 k5_json_array_add
 k5_json_array_create
+k5_json_array_fmt
 k5_json_array_get
 k5_json_array_length
 k5_json_array_set
@@ -17,6 +18,7 @@ k5_json_decode
 k5_json_encode
 k5_json_get_tid
 k5_json_null_create
+k5_json_null_create_val
 k5_json_number_create
 k5_json_number_value
 k5_json_object_count

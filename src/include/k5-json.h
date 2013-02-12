@@ -109,6 +109,9 @@ typedef struct k5_json_null_st *k5_json_null;
 
 int k5_json_null_create(k5_json_null *null_out);
 
+/* Create a null value as a k5_json_value, for polymorphic convenience. */
+int k5_json_null_create_val(k5_json_value *val_out);
+
 /*
  * Boolean
  */
@@ -134,6 +137,21 @@ void k5_json_array_set(k5_json_array array, size_t idx, k5_json_value val);
 /* Get an alias to the idx-th element of array, without incrementing the
  * reference count.  The caller must check idx against the array length. */
 k5_json_value k5_json_array_get(k5_json_array array, size_t idx);
+
+/*
+ * Create an array from a template and a variable argument list.  template
+ * characters are:
+ *   v: a k5_json_value argument is read, retained, and stored
+ *   n: no argument is read; a null value is stored
+ *   b: an int argument is read and stored as a boolean value
+ *   i: an int argument is read and stored as a number value
+ *   L: a long long argument is read and stored as a number value
+ *   s: a const char * argument is read and stored as a null or string value
+ *   B: const void * and size_t arguments are read and stored as a base64
+ *      string value
+ */
+int
+k5_json_array_fmt(k5_json_array *array_out, const char *template, ...);
 
 /*
  * Object

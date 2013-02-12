@@ -114,6 +114,32 @@ test_array()
 
     k5_json_release(v1);
     k5_json_release(v2);
+    k5_json_release(a);
+
+    k5_json_array_fmt(&a, "vnbiLssB", v3, 1, 9, (long long)-6, "def", NULL,
+                      (void *)"ghij", (size_t)4);
+    v = k5_json_array_get(a, 0);
+    check(k5_json_get_tid(v) == K5_JSON_TID_NULL, "fmt array[0] tid");
+    v = k5_json_array_get(a, 1);
+    check(k5_json_get_tid(v) == K5_JSON_TID_NULL, "fmt array[1] tid");
+    v = k5_json_array_get(a, 2);
+    check(k5_json_get_tid(v) == K5_JSON_TID_BOOL, "fmt array[2] tid");
+    check(k5_json_bool_value(v), "fmt array[2] value");
+    v = k5_json_array_get(a, 3);
+    check(k5_json_get_tid(v) == K5_JSON_TID_NUMBER, "fmt array[3] tid");
+    check(k5_json_number_value(v) == 9, "fmt array[3] value");
+    v = k5_json_array_get(a, 4);
+    check(k5_json_get_tid(v) == K5_JSON_TID_NUMBER, "fmt array[4] tid");
+    check(k5_json_number_value(v) == -6, "fmt array[4] value");
+    v = k5_json_array_get(a, 5);
+    check(k5_json_get_tid(v) == K5_JSON_TID_STRING, "fmt array[5] tid");
+    check(strcmp(k5_json_string_utf8(v), "def") == 0, "fmt array[5] value");
+    v = k5_json_array_get(a, 6);
+    check(k5_json_get_tid(v) == K5_JSON_TID_NULL, "fmt array[6] tid");
+    v = k5_json_array_get(a, 7);
+    check(k5_json_get_tid(v) == K5_JSON_TID_STRING, "fmt array[7] tid");
+    check(strcmp(k5_json_string_utf8(v), "Z2hpag==") == 0,
+          "fmt array[7] value");
     k5_json_release(v3);
     k5_json_release(a);
 }

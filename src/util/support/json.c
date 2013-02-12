@@ -167,6 +167,13 @@ k5_json_null_create(k5_json_null *val_out)
     return (*val_out == NULL) ? ENOMEM : 0;
 }
 
+int
+k5_json_null_create_val(k5_json_value *val_out)
+{
+    *val_out = alloc_value(&null_type, 0);
+    return (*val_out == NULL) ? ENOMEM : 0;
+}
+
 /*** Boolean type ***/
 
 static struct json_type_st bool_type = { K5_JSON_TID_BOOL, "bool", NULL };
@@ -263,6 +270,92 @@ k5_json_array_set(k5_json_array array, size_t idx, k5_json_value val)
         abort();
     k5_json_release(array->values[idx]);
     array->values[idx] = k5_json_retain(val);
+}
+
+int
+k5_json_array_fmt(k5_json_array *array_out, const char *template, ...)
+{
+    const char *p;
+    va_list ap;
+    const char *cstring;
+    unsigned char *data;
+    size_t len;
+    long long nval;
+    k5_json_array array;
+    k5_json_value val;
+    k5_json_number num;
+    k5_json_string str;
+    k5_json_bool b;
+    k5_json_null null;
+    int truth, ret;
+
+    *array_out = NULL;
+    if (k5_json_array_create(&array))
+        return ENOMEM;
+    va_start(ap, template);
+    for (p = template; *p != '\0'; p++) {
+        switch (*p) {
+        case 'v':
+            val = k5_json_retain(va_arg(ap, k5_json_value));
+            break;
+        case 'n':
+            if (k5_json_null_create(&null))
+                goto err;
+            val = null;
+            break;
+        case 'b':
+            truth = va_arg(ap, int);
+            if (k5_json_bool_create(truth, &b))
+                goto err;
+            val = b;
+            break;
+        case 'i':
+            nval = va_arg(ap, int);
+            if (k5_json_number_create(nval, &num))
+                goto err;
+            val = num;
+            break;
+        case 'L':
+            nval = va_arg(ap, long long);
+            if (k5_json_number_create(nval, &num))
+                goto err;
+            val = num;
+            break;
+        case 's':
+            cstring = va_arg(ap, const char *);
+            if (cstring == NULL) {
+                if (k5_json_null_create(&null))
+                    goto err;
+                val = null;
+            } else {
+                if (k5_json_string_create(cstring, &str))
+                    goto err;
+                val = str;
+            }
+            break;
+        case 'B':
+            data = va_arg(ap, unsigned char *);
+            len = va_arg(ap, size_t);
+            if (k5_json_string_create_base64(data, len, &str))
+                goto err;
+            val = str;
+            break;
+        default:
+            goto err;
+        }
+        ret = k5_json_array_add(array, val);
+        k5_json_release(val);
+        if (ret)
+            goto err;
+    }
+    va_end(ap);
+    *array_out = array;
+    return 0;
+
+err:
+    va_end(ap);
+    k5_json_release(array);
+    return ENOMEM;
 }
 
 /*** Object type (string:value mapping) ***/
