@@ -219,6 +219,14 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Retrieving {princ} from {keytab} (vno {int}, enctype {etype}) " \
           "with result: {kerr}", princ, keytab, (int) vno, enctype, err)
 
+#define TRACE_LOCALAUTH_INIT_CONFLICT(c, type, oldname, newname)        \
+    TRACE(c, "Ignoring localauth module {str} because it conflicts "    \
+          "with an2ln type {str} from module {str}", newname, type, oldname)
+#define TRACE_LOCALAUTH_VTINIT_FAIL(c, ret)                             \
+    TRACE(c, "localauth module failed to init vtable: {kerr}", ret)
+#define TRACE_LOCALAUTH_INIT_FAIL(c, name, ret)                         \
+    TRACE(c, "localauth module {str} failed to init: {kerr}", name, ret)
+
 #define TRACE_MK_REP(c, ctime, cusec, subkey, seqnum)                   \
     TRACE(c, "Creating AP-REP, time {long}.{int}, subkey {keyblock}, "  \
           "seqnum {int}", (long) ctime, (int) cusec, subkey, (int) seqnum)

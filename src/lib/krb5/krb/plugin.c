@@ -31,7 +31,8 @@ const char *interface_names[] = {
     "kadm5_hook",
     "clpreauth",
     "kdcpreauth",
-    "ccselect"
+    "ccselect",
+    "localauth"
 };
 
 /* Return the context's interface structure for id, or NULL if invalid. */

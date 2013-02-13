@@ -206,9 +206,7 @@ testlog
 /src/lib/krb5/krb/t_walk_rtree
 /src/lib/krb5/krb/t_response_items
 
-/src/lib/krb5/os/t_an_to_ln
 /src/lib/krb5/os/t_expand_path
-/src/lib/krb5/os/t_kuserok
 /src/lib/krb5/os/t_locate_kdc
 /src/lib/krb5/os/t_std_conf
 /src/lib/krb5/os/t_trace
