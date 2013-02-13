@@ -507,7 +507,7 @@ pkinit_fini_identity_crypto(pkinit_identity_crypto_context idctx)
     if (idctx == NULL)
         return;
 
-    pkiDebug("%s: freeing   ctx at %p\n", __FUNCTION__, idctx);
+    pkiDebug("%s: freeing ctx at %p\n", __FUNCTION__, idctx);
     free(idctx->identity);
     pkinit_fini_certs(idctx);
     pkinit_fini_pkcs11(idctx);
@@ -545,7 +545,7 @@ pkinit_fini_req_crypto(pkinit_req_crypto_context req_cryptoctx)
     if (req_cryptoctx == NULL)
         return;
 
-    pkiDebug("%s: freeing   ctx at %p\n", __FUNCTION__, req_cryptoctx);
+    pkiDebug("%s: freeing ctx at %p\n", __FUNCTION__, req_cryptoctx);
     if (req_cryptoctx->dh != NULL)
         DH_free(req_cryptoctx->dh);
     if (req_cryptoctx->received_cert != NULL)

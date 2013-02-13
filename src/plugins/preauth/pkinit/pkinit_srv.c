@@ -1393,7 +1393,7 @@ pkinit_server_plugin_fini(krb5_context context,
     for (i = 0; realm_contexts[i] != NULL; i++) {
         pkinit_server_plugin_fini_realm(context, realm_contexts[i]);
     }
-    pkiDebug("%s: freeing   context at %p\n", __FUNCTION__, realm_contexts);
+    pkiDebug("%s: freeing context at %p\n", __FUNCTION__, realm_contexts);
     free(realm_contexts);
 }
 
@@ -1434,7 +1434,7 @@ pkinit_fini_kdc_req_context(krb5_context context, void *ctx)
         pkiDebug("pkinit_fini_kdc_req_context: got bad reqctx (%p)!\n", reqctx);
         return;
     }
-    pkiDebug("%s: freeing   reqctx at %p\n", __FUNCTION__, reqctx);
+    pkiDebug("%s: freeing reqctx at %p\n", __FUNCTION__, reqctx);
 
     pkinit_fini_req_crypto(reqctx->cryptoctx);
     if (reqctx->rcv_auth_pack != NULL)
