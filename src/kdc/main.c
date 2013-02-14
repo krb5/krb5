@@ -229,6 +229,18 @@ handle_referral_params(krb5_realm_params *rparams,
         return 0;
     }
 
+    /* default_referral_realm (default none) */
+    if (rparams && rparams->realm_default_referral_realm_valid)
+        rdp->realm_default_referral_realm = strdup(rparams->realm_default_referral_realm);
+    else
+        rdp->realm_default_referral_realm = NULL;
+
+    /* cross_realm_default_referral (default no) */
+    if (rparams && rparams->realm_cross_realm_default_referral_valid)
+        rdp->realm_cross_realm_default_referral = rparams->realm_cross_realm_default_referral;
+    else
+        rdp->realm_cross_realm_default_referral = 0;
+
     if (host_based_srvcs &&
         (krb5_match_config_pattern(host_based_srvcs, KRB5_CONF_ASTERISK) == TRUE)) {
         rdp->realm_host_based_services = strdup(KRB5_CONF_ASTERISK);

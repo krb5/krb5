@@ -76,7 +76,7 @@ prepare_error_tgs(struct kdc_request_state *, krb5_kdc_req *,krb5_ticket *,int,
                   krb5_principal,krb5_data **,const char *, krb5_pa_data **);
 
 static krb5_int32
-prep_reprocess_req(krb5_kdc_req *,krb5_principal *);
+prep_reprocess_req(krb5_kdc_req *,krb5_principal *,krb5_ticket *,char *,char *);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -247,7 +247,8 @@ tgt_again:
                 goto cleanup;
 
             } else if ( db_ref_done == FALSE) {
-                retval = prep_reprocess_req(request, &krbtgt_princ);
+                retval = prep_reprocess_req(request, &krbtgt_princ, header_ticket,
+                                            cname, sname);
                 if (!retval) {
                     krb5_free_principal(kdc_context, request->server);
                     retval = krb5_copy_principal(kdc_context, krbtgt_princ,
@@ -1109,12 +1110,14 @@ cleanup:
 }
 
 static krb5_int32
-prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
+prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ, krb5_ticket *tgt, 
+                   char *cname, char *sname)
 {
     krb5_error_code retval = KRB5KRB_AP_ERR_BADMATCH;
     char **realms, **cpp, *temp_buf=NULL;
     krb5_data *comp1 = NULL, *comp2 = NULL;
-    char *comp1_str = NULL;
+    char *comp1_str = NULL, *tgsname = NULL;
+    krb5_boolean free_realm = TRUE;
 
     /* By now we know that server principal name is unknown.
      * If CANONICALIZE flag is set in the request
@@ -1122,6 +1125,7 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
      * the requested server princ. has exactly two components
      * either
      *      the name type is NT-SRV-HST
+     *      or name type is NT-SRV-INST 
      *      or name type is NT-UNKNOWN and
      *         the 1st component is listed in conf file under host_based_services
      * the 1st component is not in a list in conf under "no_host_referral"
@@ -1167,11 +1171,38 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
             strlcpy(temp_buf, comp2->data,comp2->length+1);
             retval = krb5int_get_domain_realm_mapping(kdc_context, temp_buf, &realms);
             free(temp_buf);
-            if (retval) {
-                /* no match found */
-                kdc_err(kdc_context, retval, "unable to find realm of host");
-                goto cleanup;
+            if (retval == 0 && (!realms || !realms[0]))
+                retval = KRB5KRB_AP_ERR_BADMATCH;
+            /* get TGS principal name for log message */
+            krb5_unparse_name(kdc_context, tgt->server, &tgsname);
+            if (!tgsname) tgsname = "<bad TGS principal name!>";
+            /* if there's a static realm mapping, we'll refer to that */
+            if (!retval)
+                krb5_klog_syslog(LOG_INFO,
+                                 "REFERRAL YES via static (%.*s -> %s): %s for %s with TGT %s",
+                                  comp2->length, comp2->data,
+                                  realms && realms[0] ? realms[0] : "NULL",
+                                  cname, sname, tgsname);
+            /* otherwise, consider for default referral if configured */
+            else if (default_referral_realm) {
+                /* if cross-realm default referral is off, compare the TGS realm and the issuer */
+                if (!cross_realm_default_referral &&
+                    strcmp(tgt->server->realm.data,
+                           krb5_princ_component(kdc_context, tgt->server, 1)->data)) {
+                    /* they're different; no referral */
+                    krb5_klog_syslog(LOG_INFO,
+                                     "REFERRAL NO via default (cross-realm): %s for %s with TGT %s",
+                                     cname, sname, tgsname);
+                    goto cleanup;
+                }
+                /* OK; issue a default referral */
+                krb5_klog_syslog(LOG_INFO,
+                                 "REFERRAL YES via default to %s: %s for %s with TGT %s",
+                                 default_referral_realm, cname, sname, tgsname);
+                realms = &default_referral_realm;
+                free_realm = FALSE;
             }
+
             if (realms == 0) {
                 retval = KRB5KRB_AP_ERR_BADMATCH;
                 goto cleanup;
@@ -1193,11 +1224,13 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
                                           (*request->server).realm.length,
                                           (*request->server).realm.data,
                                           "krbtgt", realms[0], (char *)0);
-            for (cpp = realms; *cpp; cpp++)
-                free(*cpp);
+            if (free_realm)
+                for (cpp = realms; *cpp; cpp++)
+                    free(*cpp);
         }
     }
 cleanup:
+    if (tgsname) free(tgsname);
     free(comp1_str);
 
     return retval;

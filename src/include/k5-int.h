@@ -182,7 +182,7 @@ typedef INT64_TYPE krb5_int64;
 /* Get string buffer support. */
 #include "k5-buf.h"
 
-/* cofiguration variables */
+/* configuration variables */
 #define KRB5_CONF_ACL_FILE                       "acl_file"
 #define KRB5_CONF_ADMIN_KEYTAB                   "admin_keytab"
 #define KRB5_CONF_ADMIN_SERVER                   "admin_server"
@@ -193,10 +193,12 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_CANONICALIZE                   "canonicalize"
 #define KRB5_CONF_CCACHE_TYPE                    "ccache_type"
 #define KRB5_CONF_CLOCKSKEW                      "clockskew"
+#define KRB5_CONF_CROSS_REALM_DEFAULT_REFERRAL   "cross_realm_default_referral"
 #define KRB5_CONF_DATABASE_NAME                  "database_name"
 #define KRB5_CONF_DB_MODULE_DIR                  "db_module_dir"
 #define KRB5_CONF_DEFAULT                        "default"
 #define KRB5_CONF_DEFAULT_REALM                  "default_realm"
+#define KRB5_CONF_DEFAULT_REFERRAL_REALM         "default_referral_realm"
 #define KRB5_CONF_DEFAULT_DOMAIN                 "default_domain"
 #define KRB5_CONF_DEFAULT_TKT_ENCTYPES           "default_tkt_enctypes"
 #define KRB5_CONF_DEFAULT_TGS_ENCTYPES           "default_tgs_enctypes"
