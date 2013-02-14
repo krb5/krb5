@@ -193,27 +193,27 @@ krb5int_debug_fprint (const char *fmt, ...)
         case 'A':
             /* %A => addrinfo */
             ai = va_arg(args, struct addrinfo *);
-            krb5int_buf_init_dynamic(&buf);
+            k5_buf_init_dynamic(&buf);
             if (ai->ai_socktype == SOCK_DGRAM)
-                krb5int_buf_add(&buf, "dgram");
+                k5_buf_add(&buf, "dgram");
             else if (ai->ai_socktype == SOCK_STREAM)
-                krb5int_buf_add(&buf, "stream");
+                k5_buf_add(&buf, "stream");
             else
-                krb5int_buf_add_fmt(&buf, "socktype%d", ai->ai_socktype);
+                k5_buf_add_fmt(&buf, "socktype%d", ai->ai_socktype);
 
             if (0 != getnameinfo (ai->ai_addr, ai->ai_addrlen,
                                   addrbuf, sizeof (addrbuf),
                                   portbuf, sizeof (portbuf),
                                   NI_NUMERICHOST | NI_NUMERICSERV)) {
                 if (ai->ai_addr->sa_family == AF_UNSPEC)
-                    krb5int_buf_add(&buf, " AF_UNSPEC");
+                    k5_buf_add(&buf, " AF_UNSPEC");
                 else
-                    krb5int_buf_add_fmt(&buf, " af%d", ai->ai_addr->sa_family);
+                    k5_buf_add_fmt(&buf, " af%d", ai->ai_addr->sa_family);
             } else
-                krb5int_buf_add_fmt(&buf, " %s.%s", addrbuf, portbuf);
-            if (krb5int_buf_data(&buf))
-                putstr(krb5int_buf_data(&buf));
-            krb5int_free_buf(&buf);
+                k5_buf_add_fmt(&buf, " %s.%s", addrbuf, portbuf);
+            if (k5_buf_data(&buf))
+                putstr(k5_buf_data(&buf));
+            k5_free_buf(&buf);
             break;
         case 'D':
             /* %D => krb5_data * */

@@ -73,7 +73,7 @@ gss_export_cred(OM_uint32 * minor_status, gss_cred_id_t cred_handle,
     if (status != GSS_S_COMPLETE)
         return status;
 
-    krb5int_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic(&buf);
 
     cred = (gss_union_cred_t) cred_handle;
     for (i = 0; i < cred->count; i++) {
@@ -98,21 +98,21 @@ gss_export_cred(OM_uint32 * minor_status, gss_cred_id_t cred_handle,
 
         /* Append the mech OID and token to buf. */
         store_32_be(public_oid->length, lenbuf);
-        krb5int_buf_add_len(&buf, lenbuf, 4);
-        krb5int_buf_add_len(&buf, public_oid->elements, public_oid->length);
+        k5_buf_add_len(&buf, lenbuf, 4);
+        k5_buf_add_len(&buf, public_oid->elements, public_oid->length);
         store_32_be(mech_token.length, lenbuf);
-        krb5int_buf_add_len(&buf, lenbuf, 4);
-        krb5int_buf_add_len(&buf, mech_token.value, mech_token.length);
+        k5_buf_add_len(&buf, lenbuf, 4);
+        k5_buf_add_len(&buf, mech_token.value, mech_token.length);
         gss_release_buffer(&tmpmin, &mech_token);
     }
 
-    if (krb5int_buf_data(&buf) == NULL) {
+    if (k5_buf_data(&buf) == NULL) {
         *minor_status = ENOMEM;
         return GSS_S_FAILURE;
     }
     return k5buf_to_gss(minor_status, &buf, token);
 
 error:
-    krb5int_free_buf(&buf);
+    k5_free_buf(&buf);
     return status;
 }

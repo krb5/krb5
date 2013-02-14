@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* util/support/k5buf-int.h */
+/* util/support/k5buf-int.h - Internal declarations for string buffers */
 /*
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,17 +24,16 @@
  * or implied warranty.
  */
 
-/* Internal declarations for the k5buf string buffer module */
-
 #ifndef K5BUF_INT_H
 #define K5BUF_INT_H
 
 #include "k5-platform.h"
 #include "k5-buf.h"
 
-/* The k5buf structure has funny field names to discourage callers
-   from violating the abstraction barrier.  Define less funny names
-   for them here. */
+/*
+ * The k5buf structure has funny field names to discourage callers from
+ * violating the abstraction barrier.  Define less funny names for them here.
+ */
 #define buftype xx_buftype
 #define data xx_data
 #define space xx_space

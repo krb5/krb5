@@ -506,11 +506,11 @@ aname_get_selstring(krb5_context context, krb5_const_principal aname,
         return KRB5_LNAME_NOTRANS;
     current++;
 
-    krb5int_buf_init_dynamic(&selstring);
+    k5_buf_init_dynamic(&selstring);
     while (1) {
         /* Copy in literal characters up to the next $ or ]. */
         nlit = strcspn(current, "$]");
-        krb5int_buf_add_len(&selstring, current, nlit);
+        k5_buf_add_len(&selstring, current, nlit);
         current += nlit;
         if (*current != '$')
             break;
@@ -525,16 +525,16 @@ aname_get_selstring(krb5_context context, krb5_const_principal aname,
             : krb5_princ_realm(context, aname);
         if (!datap)
             break;
-        krb5int_buf_add_len(&selstring, datap->data, datap->length);
+        k5_buf_add_len(&selstring, datap->data, datap->length);
     }
 
     /* Check that we hit a ']' and not the end of the string. */
     if (*current != ']') {
-        krb5int_free_buf(&selstring);
+        k5_free_buf(&selstring);
         return KRB5_CONFIG_BADFORMAT;
     }
 
-    str = krb5int_buf_data(&selstring);
+    str = k5_buf_data(&selstring);
     if (str == NULL)
         return ENOMEM;
 

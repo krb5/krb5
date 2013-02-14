@@ -1,5 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* util/support/k5buf.c */
+/* util/support/k5buf.c - string buffer functions */
+
 /*
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,11 +25,11 @@
  * or implied warranty.
  */
 
-/* Implement the k5buf string buffer module. */
-
-/* Can't include krb5.h here, or k5-int.h which includes it, because
-   krb5.h needs to be generated with error tables, after util/et,
-   which builds after this directory.  */
+/*
+ * Can't include krb5.h here, or k5-int.h which includes it, because krb5.h
+ * needs to be generated with error tables, after util/et, which builds after
+ * this directory.
+ */
 #include "k5buf-int.h"
 #include <assert.h>
 
@@ -43,10 +44,13 @@
  *   data[len] = '\0'
  */
 
-/* Make sure there is room for LEN more characters in BUF, in addition
-   to the null terminator and what's already in there.  Return true on
-   success.  On failure, set the error flag and return false. */
-static int ensure_space(struct k5buf *buf, size_t len)
+/*
+ * Make sure there is room for LEN more characters in BUF, in addition to the
+ * null terminator and what's already in there.  Return true on success.  On
+ * failure, set the error flag and return false.
+ */
+static int
+ensure_space(struct k5buf *buf, size_t len)
 {
     size_t new_space;
     char *new_data;
@@ -79,7 +83,8 @@ error_exit:
     return 0;
 }
 
-void krb5int_buf_init_fixed(struct k5buf *buf, char *data, size_t space)
+void
+k5_buf_init_fixed(struct k5buf *buf, char *data, size_t space)
 {
     assert(space > 0);
     buf->buftype = BUFTYPE_FIXED;
@@ -89,7 +94,8 @@ void krb5int_buf_init_fixed(struct k5buf *buf, char *data, size_t space)
     buf->data[0] = '\0';
 }
 
-void krb5int_buf_init_dynamic(struct k5buf *buf)
+void
+k5_buf_init_dynamic(struct k5buf *buf)
 {
     buf->buftype = BUFTYPE_DYNAMIC;
     buf->space = DYNAMIC_INITIAL_SIZE;
@@ -102,12 +108,14 @@ void krb5int_buf_init_dynamic(struct k5buf *buf)
     buf->data[0] = '\0';
 }
 
-void krb5int_buf_add(struct k5buf *buf, const char *data)
+void
+k5_buf_add(struct k5buf *buf, const char *data)
 {
-    krb5int_buf_add_len(buf, data, strlen(data));
+    k5_buf_add_len(buf, data, strlen(data));
 }
 
-void krb5int_buf_add_len(struct k5buf *buf, const char *data, size_t len)
+void
+k5_buf_add_len(struct k5buf *buf, const char *data, size_t len)
 {
     if (!ensure_space(buf, len))
         return;
@@ -116,7 +124,8 @@ void krb5int_buf_add_len(struct k5buf *buf, const char *data, size_t len)
     buf->data[buf->len] = '\0';
 }
 
-void krb5int_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
+void
+k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
 {
     va_list ap;
     int r;
@@ -164,8 +173,8 @@ void krb5int_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
         return;
     }
 
-    /* It's a pre-C99 snprintf implementation, or something else went
-       wrong.  Fall back to asprintf. */
+    /* It's a pre-C99 snprintf implementation, or something else went wrong.
+     * Fall back to asprintf. */
     va_start(ap, fmt);
     r = vasprintf(&tmp, fmt, ap);
     va_end(ap);
@@ -181,7 +190,8 @@ void krb5int_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
     free(tmp);
 }
 
-void krb5int_buf_truncate(struct k5buf *buf, size_t len)
+void
+k5_buf_truncate(struct k5buf *buf, size_t len)
 {
     if (buf->buftype == BUFTYPE_ERROR)
         return;
@@ -191,17 +201,20 @@ void krb5int_buf_truncate(struct k5buf *buf, size_t len)
 }
 
 
-char *krb5int_buf_data(struct k5buf *buf)
+char *
+k5_buf_data(struct k5buf *buf)
 {
     return (buf->buftype == BUFTYPE_ERROR) ? NULL : buf->data;
 }
 
-ssize_t krb5int_buf_len(struct k5buf *buf)
+ssize_t
+k5_buf_len(struct k5buf *buf)
 {
     return (buf->buftype == BUFTYPE_ERROR) ? -1 : (ssize_t) buf->len;
 }
 
-void krb5int_free_buf(struct k5buf *buf)
+void
+k5_free_buf(struct k5buf *buf)
 {
     if (buf->buftype == BUFTYPE_ERROR)
         return;

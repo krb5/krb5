@@ -670,11 +670,11 @@ krb5_rc_io_store(krb5_context context, struct dfl_data *t,
          */
 
         /* Format the extension value so we know its length. */
-        krb5int_buf_init_dynamic(&extbuf);
-        krb5int_buf_add_fmt(&extbuf, "HASH:%s %lu:%s %lu:%s", rep->msghash,
-                            (unsigned long) clientlen, rep->client,
-                            (unsigned long) serverlen, rep->server);
-        extstr = krb5int_buf_data(&extbuf);
+        k5_buf_init_dynamic(&extbuf);
+        k5_buf_add_fmt(&extbuf, "HASH:%s %lu:%s %lu:%s", rep->msghash,
+                       (unsigned long)clientlen, rep->client,
+                       (unsigned long)serverlen, rep->server);
+        extstr = k5_buf_data(&extbuf);
         if (!extstr)
             return KRB5_RC_MALLOC;
 
@@ -682,35 +682,35 @@ krb5_rc_io_store(krb5_context context, struct dfl_data *t,
          * Put the extension value into the server field of a
          * regular-format record, with an empty client field.
          */
-        krb5int_buf_init_dynamic(&buf);
+        k5_buf_init_dynamic(&buf);
         len = 1;
-        krb5int_buf_add_len(&buf, (char *) &len, sizeof(len));
-        krb5int_buf_add_len(&buf, "", 1);
+        k5_buf_add_len(&buf, (char *)&len, sizeof(len));
+        k5_buf_add_len(&buf, "", 1);
         len = strlen(extstr) + 1;
-        krb5int_buf_add_len(&buf, (char *) &len, sizeof(len));
-        krb5int_buf_add_len(&buf, extstr, len);
-        krb5int_buf_add_len(&buf, (char *) &rep->cusec, sizeof(rep->cusec));
-        krb5int_buf_add_len(&buf, (char *) &rep->ctime, sizeof(rep->ctime));
+        k5_buf_add_len(&buf, (char *)&len, sizeof(len));
+        k5_buf_add_len(&buf, extstr, len);
+        k5_buf_add_len(&buf, (char *)&rep->cusec, sizeof(rep->cusec));
+        k5_buf_add_len(&buf, (char *)&rep->ctime, sizeof(rep->ctime));
         free(extstr);
     } else  /* No extension record needed. */
-        krb5int_buf_init_dynamic(&buf);
+        k5_buf_init_dynamic(&buf);
 
     len = clientlen + 1;
-    krb5int_buf_add_len(&buf, (char *) &len, sizeof(len));
-    krb5int_buf_add_len(&buf, rep->client, len);
+    k5_buf_add_len(&buf, (char *)&len, sizeof(len));
+    k5_buf_add_len(&buf, rep->client, len);
     len = serverlen + 1;
-    krb5int_buf_add_len(&buf, (char *) &len, sizeof(len));
-    krb5int_buf_add_len(&buf, rep->server, len);
-    krb5int_buf_add_len(&buf, (char *) &rep->cusec, sizeof(rep->cusec));
-    krb5int_buf_add_len(&buf, (char *) &rep->ctime, sizeof(rep->ctime));
+    k5_buf_add_len(&buf, (char *)&len, sizeof(len));
+    k5_buf_add_len(&buf, rep->server, len);
+    k5_buf_add_len(&buf, (char *)&rep->cusec, sizeof(rep->cusec));
+    k5_buf_add_len(&buf, (char *)&rep->ctime, sizeof(rep->ctime));
 
-    bufptr = krb5int_buf_data(&buf);
-    buflen = krb5int_buf_len(&buf);
+    bufptr = k5_buf_data(&buf);
+    buflen = k5_buf_len(&buf);
     if (bufptr == NULL || buflen < 0)
         return KRB5_RC_MALLOC;
 
     ret = krb5_rc_io_write(context, &t->d, bufptr, buflen);
-    krb5int_free_buf(&buf);
+    k5_free_buf(&buf);
     return ret;
 }
 

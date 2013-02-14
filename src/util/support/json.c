@@ -575,22 +575,22 @@ encode_string(struct k5buf *buf, const char *str)
     size_t n;
     const char *p;
 
-    krb5int_buf_add(buf, "\"");
+    k5_buf_add(buf, "\"");
     while (*str != '\0') {
         n = strcspn(str, needs_quote);
-        krb5int_buf_add_len(buf, str, n);
+        k5_buf_add_len(buf, str, n);
         str += n;
         if (*str == '\0')
             break;
-        krb5int_buf_add(buf, "\\");
+        k5_buf_add(buf, "\\");
         p = strchr(quotemap_c, *str);
         if (p != NULL)
-            krb5int_buf_add_len(buf, quotemap_json + (p - quotemap_c), 1);
+            k5_buf_add_len(buf, quotemap_json + (p - quotemap_c), 1);
         else
-            krb5int_buf_add_fmt(buf, "u00%02X", (unsigned int)*str);
+            k5_buf_add_fmt(buf, "u00%02X", (unsigned int)*str);
         str++;
     }
-    krb5int_buf_add(buf, "\"");
+    k5_buf_add(buf, "\"");
 }
 
 struct obj_ctx {
@@ -609,9 +609,9 @@ encode_obj_entry(void *ctx, const char *key, k5_json_value value)
     if (j->first)
         j->first = 0;
     else
-        krb5int_buf_add(j->buf, ",");
+        k5_buf_add(j->buf, ",");
     encode_string(j->buf, key);
-    krb5int_buf_add(j->buf, ":");
+    k5_buf_add(j->buf, ":");
     j->ret = encode_value(j->buf, value);
 }
 
@@ -629,25 +629,25 @@ encode_value(struct k5buf *buf, k5_json_value val)
     type = k5_json_get_tid(val);
     switch (type) {
     case K5_JSON_TID_ARRAY:
-        krb5int_buf_add(buf, "[");
+        k5_buf_add(buf, "[");
         len = k5_json_array_length(val);
         for (i = 0; i < len; i++) {
             if (i != 0)
-                krb5int_buf_add(buf, ",");
+                k5_buf_add(buf, ",");
             ret = encode_value(buf, k5_json_array_get(val, i));
             if (ret)
                 return ret;
         }
-        krb5int_buf_add(buf, "]");
+        k5_buf_add(buf, "]");
         return 0;
 
     case K5_JSON_TID_OBJECT:
-        krb5int_buf_add(buf, "{");
+        k5_buf_add(buf, "{");
         ctx.buf = buf;
         ctx.ret = 0;
         ctx.first = 1;
         k5_json_object_iterate(val, encode_obj_entry, &ctx);
-        krb5int_buf_add(buf, "}");
+        k5_buf_add(buf, "}");
         return ctx.ret;
 
     case K5_JSON_TID_STRING:
@@ -655,15 +655,15 @@ encode_value(struct k5buf *buf, k5_json_value val)
         return 0;
 
     case K5_JSON_TID_NUMBER:
-        krb5int_buf_add_fmt(buf, "%lld", k5_json_number_value(val));
+        k5_buf_add_fmt(buf, "%lld", k5_json_number_value(val));
         return 0;
 
     case K5_JSON_TID_NULL:
-        krb5int_buf_add(buf, "null");
+        k5_buf_add(buf, "null");
         return 0;
 
     case K5_JSON_TID_BOOL:
-        krb5int_buf_add(buf, k5_json_bool_value(val) ? "true" : "false");
+        k5_buf_add(buf, k5_json_bool_value(val) ? "true" : "false");
         return 0;
 
     default:
@@ -678,13 +678,13 @@ k5_json_encode(k5_json_value val, char **json_out)
     int ret;
 
     *json_out = NULL;
-    krb5int_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic(&buf);
     ret = encode_value(&buf, val);
     if (ret) {
-        krb5int_free_buf(&buf);
+        k5_free_buf(&buf);
         return ret;
     }
-    *json_out = krb5int_buf_data(&buf);
+    *json_out = k5_buf_data(&buf);
     return (*json_out == NULL) ? ENOMEM : 0;
 }
 

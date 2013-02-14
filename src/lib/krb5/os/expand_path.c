@@ -465,7 +465,7 @@ k5_expand_path_tokens_extra(krb5_context context, const char *path_in,
 
     *path_out = NULL;
 
-    krb5int_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic(&buf);
 
     /* Count extra tokens. */
     va_start(ap, path_out);
@@ -497,10 +497,10 @@ k5_expand_path_tokens_extra(krb5_context context, const char *path_in,
          * If there are no more tokens, we can finish up. */
         tok_begin = strstr(path_left, "%{");
         if (tok_begin == NULL) {
-            krb5int_buf_add(&buf, path_left);
+            k5_buf_add(&buf, path_left);
             break;
         }
-        krb5int_buf_add_len(&buf, path_left, tok_begin - path_left);
+        k5_buf_add_len(&buf, path_left, tok_begin - path_left);
 
         /* Find the end of this token. */
         tok_end = strchr(tok_begin, '}');
@@ -515,12 +515,12 @@ k5_expand_path_tokens_extra(krb5_context context, const char *path_in,
                            &tok_val);
         if (ret)
             goto cleanup;
-        krb5int_buf_add(&buf, tok_val);
+        k5_buf_add(&buf, tok_val);
         free(tok_val);
         path_left = tok_end + 1;
     }
 
-    path = krb5int_buf_data(&buf);
+    path = k5_buf_data(&buf);
     if (path == NULL) {
         ret = ENOMEM;
         goto cleanup;
@@ -539,7 +539,7 @@ k5_expand_path_tokens_extra(krb5_context context, const char *path_in,
 
 cleanup:
     if (*path_out == NULL)
-        krb5int_free_buf(&buf);
+        k5_free_buf(&buf);
     free_extra_tokens(extra_tokens);
     return 0;
 }

@@ -75,16 +75,16 @@ krb5_aprof_init(char *fname, char *envname, krb5_pointer *acontextp)
         return ret;
     if (envname == NULL || (kdc_config = getenv(envname)) == NULL)
         kdc_config = fname;
-    krb5int_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic(&buf);
     if (kdc_config)
-        krb5int_buf_add(&buf, kdc_config);
+        k5_buf_add(&buf, kdc_config);
     for (i = 0; filenames[i] != NULL; i++) {
-        if (krb5int_buf_len(&buf) > 0)
-            krb5int_buf_add(&buf, ":");
-        krb5int_buf_add(&buf, filenames[i]);
+        if (k5_buf_len(&buf) > 0)
+            k5_buf_add(&buf, ":");
+        k5_buf_add(&buf, filenames[i]);
     }
     krb5_free_config_files(filenames);
-    profile_path = krb5int_buf_data(&buf);
+    profile_path = k5_buf_data(&buf);
     if (profile_path == NULL)
         return ENOMEM;
     profile = (profile_t) NULL;

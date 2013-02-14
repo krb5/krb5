@@ -2101,37 +2101,37 @@ krb5_dbe_set_string(krb5_context context, krb5_db_entry *entry,
     code = begin_attrs(context, entry, &pos, &end);
     if (code)
         return code;
-    krb5int_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic(&buf);
     while (next_attr(&pos, end, &mapkey, &mapval)) {
         if (strcmp(mapkey, key) == 0) {
             if (value != NULL) {
-                krb5int_buf_add_len(&buf, mapkey, strlen(mapkey) + 1);
-                krb5int_buf_add_len(&buf, value, strlen(value) + 1);
+                k5_buf_add_len(&buf, mapkey, strlen(mapkey) + 1);
+                k5_buf_add_len(&buf, value, strlen(value) + 1);
             }
             found = TRUE;
         } else {
-            krb5int_buf_add_len(&buf, mapkey, strlen(mapkey) + 1);
-            krb5int_buf_add_len(&buf, mapval, strlen(mapval) + 1);
+            k5_buf_add_len(&buf, mapkey, strlen(mapkey) + 1);
+            k5_buf_add_len(&buf, mapval, strlen(mapval) + 1);
         }
     }
 
     /* If key wasn't found in the map, add a new entry for it. */
     if (!found && value != NULL) {
-        krb5int_buf_add_len(&buf, key, strlen(key) + 1);
-        krb5int_buf_add_len(&buf, value, strlen(value) + 1);
+        k5_buf_add_len(&buf, key, strlen(key) + 1);
+        k5_buf_add_len(&buf, value, strlen(value) + 1);
     }
 
-    len = krb5int_buf_len(&buf);
+    len = k5_buf_len(&buf);
     if (len == -1)
         return ENOMEM;
     if (len > 65535)
         return KRB5_KDB_STRINGS_TOOLONG;
     tl_data.tl_data_type = KRB5_TL_STRING_ATTRS;
-    tl_data.tl_data_contents = (krb5_octet *)krb5int_buf_data(&buf);
+    tl_data.tl_data_contents = (krb5_octet *)k5_buf_data(&buf);
     tl_data.tl_data_length = len;
 
     code = krb5_dbe_update_tl_data(context, entry, &tl_data);
-    krb5int_free_buf(&buf);
+    k5_free_buf(&buf);
     return code;
 }
 

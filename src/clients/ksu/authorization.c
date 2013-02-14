@@ -513,12 +513,12 @@ krb5_boolean find_first_cmd_that_exists(fcmd_arr, cmd_out, err_out)
     }
 
     if (retbool == FALSE ){
-        krb5int_buf_init_dynamic(&buf);
-        krb5int_buf_add(&buf, _("Error: not found -> "));
+        k5_buf_init_dynamic(&buf);
+        k5_buf_add(&buf, _("Error: not found -> "));
         for(j= 0; j < i; j ++)
-            krb5int_buf_add_fmt(&buf, " %s ", fcmd_arr[j]);
-        krb5int_buf_add(&buf, "\n");
-        *err_out = krb5int_buf_data(&buf);
+            k5_buf_add_fmt(&buf, " %s ", fcmd_arr[j]);
+        k5_buf_add(&buf, "\n");
+        *err_out = k5_buf_data(&buf);
         if (*err_out == NULL) {
             perror(prog_name);
             exit(1);

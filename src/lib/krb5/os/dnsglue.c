@@ -350,11 +350,11 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
      * Form our query, and send it via DNS
      */
 
-    krb5int_buf_init_fixed(&buf, host, sizeof(host));
+    k5_buf_init_fixed(&buf, host, sizeof(host));
     if (name == NULL || name[0] == '\0') {
-        krb5int_buf_add(&buf, prefix);
+        k5_buf_add(&buf, prefix);
     } else {
-        krb5int_buf_add_fmt(&buf, "%s.%s", prefix, name);
+        k5_buf_add_fmt(&buf, "%s.%s", prefix, name);
 
         /* Realm names don't (normally) end with ".", but if the query
            doesn't end with "." and doesn't get an answer as is, the
@@ -366,11 +366,11 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
            the local domain or domain search lists to be expanded.
         */
 
-        len = krb5int_buf_len(&buf);
+        len = k5_buf_len(&buf);
         if (len > 0 && host[len - 1] != '.')
-            krb5int_buf_add(&buf, ".");
+            k5_buf_add(&buf, ".");
     }
-    if (krb5int_buf_data(&buf) == NULL)
+    if (k5_buf_data(&buf) == NULL)
         return KRB5_ERR_HOST_REALM_UNKNOWN;
     ret = krb5int_dns_init(&ds, host, C_IN, T_TXT);
     if (ret < 0)

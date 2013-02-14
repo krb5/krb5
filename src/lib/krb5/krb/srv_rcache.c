@@ -48,22 +48,22 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
 
     cachetype = krb5_rc_default_type(context);
 
-    krb5int_buf_init_dynamic(&buf);
-    krb5int_buf_add(&buf, cachetype);
-    krb5int_buf_add(&buf, ":");
+    k5_buf_init_dynamic(&buf);
+    k5_buf_add(&buf, cachetype);
+    k5_buf_add(&buf, ":");
     for (i = 0; i < piece->length; i++) {
         if (piece->data[i] == '-')
-            krb5int_buf_add(&buf, "--");
+            k5_buf_add(&buf, "--");
         else if (!isvalidrcname((int) piece->data[i]))
-            krb5int_buf_add_fmt(&buf, "-%03o", piece->data[i]);
+            k5_buf_add_fmt(&buf, "-%03o", piece->data[i]);
         else
-            krb5int_buf_add_len(&buf, &piece->data[i], 1);
+            k5_buf_add_len(&buf, &piece->data[i], 1);
     }
 #ifdef HAVE_GETEUID
-    krb5int_buf_add_fmt(&buf, "_%lu", uid);
+    k5_buf_add_fmt(&buf, "_%lu", uid);
 #endif
 
-    cachename = krb5int_buf_data(&buf);
+    cachename = k5_buf_data(&buf);
     if (cachename == NULL)
         return ENOMEM;
 

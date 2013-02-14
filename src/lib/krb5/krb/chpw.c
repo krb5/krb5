@@ -382,8 +382,8 @@ struct ad_policy_info {
 static void
 add_spaces(struct k5buf *buf)
 {
-    if (krb5int_buf_len(buf) > 0)
-        krb5int_buf_add(buf, "  ");
+    if (k5_buf_len(buf) > 0)
+        k5_buf_add(buf, "  ");
 }
 
 static krb5_error_code
@@ -422,52 +422,48 @@ decode_ad_policy_info(const krb5_data *data, char **msg_out)
     /* Check that we processed exactly the expected number of bytes. */
     assert(p == data->data + AD_POLICY_INFO_LENGTH);
 
-    krb5int_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic(&buf);
 
     /*
      * Update src/tests/misc/test_chpw_message.c if changing these strings!
      */
 
     if (policy.password_properties & AD_POLICY_COMPLEX) {
-        krb5int_buf_add(&buf,
-                        _("The password must include numbers or symbols.  "
-                          "Don't include any part of your name in the "
-                          "password."));
+        k5_buf_add(&buf, _("The password must include numbers or symbols.  "
+                           "Don't include any part of your name in the "
+                           "password."));
     }
     if (policy.min_length_password > 0) {
         add_spaces(&buf);
-        krb5int_buf_add_fmt(&buf,
-                            ngettext("The password must contain at least %d "
-                                     "character.",
-                                     "The password must contain at least %d "
-                                     "characters.",
-                                     policy.min_length_password),
-                            policy.min_length_password);
+        k5_buf_add_fmt(&buf, ngettext("The password must contain at least %d "
+                                      "character.",
+                                      "The password must contain at least %d "
+                                      "characters.",
+                                      policy.min_length_password),
+                       policy.min_length_password);
     }
     if (policy.password_history) {
         add_spaces(&buf);
-        krb5int_buf_add_fmt(&buf,
-                            ngettext("The password must be different from the "
-                                     "previous password.",
-                                     "The password must be different from the "
-                                     "previous %d passwords.",
-                                     policy.password_history),
-                            policy.password_history);
+        k5_buf_add_fmt(&buf, ngettext("The password must be different from "
+                                      "the previous password.",
+                                      "The password must be different from "
+                                      "the previous %d passwords.",
+                                      policy.password_history),
+                       policy.password_history);
     }
     if (policy.min_passwordage) {
         password_days = policy.min_passwordage / AD_POLICY_TIME_TO_DAYS;
         if (password_days == 0)
             password_days = 1;
         add_spaces(&buf);
-        krb5int_buf_add_fmt(&buf,
-                            ngettext("The password can only be changed once a "
-                                     "day.",
-                                     "The password can only be changed every "
-                                     "%d days.", (int)password_days),
-                            (int)password_days);
+        k5_buf_add_fmt(&buf, ngettext("The password can only be changed once "
+                                      "a day.",
+                                      "The password can only be changed every "
+                                      "%d days.", (int)password_days),
+                       (int)password_days);
     }
 
-    msg = krb5int_buf_data(&buf);
+    msg = k5_buf_data(&buf);
     if (msg == NULL)
         return ENOMEM;
 

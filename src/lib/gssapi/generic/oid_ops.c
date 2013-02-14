@@ -257,8 +257,8 @@ generic_gss_oid_to_str(OM_uint32 *minor_status,
 
     cp = (unsigned char *) oid->elements;
     number = (unsigned long) cp[0];
-    krb5int_buf_init_dynamic(&buf);
-    krb5int_buf_add(&buf, "{ ");
+    k5_buf_init_dynamic(&buf);
+    k5_buf_add(&buf, "{ ");
     number = 0;
     cp = (unsigned char *) oid->elements;
     first = 1;
@@ -267,16 +267,16 @@ generic_gss_oid_to_str(OM_uint32 *minor_status,
         if ((cp[i] & 0x80) == 0) {
             if (first) {
                 n = (number < 40) ? 0 : (number < 80) ? 1 : 2;
-                krb5int_buf_add_fmt(&buf, "%lu %lu ", n, number - (n * 40));
+                k5_buf_add_fmt(&buf, "%lu %lu ", n, number - (n * 40));
                 first = 0;
             } else {
-                krb5int_buf_add_fmt(&buf, "%lu ", number);
+                k5_buf_add_fmt(&buf, "%lu ", number);
             }
             number = 0;
         }
     }
-    krb5int_buf_add_len(&buf, "}\0", 2);
-    if (krb5int_buf_data(&buf) == NULL) {
+    k5_buf_add_len(&buf, "}\0", 2);
+    if (k5_buf_data(&buf) == NULL) {
         *minor_status = ENOMEM;
         return(GSS_S_FAILURE);
     }

@@ -78,16 +78,16 @@ ldap_filter_correct (char *in)
     const char special[] = "*()\\ #\"+,;<>";
     struct k5buf buf;
 
-    krb5int_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic(&buf);
     while (TRUE) {
         count = strcspn(in, special);
-        krb5int_buf_add_len(&buf, in, count);
+        k5_buf_add_len(&buf, in, count);
         in += count;
         if (*in == '\0')
             break;
-        krb5int_buf_add_fmt(&buf, "\\%2x", (unsigned char)*in++);
+        k5_buf_add_fmt(&buf, "\\%2x", (unsigned char)*in++);
     }
-    return krb5int_buf_data(&buf);
+    return k5_buf_data(&buf);
 }
 
 static int

@@ -138,7 +138,7 @@ start_child(int *to_child_out, int *from_child_out, pid_t *pid_out)
     *pid_out = pid;
 }
 
-#define WRITE(b, d) krb5int_buf_add_len(b, (char *)&d, sizeof(d))
+#define WRITE(b, d) k5_buf_add_len(b, (char *)&d, sizeof(d))
 
 /* Add the fields of lkey to bufp. */
 static void
@@ -146,7 +146,7 @@ add_lucid_key(struct k5buf *bufp, const gss_krb5_lucid_key_t *lkey)
 {
     WRITE(bufp, lkey->type);
     WRITE(bufp, lkey->length);
-    krb5int_buf_add_len(bufp, lkey->data, lkey->length);
+    k5_buf_add_len(bufp, lkey->data, lkey->length);
 }
 
 /* Using a machine-dependent format, marshal the fields of lctx into an
@@ -157,7 +157,7 @@ marshal_lucid_context(const gss_krb5_lucid_context_v1_t *lctx,
 {
     struct k5buf buf;
 
-    krb5int_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic(&buf);
     WRITE(&buf, lctx->version);
     WRITE(&buf, lctx->initiate);
     WRITE(&buf, lctx->endtime);
@@ -175,9 +175,9 @@ marshal_lucid_context(const gss_krb5_lucid_context_v1_t *lctx,
             add_lucid_key(&buf, &lctx->cfx_kd.acceptor_subkey);
     } else
         abort();
-    assert(krb5int_buf_data(&buf) != NULL);
-    *data_out = (unsigned char *)krb5int_buf_data(&buf);
-    *len_out = krb5int_buf_len(&buf);
+    assert(k5_buf_data(&buf) != NULL);
+    *data_out = (unsigned char *)k5_buf_data(&buf);
+    *len_out = k5_buf_len(&buf);
 }
 
 /* Export ctx as a lucid context, marshal it, and write it to fd. */
