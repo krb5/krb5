@@ -3249,7 +3249,7 @@ pkinit_check_kdc_pkid(krb5_context context,
     pkiDebug("found kdcPkId in AS REQ\n");
     is = d2i_PKCS7_ISSUER_AND_SERIAL(NULL, &p, (int)pkid_len);
     if (is == NULL)
-        goto cleanup;
+        return retval;
 
     status = X509_NAME_cmp(X509_get_issuer_name(kdc_cert), is->issuer);
     if (!status) {
@@ -3259,7 +3259,6 @@ pkinit_check_kdc_pkid(krb5_context context,
     }
 
     retval = 0;
-cleanup:
     X509_NAME_free(is->issuer);
     ASN1_INTEGER_free(is->serial);
     free(is);
