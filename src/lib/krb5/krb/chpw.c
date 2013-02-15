@@ -269,6 +269,9 @@ krb5_chpw_result_code_string(krb5_context context, int result_code,
     case KRB5_KPASSWD_INITIAL_FLAG_NEEDED:
         *code_string = _("Initial password required");
         break;
+    case 0:
+        *code_string = _("Success");
+        break;
     default:
         *code_string = _("Password change failed");
         break;
