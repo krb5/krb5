@@ -3243,7 +3243,6 @@ pkinit_check_kdc_pkid(krb5_context context,
                       unsigned int pkid_len,
                       int *valid_kdcPkId)
 {
-    krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     PKCS7_ISSUER_AND_SERIAL *is = NULL;
     const unsigned char *p = pdid_buf;
     int status = 1;
@@ -3253,7 +3252,7 @@ pkinit_check_kdc_pkid(krb5_context context,
     pkiDebug("found kdcPkId in AS REQ\n");
     is = d2i_PKCS7_ISSUER_AND_SERIAL(NULL, &p, (int)pkid_len);
     if (is == NULL)
-        return retval;
+        return KRB5KDC_ERR_PREAUTH_FAILED;
 
     status = X509_NAME_cmp(X509_get_issuer_name(kdc_cert), is->issuer);
     if (!status) {
@@ -3262,12 +3261,11 @@ pkinit_check_kdc_pkid(krb5_context context,
             *valid_kdcPkId = 1;
     }
 
-    retval = 0;
     X509_NAME_free(is->issuer);
     ASN1_INTEGER_free(is->serial);
     free(is);
 
-    return retval;
+    return 0;
 }
 
 static int
