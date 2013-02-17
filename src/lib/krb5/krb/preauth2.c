@@ -590,7 +590,8 @@ run_preauth_plugins(krb5_context kcontext,
                 TRACE_PREAUTH_SKIP(kcontext, module->name, module->pa_type);
                 continue;
             }
-            module->use_count++;
+            if (module->pa_type != KRB5_PADATA_SAM_CHALLENGE_2)
+                module->use_count++;
         }
         /* run the module's callback function */
         out_pa_data = NULL;
