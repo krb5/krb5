@@ -435,6 +435,7 @@ dcc_close(krb5_context context, krb5_ccache cache)
     ret = krb5_fcc_ops.close(context, data->fcc);
     free(data->residual);
     free(data);
+    free(cache);
     return ret;
 }
 
