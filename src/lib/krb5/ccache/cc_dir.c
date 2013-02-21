@@ -635,7 +635,7 @@ dcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
     }
 
     /* We exhausted the directory without finding a cache to yield. */
-    free(data->dir);
+    closedir(data->dir);
     data->dir = NULL;
     return 0;
 }
