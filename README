@@ -77,8 +77,41 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.11
----------------------
+Major changes in 1.11.1 (2013-02-21)
+------------------------------------
+
+This is a bugfix release.
+
+* Restore capability for multi-hop SAM-2 preauth exchanges, which
+  krb5-1.11 had inadvertently removed.
+
+* Fix a null pointer dereference in the KDC PKINIT code
+  [CVE-2013-1415].
+
+krb5-1.11.1 changes by ticket ID
+--------------------------------
+
+7458    add more strftime format strings for klist
+7523    Fix gss_str_to_oid for OIDs with zero-valued arcs
+7525    Fix DPRINT in ipropd_svc.c
+7534    Minor pointer management patches
+7539    Fix no_host_referral concatention in KDC
+7548    Fix iprop safety net in kdb5_util load
+7553    sendto_kdc can invoke poll with negative timeout
+7557    Fix h1 end tag in Sphinx header titles
+7558    Fix typos in layout.html
+7559    Fix "search" accesskey in layout.html
+7560    Fix kdb5_util dump.c uninitialized warnings
+7561    kprop doesn't work with RC4 session key
+7567    Fix RFC 5587 const pointer typedefs
+7569    Convert success in krb5_chpw_result_code_string
+7570    PKINIT null pointer deref [CVE-2013-1415]
+7571    Allow multi-hop SAM-2 exchanges
+7573    File descriptor leak in DIR ccaches
+7574    Fix memory leak closing DIR ccaches
+
+Major changes in 1.11 (2012-12-17)
+----------------------------------
 
 Additional background information on these changes may be found at
 
