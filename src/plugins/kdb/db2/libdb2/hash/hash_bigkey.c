@@ -303,7 +303,7 @@ __get_bigkey(hashp, pagep, ndx, key)
 
 	key_pagep =
 	    __get_page(hashp, OADDR_TO_PAGE(DATA_OFF(pagep, ndx)), A_RAW);
-	if (!pagep)
+	if (!key_pagep)
 		return (-1);
 	key->size = collect_key(hashp, key_pagep, 0, NULL);
 	key->data = hashp->bigkey_buf;
