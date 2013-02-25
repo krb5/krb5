@@ -101,7 +101,7 @@ private-and-public-decls: $(HEADERS_TO_CHECK)
 	cat $(HEADERS_TO_CHECK) > $@
 ##DOS##!endif
 ##DOS##private-and-public-decls:
-##DOS##	copy krb5\krb5.h+k5-int.h+krb5\preauth_plugin.h $@
+##DOS##	copy /y krb5\krb5.h+k5-int.h+krb5\clpreauth_plugin.h $@
 
 #
 # Build the error table include files:

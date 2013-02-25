@@ -347,7 +347,7 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 
 
 
-#if !defined(SHARED)
+#if !defined(SHARED) && !defined(_WIN32)
 
 /*
  * In this case, we just don't care about finalization.
