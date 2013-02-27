@@ -543,7 +543,7 @@ krb5_get_default_in_tkt_ktypes(krb5_context context, krb5_enctype **ktypes)
 
 void
 KRB5_CALLCONV
-krb5_free_ktypes (krb5_context context, krb5_enctype *val)
+krb5_free_enctypes(krb5_context context, krb5_enctype *val)
 {
     free (val);
 }
@@ -582,6 +582,6 @@ krb5_is_permitted_enctype(krb5_context context, krb5_enctype etype)
     if (krb5_get_permitted_enctypes(context, &list))
         return FALSE;
     ret = k5_etypes_contains(list, etype);
-    krb5_free_ktypes(context, list);
+    krb5_free_enctypes(context, list);
     return ret;
 }

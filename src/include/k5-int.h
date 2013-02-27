@@ -2344,8 +2344,6 @@ krb5_error_code krb5_set_default_tgs_ktypes(krb5_context,
 krb5_error_code KRB5_CALLCONV
 krb5_get_tgs_ktypes(krb5_context, krb5_const_principal, krb5_enctype **);
 
-void KRB5_CALLCONV krb5_free_ktypes(krb5_context, krb5_enctype *);
-
 krb5_boolean krb5_is_permitted_enctype(krb5_context, krb5_enctype);
 
 krb5_boolean KRB5_CALLCONV krb5int_c_weak_enctype(krb5_enctype);

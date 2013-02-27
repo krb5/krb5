@@ -197,6 +197,7 @@ Rarely used public interfaces
    krb5_free_data.rst
    krb5_free_data_contents.rst
    krb5_free_default_realm.rst
+   krb5_free_enctypes.rst
    krb5_free_error.rst
    krb5_free_host_realm.rst
    krb5_free_keyblock.rst

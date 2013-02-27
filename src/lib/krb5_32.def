@@ -274,7 +274,6 @@ EXPORTS
 	krb5int_cc_default			@268	; PRIVATE GSSAPI k5-int.h
 
 	krb5_free_ap_req			@119	; PRIVATE GSSAPI krb5.hin
-	krb5_free_ktypes			@139	; PRIVATE GSSAPI krb5.hin
 	krb5_get_tgs_ktypes			@177	; PRIVATE GSSAPI krb5.hin
 	krb5_auth_con_set_req_cksumtype		@36	; PRIVATE GSSAPI krb5.hin
 	krb5_kt_free_entry			@192	; PRIVATE GSSAPI krb5.hin
@@ -445,3 +444,6 @@ EXPORTS
 	krb5_cc_move					@416
 	krb5_get_init_creds_opt_set_in_ccache		@417
 	krb5int_build_conf_principals			@418 ; PRIVATE
+
+; new in 1.12
+	krb5_free_enctypes				@419

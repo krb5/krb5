@@ -1207,7 +1207,7 @@ krb5_is_permitted_tgs_enctype(krb5_context context, krb5_const_principal princ, 
         if (*ptr == etype)
             ret = 1;
 
-    krb5_free_ktypes (context, list);
+    krb5_free_enctypes(context, list);
 
     return(ret);
 }
@@ -1502,7 +1502,7 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
 
 cleanup:
     if ( etype_list )
-        krb5_free_ktypes(context, etype_list);
+        krb5_free_enctypes(context, etype_list);
 
     if ( pTicketRequest )
         LocalFree(pTicketRequest);
