@@ -247,6 +247,7 @@ testlog
 /src/tests/kdbtest
 /src/tests/kdc.conf
 /src/tests/krb5.conf
+/src/tests/t_localauth
 
 /src/tests/asn.1/expected_encode.out
 /src/tests/asn.1/expected_trval.out
