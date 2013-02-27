@@ -218,7 +218,7 @@ check-unix:: $(TEST_PROGS)
 clean::
 	$(RM) t_k5buf.o t_k5buf t_unal.o t_unal path_win.o path_win
 	$(RM) t_path_win.o t_path_win t_path.o t_path t_base64.o t_base64
-	$(RM) libkrb5support.exports
+	$(RM) t_json.o t_json libkrb5support.exports
 
 @lib_frag@
 @libobj_frag@

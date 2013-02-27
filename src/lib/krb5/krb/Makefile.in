@@ -487,6 +487,9 @@ clean::
 		$(OUTPRE)t_pac$(EXEEXT) $(OUTPRE)t_pac.$(OBJEXT)	\
 		$(OUTPRE)t_princ$(EXEEXT) $(OUTPRE)t_princ.$(OBJEXT)	\
 	$(OUTPRE)t_authdata$(EXEEXT) $(OUTPRE)t_authdata.$(OBJEXT)	\
+	$(OUTPRE)t_cc_config$(EXEEXT) $(OUTPRE)t_cc_config.$(OBJEXT)	\
+	$(OUTPRE)t_in_ccache$(EXEEXT) $(OUTPRE)t_in_ccache.$(OBJEXT)	\
+	$(OUTPRE)t_ad_fx_armor$(EXEEXT) $(OUTPRE)t_ad_fx_armor.$(OBJEXT) \
 	$(OUTPRE)t_vfy_increds$(EXEEXT) $(OUTPRE)t_vfy_increds.$(OBJEXT) \
 	$(OUTPRE)t_response_items$(EXEEXT) $(OUTPRE)t_response_items.$(OBJEXT)
 

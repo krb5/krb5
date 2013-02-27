@@ -122,6 +122,9 @@ testlog
 /src/lib/crypto/builtin/aes/aes-gen
 /src/lib/crypto/builtin/aes/kresults.out
 
+/src/lib/crypto/builtin/camellia/camellia-gen
+/src/lib/crypto/builtin/camellia/kresults.out
+
 /src/lib/crypto/builtin/des/destest
 /src/lib/crypto/builtin/des/verify
 
@@ -189,10 +192,12 @@ testlog
 /src/lib/krb5/keytab/t_keytab
 
 /src/lib/krb5/krb/t_authdata
+/src/lib/krb5/krb/t_cc_config
 /src/lib/krb5/krb/t_deltat
 /src/lib/krb5/krb/t_etypes
 /src/lib/krb5/krb/t_expand
 /src/lib/krb5/krb/t_expire_warn
+/src/lib/krb5/krb/t_in_ccache
 /src/lib/krb5/krb/t_kerb
 /src/lib/krb5/krb/t_pac
 /src/lib/krb5/krb/t_princ
@@ -202,9 +207,11 @@ testlog
 /src/lib/krb5/krb/t_response_items
 
 /src/lib/krb5/os/t_an_to_ln
+/src/lib/krb5/os/t_expand_path
 /src/lib/krb5/os/t_kuserok
 /src/lib/krb5/os/t_locate_kdc
 /src/lib/krb5/os/t_std_conf
+/src/lib/krb5/os/t_trace
 
 /src/lib/krb5/unicode/.links
 /src/lib/krb5/unicode/ucdata.[ch]
@@ -237,7 +244,9 @@ testlog
 /src/slave/kpropd
 /src/slave/kproplog
 
+/src/tests/gcred
 /src/tests/hist
+/src/tests/kdbtest
 /src/tests/kdc.conf
 /src/tests/krb5.conf
 
@@ -358,3 +367,5 @@ testlog
 /src/util/support/t_path
 /src/util/support/t_path_win
 /src/util/support/t_unal
+
+/src/util/verto/rename.h

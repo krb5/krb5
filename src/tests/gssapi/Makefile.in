@@ -14,7 +14,7 @@ SRCS=	$(srcdir)/t_accname.c $(srcdir)/t_ccselect.c $(srcdir)/t_credstore.c \
 
 OBJS=	ccinit.o ccrefresh.o common.o t_accname.o t_ccselect.o t_credstore.o \
 	t_export_cred.o t_export_name.o t_gssexts.o t_imp_cred.o t_imp_name.o \
-	t_inq_cred.o t_inq_mechs_name.o t_namingexts.o t_s4u.o \
+	t_inq_cred.o t_inq_mechs_name.o t_namingexts.o t_oid.o t_s4u.o \
 	t_s4u2proxy_krb5.o t_saslname.o t_spnego.o
 
 COMMON_DEPS= common.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)

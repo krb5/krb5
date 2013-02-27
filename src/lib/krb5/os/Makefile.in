@@ -284,7 +284,7 @@ check-unix-expand:: t_expand_path
 
 clean:: 
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o t_locate_kdc.o
-	$(RM) t_kuserok.o
+	$(RM) t_kuserok.o t_trace.o t_expand_path.o
 
 @libobj_frag@
 
