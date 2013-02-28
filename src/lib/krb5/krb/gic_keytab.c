@@ -109,22 +109,29 @@ lookup_etypes_for_keytab(krb5_context context, krb5_keytab keytab,
         if (ret)
             goto cleanup;
 
-        if (!krb5_c_valid_enctype(entry.key.enctype))
+        if (!krb5_c_valid_enctype(entry.key.enctype)) {
+            krb5_free_keytab_entry_contents(context, &entry);
             continue;
-        if (!krb5_principal_compare(context, entry.principal, client))
+        }
+        if (!krb5_principal_compare(context, entry.principal, client)) {
+            krb5_free_keytab_entry_contents(context, &entry);
             continue;
+        }
         /* Make sure our list is for the highest kvno found for client. */
         if (entry.vno > max_kvno) {
             free(etypes);
             etypes = NULL;
             count = 0;
             max_kvno = entry.vno;
-        } else if (entry.vno != max_kvno)
+        } else if (entry.vno != max_kvno) {
+            krb5_free_keytab_entry_contents(context, &entry);
             continue;
+        }
 
         /* Leave room for the terminator and possibly a second entry. */
         p = realloc(etypes, (count + 3) * sizeof(*etypes));
         if (p == NULL) {
+            krb5_free_keytab_entry_contents(context, &entry);
             ret = ENOMEM;
             goto cleanup;
         }
@@ -136,6 +143,7 @@ lookup_etypes_for_keytab(krb5_context context, krb5_keytab keytab,
             entry.key.enctype == ENCTYPE_DES_CBC_MD4)
             etypes[count++] = ENCTYPE_DES_CBC_CRC;
         etypes[count] = 0;
+        krb5_free_keytab_entry_contents(context, &entry);
     }
 
     ret = 0;
