@@ -733,6 +733,41 @@ built-in modules exist for these interfaces:
 **encrypted_timestamp**
     This module implements the encrypted timestamp mechanism.
 
+.. _localauth:
+
+localauth interface
+###################
+
+The localauth section (introduced in release 1.12) controls modules
+for the local authorization interface, which affects the relationship
+between Kerberos principals and local system accounts.  The following
+built-in modules exist for this interface:
+
+**auth_to_local**
+    This module processes **auth_to_local** values in the default
+    realm's section, and applies the default method if no
+    **auth_to_local** values exist.
+
+**an2ln**
+    This module authorizes a principal to a local account if the
+    principal name maps to the local account name.
+
+**default**
+    This module implements the **DEFAULT** type for **auth_to_local**
+    values.
+
+**k5login**
+    This module authorizes a principal to a local account according to
+    the account's :ref:`.k5login(5)` file.
+
+**names**
+    This module looks for an **auth_to_local_names** mapping for the
+    principal name.
+
+**rule**
+    This module implements the **RULE** type for **auth_to_local**
+    values.
+
 
 PKINIT options
 --------------
