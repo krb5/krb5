@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2012 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2013 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -476,6 +476,7 @@ reports, suggestions, and valuable resources:
     Arlene Berry
     Jeff Blaine
     Radoslav Bodo
+    Sumit Bose
     Emmanuel Bouillon
     Michael Calmer
     Julien Chaffraix
@@ -512,6 +513,7 @@ reports, suggestions, and valuable resources:
     Philip Guenther
     Dominic Hargreaves
     Jakob Haufe
+    Matthieu Hautreux
     Paul B. Henson
     Jeff Hodges
     Christopher Hogan
@@ -566,19 +568,25 @@ reports, suggestions, and valuable resources:
     Michael Spang
     Michael Ströder
     Bjørn Tore Sund
+    Joe Travaglini
     Rathor Vipin
     Jorgen Wahlsten
     Stef Walter
     Max (Weijun) Wang
     John Washington
+    Stef Walter
+    Xi Wang
     Kevin Wasserman
     Margaret Wasserman
     Marcus Watts
+    Andreas Wiese
     Simon Wilkinson
     Nicolas Williams
     Ross Wilper
     Xu Qiang
+    Nickolai Zeldovich
     Hanz van Zijst
+    Gertjan Zwartjes
 
 The above is not an exhaustive list; many others have contributed in
 various ways to the MIT Kerberos development effort over the years.
