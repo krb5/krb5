@@ -70,8 +70,64 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.10.3
------------------------
+Major changes in krb5-1.10.4 (2013-03-01)
+-----------------------------------------
+
+This is a bugfix release.
+
+* Fix null PKINIT pointer dereference vulnerabilities [CVE-2012-1016,
+  CVE-2013-1415]
+
+* Prevent the KDC from returning a host-based service principal
+  referral to the local realm.
+
+krb5-1.10.4 changes by ticket ID
+--------------------------------
+
+7194    Avoid mapping GSSAPI minor code on success
+7233    Use gssalloc in more parts of GSSAPI
+7236    Remove unused struct and switch_to stubs
+7237    CCAPI cleanup and bugfixes
+7254    Do not be over-restrictive in the presence of UAC
+7255    Set fCachesTicket=TRUE when no credentials
+7277    Remove preauth_sam2 from windows build
+7322    CCAPI client rpc fixes
+7339    Improve error translation for CCAPIv3 routines
+7340    Fix KfW thread-local storage allocation issues
+7342    Do not emit debug printfs under NODEBUG
+7349    SapGUI sometimes crashes on new session with MSLSA cache
+7350    Try harder not to use clock_gettime in verto-k5ev
+7353    assertion failure (possible memory corruption) when restarting
+        putty session
+7363    Update windows/README
+7386    Add version info for ccapiserver.exe
+7387    Windows build leaves (OUTPRE)/krb5ccNN.res in
+        ccapi/lib/win/srctmp
+7388    Cache TGS-REPs too
+7438    Update Camellia feature description
+7454    select on set of all bad fds
+7527    PKINIT (draft9) null ptr deref [CVE-2012-1016]
+7528    Fix spurious clock skew caused by gak_fct delay
+7536    Don't return a host referral to the service realm
+7537    Ensure null termination of AFS salts
+7538    Make verify_init_creds work with existing ccache
+7540    Fail during configure if unable to find ar
+7541    Suppress maybe-uninitialized warning in x-deltat.y
+7542    Avoid side effects in assert expressions
+7543    Suppress some gcc uninitialized variable warnings
+7544    Handle PKINIT DH replies with no certs
+7545    Fix various integer issues
+7575    Make kprop/kpropd work with RC4 session key
+7576    Convert success in krb5_chpw_result_code_string
+7577    PKINIT null pointer deref [CVE-2013-1415]
+7578    Check for negative poll timeout in k5_sendto_kdc
+7579    Fix gss_str_to_oid for OIDs with zero-valued arcs
+7580    Fix no_host_referral concatention in KDC
+7581    Fix kdb5_util dump.c uninitialized warnings
+7582    Minor pointer management patches
+
+Major changes in 1.10.3 (2012-08-08)
+------------------------------------
 
 This is a bugfix release.
 
@@ -110,8 +166,8 @@ krb5-1.10.3 changes by ticket ID
 7230    Add missing quote to install-windows
 7231    Regression tests for CVE-2012-1014, CVE-2012-1015
 
-Major changes in 1.10.2
------------------------
+Major changes in 1.10.2 (2012-05-31)
+------------------------------------
 
 This is a bugfix release.
 
@@ -140,8 +196,8 @@ krb5-1.10.2 changes by ticket ID
 7148    Export gss_mech_krb5_wrong from libgssapi_krb5
 7152    Null pointer deref in kadmind [CVE-2012-1013]
 
-Major changes in 1.10.1
------------------------
+Major changes in 1.10.1 (2012-03-08)
+------------------------------------
 
 This is a bugfix release.
 
@@ -168,8 +224,8 @@ krb5-1.10.1 changes by ticket ID
 7096    Fix KDB iteration when callback does write calls
 7098    Fix spurious password expiry warning
 
-Major changes in 1.10
----------------------
+Major changes in 1.10 (2012-01-27)
+----------------------------------
 
 Additional background information on these changes may be found at
 
