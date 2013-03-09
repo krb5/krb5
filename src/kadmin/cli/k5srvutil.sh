@@ -38,7 +38,7 @@ cmd_error() {
     }
 
 usage() {
-    echo "Usage: $0 [-i] [-f file] list|change|delete|delold"
+    echo "Usage: $0 [-i] [-f file] [-e keysalts] list|change|delete|delold"
 }
 
 
@@ -47,7 +47,8 @@ change_key() {
     princs=`list_princs `
     for princ in $princs; do
 	if interactive_prompt "Change key " $princ; then
-	    kadmin -k -t $keytab -p $princ -q "ktadd -k $keytab $princ"
+	    kadmin -k -t $keytab -p $princ -q \
+		"ktadd -k $keytab $keysalts $princ"
 	fi
     done
     }
@@ -74,6 +75,7 @@ delete_keys() {
 
 keytab=/etc/krb5.keytab
 interactive=0
+keysalts=""
 
 while [ $# -gt 0 ] ; do
     opt=$1
@@ -85,6 +87,10 @@ while [ $# -gt 0 ] ; do
 	;;
 	"-i")
 	interactive=1
+	;;
+	"-e")
+	keysalts="$keysalts -e \"$1\""
+	shift
 	;;
 	change|delold|delete|list)
 	set_command $opt
