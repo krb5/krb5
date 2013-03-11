@@ -62,7 +62,6 @@
 
 #include <krb5/krb5.h>
 #include <krb5/plugin.h>
-#include <kadm5/admin.h>
 
 /* An abstract type for localauth module data. */
 typedef struct krb5_localauth_moddata_st *krb5_localauth_moddata;
