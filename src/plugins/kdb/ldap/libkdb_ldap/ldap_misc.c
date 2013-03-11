@@ -233,7 +233,7 @@ krb5_error_code
 krb5_ldap_parse_db_params(krb5_context context, char **db_args)
 {
     char *opt = NULL, *val = NULL;
-    krb5_error_code status;
+    krb5_error_code status = 0;
     krb5_ldap_context *lctx = context->dal_handle->db_context;
 
     if (db_args == NULL)
