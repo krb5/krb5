@@ -9,6 +9,7 @@ SYNOPSIS
 **k5srvutil** *operation*
 [**-i**]
 [**-f** *filename*]
+[**-e** *keysalts*]
 
 DESCRIPTION
 -----------
@@ -31,7 +32,9 @@ a keytab or to add new keys to the keytab.
     existing tickets continue to work.  If the **-i** flag is given,
     k5srvutil will prompt for confirmation before changing each key.
     If the **-k** option is given, the old and new keys will be
-    displayed.
+    displayed.  Ordinarily, keys will be generated with the default
+    encryption types and key salts.  This can be overridden with the
+    **-e** option.
 
 **delold**
     Deletes keys that are not the most recent version from the keytab.
