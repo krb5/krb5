@@ -41,8 +41,8 @@ static krb5_error_code
 krb5_ktkdb_get_name(krb5_context context, krb5_keytab keytab,
                     char *name, unsigned int namelen)
 {
-    if (strlcpy(name, "KDB:", namelen) >= namelen);
-    return KRB5_KT_NAME_TOOLONG;
+    if (strlcpy(name, "KDB:", namelen) >= namelen)
+        return KRB5_KT_NAME_TOOLONG;
     return 0;
 }
 
