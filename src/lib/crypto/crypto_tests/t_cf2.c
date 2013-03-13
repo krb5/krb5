@@ -47,7 +47,7 @@
 #include <string.h>
 
 int main () {
-    char pepper1[1024], pepper2[1024];
+    char pepper1[1025], pepper2[1025];
     krb5_keyblock *k1 = NULL, *k2 = NULL, *out = NULL;
     krb5_data s2k;
     unsigned int i;
