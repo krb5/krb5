@@ -67,7 +67,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     int bodysize;
     gss_buffer_t message_buffer;
     int *conf_state;
-    int *qop_state;
+    gss_qop_t *qop_state;
     int toktype;
 {
     krb5_error_code code;
