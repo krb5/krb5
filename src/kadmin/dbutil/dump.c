@@ -1691,6 +1691,8 @@ load_db(int argc, char **argv)
 cleanup:
     /* If we created a temporary DB but didn't succeed, destroy it. */
     if (exit_status && temp_db_created) {
+        if (log_ctx && log_ctx->iproprole)
+            ulog_init_header(util_context);
         ret = krb5_db_destroy(util_context, db5util_db_args);
         /* Ignore a not supported error since there is nothing to do about
          * it anyway. */
