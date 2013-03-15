@@ -117,7 +117,7 @@ main(int argc, char **argv)
     int c;
     unsigned int i;
 
-    bail_on_err(context, "Error initializing Kerberos library",
+    bail_on_err(NULL, "Error initializing Kerberos library",
                 krb5_init_context(&context));
     bail_on_err(context, "Error getting location of default ccache",
                 krb5_cc_default(context, &ccache));

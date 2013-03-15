@@ -95,7 +95,7 @@ main(int argc, char **argv)
     user = argv[optind];
     password = argv[optind + 1];
 
-    bail_on_err(ctx, "Error initializing Kerberos", krb5_init_context(&ctx));
+    bail_on_err(NULL, "Error initializing Kerberos", krb5_init_context(&ctx));
     bail_on_err(ctx, "Error allocating space for get_init_creds options",
                 krb5_get_init_creds_opt_alloc(ctx, &opt));
     if (in_ccname != NULL) {
