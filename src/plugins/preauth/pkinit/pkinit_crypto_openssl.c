@@ -656,11 +656,50 @@ cleanup:
     return retval;
 }
 
+struct get_key_cb_data {
+    krb5_context context;
+    pkinit_identity_crypto_context id_cryptoctx;
+    char *filename;
+};
+
+static int
+get_key_cb(char *buf, int size, int rwflag, void *userdata)
+{
+    struct get_key_cb_data *data = userdata;
+    pkinit_identity_crypto_context id_cryptoctx;
+    krb5_data rdat;
+    krb5_prompt kprompt;
+    krb5_prompt_type prompt_type;
+    krb5_error_code retval;
+    char *prompt;
+
+    if (asprintf(&prompt, "%s %s", _("Pass phrase for"), data->filename) < 0)
+        return -1;
+    rdat.data = buf;
+    rdat.length = size;
+    kprompt.prompt = prompt;
+    kprompt.hidden = 1;
+    kprompt.reply = &rdat;
+    prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
+
+    /* PROMPTER_INVOCATION */
+    k5int_set_prompt_types(data->context, &prompt_type);
+    id_cryptoctx = data->id_cryptoctx;
+    retval = data->id_cryptoctx->prompter(data->context,
+                                          id_cryptoctx->prompter_data, NULL,
+                                          NULL, 1, &kprompt);
+    k5int_set_prompt_types(data->context, 0);
+    free(prompt);
+    return retval ? -1 : (int)rdat.length;
+}
+
 static krb5_error_code
-get_key(char *filename, EVP_PKEY **retkey)
+get_key(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
+        char *filename, EVP_PKEY **retkey)
 {
     EVP_PKEY *pkey = NULL;
     BIO *tmp = NULL;
+    struct get_key_cb_data cb_data;
     int code;
     krb5_error_code retval;
 
@@ -676,7 +715,10 @@ get_key(char *filename, EVP_PKEY **retkey)
         retval = errno;
         goto cleanup;
     }
-    pkey = (EVP_PKEY *) PEM_read_bio_PrivateKey(tmp, NULL, NULL, NULL);
+    cb_data.context = context;
+    cb_data.id_cryptoctx = id_cryptoctx;
+    cb_data.filename = filename;
+    pkey = PEM_read_bio_PrivateKey(tmp, NULL, get_key_cb, &cb_data);
     if (pkey == NULL) {
         retval = EIO;
         pkiDebug("failed to read private key from %s\n", filename);
@@ -4333,7 +4375,7 @@ pkinit_load_fs_cert_and_key(krb5_context context,
         pkiDebug("failed to load user's certificate from '%s'\n", certname);
         goto cleanup;
     }
-    retval = get_key(keyname, &y);
+    retval = get_key(context, id_cryptoctx, keyname, &y);
     if (retval != 0 || y == NULL) {
         pkiDebug("failed to load user's private key from '%s'\n", keyname);
         goto cleanup;
