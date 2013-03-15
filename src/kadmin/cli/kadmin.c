@@ -1731,10 +1731,10 @@ kadmin_getpol(int argc, char *argv[])
             printf(_("Allowed key/salt types: %s\n"), policy.allowed_keysalts);
     } else {
         /* Output 0 where we used to output policy_refcnt. */
-        printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%lu\t%ld\t%ld\t%s\n",
+        printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t0\t%lu\t%ld\t%ld\t%s\n",
                policy.policy, policy.pw_max_life, policy.pw_min_life,
                policy.pw_min_length, policy.pw_min_classes,
-               policy.pw_history_num, 0, (unsigned long)policy.pw_max_fail,
+               policy.pw_history_num, (unsigned long)policy.pw_max_fail,
                (long)policy.pw_failcnt_interval,
                (long)policy.pw_lockout_duration,
                (policy.allowed_keysalts == NULL) ? "-" :
