@@ -362,7 +362,7 @@ cleanup:
 krb5_error_code
 krb5_ldap_delete_password_policy(krb5_context context, char *policy)
 {
-    int                         mask = 0, refcount;
+    int                         mask = 0;
     char                        *policy_dn = NULL, *class[] = {"krbpwdpolicy", NULL};
     krb5_error_code             st=0;
     LDAP                        *ld=NULL;

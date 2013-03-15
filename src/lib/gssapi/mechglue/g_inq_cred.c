@@ -55,7 +55,6 @@ gss_OID_set *		mechanisms;
     gss_mechanism	mech;
     gss_cred_id_t	mech_cred;
     gss_name_t		mech_name;
-    int			i;
     gss_OID_set		mechs = NULL;
 
     /* Initialize outputs. */
