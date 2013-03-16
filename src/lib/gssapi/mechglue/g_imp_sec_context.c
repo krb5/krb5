@@ -84,6 +84,7 @@ gss_ctx_id_t *		context_handle;
     gss_union_ctx_id_t	ctx;
     gss_ctx_id_t	mctx;
     gss_buffer_desc	token;
+    gss_OID_desc	token_mech;
     gss_OID		selected_mech = GSS_C_NO_OID;
     gss_OID		public_mech;
     gss_mechanism	mech;
@@ -100,12 +101,6 @@ gss_ctx_id_t *		context_handle;
     if (!ctx)
 	return (GSS_S_FAILURE);
 
-    ctx->mech_type = (gss_OID) malloc(sizeof(gss_OID_desc));
-    if (!ctx->mech_type) {
-	free(ctx);
-	return (GSS_S_FAILURE);
-    }
-
     if (interprocess_token->length >= sizeof (OM_uint32)) {
 	p = interprocess_token->value;
 	length = (OM_uint32)*p++;
@@ -120,12 +115,9 @@ gss_ctx_id_t *		context_handle;
 	return (GSS_S_CALL_BAD_STRUCTURE | GSS_S_DEFECTIVE_TOKEN);
     }
 
-    ctx->mech_type->length = length;
-    ctx->mech_type->elements = malloc(length);
-    if (!ctx->mech_type->elements) {
-	goto error_out;
-    }
-    memcpy(ctx->mech_type->elements, p, length);
+    token_mech.length = length;
+    token_mech.elements = p;
+
     p += length;
 
     token.length = interprocess_token->length - sizeof (OM_uint32) - length;
@@ -136,7 +128,7 @@ gss_ctx_id_t *		context_handle;
      * call it.
      */
 
-    status = gssint_select_mech_type(minor_status, ctx->mech_type,
+    status = gssint_select_mech_type(minor_status, &token_mech,
 				     &selected_mech);
     if (status != GSS_S_COMPLETE)
 	goto error_out;
@@ -149,6 +141,12 @@ gss_ctx_id_t *		context_handle;
     if (!mech->gssspi_import_sec_context_by_mech &&
 	!mech->gss_import_sec_context) {
 	status = GSS_S_UNAVAILABLE;
+	goto error_out;
+    }
+
+    if (generic_gss_copy_oid(minor_status, selected_mech,
+			     &ctx->mech_type) != GSS_S_COMPLETE) {
+	status = GSS_S_FAILURE;
 	goto error_out;
     }
 
@@ -167,16 +165,11 @@ gss_ctx_id_t *		context_handle;
 	return (GSS_S_COMPLETE);
     }
     map_error(minor_status, mech);
+    free(ctx->mech_type->elements);
+    free(ctx->mech_type);
 
 error_out:
-    if (ctx) {
-	if (ctx->mech_type) {
-	    if (ctx->mech_type->elements)
-		free(ctx->mech_type->elements);
-	    free(ctx->mech_type);
-	}
-	free(ctx);
-    }
+    free(ctx);
     return status;
 }
 #endif /* LEAN_CLIENT */
