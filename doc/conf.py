@@ -253,8 +253,8 @@ rst_epilog = '\n'
 if 'notice' in tags:
     exclude_patterns = [ 'admin', 'appdev', 'basic', 'build',
                          'plugindev', 'user' ]
-    exclude_patterns += [ 'about.rst', 'build_this.rst', 'index.rst',
-                          'mitK5*.rst', 'resources.rst' ]
+    exclude_patterns += [ 'about.rst', 'build_this.rst', 'copyright.rst',
+                          'index.rst', 'mitK5*.rst', 'resources.rst' ]
     rst_epilog += '.. |copy| replace:: \(C\)'
 else:
     exclude_patterns += [ 'notice.rst' ]
