@@ -239,24 +239,16 @@ out:
  * Return arg cl str ptr on success, else NULL.
  */
 static char *
-getclhoststr(char *clprinc, char *cl, size_t len)
+getclhoststr(const char *clprinc, char *cl, size_t len)
 {
-    char *s;
-    if ((s = strchr(clprinc, '/')) != NULL) {
-	/* XXX "!++s"?  */
-	if (!++s)
-	    return NULL;
-	if (strlcpy(cl, s, len) >= len)
-	    return NULL;
-	/* XXX Copy with @REALM first, with bounds check, then
-	   chop off the realm??  */
-	if ((s = strchr(cl, '@')) != NULL) {
-	    *s = '\0';
-	    return (cl); /* success */
-	}
-    }
+    const char *s, *e;
 
-    return (NULL);
+    if ((s = strchr(clprinc, '/')) == NULL || (e = strchr(++s, '@')) == NULL ||
+	(size_t)(e - s) >= len)
+	return NULL;
+    memcpy(cl, s, e - s);
+    cl[e - s] = '\0';
+    return (cl);
 }
 
 static kdb_fullresync_result_t *
