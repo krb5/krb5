@@ -241,18 +241,16 @@ out:
 static char *
 getclhoststr(char *clprinc, char *cl, size_t len)
 {
-    char *s;
+    char *s, *e;
+    size_t n;
+
     if ((s = strchr(clprinc, '/')) != NULL) {
-	/* XXX "!++s"?  */
-	if (!++s)
-	    return NULL;
-	if (strlcpy(cl, s, len) >= len)
-	    return NULL;
-	/* XXX Copy with @REALM first, with bounds check, then
-	   chop off the realm??  */
-	if ((s = strchr(cl, '@')) != NULL) {
-	    *s = '\0';
-	    return (cl); /* success */
+	if ((e = strchr(++s, '@')) != NULL) {
+	    n = e - s + 1;
+	    if (n <= len) {
+		strlcpy(cl, s, n);
+		return (cl); /* success */
+	    }
 	}
     }
 
