@@ -22,9 +22,7 @@ STLIBOBJS= \
 	dnsglue.o	\
 	dnssrv.o	\
 	expand_path.o	\
-	free_krbhs.o	\
 	full_ipadr.o	\
-	get_krbhst.o	\
 	gen_port.o	\
 	genaddrs.o	\
 	gen_rname.o	\
@@ -69,9 +67,7 @@ OBJS= \
 	$(OUTPRE)dnsglue.$(OBJEXT)	\
 	$(OUTPRE)dnssrv.$(OBJEXT)	\
 	$(OUTPRE)expand_path.$(OBJEXT)	\
-	$(OUTPRE)free_krbhs.$(OBJEXT)	\
 	$(OUTPRE)full_ipadr.$(OBJEXT)	\
-	$(OUTPRE)get_krbhst.$(OBJEXT)	\
 	$(OUTPRE)gen_port.$(OBJEXT)	\
 	$(OUTPRE)genaddrs.$(OBJEXT)	\
 	$(OUTPRE)gen_rname.$(OBJEXT)	\
@@ -116,9 +112,7 @@ SRCS= \
 	$(srcdir)/dnsglue.c	\
 	$(srcdir)/dnssrv.c	\
 	$(srcdir)/expand_path.c	\
-	$(srcdir)/free_krbhs.c	\
 	$(srcdir)/full_ipadr.c	\
-	$(srcdir)/get_krbhst.c	\
 	$(srcdir)/gen_port.c	\
 	$(srcdir)/genaddrs.c	\
 	$(srcdir)/gen_rname.c	\
@@ -205,7 +199,6 @@ check-unix:: check-unix-stdconf check-unix-locate check-unix-trace \
 check-unix-stdconf:: t_std_conf
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
 	$(KRB5_RUN_ENV) $(VALGRIND) ./t_std_conf  -d -s NEW.DEFAULT.REALM -d \
-		-k IGGY.ORG -k DEFAULT_REALM.TST \
 		-D DEFAULT_REALM.TST -r bad.idea -r itar.bad.idea \
 		-r really.BAD.IDEA. -r clipper.bad.idea -r KeYEsCrOW.BaD.IDea \
 		-r pgp.good.idea -r no_domain > test.out

@@ -570,8 +570,6 @@ krb5_error_code krb5_unlock_file(krb5_context, int);
 krb5_error_code krb5_sendto_kdc(krb5_context, const krb5_data *,
                                 const krb5_data *, krb5_data *, int *, int);
 
-krb5_error_code krb5_get_krbhst(krb5_context, const krb5_data *, char *** );
-krb5_error_code krb5_free_krbhst(krb5_context, char * const * );
 krb5_error_code krb5_create_secure_file(krb5_context, const char * pathname);
 krb5_error_code krb5_sync_disk_file(krb5_context, FILE *fp);
 
