@@ -44,7 +44,6 @@ STLIBOBJS= \
 	lock_file.o	\
 	net_read.o	\
 	net_write.o	\
-	osconfig.o	\
 	port2ip.o	\
 	prompter.o	\
 	read_msg.o	\
@@ -92,7 +91,6 @@ OBJS= \
 	$(OUTPRE)lock_file.$(OBJEXT)	\
 	$(OUTPRE)net_read.$(OBJEXT)	\
 	$(OUTPRE)net_write.$(OBJEXT)	\
-	$(OUTPRE)osconfig.$(OBJEXT)	\
 	$(OUTPRE)port2ip.$(OBJEXT)	\
 	$(OUTPRE)prompter.$(OBJEXT)	\
 	$(OUTPRE)read_msg.$(OBJEXT)	\
@@ -140,7 +138,6 @@ SRCS= \
 	$(srcdir)/lock_file.c	\
 	$(srcdir)/net_read.c	\
 	$(srcdir)/net_write.c	\
-	$(srcdir)/osconfig.c	\
 	$(srcdir)/prompter.c	\
 	$(srcdir)/read_msg.c	\
 	$(srcdir)/read_pwd.c	\

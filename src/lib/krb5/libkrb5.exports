@@ -253,8 +253,6 @@ krb5_crypto_us_timeofday
 krb5_decode_authdata_container
 krb5_decode_ticket
 krb5_decrypt_tkt_part
-krb5_default_pwd_prompt1
-krb5_default_pwd_prompt2
 krb5_deltat_to_string
 krb5_encode_authdata_container
 krb5_encode_kdc_rep
@@ -435,7 +433,6 @@ krb5_lock_file
 krb5_make_authdata_kdc_issued
 krb5_make_full_ipaddr
 krb5_make_fulladdr
-krb5_max_dgram_size
 krb5_mcc_ops
 krb5_merge_authdata
 krb5_mk_1cred

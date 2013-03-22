@@ -134,9 +134,6 @@ typedef UINT64_TYPE krb5_ui_8;
 typedef INT64_TYPE krb5_int64;
 
 
-#define DEFAULT_PWD_STRING1 "Enter password"
-#define DEFAULT_PWD_STRING2 "Re-enter password for verification"
-
 #define KRB5_KDB_MAX_LIFE       (60*60*24) /* one day */
 #define KRB5_KDB_MAX_RLIFE      (60*60*24*7) /* one week */
 #define KRB5_KDB_EXPIRATION     2145830400 /* Thu Jan  1 00:00:00 2038 UTC */

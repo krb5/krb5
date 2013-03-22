@@ -116,7 +116,6 @@ extern k5_mutex_t krb5int_us_time_mutex;
 extern unsigned int krb5_max_skdc_timeout;
 extern unsigned int krb5_skdc_timeout_shift;
 extern unsigned int krb5_skdc_timeout_1;
-extern unsigned int krb5_max_dgram_size;
 
 krb5_error_code localauth_names_initvt(krb5_context context, int maj_ver,
                                        int min_ver, krb5_plugin_vtable vtable);

@@ -634,12 +634,12 @@ add_connection(struct conn_state **conns, struct addrinfo *ai,
         set_conn_state_msg_length (state, message);
 
         if (*udpbufp == NULL) {
-            *udpbufp = malloc(krb5_max_dgram_size);
+            *udpbufp = malloc(MAX_DGRAM_SIZE);
             if (*udpbufp == 0)
                 return ENOMEM;
         }
         state->x.in.buf = *udpbufp;
-        state->x.in.bufsize = krb5_max_dgram_size;
+        state->x.in.bufsize = MAX_DGRAM_SIZE;
     }
 
     /* Chain the new state onto the tail of the list. */
