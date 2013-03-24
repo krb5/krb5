@@ -641,15 +641,6 @@ krb5_free_pa_pac_req(krb5_context context,
 }
 
 void KRB5_CALLCONV
-krb5_free_etype_list(krb5_context context,
-                     krb5_etype_list *etypes)
-{
-    if (etypes != NULL) {
-        free(etypes->etypes);
-        free(etypes);
-    }
-}
-void KRB5_CALLCONV
 krb5_free_fast_req(krb5_context context, krb5_fast_req *val)
 {
     if (val == NULL)

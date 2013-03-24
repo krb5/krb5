@@ -25,13 +25,13 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 #include "auth_con.h"
 
 krb5_error_code
-krb5int_generate_and_save_subkey(krb5_context context,
-                                 krb5_auth_context auth_context,
-                                 krb5_keyblock *keyblock,
-                                 krb5_enctype enctype)
+k5_generate_and_save_subkey(krb5_context context,
+                            krb5_auth_context auth_context,
+                            krb5_keyblock *keyblock, krb5_enctype enctype)
 {
     /* Provide some more fodder for random number code.
        This isn't strong cryptographically; the point here is not

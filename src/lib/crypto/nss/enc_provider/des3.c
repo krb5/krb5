@@ -64,7 +64,7 @@ k5_des3_decrypt_iov(krb5_key key, const krb5_data *ivec,
 
 const struct krb5_enc_provider krb5int_enc_des3 = {
     8,
-    21, KRB5_MIT_DES3_KEYSIZE,
+    21, 24,
     k5_des3_encrypt_iov,
     k5_des3_decrypt_iov,
     NULL,

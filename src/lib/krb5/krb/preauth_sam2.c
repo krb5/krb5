@@ -28,6 +28,7 @@
 #include <k5-int.h>
 #include <krb5/clpreauth_plugin.h>
 #include "int-proto.h"
+#include "os-proto.h"
 #include "init_creds_ctx.h"
 
 /* this macro expands to the int,ptr necessary for "%.*s" in an sprintf */
@@ -182,17 +183,17 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     kprompt.reply = &response_data;
 
     prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
-    krb5int_set_prompt_types(context, &prompt_type);
+    k5_set_prompt_types(context, &prompt_type);
 
     if ((retval = ((*prompter)(context, prompter_data, name,
                                banner, 1, &kprompt)))) {
         krb5_free_sam_challenge_2(context, sc2);
         krb5_free_sam_challenge_2_body(context, sc2b);
-        krb5int_set_prompt_types(context, 0);
+        k5_set_prompt_types(context, NULL);
         return(retval);
     }
 
-    krb5int_set_prompt_types(context, (krb5_prompt_type *)NULL);
+    k5_set_prompt_types(context, NULL);
 
     /* Generate salt used by string_to_key() */
     if (ctx->default_salt) {

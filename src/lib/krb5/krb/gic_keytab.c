@@ -338,9 +338,8 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
     krb5_principal client_princ, server_princ;
     int use_master = 0;
 
-    retval = krb5int_populate_gic_opt(context, &opts,
-                                      options, addrs, ktypes,
-                                      pre_auth_types, creds);
+    retval = k5_populate_gic_opt(context, &opts, options, addrs, ktypes,
+                                 pre_auth_types, creds);
     if (retval)
         return retval;
 
@@ -356,11 +355,10 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
         goto cleanup;
     server_princ = creds->server;
     client_princ = creds->client;
-    retval = krb5int_get_init_creds(context, creds, creds->client,
-                                    krb5_prompter_posix,  NULL,
-                                    0, server, opts,
-                                    get_as_key_keytab, (void *)keytab,
-                                    &use_master, ret_as_reply);
+    retval = k5_get_init_creds(context, creds, creds->client,
+                               krb5_prompter_posix,  NULL, 0, server, opts,
+                               get_as_key_keytab, (void *)keytab, &use_master,
+                               ret_as_reply);
     krb5_free_unparsed_name( context, server);
     if (retval) {
         goto cleanup;

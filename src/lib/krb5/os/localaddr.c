@@ -34,6 +34,7 @@
  */
 
 #include "k5-int.h"
+#include "os-proto.h"
 
 #if !defined(_WIN32)
 
@@ -1291,7 +1292,7 @@ krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
             fprintf (stderr, "    processing '%s'\n", current);
 #endif
             newaddrs = 0;
-            err = krb5_os_hostaddr (context, current, &newaddrs);
+            err = k5_os_hostaddr (context, current, &newaddrs);
             if (err)
                 continue;
             for (i = 0; newaddrs[i]; i++) {

@@ -51,6 +51,8 @@
 #define MAXHOSTNAMELEN 64
 #endif
 
+#define MAX_DNS_NAMELEN (15*(MAXHOSTNAMELEN + 1)+1)
+
 #endif /* KRB5_DNS_LOOKUP */
 
 /*

@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "cc-int.h"
 
 /*
  * Routines to deal with externalizing krb5_ccache.

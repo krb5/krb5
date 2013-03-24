@@ -2178,8 +2178,8 @@ done:
 static krb5_error_code KRB5_CALLCONV
 krb5_fcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields, krb5_creds *mcreds, krb5_creds *creds)
 {
-    return krb5_cc_retrieve_cred_default (context, id, whichfields,
-                                          mcreds, creds);
+    return k5_cc_retrieve_cred_default(context, id, whichfields, mcreds,
+                                       creds);
 }
 
 

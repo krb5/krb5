@@ -36,8 +36,8 @@
  * efficiently.
  */
 krb5_error_code
-krb5int_write_messages(krb5_context context, krb5_pointer fdp,
-                       krb5_data *outbuf, int nbufs)
+k5_write_messages(krb5_context context, krb5_pointer fdp, krb5_data *outbuf,
+                  int nbufs)
 {
     int fd = *( (int *) fdp);
 
@@ -72,5 +72,5 @@ krb5int_write_messages(krb5_context context, krb5_pointer fdp,
 krb5_error_code
 krb5_write_message(krb5_context context, krb5_pointer fdp, krb5_data *outbuf)
 {
-    return krb5int_write_messages(context, fdp, outbuf, 1);
+    return k5_write_messages(context, fdp, outbuf, 1);
 }

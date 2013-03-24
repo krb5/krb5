@@ -26,6 +26,7 @@
 
 #include "k5-int.h"
 #include "os-proto.h"
+#include "../krb/int-proto.h"
 
 /* If this trick gets used elsewhere, move it to k5-platform.h.  */
 #ifndef DESIGNATED_INITIALIZERS
@@ -52,7 +53,7 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 #endif
             S (auth_con_get_subkey_enctype, krb5_auth_con_get_subkey_enctype),
 
-            S (clean_hostname, krb5int_clean_hostname),
+            S (clean_hostname, k5_clean_hostname),
 
 #ifndef LEAN_CLIENT
 #define SC(FIELD, VAL)  S(FIELD, VAL)
@@ -101,7 +102,7 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
             SC (decode_krb5_td_dh_parameters, decode_krb5_td_dh_parameters),
             SC (encode_krb5_kdc_req_body, encode_krb5_kdc_req_body),
             SC (free_kdc_req, krb5_free_kdc_req),
-            SC (set_prompt_types, krb5int_set_prompt_types),
+            SC (set_prompt_types, k5_set_prompt_types),
 #undef SC
 
 #if DESIGNATED_INITIALIZERS

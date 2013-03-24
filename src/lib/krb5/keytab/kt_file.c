@@ -54,6 +54,7 @@
 #ifndef LEAN_CLIENT
 
 #include "k5-int.h"
+#include "../os/os-proto.h"
 #include <stdio.h>
 
 /*
@@ -1045,7 +1046,7 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
     if (!KTFILEP(id)) {
         if ((mode == KRB5_LOCKMODE_EXCLUSIVE) && (errno == ENOENT)) {
             /* try making it first time around */
-            krb5_create_secure_file(context, KTFILENAME(id));
+            k5_create_secure_file(context, KTFILENAME(id));
             errno = 0;
             KTFILEP(id) = fopen(KTFILENAME(id), fopen_mode_rbplus);
             if (!KTFILEP(id))
@@ -1185,7 +1186,7 @@ krb5_ktfileint_delete_entry(krb5_context context, krb5_keytab id, krb5_int32 del
             }
         }
 
-        return krb5_sync_disk_file(context, KTFILEP(id));
+        return k5_sync_disk_file(context, KTFILEP(id));
     }
 
     return 0;
@@ -1530,7 +1531,7 @@ krb5_ktfileint_write_entry(krb5_context context, krb5_keytab id, krb5_keytab_ent
     if (fflush(KTFILEP(id)))
         goto abend;
 
-    retval = krb5_sync_disk_file(context, KTFILEP(id));
+    retval = k5_sync_disk_file(context, KTFILEP(id));
 
     if (retval) {
         return retval;
@@ -1546,7 +1547,7 @@ krb5_ktfileint_write_entry(krb5_context context, krb5_keytab id, krb5_keytab_ent
     }
     if (fflush(KTFILEP(id)))
         goto abend;
-    retval = krb5_sync_disk_file(context, KTFILEP(id));
+    retval = k5_sync_disk_file(context, KTFILEP(id));
 
     return retval;
 }

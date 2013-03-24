@@ -1,6 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include "k5-int.h"
 #include "int-proto.h"
+#include <krb5/clpreauth_plugin.h>
 
 static void
 init_common(krb5_get_init_creds_opt *opt)
@@ -100,32 +101,6 @@ krb5_get_init_creds_opt_set_change_password_prompt(krb5_get_init_creds_opt *opt,
         opt->flags &= ~KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT;
 }
 
-/*
- * Extending the krb5_get_init_creds_opt structure.  The original
- * krb5_get_init_creds_opt structure is defined publicly.  The
- * new extended version is private.  The original interface
- * assumed a pre-allocated structure which was passed to
- * krb5_get_init_creds_init().  The new interface assumes that
- * the caller will call krb5_get_init_creds_alloc() and
- * krb5_get_init_creds_free().
- *
- * Callers MUST NOT call krb5_get_init_creds_init() after allocating an
- * opts structure using krb5_get_init_creds_alloc().  To do so will
- * introduce memory leaks.  Unfortunately, there is no way to enforce
- * this behavior.
- *
- * Two private flags are added for backward compatibility.
- * KRB5_GET_INIT_CREDS_OPT_EXTENDED says that the structure was allocated
- * with the new krb5_get_init_creds_opt_alloc() function.
- * KRB5_GET_INIT_CREDS_OPT_SHADOWED is set to indicate that the extended
- * structure is a shadow copy of an original krb5_get_init_creds_opt
- * structure.
- * If KRB5_GET_INIT_CREDS_OPT_SHADOWED is set after a call to
- * krb5int_gic_opt_to_opte(), the resulting extended structure should be
- * freed (using krb5_get_init_creds_free).  Otherwise, the original
- * structure was already extended and there is no need to free it.
- */
-
 /* Forward prototype */
 static void
 free_gic_opt_ext_preauth_data(krb5_context context,
@@ -134,7 +109,7 @@ free_gic_opt_ext_preauth_data(krb5_context context,
 static krb5_error_code
 gic_opte_private_alloc(krb5_context context, krb5_gic_opt_ext *opte)
 {
-    if (NULL == opte || !krb5_gic_opt_is_extended(opte))
+    if (NULL == opte || !gic_opt_is_extended(opte))
         return EINVAL;
 
     opte->opt_private = calloc(1, sizeof(*opte->opt_private));
@@ -150,7 +125,7 @@ gic_opte_private_alloc(krb5_context context, krb5_gic_opt_ext *opte)
 static krb5_error_code
 gic_opte_private_free(krb5_context context, krb5_gic_opt_ext *opte)
 {
-    if (NULL == opte || !krb5_gic_opt_is_extended(opte))
+    if (NULL == opte || !gic_opt_is_extended(opte))
         return EINVAL;
 
     /* Free up any private stuff */
@@ -172,7 +147,7 @@ gic_opte_alloc(krb5_context context)
     opte = calloc(1, sizeof(*opte));
     if (NULL == opte)
         return NULL;
-    opte->flags = KRB5_GET_INIT_CREDS_OPT_EXTENDED;
+    opte->flags = GIC_OPT_EXTENDED;
 
     code = gic_opte_private_alloc(context, opte);
     if (code) {
@@ -214,7 +189,7 @@ krb5_get_init_creds_opt_free(krb5_context context,
         return;
 
     /* Don't touch it if we didn't allocate it */
-    if (!krb5_gic_opt_is_extended(opt))
+    if (!gic_opt_is_extended(opt))
         return;
 
     opte = (krb5_gic_opt_ext *)opt;
@@ -257,8 +232,7 @@ gic_opte_copy(krb5_context context,
      * here will be freed by the library because the
      * application is unaware of its existence.
      */
-    oe->flags |= ( KRB5_GET_INIT_CREDS_OPT_EXTENDED |
-                   KRB5_GET_INIT_CREDS_OPT_SHADOWED);
+    oe->flags |= (GIC_OPT_EXTENDED | GIC_OPT_SHADOWED);
 
     *opte = oe;
     return 0;
@@ -275,13 +249,11 @@ gic_opte_copy(krb5_context context,
  * cases where the original *should* be an extended structure.
  */
 krb5_error_code
-krb5int_gic_opt_to_opte(krb5_context context,
-                        krb5_get_init_creds_opt *opt,
-                        krb5_gic_opt_ext **opte,
-                        unsigned int force,
-                        const char *where)
+k5_gic_opt_to_opte(krb5_context context, krb5_get_init_creds_opt *opt,
+                   krb5_gic_opt_ext **opte, unsigned int force,
+                   const char *where)
 {
-    if (!krb5_gic_opt_is_extended(opt)) {
+    if (!gic_opt_is_extended(opt)) {
         if (force) {
             return gic_opte_copy(context, opt, opte);
         } else {
@@ -302,7 +274,7 @@ free_gic_opt_ext_preauth_data(krb5_context context,
 {
     int i;
 
-    if (NULL == opte || !krb5_gic_opt_is_extended(opte))
+    if (NULL == opte || !gic_opt_is_extended(opte))
         return;
     if (NULL == opte->opt_private || NULL == opte->opt_private->preauth_data)
         return;
@@ -338,8 +310,8 @@ krb5_get_init_creds_opt_get_pa(krb5_context context,
     int i;
     size_t allocsize;
 
-    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-                                     "krb5_get_init_creds_opt_get_pa");
+    retval = k5_gic_opt_to_opte(context, opt, &opte, 0,
+                                "krb5_get_init_creds_opt_get_pa");
     if (retval)
         return retval;
 
@@ -415,8 +387,8 @@ krb5_get_init_creds_opt_set_fast_ccache_name(krb5_context context,
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
 
-    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-                                     "krb5_get_init_creds_opt_set_fast_ccache_name");
+    retval = k5_gic_opt_to_opte(context, opt, &opte, 0,
+                                "krb5_get_init_creds_opt_set_fast_ccache_name");
     if (retval)
         return retval;
     if (opte->opt_private->fast_ccache_name) {
@@ -459,8 +431,8 @@ krb5_get_init_creds_opt_set_in_ccache(krb5_context context,
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
 
-    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-                                     "krb5_get_init_creds_opt_set_in_ccache");
+    retval = k5_gic_opt_to_opte(context, opt, &opte, 0,
+                                "krb5_get_init_creds_opt_set_in_ccache");
     if (retval)
         return retval;
     opte->opt_private->in_ccache = ccache;
@@ -475,8 +447,8 @@ krb5_get_init_creds_opt_set_out_ccache(krb5_context context,
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
 
-    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-                                     "krb5_get_init_creds_opt_set_out_ccache");
+    retval = k5_gic_opt_to_opte(context, opt, &opte, 0,
+                                "krb5_get_init_creds_opt_set_out_ccache");
     if (retval)
         return retval;
     opte->opt_private->out_ccache = ccache;
@@ -491,8 +463,8 @@ krb5_get_init_creds_opt_set_fast_flags(krb5_context context,
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
 
-    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-                                     "krb5_get_init_creds_opt_set_fast_flags");
+    retval = k5_gic_opt_to_opte(context, opt, &opte, 0,
+                                "krb5_get_init_creds_opt_set_fast_flags");
     if (retval)
         return retval;
     opte->opt_private->fast_flags = flags;
@@ -510,8 +482,8 @@ krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
     if (out_flags == NULL)
         return EINVAL;
     *out_flags = 0;
-    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-                                     "krb5_get_init_creds_opt_get_fast_flags");
+    retval = k5_gic_opt_to_opte(context, opt, &opte, 0,
+                                "krb5_get_init_creds_opt_get_fast_flags");
     if (retval)
         return retval;
     *out_flags = opte->opt_private->fast_flags;
@@ -527,9 +499,8 @@ krb5_get_init_creds_opt_set_expire_callback(krb5_context context,
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
 
-    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-                                     "krb5_get_init_creds_opt_set_"
-                                     "expire_callback");
+    retval = k5_gic_opt_to_opte(context, opt, &opte, 0,
+                                "krb5_get_init_creds_opt_set_expire_callback");
     if (retval)
         return retval;
     opte->opt_private->expire_cb = cb;
@@ -545,8 +516,8 @@ krb5_get_init_creds_opt_set_responder(krb5_context context,
     krb5_error_code ret;
     krb5_gic_opt_ext *opte;
 
-    ret = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-                                  "krb5_get_init_creds_opt_set_responder");
+    ret = k5_gic_opt_to_opte(context, opt, &opte, 0,
+                             "krb5_get_init_creds_opt_set_responder");
     if (ret)
         return ret;
     opte->opt_private->responder = responder;

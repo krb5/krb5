@@ -38,14 +38,7 @@
 #include <resolv.h>
 #include <netdb.h>
 #endif /* WSHELPER */
-#ifndef T_SRV
-#define T_SRV 33
-#endif /* T_SRV */
-
-/* for old Unixes and friends ... */
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64
-#endif
+#include "dnsglue.h"
 
 #if KRB5_DNS_LOOKUP_KDC
 #define DEFAULT_LOOKUP_KDC 1
@@ -488,8 +481,8 @@ prof_locate_server(krb5_context context, const krb5_data *realm,
         break;
     case locate_service_krb524:
         profname = KRB5_CONF_KRB524_SERVER;
-        serv = getservbyname(KRB524_SERVICE, "udp");
-        dflport1 = serv ? serv->s_port : htons (KRB524_PORT);
+        serv = getservbyname("krb524", "udp");
+        dflport1 = serv ? serv->s_port : htons(4444);
         break;
     case locate_service_kpasswd:
         profname = KRB5_CONF_KPASSWD_SERVER;

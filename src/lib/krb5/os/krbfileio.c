@@ -26,10 +26,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * krb5_create_secure_file
- * krb5_sync_disk_file
  */
 
 #ifdef MODULE_VERSION_ID
@@ -38,6 +34,7 @@ static char *VersionID = "@(#)krbfileio.c       2 - 08/22/91";
 
 
 #include "k5-int.h"
+#include "os-proto.h"
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
@@ -52,7 +49,7 @@ static char *VersionID = "@(#)krbfileio.c       2 - 08/22/91";
 #endif
 
 krb5_error_code
-krb5_create_secure_file(krb5_context context, const char *pathname)
+k5_create_secure_file(krb5_context context, const char *pathname)
 {
     int fd;
 
@@ -89,7 +86,7 @@ krb5_create_secure_file(krb5_context context, const char *pathname)
 }
 
 krb5_error_code
-krb5_sync_disk_file(krb5_context context, FILE *fp)
+k5_sync_disk_file(krb5_context context, FILE *fp)
 {
     fflush(fp);
 #if !defined(MSDOS_FILESYSTEM)

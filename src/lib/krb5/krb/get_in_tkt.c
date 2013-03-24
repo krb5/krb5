@@ -491,7 +491,7 @@ krb5_init_creds_free(krb5_context context,
     if (ctx == NULL)
         return;
 
-    if (ctx->opte != NULL && krb5_gic_opt_is_shadowed(ctx->opte)) {
+    if (ctx->opte != NULL && gic_opt_is_shadowed(ctx->opte)) {
         krb5_get_init_creds_opt_free(context,
                                      (krb5_get_init_creds_opt *)ctx->opte);
     }
@@ -584,7 +584,7 @@ krb5_init_creds_get_creds(krb5_context context,
     if (!ctx->complete)
         return KRB5_NO_TKT_SUPPLIED;
 
-    return krb5int_copy_creds_contents(context, &ctx->cred, creds);
+    return k5_copy_creds_contents(context, &ctx->cred, creds);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -808,8 +808,8 @@ krb5_init_creds_init(krb5_context context,
         options = &local_opts;
     }
 
-    code = krb5int_gic_opt_to_opte(context, options,
-                                   &ctx->opte, 1, "krb5_init_creds_init");
+    code = k5_gic_opt_to_opte(context, options, &ctx->opte, 1,
+                              "krb5_init_creds_init");
     if (code != 0)
         goto cleanup;
 
@@ -1706,18 +1706,12 @@ cleanup:
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5int_get_init_creds(krb5_context context,
-                       krb5_creds *creds,
-                       krb5_principal client,
-                       krb5_prompter_fct prompter,
-                       void *prompter_data,
-                       krb5_deltat start_time,
-                       const char *in_tkt_service,
-                       krb5_get_init_creds_opt *options,
-                       krb5_gic_get_as_key_fct gak_fct,
-                       void *gak_data,
-                       int  *use_master,
-                       krb5_kdc_rep **as_reply)
+k5_get_init_creds(krb5_context context, krb5_creds *creds,
+                  krb5_principal client, krb5_prompter_fct prompter,
+                  void *prompter_data, krb5_deltat start_time,
+                  const char *in_tkt_service, krb5_get_init_creds_opt *options,
+                  get_as_key_fn gak_fct, void *gak_data, int *use_master,
+                  krb5_kdc_rep **as_reply)
 {
     krb5_error_code code;
     krb5_init_creds_context ctx = NULL;
@@ -1761,10 +1755,10 @@ cleanup:
 }
 
 krb5_error_code
-krb5int_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **out,
-                         krb5_flags options, krb5_address *const *addrs,
-                         krb5_enctype *ktypes,
-                         krb5_preauthtype *pre_auth_types, krb5_creds *creds)
+k5_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **out,
+                    krb5_flags options, krb5_address *const *addrs,
+                    krb5_enctype *ktypes, krb5_preauthtype *pre_auth_types,
+                    krb5_creds *creds)
 {
     int i;
     krb5_int32 starttime;

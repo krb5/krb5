@@ -25,12 +25,13 @@
  */
 
 #include "k5-int.h"
+#include "os-proto.h"
 
 #include "fake-addrinfo.h"
 
 krb5_error_code
-krb5_os_hostaddr(krb5_context context, const char *name,
-                 krb5_address ***ret_addrs)
+k5_os_hostaddr(krb5_context context, const char *name,
+               krb5_address ***ret_addrs)
 {
     krb5_error_code     retval;
     krb5_address        **addrs;

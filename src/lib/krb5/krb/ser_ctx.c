@@ -189,7 +189,8 @@ krb5_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **b
     context = (krb5_context) arg;
     if (!context)
         return (EINVAL);
-    KRB5_VERIFY_MAGIC(context, KV5M_CONTEXT);
+    if (context->magic != KV5M_CONTEXT)
+        return (KV5M_CONTEXT);
 
     if ((kret = krb5_context_size(kcontext, arg, &required)))
         return (kret);

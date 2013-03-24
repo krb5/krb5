@@ -30,6 +30,7 @@
  */
 
 #include "k5-int.h"
+#include "../os/os-proto.h"
 #include <stdio.h>
 
 #ifndef LEAN_CLIENT

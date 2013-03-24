@@ -174,9 +174,9 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 
     /* generate subkey if needed */
     if ((ap_req_options & AP_OPTS_USE_SUBKEY)&&(!(*auth_context)->send_subkey)) {
-        retval = krb5int_generate_and_save_subkey (context, *auth_context,
-                                                   &in_creds->keyblock,
-                                                   in_creds->keyblock.enctype);
+        retval = k5_generate_and_save_subkey(context, *auth_context,
+                                             &in_creds->keyblock,
+                                             in_creds->keyblock.enctype);
         if (retval)
             goto cleanup;
     }

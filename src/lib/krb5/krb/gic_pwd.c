@@ -3,6 +3,7 @@
 #include "com_err.h"
 #include "init_creds_ctx.h"
 #include "int-proto.h"
+#include "os-proto.h"
 
 krb5_error_code
 krb5_get_as_key_password(krb5_context context,
@@ -81,9 +82,9 @@ krb5_get_as_key_password(krb5_context context,
         prompt_type = KRB5_PROMPT_TYPE_PASSWORD;
 
         /* PROMPTER_INVOCATION */
-        krb5int_set_prompt_types(context, &prompt_type);
+        k5_set_prompt_types(context, &prompt_type);
         ret = (*prompter)(context, prompter_data, NULL, NULL, 1, &prompt);
-        krb5int_set_prompt_types(context, 0);
+        k5_set_prompt_types(context, 0);
         if (ret)
             return(ret);
     }
@@ -183,7 +184,7 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
 
     get_expiry_times(as_reply->enc_part2, &pw_exp, &acct_exp, &is_last_req);
 
-    ret = krb5int_gic_opt_to_opte(context, options, &opte, 0, "");
+    ret = k5_gic_opt_to_opte(context, options, &opte, 0, "");
     if (ret == 0 && opte->opt_private->expire_cb != NULL) {
         krb5_expire_callback_func cb = opte->opt_private->expire_cb;
         void *cb_data = opte->opt_private->expire_data;
@@ -286,10 +287,9 @@ krb5_get_init_creds_password(krb5_context context,
 
     /* first try: get the requested tkt from any kdc */
 
-    ret = krb5int_get_init_creds(context, creds, client, prompter, data,
-                                 start_time, in_tkt_service, options,
-                                 krb5_get_as_key_password, (void *) &pw0,
-                                 &use_master, &as_reply);
+    ret = k5_get_init_creds(context, creds, client, prompter, data, start_time,
+                            in_tkt_service, options, krb5_get_as_key_password,
+                            (void *) &pw0, &use_master, &as_reply);
 
     /* check for success */
 
@@ -316,10 +316,10 @@ krb5_get_init_creds_password(krb5_context context,
             krb5_free_kdc_rep( context, as_reply);
             as_reply = NULL;
         }
-        ret = krb5int_get_init_creds(context, creds, client, prompter, data,
-                                     start_time, in_tkt_service, options,
-                                     krb5_get_as_key_password, (void *) &pw0,
-                                     &use_master, &as_reply);
+        ret = k5_get_init_creds(context, creds, client, prompter, data,
+                                start_time, in_tkt_service, options,
+                                krb5_get_as_key_password, (void *) &pw0,
+                                &use_master, &as_reply);
 
         if (ret == 0)
             goto cleanup;
@@ -363,11 +363,11 @@ krb5_get_init_creds_password(krb5_context context,
     krb5_get_init_creds_opt_set_forwardable(chpw_opts, 0);
     krb5_get_init_creds_opt_set_proxiable(chpw_opts, 0);
 
-    if ((ret = krb5int_get_init_creds(context, &chpw_creds, client,
-                                      prompter, data,
-                                      start_time, "kadmin/changepw", chpw_opts,
-                                      krb5_get_as_key_password, (void *) &pw0,
-                                      &use_master, NULL)))
+    ret = k5_get_init_creds(context, &chpw_creds, client, prompter, data,
+                            start_time, "kadmin/changepw", chpw_opts,
+                            krb5_get_as_key_password, (void *) &pw0,
+                            &use_master, NULL);
+    if (ret)
         goto cleanup;
 
     prompt[0].prompt = _("Enter new password");
@@ -389,10 +389,10 @@ krb5_get_init_creds_password(krb5_context context,
         pw1.length = sizeof(pw1array);
 
         /* PROMPTER_INVOCATION */
-        krb5int_set_prompt_types(context, prompt_types);
+        k5_set_prompt_types(context, prompt_types);
         ret = (*prompter)(context, data, 0, banner,
                           sizeof(prompt)/sizeof(prompt[0]), prompt);
-        krb5int_set_prompt_types(context, 0);
+        k5_set_prompt_types(context, 0);
         if (ret)
             goto cleanup;
 
@@ -460,10 +460,10 @@ krb5_get_init_creds_password(krb5_context context,
        is final.  */
 
     TRACE_GIC_PWD_CHANGED(context);
-    ret = krb5int_get_init_creds(context, creds, client, prompter, data,
-                                 start_time, in_tkt_service, options,
-                                 krb5_get_as_key_password, (void *) &pw0,
-                                 &use_master, &as_reply);
+    ret = k5_get_init_creds(context, creds, client, prompter, data,
+                            start_time, in_tkt_service, options,
+                            krb5_get_as_key_password, (void *) &pw0,
+                            &use_master, &as_reply);
     if (ret)
         goto cleanup;
 
@@ -528,9 +528,8 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
         pw0.data[0] = '\0';
         pw0.length = sizeof(pw0array);
     }
-    retval = krb5int_populate_gic_opt(context, &opts,
-                                      options, addrs, ktypes,
-                                      pre_auth_types, creds);
+    retval = k5_populate_gic_opt(context, &opts, options, addrs, ktypes,
+                                 pre_auth_types, creds);
     if (retval)
         return (retval);
     retval = krb5_unparse_name( context, creds->server, &server);
@@ -540,11 +539,10 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
     }
     server_princ = creds->server;
     client_princ = creds->client;
-    retval = krb5int_get_init_creds(context, creds, creds->client,
-                                    krb5_prompter_posix, NULL,
-                                    0, server, opts,
-                                    krb5_get_as_key_password, &pw0,
-                                    &use_master, ret_as_reply);
+    retval = k5_get_init_creds(context, creds, creds->client,
+                               krb5_prompter_posix, NULL, 0, server, opts,
+                               krb5_get_as_key_password, &pw0, &use_master,
+                               ret_as_reply);
     krb5_free_unparsed_name( context, server);
     krb5_get_init_creds_opt_free(context, opts);
     if (retval) {

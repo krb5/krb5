@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "os-proto.h"
 #include "com_err.h"
 #include "auth_con.h"
 #include <errno.h>
@@ -63,7 +64,7 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
     outbuf[0].data = (char *) sendauth_version;
     outbuf[1].length = strlen(appl_version) + 1;
     outbuf[1].data = appl_version;
-    if ((retval = krb5int_write_messages(context, fd, outbuf, 2)))
+    if ((retval = k5_write_messages(context, fd, outbuf, 2)))
         return(retval);
     /*
      * Now, read back a byte: 0 means no error, 1 means bad sendauth

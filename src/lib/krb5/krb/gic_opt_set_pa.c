@@ -79,8 +79,8 @@ krb5_get_init_creds_opt_set_pa(krb5_context context,
     krb5_error_code retval;
     krb5_gic_opt_ext *opte;
 
-    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-                                     "krb5_get_init_creds_opt_set_pa");
+    retval = k5_gic_opt_to_opte(context, opt, &opte, 0,
+                                "krb5_get_init_creds_opt_set_pa");
     if (retval)
         return retval;
 

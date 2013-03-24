@@ -40,10 +40,9 @@
 #include <k5-int.h>
 
 #ifndef LEAN_CLIENT
-krb5_error_code KRB5_CALLCONV
-krb5int_server_decrypt_ticket_keyblock(krb5_context context,
-                                       const krb5_keyblock *key,
-                                       krb5_ticket *ticket)
+static krb5_error_code
+decrypt_ticket_keyblock(krb5_context context, const krb5_keyblock *key,
+                        krb5_ticket *ticket)
 {
     krb5_error_code retval;
     krb5_data *realm;
@@ -85,7 +84,7 @@ krb5_server_decrypt_ticket_keytab(krb5_context context,
                                    ticket->enc_part.kvno,
                                    ticket->enc_part.enctype, &ktent);
         if (retval == 0) {
-            retval = krb5int_server_decrypt_ticket_keyblock(context, &ktent.key, ticket);
+            retval = decrypt_ticket_keyblock(context, &ktent.key, ticket);
 
             (void) krb5_free_keytab_entry_contents(context, &ktent);
         }
@@ -103,7 +102,7 @@ krb5_server_decrypt_ticket_keytab(krb5_context context,
             if (ktent.key.enctype != ticket->enc_part.enctype)
                 continue;
 
-            retval = krb5int_server_decrypt_ticket_keyblock(context, &ktent.key, ticket);
+            retval = decrypt_ticket_keyblock(context, &ktent.key, ticket);
             if (retval == 0) {
                 krb5_principal tmp;
 

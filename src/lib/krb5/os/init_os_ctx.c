@@ -234,7 +234,7 @@ free_filespecs(profile_filespec_t *files)
 
 /* This function is needed by KfM's KerberosPreferences API
  * because it needs to be able to specify "secure" */
-krb5_error_code
+static krb5_error_code
 os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
 {
     profile_filespec_t* files;
@@ -421,7 +421,7 @@ os_init_paths(krb5_context ctx, krb5_boolean kdc)
 }
 
 krb5_error_code
-krb5_os_init_context(krb5_context ctx, profile_t profile, krb5_flags flags)
+k5_os_init_context(krb5_context ctx, profile_t profile, krb5_flags flags)
 {
     krb5_os_context os_ctx;
     krb5_error_code    retval = 0;
@@ -499,7 +499,7 @@ krb5_free_config_files(char **filenames)
 }
 
 void
-krb5_os_free_context(krb5_context ctx)
+k5_os_free_context(krb5_context ctx)
 {
     krb5_os_context os_ctx;
 

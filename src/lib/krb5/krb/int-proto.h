@@ -29,6 +29,92 @@
 
 struct krb5int_fast_request_state;
 
+typedef struct k5_response_items_st k5_response_items;
+
+typedef krb5_error_code
+(*get_as_key_fn)(krb5_context, krb5_principal, krb5_enctype, krb5_prompter_fct,
+                 void *prompter_data, krb5_data *salt, krb5_data *s2kparams,
+                 krb5_keyblock *as_key, void *gak_data,
+                 k5_response_items *ritems);
+
+/*
+ * Extending the krb5_get_init_creds_opt structure.  The original
+ * krb5_get_init_creds_opt structure is defined publicly.  The new extended
+ * version is private.  The original interface assumed a pre-allocated
+ * structure which was passed to krb5_get_init_creds_init().  The new interface
+ * assumes that the caller will call krb5_get_init_creds_alloc() and
+ * krb5_get_init_creds_free().
+ *
+ * Callers MUST NOT call krb5_get_init_creds_init() after allocating an opts
+ * structure using krb5_get_init_creds_alloc().  To do so will introduce memory
+ * leaks.  Unfortunately, there is no way to enforce this behavior.
+ *
+ * Two private flags are added for backward compatibility.  GIC_OPT_EXTENDED
+ * says that the structure was allocated with the new
+ * krb5_get_init_creds_opt_alloc() function.  GIC_OPT_SHADOWED is set to
+ * indicate that the extended structure is a shadow copy of an original
+ * krb5_get_init_creds_opt structure.  If GIC_OPT_SHADOWED is set after a call
+ * to k5_gic_opt_to_opte(), the resulting extended structure should be freed
+ * (using krb5_get_init_creds_free).  Otherwise, the original structure was
+ * already extended and there is no need to free it.
+ */
+
+#define GIC_OPT_EXTENDED 0x80000000
+#define GIC_OPT_SHADOWED 0x40000000
+
+#define gic_opt_is_extended(s) ((s) != NULL && ((s)->flags & GIC_OPT_EXTENDED))
+#define gic_opt_is_shadowed(s) ((s) != NULL && ((s)->flags & GIC_OPT_SHADOWED))
+
+typedef struct gic_opt_private_st {
+    int num_preauth_data;
+    krb5_gic_opt_pa_data *preauth_data;
+    char * fast_ccache_name;
+    krb5_ccache in_ccache;
+    krb5_ccache out_ccache;
+    krb5_flags fast_flags;
+    krb5_expire_callback_func expire_cb;
+    void *expire_data;
+    krb5_responder_fn responder;
+    void *responder_data;
+} gic_opt_private;
+
+/*
+ * On the Mac, ensure that the layout of krb5_gic_opt_ext matches that
+ * of krb5_get_init_creds_opt.
+ */
+#if TARGET_OS_MAC
+#    pragma pack(push,2)
+#endif
+
+typedef struct _krb5_gic_opt_ext {
+    krb5_flags flags;
+    krb5_deltat tkt_life;
+    krb5_deltat renew_life;
+    int forwardable;
+    int proxiable;
+    krb5_enctype *etype_list;
+    int etype_list_length;
+    krb5_address **address_list;
+    krb5_preauthtype *preauth_list;
+    int preauth_list_length;
+    krb5_data *salt;
+    /*
+     * Do not change anything above this point in this structure.
+     * It is identical to the public krb5_get_init_creds_opt structure.
+     * New members must be added below.
+     */
+    gic_opt_private *opt_private;
+} krb5_gic_opt_ext;
+
+#if TARGET_OS_MAC
+#    pragma pack(pop)
+#endif
+
+krb5_error_code
+k5_gic_opt_to_opte(krb5_context context, krb5_get_init_creds_opt *opt,
+                   krb5_gic_opt_ext **opte, unsigned int force,
+                   const char *where);
+
 krb5_error_code
 krb5int_tgtname(krb5_context context, const krb5_data *, const krb5_data *,
                 krb5_principal *);
@@ -235,5 +321,47 @@ k5_save_ctx_error(krb5_context ctx, krb5_error_code code, struct errinfo *out);
 /* Return the code from in and restore its extended message (if any). */
 krb5_error_code
 k5_restore_ctx_error(krb5_context ctx, struct errinfo *in);
+
+krb5_error_code
+k5_encrypt_keyhelper(krb5_context context, krb5_key key,
+                     krb5_keyusage keyusage, const krb5_data *plain,
+                     krb5_enc_data *cipher);
+
+krb5_error_code KRB5_CALLCONV
+k5_get_init_creds(krb5_context context, krb5_creds *creds,
+                  krb5_principal client, krb5_prompter_fct prompter,
+                  void *prompter_data, krb5_deltat start_time,
+                  const char *in_tkt_service, krb5_get_init_creds_opt *options,
+                  get_as_key_fn gak, void *gak_data, int *master,
+                  krb5_kdc_rep **as_reply);
+
+krb5_error_code
+k5_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **opt,
+                    krb5_flags options, krb5_address *const *addrs,
+                    krb5_enctype *ktypes, krb5_preauthtype *pre_auth_types,
+                    krb5_creds *creds);
+
+krb5_error_code
+k5_copy_creds_contents(krb5_context, const krb5_creds *, krb5_creds *);
+
+krb5_error_code
+k5_build_conf_principals(krb5_context context, krb5_ccache id,
+                         krb5_const_principal principal, const char *name,
+                         krb5_creds *cred);
+
+krb5_error_code
+k5_generate_and_save_subkey(krb5_context context,
+                            krb5_auth_context auth_context,
+                            krb5_keyblock *keyblock, krb5_enctype enctype);
+
+krb5_error_code
+k5_client_realm_path(krb5_context context, const krb5_data *client,
+                     const krb5_data *server, krb5_data **rpath_out);
+
+size_t
+k5_count_etypes(const krb5_enctype *list);
+
+krb5_error_code
+k5_copy_etypes(const krb5_enctype *old_list, krb5_enctype **new_list);
 
 #endif /* KRB5_INT_FUNC_PROTO__ */

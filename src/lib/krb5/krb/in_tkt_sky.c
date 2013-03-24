@@ -25,9 +25,9 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 
-/* A krb5_gic_get_as_key_fct shim for copying a caller-provided keyblock into
- * the AS keyblock. */
+/* Copy the caller-provided keyblock into the AS keyblock. */
 static krb5_error_code
 get_as_key_skey(krb5_context context, krb5_principal client,
                 krb5_enctype etype, krb5_prompter_fct prompter,
@@ -86,8 +86,8 @@ krb5_get_in_tkt_with_skey(krb5_context context, krb5_flags options,
     }
 #endif /* LEAN_CLIENT */
 
-    retval = krb5int_populate_gic_opt(context, &opts, options, addrs, ktypes,
-                                      pre_auth_types, creds);
+    retval = k5_populate_gic_opt(context, &opts, options, addrs, ktypes,
+                                 pre_auth_types, creds);
     if (retval)
         return retval;
     retval = krb5_unparse_name(context, creds->server, &server);
@@ -97,10 +97,10 @@ krb5_get_in_tkt_with_skey(krb5_context context, krb5_flags options,
     }
     server_princ = creds->server;
     client_princ = creds->client;
-    retval = krb5int_get_init_creds(context, creds, creds->client,
-                                    krb5_prompter_posix, NULL, 0, server, opts,
-                                    get_as_key_skey, (void *) key, &use_master,
-                                    ret_as_reply);
+    retval = k5_get_init_creds(context, creds, creds->client,
+                               krb5_prompter_posix, NULL, 0, server, opts,
+                               get_as_key_skey, (void *)key, &use_master,
+                               ret_as_reply);
     krb5_free_unparsed_name(context, server);
     krb5_get_init_creds_opt_free(context, opts);
     if (retval)

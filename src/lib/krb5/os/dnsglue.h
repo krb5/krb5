@@ -155,5 +155,19 @@ int krb5int_dns_expand(struct krb5int_dns_state *,
                        const unsigned char *, char *, int);
 void krb5int_dns_fini(struct krb5int_dns_state *);
 
+struct srv_dns_entry {
+    struct srv_dns_entry *next;
+    int priority;
+    int weight;
+    unsigned short port;
+    char *host;
+};
+
+krb5_error_code krb5int_make_srv_query_realm(const krb5_data *realm,
+                                             const char *service,
+                                             const char *protocol,
+                                             struct srv_dns_entry **answers);
+void krb5int_free_srv_dns_data(struct srv_dns_entry *);
+
 #endif /* KRB5_DNS_LOOKUP */
 #endif /* !defined(KRB5_DNSGLUE_H) */

@@ -4,13 +4,18 @@
 #define KRB5_INIT_CREDS_CONTEXT 1
 
 #include "k5-json.h"
+#include "int-proto.h"
+
+struct krb5_responder_context_st {
+    k5_response_items *items;
+};
 
 struct _krb5_init_creds_context {
     krb5_gic_opt_ext *opte;
     char *in_tkt_service;
     krb5_prompter_fct prompter;
     void *prompter_data;
-    krb5_gic_get_as_key_fct gak_fct;
+    get_as_key_fn gak_fct;
     void *gak_data;
     krb5_timestamp request_time;
     krb5_deltat start_time;

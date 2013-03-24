@@ -52,6 +52,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 #include "auth_con.h"
 
 /*
@@ -95,9 +96,9 @@ k5_mk_rep(krb5_context context, krb5_auth_context auth_context,
     else if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_USE_SUBKEY) {
         assert(auth_context->negotiated_etype != ENCTYPE_NULL);
 
-        retval = krb5int_generate_and_save_subkey (context, auth_context,
-                                                   &auth_context->key->keyblock,
-                                                   auth_context->negotiated_etype);
+        retval = k5_generate_and_save_subkey(context, auth_context,
+                                             &auth_context->key->keyblock,
+                                             auth_context->negotiated_etype);
         if (retval)
             return retval;
         repl.subkey = &auth_context->send_subkey->keyblock;
@@ -116,9 +117,9 @@ k5_mk_rep(krb5_context context, krb5_auth_context auth_context,
     if ((retval = encode_krb5_ap_rep_enc_part(&repl, &scratch)))
         return retval;
 
-    if ((retval = krb5_encrypt_keyhelper(context, auth_context->key,
-                                         KRB5_KEYUSAGE_AP_REP_ENCPART,
-                                         scratch, &reply.enc_part)))
+    if ((retval = k5_encrypt_keyhelper(context, auth_context->key,
+                                       KRB5_KEYUSAGE_AP_REP_ENCPART, scratch,
+                                       &reply.enc_part)))
         goto cleanup_scratch;
 
     if (!(retval = encode_krb5_ap_rep(&reply, &toutbuf))) {

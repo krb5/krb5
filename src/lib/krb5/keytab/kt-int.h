@@ -41,4 +41,7 @@ void krb5int_kt_finalize(void);
 int krb5int_mkt_initialize(void);
 
 void krb5int_mkt_finalize(void);
+
+extern const krb5_kt_ops krb5_kt_dfl_ops;
+
 #endif /* __KRB5_KEYTAB_INT_H__ */

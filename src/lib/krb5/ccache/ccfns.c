@@ -25,6 +25,8 @@
  */
 
 #include "k5-int.h"
+#include "cc-int.h"
+#include "../krb/int-proto.h"
 
 const char * KRB5_CALLCONV
 krb5_cc_get_name(krb5_context context, krb5_ccache cache)
@@ -213,9 +215,9 @@ static const char conf_realm[] = "X-CACHECONF:";
 static const char conf_name[] = "krb5_ccache_conf_data";
 
 krb5_error_code
-krb5int_build_conf_principals(krb5_context context, krb5_ccache id,
-                              krb5_const_principal principal,
-                              const char *name, krb5_creds *cred)
+k5_build_conf_principals(krb5_context context, krb5_ccache id,
+                         krb5_const_principal principal,
+                         const char *name, krb5_creds *cred)
 {
     krb5_principal client;
     krb5_error_code ret;
@@ -277,7 +279,7 @@ krb5_cc_set_config(krb5_context context, krb5_ccache id,
 
     TRACE_CC_SET_CONFIG(context, id, principal, key, data);
 
-    ret = krb5int_build_conf_principals(context, id, principal, key, &cred);
+    ret = k5_build_conf_principals(context, id, principal, key, &cred);
     if (ret)
         goto out;
 
@@ -311,7 +313,7 @@ krb5_cc_get_config(krb5_context context, krb5_ccache id,
     memset(&cred, 0, sizeof(cred));
     memset(data, 0, sizeof(*data));
 
-    ret = krb5int_build_conf_principals(context, id, principal, key, &mcred);
+    ret = k5_build_conf_principals(context, id, principal, key, &mcred);
     if (ret)
         goto out;
 

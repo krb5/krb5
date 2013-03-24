@@ -79,7 +79,7 @@ k5_des_cbc_mac(krb5_key key, const krb5_crypto_iov *data, size_t num_data,
 
 const struct krb5_enc_provider krb5int_enc_des = {
     8,
-    7, KRB5_MIT_DES_KEYSIZE,
+    7, 8,
     k5_des_encrypt_iov,
     k5_des_decrypt_iov,
     k5_des_cbc_mac,

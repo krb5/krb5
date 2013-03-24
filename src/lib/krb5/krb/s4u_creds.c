@@ -115,10 +115,9 @@ s4u_identify_user(krb5_context context,
         client = &client_data;
     }
 
-    code = krb5int_get_init_creds(context, &creds, client,
-                                  NULL, NULL, 0, NULL, opts,
-                                  krb5_get_as_key_noop, &userid,
-                                  &use_master, NULL);
+    code = k5_get_init_creds(context, &creds, client, NULL, NULL, 0, NULL,
+                             opts, krb5_get_as_key_noop, &userid, &use_master,
+                             NULL);
     if (code == 0 || code == KRB5_PREAUTH_FAILED) {
         *canon_user = userid.user;
         userid.user = NULL;
@@ -517,7 +516,7 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
     tgtptr = tgt;
 
-    code = krb5int_copy_creds_contents(context, in_creds, &s4u_creds);
+    code = k5_copy_creds_contents(context, in_creds, &s4u_creds);
     if (code != 0)
         goto cleanup;
 

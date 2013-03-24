@@ -32,6 +32,7 @@
 #if defined(_WIN32) || defined(USE_CCAPI)
 
 #include "k5-int.h"
+#include "../cc-int.h"
 #include "stdcc.h"
 #include "stdcc_util.h"
 #include "string.h"
@@ -620,8 +621,8 @@ krb5_stdccv3_retrieve (krb5_context context,
                        krb5_creds *mcreds,
                        krb5_creds *creds)
 {
-    return krb5_cc_retrieve_cred_default (context, id, whichfields,
-                                          mcreds, creds);
+    return k5_cc_retrieve_cred_default(context, id, whichfields, mcreds,
+                                       creds);
 }
 
 /*
@@ -1487,8 +1488,8 @@ krb5_stdcc_retrieve(context, id, whichfields, mcreds, creds)
     krb5_creds *mcreds;
     krb5_creds *creds;
 {
-    return krb5_cc_retrieve_cred_default (context, id, whichfields,
-                                          mcreds, creds);
+    return k5_cc_retrieve_cred_default(context, id, whichfields, mcreds,
+                                       creds);
 }
 
 #endif

@@ -29,6 +29,7 @@
 #include <memory.h>
 #endif
 #include "int-proto.h"
+#include "os-proto.h"
 
 /* helper function: convert flags to necessary KDC options */
 #define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
@@ -137,7 +138,7 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context,
             free_rhost = 1;
         }
 
-        retval = krb5_os_hostaddr(context, rhost, &addrs);
+        retval = k5_os_hostaddr(context, rhost, &addrs);
         if (retval)
             goto errout;
     }

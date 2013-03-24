@@ -137,15 +137,6 @@ typedef struct mit_des_ran_key_seed {
 
 #define MIT_DES_CBC_CKSUM_LENGTH        (4*sizeof(krb5_octet))
 
-/*
- * Check if k5-int.h has been included before us.  If so, then check to see
- * that our view of the DES key size is the same as k5-int.h's.
- */
-#ifdef  KRB5_MIT_DES_KEYSIZE
-#if     MIT_DES_KEYSIZE != KRB5_MIT_DES_KEYSIZE
-error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
-#endif  /* MIT_DES_KEYSIZE != KRB5_MIT_DES_KEYSIZE */
-#endif  /* KRB5_MIT_DES_KEYSIZE */
 #endif /* KRB5_MIT_DES__ */
 /*
  * End "mit-des.h"

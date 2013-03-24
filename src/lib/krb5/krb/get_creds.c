@@ -1103,7 +1103,7 @@ krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
 {
     if (ctx->state != STATE_COMPLETE)
         return KRB5_NO_TKT_SUPPLIED;
-    return krb5int_copy_creds_contents(context, ctx->reply_creds, creds);
+    return k5_copy_creds_contents(context, ctx->reply_creds, creds);
 }
 
 krb5_error_code KRB5_CALLCONV

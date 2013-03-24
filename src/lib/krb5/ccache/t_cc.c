@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "cc-int.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "autoconf.h"

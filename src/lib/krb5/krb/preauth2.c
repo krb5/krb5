@@ -35,6 +35,7 @@
 #include "osconf.h"
 #include <krb5/clpreauth_plugin.h>
 #include "int-proto.h"
+#include "os-proto.h"
 #include "fast.h"
 #include "init_creds_ctx.h"
 

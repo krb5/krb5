@@ -32,6 +32,16 @@
 
 #include "k5-int.h"
 
+struct _krb5_ccache {
+    krb5_magic magic;
+    const struct _krb5_cc_ops *ops;
+    krb5_pointer data;
+};
+
+krb5_error_code
+k5_cc_retrieve_cred_default(krb5_context, krb5_ccache, krb5_flags,
+                            krb5_creds *, krb5_creds *);
+
 krb5_boolean
 krb5int_cc_creds_match_request(krb5_context, krb5_flags whichfields, krb5_creds *mcreds, krb5_creds *creds);
 
@@ -122,5 +132,64 @@ ccselect_realm_initvt(krb5_context context, int maj_ver, int min_ver,
 krb5_error_code
 ccselect_k5identity_initvt(krb5_context context, int maj_ver, int min_ver,
                            krb5_plugin_vtable vtable);
+
+/*
+ * Per-type ccache cursor.
+ */
+struct krb5_cc_ptcursor_s {
+    const struct _krb5_cc_ops *ops;
+    krb5_pointer data;
+};
+typedef struct krb5_cc_ptcursor_s *krb5_cc_ptcursor;
+
+struct _krb5_cc_ops {
+    krb5_magic magic;
+    char *prefix;
+    const char * (KRB5_CALLCONV *get_name)(krb5_context, krb5_ccache);
+    krb5_error_code (KRB5_CALLCONV *resolve)(krb5_context, krb5_ccache *,
+                                             const char *);
+    krb5_error_code (KRB5_CALLCONV *gen_new)(krb5_context, krb5_ccache *);
+    krb5_error_code (KRB5_CALLCONV *init)(krb5_context, krb5_ccache,
+                                          krb5_principal);
+    krb5_error_code (KRB5_CALLCONV *destroy)(krb5_context, krb5_ccache);
+    krb5_error_code (KRB5_CALLCONV *close)(krb5_context, krb5_ccache);
+    krb5_error_code (KRB5_CALLCONV *store)(krb5_context, krb5_ccache,
+                                           krb5_creds *);
+    krb5_error_code (KRB5_CALLCONV *retrieve)(krb5_context, krb5_ccache,
+                                              krb5_flags, krb5_creds *,
+                                              krb5_creds *);
+    krb5_error_code (KRB5_CALLCONV *get_princ)(krb5_context, krb5_ccache,
+                                               krb5_principal *);
+    krb5_error_code (KRB5_CALLCONV *get_first)(krb5_context, krb5_ccache,
+                                               krb5_cc_cursor *);
+    krb5_error_code (KRB5_CALLCONV *get_next)(krb5_context, krb5_ccache,
+                                              krb5_cc_cursor *, krb5_creds *);
+    krb5_error_code (KRB5_CALLCONV *end_get)(krb5_context, krb5_ccache,
+                                             krb5_cc_cursor *);
+    krb5_error_code (KRB5_CALLCONV *remove_cred)(krb5_context, krb5_ccache,
+                                                 krb5_flags, krb5_creds *);
+    krb5_error_code (KRB5_CALLCONV *set_flags)(krb5_context, krb5_ccache,
+                                               krb5_flags);
+    krb5_error_code (KRB5_CALLCONV *get_flags)(krb5_context, krb5_ccache,
+                                               krb5_flags *);
+    krb5_error_code (KRB5_CALLCONV *ptcursor_new)(krb5_context,
+                                                  krb5_cc_ptcursor *);
+    krb5_error_code (KRB5_CALLCONV *ptcursor_next)(krb5_context,
+                                                   krb5_cc_ptcursor,
+                                                   krb5_ccache *);
+    krb5_error_code (KRB5_CALLCONV *ptcursor_free)(krb5_context,
+                                                   krb5_cc_ptcursor *);
+    krb5_error_code (KRB5_CALLCONV *move)(krb5_context, krb5_ccache,
+                                          krb5_ccache);
+    krb5_error_code (KRB5_CALLCONV *lastchange)(krb5_context,
+                                                krb5_ccache, krb5_timestamp *);
+    krb5_error_code (KRB5_CALLCONV *wasdefault)(krb5_context, krb5_ccache,
+                                                krb5_timestamp *);
+    krb5_error_code (KRB5_CALLCONV *lock)(krb5_context, krb5_ccache);
+    krb5_error_code (KRB5_CALLCONV *unlock)(krb5_context, krb5_ccache);
+    krb5_error_code (KRB5_CALLCONV *switch_to)(krb5_context, krb5_ccache);
+};
+
+extern const krb5_cc_ops *krb5_cc_dfl_ops;
 
 #endif /* __KRB5_CCACHE_H__ */

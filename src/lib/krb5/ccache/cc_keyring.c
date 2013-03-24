@@ -968,8 +968,8 @@ krb5_krcc_retrieve(krb5_context context, krb5_ccache id,
 {
     DEBUG_PRINT(("krb5_krcc_retrieve: entered\n"));
 
-    return krb5_cc_retrieve_cred_default(context, id, whichfields,
-                                         mcreds, creds);
+    return k5_cc_retrieve_cred_default(context, id, whichfields, mcreds,
+                                       creds);
 }
 
 /*

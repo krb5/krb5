@@ -25,6 +25,7 @@
  */
 
 #include <k5-int.h>
+#include "int-proto.h"
 
 /*
  * It is possible to support sending a request that includes both a FAST and

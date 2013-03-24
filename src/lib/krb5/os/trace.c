@@ -38,6 +38,7 @@
  */
 
 #include "k5-int.h"
+#include "os-proto.h"
 #include "cm.h"
 
 #ifndef DISABLE_TRACING
@@ -328,7 +329,7 @@ subfmt(krb5_context context, struct k5buf *buf, const char *fmt, ...)
 }
 
 void
-krb5int_init_trace(krb5_context context)
+k5_init_trace(krb5_context context)
 {
     const char *filename;
 

@@ -110,6 +110,24 @@ krb5_error_code k5_expand_path_tokens_extra(krb5_context context,
                                             const char *path_in,
                                             char **path_out, ...);
 
+krb5_error_code k5_create_secure_file(krb5_context, const char * pathname);
+krb5_error_code k5_sync_disk_file(krb5_context, FILE *fp);
+krb5_error_code k5_os_init_context(krb5_context context, profile_t profile,
+                                   krb5_flags flags);
+void k5_os_free_context(krb5_context);
+krb5_error_code k5_os_hostaddr(krb5_context, const char *, krb5_address ***);
+krb5_error_code k5_time_with_offset(krb5_timestamp offset,
+                                    krb5_int32 offset_usec,
+                                    krb5_timestamp *time_out,
+                                    krb5_int32 *usec_out);
+void k5_set_prompt_types(krb5_context, krb5_prompt_type *);
+krb5_error_code k5_clean_hostname(krb5_context, const char *, char *, size_t);
+krb5_error_code k5_kt_client_default_name(krb5_context context,
+                                          char **name_out);
+krb5_error_code k5_write_messages(krb5_context, krb5_pointer, krb5_data *,
+                                  int);
+void k5_init_trace(krb5_context context);
+
 #include "k5-thread.h"
 extern k5_mutex_t krb5int_us_time_mutex;
 

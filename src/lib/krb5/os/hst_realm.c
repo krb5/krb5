@@ -31,7 +31,7 @@
 /*
  * krb5_get_host_realm()
  * krb5_get_fallback_host_realm()
- * krb5int_clean_hostname()
+ * k5_clean_hostname()
  * krb5_free_host_realm()
  */
 
@@ -98,7 +98,7 @@ domain_heuristic(krb5_context context, const char *domain,
 #endif /* MAXDNAME */
 #endif /* KRB5_DNS_LOOKUP */
 
-krb5_error_code krb5int_translate_gai_error (int);
+static krb5_error_code krb5int_translate_gai_error(int);
 
 static krb5_error_code
 get_fq_hostname(char *buf, size_t bufsize, const char *name)
@@ -144,7 +144,7 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
 
     TRACE_GET_HOST_REALM(context, host);
 
-    retval = krb5int_clean_hostname(context, host, local_host, sizeof local_host);
+    retval = k5_clean_hostname(context, host, local_host, sizeof local_host);
     if (retval)
         return retval;
 
@@ -216,7 +216,7 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
 # endif
 #endif
 
-krb5_error_code
+static krb5_error_code
 krb5int_translate_gai_error (int num)
 {
     switch (num) {
@@ -279,7 +279,7 @@ krb5_get_fallback_host_realm(krb5_context context,
 
     TRACE_GET_FALLBACK_HOST_REALM(context, host);
 
-    retval = krb5int_clean_hostname(context, host, local_host, sizeof local_host);
+    retval = k5_clean_hostname(context, host, local_host, sizeof local_host);
     if (retval)
         return retval;
 
@@ -367,8 +367,8 @@ krb5_get_fallback_host_realm(krb5_context context,
  * to do basic sanity checks on supplied hostname.
  */
 krb5_error_code
-krb5int_clean_hostname(krb5_context context,
-                       const char *host, char *local_host, size_t lhsize)
+k5_clean_hostname(krb5_context context, const char *host, char *local_host,
+                  size_t lhsize)
 {
     char *cp;
     krb5_error_code retval;

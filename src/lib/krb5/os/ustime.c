@@ -34,6 +34,7 @@
  */
 
 #include "k5-int.h"
+#include "os-proto.h"
 
 krb5_error_code
 k5_time_with_offset(krb5_timestamp offset, krb5_int32 offset_usec,

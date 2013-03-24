@@ -24,16 +24,14 @@
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- *
- * krb5_encrypt_keyhelper()
- *
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 
 krb5_error_code
-krb5_encrypt_keyhelper(krb5_context context, krb5_key key, krb5_keyusage usage,
-                       const krb5_data *plain, krb5_enc_data *cipher)
+k5_encrypt_keyhelper(krb5_context context, krb5_key key, krb5_keyusage usage,
+                     const krb5_data *plain, krb5_enc_data *cipher)
 {
     krb5_enctype enctype;
     krb5_error_code ret;

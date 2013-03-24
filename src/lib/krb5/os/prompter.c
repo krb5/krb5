@@ -1,5 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include "k5-int.h"
+#include "os-proto.h"
 #if !defined(_WIN32) || (defined(_WIN32) && defined(__CYGWIN32__))
 #include <stdio.h>
 #include <errno.h>
@@ -317,7 +318,7 @@ krb5_prompter_posix(krb5_context context,
 #endif /* Windows or Mac */
 
 void
-krb5int_set_prompt_types(krb5_context context, krb5_prompt_type *types)
+k5_set_prompt_types(krb5_context context, krb5_prompt_type *types)
 {
     context->prompt_types = types;
 }

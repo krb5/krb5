@@ -25,6 +25,7 @@
  */
 
 #include "cc-int.h"
+#include "../krb/int-proto.h"
 #include <errno.h>
 
 static krb5_error_code KRB5_CALLCONV krb5_mcc_close
@@ -383,7 +384,7 @@ krb5_mcc_next_cred(krb5_context context, krb5_ccache id,
         return KRB5_CC_END;
     memset(creds, 0, sizeof(krb5_creds));
     if (mcursor->creds) {
-        retval = krb5int_copy_creds_contents(context, mcursor->creds, creds);
+        retval = k5_copy_creds_contents(context, mcursor->creds, creds);
         if (retval)
             return retval;
     }
@@ -607,8 +608,8 @@ krb5_error_code KRB5_CALLCONV
 krb5_mcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
                   krb5_creds *mcreds, krb5_creds *creds)
 {
-    return krb5_cc_retrieve_cred_default (context, id, whichfields,
-                                          mcreds, creds);
+    return k5_cc_retrieve_cred_default(context, id, whichfields, mcreds,
+                                       creds);
 }
 
 /*

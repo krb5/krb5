@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
  * Copy credentials, allocating fresh storage where needed.
@@ -39,7 +40,7 @@ krb5_copy_creds(krb5_context context, const krb5_creds *incred, krb5_creds **out
     if (!(tempcred = (krb5_creds *)malloc(sizeof(*tempcred))))
         return ENOMEM;
 
-    retval = krb5int_copy_creds_contents(context, incred, tempcred);
+    retval = k5_copy_creds_contents(context, incred, tempcred);
     if (retval)
         free(tempcred);
     else
@@ -54,8 +55,8 @@ krb5_copy_creds(krb5_context context, const krb5_creds *incred, krb5_creds **out
  * output structure is garbage and its contents should be ignored.
  */
 krb5_error_code
-krb5int_copy_creds_contents(krb5_context context, const krb5_creds *incred,
-                            krb5_creds *tempcred)
+k5_copy_creds_contents(krb5_context context, const krb5_creds *incred,
+                       krb5_creds *tempcred)
 {
     krb5_error_code retval;
     krb5_data *scratch;

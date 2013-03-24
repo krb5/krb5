@@ -51,6 +51,7 @@
 
 #include "k5-int.h"
 #include "int-proto.h"
+#include "os-proto.h"
 #include <ctype.h>
 #include "brand.c"
 #include "../krb5_libinit.h"
@@ -189,13 +190,14 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
 
     ctx->profile_secure = (flags & KRB5_INIT_CONTEXT_SECURE) != 0;
 
-    if ((retval = krb5_os_init_context(ctx, profile, flags)) != 0)
+    retval = k5_os_init_context(ctx, profile, flags);
+    if (retval)
         goto cleanup;
 
     ctx->trace_callback = NULL;
 #ifndef DISABLE_TRACING
     if (!ctx->profile_secure)
-        krb5int_init_trace(ctx);
+        k5_init_trace(ctx);
 #endif
 
     retval = get_boolean(ctx, KRB5_CONF_ALLOW_WEAK_CRYPTO, 0, &tmp);
@@ -287,7 +289,7 @@ krb5_free_context(krb5_context ctx)
 {
     if (ctx == NULL)
         return;
-    krb5_os_free_context(ctx);
+    k5_os_free_context(ctx);
 
     free(ctx->in_tkt_etypes);
     ctx->in_tkt_etypes = NULL;
