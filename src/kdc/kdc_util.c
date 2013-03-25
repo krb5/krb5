@@ -1349,8 +1349,10 @@ kdc_make_s4u2self_rep(krb5_context context,
 
         code = add_pa_data_element(context,&padata,
                                    &reply_encpart->enc_padata, FALSE);
-        if (code != 0)
+        if (code != 0) {
+            free(padata.contents);
             goto cleanup;
+        }
     }
 
 cleanup:

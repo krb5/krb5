@@ -507,6 +507,7 @@ create_workers(verto_ctx *ctx, int num)
     for (i = 0; i < num; i++) {
         pid = fork();
         if (pid == 0) {
+            free(pids);
             if (!verto_reinitialize(ctx)) {
                 krb5_klog_syslog(LOG_ERR,
                                  _("Unable to reinitialize main loop"));
@@ -524,7 +525,6 @@ create_workers(verto_ctx *ctx, int num)
                 exit(0);
 
             /* Return control to main() in the new worker process. */
-            free(pids);
             return 0;
         }
         if (pid == -1) {
