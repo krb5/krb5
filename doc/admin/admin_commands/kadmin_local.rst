@@ -161,8 +161,7 @@ OPTIONS
     **-x debug=**\ *level*
         sets the OpenLDAP client library debug level.  *level* is an
         integer to be interpreted by the library.  Debugging messages
-        are printed to standard error.  First introduced in release
-        1.12.
+        are printed to standard error.  New in release 1.12.
 
 .. _kadmin_options_end:
 
