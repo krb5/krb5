@@ -27,5 +27,6 @@ verto_run_once
 verto_set_allocator
 verto_set_default
 verto_set_fd_state
+verto_set_flags
 verto_set_private
 verto_set_proc_status
