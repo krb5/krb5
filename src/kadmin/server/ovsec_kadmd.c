@@ -188,14 +188,15 @@ write_pid_file(const char *pid_file)
 {
     FILE *file;
     unsigned long pid;
+    int st1, st2;
 
     file = fopen(pid_file, "w");
     if (file == NULL)
         return errno;
     pid = (unsigned long) getpid();
-    if (fprintf(file, "%ld\n", pid) < 0 || fclose(file) == EOF)
-        return errno;
-    return 0;
+    st1 = fprintf(file, "%ld\n", pid);
+    st2 = fclose(file);
+    return (st1 < 0 || st2 == EOF) ? errno : 0;
 }
 
 /* XXX yuck.  the signal handlers need this */
