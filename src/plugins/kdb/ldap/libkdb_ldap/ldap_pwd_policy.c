@@ -140,7 +140,7 @@ krb5_ldap_create_password_policy(krb5_context context, osa_policy_ent_t policy)
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
-    char                        *strval[2]={NULL}, *policy_dn;
+    char                        *strval[2]={NULL}, *policy_dn=NULL;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -175,8 +175,7 @@ krb5_ldap_create_password_policy(krb5_context context, osa_policy_ent_t policy)
     }
 
 cleanup:
-    if (policy_dn != NULL)
-        free (policy_dn);
+    free(policy_dn);
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return(st);
@@ -353,8 +352,7 @@ krb5_ldap_get_password_policy(krb5_context context, char *name,
                                                policy);
 
 cleanup:
-    if (policy_dn != NULL)
-        free (policy_dn);
+    free(policy_dn);
     return st;
 }
 
@@ -399,8 +397,7 @@ krb5_ldap_delete_password_policy(krb5_context context, char *policy)
 
 cleanup:
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
-    if (policy_dn != NULL)
-        free (policy_dn);
+    free(policy_dn);
 
     return st;
 }
@@ -454,8 +451,7 @@ krb5_ldap_iterate_password_policy(krb5_context context, char *match_expr,
     ldap_msgfree(result);
 
 cleanup:
-    if (entry)
-        free (entry);
+    free(entry);
 
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
@@ -467,8 +463,7 @@ krb5_ldap_free_password_policy (context, entry)
     osa_policy_ent_t            entry;
 {
     if (entry) {
-        if (entry->name)
-            free(entry->name);
+        free(entry->name);
         free(entry);
     }
     return;
