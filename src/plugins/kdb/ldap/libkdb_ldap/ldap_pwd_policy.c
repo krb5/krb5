@@ -189,7 +189,7 @@ cleanup:
 krb5_error_code
 krb5_ldap_put_password_policy(krb5_context context, osa_policy_ent_t policy)
 {
-    char                        *policy_dn;
+    char                        *policy_dn=NULL;
     krb5_error_code             st=0;
     LDAP                        *ld=NULL;
     LDAPMod                     **mods=NULL;
@@ -227,8 +227,7 @@ krb5_ldap_put_password_policy(krb5_context context, osa_policy_ent_t policy)
     }
 
 cleanup:
-    if (policy_dn != NULL)
-        free (policy_dn);
+    free(policy_dn);
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return(st);
