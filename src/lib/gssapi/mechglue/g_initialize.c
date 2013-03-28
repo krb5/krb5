@@ -1230,7 +1230,7 @@ loadConfigFile(const char *fileName)
 		/* Parse out the module type if present. */
 		if (*next == '<') {
 			modType = next + 1;
-			next = delimit(modType, '>');
+			(void)delimit(modType, '>');
 		} else {
 			modType = NULL;
 		}
