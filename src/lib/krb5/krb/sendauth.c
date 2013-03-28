@@ -108,10 +108,8 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
         else
             retval = krb5_cc_get_principal(context, use_ccache,
                                            &creds.client);
-        if (retval) {
-            krb5_free_principal(context, creds.server);
+        if (retval)
             goto error_return;
-        }
         /* creds.times.endtime = 0; -- memset 0 takes care of this
            zero means "as long as possible" */
         /* creds.keyblock.enctype = 0; -- as well as this.
