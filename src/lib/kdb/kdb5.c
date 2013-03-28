@@ -72,7 +72,7 @@ free_mkey_list(krb5_context context, krb5_keylist_node *mkey_list)
     for (cur = mkey_list; cur != NULL; cur = next) {
         next = cur->next;
         krb5_free_keyblock_contents(context, &cur->keyblock);
-        krb5_xfree(cur);
+        free(cur);
     }
 }
 
@@ -145,7 +145,7 @@ krb5_dbe_free_key_list(krb5_context context, krb5_keylist_node *val)
         prev = temp;
         temp = temp->next;
         krb5_free_keyblock_contents(context, &(prev->keyblock));
-        krb5_xfree(prev);
+        free(prev);
     }
 }
 
@@ -157,7 +157,7 @@ krb5_dbe_free_actkvno_list(krb5_context context, krb5_actkvno_node *val)
     while (temp != NULL) {
         prev = temp;
         temp = temp->next;
-        krb5_xfree(prev);
+        free(prev);
     }
 }
 
@@ -170,7 +170,7 @@ krb5_dbe_free_mkey_aux_list(krb5_context context, krb5_mkey_aux_node *val)
         prev = temp;
         temp = temp->next;
         krb5_dbe_free_key_data_contents(context, &prev->latest_mkey);
-        krb5_xfree(prev);
+        free(prev);
     }
 }
 

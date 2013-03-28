@@ -1748,9 +1748,6 @@ krb5int_cc_default(krb5_context, krb5_ccache *);
 /* value to use when requesting a keytab entry and enctype doesn't matter */
 #define IGNORE_ENCTYPE 0
 
-/* to keep lint happy */
-#define krb5_xfree(val) free((char *)(val))
-
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */

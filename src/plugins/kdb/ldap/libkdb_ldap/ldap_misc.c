@@ -467,45 +467,45 @@ krb5_ldap_free_server_context_params(krb5_ldap_context *ldap_context)
                     ldap_unbind_ext_s(ldap_server_handle->ldap_handle, NULL, NULL);
                     ldap_server_handle->ldap_handle = NULL;
                     next_ldap_server_handle = ldap_server_handle->next;
-                    krb5_xfree(ldap_server_handle);
+                    free(ldap_server_handle);
                     ldap_server_handle = next_ldap_server_handle;
                 }
             }
-            krb5_xfree(ldap_context->server_info_list[i]);
+            free(ldap_context->server_info_list[i]);
             i++;
         }
-        krb5_xfree(ldap_context->server_info_list);
+        free(ldap_context->server_info_list);
     }
 
     if (ldap_context->conf_section != NULL) {
-        krb5_xfree(ldap_context->conf_section);
+        free(ldap_context->conf_section);
         ldap_context->conf_section = NULL;
     }
 
     if (ldap_context->bind_dn != NULL) {
-        krb5_xfree(ldap_context->bind_dn);
+        free(ldap_context->bind_dn);
         ldap_context->bind_dn = NULL;
     }
 
     if (ldap_context->bind_pwd != NULL) {
         memset(ldap_context->bind_pwd, 0, strlen(ldap_context->bind_pwd));
-        krb5_xfree(ldap_context->bind_pwd);
+        free(ldap_context->bind_pwd);
         ldap_context->bind_pwd = NULL;
     }
 
     if (ldap_context->service_password_file != NULL) {
-        krb5_xfree(ldap_context->service_password_file);
+        free(ldap_context->service_password_file);
         ldap_context->service_password_file = NULL;
     }
 
     if (ldap_context->certificates) {
         i=0;
         while (ldap_context->certificates[i] != NULL) {
-            krb5_xfree(ldap_context->certificates[i]->certificate);
-            krb5_xfree(ldap_context->certificates[i]);
+            free(ldap_context->certificates[i]->certificate);
+            free(ldap_context->certificates[i]);
             ++i;
         }
-        krb5_xfree(ldap_context->certificates);
+        free(ldap_context->certificates);
     }
 
     return(0);
@@ -520,7 +520,7 @@ krb5_ldap_free_server_params(krb5_ldap_context *ldap_context)
     krb5_ldap_free_server_context_params(ldap_context);
 
     k5_mutex_destroy(&ldap_context->hndl_lock);
-    krb5_xfree(ldap_context);
+    free(ldap_context);
     return(0);
 }
 
