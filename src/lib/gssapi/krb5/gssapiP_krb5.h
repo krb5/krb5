@@ -1227,6 +1227,7 @@ data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
 
 /* Credential store extensions */
 
+#define KRB5_CS_CLI_KEYTAB_URN "client_keytab"
 #define KRB5_CS_KEYTAB_URN "keytab"
 #define KRB5_CS_CCACHE_URN "ccache"
 
