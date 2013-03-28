@@ -232,6 +232,8 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
     krb5_db_entry       * entry;
     krb5_error_code retval;
 
+    *entry_ptr = NULL;
+
     entry = k5alloc(sizeof(*entry), &retval);
     if (entry == NULL)
         return retval;
