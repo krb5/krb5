@@ -35,8 +35,7 @@ krb5_read_message(krb5_context context, krb5_pointer fdp, krb5_data *inbuf)
     char            *buf = NULL;
     int             fd = *( (int *) fdp);
 
-    inbuf->data = NULL;
-    inbuf->length = 0;
+    *inbuf = empty_data();
 
     if ((len2 = krb5_net_read(context, fd, (char *)&len, 4)) != 4)
         return((len2 < 0) ? errno : ECONNABORTED);
@@ -45,12 +44,12 @@ krb5_read_message(krb5_context context, krb5_pointer fdp, krb5_data *inbuf)
     if ((len & VALID_UINT_BITS) != (krb5_ui_4) len)  /* Overflow size_t??? */
         return ENOMEM;
 
-    inbuf->length = ilen = (int) len;
+    ilen = (int)len;
     if (ilen) {
         /*
          * We may want to include a sanity check here someday....
          */
-        if (!(buf = malloc(inbuf->length))) {
+        if (!(buf = malloc(ilen))) {
             return(ENOMEM);
         }
         if ((len2 = krb5_net_read(context, fd, buf, ilen)) != ilen) {
@@ -58,6 +57,6 @@ krb5_read_message(krb5_context context, krb5_pointer fdp, krb5_data *inbuf)
             return((len2 < 0) ? errno : ECONNABORTED);
         }
     }
-    inbuf->data = buf;
+    *inbuf = make_data(buf, ilen);
     return(0);
 }

@@ -42,11 +42,9 @@ principal2salt_internal(krb5_context context,
     krb5_int32 nelem;
     register int i;
 
-    if (pr == 0) {
-        ret->length = 0;
-        ret->data = 0;
+    *ret = empty_data();
+    if (pr == NULL)
         return 0;
-    }
 
     nelem = krb5_princ_size(context, pr);
 
@@ -56,8 +54,7 @@ principal2salt_internal(krb5_context context,
     for (i = 0; i < (int) nelem; i++)
         size += krb5_princ_component(context, pr, i)->length;
 
-    ret->length = size;
-    if (!(ret->data = malloc (size)))
+    if (alloc_data(ret, size))
         return ENOMEM;
 
     if (use_realm) {
