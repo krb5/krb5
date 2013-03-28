@@ -2955,9 +2955,9 @@ pkinit_decode_dh_params(DH ** a, unsigned char **pp, unsigned int len)
         }
 
     }
-    M_ASN1_D2I_get_x(ASN1_INTEGER, aip, d2i_ASN1_INTEGER);
-    if (aip == NULL)
-        return NULL;
+    M_ASN1_D2I_get_opt(aip, d2i_ASN1_INTEGER, V_ASN1_INTEGER);
+    if (aip == NULL || ai.data == NULL)
+        (*a)->q = NULL;
     else {
         (*a)->q = ASN1_INTEGER_to_BN(aip, NULL);
         if ((*a)->q == NULL)
@@ -3282,7 +3282,7 @@ pkinit_check_dh_params(BIGNUM * p1, BIGNUM * p2, BIGNUM * g1, BIGNUM * q1)
         if (!BN_cmp(g1, g2)) {
             q2 = BN_new();
             BN_rshift1(q2, p1);
-            if (!BN_cmp(q1, q2)) {
+            if (q1 == NULL || !BN_cmp(q1, q2)) {
                 pkiDebug("good %d dhparams\n", BN_num_bits(p1));
                 retval = 0;
             } else
