@@ -2061,7 +2061,6 @@ krb5int_fcc_new_unique(krb5_context context, char *template, krb5_ccache *id)
         k5_cc_mutex_destroy(&data->lock);
         free(data->filename);
         free(data);
-        (void) close(ret);
         (void) unlink(template);
         return KRB5_CC_NOMEM;
     }
