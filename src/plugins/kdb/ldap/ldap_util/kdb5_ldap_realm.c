@@ -1344,6 +1344,8 @@ kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
     krb5_timestamp now;
     krb5_actkvno_node     actkvno;
 
+    memset(&entry, 0, sizeof(entry));
+
     if ((pblock == NULL) || (context == NULL)) {
         retval = EINVAL;
         goto cleanup;
@@ -1354,8 +1356,6 @@ kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
         retval = EINVAL;
         goto cleanup;
     }
-
-    memset(&entry, 0, sizeof(entry));
 
     tl_data = malloc(sizeof(*tl_data));
     if (tl_data == NULL) {
