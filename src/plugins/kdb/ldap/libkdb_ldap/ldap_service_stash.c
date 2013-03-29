@@ -97,26 +97,9 @@ krb5_ldap_readpassword(krb5_context context, krb5_ldap_context *ldap_context,
 # define strerror_r(ERRNUM, BUF, SIZE) (strncpy(BUF, strerror(ERRNUM), SIZE), BUF[(SIZE)-1] = 0)
 #endif
 
-    /* check whether file exists */
-    if (access(file, F_OK) < 0) {
+    fptr = fopen(file, "r");
+    if (fptr == NULL) {
         st = errno;
-        strerror_r(errno, errbuf, sizeof(errbuf));
-        krb5_set_error_message (context, st, "%s", errbuf);
-        goto rp_exit;
-    }
-
-    /* check read access */
-    if (access(file, R_OK) < 0) {
-        st = errno;
-        strerror_r(errno, errbuf, sizeof(errbuf));
-        krb5_set_error_message (context, st, "%s", errbuf);
-        goto rp_exit;
-    }
-
-    if ((fptr=fopen(file, "r")) == NULL) {
-        st = errno;
-        strerror_r(errno, errbuf, sizeof(errbuf));
-        krb5_set_error_message (context, st, "%s", errbuf);
         goto rp_exit;
     }
     set_cloexec_file(fptr);
