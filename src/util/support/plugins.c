@@ -155,8 +155,8 @@ int closedir(DIR *dp)
 {
     if (!dp) return 0;
     _findclose(dp->handle);
-    if (dp->dir) free(dp->dir);
-    if (dp) free(dp);
+    free(dp->dir);
+    free(dp);
 
     return 0;
 }
@@ -317,7 +317,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
         htmp = NULL;  /* h takes ownership */
     }
 
-    if (htmp != NULL) { free (htmp); }
+    free(htmp);
 
     return err;
 }
@@ -551,7 +551,7 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
         tempnames = NULL;
     }
 
-    if (tempnames) { krb5int_free_plugin_filenames (tempnames); }
+    krb5int_free_plugin_filenames(tempnames);
 
     return err;
 }
@@ -602,7 +602,7 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
                     if (!err) { handle = NULL; }  /* h takes ownership */
                 }
 
-                if (filepath != NULL) { free (filepath); }
+                free(filepath);
                 if (handle   != NULL) { krb5int_close_plugin (handle); }
             }
         } else {
@@ -637,7 +637,7 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
                     }
                 }
 
-                if (filepath  != NULL) { free (filepath); }
+                free(filepath);
                 if (handle    != NULL) { krb5int_close_plugin (handle); }
             }
 
@@ -727,7 +727,7 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
         p = NULL; /* ptrs takes ownership */
     }
 
-    if (p != NULL) { free (p); }
+    free(p);
 
     return err;
 }
@@ -786,7 +786,7 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
         p = NULL; /* ptrs takes ownership */
     }
 
-    if (p != NULL) { free (p); }
+    free(p);
 
     return err;
 }
