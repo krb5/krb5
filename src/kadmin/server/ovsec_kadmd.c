@@ -194,9 +194,9 @@ write_pid_file(const char *pid_file)
     if (file == NULL)
         return errno;
     pid = (unsigned long) getpid();
-    st1 = fprintf(file, "%ld\n", pid);
-    st2 = fclose(file);
-    return (st1 < 0 || st2 == EOF) ? errno : 0;
+    st1 = (fprintf(file, "%ld\n", pid) < 0) ? errno : 0;
+    st2 = (fclose(file) == EOF) ? errno : 0;
+    return st1 ? st1 : st2;
 }
 
 /* XXX yuck.  the signal handlers need this */
