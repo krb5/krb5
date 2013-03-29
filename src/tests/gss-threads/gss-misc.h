@@ -20,10 +20,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*
- * $Id$
- */
-
 #ifndef _GSSMISC_H_
 #define _GSSMISC_H_
 
@@ -32,16 +28,11 @@
 
 extern FILE *display_file;
 
-int send_token
-	(int s, int flags, gss_buffer_t tok);
-int recv_token
-	(int s, int *flags, gss_buffer_t tok);
-void display_status
-	(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat);
-void display_ctx_flags
-	(OM_uint32 flags);
-void print_token
-	(gss_buffer_t tok);
+int send_token(int s, int flags, gss_buffer_t tok);
+int recv_token(int s, int *flags, gss_buffer_t tok);
+void display_status(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat);
+void display_ctx_flags(OM_uint32 flags);
+void print_token(gss_buffer_t tok);
 
 /* Token types */
 #define TOKEN_NOOP		(1<<0)

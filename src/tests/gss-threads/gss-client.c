@@ -71,7 +71,8 @@
 
 static int verbose = 1;
 
-static void usage()
+static void
+usage()
 {
     fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] [-d]\n");
     fprintf(stderr, "       [-seq] [-noreplay] [-nomutual]");
@@ -101,13 +102,13 @@ static void usage()
  * message is displayed and -1 is returned.
  */
 struct sockaddr_in saddr;
-static int get_server_info(host, port)
-    char *host;
-    u_short port;
+static int
+get_server_info(char *host, u_short port)
 {
     struct hostent *hp;
 
-    if ((hp = gethostbyname(host)) == NULL) {
+    hp = gethostbyname(host);
+    if (hp == NULL) {
         fprintf(stderr, "Unknown host: %s\n", host);
         return -1;
     }
@@ -136,17 +137,19 @@ static int get_server_info(host, port)
  * opened and connected.  If an error occurs, an error message is
  * displayed and -1 is returned.
  */
-static int connect_to_server()
+static int
+connect_to_server()
 {
     int s;
 
-    if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    s = socket(AF_INET, SOCK_STREAM, 0);
+    if (s < 0) {
         perror("creating socket");
         return -1;
     }
     if (connect(s, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
         perror("connecting to server");
-        (void) closesocket(s);
+        (void)closesocket(s);
         return -1;
     }
     return s;
@@ -160,12 +163,12 @@ static int connect_to_server()
  *
  * Arguments:
  *
- *      s                   (r) an established TCP connection to the service
- *      service_name(r) the ASCII service name of the service
+ *      s               (r) an established TCP connection to the service
+ *      service_name    (r) the ASCII service name of the service
  *      gss_flags       (r) GSS-API delegation flag (if any)
  *      auth_flag       (r) whether to actually do authentication
- *  v1_format   (r) whether the v1 sample protocol should be used
- *      oid                 (r) OID of the mechanism to use
+ *      v1_format       (r) whether the v1 sample protocol should be used
+ *      oid             (r) OID of the mechanism to use
  *      context         (w) the established GSS-API context
  *      ret_flags       (w) the returned flags from init_sec_context
  *
@@ -183,16 +186,10 @@ static int connect_to_server()
  * unsuccessful, the GSS-API error messages are displayed on stderr
  * and -1 is returned.
  */
-static int client_establish_context(s, service_name, gss_flags, auth_flag,
-                                    v1_format, oid, gss_context, ret_flags)
-    int s;
-    char *service_name;
-    gss_OID oid;
-    OM_uint32 gss_flags;
-    int auth_flag;
-    int v1_format;
-    gss_ctx_id_t *gss_context;
-    OM_uint32 *ret_flags;
+static int
+client_establish_context(int s, char *service_name, OM_uint32 gss_flags,
+                         int auth_flag, int v1_format, gss_OID oid,
+                         gss_ctx_id_t *gss_context, OM_uint32 *ret_flags)
 {
     if (auth_flag) {
         gss_buffer_desc send_tok, recv_tok, *token_ptr;
@@ -205,17 +202,18 @@ static int client_establish_context(s, service_name, gss_flags, auth_flag,
          * local variable space.
          */
         send_tok.value = service_name;
-        send_tok.length = strlen(service_name) ;
+        send_tok.length = strlen(service_name);
         maj_stat = gss_import_name(&min_stat, &send_tok,
-                                   (gss_OID) gss_nt_service_name, &target_name);
+                                   (gss_OID)gss_nt_service_name, &target_name);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("parsing name", maj_stat, min_stat);
             return -1;
         }
 
         if (!v1_format) {
-            if (send_token(s, TOKEN_NOOP|TOKEN_CONTEXT_NEXT, empty_token) < 0) {
-                (void) gss_release_name(&min_stat, &target_name);
+            if (send_token(s, TOKEN_NOOP | TOKEN_CONTEXT_NEXT,
+                           empty_token) < 0) {
+                (void)gss_release_name(&min_stat, &target_name);
                 return -1;
             }
         }
@@ -240,31 +238,24 @@ static int client_establish_context(s, service_name, gss_flags, auth_flag,
         *gss_context = GSS_C_NO_CONTEXT;
 
         do {
-            maj_stat =
-                gss_init_sec_context(&init_sec_min_stat,
-                                     GSS_C_NO_CREDENTIAL,
-                                     gss_context,
-                                     target_name,
-                                     oid,
-                                     gss_flags,
-                                     0,
-                                     NULL,   /* no channel bindings */
-                                     token_ptr,
-                                     NULL,   /* ignore mech type */
-                                     &send_tok,
-                                     ret_flags,
-                                     NULL);  /* ignore time_rec */
+            maj_stat = gss_init_sec_context(&init_sec_min_stat,
+                                            GSS_C_NO_CREDENTIAL, gss_context,
+                                            target_name, oid, gss_flags, 0,
+                                            NULL, token_ptr, NULL, &send_tok,
+                                            ret_flags, NULL);
 
             if (token_ptr != GSS_C_NO_BUFFER)
-                free (recv_tok.value);
+                free(recv_tok.value);
 
             if (send_tok.length != 0) {
-                if (verbose)
+                if (verbose) {
                     printf("Sending init_sec_context token (size=%d)...",
-                           (int) send_tok.length);
-                if (send_token(s, v1_format?0:TOKEN_CONTEXT, &send_tok) < 0) {
-                    (void) gss_release_buffer(&min_stat, &send_tok);
-                    (void) gss_release_name(&min_stat, &target_name);
+                           (int)send_tok.length);
+                }
+                if (send_token(s, v1_format ? 0 : TOKEN_CONTEXT,
+                               &send_tok) < 0) {
+                    (void)gss_release_buffer(&min_stat, &send_tok);
+                    (void)gss_release_name(&min_stat, &target_name);
                     if (*gss_context != GSS_C_NO_CONTEXT) {
                         gss_delete_sec_context(&min_stat, gss_context,
                                                GSS_C_NO_BUFFER);
@@ -273,15 +264,17 @@ static int client_establish_context(s, service_name, gss_flags, auth_flag,
                     return -1;
                 }
             }
-            (void) gss_release_buffer(&min_stat, &send_tok);
+            (void)gss_release_buffer(&min_stat, &send_tok);
 
-            if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED) {
+            if (maj_stat != GSS_S_COMPLETE &&
+                maj_stat != GSS_S_CONTINUE_NEEDED) {
                 display_status("initializing context", maj_stat,
                                init_sec_min_stat);
-                (void) gss_release_name(&min_stat, &target_name);
-                if (*gss_context != GSS_C_NO_CONTEXT)
+                (void)gss_release_name(&min_stat, &target_name);
+                if (*gss_context != GSS_C_NO_CONTEXT) {
                     gss_delete_sec_context(&min_stat, gss_context,
                                            GSS_C_NO_BUFFER);
+                }
                 return -1;
             }
 
@@ -289,7 +282,7 @@ static int client_establish_context(s, service_name, gss_flags, auth_flag,
                 if (verbose)
                     printf("continue needed...");
                 if (recv_token(s, &token_flags, &recv_tok) < 0) {
-                    (void) gss_release_name(&min_stat, &target_name);
+                    (void)gss_release_name(&min_stat, &target_name);
                     return -1;
                 }
                 token_ptr = &recv_tok;
@@ -298,24 +291,22 @@ static int client_establish_context(s, service_name, gss_flags, auth_flag,
                 printf("\n");
         } while (maj_stat == GSS_S_CONTINUE_NEEDED);
 
-        (void) gss_release_name(&min_stat, &target_name);
-    }
-    else {
-        if (send_token(s, TOKEN_NOOP, empty_token) < 0)
+        (void)gss_release_name(&min_stat, &target_name);
+    } else if (send_token(s, TOKEN_NOOP, empty_token) < 0) {
             return -1;
     }
 
     return 0;
 }
 
-static void read_file(file_name, in_buf)
-    char                *file_name;
-    gss_buffer_t        in_buf;
+static void
+read_file(char *file_name, gss_buffer_t in_buf)
 {
     int fd, count;
     struct stat stat_buf;
 
-    if ((fd = open(file_name, O_RDONLY, 0)) < 0) {
+    fd = open(file_name, O_RDONLY, 0);
+    if (fd < 0) {
         perror("open");
         fprintf(stderr, "Couldn't open file %s\n", file_name);
         exit(2);
@@ -331,23 +322,25 @@ static void read_file(file_name, in_buf)
         return;
     }
 
-    if ((in_buf->value = malloc(in_buf->length)) == 0) {
+    in_buf->value = malloc(in_buf->length);
+    if (in_buf->value == NULL) {
         fprintf(stderr, "Couldn't allocate %d byte buffer for reading file\n",
-                (int) in_buf->length);
+                (int)in_buf->length);
         exit(4);
     }
 
-    /* this code used to check for incomplete reads, but you can't get
-       an incomplete read on any file for which fstat() is meaningful */
+    /* This code used to check for incomplete reads, but you can't get
+     * an incomplete read on any file for which fstat() is meaningful. */
 
     count = read(fd, in_buf->value, in_buf->length);
     if (count < 0) {
         perror("read");
         exit(5);
     }
-    if (count < in_buf->length)
+    if (count < in_buf->length) {
         fprintf(stderr, "Warning, only read in %d bytes, expected %d\n",
-                count, (int) in_buf->length);
+                count, (int)in_buf->length);
+    }
 }
 
 /*
@@ -378,246 +371,223 @@ static void read_file(file_name, in_buf)
  * seals msg in a GSS-API token with gss_wrap, sends it to the server,
  * reads back a GSS-API signature block for msg from the server, and
  * verifies it with gss_verify.  -1 is returned if any step fails,
- * otherwise 0 is returned.  */
-static int call_server(host, port, oid, service_name, gss_flags, auth_flag,
-                       wrap_flag, encrypt_flag, mic_flag, v1_format, msg, use_file,
-                       mcount)
-    char *host;
-    u_short port;
-    gss_OID oid;
-    char *service_name;
-    OM_uint32 gss_flags;
-    int auth_flag, wrap_flag, encrypt_flag, mic_flag;
-    int v1_format;
-    char *msg;
-    int use_file;
-    int mcount;
+ * otherwise 0 is returned.
+ */
+static int
+call_server(char *host, u_short port, gss_OID oid, char *service_name,
+            OM_uint32 gss_flags, int auth_flag, int wrap_flag,
+            int encrypt_flag, int mic_flag, int v1_format, char *msg,
+            int use_file, int mcount)
 {
     gss_ctx_id_t context;
-    gss_buffer_desc in_buf, out_buf;
-    int s, state;
-    OM_uint32 ret_flags;
-    OM_uint32 maj_stat, min_stat;
-    gss_name_t         src_name, targ_name;
-    gss_buffer_desc    sname, tname;
-    OM_uint32          lifetime;
-    gss_OID            mechanism, name_type;
-    int                is_local;
-    OM_uint32          context_flags;
-    int                is_open;
-    gss_qop_t          qop_state;
-    gss_OID_set        mech_names;
-    gss_buffer_desc    oid_name;
-    size_t     i;
-    int token_flags;
+    gss_buffer_desc in_buf, out_buf, sname, tname, oid_name;
+    int s, state, is_local, is_open, flags, token_flags;
+    OM_uint32 ret_flags, maj_stat, min_stat, lifetime, context_flags;
+    gss_name_t src_name, targ_name;
+    gss_OID mechanism, name_type;
+    gss_qop_t qop_state;
+    gss_OID_set mech_names;
+    size_t i;
 
-    /* Open connection */
-    if ((s = connect_to_server()) < 0)
+    /* Open connection. */
+    s = connect_to_server();
+    if (s < 0)
         return -1;
 
-    /* Establish context */
+    /* Establish context. */
     if (client_establish_context(s, service_name, gss_flags, auth_flag,
-                                 v1_format, oid, &context,
-                                 &ret_flags) < 0) {
-        (void) closesocket(s);
+                                 v1_format, oid, &context, &ret_flags) < 0) {
+        (void)closesocket(s);
         return -1;
     }
 
     if (auth_flag && verbose) {
-        /* display the flags */
+        /* Display the flags. */
         display_ctx_flags(ret_flags);
 
-        /* Get context information */
-        maj_stat = gss_inquire_context( &min_stat, context,
-                                        &src_name, &targ_name, &lifetime,
-                                        &mechanism, &context_flags,
-                                        &is_local,
-                                        &is_open);
+        /* Get context information. */
+        maj_stat = gss_inquire_context(&min_stat, context, &src_name,
+                                       &targ_name, &lifetime, &mechanism,
+                                       &context_flags, &is_local, &is_open);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("inquiring context", maj_stat, min_stat);
             return -1;
         }
 
-        maj_stat = gss_display_name(&min_stat, src_name, &sname,
-                                    &name_type);
+        maj_stat = gss_display_name(&min_stat, src_name, &sname, &name_type);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("displaying source name", maj_stat, min_stat);
             return -1;
         }
-        maj_stat = gss_display_name(&min_stat, targ_name, &tname,
-                                    (gss_OID *) NULL);
+        maj_stat = gss_display_name(&min_stat, targ_name, &tname, NULL);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("displaying target name", maj_stat, min_stat);
             return -1;
         }
         printf("\"%.*s\" to \"%.*s\", lifetime %d, flags %x, %s, %s\n",
-               (int) sname.length, (char *) sname.value,
-               (int) tname.length, (char *) tname.value, lifetime,
-               context_flags,
-               (is_local) ? "locally initiated" : "remotely initiated",
-               (is_open) ? "open" : "closed");
+               (int)sname.length, (char *)sname.value,
+               (int)tname.length, (char *)tname.value, lifetime, context_flags,
+               is_local ? "locally initiated" : "remotely initiated",
+               is_open ? "open" : "closed");
 
-        (void) gss_release_name(&min_stat, &src_name);
-        (void) gss_release_name(&min_stat, &targ_name);
-        (void) gss_release_buffer(&min_stat, &sname);
-        (void) gss_release_buffer(&min_stat, &tname);
+        (void)gss_release_name(&min_stat, &src_name);
+        (void)gss_release_name(&min_stat, &targ_name);
+        (void)gss_release_buffer(&min_stat, &sname);
+        (void)gss_release_buffer(&min_stat, &tname);
 
-        maj_stat = gss_oid_to_str(&min_stat,
-                                  name_type,
-                                  &oid_name);
+        maj_stat = gss_oid_to_str(&min_stat, name_type, &oid_name);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("converting oid->string", maj_stat, min_stat);
             return -1;
         }
-        printf("Name type of source name is %.*s.\n",
-               (int) oid_name.length, (char *) oid_name.value);
-        (void) gss_release_buffer(&min_stat, &oid_name);
+        printf("Name type of source name is %.*s.\n", (int)oid_name.length,
+               (char *)oid_name.value);
+        (void)gss_release_buffer(&min_stat, &oid_name);
 
-        /* Now get the names supported by the mechanism */
-        maj_stat = gss_inquire_names_for_mech(&min_stat,
-                                              mechanism,
+        /* Now get the names supported by the mechanism. */
+        maj_stat = gss_inquire_names_for_mech(&min_stat, mechanism,
                                               &mech_names);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("inquiring mech names", maj_stat, min_stat);
             return -1;
         }
 
-        maj_stat = gss_oid_to_str(&min_stat,
-                                  mechanism,
-                                  &oid_name);
+        maj_stat = gss_oid_to_str(&min_stat, mechanism, &oid_name);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("converting oid->string", maj_stat, min_stat);
             return -1;
         }
-        printf("Mechanism %.*s supports %d names\n",
-               (int) oid_name.length, (char *) oid_name.value,
-               (int) mech_names->count);
-        (void) gss_release_buffer(&min_stat, &oid_name);
+        printf("Mechanism %.*s supports %d names\n", (int)oid_name.length,
+               (char *)oid_name.value, (int)mech_names->count);
+        (void)gss_release_buffer(&min_stat, &oid_name);
 
-        for (i=0; i<mech_names->count; i++) {
-            maj_stat = gss_oid_to_str(&min_stat,
-                                      &mech_names->elements[i],
+        for (i = 0; i < mech_names->count; i++) {
+            maj_stat = gss_oid_to_str(&min_stat, &mech_names->elements[i],
                                       &oid_name);
             if (maj_stat != GSS_S_COMPLETE) {
                 display_status("converting oid->string", maj_stat, min_stat);
                 return -1;
             }
-            printf("  %d: %.*s\n", (int) i,
-                   (int) oid_name.length, (char *) oid_name.value);
+            printf("  %d: %.*s\n", (int)i, (int)oid_name.length,
+                   (char *)oid_name.value);
 
-            (void) gss_release_buffer(&min_stat, &oid_name);
+            (void)gss_release_buffer(&min_stat, &oid_name);
         }
-        (void) gss_release_oid_set(&min_stat, &mech_names);
+        (void)gss_release_oid_set(&min_stat, &mech_names);
     }
 
     if (use_file) {
         read_file(msg, &in_buf);
     } else {
-        /* Seal the message */
+        /* Seal the message. */
         in_buf.value = msg;
         in_buf.length = strlen(msg);
     }
 
     for (i = 0; i < mcount; i++) {
         if (wrap_flag) {
-            maj_stat = gss_wrap(&min_stat, context, encrypt_flag, GSS_C_QOP_DEFAULT,
-                                &in_buf, &state, &out_buf);
+            maj_stat = gss_wrap(&min_stat, context, encrypt_flag,
+                                GSS_C_QOP_DEFAULT, &in_buf, &state, &out_buf);
             if (maj_stat != GSS_S_COMPLETE) {
                 display_status("wrapping message", maj_stat, min_stat);
-                (void) closesocket(s);
-                (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
+                (void)closesocket(s);
+                (void)gss_delete_sec_context(&min_stat, &context,
+                                             GSS_C_NO_BUFFER);
                 return -1;
-            } else if (encrypt_flag && ! state) {
+            } else if (encrypt_flag && !state) {
                 fprintf(stderr, "Warning!  Message not encrypted.\n");
             }
-        }
-        else {
+        } else {
             out_buf = in_buf;
         }
 
-        /* Send to server */
-        if (send_token(s, (v1_format?0
-                           :(TOKEN_DATA |
-                             (wrap_flag ? TOKEN_WRAPPED : 0) |
-                             (encrypt_flag ? TOKEN_ENCRYPTED : 0) |
-                             (mic_flag ? TOKEN_SEND_MIC : 0))), &out_buf) < 0) {
-            (void) closesocket(s);
-            (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
+        /* Send to server. */
+        flags = 0;
+        if (!v1_format) {
+            flags = TOKEN_DATA | (wrap_flag ? TOKEN_WRAPPED : 0) |
+                (encrypt_flag ? TOKEN_ENCRYPTED : 0) |
+                (mic_flag ? TOKEN_SEND_MIC : 0);
+        }
+        if (send_token(s, flags, &out_buf) < 0) {
+            (void)closesocket(s);
+            (void)gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
             return -1;
         }
         if (out_buf.value != in_buf.value)
-            (void) gss_release_buffer(&min_stat, &out_buf);
+            (void)gss_release_buffer(&min_stat, &out_buf);
 
-        /* Read signature block into out_buf */
+        /* Read signature block into out_buf. */
         if (recv_token(s, &token_flags, &out_buf) < 0) {
-            (void) closesocket(s);
-            (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
+            (void)closesocket(s);
+            (void)gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
             return -1;
         }
 
         if (mic_flag) {
-            /* Verify signature block */
-            maj_stat = gss_verify_mic(&min_stat, context, &in_buf,
-                                      &out_buf, &qop_state);
+            /* Verify signature block. */
+            maj_stat = gss_verify_mic(&min_stat, context, &in_buf, &out_buf,
+                                      &qop_state);
             if (maj_stat != GSS_S_COMPLETE) {
                 display_status("verifying signature", maj_stat, min_stat);
-                (void) closesocket(s);
-                (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
+                (void)closesocket(s);
+                (void)gss_delete_sec_context(&min_stat, &context,
+                                             GSS_C_NO_BUFFER);
                 return -1;
             }
 
             if (verbose)
                 printf("Signature verified.\n");
-        }
-        else {
-            if (verbose)
-                printf("Response received.\n");
+        } else if (verbose) {
+            printf("Response received.\n");
         }
 
-        free (out_buf.value);
+        free(out_buf.value);
     }
 
     if (use_file)
         free(in_buf.value);
 
-    /* Send NOOP */
+    /* Send NOOP. */
     if (!v1_format)
-        (void) send_token(s, TOKEN_NOOP, empty_token);
+        (void)send_token(s, TOKEN_NOOP, empty_token);
 
     if (auth_flag) {
-        /* Delete context */
+        /* Delete context. */
         maj_stat = gss_delete_sec_context(&min_stat, &context, &out_buf);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("deleting context", maj_stat, min_stat);
-            (void) closesocket(s);
-            (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
+            (void)closesocket(s);
+            (void)gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
             return -1;
         }
 
-        (void) gss_release_buffer(&min_stat, &out_buf);
+        (void)gss_release_buffer(&min_stat, &out_buf);
     }
 
-    (void) closesocket(s);
+    (void)closesocket(s);
     return 0;
 }
 
-static void parse_oid(char *mechanism, gss_OID *oid)
+static void
+parse_oid(char *mechanism, gss_OID *oid)
 {
-    char        *mechstr = 0, *cp;
+    char *mechstr = 0, *cp;
     gss_buffer_desc tok;
     OM_uint32 maj_stat, min_stat;
 
-    if (isdigit((int) mechanism[0])) {
+    if (isdigit((int)mechanism[0])) {
         if (asprintf(&mechstr, "{ %s }", mechanism) < 0) {
             fprintf(stderr, "Couldn't allocate mechanism scratch!\n");
             return;
         }
-        for (cp = mechstr; *cp; cp++)
+        for (cp = mechstr; *cp; cp++) {
             if (*cp == '.')
                 *cp = ' ';
+        }
         tok.value = mechstr;
-    } else
+    } else {
         tok.value = mechanism;
+    }
     tok.length = strlen(tok.value);
     maj_stat = gss_str_to_oid(&min_stat, &tok, oid);
     if (maj_stat != GSS_S_COMPLETE) {
@@ -636,36 +606,35 @@ static HANDLE hMutex = NULL;
 static HANDLE hEvent = NULL;
 
 void
-InitHandles(void)
+init_handles(void)
 {
     hMutex = CreateMutex(NULL, FALSE, NULL);
     hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 void
-CleanupHandles(void)
+cleanup_handles(void)
 {
     CloseHandle(hMutex);
     CloseHandle(hEvent);
 }
 
 BOOL
-WaitAndIncrementThreadCounter(void)
+wait_and_increment_thread_counter(void)
 {
     for (;;) {
         if (WaitForSingleObject(hMutex, INFINITE) == WAIT_OBJECT_0) {
-            if ( thread_count < max_threads ) {
+            if (thread_count < max_threads) {
                 thread_count++;
                 ReleaseMutex(hMutex);
                 return TRUE;
             } else {
                 ReleaseMutex(hMutex);
 
-                if (WaitForSingleObject(hEvent, INFINITE) == WAIT_OBJECT_0) {
+                if (WaitForSingleObject(hEvent, INFINITE) == WAIT_OBJECT_0)
                     continue;
-                } else {
+                else
                     return FALSE;
-                }
             }
         } else {
             return FALSE;
@@ -674,7 +643,7 @@ WaitAndIncrementThreadCounter(void)
 }
 
 BOOL
-DecrementAndSignalThreadCounter(void)
+decrement_and_signal_thread_counter(void)
 {
     if (WaitForSingleObject(hMutex, INFINITE) == WAIT_OBJECT_0) {
         if (thread_count == max_threads)
@@ -686,15 +655,18 @@ DecrementAndSignalThreadCounter(void)
         return FALSE;
     }
 }
+
 #else /* assume pthread */
+
 static pthread_mutex_t counter_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t counter_cond = PTHREAD_COND_INITIALIZER;
 int counter = 0;
 
 static int
-WaitAndIncrementThreadCounter(void)
+wait_and_increment_thread_counter(void)
 {
     int err;
+
     err = pthread_mutex_lock(&counter_mutex);
     if (err) {
         perror("pthread_mutex_lock");
@@ -712,10 +684,12 @@ WaitAndIncrementThreadCounter(void)
     pthread_mutex_unlock(&counter_mutex);
     return 1;
 }
+
 static void
-DecrementAndSignalThreadCounter(void)
+decrement_and_signal_thread_counter(void)
 {
     int err;
+
     sleep(1);
     err = pthread_mutex_lock(&counter_mutex);
     if (err) {
@@ -727,6 +701,7 @@ DecrementAndSignalThreadCounter(void)
     counter--;
     pthread_mutex_unlock(&counter_mutex);
 }
+
 #endif
 
 static char *service_name, *server_host, *msg;
@@ -739,23 +714,25 @@ static gss_OID oid = GSS_C_NULL_OID;
 static int mcount = 1, ccount = 1;
 static int auth_flag, wrap_flag, encrypt_flag, mic_flag, v1_format;
 
-static void worker_bee(void * unused)
+static void *
+worker_bee(void *unused)
 {
     printf("worker bee!\n");
     if (call_server(server_host, port, oid, service_name,
                     gss_flags, auth_flag, wrap_flag, encrypt_flag, mic_flag,
-                    v1_format, msg, use_file, mcount) < 0)
-        if ( max_threads == 1 )
+                    v1_format, msg, use_file, mcount) < 0) {
+        if (max_threads == 1)
             exit(6);
+    }
 
-    if ( max_threads > 1 )
-        DecrementAndSignalThreadCounter();
+    if (max_threads > 1)
+        decrement_and_signal_thread_counter();
     free(unused);
+    return NULL;
 }
 
-int main(argc, argv)
-    int argc;
-    char **argv;
+int
+main(int argc, char **argv)
 {
     int i;
 
@@ -764,25 +741,28 @@ int main(argc, argv)
     v1_format = 0;
 
     /* Parse arguments. */
-    argc--; argv++;
+    argc--;
+    argv++;
     while (argc) {
         if (strcmp(*argv, "-port") == 0) {
-            argc--; argv++;
-            if (!argc) usage();
+            argc--;
+            argv++;
+            if (!argc)
+                usage();
             port = atoi(*argv);
         } else if (strcmp(*argv, "-mech") == 0) {
-            argc--; argv++;
-            if (!argc) usage();
+            argc--;
+            argv++;
+            if (!argc)
+                usage();
             mechanism = *argv;
-        }
-#if defined(_WIN32) || 1
-        else if (strcmp(*argv, "-threads") == 0) {
-            argc--; argv++;
-            if (!argc) usage();
+        } else if (strcmp(*argv, "-threads") == 0) {
+            argc--;
+            argv++;
+            if (!argc)
+                usage();
             max_threads = atoi(*argv);
-        }
-#endif
-        else if (strcmp(*argv, "-d") == 0) {
+        } else if (strcmp(*argv, "-d") == 0) {
             gss_flags |= GSS_C_DELEG_FLAG;
         } else if (strcmp(*argv, "-seq") == 0) {
             gss_flags |= GSS_C_SEQUENCE_FLAG;
@@ -795,15 +775,21 @@ int main(argc, argv)
         } else if (strcmp(*argv, "-q") == 0) {
             verbose = 0;
         } else if (strcmp(*argv, "-ccount") == 0) {
-            argc--; argv++;
-            if (!argc) usage();
+            argc--;
+            argv++;
+            if (!argc)
+                usage();
             ccount = atoi(*argv);
-            if (ccount <= 0) usage();
+            if (ccount <= 0)
+                usage();
         } else if (strcmp(*argv, "-mcount") == 0) {
-            argc--; argv++;
-            if (!argc) usage();
+            argc--;
+            argv++;
+            if (!argc)
+                usage();
             mcount = atoi(*argv);
-            if (mcount < 0) usage();
+            if (mcount < 0)
+                usage();
         } else if (strcmp(*argv, "-na") == 0) {
             auth_flag = wrap_flag = encrypt_flag = mic_flag = 0;
         } else if (strcmp(*argv, "-nw") == 0) {
@@ -814,9 +800,11 @@ int main(argc, argv)
             mic_flag = 0;
         } else  if (strcmp(*argv, "-v1") == 0) {
             v1_format = 1;
-        } else
+        } else {
             break;
-        argc--; argv++;
+        }
+        argc--;
+        argv++;
     }
     if (argc != 3)
         usage();
@@ -827,8 +815,8 @@ int main(argc, argv)
         max_threads = 1;
     }
 
-    InitHandles();
-    SetEnvironmentVariable("KERBEROSLOGIN_NEVER_PROMPT","1");
+    init_handles();
+    SetEnvironmentVariable("KERBEROSLOGIN_NEVER_PROMPT", "1");
 #endif
 
     server_host = *argv++;
@@ -838,31 +826,28 @@ int main(argc, argv)
     if (mechanism)
         parse_oid(mechanism, &oid);
 
-    if (get_server_info(server_host, port) < 0) {
+    if (get_server_info(server_host, port) < 0)
         exit(1);
-    }
 
-    if ( max_threads == 1 ) {
-        for (i = 0; i < ccount; i++) {
+    if (max_threads == 1) {
+        for (i = 0; i < ccount; i++)
             worker_bee(0);
-        }
     } else {
         for (i = 0; i < ccount; i++) {
-            if ( WaitAndIncrementThreadCounter() ) {
+            if (wait_and_increment_thread_counter()) {
 #ifdef _WIN32
-                uintptr_t handle = _beginthread(worker_bee, 0, (void *)0);
-                if (handle == (uintptr_t)-1) {
+                uintptr_t handle = _beginthread(worker_bee, 0, (void *)NULL);
+                if (handle == (uintptr_t)-1)
                     exit(7);
-                }
 #else
                 int err;
                 pthread_t thr;
-                err = pthread_create(&thr, 0, (void *(*)(void *))worker_bee, malloc(12));
+                err = pthread_create(&thr, 0, worker_bee, malloc(12));
                 if (err) {
                     perror("pthread_create");
                     exit(7);
                 }
-                (void) pthread_detach(thr);
+                (void)pthread_detach(thr);
 #endif
             } else {
                 exit(8);
@@ -871,10 +856,10 @@ int main(argc, argv)
     }
 
     if (oid != GSS_C_NULL_OID)
-        (void) gss_release_oid(&min_stat, &oid);
+        (void)gss_release_oid(&min_stat, &oid);
 
 #ifdef _WIN32
-    CleanupHandles();
+    cleanup_handles();
 #else
     if (max_threads > 1)
         sleep(10);
