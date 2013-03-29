@@ -697,7 +697,7 @@ main (argc, argv)
     }
 
     if(set_env_var( "HOME", target_pwd->pw_dir)){
-        fprintf(stderr, _("ksu: couldn't set environment variable USER\n"));
+        fprintf(stderr, _("ksu: couldn't set environment variable HOME\n"));
         sweep_up(ksu_context, cc_target);
         exit(1);
     }
