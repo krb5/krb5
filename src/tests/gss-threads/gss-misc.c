@@ -174,7 +174,7 @@ send_token(int s, int flags, gss_buffer_t tok)
     if (tok->length > 0xffffffffUL)
         abort();
     store_32_be(tok->length, lenbuf);
-    ret = write_all(s, lenbuf, 4);
+    ret = write_all(s, (char *)lenbuf, 4);
     if (ret < 0) {
         perror("sending token length");
         return -1;
@@ -190,7 +190,7 @@ send_token(int s, int flags, gss_buffer_t tok)
     if (ret < 0) {
         perror("sending token data");
         return -1;
-    } else if (ret != tok->length) {
+    } else if ((size_t)ret != tok->length) {
         if (display_file) {
             fprintf(display_file,
                     "sending token data: %d of %d bytes written\n",
@@ -246,7 +246,7 @@ recv_token(int s, int *flags, gss_buffer_t tok)
 
     if (char_flags == 0) {
         lenbuf[0] = 0;
-        ret = read_all(s, &lenbuf[1], 3);
+        ret = read_all(s, (char *)&lenbuf[1], 3);
         if (ret < 0) {
             perror("reading token length");
             return -1;
@@ -258,7 +258,7 @@ recv_token(int s, int *flags, gss_buffer_t tok)
             return -1;
         }
     } else {
-        ret = read_all(s, lenbuf, 4);
+        ret = read_all(s, (char *)lenbuf, 4);
         if (ret < 0) {
             perror("reading token length");
             return -1;
@@ -271,8 +271,7 @@ recv_token(int s, int *flags, gss_buffer_t tok)
         }
     }
 
-    tok->length = ((lenbuf[0] << 24) | (lenbuf[1] << 16) | (lenbuf[2] << 8) |
-                   lenbuf[3]);
+    tok->length = load_32_be(lenbuf);
     tok->value = malloc(tok->length ? tok->length : 1);
     if (tok->length && tok->value == NULL) {
         if (display_file)
@@ -285,7 +284,7 @@ recv_token(int s, int *flags, gss_buffer_t tok)
         perror("reading token data");
         free(tok->value);
         return -1;
-    } else if (ret != tok->length) {
+    } else if ((size_t)ret != tok->length) {
         fprintf(stderr, "sending token data: %d of %d bytes written\n",
                 ret, (int)tok->length);
         free(tok->value);
@@ -298,14 +297,14 @@ recv_token(int s, int *flags, gss_buffer_t tok)
 static void
 display_status_1(char *m, OM_uint32 code, int type)
 {
-    OM_uint32 maj_stat, min_stat;
+    OM_uint32 min_stat;
     gss_buffer_desc msg;
     OM_uint32 msg_ctx;
 
     msg_ctx = 0;
     while (1) {
-        maj_stat = gss_display_status(&min_stat, code, type, GSS_C_NULL_OID,
-                                      &msg_ctx, &msg);
+        (void)gss_display_status(&min_stat, code, type, GSS_C_NULL_OID,
+                                 &msg_ctx, &msg);
         if (display_file) {
             fprintf(display_file, "GSS-API error %s: %s\n", m,
                     (char *)msg.value);

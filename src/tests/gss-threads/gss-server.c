@@ -414,8 +414,8 @@ sign_server(int s, gss_cred_id_t server_creds, int export)
 {
     gss_buffer_desc client_name, xmit_buf, msg_buf;
     gss_ctx_id_t context;
-    OM_uint32 maj_stat, min_stat;
-    int i, conf_state, ret_flags, token_flags;
+    OM_uint32 maj_stat, min_stat, ret_flags;
+    int i, conf_state, token_flags;
     char *cp;
 
     /* Establish a context with the client */
@@ -497,8 +497,8 @@ sign_server(int s, gss_cred_id_t server_creds, int export)
         if (logfile) {
             fprintf(logfile, "Received message: ");
             cp = msg_buf.value;
-            if ((isprint((int)cp[0]) || isspace((int)cp[0])) &&
-                (isprint((int)cp[1]) || isspace((int)cp[1]))) {
+            if (isprint((unsigned char)cp[0]) &&
+                isprint((unsigned char)cp[1])) {
                 fprintf(logfile, "\"%.*s\"\n", (int)msg_buf.length,
                         (char *)msg_buf.value);
             } else {

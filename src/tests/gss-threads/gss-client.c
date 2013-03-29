@@ -337,7 +337,7 @@ read_file(char *file_name, gss_buffer_t in_buf)
         perror("read");
         exit(5);
     }
-    if (count < in_buf->length) {
+    if ((size_t)count < in_buf->length) {
         fprintf(stderr, "Warning, only read in %d bytes, expected %d\n",
                 count, (int)in_buf->length);
     }
@@ -377,7 +377,7 @@ static int
 call_server(char *host, u_short port, gss_OID oid, char *service_name,
             OM_uint32 gss_flags, int auth_flag, int wrap_flag,
             int encrypt_flag, int mic_flag, int v1_format, char *msg,
-            int use_file, int mcount)
+            int use_file, size_t mcount)
 {
     gss_ctx_id_t context;
     gss_buffer_desc in_buf, out_buf, sname, tname, oid_name;
@@ -575,7 +575,7 @@ parse_oid(char *mechanism, gss_OID *oid)
     gss_buffer_desc tok;
     OM_uint32 maj_stat, min_stat;
 
-    if (isdigit((int)mechanism[0])) {
+    if (isdigit((unsigned char)mechanism[0])) {
         if (asprintf(&mechstr, "{ %s }", mechanism) < 0) {
             fprintf(stderr, "Couldn't allocate mechanism scratch!\n");
             return;
