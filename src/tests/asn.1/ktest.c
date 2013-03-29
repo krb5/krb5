@@ -843,7 +843,7 @@ ktest_make_sample_auth_pack(krb5_auth_pack *p)
     ktest_make_sample_algorithm_identifier_no_params(p->supportedCMSTypes[1]);
     p->supportedCMSTypes[2] = NULL;
     ktest_make_sample_data(&p->clientDHNonce);
-    p->supportedKDFs = ealloc(2 * sizeof(krb5_data ));
+    p->supportedKDFs = ealloc(2 * sizeof(krb5_data *));
     p->supportedKDFs[0] = ealloc(sizeof(krb5_data));
     ktest_make_sample_data(p->supportedKDFs[0]);
     p->supportedKDFs[1] = NULL;
