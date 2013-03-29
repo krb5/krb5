@@ -53,7 +53,7 @@ mk_xorkey(krb5_key origkey, krb5_key *xorkey)
     xorkeyblock.contents = xorbytes;
 
     retval = krb5_k_create_key(0, &xorkeyblock, xorkey);
-    zapfree(xorbytes, sizeof(xorbytes));
+    zapfree(xorbytes, origkey->keyblock.length);
     return retval;
 }
 
