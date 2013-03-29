@@ -61,8 +61,7 @@ static krb5_error_code pkinit_encode_dh_params
 (BIGNUM *, BIGNUM *, BIGNUM *, unsigned char **, unsigned int *);
 static DH *pkinit_decode_dh_params
 (DH **, unsigned char **, unsigned int );
-static int pkinit_check_dh_params
-(BIGNUM * p1, BIGNUM * p2, BIGNUM * g1, BIGNUM * q1);
+static int pkinit_check_dh_params(DH *dh1, DH *dh2);
 
 static krb5_error_code pkinit_sign_data
 (krb5_context context, pkinit_identity_crypto_context cryptoctx,
@@ -2749,6 +2748,36 @@ cleanup:
     return retval;
 }
 
+/* Return 1 if dh is a permitted well-known group, otherwise return 0. */
+static int
+check_dh_wellknown(pkinit_plg_crypto_context cryptoctx, DH *dh, int nbits)
+{
+
+    switch (nbits) {
+    case 1024:
+        /* Oakley MODP group 2 */
+        if (pkinit_check_dh_params(cryptoctx->dh_1024, dh) == 0)
+            return 1;
+        break;
+
+    case 2048:
+        /* Oakley MODP group 14 */
+        if (pkinit_check_dh_params(cryptoctx->dh_2048, dh) == 0)
+            return 1;
+        break;
+
+    case 4096:
+        /* Oakley MODP group 16 */
+        if (pkinit_check_dh_params(cryptoctx->dh_4096, dh) == 0)
+            return 1;
+        break;
+
+    default:
+        break;
+    }
+    return 0;
+}
+
 krb5_error_code
 server_check_dh(krb5_context context,
                 pkinit_plg_crypto_context cryptoctx,
@@ -2778,26 +2807,8 @@ server_check_dh(krb5_context context,
         goto cleanup;
     }
 
-    /* check dhparams is group 2 */
-    if (pkinit_check_dh_params(cryptoctx->dh_1024->p,
-                               dh->p, dh->g, dh->q) == 0) {
+    if (check_dh_wellknown(cryptoctx, dh, dh_prime_bits))
         retval = 0;
-        goto cleanup;
-    }
-
-    /* check dhparams is group 14 */
-    if (pkinit_check_dh_params(cryptoctx->dh_2048->p,
-                               dh->p, dh->g, dh->q) == 0) {
-        retval = 0;
-        goto cleanup;
-    }
-
-    /* check dhparams is group 16 */
-    if (pkinit_check_dh_params(cryptoctx->dh_4096->p,
-                               dh->p, dh->g, dh->q) == 0) {
-        retval = 0;
-        goto cleanup;
-    }
 
 cleanup:
     if (retval == 0)
@@ -3310,31 +3321,21 @@ pkinit_check_kdc_pkid(krb5_context context,
     return 0;
 }
 
+/* Check parameters against a well-known DH group. */
 static int
-pkinit_check_dh_params(BIGNUM * p1, BIGNUM * p2, BIGNUM * g1, BIGNUM * q1)
+pkinit_check_dh_params(DH *dh1, DH *dh2)
 {
-    BIGNUM *g2 = NULL, *q2 = NULL;
-    int retval = -1;
 
-    if (!BN_cmp(p1, p2)) {
-        g2 = BN_new();
-        BN_set_word(g2, DH_GENERATOR_2);
-        if (!BN_cmp(g1, g2)) {
-            q2 = BN_new();
-            BN_rshift1(q2, p1);
-            if (q1 == NULL || !BN_cmp(q1, q2)) {
-                pkiDebug("good %d dhparams\n", BN_num_bits(p1));
-                retval = 0;
-            } else
-                pkiDebug("bad group 2 q dhparameter\n");
-            BN_free(q2);
-        } else
-            pkiDebug("bad g dhparameter\n");
-        BN_free(g2);
-    } else
-        pkiDebug("p is not well-known group 2 dhparameter\n");
-
-    return retval;
+    if (BN_cmp(dh1->p, dh2->p) != 0) {
+        pkiDebug("p is not well-known group dhparameter\n");
+        return -1;
+    }
+    if (BN_cmp(dh1->g, dh2->g) != 0) {
+        pkiDebug("bad g dhparameter\n");
+        return -1;
+    }
+    pkiDebug("good %d dhparams\n", BN_num_bits(dh1->p));
+    return 0;
 }
 
 krb5_error_code
@@ -3365,30 +3366,9 @@ pkinit_process_td_dh_params(krb5_context context,
         dh_prime_bits = BN_num_bits(dh->p);
         pkiDebug("client sent %d DH bits server prefers %d DH bits\n",
                  *new_dh_size, dh_prime_bits);
-        switch(dh_prime_bits) {
-        case 1024:
-            if (pkinit_check_dh_params(cryptoctx->dh_1024->p, dh->p,
-                                       dh->g, dh->q) == 0) {
-                *new_dh_size = 1024;
-                ok = 1;
-            }
-            break;
-        case 2048:
-            if (pkinit_check_dh_params(cryptoctx->dh_2048->p, dh->p,
-                                       dh->g, dh->q) == 0) {
-                *new_dh_size = 2048;
-                ok = 1;
-            }
-            break;
-        case 4096:
-            if (pkinit_check_dh_params(cryptoctx->dh_4096->p, dh->p,
-                                       dh->g, dh->q) == 0) {
-                *new_dh_size = 4096;
-                ok = 1;
-            }
-            break;
-        default:
-            break;
+        ok = check_dh_wellknown(cryptoctx, dh, dh_prime_bits);
+        if (ok) {
+            *new_dh_size = dh_prime_bits;
         }
         if (!ok) {
             DH_check(dh, &retval);
