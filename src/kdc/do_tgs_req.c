@@ -1141,7 +1141,8 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
             retval = ENOMEM;
             goto cleanup;
         }
-        strlcpy(comp1_str,comp1->data,comp1->length+1);
+        if (comp1->data != NULL)
+            memcpy(comp1_str, comp1->data, comp1->length);
 
         if ((krb5_princ_type(kdc_context, request->server) == KRB5_NT_SRV_HST ||
              krb5_princ_type(kdc_context, request->server) == KRB5_NT_SRV_INST ||
@@ -1164,7 +1165,8 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
                 retval = ENOMEM;
                 goto cleanup;
             }
-            strlcpy(temp_buf, comp2->data,comp2->length+1);
+            if (comp2->data != NULL)
+                memcpy(temp_buf, comp2->data, comp2->length);
             retval = krb5int_get_domain_realm_mapping(kdc_context, temp_buf, &realms);
             free(temp_buf);
             if (retval) {
