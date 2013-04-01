@@ -85,10 +85,8 @@ service_cs = 'service/cs@%s' % realm.realm
 realm.addprinc(service_cs)
 realm.extract_keytab(service_cs, servicekeytab)
 realm.kinit(service_cs, None, ['-k', '-t', servicekeytab])
-output = realm.run(['./t_credstore', service_cs, '--cred_store',
-                    'ccache', storagecache, 'keytab', servicekeytab])
-if 'Cred Store Success' not in output:
-    fail('Expected test to succeed')
+realm.run(['./t_credstore', '-s', 'p:' + service_cs, 'ccache', storagecache,
+           'keytab', servicekeytab])
 
 # Verify that we can't acquire acceptor creds without a keytab.
 os.remove(realm.keytab)

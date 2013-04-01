@@ -33,7 +33,7 @@ static void
 usage(void)
 {
     fprintf(stderr,
-            "Usage: t_credstore principal [--cred_store {key value} ...]\n");
+            "Usage: t_credstore [-sabi] principal [{key value} ...]\n");
     exit(1);
 }
 
@@ -42,63 +42,66 @@ main(int argc, char *argv[])
 {
     OM_uint32 minor, major;
     gss_key_value_set_desc store;
-    gss_buffer_desc buf;
-    gss_name_t service = GSS_C_NO_NAME;
+    gss_name_t name;
+    gss_cred_usage_t cred_usage = GSS_C_BOTH;
+    gss_OID_set mechs = GSS_C_NO_OID_SET;
     gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
-    int i, e;
+    krb5_boolean store_creds = FALSE;
+    char opt;
 
-    if (argc < 2 || ((argc - 3) % 2))
-        usage();
-
-    store.count = (argc - 3) / 2;
-    store.elements = calloc(store.count,
-                            sizeof(struct gss_key_value_element_struct));
-    if (!store.elements) {
-        fprintf(stderr, "OOM\n");
-        exit(1);
-    }
-
-    if (argc > 2) {
-        if (strcmp(argv[2], "--cred_store") != 0)
+    /* Parse options. */
+    for (argv++; *argv != NULL && **argv == '-'; argv++) {
+        opt = (*argv)[1];
+        if (opt == 's')
+            store_creds = TRUE;
+        else if (opt == 'a')
+            cred_usage = GSS_C_ACCEPT;
+        else if (opt == 'b')
+            cred_usage = GSS_C_BOTH;
+        else if (opt == 'i')
+            cred_usage = GSS_C_INITIATE;
+        else
             usage();
-
-        for (i = 3, e = 0; i < argc; i += 2, e++) {
-            store.elements[e].key = argv[i];
-            store.elements[e].value = argv[i + 1];
-            continue;
-        }
     }
 
-    /* First acquire default creds and try to store them in the cred store. */
+    /* Get the principal name. */
+    if (*argv == NULL)
+        usage();
+    name = import_name(*argv++);
 
-    major = gss_acquire_cred(&minor, GSS_C_NO_NAME, 0, GSS_C_NO_OID_SET,
-                             GSS_C_INITIATE, &cred, NULL, NULL);
-    check_gsserr("gss_acquire_cred", major, minor);
+    /* Put any remaining arguments into the store. */
+    store.elements = calloc(argc, sizeof(struct gss_key_value_element_struct));
+    if (!store.elements)
+        errout("OOM");
+    store.count = 0;
+    while (*argv != NULL) {
+        if ((*argv + 1) == NULL)
+            usage();
+        store.elements[store.count].key = *argv;
+        store.elements[store.count].value = *(argv + 1);
+        store.count++;
+        argv += 2;
+    }
 
-    major = gss_store_cred_into(&minor, cred, GSS_C_INITIATE,
-                                GSS_C_NO_OID, 1, 0, &store, NULL, NULL);
-    check_gsserr("gss_store_cred_into", major, minor);
+    if (store_creds) {
+        /* Acquire default creds and try to store them in the cred store. */
+        major = gss_acquire_cred(&minor, GSS_C_NO_NAME, 0, GSS_C_NO_OID_SET,
+                                 GSS_C_INITIATE, &cred, NULL, NULL);
+        check_gsserr("gss_acquire_cred", major, minor);
 
-    gss_release_cred(&minor, &cred);
+        major = gss_store_cred_into(&minor, cred, GSS_C_INITIATE,
+                                    GSS_C_NO_OID, 1, 0, &store, NULL, NULL);
+        check_gsserr("gss_store_cred_into", major, minor);
 
-    /* Then try to acquire creds from store. */
+        gss_release_cred(&minor, &cred);
+    }
 
-    buf.value = argv[1];
-    buf.length = strlen(argv[1]);
-
-    major = gss_import_name(&minor, &buf,
-                            (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME,
-                            &service);
-    check_gsserr("gss_import_name", major, minor);
-
-    major = gss_acquire_cred_from(&minor, service,
-                                  0, GSS_C_NO_OID_SET, GSS_C_BOTH,
+    /* Try to acquire creds from store. */
+    major = gss_acquire_cred_from(&minor, name, 0, mechs, cred_usage,
                                   &store, &cred, NULL, NULL);
     check_gsserr("gss_acquire_cred_from", major, minor);
 
-    fprintf(stdout, "Cred Store Success\n");
-
-    gss_release_name(&minor, &service);
+    gss_release_name(&minor, &name);
     gss_release_cred(&minor, &cred);
     free(store.elements);
     return 0;

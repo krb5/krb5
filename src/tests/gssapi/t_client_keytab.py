@@ -87,13 +87,21 @@ if int(out) < 1000:
     fail('Credentials apparently not refreshed')
 realm.run([kdestroy])
 
+# Test 11: gss_import_cred_from with client_keytab value
+store_keytab = os.path.join(realm.testdir, 'store_keytab')
+os.rename(realm.client_keytab, store_keytab)
+realm.run(['./t_credstore', '-i', 'p:' + realm.user_princ, 'client_keytab',
+           store_keytab])
+realm.klist(realm.user_princ)
+os.rename(store_keytab, realm.client_keytab)
+
 # Use a cache collection for the remaining tests.
 ccdir = os.path.join(realm.testdir, 'cc')
 ccname = 'DIR:' + ccdir
 os.mkdir(ccdir)
 realm.env['KRB5CCNAME'] = ccname
 
-# Test 11: name specified, matching cache in collection with no creds
+# Test 12: name specified, matching cache in collection with no creds
 bobcache = os.path.join(ccdir, 'tktbob')
 realm.run(['./ccinit', bobcache, bob])
 out = realm.run(['./t_ccselect', phost, pbob])
@@ -101,7 +109,7 @@ if bob not in out:
     fail('Authenticated as wrong principal')
 # Leave tickets for next test.
 
-# Test 12: name specified, matching cache in collection, time to refresh
+# Test 13: name specified, matching cache in collection, time to refresh
 realm.run(['./ccrefresh', bobcache, '1'])
 out = realm.run(['./t_ccselect', phost, pbob])
 if bob not in out:
@@ -111,7 +119,7 @@ if int(out) < 1000:
     fail('Credentials apparently not refreshed')
 realm.run([kdestroy, '-A'])
 
-# Test 13: name specified, collection has default for different principal
+# Test 14: name specified, collection has default for different principal
 realm.kinit(realm.user_princ, password('user'))
 out = realm.run(['./t_ccselect', phost, pbob])
 if bob not in out:
@@ -121,7 +129,7 @@ if 'Default principal: %s\n' % realm.user_princ not in out:
     fail('Default cache overwritten by acquire_cred')
 realm.run([kdestroy, '-A'])
 
-# Test 14: name specified, collection has no default cache
+# Test 15: name specified, collection has no default cache
 out = realm.run(['./t_ccselect', phost, pbob])
 if bob not in out:
     fail('Authenticated as wrong principal')
