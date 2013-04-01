@@ -69,6 +69,7 @@ Frequently used public interfaces
    krb5_kt_client_default.rst
    krb5_kt_default.rst
    krb5_kt_default_name.rst
+   krb5_kt_dup.rst
    krb5_kt_get_name.rst
    krb5_kt_get_type.rst
    krb5_kt_resolve.rst

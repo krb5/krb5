@@ -218,6 +218,16 @@ cleanup:
     return err;
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_kt_dup(krb5_context context, krb5_keytab in, krb5_keytab *out)
+{
+    krb5_error_code err;
+    char name[BUFSIZ];
+
+    err = in->ops->get_name(context, in, name, sizeof(name));
+    return err ? err : krb5_kt_resolve(context, name, out);
+}
+
 /*
  * Routines to deal with externalizingt krb5_keytab.
  *      keytab_size();

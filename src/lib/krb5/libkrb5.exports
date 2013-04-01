@@ -411,6 +411,7 @@ krb5_kt_close
 krb5_kt_default
 krb5_kt_default_name
 krb5_kt_dfl_ops
+krb5_kt_dup
 krb5_kt_end_seq_get
 krb5_kt_free_entry
 krb5_kt_get_entry

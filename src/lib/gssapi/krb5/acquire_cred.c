@@ -194,15 +194,7 @@ acquire_accept_cred(krb5_context context,
     assert(cred->keytab == NULL);
 
     if (req_keytab != NULL) {
-        char ktname[BUFSIZ];
-
-        /* Duplicate keytab handle */
-        code = krb5_kt_get_name(context, req_keytab, ktname, sizeof(ktname));
-        if (code) {
-            *minor_status = code;
-            return GSS_S_CRED_UNAVAIL;
-        }
-        code = krb5_kt_resolve(context, ktname, &kt);
+        code = krb5_kt_dup(context, req_keytab, &kt);
     } else {
         code = k5_mutex_lock(&gssint_krb5_keytab_lock);
         if (code) {
@@ -660,23 +652,12 @@ acquire_init_cred(krb5_context context,
             goto error;
     }
 
-    if (client_keytab != NULL) {
-        char ktname[BUFSIZ];
-
-        /* Duplicate keytab handle */
-        code = krb5_kt_get_name(context, client_keytab, ktname,
-                                sizeof(ktname));
-        if (code)
-            goto error;
-
-        code = krb5_kt_resolve(context, ktname, &cred->client_keytab);
-        if (code)
-            goto error;
-    } else {
+    if (client_keytab != NULL)
+        code = krb5_kt_dup(context, client_keytab, &cred->client_keytab);
+    else
         code = krb5_kt_client_default(context, &cred->client_keytab);
-        if (code)
-            goto error;
-    }
+    if (code)
+        goto error;
 
     if (password != GSS_C_NO_BUFFER) {
         pwdata = make_data(password->value, password->length);

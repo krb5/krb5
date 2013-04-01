@@ -446,3 +446,4 @@ EXPORTS
 
 ; new in 1.12
 	krb5_free_enctypes				@419
+	krb5_kt_dup					@420

@@ -4188,6 +4188,21 @@ krb5_error_code KRB5_CALLCONV
 krb5_kt_resolve(krb5_context context, const char *name, krb5_keytab *ktid);
 
 /**
+ * Duplicate keytab handle.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  in              Key table handle to be duplicated
+ * @param [out] out             Key table handle
+ *
+ * Create a new handle referring to the same key table as @a in.  The new
+ * handle and @a in can be closed independently.
+ *
+ * @version New in 1.12
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_kt_dup(krb5_context context, krb5_keytab in, krb5_keytab *out);
+
+/**
  * Get the default key table name.
  *
  * @param [in]     context      Library context
