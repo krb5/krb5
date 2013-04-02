@@ -75,7 +75,7 @@ main(int argc, char *argv[])
         errout("OOM");
     store.count = 0;
     while (*argv != NULL) {
-        if ((*argv + 1) == NULL)
+        if (*(argv + 1) == NULL)
             usage();
         store.elements[store.count].key = *argv;
         store.elements[store.count].value = *(argv + 1);
