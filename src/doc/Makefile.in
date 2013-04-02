@@ -128,4 +128,5 @@ $(docsrc)/version.py: $(top_srcdir)/patchlevel.h $(srcdir)/version.py.in
 clean::
 	rm -rf doxy rst_apiref rst_composite rst_notice html_subst \
 		Doxyfile paths.py $(docsrc)/version.py notice.txt \
-		$(docsrc)/html/.doctrees $(docsrc)/pdf/.doctrees
+		$(docsrc)/html/.doctrees $(docsrc)/pdf/.doctrees \
+		$(docsrc)/tools/*.pyc
