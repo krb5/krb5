@@ -286,6 +286,7 @@ man_pages = [
     ('user/user_commands/kpasswd', 'kpasswd', u'change a user\'s Kerberos password', [u'MIT'], 1),
     ('user/user_commands/kvno', 'kvno', u'print key version numbers of Kerberos principals', [u'MIT'], 1),
     ('user/user_commands/ksu', 'ksu', u'Kerberized super-user', [u'MIT'], 1),
+    ('user/user_commands/krb5-config', 'krb5-config', u'tool for linking against MIT Kerberos libraries', [u'MIT'], 1),
     ('user/user_config/k5login', 'k5login', u'Kerberos V5 acl file for host access', [u'MIT'], 5),
     ('user/user_config/k5identity', 'k5identity', u'Kerberos V5 client principal selection rules', [u'MIT'], 5),
     ('admin/admin_commands/krb5kdc', 'krb5kdc', u'Kerberos V5 KDC', [u'MIT'], 8),

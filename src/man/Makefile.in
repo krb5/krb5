@@ -13,8 +13,8 @@ DEFCKTNAME=@DEFCKTNAME@
 MANSUBS=k5identity.sub k5login.sub k5srvutil.sub kadm5.acl.sub kadmin.sub \
 	kadmind.sub kdb5_ldap_util.sub kdb5_util.sub kdc.conf.sub \
 	kdestroy.sub kinit.sub klist.sub kpasswd.sub kprop.sub kpropd.sub \
-	kproplog.sub krb5.conf.sub krb5kdc.sub ksu.sub kswitch.sub \
-	ktutil.sub kvno.sub sclient.sub sserver.sub
+	kproplog.sub krb5.conf.sub krb5-config.sub krb5kdc.sub ksu.sub \
+	kswitch.sub ktutil.sub kvno.sub sclient.sub sserver.sub
 
 docsrc=$(top_srcdir)/../doc
 
