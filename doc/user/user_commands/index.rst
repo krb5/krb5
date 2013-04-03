@@ -10,6 +10,7 @@ User commands
    kinit.rst
    klist.rst
    kpasswd.rst
+   krb5-config.rst
    ksu.rst
    kswitch.rst
    kvno.rst
