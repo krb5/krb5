@@ -238,6 +238,8 @@ get_plugin_vtables(krb5_context context,
     /* Auto-register encrypted challenge and (if possible) pkinit. */
     k5_plugin_register_dyn(context, PLUGIN_INTERFACE_KDCPREAUTH, "pkinit",
                            "preauth");
+    k5_plugin_register_dyn(context, PLUGIN_INTERFACE_KDCPREAUTH, "otp",
+                           "preauth");
     k5_plugin_register(context, PLUGIN_INTERFACE_KDCPREAUTH,
                        "encrypted_challenge",
                        kdcpreauth_encrypted_challenge_initvt);

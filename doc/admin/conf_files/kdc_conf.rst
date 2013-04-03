@@ -491,6 +491,72 @@ administrative server will be appended to the file
         admin_server = DEVICE=/dev/tty04
 
 
+.. _otp:
+
+[otp]
+~~~~~
+
+Each subsection of [otp] is the name of an OTP token type.  The tags
+within the subsection define the configuration required to forward a
+One Time Password request to a RADIUS server.
+
+For each token type, the following tags may be specified:
+
+**server**
+    This is the server to send the RADIUS request to.  It can be a
+    hostname with optional port, an ip address with optional port, or
+    a Unix domain socket address.  The default is
+    |kdcdir|\ ``/<name>.socket``.
+
+**secret**
+    This tag indicates a filename (which may be relative to |kdcdir|)
+    containing the secret used to encrypt the RADIUS packets.  The
+    secret should appear in the first line of the file by itself;
+    leading and trailing whitespace on the line will be removed.  If
+    the value of **server** is a Unix domain socket address, this tag
+    is optional, and an empty secret will be used if it is not
+    specified.  Otherwise, this tag is required.
+
+**timeout**
+    An integer which specifies the time in seconds during which the
+    KDC should attempt to contact the RADIUS server.  This tag is the
+    total time across all retries and should be less than the time
+    which an OTP value remains valid for.  The default is 5 seconds.
+
+**retries**
+    This tag specifies the number of retries to make to the RADIUS
+    server.  The default is 3 retries (4 tries).
+
+**strip_realm**
+    If this tag is ``true``, the principal without the realm will be
+    passed to the RADIUS server.  Otherwise, the realm will be
+    included.  The default value is ``true``.
+
+In the following example, requests are sent to a remote server via UDP.
+
+ ::
+
+    [otp]
+        MyRemoteTokenType = {
+            server = radius.mydomain.com:1812
+            secret = SEmfiajf42$
+            timeout = 15
+            retries = 5
+            strip_realm = true
+        }
+
+An implicit default token type named ``DEFAULT`` is defined for when
+the per-principal configuration does not specify a token type.  Its
+configuration is shown below.  You may override this token type to
+something applicable for your situation.
+
+ ::
+
+    [otp]
+        DEFAULT = {
+            strip_realm = false
+        }
+
 PKINIT options
 --------------
 

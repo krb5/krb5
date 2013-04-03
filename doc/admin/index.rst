@@ -14,6 +14,7 @@ For administrators
    host_config.rst
    backup_host.rst
    pkinit.rst
+   otp.rst
    princ_dns.rst
    enctypes.rst
 
