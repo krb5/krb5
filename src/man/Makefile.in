@@ -63,6 +63,7 @@ install-clientman::
 	$(INSTALL_DATA) kinit.sub $(DESTDIR)$(CLIENT_MANDIR)/kinit.1
 	$(INSTALL_DATA) klist.sub $(DESTDIR)$(CLIENT_MANDIR)/klist.1
 	$(INSTALL_DATA) kpasswd.sub $(DESTDIR)$(CLIENT_MANDIR)/kpasswd.1
+	$(INSTALL_DATA) krb5-config.sub $(DESTDIR)$(CLIENT_MANDIR)/krb5-config.1
 	$(INSTALL_DATA) ksu.sub $(DESTDIR)$(CLIENT_MANDIR)/ksu.1
 	$(INSTALL_DATA) kswitch.sub $(DESTDIR)$(CLIENT_MANDIR)/kswitch.1
 	$(INSTALL_DATA) ktutil.sub $(DESTDIR)$(CLIENT_MANDIR)/ktutil.1
@@ -102,6 +103,7 @@ install-clientcat::
 	$(GROFF_MAN) kinit.sub > $(DESTDIR)$(CLIENT_CATDIR)/kinit.1
 	$(GROFF_MAN) klist.sub > $(DESTDIR)$(CLIENT_CATDIR)/klist.1
 	$(GROFF_MAN) kpasswd.sub > $(DESTDIR)$(CLIENT_CATDIR)/kpasswd.1
+	$(GROFF_MAN) krb5-config.sub > $(DESTDIR)$(CLIENT_CATDIR)/krb5-config.1
 	$(GROFF_MAN) ksu.sub > $(DESTDIR)$(CLIENT_CATDIR)/ksu.1
 	$(GROFF_MAN) kswitch.sub > $(DESTDIR)$(CLIENT_CATDIR)/kswitch.1
 	$(GROFF_MAN) ktutil.sub > $(DESTDIR)$(CLIENT_CATDIR)/ktutil.1
