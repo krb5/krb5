@@ -1350,7 +1350,7 @@ dnl	lib/krb5/ccache/ccapi
 	lib/rpc lib/rpc/unit-test
 
 	lib/kadm5 lib/kadm5/clnt lib/kadm5/srv lib/kadm5/unit-test
-
+	lib/krad
 	lib/apputils
 
 dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
