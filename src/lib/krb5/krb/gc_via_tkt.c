@@ -126,8 +126,8 @@ check_reply_server(krb5_context context, krb5_flags kdcoptions,
 
     /* We didn't request canonicalization. */
 
-    if (!IS_TGS_PRINC(context, in_cred->server) ||
-        !IS_TGS_PRINC(context, dec_rep->ticket->server)) {
+    if (!IS_TGS_PRINC(in_cred->server) ||
+        !IS_TGS_PRINC(dec_rep->ticket->server)) {
         /* Canonicalization not requested, and not a TGS referral. */
         return KRB5_KDCREP_MODIFIED;
     }
@@ -264,7 +264,7 @@ krb5int_process_tgs_reply(krb5_context context,
     /* make sure the response hasn't been tampered with..... */
     retval = 0;
 
-    if (s4u2self && !IS_TGS_PRINC(context, dec_rep->ticket->server)) {
+    if (s4u2self && !IS_TGS_PRINC(dec_rep->ticket->server)) {
         /* Final hop, check whether KDC supports S4U2Self */
         if (krb5_principal_compare(context, dec_rep->client, in_cred->server))
             retval = KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
@@ -374,8 +374,7 @@ krb5_get_cred_via_tkt_ext(krb5_context context, krb5_creds *tkt,
 
 send_again:
     use_master = 0;
-    retval = krb5_sendto_kdc(context, &request_data,
-                             krb5_princ_realm(context, in_cred->server),
+    retval = krb5_sendto_kdc(context, &request_data, &in_cred->server->realm,
                              &response_data, &use_master, tcp_only);
     if (retval == 0) {
         if (krb5_is_krb_error(&response_data)) {

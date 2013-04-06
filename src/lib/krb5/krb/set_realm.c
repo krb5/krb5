@@ -41,10 +41,8 @@ krb5_set_principal_realm(krb5_context context, krb5_principal principal,
     if (!newrealm)
         return ENOMEM;
 
-    (void) free(krb5_princ_realm(context,principal)->data);
-
-    krb5_princ_realm(context, principal)->length = length;
-    krb5_princ_realm(context, principal)->data = newrealm;
+    free(principal->realm.data);
+    principal->realm = make_data(newrealm, length);
 
     return 0;
 }

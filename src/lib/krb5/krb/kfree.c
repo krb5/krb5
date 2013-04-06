@@ -389,9 +389,9 @@ krb5_free_principal(krb5_context context, krb5_principal val)
         return;
 
     if (val->data) {
-        i = krb5_princ_size(context, val);
+        i = val->length;
         while(--i >= 0)
-            free(krb5_princ_component(context, val, i)->data);
+            free(val->data[i].data);
         free(val->data);
     }
     free(val->realm.data);

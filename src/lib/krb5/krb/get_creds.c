@@ -563,7 +563,7 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
 
     /* Old versions of Active Directory can rewrite the server name instead of
      * returning a referral.  Try a non-referral query if we see this. */
-    if (!IS_TGS_PRINC(context, ctx->reply_creds->server)) {
+    if (!IS_TGS_PRINC(ctx->reply_creds->server)) {
         TRACE_TKT_CREDS_NON_TGT(context, ctx->reply_creds->server);
         return begin_non_referral(context, ctx);
     }
@@ -674,7 +674,7 @@ step_get_tgt_offpath(krb5_context context, krb5_tkt_creds_context ctx)
         return ctx->reply_code;
 
     /* Verify that we got a TGT. */
-    if (!IS_TGS_PRINC(context, ctx->reply_creds->server))
+    if (!IS_TGS_PRINC(ctx->reply_creds->server))
         return KRB5_KDCREP_MODIFIED;
 
     /* Use this tgt for the next request. */
@@ -879,7 +879,7 @@ step_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
         TRACE_TKT_CREDS_CLOSER_REALM(context, ctx->next_realm);
     } else {
         /* Verify that we got a TGT. */
-        if (!IS_TGS_PRINC(context, ctx->reply_creds->server))
+        if (!IS_TGS_PRINC(ctx->reply_creds->server))
             return KRB5_KDCREP_MODIFIED;
 
         /* Use this tgt for the next request regardless of what it is. */

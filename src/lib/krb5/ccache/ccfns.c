@@ -252,9 +252,7 @@ krb5_boolean KRB5_CALLCONV
 krb5_is_config_principal(krb5_context context,
                          krb5_const_principal principal)
 {
-    const krb5_data *realm;
-
-    realm = krb5_princ_realm(context, principal);
+    const krb5_data *realm = &principal->realm;
 
     if (realm->length != sizeof(conf_realm) - 1 ||
         memcmp(realm->data, conf_realm, sizeof(conf_realm) - 1) != 0)

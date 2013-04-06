@@ -162,10 +162,10 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
         return KRB5_CONFIG_CANTOPEN;
 
     *name = *inst = '\0';
-    switch (krb5_princ_size(context, princ)) {
+    switch (princ->length) {
     case 2:
         /* Check if this principal is listed in the table */
-        compo = krb5_princ_component(context, princ, 0);
+        compo = &princ->data[0];
         p = sconv_list;
         while (p->v4_str) {
             if (p->len == compo->length
@@ -177,7 +177,7 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
                 if (strlcpy(name, p->v4_str, ANAME_SZ) >= ANAME_SZ)
                     return KRB5_INVALID_PRINCIPAL;
                 if (p->flags & DO_REALM_CONVERSION) {
-                    compo = krb5_princ_component(context, princ, 1);
+                    compo = &princ->data[1];
                     c = strnchr(compo->data, '.', compo->length);
                     if (!c || (c - compo->data) >= INST_SZ - 1)
                         return KRB5_INVALID_PRINCIPAL;
@@ -191,7 +191,7 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
         /* If inst isn't set, the service isn't listed in the table, */
         /* so just copy it. */
         if (*inst == '\0') {
-            compo = krb5_princ_component(context, princ, 1);
+            compo = &princ->data[1];
             if (compo->length >= INST_SZ - 1)
                 return KRB5_INVALID_PRINCIPAL;
             memcpy(inst, compo->data, compo->length);
@@ -201,7 +201,7 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
     case 1:
         /* name may have been set above; otherwise, just copy it */
         if (*name == '\0') {
-            compo = krb5_princ_component(context, princ, 0);
+            compo = &princ->data[0];
             if (compo->length >= ANAME_SZ)
                 return KRB5_INVALID_PRINCIPAL;
             memcpy(name, compo->data, compo->length);
@@ -212,7 +212,7 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
         return KRB5_INVALID_PRINCIPAL;
     }
 
-    compo = krb5_princ_realm(context, princ);
+    compo = &princ->realm;
 
     tmp_prealm = malloc(compo->length + 1);
     if (tmp_prealm == NULL)

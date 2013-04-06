@@ -177,7 +177,7 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
                                       realm, sname, remote_host,
                                       (char *)0);
         if (retval == 0)
-            krb5_princ_type(context, *ret_princ) = type;
+            (*ret_princ)->type = type;
 
         TRACE_SNAME_TO_PRINCIPAL_RETURN(context, *ret_princ);
 

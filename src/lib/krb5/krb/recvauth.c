@@ -132,9 +132,9 @@ recvauth_common(krb5_context context,
         /*
          * Setup the replay cache.
          */
-        if (server) {
-            problem = krb5_get_server_rcache(context,
-                                             krb5_princ_component(context, server, 0), &rcache);
+        if (server != NULL && server->length > 0) {
+            problem = krb5_get_server_rcache(context, &server->data[0],
+                                             &rcache);
         } else {
             null_server.length = 7;
             null_server.data = "default";

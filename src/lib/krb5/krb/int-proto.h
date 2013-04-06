@@ -164,9 +164,8 @@ krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
 
 #define in_clock_skew(date, now) (labs((date)-(now)) < context->clockskew)
 
-#define IS_TGS_PRINC(c, p)                                              \
-    (krb5_princ_size((c), (p)) == 2 &&                                  \
-     data_eq_string(*krb5_princ_component((c), (p), 0), KRB5_TGS_NAME))
+#define IS_TGS_PRINC(p) ((p)->length == 2 &&                            \
+                         data_eq_string((p)->data[0], KRB5_TGS_NAME))
 
 typedef krb5_error_code
 (*k5_pacb_fn)(krb5_context context, krb5_keyblock *subkey, krb5_kdc_req *req,

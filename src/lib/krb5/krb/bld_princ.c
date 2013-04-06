@@ -70,8 +70,7 @@ build_principal_va(krb5_context context, krb5_principal princ,
     if (!retval) {
         princ->type = KRB5_NT_UNKNOWN;
         princ->magic = KV5M_PRINCIPAL;
-        krb5_princ_set_realm_data(context, princ, r);
-        krb5_princ_set_realm_length(context, princ, rlen);
+        princ->realm = make_data(r, rlen);
         princ->data = data;
         princ->length = count;
         r = NULL;    /* take ownership */

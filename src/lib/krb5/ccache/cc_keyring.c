@@ -1396,15 +1396,12 @@ krb5_krcc_parse_principal(krb5_context context, krb5_ccache id,
     tmpprinc->length = length;
     tmpprinc->type = type;
 
-    kret = krb5_krcc_parse_krb5data(context, id,
-                                    krb5_princ_realm(context, tmpprinc), bc);
+    kret = krb5_krcc_parse_krb5data(context, id, &tmpprinc->realm, bc);
     i = 0;
     CHECK(kret);
 
     for (i = 0; i < length; i++) {
-        kret = krb5_krcc_parse_krb5data(context, id,
-                                        krb5_princ_component(context, tmpprinc,
-                                                             i), bc);
+        kret = krb5_krcc_parse_krb5data(context, id, &tmpprinc->data[i], bc);
         CHECK(kret);
     }
     *princ = tmpprinc;
@@ -1412,8 +1409,8 @@ krb5_krcc_parse_principal(krb5_context context, krb5_ccache id,
 
 errout:
     while (--i >= 0)
-        free(krb5_princ_component(context, tmpprinc, i)->data);
-    free(krb5_princ_realm(context, tmpprinc)->data);
+        free(tmpprinc->data[i].data);
+    free(tmpprinc->realm.data);
     free(tmpprinc->data);
     free(tmpprinc);
     return kret;
@@ -1775,8 +1772,8 @@ krb5_krcc_unparse_principal(krb5_context context, krb5_ccache id,
     krb5_error_code kret;
     krb5_int32 i, length, tmp, type;
 
-    type = krb5_princ_type(context, princ);
-    tmp = length = krb5_princ_size(context, princ);
+    type = princ->type;
+    tmp = length = princ->length;
 
     kret = krb5_krcc_unparse_int32(context, id, type, bc);
     CHECK_OUT(kret);
@@ -1784,14 +1781,11 @@ krb5_krcc_unparse_principal(krb5_context context, krb5_ccache id,
     kret = krb5_krcc_unparse_int32(context, id, tmp, bc);
     CHECK_OUT(kret);
 
-    kret = krb5_krcc_unparse_krb5data(context, id,
-                                      krb5_princ_realm(context, princ), bc);
+    kret = krb5_krcc_unparse_krb5data(context, id, &princ->realm, bc);
     CHECK_OUT(kret);
 
     for (i = 0; i < length; i++) {
-        kret = krb5_krcc_unparse_krb5data(context, id,
-                                          krb5_princ_component(context, princ,
-                                                               i), bc);
+        kret = krb5_krcc_unparse_krb5data(context, id, &princ->data[i], bc);
         CHECK_OUT(kret);
     }
 

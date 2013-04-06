@@ -33,8 +33,8 @@ realm_compare_flags(krb5_context context,
                     krb5_const_principal princ2,
                     int flags)
 {
-    const krb5_data *realm1 = krb5_princ_realm(context, princ1);
-    const krb5_data *realm2 = krb5_princ_realm(context, princ2);
+    const krb5_data *realm1 = &princ1->realm;
+    const krb5_data *realm2 = &princ2->realm;
 
     if (realm1->length != realm2->length)
         return FALSE;
@@ -79,8 +79,7 @@ krb5_principal_compare_flags(krb5_context context,
                              krb5_const_principal princ2,
                              int flags)
 {
-    register int i;
-    krb5_int32 nelem;
+    krb5_int32 i;
     unsigned int utf8 = (flags & KRB5_PRINCIPAL_COMPARE_UTF8) != 0;
     unsigned int casefold = (flags & KRB5_PRINCIPAL_COMPARE_CASEFOLD) != 0;
     krb5_principal upn1 = NULL;
@@ -89,27 +88,26 @@ krb5_principal_compare_flags(krb5_context context,
 
     if (flags & KRB5_PRINCIPAL_COMPARE_ENTERPRISE) {
         /* Treat UPNs as if they were real principals */
-        if (krb5_princ_type(context, princ1) == KRB5_NT_ENTERPRISE_PRINCIPAL) {
+        if (princ1->type == KRB5_NT_ENTERPRISE_PRINCIPAL) {
             if (upn_to_principal(context, princ1, &upn1) == 0)
                 princ1 = upn1;
         }
-        if (krb5_princ_type(context, princ2) == KRB5_NT_ENTERPRISE_PRINCIPAL) {
+        if (princ2->type == KRB5_NT_ENTERPRISE_PRINCIPAL) {
             if (upn_to_principal(context, princ2, &upn2) == 0)
                 princ2 = upn2;
         }
     }
 
-    nelem = krb5_princ_size(context, princ1);
-    if (nelem != krb5_princ_size(context, princ2))
+    if (princ1->length != princ2->length)
         goto out;
 
     if ((flags & KRB5_PRINCIPAL_COMPARE_IGNORE_REALM) == 0 &&
         !realm_compare_flags(context, princ1, princ2, flags))
         goto out;
 
-    for (i = 0; i < (int) nelem; i++) {
-        const krb5_data *p1 = krb5_princ_component(context, princ1, i);
-        const krb5_data *p2 = krb5_princ_component(context, princ2, i);
+    for (i = 0; i < princ1->length; i++) {
+        const krb5_data *p1 = &princ1->data[i];
+        const krb5_data *p2 = &princ2->data[i];
         krb5_boolean eq;
 
         if (casefold) {

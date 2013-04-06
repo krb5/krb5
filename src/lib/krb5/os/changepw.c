@@ -252,10 +252,9 @@ change_set_password(krb5_context context,
 
     do {
         int socktype = (use_tcp ? SOCK_STREAM : SOCK_DGRAM);
-        if ((code = locate_kpasswd(callback_ctx.context,
-                                   krb5_princ_realm(callback_ctx.context,
-                                                    creds->server),
-                                   &sl, socktype)))
+        code = locate_kpasswd(callback_ctx.context, &creds->server->realm, &sl,
+                              socktype);
+        if (code)
             break;
 
         addrlen = sizeof(remote_addr);
@@ -404,8 +403,8 @@ krb5_set_password_using_ccache(krb5_context context,
     code = krb5_cc_get_principal (context, ccache, &creds.client);
     if (!code) {
         code = krb5_build_principal(context, &creds.server,
-                                    krb5_princ_realm(context, change_password_for)->length,
-                                    krb5_princ_realm(context, change_password_for)->data,
+                                    change_password_for->realm.length,
+                                    change_password_for->realm.data,
                                     "kadmin", "changepw", NULL);
         if (!code) {
             code = krb5_get_credentials(context, 0, ccache, &creds, &credsp);

@@ -83,7 +83,7 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
     }
     va_end(ap);
     *princ = princ_ret;
-    krb5_princ_type(context, princ_ret) = KRB5_NT_UNKNOWN;
+    princ_ret->type = KRB5_NT_UNKNOWN;
     return 0;
 
 free_out:

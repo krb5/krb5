@@ -101,7 +101,7 @@ test_princ(krb5_context context)
         err(context, 0, "%s != %s", princ_short, princ_unparsed);
     free(princ_unparsed);
 
-    realm = krb5_princ_realm(context, p)->data;
+    realm = p->realm.data;
 
     asprintf(&princ_reformed, "%s@%s", princ_short, realm);
 

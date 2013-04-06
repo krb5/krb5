@@ -42,7 +42,7 @@ krb5int_tgtname(krb5_context context, const krb5_data *server, const krb5_data *
      * Windows Server 2008 R2 RODC insists on TGS principal names having the
      * right name type.
      */
-    krb5_princ_type(context, *tgtprinc) = KRB5_NT_SRV_INST;
+    (*tgtprinc)->type = KRB5_NT_SRV_INST;
 
     return ret;
 }

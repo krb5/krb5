@@ -180,7 +180,7 @@ krb5int_fast_as_armor(krb5_context context,
     krb5_data *target_realm;
 
     krb5_clear_error_message(context);
-    target_realm = krb5_princ_realm(context, request->server);
+    target_realm = &request->server->realm;
     if (opte->opt_private->fast_ccache_name) {
         TRACE_FAST_ARMOR_CCACHE(context, opte->opt_private->fast_ccache_name);
         state->fast_state_flags |= KRB5INT_FAST_ARMOR_AVAIL;

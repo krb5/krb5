@@ -39,33 +39,29 @@ principal2salt_internal(krb5_context context,
                         krb5_data *ret, int use_realm)
 {
     unsigned int size = 0, offset=0;
-    krb5_int32 nelem;
-    register int i;
+    krb5_int32 i;
 
     *ret = empty_data();
     if (pr == NULL)
         return 0;
 
-    nelem = krb5_princ_size(context, pr);
-
     if (use_realm)
-        size += krb5_princ_realm(context, pr)->length;
+        size += pr->realm.length;
 
-    for (i = 0; i < (int) nelem; i++)
-        size += krb5_princ_component(context, pr, i)->length;
+    for (i = 0; i < pr->length; i++)
+        size += pr->data[i].length;
 
     if (alloc_data(ret, size))
         return ENOMEM;
 
     if (use_realm) {
-        offset = krb5_princ_realm(context, pr)->length;
-        memcpy(ret->data, krb5_princ_realm(context, pr)->data, offset);
+        offset = pr->realm.length;
+        memcpy(ret->data, pr->realm.data, offset);
     }
 
-    for (i = 0; i < (int) nelem; i++) {
-        memcpy(&ret->data[offset], krb5_princ_component(context, pr, i)->data,
-               krb5_princ_component(context, pr, i)->length);
-        offset += krb5_princ_component(context, pr, i)->length;
+    for (i = 0; i < pr->length; i++) {
+        memcpy(&ret->data[offset], pr->data[i].data, pr->data[i].length);
+        offset += pr->data[i].length;
     }
     return 0;
 }

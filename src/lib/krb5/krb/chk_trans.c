@@ -298,7 +298,7 @@ check_realm_in_list (krb5_data *realm, void *data)
 
     Tprintf ((".. checking '%.*s'\n", (int) realm->length, realm->data));
     for (i = 0; cdata->tgs[i]; i++) {
-        if (data_eq (*krb5_princ_realm (cdata->ctx, cdata->tgs[i]), *realm))
+        if (data_eq (cdata->tgs[i]->realm, *realm))
             return 0;
     }
     Tprintf (("BAD!\n"));

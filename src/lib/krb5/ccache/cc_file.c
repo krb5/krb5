@@ -509,13 +509,13 @@ krb5_fcc_read_principal(krb5_context context, krb5_ccache id, krb5_principal *pr
     tmpprinc->length = length;
     tmpprinc->type = type;
 
-    kret = krb5_fcc_read_data(context, id, krb5_princ_realm(context, tmpprinc));
+    kret = krb5_fcc_read_data(context, id, &tmpprinc->realm);
 
     i = 0;
     CHECK(kret);
 
     for (i=0; i < length; i++) {
-        kret = krb5_fcc_read_data(context, id, krb5_princ_component(context, tmpprinc, i));
+        kret = krb5_fcc_read_data(context, id, &tmpprinc->data[i]);
         CHECK(kret);
     }
     *princ = tmpprinc;
@@ -523,8 +523,8 @@ krb5_fcc_read_principal(krb5_context context, krb5_ccache id, krb5_principal *pr
 
 errout:
     while(--i >= 0)
-        free(krb5_princ_component(context, tmpprinc, i)->data);
-    free(krb5_princ_realm(context, tmpprinc)->data);
+        free(tmpprinc->data[i].data);
+    free(tmpprinc->realm.data);
     free(tmpprinc->data);
     free(tmpprinc);
     return kret;
@@ -949,8 +949,8 @@ krb5_fcc_store_principal(krb5_context context, krb5_ccache id, krb5_principal pr
 
     k5_cc_mutex_assert_locked(context, &((krb5_fcc_data *) id->data)->lock);
 
-    type = krb5_princ_type(context, princ);
-    tmp = length = krb5_princ_size(context, princ);
+    type = princ->type;
+    tmp = length = princ->length;
 
     if (data->version == KRB5_FCC_FVNO_1) {
         /*
@@ -967,11 +967,11 @@ krb5_fcc_store_principal(krb5_context context, krb5_ccache id, krb5_principal pr
     ret = krb5_fcc_store_int32(context, id, tmp);
     CHECK(ret);
 
-    ret = krb5_fcc_store_data(context, id, krb5_princ_realm(context, princ));
+    ret = krb5_fcc_store_data(context, id, &princ->realm);
     CHECK(ret);
 
     for (i=0; i < length; i++) {
-        ret = krb5_fcc_store_data(context, id, krb5_princ_component(context, princ, i));
+        ret = krb5_fcc_store_data(context, id, &princ->data[i]);
         CHECK(ret);
     }
 

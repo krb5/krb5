@@ -158,12 +158,11 @@ verify_as_reply(krb5_context            context,
      * principal) and we requested (and received) a TGT.
      */
     canon_req = ((request->kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
-        (krb5_princ_type(context, request->client) ==
-         KRB5_NT_ENTERPRISE_PRINCIPAL) ||
+        request->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL ||
         (request->kdc_options & KDC_OPT_REQUEST_ANONYMOUS);
     if (canon_req) {
-        canon_ok = IS_TGS_PRINC(context, request->server) &&
-            IS_TGS_PRINC(context, as_reply->enc_part2->server);
+        canon_ok = IS_TGS_PRINC(request->server) &&
+            IS_TGS_PRINC(as_reply->enc_part2->server);
         if (!canon_ok && (request->kdc_options & KDC_OPT_REQUEST_ANONYMOUS)) {
             canon_ok = krb5_principal_compare_any_realm(context,
                                                         as_reply->client,
@@ -475,11 +474,8 @@ build_in_tkt_name(krb5_context context,
      * Windows Server 2008 R2 RODC insists on TGS principal names having the
      * right name type.
      */
-    if (krb5_princ_size(context, server) == 2 &&
-        data_eq_string(*krb5_princ_component(context, server, 0),
-                       KRB5_TGS_NAME)) {
-        krb5_princ_type(context, server) = KRB5_NT_SRV_INST;
-    }
+    if (server->length == 2 && data_eq_string(server->data[0], KRB5_TGS_NAME))
+        server->type = KRB5_NT_SRV_INST;
     *server_out = server;
     return 0;
 }
@@ -957,7 +953,7 @@ krb5_init_creds_init(krb5_context context,
                 goto cleanup;
             krb5_free_principal(context, ctx->request->client);
             ctx->request->client = new_client;
-            krb5_princ_type(context, ctx->request->client) = KRB5_NT_WELLKNOWN;
+            ctx->request->client->type = KRB5_NT_WELLKNOWN;
         }
     }
     /* We will also handle anonymous if the input principal is the anonymous
@@ -965,7 +961,7 @@ krb5_init_creds_init(krb5_context context,
     if (krb5_principal_compare_any_realm(context, ctx->request->client,
                                          krb5_anonymous_principal())) {
         ctx->request->kdc_options |= KDC_OPT_REQUEST_ANONYMOUS;
-        krb5_princ_type(context, ctx->request->client) = KRB5_NT_WELLKNOWN;
+        ctx->request->client->type = KRB5_NT_WELLKNOWN;
     }
     code = restart_init_creds_loop(context, ctx, NULL);
     if (code)
@@ -1434,7 +1430,7 @@ init_creds_step_reply(krb5_context context,
 
         } else if (canon_flag && ctx->err_reply->error == KDC_ERR_WRONG_REALM) {
             if (ctx->err_reply->client == NULL ||
-                !krb5_princ_realm(context, ctx->err_reply->client)->length) {
+                !ctx->err_reply->client->realm.length) {
                 code = KRB5KDC_ERR_WRONG_REALM;
                 goto cleanup;
             }

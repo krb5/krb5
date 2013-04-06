@@ -251,10 +251,7 @@ aname_get_selstring(krb5_context context, krb5_const_principal aname,
         if (errno || ind > num_comps)
             break;
         current = end;
-        datap = ind > 0 ? krb5_princ_component(context, aname, ind - 1) :
-            krb5_princ_realm(context, aname);
-        if (!datap)
-            break;
+        datap = ind > 0 ? &aname->data[ind - 1] : &aname->realm;
         k5_buf_add_len(&selstring, datap->data, datap->length);
     }
 

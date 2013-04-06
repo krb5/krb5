@@ -121,12 +121,12 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context,
 
     if (tgt.addresses && *tgt.addresses) {
         if (rhost == NULL) {
-            if (krb5_princ_type(context, server) != KRB5_NT_SRV_HST) {
+            if (server->type != KRB5_NT_SRV_HST) {
                 retval = KRB5_FWD_BAD_PRINCIPAL;
                 goto errout;
             }
 
-            if (krb5_princ_size(context, server) < 2){
+            if (server->length < 2){
                 retval = KRB5_CC_BADNAME;
                 goto errout;
             }

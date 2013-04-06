@@ -33,7 +33,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_copy_principal(krb5_context context, krb5_const_principal inprinc, krb5_principal *outprinc)
 {
     register krb5_principal tempprinc;
-    register int i, nelems;
+    krb5_int32 i;
 
     tempprinc = (krb5_principal)malloc(sizeof(krb5_principal_data));
 
@@ -42,20 +42,18 @@ krb5_copy_principal(krb5_context context, krb5_const_principal inprinc, krb5_pri
 
     *tempprinc = *inprinc;
 
-    nelems = (int) krb5_princ_size(context, inprinc);
-    tempprinc->data = malloc(nelems * sizeof(krb5_data));
+    tempprinc->data = malloc(inprinc->length * sizeof(krb5_data));
 
     if (tempprinc->data == 0) {
         free(tempprinc);
         return ENOMEM;
     }
 
-    for (i = 0; i < nelems; i++) {
-        if (krb5int_copy_data_contents(context,
-                                       krb5_princ_component(context, inprinc, i),
-                                       krb5_princ_component(context, tempprinc, i)) != 0) {
+    for (i = 0; i < inprinc->length; i++) {
+        if (krb5int_copy_data_contents(context, &inprinc->data[i],
+                                       &tempprinc->data[i]) != 0) {
             while (--i >= 0)
-                free(krb5_princ_component(context, tempprinc, i)->data);
+                free(tempprinc->data[i].data);
             free (tempprinc->data);
             free (tempprinc);
             return ENOMEM;
@@ -64,8 +62,8 @@ krb5_copy_principal(krb5_context context, krb5_const_principal inprinc, krb5_pri
 
     if (krb5int_copy_data_contents_add0(context, &inprinc->realm,
                                         &tempprinc->realm) != 0) {
-        for (i = 0; i < nelems; i++)
-            free(krb5_princ_component(context, tempprinc, i)->data);
+        for (i = 0; i < inprinc->length; i++)
+            free(tempprinc->data[i].data);
         free(tempprinc->data);
         free(tempprinc);
         return ENOMEM;

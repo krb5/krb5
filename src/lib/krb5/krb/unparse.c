@@ -144,8 +144,7 @@ k5_unparse_name(krb5_context context, krb5_const_principal principal,
                 int flags, char **name, unsigned int *size)
 {
     char *q;
-    int i;
-    krb5_int32 nelem;
+    krb5_int32 i;
     unsigned int totalsize = 0;
     char *default_realm = NULL;
     krb5_error_code ret = 0;
@@ -161,26 +160,22 @@ k5_unparse_name(krb5_context context, krb5_const_principal principal,
         if (ret != 0)
             goto cleanup;
 
-        krb5_princ_realm(context, &p)->length = strlen(default_realm);
-        krb5_princ_realm(context, &p)->data = default_realm;
+        p.realm = string2data(default_realm);
 
         if (krb5_realm_compare(context, &p, principal))
             flags |= KRB5_PRINCIPAL_UNPARSE_NO_REALM;
     }
 
     if ((flags & KRB5_PRINCIPAL_UNPARSE_NO_REALM) == 0) {
-        totalsize += component_length_quoted(krb5_princ_realm(context,
-                                                              principal),
-                                             flags);
+        totalsize += component_length_quoted(&principal->realm, flags);
         totalsize++;            /* This is for the separator */
     }
 
-    nelem = krb5_princ_size(context, principal);
-    for (i = 0; i < (int) nelem; i++) {
-        totalsize += component_length_quoted(krb5_princ_component(context, principal, i), flags);
+    for (i = 0; i < principal->length; i++) {
+        totalsize += component_length_quoted(&principal->data[i], flags);
         totalsize++;    /* This is for the separator */
     }
-    if (nelem == 0)
+    if (principal->length == 0)
         totalsize++;
 
     /*
@@ -208,12 +203,8 @@ k5_unparse_name(krb5_context context, krb5_const_principal principal,
 
     q = *name;
 
-    for (i = 0; i < (int) nelem; i++) {
-        q += copy_component_quoting(q,
-                                    krb5_princ_component(context,
-                                                         principal,
-                                                         i),
-                                    flags);
+    for (i = 0; i < principal->length; i++) {
+        q += copy_component_quoting(q, &principal->data[i], flags);
         *q++ = COMPONENT_SEP;
     }
 
@@ -221,7 +212,7 @@ k5_unparse_name(krb5_context context, krb5_const_principal principal,
         q--;                /* Back up last component separator */
     if ((flags & KRB5_PRINCIPAL_UNPARSE_NO_REALM) == 0) {
         *q++ = REALM_SEP;
-        q += copy_component_quoting(q, krb5_princ_realm(context, principal), flags);
+        q += copy_component_quoting(q, &principal->realm, flags);
     }
     *q++ = '\0';
 
