@@ -278,7 +278,8 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
     }
     data->data = p;
 
-    memcpy(data->data + data->length, request->data, request->length);
+    if (request->length > 0)
+        memcpy(data->data + data->length, request->data, request->length);
     data->length += request->length;
 
     if (initialContextToken)

@@ -378,7 +378,8 @@ verify_securid_data_2(krb5_context context, krb5_db_entry *client,
                 esre2->sam_sad.length, user);
         goto cleanup;
     }
-    memcpy(passcode, esre2->sam_sad.data, esre2->sam_sad.length);
+    if (esre2->sam_sad.length > 0)
+        memcpy(passcode, esre2->sam_sad.data, esre2->sam_sad.length);
 
     securid_user = strdup(user);
     if (!securid_user) {

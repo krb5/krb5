@@ -56,11 +56,13 @@ principal2salt_internal(krb5_context context,
 
     if (use_realm) {
         offset = pr->realm.length;
-        memcpy(ret->data, pr->realm.data, offset);
+        if (offset > 0)
+            memcpy(ret->data, pr->realm.data, offset);
     }
 
     for (i = 0; i < pr->length; i++) {
-        memcpy(&ret->data[offset], pr->data[i].data, pr->data[i].length);
+        if (pr->data[i].length > 0)
+            memcpy(&ret->data[offset], pr->data[i].data, pr->data[i].length);
         offset += pr->data[i].length;
     }
     return 0;

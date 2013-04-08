@@ -46,14 +46,13 @@ k5identity_init(krb5_context context, krb5_ccselect_moddata *data_out,
 static krb5_boolean
 fnmatch_data(const char *pattern, krb5_data *data, krb5_boolean fold_case)
 {
+    krb5_error_code ret;
     char *str, *p;
     int res;
 
-    str = malloc(data->length + 1);
+    str = k5memdup0(data->data, data->length, &ret);
     if (str == NULL)
         return FALSE;
-    memcpy(str, data->data, data->length);
-    str[data->length] = '\0';
 
     if (fold_case) {
         for (p = str; *p != '\0'; p++) {

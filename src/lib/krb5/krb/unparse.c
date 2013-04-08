@@ -90,7 +90,8 @@ copy_component_quoting(char *dest, const krb5_data *src, int flags)
     int length = src->length;
 
     if (flags & KRB5_PRINCIPAL_UNPARSE_DISPLAY) {
-        memcpy(dest, src->data, src->length);
+        if (src->length > 0)
+            memcpy(dest, src->data, src->length);
         return src->length;
     }
 

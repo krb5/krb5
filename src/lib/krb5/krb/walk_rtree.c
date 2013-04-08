@@ -105,10 +105,8 @@ krb5_walk_realm_tree( krb5_context context,
     if (client->data == NULL || server->data == NULL)
         return KRB5_NO_TKT_IN_RLM;
 
-    if (client->length == server->length &&
-        memcmp(client->data, server->data, server->length) == 0) {
+    if (data_eq(*client, *server))
         return KRB5_NO_TKT_IN_RLM;
-    }
     retval = rtree_capath_vals(context, client, server, &capvals);
     if (retval)
         return retval;

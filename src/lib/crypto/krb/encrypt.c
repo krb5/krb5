@@ -60,7 +60,8 @@ krb5_k_encrypt(krb5_context context, krb5_key key,
     iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[1].data = make_data(output->ciphertext.data + header_len,
                             input->length);
-    memcpy(iov[1].data.data, input->data, input->length);
+    if (input->length > 0)
+        memcpy(iov[1].data.data, input->data, input->length);
 
     iov[2].flags = KRB5_CRYPTO_TYPE_PADDING;
     iov[2].data = make_data(iov[1].data.data + input->length, padding_len);

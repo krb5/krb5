@@ -242,7 +242,8 @@ foreach_realm (krb5_error_code (*fn)(krb5_data *comp,void *data), void *data,
                 if (p == transit->data) {
                     if (crealm->length >= MAXLEN)
                         return KRB5KRB_AP_ERR_ILL_CR_TKT;
-                    memcpy (last, crealm->data, crealm->length);
+                    if (crealm->length > 0)
+                        memcpy (last, crealm->data, crealm->length);
                     last[crealm->length] = '\0';
                     last_component.length = crealm->length;
                 }

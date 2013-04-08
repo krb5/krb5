@@ -135,7 +135,8 @@ data2string (krb5_data *d)
     char *s;
     s = malloc(d->length + 1);
     if (s) {
-        memcpy(s, d->data, d->length);
+        if (d->length > 0)
+            memcpy(s, d->data, d->length);
         s[d->length] = 0;
     }
     return s;

@@ -1073,6 +1073,7 @@ init_creds_validate_reply(krb5_context context,
 static void
 read_allowed_preauth_type(krb5_context context, krb5_init_creds_context ctx)
 {
+    krb5_error_code ret;
     krb5_data config;
     char *tmp, *p;
 
@@ -1084,18 +1085,14 @@ read_allowed_preauth_type(krb5_context context, krb5_init_creds_context ctx)
                            ctx->request->server,
                            KRB5_CC_CONF_PA_TYPE, &config) != 0)
         return;
-    tmp = malloc(config.length + 1);
-    if (tmp == NULL) {
-        krb5_free_data_contents(context, &config);
+    tmp = k5memdup0(config.data, config.length, &ret);
+    krb5_free_data_contents(context, &config);
+    if (tmp == NULL)
         return;
-    }
-    memcpy(tmp, config.data, config.length);
-    tmp[config.length] = '\0';
     ctx->allowed_preauth_type = strtol(tmp, &p, 10);
     if (p == NULL || *p != '\0')
         ctx->allowed_preauth_type = KRB5_PADATA_NONE;
     free(tmp);
-    krb5_free_data_contents(context, &config);
 }
 
 static krb5_error_code

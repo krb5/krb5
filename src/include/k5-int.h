@@ -2138,13 +2138,15 @@ krb5_error_code krb5_set_time_offsets(krb5_context, krb5_timestamp,
 static inline int
 data_eq(krb5_data d1, krb5_data d2)
 {
-    return (d1.length == d2.length && !memcmp(d1.data, d2.data, d1.length));
+    return (d1.length == d2.length && (d1.length == 0 ||
+                                       !memcmp(d1.data, d2.data, d1.length)));
 }
 
 static inline int
 data_eq_string (krb5_data d, const char *s)
 {
-    return (d.length == strlen(s) && !memcmp(d.data, s, d.length));
+    return (d.length == strlen(s) && (d.length == 0 ||
+                                      !memcmp(d.data, s, d.length)));
 }
 
 static inline krb5_data
@@ -2187,9 +2189,8 @@ alloc_data(krb5_data *data, unsigned int len)
 static inline int
 authdata_eq(krb5_authdata a1, krb5_authdata a2)
 {
-    return (a1.ad_type == a2.ad_type
-            && a1.length == a2.length
-            && !memcmp(a1.contents, a2.contents, a1.length));
+    return (a1.ad_type == a2.ad_type && a1.length == a2.length &&
+            (a1.length == 0 || !memcmp(a1.contents, a2.contents, a1.length)));
 }
 
 /* Allocate zeroed memory; set *code to 0 on success or ENOMEM on failure. */
@@ -2210,7 +2211,7 @@ k5memdup(const void *in, size_t len, krb5_error_code *code)
 {
     void *ptr = k5alloc(len, code);
 
-    if (ptr != NULL)
+    if (ptr != NULL && len > 0)
         memcpy(ptr, in, len);
     return ptr;
 }
@@ -2221,7 +2222,7 @@ k5memdup0(const void *in, size_t len, krb5_error_code *code)
 {
     void *ptr = k5alloc(len + 1, code);
 
-    if (ptr != NULL)
+    if (ptr != NULL && len > 0)
         memcpy(ptr, in, len);
     return ptr;
 }

@@ -119,7 +119,8 @@ k5_buf_add_len(struct k5buf *buf, const char *data, size_t len)
 {
     if (!ensure_space(buf, len))
         return;
-    memcpy(buf->data + buf->len, data, len);
+    if (len > 0)
+        memcpy(buf->data + buf->len, data, len);
     buf->len += len;
     buf->data[buf->len] = '\0';
 }

@@ -161,14 +161,17 @@ make_pa_for_user_checksum(krb5_context context,
     p += 4;
 
     for (i = 0; i < req->user->length; i++) {
-        memcpy(p, req->user->data[i].data, req->user->data[i].length);
+        if (req->user->data[i].length > 0)
+            memcpy(p, req->user->data[i].data, req->user->data[i].length);
         p += req->user->data[i].length;
     }
 
-    memcpy(p, req->user->realm.data, req->user->realm.length);
+    if (req->user->realm.length > 0)
+        memcpy(p, req->user->realm.data, req->user->realm.length);
     p += req->user->realm.length;
 
-    memcpy(p, req->auth_package.data, req->auth_package.length);
+    if (req->auth_package.length > 0)
+        memcpy(p, req->auth_package.data, req->auth_package.length);
 
     /* Per spec, use hmac-md5 checksum regardless of key type. */
     code = krb5_c_make_checksum(context, CKSUMTYPE_HMAC_MD5_ARCFOUR, key,

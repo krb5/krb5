@@ -194,7 +194,8 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
             compo = &princ->data[1];
             if (compo->length >= INST_SZ - 1)
                 return KRB5_INVALID_PRINCIPAL;
-            memcpy(inst, compo->data, compo->length);
+            if (compo->length > 0)
+                memcpy(inst, compo->data, compo->length);
             inst[compo->length] = '\0';
         }
         /* fall through */
@@ -204,7 +205,8 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
             compo = &princ->data[0];
             if (compo->length >= ANAME_SZ)
                 return KRB5_INVALID_PRINCIPAL;
-            memcpy(name, compo->data, compo->length);
+            if (compo->length > 0)
+                memcpy(name, compo->data, compo->length);
             name[compo->length] = '\0';
         }
         break;

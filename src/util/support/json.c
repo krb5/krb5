@@ -489,7 +489,8 @@ k5_json_string_create_len(const void *data, size_t len,
     s = alloc_value(&string_type, len + 1);
     if (s == NULL)
         return ENOMEM;
-    memcpy(s, data, len);
+    if (len > 0)
+        memcpy(s, data, len);
     s[len] = '\0';
     *val_out = (k5_json_string)s;
     return 0;

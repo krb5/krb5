@@ -404,7 +404,8 @@ afs_s2k_oneblock(const krb5_data *data, const krb5_data *salt,
      */
 
     memset(password, 0, sizeof(password));
-    memcpy(password, salt->data, min(salt->length, 8));
+    if (salt->length > 0)
+        memcpy(password, salt->data, min(salt->length, 8));
     for (i = 0; i < 8; i++) {
         if (isupper(password[i]))
             password[i] = tolower(password[i]);
@@ -443,7 +444,8 @@ afs_s2k_multiblock(const krb5_data *data, const krb5_data *salt,
     if (!password)
         return ENOMEM;
 
-    memcpy(password, data->data, data->length);
+    if (data->length > 0)
+        memcpy(password, data->data, data->length);
     for (i = data->length, j = 0; j < salt->length; i++, j++) {
         password[i] = salt->data[j];
         if (isupper(password[i]))
@@ -513,8 +515,9 @@ des_s2k(const krb5_data *pw, const krb5_data *salt, unsigned char *key_out)
     copy = malloc(copylen);
     if (copy == NULL)
         return ENOMEM;
-    memcpy(copy, pw->data, pw->length);
-    if (salt)
+    if (pw->length > 0)
+        memcpy(copy, pw->data, pw->length);
+    if (salt != NULL && salt->length > 0)
         memcpy(copy + pw->length, salt->data, salt->length);
 
     memset(&temp, 0, sizeof(temp));

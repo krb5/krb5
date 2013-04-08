@@ -38,6 +38,8 @@ realm_compare_flags(krb5_context context,
 
     if (realm1->length != realm2->length)
         return FALSE;
+    if (realm1->length == 0)
+        return TRUE;
 
     return (flags & KRB5_PRINCIPAL_COMPARE_CASEFOLD) ?
         (strncasecmp(realm1->data, realm2->data, realm2->length) == 0) :

@@ -1091,16 +1091,21 @@ verify_for_user_checksum(krb5_context context,
     p += 4;
 
     for (i = 0; i < krb5_princ_size(context, req->user); i++) {
-        memcpy(p, krb5_princ_component(context, req->user, i)->data,
-               krb5_princ_component(context, req->user, i)->length);
+        if (krb5_princ_component(context, req->user, i)->length > 0) {
+            memcpy(p, krb5_princ_component(context, req->user, i)->data,
+                   krb5_princ_component(context, req->user, i)->length);
+        }
         p += krb5_princ_component(context, req->user, i)->length;
     }
 
-    memcpy(p, krb5_princ_realm(context, req->user)->data,
-           krb5_princ_realm(context, req->user)->length);
+    if (krb5_princ_realm(context, req->user)->length > 0) {
+        memcpy(p, krb5_princ_realm(context, req->user)->data,
+               krb5_princ_realm(context, req->user)->length);
+    }
     p += krb5_princ_realm(context, req->user)->length;
 
-    memcpy(p, req->auth_package.data, req->auth_package.length);
+    if (req->auth_package.length > 0)
+        memcpy(p, req->auth_package.data, req->auth_package.length);
     p += req->auth_package.length;
 
     code = krb5_c_verify_checksum(context,

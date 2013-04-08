@@ -61,8 +61,9 @@ krb5int_dk_string_to_key(const struct krb5_keytypes *ktp,
 
     /* construct input string ( = string + salt), fold it, make_key it */
 
-    memcpy(concat, string->data, string->length);
-    if (salt)
+    if (string->length > 0)
+        memcpy(concat, string->data, string->length);
+    if (salt != NULL && salt->length > 0)
         memcpy(concat + string->length, salt->data, salt->length);
 
     krb5int_nfold(concatlen*8, concat, keybytes*8, foldstring);
@@ -146,9 +147,11 @@ pbkdf2_string_to_key(const struct krb5_keytypes *ktp, const krb5_data *string,
         if (err)
             return err;
 
-        memcpy(sandp.data, pepper->data, pepper->length);
+        if (pepper->length > 0)
+            memcpy(sandp.data, pepper->data, pepper->length);
         sandp.data[pepper->length] = '\0';
-        memcpy(&sandp.data[pepper->length + 1], salt->data, salt->length);
+        if (salt->length > 0)
+            memcpy(&sandp.data[pepper->length + 1], salt->data, salt->length);
 
         salt = &sandp;
     }
