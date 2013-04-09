@@ -115,10 +115,65 @@ krb5int_get_fq_local_hostname(char *buf, size_t bufsize)
     return 0;
 }
 
+/* Return true if name appears to be an IPv4 or IPv6 address. */
+static krb5_boolean
+is_numeric_address(const char *name)
+{
+    int ndots = 0;
+    const char *p;
+
+    /* If name contains only numbers and three dots, consider it to be an IPv4
+     * address. */
+    if (strspn(name, "01234567890.") == strlen(name)) {
+        for (p = name; *p; p++) {
+            if (*p == '.')
+                ndots++;
+        }
+        if (ndots == 3)
+            return TRUE;
+    }
+
+    /* If name contains a colon, consider it to be an IPv6 address. */
+    if (strchr(name, ':') != NULL)
+        return TRUE;
+
+    return FALSE;
+}
+
+/*
+ * Search progressively shorter suffixes of host in the [domain_realms] section
+ * of the profile to find the realm.  For example, given a host a.b.c, try to
+ * match a.b.c, then .b.c, then b.c, then .c, then c.  If we don't find a
+ * match, return success but set *realm_out to NULL.
+ */
+static krb5_error_code
+search_domain_realm(krb5_context context, const char *host, char **realm_out)
+{
+    krb5_error_code ret;
+    const char *p;
+    char *prof_realm;
+
+    *realm_out = NULL;
+    for (p = host; p != NULL; p = (*p == '.') ? p + 1 : strchr(p, '.')) {
+        ret = profile_get_string(context->profile, KRB5_CONF_DOMAIN_REALM, p,
+                                 NULL, NULL, &prof_realm);
+        if (ret)
+            return ret;
+        if (prof_realm != NULL) {
+            *realm_out = strdup(prof_realm);
+            profile_release_string(prof_realm);
+            if (*realm_out == NULL)
+                return ENOMEM;
+            return 0;
+        }
+    }
+    return 0;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
 {
-    char **retrealms, *p, *realm = NULL, *prof_realm = NULL;
+    char **retrealms, *realm = NULL;
     krb5_error_code ret;
     char cleanname[MAXDNAME + 1];
 
@@ -128,24 +183,10 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
     if (ret)
         return ret;
 
-    /*
-     * Search progressively shorter suffixes of cleanname.  For example, given
-     * a host a.b.c, try to match a.b.c, then .b.c, then b.c, then .c, then c.
-     */
-    for (p = cleanname; p != NULL; p = (*p == '.') ? p + 1 : strchr(p, '.')) {
-        ret = profile_get_string(context->profile, KRB5_CONF_DOMAIN_REALM, p,
-                                 NULL, NULL, &prof_realm);
-        if (ret)
-            return ret;
-        if (prof_realm != NULL)
-            break;
-    }
-    if (prof_realm != NULL) {
-        realm = strdup(prof_realm);
-        profile_release_string(prof_realm);
-        if (realm == NULL)
-            return ENOMEM;
-    }
+    /* Search the [domain_realm] profile section unless the hostname looks like
+     * an IP address. */
+    if (!is_numeric_address(cleanname))
+        ret = search_domain_realm(context, cleanname, &realm);
 
     /* If we didn't find a match, return the referral realm. */
     if (realm == NULL) {
@@ -241,6 +282,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata,
     char cleanname[MAXDNAME + 1], host[MAXDNAME + 1];
     int limit;
     errcode_t code;
+    krb5_boolean is_numeric;
 
     *realmsp = NULL;
 
@@ -251,6 +293,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata,
     ret = k5_clean_hostname(context, host, cleanname, sizeof(cleanname));
     if (ret)
         return ret;
+    is_numeric = is_numeric_address(cleanname);
 
     /*
      * Try looking up a _kerberos.<hostname> TXT record in DNS.  This heuristic
@@ -258,7 +301,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata,
      * allow an attacker to control the realm used for a host.
      */
 #ifdef KRB5_DNS_LOOKUP
-    if (_krb5_use_dns_realm(context)) {
+    if (_krb5_use_dns_realm(context) && !is_numeric) {
         p = cleanname;
         do {
             ret = krb5_try_realm_txt_rr("_kerberos", p, &realm);
@@ -275,7 +318,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata,
      * they are by default), an attacker could control which domain component
      * is used as the realm for a host.
      */
-    if (realm == NULL) {
+    if (realm == NULL && !is_numeric) {
         code = profile_get_integer(context->profile, KRB5_CONF_LIBDEFAULTS,
                                    KRB5_CONF_REALM_TRY_DOMAINS, 0, -1, &limit);
         if (code == 0) {
@@ -290,7 +333,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata,
      * configuration--is to use the upper-cased parent domain of the hostname,
      * regardless of whether we can actually look it up as a realm.
      */
-    if (realm == NULL) {
+    if (realm == NULL && !is_numeric) {
         p = strchr(cleanname, '.');
         if (p) {
             realm = strdup(p + 1);
@@ -333,36 +376,12 @@ krb5_error_code
 k5_clean_hostname(krb5_context context, const char *host, char *cleanname,
                   size_t lhsize)
 {
-    const char *cp;
     char *p;
     krb5_error_code ret;
-    int l, ndots;
+    size_t l;
 
     cleanname[0] = '\0';
     if (host) {
-        /* Filter out numeric addresses if the caller utterly failed to
-         * convert them to names. */
-        /* IPv4 - dotted quads only. */
-        if (strspn(host, "01234567890.") == strlen(host)) {
-            /*
-             * All numbers and dots... if it's three dots, it's an IP address,
-             * and we reject it.  But "12345" could be a local hostname,
-             * couldn't it?  We'll just assume that a name with three dots is
-             * not meant to be an all-numeric hostname three all-numeric
-             * domains down from the current domain.
-             */
-            ndots = 0;
-            for (cp = host; *cp; cp++) {
-                if (*cp == '.')
-                    ndots++;
-            }
-            if (ndots == 3)
-                return KRB5_ERR_NUMERIC_REALM;
-        }
-        /* IPv6 numeric address form?  Bye bye. */
-        if (strchr(host, ':') != NULL)
-            return KRB5_ERR_NUMERIC_REALM;
-
         /* Should probably error out if strlen(host) > MAXDNAME. */
         strlcpy(cleanname, host, lhsize);
     } else {
