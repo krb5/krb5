@@ -110,7 +110,8 @@ krb5int_get_fq_local_hostname(char *buf, size_t bufsize)
         freeaddrinfo(ai);
         return KRB5_EAI_FAIL;
     }
-    strlcpy(buf, ai->ai_canonname, bufsize);
+    if (strlcpy(buf, ai->ai_canonname, bufsize) >= bufsize)
+        return ENOMEM;
     freeaddrinfo(ai);
     return 0;
 }
@@ -277,20 +278,20 @@ krb5_error_code KRB5_CALLCONV
 krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata,
                              char ***realmsp)
 {
-    char **retrealms, *p, *realm = NULL;
+    char **retrealms, *p, *realm = NULL, *host, cleanname[MAXDNAME + 1];
     krb5_error_code ret;
-    char cleanname[MAXDNAME + 1], host[MAXDNAME + 1];
     int limit;
     errcode_t code;
     krb5_boolean is_numeric;
 
     *realmsp = NULL;
 
-    /* Convert what we hope is a hostname to a string. */
-    memcpy(host, hdata->data, hdata->length);
-    host[hdata->length] = '\0';
-
+    /* Convert hdata into a string and clean it up. */
+    host = k5memdup0(hdata->data, hdata->length, &ret);
+    if (host == NULL)
+        return ret;
     ret = k5_clean_hostname(context, host, cleanname, sizeof(cleanname));
+    free(host);
     if (ret)
         return ret;
     is_numeric = is_numeric_address(cleanname);
@@ -382,8 +383,8 @@ k5_clean_hostname(krb5_context context, const char *host, char *cleanname,
 
     cleanname[0] = '\0';
     if (host) {
-        /* Should probably error out if strlen(host) > MAXDNAME. */
-        strlcpy(cleanname, host, lhsize);
+        if (strlcpy(cleanname, host, lhsize) >= lhsize)
+            return ENOMEM;
     } else {
         ret = krb5int_get_fq_local_hostname(cleanname, lhsize);
         if (ret)
