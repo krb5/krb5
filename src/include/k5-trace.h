@@ -397,19 +397,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_TKT_CREDS_WRONG_ENCTYPE(c)                                \
     TRACE(c, "Retrying TGS request with desired service ticket enctypes")
 
-#define TRACE_GET_HOST_REALM(c, host) \
-    TRACE(c, "Get host realm for {str}", host)
-#define TRACE_GET_HOST_REALM_LOCALHOST(c, localhost) \
-    TRACE(c, "Use local host {str} to get host realm", localhost)
-#define TRACE_GET_HOST_REALM_DOMAIN_REALM_MAP(c, host) \
-    TRACE(c, "Look up {str} in the domain_realm map", host)
-#define TRACE_GET_HOST_REALM_TEMP_REALM(c, realm) \
-    TRACE(c, "Temporary realm is {str}", realm)
 #define TRACE_GET_HOST_REALM_RETURN(c, host, realm) \
     TRACE(c, "Got realm {str} for host {str}", realm, host)
 
-#define TRACE_GET_FALLBACK_HOST_REALM(c, host) \
-    TRACE(c, "Get fallback host realm for {str}", host)
 #define TRACE_GET_FALLBACK_HOST_REALM_RETURN(c, host, realm) \
     TRACE(c, "Got fallback realm {str} for host {str}", realm, host)
 
