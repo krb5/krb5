@@ -109,7 +109,7 @@ krb5int_utf8_normalize(
 		       krb5_data ** newdataptr,
 		       unsigned flags)
 {
-    int i, j, len, clen, outpos, ucsoutlen, outsize;
+    int i, j, len, clen, outpos = 0, ucsoutlen, outsize;
     char *out = NULL, *outtmp, *s;
     krb5_ucs4 *ucs = NULL, *p, *ucsout = NULL;
     krb5_data *newdata;
@@ -144,7 +144,6 @@ krb5int_utf8_normalize(
 		retval = ENOMEM;
 		goto cleanup;
 	    }
-	    outpos = 0;
 
 	    for (i = 1; (i < len) && KRB5_UTF8_ISASCII(s + i); i++) {
 		out[outpos++] = TOLOWER(s[i - 1]);
@@ -182,7 +181,6 @@ krb5int_utf8_normalize(
 	    retval = ENOMEM;
 	    goto cleanup;
 	}
-	outpos = 0;
 	i = 0;
     }
 
