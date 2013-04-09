@@ -109,6 +109,7 @@ struct conn_state {
     krb5_data callback_buffer;
     size_t server_index;
     struct conn_state *next;
+    time_ms endtime;
 };
 
 #undef DEBUG
@@ -1050,6 +1051,10 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
             goto kill_conn;
         }
         conn->state = WRITING;
+
+        if (get_curtime_ms(&conn->endtime) == 0)
+            conn->endtime += 10000;
+
         goto try_writing;
 
     case WRITING:
@@ -1195,6 +1200,22 @@ service_udp_fd(krb5_context context, struct conn_state *conn,
     return 1;
 }
 
+/* Return the maximum of endtime and the endtime fields of all currently active
+ * TCP connections. */
+static time_ms
+get_endtime(time_ms endtime, struct conn_state *conns)
+{
+    struct conn_state *state;
+
+    for (state = conns; state != NULL; state = state->next) {
+        if (state->addr.type == SOCK_STREAM &&
+            (state->state == READING || state->state == WRITING) &&
+            state->endtime > endtime)
+            endtime = state->endtime;
+    }
+    return endtime;
+}
+
 static krb5_boolean
 service_fds(krb5_context context, struct select_state *selstate,
             time_ms interval, struct conn_state *conns,
@@ -1215,7 +1236,8 @@ service_fds(krb5_context context, struct select_state *selstate,
 
     e = 0;
     while (selstate->nfds > 0) {
-        e = cm_select_or_poll(selstate, endtime, seltemp, &selret);
+        e = cm_select_or_poll(selstate, get_endtime(endtime, conns),
+                              seltemp, &selret);
         if (e == EINTR)
             continue;
         if (e != 0)
@@ -1282,6 +1304,10 @@ service_fds(krb5_context context, struct select_state *selstate,
  *
  * Note that if you try to reach two ports (e.g., both 88 and 750) on
  * one server, it counts as two.
+ *
+ * There is one exception to the above rules.  Whenever a TCP connection is
+ * established, we wait up to ten seconds for it to finish or fail before
+ * moving on.  This reduces network traffic significantly in a TCP environment.
  */
 
 krb5_error_code
