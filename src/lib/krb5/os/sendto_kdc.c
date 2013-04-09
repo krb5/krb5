@@ -60,6 +60,8 @@
 #define SSF_WRITE 0x02
 #define SSF_EXCEPTION 0x04
 
+typedef krb5_int64 time_ms;
+
 /* Since fd_set is large on some platforms (8K on AIX 5.2), this probably
  * shouldn't be allocated in automatic storage. */
 struct select_state {
@@ -70,7 +72,6 @@ struct select_state {
     fd_set rfds, wfds, xfds;
 #endif
     int nfds;
-    struct timeval end_time;    /* magic: tv_sec==0 => never time out */
 };
 
 static const char *const state_strings[] = {
@@ -446,6 +447,18 @@ cleanup:
 
 #endif
 
+/* Get current time in milliseconds. */
+static krb5_error_code
+get_curtime_ms(time_ms *time_out)
+{
+    struct timeval tv;
+
+    if (gettimeofday(&tv, 0))
+        return errno;
+    *time_out = (time_ms)tv.tv_sec * 1000 + tv.tv_usec / 1000;
+    return 0;
+}
+
 /*
  * Notes:
  *
@@ -470,7 +483,6 @@ static void
 cm_init_selstate(struct select_state *selstate)
 {
     selstate->nfds = 0;
-    selstate->end_time.tv_sec = selstate->end_time.tv_usec = 0;
 #ifndef USE_POLL
     selstate->max = 0;
     FD_ZERO(&selstate->rfds);
@@ -551,63 +563,33 @@ cm_unset_write(struct select_state *selstate, int fd)
 }
 
 static krb5_error_code
-cm_select_or_poll(const struct select_state *in, struct select_state *out,
-                  int *sret)
+cm_select_or_poll(const struct select_state *in, time_ms endtime,
+                  struct select_state *out, int *sret)
 {
-#ifdef USE_POLL
-    struct timeval now;
-    int e, timeout;
+#ifndef USE_POLL
+    struct timeval tv;
+#endif
+    krb5_error_code retval;
+    time_ms curtime, interval;
 
-    if (in->end_time.tv_sec == 0)
-        timeout = -1;
-    else {
-        e = gettimeofday(&now, NULL);
-        if (e)
-            return e;
-        timeout = (in->end_time.tv_sec - now.tv_sec) * 1000 +
-            (in->end_time.tv_usec - now.tv_usec) / 1000;
-        if (timeout < 0) {
-            *sret = 0;
-            return 0;
-        }
-    }
+    retval = get_curtime_ms(&curtime);
+    if (retval != 0)
+        return retval;
+    interval = (curtime < endtime) ? endtime - curtime : 0;
+
     /* We don't need a separate copy of the selstate for poll, but use one for
      * consistency with how we use select. */
     *out = *in;
-    *sret = poll(out->fds, out->nfds, timeout);
-    e = SOCKET_ERRNO;
-    return (*sret < 0) ? e : 0;
+
+#ifdef USE_POLL
+    *sret = poll(out->fds, out->nfds, interval);
 #else
-    struct timeval now, *timo;
-    krb5_error_code e;
-
-    *out = *in;
-    e = gettimeofday(&now, NULL);
-    if (e)
-        return e;
-    if (out->end_time.tv_sec == 0) {
-        timo = 0;
-    } else {
-        timo = &out->end_time;
-        out->end_time.tv_sec -= now.tv_sec;
-        out->end_time.tv_usec -= now.tv_usec;
-        if (out->end_time.tv_usec < 0) {
-            out->end_time.tv_usec += 1000000;
-            out->end_time.tv_sec--;
-        }
-        if (out->end_time.tv_sec < 0) {
-            *sret = 0;
-            return 0;
-        }
-    }
-
-    *sret = select(out->max, &out->rfds, &out->wfds, &out->xfds, timo);
-    e = SOCKET_ERRNO;
-
-    if (*sret < 0)
-        return e;
-    return 0;
+    tv.tv_sec = interval / 1000;
+    tv.tv_usec = interval % 1000 * 1000;
+    *sret = select(out->max, &out->rfds, &out->wfds, &out->xfds, &tv);
 #endif
+
+    return (*sret < 0) ? SOCKET_ERRNO : 0;
 }
 
 static unsigned int
@@ -1214,26 +1196,26 @@ service_udp_fd(krb5_context context, struct conn_state *conn,
 }
 
 static krb5_boolean
-service_fds(krb5_context context, struct select_state *selstate, int interval,
-            struct conn_state *conns, struct select_state *seltemp,
+service_fds(krb5_context context, struct select_state *selstate,
+            time_ms interval, struct conn_state *conns,
+            struct select_state *seltemp,
             int (*msg_handler)(krb5_context, const krb5_data *, void *),
             void *msg_handler_data, struct conn_state **winner_out)
 {
     int e, selret = 0;
-    struct timeval now;
+    time_ms endtime;
     struct conn_state *state;
 
     *winner_out = NULL;
 
-    e = gettimeofday(&now, NULL);
+    e = get_curtime_ms(&endtime);
     if (e)
         return 1;
-    selstate->end_time = now;
-    selstate->end_time.tv_sec += interval;
+    endtime += interval;
 
     e = 0;
     while (selstate->nfds > 0) {
-        e = cm_select_or_poll(selstate, seltemp, &selret);
+        e = cm_select_or_poll(selstate, endtime, seltemp, &selret);
         if (e == EINTR)
             continue;
         if (e != 0)
@@ -1312,7 +1294,8 @@ k5_sendto(krb5_context context, const krb5_data *message,
           int (*msg_handler)(krb5_context, const krb5_data *, void *),
           void *msg_handler_data)
 {
-    int pass, delay;
+    int pass;
+    time_ms delay;
     krb5_error_code retval;
     struct conn_state *conns = NULL, *state, **tailptr, *next, *winner;
     size_t s;
@@ -1348,7 +1331,7 @@ k5_sendto(krb5_context context, const krb5_data *message,
                 continue;
             if (maybe_send(context, state, sel_state, callback_info))
                 continue;
-            done = service_fds(context, sel_state, 1, conns, seltemp,
+            done = service_fds(context, sel_state, 1000, conns, seltemp,
                                msg_handler, msg_handler_data, &winner);
         }
     }
@@ -1360,23 +1343,23 @@ k5_sendto(krb5_context context, const krb5_data *message,
             continue;
         if (maybe_send(context, state, sel_state, callback_info))
             continue;
-        done = service_fds(context, sel_state, 1, conns, seltemp, msg_handler,
-                           msg_handler_data, &winner);
+        done = service_fds(context, sel_state, 1000, conns, seltemp,
+                           msg_handler, msg_handler_data, &winner);
     }
 
     /* Wait for two seconds at the end of the first pass. */
     if (!done) {
-        done = service_fds(context, sel_state, 2, conns, seltemp, msg_handler,
-                           msg_handler_data, &winner);
+        done = service_fds(context, sel_state, 2000, conns, seltemp,
+                           msg_handler, msg_handler_data, &winner);
     }
 
     /* Make remaining passes over all of the connections. */
-    delay = 4;
+    delay = 4000;
     for (pass = 1; pass < MAX_PASS && !done; pass++) {
         for (state = conns; state != NULL && !done; state = state->next) {
             if (maybe_send(context, state, sel_state, callback_info))
                 continue;
-            done = service_fds(context, sel_state, 1, conns, seltemp,
+            done = service_fds(context, sel_state, 1000, conns, seltemp,
                                msg_handler, msg_handler_data, &winner);
             if (sel_state->nfds == 0)
                 break;
