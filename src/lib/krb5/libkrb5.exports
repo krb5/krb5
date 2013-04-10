@@ -596,7 +596,6 @@ krb5_write_message
 krb5int_accessor
 krb5int_cc_default
 krb5int_cleanup_library
-krb5int_cm_call_select
 krb5int_copy_data_contents
 krb5int_copy_data_contents_add0
 krb5int_find_pa_data

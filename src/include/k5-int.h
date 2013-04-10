@@ -562,8 +562,6 @@ extern char *strdup (const char *);
 
 #include "k5-gmt_mktime.h"
 
-struct sendto_callback_info;
-
 /* libos.spec */
 krb5_error_code krb5_lock_file(krb5_context, int, int);
 krb5_error_code krb5_unlock_file(krb5_context, int);

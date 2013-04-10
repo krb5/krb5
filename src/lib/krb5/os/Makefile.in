@@ -18,7 +18,6 @@ STLIBOBJS= \
 	def_realm.o	\
 	ccdefname.o	\
 	changepw.o	\
-	cm.o		\
 	dnsglue.o	\
 	dnssrv.o	\
 	expand_path.o	\
@@ -63,7 +62,6 @@ OBJS= \
 	$(OUTPRE)def_realm.$(OBJEXT)	\
 	$(OUTPRE)ccdefname.$(OBJEXT)	\
 	$(OUTPRE)changepw.$(OBJEXT)	\
-	$(OUTPRE)cm.$(OBJEXT)		\
 	$(OUTPRE)dnsglue.$(OBJEXT)	\
 	$(OUTPRE)dnssrv.$(OBJEXT)	\
 	$(OUTPRE)expand_path.$(OBJEXT)	\
@@ -108,7 +106,6 @@ SRCS= \
 	$(srcdir)/def_realm.c	\
 	$(srcdir)/ccdefname.c	\
 	$(srcdir)/changepw.c	\
-	$(srcdir)/cm.c		\
 	$(srcdir)/dnsglue.c	\
 	$(srcdir)/dnssrv.c	\
 	$(srcdir)/expand_path.c	\

@@ -38,7 +38,7 @@
 
 #define TEST
 #include "k5-int.h"
-#include "cm.h"
+#include "os-proto.h"
 
 const char *prog;
 

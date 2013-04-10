@@ -55,6 +55,61 @@
 #define DEFAULT_UDP_PREF_LIMIT   1465
 #define HARD_UDP_LIMIT          32700 /* could probably do 64K-epsilon ? */
 
+/* Select state flags.  */
+#define SSF_READ 0x01
+#define SSF_WRITE 0x02
+#define SSF_EXCEPTION 0x04
+
+/* Since fd_set is large on some platforms (8K on AIX 5.2), this probably
+ * shouldn't be allocated in automatic storage. */
+struct select_state {
+#ifdef USE_POLL
+    struct pollfd fds[MAX_POLLFDS];
+#else
+    int max;
+    fd_set rfds, wfds, xfds;
+#endif
+    int nfds;
+    struct timeval end_time;    /* magic: tv_sec==0 => never time out */
+};
+
+static const char *const state_strings[] = {
+    "INITIALIZING", "CONNECTING", "WRITING", "READING", "FAILED"
+};
+
+/* connection states */
+enum conn_states { INITIALIZING, CONNECTING, WRITING, READING, FAILED };
+struct incoming_krb5_message {
+    size_t bufsizebytes_read;
+    size_t bufsize;
+    char *buf;
+    char *pos;
+    unsigned char bufsizebytes[4];
+    size_t n_left;
+};
+
+struct conn_state {
+    SOCKET fd;
+    krb5_error_code err;
+    enum conn_states state;
+    unsigned int is_udp : 1;
+    int (*service)(krb5_context context, struct conn_state *,
+                   struct select_state *, int);
+    struct remote_address addr;
+    struct {
+        struct {
+            sg_buf sgbuf[2];
+            sg_buf *sgp;
+            int sg_count;
+            unsigned char msg_len_buf[4];
+        } out;
+        struct incoming_krb5_message in;
+    } x;
+    krb5_data callback_buffer;
+    size_t server_index;
+    struct conn_state *next;
+};
+
 #undef DEBUG
 
 #ifdef DEBUG
@@ -411,18 +466,6 @@ cleanup:
  *   connections already in progress
  */
 
-#include "cm.h"
-
-/*
- * Currently only sendto_kdc.c knows how to use poll(); the other candidate
- * user, lib/apputils/net-server.c, is stuck using select() for the moment
- * since it is entangled with the RPC library.  The following cm_* functions
- * are not fully generic, are O(n^2) in the poll case, and are limited to
- * handling 1024 connections (in order to maintain a constant-sized selstate).
- * More rearchitecting would be appropriate before extending this support to
- * the KDC and kadmind.
- */
-
 static void
 cm_init_selstate(struct select_state *selstate)
 {
@@ -518,7 +561,7 @@ cm_select_or_poll(const struct select_state *in, struct select_state *out,
     if (in->end_time.tv_sec == 0)
         timeout = -1;
     else {
-        e = k5_getcurtime(&now);
+        e = gettimeofday(&now, NULL);
         if (e)
             return e;
         timeout = (in->end_time.tv_sec - now.tv_sec) * 1000 +
@@ -528,15 +571,42 @@ cm_select_or_poll(const struct select_state *in, struct select_state *out,
             return 0;
         }
     }
-    /* We don't need a separate copy of the selstate for poll, but use one
-     * anyone for consistency with the select wrapper. */
+    /* We don't need a separate copy of the selstate for poll, but use one for
+     * consistency with how we use select. */
     *out = *in;
     *sret = poll(out->fds, out->nfds, timeout);
     e = SOCKET_ERRNO;
     return (*sret < 0) ? e : 0;
 #else
-    /* Use the select wrapper from cm.c. */
-    return krb5int_cm_call_select(in, out, sret);
+    struct timeval now, *timo;
+    krb5_error_code e;
+
+    *out = *in;
+    e = gettimeofday(&now, NULL);
+    if (e)
+        return e;
+    if (out->end_time.tv_sec == 0) {
+        timo = 0;
+    } else {
+        timo = &out->end_time;
+        out->end_time.tv_sec -= now.tv_sec;
+        out->end_time.tv_usec -= now.tv_usec;
+        if (out->end_time.tv_usec < 0) {
+            out->end_time.tv_usec += 1000000;
+            out->end_time.tv_sec--;
+        }
+        if (out->end_time.tv_sec < 0) {
+            *sret = 0;
+            return 0;
+        }
+    }
+
+    *sret = select(out->max, &out->rfds, &out->wfds, &out->xfds, timo);
+    e = SOCKET_ERRNO;
+
+    if (*sret < 0)
+        return e;
+    return 0;
 #endif
 }
 
@@ -820,7 +890,7 @@ start_connection(krb5_context context, struct conn_state *state,
      */
     if (callback_info) {
 
-        e = callback_info->pfn_callback(state, callback_info->context,
+        e = callback_info->pfn_callback(state->fd, callback_info->data,
                                         &state->callback_buffer);
         if (e != 0) {
             dprint("callback failed: %m\n", e);
@@ -1155,7 +1225,7 @@ service_fds(krb5_context context, struct select_state *selstate, int interval,
 
     *winner_out = NULL;
 
-    e = k5_getcurtime(&now);
+    e = gettimeofday(&now, NULL);
     if (e)
         return 1;
     selstate->end_time = now;
@@ -1344,7 +1414,7 @@ cleanup:
         if (state->state == READING && state->x.in.buf != udpbuf)
             free(state->x.in.buf);
         if (callback_info) {
-            callback_info->pfn_cleanup(callback_info->context,
+            callback_info->pfn_cleanup(callback_info->data,
                                        &state->callback_buffer);
         }
         free(state);

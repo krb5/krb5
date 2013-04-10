@@ -39,7 +39,6 @@
 
 #include "k5-int.h"
 #include "os-proto.h"
-#include "cm.h"
 
 #ifndef DISABLE_TRACING
 

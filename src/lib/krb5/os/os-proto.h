@@ -55,6 +55,19 @@ struct serverlist {
 };
 #define SERVERLIST_INIT { NULL, 0 }
 
+struct remote_address {
+    int family;
+    int type;
+    socklen_t len;
+    struct sockaddr_storage saddr;
+};
+
+struct sendto_callback_info {
+    int (*pfn_callback)(SOCKET fd, void *data, krb5_data *message);
+    void (*pfn_cleanup)(void *data, krb5_data *message);
+    void *data;
+};
+
 krb5_error_code k5_locate_server(krb5_context, const krb5_data *realm,
                                  struct serverlist *,
                                  enum locate_service_type svc, int socktype);
