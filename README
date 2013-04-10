@@ -77,6 +77,30 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.11.1 (2013-04-11)
+------------------------------------
+
+This is a bugfix release.
+
+* Incremental propagation could erroneously act as if a slave's
+  database were current after the slave received a full dump that
+  failed to load.
+
+* gss_import_sec_context incorrectly set internal state that
+  identifies whether an imported context is from an interposer
+  mechanism or from the underlying mechanism.
+
+krb5-1.11.2 changes by ticket ID
+--------------------------------
+
+7530    iprop treats slave as current if full dump fails to load
+7586    memory leak in lookup_etypes_for_keytab()
+7587    Fix dependencies in tests/gssapi
+7591    Fix condition with empty body
+7592    gss_import_sec_context broken with interposer plugins
+7594    Export verto_set_flags from libverto
+7601    RST docs missing krb5-config man page
+
 Major changes in 1.11.1 (2013-02-21)
 ------------------------------------
 
