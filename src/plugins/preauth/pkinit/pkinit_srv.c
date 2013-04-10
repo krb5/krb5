@@ -1184,10 +1184,11 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
                               KRB5_CONF_PKINIT_DH_MIN_BITS,
                               PKINIT_DEFAULT_DH_MIN_BITS,
                               &plgctx->opts->dh_min_bits);
-    if (plgctx->opts->dh_min_bits < PKINIT_DEFAULT_DH_MIN_BITS) {
-        pkiDebug("%s: invalid value (%d) for pkinit_dh_min_bits, "
+    if (plgctx->opts->dh_min_bits < PKINIT_DH_MIN_CONFIG_BITS) {
+        pkiDebug("%s: invalid value (%d < %d) for pkinit_dh_min_bits, "
                  "using default value (%d) instead\n", __FUNCTION__,
-                 plgctx->opts->dh_min_bits, PKINIT_DEFAULT_DH_MIN_BITS);
+                 plgctx->opts->dh_min_bits, PKINIT_DH_MIN_CONFIG_BITS,
+                 PKINIT_DEFAULT_DH_MIN_BITS);
         plgctx->opts->dh_min_bits = PKINIT_DEFAULT_DH_MIN_BITS;
     }
 

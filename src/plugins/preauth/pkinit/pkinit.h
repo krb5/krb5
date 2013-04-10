@@ -73,6 +73,7 @@ extern int longhorn;	    /* XXX Talking to a Longhorn server? */
 #define PKINIT_REQ_CTX_MAGIC	0xdeadbeef
 
 #define PKINIT_DEFAULT_DH_MIN_BITS  2048
+#define PKINIT_DH_MIN_CONFIG_BITS   1024
 
 #define KRB5_CONF_KDCDEFAULTS                   "kdcdefaults"
 #define KRB5_CONF_LIBDEFAULTS                   "libdefaults"
