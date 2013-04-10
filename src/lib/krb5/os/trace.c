@@ -131,7 +131,7 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
     krb5_error_code kerr;
     size_t len, i;
     int err;
-    struct conn_state *cs;
+    struct remote_address *ra;
     const krb5_data *d;
     krb5_data data;
     char addrbuf[NI_MAXHOST], portbuf[NI_MAXSERV], tmpbuf[200], *str;
@@ -196,22 +196,22 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
                     k5_buf_add(&buf, str);
                 free(str);
             }
-        } else if (strcmp(tmpbuf, "connstate") == 0) {
-            cs = va_arg(ap, struct conn_state *);
-            if (cs->socktype == SOCK_DGRAM)
+        } else if (strcmp(tmpbuf, "raddr") == 0) {
+            ra = va_arg(ap, struct remote_address *);
+            if (ra->type == SOCK_DGRAM)
                 k5_buf_add(&buf, "dgram");
-            else if (cs->socktype == SOCK_STREAM)
+            else if (ra->type == SOCK_STREAM)
                 k5_buf_add(&buf, "stream");
             else
-                k5_buf_add_fmt(&buf, "socktype%d", cs->socktype);
+                k5_buf_add_fmt(&buf, "socktype%d", ra->type);
 
-            if (getnameinfo((struct sockaddr *)&cs->addr, cs->addrlen,
+            if (getnameinfo((struct sockaddr *)&ra->saddr, ra->len,
                             addrbuf, sizeof(addrbuf), portbuf, sizeof(portbuf),
                             NI_NUMERICHOST|NI_NUMERICSERV) != 0) {
-                if (cs->family == AF_UNSPEC)
+                if (ra->family == AF_UNSPEC)
                     k5_buf_add(&buf, " AF_UNSPEC");
                 else
-                    k5_buf_add_fmt(&buf, " af%d", cs->family);
+                    k5_buf_add_fmt(&buf, " af%d", ra->family);
             } else
                 k5_buf_add_fmt(&buf, " %s:%s", addrbuf, portbuf);
         } else if (strcmp(tmpbuf, "data") == 0) {

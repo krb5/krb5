@@ -605,10 +605,10 @@ add_connection(struct conn_state **conns, struct addrinfo *ai,
     state->state = INITIALIZING;
     state->err = 0;
     state->x.out.sgp = state->x.out.sgbuf;
-    state->socktype = ai->ai_socktype;
-    state->family = ai->ai_family;
-    state->addrlen = ai->ai_addrlen;
-    memcpy(&state->addr, ai->ai_addr, ai->ai_addrlen);
+    state->addr.type = ai->ai_socktype;
+    state->addr.family = ai->ai_family;
+    state->addr.len = ai->ai_addrlen;
+    memcpy(&state->addr.saddr, ai->ai_addr, ai->ai_addrlen);
     state->fd = INVALID_SOCKET;
     state->server_index = server_index;
     SG_SET(&state->x.out.sgbuf[1], 0, 0);
@@ -766,25 +766,27 @@ start_connection(krb5_context context, struct conn_state *state,
     static const struct linger lopt = { 0, 0 };
 
     dprint("start_connection(@%p)\ngetting %s socket in family %d...", state,
-           state->socktype == SOCK_STREAM ? "stream" : "dgram", state->family);
-    fd = socket(state->family, state->socktype, 0);
+           state->addr.type == SOCK_STREAM ? "stream" : "dgram",
+           state->addr.family);
+    fd = socket(state->addr.family, state->addr.type, 0);
     if (fd == INVALID_SOCKET) {
         state->err = SOCKET_ERRNO;
-        dprint("socket: %m creating with af %d\n", state->err, state->family);
+        dprint("socket: %m creating with af %d\n", state->err,
+               state->addr.family);
         return -1;              /* try other hosts */
     }
     set_cloexec_fd(fd);
     /* Make it non-blocking.  */
     if (ioctlsocket(fd, FIONBIO, (const void *) &one))
         dperror("sendto_kdc: ioctl(FIONBIO)");
-    if (state->socktype == SOCK_STREAM) {
+    if (state->addr.type == SOCK_STREAM) {
         if (setsockopt(fd, SOL_SOCKET, SO_LINGER, &lopt, sizeof(lopt)))
             dperror("sendto_kdc: setsockopt(SO_LINGER)");
-        TRACE_SENDTO_KDC_TCP_CONNECT(context, state);
+        TRACE_SENDTO_KDC_TCP_CONNECT(context, &state->addr);
     }
 
     /* Start connecting to KDC.  */
-    e = connect(fd, (struct sockaddr *)&state->addr, state->addrlen);
+    e = connect(fd, (struct sockaddr *)&state->addr.saddr, state->addr.len);
     if (e != 0) {
         /*
          * This is the path that should be followed for non-blocking
@@ -832,16 +834,16 @@ start_connection(krb5_context context, struct conn_state *state,
         set_conn_state_msg_length(state, &state->callback_buffer);
     }
 
-    if (state->socktype == SOCK_DGRAM) {
+    if (state->addr.type == SOCK_DGRAM) {
         /* Send it now.  */
         ssize_t ret;
         sg_buf *sg = &state->x.out.sgbuf[0];
 
-        TRACE_SENDTO_KDC_UDP_SEND_INITIAL(context, state);
+        TRACE_SENDTO_KDC_UDP_SEND_INITIAL(context, &state->addr);
         dprint("sending %d bytes on fd %d\n", SG_LEN(sg), state->fd);
         ret = send(state->fd, SG_BUF(sg), SG_LEN(sg), 0);
         if (ret < 0 || (size_t) ret != SG_LEN(sg)) {
-            TRACE_SENDTO_KDC_UDP_ERROR_SEND_INITIAL(context, state,
+            TRACE_SENDTO_KDC_UDP_ERROR_SEND_INITIAL(context, &state->addr,
                                                     SOCKET_ERRNO);
             dperror("sendto");
             (void) closesocket(state->fd);
@@ -889,7 +891,7 @@ maybe_send(krb5_context context, struct conn_state *conn,
         return -1;
     }
 
-    if (conn->socktype == SOCK_STREAM) {
+    if (conn->addr.type == SOCK_STREAM) {
         dprint("skipping stream socket\n");
         /* The select callback will handle flushing any data we
            haven't written yet, and we only write it once.  */
@@ -898,11 +900,12 @@ maybe_send(krb5_context context, struct conn_state *conn,
 
     /* UDP - retransmit after a previous attempt timed out. */
     sg = &conn->x.out.sgbuf[0];
-    TRACE_SENDTO_KDC_UDP_SEND_RETRY(context, conn);
+    TRACE_SENDTO_KDC_UDP_SEND_RETRY(context, &conn->addr);
     dprint("sending %d bytes on fd %d\n", SG_LEN(sg), conn->fd);
     ret = send(conn->fd, SG_BUF(sg), SG_LEN(sg), 0);
     if (ret < 0 || (size_t) ret != SG_LEN(sg)) {
-        TRACE_SENDTO_KDC_UDP_ERROR_SEND_RETRY(context, conn, SOCKET_ERRNO);
+        TRACE_SENDTO_KDC_UDP_ERROR_SEND_RETRY(context, &conn->addr,
+                                              SOCKET_ERRNO);
         dperror("send");
         /* Keep connection alive, we'll try again next pass.
 
@@ -965,7 +968,7 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
             /* Bad -- the KDC shouldn't be sending to us first.  */
             e = EINVAL /* ?? */;
         kill_conn:
-            TRACE_SENDTO_KDC_TCP_DISCONNECT(context, conn);
+            TRACE_SENDTO_KDC_TCP_DISCONNECT(context, &conn->addr);
             kill_conn(conn, selstate, e);
             return e == 0;
         }
@@ -990,7 +993,7 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
          */
         e = get_so_error(conn->fd);
         if (e) {
-            TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, conn, e);
+            TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, &conn->addr, e);
             dprint("socket error on write fd: %m", e);
             goto kill_conn;
         }
@@ -1012,12 +1015,12 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
                ((conn->x.out.sg_count == 2 ? SG_LEN(&conn->x.out.sgp[1]) : 0)
                 + SG_LEN(&conn->x.out.sgp[0])),
                conn->fd);
-        TRACE_SENDTO_KDC_TCP_SEND(context, conn);
+        TRACE_SENDTO_KDC_TCP_SEND(context, &conn->addr);
         nwritten = SOCKET_WRITEV(conn->fd, conn->x.out.sgp,
                                  conn->x.out.sg_count, tmp);
         if (nwritten < 0) {
             e = SOCKET_ERRNO;
-            TRACE_SENDTO_KDC_TCP_ERROR_SEND(context, conn, e);
+            TRACE_SENDTO_KDC_TCP_ERROR_SEND(context, &conn->addr, e);
             dprint("failed: %m\n", e);
             goto kill_conn;
         }
@@ -1072,7 +1075,7 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
                 e = nread ? SOCKET_ERRNO : ECONNRESET;
                 free(conn->x.in.buf);
                 conn->x.in.buf = 0;
-                TRACE_SENDTO_KDC_TCP_ERROR_RECV(context, conn, e);
+                TRACE_SENDTO_KDC_TCP_ERROR_RECV(context, &conn->addr, e);
                 goto kill_conn;
             }
             conn->x.in.n_left -= nread;
@@ -1087,7 +1090,7 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
                                 conn->x.in.bufsizebytes + conn->x.in.bufsizebytes_read,
                                 4 - conn->x.in.bufsizebytes_read);
             if (nread < 0) {
-                TRACE_SENDTO_KDC_TCP_ERROR_RECV_LEN(context, conn, e);
+                TRACE_SENDTO_KDC_TCP_ERROR_RECV_LEN(context, &conn->addr, e);
                 e = SOCKET_ERRNO;
                 goto kill_conn;
             }
@@ -1132,7 +1135,7 @@ service_udp_fd(krb5_context context, struct conn_state *conn,
 
     nread = recv(conn->fd, conn->x.in.buf, conn->x.in.bufsize, 0);
     if (nread < 0) {
-        TRACE_SENDTO_KDC_UDP_ERROR_RECV(context, conn, SOCKET_ERRNO);
+        TRACE_SENDTO_KDC_UDP_ERROR_RECV(context, &conn->addr, SOCKET_ERRNO);
         kill_conn(conn, selstate, SOCKET_ERRNO);
         return 0;
     }
@@ -1271,7 +1274,7 @@ k5_sendto(krb5_context context, const krb5_data *message,
             goto cleanup;
         for (state = *tailptr; state != NULL && !done; state = state->next) {
             /* Contact each new connection whose socktype matches socktype1. */
-            if (state->socktype != socktype1)
+            if (state->addr.type != socktype1)
                 continue;
             if (maybe_send(context, state, sel_state, callback_info))
                 continue;
@@ -1283,7 +1286,7 @@ k5_sendto(krb5_context context, const krb5_data *message,
     /* Complete the first pass by contacting servers of the non-preferred
      * socktype (if given), waiting 1s for an answer from each. */
     for (state = conns; state != NULL && !done; state = state->next) {
-        if (state->socktype != socktype2)
+        if (state->addr.type != socktype2)
             continue;
         if (maybe_send(context, state, sel_state, callback_info))
             continue;
@@ -1323,7 +1326,7 @@ k5_sendto(krb5_context context, const krb5_data *message,
         goto cleanup;
     }
     /* Success!  */
-    TRACE_SENDTO_KDC_RESPONSE(context, winner);
+    TRACE_SENDTO_KDC_RESPONSE(context, &winner->addr);
     reply->data = winner->x.in.buf;
     reply->length = winner->x.in.pos - winner->x.in.buf;
     retval = 0;

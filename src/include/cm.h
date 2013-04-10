@@ -63,6 +63,12 @@ struct incoming_krb5_message {
     unsigned char bufsizebytes[4];
     size_t n_left;
 };
+struct remote_address {
+    int family;
+    int type;
+    socklen_t len;
+    struct sockaddr_storage saddr;
+};
 struct conn_state {
     SOCKET fd;
     krb5_error_code err;
@@ -70,10 +76,7 @@ struct conn_state {
     unsigned int is_udp : 1;
     int (*service)(krb5_context context, struct conn_state *,
                    struct select_state *, int);
-    int socktype;
-    int family;
-    size_t addrlen;
-    struct sockaddr_storage addr;
+    struct remote_address addr;
     struct {
         struct {
             sg_buf sgbuf[2];

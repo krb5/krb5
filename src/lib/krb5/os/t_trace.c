@@ -61,7 +61,7 @@ main (int argc, char *argv[])
     char *str = "example.data";
     krb5_octet *oct = (krb5_octet *) str;
     unsigned int oct_length = strlen(str);
-    struct conn_state conn;
+    struct remote_address ra;
     struct sockaddr_in *addr_in;
     krb5_data data;
     struct krb5_key_st key;
@@ -112,26 +112,26 @@ main (int argc, char *argv[])
     TRACE(ctx, "size_t and const char *, as four-character hex hash: "
           "{hashlenstr}", 1, NULL);
 
-    conn.socktype = SOCK_STREAM;
-    addr_in = (struct sockaddr_in *) &conn.addr;
+    ra.type = SOCK_STREAM;
+    addr_in = (struct sockaddr_in *)&ra.saddr;
     addr_in->sin_family = AF_INET;
     addr_in->sin_addr.s_addr = INADDR_ANY;
     addr_in->sin_port = htons(88);
-    conn.addrlen = sizeof(struct sockaddr_in);
-    conn.family = AF_INET;
-    TRACE(ctx, "struct conn_state *, show socket type, address, port: "
-          "{connstate}", &conn);
-    conn.socktype = SOCK_DGRAM;
-    TRACE(ctx, "struct conn_state *, show socket type, address, port: "
-          "{connstate}", &conn);
-    conn.socktype = 1234;
+    ra.len = sizeof(struct sockaddr_in);
+    ra.family = AF_INET;
+    TRACE(ctx, "struct remote_address *, show socket type, address, port: "
+          "{raddr}", &ra);
+    ra.type = SOCK_DGRAM;
+    TRACE(ctx, "struct remote_address *, show socket type, address, port: "
+          "{raddr}", &ra);
+    ra.type = 1234;
     addr_in->sin_family = AF_UNSPEC;
-    conn.family = AF_UNSPEC;
-    TRACE(ctx, "struct conn_state *, show socket type, address, port: "
-          "{connstate}", &conn);
-    conn.family = 5678;
-    TRACE(ctx, "struct conn_state *, show socket type, address, port: "
-          "{connstate}", &conn);
+    ra.family = AF_UNSPEC;
+    TRACE(ctx, "struct remote_address *, show socket type, address, port: "
+          "{raddr}", &ra);
+    ra.family = 5678;
+    TRACE(ctx, "struct remote_address *, show socket type, address, port: "
+          "{raddr}", &ra);
 
     data.magic = 0;
     data.length = strlen(str);
