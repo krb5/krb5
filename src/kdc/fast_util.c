@@ -234,6 +234,7 @@ kdc_find_fast(krb5_kdc_req **requestptr,
                                          KRB5_PADATA_FX_COOKIE);
         if (retval == 0) {
             state->fast_options = fast_req->fast_options;
+            fast_req->req_body->msg_type = request->msg_type;
             krb5_free_kdc_req( kdc_context, request);
             *requestptr = fast_req->req_body;
             fast_req->req_body = NULL;
