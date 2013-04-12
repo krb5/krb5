@@ -114,13 +114,6 @@ Tprintf(const char *fmt, ...)
 #endif
 }
 
-#if 0
-extern void krb5int_debug_fprint(const char *, ...);
-#define dprint krb5int_debug_fprint
-#else
-static inline void dprint(const char *fmt, ...) { }
-#endif
-
 /* Make room for a new server entry in list and return a pointer to the new
  * entry.  (Do not increment list->nservers.) */
 static struct server_entry *

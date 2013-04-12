@@ -94,8 +94,6 @@ krb5_error_code krb5_make_full_ipaddr(krb5_context,
 krb5_error_code krb5_try_realm_txt_rr(const char *, const char *,
                                       char **realm);
 
-void krb5int_debug_fprint (const char *fmt, ...);
-
 int _krb5_use_dns_realm (krb5_context);
 int _krb5_use_dns_kdc (krb5_context);
 int _krb5_conf_boolean (const char *);

@@ -1215,17 +1215,12 @@ loop_setup_routing_socket(verto_ctx *ctx, void *handle, const char *progname)
     return 0;
 }
 
-/* XXX */
-extern void (*krb5int_sendtokdc_debug_handler)(const void*, size_t);
-
 krb5_error_code
 loop_setup_network(verto_ctx *ctx, void *handle, const char *prog)
 {
     struct socksetup setup_data;
     verto_ev *ev;
     int i;
-
-    krb5int_sendtokdc_debug_handler = klog_handler;
 
     /* Close any open connections. */
     FOREACH_ELT(events, i, ev)
