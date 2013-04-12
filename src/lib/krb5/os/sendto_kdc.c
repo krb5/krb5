@@ -88,7 +88,6 @@ struct incoming_krb5_message {
 
 struct conn_state {
     SOCKET fd;
-    krb5_error_code err;
     enum conn_states state;
     unsigned int is_udp : 1;
     int (*service)(krb5_context context, struct conn_state *,
@@ -459,7 +458,6 @@ add_connection(struct conn_state **conns, struct addrinfo *ai,
     if (state == NULL)
         return ENOMEM;
     state->state = INITIALIZING;
-    state->err = 0;
     state->x.out.sgp = state->x.out.sgbuf;
     state->addr.type = ai->ai_socktype;
     state->addr.family = ai->ai_family;
@@ -622,10 +620,8 @@ start_connection(krb5_context context, struct conn_state *state,
     static const struct linger lopt = { 0, 0 };
 
     fd = socket(state->addr.family, state->addr.type, 0);
-    if (fd == INVALID_SOCKET) {
-        state->err = SOCKET_ERRNO;
+    if (fd == INVALID_SOCKET)
         return -1;              /* try other hosts */
-    }
     set_cloexec_fd(fd);
     /* Make it non-blocking.  */
     ioctlsocket(fd, FIONBIO, (const void *) &one);
@@ -646,7 +642,6 @@ start_connection(krb5_context context, struct conn_state *state,
             state->fd = fd;
         } else {
             (void) closesocket(fd);
-            state->err = SOCKET_ERRNO;
             state->state = FAILED;
             return -2;
         }
@@ -670,7 +665,6 @@ start_connection(krb5_context context, struct conn_state *state,
                                         &state->callback_buffer);
         if (e != 0) {
             (void) closesocket(fd);
-            state->err = e;
             state->fd = INVALID_SOCKET;
             state->state = FAILED;
             return -3;
@@ -754,13 +748,12 @@ maybe_send(krb5_context context, struct conn_state *conn,
 }
 
 static void
-kill_conn(struct conn_state *conn, struct select_state *selstate, int err)
+kill_conn(struct conn_state *conn, struct select_state *selstate)
 {
     cm_remove_fd(selstate, conn->fd);
     closesocket(conn->fd);
     conn->fd = INVALID_SOCKET;
     conn->state = FAILED;
-    conn->err = err;
 }
 
 /* Check socket for error.  */
@@ -781,46 +774,23 @@ get_so_error(int fd)
     return sockerr;
 }
 
-/* Return nonzero only if we're finished and the caller should exit
-   its loop.  This happens in two cases: We have a complete message,
-   or the socket has closed and no others are open.  */
-
+/* Process events on a TCP socket.  Return 1 if we get a complete reply. */
 static int
 service_tcp_fd(krb5_context context, struct conn_state *conn,
                struct select_state *selstate, int ssflags)
 {
     int e = 0;
     ssize_t nwritten, nread;
+    SOCKET_WRITEV_TEMP tmp;
 
-    if (!(ssflags & (SSF_READ|SSF_WRITE|SSF_EXCEPTION)))
-        abort();
+    /* Check for a socket exception or readable data before we expect it. */
+    if (ssflags & SSF_EXCEPTION ||
+        ((ssflags & SSF_READ) && conn->state != READING))
+        goto kill_conn;
+
     switch (conn->state) {
-        SOCKET_WRITEV_TEMP tmp;
-
     case CONNECTING:
-        if (ssflags & SSF_READ) {
-            /* Bad -- the KDC shouldn't be sending to us first.  */
-            e = EINVAL /* ?? */;
-        kill_conn:
-            TRACE_SENDTO_KDC_TCP_DISCONNECT(context, &conn->addr);
-            kill_conn(conn, selstate, e);
-            return e == 0;
-        }
-        if (ssflags & SSF_EXCEPTION) {
-        handle_exception:
-            e = get_so_error(conn->fd);
-            goto kill_conn;
-        }
-
-        /*
-         * Connect finished -- but did it succeed or fail?
-         * UNIX sets can_write if failed.
-         * Call getsockopt to see if error pending.
-         *
-         * (For most UNIX systems it works to just try writing the
-         * first time and detect an error.  But Bill Dodd at IBM
-         * reports that some version of AIX, SIGPIPE can result.)
-         */
+        /* Check whether the connection succeeded. */
         e = get_so_error(conn->fd);
         if (e) {
             TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, &conn->addr, e);
@@ -828,27 +798,18 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
         }
         conn->state = WRITING;
 
+        /* Record this connection's timeout for service_fds. */
         if (get_curtime_ms(&conn->endtime) == 0)
             conn->endtime += 10000;
 
-        goto try_writing;
-
+        /* Fall through. */
     case WRITING:
-        if (ssflags & SSF_READ) {
-            e = E2BIG;
-            /* Bad -- the KDC shouldn't be sending anything yet.  */
-            goto kill_conn;
-        }
-        if (ssflags & SSF_EXCEPTION)
-            goto handle_exception;
-
-    try_writing:
         TRACE_SENDTO_KDC_TCP_SEND(context, &conn->addr);
         nwritten = SOCKET_WRITEV(conn->fd, conn->x.out.sgp,
                                  conn->x.out.sg_count, tmp);
         if (nwritten < 0) {
-            e = SOCKET_ERRNO;
-            TRACE_SENDTO_KDC_TCP_ERROR_SEND(context, &conn->addr, e);
+            TRACE_SENDTO_KDC_TCP_ERROR_SEND(context, &conn->addr,
+                                            SOCKET_ERRNO);
             goto kill_conn;
         }
         while (nwritten) {
@@ -860,19 +821,11 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
                 nwritten -= SG_LEN(sgp);
                 conn->x.out.sgp++;
                 conn->x.out.sg_count--;
-                if (conn->x.out.sg_count == 0 && nwritten != 0)
-                    /* Wrote more than we wanted to?  */
-                    abort();
             }
         }
         if (conn->x.out.sg_count == 0) {
-            /* Done writing, switch to reading.  */
-            /* Don't call shutdown at this point because
-             * some implementations cannot deal with half-closed connections.*/
+            /* Done writing, switch to reading. */
             cm_unset_write(selstate, conn->fd);
-            /* Q: How do we detect failures to send the remaining data
-               to the remote side, since we're in non-blocking mode?
-               Will we always get errors on the reading side?  */
             conn->state = READING;
             conn->x.in.bufsizebytes_read = 0;
             conn->x.in.bufsize = 0;
@@ -883,30 +836,18 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
         return 0;
 
     case READING:
-        if (ssflags & SSF_EXCEPTION) {
-            if (conn->x.in.buf) {
-                free(conn->x.in.buf);
-                conn->x.in.buf = 0;
-            }
-            goto handle_exception;
-        }
-
         if (conn->x.in.bufsizebytes_read == 4) {
             /* Reading data.  */
             nread = SOCKET_READ(conn->fd, conn->x.in.pos, conn->x.in.n_left);
             if (nread <= 0) {
                 e = nread ? SOCKET_ERRNO : ECONNRESET;
-                free(conn->x.in.buf);
-                conn->x.in.buf = 0;
                 TRACE_SENDTO_KDC_TCP_ERROR_RECV(context, &conn->addr, e);
                 goto kill_conn;
             }
             conn->x.in.n_left -= nread;
             conn->x.in.pos += nread;
-            if (conn->x.in.n_left <= 0) {
-                /* We win!  */
+            if (conn->x.in.n_left <= 0)
                 return 1;
-            }
         } else {
             /* Reading length.  */
             nread = SOCKET_READ(conn->fd,
@@ -921,17 +862,12 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
             if (conn->x.in.bufsizebytes_read == 4) {
                 unsigned long len = load_32_be (conn->x.in.bufsizebytes);
                 /* Arbitrary 1M cap.  */
-                if (len > 1 * 1024 * 1024) {
-                    e = E2BIG;
+                if (len > 1 * 1024 * 1024)
                     goto kill_conn;
-                }
                 conn->x.in.bufsize = conn->x.in.n_left = len;
                 conn->x.in.buf = conn->x.in.pos = malloc(len);
-                if (conn->x.in.buf == 0) {
-                    /* allocation failure */
-                    e = ENOMEM;
+                if (conn->x.in.buf == 0)
                     goto kill_conn;
-                }
             }
         }
         break;
@@ -940,8 +876,14 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
         abort();
     }
     return 0;
+
+kill_conn:
+    TRACE_SENDTO_KDC_TCP_DISCONNECT(context, &conn->addr);
+    kill_conn(conn, selstate);
+    return 0;
 }
 
+/* Process events on a UDP socket.  Return 1 if we get a reply. */
 static int
 service_udp_fd(krb5_context context, struct conn_state *conn,
                struct select_state *selstate, int ssflags)
@@ -956,7 +898,7 @@ service_udp_fd(krb5_context context, struct conn_state *conn,
     nread = recv(conn->fd, conn->x.in.buf, conn->x.in.bufsize, 0);
     if (nread < 0) {
         TRACE_SENDTO_KDC_UDP_ERROR_RECV(context, &conn->addr, SOCKET_ERRNO);
-        kill_conn(conn, selstate, SOCKET_ERRNO);
+        kill_conn(conn, selstate);
         return 0;
     }
     conn->x.in.pos = conn->x.in.buf + nread;
