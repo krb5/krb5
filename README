@@ -77,7 +77,7 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.11.1 (2013-04-12)
+Major changes in 1.11.2 (2013-04-12)
 ------------------------------------
 
 This is a bugfix release.
