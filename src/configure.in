@@ -1297,6 +1297,7 @@ AC_CONFIG_FILES([build-tools/kadm-server.pc
 	build-tools/krb5-gssapi.pc
 	build-tools/mit-krb5.pc
 	build-tools/mit-krb5-gssapi.pc
+	build-tools/gssrpc.pc
 ])
 V5_AC_OUTPUT_MAKEFILE(.
 
