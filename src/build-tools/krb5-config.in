@@ -97,6 +97,9 @@ while test $# != 0; do
 	gssapi)
 	    library=gssapi
 	    ;;
+	gssrpc)
+	    library=gssrpc
+	    ;;
 	kadm-client)
 	    library=kadm_client
 	    ;;
@@ -139,6 +142,7 @@ if test -n "$do_help"; then
     echo "Libraries:"
     echo "        krb5              Kerberos 5 application"
     echo "        gssapi            GSSAPI application with Kerberos 5 bindings"
+    echo "        gssrpc            GSSAPI RPC application"
     echo "        kadm-client       Kadmin client"
     echo "        kadm-server       Kadmin server"
     echo "        kdb               Application that accesses the kerberos database"
@@ -228,15 +232,15 @@ if test -n "$do_libs"; then
 
     if test $library = 'kadm_server'; then
 	lib_flags="$lib_flags -lkadm5srv_mit -lkdb5 $KDB5_DB_LIB"
-	library=kadm_common
+	library=gssrpc
     fi
 
     if test $library = 'kadm_client'; then
 	lib_flags="$lib_flags -lkadm5clnt_mit"
-	library=kadm_common
+	library=gssrpc
     fi
 
-    if test $library = 'kadm_common'; then
+    if test $library = 'gssrpc'; then
 	lib_flags="$lib_flags -lgssrpc"
 	library=gssapi
     fi
