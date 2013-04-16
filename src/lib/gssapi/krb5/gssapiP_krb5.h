@@ -1291,7 +1291,7 @@ data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
     return code;
 }
 
-#define KRB5_GSS_EXTS_IAKERB_FINISHED 1
+#define GSS_EXTS_FINISHED 2
 
 
 /* Credential store extensions */

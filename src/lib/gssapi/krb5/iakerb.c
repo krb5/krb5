@@ -97,8 +97,8 @@ iakerb_make_finished(krb5_context context,
     if (key == NULL)
         return KRB5KDC_ERR_NULL_KEY;
 
-    code = krb5_k_make_checksum(context, 0, key, KRB5_KEYUSAGE_IAKERB_FINISHED,
-                                conv, &iaf.checksum);
+    code = krb5_k_make_checksum(context, 0, key, KRB5_KEYUSAGE_FINISHED, conv,
+                                &iaf.checksum);
     if (code != 0)
         return code;
 
@@ -129,8 +129,8 @@ iakerb_verify_finished(krb5_context context,
     if (code != 0)
         return code;
 
-    code = krb5_k_verify_checksum(context, key, KRB5_KEYUSAGE_IAKERB_FINISHED,
-                                  conv, &iaf->checksum, &valid);
+    code = krb5_k_verify_checksum(context, key, KRB5_KEYUSAGE_FINISHED, conv,
+                                  &iaf->checksum, &valid);
     if (code == 0 && valid == FALSE)
         code = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 
@@ -163,7 +163,6 @@ iakerb_save_token(iakerb_ctx_id_t ctx, const gss_buffer_t token)
  */
 static krb5_error_code
 iakerb_parse_token(iakerb_ctx_id_t ctx,
-                   int initialContextToken,
                    const gss_buffer_t token,
                    krb5_data *realm,
                    krb5_data **cookie,
@@ -173,7 +172,6 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
     krb5_iakerb_header *iah = NULL;
     unsigned int bodysize;
     uint8_t *body;
-    int flags = 0;
     krb5_data data;
     struct k5input in, seq;
 
@@ -182,12 +180,10 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
         goto cleanup;
     }
 
-    if (initialContextToken)
-        flags |= G_VFY_TOKEN_HDR_WRAPPER_REQUIRED;
-
     body = token->value;
     code = g_verify_token_header(gss_mech_iakerb, &bodysize, &body,
-                                 IAKERB_TOK_PROXY, token->length, flags);
+                                 IAKERB_TOK_PROXY, token->length,
+                                 G_VFY_TOKEN_HDR_WRAPPER_REQUIRED);
     if (code != 0)
         goto cleanup;
 
@@ -232,7 +228,6 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
                   krb5_data *realm,
                   krb5_data *cookie,
                   krb5_data *request,
-                  int initialContextToken,
                   gss_buffer_t token)
 {
     krb5_error_code code;
@@ -269,11 +264,7 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
         memcpy(data->data + data->length, request->data, request->length);
     data->length += request->length;
 
-    if (initialContextToken)
-        tokenSize = g_token_size(gss_mech_iakerb, data->length);
-    else
-        tokenSize = 2 + data->length;
-
+    tokenSize = g_token_size(gss_mech_iakerb, data->length);
     token->value = gssalloc_malloc(tokenSize);
     if (token->value == NULL) {
         code = ENOMEM;
@@ -282,12 +273,7 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
     token->length = tokenSize;
     k5_buf_init_fixed(&buf, token->value, token->length);
 
-    if (initialContextToken) {
-        g_make_token_header(&buf, gss_mech_iakerb, data->length,
-                            IAKERB_TOK_PROXY);
-    } else {
-        k5_buf_add_uint16_be(&buf, IAKERB_TOK_PROXY);
-    }
+    g_make_token_header(&buf, gss_mech_iakerb, data->length, IAKERB_TOK_PROXY);
     k5_buf_add_len(&buf, data->data, data->length);
     assert(buf.len == token->length);
 
@@ -305,7 +291,6 @@ cleanup:
  */
 static krb5_error_code
 iakerb_acceptor_step(iakerb_ctx_id_t ctx,
-                     int initialContextToken,
                      const gss_buffer_t input_token,
                      gss_buffer_t output_token)
 {
@@ -324,8 +309,7 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
         goto cleanup;
     }
 
-    code = iakerb_parse_token(ctx, initialContextToken, input_token, &realm,
-                              NULL, &request);
+    code = iakerb_parse_token(ctx, input_token, &realm, NULL, &request);
     if (code != 0)
         goto cleanup;
 
@@ -374,7 +358,7 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
     } else if (code != 0)
         goto cleanup;
 
-    code = iakerb_make_token(ctx, &realm, NULL, &reply, 0, output_token);
+    code = iakerb_make_token(ctx, &realm, NULL, &reply, output_token);
     if (code != 0)
         goto cleanup;
 
@@ -524,7 +508,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     output_token->value = NULL;
 
     if (input_token != GSS_C_NO_BUFFER && input_token->length > 0) {
-        code = iakerb_parse_token(ctx, 0, input_token, NULL, &cookie, &in);
+        code = iakerb_parse_token(ctx, input_token, NULL, &cookie, &in);
         if (code != 0)
             goto cleanup;
 
@@ -593,9 +577,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     if (out.length != 0) {
         assert(ctx->state != IAKERB_AP_REQ);
 
-        code = iakerb_make_token(ctx, &realm, cookie, &out,
-                                 (input_token == GSS_C_NO_BUFFER),
-                                 output_token);
+        code = iakerb_make_token(ctx, &realm, cookie, &out, output_token);
         if (code != 0)
             goto cleanup;
 
@@ -788,8 +770,7 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
             major_status = GSS_S_DEFECTIVE_TOKEN;
             goto cleanup;
         }
-        code = iakerb_acceptor_step(ctx, initialContextToken,
-                                    input_token, output_token);
+        code = iakerb_acceptor_step(ctx, input_token, output_token);
         if (code == (OM_uint32)KRB5_BAD_MSIZE)
             major_status = GSS_S_DEFECTIVE_TOKEN;
         if (code != 0)

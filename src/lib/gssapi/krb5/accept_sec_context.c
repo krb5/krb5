@@ -378,7 +378,7 @@ kg_process_extension(krb5_context context,
     assert(exts != NULL);
 
     switch (ext_type) {
-    case KRB5_GSS_EXTS_IAKERB_FINISHED:
+    case GSS_EXTS_FINISHED:
         if (exts->iakerb.conv == NULL) {
             code = KRB5KRB_AP_ERR_MSG_TYPE; /* XXX */
         } else {

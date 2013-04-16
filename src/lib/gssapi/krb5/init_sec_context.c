@@ -339,7 +339,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
         k5_buf_add_len(&buf, credmsg.data, credmsg.length);
     }
     if (data->exts->iakerb.conv != NULL) {
-        k5_buf_add_uint32_be(&buf, KRB5_GSS_EXTS_IAKERB_FINISHED);
+        k5_buf_add_uint32_be(&buf, GSS_EXTS_FINISHED);
         k5_buf_add_uint32_be(&buf, finished->length);
         k5_buf_add_len(&buf, finished->data, finished->length);
     }

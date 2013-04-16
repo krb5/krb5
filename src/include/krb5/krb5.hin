@@ -977,6 +977,7 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_PA_REFERRAL               26
 
 #define KRB5_KEYUSAGE_AD_SIGNEDPATH             -21
+#define KRB5_KEYUSAGE_FINISHED                  41
 #define KRB5_KEYUSAGE_IAKERB_FINISHED           42
 #define KRB5_KEYUSAGE_PA_PKINIT_KX              44
 #define KRB5_KEYUSAGE_PA_OTP_REQUEST  45  /**< See RFC 6560 section 4.2 */
