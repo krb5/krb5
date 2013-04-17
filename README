@@ -70,6 +70,26 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in krb5-1.10.5 (2013-04-17)
+-----------------------------------------
+
+This is a bugfix release.  The krb5-1.10 release series is in
+maintenance, and for new deployments, installers should prefer the
+krb5-1.11 release series or later.
+
+* Fix KDC null pointer dereference in TGS-REQ handling [CVE-2013-1416]
+
+* Incremental propagation could erroneously act as if a slave's
+  database were current after the slave received a full dump that
+  failed to load.
+
+krb5-1.10.5 changes by ticket ID
+--------------------------------
+
+7600    KDC TGS-REQ null deref [CVE-2013-1416]
+7606    Fix condition with empty body
+7607    Reset ulog if database load failed
+
 Major changes in krb5-1.10.4 (2013-03-01)
 -----------------------------------------
 
