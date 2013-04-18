@@ -863,13 +863,14 @@ pkinit_server_return_padata(krb5_context context,
             goto cleanup;
         }
 
-        /* check if PA_TYPE of 132 is present which means the client is
-         * requesting that a checksum is send back instead of the nonce
+        /* check if PA_TYPE of KRB5_PADATA_AS_CHECKSUM (132) is present which
+         * means the client is requesting that a checksum is send back instead
+         * of the nonce.
          */
         for (i = 0; request->padata[i] != NULL; i++) {
             pkiDebug("%s: Checking pa_type 0x%08x\n",
                      __FUNCTION__, request->padata[i]->pa_type);
-            if (request->padata[i]->pa_type == 132)
+            if (request->padata[i]->pa_type == KRB5_PADATA_AS_CHECKSUM)
                 fixed_keypack = 1;
         }
         pkiDebug("%s: return checksum instead of nonce = %d\n",

@@ -1812,6 +1812,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_PADATA_PAC_REQUEST         128 /**< include Windows PAC */
 #define KRB5_PADATA_FOR_USER            129 /**< username protocol transition request */
 #define KRB5_PADATA_S4U_X509_USER       130 /**< certificate protocol transition request */
+#define KRB5_PADATA_AS_CHECKSUM         132 /**< AS checksum */
 #define KRB5_PADATA_FX_COOKIE           133
 #define KRB5_PADATA_FX_FAST             136
 #define KRB5_PADATA_FX_ERROR            137

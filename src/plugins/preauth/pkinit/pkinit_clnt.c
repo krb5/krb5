@@ -198,7 +198,7 @@ pa_pkinit_gen_req(krb5_context context,
      */
     if ((return_pa_data[0]->pa_type == KRB5_PADATA_PK_AS_REP_OLD
          && reqctx->opts->win2k_require_cksum) || (longhorn == 1)) {
-        return_pa_data[1]->pa_type = 132;
+        return_pa_data[1]->pa_type = KRB5_PADATA_AS_CHECKSUM;
         return_pa_data[1]->length = 0;
         return_pa_data[1]->contents = NULL;
     } else {
