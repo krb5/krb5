@@ -1783,45 +1783,46 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_PADATA_NONE                0
 #define KRB5_PADATA_AP_REQ              1
 #define KRB5_PADATA_TGS_REQ             KRB5_PADATA_AP_REQ
-#define KRB5_PADATA_ENC_TIMESTAMP       2
-#define KRB5_PADATA_PW_SALT             3
+#define KRB5_PADATA_ENC_TIMESTAMP       2 /**< RFC 4120 */
+#define KRB5_PADATA_PW_SALT             3 /**< RFC 4120 */
 #if 0                           /* Not used */
 #define KRB5_PADATA_ENC_ENCKEY          4  /* Key encrypted within itself */
 #endif
-#define KRB5_PADATA_ENC_UNIX_TIME       5  /**< timestamp encrypted in key */
-#define KRB5_PADATA_ENC_SANDIA_SECURID  6  /**< SecurId passcode */
-#define KRB5_PADATA_SESAME              7  /**< Sesame project */
-#define KRB5_PADATA_OSF_DCE             8  /**< OSF DCE */
-#define KRB5_CYBERSAFE_SECUREID         9  /**< Cybersafe */
-#define KRB5_PADATA_AFS3_SALT           10 /**< Cygnus */
-#define KRB5_PADATA_ETYPE_INFO          11 /**< Etype info for preauth */
-#define KRB5_PADATA_SAM_CHALLENGE       12 /**< draft challenge system */
-#define KRB5_PADATA_SAM_RESPONSE        13 /**< draft challenge system response */
+#define KRB5_PADATA_ENC_UNIX_TIME       5  /**< timestamp encrypted in key. RFC 4120 */
+#define KRB5_PADATA_ENC_SANDIA_SECURID  6  /**< SecurId passcode. RFC 4120 */
+#define KRB5_PADATA_SESAME              7  /**< Sesame project. RFC 4120 */
+#define KRB5_PADATA_OSF_DCE             8  /**< OSF DCE. RFC 4120 */
+#define KRB5_CYBERSAFE_SECUREID         9  /**< Cybersafe. RFC 4120 */
+#define KRB5_PADATA_AFS3_SALT           10 /**< Cygnus. RFC 4120, 3961 */
+#define KRB5_PADATA_ETYPE_INFO          11 /**< Etype info for preauth. RFC 4120 */
+#define KRB5_PADATA_SAM_CHALLENGE       12 /**< SAM/OTP */
+#define KRB5_PADATA_SAM_RESPONSE        13 /**< SAM/OTP */
 #define KRB5_PADATA_PK_AS_REQ_OLD       14 /**< PKINIT */
 #define KRB5_PADATA_PK_AS_REP_OLD       15 /**< PKINIT */
-#define KRB5_PADATA_PK_AS_REQ           16 /**< PKINIT */
-#define KRB5_PADATA_PK_AS_REP           17 /**< PKINIT */
-#define KRB5_PADATA_ETYPE_INFO2         19
-#define KRB5_PADATA_USE_SPECIFIED_KVNO  20
-#define KRB5_PADATA_SVR_REFERRAL_INFO   20 /**< Windows 2000 referrals */
-#define KRB5_PADATA_SAM_REDIRECT        21
-#define KRB5_PADATA_GET_FROM_TYPED_DATA 22
+#define KRB5_PADATA_PK_AS_REQ           16 /**< PKINIT. RFC 4556 */
+#define KRB5_PADATA_PK_AS_REP           17 /**< PKINIT. RFC 4556 */
+#define KRB5_PADATA_ETYPE_INFO2         19 /**< RFC 4120 */
+#define KRB5_PADATA_USE_SPECIFIED_KVNO  20 /**< RFC 4120 */
+#define KRB5_PADATA_SVR_REFERRAL_INFO   20 /**< Windows 2000 referrals. RFC 6820 */
+#define KRB5_PADATA_SAM_REDIRECT        21 /**< SAM/OTP. RFC 4120 */
+#define KRB5_PADATA_GET_FROM_TYPED_DATA 22 /**< Embedded in typed data. RFC 4120 */
 #define KRB5_PADATA_REFERRAL            25 /**< draft referral system */
 #define KRB5_PADATA_SAM_CHALLENGE_2     30 /**< draft challenge system, updated */
 #define KRB5_PADATA_SAM_RESPONSE_2      31 /**< draft challenge system, updated */
+/* MS-KILE */
 #define KRB5_PADATA_PAC_REQUEST         128 /**< include Windows PAC */
 #define KRB5_PADATA_FOR_USER            129 /**< username protocol transition request */
 #define KRB5_PADATA_S4U_X509_USER       130 /**< certificate protocol transition request */
 #define KRB5_PADATA_AS_CHECKSUM         132 /**< AS checksum */
-#define KRB5_PADATA_FX_COOKIE           133
-#define KRB5_PADATA_FX_FAST             136
-#define KRB5_PADATA_FX_ERROR            137
-#define KRB5_PADATA_ENCRYPTED_CHALLENGE 138
-#define KRB5_PADATA_OTP_CHALLENGE       141 /**< See RFC 6560 section 4.1 */
-#define KRB5_PADATA_OTP_REQUEST         142 /**< See RFC 6560 section 4.2 */
-#define KRB5_PADATA_OTP_PIN_CHANGE      144 /**< See RFC 6560 section 4.3 */
-#define KRB5_PADATA_PKINIT_KX           147
-#define KRB5_ENCPADATA_REQ_ENC_PA_REP   149
+#define KRB5_PADATA_FX_COOKIE           133 /**< RFC 6113 */
+#define KRB5_PADATA_FX_FAST             136 /**< RFC 6113 */
+#define KRB5_PADATA_FX_ERROR            137 /**< RFC 6113 */
+#define KRB5_PADATA_ENCRYPTED_CHALLENGE 138 /**< RFC 6113 */
+#define KRB5_PADATA_OTP_CHALLENGE       141 /**< RFC 6560 section 4.1 */
+#define KRB5_PADATA_OTP_REQUEST         142 /**< RFC 6560 section 4.2 */
+#define KRB5_PADATA_OTP_PIN_CHANGE      144 /**< RFC 6560 section 4.3 */
+#define KRB5_PADATA_PKINIT_KX           147 /**< RFC 6112 */
+#define KRB5_ENCPADATA_REQ_ENC_PA_REP   149 /**< RFC 6806 */
 
 #define KRB5_SAM_USE_SAD_AS_KEY         0x80000000
 #define KRB5_SAM_SEND_ENCRYPTED_SAD     0x40000000
