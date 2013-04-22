@@ -266,6 +266,28 @@ get_context_default_dir(krb5_context context, char **dirname_out)
     return 0;
 }
 
+/*
+ * If the default ccache name for context is a subsidiary file in a directory
+ * collection, set *subsidiary_out to the residual value.  Otherwise set
+ * *subsidiary_out to NULL.
+ */
+static krb5_error_code
+get_context_subsidiary_file(krb5_context context, char **subsidiary_out)
+{
+    const char *defname;
+    char *residual;
+
+    *subsidiary_out = NULL;
+    defname = krb5_cc_default_name(context);
+    if (defname == NULL || strncmp(defname, "DIR::", 5) != 0)
+        return 0;
+    residual = strdup(defname + 4);
+    if (residual == NULL)
+        return ENOMEM;
+    *subsidiary_out = residual;
+    return 0;
+}
+
 static const char * KRB5_CALLCONV
 dcc_get_name(krb5_context context, krb5_ccache cache)
 {
@@ -562,6 +584,18 @@ dcc_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor_out)
 
     *cursor_out = NULL;
 
+    /* If the default cache is a subsidiary file, make a cursor with the
+     * specified file as the primary but with no directory collection. */
+    ret = get_context_subsidiary_file(context, &primary);
+    if (ret)
+        goto cleanup;
+    if (primary != NULL) {
+        ret = make_cursor(NULL, primary, NULL, cursor_out);
+        if (ret)
+            free(primary);
+        return ret;
+    }
+
     /* Open the directory for the context's default cache. */
     ret = get_context_default_dir(context, &dirname);
     if (ret || dirname == NULL)
@@ -607,15 +641,16 @@ dcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
     struct stat sb;
 
     *cache_out = NULL;
-    if (data->dir == NULL)      /* Empty cursor */
-        return 0;
 
-    /* Return the primary cache if we haven't yet. */
+    /* Return the primary or specified subsidiary cache if we haven't yet. */
     if (data->first) {
         data->first = FALSE;
         if (data->primary != NULL && stat(data->primary + 1, &sb) == 0)
             return dcc_resolve(context, cache_out, data->primary);
     }
+
+    if (data->dir == NULL)      /* No directory collection */
+        return 0;
 
     /* Look for the next filename of the correct form, without repeating the
      * primary cache. */

@@ -11,6 +11,7 @@ dccname = 'DIR:%s' % ccdir
 duser = 'DIR::%s/tkt1' % ccdir
 dalice = 'DIR::%s/tkt2' % ccdir
 dbob = 'DIR::%s/tkt3' % ccdir
+dnoent = 'DIR::%s/noent' % ccdir
 realm.kinit('user', password('user'), flags=['-c', duser])
 realm.kinit('alice', password('alice'), flags=['-c', dalice])
 realm.kinit('bob', password('bob'), flags=['-c', dbob])
@@ -30,6 +31,8 @@ cursor_test('file-default2', [realm.ccache], [fccname])
 cursor_test('file-default3', [fccname], [fccname])
 
 cursor_test('dir', [dccname], [duser, dalice, dbob])
+cursor_test('dir-subsidiary', [duser], [duser])
+cursor_test('dir-nofile', [dnoent], [])
 
 mfoo = 'MEMORY:foo'
 mbar = 'MEMORY:bar'
