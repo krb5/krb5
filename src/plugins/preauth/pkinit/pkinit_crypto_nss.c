@@ -1911,8 +1911,9 @@ cert_load_ca_certs_from_slot(krb5_context context,
                  __FUNCTION__, PK11_GetTokenName(slot));
         if (PK11_Authenticate(slot, PR_TRUE,
                               crypto_pwcb_prep(id, context)) != SECSuccess) {
-            pkiDebug("%s: error logging into \"%s\", skipping\n",
-                     __FUNCTION__, PK11_GetTokenName(slot));
+            pkiDebug("%s: error logging into \"%s\": %s, skipping\n",
+                     __FUNCTION__, PK11_GetTokenName(slot),
+                     PORT_ErrorToName(PORT_GetError()));
             return SECFailure;
         }
     }
@@ -1983,8 +1984,9 @@ cert_load_certs_with_keys_from_slot(krb5_context context,
         if (PK11_Authenticate(slot, PR_TRUE,
                               crypto_pwcb_prep(id_cryptoctx,
                                                context)) != SECSuccess) {
-            pkiDebug("%s: error logging into \"%s\", skipping\n",
-                     __FUNCTION__, PK11_GetTokenName(slot));
+            pkiDebug("%s: error logging into \"%s\": %s, skipping\n",
+                     __FUNCTION__, PK11_GetTokenName(slot),
+                     PORT_ErrorToName(PORT_GetError()));
             return ENOMEM;
         }
     }
