@@ -82,6 +82,7 @@ check-pytests:: gcred hist kdbtest t_localauth
 	$(RUNPYTEST) $(srcdir)/t_iprop.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kprop.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_anonpkinit.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_authpkinit.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_policy.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_localauth.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadm5_hook.py $(PYTESTFLAGS)
