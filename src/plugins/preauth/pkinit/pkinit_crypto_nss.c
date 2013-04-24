@@ -2642,6 +2642,32 @@ crypto_load_files(krb5_context context,
             }
         }
 
+        /* "Log in" (provide an encryption password) if the PEM slot now
+         * requires it. */
+        PK11_TokenRefresh(slot);
+
+        /*
+         * Unlike most tokens, this one won't self-destruct if we throw wrong
+         * passwords at it, but it will cause the module to clear the
+         * needs-login flag so that we can continue importing PEM items.
+         */
+        if (!PK11_IsLoggedIn(slot, crypto_pwcb_prep(id_cryptoctx,
+                                                    context)) &&
+            PK11_NeedLogin(slot)) {
+            pkiDebug("%s: logging in to token \"%s\"\n",
+                     __FUNCTION__, PK11_GetTokenName(slot));
+            if (PK11_Authenticate(slot, PR_TRUE,
+                                  crypto_pwcb_prep(id_cryptoctx,
+                                                   context)) != SECSuccess) {
+                pkiDebug("%s: error logging into \"%s\": %s, skipping\n",
+                         __FUNCTION__, PK11_GetTokenName(slot),
+                         PORT_ErrorToName(PORT_GetError()));
+                status = SECFailure;
+                PK11_DestroyGenericObject(kobj->obj);
+                kobj->obj = NULL;
+            }
+        }
+
         /* If we loaded a key and a certificate, see if they match. */
         if (cobj != NULL && cobj->cert != NULL && kobj->obj != NULL) {
             key = PK11_FindPrivateKeyFromCert(slot, cobj->cert,
