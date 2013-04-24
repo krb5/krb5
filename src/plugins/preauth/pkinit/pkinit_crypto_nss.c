@@ -2498,15 +2498,13 @@ crypto_load_files(krb5_context context,
 {
     PK11SlotInfo *slot;
     struct _pkinit_identity_crypto_file *cobj, *kobj, **id_objects;
-    PRBool permanent, match;
-    CERTCertificate *cert;
-    CERTCertList *before, *after;
-    CERTCertListNode *anode, *bnode;
+    PRBool permanent;
     SECKEYPrivateKey *key;
     CK_ATTRIBUTE attrs[4];
     CK_BBOOL cktrue = CK_TRUE, cktrust;
     CK_OBJECT_CLASS keyclass = CKO_PRIVATE_KEY, certclass = CKO_CERTIFICATE;
-    SECItem a, b, tmp, *crl, **crls;
+    CERTCertificate *cert;
+    SECItem tmp, *crl, **crls;
     SECStatus status;
     int i, j, n_attrs, n_objs, n_crls;
 
@@ -2528,7 +2526,6 @@ crypto_load_files(krb5_context context,
     /* Load the certificate first to work around RHBZ#859535. */
     cobj = NULL;
     if (certfile != NULL) {
-        before = PK11_ListCertsInSlot(slot);
         n_attrs = 0;
         crypto_set_attributes(&attrs[n_attrs++], CKA_CLASS,
                               &certclass, sizeof(certclass));
@@ -2570,62 +2567,42 @@ crypto_load_files(krb5_context context,
                 id_objects[i++] = NULL;
                 id_cryptoctx->id_objects = id_objects;
             }
-        }
-        /* Add any certs which are in the slot now, but which weren't
-         * before, to the right list of certs.  (I don't see an API to
-         * get the certificate from the generic object that we just
-         * created, so we do it the hard way.) */
-        after = PK11_ListCertsInSlot(slot);
-        if (after != NULL) {
-            for (anode = CERT_LIST_HEAD(after);
-                 (anode != NULL) &&
-                     (anode->cert != NULL) &&
-                     !CERT_LIST_END(anode, after);
-                 anode = CERT_LIST_NEXT(anode)) {
-                match = PR_FALSE;
-                a = anode->cert->derCert;
-                if (before != NULL) {
-                    for (bnode = CERT_LIST_HEAD(before);
-                         (bnode != NULL) &&
-                             (bnode->cert != NULL) &&
-                             !CERT_LIST_END(bnode, before);
-                         bnode = CERT_LIST_NEXT(bnode)) {
-                        b = bnode->cert->derCert;
-                        if (SECITEM_ItemsAreEqual(&a, &b)) {
-                            match = PR_TRUE;
-                            break;
-                        }
-                    }
-                }
-                if (!match) {
-                    cert = CERT_DupCertificate(anode->cert);
-                    if (cert_self) {
-                        /* Add to the identity list. */
-                        if (cert_maybe_add_to_list
-                            (id_cryptoctx->id_certs, cert) != SECSuccess) {
-                            status = SECFailure;
-                        }
-                        cobj->cert = CERT_DupCertificate(cert);
-                    } else if (cert_mark_trusted) {
-                        /* Add to the CA list. */
-                        if (cert_maybe_add_to_list
-                            (id_cryptoctx->ca_certs, cert) != SECSuccess) {
-                            status = SECFailure;
-                        }
-                    } else {
-                        /* Don't just lose the ref. */
-                        CERT_DestroyCertificate(cert);
-                    }
+            /* Find the certificate that goes with this generic object. */
+            memset(&tmp, 0, sizeof(tmp));
+            status = PK11_ReadRawAttribute(PK11_TypeGeneric, cobj->obj,
+                                           CKA_VALUE, &tmp);
+            if (status == SECSuccess) {
+                cobj->cert = CERT_FindCertByDERCert(CERT_GetDefaultCertDB(),
+                                                    &tmp);
+                SECITEM_FreeItem(&tmp, PR_FALSE);
+            } else {
+                pkiDebug("%s: error locating certificate \"%s\"\n",
+                         __FUNCTION__, certfile);
+            }
+            /* Save a reference to the right list. */
+            if (cobj->cert != NULL) {
+                cert = CERT_DupCertificate(cobj->cert);
+                if (cert == NULL)
+                    return SECFailure;
+                if (cert_self) {
+                    /* Add to the identity list. */
+                    if (cert_maybe_add_to_list(id_cryptoctx->id_certs,
+                                               cert) != SECSuccess)
+                        status = SECFailure;
+                } else if (cert_mark_trusted) {
+                    /* Add to the CA list. */
+                    if (cert_maybe_add_to_list(id_cryptoctx->ca_certs,
+                                               cert) != SECSuccess)
+                        status = SECFailure;
+                } else {
+                    /* Don't just lose the reference. */
+                    CERT_DestroyCertificate(cert);
                 }
             }
-            CERT_DestroyCertList(after);
-        }
-        if (before != NULL) {
-            CERT_DestroyCertList(before);
         }
     }
 
-    /* Now what should be the corresponding private key. */
+    /* Now load what should be the corresponding private key. */
     kobj = NULL;
     if (status == SECSuccess && keyfile != NULL) {
         n_attrs = 0;
@@ -2666,7 +2643,7 @@ crypto_load_files(krb5_context context,
         }
 
         /* If we loaded a key and a certificate, see if they match. */
-        if (cobj != NULL && cobj->cert != NULL) {
+        if (cobj != NULL && cobj->cert != NULL && kobj->obj != NULL) {
             key = PK11_FindPrivateKeyFromCert(slot, cobj->cert,
                                               crypto_pwcb_prep(id_cryptoctx,
                                                                context));
