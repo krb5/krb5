@@ -2497,7 +2497,7 @@ crypto_load_files(krb5_context context,
                   pkinit_identity_crypto_context id_cryptoctx)
 {
     PK11SlotInfo *slot;
-    struct _pkinit_identity_crypto_file *obj, **id_objects;
+    struct _pkinit_identity_crypto_file *cobj, *kobj, **id_objects;
     PRBool permanent, match;
     CERTCertificate *cert;
     CERTCertList *before, *after;
@@ -2524,52 +2524,10 @@ crypto_load_files(krb5_context context,
     }
     if ((certfile == NULL) && (crlfile == NULL))
         return SECFailure;
-    /* If we're told to load a key, then we know for sure that it's a
-     * key+cert combination, so go ahead and try to load the key first.
-     * That way, if we're just guessing that there's a key, and we're
-     * wrong, we'll just skip the cert. */
-    status = SECSuccess;
-    if (keyfile != NULL) {
-        n_attrs = 0;
-        crypto_set_attributes(&attrs[n_attrs++], CKA_CLASS,
-                              &keyclass, sizeof(keyclass));
-        crypto_set_attributes(&attrs[n_attrs++], CKA_TOKEN,
-                              &cktrue, sizeof(cktrue));
-        crypto_set_attributes(&attrs[n_attrs++], CKA_LABEL,
-                              (char *) keyfile, strlen(keyfile) + 1);
-        permanent = PR_FALSE;   /* set lifetime to "session" */
-        obj = PORT_ArenaZAlloc(id_cryptoctx->pool, sizeof(*obj));
-        if (obj == NULL)
-            return SECFailure;
-        obj->obj = PK11_CreateGenericObject(slot, attrs, n_attrs, permanent);
-        if (obj->obj == NULL) {
-            pkiDebug("%s: error loading key \"%s\"\n", __FUNCTION__, keyfile);
-            status = SECFailure;
-        } else {
-            pkiDebug("%s: loaded key \"%s\"\n", __FUNCTION__, keyfile);
-            status = SECSuccess;
-            /* Add it to the list of objects that we're keeping. */
-            if (id_cryptoctx->id_objects != NULL)
-                for (i = 0; id_cryptoctx->id_objects[i] != NULL; i++)
-                    continue;
-            else
-                i = 0;
-            id_objects = PORT_ArenaZAlloc(id_cryptoctx->pool,
-                                          sizeof(id_objects[0]) * (i + 2));
-            if (id_objects != NULL) {
-                n_objs = i;
-                for (i = 0; i < n_objs; i++)
-                    id_objects[i] = id_cryptoctx->id_objects[i];
-                id_objects[i++] = obj;
-                id_objects[i++] = NULL;
-                id_cryptoctx->id_objects = id_objects;
-            }
-        }
-    }
 
-    /* If we loaded a key, or there wasn't one, see if we were told to
-     * load a cert. */
-    if ((status == SECSuccess) && (certfile != NULL)) {
+    /* Load the certificate first to work around RHBZ#859535. */
+    cobj = NULL;
+    if (certfile != NULL) {
         before = PK11_ListCertsInSlot(slot);
         n_attrs = 0;
         crypto_set_attributes(&attrs[n_attrs++], CKA_CLASS,
@@ -2582,13 +2540,13 @@ crypto_load_files(krb5_context context,
         crypto_set_attributes(&attrs[n_attrs++], CKA_TRUST,
                               &cktrust, sizeof(cktrust));
         permanent = PR_FALSE;   /* set lifetime to "session" */
-        obj = PORT_ArenaZAlloc(id_cryptoctx->pool, sizeof(*obj));
-        if (obj == NULL)
+        cobj = PORT_ArenaZAlloc(id_cryptoctx->pool, sizeof(*cobj));
+        if (cobj == NULL)
             return SECFailure;
-        obj->name = reassemble_files_name(id_cryptoctx->pool,
-                                          certfile, keyfile);
-        obj->obj = PK11_CreateGenericObject(slot, attrs, n_attrs, permanent);
-        if (obj->obj == NULL) {
+        cobj->name = reassemble_files_name(id_cryptoctx->pool,
+                                           certfile, keyfile);
+        cobj->obj = PK11_CreateGenericObject(slot, attrs, n_attrs, permanent);
+        if (cobj->obj == NULL) {
             pkiDebug("%s: error loading %scertificate \"%s\"\n",
                      __FUNCTION__, cert_mark_trusted ? "CA " : "", certfile);
             status = SECFailure;
@@ -2608,7 +2566,7 @@ crypto_load_files(krb5_context context,
                 n_objs = i;
                 for (i = 0; i < n_objs; i++)
                     id_objects[i] = id_cryptoctx->id_objects[i];
-                id_objects[i++] = obj;
+                id_objects[i++] = cobj;
                 id_objects[i++] = NULL;
                 id_cryptoctx->id_objects = id_objects;
             }
@@ -2647,7 +2605,7 @@ crypto_load_files(krb5_context context,
                             (id_cryptoctx->id_certs, cert) != SECSuccess) {
                             status = SECFailure;
                         }
-                        obj->cert = CERT_DupCertificate(cert);
+                        cobj->cert = CERT_DupCertificate(cert);
                     } else if (cert_mark_trusted) {
                         /* Add to the CA list. */
                         if (cert_maybe_add_to_list
@@ -2665,19 +2623,62 @@ crypto_load_files(krb5_context context,
         if (before != NULL) {
             CERT_DestroyCertList(before);
         }
-        if ((keyfile != NULL) && (obj->cert != NULL)) {
-            key = PK11_FindPrivateKeyFromCert(slot, obj->cert,
+    }
+
+    /* Now what should be the corresponding private key. */
+    kobj = NULL;
+    if (status == SECSuccess && keyfile != NULL) {
+        n_attrs = 0;
+        crypto_set_attributes(&attrs[n_attrs++], CKA_CLASS,
+                              &keyclass, sizeof(keyclass));
+        crypto_set_attributes(&attrs[n_attrs++], CKA_TOKEN,
+                              &cktrue, sizeof(cktrue));
+        crypto_set_attributes(&attrs[n_attrs++], CKA_LABEL,
+                              (char *)keyfile, strlen(keyfile) + 1);
+        permanent = PR_FALSE;   /* set lifetime to "session" */
+        kobj = PORT_ArenaZAlloc(id_cryptoctx->pool, sizeof(*kobj));
+        if (kobj == NULL)
+            return SECFailure;
+        kobj->obj = PK11_CreateGenericObject(slot, attrs, n_attrs, permanent);
+        if (kobj->obj == NULL) {
+            pkiDebug("%s: error loading key \"%s\"\n", __FUNCTION__, keyfile);
+            status = SECFailure;
+        } else {
+            pkiDebug("%s: loaded key \"%s\"\n", __FUNCTION__, keyfile);
+            status = SECSuccess;
+            /* Add it to the list of objects that we're keeping. */
+            if (id_cryptoctx->id_objects != NULL) {
+                for (i = 0; id_cryptoctx->id_objects[i] != NULL; i++)
+                    continue;
+            } else {
+                i = 0;
+            }
+            id_objects = PORT_ArenaZAlloc(id_cryptoctx->pool,
+                                          sizeof(id_objects[0]) * (i + 2));
+            if (id_objects != NULL) {
+                n_objs = i;
+                for (i = 0; i < n_objs; i++)
+                    id_objects[i] = id_cryptoctx->id_objects[i];
+                id_objects[i++] = kobj;
+                id_objects[i++] = NULL;
+                id_cryptoctx->id_objects = id_objects;
+            }
+        }
+
+        /* If we loaded a key and a certificate, see if they match. */
+        if (cobj != NULL && cobj->cert != NULL) {
+            key = PK11_FindPrivateKeyFromCert(slot, cobj->cert,
                                               crypto_pwcb_prep(id_cryptoctx,
                                                                context));
             if (key == NULL) {
-                pkiDebug("%s: no key private found for \"%s\"(%s), "
+                pkiDebug("%s: no private key found for \"%s\"(%s), "
                          "even though we just loaded that key?\n",
                          __FUNCTION__,
-                         obj->cert->nickname ?
-                         obj->cert->nickname : "(no name)",
+                         cobj->cert->nickname ?
+                         cobj->cert->nickname : "(no name)",
                          certfile);
-            } else
-                SECKEY_DestroyPrivateKey(req_cryptoctx->client_dh_privkey);
+                status = SECFailure;
+            }
         }
     }
 
