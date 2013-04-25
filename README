@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2012 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2013 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -70,9 +70,48 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in krb5-1.9.5 (2013-04-25)
+----------------------------------------
 
-Major changes in 1.9.4
-----------------------
+This is a bugfix release.  The krb5-1.9 release series has reached the
+end of its maintenance period, and krb5-1.9.5 is the last planned
+release in the series.  For new deployments, installers should prefer
+the krb5-1.11 release series or later.
+
+* Fix KDC null pointer dereference in TGS-REQ handling [CVE-2013-1416]
+
+* Fix PKINIT null pointer dereference vulnerability [CVE-2013-1415]
+
+* Fix KDC heap corruption vulnerability [CVE-2012-1015]
+
+* Prevent the KDC from returning a host-based service principal
+  referral to the local realm.
+
+* Incremental propagation could erroneously act as if a slave's
+  database were current after the slave received a full dump that
+  failed to load.
+
+krb5-1.9.5 changes by ticket ID
+-------------------------------
+
+7225    Fix KDC heap corruption vuln [CVE-2012-1015]
+7609    Don't return a host referral to the service realm
+7610    Fix spurious clock skew caused by gak_fct delay
+7611    Ensure null termination of AFS salts
+7612    Make verify_init_creds work with existing ccache
+7613    Fail during configure if unable to find ar
+7614    Avoid side effects in assert expressions
+7615    Fix gss_str_to_oid for OIDs with zero-valued arcs
+7616    Fix no_host_referral concatention in KDC
+7617    Fix kdb5_util dump.c uninitialized warnings
+7618    Minor pointer management patches
+7619    PKINIT null pointer deref [CVE-2013-1415]
+7622    KDC TGS-REQ null deref [CVE-2013-1416]
+7623    Fix condition with empty body
+7624    Reset ulog if database load failed
+
+Major changes in krb5-1.9.4 (2012-06-20)
+----------------------------------------
 
 This is a bugfix release.
 
@@ -101,8 +140,8 @@ krb5-1.9.4 changes by ticket ID
 7169    Export krb5_set_trace_callback/filename
 7170    Export gss_mech_krb5_wrong from libgssapi_krb5
 
-Major changes in 1.9.3
-----------------------
+Major changes in krb5-1.9.3 (2012-02-06)
+----------------------------------------
 
 This is primarily a bugfix release.
 
@@ -126,8 +165,8 @@ krb5-1.9.3 changes by ticket ID
 7068    Fix implicit declaration in ksu for some builds
 7069    krb5_server_decrypt_ticket_keytab wrongly succeeds
 
-Major changes in 1.9.2
-----------------------
+Major changes in krb5-1.9.2 (2011-11-02)
+----------------------------------------
 
 This is primarily a bugfix release.
 
@@ -165,8 +204,8 @@ krb5-1.9.2 changes by ticket ID
         CVE-2011-1529]
 6990    fix tar invocation in mkrel
 
-Major changes in 1.9.1
-----------------------
+Major changes in krb5-1.9.1 (2011-05-05)
+----------------------------------------
 
 This is primarily a bugfix release.
 
@@ -207,8 +246,8 @@ krb5-1.9.1 changes by ticket ID
 6881    KDC double-free when PKINIT enabled [MITKRB5-SA-2011-003 CVE-2011-0284]
 6899    kadmind frees invalid pointer [MITKRB5-SA-2011-004 CVE-2011-0285]
 
-Major changes in 1.9
---------------------
+Major changes in krb5-1.9 (2010-12-22)
+--------------------------------------
 
 Additional background information on these changes may be found at
 
@@ -464,6 +503,7 @@ reports, suggestions, and valuable resources:
     Arlene Berry
     Jeff Blaine
     Radoslav Bodo
+    Sumit Bose
     Emmanuel Bouillon
     Michael Calmer
     Julien Chaffraix
@@ -500,6 +540,7 @@ reports, suggestions, and valuable resources:
     Philip Guenther
     Dominic Hargreaves
     Jakob Haufe
+    Matthieu Hautreux
     Paul B. Henson
     Jeff Hodges
     Christopher Hogan
@@ -554,19 +595,25 @@ reports, suggestions, and valuable resources:
     Michael Spang
     Michael Ströder
     Bjørn Tore Sund
+    Joe Travaglini
     Rathor Vipin
     Jorgen Wahlsten
     Stef Walter
     Max (Weijun) Wang
     John Washington
+    Stef Walter
+    Xi Wang
     Kevin Wasserman
     Margaret Wasserman
     Marcus Watts
+    Andreas Wiese
     Simon Wilkinson
     Nicolas Williams
     Ross Wilper
     Xu Qiang
+    Nickolai Zeldovich
     Hanz van Zijst
+    Gertjan Zwartjes
 
 The above is not an exhaustive list; many others have contributed in
 various ways to the MIT Kerberos development effort over the years.
