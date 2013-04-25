@@ -770,11 +770,11 @@ crypto_get_p12_slot(struct _pkinit_identity_crypto_context *id)
 
 /* Close the slot which we've been using for holding imported PKCS12
  * certificates and keys. */
-static int
+static void
 crypto_close_p12_slot(struct _pkinit_identity_crypto_context *id)
 {
-    SECMOD_CloseUserDB(id->id_p12_slot.slot);
-    return 0;
+    PK11_FreeSlot(id->id_p12_slot.slot);
+    id->id_p12_slot.slot = NULL;
 }
 
 void
@@ -791,25 +791,23 @@ pkinit_fini_identity_crypto(pkinit_identity_crypto_context id_cryptoctx)
     CERT_DestroyCertList(id_cryptoctx->id_certs);
     if (id_cryptoctx->id_objects != NULL)
         for (i = 0; id_cryptoctx->id_objects[i] != NULL; i++) {
-            PK11_DestroyGenericObjects(id_cryptoctx->id_objects[i]->obj);
             if (id_cryptoctx->id_objects[i]->cert != NULL)
                 CERT_DestroyCertificate(id_cryptoctx->id_objects[i]->cert);
+            PK11_DestroyGenericObject(id_cryptoctx->id_objects[i]->obj);
         }
     if (id_cryptoctx->id_p12_slot.slot != NULL)
-        if ((i = crypto_close_p12_slot(id_cryptoctx)) != 0)
-            pkiDebug("%s: error closing pkcs12 slot: %s\n",
-                     __FUNCTION__, strerror(i));
+        crypto_close_p12_slot(id_cryptoctx);
     if (id_cryptoctx->id_userdbs != NULL)
         for (i = 0; id_cryptoctx->id_userdbs[i] != NULL; i++)
-            SECMOD_CloseUserDB(id_cryptoctx->id_userdbs[i]->userdb);
+            PK11_FreeSlot(id_cryptoctx->id_userdbs[i]->userdb);
     if (id_cryptoctx->id_modules != NULL)
         for (i = 0; id_cryptoctx->id_modules[i] != NULL; i++)
-            SECMOD_UnloadUserModule(id_cryptoctx->id_modules[i]->module);
+            SECMOD_DestroyModule(id_cryptoctx->id_modules[i]->module);
     if (id_cryptoctx->id_crls != NULL)
         for (i = 0; id_cryptoctx->id_crls[i] != NULL; i++)
             CERT_UncacheCRL(CERT_GetDefaultCertDB(), id_cryptoctx->id_crls[i]);
     if (id_cryptoctx->pem_module != NULL)
-        SECMOD_UnloadUserModule(id_cryptoctx->pem_module);
+        SECMOD_DestroyModule(id_cryptoctx->pem_module);
     PORT_FreeArena(id_cryptoctx->pool, PR_TRUE);
 }
 
@@ -2150,7 +2148,7 @@ crypto_load_pkcs11(krb5_context context,
     if (!module->module->loaded) {
         pkiDebug("%s: error really loading PKCS11 module \"%s\"",
                  __FUNCTION__, idopts->p11_module_name);
-        SECMOD_UnloadUserModule(module->module);
+        SECMOD_DestroyModule(module->module);
         return SECFailure;
     }
     SECMOD_UpdateSlotList(module->module);
@@ -2681,6 +2679,9 @@ crypto_load_files(krb5_context context,
                          cobj->cert->nickname : "(no name)",
                          certfile);
                 status = SECFailure;
+            } else {
+                /* We don't need this reference to the key. */
+                SECKEY_DestroyPrivateKey(key);
             }
         }
     }
@@ -4859,6 +4860,7 @@ crypto_check_for_revocation_information(CERTCertificate *cert,
             pkiDebug("%s: have CRL for \"%s\"\n", __FUNCTION__,
                      cert->issuerName);
         } else {
+            SEC_DestroyCrl(crl);
             if (allow_ocsp_checking) {
                 /* Check if the cert points to an OCSP responder. */
                 if (!crypto_cert_has_ocsp_responder(cert)) {
@@ -4878,6 +4880,7 @@ crypto_check_for_revocation_information(CERTCertificate *cert,
         if (crypto_is_cert_trusted(issuer, usage)) {
             pkiDebug("%s: \"%s\" is a trusted CA\n", __FUNCTION__,
                      issuer->subjectName);
+            CERT_DestroyCertificate(issuer);
             return 0;
         }
         /* Move on to the next link in the chain. */
@@ -4886,13 +4889,21 @@ crypto_check_for_revocation_information(CERTCertificate *cert,
         if (issuer == NULL) {
             pkiDebug("%s: unable to find issuer for \"%s\"\n", __FUNCTION__,
                      cert->subjectName);
+            /* Don't leak the reference to the last intermediate. */
+            CERT_DestroyCertificate(cert);
             return -1;
         }
         if (SECITEM_ItemsAreEqual(&cert->derCert, &issuer->derCert)) {
             pkiDebug("%s: \"%s\" is self-signed, but not trusted\n",
                      __FUNCTION__, cert->subjectName);
+            /* Don't leak the references to the self-signed cert. */
+            CERT_DestroyCertificate(issuer);
+            CERT_DestroyCertificate(cert);
             return -1;
         }
+        /* Don't leak the reference to the just-traversed intermediate. */
+        CERT_DestroyCertificate(cert);
+        cert = NULL;
     }
     return -1;
 }
