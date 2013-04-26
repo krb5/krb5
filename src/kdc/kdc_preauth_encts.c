@@ -36,7 +36,11 @@ enc_ts_get(krb5_context context, krb5_kdc_req *request,
 {
     krb5_keyblock *armor_key = cb->fast_armor(context, rock);
 
-    (*respond)(arg, (armor_key != NULL) ? ENOENT : 0, NULL);
+    /* Encrypted timestamp must not be used with FAST, and requires a key. */
+    if (armor_key != NULL || !cb->have_client_keys(context, rock))
+        (*respond)(arg, ENOENT, NULL);
+    else
+        (*respond)(arg, 0, NULL);
 }
 
 static void
