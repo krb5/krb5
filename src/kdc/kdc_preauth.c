@@ -542,8 +542,23 @@ event_context(krb5_context context, krb5_kdcpreauth_rock rock)
     return rock->vctx;
 }
 
+static krb5_boolean
+have_client_keys(krb5_context context, krb5_kdcpreauth_rock rock)
+{
+    krb5_kdc_req *request = rock->request;
+    krb5_key_data *kd;
+    int i;
+
+    for (i = 0; i < request->nktypes; i++) {
+        if (krb5_dbe_find_enctype(context, rock->client, request->ktype[i],
+                                  -1, 0, &kd) == 0)
+            return TRUE;
+    }
+    return FALSE;
+}
+
 static struct krb5_kdcpreauth_callbacks_st callbacks = {
-    1,
+    2,
     max_time_skew,
     client_keys,
     free_keys,
@@ -552,7 +567,8 @@ static struct krb5_kdcpreauth_callbacks_st callbacks = {
     get_string,
     free_string,
     client_entry,
-    event_context
+    event_context,
+    have_client_keys
 };
 
 static krb5_error_code

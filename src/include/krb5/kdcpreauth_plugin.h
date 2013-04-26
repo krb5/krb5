@@ -173,6 +173,14 @@ typedef struct krb5_kdcpreauth_callbacks_st {
                                        krb5_kdcpreauth_rock rock);
 
     /* End of version 1 kdcpreauth callbacks. */
+
+    /* Return true if the client DB entry contains any keys matching the
+     * request enctypes. */
+    krb5_boolean (*have_client_keys)(krb5_context context,
+                                     krb5_kdcpreauth_rock rock);
+
+    /* End of version 2 kdcpreauth callbacks. */
+
 } *krb5_kdcpreauth_callbacks;
 
 /* Optional: preauth plugin initialization function. */
