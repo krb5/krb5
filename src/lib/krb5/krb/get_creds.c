@@ -57,20 +57,14 @@ krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
 
     memset(mcreds, 0, sizeof(krb5_creds));
     mcreds->magic = KV5M_CREDS;
-    if (in_creds->times.endtime != 0) {
+    if (in_creds->times.endtime != 0)
         mcreds->times.endtime = in_creds->times.endtime;
-    } else {
-        krb5_error_code retval;
-        retval = krb5_timeofday(context, &mcreds->times.endtime);
-        if (retval != 0) return retval;
-    }
     mcreds->keyblock = in_creds->keyblock;
     mcreds->authdata = in_creds->authdata;
     mcreds->server = in_creds->server;
     mcreds->client = in_creds->client;
 
-    *fields = KRB5_TC_MATCH_TIMES /*XXX |KRB5_TC_MATCH_SKEY_TYPE */
-        | KRB5_TC_MATCH_AUTHDATA
+    *fields = KRB5_TC_MATCH_AUTHDATA /*XXX |KRB5_TC_MATCH_SKEY_TYPE */
         | KRB5_TC_SUPPORTED_KTYPES;
     if (mcreds->keyblock.enctype) {
         krb5_enctype *ktypes;
@@ -235,6 +229,14 @@ cache_get(krb5_context context, krb5_ccache ccache, krb5_flags flags,
     krb5_creds *creds;
 
     *out_creds = NULL;
+
+    if (in_creds->times.endtime == 0) {
+        code = krb5_timeofday(context, &in_creds->times.endtime);
+        if (code != 0)
+            return code;
+    }
+
+    flags |= KRB5_TC_MATCH_TIMES;
 
     creds = malloc(sizeof(*creds));
     if (creds == NULL)
