@@ -1420,6 +1420,11 @@ etype_info_helper(krb5_context context, krb5_kdc_req *request,
             seen_des++;
         }
     }
+
+    /* If the list is empty, don't send it at all. */
+    if (i == 0)
+        goto cleanup;
+
     if (etype_info2)
         retval = encode_krb5_etype_info2(entry, &scratch);
     else
