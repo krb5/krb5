@@ -79,7 +79,7 @@ realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
                 get_creds=False)
 setup_dir_identities(realm)
 realm.kinit('user@%s' % realm.realm,
-            flags=['-X', 'X509_user_identity=%s' % p12_identity])
+            flags=['-X', 'X509_user_identity=%s' % dir_identity])
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
 realm.stop()
