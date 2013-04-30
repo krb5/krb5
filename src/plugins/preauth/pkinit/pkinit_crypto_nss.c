@@ -745,7 +745,7 @@ crypto_get_p12_slot(struct _pkinit_identity_crypto_context *id)
                          __FUNCTION__, configdir, strerror(errno));
             else {
                 while ((ent = readdir(dir)) != NULL) {
-                    if ((strcmp(ent->d_name, ".") == 0) &&
+                    if ((strcmp(ent->d_name, ".") == 0) ||
                         (strcmp(ent->d_name, "..") == 0)) {
                         continue;
                     }
