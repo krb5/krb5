@@ -149,9 +149,6 @@ However, there are several prerequisites that must be satisfied first:
   **-**\ **-disable-rpath**, which renders the build tree less suitable for
   installation, but allows testing without interference from
   previously installed libraries.
-* In order to test the RPC layer, the local system has to be running
-  the portmap daemon and it has to be listening to the regular network
-  interface (not just localhost).
 
 There are additional regression tests available, which are not run
 by ``make check``.  These tests require manual setup and teardown of

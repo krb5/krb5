@@ -114,12 +114,13 @@ main(int argc, char **argv)
 	  exit(1);
      }
      if (!svc_register(transp, RPC_TEST_PROG, RPC_TEST_VERS_1,
-		       rpc_test_prog_1_svc, prot)) {
+		       rpc_test_prog_1_svc, 0)) {
 	  fprintf(stderr,
 		  "unable to register (RPC_TEST_PROG, RPC_TEST_VERS_1, %s).",
 		  prot == IPPROTO_TCP ? "tcp" : "udp");
 	  exit(1);
      }
+     printf("port: %d\n", (int)transp->xp_port);
 
      if (svcauth_gssapi_set_names(names, 0) == FALSE) {
 	  fprintf(stderr, "unable to set gssapi names\n");

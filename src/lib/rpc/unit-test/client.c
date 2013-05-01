@@ -7,12 +7,15 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <netdb.h>
+#include <sys/socket.h>
 #include "autoconf.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <gssrpc/rpc.h>
 #include <gssapi/gssapi.h>
+#include <gssapi/gssapi_krb5.h>
 #include <gssrpc/rpc.h>
 #include <gssrpc/auth_gssapi.h>
 #include "rpc_test.h"
@@ -51,17 +54,19 @@ main(argc, argv)
    int argc;
    char **argv;
 {
-     char        *host, *target, *echo_arg, **echo_resp, buf[BIG_BUF];
-     char	 *prot;
+     char        *host, *port, *target, *echo_arg, **echo_resp, buf[BIG_BUF];
      CLIENT      *clnt;
      AUTH	 *tmp_auth;
      struct rpc_err e;
-     int i, auth_once;
+     int i, auth_once, sock, use_tcp;
      unsigned int count;
      extern int optind;
      extern char *optarg;
      extern int svc_debug_gssapi, misc_debug_gssapi, auth_debug_gssapi;
      int c;
+     struct sockaddr_in sin;
+     struct hostent *h;
+     struct timeval tv;
 
      extern int krb5_gss_dbg_client_expcreds;
      krb5_gss_dbg_client_expcreds = 1;
@@ -69,7 +74,7 @@ main(argc, argv)
      whoami = argv[0];
      count = 1026;
      auth_once = 0;
-     prot = NULL;
+     use_tcp = -1;
 
      while ((c = getopt(argc, argv, "a:m:os:tu")) != -1) {
 	  switch (c) {
@@ -86,39 +91,60 @@ main(argc, argv)
 	       svc_debug_gssapi = atoi(optarg);
 	       break;
 	  case 't':
-	       prot = "tcp";
+	       use_tcp = 1;
 	       break;
 	  case 'u':
-	       prot = "udp";
+	       use_tcp = 0;
 	       break;
 	  case '?':
 	       usage();
 	       break;
 	  }
      }
-     if (prot == NULL)
+     if (use_tcp == -1)
 	  usage();
 
      argv += optind;
      argc -= optind;
 
      switch (argc) {
-     case 3:
-	  count = atoi(argv[2]);
+     case 4:
+	  count = atoi(argv[3]);
 	  if (count > BIG_BUF-1) {
 	    fprintf(stderr, "Test count cannot exceed %d.\n", BIG_BUF-1);
 	    usage();
 	  }
-     case 2:
+     case 3:
 	  host = argv[0];
-	  target = argv[1];
+	  port = argv[1];
+	  target = argv[2];
 	  break;
      default:
 	  usage();
      }
 
+     /* get server address */
+     h = gethostbyname(host);
+     if (h == NULL) {
+	 fprintf(stderr, "Can't resolve hostname %s\n", host);
+	 exit(1);
+     }
+     memset(&sin, 0, sizeof(sin));
+     sin.sin_family = h->h_addrtype;
+     sin.sin_port = ntohs(atoi(port));
+     memmove(&sin.sin_addr, h->h_addr, sizeof(sin.sin_addr));
+
      /* client handle to rstat */
-     clnt = clnt_create(host, RPC_TEST_PROG, RPC_TEST_VERS_1, prot);
+     sock = RPC_ANYSOCK;
+     if (use_tcp) {
+	 clnt = clnttcp_create(&sin, RPC_TEST_PROG, RPC_TEST_VERS_1, &sock, 0,
+			       0);
+     } else {
+	 tv.tv_sec = 5;
+	 tv.tv_usec = 0;
+	 clnt = clntudp_create(&sin, RPC_TEST_PROG, RPC_TEST_VERS_1, tv,
+			       &sock);
+     }
      if (clnt == NULL) {
 	  clnt_pcreateerror(whoami);
 	  exit(1);
