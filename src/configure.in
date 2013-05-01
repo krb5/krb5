@@ -930,16 +930,7 @@ extern void endrpcent();],
 AC_MSG_RESULT($k5_cv_type_endrpcent)
 AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent, [Define as return type of endrpcent])
 K5_GEN_FILE(include/gssrpc/types.h:include/gssrpc/types.hin)
-changequote(<<, >>)
-case "$krb5_cv_host" in
-*-*-solaris2.[012345]*)
-	PASS=tcp
-	;;
-*)
-	PASS="tcp udp"
-	;;
-esac
-changequote([, ])
+PASS=tcp
 AC_SUBST(PASS)
 
 # for pkinit
