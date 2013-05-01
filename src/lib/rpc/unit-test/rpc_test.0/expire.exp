@@ -19,8 +19,9 @@ proc expired {} {
     flush_server
 }
 
-#if { [info exists server_pid] && ($server_pid >= 0) } { expired }
-if { $server_started } {expired } 
+# This test doesn't work after #6948, because the client won't try to
+# authenticate using an expired TGT.
+#if { $server_started } {expired }
 
 proc overlap {} {
     global spawn_id
