@@ -113,6 +113,7 @@ LOCALINCLUDES=-I. -I$(srcdir)
 SRCS=\
 	$(srcdir)/threads.c \
 	$(srcdir)/init-addrinfo.c \
+	$(srcdir)/plugins.c \
 	$(srcdir)/errors.c \
 	$(srcdir)/k5buf.c \
 	$(srcdir)/gmt_mktime.c \
