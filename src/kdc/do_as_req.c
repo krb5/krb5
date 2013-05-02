@@ -195,23 +195,18 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                                    useenctype, -1, 0, &client_key))
             break;
     }
-    if (!(client_key)) {
-        /* Cannot find an appropriate key */
-        state->status = "CANT_FIND_CLIENT_KEY";
-        errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
-        goto egress;
-    }
-    state->rock.client_key = client_key;
 
-    /* convert client.key_data into a real key */
-    if ((errcode = krb5_dbe_decrypt_key_data(kdc_context, NULL,
-                                             client_key,
-                                             &state->client_keyblock,
-                                             NULL))) {
-        state->status = "DECRYPT_CLIENT_KEY";
-        goto egress;
+    if (client_key != NULL) {
+        /* Decrypt the client key data entry to get the real reply key. */
+        errcode = krb5_dbe_decrypt_key_data(kdc_context, NULL, client_key,
+                                            &state->client_keyblock, NULL);
+        if (errcode) {
+            state->status = "DECRYPT_CLIENT_KEY";
+            goto egress;
+        }
+        state->client_keyblock.enctype = useenctype;
+        state->rock.client_key = client_key;
     }
-    state->client_keyblock.enctype = useenctype;
 
     /* Start assembling the response */
     state->reply.msg_type = KRB5_AS_REP;
@@ -245,6 +240,14 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                             &state->client_keyblock, &state->pa_context);
     if (errcode) {
         state->status = "KDC_RETURN_PADATA";
+        goto egress;
+    }
+
+    /* If we didn't find a client long-term key and no preauth mechanism
+     * replaced the reply key, error out now. */
+    if (state->client_keyblock.enctype == ENCTYPE_NULL) {
+        state->status = "CANT_FIND_CLIENT_KEY";
+        errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
         goto egress;
     }
 
@@ -306,7 +309,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                                   &state->reply_encpart, 0,
                                   as_encrypting_key,
                                   &state->reply, &response);
-    state->reply.enc_part.kvno = client_key->key_data_kvno;
+    if (client_key != NULL)
+        state->reply.enc_part.kvno = client_key->key_data_kvno;
     if (errcode) {
         state->status = "ENCODE_KDC_REP";
         goto egress;

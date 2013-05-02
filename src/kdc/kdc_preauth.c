@@ -1489,6 +1489,9 @@ etype_info_as_rep_helper(krb5_context context, krb5_pa_data * padata,
     krb5_etype_info_entry **entry = NULL;
     krb5_data *scratch = NULL;
 
+    if (client_key == NULL)
+        return 0;
+
     /*
      * Skip PA-ETYPE-INFO completely if AS-REQ lists any "newer"
      * enctypes.
@@ -1591,6 +1594,9 @@ return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
     krb5_int16          salttype;
     krb5_key_data *     client_key = rock->client_key;
     int i;
+
+    if (client_key == NULL)
+        return 0;
 
     for (i = 0; i < request->nktypes; i++) {
         if (enctype_requires_etype_info_2(request->ktype[i]))
