@@ -78,9 +78,10 @@
 typedef const gss_OID_desc *gss_OID_const;
 
 /* der routines defined in libgss */
-extern unsigned int gssint_der_length_size(OM_uint32);
-extern int gssint_get_der_length(unsigned char **, OM_uint32, unsigned int*);
-extern int gssint_put_der_length(OM_uint32, unsigned char **, unsigned int);
+extern unsigned int gssint_der_length_size(unsigned int);
+extern int gssint_get_der_length(unsigned char **, unsigned int,
+				 unsigned int*);
+extern int gssint_put_der_length(unsigned int, unsigned char **, unsigned int);
 
 
 /* private routines for spnego_mechanism */
