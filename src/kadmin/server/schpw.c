@@ -52,7 +52,7 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
         ret = KRB5KRB_AP_ERR_MODIFIED;
         numresult = KRB5_KPASSWD_MALFORMED;
         strlcpy(strresult, "Request was truncated", sizeof(strresult));
-        goto chpwfail;
+        goto bailout;
     }
 
     ptr = req->data;
@@ -67,7 +67,7 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
         numresult = KRB5_KPASSWD_MALFORMED;
         strlcpy(strresult, "Request length was inconsistent",
                 sizeof(strresult));
-        goto chpwfail;
+        goto bailout;
     }
 
     /* verify version number */
@@ -80,7 +80,7 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
         numresult = KRB5_KPASSWD_BAD_VERSION;
         snprintf(strresult, sizeof(strresult),
                  "Request contained unknown protocol version number %d", vno);
-        goto chpwfail;
+        goto bailout;
     }
 
     /* read, check ap-req length */
@@ -93,7 +93,7 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
         numresult = KRB5_KPASSWD_MALFORMED;
         strlcpy(strresult, "Request was truncated in AP-REQ",
                 sizeof(strresult));
-        goto chpwfail;
+        goto bailout;
     }
 
     /* verify ap_req */
