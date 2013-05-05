@@ -233,6 +233,39 @@ AC_SUBST(PKINIT_CRYPTO_IMPL)
 AC_SUBST(PKINIT_CRYPTO_IMPL_CFLAGS)
 AC_SUBST(PKINIT_CRYPTO_IMPL_LIBS)
 
+AC_ARG_ENABLE([aesni],
+AC_HELP_STRING([--disable-aesni],[Do not build with AES-NI support]), ,
+enable_aesni=check)
+if test "$CRYPTO_IMPL" = builtin -a "x$enable_aesni" != xno; then
+    case "$host" in
+    i686-*)
+	aesni_flags="-f elf32"
+	aesni_obj=iaesx86.o
+	;;
+    x86_64-*)
+	# All Unix-like platforms need -D__linux__ for iaesx64.s to
+	# handle the System V x86-64 calling convention.
+	aesni_flags="-D__linux__ -f elf64"
+	aesni_obj=iaesx64.o
+	;;
+    esac
+    if test "x$aesni_obj" != x; then
+	AC_CHECK_PROG(YASM,yasm,yasm)
+	AC_CHECK_HEADERS(cpuid.h)
+	if test x"$YASM" != x -a "x$ac_cv_header_cpuid_h" = xyes; then
+	    AESNI_OBJ=$aesni_obj
+	    AESNI_FLAGS=$aesni_flags
+	    AC_DEFINE(AESNI,1,[Define if AES-NI support is enabled])
+	    AC_MSG_NOTICE([Building with AES-NI support])
+	fi
+    fi
+    if test "x$enable_aesni" = xyes -a "x$AESNI_OBJ" = x; then
+	AC_MSG_ERROR([AES-NI support requested but cannot be built])
+    fi
+fi
+AC_SUBST(AESNI_OBJ)
+AC_SUBST(AESNI_FLAGS)
+
 # --with-kdc-kdb-update makes the KDC update the database with last request
 # information and failure information.
 

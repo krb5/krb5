@@ -36,8 +36,117 @@
  */
 struct aes_key_info_cache {
     aes_ctx enc_ctx, dec_ctx;
+    krb5_boolean aesni;
 };
 #define CACHE(X) ((struct aes_key_info_cache *)((X)->cache))
+
+#ifdef AESNI
+
+/* Use AES-NI instructions (via assembly functions) when possible. */
+
+#include <cpuid.h>
+
+struct aes_data
+{
+    unsigned char *in_block;
+    unsigned char *out_block;
+    uint32_t *expanded_key;
+    unsigned char *iv;
+    size_t num_blocks;
+};
+
+void k5_iEncExpandKey128(unsigned char *key, uint32_t *expanded_key);
+void k5_iEncExpandKey256(unsigned char *key, uint32_t *expanded_key);
+void k5_iDecExpandKey256(unsigned char *key, uint32_t *expanded_key);
+void k5_iDecExpandKey128(unsigned char *key, uint32_t *expanded_key);
+
+void k5_iEnc128_CBC(struct aes_data *data);
+void k5_iDec128_CBC(struct aes_data *data);
+void k5_iEnc256_CBC(struct aes_data *data);
+void k5_iDec256_CBC(struct aes_data *data);
+
+static krb5_boolean
+aesni_supported_by_cpu()
+{
+    unsigned int a, b, c, d;
+
+    return __get_cpuid(1, &a, &b, &c, &d) && (c & (1 << 25));
+}
+
+static inline krb5_boolean
+aesni_supported(krb5_key key)
+{
+    return CACHE(key)->aesni;
+}
+
+static void
+aesni_expand_enc_key(krb5_key key)
+{
+    struct aes_key_info_cache *cache = CACHE(key);
+
+    if (key->keyblock.length == 16)
+        k5_iEncExpandKey128(key->keyblock.contents, cache->enc_ctx.k_sch);
+    else
+        k5_iEncExpandKey256(key->keyblock.contents, cache->enc_ctx.k_sch);
+    cache->enc_ctx.n_rnd = 1;
+}
+
+static void
+aesni_expand_dec_key(krb5_key key)
+{
+    struct aes_key_info_cache *cache = CACHE(key);
+
+    if (key->keyblock.length == 16)
+        k5_iDecExpandKey128(key->keyblock.contents, cache->dec_ctx.k_sch);
+    else
+        k5_iDecExpandKey256(key->keyblock.contents, cache->dec_ctx.k_sch);
+    cache->dec_ctx.n_rnd = 1;
+}
+
+static inline void
+aesni_enc(krb5_key key, unsigned char *data, size_t nblocks, unsigned char *iv)
+{
+    struct aes_key_info_cache *cache = CACHE(key);
+    struct aes_data d;
+
+    d.in_block = data;
+    d.out_block = data;
+    d.expanded_key = cache->enc_ctx.k_sch;
+    d.iv = iv;
+    d.num_blocks = nblocks;
+    if (key->keyblock.length == 16)
+        k5_iEnc128_CBC(&d);
+    else
+        k5_iEnc256_CBC(&d);
+}
+
+static inline void
+aesni_dec(krb5_key key, unsigned char *data, size_t nblocks, unsigned char *iv)
+{
+    struct aes_key_info_cache *cache = CACHE(key);
+    struct aes_data d;
+
+    d.in_block = data;
+    d.out_block = data;
+    d.expanded_key = cache->dec_ctx.k_sch;
+    d.iv = iv;
+    d.num_blocks = nblocks;
+    if (key->keyblock.length == 16)
+        k5_iDec128_CBC(&d);
+    else
+        k5_iDec256_CBC(&d);
+}
+
+#else /* not AESNI */
+
+#define aesni_supported_by_cpu() FALSE
+#define aesni_supported(key) FALSE
+#define aesni_expand_enc_key(key)
+#define aesni_expand_dec_key(key)
+#define aesni_enc(key, data, nblocks, iv)
+#define aesni_dec(key, data, nblocks, iv)
+
+#endif
 
 /* out = out ^ in */
 static inline void
@@ -58,6 +167,7 @@ init_key_cache(krb5_key key)
     if (key->cache == NULL)
         return ENOMEM;
     CACHE(key)->enc_ctx.n_rnd = CACHE(key)->dec_ctx.n_rnd = 0;
+    CACHE(key)->aesni = aesni_supported_by_cpu();
     return 0;
 }
 
@@ -66,8 +176,10 @@ expand_enc_key(krb5_key key)
 {
     if (CACHE(key)->enc_ctx.n_rnd)
         return;
-    if (aes_enc_key(key->keyblock.contents, key->keyblock.length,
-                    &CACHE(key)->enc_ctx) != aes_good)
+    if (aesni_supported(key))
+        aesni_expand_enc_key(key);
+    else if (aes_enc_key(key->keyblock.contents, key->keyblock.length,
+                         &CACHE(key)->enc_ctx) != aes_good)
         abort();
 }
 
@@ -76,8 +188,10 @@ expand_dec_key(krb5_key key)
 {
     if (CACHE(key)->dec_ctx.n_rnd)
         return;
-    if (aes_dec_key(key->keyblock.contents, key->keyblock.length,
-                    &CACHE(key)->dec_ctx) != aes_good)
+    if (aesni_supported(key))
+        aesni_expand_dec_key(key);
+    else if (aes_dec_key(key->keyblock.contents, key->keyblock.length,
+                         &CACHE(key)->dec_ctx) != aes_good)
         abort();
 }
 
@@ -85,6 +199,10 @@ expand_dec_key(krb5_key key)
 static inline void
 cbc_enc(krb5_key key, unsigned char *data, size_t nblocks, unsigned char *iv)
 {
+    if (aesni_supported(key)) {
+        aesni_enc(key, data, nblocks, iv);
+        return;
+    }
     for (; nblocks > 0; nblocks--, data += BLOCK_SIZE) {
         xorblock(iv, data);
         if (aes_enc_blk(data, data, &CACHE(key)->enc_ctx) != aes_good)
@@ -99,6 +217,10 @@ cbc_dec(krb5_key key, unsigned char *data, size_t nblocks, unsigned char *iv)
 {
     unsigned char last_cipherblock[BLOCK_SIZE];
 
+    if (aesni_supported(key)) {
+        aesni_dec(key, data, nblocks, iv);
+        return;
+    }
     assert(nblocks > 0);
     data += (nblocks - 1) * BLOCK_SIZE;
     memcpy(last_cipherblock, data, BLOCK_SIZE);

@@ -279,6 +279,9 @@ Optional features
 **-**\ **-disable-pkinit**
     Disable PKINIT plugin support.
 
+**-**\ **-disable-aesni**
+    Disable support for using AES instructions on x86 platforms.
+
 
 Optional packages
 -----------------

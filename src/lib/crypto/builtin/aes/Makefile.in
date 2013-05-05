@@ -5,10 +5,15 @@ BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 ##DOS##PREFIXDIR = builtin\aes
 ##DOS##OBJFILE = ..\..\$(OUTPRE)aes.lst
 
+YASM=@YASM@
+AESNI_OBJ=@AESNI_OBJ@
+AESNI_FLAGS=@AESNI_FLAGS@
+
 STLIBOBJS=\
 	aescrypt.o	\
 	aestab.o	\
-	aeskey.o
+	aeskey.o	\
+	@AESNI_OBJ@
 
 OBJS=\
 	$(OUTPRE)aescrypt.$(OBJEXT)	\
@@ -28,6 +33,12 @@ GEN_OBJS=\
 ##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs # aes-gen
+
+iaesx64@SHOBJEXT@: $(srcdir)/iaesx64.s
+	$(YASM) $(AESNI_FLAGS) -o $@ $(srcdir)/iaesx64.s
+
+iaesx86@SHOBJEXT@: $(srcdir)/iaesx86.s
+	$(YASM) $(AESNI_FLAGS) -o $@ $(srcdir)/iaesx86.s
 
 includes:: depend
 
