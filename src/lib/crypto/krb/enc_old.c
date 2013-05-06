@@ -130,17 +130,9 @@ krb5int_old_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
     krb5_crypto_iov *header, *trailer;
     krb5_data checksum, crcivec = empty_data();
     char *saved_checksum = NULL;
-    size_t i;
-    unsigned int cipherlen = 0;
 
     /* Check that the input data is correctly padded. */
-    for (i = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
-
-        if (ENCRYPT_IOV(iov))
-            cipherlen += iov->data.length;
-    }
-    if (cipherlen % enc->block_size != 0)
+    if (iov_total_length(data, num_data, FALSE) % enc->block_size != 0)
         return KRB5_BAD_MSIZE;
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);

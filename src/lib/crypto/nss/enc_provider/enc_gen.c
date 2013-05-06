@@ -172,35 +172,25 @@ k5_nss_gen_block_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     PK11Context *ctx = NULL;
     SECStatus rv;
     SECItem *param = NULL;
-    struct iov_block_state input_pos, output_pos;
-    unsigned char storage[MAX_BLOCK_SIZE];
+    struct iov_cursor cursor;
+    unsigned char block[MAX_BLOCK_SIZE];
     unsigned char iv0[MAX_BLOCK_SIZE];
-    unsigned char *ptr = NULL,*lastptr = NULL;
+    unsigned char *lastptr = NULL;
     SECItem iv;
     size_t blocksize;
     int length = 0;
     int lastblock = -1;
     int currentblock;
 
-    IOV_BLOCK_STATE_INIT(&input_pos);
-    IOV_BLOCK_STATE_INIT(&output_pos);
-
     blocksize = PK11_GetBlockSize(mech, NULL);
-    assert(blocksize <= sizeof(storage));
+    assert(blocksize <= sizeof(block));
 
     if (ivec && ivec->data) {
         iv.data = (unsigned char *)ivec->data;
         iv.len = ivec->length;
         if (operation == CKA_DECRYPT) {
-            int i, inputlength;
-
             /* Count the blocks so we know which block is last. */
-            for (i = 0, inputlength = 0; i < (int)num_data; i++) {
-                krb5_crypto_iov *iov = &data[i];
-
-                if (ENCRYPT_IOV(iov))
-                    inputlength += iov->data.length;
-            }
+            int inputlength = iov_total_length(data, num_data, FALSE);
             lastblock = (inputlength/blocksize) -1;
         }
     } else {
@@ -216,26 +206,25 @@ k5_nss_gen_block_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
         goto done;
     }
 
+    k5_iov_cursor_init(&cursor, data, num_data, blocksize, FALSE);
     for (currentblock = 0;;currentblock++) {
-        if (!krb5int_c_iov_get_block_nocopy(storage, blocksize, data, num_data,
-                                            &input_pos, &ptr))
+        if (!k5_iov_cursor_get(&cursor, block))
             break;
 
         lastptr = NULL;
 
         /* only set if we are decrypting */
         if (lastblock == currentblock)
-            memcpy(ivec->data, ptr, blocksize);
+            memcpy(ivec->data, block, blocksize);
 
-        rv = PK11_CipherOp(ctx, ptr, &length, blocksize, ptr, blocksize);
+        rv = PK11_CipherOp(ctx, block, &length, blocksize, block, blocksize);
         if (rv != SECSuccess) {
             ret = k5_nss_map_last_error();
             break;
         }
 
-        lastptr = ptr;
-        krb5int_c_iov_put_block_nocopy(data, num_data, storage, blocksize,
-                                       &output_pos, ptr);
+        lastptr = block;
+        k5_iov_cursor_put(&cursor, block);
     }
 
     if (lastptr && ivec && ivec->data && operation == CKA_ENCRYPT) {
@@ -349,26 +338,22 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     PK11Context *ctx = NULL;
     SECStatus rv;
     SECItem *param = NULL;
-    struct iov_block_state input_pos, output_pos;
-    unsigned char storage[MAX_BLOCK_SIZE];
+    struct iov_cursor cursor;
+    unsigned char block[MAX_BLOCK_SIZE];
     unsigned char recover1[MAX_BLOCK_SIZE];
     unsigned char recover2[MAX_BLOCK_SIZE];
     unsigned char block1[MAX_BLOCK_SIZE];
     unsigned char block2[MAX_BLOCK_SIZE];
     unsigned char iv0[MAX_BLOCK_SIZE];
-    unsigned char *ptr = NULL;
     SECItem iv;
     size_t blocksize;
     size_t bulk_length, remainder;
     size_t input_length, lastblock;
     size_t length;
-    int i, len;
-
-    IOV_BLOCK_STATE_INIT(&input_pos);
-    IOV_BLOCK_STATE_INIT(&output_pos);
+    int len;
 
     blocksize = PK11_GetBlockSize(mech, NULL);
-    assert(blocksize <= sizeof(storage));
+    assert(blocksize <= sizeof(block));
 
     if (ivec) {
         iv.data = (unsigned char *)ivec->data;
@@ -380,12 +365,7 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     }
     param = PK11_ParamFromIV(mech, &iv);
 
-    for (i = 0, input_length = 0; i < (int)num_data; i++) {
-        krb5_crypto_iov *iov = &data[i];
-
-        if (ENCRYPT_IOV(iov))
-            input_length += iov->data.length;
-    }
+    input_length = iov_total_length(data, num_data, FALSE);
     /* Must be at least a block or we fail. */
     if (input_length < blocksize) {
         ret = EINVAL;
@@ -429,48 +409,44 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
             }
         }
     }
+    k5_iov_cursor_init(&cursor, data, num_data, blocksize, FALSE);
     for (length = 0; length < lastblock; length += blocksize) {
-        if (!krb5int_c_iov_get_block_nocopy(storage, blocksize, data, num_data,
-                                            &input_pos, &ptr))
+        if (!k5_iov_cursor_get(&cursor, block))
             break;
 
-        rv = PK11_CipherOp(ctx, ptr, &len, blocksize, ptr, blocksize);
+        rv = PK11_CipherOp(ctx, block, &len, blocksize, block, blocksize);
         if (rv != SECSuccess) {
             ret = k5_nss_map_last_error();
             break;
         }
 
-        krb5int_c_iov_put_block_nocopy(data, num_data, storage, blocksize,
-                                       &output_pos, ptr);
+        k5_iov_cursor_put(&cursor, block);
     }
     if (remainder) {
         if (operation == CKA_DECRYPT) {
             if (bulk_length > blocksize) {
                 /* we need to save cn-2 */
-                if (!krb5int_c_iov_get_block_nocopy(storage, blocksize, data,
-                                                    num_data, &input_pos,
-                                                    &ptr))
+                if (!k5_iov_cursor_get(&cursor, block))
                     goto done; /* shouldn't happen */
 
                 /* save cn-2 */
-                memcpy(recover1, ptr, blocksize);
-                memcpy(recover2, ptr, blocksize);
+                memcpy(recover1, block, blocksize);
+                memcpy(recover2, block, blocksize);
 
                 /* now process it as normal */
-                rv = PK11_CipherOp(ctx, ptr, &len, blocksize, ptr, blocksize);
+                rv = PK11_CipherOp(ctx, block, &len, blocksize, block,
+                                   blocksize);
                 if (rv != SECSuccess) {
                     ret = k5_nss_map_last_error();
                     goto done;
                 }
 
-                krb5int_c_iov_put_block_nocopy(data, num_data, storage,
-                                               blocksize, &output_pos, ptr);
+                k5_iov_cursor_put(&cursor, block);
             }
         }
         /* fetch the last 2 blocks */
-        memset(block1, 0, blocksize); /* last block, could be partial */
-        krb5int_c_iov_get_block(block2, blocksize, data, num_data, &input_pos);
-        krb5int_c_iov_get_block(block1, remainder, data, num_data, &input_pos);
+        k5_iov_cursor_get(&cursor, block2);
+        k5_iov_cursor_get(&cursor, block1);
         if (operation == CKA_DECRYPT) {
             /* recover1 and recover2 are xor values to recover the true
              * underlying data of the last 2 decrypts. This keeps us from
@@ -518,8 +494,8 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
                 memcpy(ivec->data, block1, blocksize);
             }
         }
-        krb5int_c_iov_put_block(data,num_data, block1, blocksize, &output_pos);
-        krb5int_c_iov_put_block(data,num_data, block2, remainder, &output_pos);
+        k5_iov_cursor_put(&cursor, block1);
+        k5_iov_cursor_put(&cursor, block2);
     }
 
 done:
@@ -541,16 +517,13 @@ k5_nss_gen_cbcmac_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     PK11Context *ctx = NULL;
     SECStatus rv;
     SECItem *param = NULL;
-    struct iov_block_state input_pos, output_pos;
+    struct iov_cursor cursor;
     unsigned char block[MAX_BLOCK_SIZE], *lastblock;
     unsigned char iv0[MAX_BLOCK_SIZE];
     SECItem iv;
     size_t blocksize;
     int length = 0;
     int currentblock;
-
-    IOV_BLOCK_STATE_INIT(&input_pos);
-    IOV_BLOCK_STATE_INIT(&output_pos);
 
     blocksize = PK11_GetBlockSize(mech, NULL);
     assert(blocksize <= sizeof(block));
@@ -574,9 +547,9 @@ k5_nss_gen_cbcmac_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     }
 
     lastblock = iv.data;
+    k5_iov_cursor_init(&cursor, data, num_data, blocksize, FALSE);
     for (currentblock = 0;;currentblock++) {
-        if (!krb5int_c_iov_get_block(block, blocksize, data, num_data,
-                                     &input_pos))
+        if (!k5_iov_cursor_get(&cursor, block))
             break;
         rv = PK11_CipherOp(ctx, block, &length, blocksize, block, blocksize);
         if (rv != SECSuccess) {

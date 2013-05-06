@@ -33,18 +33,11 @@ validate_and_schedule(krb5_key key, const krb5_data *ivec,
                       const krb5_crypto_iov *data, size_t num_data,
                       mit_des_key_schedule schedule)
 {
-    size_t i, input_length;
-
-    for (i = 0, input_length = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
-
-        if (ENCRYPT_IOV(iov))
-            input_length += iov->data.length;
-    }
-
     if (key->keyblock.length != 8)
         return KRB5_BAD_KEYSIZE;
-    if (input_length % 8 != 0 || (ivec != NULL && ivec->length != 8))
+    if (iov_total_length(data, num_data, FALSE) % 8 != 0)
+        return KRB5_BAD_MSIZE;
+    if (ivec != NULL && ivec->length != 8)
         return KRB5_BAD_MSIZE;
 
     switch (mit_des_key_sched(key->keyblock.contents, schedule)) {

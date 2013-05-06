@@ -62,13 +62,7 @@ static krb5_error_code
 validate(krb5_key key, const krb5_data *ivec, const krb5_crypto_iov *data,
          size_t num_data, krb5_boolean *empty)
 {
-    size_t i, input_length;
-
-    for (i = 0, input_length = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
-        if (ENCRYPT_IOV(iov))
-            input_length += iov->data.length;
-    }
+    size_t input_length = iov_total_length(data, num_data, FALSE);
 
     if (key->keyblock.length != DES_KEY_SIZE)
         return(KRB5_BAD_KEYSIZE);
@@ -87,12 +81,9 @@ k5_des_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 {
     int ret, olen = DES_BLOCK_SIZE;
     unsigned char iblock[DES_BLOCK_SIZE], oblock[DES_BLOCK_SIZE];
-    struct iov_block_state input_pos, output_pos;
+    struct iov_cursor cursor;
     EVP_CIPHER_CTX ciph_ctx;
     krb5_boolean empty;
-
-    IOV_BLOCK_STATE_INIT(&input_pos);
-    IOV_BLOCK_STATE_INIT(&output_pos);
 
     ret = validate(key, ivec, data, num_data, &empty);
     if (ret != 0 || empty)
@@ -107,19 +98,13 @@ k5_des_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
     EVP_CIPHER_CTX_set_padding(&ciph_ctx,0);
 
-    for (;;) {
-
-        if (!krb5int_c_iov_get_block(iblock, DES_BLOCK_SIZE, data,
-                                     num_data, &input_pos))
-            break;
-
+    k5_iov_cursor_init(&cursor, data, num_data, DES_BLOCK_SIZE, FALSE);
+    while (k5_iov_cursor_get(&cursor, iblock)) {
         ret = EVP_EncryptUpdate(&ciph_ctx, oblock, &olen,
                                 (unsigned char *)iblock, DES_BLOCK_SIZE);
         if (!ret)
             break;
-
-        krb5int_c_iov_put_block(data, num_data, oblock, DES_BLOCK_SIZE,
-                                &output_pos);
+        k5_iov_cursor_put(&cursor, oblock);
     }
 
     if (ivec != NULL)
@@ -141,12 +126,9 @@ k5_des_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 {
     int ret, olen = DES_BLOCK_SIZE;
     unsigned char iblock[DES_BLOCK_SIZE], oblock[DES_BLOCK_SIZE];
-    struct iov_block_state input_pos, output_pos;
+    struct iov_cursor cursor;
     EVP_CIPHER_CTX ciph_ctx;
     krb5_boolean empty;
-
-    IOV_BLOCK_STATE_INIT(&input_pos);
-    IOV_BLOCK_STATE_INIT(&output_pos);
 
     ret = validate(key, ivec, data, num_data, &empty);
     if (ret != 0 || empty)
@@ -162,18 +144,13 @@ k5_des_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
     EVP_CIPHER_CTX_set_padding(&ciph_ctx,0);
 
-    for (;;) {
-
-        if (!krb5int_c_iov_get_block(iblock, DES_BLOCK_SIZE,
-                                     data, num_data, &input_pos))
-            break;
-
+    k5_iov_cursor_init(&cursor, data, num_data, DES_BLOCK_SIZE, FALSE);
+    while (k5_iov_cursor_get(&cursor, iblock)) {
         ret = EVP_DecryptUpdate(&ciph_ctx, oblock, &olen,
                                 iblock, DES_BLOCK_SIZE);
-        if (!ret) break;
-
-        krb5int_c_iov_put_block(data, num_data, oblock,
-                                DES_BLOCK_SIZE, &output_pos);
+        if (!ret)
+            break;
+        k5_iov_cursor_put(&cursor, oblock);
     }
 
     if (ivec != NULL)
@@ -194,7 +171,7 @@ k5_des_cbc_mac(krb5_key key, const krb5_crypto_iov *data, size_t num_data,
                const krb5_data *ivec, krb5_data *output)
 {
     int ret;
-    struct iov_block_state iov_state;
+    struct iov_cursor cursor;
     DES_cblock blockY, blockB;
     DES_key_schedule sched;
     krb5_boolean empty;
@@ -214,11 +191,8 @@ k5_des_cbc_mac(krb5_key key, const krb5_crypto_iov *data, size_t num_data,
     else
         memset(blockY, 0, DES_BLOCK_SIZE);
 
-    IOV_BLOCK_STATE_INIT(&iov_state);
-    for (;;) {
-        if (!krb5int_c_iov_get_block(blockB, DES_BLOCK_SIZE, data, num_data,
-                                     &iov_state))
-            break;
+    k5_iov_cursor_init(&cursor, data, num_data, DES_BLOCK_SIZE, FALSE);
+    while (k5_iov_cursor_get(&cursor, blockB)) {
         store_64_n(load_64_n(blockB) ^ load_64_n(blockY), blockB);
         DES_ecb_encrypt(&blockB, &blockY, &sched, 1);
     }

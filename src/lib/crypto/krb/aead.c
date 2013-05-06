@@ -135,3 +135,89 @@ krb5int_c_padding_length(const struct krb5_keytypes *ktp, size_t data_length)
     else
         return padding - (data_length % padding);
 }
+
+/* Return the next iov (starting from ind) which cursor should process, or
+ * cursor->iov_count if there are none remaining. */
+static size_t
+next_iov_to_process(struct iov_cursor *cursor, size_t ind)
+{
+    krb5_crypto_iov *iov;
+
+    for (; ind < cursor->iov_count; ind++) {
+        iov = &cursor->iov[ind];
+        if (cursor->signing ? SIGN_IOV(iov) : ENCRYPT_IOV(iov))
+            break;
+    }
+    return ind;
+}
+
+void
+k5_iov_cursor_init(struct iov_cursor *cursor, const krb5_crypto_iov *iov,
+                   size_t count, size_t block_size, krb5_boolean signing)
+{
+    cursor->iov = iov;
+    cursor->iov_count = count;
+    cursor->block_size = block_size;
+    cursor->signing = signing;
+    cursor->in_iov = next_iov_to_process(cursor, 0);
+    cursor->out_iov = cursor->in_iov;
+    cursor->in_pos = cursor->out_pos = 0;
+}
+
+/* Fetch one block from cursor's input position. */
+krb5_boolean
+k5_iov_cursor_get(struct iov_cursor *cursor, unsigned char *block)
+{
+    size_t nbytes, bsz = cursor->block_size, remain = cursor->block_size;
+    const krb5_crypto_iov *iov;
+
+    remain = cursor->block_size;
+    while (remain > 0 && cursor->in_iov < cursor->iov_count) {
+        iov = &cursor->iov[cursor->in_iov];
+
+        nbytes = iov->data.length - cursor->in_pos;
+        if (nbytes > remain)
+            nbytes = remain;
+
+        memcpy(block + bsz - remain, iov->data.data + cursor->in_pos, nbytes);
+        cursor->in_pos += nbytes;
+        remain -= nbytes;
+
+        if (cursor->in_pos == iov->data.length) {
+            cursor->in_iov = next_iov_to_process(cursor, cursor->in_iov + 1);
+            cursor->in_pos = 0;
+        }
+    }
+
+    if (remain == bsz)
+        return FALSE;
+    if (remain > 0)
+        memset(block + bsz - remain, 0, remain);
+    return TRUE;
+}
+
+/* Write a block to a cursor's output position. */
+void
+k5_iov_cursor_put(struct iov_cursor *cursor, unsigned char *block)
+{
+    size_t nbytes, bsz = cursor->block_size, remain = cursor->block_size;
+    const krb5_crypto_iov *iov;
+
+    remain = cursor->block_size;
+    while (remain > 0 && cursor->out_iov < cursor->iov_count) {
+        iov = &cursor->iov[cursor->out_iov];
+
+        nbytes = iov->data.length - cursor->out_pos;
+        if (nbytes > remain)
+            nbytes = remain;
+
+        memcpy(iov->data.data + cursor->out_pos, block + bsz - remain, nbytes);
+        cursor->out_pos += nbytes;
+        remain -= nbytes;
+
+        if (cursor->out_pos == iov->data.length) {
+            cursor->out_iov = next_iov_to_process(cursor, cursor->out_iov + 1);
+            cursor->out_pos = 0;
+        }
+    }
+}

@@ -82,9 +82,8 @@ krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
                          krb5_crypto_iov *data, size_t num_data)
 {
     unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE];
-    int nblocks = 0, blockno;
-    size_t input_length, i;
-    struct iov_block_state input_pos, output_pos;
+    size_t input_length, nblocks, blockno;
+    struct iov_cursor cursor;
 
     if (key->cache == NULL) {
         key->cache = malloc(sizeof(struct camellia_key_info_cache));
@@ -102,34 +101,25 @@ krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
     else
         memset(tmp, 0, BLOCK_SIZE);
 
-    for (i = 0, input_length = 0; i < num_data; i++) {
-        krb5_crypto_iov *iov = &data[i];
+    k5_iov_cursor_init(&cursor, data, num_data, BLOCK_SIZE, FALSE);
 
-        if (ENCRYPT_IOV(iov))
-            input_length += iov->data.length;
-    }
-
-    IOV_BLOCK_STATE_INIT(&input_pos);
-    IOV_BLOCK_STATE_INIT(&output_pos);
-
+    input_length = iov_total_length(data, num_data, FALSE);
     nblocks = (input_length + BLOCK_SIZE - 1) / BLOCK_SIZE;
     if (nblocks == 1) {
-        krb5int_c_iov_get_block(tmp, BLOCK_SIZE, data, num_data, &input_pos);
+        k5_iov_cursor_get(&cursor, tmp);
         enc(tmp2, tmp, &CACHE(key)->enc_ctx);
-        krb5int_c_iov_put_block(data, num_data, tmp2, BLOCK_SIZE, &output_pos);
+        k5_iov_cursor_put(&cursor, tmp2);
     } else if (nblocks > 1) {
         unsigned char blockN2[BLOCK_SIZE];   /* second last */
         unsigned char blockN1[BLOCK_SIZE];   /* last block */
 
         for (blockno = 0; blockno < nblocks - 2; blockno++) {
-            unsigned char blockN[BLOCK_SIZE], *block;
+            unsigned char block[BLOCK_SIZE];
 
-            krb5int_c_iov_get_block_nocopy(blockN, BLOCK_SIZE,
-                                           data, num_data, &input_pos, &block);
+            k5_iov_cursor_get(&cursor, block);
             xorblock(tmp, block);
             enc(block, tmp, &CACHE(key)->enc_ctx);
-            krb5int_c_iov_put_block_nocopy(data, num_data, blockN, BLOCK_SIZE,
-                                           &output_pos, block);
+            k5_iov_cursor_put(&cursor, block);
 
             /* Set up for next block.  */
             memcpy(tmp, block, BLOCK_SIZE);
@@ -139,11 +129,8 @@ krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
            may or may not be incomplete).  */
 
         /* First, get the last two blocks */
-        memset(blockN1, 0, sizeof(blockN1)); /* pad last block with zeros */
-        krb5int_c_iov_get_block(blockN2, BLOCK_SIZE, data, num_data,
-                                &input_pos);
-        krb5int_c_iov_get_block(blockN1, BLOCK_SIZE, data, num_data,
-                                &input_pos);
+        k5_iov_cursor_get(&cursor, blockN2);
+        k5_iov_cursor_get(&cursor, blockN1);
 
         /* Encrypt second last block */
         xorblock(tmp, blockN2);
@@ -157,10 +144,8 @@ krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
         memcpy(blockN1, tmp2, BLOCK_SIZE);
 
         /* Put the last two blocks back into the iovec (reverse order) */
-        krb5int_c_iov_put_block(data, num_data, blockN1, BLOCK_SIZE,
-                                &output_pos);
-        krb5int_c_iov_put_block(data, num_data, blockN2, BLOCK_SIZE,
-                                &output_pos);
+        k5_iov_cursor_put(&cursor, blockN1);
+        k5_iov_cursor_put(&cursor, blockN2);
 
         if (ivec != NULL)
             memcpy(ivec->data, blockN1, BLOCK_SIZE);
@@ -174,10 +159,8 @@ krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
                          krb5_crypto_iov *data, size_t num_data)
 {
     unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
-    int nblocks = 0, blockno;
-    unsigned int i;
-    size_t input_length;
-    struct iov_block_state input_pos, output_pos;
+    size_t input_length, nblocks, blockno;
+    struct iov_cursor cursor;
 
     if (key->cache == NULL) {
         key->cache = malloc(sizeof(struct camellia_key_info_cache));
@@ -196,47 +179,35 @@ krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
     else
         memset(tmp, 0, BLOCK_SIZE);
 
-    for (i = 0, input_length = 0; i < num_data; i++) {
-        krb5_crypto_iov *iov = &data[i];
+    k5_iov_cursor_init(&cursor, data, num_data, BLOCK_SIZE, FALSE);
 
-        if (ENCRYPT_IOV(iov))
-            input_length += iov->data.length;
-    }
-
-    IOV_BLOCK_STATE_INIT(&input_pos);
-    IOV_BLOCK_STATE_INIT(&output_pos);
-
+    input_length = iov_total_length(data, num_data, FALSE);
     nblocks = (input_length + BLOCK_SIZE - 1) / BLOCK_SIZE;
     if (nblocks == 1) {
-        krb5int_c_iov_get_block(tmp, BLOCK_SIZE, data, num_data, &input_pos);
+        k5_iov_cursor_get(&cursor, tmp);
         dec(tmp2, tmp, &CACHE(key)->dec_ctx);
-        krb5int_c_iov_put_block(data, num_data, tmp2, BLOCK_SIZE, &output_pos);
+        k5_iov_cursor_put(&cursor, tmp2);
     } else if (nblocks > 1) {
         unsigned char blockN2[BLOCK_SIZE];   /* second last */
         unsigned char blockN1[BLOCK_SIZE];   /* last block */
 
         for (blockno = 0; blockno < nblocks - 2; blockno++) {
-            unsigned char blockN[BLOCK_SIZE], *block;
+            unsigned char block[BLOCK_SIZE];
 
-            krb5int_c_iov_get_block_nocopy(blockN, BLOCK_SIZE,
-                                           data, num_data, &input_pos, &block);
+            k5_iov_cursor_get(&cursor, block);
             memcpy(tmp2, block, BLOCK_SIZE);
             dec(block, block, &CACHE(key)->dec_ctx);
             xorblock(block, tmp);
             memcpy(tmp, tmp2, BLOCK_SIZE);
-            krb5int_c_iov_put_block_nocopy(data, num_data, blockN, BLOCK_SIZE,
-                                           &output_pos, block);
+            k5_iov_cursor_put(&cursor, block);
         }
 
         /* Do last two blocks, the second of which (next-to-last block
            of plaintext) may be incomplete.  */
 
         /* First, get the last two encrypted blocks */
-        memset(blockN1, 0, sizeof(blockN1)); /* pad last block with zeros */
-        krb5int_c_iov_get_block(blockN2, BLOCK_SIZE, data, num_data,
-                                &input_pos);
-        krb5int_c_iov_get_block(blockN1, BLOCK_SIZE, data, num_data,
-                                &input_pos);
+        k5_iov_cursor_get(&cursor, blockN2);
+        k5_iov_cursor_get(&cursor, blockN1);
 
         if (ivec != NULL)
             memcpy(ivec->data, blockN2, BLOCK_SIZE);
@@ -257,10 +228,8 @@ krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
         memcpy(blockN1, tmp3, BLOCK_SIZE);
 
         /* Put the last two blocks back into the iovec */
-        krb5int_c_iov_put_block(data, num_data, blockN1, BLOCK_SIZE,
-                                &output_pos);
-        krb5int_c_iov_put_block(data, num_data, blockN2, BLOCK_SIZE,
-                                &output_pos);
+        k5_iov_cursor_put(&cursor, blockN1);
+        k5_iov_cursor_put(&cursor, blockN2);
     }
 
     return 0;
@@ -272,8 +241,8 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
                          krb5_data *output)
 {
     camellia_ctx ctx;
-    unsigned char blockY[BLOCK_SIZE];
-    struct iov_block_state iov_state;
+    unsigned char blockY[BLOCK_SIZE], blockB[BLOCK_SIZE];
+    struct iov_cursor cursor;
 
     if (output->length < BLOCK_SIZE)
         return KRB5_BAD_MSIZE;
@@ -287,14 +256,8 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
     else
         memset(blockY, 0, BLOCK_SIZE);
 
-    IOV_BLOCK_STATE_INIT(&iov_state);
-    for (;;) {
-        unsigned char blockB[BLOCK_SIZE];
-
-        if (!krb5int_c_iov_get_block(blockB, BLOCK_SIZE, data, num_data,
-                                     &iov_state))
-            break;
-
+    k5_iov_cursor_init(&cursor, data, num_data, BLOCK_SIZE, FALSE);
+    while (k5_iov_cursor_get(&cursor, blockB)) {
         xorblock(blockB, blockY);
         if (camellia_enc_blk(blockB, blockY, &ctx) != camellia_good)
             abort();

@@ -145,8 +145,8 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
     unsigned char input[BLOCK_SIZE];
     unsigned int n, i, flag;
     krb5_error_code ret;
-    struct iov_block_state iov_state;
-    unsigned int length;
+    struct iov_cursor cursor;
+    size_t length;
     krb5_crypto_iov iov[1];
     krb5_data d;
 
@@ -155,12 +155,7 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
     if (enc->block_size != BLOCK_SIZE)
         return KRB5_BAD_MSIZE;
 
-    for (i = 0, length = 0; i < num_data; i++) {
-        const krb5_crypto_iov *piov = &data[i];
-
-        if (SIGN_IOV(piov))
-            length += piov->data.length;
-    }
+    length = iov_total_length(data, num_data, TRUE);
 
     /* Step 1. */
     ret = generate_subkey(enc, key, K1, K2);
@@ -186,10 +181,9 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
     d = make_data(Y, BLOCK_SIZE);
 
     /* Step 6 (all but last block). */
-    IOV_BLOCK_STATE_INIT(&iov_state);
-    iov_state.include_sign_only = 1;
+    k5_iov_cursor_init(&cursor, data, num_data, BLOCK_SIZE, TRUE);
     for (i = 0; i < n - 1; i++) {
-        krb5int_c_iov_get_block(input, BLOCK_SIZE, data, num_data, &iov_state);
+        k5_iov_cursor_get(&cursor, input);
 
         ret = enc->cbc_mac(key, iov, 1, &d, &d);
         if (ret != 0)
@@ -197,7 +191,7 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
     }
 
     /* Step 4. */
-    krb5int_c_iov_get_block(input, BLOCK_SIZE, data, num_data, &iov_state);
+    k5_iov_cursor_get(&cursor, input);
     if (flag) {
         /* last block is complete block */
         xor_128(input, K1, M_last);
