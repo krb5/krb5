@@ -1646,9 +1646,6 @@ AC_ARG_WITH([ldap],
 esac], with_ldap=no)dnl
 
 if test $with_ldap = yes; then
-  if test $with_edirectory = yes; then
-    AC_MSG_ERROR(Cannot enable both OpenLDAP and eDirectory backends; choose one.)
-  fi
   AC_MSG_NOTICE(enabling OpenLDAP database backend module support)
   OPENLDAP_PLUGIN=yes
 fi

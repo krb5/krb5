@@ -507,7 +507,7 @@ pkinit_fini_identity_crypto(pkinit_identity_crypto_context idctx)
     if (idctx == NULL)
         return;
 
-    pkiDebug("%s: freeing   ctx at %p\n", __FUNCTION__, idctx);
+    pkiDebug("%s: freeing ctx at %p\n", __FUNCTION__, idctx);
     free(idctx->identity);
     pkinit_fini_certs(idctx);
     pkinit_fini_pkcs11(idctx);
@@ -545,7 +545,7 @@ pkinit_fini_req_crypto(pkinit_req_crypto_context req_cryptoctx)
     if (req_cryptoctx == NULL)
         return;
 
-    pkiDebug("%s: freeing   ctx at %p\n", __FUNCTION__, req_cryptoctx);
+    pkiDebug("%s: freeing ctx at %p\n", __FUNCTION__, req_cryptoctx);
     if (req_cryptoctx->dh != NULL)
         DH_free(req_cryptoctx->dh);
     if (req_cryptoctx->received_cert != NULL)
@@ -4514,23 +4514,23 @@ reassemble_pkcs11_name(pkinit_identity_opts *idopts)
     k5_buf_add(&buf, "PKCS11:");
     n = 0;
     if (idopts->p11_module_name != NULL) {
-        k5_buf_add_fmt(&buf, "%smodule_name=%s", n++ ? "," : "",
+        k5_buf_add_fmt(&buf, "%smodule_name=%s", n++ ? ":" : "",
                        idopts->p11_module_name);
     }
     if (idopts->token_label != NULL) {
-        k5_buf_add_fmt(&buf, "%stoken=%s", n++ ? "," : "",
+        k5_buf_add_fmt(&buf, "%stoken=%s", n++ ? ":" : "",
                        idopts->token_label);
     }
     if (idopts->cert_label != NULL) {
-        k5_buf_add_fmt(&buf, "%scertlabel=%s", n++ ? "," : "",
+        k5_buf_add_fmt(&buf, "%scertlabel=%s", n++ ? ":" : "",
                        idopts->cert_label);
     }
     if (idopts->cert_id_string != NULL) {
-        k5_buf_add_fmt(&buf, "%scertid=%s", n++ ? "," : "",
+        k5_buf_add_fmt(&buf, "%scertid=%s", n++ ? ":" : "",
                        idopts->cert_id_string);
     }
     if (idopts->slotid != PK_NOSLOT) {
-        k5_buf_add_fmt(&buf, "%sslotid=%ld", n++ ? "," : "",
+        k5_buf_add_fmt(&buf, "%sslotid=%ld", n++ ? ":" : "",
                        (long)idopts->slotid);
     }
     if (k5_buf_len(&buf) >= 0)
