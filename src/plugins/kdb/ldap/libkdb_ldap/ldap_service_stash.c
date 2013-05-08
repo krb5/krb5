@@ -100,6 +100,9 @@ krb5_ldap_readpassword(krb5_context context, krb5_ldap_context *ldap_context,
     fptr = fopen(file, "r");
     if (fptr == NULL) {
         st = errno;
+        krb5_set_error_message(context, st,
+                               _("Cannot open LDAP password file '%s': %s"),
+                               file, error_message(st));
         goto rp_exit;
     }
     set_cloexec_file(fptr);
@@ -127,8 +130,9 @@ krb5_ldap_readpassword(krb5_context context, krb5_ldap_context *ldap_context,
 
     if (entryfound == 0)  {
         st = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_set_error_message(context, st,
-                               _("Bind DN entry missing in stash file"));
+        krb5_set_error_message(context, st, _("Bind DN entry '%s' missing in "
+                                              "LDAP password file '%s'"),
+                               ldap_context->bind_dn, file);
         goto rp_exit;
     }
     /* replace the \n with \0 */
