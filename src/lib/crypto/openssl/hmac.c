@@ -105,7 +105,7 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
     HMAC_CTX_init(&c);
     HMAC_Init(&c, keyblock->contents, keyblock->length, map_digest(hash));
     for (i = 0; i < num_data; i++) {
-        krb5_crypto_iov *iov = &data[i];
+        const krb5_crypto_iov *iov = &data[i];
 
         if (SIGN_IOV(iov))
             HMAC_Update(&c, (unsigned char*) iov->data.data, iov->data.length);
