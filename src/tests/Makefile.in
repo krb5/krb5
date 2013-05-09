@@ -101,6 +101,7 @@ check-pytests:: gcred hist kdbtest t_localauth
 	$(RUNPYTEST) $(srcdir)/t_kdb.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2012-1014.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2012-1015.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_cve-2013-1416.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) gcred hist kdbtest krb5.conf kdc.conf t_localauth
