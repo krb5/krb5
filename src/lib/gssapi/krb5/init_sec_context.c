@@ -1014,9 +1014,7 @@ krb5_gss_init_context (krb5_context *ctxp)
     if (err)
         return err;
 #ifndef _WIN32
-    err = k5_mutex_lock(&kg_kdc_flag_mutex);
-    if (err)
-        return err;
+    k5_mutex_lock(&kg_kdc_flag_mutex);
     is_kdc = kdc_flag;
     k5_mutex_unlock(&kg_kdc_flag_mutex);
 
@@ -1041,10 +1039,7 @@ krb5int_gss_use_kdc_context(OM_uint32 *minor_status,
     err = gss_krb5int_initialize_library();
     if (err)
         return err;
-    *minor_status = k5_mutex_lock(&kg_kdc_flag_mutex);
-    if (*minor_status) {
-        return GSS_S_FAILURE;
-    }
+    k5_mutex_lock(&kg_kdc_flag_mutex);
     kdc_flag = 1;
     k5_mutex_unlock(&kg_kdc_flag_mutex);
     return GSS_S_COMPLETE;

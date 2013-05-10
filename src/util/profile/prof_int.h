@@ -244,8 +244,8 @@ int profile_file_is_writable
 void profile_dereference_data (prf_data_t);
 void profile_dereference_data_locked (prf_data_t);
 
-int profile_lock_global (void);
-int profile_unlock_global (void);
+void profile_lock_global (void);
+void profile_unlock_global (void);
 
 /* prof_init.c -- included from profile.h */
 errcode_t profile_ser_size

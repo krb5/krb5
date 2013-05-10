@@ -249,9 +249,7 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
     *id = NULL;
 
     /* First determine if a memory keytab of this name already exists */
-    err = KTGLOCK;
-    if (err)
-        return err;
+    KTGLOCK;
 
     for (list = krb5int_mkt_list; list; list = list->next) {
         if (strcmp(name,KTNAME(list->keytab)) == 0)
@@ -271,9 +269,7 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
     }
 
     /* Increment the reference count on the keytab we found or created. */
-    err = KTLOCK(list->keytab);
-    if (err)
-        goto done;
+    KTLOCK(list->keytab);
     KTREFCNT(list->keytab)++;
     KTUNLOCK(list->keytab);
     *id = list->keytab;
@@ -301,9 +297,7 @@ krb5_mkt_close(krb5_context context, krb5_keytab id)
     krb5_error_code err = 0;
 
     /* First determine if a memory keytab of this name already exists */
-    err = KTGLOCK;
-    if (err)
-        return(err);
+    KTGLOCK;
 
     for (listp = &krb5int_mkt_list; *listp; listp = &((*listp)->next))
     {
@@ -320,10 +314,7 @@ krb5_mkt_close(krb5_context context, krb5_keytab id)
     }
 
     /* reduce the refcount and return */
-    err = KTLOCK(id);
-    if (err)
-        goto done;
-
+    KTLOCK(id);
     KTREFCNT(id)--;
     KTUNLOCK(id);
 
@@ -388,9 +379,7 @@ krb5_mkt_get_entry(krb5_context context, krb5_keytab id,
     int found_wrong_kvno = 0;
     krb5_boolean similar = 0;
 
-    err = KTLOCK(id);
-    if (err)
-        return err;
+    KTLOCK(id);
 
     for (cursor = KTLINK(id); cursor && cursor->entry; cursor = cursor->next) {
         entry = cursor->entry;
@@ -480,12 +469,7 @@ krb5_mkt_get_name(krb5_context context, krb5_keytab id, char *name, unsigned int
 krb5_error_code KRB5_CALLCONV
 krb5_mkt_start_seq_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *cursorp)
 {
-    krb5_error_code err = 0;
-
-    err = KTLOCK(id);
-    if (err)
-        return(err);
-
+    KTLOCK(id);
     *cursorp = (krb5_kt_cursor)KTLINK(id);
     KTUNLOCK(id);
 
@@ -502,9 +486,7 @@ krb5_mkt_get_next(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry
     krb5_mkt_cursor mkt_cursor = (krb5_mkt_cursor)*cursor;
     krb5_error_code err = 0;
 
-    err = KTLOCK(id);
-    if (err)
-        return err;
+    KTLOCK(id);
 
     if (mkt_cursor == NULL) {
         KTUNLOCK(id);
@@ -548,9 +530,7 @@ krb5_mkt_add(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
     krb5_error_code err = 0;
     krb5_mkt_cursor cursor;
 
-    err = KTLOCK(id);
-    if (err)
-        return err;
+    KTLOCK(id);
 
     cursor = (krb5_mkt_cursor)malloc(sizeof(krb5_mkt_link));
     if (cursor == NULL) {
@@ -605,9 +585,7 @@ krb5_mkt_remove(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
     krb5_mkt_cursor *pcursor, next;
     krb5_error_code err = 0;
 
-    err = KTLOCK(id);
-    if (err)
-        return err;
+    KTLOCK(id);
 
     if ( KTLINK(id) == NULL ) {
         err = KRB5_KT_NOTFOUND;

@@ -98,10 +98,10 @@ k5_cc_mutex_assert_locked(krb5_context context, k5_cc_mutex *m);
 void
 k5_cc_mutex_assert_unlocked(krb5_context context, k5_cc_mutex *m);
 
-krb5_error_code
+void
 k5_cc_mutex_lock(krb5_context context, k5_cc_mutex *m);
 
-krb5_error_code
+void
 k5_cc_mutex_unlock(krb5_context context, k5_cc_mutex *m);
 
 extern k5_cc_mutex krb5int_mcc_mutex;
@@ -116,10 +116,10 @@ extern krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_unlock
 (krb5_context context);
 #endif
 
-krb5_error_code
+void
 k5_cc_mutex_force_unlock(k5_cc_mutex *m);
 
-krb5_error_code
+void
 k5_cccol_force_unlock(void);
 
 krb5_error_code

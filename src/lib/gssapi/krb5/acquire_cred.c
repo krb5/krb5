@@ -112,11 +112,7 @@ gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
             return GSS_S_FAILURE;
     }
 
-    err = k5_mutex_lock(&gssint_krb5_keytab_lock);
-    if (err) {
-        free(new);
-        return GSS_S_FAILURE;
-    }
+    k5_mutex_lock(&gssint_krb5_keytab_lock);
     old = krb5_gss_keytab;
     krb5_gss_keytab = new;
     k5_mutex_unlock(&gssint_krb5_keytab_lock);
@@ -196,11 +192,7 @@ acquire_accept_cred(krb5_context context,
     if (req_keytab != NULL) {
         code = krb5_kt_dup(context, req_keytab, &kt);
     } else {
-        code = k5_mutex_lock(&gssint_krb5_keytab_lock);
-        if (code) {
-            *minor_status = code;
-            return GSS_S_FAILURE;
-        }
+        k5_mutex_lock(&gssint_krb5_keytab_lock);
         if (krb5_gss_keytab != NULL) {
             code = krb5_kt_resolve(context, krb5_gss_keytab, &kt);
             k5_mutex_unlock(&gssint_krb5_keytab_lock);

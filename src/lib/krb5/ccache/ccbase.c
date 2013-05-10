@@ -151,11 +151,8 @@ krb5_cc_register(krb5_context context, const krb5_cc_ops *ops,
                  krb5_boolean override)
 {
     struct krb5_cc_typelist *t;
-    krb5_error_code err;
 
-    err = k5_mutex_lock(&cc_typelist_lock);
-    if (err)
-        return err;
+    k5_mutex_lock(&cc_typelist_lock);
     for (t = cc_typehead;t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
         ;
     if (t) {
@@ -254,13 +251,9 @@ krb5int_cc_getops(krb5_context context,
                   const char *pfx,
                   const krb5_cc_ops **ops)
 {
-    krb5_error_code err;
     struct krb5_cc_typelist *tlist;
 
-    err = k5_mutex_lock(&cc_typelist_lock);
-    if (err)
-        return err;
-
+    k5_mutex_lock(&cc_typelist_lock);
     for (tlist = cc_typehead; tlist; tlist = tlist->next) {
         if (strcmp (tlist->ops->prefix, pfx) == 0) {
             *ops = tlist->ops;
@@ -312,7 +305,6 @@ krb5_cc_new_unique(
 krb5_error_code
 krb5int_cc_typecursor_new(krb5_context context, krb5_cc_typecursor *t)
 {
-    krb5_error_code err = 0;
     krb5_cc_typecursor n = NULL;
 
     *t = NULL;
@@ -320,19 +312,11 @@ krb5int_cc_typecursor_new(krb5_context context, krb5_cc_typecursor *t)
     if (n == NULL)
         return ENOMEM;
 
-    err = k5_mutex_lock(&cc_typelist_lock);
-    if (err)
-        goto errout;
+    k5_mutex_lock(&cc_typelist_lock);
     n->tptr = cc_typehead;
-    err = k5_mutex_unlock(&cc_typelist_lock);
-    if (err)
-        goto errout;
-
+    k5_mutex_unlock(&cc_typelist_lock);
     *t = n;
-errout:
-    if (err)
-        free(n);
-    return err;
+    return 0;
 }
 
 krb5_error_code
@@ -340,23 +324,15 @@ krb5int_cc_typecursor_next(krb5_context context,
                            krb5_cc_typecursor t,
                            const krb5_cc_ops **ops)
 {
-    krb5_error_code err = 0;
-
     *ops = NULL;
     if (t->tptr == NULL)
         return 0;
 
-    err = k5_mutex_lock(&cc_typelist_lock);
-    if (err)
-        goto errout;
+    k5_mutex_lock(&cc_typelist_lock);
     *ops = t->tptr->ops;
     t->tptr = t->tptr->next;
-    err = k5_mutex_unlock(&cc_typelist_lock);
-    if (err)
-        goto errout;
-
-errout:
-    return err;
+    k5_mutex_unlock(&cc_typelist_lock);
+    return 0;
 }
 
 krb5_error_code
@@ -470,15 +446,13 @@ k5_cc_mutex_assert_unlocked(krb5_context context, k5_cc_mutex *m)
     k5_assert_unlocked(&m->lock);
 }
 
-krb5_error_code
+void
 k5_cc_mutex_lock(krb5_context context, k5_cc_mutex *m)
 {
-    krb5_error_code ret = 0;
-
     /* not locked or already locked by another context */
     if (m->owner != context) {
         /* acquire lock, blocking until available */
-        ret = k5_mutex_lock(&m->lock);
+        k5_mutex_lock(&m->lock);
         m->owner = context;
         m->refcount = 1;
     }
@@ -486,17 +460,14 @@ k5_cc_mutex_lock(krb5_context context, k5_cc_mutex *m)
     else {
         m->refcount++;
     }
-    return ret;
 }
 
-krb5_error_code
+void
 k5_cc_mutex_unlock(krb5_context context, k5_cc_mutex *m)
 {
-    krb5_error_code ret = 0;
-
     /* verify owner and sanity check refcount */
     if ((m->owner != context) || (m->refcount < 1)) {
-        return ret;
+        return;
     }
     /* decrement & unlock when count reaches zero */
     m->refcount--;
@@ -504,21 +475,17 @@ k5_cc_mutex_unlock(krb5_context context, k5_cc_mutex *m)
         m->owner = NULL;
         k5_mutex_unlock(&m->lock);
     }
-    return ret;
 }
 
 /* necessary to make reentrant locks play nice with krb5int_cc_finalize */
-krb5_error_code
+void
 k5_cc_mutex_force_unlock(k5_cc_mutex *m)
 {
-    krb5_error_code ret = 0;
-
     m->refcount = 0;
     m->owner = NULL;
     if (m->refcount > 0) {
         k5_mutex_unlock(&m->lock);
     }
-    return ret;
 }
 
 /*
@@ -530,33 +497,15 @@ krb5_cccol_lock(krb5_context context)
 {
     krb5_error_code ret = 0;
 
-    ret = k5_cc_mutex_lock(context, &cccol_lock);
-    if (ret) {
-        return ret;
-    }
-    ret = k5_mutex_lock(&cc_typelist_lock);
-    if (ret) {
-        k5_cc_mutex_unlock(context, &cccol_lock);
-        return ret;
-    }
-    ret = k5_cc_mutex_lock(context, &krb5int_cc_file_mutex);
-    if (ret) {
-        k5_mutex_unlock(&cc_typelist_lock);
-        k5_cc_mutex_unlock(context, &cccol_lock);
-        return ret;
-    }
-    ret = k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
-    if (ret) {
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-        k5_mutex_unlock(&cc_typelist_lock);
-        k5_cc_mutex_unlock(context, &cccol_lock);
-        return ret;
-    }
+    k5_cc_mutex_lock(context, &cccol_lock);
+    k5_mutex_lock(&cc_typelist_lock);
+    k5_cc_mutex_lock(context, &krb5int_cc_file_mutex);
+    k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
+#ifdef USE_KEYRING_CCACHE
+    k5_cc_mutex_lock(context, &krb5int_krcc_mutex);
+#endif
 #ifdef USE_CCAPI_V3
     ret = krb5_stdccv3_context_lock(context);
-#endif
-#ifdef USE_KEYRING_CCACHE
-    ret = k5_cc_mutex_lock(context, &krb5int_krcc_mutex);
 #endif
     if (ret) {
         k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
@@ -577,19 +526,15 @@ krb5_cccol_unlock(krb5_context context)
     /* sanity check */
     k5_cc_mutex_assert_locked(context, &cccol_lock);
 
-    ret = k5_mutex_lock(&cc_typelist_lock);
-    if (ret) {
-        k5_cc_mutex_unlock(context, &cccol_lock);
-        return ret;
-    }
+    k5_mutex_lock(&cc_typelist_lock);
 
     /* unlock each type in the opposite order */
+#ifdef USE_CCAPI_V3
+    krb5_stdccv3_context_unlock(context);
+#endif
 #ifdef USE_KEYRING_CCACHE
     k5_cc_mutex_assert_locked(context, &krb5int_krcc_mutex);
     k5_cc_mutex_unlock(context, &krb5int_krcc_mutex);
-#endif
-#ifdef USE_CCAPI_V3
-    krb5_stdccv3_context_unlock(context);
 #endif
     k5_cc_mutex_assert_locked(context, &krb5int_mcc_mutex);
     k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
@@ -604,23 +549,15 @@ krb5_cccol_unlock(krb5_context context)
 }
 
 /* necessary to make reentrant locks play nice with krb5int_cc_finalize */
-krb5_error_code
+void
 k5_cccol_force_unlock()
 {
-    krb5_error_code ret = 0;
-
     /* sanity check */
     if ((&cccol_lock)->refcount == 0) {
-        return 0;
+        return;
     }
 
-    ret = k5_mutex_lock(&cc_typelist_lock);
-    if (ret) {
-        (&cccol_lock)->refcount = 0;
-        (&cccol_lock)->owner = NULL;
-        k5_mutex_unlock(&(&cccol_lock)->lock);
-        return ret;
-    }
+    k5_mutex_lock(&cc_typelist_lock);
 
     /* unlock each type in the opposite order */
 #ifdef USE_KEYRING_CCACHE
@@ -634,6 +571,4 @@ k5_cccol_force_unlock()
 
     k5_mutex_unlock(&cc_typelist_lock);
     k5_cc_mutex_force_unlock(&cccol_lock);
-
-    return ret;
 }

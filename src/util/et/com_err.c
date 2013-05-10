@@ -106,9 +106,7 @@ void KRB5_CALLCONV com_err_va(const char *whoami,
     err = com_err_finish_init();
     if (err)
         goto best_try;
-    err = k5_mutex_lock(&com_err_hook_lock);
-    if (err)
-        goto best_try;
+    k5_mutex_lock(&com_err_hook_lock);
     p = com_err_hook ? com_err_hook : default_com_err_proc;
     (*p)(whoami, code, fmt, ap);
     k5_mutex_unlock(&com_err_hook_lock);
@@ -144,9 +142,9 @@ void KRB5_CALLCONV_C com_err(const char *whoami,
 /* Make a separate function because the assert invocations below
    use the macro expansion on some platforms, which may be insanely
    long and incomprehensible.  */
-static int com_err_lock_hook_handle(void)
+static void com_err_lock_hook_handle(void)
 {
-    return k5_mutex_lock(&com_err_hook_lock);
+    k5_mutex_lock(&com_err_hook_lock);
 }
 
 et_old_error_hook_func set_com_err_hook (et_old_error_hook_func new_proc)
@@ -156,8 +154,7 @@ et_old_error_hook_func set_com_err_hook (et_old_error_hook_func new_proc)
     /* Broken initialization?  What can we do?  */
     if (com_err_finish_init() != 0)
         abort();
-    if (com_err_lock_hook_handle() != 0)
-        abort();
+    com_err_lock_hook_handle();
     x = com_err_hook;
     com_err_hook = new_proc;
     k5_mutex_unlock(&com_err_hook_lock);
@@ -171,8 +168,7 @@ et_old_error_hook_func reset_com_err_hook ()
     /* Broken initialization?  What can we do?  */
     if (com_err_finish_init() != 0)
         abort();
-    if (com_err_lock_hook_handle() != 0)
-        abort();
+    com_err_lock_hook_handle();
     x = com_err_hook;
     com_err_hook = NULL;
     k5_mutex_unlock(&com_err_hook_lock);

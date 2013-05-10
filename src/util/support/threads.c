@@ -180,35 +180,36 @@ static void thread_termination(void *);
 
 static void thread_termination (void *tptr)
 {
-    int err = k5_mutex_lock(&key_lock);
-    if (err == 0) {
-        int i, pass, none_found;
-        struct tsd_block *t = tptr;
+    int i, pass, none_found;
+    struct tsd_block *t = tptr;
 
-        /* Make multiple passes in case, for example, a libkrb5 cleanup
-           function wants to print out an error message, which causes
-           com_err to allocate a thread-specific buffer, after we just
-           freed up the old one.
+    k5_mutex_lock(&key_lock);
 
-           Shouldn't actually happen, if we're careful, but check just in
-           case.  */
+    /*
+     * Make multiple passes in case, for example, a libkrb5 cleanup
+     * function wants to print out an error message, which causes
+     * com_err to allocate a thread-specific buffer, after we just
+     * freed up the old one.
+     *
+     * Shouldn't actually happen, if we're careful, but check just in
+     * case.
+     */
 
-        pass = 0;
-        none_found = 0;
-        while (pass < 4 && !none_found) {
-            none_found = 1;
-            for (i = 0; i < K5_KEY_MAX; i++) {
-                if (destructors_set[i] && destructors[i] && t->values[i]) {
-                    void *v = t->values[i];
-                    t->values[i] = 0;
-                    (*destructors[i])(v);
-                    none_found = 0;
-                }
+    pass = 0;
+    none_found = 0;
+    while (pass < 4 && !none_found) {
+        none_found = 1;
+        for (i = 0; i < K5_KEY_MAX; i++) {
+            if (destructors_set[i] && destructors[i] && t->values[i]) {
+                void *v = t->values[i];
+                t->values[i] = 0;
+                (*destructors[i])(v);
+                none_found = 0;
             }
         }
-        free (t);
-        err = k5_mutex_unlock(&key_lock);
     }
+    free (t);
+    k5_mutex_unlock(&key_lock);
 
     /* remove thread from global linked list */
 }
@@ -328,7 +329,6 @@ int k5_key_register (k5_key_t keynum, void (*destructor)(void *))
     assert(destructors_set[keynum] == 0);
     destructors[keynum] = destructor;
     destructors_set[keynum] = 1;
-    err = 0;
 
 #elif defined(_WIN32)
 
@@ -338,17 +338,14 @@ int k5_key_register (k5_key_t keynum, void (*destructor)(void *))
     destructors_set[keynum] = 1;
     destructors[keynum] = destructor;
     LeaveCriticalSection(&key_lock);
-    err = 0;
 
 #else /* POSIX */
 
-    err = k5_mutex_lock(&key_lock);
-    if (err == 0) {
-        assert(destructors_set[keynum] == 0);
-        destructors_set[keynum] = 1;
-        destructors[keynum] = destructor;
-        err = k5_mutex_unlock(&key_lock);
-    }
+    k5_mutex_lock(&key_lock);
+    assert(destructors_set[keynum] == 0);
+    destructors_set[keynum] = 1;
+    destructors[keynum] = destructor;
+    k5_mutex_unlock(&key_lock);
 
 #endif
     return 0;
@@ -381,21 +378,12 @@ int k5_key_delete (k5_key_t keynum)
 
 #else /* POSIX */
 
-    {
-        int err;
-
-        /* XXX RESOURCE LEAK:
-
-           Need to destroy the allocated objects first!  */
-
-        err = k5_mutex_lock(&key_lock);
-        if (err == 0) {
-            assert(destructors_set[keynum] == 1);
-            destructors_set[keynum] = 0;
-            destructors[keynum] = NULL;
-            k5_mutex_unlock(&key_lock);
-        }
-    }
+    /* XXX RESOURCE LEAK: Need to destroy the allocated objects first!  */
+    k5_mutex_lock(&key_lock);
+    assert(destructors_set[keynum] == 1);
+    destructors_set[keynum] = 0;
+    destructors[keynum] = NULL;
+    k5_mutex_unlock(&key_lock);
 
 #endif
 
@@ -512,13 +500,13 @@ krb5int_mutex_free (k5_mutex_t *m)
 }
 
 /* Callable versions of the various macros.  */
-int KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5int_mutex_lock (k5_mutex_t *m)
 {
-    return k5_mutex_lock (m);
+    k5_mutex_lock (m);
 }
-int KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5int_mutex_unlock (k5_mutex_t *m)
 {
-    return k5_mutex_unlock (m);
+    k5_mutex_unlock (m);
 }

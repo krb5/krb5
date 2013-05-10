@@ -23,11 +23,7 @@ gss_krb5int_copy_ccache(OM_uint32 *minor_status,
 
     /* cred handle will have been validated by gssspi_set_cred_option() */
     k5creds = (krb5_gss_cred_id_t) *cred_handle;
-    code = k5_mutex_lock(&k5creds->lock);
-    if (code) {
-        *minor_status = code;
-        return GSS_S_FAILURE;
-    }
+    k5_mutex_lock(&k5creds->lock);
     if (k5creds->usage == GSS_C_ACCEPT) {
         k5_mutex_unlock(&k5creds->lock);
         *minor_status = (OM_uint32) G_BAD_USAGE;

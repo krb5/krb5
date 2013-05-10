@@ -171,9 +171,7 @@ gss_OID *oid;
 	if (*minor_status != 0)
 		return (GSS_S_FAILURE);
 
-	*minor_status = k5_mutex_lock(&g_mechListLock);
-	if (*minor_status)
-		return GSS_S_FAILURE;
+	k5_mutex_lock(&g_mechListLock);
 	aMech = g_mechList;
 	while (aMech != NULL) {
 
@@ -252,13 +250,9 @@ gss_OID_set *mechSet_out;
 	 * need to lock the g_mechSet in case someone tries to update it while
 	 * I'm copying it.
 	 */
-	*minorStatus = k5_mutex_lock(&g_mechSetLock);
-	if (*minorStatus) {
-		return GSS_S_FAILURE;
-	}
-
+	k5_mutex_lock(&g_mechSetLock);
 	status = generic_gss_copy_oid_set(minorStatus, &g_mechSet, mechSet_out);
-	(void) k5_mutex_unlock(&g_mechSetLock);
+	k5_mutex_unlock(&g_mechSetLock);
 	return (status);
 } /* gss_indicate_mechs */
 
@@ -293,8 +287,7 @@ build_mechSet(void)
 	 * since we are accessing parts of the mechList which could be
 	 * modified.
 	 */
-	if (k5_mutex_lock(&g_mechListLock) != 0)
-		return GSS_S_FAILURE;
+	k5_mutex_lock(&g_mechListLock);
 
 #if 0
 	/*
@@ -316,8 +309,7 @@ build_mechSet(void)
 	 * we need to lock the mech set so that no one else will
 	 * try to read it as we are re-creating it
 	 */
-	if (k5_mutex_lock(&g_mechSetLock) != 0)
-		return GSS_S_FAILURE;
+	k5_mutex_lock(&g_mechSetLock);
 
 	/* if the oid list already exists we must free it first */
 	free_mechSet();
@@ -335,8 +327,8 @@ build_mechSet(void)
 		g_mechSet.elements =
 			(gss_OID) calloc(count, sizeof (gss_OID_desc));
 		if (g_mechSet.elements == NULL) {
-			(void) k5_mutex_unlock(&g_mechSetLock);
-			(void) k5_mutex_unlock(&g_mechListLock);
+			k5_mutex_unlock(&g_mechSetLock);
+			k5_mutex_unlock(&g_mechListLock);
 			return (GSS_S_FAILURE);
 		}
 
@@ -364,8 +356,8 @@ build_mechSet(void)
 				free(g_mechSet.elements);
 				g_mechSet.count = 0;
 				g_mechSet.elements = NULL;
-				(void) k5_mutex_unlock(&g_mechSetLock);
-				(void) k5_mutex_unlock(&g_mechListLock);
+				k5_mutex_unlock(&g_mechSetLock);
+				k5_mutex_unlock(&g_mechListLock);
 				return (GSS_S_FAILURE);
 			}
 			g_OID_copy(curItem, mList->mech_type);
@@ -377,8 +369,8 @@ build_mechSet(void)
 #if 0
 	g_mechSetTime = fileInfo.st_mtime;
 #endif
-	(void) k5_mutex_unlock(&g_mechSetLock);
-	(void) k5_mutex_unlock(&g_mechListLock);
+	k5_mutex_unlock(&g_mechSetLock);
+	k5_mutex_unlock(&g_mechListLock);
 
 	return GSS_S_COMPLETE;
 }
@@ -402,19 +394,18 @@ const gss_OID oid;
 		return (NULL);
 
 	/* make sure we have fresh data */
-	if (k5_mutex_lock(&g_mechListLock) != 0)
-		return NULL;
+	k5_mutex_lock(&g_mechListLock);
 	updateMechList();
 
 	if ((aMech = searchMechList(oid)) == NULL ||
 		aMech->optionStr == NULL) {
-		(void) k5_mutex_unlock(&g_mechListLock);
+		k5_mutex_unlock(&g_mechListLock);
 		return (NULL);
 	}
 
 	if (aMech->optionStr)
 		modOptions = strdup(aMech->optionStr);
-	(void) k5_mutex_unlock(&g_mechListLock);
+	k5_mutex_unlock(&g_mechListLock);
 
 	return (modOptions);
 } /* gssint_get_modOptions */
@@ -924,8 +915,7 @@ gssint_select_mech_type(OM_uint32 *minor, gss_const_OID oid,
 	if (gssint_mechglue_initialize_library() != 0)
 		return GSS_S_FAILURE;
 
-	if (k5_mutex_lock(&g_mechListLock) != 0)
-		return GSS_S_FAILURE;
+	k5_mutex_lock(&g_mechListLock);
 
 	/* Read conf file at least once so that interposer plugins have a
 	 * chance of getting initialized. */
@@ -953,7 +943,7 @@ gssint_select_mech_type(OM_uint32 *minor, gss_const_OID oid,
 	status = GSS_S_BAD_MECH;
 
 done:
-	(void)k5_mutex_unlock(&g_mechListLock);
+	k5_mutex_unlock(&g_mechListLock);
 	return status;
 }
 
@@ -972,8 +962,7 @@ gssint_get_public_oid(gss_const_OID oid)
 	if (gssint_mechglue_initialize_library() != 0)
 		return GSS_C_NO_OID;
 
-	if (k5_mutex_lock(&g_mechListLock) != 0)
-		return GSS_C_NO_OID;
+	k5_mutex_lock(&g_mechListLock);
 
 	for (minfo = g_mechList; minfo != NULL; minfo = minfo->next) {
 		if (minfo->is_interposer)
@@ -986,7 +975,7 @@ gssint_get_public_oid(gss_const_OID oid)
 		}
 	}
 
-	(void)k5_mutex_unlock(&g_mechListLock);
+	k5_mutex_unlock(&g_mechListLock);
 	return public_oid;
 }
 
@@ -1045,8 +1034,7 @@ gssint_get_mechanism(gss_const_OID oid)
 	if (gssint_mechglue_initialize_library() != 0)
 		return (NULL);
 
-	if (k5_mutex_lock(&g_mechListLock) != 0)
-		return NULL;
+	k5_mutex_lock(&g_mechListLock);
 
 	/* Check if the mechanism is already loaded. */
 	aMech = g_mechList;
@@ -1054,11 +1042,11 @@ gssint_get_mechanism(gss_const_OID oid)
 		oid = aMech->mech_type;
 	while (aMech != NULL) {
 		if (g_OID_equal(aMech->mech_type, oid) && aMech->mech) {
-			(void)k5_mutex_unlock(&g_mechListLock);
+			k5_mutex_unlock(&g_mechListLock);
 			return aMech->mech;
 		} else if (aMech->int_mech_type != GSS_C_NO_OID &&
 			   g_OID_equal(aMech->int_mech_type, oid)) {
-			(void)k5_mutex_unlock(&g_mechListLock);
+			k5_mutex_unlock(&g_mechListLock);
 			return aMech->int_mech;
 		}
 		aMech = aMech->next;
@@ -1074,13 +1062,13 @@ gssint_get_mechanism(gss_const_OID oid)
 
 	/* is the mechanism present in the list ? */
 	if (aMech == NULL) {
-		(void) k5_mutex_unlock(&g_mechListLock);
+		k5_mutex_unlock(&g_mechListLock);
 		return ((gss_mechanism)NULL);
 	}
 
 	/* has another thread loaded the mech */
 	if (aMech->mech) {
-		(void) k5_mutex_unlock(&g_mechListLock);
+		k5_mutex_unlock(&g_mechListLock);
 		return (aMech->mech);
 	}
 
@@ -1092,7 +1080,7 @@ gssint_get_mechanism(gss_const_OID oid)
 		(void) syslog(LOG_INFO, "libgss dlopen(%s): %s\n",
 				aMech->uLibName, dlerror());
 #endif
-		(void) k5_mutex_unlock(&g_mechListLock);
+		k5_mutex_unlock(&g_mechListLock);
 		return ((gss_mechanism)NULL);
 	}
 
@@ -1111,13 +1099,13 @@ gssint_get_mechanism(gss_const_OID oid)
 		(void) syslog(LOG_INFO, "unable to initialize mechanism"
 				" library [%s]\n", aMech->uLibName);
 #endif
-		(void) k5_mutex_unlock(&g_mechListLock);
+		k5_mutex_unlock(&g_mechListLock);
 		return ((gss_mechanism)NULL);
 	}
 
 	aMech->dl_handle = dl;
 
-	(void) k5_mutex_unlock(&g_mechListLock);
+	k5_mutex_unlock(&g_mechListLock);
 	return (aMech->mech);
 } /* gssint_get_mechanism */
 

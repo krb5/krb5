@@ -934,7 +934,7 @@ ctx_iterate(krb5_context context, krb5_db2_context *dbc,
     DBT key, contents;
     krb5_data contdata;
     krb5_db_entry *entry;
-    krb5_error_code retval, retval2;
+    krb5_error_code retval;
     int dbret;
 
     retval = ctx_lock(context, dbc, KRB5_LOCKMODE_SHARED);
@@ -948,21 +948,12 @@ ctx_iterate(krb5_context context, krb5_db2_context *dbc,
         retval = krb5_decode_princ_entry(context, &contdata, &entry);
         if (retval)
             break;
-        retval = k5_mutex_unlock(krb5_db2_mutex);
-        if (retval)
-            break;
+        k5_mutex_unlock(krb5_db2_mutex);
         retval = (*func)(func_arg, entry);
         krb5_dbe_free(context, entry);
-        retval2 = k5_mutex_lock(krb5_db2_mutex);
-        /* Note: If re-locking fails, the wrapper in db2_exp.c will
-           still try to unlock it again.  That would be a bug.  Fix
-           when integrating the locking better.  */
+        k5_mutex_lock(krb5_db2_mutex);
         if (retval)
             break;
-        if (retval2) {
-            retval = retval2;
-            break;
-        }
         dbret = dbc->db->seq(dbc->db, &key, &contents, R_NEXT);
     }
     switch (dbret) {

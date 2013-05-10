@@ -392,9 +392,7 @@ krb5_krcc_initialize(krb5_context context, krb5_ccache id,
 
     DEBUG_PRINT(("krb5_krcc_initialize: entered\n"));
 
-    kret = k5_cc_mutex_lock(context, &((krb5_krcc_data *) id->data)->lock);
-    if (kret)
-        return kret;
+    k5_cc_mutex_lock(context, &((krb5_krcc_data *) id->data)->lock);
 
     kret = krb5_krcc_clearcache(context, id);
     if (kret != KRB5_OK)
@@ -484,7 +482,7 @@ krb5_krcc_clearcache(krb5_context context, krb5_ccache id)
 static krb5_error_code KRB5_CALLCONV
 krb5_krcc_destroy(krb5_context context, krb5_ccache id)
 {
-    krb5_error_code kret;
+    krb5_error_code kret = 0;
     krb5_krcc_data *d;
     int     res;
 
@@ -492,9 +490,7 @@ krb5_krcc_destroy(krb5_context context, krb5_ccache id)
 
     d = (krb5_krcc_data *) id->data;
 
-    kret = k5_cc_mutex_lock(context, &d->lock);
-    if (kret)
-        return kret;
+    k5_cc_mutex_lock(context, &d->lock);
 
     krb5_krcc_clearcache(context, id);
     free(d->name);
@@ -513,7 +509,7 @@ cleanup:
 
     krb5_change_cache();
 
-    return KRB5_OK;
+    return kret;
 }
 
 
@@ -653,7 +649,6 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
                         krb5_cc_cursor * cursor)
 {
     krb5_krcc_cursor krcursor;
-    krb5_error_code kret;
     krb5_krcc_data *d;
     unsigned int size;
     int     res;
@@ -661,9 +656,7 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
     DEBUG_PRINT(("krb5_krcc_start_seq_get: entered\n"));
 
     d = id->data;
-    kret = k5_cc_mutex_lock(context, &d->lock);
-    if (kret)
-        return kret;
+    k5_cc_mutex_lock(context, &d->lock);
 
     /*
      * Determine how many keys currently exist and update numkeys.
@@ -862,11 +855,7 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
 
     lid->ops = &krb5_krcc_ops;
 
-    kret = k5_cc_mutex_lock(context, &krb5int_krcc_mutex);
-    if (kret) {
-        free(lid);
-        return kret;
-    }
+    k5_cc_mutex_lock(context, &krb5int_krcc_mutex);
 
 /* XXX These values are platform-specific and should not be here! */
 /* XXX There is a bug in FC5 where these are not included in errno.h  */
@@ -1028,9 +1017,7 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
 
     DEBUG_PRINT(("krb5_krcc_store: entered\n"));
 
-    kret = k5_cc_mutex_lock(context, &d->lock);
-    if (kret)
-        return kret;
+    k5_cc_mutex_lock(context, &d->lock);
 
     /* Get the service principal name and use it as the key name */
     kret = krb5_unparse_name(context, creds->server, &keyname);
@@ -1073,36 +1060,30 @@ static krb5_error_code KRB5_CALLCONV
 krb5_krcc_last_change_time(krb5_context context, krb5_ccache id,
                            krb5_timestamp *change_time)
 {
-    krb5_error_code ret = 0;
     krb5_krcc_data *data = (krb5_krcc_data *) id->data;
 
-    *change_time = 0;
-
-    ret = k5_cc_mutex_lock(context, &data->lock);
-    if (!ret) {
-        *change_time = data->changetime;
-        k5_cc_mutex_unlock(context, &data->lock);
-    }
-
-    return ret;
+    k5_cc_mutex_lock(context, &data->lock);
+    *change_time = data->changetime;
+    k5_cc_mutex_unlock(context, &data->lock);
+    return 0;
 }
 
 static krb5_error_code KRB5_CALLCONV
 krb5_krcc_lock(krb5_context context, krb5_ccache id)
 {
-    krb5_error_code ret = 0;
     krb5_krcc_data *data = (krb5_krcc_data *) id->data;
-    ret = k5_cc_mutex_lock(context, &data->lock);
-    return ret;
+
+    k5_cc_mutex_lock(context, &data->lock);
+    return 0;
 }
 
 static krb5_error_code KRB5_CALLCONV
 krb5_krcc_unlock(krb5_context context, krb5_ccache id)
 {
-    krb5_error_code ret = 0;
     krb5_krcc_data *data = (krb5_krcc_data *) id->data;
-    ret = k5_cc_mutex_unlock(context, &data->lock);
-    return ret;
+
+    k5_cc_mutex_unlock(context, &data->lock);
+    return 0;
 }
 
 
@@ -1172,9 +1153,7 @@ krb5_krcc_retrieve_principal(krb5_context context, krb5_ccache id,
     int     psize;
     krb5_krcc_bc bc;
 
-    kret = k5_cc_mutex_lock(context, &d->lock);
-    if (kret)
-        return kret;
+    k5_cc_mutex_lock(context, &d->lock);
 
     if (!d->princ_id) {
         princ = 0L;

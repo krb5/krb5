@@ -34,9 +34,7 @@ static errcode_t rw_setup(profile_t profile)
 
     file = profile->first_file;
 
-    retval = profile_lock_global();
-    if (retval)
-        return retval;
+    profile_lock_global();
 
     /* Don't update the file if we've already made modifications */
     if (file->data->flags & PROFILE_FILE_DIRTY) {
@@ -106,9 +104,7 @@ profile_update_relation(profile_t profile, const char **names,
     if (!old_value || !*old_value)
         return PROF_EINVAL;
 
-    retval = k5_mutex_lock(&profile->first_file->data->lock);
-    if (retval)
-        return retval;
+    k5_mutex_lock(&profile->first_file->data->lock);
     section = profile->first_file->data->root;
     for (cpp = names; cpp[1]; cpp++) {
         state = 0;
@@ -214,9 +210,7 @@ profile_rename_section(profile_t profile, const char **names,
     if (names == 0 || names[0] == 0 || names[1] == 0)
         return PROF_BAD_NAMESET;
 
-    retval = k5_mutex_lock(&profile->first_file->data->lock);
-    if (retval)
-        return retval;
+    k5_mutex_lock(&profile->first_file->data->lock);
     section = profile->first_file->data->root;
     for (cpp = names; cpp[1]; cpp++) {
         state = 0;
@@ -273,9 +267,7 @@ profile_add_relation(profile_t profile, const char **names,
     if (names == 0 || names[0] == 0 || names[1] == 0)
         return PROF_BAD_NAMESET;
 
-    retval = k5_mutex_lock(&profile->first_file->data->lock);
-    if (retval)
-        return retval;
+    k5_mutex_lock(&profile->first_file->data->lock);
     section = profile->first_file->data->root;
     for (cpp = names; cpp[1]; cpp++) {
         state = 0;

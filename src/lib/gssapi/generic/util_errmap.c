@@ -183,13 +183,7 @@ OM_uint32 gssint_mecherrmap_map(OM_uint32 minor, const gss_OID_desc * oid)
 
     me.code = minor;
     me.mech = *oid;
-    err = k5_mutex_lock(&mutex);
-    if (err) {
-#ifdef DEBUG
-        if (f != stderr) fclose(f);
-#endif
-        return 0;
-    }
+    k5_mutex_lock(&mutex);
 
     /* Is this status+oid already mapped?  */
     p = mecherrmap_findright(&m, me);
@@ -254,14 +248,11 @@ int gssint_mecherrmap_get(OM_uint32 minor, gss_OID mech_oid,
                           OM_uint32 *mech_minor)
 {
     const struct mecherror *p;
-    int err;
 
     if (minor == 0) {
         return EINVAL;
     }
-    err = k5_mutex_lock(&mutex);
-    if (err)
-        return err;
+    k5_mutex_lock(&mutex);
     p = mecherrmap_findleft(&m, minor);
     k5_mutex_unlock(&mutex);
     if (!p) {

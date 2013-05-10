@@ -108,9 +108,10 @@ k5_get_error(struct errinfo *ep, long code)
     if (code == ep->code && ep->msg != NULL)
         return oom_check(strdup(ep->msg));
 
-    if (initialize() || lock())
+    if (initialize())
         return oom_check(strdup(_("Kerberos library initialization failure")));
 
+    lock();
     if (fptr == NULL) {
         unlock();
 #ifdef HAVE_STRERROR_R
@@ -153,8 +154,7 @@ void
 k5_set_error_info_callout_fn(const char *(KRB5_CALLCONV *f)(long))
 {
     initialize();
-    if (lock() == 0) {
-        fptr = f;
-        unlock();
-    }
+    lock();
+    fptr = f;
+    unlock();
 }

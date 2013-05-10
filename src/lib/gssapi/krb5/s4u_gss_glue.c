@@ -58,11 +58,7 @@ kg_impersonate_name(OM_uint32 *minor_status,
     if (impersonator_cred->req_enctypes != NULL)
         in_creds.keyblock.enctype = impersonator_cred->req_enctypes[0];
 
-    code = k5_mutex_lock(&user->lock);
-    if (code != 0) {
-        *minor_status = code;
-        return GSS_S_FAILURE;
-    }
+    k5_mutex_lock(&user->lock);
 
     if (user->ad_context != NULL) {
         code = krb5_authdata_export_authdata(context,

@@ -37,12 +37,7 @@ krb5_gss_validate_cred_1(OM_uint32 *minor_status, gss_cred_id_t cred_handle,
     krb5_principal princ;
 
     cred = (krb5_gss_cred_id_t) cred_handle;
-
-    code = k5_mutex_lock(&cred->lock);
-    if (code) {
-        *minor_status = code;
-        return GSS_S_FAILURE;
-    }
+    k5_mutex_lock(&cred->lock);
 
     if (cred->ccache && cred->expire != 0) {
         if ((code = krb5_cc_get_principal(context, cred->ccache, &princ))) {

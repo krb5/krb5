@@ -89,7 +89,8 @@ kdb_lock_list()
     err = CALL_INIT_FUNCTION (kdb_init_lock_list);
     if (err)
         return err;
-    return k5_mutex_lock(&db_lock);
+    k5_mutex_lock(&db_lock);
+    return 0;
 }
 
 void
@@ -99,10 +100,10 @@ kdb_fini_lock_list()
         k5_mutex_destroy(&db_lock);
 }
 
-static int
+static void
 kdb_unlock_list()
 {
-    return k5_mutex_unlock(&db_lock);
+    k5_mutex_unlock(&db_lock);
 }
 
 /* Return true if the ulog is mapped in the master role. */

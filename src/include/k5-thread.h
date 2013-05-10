@@ -378,17 +378,17 @@ static inline int k5_mutex_finish_init(k5_mutex_t *m)
 #define k5_mutex_destroy(M)                     \
     (k5_os_mutex_destroy(M))
 
-#if __GNUC__ >= 4
-static int k5_mutex_lock(k5_mutex_t *)
-    __attribute__((warn_unused_result));
-#endif
-static inline int k5_mutex_lock(k5_mutex_t *m)
+static inline void k5_mutex_lock(k5_mutex_t *m)
 {
-    return k5_os_mutex_lock(m);
+    int r = k5_os_mutex_lock(m);
+    assert(r == 0);
 }
 
-#define k5_mutex_unlock(M)                      \
-    (k5_os_mutex_unlock(M))
+static inline void k5_mutex_unlock(k5_mutex_t *m)
+{
+    int r = k5_os_mutex_unlock(m);
+    assert(r == 0);
+}
 
 #define k5_mutex_assert_locked(M)       ((void)(M))
 #define k5_mutex_assert_unlocked(M)     ((void)(M))
@@ -423,12 +423,8 @@ extern int k5_key_delete(k5_key_t);
 
 extern int  KRB5_CALLCONV krb5int_mutex_alloc  (k5_mutex_t **);
 extern void KRB5_CALLCONV krb5int_mutex_free   (k5_mutex_t *);
-extern int  KRB5_CALLCONV krb5int_mutex_lock   (k5_mutex_t *)
-#if __GNUC__ >= 4
-    __attribute__((warn_unused_result))
-#endif
-    ;
-extern int  KRB5_CALLCONV krb5int_mutex_unlock (k5_mutex_t *);
+extern void KRB5_CALLCONV krb5int_mutex_lock   (k5_mutex_t *);
+extern void KRB5_CALLCONV krb5int_mutex_unlock (k5_mutex_t *);
 
 /* In time, many of the definitions above should move into the support
    library, and this file should be greatly simplified.  For type

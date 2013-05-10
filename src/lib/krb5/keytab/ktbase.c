@@ -123,11 +123,8 @@ krb5_kt_register(krb5_context context, const krb5_kt_ops *ops)
 {
     const struct krb5_kt_typelist *t;
     struct krb5_kt_typelist *newt;
-    krb5_error_code err;
 
-    err = k5_mutex_lock(&kt_typehead_lock);
-    if (err)
-        return err;
+    k5_mutex_lock(&kt_typehead_lock);
     for (t = kt_typehead; t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
         ;
     if (t) {
@@ -195,9 +192,7 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 
     *ktid = (krb5_keytab) 0;
 
-    err = k5_mutex_lock(&kt_typehead_lock);
-    if (err)
-        goto cleanup;
+    k5_mutex_lock(&kt_typehead_lock);
     tlist = kt_typehead;
     /* Don't need to hold the lock, since entries are never modified
        or removed once they're in the list.  Just need to protect

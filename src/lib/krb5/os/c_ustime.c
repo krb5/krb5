@@ -88,9 +88,7 @@ krb5_crypto_us_timeofday(krb5_int32 *seconds, krb5_int32 *microseconds)
        different threads getting the same value for time, which may be
        a technical violation of spec. */
 
-    err = k5_mutex_lock(&krb5int_us_time_mutex);
-    if (err)
-        return err;
+    k5_mutex_lock(&krb5int_us_time_mutex);
     /* Just guessing: If the number of seconds hasn't changed, yet the
        microseconds are moving backwards, we probably just got a third
        instance of returning the same clock value from the system, so

@@ -272,9 +272,7 @@ krb5_ktfile_get_entry(krb5_context context, krb5_keytab id,
     int was_open;
     char *princname;
 
-    kerror = KTLOCK(id);
-    if (kerror)
-        return kerror;
+    KTLOCK(id);
 
     if (KTFILEP(id) != NULL) {
         was_open = 1;
@@ -452,9 +450,7 @@ krb5_ktfile_start_seq_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *
     krb5_error_code retval;
     long *fileoff;
 
-    retval = KTLOCK(id);
-    if (retval)
-        return retval;
+    KTLOCK(id);
 
     if (KTITERS(id) == 0) {
         if ((retval = krb5_ktfileint_openr(context, id))) {
@@ -496,9 +492,7 @@ krb5_ktfile_get_next(krb5_context context, krb5_keytab id, krb5_keytab_entry *en
     krb5_keytab_entry cur_entry;
     krb5_error_code kerror;
 
-    kerror = KTLOCK(id);
-    if (kerror)
-        return kerror;
+    KTLOCK(id);
     if (KTFILEP(id) == NULL) {
         KTUNLOCK(id);
         return KRB5_KT_IOERR;
@@ -527,9 +521,7 @@ krb5_ktfile_end_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *cursor
     krb5_error_code kerror;
 
     free(*cursor);
-    kerror = KTLOCK(id);
-    if (kerror)
-        return kerror;
+    KTLOCK(id);
     KTITERS(id)--;
     if (KTFILEP(id) != NULL && KTITERS(id) == 0)
         kerror = krb5_ktfileint_close(context, id);
@@ -817,9 +809,7 @@ krb5_ktfile_add(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
 {
     krb5_error_code retval;
 
-    retval = KTLOCK(id);
-    if (retval)
-        return retval;
+    KTLOCK(id);
     if (KTFILEP(id)) {
         /* Iterator(s) active -- no changes.  */
         KTUNLOCK(id);
@@ -853,9 +843,7 @@ krb5_ktfile_remove(krb5_context context, krb5_keytab id, krb5_keytab_entry *entr
     krb5_error_code     kerror;
     krb5_int32          delete_point;
 
-    kerror = KTLOCK(id);
-    if (kerror)
-        return kerror;
+    KTLOCK(id);
     if (KTFILEP(id)) {
         /* Iterator(s) active -- no changes.  */
         KTUNLOCK(id);

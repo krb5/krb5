@@ -75,8 +75,7 @@ void com_err_terminate(void)
 #endif
     k5_key_delete(K5_KEY_COM_ERR);
     k5_mutex_destroy(&com_err_hook_lock);
-    if (k5_mutex_lock(&et_list_lock) != 0)
-        return;
+    k5_mutex_lock(&et_list_lock);
     for (e = et_list; e; e = enext) {
         enext = e->next;
         free(e);
@@ -121,7 +120,6 @@ error_message(long code)
     unsigned int divisor = 100;
     char *cp, *cp1;
     const struct error_table *table;
-    int merr;
 
     l_offset = (unsigned long)code & ((1<<ERRCODE_RANGE)-1);
     offset = l_offset;
@@ -159,9 +157,7 @@ error_message(long code)
 
     if (CALL_INIT_FUNCTION(com_err_initialize))
         return 0;
-    merr = k5_mutex_lock(&et_list_lock);
-    if (merr)
-        goto oops;
+    k5_mutex_lock(&et_list_lock);
     dprintf(("scanning list for %x\n", table_num));
     for (e = et_list; e != NULL; e = e->next) {
         dprintf(("\t%x = %s\n", e->table->base & ERRCODE_MAX,
@@ -276,7 +272,6 @@ errcode_t KRB5_CALLCONV
 add_error_table(const struct error_table *et)
 {
     struct et_list *e;
-    int merr;
 
     if (CALL_INIT_FUNCTION(com_err_initialize))
         return 0;
@@ -287,11 +282,7 @@ add_error_table(const struct error_table *et)
 
     e->table = et;
 
-    merr = k5_mutex_lock(&et_list_lock);
-    if (merr) {
-        free(e);
-        return merr;
-    }
+    k5_mutex_lock(&et_list_lock);
     e->next = et_list;
     et_list = e;
 
@@ -300,20 +291,18 @@ add_error_table(const struct error_table *et)
     if (et->msgs[et->n_msgs] != NULL && et->msgs[et->n_msgs + 1] != NULL)
         bindtextdomain(et->msgs[et->n_msgs], et->msgs[et->n_msgs + 1]);
 
-    return k5_mutex_unlock(&et_list_lock);
+    k5_mutex_unlock(&et_list_lock);
+    return 0;
 }
 
 errcode_t KRB5_CALLCONV
 remove_error_table(const struct error_table *et)
 {
     struct et_list **ep, *e;
-    int merr;
 
     if (CALL_INIT_FUNCTION(com_err_initialize))
         return 0;
-    merr = k5_mutex_lock(&et_list_lock);
-    if (merr)
-        return merr;
+    k5_mutex_lock(&et_list_lock);
 
     /* Remove the entry that matches the error table instance. */
     for (ep = &et_list; *ep; ep = &(*ep)->next) {
@@ -321,7 +310,8 @@ remove_error_table(const struct error_table *et)
             e = *ep;
             *ep = e->next;
             free(e);
-            return k5_mutex_unlock(&et_list_lock);
+            k5_mutex_unlock(&et_list_lock);
+            return 0;
         }
     }
     k5_mutex_unlock(&et_list_lock);

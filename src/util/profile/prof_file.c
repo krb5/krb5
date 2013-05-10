@@ -239,13 +239,7 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
         return ENOMEM;
     }
 
-    retval = k5_mutex_lock(&g_shared_trees_mutex);
-    if (retval) {
-        free(expanded_filename);
-        free(prf);
-        scan_shared_trees_unlocked();
-        return retval;
-    }
+    k5_mutex_lock(&g_shared_trees_mutex);
     scan_shared_trees_locked();
     for (data = g_shared_trees; data; data = data->next) {
         if (!strcmp(data->filespec, expanded_filename)
@@ -255,7 +249,7 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
     }
     if (data) {
         data->refcount++;
-        (void) k5_mutex_unlock(&g_shared_trees_mutex);
+        k5_mutex_unlock(&g_shared_trees_mutex);
         retval = profile_update_file_data(data, NULL);
         free(expanded_filename);
         if (retval) {
@@ -268,7 +262,7 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
         scan_shared_trees_unlocked();
         return 0;
     }
-    (void) k5_mutex_unlock(&g_shared_trees_mutex);
+    k5_mutex_unlock(&g_shared_trees_mutex);
     data = profile_make_prf_data(expanded_filename);
     if (data == NULL) {
         free(prf);
@@ -291,18 +285,13 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
         return retval;
     }
 
-    retval = k5_mutex_lock(&g_shared_trees_mutex);
-    if (retval) {
-        profile_close_file(prf);
-        scan_shared_trees_unlocked();
-        return retval;
-    }
+    k5_mutex_lock(&g_shared_trees_mutex);
     scan_shared_trees_locked();
     data->flags |= PROFILE_FILE_SHARED;
     data->next = g_shared_trees;
     g_shared_trees = data;
     scan_shared_trees_locked();
-    (void) k5_mutex_unlock(&g_shared_trees_mutex);
+    k5_mutex_unlock(&g_shared_trees_mutex);
 
     *ret_prof = prf;
     return 0;
@@ -381,14 +370,12 @@ errcode_t profile_update_file_data_locked(prf_data_t data, char **ret_modspec)
 
 errcode_t profile_update_file_data(prf_data_t data, char **ret_modspec)
 {
-    errcode_t retval, retval2;
+    errcode_t retval;
 
-    retval = k5_mutex_lock(&data->lock);
-    if (retval)
-        return retval;
+    k5_mutex_lock(&data->lock);
     retval = profile_update_file_data_locked(data, ret_modspec);
-    retval2 = k5_mutex_unlock(&data->lock);
-    return retval ? retval : retval2;
+    k5_mutex_unlock(&data->lock);
+    return retval;
 }
 
 static int
@@ -487,9 +474,8 @@ errout:
 errcode_t profile_flush_file_data_to_buffer (prf_data_t data, char **bufp)
 {
     errcode_t       retval;
-    retval = k5_mutex_lock(&data->lock);
-    if (retval)
-        return retval;
+
+    k5_mutex_lock(&data->lock);
     retval = profile_write_tree_to_buffer(data->root, bufp);
     k5_mutex_unlock(&data->lock);
     return retval;
@@ -502,9 +488,7 @@ errcode_t profile_flush_file_data(prf_data_t data)
     if (!data || data->magic != PROF_MAGIC_FILE_DATA)
         return PROF_MAGIC_FILE_DATA;
 
-    retval = k5_mutex_lock(&data->lock);
-    if (retval)
-        return retval;
+    k5_mutex_lock(&data->lock);
 
     if ((data->flags & PROFILE_FILE_DIRTY) == 0) {
         k5_mutex_unlock(&data->lock);
@@ -523,9 +507,7 @@ errcode_t profile_flush_file_data_to_file(prf_data_t data, const char *outfile)
     if (!data || data->magic != PROF_MAGIC_FILE_DATA)
         return PROF_MAGIC_FILE_DATA;
 
-    retval = k5_mutex_lock(&data->lock);
-    if (retval)
-        return retval;
+    k5_mutex_lock(&data->lock);
     retval = write_data_to_file(data, outfile, 1);
     k5_mutex_unlock(&data->lock);
     return retval;
@@ -535,12 +517,9 @@ errcode_t profile_flush_file_data_to_file(prf_data_t data, const char *outfile)
 
 void profile_dereference_data(prf_data_t data)
 {
-    int err;
-    err = k5_mutex_lock(&g_shared_trees_mutex);
-    if (err)
-        return;
+    k5_mutex_lock(&g_shared_trees_mutex);
     profile_dereference_data_locked(data);
-    (void) k5_mutex_unlock(&g_shared_trees_mutex);
+    k5_mutex_unlock(&g_shared_trees_mutex);
 }
 void profile_dereference_data_locked(prf_data_t data)
 {
@@ -551,13 +530,13 @@ void profile_dereference_data_locked(prf_data_t data)
     scan_shared_trees_locked();
 }
 
-int profile_lock_global()
+void profile_lock_global()
 {
-    return k5_mutex_lock(&g_shared_trees_mutex);
+    k5_mutex_lock(&g_shared_trees_mutex);
 }
-int profile_unlock_global()
+void profile_unlock_global()
 {
-    return k5_mutex_unlock(&g_shared_trees_mutex);
+    k5_mutex_unlock(&g_shared_trees_mutex);
 }
 
 void profile_free_file(prf_file_t prf)

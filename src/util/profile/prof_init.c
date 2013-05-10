@@ -278,13 +278,7 @@ copy_vtable_profile(profile_t profile, profile_t *ret_new_profile)
 
     /* Increment the refcount on the library handle if there is one. */
     if (profile->lib_handle) {
-        err = k5_mutex_lock(&profile->lib_handle->lock);
-        if (err) {
-            /* Don't decrement the refcount we failed to increment. */
-            new_profile->lib_handle = NULL;
-            profile_abandon(new_profile);
-            return err;
-        }
+        k5_mutex_lock(&profile->lib_handle->lock);
         profile->lib_handle->refcount++;
         k5_mutex_unlock(&profile->lib_handle->lock);
     }
@@ -479,7 +473,6 @@ void KRB5_CALLCONV
 profile_abandon(profile_t profile)
 {
     prf_file_t      p, next;
-    errcode_t       err;
 
     if (!profile || profile->magic != PROF_MAGIC_PROFILE)
         return;
@@ -489,13 +482,13 @@ profile_abandon(profile_t profile)
             profile->vt->cleanup(profile->cbdata);
         if (profile->lib_handle) {
             /* Decrement the refcount on the handle and maybe free it. */
-            err = k5_mutex_lock(&profile->lib_handle->lock);
-            if (!err && --profile->lib_handle->refcount == 0) {
+            k5_mutex_lock(&profile->lib_handle->lock);
+            if (--profile->lib_handle->refcount == 0) {
                 krb5int_close_plugin(profile->lib_handle->plugin_handle);
                 k5_mutex_unlock(&profile->lib_handle->lock);
                 k5_mutex_destroy(&profile->lib_handle->lock);
                 free(profile->lib_handle);
-            } else if (!err)
+            } else
                 k5_mutex_unlock(&profile->lib_handle->lock);
         }
         free(profile->vt);

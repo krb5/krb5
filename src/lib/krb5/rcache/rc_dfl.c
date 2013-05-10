@@ -201,12 +201,9 @@ krb5_error_code KRB5_CALLCONV
 krb5_rc_dfl_get_span(krb5_context context, krb5_rcache id,
                      krb5_deltat *lifespan)
 {
-    krb5_error_code err;
     struct dfl_data *t;
 
-    err = k5_mutex_lock(&id->lock);
-    if (err)
-        return err;
+    k5_mutex_lock(&id->lock);
     t = (struct dfl_data *) id->data;
     *lifespan = t->lifespan;
     k5_mutex_unlock(&id->lock);
@@ -239,9 +236,7 @@ krb5_rc_dfl_init(krb5_context context, krb5_rcache id, krb5_deltat lifespan)
 {
     krb5_error_code retval;
 
-    retval = k5_mutex_lock(&id->lock);
-    if (retval)
-        return retval;
+    k5_mutex_lock(&id->lock);
     retval = krb5_rc_dfl_init_locked(context, id, lifespan);
     k5_mutex_unlock(&id->lock);
     return retval;
@@ -276,10 +271,7 @@ krb5_rc_dfl_close_no_free(krb5_context context, krb5_rcache id)
 krb5_error_code KRB5_CALLCONV
 krb5_rc_dfl_close(krb5_context context, krb5_rcache id)
 {
-    krb5_error_code retval;
-    retval = k5_mutex_lock(&id->lock);
-    if (retval)
-        return retval;
+    k5_mutex_lock(&id->lock);
     krb5_rc_dfl_close_no_free(context, id);
     k5_mutex_unlock(&id->lock);
     k5_mutex_destroy(&id->lock);
@@ -624,9 +616,8 @@ krb5_error_code KRB5_CALLCONV
 krb5_rc_dfl_recover(krb5_context context, krb5_rcache id)
 {
     krb5_error_code ret;
-    ret = k5_mutex_lock(&id->lock);
-    if (ret)
-        return ret;
+
+    k5_mutex_lock(&id->lock);
     ret = krb5_rc_dfl_recover_locked(context, id);
     k5_mutex_unlock(&id->lock);
     return ret;
@@ -638,9 +629,7 @@ krb5_rc_dfl_recover_or_init(krb5_context context, krb5_rcache id,
 {
     krb5_error_code retval;
 
-    retval = k5_mutex_lock(&id->lock);
-    if (retval)
-        return retval;
+    k5_mutex_lock(&id->lock);
     retval = krb5_rc_dfl_recover_locked(context, id);
     if (retval)
         retval = krb5_rc_dfl_init_locked(context, id, lifespan);
@@ -727,9 +716,7 @@ krb5_rc_dfl_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep)
     if (ret)
         return ret;
 
-    ret = k5_mutex_lock(&id->lock);
-    if (ret)
-        return ret;
+    k5_mutex_lock(&id->lock);
 
     switch(rc_store(context, id, rep, now, FALSE)) {
     case CMP_MALLOC:
@@ -859,9 +846,8 @@ krb5_error_code KRB5_CALLCONV
 krb5_rc_dfl_expunge(krb5_context context, krb5_rcache id)
 {
     krb5_error_code ret;
-    ret = k5_mutex_lock(&id->lock);
-    if (ret)
-        return ret;
+
+    k5_mutex_lock(&id->lock);
     ret = krb5_rc_dfl_expunge_locked(context, id);
     k5_mutex_unlock(&id->lock);
     return ret;

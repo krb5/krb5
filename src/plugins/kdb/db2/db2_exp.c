@@ -58,12 +58,11 @@
 
 k5_mutex_t *krb5_db2_mutex;
 
-#define WRAP(NAME,TYPE,ARGLIST,ARGNAMES,ERROR_RESULT)   \
+#define WRAP(NAME,TYPE,ARGLIST,ARGNAMES)                \
     static TYPE wrap_##NAME ARGLIST                     \
     {                                                   \
         TYPE result;                                    \
-        int code = k5_mutex_lock (krb5_db2_mutex);      \
-        if (code) { return ERROR_RESULT; }              \
+        k5_mutex_lock (krb5_db2_mutex);                 \
         result = NAME ARGNAMES;                         \
         k5_mutex_unlock (krb5_db2_mutex);               \
         return result;                                  \
@@ -77,8 +76,7 @@ k5_mutex_t *krb5_db2_mutex;
 #define WRAP_VOID(NAME,ARGLIST,ARGNAMES)                \
     static void wrap_##NAME ARGLIST                     \
     {                                                   \
-        int code = k5_mutex_lock (krb5_db2_mutex);      \
-        if (code) { return; }                           \
+        k5_mutex_lock (krb5_db2_mutex);                 \
         NAME ARGNAMES;                                  \
         k5_mutex_unlock (krb5_db2_mutex);               \
     }                                                   \
@@ -86,7 +84,7 @@ k5_mutex_t *krb5_db2_mutex;
     static void wrap_##NAME ()
 
 #define WRAP_K(NAME,ARGLIST,ARGNAMES)                   \
-    WRAP(NAME,krb5_error_code,ARGLIST,ARGNAMES,code)
+    WRAP(NAME,krb5_error_code,ARGLIST,ARGNAMES)
 
 WRAP_K (krb5_db2_open,
         ( krb5_context kcontext,
