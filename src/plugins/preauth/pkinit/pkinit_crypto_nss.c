@@ -573,7 +573,7 @@ cmsdump(unsigned char *data, unsigned int length)
 
 /* A password-prompt callback for NSS that calls the libkrb5 callback. */
 static char *
-crypto_pwfn(const char *what, PRBool retry, void *arg)
+crypto_pwfn(const char *what, PRBool is_hardware, PRBool retry, void *arg)
 {
     int ret;
     pkinit_identity_crypto_context id;
@@ -601,7 +601,10 @@ crypto_pwfn(const char *what, PRBool retry, void *arg)
         pkiDebug("out of memory");
         return NULL;
     }
-    snprintf(text, text_size, "Password for %s", what);
+    if (is_hardware)
+        snprintf(text, text_size, "%s PIN", what);
+    else
+        snprintf(text, text_size, "%s %s", _("Pass phrase for"), what);
     memset(&prompt, 0, sizeof(prompt));
     prompt.prompt = text;
     prompt.hidden = 1;
@@ -646,7 +649,7 @@ crypto_pwfn(const char *what, PRBool retry, void *arg)
 static char *
 crypto_pwcb(PK11SlotInfo *slot, PRBool retry, void *arg)
 {
-    return crypto_pwfn(PK11_GetTokenName(slot), retry, arg);
+    return crypto_pwfn(PK11_GetTokenName(slot), PK11_IsHW(slot), retry, arg);
 }
 
 /* Make sure we're using our callback, and set up the callback data. */
@@ -767,11 +770,11 @@ crypto_get_p12_slot(struct _pkinit_identity_crypto_context *id)
 
 /* Close the slot which we've been using for holding imported PKCS12
  * certificates and keys. */
-static int
+static void
 crypto_close_p12_slot(struct _pkinit_identity_crypto_context *id)
 {
-    SECMOD_CloseUserDB(id->id_p12_slot.slot);
-    return 0;
+    PK11_FreeSlot(id->id_p12_slot.slot);
+    id->id_p12_slot.slot = NULL;
 }
 
 void
@@ -788,25 +791,23 @@ pkinit_fini_identity_crypto(pkinit_identity_crypto_context id_cryptoctx)
     CERT_DestroyCertList(id_cryptoctx->id_certs);
     if (id_cryptoctx->id_objects != NULL)
         for (i = 0; id_cryptoctx->id_objects[i] != NULL; i++) {
-            PK11_DestroyGenericObjects(id_cryptoctx->id_objects[i]->obj);
             if (id_cryptoctx->id_objects[i]->cert != NULL)
                 CERT_DestroyCertificate(id_cryptoctx->id_objects[i]->cert);
+            PK11_DestroyGenericObject(id_cryptoctx->id_objects[i]->obj);
         }
     if (id_cryptoctx->id_p12_slot.slot != NULL)
-        if ((i = crypto_close_p12_slot(id_cryptoctx)) != 0)
-            pkiDebug("%s: error closing pkcs12 slot: %s\n",
-                     __FUNCTION__, strerror(i));
+        crypto_close_p12_slot(id_cryptoctx);
     if (id_cryptoctx->id_userdbs != NULL)
         for (i = 0; id_cryptoctx->id_userdbs[i] != NULL; i++)
-            SECMOD_CloseUserDB(id_cryptoctx->id_userdbs[i]->userdb);
+            PK11_FreeSlot(id_cryptoctx->id_userdbs[i]->userdb);
     if (id_cryptoctx->id_modules != NULL)
         for (i = 0; id_cryptoctx->id_modules[i] != NULL; i++)
-            SECMOD_UnloadUserModule(id_cryptoctx->id_modules[i]->module);
+            SECMOD_DestroyModule(id_cryptoctx->id_modules[i]->module);
     if (id_cryptoctx->id_crls != NULL)
         for (i = 0; id_cryptoctx->id_crls[i] != NULL; i++)
             CERT_UncacheCRL(CERT_GetDefaultCertDB(), id_cryptoctx->id_crls[i]);
     if (id_cryptoctx->pem_module != NULL)
-        SECMOD_UnloadUserModule(id_cryptoctx->pem_module);
+        SECMOD_DestroyModule(id_cryptoctx->pem_module);
     PORT_FreeArena(id_cryptoctx->pool, PR_TRUE);
 }
 
@@ -1908,8 +1909,9 @@ cert_load_ca_certs_from_slot(krb5_context context,
                  __FUNCTION__, PK11_GetTokenName(slot));
         if (PK11_Authenticate(slot, PR_TRUE,
                               crypto_pwcb_prep(id, context)) != SECSuccess) {
-            pkiDebug("%s: error logging into \"%s\", skipping\n",
-                     __FUNCTION__, PK11_GetTokenName(slot));
+            pkiDebug("%s: error logging into \"%s\": %s, skipping\n",
+                     __FUNCTION__, PK11_GetTokenName(slot),
+                     PORT_ErrorToName(PORT_GetError()));
             return SECFailure;
         }
     }
@@ -1980,8 +1982,9 @@ cert_load_certs_with_keys_from_slot(krb5_context context,
         if (PK11_Authenticate(slot, PR_TRUE,
                               crypto_pwcb_prep(id_cryptoctx,
                                                context)) != SECSuccess) {
-            pkiDebug("%s: error logging into \"%s\", skipping\n",
-                     __FUNCTION__, PK11_GetTokenName(slot));
+            pkiDebug("%s: error logging into \"%s\": %s, skipping\n",
+                     __FUNCTION__, PK11_GetTokenName(slot),
+                     PORT_ErrorToName(PORT_GetError()));
             return ENOMEM;
         }
     }
@@ -2095,7 +2098,7 @@ crypto_load_pkcs11(krb5_context context,
     PK11SlotInfo *slot;
     char *spec;
     size_t spec_size;
-    const char *label, *id, *slotname, *tokenname;
+    const char *label, *id, *tokenname;
     SECStatus status;
     int i, j;
 
@@ -2145,7 +2148,7 @@ crypto_load_pkcs11(krb5_context context,
     if (!module->module->loaded) {
         pkiDebug("%s: error really loading PKCS11 module \"%s\"",
                  __FUNCTION__, idopts->p11_module_name);
-        SECMOD_UnloadUserModule(module->module);
+        SECMOD_DestroyModule(module->module);
         return SECFailure;
     }
     SECMOD_UpdateSlotList(module->module);
@@ -2163,21 +2166,16 @@ crypto_load_pkcs11(krb5_context context,
          (i < module->module->slotCount) &&
          ((slot = module->module->slots[i]) != NULL);
          i++) {
+        if (idopts->slotid != PK_NOSLOT) {
+            if (idopts->slotid != PK11_GetSlotID(slot))
+                continue;
+        }
+        tokenname = PK11_GetTokenName(slot);
+        if (tokenname == NULL || strlen(tokenname) == 0)
+            continue;
         if (idopts->token_label != NULL) {
-            label = idopts->token_label;
-            slotname = PK11_GetSlotName(slot);
-            tokenname = PK11_GetTokenName(slot);
-            if ((slotname != NULL) && (tokenname != NULL)) {
-                if ((strcmp(label, slotname) != 0) &&
-                    (strcmp(label, tokenname) != 0))
-                    continue;
-            } else if (slotname != NULL) {
-                if (strcmp(label, slotname) != 0)
-                    continue;
-            } else if (tokenname != NULL) {
-                if (strcmp(label, tokenname) != 0)
-                    continue;
-            }
+            if (strcmp(idopts->cert_label, tokenname) != 0)
+                continue;
         }
         /* Load private keys and their certs from this slot. */
         label = idopts->cert_label;
@@ -2185,6 +2183,10 @@ crypto_load_pkcs11(krb5_context context,
         if (cert_load_certs_with_keys_from_slot(context, id_cryptoctx,
                                                 slot, label, id) == 0)
             status = SECSuccess;
+        /* If no label was specified, then we've looked at a token, so we're
+         * done. */
+        if (idopts->token_label == NULL)
+            break;
     }
     return status;
 }
@@ -2390,7 +2392,8 @@ crypto_load_pkcs12(krb5_context context,
             case SEC_ERROR_BAD_PASSWORD:
                 pkiDebug("%s: prompting for password for %s\n",
                          __FUNCTION__, name);
-                newpass = crypto_pwfn(name, (attempt > 0), id_cryptoctx);
+                newpass = crypto_pwfn(name, PR_FALSE, (attempt > 0),
+                                      id_cryptoctx);
                 attempt++;
                 if (newpass != NULL) {
                     /* convert to 16-bit big-endian */
@@ -2410,7 +2413,6 @@ crypto_load_pkcs12(krb5_context context,
                 }
                 break;
             default:
-                SEC_PKCS12DecoderFinish(ctx);
                 break;
             }
             pkiDebug("%s: skipping identity PKCS12 bundle \"%s\": "
@@ -2493,16 +2495,14 @@ crypto_load_files(krb5_context context,
                   pkinit_identity_crypto_context id_cryptoctx)
 {
     PK11SlotInfo *slot;
-    struct _pkinit_identity_crypto_file *obj, **id_objects;
-    PRBool permanent, match;
-    CERTCertificate *cert;
-    CERTCertList *before, *after;
-    CERTCertListNode *anode, *bnode;
+    struct _pkinit_identity_crypto_file *cobj, *kobj, **id_objects;
+    PRBool permanent;
     SECKEYPrivateKey *key;
     CK_ATTRIBUTE attrs[4];
     CK_BBOOL cktrue = CK_TRUE, cktrust;
     CK_OBJECT_CLASS keyclass = CKO_PRIVATE_KEY, certclass = CKO_CERTIFICATE;
-    SECItem a, b, tmp, *crl, **crls;
+    CERTCertificate *cert;
+    SECItem tmp, *crl, **crls;
     SECStatus status;
     int i, j, n_attrs, n_objs, n_crls;
 
@@ -2520,53 +2520,10 @@ crypto_load_files(krb5_context context,
     }
     if ((certfile == NULL) && (crlfile == NULL))
         return SECFailure;
-    /* If we're told to load a key, then we know for sure that it's a
-     * key+cert combination, so go ahead and try to load the key first.
-     * That way, if we're just guessing that there's a key, and we're
-     * wrong, we'll just skip the cert. */
-    status = SECSuccess;
-    if (keyfile != NULL) {
-        n_attrs = 0;
-        crypto_set_attributes(&attrs[n_attrs++], CKA_CLASS,
-                              &keyclass, sizeof(keyclass));
-        crypto_set_attributes(&attrs[n_attrs++], CKA_TOKEN,
-                              &cktrue, sizeof(cktrue));
-        crypto_set_attributes(&attrs[n_attrs++], CKA_LABEL,
-                              (char *) keyfile, strlen(keyfile) + 1);
-        permanent = PR_FALSE;   /* set lifetime to "session" */
-        obj = PORT_ArenaZAlloc(id_cryptoctx->pool, sizeof(*obj));
-        if (obj == NULL)
-            return SECFailure;
-        obj->obj = PK11_CreateGenericObject(slot, attrs, n_attrs, permanent);
-        if (obj->obj == NULL) {
-            pkiDebug("%s: error loading key \"%s\"\n", __FUNCTION__, keyfile);
-            status = SECFailure;
-        } else {
-            pkiDebug("%s: loaded key \"%s\"\n", __FUNCTION__, keyfile);
-            status = SECSuccess;
-            /* Add it to the list of objects that we're keeping. */
-            if (id_cryptoctx->id_objects != NULL)
-                for (i = 0; id_cryptoctx->id_objects[i] != NULL; i++)
-                    continue;
-            else
-                i = 0;
-            id_objects = PORT_ArenaZAlloc(id_cryptoctx->pool,
-                                          sizeof(id_objects[0]) * (i + 2));
-            if (id_objects != NULL) {
-                n_objs = i;
-                for (i = 0; i < n_objs; i++)
-                    id_objects[i] = id_cryptoctx->id_objects[i];
-                id_objects[i++] = obj;
-                id_objects[i++] = NULL;
-                id_cryptoctx->id_objects = id_objects;
-            }
-        }
-    }
 
-    /* If we loaded a key, or there wasn't one, see if we were told to
-     * load a cert. */
-    if ((status == SECSuccess) && (certfile != NULL)) {
-        before = PK11_ListCertsInSlot(slot);
+    /* Load the certificate first to work around RHBZ#859535. */
+    cobj = NULL;
+    if (certfile != NULL) {
         n_attrs = 0;
         crypto_set_attributes(&attrs[n_attrs++], CKA_CLASS,
                               &certclass, sizeof(certclass));
@@ -2578,13 +2535,13 @@ crypto_load_files(krb5_context context,
         crypto_set_attributes(&attrs[n_attrs++], CKA_TRUST,
                               &cktrust, sizeof(cktrust));
         permanent = PR_FALSE;   /* set lifetime to "session" */
-        obj = PORT_ArenaZAlloc(id_cryptoctx->pool, sizeof(*obj));
-        if (obj == NULL)
+        cobj = PORT_ArenaZAlloc(id_cryptoctx->pool, sizeof(*cobj));
+        if (cobj == NULL)
             return SECFailure;
-        obj->name = reassemble_files_name(id_cryptoctx->pool,
-                                          certfile, keyfile);
-        obj->obj = PK11_CreateGenericObject(slot, attrs, n_attrs, permanent);
-        if (obj->obj == NULL) {
+        cobj->name = reassemble_files_name(id_cryptoctx->pool,
+                                           certfile, keyfile);
+        cobj->obj = PK11_CreateGenericObject(slot, attrs, n_attrs, permanent);
+        if (cobj->obj == NULL) {
             pkiDebug("%s: error loading %scertificate \"%s\"\n",
                      __FUNCTION__, cert_mark_trusted ? "CA " : "", certfile);
             status = SECFailure;
@@ -2604,76 +2561,128 @@ crypto_load_files(krb5_context context,
                 n_objs = i;
                 for (i = 0; i < n_objs; i++)
                     id_objects[i] = id_cryptoctx->id_objects[i];
-                id_objects[i++] = obj;
+                id_objects[i++] = cobj;
+                id_objects[i++] = NULL;
+                id_cryptoctx->id_objects = id_objects;
+            }
+            /* Find the certificate that goes with this generic object. */
+            memset(&tmp, 0, sizeof(tmp));
+            status = PK11_ReadRawAttribute(PK11_TypeGeneric, cobj->obj,
+                                           CKA_VALUE, &tmp);
+            if (status == SECSuccess) {
+                cobj->cert = CERT_FindCertByDERCert(CERT_GetDefaultCertDB(),
+                                                    &tmp);
+                SECITEM_FreeItem(&tmp, PR_FALSE);
+            } else {
+                pkiDebug("%s: error locating certificate \"%s\"\n",
+                         __FUNCTION__, certfile);
+            }
+            /* Save a reference to the right list. */
+            if (cobj->cert != NULL) {
+                cert = CERT_DupCertificate(cobj->cert);
+                if (cert == NULL)
+                    return SECFailure;
+                if (cert_self) {
+                    /* Add to the identity list. */
+                    if (cert_maybe_add_to_list(id_cryptoctx->id_certs,
+                                               cert) != SECSuccess)
+                        status = SECFailure;
+                } else if (cert_mark_trusted) {
+                    /* Add to the CA list. */
+                    if (cert_maybe_add_to_list(id_cryptoctx->ca_certs,
+                                               cert) != SECSuccess)
+                        status = SECFailure;
+                } else {
+                    /* Don't just lose the reference. */
+                    CERT_DestroyCertificate(cert);
+                }
+            }
+        }
+    }
+
+    /* Now load what should be the corresponding private key. */
+    kobj = NULL;
+    if (status == SECSuccess && keyfile != NULL) {
+        n_attrs = 0;
+        crypto_set_attributes(&attrs[n_attrs++], CKA_CLASS,
+                              &keyclass, sizeof(keyclass));
+        crypto_set_attributes(&attrs[n_attrs++], CKA_TOKEN,
+                              &cktrue, sizeof(cktrue));
+        crypto_set_attributes(&attrs[n_attrs++], CKA_LABEL,
+                              (char *)keyfile, strlen(keyfile) + 1);
+        permanent = PR_FALSE;   /* set lifetime to "session" */
+        kobj = PORT_ArenaZAlloc(id_cryptoctx->pool, sizeof(*kobj));
+        if (kobj == NULL)
+            return SECFailure;
+        kobj->obj = PK11_CreateGenericObject(slot, attrs, n_attrs, permanent);
+        if (kobj->obj == NULL) {
+            pkiDebug("%s: error loading key \"%s\"\n", __FUNCTION__, keyfile);
+            status = SECFailure;
+        } else {
+            pkiDebug("%s: loaded key \"%s\"\n", __FUNCTION__, keyfile);
+            status = SECSuccess;
+            /* Add it to the list of objects that we're keeping. */
+            if (id_cryptoctx->id_objects != NULL) {
+                for (i = 0; id_cryptoctx->id_objects[i] != NULL; i++)
+                    continue;
+            } else {
+                i = 0;
+            }
+            id_objects = PORT_ArenaZAlloc(id_cryptoctx->pool,
+                                          sizeof(id_objects[0]) * (i + 2));
+            if (id_objects != NULL) {
+                n_objs = i;
+                for (i = 0; i < n_objs; i++)
+                    id_objects[i] = id_cryptoctx->id_objects[i];
+                id_objects[i++] = kobj;
                 id_objects[i++] = NULL;
                 id_cryptoctx->id_objects = id_objects;
             }
         }
-        /* Add any certs which are in the slot now, but which weren't
-         * before, to the right list of certs.  (I don't see an API to
-         * get the certificate from the generic object that we just
-         * created, so we do it the hard way.) */
-        after = PK11_ListCertsInSlot(slot);
-        if (after != NULL) {
-            for (anode = CERT_LIST_HEAD(after);
-                 (anode != NULL) &&
-                     (anode->cert != NULL) &&
-                     !CERT_LIST_END(anode, after);
-                 anode = CERT_LIST_NEXT(anode)) {
-                match = PR_FALSE;
-                a = anode->cert->derCert;
-                if (before != NULL) {
-                    for (bnode = CERT_LIST_HEAD(before);
-                         (bnode != NULL) &&
-                             (bnode->cert != NULL) &&
-                             !CERT_LIST_END(bnode, before);
-                         bnode = CERT_LIST_NEXT(bnode)) {
-                        b = bnode->cert->derCert;
-                        if (SECITEM_ItemsAreEqual(&a, &b)) {
-                            match = PR_TRUE;
-                            break;
-                        }
-                    }
-                }
-                if (!match) {
-                    cert = CERT_DupCertificate(anode->cert);
-                    if (cert_self) {
-                        /* Add to the identity list. */
-                        if (cert_maybe_add_to_list
-                            (id_cryptoctx->id_certs, cert) != SECSuccess) {
-                            status = SECFailure;
-                        }
-                        obj->cert = CERT_DupCertificate(cert);
-                    } else if (cert_mark_trusted) {
-                        /* Add to the CA list. */
-                        if (cert_maybe_add_to_list
-                            (id_cryptoctx->ca_certs, cert) != SECSuccess) {
-                            status = SECFailure;
-                        }
-                    } else {
-                        /* Don't just lose the ref. */
-                        CERT_DestroyCertificate(cert);
-                    }
-                }
+
+        /* "Log in" (provide an encryption password) if the PEM slot now
+         * requires it. */
+        PK11_TokenRefresh(slot);
+
+        /*
+         * Unlike most tokens, this one won't self-destruct if we throw wrong
+         * passwords at it, but it will cause the module to clear the
+         * needs-login flag so that we can continue importing PEM items.
+         */
+        if (!PK11_IsLoggedIn(slot, crypto_pwcb_prep(id_cryptoctx,
+                                                    context)) &&
+            PK11_NeedLogin(slot)) {
+            pkiDebug("%s: logging in to token \"%s\"\n",
+                     __FUNCTION__, PK11_GetTokenName(slot));
+            if (PK11_Authenticate(slot, PR_TRUE,
+                                  crypto_pwcb_prep(id_cryptoctx,
+                                                   context)) != SECSuccess) {
+                pkiDebug("%s: error logging into \"%s\": %s, skipping\n",
+                         __FUNCTION__, PK11_GetTokenName(slot),
+                         PORT_ErrorToName(PORT_GetError()));
+                status = SECFailure;
+                PK11_DestroyGenericObject(kobj->obj);
+                kobj->obj = NULL;
             }
-            CERT_DestroyCertList(after);
         }
-        if (before != NULL) {
-            CERT_DestroyCertList(before);
-        }
-        if ((keyfile != NULL) && (obj->cert != NULL)) {
-            key = PK11_FindPrivateKeyFromCert(slot, obj->cert,
+
+        /* If we loaded a key and a certificate, see if they match. */
+        if (cobj != NULL && cobj->cert != NULL && kobj->obj != NULL) {
+            key = PK11_FindPrivateKeyFromCert(slot, cobj->cert,
                                               crypto_pwcb_prep(id_cryptoctx,
                                                                context));
             if (key == NULL) {
-                pkiDebug("%s: no key private found for \"%s\"(%s), "
+                pkiDebug("%s: no private key found for \"%s\"(%s), "
                          "even though we just loaded that key?\n",
                          __FUNCTION__,
-                         obj->cert->nickname ?
-                         obj->cert->nickname : "(no name)",
+                         cobj->cert->nickname ?
+                         cobj->cert->nickname : "(no name)",
                          certfile);
-            } else
-                SECKEY_DestroyPrivateKey(req_cryptoctx->client_dh_privkey);
+                status = SECFailure;
+            } else {
+                /* We don't need this reference to the key. */
+                SECKEY_DestroyPrivateKey(key);
+            }
         }
     }
 
@@ -3162,10 +3171,7 @@ crypto_cert_get_matching_data(krb5_context context,
     md->eku_bits = cert_get_eku_bits(context, cert_handle->cert, PR_FALSE);
     if (cert_retrieve_cert_sans(context, cert_handle->cert,
                                 &md->sans, &md->sans, NULL) != 0) {
-        free(md->subject_dn);
-        free(md->issuer_dn);
-        free(md);
-        return ENOMEM;
+        md->sans = NULL;
     }
     *ret_data = md;
     return 0;
@@ -4855,6 +4861,7 @@ crypto_check_for_revocation_information(CERTCertificate *cert,
             pkiDebug("%s: have CRL for \"%s\"\n", __FUNCTION__,
                      cert->issuerName);
         } else {
+            SEC_DestroyCrl(crl);
             if (allow_ocsp_checking) {
                 /* Check if the cert points to an OCSP responder. */
                 if (!crypto_cert_has_ocsp_responder(cert)) {
@@ -4874,6 +4881,7 @@ crypto_check_for_revocation_information(CERTCertificate *cert,
         if (crypto_is_cert_trusted(issuer, usage)) {
             pkiDebug("%s: \"%s\" is a trusted CA\n", __FUNCTION__,
                      issuer->subjectName);
+            CERT_DestroyCertificate(issuer);
             return 0;
         }
         /* Move on to the next link in the chain. */
@@ -4882,13 +4890,21 @@ crypto_check_for_revocation_information(CERTCertificate *cert,
         if (issuer == NULL) {
             pkiDebug("%s: unable to find issuer for \"%s\"\n", __FUNCTION__,
                      cert->subjectName);
+            /* Don't leak the reference to the last intermediate. */
+            CERT_DestroyCertificate(cert);
             return -1;
         }
         if (SECITEM_ItemsAreEqual(&cert->derCert, &issuer->derCert)) {
             pkiDebug("%s: \"%s\" is self-signed, but not trusted\n",
                      __FUNCTION__, cert->subjectName);
+            /* Don't leak the references to the self-signed cert. */
+            CERT_DestroyCertificate(issuer);
+            CERT_DestroyCertificate(cert);
             return -1;
         }
+        /* Don't leak the reference to the just-traversed intermediate. */
+        CERT_DestroyCertificate(cert);
+        cert = NULL;
     }
     return -1;
 }
