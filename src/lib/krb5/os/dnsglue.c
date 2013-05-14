@@ -36,8 +36,12 @@
  *
  * In any case, it is probable that platforms having broken
  * res_ninit() will have thread safety hacks for res_init() and _res.
+ *
+ * On Apple platforms (OSX, IOS), use the dns_* interfaces, which
+ * will query the multicast DNS service.
  */
-#if HAVE_RES_NINIT && HAVE_RES_NDESTROY && HAVE_RES_NSEARCH
+#if HAVE_RES_NINIT && HAVE_RES_NDESTROY && HAVE_RES_NSEARCH && \
+    !defined(__APPLE__)
 #define USE_RES_NINIT 1
 #endif
 
@@ -64,6 +68,15 @@ static int initparse(struct krb5int_dns_state *);
 #endif
 
 /*
+ * Thread local dns handle types, if available
+ */
+#if defined(__APPLE__)
+typedef dns_handle_t res_state_t;
+#else
+typedef struct __res_state res_state_t;
+#endif
+
+/*
  * krb5int_dns_init()
  *
  * Initialize an opaque handle.  Do name lookup and initial parsing of
@@ -74,8 +87,8 @@ int
 krb5int_dns_init(struct krb5int_dns_state **dsp,
                  char *host, int nclass, int ntype)
 {
-#if USE_RES_NINIT
-    struct __res_state statbuf;
+#if USE_RES_NINIT || defined(__APPLE__)
+    res_state_t statbuf;
 #endif
     struct krb5int_dns_state *ds;
     int len, ret;
@@ -99,7 +112,12 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     ds->cur_ans = 0;
 #endif
 
-#if USE_RES_NINIT
+#if defined(__APPLE__)
+    /* Get a handle to the dns "super resolver" */
+    statbuf = dns_open(NULL);
+    if (statbuf != NULL)
+        ret = 0;
+#elif USE_RES_NINIT
     memset(&statbuf, 0, sizeof(statbuf));
     ret = res_ninit(&statbuf);
 #else
@@ -119,7 +137,12 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
         ds->ansp = p;
         ds->ansmax = nextincr;
 
-#if USE_RES_NINIT
+#if defined(__APPLE__)
+        len = dns_search(statbuf, host, ds->nclass, ds->ntype,
+                         ds->ansp, ds->ansmax,
+                         /* from= */ NULL,
+                         /* fromlen= */ NULL);
+#elif USE_RES_NINIT
         len = res_nsearch(&statbuf, host, ds->nclass, ds->ntype,
                           ds->ansp, ds->ansmax);
 #else
@@ -150,7 +173,9 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     ret = 0;
 
 errout:
-#if USE_RES_NINIT
+#if defined(__APPLE__)
+    dns_free(statbuf);
+#elif USE_RES_NINIT
     res_ndestroy(&statbuf);
 #endif
     if (ret < 0) {
