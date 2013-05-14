@@ -41,7 +41,7 @@ init_int32_minus1(void *p)
     *(krb5_int32 *)p = -1;
 }
 
-DEFBOOLTYPE(bool, krb5_boolean);
+DEFBOOLTYPE(boolean, krb5_boolean);
 DEFINTTYPE(int32, krb5_int32);
 DEFPTRTYPE(int32_ptr, int32);
 DEFCOUNTEDSEQOFTYPE(cseqof_int32, krb5_int32, int32_ptr);
@@ -1008,7 +1008,7 @@ static const struct atype_info *pa_s4u_x509_user_fields[] = {
 };
 DEFSEQTYPE(pa_s4u_x509_user, krb5_pa_s4u_x509_user, pa_s4u_x509_user_fields);
 
-DEFFIELD(pa_pac_req_0, krb5_pa_pac_req, include_pac, 0, bool);
+DEFFIELD(pa_pac_req_0, krb5_pa_pac_req, include_pac, 0, boolean);
 static const struct atype_info *pa_pac_req_fields[] = {
     &k5_atype_pa_pac_req_0
 };
