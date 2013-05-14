@@ -60,6 +60,10 @@
 #include <netdb.h>
 #endif /* WSHELPER */
 
+#if defined(__APPLE__)
+#include <dns.h>
+#endif
+
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>          /* for MAXHOSTNAMELEN */
 #endif
