@@ -28,6 +28,9 @@
 #ifdef KRB5_DNS_LOOKUP
 
 #include "dnsglue.h"
+#ifdef __APPLE__
+#include <dns.h>
+#endif
 
 /*
  * Only use res_ninit() if there's also a res_ndestroy(), to avoid
@@ -37,9 +40,6 @@
  * In any case, it is probable that platforms having broken
  * res_ninit() will have thread safety hacks for res_init() and _res.
  */
-#if HAVE_RES_NINIT && HAVE_RES_NDESTROY && HAVE_RES_NSEARCH
-#define USE_RES_NINIT 1
-#endif
 
 /*
  * Opaque handle
@@ -64,6 +64,44 @@ static int initparse(struct krb5int_dns_state *);
 #endif
 
 /*
+ * Define macros to use the best available DNS search functions.  INIT_HANDLE()
+ * returns true if handle initialization is successful, false if it is not.
+ * SEARCH() returns the length of the response or -1 on error.
+ * DECLARE_HANDLE() must be used last in the declaration list since it may
+ * evaluate to nothing.
+ */
+
+#if defined(__APPLE__)
+
+/* Use the OS X interfaces dns_open, dns_search, and dns_free. */
+#define DECLARE_HANDLE(h) dns_handle_t h
+#define INIT_HANDLE(h) ((h = dns_open(NULL)) != NULL)
+#define SEARCH(h, n, c, t, a, l) dns_search(h, n, c, t, a, l, NULL, NULL)
+#define DESTROY_HANDLE(h) dns_free(h)
+
+#elif HAVE_RES_NINIT && HAVE_RES_NSEARCH
+
+/* Use res_ninit, res_nsearch, and res_ndestroy or res_nclose. */
+#define DECLARE_HANDLE(h) struct __res_state h
+#define INIT_HANDLE(h) (memset(&h, 0, sizeof(h)), res_ninit(&h) == 0)
+#define SEARCH(h, n, c, t, a, l) res_nsearch(&h, n, c, t, a, l)
+#if HAVE_RES_NDESTROY
+#define DESTROY_HANDLE(h) res_ndestroy(&h)
+#else
+#define DESTROY_HANDLE(h) res_nclose(&h)
+#endif
+
+#else
+
+/* Use res_init and res_search. */
+#define DECLARE_HANDLE(h)
+#define INIT_HANDLE(h) (res_init() == 0)
+#define SEARCH(h, n, c, t, a, l) res_search(n, c, t, a, l)
+#define DESTROY_HANDLE(h)
+
+#endif
+
+/*
  * krb5int_dns_init()
  *
  * Initialize an opaque handle.  Do name lookup and initial parsing of
@@ -74,13 +112,11 @@ int
 krb5int_dns_init(struct krb5int_dns_state **dsp,
                  char *host, int nclass, int ntype)
 {
-#if USE_RES_NINIT
-    struct __res_state statbuf;
-#endif
     struct krb5int_dns_state *ds;
     int len, ret;
     size_t nextincr, maxincr;
     unsigned char *p;
+    DECLARE_HANDLE(h);
 
     *dsp = ds = malloc(sizeof(*ds));
     if (ds == NULL)
@@ -99,13 +135,7 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     ds->cur_ans = 0;
 #endif
 
-#if USE_RES_NINIT
-    memset(&statbuf, 0, sizeof(statbuf));
-    ret = res_ninit(&statbuf);
-#else
-    ret = res_init();
-#endif
-    if (ret < 0)
+    if (!INIT_HANDLE(h))
         return -1;
 
     do {
@@ -119,13 +149,7 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
         ds->ansp = p;
         ds->ansmax = nextincr;
 
-#if USE_RES_NINIT
-        len = res_nsearch(&statbuf, host, ds->nclass, ds->ntype,
-                          ds->ansp, ds->ansmax);
-#else
-        len = res_search(host, ds->nclass, ds->ntype,
-                         ds->ansp, ds->ansmax);
-#endif
+        len = SEARCH(h, host, ds->nclass, ds->ntype, ds->ansp, ds->ansmax);
         if ((size_t) len > maxincr) {
             ret = -1;
             goto errout;
@@ -150,9 +174,7 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     ret = 0;
 
 errout:
-#if USE_RES_NINIT
-    res_ndestroy(&statbuf);
-#endif
+    DESTROY_HANDLE(h);
     if (ret < 0) {
         if (ds->ansp != NULL) {
             free(ds->ansp);
