@@ -225,11 +225,8 @@ KRB4_INCLUDES=-I$(BUILDTOP)/include/kerberosIV
 
 COM_ERR_DEPS	= $(BUILDTOP)/include/com_err.h
 
-ARADD=rem
 RANLIB=rem
-ARCHIVE=rem
 
-LIBEXT=lib
 OBJEXT=obj
 EXEEXT=.exe
 

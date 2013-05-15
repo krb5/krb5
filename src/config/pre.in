@@ -171,12 +171,8 @@ DEFS = @DEFS@
 CC = @CC@
 CXX = @CXX@
 LD = $(PURE) @LD@
-DEPLIBS = @DEPLIBS@
 KRB_INCLUDES = -I$(BUILDTOP)/include -I$(top_srcdir)/include
 LDFLAGS = @LDFLAGS@
-LD_UNRESOLVED_PREFIX = @LD_UNRESOLVED_PREFIX@
-LD_SHLIBDIR_PREFIX = @LD_SHLIBDIR_PREFIX@
-LDARGS = @LDARGS@
 LIBS = @LIBS@
 
 INSTALL=@INSTALL@
@@ -193,7 +189,6 @@ INSTALL_PREFIX=$(prefix)
 INSTALL_EXEC_PREFIX=@exec_prefix@
 exec_prefix=@exec_prefix@
 datarootdir=@datarootdir@
-SHLIB_TAIL_COMP=@SHLIB_TAIL_COMP@
 
 datadir = @datadir@
 EXAMPLEDIR = $(datadir)/examples/krb5
@@ -212,7 +207,6 @@ SERVER_CATDIR = $(KRB5MANROOT)/cat8
 CLIENT_CATDIR = $(KRB5MANROOT)/cat1
 FILE_CATDIR = $(KRB5MANROOT)/cat5
 KRB5_LIBDIR = @libdir@
-KRB5_SHLIBDIR = @libdir@$(SHLIB_TAIL_COMP)
 KRB5_INCDIR = @includedir@
 MODULE_DIR = @libdir@/krb5/plugins
 KRB5_DB_MODULE_DIR = $(MODULE_DIR)/kdb
@@ -233,10 +227,6 @@ KRB5_INCSUBDIRS = \
 #
 TESTDIR		= $(BUILDTOP)/kadmin/testing
 STESTDIR	= $(top_srcdir)/kadmin/testing
-COMPARE_DUMP	= $(TESTDIR)/scripts/compare_dump.pl
-INITDB		= $(STESTDIR)/scripts/init_db
-MAKE_KEYTAB	= $(TESTDIR)/scripts/make-host-keytab.pl
-LOCAL_MAKE_KEYTAB= $(TESTDIR)/scripts/make-host-keytab.pl
 ENV_SETUP	= $(TESTDIR)/scripts/env-setup.sh
 CLNTTCL		= $(TESTDIR)/util/kadm5_clnt_tcl
 SRVTCL		= $(TESTDIR)/util/kadm5_srv_tcl
@@ -265,14 +255,8 @@ transform = @program_transform_name@
 RM = rm -f
 CP = cp
 MV = mv -f
-LN = ln
-CHMOD=chmod
 RANLIB = @RANLIB@
-ARCHIVE = @ARCHIVE@
-ARADD = @ARADD@
 AWK = @AWK@
-LEX = @LEX@
-LEXLIB = @LEXLIB@
 YACC = @YACC@
 PERL = @PERL@
 PYTHON = @PYTHON@
@@ -282,14 +266,9 @@ AUTOHEADER = autoheader
 AUTOHEADERFLAGS =
 MOVEIFCHANGED = $(top_srcdir)/config/move-if-changed
 
-SHEXT = @SHEXT@
-STEXT=@STEXT@
-VEXT=@VEXT@
-
 TOPLIBD = $(BUILDTOP)/lib
 
 OBJEXT = o
-LIBEXT = a
 EXEEXT =
 
 #
@@ -414,9 +393,6 @@ KADM_COMM_LIBS	= $(GSSRPC_LIBS)
 KADMSRV_LIBS	= -lkadm5srv_mit $(HESIOD_LIBS) $(KDB5_LIBS) $(KADM_COMM_LIBS)
 KADMCLNT_LIBS	= -lkadm5clnt_mit $(KADM_COMM_LIBS)
 
-# libutil for NetBSD, et al. for openpty(), etc.
-UTIL_LIB	= @UTIL_LIB@
-
 # Misc stuff for linking server programs (and maybe some others,
 # eventually) but which we don't want to install.
 APPUTILS_LIB	= -lapputils
@@ -506,8 +482,8 @@ MAKE_COMMANDS-k5= $(BUILDTOP)/util/ss/mk_cmds
 LN_S=@LN_S@
 AR=@AR@
 
-# Set to "lib$(LIBBASE)$(STEXT) lib$(LIBBASE)$(SHEXT) lib$(LIBBASE)$(PFEXT)" or
-# some subset thereof by configure; determines which types of libs get
+# Set to "lib$(LIBBASE)$(STLIBEXT) lib$(LIBBASE)$(SHLIBEXT)" or some
+# subset thereof by configure; determines which types of libs get
 # built.
 LIBLIST=@LIBLIST@
 
@@ -582,9 +558,6 @@ OBJLISTS=@OBJLISTS@
 # the suffix substitution will break on some platforms!
 SHLIBOBJS=$(STLIBOBJS:.o=@SHOBJEXT@)
 PFLIBOBJS=$(STLIBOBJS:.o=@PFOBJEXT@)
-
-# "$(CC) -G", "$(LD) -Bshareable", etc.
-LDCOMBINE=@LDCOMBINE@
 
 #
 # rules to make various types of object files
