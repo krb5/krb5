@@ -1,9 +1,5 @@
 mydir=tests$(S)threads
 BUILDTOP=$(REL)..$(S)..
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
-
-RUN_SETUP = @KRB5_RUN_ENV@
 
 SRCS=$(srcdir)/t_rcache.c \
 	$(srcdir)/gss-perf.c \

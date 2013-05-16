@@ -1,10 +1,7 @@
 mydir=appl$(S)simple$(S)server
 BUILDTOP=$(REL)..$(S)..$(S)..
 
-LOCALINCLUDES= -I.. -I$(srcdir)/..
-
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
+LOCALINCLUDES= -I$(srcdir)/..
 
 all:: sim_server
 

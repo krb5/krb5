@@ -1,8 +1,5 @@
 mydir=clients$(S)kpasswd
 BUILDTOP=$(REL)..$(S)..
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
-DEFS=
 
 SRCS=kpasswd.c ksetpwd.c
 

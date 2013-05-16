@@ -2,8 +2,6 @@ mydir=appl$(S)user_user
 BUILDTOP=$(REL)..$(S)..
 # If you remove the -DDEBUG, the test program needs a line changed
 DEFINES = -DDEBUG
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: uuclient uuserver
 

@@ -1,8 +1,6 @@
 mydir=appl$(S)gss-sample
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DUSE_AUTOCONF_H -DGSSAPI_V2
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS= $(srcdir)/gss-client.c $(srcdir)/gss-misc.c $(srcdir)/gss-server.c
 

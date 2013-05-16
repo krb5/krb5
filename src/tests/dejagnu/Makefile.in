@@ -2,9 +2,6 @@ mydir=tests$(S)dejagnu
 BUILDTOP=$(REL)..$(S)..
 RUNTEST = @RUNTEST@ $(DEJAFLAGS)
 RUNTESTFLAGS =
-KRB5_RUN_ENV= @KRB5_RUN_ENV@
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS=$(srcdir)/t_inetd.c
 
@@ -34,7 +31,7 @@ clean-unix::
 	$(RM) -rf tmpdir dbg.log krb.log krb.sum
 
 runenv.vals: Makefile
-	$(KRB5_RUN_ENV) for i in $(KRB5_RUN_VARS); do \
+	$(RUN_SETUP) for i in $(RUN_VARS); do \
 		eval echo "{$$i=\$$$$i}"; done > runenv.vals
 
 site.exp: runenv.vals Makefile

@@ -1,8 +1,5 @@
 mydir=kadmin$(S)ktutil
 BUILDTOP=$(REL)..$(S)..
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
-DEFS=
 
 OBJS= 	ktutil.o \
 	ktutil_ct.o \

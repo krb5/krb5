@@ -1,7 +1,5 @@
 mydir=lib$(S)crypto$(S)nss$(S)md4
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES =
-DEFS=
 
 STLIBOBJS= md4.o
 
@@ -18,4 +16,3 @@ depend:: $(SRCS)
 clean-unix:: clean-libobjs
 
 @libobj_frag@
-

@@ -1,6 +1,5 @@
 mydir=lib$(S)krb5$(S)asn.1
 BUILDTOP=$(REL)..$(S)..$(S)..
-DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=asn.1

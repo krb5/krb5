@@ -1,7 +1,7 @@
 mydir=lib$(S)gssapi$(S)spnego
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../mechglue -I$(srcdir)/../mechglue
-DEFS=-D_GSS_STATIC_LINK=1
+DEFINES=-D_GSS_STATIC_LINK=1
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=spnego

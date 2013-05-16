@@ -1,10 +1,5 @@
 mydir=lib$(S)krb5$(S)keytab
 BUILDTOP=$(REL)..$(S)..$(S)..
-DEFS=
-
-RUN_SETUP = @KRB5_RUN_ENV@
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=keytab

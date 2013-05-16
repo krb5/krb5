@@ -1,8 +1,5 @@
 mydir=appl$(S)sample$(S)sclient
-
 BUILDTOP=$(REL)..$(S)..$(S)..
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 all:: sclient
 

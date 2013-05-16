@@ -1,7 +1,7 @@
 mydir=lib$(S)krb5$(S)ccache$(S)ccapi
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = $(WIN_INCLUDES)
-DEFS= -DUSE_CCAPI -DUSE_CCAPI_V3
+DEFINES= -DUSE_CCAPI -DUSE_CCAPI_V3
 
 ##DOS##WIN_INCLUDES = -I$(top_srcdir)\windows\lib
 

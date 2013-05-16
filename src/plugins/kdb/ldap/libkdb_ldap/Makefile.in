@@ -1,9 +1,5 @@
 mydir=plugins$(S)kdb$(S)ldap$(S)libkdb_ldap
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-KRB5_RUN_ENV = @KRB5_RUN_ENV@
-KRB5_CONFIG_SETUP = KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; export KRB5_CONFIG ;
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 # Lots of ugliness here because of duplicated symbol names.
 # Can I just punt the duplicates and import from libkdb5, or
 # is keeping them separate important?
@@ -12,7 +8,6 @@ DEFINES = \
 	-Dkrb5_dbe_lookup_tl_data=kdb_ldap_dbe_lookup_tl_data \
 	-Dkrb5_dbe_update_last_pwd_change=kdb_ldap_dbe_update_last_pwd_change \
 	-Dkrb5_dbe_update_tl_data=kdb_ldap_dbe_update_tl_data
-DEFS=
 
 LOCALINCLUDES = -I$(top_srcdir)/lib/kdb -I$(top_srcdir)/lib/krb5/asn.1
 
@@ -28,8 +23,6 @@ SHLIB_EXPDEPS = \
 	$(SUPPORT_DEPLIB) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
 SHLIB_EXPLIBS= $(KADMSRV_LIBS) -lkrb5 -lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) $(LDAP_LIBS) $(LIBS)
-SHLIB_DIRS=-L$(TOPLIBD)
-SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 LIBINITFUNC= kldap_init_fn
 LIBFINIFUNC=
@@ -51,7 +44,6 @@ SRCS= 	$(srcdir)/kdb_ldap.c \
 	$(srcdir)/ldap_err.c \
 	$(srcdir)/lockout.c \
 
-STOBJLISTS=OBJS.ST
 STLIBOBJS= kdb_ldap.o \
 	kdb_ldap_conn.o \
 	ldap_realm.o \

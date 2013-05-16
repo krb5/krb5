@@ -1,10 +1,6 @@
 mydir=tests$(S)asn.1
 BUILDTOP=$(REL)..$(S)..
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 LDAP=@LDAP@
-
-RUN_SETUP = @KRB5_RUN_ENV@
 
 SRCS= $(srcdir)/krb5_encode_test.c $(srcdir)/krb5_decode_test.c \
 	$(srcdir)/krb5_decode_leak.c $(srcdir)/ktest.c \

@@ -4,11 +4,6 @@ CRYPTO_IMPL_CFLAGS=@CRYPTO_IMPL_CFLAGS@
 LOCALINCLUDES = -I$(srcdir)/../../krb -I$(srcdir)/.. -I$(srcdir)/../md4 \
 	$(CRYPTO_IMPL_CFLAGS)
 
-DEFS=
-
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
-
 STLIBOBJS= \
 	hash_gen.o 	\
 	hash_crc32.o 	\

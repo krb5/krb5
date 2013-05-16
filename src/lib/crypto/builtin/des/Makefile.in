@@ -1,16 +1,10 @@
 mydir=lib$(S)crypto$(S)builtin$(S)des
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb
-DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = builtin\des
 ##DOS##OBJFILE = ..\..\$(OUTPRE)des.lst
-
-RUN_SETUP = @KRB5_RUN_ENV@
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
-
 
 STLIBOBJS=\
 	d3_aead.o	\

@@ -1,10 +1,6 @@
 mydir=lib$(S)kadm5$(S)unit-test
 BUILDTOP=$(REL)..$(S)..$(S)..
-DEFINES =
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
-DEFS=
 
 SRCS= init-test.c destroy-test.c handle-test.c iter-test.c setkey-test.c \
 	randkey-test.c lock-test.c

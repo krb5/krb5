@@ -1,8 +1,6 @@
 mydir=tests$(S)gssapi
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DUSE_AUTOCONF_H
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS=	$(srcdir)/t_accname.c $(srcdir)/t_ccselect.c $(srcdir)/t_credstore.c \
 	$(srcdir)/t_export_cred.c $(srcdir)/t_export_name.c \
@@ -26,7 +24,7 @@ all:: ccinit ccrefresh t_accname t_ccselect t_credstore t_export_cred \
 	t_spnego t_oid
 
 check-unix:: t_oid
-	$(KRB5_RUN_ENV) $(VALGRIND) ./t_oid
+	$(RUN_SETUP) $(VALGRIND) ./t_oid
 
 check-pytests:: ccinit ccrefresh t_accname t_ccselect t_credstore \
 	t_export_cred t_export_name t_imp_cred t_inq_cred t_inq_mechs_name \

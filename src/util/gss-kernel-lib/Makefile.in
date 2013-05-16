@@ -1,18 +1,13 @@
 mydir=util/gss-kernel-lib
 BUILDTOP=$(REL)..$(S)..
 
-KRB5_RUN_ENV=@KRB5_RUN_ENV@
-
 DEFINES=-DKRB5_KERNEL
 ALL_CFLAGS=$(CPPFLAGS) $(CFLAGS) $(WARN_CFLAGS) $(DEFS) $(DEFINES) -I. -Igssapi
-PROG_LIBPATH=-L$(TOPLIBD)
 
 SHLIB_EXPDEPS = \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
 SHLIB_EXPLIBS=-lgssrpc -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(LIBS)
-
-STOBJLISTS=OBJS.ST
 
 SRCS= \
 	k5seal.c \

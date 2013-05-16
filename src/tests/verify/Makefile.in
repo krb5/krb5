@@ -1,7 +1,5 @@
 mydir=tests$(S)verify
 BUILDTOP=$(REL)..$(S)..
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 KDB5_DEP_LIB=$(THREAD_LINKOPTS) $(DL_LIB)
 
 SRCS=$(srcdir)/kdb5_verify.c

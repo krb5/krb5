@@ -1,9 +1,6 @@
 mydir=kvno
 BUILDTOP=$(REL)..$(S)..
 
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
-
 ##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
 ##WIN32##RCFLAGS=$(CPPFLAGS) -I$(top_srcdir) -D_WIN32 -DRES_ONLY
 

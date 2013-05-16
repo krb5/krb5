@@ -8,25 +8,17 @@
 # LIBBASE	library name without "lib" or extension
 # LIBMAJOR	library major version
 # LIBMINOR	library minor version
-# STOBJLISTS	list of files, each of which is an OBJS.ST created by
-#			libobj.in; *DO NOT* use ./OBJS.ST for the current
-#			directory as that will cause some makes to lose.
 # SHLIB_EXPDEPS	list of libraries that this one has explicit
 #			dependencies on, pref. in the form libfoo$(SHLIBEXT)
 # SHLIB_EXPLIBS	list of libraries that this one has explicit
 #			dependencies on, in "-lfoo" form.
-# SHLIB_DIRS	list of directories where $(SHLIB_EXPLIBS) can be
-#			found, in the form -Ldir1 -Ldir2 ...
-#			since there are very few systems where -L is the
-#			wrong thing (notable exception of SunOS but we
-#			deal with it...)
-# SHLIB_RDIRS	rpath directories to search; given in the
-#			form dir1:dir2 ...
 # RELDIR	path to this directory relative to $(TOPLIBD)
+#
+# Makefile.in can also override the defaults for SHLIB_DIRS,
+# SHLIB_RDIRS, and STOBJLISTS from pre.in.
 
 LIBPREFIX=lib
 
-# STOBJLISTS=dir1/OBJS.ST dir2/OBJS.ST etc...
 SHOBJLISTS=$(STOBJLISTS:.ST=.SH)
 PFOBJLISTS=$(STOBJLISTS:.ST=.PF)
 

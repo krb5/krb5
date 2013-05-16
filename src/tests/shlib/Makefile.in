@@ -1,9 +1,5 @@
 mydir=tests$(S)shlib
 BUILDTOP=$(REL)..$(S)..
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
-
-RUN_SETUP = @KRB5_RUN_ENV@
 
 #VALGRIND=valgrind
 #VALGRINDFLAGS=--tool=memcheck --leak-check=yes --show-reachable=yes

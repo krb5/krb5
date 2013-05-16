@@ -1,9 +1,5 @@
 mydir=clients$(S)kinit
 BUILDTOP=$(REL)..$(S)..
-DEFS=
-
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS=kinit.c kinit_kdb.c
 

@@ -5,14 +5,10 @@ LOCALINCLUDES = -I$(srcdir)/../des 	\
 		-I$(srcdir)/../camellia \
 		-I$(srcdir)/../../krb 	\
 		-I$(srcdir)/..
-DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = builtin\enc_provider
 ##DOS##OBJFILE = ..\..\$(OUTPRE)enc_provider.lst
-
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS= \
 	des.o 	\

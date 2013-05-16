@@ -1,17 +1,5 @@
 mydir=lib$(S)crypto$(S)nss$(S)md5
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-DEFS=
-
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
-LOCALINCLUDES =
-
-
-STLIBOBJS=
-
-OBJS=
-
-SRCS=
 
 all-unix:: all-libobjs
 

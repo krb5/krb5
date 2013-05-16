@@ -18,9 +18,6 @@ SUBDIRS=util include lib \
 	config-files build-tools man doc @po@
 WINSUBDIRS=include util lib ccapi windows clients appl
 BUILDTOP=$(REL).
-LOCALINCLUDES = -I$(srcdir) 
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS =  
 HDRS = 
@@ -545,8 +542,8 @@ testrealm: runenv.py
 # environment variable settings to propagate to Python-based tests
 
 pyrunenv.vals: Makefile
-	$(KRB5_RUN_ENV) \
-	for i in $(KRB5_RUN_VARS); do \
+	$(RUN_SETUP) \
+	for i in $(RUN_VARS); do \
 		eval echo 'env['\\\'$$i\\\''] = '\\\'\$$$$i\\\'; \
 	done > $@
 

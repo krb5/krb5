@@ -2,28 +2,19 @@ thisconfigdir=../../../..
 myfulldir=lib/crypto/builtin/camellia
 mydir=lib$(S)crypto$(S)builtin$(S)camellia
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk \
-	 -I$(srcdir)/../../../../include -I$(srcdir)/../aes
-DEFS=
+LOCALINCLUDES = -I$(srcdir)/../aes
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = builtin\camellia
 ##DOS##OBJFILE = ..\..\$(OUTPRE)camellia.lst
 
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
+STLIBOBJS= camellia.o
 
-STLIBOBJS=\
-	camellia.o
+OBJS= $(OUTPRE)camellia.$(OBJEXT)
 
-OBJS=\
-	$(OUTPRE)camellia.$(OBJEXT)
+SRCS= $(srcdir)/camellia.c
 
-SRCS=\
-	$(srcdir)/camellia.c
-
-GEN_OBJS=\
-	$(OUTPRE)camellia.$(OBJEXT)
+GEN_OBJS= $(OUTPRE)camellia.$(OBJEXT)
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -34,7 +25,7 @@ includes:: depend
 depend:: $(SRCS)
 
 camellia-gen: camellia-gen.o $(GEN_OBJS)
-	$(CC_LINK) -I../../../../include $(LOCALINCLUDES) -o camellia-gen camellia-gen.o $(GEN_OBJS)
+	$(CC_LINK) -o camellia-gen camellia-gen.o $(GEN_OBJS)
 
 run-camellia-gen: camellia-gen
 	./camellia-gen > kresults.out

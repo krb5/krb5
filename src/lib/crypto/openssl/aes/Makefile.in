@@ -4,21 +4,3 @@
 
 mydir=lib$(S)crypto$(S)openssl$(S)aes
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES=
-DEFS=
-
-STLIBOBJS=
-
-OBJS=
-
-SRCS=
-
-all-unix:: all-libobjs 
-
-includes:: depend
-
-depend:: $(SRCS)
-
-clean-unix:: clean-libobjs
-
-@libobj_frag@

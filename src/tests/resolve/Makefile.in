@@ -1,8 +1,5 @@
 mydir=tests$(S)resolve
 BUILDTOP=$(REL)..$(S)..
-RUN_SETUP = @KRB5_RUN_ENV@
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 OBJS=resolve.o addrinfo-test.o fake-addrinfo-test.o
 SRCS=$(srcdir)/resolve.c $(srcdir)/addrinfo-test.c \

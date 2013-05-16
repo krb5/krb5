@@ -1,6 +1,5 @@
 mydir=lib$(S)krb5$(S)error_tables
 BUILDTOP=$(REL)..$(S)..$(S)..
-DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=error_tables

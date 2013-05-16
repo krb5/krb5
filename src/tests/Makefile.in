@@ -4,9 +4,6 @@ SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 	gss-threads misc mkeystash_compat
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
-KRB5_RUN_ENV= @KRB5_RUN_ENV@
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 OBJS= gcred.o hist.o kdbtest.o t_localauth.o
 EXTRADEPSRCS= gcred.c hist.c kdbtest.c t_localauth.c

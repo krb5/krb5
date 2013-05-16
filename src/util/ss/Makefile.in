@@ -1,7 +1,6 @@
 mydir=util$(S)ss
 BUILDTOP=$(REL)..$(S)..
 SED = sed
-DEFS=
 
 INSTALLLIB=cp
 INSTALLFILE=cp
@@ -14,8 +13,6 @@ LIBBASE=ss
 LIBMAJOR=1
 LIBMINOR=0
 RELDIR=../util/ss
-
-STOBJLISTS=OBJS.ST
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 install-unix:: install-libs

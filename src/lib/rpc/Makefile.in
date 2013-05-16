@@ -1,7 +1,6 @@
 mydir=lib$(S)rpc
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DGSSAPI_KRB5 -DDEBUG_GSSAPI=0 -DGSSRPC__IMPL
-DEFS=
 
 SUBDIRS=unit-test
 
@@ -11,15 +10,12 @@ SUBDIRS=unit-test
 LIBBASE=gssrpc
 LIBMAJOR=4
 LIBMINOR=1
-STOBJLISTS=OBJS.ST
 SHLIB_EXPDEPS= \
 	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(COM_ERR_DEPLIB)
 SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err $(LIBS)
-SHLIB_DIRS=-L$(TOPLIBD)
-SHLIB_RDIRS=$(KRB5_LIBDIR)
 RELDIR=rpc
 
 SRCS = $(srcdir)/auth_none.c \

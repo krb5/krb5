@@ -1,21 +1,15 @@
 mydir=util$(S)profile$(S)testmod
 BUILDTOP=$(REL)..$(S)..$(S)..
-KRB5_RUN_ENV = @KRB5_RUN_ENV@
-DEFS=@DEFS@
 
 LOCALINCLUDES = -I.. -I$(srcdir)/..
 
 LIBBASE=proftest
 LIBMAJOR=0
 LIBMINOR=0
-SO_EXT=.so
 
-SHLIB_DIRS=-L$(TOPLIBD)
-SHLIB_RDIRS=$(KRB5_LIBDIR)
 SHLIB_EXPLIBS=$(SUPPORT_LIB) $(LIBS)
 SHLIB_EXPDEPS=$(SUPPORT_DEPLIB)
 
-STOBJLISTS=OBJS.ST
 STLIBOBJS=testmod_main.o
 
 SRCS=$(srcdir)/testmod_main.c

@@ -1,11 +1,7 @@
 mydir=clients$(S)kswitch
 BUILDTOP=$(REL)..$(S)..
-DEFS=
 
 SRCS=kswitch.c
-
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 ##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
 ##WIN32##RCFLAGS=$(CPPFLAGS) -I$(top_srcdir) -D_WIN32 -DRES_ONLY

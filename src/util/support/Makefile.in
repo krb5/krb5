@@ -1,7 +1,6 @@
 mydir=util$(S)support
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/support
-DEFS=
 
 ##DOS##BUILDTOP = ..\..
 ##DOS##LIBNAME=$(OUTPRE)k5sprt32.lib
@@ -11,10 +10,6 @@ DEFS=
 ##DOS##WIN64OBJFILE=$(OUTPRE)k5sprt64.lst
 
 SED = sed
-
-KRB5_RUN_ENV= @KRB5_RUN_ENV@
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 LIBBASE=krb5support
 LIBMAJOR=@SUPPORTLIB_MAJOR@
@@ -104,12 +99,6 @@ LIBOBJS= \
 	$(PRINTF_OBJ) \
 	$(MKSTEMP_OBJ)
 
-STOBJLISTS=OBJS.ST
-
-INSTALLFILE = cp
-
-LOCALINCLUDES=-I. -I$(srcdir)
-
 SRCS=\
 	$(srcdir)/threads.c \
 	$(srcdir)/init-addrinfo.c \
@@ -137,8 +126,6 @@ SRCS=\
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
 SHLIB_EXPLIBS= $(LIBS) $(DL_LIB)
-SHLIB_DIRS=
-SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 DEPLIBS=
 

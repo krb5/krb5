@@ -1,14 +1,9 @@
 mydir=lib$(S)crypto$(S)builtin$(S)aes
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk  -I$(srcdir)/../../../../include
-DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = builtin\aes
 ##DOS##OBJFILE = ..\..\$(OUTPRE)aes.lst
-
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS=\
 	aescrypt.o	\
@@ -39,7 +34,7 @@ includes:: depend
 depend:: $(SRCS)
 
 aes-gen: aes-gen.o $(GEN_OBJS)
-	$(CC_LINK) -I../../../../include $(LOCALINCLUDES) -o aes-gen aes-gen.o $(GEN_OBJS)
+	$(CC_LINK) -o aes-gen aes-gen.o $(GEN_OBJS)
 
 run-aes-gen: aes-gen
 	./aes-gen > kresults.out

@@ -1,9 +1,6 @@
 mydir=kadmin$(S)cli
 BUILDTOP=$(REL)..$(S)..
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
-DEFS=
 
 PROG = kadmin
 COMMON_OBJS = kadmin.o kadmin_ct.o ss_wrapper.o getdate.o

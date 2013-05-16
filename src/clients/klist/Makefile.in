@@ -1,9 +1,5 @@
 mydir=clients$(S)klist
 BUILDTOP=$(REL)..$(S)..
-DEFS=
-
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 ##WIN32##LOCALINCLUDES=-I$(BUILDTOP)\util\windows\
 

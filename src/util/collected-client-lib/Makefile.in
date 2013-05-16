@@ -1,7 +1,6 @@
 mydir=util$(S)collected-client-lib
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/collected-client-lib
-DEFS=
 
 ##DOS##BUILDTOP = ..\..
 ##DOS##LIBNAME=$(OUTPRE)k5sprt32.lib
@@ -9,9 +8,6 @@ DEFS=
 ##DOS##XTRA=
 ##DOS##OBJFILE=$(OUTPRE)k5sprt32.lst
 ##DOS##WIN64OBJFILE=$(OUTPRE)k5sprt64.lst
-
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 LIBBASE=collected
 LIBMAJOR=1
@@ -67,8 +63,6 @@ SHLIB_EXPDEPS =
 LIBS_UTILS=-lresolv
 # Add -lm if dumping thread stats, for sqrt.
 SHLIB_EXPLIBS= $(LIBS) $(DL_LIB) $(LIBS_UTILS)
-SHLIB_DIRS=
-SHLIB_RDIRS=
 
 DEPLIBS=
 

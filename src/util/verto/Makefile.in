@@ -19,10 +19,7 @@ LIBOBJS=$(OUTPRE)verto.$(OBJEXT) \
 	$(OUTPRE)verto-k5ev.$(OBJEXT)
 SRCS=verto.c module.c verto-k5ev.c
 
-STOBJLISTS=OBJS.ST
 SHLIB_EXPLIBS= $(LIBS) -lm    # libm needed for ceil() currently.
-SHLIB_DIRS=
-SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 VERTO_HDR=$(BUILDTOP)$(S)include$(S)verto.h
 

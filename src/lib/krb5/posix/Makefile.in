@@ -1,6 +1,5 @@
 mydir=posix
 BUILDTOP=$(REL)..$(S)..$(S)..
-DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=posix

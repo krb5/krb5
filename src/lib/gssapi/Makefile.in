@@ -1,7 +1,7 @@
 mydir=lib$(S)gssapi
 BUILDTOP=$(REL)..$(S)..
 SUBDIRS= generic krb5 spnego mechglue
-DEFS=-D_GSS_STATIC_LINK=1
+DEFINES=-D_GSS_STATIC_LINK=1
 
 ##DOSLIBNAME=$(OUTPRE)gssapi.lib
 ##DOSOBJFILELIST=@$(OUTPRE)mechglue.lst @$(OUTPRE)spnego.lst @$(OUTPRE)generic.lst @$(OUTPRE)krb5.lst # @$(OUTPRE)gssapi.lst
@@ -28,8 +28,6 @@ SUBDIROBJLISTS=generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST spnego/OBJS.ST
 SHLIB_EXPDEPS=\
 	$(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB) $(COM_ERR_DEPLIB)
 SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
-SHLIB_DIRS=-L$(TOPLIBD)
-SHLIB_RDIRS=$(KRB5_LIBDIR)
 RELDIR=gssapi
 
 all-unix:: all-liblinks @MAINT@ verify-calling-conventions-gssapi

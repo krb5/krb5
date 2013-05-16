@@ -1,14 +1,9 @@
 mydir=lib$(S)crypto$(S)builtin$(S)sha2
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = builtin\sha2
 ##DOS##OBJFILE = ..\..\$(OUTPRE)sha2.lst
-
-RUN_SETUP = @KRB5_RUN_ENV@
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS= sha256.o
 

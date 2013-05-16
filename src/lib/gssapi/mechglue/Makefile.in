@@ -1,7 +1,7 @@
 mydir=lib$(S)gssapi$(S)mechglue
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../krb5 -I$(srcdir)/../krb5 -I../spnego -I$(srcdir)/../spnego
-DEFS=-D_GSS_STATIC_LINK=1
+DEFINES=-D_GSS_STATIC_LINK=1
 
 ##DOSBUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=mechglue
