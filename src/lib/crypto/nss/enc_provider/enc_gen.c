@@ -96,14 +96,11 @@ krb5_error_code
 k5_nss_init(void)
 {
     PRUint32 flags = NSS_INIT_READONLY | NSS_INIT_NOROOTINIT;
-    krb5_error_code ret;
+    krb5_error_code ret = 0;
     SECStatus rv;
     pid_t pid;
 
-    ret = k5_mutex_lock(&k5_nss_lock);
-    if (ret)
-        return ret;
-
+    k5_mutex_lock(&k5_nss_lock);
     pid = getpid();
     if (k5_nss_ctx != NULL) {
         /* Do nothing if the existing context is still good. */
