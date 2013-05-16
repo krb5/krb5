@@ -5,6 +5,7 @@
 #if defined(_WIN32) || defined(USE_CCAPI)
 
 #include "k5-int.h"     /* loads krb5.h */
+#include "../cc-int.h"
 
 #ifdef USE_CCAPI_V3
 #include <CredentialsCache.h>

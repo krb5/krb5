@@ -114,12 +114,10 @@ cc_int32 cci_context_change_time_get (cc_time_t *out_change_time)
 {
     cc_int32 err = ccNoError;
 
-    err = k5_mutex_lock (&g_change_time_mutex);
+    k5_mutex_lock (&g_change_time_mutex);
 
-    if (!err) {
-        *out_change_time = g_change_time + g_change_time_offset;
-        k5_mutex_unlock (&g_change_time_mutex);
-    }
+    *out_change_time = g_change_time + g_change_time_offset;
+    k5_mutex_unlock (&g_change_time_mutex);
 
     return err;
 }
@@ -130,11 +128,9 @@ cc_int32 cci_context_change_time_update (cci_identifier_t in_identifier,
                                          cc_time_t        in_new_change_time)
 {
     cc_int32 err = ccNoError;
-    cc_int32 lock_err = err = k5_mutex_lock (&g_change_time_mutex);
+    k5_mutex_lock (&g_change_time_mutex);
 
-    if (!err) {
-        if (!in_identifier) { err = cci_check_error (err); }
-    }
+    if (!in_identifier) { err = cci_check_error (err); }
 
     if (!err) {
         if (g_change_time < in_new_change_time) {
@@ -150,9 +146,7 @@ cc_int32 cci_context_change_time_update (cci_identifier_t in_identifier,
                                                          NULL, NULL, NULL);
     }
 
-    if (!lock_err) {
-        k5_mutex_unlock (&g_change_time_mutex);
-    }
+    k5_mutex_unlock (&g_change_time_mutex);
 
     return err;
 }
@@ -162,14 +156,13 @@ cc_int32 cci_context_change_time_update (cci_identifier_t in_identifier,
 cc_int32 cci_context_change_time_sync (cci_identifier_t in_new_identifier)
 {
     cc_int32 err = ccNoError;
-    cc_int32 lock_err = err = k5_mutex_lock (&g_change_time_mutex);
     cc_uint32 server_ids_match = 0;
     cc_uint32 server_was_running = 0;
     cc_uint32 server_is_running = 0;
 
-    if (!err) {
-        if (!in_new_identifier) { err = cci_check_error (err); }
-    }
+    k5_mutex_lock (&g_change_time_mutex);
+
+    if (!in_new_identifier) { err = cci_check_error (err); }
 
     if (!err) {
         err = cci_context_change_time_update_identifier (in_new_identifier,
@@ -200,9 +193,7 @@ cc_int32 cci_context_change_time_sync (cci_identifier_t in_new_identifier)
                           g_change_time, g_change_time_offset);
     }
 
-    if (!lock_err) {
-        k5_mutex_unlock (&g_change_time_mutex);
-    }
+    k5_mutex_unlock (&g_change_time_mutex);
 
     return err;
 }

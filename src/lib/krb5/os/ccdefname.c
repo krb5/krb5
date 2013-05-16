@@ -26,6 +26,7 @@
 
 #define NEED_WINDOWS
 #include "k5-int.h"
+#include "../ccache/cc-int.h"
 #include "os-proto.h"
 #include <stdio.h>
 
