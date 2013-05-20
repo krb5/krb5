@@ -6,7 +6,9 @@ kdc.conf
 The kdc.conf file supplements :ref:`krb5.conf(5)` for programs which
 are typically only used on a KDC, such as the :ref:`krb5kdc(8)` and
 :ref:`kadmind(8)` daemons and the :ref:`kdb5_util(8)` program.
-Relations documented here may also be specified in krb5.conf.
+Relations documented here may also be specified in krb5.conf; for the
+KDC programs mentioned, krb5.conf and kdc.conf will be merged into a
+single configuration profile.
 
 Normally, the kdc.conf file is found in the KDC state directory,
 |kdcdir|.  You can override the default location by setting the
