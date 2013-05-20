@@ -117,6 +117,19 @@ if 'host/-nomatch-' not in output:
 
 realm.stop()
 
+# Make sure a GSSAPI acceptor can handle cross-realm tickets with a
+# transited field.  (Regression test for #7639.)
+r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)),
+                          create_user=False, create_host=False,
+                          args=[{'realm': 'A.X', 'create_user': True},
+                                {'realm': 'X'},
+                                {'realm': 'B.X', 'create_host': True}])
+os.rename(r3.keytab, r1.keytab)
+r1.run_as_client(['./t_accname', 'p:' + r3.host_princ, 'h:host'])
+r1.stop()
+r2.stop()
+r3.stop()
+
 ### Test gss_inquire_cred behavior.
 
 realm = K5Realm()
