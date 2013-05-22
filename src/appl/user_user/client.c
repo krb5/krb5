@@ -240,8 +240,8 @@ int main (int argc, char *argv[])
 
 #if 1
     /* read the ap_req to get the session key */
-    retval = krb5_rd_req(context, &auth_context, &reply,
-                         NULL, NULL, NULL, &ticket);
+    retval = krb5_rd_req(context, &auth_context, &reply, creds.client, NULL,
+                         NULL, &ticket);
     free(reply.data);
 #else
     retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&s, "???",
