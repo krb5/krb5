@@ -5122,17 +5122,27 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
  * This function parses, decrypts and verifies a AP-REQ message from @a inbuf
  * and stores the authenticator in @a auth_context.
  *
- * If a keyblock is present in the @a auth_context, it is used to decrypt the
- * ticket in AP-REQ message. (This is useful for user-to-user authentication.)
- * Otherwise, the decryption key is obtained from the @a keytab.  If @a keytab
- * is iterable, all of its key entries it will be tried against the ticket;
- * otherwise, the server principal in the ticket will be looked up in the
- * keytab and that key will be tried.
+ * If a keyblock was specified in @a auth_context using
+ * krb5_auth_con_setuseruserkey(), that key is used to decrypt the ticket in
+ * AP-REQ message and @a keytab is ignored.  In this case, @a server should be
+ * specified as a complete principal name to allow for proper transited-path
+ * checking and replay cache selection.
+ *
+ * Otherwise, the decryption key is obtained from @a keytab, or from the
+ * default keytab if it is NULL.  In this case, @a server may be a complete
+ * principal name, a matching principal (see krb5_sname_match()), or NULL to
+ * match any principal name.  The keys tried against the encrypted part of the
+ * ticket are determined as follows:
+ *
+ * - If @a server is a complete principal name, then its entry in @a keytab is
+ *   tried.
+ * - Otherwise, if @a keytab is iterable, then all entries in @a keytab which
+ *   match @a server are tried.
+ * - Otherwise, the server principal in the ticket must match @a server, and
+ *   its entry in @a keytab is tried.
  *
  * The client specified in the decrypted authenticator must match the client
- * specified in the decrypted ticket.  If @a server is non-null, the key in
- * which the ticket is encrypted must correspond to a principal in @a keytab
- * matching @a server according to the rules of krb5_sname_match().
+ * specified in the decrypted ticket.
  *
  * If the @a remote_addr field of @a auth_context is set, the request must come
  * from that address.
