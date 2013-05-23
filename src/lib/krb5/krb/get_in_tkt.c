@@ -493,8 +493,7 @@ krb5_init_creds_free(krb5_context context,
     }
     k5_response_items_free(ctx->rctx.items);
     free(ctx->in_tkt_service);
-    zap(ctx->password.data, ctx->password.length);
-    krb5_free_data_contents(context, &ctx->password);
+    zapfree(ctx->gakpw.storage.data, ctx->gakpw.storage.length);
     krb5_free_error(context, ctx->err_reply);
     krb5_free_pa_data(context, ctx->err_padata);
     krb5_free_cred_contents(context, &ctx->cred);
@@ -788,7 +787,7 @@ krb5_init_creds_init(krb5_context context,
     ctx->prompter = prompter;
     ctx->prompter_data = data;
     ctx->gak_fct = krb5_get_as_key_password;
-    ctx->gak_data = &ctx->password;
+    ctx->gak_data = &ctx->gakpw;
 
     ctx->request_time = 0; /* filled in later */
     ctx->start_time = start_time;

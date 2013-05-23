@@ -10,6 +10,11 @@ struct krb5_responder_context_st {
     k5_response_items *items;
 };
 
+struct gak_password {
+    krb5_data storage;
+    const krb5_data *password;
+};
+
 struct _krb5_init_creds_context {
     krb5_gic_opt_ext *opte;
     char *in_tkt_service;
@@ -23,7 +28,7 @@ struct _krb5_init_creds_context {
     krb5_deltat renew_life;
     krb5_boolean complete;
     unsigned int loopcount;
-    krb5_data password;
+    struct gak_password gakpw;
     krb5_error *err_reply;
     krb5_pa_data **err_padata;
     krb5_creds cred;

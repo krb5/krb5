@@ -99,33 +99,6 @@ proc test6 {} {
 }
 if { $RPC } { test6 } 
 
-test "init 7"
-proc test7 {} {
-    global test
-
-    send "kadm5_init admin \"\" \$KADM5_ADMIN_SERVICE null \$KADM5_STRUCT_VERSION \$KADM5_API_VERSION_3 server_handle\n"
-
-    expect {
-	-re "assword\[^\r\n\]*:" { }
-	-re "key:$" { }
-	eof {
-		fail "$test: eof instead of password prompt"
-		api_exit
-		api_start
-		return
-	}
-	timeout {
-	    fail "$test: timeout instead of password prompt"
-	    return
-	}
-    }
-    one_line_succeed_test "admin"
-    if {! [cmd {kadm5_destroy $server_handle}]} {
-	error_and_restart "$test: couldn't close database"
-    }
-}
-if { $RPC } { test7 } 
-
 test "init 8"
 
 proc test8 {} {

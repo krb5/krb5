@@ -40,5 +40,7 @@ $(OUTPRE)kdbtest.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   $(top_srcdir)/include/gssrpc/svc.h $(top_srcdir)/include/gssrpc/svc_auth.h \
   $(top_srcdir)/include/gssrpc/xdr.h $(top_srcdir)/include/kdb.h \
   $(top_srcdir)/include/krb5.h kdbtest.c
+$(OUTPRE)t_init_creds.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/krb5.h t_init_creds.c
 $(OUTPRE)t_localauth.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
   $(COM_ERR_DEPS) $(top_srcdir)/include/krb5.h t_localauth.c

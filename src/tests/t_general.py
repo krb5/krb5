@@ -22,6 +22,15 @@ for realm in multipass_realms(create_host=False):
     # Test kinit against kdb keytab
     realm.run([kinit, "-k", "-t", "KDB:", realm.user_princ])
 
+# Test that we can get initial creds with an empty password via the
+# API.  We have to disable the "empty" pwqual module to create a
+# principal with an empty password.  (Regression test for #7642.)
+conf={'plugins': {'pwqual': {'disable': 'empty'}}}
+realm = K5Realm(create_user=False, create_host=False, krb5_conf=conf)
+realm.run_kadminl('addprinc -pw "" user')
+realm.run(['./t_init_creds', 'user', ''])
+realm.stop()
+
 realm = K5Realm(create_host=False)
 
 # Spot-check KRB5_TRACE output
