@@ -78,7 +78,8 @@ k5_utf8s_to_ucs2s(krb5_ucs2 *ucs2str,
 
     /* If input ptr is NULL or empty... */
     if (utf8str == NULL || *utf8str == '\0') {
-        *ucs2str = 0;
+        if (ucs2str != NULL)
+            *ucs2str = 0;
 
         return 0;
     }
@@ -119,9 +120,7 @@ k5_utf8s_to_ucs2s(krb5_ucs2 *ucs2str,
         ucs2len++;              /* Count number of wide chars stored/required */
     }
 
-    assert(ucs2len < count);
-
-    if (ucs2str != NULL) {
+    if (ucs2str != NULL && ucs2len < count) {
         /* Add null terminator if there's room in the buffer. */
         ucs2str[ucs2len] = 0;
     }
@@ -172,12 +171,13 @@ krb5int_utf8cs_to_ucs2s(const char *utf8s,
         return ENOMEM;
     }
 
-    len = k5_utf8s_to_ucs2s(*ucs2s, utf8s, chars + 1, 0);
+    len = k5_utf8s_to_ucs2s(*ucs2s, utf8s, chars, 0);
     if (len < 0) {
         free(*ucs2s);
         *ucs2s = NULL;
         return EINVAL;
     }
+    (*ucs2s)[chars] = 0;
 
     if (ucs2chars != NULL) {
         *ucs2chars = chars;
@@ -223,21 +223,23 @@ krb5int_utf8cs_to_ucs2les(const char *utf8s,
 {
     ssize_t len;
     size_t chars;
+    krb5_ucs2 *ucs2s;
+
+    *ucs2les = NULL;
 
     chars = krb5int_utf8c_chars(utf8s, utf8slen);
-
-    *ucs2les = (unsigned char *)malloc((chars + 1) * sizeof(krb5_ucs2));
-    if (*ucs2les == NULL) {
+    ucs2s = malloc((chars + 1) * sizeof(krb5_ucs2));
+    if (ucs2s == NULL)
         return ENOMEM;
-    }
 
-    len = k5_utf8s_to_ucs2s((krb5_ucs2 *)*ucs2les, utf8s, chars + 1, 1);
+    len = k5_utf8s_to_ucs2s(ucs2s, utf8s, chars, 1);
     if (len < 0) {
-        free(*ucs2les);
-        *ucs2les = NULL;
+        free(ucs2s);
         return EINVAL;
     }
+    ucs2s[chars] = 0;
 
+    *ucs2les = (unsigned char *)ucs2s;
     if (ucs2leslen != NULL) {
         *ucs2leslen = chars * sizeof(krb5_ucs2);
     }
@@ -402,13 +404,14 @@ krb5int_ucs2cs_to_utf8s(const krb5_ucs2 *ucs2s,
         return ENOMEM;
     }
 
-    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2s,
-                            (size_t)len + 1, (ssize_t)ucs2slen, 0);
+    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2s, (size_t)len,
+                            (ssize_t)ucs2slen, 0);
     if (len < 0) {
         free(*utf8s);
         *utf8s = NULL;
         return EINVAL;
     }
+    (*utf8s)[len] = '\0';
 
     if (utf8slen != NULL) {
         *utf8slen = len;
@@ -438,13 +441,14 @@ krb5int_ucs2lecs_to_utf8s(const unsigned char *ucs2les,
         return ENOMEM;
     }
 
-    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2les,
-                            (size_t)len + 1, (ssize_t)ucs2leslen, 1);
+    len = k5_ucs2s_to_utf8s(*utf8s, (krb5_ucs2 *)ucs2les, (size_t)len,
+                            (ssize_t)ucs2leslen, 1);
     if (len < 0) {
         free(*utf8s);
         *utf8s = NULL;
         return EINVAL;
     }
+    (*utf8s)[len] = '\0';
 
     if (utf8slen != NULL) {
         *utf8slen = len;
