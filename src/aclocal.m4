@@ -538,7 +538,7 @@ if test "$GCC" = yes ; then
     #
     # We're currently targeting C89+, not C99, so disallow some
     # constructs.
-    for flag in declaration-after-statement variadic-macros ; do
+    for flag in declaration-after-statement ; do
       TRY_WARN_CC_FLAG(-Werror=$flag)
       if test "$flag_supported" = no; then
         TRY_WARN_CC_FLAG(-W$flag)
