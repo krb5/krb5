@@ -131,7 +131,7 @@ CHECK_SIGNALS
 AC_ARG_WITH([vague-errors],
 AC_HELP_STRING([--with-vague-errors],[Do not @<:@do@:>@ send helpful errors to client]), , withval=no)
 if test "$withval" = yes; then
-	AC_MSG_RESULT(Supplying vague error messages to KDC clients)
+	AC_MSG_NOTICE(Supplying vague error messages to KDC clients)
 	AC_DEFINE(KRBCONF_VAGUE_ERRORS,1,[Define if the KDC should return only vague error codes to clients])
 fi
 
@@ -141,7 +141,7 @@ CRYPTO_IMPL="builtin"
 AC_ARG_WITH([crypto-impl],
 AC_HELP_STRING([--with-crypto-impl=IMPL], [use specified crypto implementation @<:@builtin@:>@]),
 [CRYPTO_IMPL=$withval
-AC_MSG_RESULT("k5crypto will use \'$withval\'")
+AC_MSG_NOTICE(k5crypto will use '$withval')
 ], withval=builtin)
 case "$withval" in
 builtin)
@@ -182,7 +182,7 @@ else
 AC_ARG_WITH([prng-alg],
 AC_HELP_STRING([--with-prng-alg=ALG], [use specified PRNG algorithm. Ignored for nss. @<:@fortuna@:>@]),
 [PRNG_ALG=$withval
-AC_MSG_RESULT("k5crypto will use \'$withval\'")
+AC_MSG_NOTICE(k5crypto will use '$withval')
 ], PRNG_ALG=fortuna)
 fi
 AC_CONFIG_COMMANDS(PRNG_ALG, , PRNG_ALG=$PRNG_ALG)
@@ -197,7 +197,7 @@ PKINIT_CRYPTO_IMPL="$CRYPTO_IMPL"
 AC_ARG_WITH([pkinit-crypto-impl],
 AC_HELP_STRING([--with-pkinit-crypto-impl=IMPL], [use specified pkinit crypto implementation @<:@openssl@:>@]),
 [PKINIT_CRYPTO_IMPL=$withval
-AC_MSG_RESULT("pkinit will use \'$withval\'")
+AC_MSG_NOTICE(pkinit will use '$withval')
 ], withval=$PKINIT_CRYPTO_IMPL)
 case "$withval" in
 builtin|openssl)
@@ -272,7 +272,7 @@ AC_SUBST(AESNI_FLAGS)
 AC_ARG_WITH([kdc-kdb-update],
 AC_HELP_STRING([--with-kdc-kdb-update],[Update the database @<:@don't update@:>@]), , withval=no)
 if test "$withval" = yes; then
-	AC_MSG_RESULT(Updating KDC database with each request)
+	AC_MSG_NOTICE(Updating KDC database with each request)
 	AC_DEFINE(KRBCONF_KDC_MODIFIES_KDB,1,[Define if KDC should update database with each request])
 fi
 
