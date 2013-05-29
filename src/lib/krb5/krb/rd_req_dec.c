@@ -277,11 +277,16 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
         }
         krb5_k_free_key(context, (*auth_context)->key);
         (*auth_context)->key = NULL;
+        if (server == NULL)
+            server = req->ticket->server;
     } else {
         retval = decrypt_ticket(context, req, server, keytab,
                                 check_valid_flag ? &decrypt_key : NULL);
         if (retval)
             goto cleanup;
+        /* decrypt_ticket placed the principal of the keytab key in
+         * req->ticket->server; always use this for later steps. */
+        server = req->ticket->server;
     }
     TRACE_RD_REQ_TICKET(context, req->ticket->enc_part2->client,
                         req->ticket->server, req->ticket->enc_part2->session);
@@ -308,9 +313,6 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
         goto cleanup;
     }
 
-    if (!server) {
-        server = req->ticket->server;
-    }
     /* Get an rcache if necessary. */
     if (((*auth_context)->rcache == NULL)
         && ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME)
