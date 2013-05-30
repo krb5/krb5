@@ -237,12 +237,18 @@ Options:
 {-\|+}\ **requires_preauth**
     **+requires_preauth** requires this principal to preauthenticate
     before being allowed to kinit.  **-requires_preauth** clears this
-    flag.
+    flag.  When **+requires_preauth** is set on a service principal,
+    the KDC will only issue service tickets for that service principal
+    if the client's initial authentication was performed using
+    preauthentication.
 
 {-\|+}\ **requires_hwauth**
     **+requires_hwauth** requires this principal to preauthenticate
     using a hardware device before being allowed to kinit.
-    **-requires_hwauth** clears this flag.
+    **-requires_hwauth** clears this flag.  When **+requires_hwauth** is
+    set on a service principal, the KDC will only issue service tickets
+    for that service principal if the client's initial authentication was
+    performed using a hardware device to preauthenticate.
 
 {-\|+}\ **ok_as_delegate**
     **+ok_as_delegate** sets the **okay as delegate** flag on tickets
