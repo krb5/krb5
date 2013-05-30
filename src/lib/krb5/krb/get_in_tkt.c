@@ -521,7 +521,7 @@ k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
     krb5_data reply;
     krb5_data realm;
     unsigned int flags = 0;
-    int tcp_only = 0;
+    int tcp_only = 0, master = *use_master;
 
     request.length = 0;
     request.data = NULL;
@@ -545,8 +545,9 @@ k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
 
         krb5_free_data_contents(context, &reply);
 
+        master = *use_master;
         code = krb5_sendto_kdc(context, &request, &realm,
-                               &reply, use_master, tcp_only);
+                               &reply, &master, tcp_only);
         if (code != 0)
             break;
 
@@ -558,6 +559,7 @@ k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
     krb5_free_data_contents(context, &reply);
     krb5_free_data_contents(context, &realm);
 
+    *use_master = master;
     return code;
 }
 
