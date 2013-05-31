@@ -90,7 +90,7 @@ u_int flags;				/* Current DB flags. */
 int ofd = STDOUT_FILENO;		/* Standard output fd. */
 
 DB *XXdbp;				/* Global for gdb. */
-int XXlineno;				/* Fast breakpoint for gdb. */
+u_long XXlineno;			/* Fast breakpoint for gdb. */
 
 int
 main(argc, argv)
@@ -199,7 +199,7 @@ main(argc, argv)
 			/* Don't display the newline, if CR at EOL. */
 			if (p[len - 2] == '\r')
 				--len;
-			if (write(ofd, p + 1, len - 1) != len - 1 ||
+			if (write(ofd, p + 1, len - 1) != (ssize_t)len - 1 ||
 			    write(ofd, "\n", 1) != 1)
 				err("write: %s", strerror(errno));
 			break;
@@ -362,7 +362,7 @@ compare(db1, db2)
 	for (p1 = db1->data, p2 = db2->data; len--;)
 		if (*p1++ != *p2++) {
 			err("compare failed at offset %d\n",
-			    p1 - (u_char *)db1->data);
+			    (int)(p1 - (u_char *)db1->data));
 			break;
 		}
 }
@@ -376,9 +376,12 @@ get(dbp, kp)
 
 	switch (dbp->get(dbp, kp, &data, flags)) {
 	case 0:
-		(void)write(ofd, data.data, data.size);
-		if (ofd == STDOUT_FILENO)
-			(void)write(ofd, "\n", 1);
+		if (write(ofd, data.data, data.size) != (ssize_t)data.size)
+			err("write: %s", strerror(errno));
+		if (ofd == STDOUT_FILENO) {
+			if (write(ofd, "\n", 1) != 1)
+				err("write: %s", strerror(errno));
+		}
 		break;
 	case -1:
 		err("line %lu: get: %s", lineno, strerror(errno));
@@ -386,7 +389,9 @@ get(dbp, kp)
 	case 1:
 #define	NOSUCHKEY	"get failed, no such key\n"
 		if (ofd != STDOUT_FILENO) {
-			(void)write(ofd, NOSUCHKEY, sizeof(NOSUCHKEY) - 1);
+			if (write(ofd, NOSUCHKEY, sizeof(NOSUCHKEY) - 1) !=
+			    sizeof(NOSUCHKEY) - 1)
+				err("write: %s", strerror(errno));
 			exit(1);
 		} else
 			(void)fprintf(stderr, "%lu: %.*s: %s",
@@ -426,7 +431,9 @@ put(dbp, kp, dp)
 		err("line %lu: put: %s", lineno, strerror(errno));
 		/* NOTREACHED */
 	case 1:
-		(void)write(ofd, NOOVERWRITE, sizeof(NOOVERWRITE) - 1);
+		if (write(ofd, NOOVERWRITE, sizeof(NOOVERWRITE) - 1) !=
+		    sizeof(NOOVERWRITE) - 1)
+			err("write: %s", strerror(errno));
 		break;
 	}
 }
@@ -444,9 +451,11 @@ rem(dbp, kp)
 		/* NOTREACHED */
 	case 1:
 #define	NOSUCHKEY	"rem failed, no such key\n"
-		if (ofd != STDOUT_FILENO)
-			(void)write(ofd, NOSUCHKEY, sizeof(NOSUCHKEY) - 1);
-		else if (flags != R_CURSOR)
+		if (ofd != STDOUT_FILENO) {
+			if (write(ofd, NOSUCHKEY, sizeof(NOSUCHKEY) - 1) !=
+			    sizeof(NOSUCHKEY) - 1)
+				err("write: %s", strerror(errno));
+		} else if (flags != R_CURSOR)
 			(void)fprintf(stderr, "%lu: %.*s: %s",
 			    lineno, (int) MIN(kp->size, 20), (char *) kp->data,
 				      NOSUCHKEY);
@@ -480,18 +489,22 @@ seq(dbp, kp)
 
 	switch (dbp->seq(dbp, kp, &data, flags)) {
 	case 0:
-		(void)write(ofd, data.data, data.size);
+		if (write(ofd, data.data, data.size) != (ssize_t)data.size)
+			err("write: %s", strerror(errno));
 		if (ofd == STDOUT_FILENO)
-			(void)write(ofd, "\n", 1);
+			if (write(ofd, "\n", 1) != 1)
+				err("write: %s", strerror(errno));
 		break;
 	case -1:
 		err("line %lu: seq: %s", lineno, strerror(errno));
 		/* NOTREACHED */
 	case 1:
 #define	NOSUCHKEY	"seq failed, no such key\n"
-		if (ofd != STDOUT_FILENO)
-			(void)write(ofd, NOSUCHKEY, sizeof(NOSUCHKEY) - 1);
-		else if (flags == R_CURSOR)
+		if (ofd != STDOUT_FILENO) {
+			if (write(ofd, NOSUCHKEY, sizeof(NOSUCHKEY) - 1) !=
+			    sizeof(NOSUCHKEY) - 1)
+				err("write: %s", strerror(errno));
+		} else if (flags == R_CURSOR)
 			(void)fprintf(stderr, "%lu: %.*s: %s",
 			    lineno, (int) MIN(kp->size, 20), (char *) kp->data,
 				      NOSUCHKEY);
@@ -521,9 +534,13 @@ dump(dbp, rev)
 	for (;; lflags = nflags)
 		switch (dbp->seq(dbp, &key, &data, lflags)) {
 		case 0:
-			(void)write(ofd, data.data, data.size);
-			if (ofd == STDOUT_FILENO)
-				(void)write(ofd, "\n", 1);
+			if (write(ofd, data.data, data.size) !=
+			    (ssize_t)data.size)
+				err("write: %s", strerror(errno));
+			if (ofd == STDOUT_FILENO) {
+				if (write(ofd, "\n", 1) != 1)
+					err("write: %s", strerror(errno));
+			}
 			break;
 		case 1:
 			goto done;
@@ -711,7 +728,8 @@ rfile(name, lenp)
 #endif
 	if ((p = (void *)malloc((u_int)sb.st_size)) == NULL)
 		err("%s", strerror(errno));
-	(void)read(fd, p, (int)sb.st_size);
+	if (read(fd, p, (int)sb.st_size) == -1)
+		err("%s", strerror(errno));
 	*lenp = sb.st_size;
 	(void)close(fd);
 	return (p);
