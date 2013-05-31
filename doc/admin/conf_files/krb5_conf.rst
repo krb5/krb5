@@ -99,12 +99,12 @@ Additionally, krb5.conf may include any of the relations described in
 The libdefaults section may contain any of the following relations:
 
 **allow_weak_crypto**
-    If this flag is set to false, then weak encryption types will be
-    filtered out of the previous three lists (as noted in
-    :ref:`Encryption_and_salt_types` in :ref:`kdc.conf(5)`).  The
-    default value for this tag is false, which may cause
-    authentication failures in existing Kerberos infrastructures that
-    do not support strong crypto.  Users in affected environments
+    If this flag is set to false, then weak encryption types (as noted in
+    :ref:`Encryption_and_salt_types` in :ref:`kdc.conf(5)`) will be filtered
+    out of the lists **default_tgs_enctypes**, **default_tkt_enctypes**, and
+    **permitted_enctypes**.  The default value for this tag is false, which
+    may cause authentication failures in existing Kerberos infrastructures
+    that do not support strong crypto.  Users in affected environments
     should set this tag to true until their infrastructure adopts
     stronger ciphers.
 
