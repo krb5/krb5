@@ -1,4 +1,4 @@
-.TH "KRB5.CONF" "5" " " "1.11.2" "MIT Kerberos"
+.TH "KRB5.CONF" "5" " " "1.11.3" "MIT Kerberos"
 .SH NAME
 krb5.conf \- Kerberos configuration file
 .
@@ -178,12 +178,12 @@ The libdefaults section may contain any of the following relations:
 .INDENT 0.0
 .TP
 .B \fBallow_weak_crypto\fP
-If this flag is set to false, then weak encryption types will be
-filtered out of the previous three lists (as noted in
-\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP).  The
-default value for this tag is false, which may cause
-authentication failures in existing Kerberos infrastructures that
-do not support strong crypto.  Users in affected environments
+If this flag is set to false, then weak encryption types (as noted in
+\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP) will be filtered
+out of the lists \fBdefault_tgs_enctypes\fP, \fBdefault_tkt_enctypes\fP, and
+\fBpermitted_enctypes\fP.  The default value for this tag is false, which
+may cause authentication failures in existing Kerberos infrastructures
+that do not support strong crypto.  Users in affected environments
 should set this tag to true until their infrastructure adopts
 stronger ciphers.
 .TP

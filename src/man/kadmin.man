@@ -1,4 +1,4 @@
-.TH "KADMIN" "1" " " "1.11.2" "MIT Kerberos"
+.TH "KADMIN" "1" " " "1.11.3" "MIT Kerberos"
 .SH NAME
 kadmin \- Kerberos V5 database administration program
 .
@@ -250,12 +250,18 @@ key for another user.  \fB+allow_dup_skey\fP clears this flag.
 .B {\-|+}\fBrequires_preauth\fP
 \fB+requires_preauth\fP requires this principal to preauthenticate
 before being allowed to kinit.  \fB\-requires_preauth\fP clears this
-flag.
+flag.  When \fB+requires_preauth\fP is set on a service principal,
+the KDC will only issue service tickets for that service principal
+if the client\(aqs initial authentication was performed using
+preauthentication.
 .TP
 .B {\-|+}\fBrequires_hwauth\fP
 \fB+requires_hwauth\fP requires this principal to preauthenticate
 using a hardware device before being allowed to kinit.
-\fB\-requires_hwauth\fP clears this flag.
+\fB\-requires_hwauth\fP clears this flag.  When \fB+requires_hwauth\fP is
+set on a service principal, the KDC will only issue service tickets
+for that service principal if the client\(aqs initial authentication was
+performed using a hardware device to preauthenticate.
 .TP
 .B {\-|+}\fBok_as_delegate\fP
 \fB+ok_as_delegate\fP sets the \fBokay as delegate\fP flag on tickets

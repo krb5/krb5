@@ -1,4 +1,4 @@
-.TH "KPROPD" "8" " " "1.11.2" "MIT Kerberos"
+.TH "KPROPD" "8" " " "1.11.3" "MIT Kerberos"
 .SH NAME
 kpropd \- Kerberos V5 slave KDC update server
 .

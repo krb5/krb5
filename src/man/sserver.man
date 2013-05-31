@@ -1,4 +1,4 @@
-.TH "SSERVER" "8" " " "1.11.2" "MIT Kerberos"
+.TH "SSERVER" "8" " " "1.11.3" "MIT Kerberos"
 .SH NAME
 sserver \- sample Kerberos version 5 server
 .

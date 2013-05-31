@@ -1,4 +1,4 @@
-.TH "KPROPLOG" "8" " " "1.11.2" "MIT Kerberos"
+.TH "KPROPLOG" "8" " " "1.11.3" "MIT Kerberos"
 .SH NAME
 kproplog \- display the contents of the Kerberos principal update log
 .

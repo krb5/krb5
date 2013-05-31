@@ -77,6 +77,30 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.11.3 (2013-06-03)
+------------------------------------
+
+* Fix a UDP ping-pong vulnerability in the kpasswd (password changing)
+  service.  [CVE-2002-2443]
+
+* Improve interoperability with some Windows native PKINIT clients.
+
+krb5-1.11.3 changes by ticket ID
+--------------------------------
+
+7596    PKINIT should allow missing DH param Q
+7602    allow dh_min_bits >= 1024
+7605    Set msg_type when decoding FAST requests
+7626    Rename internal Camellia symbols
+7637    Fix kpasswd UDP ping-pong [CVE-2002-2443]
+7639    Transited realm checks sometimes fail for GSSAPI
+7640    Clarify that kdc.conf and krb5.conf are merged
+7641    Clarify krb5_rd_req documentation
+7644    Sphinx doc build leaves python bytecode (.pyc) in release tarball
+7653    Document preauth flags for service principals
+7654    Clarify retiring-des based on user feedback
+7655    Clean up dangling antecedent in allow_weak_crypto
+
 Major changes in 1.11.2 (2013-04-12)
 ------------------------------------
 
@@ -590,6 +614,7 @@ reports, suggestions, and valuable resources:
     Joel Johnson
     W. Trevor King
     Mikkel Kruse
+    Reinhard Kugler
     Volker Lendecke
     Jan iankko Lieskovsky
     Oliver Loch
