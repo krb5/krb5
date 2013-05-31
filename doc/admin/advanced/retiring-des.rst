@@ -298,6 +298,19 @@ as new DES keys are still being generated, and will be used if requested
 by a client.  To make more progress removing DES from the realm, the KDC
 should be configured to not generate such keys by default.
 
+.. note::
+
+    An attacker posing as a client can implement a brute force attack against
+    a DES key for any principal, if that key is in the current (highest-kvno)
+    key list.  This attack is only possible if **allow_weak_crypto = true**
+    is enabled on the KDC.  Setting the **+requires_preauth** flag on a
+    principal forces this attack to be an online attack, much slower than
+    the offline attack otherwise available to the attacker.  However, setting
+    this flag on a service principal is not always advisable; see the entry in
+    :ref:`add_principal` for details.
+
+The following KDC configuration will not generate DES keys by default:
+
 ::
 
     [realms]
@@ -357,8 +370,11 @@ generate DES keys by default.
     Entry for principal kaduk@ZONE.MIT.EDU with kvno 3, encryption type des3-cbc-sha1 added to keytab WRFILE:kaduk-zone.keytab.
 
 Once all principals have been re-keyed, DES support can be disabled on the
-KDC, and client machines can remove **allow_weak_crypto = true** from
-their :ref:`krb5.conf(5)` configuration files, completing the migration.
+KDC (**allow_weak_crypto = false**), and client machines can remove
+**allow_weak_crypto = true** from their :ref:`krb5.conf(5)` configuration
+files, completing the migration.  **allow_weak_crypto** takes precedence over
+all places where DES enctypes could be explicitly configured.  DES keys will
+not be used, even if they are present, when **allow_weak_crypto = false**.
 
 Support for legacy services
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
