@@ -9,8 +9,8 @@ LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool \
 
 PROG_LIBPATH=-L.. -L$(TOPLIBD)
 
-DB_LIB		= -ldb
-DB_DEPLIB	= ../libdb$(DEPLIBEXT)
+DB_LIB		= -ldb $(SUPPORT_LIB)
+DB_DEPLIB	= ../libdb$(DEPLIBEXT) $(SUPPORT_DEPLIB)
 
 all::
 
