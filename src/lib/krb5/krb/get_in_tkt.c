@@ -1256,6 +1256,9 @@ init_creds_step_request(krb5_context context,
         }
     }
 
+    /* Remember when we sent this request (after any preauth delay). */
+    ctx->request_time = time(NULL);
+
     if (ctx->encoded_previous_request != NULL) {
         krb5_free_data(context, ctx->encoded_previous_request);
         ctx->encoded_previous_request = NULL;
