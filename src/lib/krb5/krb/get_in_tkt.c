@@ -211,8 +211,6 @@ verify_as_reply(krb5_context            context,
 
 static krb5_error_code
 stash_as_reply(krb5_context             context,
-               krb5_timestamp           time_now,
-               krb5_kdc_req             *request,
                krb5_kdc_rep             *as_reply,
                krb5_creds *             creds,
                krb5_ccache              ccache)
@@ -651,6 +649,68 @@ cleanup:
     return code;
 }
 
+/* Return the current time, possibly using the offset from a previously
+ * received preauth-required error. */
+krb5_error_code
+k5_init_creds_current_time(krb5_context context, krb5_init_creds_context ctx,
+                           krb5_boolean allow_unauth, krb5_timestamp *time_out,
+                           krb5_int32 *usec_out)
+{
+    if (ctx->pa_offset_state != NO_OFFSET &&
+        (allow_unauth || ctx->pa_offset_state == AUTH_OFFSET) &&
+        (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME)) {
+        /* Use the offset we got from a preauth-required error. */
+        return k5_time_with_offset(ctx->pa_offset, ctx->pa_offset_usec,
+                                   time_out, usec_out);
+    } else {
+        /* Use the time offset from the context, or no offset. */
+        return krb5_us_timeofday(context, time_out, usec_out);
+    }
+}
+
+/* Choose a random nonce for ctx->request. */
+static krb5_error_code
+pick_nonce(krb5_context context, krb5_init_creds_context ctx)
+{
+    krb5_error_code code = 0;
+    unsigned char random_buf[4];
+    krb5_data random_data = make_data(random_buf, 4);
+
+    /* We incorrectly encode this as signed, so make sure we use an unsigned
+     * value to avoid interoperability issues. */
+    code = krb5_c_random_make_octets(context, &random_data);
+    if (code != 0)
+        return code;
+    ctx->request->nonce = 0x7fffffff & load_32_n(random_buf);
+    return 0;
+}
+
+/* Set the timestamps for ctx->request based on the desired lifetimes. */
+static krb5_error_code
+set_request_times(krb5_context context, krb5_init_creds_context ctx)
+{
+    krb5_timestamp from, now = time(NULL);
+
+    /* Omit request start time unless the caller explicitly asked for one. */
+    from = krb5int_addint32(now, ctx->start_time);
+    if (ctx->start_time != 0)
+        ctx->request->from = from;
+
+    ctx->request->till = krb5int_addint32(from, ctx->tkt_life);
+
+    if (ctx->renew_life > 0) {
+        /* Don't ask for a smaller renewable time than the lifetime. */
+        ctx->request->rtime = krb5int_addint32(from, ctx->renew_life);
+        if (ctx->request->rtime < ctx->request->till)
+            ctx->request->rtime = ctx->request->till;
+        ctx->request->kdc_options &= ~KDC_OPT_RENEWABLE_OK;
+    } else {
+        ctx->request->rtime = 0;
+    }
+
+    return 0;
+}
+
 /**
  * Throw away any state related to specific realm either at the beginning of a
  * request, or when a realm changes, or when we start to use FAST after
@@ -665,9 +725,6 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
                         krb5_pa_data **padata)
 {
     krb5_error_code code = 0;
-    unsigned char random_buf[4];
-    krb5_data random_data;
-    krb5_timestamp from;
 
     if (ctx->preauth_to_use) {
         krb5_free_pa_data(context, ctx->preauth_to_use);
@@ -694,18 +751,10 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
             goto cleanup;
     }
 
-    /* Set the request nonce. */
-    random_data.length = 4;
-    random_data.data = (char *)random_buf;
-    code = krb5_c_random_make_octets(context, &random_data);
-    if (code !=0)
+    code = set_request_times(context, ctx);
+    if (code != 0)
         goto cleanup;
-    /*
-     * See RT ticket 3196 at MIT.  If we set the high bit, we may have
-     * compatibility problems with Heimdal, because we (incorrectly) encode
-     * this value as signed.
-     */
-    ctx->request->nonce = 0x7fffffff & load_32_n(random_buf);
+
     krb5_free_principal(context, ctx->request->server);
     ctx->request->server = NULL;
 
@@ -714,8 +763,6 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
                              &ctx->request->server);
     if (code != 0)
         goto cleanup;
-
-    ctx->request_time = time(NULL);
 
     code = krb5int_fast_as_armor(context, ctx->fast_state,
                                  ctx->opte, ctx->request);
@@ -730,23 +777,6 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
     /* give the preauth plugins a chance to prep the request body */
     k5_preauth_prepare_request(context, ctx->opte, ctx->request);
 
-    /* Omit request start time in the common case.  MIT and Heimdal KDCs will
-     * ignore it for non-postdated tickets anyway. */
-    from = krb5int_addint32(ctx->request_time, ctx->start_time);
-    if (ctx->start_time != 0)
-        ctx->request->from = from;
-    ctx->request->till = krb5int_addint32(from, ctx->tkt_life);
-
-    if (ctx->renew_life > 0) {
-        ctx->request->rtime =
-            krb5int_addint32(from, ctx->renew_life);
-        if (ctx->request->rtime < ctx->request->till) {
-            /* don't ask for a smaller renewable time than the lifetime */
-            ctx->request->rtime = ctx->request->till;
-        }
-        ctx->request->kdc_options &= ~(KDC_OPT_RENEWABLE_OK);
-    } else
-        ctx->request->rtime = 0;
     code = krb5int_fast_prep_req_body(context, ctx->fast_state,
                                       ctx->request,
                                       &ctx->outer_request_body);
@@ -791,7 +821,6 @@ krb5_init_creds_init(krb5_context context,
     ctx->gak_fct = krb5_get_as_key_password;
     ctx->gak_data = &ctx->gakpw;
 
-    ctx->request_time = 0; /* filled in later */
     ctx->start_time = start_time;
 
     if (options == NULL) {
@@ -1189,28 +1218,17 @@ init_creds_step_request(krb5_context context,
                         krb5_data *out)
 {
     krb5_error_code code;
-    char random_buf[4];
-    krb5_data random_data;
 
     if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
         code = KRB5_GET_IN_TKT_LOOP;
         goto cleanup;
     }
-    /*
-     * RFC 6113 requires a new nonce for the inner request on each try. It's
-     * permitted to change the nonce even for non-FAST so we do here.
-     */
-    random_data.length = 4;
-    random_data.data = (char *)random_buf;
-    code = krb5_c_random_make_octets(context, &random_data);
-    if (code !=0)
+
+    /* RFC 6113 requires a new nonce for the inner request on each try. */
+    code = pick_nonce(context, ctx);
+    if (code != 0)
         goto cleanup;
-    /*
-     * See RT ticket 3196 at MIT.  If we set the high bit, we may have
-     * compatibility problems with Heimdal, because we (incorrectly) encode
-     * this value as signed.
-     */
-    ctx->request->nonce = 0x7fffffff & load_32_n(random_buf);
+
     krb5_free_data(context, ctx->inner_request_body);
     ctx->inner_request_body = NULL;
     code = encode_krb5_kdc_req_body(ctx->request, &ctx->inner_request_body);
@@ -1574,8 +1592,7 @@ init_creds_step_reply(krb5_context context,
     if (code)
         goto cleanup;
 
-    code = stash_as_reply(context, ctx->request_time, ctx->request,
-                          ctx->reply, &ctx->cred, NULL);
+    code = stash_as_reply(context, ctx->reply, &ctx->cred, NULL);
     if (code != 0)
         goto cleanup;
     if (ctx->opte && ctx->opte->opt_private->out_ccache) {

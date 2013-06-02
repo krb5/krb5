@@ -396,19 +396,8 @@ get_preauth_time(krb5_context context, krb5_clpreauth_rock rock,
                  krb5_boolean allow_unauth_time, krb5_timestamp *time_out,
                  krb5_int32 *usec_out)
 {
-    krb5_init_creds_context ctx = (krb5_init_creds_context)rock;
-
-    if (ctx->pa_offset_state != NO_OFFSET &&
-        (allow_unauth_time || ctx->pa_offset_state == AUTH_OFFSET) &&
-        (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME)) {
-        /* Use the offset we got from the preauth-required error. */
-        return k5_time_with_offset(ctx->pa_offset, ctx->pa_offset_usec,
-                                   time_out, usec_out);
-
-    } else {
-        /* Use the time offset from the context, or no offset. */
-        return krb5_us_timeofday(context, time_out, usec_out);
-    }
+    return k5_init_creds_current_time(context, (krb5_init_creds_context)rock,
+                                      allow_unauth_time, time_out, usec_out);
 }
 
 static krb5_error_code

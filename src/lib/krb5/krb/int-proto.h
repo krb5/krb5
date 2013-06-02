@@ -255,6 +255,11 @@ k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
                   int *use_master);
 
 krb5_error_code
+k5_init_creds_current_time(krb5_context context, krb5_init_creds_context ctx,
+                           krb5_boolean allow_unauth, krb5_timestamp *time_out,
+                           krb5_int32 *usec_out);
+
+krb5_error_code
 k5_preauth(krb5_context context, krb5_init_creds_context ctx,
            krb5_pa_data **in_padata, krb5_boolean must_preauth,
            krb5_pa_data ***padata_out, krb5_preauthtype *pa_type_out);
