@@ -689,7 +689,13 @@ pick_nonce(krb5_context context, krb5_init_creds_context ctx)
 static krb5_error_code
 set_request_times(krb5_context context, krb5_init_creds_context ctx)
 {
-    krb5_timestamp from, now = time(NULL);
+    krb5_error_code code;
+    krb5_timestamp from, now;
+    krb5_int32 now_ms;
+
+    code = k5_init_creds_current_time(context, ctx, TRUE, &now, &now_ms);
+    if (code != 0)
+        return code;
 
     /* Omit request start time unless the caller explicitly asked for one. */
     from = krb5int_addint32(now, ctx->start_time);
@@ -750,10 +756,6 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
                                       &ctx->preauth_to_use)))
             goto cleanup;
     }
-
-    code = set_request_times(context, ctx);
-    if (code != 0)
-        goto cleanup;
 
     krb5_free_principal(context, ctx->request->server);
     ctx->request->server = NULL;
@@ -1226,6 +1228,11 @@ init_creds_step_request(krb5_context context,
 
     /* RFC 6113 requires a new nonce for the inner request on each try. */
     code = pick_nonce(context, ctx);
+    if (code != 0)
+        goto cleanup;
+
+    /* Reset the request timestamps, possibly adjusting to the KDC time. */
+    code = set_request_times(context, ctx);
     if (code != 0)
         goto cleanup;
 
