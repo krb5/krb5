@@ -393,7 +393,7 @@ os_init_paths(krb5_context ctx, krb5_boolean kdc)
 
 #ifdef KRB5_DNS_LOOKUP
         /* if none of the filenames can be opened use an empty profile */
-        if (retval == ENOENT) {
+        if (retval == ENOENT || retval == EACCES || retval == EPERM) {
             retval = profile_init(NULL, &ctx->profile);
             if (!retval)
                 ctx->profile_in_memory = 1;
