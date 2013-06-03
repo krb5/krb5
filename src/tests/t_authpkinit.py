@@ -117,24 +117,23 @@ realm.run([kvno, realm.host_princ])
 realm.stop()
 
 if have_soft_pkcs11:
-	os.environ['SOFTPKCS11RC'] = os.path.join(os.getcwd(), 'testdir',
-                                                  'soft-pkcs11.rc')
+    os.environ['SOFTPKCS11RC'] = os.path.join(os.getcwd(), 'testdir',
+                                              'soft-pkcs11.rc')
 
-	# PKINIT with PKCS11: identity, with a PIN supplied by the prompter.
-	realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                        get_creds=False)
-	conf = open(os.environ['SOFTPKCS11RC'], 'w')
-	conf.write("%s\t%s\t%s\t%s\n" % ('user', 'user token', user_pem,
-                                         privkey_enc_pem))
-	conf.close()
-	realm.kinit('user@%s' % realm.realm,
-                    flags=['-X', 'X509_user_identity=%s' % p11_identity],
-                    password='encrypted')
-	realm.klist('user@%s' % realm.realm)
-	realm.run([kvno, realm.host_princ])
-	realm.stop()
+    # PKINIT with PKCS11: identity, with a PIN supplied by the prompter.
+    realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
+                    get_creds=False)
+    conf = open(os.environ['SOFTPKCS11RC'], 'w')
+    conf.write("%s\t%s\t%s\t%s\n" % ('user', 'user token', user_pem,
+                                     privkey_enc_pem))
+    conf.close()
+    realm.kinit('user@%s' % realm.realm,
+                flags=['-X', 'X509_user_identity=%s' % p11_identity],
+                password='encrypted')
+    realm.klist('user@%s' % realm.realm)
+    realm.run([kvno, realm.host_princ])
+    realm.stop()
 else:
-	output('soft-pkcs11.so not found: '
-               'skipping tests with PKCS11 identities\n')
+    output('soft-pkcs11.so not found: skipping tests with PKCS11 identities\n')
 
 success('Authenticated PKINIT')
