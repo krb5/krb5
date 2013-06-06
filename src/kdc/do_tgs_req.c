@@ -116,7 +116,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_keyblock encrypting_key;
     krb5_timestamp kdc_time, authtime = 0;
     krb5_keyblock session_key;
-    krb5_timestamp rtime;
     krb5_keyblock *reply_key = NULL;
     krb5_key_data  *server_key;
     krb5_principal cprinc = NULL, sprinc = NULL, altcprinc = NULL;
@@ -442,30 +441,11 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         kdc_get_ticket_endtime(kdc_active_realm, enc_tkt_reply.times.starttime,
                                header_enc_tkt->times.endtime, request->till,
                                client, server, &enc_tkt_reply.times.endtime);
-
-        if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE_OK) &&
-            (enc_tkt_reply.times.endtime < request->till) &&
-            isflagset(header_enc_tkt->flags, TKT_FLG_RENEWABLE)) {
-            setflag(request->kdc_options, KDC_OPT_RENEWABLE);
-            request->rtime =
-                min(request->till, header_enc_tkt->times.renew_till);
-        }
     }
-    rtime = (request->rtime == 0) ? kdc_infinity : request->rtime;
 
-    if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE)) {
-        /* already checked above in policy check to reject request for a
-           renewable ticket using a non-renewable ticket */
-        setflag(enc_tkt_reply.flags, TKT_FLG_RENEWABLE);
-        enc_tkt_reply.times.renew_till =
-            min(rtime,
-                min(header_enc_tkt->times.renew_till,
-                    enc_tkt_reply.times.starttime +
-                    min(server->max_renewable_life,
-                        kdc_active_realm->realm_maxrlife)));
-    } else {
-        enc_tkt_reply.times.renew_till = 0;
-    }
+    kdc_get_ticket_renewtime(kdc_active_realm, request, header_enc_tkt, client,
+                             server, &enc_tkt_reply);
+
     if (isflagset(header_enc_tkt->flags, TKT_FLG_ANONYMOUS))
         setflag(enc_tkt_reply.flags, TKT_FLG_ANONYMOUS);
     /*

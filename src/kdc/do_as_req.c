@@ -450,7 +450,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
                verto_ctx *vctx, loop_respond_fn respond, void *arg)
 {
     krb5_error_code errcode;
-    krb5_timestamp rtime;
     unsigned int s_flags = 0;
     krb5_data encoded_req_body;
     krb5_enctype useenctype;
@@ -684,31 +683,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
                            kdc_infinity, state->request->till, state->client,
                            state->server, &state->enc_tkt_reply.times.endtime);
 
-    if (isflagset(state->request->kdc_options, KDC_OPT_RENEWABLE_OK) &&
-        !isflagset(state->client->attributes, KRB5_KDB_DISALLOW_RENEWABLE) &&
-        (state->enc_tkt_reply.times.endtime < state->request->till)) {
-
-        /* we set the RENEWABLE option for later processing */
-
-        setflag(state->request->kdc_options, KDC_OPT_RENEWABLE);
-        state->request->rtime = state->request->till;
-    }
-    rtime = (state->request->rtime == 0) ? kdc_infinity :
-        state->request->rtime;
-
-    if (isflagset(state->request->kdc_options, KDC_OPT_RENEWABLE)) {
-        /*
-         * XXX Should we squelch the output renew_till to be no
-         * earlier than the endtime of the ticket?
-         */
-        setflag(state->enc_tkt_reply.flags, TKT_FLG_RENEWABLE);
-        state->enc_tkt_reply.times.renew_till =
-            min(rtime, state->enc_tkt_reply.times.starttime +
-                min(state->client->max_renewable_life,
-                    min(state->server->max_renewable_life,
-                        kdc_active_realm->realm_maxrlife)));
-    } else
-        state->enc_tkt_reply.times.renew_till = 0; /* XXX */
+    kdc_get_ticket_renewtime(kdc_active_realm, state->request, NULL,
+                             state->client, state->server,
+                             &state->enc_tkt_reply);
 
     /*
      * starttime is optional, and treated as authtime if not present.

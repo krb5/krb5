@@ -305,6 +305,11 @@ kdc_get_ticket_endtime(kdc_realm_t *kdc_active_realm,
                        krb5_timestamp *out_endtime);
 
 void
+kdc_get_ticket_renewtime(kdc_realm_t *realm, krb5_kdc_req *request,
+                         krb5_enc_tkt_part *tgt, krb5_db_entry *client,
+                         krb5_db_entry *server, krb5_enc_tkt_part *tkt);
+
+void
 log_as_req(krb5_context context, const krb5_fulladdr *from,
            krb5_kdc_req *request, krb5_kdc_rep *reply,
            krb5_db_entry *client, const char *cname,
