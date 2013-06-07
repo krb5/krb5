@@ -187,7 +187,7 @@ krb5_lookup_tl_kadm_data(krb5_tl_data *tl_data, osa_princ_ent_rec *princ_entry)
 
     XDR xdrs;
 
-    xdrmem_create(&xdrs, tl_data->tl_data_contents,
+    xdrmem_create(&xdrs, (caddr_t)tl_data->tl_data_contents,
 		  tl_data->tl_data_length, XDR_DECODE);
     if (! ldap_xdr_osa_princ_ent_rec(&xdrs, princ_entry)) {
 	xdr_destroy(&xdrs);

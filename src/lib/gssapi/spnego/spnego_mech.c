@@ -1124,7 +1124,6 @@ make_NegHints(OM_uint32 *minor_status,
 	OM_uint32 minor;
 	unsigned int tlen = 0;
 	unsigned int hintNameSize = 0;
-	unsigned int negHintsSize = 0;
 	unsigned char *ptr;
 	unsigned char *t;
 
@@ -1208,7 +1207,6 @@ make_NegHints(OM_uint32 *minor_status,
 
 	/* Length of DER encoded hintName */
 	tlen += 1 + gssint_der_length_size(hintNameSize);
-	negHintsSize = tlen;
 
 	t = gssalloc_malloc(tlen);
 	if (t == NULL) {
@@ -1619,7 +1617,6 @@ spnego_gss_accept_sec_context(
 	gss_buffer_desc mechtok_out = GSS_C_EMPTY_BUFFER;
 	spnego_gss_ctx_id_t sc = NULL;
 	spnego_gss_cred_id_t spcred = NULL;
-	OM_uint32 mechstat = GSS_S_FAILURE;
 	int sendTokenInit = 0, tmpret;
 
 	mechtok_in = mic_in = mic_out = GSS_C_NO_BUFFER;
@@ -1718,15 +1715,12 @@ spnego_gss_accept_sec_context(
 	 * round-trip.  RET is set to a default value according to
 	 * whether it is the first round-trip.
 	 */
-	mechstat = GSS_S_FAILURE;
 	if (negState != REQUEST_MIC && mechtok_in != GSS_C_NO_BUFFER) {
 		ret = acc_ctx_call_acc(minor_status, sc, spcred,
 				       mechtok_in, mech_type, &mechtok_out,
 				       ret_flags, time_rec,
 				       delegated_cred_handle,
 				       &negState, &return_token);
-	} else if (negState == REQUEST_MIC) {
-		mechstat = GSS_S_CONTINUE_NEEDED;
 	}
 
 	/* Step 3: process or generate the MIC, if the negotiated mech is
@@ -4008,10 +4002,10 @@ g_verify_neg_token_init(unsigned char **buf_in, unsigned int cur_size)
 	 * - check for a0(context specific identifier)
 	 * - get length and verify that enoughd ata exists
 	 */
-	if (g_get_tag_and_length(&buf, CONTEXT, cur_size, &seqsize) < 0)
+	if (g_get_tag_and_length(&buf, CONTEXT, cur_size, &bytes) < 0)
 		return (G_BAD_TOK_HEADER);
 
-	cur_size = seqsize; /* should indicate bytes remaining */
+	cur_size = bytes; /* should indicate bytes remaining */
 
 	/*
 	 * Verify the next piece, it should identify this as

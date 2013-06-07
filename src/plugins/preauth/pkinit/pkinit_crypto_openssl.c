@@ -1677,7 +1677,7 @@ cms_signeddata_verify(krb5_context context,
                 goto cleanup;
             }
 
-            retval = k5int_encode_krb5_td_trusted_certifiers((const krb5_external_principal_identifier **)krb5_verified_chain, &authz);
+            retval = k5int_encode_krb5_td_trusted_certifiers((krb5_external_principal_identifier *const *)krb5_verified_chain, &authz);
             if (retval) {
                 pkiDebug("encode_krb5_td_trusted_certifiers failed\n");
                 goto cleanup;
@@ -3063,7 +3063,7 @@ pkinit_create_sequence_of_principal_identifiers(
         goto cleanup;
     }
 
-    retval = k5int_encode_krb5_td_trusted_certifiers((const krb5_external_principal_identifier **)krb5_trusted_certifiers, &td_certifiers);
+    retval = k5int_encode_krb5_td_trusted_certifiers((krb5_external_principal_identifier *const *)krb5_trusted_certifiers, &td_certifiers);
     if (retval) {
         pkiDebug("encode_krb5_td_trusted_certifiers failed\n");
         goto cleanup;
@@ -3244,7 +3244,7 @@ pkinit_create_td_dh_parameters(krb5_context context,
         algId[0]->algorithm = dh_oid;
 
     }
-    retval = k5int_encode_krb5_td_dh_parameters((const krb5_algorithm_identifier **)algId, &encoded_algId);
+    retval = k5int_encode_krb5_td_dh_parameters((krb5_algorithm_identifier *const *)algId, &encoded_algId);
     if (retval)
         goto cleanup;
 #ifdef DEBUG_ASN1

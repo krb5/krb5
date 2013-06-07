@@ -80,7 +80,7 @@ x_setpostn(xdrs, pos)
 	return (FALSE);
 }
 
-static long *
+static rpc_inline_t *
 x_inline(xdrs, len)
 	XDR *xdrs;
 	int len;
@@ -94,7 +94,7 @@ x_inline(xdrs, len)
 	if (len < (int) xdrs->x_base) {
 		/* x_private was already allocated */
 		xdrs->x_handy += len;
-		return ((long *) xdrs->x_private);
+		return ((rpc_inline_t *) xdrs->x_private);
 	} else {
 		/* Free the earlier space and allocate new area */
 		if (xdrs->x_private)
@@ -105,7 +105,7 @@ x_inline(xdrs, len)
 		}
 		xdrs->x_base = (caddr_t) len;
 		xdrs->x_handy += len;
-		return ((long *) xdrs->x_private);
+		return ((rpc_inline_t *) xdrs->x_private);
 	}
 }
 
@@ -139,7 +139,7 @@ xdr_sizeof(func, data)
 	bool_t stat;
 	/* to stop ANSI-C compiler from complaining */
 	typedef  bool_t (* dummyfunc1)(XDR *, long *);
-	typedef  bool_t (* dummyfunc2)(XDR *, caddr_t, int);
+	typedef  bool_t (* dummyfunc2)(XDR *, caddr_t, u_int);
 
 	ops.x_putlong = x_putlong;
 	ops.x_putbytes = x_putbytes;

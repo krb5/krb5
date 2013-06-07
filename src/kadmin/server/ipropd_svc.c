@@ -473,7 +473,7 @@ check_iprop_rpcsec_auth(struct svc_req *rqstp)
      gss_name_t name;
      krb5_principal princ;
      int ret, success;
-     krb5_data *c1, *c2, *realm;
+     krb5_data *c1, *realm;
      gss_buffer_desc gss_str;
      kadm5_server_handle_t handle;
      size_t slen;
@@ -514,7 +514,6 @@ check_iprop_rpcsec_auth(struct svc_req *rqstp)
 	  goto fail_princ;
 
      c1 = krb5_princ_component(kctx, princ, 0);
-     c2 = krb5_princ_component(kctx, princ, 1);
      realm = krb5_princ_realm(kctx, princ);
      if (strncmp(handle->params.realm, realm->data, realm->length) == 0
 	 && strncmp("kiprop", c1->data, c1->length) == 0) {

@@ -198,6 +198,7 @@ svcudp_recv(
 	register int rlen;
 	char *reply;
 	uint32_t replylen;
+	socklen_t addrlen;
 
     again:
 	memset(&dummy, 0, sizeof(dummy));
@@ -215,13 +216,14 @@ svcudp_recv(
 		  return (FALSE);
 	}
 
-	xprt->xp_addrlen = sizeof(struct sockaddr_in);
+	addrlen = sizeof(struct sockaddr_in);
 	rlen = recvfrom(xprt->xp_sock, rpc_buffer(xprt), (int) su->su_iosz,
-	    0, (struct sockaddr *)&(xprt->xp_raddr), &(xprt->xp_addrlen));
+	    0, (struct sockaddr *)&(xprt->xp_raddr), &addrlen);
 	if (rlen == -1 && errno == EINTR)
 		goto again;
 	if (rlen < (int) (4*sizeof(uint32_t)))
 		return (FALSE);
+	xprt->xp_addrlen = addrlen;
 	xdrs->x_op = XDR_DECODE;
 	XDR_SETPOS(xdrs, 0);
 	if (! xdr_callmsg(xdrs, msg))

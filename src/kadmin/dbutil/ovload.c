@@ -111,7 +111,7 @@ int process_ov_principal(kcontext, fname, filep, verbose, linenop)
     krb5_db_entry           *kdb = NULL;
     char                    *current = 0;
     char                    *cp;
-    int                     x;
+    unsigned int            x;
     char                    line[LINESIZE];
 
     if (fgets(line, LINESIZE, filep) == (char *) NULL) {

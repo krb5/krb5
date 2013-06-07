@@ -75,7 +75,7 @@ main(argc, argv)
     int sock, acc;
     int one = 1;
     struct sockaddr_in l_inaddr, f_inaddr;  /* local, foreign address */
-    int namelen = sizeof(f_inaddr);
+    socklen_t namelen = sizeof(f_inaddr);
 #ifdef POSIX_SIGNALS
     struct sigaction csig;
 #endif

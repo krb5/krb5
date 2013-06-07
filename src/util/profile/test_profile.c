@@ -24,9 +24,9 @@ static void do_batchmode(profile)
 {
     errcode_t       retval;
     int             argc, ret;
-    char            **argv, **values, **cpp;
+    char            **argv, **values, *value, **cpp;
     char            buf[256];
-    const char      **names, *value;
+    const char      **names, *name;
     char            *cmd;
     int             print_status;
 
@@ -76,11 +76,10 @@ static void do_batchmode(profile)
             retval = profile_rename_section(profile, names+1,
                                             *names);
         } else if (!strcmp(cmd, "add")) {
-            value = *names;
-            if (strcmp(value, "NULL") == 0)
-                value = NULL;
-            retval = profile_add_relation(profile, names+1,
-                                          value);
+            name = *names;
+            if (strcmp(name, "NULL") == 0)
+                name = NULL;
+            retval = profile_add_relation(profile, names+1, name);
         } else if (!strcmp(cmd, "flush")) {
             retval = profile_flush(profile);
         } else {
@@ -116,8 +115,7 @@ int main(argc, argv)
 {
     profile_t   profile;
     long        retval;
-    char        **values, **cpp;
-    const char  *value;
+    char        **values, *value, **cpp;
     const char  **names;
     char        *cmd;
     int         print_value = 0;

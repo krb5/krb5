@@ -125,7 +125,7 @@ static bool_t
 xdrmem_getbytes(XDR *xdrs, caddr_t addr, u_int len)
 {
 
-	if (xdrs->x_handy < len)
+	if ((u_int)xdrs->x_handy < len)
 		return (FALSE);
 	else
 		xdrs->x_handy -= len;
@@ -138,7 +138,7 @@ static bool_t
 xdrmem_putbytes(XDR *xdrs, caddr_t addr, u_int len)
 {
 
-	if (xdrs->x_handy < len)
+	if ((u_int)xdrs->x_handy < len)
 		return (FALSE);
 	else
 		xdrs->x_handy -= len;

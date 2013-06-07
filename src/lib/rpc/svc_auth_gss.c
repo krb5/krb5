@@ -486,8 +486,8 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 			offset = 0 - offset;
 			gd->seqmask <<= offset;
 			offset = 0;
-		}
-		else if (offset >= gd->win || (gd->seqmask & (1 << offset))) {
+		} else if ((u_int)offset >= gd->win ||
+			   (gd->seqmask & (1 << offset))) {
 			*no_dispatch = 1;
 			ret_freegc (RPCSEC_GSS_CTXPROBLEM);
 		}

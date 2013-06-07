@@ -536,12 +536,10 @@ krb5_error_code
 is_principal_in_realm(krb5_ldap_context *ldap_context,
                       krb5_const_principal searchfor)
 {
-    size_t                      defrealmlen=0;
     char                        *defrealm=NULL;
 
 #define FIND_MAX(a,b) ((a) > (b) ? (a) : (b))
 
-    defrealmlen = strlen(ldap_context->lrparams->realm_name);
     defrealm = ldap_context->lrparams->realm_name;
 
     /*
@@ -1646,6 +1644,7 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
 {
     krb5_error_code st = 0;
     unsigned int    mask = 0;
+    int             val;
     krb5_boolean    attr_present = FALSE;
     char            **values = NULL, *policydn = NULL, *pwdpolicydn = NULL;
     char            *polname = NULL, *tktpolname = NULL;
@@ -1720,9 +1719,10 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
         mask |= KDB_LAST_FAILED_ATTR;
 
     /* KRBLOGINFAILEDCOUNT */
-    if (krb5_ldap_get_value(ld, ent, "krbLoginFailedCount",
-                            &(entry->fail_auth_count)) == 0)
+    if (krb5_ldap_get_value(ld, ent, "krbLoginFailedCount", &val) == 0) {
+        entry->fail_auth_count = val;
         mask |= KDB_FAIL_AUTH_COUNT_ATTR;
+    }
 
     /* KRBMAXTICKETLIFE */
     if (krb5_ldap_get_value(ld, ent, "krbmaxticketlife", &(entry->max_life)) == 0)

@@ -121,11 +121,11 @@ static void test_cts()
 
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
     iov.data.data = outbuf;
-    in.data = input;
+    in.data = (char *)input;
     enciv.length = deciv.length = 16;
     enciv.data = encivbuf;
     deciv.data = decivbuf;
-    keyblock.contents = aeskey;
+    keyblock.contents = (krb5_octet *)aeskey;
     keyblock.length = 16;
     keyblock.enctype = ENCTYPE_AES128_CTS_HMAC_SHA1_96;
 

@@ -141,7 +141,7 @@ krb5int_c_padding_length(const struct krb5_keytypes *ktp, size_t data_length)
 static size_t
 next_iov_to_process(struct iov_cursor *cursor, size_t ind)
 {
-    krb5_crypto_iov *iov;
+    const krb5_crypto_iov *iov;
 
     for (; ind < cursor->iov_count; ind++) {
         iov = &cursor->iov[ind];

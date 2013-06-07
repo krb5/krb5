@@ -546,7 +546,6 @@ authgss_destroy_context(AUTH *auth)
 {
 	struct rpc_gss_data	*gd;
 	OM_uint32		 min_stat;
-	enum clnt_stat		 callstat;
 
 	log_debug("in authgss_destroy_context()");
 
@@ -555,10 +554,8 @@ authgss_destroy_context(AUTH *auth)
 	if (gd->gc.gc_ctx.length != 0) {
 		if (gd->established) {
 			gd->gc.gc_proc = RPCSEC_GSS_DESTROY;
-			callstat = clnt_call(gd->clnt, NULLPROC,
-					     xdr_void, NULL,
-					     xdr_void, NULL,
-					     AUTH_TIMEOUT);
+			(void)clnt_call(gd->clnt, NULLPROC, xdr_void, NULL,
+					xdr_void, NULL, AUTH_TIMEOUT);
 			log_debug("%s",
 				  clnt_sperror(gd->clnt,
 					       "authgss_destroy_context"));

@@ -186,16 +186,15 @@ check_min_life(void *server_handle, krb5_principal principal,
            !(princ.attributes & KRB5_KDB_REQUIRES_PWCHANGE)) {
             if (msg_ret != NULL) {
                 time_t until;
-                char *time_string, *ptr, *errstr;
+                char *time_string, *ptr;
+                const char *errstr;
 
                 until = princ.last_pwd_change + pol.pw_min_life;
 
                 time_string = ctime(&until);
                 errstr = error_message(CHPASS_UTIL_PASSWORD_TOO_SOON);
 
-                if (strlen(errstr) + strlen(time_string) >= msg_len) {
-                    *errstr = '\0';
-                } else {
+                if (strlen(errstr) + strlen(time_string) < msg_len) {
                     if (*(ptr = &time_string[strlen(time_string)-1]) == '\n')
                         *ptr = '\0';
                     snprintf(msg_ret, msg_len, errstr, time_string);

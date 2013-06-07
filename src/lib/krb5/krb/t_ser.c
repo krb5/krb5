@@ -95,7 +95,7 @@ ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
     kret = krb5_externalize_data(ser_ctx, ctx, &outrep, &outlen);
     if (!kret) {
         if (verbose) {
-            printf("%s: externalized in %d bytes\n", msg, outlen);
+            printf("%s: externalized in %d bytes\n", msg, (int)outlen);
             print_erep(outrep, outlen);
         }
 
@@ -110,7 +110,7 @@ ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
         if (!kret) {
             if (ilen)
                 printf("%s: %d bytes left over after internalize\n",
-                       msg, ilen);
+                       msg, (int)ilen);
             /* Now attempt to re-externalize it */
             kret = krb5_externalize_data(ser_ctx, nctx, &outrep2, &outlen2);
             if (!kret) {

@@ -58,7 +58,7 @@ krb5_error_code
                                          krb5_data **code);
 
 krb5_error_code
-(*k5int_encode_krb5_td_dh_parameters)(const krb5_algorithm_identifier **,
+(*k5int_encode_krb5_td_dh_parameters)(krb5_algorithm_identifier *const *,
                                       krb5_data **code);
 krb5_error_code
 (*k5int_decode_krb5_td_dh_parameters)(const krb5_data *,
@@ -66,7 +66,7 @@ krb5_error_code
 
 krb5_error_code
 (*k5int_encode_krb5_td_trusted_certifiers)
-(const krb5_external_principal_identifier **, krb5_data **code);
+(krb5_external_principal_identifier *const *, krb5_data **code);
 
 krb5_error_code
 (*k5int_decode_krb5_td_trusted_certifiers)

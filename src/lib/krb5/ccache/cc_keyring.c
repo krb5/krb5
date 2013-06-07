@@ -144,11 +144,6 @@ debug_print(char *fmt, ...)
 /* Hopefully big enough to hold a serialized credential */
 #define GUESS_CRED_SIZE 4096
 
-#define ALLOC(NUM,TYPE)                         \
-    (((NUM) <= (((size_t)0-1)/ sizeof(TYPE)))   \
-     ? (TYPE *) calloc((NUM), sizeof(TYPE))     \
-     : (errno = ENOMEM,(TYPE *) 0))
-
 #define CHECK_N_GO(ret, errdest) if (ret != KRB5_OK) goto errdest
 #define CHECK(ret) if (ret != KRB5_OK) goto errout
 #define CHECK_OUT(ret) if (ret != KRB5_OK) return ret
@@ -651,7 +646,7 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
     krb5_krcc_cursor krcursor;
     krb5_krcc_data *d;
     unsigned int size;
-    int     res;
+    long res;
 
     DEBUG_PRINT(("krb5_krcc_start_seq_get: entered\n"));
 
@@ -676,7 +671,7 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
     krcursor->keys = (key_serial_t *) ((char *) krcursor + sizeof(*krcursor));
     res = keyctl_read(d->ring_id, (char *) krcursor->keys,
                       ((d->numkeys + 1) * sizeof(key_serial_t)));
-    if (res < 0 || res > ((d->numkeys + 1) * sizeof(key_serial_t))) {
+    if (res < 0 || (size_t)res > ((d->numkeys + 1) * sizeof(key_serial_t))) {
         DEBUG_PRINT(("Read %d bytes from keyring, numkeys %d: %s\n",
                      res, d->numkeys, strerror(errno)));
         free(krcursor);
@@ -1213,7 +1208,7 @@ krb5_krcc_get_ring_ids(krb5_krcc_ring_ids_t *p)
      */
     memset(ids_buf, '\0', sizeof(ids_buf));
     val = keyctl_read(ids_key, ids_buf, sizeof(ids_buf));
-    if (val > sizeof(ids_buf))
+    if (val < 0 || (size_t)val > sizeof(ids_buf))
         goto out;
 
     val = sscanf(ids_buf, "%d:%d:%d", &session, &process, &thread);
@@ -1359,12 +1354,7 @@ krb5_krcc_parse_principal(krb5_context context, krb5_ccache id,
     if (tmpprinc == NULL)
         return KRB5_CC_NOMEM;
     if (length) {
-        size_t  msize = length;
-        if (msize != length) {
-            free(tmpprinc);
-            return KRB5_CC_NOMEM;
-        }
-        tmpprinc->data = ALLOC(msize, krb5_data);
+        tmpprinc->data = calloc(length, sizeof(krb5_data));
         if (tmpprinc->data == 0) {
             free(tmpprinc);
             return KRB5_CC_NOMEM;
@@ -1415,12 +1405,9 @@ krb5_krcc_parse_keyblock(krb5_context context, krb5_ccache id,
     if (int32 < 0)
         return KRB5_CC_NOMEM;
     keyblock->length = int32;
-    /* Overflow check.  */
-    if (keyblock->length != int32)
-        return KRB5_CC_NOMEM;
     if (keyblock->length == 0)
         return KRB5_OK;
-    keyblock->contents = ALLOC(keyblock->length, krb5_octet);
+    keyblock->contents = malloc(keyblock->length);
     if (keyblock->contents == NULL)
         return KRB5_CC_NOMEM;
 
@@ -1478,7 +1465,7 @@ krb5_krcc_parse_krb5data(krb5_context context, krb5_ccache id,
     if (len < 0)
         return KRB5_CC_NOMEM;
     data->length = len;
-    if (data->length != len || data->length + 1 == 0)
+    if (data->length + 1 == 0)
         return KRB5_CC_NOMEM;
 
     if (data->length == 0) {
@@ -1542,11 +1529,10 @@ krb5_krcc_parse_addrs(krb5_context context, krb5_ccache id,
      * Make *addrs able to hold length pointers to krb5_address structs
      * Add one extra for a null-terminated list
      */
-    msize = length;
-    msize += 1;
-    if (msize == 0 || msize - 1 != length || length < 0)
+    msize = (size_t)length + 1;
+    if (msize == 0 || length < 0)
         return KRB5_CC_NOMEM;
-    *addrs = ALLOC(msize, krb5_address *);
+    *addrs = calloc(msize, sizeof(krb5_address *));
     if (*addrs == NULL)
         return KRB5_CC_NOMEM;
 
@@ -1587,13 +1573,6 @@ krb5_krcc_parse_addr(krb5_context context, krb5_ccache id, krb5_address * addr,
     if ((int32 & VALID_INT_BITS) != int32)      /* Overflow int??? */
         return KRB5_CC_NOMEM;
     addr->length = int32;
-    /*
-     * Length field is "unsigned int", which may be smaller
-     * than 32 bits.
-     */
-    if (addr->length != int32)
-        return KRB5_CC_NOMEM;   /* XXX */
-
     if (addr->length == 0)
         return KRB5_OK;
 
@@ -1633,11 +1612,10 @@ krb5_krcc_parse_authdata(krb5_context context, krb5_ccache id,
      * Make *a able to hold length pointers to krb5_authdata structs
      * Add one extra for a null-terminated list
      */
-    msize = length;
-    msize += 1;
-    if (msize == 0 || msize - 1 != length || length < 0)
+    msize = (size_t)length + 1;
+    if (msize == 0 || length < 0)
         return KRB5_CC_NOMEM;
-    *a = ALLOC(msize, krb5_authdata *);
+    *a = calloc(msize, sizeof(krb5_authdata *));
     if (*a == NULL)
         return KRB5_CC_NOMEM;
 
@@ -1680,13 +1658,6 @@ krb5_krcc_parse_authdatum(krb5_context context, krb5_ccache id,
     if ((int32 & VALID_INT_BITS) != int32)      /* Overflow int??? */
         return KRB5_CC_NOMEM;
     a->length = int32;
-    /*
-     * Value could have gotten truncated if int is
-     * smaller than 32 bits.
-     */
-    if (a->length != int32)
-        return KRB5_CC_NOMEM;   /* XXX */
-
     if (a->length == 0)
         return KRB5_OK;
 

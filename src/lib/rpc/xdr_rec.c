@@ -244,7 +244,7 @@ static bool_t  /* must manage buffers, fragments, and records */
 xdrrec_getbytes(XDR *xdrs, caddr_t addr, u_int len)
 {
 	register RECSTREAM *rstrm = (RECSTREAM *)(xdrs->x_private);
-	register int current;
+	register u_int current;
 
 	while (len > 0) {
 		current = rstrm->fbtbc;
@@ -519,7 +519,7 @@ get_input_bytes(RECSTREAM *rstrm, caddr_t addr, int len)
 				return (FALSE);
 			continue;
 		}
-		current = (len < current) ? len : current;
+		current = ((size_t)len < current) ? (size_t)len : current;
 		memmove(addr, rstrm->in_finger, current);
 		rstrm->in_finger += current;
 		addr += current;

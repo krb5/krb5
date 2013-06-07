@@ -1772,7 +1772,7 @@ typedef struct _krb5int_access {
                                          krb5_data **code);
 
     krb5_error_code
-    (*asn1_ldap_decode_sequence_of_keys)(krb5_data *in,
+    (*asn1_ldap_decode_sequence_of_keys)(const krb5_data *in,
                                          ldap_seqof_key_data **);
 
     /*
@@ -1814,13 +1814,12 @@ typedef struct _krb5int_access {
                                          krb5_data **code);
 
     krb5_error_code
-    (*encode_krb5_td_dh_parameters)(const krb5_algorithm_identifier **,
+    (*encode_krb5_td_dh_parameters)(krb5_algorithm_identifier *const *,
                                     krb5_data **code);
 
     krb5_error_code
-    (*encode_krb5_td_trusted_certifiers)(const
-                                         krb5_external_principal_identifier **,
-                                         krb5_data **code);
+    (*encode_krb5_td_trusted_certifiers)(krb5_external_principal_identifier *
+                                         const *, krb5_data **code);
 
     krb5_error_code
     (*decode_krb5_auth_pack)(const krb5_data *, krb5_auth_pack **);

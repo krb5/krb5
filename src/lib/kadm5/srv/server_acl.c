@@ -112,7 +112,7 @@ kadm5int_acl_get_line(fp, lnp)
     line_incr = 0;
     for (domore = 1; domore && !feof(fp); ) {
         /* Copy in the line, with continuations */
-        for (i=0; ((i < sizeof acl_buf) && !feof(fp)); i++ ) {
+        for (i = 0; ((i < BUFSIZ) && !feof(fp)); i++) {
             int byte;
             byte = fgetc(fp);
             acl_buf[i] = byte;

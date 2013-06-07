@@ -86,10 +86,10 @@ gss_buffer_t empty_token = &empty_token_buf;
 static void display_status_1(char *m, OM_uint32 code, int type);
 
 static int
-write_all(int fildes, char *buf, unsigned int nbyte)
+write_all(int fildes, const void *data, unsigned int nbyte)
 {
-    int     ret;
-    char   *ptr;
+    int ret;
+    const char *ptr, *buf = data;
 
     for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
         ret = send(fildes, ptr, nbyte, 0);
@@ -106,10 +106,10 @@ write_all(int fildes, char *buf, unsigned int nbyte)
 }
 
 static int
-read_all(int fildes, char *buf, unsigned int nbyte)
+read_all(int fildes, void *data, unsigned int nbyte)
 {
     int     ret;
-    char   *ptr;
+    char   *ptr, *buf = data;
     fd_set  rfds;
     struct timeval tv;
 
@@ -195,7 +195,7 @@ send_token(s, flags, tok)
     if (ret < 0) {
         perror("sending token data");
         return -1;
-    } else if (ret != tok->length) {
+    } else if ((size_t)ret != tok->length) {
         if (display_file)
             fprintf(display_file,
                     "sending token data: %d of %d bytes written\n",
@@ -292,7 +292,7 @@ recv_token(s, flags, tok)
         perror("reading token data");
         free(tok->value);
         return -1;
-    } else if (ret != tok->length) {
+    } else if ((size_t)ret != tok->length) {
         fprintf(stderr, "sending token data: %d of %d bytes written\n",
                 ret, (int) tok->length);
         free(tok->value);
@@ -308,14 +308,14 @@ display_status_1(m, code, type)
     OM_uint32 code;
     int     type;
 {
-    OM_uint32 maj_stat, min_stat;
+    OM_uint32 min_stat;
     gss_buffer_desc msg;
     OM_uint32 msg_ctx;
 
     msg_ctx = 0;
     while (1) {
-        maj_stat = gss_display_status(&min_stat, code,
-                                      type, GSS_C_NULL_OID, &msg_ctx, &msg);
+        (void) gss_display_status(&min_stat, code, type, GSS_C_NULL_OID,
+                                  &msg_ctx, &msg);
         if (display_file)
             fprintf(display_file, "GSS-API error %s: %s\n", m,
                     (char *) msg.value);

@@ -223,9 +223,8 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
     struct stat sb1, sb2;
 #endif
     char *dir;
-    size_t dirlen;
 
-    GETDIR;
+    dir = getdir();
     if (full_pathname) {
         if (!(d->fn = strdup(full_pathname)))
             return KRB5_RC_IO_MALLOC;

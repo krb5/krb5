@@ -44,12 +44,12 @@ gss_OID_set_desc mechset_iakerb = { 1, &mech_iakerb };
 static void
 display_status(const char *msg, OM_uint32 code, int type)
 {
-    OM_uint32 maj_stat, min_stat, msg_ctx = 0;
+    OM_uint32 min_stat, msg_ctx = 0;
     gss_buffer_desc buf;
 
     do {
-        maj_stat = gss_display_status(&min_stat, code, type, GSS_C_NULL_OID,
-                                      &msg_ctx, &buf);
+        (void)gss_display_status(&min_stat, code, type, GSS_C_NULL_OID,
+                                 &msg_ctx, &buf);
         fprintf(stderr, "%s: %.*s\n", msg, (int)buf.length, (char *)buf.value);
         (void)gss_release_buffer(&min_stat, &buf);
     } while (msg_ctx != 0);

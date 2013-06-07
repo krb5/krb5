@@ -233,10 +233,9 @@ static void test_hmac()
     };
 
     for (i = 0; i < sizeof(md5tests)/sizeof(md5tests[0]); i++) {
-        key.contents = md5tests[i].key;
+        key.contents = (krb5_octet *)md5tests[i].key;
         key.length = md5tests[i].key_len;
-        in.data = md5tests[i].data;
-        in.length = md5tests[i].data_len;
+        in = make_data((char *)md5tests[i].data, md5tests[i].data_len);
 
         out.data = outbuf;
         out.length = 20;

@@ -39,7 +39,7 @@ static krb5_keyblock enc_key;
 static krb5_data ivec;
 static void init()
 {
-    enc_key.contents = key;
+    enc_key.contents = (krb5_octet *)key;
     enc_key.length = 16;
     ivec.data = zero;
     ivec.length = 16;

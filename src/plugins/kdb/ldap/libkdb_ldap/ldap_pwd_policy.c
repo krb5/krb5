@@ -232,6 +232,15 @@ cleanup:
     return(st);
 }
 
+static void
+get_ui4(LDAP *ld, LDAPMessage *ent, char *name, krb5_ui_4 *out)
+{
+    int val;
+
+    krb5_ldap_get_value(ld, ent, name, &val);
+    *out = val;
+}
+
 static krb5_error_code
 populate_policy(krb5_context context,
                 LDAP *ld,
@@ -245,19 +254,18 @@ populate_policy(krb5_context context,
     CHECK_NULL(pol_entry->name);
     pol_entry->version = 1;
 
-    krb5_ldap_get_value(ld, ent, "krbmaxpwdlife", &(pol_entry->pw_max_life));
-    krb5_ldap_get_value(ld, ent, "krbminpwdlife", &(pol_entry->pw_min_life));
-    krb5_ldap_get_value(ld, ent, "krbpwdmindiffchars", &(pol_entry->pw_min_classes));
-    krb5_ldap_get_value(ld, ent, "krbpwdminlength", &(pol_entry->pw_min_length));
-    krb5_ldap_get_value(ld, ent, "krbpwdhistorylength", &(pol_entry->pw_history_num));
-
-    krb5_ldap_get_value(ld, ent, "krbpwdmaxfailure", &(pol_entry->pw_max_fail));
-    krb5_ldap_get_value(ld, ent, "krbpwdfailurecountinterval", &(pol_entry->pw_failcnt_interval));
-    krb5_ldap_get_value(ld, ent, "krbpwdlockoutduration", &(pol_entry->pw_lockout_duration));
-    krb5_ldap_get_value(ld, ent, "krbpwdattributes", &(pol_entry->attributes));
-    krb5_ldap_get_value(ld, ent, "krbpwdmaxlife", &(pol_entry->max_life));
-    krb5_ldap_get_value(ld, ent, "krbpwdmaxrenewablelife",
-                        &(pol_entry->max_renewable_life));
+    get_ui4(ld, ent, "krbmaxpwdlife", &pol_entry->pw_max_life);
+    get_ui4(ld, ent, "krbminpwdlife", &pol_entry->pw_min_life);
+    get_ui4(ld, ent, "krbpwdmindiffchars", &pol_entry->pw_min_classes);
+    get_ui4(ld, ent, "krbpwdminlength", &pol_entry->pw_min_length);
+    get_ui4(ld, ent, "krbpwdhistorylength", &pol_entry->pw_history_num);
+    get_ui4(ld, ent, "krbpwdmaxfailure", &pol_entry->pw_max_fail);
+    get_ui4(ld, ent, "krbpwdfailurecountinterval",
+            &pol_entry->pw_failcnt_interval);
+    get_ui4(ld, ent, "krbpwdlockoutduration", &pol_entry->pw_lockout_duration);
+    get_ui4(ld, ent, "krbpwdattributes", &pol_entry->attributes);
+    get_ui4(ld, ent, "krbpwdmaxlife", &pol_entry->max_life);
+    get_ui4(ld, ent, "krbpwdmaxrenewablelife", &pol_entry->max_renewable_life);
 
     st = krb5_ldap_get_string(ld, ent, "krbpwdallowedkeysalts",
                               &(pol_entry->allowed_keysalts), NULL);

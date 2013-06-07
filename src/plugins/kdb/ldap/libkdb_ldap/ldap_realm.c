@@ -209,7 +209,8 @@ krb5_ldap_delete_realm (krb5_context context, char *lrealm)
     char                        **values=NULL, **subtrees=NULL, **policy=NULL;
     LDAPMessage                 **result_arr=NULL, *result = NULL, *ent = NULL;
     krb5_principal              principal;
-    int                         l=0, ntree=0, i=0, j=0, mask=0;
+    unsigned int                l=0, ntree=0;
+    int                         i=0, j=0, mask=0;
     kdb5_dal_handle             *dal_handle = NULL;
     krb5_ldap_context           *ldap_context = NULL;
     krb5_ldap_server_handle     *ldap_server_handle = NULL;
@@ -342,7 +343,7 @@ krb5_ldap_modify_realm(krb5_context context, krb5_ldap_realm_params *rparams,
     krb5_error_code       st=0;
     char                  **strval=NULL, *strvalprc[5]={NULL};
     LDAPMod               **mods = NULL;
-    int                   oldmask=0, objectmask=0,k=0;
+    int                   objectmask=0,k=0;
     kdb5_dal_handle       *dal_handle=NULL;
     krb5_ldap_context     *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
@@ -370,21 +371,6 @@ krb5_ldap_modify_realm(krb5_context context, krb5_ldap_realm_params *rparams,
 
     /* get ldap handle */
     GET_HANDLE ();
-
-    /* get the oldmask obtained from the krb5_ldap_read_realm_params */
-    {
-        void *voidptr=NULL;
-
-        if ((st=decode_tl_data(rparams->tl_data, KDB_TL_MASK, &voidptr)) == 0) {
-            oldmask = *((int *) voidptr);
-            free (voidptr);
-        } else {
-            st = EINVAL;
-            krb5_set_error_message(context, st, _("tl_data not available"));
-            return st;
-        }
-    }
-
 
     /* SUBTREE ATTRIBUTE */
     if (mask & LDAP_REALM_SUBTREE) {

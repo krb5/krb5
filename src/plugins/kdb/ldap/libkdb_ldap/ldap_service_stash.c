@@ -84,7 +84,6 @@ krb5_ldap_readpassword(krb5_context context, krb5_ldap_context *ldap_context,
     int                         entryfound=0;
     krb5_error_code             st=0;
     char                        line[RECORDLEN]="0", *start=NULL, *file=NULL;
-    char                        errbuf[1024];
     FILE                        *fptr=NULL;
 
     *password = NULL;
@@ -166,7 +165,8 @@ rp_exit:
 int
 tohex(krb5_data in, krb5_data *ret)
 {
-    int                i=0, err = 0;
+    unsigned int       i=0;
+    int                err = 0;
 
     ret->length = 0;
     ret->data = NULL;

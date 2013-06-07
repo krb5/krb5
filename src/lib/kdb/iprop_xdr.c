@@ -9,7 +9,7 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-bool_t
+static bool_t
 xdr_int16_t (XDR *xdrs, int16_t *objp)
 {
     register int32_t *buf;
@@ -19,17 +19,7 @@ xdr_int16_t (XDR *xdrs, int16_t *objp)
     return TRUE;
 }
 
-bool_t
-xdr_uint16_t (XDR *xdrs, uint16_t *objp)
-{
-    register int32_t *buf;
-
-    if (!xdr_u_short (xdrs, objp))
-        return FALSE;
-    return TRUE;
-}
-
-bool_t
+static bool_t
 xdr_int32_t (XDR *xdrs, int32_t *objp)
 {
     register int32_t *buf;
@@ -39,7 +29,7 @@ xdr_int32_t (XDR *xdrs, int32_t *objp)
     return TRUE;
 }
 
-bool_t
+static bool_t
 xdr_uint32_t (XDR *xdrs, uint32_t *objp)
 {
     register int32_t *buf;

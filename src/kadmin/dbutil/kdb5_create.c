@@ -264,8 +264,7 @@ void kdb5_create(argc, argv)
 
     rblock.key = &master_keyblock;
 
-    seed.length = master_keyblock.length;
-    seed.data = master_keyblock.contents;
+    seed = make_data(master_keyblock.contents, master_keyblock.length);
 
     if ((retval = krb5_c_random_seed(util_context, &seed))) {
         com_err(progname, retval,

@@ -555,7 +555,8 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         goto cleanup;
 
     if (entry->mask & KADM5_LOAD) {
-        int              tree = 0, ntrees = 0, numlentries = 0;
+        unsigned int     tree = 0, ntrees = 0;
+        int              numlentries = 0;
         char             **subtreelist = NULL, *filter = NULL;
 
         /*  A load operation is special, will do a mix-in (add krbprinc
@@ -695,7 +696,8 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
      */
     if (xargs.dn_from_kbd == TRUE) {
         /* make sure the DN falls in the subtree */
-        int              tre=0, dnlen=0, subtreelen=0, ntrees=0;
+        unsigned int     tre=0, ntrees=0;
+        int              dnlen=0, subtreelen=0;
         char             **subtreelist=NULL;
         char             *dn=NULL;
         krb5_boolean     outofsubtree=TRUE;
@@ -1293,7 +1295,7 @@ krb5_read_tkt_policy(krb5_context context, krb5_ldap_context *ldap_context,
                      krb5_db_entry *entries, char *policy)
 {
     krb5_error_code             st=0;
-    unsigned int                mask=0, omask=0;
+    int                         mask=0, omask=0;
     int                         tkt_mask=(KDB_MAX_LIFE_ATTR | KDB_MAX_RLIFE_ATTR | KDB_TKT_FLAGS_ATTR);
     krb5_ldap_policy_params     *tktpoldnparam=NULL;
 

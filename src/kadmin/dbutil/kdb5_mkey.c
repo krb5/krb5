@@ -73,7 +73,7 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
     krb5_error_code retval = 0;
     int old_key_data_count, i;
     krb5_kvno new_mkey_kvno;
-    krb5_key_data tmp_key_data, *old_key_data;
+    krb5_key_data tmp_key_data;
     krb5_mkey_aux_node  *mkey_aux_data_head = NULL, **mkey_aux_data;
     krb5_keylist_node  *keylist_node;
     krb5_keylist_node *master_keylist = krb5_db_mkey_list_alias(context);
@@ -84,9 +84,7 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
     if (use_mkvno != 0 && new_mkey_kvno != use_mkvno)
         return (KRB5_KDB_KVNONOMATCH);
 
-    /* save the old keydata */
     old_key_data_count = master_entry->n_key_data;
-    old_key_data = master_entry->key_data;
 
     /* alloc enough space to hold new and existing key_data */
     /*

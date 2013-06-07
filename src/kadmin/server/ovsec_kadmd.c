@@ -150,15 +150,14 @@ static void display_status_1(m, code, type)
     OM_uint32 code;
     int type;
 {
-    OM_uint32 maj_stat, min_stat;
+    OM_uint32 min_stat;
     gss_buffer_desc msg;
     OM_uint32 msg_ctx;
 
     msg_ctx = 0;
     while (1) {
-        maj_stat = gss_display_status(&min_stat, code,
-                                      type, GSS_C_NULL_OID,
-                                      &msg_ctx, &msg);
+        (void) gss_display_status(&min_stat, code, type, GSS_C_NULL_OID,
+                                  &msg_ctx, &msg);
         fprintf(stderr, _("GSS-API error %s: %s\n"), m, (char *)msg.value);
         (void) gss_release_buffer(&min_stat, &msg);
 
@@ -223,7 +222,7 @@ int main(int argc, char *argv[])
     kadm5_config_params params;
     char **db_args      = NULL;
     int    db_args_size = 0;
-    char *errmsg;
+    const char *errmsg;
     int i;
     int strong_random = 1;
     const char *pid_file = NULL;

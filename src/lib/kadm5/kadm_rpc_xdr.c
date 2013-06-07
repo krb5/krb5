@@ -819,7 +819,8 @@ xdr_chrand_ret(XDR *xdrs, chrand_ret *objp)
 		return (FALSE);
 	}
 	if (objp->code == KADM5_OK) {
-		if (!xdr_array(xdrs, (char **)&objp->keys, &objp->n_keys, ~0,
+		if (!xdr_array(xdrs, (char **)&objp->keys,
+			       (unsigned int *)&objp->n_keys, ~0,
 			       sizeof(krb5_keyblock), xdr_krb5_keyblock))
 			return FALSE;
 	}

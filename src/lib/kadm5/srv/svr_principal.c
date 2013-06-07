@@ -245,10 +245,12 @@ apply_keysalt_policy(kadm5_server_handle_t handle, const char *policy,
             ks_tuple = handle->params.keysalts;
         }
         /* Dup the requested or defaulted keysalt tuples. */
-        new_ks_tuple = k5memdup(ks_tuple, n_ks_tuple * sizeof(*new_ks_tuple),
-                                &ret);
-        if (new_ks_tuple == NULL)
+        new_ks_tuple = malloc(n_ks_tuple * sizeof(*new_ks_tuple));
+        if (new_ks_tuple == NULL) {
+            ret = ENOMEM;
             goto cleanup;
+        }
+        memcpy(new_ks_tuple, ks_tuple, n_ks_tuple * sizeof(*new_ks_tuple));
         new_n_ks_tuple = n_ks_tuple;
         ret = 0;
         goto cleanup;
@@ -363,7 +365,7 @@ kadm5_create_principal_3(void *server_handle,
     kadm5_policy_ent_rec        polent;
     krb5_boolean                have_polent = FALSE;
     krb5_int32                  now;
-    krb5_tl_data                *tl_data_orig, *tl_data_tail;
+    krb5_tl_data                *tl_data_tail;
     unsigned int                ret;
     kadm5_server_handle_t handle = server_handle;
     krb5_keyblock               *act_mkey;
@@ -487,7 +489,6 @@ kadm5_create_principal_3(void *server_handle,
 
     if (mask & KADM5_TL_DATA) {
         /* splice entry->tl_data onto the front of kdb->tl_data */
-        tl_data_orig = kdb->tl_data;
         for (tl_data_tail = entry->tl_data; tl_data_tail;
              tl_data_tail = tl_data_tail->tl_data_next)
         {
@@ -1264,6 +1265,8 @@ kadm5_use_password_server (void)
     return use_password_server;
 }
 #endif
+
+void kadm5_set_use_password_server (void);
 
 void
 kadm5_set_use_password_server (void)

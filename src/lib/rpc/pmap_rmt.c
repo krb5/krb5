@@ -188,7 +188,6 @@ getbroadcastnets(
 {
 	struct ifconf ifc;
         struct ifreq ifreq, *ifr;
-	struct sockaddr_in *sockin;
         int n, i;
 
         ifc.ifc_len = GIFCONF_BUFSIZE;
@@ -208,24 +207,16 @@ getbroadcastnets(
                 if ((ifreq.ifr_flags & IFF_BROADCAST) &&
 		    (ifreq.ifr_flags & IFF_UP) &&
 		    ifr->ifr_addr.sa_family == AF_INET) {
-			sockin = (struct sockaddr_in *)&ifr->ifr_addr;
 #ifdef SIOCGIFBRDADDR   /* 4.3BSD */
 			if (ioctl(sock, SIOCGIFBRDADDR, (char *)&ifreq) < 0) {
 				addrs[i++].s_addr = INADDR_ANY;
-#if 0 /* this is uuuuugly */
-				addrs[i++] = inet_makeaddr(inet_netof
-#if defined(hpux) || (defined(sun) && defined(__svr4__)) || defined(linux) || (defined(__osf__) && defined(__alpha__))
-							   (sockin->sin_addr),
-#else /* hpux or solaris */
-							   (sockin->sin_addr.s_addr),
-#endif
-							   INADDR_ANY);
-#endif
 			} else {
 				addrs[i++] = ((struct sockaddr_in*)
 				  &ifreq.ifr_addr)->sin_addr;
 			}
 #else /* 4.2 BSD */
+			struct sockaddr_in *sockin;
+			sockin = (struct sockaddr_in *)&ifr->ifr_addr;
 			addrs[i++] = inet_makeaddr(inet_netof
 			  (sockin->sin_addr.s_addr), INADDR_ANY);
 #endif

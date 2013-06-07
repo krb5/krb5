@@ -980,52 +980,6 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
     return setup_udp_port_1(data, addr, haddrbuf, 0);
 }
 
-#if 1
-static void
-klog_handler(const void *data, size_t len)
-{
-    static char buf[BUFSIZ];
-    static int bufoffset;
-    void *p;
-
-#define flush_buf()                             \
-    (bufoffset                                  \
-     ? (((buf[0] == 0 || buf[0] == '\n')        \
-         ? (fork()==0?abort():(void)0)          \
-         : (void)0),                            \
-        krb5_klog_syslog(LOG_INFO, "%s", buf),  \
-        memset(buf, 0, sizeof(buf)),            \
-        bufoffset = 0)                          \
-     : 0)
-
-    p = memchr(data, 0, len);
-    if (p)
-        len = (const char *)p - (const char *)data;
-scan_for_newlines:
-    if (len == 0)
-        return;
-    p = memchr(data, '\n', len);
-    if (p) {
-        if (p != data)
-            klog_handler(data, (size_t)((const char *)p - (const char *)data));
-        flush_buf();
-        len -= ((const char *)p - (const char *)data) + 1;
-        data = 1 + (const char *)p;
-        goto scan_for_newlines;
-    } else if (len > sizeof(buf) - 1 || len + bufoffset > sizeof(buf) - 1) {
-        size_t x = sizeof(buf) - len - 1;
-        klog_handler(data, x);
-        flush_buf();
-        len -= x;
-        data = (const char *)data + x;
-        goto scan_for_newlines;
-    } else {
-        memcpy(buf + bufoffset, data, len);
-        bufoffset += len;
-    }
-}
-#endif
-
 #ifdef HAVE_STRUCT_RT_MSGHDR
 #include <net/route.h>
 

@@ -21,7 +21,8 @@ camellia_ctx ctx, dctx;
 
 static void init ()
 {
-    int i, j, r;
+    size_t i, j;
+    cam_rval r;
 
     srand(42);
     for (i = 0; i < 16; i++)
@@ -40,7 +41,7 @@ static void init ()
 
 static void hexdump(const unsigned char *ptr, size_t len)
 {
-    int i;
+    size_t i;
     for (i = 0; i < len; i++)
 	printf ("%s%02X", (i % 16 == 0) ? "\n    " : " ", ptr[i]);
 }
@@ -89,7 +90,7 @@ static void fips_test ()
 static void
 xor (unsigned char *out, const unsigned char *a, const unsigned char *b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < B; i++)
 	out[i] = a[i] ^ b[i];
 }
@@ -97,7 +98,8 @@ xor (unsigned char *out, const unsigned char *a, const unsigned char *b)
 static void
 ecb_enc (unsigned char *out, unsigned char *in, unsigned int len)
 {
-    int i, r;
+    size_t i;
+    cam_rval r;
     for (i = 0; i < len; i += 16) {
 	r = camellia_enc_blk (in + i, out + i, &ctx);
 	if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
@@ -108,7 +110,8 @@ ecb_enc (unsigned char *out, unsigned char *in, unsigned int len)
 static void
 ecb_dec (unsigned char *out, unsigned char *in, unsigned int len)
 {
-    int i, r;
+    size_t i;
+    cam_rval r;
     for (i = 0; i < len; i += 16) {
 	r = camellia_dec_blk (in + i, out + i, &dctx);
 	if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
@@ -125,7 +128,8 @@ static void
 cbc_enc (unsigned char *out, unsigned char *in, unsigned char *iv,
 	 unsigned int len)
 {
-    int i, r;
+    size_t i;
+    cam_rval r;
     unsigned char tmp[B];
     D(iv);
     memcpy (tmp, iv, B);
@@ -145,7 +149,8 @@ static void
 cbc_dec (unsigned char *out, unsigned char *in, unsigned char *iv,
 	 unsigned int len)
 {
-    int i, r;
+    size_t i;
+    cam_rval r;
     unsigned char tmp[B];
     memcpy (tmp, iv, B);
     for (i = 0; i < len; i += B) {
@@ -231,7 +236,7 @@ cts_dec (unsigned char *out, unsigned char *in, unsigned char *iv,
 
 static void ecb_test ()
 {
-    int testno;
+    size_t testno;
     unsigned char tmp[4*B];
 
     printf ("ECB tests:\n");
@@ -239,7 +244,7 @@ static void ecb_test ()
     hexdump (key, sizeof(key));
     for (testno = 0; testno < NTESTS; testno++) {
 	unsigned len = (test_case_len[testno] + 15) & ~15;
-	printf ("\ntest %d - %d bytes\n", testno, len);
+	printf ("\ntest %d - %d bytes\n", (int)testno, len);
 	printf ("input:");
 	hexdump (test_case[testno].input, len);
 	printf ("\n");
@@ -262,7 +267,7 @@ unsigned char ivec[16] = { 0 };
 
 static void cbc_test ()
 {
-    int testno;
+    size_t testno;
     unsigned char tmp[4*B];
 
     printf ("CBC tests:\n");
@@ -270,7 +275,7 @@ static void cbc_test ()
     hexdump (ivec, sizeof(ivec));
     for (testno = 0; testno < NTESTS; testno++) {
 	unsigned len = (test_case_len[testno] + 15) & ~15;
-	printf ("\ntest %d - %d bytes\n", testno, len);
+	printf ("\ntest %d - %d bytes\n", (int)testno, len);
 	printf ("input:");
 	hexdump (test_case[testno].input, len);
 	printf ("\n");
@@ -291,7 +296,7 @@ static void cbc_test ()
 
 static void cts_test ()
 {
-    int testno;
+    size_t testno;
     unsigned char tmp[4*B];
 
     printf ("CTS tests:\n");
@@ -299,7 +304,7 @@ static void cts_test ()
     hexdump (ivec, sizeof(ivec));
     for (testno = 0; testno < NTESTS; testno++) {
 	unsigned int len = test_case_len[testno];
-	printf ("\ntest %d - %d bytes\n", testno, len);
+	printf ("\ntest %d - %d bytes\n", (int)testno, len);
 	printf ("input:");
 	hexdump (test_case[testno].input, len);
 	printf ("\n");

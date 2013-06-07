@@ -405,7 +405,6 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
                              gss_buffer_set_t *data_set)
 {
     OM_uint32 major_status = GSS_S_FAILURE;
-    krb5_gss_cred_id_t cred;
 #if 0
     size_t i;
 #endif
@@ -430,8 +429,6 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
     major_status = krb5_gss_validate_cred(minor_status, cred_handle);
     if (GSS_ERROR(major_status))
         return major_status;
-
-    cred = (krb5_gss_cred_id_t) cred_handle;
 
 #if 0
     for (i = 0; i < sizeof(krb5_gss_inquire_cred_by_oid_ops)/

@@ -126,7 +126,7 @@ main (void)
 
     };
     int fail = 0;
-    int i;
+    size_t i;
 
     for (i = 0; i < sizeof(values)/sizeof(values[0]); i++) {
         krb5_deltat result;
@@ -150,8 +150,8 @@ main (void)
         }
     }
     if (fail == 0)
-        printf ("Passed all %d tests.\n", i);
+        printf ("Passed all %d tests.\n", (int)i);
     else
-        printf ("Failed %d of %d tests.\n", fail, i);
+        printf ("Failed %d of %d tests.\n", fail, (int)i);
     return fail;
 }

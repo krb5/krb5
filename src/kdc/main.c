@@ -119,12 +119,10 @@ find_realm_data(struct server_handle *handle, char *rname, krb5_ui_4 rsize)
 kdc_realm_t *
 setup_server_realm(struct server_handle *handle, krb5_principal sprinc)
 {
-    krb5_error_code     kret;
     kdc_realm_t         *newrealm;
     kdc_realm_t **kdc_realmlist = handle->kdc_realmlist;
     int kdc_numrealms = handle->kdc_numrealms;
 
-    kret = 0;
     if (kdc_numrealms > 1) {
         if (!(newrealm = find_realm_data(handle, sprinc->realm.data,
                                          (krb5_ui_4) sprinc->realm.length)))

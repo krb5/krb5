@@ -441,7 +441,6 @@ kg_accept_krb5(minor_status, context_handle,
     char *sptr;
     OM_uint32 tmp;
     size_t md5len;
-    int bigend;
     krb5_gss_cred_id_t cred = 0;
     krb5_data ap_rep, ap_req;
     unsigned int i;
@@ -698,7 +697,6 @@ kg_accept_krb5(minor_status, context_handle,
         }
 
         gss_flags = GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
-        bigend = 0;
         decode_req_message = 0;
     } else {
         /* gss krb5 v1 */

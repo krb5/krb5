@@ -3416,7 +3416,7 @@ pkinit_create_td_dh_parameters(krb5_context context,
     SECItem tmp, *oid;
     krb5_algorithm_identifier id[sizeof(oakley_groups) /
                                  sizeof(oakley_groups[0])];
-    const krb5_algorithm_identifier *ids[(sizeof(id) / sizeof(id[0])) + 1];
+    krb5_algorithm_identifier *ids[(sizeof(id) / sizeof(id[0])) + 1];
     unsigned int i, j;
     krb5_data *data;
     krb5_pa_data **typed_data;
@@ -3525,7 +3525,7 @@ pkinit_create_td_invalid_certificate(krb5_context context,
 {
     CERTCertificate *invalid;
     krb5_external_principal_identifier id;
-    const krb5_external_principal_identifier *ids[2];
+    krb5_external_principal_identifier *ids[2];
     struct issuer_and_serial_number isn;
     krb5_data *data;
     SECItem item;
@@ -3591,7 +3591,7 @@ pkinit_create_td_trusted_certifiers(krb5_context context,
                                     pkinit_identity_crypto_context
                                     id_cryptoctx, krb5_pa_data ***pa_data)
 {
-    const krb5_external_principal_identifier **ids;
+    krb5_external_principal_identifier **ids;
     krb5_external_principal_identifier *id;
     struct issuer_and_serial_number isn;
     krb5_data *data;

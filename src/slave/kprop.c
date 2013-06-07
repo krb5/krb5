@@ -532,14 +532,14 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
     int database_fd;
     int in_database_size;
 {
-    krb5_int32      sent_size, n;
+    krb5_int32      n;
     krb5_data       inbuf, outbuf;
     char            buf[KPROP_BUFSIZ];
     krb5_error_code retval;
     krb5_error      *error;
     /* These must be 4 bytes */
     krb5_ui_4       database_size = in_database_size;
-    krb5_ui_4       send_size;
+    krb5_ui_4       send_size, sent_size;
 
     /*
      * Send over the size
