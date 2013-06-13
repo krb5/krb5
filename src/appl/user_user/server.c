@@ -95,14 +95,14 @@ int main(argc, argv)
             com_err("uu-server", errno, "binding socket");
             exit(3);
         }
-
-        printf("Server started\n");
-        fflush(stdout);
-
         if (listen(sock, 1) == -1) {
             com_err("uu-server", errno, "listening");
             exit(3);
         }
+
+        printf("Server started\n");
+        fflush(stdout);
+
         if ((acc = accept(sock, (struct sockaddr *)&f_inaddr, &namelen)) == -1) {
             com_err("uu-server", errno, "accepting");
             exit(3);
