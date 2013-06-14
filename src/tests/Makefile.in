@@ -5,8 +5,8 @@ SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
 
-OBJS= gcred.o hist.o kdbtest.o t_init_creds.o t_localauth.o
-EXTRADEPSRCS= gcred.c hist.c kdbtest.c t_init_creds.c t_localauth.c
+OBJS= gcred.o hist.o kdbtest.o plugorder.o t_init_creds.o t_localauth.o
+EXTRADEPSRCS= gcred.c hist.c kdbtest.c plugorder.c t_init_creds.c t_localauth.c
 
 TEST_DB = ./testdb
 TEST_REALM = FOO.TEST.REALM
@@ -27,6 +27,9 @@ hist: hist.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 kdbtest: kdbtest.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kdbtest.o $(KDB5_LIBS) $(KADMSRV_LIBS) \
 		$(KRB5_BASE_LIBS)
+
+plugorder: plugorder.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ plugorder.o $(KRB5_BASE_LIBS)
 
 t_init_creds: t_init_creds.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_init_creds.o $(KRB5_BASE_LIBS)
@@ -76,7 +79,7 @@ kdb_check: kdc.conf krb5.conf
 	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
 
-check-pytests:: gcred hist kdbtest t_init_creds t_localauth
+check-pytests:: gcred hist kdbtest plugorder t_init_creds t_localauth
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_iprop.py $(PYTESTFLAGS)
@@ -86,6 +89,7 @@ check-pytests:: gcred hist kdbtest t_init_creds t_localauth
 	$(RUNPYTEST) $(srcdir)/t_policy.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_localauth.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadm5_hook.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_pwqual.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kdb_locking.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_keyrollover.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_renew.py $(PYTESTFLAGS)
@@ -104,5 +108,6 @@ check-pytests:: gcred hist kdbtest t_init_creds t_localauth
 	$(RUNPYTEST) $(srcdir)/t_cve-2013-1416.py $(PYTESTFLAGS)
 
 clean::
-	$(RM) gcred hist kdbtest krb5.conf kdc.conf t_init_creds t_localauth
+	$(RM) gcred hist kdbtest plugorder t_init_creds t_localauth
+	$(RM) krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap

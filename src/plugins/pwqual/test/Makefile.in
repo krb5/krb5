@@ -1,0 +1,21 @@
+mydir=plugins$(S)pwqual$(S)test
+BUILDTOP=$(REL)..$(S)..$(S)..
+
+LIBBASE=pwqual_test
+LIBMAJOR=0
+LIBMINOR=0
+RELDIR=../plugins/pwqual/test
+# Depends on libkrb5
+SHLIB_EXPDEPS= $(KRB5_DEPLIB)
+SHLIB_EXPLIBS= $(KRB5_LIB)
+
+STLIBOBJS=main.o
+
+SRCS= $(srcdir)/main.c
+
+all-unix:: all-libs
+install-unix::
+clean-unix:: clean-libs clean-libobjs
+
+@libnover_frag@
+@libobj_frag@

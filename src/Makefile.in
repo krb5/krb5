@@ -11,6 +11,7 @@ SUBDIRS=util include lib \
 	@sam2_plugin@ \
 	plugins/kadm5_hook/test \
 	plugins/localauth/test \
+	plugins/pwqual/test \
 	plugins/kdb/db2 \
 	@ldap_plugin_dir@ \
 	plugins/preauth/pkinit \
