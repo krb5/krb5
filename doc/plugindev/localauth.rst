@@ -33,10 +33,10 @@ residual string of the **auth_to_local** value.
 
 If the module does not set **an2ln_types** but does implement
 **an2ln**, the module's **an2ln** method will be invoked for all
-:c:func:`krb5_aname_to_localname` operations before the built-in
-mechanisms are applied, with *type* and *residual* set to NULL.  The
-module can return KRB5_LNAME_NO_TRANS to defer mapping to the built-in
-mechanisms.
+:c:func:`krb5_aname_to_localname` operations unless an earlier module
+determines a mapping, with *type* and *residual* set to NULL.  The
+module can return KRB5_LNAME_NO_TRANS to defer mapping to later
+modules.
 
 If a module implements **an2ln**, it must also implement
 **free_string** to ensure that memory is allocated and deallocated

@@ -100,18 +100,6 @@ check_conflict(krb5_context context, struct localauth_module_handle **list,
     return 0;
 }
 
-/* If mod is in list, move it to the back. */
-static void
-move_to_back(krb5_plugin_initvt_fn *list, krb5_plugin_initvt_fn mod)
-{
-    for (; *list != NULL && *list != mod; list++);
-    if (*list == NULL)
-        return;
-    for (; *list != NULL; list++)
-        *list = *(list + 1);
-    *(list - 1) = mod;
-}
-
 /* Get the registered localauth modules including all built-in modules, in the
  * proper order. */
 static krb5_error_code
@@ -123,18 +111,18 @@ get_modules(krb5_context context, krb5_plugin_initvt_fn **modules_out)
     *modules_out = NULL;
 
     /* Register built-in modules. */
-    ret = k5_plugin_register(context, intf, "auth_to_local",
-                             localauth_auth_to_local_initvt);
-    if (ret)
-        return ret;
-    ret = k5_plugin_register(context, intf, "names", localauth_names_initvt);
-    if (ret)
-        return ret;
     ret = k5_plugin_register(context, intf, "default",
                              localauth_default_initvt);
     if (ret)
         return ret;
     ret = k5_plugin_register(context, intf, "rule", localauth_rule_initvt);
+    if (ret)
+        return ret;
+    ret = k5_plugin_register(context, intf, "names", localauth_names_initvt);
+    if (ret)
+        return ret;
+    ret = k5_plugin_register(context, intf, "auth_to_local",
+                             localauth_auth_to_local_initvt);
     if (ret)
         return ret;
     ret = k5_plugin_register(context, intf, "k5login",
@@ -148,13 +136,6 @@ get_modules(krb5_context context, krb5_plugin_initvt_fn **modules_out)
     ret = k5_plugin_load_all(context, intf, modules_out);
     if (ret)
         return ret;
-
-    /* Move built-in userok and untyped an2ln localauth modules to back so we
-     * try loaded modules first. */
-    move_to_back(*modules_out, localauth_names_initvt);
-    move_to_back(*modules_out, localauth_auth_to_local_initvt);
-    move_to_back(*modules_out, localauth_k5login_initvt);
-    move_to_back(*modules_out, localauth_an2ln_initvt);
 
     return 0;
 }
