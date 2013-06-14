@@ -659,6 +659,12 @@ All subsections support the same tags:
     absolute path, it will be treated as relative to the
     **plugin_base_dir** value from :ref:`libdefaults`.
 
+For pluggable interfaces where module order matters, modules
+registered with a **module** tag normally come first, in the order
+they are registered, followed by built-in modules in the order they
+are documented below.  If **enable_only** tags are used, then the
+order of those tags overrides the normal module order.
+
 The following subsections are currently supported within the [plugins]
 section:
 

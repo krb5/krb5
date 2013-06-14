@@ -1057,21 +1057,11 @@ krb5_authdata_free_internal(krb5_context kcontext,
  * and krb5.conf man page.
  */
 
-/*
- * A linked list entry mapping a module name to a module initvt function.  The
- * entry may also include a dynamic object handle so that it can be released
- * when the context is destroyed.
- */
-struct plugin_mapping {
-    char *modname;
-    krb5_plugin_initvt_fn module;
-    struct plugin_file_handle *dyn_handle;
-    struct plugin_mapping *next;
-};
+struct plugin_mapping;
 
 /* Holds krb5_context information about each pluggable interface. */
 struct plugin_interface {
-    struct plugin_mapping *modules;
+    struct plugin_mapping **modules;
     krb5_boolean configured;
 };
 
