@@ -33,12 +33,12 @@ out = realm.kinit(realm.user_princ, flags=['-R'], expected_code=1)
 if "KDC can't fulfill requested option" not in out:
     fail('expected error not seen renewing non-renewable ticket')
 
-# Test that -allow_reneable on the client principal works.
+# Test that -allow_renewable on the client principal works.
 realm.run_kadminl('modprinc -allow_renewable user')
 test('disallowed client', '1h', '2h', False)
 realm.run_kadminl('modprinc +allow_renewable user')
 
-# Test that -allow_reneable on the server principal works.
+# Test that -allow_renewable on the server principal works.
 realm.run_kadminl('modprinc -allow_renewable %s' % realm.krbtgt_princ)
 test('disallowed server', '1h', '2h', False)
 realm.run_kadminl('modprinc +allow_renewable %s' % realm.krbtgt_princ)
@@ -58,17 +58,17 @@ realm.run_kadminl('modprinc -maxlife "20 hours" user')
 # Test maximum renewable life on the client principal.
 realm.run_kadminl('modprinc -maxrenewlife "5 hours" user')
 test('maxrenewlife client yes', '4h', '5h', True)
-test('maxrenewlife client no', '5h', '10h', False)
+test('maxrenewlife client no', '6h', '10h', False)
 
 # Test maximum renewable life on the server principal.
-realm.run_kadminl('modprinc -maxrenewlife "4 hours" %s' % realm.krbtgt_princ)
-test('maxrenewlife server yes', '3h', '4h', True)
+realm.run_kadminl('modprinc -maxrenewlife "3 hours" %s' % realm.krbtgt_princ)
+test('maxrenewlife server yes', '2h', '3h', True)
 test('maxrenewlife server no', '4h', '8h', False)
 
 # Test realm maximum life.
 realm.run_kadminl('modprinc -maxrenewlife "40 hours" user')
 realm.run_kadminl('modprinc -maxrenewlife "40 hours" %s' % realm.krbtgt_princ)
 test('maxrenewlife realm yes', '10h', '20h', True)
-test('maxrenewlife realm no', '20h', '40h', False)
+test('maxrenewlife realm no', '21h', '40h', False)
 
 success('Renewing credentials')
