@@ -1057,6 +1057,8 @@ find_alternate_tgs(kdc_realm_t *kdc_active_realm, krb5_principal princ,
         goto cleanup;
     }
 cleanup:
+    if (retval == 0 && server_ptr == NULL)
+        retval = KRB5_KDB_NOENTRY;
     if (retval != 0)
         *status = "UNKNOWN_SERVER";
 
@@ -1149,7 +1151,7 @@ find_referral_tgs(kdc_realm_t *kdc_active_realm, krb5_kdc_req *request,
         goto cleanup;
     }
     /* Don't return a referral to the empty realm or the service realm. */
-    if (realms == NULL || realms[0] == '\0' ||
+    if (realms == NULL || realms[0] == NULL || *realms[0] == '\0' ||
         data_eq_string(srealm, realms[0])) {
         retval = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
         goto cleanup;
