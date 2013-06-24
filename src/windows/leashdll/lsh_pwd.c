@@ -1966,6 +1966,8 @@ NewPasswordProc(
                     return TRUE;
 		}
                 Leash_pec_add_principal(principal);
+                MessageBox(NULL, "Password successfully changed.",
+                           "Password change", MB_OK);
                 CloseMe(TRUE); /* success */
 	    }
 	    break;
