@@ -119,8 +119,10 @@ typedef _W64 int         ssize_t;
 #define NO_PASSWORD
 #define HAVE_STRERROR
 #define SYS_ERRLIST_DECLARED
-/* if __STDC_VERSION__ >= 199901L this shouldn't be needed */
+/* Visual Studio 2012 errors out when we macroize keywords in C++ mode */
+#ifndef __cplusplus
 #define inline __inline
+#endif
 #define NEED_INSIXADDR_ANY
 #define ENABLE_THREADS
 #endif
