@@ -14,10 +14,19 @@ AFS_INCLUDES=
 AFS_LIBS=
 !endif
 
+# Need MFC version 11 for VS 2012; older VS get MFC version 10
+!if defined(VISUALSTUDIOVERSION) && "$(VISUALSTUDIOVERSION)" == "11.0"
+!if defined(NODEBUG)
+MFCLIB=MFC110.LIB
+!else
+MFCLIB=MFC110D.LIB
+!endif
+!else
 !if defined(NODEBUG)
 MFCLIB=MFC100.LIB
 !else
 MFCLIB=MFC100D.LIB
+!endif
 !endif
 EXE_NAME=leash
 WSHELPER=wshelp32
