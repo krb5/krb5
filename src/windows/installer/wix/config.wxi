@@ -50,6 +50,13 @@
     <?else?>
         <?error Unknown build type?>
     <?endif?>
+    <?ifndef env.VISUALSTUDIOVERSION?>
+        <?define VCVer="100"?>
+    <?elseif $(env.VISUALSTUDIOVERSION) = "11.0"?>
+        <?define VCVer="110"?>
+    <?else?>
+        <?error Unknown MFC version?>
+    <?endif?>
     
     <?define KfwRegRoot="SOFTWARE\MIT\Kerberos"?>
     <?define KfwRegWow6432Root="SOFTWARE\Wow6432Node\MIT\Kerberos"?>
