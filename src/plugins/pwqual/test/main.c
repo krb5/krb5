@@ -77,6 +77,7 @@ init_dict(combo_moddata dict, const char *dict_file)
     /* Decompose the blob into newline-separated words. */
     p = dict->word_block;
     len = sb.st_size;
+    count = 0;
     while (len > 0 && (t = memchr(p, '\n', len)) != NULL) {
         *t = '\0';
         len -= t - p + 1;
