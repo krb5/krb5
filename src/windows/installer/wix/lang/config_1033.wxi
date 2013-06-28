@@ -28,27 +28,27 @@
     
     <?define VersionString="$(var.VersionMajor).$(var.VersionMinor).$(var.VersionPatch)"?>
     <?if $(var.Platform) = "x64" ?>
-        <?define BaseProductName="$(loc.ProductName64)"?>
-        <?define BaseProductNameShort="$(loc.ProductNameShort64)"?>
+        <?define BaseProductName="!(loc.ProductName64)"?>
+        <?define BaseProductNameShort="!(loc.ProductNameShort64)"?>
     <?elseif $(var.Platform) = "Intel" ?>
-        <?define BaseProductName="$(loc.ProductName)"?>
-        <?define BaseProductNameShort="$(loc.ProductNameShort)"?>
+        <?define BaseProductName="!(loc.ProductName)"?>
+        <?define BaseProductNameShort="!(loc.ProductNameShort)"?>
     <?else?>
         <?error Unknown build type?>
     <?endif?>
     
     <?ifdef var.Beta?> 
         <?ifndef var.Debug?>
-            <?define ProductFullName="$(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString) $(loc.ProductBeta) $(var.Beta) "?>
+            <?define ProductFullName="!(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString) !(loc.ProductBeta) $(var.Beta) "?>
         <?else?>
-            <?define ProductFullName="$(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString) $(loc.ProductBeta) $(var.Beta) $(loc.ProductDebug)"?>
+            <?define ProductFullName="!(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString) !(loc.ProductBeta) $(var.Beta) !(loc.ProductDebug)"?>
         <?endif?>
     <?else?>
         <?ifdef var.Release?>
             <?ifndef var.Debug?>
-                <?define ProductFullName="$(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString)"?>
+                <?define ProductFullName="!(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString)"?>
             <?else?>
-                <?define ProductFullName="$(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString) $(loc.ProductDebug)"?>
+                <?define ProductFullName="!(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString) !(loc.ProductDebug)"?>
             <?endif?>
         <?else?>
             <?ifndef var.Date?>
@@ -60,9 +60,9 @@
             <?endif?>
             
             <?ifndef var.Debug?>
-                <?define ProductFullName="$(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString) $(var.Date) $(var.Time)"?>
+                <?define ProductFullName="!(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString) $(var.Date) $(var.Time)"?>
             <?else?>
-                <?define ProductFullName="$(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString) $(var.Date) $(var.Time) $(loc.ProductDebug)"?>
+                <?define ProductFullName="!(loc.ProductMIT) $(var.BaseProductName) $(var.VersionString) $(var.Date) $(var.Time) !(loc.ProductDebug)"?>
             <?endif?>
         <?endif?>
     <?endif?>
@@ -72,5 +72,5 @@
     <?define CodePage="1252"?>
     <?define Language="1033"?>
 
-    <?define ARPComments="$(loc.ARPComments) $(var.Date) $(var.Time)"?>
+    <?define ARPComments="!(loc.ARPComments) $(var.Date) $(var.Time)"?>
 </Include>

@@ -48,8 +48,8 @@
         <RegistrySearch Win64="no" Id="regsrch_NSISV" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="DisplayVersion" Type="raw" />
     </Property>
 
-    <Property Id="CantRemoveNSISError">$(loc.CantRemoveNSIS)</Property>
-    <Property Id="NoIE501Error">$(loc.IE501Required)</Property>
+    <Property Id="CantRemoveNSISError">!(loc.CantRemoveNSIS)</Property>
+    <Property Id="NoIE501Error">!(loc.IE501Required)</Property>
 
     <!--  Additional properties relating to the UI are in the appropriate UI.wxi file -->
     

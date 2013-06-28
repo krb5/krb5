@@ -28,28 +28,28 @@
     <Feature 
         Id="feaKfw"
         AllowAdvertise="no"
-        Description="$(loc.KerberosDesc)"
+        Description="!(loc.KerberosDesc)"
         InstallDefault="local"
-        Title="$(loc.KerberosTitle)"
+        Title="!(loc.KerberosTitle)"
         ConfigurableDirectory="KERBEROSDIR"
         Level="30">
         <Feature
             Id="feaKfwClient"
             AllowAdvertise="no"
-            Description="$(loc.KerberosClientDesc)"
+            Description="!(loc.KerberosClientDesc)"
             InstallDefault="local"
-            Title="$(loc.KerberosClientTitle)"
+            Title="!(loc.KerberosClientTitle)"
             Level="30">
 
             <?ifdef DebugSyms?>
 	    	<Feature 
                     Id="feaKfwClientDebug" 
                     AllowAdvertise="no" 
-                    Description="$(loc.StrKerberosClientDebugDesc)" 
+                    Description="!(loc.StrKerberosClientDebugDesc)"
                     Display="expand"
 		    InstallDefault="$(var.DebugSymInstallDefault)" 
                     Level="$(var.DebugSymLowLevel)" 
-                    Title="$(loc.StrKerberosClientDebugTitle)">
+                    Title="!(loc.StrKerberosClientDebugTitle)">
                     <ComponentRef Id="cmf_bin_debug"/>
 		    <ComponentRef Id="cmp_ClientSystemDebug"/>
                     <?include runtime_debug.wxi?>
@@ -143,10 +143,10 @@
         <Feature
             Id="feaKfwSDK" 
             AllowAdvertise="no" 
-            Description="$(loc.KerberosSDKDesc)" 
+            Description="!(loc.KerberosSDKDesc)"
             InstallDefault="local" 
             Level="130" 
-            Title="$(loc.KerberosSDKTitle)">
+            Title="!(loc.KerberosSDKTitle)">
             
         <?if $(var.Platform) = "Intel" ?>
             <ComponentRef Id="cmp_dirlib_i386" />
@@ -168,10 +168,10 @@
         <Feature
             Id="feaKfwDocs" 
             AllowAdvertise="no" 
-            Description="$(loc.KerberosDocDesc)" 
+            Description="!(loc.KerberosDocDesc)"
             InstallDefault="local" 
             Level="30" 
-            Title="$(loc.KerberosDocTitle)">
+            Title="!(loc.KerberosDocTitle)">
 
 <!--            <?if $(var.Platform) = "Intel"?>
                     <ComponentRef Id="efl_leash_userdoc_pdf" />
