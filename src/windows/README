@@ -12,7 +12,10 @@ common Unix utilities such as sed/awk/cp/cat installed in the
 command-line path.  To build an MSI installer, you will additionally
 need the Windows Installer XML (WiX) toolkit, and to ensure that
 the HTML Help Compiler (hhc.exe) and the WiX tools are in your command-line
-path.
+path.  WiX version 3.5 is verified to work with this codebase; WiX 3.7
+and newer are incompatible with this codebase.  Visual Studio 2012 and
+the Windows SDK 8 introduce some changes which alter the Kerberos build
+procedure slightly (noted where appropriate).
 
 The Unix utilities can be obtained via the Utilities and SDK for UNIX-based
 Aplications, which may be enabled as a Windows feature and then the
@@ -38,7 +41,11 @@ window, you can change the build target using the setenv command; run
 "setenv /?" or see the Windows SDK documentation for details.  At the
 current time, Kerberos 5 can only be built for the x64 target if the
 host platform is also 64-bit, because it compiles and runs programs
-during the build.
+during the build.  The Windows SDK version 8 does not provide an SDK
+command prompt; the "Developer Command Prompt for VS2012" or "Visual Studio
+Command Prompt" must be used instead.  Accordingly, there is no setenv script
+to configure the build environment for different target architectures; the
+"vcvarsall.bat" script provided by Visual Studio serves this function.
 
 IMPORTANT NOTE: By default, the sources are built with debug
 information and linked against the debug version of the Microsoft C
@@ -46,9 +53,10 @@ Runtime library, which is not found on most Windows systems unless
 they have development tools, and requires a separate license to distribute.
 To build a release version, you need to define NODEBUG either in the
 environment or the nmake command-line and use setenv to enter a release
-build environment with "setenv /release".
-Debug information in the compiled binaries and libraries may be retained
-by defining DEBUG_SYMBOL in the environment or on the nmake command line.
+build environment with "setenv /release" (when using Windows SDK versions
+lower than 8).  Debug information in the compiled binaries and libraries
+may be retained by defining DEBUG_SYMBOL in the environment or on the nmake
+command line.
 
 
 Building the code and installer
@@ -65,6 +73,7 @@ and install must be performed before the 64-bit build.
  1) set CPU=i386                        # Get 32-bit target in environment
  2) set KRB_INSTALL_DIR=\path\to\dir    # Where bin/include/lib lives
  3) setenv /x86 [/release]              # Tell nmake to target 32-bit
+    (with Visual Studio 2012, use "vcvarsall.bat x86")
  4) cd xxx/src                          # Go to where the source lives
  5) nmake -f Makefile.in prep-windows   # Create Makefile for Windows
  6) nmake [NODEBUG=1]                   # Build the sources
@@ -74,6 +83,7 @@ and install must be performed before the 64-bit build.
 10) rename kfw.msi kfw32.msi            # Save the 32-bit installer
 11) set CPU=AMD64                       # Proceed to the 64-bit build
 12) setenv /x64 [/release]              # Must set both CPU and nmake env
+    ("vcvarsall.bat amd64" for Visual Studio 2012)
 13) cd ..\..\..                         # Back to the sources
 14) nmake clean                         # Clean up the 32-bit objects
 15) nmake [NODEBUG=1]                   # Build the sources for 64-bit
