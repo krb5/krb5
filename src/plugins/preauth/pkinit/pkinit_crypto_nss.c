@@ -149,6 +149,8 @@ struct _pkinit_identity_crypto_context {
         krb5_prompter_fct prompter;
         void *prompter_data;
     } pwcb_args;
+    krb5_boolean defer_id_prompt;
+    pkinit_deferred_id *deferred_ids;
 };
 
 struct _pkinit_cert_info {      /* aka _pkinit_cert_handle */
@@ -785,6 +787,8 @@ pkinit_fini_identity_crypto(pkinit_identity_crypto_context id_cryptoctx)
     pkiDebug("%s\n", __FUNCTION__);
     /* The order of cleanup here is intended to ensure that nothing gets
      * freed before anything that might have a reference to it. */
+    if (id_cryptoctx->deferred_ids != NULL)
+        pkinit_free_deferred_ids(id_cryptoctx->deferred_ids);
     if (id_cryptoctx->id_cert != NULL)
         CERT_DestroyCertificate(id_cryptoctx->id_cert);
     CERT_DestroyCertList(id_cryptoctx->ca_certs);
@@ -2894,6 +2898,8 @@ crypto_load_certs(krb5_context context,
                   krb5_boolean defer_id_prompts)
 {
     SECStatus status;
+
+    id_cryptoctx->defer_id_prompt = defer_id_prompts;
 
     switch (idopts->idtype) {
     case IDTYPE_FILE:
@@ -5549,4 +5555,38 @@ cms_signeddata_verify(krb5_context context,
     PORT_FreeArena(pool, PR_TRUE);
 
     return 0;
+}
+
+/*
+ * Add an item to the pkinit_identity_crypto_context's list of deferred
+ * identities.
+ */
+krb5_error_code
+crypto_set_deferred_id(krb5_context context,
+                       pkinit_identity_crypto_context id_cryptoctx,
+                       const char *identity, const char *password)
+{
+    unsigned long ck_flags;
+
+    ck_flags = pkinit_get_deferred_id_flags(id_cryptoctx->deferred_ids,
+                                            identity);
+    return pkinit_set_deferred_id(&id_cryptoctx->deferred_ids,
+                                  identity, ck_flags, password);
+}
+
+/*
+ * Retrieve a read-only copy of the pkinit_identity_crypto_context's list of
+ * deferred identities, sure to be valid only until the next time someone calls
+ * either pkinit_set_deferred_id() or crypto_set_deferred_id().
+ */
+const pkinit_deferred_id *
+crypto_get_deferred_ids(krb5_context context,
+                        pkinit_identity_crypto_context id_cryptoctx)
+{
+    pkinit_deferred_id *deferred;
+    const pkinit_deferred_id *ret;
+
+    deferred = id_cryptoctx->deferred_ids;
+    ret = (const pkinit_deferred_id *)deferred;
+    return ret;
 }

@@ -683,3 +683,117 @@ pkinit_identity_prompt(krb5_context context,
 errout:
     return retval;
 }
+
+/*
+ * Create an entry in the passed-in list for the named identity, optionally
+ * with the specified token flag value and/or supplied password, replacing any
+ * existing entry with the same identity name.
+ */
+krb5_error_code
+pkinit_set_deferred_id(pkinit_deferred_id **identities,
+                       const char *identity, unsigned long ck_flags,
+                       const char *password)
+{
+    int i;
+    pkinit_deferred_id *out = NULL, *ids;
+    char *tmp;
+
+    /* Search for an entry that's already in the list. */
+    ids = *identities;
+    for (i = 0; ids != NULL && ids[i] != NULL; i++) {
+        if (strcmp(ids[i]->identity, identity) == 0) {
+            /* Replace its password value, then we're done. */
+            tmp = password ? strdup(password) : NULL;
+            if (password != NULL && tmp == NULL)
+                return ENOMEM;
+            ids[i]->ck_flags = ck_flags;
+            free(ids[i]->password);
+            ids[i]->password = tmp;
+            return 0;
+        }
+    }
+
+    /* Resize the list. */
+    out = realloc(ids, sizeof(*ids) * (i + 2));
+    if (out == NULL)
+        goto oom;
+    *identities = out;
+
+    /* Allocate the new final entry. */
+    out[i] = malloc(sizeof(*(out[i])));
+    if (out[i] == NULL)
+        goto oom;
+
+    /* Populate the new entry. */
+    out[i]->magic = PKINIT_DEFERRED_ID_MAGIC;
+    out[i]->identity = strdup(identity);
+    if (out[i]->identity == NULL)
+        goto oom;
+
+    out[i]->ck_flags = ck_flags;
+    out[i]->password = password ? strdup(password) : NULL;
+    if (password != NULL && out[i]->password == NULL)
+        goto oom;
+
+    /* Terminate the list. */
+    out[i + 1] = NULL;
+    return 0;
+
+oom:
+    if (out != NULL && out[i] != NULL) {
+        free(out[i]->identity);
+        free(out[i]);
+        out[i] = NULL;
+    }
+    return ENOMEM;
+}
+
+/*
+ * Return a password which we've associated with the named identity, if we've
+ * stored one.  Otherwise return NULL.
+ */
+const char *
+pkinit_find_deferred_id(pkinit_deferred_id *identities,
+                        const char *identity)
+{
+    int i;
+
+    for (i = 0; identities != NULL && identities[i] != NULL; i++) {
+        if (strcmp(identities[i]->identity, identity) == 0)
+            return identities[i]->password;
+    }
+    return NULL;
+}
+
+/*
+ * Return the flags associated with the specified identity, or 0 if we don't
+ * have such an identity.
+ */
+unsigned long
+pkinit_get_deferred_id_flags(pkinit_deferred_id *identities,
+                             const char *identity)
+{
+    int i;
+
+    for (i = 0; identities != NULL && identities[i] != NULL; i++) {
+        if (strcmp(identities[i]->identity, identity) == 0)
+            return identities[i]->ck_flags;
+    }
+    return 0;
+}
+
+/*
+ * Free a deferred_id list.
+ */
+void
+pkinit_free_deferred_ids(pkinit_deferred_id *identities)
+{
+    int i;
+
+    for (i = 0; identities != NULL && identities[i] != NULL; i++) {
+        free(identities[i]->identity);
+        free(identities[i]->password);
+        free(identities[i]);
+    }
+    free(identities);
+}

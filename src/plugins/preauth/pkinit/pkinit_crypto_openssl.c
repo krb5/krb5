@@ -510,6 +510,8 @@ pkinit_fini_identity_crypto(pkinit_identity_crypto_context idctx)
         return;
 
     pkiDebug("%s: freeing ctx at %p\n", __FUNCTION__, idctx);
+    if (idctx->deferred_ids != NULL)
+        pkinit_free_deferred_ids(idctx->deferred_ids);
     free(idctx->identity);
     pkinit_fini_certs(idctx);
     pkinit_fini_pkcs11(idctx);
@@ -4797,6 +4799,8 @@ crypto_load_certs(krb5_context context,
 {
     krb5_error_code retval;
 
+    id_cryptoctx->defer_id_prompt = defer_id_prompts;
+
     switch(idopts->idtype) {
     case IDTYPE_FILE:
         retval = pkinit_get_certs_fs(context, plg_cryptoctx,
@@ -6077,4 +6081,38 @@ pkinit_pkcs11_code_to_text(int err)
         return (pkcs11_errstrings[i].text);
     snprintf(uc, sizeof(uc), _("unknown code 0x%x"), err);
     return (uc);
+}
+
+/*
+ * Add an item to the pkinit_identity_crypto_context's list of deferred
+ * identities.
+ */
+krb5_error_code
+crypto_set_deferred_id(krb5_context context,
+                       pkinit_identity_crypto_context id_cryptoctx,
+                       const char *identity, const char *password)
+{
+    unsigned long flags;
+
+    flags = pkinit_get_deferred_id_flags(id_cryptoctx->deferred_ids,
+                                         identity);
+    return pkinit_set_deferred_id(&id_cryptoctx->deferred_ids,
+                                  identity, flags, password);
+}
+
+/*
+ * Retrieve a read-only copy of the pkinit_identity_crypto_context's list of
+ * deferred identities, sure to be valid only until the next time someone calls
+ * either pkinit_set_deferred_id() or crypto_set_deferred_id().
+ */
+const pkinit_deferred_id *
+crypto_get_deferred_ids(krb5_context context,
+                        pkinit_identity_crypto_context id_cryptoctx)
+{
+    pkinit_deferred_id *deferred;
+    const pkinit_deferred_id *ret;
+
+    deferred = id_cryptoctx->deferred_ids;
+    ret = (const pkinit_deferred_id *)deferred;
+    return ret;
 }
