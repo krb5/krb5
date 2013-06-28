@@ -433,7 +433,8 @@ krb5_error_code crypto_load_certs
 	pkinit_req_crypto_context req_cryptoctx,	/* IN */
 	pkinit_identity_opts *idopts,			/* IN */
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
-	krb5_principal princ);				/* IN */
+	krb5_principal princ,				/* IN */
+	krb5_boolean defer_id_prompts);			/* IN */
 
 /*
  * Free up information held from crypto_load_certs()

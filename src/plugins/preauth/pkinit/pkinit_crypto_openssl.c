@@ -4792,7 +4792,8 @@ crypto_load_certs(krb5_context context,
                   pkinit_req_crypto_context req_cryptoctx,
                   pkinit_identity_opts *idopts,
                   pkinit_identity_crypto_context id_cryptoctx,
-                  krb5_principal princ)
+                  krb5_principal princ,
+                  krb5_boolean defer_id_prompts)
 {
     krb5_error_code retval;
 

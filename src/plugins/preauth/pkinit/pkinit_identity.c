@@ -511,6 +511,11 @@ process_option_ca_crl(krb5_context context,
                                     idtype, catype, residual);
 }
 
+/*
+ * Load any identity information which doesn't require us to ask a controlling
+ * user any questions, and record the names of anything else which would
+ * require us to ask questions.
+ */
 krb5_error_code
 pkinit_identity_initialize(krb5_context context,
                            pkinit_plg_crypto_context plg_cryptoctx,
@@ -519,15 +524,15 @@ pkinit_identity_initialize(krb5_context context,
                            pkinit_identity_crypto_context id_cryptoctx,
                            krb5_clpreauth_callbacks cb,
                            krb5_clpreauth_rock rock,
-                           int do_matching,
                            krb5_principal princ)
 {
     krb5_error_code retval = EINVAL;
-    const char *signer_identity;
     int i;
 
     pkiDebug("%s: %p %p %p\n", __FUNCTION__, context, idopts, id_cryptoctx);
-    if (!(princ && krb5_principal_compare_any_realm (context, princ, krb5_anonymous_principal()))) {
+    if (!(princ &&
+          krb5_principal_compare_any_realm(context, princ,
+                                           krb5_anonymous_principal()))) {
         if (idopts == NULL || id_cryptoctx == NULL)
             goto errout;
 
@@ -561,11 +566,53 @@ pkinit_identity_initialize(krb5_context context,
             goto errout;
 
         retval = crypto_load_certs(context, plg_cryptoctx, req_cryptoctx,
-                                   idopts, id_cryptoctx, princ);
+                                   idopts, id_cryptoctx, princ, TRUE);
+        if (retval)
+            goto errout;
+    } else {
+        /* We're the anonymous principal. */
+        retval = 0;
+    }
+
+errout:
+    return retval;
+}
+
+/*
+ * Load identity information, including that which requires us to ask a
+ * controlling user any questions.  If we have PIN/password values which
+ * correspond to a given identity, use that, otherwise, if one is available,
+ * we'll use the prompter callback.
+ */
+krb5_error_code
+pkinit_identity_prompt(krb5_context context,
+                       pkinit_plg_crypto_context plg_cryptoctx,
+                       pkinit_req_crypto_context req_cryptoctx,
+                       pkinit_identity_opts *idopts,
+                       pkinit_identity_crypto_context id_cryptoctx,
+                       krb5_clpreauth_callbacks cb,
+                       krb5_clpreauth_rock rock,
+                       int do_matching,
+                       krb5_principal princ)
+{
+    krb5_error_code retval = EINVAL;
+    const char *signer_identity;
+    int i;
+
+    pkiDebug("%s: %p %p %p\n", __FUNCTION__, context, idopts, id_cryptoctx);
+    if (!(princ &&
+          krb5_principal_compare_any_realm(context, princ,
+                                           krb5_anonymous_principal()))) {
+        retval = crypto_load_certs(context, plg_cryptoctx, req_cryptoctx,
+                                   idopts, id_cryptoctx, princ, FALSE);
         if (retval)
             goto errout;
 
         if (do_matching) {
+            /*
+             * Try to select exactly one certificate based on matching
+             * criteria.  Typical used for clients.
+             */
             retval = pkinit_cert_matching(context, plg_cryptoctx,
                                           req_cryptoctx, id_cryptoctx, princ);
             if (retval) {
@@ -575,7 +622,10 @@ pkinit_identity_initialize(krb5_context context,
                 goto errout;
             }
         } else {
-            /* Tell crypto code to use the "default" */
+            /*
+             * Tell crypto code to use the "default" identity.  Typically used
+             * for KDCs.
+             */
             retval = crypto_cert_select_default(context, plg_cryptoctx,
                                                 req_cryptoctx, id_cryptoctx);
             if (retval) {
