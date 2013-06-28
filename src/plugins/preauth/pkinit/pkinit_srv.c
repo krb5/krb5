@@ -1299,7 +1299,12 @@ pkinit_server_plugin_init_realm(krb5_context context, const char *realmname,
 
     retval = pkinit_identity_initialize(context, plgctx->cryptoctx, NULL,
                                         plgctx->idopts, plgctx->idctx,
-                                        NULL, NULL, 0, NULL);
+                                        NULL, NULL, NULL);
+    if (retval)
+        goto errout;
+    retval = pkinit_identity_prompt(context, plgctx->cryptoctx, NULL,
+                                    plgctx->idopts, plgctx->idctx,
+                                    NULL, NULL, 0, NULL);
     if (retval)
         goto errout;
 

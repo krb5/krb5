@@ -288,6 +288,16 @@ krb5_error_code pkinit_identity_initialize
 	 pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
 	 krb5_clpreauth_callbacks cb,			/* IN/OUT */
 	 krb5_clpreauth_rock rock,			/* IN/OUT */
+	 krb5_principal princ);				/* IN (optional) */
+
+krb5_error_code pkinit_identity_prompt
+	(krb5_context context,				/* IN */
+	 pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
+	 pkinit_req_crypto_context req_cryptoctx,	/* IN */
+	 pkinit_identity_opts *idopts,			/* IN */
+	 pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
+	 krb5_clpreauth_callbacks cb,			/* IN/OUT */
+	 krb5_clpreauth_rock rock,			/* IN/OUT */
 	 int do_matching,				/* IN */
 	 krb5_principal princ);				/* IN (optional) */
 

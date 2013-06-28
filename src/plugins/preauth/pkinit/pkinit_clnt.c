@@ -1107,15 +1107,29 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     if (processing_request) {
         pkinit_client_profile(context, plgctx, reqctx, cb, rock,
                               &request->server->realm);
-        pkinit_identity_set_prompter(reqctx->idctx, prompter, prompter_data);
-        retval = pkinit_identity_initialize(context, plgctx->cryptoctx,
-                                            reqctx->cryptoctx, reqctx->idopts,
-                                            reqctx->idctx, cb, rock,
-                                            reqctx->do_identity_matching,
-                                            request->client);
+        retval = pkinit_identity_initialize(context, plgctx->cryptoctx, NULL,
+                                            reqctx->idopts, reqctx->idctx,
+                                            cb, rock, request->client);
         if (retval) {
             TRACE_PKINIT_CLIENT_NO_IDENTITY(context);
-            pkiDebug("pkinit_identity_initialize returned %d (%s)\n",
+            pkiDebug("pkinit_identity_prompt returned %d (%s)\n",
+                     retval, error_message(retval));
+            return retval;
+        }
+        /*
+         * Load identities (again, potentially), prompting, if we can, for
+         * anything for which we didn't get an answer from the responder
+         * callback.
+         */
+        pkinit_identity_set_prompter(reqctx->idctx, prompter, prompter_data);
+        retval = pkinit_identity_prompt(context, plgctx->cryptoctx,
+                                        reqctx->cryptoctx, reqctx->idopts,
+                                        reqctx->idctx, cb, rock,
+                                        reqctx->do_identity_matching,
+                                        request->client);
+        if (retval) {
+            TRACE_PKINIT_CLIENT_NO_IDENTITY(context);
+            pkiDebug("pkinit_identity_prompt returned %d (%s)\n",
                      retval, error_message(retval));
             return retval;
         }
