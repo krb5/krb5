@@ -86,6 +86,8 @@ struct _pkinit_identity_crypto_context {
     int cert_id_len;
     CK_MECHANISM_TYPE mech;
 #endif
+    krb5_boolean defer_id_prompt;
+    pkinit_deferred_id *deferred_ids;
 };
 
 struct _pkinit_plg_crypto_context {

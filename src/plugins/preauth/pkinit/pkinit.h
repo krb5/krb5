@@ -71,6 +71,7 @@ extern int longhorn;	    /* XXX Talking to a Longhorn server? */
 
 #define PKINIT_CTX_MAGIC	0x05551212
 #define PKINIT_REQ_CTX_MAGIC	0xdeadbeef
+#define PKINIT_DEFERRED_ID_MAGIC    0x3ca20d21
 
 #define PKINIT_DEFAULT_DH_MIN_BITS  2048
 #define PKINIT_DH_MIN_CONFIG_BITS   1024
@@ -307,6 +308,26 @@ krb5_error_code pkinit_cert_matching
 	pkinit_req_crypto_context req_cryptoctx,
 	pkinit_identity_crypto_context id_cryptoctx,
 	krb5_principal princ);
+
+/*
+ * Client's list of identities for which it needs PINs or passwords
+ */
+struct _pkinit_deferred_id {
+    int magic;
+    char *identity;
+    unsigned long ck_flags;
+    char *password;
+};
+typedef struct _pkinit_deferred_id *pkinit_deferred_id;
+
+krb5_error_code pkinit_set_deferred_id
+	(pkinit_deferred_id **identities, const char *identity,
+	 unsigned long ck_flags, const char *password);
+const char * pkinit_find_deferred_id
+	(pkinit_deferred_id *identities, const char *identity);
+unsigned long pkinit_get_deferred_id_flags
+	(pkinit_deferred_id *identities, const char *identity);
+void pkinit_free_deferred_ids(pkinit_deferred_id *identities);
 
 /*
  * initialization and free functions
