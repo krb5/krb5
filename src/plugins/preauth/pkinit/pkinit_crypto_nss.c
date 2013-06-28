@@ -2109,6 +2109,13 @@ crypto_load_pkcs11(krb5_context context,
     if (idopts == NULL)
         return SECFailure;
 
+    /* If no module is specified, use the default module from pkinit.h. */
+    if (idopts->p11_module_name == NULL) {
+        idopts->p11_module_name = strdup(PKCS11_MODNAME);
+        if (idopts->p11_module_name == NULL)
+            return SECFailure;
+    }
+
     /* Build the module spec. */
     spec_size = strlen("library=''") + strlen(idopts->p11_module_name) * 2 + 1;
     spec = PORT_ArenaZAlloc(id_cryptoctx->pool, spec_size);
