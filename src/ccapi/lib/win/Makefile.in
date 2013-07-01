@@ -25,7 +25,6 @@ OBJS	= $(OUTPRE)ccapi_ccache.obj \
           $(OUTPRE)client.obj \
           $(OUTPRE)dllmain.obj \
           $(OUTPRE)init.obj \
-          $(OUTPRE)rpc.obj \
           $(OUTPRE)secure.obj \
           $(OUTPRE)tls.obj \
           $(OUTPRE)util.obj \
