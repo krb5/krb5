@@ -4,7 +4,7 @@ KDC preauthentication interface (kdcpreauth)
 The kdcpreauth interface allows the addition of KDC support for
 preauthentication mechanisms beyond those included in the core MIT
 krb5 code base.  For a detailed description of the kdcpreauth
-interface, see the header file ``<krb5/preauth_plugin.h>``.
+interface, see the header file ``<krb5/kdcpreauth_plugin.h>``.
 
 A kdcpreauth module is generally responsible for:
 
