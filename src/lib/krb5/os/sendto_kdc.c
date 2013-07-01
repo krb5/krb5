@@ -1090,9 +1090,9 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
             nread = SOCKET_READ(conn->fd,
                                 conn->x.in.bufsizebytes + conn->x.in.bufsizebytes_read,
                                 4 - conn->x.in.bufsizebytes_read);
-            if (nread < 0) {
+            if (nread <= 0) {
+                e = nread ? SOCKET_ERRNO : ECONNRESET;
                 TRACE_SENDTO_KDC_TCP_ERROR_RECV_LEN(context, conn, e);
-                e = SOCKET_ERRNO;
                 goto kill_conn;
             }
             conn->x.in.bufsizebytes_read += nread;
