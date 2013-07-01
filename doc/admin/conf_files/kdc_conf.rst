@@ -180,9 +180,10 @@ For each realm, the following tags may be specified:
 
 **dict_file**
     (String.)  Location of the dictionary file containing strings that
-    are not allowed as passwords.  If none is specified or if there is
-    no policy assigned to the principal, no dictionary checks of
-    passwords will be performed.
+    are not allowed as passwords.  The file should contain one string
+    per line, with no additional whitespace.  If none is specified or
+    if there is no policy assigned to the principal, no dictionary
+    checks of passwords will be performed.
 
 **host_based_services**
     (Whitespace- or comma-separated list.)  Lists services which will
