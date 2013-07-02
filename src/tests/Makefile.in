@@ -86,6 +86,7 @@ check-pytests:: hist
 #	$(RUNPYTEST) $(srcdir)/kdc_realm/kdcref.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2012-1014.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2012-1015.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_cve-2013-1417.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) krb5.conf kdc.conf
