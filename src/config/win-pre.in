@@ -165,9 +165,15 @@ LOPTS=$(LOPTS) -debug
 !endif
 CCOPTS=/Os /MD $(CCOPTS)
 LOPTS=$(LOPTS)
+!ifdef DEBUG_SYMBOL
+INSTALLDBGSYMS=copy
+!else
+INSTALLDBGSYMS=rem
+!endif
 !else
 CCOPTS=/Od $(DEBUGOPT) /MDd $(CCOPTS)
 LOPTS=$(LOPTS) -debug
+INSTALLDBGSYMS=copy
 !endif
 
 # XXX - NOTE: We should probably use DllMainCRTStartup
