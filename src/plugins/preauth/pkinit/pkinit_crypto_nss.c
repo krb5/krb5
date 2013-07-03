@@ -2731,8 +2731,9 @@ crypto_load_files(krb5_context context,
             return SECFailure;
         cobj->obj = PK11_CreateGenericObject(slot, attrs, n_attrs, permanent);
         if (cobj->obj == NULL) {
-            pkiDebug("%s: error loading %scertificate \"%s\"\n",
-                     __FUNCTION__, cert_mark_trusted ? "CA " : "", certfile);
+            pkiDebug("%s: error loading %scertificate \"%s\": %s\n",
+                     __FUNCTION__, cert_mark_trusted ? "CA " : "", certfile,
+                     PORT_ErrorToName(PORT_GetError()));
             status = SECFailure;
         } else {
             pkiDebug("%s: loaded %scertificate \"%s\"\n",
@@ -3102,9 +3103,9 @@ crypto_load_certs(krb5_context context,
                                    idopts->key_filename,
                                    NULL, PR_TRUE, PR_FALSE, id_cryptoctx);
         if (status != SECSuccess) {
-            pkiDebug("%s: error loading files \"%s\" and \"%s\"\n",
+            pkiDebug("%s: error loading files \"%s\" and \"%s\": %s\n",
                      __FUNCTION__, idopts->cert_filename,
-                     idopts->key_filename);
+                     idopts->key_filename, PORT_ErrorToName(PORT_GetError()));
             return defer_id_prompts ? 0 : ENOMEM;
         }
         return 0;
@@ -3116,8 +3117,9 @@ crypto_load_certs(krb5_context context,
                                    req_cryptoctx,
                                    idopts->cert_filename, id_cryptoctx);
         if (status != SECSuccess) {
-            pkiDebug("%s: error loading NSS certdb \"%s\"\n",
-                     __FUNCTION__, idopts->cert_filename);
+            pkiDebug("%s: error loading NSS certdb \"%s\": %s\n",
+                     __FUNCTION__, idopts->cert_filename,
+                     PORT_ErrorToName(PORT_GetError()));
             return ENOMEM;
         }
         return 0;
@@ -3130,8 +3132,9 @@ crypto_load_certs(krb5_context context,
                                  idopts->cert_filename,
                                  PR_TRUE, PR_FALSE, PR_FALSE, id_cryptoctx);
         if (status != SECSuccess) {
-            pkiDebug("%s: error loading directory \"%s\"\n",
-                     __FUNCTION__, idopts->cert_filename);
+            pkiDebug("%s: error loading directory \"%s\": %s\n",
+                     __FUNCTION__, idopts->cert_filename,
+                     PORT_ErrorToName(PORT_GetError()));
             return defer_id_prompts ? 0 : ENOMEM;
         }
         return 0;
@@ -3142,8 +3145,9 @@ crypto_load_certs(krb5_context context,
                                     plg_cryptoctx,
                                     req_cryptoctx, idopts, id_cryptoctx);
         if (status != SECSuccess) {
-            pkiDebug("%s: error loading module \"%s\"\n",
-                     __FUNCTION__, idopts->p11_module_name);
+            pkiDebug("%s: error loading module \"%s\": %s\n",
+                     __FUNCTION__, idopts->p11_module_name,
+                     PORT_ErrorToName(PORT_GetError()));
             return ENOMEM;
         }
         return 0;
