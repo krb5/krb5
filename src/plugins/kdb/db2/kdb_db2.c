@@ -620,16 +620,14 @@ krb5_db2_unlock(krb5_context context)
 {
     krb5_db2_context *db_ctx;
     DB     *db;
-    krb5_error_code retval;
+    krb5_error_code retval, retval2;
 
     if (!k5db2_inited(context))
         return KRB5_KDB_DBNOTINITED;
 
     db_ctx = context->dal_handle->db_context;
 
-    if ((retval = osa_adb_release_lock(db_ctx->policy_db))) {
-        return retval;
-    }
+    retval = osa_adb_release_lock(db_ctx->policy_db);
 
     if (!db_ctx->db_locks_held) /* lock already unlocked */
         return KRB5_KDB_NOTLOCKED;
@@ -637,13 +635,18 @@ krb5_db2_unlock(krb5_context context)
     if (--(db_ctx->db_locks_held) == 0) {
         (*db->close) (db);
         db_ctx->db = NULL;
-
-        retval = krb5_lock_file(context, db_ctx->db_lf_file,
-                                KRB5_LOCKMODE_UNLOCK);
         db_ctx->db_lock_mode = 0;
-        return (retval);
+
+        retval2 = krb5_lock_file(context, db_ctx->db_lf_file,
+                                 KRB5_LOCKMODE_UNLOCK);
+        if (retval2)
+            return retval2;
     }
-    return 0;
+
+    /* We may be unlocking because osa_adb_get_lock() failed. */
+    if (retval == OSA_ADB_NOTLOCKED)
+        return 0;
+    return retval;
 }
 
 /* Create the database, assuming it's not there. */
