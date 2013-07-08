@@ -851,6 +851,9 @@ pkinit_init_pkcs11(pkinit_identity_crypto_context ctx)
     ctx->slotid = PK_NOSLOT;
     ctx->token_label = NULL;
     ctx->cert_label = NULL;
+    /* Support CA inside token */
+    ctx->cacert_label = NULL;
+    /* End Support CA inside token */
     ctx->session = CK_INVALID_HANDLE;
     ctx->p11 = NULL;
 #endif
@@ -883,6 +886,10 @@ pkinit_fini_pkcs11(pkinit_identity_crypto_context ctx)
     free(ctx->token_label);
     free(ctx->cert_id);
     free(ctx->cert_label);
+    /* Support CA inside token */
+    free(ctx->cacert_id);
+    free(ctx->cacert_label);
+    /* End Support CA inside token */
 #endif
 }
 
@@ -5376,6 +5383,339 @@ cleanup:
     return retval;
 }
 
+#ifndef WITHOUT_PKCS11
+static krb5_error_code
+load_cas_and_crls_pkcs11(krb5_context context,
+                  pkinit_plg_crypto_context plg_cryptoctx,
+                  pkinit_req_crypto_context req_cryptoctx,
+                  pkinit_identity_opts *idopts,
+                  pkinit_identity_crypto_context id_cryptoctx,
+                  int catype,
+                  char *filename)
+{
+    CK_OBJECT_CLASS cls;
+    CK_OBJECT_HANDLE obj;
+    CK_ATTRIBUTE attrs[4];
+    CK_ULONG count;
+    CK_CERTIFICATE_TYPE certtype;
+    CK_BYTE_PTR cacert = NULL, cacert_id;
+    const unsigned char *cp;
+    int r;
+    unsigned int nattrs;
+    X509 *x = NULL;
+
+
+    STACK_OF(X509_INFO) *sk = NULL;
+    STACK_OF(X509) *ca_certs = NULL;
+    STACK_OF(X509_CRL) *ca_crls = NULL;
+    BIO *in = NULL;
+    krb5_error_code retval = ENOMEM;
+    int i = 0;
+
+
+    /* Copy stuff from idopts -> id_cryptoctx */
+    if (idopts->p11_module_name != NULL) {
+        id_cryptoctx->p11_module_name = strdup(idopts->p11_module_name);
+        if (id_cryptoctx->p11_module_name == NULL)
+            return ENOMEM;
+    }
+    if (idopts->token_label != NULL) {
+        id_cryptoctx->token_label = strdup(idopts->token_label);
+        if (id_cryptoctx->token_label == NULL)
+            return ENOMEM;
+    }
+    if (idopts->cacert_label != NULL) {
+        id_cryptoctx->cacert_label = strdup(idopts->cacert_label);
+        if (id_cryptoctx->cacert_label == NULL)
+            return ENOMEM;
+    }
+    /* Convert the ascii cacert_id string into a binary blob */
+    if (idopts->cacert_id_string != NULL) {
+        BIGNUM *bn = NULL;
+        BN_hex2bn(&bn, idopts->cacert_id_string);
+        if (bn == NULL)
+            return ENOMEM;
+        id_cryptoctx->cacert_id_len = BN_num_bytes(bn);
+        id_cryptoctx->cacert_id = malloc((size_t) id_cryptoctx->cacert_id_len);
+        if (id_cryptoctx->cacert_id == NULL) {
+            BN_free(bn);
+            return ENOMEM;
+        }
+        BN_bn2bin(bn, id_cryptoctx->cacert_id);
+        BN_free(bn);
+    }
+    id_cryptoctx->slotid = idopts->slotid;
+    id_cryptoctx->pkcs11_method = 1;
+
+    if (pkinit_open_session(context, id_cryptoctx)) {
+        pkiDebug("can't open pkcs11 session\n");
+        return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+
+    cls = CKO_CERTIFICATE;
+    attrs[0].type = CKA_CLASS;
+    attrs[0].pValue = &cls;
+    attrs[0].ulValueLen = sizeof cls;
+
+    certtype = CKC_X_509;
+    attrs[1].type = CKA_CERTIFICATE_TYPE;
+    attrs[1].pValue = &certtype;
+    attrs[1].ulValueLen = sizeof certtype;
+
+    nattrs = 2;
+
+    /* If a cacert id and/or label were given, use them too */
+    if (id_cryptoctx->cacert_id_len > 0) {
+        attrs[nattrs].type = CKA_ID;
+        attrs[nattrs].pValue = id_cryptoctx->cacert_id;
+        attrs[nattrs].ulValueLen = id_cryptoctx->cacert_id_len;
+        nattrs++;
+    }
+    if (id_cryptoctx->cacert_label != NULL) {
+        attrs[nattrs].type = CKA_LABEL;
+        attrs[nattrs].pValue = id_cryptoctx->cacert_label;
+        attrs[nattrs].ulValueLen = strlen(id_cryptoctx->cacert_label);
+        nattrs++;
+    }
+
+    /* If there isn't already a stack in the context,
+     * create a temporary one now */
+    switch(catype) {
+    case CATYPE_ANCHORS:
+        if (id_cryptoctx->trustedCAs != NULL)
+            ca_certs = id_cryptoctx->trustedCAs;
+        else {
+            ca_certs = sk_X509_new_null();
+            if (ca_certs == NULL)
+                return ENOMEM;
+        }
+        break;
+    case CATYPE_INTERMEDIATES:
+        if (id_cryptoctx->intermediateCAs != NULL)
+            ca_certs = id_cryptoctx->intermediateCAs;
+        else {
+            ca_certs = sk_X509_new_null();
+            if (ca_certs == NULL)
+                return ENOMEM;
+        }
+        break;
+    /*
+    case CATYPE_CRLS:
+        if (id_cryptoctx->revoked != NULL)
+            ca_crls = id_cryptoctx->revoked;
+        else {
+            ca_crls = sk_X509_CRL_new_null();
+            if (ca_crls == NULL)
+                return ENOMEM;
+        }
+        break;
+    */
+    default:
+        return ENOTSUP;
+    }
+
+    r = id_cryptoctx->p11->C_FindObjectsInit(id_cryptoctx->session, attrs,nattrs);
+    if (r != CKR_OK) {
+        pkiDebug("C_FindObjectsInit: %s\n", pkinit_pkcs11_code_to_text(r));
+        return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+
+    for (i = 0; ; i++) {
+        if (i >= MAX_CREDS_ALLOWED)
+            return KRB5KDC_ERR_PREAUTH_FAILED;
+
+        /* Look for x.509 cert */
+        if ((r = id_cryptoctx->p11->C_FindObjects(id_cryptoctx->session,
+                                                  &obj, 1, &count)) != CKR_OK || count <= 0) {
+            id_cryptoctx->creds[i] = NULL;
+            break;
+        }
+
+        /* Get cert and id len */
+        attrs[0].type = CKA_VALUE;
+        attrs[0].pValue = NULL;
+        attrs[0].ulValueLen = 0;
+
+        attrs[1].type = CKA_ID;
+        attrs[1].pValue = NULL;
+        attrs[1].ulValueLen = 0;
+
+        if ((r = id_cryptoctx->p11->C_GetAttributeValue(id_cryptoctx->session,
+                                                        obj, attrs, 2)) != CKR_OK && r != CKR_BUFFER_TOO_SMALL) {
+            pkiDebug("C_GetAttributeValue: %s\n", pkinit_pkcs11_code_to_text(r));
+            return KRB5KDC_ERR_PREAUTH_FAILED;
+        }
+        cacert = (CK_BYTE_PTR) malloc((size_t) attrs[0].ulValueLen + 1);
+        cacert_id = (CK_BYTE_PTR) malloc((size_t) attrs[1].ulValueLen + 1);
+        if (cacert == NULL || cacert_id == NULL)
+            return ENOMEM;
+
+        /* Read the cert and id off the card */
+
+        attrs[0].type = CKA_VALUE;
+        attrs[0].pValue = cacert;
+
+        attrs[1].type = CKA_ID;
+        attrs[1].pValue = cacert_id;
+
+        if ((r = id_cryptoctx->p11->C_GetAttributeValue(id_cryptoctx->session,
+                                                        obj, attrs, 2)) != CKR_OK) {
+            pkiDebug("C_GetAttributeValue: %s\n", pkinit_pkcs11_code_to_text(r));
+            return KRB5KDC_ERR_PREAUTH_FAILED;
+        }
+
+        pkiDebug("cacert %d size %d cacert_id %d idlen %d\n", i,
+                 (int) attrs[0].ulValueLen, (int) cacert_id[0],
+                 (int) attrs[1].ulValueLen);
+
+        cp = (unsigned char *) cacert;
+        x = d2i_X509(NULL, &cp, (int) attrs[0].ulValueLen);
+        if (x == NULL)
+            return KRB5KDC_ERR_PREAUTH_FAILED;
+
+        /* Let's construct our trust chain */
+        switch(catype) {
+        case CATYPE_ANCHORS:
+            //Look for certificate with subject = issuer (Root CA)
+            if (X509_NAME_cmp(X509_get_issuer_name(x), X509_get_subject_name(x)) == 0){
+                //Check for basicConstraint CA:TRUE and keyUsage certSign
+                if (X509_check_ca(x) == 1){
+                    pkiDebug("Found anchor which looks like a RootCA\n");
+                    sk_X509_push(ca_certs, X509_dup(x));
+                }
+            }
+            break;
+        case CATYPE_INTERMEDIATES:
+            //Look for certificate with subject != issuer (Intermediate CA)
+            if (X509_NAME_cmp(X509_get_issuer_name(x), X509_get_subject_name(x)) != 0){
+                //Check for basicConstraint CA:TRUE and keyUsage certSign
+                if (X509_check_ca(x) == 1){
+                    pkiDebug("Found intermediate cert which looks like a CA\n");
+                    sk_X509_push(ca_certs, X509_dup(x));
+                }
+            }
+            break;
+        default:
+            return ENOTSUP;
+        }
+
+
+    }
+    id_cryptoctx->p11->C_FindObjectsFinal(id_cryptoctx->session);
+//    return 0;
+//END
+
+    /* This loads from a file, a stack of x509/crl/pkey sets */
+    /*
+    if ((sk = PEM_X509_INFO_read_bio(in, NULL, NULL, NULL)) == NULL) {
+        pkiDebug("%s: error reading file '%s'\n", __FUNCTION__, filename);
+        retval = EIO;
+        goto cleanup;
+    }
+    */
+
+    /* scan over the stack created from loading the file contents,
+     * weed out duplicates, and push new ones onto the return stack
+     */
+    /*
+    for (i = 0; i < sk_X509_INFO_num(sk); i++) {
+        X509_INFO *xi = sk_X509_INFO_value(sk, i);
+        if (xi != NULL && xi->x509 != NULL && catype != CATYPE_CRLS) {
+            int j = 0, size = sk_X509_num(ca_certs), flag = 0;
+
+            if (!size) {
+                sk_X509_push(ca_certs, xi->x509);
+                xi->x509 = NULL;
+                continue;
+            }
+            for (j = 0; j < size; j++) {
+                X509 *x = sk_X509_value(ca_certs, j);
+                flag = X509_cmp(x, xi->x509);
+                if (flag == 0)
+                    break;
+                else
+                    continue;
+            }
+            if (flag != 0) {
+                sk_X509_push(ca_certs, X509_dup(xi->x509));
+            }
+        } else if (xi != NULL && xi->crl != NULL && catype == CATYPE_CRLS) {
+            int j = 0, size = sk_X509_CRL_num(ca_crls), flag = 0;
+            if (!size) {
+                sk_X509_CRL_push(ca_crls, xi->crl);
+                xi->crl = NULL;
+                continue;
+            }
+            for (j = 0; j < size; j++) {
+                X509_CRL *x = sk_X509_CRL_value(ca_crls, j);
+                flag = X509_CRL_cmp(x, xi->crl);
+                if (flag == 0)
+                    break;
+                else
+                    continue;
+            }
+            if (flag != 0) {
+                sk_X509_CRL_push(ca_crls, X509_CRL_dup(xi->crl));
+            }
+        }
+    }
+    */
+
+    /* If we added something and there wasn't a stack in the
+     * context before, add the temporary stack to the context.
+     */
+    switch(catype) {
+    case CATYPE_ANCHORS:
+        if (sk_X509_num(ca_certs) == 0) {
+            pkiDebug("no anchors in token, %s\n", filename);
+            if (id_cryptoctx->trustedCAs == NULL)
+                sk_X509_free(ca_certs);
+        } else {
+            if (id_cryptoctx->trustedCAs == NULL)
+                id_cryptoctx->trustedCAs = ca_certs;
+        }
+        break;
+    case CATYPE_INTERMEDIATES:
+        if (sk_X509_num(ca_certs) == 0) {
+            pkiDebug("no intermediates in file, %s\n", filename);
+            if (id_cryptoctx->intermediateCAs == NULL)
+                sk_X509_free(ca_certs);
+        } else {
+            if (id_cryptoctx->intermediateCAs == NULL)
+                id_cryptoctx->intermediateCAs = ca_certs;
+        }
+        break;
+    /*
+    case CATYPE_CRLS:
+        if (sk_X509_CRL_num(ca_crls) == 0) {
+            pkiDebug("no crls in file, %s\n", filename);
+            if (id_cryptoctx->revoked == NULL)
+                sk_X509_CRL_free(ca_crls);
+        } else {
+            if (id_cryptoctx->revoked == NULL)
+                id_cryptoctx->revoked = ca_crls;
+        }
+        break;
+    */
+    default:
+        /* Should have been caught above! */
+        retval = EINVAL;
+        goto cleanup;
+        break;
+    }
+
+    retval = 0;
+
+cleanup:
+    if (sk != NULL)
+        sk_X509_INFO_pop_free(sk, X509_INFO_free);
+
+    return retval;
+}
+#endif
+
+
+
 static krb5_error_code
 load_cas_and_crls_dir(krb5_context context,
                       pkinit_plg_crypto_context plg_cryptoctx,
@@ -5443,6 +5783,12 @@ crypto_load_cas_and_crls(krb5_context context,
         return load_cas_and_crls(context, plg_cryptoctx, req_cryptoctx,
                                  id_cryptoctx, catype, id);
         break;
+#ifndef WITHOUT_PKCS11
+    case IDTYPE_PKCS11:
+        return load_cas_and_crls_pkcs11(context, plg_cryptoctx, req_cryptoctx,
+                                 idopts, id_cryptoctx, catype, id);
+        break;
+#endif
     case IDTYPE_DIR:
         return load_cas_and_crls_dir(context, plg_cryptoctx, req_cryptoctx,
                                      id_cryptoctx, catype, id);

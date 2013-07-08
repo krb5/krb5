@@ -135,6 +135,9 @@ pkinit_init_identity_opts(pkinit_identity_opts **idopts)
     opts->token_label = NULL;
     opts->cert_id_string = NULL;
     opts->cert_label = NULL;
+    /* Support CA inside token */
+    opts->cacert_id_string = NULL;
+    opts->cacert_label = NULL;
 #endif
 
     *idopts = opts;
@@ -218,6 +221,18 @@ pkinit_dup_identity_opts(pkinit_identity_opts *src_opts,
         if (newopts->cert_label == NULL)
             goto cleanup;
     }
+    /* Support CA inside token */
+    if (src_opts->cacert_id_string != NULL) {
+        newopts->cacert_id_string = strdup(src_opts->cacert_id_string);
+        if (newopts->cacert_id_string == NULL)
+            goto cleanup;
+    }
+
+    if (src_opts->cacert_label != NULL) {
+        newopts->cacert_label = strdup(src_opts->cacert_label);
+        if (newopts->cacert_label == NULL)
+            goto cleanup;
+    }
 #endif
 
 
@@ -248,6 +263,9 @@ pkinit_fini_identity_opts(pkinit_identity_opts *idopts)
     free(idopts->token_label);
     free(idopts->cert_id_string);
     free(idopts->cert_label);
+    /* Support CA inside token */
+    free(idopts->cacert_id_string);
+    free(idopts->cacert_label);
 #endif
     free(idopts);
 }
@@ -311,6 +329,75 @@ parse_pkcs11_options(krb5_context context,
             free(idopts->cert_label);
             idopts->cert_label = strdup(vp);
             if (idopts->cert_label == NULL)
+                goto cleanup;
+        }
+    }
+    retval = 0;
+cleanup:
+    free(s);
+    return retval;
+}
+#endif
+
+#ifndef WITHOUT_PKCS11
+static krb5_error_code
+parse_pkcs11_ca_options(krb5_context context,
+                     pkinit_identity_opts *idopts,
+                     const char *residual)
+{
+    char *s, *cp, *vp, *save;
+    krb5_error_code retval = ENOMEM;
+
+    if (residual == NULL || residual[0] == '\0')
+        return 0;
+
+    /* Split string into attr=value substrings */
+    s = strdup(residual);
+    if (s == NULL)
+        return retval;
+
+    for (cp = strtok_r(s, ":", &save); cp; cp = strtok_r(NULL, ":", &save)) {
+        vp = strchr(cp, '=');
+
+        /* If there is no "=", this is a pkcs11 module name */
+        if (vp == NULL) {
+            free(idopts->p11_module_name);
+            idopts->p11_module_name = strdup(cp);
+            if (idopts->p11_module_name == NULL)
+                goto cleanup;
+            continue;
+        }
+        *vp++ = '\0';
+        if (!strcmp(cp, "module_name")) {
+            free(idopts->p11_module_name);
+            idopts->p11_module_name = strdup(vp);
+            if (idopts->p11_module_name == NULL)
+                goto cleanup;
+        } else if (!strcmp(cp, "slotid")) {
+            long slotid = strtol(vp, NULL, 10);
+            if ((slotid == LONG_MIN || slotid == LONG_MAX) && errno != 0) {
+                retval = EINVAL;
+                goto cleanup;
+            }
+            if ((long) (int) slotid != slotid) {
+                retval = EINVAL;
+                goto cleanup;
+            }
+            idopts->slotid = slotid;
+        } else if (!strcmp(cp, "token")) {
+            free(idopts->token_label);
+            idopts->token_label = strdup(vp);
+            if (idopts->token_label == NULL)
+                goto cleanup;
+        } else if (!strcmp(cp, "cacertid")) {
+            free(idopts->cacert_id_string);
+            idopts->cacert_id_string = strdup(vp);
+            if (idopts->cacert_id_string == NULL)
+                goto cleanup;
+        } else if (!strcmp(cp, "cacertlabel")) {
+            free(idopts->cacert_label);
+            idopts->cacert_label = strdup(vp);
+            if (idopts->cacert_label == NULL)
                 goto cleanup;
         }
     }
@@ -482,6 +569,9 @@ process_option_ca_crl(krb5_context context,
     char *residual;
     unsigned int typelen;
     int idtype;
+    /* Support CA inside token */
+    krb5_error_code retval = ENOMEM;
+
 
     pkiDebug("%s: processing catype %s, value '%s'\n",
              __FUNCTION__, catype2string(catype), value);
@@ -494,6 +584,15 @@ process_option_ca_crl(krb5_context context,
     typelen = residual - value;
     if (strncmp(value, "FILE:", typelen) == 0) {
         idtype = IDTYPE_FILE;
+#ifndef WITHOUT_PKCS11
+    /* Support CA inside token */
+    } else if (strncmp(value, "PKCS11:", typelen) == 0) {
+        idtype = IDTYPE_PKCS11;
+        retval = parse_pkcs11_ca_options(context, idopts, residual);
+        if (retval) {
+            return retval;
+        }
+#endif
     } else if (strncmp(value, "DIR:", typelen) == 0) {
         idtype = IDTYPE_DIR;
 #ifdef PKINIT_CRYPTO_IMPL_NSS
