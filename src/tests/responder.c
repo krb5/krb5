@@ -40,6 +40,7 @@
  *                         "question=answer"
  *   -c                 -> print the pkinit challenge
  *   -p identity=pin    -> provide a pkinit answer, in the form "identity=pin"
+ *   -o index=value:pin -> provide an OTP answer, in the form "index=value:pin"
  *   principal          -> client principal name
  *
  *  If the responder callback isn't called, that's treated as an error.
@@ -68,13 +69,14 @@ struct responder_data {
     const char *challenge;
     const char *response;
     const char *pkinit_answer;
+    const char *otp_answer;
 };
 
 static krb5_error_code
 responder(krb5_context ctx, void *rawdata, krb5_responder_context rctx)
 {
     krb5_error_code err;
-    char *key, *value, *encoded1, *encoded2;
+    char *key, *value, *pin, *encoded1, *encoded2;
     const char *challenge;
     k5_json_value decoded1, decoded2;
     k5_json_object ids;
@@ -82,6 +84,7 @@ responder(krb5_context ctx, void *rawdata, krb5_responder_context rctx)
     krb5_int32 token_flags;
     struct responder_data *data = rawdata;
     krb5_responder_pkinit_challenge *chl;
+    krb5_responder_otp_challenge *ochl;
     unsigned int i, n;
 
     data->called = TRUE;
@@ -161,14 +164,13 @@ responder(krb5_context ctx, void *rawdata, krb5_responder_context rctx)
         free(key);
     }
 
-    /* Read the challenge, formatted as a structure. */
-    err = krb5_responder_pkinit_get_challenge(ctx, rctx, &chl);
-    if (err != 0) {
-        fprintf(stderr, "error getting pkinit challenge\n");
-        exit(1);
-    }
-
     if (data->print_pkinit_challenge) {
+        /* Read the PKINIT challenge, formatted as a structure. */
+        err = krb5_responder_pkinit_get_challenge(ctx, rctx, &chl);
+        if (err != 0) {
+            fprintf(stderr, "error getting pkinit challenge\n");
+            exit(1);
+        }
         if (chl != NULL) {
             for (n = 0; chl->identities[n] != NULL; n++)
                 continue;
@@ -183,10 +185,17 @@ responder(krb5_context ctx, void *rawdata, krb5_responder_context rctx)
                 }
             }
         }
+        krb5_responder_pkinit_challenge_free(ctx, rctx, chl);
     }
 
     /* Provide a particular response for the PKINIT challenge. */
     if (data->pkinit_answer != NULL) {
+        /* Read the PKINIT challenge, formatted as a structure. */
+        err = krb5_responder_pkinit_get_challenge(ctx, rctx, &chl);
+        if (err != 0) {
+            fprintf(stderr, "error getting pkinit challenge\n");
+            exit(1);
+        }
         /*
          * In case order matters, if the identity starts with "FILE:", exercise
          * the set_answer function, with the real answer second.
@@ -222,9 +231,8 @@ responder(krb5_context ctx, void *rawdata, krb5_responder_context rctx)
             if (strncmp(chl->identities[0]->identity, "PKCS12:", 5) == 0)
                 krb5_responder_pkinit_set_answer(ctx, rctx, "foo", "bar");
         }
+        krb5_responder_pkinit_challenge_free(ctx, rctx, chl);
     }
-
-    krb5_responder_pkinit_challenge_free(ctx, rctx, chl);
 
     /*
      * Something we always check: read the PKINIT challenge, both as a
@@ -271,6 +279,34 @@ responder(krb5_context ctx, void *rawdata, krb5_responder_context rctx)
         }
         krb5_responder_pkinit_challenge_free(ctx, rctx, chl);
         free(encoded1);
+    }
+
+    /* Provide a particular response for an OTP challenge. */
+    if (data->otp_answer != NULL) {
+        if (krb5_responder_otp_get_challenge(ctx, rctx, &ochl) == 0) {
+            key = strchr(data->otp_answer, '=');
+            if (key != NULL) {
+                /* Make a copy of the answer that we can chop up. */
+                key = strdup(data->otp_answer);
+                if (key == NULL)
+                    return ENOMEM;
+                /* Isolate the ti value. */
+                value = strchr(key, '=');
+                *value++ = '\0';
+                n = atoi(key);
+                /* Break the value and PIN apart. */
+                pin = strchr(value, ':');
+                if (pin != NULL)
+                    *pin++ = '\0';
+                err = krb5_responder_otp_set_answer(ctx, rctx, n, value, pin);
+                if (err != 0) {
+                    fprintf(stderr, "error setting response\n");
+                    exit(1);
+                }
+                free(key);
+            }
+            krb5_responder_otp_challenge_free(ctx, rctx, ochl);
+        }
     }
 
     return 0;
@@ -346,6 +382,10 @@ main(int argc, char **argv)
         case 'p':
             /* Set a PKINIT answer for a specific PKINIT identity. */
             response.pkinit_answer = optarg;
+            break;
+        case 'o':
+            /* Set an OTP answer for a specific OTP tokeninfo. */
+            response.otp_answer = optarg;
             break;
         }
     }
