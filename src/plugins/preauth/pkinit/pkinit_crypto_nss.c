@@ -2985,7 +2985,12 @@ crypto_free_cert_info(krb5_context context,
                       pkinit_req_crypto_context req_cryptoctx,
                       pkinit_identity_crypto_context id_cryptoctx)
 {
-    return 0;   /* Maybe should we nuke the id_certs list here? */
+    /* Mimic the OpenSSL-based implementation's check first. */
+    if (id_cryptoctx == NULL)
+        return EINVAL;
+
+    /* Maybe should we nuke the id_certs list here? */
+    return 0;
 }
 
 /* Count how many candidate "self" certificates and keys we have.  We could as
