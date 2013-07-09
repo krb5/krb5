@@ -287,6 +287,10 @@ Options:
 **-randkey**
     Sets the key of the principal to a random value.
 
+**-nokey**
+    Causes the principal to be created with no key.  New in release
+    1.12.
+
 **-pw** *password*
     Sets the password of the principal to the specified string and
     does not prompt for a password.  Note: using this option in a
@@ -450,11 +454,13 @@ Example:
 purgekeys
 ~~~~~~~~~
 
-    **purgekeys** [**-keepkvno** *oldest_kvno_to_keep*] *principal*
+    **purgekeys** [**-all**\|\ **-keepkvno** *oldest_kvno_to_keep*] *principal*
 
 Purges previously retained old keys (e.g., from **change_password
 -keepold**) from *principal*.  If **-keepkvno** is specified, then
-only purges keys with kvnos lower than *oldest_kvno_to_keep*.
+only purges keys with kvnos lower than *oldest_kvno_to_keep*.  If
+**-all** is specified, then all keys are purged.  The **-all** option
+is new in release 1.12.
 
 This command requires the **modify** privilege.
 

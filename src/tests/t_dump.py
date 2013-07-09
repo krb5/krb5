@@ -78,6 +78,9 @@ def load_dump_check_compare(realm, opt, srcfile):
     out = realm.run_kadminl('getprincs')
     if 'user@' not in out:
         fail('Loaded dumpfile missing user principal')
+    out = realm.run_kadminl('getprinc nokeys')
+    if 'Number of keys: 0' not in out:
+        fail('Loading dumpfile did not process zero-key principal')
     out = realm.run_kadminl('getpols')
     if 'testpol' not in out:
         fail('Loaded dumpfile missing test policy')
