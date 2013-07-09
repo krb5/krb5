@@ -1130,8 +1130,10 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
         retval = pa_pkinit_parse_rep(context, plgctx, reqctx, request,
                                      in_padata, enctype, &as_key,
                                      encoded_previous_request);
-        if (retval == 0)
+        if (retval == 0) {
             retval = cb->set_as_key(context, rock, &as_key);
+            krb5_free_keyblock_contents(context, &as_key);
+        }
     }
 
     pkiDebug("pkinit_client_process: returning %d (%s)\n",
