@@ -4389,6 +4389,7 @@ cert_retrieve_cert_sans(krb5_context context,
             break;
         }
     }
+    PORT_FreeArena(pool, PR_TRUE);
 
     return 0;
 }
