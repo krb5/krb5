@@ -8,7 +8,8 @@ preauthentication, and is described in :rfc:`4120` and :rfc:`6113`.
 The clpreauth interface allows the addition of client support for
 preauthentication mechanisms beyond those included in the core MIT
 krb5 code base.  For a detailed description of the clpreauth
-interface, see the header file ``<krb5/clpreauth_plugin.h>``.
+interface, see the header file ``<krb5/clpreauth_plugin.h>`` (or
+``<krb5/preauth_plugin.h>`` before release 1.12).
 
 A clpreauth module is generally responsible for:
 
