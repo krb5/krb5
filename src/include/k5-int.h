@@ -2182,14 +2182,21 @@ authdata_eq(krb5_authdata a1, krb5_authdata a2)
 
 /* Allocate zeroed memory; set *code to 0 on success or ENOMEM on failure. */
 static inline void *
-k5alloc(size_t len, krb5_error_code *code)
+k5calloc(size_t nmemb, size_t size, krb5_error_code *code)
 {
     void *ptr;
 
     /* Allocate at least one byte since zero-byte allocs may return NULL. */
-    ptr = calloc((len > 0) ? len : 1, 1);
+    ptr = calloc(nmemb ? nmemb : 1, size ? size : 1);
     *code = (ptr == NULL) ? ENOMEM : 0;
     return ptr;
+}
+
+/* Allocate zeroed memory; set *code to 0 on success or ENOMEM on failure. */
+static inline void *
+k5alloc(size_t size, krb5_error_code *code)
+{
+    return k5calloc(1, size, code);
 }
 
 /* Return a copy of the len bytes of memory at in; set *code to 0 or ENOMEM. */
