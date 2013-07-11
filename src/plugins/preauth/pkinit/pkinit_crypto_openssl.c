@@ -177,8 +177,10 @@ pkinit_pkcs11_code_to_text(int err);
 #include <openssl/cms.h>
 #define pkinit_CMS_get0_content_signed(_cms) CMS_get0_content(_cms)
 #define pkinit_CMS_get0_content_data(_cms) CMS_get0_content(_cms)
-#define pkinit_CMS_free1_crls(_sk_x509crl) sk_X509_CRL_free((_sk_x509crl))
-#define pkinit_CMS_free1_certs(_sk_x509) sk_X509_free((_sk_x509))
+#define pkinit_CMS_free1_crls(_sk_x509crl)              \
+    sk_X509_CRL_pop_free((_sk_x509crl), X509_CRL_free)
+#define pkinit_CMS_free1_certs(_sk_x509)        \
+    sk_X509_pop_free((_sk_x509), X509_free)
 #define pkinit_CMS_SignerInfo_get_cert(_cms,_si,_x509_pp)       \
     CMS_SignerInfo_get0_algs(_si,NULL,_x509_pp,NULL,NULL)
 #else
