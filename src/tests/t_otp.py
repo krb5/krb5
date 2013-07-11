@@ -30,14 +30,10 @@
 # test how OTP handles the case of short daemon restarts.
 #
 
+from k5test import *
 from Queue import Empty
 import StringIO
 import struct
-import subprocess
-import sys
-import socket
-import os
-import atexit
 
 try:
     from pyrad import packet, dictionary
@@ -45,8 +41,6 @@ try:
 except ImportError:
     success('Warning: skipping OTP tests due to missing pyrad or old Python')
     exit(0)
-
-from k5test import *
 
 class RadiusDaemon(Process):
     MAX_PACKET_SIZE = 4096
