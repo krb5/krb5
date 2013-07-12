@@ -342,7 +342,7 @@ kh_db_sign_auth_data(krb5_context context,
         goto cleanup;
 
     if (authdata == NULL) {
-        authdata = k5alloc(2 * sizeof(krb5_authdata *), &code);
+        authdata = k5calloc(2, sizeof(krb5_authdata *), &code);
         if (code != 0)
             goto cleanup;
 
@@ -461,7 +461,7 @@ kh_marshall_HostAddresses(krb5_context context,
         return code;
 
     haddresses->len = 0;
-    haddresses->val = k5alloc(i * sizeof(HostAddress), &code);
+    haddresses->val = k5calloc(i, sizeof(HostAddress), &code);
     if (code != 0)
         return code;
 

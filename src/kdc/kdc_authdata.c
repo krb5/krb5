@@ -811,7 +811,7 @@ make_ad_signedpath_data(krb5_context context,
         i = 0;
 
     if (i != 0) {
-        sign_authdata = k5alloc((i + 1) * sizeof(krb5_authdata *), &code);
+        sign_authdata = k5calloc(i + 1, sizeof(krb5_authdata *), &code);
         if (sign_authdata == NULL)
             return code;
 
@@ -1018,8 +1018,8 @@ make_ad_signedpath(krb5_context context,
     } else
         i = 0;
 
-    sp.delegated = k5alloc((i + (server ? 1 : 0) + 1) *
-                           sizeof(krb5_principal), &code);
+    sp.delegated = k5calloc(i + (server ? 1 : 0) + 1, sizeof(krb5_principal),
+                            &code);
     if (code != 0)
         goto cleanup;
 

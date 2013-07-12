@@ -56,7 +56,7 @@ prf_plus(krb5_context context, krb5_keyblock *k, const char *pepper,
     if (keybytes % prflen != 0)
         iterations++;
     assert(iterations <= 254);
-    buffer = k5alloc(iterations * prflen, &retval);
+    buffer = k5calloc(iterations, prflen, &retval);
     if (retval)
         goto cleanup;
     if (k5_buf_len(&prf_inbuf) == -1) {

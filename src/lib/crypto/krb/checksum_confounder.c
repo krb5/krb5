@@ -83,7 +83,7 @@ krb5int_confounder_checksum(const struct krb5_cksumtypes *ctp,
         return ret;
 
     /* Hash the confounder, then the input data. */
-    hash_iov = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
+    hash_iov = k5calloc(num_data + 1, sizeof(krb5_crypto_iov), &ret);
     if (hash_iov == NULL)
         goto cleanup;
     hash_iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
@@ -134,7 +134,7 @@ krb5_error_code krb5int_confounder_verify(const struct krb5_cksumtypes *ctp,
         goto cleanup;
 
     /* Hash the confounder, then the input data. */
-    hash_iov = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
+    hash_iov = k5calloc(num_data + 1, sizeof(krb5_crypto_iov), &ret);
     if (hash_iov == NULL)
         goto cleanup;
     hash_iov[0].flags = KRB5_CRYPTO_TYPE_DATA;

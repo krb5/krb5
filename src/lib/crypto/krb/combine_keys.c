@@ -110,7 +110,7 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
     rnd = k5alloc(keybytes, &ret);
     if (ret)
         goto cleanup;
-    combined = k5alloc(keybytes * 2, &ret);
+    combined = k5calloc(2, keybytes, &ret);
     if (ret)
         goto cleanup;
     output = k5alloc(keylength, &ret);

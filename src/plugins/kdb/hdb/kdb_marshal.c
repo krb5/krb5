@@ -187,9 +187,9 @@ kh_marshal_Principal(krb5_context context,
         return code;
 
     hprinc->name.name_type = kprinc->type;
-    hprinc->name.name_string.val = k5alloc(kprinc->length *
-                                           sizeof(heim_general_string),
-                                           &code);
+    hprinc->name.name_string.val = k5calloc(kprinc->length,
+                                            sizeof(heim_general_string),
+                                            &code);
     if (code != 0) {
         kh_free_Principal(context, hprinc);
         return code;
@@ -229,8 +229,8 @@ kh_unmarshal_Principal(krb5_context context,
 
     kprinc->magic = KV5M_PRINCIPAL;
     kprinc->type = hprinc->name.name_type;
-    kprinc->data = k5alloc(hprinc->name.name_string.len * sizeof(krb5_data),
-                           &code);
+    kprinc->data = k5calloc(hprinc->name.name_string.len, sizeof(krb5_data),
+                            &code);
     if (code != 0) {
         krb5_free_principal(context, kprinc);
         return code;
@@ -594,7 +594,8 @@ kh_marshal_HDB_extensions(krb5_context context,
     unsigned int i;
     krb5_error_code code;
 
-    hexts->val = k5alloc(kh_hdb_extension_count * sizeof(HDB_extension), &code);
+    hexts->val = k5calloc(kh_hdb_extension_count, sizeof(HDB_extension),
+                          &code);
     if (code != 0)
         return code;
 
@@ -704,7 +705,7 @@ kh_marshal_hdb_entry(krb5_context context,
         goto cleanup;
 
     hentry->keys.len = 0;
-    hentry->keys.val = k5alloc(kentry->n_key_data * sizeof(Key), &code);
+    hentry->keys.val = k5calloc(kentry->n_key_data, sizeof(Key), &code);
     if (code != 0)
         goto cleanup;
 
@@ -788,7 +789,8 @@ kh_unmarshal_hdb_entry(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    kentry->key_data = k5alloc(hentry->keys.len * sizeof(krb5_key_data), &code);
+    kentry->key_data = k5calloc(hentry->keys.len, sizeof(krb5_key_data),
+                                &code);
     if (code != 0)
         goto cleanup;
 

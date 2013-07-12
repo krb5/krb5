@@ -77,7 +77,7 @@ load_modules(krb5_context context)
 
     /* Allocate a large enough list of handles. */
     for (count = 0; modules[count] != NULL; count++);
-    list = k5alloc((count + 1) * sizeof(*list), &ret);
+    list = k5calloc(count + 1, sizeof(*list), &ret);
     if (list == NULL)
         goto cleanup;
 

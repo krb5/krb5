@@ -293,7 +293,7 @@ token_types_decode(profile_t profile, token_type **out)
     }
 
     /* Leave space for the default (possibly) and the terminator. */
-    types = k5alloc((i + 2) * sizeof(token_type), &retval);
+    types = k5calloc(i + 2, sizeof(token_type), &retval);
     if (types == NULL)
         goto cleanup;
 
@@ -441,7 +441,7 @@ tokens_decode(krb5_context ctx, krb5_const_principal princ,
         return retval;
     len = k5_json_array_length(arr);
 
-    tokens = k5alloc((len + 1) * sizeof(token), &retval);
+    tokens = k5calloc(len + 1, sizeof(token), &retval);
     if (tokens == NULL)
         goto cleanup;
 

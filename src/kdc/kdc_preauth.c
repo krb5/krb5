@@ -1367,7 +1367,7 @@ etype_info_helper(krb5_context context, krb5_kdc_req *request,
     int i = 0, start = 0, seen_des = 0;
     int etype_info2 = (pa_type == KRB5_PADATA_ETYPE_INFO2);
 
-    entry = k5alloc((client->n_key_data * 2 + 1) * sizeof(*entry), &retval);
+    entry = k5calloc(client->n_key_data * 2 + 1, sizeof(*entry), &retval);
     if (entry == NULL)
         goto cleanup;
     entry[0] = NULL;

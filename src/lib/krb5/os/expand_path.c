@@ -477,7 +477,7 @@ k5_expand_path_tokens_extra(krb5_context context, const char *path_in,
 
     /* Get extra tokens. */
     if (nargs > 0) {
-        extra_tokens = k5alloc((nargs + 1) * sizeof(char *), &ret);
+        extra_tokens = k5calloc(nargs + 1, sizeof(char *), &ret);
         if (extra_tokens == NULL)
             goto cleanup;
         va_start(ap, path_out);

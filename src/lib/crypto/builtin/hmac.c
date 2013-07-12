@@ -71,7 +71,7 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
     ihash = k5alloc(hash->hashsize, &ret);
     if (ihash == NULL)
         goto cleanup;
-    ihash_iov = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
+    ihash_iov = k5calloc(num_data + 1, sizeof(krb5_crypto_iov), &ret);
     if (ihash_iov == NULL)
         goto cleanup;
 

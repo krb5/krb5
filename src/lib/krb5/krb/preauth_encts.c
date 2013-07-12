@@ -92,7 +92,7 @@ encts_process(krb5_context context, krb5_clpreauth_moddata moddata,
     if (ret)
         goto cleanup;
 
-    pa = k5alloc(2 * sizeof(krb5_pa_data *), &ret);
+    pa = k5calloc(2, sizeof(krb5_pa_data *), &ret);
     if (pa == NULL)
         goto cleanup;
 

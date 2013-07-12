@@ -232,7 +232,7 @@ k5_make_tgs_req(krb5_context context,
     for (count = 0; in_padata != NULL && in_padata[count] != NULL; count++);
 
     /* Construct a padata array for the request, beginning with the ap-req. */
-    padata = k5alloc((count + 2) * sizeof(krb5_pa_data *), &ret);
+    padata = k5calloc(count + 2, sizeof(krb5_pa_data *), &ret);
     if (padata == NULL)
         goto cleanup;
     padata[0] = k5alloc(sizeof(krb5_pa_data), &ret);

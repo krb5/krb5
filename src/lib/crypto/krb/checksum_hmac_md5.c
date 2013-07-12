@@ -68,7 +68,7 @@ krb5_error_code krb5int_hmacmd5_checksum(const struct krb5_cksumtypes *ctp,
     /* Compute the MD5 value of the input. */
     ms_usage = krb5int_arcfour_translate_usage(usage);
     store_32_le(ms_usage, t);
-    hash_iov = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
+    hash_iov = k5calloc(num_data + 1, sizeof(krb5_crypto_iov), &ret);
     if (hash_iov == NULL)
         goto cleanup;
     hash_iov[0].flags = KRB5_CRYPTO_TYPE_DATA;

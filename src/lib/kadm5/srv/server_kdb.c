@@ -188,7 +188,7 @@ kdb_get_hist_key(kadm5_server_handle_t handle, krb5_keyblock **keyblocks_out,
     if (ret)
         goto done;
 
-    kblist = k5alloc((kdb->n_key_data + 1) * sizeof(*kblist), &ret);
+    kblist = k5calloc(kdb->n_key_data + 1, sizeof(*kblist), &ret);
     if (kblist == NULL)
         goto done;
     for (i = 0; i < kdb->n_key_data; i++) {

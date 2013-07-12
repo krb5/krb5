@@ -165,7 +165,7 @@ s4u2proxy_export_authdata(krb5_context kcontext,
     memset(&sp, 0, sizeof(sp));
     sp.delegated = s4uctx->delegated;
 
-    authdata = k5alloc(2 * sizeof(krb5_authdata *), &code);
+    authdata = k5calloc(2, sizeof(krb5_authdata *), &code);
     if (authdata == NULL)
         return code;
 
@@ -253,7 +253,7 @@ s4u2proxy_get_attribute_types(krb5_context kcontext,
     if (s4uctx->count == 0)
         return ENOENT;
 
-    attrs = k5alloc(2 * sizeof(krb5_data), &code);
+    attrs = k5calloc(2, sizeof(krb5_data), &code);
     if (attrs == NULL)
         goto cleanup;
 
@@ -379,7 +379,7 @@ s4u2proxy_export_internal(krb5_context kcontext,
     if (restrict_authenticated)
         return ENOENT;
 
-    delegated = k5alloc((s4uctx->count + 1) * sizeof(krb5_principal), &code);
+    delegated = k5calloc(s4uctx->count + 1, sizeof(krb5_principal), &code);
     if (delegated == NULL)
         return code;
 
@@ -511,7 +511,7 @@ s4u2proxy_internalize(krb5_context kcontext,
     else if (count > 0) {
         int i;
 
-        delegated = k5alloc((count + 1) * sizeof(krb5_principal), &code);
+        delegated = k5calloc(count + 1, sizeof(krb5_principal), &code);
         if (delegated == NULL)
             goto cleanup;
 
