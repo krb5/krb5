@@ -589,6 +589,7 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
     krb5_error_code ret;
     unsigned int prev_n_keys = 0;
     krb5_boolean is_add;
+    void *newptr;
 
     *entry = NULL;
 
@@ -687,15 +688,12 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
             if (is_add)
                 ent->key_data = NULL;
 
-            ent->key_data = (krb5_key_data *)realloc(ent->key_data,
-                                                     (ent->n_key_data *
-                                                      sizeof (krb5_key_data)));
-            /* XXX Memory leak: Old key data in
-               records eliminated by resizing to
-               smaller size.  */
-            if (ent->key_data == NULL)
-                /* XXX Memory leak: old storage.  */
-                return (ENOMEM);
+            /* Allocate one extra key data to avoid allocating zero bytes. */
+            newptr = realloc(ent->key_data, (ent->n_key_data + 1) *
+                             sizeof(krb5_key_data));
+            if (newptr == NULL)
+                return ENOMEM;
+            ent->key_data = newptr;
 
 /* BEGIN CSTYLED */
             for (j = prev_n_keys; j < ent->n_key_data; j++) {
@@ -713,7 +711,6 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
                 }
 
                 for (cnt = 0; cnt < kp->key_data_ver; cnt++) {
-                    void *newptr;
                     kp->key_data_type[cnt] =  (krb5_int16)kv->k_enctype.k_enctype_val[cnt];
                     kp->key_data_length[cnt] = (krb5_int16)kv->k_contents.k_contents_val[cnt].utf8str_t_len;
                     newptr = realloc(kp->key_data_contents[cnt],

@@ -941,11 +941,10 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
     if (mask & KADM5_KEY_DATA) {
         entry->n_key_data = kdb->n_key_data;
         if(entry->n_key_data) {
-            entry->key_data = malloc(entry->n_key_data*sizeof(krb5_key_data));
-            if (entry->key_data == NULL) {
-                ret = ENOMEM;
+            entry->key_data = k5calloc(entry->n_key_data,
+                                       sizeof(krb5_key_data), &ret);
+            if (entry->key_data == NULL)
                 goto done;
-            }
         } else
             entry->key_data = NULL;
 
@@ -1070,14 +1069,14 @@ int create_history_entry(krb5_context context,
                          krb5_keyblock *hist_key, int n_key_data,
                          krb5_key_data *key_data, osa_pw_hist_ent *hist)
 {
-    int i, ret;
+    krb5_error_code ret;
     krb5_keyblock key;
     krb5_keysalt salt;
+    int i;
 
-    hist->key_data = (krb5_key_data*)malloc(n_key_data*sizeof(krb5_key_data));
+    hist->key_data = k5calloc(n_key_data, sizeof(krb5_key_data), &ret);
     if (hist->key_data == NULL)
-        return ENOMEM;
-    memset(hist->key_data, 0, n_key_data*sizeof(krb5_key_data));
+        return ret;
 
     for (i = 0; i < n_key_data; i++) {
         ret = krb5_dbe_decrypt_key_data(context, NULL, &key_data[i], &key,
@@ -1999,8 +1998,10 @@ kadm5_setkey_principal_3(void *server_handle,
         old_key_data = NULL;
     }
 
-    kdb->key_data = (krb5_key_data*)krb5_db_alloc(handle->context, NULL, (n_keys+n_old_keys)
-                                                  *sizeof(krb5_key_data));
+    /* Allocate one extra key_data to avoid allocating 0 bytes. */
+    kdb->key_data = krb5_db_alloc(handle->context, NULL,
+                                  (n_keys + n_old_keys + 1) *
+                                  sizeof(krb5_key_data));
     if (kdb->key_data == NULL) {
         ret = ENOMEM;
         goto done;
@@ -2330,8 +2331,9 @@ kadm5_purgekeys(void *server_handle,
     old_keydata = kdb->key_data;
     n_old_keydata = kdb->n_key_data;
     kdb->n_key_data = 0;
+    /* Allocate one extra key_data to avoid allocating 0 bytes. */
     kdb->key_data = krb5_db_alloc(handle->context, NULL,
-                                  n_old_keydata * sizeof(krb5_key_data));
+                                  (n_old_keydata + 1) * sizeof(krb5_key_data));
     if (kdb->key_data == NULL) {
         ret = ENOMEM;
         goto done;
