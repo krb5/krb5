@@ -231,6 +231,9 @@ struct _pkinit_req_context {
     int do_identity_matching;
     krb5_preauthtype pa_type;
     int rfc6112_kdc;
+    int identity_initialized;
+    int identity_prompted;
+    krb5_error_code identity_prompt_retval;
 };
 typedef struct _pkinit_req_context *pkinit_req_context;
 

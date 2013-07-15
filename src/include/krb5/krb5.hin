@@ -6485,6 +6485,50 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
 #define KRB5_RESPONDER_OTP_FLAGS_SEPARATE_PIN  0x0008
 
 /**
+ * PKINIT responder question
+ *
+ * The PKINIT responder question is asked when the client needs a password
+ * that's being used to protect key information, and is formatted as a JSON
+ * object.  A specific identity's flags value, if not zero, is the bitwise-OR
+ * of one or more of the KRB5_RESPONDER_PKINIT_FLAGS_TOKEN_* flags defined
+ * below, and possibly other flags to be added later.  Any resemblance to
+ * similarly-named CKF_* values in the PKCS#11 API should not be depended on.
+ *
+ *  @n {
+ *  @n     identity <string> : flags <number>,
+ *  @n     ...
+ *  @n }
+ *
+ * The answer to the question MUST be JSON formatted:
+ *
+ *  @n {
+ *  @n     identity <string> : password <string>,
+ *  @n     ...
+ *  @n }
+ *
+ * @version New in 1.12
+ */
+#define KRB5_RESPONDER_QUESTION_PKINIT "pkinit"
+
+/**
+ * This flag indicates that an incorrect PIN was supplied at least once since
+ * the last time the correct PIN was supplied.
+ */
+#define KRB5_RESPONDER_PKINIT_FLAGS_TOKEN_USER_PIN_COUNT_LOW       (1 << 0)
+
+/**
+ * This flag indicates that supplying an incorrect PIN will cause the token to
+ * lock itself.
+ */
+#define KRB5_RESPONDER_PKINIT_FLAGS_TOKEN_USER_PIN_FINAL_TRY       (1 << 1)
+
+/**
+ * This flag indicates that the user PIN is locked, and you can't log in to the
+ * token with it.
+ */
+#define KRB5_RESPONDER_PKINIT_FLAGS_TOKEN_USER_PIN_LOCKED          (1 << 2)
+
+/**
  * A container for a set of preauthentication questions and answers
  *
  * A responder context is supplied by the krb5 authentication system to a @ref
