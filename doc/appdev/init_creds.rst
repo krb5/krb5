@@ -210,6 +210,22 @@ challenge into a krb5_responder_otp_challenge structure.  The
 token information elements from the challenge and supplies the value
 and pin for that token.
 
+PKINIT password or PIN question
+###############################
+
+The :c:macro:`KRB5_RESPONDER_QUESTION_PKINIT` (or ``"pkinit"``) question
+type requests PINs for hardware devices and/or passwords for encrypted
+credentials which are stored on disk, potentially also supplying
+information about the state of the hardware devices.  The challenge and
+answer are JSON-encoded strings, but an application can use convenience
+functions to avoid doing any JSON processing itself.
+
+The :c:func:`krb5_responder_pkinit_get_challenge` function decodes the
+challenges into a krb5_responder_pkinit_challenge structure.  The
+:c:func:`krb5_responder_pkinit_set_answer` function can be used to
+supply the PIN or password for a particular client credential, and can
+be called multiple times.
+
 Example
 #######
 

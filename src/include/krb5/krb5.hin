@@ -6689,6 +6689,65 @@ krb5_responder_otp_challenge_free(krb5_context ctx,
                                   krb5_responder_context rctx,
                                   krb5_responder_otp_challenge *chl);
 
+typedef struct _krb5_responder_pkinit_identity {
+    char *identity;
+    krb5_int32 token_flags;   /* 0 when not specified or not applicable. */
+} krb5_responder_pkinit_identity;
+
+typedef struct _krb5_responder_pkinit_challenge {
+    krb5_responder_pkinit_identity **identities;
+} krb5_responder_pkinit_challenge;
+
+/**
+ * Decode the KRB5_RESPONDER_QUESTION_PKINIT to a C struct.
+ *
+ * A convenience function which parses the KRB5_RESPONDER_QUESTION_PKINIT
+ * question challenge data, making it available in native C.  The main feature
+ * of this function is the ability to read the challenge without parsing
+ * the JSON.
+ *
+ * The returned value must be passed to krb5_responder_pkinit_challenge_free()
+ * to be freed.
+ *
+ * @param [in]  ctx             Library context
+ * @param [in]  rctx            Responder context
+ * @param [out] chl_out         Challenge structure
+ *
+ * @version New in 1.12
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_responder_pkinit_get_challenge(krb5_context ctx,
+                                    krb5_responder_context rctx,
+                                    krb5_responder_pkinit_challenge **chl_out);
+
+/**
+ * Answer the KRB5_RESPONDER_QUESTION_PKINIT question for one identity.
+ *
+ * @param [in] ctx              Library context
+ * @param [in] rctx             Responder context
+ * @param [in] identity         The identity for which a PIN is being supplied
+ * @param [in] pin              The provided PIN, or NULL for none
+ *
+ * @version New in 1.12
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_responder_pkinit_set_answer(krb5_context ctx, krb5_responder_context rctx,
+                                 const char *identity, const char *pin);
+
+/**
+ * Free the value returned by krb5_responder_pkinit_get_challenge().
+ *
+ * @param [in] ctx              Library context
+ * @param [in] rctx             Responder context
+ * @param [in] chl              The challenge to free
+ *
+ * @version New in 1.12
+ */
+void KRB5_CALLCONV
+krb5_responder_pkinit_challenge_free(krb5_context ctx,
+                                     krb5_responder_context rctx,
+                                     krb5_responder_pkinit_challenge *chl);
+
 /** Store options for @c _krb5_get_init_creds */
 typedef struct _krb5_get_init_creds_opt {
     krb5_flags flags;

@@ -447,3 +447,6 @@ EXPORTS
 ; new in 1.12
 	krb5_free_enctypes				@419
 	krb5_kt_dup					@420
+	krb5_responder_pkinit_get_challenge		@421
+	krb5_responder_pkinit_set_answer		@422
+	krb5_responder_pkinit_challenge_free		@423
