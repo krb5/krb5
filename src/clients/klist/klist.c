@@ -520,9 +520,9 @@ do_ccache(krb5_ccache cache)
         return 1;
     }
     while (!(code = krb5_cc_next_cred(kcontext, cache, &cur, &creds))) {
-        if (!show_config && krb5_is_config_principal(kcontext, creds.server))
-            continue;
-        if (status_only) {
+        if (!show_config && krb5_is_config_principal(kcontext, creds.server)) {
+            /* Do nothing with this entry. */
+        } else if (status_only) {
             if (exit_status && creds.server->length == 2 &&
                 data_eq(creds.server->realm, princ->realm) &&
                 data_eq_string(creds.server->data[0], "krbtgt") &&
@@ -556,6 +556,7 @@ do_ccache(krb5_ccache cache)
             com_err(progname, code, _("while retrieving a ticket"));
         return 1;
     }
+    krb5_free_principal(kcontext, princ);
 }
 
 char *
