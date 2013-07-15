@@ -51,8 +51,8 @@ daemon_stop(void)
 static krb5_boolean
 daemon_start(int argc, const char **argv)
 {
-    sigset_t set;
-    int sig;
+    int fds[2];
+    char buf[1];
 
     if (argc != 3 || argv == NULL)
         return FALSE;
@@ -60,30 +60,23 @@ daemon_start(int argc, const char **argv)
     if (daemon_pid != 0)
         return TRUE;
 
-    if (sigemptyset(&set) != 0)
+    if (pipe(fds) != 0)
         return FALSE;
 
-    if (sigaddset(&set, SIGUSR1) != 0)
-        return FALSE;
-
-    if (sigaddset(&set, SIGCHLD) != 0)
-        return FALSE;
-
-    if (sigprocmask(SIG_BLOCK, &set, NULL) != 0)
-        return FALSE;
-
+    /* Start the child process with the write end of the pipe as stdout. */
     daemon_pid = fork();
     if (daemon_pid == 0) {
-        close(STDOUT_FILENO);
-        open("/dev/null", O_WRONLY);
+        dup2(fds[1], STDOUT_FILENO);
+        close(fds[0]);
+        close(fds[1]);
         exit(execlp(argv[1], argv[1], argv[2], NULL));
     }
+    close(fds[1]);
 
-    if (sigwait(&set, &sig) != 0 || sig == SIGCHLD) {
-        daemon_stop();
-        daemon_pid = 0;
+    /* The child will write a sentinel character when it is listening. */
+    if (read(fds[0], buf, 1) != 1 || *buf != '~')
         return FALSE;
-    }
+    close(fds[0]);
 
     atexit(daemon_stop);
     return TRUE;

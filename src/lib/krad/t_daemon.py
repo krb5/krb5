@@ -33,7 +33,7 @@ import signal
 try:
     from pyrad import dictionary, packet, server
 except ImportError:
-    sys.stdout.write("pyrad not found!\n")
+    sys.stderr.write("pyrad not found!\n")
     sys.exit(0)
 
 # We could use a dictionary file, but since we need
@@ -50,27 +50,24 @@ class TestServer(server.Server):
 
         passwd = []
 
-        print "Request: "
         for key in pkt.keys():
             if key == "User-Password":
                 passwd = map(pkt.PwDecrypt, pkt[key])
-                print "\t%s\t%s" % (key, passwd)
-            else:
-                print "\t%s\t%s" % (key, pkt[key])
 
         reply = self.CreateReplyPacket(pkt)
         if passwd == ['accept']:
             reply.code = packet.AccessAccept
-            print "Response: %s" % "Access-Accept"
         else:
             reply.code = packet.AccessReject
-            print "Response: %s" % "Access-Reject"
-        print
         self.SendReplyPacket(pkt.fd, reply)
 
 srv = TestServer(addresses=["localhost"],
                  hosts={"127.0.0.1":
                         server.RemoteHost("127.0.0.1", "foo", "localhost")},
                  dict=dictionary.Dictionary(StringIO.StringIO(DICTIONARY)))
-os.kill(os.getppid(), signal.SIGUSR1)
+
+# Write a sentinel character to let the parent process know we're listening.
+sys.stdout.write("~")
+sys.stdout.flush()
+
 srv.Run()
