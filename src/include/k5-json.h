@@ -168,7 +168,11 @@ void k5_json_object_iterate(k5_json_object obj,
 /* Return the number of mappings in an object. */
 size_t k5_json_object_count(k5_json_object obj);
 
-/* Store val into object at key, incrementing val's reference count. */
+/*
+ * Store val into object at key, incrementing val's reference count and
+ * releasing any previous value at key.  If val is NULL, key is removed from
+ * obj if it exists, and obj remains unchanged if it does not.
+ */
 int k5_json_object_set(k5_json_object obj, const char *key, k5_json_value val);
 
 /* Get an alias to the object's value for key, without incrementing the

@@ -165,6 +165,15 @@ test_object(void)
     if (strcmp(k5_json_string_utf8(s), "hejsan") != 0)
         err("Retrieving key2 from object failed");
 
+    check(k5_json_object_get(object, "key3") == NULL,
+          "object nonexistent key");
+
+    k5_json_object_set(object, "key1", NULL);
+    check(k5_json_object_get(object, "key1") == NULL,
+          "object removed key");
+    check(k5_json_object_get(object, "key2") != NULL,
+          "object remaining key");
+
     k5_json_release(v1);
     k5_json_release(v2);
     k5_json_release(object);

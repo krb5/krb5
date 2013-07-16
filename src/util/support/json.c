@@ -429,14 +429,27 @@ int
 k5_json_object_set(k5_json_object obj, const char *key, k5_json_value val)
 {
     struct entry *ent, *ptr;
-    size_t new_alloc;
+    size_t new_alloc, i;
 
     ent = object_search(obj, key);
-    if (ent) {
+    if (ent != NULL) {
         k5_json_release(ent->value);
-        ent->value = k5_json_retain(val);
+        if (val == NULL) {
+            /* Remove this key. */
+            free(ent->key);
+            for (i = ent - obj->entries; i < obj->len - 1; i++)
+                obj->entries[i] = obj->entries[i + 1];
+            obj->len--;
+        } else {
+            /* Overwrite this key's value with the new one. */
+            ent->value = k5_json_retain(val);
+        }
         return 0;
     }
+
+    /* If didn't find a key the caller asked to remove, do nothing. */
+    if (val == NULL)
+        return 0;
 
     if (obj->len >= obj->allocated) {
         /* Increase the number of slots by 50% (16 slots minimum). */
