@@ -204,7 +204,9 @@ otp_edata(krb5_context context, krb5_kdc_req *request,
 
     /* Determine if otp is enabled for the user. */
     retval = cb->get_string(context, rock, "otp", &config);
-    if (retval != 0 || config == NULL)
+    if (retval == 0 && config == NULL)
+        retval = ENOENT;
+    if (retval != 0)
         goto out;
     cb->free_string(context, rock, config);
 
@@ -305,7 +307,7 @@ otp_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
 
     /* Get the principal's OTP configuration string. */
     retval = cb->get_string(context, rock, "otp", &config);
-    if (config == NULL)
+    if (retval == 0 && config == NULL)
         retval = KRB5_PREAUTH_FAILED;
     if (retval != 0) {
         free(rs);
