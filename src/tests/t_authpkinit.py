@@ -61,6 +61,18 @@ def setup_dir_identities(realm):
     shutil.copy(user_pem, os.path.join(path, 'user.crt'))
     shutil.copy(user_pem, os.path.join(path_enc, 'user.crt'))
 
+# Sanity check - password-based preauth should still work.
+realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
+                get_creds=False)
+realm.run(['./responder',
+           '-r', 'password=%s' % password('user'),
+           'user@%s' % realm.realm])
+realm.kinit('user@%s' % realm.realm,
+            password=password('user'))
+realm.klist('user@%s' % realm.realm)
+realm.run([kvno, realm.host_princ])
+realm.stop()
+
 # Run the basic test - PKINIT with FILE: identity, with no password on the key.
 realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
                 get_creds=False)
