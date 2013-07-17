@@ -71,6 +71,7 @@ extern int longhorn;	    /* XXX Talking to a Longhorn server? */
 
 #define PKINIT_CTX_MAGIC	0x05551212
 #define PKINIT_REQ_CTX_MAGIC	0xdeadbeef
+#define PKINIT_DEFERRED_ID_MAGIC    0x3ca20d21
 
 #define PKINIT_DEFAULT_DH_MIN_BITS  2048
 #define PKINIT_DH_MIN_CONFIG_BITS   1024
@@ -230,6 +231,9 @@ struct _pkinit_req_context {
     int do_identity_matching;
     krb5_preauthtype pa_type;
     int rfc6112_kdc;
+    int identity_initialized;
+    int identity_prompted;
+    krb5_error_code identity_prompt_retval;
 };
 typedef struct _pkinit_req_context *pkinit_req_context;
 
@@ -288,6 +292,16 @@ krb5_error_code pkinit_identity_initialize
 	 pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
 	 krb5_clpreauth_callbacks cb,			/* IN/OUT */
 	 krb5_clpreauth_rock rock,			/* IN/OUT */
+	 krb5_principal princ);				/* IN (optional) */
+
+krb5_error_code pkinit_identity_prompt
+	(krb5_context context,				/* IN */
+	 pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
+	 pkinit_req_crypto_context req_cryptoctx,	/* IN */
+	 pkinit_identity_opts *idopts,			/* IN */
+	 pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
+	 krb5_clpreauth_callbacks cb,			/* IN/OUT */
+	 krb5_clpreauth_rock rock,			/* IN/OUT */
 	 int do_matching,				/* IN */
 	 krb5_principal princ);				/* IN (optional) */
 
@@ -297,6 +311,26 @@ krb5_error_code pkinit_cert_matching
 	pkinit_req_crypto_context req_cryptoctx,
 	pkinit_identity_crypto_context id_cryptoctx,
 	krb5_principal princ);
+
+/*
+ * Client's list of identities for which it needs PINs or passwords
+ */
+struct _pkinit_deferred_id {
+    int magic;
+    char *identity;
+    unsigned long ck_flags;
+    char *password;
+};
+typedef struct _pkinit_deferred_id *pkinit_deferred_id;
+
+krb5_error_code pkinit_set_deferred_id
+	(pkinit_deferred_id **identities, const char *identity,
+	 unsigned long ck_flags, const char *password);
+const char * pkinit_find_deferred_id
+	(pkinit_deferred_id *identities, const char *identity);
+unsigned long pkinit_get_deferred_id_flags
+	(pkinit_deferred_id *identities, const char *identity);
+void pkinit_free_deferred_ids(pkinit_deferred_id *identities);
 
 /*
  * initialization and free functions

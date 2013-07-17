@@ -116,7 +116,7 @@ static krb5_error_code pkinit_find_private_key
  CK_OBJECT_HANDLE *objp);
 static krb5_error_code pkinit_login
 (krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
- CK_TOKEN_INFO *tip);
+ CK_TOKEN_INFO *tip, const char *password);
 static krb5_error_code pkinit_open_session
 (krb5_context context, pkinit_identity_crypto_context id_cryptoctx);
 static void * pkinit_C_LoadModule(const char *modname, CK_FUNCTION_LIST_PTR_PTR p11p);
@@ -510,6 +510,8 @@ pkinit_fini_identity_crypto(pkinit_identity_crypto_context idctx)
         return;
 
     pkiDebug("%s: freeing ctx at %p\n", __FUNCTION__, idctx);
+    if (idctx->deferred_ids != NULL)
+        pkinit_free_deferred_ids(idctx->deferred_ids);
     free(idctx->identity);
     pkinit_fini_certs(idctx);
     pkinit_fini_pkcs11(idctx);
@@ -660,7 +662,9 @@ cleanup:
 struct get_key_cb_data {
     krb5_context context;
     pkinit_identity_crypto_context id_cryptoctx;
+    const char *fsname;
     char *filename;
+    const char *password;
 };
 
 static int
@@ -674,29 +678,50 @@ get_key_cb(char *buf, int size, int rwflag, void *userdata)
     krb5_error_code retval;
     char *prompt;
 
-    if (asprintf(&prompt, "%s %s", _("Pass phrase for"), data->filename) < 0)
+    if (data->id_cryptoctx->defer_id_prompt) {
+        /* Supply the identity name to be passed to a responder callback. */
+        pkinit_set_deferred_id(&data->id_cryptoctx->deferred_ids,
+                               data->fsname, 0, NULL);
         return -1;
-    rdat.data = buf;
-    rdat.length = size;
-    kprompt.prompt = prompt;
-    kprompt.hidden = 1;
-    kprompt.reply = &rdat;
-    prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
+    }
+    if (data->password == NULL) {
+        /* We don't already have a password to use, so prompt for one. */
+        if (data->id_cryptoctx->prompter == NULL)
+            return -1;
+        if (asprintf(&prompt, "%s %s", _("Pass phrase for"),
+                     data->filename) < 0)
+            return -1;
+        rdat.data = buf;
+        rdat.length = size;
+        kprompt.prompt = prompt;
+        kprompt.hidden = 1;
+        kprompt.reply = &rdat;
+        prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
 
-    /* PROMPTER_INVOCATION */
-    k5int_set_prompt_types(data->context, &prompt_type);
-    id_cryptoctx = data->id_cryptoctx;
-    retval = data->id_cryptoctx->prompter(data->context,
-                                          id_cryptoctx->prompter_data, NULL,
-                                          NULL, 1, &kprompt);
-    k5int_set_prompt_types(data->context, 0);
-    free(prompt);
-    return retval ? -1 : (int)rdat.length;
+        /* PROMPTER_INVOCATION */
+        k5int_set_prompt_types(data->context, &prompt_type);
+        id_cryptoctx = data->id_cryptoctx;
+        retval = (data->id_cryptoctx->prompter)(data->context,
+                                                id_cryptoctx->prompter_data,
+                                                NULL, NULL, 1, &kprompt);
+        k5int_set_prompt_types(data->context, 0);
+        free(prompt);
+        if (retval != 0)
+            return -1;
+    } else {
+        /* Just use the already-supplied password. */
+        rdat.length = strlen(data->password);
+        if ((int)rdat.length >= size)
+            return -1;
+        snprintf(buf, size, "%s", data->password);
+    }
+    return (int)rdat.length;
 }
 
 static krb5_error_code
 get_key(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
-        char *filename, EVP_PKEY **retkey)
+        char *filename, const char *fsname, EVP_PKEY **retkey,
+        const char *password)
 {
     EVP_PKEY *pkey = NULL;
     BIO *tmp = NULL;
@@ -719,8 +744,10 @@ get_key(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
     cb_data.context = context;
     cb_data.id_cryptoctx = id_cryptoctx;
     cb_data.filename = filename;
+    cb_data.fsname = fsname;
+    cb_data.password = password;
     pkey = PEM_read_bio_PrivateKey(tmp, NULL, get_key_cb, &cb_data);
-    if (pkey == NULL) {
+    if (pkey == NULL && !id_cryptoctx->defer_id_prompt) {
         retval = EIO;
         pkiDebug("failed to read private key from %s\n", filename);
         goto cleanup;
@@ -875,7 +902,7 @@ pkinit_fini_pkcs11(pkinit_identity_crypto_context ctx)
         return;
 
     if (ctx->p11 != NULL) {
-        if (ctx->session) {
+        if (ctx->session != CK_INVALID_HANDLE) {
             ctx->p11->C_CloseSession(ctx->session);
             ctx->session = CK_INVALID_HANDLE;
         }
@@ -1397,7 +1424,7 @@ cms_signeddata_verify(krb5_context context,
     etype = CMS_get0_eContentType(cms);
 
     /*
-     * Prior to 1.10 the MIT client incorrectly omitted the pkinit structure
+     * Prior to 1.10 the MIT client incorrectly emitted the pkinit structure
      * directly in a CMS ContentInfo rather than using SignedData with no
      * signers. Handle that case.
      */
@@ -3686,7 +3713,7 @@ pkinit_C_UnloadModule(void *handle)
 static krb5_error_code
 pkinit_login(krb5_context context,
              pkinit_identity_crypto_context id_cryptoctx,
-             CK_TOKEN_INFO *tip)
+             CK_TOKEN_INFO *tip, const char *password)
 {
     krb5_data rdat;
     char *prompt;
@@ -3698,6 +3725,12 @@ pkinit_login(krb5_context context,
     if (tip->flags & CKF_PROTECTED_AUTHENTICATION_PATH) {
         rdat.data = NULL;
         rdat.length = 0;
+    } else if (password != NULL) {
+        rdat.data = strdup(password);
+        rdat.length = strlen(password);
+    } else if (id_cryptoctx->prompter == NULL) {
+        r = KRB5_LIBOS_CANTREADPWD;
+        rdat.data = NULL;
     } else {
         if (tip->flags & CKF_USER_PIN_LOCKED)
             warning = " (Warning: PIN locked)";
@@ -3749,6 +3782,8 @@ pkinit_open_session(krb5_context context,
     CK_ULONG count = 0;
     CK_SLOT_ID_PTR slotlist;
     CK_TOKEN_INFO tinfo;
+    char *p11name;
+    const char *password;
 
     if (cctx->p11_module != NULL)
         return 0; /* session already open */
@@ -3812,12 +3847,40 @@ pkinit_open_session(krb5_context context,
     }
     cctx->slotid = slotlist[i];
     free(slotlist);
-    pkiDebug("open_session: slotid %d (%lu of %d)\n", (int) cctx->slotid,
+    pkiDebug("open_session: slotid %d (%lu of %d)\n", (int)cctx->slotid,
              i + 1, (int) count);
 
     /* Login if needed */
-    if (tinfo.flags & CKF_LOGIN_REQUIRED)
-        r = pkinit_login(context, cctx, &tinfo);
+    if (tinfo.flags & CKF_LOGIN_REQUIRED) {
+        if (cctx->p11_module_name != NULL) {
+            if (cctx->slotid != PK_NOSLOT) {
+                if (asprintf(&p11name,
+                             "PKCS11:module_name=%s:slotid=%ld:token=%s",
+                             cctx->p11_module_name, (long)cctx->slotid,
+                             tinfo.label) < 0)
+                    p11name = NULL;
+            } else {
+                if (asprintf(&p11name,
+                             "PKCS11:module_name=%s,token=%s",
+                             cctx->p11_module_name,
+                             tinfo.label) < 0)
+                    p11name = NULL;
+            }
+        } else {
+            p11name = NULL;
+        }
+        if (cctx->defer_id_prompt) {
+            /* Supply the identity name to be passed to the responder. */
+            pkinit_set_deferred_id(&cctx->deferred_ids,
+                                   p11name, tinfo.flags, NULL);
+            free(p11name);
+            return KRB5KRB_ERR_GENERIC;
+        }
+        /* Look up a responder-supplied password for the token. */
+        password = pkinit_find_deferred_id(cctx->deferred_ids, p11name);
+        free(p11name);
+        r = pkinit_login(context, cctx, &tinfo, password);
+    }
 
     return r;
 }
@@ -4267,34 +4330,56 @@ pkinit_get_certs_pkcs12(krb5_context context,
         char prompt_string[128];
         char prompt_reply[128];
         char *prompt_prefix = _("Pass phrase for");
+        char *p12name = reassemble_pkcs12_name(idopts->cert_filename);
+        const char *tmp;
 
         pkiDebug("Initial PKCS12_parse with no password failed\n");
 
-        memset(prompt_reply, '\0', sizeof(prompt_reply));
-        rdat.data = prompt_reply;
-        rdat.length = sizeof(prompt_reply);
-
-        r = snprintf(prompt_string, sizeof(prompt_string), "%s %s",
-                     prompt_prefix, idopts->cert_filename);
-        if (r >= (int) sizeof(prompt_string)) {
-            pkiDebug("Prompt string, '%s %s', is too long!\n",
-                     prompt_prefix, idopts->cert_filename);
+        if (id_cryptoctx->defer_id_prompt) {
+            /* Supply the identity name to be passed to the responder. */
+            pkinit_set_deferred_id(&id_cryptoctx->deferred_ids, p12name, 0,
+                                   NULL);
+            free(p12name);
+            retval = 0;
             goto cleanup;
         }
-        kprompt.prompt = prompt_string;
-        kprompt.hidden = 1;
-        kprompt.reply = &rdat;
-        prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
+        /* Try to read a responder-supplied password. */
+        tmp = pkinit_find_deferred_id(id_cryptoctx->deferred_ids, p12name);
+        free(p12name);
+        if (tmp != NULL) {
+            /* Try using the responder-supplied password. */
+            rdat.data = (char *)tmp;
+            rdat.length = strlen(tmp);
+        } else if (id_cryptoctx->prompter == NULL) {
+            /* We can't use a prompter. */
+            goto cleanup;
+        } else {
+            /* Ask using a prompter. */
+            memset(prompt_reply, '\0', sizeof(prompt_reply));
+            rdat.data = prompt_reply;
+            rdat.length = sizeof(prompt_reply);
 
-        /* PROMPTER_INVOCATION */
-        k5int_set_prompt_types(context, &prompt_type);
-        r = (*id_cryptoctx->prompter)(context, id_cryptoctx->prompter_data,
-                                      NULL, NULL, 1, &kprompt);
-        k5int_set_prompt_types(context, 0);
+            r = snprintf(prompt_string, sizeof(prompt_string), "%s %s",
+                         prompt_prefix, idopts->cert_filename);
+            if (r >= (int)sizeof(prompt_string)) {
+                pkiDebug("Prompt string, '%s %s', is too long!\n",
+                         prompt_prefix, idopts->cert_filename);
+                goto cleanup;
+            }
+            kprompt.prompt = prompt_string;
+            kprompt.hidden = 1;
+            kprompt.reply = &rdat;
+            prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
+            /* PROMPTER_INVOCATION */
+            k5int_set_prompt_types(context, &prompt_type);
+            r = (*id_cryptoctx->prompter)(context, id_cryptoctx->prompter_data,
+                                          NULL, NULL, 1, &kprompt);
+            k5int_set_prompt_types(context, 0);
+        }
 
         ret = PKCS12_parse(p12, rdat.data, &y, &x, NULL);
         if (ret == 0) {
-            pkiDebug("Seconde PKCS12_parse with password failed\n");
+            pkiDebug("Second PKCS12_parse with password failed\n");
             goto cleanup;
         }
     }
@@ -4350,14 +4435,22 @@ pkinit_load_fs_cert_and_key(krb5_context context,
     krb5_error_code retval;
     X509 *x = NULL;
     EVP_PKEY *y = NULL;
+    char *fsname = NULL;
+    const char *password;
 
-    /* load the certificate */
+    fsname = reassemble_files_name(certname, keyname);
+
+    /* Try to read a responder-supplied password. */
+    password = pkinit_find_deferred_id(id_cryptoctx->deferred_ids, fsname);
+
+    /* Load the certificate. */
     retval = get_cert(certname, &x);
     if (retval != 0 || x == NULL) {
         pkiDebug("failed to load user's certificate from '%s'\n", certname);
         goto cleanup;
     }
-    retval = get_key(context, id_cryptoctx, keyname, &y);
+    /* Load the key. */
+    retval = get_key(context, id_cryptoctx, keyname, fsname, &y, password);
     if (retval != 0 || y == NULL) {
         pkiDebug("failed to load user's private key from '%s'\n", keyname);
         goto cleanup;
@@ -4381,7 +4474,8 @@ pkinit_load_fs_cert_and_key(krb5_context context,
     retval = 0;
 
 cleanup:
-    if (retval) {
+    free(fsname);
+    if (retval != 0 || y == NULL) {
         if (x != NULL)
             X509_free(x);
         if (y != NULL)
@@ -4488,7 +4582,7 @@ pkinit_get_certs_dir(krb5_context context,
             continue;
     }
 
-    if (i == 0) {
+    if (!id_cryptoctx->defer_id_prompt && i == 0) {
         pkiDebug("%s: No cert/key pairs found in directory '%s'\n",
                  __FUNCTION__, idopts->cert_filename);
         retval = ENOENT;
@@ -4568,6 +4662,7 @@ pkinit_get_certs_pkcs11(krb5_context context,
 
     /* Copy stuff from idopts -> id_cryptoctx */
     if (idopts->p11_module_name != NULL) {
+        free(id_cryptoctx->p11_module_name);
         id_cryptoctx->p11_module_name = strdup(idopts->p11_module_name);
         if (id_cryptoctx->p11_module_name == NULL)
             return ENOMEM;
@@ -4602,7 +4697,18 @@ pkinit_get_certs_pkcs11(krb5_context context,
 
     if (pkinit_open_session(context, id_cryptoctx)) {
         pkiDebug("can't open pkcs11 session\n");
-        return KRB5KDC_ERR_PREAUTH_FAILED;
+        if (!id_cryptoctx->defer_id_prompt)
+            return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+    if (id_cryptoctx->defer_id_prompt) {
+        /*
+         * We need to reset all of the PKCS#11 state, so that the next time we
+         * poke at it, it'll be in as close to the state it was in after we
+         * loaded it the first time as we can make it.
+         */
+        pkinit_fini_pkcs11(id_cryptoctx);
+        pkinit_init_pkcs11(id_cryptoctx);
+        return 0;
     }
 
 #ifndef PKINIT_USE_MECH_LIST
@@ -4792,9 +4898,12 @@ crypto_load_certs(krb5_context context,
                   pkinit_req_crypto_context req_cryptoctx,
                   pkinit_identity_opts *idopts,
                   pkinit_identity_crypto_context id_cryptoctx,
-                  krb5_principal princ)
+                  krb5_principal princ,
+                  krb5_boolean defer_id_prompts)
 {
     krb5_error_code retval;
+
+    id_cryptoctx->defer_id_prompt = defer_id_prompts;
 
     switch(idopts->idtype) {
     case IDTYPE_FILE:
@@ -6076,4 +6185,38 @@ pkinit_pkcs11_code_to_text(int err)
         return (pkcs11_errstrings[i].text);
     snprintf(uc, sizeof(uc), _("unknown code 0x%x"), err);
     return (uc);
+}
+
+/*
+ * Add an item to the pkinit_identity_crypto_context's list of deferred
+ * identities.
+ */
+krb5_error_code
+crypto_set_deferred_id(krb5_context context,
+                       pkinit_identity_crypto_context id_cryptoctx,
+                       const char *identity, const char *password)
+{
+    unsigned long ck_flags;
+
+    ck_flags = pkinit_get_deferred_id_flags(id_cryptoctx->deferred_ids,
+                                            identity);
+    return pkinit_set_deferred_id(&id_cryptoctx->deferred_ids,
+                                  identity, ck_flags, password);
+}
+
+/*
+ * Retrieve a read-only copy of the pkinit_identity_crypto_context's list of
+ * deferred identities, sure to be valid only until the next time someone calls
+ * either pkinit_set_deferred_id() or crypto_set_deferred_id().
+ */
+const pkinit_deferred_id *
+crypto_get_deferred_ids(krb5_context context,
+                        pkinit_identity_crypto_context id_cryptoctx)
+{
+    pkinit_deferred_id *deferred;
+    const pkinit_deferred_id *ret;
+
+    deferred = id_cryptoctx->deferred_ids;
+    ret = (const pkinit_deferred_id *)deferred;
+    return ret;
 }
