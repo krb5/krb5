@@ -68,6 +68,8 @@ Public
    krb5_responder_fn.rst
    krb5_responder_otp_challenge.rst
    krb5_responder_otp_tokeninfo.rst
+   krb5_responder_pkinit_challenge.rst
+   krb5_responder_pkinit_identity.rst
    krb5_response.rst
    krb5_replay_data.rst
    krb5_ticket.rst
