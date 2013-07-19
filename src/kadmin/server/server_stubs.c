@@ -1579,9 +1579,10 @@ purgekeys_2_svc(purgekeys_arg *arg, struct svc_req *rqstp)
         goto exit_func;
     }
 
-    if (CHANGEPW_SERVICE(rqstp)
-        || !kadm5int_acl_check(handle->context, rqst2name(rqstp), ACL_MODIFY,
-                               arg->princ, NULL)) {
+    if (!cmp_gss_krb5_name(handle, rqst2name(rqstp), arg->princ) &&
+        (CHANGEPW_SERVICE(rqstp)
+         || !kadm5int_acl_check(handle->context, rqst2name(rqstp), ACL_MODIFY,
+                                arg->princ, NULL))) {
         ret.code = KADM5_AUTH_MODIFY;
         log_unauth(funcname, prime_arg, &client_name, &service_name, rqstp);
     } else {
