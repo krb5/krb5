@@ -78,7 +78,7 @@ realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
                 get_creds=False)
 realm.run(['./responder',
            '-x',
-           'pkinit={}',
+           'pkinit=',
            '-X',
            'X509_user_identity=%s' % file_identity,
            'user@%s' % realm.realm])
@@ -137,7 +137,7 @@ realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
 setup_dir_identities(realm)
 realm.run(['./responder',
            '-x',
-           'pkinit={}',
+           'pkinit=',
            '-X',
            'X509_user_identity=%s' % dir_identity,
            'user@%s' % realm.realm])
@@ -199,7 +199,7 @@ realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
                 get_creds=False)
 realm.run(['./responder',
            '-x',
-           'pkinit={}',
+           'pkinit=',
            '-X',
            'X509_user_identity=%s' % p12_identity,
            'user@%s' % realm.realm])
@@ -255,6 +255,26 @@ realm.stop()
 if have_soft_pkcs11:
     os.environ['SOFTPKCS11RC'] = os.path.join(os.getcwd(), 'testdir',
                                               'soft-pkcs11.rc')
+
+    # PKINIT with PKCS11: identity, with no need for a PIN.
+    realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
+                    get_creds=False)
+    conf = open(os.environ['SOFTPKCS11RC'], 'w')
+    conf.write("%s\t%s\t%s\t%s\n" % ('user', 'user token', user_pem,
+                                     privkey_pem))
+    conf.close()
+    # Expect to succeed without having to supply any more information.
+    realm.run(['./responder',
+               '-x',
+               'pkinit=',
+               '-X',
+               'X509_user_identity=%s' % p11_identity,
+               'user@%s' % realm.realm])
+    realm.kinit('user@%s' % realm.realm,
+                flags=['-X', 'X509_user_identity=%s' % p11_identity])
+    realm.klist('user@%s' % realm.realm)
+    realm.run([kvno, realm.host_princ])
+    realm.stop()
 
     # PKINIT with PKCS11: identity, with a PIN supplied by the prompter.
     realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
