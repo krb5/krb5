@@ -100,11 +100,11 @@ responder(krb5_context ctx, void *rawdata, krb5_responder_context rctx)
             *value++ = '\0';
         /* Read the challenge. */
         challenge = krb5_responder_get_challenge(ctx, rctx, key);
-        if (challenge == NULL)
-            challenge = "";
-        /* See if the expected challenge looks like JSON-encoded data. */
         err = k5_json_decode(value, &decoded1);
-        if (err != 0) {
+        /* Check for "no challenge". */
+        if (challenge == NULL && *value == '\0') {
+            fprintf(stderr, "OK: (no challenge) == (no challenge)\n");
+        } else if (err != 0) {
             /* It's not JSON, so assume we're just after a string compare. */
             if (strcmp(challenge, value) == 0) {
                 fprintf(stderr, "OK: \"%s\" == \"%s\"\n", challenge, value);

@@ -89,7 +89,7 @@ realm.run_kadminl('delprinc -force WELLKNOWN/ANONYMOUS')
 # Run the basic test - PKINIT with FILE: identity, with no password on the key.
 realm.run(['./responder',
            '-x',
-           'pkinit={}',
+           'pkinit=',
            '-X',
            'X509_user_identity=%s' % file_identity,
            'user@%s' % realm.realm])
@@ -144,7 +144,7 @@ shutil.copy(user_pem, os.path.join(path, 'user.crt'))
 shutil.copy(user_pem, os.path.join(path_enc, 'user.crt'))
 realm.run(['./responder',
            '-x',
-           'pkinit={}',
+           'pkinit=',
            '-X',
            'X509_user_identity=%s' % dir_identity,
            'user@%s' % realm.realm])
@@ -195,7 +195,7 @@ realm.run([kvno, realm.host_princ])
 # PKINIT with PKCS12: identity, with no password on the bundle.
 realm.run(['./responder',
            '-x',
-           'pkinit={}',
+           'pkinit=',
            '-X',
            'X509_user_identity=%s' % p12_identity,
            'user@%s' % realm.realm])
@@ -243,13 +243,31 @@ realm.run([kvno, realm.host_princ])
 
 if have_soft_pkcs11:
     softpkcs11rc = os.path.join(os.getcwd(), 'testdir', 'soft-pkcs11.rc')
+    realm.env['SOFTPKCS11RC'] = softpkcs11rc
+
+    # PKINIT with PKCS11: identity, with no need for a PIN.
+    conf = open(softpkcs11rc, 'w')
+    conf.write("%s\t%s\t%s\t%s\n" % ('user', 'user token', user_pem,
+                                     privkey_pem))
+    conf.close()
+    # Expect to succeed without having to supply any more information.
+    realm.run(['./responder',
+               '-x',
+               'pkinit=',
+               '-X',
+               'X509_user_identity=%s' % p11_identity,
+               'user@%s' % realm.realm])
+    realm.kinit('user@%s' % realm.realm,
+                flags=['-X', 'X509_user_identity=%s' % p11_identity])
+    realm.klist('user@%s' % realm.realm)
+    realm.run([kvno, realm.host_princ])
+
+    # PKINIT with PKCS11: identity, with a PIN supplied by the prompter.
+    os.remove(softpkcs11rc)
     conf = open(softpkcs11rc, 'w')
     conf.write("%s\t%s\t%s\t%s\n" % ('user', 'user token', user_pem,
                                      privkey_enc_pem))
     conf.close()
-    realm.env['SOFTPKCS11RC'] = softpkcs11rc
-
-    # PKINIT with PKCS11: identity, with a PIN supplied by the prompter.
     # Expect failure if the responder does nothing, and there's no prompter
     realm.run(['./responder',
                '-x',
