@@ -1126,6 +1126,13 @@ pkinit_client_prep_questions(krb5_context context,
         continue;
     n = i;
 
+    /* Make sure we don't just return an empty challenge. */
+    if (n == 0) {
+        pkiDebug("%s: no questions to ask\n", __FUNCTION__);
+        retval = 0;
+        goto cleanup;
+    }
+
     /* Create the top-level object. */
     retval = k5_json_object_create(&jval);
     if (retval != 0)
