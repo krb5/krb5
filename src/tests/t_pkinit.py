@@ -7,7 +7,6 @@ if not os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so')):
     exit(0)
 
 # Check if soft-pkcs11.so is available.
-have_soft_pkcs11 = False
 try:
     import ctypes
     lib = ctypes.LibraryLoader(ctypes.CDLL).LoadLibrary('soft-pkcs11.so')
@@ -28,14 +27,14 @@ user_enc_p12 = os.path.join(certs, 'user-enc.p12')
 path = os.path.join(os.getcwd(), 'testdir', 'tmp-pkinit-certs')
 path_enc = os.path.join(os.getcwd(), 'testdir', 'tmp-pkinit-certs-enc')
 
-pkinit_krb5_conf = {
-    'realms': {'$realm': {
-            'pkinit_anchors': 'FILE:%s' % ca_pem,
-            'pkinit_identity': 'FILE:%s,%s' % (kdc_pem, privkey_pem)}}}
-pkinit_kdc_conf = {
-    'realms': {'$realm': {
+pkinit_krb5_conf = {'realms': {'$realm': {
+            'pkinit_anchors': 'FILE:%s' % ca_pem}}}
+pkinit_kdc_conf = {'realms': {'$realm': {
             'default_principal_flags': '+preauth',
-            'pkinit_eku_checking': 'none'}}}
+            'pkinit_eku_checking': 'none',
+            'pkinit_identity': 'FILE:%s,%s' % (kdc_pem, privkey_pem)}}}
+restrictive_kdc_conf = {'realms': {'$realm': {
+            'restrict_anonymous_to_tgt': 'true' }}}
 
 file_identity = 'FILE:%s,%s' % (user_pem, privkey_pem)
 file_enc_identity = 'FILE:%s,%s' % (user_pem, privkey_enc_pem)
@@ -51,19 +50,10 @@ p11_identity = 'PKCS11:soft-pkcs11.so'
 p11_token_identity = ('PKCS11:module_name=soft-pkcs11.so:'
                       'slotid=1:token=SoftToken (token)')
 
-# Set up the DIR: identities.  They go away as a side-effect of reinitializing
-# the realm testdir, so we don't have a specific cleanup method.
-def setup_dir_identities(realm):
-    os.mkdir(path)
-    os.mkdir(path_enc)
-    shutil.copy(privkey_pem, os.path.join(path, 'user.key'))
-    shutil.copy(privkey_enc_pem, os.path.join(path_enc, 'user.key'))
-    shutil.copy(user_pem, os.path.join(path, 'user.crt'))
-    shutil.copy(user_pem, os.path.join(path_enc, 'user.crt'))
-
-# Sanity check - password-based preauth should still work.
 realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
                 get_creds=False)
+
+# Sanity check - password-based preauth should still work.
 realm.run(['./responder',
            '-r', 'password=%s' % password('user'),
            'user@%s' % realm.realm])
@@ -71,33 +61,32 @@ realm.kinit('user@%s' % realm.realm,
             password=password('user'))
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
-realm.stop()
-
-restrictive_kdc_conf = {
-    'realms': {'$realm' : {
-            'restrict_anonymous_to_tgt': 'true' }}}
 
 # Test anonymous PKINIT.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, create_user=False)
+out = realm.kinit('@%s' % realm.realm, flags=['-n'], expected_code=1)
+if 'not found in Kerberos database' not in out:
+    fail('Wrong error for anonymous PKINIT without anonymous enabled')
 realm.addprinc('WELLKNOWN/ANONYMOUS')
 realm.kinit('@%s' % realm.realm, flags=['-n'])
 realm.klist('WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS')
 realm.run([kvno, realm.host_princ])
-realm.stop()
 
-# Now try again with anonymous restricted; kvno should fail.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=restrictive_kdc_conf,
-                create_user=False)
-realm.addprinc('WELLKNOWN/ANONYMOUS')
+# Test with anonymous restricted; FAST should work but kvno should fail.
+r_env = realm.special_env('restrict', True, kdc_conf=restrictive_kdc_conf)
+realm.stop_kdc()
+realm.start_kdc(env=r_env)
 realm.kinit('@%s' % realm.realm, flags=['-n'])
-# now try FAST
 realm.kinit('@%s' % realm.realm, flags=['-n', '-T', realm.ccache])
-realm.run([kvno, realm.host_princ], expected_code=1)
-realm.stop()
+out = realm.run([kvno, realm.host_princ], expected_code=1)
+if 'KDC policy rejects request' not in out:
+    fail('Wrong error for restricted anonymous PKINIT')
+
+# Go back to a normal KDC and disable anonymous PKINIT.
+realm.stop_kdc()
+realm.start_kdc()
+realm.run_kadminl('delprinc -force WELLKNOWN/ANONYMOUS')
 
 # Run the basic test - PKINIT with FILE: identity, with no password on the key.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                get_creds=False)
 realm.run(['./responder',
            '-x',
            'pkinit={}',
@@ -108,12 +97,9 @@ realm.kinit('user@%s' % realm.realm,
             flags=['-X', 'X509_user_identity=%s' % file_identity])
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
-realm.stop()
 
 # Run the basic test - PKINIT with FILE: identity, with a password on the key,
 # supplied by the prompter.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                get_creds=False)
 # Expect failure if the responder does nothing, and we have no prompter.
 realm.run(['./responder',
           '-x',
@@ -127,12 +113,9 @@ realm.kinit('user@%s' % realm.realm,
             password='encrypted')
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
-realm.stop()
 
 # Run the basic test - PKINIT with FILE: identity, with a password on the key,
 # supplied by the responder.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                get_creds=False)
 # Supply the response in raw form.
 realm.run(['./responder',
            '-x',
@@ -151,12 +134,14 @@ realm.run(['./responder',
            'user@%s' % realm.realm])
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
-realm.stop()
 
 # PKINIT with DIR: identity, with no password on the key.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                get_creds=False)
-setup_dir_identities(realm)
+os.mkdir(path)
+os.mkdir(path_enc)
+shutil.copy(privkey_pem, os.path.join(path, 'user.key'))
+shutil.copy(privkey_enc_pem, os.path.join(path_enc, 'user.key'))
+shutil.copy(user_pem, os.path.join(path, 'user.crt'))
+shutil.copy(user_pem, os.path.join(path_enc, 'user.crt'))
 realm.run(['./responder',
            '-x',
            'pkinit={}',
@@ -167,13 +152,9 @@ realm.kinit('user@%s' % realm.realm,
             flags=['-X', 'X509_user_identity=%s' % dir_identity])
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
-realm.stop()
 
 # PKINIT with DIR: identity, with a password on the key, supplied by the
 # prompter.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                get_creds=False)
-setup_dir_identities(realm)
 # Expect failure if the responder does nothing, and we have no prompter.
 realm.run(['./responder',
            '-x',
@@ -188,13 +169,9 @@ realm.kinit('user@%s' % realm.realm,
             password='encrypted')
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
-realm.stop()
 
 # PKINIT with DIR: identity, with a password on the key, supplied by the
 # responder.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                get_creds=False)
-setup_dir_identities(realm)
 # Supply the response in raw form.
 realm.run(['./responder',
            '-x',
@@ -214,11 +191,8 @@ realm.run(['./responder',
            'user@%s' % realm.realm])
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
-realm.stop()
 
 # PKINIT with PKCS12: identity, with no password on the bundle.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                get_creds=False)
 realm.run(['./responder',
            '-x',
            'pkinit={}',
@@ -229,12 +203,9 @@ realm.kinit('user@%s' % realm.realm,
             flags=['-X', 'X509_user_identity=%s' % p12_identity])
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
-realm.stop()
 
 # PKINIT with PKCS12: identity, with a password on the bundle, supplied by the
 # prompter.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                get_creds=False)
 # Expect failure if the responder does nothing, and we have no prompter.
 realm.run(['./responder',
            '-x',
@@ -248,12 +219,9 @@ realm.kinit('user@%s' % realm.realm,
             password='encrypted')
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
-realm.stop()
 
 # PKINIT with PKCS12: identity, with a password on the bundle, supplied by the
 # responder.
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                get_creds=False)
 # Supply the response in raw form.
 realm.run(['./responder',
            '-x',
@@ -272,19 +240,16 @@ realm.run(['./responder',
            'user@%s' % realm.realm])
 realm.klist('user@%s' % realm.realm)
 realm.run([kvno, realm.host_princ])
-realm.stop()
 
 if have_soft_pkcs11:
-    os.environ['SOFTPKCS11RC'] = os.path.join(os.getcwd(), 'testdir',
-                                              'soft-pkcs11.rc')
-
-    # PKINIT with PKCS11: identity, with a PIN supplied by the prompter.
-    realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                    get_creds=False)
-    conf = open(os.environ['SOFTPKCS11RC'], 'w')
+    softpkcs11rc = os.path.join(os.getcwd(), 'testdir', 'soft-pkcs11.rc')
+    conf = open(softpkcs11rc, 'w')
     conf.write("%s\t%s\t%s\t%s\n" % ('user', 'user token', user_pem,
                                      privkey_enc_pem))
     conf.close()
+    realm.env['SOFTPKCS11RC'] = softpkcs11rc
+
+    # PKINIT with PKCS11: identity, with a PIN supplied by the prompter.
     # Expect failure if the responder does nothing, and there's no prompter
     realm.run(['./responder',
                '-x',
@@ -298,15 +263,8 @@ if have_soft_pkcs11:
                 password='encrypted')
     realm.klist('user@%s' % realm.realm)
     realm.run([kvno, realm.host_princ])
-    realm.stop()
 
     # PKINIT with PKCS11: identity, with a PIN supplied by the responder.
-    realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
-                    get_creds=False)
-    conf = open(os.environ['SOFTPKCS11RC'], 'w')
-    conf.write("%s\t%s\t%s\t%s\n" % ('user', 'user token', user_pem,
-                                     privkey_enc_pem))
-    conf.close()
     # Supply the response in raw form.
     realm.run(['./responder',
                '-x',
@@ -326,7 +284,6 @@ if have_soft_pkcs11:
                'user@%s' % realm.realm])
     realm.klist('user@%s' % realm.realm)
     realm.run([kvno, realm.host_princ])
-    realm.stop()
 else:
     output('soft-pkcs11.so not found: skipping tests with PKCS11 identities\n')
 
