@@ -38,6 +38,7 @@
 #include <kadm5/admin.h>
 #include "adm_proto.h"
 #include "kdc_util.h"
+#include "kdc_audit.h"
 #include "extern.h"
 #include "kdc5_err.h"
 #include "kdb_kt.h"
@@ -1044,15 +1045,26 @@ int main(int argc, char **argv)
         /* We get here only in a worker child process; re-initialize realms. */
         initialize_realms(kcontext, argc, argv);
     }
+
+    /* Initialize audit system and audit KDC startup. */
+    retval = load_audit_modules(kcontext);
+    if (retval) {
+        kdc_err(kcontext, retval, _("while loading audit plugin module(s)"));
+        finish_realms();
+        return 1;
+    }
     krb5_klog_syslog(LOG_INFO, _("commencing operation"));
     if (nofork)
         fprintf(stderr, _("%s: starting...\n"), kdc_progname);
+    kau_kdc_start(kcontext, TRUE);
 
     verto_run(ctx);
     loop_free(ctx);
+    kau_kdc_stop(kcontext, TRUE);
     krb5_klog_syslog(LOG_INFO, _("shutting down"));
     unload_preauth_plugins(kcontext);
     unload_authdata_plugins(kcontext);
+    unload_audit_modules(kcontext);
     krb5_klog_close(kcontext);
     finish_realms();
     if (shandle.kdc_realmlist)

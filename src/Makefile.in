@@ -9,6 +9,9 @@ mydir=.
 #	plugins/authdata/greet
 SUBDIRS=util include lib \
 	@sam2_plugin@ \
+	plugins/audit \
+	plugins/audit/test \
+	@audit_plugin@ \
 	plugins/kadm5_hook/test \
 	plugins/hostrealm/test \
 	plugins/localauth/test \

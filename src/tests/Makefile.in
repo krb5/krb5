@@ -118,8 +118,13 @@ check-pytests:: t_init_creds t_localauth
 	$(RUNPYTEST) $(srcdir)/t_cve-2012-1015.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2013-1416.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2013-1417.py $(PYTESTFLAGS)
+	$(RM) au.log
+	$(RUNPYTEST) $(srcdir)/t_audit.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/jsonwalker.py -d $(srcdir)/au_dict.json \
+			-i au.log
 
 clean::
 	$(RM) gcred hist hrealm kdbtest plugorder responder
 	$(RM) t_init_creds t_localauth krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap
+	$(RM) au.log

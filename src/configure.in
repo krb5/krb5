@@ -135,6 +135,30 @@ if test "$withval" = yes; then
 	AC_DEFINE(KRBCONF_VAGUE_ERRORS,1,[Define if the KDC should return only vague error codes to clients])
 fi
 
+# Check which (if any) audit plugin to build
+audit_plugin=""
+AC_ARG_ENABLE([audit-plugin],
+AC_HELP_STRING([--enable-audit-plugin=IMPL],
+               [use audit plugin @<:@ do not use audit @:>@]), , enableval=no)
+if test "$enableval" != no; then
+    case "$enableval" in
+    simple)
+        # if audit_log_user_message is found, we assume
+        # that audit_open and audit_close are also defined.
+        AC_CHECK_LIB(audit, audit_log_user_message,
+                     [AUDIT_IMPL_LIBS=-laudit
+                     K5_GEN_MAKEFILE(plugins/audit/simple)
+                     audit_plugin=plugins/audit/simple ],
+                     AC_MSG_ERROR([libaudit not found or undefined symbol audit_log_user_message]))
+        ;;
+    *)
+        AC_MSG_ERROR([Unknown audit plugin implementation $enableval.])
+        ;;
+    esac
+fi
+AC_SUBST(AUDIT_IMPL_LIBS)
+AC_SUBST(audit_plugin)
+
 # WITH_CRYPTO_IMPL
 
 CRYPTO_IMPL="builtin"
@@ -1362,6 +1386,8 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/localauth/test
 	plugins/kadm5_hook/test
 	plugins/pwqual/test
+	plugins/audit
+	plugins/audit/test
 	plugins/kdb/db2
 	plugins/kdb/db2/libdb2
 	plugins/kdb/db2/libdb2/hash
