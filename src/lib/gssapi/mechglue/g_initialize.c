@@ -680,6 +680,8 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
         GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_mech_for_saslname);
         /* RFC 5587 */
         GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_attrs_for_mech);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_acquire_cred_from);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_store_cred_into);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_acquire_cred_with_password);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_sec_context_by_mech);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_name_by_mech);
@@ -778,6 +780,8 @@ build_interMech(void *dl, const gss_OID mech_type)
 	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_mech_for_saslname);
 	/* RFC 5587 */
 	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _inquire_attrs_for_mech);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _acquire_cred_from);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _store_cred_into);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _acquire_cred_with_password);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_sec_context_by_mech);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_name_by_mech);
