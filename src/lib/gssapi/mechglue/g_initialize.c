@@ -683,6 +683,8 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_acquire_cred_from);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_store_cred_into);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_acquire_cred_with_password);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_cred);
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_import_cred);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_sec_context_by_mech);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_name_by_mech);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_cred_by_mech);
@@ -783,6 +785,8 @@ build_interMech(void *dl, const gss_OID mech_type)
 	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _acquire_cred_from);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _store_cred_into);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _acquire_cred_with_password);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _export_cred);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _import_cred);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_sec_context_by_mech);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_name_by_mech);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_cred_by_mech);
