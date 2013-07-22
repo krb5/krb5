@@ -1,8 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/krb5/os/sendto_kdc.c */
 /*
- * Copyright 1990,1991,2001,2002,2004,2005,2007,2008 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1990,1991,2001,2002,2004,2005,2007,2008,2013 by the Massachusetts
+ * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -89,7 +89,6 @@ struct incoming_krb5_message {
 struct conn_state {
     SOCKET fd;
     enum conn_states state;
-    unsigned int is_udp : 1;
     int (*service)(krb5_context context, struct conn_state *,
                    struct select_state *, int);
     struct remote_address addr;
@@ -432,19 +431,15 @@ set_conn_state_msg_length (struct conn_state *state, const krb5_data *message)
     if (!message || message->length == 0)
         return;
 
-    if (!state->is_udp) {
-
+    if (state->addr.type == SOCK_STREAM) {
         store_32_be(message->length, state->x.out.msg_len_buf);
         SG_SET(&state->x.out.sgbuf[0], state->x.out.msg_len_buf, 4);
         SG_SET(&state->x.out.sgbuf[1], message->data, message->length);
         state->x.out.sg_count = 2;
-
     } else {
-
         SG_SET(&state->x.out.sgbuf[0], message->data, message->length);
         SG_SET(&state->x.out.sgbuf[1], 0, 0);
         state->x.out.sg_count = 1;
-
     }
 }
 
@@ -473,7 +468,6 @@ add_connection(struct conn_state **conns, struct addrinfo *ai,
           state->x.out.sg_count = 2;
         */
 
-        state->is_udp = 0;
         state->service = service_tcp_fd;
         set_conn_state_msg_length (state, message);
     } else {
@@ -483,7 +477,6 @@ add_connection(struct conn_state **conns, struct addrinfo *ai,
           state->x.out.sg_count = 1;
         */
 
-        state->is_udp = 1;
         state->service = service_udp_fd;
         set_conn_state_msg_length (state, message);
 
