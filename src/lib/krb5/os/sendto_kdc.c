@@ -465,21 +465,9 @@ add_connection(struct conn_state **conns, struct addrinfo *ai,
     state->server_index = server_index;
     SG_SET(&state->x.out.sgbuf[1], 0, 0);
     if (ai->ai_socktype == SOCK_STREAM) {
-        /*
-          SG_SET(&state->x.out.sgbuf[0], message_len_buf, 4);
-          SG_SET(&state->x.out.sgbuf[1], message->data, message->length);
-          state->x.out.sg_count = 2;
-        */
-
         state->service = service_tcp_fd;
         set_conn_state_msg_length (state, message);
     } else {
-        /*
-          SG_SET(&state->x.out.sgbuf[0], message->data, message->length);
-          SG_SET(&state->x.out.sgbuf[1], 0, 0);
-          state->x.out.sg_count = 1;
-        */
-
         state->service = service_udp_fd;
         set_conn_state_msg_length (state, message);
 
