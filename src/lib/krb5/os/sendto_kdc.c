@@ -1,8 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/krb5/os/sendto_kdc.c */
 /*
- * Copyright 1990,1991,2001,2002,2004,2005,2007,2008 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1990,1991,2001,2002,2004,2005,2007,2008,2013 by the Massachusetts
+ * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -436,13 +436,10 @@ set_conn_state_msg_length (struct conn_state *state, const krb5_data *message)
         SG_SET(&state->x.out.sgbuf[0], state->x.out.msg_len_buf, 4);
         SG_SET(&state->x.out.sgbuf[1], message->data, message->length);
         state->x.out.sg_count = 2;
-
     } else {
-
         SG_SET(&state->x.out.sgbuf[0], message->data, message->length);
         SG_SET(&state->x.out.sgbuf[1], 0, 0);
         state->x.out.sg_count = 1;
-
     }
 }
 
