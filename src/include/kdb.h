@@ -371,6 +371,12 @@ krb5_error_code krb5_db_put_principal ( krb5_context kcontext,
                                         krb5_db_entry *entry );
 krb5_error_code krb5_db_delete_principal ( krb5_context kcontext,
                                            krb5_principal search_for );
+
+/*
+ * Iterate over principals in the KDB.  If the callback may write to the DB,
+ * the caller must get an exclusive lock with krb5_db_lock before iterating,
+ * and release it with krb5_db_unlock after iterating.
+ */
 krb5_error_code krb5_db_iterate ( krb5_context kcontext,
                                   char *match_entry,
                                   int (*func) (krb5_pointer, krb5_db_entry *),
