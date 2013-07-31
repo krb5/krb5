@@ -1050,6 +1050,16 @@ kdb5_update_princ_encryption(int argc, char *argv[])
         }
     }
 
+    if (!data.dry_run) {
+        /* Grab a write lock so we don't have to upgrade to a write lock and
+         * reopen the DB while iterating. */
+        retval = krb5_db_lock(util_context, KRB5_DB_LOCKMODE_EXCLUSIVE);
+        if (retval != 0 && retval != KRB5_PLUGIN_OP_NOTSUPP) {
+            com_err(progname, retval, _("trying to lock database"));
+            exit_status++;
+        }
+    }
+
     retval = krb5_db_iterate(util_context, name_pattern,
                              update_princ_encryption_1, &data);
     /* If exit_status is set, then update_princ_encryption_1 already
@@ -1058,6 +1068,8 @@ kdb5_update_princ_encryption(int argc, char *argv[])
         com_err(progname, retval, _("trying to process principal database"));
         exit_status++;
     }
+    if (!data.dry_run)
+        (void)krb5_db_unlock(util_context);
     (void) krb5_db_fini(util_context);
     if (data.dry_run) {
         printf(_("%u principals processed: %u would be updated, %u already "
