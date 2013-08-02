@@ -1913,7 +1913,7 @@ krb5_krcc_unparse_cred(krb5_context context, krb5_ccache id,
                        krb5_creds * creds, char **datapp, unsigned int *lenptr)
 {
     krb5_error_code kret;
-    char   *buf;
+    char *buf = NULL;
     krb5_krcc_bc bc;
 
     if (!creds || !datapp || !lenptr)
@@ -1963,9 +1963,11 @@ krb5_krcc_unparse_cred(krb5_context context, krb5_ccache id,
     /* Success! */
     *datapp = buf;
     *lenptr = bc.bpp - buf;
+    buf = NULL;
     kret = KRB5_OK;
 
 errout:
+    free(buf);
     return kret;
 }
 
