@@ -274,75 +274,62 @@ static int krb5_krcc_get_ring_ids(krb5_krcc_ring_ids_t *p);
 
 /* Routines to parse a key from a keyring into a cred structure */
 static krb5_error_code krb5_krcc_parse
-(krb5_context, krb5_ccache id, krb5_pointer buf, unsigned int len,
- krb5_krcc_bc * bc);
+(krb5_context, krb5_pointer buf, unsigned int len, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_cred
-(krb5_context context, krb5_ccache id, krb5_creds * creds,
- char *payload, int psize);
+(krb5_context context, krb5_creds * creds, char *payload, int psize);
 static krb5_error_code krb5_krcc_parse_principal
-(krb5_context context, krb5_ccache id, krb5_principal * princ,
- krb5_krcc_bc * bc);
+(krb5_context context, krb5_principal * princ, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_keyblock
-(krb5_context context, krb5_ccache id, krb5_keyblock * keyblock,
- krb5_krcc_bc * bc);
+(krb5_context context, krb5_keyblock * keyblock, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_times
-(krb5_context context, krb5_ccache id, krb5_ticket_times * t,
- krb5_krcc_bc * bc);
+(krb5_context context, krb5_ticket_times * t, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_krb5data
-(krb5_context context, krb5_ccache id, krb5_data * data,
- krb5_krcc_bc * bc);
+(krb5_context context, krb5_data * data, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_int32
-(krb5_context context, krb5_ccache id, krb5_int32 * i, krb5_krcc_bc * bc);
+(krb5_context context, krb5_int32 * i, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_octet
-(krb5_context context, krb5_ccache id, krb5_octet * octet,
- krb5_krcc_bc * bc);
+(krb5_context context, krb5_octet * octet, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_addrs
-(krb5_context context, krb5_ccache id, krb5_address *** a,
- krb5_krcc_bc * bc);
+(krb5_context context, krb5_address *** a, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_addr
-(krb5_context context, krb5_ccache id, krb5_address * a,
- krb5_krcc_bc * bc);
+(krb5_context context, krb5_address * a, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_authdata
-(krb5_context context, krb5_ccache id, krb5_authdata *** ad,
- krb5_krcc_bc * bc);
+(krb5_context context, krb5_authdata *** ad, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_authdatum
-(krb5_context context, krb5_ccache id, krb5_authdata * ad,
- krb5_krcc_bc * bc);
+(krb5_context context, krb5_authdata * ad, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_parse_ui_2
-(krb5_context, krb5_ccache id, krb5_ui_2 * i, krb5_krcc_bc * bc);
+(krb5_context, krb5_ui_2 * i, krb5_krcc_bc * bc);
 
 /* Routines to unparse a cred structure into keyring key */
 static krb5_error_code krb5_krcc_unparse
-(krb5_context, krb5_ccache id, krb5_pointer buf, unsigned int len,
- krb5_krcc_bc * bc);
+(krb5_context, krb5_pointer buf, unsigned int len, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_cred
-(krb5_context context, krb5_ccache id, krb5_creds * creds,
+(krb5_context context, krb5_creds * creds,
  char **datapp, unsigned int *lenptr);
 static krb5_error_code krb5_krcc_unparse_principal
-(krb5_context, krb5_ccache id, krb5_principal princ, krb5_krcc_bc * bc);
+(krb5_context, krb5_principal princ, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_keyblock
-(krb5_context, krb5_ccache id, krb5_keyblock * keyblock,
- krb5_krcc_bc * bc);
+(krb5_context, krb5_keyblock * keyblock, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_times
-(krb5_context, krb5_ccache id, krb5_ticket_times * t, krb5_krcc_bc * bc);
+(krb5_context, krb5_ticket_times * t, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_krb5data
-(krb5_context, krb5_ccache id, krb5_data * data, krb5_krcc_bc * bc);
+(krb5_context, krb5_data * data, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_int32
-(krb5_context, krb5_ccache id, krb5_int32 i, krb5_krcc_bc * bc);
+(krb5_context, krb5_int32 i, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_octet
-(krb5_context, krb5_ccache id, krb5_int32 i, krb5_krcc_bc * bc);
+(krb5_context, krb5_int32 i, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_addrs
-(krb5_context, krb5_ccache, krb5_address ** a, krb5_krcc_bc * bc);
+(krb5_context, krb5_address ** a, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_addr
-(krb5_context, krb5_ccache, krb5_address * a, krb5_krcc_bc * bc);
+(krb5_context, krb5_address * a, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_authdata
-(krb5_context, krb5_ccache, krb5_authdata ** ad, krb5_krcc_bc * bc);
+(krb5_context, krb5_authdata ** ad, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_authdatum
-(krb5_context, krb5_ccache, krb5_authdata * ad, krb5_krcc_bc * bc);
+(krb5_context, krb5_authdata * ad, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_ui_4
-(krb5_context, krb5_ccache id, krb5_ui_4 i, krb5_krcc_bc * bc);
+(krb5_context, krb5_ui_4 i, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_ui_2
-(krb5_context, krb5_ccache id, krb5_int32 i, krb5_krcc_bc * bc);
+(krb5_context, krb5_int32 i, krb5_krcc_bc * bc);
 static void krb5_krcc_update_change_time
 (krb5_krcc_data *);
 
@@ -751,7 +738,7 @@ krb5_krcc_next_cred(krb5_context context, krb5_ccache id,
     }
     krcursor->currkey++;
 
-    kret = krb5_krcc_parse_cred(context, id, creds, payload, psize);
+    kret = krb5_krcc_parse_cred(context, creds, payload, psize);
 
 freepayload:
     if (payload) free(payload);
@@ -1022,7 +1009,7 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
     }
 
     /* Serialize credential into memory */
-    kret = krb5_krcc_unparse_cred(context, id, creds, &payload, &payloadlen);
+    kret = krb5_krcc_unparse_cred(context, creds, &payload, &payloadlen);
     if (kret != KRB5_OK)
         goto errout;
 
@@ -1104,7 +1091,7 @@ krb5_krcc_save_principal(krb5_context context, krb5_ccache id,
     bc.bpp = payload;
     bc.endp = payload + GUESS_CRED_SIZE;
 
-    kret = krb5_krcc_unparse_principal(context, id, princ, &bc);
+    kret = krb5_krcc_unparse_principal(context, princ, &bc);
     CHECK_N_GO(kret, errout);
 
     /* Add new key into keyring */
@@ -1165,7 +1152,7 @@ krb5_krcc_retrieve_principal(krb5_context context, krb5_ccache id,
     }
     bc.bpp = payload;
     bc.endp = (char *)payload + psize;
-    kret = krb5_krcc_parse_principal(context, id, princ, &bc);
+    kret = krb5_krcc_parse_principal(context, princ, &bc);
 
 errout:
     if (payload)
@@ -1245,8 +1232,8 @@ out:
  * KRB5_CC_END - there were not len bytes available
  */
 static  krb5_error_code
-krb5_krcc_parse(krb5_context context, krb5_ccache id, krb5_pointer buf,
-                unsigned int len, krb5_krcc_bc * bc)
+krb5_krcc_parse(krb5_context context, krb5_pointer buf, unsigned int len,
+                krb5_krcc_bc * bc)
 {
     DEBUG_PRINT(("krb5_krcc_parse: entered\n"));
 
@@ -1264,8 +1251,8 @@ krb5_krcc_parse(krb5_context context, krb5_ccache id, krb5_pointer buf,
  * and parse it into a credential structure.
  */
 static  krb5_error_code
-krb5_krcc_parse_cred(krb5_context context, krb5_ccache id, krb5_creds * creds,
-                     char *payload, int psize)
+krb5_krcc_parse_cred(krb5_context context, krb5_creds * creds, char *payload,
+                     int psize)
 {
     krb5_error_code kret;
     krb5_octet octet;
@@ -1275,36 +1262,36 @@ krb5_krcc_parse_cred(krb5_context context, krb5_ccache id, krb5_creds * creds,
     /* Parse the pieces of the credential */
     bc.bpp = payload;
     bc.endp = bc.bpp + psize;
-    kret = krb5_krcc_parse_principal(context, id, &creds->client, &bc);
+    kret = krb5_krcc_parse_principal(context, &creds->client, &bc);
     CHECK_N_GO(kret, out);
 
-    kret = krb5_krcc_parse_principal(context, id, &creds->server, &bc);
+    kret = krb5_krcc_parse_principal(context, &creds->server, &bc);
     CHECK_N_GO(kret, cleanclient);
 
-    kret = krb5_krcc_parse_keyblock(context, id, &creds->keyblock, &bc);
+    kret = krb5_krcc_parse_keyblock(context, &creds->keyblock, &bc);
     CHECK_N_GO(kret, cleanserver);
 
-    kret = krb5_krcc_parse_times(context, id, &creds->times, &bc);
+    kret = krb5_krcc_parse_times(context, &creds->times, &bc);
     CHECK_N_GO(kret, cleanserver);
 
-    kret = krb5_krcc_parse_octet(context, id, &octet, &bc);
+    kret = krb5_krcc_parse_octet(context, &octet, &bc);
     CHECK_N_GO(kret, cleanserver);
     creds->is_skey = octet;
 
-    kret = krb5_krcc_parse_int32(context, id, &int32, &bc);
+    kret = krb5_krcc_parse_int32(context, &int32, &bc);
     CHECK_N_GO(kret, cleanserver);
     creds->ticket_flags = int32;
 
-    kret = krb5_krcc_parse_addrs(context, id, &creds->addresses, &bc);
+    kret = krb5_krcc_parse_addrs(context, &creds->addresses, &bc);
     CHECK_N_GO(kret, cleanblock);
 
-    kret = krb5_krcc_parse_authdata(context, id, &creds->authdata, &bc);
+    kret = krb5_krcc_parse_authdata(context, &creds->authdata, &bc);
     CHECK_N_GO(kret, cleanaddrs);
 
-    kret = krb5_krcc_parse_krb5data(context, id, &creds->ticket, &bc);
+    kret = krb5_krcc_parse_krb5data(context, &creds->ticket, &bc);
     CHECK_N_GO(kret, cleanauthdata);
 
-    kret = krb5_krcc_parse_krb5data(context, id, &creds->second_ticket, &bc);
+    kret = krb5_krcc_parse_krb5data(context, &creds->second_ticket, &bc);
     CHECK_N_GO(kret, cleanticket);
 
     kret = KRB5_OK;
@@ -1329,8 +1316,8 @@ out:
 }
 
 static  krb5_error_code
-krb5_krcc_parse_principal(krb5_context context, krb5_ccache id,
-                          krb5_principal * princ, krb5_krcc_bc * bc)
+krb5_krcc_parse_principal(krb5_context context, krb5_principal * princ,
+                          krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     register krb5_principal tmpprinc;
@@ -1338,12 +1325,12 @@ krb5_krcc_parse_principal(krb5_context context, krb5_ccache id,
     int     i;
 
     /* Read principal type */
-    kret = krb5_krcc_parse_int32(context, id, &type, bc);
+    kret = krb5_krcc_parse_int32(context, &type, bc);
     if (kret != KRB5_OK)
         return kret;
 
     /* Read the number of components */
-    kret = krb5_krcc_parse_int32(context, id, &length, bc);
+    kret = krb5_krcc_parse_int32(context, &length, bc);
     if (kret != KRB5_OK)
         return kret;
 
@@ -1365,12 +1352,12 @@ krb5_krcc_parse_principal(krb5_context context, krb5_ccache id,
     tmpprinc->length = length;
     tmpprinc->type = type;
 
-    kret = krb5_krcc_parse_krb5data(context, id, &tmpprinc->realm, bc);
+    kret = krb5_krcc_parse_krb5data(context, &tmpprinc->realm, bc);
     i = 0;
     CHECK(kret);
 
     for (i = 0; i < length; i++) {
-        kret = krb5_krcc_parse_krb5data(context, id, &tmpprinc->data[i], bc);
+        kret = krb5_krcc_parse_krb5data(context, &tmpprinc->data[i], bc);
         CHECK(kret);
     }
     *princ = tmpprinc;
@@ -1386,8 +1373,8 @@ errout:
 }
 
 static  krb5_error_code
-krb5_krcc_parse_keyblock(krb5_context context, krb5_ccache id,
-                         krb5_keyblock * keyblock, krb5_krcc_bc * bc)
+krb5_krcc_parse_keyblock(krb5_context context, krb5_keyblock * keyblock,
+                         krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     krb5_ui_2 ui2;
@@ -1396,11 +1383,11 @@ krb5_krcc_parse_keyblock(krb5_context context, krb5_ccache id,
     keyblock->magic = KV5M_KEYBLOCK;
     keyblock->contents = 0;
 
-    kret = krb5_krcc_parse_ui_2(context, id, &ui2, bc);
+    kret = krb5_krcc_parse_ui_2(context, &ui2, bc);
     CHECK(kret);
     keyblock->enctype = ui2;
 
-    kret = krb5_krcc_parse_int32(context, id, &int32, bc);
+    kret = krb5_krcc_parse_int32(context, &int32, bc);
     CHECK(kret);
     if (int32 < 0)
         return KRB5_CC_NOMEM;
@@ -1411,8 +1398,7 @@ krb5_krcc_parse_keyblock(krb5_context context, krb5_ccache id,
     if (keyblock->contents == NULL)
         return KRB5_CC_NOMEM;
 
-    kret = krb5_krcc_parse(context, id, keyblock->contents,
-                           keyblock->length, bc);
+    kret = krb5_krcc_parse(context, keyblock->contents, keyblock->length, bc);
     CHECK(kret);
 
     return KRB5_OK;
@@ -1423,25 +1409,25 @@ errout:
 }
 
 static  krb5_error_code
-krb5_krcc_parse_times(krb5_context context, krb5_ccache id,
-                      krb5_ticket_times * t, krb5_krcc_bc * bc)
+krb5_krcc_parse_times(krb5_context context, krb5_ticket_times * t,
+                      krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     krb5_int32 i;
 
-    kret = krb5_krcc_parse_int32(context, id, &i, bc);
+    kret = krb5_krcc_parse_int32(context, &i, bc);
     CHECK(kret);
     t->authtime = i;
 
-    kret = krb5_krcc_parse_int32(context, id, &i, bc);
+    kret = krb5_krcc_parse_int32(context, &i, bc);
     CHECK(kret);
     t->starttime = i;
 
-    kret = krb5_krcc_parse_int32(context, id, &i, bc);
+    kret = krb5_krcc_parse_int32(context, &i, bc);
     CHECK(kret);
     t->endtime = i;
 
-    kret = krb5_krcc_parse_int32(context, id, &i, bc);
+    kret = krb5_krcc_parse_int32(context, &i, bc);
     CHECK(kret);
     t->renew_till = i;
 
@@ -1451,8 +1437,8 @@ errout:
 }
 
 static  krb5_error_code
-krb5_krcc_parse_krb5data(krb5_context context, krb5_ccache id,
-                         krb5_data * data, krb5_krcc_bc * bc)
+krb5_krcc_parse_krb5data(krb5_context context, krb5_data * data,
+                         krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     krb5_int32 len;
@@ -1460,7 +1446,7 @@ krb5_krcc_parse_krb5data(krb5_context context, krb5_ccache id,
     data->magic = KV5M_DATA;
     data->data = 0;
 
-    kret = krb5_krcc_parse_int32(context, id, &len, bc);
+    kret = krb5_krcc_parse_int32(context, &len, bc);
     CHECK(kret);
     if (len < 0)
         return KRB5_CC_NOMEM;
@@ -1477,8 +1463,7 @@ krb5_krcc_parse_krb5data(krb5_context context, krb5_ccache id,
     if (data->data == NULL)
         return KRB5_CC_NOMEM;
 
-    kret = krb5_krcc_parse(context, id, data->data, (unsigned) data->length,
-                           bc);
+    kret = krb5_krcc_parse(context, data->data, (unsigned) data->length, bc);
     CHECK(kret);
 
     data->data[data->length] = 0;       /* Null terminate, just in case.... */
@@ -1490,13 +1475,12 @@ errout:
 }
 
 static  krb5_error_code
-krb5_krcc_parse_int32(krb5_context context, krb5_ccache id, krb5_int32 * i,
-                      krb5_krcc_bc * bc)
+krb5_krcc_parse_int32(krb5_context context, krb5_int32 * i, krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     unsigned char buf[4];
 
-    kret = krb5_krcc_parse(context, id, buf, 4, bc);
+    kret = krb5_krcc_parse(context, buf, 4, bc);
     if (kret)
         return kret;
     *i = load_32_be(buf);
@@ -1504,15 +1488,14 @@ krb5_krcc_parse_int32(krb5_context context, krb5_ccache id, krb5_int32 * i,
 }
 
 static  krb5_error_code
-krb5_krcc_parse_octet(krb5_context context, krb5_ccache id, krb5_octet * i,
-                      krb5_krcc_bc * bc)
+krb5_krcc_parse_octet(krb5_context context, krb5_octet * i, krb5_krcc_bc * bc)
 {
-    return krb5_krcc_parse(context, id, (krb5_pointer) i, 1, bc);
+    return krb5_krcc_parse(context, (krb5_pointer) i, 1, bc);
 }
 
 static  krb5_error_code
-krb5_krcc_parse_addrs(krb5_context context, krb5_ccache id,
-                      krb5_address *** addrs, krb5_krcc_bc * bc)
+krb5_krcc_parse_addrs(krb5_context context, krb5_address *** addrs,
+                      krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     krb5_int32 length;
@@ -1522,7 +1505,7 @@ krb5_krcc_parse_addrs(krb5_context context, krb5_ccache id,
     *addrs = 0;
 
     /* Read the number of components */
-    kret = krb5_krcc_parse_int32(context, id, &length, bc);
+    kret = krb5_krcc_parse_int32(context, &length, bc);
     CHECK(kret);
 
     /*
@@ -1542,7 +1525,7 @@ krb5_krcc_parse_addrs(krb5_context context, krb5_ccache id,
             krb5_free_addresses(context, *addrs);
             return KRB5_CC_NOMEM;
         }
-        kret = krb5_krcc_parse_addr(context, id, (*addrs)[i], bc);
+        kret = krb5_krcc_parse_addr(context, (*addrs)[i], bc);
         CHECK(kret);
     }
 
@@ -1554,7 +1537,7 @@ errout:
 }
 
 static  krb5_error_code
-krb5_krcc_parse_addr(krb5_context context, krb5_ccache id, krb5_address * addr,
+krb5_krcc_parse_addr(krb5_context context, krb5_address * addr,
                      krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
@@ -1564,11 +1547,11 @@ krb5_krcc_parse_addr(krb5_context context, krb5_ccache id, krb5_address * addr,
     addr->magic = KV5M_ADDRESS;
     addr->contents = 0;
 
-    kret = krb5_krcc_parse_ui_2(context, id, &ui2, bc);
+    kret = krb5_krcc_parse_ui_2(context, &ui2, bc);
     CHECK(kret);
     addr->addrtype = ui2;
 
-    kret = krb5_krcc_parse_int32(context, id, &int32, bc);
+    kret = krb5_krcc_parse_int32(context, &int32, bc);
     CHECK(kret);
     if ((int32 & VALID_INT_BITS) != int32)      /* Overflow int??? */
         return KRB5_CC_NOMEM;
@@ -1580,7 +1563,7 @@ krb5_krcc_parse_addr(krb5_context context, krb5_ccache id, krb5_address * addr,
     if (addr->contents == NULL)
         return KRB5_CC_NOMEM;
 
-    kret = krb5_krcc_parse(context, id, addr->contents, addr->length, bc);
+    kret = krb5_krcc_parse(context, addr->contents, addr->length, bc);
     CHECK(kret);
 
     return KRB5_OK;
@@ -1591,8 +1574,8 @@ errout:
 }
 
 static  krb5_error_code
-krb5_krcc_parse_authdata(krb5_context context, krb5_ccache id,
-                         krb5_authdata *** a, krb5_krcc_bc * bc)
+krb5_krcc_parse_authdata(krb5_context context, krb5_authdata *** a,
+                         krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     krb5_int32 length;
@@ -1602,7 +1585,7 @@ krb5_krcc_parse_authdata(krb5_context context, krb5_ccache id,
     *a = 0;
 
     /* Read the number of components */
-    kret = krb5_krcc_parse_int32(context, id, &length, bc);
+    kret = krb5_krcc_parse_int32(context, &length, bc);
     CHECK(kret);
 
     if (length == 0)
@@ -1626,7 +1609,7 @@ krb5_krcc_parse_authdata(krb5_context context, krb5_ccache id,
             *a = NULL;
             return KRB5_CC_NOMEM;
         }
-        kret = krb5_krcc_parse_authdatum(context, id, (*a)[i], bc);
+        kret = krb5_krcc_parse_authdatum(context, (*a)[i], bc);
         CHECK(kret);
     }
 
@@ -1640,8 +1623,8 @@ errout:
 }
 
 static  krb5_error_code
-krb5_krcc_parse_authdatum(krb5_context context, krb5_ccache id,
-                          krb5_authdata * a, krb5_krcc_bc * bc)
+krb5_krcc_parse_authdatum(krb5_context context, krb5_authdata * a,
+                          krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     krb5_int32 int32;
@@ -1650,10 +1633,10 @@ krb5_krcc_parse_authdatum(krb5_context context, krb5_ccache id,
     a->magic = KV5M_AUTHDATA;
     a->contents = NULL;
 
-    kret = krb5_krcc_parse_ui_2(context, id, &ui2, bc);
+    kret = krb5_krcc_parse_ui_2(context, &ui2, bc);
     CHECK(kret);
     a->ad_type = (krb5_authdatatype) ui2;
-    kret = krb5_krcc_parse_int32(context, id, &int32, bc);
+    kret = krb5_krcc_parse_int32(context, &int32, bc);
     CHECK(kret);
     if ((int32 & VALID_INT_BITS) != int32)      /* Overflow int??? */
         return KRB5_CC_NOMEM;
@@ -1665,7 +1648,7 @@ krb5_krcc_parse_authdatum(krb5_context context, krb5_ccache id,
     if (a->contents == NULL)
         return KRB5_CC_NOMEM;
 
-    kret = krb5_krcc_parse(context, id, a->contents, a->length, bc);
+    kret = krb5_krcc_parse(context, a->contents, a->length, bc);
     CHECK(kret);
 
     return KRB5_OK;
@@ -1677,13 +1660,12 @@ errout:
 }
 
 static  krb5_error_code
-krb5_krcc_parse_ui_2(krb5_context context, krb5_ccache id, krb5_ui_2 * i,
-                     krb5_krcc_bc * bc)
+krb5_krcc_parse_ui_2(krb5_context context, krb5_ui_2 * i, krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     unsigned char buf[2];
 
-    kret = krb5_krcc_parse(context, id, buf, 2, bc);
+    kret = krb5_krcc_parse(context, buf, 2, bc);
     if (kret)
         return kret;
     *i = load_16_be(buf);
@@ -1703,8 +1685,8 @@ krb5_krcc_parse_ui_2(krb5_context context, krb5_ccache id, krb5_ui_2 * i,
  * system errors
  */
 static  krb5_error_code
-krb5_krcc_unparse(krb5_context context, krb5_ccache id, krb5_pointer buf,
-                  unsigned int len, krb5_krcc_bc * bc)
+krb5_krcc_unparse(krb5_context context, krb5_pointer buf, unsigned int len,
+                  krb5_krcc_bc * bc)
 {
     if (bc->bpp + len > bc->endp)
         return KRB5_CC_WRITE;
@@ -1716,8 +1698,8 @@ krb5_krcc_unparse(krb5_context context, krb5_ccache id, krb5_pointer buf,
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_principal(krb5_context context, krb5_ccache id,
-                            krb5_principal princ, krb5_krcc_bc * bc)
+krb5_krcc_unparse_principal(krb5_context context, krb5_principal princ,
+                            krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     krb5_int32 i, length, tmp, type;
@@ -1725,17 +1707,17 @@ krb5_krcc_unparse_principal(krb5_context context, krb5_ccache id,
     type = princ->type;
     tmp = length = princ->length;
 
-    kret = krb5_krcc_unparse_int32(context, id, type, bc);
+    kret = krb5_krcc_unparse_int32(context, type, bc);
     CHECK_OUT(kret);
 
-    kret = krb5_krcc_unparse_int32(context, id, tmp, bc);
+    kret = krb5_krcc_unparse_int32(context, tmp, bc);
     CHECK_OUT(kret);
 
-    kret = krb5_krcc_unparse_krb5data(context, id, &princ->realm, bc);
+    kret = krb5_krcc_unparse_krb5data(context, &princ->realm, bc);
     CHECK_OUT(kret);
 
     for (i = 0; i < length; i++) {
-        kret = krb5_krcc_unparse_krb5data(context, id, &princ->data[i], bc);
+        kret = krb5_krcc_unparse_krb5data(context, &princ->data[i], bc);
         CHECK_OUT(kret);
     }
 
@@ -1743,67 +1725,65 @@ krb5_krcc_unparse_principal(krb5_context context, krb5_ccache id,
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_keyblock(krb5_context context, krb5_ccache id,
-                           krb5_keyblock * keyblock, krb5_krcc_bc * bc)
+krb5_krcc_unparse_keyblock(krb5_context context, krb5_keyblock * keyblock,
+                           krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
 
-    kret = krb5_krcc_unparse_ui_2(context, id, keyblock->enctype, bc);
+    kret = krb5_krcc_unparse_ui_2(context, keyblock->enctype, bc);
     CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_ui_4(context, id, keyblock->length, bc);
+    kret = krb5_krcc_unparse_ui_4(context, keyblock->length, bc);
     CHECK_OUT(kret);
-    return krb5_krcc_unparse(context, id, (char *) keyblock->contents,
+    return krb5_krcc_unparse(context, (char *) keyblock->contents,
                              keyblock->length, bc);
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_times(krb5_context context, krb5_ccache id,
-                        krb5_ticket_times * t, krb5_krcc_bc * bc)
+krb5_krcc_unparse_times(krb5_context context, krb5_ticket_times * t,
+                        krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
 
-    kret = krb5_krcc_unparse_int32(context, id, t->authtime, bc);
+    kret = krb5_krcc_unparse_int32(context, t->authtime, bc);
     CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_int32(context, id, t->starttime, bc);
+    kret = krb5_krcc_unparse_int32(context, t->starttime, bc);
     CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_int32(context, id, t->endtime, bc);
+    kret = krb5_krcc_unparse_int32(context, t->endtime, bc);
     CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_int32(context, id, t->renew_till, bc);
+    kret = krb5_krcc_unparse_int32(context, t->renew_till, bc);
     CHECK_OUT(kret);
     return 0;
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_krb5data(krb5_context context, krb5_ccache id,
-                           krb5_data * data, krb5_krcc_bc * bc)
+krb5_krcc_unparse_krb5data(krb5_context context, krb5_data * data,
+                           krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
 
-    kret = krb5_krcc_unparse_ui_4(context, id, data->length, bc);
+    kret = krb5_krcc_unparse_ui_4(context, data->length, bc);
     CHECK_OUT(kret);
-    return krb5_krcc_unparse(context, id, data->data, data->length, bc);
+    return krb5_krcc_unparse(context, data->data, data->length, bc);
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_int32(krb5_context context, krb5_ccache id, krb5_int32 i,
-                        krb5_krcc_bc * bc)
+krb5_krcc_unparse_int32(krb5_context context, krb5_int32 i, krb5_krcc_bc * bc)
 {
-    return krb5_krcc_unparse_ui_4(context, id, (krb5_ui_4) i, bc);
+    return krb5_krcc_unparse_ui_4(context, (krb5_ui_4) i, bc);
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_octet(krb5_context context, krb5_ccache id, krb5_int32 i,
-                        krb5_krcc_bc * bc)
+krb5_krcc_unparse_octet(krb5_context context, krb5_int32 i, krb5_krcc_bc * bc)
 {
     krb5_octet ibuf;
 
     ibuf = (krb5_octet) i;
-    return krb5_krcc_unparse(context, id, (char *) &ibuf, 1, bc);
+    return krb5_krcc_unparse(context, (char *) &ibuf, 1, bc);
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_addrs(krb5_context context, krb5_ccache id,
-                        krb5_address ** addrs, krb5_krcc_bc * bc)
+krb5_krcc_unparse_addrs(krb5_context context, krb5_address ** addrs,
+                        krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
     krb5_address **temp;
@@ -1816,10 +1796,10 @@ krb5_krcc_unparse_addrs(krb5_context context, krb5_ccache id,
             length += 1;
     }
 
-    kret = krb5_krcc_unparse_int32(context, id, length, bc);
+    kret = krb5_krcc_unparse_int32(context, length, bc);
     CHECK_OUT(kret);
     for (i = 0; i < length; i++) {
-        kret = krb5_krcc_unparse_addr(context, id, addrs[i], bc);
+        kret = krb5_krcc_unparse_addr(context, addrs[i], bc);
         CHECK_OUT(kret);
     }
 
@@ -1827,21 +1807,21 @@ krb5_krcc_unparse_addrs(krb5_context context, krb5_ccache id,
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_addr(krb5_context context, krb5_ccache id,
-                       krb5_address * addr, krb5_krcc_bc * bc)
+krb5_krcc_unparse_addr(krb5_context context, krb5_address * addr,
+                       krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
 
-    kret = krb5_krcc_unparse_ui_2(context, id, addr->addrtype, bc);
+    kret = krb5_krcc_unparse_ui_2(context, addr->addrtype, bc);
     CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_ui_4(context, id, addr->length, bc);
+    kret = krb5_krcc_unparse_ui_4(context, addr->length, bc);
     CHECK_OUT(kret);
-    return krb5_krcc_unparse(context, id, (char *) addr->contents,
+    return krb5_krcc_unparse(context, (char *) addr->contents,
                              addr->length, bc);
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_authdata(krb5_context context, krb5_ccache id,
+krb5_krcc_unparse_authdata(krb5_context context,
                            krb5_authdata ** a, krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
@@ -1853,47 +1833,45 @@ krb5_krcc_unparse_authdata(krb5_context context, krb5_ccache id,
             length++;
     }
 
-    kret = krb5_krcc_unparse_int32(context, id, length, bc);
+    kret = krb5_krcc_unparse_int32(context, length, bc);
     CHECK_OUT(kret);
     for (i = 0; i < length; i++) {
-        kret = krb5_krcc_unparse_authdatum(context, id, a[i], bc);
+        kret = krb5_krcc_unparse_authdatum(context, a[i], bc);
         CHECK_OUT(kret);
     }
     return KRB5_OK;
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_authdatum(krb5_context context, krb5_ccache id,
-                            krb5_authdata * a, krb5_krcc_bc * bc)
+krb5_krcc_unparse_authdatum(krb5_context context, krb5_authdata * a,
+                            krb5_krcc_bc * bc)
 {
     krb5_error_code kret;
 
-    kret = krb5_krcc_unparse_ui_2(context, id, a->ad_type, bc);
+    kret = krb5_krcc_unparse_ui_2(context, a->ad_type, bc);
     CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_ui_4(context, id, a->length, bc);
+    kret = krb5_krcc_unparse_ui_4(context, a->length, bc);
     CHECK_OUT(kret);
-    return krb5_krcc_unparse(context, id, (krb5_pointer) a->contents,
+    return krb5_krcc_unparse(context, (krb5_pointer) a->contents,
                              a->length, bc);
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_ui_4(krb5_context context, krb5_ccache id, krb5_ui_4 i,
-                       krb5_krcc_bc * bc)
+krb5_krcc_unparse_ui_4(krb5_context context, krb5_ui_4 i, krb5_krcc_bc * bc)
 {
     unsigned char buf[4];
 
     store_32_be(i, buf);
-    return krb5_krcc_unparse(context, id, buf, 4, bc);
+    return krb5_krcc_unparse(context, buf, 4, bc);
 }
 
 static  krb5_error_code
-krb5_krcc_unparse_ui_2(krb5_context context, krb5_ccache id, krb5_int32 i,
-                       krb5_krcc_bc * bc)
+krb5_krcc_unparse_ui_2(krb5_context context, krb5_int32 i, krb5_krcc_bc * bc)
 {
     unsigned char buf[2];
 
     store_16_be(i, buf);
-    return krb5_krcc_unparse(context, id, buf, 2, bc);
+    return krb5_krcc_unparse(context, buf, 2, bc);
 }
 
 /*
@@ -1909,8 +1887,8 @@ krb5_krcc_unparse_ui_2(krb5_context context, krb5_ccache id, krb5_int32 i,
  * Caller is responsible for freeing returned buffer.
  */
 static  krb5_error_code
-krb5_krcc_unparse_cred(krb5_context context, krb5_ccache id,
-                       krb5_creds * creds, char **datapp, unsigned int *lenptr)
+krb5_krcc_unparse_cred(krb5_context context, krb5_creds * creds,
+                       char **datapp, unsigned int *lenptr)
 {
     krb5_error_code kret;
     char *buf = NULL;
@@ -1929,35 +1907,34 @@ krb5_krcc_unparse_cred(krb5_context context, krb5_ccache id,
     bc.bpp = buf;
     bc.endp = buf + GUESS_CRED_SIZE;
 
-    kret = krb5_krcc_unparse_principal(context, id, creds->client, &bc);
+    kret = krb5_krcc_unparse_principal(context, creds->client, &bc);
     CHECK_N_GO(kret, errout);
 
-    kret = krb5_krcc_unparse_principal(context, id, creds->server, &bc);
+    kret = krb5_krcc_unparse_principal(context, creds->server, &bc);
     CHECK_N_GO(kret, errout);
 
-    kret = krb5_krcc_unparse_keyblock(context, id, &creds->keyblock, &bc);
+    kret = krb5_krcc_unparse_keyblock(context, &creds->keyblock, &bc);
     CHECK_N_GO(kret, errout);
 
-    kret = krb5_krcc_unparse_times(context, id, &creds->times, &bc);
+    kret = krb5_krcc_unparse_times(context, &creds->times, &bc);
     CHECK_N_GO(kret, errout);
 
-    kret = krb5_krcc_unparse_octet(context, id, (krb5_int32) creds->is_skey,
-                                   &bc);
+    kret = krb5_krcc_unparse_octet(context, (krb5_int32) creds->is_skey, &bc);
     CHECK_N_GO(kret, errout);
 
-    kret = krb5_krcc_unparse_int32(context, id, creds->ticket_flags, &bc);
+    kret = krb5_krcc_unparse_int32(context, creds->ticket_flags, &bc);
     CHECK_N_GO(kret, errout);
 
-    kret = krb5_krcc_unparse_addrs(context, id, creds->addresses, &bc);
+    kret = krb5_krcc_unparse_addrs(context, creds->addresses, &bc);
     CHECK_N_GO(kret, errout);
 
-    kret = krb5_krcc_unparse_authdata(context, id, creds->authdata, &bc);
+    kret = krb5_krcc_unparse_authdata(context, creds->authdata, &bc);
     CHECK_N_GO(kret, errout);
 
-    kret = krb5_krcc_unparse_krb5data(context, id, &creds->ticket, &bc);
+    kret = krb5_krcc_unparse_krb5data(context, &creds->ticket, &bc);
     CHECK_N_GO(kret, errout);
 
-    kret = krb5_krcc_unparse_krb5data(context, id, &creds->second_ticket, &bc);
+    kret = krb5_krcc_unparse_krb5data(context, &creds->second_ticket, &bc);
     CHECK_N_GO(kret, errout);
 
     /* Success! */
