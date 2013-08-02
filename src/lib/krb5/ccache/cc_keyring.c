@@ -142,7 +142,7 @@ debug_print(char *fmt, ...)
 #define KRB5_OK 0
 
 /* Hopefully big enough to hold a serialized credential */
-#define GUESS_CRED_SIZE 4096
+#define MAX_CRED_SIZE (1024*1024)
 
 #define CHECK_N_GO(ret, errdest) if (ret != KRB5_OK) goto errdest
 #define CHECK(ret) if (ret != KRB5_OK) goto errout
@@ -185,6 +185,7 @@ typedef struct _krb5_krcc_buffer_cursor
 {
     char   *bpp;
     char   *endp;
+    size_t  size;               /* For dry-run length calculation */
 } krb5_krcc_bc;
 
 /* Global mutex */
@@ -303,9 +304,11 @@ static krb5_error_code krb5_krcc_parse_ui_2
 /* Routines to unparse a cred structure into keyring key */
 static krb5_error_code krb5_krcc_unparse
 (krb5_context, krb5_pointer buf, unsigned int len, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_cred
+static krb5_error_code krb5_krcc_unparse_cred_alloc
 (krb5_context context, krb5_creds * creds,
  char **datapp, unsigned int *lenptr);
+static krb5_error_code krb5_krcc_unparse_cred
+(krb5_context context, krb5_creds * creds, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_principal
 (krb5_context, krb5_principal princ, krb5_krcc_bc * bc);
 static krb5_error_code krb5_krcc_unparse_keyblock
@@ -1009,7 +1012,7 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
     }
 
     /* Serialize credential into memory */
-    kret = krb5_krcc_unparse_cred(context, creds, &payload, &payloadlen);
+    kret = krb5_krcc_unparse_cred_alloc(context, creds, &payload, &payloadlen);
     if (kret != KRB5_OK)
         goto errout;
 
@@ -1075,7 +1078,7 @@ krb5_krcc_save_principal(krb5_context context, krb5_ccache id,
 {
     krb5_krcc_data *d;
     krb5_error_code kret;
-    char   *payload;
+    char *payload = NULL;
     key_serial_t newkey;
     unsigned int payloadsize;
     krb5_krcc_bc bc;
@@ -1084,13 +1087,18 @@ krb5_krcc_save_principal(krb5_context context, krb5_ccache id,
 
     d = (krb5_krcc_data *) id->data;
 
-    payload = malloc(GUESS_CRED_SIZE);
+    /* Do a dry run first to calculate the size. */
+    bc.bpp = bc.endp = NULL;
+    bc.size = 0;
+    kret = krb5_krcc_unparse_principal(context, princ, &bc);
+    CHECK_N_GO(kret, errout);
+
+    /* Allocate a buffer and serialize for real. */
+    payload = malloc(bc.size);
     if (payload == NULL)
         return KRB5_CC_NOMEM;
-
     bc.bpp = payload;
-    bc.endp = payload + GUESS_CRED_SIZE;
-
+    bc.endp = payload + bc.size;
     kret = krb5_krcc_unparse_principal(context, princ, &bc);
     CHECK_N_GO(kret, errout);
 
@@ -1688,6 +1696,12 @@ static  krb5_error_code
 krb5_krcc_unparse(krb5_context context, krb5_pointer buf, unsigned int len,
                   krb5_krcc_bc * bc)
 {
+    if (bc->bpp == NULL) {
+        /* This is a dry run; just increase size and return. */
+        bc->size += len;
+        return KRB5_OK;
+    }
+
     if (bc->bpp + len > bc->endp)
         return KRB5_CC_WRITE;
 
@@ -1888,7 +1902,51 @@ krb5_krcc_unparse_ui_2(krb5_context context, krb5_int32 i, krb5_krcc_bc * bc)
  */
 static  krb5_error_code
 krb5_krcc_unparse_cred(krb5_context context, krb5_creds * creds,
-                       char **datapp, unsigned int *lenptr)
+                       krb5_krcc_bc *bc)
+{
+    krb5_error_code kret;
+
+    kret = krb5_krcc_unparse_principal(context, creds->client, bc);
+    CHECK_OUT(kret);
+
+    kret = krb5_krcc_unparse_principal(context, creds->server, bc);
+    CHECK_OUT(kret);
+
+    kret = krb5_krcc_unparse_keyblock(context, &creds->keyblock, bc);
+    CHECK_OUT(kret);
+
+    kret = krb5_krcc_unparse_times(context, &creds->times, bc);
+    CHECK_OUT(kret);
+
+    kret = krb5_krcc_unparse_octet(context, (krb5_int32) creds->is_skey, bc);
+    CHECK_OUT(kret);
+
+    kret = krb5_krcc_unparse_int32(context, creds->ticket_flags, bc);
+    CHECK_OUT(kret);
+
+    kret = krb5_krcc_unparse_addrs(context, creds->addresses, bc);
+    CHECK_OUT(kret);
+
+    kret = krb5_krcc_unparse_authdata(context, creds->authdata, bc);
+    CHECK_OUT(kret);
+
+    kret = krb5_krcc_unparse_krb5data(context, &creds->ticket, bc);
+    CHECK_OUT(kret);
+    CHECK(kret);
+
+    kret = krb5_krcc_unparse_krb5data(context, &creds->second_ticket, bc);
+    CHECK_OUT(kret);
+
+    /* Success! */
+    kret = KRB5_OK;
+
+errout:
+    return kret;
+}
+
+static  krb5_error_code
+krb5_krcc_unparse_cred_alloc(krb5_context context, krb5_creds * creds,
+                             char **datapp, unsigned int *lenptr)
 {
     krb5_error_code kret;
     char *buf = NULL;
@@ -1900,42 +1958,22 @@ krb5_krcc_unparse_cred(krb5_context context, krb5_creds * creds,
     *datapp = NULL;
     *lenptr = 0;
 
-    buf = malloc(GUESS_CRED_SIZE);
+    /* Do a dry run first to calculate the size. */
+    bc.bpp = bc.endp = NULL;
+    bc.size = 0;
+    kret = krb5_krcc_unparse_cred(context, creds, &bc);
+    CHECK(kret);
+    if (bc.size > MAX_CRED_SIZE)
+        return KRB5_CC_WRITE;
+
+    /* Allocate a buffer and unparse for real. */
+    buf = malloc(bc.size);
     if (buf == NULL)
         return KRB5_CC_NOMEM;
-
     bc.bpp = buf;
-    bc.endp = buf + GUESS_CRED_SIZE;
-
-    kret = krb5_krcc_unparse_principal(context, creds->client, &bc);
-    CHECK_N_GO(kret, errout);
-
-    kret = krb5_krcc_unparse_principal(context, creds->server, &bc);
-    CHECK_N_GO(kret, errout);
-
-    kret = krb5_krcc_unparse_keyblock(context, &creds->keyblock, &bc);
-    CHECK_N_GO(kret, errout);
-
-    kret = krb5_krcc_unparse_times(context, &creds->times, &bc);
-    CHECK_N_GO(kret, errout);
-
-    kret = krb5_krcc_unparse_octet(context, (krb5_int32) creds->is_skey, &bc);
-    CHECK_N_GO(kret, errout);
-
-    kret = krb5_krcc_unparse_int32(context, creds->ticket_flags, &bc);
-    CHECK_N_GO(kret, errout);
-
-    kret = krb5_krcc_unparse_addrs(context, creds->addresses, &bc);
-    CHECK_N_GO(kret, errout);
-
-    kret = krb5_krcc_unparse_authdata(context, creds->authdata, &bc);
-    CHECK_N_GO(kret, errout);
-
-    kret = krb5_krcc_unparse_krb5data(context, &creds->ticket, &bc);
-    CHECK_N_GO(kret, errout);
-
-    kret = krb5_krcc_unparse_krb5data(context, &creds->second_ticket, &bc);
-    CHECK_N_GO(kret, errout);
+    bc.endp = buf + bc.size;
+    kret = krb5_krcc_unparse_cred(context, creds, &bc);
+    CHECK(kret);
 
     /* Success! */
     *datapp = buf;
