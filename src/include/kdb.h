@@ -1276,7 +1276,7 @@ typedef struct _kdb_vftabl {
      *   - Place a short string literal into *status.
      *   - If desired, place data into e_data.  Any data placed here will be
      *     freed by the caller using the standard free function.
-     *   - Return an appropriate error (such as KDC_ERR_POLICY).
+     *   - Return an appropriate error (such as KRB5KDC_ERR_POLICY).
      */
     krb5_error_code (*check_policy_as)(krb5_context kcontext,
                                        krb5_kdc_req *request,
@@ -1293,7 +1293,7 @@ typedef struct _kdb_vftabl {
      *   - Place a short string literal into *status.
      *   - If desired, place data into e_data.  Any data placed here will be
      *     freed by the caller using the standard free function.
-     *   - Return an appropriate error (such as KDC_ERR_POLICY).
+     *   - Return an appropriate error (such as KRB5KDC_ERR_POLICY).
      * The input parameter ticket contains the TGT used in the TGS request.
      */
     krb5_error_code (*check_policy_tgs)(krb5_context kcontext,
