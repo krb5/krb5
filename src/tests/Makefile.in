@@ -26,6 +26,9 @@ gcred: gcred.o $(KRB5_BASE_DEPLIBS)
 hist: hist.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ hist.o $(KDB5_LIBS) $(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
 
+hrealm: hrealm.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ hrealm.o $(KRB5_BASE_LIBS)
+
 kdbtest: kdbtest.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kdbtest.o $(KDB5_LIBS) $(KADMSRV_LIBS) \
 		$(KRB5_BASE_LIBS)
@@ -84,7 +87,8 @@ kdb_check: kdc.conf krb5.conf
 	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
 
-check-pytests:: gcred hist kdbtest plugorder responder t_init_creds t_localauth
+check-pytests:: gcred hist hrealm kdbtest plugorder responder
+check-pytests:: t_init_creds t_localauth
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_iprop.py $(PYTESTFLAGS)
@@ -95,6 +99,7 @@ check-pytests:: gcred hist kdbtest plugorder responder t_init_creds t_localauth
 	$(RUNPYTEST) $(srcdir)/t_localauth.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadm5_hook.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_pwqual.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_hostrealm.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kdb_locking.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_keyrollover.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_renew.py $(PYTESTFLAGS)
@@ -115,6 +120,6 @@ check-pytests:: gcred hist kdbtest plugorder responder t_init_creds t_localauth
 	$(RUNPYTEST) $(srcdir)/t_cve-2013-1417.py $(PYTESTFLAGS)
 
 clean::
-	$(RM) gcred hist kdbtest plugorder responder t_init_creds t_localauth
-	$(RM) krb5.conf kdc.conf
+	$(RM) gcred hist hrealm kdbtest plugorder responder
+	$(RM) t_init_creds t_localauth krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap
