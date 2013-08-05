@@ -53,7 +53,8 @@ const char *interface_names[] = {
     "clpreauth",
     "kdcpreauth",
     "ccselect",
-    "localauth"
+    "localauth",
+    "hostrealm"
 };
 
 /* Return the context's interface structure for id, or NULL if invalid. */

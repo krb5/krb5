@@ -1074,7 +1074,8 @@ struct plugin_interface {
 #define PLUGIN_INTERFACE_KDCPREAUTH  3
 #define PLUGIN_INTERFACE_CCSELECT    4
 #define PLUGIN_INTERFACE_LOCALAUTH   5
-#define PLUGIN_NUM_INTERFACES        6
+#define PLUGIN_INTERFACE_HOSTREALM   6
+#define PLUGIN_NUM_INTERFACES        7
 
 /* Retrieve the plugin module of type interface_id and name modname,
  * storing the result into module. */
