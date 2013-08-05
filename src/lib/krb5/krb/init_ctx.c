@@ -310,6 +310,7 @@ krb5_free_context(krb5_context ctx)
 #endif
 
     k5_ccselect_free_context(ctx);
+    k5_hostrealm_free_context(ctx);
     k5_localauth_free_context(ctx);
     k5_plugin_free_context(ctx);
     free(ctx->plugin_base_dir);

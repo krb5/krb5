@@ -11,7 +11,6 @@ LOCALINCLUDES=-I$(top_srcdir)/util/profile
 STLIBOBJS= \
 	accessor.o	\
 	c_ustime.o	\
-	def_realm.o	\
 	ccdefname.o	\
 	changepw.o	\
 	dnsglue.o	\
@@ -22,6 +21,10 @@ STLIBOBJS= \
 	genaddrs.o	\
 	gen_rname.o	\
 	hostaddr.o	\
+	hostrealm.o	\
+	hostrealm_dns.o \
+	hostrealm_domain.o \
+	hostrealm_profile.o \
 	hst_realm.o	\
 	init_os_ctx.o	\
 	krbfileio.o	\
@@ -55,7 +58,6 @@ STLIBOBJS= \
 OBJS= \
 	$(OUTPRE)accessor.$(OBJEXT)	\
 	$(OUTPRE)c_ustime.$(OBJEXT)	\
-	$(OUTPRE)def_realm.$(OBJEXT)	\
 	$(OUTPRE)ccdefname.$(OBJEXT)	\
 	$(OUTPRE)changepw.$(OBJEXT)	\
 	$(OUTPRE)dnsglue.$(OBJEXT)	\
@@ -66,6 +68,10 @@ OBJS= \
 	$(OUTPRE)genaddrs.$(OBJEXT)	\
 	$(OUTPRE)gen_rname.$(OBJEXT)	\
 	$(OUTPRE)hostaddr.$(OBJEXT)	\
+	$(OUTPRE)hostrealm.$(OBJEXT)	\
+	$(OUTPRE)hostrealm_dns.$(OBJEXT) \
+	$(OUTPRE)hostrealm_domain.$(OBJEXT) \
+	$(OUTPRE)hostrealm_profile.$(OBJEXT) \
 	$(OUTPRE)hst_realm.$(OBJEXT)	\
 	$(OUTPRE)init_os_ctx.$(OBJEXT)	\
 	$(OUTPRE)krbfileio.$(OBJEXT)	\
@@ -99,7 +105,6 @@ OBJS= \
 SRCS= \
 	$(srcdir)/accessor.c    \
 	$(srcdir)/c_ustime.c	\
-	$(srcdir)/def_realm.c	\
 	$(srcdir)/ccdefname.c	\
 	$(srcdir)/changepw.c	\
 	$(srcdir)/dnsglue.c	\
@@ -110,6 +115,10 @@ SRCS= \
 	$(srcdir)/genaddrs.c	\
 	$(srcdir)/gen_rname.c	\
 	$(srcdir)/hostaddr.c	\
+	$(srcdir)/hostrealm.c	\
+	$(srcdir)/hostrealm_dns.c \
+	$(srcdir)/hostrealm_domain.c \
+	$(srcdir)/hostrealm_profile.c \
 	$(srcdir)/hst_realm.c	\
 	$(srcdir)/init_os_ctx.c	\
 	$(srcdir)/krbfileio.c	\

@@ -1117,6 +1117,7 @@ struct _kdb_log_context;
 typedef struct krb5_preauth_context_st krb5_preauth_context;
 struct ccselect_module_handle;
 struct localauth_module_handle;
+struct hostrealm_module_handle;
 struct _krb5_context {
     krb5_magic      magic;
     krb5_enctype    *in_tkt_etypes;
@@ -1162,6 +1163,9 @@ struct _krb5_context {
 
     /* localauth module stuff */
     struct localauth_module_handle **localauth_handles;
+
+    /* hostrealm module stuff */
+    struct hostrealm_module_handle **hostrealm_handles;
 
     /* error detail info */
     struct errinfo err;

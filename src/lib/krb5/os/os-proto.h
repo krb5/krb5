@@ -133,6 +133,8 @@ krb5_error_code k5_time_with_offset(krb5_timestamp offset,
                                     krb5_int32 *usec_out);
 void k5_set_prompt_types(krb5_context, krb5_prompt_type *);
 krb5_error_code k5_clean_hostname(krb5_context, const char *, char *, size_t);
+krb5_boolean k5_is_numeric_address(const char *name);
+krb5_error_code k5_make_realmlist(const char *realm, char ***realms_out);
 krb5_error_code k5_kt_client_default_name(krb5_context context,
                                           char **name_out);
 krb5_error_code k5_write_messages(krb5_context, krb5_pointer, krb5_data *,
@@ -145,6 +147,16 @@ extern k5_mutex_t krb5int_us_time_mutex;
 extern unsigned int krb5_max_skdc_timeout;
 extern unsigned int krb5_skdc_timeout_shift;
 extern unsigned int krb5_skdc_timeout_1;
+
+void k5_hostrealm_free_context(krb5_context);
+krb5_error_code hostrealm_profile_initvt(krb5_context context, int maj_ver,
+                                         int min_ver,
+                                         krb5_plugin_vtable vtable);
+krb5_error_code hostrealm_dns_initvt(krb5_context context, int maj_ver,
+                                     int min_ver, krb5_plugin_vtable vtable);
+krb5_error_code hostrealm_domain_initvt(krb5_context context, int maj_ver,
+                                        int min_ver,
+                                        krb5_plugin_vtable vtable);
 
 void k5_localauth_free_context(krb5_context);
 krb5_error_code localauth_names_initvt(krb5_context context, int maj_ver,

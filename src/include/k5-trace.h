@@ -183,6 +183,11 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_ENCTYPE_LIST_UNKNOWN(c, profvar, name)                    \
     TRACE(c, "Unrecognized enctype name in {str}: {str}", profvar, name)
 
+#define TRACE_HOSTREALM_VTINIT_FAIL(c, ret)                             \
+    TRACE(c, "hostrealm module failed to init vtable: {kerr}", ret)
+#define TRACE_HOSTREALM_INIT_FAIL(c, name, ret)                         \
+    TRACE(c, "hostrealm module {str} failed to init: {kerr}", name, ret)
+
 #define TRACE_INIT_CREDS(c, princ)                              \
     TRACE(c, "Getting initial credentials for {princ}", princ)
 #define TRACE_INIT_CREDS_AS_KEY_GAK(c, keyblock)                        \
@@ -401,12 +406,6 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "TXT record {str} not found", host)
 #define TRACE_TXT_LOOKUP_SUCCESS(c, host, realm)                \
     TRACE(c, "TXT record {str} found: {str}", host, realm)
-
-#define TRACE_GET_HOST_REALM_RETURN(c, host, realm) \
-    TRACE(c, "Got realm {str} for host {str}", realm, host)
-
-#define TRACE_GET_FALLBACK_HOST_REALM_RETURN(c, host, realm) \
-    TRACE(c, "Got fallback realm {str} for host {str}", realm, host)
 
 #define TRACE_SNAME_TO_PRINCIPAL(c, host, sname, type) \
     TRACE(c, "Convert service {str} ({ptype}) on host {str} to principal", \
