@@ -25,7 +25,6 @@ STLIBOBJS= \
 	hostrealm_dns.o \
 	hostrealm_domain.o \
 	hostrealm_profile.o \
-	hst_realm.o	\
 	init_os_ctx.o	\
 	krbfileio.o	\
 	ktdefname.o	\
@@ -72,7 +71,6 @@ OBJS= \
 	$(OUTPRE)hostrealm_dns.$(OBJEXT) \
 	$(OUTPRE)hostrealm_domain.$(OBJEXT) \
 	$(OUTPRE)hostrealm_profile.$(OBJEXT) \
-	$(OUTPRE)hst_realm.$(OBJEXT)	\
 	$(OUTPRE)init_os_ctx.$(OBJEXT)	\
 	$(OUTPRE)krbfileio.$(OBJEXT)	\
 	$(OUTPRE)ktdefname.$(OBJEXT)	\
@@ -119,7 +117,6 @@ SRCS= \
 	$(srcdir)/hostrealm_dns.c \
 	$(srcdir)/hostrealm_domain.c \
 	$(srcdir)/hostrealm_profile.c \
-	$(srcdir)/hst_realm.c	\
 	$(srcdir)/init_os_ctx.c	\
 	$(srcdir)/krbfileio.c	\
 	$(srcdir)/ktdefname.c	\
