@@ -625,8 +625,8 @@ kg_accept_krb5(minor_status, context_handle,
 
     /* Limit the encryption types negotiated (if requested). */
     if (cred->req_enctypes) {
-        if ((code = krb5_set_default_tgs_enctypes(context,
-                                                  cred->req_enctypes))) {
+        if ((code = krb5_auth_con_setpermetypes(context, auth_context,
+                                                cred->req_enctypes))) {
             major_status = GSS_S_FAILURE;
             goto fail;
         }
