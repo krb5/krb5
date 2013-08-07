@@ -312,8 +312,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Response was{str} from master KDC", (master) ? "" : " not")
 #define TRACE_SENDTO_KDC_RESOLVING(c, hostname)         \
     TRACE(c, "Resolving hostname {str}", hostname)
-#define TRACE_SENDTO_KDC_RESPONSE(c, raddr)             \
-    TRACE(c, "Received answer from {raddr}", raddr)
+#define TRACE_SENDTO_KDC_RESPONSE(c, len, raddr)                        \
+    TRACE(c, "Received answer ({int} bytes) from {raddr}", len, raddr)
 #define TRACE_SENDTO_KDC_TCP_CONNECT(c, raddr)                  \
     TRACE(c, "Initiating TCP connection to {raddr}", raddr)
 #define TRACE_SENDTO_KDC_TCP_DISCONNECT(c, raddr)               \

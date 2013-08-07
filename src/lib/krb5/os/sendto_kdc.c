@@ -1091,7 +1091,6 @@ k5_sendto(krb5_context context, const krb5_data *message,
         goto cleanup;
     }
     /* Success!  */
-    TRACE_SENDTO_KDC_RESPONSE(context, &winner->addr);
     reply->data = winner->x.in.buf;
     reply->length = winner->x.in.pos - winner->x.in.buf;
     retval = 0;
@@ -1100,6 +1099,7 @@ k5_sendto(krb5_context context, const krb5_data *message,
         *server_used = winner->server_index;
     if (remoteaddr != NULL && remoteaddrlen != 0 && *remoteaddrlen > 0)
         (void)getpeername(winner->fd, remoteaddr, remoteaddrlen);
+    TRACE_SENDTO_KDC_RESPONSE(context, reply->length, &winner->addr);
 
 cleanup:
     for (state = conns; state != NULL; state = next) {
