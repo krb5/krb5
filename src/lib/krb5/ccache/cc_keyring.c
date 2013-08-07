@@ -599,7 +599,7 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
         return KRB5_CC_NOMEM;
 
 
-    kret = krb5_krcc_new_data(residual, key, ring_id, &d);
+    kret = krb5_krcc_new_data(full_residual, key, ring_id, &d);
     if (kret) {
         free(lid);
         return kret;
