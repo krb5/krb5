@@ -743,6 +743,32 @@ built-in modules exist for these interfaces:
 **encrypted_timestamp**
     This module implements the encrypted timestamp mechanism.
 
+.. _hostrealm:
+
+hostrealm interface
+###################
+
+The hostrealm section (introduced in release 1.12) controls modules
+for the host-to-realm interface, which affects the local mapping of
+hostnames to realm names and the choice of default realm.  The following
+built-in modules exist for this interface:
+
+**profile**
+    This module consults the [domain_realm] section of the profile for
+    authoritative host-to-realm mappings, and the **default_realm**
+    variable for the default realm.
+
+**dns**
+    This module looks for DNS records for fallback host-to-realm
+    mappings and the default realm.  It only operates if the
+    **dns_lookup_realm** variable is set to true.
+
+**domain**
+    This module applies heuristics for fallback host-to-realm
+    mappings.  It implements the **realm_try_domains** variable, and
+    uses the uppercased parent domain of the hostname if that does not
+    produce a result.
+
 .. _localauth:
 
 localauth interface
