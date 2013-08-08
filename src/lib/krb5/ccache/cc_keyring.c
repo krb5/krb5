@@ -66,7 +66,7 @@
  *        not other keyrings
  *      - Each Kerberos ticket will have its own key within the ccache keyring
  *      - The principal information for the ccache is stored in a
- *        special key, which is not counted in the 'numkeys' count
+ *        special key
  */
 
 #include "cc-int.h"
@@ -155,8 +155,6 @@ typedef struct _krb5_krcc_data
     key_serial_t parent_id;     /* parent keyring of this ccache keyring */
     key_serial_t ring_id;       /* keyring representing ccache */
     key_serial_t princ_id;      /* key holding principal info */
-    int     numkeys;            /* # of keys in this ring
-                                 * (does NOT include principal info) */
     krb5_timestamp changetime;
 } krb5_krcc_data;
 
@@ -421,14 +419,13 @@ krb5_krcc_clearcache(krb5_context context, krb5_ccache id)
 
     d = (krb5_krcc_data *) id->data;
 
-    DEBUG_PRINT(("krb5_krcc_clearcache: ring_id %d, princ_id %d, "
-                 "numkeys is %d\n", d->ring_id, d->princ_id, d->numkeys));
+    DEBUG_PRINT(("krb5_krcc_clearcache: ring_id %d, princ_id %d\n",
+                 d->ring_id, d->princ_id));
 
     res = keyctl_clear(d->ring_id);
     if (res != 0) {
         return errno;
     }
-    d->numkeys = 0;
     d->princ_id = 0;
     krb5_krcc_update_change_time(d);
 
@@ -504,7 +501,6 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
     krb5_krcc_data *d;
     key_serial_t key;
     key_serial_t pkey = 0;
-    int     nkeys = 0;
     key_serial_t ring_id;
     const char *residual;
 
@@ -559,8 +555,6 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
                          key, strerror(errno)));
             pkey = 0;
         }
-        /* Determine how many keys exist */
-        nkeys = krb5_krcc_getkeycount(key);
     }
 
     lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
@@ -577,7 +571,6 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
     DEBUG_PRINT(("krb5_krcc_resolve: ring_id %d, princ_id %d, "
                  "nkeys %d\n", key, pkey, nkeys));
     d->princ_id = pkey;
-    d->numkeys = nkeys;
     lid->ops = &krb5_krcc_ops;
     lid->data = d;
     lid->magic = KV5M_CCACHE;
@@ -605,6 +598,7 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
     krb5_krcc_cursor krcursor;
     krb5_krcc_data *d;
     unsigned int size;
+    int numkeys;
     long res;
 
     DEBUG_PRINT(("krb5_krcc_start_seq_get: entered\n"));
@@ -612,14 +606,9 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
     d = id->data;
     k5_cc_mutex_lock(context, &d->lock);
 
-    /*
-     * Determine how many keys currently exist and update numkeys.
-     * We cannot depend on the current value of numkeys because
-     * the ccache may have been updated elsewhere
-     */
-    d->numkeys = krb5_krcc_getkeycount(d->ring_id);
+    numkeys = krb5_krcc_getkeycount(d->ring_id);
 
-    size = sizeof(*krcursor) + ((d->numkeys + 1) * sizeof(key_serial_t));
+    size = sizeof(*krcursor) + ((numkeys + 1) * sizeof(key_serial_t));
 
     krcursor = (krb5_krcc_cursor) malloc(size);
     if (krcursor == NULL) {
@@ -629,16 +618,16 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
 
     krcursor->keys = (key_serial_t *) ((char *) krcursor + sizeof(*krcursor));
     res = keyctl_read(d->ring_id, (char *) krcursor->keys,
-                      ((d->numkeys + 1) * sizeof(key_serial_t)));
-    if (res < 0 || (size_t)res > ((d->numkeys + 1) * sizeof(key_serial_t))) {
+                      ((numkeys + 1) * sizeof(key_serial_t)));
+    if (res < 0 || (size_t)res > ((numkeys + 1) * sizeof(key_serial_t))) {
         DEBUG_PRINT(("Read %d bytes from keyring, numkeys %d: %s\n",
-                     res, d->numkeys, strerror(errno)));
+                     res, numkeys, strerror(errno)));
         free(krcursor);
         k5_cc_mutex_unlock(context, &d->lock);
         return KRB5_CC_IO;
     }
 
-    krcursor->numkeys = d->numkeys;
+    krcursor->numkeys = numkeys;
     krcursor->currkey = 0;
     krcursor->princ_id = d->princ_id;
 
@@ -770,7 +759,6 @@ krb5_krcc_new_data(const char *name, key_serial_t ring,
     d->princ_id = 0;
     d->ring_id = ring;
     d->parent_id = parent_ring;
-    d->numkeys = 0;
     d->changetime = 0;
     krb5_krcc_update_change_time(d);
 
@@ -995,7 +983,6 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
         DEBUG_PRINT(("Error adding user key '%s': %s\n",
                      keyname, strerror(kret)));
     } else {
-        d->numkeys++;
         kret = KRB5_OK;
         krb5_krcc_update_change_time(d);
     }
