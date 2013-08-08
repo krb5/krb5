@@ -117,20 +117,6 @@ debug_print(char *fmt, ...)
 #define KRCC_SPEC_PRINC_KEYNAME "__krb5_princ__"
 
 /*
- * XXX The following two really belong in some external
- * header since outside programs will need to use these
- * same names.
- */
-/*
- * Special name for key to communicate key serial numbers
- * This is used by the Linux gssd process to pass the
- * user's keyring values it gets in an upcall.
- * The format of the contents should be
- *    <session_key>:<process_key>:<thread_key>
- */
-#define KRCC_SPEC_IDS_KEYNAME "_gssd_keyring_ids_"
-
-/*
  * Special name for the key to communicate the name(s)
  * of credentials caches to be used for requests.
  * This should currently contain a single name, but
@@ -147,12 +133,6 @@ debug_print(char *fmt, ...)
 #define CHECK_N_GO(ret, errdest) if (ret != KRB5_OK) goto errdest
 #define CHECK(ret) if (ret != KRB5_OK) goto errout
 #define CHECK_OUT(ret) if (ret != KRB5_OK) return ret
-
-typedef struct krb5_krcc_ring_ids {
-    key_serial_t        session;
-    key_serial_t        process;
-    key_serial_t        thread;
-} krb5_krcc_ring_ids_t;
 
 typedef struct _krb5_krcc_cursor
 {
@@ -270,8 +250,6 @@ static krb5_error_code krb5_krcc_save_principal
 
 static krb5_error_code krb5_krcc_retrieve_principal
 (krb5_context context, krb5_ccache id, krb5_principal * princ);
-
-static int krb5_krcc_get_ring_ids(krb5_krcc_ring_ids_t *p);
 
 /* Routines to parse a key from a keyring into a cred structure */
 static krb5_error_code krb5_krcc_parse
@@ -527,30 +505,21 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
     key_serial_t key;
     key_serial_t pkey = 0;
     int     nkeys = 0;
-    int     res;
-    krb5_krcc_ring_ids_t ids;
     key_serial_t ring_id;
     const char *residual;
 
     DEBUG_PRINT(("krb5_krcc_resolve: entered with name '%s'\n",
                  full_residual));
 
-    res = krb5_krcc_get_ring_ids(&ids);
-    if (res) {
-        kret = EINVAL;
-        DEBUG_PRINT(("krb5_krcc_resolve: Error getting ring id values!\n"));
-        return kret;
-    }
-
     if (strncmp(full_residual, "thread:", 7) == 0) {
         residual = full_residual + 7;
-        ring_id = ids.thread;
+        ring_id = KEY_SPEC_THREAD_KEYRING;
     } else if (strncmp(full_residual, "process:", 8) == 0) {
         residual = full_residual + 8;
-        ring_id = ids.process;
+        ring_id = KEY_SPEC_PROCESS_KEYRING;
     } else {
         residual = full_residual;
-        ring_id = ids.session;
+        ring_id = KEY_SPEC_SESSION_KEYRING;
     }
 
     DEBUG_PRINT(("krb5_krcc_resolve: searching ring %d for residual '%s'\n",
@@ -1167,57 +1136,6 @@ errout:
         free(payload);
     k5_cc_mutex_unlock(context, &d->lock);
     return kret;
-}
-
-static int
-krb5_krcc_get_ring_ids(krb5_krcc_ring_ids_t *p)
-{
-    key_serial_t ids_key;
-    char ids_buf[128];
-    key_serial_t session, process, thread;
-    long val;
-
-    DEBUG_PRINT(("krb5_krcc_get_ring_ids: entered\n"));
-
-    if (!p)
-        return EINVAL;
-
-    /* Use the defaults in case we find no ids key */
-    p->session = KEY_SPEC_SESSION_KEYRING;
-    p->process = KEY_SPEC_PROCESS_KEYRING;
-    p->thread = KEY_SPEC_THREAD_KEYRING;
-
-    /*
-     * Note that in the "normal" case, this will not be found.
-     * The Linux gssd creates this key while creating a
-     * context to communicate the user's key serial numbers.
-     */
-    ids_key = request_key(KRCC_KEY_TYPE_USER, KRCC_SPEC_IDS_KEYNAME, NULL, 0);
-    if (ids_key < 0)
-        goto out;
-
-    DEBUG_PRINT(("krb5_krcc_get_ring_ids: processing '%s' key %d\n",
-                 KRCC_SPEC_IDS_KEYNAME, ids_key));
-    /*
-     * Read and parse the ids file
-     */
-    memset(ids_buf, '\0', sizeof(ids_buf));
-    val = keyctl_read(ids_key, ids_buf, sizeof(ids_buf));
-    if (val < 0 || (size_t)val > sizeof(ids_buf))
-        goto out;
-
-    val = sscanf(ids_buf, "%d:%d:%d", &session, &process, &thread);
-    if (val != 3)
-        goto out;
-
-    p->session = session;
-    p->process = process;
-    p->thread = thread;
-
-out:
-    DEBUG_PRINT(("krb5_krcc_get_ring_ids: returning %d:%d:%d\n",
-                 p->session, p->process, p->thread));
-    return 0;
 }
 
 /*
