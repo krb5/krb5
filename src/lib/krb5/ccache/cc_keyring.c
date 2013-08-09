@@ -316,23 +316,6 @@ static void krb5_krcc_update_change_time
 extern krb5_error_code krb5_change_cache(void);
 
 /*
- * Determine how many keys exist in a ccache keyring.
- * Subtracts out the "hidden" key holding the principal information.
- */
-static int KRB5_CALLCONV
-krb5_krcc_getkeycount(key_serial_t cred_ring)
-{
-    int res, nkeys;
-
-    res = keyctl_read(cred_ring, NULL, 0);
-    if (res > 0)
-        nkeys = (res / sizeof(key_serial_t)) - 1;
-    else
-        nkeys = 0;
-    return(nkeys);
-}
-
-/*
  * Modifies:
  * id
  *
@@ -597,39 +580,31 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
 {
     krb5_krcc_cursor krcursor;
     krb5_krcc_data *d;
-    unsigned int size;
-    int numkeys;
-    long res;
+    void *keys;
+    long size;
 
     DEBUG_PRINT(("krb5_krcc_start_seq_get: entered\n"));
 
     d = id->data;
     k5_cc_mutex_lock(context, &d->lock);
 
-    numkeys = krb5_krcc_getkeycount(d->ring_id);
-
-    size = sizeof(*krcursor) + ((numkeys + 1) * sizeof(key_serial_t));
-
-    krcursor = (krb5_krcc_cursor) malloc(size);
-    if (krcursor == NULL) {
-        k5_cc_mutex_unlock(context, &d->lock);
-        return KRB5_CC_NOMEM;
-    }
-
-    krcursor->keys = (key_serial_t *) ((char *) krcursor + sizeof(*krcursor));
-    res = keyctl_read(d->ring_id, (char *) krcursor->keys,
-                      ((numkeys + 1) * sizeof(key_serial_t)));
-    if (res < 0 || (size_t)res > ((numkeys + 1) * sizeof(key_serial_t))) {
-        DEBUG_PRINT(("Read %d bytes from keyring, numkeys %d: %s\n",
-                     res, numkeys, strerror(errno)));
-        free(krcursor);
+    size = keyctl_read_alloc(d->ring_id, &keys);
+    if (size == -1) {
+        DEBUG_PRINT(("Error getting from keyring: %s\n", strerror(errno)));
         k5_cc_mutex_unlock(context, &d->lock);
         return KRB5_CC_IO;
     }
 
-    krcursor->numkeys = numkeys;
-    krcursor->currkey = 0;
+    krcursor = calloc(1, sizeof(*krcursor));
+    if (krcursor == NULL) {
+        free(keys);
+        k5_cc_mutex_unlock(context, &d->lock);
+        return KRB5_CC_NOMEM;
+    }
+
     krcursor->princ_id = d->princ_id;
+    krcursor->numkeys = size / sizeof(key_serial_t);
+    krcursor->keys = keys;
 
     k5_cc_mutex_unlock(context, &d->lock);
     *cursor = (krb5_cc_cursor) krcursor;
@@ -677,14 +652,14 @@ krb5_krcc_next_cred(krb5_context context, krb5_ccache id,
     memset(creds, 0, sizeof(krb5_creds));
 
     /* If we're pointing past the end of the keys array, there are no more */
-    if (krcursor->currkey > krcursor->numkeys)
+    if (krcursor->currkey >= krcursor->numkeys)
         return KRB5_CC_END;
 
     /* If we're pointing at the entry with the principal, skip it */
     if (krcursor->keys[krcursor->currkey] == krcursor->princ_id) {
         krcursor->currkey++;
         /* Check if we have now reached the end */
-        if (krcursor->currkey > krcursor->numkeys)
+        if (krcursor->currkey >= krcursor->numkeys)
             return KRB5_CC_END;
     }
 
@@ -723,10 +698,14 @@ static krb5_error_code KRB5_CALLCONV
 krb5_krcc_end_seq_get(krb5_context context, krb5_ccache id,
                       krb5_cc_cursor * cursor)
 {
+    krb5_krcc_cursor krcursor = (krb5_krcc_cursor)*cursor;
     DEBUG_PRINT(("krb5_krcc_end_seq_get: entered\n"));
 
-    free(*cursor);
-    *cursor = 0L;
+    if (krcursor != NULL) {
+        free(krcursor->keys);
+        free(krcursor);
+    }
+    *cursor = NULL;
     return KRB5_OK;
 }
 
