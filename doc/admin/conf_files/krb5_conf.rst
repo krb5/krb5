@@ -467,7 +467,9 @@ The [domain_realm] section provides a translation from a domain name
 or hostname to a Kerberos realm name.  The tag name can be a host name
 or domain name, where domain names are indicated by a prefix of a
 period (``.``).  The value of the relation is the Kerberos realm name
-for that particular host or domain.  The Kerberos realm may be
+for that particular host or domain.  A host name relation implicitly
+provides the corresponding domain name relation, unless an explicit domain
+name relation is provided.  The Kerberos realm may be
 identified either in the realms_ section or using DNS SRV records.
 Host names and domain names should be in lower case.  For example:
 
@@ -475,14 +477,16 @@ Host names and domain names should be in lower case.  For example:
 
     [domain_realm]
         crash.mit.edu = TEST.ATHENA.MIT.EDU
-        .mit.edu = ATHENA.MIT.EDU
+	.dev.mit.edu = TEST.ATHENA.MIT.EDU
         mit.edu = ATHENA.MIT.EDU
 
-maps the host with the exact name ``crash.mit.edu`` into the
-TEST.ATHENA.MIT.EDU realm.  The period prefix in ``.mit.edu`` denotes
-that all systems in the ``mit.edu`` domain belong to
-``ATHENA.MIT.EDU`` realm.  The third entry maps the host ``mit.edu``
-itself to the ``ATHENA.MIT.EDU`` realm.
+maps the host with the name ``crash.mit.edu`` into the
+``TEST.ATHENA.MIT.EDU`` realm.  The second entry maps all hosts under the
+domain ``dev.mit.edu`` into the ``TEST.ATHENA.MIT.EDU`` realm, but not
+the host with the name ``dev.mit.edu``.  That host is matched
+by the third entry, which maps the host ``mit.edu`` and all hosts
+under the domain ``mit.edu`` that do not match a preceding rule
+into the realm ``ATHENA.MIT.EDU``.
 
 If no translation entry applies to a hostname used for a service
 principal for a service ticket request, the library will try to get a
