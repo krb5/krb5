@@ -117,6 +117,7 @@ k5_free_pa_otp_req
 k5_free_serverlist
 k5_init_trace
 k5_kt_get_principal
+k5_localauth_free_context
 k5_locate_kdc
 k5_os_free_context
 k5_os_init_context

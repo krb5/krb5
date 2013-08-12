@@ -146,6 +146,7 @@ extern unsigned int krb5_max_skdc_timeout;
 extern unsigned int krb5_skdc_timeout_shift;
 extern unsigned int krb5_skdc_timeout_1;
 
+void k5_localauth_free_context(krb5_context);
 krb5_error_code localauth_names_initvt(krb5_context context, int maj_ver,
                                        int min_ver, krb5_plugin_vtable vtable);
 krb5_error_code localauth_rule_initvt(krb5_context context, int maj_ver,

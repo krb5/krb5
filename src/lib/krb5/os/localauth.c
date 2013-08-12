@@ -434,3 +434,10 @@ krb5_aname_to_localname(krb5_context context, krb5_const_principal aname,
     }
     return KRB5_LNAME_NOTRANS;
 }
+
+void
+k5_localauth_free_context(krb5_context context)
+{
+    free_handles(context, context->localauth_handles);
+    context->localauth_handles = NULL;
+}
