@@ -91,8 +91,8 @@ krb5_error_code krb5_make_full_ipaddr(krb5_context,
 
 #endif /* HAVE_NETINET_IN_H */
 
-krb5_error_code krb5_try_realm_txt_rr(const char *, const char *,
-                                      char **realm);
+krb5_error_code k5_try_realm_txt_rr(krb5_context context, const char *prefix,
+                                    const char *name, char **realm);
 
 int _krb5_use_dns_realm (krb5_context);
 int _krb5_use_dns_kdc (krb5_context);

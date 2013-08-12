@@ -580,7 +580,6 @@ krb5_tkt_creds_step
 krb5_timeofday
 krb5_timestamp_to_sfstring
 krb5_timestamp_to_string
-krb5_try_realm_txt_rr
 krb5_unlock_file
 krb5_unpack_full_ipaddr
 krb5_unparse_name

@@ -397,6 +397,11 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_TKT_CREDS_WRONG_ENCTYPE(c)                                \
     TRACE(c, "Retrying TGS request with desired service ticket enctypes")
 
+#define TRACE_TXT_LOOKUP_NOTFOUND(c, host)              \
+    TRACE(c, "TXT record {str} not found", host)
+#define TRACE_TXT_LOOKUP_SUCCESS(c, host, realm)                \
+    TRACE(c, "TXT record {str} found: {str}", host, realm)
+
 #define TRACE_GET_HOST_REALM_RETURN(c, host, realm) \
     TRACE(c, "Got realm {str} for host {str}", realm, host)
 

@@ -122,19 +122,19 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
                 if ( localhost[0] ) {
                     p = localhost;
                     do {
-                        retval = krb5_try_realm_txt_rr("_kerberos", p,
-                                                       &context->default_realm);
+                        retval = k5_try_realm_txt_rr(context, "_kerberos", p,
+                                                     &context->default_realm);
                         p = strchr(p,'.');
                         if (p)
                             p++;
                     } while (retval && p && p[0]);
 
                     if (retval)
-                        retval = krb5_try_realm_txt_rr("_kerberos", "",
-                                                       &context->default_realm);
+                        retval = k5_try_realm_txt_rr(context, "_kerberos", "",
+                                                     &context->default_realm);
                 } else {
-                    retval = krb5_try_realm_txt_rr("_kerberos", "",
-                                                   &context->default_realm);
+                    retval = k5_try_realm_txt_rr(context, "_kerberos", "",
+                                                 &context->default_realm);
                 }
                 if (retval) {
                     return(KRB5_CONFIG_NODEFREALM);

@@ -305,7 +305,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata,
     if (_krb5_use_dns_realm(context) && !is_numeric) {
         p = cleanname;
         do {
-            ret = krb5_try_realm_txt_rr("_kerberos", p, &realm);
+            ret = k5_try_realm_txt_rr(context, "_kerberos", p, &realm);
             p = strchr(p, '.');
             if (p != NULL)
                 p++;

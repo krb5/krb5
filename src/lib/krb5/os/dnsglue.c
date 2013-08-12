@@ -359,7 +359,8 @@ out:
  */
 
 krb5_error_code
-krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
+k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
+                    char **realm)
 {
     krb5_error_code retval = KRB5_ERR_HOST_REALM_UNKNOWN;
     const unsigned char *p, *base;
@@ -395,8 +396,10 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
     if (k5_buf_data(&buf) == NULL)
         return KRB5_ERR_HOST_REALM_UNKNOWN;
     ret = krb5int_dns_init(&ds, host, C_IN, T_TXT);
-    if (ret < 0)
+    if (ret < 0) {
+        TRACE_TXT_LOOKUP_NOTFOUND(context, host);
         goto errout;
+    }
 
     ret = krb5int_dns_nextans(ds, &base, &rdlen);
     if (ret < 0 || base == NULL)
@@ -417,6 +420,7 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
     if ( (*realm)[len-1] == '.' )
         (*realm)[len-1] = '\0';
     retval = 0;
+    TRACE_TXT_LOOKUP_SUCCESS(context, host, *realm);
 
 errout:
     if (ds != NULL) {
