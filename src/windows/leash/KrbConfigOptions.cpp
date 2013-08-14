@@ -309,11 +309,7 @@ BOOL CKrbConfigOptions::OnInitDialog()
                 retval = pprofile_get_string(CLeashApp::m_krbv5_profile, "libdefaults",
                                               "dns_fallback", 0, 0, &value);
             if (value == 0) {
-#if KRB5_DNS_LOOKUP_KDC
                 dns_in_use = 1;
-#else
-                dns_in_use = 0;
-#endif
             } else {
                 dns_in_use = config_boolean_to_int(value);
                 pprofile_release_string(value);
@@ -462,11 +458,7 @@ void CKrbConfigOptions::OnSelchangeEditDefaultRealm()
 					retval = pprofile_get_string(CLeashApp::m_krbv5_profile, "libdefaults",
 								                 "dns_fallback", 0, 0, &value);
 				if (value == 0) {
-#if KRB5_DNS_LOOKUP_KDC
 			        dns_in_use = 1;
-#else
-					dns_in_use = 0;
-#endif
 				} else {
 					dns_in_use = config_boolean_to_int(value);
 					pprofile_release_string(value);
@@ -541,11 +533,7 @@ void CKrbConfigOptions::ResetDefaultRealmComboBox()
         retval = pprofile_get_string(CLeashApp::m_krbv5_profile, "libdefaults",
                                       "dns_fallback", 0, 0, &value);
     if (value == 0) {
-#if KRB5_DNS_LOOKUP_KDC
         dns = 1;
-#else
-        dns = 0;
-#endif
     } else {
         dns = config_boolean_to_int(value);
         pprofile_release_string(value);

@@ -1303,9 +1303,6 @@ dnl KRB5_AC_ENABLE_DNS
 dnl
 AC_DEFUN(KRB5_AC_ENABLE_DNS, [
 enable_dns=yes
-enable_dns_for_kdc=yes
-AC_DEFINE(KRB5_DNS_LOOKUP_KDC,1,[Define to enable DNS lookups of Kerberos KDCs])
-
   AC_ARG_ENABLE([dns-for-realm],
 [  --enable-dns-for-realm  enable DNS lookups of Kerberos realm names], ,
 [enable_dns_for_realm=no])

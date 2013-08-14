@@ -88,12 +88,9 @@ C=.^\
 srcdir = .
 top_srcdir = $(srcdir)\$(BUILDTOP)
 
-KRB5_USE_DNS=1
-KRB5_USE_DNS_KDC=1
 DNS_LIB=$(BUILDTOP)\util\wshelper\$(OUTPRE)$(DLIB).lib
 DNS_INC=$(BUILDTOP)\windows\include
 
-!if defined(KRB5_USE_DNS) || defined(KRB5_USE_DNS_KDC) || defined(KRB5_USE_DNS_REALMS)
 !if defined(KRB5_NO_WSHELPER)
 DNSMSG=resolver
 !else
@@ -110,15 +107,8 @@ DNSFLAGS=-DWSHELPER=1
 !endif
 DNSLIBS=$(DNS_LIB)
 DNSFLAGS=-I$(DNS_INC) $(DNSFLAGS) -DKRB5_DNS_LOOKUP=1
-!if defined(KRB5_USE_DNS_KDC)
-DNSFLAGS=$(DNSFLAGS) -DKRB5_DNS_LOOKUP_KDC=1
-!endif
 !if defined(KRB5_USE_DNS_REALMS)
 DNSFLAGS=$(DNSFLAGS) -DKRB5_DNS_LOOKUP_REALM=1
-!endif
-!else
-DNSLIBS=
-DNSFLAGS=
 !endif
 
 !if ("$(CPU)" == "i386")

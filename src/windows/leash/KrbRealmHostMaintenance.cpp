@@ -130,11 +130,7 @@ BOOL CKrbRealmHostMaintenance::OnInitDialog()
         retval = pprofile_get_string(CLeashApp::m_krbv5_profile, "libdefaults",
                                   "dns_fallback", 0, 0, &value);
     if (value == 0) {
-#if KRB5_DNS_LOOKUP_KDC
         m_initDnsKdcLookup = m_newDnsKdcLookup = 1;
-#else
-        m_initDnsKdcLookup = m_newDnsKdcLookup = 0;
-#endif
     } else {
         m_initDnsKdcLookup = m_newDnsKdcLookup = config_boolean_to_int(value);
         pprofile_release_string(value);

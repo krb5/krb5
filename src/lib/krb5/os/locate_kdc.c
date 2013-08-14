@@ -40,11 +40,7 @@
 #endif /* WSHELPER */
 #include "dnsglue.h"
 
-#if KRB5_DNS_LOOKUP_KDC
 #define DEFAULT_LOOKUP_KDC 1
-#else
-#define DEFAULT_LOOKUP_KDC 0
-#endif
 #if KRB5_DNS_LOOKUP_REALM
 #define DEFAULT_LOOKUP_REALM 1
 #else
