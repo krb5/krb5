@@ -168,7 +168,8 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
 {
     krb5_error_code retval, err;
     struct serverlist servers;
-    int socktype1 = 0, socktype2 = 0, server_used;
+    int server_used;
+    transport protocol1, protocol2;
 
     /*
      * find KDC location(s) for realm
@@ -203,18 +204,18 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
     }
 
     if (tcp_only)
-        socktype1 = SOCK_STREAM, socktype2 = 0;
+        protocol1 = TCP, protocol2 = 0;
     else if (message->length <= (unsigned int) context->udp_pref_limit)
-        socktype1 = SOCK_DGRAM, socktype2 = SOCK_STREAM;
+        protocol1 = UDP, protocol2 = TCP;
     else
-        socktype1 = SOCK_STREAM, socktype2 = SOCK_DGRAM;
+        protocol1 = TCP, protocol2 = UDP;
 
     retval = k5_locate_kdc(context, realm, &servers, *use_master,
                            tcp_only ? SOCK_STREAM : 0);
     if (retval)
         return retval;
 
-    retval = k5_sendto(context, message, &servers, socktype1, socktype2,
+    retval = k5_sendto(context, message, &servers, protocol1, protocol2,
                        NULL, reply, NULL, NULL, &server_used,
                        check_for_svc_unavailable, &err);
     if (retval == KRB5_KDC_UNREACH) {
@@ -235,7 +236,7 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
         struct serverlist mservers;
         struct server_entry *entry = &servers.servers[server_used];
         retval = k5_locate_kdc(context, realm, &mservers, TRUE,
-                               entry->socktype);
+                               entry->protocol);
         if (retval == 0) {
             if (in_addrlist(entry, &mservers))
                 *use_master = 1;
@@ -541,7 +542,7 @@ translate_ai_error (int err)
  */
 static krb5_error_code
 resolve_server(krb5_context context, const struct serverlist *servers,
-               size_t ind, int socktype1, int socktype2,
+               size_t ind, transport protocol1, transport protocol2,
                const krb5_data *message, char **udpbufp,
                struct conn_state **conns)
 {
@@ -552,12 +553,17 @@ resolve_server(krb5_context context, const struct serverlist *servers,
     char portbuf[64];
 
     /* Skip any stray entries of socktypes we don't want. */
-    if (entry->socktype != 0 && entry->socktype != socktype1 &&
-        entry->socktype != socktype2)
+    if (entry->protocol != 0 && entry->protocol != protocol1 &&
+        entry->protocol != protocol2)
         return 0;
 
     if (entry->hostname == NULL) {
-        ai.ai_socktype = entry->socktype;
+        if (entry->protocol == UDP)
+            ai.ai_socktype = SOCK_DGRAM;
+        else if (entry->protocol == TCP)
+            ai.ai_socktype = SOCK_STREAM;
+        else
+            ai.ai_socktype = 0;
         ai.ai_family = entry->family;
         ai.ai_addrlen = entry->addrlen;
         ai.ai_addr = (struct sockaddr *)&entry->addr;
@@ -566,7 +572,12 @@ resolve_server(krb5_context context, const struct serverlist *servers,
 
     memset(&hint, 0, sizeof(hint));
     hint.ai_family = entry->family;
-    hint.ai_socktype = (entry->socktype != 0) ? entry->socktype : socktype1;
+    if (entry->protocol == UDP)
+        hint.ai_socktype = SOCK_DGRAM;
+    else if (entry->protocol == TCP)
+        hint.ai_socktype = SOCK_STREAM;
+    else
+        hint.ai_socktype = 0;
     hint.ai_flags = AI_ADDRCONFIG;
 #ifdef AI_NUMERICSERV
     hint.ai_flags |= AI_NUMERICSERV;
@@ -582,10 +593,15 @@ resolve_server(krb5_context context, const struct serverlist *servers,
     retval = 0;
     for (a = addrs; a != 0 && retval == 0; a = a->ai_next)
         retval = add_connection(conns, a, ind, message, udpbufp);
-    if (retval == 0 && entry->socktype == 0 && socktype2 != 0) {
+    if (retval == 0 && entry->protocol == 0 && protocol2 != 0) {
         /* Add each address again with the non-preferred socktype. */
         for (a = addrs; a != 0 && retval == 0; a = a->ai_next) {
-            a->ai_socktype = socktype2;
+            if (protocol2 == UDP)
+                a->ai_socktype = SOCK_DGRAM;
+            else if (protocol2 == TCP)
+                a->ai_socktype = SOCK_STREAM;
+            else
+                a->ai_socktype = 0;
             retval = add_connection(conns, a, ind, message, udpbufp);
         }
     }
@@ -998,7 +1014,8 @@ service_fds(krb5_context context, struct select_state *selstate,
 
 krb5_error_code
 k5_sendto(krb5_context context, const krb5_data *message,
-          const struct serverlist *servers, int socktype1, int socktype2,
+          const struct serverlist *servers,
+          transport protocol1, transport protocol2,
           struct sendto_callback_info* callback_info, krb5_data *reply,
           struct sockaddr *remoteaddr, socklen_t *remoteaddrlen,
           int *server_used,
@@ -1029,17 +1046,19 @@ k5_sendto(krb5_context context, const krb5_data *message,
     cm_init_selstate(sel_state);
 
     /* First pass: resolve server hosts, communicate with resulting addresses
-     * of the preferred socktype, and wait 1s for an answer from each. */
+     * of the preferred transport, and wait 1s for an answer from each. */
     for (s = 0; s < servers->nservers && !done; s++) {
         /* Find the current tail pointer. */
         for (tailptr = &conns; *tailptr != NULL; tailptr = &(*tailptr)->next);
-        retval = resolve_server(context, servers, s, socktype1, socktype2,
+        retval = resolve_server(context, servers, s, protocol1, protocol2,
                                 message, &udpbuf, &conns);
         if (retval)
             goto cleanup;
         for (state = *tailptr; state != NULL && !done; state = state->next) {
-            /* Contact each new connection whose socktype matches socktype1. */
-            if (state->addr.type != socktype1)
+            /* Contact each new connection whose protocol matches protocol1. */
+            if (!protocol1 ||
+                (state->addr.type == SOCK_STREAM && protocol1 != TCP) ||
+                (state->addr.type == SOCK_DGRAM && protocol1 != UDP))
                 continue;
             if (maybe_send(context, state, sel_state, callback_info))
                 continue;
@@ -1049,9 +1068,11 @@ k5_sendto(krb5_context context, const krb5_data *message,
     }
 
     /* Complete the first pass by contacting servers of the non-preferred
-     * socktype (if given), waiting 1s for an answer from each. */
+     * protocol (if given), waiting 1s for an answer from each. */
     for (state = conns; state != NULL && !done; state = state->next) {
-        if (state->addr.type != socktype2)
+        if (!protocol2 ||
+            (state->addr.type == SOCK_STREAM && protocol2 != TCP) ||
+            (state->addr.type == SOCK_DGRAM && protocol2 != UDP))
             continue;
         if (maybe_send(context, state, sel_state, callback_info))
             continue;

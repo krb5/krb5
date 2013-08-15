@@ -129,7 +129,7 @@ new_server_entry(struct serverlist *list)
 
 /* Add an address entry to list. */
 static int
-add_addr_to_list(struct serverlist *list, int socktype, int family,
+add_addr_to_list(struct serverlist *list, transport protocol, int family,
                  size_t addrlen, struct sockaddr *addr)
 {
     struct server_entry *entry;
@@ -137,7 +137,7 @@ add_addr_to_list(struct serverlist *list, int socktype, int family,
     entry = new_server_entry(list);
     if (entry == NULL)
         return ENOMEM;
-    entry->socktype = socktype;
+    entry->protocol = protocol;
     entry->family = family;
     entry->hostname = NULL;
     entry->addrlen = addrlen;
@@ -149,14 +149,14 @@ add_addr_to_list(struct serverlist *list, int socktype, int family,
 /* Add a hostname entry to list. */
 static int
 add_host_to_list(struct serverlist *list, const char *hostname, int port,
-                 int socktype, int family)
+                 transport protocol, int family)
 {
     struct server_entry *entry;
 
     entry = new_server_entry(list);
     if (entry == NULL)
         return ENOMEM;
-    entry->socktype = socktype;
+    entry->protocol = protocol;
     entry->family = family;
     entry->hostname = strdup(hostname);
     if (entry->hostname == NULL)
