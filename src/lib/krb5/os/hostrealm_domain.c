@@ -85,7 +85,7 @@ domain_fallback_realm(krb5_context context, krb5_hostrealm_moddata data,
     suffix = uhost;
     while (limit-- >= 0 && (dot = strchr(suffix, '.')) != NULL) {
         drealm = string2data((char *)suffix);
-        if (k5_locate_kdc(context, &drealm, &slist, FALSE, SOCK_DGRAM) == 0) {
+        if (k5_locate_kdc(context, &drealm, &slist, FALSE, FALSE) == 0) {
             k5_free_serverlist(&slist);
             ret = k5_make_realmlist(suffix, realms_out);
             goto cleanup;

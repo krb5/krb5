@@ -129,7 +129,7 @@ new_server_entry(struct serverlist *list)
 
 /* Add an address entry to list. */
 static int
-add_addr_to_list(struct serverlist *list, int socktype, int family,
+add_addr_to_list(struct serverlist *list, k5_transport transport, int family,
                  size_t addrlen, struct sockaddr *addr)
 {
     struct server_entry *entry;
@@ -137,7 +137,7 @@ add_addr_to_list(struct serverlist *list, int socktype, int family,
     entry = new_server_entry(list);
     if (entry == NULL)
         return ENOMEM;
-    entry->socktype = socktype;
+    entry->transport = transport;
     entry->family = family;
     entry->hostname = NULL;
     entry->addrlen = addrlen;
@@ -149,14 +149,14 @@ add_addr_to_list(struct serverlist *list, int socktype, int family,
 /* Add a hostname entry to list. */
 static int
 add_host_to_list(struct serverlist *list, const char *hostname, int port,
-                 int socktype, int family)
+                 k5_transport transport, int family)
 {
     struct server_entry *entry;
 
     entry = new_server_entry(list);
     if (entry == NULL)
         return ENOMEM;
-    entry->socktype = socktype;
+    entry->transport = transport;
     entry->family = family;
     entry->hostname = strdup(hostname);
     if (entry->hostname == NULL)
@@ -187,7 +187,7 @@ server_list_contains(struct serverlist *list, struct server_entry *server)
 static krb5_error_code
 locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                   const char * name, struct serverlist *serverlist,
-                  int socktype, int udpport, int sec_udpport)
+                  k5_transport transport, int udpport, int sec_udpport)
 {
     const char  *realm_srv_names[4];
     char **hostlist, *host, *port, *cp;
@@ -255,12 +255,12 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
             *cp = '\0';
         }
 
-        code = add_host_to_list(serverlist, host, p1, socktype, AF_UNSPEC);
+        code = add_host_to_list(serverlist, host, p1, transport, AF_UNSPEC);
         /* Second port is for IPv4 UDP only, and should possibly go away as
          * it was originally a krb4 compatibility measure. */
         if (code == 0 && p2 != 0 &&
-            (socktype == 0 || socktype == SOCK_DGRAM))
-            code = add_host_to_list(serverlist, host, p2, SOCK_DGRAM, AF_INET);
+            (transport == TCP_OR_UDP || transport == UDP))
+            code = add_host_to_list(serverlist, host, p2, UDP, AF_INET);
         if (code)
             goto cleanup;
     }
@@ -278,7 +278,8 @@ krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
 {
     krb5_error_code ret;
 
-    ret = locate_srv_conf_1(context, realm, name, al, 0, udpport, sec_udpport);
+    ret = locate_srv_conf_1(context, realm, name, al, TCP_OR_UDP, udpport,
+                            sec_udpport);
     if (ret)
         return ret;
     if (al->nservers == 0)        /* Couldn't resolve any KDC names */
@@ -294,7 +295,7 @@ locate_srv_dns_1(const krb5_data *realm, const char *service,
 {
     struct srv_dns_entry *head = NULL, *entry = NULL;
     krb5_error_code code = 0;
-    int socktype;
+    k5_transport transport;
 
     code = krb5int_make_srv_query_realm(realm, service, protocol, &head);
     if (code)
@@ -310,9 +311,9 @@ locate_srv_dns_1(const krb5_data *realm, const char *service,
     }
 
     for (entry = head; entry != NULL; entry = entry->next) {
-        socktype = (strcmp(protocol, "_tcp") == 0) ? SOCK_STREAM : SOCK_DGRAM;
+        transport = (strcmp(protocol, "_tcp") == 0) ? TCP : UDP;
         code = add_host_to_list(serverlist, entry->host, htons(entry->port),
-                                socktype, AF_UNSPEC);
+                                transport, AF_UNSPEC);
         if (code)
             goto cleanup;
     }
@@ -341,6 +342,7 @@ module_callback(void *cbdata, int socktype, struct sockaddr *sa)
 {
     struct module_callback_data *d = cbdata;
     size_t addrlen;
+    k5_transport transport;
 
     if (socktype != SOCK_STREAM && socktype != SOCK_DGRAM)
         return 0;
@@ -350,7 +352,8 @@ module_callback(void *cbdata, int socktype, struct sockaddr *sa)
         addrlen = sizeof(struct sockaddr_in6);
     else
         return 0;
-    if (add_addr_to_list(d->list, socktype, sa->sa_family, addrlen,
+    transport = (socktype == SOCK_STREAM) ? TCP : UDP;
+    if (add_addr_to_list(d->list, transport, sa->sa_family, addrlen,
                          sa) != 0) {
         /* Assumes only error is ENOMEM.  */
         d->out_of_mem = 1;
@@ -362,14 +365,14 @@ module_callback(void *cbdata, int socktype, struct sockaddr *sa)
 static krb5_error_code
 module_locate_server(krb5_context ctx, const krb5_data *realm,
                      struct serverlist *serverlist,
-                     enum locate_service_type svc, int socktype)
+                     enum locate_service_type svc, k5_transport transport)
 {
     struct krb5plugin_service_locate_result *res = NULL;
     krb5_error_code code;
     struct krb5plugin_service_locate_ftable *vtbl = NULL;
     void **ptrs;
     char *realmz;               /* NUL-terminated realm */
-    int i;
+    int socktype, i;
     struct module_callback_data cbdata = { 0, };
     const char *msg;
 
@@ -413,11 +416,11 @@ module_locate_server(krb5_context ctx, const krb5_data *realm,
         if (code)
             continue;
 
-        code = vtbl->lookup(blob, svc, realmz,
-                            (socktype != 0) ? socktype : SOCK_DGRAM, AF_UNSPEC,
+        socktype = (transport == TCP) ? SOCK_STREAM : SOCK_DGRAM;
+        code = vtbl->lookup(blob, svc, realmz, socktype, AF_UNSPEC,
                             module_callback, &cbdata);
         /* Also ask for TCP addresses if we got UDP addresses and want both. */
-        if (code == 0 && socktype == 0) {
+        if (code == 0 && transport == TCP_OR_UDP) {
             code = vtbl->lookup(blob, svc, realmz, SOCK_STREAM, AF_UNSPEC,
                                 module_callback, &cbdata);
             if (code == KRB5_PLUGIN_NO_HANDLE)
@@ -459,7 +462,7 @@ module_locate_server(krb5_context ctx, const krb5_data *realm,
 static krb5_error_code
 prof_locate_server(krb5_context context, const krb5_data *realm,
                    struct serverlist *serverlist, enum locate_service_type svc,
-                   int socktype)
+                   k5_transport transport)
 {
     const char *profname;
     int dflport1, dflport2 = 0;
@@ -495,7 +498,7 @@ prof_locate_server(krb5_context context, const krb5_data *realm,
         return EBUSY;           /* XXX */
     }
 
-    return locate_srv_conf_1(context, realm, profname, serverlist, socktype,
+    return locate_srv_conf_1(context, realm, profname, serverlist, transport,
                              dflport1, dflport2);
 }
 
@@ -503,7 +506,7 @@ prof_locate_server(krb5_context context, const krb5_data *realm,
 static krb5_error_code
 dns_locate_server(krb5_context context, const krb5_data *realm,
                   struct serverlist *serverlist, enum locate_service_type svc,
-                  int socktype)
+                  k5_transport transport)
 {
     const char *dnsname;
     int use_dns = _krb5_use_dns_kdc(context);
@@ -533,12 +536,12 @@ dns_locate_server(krb5_context context, const krb5_data *realm,
     }
 
     code = 0;
-    if (socktype == SOCK_DGRAM || socktype == 0) {
+    if (transport == UDP || transport == TCP_OR_UDP) {
         code = locate_srv_dns_1(realm, dnsname, "_udp", serverlist);
         if (code)
             Tprintf("dns udp lookup returned error %d\n", code);
     }
-    if ((socktype == SOCK_STREAM || socktype == 0) && code == 0) {
+    if ((transport == TCP || transport == TCP_OR_UDP) && code == 0) {
         code = locate_srv_dns_1(realm, dnsname, "_tcp", serverlist);
         if (code)
             Tprintf("dns tcp lookup returned error %d\n", code);
@@ -547,10 +550,16 @@ dns_locate_server(krb5_context context, const krb5_data *realm,
 }
 #endif /* KRB5_DNS_LOOKUP */
 
+/*
+ * Try all of the server location methods in sequence.  transport must be
+ * TCP_OR_UDP, TCP, or UDP.  It is applied to hostname entries in the profile
+ * and affects whether we query modules or DNS for UDP or TCP or both, but does
+ * not restrict a method from returning entries of other transports.
+ */
 static krb5_error_code
 locate_server(krb5_context context, const krb5_data *realm,
               struct serverlist *serverlist, enum locate_service_type svc,
-              int socktype)
+              k5_transport transport)
 {
     krb5_error_code ret;
     struct serverlist list = SERVERLIST_INIT;
@@ -559,18 +568,18 @@ locate_server(krb5_context context, const krb5_data *realm,
 
     /* Try modules.  If a module returns 0 but leaves the list empty, return an
      * empty list. */
-    ret = module_locate_server(context, realm, &list, svc, socktype);
+    ret = module_locate_server(context, realm, &list, svc, transport);
     if (ret != KRB5_PLUGIN_NO_HANDLE)
         goto done;
 
     /* Try the profile.  Fall back to DNS if it returns an empty list. */
-    ret = prof_locate_server(context, realm, &list, svc, socktype);
+    ret = prof_locate_server(context, realm, &list, svc, transport);
     if (ret)
         goto done;
 
 #ifdef KRB5_DNS_LOOKUP
     if (list.nservers == 0)
-        ret = dns_locate_server(context, realm, &list, svc, socktype);
+        ret = dns_locate_server(context, realm, &list, svc, transport);
 #endif
 
 done:
@@ -589,9 +598,10 @@ done:
 krb5_error_code
 k5_locate_server(krb5_context context, const krb5_data *realm,
                  struct serverlist *serverlist, enum locate_service_type svc,
-                 int socktype)
+                 krb5_boolean no_udp)
 {
     krb5_error_code ret;
+    k5_transport transport = no_udp ? TCP : TCP_OR_UDP;
 
     memset(serverlist, 0, sizeof(*serverlist));
     if (realm == NULL || realm->data == NULL || realm->data[0] == 0) {
@@ -600,7 +610,7 @@ k5_locate_server(krb5_context context, const krb5_data *realm,
         return KRB5_REALM_CANT_RESOLVE;
     }
 
-    ret = locate_server(context, realm, serverlist, svc, socktype);
+    ret = locate_server(context, realm, serverlist, svc, transport);
     if (ret)
         return ret;
 
@@ -616,12 +626,13 @@ k5_locate_server(krb5_context context, const krb5_data *realm,
 
 krb5_error_code
 k5_locate_kdc(krb5_context context, const krb5_data *realm,
-              struct serverlist *serverlist, int get_masters, int socktype)
+              struct serverlist *serverlist, krb5_boolean get_masters,
+              krb5_boolean no_udp)
 {
     enum locate_service_type stype;
 
     stype = get_masters ? locate_service_master_kdc : locate_service_kdc;
-    return k5_locate_server(context, realm, serverlist, stype, socktype);
+    return k5_locate_server(context, realm, serverlist, stype, no_udp);
 }
 
 krb5_boolean
@@ -632,7 +643,7 @@ k5_kdc_is_master(krb5_context context, const krb5_data *realm,
     krb5_boolean found;
 
     if (locate_server(context, realm, &list, locate_service_master_kdc,
-                      server->socktype) != 0)
+                      server->transport) != 0)
         return FALSE;
     found = server_list_contains(&list, server);
     k5_free_serverlist(&list);

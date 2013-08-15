@@ -38,11 +38,23 @@
 
 #include <krb5/locate_plugin.h>
 
+typedef enum {
+    TCP_OR_UDP = 0,
+    TCP,
+    UDP,
+} k5_transport;
+
+typedef enum {
+    UDP_FIRST = 0,
+    UDP_LAST,
+    NO_UDP,
+} k5_transport_strategy;
+
 /* A single server hostname or address. */
 struct server_entry {
     char *hostname;             /* NULL -> use addrlen/addr instead */
     int port;                   /* Used only if hostname set */
-    int socktype;               /* May be 0 for UDP/TCP if hostname set */
+    k5_transport transport;     /* May be 0 for UDP/TCP if hostname set */
     int family;                 /* May be 0 (aka AF_UNSPEC) if hostname set */
     size_t addrlen;
     struct sockaddr_storage addr;
@@ -56,8 +68,8 @@ struct serverlist {
 #define SERVERLIST_INIT { NULL, 0 }
 
 struct remote_address {
+    k5_transport transport;
     int family;
-    int type;
     socklen_t len;
     struct sockaddr_storage saddr;
 };
@@ -69,12 +81,13 @@ struct sendto_callback_info {
 };
 
 krb5_error_code k5_locate_server(krb5_context, const krb5_data *realm,
-                                 struct serverlist *,
-                                 enum locate_service_type svc, int socktype);
+                                 struct serverlist *serverlist,
+                                 enum locate_service_type svc,
+                                 krb5_boolean no_udp);
 
 krb5_error_code k5_locate_kdc(krb5_context context, const krb5_data *realm,
-                              struct serverlist *serverlist, int get_masters,
-                              int socktype);
+                              struct serverlist *serverlist,
+                              krb5_boolean get_masters, krb5_boolean no_udp);
 
 krb5_boolean k5_kdc_is_master(krb5_context context, const krb5_data *realm,
                               struct server_entry *server);
@@ -103,7 +116,7 @@ int _krb5_conf_boolean (const char *);
 
 krb5_error_code k5_sendto(krb5_context context, const krb5_data *message,
                           const struct serverlist *addrs,
-                          int socktype1, int socktype2,
+                          k5_transport_strategy strategy,
                           struct sendto_callback_info *callback_info,
                           krb5_data *reply, struct sockaddr *remoteaddr,
                           socklen_t *remoteaddrlen, int *server_used,
