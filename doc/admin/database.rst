@@ -243,6 +243,15 @@ You can retrieve the list of policies with the kadmin
    :end-before: _list_policies_end:
 
 
+Policies and principals
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Policies can be applied to principals as they are created by using
+the **-policy** flag to :ref:`add_principal`. Existing principals can
+be modified by using the **-policy** or **-clearpolicy** flag to
+:ref:`modify_principal`.
+
+
 Updating the history key
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
