@@ -77,7 +77,7 @@ locate_kpasswd(krb5_context context, const krb5_data *realm,
                 struct server_entry *s = &serverlist->servers[i];
                 krb5_ui_2 kpasswd_port = htons(DEFAULT_KPASSWD_PORT);
                 if (socktype != SOCK_STREAM)
-                    s->socktype = socktype;
+                    s->protocol = UDP;
                 if (s->hostname != NULL)
                     s->port = kpasswd_port;
                 else if (s->family == AF_INET)
