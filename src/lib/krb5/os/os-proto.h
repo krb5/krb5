@@ -115,6 +115,7 @@ int _krb5_use_dns_kdc (krb5_context);
 int _krb5_conf_boolean (const char *);
 
 krb5_error_code k5_sendto(krb5_context context, const krb5_data *message,
+                          const krb5_data *realm,
                           const struct serverlist *addrs,
                           k5_transport_strategy strategy,
                           struct sendto_callback_info *callback_info,

@@ -261,9 +261,9 @@ change_set_password(krb5_context context,
         callback_info.pfn_cleanup = kpasswd_sendto_msg_cleanup;
         krb5_free_data_contents(callback_ctx.context, &chpw_rep);
 
-        code = k5_sendto(callback_ctx.context, NULL, &sl, strategy,
-                         &callback_info, &chpw_rep, ss2sa(&remote_addr),
-                         &addrlen, NULL, NULL, NULL);
+        code = k5_sendto(callback_ctx.context, NULL, &creds->server->realm,
+                         &sl, strategy, &callback_info, &chpw_rep,
+                         ss2sa(&remote_addr), &addrlen, NULL, NULL, NULL);
         if (code) {
             /*
              * Here we may want to switch to TCP on some errors.
