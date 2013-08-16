@@ -32,6 +32,11 @@
 
 #include "os-proto.h"
 
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+#include <openssl/err.h>
+#include <openssl/ssl.h>
+#endif
+
 #if defined(HAVE_POLL_H)
 #include <poll.h>
 #define USE_POLL
