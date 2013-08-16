@@ -280,6 +280,9 @@ get_curtime_ms(time_ms *time_out)
  * Always watch for responses from *any* of the servers.  Eventually
  * fix the UDP code to do the same.
  *
+ * The cm set/unset read/write functions are safe to call without knowing the
+ * current read/write state so long as the fd is valid and registered already.
+ *
  * To do:
  * - TCP NOPUSH/CORK socket options?
  * - error codes that don't suck
@@ -356,19 +359,79 @@ cm_remove_fd(struct select_state *selstate, int fd)
     selstate->nfds--;
 }
 
+#ifdef USE_POLL
+
 static void
 cm_unset_write(struct select_state *selstate, int fd)
 {
-#ifdef USE_POLL
     int i;
 
     for (i = 0; i < selstate->nfds && selstate->fds[i].fd != fd; i++);
     assert(i < selstate->nfds);
     selstate->fds[i].events &= ~POLLOUT;
-#else
-    FD_CLR(fd, &selstate->wfds);
-#endif
 }
+
+static void
+cm_set_write(struct select_state *selstate, int fd)
+{
+    int i;
+
+    for (i = 0; i < selstate->nfds && selstate->fds[i].fd != fd; i++);
+    assert(i < selstate->nfds);
+    selstate->fds[i].events |= POLLOUT;
+}
+
+static void
+cm_unset_read(struct select_state *selstate, int fd)
+{
+    int i;
+
+    for (i = 0; i < selstate->nfds && selstate->fds[i].fd != fd; i++);
+    assert(i < selstate->nfds);
+    selstate->fds[i].events &= ~POLLIN;
+}
+
+static void
+cm_set_read(struct select_state *selstate, int fd)
+{
+    int i;
+
+    for (i = 0; i < selstate->nfds && selstate->fds[i].fd != fd; i++);
+    assert(i < selstate->nfds);
+    selstate->fds[i].events |= POLLIN;
+}
+
+#else /* #ifdef USE_POLL */
+
+static void
+cm_unset_write(struct select_state *selstate, int fd)
+{
+    if (FD_ISSET(fd, &selstate->wfds))
+        FD_CLR(fd, &selstate->wfds);
+}
+
+static void
+cm_set_write(struct select_state *selstate, int fd)
+{
+    if (!FD_ISSET(fd, &selstate->wfds))
+        FD_ADD(fd, &selstate->wfds);
+}
+
+static void
+cm_unset_read(struct select_state *selstate, int fd)
+{
+    if (FD_ISSET(fd, &selstate->rfds))
+        FD_CLR(fd, &selstate->rfds);
+}
+
+static void
+cm_set_read(struct select_state *selstate, int fd)
+{
+    if (!FD_ISSET(fd, &selstate->rfds))
+        FD_ADD(fd, &selstate->rfds);
+}
+
+#endif /* #ifdef USE_POLL */
 
 static krb5_error_code
 cm_select_or_poll(const struct select_state *in, time_ms endtime,
