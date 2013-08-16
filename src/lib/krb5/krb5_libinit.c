@@ -58,6 +58,8 @@ int krb5int_lib_init(void)
     if (err)
         return err;
 
+    k5_sendto_kdc_initialize();
+
     return 0;
 }
 

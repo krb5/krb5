@@ -48,6 +48,10 @@
 #endif
 #endif
 
+#ifdef PROXY_TLS_IMPL_OPENSSL
+#include <openssl/ssl.h>
+#endif
+
 #define MAX_PASS                    3
 #define DEFAULT_UDP_PREF_LIMIT   1465
 #define HARD_UDP_LIMIT          32700 /* could probably do 64K-epsilon ? */
@@ -106,6 +110,16 @@ struct conn_state {
     time_ms endtime;
     krb5_boolean defer;
 };
+
+void
+k5_sendto_kdc_initialize(void)
+{
+#ifdef PROXY_TLS_IMPL_OPENSSL
+    SSL_library_init();
+    SSL_load_error_strings();
+    OpenSSL_add_all_algorithms();
+#endif
+}
 
 /* Get current time in milliseconds. */
 static krb5_error_code
