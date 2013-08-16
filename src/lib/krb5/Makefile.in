@@ -1,6 +1,6 @@
 mydir=lib$(S)krb5
 BUILDTOP=$(REL)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os -I$(srcdir)/unicode
+LOCALINCLUDES = @HTTPS_CRYPTO_IMPL_CFLAGS@ -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os -I$(srcdir)/unicode
 SUBDIRS= error_tables asn.1 ccache keytab krb os rcache unicode
 WINSUBDIRS= $(SUBDIRS) posix
 DEFINES=-DLOCALEDIR=\"$(KRB5_LOCALEDIR)\"
@@ -56,7 +56,7 @@ RELDIR=krb5
 SHLIB_EXPDEPS = \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
-SHLIB_EXPLIBS=-lk5crypto -lcom_err $(SUPPORT_LIB) @GEN_LIB@ $(LIBS)
+SHLIB_EXPLIBS=-lk5crypto -lcom_err @HTTPS_CRYPTO_IMPL_LIBS@ $(SUPPORT_LIB) @GEN_LIB@ $(LIBS)
 
 all-unix:: all-liblinks
 

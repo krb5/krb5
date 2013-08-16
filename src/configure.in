@@ -233,6 +233,33 @@ AC_SUBST(PKINIT_CRYPTO_IMPL)
 AC_SUBST(PKINIT_CRYPTO_IMPL_CFLAGS)
 AC_SUBST(PKINIT_CRYPTO_IMPL_LIBS)
 
+# WITH_HTTPS_CRYPTO_IMPL
+
+AC_ARG_WITH([https-crypto-impl],
+            AC_HELP_STRING([--with-https-crypto-impl=IMPL],
+                           [use specified HTTPS crypto implementation @<:@openssl@:>@]),
+            [HTTPS_CRYPTO_IMPL=$withval], [HTTPS_CRYPTO_IMPL="no"])
+case "$HTTPS_CRYPTO_IMPL" in
+openssl)
+  AC_MSG_CHECKING([for OpenSSL])
+  if HTTPS_CRYPTO_IMPL_LIBS=`pkg-config --libs openssl` && \
+     HTTPS_CRYPTO_IMPL_CFLAGS=`pkg-config --cflags openssl`; then
+    AC_DEFINE(HTTPS_CRYPTO_IMPL_OPENSSL, 1, [Define if HTTPS crypto implementation is OpenSSL])
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_ERROR([OpenSSL not found!])
+  fi
+  ;;
+no)
+  ;;
+*)
+  AC_MSG_ERROR([Unsupported HTTPS crypto implementation $withval])
+  ;;
+esac
+AC_SUBST(HTTPS_CRYPTO_IMPL)
+AC_SUBST(HTTPS_CRYPTO_IMPL_CFLAGS)
+AC_SUBST(HTTPS_CRYPTO_IMPL_LIBS)
+
 AC_ARG_ENABLE([aesni],
 AC_HELP_STRING([--disable-aesni],[Do not build with AES-NI support]), ,
 enable_aesni=check)
