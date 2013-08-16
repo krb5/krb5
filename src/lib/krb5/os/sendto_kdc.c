@@ -96,11 +96,18 @@ struct outgoing_message {
     unsigned char msg_len_buf[4];
 };
 
+struct conn_state;
+typedef krb5_boolean fd_handler_fn(krb5_context context,
+                                   const krb5_data *realm,
+                                   struct conn_state *conn,
+                                   struct select_state *selstate);
+
 struct conn_state {
     SOCKET fd;
     enum conn_states state;
-    int (*service)(krb5_context context, struct conn_state *,
-                   struct select_state *, int);
+    fd_handler_fn *service_connect;
+    fd_handler_fn *service_write;
+    fd_handler_fn *service_read;
     struct remote_address addr;
     struct incoming_message in;
     struct outgoing_message out;
@@ -409,9 +416,9 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
         return retval;
 
     err = 0;
-    retval = k5_sendto(context, message, &servers, strategy, NULL, reply,
-                       NULL, NULL, &server_used, check_for_svc_unavailable,
-                       &err);
+    retval = k5_sendto(context, message, realm, &servers, strategy, NULL,
+                       reply, NULL, NULL, &server_used,
+                       check_for_svc_unavailable, &err);
     if (retval == KRB5_KDC_UNREACH) {
         if (err == KDC_ERR_SVC_UNAVAILABLE) {
             retval = KRB5KDC_ERR_SVC_UNAVAILABLE;
@@ -457,10 +464,10 @@ cleanup:
  *   connections already in progress
  */
 
-static int service_tcp_fd(krb5_context context, struct conn_state *conn,
-                          struct select_state *selstate, int ssflags);
-static int service_udp_fd(krb5_context context, struct conn_state *conn,
-                          struct select_state *selstate, int ssflags);
+static fd_handler_fn service_tcp_connect;
+static fd_handler_fn service_tcp_write;
+static fd_handler_fn service_tcp_read;
+static fd_handler_fn service_udp_read;
 
 /* Set up the actual message we will send across the underlying transport to
  * communicate the payload message, using one or both of state->out.sgbuf. */
@@ -505,9 +512,13 @@ add_connection(struct conn_state **conns, k5_transport transport,
     state->server_index = server_index;
     SG_SET(&state->out.sgbuf[1], NULL, 0);
     if (transport == TCP) {
-        state->service = service_tcp_fd;
+        state->service_connect = service_tcp_connect;
+        state->service_write = service_tcp_write;
+        state->service_read = service_tcp_read;
     } else {
-        state->service = service_udp_fd;
+        state->service_connect = NULL;
+        state->service_write = NULL;
+        state->service_read = service_udp_read;
 
         if (*udpbufp == NULL) {
             *udpbufp = malloc(MAX_DGRAM_SIZE);
@@ -790,9 +801,13 @@ maybe_send(krb5_context context, struct conn_state *conn,
 }
 
 static void
-kill_conn(struct conn_state *conn, struct select_state *selstate)
+kill_conn(krb5_context context, struct conn_state *conn,
+          struct select_state *selstate)
 {
+    if (socktype_for_transport(conn->addr.transport) == SOCK_STREAM)
+        TRACE_SENDTO_KDC_TCP_DISCONNECT(context, &conn->addr);
     cm_remove_fd(selstate, conn->fd);
+
     closesocket(conn->fd);
     conn->fd = INVALID_SOCKET;
     conn->state = FAILED;
@@ -816,136 +831,157 @@ get_so_error(int fd)
     return sockerr;
 }
 
-/* Process events on a TCP socket.  Return 1 if we get a complete reply. */
-static int
-service_tcp_fd(krb5_context context, struct conn_state *conn,
-               struct select_state *selstate, int ssflags)
+/* Perform next step in sending.  Return true on usable data. */
+static krb5_boolean
+service_dispatch(krb5_context context, const krb5_data *realm,
+                 struct conn_state *conn, struct select_state *selstate,
+                 int ssflags)
 {
-    int e = 0;
-    ssize_t nwritten, nread;
-    SOCKET_WRITEV_TEMP tmp;
-    struct incoming_message *in = &conn->in;
-    struct outgoing_message *out = &conn->out;
-
     /* Check for a socket exception. */
-    if (ssflags & SSF_EXCEPTION)
-        goto kill_conn;
+    if (ssflags & SSF_EXCEPTION) {
+        kill_conn(context, conn, selstate);
+        return FALSE;
+    }
 
     switch (conn->state) {
     case CONNECTING:
-        /* Check whether the connection succeeded. */
-        e = get_so_error(conn->fd);
-        if (e) {
-            TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, &conn->addr, e);
-            goto kill_conn;
-        }
-        conn->state = WRITING;
-
-        /* Record this connection's timeout for service_fds. */
-        if (get_curtime_ms(&conn->endtime) == 0)
-            conn->endtime += 10000;
-
-        /* Fall through. */
+        assert(conn->service_connect != NULL);
+        return conn->service_connect(context, realm, conn, selstate);
     case WRITING:
-        TRACE_SENDTO_KDC_TCP_SEND(context, &conn->addr);
-        nwritten = SOCKET_WRITEV(conn->fd, out->sgp, out->sg_count, tmp);
-        if (nwritten < 0) {
-            TRACE_SENDTO_KDC_TCP_ERROR_SEND(context, &conn->addr,
-                                            SOCKET_ERRNO);
-            goto kill_conn;
-        }
-        while (nwritten) {
-            sg_buf *sgp = out->sgp;
-            if ((size_t) nwritten < SG_LEN(sgp)) {
-                SG_ADVANCE(sgp, (size_t) nwritten);
-                nwritten = 0;
-            } else {
-                nwritten -= SG_LEN(sgp);
-                out->sgp++;
-                out->sg_count--;
-            }
-        }
-        if (out->sg_count == 0) {
-            /* Done writing, switch to reading. */
-            cm_read(selstate, conn->fd);
-            conn->state = READING;
-            in->bufsizebytes_read = 0;
-            in->bufsize = 0;
-            in->pos = 0;
-            in->buf = NULL;
-            in->n_left = 0;
-        }
-        return 0;
-
+        assert(conn->service_write != NULL);
+        return conn->service_write(context, realm, conn, selstate);
     case READING:
-        if (in->bufsizebytes_read == 4) {
-            /* Reading data.  */
-            nread = SOCKET_READ(conn->fd, &in->buf[in->pos], in->n_left);
-            if (nread <= 0) {
-                e = nread ? SOCKET_ERRNO : ECONNRESET;
-                TRACE_SENDTO_KDC_TCP_ERROR_RECV(context, &conn->addr, e);
-                goto kill_conn;
-            }
-            in->n_left -= nread;
-            in->pos += nread;
-            if (in->n_left <= 0)
-                return 1;
-        } else {
-            /* Reading length.  */
-            nread = SOCKET_READ(conn->fd,
-                                in->bufsizebytes + in->bufsizebytes_read,
-                                4 - in->bufsizebytes_read);
-            if (nread <= 0) {
-                e = nread ? SOCKET_ERRNO : ECONNRESET;
-                TRACE_SENDTO_KDC_TCP_ERROR_RECV_LEN(context, &conn->addr, e);
-                goto kill_conn;
-            }
-            in->bufsizebytes_read += nread;
-            if (in->bufsizebytes_read == 4) {
-                unsigned long len = load_32_be(in->bufsizebytes);
-                /* Arbitrary 1M cap.  */
-                if (len > 1 * 1024 * 1024)
-                    goto kill_conn;
-                in->bufsize = in->n_left = len;
-                in->pos = 0;
-                in->buf = malloc(len);
-                if (in->buf == NULL)
-                    goto kill_conn;
-            }
-        }
-        break;
-
+        assert(conn->service_read != NULL);
+        return conn->service_read(context, realm, conn, selstate);
     default:
         abort();
     }
-    return 0;
-
-kill_conn:
-    TRACE_SENDTO_KDC_TCP_DISCONNECT(context, &conn->addr);
-    kill_conn(conn, selstate);
-    return 0;
 }
 
-/* Process events on a UDP socket.  Return 1 if we get a reply. */
-static int
-service_udp_fd(krb5_context context, struct conn_state *conn,
-               struct select_state *selstate, int ssflags)
+/* Initialize TCP transport. */
+static krb5_boolean
+service_tcp_connect(krb5_context context, const krb5_data *realm,
+                    struct conn_state *conn, struct select_state *selstate)
+{
+    /* Check whether the connection succeeded. */
+    int e = get_so_error(conn->fd);
+
+    if (e) {
+        TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, &conn->addr, e);
+        kill_conn(context, conn, selstate);
+        return FALSE;
+    }
+
+    conn->state = WRITING;
+
+    /* Record this connection's timeout for service_fds. */
+    if (get_curtime_ms(&conn->endtime) == 0)
+        conn->endtime += 10000;
+
+    return service_tcp_write(context, realm, conn, selstate);
+}
+
+/* Sets conn->state to READING when done. */
+static krb5_boolean
+service_tcp_write(krb5_context context, const krb5_data *realm,
+                  struct conn_state *conn, struct select_state *selstate)
+{
+    ssize_t nwritten;
+    SOCKET_WRITEV_TEMP tmp;
+
+    TRACE_SENDTO_KDC_TCP_SEND(context, &conn->addr);
+    nwritten = SOCKET_WRITEV(conn->fd, conn->out.sgp, conn->out.sg_count, tmp);
+    if (nwritten < 0) {
+        TRACE_SENDTO_KDC_TCP_ERROR_SEND(context, &conn->addr, SOCKET_ERRNO);
+        kill_conn(context, conn, selstate);
+        return FALSE;
+    }
+    while (nwritten) {
+        sg_buf *sgp = conn->out.sgp;
+        if ((size_t)nwritten < SG_LEN(sgp)) {
+            SG_ADVANCE(sgp, (size_t)nwritten);
+            nwritten = 0;
+        } else {
+            nwritten -= SG_LEN(sgp);
+            conn->out.sgp++;
+            conn->out.sg_count--;
+        }
+    }
+    if (conn->out.sg_count == 0) {
+        /* Done writing, switch to reading. */
+        cm_read(selstate, conn->fd);
+        conn->state = READING;
+    }
+    return FALSE;
+}
+
+/* Return true on usable data. */
+static krb5_boolean
+service_tcp_read(krb5_context context, const krb5_data *realm,
+                 struct conn_state *conn, struct select_state *selstate)
+{
+    ssize_t nread;
+    int e = 0;
+    struct incoming_message *in = &conn->in;
+
+    if (in->bufsizebytes_read == 4) {
+        /* Reading data.  */
+        nread = SOCKET_READ(conn->fd, &in->buf[in->pos], in->n_left);
+        if (nread <= 0) {
+            e = nread ? SOCKET_ERRNO : ECONNRESET;
+            TRACE_SENDTO_KDC_TCP_ERROR_RECV(context, &conn->addr, e);
+            kill_conn(context, conn, selstate);
+            return FALSE;
+        }
+        in->n_left -= nread;
+        in->pos += nread;
+        if (in->n_left <= 0)
+            return TRUE;
+    } else {
+        /* Reading length.  */
+        nread = SOCKET_READ(conn->fd, in->bufsizebytes + in->bufsizebytes_read,
+                            4 - in->bufsizebytes_read);
+        if (nread <= 0) {
+            e = nread ? SOCKET_ERRNO : ECONNRESET;
+            TRACE_SENDTO_KDC_TCP_ERROR_RECV_LEN(context, &conn->addr, e);
+            kill_conn(context, conn, selstate);
+            return FALSE;
+        }
+        in->bufsizebytes_read += nread;
+        if (in->bufsizebytes_read == 4) {
+            unsigned long len = load_32_be(in->bufsizebytes);
+            /* Arbitrary 1M cap.  */
+            if (len > 1 * 1024 * 1024) {
+                kill_conn(context, conn, selstate);
+                return FALSE;
+            }
+            in->bufsize = in->n_left = len;
+            in->pos = 0;
+            in->buf = malloc(len);
+            if (in->buf == NULL) {
+                kill_conn(context, conn, selstate);
+                return FALSE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+/* Process events on a UDP socket.  Return true if we get a reply. */
+static krb5_boolean
+service_udp_read(krb5_context context, const krb5_data *realm,
+                 struct conn_state *conn, struct select_state *selstate)
 {
     int nread;
-
-    if (!(ssflags & (SSF_READ|SSF_EXCEPTION)))
-        abort();
-    if (conn->state != READING)
-        abort();
 
     nread = recv(conn->fd, conn->in.buf, conn->in.bufsize, 0);
     if (nread < 0) {
         TRACE_SENDTO_KDC_UDP_ERROR_RECV(context, &conn->addr, SOCKET_ERRNO);
-        kill_conn(conn, selstate);
-        return 0;
+        kill_conn(context, conn, selstate);
+        return FALSE;
     }
     conn->in.pos = nread;
-    return 1;
+    return TRUE;
 }
 
 /* Return the maximum of endtime and the endtime fields of all currently active
@@ -967,7 +1003,7 @@ get_endtime(time_ms endtime, struct conn_state *conns)
 static krb5_boolean
 service_fds(krb5_context context, struct select_state *selstate,
             time_ms interval, struct conn_state *conns,
-            struct select_state *seltemp,
+            struct select_state *seltemp, const krb5_data *realm,
             int (*msg_handler)(krb5_context, const krb5_data *, void *),
             void *msg_handler_data, struct conn_state **winner_out)
 {
@@ -979,7 +1015,7 @@ service_fds(krb5_context context, struct select_state *selstate,
 
     e = get_curtime_ms(&endtime);
     if (e)
-        return 1;
+        return TRUE;
     endtime += interval;
 
     e = 0;
@@ -993,7 +1029,7 @@ service_fds(krb5_context context, struct select_state *selstate,
 
         if (selret == 0)
             /* Timeout, return to caller.  */
-            return 0;
+            return FALSE;
 
         /* Got something on a socket, process it.  */
         for (state = conns; state != NULL; state = state->next) {
@@ -1005,7 +1041,7 @@ service_fds(krb5_context context, struct select_state *selstate,
             if (!ssflags)
                 continue;
 
-            if (state->service(context, state, selstate, ssflags)) {
+            if (service_dispatch(context, realm, state, selstate, ssflags)) {
                 int stop = 1;
 
                 if (msg_handler != NULL) {
@@ -1016,14 +1052,14 @@ service_fds(krb5_context context, struct select_state *selstate,
 
                 if (stop) {
                     *winner_out = state;
-                    return 1;
+                    return TRUE;
                 }
             }
         }
     }
     if (e != 0)
-        return 1;
-    return 0;
+        return TRUE;
+    return FALSE;
 }
 
 /*
@@ -1054,7 +1090,8 @@ service_fds(krb5_context context, struct select_state *selstate,
 
 krb5_error_code
 k5_sendto(krb5_context context, const krb5_data *message,
-          const struct serverlist *servers, k5_transport_strategy strategy,
+          const krb5_data *realm, const struct serverlist *servers,
+          k5_transport_strategy strategy,
           struct sendto_callback_info* callback_info, krb5_data *reply,
           struct sockaddr *remoteaddr, socklen_t *remoteaddrlen,
           int *server_used,
@@ -1100,7 +1137,7 @@ k5_sendto(krb5_context context, const krb5_data *message,
             if (maybe_send(context, state, message, sel_state, callback_info))
                 continue;
             done = service_fds(context, sel_state, 1000, conns, seltemp,
-                               msg_handler, msg_handler_data, &winner);
+                               realm, msg_handler, msg_handler_data, &winner);
         }
     }
 
@@ -1112,13 +1149,13 @@ k5_sendto(krb5_context context, const krb5_data *message,
         if (maybe_send(context, state, message, sel_state, callback_info))
             continue;
         done = service_fds(context, sel_state, 1000, conns, seltemp,
-                           msg_handler, msg_handler_data, &winner);
+                           realm, msg_handler, msg_handler_data, &winner);
     }
 
     /* Wait for two seconds at the end of the first pass. */
     if (!done) {
         done = service_fds(context, sel_state, 2000, conns, seltemp,
-                           msg_handler, msg_handler_data, &winner);
+                           realm, msg_handler, msg_handler_data, &winner);
     }
 
     /* Make remaining passes over all of the connections. */
@@ -1128,14 +1165,14 @@ k5_sendto(krb5_context context, const krb5_data *message,
             if (maybe_send(context, state, message, sel_state, callback_info))
                 continue;
             done = service_fds(context, sel_state, 1000, conns, seltemp,
-                               msg_handler, msg_handler_data, &winner);
+                               realm, msg_handler, msg_handler_data, &winner);
             if (sel_state->nfds == 0)
                 break;
         }
         /* Wait for the delay backoff at the end of this pass. */
         if (!done) {
             done = service_fds(context, sel_state, delay, conns, seltemp,
-                               msg_handler, msg_handler_data, &winner);
+                               realm, msg_handler, msg_handler_data, &winner);
         }
         if (sel_state->nfds == 0)
             break;
