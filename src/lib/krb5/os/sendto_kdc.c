@@ -23,6 +23,7 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  */
+/* MS-KKDCPP implementation Copyright (C) 2013 Red Hat, Inc. */
 
 /* Send packet to KDC for realm; wait for response, retransmitting
  * as necessary. */
@@ -114,6 +115,13 @@ struct conn_state {
     size_t server_index;
     struct conn_state *next;
     time_ms endtime;
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+    struct {
+        char *uri;
+        SSL_CTX *ctx;
+        SSL *ssl;
+    } http;
+#endif
 };
 
 static int
@@ -648,6 +656,14 @@ kkdcpp_extract(unsigned char *enc) {
 SERVICE_DECL(service_dispatch);
 SERVICE_DECL(service_kill_conn);
 
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+SERVICE_DECL(service_ssl_connect);
+SERVICE_DECL(service_ssl_write);
+SERVICE_DECL(service_ssl_read);
+
+SERVICE_DECL(service_https_read);
+#endif
+
 SERVICE_DECL(service_tcp_connect);
 SERVICE_DECL(service_tcp_write);
 SERVICE_DECL(service_tcp_read);
@@ -655,29 +671,62 @@ SERVICE_DECL(service_tcp_read);
 SERVICE_DECL(service_udp_read);
 
 static void
-set_conn_state_msg_length (struct conn_state *state, const krb5_data *message)
+set_conn_state_msg_length (struct conn_state *state, const krb5_data *message,
+                           transport protocol, const krb5_data *realm,
+                           char *uri)
 {
     if (!message || message->length == 0)
         return;
 
-    if (state->addr.type == SOCK_STREAM) {
+    if (protocol == UDP) {
+        SG_SET(&state->x.out.sgbuf[0], message->data, message->length);
+        SG_SET(&state->x.out.sgbuf[1], 0, 0);
+        state->x.out.sg_count = 1;
+    } else if (IS_HTTPS(protocol)) {
+        char *req, *tmp;
+        krb5_data *asn1;
+        size_t reqlen;
+        const char *fmt = "POST /%s HTTP/1.0\r\n"
+            "Cache-Control: no-cache\r\n"
+            "Pragma: no-cache\r\n"
+            "User-Agent: kerberos/1.0\r\n"
+            "Content-type: application/kerberos\r\n"
+            "Content-length: %d\r\n"
+            "\r\n";
+
+        asn1 = kkdcpp_encode(message, realm);
+        if (asn1 == NULL)
+            return;
+        reqlen = asprintf(&tmp, fmt, (uri != NULL ? uri : ""), asn1->length);
+        req = malloc(reqlen + asn1->length + 1);
+        if (req == NULL) {
+            free(asn1->data);
+            free(asn1);
+            return;
+        }
+        memcpy(req, tmp, reqlen);
+        free(tmp);
+        tmp = req + reqlen;
+        memcpy(tmp, asn1->data, asn1->length);
+        reqlen += asn1->length;
+
+        SG_SET(&state->x.out.sgbuf[0], req, reqlen);
+        SG_SET(&state->x.out.sgbuf[1], 0, 0);
+
+        free(asn1->data);
+        free(asn1);
+    } else /* assume protocol == TCP */ {
         store_32_be(message->length, state->x.out.msg_len_buf);
         SG_SET(&state->x.out.sgbuf[0], state->x.out.msg_len_buf, 4);
         SG_SET(&state->x.out.sgbuf[1], message->data, message->length);
         state->x.out.sg_count = 2;
-
-    } else {
-
-        SG_SET(&state->x.out.sgbuf[0], message->data, message->length);
-        SG_SET(&state->x.out.sgbuf[1], 0, 0);
-        state->x.out.sg_count = 1;
-
     }
 }
 
 static krb5_error_code
 add_connection(struct conn_state **conns, struct addrinfo *ai,
-               size_t server_index, const krb5_data *message, char **udpbufp)
+               size_t server_index, const krb5_data *message, char **udpbufp,
+               transport proto, const krb5_data *realm, char *uri)
 {
     struct conn_state *state, **tailptr;
 
@@ -693,18 +742,49 @@ add_connection(struct conn_state **conns, struct addrinfo *ai,
     state->fd = INVALID_SOCKET;
     state->server_index = server_index;
     SG_SET(&state->x.out.sgbuf[1], 0, 0);
-    if (ai->ai_socktype == SOCK_STREAM) {
-        state->service_connect = service_tcp_connect;
-        state->service_write = service_tcp_write;
-        state->service_read = service_tcp_read;
-
-        set_conn_state_msg_length (state, message);
-    } else {
+    if (proto == UDP) {
         state->service_connect = service_kill_conn;
         state->service_write = service_kill_conn;
         state->service_read = service_udp_read;
 
-        set_conn_state_msg_length (state, message);
+        set_conn_state_msg_length(state, message, proto, realm, NULL);
+
+        if (*udpbufp == NULL) {
+            *udpbufp = malloc(MAX_DGRAM_SIZE);
+            if (*udpbufp == 0)
+                return ENOMEM;
+        }
+        state->x.in.buf = *udpbufp;
+        state->x.in.bufsize = MAX_DGRAM_SIZE;
+    } else if (proto == TCP) {
+        state->service_connect = service_tcp_connect;
+        state->service_write = service_tcp_write;
+        state->service_read = service_tcp_read;
+
+        set_conn_state_msg_length(state, message, proto, realm, NULL);
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+    } else if (IS_HTTPS(proto)) {
+        state->service_connect = service_ssl_connect;
+        state->service_write = service_ssl_write;
+        state->service_read = service_https_read;
+
+        set_conn_state_msg_length(state, message, proto, realm, uri);
+        state->http.ctx = NULL;
+        state->http.ssl = NULL;
+        state->http.uri = (uri != NULL) ? strdup(uri) : NULL;
+#endif
+    } else if (ai->ai_socktype == SOCK_STREAM) {
+        state->service_connect = service_tcp_connect;
+        state->service_write = service_tcp_write;
+        state->service_read = service_tcp_read;
+
+        set_conn_state_msg_length(state, message, TCP, realm, NULL);
+    } else if (ai->ai_socktype == SOCK_DGRAM) {
+        state->service_connect = service_kill_conn;
+        state->service_write = service_kill_conn;
+        state->service_read = service_udp_read;
+
+        set_conn_state_msg_length(state, message, UDP, realm, NULL);
 
         if (*udpbufp == NULL) {
             *udpbufp = malloc(MAX_DGRAM_SIZE);
@@ -788,27 +868,28 @@ resolve_server(krb5_context context, const struct serverlist *servers,
 
     /* Skip any stray entries of socktypes we don't want. */
     if (entry->protocol != 0 && entry->protocol != protocol1 &&
-        entry->protocol != protocol2)
+        entry->protocol != protocol2 && !IS_HTTPS(entry->protocol))
         return 0;
 
     if (entry->hostname == NULL) {
         if (entry->protocol == UDP)
             ai.ai_socktype = SOCK_DGRAM;
-        else if (entry->protocol == TCP)
+        else if (entry->protocol == TCP || IS_HTTPS(entry->protocol))
             ai.ai_socktype = SOCK_STREAM;
         else
             ai.ai_socktype = 0;
         ai.ai_family = entry->family;
         ai.ai_addrlen = entry->addrlen;
         ai.ai_addr = (struct sockaddr *)&entry->addr;
-        return add_connection(conns, &ai, ind, message, udpbufp);
+        return add_connection(conns, &ai, ind, message, udpbufp,
+                              entry->protocol, &entry->realm, entry->uri);
     }
 
     memset(&hint, 0, sizeof(hint));
     hint.ai_family = entry->family;
     if (entry->protocol == UDP)
         hint.ai_socktype = SOCK_DGRAM;
-    else if (entry->protocol == TCP)
+    else if (entry->protocol == TCP || IS_HTTPS(entry->protocol))
         hint.ai_socktype = SOCK_STREAM;
     else
         hint.ai_socktype = 0;
@@ -823,20 +904,26 @@ resolve_server(krb5_context context, const struct serverlist *servers,
     err = getaddrinfo(entry->hostname, portbuf, &hint, &addrs);
     if (err)
         return translate_ai_error(err);
-    /* Add each address with the preferred socktype. */
+    /* Add each address with the preferred transport. */
     retval = 0;
     for (a = addrs; a != 0 && retval == 0; a = a->ai_next)
-        retval = add_connection(conns, a, ind, message, udpbufp);
+        retval = add_connection(
+            conns, a, ind, message, udpbufp,
+            (entry->protocol ? entry->protocol : protocol1), &entry->realm,
+            entry->uri);
     if (retval == 0 && entry->protocol == 0 && protocol2 != 0) {
-        /* Add each address again with the non-preferred socktype. */
+        /* Add each address again with the non-preferred transport. */
         for (a = addrs; a != 0 && retval == 0; a = a->ai_next) {
             if (protocol2 == UDP)
                 a->ai_socktype = SOCK_DGRAM;
-            else if (protocol2 == TCP)
+            else if (protocol2 == TCP || IS_HTTPS(protocol2))
                 a->ai_socktype = SOCK_STREAM;
             else
                 a->ai_socktype = 0;
-            retval = add_connection(conns, a, ind, message, udpbufp);
+            retval = add_connection(
+                conns, a, ind, message, udpbufp,
+                (entry->protocol ? protocol1 : protocol2), &entry->realm,
+                entry->uri);
         }
     }
     freeaddrinfo(addrs);
@@ -852,6 +939,8 @@ start_connection(krb5_context context, struct conn_state *state,
     unsigned int ssflags;
     static const int one = 1;
     static const struct linger lopt = { 0, 0 };
+    transport protocol;
+    char *uri = NULL;
 
     fd = socket(state->addr.family, state->addr.type, 0);
     if (fd == INVALID_SOCKET)
@@ -904,7 +993,18 @@ start_connection(krb5_context context, struct conn_state *state,
             return -3;
         }
 
-        set_conn_state_msg_length(state, &state->callback_buffer);
+        if (state->addr.type == SOCK_DGRAM) {
+            protocol = UDP;
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+        } else if (state->http.uri != NULL) {
+            protocol = HTTPS;
+            uri = state->http.uri;
+#endif
+        } else {
+            protocol = TCP;
+        }
+        set_conn_state_msg_length(state, &state->callback_buffer,
+                                  protocol, NULL, uri);
     }
 
     if (state->addr.type == SOCK_DGRAM) {
@@ -999,14 +1099,281 @@ get_so_error(int fd)
     return sockerr;
 }
 
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+/* Set up SSL and connect using TCP */
+static int
+service_ssl_connect(krb5_context context, struct conn_state *conn,
+                    struct select_state *selstate, int ssflags)
+{
+    SSL_METHOD *method;
+
+    int e = 0;
+
+    SSL_library_init();
+    SSL_load_error_strings();
+    OpenSSL_add_all_algorithms();
+    method = (SSL_METHOD *)SSLv23_client_method();
+    if (method == NULL) {
+        TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, &conn->addr, e);
+        ERR_print_errors_fp(stderr);
+        service_kill_conn(context, conn, selstate, ssflags);
+        return 0;
+    }
+    conn->http.ctx = SSL_CTX_new(method);
+    if (conn->http.ctx == NULL) {
+        ERR_print_errors_fp(stderr);
+        TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, &conn->addr, e);
+        service_kill_conn(context, conn, selstate, ssflags);
+        return 0;
+    }
+
+    SSL_CTX_set_verify(conn->http.ctx, SSL_VERIFY_PEER, NULL);
+    if (!SSL_CTX_set_default_verify_paths(conn->http.ctx)) {
+        ERR_print_errors_fp(stderr);
+        TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, &conn->addr, e);
+        service_kill_conn(context, conn, selstate, ssflags);
+        return 0;
+    }
+    conn->http.ssl = SSL_new(conn->http.ctx);
+    if (conn->http.ssl == NULL) {
+        ERR_print_errors_fp(stderr);
+        TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, &conn->addr, e);
+        service_kill_conn(context, conn, selstate, ssflags);
+        return 0;
+    }
+
+    /* Check whether the connection succeeded. */
+    e = get_so_error(conn->fd);
+    if (e) {
+        TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, &conn->addr, e);
+        service_kill_conn(context, conn, selstate, ssflags);
+        return 0;
+    }
+
+    /* SSL the socket */
+    if (!SSL_set_fd(conn->http.ssl, conn->fd)) {
+        ERR_print_errors_fp(stderr);
+        TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, &conn->addr, e);
+        service_kill_conn(context, conn, selstate, ssflags);
+        return 0;
+    }
+    SSL_set_connect_state(conn->http.ssl);
+
+    conn->state = WRITING;
+
+    /* Record this connection's timeout for service_fds. */
+    if (get_curtime_ms(&conn->endtime) == 0)
+        conn->endtime += 100000;
+
+    return 0;
+}
+
+/* Sets conn->state to READING when done; otherwise, calls a cm_set_ */
+static int
+service_ssl_write(krb5_context context, struct conn_state *conn,
+                  struct select_state *selstate, int ssflags)
+{
+    ssize_t nwritten;
+
+    int e = 0;
+
+    TRACE_SENDTO_KDC_TCP_SEND(context, &conn->addr);
+    nwritten = SSL_write(conn->http.ssl, SG_BUF(conn->x.out.sgp),
+                         SG_LEN(conn->x.out.sgbuf));
+    if (nwritten <= 0) {
+        e = SSL_get_error(conn->http.ssl, nwritten);
+        if (e == SSL_ERROR_WANT_READ) {
+            cm_set_read(selstate, conn->fd);
+            cm_unset_write(selstate, conn->fd);
+            return 0;
+        } else if (e == SSL_ERROR_WANT_WRITE) {
+            cm_set_write(selstate, conn->fd);
+            cm_unset_read(selstate, conn->fd);
+            return 0;
+        } else if (e == SSL_ERROR_WANT_CONNECT) {
+            cm_set_read(selstate, conn->fd);
+            cm_set_write(selstate, conn->fd);
+            return 0;
+        }
+        TRACE_SENDTO_KDC_TCP_ERROR_SEND(context, &conn->addr,
+                                        SOCKET_ERRNO);
+        service_kill_conn(context, conn, selstate, ssflags);
+        return 0;
+    }
+    while (nwritten) {
+        sg_buf *sgp = conn->x.out.sgp;
+        if ((size_t)nwritten < SG_LEN(sgp)) {
+            SG_ADVANCE(sgp, (size_t)nwritten);
+            nwritten = 0;
+        } else {
+            nwritten -= SG_LEN(sgp);
+            conn->x.out.sgp++;
+            conn->x.out.sg_count--;
+        }
+    }
+    if (conn->x.out.sg_count <= 0) {
+        /* Done writing, switch to reading */
+        cm_unset_write(selstate, conn->fd);
+        cm_set_read(selstate, conn->fd);
+        conn->state = READING;
+        conn->x.in.bufsizebytes_read = 0;
+        conn->x.in.bufsize = 0;
+        conn->x.in.buf = 0;
+        conn->x.in.pos = 0;
+        conn->x.in.n_left = 0;
+    }
+    return 0;
+}
+
+/*
+ * Returns 1 on readable data and calls a cm_set_ function otherwise.
+ *
+ * There is no clearly defined _end_ of a SSL-layer chunk, and so the caller
+ * of this funtion will need to perform additional checks for
+ * end-of-transmission and validity.
+ */
+static int
+service_ssl_read(krb5_context context, struct conn_state *conn,
+                 struct select_state *selstate, int ssflags)
+{
+    const int bufsize = 1 * 1024 * 1024;
+
+    ssize_t nread;
+    char *needle, *bufptr;
+    unsigned int out_len;
+
+    int e = 0;
+
+    if (conn->x.in.buf == NULL) {
+        /* first read */
+        conn->x.in.pos = conn->x.in.buf = malloc(bufsize);
+        if (conn->x.in.buf == NULL) {
+            service_kill_conn(context, conn, selstate, ssflags);
+            return 0;
+        }
+        conn->x.in.bufsize = bufsize;
+    }
+
+    nread = SSL_read(conn->http.ssl, conn->x.in.pos,
+                     bufsize - conn->x.in.bufsizebytes_read);
+    if (nread <= 0) {
+        e = SSL_get_error(conn->http.ssl, nread);
+        if (e == SSL_ERROR_WANT_READ) {
+            cm_set_read(selstate, conn->fd);
+            cm_unset_write(selstate, conn->fd);
+            return 0;
+        } else if (e == SSL_ERROR_WANT_WRITE) {
+            cm_set_write(selstate, conn->fd);
+            cm_unset_read(selstate, conn->fd);
+            return 0;
+        } else if (e == SSL_ERROR_WANT_CONNECT) {
+            /* if this happens, we're probably out of luck */
+            cm_set_write(selstate, conn->fd);
+            cm_set_read(selstate, conn->fd);
+            return 0;
+        }
+
+        e = nread ? SOCKET_ERRNO : ECONNRESET;
+        TRACE_SENDTO_KDC_TCP_ERROR_RECV(context, &conn->addr, e);
+        service_kill_conn(context, conn, selstate, ssflags);
+        return 0;
+    }
+    conn->x.in.pos += nread;
+    *(conn->x.in.pos) = '\0';
+    return 1;
+}
+
+/* Returns 1 on readable, valid KKDCPP data */
+static int
+service_https_read(krb5_context context, struct conn_state *conn,
+                   struct select_state *selstate, int ssflags)
+{
+    const int bufsize = 1 * 1024 * 1024; /* see note in service_tcp_read */
+
+    ssize_t nwritten, nread;
+    SSL_METHOD *method;
+    krb5_data *reply;
+    char *needle;
+
+    int e = 0;
+    char *bufptr = NULL;
+    size_t out_len = 0;
+
+    /* Check for a socket exception */
+    /* we can't check for unexpected readable data because we are using SSL */
+    if (ssflags & SSF_EXCEPTION) {
+        service_kill_conn(context, conn, selstate, ssflags);
+        return 0;
+    }
+
+    if (service_ssl_read(context, conn, selstate, ssflags) != 1)
+        return 0;
+
+    /* in lieu of strcasestr... */
+    needle = "CONTENT-LENGTH:";
+    for (bufptr = conn->x.in.buf; *bufptr != '\0'; bufptr++) {
+        int found = 1;
+        unsigned int i;
+
+        for (i = 0; i < strlen(needle); i++) {
+            if ((bufptr[i] >= 'a' && bufptr[i] - 0x20 != needle[i]) ||
+                (bufptr[i] < 'a' && bufptr[i] != needle[i])) {
+                found = 0;
+                break;
+            }
+        }
+
+        if (found)
+            break;
+    }
+    if (*bufptr == '\0')
+        return 0;
+
+    bufptr += strlen(needle);
+    while (*bufptr == ' ' || *bufptr == '\t') {
+        bufptr++;
+    }
+
+    for (out_len = 0; *bufptr != '\r'; bufptr++) {
+        out_len *= 10;
+        out_len += *bufptr - '0';
+    }
+
+    bufptr = strstr(conn->x.in.buf, "\r\n\r\n");
+    if (bufptr == NULL || bufptr + out_len + 3 > conn->x.in.pos)
+        return 0;
+
+    bufptr += 4;
+    reply = kkdcpp_extract((unsigned char *)bufptr);
+    if (reply == NULL) {
+        service_kill_conn(context, conn, selstate, ssflags);
+        return 0;
+    }
+
+    free(conn->x.in.buf);
+    conn->x.in.buf = reply->data;
+    conn->x.in.bufsize = reply->length;
+    conn->x.in.pos = reply->data + reply->length;
+    free(reply);
+
+    return 1;
+}
+#endif
+
+/* Ends a connection at the TCP/UDP layer */
 static int
 service_kill_conn(krb5_context context, struct conn_state *conn,
                   struct select_state *selstate, int ssflags)
 {
     (void)ssflags; /* same type signature as all service functions */
 
-    if (conn->addr.type == SOCK_STREAM)
+    if (conn->addr.type == SOCK_STREAM) {
         TRACE_SENDTO_KDC_TCP_DISCONNECT(context, &conn->addr);
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+        SSL_free(conn->http.ssl);
+        SSL_CTX_free(conn->http.ctx);
+#endif
+    }
 
     cm_remove_fd(selstate, conn->fd);
     closesocket(conn->fd);
@@ -1400,8 +1767,13 @@ k5_sendto(krb5_context context, const krb5_data *message,
 cleanup:
     for (state = conns; state != NULL; state = next) {
         next = state->next;
-        if (state->fd != INVALID_SOCKET)
+        if (state->fd != INVALID_SOCKET) {
             closesocket(state->fd);
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+            SSL_free(state->http.ssl);
+            SSL_CTX_free(state->http.ctx);
+#endif
+        }
         if (state->state == READING && state->x.in.buf != udpbuf)
             free(state->x.in.buf);
         if (callback_info) {

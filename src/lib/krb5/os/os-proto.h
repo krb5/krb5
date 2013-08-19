@@ -42,7 +42,17 @@ typedef enum {
     TCP_OR_UDP = 0,
     TCP,
     UDP,
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+    HTTPS,
+#endif
 } transport;
+
+/* HTTPS convenience macros */
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+#define IS_HTTPS(transport) ((transport) == HTTPS)
+#else
+#define IS_HTTPS(transport) 0
+#endif
 
 /* A single server hostname or address. */
 struct server_entry {
@@ -50,6 +60,8 @@ struct server_entry {
     int port;                   /* Used only if hostname set */
     transport protocol;         /* May be 0 for UDP/TCP if hostname set */
     int family;                 /* May be 0 (aka AF_UNSPEC) if hostname set */
+    krb5_data realm;            /* May be NULL if transport not HTTPS */
+    char *uri;                  /* May be NULL if transport not HTTPS */
     size_t addrlen;
     struct sockaddr_storage addr;
 };
