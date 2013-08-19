@@ -130,7 +130,8 @@ new_server_entry(struct serverlist *list)
 /* Add an address entry to list. */
 static int
 add_addr_to_list(struct serverlist *list, transport protocol, int family,
-                 size_t addrlen, struct sockaddr *addr)
+                 size_t addrlen, struct sockaddr *addr, const krb5_data *realm,
+                 char *uri)
 {
     struct server_entry *entry;
 
@@ -140,6 +141,8 @@ add_addr_to_list(struct serverlist *list, transport protocol, int family,
     entry->protocol = protocol;
     entry->family = family;
     entry->hostname = NULL;
+    entry->uri = (uri != NULL) ? strdup(uri) : NULL;
+    memcpy(&entry->realm, realm, sizeof(krb5_data));
     entry->addrlen = addrlen;
     memcpy(&entry->addr, addr, addrlen);
     list->nservers++;
@@ -149,7 +152,8 @@ add_addr_to_list(struct serverlist *list, transport protocol, int family,
 /* Add a hostname entry to list. */
 static int
 add_host_to_list(struct serverlist *list, const char *hostname, int port,
-                 transport protocol, int family)
+                 transport protocol, int family, const krb5_data *realm,
+                 char *uri)
 {
     struct server_entry *entry;
 
@@ -161,6 +165,9 @@ add_host_to_list(struct serverlist *list, const char *hostname, int port,
     entry->hostname = strdup(hostname);
     if (entry->hostname == NULL)
         return ENOMEM;
+
+    entry->uri = (uri != NULL) ? strdup(uri) : NULL;
+    memcpy(&entry->realm, realm, sizeof(krb5_data));
     entry->port = port;
     list->nservers++;
     return 0;
@@ -204,9 +211,25 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
     for (i=0; hostlist[i]; i++) {
         int p1, p2;
+        transport protocol = 0;
+        char *uri = NULL;
 
         host = hostlist[i];
         Tprintf ("entry %d is '%s'\n", i, host);
+
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+        if (!strncmp(host, "https://", 8)) {
+            protocol = HTTPS;
+            host += 8;
+
+            cp = strchr(host, '/');
+            if (cp != NULL) {
+                *cp = '\0';
+                uri = cp + 1;
+            }
+        }
+#endif
+
         /* Find port number, and strip off any excess characters. */
         if (*host == '[' && (cp = strchr(host, ']')))
             cp = cp + 1;
@@ -230,6 +253,9 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                 return EINVAL;
             p1 = htons (l);
             p2 = 0;
+        } else if (IS_HTTPS(protocol)) {
+            p1 = htons(443);
+            p2 = 0;
         } else {
             p1 = udpport;
             p2 = sec_udpport;
@@ -241,12 +267,28 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
             *cp = '\0';
         }
 
-        code = add_host_to_list(serverlist, host, p1, socktype, AF_UNSPEC);
+        if (protocol) {
+            code = add_host_to_list(serverlist, host, p1, protocol,
+                                    AF_UNSPEC, realm, uri);
+        } else if (socktype == SOCK_STREAM) {
+            code = add_host_to_list(serverlist, host, p1, TCP,
+                                    AF_UNSPEC, realm, uri);
+        } else if (socktype == SOCK_DGRAM) {
+            code = add_host_to_list(serverlist, host, p1, UDP,
+                                    AF_UNSPEC, realm, uri);
+        } else {
+            code = add_host_to_list(serverlist, host, p1, TCP_OR_UDP,
+                                    AF_UNSPEC, realm, uri);
+        }
+
         /* Second port is for IPv4 UDP only, and should possibly go away as
          * it was originally a krb4 compatibility measure. */
         if (code == 0 && p2 != 0 &&
-            (socktype == 0 || socktype == SOCK_DGRAM))
-            code = add_host_to_list(serverlist, host, p2, SOCK_DGRAM, AF_INET);
+            (socktype == 0 || socktype == SOCK_DGRAM)) {
+            code = add_host_to_list(serverlist, host, p2, UDP,
+                                    AF_INET, realm, uri);
+        }
+
         if (code)
             goto cleanup;
     }
@@ -298,7 +340,7 @@ locate_srv_dns_1(const krb5_data *realm, const char *service,
     for (entry = head; entry != NULL; entry = entry->next) {
         socktype = (strcmp(protocol, "_tcp") == 0) ? SOCK_STREAM : SOCK_DGRAM;
         code = add_host_to_list(serverlist, entry->host, htons(entry->port),
-                                socktype, AF_UNSPEC);
+                                socktype, AF_UNSPEC, realm, NULL);
         if (code)
             goto cleanup;
     }
@@ -336,8 +378,8 @@ module_callback(void *cbdata, int socktype, struct sockaddr *sa)
         addrlen = sizeof(struct sockaddr_in6);
     else
         return 0;
-    if (add_addr_to_list(d->list, socktype, sa->sa_family, addrlen,
-                         sa) != 0) {
+    if (add_addr_to_list(d->list, socktype, sa->sa_family, addrlen, sa,
+                         NULL, NULL) != 0) {
         /* Assumes only error is ENOMEM.  */
         d->out_of_mem = 1;
         return 1;
