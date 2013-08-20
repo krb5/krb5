@@ -126,8 +126,8 @@ For each realm, the following tags may be specified:
         tickets.
 
     **no-auth-data-required**
-        Enabling this flag prevents PAC data from being added to
-        service tickets for the principal.
+        Enabling this flag prevents PAC or AD-SIGNEDPATH data from
+        being added to service tickets for the principal.
 
     **ok-as-delegate**
         If this flag is enabled, it hints the client that credentials

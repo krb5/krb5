@@ -284,6 +284,15 @@ Options:
     **+password_changing_service** marks this principal as a password
     change service principal.
 
+{-\|+}\ **ok_to_auth_as_delegate**
+    **+ok_to_auth_as_delegate** allows this principal to acquire
+    forwardable tickets to itself from arbitrary users, for use with
+    constrained delegation.
+
+{-\|+}\ **no_auth_data_required**
+    **+no_auth_data_required** prevents PAC or AD-SIGNEDPATH data from
+    being added to service tickets for the principal.
+
 **-randkey**
     Sets the key of the principal to a random value.
 

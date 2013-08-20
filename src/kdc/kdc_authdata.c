@@ -1159,7 +1159,8 @@ handle_signedpath_authdata (krb5_context context,
 
     /* No point in including signedpath authdata for a cross-realm TGT, since
      * it will be presented to a different KDC. */
-    if (!is_cross_tgs_principal(server->princ) &&
+    if (!isflagset(server->attributes, KRB5_KDB_NO_AUTH_DATA_REQUIRED) &&
+        !is_cross_tgs_principal(server->princ) &&
         !only_pac_p(context, enc_tkt_reply->authorization_data)) {
         code = make_ad_signedpath(context,
                                   for_user_princ,
