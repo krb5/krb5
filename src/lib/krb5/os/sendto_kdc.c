@@ -489,6 +489,153 @@ cm_get_ssflags(struct select_state *selstate, int fd)
     return ssflags;
 }
 
+/*
+ * Utility functions for MS-KKDCPP interaction
+ *
+ * Request structure:
+ * '\x30' <len[0]>
+ *        '\xa0' <len[1]>
+ *               '\x04' <len[2]>
+ *                      <raw->data>
+ *        '\xa1' <len[3]>
+ *               '\x1b' <len[4]>
+ *                      <realm>
+ */
+const unsigned char kkdcpp_magic[] = "\x30\xa0\x04\xa1\x1b"; /* ASN.1 tags */
+
+/* Bytes needed to write length field */
+static int
+kkdcpp_bytesneeded(int i) {
+    return 1 + (i > (1 << 7) ? (i + 254) / 255 : 0);
+}
+
+/* Write length field to pptr */
+static void
+kkdcpp_length_serialize(char **pptr, int *lenlen, int *len, int i) {
+    char *ptr;
+
+    ptr = *pptr;
+    *ptr = kkdcpp_magic[i];
+    ptr++;
+
+    if (lenlen[i] == 1) {
+        *ptr = (char) (len[i]);
+        ptr++;
+    } else {
+        lenlen[i]--;
+        *ptr = 0x80 | lenlen[i];
+        ptr++;
+        while (lenlen[i] > 0) {
+            *ptr = (char) (len[i] >> (8*(lenlen[i] - 1)));
+            ptr++;
+            lenlen[i]--;
+        }
+    }
+
+    *pptr = ptr;
+    return;
+}
+
+/* Encapsulate for KKDCPP transport.  NULL when no memory. */
+static krb5_data *
+kkdcpp_encode(const krb5_data *raw, const krb5_data *realm) {
+    int len[5], lenlen[5];
+    int i;
+    krb5_data *enc;
+    char *ptr;
+
+    len[2] = raw->length + 4;
+    lenlen[2] = kkdcpp_bytesneeded(len[2]);
+
+    len[1] = len[2] + lenlen[2] + 1;
+    lenlen[1] = kkdcpp_bytesneeded(len[1]);
+
+    len[4] = realm->length;
+    lenlen[4] = kkdcpp_bytesneeded(len[4]);
+
+    len[3] = len[4] + lenlen[4] + 1;
+    lenlen[3] = kkdcpp_bytesneeded(len[3]);
+
+    len[0] = len[1] + len[4] + lenlen[1] + lenlen[3] + lenlen[4] + 3;
+    lenlen[0] = kkdcpp_bytesneeded(len[0]);
+
+    enc = malloc(sizeof(krb5_data));
+    if (enc == NULL)
+        return NULL;
+    enc->length = len[0] + lenlen[0] + 1;
+    enc->data = malloc(enc->length + 1);
+    if (enc->data == NULL) {
+        free(enc);
+        return NULL;
+    }
+    ptr = enc->data;
+
+    for (i = 0; i <= 4; i++) {
+        kkdcpp_length_serialize(&ptr, lenlen, len, i);
+        if (i == 2) {
+            store_32_be(raw->length, ptr);
+            ptr += 4;
+            memcpy(ptr, raw->data, raw->length);
+            ptr += raw->length;
+        } else if (i == 4) {
+            memcpy(ptr, realm->data, realm->length);
+            ptr += realm->length;
+        }
+    }
+
+    enc->data[enc->length] = '\0';
+    return enc;
+}
+
+/* Unencapsulates the krb traffic from KKDCPP.  NULL on failure. */
+static krb5_data *
+kkdcpp_extract(unsigned char *enc) {
+    unsigned int len[5], lenlen[5];
+    int i;
+    unsigned int check;
+    krb5_data *raw;
+
+    for (i = 0; i <= 2; i++) {
+        if (*enc != kkdcpp_magic[i]) {
+            return NULL;
+        }
+        enc++;
+
+        lenlen[i] = 1 + (*enc > 0x80 ? *enc & ~0x80 : 0);
+        if (lenlen[i] == 1) {
+            len[i] = *enc;
+        } else {
+            for (len[i] = 0; lenlen[i] > 1; lenlen[i]--) {
+                enc++;
+                len[i] <<= 8;
+                len[i] |= *enc;
+            }
+        }
+        enc++;
+    }
+
+    check = load_32_be(enc);
+    if (check != len[2] - 4)
+        return NULL;
+
+    raw = malloc(sizeof(krb5_data));
+    if (raw == NULL)
+        return NULL;
+
+    raw->length = len[2] - 4;
+    raw->data = malloc(len[2] - 4);
+    if (raw->data == NULL) {
+        free(raw);
+        return NULL;
+    }
+    memcpy(raw->data, enc + 4, len[2] - 4);
+
+    /* specification indicates this will be the end of packet */
+
+    return raw;
+}
+
+
 static int service_tcp_fd(krb5_context context, struct conn_state *conn,
                           struct select_state *selstate, int ssflags);
 static int service_udp_fd(krb5_context context, struct conn_state *conn,
