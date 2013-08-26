@@ -1635,34 +1635,15 @@ load_db(int argc, char **argv)
         }
     }
 
-    if (log_ctx != NULL && log_ctx->iproprole) {
-        /*
-         * We don't want to take out the ulog out from underneath kadmind so we
-         * reinit the header log.
-         *
-         * We also don't want to add to the update log since we are doing a
-         * whole sale replace of the db, because:
-         *      we could easily exceed # of update entries
-         *      we could implicity delete db entries during a replace
-         *      no advantage in incr updates when entire db is replaced
-         */
-        if (!(flags & FLAG_UPDATE)) {
-            ulog_init_header(util_context);
-            log_ctx->iproprole = IPROP_NULL;
-
-            if (!add_update) {
-                if (!parse_iprop_header(buf, &load, &last_sno, &last_seconds,
-                                        &last_useconds))
-                    goto error;
-
-                log_ctx->ulog->kdb_last_sno = last_sno;
-                log_ctx->ulog->kdb_last_time.seconds = last_seconds;
-                log_ctx->ulog->kdb_last_time.useconds = last_useconds;
-
-                /* Technically we must msync() in order for our writes here to
-                 * be visible to a running kpropd. */
-                ulog_sync_header(log_ctx->ulog);
-            }
+    if (log_ctx != NULL && log_ctx->iproprole && !(flags & FLAG_UPDATE)) {
+        /* Don't record updates we are making to the temporary DB.  We will
+         * reinitialize or update the ulog header after promoting it. */
+        log_ctx->iproprole = IPROP_SLAVE;
+        if (!add_update) {
+            /* Parse the iprop header information. */
+            if (!parse_iprop_header(buf, &load, &last_sno, &last_seconds,
+                                    &last_useconds))
+                goto error;
         }
     }
 
@@ -1686,13 +1667,23 @@ load_db(int argc, char **argv)
                     _("while making newly loaded database live"));
             goto error;
         }
+
+        if (log_ctx != NULL && log_ctx->iproprole) {
+            /* Reinitialize the ulog header since we replaced the DB, and
+             * record the iprop state if we received it. */
+            ulog_init_header(util_context);
+            if (!add_update) {
+                log_ctx->ulog->kdb_last_sno = last_sno;
+                log_ctx->ulog->kdb_last_time.seconds = last_seconds;
+                log_ctx->ulog->kdb_last_time.useconds = last_useconds;
+                ulog_sync_header(log_ctx->ulog);
+            }
+        }
     }
 
 cleanup:
     /* If we created a temporary DB but didn't succeed, destroy it. */
     if (exit_status && temp_db_created) {
-        if (log_ctx && log_ctx->iproprole)
-            ulog_init_header(util_context);
         ret = krb5_db_destroy(util_context, db5util_db_args);
         /* Ignore a not supported error since there is nothing to do about
          * it anyway. */
