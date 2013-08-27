@@ -40,7 +40,7 @@
 #endif  /* HAVE_REGEX_H */
 
 /* Needed for master key conversion. */
-static int mkey_convert;
+static krb5_boolean mkey_convert;
 krb5_keyblock new_master_keyblock;
 krb5_kvno new_mkvno;
 
@@ -60,15 +60,12 @@ krb5_kvno new_mkvno;
 #include <regexp.h>
 #endif /* !HAVE_REGCOMP && HAVE_REGEXP_H */
 
-#define FLAG_VERBOSE    0x1     /* be verbose */
-#define FLAG_UPDATE     0x2     /* processing an update */
-#define FLAG_OMIT_NRA   0x4     /* avoid dumping non-replicated attrs */
-
 typedef krb5_error_code (*dump_func)(krb5_context context,
                                      krb5_db_entry *entry, const char *name,
-                                     FILE *fp, int flags);
+                                     FILE *fp, krb5_boolean verbose,
+                                     krb5_boolean omit_nra);
 typedef int (*load_func)(krb5_context context, const char *dumpfile, FILE *fp,
-                         int flags, int *linenop);
+                         krb5_boolean verbose, int *linenop);
 
 typedef struct _dump_version {
     char *name;
@@ -86,7 +83,8 @@ struct dump_args {
     krb5_context context;
     char **names;
     int nnames;
-    int flags;
+    krb5_boolean verbose;
+    krb5_boolean omit_nra;      /* omit non-replicated attributes */
     dump_version *dump;
 };
 
@@ -328,7 +326,8 @@ dump_tl_data(FILE *ofile, krb5_tl_data *tlp, krb5_boolean filter_kadm)
  * is false. */
 static krb5_error_code
 k5beta7_common(krb5_context context, krb5_db_entry *entry,
-               const char *name, FILE *fp, int flags, krb5_boolean kadm)
+               const char *name, FILE *fp, krb5_boolean verbose,
+               krb5_boolean omit_nra, krb5_boolean kadm)
 {
     krb5_tl_data *tlp;
     krb5_key_data *kdata;
@@ -373,9 +372,9 @@ k5beta7_common(krb5_context context, krb5_db_entry *entry,
     fprintf(fp, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d", entry->attributes,
             entry->max_life, entry->max_renewable_life, entry->expiration,
             entry->pw_expiration,
-            (flags & FLAG_OMIT_NRA) ? 0 : entry->last_success,
-            (flags & FLAG_OMIT_NRA) ? 0 : entry->last_failed,
-            (flags & FLAG_OMIT_NRA) ? 0 : entry->fail_auth_count);
+            omit_nra ? 0 : entry->last_success,
+            omit_nra ? 0 : entry->last_failed,
+            omit_nra ? 0 : entry->fail_auth_count);
 
     /* Write out tagged data. */
     dump_tl_data(fp, entry->tl_data, !kadm);
@@ -401,7 +400,7 @@ k5beta7_common(krb5_context context, krb5_db_entry *entry,
     /* Write trailer. */
     fprintf(fp, ";\n");
 
-    if (flags & FLAG_VERBOSE)
+    if (verbose)
         fprintf(stderr, "%s\n", name);
 
     return 0;
@@ -410,16 +409,18 @@ k5beta7_common(krb5_context context, krb5_db_entry *entry,
 /* Output a dump record in krb5b7 format. */
 static krb5_error_code
 dump_k5beta7_princ(krb5_context context, krb5_db_entry *entry,
-                   const char *name, FILE *fp, int flags)
+                   const char *name, FILE *fp, krb5_boolean verbose,
+                   krb5_boolean omit_nra)
 {
-    return k5beta7_common(context, entry, name, fp, flags, FALSE);
+    return k5beta7_common(context, entry, name, fp, verbose, omit_nra, FALSE);
 }
 
 static krb5_error_code
 dump_k5beta7_princ_withpolicy(krb5_context context, krb5_db_entry *entry,
-                              const char *name, FILE *fp, int flags)
+                              const char *name, FILE *fp, krb5_boolean verbose,
+                              krb5_boolean omit_nra)
 {
-    return k5beta7_common(context, entry, name, fp, flags, TRUE);
+    return k5beta7_common(context, entry, name, fp, verbose, omit_nra, TRUE);
 }
 
 static void
@@ -476,7 +477,7 @@ print_key_data(FILE *f, krb5_key_data *kd)
  * ovsec_adm_import consumption. */
 static krb5_error_code
 dump_ov_princ(krb5_context context, krb5_db_entry *entry, const char *name,
-              FILE *fp, int flags)
+              FILE *fp, krb5_boolean verbose, krb5_boolean omit_nra)
 {
     char *princstr;
     unsigned int x;
@@ -566,7 +567,7 @@ dump_iterator(void *ptr, krb5_db_entry *entry)
         goto cleanup;
 
     ret = args->dump->dump_princ(args->context, entry, name, args->ofile,
-                                 args->flags);
+                                 args->verbose, args->omit_nra);
 
 cleanup:
     free(name);
@@ -701,7 +702,7 @@ process_tl_data(const char *fname, FILE *filep, int lineno,
  * 0 for success and 1 for failure. */
 static int
 process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
-                      int flags, int *linenop)
+                      krb5_boolean verbose, int *linenop)
 {
     int retval, nread, i, j;
     krb5_db_entry *dbentry;
@@ -858,7 +859,7 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
         goto fail;
     }
 
-    if (flags & FLAG_VERBOSE)
+    if (verbose)
         fprintf(stderr, "%s\n", name);
     retval = 0;
 
@@ -875,7 +876,7 @@ fail:
 
 static int
 process_k5beta7_policy(krb5_context context, const char *fname, FILE *filep,
-                       int flags, int *linenop)
+                       krb5_boolean verbose, int *linenop)
 {
     osa_policy_ent_rec rec;
     char namebuf[1024];
@@ -904,7 +905,7 @@ process_k5beta7_policy(krb5_context context, const char *fname, FILE *filep,
         com_err(progname, ret, _("while creating policy"));
         return 1;
     }
-    if (flags & FLAG_VERBOSE)
+    if (verbose)
         fprintf(stderr, _("created policy %s\n"), rec.name);
 
     return 0;
@@ -912,7 +913,7 @@ process_k5beta7_policy(krb5_context context, const char *fname, FILE *filep,
 
 static int
 process_r1_8_policy(krb5_context context, const char *fname, FILE *filep,
-                    int flags, int *linenop)
+                    krb5_boolean verbose, int *linenop)
 {
     osa_policy_ent_rec rec;
     char namebuf[1024];
@@ -943,7 +944,7 @@ process_r1_8_policy(krb5_context context, const char *fname, FILE *filep,
         com_err(progname, ret, _("while creating policy"));
         return 1;
     }
-    if (flags & FLAG_VERBOSE)
+    if (verbose)
         fprintf(stderr, "created policy %s\n", rec.name);
 
     return 0;
@@ -951,7 +952,7 @@ process_r1_8_policy(krb5_context context, const char *fname, FILE *filep,
 
 static int
 process_r1_11_policy(krb5_context context, const char *fname, FILE *filep,
-                     int flags, int *linenop)
+                     krb5_boolean verbose, int *linenop)
 {
     osa_policy_ent_rec rec;
     krb5_tl_data *tl, *tl_next;
@@ -1001,7 +1002,7 @@ process_r1_11_policy(krb5_context context, const char *fname, FILE *filep,
         com_err(progname, ret, _("while creating policy"));
         goto cleanup;
     }
-    if (flags & FLAG_VERBOSE)
+    if (verbose)
         fprintf(stderr, "created policy %s\n", rec.name);
 
 cleanup:
@@ -1016,8 +1017,9 @@ cleanup:
 /* Read a record which is tagged with "princ" or "policy", calling princfn
  * or policyfn as appropriate. */
 static int
-process_tagged(krb5_context context, const char *fname, FILE *filep, int flags,
-               int *linenop, load_func princfn, load_func policyfn)
+process_tagged(krb5_context context, const char *fname, FILE *filep,
+               krb5_boolean verbose, int *linenop, load_func princfn,
+               load_func policyfn)
 {
     int nread;
     char rectype[100];
@@ -1028,9 +1030,9 @@ process_tagged(krb5_context context, const char *fname, FILE *filep, int flags,
     if (nread != 1)
         return 1;
     if (strcmp(rectype, "princ") == 0)
-        return (*princfn)(context, fname, filep, flags, linenop);
+        return (*princfn)(context, fname, filep, verbose, linenop);
     if (strcmp(rectype, "policy") == 0)
-        return (*policyfn)(context, fname, filep, flags, linenop);
+        return (*policyfn)(context, fname, filep, verbose, linenop);
     if (strcmp(rectype, "End") == 0)  /* Only expected for OV format */
         return -1;
 
@@ -1040,33 +1042,33 @@ process_tagged(krb5_context context, const char *fname, FILE *filep, int flags,
 
 static int
 process_k5beta7_record(krb5_context context, const char *fname, FILE *filep,
-                       int flags, int *linenop)
+                       krb5_boolean verbose, int *linenop)
 {
-    return process_tagged(context, fname, filep, flags, linenop,
+    return process_tagged(context, fname, filep, verbose, linenop,
                           process_k5beta7_princ, process_k5beta7_policy);
 }
 
 static int
 process_ov_record(krb5_context context, const char *fname, FILE *filep,
-                  int flags, int *linenop)
+                  krb5_boolean verbose, int *linenop)
 {
-    return process_tagged(context, fname, filep, flags, linenop,
+    return process_tagged(context, fname, filep, verbose, linenop,
                           process_ov_principal, process_k5beta7_policy);
 }
 
 static int
 process_r1_8_record(krb5_context context, const char *fname, FILE *filep,
-                    int flags, int *linenop)
+                    krb5_boolean verbose, int *linenop)
 {
-    return process_tagged(context, fname, filep, flags, linenop,
+    return process_tagged(context, fname, filep, verbose, linenop,
                           process_k5beta7_princ, process_r1_8_policy);
 }
 
 static int
 process_r1_11_record(krb5_context context, const char *fname, FILE *filep,
-                     int flags, int *linenop)
+                     krb5_boolean verbose, int *linenop)
 {
-    return process_tagged(context, fname, filep, flags, linenop,
+    return process_tagged(context, fname, filep, verbose, linenop,
                           process_k5beta7_princ, process_r1_11_policy);
 }
 
@@ -1232,16 +1234,18 @@ dump_db(int argc, char **argv)
     char *ofile = NULL, *tmpofile = NULL, *new_mkey_file = NULL;
     krb5_error_code ret, retval;
     dump_version *dump;
-    int aindex, conditional = 0, ok_fd = -1;
+    int aindex, ok_fd = -1;
     bool_t dump_sno = FALSE;
     kdb_log_context *log_ctx;
     unsigned int ipropx_version = IPROPX_VERSION_0;
     krb5_kvno kt_kvno;
+    krb5_boolean conditional = FALSE;
 
     /* Parse the arguments. */
     dump = &r1_11_version;
-    args.flags = 0;
-    mkey_convert = 0;
+    args.verbose = FALSE;
+    args.omit_nra = FALSE;
+    mkey_convert = FALSE;
     log_ctx = util_context->kdblog_context;
 
     /*
@@ -1269,7 +1273,7 @@ dump_db(int argc, char **argv)
                 dump_sno = TRUE;
                 /* FLAG_OMIT_NRA is set to indicate that non-replicated
                  * attributes should be omitted. */
-                args.flags |= FLAG_OMIT_NRA;
+                args.omit_nra = TRUE;
             } else {
                 fprintf(stderr, _("Iprop not enabled\n"));
                 goto error;
@@ -1277,7 +1281,7 @@ dump_db(int argc, char **argv)
         } else if (!strcmp(argv[aindex], "-c")) {
             conditional = 1;
         } else if (!strcmp(argv[aindex], "-verbose")) {
-            args.flags |= FLAG_VERBOSE;
+            args.verbose = TRUE;
         } else if (!strcmp(argv[aindex], "-mkey_convert")) {
             mkey_convert = 1;
         } else if (!strcmp(argv[aindex], "-new_mkey_file")) {
@@ -1450,18 +1454,18 @@ error:
 
 /* Restore the database from any version dump file. */
 static int
-restore_dump(krb5_context context, char *dumpfile, FILE *f, int flags,
-             dump_version *dump)
+restore_dump(krb5_context context, char *dumpfile, FILE *f,
+             krb5_boolean verbose, dump_version *dump)
 {
-    int error = 0;
+    int err = 0;
     int lineno = 1;
 
     /* Process the records. */
-    while (!(error = dump->load_record(context, dumpfile, f, flags, &lineno)));
-    if (error != -1) {
+    while (!(err = dump->load_record(context, dumpfile, f, verbose, &lineno)));
+    if (err != -1) {
         fprintf(stderr, _("%s: error processing line %d of %s\n"), progname,
                 lineno, dumpfile);
-        return error;
+        return err;
     }
     return 0;
 }
@@ -1479,9 +1483,10 @@ load_db(int argc, char **argv)
     extern int optind;
     char *dumpfile = NULL, *dbname, buf[BUFSIZ];
     dump_version *load = NULL;
-    int flags = 0, aindex;
+    int aindex;
     kdb_log_context *log_ctx;
-    krb5_boolean add_update = TRUE, db_locked = FALSE, temp_db_created = FALSE;
+    krb5_boolean db_locked = FALSE, temp_db_created = FALSE;
+    krb5_boolean verbose = FALSE, update = FALSE, iprop_load = FALSE;
     uint32_t caller = FKCOMMAND, last_sno, last_seconds, last_useconds;
 
     /* Parse the arguments. */
@@ -1501,16 +1506,16 @@ load_db(int argc, char **argv)
         } else if (!strcmp(argv[aindex], "-i")) {
             if (log_ctx && log_ctx->iproprole) {
                 load = &iprop_version;
-                add_update = FALSE;
+                iprop_load = TRUE;
                 caller = FKLOAD;
             } else {
                 fprintf(stderr, _("Iprop not enabled\n"));
                 goto error;
             }
         } else if (!strcmp(argv[aindex], "-verbose")) {
-            flags |= FLAG_VERBOSE;
+            verbose = TRUE;
         } else if (!strcmp(argv[aindex], "-update")){
-            flags |= FLAG_UPDATE;
+            update = TRUE;
         } else if (!strcmp(argv[aindex], "-hash")) {
             if (!add_db_arg("hash=true")) {
                 com_err(progname, ENOMEM, _("while parsing options"));
@@ -1590,7 +1595,7 @@ load_db(int argc, char **argv)
         }
     }
 
-    if (load->updateonly && !(flags & FLAG_UPDATE)) {
+    if (load->updateonly && !update) {
         fprintf(stderr, _("%s: dump version %s can only be loaded with the "
                           "-update flag\n"), progname, load->name);
         goto error;
@@ -1598,13 +1603,13 @@ load_db(int argc, char **argv)
 
     /* If we are not in update mode, we create an alternate database and then
      * promote it to be the live db. */
-    if (!(flags & FLAG_UPDATE)) {
+    if (!update) {
         if (!add_db_arg("temporary")) {
             com_err(progname, ENOMEM, _("computing parameters for database"));
             goto error;
         }
 
-        if (!add_update && !add_db_arg("merge_nra")) {
+        if (iprop_load && !add_db_arg("merge_nra")) {
             com_err(progname, ENOMEM, _("computing parameters for database"));
             goto error;
         }
@@ -1635,11 +1640,11 @@ load_db(int argc, char **argv)
         }
     }
 
-    if (log_ctx != NULL && log_ctx->iproprole && !(flags & FLAG_UPDATE)) {
+    if (log_ctx != NULL && log_ctx->iproprole && !update) {
         /* Don't record updates we are making to the temporary DB.  We will
          * reinitialize or update the ulog header after promoting it. */
         log_ctx->iproprole = IPROP_SLAVE;
-        if (!add_update) {
+        if (iprop_load) {
             /* Parse the iprop header information. */
             if (!parse_iprop_header(buf, &load, &last_sno, &last_seconds,
                                     &last_useconds))
@@ -1648,7 +1653,7 @@ load_db(int argc, char **argv)
     }
 
     if (restore_dump(util_context, dumpfile ? dumpfile : _("standard input"),
-                     f, flags, load)) {
+                     f, verbose, load)) {
         fprintf(stderr, _("%s: %s restore failed\n"), progname, load->name);
         goto error;
     }
@@ -1658,7 +1663,7 @@ load_db(int argc, char **argv)
         goto error;
     }
 
-    if (!(flags & FLAG_UPDATE)) {
+    if (!update) {
         ret = krb5_db_promote(util_context, db5util_db_args);
         /* Ignore a not supported error since there is nothing to do about it
          * anyway. */
@@ -1672,7 +1677,7 @@ load_db(int argc, char **argv)
             /* Reinitialize the ulog header since we replaced the DB, and
              * record the iprop state if we received it. */
             ulog_init_header(util_context);
-            if (!add_update) {
+            if (iprop_load) {
                 log_ctx->ulog->kdb_last_sno = last_sno;
                 log_ctx->ulog->kdb_last_time.seconds = last_seconds;
                 log_ctx->ulog->kdb_last_time.useconds = last_useconds;

@@ -71,7 +71,7 @@ extern int kadm5_create_magic_princs (kadm5_config_params *params,
                                       krb5_context context);
 
 extern int process_ov_principal (krb5_context kcontext, const char *fname,
-                                 FILE *filep, int verbose,
+                                 FILE *filep, krb5_boolean verbose,
                                  int *linenop);
 
 extern void load_db (int argc, char **argv);

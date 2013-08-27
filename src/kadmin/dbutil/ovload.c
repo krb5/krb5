@@ -100,7 +100,7 @@ int process_ov_principal(kcontext, fname, filep, verbose, linenop)
     krb5_context        kcontext;
     const char          *fname;
     FILE                *filep;
-    int                 verbose;
+    krb5_boolean        verbose;
     int                 *linenop;
 {
     XDR                     xdrs;
