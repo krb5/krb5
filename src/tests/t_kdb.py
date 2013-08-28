@@ -269,6 +269,23 @@ out = realm.run([klist])
 if 'alias@KRBTEST.COM\n' not in out or 'canon@KRBTEST.COM' not in out:
     fail('After fetching alias and canon, klist is missing one or both')
 
+# Make sure an alias to the local TGS is still treated like an alias.
+ldap_modify('dn: krbPrincipalName=krbtgt/KRBTEST.COM@KRBTEST.COM,'
+            'cn=KRBTEST.COM,cn=krb5\n'
+            'changetype: modify\n'
+            'add:krbPrincipalName\n'
+            'krbPrincipalName: tgtalias@KRBTEST.COM\n'
+            '-\n'
+            'add: krbCanonicalName\n'
+            'krbCanonicalName: krbtgt/KRBTEST.COM@KRBTEST.COM\n')
+out = realm.run_kadminl('getprinc tgtalias')
+if 'Principal: krbtgt/KRBTEST.COM@KRBTEST.COM' not in out:
+    fail('Could not fetch krbtgt through tgtalias')
+realm.run([kvno, 'tgtalias'])
+out = realm.run([klist])
+if 'tgtalias@KRBTEST.COM\n' not in out:
+    fail('After fetching tgtalias, klist is missing it')
+
 realm.stop()
 
 # Briefly test dump and load.
