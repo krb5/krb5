@@ -109,19 +109,23 @@ def kldaputil(args, **kw):
 # kdb5_ldap_util before proceeding.
 kldaputil(['destroy', '-f'])
 
-ldapadd = which('ldapadd')
-if not ldapadd:
-    success('Warning: skipping some LDAP tests because ldapadd not found')
+ldapmodify = which('ldapmodify')
+if not ldapmodify:
+    success('Warning: skipping some LDAP tests because ldapmodify not found')
     exit(0)
 
+def ldap_modify(ldif, args=[]):
+    proc = subprocess.Popen([ldapmodify, '-H', ldap_uri, '-D', admin_dn,
+                             '-x', '-w', admin_pw] + args,
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+    (out, dummy) = proc.communicate(ldif)
+    output(out)
+
 def ldap_add(dn, objectclass, attrs=[]):
-    proc = subprocess.Popen([ldapadd, '-H', ldap_uri, '-D', admin_dn, '-x',
-                             '-w', admin_pw], stdin=subprocess.PIPE,
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     in_data = 'dn: %s\nobjectclass: %s\n' % (dn, objectclass)
     in_data += '\n'.join(attrs) + '\n'
-    (out, dummy) = proc.communicate(in_data)
-    output(out)
+    ldap_modify(in_data, ['-a'])
 
 # Create krbContainer objects for use as subtrees.
 ldap_add('cn=t1,cn=krb5', 'krbContainer')
@@ -243,6 +247,28 @@ realm.extract_keytab(realm.host_princ, realm.keytab)
 realm.kinit(realm.user_princ, password('user'))
 realm.run([kvno, realm.host_princ])
 realm.klist(realm.user_princ, realm.host_princ)
+
+# Test service principal aliases.
+realm.addprinc('canon')
+ldap_modify('dn: krbPrincipalName=canon@KRBTEST.COM,cn=t1,cn=krb5\n'
+            'changetype: modify\n'
+            'add: krbPrincipalName\n'
+            'krbPrincipalName: alias@KRBTEST.COM\n'
+            '-\n'
+            'add: krbCanonicalName\n'
+            'krbCanonicalName: canon@KRBTEST.COM\n')
+out = realm.run_kadminl('getprinc alias')
+if 'Principal: canon@KRBTEST.COM\n' not in out:
+    fail('Could not fetch canon through alias')
+out = realm.run_kadminl('getprinc canon')
+if 'Principal: canon@KRBTEST.COM\n' not in out:
+    fail('Could not fetch canon through canon')
+realm.run([kvno, 'alias'])
+realm.run([kvno, 'canon'])
+out = realm.run([klist])
+if 'alias@KRBTEST.COM\n' not in out or 'canon@KRBTEST.COM' not in out:
+    fail('After fetching alias and canon, klist is missing one or both')
+
 realm.stop()
 
 # Briefly test dump and load.
