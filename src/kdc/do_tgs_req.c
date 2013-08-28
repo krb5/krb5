@@ -217,12 +217,14 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     if (errcode != 0)
         goto cleanup;
     sprinc = server->princ;
-    if (krb5_is_tgs_principal(server->princ)) {
+    is_referral = krb5_is_tgs_principal(server->princ) &&
+        !krb5_principal_compare(kdc_context, tgs_server, server->princ);
+    if (is_referral) {
         /*
-         * We may be issuing an alternate TGT or host referral, in which case
-         * we should use the canonical name in the reply.  XXX We should track
-         * the reply server separately instead of modifying request->server,
-         * but that requires a bunch of code changes.
+         * We may be issuing an alternate TGT or a referral to another realm,
+         * in which case we should use the canonical name in the reply.  XXX We
+         * should track the reply server separately instead of modifying
+         * request->server, but that requires a bunch of code changes.
          */
         krb5_free_principal(kdc_context, request->server);
         request->server = NULL;
@@ -250,9 +252,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
 
     if (!is_local_principal(kdc_active_realm, header_enc_tkt->client))
         setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
-
-    is_referral = krb5_is_tgs_principal(server->princ) &&
-        !krb5_principal_compare(kdc_context, tgs_server, server->princ);
 
     /* Check for protocol transition */
     errcode = kdc_process_s4u2self_req(kdc_active_realm,
