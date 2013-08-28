@@ -217,14 +217,21 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     if (errcode != 0)
         goto cleanup;
     sprinc = server->princ;
-    /* XXX until nothing depends on request being mutated */
-    krb5_free_principal(kdc_context, request->server);
-    request->server = NULL;
-    errcode = krb5_copy_principal(kdc_context, server->princ,
-                                  &request->server);
-    if (errcode != 0) {
-        status = "COPYING RESOLVED SERVER";
-        goto cleanup;
+    if (krb5_is_tgs_principal(server->princ)) {
+        /*
+         * We may be issuing an alternate TGT or host referral, in which case
+         * we should use the canonical name in the reply.  XXX We should track
+         * the reply server separately instead of modifying request->server,
+         * but that requires a bunch of code changes.
+         */
+        krb5_free_principal(kdc_context, request->server);
+        request->server = NULL;
+        errcode = krb5_copy_principal(kdc_context, server->princ,
+                                      &request->server);
+        if (errcode != 0) {
+            status = "COPYING RESOLVED SERVER";
+            goto cleanup;
+        }
     }
 
     if ((errcode = krb5_timeofday(kdc_context, &kdc_time))) {
