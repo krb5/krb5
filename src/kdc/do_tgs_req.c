@@ -217,8 +217,12 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     if (errcode != 0)
         goto cleanup;
     sprinc = server->princ;
-    is_referral = krb5_is_tgs_principal(server->princ) &&
-        !krb5_principal_compare(kdc_context, tgs_server, server->princ);
+
+    /* If we got a cross-realm TGS which is not the requested server, we are
+     * issuing a referral (or alternate TGT, which we treat similarly). */
+    is_referral = is_cross_tgs_principal(server->princ) &&
+        !krb5_principal_compare(kdc_context, request->server, server->princ);
+
     if (is_referral) {
         /*
          * We may be issuing an alternate TGT or a referral to another realm,
