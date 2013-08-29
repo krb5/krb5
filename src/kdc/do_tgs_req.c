@@ -1027,7 +1027,7 @@ find_alternate_tgs(kdc_realm_t *kdc_active_realm, krb5_principal princ,
     while (--pl2 > plist) {
         tmp = *krb5_princ_realm(kdc_context, *pl2);
         krb5_princ_set_realm(kdc_context, *pl2,
-                             krb5_princ_realm(kdc_context, tgs_server));
+                             krb5_princ_realm(kdc_context, princ));
         retval = db_get_svc_princ(kdc_context, *pl2, 0, &server, status);
         krb5_princ_set_realm(kdc_context, *pl2, &tmp);
         if (retval == KRB5_KDB_NOENTRY)
