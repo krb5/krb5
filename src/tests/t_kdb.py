@@ -286,6 +286,14 @@ out = realm.run([klist])
 if 'tgtalias@KRBTEST.COM\n' not in out:
     fail('After fetching tgtalias, klist is missing it')
 
+# Make sure aliases work in header tickets.
+realm.run_kadminl('modprinc -maxrenewlife "3 hours" user')
+realm.run_kadminl('modprinc -maxrenewlife "3 hours" krbtgt/KRBTEST.COM')
+realm.kinit(realm.user_princ, password('user'), ['-l', '1h', '-r', '2h'])
+realm.run([kvno, 'alias'])
+realm.kinit(realm.user_princ, flags=['-R', '-S', 'alias'])
+realm.klist(realm.user_princ, 'alias@KRBTEST.COM')
+
 realm.stop()
 
 # Briefly test dump and load.
