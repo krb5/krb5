@@ -223,23 +223,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     is_referral = is_cross_tgs_principal(server->princ) &&
         !krb5_principal_compare(kdc_context, request->server, server->princ);
 
-    if (is_referral) {
-        /*
-         * We may be issuing an alternate TGT or a referral to another realm,
-         * in which case we should use the canonical name in the reply.  XXX We
-         * should track the reply server separately instead of modifying
-         * request->server, but that requires a bunch of code changes.
-         */
-        krb5_free_principal(kdc_context, request->server);
-        request->server = NULL;
-        errcode = krb5_copy_principal(kdc_context, server->princ,
-                                      &request->server);
-        if (errcode != 0) {
-            status = "COPYING RESOLVED SERVER";
-            goto cleanup;
-        }
-    }
-
     if ((errcode = krb5_timeofday(kdc_context, &kdc_time))) {
         status = "TIME_OF_DAY";
         goto cleanup;
