@@ -270,8 +270,16 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
                                        &status);
     if (errcode)
         goto cleanup;
-    if (s4u_x509_user != NULL)
+    if (s4u_x509_user != NULL) {
         setflag(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION);
+        if (is_referral) {
+            /* The requesting server appears to no longer exist, and we found
+             * a referral instead.  Treat this as a server lookup failure. */
+            errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+            status = "LOOKING_UP_SERVER";
+            goto cleanup;
+        }
+    }
 
     errcode = decrypt_2ndtkt(kdc_active_realm, request, c_flags,
                              &stkt_server, &status);
@@ -1191,9 +1199,16 @@ search_sprinc(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
     krb5_error_code ret;
     krb5_principal princ = req->server;
     krb5_principal reftgs = NULL;
+    krb5_boolean allow_referral;
+
+    /* Do not allow referrals for u2u or ticket modification requests, because
+     * the server is supposed to match an already-issued ticket. */
+    allow_referral = !(req->kdc_options & NO_REFERRAL_OPTION);
+    if (!allow_referral)
+        flags &= ~KRB5_KDB_FLAG_CANONICALIZE;
 
     ret = db_get_svc_princ(kdc_context, princ, flags, server, status);
-    if (ret == 0 || ret != KRB5_KDB_NOENTRY)
+    if (ret == 0 || ret != KRB5_KDB_NOENTRY || !allow_referral)
         goto cleanup;
 
     if (!is_cross_tgs_principal(req->server)) {

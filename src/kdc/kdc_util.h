@@ -410,6 +410,10 @@ struct krb5_kdcpreauth_rock_st {
 
 #define NON_TGT_OPTION (KDC_OPT_FORWARDED | KDC_OPT_PROXY | KDC_OPT_RENEW | \
                         KDC_OPT_VALIDATE)
+
+/* TGS-REQ options which are not compatible with referrals */
+#define NO_REFERRAL_OPTION (NON_TGT_OPTION | KDC_OPT_ENC_TKT_IN_SKEY)
+
 int check_anon(kdc_realm_t *kdc_active_realm,
                krb5_principal client, krb5_principal server);
 int errcode_to_protocol(krb5_error_code code);
