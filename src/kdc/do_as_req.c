@@ -305,6 +305,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
         goto egress;
     }
 
+    if (kdc_fast_hide_client(state->rstate))
+        state->reply.client = (krb5_principal)krb5_anonymous_principal();
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP,
                                   &state->reply_encpart, 0,
                                   as_encrypting_key,
@@ -782,6 +784,8 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
     scratch = k5alloc(sizeof(*scratch), &retval);
     if (scratch == NULL)
         goto cleanup;
+    if (kdc_fast_hide_client(rstate) && errpkt.client != NULL)
+        errpkt.client = (krb5_principal)krb5_anonymous_principal();
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     if (retval)
         goto cleanup;

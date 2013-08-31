@@ -739,6 +739,8 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         goto cleanup;
     }
 
+    if (kdc_fast_hide_client(state))
+        reply.client = (krb5_principal)krb5_anonymous_principal();
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart,
                                   subkey ? 1 : 0,
                                   reply_key,
@@ -877,6 +879,8 @@ prepare_error_tgs (struct kdc_request_state *state,
     }
     if (fast_edata)
         errpkt.e_data = *fast_edata;
+    if (kdc_fast_hide_client(state) && errpkt.client != NULL)
+        errpkt.client = (krb5_principal)krb5_anonymous_principal();
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);
     krb5_free_data(kdc_context, e_data_asn1);

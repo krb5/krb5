@@ -516,3 +516,9 @@ kdc_preauth_get_cookie(struct kdc_request_state *state,
     *cookie = pa;
     return 0;
 }
+
+krb5_boolean
+kdc_fast_hide_client(struct kdc_request_state *state)
+{
+    return (state->fast_options & KRB5_FAST_OPTION_HIDE_CLIENT_NAMES) != 0;
+}
