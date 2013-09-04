@@ -1,9 +1,12 @@
 #!/usr/bin/python
 from k5test import *
 
-# Test krb5 negotiation under SPNEGO for all enctype configurations.
+# Test krb5 negotiation under SPNEGO for all enctype configurations.  Also
+# test IOV wrap/unwrap with and without SPNEGO.
 for realm in multipass_realms():
     realm.run(['./t_spnego','p:' + realm.host_princ, realm.keytab])
+    realm.run(['./t_iov', 'p:' + realm.host_princ])
+    realm.run(['./t_iov', '-s', 'p:' + realm.host_princ])
 
 ### Test acceptor name behavior.
 
