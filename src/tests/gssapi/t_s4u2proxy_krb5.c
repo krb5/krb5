@@ -54,16 +54,15 @@ main(int argc, char *argv[])
     krb5_boolean use_spnego = FALSE;
     krb5_ccache storage_ccache = NULL;
     krb5_principal client_princ = NULL;
-    OM_uint32 minor, major;
-    gss_buffer_desc buf = GSS_C_EMPTY_BUFFER, token = GSS_C_EMPTY_BUFFER;
+    OM_uint32 minor, major, flags;
+    gss_buffer_desc buf = GSS_C_EMPTY_BUFFER;
     gss_OID mech;
     gss_OID_set mechs;
     gss_name_t acceptor_name = GSS_C_NO_NAME, client_name = GSS_C_NO_NAME;
     gss_name_t service1_name = GSS_C_NO_NAME, service2_name = GSS_C_NO_NAME;
     gss_cred_id_t service1_cred = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t deleg_cred = GSS_C_NO_CREDENTIAL;
-    gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
-    gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
+    gss_ctx_id_t initiator_context, acceptor_context;
 
     /* Parse arguments. */
     if (argc >= 2 && strcmp(argv[1], "--spnego") == 0) {
@@ -95,26 +94,14 @@ main(int argc, char *argv[])
                              mechs, GSS_C_BOTH, &service1_cred, NULL, NULL);
     check_gsserr("gss_acquire_cred(service1)", major, minor);
 
-    /* Create initiator context and get the first token, using the client
-     * ccache. */
+    /* Establish contexts using the client ccache. */
     service1_name = import_name(service1);
     major = gss_krb5_ccache_name(&minor, client_ccname, NULL);
     check_gsserr("gss_krb5_ccache_name(1)", major, minor);
-    major = gss_init_sec_context(&minor, GSS_C_NO_CREDENTIAL,
-                                 &initiator_context, service1_name, mech,
-                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
-                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
-                                 GSS_C_NO_BUFFER, NULL, &token, NULL, NULL);
-    if (GSS_ERROR(major))
-        check_gsserr("gss_init_sec_context(1)", major, minor);
-
-    /* Pass the token to gss_accept_sec_context. */
-    major = gss_accept_sec_context(&minor, &acceptor_context,
-                                   service1_cred, &token,
-                                   GSS_C_NO_CHANNEL_BINDINGS, &client_name,
-                                   NULL, &buf, NULL, NULL, &deleg_cred);
-    check_gsserr("gss_accept_sec_context(1)", major, minor);
-    (void)gss_release_buffer(&minor, &token);
+    flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+    establish_contexts(mech, GSS_C_NO_CREDENTIAL, service1_cred, service1_name,
+                       flags, &initiator_context, &acceptor_context,
+                       &client_name, NULL, &deleg_cred);
 
     /* Display and remember the client principal. */
     major = gss_display_name(&minor, client_name, &buf, NULL);
@@ -143,25 +130,13 @@ main(int argc, char *argv[])
     (void)gss_delete_sec_context(&minor, &initiator_context, GSS_C_NO_BUFFER);
     (void)gss_delete_sec_context(&minor, &acceptor_context, GSS_C_NO_BUFFER);
 
-    /* Create initiator context and get the first token, using the storage
-     * ccache. */
+    /* Establish contexts using the storage ccache. */
     service2_name = import_name(service2);
     major = gss_krb5_ccache_name(&minor, storage_ccname, NULL);
     check_gsserr("gss_krb5_ccache_name(2)", major, minor);
-    major = gss_init_sec_context(&minor, GSS_C_NO_CREDENTIAL,
-                                 &initiator_context, service2_name, mech,
-                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
-                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
-                                 GSS_C_NO_BUFFER, NULL, &token, NULL, NULL);
-    check_gsserr("gss_init_sec_context(2)", major, minor);
-
-    /* Pass the token to gss_accept_sec_context. */
-    major = gss_accept_sec_context(&minor, &acceptor_context,
-                                   GSS_C_NO_CREDENTIAL, &token,
-                                   GSS_C_NO_CHANNEL_BINDINGS, &client_name,
-                                   NULL, &buf, NULL, NULL, &deleg_cred);
-    check_gsserr("gss_accept_sec_context(2)", major, minor);
-    (void)gss_release_buffer(&minor, &token);
+    establish_contexts(mech, GSS_C_NO_CREDENTIAL, GSS_C_NO_CREDENTIAL,
+                       service2_name, flags, &initiator_context,
+                       &acceptor_context, &client_name, NULL, &deleg_cred);
 
     major = gss_display_name(&minor, client_name, &buf, NULL);
     check_gsserr("gss_display_name(2)", major, minor);

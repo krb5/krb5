@@ -30,12 +30,11 @@
 
 /*
  * Test program for acceptor names, intended to be run from a Python test
- * script.  Performs a one-token gss_init_sec_context/gss_accept_sec_context
- * exchange with the default initiator name, a specified principal name as
- * target name, and a specified host-based name as acceptor name (or
- * GSS_C_NO_NAME if no acceptor name is given).  If the exchange is successful,
- * queries the context for the acceptor name and prints it.  If any call is
- * unsuccessful, displays an error message.  Exits with status 0 if all
+ * script.  Establishes contexts with the default initiator name, a specified
+ * principal name as target name, and a specified host-based name as acceptor
+ * name (or GSS_C_NO_NAME if no acceptor name is given).  If the exchange is
+ * successful, queries the context for the acceptor name and prints it.  If any
+ * call is unsuccessful, displays an error message.  Exits with status 0 if all
  * operations are successful, or 1 if not.
  *
  * Usage: ./t_accname targetname [acceptorname]
@@ -44,12 +43,11 @@
 int
 main(int argc, char *argv[])
 {
-    OM_uint32 minor, major;
+    OM_uint32 minor, major, flags;
     gss_cred_id_t acceptor_cred;
     gss_name_t target_name, acceptor_name = GSS_C_NO_NAME, real_acceptor_name;
-    gss_buffer_desc token, tmp, namebuf;
-    gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
-    gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
+    gss_buffer_desc namebuf;
+    gss_ctx_id_t initiator_context, acceptor_context;
 
     if (argc < 2 || argc > 3) {
         fprintf(stderr, "Usage: %s targetname [acceptorname]\n", argv[0]);
@@ -67,24 +65,10 @@ main(int argc, char *argv[])
                              &acceptor_cred, NULL, NULL);
     check_gsserr("gss_acquire_cred", major, minor);
 
-    /* Create krb5 initiator context and get the first token. */
-    token.value = NULL;
-    token.length = 0;
-    major = gss_init_sec_context(&minor, GSS_C_NO_CREDENTIAL,
-                                 &initiator_context, target_name,
-                                 (gss_OID)gss_mech_krb5,
-                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
-                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
-                                 GSS_C_NO_BUFFER, NULL, &token, NULL, NULL);
-    check_gsserr("gss_init_sec_context", major, minor);
-
-    /* Pass the token to gss_accept_sec_context. */
-    tmp.value = NULL;
-    tmp.length = 0;
-    major = gss_accept_sec_context(&minor, &acceptor_context, acceptor_cred,
-                                   &token, GSS_C_NO_CHANNEL_BINDINGS,
-                                   NULL, NULL, &tmp, NULL, NULL, NULL);
-    check_gsserr("gss_accept_sec_context", major, minor);
+    flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+    establish_contexts(&mech_krb5, GSS_C_NO_CREDENTIAL, acceptor_cred,
+                       target_name, flags, &initiator_context,
+                       &acceptor_context, NULL, NULL, NULL);
 
     major = gss_inquire_context(&minor, acceptor_context, NULL,
                                 &real_acceptor_name, NULL, NULL, NULL, NULL,
@@ -103,7 +87,5 @@ main(int argc, char *argv[])
     (void)gss_release_cred(&minor, &acceptor_cred);
     (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);
-    (void)gss_release_buffer(&minor, &token);
-    (void)gss_release_buffer(&minor, &tmp);
     return 0;
 }

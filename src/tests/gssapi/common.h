@@ -55,6 +55,13 @@ void errout(const char *msg);
  * 'p:principalname', or 'h:host@service' (or just 'h:service'). */
 gss_name_t import_name(const char *str);
 
+/* Establish contexts using gss_init_sec_context and gss_accept_sec_context. */
+void establish_contexts(gss_OID imech, gss_cred_id_t icred,
+                        gss_cred_id_t acred, gss_name_t tname, OM_uint32 flags,
+                        gss_ctx_id_t *ictx, gss_ctx_id_t *actx,
+                        gss_name_t *src_name, gss_OID *amech,
+                        gss_cred_id_t *deleg_cred);
+
 /* Display name as canonicalized to mech, preceded by tag. */
 void display_canon_name(const char *tag, gss_name_t name, gss_OID mech);
 

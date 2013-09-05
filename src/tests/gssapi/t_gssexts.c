@@ -110,12 +110,9 @@ init_accept_sec_context(gss_cred_id_t claimant_cred_handle,
                         gss_cred_id_t verifier_cred_handle,
                         gss_cred_id_t *deleg_cred_handle)
 {
-    OM_uint32 major, minor;
-    gss_buffer_desc token = GSS_C_EMPTY_BUFFER, tmp = GSS_C_EMPTY_BUFFER;
+    OM_uint32 major, minor, flags;
     gss_name_t source_name = GSS_C_NO_NAME, target_name = GSS_C_NO_NAME;
-    gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
-    gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
-    OM_uint32 time_rec;
+    gss_ctx_id_t initiator_context, acceptor_context;
     gss_OID mech;
 
     *deleg_cred_handle = GSS_C_NO_CREDENTIAL;
@@ -128,21 +125,11 @@ init_accept_sec_context(gss_cred_id_t claimant_cred_handle,
     mech = use_spnego ? &mech_spnego : &mech_krb5;
     display_oid("Target mech", mech);
 
-    major = gss_init_sec_context(&minor, claimant_cred_handle,
-                                 &initiator_context, target_name, mech,
-                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
-                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
-                                 GSS_C_NO_BUFFER, NULL, &token, NULL,
-                                 &time_rec);
-    (void)gss_release_name(&minor, &target_name);
-    check_gsserr("gss_init_sec_context", major, minor);
-
-    major = gss_accept_sec_context(&minor, &acceptor_context,
-                                   verifier_cred_handle, &token,
-                                   GSS_C_NO_CHANNEL_BINDINGS, &source_name,
-                                   NULL, &tmp, NULL, &time_rec,
-                                   deleg_cred_handle);
-    check_gsserr("gss_accept_sec_context", major, minor);
+    flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+    establish_contexts(mech, claimant_cred_handle, verifier_cred_handle,
+                       target_name, flags, &initiator_context,
+                       &acceptor_context, &source_name, NULL,
+                       deleg_cred_handle);
 
     test_prf(initiator_context, acceptor_context, GSS_C_PRF_KEY_FULL);
     test_prf(initiator_context, acceptor_context, GSS_C_PRF_KEY_PARTIAL);
@@ -150,8 +137,6 @@ init_accept_sec_context(gss_cred_id_t claimant_cred_handle,
     (void)gss_release_name(&minor, &source_name);
     (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);
     (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
-    (void)gss_release_buffer(&minor, &token);
-    (void)gss_release_buffer(&minor, &tmp);
 }
 
 static void

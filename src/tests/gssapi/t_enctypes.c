@@ -38,14 +38,13 @@
 #include "common.h"
 
 /*
- * This test program performs a gss_init_sec_context/gss_accept_sec_context
- * exchange with the krb5 mech, the default initiator name, a specified
- * principal name as target name, and the default acceptor name.  Before the
- * exchange, gss_set_allowable_enctypes is called for the initiator and the
- * acceptor cred if requested.  If the exchange is successful, the resulting
- * contexts are exported with gss_krb5_export_lucid_sec_context, checked for
- * mismatches, and the GSS protocol and keys are displayed.  Exits with status
- * 0 if all operations are successful, or 1 if not.
+ * This test program establishes contexts with the krb5 mech, the default
+ * initiator name, a specified target name, and the default acceptor name.
+ * Before the exchange, gss_set_allowable_enctypes is called for the initiator
+ * and the acceptor cred if requested.  If the exchange is successful, the
+ * resulting contexts are exported with gss_krb5_export_lucid_sec_context,
+ * checked for mismatches, and the GSS protocol and keys are displayed.  Exits
+ * with status 0 if all operations are successful, or 1 if not.
  *
  * Usage: ./t_enctypes [-i initenctypes] [-a accenctypes] targetname
  */
@@ -87,8 +86,7 @@ main(int argc, char *argv[])
     OM_uint32 minor, major, flags;
     gss_name_t tname;
     gss_cred_id_t icred = GSS_C_NO_CREDENTIAL, acred = GSS_C_NO_CREDENTIAL;
-    gss_ctx_id_t ictx = GSS_C_NO_CONTEXT, actx = GSS_C_NO_CONTEXT;
-    gss_buffer_desc itok, atok, tmp;
+    gss_ctx_id_t ictx, actx;
     gss_krb5_lucid_context_v1_t *ilucid, *alucid;
     gss_krb5_rfc1964_keydata_t *i1964, *a1964;
     gss_krb5_cfx_keydata_t *icfx, *acfx;
@@ -141,38 +139,9 @@ main(int argc, char *argv[])
         check_gsserr("gss_krb5_set_allowable_enctypes(acc)", major, minor);
     }
 
-    /* Create initiator context and get the first token. */
-    itok.value = NULL;
-    itok.length = 0;
     flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG | GSS_C_MUTUAL_FLAG;
-    major = gss_init_sec_context(&minor, icred, &ictx, tname, &mech_krb5,
-                                 flags, GSS_C_INDEFINITE,
-                                 GSS_C_NO_CHANNEL_BINDINGS, GSS_C_NO_BUFFER,
-                                 NULL, &itok, NULL, NULL);
-    check_gsserr("gss_init_sec_context(1)", major, minor);
-    if (major != GSS_S_CONTINUE_NEEDED)
-        errout("gss_init_sec_context(1) unexpected complete");
-
-    /* Pass the initiator token to gss_accept_sec_context. */
-    atok.value = NULL;
-    atok.length = 0;
-    major = gss_accept_sec_context(&minor, &actx, acred, &itok,
-                                   GSS_C_NO_CHANNEL_BINDINGS, NULL, NULL,
-                                   &atok, NULL, NULL, NULL);
-    check_gsserr("gss_accept_sec_context", major, minor);
-    if (major != GSS_S_COMPLETE)
-        errout("gss_accept_sec_context unexpected continue");
-
-    /* Pass the return token to gss_init_sec_context again. */
-    tmp.value = NULL;
-    tmp.length = 0;
-    major = gss_init_sec_context(&minor, icred, &ictx, tname, &mech_krb5,
-                                 flags, GSS_C_INDEFINITE,
-                                 GSS_C_NO_CHANNEL_BINDINGS, &atok, NULL, &tmp,
-                                 NULL, NULL);
-    check_gsserr("gss_init_sec_context(2)", major, minor);
-    if (major != GSS_S_COMPLETE)
-        errout("gss_init_sec_context(2) unexpected continue");
+    establish_contexts(&mech_krb5, icred, acred, tname, flags, &ictx, &actx,
+                       NULL, NULL, NULL);
 
     /* Export to lucid contexts. */
     major = gss_krb5_export_lucid_sec_context(&minor, &ictx, 1, &lptr);
@@ -220,9 +189,6 @@ main(int argc, char *argv[])
     (void)gss_release_cred(&minor, &acred);
     (void)gss_delete_sec_context(&minor, &ictx, NULL);
     (void)gss_delete_sec_context(&minor, &actx, NULL);
-    (void)gss_release_buffer(&minor, &itok);
-    (void)gss_release_buffer(&minor, &atok);
-    (void)gss_release_buffer(&minor, &tmp);
     (void)gss_krb5_free_lucid_sec_context(&minor, ilucid);
     (void)gss_krb5_free_lucid_sec_context(&minor, alucid);
     return 0;

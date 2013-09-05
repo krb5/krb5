@@ -64,7 +64,6 @@ main(int argc, char *argv[])
     gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
     gss_OID mech = GSS_C_NO_OID;
     gss_OID_set mechs = GSS_C_NO_OID_SET;
-    gss_buffer_desc token, tmp;
     char optchar;
 
     /* Parse arguments. */
@@ -110,17 +109,9 @@ main(int argc, char *argv[])
      * delegating credentials. */
     flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG | GSS_C_CONF_FLAG |
         GSS_C_INTEG_FLAG | GSS_C_DELEG_FLAG;
-    major = gss_init_sec_context(&minor, initiator_cred, &initiator_context,
-                                 target_name, mech, flags, GSS_C_INDEFINITE,
-                                 GSS_C_NO_CHANNEL_BINDINGS, GSS_C_NO_BUFFER,
-                                 NULL, &token, NULL, NULL);
-    check_gsserr("gss_init_sec_context", major, minor);
-
-    major = gss_accept_sec_context(&minor, &acceptor_context, acceptor_cred,
-                                   &token, GSS_C_NO_CHANNEL_BINDINGS,
-                                   NULL, NULL, &tmp, NULL, NULL,
-                                   &delegated_cred);
-    check_gsserr("gss_accept_sec_context", major, minor);
+    establish_contexts(mech, initiator_cred, acceptor_cred, target_name, flags,
+                       &initiator_context, &acceptor_context, NULL, NULL,
+                       &delegated_cred);
 
     /* Import, release, export, and store delegated creds */
     export_import_cred(&delegated_cred);
@@ -136,7 +127,5 @@ main(int argc, char *argv[])
     (void)gss_release_cred(&minor, &delegated_cred);
     (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);
-    (void)gss_release_buffer(&minor, &token);
-    (void)gss_release_buffer(&minor, &tmp);
     return 0;
 }

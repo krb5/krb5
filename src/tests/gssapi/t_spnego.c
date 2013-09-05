@@ -42,14 +42,12 @@
 int
 main(int argc, char *argv[])
 {
-    OM_uint32 minor, major;
+    OM_uint32 minor, major, flags;
     gss_cred_id_t verifier_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
     gss_buffer_desc token = GSS_C_EMPTY_BUFFER, tmp = GSS_C_EMPTY_BUFFER;
-    gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
-    gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
+    gss_ctx_id_t initiator_context, acceptor_context;
     gss_name_t target_name, source_name = GSS_C_NO_NAME;
-    OM_uint32 time_rec;
     gss_OID mech = GSS_C_NO_OID;
 
     if (argc < 2 || argc > 3) {
@@ -74,24 +72,15 @@ main(int argc, char *argv[])
     major = gss_set_neg_mechs(&minor, verifier_cred_handle, &mechset_krb5);
     check_gsserr("gss_set_neg_mechs", major, minor);
 
-    major = gss_init_sec_context(&minor, GSS_C_NO_CREDENTIAL,
-                                 &initiator_context, target_name, &mech_spnego,
-                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
-                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
-                                 GSS_C_NO_BUFFER, NULL, &token, NULL,
-                                 &time_rec);
-    check_gsserr("gss_init_sec_context", major, minor);
-    (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
-
-    major = gss_accept_sec_context(&minor, &acceptor_context,
-                                   verifier_cred_handle, &token,
-                                   GSS_C_NO_CHANNEL_BINDINGS, &source_name,
-                                   &mech, &tmp, NULL, &time_rec, NULL);
-    check_gsserr("gss_accept_sec_context", major, minor);
+    flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+    establish_contexts(&mech_spnego, GSS_C_NO_CREDENTIAL, verifier_cred_handle,
+                       target_name, flags, &initiator_context,
+                       &acceptor_context, &source_name, &mech, NULL);
 
     display_canon_name("Source name", source_name, &mech_krb5);
     display_oid("Source mech", mech);
 
+    (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);
     (void)gss_release_name(&minor, &source_name);
     (void)gss_release_name(&minor, &target_name);

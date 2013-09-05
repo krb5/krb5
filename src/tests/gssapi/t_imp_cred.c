@@ -45,11 +45,9 @@
 int
 main(int argc, char *argv[])
 {
-    OM_uint32 minor, major;
+    OM_uint32 minor, major, flags;
     gss_cred_id_t initiator_cred, acceptor_cred;
-    gss_buffer_desc token, tmp;
-    gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
-    gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
+    gss_ctx_id_t initiator_context, acceptor_context;
     gss_name_t target_name;
     krb5_context context = NULL;
     krb5_ccache cc;
@@ -85,24 +83,10 @@ main(int argc, char *argv[])
     major = gss_krb5_import_cred(&minor, NULL, princ, kt, &acceptor_cred);
     check_gsserr("gss_krb5_import_cred (acceptor)", major, minor);
 
-    /* Create krb5 initiator context and get the first token. */
-    token.value = NULL;
-    token.length = 0;
-    major = gss_init_sec_context(&minor, initiator_cred,
-                                 &initiator_context, target_name,
-                                 (gss_OID)gss_mech_krb5,
-                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
-                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
-                                 GSS_C_NO_BUFFER, NULL, &token, NULL, NULL);
-    check_gsserr("gss_init_sec_context", major, minor);
-
-    /* Pass the token to gss_accept_sec_context. */
-    tmp.value = NULL;
-    tmp.length = 0;
-    major = gss_accept_sec_context(&minor, &acceptor_context, acceptor_cred,
-                                   &token, GSS_C_NO_CHANNEL_BINDINGS,
-                                   NULL, NULL, &tmp, NULL, NULL, NULL);
-    check_gsserr("gss_accept_sec_context", major, minor);
+    flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+    establish_contexts(&mech_krb5, initiator_cred, acceptor_cred, target_name,
+                       flags, &initiator_context, &acceptor_context, NULL,
+                       NULL, NULL);
 
     krb5_cc_close(context, cc);
     krb5_kt_close(context, kt);
@@ -113,7 +97,5 @@ main(int argc, char *argv[])
     (void)gss_release_cred(&minor, &acceptor_cred);
     (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);
-    (void)gss_release_buffer(&minor, &token);
-    (void)gss_release_buffer(&minor, &tmp);
     return 0;
 }

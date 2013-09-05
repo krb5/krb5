@@ -125,13 +125,10 @@ test_map_name_to_any(gss_name_t name)
 static void
 init_accept_sec_context(gss_cred_id_t verifier_cred_handle)
 {
-    OM_uint32 major, minor;
-    gss_buffer_desc token = GSS_C_EMPTY_BUFFER, tmp = GSS_C_EMPTY_BUFFER;
+    OM_uint32 major, minor, flags;
     gss_name_t source_name = GSS_C_NO_NAME, target_name = GSS_C_NO_NAME;
-    gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
-    gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
+    gss_ctx_id_t initiator_context, acceptor_context;
     gss_OID mech = use_spnego ? &mech_spnego : &mech_krb5;
-    OM_uint32 time_rec;
 
     major = gss_inquire_cred(&minor, verifier_cred_handle, &target_name, NULL,
                              NULL, NULL);
@@ -139,22 +136,10 @@ init_accept_sec_context(gss_cred_id_t verifier_cred_handle)
 
     display_canon_name("Target name", target_name, &mech_krb5);
 
-    major = gss_init_sec_context(&minor, verifier_cred_handle,
-                                 &initiator_context, target_name, mech,
-                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
-                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
-                                 GSS_C_NO_BUFFER, NULL, &token, NULL,
-                                 &time_rec);
-    check_gsserr("gss_init_sec_context", major, minor);
-
-    (void)gss_release_name(&minor, &target_name);
-    (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
-
-    major = gss_accept_sec_context(&minor, &acceptor_context,
-                                   verifier_cred_handle, &token,
-                                   GSS_C_NO_CHANNEL_BINDINGS, &source_name,
-                                   NULL, &tmp, NULL, &time_rec, NULL);
-    check_gsserr("gss_accept_sec_context", major, minor);
+    flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+    establish_contexts(mech, verifier_cred_handle, verifier_cred_handle,
+                       target_name, flags, &initiator_context,
+                       &acceptor_context, &source_name, NULL, NULL);
 
     display_canon_name("Source name", source_name, &mech_krb5);
     enumerate_attributes(source_name, 1);
@@ -162,9 +147,9 @@ init_accept_sec_context(gss_cred_id_t verifier_cred_handle)
     test_map_name_to_any(source_name);
 
     (void)gss_release_name(&minor, &source_name);
+    (void)gss_release_name(&minor, &target_name);
+    (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);
-    (void)gss_release_buffer(&minor, &token);
-    (void)gss_release_buffer(&minor, &tmp);
 }
 
 int
