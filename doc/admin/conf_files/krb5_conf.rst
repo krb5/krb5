@@ -185,6 +185,13 @@ The libdefaults section may contain any of the following relations:
     clients from taking advantage of new stronger enctypes when the
     libraries are upgraded.
 
+**dns_canonicalize_hostname**
+    Indicate whether name lookups will be used to canonicalize
+    hostnames for use in service principal names.  Setting this flag
+    to false can improve security by reducing reliance on DNS, but
+    means that short hostnames will not be canonicalized to
+    fully-qualified hostnames.  The default value is true.
+
 **dns_lookup_kdc**
     Indicate whether DNS SRV records should be used to locate the KDCs
     and other servers for a realm, if they are not listed in the
@@ -302,7 +309,8 @@ The libdefaults section may contain any of the following relations:
 **rdns**
     If this flag is true, reverse name lookup will be used in addition
     to forward name lookup to canonicalizing hostnames for use in
-    service principal names.  The default value is true.
+    service principal names.  If **dns_canonicalize_hostname** is set
+    to false, this flag has no effect.  The default value is true.
 
 **realm_try_domains**
     Indicate whether a host's domain components should be used to
