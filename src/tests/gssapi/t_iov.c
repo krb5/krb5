@@ -36,19 +36,6 @@
 #include <stddef.h>
 #include "common.h"
 
-/* Release all library-allocated buffers in iov. */
-static void
-release_iov(gss_iov_buffer_desc *iov, size_t len)
-{
-    OM_uint32 minor;
-    size_t i;
-
-    for (i = 0; i < len; i++) {
-        if (GSS_IOV_BUFFER_FLAGS(iov[i].type) & GSS_IOV_BUFFER_FLAG_ALLOCATED)
-            (void)gss_release_buffer(&minor, &iov[i].buffer);
-    }
-}
-
 /* Concatenate iov (except for sign-only buffers) into a contiguous token. */
 static void
 concat_iov(gss_iov_buffer_desc *iov, size_t iovlen, char **buf_out,
@@ -144,7 +131,7 @@ test_standard_wrap(gss_ctx_id_t ctx1, gss_ctx_id_t ctx2, int conf)
         errout("gss_unwrap_iov(std1) data buffer");
     if (memcmp(data, string1, iov[1].buffer.length) != 0)
         errout("gss_unwrap_iov(std1) decryption");
-    release_iov(iov, 4);
+    (void)gss_release_iov_buffer(&minor, iov, 4);
 
     /* Wrap a standard token and unwrap it using gss_unwrap(). */
     memcpy(data, string2, strlen(string2) + 1);
@@ -160,8 +147,8 @@ test_standard_wrap(gss_ctx_id_t ctx1, gss_ctx_id_t ctx2, int conf)
         memcmp(output.value, string2, output.length) != 0)
         errout("gss_unwrap(std2) decryption");
     (void)gss_release_buffer(&minor, &output);
+    (void)gss_release_iov_buffer(&minor, iov, 4);
     free(fulltoken);
-    release_iov(iov, 4);
 
     /* Wrap a standard token and unwrap it using a stream buffer. */
     memcpy(data, string3, strlen(string3) + 1);
@@ -181,8 +168,8 @@ test_standard_wrap(gss_ctx_id_t ctx1, gss_ctx_id_t ctx2, int conf)
     offset = (char *)stiov[1].buffer.value - fulltoken;
     if (offset < 0 || (size_t)offset > len)
         errout("gss_unwrap_iov(std3) offset");
+    (void)gss_release_iov_buffer(&minor, iov, 4);
     free(fulltoken);
-    release_iov(iov, 4);
 
     /* Wrap a token using gss_wrap and unwrap it using a stream buffer with
      * allocation and copying. */
@@ -206,7 +193,7 @@ test_standard_wrap(gss_ctx_id_t ctx1, gss_ctx_id_t ctx2, int conf)
         memcmp(stiov[1].buffer.value, string4, strlen(string4)) != 0)
         errout("gss_unwrap_iov(std4) decryption");
     (void)gss_release_buffer(&minor, &output);
-    release_iov(stiov, 2);
+    (void)gss_release_iov_buffer(&minor, stiov, 2);
 }
 
 /*
@@ -333,7 +320,7 @@ test_aead(gss_ctx_id_t ctx1, gss_ctx_id_t ctx2, int conf)
     if (offset < 0 || (size_t)offset > len)
         errout("gss_unwrap_iov(aead3) offset");
     free(fulltoken);
-    release_iov(iov, 4);
+    (void)gss_release_iov_buffer(&minor, iov, 4);
 
     /* Wrap a token using gss_wrap_aead and unwrap it using a stream buffer
      * with allocation and copying. */
@@ -361,7 +348,7 @@ test_aead(gss_ctx_id_t ctx1, gss_ctx_id_t ctx2, int conf)
         memcmp(stiov[2].buffer.value, wrap, strlen(wrap)) != 0)
         errout("gss_unwrap_iov(aead4) decryption");
     (void)gss_release_buffer(&minor, &output);
-    release_iov(stiov, 3);
+    (void)gss_release_iov_buffer(&minor, stiov, 3);
 }
 
 /* Create a DCE-style token and make sure we can unwrap it. */
@@ -415,7 +402,7 @@ test_dce(gss_ctx_id_t ctx1, gss_ctx_id_t ctx2, int conf)
         errout("gss_unwrap_iov(dce) sign2 buffer");
     if (memcmp(data, wrap, iov[1].buffer.length) != 0)
         errout("gss_unwrap_iov(dce) decryption");
-    release_iov(iov, 4);
+    (void)gss_release_iov_buffer(&minor, iov, 4);
 }
 
 int
