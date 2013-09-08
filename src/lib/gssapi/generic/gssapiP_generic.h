@@ -157,7 +157,6 @@ void g_make_token_header (const gss_OID_desc * mech, unsigned int body_size,
 
 /* flags for g_verify_token_header() */
 #define G_VFY_TOKEN_HDR_WRAPPER_REQUIRED        0x01
-#define G_VFY_TOKEN_HDR_IGNORE_SEQ_SIZE         0x02
 
 gss_int32 g_verify_token_header (const gss_OID_desc * mech,
                                  unsigned int *body_size,

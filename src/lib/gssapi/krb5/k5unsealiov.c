@@ -315,7 +315,6 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
     size_t input_length;
     unsigned int bodysize;
     int toktype2;
-    int vfyflags = 0;
 
     header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
     if (header == NULL) {
@@ -342,9 +341,6 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
         if (trailer != NULL)
             input_length += trailer->buffer.length;
     }
-
-    if (ctx->gss_flags & GSS_C_DCE_STYLE)
-        vfyflags |= G_VFY_TOKEN_HDR_IGNORE_SEQ_SIZE;
 
     code = g_verify_token_header(ctx->mech_used,
                                  &bodysize, &ptr, -1,
