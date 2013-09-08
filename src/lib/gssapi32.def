@@ -176,3 +176,7 @@ EXPORTS
 	gss_store_cred_into				@141
 	gss_export_cred					@142
 	gss_import_cred					@143
+; Added in 1.12
+	gss_get_mic_iov					@144
+	gss_get_mic_iov_length				@145
+	gss_verify_mic_iov				@146

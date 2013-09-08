@@ -403,6 +403,9 @@ gss_iov_buffer_t kg_locate_iov (gss_iov_buffer_desc *iov,
               int iov_count,
               OM_uint32 type);
 
+gss_iov_buffer_t kg_locate_header_iov(gss_iov_buffer_desc *iov, int iov_count,
+                                      int toktype);
+
 void kg_iov_msglen(gss_iov_buffer_desc *iov,
               int iov_count,
               size_t *data_length,
@@ -428,7 +431,8 @@ krb5_error_code kg_make_checksum_iov_v3(krb5_context context,
                 krb5_key key,
                 krb5_keyusage sign_usage,
                 gss_iov_buffer_desc *iov,
-                int iov_count);
+                int iov_count,
+                int toktype);
 
 krb5_error_code kg_verify_checksum_iov_v3(krb5_context context,
                 krb5_cksumtype type,
@@ -437,6 +441,7 @@ krb5_error_code kg_verify_checksum_iov_v3(krb5_context context,
                 krb5_keyusage sign_usage,
                 gss_iov_buffer_desc *iov,
                 int iov_count,
+                int toktype,
                 krb5_boolean *valid);
 
 OM_uint32 kg_seal_iov (OM_uint32 *minor_status,
@@ -462,7 +467,8 @@ OM_uint32 kg_seal_iov_length(OM_uint32 *minor_status,
            gss_qop_t qop_req,
            int *conf_state,
            gss_iov_buffer_desc *iov,
-           int iov_count);
+           int iov_count,
+           int toktype);
 
 krb5_cryptotype kg_translate_flag_iov(OM_uint32 type);
 
@@ -700,12 +706,36 @@ OM_uint32 KRB5_CALLCONV krb5_gss_get_mic
  gss_buffer_t                /* message_token */
 );
 
+OM_uint32 KRB5_CALLCONV krb5_gss_get_mic_iov
+(OM_uint32 *,                /* minor_status */
+ gss_ctx_id_t,               /* context_handle */
+ gss_qop_t,                  /* qop_req */
+ gss_iov_buffer_desc *,      /* iov */
+ int                         /* iov_count */
+);
+
+OM_uint32 KRB5_CALLCONV krb5_gss_get_mic_iov_length
+(OM_uint32 *,                /* minor_status */
+ gss_ctx_id_t,               /* context_handle */
+ gss_qop_t,                  /* qop_req */
+ gss_iov_buffer_desc *,      /* iov */
+ int                         /* iov_count */
+);
+
 OM_uint32 KRB5_CALLCONV krb5_gss_verify_mic
 (OM_uint32 *,           /* minor_status */
  gss_ctx_id_t,               /* context_handle */
  gss_buffer_t,               /* message_buffer */
  gss_buffer_t,               /* message_token */
  gss_qop_t *                 /* qop_state */
+);
+
+OM_uint32 KRB5_CALLCONV krb5_gss_verify_mic_iov
+(OM_uint32 *,                /* minor_status */
+ gss_ctx_id_t,               /* context_handle */
+ gss_qop_t *,                /* qop_state */
+ gss_iov_buffer_desc *,      /* iov */
+ int                         /* iov_count */
 );
 
 OM_uint32 KRB5_CALLCONV krb5_gss_wrap

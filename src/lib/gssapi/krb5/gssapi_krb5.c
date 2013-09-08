@@ -896,6 +896,12 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_acquire_cred_with_password,
     krb5_gss_export_cred,
     krb5_gss_import_cred,
+    NULL,               /* import_sec_context_by_mech */
+    NULL,               /* import_name_by_mech */
+    NULL,               /* import_cred_by_mech */
+    krb5_gss_get_mic_iov,
+    krb5_gss_verify_mic_iov,
+    krb5_gss_get_mic_iov_length,
 };
 
 #ifdef _GSS_STATIC_LINK

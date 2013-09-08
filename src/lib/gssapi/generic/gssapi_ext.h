@@ -238,6 +238,7 @@ typedef struct gss_iov_buffer_desc_struct {
 #define GSS_IOV_BUFFER_TYPE_PADDING	    9	/* Padding */
 #define GSS_IOV_BUFFER_TYPE_STREAM	    10	/* Complete wrap token */
 #define GSS_IOV_BUFFER_TYPE_SIGN_ONLY	    11	/* Sign only packet data */
+#define GSS_IOV_BUFFER_TYPE_MIC_TOKEN	    12	/* MIC token destination */
 
 #define GSS_IOV_BUFFER_FLAG_MASK	    0xFFFF0000
 #define GSS_IOV_BUFFER_FLAG_ALLOCATE	    0x00010000	/* indicates GSS should allocate */
@@ -322,6 +323,46 @@ OM_uint32 KRB5_CALLCONV gss_wrap_iov_length
     int,		/* conf_req_flag */
     gss_qop_t,		/* qop_req */
     int *,		/* conf_state */
+    gss_iov_buffer_desc *, /* iov */
+    int);		/* iov_count */
+
+/*
+ * Produce a GSSAPI MIC token for a sequence of buffers.  All SIGN_ONLY and
+ * DATA buffers will be signed, in the order they appear.  One MIC_TOKEN buffer
+ * must be included for the result.  Suitable space should be provided for the
+ * MIC_TOKEN buffer by calling gss_get_mic_iov_length, or the ALLOCATE flag
+ * should be set on that buffer.  If the ALLOCATE flag is used, use
+ * gss_release_iov_buffer to free the allocated buffer within the iov list when
+ * it is no longer needed.
+ */
+OM_uint32 KRB5_CALLCONV gss_get_mic_iov
+(
+    OM_uint32 *,	/* minor_status */
+    gss_ctx_id_t,	/* context_handle */
+    gss_qop_t,		/* qop_req */
+    gss_iov_buffer_desc *, /* iov */
+    int);		/* iov_count */
+
+/*
+ * Query the MIC_TOKEN buffer length within the iov list.
+ */
+OM_uint32 KRB5_CALLCONV gss_get_mic_iov_length(
+    OM_uint32 *,	/* minor_status */
+    gss_ctx_id_t,	/* context_handle */
+    gss_qop_t,		/* qop_req */
+    gss_iov_buffer_desc *, /* iov */
+    int);		/* iov_count */
+
+/*
+ * Verify the MIC_TOKEN buffer within the iov list against the SIGN_ONLY and
+ * DATA buffers in the order they appear.  Return values are the same as for
+ * gss_verify_mic.
+ */
+OM_uint32 KRB5_CALLCONV gss_verify_mic_iov
+(
+    OM_uint32 *,	/* minor_status */
+    gss_ctx_id_t,	/* context_handle */
+    gss_qop_t *,	/* qop_state */
     gss_iov_buffer_desc *, /* iov */
     int);		/* iov_count */
 

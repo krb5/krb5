@@ -351,6 +351,91 @@ test_aead(gss_ctx_id_t ctx1, gss_ctx_id_t ctx2, int conf)
     (void)gss_release_iov_buffer(&minor, stiov, 3);
 }
 
+/*
+ * Get a MIC for sign1, sign2, and sign3 using the caller-provided array iov,
+ * which must have space for four elements, and the caller-provided buffer
+ * data, which must be big enough for the MIC.  If data is NULL, the library
+ * will be asked to allocate the MIC buffer.  The MIC will be located in
+ * iov[3].buffer.
+ */
+static void
+mic(gss_ctx_id_t ctx, const char *sign1, const char *sign2, const char *sign3,
+    gss_iov_buffer_desc *iov, char *data)
+{
+    OM_uint32 minor, major;
+    krb5_boolean allocated;
+
+    /* Lay out iov array. */
+    iov[0].type = GSS_IOV_BUFFER_TYPE_DATA;
+    iov[0].buffer.value = (char *)sign1;
+    iov[0].buffer.length = strlen(sign1);
+    iov[1].type = GSS_IOV_BUFFER_TYPE_SIGN_ONLY;
+    iov[1].buffer.value = (char *)sign2;
+    iov[1].buffer.length = strlen(sign2);
+    iov[2].type = GSS_IOV_BUFFER_TYPE_SIGN_ONLY;
+    iov[2].buffer.value = (char *)sign3;
+    iov[2].buffer.length = strlen(sign3);
+    iov[3].type = GSS_IOV_BUFFER_TYPE_MIC_TOKEN;
+    if (data == NULL) {
+        /* Ask the library to allocate the MIC buffer. */
+        iov[3].type |= GSS_IOV_BUFFER_FLAG_ALLOCATE;
+    } else {
+        /* Get the MIC length and use the caller-provided buffer. */
+        major = gss_get_mic_iov_length(&minor, ctx, GSS_C_QOP_DEFAULT, iov, 4);
+        check_gsserr("gss_get_mic_iov_length", major, minor);
+        iov[3].buffer.value = data;
+    }
+    major = gss_get_mic_iov(&minor, ctx, GSS_C_QOP_DEFAULT, iov, 4);
+    check_gsserr("gss_get_mic_iov", major, minor);
+    allocated = (GSS_IOV_BUFFER_FLAGS(iov[3].type) &
+                 GSS_IOV_BUFFER_FLAG_ALLOCATED) != 0;
+    if (allocated != (data == NULL))
+        errout("gss_get_mic_iov allocated");
+}
+
+static void
+test_mic(gss_ctx_id_t ctx1, gss_ctx_id_t ctx2)
+{
+    OM_uint32 major, minor;
+    gss_iov_buffer_desc iov[4];
+    gss_qop_t qop;
+    gss_buffer_desc concatbuf, micbuf;
+    const char *sign1 = "Data and sign-only ";
+    const char *sign2 = "buffers are treated ";
+    const char *sign3 = "equally by gss_get_mic_iov";
+    char concat[1024], data[1024];
+
+    (void)snprintf(concat, sizeof(concat), "%s%s%s", sign1, sign2, sign3);
+    concatbuf.value = concat;
+    concatbuf.length = strlen(concat);
+
+    /* MIC with a caller-provided buffer and verify with the IOV array. */
+    mic(ctx1, sign1, sign2, sign3, iov, data);
+    major = gss_verify_mic_iov(&minor, ctx2, &qop, iov, 4);
+    check_gsserr("gss_verify_mic_iov(mic1)", major, minor);
+    if (qop != GSS_C_QOP_DEFAULT)
+        errout("gss_verify_mic_iov(mic1) qop");
+
+    /* MIC with an allocated buffer and verify with gss_verify_mic. */
+    mic(ctx1, sign1, sign2, sign3, iov, NULL);
+    major = gss_verify_mic(&minor, ctx2, &concatbuf, &iov[3].buffer, &qop);
+    check_gsserr("gss_verify_mic(mic2)", major, minor);
+    if (qop != GSS_C_QOP_DEFAULT)
+        errout("gss_verify_mic(mic2) qop");
+    (void)gss_release_iov_buffer(&minor, iov, 4);
+
+    /* MIC with gss_c_get_mic and verify using the IOV array (which is still
+     * mostly set up from the last call to mic(). */
+    major = gss_get_mic(&minor, ctx1, GSS_C_QOP_DEFAULT, &concatbuf, &micbuf);
+    check_gsserr("gss_get_mic(mic3)", major, minor);
+    iov[3].buffer = micbuf;
+    major = gss_verify_mic_iov(&minor, ctx2, &qop, iov, 4);
+    check_gsserr("gss_verify_mic_iov(mic3)", major, minor);
+    if (qop != GSS_C_QOP_DEFAULT)
+        errout("gss_verify_mic_iov(mic3) qop");
+    (void)gss_release_buffer(&minor, &micbuf);
+}
+
 /* Create a DCE-style token and make sure we can unwrap it. */
 static void
 test_dce(gss_ctx_id_t ctx1, gss_ctx_id_t ctx2, int conf)
@@ -439,6 +524,10 @@ main(int argc, char *argv[])
     test_aead(ictx, actx, 1);
     test_aead(actx, ictx, 0);
     test_aead(actx, ictx, 1);
+
+    /* Test MIC tokens. */
+    test_mic(ictx, actx);
+    test_mic(actx, ictx);
 
     /* Test DCE wrapping with DCE-style contexts. */
     (void)gss_delete_sec_context(&minor, &ictx, NULL);

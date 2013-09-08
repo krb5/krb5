@@ -57,12 +57,10 @@ kg_unseal_v1_iov(krb5_context context,
     size_t sumlen;
     krb5_keyusage sign_usage = KG_USAGE_SIGN;
 
-    assert(toktype == KG_TOK_WRAP_MSG);
-
     md5cksum.length = cksum.length = 0;
     md5cksum.contents = cksum.contents = NULL;
 
-    header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
+    header = kg_locate_header_iov(iov, iov_count, toktype);
     assert(header != NULL);
 
     trailer = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_TRAILER);
@@ -316,7 +314,7 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
     unsigned int bodysize;
     int toktype2;
 
-    header = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_HEADER);
+    header = kg_locate_header_iov(iov, iov_count, toktype);
     if (header == NULL) {
         *minor_status = EINVAL;
         return GSS_S_FAILURE;
@@ -328,7 +326,8 @@ kg_unseal_iov_token(OM_uint32 *minor_status,
     ptr = (unsigned char *)header->buffer.value;
     input_length = header->buffer.length;
 
-    if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0) {
+    if ((ctx->gss_flags & GSS_C_DCE_STYLE) == 0 &&
+        toktype == KG_TOK_WRAP_MSG) {
         size_t data_length, assoc_data_length;
 
         kg_iov_msglen(iov, iov_count, &data_length, &assoc_data_length);
@@ -655,8 +654,7 @@ krb5_gss_unwrap_iov(OM_uint32 *minor_status,
     return major_status;
 }
 
-#if 0
-OM_uint32
+OM_uint32 KRB5_CALLCONV
 krb5_gss_verify_mic_iov(OM_uint32 *minor_status,
                         gss_ctx_id_t context_handle,
                         gss_qop_t *qop_state,
@@ -667,8 +665,7 @@ krb5_gss_verify_mic_iov(OM_uint32 *minor_status,
 
     major_status = kg_unseal_iov(minor_status, context_handle,
                                  NULL, qop_state,
-                                 iov, iov_count, KG_TOK_WRAP_MSG);
+                                 iov, iov_count, KG_TOK_MIC_MSG);
 
     return major_status;
 }
-#endif

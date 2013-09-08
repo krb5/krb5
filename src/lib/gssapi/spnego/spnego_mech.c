@@ -280,6 +280,12 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_acquire_cred_with_password,
 	spnego_gss_export_cred,
 	spnego_gss_import_cred,
+	NULL,				/* gssspi_import_sec_context_by_mech */
+	NULL,				/* gssspi_import_name_by_mech */
+	NULL,				/* gssspi_import_cred_by_mech */
+	spnego_gss_get_mic_iov,
+	spnego_gss_verify_mic_iov,
+	spnego_gss_get_mic_iov_length
 };
 
 #ifdef _GSS_STATIC_LINK
@@ -2835,6 +2841,33 @@ spnego_gss_import_cred(OM_uint32 *minor_status,
 	spcred->neg_mechs = GSS_C_NULL_OID_SET;
 	*cred_handle = (gss_cred_id_t)spcred;
 	return (ret);
+}
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_get_mic_iov(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
+		       gss_qop_t qop_req, gss_iov_buffer_desc *iov,
+		       int iov_count)
+{
+    return gss_get_mic_iov(minor_status, context_handle, qop_req, iov,
+			   iov_count);
+}
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_verify_mic_iov(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
+			  gss_qop_t *qop_state, gss_iov_buffer_desc *iov,
+			  int iov_count)
+{
+    return gss_verify_mic_iov(minor_status, context_handle, qop_state, iov,
+			      iov_count);
+}
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_get_mic_iov_length(OM_uint32 *minor_status,
+			      gss_ctx_id_t context_handle, gss_qop_t qop_req,
+			      gss_iov_buffer_desc *iov, int iov_count)
+{
+    return gss_get_mic_iov_length(minor_status, context_handle, qop_req, iov,
+				  iov_count);
 }
 
 /*
