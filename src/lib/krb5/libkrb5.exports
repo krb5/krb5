@@ -25,6 +25,7 @@ decode_krb5_iakerb_finished
 decode_krb5_iakerb_header
 decode_krb5_kdc_req_body
 decode_krb5_otp_tokeninfo
+decode_krb5_kkdcp_message
 decode_krb5_pa_enc_ts
 decode_krb5_pa_for_user
 decode_krb5_pa_fx_fast_reply
@@ -72,6 +73,7 @@ encode_krb5_iakerb_finished
 encode_krb5_iakerb_header
 encode_krb5_kdc_req_body
 encode_krb5_otp_tokeninfo
+encode_krb5_kkdcp_message
 encode_krb5_pa_enc_ts
 encode_krb5_pa_for_user
 encode_krb5_pa_fx_fast_reply
@@ -113,6 +115,7 @@ k5_expand_path_tokens
 k5_expand_path_tokens_extra
 k5_free_algorithm_identifier
 k5_free_otp_tokeninfo
+k5_free_kkdcp_message
 k5_free_pa_otp_challenge
 k5_free_pa_otp_req
 k5_free_serverlist

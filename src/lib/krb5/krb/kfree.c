@@ -821,3 +821,13 @@ k5_free_pa_otp_req(krb5_context context, krb5_pa_otp_req *val)
     free(val->vendor.data);
     free(val);
 }
+
+void
+k5_free_kkdcp_message(krb5_context context, krb5_kkdcp_message *val)
+{
+    if (val == NULL)
+        return;
+    free(val->target_domain.data);
+    free(val->kerb_message.data);
+    free(val);
+}

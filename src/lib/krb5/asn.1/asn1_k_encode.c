@@ -1711,3 +1711,17 @@ static const struct atype_info *pa_otp_enc_req_fields[] = {
 };
 DEFSEQTYPE(pa_otp_enc_req, krb5_data, pa_otp_enc_req_fields);
 MAKE_CODEC(krb5_pa_otp_enc_req, pa_otp_enc_req);
+
+DEFFIELD(kkdcp_message_0, krb5_kkdcp_message,
+         kerb_message, 0, ostring_data);
+DEFFIELD(kkdcp_message_1, krb5_kkdcp_message,
+         target_domain, 1, opt_gstring_data);
+DEFFIELD(kkdcp_message_2, krb5_kkdcp_message,
+         dclocator_hint, 2, opt_int32);
+static const struct atype_info *kkdcp_message_fields[] = {
+    &k5_atype_kkdcp_message_0, &k5_atype_kkdcp_message_1,
+    &k5_atype_kkdcp_message_2
+};
+DEFSEQTYPE(kkdcp_message, krb5_kkdcp_message,
+           kkdcp_message_fields);
+MAKE_CODEC(krb5_kkdcp_message, kkdcp_message);
