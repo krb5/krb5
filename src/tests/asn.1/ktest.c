@@ -933,6 +933,21 @@ ktest_make_sample_ldap_seqof_key_data(ldap_seqof_key_data *p)
 }
 #endif
 
+void
+ktest_make_sample_kkdcp_message(krb5_kkdcp_message *p)
+{
+    krb5_kdc_req req;
+    krb5_data *message;
+
+    ktest_make_sample_kdc_req(&req);
+    req.msg_type = KRB5_AS_REQ;
+    encode_krb5_as_req(&req, &message);
+    p->kerb_message = *message;
+    free(message);
+    ktest_empty_kdc_req(&req);
+    ktest_make_sample_data(&(p->target_domain));
+    p->dclocator_hint = 0;
+}
 
 /****************************************************************/
 /* destructors */
@@ -1731,3 +1746,11 @@ ktest_empty_ldap_seqof_key_data(krb5_context ctx, ldap_seqof_key_data *p)
     free(p->key_data);
 }
 #endif
+
+void
+ktest_empty_kkdcp_message(krb5_kkdcp_message *p)
+{
+    ktest_empty_data(&p->kerb_message);
+    ktest_empty_data(&p->target_domain);
+    p->dclocator_hint = -1;
+}

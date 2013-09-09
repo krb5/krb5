@@ -1039,3 +1039,15 @@ ktest_equal_reply_key_pack_draft9(krb5_reply_key_pack_draft9 *ref,
 }
 
 #endif /* not DISABLE_PKINIT */
+
+int
+ktest_equal_kkdcp_message(krb5_kkdcp_message *ref, krb5_kkdcp_message *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && data_eq(ref->kerb_message, var->kerb_message);
+    p = p && data_eq(ref->target_domain, var->target_domain);
+    p = p && (ref->dclocator_hint == var->dclocator_hint);
+    return p;
+}
