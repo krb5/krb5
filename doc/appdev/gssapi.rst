@@ -218,6 +218,301 @@ case, the contents of the credential cache are serialized, so that the
 resulting token may be imported even if the original memory credential
 cache no longer exists.
 
+
+AEAD message wrapping
+---------------------
+
+The following GSSAPI extensions (declared in
+``<gssapi/gssapi_ext.h>``) can be used to wrap and unwrap messages
+with additional "associated data" which is integrity-checked but is
+not included in the output buffer::
+
+    OM_uint32 gss_wrap_aead(OM_uint32 *minor_status,
+                            gss_ctx_id_t context_handle,
+                            int conf_req_flag, gss_qop_t qop_req,
+                            gss_buffer_t input_assoc_buffer,
+                            gss_buffer_t input_payload_buffer,
+                            int *conf_state,
+                            gss_buffer_t output_message_buffer);
+
+    OM_uint32 gss_unwrap_aead(OM_uint32 *minor_status,
+                              gss_ctx_id_t context_handle,
+                              gss_buffer_t input_message_buffer,
+                              gss_buffer_t input_assoc_buffer,
+                              gss_buffer_t output_payload_buffer,
+                              int *conf_state,
+                              gss_qop_t *qop_state);
+
+Wrap tokens created with gss_wrap_aead will successfully unwrap only
+if the same *input_assoc_buffer* contents are presented to
+gss_unwrap_aead.
+
+
+IOV message wrapping
+--------------------
+
+The following extensions (declared in ``<gssapi/gssapi_ext.h>``) can
+be used for in-place encryption, fine-grained control over wrap token
+layout, and for constructing wrap tokens compatible with Microsoft DCE
+RPC::
+
+    typedef struct gss_iov_buffer_desc_struct {
+        OM_uint32 type;
+        gss_buffer_desc buffer;
+    } gss_iov_buffer_desc, *gss_iov_buffer_t;
+
+    OM_uint32 gss_wrap_iov(OM_uint32 *minor_status,
+                           gss_ctx_id_t context_handle,
+                           int conf_req_flag, gss_qop_t qop_req,
+                           int *conf_state,
+                           gss_iov_buffer_desc *iov, int iov_count);
+
+    OM_uint32 gss_unwrap_iov(OM_uint32 *minor_status,
+                             gss_ctx_id_t context_handle,
+                             int *conf_state, gss_qop_t *qop_state,
+                             gss_iov_buffer_desc *iov, int iov_count);
+
+    OM_uint32 gss_wrap_iov_length(OM_uint32 *minor_status,
+                                  gss_ctx_id_t context_handle,
+                                  int conf_req_flag,
+                                  gss_qop_t qop_req, int *conf_state,
+                                  gss_iov_buffer_desc *iov,
+                                  int iov_count);
+
+    OM_uint32 gss_release_iov_buffer(OM_uint32 *minor_status,
+                                     gss_iov_buffer_desc *iov,
+                                     int iov_count);
+
+The caller of gss_wrap_iov provides an array of gss_iov_buffer_desc
+structures, each containing a type and a gss_buffer_desc structure.
+Valid types include:
+
+* **GSS_C_BUFFER_TYPE_DATA**: A data buffer to be included in the
+  token, and to be encrypted or decrypted in-place if the token is
+  confidentiality-protected.
+
+* **GSS_C_BUFFER_TYPE_HEADER**: The GSSAPI wrap token header and
+  underlying cryptographic header.
+
+* **GSS_C_BUFFER_TYPE_TRAILER**: The cryptographic trailer, if one is
+  required.
+
+* **GSS_C_BUFFER_TYPE_PADDING**: Padding to be combined with the data
+  during encryption and decryption.  (The implementation may choose to
+  place padding in the trailer buffer, in which case it will set the
+  padding buffer length to 0.)
+
+* **GSS_C_BUFFER_TYPE_STREAM**: For unwrapping only, a buffer
+  containing a complete wrap token in standard format to be unwrapped.
+
+* **GSS_C_BUFFER_TYPE_SIGN_ONLY**: A buffer to be included in the
+  token's integrity protection checksum, but not to be encrypted or
+  included in the token itself.
+
+For gss_wrap_iov, the IOV list should contain one HEADER buffer,
+followed by zero or more SIGN_ONLY buffers, followed by one or more
+DATA buffers, followed by a TRAILER buffer.  The memory pointed to by
+the buffers is not required to be contiguous or in any particular
+order.  If *conf_req_flag* is true, DATA buffers will be encrypted
+in-place, while SIGN_ONLY buffers will not be modified.
+
+The type of an output buffer may be combined with
+**GSS_C_BUFFER_FLAG_ALLOCATE** to request that gss_wrap_iov allocate
+the buffer contents.  If gss_wrap_iov allocates a buffer, it sets the
+**GSS_C_BUFFER_FLAG_ALLOCATED** flag on the buffer type.
+gss_release_iov_buffer can be used to release all allocated buffers
+within an iov list and unset their allocated flags.  Here is an
+example of how gss_wrap_iov can be used with allocation requested
+(*ctx* is assumed to be a previously established gss_ctx_id_t)::
+
+    OM_uint32 major, minor;
+    gss_iov_buffer_desc iov[4];
+    char str[] = "message";
+
+    iov[0].type = GSS_IOV_BUFFER_TYPE_HEADER | GSS_IOV_BUFFER_FLAG_ALLOCATE;
+    iov[1].type = GSS_IOV_BUFFER_TYPE_DATA;
+    iov[1].buffer.value = str;
+    iov[1].buffer.length = strlen(str);
+    iov[2].type = GSS_IOV_BUFFER_TYPE_PADDING | GSS_IOV_BUFFER_FLAG_ALLOCATE;
+    iov[3].type = GSS_IOV_BUFFER_TYPE_TRAILER | GSS_IOV_BUFFER_FLAG_ALLOCATE;
+
+    major = gss_wrap_iov(&minor, ctx, 1, GSS_C_QOP_DEFAULT, NULL,
+                         iov, 4);
+    if (GSS_ERROR(major))
+        handle_error(major, minor);
+
+    /* Transmit or otherwise use resulting buffers. */
+
+    (void)gss_release_iov_buffer(&minor, iov, 4);
+
+If the caller does not choose to request buffer allocation by
+gss_wrap_iov, it should first call gss_wrap_iov_length to query the
+lengths of the HEADER, PADDING, and TRAILER buffers.  DATA buffers
+must be provided in the iov list so that padding length can be
+computed correctly, but the output buffers need not be initialized.
+Here is an example of using gss_wrap_iov_length and gss_wrap_iov:
+
+    OM_uint32 major, minor;
+    gss_iov_buffer_desc iov[4];
+    char str[1024] = "message", *ptr;
+
+    iov[0].type = GSS_IOV_BUFFER_TYPE_HEADER;
+    iov[1].type = GSS_IOV_BUFFER_TYPE_DATA;
+    iov[1].buffer.value = str;
+    iov[1].buffer.length = strlen(str);
+
+    iov[2].type = GSS_IOV_BUFFER_TYPE_PADDING;
+    iov[3].type = GSS_IOV_BUFFER_TYPE_TRAILER;
+
+    major = gss_wrap_iov_length(&minor, ctx, 1, GSS_C_QOP_DEFAULT,
+                                NULL, iov, 4);
+    if (GSS_ERROR(major))
+        handle_error(major, minor);
+    if (strlen(str) + iov[0].buffer.length + iov[2].buffer.length +
+        iov[3].buffer.length > sizeof(str))
+        handle_out_of_space_error();
+    ptr = str + strlen(str);
+    iov[0].buffer.value = ptr;
+    ptr += iov[0].buffer.length;
+    iov[2].buffer.value = ptr;
+    ptr += iov[2].buffer.length;
+    iov[3].buffer.value = ptr;
+
+    major = gss_wrap_iov(&minor, ctx, 1, GSS_C_QOP_DEFAULT, NULL,
+                         iov, 4);
+    if (GSS_ERROR(major))
+        handle_error(major, minor);
+
+If the context was established using the **GSS_C_DCE_STYLE** flag
+(described in :rfc:`4757`), wrap tokens compatible with Microsoft DCE
+RPC can be constructed.  In this case, the IOV list must include a
+SIGN_ONLY buffer, a DATA buffer, a second SIGN_ONLY buffer, and a
+HEADER buffer in that order (the order of the buffer contents remains
+arbitrary).  The application must pad the DATA buffer to a multiple of
+16 bytes as no padding or trailer buffer is used.
+
+gss_unwrap_iov may be called with an IOV list just like one which
+would be provided to gss_wrap_iov.  DATA buffers will be decrypted
+in-place if they were encrypted, and SIGN_ONLY buffers will not be
+modified.
+
+Alternatively, gss_unwrap_iov may be called with a single STREAM
+buffer, zero or more SIGN_ONLY buffers, and a single DATA buffer.  The
+STREAM buffer is interpreted as a complete wrap token.  The STREAM
+buffer will be modified in-place to decrypt its contents.  The DATA
+buffer will be initialized to point to the decrypted data within the
+STREAM buffer, unless it has the **GSS_C_BUFFER_FLAG_ALLOCATE** flag
+set, in which case it will be initialized with a copy of the decrypted
+data.  Here is an example (*token* and *token_len* are assumed to be a
+pre-existing pointer and length for a modifiable region of data)::
+
+    OM_uint32 major, minor;
+    gss_iov_buffer_desc iov[2];
+
+    iov[0].type = GSS_IOV_BUFFER_TYPE_STREAM;
+    iov[0].buffer.value = token;
+    iov[0].buffer.length = token_len;
+    iov[1].type = GSS_IOV_BUFFER_TYPE_DATA;
+    major = gss_unwrap_iov(&minor, ctx, NULL, NULL, iov, 2);
+    if (GSS_ERROR(major))
+        handle_error(major, minor);
+
+    /* Decrypted data is in iov[1].buffer, pointing to a subregion of
+     * token. */
+
+
+IOV MIC tokens
+--------------
+
+The following extensions (declared in ``<gssapi/gssapi_ext.h>``) can
+be used in release 1.12 or later to construct and verify MIC tokens
+using an IOV list::
+
+    OM_uint32 gss_get_mic_iov(OM_uint32 *minor_status,
+                              gss_ctx_id_t context_handle,
+                              gss_qop_t qop_req,
+                              gss_iov_buffer_desc *iov,
+                              int iov_count);
+
+    OM_uint32 gss_get_mic_iov_length(OM_uint32 *minor_status,
+                                     gss_ctx_id_t context_handle,
+                                     gss_qop_t qop_req,
+                                     gss_iov_buffer_desc *iov,
+                                     iov_count);
+
+    OM_uint32 gss_verify_mic_iov(OM_uint32 *minor_status,
+                                 gss_ctx_id_t context_handle,
+                                 gss_qop_t *qop_state,
+                                 gss_iov_buffer_desc *iov,
+                                 int iov_count);
+
+The caller of gss_get_mic_iov provides an array of gss_iov_buffer_desc
+structures, each containing a type and a gss_buffer_desc structure.
+Valid types include:
+
+* **GSS_C_BUFFER_TYPE_DATA** and **GSS_C_BUFFER_TYPE_SIGN_ONLY**: The
+  corresponding buffer for each of these types will be signed for the
+  MIC token, in the order provided.
+
+* **GSS_C_BUFFER_TYPE_MIC_TOKEN**: The GSSAPI MIC token.
+
+The type of the MIC_TOKEN buffer may be combined with
+**GSS_C_BUFFER_FLAG_ALLOCATE** to request that gss_get_mic_iov
+allocate the buffer contents.  If gss_get_mic_iov allocates the
+buffer, it sets the **GSS_C_BUFFER_FLAG_ALLOCATED** flag on the buffer
+type.  gss_release_iov_buffer can be used to release all allocated
+buffers within an iov list and unset their allocated flags.  Here is
+an example of how gss_get_mic_iov can be used with allocation
+requested (*ctx* is assumed to be a previously established
+gss_ctx_id_t)::
+
+    OM_uint32 major, minor;
+    gss_iov_buffer_desc iov[3];
+
+    iov[0].type = GSS_IOV_BUFFER_TYPE_DATA;
+    iov[0].buffer.value = "sign1";
+    iov[0].buffer.length = 5;
+    iov[1].type = GSS_IOV_BUFFER_TYPE_SIGN_ONLY;
+    iov[1].buffer.value = "sign2";
+    iov[1].buffer.length = 5;
+    iov[2].type = GSS_IOV_BUFFER_TYPE_MIC_TOKEN | GSS_IOV_BUFFER_FLAG_ALLOCATE;
+
+    major = gss_get_mic_iov(&minor, ctx, GSS_C_QOP_DEFAULT, iov, 3);
+    if (GSS_ERROR(major))
+        handle_error(major, minor);
+
+    /* Transmit or otherwise use iov[2].buffer. */
+
+    (void)gss_release_iov_buffer(&minor, iov, 3);
+
+If the caller does not choose to request buffer allocation by
+gss_get_mic_iov, it should first call gss_get_mic_iov_length to query
+the length of the MIC_TOKEN buffer.  Here is an example of using
+gss_get_mic_iov_length and gss_get_mic_iov:
+
+    OM_uint32 major, minor;
+    gss_iov_buffer_desc iov[2];
+    char data[1024];
+
+    iov[0].type = GSS_IOV_BUFFER_TYPE_MIC_TOKEN;
+    iov[1].type = GSS_IOV_BUFFER_TYPE_DATA;
+    iov[1].buffer.value = "message";
+    iov[1].buffer.length = 7;
+
+    major = gss_wrap_iov_length(&minor, ctx, 1, GSS_C_QOP_DEFAULT,
+                                NULL, iov, 2);
+    if (GSS_ERROR(major))
+        handle_error(major, minor);
+    if (iov[0].buffer.length > sizeof(data))
+        handle_out_of_space_error();
+    iov[0].buffer.value = data;
+
+    major = gss_wrap_iov(&minor, ctx, 1, GSS_C_QOP_DEFAULT, NULL,
+                         iov, 2);
+    if (GSS_ERROR(major))
+        handle_error(major, minor);
+
+
 .. _gss_accept_sec_context: http://tools.ietf.org/html/rfc2744.html#section-5.1
 .. _gss_acquire_cred: http://tools.ietf.org/html/rfc2744.html#section-5.2
 .. _gss_export_name: http://tools.ietf.org/html/rfc2744.html#section-5.13
