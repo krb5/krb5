@@ -30,7 +30,7 @@
  * version, which is 1.  Major version 1 has a current minor version number of
  * 1.
  *
- * Password quality plugin modules should define a function named
+ * Credential cache selection modules should define a function named
  * ccselect_<modulename>_initvt, matching the signature:
  *
  *   krb5_error_code
@@ -57,7 +57,7 @@
 #include <krb5/krb5.h>
 #include <krb5/plugin.h>
 
-/* An abstract type for password quality module data. */
+/* An abstract type for credential cache selection module data. */
 typedef struct krb5_ccselect_moddata_st *krb5_ccselect_moddata;
 
 #define KRB5_CCSELECT_PRIORITY_AUTHORITATIVE 2
@@ -93,7 +93,7 @@ typedef void
 
 /*** vtable declarations **/
 
-/* Password quality plugin vtable for major version 1. */
+/* Credential cache selection plugin vtable for major version 1. */
 typedef struct krb5_ccselect_vtable_st {
     const char *name;           /* Mandatory: name of module. */
     krb5_ccselect_init_fn init;
