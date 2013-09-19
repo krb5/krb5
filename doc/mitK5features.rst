@@ -20,7 +20,7 @@ License - :ref:`mitK5license`
 
 Releases:
     - Latest stable: http://web.mit.edu/kerberos/krb5-1.11/
-    - Supported: http://web.mit.edu/kerberos/krb5-1.10/ http://web.mit.edu/kerberos/krb5-1.9/
+    - Supported: http://web.mit.edu/kerberos/krb5-1.10/
     - Release cycle: 9 -- 12 months
 
 Supported platforms \/ OS distributions:
