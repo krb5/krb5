@@ -776,7 +776,7 @@ cleanup:
             got_err = 1;
         }
         errcode -= ERROR_TABLE_BASE_krb5;
-        if (errcode < 0 || errcode > 128)
+        if (errcode < 0 || errcode > KRB_ERR_MAX)
             errcode = KRB_ERR_GENERIC;
 
         retval = prepare_error_tgs(state, request, header_ticket, errcode,

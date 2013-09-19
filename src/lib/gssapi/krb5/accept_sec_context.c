@@ -1233,7 +1233,7 @@ fail:
         memset(&krb_error_data, 0, sizeof(krb_error_data));
 
         code -= ERROR_TABLE_BASE_krb5;
-        if (code < 0 || code > 128)
+        if (code < 0 || code > KRB_ERR_MAX)
             code = 60 /* KRB_ERR_GENERIC */;
 
         krb_error_data.error = code;

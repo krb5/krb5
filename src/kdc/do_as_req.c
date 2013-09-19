@@ -351,7 +351,7 @@ egress:
         }
         if (errcode != KRB5KDC_ERR_DISCARD) {
             errcode -= ERROR_TABLE_BASE_krb5;
-            if (errcode < 0 || errcode > 128)
+            if (errcode < 0 || errcode > KRB_ERR_MAX)
                 errcode = KRB_ERR_GENERIC;
 
             errcode = prepare_error_as(state->rstate, state->request,
