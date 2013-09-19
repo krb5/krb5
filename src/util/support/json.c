@@ -79,6 +79,7 @@
 #include <k5-buf.h>
 
 #define MAX_DECODE_DEPTH 64
+#define MIN_ALLOC_SLOT   16
 
 typedef void (*type_dealloc_fn)(void *val);
 
@@ -235,10 +236,10 @@ k5_json_array_add(k5_json_array array, k5_json_value val)
     size_t new_alloc;
 
     if (array->len >= array->allocated) {
-        /* Increase the number of slots by 50% (16 slots minimum). */
+        /* Increase the number of slots by 50% (MIN_ALLOC_SLOT minimum). */
         new_alloc = array->len + 1 + (array->len >> 1);
-        if (new_alloc < 16)
-            new_alloc = 16;
+        if (new_alloc < MIN_ALLOC_SLOT)
+            new_alloc = MIN_ALLOC_SLOT;
         ptr = realloc(array->values, new_alloc * sizeof(*array->values));
         if (ptr == NULL)
             return ENOMEM;
@@ -452,10 +453,10 @@ k5_json_object_set(k5_json_object obj, const char *key, k5_json_value val)
         return 0;
 
     if (obj->len >= obj->allocated) {
-        /* Increase the number of slots by 50% (16 slots minimum). */
+        /* Increase the number of slots by 50% (MIN_ALLOC_SLOT minimum). */
         new_alloc = obj->len + 1 + (obj->len >> 1);
-        if (new_alloc < 16)
-            new_alloc = 16;
+        if (new_alloc < MIN_ALLOC_SLOT)
+            new_alloc = MIN_ALLOC_SLOT;
         ptr = realloc(obj->entries, new_alloc * sizeof(*obj->entries));
         if (ptr == NULL)
             return ENOMEM;
