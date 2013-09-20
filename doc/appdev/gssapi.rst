@@ -350,7 +350,7 @@ gss_wrap_iov, it should first call gss_wrap_iov_length to query the
 lengths of the HEADER, PADDING, and TRAILER buffers.  DATA buffers
 must be provided in the iov list so that padding length can be
 computed correctly, but the output buffers need not be initialized.
-Here is an example of using gss_wrap_iov_length and gss_wrap_iov:
+Here is an example of using gss_wrap_iov_length and gss_wrap_iov::
 
     OM_uint32 major, minor;
     gss_iov_buffer_desc iov[4];
@@ -488,7 +488,7 @@ gss_ctx_id_t)::
 If the caller does not choose to request buffer allocation by
 gss_get_mic_iov, it should first call gss_get_mic_iov_length to query
 the length of the MIC_TOKEN buffer.  Here is an example of using
-gss_get_mic_iov_length and gss_get_mic_iov:
+gss_get_mic_iov_length and gss_get_mic_iov::
 
     OM_uint32 major, minor;
     gss_iov_buffer_desc iov[2];
