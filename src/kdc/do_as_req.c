@@ -516,18 +516,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         goto errout;
     }
     limit_string(state->cname);
-    if (!state->request->server) {
-        state->status = "NULL_SERVER";
-        errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
-        goto errout;
-    }
-    if ((errcode = krb5_unparse_name(kdc_context,
-                                     state->request->server,
-                                     &state->sname))) {
-        state->status = "UNPARSING_SERVER";
-        goto errout;
-    }
-    limit_string(state->sname);
 
     /*
      * We set KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY as a hint
@@ -575,6 +563,18 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         goto errout;
     }
 
+    if (!state->request->server) {
+        state->status = "NULL_SERVER";
+        errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+        goto errout;
+    }
+    if ((errcode = krb5_unparse_name(kdc_context,
+                                     state->request->server,
+                                     &state->sname))) {
+        state->status = "UNPARSING_SERVER";
+        goto errout;
+    }
+    limit_string(state->sname);
     s_flags = 0;
     setflag(s_flags, KRB5_KDB_FLAG_ALIAS_OK);
     if (isflagset(state->request->kdc_options, KDC_OPT_CANONICALIZE)) {
