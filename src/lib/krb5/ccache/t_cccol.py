@@ -1,6 +1,12 @@
 #!/usr/bin/python
 from k5test import *
 
+# Run the collection test program against each collection-enabled type.
+realm = K5Realm(create_kdb=False)
+realm.run(['./t_cccol', 'DIR:' + os.path.join(realm.testdir, 'cc')])
+realm.stop()
+
+# Test cursor semantics using real ccaches.
 realm = K5Realm(create_host=False)
 
 realm.addprinc('alice', password('alice'))

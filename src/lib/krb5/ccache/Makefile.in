@@ -66,6 +66,7 @@ SRCS=	$(srcdir)/ccbase.c \
 
 EXTRADEPSRCS= \
 	$(srcdir)/t_cc.c \
+	$(srcdir)/t_cccol.c \
 	$(srcdir)/t_cccursor.c
 
 ##DOS##OBJS=$(OBJS) $(OUTPRE)ccfns.$(OBJEXT)
@@ -103,6 +104,10 @@ T_CC_OBJS=t_cc.o
 t_cc: $(T_CC_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_cc $(T_CC_OBJS) $(KRB5_BASE_LIBS)
 
+T_CCCOL_OBJS = t_cccol.o
+t_cccol: $(T_CCCOL_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ $(T_CCCOL_OBJS) $(KRB5_BASE_LIBS)
+
 T_CCCURSOR_OBJS = t_cccursor.o
 t_cccursor: $(T_CCCURSOR_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ $(T_CCCURSOR_OBJS) $(KRB5_BASE_LIBS)
@@ -111,11 +116,11 @@ check-unix:: t_cc
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
 	$(RUN_SETUP) $(VALGRIND) ./t_cc
 
-check-pytests:: t_cccursor
+check-pytests:: t_cccursor t_cccol
 	$(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
 
 clean-unix::
-	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o
+	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o t_cccol t_cccol.o
 
 ##WIN32## $(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(top_srcdir)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
 
