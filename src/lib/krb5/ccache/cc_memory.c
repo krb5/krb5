@@ -513,44 +513,6 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
     return KRB5_OK;
 }
 
-/* Utility routine: Creates a random memory ccache name.
- * This algorithm was selected because it creates readable
- * random ccache names in a fixed size buffer.  */
-
-krb5_error_code
-krb5int_random_string (krb5_context context, char *string, unsigned int length)
-{
-    static const unsigned char charlist[] =
-        "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    krb5_error_code err = 0;
-    unsigned char *bytes = NULL;
-    unsigned int bytecount = length - 1;
-
-    if (!err) {
-        bytes = malloc (bytecount);
-        if (bytes == NULL) { err = ENOMEM; }
-    }
-
-    if (!err) {
-        krb5_data data;
-        data.length = bytecount;
-        data.data = (char *) bytes;
-        err = krb5_c_random_make_octets (context, &data);
-    }
-
-    if (!err) {
-        unsigned int i;
-        for (i = 0; i < bytecount; i++) {
-            string [i] = charlist[bytes[i] % (sizeof (charlist) - 1)];
-        }
-        string[length - 1] = '\0';
-    }
-
-    if (bytes != NULL) { free (bytes); }
-
-    return err;
-}
-
 /*
  * Requires:
  * id is a file credential cache

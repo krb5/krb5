@@ -1739,6 +1739,10 @@ krb5_ser_unpack_bytes(krb5_octet *, size_t, krb5_octet **, size_t *);
 krb5_error_code KRB5_CALLCONV
 krb5int_cc_default(krb5_context, krb5_ccache *);
 
+/* Fill in the buffer with random alpha-numeric data. */
+krb5_error_code
+krb5int_random_string(krb5_context, char *string, unsigned int length);
+
 /* value to use when requesting a keytab entry and KVNO doesn't matter */
 #define IGNORE_VNO 0
 /* value to use when requesting a keytab entry and enctype doesn't matter */
