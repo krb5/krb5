@@ -1261,8 +1261,9 @@ typedef struct _kdb_vftabl {
 
     /*
      * Optional: Perform a policy check on a cross-realm ticket's transited
-     * field and return an error (other than KRB5_PLUGIN_OP_NOTSUPP) if the
-     * check fails.
+     * field.  Return 0 if the check authoritatively succeeds,
+     * KRB5_PLUGIN_NO_HANDLE to use the core transited-checking mechanisms, or
+     * another error (other than KRB5_PLUGIN_OP_NOTSUPP) if the check fails.
      */
     krb5_error_code (*check_transited_realms)(krb5_context kcontext,
                                               const krb5_data *tr_contents,
