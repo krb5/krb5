@@ -315,6 +315,24 @@ static void krb5_krcc_update_change_time
 /* Note the following is a stub function for Linux */
 extern krb5_error_code krb5_change_cache(void);
 
+/* Find or create a keyring within parent with the given name. */
+static krb5_error_code
+find_or_create_keyring(key_serial_t parent, const char *name,
+                       key_serial_t *key_out)
+{
+    key_serial_t key;
+
+    *key_out = -1;
+    key = keyctl_search(parent, KRCC_KEY_TYPE_KEYRING, name, 0);
+    if (key == -1) {
+        key = add_key(KRCC_KEY_TYPE_KEYRING, name, NULL, 0, parent);
+        if (key == -1)
+            return errno;
+    }
+    *key_out = key;
+    return 0;
+}
+
 /*
  * Modifies:
  * id
@@ -332,22 +350,35 @@ static krb5_error_code KRB5_CALLCONV
 krb5_krcc_initialize(krb5_context context, krb5_ccache id,
                      krb5_principal princ)
 {
+    krb5_krcc_data *data = (krb5_krcc_data *)id->data;
     krb5_error_code kret;
+    const char *ring_name, *p;
 
     DEBUG_PRINT(("krb5_krcc_initialize: entered\n"));
 
-    k5_cc_mutex_lock(context, &((krb5_krcc_data *) id->data)->lock);
+    k5_cc_mutex_lock(context, &data->lock);
 
     kret = krb5_krcc_clearcache(context, id);
     if (kret != KRB5_OK)
         goto out;
+
+    if (!data->ring_id) {
+        /* The key didn't exist at resolve time.  Check again and create the
+         * key if it still isn't there. */
+        p = strrchr(data->name, ':');
+        ring_name = (p != NULL) ? p + 1 : data->name;
+        kret = find_or_create_keyring(data->parent_id, ring_name,
+                                      &data->ring_id);
+        if (kret)
+            goto out;
+    }
 
     kret = krb5_krcc_save_principal(context, id, princ);
     if (kret == KRB5_OK)
         krb5_change_cache();
 
 out:
-    k5_cc_mutex_unlock(context, &((krb5_krcc_data *) id->data)->lock);
+    k5_cc_mutex_unlock(context, &data->lock);
     return kret;
 }
 
@@ -405,9 +436,10 @@ krb5_krcc_clearcache(krb5_context context, krb5_ccache id)
     DEBUG_PRINT(("krb5_krcc_clearcache: ring_id %d, princ_id %d\n",
                  d->ring_id, d->princ_id));
 
-    res = keyctl_clear(d->ring_id);
-    if (res != 0) {
-        return errno;
+    if (d->ring_id) {
+        res = keyctl_clear(d->ring_id);
+        if (res != 0)
+            return errno;
     }
     d->princ_id = 0;
     krb5_krcc_update_change_time(d);
@@ -437,12 +469,14 @@ krb5_krcc_destroy(krb5_context context, krb5_ccache id)
 
     krb5_krcc_clearcache(context, id);
     free(d->name);
-    res = keyctl_unlink(d->ring_id, d->parent_id);
-    if (res < 0) {
-        kret = errno;
-        DEBUG_PRINT(("krb5_krcc_destroy: unlinking key %d from ring %d: %s",
-                     d->ring_id, d->parent_id, error_message(errno)));
-        goto cleanup;
+    if (d->ring_id) {
+        res = keyctl_unlink(d->ring_id, d->parent_id);
+        if (res < 0) {
+            kret = errno;
+            DEBUG_PRINT(("unlinking key %d from ring %d: %s",
+                         d->ring_id, d->parent_id, error_message(errno)));
+            goto cleanup;
+        }
     }
 cleanup:
     k5_cc_mutex_unlock(context, &d->lock);
@@ -515,16 +549,8 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
      */
     key = keyctl_search(ring_id, KRCC_KEY_TYPE_KEYRING, residual, 0);
     if (key < 0) {
-        key = add_key(KRCC_KEY_TYPE_KEYRING, residual, NULL, 0, ring_id);
-        if (key < 0) {
-            kret = errno;
-            DEBUG_PRINT(("krb5_krcc_resolve: Error adding new "
-                         "keyring '%s': %s\n", residual, strerror(errno)));
-            return kret;
-        }
-        DEBUG_PRINT(("krb5_krcc_resolve: new keyring '%s', "
-                     "key %d, added to keyring %d\n",
-                     residual, key, ring_id));
+        /* Defer key creation to krb5_cc_initialize. */
+        key = 0;
     } else {
         DEBUG_PRINT(("krb5_krcc_resolve: found existing "
                      "key %d, with name '%s' in keyring %d\n",
@@ -587,6 +613,11 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
 
     d = id->data;
     k5_cc_mutex_lock(context, &d->lock);
+
+    if (!d->ring_id) {
+        k5_cc_mutex_unlock(context, &d->lock);
+        return KRB5_FCC_NOFILE;
+    }
 
     size = keyctl_read_alloc(d->ring_id, &keys);
     if (size == -1) {
@@ -940,6 +971,11 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
 
     k5_cc_mutex_lock(context, &d->lock);
 
+    if (!d->ring_id) {
+        k5_cc_mutex_unlock(context, &d->lock);
+        return KRB5_FCC_NOFILE;
+    }
+
     /* Get the service principal name and use it as the key name */
     kret = krb5_unparse_name(context, creds->server, &keyname);
     if (kret) {
@@ -1080,7 +1116,7 @@ krb5_krcc_retrieve_principal(krb5_context context, krb5_ccache id,
 
     k5_cc_mutex_lock(context, &d->lock);
 
-    if (!d->princ_id) {
+    if (!d->ring_id || !d->princ_id) {
         princ = 0L;
         kret = KRB5_FCC_NOFILE;
         goto errout;
