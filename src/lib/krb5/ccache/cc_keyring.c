@@ -144,7 +144,7 @@ typedef struct _krb5_krcc_cursor
 
 /*
  * This represents a credentials cache "file"
- * where ring_id is the keyring serial number for
+ * where cache_id is the keyring serial number for
  * this credentials cache "file".  Each key
  * in the keyring contains a separate key.
  */
@@ -153,7 +153,7 @@ typedef struct _krb5_krcc_data
     char   *name;               /* Name for this credentials cache */
     k5_cc_mutex lock;           /* synchronization */
     key_serial_t parent_id;     /* parent keyring of this ccache keyring */
-    key_serial_t ring_id;       /* keyring representing ccache */
+    key_serial_t cache_id;      /* keyring representing ccache */
     key_serial_t princ_id;      /* key holding principal info */
     krb5_timestamp changetime;
 } krb5_krcc_data;
@@ -240,7 +240,7 @@ static krb5_error_code krb5_krcc_clearcache
 (krb5_context context, krb5_ccache id);
 
 static krb5_error_code krb5_krcc_new_data
-(const char *, key_serial_t ring, key_serial_t parent_ring,
+(const char *, key_serial_t cache_id, key_serial_t parent_ring,
  krb5_krcc_data **);
 
 static krb5_error_code krb5_krcc_save_principal
@@ -352,7 +352,8 @@ krb5_krcc_initialize(krb5_context context, krb5_ccache id,
 {
     krb5_krcc_data *data = (krb5_krcc_data *)id->data;
     krb5_error_code kret;
-    const char *ring_name, *p;
+    const char *cache_name, *p;
+    key_serial_t cache_id;
 
     DEBUG_PRINT(("krb5_krcc_initialize: entered\n"));
 
@@ -362,13 +363,13 @@ krb5_krcc_initialize(krb5_context context, krb5_ccache id,
     if (kret != KRB5_OK)
         goto out;
 
-    if (!data->ring_id) {
+    if (!data->cache_id) {
         /* The key didn't exist at resolve time.  Check again and create the
          * key if it still isn't there. */
         p = strrchr(data->name, ':');
-        ring_name = (p != NULL) ? p + 1 : data->name;
-        kret = find_or_create_keyring(data->parent_id, ring_name,
-                                      &data->ring_id);
+        cache_name = (p != NULL) ? p + 1 : data->name;
+        kret = find_or_create_keyring(data->parent_id, cache_name,
+                                      &data->cache_id);
         if (kret)
             goto out;
     }
@@ -433,11 +434,11 @@ krb5_krcc_clearcache(krb5_context context, krb5_ccache id)
 
     d = (krb5_krcc_data *) id->data;
 
-    DEBUG_PRINT(("krb5_krcc_clearcache: ring_id %d, princ_id %d\n",
-                 d->ring_id, d->princ_id));
+    DEBUG_PRINT(("krb5_krcc_clearcache: cache_id %d, princ_id %d\n",
+                 d->cache_id, d->princ_id));
 
-    if (d->ring_id) {
-        res = keyctl_clear(d->ring_id);
+    if (d->cache_id) {
+        res = keyctl_clear(d->cache_id);
         if (res != 0)
             return errno;
     }
@@ -469,12 +470,12 @@ krb5_krcc_destroy(krb5_context context, krb5_ccache id)
 
     krb5_krcc_clearcache(context, id);
     free(d->name);
-    if (d->ring_id) {
-        res = keyctl_unlink(d->ring_id, d->parent_id);
+    if (d->cache_id) {
+        res = keyctl_unlink(d->cache_id, d->parent_id);
         if (res < 0) {
             kret = errno;
             DEBUG_PRINT(("unlinking key %d from ring %d: %s",
-                         d->ring_id, d->parent_id, error_message(errno)));
+                         d->cache_id, d->parent_id, error_message(errno)));
             goto cleanup;
         }
     }
@@ -511,32 +512,29 @@ cleanup:
  */
 
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_residual)
+krb5_krcc_resolve(krb5_context context, krb5_ccache *id, const char *residual)
 {
     krb5_ccache lid;
     krb5_error_code kret;
     krb5_krcc_data *d;
-    key_serial_t key;
-    key_serial_t pkey = 0;
-    key_serial_t ring_id;
-    const char *residual;
+    key_serial_t anchor_id, cache_id, pkey = 0;
+    const char *cache_name;
 
-    DEBUG_PRINT(("krb5_krcc_resolve: entered with name '%s'\n",
-                 full_residual));
+    DEBUG_PRINT(("krb5_krcc_resolve: entered with name '%s'\n", residual));
 
-    if (strncmp(full_residual, "thread:", 7) == 0) {
-        residual = full_residual + 7;
-        ring_id = KEY_SPEC_THREAD_KEYRING;
-    } else if (strncmp(full_residual, "process:", 8) == 0) {
-        residual = full_residual + 8;
-        ring_id = KEY_SPEC_PROCESS_KEYRING;
+    if (strncmp(residual, "thread:", 7) == 0) {
+        cache_name = residual + 7;
+        anchor_id = KEY_SPEC_THREAD_KEYRING;
+    } else if (strncmp(residual, "process:", 8) == 0) {
+        cache_name = residual + 8;
+        anchor_id = KEY_SPEC_PROCESS_KEYRING;
     } else {
-        residual = full_residual;
-        ring_id = KEY_SPEC_SESSION_KEYRING;
+        cache_name = residual;
+        anchor_id = KEY_SPEC_SESSION_KEYRING;
     }
 
-    DEBUG_PRINT(("krb5_krcc_resolve: searching ring %d for residual '%s'\n",
-                 ring_id, residual));
+    DEBUG_PRINT(("krb5_krcc_resolve: searching ring %d for cache '%s'\n",
+                 anchor_id, cache_name));
 
     /*
      * Use keyctl_search instead of request_key. If we're supposed
@@ -547,16 +545,16 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
      * the process and session rings if not found in the thread ring?
      *
      */
-    key = keyctl_search(ring_id, KRCC_KEY_TYPE_KEYRING, residual, 0);
-    if (key < 0) {
+    cache_id = keyctl_search(anchor_id, KRCC_KEY_TYPE_KEYRING, cache_name, 0);
+    if (cache_id < 0) {
         /* Defer key creation to krb5_cc_initialize. */
-        key = 0;
+        cache_id = 0;
     } else {
         DEBUG_PRINT(("krb5_krcc_resolve: found existing "
                      "key %d, with name '%s' in keyring %d\n",
-                     key, residual, ring_id));
+                     cache_id, cache_name, anchor_id));
         /* Determine key containing principal information */
-        pkey = keyctl_search(key, KRCC_KEY_TYPE_USER,
+        pkey = keyctl_search(cache_id, KRCC_KEY_TYPE_USER,
                              KRCC_SPEC_PRINC_KEYNAME, 0);
         if (pkey < 0) {
             DEBUG_PRINT(("krb5_krcc_resolve: Error locating principal "
@@ -571,14 +569,14 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
         return KRB5_CC_NOMEM;
 
 
-    kret = krb5_krcc_new_data(full_residual, key, ring_id, &d);
+    kret = krb5_krcc_new_data(residual, cache_id, anchor_id, &d);
     if (kret) {
         free(lid);
         return kret;
     }
 
-    DEBUG_PRINT(("krb5_krcc_resolve: ring_id %d, princ_id %d, "
-                 "nkeys %d\n", key, pkey, nkeys));
+    DEBUG_PRINT(("krb5_krcc_resolve: cache_id %d, princ_id %d, "
+                 "nkeys %d\n", cache_id, pkey, nkeys));
     d->princ_id = pkey;
     lid->ops = &krb5_krcc_ops;
     lid->data = d;
@@ -614,12 +612,12 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
     d = id->data;
     k5_cc_mutex_lock(context, &d->lock);
 
-    if (!d->ring_id) {
+    if (!d->cache_id) {
         k5_cc_mutex_unlock(context, &d->lock);
         return KRB5_FCC_NOFILE;
     }
 
-    size = keyctl_read_alloc(d->ring_id, &keys);
+    size = keyctl_read_alloc(d->cache_id, &keys);
     if (size == -1) {
         DEBUG_PRINT(("Error getting from keyring: %s\n", strerror(errno)));
         k5_cc_mutex_unlock(context, &d->lock);
@@ -744,7 +742,7 @@ krb5_krcc_end_seq_get(krb5_context context, krb5_ccache id,
 
    Call with the global list lock held.  */
 static  krb5_error_code
-krb5_krcc_new_data(const char *name, key_serial_t ring,
+krb5_krcc_new_data(const char *name, key_serial_t cache_id,
                    key_serial_t parent_ring, krb5_krcc_data ** datapp)
 {
     krb5_error_code kret;
@@ -767,7 +765,7 @@ krb5_krcc_new_data(const char *name, key_serial_t ring,
         return KRB5_CC_NOMEM;
     }
     d->princ_id = 0;
-    d->ring_id = ring;
+    d->cache_id = cache_id;
     d->parent_id = parent_ring;
     d->changetime = 0;
     krb5_krcc_update_change_time(d);
@@ -795,7 +793,7 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
     char uniquename[8];
     krb5_error_code kret;
     krb5_krcc_data *d;
-    key_serial_t ring_id = KEY_SPEC_SESSION_KEYRING;
+    key_serial_t cache_id = KEY_SPEC_SESSION_KEYRING;
     key_serial_t key;
 
     DEBUG_PRINT(("krb5_krcc_generate_new: entered\n"));
@@ -838,11 +836,12 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
 
         DEBUG_PRINT(("krb5_krcc_generate_new: searching for name '%s'\n",
                      uniquename));
-        key = keyctl_search(ring_id, KRCC_KEY_TYPE_KEYRING, uniquename, 0);
+        key = keyctl_search(cache_id, KRCC_KEY_TYPE_KEYRING, uniquename, 0);
         /*XXX*/ DEBUG_PRINT(("krb5_krcc_generate_new: after searching for '%s', key = %d, errno = %d\n", uniquename, key, errno));
         if (key < 0 && errno == ENOKEY) {
             /* name does not already exist, create it to reserve the name */
-            key = add_key(KRCC_KEY_TYPE_KEYRING, uniquename, NULL, 0, ring_id);
+            key = add_key(KRCC_KEY_TYPE_KEYRING, uniquename, NULL, 0,
+                          cache_id);
             if (key < 0) {
                 kret = errno;
                 DEBUG_PRINT(("krb5_krcc_generate_new: '%s' trying to "
@@ -854,7 +853,7 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
         }
     }
 
-    kret = krb5_krcc_new_data(uniquename, key, ring_id, &d);
+    kret = krb5_krcc_new_data(uniquename, key, cache_id, &d);
     k5_cc_mutex_unlock(context, &krb5int_krcc_mutex);
     if (kret) {
         free(lid);
@@ -971,7 +970,7 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
 
     k5_cc_mutex_lock(context, &d->lock);
 
-    if (!d->ring_id) {
+    if (!d->cache_id) {
         k5_cc_mutex_unlock(context, &d->lock);
         return KRB5_FCC_NOFILE;
     }
@@ -990,9 +989,9 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
 
     /* Add new key (credentials) into keyring */
     DEBUG_PRINT(("krb5_krcc_store: adding new key '%s' to keyring %d\n",
-                 keyname, d->ring_id));
+                 keyname, d->cache_id));
     newkey = add_key(KRCC_KEY_TYPE_USER, keyname, payload,
-                     payloadlen, d->ring_id);
+                     payloadlen, d->cache_id);
     if (newkey < 0) {
         kret = errno;
         DEBUG_PRINT(("Error adding user key '%s': %s\n",
@@ -1082,14 +1081,14 @@ krb5_krcc_save_principal(krb5_context context, krb5_ccache id,
         rc = krb5_unparse_name(context, princ, &princname);
         DEBUG_PRINT(("krb5_krcc_save_principal: adding new key '%s' "
                      "to keyring %d for principal '%s'\n",
-                     KRCC_SPEC_PRINC_KEYNAME, d->ring_id,
+                     KRCC_SPEC_PRINC_KEYNAME, d->cache_id,
                      rc ? "<unknown>" : princname));
         if (rc == 0)
             krb5_free_unparsed_name(context, princname);
     }
 #endif
     newkey = add_key(KRCC_KEY_TYPE_USER, KRCC_SPEC_PRINC_KEYNAME, payload,
-                     payloadsize, d->ring_id);
+                     payloadsize, d->cache_id);
     if (newkey < 0) {
         kret = errno;
         DEBUG_PRINT(("Error adding principal key: %s\n", strerror(kret)));
@@ -1116,7 +1115,7 @@ krb5_krcc_retrieve_principal(krb5_context context, krb5_ccache id,
 
     k5_cc_mutex_lock(context, &d->lock);
 
-    if (!d->ring_id || !d->princ_id) {
+    if (!d->cache_id || !d->princ_id) {
         princ = 0L;
         kret = KRB5_FCC_NOFILE;
         goto errout;
