@@ -466,9 +466,12 @@ k5_begin(opts, k5)
     struct k5_data* k5;
 {
     krb5_error_code code = 0;
+    int success = 0;
     int flags = opts->enterprise ? KRB5_PRINCIPAL_PARSE_ENTERPRISE : 0;
-    krb5_ccache defcache;
-    const char *deftype;
+    krb5_ccache defcache = NULL;
+    krb5_principal defcache_princ = NULL, princ;
+    const char *deftype = NULL;
+    char *defrealm, *name;
 
     code = krb5_init_context(&k5->ctx);
     if (code) {
@@ -477,73 +480,153 @@ k5_begin(opts, k5)
     }
     errctx = k5->ctx;
 
-    /* Parse specified principal name now if we got one. */
-    if (opts->principal_name) {
-        if ((code = krb5_parse_name_flags(k5->ctx, opts->principal_name,
-                                          flags, &k5->me))) {
-            com_err(progname, code, _("when parsing name %s"),
-                    opts->principal_name);
-            return 0;
-        }
-    }
-
     if (opts->k5_out_cache_name) {
         code = krb5_cc_resolve(k5->ctx, opts->k5_out_cache_name, &k5->out_cc);
         if (code != 0) {
             com_err(progname, code, _("resolving ccache %s"),
                     opts->k5_out_cache_name);
-            return 0;
+            goto cleanup;
         }
         if (opts->verbose) {
             fprintf(stderr, _("Using specified cache: %s\n"),
                     opts->k5_out_cache_name);
         }
     } else {
-        if ((code = krb5_cc_default(k5->ctx, &defcache))) {
+        /* Resolve the default ccache and get its type and default principal
+         * (if it is initialized). */
+        code = krb5_cc_default(k5->ctx, &defcache);
+        if (code) {
             com_err(progname, code, _("while getting default ccache"));
-            return 0;
+            goto cleanup;
         }
         deftype = krb5_cc_get_type(k5->ctx, defcache);
-        if (k5->me != NULL && krb5_cc_support_switch(k5->ctx, deftype)) {
-            /* Use an existing cache for the specified principal if we can. */
-            code = krb5_cc_cache_match(k5->ctx, k5->me, &k5->out_cc);
-            if (code != 0 && code != KRB5_CC_NOTFOUND) {
-                com_err(progname, code, _("while searching for ccache for %s"),
-                        opts->principal_name);
-                krb5_cc_close(k5->ctx, defcache);
-                return 0;
+        if (krb5_cc_get_principal(k5->ctx, defcache, &defcache_princ) != 0)
+            defcache_princ = NULL;
+    }
+
+    /* Choose a client principal name. */
+    if (opts->principal_name != NULL) {
+        /* Use the specified principal name. */
+        code = krb5_parse_name_flags(k5->ctx, opts->principal_name, flags,
+                                     &k5->me);
+        if (code) {
+            com_err(progname, code, _("when parsing name %s"),
+                    opts->principal_name);
+            goto cleanup;
+        }
+    } else if (opts->anonymous) {
+        /* Use the anonymous principal for the local realm. */
+        code = krb5_get_default_realm(k5->ctx, &defrealm);
+        if (code) {
+            com_err(progname, code, _("while getting default realm"));
+            goto cleanup;
+        }
+        code = krb5_build_principal_ext(k5->ctx, &k5->me,
+                                        strlen(defrealm), defrealm,
+                                        strlen(KRB5_WELLKNOWN_NAMESTR),
+                                        KRB5_WELLKNOWN_NAMESTR,
+                                        strlen(KRB5_ANONYMOUS_PRINCSTR),
+                                        KRB5_ANONYMOUS_PRINCSTR,
+                                        0);
+        krb5_free_default_realm(k5->ctx, defrealm);
+        if (code) {
+            com_err(progname, code, _("while building principal"));
+            goto cleanup;
+        }
+    } else if (opts->action == INIT_KT) {
+        /* Use the default host/service name. */
+        code = krb5_sname_to_principal(k5->ctx, NULL, NULL, KRB5_NT_SRV_HST,
+                                       &k5->me);
+        if (code) {
+            com_err(progname, code,
+                    _("when creating default server principal name"));
+            goto cleanup;
+        }
+        if (k5->me->realm.data[0] == 0) {
+            code = krb5_unparse_name(k5->ctx, k5->me, &k5->name);
+            if (code == 0) {
+                com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
+                        _("(principal %s)"), k5->name);
+            } else {
+                com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
+                        _("for local services"));
             }
-            if (code == KRB5_CC_NOTFOUND) {
-                code = krb5_cc_new_unique(k5->ctx, deftype, NULL, &k5->out_cc);
-                if (code) {
-                    com_err(progname, code, _("while generating new ccache"));
-                    krb5_cc_close(k5->ctx, defcache);
-                    return 0;
-                }
-                if (opts->verbose) {
-                    fprintf(stderr, _("Using new cache: %s\n"),
-                            krb5_cc_get_name(k5->ctx, k5->out_cc));
-                }
-            } else if (opts->verbose) {
+            goto cleanup;
+        }
+    } else if (k5->out_cc != NULL) {
+        /* If the output ccache is initialized, use its principal. */
+        if (krb5_cc_get_principal(k5->ctx, k5->out_cc, &princ) == 0)
+            k5->me = princ;
+    } else if (defcache_princ != NULL) {
+        /* Use the default cache's principal, and use the default cache as the
+         * output cache. */
+        k5->out_cc = defcache;
+        defcache = NULL;
+        k5->me = defcache_princ;
+        defcache_princ = NULL;
+    }
+
+    /* If we still haven't chosen, use the local username. */
+    if (k5->me == NULL) {
+        name = get_name_from_os();
+        if (name == NULL) {
+            fprintf(stderr, _("Unable to identify user\n"));
+            goto cleanup;
+        }
+        code = krb5_parse_name_flags(k5->ctx, name, flags, &k5->me);
+        if (code) {
+            com_err(progname, code, _("when parsing name %s"),
+                    name);
+            goto cleanup;
+        }
+    }
+
+    if (k5->out_cc == NULL && krb5_cc_support_switch(k5->ctx, deftype)) {
+        /* Use an existing cache for the client principal if we can. */
+        code = krb5_cc_cache_match(k5->ctx, k5->me, &k5->out_cc);
+        if (code != 0 && code != KRB5_CC_NOTFOUND) {
+            com_err(progname, code, _("while searching for ccache for %s"),
+                    opts->principal_name);
+            goto cleanup;
+        }
+        if (code == 0) {
+            if (opts->verbose) {
                 fprintf(stderr, _("Using existing cache: %s\n"),
                         krb5_cc_get_name(k5->ctx, k5->out_cc));
             }
-            krb5_cc_close(k5->ctx, defcache);
             k5->switch_to_cache = 1;
-        } else {
-            k5->out_cc = defcache;
+        } else if (defcache_princ != NULL) {
+            /* Create a new cache to avoid overwriting the initialized default
+             * cache. */
+            code = krb5_cc_new_unique(k5->ctx, deftype, NULL, &k5->out_cc);
+            if (code) {
+                com_err(progname, code, _("while generating new ccache"));
+                goto cleanup;
+            }
             if (opts->verbose) {
-                fprintf(stderr, _("Using default cache: %s\n"),
+                fprintf(stderr, _("Using new cache: %s\n"),
                         krb5_cc_get_name(k5->ctx, k5->out_cc));
             }
+            k5->switch_to_cache = 1;
         }
     }
+
+    /* Use the default cache if we haven't picked one yet. */
+    if (k5->out_cc == NULL) {
+        k5->out_cc = defcache;
+        defcache = NULL;
+        if (opts->verbose) {
+            fprintf(stderr, _("Using default cache: %s\n"),
+                    krb5_cc_get_name(k5->ctx, k5->out_cc));
+        }
+    }
+
     if (opts->k5_in_cache_name) {
         code = krb5_cc_resolve(k5->ctx, opts->k5_in_cache_name, &k5->in_cc);
         if (code != 0) {
             com_err(progname, code, _("resolving ccache %s"),
                     opts->k5_in_cache_name);
-            return 0;
+            goto cleanup;
         }
         if (opts->verbose) {
             fprintf(stderr, _("Using specified input cache: %s\n"),
@@ -551,80 +634,24 @@ k5_begin(opts, k5)
         }
     }
 
-    if (!k5->me) {
-        /* No principal name specified */
-        if (opts->anonymous) {
-            char *defrealm;
-            code = krb5_get_default_realm(k5->ctx, &defrealm);
-            if (code) {
-                com_err(progname, code, _("while getting default realm"));
-                return 0;
-            }
-            code = krb5_build_principal_ext(k5->ctx, &k5->me,
-                                            strlen(defrealm), defrealm,
-                                            strlen(KRB5_WELLKNOWN_NAMESTR),
-                                            KRB5_WELLKNOWN_NAMESTR,
-                                            strlen(KRB5_ANONYMOUS_PRINCSTR),
-                                            KRB5_ANONYMOUS_PRINCSTR,
-                                            0);
-            krb5_free_default_realm(k5->ctx, defrealm);
-            if (code) {
-                com_err(progname, code, _("while building principal"));
-                return 0;
-            }
-        } else {
-            if (opts->action == INIT_KT) {
-                /* Use the default host/service name */
-                code = krb5_sname_to_principal(k5->ctx, NULL, NULL,
-                                               KRB5_NT_SRV_HST, &k5->me);
-                if (code) {
-                    com_err(progname, code,
-                            _("when creating default server principal name"));
-                    return 0;
-                }
-                if (k5->me->realm.data[0] == 0) {
-                    code = krb5_unparse_name(k5->ctx, k5->me, &k5->name);
-                    if (code == 0) {
-                        com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
-                                _("(principal %s)"), k5->name);
-                    } else {
-                        com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
-                                _("for local services"));
-                    }
-                    return 0;
-                }
-            } else {
-                /* Get default principal from cache if one exists */
-                code = krb5_cc_get_principal(k5->ctx, k5->out_cc,
-                                             &k5->me);
-                if (code) {
-                    char *name = get_name_from_os();
-                    if (!name) {
-                        fprintf(stderr, _("Unable to identify user\n"));
-                        return 0;
-                    }
-                    if ((code = krb5_parse_name_flags(k5->ctx, name,
-                                                      flags, &k5->me))) {
-                        com_err(progname, code, _("when parsing name %s"),
-                                name);
-                        return 0;
-                    }
-                }
-            }
-        }
-    }
 
     code = krb5_unparse_name(k5->ctx, k5->me, &k5->name);
     if (code) {
         com_err(progname, code, _("when unparsing name"));
-        return 0;
+        goto cleanup;
     }
     if (opts->verbose)
         fprintf(stderr, _("Using principal: %s\n"), k5->name);
 
     opts->principal_name = k5->name;
 
-    return 1;
+    success = 1;
+
+cleanup:
+    if (defcache != NULL)
+        krb5_cc_close(k5->ctx, defcache);
+    krb5_free_principal(k5->ctx, defcache_princ);
+    return success;
 }
 
 static void
