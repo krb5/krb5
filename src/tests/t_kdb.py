@@ -2,15 +2,6 @@
 from k5test import *
 import time
 
-# Return the location of progname in tht executable path, or None if
-# it is not found.
-def which(progname):
-    for dir in os.environ["PATH"].split(os.pathsep):
-        path = os.path.join(dir, progname)
-        if os.access(path, os.X_OK):
-            return path
-    return None
-
 # Run kdbtest against the BDB module.
 realm = K5Realm(create_kdb=False)
 realm.run(['./kdbtest'])

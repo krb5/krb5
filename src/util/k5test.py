@@ -133,6 +133,9 @@ Scripts may use the following functions and variables:
   added newline) in testlog, and write it to stdout if running
   verbosely.
 
+* which(progname): Return the location of progname in the executable
+  path, or None if it is not found.
+
 * password(name): Return a weakly random password based on name.  The
   password will be consistent across calls with the same name.
 
@@ -369,6 +372,16 @@ def output(msg, force_verbose=False):
     _outfile.write(msg)
     if verbose or force_verbose:
         sys.stdout.write(msg)
+
+
+# Return the location of progname in the executable path, or None if
+# it is not found.
+def which(progname):
+    for dir in os.environ["PATH"].split(os.pathsep):
+        path = os.path.join(dir, progname)
+        if os.access(path, os.X_OK):
+            return path
+    return None
 
 
 def password(name):
