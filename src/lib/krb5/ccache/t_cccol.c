@@ -294,6 +294,15 @@ main(int argc, char **argv)
     check_collection(initial_primary_name, 2, unique1_name, unique2_name);
 
     /*
+     * Temporarily set the context default ccache to a subsidiary name, and
+     * check that iterating over the collection yields that subsidiary cache
+     * and no others.
+     */
+    check(krb5_cc_set_default_name(ctx, unique1_name));
+    check_collection(unique1_name, 0);
+    check(krb5_cc_set_default_name(ctx, collection_name));
+
+    /*
      * Destroy the primary cache.  Make sure this causes both the initial
      * primary name and the collection name to resolve to an uninitialized
      * cache.  Make sure the primary name doesn't change and doesn't appear in
@@ -349,5 +358,6 @@ main(int argc, char **argv)
     krb5_free_principal(ctx, princ1);
     krb5_free_principal(ctx, princ2);
     krb5_free_principal(ctx, princ3);
+    krb5_free_context(ctx);
     return 0;
 }

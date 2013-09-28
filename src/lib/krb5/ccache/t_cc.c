@@ -426,8 +426,8 @@ main(void)
     test_misc(context);
     do_test(context, "");
 
-    if(check_registered(context, "KEYRING:"))
-        do_test(context, "KEYRING:");
+    if (check_registered(context, "KEYRING:process:"))
+        do_test(context, "KEYRING:process:");
     else
         printf("Skiping KEYRING: test - unregistered type\n");
 

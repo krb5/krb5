@@ -1,9 +1,43 @@
 #!/usr/bin/python
 from k5test import *
 
-# Run the collection test program against each collection-enabled type.
 realm = K5Realm(create_kdb=False)
+
+keyctl = which('keyctl')
+out = realm.run([klist, '-c', 'KEYRING:process:abcd'], expected_code=1)
+test_keyring = (keyctl is not None and
+                'Unknown credential cache type' not in out)
+
+# Run the collection test program against each collection-enabled type.
 realm.run(['./t_cccol', 'DIR:' + os.path.join(realm.testdir, 'cc')])
+if test_keyring:
+    # Use the test directory as the collection name to avoid colliding
+    # with other build trees.
+    cname = realm.testdir
+
+    # Remove any keys left behind by previous failed test runs.
+    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
+    realm.run(['keyctl', 'purge', 'keyring', cname])
+    out = realm.run(['keyctl', 'list', '@u'])
+    if ('keyring: _krb_' + cname + '\n') in out:
+        id = realm.run(['keyctl', 'search', '@u', 'keyring', '_krb_' + cname])
+        realm.run(['keyctl', 'unlink', id.strip(), '@u'])
+
+    # Run test program over each subtype, cleaning up as we go.  Don't
+    # test the persistent subtype, since it supports only one
+    # collection and might be in actual use.
+    realm.run(['./t_cccol', 'KEYRING:' + cname])
+    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
+    realm.run(['./t_cccol', 'KEYRING:legacy:' + cname])
+    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
+    realm.run(['./t_cccol', 'KEYRING:session:' + cname])
+    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
+    realm.run(['./t_cccol', 'KEYRING:user:' + cname])
+    id = realm.run(['keyctl', 'search', '@u', 'keyring', '_krb_' + cname])
+    realm.run(['keyctl', 'unlink', id.strip(), '@u'])
+    realm.run(['./t_cccol', 'KEYRING:process:abcd'])
+    realm.run(['./t_cccol', 'KEYRING:thread:abcd'])
+
 realm.stop()
 
 # Test cursor semantics using real ccaches.
@@ -21,6 +55,18 @@ dnoent = 'DIR::%s/noent' % ccdir
 realm.kinit('user', password('user'), flags=['-c', duser])
 realm.kinit('alice', password('alice'), flags=['-c', dalice])
 realm.kinit('bob', password('bob'), flags=['-c', dbob])
+
+if test_keyring:
+    cname = realm.testdir
+    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
+    krccname = 'KEYRING:session:' + cname
+    kruser = '%s:tkt1' % krccname
+    kralice = '%s:tkt2' % krccname
+    krbob = '%s:tkt3' % krccname
+    krnoent = '%s:noent' % krccname
+    realm.kinit('user', password('user'), flags=['-c', kruser])
+    realm.kinit('alice', password('alice'), flags=['-c', kralice])
+    realm.kinit('bob', password('bob'), flags=['-c', krbob])
 
 def cursor_test(testname, args, expected):
     outlines = realm.run(['./t_cccursor'] + args).splitlines()
@@ -40,16 +86,26 @@ cursor_test('dir', [dccname], [duser, dalice, dbob])
 cursor_test('dir-subsidiary', [duser], [duser])
 cursor_test('dir-nofile', [dnoent], [])
 
+if test_keyring:
+    cursor_test('keyring', [krccname], [kruser, kralice, krbob])
+    cursor_test('keyring-subsidiary', [kruser], [kruser])
+    cursor_test('keyring-noent', [krnoent], [])
+
 mfoo = 'MEMORY:foo'
 mbar = 'MEMORY:bar'
 cursor_test('filemem', [fccname, mfoo, mbar], [fccname, mfoo, mbar])
 cursor_test('dirmem', [dccname, mfoo], [duser, dalice, dbob, mfoo])
+if test_keyring:
+    cursor_test('keyringmem', [krccname, mfoo], [kruser, kralice, krbob, mfoo])
 
 # Test krb5_cccol_have_content.
 realm.run(['./t_cccursor', dccname, 'CONTENT'])
 realm.run(['./t_cccursor', fccname, 'CONTENT'])
 realm.run(['./t_cccursor', realm.ccache, 'CONTENT'])
 realm.run(['./t_cccursor', mfoo, 'CONTENT'], expected_code=1)
+if test_keyring:
+    realm.run(['./t_cccursor', krccname, 'CONTENT'])
+    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
 
 # Make sure FILE doesn't yield a nonexistent default cache.
 realm.run([kdestroy])
