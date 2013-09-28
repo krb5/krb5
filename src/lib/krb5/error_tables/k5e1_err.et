@@ -37,4 +37,5 @@ error_code KRB5KDC_ERR_DISCARD, "The KDC should discard this request"
 error_code KRB5_DCC_CANNOT_CREATE, "Can't create new subsidiary cache"
 error_code KRB5_KCC_INVALID_ANCHOR, "Invalid keyring anchor name"
 error_code KRB5_KCC_UNKNOWN_VERSION, "Unknown keyring collection version"
+error_code KRB5_KCC_INVALID_UID, "Invalid UID in persistent keyring name"
 end

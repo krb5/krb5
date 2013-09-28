@@ -126,7 +126,20 @@ debug_print(char *fmt, ...)
 #endif
 
 /*
- * We always use "user" key type
+ * We try to use the big_key key type for credentials except in legacy caches.
+ * We fall back to the user key type if the kernel does not support big_key.
+ * If the library doesn't support keyctl_get_persistent(), we don't even try
+ * big_key since the two features were added at the same time.
+ */
+#ifdef HAVE_PERSISTENT_KEYRING
+#define KRCC_CRED_KEY_TYPE "big_key"
+#else
+#define KRCC_CRED_KEY_TYPE "user"
+#endif
+
+/*
+ * We use the "user" key type for collection primary names, for cache principal
+ * names, and for credentials in legacy caches.
  */
 #define KRCC_KEY_TYPE_USER "user"
 
@@ -160,7 +173,7 @@ debug_print(char *fmt, ...)
  * If the library context does not specify a keyring collection, unique ccaches
  * will be created within this collection.
  */
-#define KRCC_DEFAULT_UNIQUE_COLLECTION "__krb5_unique__"
+#define KRCC_DEFAULT_UNIQUE_COLLECTION "session:__krb5_unique__"
 
 /*
  * Collection keyring names begin with this prefix.  We use a prefix so that a
@@ -170,6 +183,12 @@ debug_print(char *fmt, ...)
 #define KRCC_CCCOL_PREFIX "_krb_"
 
 /*
+ * For the "persistent" anchor type, we look up or create this fixed keyring
+ * name within the per-UID persistent keyring.
+ */
+#define KRCC_PERSISTENT_KEYRING_NAME "_krb"
+
+/*
  * Keyring name prefix and length of random name part
  */
 #define KRCC_NAME_PREFIX "krb_ccache_"
@@ -177,8 +196,11 @@ debug_print(char *fmt, ...)
 
 #define KRCC_COLLECTION_VERSION 1
 
+#define KRCC_PERSISTENT_ANCHOR "persistent"
 #define KRCC_PROCESS_ANCHOR "process"
 #define KRCC_THREAD_ANCHOR "thread"
+#define KRCC_SESSION_ANCHOR "session"
+#define KRCC_USER_ANCHOR "user"
 #define KRCC_LEGACY_ANCHOR "legacy"
 
 #define KRB5_OK 0
@@ -212,6 +234,7 @@ typedef struct _krb5_krcc_data
     key_serial_t cache_id;      /* keyring representing ccache */
     key_serial_t princ_id;      /* key holding principal info */
     krb5_timestamp changetime;
+    krb5_boolean is_legacy_type;
 } krb5_krcc_data;
 
 /* Passed internally to assure we don't go past the bounds of our buffer */
@@ -391,19 +414,58 @@ krb5_krcc_unparse_index(krb5_context context, krb5_int32 version,
 /* Note the following is a stub function for Linux */
 extern krb5_error_code krb5_change_cache(void);
 
-/* Find or create a keyring within parent with the given name. */
+/*
+ * GET_PERSISTENT(uid) acquires the persistent keyring for uid, or falls back
+ * to the user keyring if uid matches the current effective uid.
+ */
+
+static key_serial_t
+get_persistent_fallback(uid_t uid)
+{
+    return (uid == geteuid()) ? KEY_SPEC_USER_KEYRING : -1;
+}
+
+#ifdef HAVE_PERSISTENT_KEYRING
+#define GET_PERSISTENT get_persistent_real
+static key_serial_t
+get_persistent_real(uid_t uid)
+{
+    key_serial_t key;
+
+    key = keyctl_get_persistent(uid, KEY_SPEC_PROCESS_KEYRING);
+    return (key == -1 && errno == ENOTSUP) ? get_persistent_fallback(uid) :
+        key;
+}
+#else
+#define GET_PERSISTENT get_persistent_fallback
+#endif
+
+/*
+ * Find or create a keyring within parent with the given name.  If possess is
+ * nonzero, also make sure the key is linked from possess.  This is necessary
+ * to ensure that we have possession rights on the key when the parent is the
+ * user or persistent keyring.
+ */
 static krb5_error_code
-find_or_create_keyring(key_serial_t parent, const char *name,
-                       key_serial_t *key_out)
+find_or_create_keyring(key_serial_t parent, key_serial_t possess,
+                       const char *name, key_serial_t *key_out)
 {
     key_serial_t key;
 
     *key_out = -1;
-    key = keyctl_search(parent, KRCC_KEY_TYPE_KEYRING, name, 0);
+    key = keyctl_search(parent, KRCC_KEY_TYPE_KEYRING, name, possess);
     if (key == -1) {
-        key = add_key(KRCC_KEY_TYPE_KEYRING, name, NULL, 0, parent);
-        if (key == -1)
-            return errno;
+        if (possess != 0) {
+            key = add_key(KRCC_KEY_TYPE_KEYRING, name, NULL, 0, possess);
+            if (key == -1)
+                return errno;
+            if (keyctl_link(key, parent) == -1)
+                return errno;
+        } else {
+            key = add_key(KRCC_KEY_TYPE_KEYRING, name, NULL, 0, parent);
+            if (key == -1)
+                return errno;
+        }
     }
     *key_out = key;
     return 0;
@@ -530,24 +592,57 @@ get_collection(const char *anchor_name, const char *collection_name,
                key_serial_t *collection_id_out)
 {
     krb5_error_code ret;
-    key_serial_t anchor_id;
+    key_serial_t persistent_id, anchor_id, possess_id = 0;
     char *ckname;
+    long uidnum;
 
     *collection_id_out = 0;
 
-    if (strcmp(anchor_name, KRCC_PROCESS_ANCHOR) == 0)
+    if (strcmp(anchor_name, KRCC_PERSISTENT_ANCHOR) == 0) {
+        /*
+         * The collection name is a uid (or empty for the current effective
+         * uid), and we look up a fixed keyring name within the persistent
+         * keyring for that uid.  We link it to the process keyring to ensure
+         * that we have possession rights on the collection key.
+         */
+        if (*collection_name != '\0') {
+            errno = 0;
+            uidnum = strtol(collection_name, NULL, 10);
+            if (errno)
+                return KRB5_KCC_INVALID_UID;
+        } else {
+            uidnum = geteuid();
+        }
+        persistent_id = GET_PERSISTENT(uidnum);
+        if (persistent_id == -1)
+            return KRB5_KCC_INVALID_UID;
+        return find_or_create_keyring(persistent_id, KEY_SPEC_PROCESS_KEYRING,
+                                      KRCC_PERSISTENT_KEYRING_NAME,
+                                      collection_id_out);
+    }
+
+    if (strcmp(anchor_name, KRCC_PROCESS_ANCHOR) == 0) {
         anchor_id = KEY_SPEC_PROCESS_KEYRING;
-    else if (strcmp(anchor_name, KRCC_THREAD_ANCHOR) == 0)
+    } else if (strcmp(anchor_name, KRCC_THREAD_ANCHOR) == 0) {
         anchor_id = KEY_SPEC_THREAD_KEYRING;
-    else if (strcmp(anchor_name, KRCC_LEGACY_ANCHOR) == 0)
+    } else if (strcmp(anchor_name, KRCC_SESSION_ANCHOR) == 0) {
         anchor_id = KEY_SPEC_SESSION_KEYRING;
-    else
+    } else if (strcmp(anchor_name, KRCC_USER_ANCHOR) == 0) {
+        /* The user keyring does not confer possession, so we need to link the
+         * collection to the process keyring to maintain possession rights. */
+        anchor_id = KEY_SPEC_USER_KEYRING;
+        possess_id = KEY_SPEC_PROCESS_KEYRING;
+    } else if (strcmp(anchor_name, KRCC_LEGACY_ANCHOR) == 0) {
+        anchor_id = KEY_SPEC_SESSION_KEYRING;
+    } else {
         return KRB5_KCC_INVALID_ANCHOR;
+    }
 
     /* Look up the collection keyring name within the anchor keyring. */
     if (asprintf(&ckname, "%s%s", KRCC_CCCOL_PREFIX, collection_name) == -1)
         return ENOMEM;
-    ret = find_or_create_keyring(anchor_id, ckname, collection_id_out);
+    ret = find_or_create_keyring(anchor_id, possess_id, ckname,
+                                 collection_id_out);
     free(ckname);
     return ret;
 }
@@ -703,6 +798,25 @@ cleanup:
     return ret;
 }
 
+static krb5_error_code
+add_cred_key(const char *name, const void *payload, size_t plen,
+             key_serial_t cache_id, krb5_boolean legacy_type)
+{
+    key_serial_t key;
+
+    if (!legacy_type) {
+        /* Try the preferred cred key type; fall back if no kernel support. */
+        key = add_key(KRCC_CRED_KEY_TYPE, name, payload, plen, cache_id);
+        if (key != -1)
+            return 0;
+        else if (errno != EINVAL && errno != ENODEV)
+            return errno;
+    }
+    /* Use the user key type. */
+    key = add_key(KRCC_KEY_TYPE_USER, name, payload, plen, cache_id);
+    return (key == -1) ? errno : 0;
+}
+
 /*
  * Modifies:
  * id
@@ -737,7 +851,7 @@ krb5_krcc_initialize(krb5_context context, krb5_ccache id,
          * key if it still isn't there. */
         p = strrchr(data->name, ':');
         cache_name = (p != NULL) ? p + 1 : data->name;
-        kret = find_or_create_keyring(data->collection_id, cache_name,
+        kret = find_or_create_keyring(data->collection_id, 0, cache_name,
                                       &data->cache_id);
         if (kret)
             goto out;
@@ -1146,6 +1260,7 @@ krb5_krcc_new_data(const char *anchor_name, const char *collection_name,
     d->cache_id = cache_id;
     d->collection_id = collection_id;
     d->changetime = 0;
+    d->is_legacy_type = (strcmp(anchor_name, KRCC_LEGACY_ANCHOR) == 0);
     krb5_krcc_update_change_time(d);
 
     *datapp = d;
@@ -1335,7 +1450,6 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
     krb5_krcc_data *d = (krb5_krcc_data *) id->data;
     char   *payload = NULL;
     unsigned int payloadlen;
-    key_serial_t newkey;
     char   *keyname = NULL;
 
     DEBUG_PRINT(("krb5_krcc_store: entered\n"));
@@ -1362,16 +1476,12 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
     /* Add new key (credentials) into keyring */
     DEBUG_PRINT(("krb5_krcc_store: adding new key '%s' to keyring %d\n",
                  keyname, d->cache_id));
-    newkey = add_key(KRCC_KEY_TYPE_USER, keyname, payload,
-                     payloadlen, d->cache_id);
-    if (newkey < 0) {
-        kret = errno;
-        DEBUG_PRINT(("Error adding user key '%s': %s\n",
-                     keyname, strerror(kret)));
-    } else {
-        kret = KRB5_OK;
-        krb5_krcc_update_change_time(d);
-    }
+    kret = add_cred_key(keyname, payload, payloadlen, d->cache_id,
+                        d->is_legacy_type);
+    if (kret)
+        goto errout;
+
+    krb5_krcc_update_change_time(d);
 
 errout:
     if (keyname)

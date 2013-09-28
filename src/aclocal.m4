@@ -89,6 +89,7 @@ KRB5_AC_INITFINI
 KRB5_AC_ENABLE_THREADS
 KRB5_AC_FIND_DLOPEN
 KRB5_AC_KEYRING_CCACHE
+KRB5_AC_PERSISTENT_KEYRING
 ])dnl
 
 dnl Maintainer mode, akin to what automake provides, 'cept we don't
@@ -1655,6 +1656,15 @@ AC_DEFUN(KRB5_AC_KEYRING_CCACHE,[
       [dnl Pre-reqs were found
        AC_DEFINE(USE_KEYRING_CCACHE, 1, [Define if the keyring ccache should be enabled])
        LIBS="-lkeyutils $LIBS"
+      ]))
+])dnl
+dnl
+dnl If libkeyutils supports persistent keyrings, use them
+AC_DEFUN(KRB5_AC_PERSISTENT_KEYRING,[
+  AC_CHECK_HEADERS([keyutils.h],
+    AC_CHECK_LIB(keyutils, keyctl_get_persistent,
+      [AC_DEFINE(HAVE_PERSISTENT_KEYRING, 1,
+                 [Define if persistent keyrings are supported])
       ]))
 ])dnl
 dnl
