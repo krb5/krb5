@@ -71,8 +71,8 @@ krb5_k_verify_checksum_iov(krb5_context context,
 
     ret = ctp->checksum(ctp, key, usage, data, num_data, &computed);
     if (ret == 0) {
-        *valid = (memcmp(computed.data, checksum->data.data,
-                         ctp->output_size) == 0);
+        *valid = (k5_bcmp(computed.data, checksum->data.data,
+                          ctp->output_size) == 0);
     }
 
     zapfree(computed.data, ctp->compute_size);

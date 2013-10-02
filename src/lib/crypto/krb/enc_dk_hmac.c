@@ -256,7 +256,7 @@ krb5int_dk_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
         goto cleanup;
 
     /* Compare only the possibly truncated length. */
-    if (memcmp(cksum, trailer->data.data, hmacsize) != 0) {
+    if (k5_bcmp(cksum, trailer->data.data, hmacsize) != 0) {
         ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
         goto cleanup;
     }

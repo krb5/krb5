@@ -903,8 +903,8 @@ pkinit_as_rep_parse(krb5_context context,
         }
 
         if ((cksum.length != key_pack->asChecksum.length) ||
-            memcmp(cksum.contents, key_pack->asChecksum.contents,
-                   cksum.length)) {
+            k5_bcmp(cksum.contents, key_pack->asChecksum.contents,
+                    cksum.length) != 0) {
             TRACE_PKINIT_CLIENT_REP_CHECKSUM_FAIL(context, &cksum,
                                                   &key_pack->asChecksum);
             pkiDebug("failed to match the checksums\n");

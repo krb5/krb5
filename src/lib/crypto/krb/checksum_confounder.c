@@ -148,7 +148,7 @@ krb5_error_code krb5int_confounder_verify(const struct krb5_cksumtypes *ctp,
         goto cleanup;
 
     /* Compare the decrypted hash to the computed one. */
-    *valid = (memcmp(plaintext + blocksize, computed.data, hashsize) == 0);
+    *valid = (k5_bcmp(plaintext + blocksize, computed.data, hashsize) == 0);
 
 cleanup:
     zapfree(plaintext, input->length);

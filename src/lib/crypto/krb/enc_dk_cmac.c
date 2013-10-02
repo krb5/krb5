@@ -169,7 +169,7 @@ krb5int_dk_cmac_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
     ret = krb5int_cmac_checksum(enc, ki, data, num_data, &cksum);
     if (ret != 0)
         goto cleanup;
-    if (!data_eq(cksum, trailer->data))
+    if (k5_bcmp(cksum.data, trailer->data.data, enc->block_size) != 0)
         ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 
 cleanup:

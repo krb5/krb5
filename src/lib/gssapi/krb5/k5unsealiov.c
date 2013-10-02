@@ -234,11 +234,11 @@ kg_unseal_v1_iov(krb5_context context,
         cksum.length = cksum_len;
         cksum.contents = md5cksum.contents + 16 - cksum.length;
 
-        code = memcmp(cksum.contents, ptr + 14, cksum.length);
+        code = k5_bcmp(cksum.contents, ptr + 14, cksum.length);
         break;
     case SGN_ALG_HMAC_SHA1_DES3_KD:
     case SGN_ALG_HMAC_MD5:
-        code = memcmp(md5cksum.contents, ptr + 14, cksum_len);
+        code = k5_bcmp(md5cksum.contents, ptr + 14, cksum_len);
         break;
     default:
         code = 0;

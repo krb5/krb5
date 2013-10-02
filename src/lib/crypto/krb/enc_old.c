@@ -169,7 +169,7 @@ krb5int_old_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
      * the saved checksum.
      */
     ret = hash->hash(data, num_data, &checksum);
-    if (memcmp(checksum.data, saved_checksum, checksum.length) != 0) {
+    if (k5_bcmp(checksum.data, saved_checksum, checksum.length) != 0) {
         ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
         goto cleanup;
     }

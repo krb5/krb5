@@ -277,7 +277,7 @@ krb5int_arcfour_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
         if (ret != 0)
             goto cleanup;
 
-        if (memcmp(checksum.data, comp_checksum.data, hash->hashsize) != 0) {
+        if (k5_bcmp(checksum.data, comp_checksum.data, hash->hashsize) != 0) {
             if (usage == 9) {
                 /*
                  * RFC 4757 specifies usage 8 for TGS-REP encrypted parts

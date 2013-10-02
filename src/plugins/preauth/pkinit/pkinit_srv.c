@@ -461,9 +461,9 @@ pkinit_server_verify_padata(krb5_context context,
             goto cleanup;
         }
         if (cksum.length != auth_pack->pkAuthenticator.paChecksum.length ||
-            memcmp(cksum.contents,
-                   auth_pack->pkAuthenticator.paChecksum.contents,
-                   cksum.length)) {
+            k5_bcmp(cksum.contents,
+                    auth_pack->pkAuthenticator.paChecksum.contents,
+                    cksum.length) != 0) {
             pkiDebug("failed to match the checksum\n");
 #ifdef DEBUG_CKSUM
             pkiDebug("calculating checksum on buf size (%d)\n",
