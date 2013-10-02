@@ -71,6 +71,7 @@ STLIBOBJS= \
 	path.o \
 	base64.o \
 	json.o \
+	bcmp.o \
 	$(GETTIMEOFDAY_ST_OBJ) \
 	$(IPC_ST_OBJ) \
 	$(STRLCPY_ST_OBJ) \
@@ -92,6 +93,7 @@ LIBOBJS= \
 	$(OUTPRE)path.$(OBJEXT) \
 	$(OUTPRE)base64.$(OBJEXT) \
 	$(OUTPRE)json.$(OBJEXT) \
+	$(OUTPRE)bcmp.$(OBJEXT) \
 	$(GETTIMEOFDAY_OBJ) \
 	$(IPC_OBJ) \
 	$(STRLCPY_OBJ) \
@@ -121,7 +123,8 @@ SRCS=\
 	$(srcdir)/zap.c \
 	$(srcdir)/path.c \
 	$(srcdir)/base64.c \
-	$(srcdir)/json.c
+	$(srcdir)/json.c \
+	$(srcdir)/bcmp.c
 
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.

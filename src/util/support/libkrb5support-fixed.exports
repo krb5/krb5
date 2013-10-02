@@ -1,5 +1,6 @@
 k5_base64_decode
 k5_base64_encode
+k5_bcmp
 k5_buf_init_fixed
 k5_buf_init_dynamic
 k5_buf_add

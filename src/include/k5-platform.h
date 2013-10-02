@@ -40,6 +40,7 @@
  * + [v]asprintf
  * + mkstemp
  * + zap (support function; macro is in k5-int.h)
+ * + constant time memory comparison
  * + path manipulation
  * + _, N_, dgettext, bindtextdomain (for localization)
  */
@@ -1047,6 +1048,13 @@ extern int krb5int_gettimeofday(struct timeval *tp, void *ignore);
 #endif
 
 extern void krb5int_zap(void *ptr, size_t len);
+
+/*
+ * Return 0 if the n-byte memory regions p1 and p2 are equal, and nonzero if
+ * they are not.  The function is intended to take the same amount of time
+ * regardless of how many bytes of p1 and p2 are equal.
+ */
+int k5_bcmp(const void *p1, const void *p2, size_t n);
 
 /*
  * Split a path into parent directory and basename.  Either output parameter
