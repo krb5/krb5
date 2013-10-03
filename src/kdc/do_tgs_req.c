@@ -137,10 +137,10 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_pa_data **e_data = NULL;
     kdc_realm_t *kdc_active_realm = NULL;
 
-    reply.padata = 0; /* For cleanup handler */
-    reply_encpart.enc_padata = 0;
-    enc_tkt_reply.authorization_data = NULL;
-
+    memset(&reply, 0, sizeof(reply));
+    memset(&reply_encpart, 0, sizeof(reply_encpart));
+    memset(&ticket_reply, 0, sizeof(ticket_reply));
+    memset(&enc_tkt_reply, 0, sizeof(enc_tkt_reply));
     session_key.contents = NULL;
 
     retval = decode_krb5_tgs_req(pkt, &request);
@@ -701,6 +701,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
 
     nolrentry.lr_type = KRB5_LRQ_NONE;
     nolrentry.value = 0;
+    nolrentry.magic = 0;
     nolrarray[0] = &nolrentry;
     nolrarray[1] = 0;
     reply_encpart.last_req = nolrarray;        /* not available for TGS reqs */
