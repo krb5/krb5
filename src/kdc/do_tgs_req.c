@@ -110,7 +110,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_ticket ticket_reply, *header_ticket = 0;
     int st_idx = 0;
     krb5_enc_tkt_part enc_tkt_reply;
-    krb5_transited enc_tkt_transited;
     int newtransited = 0;
     krb5_error_code retval = 0;
     krb5_keyblock encrypting_key;
@@ -584,12 +583,8 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
             errcode = KRB5KDC_ERR_TRTYPE_NOSUPP;
             goto cleanup;
         }
-        enc_tkt_transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
-        enc_tkt_transited.magic = 0;
-        enc_tkt_transited.tr_contents.magic = 0;
-        enc_tkt_transited.tr_contents.data = 0;
-        enc_tkt_transited.tr_contents.length = 0;
-        enc_tkt_reply.transited = enc_tkt_transited;
+        memset(&enc_tkt_reply.transited, 0, sizeof(enc_tkt_reply.transited));
+        enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
         if ((errcode =
              add_to_transited(&header_enc_tkt->transited.tr_contents,
                               &enc_tkt_reply.transited.tr_contents,
