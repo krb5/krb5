@@ -1,4 +1,4 @@
-                   Kerberos Version 5, Release 1.12
+                   Kerberos Version 5, Release 1.13
 
                             Release Notes
                         The MIT Kerberos Team
@@ -77,10 +77,10 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.12
+Major changes in 1.13
 ---------------------
 
-krb5-1.12 changes by ticket ID
+krb5-1.13 changes by ticket ID
 ------------------------------
 
 Acknowledgements
