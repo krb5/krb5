@@ -55,9 +55,8 @@ static krb5_error_code
 open_au(krb5_audit_moddata *auctx)
 {
     au_fd = fopen("au.log", "a+");
-    if ( au_fd < 0) {
+    if (au_fd == NULL)
         return KRB5_PLUGIN_NO_HANDLE; /* audit module is unavailable */
-    }
     k5_mutex_init(&lock);
     return 0;
 }
