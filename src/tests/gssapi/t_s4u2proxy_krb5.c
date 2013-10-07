@@ -117,6 +117,10 @@ main(int argc, char *argv[])
         goto cleanup;
     }
 
+    /* Take the opportunity to test cred export/import on the synthesized
+     * S4U2Proxy delegated cred. */
+    export_import_cred(&deleg_cred);
+
     /* Store the delegated credentials. */
     ret = krb5_cc_resolve(context, storage_ccname, &storage_ccache);
     check_k5err(context, "krb5_cc_resolve", ret);
