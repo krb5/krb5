@@ -486,7 +486,7 @@ json_to_ccache(krb5_context context, k5_json_value v, krb5_ccache *ccache_out,
 
     /* Add remaining array entries to the ccache as credentials. */
     for (i = 1; i < len; i++) {
-        if (json_to_creds(context, k5_json_array_get(array, 1), &creds))
+        if (json_to_creds(context, k5_json_array_get(array, i), &creds))
             goto invalid;
         ret = krb5_cc_store_cred(context, ccache, &creds);
         krb5_free_cred_contents(context, &creds);
