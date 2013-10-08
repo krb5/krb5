@@ -194,4 +194,8 @@ out = realm.run(['./t_inq_mechs_name', 'h:host'])
 if krb5_mech not in out or spnego_mech not in out:
     fail('t_inq_mecs_name (hostbased)')
 
+# Test that accept_sec_context can produce an error token and
+# init_sec_context can interpret it.
+realm.run(['./t_err', 'p:' + realm.host_princ])
+
 success('GSSAPI tests')

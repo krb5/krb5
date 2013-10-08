@@ -451,3 +451,4 @@ EXPORTS
 	krb5_responder_pkinit_set_answer		@422
 	krb5_responder_pkinit_challenge_free		@423
 	krb5_auth_con_setpermetypes			@424 ; PRIVATE GSSAPI
+	krb5_rd_req_decoded				@425 ; PRIVATE GSSAPI
