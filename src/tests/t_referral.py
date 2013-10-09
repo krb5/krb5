@@ -1,21 +1,32 @@
 #!/usr/bin/python
 from k5test import *
 
-# Create a realm where the KDC has a [domain_realm] mapping for 'd'
-# and clients will not try to use DNS to look up KDC addresses.  The
-# KDC believes it has a cross-realm TGT for REFREALM, but we won't
-# actually create REFREALM.
-nodns = {'libdefaults': {'dns_lookup_kdc': 'false'}}
+# Create a pair of realms, where KRBTEST1.COM can authenticate to
+# REFREALM and has a domain-realm mapping for 'd' pointing to it.
 drealm = {'domain_realm': {'d': 'REFREALM'}}
-realm = K5Realm(krb5_conf=nodns, kdc_conf=drealm, create_host=False)
+realm, refrealm = cross_realms(2, xtgts=((0,1),),
+                               args=({'kdc_conf': drealm},
+                                     {'realm': 'REFREALM',
+                                      'create_user': False}),
+                               create_host=False)
 realm.addprinc('krbtgt/REFREALM')
+refrealm.addprinc('a/x.d')
 
-# Get credentials for a/x.d and check whether the KDC returned a referral.
-def test(realm, nametype, expected_ref, msg):
+savefile = os.path.join(realm.testdir, 'ccache.copy')
+os.rename(realm.ccache, savefile)
+
+# Get credentials and check that we got a referral to REFREALM.
+def testref(realm, nametype):
+    shutil.copyfile(savefile, realm.ccache)
+    realm.run(['./gcred', nametype, 'a/x.d'])
+    realm.klist(realm.user_princ, 'a/x.d@REFREALM')
+
+# Get credentials and check that we get an error, not a referral.
+def testfail(realm, nametype):
+    shutil.copyfile(savefile, realm.ccache)
     out = realm.run(['./gcred', nametype, 'a/x.d'], expected_code=1)
-    if ((expected_ref and 'Cannot find KDC for realm "REFREALM"' not in out) or
-        (not expected_ref and 'not found in Kerberos database' not in out)):
-        fail(msg)
+    if 'not found in Kerberos database' not in out:
+        fail('unexpected error')
 
 # Create a modified KDC environment and restart the KDC.
 def restart_kdc(realm, kdc_conf):
@@ -26,10 +37,10 @@ def restart_kdc(realm, kdc_conf):
 # With no KDC configuration besides [domain_realm], we should get a
 # referral for a NT-SRV-HST or NT-SRV-INST server name, but not an
 # NT-UNKNOWN or NT-PRINCIPAL server name.
-test(realm, 'srv-hst', True, 'srv-hst, no variables')
-test(realm, 'srv-inst', True, 'srv-inst, no variables')
-test(realm, 'principal', False, 'principal, no variables')
-test(realm, 'unknown', False, 'unknown, no variables')
+testref(realm, 'srv-hst')
+testref(realm, 'srv-inst')
+testfail(realm, 'principal')
+testfail(realm, 'unknown')
 
 # With host_based_services matching the first server name component
 # ("a"), we should get a referral for an NT-UNKNOWN server name.
@@ -38,49 +49,51 @@ test(realm, 'unknown', False, 'unknown, no variables')
 # NT-SRV-HST server names should be unaffected by host_based_services,
 # and NT-PRINCIPAL server names shouldn't get a referral regardless.
 restart_kdc(realm, {'kdcdefaults': {'host_based_services': '*'}})
-test(realm, 'unknown', True, 'unknown, kdcdefaults hostbased *')
-test(realm, 'principal', False, 'principal, kdcdefaults hostbased *')
+testref(realm, 'unknown')
+testfail(realm, 'principal')
 restart_kdc(realm, {'kdcdefaults': {'host_based_services': ['b', 'a,c']}})
-test(realm, 'unknown', True, 'unknown, kdcdefaults hostbased b and a,c')
+testref(realm, 'unknown')
 restart_kdc(realm, {'realms': {'$realm': {'host_based_services': 'a b c'}}})
-test(realm, 'unknown', True, 'unknown, realm hostbased a b c')
+testref(realm, 'unknown')
 restart_kdc(realm, {'kdcdefaults': {'host_based_services': 'a'},
                     'realms': {'$realm': {'host_based_services': 'b c'}}})
-test(realm, 'unknown', True, 'unknown, kdcdefaults hostbased a (w/ realm)')
+testref(realm, 'unknown')
 restart_kdc(realm, {'kdcdefaults': {'host_based_services': 'b,c'},
                     'realms': {'$realm': {'host_based_services': 'a,b'}}})
-test(realm, 'unknown', True, 'unknown, realm hostbased a,b (w/ kdcdefaults)')
+testref(realm, 'unknown')
 restart_kdc(realm, {'kdcdefaults': {'host_based_services': 'b,c'}})
-test(realm, 'unknown', False, 'unknown, kdcdefaults hostbased b,c')
-test(realm, 'srv-hst', True, 'srv-hst, kdcdefaults hostbased b,c')
+testfail(realm, 'unknown')
+testref(realm, 'srv-hst')
 
 # With no_host_referrals matching the first server name component, we
 # should not get a referral even for NT-SRV-HOST server names
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': '*'}})
-test(realm, 'srv-hst', False, 'srv-hst, kdcdefaults nohost *')
+testfail(realm, 'srv-hst')
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': ['b', 'a,c']}})
-test(realm, 'srv-hst', False, 'srv-hst, kdcdefaults nohost b and a,c')
+testfail(realm, 'srv-hst')
 restart_kdc(realm, {'realms': {'$realm': {'no_host_referral': 'a b c'}}})
-test(realm, 'srv-hst', False, 'srv-hst, realm nohost a b c')
+testfail(realm, 'srv-hst')
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': 'a'},
                     'realms': {'$realm': {'no_host_referral': 'b c'}}})
-test(realm, 'srv-hst', False, 'srv-hst, kdcdefaults nohost a (w/ realm)')
+testfail(realm, 'srv-hst')
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': 'b,c'},
                     'realms': {'$realm': {'no_host_referral': 'a,b'}}})
-test(realm, 'srv-hst', False, 'srv-hst, realm nohost a,b (w/ kdcdefaults)')
+testfail(realm, 'srv-hst')
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': 'b,c'}})
-test(realm, 'srv-hst', True, 'srv-hst, kdcdefaults nohost b,c')
+testref(realm, 'srv-hst')
 
 # no_host_referrals should override host_based_services for NT-UNKNWON
 # server names.
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': '*',
                                     'host_based_services': '*'}})
-test(realm, 'unknown', False, 'srv-hst, kdcdefaults nohost * hostbased *')
+testfail(realm, 'unknown')
+
+realm.stop()
+refrealm.stop()
 
 # Regression test for #7483: a KDC should not return a host referral
 # to its own realm.
 drealm = {'domain_realm': {'d': 'KRBTEST.COM'}}
-realm.stop()
 realm = K5Realm(kdc_conf=drealm, create_host=False)
 tracefile = os.path.join(realm.testdir, 'trace')
 realm.run(['env', 'KRB5_TRACE=' + tracefile, './gcred', 'srv-hst', 'a/x.d@'],
