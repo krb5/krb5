@@ -214,7 +214,6 @@ change_set_password(krb5_context context,
                     krb5_data *result_string)
 {
     krb5_data                   chpw_rep;
-    krb5_address                remote_kaddr;
     krb5_boolean                use_tcp = 0;
     GETSOCKNAME_ARG3_TYPE       addrlen;
     krb5_error_code             code = 0;
@@ -271,26 +270,6 @@ change_set_password(krb5_context context,
              */
             break;
         }
-
-        if (remote_addr.ss_family == AF_INET) {
-            remote_kaddr.addrtype = ADDRTYPE_INET;
-            remote_kaddr.length = sizeof(ss2sin(&remote_addr)->sin_addr);
-            remote_kaddr.contents =
-                (krb5_octet *) &ss2sin(&remote_addr)->sin_addr;
-        } else if (remote_addr.ss_family == AF_INET6) {
-            remote_kaddr.addrtype = ADDRTYPE_INET6;
-            remote_kaddr.length = sizeof(ss2sin6(&remote_addr)->sin6_addr);
-            remote_kaddr.contents =
-                (krb5_octet *) &ss2sin6(&remote_addr)->sin6_addr;
-        } else {
-            break;
-        }
-
-        if ((code = krb5_auth_con_setaddrs(callback_ctx.context,
-                                           callback_ctx.auth_context,
-                                           NULL,
-                                           &remote_kaddr)))
-            break;
 
         code = krb5int_rd_chpw_rep(callback_ctx.context,
                                    callback_ctx.auth_context,
