@@ -611,7 +611,7 @@ policy_lock:
 lock_error:;
     db_ctx->db_lock_mode = 0;
     db_ctx->db_locks_held = 0;
-    krb5_db2_unlock(context);
+    krb5_lock_file(context, db_ctx->db_lf_file, KRB5_LOCKMODE_UNLOCK);
     return retval;
 }
 
