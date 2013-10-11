@@ -34,7 +34,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 The kdc.conf file supplements \fIkrb5.conf(5)\fP for programs which
 are typically only used on a KDC, such as the \fIkrb5kdc(8)\fP and
 \fIkadmind(8)\fP daemons and the \fIkdb5_util(8)\fP program.
-Relations documented here may also be specified in krb5.conf.
+Relations documented here may also be specified in krb5.conf; for the
+KDC programs mentioned, krb5.conf and kdc.conf will be merged into a
+single configuration profile.
 .sp
 Normally, the kdc.conf file is found in the KDC state directory,
 \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP.  You can override the default location by setting the
@@ -174,8 +176,8 @@ preauthenticate using a hardware device before receiving any
 tickets.
 .TP
 .B \fBno\-auth\-data\-required\fP
-Enabling this flag prevents PAC data from being added to
-service tickets for the principal.
+Enabling this flag prevents PAC or AD\-SIGNEDPATH data from
+being added to service tickets for the principal.
 .TP
 .B \fBok\-as\-delegate\fP
 If this flag is enabled, it hints the client that credentials
@@ -229,9 +231,10 @@ authentication process that was used to obtain the TGT.
 .TP
 .B \fBdict_file\fP
 (String.)  Location of the dictionary file containing strings that
-are not allowed as passwords.  If none is specified or if there is
-no policy assigned to the principal, no dictionary checks of
-passwords will be performed.
+are not allowed as passwords.  The file should contain one string
+per line, with no additional whitespace.  If none is specified or
+if there is no policy assigned to the principal, no dictionary
+checks of passwords will be performed.
 .TP
 .B \fBhost_based_services\fP
 (Whitespace\- or comma\-separated list.)  Lists services which will
@@ -539,6 +542,82 @@ administrative server will be appended to the file
     kdc = SYSLOG:INFO:DAEMON
     admin_server = FILE:/var/adm/kadmin.log
     admin_server = DEVICE=/dev/tty04
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS [otp]
+.sp
+Each subsection of [otp] is the name of an OTP token type.  The tags
+within the subsection define the configuration required to forward a
+One Time Password request to a RADIUS server.
+.sp
+For each token type, the following tags may be specified:
+.INDENT 0.0
+.TP
+.B \fBserver\fP
+This is the server to send the RADIUS request to.  It can be a
+hostname with optional port, an ip address with optional port, or
+a Unix domain socket address.  The default is
+\fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/<name>.socket\fP.
+.TP
+.B \fBsecret\fP
+This tag indicates a filename (which may be relative to \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP)
+containing the secret used to encrypt the RADIUS packets.  The
+secret should appear in the first line of the file by itself;
+leading and trailing whitespace on the line will be removed.  If
+the value of \fBserver\fP is a Unix domain socket address, this tag
+is optional, and an empty secret will be used if it is not
+specified.  Otherwise, this tag is required.
+.TP
+.B \fBtimeout\fP
+An integer which specifies the time in seconds during which the
+KDC should attempt to contact the RADIUS server.  This tag is the
+total time across all retries and should be less than the time
+which an OTP value remains valid for.  The default is 5 seconds.
+.TP
+.B \fBretries\fP
+This tag specifies the number of retries to make to the RADIUS
+server.  The default is 3 retries (4 tries).
+.TP
+.B \fBstrip_realm\fP
+If this tag is \fBtrue\fP, the principal without the realm will be
+passed to the RADIUS server.  Otherwise, the realm will be
+included.  The default value is \fBtrue\fP.
+.UNINDENT
+.sp
+In the following example, requests are sent to a remote server via UDP.
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[otp]
+    MyRemoteTokenType = {
+        server = radius.mydomain.com:1812
+        secret = SEmfiajf42$
+        timeout = 15
+        retries = 5
+        strip_realm = true
+    }
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+An implicit default token type named \fBDEFAULT\fP is defined for when
+the per\-principal configuration does not specify a token type.  Its
+configuration is shown below.  You may override this token type to
+something applicable for your situation.
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[otp]
+    DEFAULT = {
+        strip_realm = false
+    }
 .ft P
 .fi
 .UNINDENT

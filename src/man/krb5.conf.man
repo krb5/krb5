@@ -178,12 +178,12 @@ The libdefaults section may contain any of the following relations:
 .INDENT 0.0
 .TP
 .B \fBallow_weak_crypto\fP
-If this flag is set to false, then weak encryption types will be
-filtered out of the previous three lists (as noted in
-\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP).  The
-default value for this tag is false, which may cause
-authentication failures in existing Kerberos infrastructures that
-do not support strong crypto.  Users in affected environments
+If this flag is set to false, then weak encryption types (as noted in
+\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP) will be filtered
+out of the lists \fBdefault_tgs_enctypes\fP, \fBdefault_tkt_enctypes\fP, and
+\fBpermitted_enctypes\fP.  The default value for this tag is false, which
+may cause authentication failures in existing Kerberos infrastructures
+that do not support strong crypto.  Users in affected environments
 should set this tag to true until their infrastructure adopts
 stronger ciphers.
 .TP
@@ -263,6 +263,13 @@ Do not set this unless required for specific backward
 compatibility purposes; stale values of this setting can prevent
 clients from taking advantage of new stronger enctypes when the
 libraries are upgraded.
+.TP
+.B \fBdns_canonicalize_hostname\fP
+Indicate whether name lookups will be used to canonicalize
+hostnames for use in service principal names.  Setting this flag
+to false can improve security by reducing reliance on DNS, but
+means that short hostnames will not be canonicalized to
+fully\-qualified hostnames.  The default value is true.
 .TP
 .B \fBdns_lookup_kdc\fP
 Indicate whether DNS SRV records should be used to locate the KDCs
@@ -428,7 +435,8 @@ default, if allowed by the KDC.  The default value is false.
 .B \fBrdns\fP
 If this flag is true, reverse name lookup will be used in addition
 to forward name lookup to canonicalizing hostnames for use in
-service principal names.  The default value is true.
+service principal names.  If \fBdns_canonicalize_hostname\fP is set
+to false, this flag has no effect.  The default value is true.
 .TP
 .B \fBrealm_try_domains\fP
 Indicate whether a host\(aqs domain components should be used to
@@ -590,7 +598,9 @@ The [domain_realm] section provides a translation from a domain name
 or hostname to a Kerberos realm name.  The tag name can be a host name
 or domain name, where domain names are indicated by a prefix of a
 period (\fB.\fP).  The value of the relation is the Kerberos realm name
-for that particular host or domain.  The Kerberos realm may be
+for that particular host or domain.  A host name relation implicitly
+provides the corresponding domain name relation, unless an explicit domain
+name relation is provided.  The Kerberos realm may be
 identified either in the \fI\%realms\fP section or using DNS SRV records.
 Host names and domain names should be in lower case.  For example:
 .INDENT 0.0
@@ -600,18 +610,20 @@ Host names and domain names should be in lower case.  For example:
 .ft C
 [domain_realm]
     crash.mit.edu = TEST.ATHENA.MIT.EDU
-    .mit.edu = ATHENA.MIT.EDU
+    .dev.mit.edu = TEST.ATHENA.MIT.EDU
     mit.edu = ATHENA.MIT.EDU
 .ft P
 .fi
 .UNINDENT
 .UNINDENT
 .sp
-maps the host with the exact name \fBcrash.mit.edu\fP into the
-TEST.ATHENA.MIT.EDU realm.  The period prefix in \fB.mit.edu\fP denotes
-that all systems in the \fBmit.edu\fP domain belong to
-\fBATHENA.MIT.EDU\fP realm.  The third entry maps the host \fBmit.edu\fP
-itself to the \fBATHENA.MIT.EDU\fP realm.
+maps the host with the name \fBcrash.mit.edu\fP into the
+\fBTEST.ATHENA.MIT.EDU\fP realm.  The second entry maps all hosts under the
+domain \fBdev.mit.edu\fP into the \fBTEST.ATHENA.MIT.EDU\fP realm, but not
+the host with the name \fBdev.mit.edu\fP.  That host is matched
+by the third entry, which maps the host \fBmit.edu\fP and all hosts
+under the domain \fBmit.edu\fP that do not match a preceding rule
+into the realm \fBATHENA.MIT.EDU\fP.
 .sp
 If no translation entry applies to a hostname used for a service
 principal for a service ticket request, the library will try to get a
@@ -800,6 +812,12 @@ absolute path, it will be treated as relative to the
 \fBplugin_base_dir\fP value from \fI\%[libdefaults]\fP.
 .UNINDENT
 .sp
+For pluggable interfaces where module order matters, modules
+registered with a \fBmodule\fP tag normally come first, in the order
+they are registered, followed by built\-in modules in the order they
+are documented below.  If \fBenable_only\fP tags are used, then the
+order of those tags overrides the normal module order.
+.sp
 The following subsections are currently supported within the [plugins]
 section:
 .SS ccselect interface
@@ -861,6 +879,30 @@ This module implements the encrypted challenge FAST factor.
 .B \fBencrypted_timestamp\fP
 This module implements the encrypted timestamp mechanism.
 .UNINDENT
+.SS hostrealm interface
+.sp
+The hostrealm section (introduced in release 1.12) controls modules
+for the host\-to\-realm interface, which affects the local mapping of
+hostnames to realm names and the choice of default realm.  The following
+built\-in modules exist for this interface:
+.INDENT 0.0
+.TP
+.B \fBprofile\fP
+This module consults the [domain_realm] section of the profile for
+authoritative host\-to\-realm mappings, and the \fBdefault_realm\fP
+variable for the default realm.
+.TP
+.B \fBdns\fP
+This module looks for DNS records for fallback host\-to\-realm
+mappings and the default realm.  It only operates if the
+\fBdns_lookup_realm\fP variable is set to true.
+.TP
+.B \fBdomain\fP
+This module applies heuristics for fallback host\-to\-realm
+mappings.  It implements the \fBrealm_try_domains\fP variable, and
+uses the uppercased parent domain of the hostname if that does not
+produce a result.
+.UNINDENT
 .SS localauth interface
 .sp
 The localauth section (introduced in release 1.12) controls modules
@@ -869,30 +911,30 @@ between Kerberos principals and local system accounts.  The following
 built\-in modules exist for this interface:
 .INDENT 0.0
 .TP
-.B \fBauth_to_local\fP
-This module processes \fBauth_to_local\fP values in the default
-realm\(aqs section, and applies the default method if no
-\fBauth_to_local\fP values exist.
-.TP
-.B \fBan2ln\fP
-This module authorizes a principal to a local account if the
-principal name maps to the local account name.
-.TP
 .B \fBdefault\fP
 This module implements the \fBDEFAULT\fP type for \fBauth_to_local\fP
 values.
 .TP
-.B \fBk5login\fP
-This module authorizes a principal to a local account according to
-the account\(aqs \fI.k5login(5)\fP file.
+.B \fBrule\fP
+This module implements the \fBRULE\fP type for \fBauth_to_local\fP
+values.
 .TP
 .B \fBnames\fP
 This module looks for an \fBauth_to_local_names\fP mapping for the
 principal name.
 .TP
-.B \fBrule\fP
-This module implements the \fBRULE\fP type for \fBauth_to_local\fP
-values.
+.B \fBauth_to_local\fP
+This module processes \fBauth_to_local\fP values in the default
+realm\(aqs section, and applies the default method if no
+\fBauth_to_local\fP values exist.
+.TP
+.B \fBk5login\fP
+This module authorizes a principal to a local account according to
+the account\(aqs \fI.k5login(5)\fP file.
+.TP
+.B \fBan2ln\fP
+This module authorizes a principal to a local account if the
+principal name maps to the local account name.
 .UNINDENT
 .SH PKINIT OPTIONS
 .IP Note
