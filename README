@@ -80,8 +80,132 @@ beginning with krb5-1.8.
 Major changes in 1.12
 ---------------------
 
+Developer experience:
+
+* Add a plugin interface to control krb5_aname_to_localname and
+  krb5_kuserok behavior.
+
+* Add a plugin interface to control hostname-to-realm mappings and the
+  default realm.
+
+* Add GSSAPI extensions for constructing MIC tokens using IOV lists.
+
+Administrator experience:
+
+* Principal entries may now refer to the names of policies which do
+  not exist as policy objects in the database.  Policy objects may now
+  be deleted whether or not principals reference their names.  A
+  principal which references a nonexistent policy name will behave as
+  if it does not reference a policy.
+
+* Add support for having no long-term keys for a principal. This can
+  be useful if the principal is only intended to be used with PKINIT
+  or OTP preauthentication.
+
+* Add collection support to the KEYRING credential cache type on
+  Linux, and add support for persistent user keyrings and larger
+  credentials on systems which support them.
+
+* Add a FAST OTP preauthentication module for the KDC which uses
+  RADIUS to validate OTP token values.
+
+* Add an experimental pluggable interface for auditing KDC
+  processing. This interface may change in a backwards-incompatible
+  way in a future release.
+
+Performance:
+
+* The AES-based encryption types will use AES-NI instructions when
+  possible for improved performance.
+
 krb5-1.12 changes by ticket ID
 ------------------------------
+
+1539    tests should test getting renewable tickets
+2602    Don't reject renewable of non-renewable tickets
+3206    gss_acquire_cred with GSS_C_BOTH or GSS_C_INITIATE should work
+        with keytab creds
+6429    KDC prefers built-in preauth to plugins
+6948    Funny klist output if you try to get credentials right when a
+        ticket expires
+7172    Credential collection doesn't include DIR subsidiary default
+        cache
+7296    issues in handling special characters in KDC ldap plugin code
+7385    Policy deletion should not rely on refcounts
+7511    Fix minor int overflow and null pointer problems
+7517    Pass through module errors when preauthenticating
+7518    Delete timestamp_to_sfstring sprintf fallback
+7520    Make kproplog consistently treat ulog as a circular buffer
+7522    Propagate policy changes over iprop via full dump
+7524    Fix gss_str_to_oid and gss_oid_to_str edge cases
+7529    Install pkg-config data files
+7535    Stop loading policy for pw_expiration in LDAP
+7550    Fix iprop log reinitialization
+7551    Add LDAP debug DB option
+7552    Remove ulog_check(); the ulog is not a DB journal
+7555    Don't squash name type for cross TGT requests
+7556    Fix COPY_FIRST_CANONNAME hostent search
+7564    Remove -b6 and -old dump formats
+7565    Desupport krb5_auth_con_setivector
+7583    Add localauth pluggable interface
+7584    krb5_free_ktypes() needs a prototype in krb5.h
+7585    t_oid.o not deleted when make clean run
+7589    Add support for k5srvutil -e keysalts
+7590    PKINIT needs to use the prompter callback for PEM files
+7598    Add support for client keytab from cred store
+7599    Add krb5_kt_dup API and use it in two places
+7603    Allow numeric addresses as service hostnames
+7604    Dynamically expand timeout when TCP connects
+7620    libgssrpc is missing from krb5-config and pkg-config
+7625    Don't use "bool" for ASN.1 boolean macros
+7628    Fix link line for t_fortuna when built with openssl
+7629    src/util/support/plugins.c dependencies
+7630    Make AS requests work with no client keys
+7631    No-effect statement in builtin crypto
+7632    LDAP password file errors not helpful enough
+7634    Fix crypto openssl hmac warning
+7635    Add test case for CVE-2013-1416
+7636    kinit checks for "KDB" keytab prefix, not "KDB:"
+7642    Can't get initial creds with empty password via API
+7643    Fix rc4 string-to-key on unterminated inputs
+7645    Add AES-NI support on x86/x64 platforms
+7648    Change message macro for configure selection
+7651    Link dbtest with libkrb5support
+7652    Fix warnings in dbtest.c
+7656    Fix spurious clock skew caused by preauth delay
+7657    Use KDC clock skew for AS-REQ timestamps
+7661    Refactor KDC renewable ticket handling
+7662    Assertion `password->length >0' failed
+7663    FAST options bit ordering is backwards
+7665    Provide plugin module ordering guarantees
+7673    Use better URL for kerberos documentation (in KfW)
+7678    Add libkrad
+7679    Add kadmin support for principals without keys
+7680    Add PKINIT responder support
+7681    Allow self-service for kadmin purgekeys RPC
+7682    Mechglue dynamic initialization functions miss some functions
+7683    Update config.guess and config.sub
+7684    Don't reopen the KDB in update_princ_encryption
+7687    Add hostrealm pluggable interface definition
+7688    Fix gss_krb5_set_allowable_enctypes for acceptor
+7689    kinit can create duplicate ccache in collection with default
+        principal
+7690    Remove redundant domain_realm mappings
+7691    Remove KRB5_DNS_LOOKUP_KDC
+7692    Save the full residual for keyring caches
+7693    Add a note about how to apply/remove policies
+7695    krb5-1.11.3/1.10.6 - full resync may fail and still result in
+        ulog being updated
+7697    Omit signedpath if no_auth_data_required is set
+7698    Service principal aliases broken in 1.11 KDC
+7699    Make it possible to renew aliased service tickets
+7700    Support FAST hide-client-names option
+7701    Fix FAST critical option bit checking
+7703    Add a flag to prevent all host canonicalization
+7705    Add GSSAPI IOV MIC functions
+7709    Wrong order in kdc_check_transited_list()
+7712    KDC Audit infrastructure and plugin implementation
+7713    Fix audit test module initialization
 
 Acknowledgements
 ----------------
@@ -182,6 +306,7 @@ reports, suggestions, and valuable resources:
     Mark Bannister
     David Bantz
     Alex Baule
+    David Benjamin
     Adam Bernstein
     Arlene Berry
     Jeff Blaine
@@ -202,14 +327,18 @@ reports, suggestions, and valuable resources:
     Nalin Dahyabhai
     Mark Davies
     Dennis Davis
+    Alex Dehnert
     Mark Deneen
+    Günther Deschner
     Roland Dowdeswell
+    Viktor Dukhovni
     Jason Edgecombe
     Mark Eichin
     Shawn M. Emery
     Douglas E. Engert
     Peter Eriksson
     Juha Erkkilä
+    Gilles Espinasse
     Ronni Feldt
     Bill Fellows
     JC Ferguson
@@ -222,6 +351,7 @@ reports, suggestions, and valuable resources:
     Steve Grubb
     Philip Guenther
     Dominic Hargreaves
+    Robbie Harwood
     Jakob Haufe
     Matthieu Hautreux
     Paul B. Henson
@@ -244,6 +374,7 @@ reports, suggestions, and valuable resources:
     Jan iankko Lieskovsky
     Oliver Loch
     Kevin Longfellow
+    Nuno Lopes
     Ryan Lynch
     Nathaniel McCallum
     Greg McClement
@@ -273,6 +404,7 @@ reports, suggestions, and valuable resources:
     Mike Roszkowski
     Guillaume Rousse
     Tom Shaw
+    Jim Shi
     Peter Shoults
     Simo Sorce
     Michael Spang
@@ -293,6 +425,7 @@ reports, suggestions, and valuable resources:
     Simon Wilkinson
     Nicolas Williams
     Ross Wilper
+    Augustin Wolf
     Xu Qiang
     Nickolai Zeldovich
     Hanz van Zijst
