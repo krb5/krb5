@@ -24,10 +24,15 @@ You can establish a new certificate authority (CA) for use with a
 PKINIT deployment with the commands::
 
     openssl genrsa -out cakey.pem 2048
-    openssl req -key cakey.pem -new -x509 -out cacert.pem
+    openssl req -key cakey.pem -new -x509 -out cacert.pem -days 3650
 
 The second command will ask for the values of several certificate
-fields.  These fields can be set to any values.
+fields.  These fields can be set to any values.  You can adjust the
+expiration time of the CA certificate by changing the number after
+``-days``.  Since the CA certificate must be deployed to client
+machines each time it changes, it should normally have an expiration
+time far in the future; however, expiration times after 2037 may cause
+interoperability issues in rare circumstances.
 
 The result of these commands will be two files, cakey.pem and
 cacert.pem.  cakey.pem will contain a 2048-bit RSA private key, which
@@ -71,13 +76,15 @@ and sign a KDC certificate with the following commands::
     openssl genrsa -out kdckey.pem 2048
     openssl req -new -out kdc.req -key kdckey.pem
     env REALM=YOUR_REALMNAME openssl x509 -req -in kdc.req \
-        -CAkey cakey.pem -CA cacert.pem -out kdc.pem \
+        -CAkey cakey.pem -CA cacert.pem -out kdc.pem -days 365 \
         -extfile extensions.kdc -extensions kdc_cert -CAcreateserial
     rm kdc.req
 
 The second command will ask for the values of certificate fields,
 which can be set to any values.  In the third command, substitute your
-KDC's realm name for YOUR_REALMNAME.
+KDC's realm name for YOUR_REALMNAME.  You can adjust the certificate's
+expiration date by changing the number after ``-days``.  Remember to
+create a new KDC certificate before the old one expires.
 
 The result of this operation will be in two files, kdckey.pem and
 kdc.pem.  Both files must be placed in the KDC's filesystem.
@@ -121,7 +128,7 @@ generate and sign a client certificate with the following commands::
     env REALM=YOUR_REALMNAME CLIENT=YOUR_PRINCNAME openssl x509 \
         -CAkey cakey.pem -CA cacert.pem -req -in client.req \
         -extensions client_cert -extfile extensions.client \
-        -out client.pem
+        -days 365 -out client.pem
     rm client.req
 
 Normally, the first two commands should be run on the client host, and
@@ -130,7 +137,8 @@ host for the third command.  As in the previous steps, the second
 command will ask for the values of certificate fields, which can be
 set to any values.  In the third command, substitute your realm's name
 for YOUR_REALMNAME and the client's principal name (without realm) for
-YOUR_PRINCNAME.
+YOUR_PRINCNAME.  You can adjust the certificate's expiration date by
+changing the number after ``-days``.
 
 The result of this operation will be two files, clientkey.pem and
 client.pem.  Both files must be present on the client's host;
@@ -163,6 +171,18 @@ The principal entry for each PKINIT-using client must be configured to
 require preauthentication.  Ensure this with the command::
 
     kadmin -q 'modprinc +requires_preauth YOUR_PRINCNAME'
+
+Starting with release 1.12, it is possible to remove the long-term
+keys of a principal entry, which can save some space in the database
+and help to clarify some PKINIT-related error conditions by not asking
+for a password::
+
+    kadmin -q 'purgekeys -all YOUR_PRINCNAME'
+
+These principal options can also be specified at principal creation
+time as follows::
+
+    kadmin -q 'add_principal +requires_preauth -nokey YOUR_PRINCNAME'
 
 
 Configuring the clients

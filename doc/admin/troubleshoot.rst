@@ -52,6 +52,26 @@ section of :ref:`krb5.conf(5)`.
 
 Seen in: clients
 
+.. error::
+
+    Cannot create cert chain: certificate has expired
+
+This error message indicates that PKINIT authentication failed because
+the client certificate, KDC certificate, or one of the certificates in
+the signing chain above them has expired.
+
+If the KDC certificate has expired, this message appears in the KDC
+log file, and the client will receive a "Preauthentication failed"
+error.  (Prior to release 1.11, the KDC log file message erroneously
+appears as "Out of memory".  Prior to release 1.12, the client will
+receive a "Generic error".)
+
+If the client or a signing certificate has expired, this message may
+appear in trace_logging_ output from :ref:`kinit(1)` or, starting in
+release 1.12, as an error message from kinit or another program which
+gets initial tickets.  The error message is more likely to appear
+properly on the client if the principal entry has no long-term keys.
+
 ----
 
 .. include:: ./install_kdc.rst
