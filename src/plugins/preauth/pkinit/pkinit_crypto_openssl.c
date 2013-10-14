@@ -1109,7 +1109,7 @@ cms_signeddata_create(krb5_context context,
                 pkiDebug("failed to create a certificate chain: %s\n", msg);
                 if (!sk_X509_num(id_cryptoctx->trustedCAs))
                     pkiDebug("No trusted CAs found. Check your X509_anchors\n");
-                retval = KRB5_PREAUTH_FAILED;
+                retval = KRB5KDC_ERR_PREAUTH_FAILED;
                 krb5_set_error_message(context, retval,
                                        _("Cannot create cert chain: %s"), msg);
                 goto cleanup;
