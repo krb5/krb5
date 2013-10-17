@@ -109,6 +109,20 @@ import_name(const char *str)
 }
 
 void
+export_import_cred(gss_cred_id_t *cred)
+{
+    OM_uint32 major, minor;
+    gss_buffer_desc buf;
+
+    major = gss_export_cred(&minor, *cred, &buf);
+    check_gsserr("gss_export_cred", major, minor);
+    (void)gss_release_cred(&minor, cred);
+    major = gss_import_cred(&minor, &buf, cred);
+    check_gsserr("gss_import_cred", major, minor);
+    (void)gss_release_buffer(&minor, &buf);
+}
+
+void
 display_canon_name(const char *tag, gss_name_t name, gss_OID mech)
 {
     gss_name_t canon;

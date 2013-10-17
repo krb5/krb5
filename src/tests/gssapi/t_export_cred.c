@@ -37,22 +37,6 @@ usage(void)
     exit(1);
 }
 
-/* Export *cred to a token, then release *cred and replace it by re-importing
- * the token. */
-static void
-export_import_cred(gss_cred_id_t *cred)
-{
-    OM_uint32 major, minor;
-    gss_buffer_desc buf;
-
-    major = gss_export_cred(&minor, *cred, &buf);
-    check_gsserr("gss_export_cred", major, minor);
-    (void)gss_release_cred(&minor, cred);
-    major = gss_import_cred(&minor, &buf, cred);
-    check_gsserr("gss_import_cred", major, minor);
-    (void)gss_release_buffer(&minor, &buf);
-}
-
 int
 main(int argc, char *argv[])
 {

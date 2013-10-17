@@ -1,7 +1,10 @@
 #!/usr/bin/python
 from k5test import *
 
-# Test gss_export_cred and gss_import_cred.
+# Test gss_export_cred and gss_import_cred for initiator creds,
+# acceptor creds, and traditional delegated creds.  t_s4u.py tests
+# exporting and importing a synthesized S4U2Proxy delegated
+# credential.
 
 # Make up a filename to hold user's initial credentials.
 def ccache_savefile(realm):

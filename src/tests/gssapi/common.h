@@ -55,6 +55,10 @@ void errout(const char *msg);
  * 'p:principalname', or 'h:host@service' (or just 'h:service'). */
 gss_name_t import_name(const char *str);
 
+/* Export *cred to a token, then release *cred and replace it by re-importing
+ * the token. */
+void export_import_cred(gss_cred_id_t *cred);
+
 /* Display name as canonicalized to mech, preceded by tag. */
 void display_canon_name(const char *tag, gss_name_t name, gss_OID mech);
 
