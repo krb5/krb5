@@ -62,13 +62,7 @@ generate-files-mac: profile.h
 $(PROFILE_HDR):: profile.h
 	$(CP) profile.h "$@"
 
-includes:: profile.h
-	if cmp profile.h \
-	$(BUILDTOP)/include/profile.h >/dev/null 2>&1; then :; \
-	else \
-		(set -x; $(RM) $(BUILDTOP)/include/profile.h; \
-		 $(CP) profile.h $(BUILDTOP)/include/profile.h) ; \
-	fi
+includes:: $(PROFILE_HDR)
 
 clean-unix::
 	$(RM) $(BUILDTOP)/include/profile.h test2.ini test3.ini test2.ini.bak
