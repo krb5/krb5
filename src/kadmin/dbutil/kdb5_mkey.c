@@ -664,16 +664,16 @@ kdb5_list_mkeys(int argc, char *argv[])
         if (cur_kb_node->kvno == act_kvno) {
             /* * indicates kvno is currently active */
             retval = asprintf(&output_str,
-                              _("KNVO: %d, Enctype: %s, Active on: %s *\n"),
+                              _("KVNO: %d, Enctype: %s, Active on: %s *\n"),
                               cur_kb_node->kvno, enctype, strdate(act_time));
         } else {
             if (act_time != -1) {
                 retval = asprintf(&output_str,
-                                  _("KNVO: %d, Enctype: %s, Active on: %s\n"),
+                                  _("KVNO: %d, Enctype: %s, Active on: %s\n"),
                                   cur_kb_node->kvno, enctype, strdate(act_time));
             } else {
                 retval = asprintf(&output_str,
-                                  _("KNVO: %d, Enctype: %s, No activate time "
+                                  _("KVNO: %d, Enctype: %s, No activate time "
                                     "set\n"), cur_kb_node->kvno, enctype);
             }
         }
@@ -1231,10 +1231,10 @@ kdb5_purge_mkeys(int argc, char *argv[])
      * princ entries
      */
     if (dry_run) {
-        printf(_("Would purge the follwing master key(s) from %s:\n"),
+        printf(_("Would purge the following master key(s) from %s:\n"),
                mkey_fullname);
     } else {
-        printf(_("Purging the follwing master key(s) from %s:\n"),
+        printf(_("Purging the following master key(s) from %s:\n"),
                mkey_fullname);
     }
 
