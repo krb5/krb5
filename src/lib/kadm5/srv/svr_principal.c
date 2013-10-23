@@ -25,7 +25,6 @@
 extern  krb5_principal      master_princ;
 extern  krb5_principal      hist_princ;
 extern  krb5_keyblock       master_keyblock;
-extern  krb5_actkvno_node  *active_mkey_list;
 extern  krb5_db_entry       master_db;
 
 static int decrypt_key_data(krb5_context context,
@@ -512,8 +511,7 @@ kadm5_create_principal_3(void *server_handle,
 
     /* initialize the keys */
 
-    ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list, &act_kvno,
-                                 &act_mkey);
+    ret = kdb_get_active_mkey(handle, &act_kvno, &act_mkey);
     if (ret)
         goto cleanup;
 
@@ -1431,8 +1429,7 @@ kadm5_chpass_principal_3(void *server_handle,
                             principal)))
         goto done;
 
-    ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list, &act_kvno,
-                                 &act_mkey);
+    ret = kdb_get_active_mkey(handle, &act_kvno, &act_mkey);
     if (ret)
         goto done;
 
@@ -1629,8 +1626,7 @@ kadm5_randkey_principal_3(void *server_handle,
         new_n_ks_tuple = 1;
     }
 
-    ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list, NULL,
-                                 &act_mkey);
+    ret = kdb_get_active_mkey(handle, NULL, &act_mkey);
     if (ret)
         goto done;
 
@@ -1779,8 +1775,7 @@ kadm5_setv4key_principal(void *server_handle,
     keysalt.data.length = 0;
     keysalt.data.data = NULL;
 
-    ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list, NULL,
-                                 &act_mkey);
+    ret = kdb_get_active_mkey(handle, NULL, &act_mkey);
     if (ret)
         goto done;
 
@@ -2027,8 +2022,7 @@ kadm5_setkey_principal_3(void *server_handle,
         }
         memset (&tmp_key_data, 0, sizeof(tmp_key_data));
 
-        ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list, NULL,
-                                     &act_mkey);
+        ret = kdb_get_active_mkey(handle, NULL, &act_mkey);
         if (ret)
             goto done;
 
