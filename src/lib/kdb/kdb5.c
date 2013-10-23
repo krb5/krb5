@@ -1226,6 +1226,37 @@ krb5_dbe_fetch_act_key_list(krb5_context context, krb5_principal princ,
     return retval;
 }
 
+/* Find the most recent entry in list (which must not be empty) for the given
+ * timestamp, and return its kvno. */
+static krb5_kvno
+find_actkvno(krb5_actkvno_node *list, krb5_timestamp now)
+{
+    /*
+     * The list is sorted in ascending order of time.  Return the kvno of the
+     * predecessor of the first entry whose time is in the future.  If
+     * (contrary to the safety checks in kdb5_util use_mkey) all of the entries
+     * are in the future, we will return the first node; if all are in the
+     * past, we will return the last node.
+     */
+    while (list->next != NULL && list->next->act_time <= now)
+        list = list->next;
+    return list->act_kvno;
+}
+
+/* Search the master keylist for the master key with the specified kvno.
+ * Return the keyblock of the matching entry or NULL if it does not exist. */
+static krb5_keyblock *
+find_master_key(krb5_context context, krb5_kvno kvno)
+{
+    krb5_keylist_node *n;
+
+    for (n = context->dal_handle->master_keylist; n != NULL; n = n->next) {
+        if (n->kvno == kvno)
+            return &n->keyblock;
+    }
+    return NULL;
+}
+
 /*
  * Locates the "active" mkey used when encrypting a princ's keys.  Note, the
  * caller must NOT free the output act_mkey.
@@ -1235,12 +1266,10 @@ krb5_error_code
 krb5_dbe_find_act_mkey(krb5_context context, krb5_actkvno_node *act_mkey_list,
                        krb5_kvno *act_kvno, krb5_keyblock **act_mkey)
 {
-    krb5_kvno tmp_act_kvno;
+    krb5_kvno kvno;
     krb5_error_code retval;
-    krb5_keylist_node *cur_keyblock = context->dal_handle->master_keylist;
-    krb5_actkvno_node   *prev_actkvno, *cur_actkvno;
-    krb5_timestamp      now;
-    krb5_boolean        found = FALSE;
+    krb5_keyblock *mkey, *cur_mkey;
+    krb5_timestamp now;
 
     if (act_mkey_list == NULL) {
         *act_kvno = 0;
@@ -1248,68 +1277,30 @@ krb5_dbe_find_act_mkey(krb5_context context, krb5_actkvno_node *act_mkey_list,
         return 0;
     }
 
-    if (!cur_keyblock)
+    if (context->dal_handle->master_keylist == NULL)
         return KRB5_KDB_DBNOTINITED;
 
+    /* Find the currently active master key version. */
     if ((retval = krb5_timeofday(context, &now)))
         return (retval);
+    kvno = find_actkvno(act_mkey_list, now);
 
-    /*
-     * The list should be sorted in time, early to later so if the first entry
-     * is later than now, this is a problem.  The fallback in this case is to
-     * return the earlist activation entry.
-     */
-    if (act_mkey_list->act_time > now) {
-        while (cur_keyblock && cur_keyblock->kvno != act_mkey_list->act_kvno)
-            cur_keyblock = cur_keyblock->next;
-        if (cur_keyblock) {
-            *act_mkey = &cur_keyblock->keyblock;
-            if (act_kvno != NULL)
-                *act_kvno = cur_keyblock->kvno;
-            return (0);
-        } else {
-            return (KRB5_KDB_NOACTMASTERKEY);
-        }
+    /* Find the corresponding master key. */
+    mkey = find_master_key(context, kvno);
+    if (mkey == NULL) {
+        /* Reload the master key list and try again. */
+        cur_mkey = &context->dal_handle->master_keylist->keyblock;
+        if (krb5_db_fetch_mkey_list(context, context->dal_handle->master_princ,
+                                    cur_mkey) == 0)
+            mkey = find_master_key(context, kvno);
     }
-
-    /* find the most current entry <= now */
-    for (prev_actkvno = cur_actkvno = act_mkey_list; cur_actkvno != NULL;
-         prev_actkvno = cur_actkvno, cur_actkvno = cur_actkvno->next) {
-
-        if (cur_actkvno->act_time == now) {
-            tmp_act_kvno = cur_actkvno->act_kvno;
-            found = TRUE;
-            break;
-        } else if (cur_actkvno->act_time > now && prev_actkvno->act_time <= now) {
-            tmp_act_kvno = prev_actkvno->act_kvno;
-            found = TRUE;
-            break;
-        }
-    }
-
-    if (!found) {
-        /*
-         * The end of the list was encountered and all entries are < now so use
-         * the latest entry.
-         */
-        if (prev_actkvno->act_time <= now)
-            tmp_act_kvno = prev_actkvno->act_kvno;
-        else
-            return KRB5_KDB_NOACTMASTERKEY;  /* This shouldn't happen. */
-
-    }
-
-    while (cur_keyblock && cur_keyblock->kvno != tmp_act_kvno)
-        cur_keyblock = cur_keyblock->next;
-
-    if (cur_keyblock) {
-        *act_mkey = &cur_keyblock->keyblock;
-        if (act_kvno != NULL)
-            *act_kvno = tmp_act_kvno;
-        return (0);
-    } else {
+    if (mkey == NULL)
         return KRB5_KDB_NO_MATCHING_KEY;
-    }
+
+    *act_mkey = mkey;
+    if (act_kvno != NULL)
+        *act_kvno = kvno;
+    return 0;
 }
 
 /*
