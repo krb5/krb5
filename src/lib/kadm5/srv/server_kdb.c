@@ -18,7 +18,6 @@
 
 krb5_principal      master_princ;
 krb5_keyblock       master_keyblock; /* local mkey */
-krb5_actkvno_node   *active_mkey_list = NULL;
 krb5_db_entry       master_db;
 
 krb5_principal      hist_princ;
@@ -73,17 +72,29 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
         return (ret);
     }
 
-    if ((ret = krb5_dbe_fetch_act_key_list(handle->context, master_princ,
-                                           &active_mkey_list))) {
-        krb5_db_fini(handle->context);
-        return (ret);
-    }
-
 done:
     if (r == NULL)
         free(realm);
 
     return(ret);
+}
+
+/* Fetch the currently active master key version number and keyblock. */
+krb5_error_code
+kdb_get_active_mkey(kadm5_server_handle_t handle, krb5_kvno *act_kvno_out,
+                    krb5_keyblock **act_mkey_out)
+{
+    krb5_error_code ret;
+    krb5_actkvno_node *active_mkey_list;
+
+    ret = krb5_dbe_fetch_act_key_list(handle->context, master_princ,
+                                      &active_mkey_list);
+    if (ret)
+        return ret;
+    ret = krb5_dbe_find_act_mkey(handle->context, active_mkey_list,
+                                 act_kvno_out, act_mkey_out);
+    krb5_dbe_free_actkvno_list(handle->context, active_mkey_list);
+    return ret;
 }
 
 /*
