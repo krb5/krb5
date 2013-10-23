@@ -114,6 +114,7 @@ check-pytests:: t_init_creds t_localauth
 	$(RUNPYTEST) $(srcdir)/t_kadmin_acl.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kdb.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_keydata.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_mkey.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2012-1014.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2012-1015.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cve-2013-1416.py $(PYTESTFLAGS)
