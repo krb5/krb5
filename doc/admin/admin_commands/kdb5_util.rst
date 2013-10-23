@@ -340,8 +340,8 @@ update_princ_encryption
 
 Update all principal records (or only those matching the
 *princ-pattern* glob pattern) to re-encrypt the key data using the
-active database master key, if they are encrypted using older
-versions, and give a count at the end of the number of principals
+active database master key, if they are encrypted using a different
+version, and give a count at the end of the number of principals
 updated.  If the **-f** option is not given, ask for confirmation
 before starting to make changes.  The **-v** option causes each
 principal processed to be listed, with an indication as to whether it
