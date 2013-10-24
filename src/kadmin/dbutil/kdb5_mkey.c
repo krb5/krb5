@@ -610,22 +610,12 @@ kdb5_list_mkeys(int argc, char *argv[])
         goto cleanup_return;
     }
 
-    if (actkvno_list == NULL) {
-        act_kvno = master_entry->key_data[0].key_data_kvno;
-    } else {
-        retval = krb5_dbe_find_act_mkey(util_context, actkvno_list, &act_kvno,
-                                        &act_mkey);
-        if (retval == KRB5_KDB_NOACTMASTERKEY) {
-            /* Maybe we went through a time warp, and the only keys
-               with activation dates have them set in the future?  */
-            com_err(progname, retval, "");
-            /* Keep going.  */
-            act_kvno = -1;
-        } else if (retval != 0) {
-            com_err(progname, retval, _("while looking up active master key"));
-            exit_status++;
-            goto cleanup_return;
-        }
+    retval = krb5_dbe_find_act_mkey(util_context, actkvno_list, &act_kvno,
+                                    &act_mkey);
+    if (retval != 0) {
+        com_err(progname, retval, _("while looking up active master key"));
+        exit_status++;
+        goto cleanup_return;
     }
 
     printf("Master keys for Principal: %s\n", mkey_fullname);
@@ -640,24 +630,12 @@ kdb5_list_mkeys(int argc, char *argv[])
             goto cleanup_return;
         }
 
-        if (actkvno_list != NULL) {
-            act_time = -1; /* assume actkvno entry not found */
-            for (cur_actkvno = actkvno_list; cur_actkvno != NULL;
-                 cur_actkvno = cur_actkvno->next) {
-                if (cur_actkvno->act_kvno == cur_kb_node->kvno) {
-                    act_time = cur_actkvno->act_time;
-                    break;
-                }
-            }
-        } else {
-            /*
-             * mkey princ doesn't have an active knvo list so assume the current
-             * key is active now
-             */
-            if ((retval = krb5_timeofday(util_context, &act_time))) {
-                com_err(progname, retval, _("while getting current time"));
-                exit_status++;
-                goto cleanup_return;
+        act_time = -1; /* assume actkvno entry not found */
+        for (cur_actkvno = actkvno_list; cur_actkvno != NULL;
+             cur_actkvno = cur_actkvno->next) {
+            if (cur_actkvno->act_kvno == cur_kb_node->kvno) {
+                act_time = cur_actkvno->act_time;
+                break;
             }
         }
 
