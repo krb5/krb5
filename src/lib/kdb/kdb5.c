@@ -1215,26 +1215,6 @@ krb5_dbe_fetch_act_key_list(krb5_context context, krb5_principal princ,
         return retval;
 
     retval = krb5_dbe_lookup_actkvno(context, entry, act_key_list);
-
-    if (*act_key_list == NULL) {
-        krb5_actkvno_node *tmp_actkvno;
-        /*
-         * for mkey princ entries without KRB5_TL_ACTKVNO data provide a default
-         */
-
-        tmp_actkvno = (krb5_actkvno_node *) malloc(sizeof(krb5_actkvno_node));
-        if (tmp_actkvno == NULL) {
-            krb5_db_free_principal(context, entry);
-            return ENOMEM;
-        }
-
-        memset(tmp_actkvno, 0, sizeof(krb5_actkvno_node));
-        tmp_actkvno->act_time = 0; /* earliest time possible */
-        /* use most current key */
-        tmp_actkvno->act_kvno = entry->key_data[0].key_data_kvno;
-        *act_key_list = tmp_actkvno;
-    }
-
     krb5_db_free_principal(context, entry);
     return retval;
 }
@@ -1838,6 +1818,7 @@ krb5_dbe_lookup_actkvno(krb5_context context, krb5_db_entry *entry,
     krb5_actkvno_node *head_data = NULL, *new_data = NULL, *prev_data = NULL;
     unsigned int num_actkvno, i;
     krb5_octet *next_tuple;
+    krb5_kvno earliest_kvno;
 
     memset(&tl_data, 0, sizeof(tl_data));
     tl_data.tl_data_type = KRB5_TL_ACTKVNO;
@@ -1846,8 +1827,24 @@ krb5_dbe_lookup_actkvno(krb5_context context, krb5_db_entry *entry,
         return (code);
 
     if (tl_data.tl_data_contents == NULL) {
-        *actkvno_list = NULL;
-        return (0);
+        /*
+         * If there is no KRB5_TL_ACTKVNO data (likely because the KDB was
+         * created prior to 1.7), synthesize the list which should have been
+         * created at KDB initialization, making the earliest master key
+         * active.
+         */
+
+        /* Get the earliest master key version. */
+        if (entry->n_key_data == 0)
+            return KRB5_KDB_NOMASTERKEY;
+        earliest_kvno = entry->key_data[entry->n_key_data - 1].key_data_kvno;
+
+        head_data = malloc(sizeof(*head_data));
+        if (head_data == NULL)
+            return ENOMEM;
+        memset(head_data, 0, sizeof(*head_data));
+        head_data->act_time = 0; /* earliest time possible */
+        head_data->act_kvno = earliest_kvno;
     } else {
         /* get version to determine how to parse the data */
         krb5_kdb_decode_int16(tl_data.tl_data_contents, version);
