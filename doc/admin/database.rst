@@ -484,6 +484,57 @@ Examples
     shell%
 
 
+Updating the master key
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Starting with release 1.7, :ref:`kdb5_util(8)` allows the master key
+to be changed using a rollover process, with minimal loss of
+availability.  To roll over the master key, follow these steps:
+
+#. On the master KDC, run ``kdb5_util list_mkeys`` to view the current
+   master key version number (KVNO).  If you have never rolled over
+   the master key before, this will likely be version 1::
+
+    $ kdb5_util list_mkeys
+    Master keys for Principal: K/M@KRBTEST.COM
+    KVNO: 1, Enctype: des-cbc-crc, Active on: Wed Dec 31 19:00:00 EST 1969 *
+
+#. On the master KDC, run ``kdb5_util use_mkey 1`` to ensure that a
+   master key activation list is present in the database.  This step
+   is unnecessary in release 1.11.4 or later, or if the database was
+   initially created with release 1.7 or later.
+
+#. On the master KDC, run ``kdb5_util add_mkey -s`` to create a new
+   master key and write it to the stash file.  Enter a secure password
+   when prompted.  If this is the first time you are changing the
+   master key, the new key will have version 2.  The new master key
+   will not be used until you make it active.
+
+#. Propagate the database to all slave KDCs, either manually or by
+   waiting until the next scheduled propagation.  If you do not have
+   any slave KDCs, you can skip this and the next step.
+
+#. On each slave KDC, run ``kdb5_util list_mkeys`` to verify that the
+   new master key is present, and then ``kdb5_util stash`` to write
+   the new master key to the slave KDC's stash file.
+
+#. On the master KDC, run ``kdb5_util use_mkey 2`` to begin using the
+   new master key.  Replace ``2`` with the version of the new master
+   key, as appropriate.  You can optionally specify a date for the new
+   master key to become active; by default, it will become active
+   immediately.  Prior to release 1.12, :ref:`kadmind(8)` must be
+   restarted for this change to take full effect.
+
+#. On the master KDC, run ``kdb5_util update_princ_encryption``.  This
+   command will iterate over the database and re-encrypt all keys in
+   the new master key.  If the database is large, the master KDC will
+   become unavailable while this command runs, but clients should fail
+   over to slave KDCs (if any are present) during this time period.
+
+#. On the master KDC, run ``kdb5_util purge_mkeys`` to clean up the
+   old master key.
+
+
 .. _ops_on_ldap:
 
 Operations on the LDAP database
