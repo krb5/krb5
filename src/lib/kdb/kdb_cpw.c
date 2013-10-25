@@ -389,7 +389,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
     krb5_keysalt          key_salt;
     krb5_keyblock         key;
     krb5_data             pwd;
-    krb5_data             afs_params = string2data("\1"), *s2k_params = NULL;
+    krb5_data             afs_params = string2data("\1"), *s2k_params;
     int                   i, j, k;
     krb5_key_data         tmp_key_data;
     krb5_key_data        *tptr;
@@ -402,6 +402,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
         krb5_boolean similar;
 
         similar = 0;
+        s2k_params = NULL;
 
         /*
          * We could use krb5_keysalt_iterate to replace this loop, or use
