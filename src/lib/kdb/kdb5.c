@@ -1643,7 +1643,7 @@ krb5_dbe_lookup_mkey_aux(krb5_context context, krb5_db_entry *entry,
                          krb5_mkey_aux_node **mkey_aux_data_list)
 {
     krb5_tl_data tl_data;
-    krb5_int16 version;
+    krb5_int16 version, mkey_kvno;
     krb5_mkey_aux_node *head_data = NULL, *new_data = NULL,
         *prev_data = NULL;
     krb5_octet *curloc; /* current location pointer */
@@ -1676,7 +1676,8 @@ krb5_dbe_lookup_mkey_aux(krb5_context context, krb5_db_entry *entry,
                 }
                 memset(new_data, 0, sizeof(krb5_mkey_aux_node));
 
-                krb5_kdb_decode_int16(curloc, new_data->mkey_kvno);
+                krb5_kdb_decode_int16(curloc, mkey_kvno);
+                new_data->mkey_kvno = mkey_kvno;
                 curloc += sizeof(krb5_ui_2);
                 krb5_kdb_decode_int16(curloc, new_data->latest_mkey.key_data_kvno);
                 curloc += sizeof(krb5_ui_2);
