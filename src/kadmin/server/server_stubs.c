@@ -214,15 +214,19 @@ static int cmp_gss_krb5_name(kadm5_server_handle_t handle,
 static int gss_to_krb5_name(kadm5_server_handle_t handle,
                             gss_name_t gss_name, krb5_principal *princ)
 {
-    OM_uint32 status, minor_stat;
+    OM_uint32 minor_stat;
     gss_buffer_desc gss_str;
-    gss_OID gss_type;
     int success;
+    char *s;
 
-    status = gss_display_name(&minor_stat, gss_name, &gss_str, &gss_type);
-    if ((status != GSS_S_COMPLETE) || (gss_type != gss_nt_krb5_name))
+    if (gss_name_to_string(gss_name, &gss_str) != 0)
         return 0;
-    success = (krb5_parse_name(handle->context, gss_str.value, princ) == 0);
+    if (asprintf(&s, "%.*s", (int)gss_str.length, (char *)gss_str.value) < 0) {
+        gss_release_buffer(&minor_stat, &gss_str);
+        return 0;
+    }
+    success = (krb5_parse_name(handle->context, s, princ) == 0);
+    free(s);
     gss_release_buffer(&minor_stat, &gss_str);
     return success;
 }
@@ -232,10 +236,19 @@ gss_name_to_string(gss_name_t gss_name, gss_buffer_desc *str)
 {
     OM_uint32 status, minor_stat;
     gss_OID gss_type;
+    const char pref[] = KRB5_WELLKNOWN_NAMESTR "/" KRB5_ANONYMOUS_PRINCSTR "@";
+    const size_t preflen = sizeof(pref) - 1;
 
     status = gss_display_name(&minor_stat, gss_name, str, &gss_type);
-    if ((status != GSS_S_COMPLETE) || (gss_type != gss_nt_krb5_name))
+    if (status != GSS_S_COMPLETE)
         return 1;
+    if (gss_oid_equal(gss_type, GSS_C_NT_ANONYMOUS)) {
+        /* Guard against non-krb5 mechs with different anonymous displays. */
+        if (str->length < preflen || memcmp(str->value, pref, preflen) != 0)
+            return 1;
+    } else if (!gss_oid_equal(gss_type, GSS_KRB5_NT_PRINCIPAL_NAME)) {
+        return 1;
+    }
     return 0;
 }
 
