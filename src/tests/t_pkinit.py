@@ -71,6 +71,19 @@ realm.kinit('@%s' % realm.realm, flags=['-n'])
 realm.klist('WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS')
 realm.run([kvno, realm.host_princ])
 
+# Test anonymous kadmin.
+f = open(os.path.join(realm.testdir, 'acl'), 'a')
+f.write('WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS a *')
+f.close()
+realm.start_kadmind()
+out = realm.run([kadmin, '-n', '-q', 'addprinc -pw test testadd'])
+if 'created.' not in out:
+    fail('Could not create principal with anonymous kadmin')
+out = realm.run([kadmin, '-n', '-q', 'getprinc testadd'])
+if "Operation requires ``get'' privilege" not in out:
+    fail('Anonymous kadmin has too much privilege')
+realm.stop_kadmind()
+
 # Test with anonymous restricted; FAST should work but kvno should fail.
 r_env = realm.special_env('restrict', True, kdc_conf=restrictive_kdc_conf)
 realm.stop_kdc()
