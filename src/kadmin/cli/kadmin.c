@@ -397,18 +397,26 @@ kadmin_startup(int argc, char *argv[])
     }
 
     /*
-     * If no principal name is specified: If a ccache was specified
-     * and its primary principal name can be read, it is used, else if
-     * a keytab was specified, the principal name is host/hostname,
-     * otherwise append "/admin" to the primary name of the default
-     * ccache, $USER, or pw_name.
+     * If no principal name is specified: If authenticating anonymously, use
+     * the anonymouse principal for the local realm, else if a ccache was
+     * specified and its primary principal name can be read, it is used, else
+     * if a keytab was specified, the principal name is host/hostname,
+     * otherwise append "/admin" to the primary name of the default ccache,
+     * $USER, or pw_name.
      *
      * Gee, 100+ lines to figure out the client principal name.  This
      * should be compressed...
      */
 
     if (princstr == NULL) {
-        if (ccache_name != NULL &&
+        if (use_anonymous) {
+            if (asprintf(&princstr, "%s/%s@%s", KRB5_WELLKNOWN_NAMESTR,
+                         KRB5_ANONYMOUS_PRINCSTR, def_realm) < 0) {
+                fprintf(stderr, _("%s: out of memory\n"), whoami);
+                exit(1);
+            }
+            freeprinc++;
+        } else if (ccache_name != NULL &&
             !krb5_cc_get_principal(context, cc, &princ)) {
             retval = krb5_unparse_name(context, princ, &princstr);
             if (retval) {
