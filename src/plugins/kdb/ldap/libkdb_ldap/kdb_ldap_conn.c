@@ -113,9 +113,9 @@ krb5_ldap_initialize(krb5_ldap_context *ldap_context,
 
     /* ldap init */
     if ((st = ldap_initialize(&ldap_server_handle->ldap_handle, server_info->server_name)) != 0) {
-        if (ldap_context->kcontext)
-            krb5_set_error_message (ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR, "%s",
-                                    ldap_err2string(st));
+        krb5_set_error_message(ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR,
+                               _("Cannot create LDAP handle for '%s': %s"),
+                               server_info->server_name, ldap_err2string(st));
         st = KRB5_KDB_ACCESS_ERROR;
         goto err_out;
     }
@@ -125,10 +125,10 @@ krb5_ldap_initialize(krb5_ldap_context *ldap_context,
         server_info->server_status = ON;
         krb5_update_ldap_handle(ldap_server_handle, server_info);
     } else {
-        if (ldap_context->kcontext)
-            krb5_set_error_message (ldap_context->kcontext,
-                                    KRB5_KDB_ACCESS_ERROR, "%s",
-                                    ldap_err2string(st));
+        krb5_set_error_message(ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR,
+                               _("Cannot bind to LDAP server '%s' as '%s'"
+                                 ": %s"), server_info->server_name,
+                               ldap_context->bind_dn, ldap_err2string(st));
         st = KRB5_KDB_ACCESS_ERROR;
         server_info->server_status = OFF;
         time(&server_info->downtime);
