@@ -219,7 +219,8 @@ krb5_error_code krb5_get_nonexp_tkts(context, cc, creds_array)
 
     while (!(retval = krb5_cc_next_cred(context, cc, &cur, &creds))){
 
-        if ((retval = krb5_check_exp(context, creds.times))){
+        if (!krb5_is_config_principal(context, creds.server) &&
+            (retval = krb5_check_exp(context, creds.times))){
             if (retval != KRB5KRB_AP_ERR_TKT_EXPIRED){
                 return retval;
             }
