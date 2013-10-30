@@ -874,22 +874,19 @@ k5_ntohll (UINT64_TYPE val)
    anyways.  */
 
 #if 0
-static inline int
+static inline void
 set_cloexec_fd(int fd)
 {
 #if defined(F_SETFD)
 # ifdef FD_CLOEXEC
-    if (fcntl(fd, F_SETFD, FD_CLOEXEC) != 0)
-        return errno;
+    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
 # else
-    if (fcntl(fd, F_SETFD, 1) != 0)
-        return errno;
+    (void)fcntl(fd, F_SETFD, 1);
 # endif
 #endif
-    return 0;
 }
 
-static inline int
+static inline void
 set_cloexec_file(FILE *f)
 {
     return set_cloexec_fd(fileno(f));
@@ -901,12 +898,12 @@ set_cloexec_file(FILE *f)
    with F_SETFD.  */
 #ifdef F_SETFD
 # ifdef FD_CLOEXEC
-#  define set_cloexec_fd(FD)    (fcntl((FD), F_SETFD, FD_CLOEXEC) ? errno : 0)
+#  define set_cloexec_fd(FD)    ((void)fcntl((FD), F_SETFD, FD_CLOEXEC))
 # else
-#  define set_cloexec_fd(FD)    (fcntl((FD), F_SETFD, 1) ? errno : 0)
+#  define set_cloexec_fd(FD)    ((void)fcntl((FD), F_SETFD, 1))
 # endif
 #else
-# define set_cloexec_fd(FD)     ((FD),0)
+# define set_cloexec_fd(FD)     ((void)(FD))
 #endif
 #define set_cloexec_file(F)     set_cloexec_fd(fileno(F))
 #endif
