@@ -280,7 +280,7 @@ load_authdata_plugins(krb5_context context)
             void *pctx = NULL;
 
             ftable = authdata_plugins_ftables_v2[i];
-            if ((ftable->authdata_proc == NULL)) {
+            if (ftable->authdata_proc == NULL) {
                 continue;
             }
             server_init_proc = ftable->init_proc;
@@ -316,7 +316,7 @@ load_authdata_plugins(krb5_context context)
             void *pctx = NULL;
 
             ftable = authdata_plugins_ftables_v0[i];
-            if ((ftable->authdata_proc == NULL)) {
+            if (ftable->authdata_proc == NULL) {
                 continue;
             }
             server_init_proc = ftable->init_proc;

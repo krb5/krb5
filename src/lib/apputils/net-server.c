@@ -983,6 +983,7 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
 #ifdef HAVE_STRUCT_RT_MSGHDR
 #include <net/route.h>
 
+#if 0
 static char *
 rtm_type_name(int type)
 {
@@ -1006,6 +1007,7 @@ rtm_type_name(int type)
     default: return "?";
     }
 }
+#endif
 
 static void
 do_network_reconfig(verto_ctx *ctx, verto_ev *ev)

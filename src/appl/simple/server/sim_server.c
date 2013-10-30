@@ -73,7 +73,6 @@ main(int argc, char *argv[])
     struct sockaddr_in c_sock;          /* client's address */
     char full_hname[MAXHOSTNAMELEN];
     char *cp;
-    extern int opterr, optind;
     extern char * optarg;
     int ch;
 
@@ -100,7 +99,6 @@ main(int argc, char *argv[])
      * Parse command line arguments
      *
      */
-    opterr = 0;
     while ((ch = getopt(argc, argv, "p:s:S:")) != -1) {
         switch (ch) {
         case 'p':

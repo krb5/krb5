@@ -791,7 +791,7 @@ kg_accept_krb5(minor_status, context_handle,
                 TREAD_INT16(ptr, option.length, 0);
                 i -= 4;
 
-                if (i < option.length || option.length < 0) {
+                if (i < option.length) {
                     code = KG_BAD_LENGTH;
                     major_status = GSS_S_FAILURE;
                     goto fail;

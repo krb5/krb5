@@ -210,8 +210,6 @@ char *dump_file = KPROP_DEFAULT_FILE;
 
 int main(int argc, char *argv[])
 {
-    extern     char *optarg;
-    extern     int optind, opterr;
     int ret;
     OM_uint32 OMret, major_status, minor_status;
     char *whoami;

@@ -1479,8 +1479,6 @@ load_db(int argc, char **argv)
 {
     krb5_error_code ret;
     FILE *f = NULL;
-    extern char *optarg;
-    extern int optind;
     char *dumpfile = NULL, *dbname, buf[BUFSIZ];
     dump_version *load = NULL;
     int aindex;

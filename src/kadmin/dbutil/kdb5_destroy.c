@@ -43,7 +43,6 @@ kdb5_destroy(argc, argv)
     int argc;
     char *argv[];
 {
-    extern char *optarg;
     extern int optind;
     int optchar;
     char *dbname;
