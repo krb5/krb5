@@ -39,9 +39,14 @@ the ``/etc/inetd.conf`` file which looks like this:
 
     kprop  stream  tcp  nowait  root  /usr/local/sbin/kpropd  kpropd
 
-kpropd can also run as a standalone daemon.  This is required for
-incremental propagation.  But this is also useful for debugging
-purposes.
+kpropd can also run as a standalone daemon, backgrounding itself and
+waiting for connections on port 754 (or the port specified with the
+**-P** option if given).  Standalone mode is required for incremental
+propagation.  Starting in release 1.11, kpropd automatically detects
+whether it was run from inetd and runs in standalone mode if it is
+not.  Prior to release 1.11, the **-S** option is required to run
+kpropd in standalone mode; this option is now accepted for backward
+compatibility but does nothing.
 
 Incremental propagation may be enabled with the **iprop_enable**
 variable in :ref:`kdc.conf(5)`.  If incremental propagation is
@@ -75,19 +80,11 @@ OPTIONS
     program; by default the pathname used is |sbindir|\
     ``/kdb5_util``.
 
-**-S**
-    [DEPRECATED] Enable standalone mode.  Normally kpropd is invoked by
-    inetd(8) so it expects a network connection to be passed to it
-    from inetd(8).  If the **-S** option is specified, or if standard
-    input is not a socket, kpropd will put itself into the background,
-    and wait for connections on port 754 (or the port specified with the
-    **-P** option if given).
-
 **-d**
-    Turn on debug mode.  In this mode, if the **-S** option is
-    selected, kpropd will not detach itself from the current job and
-    run in the background.  Instead, it will run in the foreground and
-    print out debugging messages during the database propagation.
+    Turn on debug mode.  In this mode, kpropd will not detach
+    itself from the current job and run in the background.  Instead,
+    it will run in the foreground and print out debugging messages
+    during the database propagation.
 
 **-P**
     Allow for an alternate port number for kpropd to listen on.  This
