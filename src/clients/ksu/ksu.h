@@ -106,8 +106,8 @@ extern krb5_error_code get_best_principal
 
 /* ccache.c */
 extern krb5_error_code krb5_ccache_copy
-(krb5_context, krb5_ccache, char *, krb5_principal,
- krb5_boolean, krb5_ccache *, krb5_boolean *, uid_t);
+(krb5_context, krb5_ccache, char *, krb5_principal, krb5_boolean,
+ krb5_principal, krb5_ccache *, krb5_boolean *, uid_t);
 
 extern krb5_error_code krb5_store_all_creds
 (krb5_context, krb5_ccache, krb5_creds **, krb5_creds **);
