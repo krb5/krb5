@@ -47,14 +47,15 @@ void show_credential();
 */
 
 krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag,
-                                  primary_principal, restrict_creds, cc_out,
-                                  stored, target_uid)
+                                  primary_principal, restrict_creds,
+                                  target_principal, cc_out, stored, target_uid)
 /* IN */
     krb5_context context;
     krb5_ccache cc_def;
     char *cc_other_tag;
     krb5_principal primary_principal;
     krb5_boolean restrict_creds;
+    krb5_principal target_principal;
     uid_t target_uid;
     /* OUT */
     krb5_ccache *cc_out;
@@ -86,10 +87,9 @@ krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag,
         return errno;
     }
 
-
-    if ((retval = krb5_cc_initialize(context, *cc_other, primary_principal))){
+    retval = krb5_cc_initialize(context, *cc_other, target_principal);
+    if (retval)
         return retval;
-    }
 
     if (restrict_creds) {
         retval = krb5_store_some_creds(context, *cc_other, cc_def_creds_arr,
