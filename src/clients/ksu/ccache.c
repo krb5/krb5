@@ -46,33 +46,22 @@ void show_credential();
    with k5 beta 3 release.
 */
 
-krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag,
-                                  primary_principal, restrict_creds,
-                                  target_principal, cc_out, stored, target_uid)
+krb5_error_code krb5_ccache_copy(context, cc_def, target_principal, cc_target,
+                                 restrict_creds, primary_principal, stored)
 /* IN */
     krb5_context context;
     krb5_ccache cc_def;
-    char *cc_other_tag;
-    krb5_principal primary_principal;
-    krb5_boolean restrict_creds;
     krb5_principal target_principal;
-    uid_t target_uid;
+    krb5_ccache cc_target;
+    krb5_boolean restrict_creds;
+    krb5_principal primary_principal;
     /* OUT */
-    krb5_ccache *cc_out;
     krb5_boolean *stored;
 {
     int i=0;
-    krb5_ccache  * cc_other;
     krb5_error_code retval=0;
     krb5_creds ** cc_def_creds_arr = NULL;
     krb5_creds ** cc_other_creds_arr = NULL;
-
-    cc_other = (krb5_ccache *)  xcalloc(1, sizeof (krb5_ccache));
-
-    if ((retval = krb5_cc_resolve(context, cc_other_tag, cc_other))){
-        com_err(prog_name, retval, _("resolving ccache %s"), cc_other_tag);
-        return retval;
-    }
 
     if (ks_ccache_is_initialized(context, cc_def)) {
         if((retval = krb5_get_nonexp_tkts(context,cc_def,&cc_def_creds_arr))){
@@ -80,25 +69,18 @@ krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag,
         }
     }
 
-    if (ks_ccache_name_is_initialized(context, cc_other_tag))
-        return EINVAL;
-
-    if (krb5_seteuid(0)||krb5_seteuid(target_uid)) {
-        return errno;
-    }
-
-    retval = krb5_cc_initialize(context, *cc_other, target_principal);
+    retval = krb5_cc_initialize(context, cc_target, target_principal);
     if (retval)
         return retval;
 
     if (restrict_creds) {
-        retval = krb5_store_some_creds(context, *cc_other, cc_def_creds_arr,
+        retval = krb5_store_some_creds(context, cc_target, cc_def_creds_arr,
                                        cc_other_creds_arr, primary_principal,
                                        stored);
     } else {
         *stored = krb5_find_princ_in_cred_list(context, cc_def_creds_arr,
                                                primary_principal);
-        retval = krb5_store_all_creds(context, *cc_other, cc_def_creds_arr,
+        retval = krb5_store_all_creds(context, cc_target, cc_def_creds_arr,
                                       cc_other_creds_arr);
     }
 
@@ -118,7 +100,6 @@ krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag,
         }
     }
 
-    *cc_out = *cc_other;
     return retval;
 }
 
