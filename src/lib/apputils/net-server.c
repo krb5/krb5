@@ -983,30 +983,6 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
 #ifdef HAVE_STRUCT_RT_MSGHDR
 #include <net/route.h>
 
-static char *
-rtm_type_name(int type)
-{
-    switch (type) {
-    case RTM_ADD: return "RTM_ADD";
-    case RTM_DELETE: return "RTM_DELETE";
-    case RTM_NEWADDR: return "RTM_NEWADDR";
-    case RTM_DELADDR: return "RTM_DELADDR";
-    case RTM_IFINFO: return "RTM_IFINFO";
-    case RTM_OLDADD: return "RTM_OLDADD";
-    case RTM_OLDDEL: return "RTM_OLDDEL";
-    case RTM_RESOLVE: return "RTM_RESOLVE";
-#ifdef RTM_NEWMADDR
-    case RTM_NEWMADDR: return "RTM_NEWMADDR";
-    case RTM_DELMADDR: return "RTM_DELMADDR";
-#endif
-    case RTM_MISS: return "RTM_MISS";
-    case RTM_REDIRECT: return "RTM_REDIRECT";
-    case RTM_LOSING: return "RTM_LOSING";
-    case RTM_GET: return "RTM_GET";
-    default: return "?";
-    }
-}
-
 static void
 do_network_reconfig(verto_ctx *ctx, verto_ev *ev)
 {
@@ -1055,11 +1031,6 @@ routing_update_needed(struct rt_msghdr *rtm)
 #ifdef RTF_LLINFO
         if (rtm->rtm_flags & RTF_LLINFO)
             break;
-#endif
-#if 0
-        krb5_klog_syslog(LOG_DEBUG,
-                         "network reconfiguration message (%s) received",
-                         rtm_type_name(rtm->rtm_type));
 #endif
         return 1;
     case RTM_RESOLVE:
@@ -1117,12 +1088,6 @@ process_routing_update(verto_ctx *ctx, verto_ev *ev)
                 return;
             }
         }
-#if 0
-        krb5_klog_syslog(LOG_INFO,
-                         _("got routing msg type %d(%s) v%d"),
-                         rtm.rtm_type, rtm_type_name(rtm.rtm_type),
-                         rtm.rtm_version);
-#endif
         if (rtm.rtm_msglen > sizeof(rtm)) {
             /* It appears we get a partial message and the rest is
                thrown away?  */
