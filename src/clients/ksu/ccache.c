@@ -62,12 +62,9 @@ krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag,
 {
     int i=0;
     krb5_ccache  * cc_other;
-    const char * cc_def_name;
-    const char * cc_other_name;
     krb5_error_code retval=0;
     krb5_creds ** cc_def_creds_arr = NULL;
     krb5_creds ** cc_other_creds_arr = NULL;
-    struct stat st_temp;
 
     cc_other = (krb5_ccache *)  xcalloc(1, sizeof (krb5_ccache));
 
@@ -76,16 +73,13 @@ krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag,
         return retval;
     }
 
-    cc_def_name = krb5_cc_get_name(context, cc_def);
-    cc_other_name = krb5_cc_get_name(context, *cc_other);
-
-    if ( ! stat(cc_def_name, &st_temp)){
+    if (ks_ccache_is_initialized(context, cc_def)) {
         if((retval = krb5_get_nonexp_tkts(context,cc_def,&cc_def_creds_arr))){
             return retval;
         }
     }
 
-    if (!lstat( cc_other_name, &st_temp))
+    if (ks_ccache_name_is_initialized(context, cc_other_tag))
         return EINVAL;
 
     if (krb5_seteuid(0)||krb5_seteuid(target_uid)) {
@@ -540,24 +534,18 @@ krb5_error_code krb5_ccache_overwrite(context, ccs, cct, primary_principal)
     krb5_ccache cct;
     krb5_principal primary_principal;
 {
-    const char * cct_name;
-    const char * ccs_name;
     krb5_error_code retval=0;
     krb5_principal temp_principal;
     krb5_creds ** ccs_creds_arr = NULL;
     int i=0;
-    struct stat st_temp;
 
-    ccs_name = krb5_cc_get_name(context, ccs);
-    cct_name = krb5_cc_get_name(context, cct);
-
-    if ( ! stat(ccs_name, &st_temp)){
+    if (ks_ccache_is_initialized(context, ccs)) {
         if ((retval = krb5_get_nonexp_tkts(context,  ccs, &ccs_creds_arr))){
             return retval;
         }
     }
 
-    if ( ! stat(cct_name, &st_temp)){
+    if (ks_ccache_is_initialized(context, cct)) {
         if ((retval = krb5_cc_get_principal(context, cct, &temp_principal))){
             return retval;
         }
@@ -643,12 +631,10 @@ krb5_error_code krb5_ccache_filter (context, cc, prst)
     krb5_creds ** cc_creds_arr = NULL;
     const char * cc_name;
     krb5_boolean stored;
-    struct stat st_temp;
 
     cc_name = krb5_cc_get_name(context, cc);
 
-    if ( ! stat(cc_name, &st_temp)){
-
+    if (ks_ccache_is_initialized(context, cc)) {
         if (auth_debug) {
             fprintf(stderr,"putting cache %s through a filter for -z option\n",                     cc_name);
         }
@@ -713,12 +699,8 @@ krb5_error_code  krb5_find_princ_in_cache (context, cc, princ, found)
 {
     krb5_error_code retval;
     krb5_creds ** creds_list = NULL;
-    const char * cc_name;
-    struct stat st_temp;
 
-    cc_name = krb5_cc_get_name(context, cc);
-
-    if ( ! stat(cc_name, &st_temp)){
+    if (ks_ccache_is_initialized(context, cc)) {
         if ((retval = krb5_get_nonexp_tkts(context, cc, &creds_list))){
             return retval;
         }
@@ -726,4 +708,34 @@ krb5_error_code  krb5_find_princ_in_cache (context, cc, princ, found)
 
     *found = krb5_find_princ_in_cred_list(context, creds_list, princ);
     return 0;
+}
+
+krb5_boolean
+ks_ccache_name_is_initialized(krb5_context context, const char *cctag)
+{
+    krb5_boolean result;
+    krb5_ccache cc;
+
+    if (krb5_cc_resolve(context, cctag, &cc) != 0)
+        return FALSE;
+    result = ks_ccache_is_initialized(context, cc);
+    krb5_cc_close(context, cc);
+
+    return result;
+}
+
+krb5_boolean
+ks_ccache_is_initialized(krb5_context context, krb5_ccache cc)
+{
+    krb5_principal princ;
+    krb5_error_code retval;
+
+    if (cc == NULL)
+        return FALSE;
+
+    retval = krb5_cc_get_principal(context, cc, &princ);
+    if (retval == 0)
+        krb5_free_principal(context, princ);
+
+    return retval == 0;
 }

@@ -141,6 +141,12 @@ extern krb5_error_code krb5_store_some_creds
 (krb5_context, krb5_ccache, krb5_creds **, krb5_creds **,
  krb5_principal, krb5_boolean *);
 
+extern krb5_boolean ks_ccache_name_is_initialized
+(krb5_context, const char *);
+
+extern krb5_boolean ks_ccache_is_initialized
+(krb5_context, krb5_ccache);
+
 extern krb5_error_code krb5_ccache_refresh
 (krb5_context, krb5_ccache);
 
@@ -197,8 +203,6 @@ extern void usage (void);
 extern int standard_shell (char *);
 
 extern krb5_error_code get_params (int *, int, char **, char ***);
-
-extern char *get_dir_of_file (const char *);
 
 /* heuristic.c */
 extern krb5_error_code get_all_princ_from_file (FILE *, char ***);

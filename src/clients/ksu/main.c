@@ -51,7 +51,6 @@ static void print_status( const char *fmt, ...)
     __attribute__ ((__format__ (__printf__, 1, 2)))
 #endif
     ;
-char * get_dir_of_file();
 
 /* Note -e and -a options are mutually exclusive */
 /* insure the proper specification of target user as well as catching
@@ -96,7 +95,6 @@ main (argc, argv)
     const char * cc_source_tag = NULL;
     uid_t source_gid;
     const char * cc_source_tag_tmp = NULL;
-    char * cc_target_tag_tmp=NULL;
     char * cmd = NULL, * exec_cmd = NULL;
     int errflg = 0;
     krb5_boolean auth_val;
@@ -112,11 +110,9 @@ main (argc, argv)
     extern char * getpass(), *crypt();
     int pargc;
     char ** pargv;
-    struct stat  st_temp;
     krb5_boolean stored = FALSE;
     krb5_principal  kdc_server;
     krb5_boolean zero_password;
-    char * dir_of_cc_target;
     krb5_boolean restrict_creds;
 
     options.opt = KRB5_DEFAULT_OPTIONS;
@@ -266,9 +262,10 @@ main (argc, argv)
                 if ( strchr(cc_source_tag, ':')){
                     cc_source_tag_tmp = strchr(cc_source_tag, ':') + 1;
 
-                    if( stat( cc_source_tag_tmp, &st_temp)){
+                    if (!ks_ccache_name_is_initialized(ksu_context,
+                                                       cc_source_tag)) {
                         com_err(prog_name, errno,
-                                _("while looking for credentials file %s"),
+                                _("while looking for credentials cache %s"),
                                 cc_source_tag_tmp);
                         exit (1);
                     }
@@ -419,32 +416,18 @@ main (argc, argv)
         exit(1);
     }
 
-    if (cc_target_tag == NULL) {
-
-        cc_target_tag = (char *)xcalloc(KRB5_SEC_BUFFSIZE ,sizeof(char));
-        /* make sure that the new ticket file does not already exist
-           This is run as source_uid because it is reasonable to
-           require the source user to have write to where the target
-           cache will be created.*/
-
-        do {
-            snprintf(cc_target_tag, KRB5_SEC_BUFFSIZE, "%s%ld.%d",
-                     KRB5_SECONDARY_CACHE,
-                     (long) target_uid, gen_sym());
-            cc_target_tag_tmp = strchr(cc_target_tag, ':') + 1;
-
-        }while ( !stat ( cc_target_tag_tmp, &st_temp));
-    }
-
-
-    dir_of_cc_target = get_dir_of_file(cc_target_tag_tmp);
-
-    if (access(dir_of_cc_target, R_OK | W_OK )){
-        fprintf(stderr,
-                _("%s does not have correct permissions for %s\n"),
-                source_user, cc_target_tag);
-        exit(1);
-    }
+    /*
+     * Make sure that the new ticket file does not already exist.
+     * This is run as source_uid because it is reasonable to
+     * require the source user to have write to where the target
+     * cache will be created.
+     */
+    cc_target_tag = (char *)xcalloc(KRB5_SEC_BUFFSIZE, sizeof(char));
+    do {
+        snprintf(cc_target_tag, KRB5_SEC_BUFFSIZE, "%s%ld.%d",
+                 KRB5_SECONDARY_CACHE,
+                 (long)target_uid, gen_sym());
+    } while (ks_ccache_name_is_initialized(ksu_context, cc_target_tag));
 
     if (auth_debug){
         fprintf(stderr, " source cache =  %s\n", cc_source_tag);
@@ -747,13 +730,6 @@ main (argc, argv)
         exit(1);
     }
 
-    if (access( cc_target_tag_tmp, R_OK | W_OK )){
-        com_err(prog_name, errno,
-                _("%s does not have correct permissions for %s, %s aborted"),
-                target_user, cc_target_tag_tmp, prog_name);
-        exit(1);
-    }
-
     if ( cc_source)
         krb5_cc_close(ksu_context, cc_source);
 
@@ -873,8 +849,6 @@ static void sweep_up(context, cc)
     krb5_ccache cc;
 {
     krb5_error_code retval;
-    const char * cc_name;
-    struct stat  st_temp;
 
     krb5_seteuid(0);
     if (krb5_seteuid(target_uid) < 0) {
@@ -883,8 +857,7 @@ static void sweep_up(context, cc)
         exit(1);
     }
 
-    cc_name = krb5_cc_get_name(context, cc);
-    if ( ! stat(cc_name, &st_temp)){
+    if (ks_ccache_is_initialized(context, cc)) {
         if ((retval = krb5_cc_destroy(context, cc)))
             com_err(prog_name, retval, _("while destroying cache"));
     }
@@ -935,26 +908,6 @@ void print_status(const char *fmt, ...)
         vfprintf(stderr, fmt, ap);
         va_end(ap);
     }
-}
-
-
-char *get_dir_of_file(path)
-    const char *path;
-{
-    char * temp_path;
-    char * ptr;
-
-    temp_path =  xstrdup(path);
-
-    if ((ptr = strrchr( temp_path, '/'))) {
-        *ptr = '\0';
-    } else {
-        free (temp_path);
-        temp_path = xmalloc(MAXPATHLEN);
-        if (temp_path)
-            getcwd(temp_path, MAXPATHLEN);
-    }
-    return temp_path;
 }
 
 krb5_error_code
