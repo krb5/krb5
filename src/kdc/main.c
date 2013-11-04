@@ -140,6 +140,9 @@ setup_server_realm(krb5_principal sprinc)
     kdc_realm_t         *newrealm;
 
     kret = 0;
+    if (sprinc == NULL)
+        return NULL;
+
     if (kdc_numrealms > 1) {
         if (!(newrealm = find_realm_data(sprinc->realm.data,
                                          (krb5_ui_4) sprinc->realm.length)))
