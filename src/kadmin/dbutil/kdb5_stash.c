@@ -130,7 +130,7 @@ kdb5_stash(argc, argv)
     retval = krb5_db_store_master_key_list(util_context, keyfile, master_princ,
                                            NULL);
     if (retval) {
-        com_err(progname, errno, _("while storing key"));
+        com_err(progname, retval, _("while storing key"));
         exit_status++; return;
     }
 

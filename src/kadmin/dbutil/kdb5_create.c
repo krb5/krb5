@@ -341,7 +341,7 @@ void kdb5_create(argc, argv)
                                       &master_keyblock,
                                       mkey_password);
     if (retval) {
-        com_err(progname, errno, _("while storing key"));
+        com_err(progname, retval, _("while storing key"));
         printf(_("Warning: couldn't stash master key.\n"));
     }
     /* clean up */
