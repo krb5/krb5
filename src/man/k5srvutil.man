@@ -1,4 +1,4 @@
-.TH "K5SRVUTIL" "1" " " "1.11.3" "MIT Kerberos"
+.TH "K5SRVUTIL" "1" " " "1.11.4" "MIT Kerberos"
 .SH NAME
 k5srvutil \- host key table (keytab) manipulation utility
 .

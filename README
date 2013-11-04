@@ -77,6 +77,42 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.11.4 (2013-11-04)
+------------------------------------
+
+* Fix a KDC null pointer dereference [CVE-2013-1417] that could affect
+  realms with an uncommon configuration.
+
+* Fix a KDC null pointer dereference [CVE-2013-1418] that could affect
+  KDCs that serve multiple realms.
+
+* Fix a number of bugs related to KDC master key rollover.
+
+krb5-1.11.4 changes by ticket ID
+--------------------------------
+
+7508    Indefinite FD polling
+7650    Issue following client referral from AD
+7664    Build with Visual Studio 2012
+7668    KDC null deref due to referrals [CVE-2013-1417]
+7670    Add test case for CVE-2013-1417
+7671    Install ccselect_plugin.h
+7702    krb5-1.11.3 FTBFS on NetBSD
+7723    Fix GSSAPI krb5 cred ccache import
+7724    Change KRB5KDC_ERR_NO_ACCEPTABLE_KDF to 100
+7726    Use protocol error for PKINIT cert expiry
+7727    Discuss cert expiry, no-key princs in PKINIT docs
+7734    Fix typos in kdb5_util master key command outputs
+7735    Use active master key in update_princ_encryption
+7737    Correctly activate master keys in pre-1.7 KDBs
+7742    Reset key-generation parameters for each enctype
+7746    Fix decoding of mkey kvno in mkey_aux tl-data
+7747    Improve LDAP KDB initialization error messages
+7748    Document master key rollover
+7752    Clarify kpropd standalone mode documentation
+7756    Multi-realm KDC null deref [CVE-2013-1418]
+7758    Fix reference for trace logging
+
 Major changes in 1.11.3 (2013-06-03)
 ------------------------------------
 
@@ -556,6 +592,7 @@ reports, suggestions, and valuable resources:
     Mark Bannister
     David Bantz
     Alex Baule
+    David Benjamin
     Adam Bernstein
     Arlene Berry
     Jeff Blaine
@@ -576,14 +613,18 @@ reports, suggestions, and valuable resources:
     Nalin Dahyabhai
     Mark Davies
     Dennis Davis
+    Alex Dehnert
     Mark Deneen
+    Günther Deschner
     Roland Dowdeswell
+    Viktor Dukhovni
     Jason Edgecombe
     Mark Eichin
     Shawn M. Emery
     Douglas E. Engert
     Peter Eriksson
     Juha Erkkilä
+    Gilles Espinasse
     Ronni Feldt
     Bill Fellows
     JC Ferguson
@@ -596,6 +637,7 @@ reports, suggestions, and valuable resources:
     Steve Grubb
     Philip Guenther
     Dominic Hargreaves
+    Robbie Harwood
     Jakob Haufe
     Matthieu Hautreux
     Paul B. Henson
@@ -619,6 +661,7 @@ reports, suggestions, and valuable resources:
     Jan iankko Lieskovsky
     Oliver Loch
     Kevin Longfellow
+    Nuno Lopes
     Ryan Lynch
     Nathaniel McCallum
     Greg McClement
@@ -648,6 +691,7 @@ reports, suggestions, and valuable resources:
     Mike Roszkowski
     Guillaume Rousse
     Tom Shaw
+    Jim Shi
     Peter Shoults
     Simo Sorce
     Michael Spang
@@ -668,6 +712,7 @@ reports, suggestions, and valuable resources:
     Simon Wilkinson
     Nicolas Williams
     Ross Wilper
+    Augustin Wolf
     Xu Qiang
     Nickolai Zeldovich
     Hanz van Zijst
