@@ -1,6 +1,8 @@
 Troubleshooting
 ===============
 
+.. _trace_logging:
+
 Trace logging
 -------------
 
