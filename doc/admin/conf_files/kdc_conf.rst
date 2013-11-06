@@ -64,11 +64,17 @@ subsection does not contain a relation for the tag.  See the
 [realms]
 ~~~~~~~~
 
-Each tag in the [realms] section is the name of a Kerberos realm.
-The value of the tag is a subsection where the relations define KDC
-parameters for that particular realm.
+Each tag in the [realms] section is the name of a Kerberos realm.  The
+value of the tag is a subsection where the relations define KDC
+parameters for that particular realm.  The following example shows how
+to define one parameter for the ATHENA.MIT.EDU realm::
 
-For each realm, the following tags may be specified:
+    [realms]
+        ATHENA.MIT.EDU = {
+            max_renewable_life = 7d 0h 0m 0s
+        }
+
+The following tags may be specified in a [realms] subsection:
 
 **acl_file**
     (String.)  Location of the access control list file that
@@ -78,17 +84,17 @@ For each realm, the following tags may be specified:
     file see :ref:`kadm5.acl(5)`.
 
 **database_module**
-    This relation indicates the name of the configuration section
-    under :ref:`dbmodules` for database specific parameters used by
-    the loadable database library.
+    (String.)  This relation indicates the name of the configuration
+    section under :ref:`dbmodules` for database-specific parameters
+    used by the loadable database library.  The default value is the
+    realm name.  If this configuration section does not exist, default
+    values will be used for all database parameters.
 
 **database_name**
-    (String.)  This string specifies the location of the Kerberos
-    database for this realm, if the DB2 back-end is being used.  If a
-    **database_module** is specified for the realm and the
-    corresponding module contains a **database_name** parameter, that
-    value will take precedence over this one.  The default value is
-    |kdcdir|\ ``/principal``.
+    (String, deprecated.)  This relation specifies the location of the
+    Kerberos database for this realm, if the DB2 module is being used
+    and the :ref:`dbmodules` configuration section does not specify a
+    database name.  The default value is |kdcdir|\ ``/principal``.
 
 **default_principal_expiration**
     (:ref:`abstime` string.)  Specifies the default expiration date of
@@ -348,18 +354,17 @@ definitions of these relations.
 ~~~~~~~~~~~
 
 The [dbmodules] section contains parameters used by the KDC database
-library and database modules.
+library and database modules.  Each tag in the [dbmodules] section is
+the name of a Kerberos realm or a section name specified by a realm's
+**database_module** parameter.  The following example shows how to
+define one database parameter for the ATHENA.MIT.EDU realm::
 
-The following tag may be specified in the [dbmodules] section:
+    [dbmodules]
+        ATHENA.MIT.EDU = {
+            disable_last_success = true
+        }
 
-**db_module_dir**
-    This tag controls where the plugin system looks for modules.  The
-    value should be an absolute path.
-
-Other tags in the [dbmodules] section name a configuration subsection
-for parameters which can be referred to by a realm's
-**database_module** parameter.  The following tags may be specified in
-the subsection:
+The following tags may be specified in a [dbmodules] subsection:
 
 **database_name**
     This DB2-specific tag indicates the location of the database in
@@ -419,6 +424,12 @@ the subsection:
     **ldap_kadmind_dn** and **ldap_kdc_dn** objects.  This file must
     be kept secure.
 
+The following tag may be specified directly in the [dbmodules]
+section to control where database modules are loaded from:
+
+**db_module_dir**
+    This tag controls where the plugin system looks for database
+    modules.  The value should be an absolute path.
 
 .. _logging:
 
