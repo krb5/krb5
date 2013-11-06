@@ -70,6 +70,33 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in krb5-1.10.7 (2013-11-06)
+-----------------------------------------
+
+This is a bugfix release.  The krb5-1.10 release series is in
+maintenance, and for new deployments, installers should prefer the
+krb5-1.11 release series or later.
+
+* Fix a KDC locking issue that could lead to the KDC process holding a
+  persistent lock, preventing administrative actions such as password
+  changes.
+
+* Fix a number of bugs related to KDC master key rollover.
+
+* Fix a KDC null pointer dereference [CVE-2013-1418] that could affect
+  KDCs that serve multiple realms.
+
+krb5-1.10.7 changes by ticket ID
+--------------------------------
+
+7675    Fix lock inconsistency in ctx_unlock()
+7725    Change KRB5KDC_ERR_NO_ACCEPTABLE_KDF to 100
+7744    Fix typos in kdb5_util master key command outputs
+7745    Correctly activate master keys in pre-1.7 KDBs
+7749    Fix decoding of mkey kvno in mkey_aux tl-data
+7750    Improve LDAP KDB initialization error messages
+7757    Multi-realm KDC null deref [CVE-2013-1418]
+
 Major changes in krb5-1.10.6 (2013-06-05)
 -----------------------------------------
 
