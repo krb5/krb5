@@ -112,11 +112,21 @@ default value is 4096 bytes.
 .UNINDENT
 .SS [realms]
 .sp
-Each tag in the [realms] section is the name of a Kerberos realm.
-The value of the tag is a subsection where the relations define KDC
-parameters for that particular realm.
+Each tag in the [realms] section is the name of a Kerberos realm.  The
+value of the tag is a subsection where the relations define KDC
+parameters for that particular realm.  The following example shows how
+to define one parameter for the ATHENA.MIT.EDU realm:
 .sp
-For each realm, the following tags may be specified:
+.nf
+.ft C
+[realms]
+    ATHENA.MIT.EDU = {
+        max_renewable_life = 7d 0h 0m 0s
+    }
+.ft P
+.fi
+.sp
+The following tags may be specified in a [realms] subsection:
 .INDENT 0.0
 .TP
 .B \fBacl_file\fP
@@ -127,17 +137,17 @@ which permissions on the Kerberos database.  The default value is
 file see \fIkadm5.acl(5)\fP.
 .TP
 .B \fBdatabase_module\fP
-This relation indicates the name of the configuration section
-under \fI\%[dbmodules]\fP for database specific parameters used by
-the loadable database library.
+(String.)  This relation indicates the name of the configuration
+section under \fI\%[dbmodules]\fP for database\-specific parameters
+used by the loadable database library.  The default value is the
+realm name.  If this configuration section does not exist, default
+values will be used for all database parameters.
 .TP
 .B \fBdatabase_name\fP
-(String.)  This string specifies the location of the Kerberos
-database for this realm, if the DB2 back\-end is being used.  If a
-\fBdatabase_module\fP is specified for the realm and the
-corresponding module contains a \fBdatabase_name\fP parameter, that
-value will take precedence over this one.  The default value is
-\fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/principal\fP.
+(String, deprecated.)  This relation specifies the location of the
+Kerberos database for this realm, if the DB2 module is being used
+and the \fI\%[dbmodules]\fP configuration section does not specify a
+database name.  The default value is \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/principal\fP.
 .TP
 .B \fBdefault_principal_expiration\fP
 (\fIabstime\fP string.)  Specifies the default expiration date of
@@ -396,20 +406,21 @@ definitions of these relations.
 .SS [dbmodules]
 .sp
 The [dbmodules] section contains parameters used by the KDC database
-library and database modules.
+library and database modules.  Each tag in the [dbmodules] section is
+the name of a Kerberos realm or a section name specified by a realm\(aqs
+\fBdatabase_module\fP parameter.  The following example shows how to
+define one database parameter for the ATHENA.MIT.EDU realm:
 .sp
-The following tag may be specified in the [dbmodules] section:
-.INDENT 0.0
-.TP
-.B \fBdb_module_dir\fP
-This tag controls where the plugin system looks for modules.  The
-value should be an absolute path.
-.UNINDENT
+.nf
+.ft C
+[dbmodules]
+    ATHENA.MIT.EDU = {
+        disable_last_success = true
+    }
+.ft P
+.fi
 .sp
-Other tags in the [dbmodules] section name a configuration subsection
-for parameters which can be referred to by a realm\(aqs
-\fBdatabase_module\fP parameter.  The following tags may be specified in
-the subsection:
+The following tags may be specified in a [dbmodules] subsection:
 .INDENT 0.0
 .TP
 .B \fBdatabase_name\fP
@@ -469,6 +480,15 @@ This LDAP\-specific tag indicates the file containing the stashed
 passwords (created by \fBkdb5_ldap_util stashsrvpw\fP) for the
 \fBldap_kadmind_dn\fP and \fBldap_kdc_dn\fP objects.  This file must
 be kept secure.
+.UNINDENT
+.sp
+The following tag may be specified directly in the [dbmodules]
+section to control where database modules are loaded from:
+.INDENT 0.0
+.TP
+.B \fBdb_module_dir\fP
+This tag controls where the plugin system looks for database
+modules.  The value should be an absolute path.
 .UNINDENT
 .SS [logging]
 .sp

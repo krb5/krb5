@@ -69,9 +69,14 @@ kprop  stream  tcp  nowait  root  /usr/local/sbin/kpropd  kpropd
 .UNINDENT
 .UNINDENT
 .sp
-kpropd can also run as a standalone daemon.  This is required for
-incremental propagation.  But this is also useful for debugging
-purposes.
+kpropd can also run as a standalone daemon, backgrounding itself and
+waiting for connections on port 754 (or the port specified with the
+\fB\-P\fP option if given).  Standalone mode is required for incremental
+propagation.  Starting in release 1.11, kpropd automatically detects
+whether it was run from inetd and runs in standalone mode if it is
+not.  Prior to release 1.11, the \fB\-S\fP option is required to run
+kpropd in standalone mode; this option is now accepted for backward
+compatibility but does nothing.
 .sp
 Incremental propagation may be enabled with the \fBiprop_enable\fP
 variable in \fIkdc.conf(5)\fP.  If incremental propagation is
@@ -101,19 +106,11 @@ to be stored; by default the dumped database file is \fB@LOCALSTATEDIR@\fP\fB/kr
 Allows the user to specify the pathname to the \fIkdb5_util(8)\fP
 program; by default the pathname used is \fB@SBINDIR@\fP\fB/kdb5_util\fP.
 .TP
-.B \fB\-S\fP
-[DEPRECATED] Enable standalone mode.  Normally kpropd is invoked by
-inetd(8) so it expects a network connection to be passed to it
-from inetd(8).  If the \fB\-S\fP option is specified, or if standard
-input is not a socket, kpropd will put itself into the background,
-and wait for connections on port 754 (or the port specified with the
-\fB\-P\fP option if given).
-.TP
 .B \fB\-d\fP
-Turn on debug mode.  In this mode, if the \fB\-S\fP option is
-selected, kpropd will not detach itself from the current job and
-run in the background.  Instead, it will run in the foreground and
-print out debugging messages during the database propagation.
+Turn on debug mode.  In this mode, kpropd will not detach
+itself from the current job and run in the background.  Instead,
+it will run in the foreground and print out debugging messages
+during the database propagation.
 .TP
 .B \fB\-P\fP
 Allow for an alternate port number for kpropd to listen on.  This
