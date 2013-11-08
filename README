@@ -77,8 +77,8 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.12
----------------------
+Major changes in 1.12 (2013-11-08)
+----------------------------------
 
 Developer experience:
 
@@ -206,6 +206,21 @@ krb5-1.12 changes by ticket ID
 7709    Wrong order in kdc_check_transited_list()
 7712    KDC Audit infrastructure and plugin implementation
 7713    Fix audit test module initialization
+7715    Change KRB5KDC_ERR_NO_ACCEPTABLE_KDF to 100
+7718    Use protocol error for PKINIT cert expiry
+7719    Discuss cert expiry, no-key princs in PKINIT docs
+7722    Add missing entries to tests/gssapi Makefile.in
+7730    Fix typos in kdb5_util master key command outputs
+7732    Document master key rollover
+7733    afs3 salt contaminates later enctypes in the list at key
+        generation time
+7738    Fix decoding of mkey kvno in mkey_aux tl-data
+7739    Improve LDAP KDB initialization error messages
+7740    Accept anonymous GSS names in kadmind
+7741    Use correct default principal for kadmin -n
+7751    Clarify kpropd standalone mode documentation
+7755    Multi-realm KDC null deref [CVE-2013-1418]
+7759    Clarify realm and dbmodules configuration docs
 
 Acknowledgements
 ----------------
@@ -370,6 +385,7 @@ reports, suggestions, and valuable resources:
     Joel Johnson
     W. Trevor King
     Mikkel Kruse
+    Reinhard Kugler
     Volker Lendecke
     Jan iankko Lieskovsky
     Oliver Loch
