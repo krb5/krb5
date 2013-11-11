@@ -593,7 +593,7 @@ get_collection(const char *anchor_name, const char *collection_name,
 {
     krb5_error_code ret;
     key_serial_t persistent_id, anchor_id, possess_id = 0;
-    char *ckname;
+    char *ckname, *cnend;
     long uidnum;
 
     *collection_id_out = 0;
@@ -607,8 +607,8 @@ get_collection(const char *anchor_name, const char *collection_name,
          */
         if (*collection_name != '\0') {
             errno = 0;
-            uidnum = strtol(collection_name, NULL, 10);
-            if (errno)
+            uidnum = strtol(collection_name, &cnend, 10);
+            if (errno || *cnend != '\0')
                 return KRB5_KCC_INVALID_UID;
         } else {
             uidnum = geteuid();
