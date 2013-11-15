@@ -101,3 +101,4 @@ k5_sha256_final
 k5_sha256_init
 k5_sha256_update
 krb5int_nfold
+k5_allow_weak_pbkdf2iter
