@@ -103,6 +103,8 @@ cleanup:
 
 #define MAX_ITERATION_COUNT             0x1000000L
 
+krb5_boolean k5_allow_weak_pbkdf2iter = FALSE;
+
 static krb5_error_code
 pbkdf2_string_to_key(const struct krb5_keytypes *ktp, const krb5_data *string,
                      const krb5_data *salt, const krb5_data *pepper,
@@ -127,6 +129,9 @@ pbkdf2_string_to_key(const struct krb5_keytypes *ktp, const krb5_data *string,
             if (((iter_count >> 16) >> 16) != 1)
                 return KRB5_ERR_BAD_S2K_PARAMS;
         }
+        if (!k5_allow_weak_pbkdf2iter && iter_count < def_iter_count)
+            return KRB5_ERR_BAD_S2K_PARAMS;
+
     } else
         iter_count = def_iter_count;
 
