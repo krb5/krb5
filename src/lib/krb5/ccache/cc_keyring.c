@@ -800,21 +800,68 @@ cleanup:
 
 static krb5_error_code
 add_cred_key(const char *name, const void *payload, size_t plen,
-             key_serial_t cache_id, krb5_boolean legacy_type)
+             key_serial_t cache_id, krb5_boolean legacy_type,
+             key_serial_t *key_out)
 {
     key_serial_t key;
 
+    *key_out = -1;
     if (!legacy_type) {
         /* Try the preferred cred key type; fall back if no kernel support. */
         key = add_key(KRCC_CRED_KEY_TYPE, name, payload, plen, cache_id);
-        if (key != -1)
+        if (key != -1) {
+            *key_out = key;
             return 0;
-        else if (errno != EINVAL && errno != ENODEV)
+        } else if (errno != EINVAL && errno != ENODEV) {
             return errno;
+        }
     }
     /* Use the user key type. */
     key = add_key(KRCC_KEY_TYPE_USER, name, payload, plen, cache_id);
-    return (key == -1) ? errno : 0;
+    if (key == -1)
+        return errno;
+    *key_out = key;
+    return 0;
+}
+
+static void
+update_keyring_expiration(krb5_context context, krb5_ccache id)
+{
+    krb5_krcc_data *d = (krb5_krcc_data *)id->data;
+    krb5_cc_cursor cursor;
+    krb5_creds creds;
+    krb5_timestamp now, endtime = 0;
+    unsigned int timeout;
+
+    /*
+     * We have no way to know what is the actual timeout set on the keyring.
+     * We also cannot keep track of it in a local variable as another process
+     * can always modify the keyring independently, so just always enumerate
+     * all keys and find out the highest endtime time.
+     */
+
+    /* Find the maximum endtime of all creds in the cache. */
+    if (krb5_krcc_start_seq_get(context, id, &cursor) != 0)
+        return;
+    for (;;) {
+        if (krb5_krcc_next_cred(context, id, &cursor, &creds) != 0)
+            break;
+        if (creds.times.endtime > endtime)
+            endtime = creds.times.endtime;
+        krb5_free_cred_contents(context, &creds);
+    }
+    (void)krb5_krcc_end_seq_get(context, id, &cursor);
+
+    if (endtime == 0)        /* No creds with end times */
+        return;
+
+    if (krb5_timeofday(context, &now) != 0)
+        return;
+
+    /* Setting the timeout to zero would reset the timeout, so we set it to one
+     * second instead if creds are already expired. */
+    timeout = (endtime > now) ? endtime - now : 1;
+    (void)keyctl_set_timeout(d->cache_id, timeout);
 }
 
 /*
@@ -1451,6 +1498,8 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
     char   *payload = NULL;
     unsigned int payloadlen;
     char   *keyname = NULL;
+    key_serial_t cred_key;
+    krb5_timestamp now;
 
     DEBUG_PRINT(("krb5_krcc_store: entered\n"));
 
@@ -1477,11 +1526,23 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
     DEBUG_PRINT(("krb5_krcc_store: adding new key '%s' to keyring %d\n",
                  keyname, d->cache_id));
     kret = add_cred_key(keyname, payload, payloadlen, d->cache_id,
-                        d->is_legacy_type);
+                        d->is_legacy_type, &cred_key);
     if (kret)
         goto errout;
 
     krb5_krcc_update_change_time(d);
+
+    /* Set appropriate timeouts on cache keys. */
+    kret = krb5_timeofday(context, &now);
+    if (kret)
+        goto errout;
+
+    if (creds->times.endtime > now)
+        (void)keyctl_set_timeout(cred_key, creds->times.endtime - now);
+
+    update_keyring_expiration(context, id);
+
+    kret = KRB5_OK;
 
 errout:
     if (keyname)
