@@ -122,14 +122,11 @@ pbkdf2_string_to_key(const struct krb5_keytypes *ktp, const krb5_data *string,
         unsigned char *p = (unsigned char *) params->data;
         if (params->length != 4)
             return KRB5_ERR_BAD_S2K_PARAMS;
-        /* The first two need casts in case 'int' is 16 bits.  */
         iter_count = load_32_be(p);
-        if (iter_count == 0) {
-            iter_count = (1UL << 16) << 16;
-            if (((iter_count >> 16) >> 16) != 1)
-                return KRB5_ERR_BAD_S2K_PARAMS;
-        }
-        if (!k5_allow_weak_pbkdf2iter && iter_count < def_iter_count)
+        /* Zero means 2^32, which is way above what we will accept.  Also don't
+         * accept values less than the default, unless we're running tests. */
+        if (iter_count == 0 ||
+            (!k5_allow_weak_pbkdf2iter && iter_count < def_iter_count))
             return KRB5_ERR_BAD_S2K_PARAMS;
 
     } else
