@@ -351,15 +351,6 @@ Optional packages
     Use the specified pkinit crypto implementation *IMPL*.
     Defaults to using OpenSSL.
 
-**-**\ **-with-kdc-kdb-update**
-    Update the KDC database with the information about
-
-    * the last successful authentication;
-    * the last failed authentication attempt;
-    * the number of the failed authentication attempts.
-
-    By default the kdb is not updated with this information.
-
 **-**\ **-without-libedit**
     Do not compile and link against libedit.  Some utilities will no
     longer offer command history or completion in interactive mode if
