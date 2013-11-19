@@ -119,6 +119,158 @@ parse_hostbased(const char *str, size_t len,
     return 0;
 }
 
+/*
+ * NUL-terminate data element.
+ * Caller must release with xfree().
+ */
+static char *data_to_str(const char *data, size_t length)
+{
+    char *buf;
+
+    if ((buf = xmalloc(length + 1)) != NULL) {
+        memcpy(buf, data, length);
+        buf[length] = '\0';
+    }
+    return buf;
+}
+
+/*
+ * Is input of the form l.d-host:port.  Dots and hypens must be internal to
+ * the host name and isolated.
+ */
+static int hasport(const krb5_data *hostport)
+{
+    char portbuf[6];
+    char *cp = hostport->data;
+    char *end = hostport->data + hostport->length;
+    size_t portlen;
+    long portnum;
+    int inword = 0;
+
+    for (cp = hostport->data; cp < end; ++cp) {
+        if (((*cp) >= 'a' && (*cp) <= 'z') ||
+            ((*cp) >= '0' && (*cp) <= '9') ||
+            ((*cp) >= 'A' && (*cp) <= 'Z')) {
+            inword = 1;
+            continue;
+        }
+        if (inword && (*cp == '.' || *cp == '-')) {
+            inword = 0;
+            continue;
+        }
+        if (!inword || *cp++ != ':' ||          /* Malformed host */
+            (portlen = (end - cp)) == 0 ||      /* Empty port part */
+            portlen >= sizeof(portbuf) ||       /* Port part too long */
+            *cp < '1' || *cp > '9')
+            break;
+        memcpy(portbuf, cp, portlen);
+        portbuf[portlen] = '\0';
+        portnum = strtol(portbuf, &cp, 10);
+        return (portnum > 0 && portnum < 65536 && *cp == '\0');
+    }
+    return 0;
+}
+
+/*
+ * Sadly Microsoft's principal naming scheme for SQL server instances is not
+ * GSSAPI friendly.  Instead of encoding the port number into the service name,
+ * they append it to the hostname:  MSSQLSvc/db.example.com:1433.  At least
+ * some JDBC libraries specify server name of "MSSQLSvc/db.example.com:1433"
+ * with a null name type.
+ *
+ * This only works when the database server is in the default realm and is not
+ * an alias.  If either condition is false, the client is unable to obtain the
+ * required tickets.
+ *
+ * The code below is invoked for all names with a null name type.  If parsing
+ * the name as a principal yields a two-part principal in the default realm,
+ * and the second part ends in ":port" where port is a base 10 integer between
+ * 1 and 65535, we assume that the name is in fact a host(port) based service.
+ *
+ * The krb5_sname_to_principal() function was separately extended to handle a
+ * port suffix when the name type indicates a host-based service.
+ *
+ * Returns: 0 when the input_name is not a hostport based service.
+ *          1 when the input_name is a hostport based service, or an error
+ *            occurred in which case code is set to a suitable error code.
+ */
+static int parse_hpbs(
+        krb5_context context,
+        const char *input_buf,
+        size_t buf_len,
+        char **hostpart,
+        char **servicepart,
+        krb5_error_code *code)
+{
+    static const char MSSQLSvc[] = "MSSQLSvc";
+    int result = 0;
+    int mssql_workaround = 0;
+    krb5_data *realm;
+    krb5_principal tmp;
+    const krb5_data *s;                         /* Service component */
+    const krb5_data *h;                         /* Host component */
+    char *input_name;
+    char *default_realm;
+
+    *code = profile_get_boolean(context->profile, KRB5_CONF_LIBDEFAULTS,
+                                "mssql_workaround", NULL, 1, &mssql_workaround);
+    if (*code != 0)
+        return 1;       /* Fail */
+    if (!mssql_workaround)
+        return 0;
+
+    if ((*code = krb5_get_default_realm(context, &default_realm)) != 0)
+        return 1;       /* Fail */
+
+    if ((input_name = data_to_str(input_buf, buf_len)) == 0) {
+        *code = ENOMEM;
+        free(default_realm);
+        return 1;       /* Fail */
+    }
+
+    if ((*code = krb5_parse_name(context, input_name, &tmp)) != 0) {
+        free(default_realm);
+        free(input_name);
+        return 1;       /* Fail */
+    }
+
+    /*
+     * When the input name specifies no realm or equivalently (after
+     * krb5_parse_name) the default realm, has two components and the first
+     * component is MSSQLSvc (case-insensitive) we treat the input name as a
+     * host-based service provided the second component is the form
+     * host:port, with port a positive decimal number less than 65536.
+     */
+    realm = krb5_princ_realm(context, tmp);
+    if (realm->length == strlen(default_realm) &&
+        strncmp(default_realm, realm->data, realm->length) == 0 &&
+        krb5_princ_size(context, tmp) == 2 &&
+        (s = krb5_princ_component(context, tmp, 0)) != 0 &&
+        s->length + 1 == sizeof(MSSQLSvc) &&
+        strncasecmp(s->data, MSSQLSvc, s->length) == 0 &&
+        (h = krb5_princ_component(context, tmp, 1)) != 0 &&
+        hasport(h)) {
+        char *host;
+        char *srvc;
+
+        if ((host = data_to_str(h->data, h->length)) != NULL &&
+            (srvc = data_to_str(s->data, s->length)) != NULL) {
+            *hostpart = host;
+            *servicepart = srvc;
+            result = 1;
+        } else {
+            if (host)
+                xfree(host);
+            *code = ENOMEM;
+        }
+    }
+
+    krb5_free_principal(context, tmp);
+    xfree(input_name);
+    free(default_realm);
+    return result;
+}
+
 OM_uint32 KRB5_CALLCONV
 krb5_gss_import_name(minor_status, input_name_buffer,
                      input_name_type, output_name)
@@ -185,6 +337,15 @@ krb5_gss_import_name(minor_status, input_name_buffer,
                g_OID_equal(input_name_type, GSS_C_NT_ANONYMOUS)) {
         code = krb5_copy_principal(context, krb5_anonymous_principal(),
                                    &princ);
+        if (code)
+            goto cleanup;
+    } else if ((input_name_type == GSS_C_NULL_OID ||
+                g_OID_equal(input_name_type, gss_nt_krb5_name)) &&
+               parse_hpbs(context, input_name_buffer->value,
+                          input_name_buffer->length, &host, &service, &code)) {
+        if (!code)
+            code = krb5_sname_to_principal(context, host, service,
+                                           KRB5_NT_SRV_HST, &princ);
         if (code)
             goto cleanup;
     } else {

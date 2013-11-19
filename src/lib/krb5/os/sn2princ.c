@@ -72,6 +72,8 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 
     if ((type == KRB5_NT_UNKNOWN) ||
         (type == KRB5_NT_SRV_HST)) {
+        char *remote_port = 0;
+        size_t portlen = 0;
 
         /* if hostname is NULL, use local hostname */
         if (! hostname) {
@@ -90,6 +92,7 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
             struct addrinfo *ai = NULL, hints;
             int err;
             char hnamebuf[NI_MAXHOST];
+            const char *hname;
 
             /* Note that the old code would accept numeric addresses,
                and if the gethostbyaddr step could convert them to
@@ -103,11 +106,28 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 
             memset(&hints, 0, sizeof(hints));
             hints.ai_flags = AI_CANONNAME;
-            err = getaddrinfo(hostname, 0, &hints, &ai);
+
+            /*
+             * Handle host:port provided there is only one ":" (not an IPv6 address)
+             * and the host and port parts have reasonable length/content.
+             */
+            if ((remote_port = strchr(hostname, ':')) != 0
+                && (remote_port - hostname) < NI_MAXHOST
+                && (portlen = strlen(remote_port) - 1) > 0
+                && portlen < sizeof("65535")
+                && portlen == strspn(remote_port + 1, "0123456789")) {
+                strncpy(hnamebuf, hostname, remote_port - hostname);
+                hnamebuf[remote_port - hostname] = '\0';
+                hname = hnamebuf;
+            } else {
+                remote_port = 0;
+                hname = hostname;
+            }
+            err = getaddrinfo(hname, 0, &hints, &ai);
             if (err) {
                 TRACE_SNAME_TO_PRINCIPAL_NOCANON(context, hostname);
             }
-            remote_host = strdup((ai && ai->ai_canonname) ? ai->ai_canonname : hostname);
+            remote_host = strdup((ai && ai->ai_canonname) ? ai->ai_canonname : hname);
             if (!remote_host) {
                 if(ai)
                     freeaddrinfo(ai);
@@ -172,6 +192,16 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
             return KRB5_ERR_HOST_REALM_UNKNOWN;
         }
         realm = hrealms[0];
+
+        if (remote_port) {
+            size_t hostlen = strlen(remote_host);
+            remote_host = realloc(remote_host, hostlen + 1 + portlen + 1);
+            if (! remote_host) {
+                krb5_free_host_realm(context, hrealms);
+                return ENOMEM;
+            }
+            strcpy(remote_host + hostlen, remote_port);
+        }
 
         retval = krb5_build_principal(context, ret_princ, strlen(realm),
                                       realm, sname, remote_host,
