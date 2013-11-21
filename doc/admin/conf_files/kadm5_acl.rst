@@ -66,7 +66,8 @@ ignored.  Lines containing ACL entries have the format:
     character.
 
     *target_principal* can also include back-references to *principal*,
-    in which ``*number`` matches the component number in *principal*.
+    in which ``*number`` matches the corresponding wildcard in
+    *principal*.
 
 *restrictions*
     (Optional) A string of flags. Allowed restrictions are:
@@ -121,8 +122,8 @@ instance ``root`` (matches line 3).
 
 (line 4) Any ``root`` principal in ``ATHENA.MIT.EDU`` can inquire, list,
 or change the password of their null instance, but not any other
-null instance.  (Here, "\*1" denotes a back-reference to the first
-component of the actor principal.)
+null instance.  (Here, ``*1`` denotes a back-reference to the
+component matching the first wildcard in the actor principal.)
 
 (line 5) Any principal in the realm ``ATHENA.MIT.EDU`` (except for
 ``joeadmin@ATHENA.MIT.EDU``, as mentioned above) has inquire
