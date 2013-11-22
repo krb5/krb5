@@ -136,7 +136,7 @@ dump
 
 Dumps the current Kerberos and KADM5 database into an ASCII file.  By
 default, the database is dumped in current format, "kdb5_util
-load_dump version 6".  If filename is not specified, or is the string
+load_dump version 7".  If filename is not specified, or is the string
 "-", the dump is sent to standard output.  Options:
 
 **-b7**
