@@ -60,7 +60,6 @@ static struct rpcdata *get_rpcdata();
 
 static	struct rpcent *interpret();
 struct	hostent *gethostent();
-char	*inet_ntoa();
 
 static char RPCDB[] = "/etc/rpc";
 
