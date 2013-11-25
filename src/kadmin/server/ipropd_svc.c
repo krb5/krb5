@@ -38,13 +38,6 @@ extern short l_port;
 extern char *kdb5_util;
 extern char *kprop;
 extern char *dump_file;
-static char abuf[33];
-
-/* Result is stored in a static buffer and is invalidated by the next call. */
-static const char *client_addr(struct svc_req *svc) {
-    strlcpy(abuf, inet_ntoa(svc->rq_xprt->xp_raddr.sin_addr), sizeof(abuf));
-    return abuf;
-}
 
 static char *reply_ok_str	= "UPDATE_OK";
 static char *reply_err_str	= "UPDATE_ERROR";
@@ -193,7 +186,7 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_UNAUTH, whoami,
 			 client_name, service_name,
-			 client_addr(rqstp));
+			 client_addr(rqstp->rq_xprt));
 	goto out;
     }
 
@@ -223,7 +216,7 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 		     obuf,
 		     ((kret == 0) ? "success" : error_message(kret)),
 		     client_name, service_name,
-		     client_addr(rqstp));
+		     client_addr(rqstp->rq_xprt));
 
 out:
     if (nofork)
@@ -320,7 +313,7 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 	DPRINT("%s: Permission denied\n", whoami);
 	krb5_klog_syslog(LOG_NOTICE, LOG_UNAUTH, whoami,
 			 client_name, service_name,
-			 client_addr(rqstp));
+			 client_addr(rqstp->rq_xprt));
 	goto out;
     }
 
@@ -425,12 +418,12 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 
 	DPRINT("%s: spawned resync process %d, client=%s, "
 		"service=%s, addr=%s\n", whoami, fret, client_name,
-		service_name, client_addr(rqstp));
+		service_name, client_addr(rqstp->rq_xprt));
 	krb5_klog_syslog(LOG_NOTICE,
 			 _("Request: %s, spawned resync process %d, client=%s, service=%s, addr=%s"),
 			 whoami, fret,
 			 client_name, service_name,
-			 client_addr(rqstp));
+			 client_addr(rqstp->rq_xprt));
 
 	goto out;
     }
@@ -493,8 +486,7 @@ check_iprop_rpcsec_auth(struct svc_req *rqstp)
 	  krb5_klog_syslog(LOG_ERR,
 			   _("check_rpcsec_auth: failed inquire_context, "
 			     "stat=%u"), maj_stat);
-	  log_badauth(maj_stat, min_stat,
-		      &rqstp->rq_xprt->xp_raddr, NULL);
+	  log_badauth(maj_stat, min_stat, rqstp->rq_xprt, NULL);
 	  goto fail_name;
      }
 
@@ -547,7 +539,7 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
     if (!check_iprop_rpcsec_auth(rqstp)) {
 	krb5_klog_syslog(LOG_ERR, _("authentication attempt failed: %s, RPC "
 				    "authentication flavor %d"),
-			 inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr),
+			 client_addr(rqstp->rq_xprt),
 			 rqstp->rq_cred.oa_flavor);
 	svcerr_weakauth(transp);
 	return;

@@ -9,10 +9,6 @@
 
 #include "net-server.h"         /* for krb5_fulladdr */
 
-void
-log_badauth(OM_uint32 major, OM_uint32 minor,
-            struct sockaddr_in *addr, char *data);
-
 int
 setup_gss_names(struct svc_req *, gss_buffer_desc *,
                 gss_buffer_desc *);
@@ -55,8 +51,9 @@ gss_to_krb5_name_1(struct svc_req *rqstp, krb5_context ctx, gss_name_t gss_name,
 
 void reset_db(void);
 
-void log_badauth(OM_uint32 major, OM_uint32 minor,
-                 struct sockaddr_in *addr, char *data);
+void log_badauth(OM_uint32 major, OM_uint32 minor, SVCXPRT *xprt, char *data);
+
+const char *client_addr(SVCXPRT *xprt);
 
 /* network.c */
 #include "net-server.h"
