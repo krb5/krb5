@@ -54,6 +54,14 @@ typedef void (*auth_gssapi_log_badauth_func)
 		struct sockaddr_in *raddr,
 		caddr_t data);
 
+/* auth_gssapi_log_badauth_func is IPv4-specific; this version gives the
+ * transport handle so the fd can be used to get the address. */
+typedef void (*auth_gssapi_log_badauth2_func)
+     (OM_uint32 major,
+		OM_uint32 minor,
+		SVCXPRT *xprt,
+		caddr_t data);
+
 typedef void (*auth_gssapi_log_badverf_func)
      (gss_name_t client,
 		gss_name_t server,
@@ -117,6 +125,9 @@ void svcauth_gssapi_unset_names
 void svcauth_gssapi_set_log_badauth_func
 (auth_gssapi_log_badauth_func func,
 	   caddr_t data);
+void svcauth_gssapi_set_log_badauth2_func
+(auth_gssapi_log_badauth2_func func,
+	   caddr_t data);
 void svcauth_gssapi_set_log_badverf_func
 (auth_gssapi_log_badverf_func func,
 	   caddr_t data);
@@ -126,6 +137,8 @@ void svcauth_gssapi_set_log_miscerr_func
 
 void svcauth_gss_set_log_badauth_func(auth_gssapi_log_badauth_func,
 				      caddr_t);
+void svcauth_gss_set_log_badauth2_func(auth_gssapi_log_badauth2_func,
+				       caddr_t);
 void svcauth_gss_set_log_badverf_func(auth_gssapi_log_badverf_func,
 				      caddr_t);
 void svcauth_gss_set_log_miscerr_func(auth_gssapi_log_miscerr_func,

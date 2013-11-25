@@ -80,6 +80,8 @@ typedef struct gss_union_ctx_id_t {
 
 static auth_gssapi_log_badauth_func log_badauth = NULL;
 static caddr_t log_badauth_data = NULL;
+static auth_gssapi_log_badauth2_func log_badauth2 = NULL;
+static caddr_t log_badauth2_data = NULL;
 static auth_gssapi_log_badverf_func log_badverf = NULL;
 static caddr_t log_badverf_data = NULL;
 static auth_gssapi_log_miscerr_func log_miscerr = NULL;
@@ -186,6 +188,16 @@ svcauth_gss_release_cred(void)
 	return (TRUE);
 }
 
+/* Invoke log_badauth callbacks for an authentication failure. */
+static void
+badauth(OM_uint32 maj, OM_uint32 minor, SVCXPRT *xprt)
+{
+	if (log_badauth != NULL)
+		(*log_badauth)(maj, minor, &xprt->xp_raddr, log_badauth_data);
+	if (log_badauth2 != NULL)
+		(*log_badauth2)(maj, minor, xprt, log_badauth2_data);
+}
+
 static bool_t
 svcauth_gss_accept_sec_context(struct svc_req *rqst,
 			       struct rpc_gss_init_res *gr)
@@ -226,12 +238,7 @@ svcauth_gss_accept_sec_context(struct svc_req *rqst,
 	log_status("accept_sec_context", gr->gr_major, gr->gr_minor);
 	if (gr->gr_major != GSS_S_COMPLETE &&
 	    gr->gr_major != GSS_S_CONTINUE_NEEDED) {
-		if (log_badauth != NULL) {
-			(*log_badauth)(gr->gr_major,
-				       gr->gr_minor,
-				       &rqst->rq_xprt->xp_raddr,
-				       log_badauth_data);
-		}
+		badauth(gr->gr_major, gr->gr_minor, rqst->rq_xprt);
 		gd->ctx = GSS_C_NO_CONTEXT;
 		goto errout;
 	}
@@ -671,6 +678,14 @@ void svcauth_gss_set_log_badauth_func(
 {
 	log_badauth = func;
 	log_badauth_data = data;
+}
+
+void
+svcauth_gss_set_log_badauth2_func(auth_gssapi_log_badauth2_func func,
+				  caddr_t data)
+{
+	log_badauth2 = func;
+	log_badauth2_data = data;
 }
 
 /*
