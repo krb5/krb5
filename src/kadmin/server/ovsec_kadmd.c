@@ -43,7 +43,6 @@
 #include    <sys/socket.h>
 #include    <unistd.h>
 #include    <netinet/in.h>
-#include    <arpa/inet.h>  /* inet_ntoa */
 #include    <netdb.h>
 #include    <gssrpc/rpc.h>
 #include    <gssapi/gssapi.h>
@@ -71,8 +70,7 @@ gss_name_t gss_kadmin_name = NULL;
 void *global_server_handle;
 
 char *build_princ_name(char *name, char *realm);
-void log_badauth(OM_uint32 major, OM_uint32 minor,
-                 struct sockaddr_in *addr, char *data);
+void log_badauth(OM_uint32 major, OM_uint32 minor, SVCXPRT *xprt, char *data);
 void log_badverf(gss_name_t client_name, gss_name_t server_name,
                  struct svc_req *rqst, struct rpc_msg *msg,
                  char *data);
@@ -491,11 +489,11 @@ kterr:
     (void) gss_import_name(&OMret, &in_buf, nt_krb5_name_oid,
                            &gss_changepw_name);
 
-    svcauth_gssapi_set_log_badauth_func(log_badauth, NULL);
+    svcauth_gssapi_set_log_badauth2_func(log_badauth, NULL);
     svcauth_gssapi_set_log_badverf_func(log_badverf, NULL);
     svcauth_gssapi_set_log_miscerr_func(log_miscerr, NULL);
 
-    svcauth_gss_set_log_badauth_func(log_badauth, NULL);
+    svcauth_gss_set_log_badauth2_func(log_badauth, NULL);
     svcauth_gss_set_log_badverf_func(log_badverf, NULL);
     svcauth_gss_set_log_miscerr_func(log_miscerr, NULL);
 
@@ -772,7 +770,7 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
     OM_uint32 minor;
     gss_buffer_desc client, server;
     gss_OID gss_type;
-    char *a;
+    const char *a;
     rpcproc_t proc;
     unsigned int i;
     const char *procname;
@@ -800,7 +798,7 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
         slen = server.length;
     }
     trunc_name(&slen, &sdots);
-    a = inet_ntoa(rqst->rq_xprt->xp_raddr.sin_addr);
+    a = client_addr(rqst->rq_xprt);
 
     proc = msg->rm_call.cb_proc;
     procname = NULL;
@@ -846,11 +844,8 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
 void log_miscerr(struct svc_req *rqst, struct rpc_msg *msg,
                  char *error, char *data)
 {
-    char *a;
-
-    a = inet_ntoa(rqst->rq_xprt->xp_raddr.sin_addr);
-    krb5_klog_syslog(LOG_NOTICE, _("Miscellaneous RPC error: %s, %s"), a,
-                     error);
+    krb5_klog_syslog(LOG_NOTICE, _("Miscellaneous RPC error: %s, %s"),
+                     client_addr(rqst->rq_xprt), error);
 }
 
 
@@ -872,18 +867,14 @@ void log_miscerr(struct svc_req *rqst, struct rpc_msg *msg,
  * Logs the GSS-API error via krb5_klog_syslog(); see functional spec for
  * format.
  */
-void log_badauth(OM_uint32 major, OM_uint32 minor,
-                 struct sockaddr_in *addr, char *data)
+void log_badauth(OM_uint32 major, OM_uint32 minor, SVCXPRT *xprt, char *data)
 {
-    char *a;
-
     /* Authentication attempt failed: <IP address>, <GSS-API error */
     /* strings> */
 
-    a = inet_ntoa(addr->sin_addr);
-
     krb5_klog_syslog(LOG_NOTICE, _("Authentication attempt failed: %s, "
-                                   "GSS-API error strings are:"), a);
+                                   "GSS-API error strings are:"),
+                     client_addr(xprt));
     log_badauth_display_status("   ", major, minor);
     krb5_klog_syslog(LOG_NOTICE, _("   GSS-API error strings complete."));
 }

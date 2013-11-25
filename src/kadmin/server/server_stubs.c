@@ -5,6 +5,7 @@
  */
 
 #include <k5-platform.h>
+#include <socket-utils.h>
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_krb5.h> /* for gss_nt_krb5_name */
 #include <krb5.h>
@@ -13,7 +14,6 @@
 #include <kadm5/server_internal.h>
 #include <kadm5/server_acl.h>
 #include <syslog.h>
-#include <arpa/inet.h>  /* inet_ntoa */
 #include <adm_proto.h>  /* krb5_klog_syslog */
 #include "misc.h"
 
@@ -141,6 +141,24 @@ static void free_server_handle(kadm5_server_handle_t handle)
         return;
     krb5_free_principal(handle->context, handle->current_caller);
     free(handle);
+}
+
+/* Result is stored in a static buffer and is invalidated by the next call. */
+const char *
+client_addr(SVCXPRT *xprt)
+{
+    static char abuf[128];
+    struct sockaddr_storage ss;
+    socklen_t len = sizeof(ss);
+    const char *p = NULL;
+
+    if (getpeername(xprt->xp_sock, ss2sa(&ss), &len) != 0)
+        return "(unknown)";
+    if (ss2sa(&ss)->sa_family == AF_INET)
+        p = inet_ntop(AF_INET, &ss2sin(&ss)->sin_addr, abuf, sizeof(abuf));
+    else if (ss2sa(&ss)->sa_family == AF_INET6)
+        p = inet_ntop(AF_INET6, &ss2sin6(&ss)->sin6_addr, abuf, sizeof(abuf));
+    return (p == NULL) ? "(unknown)" : p;
 }
 
 /*
@@ -277,7 +295,7 @@ log_unauth(
                             op, (int)tlen, target, tdots,
                             (int)clen, (char *)client->value, cdots,
                             (int)slen, (char *)server->value, sdots,
-                            inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
+                            client_addr(rqstp->rq_xprt));
 }
 
 static int
@@ -308,7 +326,7 @@ log_done(
                             op, (int)tlen, target, tdots, errmsg,
                             (int)clen, (char *)client->value, cdots,
                             (int)slen, (char *)server->value, sdots,
-                            inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
+                            client_addr(rqstp->rq_xprt));
 }
 
 generic_ret *
@@ -614,7 +632,7 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
                          (int)tlen2, prime_arg2, tdots2,
                          (int)clen, (char *)client_name.value, cdots,
                          (int)slen, (char *)service_name.value, sdots,
-                         inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
+                         client_addr(rqstp->rq_xprt));
     } else {
         ret.code = kadm5_rename_principal((void *)handle, arg->src,
                                           arg->dest);
@@ -631,7 +649,7 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
                          errmsg ? errmsg : _("success"),
                          (int)clen, (char *)client_name.value, cdots,
                          (int)slen, (char *)service_name.value, sdots,
-                         inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
+                         client_addr(rqstp->rq_xprt));
 
         if (errmsg != NULL)
             krb5_free_error_message(handle->context, errmsg);
@@ -1774,7 +1792,7 @@ generic_ret *init_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
                      errmsg ? errmsg : _("success"),
                      (int)clen, (char *)client_name.value, cdots,
                      (int)slen, (char *)service_name.value, sdots,
-                     inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr),
+                     client_addr(rqstp->rq_xprt),
                      ret.api_version & ~(KADM5_API_VERSION_MASK),
                      rqstp->rq_cred.oa_flavor);
     if (errmsg != NULL)
