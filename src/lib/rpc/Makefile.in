@@ -9,7 +9,7 @@ SUBDIRS=unit-test
 
 LIBBASE=gssrpc
 LIBMAJOR=4
-LIBMINOR=1
+LIBMINOR=2
 SHLIB_EXPDEPS= \
 	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
