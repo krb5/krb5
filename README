@@ -121,17 +121,21 @@ Performance:
 krb5-1.12 changes by ticket ID
 ------------------------------
 
+1445    GSSAPI can fail to generate error in GSS_C_NO_CREDENTIAL case
 1539    tests should test getting renewable tickets
 2602    Don't reject renewable of non-renewable tickets
 3206    gss_acquire_cred with GSS_C_BOTH or GSS_C_INITIATE should work
         with keytab creds
 6429    KDC prefers built-in preauth to plugins
+6507    kdb5_util update_princ_encryption uses latest mkey instead of
+        active mkey
 6948    Funny klist output if you try to get credentials right when a
         ticket expires
 7172    Credential collection doesn't include DIR subsidiary default
         cache
 7296    issues in handling special characters in KDC ldap plugin code
 7385    Policy deletion should not rely on refcounts
+7465    minimum iteration count for PBKDF2
 7511    Fix minor int overflow and null pointer problems
 7517    Pass through module errors when preauthenticating
 7518    Delete timestamp_to_sfstring sprintf fallback
@@ -186,6 +190,8 @@ krb5-1.12 changes by ticket ID
 7682    Mechglue dynamic initialization functions miss some functions
 7683    Update config.guess and config.sub
 7684    Don't reopen the KDB in update_princ_encryption
+7685    kadmind caches master key activation times
+7686    Master key rollover mishandles databases created prior to 1.7
 7687    Add hostrealm pluggable interface definition
 7688    Fix gss_krb5_set_allowable_enctypes for acceptor
 7689    kinit can create duplicate ccache in collection with default
@@ -203,7 +209,9 @@ krb5-1.12 changes by ticket ID
 7701    Fix FAST critical option bit checking
 7703    Add a flag to prevent all host canonicalization
 7705    Add GSSAPI IOV MIC functions
+7706    Export/Import creds breaks with delegated credentials
 7709    Wrong order in kdc_check_transited_list()
+7711    Add collection support for KEYRING ccache type
 7712    KDC Audit infrastructure and plugin implementation
 7713    Fix audit test module initialization
 7715    Change KRB5KDC_ERR_NO_ACCEPTABLE_KDF to 100
@@ -221,6 +229,17 @@ krb5-1.12 changes by ticket ID
 7751    Clarify kpropd standalone mode documentation
 7755    Multi-realm KDC null deref [CVE-2013-1418]
 7759    Clarify realm and dbmodules configuration docs
+7764    Catch more strtol() failures when using KEYRINGs
+7768    Add support to store time offsets in cc_keyring
+7769    Set expiration time on keys and keyrings
+7770    kadmind does not log IPv6 requests properly
+7771    Remove dangling --with-kdc-kdb-update references
+7773    Clarify lockout replication issues in docs
+7774    Correct kadm5.acl back-reference documentation
+7775    Improve default ccache name API documentation
+7776    Added a new ccache doc to "Kerberos V5 concepts"
+7777    krb5-admin doc update: `kdb5_util dump` default format is now
+        "krb5_util load_dump version 7"
 
 Acknowledgements
 ----------------
@@ -339,6 +358,7 @@ reports, suggestions, and valuable resources:
     Kevin Coffman
     Simon Cooper
     Sylvain Cortes
+    Jeff D'Angelo
     Nalin Dahyabhai
     Mark Davies
     Dennis Davis
