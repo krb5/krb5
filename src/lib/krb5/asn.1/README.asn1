@@ -1,16 +1,17 @@
 These notes attempt to explain how to use the ASN.1 infrastructure to
 add new ASN.1 types.  ASN.1 is complicated and easy to get wrong, so
-it's best to verify your results against another tool (such as asn1c)
+it is best to verify your results against another tool (such as asn1c)
 if at all possible.  These notes are up to date as of 2012-02-13.
 
-If you are trying to debug a problem which shows up in the ASN.1
+If you are trying to debug a problem that shows up in the ASN.1
 encoder or decoder, skip to the last section.
+
 
 General
 -------
 
 For the moment, a developer must hand-translate the ASN.1 module into
-macro invocations which generate data structures used by the encoder
+macro invocations that generate data structures used by the encoder
 and decoder.  Ideally we would have a tool to compile an ASN.1 module
 (and probably some additional information about C identifier mappings)
 and generate the macro invocations.
@@ -22,10 +23,11 @@ Plugin modules built separately from the krb5 tree must use another
 tool (such as asn1c) for now if they need to do ASN.1 encoding or
 decoding.
 
+
 Tags
 ----
 
-Before you start writing macro invocations, it's important to
+Before you start writing macro invocations, it is important to
 understand a little bit about ASN.1 tags.  You will most commonly see
 tag notation in a sequence definition, like:
 
@@ -34,9 +36,9 @@ tag notation in a sequence definition, like:
   }
 
 Contrary to intuition, the tag notation "[0] IMPLICIT" is not a
-property of the sequence field; instead, it specifies a type which is
-wraps the type named to the right (OCTET STRING).  The right way to
-think about the above definition is:
+property of the sequence field; instead, it specifies a type that
+wraps the type to the right (OCTET STRING).  The right way to think
+about the above definition is:
 
   TypeName is defined as a sequence type
     which has an optional field named field-name
@@ -53,7 +55,7 @@ The other case you are likely to see tag notation is something like:
 This example defines AS-REQ to be a tagged type whose class is
 application, whose tag number is 10, and whose base type is KDC-REQ.
 The tag may be implicit or explicit depending on the module's tag
-environment, which we'll get to in a moment.
+environment, which we will get to in a moment.
 
 Tags can have one of four classes: universal, application, private,
 and context-specific.  Universal tags are used for built-in ASN.1
@@ -62,8 +64,8 @@ see in ASN.1 modules; private is rarely used.  If no tag class is
 specified, the default is context-specific.
 
 Tags can be explicit or implicit, and the distinction is important to
-the wire encoding.  If a tag's closing bracket is followed by word
-IMPLICIT or EXPLICIT, then it's clear which kind of tag it is, but
+the wire encoding.  If a tag's closing bracket is followed by the word
+IMPLICIT or EXPLICIT, then it is clear which kind of tag it is, but
 usually there will be no such annotation.  If not, the default depends
 on the header of the ASN.1 module.  Look at the top of the module for
 the word DEFINITIONS.  It may be followed by one of three phrases:
@@ -85,6 +87,7 @@ types, starting from 0, unless one of the fields of the sequence or
 set is already a tagged type.  See ITU X.680 section 24.2 for details,
 particularly if COMPONENTS OF is used in the sequence definition.
 
+
 Basic types
 -----------
 
@@ -92,8 +95,8 @@ In our infrastructure, a type descriptor specifies a mapping between
 an ASN.1 type and a C type.  The first step is to ensure that type
 descriptors are defined for the basic types used by your ASN.1 module,
 as mapped to the C types used in your structures, in asn1_k_encode.c.
-If not, you'll need to create it.  For a BOOLEAN or INTEGER ASN.1
-type, you'll use one of these macros:
+If not, you will need to create it.  For a BOOLEAN or INTEGER ASN.1
+type, you will use one of these macros:
 
   DEFBOOLTYPE(descname, ctype)
   DEFINTTYPE(descname, ctype)
@@ -113,8 +116,8 @@ strings in a krb5_data structure (rather than a zero-terminated C
 string), so our infrastructure currently assumes that all strings are
 represented as "counted types", meaning the C representation is a
 combination of a pointer and an integer type.  So, first you must
-declare a counted type descriptor (we'll describe those in more detail
-later) with something like:
+declare a counted type descriptor (we will describe those in more
+detail later) with something like:
 
   DEFCOUNTEDSTRINGTYPE(generalstring, char *, unsigned int,
                        k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
@@ -134,6 +137,7 @@ descriptor to wrap it in a krb5_data structure with something like:
 
   DEFCOUNTEDTYPE(gstring_data, krb5_data, data, length, generalstring);
 
+
 Sequences
 ---------
 
@@ -152,7 +156,7 @@ where "descname" is an identifier you make up, "structuretype" and
 structure field, and "basedesc" is the type of the ASN.1 object to be
 stored at that offset.
 
-If your C structure contains a pointer to another C object, you'll
+If your C structure contains a pointer to another C object, you will
 need to first define a pointer wrapper, which is very simple:
 
   DEFPTRTYPE(descname, basedesc)
@@ -168,7 +172,7 @@ is computed.)  It is okay for several fields of a sequence to
 reference the same pointer field within a structure, as long as the
 pointer types all wrap base types with the same corresponding C type.
 
-If the sequence field has a context tag attached to its type, you'll
+If the sequence field has a context tag attached to its type, you will
 also need to create a tag wrapper for it:
 
   DEFCTAGGEDTYPE(descname, tagnum, basedesc)
@@ -206,6 +210,7 @@ enforce that they appear together.
 
 If your ASN.1 sequence contains optional fields, keep reading.
 
+
 Optional sequence fields
 ------------------------
 
@@ -229,7 +234,7 @@ type:
 
 and then use opt_ptr_basetype in the DEFFIELD invocation for the
 sequence field.  DEFOPTIONALZEROTYPE can also be used for integer
-types, if it's okay for the value 0 to represent that the
+types, if it is okay for the value 0 to represent that the
 corresponding ASN.1 value is omitted.  Optional-zero wrappers, like
 pointer wrappers, are usually defined just after the types they wrap.
 
@@ -257,6 +262,7 @@ wrapped using the nonempty_data function already defined in
 asn1_k_encode.c, like so:
 
   DEFOPTIONALTYPE(opt_ostring_data, nonempty_data, NULL, ostring_data);
+
 
 Sequence-of types
 -----------------
@@ -297,7 +303,7 @@ as:
   DEFPTRTYPE(int32_ptr, int32);
   DEFCOUNTEDSEQOFTYPE(cseqof_int32, krb5_int32, int32_ptr);
 
-To use a counted sequence-of type in a sequence, you use DEFCOUNTEDTYPE:
+To use a counted sequence-of type in a sequence, use DEFCOUNTEDTYPE:
 
   DEFCOUNTEDTYPE(descname, structuretype, ptrfield, lenfield, cdesc)
 
@@ -309,6 +315,7 @@ The combination of DEFCOUNTEDTYPE and DEFCTAGGEDTYPE can be
 abbreviated using DEFCNFIELD:
 
   DEFCNFIELD(descname, structuretype, ptrfield, lenfield, tagnum, cdesc)
+
 
 Tag wrappers
 ------------
@@ -335,6 +342,7 @@ type model, but is instead a concept used in DER.  In general, all
 explicit tags should be constructed (but see the section on "Dirty
 tricks" below).  The construction parameter is ignored for implicit
 tags.
+
 
 Choice types
 ------------
@@ -381,6 +389,7 @@ set the distinguisher to -1 if the tag of the ASN.1 value is not
 matched by any of the alternatives, and will leave the union
 zero-filled in that case.
 
+
 Counted type descriptors
 ------------------------
 
@@ -396,8 +405,8 @@ counted type descriptors, defined using the following macros:
   DEFCOUNTEDSEQOFTYPE(descname, lentype, baseptrdesc)
   DEFCHOICETYPE(descname, uniontype, distinguishertype, fields)
 
-DEFDERTYPE is described in the "Dirty tricks" section below.  The
-other three kinds of counted types have been covered previously.
+DEFCOUNTEDDERTYPE is described in the "Dirty tricks" section below.
+The other three kinds of counted types have been covered previously.
 
 Counted types are always used by wrapping them in a normal type
 descriptor with one of these macros:
@@ -406,8 +415,9 @@ descriptor with one of these macros:
   DEFCOUNTEDTYPE_SIGNED(descname, structuretype, datafield, countfield, cdesc)
 
 These macros are similar in concept to an offset type, only with two
-offsets.  Use DEFCOUNTEDTYPE if the count field is unsigned or
+offsets.  Use DEFCOUNTEDTYPE if the count field is unsigned,
 DEFCOUNTEDTYPE_SIGNED if it is signed.
+
 
 Defining encoder and decoder functions
 --------------------------------------
@@ -444,6 +454,7 @@ have the prototype:
 Decoder functions allocate a container for the C type of the object
 being decoded and return a pointer to it in *rep_out.
 
+
 Writing test cases
 ------------------
 
@@ -474,8 +485,10 @@ existing test cases there.
 Following these steps will not ensure the correctness of your
 translation of the ASN.1 module to macro invocations; it only lets us
 detect unintentional changes to the encodings after they are defined.
-For that, you should use a different tool such as asn1c.  There is
-currently no blueprint for doing this; we should create one.
+To ensure that your translations are correct, you should extend
+tests/asn.1/make-vectors.c and use "make test-vectors" to create
+vectors using asn1c.
+
 
 Dirty tricks
 ------------
@@ -497,6 +510,7 @@ In this case you can use a DEFTAGGEDTYPE wrapper like so:
   DEFTAGGEDTYPE(descname, UNIVERSAL, PRIMITIVE, ASN1_OCTETSTRING, 0,
                 basedesc)
 
+
 Limitations
 -----------
 
@@ -505,32 +519,35 @@ We cannot currently encode or decode SET or SET OF types.
 We cannot model self-referential types (like "MATHSET ::= SET OF
 MATHSET").
 
-If a sequence uses an optional field which is a choice field (without
-a context tag wrapper), or an optional field which uses a stored DER
+If a sequence uses an optional field that is a choice field (without
+a context tag wrapper), or an optional field that uses a stored DER
 encoding (again, without a context tag wrapper), our decoder may
 assign a value to the choice or stored-DER field when the correct
 behavior is to skip that field and assign the value to a subsequent
 field.  It should be very rare for ASN.1 modules to use choice or open
 types this way.
 
-For historical interoperability reasons, our decoder the indefinite
-length form for constructed tags, which is allowed by BER but not DER.
-We still require the primitive forms of basic scalar types, however,
-so we do not accept all BER encodings of ASN.1 values.
+For historical interoperability reasons, our decoder accepts the
+indefinite length form for constructed tags, which is allowed by BER
+but not DER.  We still require the primitive forms of basic scalar
+types, however, so we do not accept all BER encodings of ASN.1 values.
+
 
 Debugging
 ---------
 
-If you're looking at a stack trace with a bunch of ASN.1 encoder or
-decoder calls at the top, here are some things which might help with
+If you are looking at a stack trace with a bunch of ASN.1 encoder or
+decoder calls at the top, here are some notes that might help with
 debugging:
 
 1. You may have noticed that the entry point into the encoder is
 defined by a macro like MAKE_CODEC.  Don't worry about this; those
 macros just define thin wrappers around k5_asn1_full_encode and
-k5_asn1_full_decode.
+k5_asn1_full_decode.  If you are stepping through code and hit a
+wrapper function, just enter "step" to get into the actual encoder or
+decoder function.
 
-2. If you're in the encoder, look for stack frames in
+2. If you are in the encoder, look for stack frames in
 encode_sequence(), and print the value of i within those stack frames.
 You should be able to subtract 1 from those values and match them up
 with the sequence field offsets in asn1_k_encode.c for the type being
@@ -554,7 +571,7 @@ you could match those up as following:
 So the problem would likely be in the data components of the client
 principal in the kdc_req structure.
 
-3. If you're in the decoder, look for stacks frames in
+3. If you are in the decoder, look for stacks frames in
 decode_sequence(), and again print the values of i.  You can match
 these up just as above, except without subtracting 1 from the i
 values.
