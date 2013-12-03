@@ -462,13 +462,12 @@ Propagation failed?
            kprop: No route to host while connecting to server
 
 Make sure that the hostname of the slave (as given to kprop) is
-correct, and that any firewalls beween the master and the slave allow
+correct, and that any firewalls between the master and the slave allow
 a connection on port 754.
 
 .. error::
 
-           kprop: Connection refused in call to connect while opening
-           connection
+           kprop: Connection refused while connecting to server
 
 If the slave is intended to run kpropd out of inetd, make sure that
 inetd is configured to accept krb5_prop connections.  inetd may need
@@ -478,12 +477,12 @@ that it is running.
 
 .. error::
 
-           kprop: Server rejected authentication while authenticating
-           to server
+           kprop: Server rejected authentication (during sendauth
+           exchange) while authenticating to server
 
 Make sure that:
 
-#. The time is syncronized between the master and slave KDCs.
+#. The time is synchronized between the master and slave KDCs.
 #. The master stash file was copied from the master to the expected
    location on the slave.
 #. The slave has a keytab file in the default location containing a
