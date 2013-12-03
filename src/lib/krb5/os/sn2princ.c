@@ -39,153 +39,135 @@
 #define DEFAULT_RDNS_LOOKUP 1
 #endif
 
-static int
-maybe_use_reverse_dns (krb5_context context, int defalt)
+static krb5_boolean
+use_reverse_dns(krb5_context context)
 {
-    krb5_error_code code;
-    char * value = NULL;
-    int use_rdns = 0;
+    krb5_error_code ret;
+    int value;
 
-    code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
-                              KRB5_CONF_RDNS, 0, 0, &value);
-    if (code)
-        return defalt;
-
-    if (value == 0)
-        return defalt;
-
-    use_rdns = _krb5_conf_boolean(value);
-    profile_release_string(value);
-    return use_rdns;
+    ret = profile_get_boolean(context->profile, KRB5_CONF_LIBDEFAULTS,
+                              KRB5_CONF_RDNS, NULL, DEFAULT_RDNS_LOOKUP,
+                              &value);
+    if (ret)
+        return DEFAULT_RDNS_LOOKUP;
+    return value;
 }
 
+/* Set *name_out to the canonicalized form of name, obeying relevant
+ * configuration settings.  The caller must free the result. */
+static krb5_error_code
+canon_hostname(krb5_context context, krb5_int32 type, const char *host,
+               char **canonhost_out)
+{
+    struct addrinfo *ai = NULL, hint;
+    char namebuf[NI_MAXHOST], *copy, *p;
+    int err;
+    const char *canonhost;
+
+    *canonhost_out = NULL;
+
+    canonhost = host;
+    if (type == KRB5_NT_SRV_HST && context->dns_canonicalize_hostname) {
+        /* Try a forward lookup of the hostname. */
+        memset(&hint, 0, sizeof(hint));
+        hint.ai_flags = AI_CANONNAME;
+        err = getaddrinfo(host, 0, &hint, &ai);
+        if (err == EAI_MEMORY)
+            goto cleanup;
+        if (!err && ai->ai_canonname != NULL)
+            canonhost = ai->ai_canonname;
+
+        if (!err && use_reverse_dns(context)) {
+            /* Try a reverse lookup of the address. */
+            err = getnameinfo(ai->ai_addr, ai->ai_addrlen, namebuf,
+                              sizeof(namebuf), NULL, 0, NI_NAMEREQD);
+            if (err == EAI_MEMORY)
+                goto cleanup;
+            if (!err)
+                canonhost = namebuf;
+        }
+    }
+
+    copy = strdup(canonhost);
+    if (copy == NULL)
+        goto cleanup;
+
+    if (type == KRB5_NT_SRV_HST) {
+        /* Convert the hostname to lower case. */
+        for (p = copy; *p != '\0'; p++) {
+            if (isupper((unsigned char)*p))
+                *p = tolower((unsigned char)*p);
+        }
+    }
+
+    /* Remove any trailing dot. */
+    if (copy[0] != '\0') {
+        p = copy + strlen(copy) - 1;
+        if (*p == '.')
+            *p = '\0';
+    }
+
+    *canonhost_out = copy;
+
+cleanup:
+    /* We only return success or ENOMEM. */
+    if (ai != NULL)
+        freeaddrinfo(ai);
+    return (*canonhost_out == NULL) ? ENOMEM : 0;
+}
 
 krb5_error_code KRB5_CALLCONV
-krb5_sname_to_principal(krb5_context context, const char *hostname, const char *sname, krb5_int32 type, krb5_principal *ret_princ)
+krb5_sname_to_principal(krb5_context context, const char *hostname,
+                        const char *sname, krb5_int32 type,
+                        krb5_principal *princ_out)
 {
-    char **hrealms, *realm, *remote_host;
-    krb5_error_code retval;
-    register char *cp;
-    char localname[MAXHOSTNAMELEN];
+    krb5_error_code ret;
+    krb5_principal princ;
+    const char *realm;
+    char **hrealms = NULL, *canonhost = NULL, localname[MAXHOSTNAMELEN];
 
-    TRACE_SNAME_TO_PRINCIPAL(context, hostname, sname, type);
+    *princ_out = NULL;
 
-    if ((type == KRB5_NT_UNKNOWN) ||
-        (type == KRB5_NT_SRV_HST)) {
-
-        /* if hostname is NULL, use local hostname */
-        if (! hostname) {
-            if (gethostname(localname, MAXHOSTNAMELEN))
-                return SOCKET_ERRNO;
-            hostname = localname;
-        }
-
-        /* if sname is NULL, use "host" */
-        if (! sname)
-            sname = "host";
-
-        /* copy the hostname into non-volatile storage */
-
-        if (type == KRB5_NT_SRV_HST && context->dns_canonicalize_hostname) {
-            struct addrinfo *ai = NULL, hints;
-            int err;
-            char hnamebuf[NI_MAXHOST];
-
-            /* Note that the old code would accept numeric addresses,
-               and if the gethostbyaddr step could convert them to
-               real hostnames, you could actually get reasonable
-               results.  If the mapping failed, you'd get dotted
-               triples as realm names.  *sigh*
-
-               The latter has been fixed in hst_realm.c, but we should
-               keep supporting numeric addresses if they do have
-               hostnames associated.  */
-
-            memset(&hints, 0, sizeof(hints));
-            hints.ai_flags = AI_CANONNAME;
-            err = getaddrinfo(hostname, 0, &hints, &ai);
-            if (err) {
-                TRACE_SNAME_TO_PRINCIPAL_NOCANON(context, hostname);
-            }
-            remote_host = strdup((ai && ai->ai_canonname) ? ai->ai_canonname : hostname);
-            if (!remote_host) {
-                if(ai)
-                    freeaddrinfo(ai);
-                return ENOMEM;
-            }
-            TRACE_SNAME_TO_PRINCIPAL_CANON(context, remote_host);
-            if ((!err) && maybe_use_reverse_dns(context, DEFAULT_RDNS_LOOKUP)) {
-                /*
-                 * Do a reverse resolution to get the full name, just in
-                 * case there's some funny business going on.  If there
-                 * isn't an in-addr record, give up.
-                 */
-                /* XXX: This is *so* bogus.  There are several cases where
-                   this won't get us the canonical name of the host, but
-                   this is what we've trained people to expect.  We'll
-                   probably fix it at some point, but let's try to
-                   preserve the current behavior and only shake things up
-                   once when it comes time to fix this lossage.  */
-                err = getnameinfo(ai->ai_addr, ai->ai_addrlen,
-                                  hnamebuf, sizeof(hnamebuf), 0, 0, NI_NAMEREQD);
-                freeaddrinfo(ai);
-                if (err == 0) {
-                    free(remote_host);
-                    remote_host = strdup(hnamebuf);
-                    if (!remote_host)
-                        return ENOMEM;
-                }
-            } else
-                freeaddrinfo(ai);
-        } else /* type == KRB5_NT_UNKNOWN */ {
-            remote_host = strdup(hostname);
-        }
-        if (!remote_host)
-            return ENOMEM;
-        TRACE_SNAME_TO_PRINCIPAL_RDNS(context, remote_host);
-
-        if (type == KRB5_NT_SRV_HST)
-            for (cp = remote_host; *cp; cp++)
-                if (isupper((unsigned char) (*cp)))
-                    *cp = tolower((unsigned char) (*cp));
-
-        /*
-         * Windows NT5's broken resolver gratuitously tacks on a
-         * trailing period to the hostname (at least it does in
-         * Beta2).  Find and remove it.
-         */
-        if (remote_host[0]) {
-            cp = remote_host + strlen(remote_host)-1;
-            if (*cp == '.')
-                *cp = 0;
-        }
-
-
-        if ((retval = krb5_get_host_realm(context, remote_host, &hrealms))) {
-            free(remote_host);
-            return retval;
-        }
-
-        if (!hrealms[0]) {
-            free(remote_host);
-            free(hrealms);
-            return KRB5_ERR_HOST_REALM_UNKNOWN;
-        }
-        realm = hrealms[0];
-
-        retval = krb5_build_principal(context, ret_princ, strlen(realm),
-                                      realm, sname, remote_host,
-                                      (char *)0);
-        if (retval == 0)
-            (*ret_princ)->type = type;
-
-        TRACE_SNAME_TO_PRINCIPAL_RETURN(context, *ret_princ);
-
-        free(remote_host);
-
-        krb5_free_host_realm(context, hrealms);
-        return retval;
-    } else {
+    if (type != KRB5_NT_UNKNOWN && type != KRB5_NT_SRV_HST)
         return KRB5_SNAME_UNSUPP_NAMETYPE;
+
+    /* If hostname is NULL, use the local hostname. */
+    if (hostname == NULL) {
+        if (gethostname(localname, MAXHOSTNAMELEN) != 0)
+            return SOCKET_ERRNO;
+        hostname = localname;
     }
+
+    /* If sname is NULL, use "host". */
+    if (sname == NULL)
+        sname = "host";
+
+    /* Canonicalize the hostname if appropriate. */
+    ret = canon_hostname(context, type, hostname, &canonhost);
+    if (ret)
+        goto cleanup;
+    hostname = canonhost;
+
+    /* Find the realm of the host. */
+    ret = krb5_get_host_realm(context, hostname, &hrealms);
+    if (ret)
+        goto cleanup;
+    if (hrealms[0] == NULL) {
+        ret = KRB5_ERR_HOST_REALM_UNKNOWN;
+        goto cleanup;
+    }
+    realm = hrealms[0];
+
+    ret = krb5_build_principal(context, &princ, strlen(realm), realm, sname,
+                               hostname, (char *)NULL);
+    if (ret)
+        goto cleanup;
+
+    princ->type = type;
+    *princ_out = princ;
+
+cleanup:
+    free(canonhost);
+    krb5_free_host_realm(context, hrealms);
+    return ret;
 }
