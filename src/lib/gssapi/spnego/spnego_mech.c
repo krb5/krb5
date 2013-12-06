@@ -3140,14 +3140,17 @@ get_input_token(unsigned char **buff_in, unsigned int buff_length)
 		return (NULL);
 
 	input_token->length = len;
-	input_token->value = gssalloc_malloc(input_token->length);
+	if (input_token->length > 0) {
+		input_token->value = gssalloc_malloc(input_token->length);
+		if (input_token->value == NULL) {
+			free(input_token);
+			return (NULL);
+		}
 
-	if (input_token->value == NULL) {
-		free(input_token);
-		return (NULL);
+		memcpy(input_token->value, *buff_in, input_token->length);
+	} else {
+		input_token->value = NULL;
 	}
-
-	(void) memcpy(input_token->value, *buff_in, input_token->length);
 	*buff_in += input_token->length;
 	return (input_token);
 }
