@@ -2034,7 +2034,9 @@ k5_get_num_cred(int verbose)
 
   if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
     if (verbose)
-      com_err(NULL, code, "while starting to retrieve tickets.");
+      com_err(NULL, code,
+              "while starting to retrieve tickets (ticket cache %s).",
+              krb5_cc_get_name(k5_context, k5_ccache));
     return -1;
   }
 
