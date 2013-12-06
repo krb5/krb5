@@ -225,6 +225,32 @@ krb5int_fast_as_armor(krb5_context context,
     return retval;
 }
 
+/*
+ * Construct a list of outer request padata for a TGS request.  Since we do
+ * FAST TGS even when we don't have reason to believe the KDC supports FAST,
+ * the outer padata has to contain duplicates of the inner padata (such as
+ * S4U2Self padata) as well as the PA-TGS-REQ and PA-FX-FAST padata.  The
+ * caller must free *out_padata with free() as it is not a deep copy.
+ */
+static krb5_error_code
+make_tgs_outer_padata(krb5_pa_data *tgs, krb5_pa_data *fast,
+                      krb5_pa_data **other, krb5_pa_data ***out_padata)
+{
+    krb5_pa_data **pa_list;
+    size_t i;
+
+    *out_padata = NULL;
+    for (i = 0; other[i] != NULL; i++);
+    pa_list = calloc(i + 3, sizeof(*pa_list));
+    if (pa_list == NULL)
+        return ENOMEM;
+    pa_list[0] = tgs;
+    pa_list[1] = fast;
+    for (i = 0; other[i] != NULL; i++)
+        pa_list[i + 2] = other[i];
+    *out_padata = pa_list;
+    return 0;
+}
 
 krb5_error_code
 krb5int_fast_prep_req(krb5_context context,
@@ -235,7 +261,7 @@ krb5int_fast_prep_req(krb5_context context,
                       krb5_data **encoded_request)
 {
     krb5_error_code retval = 0;
-    krb5_pa_data *pa_array[3];
+    krb5_pa_data *pa_array[2], **pa_tgs_array = NULL;
     krb5_pa_data pa[2];
     krb5_fast_req fast_req;
     krb5_pa_data *tgs = NULL;
@@ -299,12 +325,14 @@ krb5int_fast_prep_req(krb5_context context,
         pa[0].contents = (unsigned char *) encoded_armored_req->data;
         pa[0].length = encoded_armored_req->length;
         if (tgs) {
-            pa_array[0] = tgs;
-            pa_array[1] = &pa[0];
-        } else
+            retval = make_tgs_outer_padata(tgs, pa, request->padata,
+                                           &pa_tgs_array);
+            state->fast_outer_request.padata = pa_tgs_array;
+        } else {
             pa_array[0] = &pa[0];
+            state->fast_outer_request.padata = pa_array;
+        }
     }
-    state->fast_outer_request.padata = pa_array;
     if (retval == 0)
         retval = encoder(&state->fast_outer_request, &local_encoded_result);
     if (retval == 0) {
@@ -326,6 +354,7 @@ krb5int_fast_prep_req(krb5_context context,
         free(tgs);
     }
     state->fast_outer_request.padata = NULL;
+    free(pa_tgs_array);
     return retval;
 }
 
