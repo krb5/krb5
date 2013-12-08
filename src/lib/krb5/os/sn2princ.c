@@ -116,6 +116,20 @@ cleanup:
     return (*canonhost_out == NULL) ? ENOMEM : 0;
 }
 
+/* If hostname appears to have a :port or :instance trailer (used in MSSQLSvc
+ * principals), return a pointer to the separator.  Otherwise return NULL. */
+static const char *
+find_trailer(const char *hostname)
+{
+    const char *p = strchr(hostname, ':');
+
+    /* Look for a single colon followed by one or more characters.  An IPv6
+     * address will have more than one colon, so don't accept that. */
+    if (p == NULL || p[1] == '\0' || strchr(p + 1, ':') != NULL)
+        return NULL;
+    return p;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_sname_to_principal(krb5_context context, const char *hostname,
                         const char *sname, krb5_int32 type,
@@ -123,8 +137,9 @@ krb5_sname_to_principal(krb5_context context, const char *hostname,
 {
     krb5_error_code ret;
     krb5_principal princ;
-    const char *realm;
-    char **hrealms = NULL, *canonhost = NULL, localname[MAXHOSTNAMELEN];
+    const char *realm, *trailer;
+    char **hrealms = NULL, *canonhost = NULL, *hostonly = NULL, *concat = NULL;
+    char localname[MAXHOSTNAMELEN];
 
     *princ_out = NULL;
 
@@ -142,6 +157,15 @@ krb5_sname_to_principal(krb5_context context, const char *hostname,
     if (sname == NULL)
         sname = "host";
 
+    /* If there is a trailer, remove it for now. */
+    trailer = find_trailer(hostname);
+    if (trailer != NULL) {
+        hostonly = k5memdup0(hostname, trailer - hostname, &ret);
+        if (hostonly == NULL)
+            goto cleanup;
+        hostname = hostonly;
+    }
+
     /* Canonicalize the hostname if appropriate. */
     ret = canon_hostname(context, type, hostname, &canonhost);
     if (ret)
@@ -158,6 +182,15 @@ krb5_sname_to_principal(krb5_context context, const char *hostname,
     }
     realm = hrealms[0];
 
+    /* If there was a trailer, put it back on the end. */
+    if (trailer != NULL) {
+        if (asprintf(&concat, "%s%s", hostname, trailer) < 0) {
+            ret = ENOMEM;
+            goto cleanup;
+        }
+        hostname = concat;
+    }
+
     ret = krb5_build_principal(context, &princ, strlen(realm), realm, sname,
                                hostname, (char *)NULL);
     if (ret)
@@ -167,7 +200,9 @@ krb5_sname_to_principal(krb5_context context, const char *hostname,
     *princ_out = princ;
 
 cleanup:
+    free(hostonly);
     free(canonhost);
+    free(concat);
     krb5_free_host_realm(context, hrealms);
     return ret;
 }
