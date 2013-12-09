@@ -267,7 +267,7 @@ The following tags may be specified in a [realms] subsection:
 **master_key_type**
     (Key type string.)  Specifies the master key's key type.  The
     default value for this is |defmkey|.  For a list of all possible
-    values, see :ref:`Encryption_and_salt_types`.
+    values, see :ref:`Encryption_types`.
 
 **max_life**
     (:ref:`duration` string.)  Specifies the maximum time period for
@@ -327,7 +327,7 @@ The following tags may be specified in a [realms] subsection:
     combinations of principals for this realm.  Any principals created
     through :ref:`kadmin(1)` will have keys of these types.  The
     default value for this tag is |defkeysalts|.  For lists of
-    possible values, see :ref:`Encryption_and_salt_types`.
+    possible values, see :ref:`Keysalt_lists`.
 
 
 .. _dbdefaults:
@@ -679,10 +679,10 @@ For information about the syntax of some of these options, see
     policy is such that up-to-date CRLs must be present for every CA.
 
 
-.. _Encryption_and_salt_types:
+.. _Encryption_types:
 
-Encryption and salt types
--------------------------
+Encryption types
+----------------
 
 Any tag in the configuration files which requires a list of encryption
 types can be set to some combination of the following strings.
@@ -726,10 +726,31 @@ implementation (krb5-1.3.1 and earlier).  Services running versions of
 krb5 without AES support must not be given AES keys in the KDC
 database.
 
-Kerberos keys for users are usually derived from passwords.  To ensure
-that people who happen to pick the same password do not have the same
-key, Kerberos 5 incorporates more information into the key using
-something called a salt.  The supported salt types are as follows:
+
+.. _Keysalt_lists:
+
+Keysalt lists
+-------------
+
+Kerberos keys for users are usually derived from passwords.  Kerberos
+commands and configuration parameters that affect generation of keys
+take lists of enctype-salttype ("keysalt") pairs, known as *keysalt
+lists*.  Each keysalt pair is an enctype name followed by a salttype
+name, in the format *enc*:*salt*.  Individual keysalt list members are
+separated by comma (",") characters or space characters.  For example:
+
+ ::
+
+    kadmin -e aes256-cts:normal,aes128-cts:normal
+
+would start up kadmin so that by default it would generate
+password-derived keys for the **aes256-cts** and **aes128-cts**
+encryption types, using a **normal** salt.
+
+To ensure that people who happen to pick the same password do not have
+the same key, Kerberos 5 incorporates more information into the key
+using something called a salt.  The supported salt types are as
+follows:
 
 ================= ============================================
 normal            default for Kerberos Version 5

@@ -20,7 +20,7 @@ Admin server ACL file :ref:`kadm5.acl(5)`   |kdcdir|\ ``/kadm5.acl``
 Plugin base directory                       |libdir|\ ``/krb5/plugins``
 :ref:`rcache_definition` directory          ``/var/tmp``                   **KRB5RCACHEDIR**
 Master key default enctype                  |defmkey|
-Supported :ref:`Encryption_and_salt_types`  |defkeysalts|
+Default :ref:`keysalt list<Keysalt_lists>`  |defkeysalts|
 Permitted enctypes                          |defetypes|
 KDC default port                            88
 Second KDC default port                     750

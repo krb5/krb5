@@ -99,14 +99,14 @@ Additionally, krb5.conf may include any of the relations described in
 The libdefaults section may contain any of the following relations:
 
 **allow_weak_crypto**
-    If this flag is set to false, then weak encryption types (as noted in
-    :ref:`Encryption_and_salt_types` in :ref:`kdc.conf(5)`) will be filtered
-    out of the lists **default_tgs_enctypes**, **default_tkt_enctypes**, and
-    **permitted_enctypes**.  The default value for this tag is false, which
-    may cause authentication failures in existing Kerberos infrastructures
-    that do not support strong crypto.  Users in affected environments
-    should set this tag to true until their infrastructure adopts
-    stronger ciphers.
+    If this flag is set to false, then weak encryption types (as noted
+    in :ref:`Encryption_types` in :ref:`kdc.conf(5)`) will be filtered
+    out of the lists **default_tgs_enctypes**,
+    **default_tkt_enctypes**, and **permitted_enctypes**.  The default
+    value for this tag is false, which may cause authentication
+    failures in existing Kerberos infrastructures that do not support
+    strong crypto.  Users in affected environments should set this tag
+    to true until their infrastructure adopts stronger ciphers.
 
 **ap_req_checksum_type**
     An integer which specifies the type of AP-REQ checksum to use in
@@ -160,7 +160,7 @@ The libdefaults section may contain any of the following relations:
     Identifies the supported list of session key encryption types that
     the client should request when making a TGS-REQ, in order of
     preference from highest to lowest.  The list may be delimited with
-    commas or whitespace.  See :ref:`Encryption_and_salt_types` in
+    commas or whitespace.  See :ref:`Encryption_types` in
     :ref:`kdc.conf(5)` for a list of the accepted values for this tag.
     The default value is |defetypes|, but single-DES encryption types
     will be implicitly removed from this list if the value of

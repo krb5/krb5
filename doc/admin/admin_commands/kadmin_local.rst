@@ -127,9 +127,9 @@ OPTIONS
     instead of reading it from a stash file.
 
 **-e** "*enc*:*salt* ..."
-    Sets the list of encryption types and salt types to be used for
-    any new keys created.  See :ref:`Encryption_and_salt_types` in
-    :ref:`kdc.conf(5)` for a list of possible values.
+    Sets the keysalt list to be used for any new keys created.  See
+    :ref:`Keysalt_lists` in :ref:`kdc.conf(5)` for a list of possible
+    values.
 
 **-O**
     Force use of old AUTH_GSSAPI authentication flavor.
@@ -307,8 +307,9 @@ Options:
     via the process list.
 
 **-e** *enc*:*salt*,...
-    Uses the specified list of enctype-salttype pairs for setting the
-    key of the principal.
+    Uses the specified keysalt list for setting the keys of the
+    principal.  See :ref:`Keysalt_lists` in :ref:`kdc.conf(5)` for a
+    list of possible values.
 
 **-x** *db_princ_args*
     Indicates database-specific options.  The options for the LDAP
@@ -439,8 +440,9 @@ The following options are available:
     the process list.
 
 **-e** *enc*:*salt*,...
-    Uses the specified list of enctype-salttype pairs for setting the
-    key of the principal.
+    Uses the specified keysalt list for setting the keys of the
+    principal.  See :ref:`Keysalt_lists` in :ref:`kdc.conf(5)` for a
+    list of possible values.
 
 **-keepold**
     Keeps the existing keys in the database.  This flag is usually not
@@ -580,8 +582,8 @@ modules.  The following string attributes are recognized by the KDC:
 **session_enctypes**
     Specifies the encryption types supported for session keys when the
     principal is authenticated to as a server.  See
-    :ref:`Encryption_and_salt_types` in :ref:`kdc.conf(5)` for a list
-    of the accepted values.
+    :ref:`Encryption_types` in :ref:`kdc.conf(5)` for a list of the
+    accepted values.
 
 This command requires the **modify** privilege.
 
@@ -668,10 +670,10 @@ The following options are available:
 **-allowedkeysalts**
     Specifies the key/salt tuples supported for long-term keys when
     setting or changing a principal's password/keys.  See
-    :ref:`Encryption_and_salt_types` in :ref:`kdc.conf(5)` for a list
-    of the accepted values, but note that key/salt tuples must be
-    separated with commas (',') only.  To clear the allowed key/salt
-    policy use a value of '-'.
+    :ref:`Keysalt_lists` in :ref:`kdc.conf(5)` for a list of the
+    accepted values, but note that key/salt tuples must be separated
+    with commas (',') only.  To clear the allowed key/salt policy use
+    a value of '-'.
 
 Example:
 
@@ -819,8 +821,9 @@ The options are:
     used.
 
 **-e** *enc*:*salt*,...
-    Use the specified list of enctype-salttype pairs for setting the
-    new keys of the principal.
+    Uses the specified keysalt list for setting the new keys of the
+    principal.  See :ref:`Keysalt_lists` in :ref:`kdc.conf(5)` for a
+    list of possible values.
 
 **-q**
     Display less verbose information.
