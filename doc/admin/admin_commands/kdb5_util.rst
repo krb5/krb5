@@ -262,9 +262,9 @@ add_mkey
 Adds a new master key to the master key principal, but does not mark
 it as active.  Existing master keys will remain.  The **-e** option
 specifies the encryption type of the new master key; see
-:ref:`Encryption_and_salt_types` in :ref:`kdc.conf(5)` for a list of
-possible values.  The **-s** option stashes the new master key in the
-stash file, which will be created if it doesn't already exist.
+:ref:`Encryption_types` in :ref:`kdc.conf(5)` for a list of possible
+values.  The **-s** option stashes the new master key in the stash
+file, which will be created if it doesn't already exist.
 
 After a new master key is added, it should be propagated to slave
 servers via a manual or periodic invocation of :ref:`kprop(8)`.  Then,
