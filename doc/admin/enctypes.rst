@@ -122,8 +122,7 @@ generation of long-term keys.
 Enctype compatibility
 ---------------------
 
-See :ref:`Encryption_and_salt_types` for additional information about
-enctypes.
+See :ref:`Encryption_types` for additional information about enctypes.
 
 ======================= ===== ======== =======
 enctype                 weak? krb5     Windows
