@@ -178,14 +178,14 @@ The libdefaults section may contain any of the following relations:
 .INDENT 0.0
 .TP
 .B \fBallow_weak_crypto\fP
-If this flag is set to false, then weak encryption types (as noted in
-\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP) will be filtered
-out of the lists \fBdefault_tgs_enctypes\fP, \fBdefault_tkt_enctypes\fP, and
-\fBpermitted_enctypes\fP.  The default value for this tag is false, which
-may cause authentication failures in existing Kerberos infrastructures
-that do not support strong crypto.  Users in affected environments
-should set this tag to true until their infrastructure adopts
-stronger ciphers.
+If this flag is set to false, then weak encryption types (as noted
+in \fIEncryption_types\fP in \fIkdc.conf(5)\fP) will be filtered
+out of the lists \fBdefault_tgs_enctypes\fP,
+\fBdefault_tkt_enctypes\fP, and \fBpermitted_enctypes\fP.  The default
+value for this tag is false, which may cause authentication
+failures in existing Kerberos infrastructures that do not support
+strong crypto.  Users in affected environments should set this tag
+to true until their infrastructure adopts stronger ciphers.
 .TP
 .B \fBap_req_checksum_type\fP
 An integer which specifies the type of AP\-REQ checksum to use in
@@ -239,7 +239,7 @@ invoking programs such as \fIkinit(1)\fP.
 Identifies the supported list of session key encryption types that
 the client should request when making a TGS\-REQ, in order of
 preference from highest to lowest.  The list may be delimited with
-commas or whitespace.  See \fIEncryption_and_salt_types\fP in
+commas or whitespace.  See \fIEncryption_types\fP in
 \fIkdc.conf(5)\fP for a list of the accepted values for this tag.
 The default value is \fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac des\-cbc\-crc des\-cbc\-md5 des\-cbc\-md4\fP, but single\-DES encryption types
 will be implicitly removed from this list if the value of

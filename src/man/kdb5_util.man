@@ -265,9 +265,9 @@ salt types to be used for the new keys.
 Adds a new master key to the master key principal, but does not mark
 it as active.  Existing master keys will remain.  The \fB\-e\fP option
 specifies the encryption type of the new master key; see
-\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP for a list of
-possible values.  The \fB\-s\fP option stashes the new master key in the
-stash file, which will be created if it doesn\(aqt already exist.
+\fIEncryption_types\fP in \fIkdc.conf(5)\fP for a list of possible
+values.  The \fB\-s\fP option stashes the new master key in the stash
+file, which will be created if it doesn\(aqt already exist.
 .sp
 After a new master key is added, it should be propagated to slave
 servers via a manual or periodic invocation of \fIkprop(8)\fP.  Then,

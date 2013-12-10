@@ -321,7 +321,7 @@ master key.  The default is \fBK/M\fP.
 .B \fBmaster_key_type\fP
 (Key type string.)  Specifies the master key\(aqs key type.  The
 default value for this is \fBaes256\-cts\-hmac\-sha1\-96\fP.  For a list of all possible
-values, see \fI\%Encryption and salt types\fP.
+values, see \fI\%Encryption types\fP.
 .TP
 .B \fBmax_life\fP
 (\fIduration\fP string.)  Specifies the maximum time period for
@@ -381,7 +381,7 @@ default value is false.  New in release 1.9.
 combinations of principals for this realm.  Any principals created
 through \fIkadmin(1)\fP will have keys of these types.  The
 default value for this tag is \fBaes256\-cts\-hmac\-sha1\-96:normal aes128\-cts\-hmac\-sha1\-96:normal des3\-cbc\-sha1:normal arcfour\-hmac\-md5:normal\fP.  For lists of
-possible values, see \fI\%Encryption and salt types\fP.
+possible values, see \fI\%Keysalt lists\fP.
 .UNINDENT
 .SS [dbdefaults]
 .sp
@@ -767,7 +767,7 @@ fails.
 \fBpkinit_require_crl_checking\fP should be set to true if the
 policy is such that up\-to\-date CRLs must be present for every CA.
 .UNINDENT
-.SH ENCRYPTION AND SALT TYPES
+.SH ENCRYPTION TYPES
 .sp
 Any tag in the configuration files which requires a list of encryption
 types can be set to some combination of the following strings.
@@ -902,11 +902,33 @@ operations, they are not supported by very old versions of our GSSAPI
 implementation (krb5\-1.3.1 and earlier).  Services running versions of
 krb5 without AES support must not be given AES keys in the KDC
 database.
+.SH KEYSALT LISTS
 .sp
-Kerberos keys for users are usually derived from passwords.  To ensure
-that people who happen to pick the same password do not have the same
-key, Kerberos 5 incorporates more information into the key using
-something called a salt.  The supported salt types are as follows:
+Kerberos keys for users are usually derived from passwords.  Kerberos
+commands and configuration parameters that affect generation of keys
+take lists of enctype\-salttype ("keysalt") pairs, known as \fIkeysalt
+lists\fP.  Each keysalt pair is an enctype name followed by a salttype
+name, in the format \fIenc\fP:\fIsalt\fP.  Individual keysalt list members are
+separated by comma (",") characters or space characters.  For example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin \-e aes256\-cts:normal,aes128\-cts:normal
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+would start up kadmin so that by default it would generate
+password\-derived keys for the \fBaes256\-cts\fP and \fBaes128\-cts\fP
+encryption types, using a \fBnormal\fP salt.
+.sp
+To ensure that people who happen to pick the same password do not have
+the same key, Kerberos 5 incorporates more information into the key
+using something called a salt.  The supported salt types are as
+follows:
 .TS
 center;
 |l|l|.

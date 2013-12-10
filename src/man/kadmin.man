@@ -142,9 +142,9 @@ If using kadmin.local, prompt for the database master password
 instead of reading it from a stash file.
 .TP
 .B \fB\-e\fP "\fIenc\fP:\fIsalt\fP ..."
-Sets the list of encryption types and salt types to be used for
-any new keys created.  See \fIEncryption_and_salt_types\fP in
-\fIkdc.conf(5)\fP for a list of possible values.
+Sets the keysalt list to be used for any new keys created.  See
+\fIKeysalt_lists\fP in \fIkdc.conf(5)\fP for a list of possible
+values.
 .TP
 .B \fB\-O\fP
 Force use of old AUTH_GSSAPI authentication flavor.
@@ -320,8 +320,9 @@ shell script may expose the password to other users on the system
 via the process list.
 .TP
 .B \fB\-e\fP \fIenc\fP:\fIsalt\fP,...
-Uses the specified list of enctype\-salttype pairs for setting the
-key of the principal.
+Uses the specified keysalt list for setting the keys of the
+principal.  See \fIKeysalt_lists\fP in \fIkdc.conf(5)\fP for a
+list of possible values.
 .TP
 .B \fB\-x\fP \fIdb_princ_args\fP
 Indicates database\-specific options.  The options for the LDAP
@@ -456,8 +457,9 @@ script may expose the password to other users on the system via
 the process list.
 .TP
 .B \fB\-e\fP \fIenc\fP:\fIsalt\fP,...
-Uses the specified list of enctype\-salttype pairs for setting the
-key of the principal.
+Uses the specified keysalt list for setting the keys of the
+principal.  See \fIKeysalt_lists\fP in \fIkdc.conf(5)\fP for a
+list of possible values.
 .TP
 .B \fB\-keepold\fP
 Keeps the existing keys in the database.  This flag is usually not
@@ -602,8 +604,8 @@ modules.  The following string attributes are recognized by the KDC:
 .B \fBsession_enctypes\fP
 Specifies the encryption types supported for session keys when the
 principal is authenticated to as a server.  See
-\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP for a list
-of the accepted values.
+\fIEncryption_types\fP in \fIkdc.conf(5)\fP for a list of the
+accepted values.
 .UNINDENT
 .sp
 This command requires the \fBmodify\fP privilege.
@@ -686,10 +688,10 @@ out until it is administratively unlocked with \fBmodprinc
 .B \fB\-allowedkeysalts\fP
 Specifies the key/salt tuples supported for long\-term keys when
 setting or changing a principal\(aqs password/keys.  See
-\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP for a list
-of the accepted values, but note that key/salt tuples must be
-separated with commas (\(aq,\(aq) only.  To clear the allowed key/salt
-policy use a value of \(aq\-\(aq.
+\fIKeysalt_lists\fP in \fIkdc.conf(5)\fP for a list of the
+accepted values, but note that key/salt tuples must be separated
+with commas (\(aq,\(aq) only.  To clear the allowed key/salt policy use
+a value of \(aq\-\(aq.
 .UNINDENT
 .sp
 Example:
@@ -851,8 +853,9 @@ Use \fIkeytab\fP as the keytab file.  Otherwise, the default keytab is
 used.
 .TP
 .B \fB\-e\fP \fIenc\fP:\fIsalt\fP,...
-Use the specified list of enctype\-salttype pairs for setting the
-new keys of the principal.
+Uses the specified keysalt list for setting the new keys of the
+principal.  See \fIKeysalt_lists\fP in \fIkdc.conf(5)\fP for a
+list of possible values.
 .TP
 .B \fB\-q\fP
 Display less verbose information.
