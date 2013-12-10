@@ -77,7 +77,7 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.12 (2013-11-08)
+Major changes in 1.12 (2013-12-10)
 ----------------------------------
 
 Developer experience:
@@ -160,6 +160,7 @@ krb5-1.12 changes by ticket ID
 7599    Add krb5_kt_dup API and use it in two places
 7603    Allow numeric addresses as service hostnames
 7604    Dynamically expand timeout when TCP connects
+7608    improve kadmin manpage "-e" description
 7620    libgssrpc is missing from krb5-config and pkg-config
 7625    Don't use "bool" for ASN.1 boolean macros
 7628    Fix link line for t_fortuna when built with openssl
@@ -240,6 +241,7 @@ krb5-1.12 changes by ticket ID
 7776    Added a new ccache doc to "Kerberos V5 concepts"
 7777    krb5-admin doc update: `kdb5_util dump` default format is now
         "krb5_util load_dump version 7"
+7785    Fix error message quotations in install_kdc.rst
 
 Acknowledgements
 ----------------
