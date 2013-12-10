@@ -760,6 +760,12 @@ init_ctx_nego(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 			map_errcode(minor_status);
 			ret = GSS_S_DEFECTIVE_TOKEN;
 		}
+	} else if ((*responseToken)->length == 0 && sc->mech_complete) {
+		/* Handle old IIS servers returning empty token instead of
+		 * null tokens in the non-mutual auth case. */
+		*negState = ACCEPT_COMPLETE;
+		*tokflag = NO_TOKEN_SEND;
+		ret = GSS_S_COMPLETE;
 	} else if (sc->mech_complete) {
 		/* Reject spurious mech token. */
 		ret = GSS_S_DEFECTIVE_TOKEN;
