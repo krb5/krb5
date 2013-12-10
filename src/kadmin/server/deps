@@ -33,6 +33,7 @@ $(OUTPRE)server_stubs.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/kdb.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/net-server.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   misc.h server_stubs.c
 $(OUTPRE)ovsec_kadmd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_alloc.h \
