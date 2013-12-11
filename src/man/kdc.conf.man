@@ -1,4 +1,4 @@
-.TH "KDC.CONF" "5" " " "1.12" "MIT Kerberos"
+.TH "KDC.CONF" "5" " " "1.13" "MIT Kerberos"
 .SH NAME
 kdc.conf \- Kerberos V5 KDC configuration file
 .
@@ -34,7 +34,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 The kdc.conf file supplements \fIkrb5.conf(5)\fP for programs which
 are typically only used on a KDC, such as the \fIkrb5kdc(8)\fP and
 \fIkadmind(8)\fP daemons and the \fIkdb5_util(8)\fP program.
-Relations documented here may also be specified in krb5.conf.
+Relations documented here may also be specified in krb5.conf; for the
+KDC programs mentioned, krb5.conf and kdc.conf will be merged into a
+single configuration profile.
 .sp
 Normally, the kdc.conf file is found in the KDC state directory,
 \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP.  You can override the default location by setting the
@@ -110,11 +112,21 @@ default value is 4096 bytes.
 .UNINDENT
 .SS [realms]
 .sp
-Each tag in the [realms] section is the name of a Kerberos realm.
-The value of the tag is a subsection where the relations define KDC
-parameters for that particular realm.
+Each tag in the [realms] section is the name of a Kerberos realm.  The
+value of the tag is a subsection where the relations define KDC
+parameters for that particular realm.  The following example shows how
+to define one parameter for the ATHENA.MIT.EDU realm:
 .sp
-For each realm, the following tags may be specified:
+.nf
+.ft C
+[realms]
+    ATHENA.MIT.EDU = {
+        max_renewable_life = 7d 0h 0m 0s
+    }
+.ft P
+.fi
+.sp
+The following tags may be specified in a [realms] subsection:
 .INDENT 0.0
 .TP
 .B \fBacl_file\fP
@@ -125,17 +137,17 @@ which permissions on the Kerberos database.  The default value is
 file see \fIkadm5.acl(5)\fP.
 .TP
 .B \fBdatabase_module\fP
-This relation indicates the name of the configuration section
-under \fI\%[dbmodules]\fP for database specific parameters used by
-the loadable database library.
+(String.)  This relation indicates the name of the configuration
+section under \fI\%[dbmodules]\fP for database\-specific parameters
+used by the loadable database library.  The default value is the
+realm name.  If this configuration section does not exist, default
+values will be used for all database parameters.
 .TP
 .B \fBdatabase_name\fP
-(String.)  This string specifies the location of the Kerberos
-database for this realm, if the DB2 back\-end is being used.  If a
-\fBdatabase_module\fP is specified for the realm and the
-corresponding module contains a \fBdatabase_name\fP parameter, that
-value will take precedence over this one.  The default value is
-\fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/principal\fP.
+(String, deprecated.)  This relation specifies the location of the
+Kerberos database for this realm, if the DB2 module is being used
+and the \fI\%[dbmodules]\fP configuration section does not specify a
+database name.  The default value is \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/principal\fP.
 .TP
 .B \fBdefault_principal_expiration\fP
 (\fIabstime\fP string.)  Specifies the default expiration date of
@@ -174,8 +186,8 @@ preauthenticate using a hardware device before receiving any
 tickets.
 .TP
 .B \fBno\-auth\-data\-required\fP
-Enabling this flag prevents PAC data from being added to
-service tickets for the principal.
+Enabling this flag prevents PAC or AD\-SIGNEDPATH data from
+being added to service tickets for the principal.
 .TP
 .B \fBok\-as\-delegate\fP
 If this flag is enabled, it hints the client that credentials
@@ -229,9 +241,10 @@ authentication process that was used to obtain the TGT.
 .TP
 .B \fBdict_file\fP
 (String.)  Location of the dictionary file containing strings that
-are not allowed as passwords.  If none is specified or if there is
-no policy assigned to the principal, no dictionary checks of
-passwords will be performed.
+are not allowed as passwords.  The file should contain one string
+per line, with no additional whitespace.  If none is specified or
+if there is no policy assigned to the principal, no dictionary
+checks of passwords will be performed.
 .TP
 .B \fBhost_based_services\fP
 (Whitespace\- or comma\-separated list.)  Lists services which will
@@ -308,7 +321,7 @@ master key.  The default is \fBK/M\fP.
 .B \fBmaster_key_type\fP
 (Key type string.)  Specifies the master key\(aqs key type.  The
 default value for this is \fBaes256\-cts\-hmac\-sha1\-96\fP.  For a list of all possible
-values, see \fI\%Encryption and salt types\fP.
+values, see \fI\%Encryption types\fP.
 .TP
 .B \fBmax_life\fP
 (\fIduration\fP string.)  Specifies the maximum time period for
@@ -368,7 +381,7 @@ default value is false.  New in release 1.9.
 combinations of principals for this realm.  Any principals created
 through \fIkadmin(1)\fP will have keys of these types.  The
 default value for this tag is \fBaes256\-cts\-hmac\-sha1\-96:normal aes128\-cts\-hmac\-sha1\-96:normal des3\-cbc\-sha1:normal arcfour\-hmac\-md5:normal\fP.  For lists of
-possible values, see \fI\%Encryption and salt types\fP.
+possible values, see \fI\%Keysalt lists\fP.
 .UNINDENT
 .SS [dbdefaults]
 .sp
@@ -393,20 +406,21 @@ definitions of these relations.
 .SS [dbmodules]
 .sp
 The [dbmodules] section contains parameters used by the KDC database
-library and database modules.
+library and database modules.  Each tag in the [dbmodules] section is
+the name of a Kerberos realm or a section name specified by a realm\(aqs
+\fBdatabase_module\fP parameter.  The following example shows how to
+define one database parameter for the ATHENA.MIT.EDU realm:
 .sp
-The following tag may be specified in the [dbmodules] section:
-.INDENT 0.0
-.TP
-.B \fBdb_module_dir\fP
-This tag controls where the plugin system looks for modules.  The
-value should be an absolute path.
-.UNINDENT
+.nf
+.ft C
+[dbmodules]
+    ATHENA.MIT.EDU = {
+        disable_last_success = true
+    }
+.ft P
+.fi
 .sp
-Other tags in the [dbmodules] section name a configuration subsection
-for parameters which can be referred to by a realm\(aqs
-\fBdatabase_module\fP parameter.  The following tags may be specified in
-the subsection:
+The following tags may be specified in a [dbmodules] subsection:
 .INDENT 0.0
 .TP
 .B \fBdatabase_name\fP
@@ -466,6 +480,15 @@ This LDAP\-specific tag indicates the file containing the stashed
 passwords (created by \fBkdb5_ldap_util stashsrvpw\fP) for the
 \fBldap_kadmind_dn\fP and \fBldap_kdc_dn\fP objects.  This file must
 be kept secure.
+.UNINDENT
+.sp
+The following tag may be specified directly in the [dbmodules]
+section to control where database modules are loaded from:
+.INDENT 0.0
+.TP
+.B \fBdb_module_dir\fP
+This tag controls where the plugin system looks for database
+modules.  The value should be an absolute path.
 .UNINDENT
 .SS [logging]
 .sp
@@ -539,6 +562,82 @@ administrative server will be appended to the file
     kdc = SYSLOG:INFO:DAEMON
     admin_server = FILE:/var/adm/kadmin.log
     admin_server = DEVICE=/dev/tty04
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SS [otp]
+.sp
+Each subsection of [otp] is the name of an OTP token type.  The tags
+within the subsection define the configuration required to forward a
+One Time Password request to a RADIUS server.
+.sp
+For each token type, the following tags may be specified:
+.INDENT 0.0
+.TP
+.B \fBserver\fP
+This is the server to send the RADIUS request to.  It can be a
+hostname with optional port, an ip address with optional port, or
+a Unix domain socket address.  The default is
+\fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/<name>.socket\fP.
+.TP
+.B \fBsecret\fP
+This tag indicates a filename (which may be relative to \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP)
+containing the secret used to encrypt the RADIUS packets.  The
+secret should appear in the first line of the file by itself;
+leading and trailing whitespace on the line will be removed.  If
+the value of \fBserver\fP is a Unix domain socket address, this tag
+is optional, and an empty secret will be used if it is not
+specified.  Otherwise, this tag is required.
+.TP
+.B \fBtimeout\fP
+An integer which specifies the time in seconds during which the
+KDC should attempt to contact the RADIUS server.  This tag is the
+total time across all retries and should be less than the time
+which an OTP value remains valid for.  The default is 5 seconds.
+.TP
+.B \fBretries\fP
+This tag specifies the number of retries to make to the RADIUS
+server.  The default is 3 retries (4 tries).
+.TP
+.B \fBstrip_realm\fP
+If this tag is \fBtrue\fP, the principal without the realm will be
+passed to the RADIUS server.  Otherwise, the realm will be
+included.  The default value is \fBtrue\fP.
+.UNINDENT
+.sp
+In the following example, requests are sent to a remote server via UDP.
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[otp]
+    MyRemoteTokenType = {
+        server = radius.mydomain.com:1812
+        secret = SEmfiajf42$
+        timeout = 15
+        retries = 5
+        strip_realm = true
+    }
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+An implicit default token type named \fBDEFAULT\fP is defined for when
+the per\-principal configuration does not specify a token type.  Its
+configuration is shown below.  You may override this token type to
+something applicable for your situation.
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[otp]
+    DEFAULT = {
+        strip_realm = false
+    }
 .ft P
 .fi
 .UNINDENT
@@ -668,7 +767,7 @@ fails.
 \fBpkinit_require_crl_checking\fP should be set to true if the
 policy is such that up\-to\-date CRLs must be present for every CA.
 .UNINDENT
-.SH ENCRYPTION AND SALT TYPES
+.SH ENCRYPTION TYPES
 .sp
 Any tag in the configuration files which requires a list of encryption
 types can be set to some combination of the following strings.
@@ -803,11 +902,33 @@ operations, they are not supported by very old versions of our GSSAPI
 implementation (krb5\-1.3.1 and earlier).  Services running versions of
 krb5 without AES support must not be given AES keys in the KDC
 database.
+.SH KEYSALT LISTS
 .sp
-Kerberos keys for users are usually derived from passwords.  To ensure
-that people who happen to pick the same password do not have the same
-key, Kerberos 5 incorporates more information into the key using
-something called a salt.  The supported salt types are as follows:
+Kerberos keys for users are usually derived from passwords.  Kerberos
+commands and configuration parameters that affect generation of keys
+take lists of enctype\-salttype ("keysalt") pairs, known as \fIkeysalt
+lists\fP.  Each keysalt pair is an enctype name followed by a salttype
+name, in the format \fIenc\fP:\fIsalt\fP.  Individual keysalt list members are
+separated by comma (",") characters or space characters.  For example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+kadmin \-e aes256\-cts:normal,aes128\-cts:normal
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+would start up kadmin so that by default it would generate
+password\-derived keys for the \fBaes256\-cts\fP and \fBaes128\-cts\fP
+encryption types, using a \fBnormal\fP salt.
+.sp
+To ensure that people who happen to pick the same password do not have
+the same key, Kerberos 5 incorporates more information into the key
+using something called a salt.  The supported salt types are as
+follows:
 .TS
 center;
 |l|l|.

@@ -1,4 +1,4 @@
-.TH "KADMIN" "1" " " "1.12" "MIT Kerberos"
+.TH "KADMIN" "1" " " "1.13" "MIT Kerberos"
 .SH NAME
 kadmin \- Kerberos V5 database administration program
 .
@@ -142,9 +142,9 @@ If using kadmin.local, prompt for the database master password
 instead of reading it from a stash file.
 .TP
 .B \fB\-e\fP "\fIenc\fP:\fIsalt\fP ..."
-Sets the list of encryption types and salt types to be used for
-any new keys created.  See \fIEncryption_and_salt_types\fP in
-\fIkdc.conf(5)\fP for a list of possible values.
+Sets the keysalt list to be used for any new keys created.  See
+\fIKeysalt_lists\fP in \fIkdc.conf(5)\fP for a list of possible
+values.
 .TP
 .B \fB\-O\fP
 Force use of old AUTH_GSSAPI authentication flavor.
@@ -255,12 +255,18 @@ key for another user.  \fB+allow_dup_skey\fP clears this flag.
 .B {\-|+}\fBrequires_preauth\fP
 \fB+requires_preauth\fP requires this principal to preauthenticate
 before being allowed to kinit.  \fB\-requires_preauth\fP clears this
-flag.
+flag.  When \fB+requires_preauth\fP is set on a service principal,
+the KDC will only issue service tickets for that service principal
+if the client\(aqs initial authentication was performed using
+preauthentication.
 .TP
 .B {\-|+}\fBrequires_hwauth\fP
 \fB+requires_hwauth\fP requires this principal to preauthenticate
 using a hardware device before being allowed to kinit.
-\fB\-requires_hwauth\fP clears this flag.
+\fB\-requires_hwauth\fP clears this flag.  When \fB+requires_hwauth\fP is
+set on a service principal, the KDC will only issue service tickets
+for that service principal if the client\(aqs initial authentication was
+performed using a hardware device to preauthenticate.
 .TP
 .B {\-|+}\fBok_as_delegate\fP
 \fB+ok_as_delegate\fP sets the \fBokay as delegate\fP flag on tickets
@@ -291,8 +297,21 @@ flag.
 \fB+password_changing_service\fP marks this principal as a password
 change service principal.
 .TP
+.B {\-|+}\fBok_to_auth_as_delegate\fP
+\fB+ok_to_auth_as_delegate\fP allows this principal to acquire
+forwardable tickets to itself from arbitrary users, for use with
+constrained delegation.
+.TP
+.B {\-|+}\fBno_auth_data_required\fP
+\fB+no_auth_data_required\fP prevents PAC or AD\-SIGNEDPATH data from
+being added to service tickets for the principal.
+.TP
 .B \fB\-randkey\fP
 Sets the key of the principal to a random value.
+.TP
+.B \fB\-nokey\fP
+Causes the principal to be created with no key.  New in release
+1.12.
 .TP
 .B \fB\-pw\fP \fIpassword\fP
 Sets the password of the principal to the specified string and
@@ -301,8 +320,9 @@ shell script may expose the password to other users on the system
 via the process list.
 .TP
 .B \fB\-e\fP \fIenc\fP:\fIsalt\fP,...
-Uses the specified list of enctype\-salttype pairs for setting the
-key of the principal.
+Uses the specified keysalt list for setting the keys of the
+principal.  See \fIKeysalt_lists\fP in \fIkdc.conf(5)\fP for a
+list of possible values.
 .TP
 .B \fB\-x\fP \fIdb_princ_args\fP
 Indicates database\-specific options.  The options for the LDAP
@@ -437,8 +457,9 @@ script may expose the password to other users on the system via
 the process list.
 .TP
 .B \fB\-e\fP \fIenc\fP:\fIsalt\fP,...
-Uses the specified list of enctype\-salttype pairs for setting the
-key of the principal.
+Uses the specified keysalt list for setting the keys of the
+principal.  See \fIKeysalt_lists\fP in \fIkdc.conf(5)\fP for a
+list of possible values.
 .TP
 .B \fB\-keepold\fP
 Keeps the existing keys in the database.  This flag is usually not
@@ -463,13 +484,15 @@ kadmin:
 .SS purgekeys
 .INDENT 0.0
 .INDENT 3.5
-\fBpurgekeys\fP [\fB\-keepkvno\fP \fIoldest_kvno_to_keep\fP] \fIprincipal\fP
+\fBpurgekeys\fP [\fB\-all\fP|\fB\-keepkvno\fP \fIoldest_kvno_to_keep\fP] \fIprincipal\fP
 .UNINDENT
 .UNINDENT
 .sp
 Purges previously retained old keys (e.g., from \fBchange_password
 \-keepold\fP) from \fIprincipal\fP.  If \fB\-keepkvno\fP is specified, then
-only purges keys with kvnos lower than \fIoldest_kvno_to_keep\fP.
+only purges keys with kvnos lower than \fIoldest_kvno_to_keep\fP.  If
+\fB\-all\fP is specified, then all keys are purged.  The \fB\-all\fP option
+is new in release 1.12.
 .sp
 This command requires the \fBmodify\fP privilege.
 .SS get_principal
@@ -581,8 +604,8 @@ modules.  The following string attributes are recognized by the KDC:
 .B \fBsession_enctypes\fP
 Specifies the encryption types supported for session keys when the
 principal is authenticated to as a server.  See
-\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP for a list
-of the accepted values.
+\fIEncryption_types\fP in \fIkdc.conf(5)\fP for a list of the
+accepted values.
 .UNINDENT
 .sp
 This command requires the \fBmodify\fP privilege.
@@ -665,10 +688,10 @@ out until it is administratively unlocked with \fBmodprinc
 .B \fB\-allowedkeysalts\fP
 Specifies the key/salt tuples supported for long\-term keys when
 setting or changing a principal\(aqs password/keys.  See
-\fIEncryption_and_salt_types\fP in \fIkdc.conf(5)\fP for a list
-of the accepted values, but note that key/salt tuples must be
-separated with commas (\(aq,\(aq) only.  To clear the allowed key/salt
-policy use a value of \(aq\-\(aq.
+\fIKeysalt_lists\fP in \fIkdc.conf(5)\fP for a list of the
+accepted values, but note that key/salt tuples must be separated
+with commas (\(aq,\(aq) only.  To clear the allowed key/salt policy use
+a value of \(aq\-\(aq.
 .UNINDENT
 .sp
 Example:
@@ -830,8 +853,9 @@ Use \fIkeytab\fP as the keytab file.  Otherwise, the default keytab is
 used.
 .TP
 .B \fB\-e\fP \fIenc\fP:\fIsalt\fP,...
-Use the specified list of enctype\-salttype pairs for setting the
-new keys of the principal.
+Uses the specified keysalt list for setting the new keys of the
+principal.  See \fIKeysalt_lists\fP in \fIkdc.conf(5)\fP for a
+list of possible values.
 .TP
 .B \fB\-q\fP
 Display less verbose information.
