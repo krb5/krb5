@@ -49,6 +49,10 @@ $(OUTPRE)t_enctypes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   common.h t_enctypes.c
+$(OUTPRE)t_err.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/include/krb5.h \
+  common.h t_err.c
 $(OUTPRE)t_export_cred.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
   $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/include/krb5.h \

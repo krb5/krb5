@@ -817,6 +817,17 @@ privsafe.so privsafe.po $(OUTPRE)privsafe.$(OBJEXT): \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   auth_con.h int-proto.h privsafe.c
+random_str.so random_str.po $(OUTPRE)random_str.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
+  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
+  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  random_str.c
 rd_cred.so rd_cred.po $(OUTPRE)rd_cred.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \

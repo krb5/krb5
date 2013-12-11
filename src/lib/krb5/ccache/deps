@@ -173,6 +173,8 @@ t_cc.so t_cc.po $(OUTPRE)t_cc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h cc-int.h t_cc.c
+t_cccol.so t_cccol.po $(OUTPRE)t_cccol.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/krb5.h t_cccol.c
 t_cccursor.so t_cccursor.po $(OUTPRE)t_cccursor.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
