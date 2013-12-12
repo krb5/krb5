@@ -244,9 +244,12 @@ testlog
 
 /src/tests/gcred
 /src/tests/hist
+/src/tests/hrealm
 /src/tests/kdbtest
 /src/tests/kdc.conf
 /src/tests/krb5.conf
+/src/tests/plugorder
+/src/tests/responder
 /src/tests/s2p
 /src/tests/t_init_creds
 /src/tests/t_localauth
