@@ -896,6 +896,7 @@ init_ctx_call_init(OM_uint32 *minor_status,
 	 * can do this with recursion.  If all mechanisms produce errors, the
 	 * caller should get the error from the first mech in the list.
 	 */
+	gssalloc_free(sc->mech_set->elements->elements);
 	memmove(sc->mech_set->elements, sc->mech_set->elements + 1,
 		--sc->mech_set->count * sizeof(*sc->mech_set->elements));
 	if (sc->mech_set->count == 0)
