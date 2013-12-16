@@ -524,6 +524,19 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
     limit_string(state->sname);
 
+    if (!state->request->server) {
+        state->status = "NULL_SERVER";
+        errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+        goto errout;
+    }
+    if ((errcode = krb5_unparse_name(kdc_context,
+                                     state->request->server,
+                                     &state->sname))) {
+        state->status = "UNPARSING_SERVER";
+        goto errout;
+    }
+    limit_string(state->sname);
+
     /*
      * We set KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY as a hint
      * to the backend to return naming information in lieu
