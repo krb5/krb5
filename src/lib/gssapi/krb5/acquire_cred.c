@@ -243,6 +243,7 @@ acquire_accept_cred(krb5_context context,
         assert(cred->name == NULL);
         code = kg_duplicate_name(context, desired_name, &cred->name);
         if (code) {
+            krb5_kt_close(context, kt);
             *minor_status = code;
             return GSS_S_FAILURE;
         }
@@ -251,8 +252,9 @@ acquire_accept_cred(krb5_context context,
         code = krb5_get_server_rcache(context, &desired_name->princ->data[0],
                                       &cred->rcache);
         if (code) {
+            krb5_kt_close(context, kt);
             *minor_status = code;
-            return GSS_S_FAILURE;
+            return GSS_S_CRED_UNAVAIL;
         }
     }
 
