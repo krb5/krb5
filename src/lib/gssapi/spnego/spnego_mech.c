@@ -648,13 +648,6 @@ init_ctx_cont(OM_uint32 *minor_status, gss_ctx_id_t *ctx, gss_buffer_t buf,
 			       responseToken, mechListMIC);
 	if (ret != GSS_S_COMPLETE)
 		goto cleanup;
-	if (acc_negState == ACCEPT_DEFECTIVE_TOKEN &&
-	    supportedMech == GSS_C_NO_OID &&
-	    *responseToken == GSS_C_NO_BUFFER &&
-	    *mechListMIC == GSS_C_NO_BUFFER) {
-		/* Reject "empty" token. */
-		ret = GSS_S_DEFECTIVE_TOKEN;
-	}
 	if (acc_negState == REJECT) {
 		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
 		map_errcode(minor_status);
