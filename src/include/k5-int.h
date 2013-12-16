@@ -1149,10 +1149,6 @@ struct _krb5_context {
     /* Use the config-file ktypes instead of app-specified?  */
     krb5_boolean    use_conf_ktypes;
 
-#ifdef KRB5_DNS_LOOKUP
-    krb5_boolean    profile_in_memory;
-#endif /* KRB5_DNS_LOOKUP */
-
     /* locate_kdc module stuff */
     struct plugin_dir_handle libkrb5_plugins;
     struct krb5plugin_service_locate_ftable *vtbl;

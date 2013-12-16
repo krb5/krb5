@@ -378,10 +378,6 @@ os_init_paths(krb5_context ctx, krb5_boolean kdc)
     profile_filespec_t *files = 0;
     krb5_boolean secure = ctx->profile_secure;
 
-#ifdef KRB5_DNS_LOOKUP
-    ctx->profile_in_memory = 0;
-#endif /* KRB5_DNS_LOOKUP */
-
     retval = os_get_default_config_files(&files, secure);
 
     if (retval == 0 && kdc)
@@ -391,14 +387,9 @@ os_init_paths(krb5_context ctx, krb5_boolean kdc)
         retval = profile_init_flags((const_profile_filespec_t *) files,
                                     PROFILE_INIT_ALLOW_MODULE, &ctx->profile);
 
-#ifdef KRB5_DNS_LOOKUP
-        /* if none of the filenames can be opened use an empty profile */
-        if (retval == ENOENT) {
+        /* If none of the filenames can be opened, use an empty profile. */
+        if (retval == ENOENT)
             retval = profile_init(NULL, &ctx->profile);
-            if (!retval)
-                ctx->profile_in_memory = 1;
-        }
-#endif /* KRB5_DNS_LOOKUP */
     }
 
     if (files)
