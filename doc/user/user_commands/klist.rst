@@ -64,10 +64,9 @@ OPTIONS
         a    anonymous
 
 **-s**
-    Causes klist to run silently (produce no output), but to still set
-    the exit status according to whether it finds the credentials
-    cache.  The exit status is '0' if klist finds a credentials cache,
-    and '1' if it does not or if the tickets are expired.
+    Causes klist to run silently (produce no output).  klist will exit
+    with status 1 if the credentials cache cannot be read or is
+    expired, and with status 0 otherwise.
 
 **-a**
     Display list of addresses in credentials.
