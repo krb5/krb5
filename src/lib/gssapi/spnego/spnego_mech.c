@@ -85,8 +85,8 @@ extern int gssint_put_der_length(unsigned int, unsigned char **, unsigned int);
 
 
 /* private routines for spnego_mechanism */
-static spnego_token_t make_spnego_token(char *);
-static gss_buffer_desc make_err_msg(char *);
+static spnego_token_t make_spnego_token(const char *);
+static gss_buffer_desc make_err_msg(const char *);
 static int g_token_size(gss_OID_const, unsigned int);
 static int g_make_token_header(gss_OID_const, unsigned int,
 			       unsigned char **, unsigned int);
@@ -316,6 +316,12 @@ int gss_krb5int_lib_init(void);
 
 int gss_spnegoint_lib_init(void)
 {
+	int err;
+
+	err = k5_key_register(K5_KEY_GSS_SPNEGO_STATUS, NULL);
+	if (err)
+		return err;
+
 #ifdef _GSS_STATIC_LINK
 	return gss_spnegomechglue_init();
 #else
@@ -1791,7 +1797,6 @@ cleanup:
 }
 #endif /*  LEAN_CLIENT */
 
-
 /*ARGSUSED*/
 OM_uint32 KRB5_CALLCONV
 spnego_gss_display_status(
@@ -1802,6 +1807,9 @@ spnego_gss_display_status(
 		OM_uint32 *message_context,
 		gss_buffer_t status_string)
 {
+	OM_uint32 maj = GSS_S_COMPLETE;
+	int ret;
+
 	dsyslog("Entering display_status\n");
 
 	*message_context = 0;
@@ -1832,13 +1840,31 @@ spnego_gss_display_status(
 						"return a valid token"));
 		break;
 	    default:
-		status_string->length = 0;
-		status_string->value = "";
+		/* Not one of our minor codes; might be from a mech.  Call back
+		 * to gss_display_status, but first check for recursion. */
+		if (k5_getspecific(K5_KEY_GSS_SPNEGO_STATUS) != NULL) {
+			/* Perhaps we returned a com_err code like ENOMEM. */
+			const char *err = error_message(status_value);
+			*status_string = make_err_msg(err);
+			break;
+		}
+		/* Set a non-null pointer value; doesn't matter which one. */
+		ret = k5_setspecific(K5_KEY_GSS_SPNEGO_STATUS, &ret);
+		if (ret != 0) {
+			*minor_status = ret;
+			maj = GSS_S_FAILURE;
+			break;
+		}
+		maj = gss_display_status(minor_status, status_value,
+					 status_type, mech_type,
+					 message_context, status_string);
+		/* This is unlikely to fail; not much we can do if it does. */
+		(void)k5_setspecific(K5_KEY_GSS_SPNEGO_STATUS, NULL);
 		break;
 	}
 
 	dsyslog("Leaving display_status\n");
-	return (GSS_S_COMPLETE);
+	return maj;
 }
 
 
@@ -3547,13 +3573,13 @@ negotiate_mech(gss_OID_set supported, gss_OID_set received,
  * these routines will be changes to return the error string.
  */
 static spnego_token_t
-make_spnego_token(char *name)
+make_spnego_token(const char *name)
 {
 	return (spnego_token_t)strdup(name);
 }
 
 static gss_buffer_desc
-make_err_msg(char *name)
+make_err_msg(const char *name)
 {
 	gss_buffer_desc buffer;
 
