@@ -1151,8 +1151,6 @@ struct _krb5_context {
 
     /* locate_kdc module stuff */
     struct plugin_dir_handle libkrb5_plugins;
-    struct krb5plugin_service_locate_ftable *vtbl;
-    void (**locate_fptrs)(void);
 
     /* preauth module stuff */
     krb5_preauth_context *preauth_context;

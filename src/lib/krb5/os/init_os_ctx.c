@@ -428,7 +428,6 @@ k5_os_init_context(krb5_context ctx, profile_t profile, krb5_flags flags)
     os_ctx->os_flags = 0;
     os_ctx->default_ccname = 0;
 
-    ctx->vtbl = 0;
     PLUGIN_DIR_INIT(&ctx->libkrb5_plugins);
     ctx->preauth_context = NULL;
 

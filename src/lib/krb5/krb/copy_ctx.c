@@ -80,8 +80,6 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     nctx->os_context.default_ccname = NULL;
 
     memset(&nctx->libkrb5_plugins, 0, sizeof(nctx->libkrb5_plugins));
-    nctx->vtbl = NULL;
-    nctx->locate_fptrs = NULL;
 
     memset(&nctx->err, 0, sizeof(nctx->err));
 
