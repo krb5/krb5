@@ -91,12 +91,16 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     memset(&nctx->err, 0, sizeof(nctx->err));
     memset(&nctx->plugins, 0, sizeof(nctx->plugins));
 
-    ret = k5_copy_etypes(ctx->in_tkt_etypes, &nctx->in_tkt_etypes);
-    if (ret)
-        goto errout;
-    ret = k5_copy_etypes(ctx->tgs_etypes, &nctx->tgs_etypes);
-    if (ret)
-        goto errout;
+    if (ctx->in_tkt_etypes != NULL) {
+        ret = k5_copy_etypes(ctx->in_tkt_etypes, &nctx->in_tkt_etypes);
+        if (ret)
+            goto errout;
+    }
+    if (ctx->tgs_etypes != NULL) {
+        ret = k5_copy_etypes(ctx->tgs_etypes, &nctx->tgs_etypes);
+        if (ret)
+            goto errout;
+    }
 
     if (ctx->os_context.default_ccname != NULL) {
         nctx->os_context.default_ccname =
