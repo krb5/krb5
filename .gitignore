@@ -193,6 +193,7 @@ testlog
 
 /src/lib/krb5/krb/t_authdata
 /src/lib/krb5/krb/t_cc_config
+/src/lib/krb5/krb/t_copy_context
 /src/lib/krb5/krb/t_deltat
 /src/lib/krb5/krb/t_etypes
 /src/lib/krb5/krb/t_expand
