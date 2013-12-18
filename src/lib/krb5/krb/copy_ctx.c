@@ -77,11 +77,19 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     nctx->ser_ctx_count = 0;
     nctx->ser_ctx = NULL;
     nctx->prompt_types = NULL;
+    nctx->preauth_context = NULL;
+    nctx->ccselect_handles = NULL;
+    nctx->localauth_handles = NULL;
+    nctx->hostrealm_handles = NULL;
+    nctx->kdblog_context = NULL;
+    nctx->trace_callback = NULL;
+    nctx->trace_callback_data = NULL;
+    nctx->plugin_base_dir = NULL;
     nctx->os_context.default_ccname = NULL;
 
     memset(&nctx->libkrb5_plugins, 0, sizeof(nctx->libkrb5_plugins));
-
     memset(&nctx->err, 0, sizeof(nctx->err));
+    memset(&nctx->plugins, 0, sizeof(nctx->plugins));
 
     ret = k5_copy_etypes(ctx->in_tkt_etypes, &nctx->in_tkt_etypes);
     if (ret)
@@ -101,6 +109,11 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     ret = krb5_get_profile(ctx, &nctx->profile);
     if (ret)
         goto errout;
+    nctx->plugin_base_dir = strdup(ctx->plugin_base_dir);
+    if (nctx->plugin_base_dir == NULL) {
+        ret = ENOMEM;
+        goto errout;
+    }
 
 errout:
     if (ret) {
