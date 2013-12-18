@@ -30,12 +30,12 @@ if ('auth1: ' + realm.user_princ not in output or
     'NOT_ALLOWED_TO_DELEGATE' not in output):
     fail('krb5 -> s4u2proxy')
 
-# Again with SPNEGO.  Bug #7045 prevents us from checking the error
-# message, but we can at least exercise the code.
+# Again with SPNEGO.
 output = realm.run(['./t_s4u2proxy_krb5', '--spnego', usercache, storagecache,
                     '-', pservice1, pservice2],
                    expected_code=1)
-if ('auth1: ' + realm.user_princ not in output):
+if ('auth1: ' + realm.user_princ not in output or
+    'NOT_ALLOWED_TO_DELEGATE' not in output):
     fail('krb5 -> s4u2proxy (SPNEGO)')
 
 # Try krb5 -> S4U2Proxy without forwardable user creds.  This should
@@ -66,10 +66,9 @@ if 'NOT_ALLOWED_TO_DELEGATE' not in output:
     fail('s4u2self')
 
 # Again with SPNEGO.  This uses SPNEGO for the initial authentication,
-# but still uses krb5 for S4U2Proxy (the delegated cred is returned as
+# but still uses krb5 for S4U2Proxy--the delegated cred is returned as
 # a krb5 cred, not a SPNEGO cred, and t_s4u uses the delegated cred
-# directly rather than saving and reacquiring it) so bug #7045 does
-# not apply and we can verify the error message.
+# directly rather than saving and reacquiring it.
 output = realm.run(['./t_s4u', '--spnego', puser, pservice2], expected_code=1)
 if 'NOT_ALLOWED_TO_DELEGATE' not in output:
     fail('s4u2self')
