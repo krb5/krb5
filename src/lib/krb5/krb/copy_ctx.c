@@ -98,6 +98,14 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     if (ret)
         goto errout;
 
+    if (ctx->plugin_base_dir != NULL) {
+        nctx->plugin_base_dir = strdup(ctx->plugin_base_dir);
+        if (nctx->plugin_base_dir == NULL) {
+            ret = ENOMEM;
+            goto errout;
+        }
+    }
+
     if (ctx->os_context.default_ccname != NULL) {
         nctx->os_context.default_ccname =
             strdup(ctx->os_context.default_ccname);
