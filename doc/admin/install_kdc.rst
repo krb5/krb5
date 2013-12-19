@@ -455,40 +455,13 @@ the krb5kdc daemon automatically at boot time.
 Propagation failed?
 ###################
 
-.. _prop_failed_start:
+You may encounter the following error messages. For a more detailed
+discussion on possible causes and solutions click on the error link
+to be redirected to :ref:`troubleshoot` section.
 
-.. error::
-
-           kprop: No route to host while connecting to server
-
-Make sure that the hostname of the slave (as given to kprop) is
-correct, and that any firewalls between the master and the slave allow
-a connection on port 754.
-
-.. error::
-
-           kprop: Connection refused while connecting to server
-
-If the slave is intended to run kpropd out of inetd, make sure that
-inetd is configured to accept krb5_prop connections.  inetd may need
-to be restarted or sent a SIGHUP to recognize the new configuration.
-If the slave is intended to run kpropd in standalone mode, make sure
-that it is running.
-
-.. error::
-
-           kprop: Server rejected authentication (during sendauth
-           exchange) while authenticating to server
-
-Make sure that:
-
-#. The time is synchronized between the master and slave KDCs.
-#. The master stash file was copied from the master to the expected
-   location on the slave.
-#. The slave has a keytab file in the default location containing a
-   ``host`` principal for the slave's hostname.
-
-.. _prop_failed_end:
+.. include:: ./troubleshoot.rst
+   :start-after:  _prop_failed_start:
+   :end-before: _prop_failed_end:
 
 
 Add Kerberos principals to the database
