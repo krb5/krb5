@@ -162,7 +162,6 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
     rpcprog_t rpc_prog;
     rpcvers_t rpc_vers;
     char full_svcname[BUFSIZ];
-    char *realm;
     krb5_ccache ccache;
 
     kadm5_server_handle_t handle;
@@ -215,39 +214,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
     GENERIC_CHECK_HANDLE(handle, KADM5_OLD_LIB_API_VERSION,
                          KADM5_NEW_LIB_API_VERSION);
 
-    /*
-     * Acquire relevant profile entries.  In version 2, merge values
-     * in params_in with values from profile, based on
-     * params_in->mask.
-     *
-     * In version 1, we've given a realm (which may be NULL) instead
-     * of params_in.  So use that realm, make params_in contain an
-     * empty mask, and behave like version 2.
-     */
     memset(&params_local, 0, sizeof(params_local));
-    if (params_in && (params_in->mask & KADM5_CONFIG_REALM))
-        realm = params_in->realm;
-    else
-        realm = NULL;
-
-#if 0 /* Since KDC config params can now be put in krb5.conf, these
-         could show up even when you're just using the remote kadmin
-         client.  */
-#define ILLEGAL_PARAMS (KADM5_CONFIG_DBNAME | KADM5_CONFIG_ADBNAME |    \
-                        KADM5_CONFIG_ADB_LOCKFILE |                     \
-                        KADM5_CONFIG_ACL_FILE | KADM5_CONFIG_DICT_FILE  \
-                        | KADM5_CONFIG_STASH_FILE |                     \
-                        KADM5_CONFIG_MKEY_NAME | KADM5_CONFIG_ENCTYPE   \
-                        | KADM5_CONFIG_MAX_LIFE |                       \
-                        KADM5_CONFIG_MAX_RLIFE |                        \
-                        KADM5_CONFIG_EXPIRATION | KADM5_CONFIG_FLAGS |  \
-                        KADM5_CONFIG_ENCTYPES | KADM5_CONFIG_MKEY_FROM_KBD)
-
-    if (params_in && params_in->mask & ILLEGAL_PARAMS) {
-        free(handle);
-        return KADM5_BAD_CLIENT_PARAMS;
-    }
-#endif
 
     if ((code = kadm5_get_config_params(handle->context, 0,
                                         params_in, &handle->params))) {
@@ -269,7 +236,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
      * principal doesn't exist.
      */
     code = get_init_creds(handle, client_name, init_type, pass, ccache_in,
-                          service_name, realm, full_svcname,
+                          service_name, handle->params.realm, full_svcname,
                           sizeof(full_svcname));
     if (code)
         goto error;
@@ -503,19 +470,9 @@ gic_iter(kadm5_server_handle_t handle, enum init_type init_type,
     memset(&outcreds, 0, sizeof(outcreds));
 
     code = ENOMEM;
-    if (realm) {
-        n = snprintf(full_svcname, full_svcname_len, "%s@%s",
-                     svcname, realm);
-        if (n < 0 || n >= (int) full_svcname_len)
-            goto error;
-    } else {
-        /* krb5_princ_realm(client) is not null terminated */
-        n = snprintf(full_svcname, full_svcname_len, "%s@%.*s",
-                     svcname, krb5_princ_realm(ctx, client)->length,
-                     krb5_princ_realm(ctx, client)->data);
-        if (n < 0 || n >= (int) full_svcname_len)
-            goto error;
-    }
+    n = snprintf(full_svcname, full_svcname_len, "%s@%s", svcname, realm);
+    if (SNPRINTF_OVERFLOW(n, full_svcname_len))
+        goto error;
 
     /* Credentials for kadmin don't need to be forwardable or proxiable. */
     if (init_type != INIT_CREDS) {
