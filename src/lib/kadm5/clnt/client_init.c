@@ -69,23 +69,21 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
          krb5_ui_4 api_version, char **db_args, void **server_handle);
 
 static kadm5_ret_t
-get_init_creds(kadm5_server_handle_t handle, char *client_name,
+get_init_creds(kadm5_server_handle_t handle, krb5_principal client,
                enum init_type init_type, char *pass, krb5_ccache ccache_in,
-               char *svcname_in, char *realm, char *full_svcname,
-               unsigned int full_svcname_len);
+               char *svcname_in, char *realm, krb5_principal *server_out);
 
 static kadm5_ret_t
 gic_iter(kadm5_server_handle_t handle, enum init_type init_type,
          krb5_ccache ccache, krb5_principal client, char *pass,
-         char *svcname, char *realm, char *full_svcname,
-         unsigned int full_svcname_len);
+         char *svcname, char *realm, krb5_principal *server_out);
 
 static kadm5_ret_t
 connect_to_server(const char *hostname, int port, int *fd);
 
 static kadm5_ret_t
 setup_gss(kadm5_server_handle_t handle, kadm5_config_params *params_in,
-          char *client_name, char *full_svcname);
+          krb5_principal client, krb5_principal server);
 
 static void
 rpc_auth(kadm5_server_handle_t handle, kadm5_config_params *params_in,
@@ -161,8 +159,8 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
     int port;
     rpcprog_t rpc_prog;
     rpcvers_t rpc_vers;
-    char full_svcname[BUFSIZ];
     krb5_ccache ccache;
+    krb5_principal client = NULL, server = NULL;
 
     kadm5_server_handle_t handle;
     kadm5_config_params params_local;
@@ -231,13 +229,16 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
         return KADM5_MISSING_KRB5_CONF_PARAMS;
     }
 
+    code = krb5_parse_name(handle->context, client_name, &client);
+    if (code)
+        goto error;
+
     /*
      * Get credentials.  Also does some fallbacks in case kadmin/fqdn
      * principal doesn't exist.
      */
-    code = get_init_creds(handle, client_name, init_type, pass, ccache_in,
-                          service_name, handle->params.realm, full_svcname,
-                          sizeof(full_svcname));
+    code = get_init_creds(handle, client, init_type, pass, ccache_in,
+                          service_name, handle->params.realm, &server);
     if (code)
         goto error;
 
@@ -281,8 +282,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
      * authentication context.
      */
     code = setup_gss(handle, params_in,
-                     (init_type == INIT_CREDS) ? client_name : NULL,
-                     full_svcname);
+                     (init_type == INIT_CREDS) ? client : NULL, server);
     if (code)
         goto error;
 
@@ -357,6 +357,8 @@ error:
     kadm5_free_config_params(handle->context, &handle->params);
 
 cleanup:
+    krb5_free_principal(handle->context, client);
+    krb5_free_principal(handle->context, server);
     if (code)
         free(handle);
 
@@ -366,15 +368,15 @@ cleanup:
 /* Get initial credentials for authenticating to server.  Perform fallback from
  * kadmin/fqdn to kadmin/admin if svcname_in is NULL. */
 static kadm5_ret_t
-get_init_creds(kadm5_server_handle_t handle, char *client_name,
+get_init_creds(kadm5_server_handle_t handle, krb5_principal client,
                enum init_type init_type, char *pass, krb5_ccache ccache_in,
-               char *svcname_in, char *realm, char *full_svcname,
-               unsigned int full_svcname_len)
+               char *svcname_in, char *realm, krb5_principal *server_out)
 {
     kadm5_ret_t code;
-    krb5_principal client = NULL;
     krb5_ccache ccache = NULL;
     char svcname[BUFSIZ];
+
+    *server_out = NULL;
 
     /* NULL svcname means use host-based. */
     if (svcname_in == NULL) {
@@ -387,16 +389,12 @@ get_init_creds(kadm5_server_handle_t handle, char *client_name,
         strncpy(svcname, svcname_in, sizeof(svcname));
         svcname[sizeof(svcname)-1] = '\0';
     }
-    /*
-     * Acquire a service ticket for svcname@realm in the name of
-     * client_name, using password pass (which could be NULL), and
-     * create a ccache to store them in.  If INIT_CREDS, use the
-     * ccache we were provided instead.
-     */
-    code = krb5_parse_name(handle->context, client_name, &client);
-    if (code)
-        goto error;
 
+    /*
+     * Acquire a service ticket for svcname@realm for client, using password
+     * pass (which could be NULL), and create a ccache to store them in.  If
+     * INIT_CREDS, use the ccache we were provided instead.
+     */
     if (init_type == INIT_CREDS) {
         ccache = ccache_in;
         if (asprintf(&handle->cache_name, "%s:%s",
@@ -428,13 +426,12 @@ get_init_creds(kadm5_server_handle_t handle, char *client_name,
     handle->lhandle->cache_name = handle->cache_name;
 
     code = gic_iter(handle, init_type, ccache, client, pass, svcname, realm,
-                    full_svcname, full_svcname_len);
+                    server_out);
     if ((code == KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN
          || code == KRB5_CC_NOTFOUND) && svcname_in == NULL) {
         /* Retry with old host-independent service principal. */
         code = gic_iter(handle, init_type, ccache, client, pass,
-                        KADM5_ADMIN_SERVICE, realm, full_svcname,
-                        full_svcname_len);
+                        KADM5_ADMIN_SERVICE, realm, server_out);
     }
     /* Improved error messages */
     if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY) code = KADM5_BAD_PASSWORD;
@@ -442,7 +439,6 @@ get_init_creds(kadm5_server_handle_t handle, char *client_name,
         code = KADM5_SECURE_PRINC_MISSING;
 
 error:
-    krb5_free_principal(handle->context, client);
     if (ccache != NULL && init_type != INIT_CREDS)
         krb5_cc_close(handle->context, ccache);
     return code;
@@ -453,26 +449,20 @@ error:
 static kadm5_ret_t
 gic_iter(kadm5_server_handle_t handle, enum init_type init_type,
          krb5_ccache ccache, krb5_principal client, char *pass, char *svcname,
-         char *realm, char *full_svcname, unsigned int full_svcname_len)
+         char *realm, krb5_principal *server_out)
 {
     kadm5_ret_t code;
     krb5_context ctx;
     krb5_keytab kt;
     krb5_get_init_creds_opt *opt = NULL;
     krb5_creds mcreds, outcreds;
-    int n;
 
+    *server_out = NULL;
     ctx = handle->context;
     kt = NULL;
-    memset(full_svcname, 0, full_svcname_len);
     memset(&opt, 0, sizeof(opt));
     memset(&mcreds, 0, sizeof(mcreds));
     memset(&outcreds, 0, sizeof(outcreds));
-
-    code = ENOMEM;
-    n = snprintf(full_svcname, full_svcname_len, "%s@%s", svcname, realm);
-    if (SNPRINTF_OVERFLOW(n, full_svcname_len))
-        goto error;
 
     /* Credentials for kadmin don't need to be forwardable or proxiable. */
     if (init_type != INIT_CREDS) {
@@ -487,8 +477,7 @@ gic_iter(kadm5_server_handle_t handle, enum init_type init_type,
     if (init_type == INIT_PASS || init_type == INIT_ANONYMOUS) {
         code = krb5_get_init_creds_password(ctx, &outcreds, client, pass,
                                             krb5_prompter_posix,
-                                            NULL, 0,
-                                            full_svcname, opt);
+                                            NULL, 0, svcname, opt);
         if (code)
             goto error;
     } else if (init_type == INIT_SKEY) {
@@ -498,14 +487,19 @@ gic_iter(kadm5_server_handle_t handle, enum init_type init_type,
                 goto error;
         }
         code = krb5_get_init_creds_keytab(ctx, &outcreds, client, kt,
-                                          0, full_svcname, opt);
+                                          0, svcname, opt);
         if (pass)
             krb5_kt_close(ctx, kt);
         if (code)
             goto error;
     } else if (init_type == INIT_CREDS) {
         mcreds.client = client;
-        code = krb5_parse_name(ctx, full_svcname, &mcreds.server);
+        code = krb5_parse_name_flags(ctx, svcname,
+                                     KRB5_PRINCIPAL_PARSE_IGNORE_REALM,
+                                     &mcreds.server);
+        if (code)
+            goto error;
+        code = krb5_set_principal_realm(ctx, mcreds.server, realm);
         if (code)
             goto error;
         code = krb5_cc_retrieve_cred(ctx, ccache, 0,
@@ -514,6 +508,12 @@ gic_iter(kadm5_server_handle_t handle, enum init_type init_type,
         if (code)
             goto error;
     }
+
+    /* Steal the server principal of the creds we acquired and return it to the
+     * caller, which needs to knows what service to authenticate to. */
+    *server_out = outcreds.server;
+    outcreds.server = NULL;
+
 error:
     krb5_free_cred_contents(ctx, &outcreds);
     if (opt)
@@ -568,7 +568,7 @@ cleanup:
 /* Acquire GSSAPI credentials and set up RPC auth flavor. */
 static kadm5_ret_t
 setup_gss(kadm5_server_handle_t handle, kadm5_config_params *params_in,
-          char *client_name, char *full_svcname)
+          krb5_principal client, krb5_principal server)
 {
     OM_uint32 gssstat, minor_stat;
     gss_buffer_desc buf;
@@ -592,18 +592,18 @@ setup_gss(kadm5_server_handle_t handle, kadm5_config_params *params_in,
     else
         ccname_orig = 0;
 
-    buf.value = full_svcname;
-    buf.length = strlen((char *)buf.value) + 1;
+    buf.value = &server;
+    buf.length = sizeof(server);
     gssstat = gss_import_name(&minor_stat, &buf,
-                              (gss_OID) gss_nt_krb5_name, &gss_target);
+                              (gss_OID)gss_nt_krb5_principal, &gss_target);
     if (gssstat != GSS_S_COMPLETE)
         goto error;
 
-    if (client_name) {
-        buf.value = client_name;
-        buf.length = strlen((char *)buf.value) + 1;
+    if (client != NULL) {
+        buf.value = &client;
+        buf.length = sizeof(client);
         gssstat = gss_import_name(&minor_stat, &buf,
-                                  (gss_OID) gss_nt_krb5_name, &gss_client);
+                                  (gss_OID)gss_nt_krb5_principal, &gss_client);
     } else gss_client = GSS_C_NO_NAME;
 
     if (gssstat != GSS_S_COMPLETE)
