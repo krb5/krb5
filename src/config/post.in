@@ -52,6 +52,14 @@ depend-verify-ss-k5:
 depend-verify-ss-sys:
 	@echo 1>&2 error: cannot build dependencies using system ss package
 	@exit 1
+$(BUILDTOP)/.depend-verify-verto: depend-verify-verto-$(VERTO_VERSION)
+depend-verify-verto-k5:
+	@if test -r $(BUILDTOP)/.depend-verify-verto; then :; \
+		else (set -x; touch $(BUILDTOP)/.depend-verify-verto); fi
+depend-verify-verto-sys:
+	@echo 1>&2 error: cannot build dependencies using system verto package
+	@echo 1>&2 Please configure with --without-system-verto
+	@exit 1
 $(BUILDTOP)/.depend-verify-gcc: depend-verify-gcc-@HAVE_GCC@
 depend-verify-gcc-yes:
 	@if test -r $(BUILDTOP)/.depend-verify-gcc; then :; \
@@ -62,7 +70,8 @@ depend-verify-gcc-no:
 	@exit 1
 
 DEP_CFG_VERIFY = $(BUILDTOP)/.depend-verify-srcdir \
-	$(BUILDTOP)/.depend-verify-et $(BUILDTOP)/.depend-verify-ss
+	$(BUILDTOP)/.depend-verify-et $(BUILDTOP)/.depend-verify-ss \
+	$(BUILDTOP)/.depend-verify-verto
 DEP_VERIFY = $(DEP_CFG_VERIFY) $(BUILDTOP)/.depend-verify-gcc
 
 .d: $(ALL_DEP_SRCS) $(DEP_CFG_VERIFY) depend-dependencies
