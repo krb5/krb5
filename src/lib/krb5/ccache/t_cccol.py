@@ -11,30 +11,33 @@ test_keyring = (keyctl is not None and
 # Run the collection test program against each collection-enabled type.
 realm.run(['./t_cccol', 'DIR:' + os.path.join(realm.testdir, 'cc')])
 if test_keyring:
+    def cleanup_keyring(anchor, name):
+        out = realm.run(['keyctl', 'list', anchor])
+        if ('keyring: ' + name + '\n') in out:
+            keyid = realm.run(['keyctl', 'search', anchor, 'keyring', name])
+            realm.run(['keyctl', 'unlink', keyid.strip(), anchor])
+
     # Use the test directory as the collection name to avoid colliding
     # with other build trees.
     cname = realm.testdir
+    col_ringname = '_krb_' + cname
 
     # Remove any keys left behind by previous failed test runs.
-    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
-    realm.run(['keyctl', 'purge', 'keyring', cname])
-    out = realm.run(['keyctl', 'list', '@u'])
-    if ('keyring: _krb_' + cname + '\n') in out:
-        id = realm.run(['keyctl', 'search', '@u', 'keyring', '_krb_' + cname])
-        realm.run(['keyctl', 'unlink', id.strip(), '@u'])
+    cleanup_keyring('@s', cname)
+    cleanup_keyring('@s', col_ringname)
+    cleanup_keyring('@u', col_ringname)
 
     # Run test program over each subtype, cleaning up as we go.  Don't
     # test the persistent subtype, since it supports only one
     # collection and might be in actual use.
     realm.run(['./t_cccol', 'KEYRING:' + cname])
-    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
+    cleanup_keyring('@s', col_ringname)
     realm.run(['./t_cccol', 'KEYRING:legacy:' + cname])
-    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
+    cleanup_keyring('@s', col_ringname)
     realm.run(['./t_cccol', 'KEYRING:session:' + cname])
-    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
+    cleanup_keyring('@s', col_ringname)
     realm.run(['./t_cccol', 'KEYRING:user:' + cname])
-    id = realm.run(['keyctl', 'search', '@u', 'keyring', '_krb_' + cname])
-    realm.run(['keyctl', 'unlink', id.strip(), '@u'])
+    cleanup_keyring('@u', col_ringname)
     realm.run(['./t_cccol', 'KEYRING:process:abcd'])
     realm.run(['./t_cccol', 'KEYRING:thread:abcd'])
 
@@ -57,8 +60,7 @@ realm.kinit('alice', password('alice'), flags=['-c', dalice])
 realm.kinit('bob', password('bob'), flags=['-c', dbob])
 
 if test_keyring:
-    cname = realm.testdir
-    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
+    cleanup_keyring('@s', col_ringname)
     krccname = 'KEYRING:session:' + cname
     kruser = '%s:tkt1' % krccname
     kralice = '%s:tkt2' % krccname
@@ -105,7 +107,7 @@ realm.run(['./t_cccursor', realm.ccache, 'CONTENT'])
 realm.run(['./t_cccursor', mfoo, 'CONTENT'], expected_code=1)
 if test_keyring:
     realm.run(['./t_cccursor', krccname, 'CONTENT'])
-    realm.run(['keyctl', 'purge', 'keyring', '_krb_' + cname])
+    cleanup_keyring('@s', col_ringname)
 
 # Make sure FILE doesn't yield a nonexistent default cache.
 realm.run([kdestroy])

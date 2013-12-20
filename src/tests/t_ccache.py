@@ -85,13 +85,20 @@ def collection_test(realm, ccname):
 
 collection_test(realm, 'DIR:' + os.path.join(realm.testdir, 'cc'))
 if test_keyring:
+    def cleanup_keyring(anchor, name):
+        out = realm.run(['keyctl', 'list', anchor])
+        if ('keyring: ' + name + '\n') in out:
+            keyid = realm.run(['keyctl', 'search', anchor, 'keyring', name])
+            realm.run(['keyctl', 'unlink', keyid.strip(), anchor])
+
     # Use realm.testdir as the collection name to avoid conflicts with
     # other build trees.
     cname = realm.testdir
+    col_ringname = '_krb_' + cname
 
-    realm.run([keyctl, 'purge', 'keyring', '_krb_' + cname])
+    cleanup_keyring('@s', col_ringname)
     collection_test(realm, 'KEYRING:session:' + cname)
-    realm.run([keyctl, 'purge', 'keyring', '_krb_' + cname])
+    cleanup_keyring('@s', col_ringname)
 
     # Test legacy keyring cache linkage.
     realm.env['KRB5CCNAME'] = 'KEYRING:' + cname
@@ -108,12 +115,10 @@ if test_keyring:
     # Remove the collection keyring.  When the collection is
     # reinitialized, the legacy cache should reappear inside it
     # automatically as the primary cache.
-    out = realm.run([keyctl, 'purge', 'keyring', '_krb_' + cname])
-    if 'purged 1 keys' not in out:
-        fail('Could not purge collection keyring')
+    cleanup_keyring('@s', col_ringname)
     out = realm.run([klist])
     if realm.user_princ not in out:
-        fail('Cannot see legacy cache after purging collection')
+        fail('Cannot see legacy cache after removing collection')
     coll_id = realm.run([keyctl, 'search', '@s', 'keyring', '_krb_' + cname])
     out = realm.run([keyctl, 'list', coll_id.strip()])
     if (id.strip() + ':') not in out:
@@ -121,8 +126,7 @@ if test_keyring:
     # Destroy the cache and check that it is unlinked from the session keyring.
     realm.run([kdestroy])
     realm.run([keyctl, 'search', '@s', 'keyring', cname], expected_code=1)
-    # Clean up the collection key.
-    realm.run([keyctl, 'purge', 'keyring', '_krb_' + cname])
+    cleanup_keyring('@s', col_ringname)
 
 # Test parameter expansion in default_ccache_name
 realm.stop()
