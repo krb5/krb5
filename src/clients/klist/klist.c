@@ -112,6 +112,19 @@ static void usage()
     exit(1);
 }
 
+static void
+extended_com_err_fn(const char *prog, errcode_t code, const char *fmt,
+                    va_list args)
+{
+    const char *msg;
+
+    msg = krb5_get_error_message(kcontext, code);
+    fprintf(stderr, "%s: %s%s", prog, msg, (*fmt == '\0') ? "" : " ");
+    krb5_free_error_message(kcontext, msg);
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+}
+
 int
 main(argc, argv)
     int argc;
@@ -123,6 +136,7 @@ main(argc, argv)
 
     setlocale(LC_ALL, "");
     progname = GET_PROGNAME(argv[0]);
+    set_com_err_hook(extended_com_err_fn);
 
     name = NULL;
     mode = DEFAULT;
@@ -472,28 +486,13 @@ do_ccache(krb5_ccache cache)
 
     flags = 0;                          /* turns off OPENCLOSE mode */
     if ((code = krb5_cc_set_flags(kcontext, cache, flags))) {
-        if (code == KRB5_FCC_NOFILE) {
-            if (!status_only) {
-                com_err(progname, code, _("(ticket cache %s:%s)"),
-                        krb5_cc_get_type(kcontext, cache),
-                        krb5_cc_get_name(kcontext, cache));
-#ifdef KRB5_KRB4_COMPAT
-                if (name == NULL)
-                    do_v4_ccache(0);
-#endif
-            }
-        } else {
-            if (!status_only)
-                com_err(progname, code,
-                        _("while setting cache flags (ticket cache %s:%s)"),
-                        krb5_cc_get_type(kcontext, cache),
-                        krb5_cc_get_name(kcontext, cache));
-        }
+        if (!status_only)
+            com_err(progname, code, "");
         return 1;
     }
     if ((code = krb5_cc_get_principal(kcontext, cache, &princ))) {
         if (!status_only)
-            com_err(progname, code, _("while retrieving principal name"));
+            com_err(progname, code, "");
         return 1;
     }
     if ((code = krb5_unparse_name(kcontext, princ, &defname))) {

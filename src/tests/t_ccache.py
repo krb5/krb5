@@ -33,7 +33,7 @@ test_keyring = (keyctl is not None and
 # Test kdestroy and klist of a non-existent ccache.
 realm.run([kdestroy])
 output = realm.run([klist], expected_code=1)
-if 'No credentials cache found' not in output:
+if ' not found' not in output:
     fail('Expected error message not seen in klist output')
 
 realm.addprinc('alice', password('alice'))
@@ -49,7 +49,7 @@ def collection_test(realm, ccname):
         fail('Initial kinit failed to get credentials for alice.')
     realm.run([kdestroy])
     output = realm.run([klist], expected_code=1)
-    if 'No credentials cache found' not in output:
+    if ' not found' not in output:
         fail('Initial kdestroy failed to destroy primary cache.')
     output = realm.run([klist, '-l'], expected_code=1)
     if not output.endswith('---\n') or output.count('\n') != 2:
@@ -131,7 +131,7 @@ realm = K5Realm(krb5_conf=conf, create_kdb=False)
 del realm.env['KRB5CCNAME']
 uidstr = str(os.getuid())
 out = realm.run([klist], expected_code=1)
-if 'FILE:testdir/abc%s' % uidstr not in out:
+if 'testdir/abc%s' % uidstr not in out:
     fail('Wrong ccache in klist')
 
 success('Credential cache tests')
