@@ -493,7 +493,10 @@ do_ccache(krb5_ccache cache)
     }
     if ((code = krb5_cc_get_principal(kcontext, cache, &princ))) {
         if (!status_only)
-            com_err(progname, code, _("while retrieving principal name"));
+            com_err(progname, code,
+                    _("while retrieving principal name (ticket cache %s:%s)"),
+                    krb5_cc_get_type(kcontext, cache),
+                    krb5_cc_get_name(kcontext, cache));
         return 1;
     }
     if ((code = krb5_unparse_name(kcontext, princ, &defname))) {

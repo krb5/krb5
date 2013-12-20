@@ -1707,6 +1707,12 @@ krb5_krcc_retrieve_principal(krb5_context context, krb5_ccache id,
     if (!d->cache_id || !d->princ_id) {
         princ = 0L;
         kret = KRB5_FCC_NOFILE;
+        if (d->name) {
+            krb5_set_error_message(context, kret,
+                                   _("Credentials cache keyring '%s' "
+                                     "not found"),
+                                   d->name);
+        }
         goto errout;
     }
 

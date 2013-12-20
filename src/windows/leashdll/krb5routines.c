@@ -543,6 +543,7 @@ Leash_krb5_cc_default(krb5_context *ctx, krb5_ccache *cache)
 {
     krb5_error_code rc;
     krb5_flags flags;
+    krb5_principal principal;
 
     char *functionName = NULL;
     if (*cache == 0) {
@@ -556,6 +557,12 @@ Leash_krb5_cc_default(krb5_context *ctx, krb5_ccache *cache)
     flags = KRB5_TC_NOTICKET;
 #endif
     rc = pkrb5_cc_set_flags(*ctx, *cache, flags);
+    if (!rc) {
+        rc = pkrb5_cc_get_principal(*ctx, *cache, &principal);
+        if (!rc) {
+            pkrb5_free_principal(*ctx, principal);
+        }
+    }
     if (rc) {
         if (rc == KRB5_FCC_NOFILE || rc == KRB5_CC_NOTFOUND) {
             if (*cache != NULL && *ctx != NULL)
