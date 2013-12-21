@@ -507,6 +507,9 @@ gic_iter(kadm5_server_handle_t handle, enum init_type init_type,
         krb5_free_principal(ctx, mcreds.server);
         if (code)
             goto error;
+    } else {
+        code = EINVAL;
+        goto error;
     }
 
     /* Steal the server principal of the creds we acquired and return it to the
