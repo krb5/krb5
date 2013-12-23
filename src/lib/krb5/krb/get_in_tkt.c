@@ -1396,6 +1396,35 @@ note_req_timestamp(krb5_context context, krb5_init_creds_context ctx,
         AUTH_OFFSET : UNAUTH_OFFSET;
 }
 
+/* Determine whether the client realm in a KRB-ERROR is empty. */
+static krb5_boolean
+is_empty_crealm(krb5_error *err)
+{
+
+    return (err->client == NULL || err->client->realm.length == 0);
+}
+
+/*
+ * Determine whether a KRB-ERROR is a referral to another realm.
+ *
+ * RFC 6806 Section 7 requires that KDCs return the referral realm in
+ * an error type WRONG_REALM, but Microsoft Windows Server 2003 (and
+ * possibly others) return the realm in a PRINCIPAL_UNKNOWN message.
+ * Detect this case by looking for a non-empty client.realm field in
+ * such responses.
+ */
+static krb5_boolean
+is_referral(krb5_init_creds_context ctx)
+{
+    krb5_error *err = ctx->err_reply;
+
+    if (err->error == KDC_ERR_WRONG_REALM)
+        return TRUE;
+    if (err->error != KDC_ERR_C_PRINCIPAL_UNKNOWN)
+        return FALSE;
+    return !is_empty_crealm(err);
+}
+
 static krb5_error_code
 init_creds_step_reply(krb5_context context,
                       krb5_init_creds_context ctx,
@@ -1454,9 +1483,9 @@ init_creds_step_reply(krb5_context context,
                                              ctx->preauth_to_use);
             ctx->preauth_required = TRUE;
 
-        } else if (canon_flag && ctx->err_reply->error == KDC_ERR_WRONG_REALM) {
-            if (ctx->err_reply->client == NULL ||
-                !ctx->err_reply->client->realm.length) {
+        } else if (canon_flag && is_referral(ctx)) {
+            if (is_empty_crealm(ctx->err_reply)) {
+                /* Only WRONG_REALM referral types can reach this. */
                 code = KRB5KDC_ERR_WRONG_REALM;
                 goto cleanup;
             }
