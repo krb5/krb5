@@ -29,6 +29,20 @@
 #include <syslog.h>
 #include "adm_proto.h"
 
+/*
+ * A note on KDC-status string format.
+ *
+ * - All letters in the status string should be capitalized;
+ * - the words in the status phrase are separated by underscores;
+ * - abbreviations should be avoided.  Some acceptable "standard" acronyms
+ *   are AS_REQ, TGS_REP etc.
+ * - since in almost all cases KDC status string is set on error, no need
+ *   to state this fact as part of the status string;
+ * - KDC status string should be an imperative phrase.
+ *
+ * Example: "MAKE_RANDOM_KEY"
+ */
+
 /* Main logging routines for ticket requests.
 
    There are a few simple cases -- unparseable requests mainly --

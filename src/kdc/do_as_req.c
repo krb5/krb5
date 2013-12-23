@@ -279,7 +279,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     errcode = krb5_encrypt_tkt_part(kdc_context, &state->server_keyblock,
                                     &state->ticket_reply);
     if (errcode) {
-        state->status = "ENCRYPTING_TICKET";
+        state->status = "ENCRYPT_TICKET";
         goto egress;
     }
 
@@ -296,7 +296,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                                               &state->reply,
                                               state->client_keyblock.enctype);
     if (errcode) {
-        state->status = "fast response handling";
+        state->status = "MAKE_FAST_RESPONSE";
         goto egress;
     }
 
@@ -307,7 +307,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     errcode = kdc_fast_handle_reply_key(state->rstate, &state->client_keyblock,
                                         &as_encrypting_key);
     if (errcode) {
-        state->status = "generating reply key";
+        state->status = "MAKE_FAST_REPLY_KEY";
         goto egress;
     }
     errcode = return_enc_padata(kdc_context, state->req_pkt, state->request,
@@ -508,7 +508,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->au_state = au_state;
 
     if (state->request->msg_type != KRB5_AS_REQ) {
-        state->status = "msg_type mismatch";
+        state->status = "VALIDATE_MESSAGE_TYPE";
         errcode = KRB5_BADMSGTYPE;
         goto errout;
     }
@@ -519,13 +519,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     if (fetch_asn1_field((unsigned char *) req_pkt->data,
                          1, 4, &encoded_req_body) != 0) {
         errcode = ASN1_BAD_ID;
-        state->status = "Finding req_body";
+        state->status = "FETCH_REQ_BODY";
         goto errout;
     }
     errcode = kdc_find_fast(&state->request, &encoded_req_body, NULL, NULL,
                             state->rstate, &state->inner_body);
     if (errcode) {
-        state->status = "error decoding FAST";
+        state->status = "FIND_FAST";
         goto errout;
     }
     if (state->inner_body == NULL) {
@@ -533,7 +533,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         errcode = krb5_copy_data(kdc_context, &encoded_req_body,
                                  &state->inner_body);
         if (errcode) {
-            state->status = "storing req body";
+            state->status = "COPY_REQ_BODY";
             goto errout;
         }
     }
@@ -550,7 +550,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     if ((errcode = krb5_unparse_name(kdc_context,
                                      state->request->client,
                                      &state->cname))) {
-        state->status = "UNPARSING_CLIENT";
+        state->status = "UNPARSE_CLIENT";
         goto errout;
     }
     limit_string(state->cname);
@@ -563,7 +563,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     if ((errcode = krb5_unparse_name(kdc_context,
                                      state->request->server,
                                      &state->sname))) {
-        state->status = "UNPARSING_SERVER";
+        state->status = "UNPARSE_SERVER";
         goto errout;
     }
     limit_string(state->sname);
@@ -669,7 +669,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     if ((errcode = krb5_c_make_random_key(kdc_context, useenctype,
                                           &state->session_key))) {
-        state->status = "RANDOM_KEY_FAILED";
+        state->status = "MAKE_RANDOM_KEY";
         goto errout;
     }
 
@@ -753,8 +753,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
                                               state->request->client,
                                               krb5_anonymous_principal())) {
             errcode = KRB5KDC_ERR_BADOPTION;
-            state->status = "Anonymous requested but anonymous "
-                "principal not used.";
+            /* Anonymous requested but anonymous principal not used.*/
+            state->status = "VALIDATE_ANONYMOUS_PRINCIPAL";
             goto errout;
         }
         setflag(state->enc_tkt_reply.flags, TKT_FLG_ANONYMOUS);
@@ -763,7 +763,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         errcode = krb5_copy_principal(kdc_context, krb5_anonymous_principal(),
                                       &state->request->client);
         if (errcode) {
-            state->status = "Copying anonymous principal";
+            state->status = "COPY_ANONYMOUS_PRINCIPAL";
             goto errout;
         }
         state->enc_tkt_reply.client = state->request->client;
