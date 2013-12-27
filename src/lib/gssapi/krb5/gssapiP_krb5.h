@@ -1260,6 +1260,7 @@ data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
 #define KRB5_CS_CLI_KEYTAB_URN "client_keytab"
 #define KRB5_CS_KEYTAB_URN "keytab"
 #define KRB5_CS_CCACHE_URN "ccache"
+#define KRB5_CS_RCACHE_URN "rcache"
 
 OM_uint32
 kg_value_from_cred_store(gss_const_key_value_set_t cred_store,
