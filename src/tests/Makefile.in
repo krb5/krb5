@@ -128,6 +128,7 @@ check-pytests:: t_init_creds t_localauth
 	$(RUNPYTEST) $(srcdir)/jsonwalker.py -d $(srcdir)/au_dict.json \
 			-i au.log
 	$(RUNPYTEST) $(srcdir)/t_salt.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_bogus_kdc_req.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) gcred hist hrealm kdbtest plugorder responder s2p
