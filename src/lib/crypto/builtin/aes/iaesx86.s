@@ -871,3 +871,14 @@ lp256encsingle_CBC:
 	movdqu	[ecx],xmm1 ; store last iv for chaining
 
 	ret
+
+; Mark this file as not needing an executable stack.
+%ifidn __OUTPUT_FORMAT__,elf
+section .note.GNU-stack noalloc noexec nowrite progbits
+%endif
+%ifidn __OUTPUT_FORMAT__,elf32
+section .note.GNU-stack noalloc noexec nowrite progbits
+%endif
+%ifidn __OUTPUT_FORMAT__,elf64
+section .note.GNU-stack noalloc noexec nowrite progbits
+%endif
