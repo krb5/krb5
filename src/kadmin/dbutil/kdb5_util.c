@@ -586,7 +586,7 @@ add_random_key(argc, argv)
         return;
     }
     ret = krb5_string_to_keysalts(ks_str,
-                                  ", \t", ":.-", 0,
+                                  NULL, NULL, 0,
                                   &keysalts,
                                   &num_keysalts);
     if (ret) {

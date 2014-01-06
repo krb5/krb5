@@ -27,7 +27,7 @@ validate_allowed_keysalts(const char *allowed_keysalts)
 
     if (strchr(allowed_keysalts, '\t') != NULL)
         return KADM5_BAD_KEYSALTS;
-    ret = krb5_string_to_keysalts(allowed_keysalts, ",", ":.-", 0,
+    ret = krb5_string_to_keysalts(allowed_keysalts, ",", NULL, 0,
                                   &ks_tuple, &n_ks_tuple);
     free(ks_tuple);
     if (ret == EINVAL)

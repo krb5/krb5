@@ -256,8 +256,8 @@ apply_keysalt_policy(kadm5_server_handle_t handle, const char *policy,
     }
 
     ret = krb5_string_to_keysalts(polent.allowed_keysalts,
-                                  ", ",  /* Tuple separators */
-                                  ":.-", /* Key/salt separators */
+                                  ",",   /* Tuple separators */
+                                  NULL,  /* Key/salt separators */
                                   0,     /* No duplicates */
                                   &ak_ks_tuple,
                                   &ak_n_ks_tuple);

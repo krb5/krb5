@@ -158,7 +158,7 @@ kadmin_keytab_add(int argc, char **argv)
                 add_usage();
                 return;
             }
-            retval = krb5_string_to_keysalts(*++argv, ", \t", ":.-", 0,
+            retval = krb5_string_to_keysalts(*++argv, NULL, NULL, 0,
                                              &ks_tuple, &n_ks_tuple);
             if (retval) {
                 com_err("ktadd", retval, _("while parsing keysalts %s"),

@@ -57,7 +57,7 @@ struct flags_lookup_entry {
  */
 
 static const char default_tupleseps[]   = ", \t";
-static const char default_ksaltseps[]   = ":.";
+static const char default_ksaltseps[]   = ":";
 
 /* Keytype strings */
 /* Flags strings */

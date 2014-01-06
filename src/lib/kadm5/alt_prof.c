@@ -727,8 +727,8 @@ krb5_error_code kadm5_get_config_params(krb5_context context,
         params.keysalts = NULL;
         params.num_keysalts = 0;
         krb5_string_to_keysalts(svalue,
-                                ", \t", /* Tuple separators */
-                                ":.-",  /* Key/salt separators */
+                                NULL, /* Tuple separators */
+                                NULL, /* Key/salt separators */
                                 0,      /* No duplicates */
                                 &params.keysalts,
                                 &params.num_keysalts);
