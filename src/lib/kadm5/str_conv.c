@@ -308,7 +308,7 @@ krb5_string_to_keysalts(const char *string, const char *tupleseps,
             sp++;
         }
         else
-            stype = -1;
+            stype = KRB5_KDB_SALTTYPE_NORMAL;
 
         /*
          * Attempt to parse enctype and salttype.  If we parse well
