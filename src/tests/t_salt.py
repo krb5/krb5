@@ -27,7 +27,8 @@ salts = [('des-cbc-crc:afs3', 'AFS version 3'),
          ('des-cbc-crc:v4', 'Version 4'),
          ('aes128-cts-hmac-sha1-96:special', 'Special')]
 # These enctypes are chosen to cover the different string-to-key routines.
-second_kstypes = ['aes256-cts-hmac-sha1-96:normal', 'arcfour-hmac:normal',
+# Omit ":normal" from aes256 to check that salttype defaulting works.
+second_kstypes = ['aes256-cts-hmac-sha1-96', 'arcfour-hmac:normal',
                   'des3-cbc-sha1:normal', 'des-cbc-crc:normal']
 
 # Test using different salt types in a principal's key list.
