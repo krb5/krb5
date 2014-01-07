@@ -246,6 +246,30 @@ krb5_keysalt_is_present(ksaltlist, nksalts, enctype, salttype)
     return(foundit);
 }
 
+/* NOTE: This is a destructive parser (writes NULs). */
+static krb5_error_code
+string_to_keysalt(char *s, const char *ksaltseps,
+                  krb5_enctype *etype, krb5_int32 *stype)
+{
+    char *sp;
+    const char *ksseps = (ksaltseps != NULL) ? ksaltseps : default_ksaltseps;
+    krb5_error_code ret = 0;
+
+    sp = strpbrk(s, ksseps);
+    if (sp != NULL) {
+        *sp++ = '\0';
+    }
+    ret = krb5_string_to_enctype(s, etype);
+    if (ret)
+        return ret;
+
+    /* Default to normal salt if omitted. */
+    *stype = KRB5_KDB_SALTTYPE_NORMAL;
+    if (sp == NULL)
+        return 0;
+    return krb5_string_to_salttype(sp, stype);
+}
+
 /*
  * krb5_string_to_keysalts()    - Convert a string representation to a list
  *                                of key/salt tuples.
@@ -255,123 +279,48 @@ krb5_string_to_keysalts(const char *string, const char *tupleseps,
                         const char *ksaltseps, krb5_boolean dups,
                         krb5_key_salt_tuple **ksaltp, krb5_int32 *nksaltp)
 {
-    krb5_error_code     kret;
-    char                *dup_string, *kp, *sp, *ep;
-    char                sepchar = 0, trailchar = 0;
-    krb5_enctype        ktype;
-    krb5_int32          stype;
-    krb5_key_salt_tuple *savep;
-    const char          *tseplist;
-    const char          *ksseplist;
-    const char          *septmp;
-    size_t              len;
+    char *p, *ksp;
+    char *tlasts = NULL;
+    const char *tseps = (tupleseps != NULL) ? tupleseps : default_tupleseps;
+    krb5_int32 nksalts = 0;
+    krb5_int32 stype;
+    krb5_enctype etype;
+    krb5_error_code ret = 0;
+    krb5_key_salt_tuple *ksalts = NULL, *ksalts_new = NULL;
 
-    kret = 0;
-    dup_string = strdup(string);
-    if (dup_string == NULL)
+    *ksaltp = NULL;
+    *nksaltp = 0;
+    p = strdup(string);
+    if (p == NULL)
         return ENOMEM;
-    kp = dup_string;
-    tseplist = (tupleseps) ? tupleseps : default_tupleseps;
-    ksseplist = (ksaltseps) ? ksaltseps : default_ksaltseps;
-    while (kp) {
-        /* Attempt to find a separator */
-        ep = (char *) NULL;
-        if (*tseplist) {
-            septmp = tseplist;
-            for (ep = strchr(kp, (int) *septmp);
-                 *(++septmp) && !ep;
-                 ep = strchr(kp, (int) *septmp));
+    ksp = strtok_r(p, tseps, &tlasts);
+    while (ksp != NULL) {
+        ret = string_to_keysalt(ksp, ksaltseps, &etype, &stype);
+        if (ret)
+            goto cleanup;
+
+        /* Ignore duplicate keysalts if caller asks. */
+        if (!dups && krb5_keysalt_is_present(ksalts, nksalts, etype, stype))
+            continue;
+
+        ksalts_new = realloc(ksalts, (nksalts + 1) * sizeof(*ksalts));
+        if (ksalts_new == NULL) {
+            ret = ENOMEM;
+            goto cleanup;
         }
-
-        if (ep) {
-            trailchar = *ep;
-            *ep = '\0';
-            ep++;
-        }
-        /*
-         * kp points to something (hopefully) of the form:
-         *      <enctype><ksseplist><salttype>
-         *      or
-         *      <enctype>
-         */
-        sp = (char *) NULL;
-        /* Attempt to find a separator */
-        septmp = ksseplist;
-        for (sp = strchr(kp, (int) *septmp);
-             *(++septmp) && !sp;
-             sp = strchr(kp, (int) *septmp));
-
-        if (sp) {
-            /* Separate enctype from salttype */
-            sepchar = *sp;
-            *sp = '\0';
-            sp++;
-        }
-        else
-            stype = KRB5_KDB_SALTTYPE_NORMAL;
-
-        /*
-         * Attempt to parse enctype and salttype.  If we parse well
-         * then make sure that it specifies a unique key/salt combo
-         */
-        if (!(kret = krb5_string_to_enctype(kp, &ktype)) &&
-            (!sp || !(kret = krb5_string_to_salttype(sp, &stype))) &&
-            (dups ||
-             !krb5_keysalt_is_present(*ksaltp, *nksaltp, ktype, stype))) {
-
-            /* Squirrel away old keysalt array */
-            savep = *ksaltp;
-            len = (size_t) *nksaltp;
-
-            /* Get new keysalt array */
-            *ksaltp = (krb5_key_salt_tuple *)
-                malloc((len + 1) * sizeof(krb5_key_salt_tuple));
-            if (*ksaltp) {
-
-                /* Copy old keysalt if appropriate */
-                if (savep) {
-                    memcpy(*ksaltp, savep,
-                           len * sizeof(krb5_key_salt_tuple));
-                    free(savep);
-                }
-
-                /* Save our values */
-                (*ksaltp)[(*nksaltp)].ks_enctype = ktype;
-                (*ksaltp)[(*nksaltp)].ks_salttype = stype;
-                (*nksaltp)++;
-            }
-            else {
-                *ksaltp = savep;
-                break;
-            }
-        }
-        if (kret) {
-            free(dup_string);
-            return kret;
-        }
-        if (sp)
-            sp[-1] = sepchar;
-        if (ep)
-            ep[-1] = trailchar;
-        kp = ep;
-
-        /* Skip over extra separators - like spaces */
-        if (kp && *tseplist) {
-            septmp = tseplist;
-            while(*septmp && *kp) {
-                if(*septmp == *kp) {
-                    /* Increment string - reset separator list */
-                    kp++;
-                    septmp = tseplist;
-                } else {
-                    septmp++;
-                }
-            }
-            if (!*kp) kp = NULL;
-        }
-    } /* while kp */
-    free(dup_string);
-    return(kret);
+        ksalts = ksalts_new;
+        ksalts[nksalts].ks_enctype = etype;
+        ksalts[nksalts].ks_salttype = stype;
+        nksalts++;
+        ksp = strtok_r(NULL, tseps, &tlasts);
+    }
+    *ksaltp = ksalts;
+    *nksaltp = nksalts;
+cleanup:
+    if (ret)
+        free(ksalts);
+    free(p);
+    return ret;
 }
 
 /*
