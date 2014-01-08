@@ -49,6 +49,8 @@ k5_copy_etypes(const krb5_enctype *old_list, krb5_enctype **new_list)
     krb5_enctype *list;
 
     *new_list = NULL;
+    if (old_list == NULL)
+        return 0;
     count = k5_count_etypes(old_list);
     list = malloc(sizeof(krb5_enctype) * (count + 1));
     if (list == NULL)
