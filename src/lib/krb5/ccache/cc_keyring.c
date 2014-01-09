@@ -459,6 +459,26 @@ get_persistent_real(uid_t uid)
 #endif
 
 /*
+ * If a process has no explicitly set session keyring, KEY_SPEC_SESSION_KEYRING
+ * will resolve to the user session keyring for ID lookup and reading, but in
+ * some kernel versions, writing to that special keyring will instead create a
+ * new empty session keyring for the process.  We do not want that; the keys we
+ * create would be invisible to other processes.  We can work around that
+ * behavior by explicitly writing to the user session keyring when it matches
+ * the session keyring.  This function returns the keyring we should write to
+ * for the session anchor.
+ */
+static key_serial_t
+session_write_anchor()
+{
+    key_serial_t s, u;
+
+    s = keyctl_get_keyring_ID(KEY_SPEC_SESSION_KEYRING, 0);
+    u = keyctl_get_keyring_ID(KEY_SPEC_USER_SESSION_KEYRING, 0);
+    return (s == u) ? KEY_SPEC_USER_SESSION_KEYRING : KEY_SPEC_SESSION_KEYRING;
+}
+
+/*
  * Find or create a keyring within parent with the given name.  If possess is
  * nonzero, also make sure the key is linked from possess.  This is necessary
  * to ensure that we have possession rights on the key when the parent is the
@@ -644,14 +664,14 @@ get_collection(const char *anchor_name, const char *collection_name,
     } else if (strcmp(anchor_name, KRCC_THREAD_ANCHOR) == 0) {
         anchor_id = KEY_SPEC_THREAD_KEYRING;
     } else if (strcmp(anchor_name, KRCC_SESSION_ANCHOR) == 0) {
-        anchor_id = KEY_SPEC_SESSION_KEYRING;
+        anchor_id = session_write_anchor();
     } else if (strcmp(anchor_name, KRCC_USER_ANCHOR) == 0) {
         /* The user keyring does not confer possession, so we need to link the
          * collection to the process keyring to maintain possession rights. */
         anchor_id = KEY_SPEC_USER_KEYRING;
         possess_id = KEY_SPEC_PROCESS_KEYRING;
     } else if (strcmp(anchor_name, KRCC_LEGACY_ANCHOR) == 0) {
-        anchor_id = KEY_SPEC_SESSION_KEYRING;
+        anchor_id = session_write_anchor();
     } else {
         return KRB5_KCC_INVALID_ANCHOR;
     }
@@ -926,7 +946,7 @@ krb5_krcc_initialize(krb5_context context, krb5_ccache id,
     /* If this is the legacy cache in a legacy session collection, link it
      * directly to the session keyring so that old code can see it. */
     if (is_legacy_cache_name(data->name))
-        (void)keyctl_link(data->cache_id, KEY_SPEC_SESSION_KEYRING);
+        (void)keyctl_link(data->cache_id, session_write_anchor());
 
     kret = krb5_krcc_save_principal(context, id, princ);
 
@@ -1041,7 +1061,7 @@ krb5_krcc_destroy(krb5_context context, krb5_ccache id)
         }
         /* If this is a legacy cache, unlink it from the session anchor. */
         if (is_legacy_cache_name(d->name))
-            (void)keyctl_unlink(d->cache_id, KEY_SPEC_SESSION_KEYRING);
+            (void)keyctl_unlink(d->cache_id, session_write_anchor());
     }
 
     k5_cc_mutex_unlock(context, &d->lock);
