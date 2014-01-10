@@ -263,17 +263,22 @@ enable_aesni=check)
 if test "$CRYPTO_IMPL" = builtin -a "x$enable_aesni" != xno; then
     case "$host" in
     i686-*)
-	aesni_flags="-f elf32"
 	aesni_obj=iaesx86.o
+	aesni_machine=x86
 	;;
     x86_64-*)
-	# All Unix-like platforms need -D__linux__ for iaesx64.s to
-	# handle the System V x86-64 calling convention.
-	aesni_flags="-D__linux__ -f elf64"
 	aesni_obj=iaesx64.o
+	aesni_machine=amd64
 	;;
     esac
-    if test "x$aesni_obj" != x; then
+    case "$host" in
+    *-*-linux* | *-*-gnu* | *-*-*bsd* | *-*-solaris*)
+	# All Unix-like platforms need -D__linux__ for iaesx64.s to
+	# use the System V x86-64 calling convention.
+	aesni_flags="-D__linux__ -f elf -m $aesni_machine"
+	;;
+    esac
+    if test "x$aesni_obj" != x && test "x$aesni_flags" != x; then
 	AC_CHECK_PROG(YASM,yasm,yasm)
 	AC_CHECK_HEADERS(cpuid.h)
 	if test x"$YASM" != x -a "x$ac_cv_header_cpuid_h" = xyes; then
