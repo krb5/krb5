@@ -138,26 +138,6 @@
 %endmacro
 
 
-%macro load_and_inc4 1
-	movdqa	xmm4,%1
-	movdqa	xmm0,xmm5
-	pshufb	xmm0, xmm6 ; byte swap counter back
-	movdqa  xmm1,xmm5
-	paddd	xmm1,[counter_add_one]
-	pshufb	xmm1, xmm6 ; byte swap counter back
-	movdqa  xmm2,xmm5
-	paddd	xmm2,[counter_add_two]
-	pshufb	xmm2, xmm6 ; byte swap counter back
-	movdqa  xmm3,xmm5
-	paddd	xmm3,[counter_add_three]
-	pshufb	xmm3, xmm6 ; byte swap counter back
-	pxor	xmm0,xmm4
-	paddd	xmm5,[counter_add_four]
-	pxor	xmm1,xmm4
-	pxor	xmm2,xmm4
-	pxor	xmm3,xmm4
-%endmacro
-
 %macro xor_with_input4 1
 	movdqu xmm4,[%1]
 	pxor xmm0,xmm4
@@ -216,41 +196,13 @@
 
 
 
-section .data
+section .rodata
 align 16
 shuffle_mask:
 DD 0FFFFFFFFh
 DD 03020100h
 DD 07060504h
 DD 0B0A0908h
-
-byte_swap_16:
-DDQ 0x000102030405060708090A0B0C0D0E0F
-
-align 16
-counter_add_one:
-DD 1
-DD 0
-DD 0
-DD 0
-
-counter_add_two:
-DD 2
-DD 0
-DD 0
-DD 0
-
-counter_add_three:
-DD 3
-DD 0
-DD 0
-DD 0
-
-counter_add_four:
-DD 4
-DD 0
-DD 0
-DD 0
 
 
 section .text
