@@ -323,7 +323,10 @@ _iEncExpandKey128:
 
         movdqu [edx], xmm1
 
-        movdqa xmm5, [shuffle_mask]
+        call .next
+.next:
+        pop ecx
+        movdqa xmm5, [ecx-.next+shuffle_mask]
 
         add edx,16
 
@@ -421,7 +424,10 @@ _iEncExpandKey256:
 
     add edx,32
 
-    movdqa xmm5, [shuffle_mask]  ; this mask is used by key_expansion
+    call .next
+.next:
+    pop ecx
+    movdqa xmm5, [ecx-.next+shuffle_mask]  ; this mask is used by key_expansion
 
     aeskeygenassist xmm2, xmm3, 0x1     ;
     call key_expansion256
