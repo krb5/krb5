@@ -42,13 +42,7 @@ src/windows/README file.
 Reporting Bugs
 --------------
 
-Please report any problems/bugs/comments using the krb5-send-pr
-program.  The krb5-send-pr program will be installed in the sbin
-directory once you have successfully compiled and installed Kerberos
-V5 (or if you have installed one of our binary distributions).
-
-If you are not able to use krb5-send-pr because you haven't been able
-compile and install Kerberos V5 on any platform, you may send mail to
+Please report any problems/bugs/comments by sending email to
 krb5-bugs@mit.edu.
 
 Please keep in mind that unencrypted e-mail is not secure. If you need
@@ -59,7 +53,9 @@ You may view bug reports by visiting
 
     http://krbdev.mit.edu/rt/
 
-and logging in as "guest" with password "guest".
+and using the "Guest Login" button.  Please note that the web
+interface to our bug database is read-only for guests, and the primary
+way to interact with our bug database is via email.
 
 DES transition
 --------------
