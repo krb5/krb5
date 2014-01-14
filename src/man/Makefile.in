@@ -29,7 +29,9 @@ man: $(docsrc)/version.py
 	$(SPHINX_BUILD) -q -t mansubs -b man $(docsrc) rst_man
 	for f in rst_man/*.[0-9]; do \
 		name=`echo $$f | sed -e 's|^.*/\(.*\)\.[0-9]$$|\1|'`; \
-		sed -e '/^\.\\" $$/d' $$f > $(srcdir)/$$name.man; \
+		sed -e '/^\.\\" $$/d' \
+		-e '/^\.\\"/s/reStructeredText/reStructuredText/' \
+		$$f > $(srcdir)/$$name.man; \
 	done
 
 $(docsrc)/version.py: $(top_srcdir)/patchlevel.h
