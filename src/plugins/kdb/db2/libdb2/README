@@ -4,8 +4,7 @@ This directory contains code of somewhat unknown origin that is
 INCOMPATIBLE with both Berkeley DB 1.85 and Sleepycat DB 2.x.  Do NOT
 contact Sleepycat regarding bugs in code found here; they do not
 appreciate it.  All bug reports about this code should go to the MIT
-Kerberos team via krb5-send-pr or email to krb5-bugs@mit.edu, as
-usual.
+Kerberos team via email to krb5-bugs@mit.edu, as usual.
 
 It is believed that this "db" code originated from Berkeley DB 1.85
 and was further modified by Cygnus and the MIT Kerberos team.  Some
