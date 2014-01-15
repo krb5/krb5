@@ -1,4 +1,4 @@
-.TH "KPROP" "8" " " "1.12" "MIT Kerberos"
+.TH "KPROP" "8" " " "1.12.1" "MIT Kerberos"
 .SH NAME
 kprop \- propagate a Kerberos V5 principal database to a slave server
 .

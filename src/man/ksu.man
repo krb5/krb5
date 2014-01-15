@@ -1,4 +1,4 @@
-.TH "KSU" "1" " " "1.12" "MIT Kerberos"
+.TH "KSU" "1" " " "1.12.1" "MIT Kerberos"
 .SH NAME
 ksu \- Kerberized super-user
 .

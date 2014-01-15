@@ -1,4 +1,4 @@
-.TH "KADMIND" "8" " " "1.12" "MIT Kerberos"
+.TH "KADMIND" "8" " " "1.12.1" "MIT Kerberos"
 .SH NAME
 kadmind \- KADM5 administration server
 .

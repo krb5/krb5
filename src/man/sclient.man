@@ -1,4 +1,4 @@
-.TH "SCLIENT" "1" " " "1.12" "MIT Kerberos"
+.TH "SCLIENT" "1" " " "1.12.1" "MIT Kerberos"
 .SH NAME
 sclient \- sample Kerberos version 5 client
 .

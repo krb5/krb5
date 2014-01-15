@@ -1,4 +1,4 @@
-.TH "KADM5.ACL" "5" " " "1.12" "MIT Kerberos"
+.TH "KADM5.ACL" "5" " " "1.12.1" "MIT Kerberos"
 .SH NAME
 kadm5.acl \- Kerberos ACL file
 .

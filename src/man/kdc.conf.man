@@ -1,4 +1,4 @@
-.TH "KDC.CONF" "5" " " "1.12" "MIT Kerberos"
+.TH "KDC.CONF" "5" " " "1.12.1" "MIT Kerberos"
 .SH NAME
 kdc.conf \- Kerberos V5 KDC configuration file
 .

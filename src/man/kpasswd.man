@@ -1,4 +1,4 @@
-.TH "KPASSWD" "1" " " "1.12" "MIT Kerberos"
+.TH "KPASSWD" "1" " " "1.12.1" "MIT Kerberos"
 .SH NAME
 kpasswd \- change a user's Kerberos password
 .

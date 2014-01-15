@@ -1,4 +1,4 @@
-.TH "KSWITCH" "1" " " "1.12" "MIT Kerberos"
+.TH "KSWITCH" "1" " " "1.12.1" "MIT Kerberos"
 .SH NAME
 kswitch \- switch primary ticket cache
 .

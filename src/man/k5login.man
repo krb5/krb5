@@ -1,4 +1,4 @@
-.TH "K5LOGIN" "5" " " "1.12" "MIT Kerberos"
+.TH "K5LOGIN" "5" " " "1.12.1" "MIT Kerberos"
 .SH NAME
 k5login \- Kerberos V5 acl file for host access
 .

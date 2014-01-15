@@ -1,4 +1,4 @@
-.TH "KINIT" "1" " " "1.12" "MIT Kerberos"
+.TH "KINIT" "1" " " "1.12.1" "MIT Kerberos"
 .SH NAME
 kinit \- obtain and cache Kerberos ticket-granting ticket
 .

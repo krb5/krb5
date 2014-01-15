@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2013 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2014 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -72,6 +72,42 @@ krb5-1.7 release contains measures to encourage sites to migrate away
 from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
+
+Major changes in 1.12.1 (2014-01-15)
+------------------------------------
+
+* Make KDC log service principal names more consistently during some
+  error conditions, instead of "<unknown server>"
+
+* Fix several bugs related to building AES-NI support on less common
+  configurations
+
+* Fix several bugs related to keyring credential caches
+
+krb5-1.12.1 changes by ticket ID
+--------------------------------
+
+5566    krb5-send-pr is difficult to use and largely unnecessary
+7045    SPNEGO can't display mechanism errors
+7791    S4U2Self fails with Windows 2008
+7794    Avoid malloc(0) in SPNEGO get_input_token
+7797    Fix SPNEGO one-hop interop against old IIS
+7802    KDC sometimes fails to log principal names
+7803    Fix memory leak in SPNEGO initiator
+7805    Potential leaks in error paths in acquire_accept_cred
+7806    Clarify klist -s documentation
+7807    Fix krb5_copy_context
+7808    Test for verto_set_flags in system libverto
+7809    klist displays bad error for nonexistent KEYRING ccache
+7810    keyring ccache tests can fail if keyctl purge subcommand is
+        unavailable
+7811    Test bogus KDC-REQs
+7812    AES-NI support can break OS X build
+7813    AES-NI support in 1.12 and executable stacks
+7814    Session keyring caches don't work if session keyring not set
+        (with current Linux)
+7815    Text relocations in iaesx86.s
+7817    Fix typo in sphinx manpage output
 
 Major changes in 1.12 (2013-12-10)
 ----------------------------------
@@ -346,6 +382,7 @@ reports, suggestions, and valuable resources:
     Sumit Bose
     Emmanuel Bouillon
     Michael Calmer
+    Andrea Campi
     Julien Chaffraix
     Ravi Channavajhala
     Srinivas Cheruku
@@ -356,6 +393,7 @@ reports, suggestions, and valuable resources:
     Kevin Coffman
     Simon Cooper
     Sylvain Cortes
+    Arran Cudbard-Bell
     Jeff D'Angelo
     Nalin Dahyabhai
     Mark Davies
