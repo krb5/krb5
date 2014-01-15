@@ -179,13 +179,13 @@ cleanup:
 */
 
 static OM_uint32
-acquire_accept_cred(krb5_context context,
-                    OM_uint32 *minor_status,
-                    krb5_keytab req_keytab,
-                    krb5_gss_cred_id_rec *cred)
+acquire_accept_cred(krb5_context context, OM_uint32 *minor_status,
+                    krb5_keytab req_keytab, krb5_gss_cred_id_rec *cred)
 {
+    OM_uint32 major;
     krb5_error_code code;
-    krb5_keytab kt;
+    krb5_keytab kt = NULL;
+    krb5_rcache rc = NULL;
 
     assert(cred->keytab == NULL);
 
@@ -202,46 +202,54 @@ acquire_accept_cred(krb5_context context,
         }
     }
     if (code) {
-        *minor_status = code;
-        return GSS_S_CRED_UNAVAIL;
+        major = GSS_S_CRED_UNAVAIL;
+        goto cleanup;
     }
 
     if (cred->name != NULL) {
-        /* Make sure we keys matching the desired name in the keytab. */
+        /* Make sure we have keys matching the desired name in the keytab. */
         code = check_keytab(context, kt, cred->name);
         if (code) {
-            krb5_kt_close(context, kt);
             if (code == KRB5_KT_NOTFOUND) {
                 char *errstr = (char *)krb5_get_error_message(context, code);
-                krb5_set_error_message(context, KG_KEYTAB_NOMATCH, "%s", errstr);
+                krb5_set_error_message(context, KG_KEYTAB_NOMATCH, "%s",
+                                       errstr);
                 krb5_free_error_message(context, errstr);
-                *minor_status = KG_KEYTAB_NOMATCH;
-            } else
-                *minor_status = code;
-            return GSS_S_CRED_UNAVAIL;
+                code = KG_KEYTAB_NOMATCH;
+            }
+            major = GSS_S_CRED_UNAVAIL;
+            goto cleanup;
         }
 
         /* Open the replay cache for this principal. */
         code = krb5_get_server_rcache(context, &cred->name->princ->data[0],
-                                      &cred->rcache);
+                                      &rc);
         if (code) {
-            krb5_kt_close(context, kt);
-            *minor_status = code;
-            return GSS_S_FAILURE;
+            major = GSS_S_FAILURE;
+            goto cleanup;
         }
     } else {
         /* Make sure we have a keytab with keys in it. */
         code = krb5_kt_have_content(context, kt);
         if (code) {
-            krb5_kt_close(context, kt);
-            *minor_status = code;
-            return GSS_S_CRED_UNAVAIL;
+            major = GSS_S_CRED_UNAVAIL;
+            goto cleanup;
         }
     }
 
     cred->keytab = kt;
+    kt = NULL;
+    cred->rcache = rc;
+    rc = NULL;
+    major = GSS_S_COMPLETE;
 
-    return GSS_S_COMPLETE;
+cleanup:
+    if (kt != NULL)
+        krb5_kt_close(context, kt);
+    if (rc != NULL)
+        krb5_rc_close(context, rc);
+    *minor_status = code;
+    return major;
 }
 #endif /* LEAN_CLIENT */
 
