@@ -31,7 +31,7 @@ update-po: csrcs check_et_@COM_ERR_VERSION@
 	$(XGETTEXT) -kN_ -j -o $(POTFILE) $(ETSRCS)
 
 csrcs: always
-	find $(top_srcdir) -name "*.c" -print > $@
+	find $(top_srcdir) -name "*.c" -print | LC_ALL=C sort > $@
 
 check_et_k5 check_et_intlsys:
 check_et_sys:
