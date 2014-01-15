@@ -1887,8 +1887,10 @@ krb5_error_code KRB5_CALLCONV
 krb5int_cc_user_set_default_name(krb5_context context, const char *name);
 
 krb5_error_code krb5_rc_default(krb5_context, krb5_rcache *);
-krb5_error_code krb5_rc_resolve_type(krb5_context, krb5_rcache *,char *);
-krb5_error_code krb5_rc_resolve_full(krb5_context, krb5_rcache *,char *);
+krb5_error_code krb5_rc_resolve_type(krb5_context, krb5_rcache *,
+                                     const char *);
+krb5_error_code krb5_rc_resolve_full(krb5_context, krb5_rcache *,
+                                     const char *);
 char *krb5_rc_get_type(krb5_context, krb5_rcache);
 char *krb5_rc_default_type(krb5_context);
 char *krb5_rc_default_name(krb5_context);
