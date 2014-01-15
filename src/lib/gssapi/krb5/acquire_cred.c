@@ -831,6 +831,8 @@ error_out:
         if (cred->keytab)
             krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
+        if (cred->rcache)
+            krb5_rc_close(context, cred->rcache);
         if (cred->name)
             kg_release_name(context, &cred->name);
         k5_mutex_destroy(&cred->lock);
