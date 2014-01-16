@@ -123,6 +123,9 @@ error_message(long code)
     const struct error_table *table;
     int merr;
 
+    if (CALL_INIT_FUNCTION(com_err_initialize))
+        return 0;
+
     l_offset = (unsigned long)code & ((1<<ERRCODE_RANGE)-1);
     offset = l_offset;
     table_num = ((unsigned long)code - l_offset) & ERRCODE_MAX;
@@ -157,8 +160,6 @@ error_message(long code)
         goto oops;
     }
 
-    if (CALL_INIT_FUNCTION(com_err_initialize))
-        return 0;
     merr = k5_mutex_lock(&et_list_lock);
     if (merr)
         goto oops;
