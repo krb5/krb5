@@ -121,6 +121,9 @@ error_message(long code)
     char *cp, *cp1;
     const struct error_table *table;
 
+    if (CALL_INIT_FUNCTION(com_err_initialize))
+        return 0;
+
     l_offset = (unsigned long)code & ((1<<ERRCODE_RANGE)-1);
     offset = l_offset;
     table_num = ((unsigned long)code - l_offset) & ERRCODE_MAX;
@@ -155,8 +158,6 @@ error_message(long code)
         goto oops;
     }
 
-    if (CALL_INIT_FUNCTION(com_err_initialize))
-        return 0;
     k5_mutex_lock(&et_list_lock);
     dprintf(("scanning list for %x\n", table_num));
     for (e = et_list; e != NULL; e = e->next) {
