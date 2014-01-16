@@ -147,7 +147,8 @@ Each component of the name may be wildcarded using the \fB*\fP
 character.
 .sp
 \fItarget_principal\fP can also include back\-references to \fIprincipal\fP,
-in which \fB*number\fP matches the component number in \fIprincipal\fP.
+in which \fB*number\fP matches the corresponding wildcard in
+\fIprincipal\fP.
 .TP
 .B \fIrestrictions\fP
 (Optional) A string of flags. Allowed restrictions are:
@@ -212,8 +213,8 @@ instance \fBroot\fP (matches line 3).
 .sp
 (line 4) Any \fBroot\fP principal in \fBATHENA.MIT.EDU\fP can inquire, list,
 or change the password of their null instance, but not any other
-null instance.  (Here, "*1" denotes a back\-reference to the first
-component of the actor principal.)
+null instance.  (Here, \fB*1\fP denotes a back\-reference to the
+component matching the first wildcard in the actor principal.)
 .sp
 (line 5) Any principal in the realm \fBATHENA.MIT.EDU\fP (except for
 \fBjoeadmin@ATHENA.MIT.EDU\fP, as mentioned above) has inquire
