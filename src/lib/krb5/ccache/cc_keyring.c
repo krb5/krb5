@@ -1077,11 +1077,13 @@ krb5_krcc_destroy(krb5_context context, krb5_ccache id)
 
 /* Create a cache handle for a cache ID. */
 static krb5_error_code
-make_cache(key_serial_t collection_id, key_serial_t cache_id,
-           const char *anchor_name, const char *collection_name,
-           const char *subsidiary_name, krb5_ccache *cache_out)
+make_cache(krb5_context context, key_serial_t collection_id,
+           key_serial_t cache_id, const char *anchor_name,
+           const char *collection_name, const char *subsidiary_name,
+           krb5_ccache *cache_out)
 {
     krb5_error_code ret;
+    krb5_os_context os_ctx = &context->os_context;
     krb5_ccache ccache = NULL;
     krb5_krcc_data *d;
     key_serial_t pkey = 0;
@@ -1108,6 +1110,18 @@ make_cache(key_serial_t collection_id, key_serial_t cache_id,
     ccache->data = d;
     ccache->magic = KV5M_CCACHE;
     *cache_out = ccache;
+
+    /* Lookup time offsets if necessary. */
+    if ((context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) &&
+        !(os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)) {
+        if (krb5_krcc_get_time_offsets(context, ccache,
+                                       &os_ctx->time_offset,
+                                       &os_ctx->usec_offset) == 0) {
+            os_ctx->os_flags &= ~KRB5_OS_TOFFSET_TIME;
+            os_ctx->os_flags |= KRB5_OS_TOFFSET_VALID;
+        }
+    }
+
     return 0;
 }
 
@@ -1134,7 +1148,6 @@ make_cache(key_serial_t collection_id, key_serial_t cache_id,
 static krb5_error_code KRB5_CALLCONV
 krb5_krcc_resolve(krb5_context context, krb5_ccache *id, const char *residual)
 {
-    krb5_os_context os_ctx = &context->os_context;
     krb5_error_code ret;
     key_serial_t collection_id, cache_id;
     char *anchor_name = NULL, *collection_name = NULL, *subsidiary_name = NULL;
@@ -1161,21 +1174,10 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache *id, const char *residual)
     if (cache_id < 0)
         cache_id = 0;
 
-    ret = make_cache(collection_id, cache_id, anchor_name, collection_name,
-                     subsidiary_name, id);
+    ret = make_cache(context, collection_id, cache_id, anchor_name,
+                     collection_name, subsidiary_name, id);
     if (ret)
         goto cleanup;
-
-    /* Lookup time offsets if necessary. */
-    if ((context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) &&
-        !(os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)) {
-        if (krb5_krcc_get_time_offsets(context, *id,
-                                       &os_ctx->time_offset,
-                                       &os_ctx->usec_offset) == 0) {
-            os_ctx->os_flags &= ~KRB5_OS_TOFFSET_TIME;
-            os_ctx->os_flags |= KRB5_OS_TOFFSET_VALID;
-        }
-    }
 
 cleanup:
     free(anchor_name);
@@ -1928,8 +1930,9 @@ krb5_krcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
         cache_id = keyctl_search(data->collection_id, KRCC_KEY_TYPE_KEYRING,
                                  first_name, 0);
         if (cache_id != -1) {
-            return make_cache(data->collection_id, cache_id, data->anchor_name,
-                              data->collection_name, first_name, cache_out);
+            return make_cache(context, data->collection_id, cache_id,
+                              data->anchor_name, data->collection_name,
+                              first_name, cache_out);
         }
     }
 
@@ -1967,7 +1970,7 @@ krb5_krcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
 
         /* We found a valid key */
         data->next_key++;
-        ret = make_cache(data->collection_id, key, data->anchor_name,
+        ret = make_cache(context, data->collection_id, key, data->anchor_name,
                          data->collection_name, subsidiary_name, cache_out);
         free(description);
         return ret;
