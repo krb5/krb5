@@ -91,6 +91,15 @@ realm.kinit(service_cs, None, ['-k', '-t', servicekeytab])
 realm.run(['./t_credstore', '-s', 'p:' + service_cs, 'ccache', storagecache,
            'keytab', servicekeytab])
 
+# Test rcache feature of cred stores.  t_credstore -r should produce a
+# replay error normally, but not with rcache set to "none:".
+output = realm.run(['./t_credstore', '-r', '-a', 'p:' + realm.host_princ],
+                   expected_code=1)
+if 'gss_accept_sec_context(2): Request is a replay' not in output:
+    fail('Expected replay error not seen in t_credstore output')
+realm.run(['./t_credstore', '-r', '-a', 'p:' + realm.host_princ,
+           'rcache', 'none:'])
+
 # Verify that we can't acquire acceptor creds without a keytab.
 os.remove(realm.keytab)
 output = realm.run(['./t_accname', 'p:abc'], expected_code=1)
