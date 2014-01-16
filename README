@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2013 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2014 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -596,6 +596,7 @@ reports, suggestions, and valuable resources:
     Sumit Bose
     Emmanuel Bouillon
     Michael Calmer
+    Andrea Campi
     Julien Chaffraix
     Ravi Channavajhala
     Srinivas Cheruku
@@ -606,6 +607,8 @@ reports, suggestions, and valuable resources:
     Kevin Coffman
     Simon Cooper
     Sylvain Cortes
+    Arran Cudbard-Bell
+    Jeff D'Angelo
     Nalin Dahyabhai
     Mark Davies
     Dennis Davis
