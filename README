@@ -108,6 +108,7 @@ krb5-1.12.1 changes by ticket ID
         (with current Linux)
 7815    Text relocations in iaesx86.s
 7817    Fix typo in sphinx manpage output
+7821    Sort file list for msgfmt
 
 Major changes in 1.12 (2013-12-10)
 ----------------------------------
