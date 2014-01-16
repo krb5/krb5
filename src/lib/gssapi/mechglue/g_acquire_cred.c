@@ -80,12 +80,6 @@ val_acq_cred_args(
 	return GSS_S_FAILURE;
     }
 
-    if (cred_store != NULL && cred_store->count == 0) {
-	*minor_status = EINVAL;
-	map_errcode(minor_status);
-	return GSS_S_FAILURE;
-    }
-
     return (GSS_S_COMPLETE);
 }
 
@@ -299,12 +293,6 @@ val_add_cred_args(
 	    *minor_status = EINVAL;
 	    map_errcode(minor_status);
 	}
-	return GSS_S_FAILURE;
-    }
-
-    if (cred_store != NULL && cred_store->count == 0) {
-	*minor_status = EINVAL;
-	map_errcode(minor_status);
 	return GSS_S_FAILURE;
     }
 
