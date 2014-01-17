@@ -468,7 +468,7 @@ clean::
 		$(OUTPRE)t_princ$(EXEEXT) $(OUTPRE)t_princ.$(OBJEXT)	\
 	$(OUTPRE)t_authdata$(EXEEXT) $(OUTPRE)t_authdata.$(OBJEXT)	\
 	$(OUTPRE)t_vfy_increds$(EXEEXT) $(OUTPRE)t_vfy_increds.$(OBJEXT) \
-	$(OUTPRE)t_copy_context(EXEEXT) $(OUTPRE)t_copy_context.$(OBJEXT)
+	$(OUTPRE)t_copy_context$(EXEEXT) $(OUTPRE)t_copy_context.$(OBJEXT)
 
 @libobj_frag@
 
