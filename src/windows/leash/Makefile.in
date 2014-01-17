@@ -105,6 +105,9 @@ $(OUTPRE)$(EXE_NAME).exe: $(OBJS) $(XOBJS) $(LIBS)
 	  ../lib/$(OUTPRE)libwin.lib atl.lib $(MFCLIB) $(SCLIB)
 	copy $@ "$(OUTPRE)MIT Kerberos.exe"
 
+kfwribbon.bml kfwribbon.h kfwribbon.rc: kfwribbon.xml
+	uicc.exe kfwribbon.xml kfwribbon.bml /res:kfwribbon.rc /header:kfwribbon.h /name:KFW_RIBBON
+
 $(RESFILE): Leash.rc res/Leash.rc2 ver.rc ../version.rc ../kerberos.ver
 
 clean::
@@ -113,3 +116,6 @@ clean::
 	if exist $(OUTPRE)*.res del $(OUTPRE)*.res
 	if exist $(OUTPRE)*.pdb del $(OUTPRE)*.pdb
 	if exist *.err del *.err
+	if exist *.bml del *.bml
+	if exist kfwribbon.h del kfwribbon.h
+	if exist kfwribbon.rc del kfwribbon.rc
