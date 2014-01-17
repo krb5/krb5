@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2013 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2014 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -178,6 +178,7 @@ reports, suggestions, and valuable resources:
     Mark Bannister
     David Bantz
     Alex Baule
+    David Benjamin
     Adam Bernstein
     Arlene Berry
     Jeff Blaine
@@ -185,6 +186,7 @@ reports, suggestions, and valuable resources:
     Sumit Bose
     Emmanuel Bouillon
     Michael Calmer
+    Andrea Campi
     Julien Chaffraix
     Ravi Channavajhala
     Srinivas Cheruku
@@ -195,17 +197,23 @@ reports, suggestions, and valuable resources:
     Kevin Coffman
     Simon Cooper
     Sylvain Cortes
+    Arran Cudbard-Bell
+    Jeff D'Angelo
     Nalin Dahyabhai
     Mark Davies
     Dennis Davis
+    Alex Dehnert
     Mark Deneen
+    Günther Deschner
     Roland Dowdeswell
+    Viktor Dukhovni
     Jason Edgecombe
     Mark Eichin
     Shawn M. Emery
     Douglas E. Engert
     Peter Eriksson
     Juha Erkkilä
+    Gilles Espinasse
     Ronni Feldt
     Bill Fellows
     JC Ferguson
@@ -218,6 +226,7 @@ reports, suggestions, and valuable resources:
     Steve Grubb
     Philip Guenther
     Dominic Hargreaves
+    Robbie Harwood
     Jakob Haufe
     Matthieu Hautreux
     Paul B. Henson
@@ -236,10 +245,12 @@ reports, suggestions, and valuable resources:
     Joel Johnson
     W. Trevor King
     Mikkel Kruse
+    Reinhard Kugler
     Volker Lendecke
     Jan iankko Lieskovsky
     Oliver Loch
     Kevin Longfellow
+    Nuno Lopes
     Ryan Lynch
     Nathaniel McCallum
     Greg McClement
@@ -269,6 +280,7 @@ reports, suggestions, and valuable resources:
     Mike Roszkowski
     Guillaume Rousse
     Tom Shaw
+    Jim Shi
     Peter Shoults
     Simo Sorce
     Michael Spang
@@ -289,6 +301,7 @@ reports, suggestions, and valuable resources:
     Simon Wilkinson
     Nicolas Williams
     Ross Wilper
+    Augustin Wolf
     Xu Qiang
     Nickolai Zeldovich
     Hanz van Zijst
