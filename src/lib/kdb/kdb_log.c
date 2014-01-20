@@ -85,6 +85,49 @@ ulog_sync_header(kdb_hlog_t *ulog)
     }
 }
 
+/* Return true if the ulog entry for sno matches sno and timestamp. */
+static krb5_boolean
+check_sno(kdb_log_context *log_ctx, kdb_sno_t sno,
+          const kdbe_time_t *timestamp)
+{
+    unsigned int indx = (sno - 1) % log_ctx->ulogentries;
+    kdb_ent_header_t *ent = INDEX(log_ctx->ulog, indx);
+
+    return ent->kdb_entry_sno == sno && time_equal(&ent->kdb_time, timestamp);
+}
+
+/*
+ * Check last against our ulog and determine whether it is up to date
+ * (UPDATE_NIL), so far out of date that a full dump is required
+ * (UPDATE_FULL_RESYNC_NEEDED), or okay to update with ulog entries
+ * (UPDATE_OK).
+ */
+static update_status_t
+get_sno_status(kdb_log_context *log_ctx, const kdb_last_t *last)
+{
+    kdb_hlog_t *ulog = log_ctx->ulog;
+
+    /* If last matches the ulog's last serial number and time exactly, it are
+     * up to date even if the ulog is empty. */
+    if (last->last_sno == ulog->kdb_last_sno &&
+        time_equal(&last->last_time, &ulog->kdb_last_time))
+        return UPDATE_NIL;
+
+    /* If our ulog is empty or does not contain last_sno, a full resync is
+     * required. */
+    if (ulog->kdb_num == 0 || last->last_sno > ulog->kdb_last_sno ||
+        last->last_sno < ulog->kdb_first_sno)
+        return UPDATE_FULL_RESYNC_NEEDED;
+
+    /* If the timestamp in our ulog entry does not match last, then sno was
+     * reused and a full resync is required. */
+    if (!check_sno(log_ctx, last->last_sno, &last->last_time))
+        return UPDATE_FULL_RESYNC_NEEDED;
+
+    /* last is not fully up to date, but can be updated using our ulog. */
+    return UPDATE_OK;
+}
+
 /* Extend update log file. */
 static int
 extend_file_to(int fd, unsigned int new_size)
@@ -553,34 +596,11 @@ ulog_get_entries(krb5_context context, const kdb_last_t *last,
     if (ulog->kdb_state != KDB_STABLE)
         reset_header(ulog);
 
-    /* If we have the same sno and timestamp, return a nil update.  If a
-     * different timestamp, the sno was reused and we need a full resync. */
-    if (last->last_sno == ulog->kdb_last_sno) {
-        ulog_handle->ret = time_equal(&last->last_time, &ulog->kdb_last_time) ?
-            UPDATE_NIL : UPDATE_FULL_RESYNC_NEEDED;
+    ulog_handle->ret = get_sno_status(log_ctx, last);
+    if (ulog_handle->ret != UPDATE_OK)
         goto cleanup;
-    }
-
-    /* We may have overflowed the update log or shrunk the log, or the client
-     * may have created its ulog. */
-    if (last->last_sno > ulog->kdb_last_sno ||
-        last->last_sno < ulog->kdb_first_sno) {
-        ulog_handle->lastentry.last_sno = ulog->kdb_last_sno;
-        ulog_handle->ret = UPDATE_FULL_RESYNC_NEEDED;
-        goto cleanup;
-    }
 
     sno = last->last_sno;
-    indx = (sno - 1) % ulogentries;
-    indx_log = INDEX(ulog, indx);
-
-    if (!time_equal(&indx_log->kdb_time, &last->last_time)) {
-        /* We have time stamp mismatch or we no longer have the slave's last
-         * sno, so we brute force it. */
-        ulog_handle->ret = UPDATE_FULL_RESYNC_NEEDED;
-        goto cleanup;
-    }
-
     count = ulog->kdb_last_sno - sno;
     upd = calloc(count, sizeof(kdb_incr_update_t));
     if (upd == NULL) {
@@ -631,4 +651,16 @@ ulog_set_role(krb5_context ctx, iprop_role role)
     }
     ctx->kdblog_context->iproprole = role;
     return 0;
+}
+
+update_status_t
+ulog_get_sno_status(krb5_context context, const kdb_last_t *last)
+{
+    update_status_t status;
+
+    if (ulog_lock(context, KRB5_LOCKMODE_SHARED) != 0)
+        return UPDATE_ERROR;
+    status = get_sno_status(context->kdblog_context, last);
+    (void)ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
+    return status;
 }
