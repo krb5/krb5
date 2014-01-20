@@ -95,5 +95,6 @@ xdr_kdb_last_t
 xdr_kdb_incr_result_t
 xdr_kdb_fullresync_result_t
 ulog_get_entries
+ulog_get_sno_status
 ulog_replay
 xdr_kdb_incr_update_t

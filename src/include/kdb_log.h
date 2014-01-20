@@ -82,6 +82,8 @@ krb5_error_code ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
 void ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates);
 krb5_error_code ulog_set_role(krb5_context ctx, iprop_role role);
 krb5_error_code ulog_lock(krb5_context ctx, int mode);
+update_status_t ulog_get_sno_status(krb5_context context,
+                                    const kdb_last_t *last);
 
 typedef struct kdb_hlog {
     uint32_t        kdb_hmagic;     /* Log header magic # */

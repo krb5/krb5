@@ -1146,8 +1146,7 @@ dump_version ipropx_1_version = {
 /* Read the dump header.  Return 1 on success, 0 if the file is not a
  * recognized iprop dump format. */
 static int
-parse_iprop_header(char *buf, dump_version **dv, uint32_t *last_sno,
-                   uint32_t *last_seconds, uint32_t *last_useconds)
+parse_iprop_header(char *buf, dump_version **dv, kdb_last_t *last)
 {
     char head[128];
     int nread;
@@ -1180,24 +1179,22 @@ parse_iprop_header(char *buf, dump_version **dv, uint32_t *last_sno,
         return 0;
     }
 
-    *last_sno = *up++;
-    *last_seconds = *up++;
-    *last_useconds = *up++;
+    last->last_sno = *up++;
+    last->last_time.seconds = *up++;
+    last->last_time.useconds = *up++;
     return 1;
 }
 
-/* Return 1 if the {sno, timestamp} in an existing dump file is in the
- * ulog, else return 0. */
-static int
-current_dump_sno_in_ulog(char *ifile, kdb_hlog_t *ulog)
+/* Return true if the serial number and timestamp in an existing dump file is
+ * in the ulog. */
+static krb5_boolean
+current_dump_sno_in_ulog(krb5_context context, const char *ifile)
 {
+    update_status_t status;
     dump_version *junk;
-    uint32_t last_sno, last_seconds, last_useconds;
+    kdb_last_t last;
     char buf[BUFSIZ];
     FILE *f;
-
-    if (ulog->kdb_last_sno == 0)
-        return 0;              /* nothing in ulog */
 
     f = fopen(ifile, "r");
     if (f == NULL)
@@ -1207,17 +1204,11 @@ current_dump_sno_in_ulog(char *ifile, kdb_hlog_t *ulog)
         return errno ? -1 : 0;
     fclose(f);
 
-    if (!parse_iprop_header(buf, &junk, &last_sno, &last_seconds,
-                            &last_useconds))
+    if (!parse_iprop_header(buf, &junk, &last))
         return 0;
 
-    if (ulog->kdb_first_sno > last_sno ||
-        ulog->kdb_first_time.seconds > last_seconds ||
-        (ulog->kdb_first_time.seconds == last_seconds &&
-        ulog->kdb_first_time.useconds > last_useconds))
-        return 0;
-
-    return 1;
+    status = ulog_get_sno_status(context, &last);
+    return status == UPDATE_OK || status == UPDATE_NIL;
 }
 
 /*
@@ -1316,7 +1307,7 @@ dump_db(int argc, char **argv)
                       "use only for iprop dumps"));
             goto error;
         }
-        if (current_dump_sno_in_ulog(ofile, log_ctx->ulog))
+        if (current_dump_sno_in_ulog(util_context, ofile))
             return;
     }
 
@@ -1483,9 +1474,9 @@ load_db(int argc, char **argv)
     dump_version *load = NULL;
     int aindex;
     kdb_log_context *log_ctx;
+    kdb_last_t last;
     krb5_boolean db_locked = FALSE, temp_db_created = FALSE;
     krb5_boolean verbose = FALSE, update = FALSE, iprop_load = FALSE;
-    uint32_t last_sno, last_seconds, last_useconds;
 
     /* Parse the arguments. */
     dbname = global_params.dbname;
@@ -1629,8 +1620,7 @@ load_db(int argc, char **argv)
         log_ctx->iproprole = IPROP_SLAVE;
         if (iprop_load) {
             /* Parse the iprop header information. */
-            if (!parse_iprop_header(buf, &load, &last_sno, &last_seconds,
-                                    &last_useconds))
+            if (!parse_iprop_header(buf, &load, &last))
                 goto error;
         }
     }
@@ -1666,9 +1656,8 @@ load_db(int argc, char **argv)
              * record the iprop state if we received it. */
             ulog_init_header(util_context);
             if (iprop_load) {
-                log_ctx->ulog->kdb_last_sno = last_sno;
-                log_ctx->ulog->kdb_last_time.seconds = last_seconds;
-                log_ctx->ulog->kdb_last_time.useconds = last_useconds;
+                log_ctx->ulog->kdb_last_sno = last.last_sno;
+                log_ctx->ulog->kdb_last_time = last.last_time;
                 ulog_sync_header(log_ctx->ulog);
             }
         }
