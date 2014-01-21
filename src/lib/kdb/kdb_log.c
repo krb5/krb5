@@ -35,6 +35,7 @@ static int pagesize = 0;
     assert(ulog != NULL)
 
 static int extend_file_to(int fd, unsigned int new_size);
+static void ulog_reset(kdb_hlog_t *ulog);
 
 static inline krb5_boolean
 time_equal(const kdbe_time_t *a, const kdbe_time_t *b)
@@ -180,19 +181,13 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
             return retval;
     }
 
-    cur_sno = ulog->kdb_last_sno;
+    /* If we have reached the last possible serial number, reinitialize the
+     * ulog and start over.  Slaves will do a full resync. */
+    if (ulog->kdb_last_sno == (kdb_sno_t)-1)
+        ulog_reset(ulog);
 
-    /*
-     * If we need to, wrap our sno around to 1.  A slaves will do a full resync
-     * since its sno will be out of range of the ulog (or in extreme cases,
-     * its timestamp won't match).
-     */
-    if (cur_sno == (kdb_sno_t)-1)
-        cur_sno = 1;
-    else
-        cur_sno++;
-
-    /* Squirrel this away for finish_update() to index. */
+    /* Get the next serial number and save it for finish_update() to index. */
+    cur_sno = ulog->kdb_last_sno + 1;
     upd->kdb_entry_sno = cur_sno;
 
     i = (cur_sno - 1) % ulogentries;
@@ -229,7 +224,7 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
         ulog->kdb_first_sno = indx_log->kdb_entry_sno;
         ulog->kdb_first_time = indx_log->kdb_time;
     } else if (cur_sno == 1) {
-        /* This is the first update, or we wrapped. */
+        /* This is the first update. */
         ulog->kdb_first_sno = 1;
         ulog->kdb_first_time = indx_log->kdb_time;
     }
