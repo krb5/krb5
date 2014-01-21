@@ -73,6 +73,43 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.11.5 (2014-01-21)
+------------------------------------
+
+* Make KDC log service principal names more consistently during some
+  error conditions, instead of "<unknown server>"
+
+* Fix some GSSAPI bugs.
+
+* Improve documentation.
+
+krb5-1.11.4 changes by ticket ID
+--------------------------------
+
+7760    Fix use-before-init in two test programs
+7762    Clarify realm and dbmodules configuration docs
+7778    Remove dangling --with-kdc-kdb-update references
+7779    Clarify lockout replication issues in docs
+7780    Correct kadm5.acl back-reference documentation
+7781    Improve default ccache name API documentation
+7782    Added a new ccache doc to "Kerberos V5 concepts"
+7783    Update doc for current kdb5_util dump version
+7798    Fix error message quotations in install_kdc.rst
+7799    Better keysalt docs
+7823    Let SPNEGO display mechanism errors
+7824    Fix S4U2Self against non-FAST KDCs
+7825    Avoid malloc(0) in SPNEGO get_input_token
+7826    Fix krb5_copy_context
+7827    Fix SPNEGO one-hop interop against old IIS
+7828    Fix memory leak in SPNEGO initiator
+7829    Fix GSS krb5 acceptor acquire_cred error handling
+7830    Clarify klist -s documentation
+7831    Log service princ in KDC more reliably
+7832    Test bogus KDC-REQs
+7833    Fix typo in sphinx manpage output
+7834    Remove mentions of krb5-send-pr
+7835    Sort file list for msgfmt
+
 Major changes in 1.11.4 (2013-11-04)
 ------------------------------------
 
