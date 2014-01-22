@@ -4,7 +4,7 @@ mydir=util
 # configure scripts, so hide this.
 ##WIN32##!if 0
 SUBDIRS=support $(MAYBE_ET_@COM_ERR_VERSION@) $(MAYBE_SS_@SS_VERSION@) \
-	profile send-pr gss-kernel-lib $(MAYBE_VERTO_@VERTO_VERSION@)
+	profile gss-kernel-lib $(MAYBE_VERTO_@VERTO_VERSION@)
 ##WIN32##!endif
 WINSUBDIRS=windows support et profile wshelper
 BUILDTOP=$(REL)..
@@ -22,4 +22,4 @@ all-recurse:
 NO_OUTDIR=1
 
 install::
-	@echo nothing to install in util
+	$(INSTALL_SCRIPT) $(srcdir)/krb5-send-pr.sh $(DESTDIR)$(ADMIN_BINDIR)/krb5-send-pr

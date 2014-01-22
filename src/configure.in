@@ -1344,7 +1344,7 @@ AC_CONFIG_FILES([build-tools/kadm-server.pc
 ])
 V5_AC_OUTPUT_MAKEFILE(.
 
-	util util/support util/profile util/profile/testmod util/send-pr
+	util util/support util/profile util/profile/testmod
 	util/verto
 
 	lib lib/kdb
