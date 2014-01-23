@@ -50,7 +50,6 @@ extern "C" {
 #define FKPROPLOG       2
 #define FKPROPD         3
 #define FKCOMMAND       4       /* Includes kadmin.local and kdb5_util */
-#define FKLOAD          5       /* kdb5_util load */
 
 /*
  * Default ulog file attributes
