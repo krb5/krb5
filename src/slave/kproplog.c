@@ -480,7 +480,11 @@ main(int argc, char **argv)
     }
 
     if (reset) {
-        ulog_init_header(context);
+        if (ulog_init_header(context) != 0) {
+            fprintf(stderr, _("Couldn't reinitialize ulog file %s\n\n"),
+                    params.iprop_logfile);
+            exit(1);
+        }
         printf(_("Reinitialized the ulog.\n"));
         exit(0);
     }

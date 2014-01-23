@@ -300,7 +300,12 @@ void kdb5_create(argc, argv)
          * We're reinitializing the update log in case one already
          * existed, but this should never happen.
          */
-        ulog_init_header(util_context);
+        retval = ulog_init_header(util_context);
+        if (retval) {
+            com_err(argv[0], retval, _("while initializing update log"));
+            exit_status++;
+            return;
+        }
 
         /*
          * Since we're creating a new db we shouldn't worry about

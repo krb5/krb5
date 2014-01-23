@@ -72,15 +72,15 @@ sync_update(kdb_hlog_t *ulog, kdb_ent_header_t *upd)
 }
 
 /* Sync memory to disk for the update log header. */
-void
-ulog_sync_header(kdb_hlog_t *ulog)
+static void
+sync_header(kdb_hlog_t *ulog)
 {
     if (!pagesize)
         pagesize = getpagesize();
 
     if (msync((caddr_t)ulog, pagesize, MS_SYNC)) {
         /* Couldn't sync to disk, let's panic. */
-        syslog(LOG_ERR, _("ulog_sync_header: could not sync to disk"));
+        syslog(LOG_ERR, _("could not sync ulog header to disk"));
         abort();
     }
 }
@@ -190,7 +190,7 @@ resize(kdb_hlog_t *ulog, uint32_t ulogentries, int ulogfd,
     ulog->db_version_num = KDB_VERSION;
     ulog->kdb_state = KDB_STABLE;
     ulog->kdb_block = new_block;
-    ulog_sync_header(ulog);
+    sync_header(ulog);
 
     /* Expand log considering new block size. */
     if (extend_file_to(ulogfd, new_size) < 0)
@@ -210,19 +210,25 @@ reset_header(kdb_hlog_t *ulog)
     time_current(&ulog->kdb_last_time);
 }
 
-krb5_error_code
-ulog_lock(krb5_context ctx, int mode)
+/*
+ * If any database operations will be invoked while the ulog lock is held, the
+ * caller must explicitly lock the database before locking the ulog, or
+ * deadlock may result.
+ */
+static krb5_error_code
+lock_ulog(krb5_context context, int mode)
 {
     kdb_log_context *log_ctx = NULL;
     kdb_hlog_t *ulog = NULL;
 
-    if (ctx == NULL)
-        return KRB5_LOG_ERROR;
-    if (ctx->kdblog_context == NULL ||
-        ctx->kdblog_context->iproprole == IPROP_NULL)
-        return 0;
-    INIT_ULOG(ctx);
-    return krb5_lock_file(ctx, log_ctx->ulogfd, mode);
+    INIT_ULOG(context);
+    return krb5_lock_file(context, log_ctx->ulogfd, mode);
+}
+
+static void
+unlock_ulog(krb5_context context)
+{
+    (void)lock_ulog(context, KRB5_LOCKMODE_UNLOCK);
 }
 
 /*
@@ -246,7 +252,7 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
     int ulogfd;
 
     INIT_ULOG(context);
-    retval = ulog_lock(context, KRB5_LOCKMODE_EXCLUSIVE);
+    retval = lock_ulog(context, KRB5_LOCKMODE_EXCLUSIVE);
     if (retval)
         return retval;
 
@@ -317,13 +323,12 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
     ulog->kdb_state = KDB_STABLE;
 
 cleanup:
-    ulog_sync_header(ulog);
-    ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
+    sync_header(ulog);
+    unlock_ulog(context);
     return retval;
 }
 
-/* Used by the slave to update its hash db from* the incr update log.  Must be
- * called with lock held. */
+/* Used by the slave to update its hash db from the incr update log. */
 krb5_error_code
 ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 {
@@ -339,6 +344,20 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 
     INIT_ULOG(context);
 
+    /* Lock the DB before the ulog to avoid deadlock. */
+    retval = krb5_db_open(context, db_args,
+                          KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN);
+    if (retval)
+        return retval;
+    retval = krb5_db_lock(context, KRB5_DB_LOCKMODE_EXCLUSIVE);
+    if (retval)
+        return retval;
+    retval = lock_ulog(context, KRB5_LOCKMODE_EXCLUSIVE);
+    if (retval) {
+        krb5_db_unlock(context);
+        return retval;
+    }
+
     no_of_updates = incr_ret->updates.kdb_ulog_t_len;
     upd = incr_ret->updates.kdb_ulog_t_val;
     fupd = upd;
@@ -349,11 +368,6 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
     errlast.last_time.seconds = (unsigned int)0;
     errlast.last_time.useconds = (unsigned int)0;
     last = &errlast;
-
-    retval = krb5_db_open(context, db_args,
-                          KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN);
-    if (retval)
-        goto cleanup;
 
     for (i = 0; i < no_of_updates; i++) {
         if (!upd->kdb_commit)
@@ -401,21 +415,28 @@ cleanup:
     /* Record a new last serial number and timestamp in the ulog header. */
     ulog->kdb_last_sno = last->last_sno;
     ulog->kdb_last_time = last->last_time;
-    ulog_sync_header(ulog);
-
+    sync_header(ulog);
+    unlock_ulog(context);
+    krb5_db_unlock(context);
     return retval;
 }
 
-/* Reinitialize the log header.  Locking is the caller's responsibility. */
-void
+/* Reinitialize the log header. */
+krb5_error_code
 ulog_init_header(krb5_context context)
 {
+    krb5_error_code ret;
     kdb_log_context *log_ctx;
     kdb_hlog_t *ulog;
 
     INIT_ULOG(context);
+    ret = lock_ulog(context, KRB5_LOCKMODE_EXCLUSIVE);
+    if (ret)
+        return ret;
     reset_header(ulog);
-    ulog_sync_header(ulog);
+    sync_header(ulog);
+    unlock_ulog(context);
+    return 0;
 }
 
 /*
@@ -519,26 +540,26 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
     log_ctx->ulogentries = ulogentries;
     log_ctx->ulogfd = ulogfd;
 
-    retval = ulog_lock(context, KRB5_LOCKMODE_EXCLUSIVE);
+    retval = lock_ulog(context, KRB5_LOCKMODE_EXCLUSIVE);
     if (retval)
         return retval;
 
     if (ulog->kdb_hmagic != KDB_ULOG_HDR_MAGIC && ulog->kdb_hmagic != 0) {
-        ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
+        unlock_ulog(context);
         return KRB5_LOG_CORRUPT;
     }
 
     if (ulog->kdb_hmagic != KDB_ULOG_HDR_MAGIC) {
         reset_header(ulog);
         if (caller != FKPROPLOG)
-            ulog_sync_header(ulog);
-        ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
+            sync_header(ulog);
+        unlock_ulog(context);
         return 0;
     }
 
     if (caller == FKPROPLOG || caller == FKPROPD) {
         /* kproplog and kpropd don't need to do anything else. */
-        ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
+        unlock_ulog(context);
         return 0;
     }
 
@@ -551,7 +572,7 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
             (ulog->kdb_last_sno > ulog->kdb_num ||
              ulog->kdb_num > ulogentries)) {
             reset_header(ulog);
-            ulog_sync_header(ulog);
+            sync_header(ulog);
         }
 
         /* Expand ulog if we have specified a greater size. */
@@ -559,12 +580,12 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
             ulog_filesize += ulogentries * ulog->kdb_block;
 
             if (extend_file_to(ulogfd, ulog_filesize) < 0) {
-                ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
+                unlock_ulog(context);
                 return errno;
             }
         }
     }
-    ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
+    unlock_ulog(context);
 
     return 0;
 }
@@ -587,7 +608,7 @@ ulog_get_entries(krb5_context context, const kdb_last_t *last,
     INIT_ULOG(context);
     ulogentries = log_ctx->ulogentries;
 
-    retval = ulog_lock(context, KRB5_LOCKMODE_SHARED);
+    retval = lock_ulog(context, KRB5_LOCKMODE_SHARED);
     if (retval)
         return retval;
 
@@ -637,7 +658,7 @@ ulog_get_entries(krb5_context context, const kdb_last_t *last,
     ulog_handle->ret = UPDATE_OK;
 
 cleanup:
-    (void)ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
+    unlock_ulog(context);
     return retval;
 }
 
@@ -658,9 +679,44 @@ ulog_get_sno_status(krb5_context context, const kdb_last_t *last)
 {
     update_status_t status;
 
-    if (ulog_lock(context, KRB5_LOCKMODE_SHARED) != 0)
+    if (lock_ulog(context, KRB5_LOCKMODE_SHARED) != 0)
         return UPDATE_ERROR;
     status = get_sno_status(context->kdblog_context, last);
-    (void)ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
+    unlock_ulog(context);
     return status;
+}
+
+krb5_error_code
+ulog_get_last(krb5_context context, kdb_last_t *last_out)
+{
+    krb5_error_code ret;
+    kdb_log_context *log_ctx;
+    kdb_hlog_t *ulog;
+
+    INIT_ULOG(context);
+    ret = lock_ulog(context, KRB5_LOCKMODE_SHARED);
+    if (ret)
+        return ret;
+    last_out->last_sno = log_ctx->ulog->kdb_last_sno;
+    last_out->last_time = log_ctx->ulog->kdb_last_time;
+    unlock_ulog(context);
+    return 0;
+}
+
+krb5_error_code
+ulog_set_last(krb5_context context, const kdb_last_t *last)
+{
+    krb5_error_code ret;
+    kdb_log_context *log_ctx;
+    kdb_hlog_t *ulog;
+
+    INIT_ULOG(context);
+    ret = lock_ulog(context, KRB5_LOCKMODE_EXCLUSIVE);
+    if (ret)
+        return ret;
+    ulog->kdb_last_sno = last->last_sno;
+    ulog->kdb_last_time = last->last_time;
+    sync_header(ulog);
+    unlock_ulog(context);
+    return 0;
 }

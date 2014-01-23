@@ -2266,7 +2266,7 @@ krb5_db_create_policy(krb5_context kcontext, osa_policy_ent_t policy)
     status = v->create_policy(kcontext, policy);
     /* iprop does not support policy mods; force full resync. */
     if (!status && logging(kcontext))
-        ulog_init_header(kcontext);
+        status = ulog_init_header(kcontext);
     return status;
 }
 
@@ -2299,7 +2299,7 @@ krb5_db_put_policy(krb5_context kcontext, osa_policy_ent_t policy)
     status = v->put_policy(kcontext, policy);
     /* iprop does not support policy mods; force full resync. */
     if (!status && logging(kcontext))
-        ulog_init_header(kcontext);
+        status = ulog_init_header(kcontext);
     return status;
 }
 
@@ -2333,7 +2333,7 @@ krb5_db_delete_policy(krb5_context kcontext, char *policy)
     status = v->delete_policy(kcontext, policy);
     /* iprop does not support policy mods; force full resync. */
     if (!status && logging(kcontext))
-        ulog_init_header(kcontext);
+        status = ulog_init_header(kcontext);
     return status;
 }
 
