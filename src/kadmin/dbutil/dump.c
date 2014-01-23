@@ -1485,7 +1485,7 @@ load_db(int argc, char **argv)
     kdb_log_context *log_ctx;
     krb5_boolean db_locked = FALSE, temp_db_created = FALSE;
     krb5_boolean verbose = FALSE, update = FALSE, iprop_load = FALSE;
-    uint32_t caller = FKCOMMAND, last_sno, last_seconds, last_useconds;
+    uint32_t last_sno, last_seconds, last_useconds;
 
     /* Parse the arguments. */
     dbname = global_params.dbname;
@@ -1505,7 +1505,6 @@ load_db(int argc, char **argv)
             if (log_ctx && log_ctx->iproprole) {
                 load = &iprop_version;
                 iprop_load = TRUE;
-                caller = FKLOAD;
             } else {
                 fprintf(stderr, _("Iprop not enabled\n"));
                 goto error;
@@ -1574,7 +1573,7 @@ load_db(int argc, char **argv)
 
     if (global_params.iprop_enabled &&
         ulog_map(util_context, global_params.iprop_logfile,
-                 global_params.iprop_ulogsize, caller, db5util_db_args)) {
+                 global_params.iprop_ulogsize, FKCOMMAND, db5util_db_args)) {
         fprintf(stderr, _("Could not open iprop ulog\n"));
         goto error;
     }
@@ -1648,6 +1647,11 @@ load_db(int argc, char **argv)
     }
 
     if (!update) {
+        /* Initialize the ulog header before promoting so we can't leave behind
+         * the pre-load ulog state if we are killed just after promoting. */
+        if (log_ctx != NULL && log_ctx->iproprole)
+            ulog_init_header(util_context);
+
         ret = krb5_db_promote(util_context, db5util_db_args);
         /* Ignore a not supported error since there is nothing to do about it
          * anyway. */

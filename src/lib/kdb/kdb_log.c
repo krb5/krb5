@@ -415,11 +415,6 @@ ulog_init_header(krb5_context context)
  *
  *    Create and initialize if need be, map as MAP_SHARED.
  *
- *  - FKLOAD
- *
- *    Create if need be, initialize (even if the ulog was already present), map
- *    as MAP_SHARED.  (Intended for kdb5_util load of iprop dump.)
- *
  *  - FKCOMMAND
  *
  *    Create and [re-]initialize if need be, size appropriately, map as
@@ -513,7 +508,7 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
         return KRB5_LOG_CORRUPT;
     }
 
-    if (ulog->kdb_hmagic != KDB_ULOG_HDR_MAGIC || caller == FKLOAD) {
+    if (ulog->kdb_hmagic != KDB_ULOG_HDR_MAGIC) {
         reset_header(ulog);
         if (caller != FKPROPLOG)
             ulog_sync_header(ulog);
