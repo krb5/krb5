@@ -21,8 +21,9 @@ extern "C" {
 /*
  * DB macros
  */
-#define INDEX(ulogaddr, i) ((unsigned long) ulogaddr + sizeof (kdb_hlog_t) + \
-                            (i*ulog->kdb_block))
+#define INDEX(ulog, i) (kdb_ent_header_t *)((char *)(ulog) +            \
+                                            sizeof(kdb_hlog_t) +        \
+                                            (i) * ulog->kdb_block)
 
 /*
  * Current DB version #
@@ -67,35 +68,23 @@ extern "C" {
 /*
  * Prototype declarations
  */
-extern krb5_error_code ulog_map(krb5_context context,
-                                const char *logname, uint32_t entries,
-                                int caller,
-                                char **db_args);
-extern void ulog_init_header(krb5_context context);
-extern krb5_error_code ulog_add_update(krb5_context context,
-                                       kdb_incr_update_t *upd);
-extern krb5_error_code ulog_delete_update(krb5_context context,
-                                          kdb_incr_update_t *upd);
-extern krb5_error_code ulog_finish_update(krb5_context context,
-                                          kdb_incr_update_t *upd);
-extern krb5_error_code ulog_get_entries(krb5_context context, kdb_last_t last,
-                                        kdb_incr_result_t *ulog_handle);
-
-extern krb5_error_code
-ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args);
-
-extern krb5_error_code
-ulog_conv_2logentry(krb5_context context, krb5_db_entry *entry,
-                    kdb_incr_update_t *update);
-
-extern krb5_error_code
-ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
-                   kdb_incr_update_t *update);
-
-extern void ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates);
-extern krb5_error_code ulog_set_role(krb5_context ctx, iprop_role role);
-
-extern krb5_error_code ulog_lock(krb5_context ctx, int mode);
+krb5_error_code ulog_map(krb5_context context, const char *logname,
+                         uint32_t entries, int caller, char **db_args);
+void ulog_init_header(krb5_context context);
+krb5_error_code ulog_add_update(krb5_context context, kdb_incr_update_t *upd);
+krb5_error_code ulog_finish_update(krb5_context context,
+                                   kdb_incr_update_t *upd);
+krb5_error_code ulog_get_entries(krb5_context context, const kdb_last_t *last,
+                                 kdb_incr_result_t *ulog_handle);
+krb5_error_code ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret,
+                            char **db_args);
+krb5_error_code ulog_conv_2logentry(krb5_context context, krb5_db_entry *entry,
+                                    kdb_incr_update_t *update);
+krb5_error_code ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
+                                   kdb_incr_update_t *update);
+void ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates);
+krb5_error_code ulog_set_role(krb5_context ctx, iprop_role role);
+krb5_error_code ulog_lock(krb5_context ctx, int mode);
 
 typedef struct kdb_hlog {
     uint32_t        kdb_hmagic;     /* Log header magic # */
@@ -109,7 +98,7 @@ typedef struct kdb_hlog {
     uint16_t        kdb_block;      /* Block size of each element */
 } kdb_hlog_t;
 
-extern void ulog_sync_header(kdb_hlog_t *);
+void ulog_sync_header(kdb_hlog_t *);
 
 typedef struct kdb_ent_header {
     uint32_t        kdb_umagic;     /* Update entry magic # */

@@ -51,34 +51,38 @@
 
 static char *kprop_version = KPROP_PROT_VERSION;
 
-char    *progname = 0;
-int     debug = 0;
-char    *srvtab = 0;
-char    *slave_host;
-char    *realm = 0;
-char    *file = KPROP_DEFAULT_FILE;
+static char *progname = NULL;
+static int debug = 0;
+static char *srvtab = NULL;
+static char *slave_host;
+static char *realm = NULL;
+static char *file = KPROP_DEFAULT_FILE;
 
-krb5_principal  my_principal;           /* The Kerberos principal we'll be */
-/* running under, initialized in */
-/* get_tickets() */
-krb5_ccache     ccache;         /* Credentials cache which we'll be using */
-krb5_creds      creds;
-krb5_address    *sender_addr;
-krb5_address    *receiver_addr;
-const char      *port = KPROP_SERVICE;
+/* The Kerberos principal we'll be sending as, initialized in get_tickets. */
+static krb5_principal my_principal;
 
-void    PRS(int, char **);
-void    get_tickets(krb5_context);
+static krb5_ccache ccache;      /* Credentials cache which we'll be using */
+static krb5_creds creds;
+static krb5_address *sender_addr;
+static krb5_address *receiver_addr;
+static const char *port = KPROP_SERVICE;
+static char *dbpathname;
+
+static void parse_args(int argc, char **argv);
+static void get_tickets(krb5_context context);
 static void usage(void);
-static void open_connection(krb5_context, char *, int *);
-void    kerberos_authenticate(krb5_context, krb5_auth_context *,
-                              int, krb5_principal, krb5_creds **);
-int     open_database(krb5_context, char *, int *);
-void    close_database(krb5_context, int);
-void    xmit_database(krb5_context, krb5_auth_context, krb5_creds *,
-                      int, int, int);
-void    send_error(krb5_context, krb5_creds *, int, char *, krb5_error_code);
-void    update_last_prop_file(char *, char *);
+static void open_connection(krb5_context context, char *host, int *fd_out);
+static void kerberos_authenticate(krb5_context context,
+                                  krb5_auth_context *auth_context, int fd,
+                                  krb5_principal me, krb5_creds **new_creds);
+static int open_database(krb5_context context, char *data_fn, int *size);
+static void close_database(krb5_context context, int fd);
+static void xmit_database(krb5_context context,
+                          krb5_auth_context auth_context, krb5_creds *my_creds,
+                          int fd, int database_fd, int in_database_size);
+static void send_error(krb5_context context, krb5_creds *my_creds, int fd,
+                       char *err_text, krb5_error_code err_code);
+static void update_last_prop_file(char *hostname, char *file_name);
 
 static void usage()
 {
@@ -88,11 +92,9 @@ static void usage()
 }
 
 int
-main(argc, argv)
-    int     argc;
-    char    **argv;
+main(int argc, char **argv)
 {
-    int     fd, database_fd, database_size;
+    int fd, database_fd, database_size;
     krb5_error_code retval;
     krb5_context context;
     krb5_creds *my_creds;
@@ -104,13 +106,12 @@ main(argc, argv)
         com_err(argv[0], retval, _("while initializing krb5"));
         exit(1);
     }
-    PRS(argc, argv);
+    parse_args(argc, argv);
     get_tickets(context);
 
     database_fd = open_database(context, file, &database_size);
     open_connection(context, slave_host, &fd);
-    kerberos_authenticate(context, &auth_context, fd, my_principal,
-                          &my_creds);
+    kerberos_authenticate(context, &auth_context, fd, my_principal, &my_creds);
     xmit_database(context, auth_context, my_creds, fd, database_fd,
                   database_size);
     update_last_prop_file(slave_host, file);
@@ -120,72 +121,62 @@ main(argc, argv)
     exit(0);
 }
 
-void PRS(argc, argv)
-    int     argc;
-    char    **argv;
+static void
+parse_args(int argc, char **argv)
 {
-    register char   *word, ch;
+    char *word, ch;
 
     progname = *argv++;
-    while (--argc && (word = *argv++)) {
-        if (*word == '-') {
-            word++;
-            while (word && (ch = *word++)) {
-                switch(ch){
-                case 'r':
-                    if (*word)
-                        realm = word;
-                    else
-                        realm = *argv++;
-                    if (!realm)
-                        usage();
-                    word = 0;
-                    break;
-                case 'f':
-                    if (*word)
-                        file = word;
-                    else
-                        file = *argv++;
-                    if (!file)
-                        usage();
-                    word = 0;
-                    break;
-                case 'd':
-                    debug++;
-                    break;
-                case 'P':
-                    port = (*word != '\0') ? word : *argv++;
-                    if (port == NULL)
-                        usage();
-                    word = 0;
-                    break;
-                case 's':
-                    if (*word)
-                        srvtab = word;
-                    else
-                        srvtab = *argv++;
-                    if (!srvtab)
-                        usage();
-                    word = 0;
-                    break;
-                default:
-                    usage();
-                }
-
-            }
-        } else {
-            if (slave_host)
+    while (--argc && (word = *argv++) != NULL) {
+        if (*word != '-') {
+            if (slave_host != NULL)
                 usage();
             else
                 slave_host = word;
+            continue;
+        }
+        word++;
+        while (word != NULL && (ch = *word++) != '\0') {
+            switch (ch) {
+            case 'r':
+                realm = (*word != '\0') ? word : *argv++;
+                if (realm == NULL)
+                    usage();
+                word = NULL;
+                break;
+            case 'f':
+                file = (*word != '\0') ? word : *argv++;
+                if (file == NULL)
+                    usage();
+                word = NULL;
+                break;
+            case 'd':
+                debug++;
+                break;
+            case 'P':
+                port = (*word != '\0') ? word : *argv++;
+                if (port == NULL)
+                    usage();
+                word = NULL;
+                break;
+            case 's':
+                srvtab = (*word != '\0') ? word : *argv++;
+                if (srvtab == NULL)
+                    usage();
+                word = NULL;
+                break;
+            default:
+                usage();
+            }
+
         }
     }
-    if (!slave_host)
+    if (slave_host == NULL)
         usage();
 }
 
-void get_tickets(context)
-    krb5_context context;
+static void
+get_tickets(krb5_context context)
 {
     char const ccname[] = "MEMORY:kpropcc";
     char *def_realm, *server;
@@ -193,16 +184,14 @@ void get_tickets(context)
     krb5_keytab keytab = NULL;
     krb5_principal server_princ = NULL;
 
-    /*
-     * Figure out what tickets we'll be using to send stuff
-     */
-    retval = krb5_sname_to_principal(context, NULL, NULL,
-                                     KRB5_NT_SRV_HST, &my_principal);
+    /* Figure out what tickets we'll be using to send. */
+    retval = krb5_sname_to_principal(context, NULL, NULL, KRB5_NT_SRV_HST,
+                                     &my_principal);
     if (retval) {
         com_err(progname, errno, _("while setting client principal name"));
         exit(1);
     }
-    if (realm) {
+    if (realm != NULL) {
         retval = krb5_set_principal_realm(context, my_principal, realm);
         if (retval) {
             com_err(progname, errno,
@@ -226,13 +215,7 @@ void get_tickets(context)
         }
     }
 
-#if 0
-    krb5_princ_type(context, my_principal) = KRB5_NT_PRINCIPAL;
-#endif
-
-    /*
-     * Use a memory cache to avoid possible filesystem conflicts.
-     */
+    /* Use a memory cache to avoid possible filesystem conflicts. */
     retval = krb5_cc_resolve(context, ccname, &ccache);
     if (retval) {
         com_err(progname, retval, _("while opening credential cache %s"),
@@ -246,18 +229,13 @@ void get_tickets(context)
         exit(1);
     }
 
-    /*
-     * Get the tickets we'll need.
-     *
-     * Construct the principal name for the slave host.
-     */
+    /* Construct the principal name for the slave host. */
     memset(&creds, 0, sizeof(creds));
-    retval = krb5_sname_to_principal(context,
-                                     slave_host, KPROP_SERVICE_NAME,
+    retval = krb5_sname_to_principal(context, slave_host, KPROP_SERVICE_NAME,
                                      KRB5_NT_SRV_HST, &server_princ);
     if (retval) {
         com_err(progname, errno, _("while setting server principal name"));
-        (void) krb5_cc_destroy(context, ccache);
+        krb5_cc_destroy(context, ccache);
         exit(1);
     }
     retval = krb5_unparse_name_flags(context, server_princ,
@@ -267,35 +245,33 @@ void get_tickets(context)
         exit(1);
     }
 
-    /*
-     * Now fill in the client....
-     */
+    /* Fill in the client. */
     retval = krb5_copy_principal(context, my_principal, &creds.client);
     if (retval) {
         com_err(progname, retval, _("while copying client principal"));
-        (void) krb5_cc_destroy(context, ccache);
+        krb5_cc_destroy(context, ccache);
         exit(1);
     }
-    if (srvtab) {
+
+    if (srvtab != NULL) {
         retval = krb5_kt_resolve(context, srvtab, &keytab);
         if (retval) {
             com_err(progname, retval, _("while resolving keytab"));
-            (void) krb5_cc_destroy(context, ccache);
+            krb5_cc_destroy(context, ccache);
             exit(1);
         }
     }
 
-    retval = krb5_get_init_creds_keytab(context, &creds, my_principal,
-                                        keytab, 0, server, NULL);
+    retval = krb5_get_init_creds_keytab(context, &creds, my_principal, keytab,
+                                        0, server, NULL);
     if (retval) {
         com_err(progname, retval, _("while getting initial credentials\n"));
-        (void) krb5_cc_destroy(context, ccache);
+        krb5_cc_destroy(context, ccache);
         exit(1);
     }
 
-    if (keytab)
-        (void) krb5_kt_close(context, keytab);
-
+    if (keytab != NULL)
+        krb5_kt_close(context, keytab);
     krb5_free_unparsed_name(context, server);
     krb5_free_principal(context, server_princ);
 }
@@ -303,13 +279,12 @@ void get_tickets(context)
 static void
 open_connection(krb5_context context, char *host, int *fd_out)
 {
-    int     s;
     krb5_error_code retval;
     GETSOCKNAME_ARG3_TYPE socket_length;
     struct addrinfo hints, *res, *answers;
     struct sockaddr *sa;
     struct sockaddr_storage my_sin;
-    int error;
+    int s, error;
 
     *fd_out = -1;
     memset(&hints, 0, sizeof(hints));
@@ -363,24 +338,20 @@ open_connection(krb5_context context, char *host, int *fd_out)
         com_err(progname, errno, _("while getting local socket address"));
         exit(1);
     }
-    sa = (struct sockaddr *) &my_sin;
+    sa = (struct sockaddr *)&my_sin;
     if (sockaddr2krbaddr(context, sa->sa_family, sa, &sender_addr) != 0) {
         com_err(progname, errno, _("while converting local address"));
         exit(1);
     }
 }
 
-
-void kerberos_authenticate(context, auth_context, fd, me, new_creds)
-    krb5_context context;
-    krb5_auth_context *auth_context;
-    int fd;
-    krb5_principal me;
-    krb5_creds ** new_creds;
+static void
+kerberos_authenticate(krb5_context context, krb5_auth_context *auth_context,
+                      int fd, krb5_principal me, krb5_creds **new_creds)
 {
     krb5_error_code retval;
-    krb5_error      *error = NULL;
-    krb5_ap_rep_enc_part    *rep_result;
+    krb5_error *error = NULL;
+    krb5_ap_rep_enc_part *rep_result;
 
     retval = krb5_auth_con_init(context, auth_context);
     if (retval)
@@ -396,13 +367,12 @@ void kerberos_authenticate(context, auth_context, fd, me, new_creds)
         exit(1);
     }
 
-    retval = krb5_sendauth(context, auth_context, (void *)&fd,
-                           kprop_version, me, creds.server,
-                           AP_OPTS_MUTUAL_REQUIRED, NULL, &creds, NULL,
-                           &error, &rep_result, new_creds);
+    retval = krb5_sendauth(context, auth_context, &fd, kprop_version,
+                           me, creds.server, AP_OPTS_MUTUAL_REQUIRED, NULL,
+                           &creds, NULL, &error, &rep_result, new_creds);
     if (retval) {
         com_err(progname, retval, _("while authenticating to server"));
-        if (error) {
+        if (error != NULL) {
             if (error->error == KRB_ERR_GENERIC) {
                 if (error->text.data) {
                     fprintf(stderr, _("Generic remote error: %s\n"),
@@ -410,7 +380,7 @@ void kerberos_authenticate(context, auth_context, fd, me, new_creds)
                 }
             } else if (error->error) {
                 com_err(progname,
-                        (krb5_error_code) error->error + ERROR_TABLE_BASE_krb5,
+                        (krb5_error_code)error->error + ERROR_TABLE_BASE_krb5,
                         _("signalled from server"));
                 if (error->text.data) {
                     fprintf(stderr, _("Error text from server: %s\n"),
@@ -424,7 +394,6 @@ void kerberos_authenticate(context, auth_context, fd, me, new_creds)
     krb5_free_ap_rep_enc_part(context, rep_result);
 }
 
-char * dbpathname;
 /*
  * Open the Kerberos database dump file.  Takes care of locking it
  * and making sure that the .ok file is more recent that the database
@@ -433,32 +402,27 @@ char * dbpathname;
  * Returns the file descriptor of the database dump file.  Also fills
  * in the size of the database file.
  */
-int
-open_database(context, data_fn, size)
-    krb5_context context;
-    char *data_fn;
-    int *size;
+static int
+open_database(krb5_context context, char *data_fn, int *size)
 {
-    int             fd;
-    int             err;
-    struct stat     stbuf, stbuf_ok;
-    char            *data_ok_fn;
-    static char ok[] = ".dump_ok";
+    struct stat stbuf, stbuf_ok;
+    char *data_ok_fn;
+    int fd, err;
 
     dbpathname = strdup(data_fn);
-    if (!dbpathname) {
+    if (dbpathname == NULL) {
         com_err(progname, ENOMEM, _("allocating database file name '%s'"),
                 data_fn);
         exit(1);
     }
-    if ((fd = open(dbpathname, O_RDONLY)) < 0) {
-        com_err(progname, errno, _("while trying to open %s"),
-                dbpathname);
+    fd = open(dbpathname, O_RDONLY);
+    if (fd < 0) {
+        com_err(progname, errno, _("while trying to open %s"), dbpathname);
         exit(1);
     }
 
     err = krb5_lock_file(context, fd,
-                         KRB5_LOCKMODE_SHARED|KRB5_LOCKMODE_DONTBLOCK);
+                         KRB5_LOCKMODE_SHARED | KRB5_LOCKMODE_DONTBLOCK);
     if (err == EAGAIN || err == EWOULDBLOCK || errno == EACCES) {
         com_err(progname, 0, _("database locked"));
         exit(1);
@@ -470,7 +434,7 @@ open_database(context, data_fn, size)
         com_err(progname, errno, _("while trying to stat %s"), data_fn);
         exit(1);
     }
-    if (asprintf(&data_ok_fn, "%s%s", data_fn, ok) < 0) {
+    if (asprintf(&data_ok_fn, "%s.dump_ok", data_fn) < 0) {
         com_err(progname, ENOMEM, _("while trying to malloc data_ok_fn"));
         exit(1);
     }
@@ -480,27 +444,25 @@ open_database(context, data_fn, size)
         exit(1);
     }
     if (stbuf.st_mtime > stbuf_ok.st_mtime) {
-        com_err(progname, 0, _("'%s' more recent than '%s'."),
-                data_fn, data_ok_fn);
+        com_err(progname, 0, _("'%s' more recent than '%s'."), data_fn,
+                data_ok_fn);
         exit(1);
     }
     free(data_ok_fn);
     *size = stbuf.st_size;
-    return(fd);
+    return fd;
 }
 
-void
-close_database(context, fd)
-    krb5_context context;
-    int fd;
+static void
+close_database(krb5_context context, int fd)
 {
     int err;
+
     err = krb5_lock_file(context, fd, KRB5_LOCKMODE_UNLOCK);
     if (err)
         com_err(progname, err, _("while unlocking database '%s'"), dbpathname);
     free(dbpathname);
-    (void)close(fd);
-    return;
+    close(fd);
 }
 
 /*
@@ -512,34 +474,24 @@ close_database(context, fd)
  * At any point in the protocol, we may send a KRB_ERROR message; this
  * will abort the entire operation.
  */
-void
-xmit_database(context, auth_context, my_creds, fd, database_fd,
-              in_database_size)
-    krb5_context context;
-    krb5_auth_context auth_context;
-    krb5_creds *my_creds;
-    int fd;
-    int database_fd;
-    int in_database_size;
+static void
+xmit_database(krb5_context context, krb5_auth_context auth_context,
+              krb5_creds *my_creds, int fd, int database_fd,
+              int in_database_size)
 {
-    krb5_int32      n;
-    krb5_data       inbuf, outbuf;
-    char            buf[KPROP_BUFSIZ];
+    krb5_int32 n;
+    krb5_data inbuf, outbuf;
+    char buf[KPROP_BUFSIZ];
     krb5_error_code retval;
-    krb5_error      *error;
-    /* These must be 4 bytes */
-    krb5_ui_4       database_size = in_database_size;
-    krb5_ui_4       send_size, sent_size;
+    krb5_error *error;
+    krb5_ui_4 database_size = in_database_size, send_size, sent_size;
 
-    /*
-     * Send over the size
-     */
+    /* Send over the size. */
     send_size = htonl(database_size);
-    inbuf.data = (char *) &send_size;
+    inbuf.data = (char *)&send_size;
     inbuf.length = sizeof(send_size); /* must be 4, really */
     /* KPROP_CKSUMTYPE */
-    retval = krb5_mk_safe(context, auth_context, &inbuf,
-                          &outbuf, NULL);
+    retval = krb5_mk_safe(context, auth_context, &inbuf, &outbuf, NULL);
     if (retval) {
         com_err(progname, retval, _("while encoding database size"));
         send_error(context, my_creds, fd, _("while encoding database size"),
@@ -547,16 +499,15 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
         exit(1);
     }
 
-    retval = krb5_write_message(context, (void *) &fd, &outbuf);
+    retval = krb5_write_message(context, &fd, &outbuf);
     if (retval) {
         krb5_free_data_contents(context, &outbuf);
         com_err(progname, retval, _("while sending database size"));
         exit(1);
     }
     krb5_free_data_contents(context, &outbuf);
-    /*
-     * Initialize the initial vector.
-     */
+
+    /* Initialize the initial vector. */
     retval = krb5_auth_con_initivector(context, auth_context);
     if (retval) {
         send_error(context, my_creds, fd,
@@ -565,15 +516,12 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
         exit(1);
     }
 
-    /*
-     * Send over the file, block by block....
-     */
+    /* Send over the file, block by block. */
     inbuf.data = buf;
     sent_size = 0;
     while ((n = read(database_fd, buf, sizeof(buf)))) {
         inbuf.length = n;
-        retval = krb5_mk_priv(context, auth_context, &inbuf,
-                              &outbuf, NULL);
+        retval = krb5_mk_priv(context, auth_context, &inbuf, &outbuf, NULL);
         if (retval) {
             snprintf(buf, sizeof(buf),
                      "while encoding database block starting at %d",
@@ -583,7 +531,7 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
             exit(1);
         }
 
-        retval = krb5_write_message(context, (void *)&fd,&outbuf);
+        retval = krb5_write_message(context, &fd, &outbuf);
         if (retval) {
             krb5_free_data_contents(context, &outbuf);
             com_err(progname, retval,
@@ -598,7 +546,8 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
     }
     if (sent_size != database_size) {
         com_err(progname, 0, _("Premature EOF found for database file!"));
-        send_error(context, my_creds, fd,"Premature EOF found for database file!",
+        send_error(context, my_creds, fd,
+                   "Premature EOF found for database file!",
                    KRB5KRB_ERR_GENERIC);
         exit(1);
     }
@@ -607,7 +556,7 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
      * OK, we've sent the database; now let's wait for a success
      * indication from the remote end.
      */
-    retval = krb5_read_message(context, (void *) &fd, &inbuf);
+    retval = krb5_read_message(context, &fd, &inbuf);
     if (retval) {
         com_err(progname, retval, _("while reading response from server"));
         exit(1);
@@ -630,8 +579,7 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
             }
         } else if (error->error) {
             com_err(progname,
-                    (krb5_error_code) error->error +
-                    ERROR_TABLE_BASE_krb5,
+                    (krb5_error_code)error->error + ERROR_TABLE_BASE_krb5,
                     _("signalled from server"));
             if (error->text.data) {
                 fprintf(stderr, _("Error text from server: %s\n"),
@@ -652,26 +600,20 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
     memcpy(&send_size, outbuf.data, sizeof(send_size));
     send_size = ntohl(send_size);
     if (send_size != database_size) {
-        com_err(progname, 0,
-                _("Kpropd sent database size %d, expecting %d"),
+        com_err(progname, 0, _("Kpropd sent database size %d, expecting %d"),
                 send_size, database_size);
         exit(1);
     }
     free(outbuf.data);
-    /* inbuf.data points to local storage */
 }
 
-void
-send_error(context, my_creds, fd, err_text, err_code)
-    krb5_context context;
-    krb5_creds *my_creds;
-    int fd;
-    char        *err_text;
-    krb5_error_code     err_code;
+static void
+send_error(krb5_context context, krb5_creds *my_creds, int fd, char *err_text,
+           krb5_error_code err_code)
 {
-    krb5_error      error;
-    const char      *text;
-    krb5_data       outbuf;
+    krb5_error error;
+    const char *text;
+    krb5_data outbuf;
 
     memset(&error, 0, sizeof(error));
     krb5_us_timeofday(context, &error.ctime, &error.cusec);
@@ -680,29 +622,24 @@ send_error(context, my_creds, fd, err_text, err_code)
     error.error = err_code - ERROR_TABLE_BASE_krb5;
     if (error.error > 127)
         error.error = KRB_ERR_GENERIC;
-    if (err_text)
-        text = err_text;
-    else
-        text = error_message(err_code);
+    text = (err_text != NULL) ? err_text : error_message(err_code);
     error.text.length = strlen(text) + 1;
     error.text.data = strdup(text);
     if (error.text.data) {
         if (!krb5_mk_error(context, &error, &outbuf)) {
-            (void) krb5_write_message(context, (void *)&fd,&outbuf);
+            (void)krb5_write_message(context, &fd, &outbuf);
             krb5_free_data_contents(context, &outbuf);
         }
         free(error.text.data);
     }
 }
 
-void update_last_prop_file(hostname, file_name)
-    char *hostname;
-    char *file_name;
+static void
+update_last_prop_file(char *hostname, char *file_name)
 {
-    /* handle slave locking/failure stuff */
     char *file_last_prop;
     int fd;
-    static char last_prop[]=".last_prop";
+    static char last_prop[] = ".last_prop";
 
     if (asprintf(&file_last_prop, "%s.%s%s", file_name, hostname,
                  last_prop) < 0) {
@@ -710,7 +647,8 @@ void update_last_prop_file(hostname, file_name)
                 _("while allocating filename for update_last_prop_file"));
         return;
     }
-    if ((fd = THREEPARAMOPEN(file_last_prop, O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
+    fd = THREEPARAMOPEN(file_last_prop, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (fd < 0) {
         com_err(progname, errno, _("while creating 'last_prop' file, '%s'"),
                 file_last_prop);
         free(file_last_prop);
@@ -719,5 +657,4 @@ void update_last_prop_file(hostname, file_name)
     write(fd, "", 1);
     free(file_last_prop);
     close(fd);
-    return;
 }

@@ -190,7 +190,7 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 	goto out;
     }
 
-    kret = ulog_get_entries(handle->context, *arg, &ret);
+    kret = ulog_get_entries(handle->context, arg, &ret);
 
     if (ret.ret == UPDATE_OK) {
 	(void) snprintf(obuf, sizeof (obuf),

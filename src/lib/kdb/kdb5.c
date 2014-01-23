@@ -978,8 +978,9 @@ krb5_db_delete_principal(krb5_context kcontext, krb5_principal search_for)
 
         upd.kdb_princ_name.utf8str_t_val = princ_name;
         upd.kdb_princ_name.utf8str_t_len = strlen(princ_name);
+        upd.kdb_deleted = TRUE;
 
-        status = ulog_delete_update(kcontext, &upd);
+        status = ulog_add_update(kcontext, &upd);
         if (status)
             goto cleanup;
     }
