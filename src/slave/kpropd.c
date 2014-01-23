@@ -147,7 +147,7 @@ static int db_args_size = 0;
 static void parse_args(char **argv);
 static void do_standalone(void);
 static void doit(int fd);
-static krb5_error_code do_iprop(kdb_log_context *log_ctx);
+static krb5_error_code do_iprop(void);
 static void kerberos_authenticate(krb5_context context, int fd,
                                   krb5_principal *clientp, krb5_enctype *etype,
                                   struct sockaddr_storage *my_sin);
@@ -321,7 +321,7 @@ main(int argc, char **argv)
         /* NOTREACHED */
         break;
     default:
-        retval = do_iprop(log_ctx);
+        retval = do_iprop();
         /* do_iprop() can return due to failures and runonce. */
         kill(fullprop_child, SIGHUP);
         wait(NULL);
@@ -606,7 +606,7 @@ full_resync(CLIENT *clnt)
  * Returns non-zero on failure due to errors.
  */
 krb5_error_code
-do_iprop(kdb_log_context *log_ctx)
+do_iprop()
 {
     kadm5_ret_t retval;
     krb5_principal iprop_svc_principal;
@@ -621,12 +621,9 @@ do_iprop(kdb_log_context *log_ctx)
     kdb_last_t mylast;
     kdb_fullresync_result_t *full_ret;
     kadm5_iprop_handle_t handle;
-    kdb_hlog_t *ulog;
 
     if (debug)
         fprintf(stderr, _("Incremental propagation enabled\n"));
-
-    ulog = log_ctx->ulog;
 
     pollin = params.iprop_poll_time;
     if (pollin == 0)
@@ -771,8 +768,11 @@ reinit:
          * Get the most recent ulog entry sno + ts, which
          * we package in the request to the master KDC
          */
-        mylast.last_sno = ulog->kdb_last_sno;
-        mylast.last_time = ulog->kdb_last_time;
+        retval = ulog_get_last(kpropd_context, &mylast);
+        if (retval) {
+            com_err(progname, retval, _("reading update log header"));
+            goto done;
+        }
 
         /*
          * Loop continuously on an iprop_get_updates_1(),

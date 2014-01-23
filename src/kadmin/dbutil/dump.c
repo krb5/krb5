@@ -1231,6 +1231,7 @@ dump_db(int argc, char **argv)
     unsigned int ipropx_version = IPROPX_VERSION_0;
     krb5_kvno kt_kvno;
     krb5_boolean conditional = FALSE;
+    kdb_last_t last;
 
     /* Parse the arguments. */
     dump = &r1_11_version;
@@ -1404,11 +1405,16 @@ dump_db(int argc, char **argv)
     }
 
     if (dump_sno) {
+        ret = ulog_get_last(util_context, &last);
+        if (ret) {
+            com_err(progname, ret, _("while reading update log header"));
+            goto error;
+        }
         if (ipropx_version)
             fprintf(f, " %u", IPROPX_VERSION);
-        fprintf(f, " %u", log_ctx->ulog->kdb_last_sno);
-        fprintf(f, " %u", log_ctx->ulog->kdb_last_time.seconds);
-        fprintf(f, " %u", log_ctx->ulog->kdb_last_time.useconds);
+        fprintf(f, " %u", last.last_sno);
+        fprintf(f, " %u", last.last_time.seconds);
+        fprintf(f, " %u", last.last_time.useconds);
     }
 
     if (dump->header[strlen(dump->header)-1] != '\n')
@@ -1639,8 +1645,13 @@ load_db(int argc, char **argv)
     if (!update) {
         /* Initialize the ulog header before promoting so we can't leave behind
          * the pre-load ulog state if we are killed just after promoting. */
-        if (log_ctx != NULL && log_ctx->iproprole)
-            ulog_init_header(util_context);
+        if (log_ctx != NULL && log_ctx->iproprole) {
+            ret = ulog_init_header(util_context);
+            if (ret) {
+                com_err(progname, ret, _("while reinitializing update log"));
+                goto error;
+            }
+        }
 
         ret = krb5_db_promote(util_context, db5util_db_args);
         /* Ignore a not supported error since there is nothing to do about it
@@ -1654,11 +1665,18 @@ load_db(int argc, char **argv)
         if (log_ctx != NULL && log_ctx->iproprole) {
             /* Reinitialize the ulog header since we replaced the DB, and
              * record the iprop state if we received it. */
-            ulog_init_header(util_context);
+            ret = ulog_init_header(util_context);
+            if (ret) {
+                com_err(progname, ret, _("while reinitializing update log"));
+                goto error;
+            }
             if (iprop_load) {
-                log_ctx->ulog->kdb_last_sno = last.last_sno;
-                log_ctx->ulog->kdb_last_time = last.last_time;
-                ulog_sync_header(log_ctx->ulog);
+                ret = ulog_set_last(util_context, &last);
+                if (ret) {
+                    com_err(progname, ret,
+                            _("while writing update log header"));
+                    goto error;
+                }
             }
         }
     }
