@@ -1570,7 +1570,7 @@ load_db(int argc, char **argv)
 
     if (global_params.iprop_enabled &&
         ulog_map(util_context, global_params.iprop_logfile,
-                 global_params.iprop_ulogsize, FKCOMMAND, db5util_db_args)) {
+                 global_params.iprop_ulogsize)) {
         fprintf(stderr, _("Could not open iprop ulog\n"));
         goto error;
     }

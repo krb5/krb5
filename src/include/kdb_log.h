@@ -44,14 +44,6 @@ extern "C" {
 #define KDB_ULOG_HDR_MAGIC      0x6662323
 
 /*
- * DB Flags
- */
-#define FKADMIND        1
-#define FKPROPLOG       2
-#define FKPROPD         3
-#define FKCOMMAND       4       /* Includes kadmin.local and kdb5_util */
-
-/*
  * Default ulog file attributes
  */
 #define DEF_ULOGENTRIES 1000
@@ -68,7 +60,7 @@ extern "C" {
  * Prototype declarations
  */
 krb5_error_code ulog_map(krb5_context context, const char *logname,
-                         uint32_t entries, int caller, char **db_args);
+                         uint32_t entries);
 krb5_error_code ulog_init_header(krb5_context context);
 krb5_error_code ulog_add_update(krb5_context context, kdb_incr_update_t *upd);
 krb5_error_code ulog_get_entries(krb5_context context, const kdb_last_t *last,

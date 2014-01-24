@@ -65,7 +65,7 @@ main(int argc, char **argv)
     filename = argv[1];
     unlink(filename);
 
-    if (ulog_map(context, filename, 10, FKCOMMAND, NULL) != 0)
+    if (ulog_map(context, filename, 10) != 0)
         abort();
     lctx = context->kdblog_context;
     ulog = lctx->ulog;

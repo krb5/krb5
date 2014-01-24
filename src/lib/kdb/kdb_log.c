@@ -445,60 +445,24 @@ ulog_init_header(krb5_context context)
  * Called by: if iprop_enabled then ulog_map();
  * Assumes that the caller will terminate on ulog_map, hence munmap and
  * closing of the fd are implicitly performed by the caller.
- *
- * Semantics for various values of caller:
- *
- *  - FKPROPLOG
- *
- *    Don't create if it doesn't exist, map as MAP_PRIVATE.
- *
- *  - FKPROPD
- *
- *    Create and initialize if need be, map as MAP_SHARED.
- *
- *  - FKCOMMAND
- *
- *    Create and [re-]initialize if need be, size appropriately, map as
- *    MAP_SHARED.  (Intended for kdb5_util create and kdb5_util load of
- *    non-iprop dump.)
- *
- *  - FKADMIN
- *
- *    Create and [re-]initialize if need be, size appropriately, map as
- *    MAP_SHARED, and check consistency and recover as necessary.  (Intended
- *    for kadmind and kadmin.local.)
- *
- * Returns 0 on success else failure.
  */
 krb5_error_code
-ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
-         int caller, char **db_args)
+ulog_map(krb5_context context, const char *logname, uint32_t ulogentries)
 {
     struct stat st;
     krb5_error_code retval;
-    uint32_t ulog_filesize;
+    uint32_t filesize;
     kdb_log_context *log_ctx;
     kdb_hlog_t *ulog = NULL;
     int ulogfd = -1;
 
-    ulog_filesize = sizeof(kdb_hlog_t);
-
     if (stat(logname, &st) == -1) {
-        /* File doesn't exist so we exit with kproplog. */
-        if (caller == FKPROPLOG)
-            return errno;
-
         ulogfd = open(logname, O_RDWR | O_CREAT, 0600);
         if (ulogfd == -1)
             return errno;
 
-        if (lseek(ulogfd, 0L, SEEK_CUR) == -1)
-            return errno;
-
-        if (caller == FKADMIND || caller == FKCOMMAND)
-            ulog_filesize += ulogentries * ULOG_BLOCK;
-
-        if (extend_file_to(ulogfd, ulog_filesize) < 0)
+        filesize = sizeof(kdb_hlog_t) + ulogentries * ULOG_BLOCK;
+        if (extend_file_to(ulogfd, filesize) < 0)
             return errno;
     } else {
         ulogfd = open(logname, O_RDWR, 0600);
@@ -506,21 +470,7 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
             return errno;
     }
 
-    if (caller == FKPROPLOG) {
-        if (fstat(ulogfd, &st) < 0) {
-            close(ulogfd);
-            return errno;
-        }
-        ulog_filesize = st.st_size;
-
-        ulog = mmap(0, ulog_filesize, PROT_READ | PROT_WRITE, MAP_PRIVATE,
-                    ulogfd, 0);
-    } else {
-        /* kadmind, kpropd, & kcommands should udpate stores. */
-        ulog = mmap(0, MAXLOGLEN, PROT_READ | PROT_WRITE, MAP_SHARED,
-                    ulogfd, 0);
-    }
-
+    ulog = mmap(0, MAXLOGLEN, PROT_READ | PROT_WRITE, MAP_SHARED, ulogfd, 0);
     if (ulog == MAP_FAILED) {
         /* Can't map update log file to memory. */
         close(ulogfd);
@@ -544,26 +494,14 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
     if (retval)
         return retval;
 
-    if (ulog->kdb_hmagic != KDB_ULOG_HDR_MAGIC && ulog->kdb_hmagic != 0) {
-        unlock_ulog(context);
-        return KRB5_LOG_CORRUPT;
-    }
-
     if (ulog->kdb_hmagic != KDB_ULOG_HDR_MAGIC) {
+        if (ulog->kdb_hmagic != 0) {
+            unlock_ulog(context);
+            return KRB5_LOG_CORRUPT;
+        }
         reset_header(ulog);
-        if (caller != FKPROPLOG)
-            sync_header(ulog);
-        unlock_ulog(context);
-        return 0;
+        sync_header(ulog);
     }
-
-    if (caller == FKPROPLOG || caller == FKPROPD) {
-        /* kproplog and kpropd don't need to do anything else. */
-        unlock_ulog(context);
-        return 0;
-    }
-
-    assert(caller == FKADMIND || caller == FKCOMMAND);
 
     /* Reinit ulog if the log is being truncated or expanded after we have
      * circled. */
@@ -575,14 +513,11 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries,
             sync_header(ulog);
         }
 
-        /* Expand ulog if we have specified a greater size. */
-        if (ulog->kdb_num < ulogentries) {
-            ulog_filesize += ulogentries * ulog->kdb_block;
-
-            if (extend_file_to(ulogfd, ulog_filesize) < 0) {
-                unlock_ulog(context);
-                return errno;
-            }
+        /* Expand the ulog file if it isn't big enough. */
+        filesize = sizeof(kdb_hlog_t) + ulogentries * ulog->kdb_block;
+        if (extend_file_to(ulogfd, filesize) < 0) {
+            unlock_ulog(context);
+            return errno;
         }
     }
     unlock_ulog(context);

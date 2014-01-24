@@ -508,8 +508,7 @@ main(int argc, char *argv[])
     if (params.iprop_enabled == TRUE) {
         ulog_set_role(context, IPROP_MASTER);
 
-        ret = ulog_map(context, params.iprop_logfile, params.iprop_ulogsize,
-                       FKADMIND, db_args);
+        ret = ulog_map(context, params.iprop_logfile, params.iprop_ulogsize);
         if (ret)
             fail_to_start(ret, _("mapping update log"));
 
