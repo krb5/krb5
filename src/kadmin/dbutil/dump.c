@@ -1572,25 +1572,11 @@ load_db(int argc, char **argv)
         }
     }
 
-    /*
-     * Fail if the dump is not in iprop format and iprop is enabled and we have
-     * a ulog -- we don't want an accidental stepping on our toes by a sysadmin
-     * or wayward cronjob left over from before enabling iprop.
-     */
     if (global_params.iprop_enabled &&
         ulog_map(util_context, global_params.iprop_logfile,
                  global_params.iprop_ulogsize, caller, db5util_db_args)) {
         fprintf(stderr, _("Could not open iprop ulog\n"));
         goto error;
-    }
-    if (global_params.iprop_enabled && !load->iprop) {
-        if (log_ctx->ulog != NULL && log_ctx->ulog->kdb_first_time.seconds &&
-            (log_ctx->ulog->kdb_first_sno || log_ctx->ulog->kdb_last_sno)) {
-            fprintf(stderr, _("%s: Loads disallowed when iprop is enabled "
-                              "and a ulog is present\n"),
-                    progname);
-            goto error;
-        }
     }
 
     if (load->updateonly && !update) {
