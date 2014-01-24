@@ -1172,7 +1172,7 @@ parse_args(char **argv)
         ulog_set_role(kpropd_context, IPROP_SLAVE);
 
         if (ulog_map(kpropd_context, params.iprop_logfile,
-                     params.iprop_ulogsize, FKPROPD, db_args)) {
+                     params.iprop_ulogsize)) {
             com_err(progname, errno, _("Unable to map log!\n"));
             exit(1);
         }
