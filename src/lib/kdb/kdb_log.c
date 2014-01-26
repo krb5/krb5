@@ -561,12 +561,10 @@ ulog_get_entries(krb5_context context, kdb_last_t last,
     if (retval)
         return retval;
 
-    /* Check to make sure we don't have a corrupt ulog first. */
-    if (ulog->kdb_state == KDB_CORRUPT) {
-        ulog_handle->ret = UPDATE_ERROR;
-        (void)ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
-        return KRB5_LOG_CORRUPT;
-    }
+    /* If another process terminated mid-update, reset the ulog and force full
+     * resyncs. */
+    if (ulog->kdb_state != KDB_STABLE)
+        ulog_reset(ulog);
 
     /*
      * We need to lock out other processes here, such as kadmin.local, since we
