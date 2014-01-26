@@ -1194,6 +1194,7 @@ void PRS(argv)
                         usage();
                     db_args[db_args_size+1] = NULL;
                     db_args_size++;
+                    break;
                 }
 
                 default:
