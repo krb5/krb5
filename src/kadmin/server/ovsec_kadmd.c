@@ -84,7 +84,7 @@ usage()
 {
     fprintf(stderr, _("Usage: kadmind [-x db_args]* [-r realm] [-m] [-nofork] "
                       "[-port port-number]\n"
-                      "\t\t[-p path-to-kdb5_util] [-F dump-file]\n"
+                      "\t\t[-proponly] [-p path-to-kdb5_util] [-F dump-file]\n"
                       "\t\t[-K path-to-kprop] [-P pid_file]\n"
                       "\nwhere,\n\t[-x db_args]* - any number of database "
                       "specific arguments.\n"
@@ -133,9 +133,10 @@ write_pid_file(const char *pid_file)
     return st1 ? st1 : st2;
 }
 
-/* Set up the main loop.  May set *ctx_out even on error. */
+/* Set up the main loop.  If proponly is set, don't set up ports for kpasswd or
+ * kadmin.  May set *ctx_out even on error. */
 static krb5_error_code
-setup_loop(verto_ctx **ctx_out)
+setup_loop(int proponly, verto_ctx **ctx_out)
 {
     krb5_error_code ret;
     verto_ctx *ctx;
@@ -147,16 +148,18 @@ setup_loop(verto_ctx **ctx_out)
     ret = loop_setup_signals(ctx, global_server_handle, NULL);
     if (ret)
         return ret;
-    ret = loop_add_udp_port(handle->params.kpasswd_port);
-    if (ret)
-        return ret;
-    ret = loop_add_tcp_port(handle->params.kpasswd_port);
-    if (ret)
-        return ret;
-    ret = loop_add_rpc_service(handle->params.kadmind_port, KADM, KADMVERS,
-                               kadm_1);
-    if (ret)
-        return ret;
+    if (!proponly) {
+        ret = loop_add_udp_port(handle->params.kpasswd_port);
+        if (ret)
+            return ret;
+        ret = loop_add_tcp_port(handle->params.kpasswd_port);
+        if (ret)
+            return ret;
+        ret = loop_add_rpc_service(handle->params.kadmind_port, KADM, KADMVERS,
+                                   kadm_1);
+        if (ret)
+            return ret;
+    }
 #ifndef DISABLE_IPROP
     if (handle->params.iprop_enabled) {
         ret = loop_add_rpc_service(handle->params.iprop_port, KRB5_IPROP_PROG,
@@ -348,7 +351,7 @@ main(int argc, char *argv[])
     verto_ctx *vctx;
     const char *pid_file = NULL;
     char **db_args = NULL, **tmpargs;
-    int ret, i, db_args_size = 0, strong_random = 1;
+    int ret, i, db_args_size = 0, strong_random = 1, proponly = 0;
 
     setlocale(LC_ALL, "");
     setvbuf(stderr, NULL, _IONBF, 0);
@@ -394,6 +397,10 @@ main(int argc, char *argv[])
 #ifdef USE_PASSWORD_SERVER
         } else if (strcmp(*argv, "-passwordserver") == 0) {
             kadm5_set_use_password_server();
+#endif
+#ifndef DISABLE_IPROP
+        } else if (strcmp(*argv, "-proponly") == 0) {
+            proponly = 1;
 #endif
         } else if (strcmp(*argv, "-port") == 0) {
             argc--, argv++;
@@ -455,7 +462,7 @@ main(int argc, char *argv[])
     if (!(params.mask & KADM5_CONFIG_ACL_FILE))
         fail_to_start(0, _("Missing required ACL file configuration"));
 
-    ret = setup_loop(&vctx);
+    ret = setup_loop(proponly, &vctx);
     if (ret)
         fail_to_start(ret, _("initializing network"));
 
