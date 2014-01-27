@@ -8,6 +8,7 @@ SYNOPSIS
 
 **kpropd**
 [**-r** *realm*]
+[**-A** *admin_server*]
 [**-a** *acl_file*]
 [**-f** *slave_dumpfile*]
 [**-F** *principal_database*]
@@ -69,6 +70,10 @@ OPTIONS
 
 **-r** *realm*
     Specifies the realm of the master server.
+
+**-A** *admin_server*
+    Specifies the server to be contacted for incremental updates; by
+    default, the master admin server is contacted.
 
 **-f** *file*
     Specifies the filename where the dumped principal database file is
