@@ -174,6 +174,7 @@ usage()
             progname);
     fprintf(stderr, _("\t[-F kerberos_db_file ] [-p kdb5_util_pathname]\n"));
     fprintf(stderr, _("\t[-x db_args]* [-P port] [-a acl_file]\n"));
+    fprintf(stderr, _("\t[-A admin_server]\n"));
     exit(1);
 }
 
@@ -1056,6 +1057,13 @@ parse_args(char **argv)
         word++;
         while (word != NULL && (ch = *word++) != '\0') {
             switch (ch) {
+            case 'A':
+                params.mask |= KADM5_CONFIG_ADMIN_SERVER;
+                params.admin_server = (*word != '\0') ? word : *argv++;
+                if (params.admin_server == NULL)
+                    usage();
+                word = NULL;
+                break;
             case 'f':
                 file = (*word != '\0') ? word : *argv++;
                 if (file == NULL)
