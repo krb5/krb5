@@ -357,9 +357,6 @@ testlog
 /src/util/profile/testinc.ini
 /src/util/profile/testinc2.ini
 
-/src/util/send-pr/install-sid
-/src/util/send-pr/send-pr
-
 /src/util/ss/ct_c.awk
 /src/util/ss/ct_c.sed
 /src/util/ss/mk_cmds
