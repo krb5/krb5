@@ -826,12 +826,19 @@ point in the update log at which the slave should resume fetching
 incremental updates.  Thus, all the keytab and ACL setup previously
 described for kprop propagation is still needed.
 
-There are several known bugs and restrictions in the current
-implementation:
+If an environment has a large number of slaves, it may be desirable to
+arrange them in a hierarchy instead of having the master serve updates
+to every slave.  To do this, run ``kadmind -proponly`` on each
+intermediate slave, and ``kpropd -A upstreamhostname`` on downstream
+slaves to direct each one to the appropriate upstream slave.
 
-- The "call out to kprop" mechanism is a bit fragile; if the kprop
-  propagation fails to connect for some reason, the process on the
-  slave may hang waiting for it, and will need to be restarted.
+There are several known restrictions in the current implementation:
+
+- The incremental update protocol does not transport changes to policy
+  objects.  Any policy changes on the master will result in full
+  resyncs to all slaves.
+- The slave's KDB module must support locking; it cannot be using the
+  LDAP KDB module.
 - The master and slave must be able to initiate TCP connections in
   both directions, without an intervening NAT.
 
