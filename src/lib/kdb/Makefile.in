@@ -45,10 +45,16 @@ STLIBOBJS= \
 	kdb_log.o \
 	keytab.o
 
+EXTRADEPSRCS= t_ulog.c
+
 all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 	$(RM) adb_err.c adb_err.h t_stringattr.o t_stringattr
+	$(RM) t_ulog.o t_ulog test.ulog
+
+check-unix:: t_ulog
+	$(RUN_SETUP) $(VALGRIND) ./t_ulog test.ulog
 
 check-pytests:: t_stringattr
 	$(RUNPYTEST) $(srcdir)/t_stringattr.py $(PYTESTFLAGS)
@@ -59,6 +65,10 @@ depend:: adb_err.h
 
 t_stringattr: t_stringattr.o $(KDB5_DEPLIBS) $(KADM_COMM_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_stringattr.o $(KDB5_LIBS) $(KADM_COMM_LIBS) \
+		$(KRB5_BASE_LIBS)
+
+t_ulog: t_ulog.o $(KDB5_DEPLIBS) $(KADM_COMM_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_ulog.o $(KDB5_LIBS) $(KADM_COMM_LIBS) \
 		$(KRB5_BASE_LIBS)
 
 @lib_frag@
