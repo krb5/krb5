@@ -183,6 +183,8 @@ testlog
 /src/lib/kdb/adb_err.[ch]
 
 /src/lib/kdb/t_stringattr
+/src/lib/kdb/t_ulog
+/src/lib/kdb/test.ulog
 
 /src/lib/krb5/ccache/t_cc
 /src/lib/krb5/ccache/t_cccursor
