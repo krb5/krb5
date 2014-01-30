@@ -576,17 +576,6 @@ ulog_get_entries(krb5_context context, const kdb_last_t *last,
     if (ulog->kdb_state != KDB_STABLE)
         reset_header(ulog);
 
-    /*
-     * We need to lock out other processes here, such as kadmin.local, since we
-     * are looking at the last_sno and looking up updates.  So we can share
-     * with other readers.
-     */
-    retval = krb5_db_lock(context, KRB5_LOCKMODE_SHARED);
-    if (retval) {
-        (void)ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
-        return retval;
-    }
-
     /* If we have the same sno and timestamp, return a nil update.  If a
      * different timestamp, the sno was reused and we need a full resync. */
     if (last->last_sno == ulog->kdb_last_sno) {
@@ -652,7 +641,6 @@ ulog_get_entries(krb5_context context, const kdb_last_t *last,
 
 cleanup:
     (void)ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
-    (void)krb5_db_unlock(context);
     return retval;
 }
 
