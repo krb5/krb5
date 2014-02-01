@@ -92,6 +92,7 @@
 #include <stdlib.h>
 #include <limits.h>             /* for *_MAX */
 #include <stdarg.h>
+#include <stdint.h>
 
 #ifndef KRB5INT_BEGIN_DECLS
 #if defined(__cplusplus)
@@ -129,30 +130,11 @@ struct _profile_t;
  * Word-size related definition.
  */
 
-typedef unsigned char   krb5_octet;
-
-#if INT_MAX == 0x7fff
-typedef int     krb5_int16;
-typedef unsigned int    krb5_ui_2;
-#elif SHRT_MAX == 0x7fff
-typedef short   krb5_int16;
-typedef unsigned short  krb5_ui_2;
-#else
-#error undefined 16 bit type
-#endif
-
-#if INT_MAX == 0x7fffffffL
-typedef int     krb5_int32;
-typedef unsigned int    krb5_ui_4;
-#elif LONG_MAX == 0x7fffffffL
-typedef long    krb5_int32;
-typedef unsigned long   krb5_ui_4;
-#elif SHRT_MAX == 0x7fffffffL
-typedef short   krb5_int32;
-typedef unsigned short  krb5_ui_4;
-#else
-#error: undefined 32 bit type
-#endif
+typedef uint8_t krb5_octet;
+typedef int16_t krb5_int16;
+typedef uint16_t krb5_ui_2;
+typedef int32_t krb5_int32;
+typedef uint32_t krb5_ui_4;
 
 #define VALID_INT_BITS    INT_MAX
 #define VALID_UINT_BITS   UINT_MAX

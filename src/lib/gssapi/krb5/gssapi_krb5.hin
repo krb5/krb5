@@ -27,6 +27,7 @@
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_ext.h>
 #include <krb5.h>
+#include <stdint.h>
 
 /* C++ friendlyness */
 #ifdef __cplusplus
@@ -92,14 +93,7 @@ GSS_DLLIMP extern const gss_OID_desc krb5_gss_oid_array[];
 #define gss_krb5_nt_machine_uid_name    gss_nt_machine_uid_name
 #define gss_krb5_nt_string_uid_name     gss_nt_string_uid_name
 
-
-#if defined(_WIN32)
-typedef  unsigned __int64 gss_uint64;
-#else /*windows*/
-#include <inttypes.h>
-typedef  uint64_t gss_uint64;
-#endif
-
+typedef uint64_t gss_uint64;
 
 typedef struct gss_krb5_lucid_key {
     OM_uint32       type;           /* key encryption type */

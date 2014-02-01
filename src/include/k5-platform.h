@@ -52,6 +52,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -410,40 +411,11 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 
 #endif
 
-
-/* 64-bit support: krb5_ui_8 and krb5_int64.
-
-   This should move to krb5.h eventually, but without the namespace
-   pollution from the autoconf macros.  */
-#if defined(HAVE_STDINT_H) || defined(HAVE_INTTYPES_H)
-# ifdef HAVE_STDINT_H
-#  include <stdint.h>
-# endif
-# ifdef HAVE_INTTYPES_H
-#  include <inttypes.h>
-# endif
-# define INT64_TYPE int64_t
-# define UINT64_TYPE uint64_t
-# define INT64_FMT PRId64
-# define UINT64_FMT PRIu64
-#elif defined(_WIN32)
-# define INT64_TYPE signed __int64
-# define UINT64_TYPE unsigned __int64
-# define INT64_FMT "I64d"
-# define UINT64_FMT "I64u"
-#else /* not Windows, and neither stdint.h nor inttypes.h */
-# define INT64_TYPE signed long long
-# define UINT64_TYPE unsigned long long
-# define INT64_FMT "lld"
-# define UINT64_FMT "llu"
-#endif
+#define INT64_TYPE int64_t
+#define UINT64_TYPE uint64_t
 
 #ifndef SIZE_MAX
 # define SIZE_MAX ((size_t)((size_t)0 - 1))
-#endif
-
-#ifndef UINT64_MAX
-# define UINT64_MAX ((UINT64_TYPE)((UINT64_TYPE)0 - 1))
 #endif
 
 #ifdef _WIN32
@@ -743,13 +715,8 @@ load_64_le (const void *cvp)
 #endif
 }
 
-#ifdef _WIN32
-#define UINT16_TYPE unsigned __int16
-#define UINT32_TYPE unsigned __int32
-#else
 #define UINT16_TYPE uint16_t
 #define UINT32_TYPE uint32_t
-#endif
 
 static inline void
 store_16_n (unsigned int val, void *vp)
