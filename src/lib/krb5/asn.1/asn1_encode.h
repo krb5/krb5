@@ -45,11 +45,11 @@ typedef struct {
 
 /* These functions are referenced by encoder structures.  They handle the
  * encoding of primitive ASN.1 types. */
-asn1_error_code k5_asn1_encode_bool(asn1buf *buf, asn1_intmax val,
+asn1_error_code k5_asn1_encode_bool(asn1buf *buf, intmax_t val,
                                     size_t *len_out);
-asn1_error_code k5_asn1_encode_int(asn1buf *buf, asn1_intmax val,
+asn1_error_code k5_asn1_encode_int(asn1buf *buf, intmax_t val,
                                    size_t *len_out);
-asn1_error_code k5_asn1_encode_uint(asn1buf *buf, asn1_uintmax val,
+asn1_error_code k5_asn1_encode_uint(asn1buf *buf, uintmax_t val,
                                     size_t *len_out);
 asn1_error_code k5_asn1_encode_bytestring(asn1buf *buf,
                                           unsigned char *const *val,
@@ -63,11 +63,11 @@ asn1_error_code k5_asn1_encode_generaltime(asn1buf *buf, time_t val,
 /* These functions are referenced by encoder structures.  They handle the
  * decoding of primitive ASN.1 types. */
 asn1_error_code k5_asn1_decode_bool(const unsigned char *asn1, size_t len,
-                                    asn1_intmax *val);
+                                    intmax_t *val);
 asn1_error_code k5_asn1_decode_int(const unsigned char *asn1, size_t len,
-                                   asn1_intmax *val);
+                                   intmax_t *val);
 asn1_error_code k5_asn1_decode_uint(const unsigned char *asn1, size_t len,
-                                    asn1_uintmax *val);
+                                    uintmax_t *val);
 asn1_error_code k5_asn1_decode_generaltime(const unsigned char *asn1,
                                            size_t len, time_t *time_out);
 asn1_error_code k5_asn1_decode_bytestring(const unsigned char *asn1,
@@ -190,7 +190,7 @@ struct tagged_info {
 };
 
 struct immediate_info {
-    asn1_intmax val;
+    intmax_t val;
     asn1_error_code err;
 };
 

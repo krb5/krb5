@@ -129,10 +129,6 @@ typedef unsigned char   u_char;
 
 
 #include "k5-platform.h"
-/* not used in krb5.h (yet) */
-typedef UINT64_TYPE krb5_ui_8;
-typedef INT64_TYPE krb5_int64;
-
 
 #define KRB5_KDB_MAX_LIFE       (60*60*24) /* one day */
 #define KRB5_KDB_MAX_RLIFE      (60*60*24*7) /* one week */
@@ -1719,10 +1715,10 @@ krb5_ser_unpack_int32(krb5_int32 *, krb5_octet **, size_t *);
 
 /* [De]serialize 8-byte integer */
 krb5_error_code KRB5_CALLCONV
-krb5_ser_pack_int64(krb5_int64, krb5_octet **, size_t *);
+krb5_ser_pack_int64(int64_t, krb5_octet **, size_t *);
 
 krb5_error_code KRB5_CALLCONV
-krb5_ser_unpack_int64(krb5_int64 *, krb5_octet **, size_t *);
+krb5_ser_unpack_int64(int64_t *, krb5_octet **, size_t *);
 
 /* [De]serialize byte string */
 krb5_error_code KRB5_CALLCONV
@@ -1758,10 +1754,10 @@ typedef struct _krb5int_access {
 
     krb5_error_code (*mandatory_cksumtype)(krb5_context, krb5_enctype,
                                            krb5_cksumtype *);
-    krb5_error_code (KRB5_CALLCONV *ser_pack_int64)(krb5_int64, krb5_octet **,
+    krb5_error_code (KRB5_CALLCONV *ser_pack_int64)(int64_t, krb5_octet **,
                                                     size_t *);
-    krb5_error_code (KRB5_CALLCONV *ser_unpack_int64)(krb5_int64 *,
-                                                      krb5_octet **, size_t *);
+    krb5_error_code (KRB5_CALLCONV *ser_unpack_int64)(int64_t *, krb5_octet **,
+                                                      size_t *);
 
     /* Used for KDB LDAP back end.  */
     krb5_error_code

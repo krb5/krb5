@@ -294,7 +294,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
     size_t rrc, ec;
     size_t data_length, assoc_data_length;
     krb5_key key;
-    gssint_uint64 seqnum;
+    uint64_t seqnum;
     krb5_boolean valid;
     krb5_cksumtype cksumtype;
     int conf_flag = 0;

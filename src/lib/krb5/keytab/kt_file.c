@@ -622,7 +622,7 @@ krb5_ktf_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet 
     size_t              remain;
     krb5_ktfile_data    *ktdata;
     krb5_int32          file_is_open;
-    krb5_int64          file_pos;
+    int64_t             file_pos;
     char                *ktname;
     const char          *fnamep;
 
@@ -719,7 +719,7 @@ krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octe
     char                *ktname = NULL;
     krb5_ktfile_data    *ktdata;
     krb5_int32          file_is_open;
-    krb5_int64          foff;
+    int64_t             foff;
 
     *argp = NULL;
     bp = *buffer;

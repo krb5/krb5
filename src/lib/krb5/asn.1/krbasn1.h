@@ -35,9 +35,6 @@ typedef enum { PRIMITIVE = 0x00, CONSTRUCTED = 0x20 } asn1_construction;
 typedef enum { UNIVERSAL = 0x00, APPLICATION = 0x40,
                CONTEXT_SPECIFIC = 0x80, PRIVATE = 0xC0 } asn1_class;
 
-typedef INT64_TYPE asn1_intmax;
-typedef UINT64_TYPE asn1_uintmax;
-
 typedef int asn1_tagnum;
 #define ASN1_TAGNUM_CEILING INT_MAX
 #define ASN1_TAGNUM_MAX (ASN1_TAGNUM_CEILING-1)

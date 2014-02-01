@@ -165,7 +165,7 @@ init_state(struct fortuna_state *st)
 static void
 inc_counter(struct fortuna_state *st)
 {
-    UINT64_TYPE val;
+    uint64_t val;
 
     val = load_64_le(st->counter) + 1;
     store_64_le(val, st->counter);

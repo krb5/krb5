@@ -9,7 +9,7 @@ int main ()
        on.  */
 
     union {
-        UINT64_TYPE n64;
+        uint64_t n64;
         uint32_t n32;
         uint16_t n16;
         unsigned char b[9];

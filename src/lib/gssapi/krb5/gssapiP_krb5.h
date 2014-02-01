@@ -221,8 +221,8 @@ typedef struct _krb5_gss_ctx_id_rec {
     /* XXX these used to be signed.  the old spec is inspecific, and
        the new spec specifies unsigned.  I don't believe that the change
        affects the wire encoding. */
-    gssint_uint64 seq_send;
-    gssint_uint64 seq_recv;
+    uint64_t seq_send;
+    uint64_t seq_recv;
     void *seqstate;
     krb5_context k5_context;
     krb5_auth_context auth_context;

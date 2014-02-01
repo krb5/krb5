@@ -411,9 +411,6 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 
 #endif
 
-#define INT64_TYPE int64_t
-#define UINT64_TYPE uint64_t
-
 #ifndef SIZE_MAX
 # define SIZE_MAX ((size_t)((size_t)0 - 1))
 #endif
@@ -575,7 +572,7 @@ store_32_be (unsigned int val, void *vp)
 #endif
 }
 static inline void
-store_64_be (UINT64_TYPE val, void *vp)
+store_64_be (uint64_t val, void *vp)
 {
     unsigned char *p = (unsigned char *) vp;
 #if defined(__GNUC__) && defined(K5_BE) && !defined(__cplusplus)
@@ -619,7 +616,7 @@ load_32_be (const void *cvp)
             | ((uint32_t) p[0] << 24));
 #endif
 }
-static inline UINT64_TYPE
+static inline uint64_t
 load_64_be (const void *cvp)
 {
     const unsigned char *p = (const unsigned char *) cvp;
@@ -628,7 +625,7 @@ load_64_be (const void *cvp)
 #elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64) && !defined(__cplusplus)
     return GETSWAPPED(64,p);
 #else
-    return ((UINT64_TYPE)load_32_be(p) << 32) | load_32_be(p+4);
+    return ((uint64_t)load_32_be(p) << 32) | load_32_be(p+4);
 #endif
 }
 static inline void
@@ -660,7 +657,7 @@ store_32_le (unsigned int val, void *vp)
 #endif
 }
 static inline void
-store_64_le (UINT64_TYPE val, void *vp)
+store_64_le (uint64_t val, void *vp)
 {
     unsigned char *p = (unsigned char *) vp;
 #if defined(__GNUC__) && defined(K5_LE) && !defined(__cplusplus)
@@ -702,7 +699,7 @@ load_32_le (const void *cvp)
     return (p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24));
 #endif
 }
-static inline UINT64_TYPE
+static inline uint64_t
 load_64_le (const void *cvp)
 {
     const unsigned char *p = (const unsigned char *) cvp;
@@ -711,7 +708,7 @@ load_64_le (const void *cvp)
 #elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64) && !defined(__cplusplus)
     return GETSWAPPED(64,p);
 #else
-    return ((UINT64_TYPE)load_32_le(p+4) << 32) | load_32_le(p);
+    return ((uint64_t)load_32_le(p+4) << 32) | load_32_le(p);
 #endif
 }
 
@@ -731,9 +728,9 @@ store_32_n (unsigned int val, void *vp)
     memcpy(vp, &n, 4);
 }
 static inline void
-store_64_n (UINT64_TYPE val, void *vp)
+store_64_n (uint64_t val, void *vp)
 {
-    UINT64_TYPE n = val;
+    uint64_t n = val;
     memcpy(vp, &n, 8);
 }
 static inline unsigned short
@@ -750,10 +747,10 @@ load_32_n (const void *p)
     memcpy(&n, p, 4);
     return n;
 }
-static inline UINT64_TYPE
+static inline uint64_t
 load_64_n (const void *p)
 {
-    UINT64_TYPE n;
+    uint64_t n;
     memcpy(&n, p, 8);
     return n;
 }
@@ -761,8 +758,8 @@ load_64_n (const void *p)
 #undef UINT32_TYPE
 
 /* Assume for simplicity that these swaps are identical.  */
-static inline UINT64_TYPE
-k5_htonll (UINT64_TYPE val)
+static inline uint64_t
+k5_htonll (uint64_t val)
 {
 #ifdef K5_BE
     return val;
@@ -772,8 +769,8 @@ k5_htonll (UINT64_TYPE val)
     return load_64_be ((unsigned char *)&val);
 #endif
 }
-static inline UINT64_TYPE
-k5_ntohll (UINT64_TYPE val)
+static inline uint64_t
+k5_ntohll (uint64_t val)
 {
     return k5_htonll (val);
 }
