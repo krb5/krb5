@@ -13,12 +13,6 @@
 #endif
 #include <errno.h>
 
-#ifdef HAVE_STDINT_H
-# include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-# include <inttypes.h>
-#endif
 typedef int32_t prof_int32;
 
 /* Create a vtable profile, possibly with a library handle.  The new profile

@@ -42,18 +42,12 @@ gssapi_err_generic.h: gssapi_err_generic.et
 gssapi_err_generic.c: gssapi_err_generic.et
 
 ##DOS##!if 0
-include_stdint=@include_stdint@
-include_inttypes=@include_inttypes@
 include_xom=@include_xom@
-##DOS##include_stdint=rem
-##DOS##include_inttypes=rem
 ##DOS##include_xom=rem
 gssapi.h: gssapi.hin
 	@echo "Creating gssapi.h" ; \
 	h=gss$$$$; $(RM) $$h; \
 	(echo "/* This is the gssapi.h prologue. */"; \
-	$(include_stdint) && \
-	$(include_inttypes) && \
 	$(include_xom) && \
 	echo "/* End of gssapi.h prologue. */"&& \
 	cat $(srcdir)/gssapi.hin )> $$h && \

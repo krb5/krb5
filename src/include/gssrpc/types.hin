@@ -55,16 +55,7 @@
 #include <netinet/in.h>
 
 #include <stdlib.h>
-
-/*
- * Pull in typedefs for fixed-width integers somehow, if they weren't
- * in sys/types.h.
- */
-@GSSRPC__STDINT_H@
-@GSSRPC__INTTYPES_H@
-/* Define if there is no uint32_t in system headers. */
-@GSSRPC__FAKE_UINT32@
-
+#include <stdint.h>
 #include <limits.h>
 
 #ifndef GSSRPC__BEGIN_DECLS
@@ -81,39 +72,6 @@ GSSRPC__BEGIN_DECLS
 
 #if defined(CHAR_BIT) && CHAR_BIT != 8
 #error "Bytes must be exactly 8 bits."
-#endif
-
-/*
- * If no uint32_t in system headers, fake it by looking for a 32-bit
- * two's-complement type.  Yes, this stomps on POSIX namespace, but if
- * we get here, we're on a system that's far from being
- * POSIX-compliant anyway.
- */
-#if GSSRPC__FAKE_UINT32
-#if (UINT_MAX == 0xffffffffUL) && (INT_MAX == 0x7fffffffL) \
-	&& (INT_MIN == -INT_MAX-1)
-typedef int		int32_t;
-typedef unsigned int	uint32_t;
-#else
-#if (ULONG_MAX == 0xffffffffUL) && (LONG_MAX == 0x7fffffffL) \
-	&& (LONG_MIN == -LONG_MAX-1)
-typedef long		int32_t;
-typedef unsigned long	uint32_t;
-#else
-#if (USHRT_MAX == 0xffffffffUL) && (SHRT_MAX == 0x7fffffffL) \
-	&& (SHRT_MIN == -SHRT_MAX-1)
-typedef short		int32_t;
-typedef unsigned short	uint32_t;
-#else
-#error "Can't fake up uint32_t."
-#endif
-#endif
-#endif
-#endif /* GSSRPC__FAKE_UINT32 */
-
-#if (LONG_MIN != -LONG_MAX-1) || (INT_MIN != -INT_MAX-1) \
-	|| (SHRT_MIN != -SHRT_MAX-1)
-#error "Integer types must be two's-complement."
 #endif
 
 /* Define if we need to fake up some BSD type aliases. */
