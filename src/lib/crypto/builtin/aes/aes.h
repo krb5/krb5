@@ -33,7 +33,7 @@
 #ifndef _AES_H
 #define _AES_H
 
-#include "uitypes.h"
+#include <stdint.h>
 
 /*  BLOCK_SIZE is in BYTES: 16, 24, 32 or undefined for aes.c and 16, 20,
     24, 28, 32 or undefined for aespp.c.  When left undefined a slower

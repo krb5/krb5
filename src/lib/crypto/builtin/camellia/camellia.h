@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-#include "uitypes.h" /* ../aes/ui_types.h */
+#include <stdint.h>
 
 #define CAMELLIA_BLOCK_SIZE 16
 #define CAMELLIA_TABLE_BYTE_LEN 272
