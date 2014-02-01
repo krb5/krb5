@@ -57,7 +57,7 @@
 #define SSF_WRITE 0x02
 #define SSF_EXCEPTION 0x04
 
-typedef krb5_int64 time_ms;
+typedef int64_t time_ms;
 
 /* Since fd_set is large on some platforms (8K on AIX 5.2), this probably
  * shouldn't be allocated in automatic storage. */

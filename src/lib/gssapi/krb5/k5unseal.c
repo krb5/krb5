@@ -435,7 +435,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
         return(GSS_S_BAD_SIG);
     }
 
-    retval = g_order_check(&(ctx->seqstate), (gssint_uint64)seqnum);
+    retval = g_order_check(&(ctx->seqstate), (uint64_t)seqnum);
 
     /* success or ordering violation */
 

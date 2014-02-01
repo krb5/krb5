@@ -29,7 +29,7 @@
 /**** Functions for encoding primitive types ****/
 
 asn1_error_code
-k5_asn1_encode_bool(asn1buf *buf, asn1_intmax val, size_t *len_out)
+k5_asn1_encode_bool(asn1buf *buf, intmax_t val, size_t *len_out)
 {
     asn1_octet bval = val ? 0xFF : 0x00;
 
@@ -38,7 +38,7 @@ k5_asn1_encode_bool(asn1buf *buf, asn1_intmax val, size_t *len_out)
 }
 
 asn1_error_code
-k5_asn1_encode_int(asn1buf *buf, asn1_intmax val, size_t *len_out)
+k5_asn1_encode_int(asn1buf *buf, intmax_t val, size_t *len_out)
 {
     asn1_error_code ret;
     size_t len = 0;
@@ -73,11 +73,11 @@ k5_asn1_encode_int(asn1buf *buf, asn1_intmax val, size_t *len_out)
 }
 
 asn1_error_code
-k5_asn1_encode_uint(asn1buf *buf, asn1_uintmax val, size_t *len_out)
+k5_asn1_encode_uint(asn1buf *buf, uintmax_t val, size_t *len_out)
 {
     asn1_error_code ret;
     size_t len = 0;
-    asn1_uintmax valcopy;
+    uintmax_t valcopy;
     int digit;
 
     valcopy = val;
@@ -179,7 +179,7 @@ k5_asn1_encode_bitstring(asn1buf *buf, unsigned char *const *val, size_t len,
 /**** Functions for decoding primitive types ****/
 
 asn1_error_code
-k5_asn1_decode_bool(const unsigned char *asn1, size_t len, asn1_intmax *val)
+k5_asn1_decode_bool(const unsigned char *asn1, size_t len, intmax_t *val)
 {
     if (len != 1)
         return ASN1_BAD_LENGTH;
@@ -190,16 +190,16 @@ k5_asn1_decode_bool(const unsigned char *asn1, size_t len, asn1_intmax *val)
 /* Decode asn1/len as the contents of a DER integer, placing the signed result
  * in val. */
 asn1_error_code
-k5_asn1_decode_int(const unsigned char *asn1, size_t len, asn1_intmax *val)
+k5_asn1_decode_int(const unsigned char *asn1, size_t len, intmax_t *val)
 {
-    asn1_intmax n;
+    intmax_t n;
     size_t i;
 
     if (len == 0)
         return ASN1_BAD_LENGTH;
     n = (asn1[0] & 0x80) ? -1 : 0;
     /* Check length; allow extra octet if first octet is 0. */
-    if (len > sizeof(asn1_intmax) + (asn1[0] == 0))
+    if (len > sizeof(intmax_t) + (asn1[0] == 0))
         return ASN1_OVERFLOW;
     for (i = 0; i < len; i++)
         n = (n << 8) | asn1[i];
@@ -210,15 +210,15 @@ k5_asn1_decode_int(const unsigned char *asn1, size_t len, asn1_intmax *val)
 /* Decode asn1/len as the contents of a DER integer, placing the unsigned
  * result in val. */
 asn1_error_code
-k5_asn1_decode_uint(const unsigned char *asn1, size_t len, asn1_uintmax *val)
+k5_asn1_decode_uint(const unsigned char *asn1, size_t len, uintmax_t *val)
 {
-    asn1_uintmax n;
+    uintmax_t n;
     size_t i;
 
     if (len == 0)
         return ASN1_BAD_LENGTH;
     /* Check for negative values and check length. */
-    if ((asn1[0] & 0x80) || len > sizeof(asn1_uintmax) + (asn1[0] == 0))
+    if ((asn1[0] & 0x80) || len > sizeof(uintmax_t) + (asn1[0] == 0))
         return ASN1_OVERFLOW;
     for (i = 0, n = 0; i < len; i++)
         n = (n << 8) | asn1[i];
@@ -521,26 +521,26 @@ encode_nullterm_sequence_of(asn1buf *buf, const void *val,
     return encode_sequence_of(buf, len, val, type, len_out);
 }
 
-static asn1_intmax
+static intmax_t
 load_int(const void *val, size_t size)
 {
     switch (size) {
     case 1: return *(signed char *)val;
     case 2: return *(krb5_int16 *)val;
     case 4: return *(krb5_int32 *)val;
-    case 8: return *(INT64_TYPE *)val;
+    case 8: return *(int64_t *)val;
     default: abort();
     }
 }
 
-static asn1_uintmax
+static uintmax_t
 load_uint(const void *val, size_t size)
 {
     switch (size) {
     case 1: return *(unsigned char *)val;
     case 2: return *(krb5_ui_2 *)val;
     case 4: return *(krb5_ui_4 *)val;
-    case 8: return *(UINT64_TYPE *)val;
+    case 8: return *(uint64_t *)val;
     default: abort();
     }
 }
@@ -551,14 +551,14 @@ load_count(const void *val, const struct counted_info *counted,
 {
     const void *countptr = (const char *)val + counted->lenoff;
 
-    assert(sizeof(size_t) <= sizeof(asn1_uintmax));
+    assert(sizeof(size_t) <= sizeof(uintmax_t));
     if (counted->lensigned) {
-        asn1_intmax xlen = load_int(countptr, counted->lensize);
-        if (xlen < 0 || (asn1_uintmax)xlen > SIZE_MAX)
+        intmax_t xlen = load_int(countptr, counted->lensize);
+        if (xlen < 0 || (uintmax_t)xlen > SIZE_MAX)
             return EINVAL;
         *count_out = xlen;
     } else {
-        asn1_uintmax xlen = load_uint(countptr, counted->lensize);
+        uintmax_t xlen = load_uint(countptr, counted->lensize);
         if ((size_t)xlen != xlen || xlen > SIZE_MAX)
             return EINVAL;
         *count_out = xlen;
@@ -567,7 +567,7 @@ load_count(const void *val, const struct counted_info *counted,
 }
 
 static asn1_error_code
-store_int(asn1_intmax intval, size_t size, void *val)
+store_int(intmax_t intval, size_t size, void *val)
 {
     switch (size) {
     case 1:
@@ -586,9 +586,9 @@ store_int(asn1_intmax intval, size_t size, void *val)
         *(krb5_int32 *)val = intval;
         return 0;
     case 8:
-        if ((INT64_TYPE)intval != intval)
+        if ((int64_t)intval != intval)
             return ASN1_OVERFLOW;
-        *(INT64_TYPE *)intval = intval;
+        *(int64_t *)intval = intval;
         return 0;
     default:
         abort();
@@ -596,7 +596,7 @@ store_int(asn1_intmax intval, size_t size, void *val)
 }
 
 static asn1_error_code
-store_uint(asn1_uintmax intval, size_t size, void *val)
+store_uint(uintmax_t intval, size_t size, void *val)
 {
     switch (size) {
     case 1:
@@ -615,9 +615,9 @@ store_uint(asn1_uintmax intval, size_t size, void *val)
         *(krb5_ui_4 *)val = intval;
         return 0;
     case 8:
-        if ((UINT64_TYPE)intval != intval)
+        if ((uint64_t)intval != intval)
             return ASN1_OVERFLOW;
-        *(UINT64_TYPE *)val = intval;
+        *(uint64_t *)val = intval;
         return 0;
     default:
         abort();
@@ -634,7 +634,7 @@ store_count(size_t count, const struct counted_info *counted, void *val)
     if (counted->lensigned) {
         if (count == SIZE_MAX)
             return store_int(-1, counted->lensize, countptr);
-        else if ((asn1_intmax)count < 0)
+        else if ((intmax_t)count < 0)
             return ASN1_OVERFLOW;
         else
             return store_int(count, counted->lensize, countptr);
@@ -1270,21 +1270,21 @@ decode_atype(const taginfo *t, const unsigned char *asn1,
         return decode_atype(tp, asn1, len, tag->basetype, val);
     }
     case atype_bool: {
-        asn1_intmax intval;
+        intmax_t intval;
         ret = k5_asn1_decode_bool(asn1, len, &intval);
         if (ret)
             return ret;
         return store_int(intval, a->size, val);
     }
     case atype_int: {
-        asn1_intmax intval;
+        intmax_t intval;
         ret = k5_asn1_decode_int(asn1, len, &intval);
         if (ret)
             return ret;
         return store_int(intval, a->size, val);
     }
     case atype_uint: {
-        asn1_uintmax intval;
+        uintmax_t intval;
         ret = k5_asn1_decode_uint(asn1, len, &intval);
         if (ret)
             return ret;
@@ -1292,7 +1292,7 @@ decode_atype(const taginfo *t, const unsigned char *asn1,
     }
     case atype_int_immediate: {
         const struct immediate_info *imm = a->tinfo;
-        asn1_intmax intval;
+        intmax_t intval;
         ret = k5_asn1_decode_int(asn1, len, &intval);
         if (ret)
             return ret;

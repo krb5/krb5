@@ -192,12 +192,12 @@ krb5_ser_pack_int32(krb5_int32 iarg, krb5_octet **bufp, size_t *remainp)
  *                                Update buffer pointer and remaining space.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_ser_pack_int64(krb5_int64 iarg, krb5_octet **bufp, size_t *remainp)
+krb5_ser_pack_int64(int64_t iarg, krb5_octet **bufp, size_t *remainp)
 {
-    if (*remainp >= sizeof(krb5_int64)) {
+    if (*remainp >= sizeof(int64_t)) {
         store_64_be(iarg, (unsigned char *)*bufp);
-        *bufp += sizeof(krb5_int64);
-        *remainp -= sizeof(krb5_int64);
+        *bufp += sizeof(int64_t);
+        *remainp -= sizeof(int64_t);
         return(0);
     }
     else
@@ -240,12 +240,12 @@ krb5_ser_unpack_int32(krb5_int32 *intp, krb5_octet **bufp, size_t *remainp)
  * krb5_ser_unpack_int64()      - Unpack an 8-byte integer if it's there.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_ser_unpack_int64(krb5_int64 *intp, krb5_octet **bufp, size_t *remainp)
+krb5_ser_unpack_int64(int64_t *intp, krb5_octet **bufp, size_t *remainp)
 {
-    if (*remainp >= sizeof(krb5_int64)) {
+    if (*remainp >= sizeof(int64_t)) {
         *intp = load_64_be((unsigned char *)*bufp);
-        *bufp += sizeof(krb5_int64);
-        *remainp -= sizeof(krb5_int64);
+        *bufp += sizeof(int64_t);
+        *remainp -= sizeof(int64_t);
         return(0);
     }
     else

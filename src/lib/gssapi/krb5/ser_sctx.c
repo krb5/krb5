@@ -262,8 +262,8 @@ kg_ctx_size(kcontext, arg, sizep)
      *  krb5_int32      for endtime.
      *  krb5_int32      for renew_till.
      *  krb5_int32      for flags.
-     *  krb5_int64      for seq_send.
-     *  krb5_int64      for seq_recv.
+     *  int64_t         for seq_send.
+     *  int64_t         for seq_recv.
      *  ...             for seqstate
      *  ...             for auth_context
      *  ...             for mech_used
@@ -279,7 +279,7 @@ kg_ctx_size(kcontext, arg, sizep)
     kret = EINVAL;
     if ((ctx = (krb5_gss_ctx_id_rec *) arg)) {
         required = 21*sizeof(krb5_int32);
-        required += 2*sizeof(krb5_int64);
+        required += 2*sizeof(int64_t);
         required += sizeof(ctx->seed);
 
         kret = 0;
@@ -425,9 +425,9 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
                                        &bp, &remain);
             (void) krb5_ser_pack_int32((krb5_int32) ctx->krb_flags,
                                        &bp, &remain);
-            (void) (*kaccess.ser_pack_int64)((krb5_int64) ctx->seq_send,
+            (void) (*kaccess.ser_pack_int64)((int64_t) ctx->seq_send,
                                              &bp, &remain);
-            (void) (*kaccess.ser_pack_int64)((krb5_int64) ctx->seq_recv,
+            (void) (*kaccess.ser_pack_int64)((int64_t) ctx->seq_recv,
                                              &bp, &remain);
 
             /* Now dynamic data */
@@ -596,7 +596,7 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 
         /* Get a context */
         if ((remain >= (17*sizeof(krb5_int32)
-                        + 2*sizeof(krb5_int64)
+                        + 2*sizeof(int64_t)
                         + sizeof(ctx->seed))) &&
             (ctx = (krb5_gss_ctx_id_rec *)
              xmalloc(sizeof(krb5_gss_ctx_id_rec)))) {
@@ -635,9 +635,9 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
             ctx->krb_times.renew_till = (krb5_timestamp) ibuf;
             (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
             ctx->krb_flags = (krb5_flags) ibuf;
-            (void) (*kaccess.ser_unpack_int64)((krb5_int64 *)&ctx->seq_send,
+            (void) (*kaccess.ser_unpack_int64)((int64_t *)&ctx->seq_send,
                                                &bp, &remain);
-            kret = (*kaccess.ser_unpack_int64)((krb5_int64 *)&ctx->seq_recv,
+            kret = (*kaccess.ser_unpack_int64)((int64_t *)&ctx->seq_recv,
                                                &bp, &remain);
             if (kret) {
                 free(ctx);

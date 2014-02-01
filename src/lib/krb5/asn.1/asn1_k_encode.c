@@ -132,7 +132,7 @@ static asn1_error_code
 decode_seqno(const taginfo *t, const unsigned char *asn1, size_t len, void *p)
 {
     asn1_error_code ret;
-    asn1_intmax val;
+    intmax_t val;
     ret = k5_asn1_decode_int(asn1, len, &val);
     if (ret)
         return ret;
@@ -330,7 +330,7 @@ decode_lr_type(const taginfo *t, const unsigned char *asn1, size_t len,
                void *p)
 {
     asn1_error_code ret;
-    asn1_intmax val;
+    intmax_t val;
     ret = k5_asn1_decode_int(asn1, len, &val);
     if (ret)
         return ret;

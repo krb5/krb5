@@ -93,8 +93,6 @@ GSS_DLLIMP extern const gss_OID_desc krb5_gss_oid_array[];
 #define gss_krb5_nt_machine_uid_name    gss_nt_machine_uid_name
 #define gss_krb5_nt_string_uid_name     gss_nt_string_uid_name
 
-typedef uint64_t gss_uint64;
-
 typedef struct gss_krb5_lucid_key {
     OM_uint32       type;           /* key encryption type */
     OM_uint32       length;         /* length of key data */
@@ -126,8 +124,8 @@ typedef struct gss_krb5_lucid_context_v1 {
                                        MUST be at beginning of struct! */
     OM_uint32       initiate;       /* Are we the initiator? */
     OM_uint32       endtime;        /* expiration time of context */
-    gss_uint64      send_seq;       /* sender sequence number */
-    gss_uint64      recv_seq;       /* receive sequence number */
+    uint64_t        send_seq;       /* sender sequence number */
+    uint64_t        recv_seq;       /* receive sequence number */
     OM_uint32       protocol;       /* 0: rfc1964,
                                        1: draft-ietf-krb-wg-gssapi-cfx-07 */
     /*

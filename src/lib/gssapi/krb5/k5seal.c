@@ -55,7 +55,7 @@ static krb5_error_code
 make_seal_token_v1 (krb5_context context,
                     krb5_key enc,
                     krb5_key seq,
-                    gssint_uint64 *seqnum,
+                    uint64_t *seqnum,
                     int direction,
                     gss_buffer_t text,
                     gss_buffer_t token,

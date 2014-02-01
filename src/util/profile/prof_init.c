@@ -13,8 +13,6 @@
 #endif
 #include <errno.h>
 
-typedef int32_t prof_int32;
-
 /* Create a vtable profile, possibly with a library handle.  The new profile
  * takes ownership of the handle refcount on success. */
 static errcode_t
@@ -529,20 +527,20 @@ errcode_t profile_ser_size(const char *unused, profile_t profile,
     size_t      required;
     prf_file_t  pfp;
 
-    required = 3*sizeof(prof_int32);
+    required = 3*sizeof(int32_t);
     for (pfp = profile->first_file; pfp; pfp = pfp->next) {
-        required += sizeof(prof_int32);
+        required += sizeof(int32_t);
         required += strlen(pfp->data->filespec);
     }
     *sizep += required;
     return 0;
 }
 
-static void pack_int32(prof_int32 oval, unsigned char **bufpp, size_t *remainp)
+static void pack_int32(int32_t oval, unsigned char **bufpp, size_t *remainp)
 {
     store_32_be(oval, *bufpp);
-    *bufpp += sizeof(prof_int32);
-    *remainp -= sizeof(prof_int32);
+    *bufpp += sizeof(int32_t);
+    *remainp -= sizeof(int32_t);
 }
 
 errcode_t profile_ser_externalize(const char *unused, profile_t profile,
@@ -553,7 +551,7 @@ errcode_t profile_ser_externalize(const char *unused, profile_t profile,
     unsigned char       *bp;
     size_t              remain;
     prf_file_t          pfp;
-    prof_int32          fcount, slen;
+    int32_t             fcount, slen;
 
     required = 0;
     bp = *bufpp;
@@ -569,7 +567,7 @@ errcode_t profile_ser_externalize(const char *unused, profile_t profile,
             pack_int32(PROF_MAGIC_PROFILE, &bp, &remain);
             pack_int32(fcount, &bp, &remain);
             for (pfp = profile->first_file; pfp; pfp = pfp->next) {
-                slen = (prof_int32) strlen(pfp->data->filespec);
+                slen = (int32_t) strlen(pfp->data->filespec);
                 pack_int32(slen, &bp, &remain);
                 if (slen) {
                     memcpy(bp, pfp->data->filespec, (size_t) slen);
@@ -586,13 +584,13 @@ errcode_t profile_ser_externalize(const char *unused, profile_t profile,
     return(retval);
 }
 
-static int unpack_int32(prof_int32 *intp, unsigned char **bufpp,
+static int unpack_int32(int32_t *intp, unsigned char **bufpp,
                         size_t *remainp)
 {
-    if (*remainp >= sizeof(prof_int32)) {
+    if (*remainp >= sizeof(int32_t)) {
         *intp = load_32_be(*bufpp);
-        *bufpp += sizeof(prof_int32);
-        *remainp -= sizeof(prof_int32);
+        *bufpp += sizeof(int32_t);
+        *remainp -= sizeof(int32_t);
         return 0;
     }
     else
@@ -606,7 +604,7 @@ errcode_t profile_ser_internalize(const char *unused, profile_t *profilep,
     unsigned char   *bp;
     size_t          remain;
     int                     i;
-    prof_int32              fcount, tmp;
+    int32_t                 fcount, tmp;
     profile_filespec_t              *flist = 0;
 
     bp = *bufpp;

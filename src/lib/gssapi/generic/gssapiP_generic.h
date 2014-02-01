@@ -47,7 +47,6 @@
 
 #include "k5-platform.h"
 #include "k5-buf.h"
-typedef UINT64_TYPE gssint_uint64;
 
 /** helper macros **/
 
@@ -173,10 +172,10 @@ OM_uint32 g_display_com_err_status (OM_uint32 *minor_status,
                                     OM_uint32 status_value,
                                     gss_buffer_t status_string);
 
-gss_int32 g_order_init (void **queue, gssint_uint64 seqnum,
+gss_int32 g_order_init (void **queue, uint64_t seqnum,
                         int do_replay, int do_sequence, int wide);
 
-gss_int32 g_order_check (void **queue, gssint_uint64 seqnum);
+gss_int32 g_order_check (void **queue, uint64_t seqnum);
 
 void g_order_free (void **queue);
 

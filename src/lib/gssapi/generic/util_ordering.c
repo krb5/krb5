@@ -39,14 +39,14 @@ typedef struct _queue {
     int do_sequence;
     int start;
     int length;
-    gssint_uint64 firstnum;
+    uint64_t firstnum;
     /* Stored as deltas from firstnum.  This way, the high bit won't
        overflow unless we've actually gone through 2**n messages, or
        gotten something *way* out of sequence.  */
-    gssint_uint64 elem[QUEUE_LENGTH];
+    uint64_t elem[QUEUE_LENGTH];
     /* All ones for 64-bit sequence numbers; 32 ones for 32-bit
        sequence numbers.  */
-    gssint_uint64 mask;
+    uint64_t mask;
 } queue;
 
 /* rep invariant:
@@ -58,7 +58,7 @@ typedef struct _queue {
 #define QELEM(q,i) ((q)->elem[(i)%QSIZE(q)])
 
 static void
-queue_insert(queue *q, int after, gssint_uint64 seqnum)
+queue_insert(queue *q, int after, uint64_t seqnum)
 {
     /* insert.  this is not the fastest way, but it's easy, and it's
        optimized for insert at end, which is the common case */
@@ -89,7 +89,7 @@ queue_insert(queue *q, int after, gssint_uint64 seqnum)
 }
 
 gss_int32
-g_order_init(void **vqueue, gssint_uint64 seqnum,
+g_order_init(void **vqueue, uint64_t seqnum,
              int do_replay, int do_sequence, int wide_nums)
 {
     queue *q;
@@ -105,23 +105,23 @@ g_order_init(void **vqueue, gssint_uint64 seqnum,
 
     q->do_replay = do_replay;
     q->do_sequence = do_sequence;
-    q->mask = wide_nums ? ~(gssint_uint64)0 : 0xffffffffUL;
+    q->mask = wide_nums ? ~(uint64_t)0 : 0xffffffffUL;
 
     q->start = 0;
     q->length = 1;
     q->firstnum = seqnum;
-    q->elem[q->start] = ((gssint_uint64)0 - 1) & q->mask;
+    q->elem[q->start] = ((uint64_t)0 - 1) & q->mask;
 
     *vqueue = (void *) q;
     return(0);
 }
 
 gss_int32
-g_order_check(void **vqueue, gssint_uint64 seqnum)
+g_order_check(void **vqueue, uint64_t seqnum)
 {
     queue *q;
     int i;
-    gssint_uint64 expected;
+    uint64_t expected;
 
     q = (queue *) (*vqueue);
 

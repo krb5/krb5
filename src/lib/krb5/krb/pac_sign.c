@@ -40,7 +40,7 @@ k5_insert_client_info(krb5_context context,
     char *princ_name_utf8 = NULL;
     unsigned char *princ_name_ucs2 = NULL, *p;
     size_t princ_name_ucs2_len = 0;
-    krb5_ui_8 nt_authtime;
+    uint64_t nt_authtime;
 
     /* If we already have a CLIENT_INFO buffer, then just validate it */
     if (k5_pac_locate_buffer(context, pac, KRB5_PAC_CLIENT_INFO,

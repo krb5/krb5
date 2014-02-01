@@ -150,7 +150,7 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
        of using uint64_t, the possibility does exist that we're
        wrong.  */
     {
-        krb5_ui_8 i64;
+        uint64_t i64;
         assert(sizeof(i64) == 8);
         i64 = 0, i64--, i64 >>= 62;
         assert(i64 == 3);

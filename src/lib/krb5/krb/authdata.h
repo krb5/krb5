@@ -51,7 +51,7 @@ krb5int_authdata_verify(krb5_context context,
 typedef struct _PAC_INFO_BUFFER {
     krb5_ui_4 ulType;
     krb5_ui_4 cbBufferSize;
-    krb5_ui_8 Offset;
+    uint64_t Offset;
 } PAC_INFO_BUFFER;
 
 typedef struct _PACTYPE {
@@ -100,8 +100,7 @@ k5_pac_add_buffer(krb5_context context,
                   krb5_data *out_data);
 
 krb5_error_code
-k5_seconds_since_1970_to_time(krb5_timestamp elapsedSeconds,
-                              krb5_ui_8 *ntTime);
+k5_seconds_since_1970_to_time(krb5_timestamp elapsedSeconds, uint64_t *ntTime);
 
 
 #endif /* !KRB_AUTHDATA_H */

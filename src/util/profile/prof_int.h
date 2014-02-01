@@ -49,7 +49,7 @@ struct _prf_data_t {
 	   This is icky.  I just hope it's adequate.
 
 	   For next major release, fix this.  */
-	union { double d; void *p; UINT64_TYPE ll; k5_mutex_t m; } pad;
+	union { double d; void *p; uint64_t ll; k5_mutex_t m; } pad;
 
 	int		refcount; /* prf_file_t references */
 	struct _prf_data_t *next;
