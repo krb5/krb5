@@ -21,8 +21,6 @@ DEFINES=-D_GSS_STATIC_LINK=1
 
 ##DOS##DLL_EXP_TYPE=GSS
 
-include_stdint=@include_stdint@
-##DOS##include_stdint=
 ETSRCS= gssapi_err_krb5.c
 ETOBJS= $(OUTPRE)gssapi_err_krb5.$(OBJEXT)
 ETHDRS= gssapi_err_krb5.h
@@ -213,11 +211,11 @@ all-windows:: $(EHDRDIR) $(GSSAPI_KRB5_HDR) $(SRCS) $(HDRS)
 MK_EHDRDIR=if test -d $(EHDRDIR); then :; else (set -x; mkdir $(EHDRDIR)); fi
 ##DOS##MK_EHDRDIR=rem
 
-$(GSSAPI_KRB5_HDR): gssapi_krb5.h
+$(GSSAPI_KRB5_HDR): $(srcdir)$(S)gssapi_krb5.h
 	@$(MK_EHDRDIR)
-	$(CP) gssapi_krb5.h "$@"
+	$(CP) $(srcdir)$(S)gssapi_krb5.h "$@"
 
-all-unix:: $(SRCS) $(HDRS) $(GSSAPI_KRB5_HDR) includes
+all-unix:: $(SRCS) $(HDRS) $(GSSAPI_KRB5_HDR)
 all-unix:: all-libobjs
 
 error_map.h: $(top_srcdir)/util/gen-map.pl \
@@ -247,9 +245,6 @@ clean-windows::
 
 generate-files-mac: gssapi_krb5.h error_map.h
 
-gssapi_krb5.h: $(srcdir)/gssapi_krb5.hin
-	$(CP) $(srcdir)/gssapi_krb5.hin $@
-
 install-headers-unix install::
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
 	do $(INSTALL_DATA) $$f	\
@@ -257,8 +252,6 @@ install-headers-unix install::
 	done
 
 depend:: $(ETSRCS) $(ETHDRS) $(GSSAPI_KRB5_HDR) error_map.h
-
-includes::  gssapi_krb5.h
 
 install::
 
