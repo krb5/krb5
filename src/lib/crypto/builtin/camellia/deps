@@ -2,5 +2,4 @@
 # Generated makefile dependencies follow.
 #
 camellia.so camellia.po $(OUTPRE)camellia.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(srcdir)/../aes/uitypes.h \
   camellia.c camellia.h
