@@ -1390,8 +1390,8 @@ acc_ctx_new(OM_uint32 *minor_status,
 		*return_token = NO_TOKEN_SEND;
 		goto cleanup;
 	}
-	sc->mech_set = supported_mechSet;
-	supported_mechSet = GSS_C_NO_OID_SET;
+	sc->mech_set = mechTypes;
+	mechTypes = GSS_C_NO_OID_SET;
 	sc->internal_mech = mech_wanted;
 	sc->DER_mechTypes = der_mechTypes;
 	der_mechTypes.length = 0;
@@ -3517,7 +3517,7 @@ put_negResult(unsigned char **buf_out, OM_uint32 negResult,
  * is set to ACCEPT_INCOMPLETE if it's the first mech, REQUEST_MIC if
  * it's not the first mech, otherwise we return NULL and negResult
  * is set to REJECT. The returned pointer is an alias into
- * supported->elements and should not be freed.
+ * received->elements and should not be freed.
  *
  * NOTE: There is currently no way to specify a preference order of
  * mechanisms supported by the acceptor.
@@ -3539,7 +3539,7 @@ negotiate_mech(gss_OID_set supported, gss_OID_set received,
 			if (g_OID_equal(mech_oid, &supported->elements[j])) {
 				*negResult = (i == 0) ? ACCEPT_INCOMPLETE :
 					REQUEST_MIC;
-				return &supported->elements[j];
+				return &received->elements[i];
 			}
 		}
 	}
