@@ -5,6 +5,7 @@ SPHINX_BUILD=sphinx-build
 GROFF=@GROFF@
 GROFF_MAN=$(GROFF) -mtty-char -Tascii -mandoc -c
 localstatedir=@localstatedir@
+runstatedir=@runstatedir@
 sysconfdir=@sysconfdir@
 DEFCCNAME=@DEFCCNAME@
 DEFKTNAME=@DEFKTNAME@
@@ -44,6 +45,7 @@ $(docsrc)/version.py: $(top_srcdir)/patchlevel.h
 	    -e 's|@SBINDIR@|$(SERVER_BINDIR)|g' \
 	    -e 's|@LIBDIR@|$(KRB5_LIBDIR)|g' \
 	    -e 's|@LOCALSTATEDIR@|$(localstatedir)|g' \
+	    -e 's|@RUNSTATEDIR@|$(runstatedir)|g' \
 	    -e 's|@SYSCONFDIR@|$(sysconfdir)|g' \
 	    -e 's|@CCNAME@|$(DEFCCNAME)|g' \
 	    -e 's|@KTNAME@|$(DEFKTNAME)|g' \

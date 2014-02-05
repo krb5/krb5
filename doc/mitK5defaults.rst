@@ -17,6 +17,7 @@ KDC config file :ref:`kdc.conf(5)`          |kdcdir|\ ``/kdc.conf``        **KRB
 KDC database path (DB2)                     |kdcdir|\ ``/principal``
 Master key :ref:`stash_definition`          |kdcdir|\ ``/.k5.``\ *realm*
 Admin server ACL file :ref:`kadm5.acl(5)`   |kdcdir|\ ``/kadm5.acl``
+OTP socket directory                        |kdcrundir|
 Plugin base directory                       |libdir|\ ``/krb5/plugins``
 :ref:`rcache_definition` directory          ``/var/tmp``                   **KRB5RCACHEDIR**
 Master key default enctype                  |defmkey|
@@ -64,6 +65,7 @@ Description                 Symbolic name  Custom build path            Typical 
 User programs               BINDIR         ``/usr/local/bin``           ``/usr/bin``
 Libraries and plugins       LIBDIR         ``/usr/local/lib``           ``/usr/lib``
 Parent of KDC state dir     LOCALSTATEDIR  ``/usr/local/var``           ``/var``
+Parent of KDC runtime dir   RUNSTATEDIR    ``/usr/local/var/run``       ``/run``
 Administrative programs     SBINDIR        ``/usr/local/sbin``          ``/usr/sbin``
 Alternate krb5.conf dir     SYSCONFDIR     ``/usr/local/etc``           ``/etc``
 Default ccache name         DEFCCNAME      ``FILE:/tmp/krb5cc_%{uid}``  ``FILE:/tmp/krb5cc_%{uid}``
