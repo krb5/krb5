@@ -23,7 +23,7 @@ the following format::
 
     [otp]
         <name> = {
-            server = <host:port or filename> (default: $KDCDIR/<name>.socket)
+            server = <host:port or filename> (default: see below)
             secret = <filename>
             timeout = <integer> (default: 5 [seconds])
             retries = <integer> (default: 3)
@@ -33,7 +33,8 @@ the following format::
 If the server field begins with '/', it will be interpreted as a UNIX
 socket.  Otherwise, it is assumed to be in the format host:port.  When
 a UNIX domain socket is specified, the secret field is optional and an
-empty secret is used by default.
+empty secret is used by default.  If the server field is not
+specified, it defaults to |kdcrundir|\ ``/<name>.socket``.
 
 When forwarding the request over RADIUS, by default the principal is
 used in the User-Name attribute of the RADIUS packet.  The strip_realm

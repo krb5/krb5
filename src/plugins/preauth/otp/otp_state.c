@@ -40,7 +40,7 @@
 #endif
 
 #define DEFAULT_TYPE_NAME "DEFAULT"
-#define DEFAULT_SOCKET_FMT KDC_DIR "/%s.socket"
+#define DEFAULT_SOCKET_FMT KDC_RUN_DIR "/%s.socket"
 #define DEFAULT_TIMEOUT 5
 #define DEFAULT_RETRIES 3
 #define MAX_SECRET_LEN 1024
