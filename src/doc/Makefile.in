@@ -7,6 +7,7 @@ DOXYGEN=doxygen
 
 docsrc=$(top_srcdir)/../doc
 localstatedir=@localstatedir@
+runstatedir=@runstatedir@
 sysconfdir=@sysconfdir@
 DEFCCNAME=@DEFCCNAME@
 DEFKTNAME=@DEFKTNAME@
@@ -113,6 +114,7 @@ paths.py:
 	echo 'sbindir = "``$(SERVER_BINDIR)``"' >> $@
 	echo 'libdir = "``$(KRB5_LIBDIR)``"' >> $@
 	echo 'localstatedir = "``$(localstatedir)``"' >> $@
+	echo 'runstatedir = "``$(runstatedir)``"' >> $@
 	echo 'sysconfdir = "``$(sysconfdir)``"' >> $@
 	echo 'ccache = "``$(DEFCCNAME)``"' >> $@
 	echo 'keytab = "``$(DEFKTNAME)``"' >> $@

@@ -59,6 +59,7 @@
 #define PLUGIN_EXT              "@DYNOBJEXT"
 
 #define KDC_DIR                 "@LOCALSTATEDIR/krb5kdc"
+#define KDC_RUN_DIR             "@RUNSTATEDIR/krb5kdc"
 #define DEFAULT_KDB_FILE        KDC_DIR "/principal"
 #define DEFAULT_KEYFILE_STUB    KDC_DIR "/.k5."
 #define KRB5_DEFAULT_ADMIN_ACL  KDC_DIR "/krb5_adm.acl"
