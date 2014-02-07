@@ -134,6 +134,7 @@ check-pytests:: t_init_creds t_localauth
 			-i au.log
 	$(RUNPYTEST) $(srcdir)/t_salt.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_bogus_kdc_req.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_proxy.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) gcred hist hrealm kdbtest plugorder rdreq responder s2p
