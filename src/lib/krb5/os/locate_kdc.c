@@ -217,14 +217,10 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
         if (port) {
             unsigned long l;
-#ifdef HAVE_STROUL
             char *endptr;
             l = strtoul (port, &endptr, 10);
             if (endptr == NULL || *endptr != 0)
                 return EINVAL;
-#else
-            l = atoi (port);
-#endif
             /* L is unsigned, don't need to check <0.  */
             if (l > 65535)
                 return EINVAL;
