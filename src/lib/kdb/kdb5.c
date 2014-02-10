@@ -212,12 +212,12 @@ static krb5_error_code
 get_conf_section(krb5_context context, char **section)
 {
     krb5_error_code status;
-    char *result = NULL;
-    char *value = NULL;
+    char *result = NULL, *value = NULL, *defrealm;
 
     *section = NULL;
 
-    if (context->default_realm == NULL) {
+    status = krb5_get_default_realm(context, &defrealm);
+    if (status) {
         krb5_set_error_message(context, KRB5_KDB_SERVER_INTERNAL_ERR,
                                _("No default realm set; cannot initialize "
                                  "KDB"));
@@ -226,12 +226,13 @@ get_conf_section(krb5_context context, char **section)
     status = profile_get_string(context->profile,
                                 /* realms */
                                 KDB_REALM_SECTION,
-                                context->default_realm,
+                                defrealm,
                                 /* under the realm name, database_module */
                                 KDB_MODULE_POINTER,
                                 /* default value is the realm name itself */
-                                context->default_realm,
+                                defrealm,
                                 &value);
+    krb5_free_default_realm(context, defrealm);
     if (status)
         return status;
     result = strdup(value);
@@ -246,18 +247,19 @@ static char *
 kdb_get_library_name(krb5_context kcontext)
 {
     krb5_error_code status = 0;
-    char   *result = NULL;
-    char   *value = NULL;
-    char   *lib = NULL;
+    char *result = NULL, *value = NULL, *lib = NULL, *defrealm = NULL;
 
+    status = krb5_get_default_realm(kcontext, &defrealm);
+    if (status)
+        goto clean_n_exit;
     status = profile_get_string(kcontext->profile,
                                 /* realms */
                                 KDB_REALM_SECTION,
-                                kcontext->default_realm,
+                                defrealm,
                                 /* under the realm name, database_module */
                                 KDB_MODULE_POINTER,
                                 /* default value is the realm name itself */
-                                kcontext->default_realm,
+                                defrealm,
                                 &value);
     if (status)
         goto clean_n_exit;
@@ -276,6 +278,7 @@ kdb_get_library_name(krb5_context kcontext)
 
     result = strdup(lib);
 clean_n_exit:
+    krb5_free_default_realm(kcontext, defrealm);
     profile_release_string(value);
     profile_release_string(lib);
     return result;
