@@ -276,13 +276,9 @@ main()
     osa_policy_ent_t pol;
     krb5_pa_data **e_data;
     const char *status;
-    char *defrealm;
     int count;
 
     CHECK(krb5_init_context_profile(NULL, KRB5_INIT_CONTEXT_KDC, &ctx));
-
-    /* Currently necessary for krb5_db_open to work. */
-    CHECK(krb5_get_default_realm(ctx, &defrealm));
 
     /* If we can, revert to requiring all entries match sample_princ in
      * iter_princ_handler */
@@ -401,7 +397,6 @@ main()
     /* It might be nice to exercise krb5_db_destroy here, but the LDAP module
      * doesn't support it. */
 
-    krb5_free_default_realm(ctx, defrealm);
     krb5_free_context(ctx);
     return 0;
 }
