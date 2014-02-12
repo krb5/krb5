@@ -15,14 +15,6 @@ main()
 
 	if [ \! -z "$WORDLIST" -a -f "$WORDLIST" ]; then
 		DICT=$WORDLIST
-	elif [ -f /usr/local/lib/dict/words ]; then
-		DICT=/usr/local/lib/dict/words
-	elif [ -f /usr/share/dict/words ]; then
-		DICT=/usr/share/dict/words
-	elif [ -f /usr/dict/words ]; then
-		DICT=/usr/dict/words
-	elif [ -f /usr/share/lib/dict/words ]; then
-		DICT=/usr/share/lib/dict/words
 	elif [ -f $srcdir/../test/dictionary ]; then
 		DICT=`cd $srcdir/../test && pwd`/dictionary
 	else
