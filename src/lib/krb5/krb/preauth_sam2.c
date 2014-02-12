@@ -95,6 +95,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     krb5_prompt kprompt;
     krb5_prompt_type prompt_type;
     krb5_data defsalt, *salt;
+    struct gak_password *gakpw;
     krb5_checksum **cksum;
     krb5_data *scratch = NULL;
     krb5_boolean valid_cksum = 0;
@@ -219,9 +220,9 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
         }
 
         /* generate a key using the supplied password */
+        gakpw = ctx->gak_data;
         retval = krb5_c_string_to_key(context, sc2b->sam_etype,
-                                      (krb5_data *)ctx->gak_data, salt,
-                                      &ctx->as_key);
+                                      gakpw->password, salt, &ctx->as_key);
 
         if (retval) {
             krb5_free_sam_challenge_2(context, sc2);
