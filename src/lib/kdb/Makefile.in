@@ -45,7 +45,7 @@ STLIBOBJS= \
 	kdb_log.o \
 	keytab.o
 
-EXTRADEPSRCS= t_ulog.c
+EXTRADEPSRCS= t_stringattr.c t_ulog.c
 
 all-unix:: all-liblinks
 install-unix:: install-libs
