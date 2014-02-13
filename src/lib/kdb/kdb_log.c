@@ -203,11 +203,12 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
     int ulogfd;
 
     INIT_ULOG(context);
+    retval = ulog_lock(context, KRB5_LOCKMODE_EXCLUSIVE);
+    if (retval)
+        return retval;
+
     ulogentries = log_ctx->ulogentries;
     ulogfd = log_ctx->ulogfd;
-
-    if (upd == NULL)
-        return KRB5_LOG_ERROR;
 
     time_current(&ktime);
 
@@ -218,7 +219,7 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
     if (recsize > ulog->kdb_block) {
         retval = resize(ulog, ulogentries, ulogfd, recsize);
         if (retval)
-            return retval;
+            goto cleanup;
     }
 
     /* If we have reached the last possible serial number, reinitialize the
@@ -226,30 +227,31 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
     if (ulog->kdb_last_sno == (kdb_sno_t)-1)
         reset_header(ulog);
 
-    /* Get the next serial number and save it for finish_update() to index. */
-    cur_sno = ulog->kdb_last_sno + 1;
-    upd->kdb_entry_sno = cur_sno;
+    ulog->kdb_state = KDB_UNSTABLE;
 
+    /* Get the next serial number and find its update entry. */
+    cur_sno = ulog->kdb_last_sno + 1;
     i = (cur_sno - 1) % ulogentries;
     indx_log = INDEX(ulog, i);
 
     memset(indx_log, 0, ulog->kdb_block);
     indx_log->kdb_umagic = KDB_ULOG_MAGIC;
     indx_log->kdb_entry_size = upd_size;
-    indx_log->kdb_entry_sno = cur_sno;
+    indx_log->kdb_entry_sno = upd->kdb_entry_sno = cur_sno;
     indx_log->kdb_time = upd->kdb_time = ktime;
     indx_log->kdb_commit = upd->kdb_commit = FALSE;
 
-    ulog->kdb_state = KDB_UNSTABLE;
-
     xdrmem_create(&xdrs, (char *)indx_log->entry_data,
                   indx_log->kdb_entry_size, XDR_ENCODE);
-    if (!xdr_kdb_incr_update_t(&xdrs, upd))
-        return KRB5_LOG_CONV;
+    if (!xdr_kdb_incr_update_t(&xdrs, upd)) {
+        retval = KRB5_LOG_CONV;
+        goto cleanup;
+    }
 
+    indx_log->kdb_commit = TRUE;
     retval = sync_update(ulog, indx_log);
     if (retval)
-        return retval;
+        goto cleanup;
 
     if (ulog->kdb_num < ulogentries)
         ulog->kdb_num++;
@@ -269,37 +271,12 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
         ulog->kdb_first_time = indx_log->kdb_time;
     }
 
-    ulog_sync_header(ulog);
-    return 0;
-}
-
-/* Mark the log entry as committed and sync the memory mapped log to file. */
-krb5_error_code
-ulog_finish_update(krb5_context context, kdb_incr_update_t *upd)
-{
-    krb5_error_code retval;
-    kdb_ent_header_t *indx_log;
-    unsigned int i;
-    kdb_log_context *log_ctx;
-    kdb_hlog_t *ulog = NULL;
-    uint32_t ulogentries;
-
-    INIT_ULOG(context);
-    ulogentries = log_ctx->ulogentries;
-
-    i = (upd->kdb_entry_sno - 1) % ulogentries;
-
-    indx_log = INDEX(ulog, i);
-    indx_log->kdb_commit = TRUE;
-
     ulog->kdb_state = KDB_STABLE;
 
-    retval = sync_update(ulog, indx_log);
-    if (retval)
-        return retval;
-
+cleanup:
     ulog_sync_header(ulog);
-    return 0;
+    ulog_lock(context, KRB5_LOCKMODE_UNLOCK);
+    return retval;
 }
 
 /* Used by the slave to update its hash db from* the incr update log.  Must be
