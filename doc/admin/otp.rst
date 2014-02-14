@@ -1,3 +1,5 @@
+.. _otp_preauth:
+
 OTP Preauthentication
 =====================
 

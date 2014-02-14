@@ -19,8 +19,8 @@ Quick facts
 License - :ref:`mitK5license`
 
 Releases:
-    - Latest stable: http://web.mit.edu/kerberos/krb5-1.11/
-    - Supported: http://web.mit.edu/kerberos/krb5-1.10/
+    - Latest stable: http://web.mit.edu/kerberos/krb5-1.12/
+    - Supported: http://web.mit.edu/kerberos/krb5-1.11/
     - Release cycle: 9 -- 12 months
 
 Supported platforms \/ OS distributions:
@@ -130,6 +130,17 @@ Release 1.11
  -   GSS-API extensions for credential locations
  -   Responder mechanism
 
+Release 1.12
+ -   Plugin to control krb5_aname_to_localname and krb5_kuserok behavior   :ref:`localauth_plugin`
+ -   Plugin to control hostname-to-realm mappings and the default realm    :ref:`hostrealm_plugin`
+ -   GSSAPI extensions for constructing MIC tokens using IOV lists         :ref:`gssapi_mic_token`
+ -   Principal may refer to nonexistent policies `Policy Refcount project <http://k5wiki.kerberos.org/wiki/Projects/Policy_refcount_elimination>`_
+ -   Support for having no long-term keys for a principal `Principals Without Keys project <http://k5wiki.kerberos.org/wiki/Projects/Principals_without_keys>`_
+ -   Collection support to the KEYRING credential cache type on Linux :ref:`ccache_definition`
+ -   FAST OTP preauthentication module for the KDC which uses RADIUS to validate OTP token values :ref:`otp_preauth`
+ -   Experimental Audit plugin for KDC processing `Audit project <http://k5wiki.kerberos.org/wiki/Projects/Audit>`_
+
+
 `Pre-authentication mechanisms`
 
 - PW-SALT                                         :rfc:`4120#section-5.2.7.3`
@@ -140,6 +151,7 @@ Release 1.11
 - PKINIT                                          :rfc:`4556`
 - FX-COOKIE                                       :rfc:`6113#section-5.2`
 - S4U-X509-USER                (release 1.8)      http://msdn.microsoft.com/en-us/library/cc246091
+- OTP                          (release 1.12)     :ref:`otp_preauth`
 
 `PRNG`
 
