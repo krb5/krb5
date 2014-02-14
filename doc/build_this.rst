@@ -23,7 +23,9 @@ directory::
     sphinx-build . test_html
 
 You will see a number of warnings about missing files.  This is
-expected.
+expected.  If there is not already a ``doc/version.py`` file, you will
+need to create one by first running ``make version.py`` in the
+``src/doc`` directory of a configured build tree.
 
 
 Updating man pages

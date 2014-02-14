@@ -1,25 +1,8 @@
-HTML
-====
+BUILDING
+========
 
-To build the documentation as HTML pages run:
-
-sphinx-build source_dir  destination_dir
-
-where
-source_dir is the source directory which includes configuration file conf.py and all source files;
-destination_dir is the directory for the built documentation.
-
-Once completed, the newly generated HTML documentation can be viewed from the browser by pointing to destination_dir/index.html
-
-
-MAN PAGES
-=========
-
-Similarly, to build the documentation as man pages run:
-
-sphinx-build -b man source_dir  destination_dir
-
-The list of manual pages to be built should be constructed under man_pages section on conf.py
+See doc/build_this.rst for details about how to build the
+documentation.
 
 
 CONVENTIONS
