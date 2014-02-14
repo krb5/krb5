@@ -420,6 +420,7 @@ pre-existing pointer and length for a modifiable region of data)::
     /* Decrypted data is in iov[1].buffer, pointing to a subregion of
      * token. */
 
+.. _gssapi_mic_token:
 
 IOV MIC tokens
 --------------
