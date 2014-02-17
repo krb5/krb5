@@ -69,9 +69,9 @@ copy_creds_except(krb5_context context, krb5_ccache incc,
 
     while (!(ret = krb5_cc_next_cred(context, incc, &cur, &creds))) {
         if (krb5_principal_compare(context, princ, creds.server))
-            continue;
-
-        ret = krb5_cc_store_cred(context, outcc, &creds);
+            ret = 0;
+        else
+            ret = krb5_cc_store_cred(context, outcc, &creds);
         krb5_free_cred_contents(context, &creds);
         if (ret)
             goto cleanup;
