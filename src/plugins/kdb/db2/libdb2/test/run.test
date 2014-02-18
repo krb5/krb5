@@ -71,10 +71,11 @@ main()
 }
 
 getnwords() {
-	# Delete blank lines because the db code appears not to
-	# like empty keys.  On Debian Linux, $DICT appears to contain
-	# some non-ASCII characters, and "rev" chokes on them.
-	sed -e '/^$/d' < $DICT | cat -v | sed -e ${1}q
+	# Delete blank lines because the db code appears not to like
+	# empty keys.  Omit lines with non-alphanumeric characters to
+	# avoid shell metacharacters and non-ASCII characters which
+	# could cause 'rev' to choke.
+	LC_ALL=C sed -e '/^$/d' -e '/[^A-Za-z]/d' < $DICT | sed -e ${1}q
 }
 
 # Take the first hundred entries in the dictionary, and make them
