@@ -1396,6 +1396,24 @@ note_req_timestamp(krb5_context context, krb5_init_creds_context ctx,
         AUTH_OFFSET : UNAUTH_OFFSET;
 }
 
+/*
+ * Returns whether the error response is a referral to another domain.
+ *
+ * The referrals draft [1] requires servers to return the referral domain in an
+ * error type WRONG_REALM, but Microsoft Windows Server 2003 (and possibly
+ * others) return the realm in a PRINCIPAL_UNKNOWN message. We detect this case
+ * by looking for a non-empty client.realm field in such responses.
+ *
+ * [1] http://tools.ietf.org/html/draft-ietf-krb-wg-kerberos-referrals-11
+ */
+static int
+is_referral(krb5_init_creds_context ctx) {
+    return ctx->err_reply->error == KDC_ERR_WRONG_REALM ||
+        (ctx->err_reply->error == KDC_ERR_C_PRINCIPAL_UNKNOWN &&
+         ctx->err_reply->client != NULL &&
+         ctx->err_reply->client->realm.length);
+}
+
 static krb5_error_code
 init_creds_step_reply(krb5_context context,
                       krb5_init_creds_context ctx,
@@ -1454,9 +1472,10 @@ init_creds_step_reply(krb5_context context,
                                              ctx->preauth_to_use);
             ctx->preauth_required = TRUE;
 
-        } else if (canon_flag && ctx->err_reply->error == KDC_ERR_WRONG_REALM) {
+        } else if (canon_flag && is_referral(ctx)) {
             if (ctx->err_reply->client == NULL ||
                 !ctx->err_reply->client->realm.length) {
+                /* Only WRONG_REALM referral types can reach this. */
                 code = KRB5KDC_ERR_WRONG_REALM;
                 goto cleanup;
             }
