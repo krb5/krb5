@@ -288,9 +288,9 @@ void kdb5_create(argc, argv)
 /*     } */
 
     if (log_ctx && log_ctx->iproprole) {
-        if ((retval = ulog_map(util_context, global_params.iprop_logfile,
-                               global_params.iprop_ulogsize, FKCOMMAND,
-                               db5util_db_args))) {
+        retval = ulog_map(util_context, global_params.iprop_logfile,
+                          global_params.iprop_ulogsize);
+        if (retval) {
             com_err(argv[0], retval, _("while creating update log"));
             exit_status++;
             return;
@@ -300,7 +300,12 @@ void kdb5_create(argc, argv)
          * We're reinitializing the update log in case one already
          * existed, but this should never happen.
          */
-        ulog_init_header(util_context);
+        retval = ulog_init_header(util_context);
+        if (retval) {
+            com_err(argv[0], retval, _("while initializing update log"));
+            exit_status++;
+            return;
+        }
 
         /*
          * Since we're creating a new db we shouldn't worry about

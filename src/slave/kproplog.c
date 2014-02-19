@@ -11,6 +11,7 @@
 #include <locale.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include <sys/mman.h>
 #include <time.h>
 #include <limits.h>
 #include <locale.h>
@@ -409,6 +410,24 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, uint32_t ulogentries,
     }
 }
 
+/* Return a read-only mmap of the ulog, or NULL on failure.  Assumes fd is
+ * released on process exit. */
+static kdb_hlog_t *
+map_ulog(const char *filename)
+{
+    int fd;
+    struct stat st;
+    kdb_hlog_t *ulog;
+
+    fd = open(filename, O_RDONLY);
+    if (fd == -1)
+        return NULL;
+    if (fstat(fd, &st) < 0)
+        return NULL;
+    ulog = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    return (ulog == MAP_FAILED) ? NULL : ulog;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -418,7 +437,6 @@ main(int argc, char **argv)
     uint32_t entry = 0;
     krb5_context context;
     kadm5_config_params params;
-    kdb_log_context *log_ctx;
     kdb_hlog_t *ulog = NULL;
 
     setlocale(LC_ALL, "");
@@ -458,17 +476,23 @@ main(int argc, char **argv)
 
     printf(_("\nKerberos update log (%s)\n"), params.iprop_logfile);
 
-    if (ulog_map(context, params.iprop_logfile, 0,
-                 reset ? FKADMIND : FKPROPLOG, NULL)) {
-        fprintf(stderr, _("Unable to map log file %s\n\n"),
-                params.iprop_logfile);
-        exit(1);
+    if (reset) {
+        if (ulog_map(context, params.iprop_logfile, params.iprop_ulogsize)) {
+            fprintf(stderr, _("Unable to map log file %s\n\n"),
+                    params.iprop_logfile);
+            exit(1);
+        }
+        if (ulog_init_header(context) != 0) {
+            fprintf(stderr, _("Couldn't reinitialize ulog file %s\n\n"),
+                    params.iprop_logfile);
+            exit(1);
+        }
+        printf(_("Reinitialized the ulog.\n"));
+        exit(0);
     }
 
-    log_ctx = context->kdblog_context;
-    if (log_ctx) {
-        ulog = log_ctx->ulog;
-    } else {
+    ulog = map_ulog(params.iprop_logfile);
+    if (ulog == NULL) {
         fprintf(stderr, _("Unable to map log file %s\n\n"),
                 params.iprop_logfile);
         exit(1);
@@ -477,12 +501,6 @@ main(int argc, char **argv)
     if (ulog->kdb_hmagic != KDB_ULOG_HDR_MAGIC) {
         fprintf(stderr, _("Corrupt header log, exiting\n\n"));
         exit(1);
-    }
-
-    if (reset) {
-        ulog_init_header(context);
-        printf(_("Reinitialized the ulog.\n"));
-        exit(0);
     }
 
     printf(_("Update log dump :\n"));

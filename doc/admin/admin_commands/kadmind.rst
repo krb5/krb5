@@ -11,6 +11,7 @@ SYNOPSIS
 [**-r** *realm*]
 [**-m**]
 [**-nofork**]
+[**-proponly**]
 [**-port** *port-number*]
 [**-P** *pid_file*]
 [**-p** *kdb5_util_path*]
@@ -73,6 +74,12 @@ OPTIONS
     causes the server to remain in the foreground and remain
     associated to the terminal.  In normal operation, you should allow
     the server to place itself in the background.
+
+**-proponly**
+    causes the server to only listen and respond to Kerberos slave
+    incremental propagation polling requests.  This option can be used
+    to set up a hierarchical propagation topology where a slave KDC
+    provides incremental updates to other Kerberos slaves.
 
 **-port** *port-number*
     specifies the port on which the administration server listens for

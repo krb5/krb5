@@ -884,23 +884,8 @@ krb5_error_code
 krb5_db_put_principal(krb5_context kcontext, krb5_db_entry *entry)
 {
     krb5_error_code status = 0;
-    kdb_vftabl *v;
-    char  **db_args = NULL;
     kdb_incr_update_t *upd = NULL;
     char *princ_name = NULL;
-    int ulog_locked = 0;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    if (v->put_principal == NULL)
-        return KRB5_PLUGIN_OP_NOTSUPP;
-
-    status = extract_db_args_from_tl_data(kcontext, &entry->tl_data,
-                                          &entry->n_tl_data,
-                                          &db_args);
-    if (status)
-        goto cleanup;
 
     if (logging(kcontext)) {
         upd = k5alloc(sizeof(*upd), &status);
@@ -909,30 +894,22 @@ krb5_db_put_principal(krb5_context kcontext, krb5_db_entry *entry)
         if ((status = ulog_conv_2logentry(kcontext, entry, upd)))
             goto cleanup;
 
-        status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
-        if (status != 0)
-            goto cleanup;
-        ulog_locked = 1;
-
         status = krb5_unparse_name(kcontext, entry->princ, &princ_name);
         if (status != 0)
             goto cleanup;
 
         upd->kdb_princ_name.utf8str_t_val = princ_name;
         upd->kdb_princ_name.utf8str_t_len = strlen(princ_name);
-
-        if ((status = ulog_add_update(kcontext, upd)) != 0)
-            goto cleanup;
     }
 
-    status = v->put_principal(kcontext, entry, db_args);
-    if (status == 0 && ulog_locked)
-        (void) ulog_finish_update(kcontext, upd);
+    status = krb5int_put_principal_no_log(kcontext, entry);
+    if (status)
+        goto cleanup;
+
+    if (logging(kcontext))
+        status = ulog_add_update(kcontext, upd);
 
 cleanup:
-    if (ulog_locked)
-        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
-    free_db_args(kcontext, db_args);
     ulog_free_entries(upd, 1);
     return status;
 }
@@ -956,45 +933,23 @@ krb5_error_code
 krb5_db_delete_principal(krb5_context kcontext, krb5_principal search_for)
 {
     krb5_error_code status = 0;
-    kdb_vftabl *v;
     kdb_incr_update_t upd;
     char *princ_name = NULL;
-    int ulog_locked = 0;
 
-    status = get_vftabl(kcontext, &v);
+    status = krb5int_delete_principal_no_log(kcontext, search_for);
+    if (status || !logging(kcontext))
+        return status;
+
+    status = krb5_unparse_name(kcontext, search_for, &princ_name);
     if (status)
         return status;
-    if (v->delete_principal == NULL)
-        return KRB5_PLUGIN_OP_NOTSUPP;
 
-    if (logging(kcontext)) {
-        status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
-        if (status)
-            return status;
-        ulog_locked = 1;
+    memset(&upd, 0, sizeof(kdb_incr_update_t));
+    upd.kdb_princ_name.utf8str_t_val = princ_name;
+    upd.kdb_princ_name.utf8str_t_len = strlen(princ_name);
+    upd.kdb_deleted = TRUE;
 
-        status = krb5_unparse_name(kcontext, search_for, &princ_name);
-        if (status)
-            goto cleanup;
-
-        (void) memset(&upd, 0, sizeof (kdb_incr_update_t));
-
-        upd.kdb_princ_name.utf8str_t_val = princ_name;
-        upd.kdb_princ_name.utf8str_t_len = strlen(princ_name);
-        upd.kdb_deleted = TRUE;
-
-        status = ulog_add_update(kcontext, &upd);
-        if (status)
-            goto cleanup;
-    }
-
-    status = v->delete_principal(kcontext, search_for);
-    if (status == 0 && ulog_locked)
-        (void) ulog_finish_update(kcontext, &upd);
-
-cleanup:
-    if (ulog_locked)
-        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
+    status = ulog_add_update(kcontext, &upd);
     free(princ_name);
     return status;
 }
@@ -2301,7 +2256,6 @@ krb5_db_create_policy(krb5_context kcontext, osa_policy_ent_t policy)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
-    int ulog_locked = 0;
 
     status = get_vftabl(kcontext, &v);
     if (status)
@@ -2309,20 +2263,10 @@ krb5_db_create_policy(krb5_context kcontext, osa_policy_ent_t policy)
     if (v->create_policy == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
 
-    if (logging(kcontext)) {
-        status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
-        if (status != 0)
-            return status;
-        ulog_locked = 1;
-    }
-
     status = v->create_policy(kcontext, policy);
     /* iprop does not support policy mods; force full resync. */
-    if (!status && ulog_locked)
-        ulog_init_header(kcontext);
-
-    if (ulog_locked)
-        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
+    if (!status && logging(kcontext))
+        status = ulog_init_header(kcontext);
     return status;
 }
 
@@ -2345,7 +2289,6 @@ krb5_db_put_policy(krb5_context kcontext, osa_policy_ent_t policy)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
-    int ulog_locked = 0;
 
     status = get_vftabl(kcontext, &v);
     if (status)
@@ -2353,20 +2296,10 @@ krb5_db_put_policy(krb5_context kcontext, osa_policy_ent_t policy)
     if (v->put_policy == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
 
-    if (logging(kcontext)) {
-        status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
-        if (status)
-            return status;
-        ulog_locked = 1;
-    }
-
     status = v->put_policy(kcontext, policy);
     /* iprop does not support policy mods; force full resync. */
-    if (!status && ulog_locked)
-        ulog_init_header(kcontext);
-
-    if (ulog_locked)
-        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
+    if (!status && logging(kcontext))
+        status = ulog_init_header(kcontext);
     return status;
 }
 
@@ -2390,7 +2323,6 @@ krb5_db_delete_policy(krb5_context kcontext, char *policy)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
-    int ulog_locked = 0;
 
     status = get_vftabl(kcontext, &v);
     if (status)
@@ -2398,20 +2330,10 @@ krb5_db_delete_policy(krb5_context kcontext, char *policy)
     if (v->delete_policy == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
 
-    if (logging(kcontext)) {
-        status = ulog_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
-        if (status)
-            return status;
-        ulog_locked = 1;
-    }
-
     status = v->delete_policy(kcontext, policy);
     /* iprop does not support policy mods; force full resync. */
-    if (!status && ulog_locked)
-        ulog_init_header(kcontext);
-
-    if (ulog_locked)
-        ulog_lock(kcontext, KRB5_LOCKMODE_UNLOCK);
+    if (!status && logging(kcontext))
+        status = ulog_init_header(kcontext);
     return status;
 }
 
