@@ -1117,7 +1117,7 @@ find_alternate_tgs(kdc_realm_t *kdc_active_realm, krb5_principal princ,
         goto cleanup;
     }
 cleanup:
-    if (retval == 0 && server_ptr == NULL)
+    if (retval == 0 && *server_ptr == NULL)
         retval = KRB5_KDB_NOENTRY;
     if (retval != 0)
         *status = "UNKNOWN_SERVER";
