@@ -438,6 +438,11 @@ following tags may be specified in the realm's subsection:
     be given a value in each realm subsection in the configuration
     file, or there must be DNS SRV records specifying the KDCs.
 
+    Alternatively, the URL of the MS-KKDCP proxy service. The scheme
+    of this URL MUST be 'https'. If your system does not already
+    trust the cetificate chain of the remote MS-KKDCP proxy, this may
+    need to be configured.
+
 **kpasswd_server**
     Points to the server where all the password changes are performed.
     If there is no such entry, the port 464 on the **admin_server**

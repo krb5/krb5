@@ -38,12 +38,30 @@
 
 #include <krb5/locate_plugin.h>
 
+typedef enum {
+    TCP_OR_UDP = 0,
+    TCP,
+    UDP,
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+    HTTPS,
+#endif
+} transport;
+
+/* HTTPS convenience macros */
+#ifdef HTTPS_CRYPTO_IMPL_OPENSSL
+#define IS_HTTPS(transport) ((transport) == HTTPS)
+#else
+#define IS_HTTPS(transport) 0
+#endif
+
 /* A single server hostname or address. */
 struct server_entry {
     char *hostname;             /* NULL -> use addrlen/addr instead */
     int port;                   /* Used only if hostname set */
-    int socktype;               /* May be 0 for UDP/TCP if hostname set */
+    transport protocol;         /* May be 0 for UDP/TCP if hostname set */
     int family;                 /* May be 0 (aka AF_UNSPEC) if hostname set */
+    krb5_data realm;            /* May be NULL if transport not HTTPS */
+    char *uri;                  /* May be NULL if transport not HTTPS */
     size_t addrlen;
     struct sockaddr_storage addr;
 };
@@ -100,7 +118,7 @@ int _krb5_conf_boolean (const char *);
 
 krb5_error_code k5_sendto(krb5_context context, const krb5_data *message,
                           const struct serverlist *addrs,
-                          int socktype1, int socktype2,
+                          transport protocol1, transport protocol2,
                           struct sendto_callback_info *callback_info,
                           krb5_data *reply, struct sockaddr *remoteaddr,
                           socklen_t *remoteaddrlen, int *server_used,

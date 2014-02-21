@@ -522,6 +522,12 @@ typedef struct _krb5_pa_otp_req {
     krb5_data vendor;
 } krb5_pa_otp_req;
 
+typedef struct _krb5_kkdcp_proxy_message {
+    krb5_data kerb_message;
+    krb5_data target_domain;
+    krb5_int32 dclocator_hint;
+} krb5_kkdcp_proxymessage;
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -902,6 +908,8 @@ void k5_free_otp_tokeninfo(krb5_context context, krb5_otp_tokeninfo *val);
 void k5_free_pa_otp_challenge(krb5_context context,
                               krb5_pa_otp_challenge *val);
 void k5_free_pa_otp_req(krb5_context context, krb5_pa_otp_req *val);
+void k5_free_kkdcp_proxymessage(krb5_context context,
+                                krb5_kkdcp_proxymessage *val);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1442,6 +1450,9 @@ encode_krb5_pa_otp_req(const krb5_pa_otp_req *, krb5_data **);
 krb5_error_code
 encode_krb5_pa_otp_enc_req(const krb5_data *, krb5_data **);
 
+krb5_error_code
+encode_krb5_kkdcp_proxymessage(const krb5_kkdcp_proxymessage *, krb5_data **);
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1611,6 +1622,9 @@ decode_krb5_pa_otp_req(const krb5_data *, krb5_pa_otp_req **);
 
 krb5_error_code
 decode_krb5_pa_otp_enc_req(const krb5_data *, krb5_data **);
+
+krb5_error_code
+decode_krb5_kkdcp_proxymessage(const krb5_data *, krb5_kkdcp_proxymessage **);
 
 struct _krb5_key_data;          /* kdb.h */
 
