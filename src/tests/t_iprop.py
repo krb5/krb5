@@ -8,29 +8,43 @@ from k5test import *
 # Read lines from kpropd output until we are synchronized.  Error if
 # full_expected is true and we didn't see a full propagation or vice
 # versa.
-def wait_for_prop(kpropd, full_expected):
+def wait_for_prop(kpropd, full_expected, expected_old, expected_new):
     output('*** Waiting for sync from kpropd\n')
-    full_seen = False
+    full_seen = sleep_seen = prodded_after_dump = False
+    old_sno = new_sno = -1
     while True:
         line = kpropd.stdout.readline()
         if line == '':
             fail('kpropd process exited unexpectedly')
         output('kpropd: ' + line)
 
-        if 'KDC is synchronized' in line or 'Incremental updates:' in line:
-            output('*** Sync complete\n')
-            if full_expected and not full_seen:
-                fail('Expected full dump but saw only incremental')
-            if full_seen and not full_expected:
-                fail('Expected incremental prop but saw full dump')
-            return
+        m = re.match(r'Calling iprop_get_updates_1 \(sno=(\d+) ', line)
+        if m:
+            if not full_seen:
+                old_sno = int(m.group(1))
+            # Also record this as the new sno, in case we get back
+            # UPDATE_NIL.
+            new_sno = int(m.group(1))
 
+        m = re.match(r'Got incremental updates \(sno=(\d+) ', line)
+        if m:
+            new_sno = int(m.group(1))
+
+        if 'KDC is synchronized' in line or 'Incremental updates:' in line:
+            break
+
+        # After a full resync request, these lines could appear in
+        # either order.
+        if 'Waiting for' in line:
+            sleep_seen = True
         if 'load process for full propagation completed' in line:
             full_seen = True
-            # kpropd's child process has finished a DB load; make the parent
-            # do another iprop request.  This will be unnecessary if kpropd
-            # is simplified to use a single process.
+        if sleep_seen and full_seen and not prodded_after_dump:
+            # Prod the kpropd parent into getting incrementals after
+            # it finishes a DB load.  This will be unnecessary if
+            # kpropd is simplified to use a single process.
             kpropd.send_signal(signal.SIGUSR1)
+            prodded_after_dump = True
 
         # Detect some failure conditions.
         if 'Still waiting for full resync' in line:
@@ -46,6 +60,25 @@ def wait_for_prop(kpropd, full_expected):
         if 'invalid return' in line:
             fail('kadmind returned invalid result')
 
+    if full_expected and not full_seen:
+        fail('Expected full dump but saw only incremental')
+    if full_seen and not full_expected:
+        fail('Expected incremental prop but saw full dump')
+    if old_sno != expected_old:
+         fail('Expected old serial %d from kpropd sync' % expected_old)
+    if new_sno != expected_new:
+         fail('Expected new serial %d from kpropd sync' % expected_new)
+
+    # Wait until kpropd is sleeping before continuing, to avoid races.
+    # (This is imperfect since there's there is a short window between
+    # the fprintf and the sleep; kpropd will need design changes to
+    # fix that.)
+    while True:
+        line = kpropd.stdout.readline()
+        output('kpropd: ' + line)
+        if 'Waiting for' in line:
+            break
+    output('*** Sync complete\n')
 
 # Verify the output of kproplog against the expected number of
 # entries, first and last serial number, and a list of principal names
@@ -144,7 +177,7 @@ check_ulog(5, 1, 5, [pr1, pr3, pr2, pr2, pr2])
 
 # Start kpropd for slave1 and get a full dump from master.
 kpropd1 = realm.start_kpropd(slave1, ['-d'])
-wait_for_prop(kpropd1, True)
+wait_for_prop(kpropd1, True, 0, 5)
 out = realm.run_kadminl('listprincs', slave1)
 if pr1 not in out or pr2 not in out or pr3 not in out:
     fail('slave1 does not have all principals from master')
@@ -154,7 +187,7 @@ check_ulog(0, 0, 5, [], slave1)
 realm.run_kadminl('modprinc -allow_tix ' + pr2)
 check_ulog(6, 1, 6, [pr1, pr3, pr2, pr2, pr2, pr2])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, False)
+wait_for_prop(kpropd1, False, 5, 6)
 check_ulog(1, 6, 6, [pr2], slave1)
 out = realm.run_kadminl('getprinc ' + pr2, slave1)
 if 'Attributes: DISALLOW_ALL_TIX' not in out:
@@ -177,7 +210,7 @@ realm.start_server([kadmind, '-nofork', '-proponly', '-W', '-p', kdb5_util,
 kpropd2 = realm.start_server([kpropd, '-d', '-D', '-P', slave2_kprop_port,
                               '-f', slave2_in_dump_path, '-p', kdb5_util,
                               '-a', acl_file, '-A', hostname], 'ready', slave2)
-wait_for_prop(kpropd2, True)
+wait_for_prop(kpropd2, True, 0, 6)
 check_ulog(0, 0, 6, [], slave2)
 out = realm.run_kadminl('listprincs', slave1)
 if pr1 not in out or pr2 not in out or pr3 not in out:
@@ -188,13 +221,13 @@ if pr1 not in out or pr2 not in out or pr3 not in out:
 realm.run_kadminl('modprinc -maxrenewlife "22 hours" ' + pr1)
 check_ulog(7, 1, 7, [pr1, pr3, pr2, pr2, pr2, pr2, pr1])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, False)
+wait_for_prop(kpropd1, False, 6, 7)
 check_ulog(2, 6, 7, [pr2, pr1], slave1)
 out = realm.run_kadminl('getprinc ' + pr1, slave1)
 if 'Maximum renewable life: 0 days 22:00:00\n' not in out:
     fail('slave1 does not have modification from master')
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, False)
+wait_for_prop(kpropd2, False, 6, 7)
 check_ulog(1, 7, 7, [pr1], slave2)
 out = realm.run_kadminl('getprinc ' + pr1, slave2)
 if 'Maximum renewable life: 0 days 22:00:00\n' not in out:
@@ -207,10 +240,10 @@ if 'Maximum renewable life: 0 days 22:00:00\n' not in out:
 realm.run([kproplog, '-R'], slave1)
 check_ulog(0, 0, 0, [], slave1)
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, True)
+wait_for_prop(kpropd1, True, 0, 7)
 check_ulog(2, 6, 7, [pr2, pr1], slave1)
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, False)
+wait_for_prop(kpropd2, False, 7, 7)
 check_ulog(1, 7, 7, [pr1], slave2)
 
 # Make another change and check that it propagates incrementally to
@@ -218,13 +251,13 @@ check_ulog(1, 7, 7, [pr1], slave2)
 realm.run_kadminl('modprinc +allow_tix w')
 check_ulog(8, 1, 8, [pr1, pr3, pr2, pr2, pr2, pr2, pr1, pr2])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, False)
+wait_for_prop(kpropd1, False, 7, 8)
 check_ulog(3, 6, 8, [pr2, pr1, pr2], slave1)
 out = realm.run_kadminl('getprinc ' + pr2, slave1)
 if 'Attributes:\n' not in out:
     fail('slave1 does not have modification from master')
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, False)
+wait_for_prop(kpropd2, False, 7, 8)
 check_ulog(2, 7, 8, [pr1, pr2], slave2)
 out = realm.run_kadminl('getprinc ' + pr2, slave2)
 if 'Attributes:\n' not in out:
@@ -234,13 +267,13 @@ if 'Attributes:\n' not in out:
 realm.run_kadminl('addpol -minclasses 2 testpol')
 check_ulog(0, 0, 0, [])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, True)
+wait_for_prop(kpropd1, True, 8, 0)
 check_ulog(0, 0, 0, [], slave1)
 out = realm.run_kadminl('getpol testpol', slave1)
 if 'Minimum number of password character classes: 2' not in out:
     fail('slave1 does not have policy from master')
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, True)
+wait_for_prop(kpropd2, True, 8, 0)
 check_ulog(0, 0, 0, [], slave2)
 out = realm.run_kadminl('getpol testpol', slave2)
 if 'Minimum number of password character classes: 2' not in out:
@@ -250,13 +283,13 @@ if 'Minimum number of password character classes: 2' not in out:
 realm.run_kadminl('modpol -minlength 17 testpol')
 check_ulog(0, 0, 0, [])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, True)
+wait_for_prop(kpropd1, True, 0, 0)
 check_ulog(0, 0, 0, [], slave1)
 out = realm.run_kadminl('getpol testpol', slave1)
 if 'Minimum password length: 17' not in out:
     fail('slave1 does not have policy change from master')
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, True)
+wait_for_prop(kpropd2, True, 0, 0)
 check_ulog(0, 0, 0, [], slave2)
 out = realm.run_kadminl('getpol testpol', slave2)
 if 'Minimum password length: 17' not in out:
@@ -266,13 +299,13 @@ if 'Minimum password length: 17' not in out:
 realm.run_kadminl('delpol -force testpol')
 check_ulog(0, 0, 0, [])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, True)
+wait_for_prop(kpropd1, True, 0, 0)
 check_ulog(0, 0, 0, [], slave1)
 out = realm.run_kadminl('getpol testpol', slave1)
 if 'Policy does not exist' not in out:
     fail('slave1 did not get policy deletion from master')
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, True)
+wait_for_prop(kpropd2, True, 0, 0)
 check_ulog(0, 0, 0, [], slave2)
 out = realm.run_kadminl('getpol testpol', slave2)
 if 'Policy does not exist' not in out:
@@ -285,13 +318,13 @@ if 'Policy does not exist' not in out:
 realm.run_kadminl('modprinc -maxlife "10 minutes" ' + pr1)
 check_ulog(1, 1, 1, [pr1])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, True)
+wait_for_prop(kpropd1, True, 0, 1)
 check_ulog(0, 0, 1, [], slave1)
 out = realm.run_kadminl('getprinc ' + pr1, slave1)
 if 'Maximum ticket life: 0 days 00:10:00' not in out:
     fail('slave1 does not have modification from master')
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, True)
+wait_for_prop(kpropd2, True, 0, 1)
 check_ulog(0, 0, 1, [], slave2)
 out = realm.run_kadminl('getprinc ' + pr1, slave2)
 if 'Maximum ticket life: 0 days 00:10:00' not in out:
@@ -304,13 +337,13 @@ if 'Maximum ticket life: 0 days 00:10:00' not in out:
 realm.run_kadminl('delprinc -force ' + pr3)
 check_ulog(2, 1, 2, [pr1, pr3])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, False)
+wait_for_prop(kpropd1, False, 1, 2)
 check_ulog(1, 2, 2, [pr3], slave1)
 out = realm.run_kadminl('getprinc ' + pr3, slave1)
 if 'Principal does not exist' not in out:
     fail('slave1 does not have principal deletion from master')
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, True)
+wait_for_prop(kpropd2, True, 1, 2)
 check_ulog(0, 0, 2, [], slave2)
 out = realm.run_kadminl('getprinc ' + pr3, slave2)
 if 'Principal does not exist' not in out:
@@ -320,10 +353,10 @@ if 'Principal does not exist' not in out:
 realm.run([kproplog, '-R'])
 check_ulog(0, 0, 0, [])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, True)
+wait_for_prop(kpropd1, True, 2, 0)
 check_ulog(0, 0, 0, [], slave1)
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, True)
+wait_for_prop(kpropd2, True, 2, 0)
 check_ulog(0, 0, 0, [], slave2)
 
 success('iprop tests')
