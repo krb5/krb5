@@ -781,8 +781,13 @@ reinit:
          * or (if needed) do a full resync of the krb5 db.
          */
 
-        if (debug)
-            fprintf(stderr, _("Calling iprop_get_updates_1()\n"));
+        if (debug) {
+            fprintf(stderr, _("Calling iprop_get_updates_1 "
+                              "(sno=%u sec=%u usec=%u)\n"),
+                    (unsigned int)mylast.last_sno,
+                    (unsigned int)mylast.last_time.seconds,
+                    (unsigned int)mylast.last_time.useconds);
+        }
         gettimeofday(&iprop_start, NULL);
         incr_ret = iprop_get_updates_1(&mylast, handle->clnt);
         if (incr_ret == (kdb_incr_result_t *)NULL) {
@@ -885,8 +890,11 @@ reinit:
              * the entries to the slave kdc database
              */
             if (debug) {
-                fprintf(stderr,
-                        _("Got incremental updates from the master\n"));
+                fprintf(stderr, _("Got incremental updates "
+                                  "(sno=%u sec=%u usec=%u)\n"),
+                        (unsigned int)incr_ret->lastentry.last_sno,
+                        (unsigned int)incr_ret->lastentry.last_time.seconds,
+                        (unsigned int)incr_ret->lastentry.last_time.useconds);
             }
             retval = ulog_replay(kpropd_context, incr_ret, db_args);
 
