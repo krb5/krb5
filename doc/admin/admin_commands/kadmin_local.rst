@@ -573,11 +573,12 @@ Alias: **getstr**
 set_string
 ~~~~~~~~~~
 
-    **set_string** *principal* *key* *value*
+    **set_string** *principal* *name* *value*
 
 Sets a string attribute on *principal*.  String attributes are used to
 supply per-principal configuration to the KDC and some KDC plugin
-modules.  The following string attributes are recognized by the KDC:
+modules.  The following string attribute names are recognized by the
+KDC:
 
 **session_enctypes**
     Specifies the encryption types supported for session keys when the
@@ -585,9 +586,21 @@ modules.  The following string attributes are recognized by the KDC:
     :ref:`Encryption_types` in :ref:`kdc.conf(5)` for a list of the
     accepted values.
 
+**otp**
+    Enables One Time Passwords (OTP) preauthentication for a client
+    *principal*.  The *value* is a JSON string representing an array
+    of objects, each having optional ``type`` and ``username`` fields.
+
 This command requires the **modify** privilege.
 
 Alias: **setstr**
+
+Example:
+
+ ::
+
+    set_string host/foo.mit.edu session_enctypes aes128-cts
+    set_string user@FOO.COM otp [{"type":"hotp","username":"custom"}]
 
 .. _set_string_end:
 
