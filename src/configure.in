@@ -1,5 +1,14 @@
 K5_AC_INIT([aclocal.m4])
 
+# Don't make duplicate profile path entries for /etc/krb5.conf if
+# $sysconfdir is /etc
+if test "$sysconfdir" == /etc; then
+  SYSCONFCONF=""
+else
+  SYSCONFCONF=":${sysconfdir}/krb5.conf"
+fi
+AC_SUBST(SYSCONFCONF)
+
 CONFIG_RULES
 KRB5_VERSION=K5_VERSION
 AC_SUBST(KRB5_VERSION)
