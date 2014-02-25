@@ -57,6 +57,7 @@ RUNSTATEDIR = @runstatedir@
 BINDIR = @bindir@
 SBINDIR = @sbindir@
 LIBDIR  = @libdir@
+SYSCONFCONF = @SYSCONFCONF@
 
 PROCESS_REPLACE = -e "s+@KRB5RCTMPDIR+$(KRB5RCTMPDIR)+" \
 		  -e "s+@PREFIX+$(INSTALL_PREFIX)+" \
@@ -69,7 +70,8 @@ PROCESS_REPLACE = -e "s+@KRB5RCTMPDIR+$(KRB5RCTMPDIR)+" \
 		  -e 's+@LOCALSTATEDIR+$(LOCALSTATEDIR)+' \
 		  -e 's+@RUNSTATEDIR+$(RUNSTATEDIR)+' \
 		  -e 's+@SYSCONFDIR+$(SYSCONFDIR)+' \
-		  -e 's+@DYNOBJEXT+$(DYNOBJEXT)+'
+		  -e 's+@DYNOBJEXT+$(DYNOBJEXT)+' \
+		  -e 's+@SYSCONFCONF+$(SYSCONFCONF)+'
 
 OSCONFSRC = $(srcdir)/osconf.hin
 
