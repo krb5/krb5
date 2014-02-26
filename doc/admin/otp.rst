@@ -20,8 +20,8 @@ details of authentication.
 Defining token types
 --------------------
 
-Token types are defined in either krb5.conf or kdc.conf according to
-the following format::
+Token types are defined in either :ref:`krb5.conf(5)` or
+:ref:`kdc.conf(5)` according to the following format::
 
     [otp]
         <name> = {
@@ -63,8 +63,11 @@ Token instance configuration
 ----------------------------
 
 To enable OTP for a client principal, the administrator must define
-the **otp** string attribute for that principal.  The **otp** user
-string is a JSON string of the format::
+the **otp** string attribute for that principal.  (See
+:ref:`set_string`.)  The **otp** user string is a JSON string of the
+format:
+
+.. code-block:: xml
 
     [{
         "type": <string>,
