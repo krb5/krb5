@@ -52,6 +52,8 @@ extern "C" {
 #define KRB5_CALLCONV_C
 #endif
 
+#include <stdint.h>
+
 /*
  * First, include stddef.h to get size_t defined.
  */
