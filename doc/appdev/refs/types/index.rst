@@ -38,6 +38,7 @@ Public
    krb5_flags.rst
    krb5_get_init_creds_opt.rst
    krb5_gic_opt_pa_data.rst
+   krb5_int16.rst
    krb5_int32.rst
    krb5_kdc_rep.rst
    krb5_kdc_req.rst
@@ -80,6 +81,7 @@ Public
    krb5_trace_info.rst
    krb5_transited.rst
    krb5_typed_data.rst
+   krb5_ui_2.rst
    krb5_ui_4.rst
    krb5_verify_init_creds_opt.rst
    passwd_phrase_element.rst
