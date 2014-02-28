@@ -247,7 +247,7 @@ generate-files-mac: gssapi_krb5.h error_map.h
 
 install-headers-unix install::
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
-	do $(INSTALL_DATA) $$f	\
+	do $(INSTALL_DATA) $(srcdir)/$$f	\
 		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
 	done
 
