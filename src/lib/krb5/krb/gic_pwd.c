@@ -242,6 +242,54 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
     (*prompter)(context, data, 0, banner, 0, 0);
 }
 
+/*
+ * Create a temporary options structure for getting a kadmin/changepw ticket,
+ * based on the appplication-specified options.  Propagate all application
+ * options which affect preauthentication, but not options which affect the
+ * resulting ticket or how it is stored.  Set lifetime and flags appropriate
+ * for a ticket which we will use immediately and then discard.
+ *
+ * storage1 and storage2 will be used to hold the temporary options.  The
+ * caller must not free the result, as it will contain aliases into the
+ * application options.
+ */
+static krb5_get_init_creds_opt *
+make_chpw_options(krb5_get_init_creds_opt *in, krb5_gic_opt_ext *storage1,
+                  gic_opt_private *storage2)
+{
+    krb5_gic_opt_ext *in_ext;
+    krb5_get_init_creds_opt *opt;
+
+    /* Copy the application's options to storage. */
+    if (in == NULL) {
+        storage1->flags = 0;
+    } else if (gic_opt_is_extended(in)) {
+        in_ext = (krb5_gic_opt_ext *)in;
+        *storage1 = *in_ext;
+        *storage2 = *in_ext->opt_private;
+        storage1->opt_private = storage2;
+    } else {
+        *(krb5_get_init_creds_opt *)storage1 = *in;
+    }
+
+    /* Get a non-forwardable, non-proxiable, short-lifetime ticket. */
+    opt = (krb5_get_init_creds_opt *)storage1;
+    krb5_get_init_creds_opt_set_tkt_life(opt, 5 * 60);
+    krb5_get_init_creds_opt_set_renew_life(opt, 0);
+    krb5_get_init_creds_opt_set_forwardable(opt, 0);
+    krb5_get_init_creds_opt_set_proxiable(opt, 0);
+
+    /* Unset options which should only apply to the actual ticket. */
+    opt->flags &= ~KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST;
+    opt->flags &= ~KRB5_GET_INIT_CREDS_OPT_ANONYMOUS;
+
+    /* The output ccache should only be used for the actual ticket. */
+    if (gic_opt_is_extended(opt))
+        storage2->out_ccache = NULL;
+
+    return opt;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password(krb5_context context,
                              krb5_creds *creds,
@@ -259,6 +307,8 @@ krb5_get_init_creds_password(krb5_context context,
     int tries;
     krb5_creds chpw_creds;
     krb5_get_init_creds_opt *chpw_opts = NULL;
+    krb5_gic_opt_ext storage1;
+    gic_opt_private storage2;
     struct gak_password gakpw;
     krb5_data pw0, pw1;
     char banner[1024], pw0array[1024], pw1array[1024];
@@ -345,16 +395,7 @@ krb5_get_init_creds_password(krb5_context context,
     /* ok, we have an expired password.  Give the user a few chances
        to change it */
 
-    /* use a minimal set of options */
-
-    ret = krb5_get_init_creds_opt_alloc(context, &chpw_opts);
-    if (ret)
-        goto cleanup;
-    krb5_get_init_creds_opt_set_tkt_life(chpw_opts, 5*60);
-    krb5_get_init_creds_opt_set_renew_life(chpw_opts, 0);
-    krb5_get_init_creds_opt_set_forwardable(chpw_opts, 0);
-    krb5_get_init_creds_opt_set_proxiable(chpw_opts, 0);
-
+    chpw_opts = make_chpw_options(options, &storage1, &storage2);
     ret = k5_get_init_creds(context, &chpw_creds, client, prompter, data,
                             start_time, "kadmin/changepw", chpw_opts,
                             krb5_get_as_key_password, &gakpw, &use_master,
@@ -471,8 +512,6 @@ cleanup:
         warn_pw_expiry(context, options, prompter, data, in_tkt_service,
                        as_reply);
 
-    if (chpw_opts)
-        krb5_get_init_creds_opt_free(context, chpw_opts);
     zapfree(gakpw.storage.data, gakpw.storage.length);
     memset(pw0array, 0, sizeof(pw0array));
     memset(pw1array, 0, sizeof(pw1array));
