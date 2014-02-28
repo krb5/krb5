@@ -204,7 +204,8 @@ Options:
 
 **-b7**
     requires the database to be in the Kerberos 5 Beta 7 format
-    ("kdb5_util load_dump version 4").
+    ("kdb5_util load_dump version 4").  This was the dump format
+    produced on releases prior to 1.2.2.
 
 **-ov**
     requires the database to be in "ovsec_adm_import" format.  Must be
@@ -232,10 +233,7 @@ Options:
 
 **-update**
     records from the dump file are added to or updated in the existing
-    database.  (This is useful in conjunction with an ovsec_adm_export
-    format dump if you want to preserve per-principal policy
-    information, since the current default format does not contain
-    this data.)  Otherwise, a new database is created containing only
+    database.  Otherwise, a new database is created containing only
     what is in the dump file and the old one destroyed upon successful
     completion.
 
