@@ -171,21 +171,21 @@ krb5int_fast_prep_req_body(krb5_context context,
 krb5_error_code
 krb5int_fast_as_armor(krb5_context context,
                       struct krb5int_fast_request_state *state,
-                      krb5_gic_opt_ext *opte,
-                      krb5_kdc_req *request)
+                      krb5_get_init_creds_opt *opt, krb5_kdc_req *request)
 {
     krb5_error_code retval = 0;
     krb5_ccache ccache = NULL;
     krb5_principal target_principal = NULL;
     krb5_data *target_realm;
+    const char *ccname = k5_gic_opt_get_fast_ccache_name(opt);
+    krb5_flags fast_flags;
 
     krb5_clear_error_message(context);
     target_realm = &request->server->realm;
-    if (opte->opt_private->fast_ccache_name) {
-        TRACE_FAST_ARMOR_CCACHE(context, opte->opt_private->fast_ccache_name);
+    if (ccname != NULL) {
+        TRACE_FAST_ARMOR_CCACHE(context, ccname);
         state->fast_state_flags |= KRB5INT_FAST_ARMOR_AVAIL;
-        retval = krb5_cc_resolve(context, opte->opt_private->fast_ccache_name,
-                                 &ccache);
+        retval = krb5_cc_resolve(context, ccname, &ccache);
         if (retval == 0) {
             retval = krb5int_tgtname(context, target_realm, target_realm,
                                      &target_principal);
@@ -202,7 +202,8 @@ krb5int_fast_as_armor(krb5_context context,
             krb5_free_data_contents(context, &config_data);
             retval = 0;
         }
-        if (opte->opt_private->fast_flags & KRB5_FAST_REQUIRED) {
+        fast_flags = k5_gic_opt_get_fast_flags(opt);
+        if (fast_flags & KRB5_FAST_REQUIRED) {
             TRACE_FAST_REQUIRED(context);
             state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
         }

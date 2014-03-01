@@ -16,7 +16,8 @@ struct gak_password {
 };
 
 struct _krb5_init_creds_context {
-    krb5_gic_opt_ext *opte;
+    krb5_get_init_creds_opt *opt;
+    krb5_get_init_creds_opt opt_storage;
     char *in_tkt_service;
     krb5_prompter_fct prompter;
     void *prompter_data;

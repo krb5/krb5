@@ -492,7 +492,7 @@ static struct krb5_clpreauth_callbacks_st callbacks = {
  * to add support for to the list, but in the future perhaps doing more
  * involved things. */
 void
-k5_preauth_prepare_request(krb5_context context, krb5_gic_opt_ext *opte,
+k5_preauth_prepare_request(krb5_context context, krb5_get_init_creds_opt *opt,
                            krb5_kdc_req *req)
 {
     struct krb5_preauth_context_st *pctx = context->preauth_context;
@@ -502,7 +502,7 @@ k5_preauth_prepare_request(krb5_context context, krb5_gic_opt_ext *opte,
     if (pctx == NULL)
         return;
     /* Don't modify the enctype list if it's specified in the gic opts. */
-    if (opte != NULL && (opte->flags & KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST))
+    if (opt != NULL && (opt->flags & KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST))
         return;
     for (hp = pctx->handles; *hp != NULL; hp++) {
         h = *hp;
@@ -586,7 +586,6 @@ process_pa_data(krb5_context context, krb5_init_creds_context ctx,
                 krb5_preauthtype *out_type)
 {
     struct krb5_preauth_context_st *pctx = context->preauth_context;
-    krb5_get_init_creds_opt *opt = (krb5_get_init_creds_opt *)ctx->opte;
     struct errinfo save = EMPTY_ERRINFO;
     krb5_pa_data *pa, **pa_ptr, **mod_pa;
     krb5_error_code ret = 0;
@@ -614,7 +613,7 @@ process_pa_data(krb5_context context, krb5_init_creds_context ctx,
             if (real && already_tried(context, pa->pa_type))
                 continue;
             mod_pa = NULL;
-            ret = clpreauth_process(context, h, opt, &callbacks,
+            ret = clpreauth_process(context, h, ctx->opt, &callbacks,
                                     (krb5_clpreauth_rock)ctx, ctx->request,
                                     ctx->inner_request_body,
                                     ctx->encoded_previous_request, pa,
@@ -863,7 +862,6 @@ k5_preauth_tryagain(krb5_context context, krb5_init_creds_context ctx,
     struct krb5_preauth_context_st *pctx = context->preauth_context;
     krb5_error_code ret;
     krb5_pa_data **mod_pa;
-    krb5_get_init_creds_opt *opt = (krb5_get_init_creds_opt *)ctx->opte;
     clpreauth_handle h;
     int i;
 
@@ -878,7 +876,7 @@ k5_preauth_tryagain(krb5_context context, krb5_init_creds_context ctx,
         if (h == NULL)
             continue;
         mod_pa = NULL;
-        ret = clpreauth_tryagain(context, h, opt, &callbacks,
+        ret = clpreauth_tryagain(context, h, ctx->opt, &callbacks,
                                  (krb5_clpreauth_rock)ctx, ctx->request,
                                  ctx->inner_request_body,
                                  ctx->encoded_previous_request,
@@ -901,7 +899,6 @@ fill_response_items(krb5_context context, krb5_init_creds_context ctx,
                     krb5_pa_data **in_padata)
 {
     struct krb5_preauth_context_st *pctx = context->preauth_context;
-    krb5_get_init_creds_opt *opt = (krb5_get_init_creds_opt *)ctx->opte;
     krb5_error_code ret;
     krb5_pa_data *pa;
     clpreauth_handle h;
@@ -915,7 +912,7 @@ fill_response_items(krb5_context context, krb5_init_creds_context ctx,
         h = find_module(pctx->handles, pa->pa_type);
         if (h == NULL)
             continue;
-        ret = clpreauth_prep_questions(context, h, opt, &callbacks,
+        ret = clpreauth_prep_questions(context, h, ctx->opt, &callbacks,
                                        (krb5_clpreauth_rock)ctx,
                                        ctx->request, ctx->inner_request_body,
                                        ctx->encoded_previous_request, pa);
@@ -933,8 +930,8 @@ k5_preauth(krb5_context context, krb5_init_creds_context ctx,
     int out_pa_list_size = 0;
     krb5_pa_data **out_pa_list = NULL;
     krb5_error_code ret;
-    krb5_responder_fn responder = ctx->opte->opt_private->responder;
-    void *responder_data = ctx->opte->opt_private->responder_data;
+    krb5_responder_fn responder;
+    void *responder_data;
 
     *padata_out = NULL;
     *pa_type_out = KRB5_PADATA_NONE;
@@ -978,6 +975,7 @@ k5_preauth(krb5_context context, krb5_init_creds_context ctx,
         goto error;
 
     /* Call the responder to answer response items. */
+    k5_gic_opt_get_responder(ctx->opt, &responder, &responder_data);
     if (responder != NULL && !k5_response_items_empty(ctx->rctx.items)) {
         ret = (*responder)(context, responder_data, &ctx->rctx);
         if (ret)
@@ -1003,11 +1001,11 @@ error:
  * has just been set
  */
 krb5_error_code
-krb5_preauth_supply_preauth_data(krb5_context context, krb5_gic_opt_ext *opte,
+krb5_preauth_supply_preauth_data(krb5_context context,
+                                 krb5_get_init_creds_opt *opt,
                                  const char *attr, const char *value)
 {
     struct krb5_preauth_context_st *pctx = context->preauth_context;
-    krb5_get_init_creds_opt *opt = (krb5_get_init_creds_opt *)opte;
     clpreauth_handle *hp, h;
     krb5_error_code ret;
     const char *emsg = NULL;
