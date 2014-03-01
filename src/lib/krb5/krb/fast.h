@@ -83,7 +83,7 @@ krb5int_fast_free_state(krb5_context context,
 krb5_error_code
 krb5int_fast_as_armor(krb5_context context,
                       struct krb5int_fast_request_state *state,
-                      krb5_gic_opt_ext *opte, krb5_kdc_req *request);
+                      krb5_get_init_creds_opt *opt, krb5_kdc_req *request);
 
 krb5_error_code
 krb5int_fast_reply_key(krb5_context context,

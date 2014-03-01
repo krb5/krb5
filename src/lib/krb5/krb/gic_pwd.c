@@ -178,21 +178,19 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
                const char *in_tkt_service, krb5_kdc_rep *as_reply)
 {
     krb5_error_code ret;
+    krb5_expire_callback_func expire_cb;
+    void *expire_data;
     krb5_timestamp pw_exp, acct_exp, now;
     krb5_boolean is_last_req;
     krb5_deltat delta;
-    krb5_gic_opt_ext *opte;
     char ts[256], banner[1024];
 
     get_expiry_times(as_reply->enc_part2, &pw_exp, &acct_exp, &is_last_req);
 
-    ret = k5_gic_opt_to_opte(context, options, &opte, 0, "");
-    if (ret == 0 && opte->opt_private->expire_cb != NULL) {
-        krb5_expire_callback_func cb = opte->opt_private->expire_cb;
-        void *cb_data = opte->opt_private->expire_data;
-
+    k5_gic_opt_get_expire_cb(options, &expire_cb, &expire_data);
+    if (expire_cb != NULL) {
         /* Invoke the expire callback and don't send prompter warnings. */
-        (*cb)(context, cb_data, pw_exp, acct_exp, is_last_req);
+        (*expire_cb)(context, expire_data, pw_exp, acct_exp, is_last_req);
         return;
     }
 
@@ -249,31 +247,20 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
  * resulting ticket or how it is stored.  Set lifetime and flags appropriate
  * for a ticket which we will use immediately and then discard.
  *
- * storage1 and storage2 will be used to hold the temporary options.  The
- * caller must not free the result, as it will contain aliases into the
- * application options.
+ * The caller should free the result with free().
  */
-static krb5_get_init_creds_opt *
-make_chpw_options(krb5_get_init_creds_opt *in, krb5_gic_opt_ext *storage1,
-                  gic_opt_private *storage2)
+static krb5_error_code
+make_chpw_options(krb5_context context, krb5_get_init_creds_opt *in,
+                  krb5_get_init_creds_opt **out)
 {
-    krb5_gic_opt_ext *in_ext;
     krb5_get_init_creds_opt *opt;
 
-    /* Copy the application's options to storage. */
-    if (in == NULL) {
-        storage1->flags = 0;
-    } else if (gic_opt_is_extended(in)) {
-        in_ext = (krb5_gic_opt_ext *)in;
-        *storage1 = *in_ext;
-        *storage2 = *in_ext->opt_private;
-        storage1->opt_private = storage2;
-    } else {
-        *(krb5_get_init_creds_opt *)storage1 = *in;
-    }
+    *out = NULL;
+    opt = k5_gic_opt_shallow_copy(in);
+    if (opt == NULL)
+        return ENOMEM;
 
     /* Get a non-forwardable, non-proxiable, short-lifetime ticket. */
-    opt = (krb5_get_init_creds_opt *)storage1;
     krb5_get_init_creds_opt_set_tkt_life(opt, 5 * 60);
     krb5_get_init_creds_opt_set_renew_life(opt, 0);
     krb5_get_init_creds_opt_set_forwardable(opt, 0);
@@ -284,10 +271,10 @@ make_chpw_options(krb5_get_init_creds_opt *in, krb5_gic_opt_ext *storage1,
     opt->flags &= ~KRB5_GET_INIT_CREDS_OPT_ANONYMOUS;
 
     /* The output ccache should only be used for the actual ticket. */
-    if (gic_opt_is_extended(opt))
-        storage2->out_ccache = NULL;
+    krb5_get_init_creds_opt_set_out_ccache(context, opt, NULL);
 
-    return opt;
+    *out = opt;
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -307,8 +294,6 @@ krb5_get_init_creds_password(krb5_context context,
     int tries;
     krb5_creds chpw_creds;
     krb5_get_init_creds_opt *chpw_opts = NULL;
-    krb5_gic_opt_ext storage1;
-    gic_opt_private storage2;
     struct gak_password gakpw;
     krb5_data pw0, pw1;
     char banner[1024], pw0array[1024], pw1array[1024];
@@ -395,7 +380,9 @@ krb5_get_init_creds_password(krb5_context context,
     /* ok, we have an expired password.  Give the user a few chances
        to change it */
 
-    chpw_opts = make_chpw_options(options, &storage1, &storage2);
+    ret = make_chpw_options(context, options, &chpw_opts);
+    if (ret)
+        goto cleanup;
     ret = k5_get_init_creds(context, &chpw_creds, client, prompter, data,
                             start_time, "kadmin/changepw", chpw_opts,
                             krb5_get_as_key_password, &gakpw, &use_master,
@@ -511,7 +498,7 @@ cleanup:
     if (ret == 0)
         warn_pw_expiry(context, options, prompter, data, in_tkt_service,
                        as_reply);
-
+    free(chpw_opts);
     zapfree(gakpw.storage.data, gakpw.storage.length);
     memset(pw0array, 0, sizeof(pw0array));
     memset(pw1array, 0, sizeof(pw1array));
