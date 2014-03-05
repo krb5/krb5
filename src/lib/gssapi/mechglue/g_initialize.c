@@ -91,7 +91,6 @@ static gss_mech_info g_mechListTail = NULL;
 static k5_mutex_t g_mechListLock = K5_MUTEX_PARTIAL_INITIALIZER;
 static time_t g_confFileModTime = (time_t)0;
 
-static time_t g_mechSetTime = (time_t)0;
 static gss_OID_set_desc g_mechSet = { 0, NULL };
 static k5_mutex_t g_mechSetLock = K5_MUTEX_PARTIAL_INITIALIZER;
 
@@ -213,8 +212,6 @@ gss_indicate_mechs(minorStatus, mechSet_out)
 OM_uint32 *minorStatus;
 gss_OID_set *mechSet_out;
 {
-	char *fileName;
-	struct stat fileInfo;
 	OM_uint32 status;
 
 	/* Initialize outputs. */
@@ -233,16 +230,6 @@ gss_OID_set *mechSet_out;
 	if (*minorStatus != 0)
 		return (GSS_S_FAILURE);
 
-	fileName = MECH_CONF;
-
-	/*
-	 * If we have already computed the mechanisms supported and if it
-	 * is still valid; make a copy and return to caller,
-	 * otherwise build it first.
-	 */
-	if ((stat(fileName, &fileInfo) == 0 &&
-		fileInfo.st_mtime > g_mechSetTime)) {
-	} /* if g_mechSet is out of date or not initialized */
 	if (build_mechSet())
 		return GSS_S_FAILURE;
 
@@ -288,20 +275,6 @@ build_mechSet(void)
 	 * modified.
 	 */
 	k5_mutex_lock(&g_mechListLock);
-
-#if 0
-	/*
-	 * this checks for the case when we need to re-construct the
-	 * g_mechSet structure, but the mechanism list is upto date
-	 * (because it has been read by someone calling
-	 * gssint_get_mechanism)
-	 */
-	if (fileInfo.st_mtime > g_confFileModTime)
-	{
-		g_confFileModTime = fileInfo.st_mtime;
-		loadConfigFile(fileName);
-	}
-#endif
 
 	updateMechList();
 
