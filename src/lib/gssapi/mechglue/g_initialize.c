@@ -41,6 +41,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <glob.h>
 
 #define	M_DEFAULT	"default"
 
@@ -58,6 +59,7 @@
 #ifndef MECH_CONF
 #define	MECH_CONF "/etc/gss/mech"
 #endif
+#define MECH_CONF_PATTERN MECH_CONF ".d/*.conf"
 
 /* Local functions */
 static void addConfigEntry(const char *oidStr, const char *oid,
@@ -90,6 +92,7 @@ static gss_mech_info g_mechList = NULL;
 static gss_mech_info g_mechListTail = NULL;
 static k5_mutex_t g_mechListLock = K5_MUTEX_PARTIAL_INITIALIZER;
 static time_t g_confFileModTime = (time_t)0;
+static time_t g_confLastCall = (time_t)0;
 
 static gss_OID_set_desc g_mechSet = { 0, NULL };
 static k5_mutex_t g_mechSetLock = K5_MUTEX_PARTIAL_INITIALIZER;
@@ -383,6 +386,56 @@ const gss_OID oid;
 	return (modOptions);
 } /* gssint_get_modOptions */
 
+/* Return the mtime of filename or its eventual symlink target (if it is a
+ * symlink), whichever is larger.  Return (time_t)-1 if lstat or stat fails. */
+static time_t
+check_link_mtime(const char *filename, time_t *mtime_out)
+{
+	struct stat st1, st2;
+
+	if (lstat(filename, &st1) != 0)
+		return (time_t)-1;
+	if (!S_ISLNK(st1.st_mode))
+		return st1.st_mtime;
+	if (stat(filename, &st2) != 0)
+		return (time_t)-1;
+	return (st1.st_mtime > st2.st_mtime) ? st1.st_mtime : st2.st_mtime;
+}
+
+/* Try to load any config files which have changed since the last call.  Config
+ * files are MECH_CONF and any files matching MECH_CONF_PATTERN. */
+static void
+loadConfigFiles()
+{
+	glob_t globbuf;
+	time_t highest_mtime = 0, mtime, now;
+	char **pathptr;
+
+	/* Don't glob and stat more than once per second. */
+	if (time(&now) == (time_t)-1 || now == g_confLastCall)
+		return;
+	g_confLastCall = now;
+
+	globbuf.gl_offs = 1;
+	if (glob(MECH_CONF_PATTERN, GLOB_DOOFFS, NULL, &globbuf) != 0)
+		return;
+	globbuf.gl_pathv[0] = MECH_CONF;
+
+	for (pathptr = globbuf.gl_pathv; *pathptr != NULL; pathptr++) {
+		mtime = check_link_mtime(*pathptr, &mtime);
+		if (mtime == (time_t)-1)
+			continue;
+		if (mtime > highest_mtime)
+			highest_mtime = mtime;
+		if (mtime > g_confFileModTime)
+			loadConfigFile(*pathptr);
+	}
+	g_confFileModTime = highest_mtime;
+
+	globbuf.gl_pathv[0] = NULL;
+	globfree(&globbuf);
+}
+
 /*
  * determines if the mechList needs to be updated from file
  * and performs the update.
@@ -401,17 +454,7 @@ updateMechList(void)
 	loadConfigFromRegistry(HKEY_CURRENT_USER, MECH_KEY);
 	loadConfigFromRegistry(HKEY_LOCAL_MACHINE, MECH_KEY);
 #else /* _WIN32 */
-	char *fileName;
-	struct stat fileInfo;
-
-	fileName = MECH_CONF;
-
-	/* check if mechList needs updating */
-	if (stat(fileName, &fileInfo) != 0 ||
-	    g_confFileModTime >= fileInfo.st_mtime)
-		return;
-	g_confFileModTime = fileInfo.st_mtime;
-	loadConfigFile(fileName);
+	loadConfigFiles();
 #endif /* !_WIN32 */
 
 	/* Load any unloaded interposer mechanisms immediately, to make sure we
