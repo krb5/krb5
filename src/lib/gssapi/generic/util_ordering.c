@@ -195,6 +195,21 @@ g_order_check(void **vqueue, gssint_uint64 seqnum)
                     return(GSS_S_UNSEQ_TOKEN);
             }
         }
+        /*
+         * Exception: if first token arrived out-of-order.
+         * In that case first two elements in queue are 0xFFFFFFFF and some k,
+         * where k > seqnum. We need to insert seqnum before k.
+         * We check this after the for-loop, because this should be rare.
+         */
+        if ((QELEM(q, q->start) == (((uint64_t)0 - 1) & q->mask)) &&
+            ((QELEM(q, q->start + 1) > seqnum))) {
+                queue_insert(q, q->start, seqnum);
+                if (q->do_replay && !q->do_sequence)
+                    return(GSS_S_COMPLETE);
+                else
+                    return(GSS_S_UNSEQ_TOKEN);
+
+        }
     }
 
     /* this should never happen */
