@@ -202,8 +202,8 @@ The following tags may be specified in a [realms] subsection:
 
 **iprop_master_ulogsize**
     (Integer.)  Specifies the maximum number of log entries to be
-    retained for incremental propagation.  The maximum value is 2500;
-    the default value is 1000.
+    retained for incremental propagation.  The default value is 1000.
+    Prior to release 1.11, the maximum value was 2500.
 
 **iprop_slave_poll**
     (Delta time string.)  Specifies how often the slave KDC polls for
