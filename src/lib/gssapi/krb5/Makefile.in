@@ -232,7 +232,7 @@ error_map.h: $(top_srcdir)/util/gen-map.pl \
 
 clean-unix::
 	$(RM) $(BUILDTOP)/include/gssapi/gssapi_krb5.h
-	-$(RM) gssapi_krb5.h error_map.h
+	-$(RM) error_map.h
 
 clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS)
