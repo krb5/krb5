@@ -171,7 +171,6 @@ testlog
 
 /src/lib/gssapi/krb5/error_map.h
 /src/lib/gssapi/krb5/gssapi_err_krb5.[ch]
-/src/lib/gssapi/krb5/gssapi_krb5.h
 
 /src/lib/kadm5/chpass_util_strings.[ch]
 /src/lib/kadm5/kadm_err.[ch]
