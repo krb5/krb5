@@ -336,6 +336,7 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
     if (retval)
         return retval;
 
+    err = 0;
     retval = k5_sendto(context, message, &servers, socktype1, socktype2,
                        NULL, reply, NULL, NULL, &server_used,
                        check_for_svc_unavailable, &err);
