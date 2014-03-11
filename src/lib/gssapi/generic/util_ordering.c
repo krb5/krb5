@@ -34,7 +34,7 @@
 
 #define QUEUE_LENGTH 20
 
-typedef struct _queue {
+typedef struct g_seqnum_state_st {
     int do_replay;
     int do_sequence;
     int start;
@@ -88,9 +88,9 @@ queue_insert(queue *q, int after, uint64_t seqnum)
     }
 }
 
-gss_int32
-g_order_init(void **vqueue, uint64_t seqnum,
-             int do_replay, int do_sequence, int wide_nums)
+long
+g_seqstate_init(g_seqnum_state *state_out, uint64_t seqnum,
+                int do_replay, int do_sequence, int wide_nums)
 {
     queue *q;
 
@@ -112,18 +112,15 @@ g_order_init(void **vqueue, uint64_t seqnum,
     q->firstnum = seqnum;
     q->elem[q->start] = ((uint64_t)0 - 1) & q->mask;
 
-    *vqueue = (void *) q;
+    *state_out = q;
     return(0);
 }
 
-gss_int32
-g_order_check(void **vqueue, uint64_t seqnum)
+OM_uint32
+g_seqstate_check(g_seqnum_state q, uint64_t seqnum)
 {
-    queue *q;
     int i;
     uint64_t expected;
-
-    q = (queue *) (*vqueue);
 
     if (!q->do_replay && !q->do_sequence)
         return(GSS_S_COMPLETE);
@@ -217,51 +214,46 @@ g_order_check(void **vqueue, uint64_t seqnum)
 }
 
 void
-g_order_free(void **vqueue)
+g_seqstate_free(g_seqnum_state q)
 {
-    queue *q;
-
-    q = (queue *) (*vqueue);
-
     free(q);
-
-    *vqueue = NULL;
 }
 
 /*
  * These support functions are for the serialization routines
  */
-gss_uint32
-g_queue_size(void *vqueue, size_t *sizep)
+void
+g_seqstate_size(g_seqnum_state q, size_t *sizep)
 {
-    *sizep += sizeof(queue);
-    return 0;
+    *sizep += sizeof(*q);
 }
 
-gss_uint32
-g_queue_externalize(void *vqueue, unsigned char **buf, size_t *lenremain)
+long
+g_seqstate_externalize(g_seqnum_state q, unsigned char **buf,
+                       size_t *lenremain)
 {
-    if (*lenremain < sizeof(queue))
+    if (*lenremain < sizeof(*q))
         return ENOMEM;
-    memcpy(*buf, vqueue, sizeof(queue));
-    *buf += sizeof(queue);
-    *lenremain -= sizeof(queue);
+    memcpy(*buf, q, sizeof(*q));
+    *buf += sizeof(*q);
+    *lenremain -= sizeof(*q);
 
     return 0;
 }
 
-gss_uint32
-g_queue_internalize(void **vqueue, unsigned char **buf, size_t *lenremain)
+long
+g_seqstate_internalize(g_seqnum_state *state_out, unsigned char **buf,
+                       size_t *lenremain)
 {
-    void *q;
+    queue *q;
 
-    if (*lenremain < sizeof(queue))
+    if (*lenremain < sizeof(*q))
         return EINVAL;
-    if ((q = malloc(sizeof(queue))) == 0)
+    if ((q = malloc(sizeof(*q))) == 0)
         return ENOMEM;
-    memcpy(q, *buf, sizeof(queue));
-    *buf += sizeof(queue);
-    *lenremain -= sizeof(queue);
-    *vqueue = q;
+    memcpy(q, *buf, sizeof(*q));
+    *buf += sizeof(*q);
+    *lenremain -= sizeof(*q);
+    *state_out = q;
     return 0;
 }

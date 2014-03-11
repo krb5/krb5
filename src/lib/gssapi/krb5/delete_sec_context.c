@@ -53,7 +53,7 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
     /* free all the context state */
 
     if (ctx->seqstate)
-        g_order_free(&(ctx->seqstate));
+        g_seqstate_free(ctx->seqstate);
 
     if (ctx->enc)
         krb5_k_free_key(context, ctx->enc);

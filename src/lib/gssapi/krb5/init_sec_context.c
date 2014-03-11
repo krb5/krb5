@@ -639,6 +639,17 @@ kg_new_connection(
     if (code != 0)
         goto cleanup;
 
+    if (!(ctx->gss_flags & GSS_C_MUTUAL_FLAG)) {
+        /* There will be no AP-REP, so set up sequence state now. */
+        ctx->seq_recv = ctx->seq_send;
+        code = g_seqstate_init(&ctx->seqstate, ctx->seq_recv,
+                               (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
+                               (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0,
+                               ctx->proto);
+        if (code != 0)
+            goto cleanup;
+    }
+
     /* compute time_rec */
     if (time_rec) {
         if ((code = krb5_timeofday(context, &now)))
@@ -663,10 +674,6 @@ kg_new_connection(
         ctx->established = 0;
         major_status = GSS_S_CONTINUE_NEEDED;
     } else {
-        ctx->seq_recv = ctx->seq_send;
-        g_order_init(&(ctx->seqstate), ctx->seq_recv,
-                     (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
-                     (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0, ctx->proto);
         ctx->gss_flags |= GSS_C_PROT_READY_FLAG;
         ctx->established = 1;
         major_status = GSS_S_COMPLETE;
@@ -811,9 +818,14 @@ mutual_auth(
 
     /* store away the sequence number */
     ctx->seq_recv = ap_rep_data->seq_number;
-    g_order_init(&(ctx->seqstate), ctx->seq_recv,
-                 (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
-                 (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) !=0, ctx->proto);
+    code = g_seqstate_init(&ctx->seqstate, ctx->seq_recv,
+                           (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
+                           (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0,
+                           ctx->proto);
+    if (code) {
+        krb5_free_ap_rep_enc_part(context, ap_rep_data);
+        goto fail;
+    }
 
     if (ap_rep_data->subkey != NULL &&
         (ctx->proto == 1 || (ctx->gss_flags & GSS_C_DCE_STYLE) ||

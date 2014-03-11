@@ -160,7 +160,7 @@ main()
     size_t i, j;
     enum width w;
     struct test *t;
-    void *seqstate;
+    g_seqnum_state seqstate;
     OM_uint32 status;
 
     for (i = 0; i < sizeof(tests) / sizeof(*tests); i++) {
@@ -169,18 +169,18 @@ main()
         for (w = NARROW; w <= WIDE; w++) {
             if (t->wide_seqnums != BOTH && t->wide_seqnums != w)
                 continue;
-            if (g_order_init(&seqstate, t->initial, t->do_replay,
-                             t->do_sequence, w))
+            if (g_seqstate_init(&seqstate, t->initial, t->do_replay,
+                                t->do_sequence, w))
                 abort();
             for (j = 0; j < t->nseqs; j++) {
-                status = g_order_check(&seqstate, t->seqs[j].seqnum);
+                status = g_seqstate_check(seqstate, t->seqs[j].seqnum);
                 if (status != t->seqs[j].result) {
                     fprintf(stderr, "Test %d seq %d failed: %d != %d\n",
                             (int)i, (int)j, status, t->seqs[j].result);
                     return 1;
                 }
             }
-            g_order_free(&seqstate);
+            g_seqstate_free(seqstate);
         }
     }
 

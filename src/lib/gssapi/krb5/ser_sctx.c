@@ -150,25 +150,25 @@ kg_oid_size(kcontext, arg, sizep)
 }
 
 static krb5_error_code
-kg_queue_externalize(kcontext, arg, buffer, lenremain)
+kg_seqstate_externalize(kcontext, arg, buffer, lenremain)
     krb5_context        kcontext;
-    krb5_pointer        arg;
+    g_seqnum_state      arg;
     krb5_octet          **buffer;
     size_t              *lenremain;
 {
     krb5_error_code err;
     err = krb5_ser_pack_int32(KV5M_GSS_QUEUE, buffer, lenremain);
     if (err == 0)
-        err = g_queue_externalize(arg, buffer, lenremain);
+        err = g_seqstate_externalize(arg, buffer, lenremain);
     if (err == 0)
         err = krb5_ser_pack_int32(KV5M_GSS_QUEUE, buffer, lenremain);
     return err;
 }
 
 static krb5_error_code
-kg_queue_internalize(kcontext, argp, buffer, lenremain)
+kg_seqstate_internalize(kcontext, argp, buffer, lenremain)
     krb5_context        kcontext;
-    krb5_pointer        *argp;
+    g_seqnum_state      *argp;
     krb5_octet          **buffer;
     size_t              *lenremain;
 {
@@ -187,18 +187,18 @@ kg_queue_internalize(kcontext, argp, buffer, lenremain)
     if (ibuf != KV5M_GSS_QUEUE)
         return (EINVAL);
 
-    err = g_queue_internalize(argp, &bp, &remain);
+    err = g_seqstate_internalize(argp, &bp, &remain);
     if (err)
         return err;
 
     /* Read in and check our trailing magic number */
     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain)) {
-        g_order_free(argp);
+        g_seqstate_free(*argp);
         return (EINVAL);
     }
 
     if (ibuf != KV5M_GSS_QUEUE) {
-        g_order_free(argp);
+        g_seqstate_free(*argp);
         return (EINVAL);
     }
 
@@ -208,9 +208,9 @@ kg_queue_internalize(kcontext, argp, buffer, lenremain)
 }
 
 static krb5_error_code
-kg_queue_size(kcontext, arg, sizep)
+kg_seqstate_size(kcontext, arg, sizep)
     krb5_context        kcontext;
-    krb5_pointer        arg;
+    g_seqnum_state      arg;
     size_t              *sizep;
 {
     krb5_error_code kret;
@@ -219,7 +219,7 @@ kg_queue_size(kcontext, arg, sizep)
     kret = EINVAL;
     if (arg) {
         required = 2*sizeof(krb5_int32); /* For the header and trailer */
-        g_queue_size(arg, &required);
+        g_seqstate_size(arg, &required);
 
         kret = 0;
         *sizep += required;
@@ -319,7 +319,7 @@ kg_ctx_size(kcontext, arg, sizep)
                                &required);
 
         if (!kret && ctx->seqstate)
-            kret = kg_queue_size(kcontext, ctx->seqstate, &required);
+            kret = kg_seqstate_size(kcontext, ctx->seqstate, &required);
 
         if (!kret)
             kret = krb5_size_opaque(kcontext,
@@ -468,8 +468,8 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
                                                &bp, &remain);
 
             if (!kret && ctx->seqstate)
-                kret = kg_queue_externalize(kcontext,
-                                            ctx->seqstate, &bp, &remain);
+                kret = kg_seqstate_externalize(kcontext,
+                                               ctx->seqstate, &bp, &remain);
 
             if (!kret)
                 kret = krb5_externalize_opaque(kcontext,
@@ -695,8 +695,8 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
             }
 
             if (!kret) {
-                kret = kg_queue_internalize(kcontext, &ctx->seqstate,
-                                            &bp, &remain);
+                kret = kg_seqstate_internalize(kcontext, &ctx->seqstate,
+                                               &bp, &remain);
                 if (kret == EINVAL)
                     kret = 0;
             }

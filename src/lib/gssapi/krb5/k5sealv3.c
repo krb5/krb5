@@ -464,7 +464,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                 goto no_mem;
             memcpy(message_buffer->value, plain.data, message_buffer->length);
         }
-        err = g_order_check(&ctx->seqstate, seqnum);
+        err = g_seqstate_check(ctx->seqstate, seqnum);
         *minor_status = 0;
         return err;
     } else if (toktype == KG_TOK_MIC_MSG) {
@@ -501,7 +501,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             *minor_status = 0;
             return GSS_S_BAD_SIG;
         }
-        err = g_order_check(&ctx->seqstate, seqnum);
+        err = g_seqstate_check(ctx->seqstate, seqnum);
         *minor_status = 0;
         return err;
     } else if (toktype == KG_TOK_DEL_CTX) {

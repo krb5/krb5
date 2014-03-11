@@ -428,7 +428,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
             }
         }
 
-        code = g_order_check(&ctx->seqstate, seqnum);
+        code = g_seqstate_check(ctx->seqstate, seqnum);
     } else if (toktype == KG_TOK_MIC_MSG) {
         if (load_16_be(ptr) != KG2_TOK_MIC_MSG)
             goto defective;
@@ -448,7 +448,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
             *minor_status = code;
             return GSS_S_BAD_SIG;
         }
-        code = g_order_check(&ctx->seqstate, seqnum);
+        code = g_seqstate_check(ctx->seqstate, seqnum);
     } else if (toktype == KG_TOK_DEL_CTX) {
         if (load_16_be(ptr) != KG2_TOK_DEL_CTX)
             goto defective;

@@ -987,9 +987,14 @@ kg_accept_krb5(minor_status, context_handle,
         goto fail;
     }
 
-    g_order_init(&(ctx->seqstate), ctx->seq_recv,
-                 (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
-                 (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0, ctx->proto);
+    code = g_seqstate_init(&ctx->seqstate, ctx->seq_recv,
+                           (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
+                           (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0,
+                           ctx->proto);
+    if (code) {
+        major_status = GSS_S_FAILURE;
+        goto fail;
+    }
 
     /* DCE_STYLE implies mutual authentication */
     if (ctx->gss_flags & GSS_C_DCE_STYLE)

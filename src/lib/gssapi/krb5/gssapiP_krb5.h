@@ -223,7 +223,7 @@ typedef struct _krb5_gss_ctx_id_rec {
        affects the wire encoding. */
     uint64_t seq_send;
     uint64_t seq_recv;
-    void *seqstate;
+    g_seqnum_state seqstate;
     krb5_context k5_context;
     krb5_auth_context auth_context;
     gss_OID_desc *mech_used;

@@ -280,7 +280,7 @@ kg_unseal_v1_iov(krb5_context context,
     }
 
     code = 0;
-    retval = g_order_check(&ctx->seqstate, (uint64_t)seqnum);
+    retval = g_seqstate_check(ctx->seqstate, (uint64_t)seqnum);
 
 cleanup:
     krb5_free_checksum_contents(context, &md5cksum);

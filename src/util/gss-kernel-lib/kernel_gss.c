@@ -125,7 +125,7 @@ import_lucid_sec_context_v1(const gss_krb5_lucid_context_v1_t *lctx,
      * the protocol needs replay or sequence protection.  Assume we don't
      * (because RPCSEC_GSS doesn't).
      */
-    g_order_init(&gctx->seqstate, gctx->seq_recv, 0, 0, gctx->proto);
+    g_seqstate_init(&gctx->seqstate, gctx->seq_recv, 0, 0, gctx->proto);
 
     *context_handle_out = (gss_ctx_id_t)gctx;
     gctx = NULL;
@@ -174,7 +174,7 @@ krb5_gss_delete_sec_context(OM_uint32 *minor_status,
         return GSS_S_COMPLETE;
 
     ctx = (krb5_gss_ctx_id_t)*context_handle;
-    g_order_free(&ctx->seqstate);
+    g_seqstate_free(ctx->seqstate);
     krb5_k_free_key(NULL, ctx->enc);
     krb5_k_free_key(NULL, ctx->seq);
     krb5_k_free_key(NULL, ctx->subkey);
