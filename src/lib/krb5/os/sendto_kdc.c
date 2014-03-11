@@ -166,7 +166,7 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
                 const krb5_data *realm, krb5_data *reply, int *use_master,
                 int tcp_only)
 {
-    krb5_error_code retval, err;
+    krb5_error_code retval, err = 0;
     struct serverlist servers;
     int socktype1 = 0, socktype2 = 0, server_used;
 
