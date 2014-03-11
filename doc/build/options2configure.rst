@@ -334,10 +334,11 @@ Optional packages
     should return only vague error codes to clients.
 
 **-**\ **-with-crypto-impl=**\ *IMPL*
-    Use specified crypto implementation (e.g., **-**\ **-with-crypto=**\
-    *openssl*).  Default is a native MIT Kerberos implementation
-    ``builtin``.  The other currently implemented crypto backends are
-    ``openssl`` and ``nss``.  (See :ref:`mitK5features`)
+    Use specified crypto implementation (e.g., **-**\
+    **-with-crypto-impl=**\ *openssl*).  The default is the native MIT
+    Kerberos implementation ``builtin``.  The other currently
+    implemented crypto backends are ``openssl`` and ``nss``.  (See
+    :ref:`mitK5features`)
 
 **-**\ **-with-prng-alg=**\ *ALG*
     Use specified PRNG algorithm.  For example, to use the OS native
