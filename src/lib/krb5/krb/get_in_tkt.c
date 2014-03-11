@@ -492,6 +492,7 @@ krb5_init_creds_free(krb5_context context,
     k5_response_items_free(ctx->rctx.items);
     free(ctx->in_tkt_service);
     zapfree(ctx->gakpw.storage.data, ctx->gakpw.storage.length);
+    k5_preauth_request_context_fini(context);
     krb5_free_error(context, ctx->err_reply);
     krb5_free_pa_data(context, ctx->err_padata);
     krb5_free_cred_contents(context, &ctx->cred);
