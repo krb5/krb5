@@ -168,6 +168,7 @@ testlog
 /src/lib/gssapi/generic/errmap.h
 /src/lib/gssapi/generic/gssapi.h
 /src/lib/gssapi/generic/gssapi_err_generic.[ch]
+/src/lib/gssapi/generic/t_seqstate
 
 /src/lib/gssapi/krb5/error_map.h
 /src/lib/gssapi/krb5/gssapi_err_krb5.[ch]

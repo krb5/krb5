@@ -71,6 +71,8 @@ SRCS = \
 	$(srcdir)/util_token.c \
 	gssapi_err_generic.c
 
+EXTRADEPSRCS = t_seqstate.c
+
 OBJS = \
 	$(OUTPRE)disp_com_err_status.$(OBJEXT) \
 	$(OUTPRE)disp_major_status.$(OBJEXT) \
@@ -138,10 +140,17 @@ win-create-ehdrdir:
 clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) $(EXPORTED_BUILT_HEADERS) \
 		$(EHDRDIR)$(S)timestamp errmap.h maptest.h
+	$(RM) t_seqstate.o t_seqstate
 
 clean-windows::
 	$(RM) $(HDRS) maptest.h
 	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
+
+t_seqstate: t_seqstate.o util_ordering.o
+	$(CC_LINK) $(ALL_CFLAGS) -o $@ t_seqstate.o util_ordering.o
+
+check-unix:: t_seqstate
+	$(RUN_SETUP) $(VALGRIND) ./t_seqstate
 
 generate-files-mac: gssapi.h errmap.h
 
