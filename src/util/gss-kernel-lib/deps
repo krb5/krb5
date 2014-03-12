@@ -89,10 +89,10 @@ $(OUTPRE)util_set.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
   k5-buf.h k5-platform.h k5-thread.h util_set.c
-$(OUTPRE)util_ordering.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
+$(OUTPRE)util_seqstate.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
-  k5-buf.h k5-platform.h k5-thread.h util_ordering.c
+  k5-buf.h k5-platform.h k5-thread.h util_seqstate.c
 $(OUTPRE)kernel_gss.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \

@@ -22,7 +22,7 @@ SRCS= \
 	util_seed.c \
 	util_token.c \
 	util_set.c \
-	util_ordering.c
+	util_seqstate.c
 
 EXTRADEPSRCS= kernel_gss.c t_kgss_common.c t_kgss_user.c t_kgss_kernel.c
 
@@ -40,7 +40,7 @@ OBJS= \
 	util_seed.o \
 	util_token.o \
 	util_set.o \
-	util_ordering.o
+	util_seqstate.o
 
 # COM_ERR_DEPS is COM_ERR_DEPS-k5 when we use the bundled com_err, and
 # empty otherwise.  Normally COM_ERR_DEPS-k5 is from the central
@@ -138,8 +138,8 @@ util_token.c: $(GSS_GENERIC)/util_token.c
 	$(CP) $(GSS_GENERIC)/util_token.c $@
 util_set.c: $(GSS_GENERIC)/util_set.c
 	$(CP) $(GSS_GENERIC)/util_set.c $@
-util_ordering.c: $(GSS_GENERIC)/util_ordering.c
-	$(CP) $(GSS_GENERIC)/util_ordering.c $@
+util_seqstate.c: $(GSS_GENERIC)/util_seqstate.c
+	$(CP) $(GSS_GENERIC)/util_seqstate.c $@
 
 # Rules to copy headers from their real homes in the source or build tree.
 gssapi.h: $(INCLUDE)/gssapi.h

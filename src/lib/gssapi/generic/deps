@@ -64,13 +64,6 @@ util_errmap.so util_errmap.po $(OUTPRE)util_errmap.$(OBJEXT): \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/krb5.h \
   errmap.h gssapiP_generic.h gssapi_err_generic.h gssapi_ext.h \
   gssapi_generic.h util_errmap.c
-util_ordering.so util_ordering.po $(OUTPRE)util_ordering.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_alloc.h $(COM_ERR_DEPS) \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-thread.h gssapiP_generic.h \
-  gssapi_err_generic.h gssapi_ext.h gssapi_generic.h \
-  util_ordering.c
 util_set.so util_set.po $(OUTPRE)util_set.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_alloc.h $(COM_ERR_DEPS) \
@@ -78,6 +71,13 @@ util_set.so util_set.po $(OUTPRE)util_set.$(OBJEXT): \
   $(top_srcdir)/include/k5-thread.h gssapiP_generic.h \
   gssapi_err_generic.h gssapi_ext.h gssapi_generic.h \
   util_set.c
+util_seqstate.so util_seqstate.po $(OUTPRE)util_seqstate.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_alloc.h $(COM_ERR_DEPS) \
+  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-thread.h gssapiP_generic.h \
+  gssapi_err_generic.h gssapi_ext.h gssapi_generic.h \
+  util_seqstate.c
 util_token.so util_token.po $(OUTPRE)util_token.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_alloc.h $(COM_ERR_DEPS) \

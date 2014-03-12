@@ -115,11 +115,10 @@ struct test {
         3, { { UINT32_MAX - 1, NOERR }, { UINT32_MAX, NOERR }, { 0, GAP } }
     },
 
-    /* Replay without the replay flag set.  Current code reports a replay
-     * anyway. */
+    /* Replay without the replay flag set. */
     {
         250, NO_REPLAY, DO_SEQUENCE, BOTH,
-        2, { { 250, NOERR }, { 250, REPLAY } }
+        2, { { 250, NOERR }, { 250, UNSEQ } }
     },
 
     /* Basic replay detection with and without sequence checking. */
@@ -151,6 +150,16 @@ struct test {
               { UINT32_MAX, REPLAY }, { UINT32_MAX, REPLAY },
               { 2, GAP }, { 0, REPLAY }, { 1, UNSEQ },
               { UINT32_MAX - 2, REPLAY }, { UINT32_MAX - 6, GAP } }
+    },
+
+    /* Old token edge cases.  The current code can detect replays up to 64
+     * numbers behind the expected sequence number (1164 in this case). */
+    {
+        1000, DO_REPLAY, NO_SEQUENCE, BOTH,
+        10, { { 1163, NOERR }, { 1100, NOERR }, { 1100, REPLAY },
+              { 1163, REPLAY }, { 1099, OLD }, { 1100, REPLAY },
+              { 1150, NOERR }, { 1150, REPLAY }, { 1000, OLD },
+              { 999, NOERR } }
     },
 };
 

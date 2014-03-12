@@ -66,8 +66,8 @@ SRCS = \
 	$(srcdir)/util_buffer.c \
 	$(srcdir)/util_buffer_set.c \
 	$(srcdir)/util_errmap.c \
-	$(srcdir)/util_ordering.c \
 	$(srcdir)/util_set.c \
+	$(srcdir)/util_seqstate.c \
 	$(srcdir)/util_token.c \
 	gssapi_err_generic.c
 
@@ -83,8 +83,8 @@ OBJS = \
 	$(OUTPRE)util_buffer.$(OBJEXT) \
 	$(OUTPRE)util_buffer_set.$(OBJEXT) \
 	$(OUTPRE)util_errmap.$(OBJEXT) \
-	$(OUTPRE)util_ordering.$(OBJEXT) \
 	$(OUTPRE)util_set.$(OBJEXT) \
+	$(OUTPRE)util_seqstate.$(OBJEXT) \
 	$(OUTPRE)util_token.$(OBJEXT) \
 	$(OUTPRE)gssapi_err_generic.$(OBJEXT)
 
@@ -98,8 +98,8 @@ STLIBOBJS = \
 	util_buffer.o \
 	util_buffer_set.o \
 	util_errmap.o \
-	util_ordering.o \
 	util_set.o \
+	util_seqstate.o \
 	util_token.o \
 	gssapi_err_generic.o
 
@@ -146,8 +146,8 @@ clean-windows::
 	$(RM) $(HDRS) maptest.h
 	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
-t_seqstate: t_seqstate.o util_ordering.o
-	$(CC_LINK) $(ALL_CFLAGS) -o $@ t_seqstate.o util_ordering.o
+t_seqstate: t_seqstate.o util_seqstate.o
+	$(CC_LINK) $(ALL_CFLAGS) -o $@ t_seqstate.o util_seqstate.o
 
 check-unix:: t_seqstate
 	$(RUN_SETUP) $(VALGRIND) ./t_seqstate
