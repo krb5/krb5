@@ -212,7 +212,6 @@ pa_pkinit_gen_req(krb5_context context,
 cleanup:
     if (der_req != NULL)
         krb5_free_data(context, der_req);
-    free(out_data);
 
     if (retval) {
         if (return_pa_data) {
@@ -222,9 +221,9 @@ cleanup:
         }
         if (out_data) {
             free(out_data->data);
-            free(out_data);
         }
     }
+    free(out_data);
     return retval;
 }
 
