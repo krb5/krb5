@@ -18,7 +18,7 @@ EXAMPLES
 --------
 
 Suppose the user ``alice`` had a .k5login file in her home directory
-containing the following line:
+containing just the following line:
 
  ::
 
@@ -26,7 +26,12 @@ containing the following line:
 
 This would allow ``bob`` to use Kerberos network applications, such as
 ssh(1), to access ``alice``'s account, using ``bob``'s Kerberos
-tickets.
+tickets.  In a default configuration (with **k5login_authoritative** set
+to true in :ref:`krb5.conf(5)`), this .k5login file would not let
+``alice`` use those network applications to access her account, since
+she is not listed!  With no .k5login file, or with **k5login_authoritative**
+set to false, a default rule would permit the principal ``alice`` in the
+machine's default realm to access the ``alice`` account.
 
 Let us further suppose that ``alice`` is a system administrator.
 Alice and the other system administrators would have their principals
