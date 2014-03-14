@@ -302,27 +302,6 @@ init_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
 }
 
 void
-init_krb5_auth_pack(krb5_auth_pack **in)
-{
-    (*in) = malloc(sizeof(krb5_auth_pack));
-    if ((*in) == NULL) return;
-    (*in)->clientPublicValue = NULL;
-    (*in)->supportedCMSTypes = NULL;
-    (*in)->clientDHNonce.length = 0;
-    (*in)->clientDHNonce.data = NULL;
-    (*in)->pkAuthenticator.paChecksum.contents = NULL;
-    (*in)->supportedKDFs = NULL;
-}
-
-void
-init_krb5_auth_pack_draft9(krb5_auth_pack_draft9 **in)
-{
-    (*in) = malloc(sizeof(krb5_auth_pack_draft9));
-    if ((*in) == NULL) return;
-    (*in)->clientPublicValue = NULL;
-}
-
-void
 init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
 {
     (*in) = malloc(sizeof(krb5_pa_pk_as_rep));

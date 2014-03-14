@@ -340,8 +340,6 @@ void init_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in);
 void init_krb5_reply_key_pack(krb5_reply_key_pack **in);
 void init_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in);
 
-void init_krb5_auth_pack(krb5_auth_pack **in);
-void init_krb5_auth_pack_draft9(krb5_auth_pack_draft9 **in);
 void init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in);
 void init_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in);
 void init_krb5_subject_pk_info(krb5_subject_pk_info **in);
