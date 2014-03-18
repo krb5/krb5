@@ -167,6 +167,7 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
     krb5_error_code ret;
     krb5_keytab_entry ent;
     krb5_kt_cursor cursor;
+    krb5_boolean similar;
 
 #ifdef LEAN_CLIENT
     return KRB5KRB_AP_WRONG_PRINC;
@@ -189,8 +190,16 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
         goto cleanup;
 
     while ((ret = krb5_kt_next_entry(context, keytab, &ent, &cursor)) == 0) {
-        if (ent.key.enctype == req->ticket->enc_part.enctype &&
+        if (krb5_c_enctype_compare(context, ent.key.enctype,
+                                   req->ticket->enc_part.enctype,
+                                   &similar) == 0 &&
+            similar &&
             krb5_sname_match(context, server, ent.principal)) {
+            /*
+             * Coerce the enctype of the output keyblock in case we
+             * got an inexact match on the enctype.
+             */
+            ent.key.enctype = req->ticket->enc_part.enctype;
             ret = try_one_entry(context, req, &ent, keyblock_out);
             if (ret == 0) {
                 TRACE_RD_REQ_DECRYPT_ANY(context, ent.principal, &ent.key);
