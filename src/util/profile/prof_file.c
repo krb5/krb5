@@ -396,6 +396,7 @@ static errcode_t write_data_to_file(prf_data_t data, const char *outfile,
     profile_filespec_t new_file;
     profile_filespec_t old_file;
     errcode_t       retval = 0;
+    prf_data_t      g_data;
 
     retval = ENOMEM;
 
@@ -460,6 +461,32 @@ static errcode_t write_data_to_file(prf_data_t data, const char *outfile,
             goto errout;
         }
     }
+
+    /*
+     * Work around cached profile data issue where written profile data is
+     * immediately read.  For cached profile data that is associated with the
+     * file just written, clear the last_stat field to force
+     * profile_update_file_data_locked() to stat() the file and update the
+     * profile data cache instead of just returning the cached profile data.
+     */
+    k5_mutex_lock(&g_shared_trees_mutex);
+    scan_shared_trees_locked();
+    for (g_data = g_shared_trees; g_data; g_data = g_data->next) {
+        /* filespec is fixed after creation, no lock needed */
+        if (strcmp(g_data->filespec, outfile) == 0) {
+            /*
+             * This function requires the caller have a lock on data->lock so
+             * let's avoid deadlock in case data == g_data.
+             */
+            if (data != g_data)
+                k5_mutex_lock(&g_data->lock);
+            g_data->last_stat = 0; /* force stat of file */
+            if (data != g_data)
+                k5_mutex_unlock(&g_data->lock);
+            break;
+        }
+    }
+    k5_mutex_unlock(&g_shared_trees_mutex);
 
     data->flags = 0;
     retval = 0;
