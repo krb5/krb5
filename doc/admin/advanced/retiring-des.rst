@@ -91,17 +91,17 @@ and the database entries for some "high-value" principals were:
     [root@casio krb5kdc]# kadmin.local -r ZONE.MIT.EDU -q 'getprinc krbtgt/ZONE.MIT.EDU'
     [...]
     Number of keys: 1
-    Key: vno 1, des-cbc-crc, Version 4
+    Key: vno 1, des-cbc-crc:v4
     [...]
     [root@casio krb5kdc]# kadmin.local -r ZONE.MIT.EDU -q 'getprinc kadmin/admin'
     [...]
     Number of keys: 1
-    Key: vno 15, des-cbc-crc, no salt
+    Key: vno 15, des-cbc-crc
     [...]
     [root@casio krb5kdc]# kadmin.local -r ZONE.MIT.EDU -q 'getprinc kadmin/changepw'
     [...]
     Number of keys: 1
-    Key: vno 14, des-cbc-crc, no salt
+    Key: vno 14, des-cbc-crc
     [...]
 
 The ``krbtgt/REALM`` key appears to have never been changed since creation
@@ -162,11 +162,11 @@ After the change, the database entry is now:
     [root@casio krb5kdc]# kadmin.local -r ZONE.MIT.EDU -q 'getprinc krbtgt/ZONE.MIT.EDU'
     [...]
     Number of keys: 5
-    Key: vno 2, aes256-cts-hmac-sha1-96, no salt
-    Key: vno 2, aes128-cts-hmac-sha1-96, no salt
-    Key: vno 2, des3-cbc-sha1, no salt
-    Key: vno 2, des-cbc-crc, no salt
-    Key: vno 1, des-cbc-crc, Version 4
+    Key: vno 2, aes256-cts-hmac-sha1-96
+    Key: vno 2, aes128-cts-hmac-sha1-96
+    Key: vno 2, des3-cbc-sha1
+    Key: vno 2, des-cbc-crc
+    Key: vno 1, des-cbc-crc:v4
     [...]
 
 Since the expected disruptions from rekeying the krbtgt principal are
@@ -357,9 +357,9 @@ generate DES keys by default.
     contents-vnder-pressvre:~> kadmin -r ZONE.MIT.EDU -q 'getprinc zonetest'
     [...]
     Number of keys: 3
-    Key: vno 9, aes256-cts-hmac-sha1-96, no salt
-    Key: vno 9, aes128-cts-hmac-sha1-96, no salt
-    Key: vno 9, des3-cbc-sha1, no salt
+    Key: vno 9, aes256-cts-hmac-sha1-96
+    Key: vno 9, aes128-cts-hmac-sha1-96
+    Key: vno 9, des3-cbc-sha1
     [...]
 
     [kaduk@glossolalia ~]$ kadmin -p kaduk@ZONE.MIT.EDU -r ZONE.MIT.EDU -k \

@@ -49,7 +49,7 @@ def check_mkey_list(*expected):
 # Get the K/M principal.  Verify that it has the expected mkvno.  Each
 # remaining argment must be a sequence of two elements: an expected
 # key version and an expected enctype.
-keyline_re = re.compile(r'^Key: vno (\d+), (\S+), ')
+keyline_re = re.compile(r'^Key: vno (\d+), (\S+)$')
 def check_master_dbent(expected_mkvno, *expected_keys):
     outlines = realm.run_kadminl('getprinc K/M').splitlines()
     mkeyline = [l for l in outlines if l.startswith('MKey: vno ')]

@@ -50,9 +50,8 @@
  * Local data structures.
  */
 struct salttype_lookup_entry {
-    krb5_int32          stt_enctype;            /* Salt type            */
-    const char *        stt_specifier;          /* How to recognize it  */
-    const char *        stt_output;             /* How to spit it out   */
+    krb5_int32          stt_enctype;            /* Salt type number */
+    const char *        stt_name;               /* Salt type name */
 };
 
 /*
@@ -61,14 +60,12 @@ struct salttype_lookup_entry {
 
 #include "kdb.h"
 static const struct salttype_lookup_entry salttype_table[] = {
-/* salt type                    input specifier output string  */
-/*----------------------------- --------------- ---------------*/
-    { KRB5_KDB_SALTTYPE_NORMAL,     "normal",       "Version 5"       },
-    { KRB5_KDB_SALTTYPE_V4,         "v4",           "Version 4"       },
-    { KRB5_KDB_SALTTYPE_NOREALM,    "norealm",      "Version 5 - No Realm" },
-    { KRB5_KDB_SALTTYPE_ONLYREALM,  "onlyrealm",    "Version 5 - Realm Only" },
-    { KRB5_KDB_SALTTYPE_SPECIAL,    "special",      "Special" },
-    { KRB5_KDB_SALTTYPE_AFS3,       "afs3",         "AFS version 3"    },
+    { KRB5_KDB_SALTTYPE_NORMAL,     "normal"     },
+    { KRB5_KDB_SALTTYPE_V4,         "v4",        },
+    { KRB5_KDB_SALTTYPE_NOREALM,    "norealm",   },
+    { KRB5_KDB_SALTTYPE_ONLYREALM,  "onlyrealm", },
+    { KRB5_KDB_SALTTYPE_SPECIAL,    "special",   },
+    { KRB5_KDB_SALTTYPE_AFS3,       "afs3",      },
 };
 static const int salttype_table_nents = sizeof(salttype_table)/
     sizeof(salttype_table[0]);
@@ -81,7 +78,7 @@ krb5_string_to_salttype(char *string, krb5_int32 *salttypep)
 
     found = 0;
     for (i=0; i<salttype_table_nents; i++) {
-        if (!strcasecmp(string, salttype_table[i].stt_specifier)) {
+        if (!strcasecmp(string, salttype_table[i].stt_name)) {
             found = 1;
             *salttypep = salttype_table[i].stt_enctype;
             break;
@@ -105,7 +102,7 @@ krb5_salttype_to_string(krb5_int32 salttype, char *buffer, size_t buflen)
     out = (char *) NULL;
     for (i=0; i<salttype_table_nents; i++) {
         if (salttype ==  salttype_table[i].stt_enctype) {
-            out = salttype_table[i].stt_output;
+            out = salttype_table[i].stt_name;
             break;
         }
     }
