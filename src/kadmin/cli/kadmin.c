@@ -1445,15 +1445,16 @@ kadmin_getprinc(int argc, char *argv[])
                                      enctype, sizeof(enctype)))
                 snprintf(enctype, sizeof(enctype), _("<Encryption type 0x%x>"),
                          key_data->key_data_type[0]);
-            printf("Key: vno %d, %s, ", key_data->key_data_kvno, enctype);
-            if (key_data->key_data_ver > 1) {
+            printf("Key: vno %d, %s", key_data->key_data_kvno, enctype);
+            if (key_data->key_data_ver > 1 &&
+                key_data->key_data_type[1] != KRB5_KDB_SALTTYPE_NORMAL) {
                 if (krb5_salttype_to_string(key_data->key_data_type[1],
                                             salttype, sizeof(salttype)))
                     snprintf(salttype, sizeof(salttype), _("<Salt type 0x%x>"),
                              key_data->key_data_type[1]);
-                printf("%s\n", salttype);
-            } else
-                printf(_("no salt\n"));
+                printf(":%s", salttype);
+            }
+            printf("\n");
         }
         printf(_("MKey: vno %d\n"), dprinc.mkvno);
 

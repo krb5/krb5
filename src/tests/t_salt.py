@@ -4,28 +4,26 @@ import re
 
 realm = K5Realm(create_user=False)
 
-# Check that a non-default salt type applies only to the key it is matched
-# with and not to subsequent keys.  e1 is a enctype:salt string with
-# non-default salt, and e2 is an enctype:salt string with default salt.
-# The string argument corresponds to the salt type of e1, and must appear
-# exactly once in the getprinc output, corresponding to just the first key.
-def test_salt(realm, e1, string, e2):
-    query = 'ank -e ' + e1 + ',' + e2 + ' -pw password user'
+# Check that a non-default salt type applies only to the key it is
+# matched with and not to subsequent keys.  e1 and e2 are enctypes,
+# and salt is a non-default salt type.
+def test_salt(realm, e1, salt, e2):
+    query = 'ank -e %s:%s,%s -pw password user' % (e1, salt, e2)
     realm.run_kadminl(query)
     out = realm.run_kadminl('getprinc user')
-    if len(re.findall(string, out)) != 1:
-        fail(string + ' present in second enctype or not present')
+    if len(re.findall(':' + salt, out)) != 1:
+        fail(salt + ' present in second enctype or not present')
     realm.run_kadminl('delprinc -force user')
 
 # Enctype/salt pairs chosen with non-default salt types.
 # The enctypes are mostly arbitrary, though afs3 must only be used with des.
 # We do not enforce that v4 salts must only be used with des, but it seems
 # like a good idea.
-salts = [('des-cbc-crc:afs3', 'AFS version 3'),
-         ('des3-cbc-sha1:norealm', 'Version 5 - No Realm'),
-         ('arcfour-hmac:onlyrealm', 'Version 5 - Realm Only'),
-         ('des-cbc-crc:v4', 'Version 4'),
-         ('aes128-cts-hmac-sha1-96:special', 'Special')]
+salts = [('des-cbc-crc', 'afs3'),
+         ('des3-cbc-sha1', 'norealm'),
+         ('arcfour-hmac', 'onlyrealm'),
+         ('des-cbc-crc', 'v4'),
+         ('aes128-cts-hmac-sha1-96', 'special')]
 # These enctypes are chosen to cover the different string-to-key routines.
 # Omit ":normal" from aes256 to check that salttype defaulting works.
 second_kstypes = ['aes256-cts-hmac-sha1-96', 'arcfour-hmac:normal',
