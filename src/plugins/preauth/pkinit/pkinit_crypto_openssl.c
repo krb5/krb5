@@ -597,14 +597,6 @@ pkinit_init_pkinit_oids(pkinit_plg_crypto_context ctx)
     CREATE_OBJ_IF_NEEDED("1.3.6.1.5.2.3.5", id_pkinit_KPKdc,
                          "id-pkinit-KPKdc", "KDC EKU");
 
-#if 0
-    CREATE_OBJ_IF_NEEDED("1.2.840.113549.1.7.1", id_pkinit_authData9,
-                         "id-pkcs7-data", "PKCS7 data");
-#else
-    /* See note in pkinit_pkcs7type2oid() */
-    ctx->id_pkinit_authData9 = NULL;
-#endif
-
     CREATE_OBJ_IF_NEEDED("1.3.6.1.4.1.311.20.2.2", id_ms_kp_sc_logon,
                          "id-ms-kp-sc-logon EKU", "Microsoft SmartCard Login EKU");
 
@@ -931,46 +923,50 @@ pkinit_identity_set_prompter(pkinit_identity_crypto_context id_cryptoctx,
     return 0;
 }
 
-/*helper function for creating pkinit ContentInfo*/
+/* Create a CMS ContentInfo of type oid containing the octet string in data. */
 static krb5_error_code
-create_contentinfo(krb5_context context,
-                   pkinit_plg_crypto_context plg_crypto_context,
-                   ASN1_OBJECT *oid, unsigned char *data, size_t data_len,
-                   PKCS7 **out_p7)
+create_contentinfo(krb5_context context, ASN1_OBJECT *oid,
+                   unsigned char *data, size_t data_len, PKCS7 **p7_out)
 {
-    krb5_error_code retval = EINVAL;
-    PKCS7 *inner_p7;
-    ASN1_TYPE *pkinit_data = NULL;
+    PKCS7 *p7 = NULL;
+    ASN1_OCTET_STRING *ostr = NULL;
 
-    *out_p7 = NULL;
-    if ((inner_p7 = PKCS7_new()) == NULL)
-        goto cleanup;
-    if ((pkinit_data = ASN1_TYPE_new()) == NULL)
-        goto cleanup;
-    pkinit_data->type = V_ASN1_OCTET_STRING;
-    if ((pkinit_data->value.octet_string = ASN1_OCTET_STRING_new()) == NULL)
-        goto cleanup;
-    if (!ASN1_OCTET_STRING_set(pkinit_data->value.octet_string,
-                               (unsigned char *) data, data_len)) {
-        unsigned long err = ERR_peek_error();
-        retval = KRB5KDC_ERR_PREAUTH_FAILED;
-        krb5_set_error_message(context, retval, "%s\n",
-                               ERR_error_string(err, NULL));
-        pkiDebug("failed to add pkcs7 data\n");
-        goto cleanup;
+    *p7_out = NULL;
+
+    ostr = ASN1_OCTET_STRING_new();
+    if (ostr == NULL)
+        goto oom;
+    if (!ASN1_OCTET_STRING_set(ostr, (unsigned char *)data, data_len))
+        goto oom;
+
+    p7 = PKCS7_new();
+    if (p7 == NULL)
+        goto oom;
+    p7->type = OBJ_dup(oid);
+    if (p7->type == NULL)
+        goto oom;
+
+    if (OBJ_obj2nid(oid) == NID_pkcs7_data) {
+        /* Draft 9 uses id-pkcs7-data for signed data.  For this type OpenSSL
+         * expects an octet string in d.data. */
+        p7->d.data = ostr;
+    } else {
+        p7->d.other = ASN1_TYPE_new();
+        if (p7->d.other == NULL)
+            goto oom;
+        p7->d.other->type = V_ASN1_OCTET_STRING;
+        p7->d.other->value.octet_string = ostr;
     }
-    if (!PKCS7_set0_type_other(inner_p7, OBJ_obj2nid(oid), pkinit_data))
-        goto cleanup;
-    retval = 0;
-    *out_p7 = inner_p7;
-    inner_p7 = NULL;
-    pkinit_data = NULL;
-cleanup:
-    if (inner_p7)
-        PKCS7_free(inner_p7);
-    if (pkinit_data)
-        ASN1_TYPE_free(pkinit_data);
-    return retval;
+
+    *p7_out = p7;
+    return 0;
+
+oom:
+    if (ostr != NULL)
+        ASN1_OCTET_STRING_free(ostr);
+    if (p7 != NULL)
+        PKCS7_free(p7);
+    return ENOMEM;
 }
 
 krb5_error_code
@@ -991,8 +987,7 @@ cms_contentinfo_create(krb5_context context,                          /* IN */
     oid = pkinit_pkcs7type2oid(plg_cryptoctx, cms_msg_type);
     if (oid == NULL)
         goto cleanup;
-    retval = create_contentinfo(context, plg_cryptoctx, oid,
-                                data, data_len, &p7);
+    retval = create_contentinfo(context, oid, data, data_len, &p7);
     if (retval != 0)
         goto cleanup;
     *out_data_len = i2d_PKCS7(p7, NULL);
@@ -1282,8 +1277,7 @@ cms_signeddata_create(krb5_context context,
     } /* we have a certificate */
 
     /* start on adding data to the pkcs7 signed */
-    retval = create_contentinfo(context, plg_cryptoctx, oid,
-                                data, data_len, &inner_p7);
+    retval = create_contentinfo(context, oid, data, data_len, &inner_p7);
     if (p7s->contents != NULL)
         PKCS7_free(p7s->contents);
     p7s->contents = inner_p7;
@@ -1407,7 +1401,7 @@ cms_signeddata_verify(krb5_context context,
 #endif
     if (is_signed)
         *is_signed = 1;
-    /* Do this early enough to create the shadow OID for pkcs7-data if needed */
+
     oid = pkinit_pkcs7type2oid(plgctx, cms_msg_type);
     if (oid == NULL)
         goto cleanup;
@@ -3464,31 +3458,11 @@ openssl_callback_ignore_crls(int ok, X509_STORE_CTX * ctx)
 static ASN1_OBJECT *
 pkinit_pkcs7type2oid(pkinit_plg_crypto_context cryptoctx, int pkcs7_type)
 {
-    int nid;
-
     switch (pkcs7_type) {
     case CMS_SIGN_CLIENT:
         return cryptoctx->id_pkinit_authData;
     case CMS_SIGN_DRAFT9:
-        /*
-         * Delay creating this OID until we know we need it.
-         * It shadows an existing OpenSSL oid.  If it
-         * is created too early, it breaks things like
-         * the use of pkcs12 (which uses pkcs7 structures).
-         * We need this shadow version because our code
-         * depends on the "other" type to be unknown to the
-         * OpenSSL code.
-         */
-        if (cryptoctx->id_pkinit_authData9 == NULL) {
-            pkiDebug("%s: Creating shadow instance of pkcs7-data oid\n",
-                     __FUNCTION__);
-            nid = OBJ_create("1.2.840.113549.1.7.1", "id-pkcs7-data",
-                             "PKCS7 data");
-            if (nid == NID_undef)
-                return NULL;
-            cryptoctx->id_pkinit_authData9 = OBJ_nid2obj(nid);
-        }
-        return cryptoctx->id_pkinit_authData9;
+        return OBJ_nid2obj(NID_pkcs7_data);
     case CMS_SIGN_SERVER:
         return cryptoctx->id_pkinit_DHKeyData;
     case CMS_ENVEL_SERVER:
