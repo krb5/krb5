@@ -95,7 +95,6 @@ struct _pkinit_plg_crypto_context {
     DH *dh_2048;
     DH *dh_4096;
     ASN1_OBJECT *id_pkinit_authData;
-    ASN1_OBJECT *id_pkinit_authData9;
     ASN1_OBJECT *id_pkinit_DHKeyData;
     ASN1_OBJECT *id_pkinit_rkeyData;
     ASN1_OBJECT *id_pkinit_san;
