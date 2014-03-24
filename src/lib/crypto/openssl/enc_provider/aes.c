@@ -279,7 +279,8 @@ const struct krb5_enc_provider krb5int_enc_aes128 = {
     krb5int_aes_decrypt,
     NULL,
     krb5int_aes_init_state,
-    krb5int_default_free_state
+    krb5int_default_free_state,
+    NULL
 };
 
 const struct krb5_enc_provider krb5int_enc_aes256 = {
@@ -289,5 +290,6 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     krb5int_aes_decrypt,
     NULL,
     krb5int_aes_init_state,
-    krb5int_default_free_state
+    krb5int_default_free_state,
+    NULL
 };

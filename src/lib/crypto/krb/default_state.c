@@ -55,7 +55,7 @@ krb5int_default_free_state(krb5_data *state)
 {
     if (state->data) {
         free (state->data);
-        state-> data = NULL;
+        state->data = NULL;
         state->length = 0;
     }
 }

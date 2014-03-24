@@ -334,7 +334,7 @@ Optional packages
     should return only vague error codes to clients.
 
 **-**\ **-with-crypto-impl=**\ *IMPL*
-    Use specified crypto implementation (e.g., **-**\ **-with-crypto=**\
+    Use specified crypto implementation (e.g., **-**\ **-with-crypto-impl=**\
     *openssl*).  Default is a native MIT Kerberos implementation
     ``builtin``.  The other currently implemented crypto backends are
     ``openssl`` and ``nss``.  (See :ref:`mitK5features`)
