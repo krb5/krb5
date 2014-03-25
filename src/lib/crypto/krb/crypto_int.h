@@ -364,7 +364,7 @@ int krb5int_crypto_init(void);
 /* DES default state initialization handler (used by module enc providers). */
 krb5_error_code krb5int_des_init_state(const krb5_keyblock *key,
                                        krb5_keyusage keyusage,
-                                       krb5_data *new_state);
+                                       krb5_data *state_out);
 
 /* Default state cleanup handler (used by module enc providers). */
 void krb5int_default_free_state(krb5_data *state);
