@@ -74,6 +74,7 @@ typedef struct _kadm5_server_handle_t {
     CLIENT *        clnt;
     int             client_socket;
     krb5_context    context;
+    gss_cred_id_t   cred;
     kadm5_config_params params;
     struct _kadm5_server_handle_t *lhandle;
 } kadm5_server_handle_rec, *kadm5_server_handle_t;
