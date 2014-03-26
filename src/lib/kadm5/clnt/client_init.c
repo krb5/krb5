@@ -193,6 +193,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
     handle->cache_name = 0;
     handle->destroy_cache = 0;
     handle->context = 0;
+    handle->cred = GSS_C_NO_CREDENTIAL;
     *handle->lhandle = *handle;
     handle->lhandle->api_version = KADM5_API_VERSION_4;
     handle->lhandle->struct_version = KADM5_STRUCT_VERSION;
@@ -577,11 +578,9 @@ setup_gss(kadm5_server_handle_t handle, kadm5_config_params *params_in,
     gss_buffer_desc buf;
     gss_name_t gss_client;
     gss_name_t gss_target;
-    gss_cred_id_t gss_client_creds;
     const char *c_ccname_orig;
     char *ccname_orig;
 
-    gss_client_creds = GSS_C_NO_CREDENTIAL;
     ccname_orig = NULL;
     gss_client = gss_target = GSS_C_NO_NAME;
 
@@ -614,7 +613,7 @@ setup_gss(kadm5_server_handle_t handle, kadm5_config_params *params_in,
 
     gssstat = gss_acquire_cred(&minor_stat, gss_client, 0,
                                GSS_C_NULL_OID_SET, GSS_C_INITIATE,
-                               &gss_client_creds, NULL, NULL);
+                               &handle->cred, NULL, NULL);
     if (gssstat != GSS_S_COMPLETE) {
 #if 0 /* for debugging only */
         {
@@ -667,12 +666,9 @@ setup_gss(kadm5_server_handle_t handle, kadm5_config_params *params_in,
      * Do actual creation of RPC auth handle.  Implements auth flavor
      * fallback.
      */
-    rpc_auth(handle, params_in, gss_client_creds, gss_target);
+    rpc_auth(handle, params_in, handle->cred, gss_target);
 
 error:
-    if (gss_client_creds != GSS_C_NO_CREDENTIAL)
-        (void) gss_release_cred(&minor_stat, &gss_client_creds);
-
     if (gss_client)
         gss_release_name(&minor_stat, &gss_client);
     if (gss_target)
@@ -743,6 +739,7 @@ rpc_auth(kadm5_server_handle_t handle, kadm5_config_params *params_in,
 kadm5_ret_t
 kadm5_destroy(void *server_handle)
 {
+    OM_uint32 minor_stat;
     krb5_ccache            ccache = NULL;
     int                    code = KADM5_OK;
     kadm5_server_handle_t      handle =
@@ -757,6 +754,8 @@ kadm5_destroy(void *server_handle)
     }
     if (handle->cache_name)
         free(handle->cache_name);
+    if (handle->cred)
+        (void)gss_release_cred(&minor_stat, &handle->cred);
     if (handle->clnt && handle->clnt->cl_auth)
         AUTH_DESTROY(handle->clnt->cl_auth);
     if (handle->clnt)
