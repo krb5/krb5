@@ -508,8 +508,8 @@ Examples:
     Last failed authentication: [never]
     Failed password attempts: 0
     Number of keys: 2
-    Key: vno 1, DES cbc mode with CRC-32, no salt
-    Key: vno 1, DES cbc mode with CRC-32, Version 4
+    Key: vno 1, des-cbc-crc, no salt
+    Key: vno 1, des-cbc-crc, Version 4
     Attributes:
     Policy: [none]
 
