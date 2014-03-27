@@ -367,8 +367,7 @@ gsskrb5_extract_authz_data_from_sec_context(OM_uint32 *minor_status,
         return major_status;
     }
 
-    if (data_set == GSS_C_NO_BUFFER_SET ||
-        data_set->count != 1) {
+    if (data_set == GSS_C_NO_BUFFER_SET || data_set->count == 0) {
         return GSS_S_FAILURE;
     }
 
