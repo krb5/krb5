@@ -193,6 +193,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
     handle->cache_name = 0;
     handle->destroy_cache = 0;
     handle->context = 0;
+    handle->cred = 0;
     *handle->lhandle = *handle;
     handle->lhandle->api_version = KADM5_API_VERSION_4;
     handle->lhandle->struct_version = KADM5_STRUCT_VERSION;
@@ -662,6 +663,7 @@ setup_gss(kadm5_server_handle_t handle, kadm5_config_params *params_in,
 #endif
         goto error;
     }
+    handle->cred = gss_client_creds;
 
     /*
      * Do actual creation of RPC auth handle.  Implements auth flavor
@@ -670,9 +672,6 @@ setup_gss(kadm5_server_handle_t handle, kadm5_config_params *params_in,
     rpc_auth(handle, params_in, gss_client_creds, gss_target);
 
 error:
-    if (gss_client_creds != GSS_C_NO_CREDENTIAL)
-        (void) gss_release_cred(&minor_stat, &gss_client_creds);
-
     if (gss_client)
         gss_release_name(&minor_stat, &gss_client);
     if (gss_target)
@@ -743,6 +742,7 @@ rpc_auth(kadm5_server_handle_t handle, kadm5_config_params *params_in,
 kadm5_ret_t
 kadm5_destroy(void *server_handle)
 {
+    OM_uint32 minor_stat;
     krb5_ccache            ccache = NULL;
     int                    code = KADM5_OK;
     kadm5_server_handle_t      handle =
@@ -757,6 +757,8 @@ kadm5_destroy(void *server_handle)
     }
     if (handle->cache_name)
         free(handle->cache_name);
+    if (handle->cred)
+        (void)gss_release_cred(&minor_stat, &handle->cred);
     if (handle->clnt && handle->clnt->cl_auth)
         AUTH_DESTROY(handle->clnt->cl_auth);
     if (handle->clnt)
