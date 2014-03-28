@@ -56,7 +56,7 @@
  */
 
 #include <sys/types.h>
-#include <getopt.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <krb5.h>
