@@ -37,7 +37,6 @@
 
 #include <k5-int.h>
 #include "int-proto.h"
-#include <getopt.h>
 
 static void
 bail_on_err(krb5_context context, const char *msg, krb5_error_code code)
