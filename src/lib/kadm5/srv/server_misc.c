@@ -38,7 +38,7 @@ kadm5_ret_t
 adb_policy_init(kadm5_server_handle_t handle)
 {
     /* now policy is initialized as part of database. No seperate call needed */
-    if( krb5_db_inited( handle->context ) )
+    if (krb5_db_inited(handle->context) == 0)
         return KADM5_OK;
 
     return krb5_db_open( handle->context, NULL,
