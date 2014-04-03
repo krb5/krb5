@@ -35,24 +35,6 @@
 #include    <adm_proto.h>
 
 kadm5_ret_t
-adb_policy_init(kadm5_server_handle_t handle)
-{
-    /* now policy is initialized as part of database. No seperate call needed */
-    if (krb5_db_inited(handle->context) == 0)
-        return KADM5_OK;
-
-    return krb5_db_open( handle->context, NULL,
-                         KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN );
-}
-
-kadm5_ret_t
-adb_policy_close(kadm5_server_handle_t handle)
-{
-    /* will be taken care by database close */
-    return KADM5_OK;
-}
-
-kadm5_ret_t
 init_pwqual(kadm5_server_handle_t handle)
 {
     krb5_error_code ret;

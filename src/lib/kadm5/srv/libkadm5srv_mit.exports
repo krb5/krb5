@@ -5,8 +5,6 @@ kadm5int_acl_check_krb
 kadm5int_acl_finish
 kadm5int_acl_impose_restrictions
 kadm5int_acl_init
-adb_policy_close
-adb_policy_init
 hist_princ
 kadm5_set_use_password_server
 kadm5_chpass_principal
