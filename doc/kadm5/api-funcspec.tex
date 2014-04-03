@@ -1107,9 +1107,8 @@ the Admin API open.  This function behaves differently when called by
 local and remote clients.
 
 For local clients, the function closes and reopens the Kerberos
-database with krb5_db_fini() and krb5_db_init(), and closes and
-reopens the Admin policy database with adb_policy_close() and
-adb_policy_open().  Although it is unlikely, any other these functions
+database with krb5_db_fini() and krb5_db_init().
+Although it is unlikely, either of these functions
 could return errors; in that case, this function calls
 kadm5_destroy and returns the error code.  Therefore, if
 kadm5_flush does not return KADM5_OK, the connection to the

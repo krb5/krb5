@@ -70,8 +70,6 @@ typedef struct _osa_princ_ent_t {
 } osa_princ_ent_rec, *osa_princ_ent_t;
 
 
-kadm5_ret_t    adb_policy_init(kadm5_server_handle_t handle);
-kadm5_ret_t    adb_policy_close(kadm5_server_handle_t handle);
 kadm5_ret_t    passwd_check(kadm5_server_handle_t handle,
                             const char *pass, kadm5_policy_ent_t policy,
                             krb5_principal principal);

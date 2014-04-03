@@ -346,7 +346,6 @@ kadm5_ret_t kadm5_destroy(void *server_handle)
     destroy_pwqual(handle);
 
     k5_kadm5_hook_free_handles(handle->context, handle->hook_handles);
-    adb_policy_close(handle);
     krb5_db_fini(handle->context);
     krb5_free_principal(handle->context, handle->current_caller);
     kadm5_free_config_params(handle->context, &handle->params);
@@ -393,9 +392,7 @@ kadm5_ret_t kadm5_flush(void *server_handle)
 
     if ((ret = krb5_db_fini(handle->context)) ||
         (ret = krb5_db_open(handle->context, handle->db_args,
-                            KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN)) ||
-        (ret = adb_policy_close(handle)) ||
-        (ret = adb_policy_init(handle))) {
+                            KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN))) {
         (void) kadm5_destroy(server_handle);
         return ret;
     }
