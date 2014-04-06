@@ -166,6 +166,24 @@ add_host_to_list(struct serverlist *list, const char *hostname, int port,
     return 0;
 }
 
+/* Return true if server is identical to an entry in list. */
+static krb5_boolean
+server_list_contains(struct serverlist *list, struct server_entry *server)
+{
+    struct server_entry *ent;
+
+    for (ent = list->servers; ent < list->servers + list->nservers; ent++) {
+        if (server->hostname != NULL && ent->hostname != NULL &&
+            strcmp(server->hostname, ent->hostname) == 0)
+            return TRUE;
+        if (server->hostname == NULL && ent->hostname == NULL &&
+            server->addrlen == ent->addrlen &&
+            memcmp(&server->addr, &ent->addr, server->addrlen) == 0)
+            return TRUE;
+    }
+    return FALSE;
+}
+
 static krb5_error_code
 locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                   const char * name, struct serverlist *serverlist,
@@ -529,6 +547,41 @@ dns_locate_server(krb5_context context, const krb5_data *realm,
 }
 #endif /* KRB5_DNS_LOOKUP */
 
+static krb5_error_code
+locate_server(krb5_context context, const krb5_data *realm,
+              struct serverlist *serverlist, enum locate_service_type svc,
+              int socktype)
+{
+    krb5_error_code ret;
+    struct serverlist list = SERVERLIST_INIT;
+
+    *serverlist = list;
+
+    /* Try modules.  If a module returns 0 but leaves the list empty, return an
+     * empty list. */
+    ret = module_locate_server(context, realm, &list, svc, socktype);
+    if (ret != KRB5_PLUGIN_NO_HANDLE)
+        goto done;
+
+    /* Try the profile.  Fall back to DNS if it returns an empty list. */
+    ret = prof_locate_server(context, realm, &list, svc, socktype);
+    if (ret)
+        goto done;
+
+#ifdef KRB5_DNS_LOOKUP
+    if (list.nservers == 0)
+        ret = dns_locate_server(context, realm, &list, svc, socktype);
+#endif
+
+done:
+    if (ret) {
+        k5_free_serverlist(&list);
+        return ret;
+    }
+    *serverlist = list;
+    return 0;
+}
+
 /*
  * Wrapper function for the various backends
  */
@@ -538,54 +591,26 @@ k5_locate_server(krb5_context context, const krb5_data *realm,
                  struct serverlist *serverlist, enum locate_service_type svc,
                  int socktype)
 {
-    krb5_error_code code;
-    struct serverlist al = SERVERLIST_INIT;
+    krb5_error_code ret;
 
-    *serverlist = al;
-
+    memset(serverlist, 0, sizeof(*serverlist));
     if (realm == NULL || realm->data == NULL || realm->data[0] == 0) {
         krb5_set_error_message(context, KRB5_REALM_CANT_RESOLVE,
                                "Cannot find KDC for invalid realm name \"\"");
         return KRB5_REALM_CANT_RESOLVE;
     }
 
-    code = module_locate_server(context, realm, &al, svc, socktype);
-    Tprintf("module_locate_server returns %d\n", code);
-    if (code == KRB5_PLUGIN_NO_HANDLE) {
-        /*
-         * We always try the local file before DNS.  Note that there
-         * is no way to indicate "service not available" via the
-         * config file.
-         */
+    ret = locate_server(context, realm, serverlist, svc, socktype);
+    if (ret)
+        return ret;
 
-        code = prof_locate_server(context, realm, &al, svc, socktype);
-
-#ifdef KRB5_DNS_LOOKUP
-        if (code == 0 && al.nservers == 0)
-            code = dns_locate_server(context, realm, &al, svc, socktype);
-#endif /* KRB5_DNS_LOOKUP */
-
-        /* We could put more heuristics here, like looking up a hostname
-           of "kerberos."+REALM, etc.  */
-    }
-    if (code == 0)
-        Tprintf ("krb5int_locate_server found %d addresses\n",
-                 al.nservers);
-    else
-        Tprintf ("krb5int_locate_server returning error code %d/%s\n",
-                 code, error_message(code));
-    if (code != 0) {
-        k5_free_serverlist(&al);
-        return code;
-    }
-    if (al.nservers == 0) {       /* No good servers */
-        k5_free_serverlist(&al);
+    if (serverlist->nservers == 0) {
+        k5_free_serverlist(serverlist);
         krb5_set_error_message(context, KRB5_REALM_UNKNOWN,
                                _("Cannot find KDC for realm \"%.*s\""),
                                realm->length, realm->data);
         return KRB5_REALM_UNKNOWN;
     }
-    *serverlist = al;
     return 0;
 }
 
@@ -597,4 +622,19 @@ k5_locate_kdc(krb5_context context, const krb5_data *realm,
 
     stype = get_masters ? locate_service_master_kdc : locate_service_kdc;
     return k5_locate_server(context, realm, serverlist, stype, socktype);
+}
+
+krb5_boolean
+k5_kdc_is_master(krb5_context context, const krb5_data *realm,
+                 struct server_entry *server)
+{
+    struct serverlist list;
+    krb5_boolean found;
+
+    if (locate_server(context, realm, &list, locate_service_master_kdc,
+                      server->socktype) != 0)
+        return FALSE;
+    found = server_list_contains(&list, server);
+    k5_free_serverlist(&list);
+    return found;
 }
