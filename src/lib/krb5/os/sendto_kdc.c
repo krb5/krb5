@@ -293,25 +293,6 @@ cm_select_or_poll(const struct select_state *in, time_ms endtime,
 }
 
 static int
-in_addrlist(struct server_entry *entry, struct serverlist *list)
-{
-    size_t i;
-    struct server_entry *le;
-
-    for (i = 0; i < list->nservers; i++) {
-        le = &list->servers[i];
-        if (entry->hostname != NULL && le->hostname != NULL &&
-            strcmp(entry->hostname, le->hostname) == 0)
-            return 1;
-        if (entry->hostname == NULL && le->hostname == NULL &&
-            entry->addrlen == le->addrlen &&
-            memcmp(&entry->addr, &le->addr, entry->addrlen) == 0)
-            return 1;
-    }
-    return 0;
-}
-
-static int
 check_for_svc_unavailable (krb5_context context,
                            const krb5_data *reply,
                            void *msg_handler_data)
@@ -418,17 +399,9 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
     /* Set use_master to 1 if we ended up talking to a master when we didn't
      * explicitly request to. */
     if (*use_master == 0) {
-        struct serverlist mservers;
-        struct server_entry *entry = &servers.servers[server_used];
-        retval = k5_locate_kdc(context, realm, &mservers, TRUE,
-                               entry->socktype);
-        if (retval == 0) {
-            if (in_addrlist(entry, &mservers))
-                *use_master = 1;
-            k5_free_serverlist(&mservers);
-        }
+        *use_master = k5_kdc_is_master(context, realm,
+                                       &servers.servers[server_used]);
         TRACE_SENDTO_KDC_MASTER(context, *use_master);
-        retval = 0;
     }
 
 cleanup:

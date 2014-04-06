@@ -76,6 +76,9 @@ krb5_error_code k5_locate_kdc(krb5_context context, const krb5_data *realm,
                               struct serverlist *serverlist, int get_masters,
                               int socktype);
 
+krb5_boolean k5_kdc_is_master(krb5_context context, const krb5_data *realm,
+                              struct server_entry *server);
+
 void k5_free_serverlist(struct serverlist *);
 
 #ifdef HAVE_NETINET_IN_H
