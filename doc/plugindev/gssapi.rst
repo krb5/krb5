@@ -9,8 +9,8 @@ the set of built-in mechanisms.
 
 A mechanism module is a Unix shared object or Windows DLL, built
 separately from the krb5 tree.  Modules are loaded according to the
-``/etc/gss/mech`` config file, as described in
-:ref:`gssapi_plugin_config`.
+``/etc/gss/mech`` or ``/etc/gss/mech.d/*.conf`` config files, as
+described in :ref:`gssapi_plugin_config`.
 
 For the most part, a GSSAPI mechanism module exports the same
 functions as would a GSSAPI implementation itself, with the same
@@ -45,10 +45,10 @@ with the following signature::
     gss_OID_set gss_mech_interposer(gss_OID mech_type);
 
 This function is invoked with the OID of the interposer mechanism as
-specified in ``/etc/gss/mech``, and returns a set of mechanism OIDs to
-be interposed.  The returned OID set must have been created using the
-mechglue's gss_create_empty_oid_set and gss_add_oid_set_member
-functions.
+specified in ``/etc/gss/mech`` or in a ``/etc/gss/mech.d/*.conf``
+file, and returns a set of mechanism OIDs to be interposed.  The
+returned OID set must have been created using the mechglue's
+gss_create_empty_oid_set and gss_add_oid_set_member functions.
 
 An interposer module must use the prefix ``gssi_`` for the GSSAPI
 functions it exports, instead of the prefix ``gss_``.
