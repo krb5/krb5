@@ -85,8 +85,11 @@ locator plugin would be registered by placing its shared object in
 GSSAPI mechanism modules
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-GSSAPI mechanism module are registered using the file
-``/etc/gss/mech``.  Each line in this file has the form::
+GSSAPI mechanism modules are registered using the file
+``/etc/gss/mech`` or configuration files in the ``/etc/gss/mech.d/``
+directory.  Only files with a ``.conf`` suffix will be read from the
+``/etc/gss/mech.d/`` directory.  Each line in these files has the
+form::
 
     oid  pathname  [options]  <type>
 
