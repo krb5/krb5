@@ -1107,8 +1107,6 @@ Here is an example of a generic krb5.conf file:
 
     [libdefaults]
         default_realm = ATHENA.MIT.EDU
-        default_tkt_enctypes = des3-hmac-sha1 des-cbc-crc
-        default_tgs_enctypes = des3-hmac-sha1 des-cbc-crc
         dns_lookup_kdc = true
         dns_lookup_realm = false
 
@@ -1119,7 +1117,6 @@ Here is an example of a generic krb5.conf file:
             kdc = kerberos-2.mit.edu:750
             admin_server = kerberos.mit.edu
             master_kdc = kerberos.mit.edu
-            default_domain = mit.edu
         }
         EXAMPLE.COM = {
             kdc = kerberos.example.com
@@ -1128,7 +1125,6 @@ Here is an example of a generic krb5.conf file:
         }
 
     [domain_realm]
-        .mit.edu = ATHENA.MIT.EDU
         mit.edu = ATHENA.MIT.EDU
 
     [capaths]

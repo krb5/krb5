@@ -24,11 +24,11 @@ An example profile file might look like this:
 
 [realms]
 	ATHENA.MIT.EDU = {
-		kdc = kerberos.mit.edu:88
-		kdc = kerberos-1.mit.edu:88
-		kdc = kerberos-2.mit.edu:88
-		admin_server = kerberos.mit.edu:88
-		default_domain = mit.edu
+		kdc = kerberos.mit.edu
+		kdc = kerberos-1.mit.edu
+		kdc = kerberos-2.mit.edu
+		master_kdc = kerberos.mit.edu
+		admin_server = kerberos.mit.edu
 	}
 	CYGNUS.COM = {
 		kdc = KERBEROS-1.CYGNUS.COM
@@ -65,7 +65,8 @@ sections have been marked as final:
 
 [realms]
 	ATHENA.MIT.EDU = {
-		kdc = kerberos.mit.edu:88
-		admin_server = kerberos.mit.edu:88
+		kdc = kerberos.mit.edu
+		master_kdc = kerberos.mit.edu
+		admin_server = kerberos.mit.edu
 	}*
 
