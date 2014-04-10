@@ -126,31 +126,6 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
 }
 
 /*
- * Function: build_name_with_realm
- *
- * Purpose: concatenate a name and a realm to form a krb5 name
- *
- * Arguments:
- *
- *      name    (input) the name
- *      realm   (input) the realm
- *
- * Returns:
- *
- *      pointer to name@realm, in allocated memory, or NULL if it
- *      cannot be allocated
- *
- * Requires: both strings are null-terminated
- */
-static char *build_name_with_realm(char *name, char *realm)
-{
-    char *n;
-
-    asprintf(&n, "%s@%s", name, realm);
-    return n;
-}
-
-/*
  * Function: add_admin_princs
  *
  * Purpose: create admin principals
@@ -284,7 +259,10 @@ int add_admin_princ(void *handle, krb5_context context,
 
     memset(&ent, 0, sizeof(ent));
 
-    fullname = build_name_with_realm(name, realm);
+    if (asprintf(&fullname, "%s@%s", name, realm) < 0) {
+        com_err(progname, ENOMEM, _("while appending realm to principal"));
+        return ERR;
+    }
     ret = krb5_parse_name(context, fullname, &ent.principal);
     if (ret) {
         com_err(progname, ret, _("while parsing admin principal name"));
