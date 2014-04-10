@@ -186,6 +186,11 @@ krb5_parse_name_flags(krb5_context context, const char *name,
 
     *principal_out = NULL;
 
+    if (name == NULL) {
+        ret = KRB5_PARSE_MALFORMED;
+        goto cleanup;
+    }
+
     ret = allocate_princ(context, name, enterprise, &princ, &has_realm);
     if (ret)
         goto cleanup;
