@@ -43,8 +43,6 @@
 
 #include "pkinit_crypto_openssl.h"
 
-static void openssl_init(void);
-
 static krb5_error_code pkinit_init_pkinit_oids(pkinit_plg_crypto_context );
 static void pkinit_fini_pkinit_oids(pkinit_plg_crypto_context );
 
@@ -423,6 +421,9 @@ unsigned char pkinit_4096_dhprime[4096/8] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
+MAKE_INIT_FUNCTION(pkinit_openssl_init);
+MAKE_FINI_FUNCTION(pkinit_openssl_fini);
+
 krb5_error_code
 pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx)
 {
@@ -430,11 +431,15 @@ pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx)
     pkinit_plg_crypto_context ctx = NULL;
 
     /* initialize openssl routines */
-    openssl_init();
+    retval = CALL_INIT_FUNCTION(pkinit_openssl_init);
+    if (retval)
+        goto out;
 
     ctx = malloc(sizeof(*ctx));
-    if (ctx == NULL)
+    if (ctx == NULL) {
+        retval = ENOMEM;
         goto out;
+    }
     memset(ctx, 0, sizeof(*ctx));
 
     pkiDebug("%s: initializing openssl crypto context at %p\n",
@@ -2921,18 +2926,31 @@ cleanup:
     return retval;
 }
 
-static void
-openssl_init()
+int
+pkinit_openssl_init()
 {
-    static int did_init = 0;
+#ifdef SHOW_INITFINI_FUNCS
+    printf("pkinit_openssl_init\n");
+#endif
 
-    if (!did_init) {
-        /* initialize openssl routines */
-        CRYPTO_malloc_init();
-        ERR_load_crypto_strings();
-        OpenSSL_add_all_algorithms();
-        did_init++;
-    }
+    /* initialize openssl routines */
+    CRYPTO_malloc_init();
+    ERR_load_crypto_strings();
+    OpenSSL_add_all_algorithms();
+
+    return 0;
+}
+
+void
+pkinit_openssl_fini()
+{
+#ifdef SHOW_INITFINI_FUNCS
+    printf("pkinit_openssl_fini\n");
+#endif
+    /*
+     * Intentionally not calling ERR_free_strings nor EVP_cleanup here
+     * in case pkinit plugin is unloading but OpenSSL lib is not.
+     */
 }
 
 static krb5_error_code
