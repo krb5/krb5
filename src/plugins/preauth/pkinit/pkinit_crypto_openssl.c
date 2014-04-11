@@ -43,8 +43,6 @@
 
 #include "pkinit_crypto_openssl.h"
 
-static void openssl_init(void);
-
 static krb5_error_code pkinit_init_pkinit_oids(pkinit_plg_crypto_context );
 static void pkinit_fini_pkinit_oids(pkinit_plg_crypto_context );
 
@@ -423,14 +421,15 @@ unsigned char pkinit_4096_dhprime[4096/8] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
+MAKE_INIT_FUNCTION(pkinit_openssl_init);
+
 krb5_error_code
 pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx)
 {
     krb5_error_code retval = ENOMEM;
     pkinit_plg_crypto_context ctx = NULL;
 
-    /* initialize openssl routines */
-    openssl_init();
+    (void)CALL_INIT_FUNCTION(pkinit_openssl_init);
 
     ctx = malloc(sizeof(*ctx));
     if (ctx == NULL)
@@ -2921,18 +2920,14 @@ cleanup:
     return retval;
 }
 
-static void
-openssl_init()
+int
+pkinit_openssl_init()
 {
-    static int did_init = 0;
-
-    if (!did_init) {
-        /* initialize openssl routines */
-        CRYPTO_malloc_init();
-        ERR_load_crypto_strings();
-        OpenSSL_add_all_algorithms();
-        did_init++;
-    }
+    /* Initialize OpenSSL. */
+    CRYPTO_malloc_init();
+    ERR_load_crypto_strings();
+    OpenSSL_add_all_algorithms();
+    return 0;
 }
 
 static krb5_error_code
