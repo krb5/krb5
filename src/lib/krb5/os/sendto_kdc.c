@@ -77,6 +77,9 @@
 #ifdef PROXY_TLS_IMPL_OPENSSL
 #include <openssl/err.h>
 #include <openssl/ssl.h>
+#include <openssl/x509.h>
+#include <openssl/x509v3.h>
+#include <dirent.h>
 #endif
 
 #define MAX_PASS                    3
@@ -152,6 +155,11 @@ struct conn_state {
     } http;
 };
 
+#ifdef PROXY_TLS_IMPL_OPENSSL
+/* Extra-data identifier, used to pass context into the verify callback. */
+static int ssl_ex_context_id = -1;
+#endif
+
 void
 k5_sendto_kdc_initialize(void)
 {
@@ -159,6 +167,8 @@ k5_sendto_kdc_initialize(void)
     SSL_library_init();
     SSL_load_error_strings();
     OpenSSL_add_all_algorithms();
+
+    ssl_ex_context_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
 #endif
 }
 
@@ -1147,6 +1157,152 @@ flush_ssl_errors(krb5_context context)
     }
 }
 
+static krb5_error_code
+load_http_anchor_file(X509_STORE *store, const char *path)
+{
+    FILE *fp;
+    STACK_OF(X509_INFO) *sk = NULL;
+    X509_INFO *xi;
+    int i;
+
+    fp = fopen(path, "r");
+    if (fp == NULL)
+        return errno;
+    sk = PEM_X509_INFO_read(fp, NULL, NULL, NULL);
+    fclose(fp);
+    if (sk == NULL)
+        return ENOENT;
+    for (i = 0; i < sk_X509_INFO_num(sk); i++) {
+        xi = sk_X509_INFO_value(sk, i);
+        if (xi->x509 != NULL)
+            X509_STORE_add_cert(store, xi->x509);
+    }
+    sk_X509_INFO_pop_free(sk, X509_INFO_free);
+    return 0;
+}
+
+static krb5_error_code
+load_http_anchor_dir(X509_STORE *store, const char *path)
+{
+    DIR *d = NULL;
+    struct dirent *dentry = NULL;
+    char filename[1024];
+    krb5_boolean found_any = FALSE;
+
+    d = opendir(path);
+    if (d == NULL)
+        return ENOENT;
+    while ((dentry = readdir(d)) != NULL) {
+        if (dentry->d_name[0] != '.') {
+            snprintf(filename, sizeof(filename), "%s/%s",
+                     path, dentry->d_name);
+            if (load_http_anchor_file(store, filename) == 0)
+                found_any = TRUE;
+        }
+    }
+    closedir(d);
+    return found_any ? 0 : ENOENT;
+}
+
+static krb5_error_code
+load_http_anchor(SSL_CTX *ctx, const char *location)
+{
+    X509_STORE *store;
+    const char *envloc;
+
+    store = SSL_CTX_get_cert_store(ctx);
+    if (strncmp(location, "FILE:", 5) == 0) {
+        return load_http_anchor_file(store, location + 5);
+    } else if (strncmp(location, "DIR:", 4) == 0) {
+        return load_http_anchor_dir(store, location + 4);
+    } else if (strncmp(location, "ENV:", 4) == 0) {
+        envloc = getenv(location + 4);
+        if (envloc == NULL)
+            return ENOENT;
+        return load_http_anchor(ctx, envloc);
+    }
+    return EINVAL;
+}
+
+static krb5_error_code
+load_http_verify_anchors(krb5_context context, const krb5_data *realm,
+                         SSL_CTX *sctx)
+{
+    const char *anchors[4];
+    char **values = NULL, *realmz;
+    unsigned int i;
+    krb5_error_code err;
+
+    realmz = k5memdup0(realm->data, realm->length, &err);
+    if (realmz == NULL)
+        goto cleanup;
+
+    /* Load the configured anchors. */
+    anchors[0] = KRB5_CONF_REALMS;
+    anchors[1] = realmz;
+    anchors[2] = KRB5_CONF_HTTP_ANCHORS;
+    anchors[3] = NULL;
+    if (profile_get_values(context->profile, anchors, &values) == 0) {
+        for (i = 0; values[i] != NULL; i++) {
+            err = load_http_anchor(sctx, values[i]);
+            if (err != 0)
+                break;
+        }
+        profile_free_list(values);
+    } else {
+        /* Use the library defaults. */
+        if (SSL_CTX_set_default_verify_paths(sctx) != 1)
+            err = ENOENT;
+    }
+
+cleanup:
+    free(realmz);
+    return err;
+}
+
+static int
+ssl_verify_callback(int preverify_ok, X509_STORE_CTX *store_ctx)
+{
+    X509 *x;
+    SSL *ssl;
+    BIO *bio;
+    krb5_context context;
+    int err, depth;
+    const char *cert = NULL, *errstr;
+    size_t count;
+
+    ssl = X509_STORE_CTX_get_ex_data(store_ctx,
+                                     SSL_get_ex_data_X509_STORE_CTX_idx());
+    context = SSL_get_ex_data(ssl, ssl_ex_context_id);
+    /* We do have the peer's cert, right? */
+    x = X509_STORE_CTX_get_current_cert(store_ctx);
+    if (x == NULL) {
+        TRACE_SENDTO_KDC_HTTPS_NO_REMOTE_CERTIFICATE(context);
+        return 0;
+    }
+    /* Figure out where we are. */
+    depth = X509_STORE_CTX_get_error_depth(store_ctx);
+    if (depth < 0)
+        return 0;
+    /* If there's an error at this level that we're not ignoring, fail. */
+    err = X509_STORE_CTX_get_error(store_ctx);
+    if (err != X509_V_OK) {
+        bio = BIO_new(BIO_s_mem());
+        if (bio != NULL) {
+            X509_NAME_print_ex(bio, x->cert_info->subject, 0, 0);
+            count = BIO_get_mem_data(bio, &cert);
+            errstr = X509_verify_cert_error_string(err);
+            TRACE_SENDTO_KDC_HTTPS_PROXY_CERTIFICATE_ERROR(context, depth,
+                                                           count, cert, err,
+                                                           errstr);
+            BIO_free(bio);
+        }
+        return 0;
+    }
+    /* All done. */
+    return 1;
+}
+
 /*
  * Set up structures that we use to manage the SSL handling for this connection
  * and apply any non-default settings.  Kill the connection and return false if
@@ -1156,9 +1312,13 @@ static krb5_boolean
 setup_ssl(krb5_context context, const krb5_data *realm,
           struct conn_state *conn, struct select_state *selstate)
 {
+    int e;
     long options;
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
+
+    if (ssl_ex_context_id == -1)
+        goto kill_conn;
 
     /* Do general SSL library setup. */
     ctx = SSL_CTX_new(SSLv23_client_method());
@@ -1167,12 +1327,17 @@ setup_ssl(krb5_context context, const krb5_data *realm,
     options = SSL_CTX_get_options(ctx);
     SSL_CTX_set_options(ctx, options | SSL_OP_NO_SSLv2);
 
-    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
-    if (!SSL_CTX_set_default_verify_paths(ctx))
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ssl_verify_callback);
+    X509_STORE_set_flags(SSL_CTX_get_cert_store(ctx), 0);
+    e = load_http_verify_anchors(context, realm, ctx);
+    if (e != 0)
         goto kill_conn;
 
     ssl = SSL_new(ctx);
     if (ssl == NULL)
+        goto kill_conn;
+
+    if (!SSL_set_ex_data(ssl, ssl_ex_context_id, context))
         goto kill_conn;
 
     /* Tell the SSL library about the socket. */

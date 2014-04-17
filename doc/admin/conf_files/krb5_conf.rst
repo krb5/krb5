@@ -428,6 +428,32 @@ following tags may be specified in the realm's subsection:
     (for example, when converting ``rcmd.hostname`` to
     ``host/hostname.domain``).
 
+**http_anchors**
+    When KDCs and kpasswd servers are accessed through HTTPS proxies, this tag
+    can be used to specify the location of the CA certificate which should be
+    trusted to issue the certificate for a proxy server.  If left unspecified,
+    the system-wide default set of CA certificates is used.
+
+    The syntax for values is similar to that of values for the
+    **pkinit_anchors** tag:
+
+    **FILE:** *filename*
+
+    *filename* is assumed to be the name of an OpenSSL-style ca-bundle file.
+
+    **DIR:** *dirname*
+
+    *dirname* is assumed to be an directory which contains CA certificates.
+    All files in the directory will be examined; if they contain certificates
+    (in PEM format), they will be used.
+
+    **ENV:** *envvar*
+
+    *envvar* specifies the name of an environment variable which has been set
+    to a value conforming to one of the previous values.  For example,
+    ``ENV:X509_PROXY_CA``, where environment variable ``X509_PROXY_CA`` has
+    been set to ``FILE:/tmp/my_proxy.pem``.
+
 **kdc**
     The name or address of a host running a KDC for that realm.  An
     optional port number, separated from the hostname by a colon, may

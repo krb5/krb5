@@ -324,6 +324,13 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Resolving hostname {str}", hostname)
 #define TRACE_SENDTO_KDC_RESPONSE(c, len, raddr)                        \
     TRACE(c, "Received answer ({int} bytes) from {raddr}", len, raddr)
+#define TRACE_SENDTO_KDC_HTTPS_NO_REMOTE_CERTIFICATE(c)                 \
+    TRACE(c, "HTTPS server certificate not received")
+#define TRACE_SENDTO_KDC_HTTPS_PROXY_CERTIFICATE_ERROR(c, depth,        \
+                                                       namelen, name,   \
+                                                       err, errs)       \
+    TRACE(c, "HTTPS certificate error at {int} ({lenstr}): "            \
+          "{int} ({str})", depth, namelen, name, err, errs)
 #define TRACE_SENDTO_KDC_HTTPS_ERROR_CONNECT(c, raddr)                  \
     TRACE(c, "HTTPS error connecting to {raddr}", raddr)
 #define TRACE_SENDTO_KDC_HTTPS_ERROR_RECV(c, raddr, err)                \
