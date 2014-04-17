@@ -32,6 +32,8 @@
 #include "fast.h"
 #include "init_creds_ctx.h"
 
+#define max(a, b) ((a) > (b) ? (a) : (b))
+
 /* some typedef's for the function args to make things look a bit cleaner */
 
 static krb5_error_code make_preauth_list (krb5_context,
@@ -184,6 +186,8 @@ verify_as_reply(krb5_context            context,
         || ((request->till != 0) &&
             (as_reply->enc_part2->times.endtime > request->till))
         || ((request->kdc_options & KDC_OPT_RENEWABLE) &&
+            !(request->kdc_options & KDC_OPT_RENEWABLE_OK) &&
+            (as_reply->enc_part2->flags & KDC_OPT_RENEWABLE) &&
             (request->rtime != 0) &&
             (as_reply->enc_part2->times.renew_till > request->rtime))
         || ((request->kdc_options & KDC_OPT_RENEWABLE_OK) &&
@@ -191,6 +195,12 @@ verify_as_reply(krb5_context            context,
             (as_reply->enc_part2->flags & KDC_OPT_RENEWABLE) &&
             (request->till != 0) &&
             (as_reply->enc_part2->times.renew_till > request->till))
+        || ((request->kdc_options & KDC_OPT_RENEWABLE_OK) &&
+            (as_reply->enc_part2->flags & KDC_OPT_RENEWABLE) &&
+            (request->till != 0) &&
+            (request->rtime != 0) &&
+            (as_reply->enc_part2->times.renew_till > max(request->till,
+             request->rtime)))
     ) {
         return KRB5_KDCREP_MODIFIED;
     }
