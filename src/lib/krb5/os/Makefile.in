@@ -13,6 +13,7 @@ STLIBOBJS= \
 	c_ustime.o	\
 	ccdefname.o	\
 	changepw.o	\
+	checkhost.o	\
 	dnsglue.o	\
 	dnssrv.o	\
 	expand_path.o	\
@@ -59,6 +60,7 @@ OBJS= \
 	$(OUTPRE)c_ustime.$(OBJEXT)	\
 	$(OUTPRE)ccdefname.$(OBJEXT)	\
 	$(OUTPRE)changepw.$(OBJEXT)	\
+	$(OUTPRE)checkhost.$(OBJEXT)	\
 	$(OUTPRE)dnsglue.$(OBJEXT)	\
 	$(OUTPRE)dnssrv.$(OBJEXT)	\
 	$(OUTPRE)expand_path.$(OBJEXT)	\
@@ -105,6 +107,7 @@ SRCS= \
 	$(srcdir)/c_ustime.c	\
 	$(srcdir)/ccdefname.c	\
 	$(srcdir)/changepw.c	\
+	$(srcdir)/checkhost.c	\
 	$(srcdir)/dnsglue.c	\
 	$(srcdir)/dnssrv.c	\
 	$(srcdir)/expand_path.c	\
