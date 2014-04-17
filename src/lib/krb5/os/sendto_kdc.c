@@ -80,6 +80,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <dirent.h>
+#include "checkhost.h"
 #endif
 
 #define MAX_PASS                    3
@@ -148,6 +149,7 @@ struct conn_state {
     krb5_boolean defer;
     struct {
         const char *uri_path;
+        const char *servername;
         char *https_request;
 #ifdef PROXY_TLS_IMPL_OPENSSL
         SSL *ssl;
@@ -158,6 +160,7 @@ struct conn_state {
 #ifdef PROXY_TLS_IMPL_OPENSSL
 /* Extra-data identifier, used to pass context into the verify callback. */
 static int ssl_ex_context_id = -1;
+static int ssl_ex_conn_id = -1;
 #endif
 
 void
@@ -169,6 +172,7 @@ k5_sendto_kdc_initialize(void)
     OpenSSL_add_all_algorithms();
 
     ssl_ex_context_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
+    ssl_ex_conn_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
 #endif
 }
 
@@ -636,7 +640,7 @@ static krb5_error_code
 add_connection(krb5_context context, struct conn_state **conns,
                k5_transport transport, krb5_boolean defer, struct addrinfo *ai,
                size_t server_index, const krb5_data *realm,
-               const char *uri_path, char **udpbufp)
+               const char *hostname, const char *uri_path, char **udpbufp)
 {
     struct conn_state *state, **tailptr;
 
@@ -662,6 +666,7 @@ add_connection(krb5_context context, struct conn_state **conns,
         state->service_write = service_https_write;
         state->service_read = service_https_read;
         state->http.uri_path = uri_path;
+        state->http.servername = hostname;
     } else {
         state->service_connect = NULL;
         state->service_write = NULL;
@@ -762,7 +767,8 @@ resolve_server(krb5_context context, const krb5_data *realm,
         ai.ai_addr = (struct sockaddr *)&entry->addr;
         defer = (entry->transport != transport);
         return add_connection(context, conns, entry->transport, defer, &ai,
-                              ind, realm, entry->uri_path, udpbufp);
+                              ind, realm, entry->hostname, entry->uri_path,
+                              udpbufp);
     }
 
     memset(&hint, 0, sizeof(hint));
@@ -789,7 +795,8 @@ resolve_server(krb5_context context, const krb5_data *realm,
     for (a = addrs; a != 0 && retval == 0; a = a->ai_next) {
         a->ai_socktype = socktype_for_transport(transport);
         retval = add_connection(context, conns, transport, FALSE, a, ind,
-                                realm, entry->uri_path, udpbufp);
+                                realm, entry->hostname, entry->uri_path,
+                                udpbufp);
     }
 
     /* For TCP_OR_UDP entries, add each address again with the non-preferred
@@ -799,7 +806,8 @@ resolve_server(krb5_context context, const krb5_data *realm,
         for (a = addrs; a != 0 && retval == 0; a = a->ai_next) {
             a->ai_socktype = socktype_for_transport(transport);
             retval = add_connection(context, conns, transport, TRUE, a, ind,
-                                    realm, entry->uri_path, udpbufp);
+                                    realm, entry->hostname, entry->uri_path,
+                                    udpbufp);
         }
     }
     freeaddrinfo(addrs);
@@ -1262,6 +1270,20 @@ cleanup:
     return err;
 }
 
+static krb5_boolean
+ssl_check_name_or_ip(X509 *x, const char *expected_name)
+{
+    struct in_addr in;
+    struct in6_addr in6;
+
+    if (inet_aton(expected_name, &in) != 0 ||
+        inet_pton(AF_INET6, expected_name, &in6) != 0) {
+        return k5_check_cert_address(x, expected_name);
+    } else {
+        return k5_check_cert_servername(x, expected_name);
+    }
+}
+
 static int
 ssl_verify_callback(int preverify_ok, X509_STORE_CTX *store_ctx)
 {
@@ -1270,12 +1292,14 @@ ssl_verify_callback(int preverify_ok, X509_STORE_CTX *store_ctx)
     BIO *bio;
     krb5_context context;
     int err, depth;
-    const char *cert = NULL, *errstr;
+    struct conn_state *conn = NULL;
+    const char *cert = NULL, *errstr, *expected_name;
     size_t count;
 
     ssl = X509_STORE_CTX_get_ex_data(store_ctx,
                                      SSL_get_ex_data_X509_STORE_CTX_idx());
     context = SSL_get_ex_data(ssl, ssl_ex_context_id);
+    conn = SSL_get_ex_data(ssl, ssl_ex_conn_id);
     /* We do have the peer's cert, right? */
     x = X509_STORE_CTX_get_current_cert(store_ctx);
     if (x == NULL) {
@@ -1301,8 +1325,19 @@ ssl_verify_callback(int preverify_ok, X509_STORE_CTX *store_ctx)
         }
         return 0;
     }
-    /* All done. */
-    return 1;
+    /* If we're not looking at the peer, we're done and everything's ok. */
+    if (depth != 0)
+        return 1;
+    /* Check if the name we expect to find is in the certificate. */
+    expected_name = conn->http.servername;
+    if (ssl_check_name_or_ip(x, expected_name)) {
+        TRACE_SENDTO_KDC_HTTPS_SERVER_NAME_MATCH(context, expected_name);
+        return 1;
+    } else {
+        TRACE_SENDTO_KDC_HTTPS_SERVER_NAME_MISMATCH(context, expected_name);
+    }
+    /* The name didn't match. */
+    return 0;
 }
 
 /*
@@ -1319,7 +1354,7 @@ setup_ssl(krb5_context context, const krb5_data *realm,
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
 
-    if (ssl_ex_context_id == -1)
+    if (ssl_ex_context_id == -1 || ssl_ex_conn_id == -1)
         goto kill_conn;
 
     /* Do general SSL library setup. */
@@ -1340,6 +1375,8 @@ setup_ssl(krb5_context context, const krb5_data *realm,
         goto kill_conn;
 
     if (!SSL_set_ex_data(ssl, ssl_ex_context_id, context))
+        goto kill_conn;
+    if (!SSL_set_ex_data(ssl, ssl_ex_conn_id, conn))
         goto kill_conn;
 
     /* Tell the SSL library about the socket. */
