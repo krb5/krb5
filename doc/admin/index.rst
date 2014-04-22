@@ -17,6 +17,7 @@ For administrators
    otp.rst
    princ_dns.rst
    enctypes.rst
+   https.rst
 
 .. toctree::
    :maxdepth: 1
