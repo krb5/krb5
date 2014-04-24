@@ -201,6 +201,8 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
                 k5_buf_add(&buf, "dgram");
             else if (ra->transport == TCP)
                 k5_buf_add(&buf, "stream");
+            else if (ra->transport == HTTPS)
+                k5_buf_add(&buf, "https");
             else
                 k5_buf_add_fmt(&buf, "transport%d", ra->transport);
 

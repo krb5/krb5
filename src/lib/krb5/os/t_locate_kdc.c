@@ -39,6 +39,8 @@ ttypename (k5_transport ttype)
         return "tcp";
     case UDP:
         return "udp";
+    case HTTPS:
+        return "https";
     default:
         snprintf(buf, sizeof(buf), "?%d", ttype);
         return buf;

@@ -91,8 +91,10 @@ k5_free_serverlist (struct serverlist *list)
 {
     size_t i;
 
-    for (i = 0; i < list->nservers; i++)
+    for (i = 0; i < list->nservers; i++) {
         free(list->servers[i].hostname);
+        free(list->servers[i].uri_path);
+    }
     free(list->servers);
     list->servers = NULL;
     list->nservers = 0;
@@ -140,6 +142,7 @@ add_addr_to_list(struct serverlist *list, k5_transport transport, int family,
     entry->transport = transport;
     entry->family = family;
     entry->hostname = NULL;
+    entry->uri_path = NULL;
     entry->addrlen = addrlen;
     memcpy(&entry->addr, addr, addrlen);
     list->nservers++;
@@ -149,7 +152,7 @@ add_addr_to_list(struct serverlist *list, k5_transport transport, int family,
 /* Add a hostname entry to list. */
 static int
 add_host_to_list(struct serverlist *list, const char *hostname, int port,
-                 k5_transport transport, int family)
+                 k5_transport transport, int family, char *uri_path)
 {
     struct server_entry *entry;
 
@@ -160,11 +163,46 @@ add_host_to_list(struct serverlist *list, const char *hostname, int port,
     entry->family = family;
     entry->hostname = strdup(hostname);
     if (entry->hostname == NULL)
-        return ENOMEM;
+        goto oom;
+    if (uri_path != NULL) {
+        entry->uri_path = strdup(uri_path);
+        if (entry->uri_path == NULL)
+            goto oom;
+    }
     entry->port = port;
     list->nservers++;
     return 0;
+oom:
+    free(entry->hostname);
+    entry->hostname = NULL;
+    return ENOMEM;
 }
+
+#ifdef PROXY_TLS_IMPL_OPENSSL
+static void
+parse_uri_if_https(char *host_or_uri, k5_transport *transport, char **host,
+                   char **uri_path)
+{
+    char *cp;
+
+    if (strncmp(host_or_uri, "https://", 8) == 0) {
+        *transport = HTTPS;
+        *host = host_or_uri + 8;
+
+        cp = strchr(*host, '/');
+        if (cp != NULL) {
+            *cp = '\0';
+            *uri_path = cp + 1;
+        }
+    }
+}
+#else
+static void
+parse_uri_if_https(char *host_or_uri, k5_transport *transport, char **host,
+                   char **uri)
+{
+}
+#endif
 
 /* Return true if server is identical to an entry in list. */
 static krb5_boolean
@@ -222,9 +260,14 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
     for (i=0; hostlist[i]; i++) {
         int p1, p2;
+        k5_transport this_transport = transport;
+        char *uri_path = NULL;
 
         host = hostlist[i];
         Tprintf ("entry %d is '%s'\n", i, host);
+
+        parse_uri_if_https(host, &this_transport, &host, &uri_path);
+
         /* Find port number, and strip off any excess characters. */
         if (*host == '[' && (cp = strchr(host, ']')))
             cp = cp + 1;
@@ -244,6 +287,9 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                 return EINVAL;
             p1 = htons (l);
             p2 = 0;
+        } else if (this_transport == HTTPS) {
+            p1 = htons(443);
+            p2 = 0;
         } else {
             p1 = udpport;
             p2 = sec_udpport;
@@ -255,12 +301,15 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
             *cp = '\0';
         }
 
-        code = add_host_to_list(serverlist, host, p1, transport, AF_UNSPEC);
+        code = add_host_to_list(serverlist, host, p1, this_transport,
+                                AF_UNSPEC, uri_path);
         /* Second port is for IPv4 UDP only, and should possibly go away as
          * it was originally a krb4 compatibility measure. */
         if (code == 0 && p2 != 0 &&
-            (transport == TCP_OR_UDP || transport == UDP))
-            code = add_host_to_list(serverlist, host, p2, UDP, AF_INET);
+            (this_transport == TCP_OR_UDP || this_transport == UDP)) {
+            code = add_host_to_list(serverlist, host, p2, UDP, AF_INET,
+                                    uri_path);
+        }
         if (code)
             goto cleanup;
     }
@@ -313,7 +362,7 @@ locate_srv_dns_1(const krb5_data *realm, const char *service,
     for (entry = head; entry != NULL; entry = entry->next) {
         transport = (strcmp(protocol, "_tcp") == 0) ? TCP : UDP;
         code = add_host_to_list(serverlist, entry->host, htons(entry->port),
-                                transport, AF_UNSPEC);
+                                transport, AF_UNSPEC, NULL);
         if (code)
             goto cleanup;
     }

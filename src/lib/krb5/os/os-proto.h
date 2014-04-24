@@ -42,6 +42,7 @@ typedef enum {
     TCP_OR_UDP = 0,
     TCP,
     UDP,
+    HTTPS,
 } k5_transport;
 
 typedef enum {
@@ -55,6 +56,7 @@ struct server_entry {
     char *hostname;             /* NULL -> use addrlen/addr instead */
     int port;                   /* Used only if hostname set */
     k5_transport transport;     /* May be 0 for UDP/TCP if hostname set */
+    char *uri_path;             /* Used only if transport is HTTPS */
     int family;                 /* May be 0 (aka AF_UNSPEC) if hostname set */
     size_t addrlen;
     struct sockaddr_storage addr;

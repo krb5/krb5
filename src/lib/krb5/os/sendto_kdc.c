@@ -23,6 +23,32 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  */
+/*
+ * MS-KKDCP implementation Copyright 2013,2014 Red Hat, Inc.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *    1. Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /* Send packet to KDC for realm; wait for response, retransmitting
  * as necessary. */
@@ -49,6 +75,7 @@
 #endif
 
 #ifdef PROXY_TLS_IMPL_OPENSSL
+#include <openssl/err.h>
 #include <openssl/ssl.h>
 #endif
 
@@ -116,6 +143,13 @@ struct conn_state {
     struct conn_state *next;
     time_ms endtime;
     krb5_boolean defer;
+    struct {
+        const char *uri_path;
+        char *https_request;
+#ifdef PROXY_TLS_IMPL_OPENSSL
+        SSL *ssl;
+#endif
+    } http;
 };
 
 void
@@ -139,6 +173,22 @@ get_curtime_ms(time_ms *time_out)
     *time_out = (time_ms)tv.tv_sec * 1000 + tv.tv_usec / 1000;
     return 0;
 }
+
+#ifdef PROXY_TLS_IMPL_OPENSSL
+static void
+free_http_ssl_data(struct conn_state *state)
+{
+    SSL_free(state->http.ssl);
+    state->http.ssl = NULL;
+    free(state->http.https_request);
+    state->http.https_request = NULL;
+}
+#else
+static void
+free_http_ssl_data(struct conn_state *state)
+{
+}
+#endif
 
 #ifdef USE_POLL
 
@@ -321,6 +371,7 @@ socktype_for_transport(k5_transport transport)
     case UDP:
         return SOCK_DGRAM;
     case TCP:
+    case HTTPS:
         return SOCK_STREAM;
     default:
         return 0;
@@ -468,33 +519,113 @@ static fd_handler_fn service_tcp_connect;
 static fd_handler_fn service_tcp_write;
 static fd_handler_fn service_tcp_read;
 static fd_handler_fn service_udp_read;
+static fd_handler_fn service_https_write;
+static fd_handler_fn service_https_read;
+
+#ifdef PROXY_TLS_IMPL_OPENSSL
+static krb5_error_code
+make_proxy_request(struct conn_state *state, const krb5_data *realm,
+                   const krb5_data *message, char **req_out, size_t *len_out)
+{
+    krb5_kkdcp_message pm;
+    krb5_data *encoded_pm = NULL;
+    struct k5buf buf;
+    const char *uri_path;
+    krb5_error_code ret;
+
+    *req_out = NULL;
+    *len_out = 0;
+
+    /*
+     * Stuff the message length in at the front of the kerb_message field
+     * before encoding.  The proxied messages are actually the payload we'd
+     * be sending and receiving if we were using plain TCP.
+     */
+    memset(&pm, 0, sizeof(pm));
+    ret = alloc_data(&pm.kerb_message, message->length + 4);
+    if (ret != 0)
+        goto cleanup;
+    store_32_be(message->length, pm.kerb_message.data);
+    memcpy(pm.kerb_message.data + 4, message->data, message->length);
+    pm.target_domain = *realm;
+    ret = encode_krb5_kkdcp_message(&pm, &encoded_pm);
+    if (ret != 0)
+        goto cleanup;
+
+    /* Build the request to transmit: the headers + the proxy message. */
+    k5_buf_init_dynamic(&buf);
+    uri_path = (state->http.uri_path != NULL) ? state->http.uri_path : "";
+    k5_buf_add_fmt(&buf, "POST /%s HTTP/1.0\r\n", uri_path);
+    k5_buf_add(&buf, "Cache-Control: no-cache\r\n");
+    k5_buf_add(&buf, "Pragma: no-cache\r\n");
+    k5_buf_add(&buf, "User-Agent: kerberos/1.0\r\n");
+    k5_buf_add(&buf, "Content-type: application/kerberos\r\n");
+    k5_buf_add_fmt(&buf, "Content-Length: %d\r\n\r\n", encoded_pm->length);
+    k5_buf_add_len(&buf, encoded_pm->data, encoded_pm->length);
+    if (k5_buf_data(&buf) == NULL) {
+        ret = ENOMEM;
+        goto cleanup;
+    }
+
+    *req_out = k5_buf_data(&buf);
+    *len_out = k5_buf_len(&buf);
+
+cleanup:
+    krb5_free_data_contents(NULL, &pm.kerb_message);
+    krb5_free_data(NULL, encoded_pm);
+    return ret;
+}
+#else
+static krb5_error_code
+make_proxy_request(struct conn_state *state, const krb5_data *realm,
+                   const krb5_data *message, char **req_out, size_t *len_out)
+{
+    abort();
+}
+#endif
 
 /* Set up the actual message we will send across the underlying transport to
  * communicate the payload message, using one or both of state->out.sgbuf. */
-static void
-set_transport_message(struct conn_state *state, const krb5_data *message)
+static krb5_error_code
+set_transport_message(struct conn_state *state, const krb5_data *realm,
+                      const krb5_data *message)
 {
     struct outgoing_message *out = &state->out;
+    char *req = NULL;
+    size_t reqlen;
+    krb5_error_code ret;
 
     if (message == NULL || message->length == 0)
-        return;
+        return 0;
 
     if (state->addr.transport == TCP) {
         store_32_be(message->length, out->msg_len_buf);
         SG_SET(&out->sgbuf[0], out->msg_len_buf, 4);
         SG_SET(&out->sgbuf[1], message->data, message->length);
         out->sg_count = 2;
+        return 0;
+    } else if (state->addr.transport == HTTPS) {
+        ret = make_proxy_request(state, realm, message, &req, &reqlen);
+        if (ret != 0)
+            return ret;
+        SG_SET(&state->out.sgbuf[0], req, reqlen);
+        SG_SET(&state->out.sgbuf[1], 0, 0);
+        state->out.sg_count = 1;
+        free(state->http.https_request);
+        state->http.https_request = req;
+        return 0;
     } else {
         SG_SET(&out->sgbuf[0], message->data, message->length);
         SG_SET(&out->sgbuf[1], NULL, 0);
         out->sg_count = 1;
+        return 0;
     }
 }
 
 static krb5_error_code
 add_connection(struct conn_state **conns, k5_transport transport,
                krb5_boolean defer, struct addrinfo *ai, size_t server_index,
-               char **udpbufp)
+               const krb5_data *realm, const char *uri_path, char **udpbufp)
 {
     struct conn_state *state, **tailptr;
 
@@ -515,6 +646,11 @@ add_connection(struct conn_state **conns, k5_transport transport,
         state->service_connect = service_tcp_connect;
         state->service_write = service_tcp_write;
         state->service_read = service_tcp_read;
+    } else if (transport == HTTPS) {
+        state->service_connect = service_tcp_connect;
+        state->service_write = service_https_write;
+        state->service_read = service_https_read;
+        state->http.uri_path = uri_path;
     } else {
         state->service_connect = NULL;
         state->service_write = NULL;
@@ -589,10 +725,10 @@ translate_ai_error (int err)
  * connections.
  */
 static krb5_error_code
-resolve_server(krb5_context context, const struct serverlist *servers,
-               size_t ind, k5_transport_strategy strategy,
-               const krb5_data *message, char **udpbufp,
-               struct conn_state **conns)
+resolve_server(krb5_context context, const krb5_data *realm,
+               const struct serverlist *servers, size_t ind,
+               k5_transport_strategy strategy, const krb5_data *message,
+               char **udpbufp, struct conn_state **conns)
 {
     krb5_error_code retval;
     struct server_entry *entry = &servers->servers[ind];
@@ -615,7 +751,7 @@ resolve_server(krb5_context context, const struct serverlist *servers,
         ai.ai_addr = (struct sockaddr *)&entry->addr;
         defer = (entry->transport != transport);
         return add_connection(conns, entry->transport, defer, &ai, ind,
-                              udpbufp);
+                              realm, entry->uri_path, udpbufp);
     }
 
     memset(&hint, 0, sizeof(hint));
@@ -641,7 +777,8 @@ resolve_server(krb5_context context, const struct serverlist *servers,
     retval = 0;
     for (a = addrs; a != 0 && retval == 0; a = a->ai_next) {
         a->ai_socktype = socktype_for_transport(transport);
-        retval = add_connection(conns, transport, FALSE, a, ind, udpbufp);
+        retval = add_connection(conns, transport, FALSE, a, ind, realm,
+                                entry->uri_path, udpbufp);
     }
 
     /* For TCP_OR_UDP entries, add each address again with the non-preferred
@@ -650,7 +787,8 @@ resolve_server(krb5_context context, const struct serverlist *servers,
         transport = (strategy == UDP_FIRST) ? TCP : UDP;
         for (a = addrs; a != 0 && retval == 0; a = a->ai_next) {
             a->ai_socktype = socktype_for_transport(transport);
-            retval = add_connection(conns, transport, TRUE, a, ind, udpbufp);
+            retval = add_connection(conns, transport, TRUE, a, ind, realm,
+                                    entry->uri_path, udpbufp);
         }
     }
     freeaddrinfo(addrs);
@@ -660,6 +798,7 @@ resolve_server(krb5_context context, const struct serverlist *servers,
 static int
 start_connection(krb5_context context, struct conn_state *state,
                  const krb5_data *message, struct select_state *selstate,
+                 const krb5_data *realm,
                  struct sendto_callback_info *callback_info)
 {
     int fd, e, type;
@@ -720,7 +859,15 @@ start_connection(krb5_context context, struct conn_state *state,
 
         message = &state->callback_buffer;
     }
-    set_transport_message(state, message);
+
+    e = set_transport_message(state, realm, message);
+    if (e != 0) {
+        TRACE_SENDTO_KDC_ERROR_SET_MESSAGE(context, &state->addr, e);
+        (void) closesocket(state->fd);
+        state->fd = INVALID_SOCKET;
+        state->state = FAILED;
+        return -4;
+    }
 
     if (state->addr.transport == UDP) {
         /* Send it now.  */
@@ -735,7 +882,7 @@ start_connection(krb5_context context, struct conn_state *state,
             (void) closesocket(state->fd);
             state->fd = INVALID_SOCKET;
             state->state = FAILED;
-            return -4;
+            return -5;
         } else {
             state->state = READING;
         }
@@ -762,6 +909,7 @@ start_connection(krb5_context context, struct conn_state *state,
 static int
 maybe_send(krb5_context context, struct conn_state *conn,
            const krb5_data *message, struct select_state *selstate,
+           const krb5_data *realm,
            struct sendto_callback_info *callback_info)
 {
     sg_buf *sg;
@@ -769,7 +917,7 @@ maybe_send(krb5_context context, struct conn_state *conn,
 
     if (conn->state == INITIALIZING) {
         return start_connection(context, conn, message, selstate,
-                                callback_info);
+                                realm, callback_info);
     }
 
     /* Did we already shut down this channel?  */
@@ -804,6 +952,8 @@ static void
 kill_conn(krb5_context context, struct conn_state *conn,
           struct select_state *selstate)
 {
+    free_http_ssl_data(conn);
+
     if (socktype_for_transport(conn->addr.transport) == SOCK_STREAM)
         TRACE_SENDTO_KDC_TCP_DISCONNECT(context, &conn->addr);
     cm_remove_fd(selstate, conn->fd);
@@ -878,7 +1028,7 @@ service_tcp_connect(krb5_context context, const krb5_data *realm,
     if (get_curtime_ms(&conn->endtime) == 0)
         conn->endtime += 10000;
 
-    return service_tcp_write(context, realm, conn, selstate);
+    return conn->service_write(context, realm, conn, selstate);
 }
 
 /* Sets conn->state to READING when done. */
@@ -983,6 +1133,223 @@ service_udp_read(krb5_context context, const krb5_data *realm,
     conn->in.pos = nread;
     return TRUE;
 }
+
+#ifdef PROXY_TLS_IMPL_OPENSSL
+/* Output any error strings that OpenSSL's accumulated as tracing messages. */
+static void
+flush_ssl_errors(krb5_context context)
+{
+    unsigned long err;
+    char buf[128];
+
+    while ((err = ERR_get_error()) != 0) {
+        ERR_error_string_n(err, buf, sizeof(buf));
+        TRACE_SENDTO_KDC_HTTPS_ERROR(context, buf);
+    }
+}
+
+/*
+ * Set up structures that we use to manage the SSL handling for this connection
+ * and apply any non-default settings.  Kill the connection and return false if
+ * anything goes wrong while we're doing that; return true otherwise.
+ */
+static krb5_boolean
+setup_ssl(krb5_context context, const krb5_data *realm,
+          struct conn_state *conn, struct select_state *selstate)
+{
+    long options;
+    SSL_CTX *ctx = NULL;
+    SSL *ssl = NULL;
+
+    /* Do general SSL library setup. */
+    ctx = SSL_CTX_new(SSLv23_client_method());
+    if (ctx == NULL)
+        goto kill_conn;
+    options = SSL_CTX_get_options(ctx);
+    SSL_CTX_set_options(ctx, options | SSL_OP_NO_SSLv2);
+
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+    if (!SSL_CTX_set_default_verify_paths(ctx))
+        goto kill_conn;
+
+    ssl = SSL_new(ctx);
+    if (ssl == NULL)
+        goto kill_conn;
+
+    /* Tell the SSL library about the socket. */
+    if (!SSL_set_fd(ssl, conn->fd))
+        goto kill_conn;
+    SSL_set_connect_state(ssl);
+
+    SSL_CTX_free(ctx);
+    conn->http.ssl = ssl;
+
+    return TRUE;
+
+kill_conn:
+    TRACE_SENDTO_KDC_HTTPS_ERROR_CONNECT(context, &conn->addr);
+    flush_ssl_errors(context);
+    SSL_free(ssl);
+    SSL_CTX_free(ctx);
+    kill_conn(context, conn, selstate);
+    return FALSE;
+}
+
+/* Set conn->state to READING when done; otherwise, call a cm_set_. */
+static krb5_boolean
+service_https_write(krb5_context context, const krb5_data *realm,
+                    struct conn_state *conn, struct select_state *selstate)
+{
+    ssize_t nwritten;
+    int e;
+
+    /* If this is our first time in here, set up the SSL context. */
+    if (conn->http.ssl == NULL && !setup_ssl(context, realm, conn, selstate))
+        return FALSE;
+
+    /* Try to transmit our request to the server. */
+    nwritten = SSL_write(conn->http.ssl, SG_BUF(conn->out.sgp),
+                         SG_LEN(conn->out.sgbuf));
+    if (nwritten <= 0) {
+        e = SSL_get_error(conn->http.ssl, nwritten);
+        if (e == SSL_ERROR_WANT_READ) {
+            cm_read(selstate, conn->fd);
+            return FALSE;
+        } else if (e == SSL_ERROR_WANT_WRITE) {
+            cm_write(selstate, conn->fd);
+            return FALSE;
+        }
+        TRACE_SENDTO_KDC_HTTPS_ERROR_SEND(context, &conn->addr);
+        flush_ssl_errors(context);
+        kill_conn(context, conn, selstate);
+        return FALSE;
+    }
+
+    /* Done writing, switch to reading. */
+    TRACE_SENDTO_KDC_HTTPS_SEND(context, &conn->addr);
+    cm_read(selstate, conn->fd);
+    conn->state = READING;
+    return FALSE;
+}
+
+/*
+ * Return true on readable data, call a cm_read/write function and return
+ * false if the SSL layer needs it, kill the connection otherwise.
+ */
+static krb5_boolean
+https_read_bytes(krb5_context context, struct conn_state *conn,
+                 struct select_state *selstate)
+{
+    size_t bufsize;
+    ssize_t nread;
+    krb5_boolean readbytes = FALSE;
+    int e = 0;
+    char *tmp;
+    struct incoming_message *in = &conn->in;
+
+    for (;;) {
+        if (in->buf == NULL || in->bufsize - in->pos < 1024) {
+            bufsize = in->bufsize ? in->bufsize * 2 : 8192;
+            if (bufsize > 1024 * 1024) {
+                kill_conn(context, conn, selstate);
+                return FALSE;
+            }
+            tmp = realloc(in->buf, bufsize);
+            if (tmp == NULL) {
+                kill_conn(context, conn, selstate);
+                return FALSE;
+            }
+            in->buf = tmp;
+            in->bufsize = bufsize;
+        }
+
+        nread = SSL_read(conn->http.ssl, &in->buf[in->pos],
+                         in->bufsize - in->pos - 1);
+        if (nread <= 0)
+            break;
+        in->pos += nread;
+        in->buf[in->pos] = '\0';
+        readbytes = TRUE;
+    }
+
+    e = SSL_get_error(conn->http.ssl, nread);
+    if (e == SSL_ERROR_WANT_READ) {
+        cm_read(selstate, conn->fd);
+        return FALSE;
+    } else if (e == SSL_ERROR_WANT_WRITE) {
+        cm_write(selstate, conn->fd);
+        return FALSE;
+    } else if ((e == SSL_ERROR_ZERO_RETURN) ||
+               (e == SSL_ERROR_SYSCALL && nread == 0 && readbytes)) {
+        return TRUE;
+    }
+
+    e = readbytes ? SOCKET_ERRNO : ECONNRESET;
+    TRACE_SENDTO_KDC_HTTPS_ERROR_RECV(context, &conn->addr, e);
+    flush_ssl_errors(context);
+    kill_conn(context, conn, selstate);
+    return FALSE;
+}
+
+/* Return true on readable, valid KKDCPP data. */
+static krb5_boolean
+service_https_read(krb5_context context, const krb5_data *realm,
+                   struct conn_state *conn, struct select_state *selstate)
+{
+    krb5_kkdcp_message *pm = NULL;
+    krb5_data buf;
+    const char *rep;
+    struct incoming_message *in = &conn->in;
+
+    /* Read data through the encryption layer. */
+    if (!https_read_bytes(context, conn, selstate))
+        return FALSE;
+
+    /* Find the beginning of the response body. */
+    rep = strstr(in->buf, "\r\n\r\n");
+    if (rep == NULL)
+        goto kill_conn;
+    rep += 4;
+
+    /* Decode the response. */
+    buf = make_data((char *)rep, in->pos - (rep - in->buf));
+    if (decode_krb5_kkdcp_message(&buf, &pm) != 0)
+        goto kill_conn;
+
+    /* Check and discard the message length at the front of the kerb_message
+     * field after decoding.  If it's wrong or missing, something broke. */
+    if (pm->kerb_message.length < 4 ||
+        load_32_be(pm->kerb_message.data) != pm->kerb_message.length - 4) {
+        goto kill_conn;
+    }
+
+    /* Replace all of the content that we read back with just the message. */
+    memcpy(in->buf, pm->kerb_message.data + 4, pm->kerb_message.length - 4);
+    in->pos = pm->kerb_message.length - 4;
+    k5_free_kkdcp_message(context, pm);
+
+    return TRUE;
+
+kill_conn:
+    TRACE_SENDTO_KDC_HTTPS_ERROR(context, in->buf);
+    k5_free_kkdcp_message(context, pm);
+    kill_conn(context, conn, selstate);
+    return FALSE;
+}
+#else
+static krb5_boolean
+service_https_write(krb5_context context, const krb5_data *realm,
+                    struct conn_state *conn, struct select_state *selstate)
+{
+    abort();
+}
+static krb5_boolean
+service_https_read(krb5_context context, const krb5_data *realm,
+                   struct conn_state *conn, struct select_state *selstate)
+{
+    abort();
+}
+#endif
 
 /* Return the maximum of endtime and the endtime fields of all currently active
  * TCP connections. */
@@ -1125,7 +1492,7 @@ k5_sendto(krb5_context context, const krb5_data *message,
     for (s = 0; s < servers->nservers && !done; s++) {
         /* Find the current tail pointer. */
         for (tailptr = &conns; *tailptr != NULL; tailptr = &(*tailptr)->next);
-        retval = resolve_server(context, servers, s, strategy, message,
+        retval = resolve_server(context, realm, servers, s, strategy, message,
                                 &udpbuf, &conns);
         if (retval)
             goto cleanup;
@@ -1134,7 +1501,8 @@ k5_sendto(krb5_context context, const krb5_data *message,
              * non-preferred RFC 4120 transport. */
             if (state->defer)
                 continue;
-            if (maybe_send(context, state, message, sel_state, callback_info))
+            if (maybe_send(context, state, message, sel_state, realm,
+                           callback_info))
                 continue;
             done = service_fds(context, sel_state, 1000, conns, seltemp,
                                realm, msg_handler, msg_handler_data, &winner);
@@ -1146,7 +1514,8 @@ k5_sendto(krb5_context context, const krb5_data *message,
     for (state = conns; state != NULL && !done; state = state->next) {
         if (!state->defer)
             continue;
-        if (maybe_send(context, state, message, sel_state, callback_info))
+        if (maybe_send(context, state, message, sel_state, realm,
+                       callback_info))
             continue;
         done = service_fds(context, sel_state, 1000, conns, seltemp,
                            realm, msg_handler, msg_handler_data, &winner);
@@ -1162,7 +1531,8 @@ k5_sendto(krb5_context context, const krb5_data *message,
     delay = 4000;
     for (pass = 1; pass < MAX_PASS && !done; pass++) {
         for (state = conns; state != NULL && !done; state = state->next) {
-            if (maybe_send(context, state, message, sel_state, callback_info))
+            if (maybe_send(context, state, message, sel_state, realm,
+                           callback_info))
                 continue;
             done = service_fds(context, sel_state, 1000, conns, seltemp,
                                realm, msg_handler, msg_handler_data, &winner);
@@ -1196,8 +1566,12 @@ k5_sendto(krb5_context context, const krb5_data *message,
 cleanup:
     for (state = conns; state != NULL; state = next) {
         next = state->next;
-        if (state->fd != INVALID_SOCKET)
+        if (state->fd != INVALID_SOCKET) {
+            if (socktype_for_transport(state->addr.transport) == SOCK_STREAM)
+                TRACE_SENDTO_KDC_TCP_DISCONNECT(context, &state->addr);
             closesocket(state->fd);
+            free_http_ssl_data(state);
+        }
         if (state->state == READING && state->in.buf != udpbuf)
             free(state->in.buf);
         if (callback_info) {
