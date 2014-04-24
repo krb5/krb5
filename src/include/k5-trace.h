@@ -312,6 +312,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "AP-REQ ticket: {princ} -> {princ}, session key {keyblock}", \
           client, server, keyblock)
 
+#define TRACE_SENDTO_KDC_ERROR_SET_MESSAGE(c, raddr, err)               \
+    TRACE(c, "Error preparing message to send to {raddr}: {errno}",     \
+          raddr, err)
 #define TRACE_SENDTO_KDC(c, len, rlm, master, tcp)                     \
     TRACE(c, "Sending request ({int} bytes) to {data}{str}{str}", len,  \
           rlm, (master) ? " (master)" : "", (tcp) ? " (tcp only)" : "")
@@ -321,6 +324,16 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Resolving hostname {str}", hostname)
 #define TRACE_SENDTO_KDC_RESPONSE(c, len, raddr)                        \
     TRACE(c, "Received answer ({int} bytes) from {raddr}", len, raddr)
+#define TRACE_SENDTO_KDC_HTTPS_ERROR_CONNECT(c, raddr)                  \
+    TRACE(c, "HTTPS error connecting to {raddr}", raddr)
+#define TRACE_SENDTO_KDC_HTTPS_ERROR_RECV(c, raddr, err)                \
+    TRACE(c, "HTTPS error receiving from {raddr}: {errno}", raddr, err)
+#define TRACE_SENDTO_KDC_HTTPS_ERROR_SEND(c, raddr)                     \
+    TRACE(c, "HTTPS error sending to {raddr}", raddr)
+#define TRACE_SENDTO_KDC_HTTPS_SEND(c, raddr)                           \
+    TRACE(c, "Sending HTTPS request to {raddr}", raddr)
+#define TRACE_SENDTO_KDC_HTTPS_ERROR(c, errs)                           \
+    TRACE(c, "HTTPS error: {str}", errs)
 #define TRACE_SENDTO_KDC_TCP_CONNECT(c, raddr)                  \
     TRACE(c, "Initiating TCP connection to {raddr}", raddr)
 #define TRACE_SENDTO_KDC_TCP_DISCONNECT(c, raddr)               \
