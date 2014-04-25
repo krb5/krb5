@@ -251,14 +251,14 @@ int main (argc, argv) int argc; char **argv; {
     fprintf(cfile,
             "const struct error_table et_%s_error_table = { text, %ldL, %d };\n\n",
             table_name, table_number, current);
-    fputs("static struct et_list link = { 0, 0 };\n\n",
+    fputs("static struct et_list et_link = { 0, 0 };\n\n",
           cfile);
     fprintf(cfile, "void initialize_%s_error_table (%s) {\n",
             table_name, (language == lang_C) ? "void" : "NOARGS");
-    fputs("    if (!link.table) {\n", cfile);
-    fputs("        link.next = _et_list;\n", cfile);
-    fprintf(cfile, "        link.table = &et_%s_error_table;\n", table_name);
-    fputs("        _et_list = &link;\n", cfile);
+    fputs("    if (!et_link.table) {\n", cfile);
+    fputs("        et_link.next = _et_list;\n", cfile);
+    fprintf(cfile, "        et_link.table = &et_%s_error_table;\n", table_name);
+    fputs("        _et_list = &et_link;\n", cfile);
     fputs("    }\n", cfile);
     fputs("}\n", cfile);
     fclose(cfile);
