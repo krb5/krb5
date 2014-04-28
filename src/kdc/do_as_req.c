@@ -2,8 +2,8 @@
 /* kdc/do_as_req.c */
 /*
  * Portions Copyright (C) 2007 Apple Inc.
- * Copyright 1990, 1991, 2007, 2008, 2009, 2013 by the Massachusetts Institute
- * of Technology.  All Rights Reserved.
+ * Copyright 1990, 1991, 2007, 2008, 2009, 2013, 2014 by the
+ * Massachusetts Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -686,7 +686,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         state->ticket_reply.server = state->request->server;
     }
 
-    state->enc_tkt_reply.flags = 0;
+    /* Copy options that request the corresponding ticket flags. */
+    state->enc_tkt_reply.flags = OPTS2FLAGS(state->request->kdc_options);
     state->enc_tkt_reply.times.authtime = state->authtime;
 
     setflag(state->enc_tkt_reply.flags, TKT_FLG_INITIAL);
@@ -697,15 +698,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
      * processing of any of these flags.  For example, some
      * realms may refuse to issue renewable tickets
      */
-
-    if (isflagset(state->request->kdc_options, KDC_OPT_FORWARDABLE))
-        setflag(state->enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-
-    if (isflagset(state->request->kdc_options, KDC_OPT_PROXIABLE))
-        setflag(state->enc_tkt_reply.flags, TKT_FLG_PROXIABLE);
-
-    if (isflagset(state->request->kdc_options, KDC_OPT_ALLOW_POSTDATE))
-        setflag(state->enc_tkt_reply.flags, TKT_FLG_MAY_POSTDATE);
 
     state->enc_tkt_reply.session = &state->session_key;
     if (isflagset(state->c_flags, KRB5_KDB_FLAG_CANONICALIZE)) {
@@ -720,7 +712,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->enc_tkt_reply.transited.tr_contents = empty_string;
 
     if (isflagset(state->request->kdc_options, KDC_OPT_POSTDATED)) {
-        setflag(state->enc_tkt_reply.flags, TKT_FLG_POSTDATED);
         setflag(state->enc_tkt_reply.flags, TKT_FLG_INVALID);
         state->enc_tkt_reply.times.starttime = state->request->from;
     } else
@@ -757,7 +748,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
             state->status = "VALIDATE_ANONYMOUS_PRINCIPAL";
             goto errout;
         }
-        setflag(state->enc_tkt_reply.flags, TKT_FLG_ANONYMOUS);
         krb5_free_principal(kdc_context, state->request->client);
         state->request->client = NULL;
         errcode = krb5_copy_principal(kdc_context, krb5_anonymous_principal(),
