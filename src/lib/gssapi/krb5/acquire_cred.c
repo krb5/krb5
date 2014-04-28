@@ -226,10 +226,7 @@ acquire_accept_cred(krb5_context context, OM_uint32 *minor_status,
         code = check_keytab(context, kt, cred->name);
         if (code) {
             if (code == KRB5_KT_NOTFOUND) {
-                char *errstr = (char *)krb5_get_error_message(context, code);
-                krb5_set_error_message(context, KG_KEYTAB_NOMATCH, "%s",
-                                       errstr);
-                krb5_free_error_message(context, errstr);
+                k5_change_error_message_code(context, code, KG_KEYTAB_NOMATCH);
                 code = KG_KEYTAB_NOMATCH;
             }
             major = GSS_S_CRED_UNAVAIL;
