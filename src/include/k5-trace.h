@@ -301,6 +301,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_RD_REQ_DECRYPT_SPECIFIC(c, princ, keyblock)               \
     TRACE(c, "Decrypted AP-REQ with specified server principal {princ}: " \
           "{keyblock}", princ, keyblock)
+#define TRACE_RD_REQ_DECRYPT_FAIL(c, err)                       \
+    TRACE(c, "Failed to decrypt AP-REQ ticket: {kerr}", err)
 #define TRACE_RD_REQ_NEGOTIATED_ETYPE(c, etype)                     \
     TRACE(c, "Negotiated enctype based on authenticator: {etype}",  \
           etype)

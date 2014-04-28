@@ -20,8 +20,8 @@ verbose "gss err: checking server output"
 
 expect {
 	-i $server_id
-	-re "rpc_test server: Authent.*failed: .* Wrong princ" {
-		pass "gss err: server logged auth error"
+	-re "rpc_test server: Authent.*failed: .* not found in keytab" {
+	    pass "gss err: server logged auth error"
 	}
 	eof { fail "gss err: server exited" }
 	timeout { fail "gss err: timeout waiting for server output" }

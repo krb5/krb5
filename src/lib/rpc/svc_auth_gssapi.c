@@ -28,7 +28,7 @@
 
 #ifdef GSSAPI_KRB5
 /* This is here for the krb5_error_code typedef and the
-   KRB5KRB_AP_WRONG_PRINC #define.*/
+ * KRB5KRB_AP_ERR_NOT_US #define.*/
 #include <krb5.h>
 #endif
 
@@ -416,8 +416,9 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	       if (server_creds == client_data->server_creds)
 		    break;
 
-	       PRINTF(("accept_sec_context returned 0x%x 0x%x wrong-princ=%#x\n",
-		       call_res.gss_major, call_res.gss_minor, (int) KRB5KRB_AP_WRONG_PRINC));
+	       PRINTF(("accept_sec_context returned 0x%x 0x%x not-us=%#x\n",
+		       call_res.gss_major, call_res.gss_minor,
+		       (int) KRB5KRB_AP_ERR_NOT_US));
 	       if (call_res.gss_major == GSS_S_COMPLETE ||
 		   call_res.gss_major == GSS_S_CONTINUE_NEEDED) {
 		    /* server_creds was right, set it! */
@@ -434,7 +435,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 			   * error
 			   */
 			  || ((krb5_error_code) call_res.gss_minor !=
-			      (krb5_error_code) KRB5KRB_AP_WRONG_PRINC)
+			      (krb5_error_code) KRB5KRB_AP_ERR_NOT_US)
 #endif
 			  ) {
 		    break;

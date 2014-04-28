@@ -37,7 +37,7 @@ output = realm.run(['./t_accname', 'p:service2/calvin'])
 if 'service2/calvin' not in output:
     fail('Expected service1/barack in t_accname output')
 output = realm.run(['./t_accname', 'p:service2/dwight'], expected_code=1)
-if 'Wrong principal in request' not in output:
+if ' not found in keytab' not in output:
     fail('Expected error message not seen in t_accname output')
 
 # Test with acceptor name containing service only, including
@@ -48,14 +48,14 @@ if 'service1/abraham' not in output:
     fail('Expected service1/abraham in t_accname output')
 output = realm.run(['./t_accname', 'p:service1/andrew', 'h:service2'],
                    expected_code=1)
-if 'Wrong principal in request' not in output:
+if ' not found in keytab' not in output:
     fail('Expected error message not seen in t_accname output')
 output = realm.run(['./t_accname', 'p:service2/calvin', 'h:service2'])
 if 'service2/calvin' not in output:
     fail('Expected service2/calvin in t_accname output')
 output = realm.run(['./t_accname', 'p:service2/calvin', 'h:service1'],
                    expected_code=1)
-if 'Wrong principal in request' not in output:
+if ' found in keytab but does not match server principal' not in output:
     fail('Expected error message not seen in t_accname output')
 
 # Test with acceptor name containing service and host.  Use the
@@ -68,7 +68,7 @@ if realm.host_princ not in output:
 output = realm.run(['./t_accname', 'p:host/-nomatch-',
                     'h:host@%s' % socket.gethostname()],
                    expected_code=1)
-if 'Wrong principal in request' not in output:
+if ' not found in keytab' not in output:
     fail('Expected error message not seen in t_accname output')
 
 # Test krb5_gss_import_cred.
@@ -76,7 +76,7 @@ realm.run(['./t_imp_cred', 'p:service1/barack'])
 realm.run(['./t_imp_cred', 'p:service1/barack', 'service1/barack'])
 realm.run(['./t_imp_cred', 'p:service1/andrew', 'service1/abraham'])
 output = realm.run(['./t_imp_cred', 'p:service2/dwight'], expected_code=1)
-if 'Wrong principal in request' not in output:
+if ' not found in keytab' not in output:
     fail('Expected error message not seen in t_imp_cred output')
 
 # Test credential store extension.
