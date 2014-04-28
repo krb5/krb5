@@ -180,3 +180,13 @@ k5_restore_ctx_error(krb5_context ctx, struct errinfo *in)
     }
     return code;
 }
+
+/* If ctx contains an extended error message for oldcode, change it to be an
+ * extended error message for newcode. */
+void
+k5_change_error_message_code(krb5_context ctx, krb5_error_code oldcode,
+                             krb5_error_code newcode)
+{
+    if (ctx != NULL && ctx->err.msg != NULL && ctx->err.code == oldcode)
+        ctx->err.code = newcode;
+}
