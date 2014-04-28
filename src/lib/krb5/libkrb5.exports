@@ -107,6 +107,7 @@ initialize_kv5m_error_table
 initialize_prof_error_table
 k5_build_conf_principals
 k5_ccselect_free_context
+k5_change_error_message_code
 k5_etypes_contains
 k5_expand_path_tokens
 k5_expand_path_tokens_extra
