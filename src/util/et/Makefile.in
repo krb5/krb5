@@ -20,7 +20,7 @@ LIBINITFUNC=com_err_initialize
 LIBFINIFUNC=com_err_terminate
 
 all-unix:: all-liblinks
-clean-unix:: clean-liblinks clean-libs clean-libobjs clean-lclint
+clean-unix:: clean-liblinks clean-libs clean-libobjs
 install-unix:: install-libs
 
 LINTFLAGS=-uhvb 
@@ -28,8 +28,7 @@ LINTFILES= error_message.c et_name.c com_err.c
 LIBOBJS=$(OUTPRE)com_err.$(OBJEXT) \
 	$(OUTPRE)error_message.$(OBJEXT) \
 	$(OUTPRE)et_name.$(OBJEXT)
-# for et_lex.lex.c include in error_table.y
-LOCALINCLUDES=-I. -I$(srcdir)
+LOCALINCLUDES=-I.
 
 SRCS= $(srcdir)/error_message.c \
 	$(srcdir)/et_name.c \
@@ -62,15 +61,8 @@ $(COM_ERR_HDR): com_err.h
 
 generate-files-mac: compile_et
 
-error_table.c: et_lex.lex.c 
-error_table.c: $(srcdir)/error_table.y
-
-error_table.o: error_table.c et_lex.lex.c
-	$(CC) $(ALL_CFLAGS) -c error_table.c
-
 com_err.o : com_err.c
 
-et_lex.lex.o: et_lex.lex.c
 test1.o: test1.c
 test2.o: test2.c
 test_et.o: test1.h test2.h
@@ -79,36 +71,6 @@ et2.o: et2.c
 test1.c test2.c et1.c et2.c test1.h test2.h et1.h et2.h: \
 	compile_et et_c.awk et_h.awk
 t_com_err.o: et1.h et2.h t_com_err.c
-
-# /u1/kr/lclint-2.5q/bin/lclint -warnposix -D__sparc
-LCLINT=lclint
-# +posixlib	gets more complete errno list than ansilib
-# -usedef	turns off bogus warnings from poor dataflow analysis (should be
-#		redundant with gcc warnings anyways)
-# -warnposix
-# +charintliteral
-# +ignoresigns
-# -predboolint
-# -exportlocal
-# -retvalint	allow ignoring of int return values (e.g., fputs)
-LCLINTOPTS=+posixlib \
-	-usedef -warnposix +charintliteral +ignoresigns -predboolint +boolint \
-	-exportlocal -retvalint \
-	+mod-uncon +modinternalstrict +modfilesys
-com_err.lcd: error_table.c error_table.h et_lex.lex.c com_err.h
-	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) $(DEFS) $(SRCS) \
-		-dump com_err.new -expect 1
-	mv -f com_err.new com_err.lcd
-do-lclint: com_err.lcd t_com_err.c et1.c et2.c et1.h et2.h
-	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) \
-		$(srcdir)/t_com_err.c et1.c et2.c
-# "-load com_err.lcd" -> lclint brokenness
-clean-lclint:
-	$(RM) com_err.new com_err.lcd
-ITS4=its4
-ITS4OPTS=
-do-its4: error_table.y et_lex.lex.c
-	$(ITS4) $(ITS4OPTS) $(SRCS)
 
 #test_et: test_et.o test1.o test2.o $(LIBOBJS)
 #	$(CC) -o test_et test_et.o test1.o test2.o $(LIBOBJS)
@@ -149,12 +111,6 @@ check-windows:: $(OUTPRE)test_et$(EXEEXT)
 	path
 	$(OUTPRE)test_et$(EXEEXT)
 
-# The real compile_et just isn't portable.  (But then again, anything using 
-# lex and yacc isn't portable by definition.  :-(  )
-#
-#compile_et: compile_et.o error_table.o
-#	$(CC) $(CFLAGS) -o $@ compile_et.o error_table.o $(LEXLIB) $(BSDLIB)
-#
 install-unix:: compile_et
 	$(INSTALL) compile_et $(DESTDIR)$(bindir)/compile_et
 	test -d $(DESTDIR)$(mydatadir) || mkdir $(DESTDIR)$(mydatadir)
@@ -199,8 +155,7 @@ clean-files::
 		*.cp *.fn *.ky *.log *.pg *.tp *.vr \
 		*.o profiled/?*.o libcom_err.a libcom_err_p.a \
 		com_err.o compile_et \
-		et.ar TAGS y.tab.c lex.yy.c error_table.c \
-		et_lex.lex.c \
+		et.ar TAGS \
 		test1.h test1.c test2.h test2.c test_et \
 		et1.c et1.h et2.c et2.h t_com_err \
 		eddep makedep *.ln
@@ -217,12 +172,10 @@ libcom_err.o:	$(LIBOBJS)
 
 archive:	et.tar
 
-TAGS:	et_name.c error_message.c compile_et.c error_table.c \
-		lex.yy.c init_et.c
-	etags et_name.c error_message.c compile_et.c \
-		error_table.c init_et.c
+TAGS:	et_name.c error_message.c
+	etags et_name.c error_message.c
 
-depend::  et_lex.lex.c includes compile_et
+depend::  includes compile_et
 
 
 @lib_frag@
