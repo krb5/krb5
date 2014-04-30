@@ -452,3 +452,6 @@ EXPORTS
 	krb5_responder_pkinit_challenge_free		@423
 	krb5_auth_con_setpermetypes			@424 ; PRIVATE GSSAPI
 	krb5_rd_req_decoded				@425 ; PRIVATE GSSAPI
+
+; new in 1.13
+	k5_change_error_message_code			@426 ; PRIVATE GSSAPI

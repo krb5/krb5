@@ -252,6 +252,7 @@ testlog
 /src/tests/kdc.conf
 /src/tests/krb5.conf
 /src/tests/plugorder
+/src/tests/rdreq
 /src/tests/responder
 /src/tests/s2p
 /src/tests/t_init_creds
