@@ -215,6 +215,7 @@ make_external_lucid_ctx_v1(
         }
     }
     else {
+        xfree(lctx);
         return EINVAL;  /* XXX better error code? */
     }
 
