@@ -91,6 +91,10 @@ void k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
 #endif
     ;
 
+/* Extend the length of buf by len and return a pointer to the reserved space,
+ * to be filled in by the caller.  Return NULL on error. */
+void *k5_buf_get_space(struct k5buf *buf, size_t len);
+
 /* Truncate BUF.  LEN must be between 0 and the existing buffer
  * length, or an assertion failure will result. */
 void k5_buf_truncate(struct k5buf *buf, size_t len);
