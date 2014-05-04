@@ -191,6 +191,16 @@ k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
     free(tmp);
 }
 
+void *
+k5_buf_get_space(struct k5buf *buf, size_t len)
+{
+    if (!ensure_space(buf, len))
+        return NULL;
+    buf->len += len;
+    buf->data[buf->len] = '\0';
+    return &buf->data[buf->len - len];
+}
+
 void
 k5_buf_truncate(struct k5buf *buf, size_t len)
 {
