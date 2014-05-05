@@ -474,6 +474,39 @@ create_spnego_ctx(void)
 	return (spnego_ctx);
 }
 
+/* iso(1) org(3) dod(6) internet(1) private(4) enterprises(1) samba(7165)
+ * gssntlmssp(655) controls(1) spnego_req_mechlistMIC(2) */
+static const gss_OID_desc spnego_req_mechlistMIC_oid =
+	{ 11, "\x2B\x06\x01\x04\x01\xB7\x7D\x85\x0F\x01\x02" };
+
+/*
+ * Return nonzero if the mechanism has reason to believe that a mechlistMIC
+ * exchange will be required.  Microsoft servers erroneously require SPNEGO
+ * mechlistMIC if they see an internal MIC within an NTLMSSP Authenticate
+ * message, even if NTLMSSP was the preferred mechanism.
+ */
+static int
+mech_requires_mechlistMIC(spnego_gss_ctx_id_t sc)
+{
+	OM_uint32 major, minor;
+	gss_ctx_id_t ctx = sc->ctx_handle;
+	gss_OID oid = (gss_OID)&spnego_req_mechlistMIC_oid;
+	gss_buffer_set_t bufs;
+	int result;
+
+	major = gss_inquire_sec_context_by_oid(&minor, ctx, oid, &bufs);
+	if (major != GSS_S_COMPLETE)
+		return 0;
+
+	/* Report true if the mech returns a single buffer containing a single
+	 * byte with value 1. */
+	result = (bufs != NULL && bufs->count == 1 &&
+		  bufs->elements[0].length == 1 &&
+		  memcmp(bufs->elements[0].value, "\1", 1) == 0);
+	(void) gss_release_buffer_set(&minor, &bufs);
+	return result;
+}
+
 /*
  * Both initiator and acceptor call here to verify and/or create mechListMIC,
  * and to consistency-check the MIC state.  handle_mic is invoked only if the
@@ -1014,6 +1047,10 @@ spnego_gss_init_sec_context(
 			actual_mech, &mechtok_out,
 			ret_flags, time_rec,
 			&negState, &send_token);
+
+		/* Give the mechanism a chance to force a mechlistMIC. */
+		if (!HARD_ERROR(ret) && mech_requires_mechlistMIC(spnego_ctx))
+			spnego_ctx->mic_reqd = 1;
 	}
 
 	/* Step 3: process or generate the MIC, if the negotiated mech is
