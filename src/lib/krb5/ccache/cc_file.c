@@ -75,21 +75,6 @@ extern const krb5_cc_ops krb5_cc_file_ops;
 
 krb5_error_code krb5_change_cache(void);
 
-static krb5_error_code read_data(krb5_context, krb5_ccache id,
-                                 krb5_data *data);
-static krb5_error_code read32(krb5_context, krb5_ccache id, int32_t *i);
-static krb5_error_code read16(krb5_context, krb5_ccache id, uint16_t *i);
-static krb5_error_code read_addr(krb5_context context, krb5_ccache id,
-                                 krb5_address *addr);
-static krb5_error_code read_authdatum(krb5_context, krb5_ccache,
-                                      krb5_authdata *);
-static krb5_error_code store_data(krb5_context, krb5_ccache id,
-                                  krb5_data *data);
-static krb5_error_code store32(krb5_context, krb5_ccache id, uint32_t i);
-static krb5_error_code store16(krb5_context, krb5_ccache id, uint16_t i);
-static krb5_error_code store_addr(krb5_context, krb5_ccache, krb5_address *);
-static krb5_error_code store_authdatum(krb5_context, krb5_ccache,
-                                       krb5_authdata *);
 static krb5_error_code interpret_errno(krb5_context, int);
 
 #define FVNO_1 0x0501           /* krb v5, fcc v1 */
@@ -141,6 +126,24 @@ static inline int
 version(krb5_ccache id)
 {
     return ((fcc_data *)id->data)->version - FVNO_1 + 1;
+}
+
+/* Get the size of the cache file as a size_t, or SIZE_MAX if it is too
+ * large to be represented as a size_t. */
+static krb5_error_code
+get_size(krb5_context context, krb5_ccache id, size_t *size_out)
+{
+    fcc_data *data = id->data;
+    struct stat sb;
+
+    k5_cc_mutex_assert_locked(context, &data->lock);
+    if (fstat(data->fd, &sb) == -1)
+        return interpret_errno(context, errno);
+    if (sizeof(off_t) > sizeof(size_t) && sb.st_size > (off_t)SIZE_MAX)
+        *size_out = SIZE_MAX;
+    else
+        *size_out = sb.st_size;
+    return 0;
 }
 
 /* Discard cached read information within data. */
@@ -207,8 +210,6 @@ typedef struct _krb5_fcc_cursor {
         }                                                               \
     }
 
-#define CHECK(ret) if (ret) goto errout;
-
 #define NO_FILE -1
 
 /* Read len bytes from the cache id, storing them in buf.  Return KRB5_CC_END
@@ -252,297 +253,10 @@ read_bytes(krb5_context context, krb5_ccache id, void *buf, unsigned int len)
     return 0;
 }
 
-/*
- * FOR ALL OF THE FOLLOWING FUNCTIONS:
- *
- * Requires:
- * id is open and set to read at the appropriate place in the file
- *
- * mutex is locked
- *
- * Effects:
- * Fills in the second argument with data of the appropriate type from
- * the file.  In some cases, the functions have to allocate space for
- * variable length fields; therefore, krb5_destroy_<type> must be
- * called for each filled in structure.
- *
- * Errors:
- * system errors (read errors)
- * KRB5_CC_NOMEM
- */
-
-#define ALLOC(NUM, TYPE)                            \
-    (((NUM) <= (((size_t)0 - 1) / sizeof(TYPE))) ?  \
-     (TYPE *)calloc((NUM), sizeof(TYPE)) :          \
-     (errno = ENOMEM, (TYPE *)0))
-
-static krb5_error_code
-read_principal(krb5_context context, krb5_ccache id, krb5_principal *princ)
-{
-    fcc_data *data = id->data;
-    krb5_error_code kret;
-    register krb5_principal tmpprinc;
-    int32_t length, type;
-    int i;
-
-    k5_cc_mutex_assert_locked(context, &data->lock);
-
-    *princ = NULL;
-
-    if (version(id) == 1) {
-        type = KRB5_NT_UNKNOWN;
-    } else {
-        /* Read principal type. */
-        kret = read32(context, id, &type);
-        if (kret)
-            return kret;
-    }
-
-    /* Read the number of components. */
-    kret = read32(context, id, &length);
-    if (kret)
-        return kret;
-
-    /*
-     * DCE includes the principal's realm in the count; the new format
-     * does not.
-     */
-    if (version(id) == 1)
-        length--;
-    if (length < 0)
-        return KRB5_CC_NOMEM;
-
-    tmpprinc = malloc(sizeof(*tmpprinc));
-    if (tmpprinc == NULL)
-        return KRB5_CC_NOMEM;
-    if (length) {
-        size_t msize = length;
-        if (msize != (uint32_t)length) {
-            free(tmpprinc);
-            return KRB5_CC_NOMEM;
-        }
-        tmpprinc->data = ALLOC(msize, krb5_data);
-        if (tmpprinc->data == 0) {
-            free(tmpprinc);
-            return KRB5_CC_NOMEM;
-        }
-    } else {
-        tmpprinc->data = 0;
-    }
-    tmpprinc->magic = KV5M_PRINCIPAL;
-    tmpprinc->length = length;
-    tmpprinc->type = type;
-
-    kret = read_data(context, id, &tmpprinc->realm);
-
-    i = 0;
-    CHECK(kret);
-
-    for (i = 0; i < length; i++) {
-        kret = read_data(context, id, &tmpprinc->data[i]);
-        CHECK(kret);
-    }
-    *princ = tmpprinc;
-    return 0;
-
-errout:
-    while (--i >= 0)
-        free(tmpprinc->data[i].data);
-    free(tmpprinc->realm.data);
-    free(tmpprinc->data);
-    free(tmpprinc);
-    return kret;
-}
-
-static krb5_error_code
-read_addrs(krb5_context context, krb5_ccache id, krb5_address ***addrs)
-{
-    krb5_error_code kret;
-    int32_t length;
-    size_t msize;
-    int i;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    *addrs = NULL;
-
-    /* Read the number of components */
-    kret = read32(context, id, &length);
-    CHECK(kret);
-
-    /* Make *addrs able to hold length pointers to krb5_address structs
-     * Add one extra for a null-terminated list */
-    msize = length;
-    msize += 1;
-    if (msize == 0 || msize - 1 != (uint32_t)length || length < 0)
-        return KRB5_CC_NOMEM;
-    *addrs = ALLOC(msize, krb5_address *);
-    if (*addrs == NULL)
-        return KRB5_CC_NOMEM;
-
-    for (i = 0; i < length; i++) {
-        (*addrs)[i] = malloc(sizeof(krb5_address));
-        if ((*addrs)[i] == NULL) {
-            krb5_free_addresses(context, *addrs);
-            *addrs = 0;
-            return KRB5_CC_NOMEM;
-        }
-        (*addrs)[i]->contents = NULL;
-        kret = read_addr(context, id, (*addrs)[i]);
-        CHECK(kret);
-    }
-
-    return 0;
-errout:
-    if (*addrs) {
-        krb5_free_addresses(context, *addrs);
-        *addrs = NULL;
-    }
-    return kret;
-}
-
-static krb5_error_code
-read_keyblock(krb5_context context, krb5_ccache id, krb5_keyblock *keyblock)
-{
-    krb5_error_code kret;
-    uint16_t ui2;
-    int32_t int32;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    keyblock->magic = KV5M_KEYBLOCK;
-    keyblock->contents = 0;
-
-    /* Enctype is signed, so sign-extend the 16-bit value we read. */
-    kret = read16(context, id, &ui2);
-    keyblock->enctype = (int16_t)ui2;
-    CHECK(kret);
-    if (version(id) == 3) {
-        /* This works because the old etype is the same as the new enctype. */
-        kret = read16(context, id, &ui2);
-        /* keyblock->enctype = ui2; */
-        CHECK(kret);
-    }
-
-    kret = read32(context, id, &int32);
-    CHECK(kret);
-    if (int32 < 0)
-        return KRB5_CC_NOMEM;
-    keyblock->length = int32;
-    /* Overflow check.  */
-    if (keyblock->length != (uint32_t)int32)
-        return KRB5_CC_NOMEM;
-    if (keyblock->length == 0)
-        return 0;
-    keyblock->contents = malloc(keyblock->length);
-    if (keyblock->contents == NULL)
-        return KRB5_CC_NOMEM;
-
-    kret = read_bytes(context, id, keyblock->contents, keyblock->length);
-    if (kret)
-        goto errout;
-
-    return 0;
-
-errout:
-    if (keyblock->contents) {
-        free(keyblock->contents);
-        keyblock->contents = NULL;
-    }
-    return kret;
-}
-
-static krb5_error_code
-read_data(krb5_context context, krb5_ccache id, krb5_data *data)
-{
-    krb5_error_code kret;
-    int32_t len;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    data->magic = KV5M_DATA;
-    data->data = 0;
-
-    kret = read32(context, id, &len);
-    CHECK(kret);
-    if (len < 0)
-        return KRB5_CC_NOMEM;
-    data->length = len;
-    if (data->length != (uint32_t)len || data->length + 1 == 0)
-        return KRB5_CC_NOMEM;
-
-    if (data->length == 0) {
-        data->data = NULL;
-        return 0;
-    }
-
-    data->data = malloc(data->length + 1);
-    if (data->data == NULL)
-        return KRB5_CC_NOMEM;
-
-    kret = read_bytes(context, id, data->data, data->length);
-    CHECK(kret);
-
-    data->data[data->length] = 0; /* Null terminate, just in case.... */
-    return 0;
-
-errout:
-    if (data->data) {
-        free(data->data);
-        data->data = NULL;
-    }
-    return kret;
-}
-
-static krb5_error_code
-read_addr(krb5_context context, krb5_ccache id, krb5_address *addr)
-{
-    krb5_error_code kret;
-    uint16_t ui2;
-    int32_t int32;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    addr->magic = KV5M_ADDRESS;
-    addr->contents = 0;
-
-    kret = read16(context, id, &ui2);
-    CHECK(kret);
-    addr->addrtype = ui2;
-
-    kret = read32(context, id, &int32);
-    CHECK(kret);
-    if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
-        return KRB5_CC_NOMEM;
-    addr->length = int32;
-    /* Length field is "unsigned int", which may be smaller than 32 bits. */
-    if (addr->length != (uint32_t)int32)
-        return KRB5_CC_NOMEM;  /* XXX */
-
-    if (addr->length == 0)
-        return 0;
-
-    addr->contents = malloc(addr->length);
-    if (addr->contents == NULL)
-        return KRB5_CC_NOMEM;
-
-    kret = read_bytes(context, id, addr->contents, addr->length);
-    CHECK(kret);
-
-    return 0;
-
-errout:
-    if (addr->contents) {
-        free(addr->contents);
-        addr->contents = NULL;
-    }
-    return kret;
-}
-
 /* Load four bytes from the cache file and return their value as a 32-bit
- * signed integer according to the file format. */
+ * unsigned integer according to the file format.  Also append them to buf. */
 static krb5_error_code
-read32(krb5_context context, krb5_ccache id, int32_t *out)
+read32(krb5_context context, krb5_ccache id, struct k5buf *buf, uint32_t *out)
 {
     krb5_error_code ret;
     char bytes[4];
@@ -552,6 +266,8 @@ read32(krb5_context context, krb5_ccache id, int32_t *out)
     ret = read_bytes(context, id, bytes, 4);
     if (ret)
         return ret;
+    if (buf != NULL)
+        k5_buf_add_len(buf, bytes, 4);
     *out = (version(id) < 3) ? load_32_n(bytes) : load_32_be(bytes);
     return 0;
 }
@@ -573,142 +289,145 @@ read16(krb5_context context, krb5_ccache id, uint16_t *out)
     return 0;
 }
 
+/* Read len bytes from the cache file and add them to buf. */
 static krb5_error_code
-read_octet(krb5_context context, krb5_ccache id, unsigned char *i)
+load_bytes(krb5_context context, krb5_ccache id, size_t len, struct k5buf *buf)
 {
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-    return read_bytes(context, id, i, 1);
+    void *ptr;
+
+    ptr = k5_buf_get_space(buf, len);
+    return (ptr == NULL) ? ENOMEM : read_bytes(context, id, ptr, len);
 }
 
+/* Load a 32-bit length and data from the cache file into buf, but not more
+ * than maxsize bytes. */
 static krb5_error_code
-read_times(krb5_context context, krb5_ccache id, krb5_ticket_times *t)
+load_data(krb5_context context, krb5_ccache id, size_t maxsize,
+          struct k5buf *buf)
 {
-    fcc_data *data = id->data;
-    krb5_error_code retval;
-    int32_t i;
+    krb5_error_code ret;
+    uint32_t count;
 
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
+    ret = read32(context, id, buf, &count);
+    if (ret)
+        return ret;
+    if (count > maxsize)
+        return KRB5_CC_FORMAT;
+    return load_bytes(context, id, count, buf);
+}
 
-    if (data->version == FVNO_1 || data->version == FVNO_2) {
-        return read_bytes(context, id, t, sizeof(krb5_ticket_times));
-    } else {
-        retval = read32(context, id, &i);
-        CHECK(retval);
-        t->authtime = i;
+/* Load a marshalled principal from the cache file into buf, without
+ * unmarshalling it. */
+static krb5_error_code
+load_principal(krb5_context context, krb5_ccache id, size_t maxsize,
+               struct k5buf *buf)
+{
+    krb5_error_code ret;
+    uint32_t count;
 
-        retval = read32(context, id, &i);
-        CHECK(retval);
-        t->starttime = i;
-
-        retval = read32(context, id, &i);
-        CHECK(retval);
-        t->endtime = i;
-
-        retval = read32(context, id, &i);
-        CHECK(retval);
-        t->renew_till = i;
+    if (version(id) > 1) {
+        ret = load_bytes(context, id, 4, buf);
+        if (ret)
+            return ret;
+    }
+    ret = read32(context, id, buf, &count);
+    if (ret)
+        return ret;
+    /* Add one for the realm (except in version 1 which already counts it). */
+    if (version(id) != 1)
+        count++;
+    while (count-- > 0) {
+        ret = load_data(context, id, maxsize, buf);
+        if (ret)
+            return ret;
     }
     return 0;
-errout:
-    return retval;
 }
 
+/* Load a marshalled credential from the cache file into buf, without
+ * unmarshalling it. */
 static krb5_error_code
-read_authdata(krb5_context context, krb5_ccache id, krb5_authdata ***a)
+load_cred(krb5_context context, krb5_ccache id, size_t maxsize,
+          struct k5buf *buf)
 {
-    krb5_error_code kret;
-    int32_t length;
-    size_t msize;
-    int i;
+    krb5_error_code ret;
+    uint32_t count, i;
 
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
+    /* client and server */
+    ret = load_principal(context, id, maxsize, buf);
+    if (ret)
+        return ret;
+    ret = load_principal(context, id, maxsize, buf);
+    if (ret)
+        return ret;
 
-    *a = 0;
+    /* keyblock (enctype, enctype again for version 3, length, value) */
+    ret = load_bytes(context, id, (version(id) == 3) ? 4 : 2, buf);
+    if (ret)
+        return ret;
+    ret = load_data(context, id, maxsize, buf);
+    if (ret)
+        return ret;
 
-    /* Read the number of components */
-    kret = read32(context, id, &length);
-    CHECK(kret);
+    /* times (4*4 bytes), is_skey (1 byte), ticket flags (4 bytes) */
+    ret = load_bytes(context, id, 4 * 4 + 1 + 4, buf);
+    if (ret)
+        return ret;
 
-    if (length == 0)
-        return 0;
-
-    /* Make *a able to hold length pointers to krb5_authdata structs
-     * Add one extra for a null-terminated list. */
-    msize = length;
-    msize += 1;
-    if (msize == 0 || msize - 1 != (uint32_t)length || length < 0)
-        return KRB5_CC_NOMEM;
-    *a = ALLOC(msize, krb5_authdata *);
-    if (*a == NULL)
-        return KRB5_CC_NOMEM;
-
-    for (i = 0; i < length; i++) {
-        (*a)[i] = malloc(sizeof(krb5_authdata));
-        if ((*a)[i] == NULL) {
-            krb5_free_authdata(context, *a);
-            *a = NULL;
-            return KRB5_CC_NOMEM;
+    /* addresses and authdata, both lists of {type, length, data} */
+    for (i = 0; i < 2; i++) {
+        ret = read32(context, id, buf, &count);
+        if (ret)
+            return ret;
+        while (count-- > 0) {
+            ret = load_bytes(context, id, 2, buf);
+            if (ret)
+                return ret;
+            ret = load_data(context, id, maxsize, buf);
+            if (ret)
+                return ret;
         }
-        (*a)[i]->contents = NULL;
-        kret = read_authdatum(context, id, (*a)[i]);
-        CHECK(kret);
     }
 
-    return 0;
-errout:
-    if (*a) {
-        krb5_free_authdata(context, *a);
-        *a = NULL;
-    }
-    return kret;
+    /* ticket and second_ticket */
+    ret = load_data(context, id, maxsize, buf);
+    if (ret)
+        return ret;
+    return load_data(context, id, maxsize, buf);
 }
 
 static krb5_error_code
-read_authdatum(krb5_context context, krb5_ccache id, krb5_authdata *a)
+read_principal(krb5_context context, krb5_ccache id, krb5_principal *princ)
 {
-    krb5_error_code kret;
-    int32_t int32;
-    int16_t ui2; /* negative authorization data types are allowed */
+    krb5_error_code ret;
+    struct k5buf buf;
+    size_t maxsize;
+    unsigned char *bytes;
 
+    *princ = NULL;
     k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
+    k5_buf_init_dynamic(&buf);
 
-    a->magic = KV5M_AUTHDATA;
-    a->contents = NULL;
-
-    kret = read16(context, id, (uint16_t *)&ui2);
-    CHECK(kret);
-    a->ad_type = (krb5_authdatatype)ui2;
-    kret = read32(context, id, &int32);
-    CHECK(kret);
-    if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
-        return KRB5_CC_NOMEM;
-    a->length = int32;
-    /* Value could have gotten truncated if int is smaller than 32 bits.  */
-    if (a->length != (uint32_t)int32)
-        return KRB5_CC_NOMEM;
-
-    if (a->length == 0)
-        return 0;
-
-    a->contents = malloc(a->length);
-    if (a->contents == NULL)
-        return KRB5_CC_NOMEM;
-
-    kret = read_bytes(context, id, a->contents, a->length);
-    CHECK(kret);
-
-    return 0;
-errout:
-    if (a->contents) {
-        free(a->contents);
-        a->contents = NULL;
+    /* Read the principal representation into memory. */
+    ret = get_size(context, id, &maxsize);
+    if (ret)
+        goto cleanup;
+    ret = load_principal(context, id, maxsize, &buf);
+    if (ret)
+        goto cleanup;
+    bytes = (unsigned char *)k5_buf_data(&buf);
+    if (bytes == NULL) {
+        ret = ENOMEM;
+        goto cleanup;
     }
-    return kret;
 
+    /* Unmarshal it from buf into princ. */
+    ret = k5_unmarshal_princ(bytes, k5_buf_len(&buf), version(id), princ);
+
+cleanup:
+    k5_free_buf(&buf);
+    return ret;
 }
-#undef CHECK
-
-#define CHECK(ret) if (ret) return ret;
 
 /* Write len bytes from buf into the cache file.  Call with the mutex
  * locked. */
@@ -727,131 +446,6 @@ write_bytes(krb5_context context, krb5_ccache id, const void *buf,
     if ((unsigned int)ret != len)
         return KRB5_CC_WRITE;
     return 0;
-}
-
-/*
- * FOR ALL OF THE FOLLOWING FUNCTIONS:
- *
- * Requires:
- * ((fcc_data *)id->data)->fd is open and at the right position.
- *
- * mutex is locked
- *
- * Effects:
- * Stores an encoded version of the second argument in the
- * cache file.
- *
- * Errors:
- * system errors
- */
-
-static krb5_error_code
-store_principal(krb5_context context, krb5_ccache id, krb5_principal princ)
-{
-    fcc_data *data = id->data;
-    krb5_error_code ret;
-    int32_t i, length, tmp, type;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    type = princ->type;
-    tmp = length = princ->length;
-
-    if (data->version == FVNO_1) {
-        /*
-         * DCE-compatible format means that the length count
-         * includes the realm.  (It also doesn't include the
-         * principal type information.)
-         */
-        tmp++;
-    } else {
-        ret = store32(context, id, type);
-        CHECK(ret);
-    }
-
-    ret = store32(context, id, tmp);
-    CHECK(ret);
-
-    ret = store_data(context, id, &princ->realm);
-    CHECK(ret);
-
-    for (i = 0; i < length; i++) {
-        ret = store_data(context, id, &princ->data[i]);
-        CHECK(ret);
-    }
-
-    return 0;
-}
-
-static krb5_error_code
-store_addrs(krb5_context context, krb5_ccache id, krb5_address **addrs)
-{
-    krb5_error_code ret;
-    krb5_address **temp;
-    int32_t i, length = 0;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    /* Count the number of components */
-    if (addrs) {
-        temp = addrs;
-        while (*temp++)
-            length += 1;
-    }
-
-    ret = store32(context, id, length);
-    CHECK(ret);
-    for (i = 0; i < length; i++) {
-        ret = store_addr(context, id, addrs[i]);
-        CHECK(ret);
-    }
-
-    return 0;
-}
-
-static krb5_error_code
-store_keyblock(krb5_context context, krb5_ccache id, krb5_keyblock *keyblock)
-{
-    fcc_data *data = id->data;
-    krb5_error_code ret;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    ret = store16(context, id, keyblock->enctype);
-    CHECK(ret);
-    if (data->version == FVNO_3) {
-        ret = store16(context, id, keyblock->enctype);
-        CHECK(ret);
-    }
-    ret = store32(context, id, keyblock->length);
-    CHECK(ret);
-    return write_bytes(context, id, keyblock->contents, keyblock->length);
-}
-
-static krb5_error_code
-store_addr(krb5_context context, krb5_ccache id, krb5_address *addr)
-{
-    krb5_error_code ret;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    ret = store16(context, id, addr->addrtype);
-    CHECK(ret);
-    ret = store32(context, id, addr->length);
-    CHECK(ret);
-    return write_bytes(context, id, addr->contents, addr->length);
-}
-
-static krb5_error_code
-store_data(krb5_context context, krb5_ccache id, krb5_data *data)
-{
-    krb5_error_code ret;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    ret = store32(context, id, data->length);
-    CHECK(ret);
-    return write_bytes(context, id, data->data, data->length);
 }
 
 /* Store a 32-bit integer into the cache file according to the file format. */
@@ -885,73 +479,20 @@ store16(krb5_context context, krb5_ccache id, uint16_t i)
 }
 
 static krb5_error_code
-store_octet(krb5_context context, krb5_ccache id, unsigned char i)
-{
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    return write_bytes(context, id, &i, 1);
-}
-
-static krb5_error_code
-store_times(krb5_context context, krb5_ccache id, krb5_ticket_times *t)
-{
-    fcc_data *data = id->data;
-    krb5_error_code retval;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    if (data->version == FVNO_1 || data->version == FVNO_2) {
-        return write_bytes(context, id, t, sizeof(krb5_ticket_times));
-    } else {
-        retval = store32(context, id, t->authtime);
-        CHECK(retval);
-        retval = store32(context, id, t->starttime);
-        CHECK(retval);
-        retval = store32(context, id, t->endtime);
-        CHECK(retval);
-        retval = store32(context, id, t->renew_till);
-        CHECK(retval);
-        return 0;
-    }
-}
-
-static krb5_error_code
-store_authdata(krb5_context context, krb5_ccache id, krb5_authdata **a)
+store_principal(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
     krb5_error_code ret;
-    krb5_authdata **temp;
-    int32_t i, length = 0;
+    unsigned char *bytes;
+    size_t len;
 
     k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    if (a != NULL) {
-        for (temp = a; *temp; temp++)
-            length++;
-    }
-
-    ret = store32(context, id, length);
-    CHECK(ret);
-    for (i = 0; i < length; i++) {
-        ret = store_authdatum(context, id, a[i]);
-        CHECK(ret);
-    }
-    return 0;
+    ret = k5_marshal_princ(princ, version(id), &bytes, &len);
+    if (ret)
+        return ret;
+    ret = write_bytes(context, id, bytes, len);
+    free(bytes);
+    return ret;
 }
-
-static krb5_error_code
-store_authdatum(krb5_context context, krb5_ccache id, krb5_authdata *a)
-{
-    krb5_error_code ret;
-
-    k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-
-    ret = store16(context, id, a->ad_type);
-    CHECK(ret);
-    ret = store32(context, id, a->length);
-    CHECK(ret);
-    return write_bytes(context, id, a->contents, a->length);
-}
-#undef CHECK
 
 /* Unlock and close the cache file.  Call with the mutex locked. */
 static krb5_error_code
@@ -996,7 +537,7 @@ open_cache_file(krb5_context context, krb5_ccache id, int mode)
     fcc_data *data = id->data;
     char fcc_fvno[2];
     uint16_t fcc_flen, fcc_tag, fcc_taglen;
-    int32_t time_offset, usec_offset;
+    uint32_t time_offset, usec_offset;
     int f, open_flag, lock_flag, cnt;
     char buf[1024];
 
@@ -1139,8 +680,8 @@ open_cache_file(krb5_context context, krb5_ccache id, int mode)
                     }
                     break;
                 }
-                if (read32(context, id, &time_offset) ||
-                    read32(context, id, &usec_offset)) {
+                if (read32(context, id, NULL, &time_offset) ||
+                    read32(context, id, NULL, &usec_offset)) {
                     ret = KRB5_CC_FORMAT;
                     goto done;
                 }
@@ -1547,52 +1088,44 @@ static krb5_error_code KRB5_CALLCONV
 fcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
               krb5_creds *creds)
 {
-#define TCHECK(ret) if (ret) goto lose;
     krb5_error_code ret;
     krb5_fcc_cursor *fcursor = *cursor;
-    int32_t int32;
-    unsigned char octet;
     fcc_data *data = id->data;
+    struct k5buf buf;
+    size_t maxsize;
+    unsigned char *bytes;
 
     memset(creds, 0, sizeof(*creds));
     k5_cc_mutex_lock(context, &data->lock);
     MAYBE_OPEN(context, id, FCC_OPEN_RDONLY);
+    k5_buf_init_dynamic(&buf);
 
     if (fcc_lseek(data, fcursor->pos, SEEK_SET) == -1) {
         ret = interpret_errno(context, errno);
-        goto lose;
+        goto cleanup;
     }
 
-    ret = read_principal(context, id, &creds->client);
-    TCHECK(ret);
-    ret = read_principal(context, id, &creds->server);
-    TCHECK(ret);
-    ret = read_keyblock(context, id, &creds->keyblock);
-    TCHECK(ret);
-    ret = read_times(context, id, &creds->times);
-    TCHECK(ret);
-    ret = read_octet(context, id, &octet);
-    TCHECK(ret);
-    creds->is_skey = octet;
-    ret = read32(context, id, &int32);
-    TCHECK(ret);
-    creds->ticket_flags = int32;
-    ret = read_addrs(context, id, &creds->addresses);
-    TCHECK(ret);
-    ret = read_authdata(context, id, &creds->authdata);
-    TCHECK(ret);
-    ret = read_data(context, id, &creds->ticket);
-    TCHECK(ret);
-    ret = read_data(context, id, &creds->second_ticket);
-    TCHECK(ret);
+    /* Load a marshalled cred into memory. */
+    ret = get_size(context, id, &maxsize);
+    if (ret)
+        return ret;
+    ret = load_cred(context, id, maxsize, &buf);
+    if (ret)
+        goto cleanup;
+    bytes = (unsigned char *)k5_buf_data(&buf);
+    if (bytes == NULL) {
+        ret = ENOMEM;
+        goto cleanup;
+    }
 
+    /* Unmarshal it from buf into creds. */
     fcursor->pos = fcc_lseek(data, 0, SEEK_CUR);
+    ret = k5_unmarshal_cred(bytes, k5_buf_len(&buf), version(id), creds);
 
-lose:
+cleanup:
+    k5_free_buf(&buf);
     MAYBE_CLOSE(context, id, ret);
     k5_cc_mutex_unlock(context, &data->lock);
-    if (ret)
-        krb5_free_cred_contents(context, creds);
     return ret;
 }
 
@@ -1804,8 +1337,9 @@ fcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
 static krb5_error_code KRB5_CALLCONV
 fcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
 {
-#define TCHECK(ret) if (ret) goto lose;
     krb5_error_code ret;
+    unsigned char *bytes;
+    size_t len;
 
     k5_cc_mutex_lock(context, &((fcc_data *)id->data)->lock);
 
@@ -1821,33 +1355,16 @@ fcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
         return interpret_errno(context, errno);
     }
 
-    ret = store_principal(context, id, creds->client);
-    TCHECK(ret);
-    ret = store_principal(context, id, creds->server);
-    TCHECK(ret);
-    ret = store_keyblock(context, id, &creds->keyblock);
-    TCHECK(ret);
-    ret = store_times(context, id, &creds->times);
-    TCHECK(ret);
-    ret = store_octet(context, id, creds->is_skey);
-    TCHECK(ret);
-    ret = store32(context, id, creds->ticket_flags);
-    TCHECK(ret);
-    ret = store_addrs(context, id, creds->addresses);
-    TCHECK(ret);
-    ret = store_authdata(context, id, creds->authdata);
-    TCHECK(ret);
-    ret = store_data(context, id, &creds->ticket);
-    TCHECK(ret);
-    ret = store_data(context, id, &creds->second_ticket);
-    TCHECK(ret);
+    ret = k5_marshal_cred(creds, version(id), &bytes, &len);
+    if (ret == 0) {
+        ret = write_bytes(context, id, bytes, len);
+        free(bytes);
+    }
 
-lose:
     MAYBE_CLOSE(context, id, ret);
     k5_cc_mutex_unlock(context, &((fcc_data *)id->data)->lock);
     krb5_change_cache();
     return ret;
-#undef TCHECK
 }
 
 /* Non-functional stub for removing a cred from the cache file. */
