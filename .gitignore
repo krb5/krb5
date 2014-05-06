@@ -188,6 +188,8 @@ testlog
 
 /src/lib/krb5/ccache/t_cc
 /src/lib/krb5/ccache/t_cccursor
+/src/lib/krb5/ccache/t_marshal
+/src/lib/krb5/ccache/testcache
 
 /src/lib/krb5/error_tables/*_err.[ch]
 
