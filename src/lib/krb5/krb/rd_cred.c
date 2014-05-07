@@ -170,8 +170,10 @@ krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
     (*pppcreds)[i] = NULL;
 
 cleanup:
-    if (retval)
+    if (retval) {
         krb5_free_tgt_creds(context, *pppcreds);
+        *pppcreds = NULL;
+    }
 
 cleanup_cred:
     krb5_free_cred(context, pcred);
