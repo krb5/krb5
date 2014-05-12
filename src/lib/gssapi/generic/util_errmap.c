@@ -78,6 +78,9 @@ print_OM_uint32 (OM_uint32 value, FILE *f)
 static inline int
 mecherror_copy(struct mecherror *dest, struct mecherror src)
 {
+    if (src.mech.length == 0 || src.mech.elements == NULL)
+        return 0;
+
     *dest = src;
     if (src.mech.length > 0) {
         dest->mech.elements = malloc(src.mech.length);
@@ -155,7 +158,8 @@ int gssint_mecherrmap_init(void)
    element storage when destroying the collection.  */
 static int free_one(OM_uint32 i, struct mecherror value, void *p)
 {
-    free(value.mech.elements);
+    if (value.mech.length && value.mech.elements)
+        free(value.mech.elements);
     return 0;
 }
 
@@ -169,7 +173,7 @@ void gssint_mecherrmap_destroy(void)
 OM_uint32 gssint_mecherrmap_map(OM_uint32 minor, const gss_OID_desc * oid)
 {
     const struct mecherror *mep;
-    struct mecherror me, me_copy;
+    struct mecherror me, me_copy = {0, NULL};
     const OM_uint32 *p;
     int err;
     OM_uint32 new_status;
@@ -182,7 +186,8 @@ OM_uint32 gssint_mecherrmap_map(OM_uint32 minor, const gss_OID_desc * oid)
 #endif
 
     me.code = minor;
-    me.mech = *oid;
+    me.mech.length = oid->length;
+    me.mech.elements = oid->elements;
     k5_mutex_lock(&mutex);
 
     /* Is this status+oid already mapped?  */
