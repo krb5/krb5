@@ -208,23 +208,21 @@ debug_print(char *fmt, ...)
 #define KRCC_USER_ANCHOR "user"
 #define KRCC_LEGACY_ANCHOR "legacy"
 
-#define KRB5_OK 0
-
 /* Hopefully big enough to hold a serialized credential */
 #define MAX_CRED_SIZE (1024*1024)
 
-#define CHECK_N_GO(ret, errdest) if (ret != KRB5_OK) goto errdest
-#define CHECK(ret) if (ret != KRB5_OK) goto errout
-#define CHECK_OUT(ret) if (ret != KRB5_OK) return ret
+#define CHECK_N_GO(ret, errdest) if (ret) goto errdest
+#define CHECK(ret) if (ret) goto errout
+#define CHECK_OUT(ret) if (ret) return ret
 
-typedef struct _krb5_krcc_cursor
+typedef struct _krcc_cursor
 {
-    int     numkeys;
-    int     currkey;
+    int numkeys;
+    int currkey;
     key_serial_t princ_id;
     key_serial_t offsets_id;
     key_serial_t *keys;
-} *krb5_krcc_cursor;
+} *krcc_cursor;
 
 /*
  * This represents a credentials cache "file"
@@ -232,202 +230,59 @@ typedef struct _krb5_krcc_cursor
  * this credentials cache "file".  Each key
  * in the keyring contains a separate key.
  */
-typedef struct _krb5_krcc_data
+typedef struct _krcc_data
 {
-    char   *name;               /* Name for this credentials cache */
+    char *name;                 /* Name for this credentials cache */
     k5_cc_mutex lock;           /* synchronization */
     key_serial_t collection_id; /* collection containing this cache keyring */
     key_serial_t cache_id;      /* keyring representing ccache */
     key_serial_t princ_id;      /* key holding principal info */
     krb5_timestamp changetime;
     krb5_boolean is_legacy_type;
-} krb5_krcc_data;
-
-/* Passed internally to assure we don't go past the bounds of our buffer */
-typedef struct _krb5_krcc_buffer_cursor
-{
-    char   *bpp;
-    char   *endp;
-    size_t  size;               /* For dry-run length calculation */
-} krb5_krcc_bc;
+} krcc_data;
 
 /* Global mutex */
 k5_cc_mutex krb5int_krcc_mutex = K5_CC_MUTEX_PARTIAL_INITIALIZER;
 
-/*
- * Internal functions (exported via the krb5_krcc_ops)
- */
-
 extern const krb5_cc_ops krb5_krcc_ops;
 
-static const char *KRB5_CALLCONV krb5_krcc_get_name
-(krb5_context, krb5_ccache id);
+static const char *KRB5_CALLCONV
+krcc_get_name(krb5_context context, krb5_ccache id);
 
-static krb5_error_code KRB5_CALLCONV krb5_krcc_resolve
-(krb5_context, krb5_ccache * id, const char *residual);
+static krb5_error_code KRB5_CALLCONV
+krcc_start_seq_get(krb5_context, krb5_ccache id, krb5_cc_cursor *cursor);
 
-static krb5_error_code KRB5_CALLCONV krb5_krcc_generate_new
-(krb5_context, krb5_ccache * id);
+static krb5_error_code KRB5_CALLCONV
+krcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
+               krb5_creds *creds);
 
-static krb5_error_code KRB5_CALLCONV krb5_krcc_initialize
-(krb5_context, krb5_ccache id, krb5_principal princ);
+static krb5_error_code KRB5_CALLCONV
+krcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor);
 
-static krb5_error_code KRB5_CALLCONV krb5_krcc_destroy
-(krb5_context, krb5_ccache id);
+static krb5_error_code KRB5_CALLCONV
+krcc_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor);
 
-static krb5_error_code KRB5_CALLCONV krb5_krcc_close
-(krb5_context, krb5_ccache id);
+static krb5_error_code clear_cache_keyring(krb5_context context,
+                                           krb5_ccache id);
 
-static krb5_error_code KRB5_CALLCONV krb5_krcc_store
-(krb5_context, krb5_ccache id, krb5_creds * creds);
+static krb5_error_code make_krcc_data(const char *anchor_name,
+                                      const char *collection_name,
+                                      const char *subsidiary_name,
+                                      key_serial_t cache_id, key_serial_t
+                                      collection_id, krcc_data **datapp);
 
-static krb5_error_code KRB5_CALLCONV krb5_krcc_retrieve
-(krb5_context, krb5_ccache id, krb5_flags whichfields,
- krb5_creds * mcreds, krb5_creds * creds);
+static krb5_error_code save_principal(krb5_context context, krb5_ccache id,
+                                      krb5_principal princ);
 
-static krb5_error_code KRB5_CALLCONV krb5_krcc_get_principal
-(krb5_context, krb5_ccache id, krb5_principal * princ);
+static krb5_error_code save_time_offsets(krb5_context context, krb5_ccache id,
+                                         int32_t time_offset,
+                                         int32_t usec_offset);
 
-static krb5_error_code KRB5_CALLCONV krb5_krcc_start_seq_get
-(krb5_context, krb5_ccache id, krb5_cc_cursor * cursor);
+static krb5_error_code get_time_offsets(krb5_context context, krb5_ccache id,
+                                        int32_t *time_offset,
+                                        int32_t *usec_offset);
 
-static krb5_error_code KRB5_CALLCONV krb5_krcc_next_cred
-(krb5_context, krb5_ccache id, krb5_cc_cursor * cursor,
- krb5_creds * creds);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_end_seq_get
-(krb5_context, krb5_ccache id, krb5_cc_cursor * cursor);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_remove_cred
-(krb5_context context, krb5_ccache cache, krb5_flags flags,
- krb5_creds * creds);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_set_flags
-(krb5_context, krb5_ccache id, krb5_flags flags);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_get_flags
-(krb5_context context, krb5_ccache id, krb5_flags * flags);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_last_change_time
-(krb5_context, krb5_ccache, krb5_timestamp *);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_lock
-(krb5_context context, krb5_ccache id);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_unlock
-(krb5_context context, krb5_ccache id);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_ptcursor_new
-(krb5_context context, krb5_cc_ptcursor *cursor_out);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_ptcursor_next
-(krb5_context context, krb5_cc_ptcursor cursor, krb5_ccache *cache_out);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_ptcursor_free
-(krb5_context context, krb5_cc_ptcursor *cursor);
-
-static krb5_error_code KRB5_CALLCONV krb5_krcc_switch_to
-(krb5_context context, krb5_ccache cache);
-
-/*
- * Internal utility functions
- */
-
-static krb5_error_code krb5_krcc_clearcache
-(krb5_context context, krb5_ccache id);
-
-static krb5_error_code krb5_krcc_new_data
-(const char *anchor_name, const char *collection_name,
- const char *subsidiary_name, key_serial_t cache_id,
- key_serial_t collection_id, krb5_krcc_data **datapp);
-
-static krb5_error_code krb5_krcc_save_principal
-(krb5_context context, krb5_ccache id, krb5_principal princ);
-
-static krb5_error_code krb5_krcc_retrieve_principal
-(krb5_context context, krb5_ccache id, krb5_principal * princ);
-static krb5_error_code krb5_krcc_save_time_offsets
-(krb5_context context, krb5_ccache id, krb5_int32 time_offset,
- krb5_int32 usec_offset);
-static krb5_error_code krb5_krcc_get_time_offsets
-(krb5_context context, krb5_ccache id, krb5_int32 *time_offset,
- krb5_int32 *usec_offset);
-
-/* Routines to parse a key from a keyring into a cred structure */
-static krb5_error_code krb5_krcc_parse
-(krb5_context, krb5_pointer buf, unsigned int len, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_cred
-(krb5_context context, krb5_creds * creds, char *payload, int psize);
-static krb5_error_code krb5_krcc_parse_principal
-(krb5_context context, krb5_principal * princ, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_keyblock
-(krb5_context context, krb5_keyblock * keyblock, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_times
-(krb5_context context, krb5_ticket_times * t, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_krb5data
-(krb5_context context, krb5_data * data, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_int32
-(krb5_context context, krb5_int32 * i, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_octet
-(krb5_context context, krb5_octet * octet, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_addrs
-(krb5_context context, krb5_address *** a, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_addr
-(krb5_context context, krb5_address * a, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_authdata
-(krb5_context context, krb5_authdata *** ad, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_authdatum
-(krb5_context context, krb5_authdata * ad, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_parse_ui_2
-(krb5_context, krb5_ui_2 * i, krb5_krcc_bc * bc);
-
-/* Routines to unparse a cred structure into keyring key */
-static krb5_error_code krb5_krcc_unparse
-(krb5_context, krb5_pointer buf, unsigned int len, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_cred_alloc
-(krb5_context context, krb5_creds * creds,
- char **datapp, unsigned int *lenptr);
-static krb5_error_code krb5_krcc_unparse_cred
-(krb5_context context, krb5_creds * creds, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_principal
-(krb5_context, krb5_principal princ, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_keyblock
-(krb5_context, krb5_keyblock * keyblock, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_times
-(krb5_context, krb5_ticket_times * t, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_krb5data
-(krb5_context, krb5_data * data, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_int32
-(krb5_context, krb5_int32 i, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_octet
-(krb5_context, krb5_int32 i, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_addrs
-(krb5_context, krb5_address ** a, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_addr
-(krb5_context, krb5_address * a, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_authdata
-(krb5_context, krb5_authdata ** ad, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_authdatum
-(krb5_context, krb5_authdata * ad, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_ui_4
-(krb5_context, krb5_ui_4 i, krb5_krcc_bc * bc);
-static krb5_error_code krb5_krcc_unparse_ui_2
-(krb5_context, krb5_int32 i, krb5_krcc_bc * bc);
-static void krb5_krcc_update_change_time
-(krb5_krcc_data *);
-
-static krb5_error_code
-krb5_krcc_parse_index(krb5_context context, krb5_int32 *version,
-                      char **primary, void *payload, int psize);
-static krb5_error_code
-krb5_krcc_unparse_index(krb5_context context, krb5_int32 version,
-                        const char *primary, void **datapp, int *lenptr);
-static krb5_error_code
-krb5_krcc_parse_offsets(krb5_context context, krb5_int32 *time_offset,
-                        krb5_int32 *usec_offset, void *payload, int psize);
-static krb5_error_code
-krb5_krcc_unparse_offsets(krb5_context context, krb5_int32 time_offset,
-                          krb5_int32 usec_offset, void **datapp, int *lenptr);
+static void krcc_update_change_time(krcc_data *d);
 
 /* Note the following is a stub function for Linux */
 extern krb5_error_code krb5_change_cache(void);
@@ -690,19 +545,38 @@ static krb5_error_code
 set_primary_name(krb5_context context, key_serial_t collection_id,
                  const char *subsidiary_name)
 {
-    krb5_error_code ret;
     key_serial_t key;
-    void *payload = NULL;
-    int payloadlen;
+    uint32_t len = strlen(subsidiary_name), plen = 8 + len;
+    unsigned char *payload;
 
-    ret = krb5_krcc_unparse_index(context, KRCC_COLLECTION_VERSION,
-                                  subsidiary_name, &payload, &payloadlen);
-    if (ret)
-        return ret;
+    payload = malloc(plen);
+    if (payload == NULL)
+        return ENOMEM;
+    store_32_be(KRCC_COLLECTION_VERSION, payload);
+    store_32_be(len, payload + 4);
+    memcpy(payload + 8, subsidiary_name, len);
     key = add_key(KRCC_KEY_TYPE_USER, KRCC_COLLECTION_PRIMARY,
-                  payload, payloadlen, collection_id);
+                  payload, plen, collection_id);
     free(payload);
     return (key == -1) ? errno : 0;
+}
+
+static krb5_error_code
+parse_index(krb5_context context, int32_t *version, char **primary,
+            const unsigned char *payload, size_t psize)
+{
+    krb5_error_code ret;
+    uint32_t len;
+
+    if (psize < 8)
+        return KRB5_CC_END;
+
+    *version = load_32_be(payload);
+    len = load_32_be(payload + 4);
+    if (len > psize - 8)
+        return KRB5_CC_END;
+    *primary = k5memdup0(payload + 8, len, &ret);
+    return (*primary == NULL) ? ret : 0;
 }
 
 /*
@@ -719,7 +593,7 @@ get_primary_name(krb5_context context, const char *anchor_name,
     key_serial_t primary_id, legacy;
     void *payload = NULL;
     int payloadlen;
-    krb5_int32 version;
+    int32_t version;
     char *subsidiary_name = NULL;
 
     *subsidiary_out = NULL;
@@ -756,8 +630,8 @@ get_primary_name(krb5_context context, const char *anchor_name,
             ret = errno;
             goto cleanup;
         }
-        ret = krb5_krcc_parse_index(context, &version, &subsidiary_name,
-                                    payload, payloadlen);
+        ret = parse_index(context, &version, &subsidiary_name, payload,
+                          payloadlen);
         if (ret)
             goto cleanup;
 
@@ -830,7 +704,7 @@ unique_keyring(krb5_context context, key_serial_t collection_id,
         goto cleanup;
     }
     *cache_id_out = key;
-    ret = KRB5_OK;
+    ret = 0;
 cleanup:
     k5_cc_mutex_unlock(context, &krb5int_krcc_mutex);
     return ret;
@@ -865,7 +739,7 @@ add_cred_key(const char *name, const void *payload, size_t plen,
 static void
 update_keyring_expiration(krb5_context context, krb5_ccache id)
 {
-    krb5_krcc_data *d = (krb5_krcc_data *)id->data;
+    krcc_data *data = id->data;
     krb5_cc_cursor cursor;
     krb5_creds creds;
     krb5_timestamp now, endtime = 0;
@@ -879,16 +753,16 @@ update_keyring_expiration(krb5_context context, krb5_ccache id)
      */
 
     /* Find the maximum endtime of all creds in the cache. */
-    if (krb5_krcc_start_seq_get(context, id, &cursor) != 0)
+    if (krcc_start_seq_get(context, id, &cursor) != 0)
         return;
     for (;;) {
-        if (krb5_krcc_next_cred(context, id, &cursor, &creds) != 0)
+        if (krcc_next_cred(context, id, &cursor, &creds) != 0)
             break;
         if (creds.times.endtime > endtime)
             endtime = creds.times.endtime;
         krb5_free_cred_contents(context, &creds);
     }
-    (void)krb5_krcc_end_seq_get(context, id, &cursor);
+    (void)krcc_end_seq_get(context, id, &cursor);
 
     if (endtime == 0)        /* No creds with end times */
         return;
@@ -899,37 +773,22 @@ update_keyring_expiration(krb5_context context, krb5_ccache id)
     /* Setting the timeout to zero would reset the timeout, so we set it to one
      * second instead if creds are already expired. */
     timeout = (endtime > now) ? endtime - now : 1;
-    (void)keyctl_set_timeout(d->cache_id, timeout);
+    (void)keyctl_set_timeout(data->cache_id, timeout);
 }
 
-/*
- * Modifies:
- * id
- *
- * Effects:
- * Creates/refreshes the cred cache id.  If the cache exists, its
- * contents are destroyed.
- *
- * Errors:
- * system errors
- * permission errors
- */
-
+/* Create or overwrite the cache keyring, and set the default principal. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_initialize(krb5_context context, krb5_ccache id,
-                     krb5_principal princ)
+krcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
-    krb5_krcc_data *data = (krb5_krcc_data *)id->data;
+    krcc_data *data = (krcc_data *)id->data;
     krb5_os_context os_ctx = &context->os_context;
-    krb5_error_code kret;
+    krb5_error_code ret;
     const char *cache_name, *p;
-
-    DEBUG_PRINT(("krb5_krcc_initialize: entered\n"));
 
     k5_cc_mutex_lock(context, &data->lock);
 
-    kret = krb5_krcc_clearcache(context, id);
-    if (kret != KRB5_OK)
+    ret = clear_cache_keyring(context, id);
+    if (ret)
         goto out;
 
     if (!data->cache_id) {
@@ -937,9 +796,9 @@ krb5_krcc_initialize(krb5_context context, krb5_ccache id,
          * key if it still isn't there. */
         p = strrchr(data->name, ':');
         cache_name = (p != NULL) ? p + 1 : data->name;
-        kret = find_or_create_keyring(data->collection_id, 0, cache_name,
-                                      &data->cache_id);
-        if (kret)
+        ret = find_or_create_keyring(data->collection_id, 0, cache_name,
+                                     &data->cache_id);
+        if (ret)
             goto out;
     }
 
@@ -948,131 +807,91 @@ krb5_krcc_initialize(krb5_context context, krb5_ccache id,
     if (is_legacy_cache_name(data->name))
         (void)keyctl_link(data->cache_id, session_write_anchor());
 
-    kret = krb5_krcc_save_principal(context, id, princ);
+    ret = save_principal(context, id, princ);
 
     /* Save time offset if it is valid and this is not a legacy cache.  Legacy
      * applications would fail to parse the new key in the cache keyring. */
     if (!is_legacy_cache_name(data->name) &&
         (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)) {
-        kret = krb5_krcc_save_time_offsets(context, id, os_ctx->time_offset,
-                                           os_ctx->usec_offset);
+        ret = save_time_offsets(context, id, os_ctx->time_offset,
+                                os_ctx->usec_offset);
     }
 
-    if (kret == KRB5_OK)
+    if (ret == 0)
         krb5_change_cache();
 
 out:
     k5_cc_mutex_unlock(context, &data->lock);
-    return kret;
+    return ret;
 }
 
-/*
- * Modifies:
- * id
- *
- * Effects:
- * Invalidates the id, and frees any resources associated with the cache.
- * (Does NOT destroy the underlying ccache in the keyring.)
- */
+/* Release the ccache handle. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_close(krb5_context context, krb5_ccache id)
+krcc_close(krb5_context context, krb5_ccache id)
 {
-    krb5_krcc_data *d;
+    krcc_data *data = id->data;
 
-    DEBUG_PRINT(("krb5_krcc_close: entered\n"));
-
-    d = (krb5_krcc_data *) id->data;
-
-    free(d->name);
-    k5_cc_mutex_destroy(&d->lock);
-    free(d);
-
+    k5_cc_mutex_destroy(&data->lock);
+    free(data->name);
+    free(data);
     free(id);
-
-    return KRB5_OK;
+    return 0;
 }
 
-/*
- * Modifies:
- * id
- *
- * Effects:
- * Clears out a ccache keyring, unlinking all keys within it
- * (Including the "hidden" key with the principal information)
- *
- * Requires:
- * Must be called with mutex locked.
- *
- * Errors:
- * system errors
- */
-
-static  krb5_error_code
-krb5_krcc_clearcache(krb5_context context, krb5_ccache id)
+/* Clear out a ccache keyring, unlinking all keys within it.  Call with the
+ * mutex locked. */
+static krb5_error_code
+clear_cache_keyring(krb5_context context, krb5_ccache id)
 {
-    krb5_krcc_data *d;
-    int     res;
+    krcc_data *data = id->data;
+    int res;
 
-    k5_cc_mutex_assert_locked(context, &((krb5_krcc_data *) id->data)->lock);
+    k5_cc_mutex_assert_locked(context, &data->lock);
 
-    d = (krb5_krcc_data *) id->data;
+    DEBUG_PRINT(("clear_cache_keyring: cache_id %d, princ_id %d\n",
+                 data->cache_id, data->princ_id));
 
-    DEBUG_PRINT(("krb5_krcc_clearcache: cache_id %d, princ_id %d\n",
-                 d->cache_id, d->princ_id));
-
-    if (d->cache_id) {
-        res = keyctl_clear(d->cache_id);
+    if (data->cache_id) {
+        res = keyctl_clear(data->cache_id);
         if (res != 0)
             return errno;
     }
-    d->princ_id = 0;
-    krb5_krcc_update_change_time(d);
+    data->princ_id = 0;
+    krcc_update_change_time(data);
 
-    return KRB5_OK;
+    return 0;
 }
 
-/*
- * Effects:
- * Destroys the contents of id.
- *
- * Errors:
- * system errors
- */
+/* Destroy the cache keyring and release the handle. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_destroy(krb5_context context, krb5_ccache id)
+krcc_destroy(krb5_context context, krb5_ccache id)
 {
-    krb5_error_code kret = 0;
-    krb5_krcc_data *d;
-    int     res;
+    krb5_error_code ret = 0;
+    krcc_data *data = id->data;
+    int res;
 
-    DEBUG_PRINT(("krb5_krcc_destroy: entered\n"));
+    k5_cc_mutex_lock(context, &data->lock);
 
-    d = (krb5_krcc_data *) id->data;
-
-    k5_cc_mutex_lock(context, &d->lock);
-
-    krb5_krcc_clearcache(context, id);
-    if (d->cache_id) {
-        res = keyctl_unlink(d->cache_id, d->collection_id);
+    clear_cache_keyring(context, id);
+    if (data->cache_id) {
+        res = keyctl_unlink(data->cache_id, data->collection_id);
         if (res < 0) {
-            kret = errno;
-            DEBUG_PRINT(("unlinking key %d from ring %d: %s",
-                         d->cache_id, d->collection_id, error_message(errno)));
+            ret = errno;
+            DEBUG_PRINT(("unlinking key %d from ring %d: %s", data->cache_id,
+                         data->collection_id, error_message(errno)));
         }
         /* If this is a legacy cache, unlink it from the session anchor. */
-        if (is_legacy_cache_name(d->name))
-            (void)keyctl_unlink(d->cache_id, session_write_anchor());
+        if (is_legacy_cache_name(data->name))
+            (void)keyctl_unlink(data->cache_id, session_write_anchor());
     }
 
-    k5_cc_mutex_unlock(context, &d->lock);
-    k5_cc_mutex_destroy(&d->lock);
-    free(d->name);
-    free(d);
+    k5_cc_mutex_unlock(context, &data->lock);
+    k5_cc_mutex_destroy(&data->lock);
+    free(data->name);
+    free(data);
     free(id);
-
     krb5_change_cache();
-
-    return kret;
+    return ret;
 }
 
 /* Create a cache handle for a cache ID. */
@@ -1085,7 +904,7 @@ make_cache(krb5_context context, key_serial_t collection_id,
     krb5_error_code ret;
     krb5_os_context os_ctx = &context->os_context;
     krb5_ccache ccache = NULL;
-    krb5_krcc_data *d;
+    krcc_data *data;
     key_serial_t pkey = 0;
 
     /* Determine the key containing principal information, if present. */
@@ -1098,25 +917,24 @@ make_cache(krb5_context context, key_serial_t collection_id,
     if (!ccache)
         return ENOMEM;
 
-    ret = krb5_krcc_new_data(anchor_name, collection_name, subsidiary_name,
-                             cache_id, collection_id, &d);
+    ret = make_krcc_data(anchor_name, collection_name, subsidiary_name,
+                         cache_id, collection_id, &data);
     if (ret) {
         free(ccache);
         return ret;
     }
 
-    d->princ_id = pkey;
+    data->princ_id = pkey;
     ccache->ops = &krb5_krcc_ops;
-    ccache->data = d;
+    ccache->data = data;
     ccache->magic = KV5M_CCACHE;
     *cache_out = ccache;
 
-    /* Lookup time offsets if necessary. */
+    /* Look up time offsets if necessary. */
     if ((context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) &&
         !(os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)) {
-        if (krb5_krcc_get_time_offsets(context, ccache,
-                                       &os_ctx->time_offset,
-                                       &os_ctx->usec_offset) == 0) {
+        if (get_time_offsets(context, ccache, &os_ctx->time_offset,
+                             &os_ctx->usec_offset) == 0) {
             os_ctx->os_flags &= ~KRB5_OS_TOFFSET_TIME;
             os_ctx->os_flags |= KRB5_OS_TOFFSET_VALID;
         }
@@ -1125,28 +943,9 @@ make_cache(krb5_context context, key_serial_t collection_id,
     return 0;
 }
 
-/*
- * Requires:
- * residual is a legal path name, and a null-terminated string
- *
- * Modifies:
- * id
- *
- * Effects:
- * creates a cred cache that will reside in the keyring with
- * a name of <residual>.
- *
- * Returns:
- * A filled in krb5_ccache structure "id".
- *
- * Errors:
- * KRB5_CC_NOMEM - there was insufficient memory to allocate the
- *              krb5_ccache.  id is undefined.
- * permission errors
- */
-
+/* Create a keyring ccache handle for the given residual string. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_resolve(krb5_context context, krb5_ccache *id, const char *residual)
+krcc_resolve(krb5_context context, krb5_ccache *id, const char *residual)
 {
     krb5_error_code ret;
     key_serial_t collection_id, cache_id;
@@ -1186,104 +985,67 @@ cleanup:
     return ret;
 }
 
-/*
- * Effects:
- * Prepares for a sequential search of the credentials cache.
- * Returns a krb5_cc_cursor to be used with krb5_krcc_next_cred and
- * krb5_krcc_end_seq_get.
- *
- * If the cache is modified between the time of this call and the time
- * of the final krb5_krcc_end_seq_get, the results are undefined.
- *
- * Errors:
- * KRB5_CC_NOMEM
- * system errors
- */
+/* Prepare for a sequential iteration over the cache keyring. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
-                        krb5_cc_cursor * cursor)
+krcc_start_seq_get(krb5_context context, krb5_ccache id,
+                   krb5_cc_cursor *cursor)
 {
-    krb5_krcc_cursor krcursor;
-    krb5_krcc_data *d;
+    krcc_cursor krcursor;
+    krcc_data *data = id->data;
     void *keys;
     long size;
 
-    DEBUG_PRINT(("krb5_krcc_start_seq_get: entered\n"));
+    k5_cc_mutex_lock(context, &data->lock);
 
-    d = id->data;
-    k5_cc_mutex_lock(context, &d->lock);
-
-    if (!d->cache_id) {
-        k5_cc_mutex_unlock(context, &d->lock);
+    if (!data->cache_id) {
+        k5_cc_mutex_unlock(context, &data->lock);
         return KRB5_FCC_NOFILE;
     }
 
-    size = keyctl_read_alloc(d->cache_id, &keys);
+    size = keyctl_read_alloc(data->cache_id, &keys);
     if (size == -1) {
         DEBUG_PRINT(("Error getting from keyring: %s\n", strerror(errno)));
-        k5_cc_mutex_unlock(context, &d->lock);
+        k5_cc_mutex_unlock(context, &data->lock);
         return KRB5_CC_IO;
     }
 
     krcursor = calloc(1, sizeof(*krcursor));
     if (krcursor == NULL) {
         free(keys);
-        k5_cc_mutex_unlock(context, &d->lock);
+        k5_cc_mutex_unlock(context, &data->lock);
         return KRB5_CC_NOMEM;
     }
 
-    krcursor->princ_id = d->princ_id;
-    krcursor->offsets_id = keyctl_search(d->cache_id, KRCC_KEY_TYPE_USER,
+    krcursor->princ_id = data->princ_id;
+    krcursor->offsets_id = keyctl_search(data->cache_id, KRCC_KEY_TYPE_USER,
                                          KRCC_TIME_OFFSETS, 0);
     krcursor->numkeys = size / sizeof(key_serial_t);
     krcursor->keys = keys;
 
-    k5_cc_mutex_unlock(context, &d->lock);
-    *cursor = (krb5_cc_cursor) krcursor;
-    return KRB5_OK;
+    k5_cc_mutex_unlock(context, &data->lock);
+    *cursor = krcursor;
+    return 0;
 }
 
-/*
- * Requires:
- * cursor is a krb5_cc_cursor originally obtained from
- * krb5_krcc_start_seq_get.
- *
- * Modifes:
- * cursor, creds
- *
- * Effects:
- * Fills in creds with the "next" credentals structure from the cache
- * id.  The actual order the creds are returned in is arbitrary.
- * Space is allocated for the variable length fields in the
- * credentials structure, so the object returned must be passed to
- * krb5_destroy_credential.
- *
- * The cursor is updated for the next call to krb5_krcc_next_cred.
- *
- * Errors:
- * system errors
- */
+/* Get the next credential from the cache keyring. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_next_cred(krb5_context context, krb5_ccache id,
-                    krb5_cc_cursor * cursor, krb5_creds * creds)
+krcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
+               krb5_creds *creds)
 {
-    krb5_krcc_cursor krcursor;
-    krb5_error_code kret;
-    int     psize;
-    void   *payload = NULL;
+    krcc_cursor krcursor;
+    krb5_error_code ret;
+    int psize;
+    void *payload = NULL;
 
-    DEBUG_PRINT(("krb5_krcc_next_cred: entered\n"));
-
-    /*
-     * The cursor has the entire list of keys.
-     * (Note that we don't support _remove_cred.)
-     */
-    krcursor = (krb5_krcc_cursor) * cursor;
-    if (krcursor == NULL)
-        return KRB5_CC_END;
     memset(creds, 0, sizeof(krb5_creds));
 
-    /* If we're pointing past the end of the keys array, there are no more */
+    /* The cursor has the entire list of keys.  (Note that we don't support
+     * remove_cred.) */
+    krcursor = *cursor;
+    if (krcursor == NULL)
+        return KRB5_CC_END;
+
+    /* If we're pointing past the end of the keys array, there are no more. */
     if (krcursor->currkey >= krcursor->numkeys)
         return KRB5_CC_END;
 
@@ -1297,160 +1059,132 @@ krb5_krcc_next_cred(krb5_context context, krb5_ccache id,
             return KRB5_CC_END;
     }
 
-    /* Read the key, the right size buffer will ba allocated and returned */
+    /* Read the key; the right size buffer will be allocated and returned. */
     psize = keyctl_read_alloc(krcursor->keys[krcursor->currkey], &payload);
     if (psize == -1) {
         DEBUG_PRINT(("Error reading key %d: %s\n",
                      krcursor->keys[krcursor->currkey],
                      strerror(errno)));
-        kret = KRB5_FCC_NOFILE;
-        goto freepayload;
+        return KRB5_FCC_NOFILE;
     }
     krcursor->currkey++;
 
-    kret = krb5_krcc_parse_cred(context, creds, payload, psize);
-
-freepayload:
-    if (payload) free(payload);
-    return kret;
+    /* Unmarshal the credential using the file ccache version 4 format. */
+    ret = k5_unmarshal_cred(payload, psize, 4, creds);
+    free(payload);
+    return ret;
 }
 
-/*
- * Requires:
- * cursor is a krb5_cc_cursor originally obtained from
- * krb5_krcc_start_seq_get.
- *
- * Modifies:
- * id, cursor
- *
- * Effects:
- * Finishes sequential processing of the keyring credentials ccache id,
- * and invalidates the cursor (it must never be used after this call).
- */
-/* ARGSUSED */
+/* Release an iteration cursor. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_end_seq_get(krb5_context context, krb5_ccache id,
-                      krb5_cc_cursor * cursor)
+krcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor)
 {
-    krb5_krcc_cursor krcursor = (krb5_krcc_cursor)*cursor;
-    DEBUG_PRINT(("krb5_krcc_end_seq_get: entered\n"));
+    krcc_cursor krcursor = *cursor;
 
     if (krcursor != NULL) {
         free(krcursor->keys);
         free(krcursor);
     }
     *cursor = NULL;
-    return KRB5_OK;
-}
-
-/* Utility routine: Creates the back-end data for a keyring cache.
-
-   Call with the global list lock held.  */
-static krb5_error_code
-krb5_krcc_new_data(const char *anchor_name, const char *collection_name,
-                   const char *subsidiary_name, key_serial_t cache_id,
-                   key_serial_t collection_id, krb5_krcc_data **datapp)
-{
-    krb5_error_code kret;
-    krb5_krcc_data *d;
-
-    d = malloc(sizeof(krb5_krcc_data));
-    if (d == NULL)
-        return KRB5_CC_NOMEM;
-
-    kret = k5_cc_mutex_init(&d->lock);
-    if (kret) {
-        free(d);
-        return kret;
-    }
-
-    kret = make_subsidiary_residual(anchor_name, collection_name,
-                                    subsidiary_name, &d->name);
-    if (kret) {
-        k5_cc_mutex_destroy(&d->lock);
-        free(d);
-        return kret;
-    }
-    d->princ_id = 0;
-    d->cache_id = cache_id;
-    d->collection_id = collection_id;
-    d->changetime = 0;
-    d->is_legacy_type = (strcmp(anchor_name, KRCC_LEGACY_ANCHOR) == 0);
-    krb5_krcc_update_change_time(d);
-
-    *datapp = d;
     return 0;
 }
 
-/*
- * Effects:
- * Creates a new keyring cred cache whose name is guaranteed to be
- * unique.
- *
- * Returns:
- * The filled in krb5_ccache id.
- *
- * Errors:
- * KRB5_CC_NOMEM - there was insufficient memory to allocate the
- *              krb5_ccache.  id is undefined.
- */
-static krb5_error_code KRB5_CALLCONV
-krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
+/* Create keyring data for a credential cache. */
+static krb5_error_code
+make_krcc_data(const char *anchor_name, const char *collection_name,
+               const char *subsidiary_name, key_serial_t cache_id,
+               key_serial_t collection_id, krcc_data **data_out)
 {
-    krb5_ccache lid = NULL;
-    krb5_error_code kret;
+    krb5_error_code ret;
+    krcc_data *data;
+
+    *data_out = NULL;
+
+    data = malloc(sizeof(krcc_data));
+    if (data == NULL)
+        return KRB5_CC_NOMEM;
+
+    ret = k5_cc_mutex_init(&data->lock);
+    if (ret) {
+        free(data);
+        return ret;
+    }
+
+    ret = make_subsidiary_residual(anchor_name, collection_name,
+                                   subsidiary_name, &data->name);
+    if (ret) {
+        k5_cc_mutex_destroy(&data->lock);
+        free(data);
+        return ret;
+    }
+    data->princ_id = 0;
+    data->cache_id = cache_id;
+    data->collection_id = collection_id;
+    data->changetime = 0;
+    data->is_legacy_type = (strcmp(anchor_name, KRCC_LEGACY_ANCHOR) == 0);
+    krcc_update_change_time(data);
+
+    *data_out = data;
+    return 0;
+}
+
+/* Create a new keyring cache with a unique name. */
+static krb5_error_code KRB5_CALLCONV
+krcc_generate_new(krb5_context context, krb5_ccache *id_out)
+{
+    krb5_ccache id = NULL;
+    krb5_error_code ret;
     char *anchor_name = NULL, *collection_name = NULL, *subsidiary_name = NULL;
     char *new_subsidiary_name = NULL, *new_residual = NULL;
-    krb5_krcc_data *d;
+    krcc_data *data;
     key_serial_t collection_id;
     key_serial_t cache_id = 0;
 
-    DEBUG_PRINT(("krb5_krcc_generate_new: entered\n"));
+    *id_out = NULL;
 
     /* Determine the collection in which we will create the cache.*/
-    kret = get_default(context, &anchor_name, &collection_name,
-                       &subsidiary_name);
-    if (kret)
-        return kret;
+    ret = get_default(context, &anchor_name, &collection_name,
+                      &subsidiary_name);
+    if (ret)
+        return ret;
     if (anchor_name == NULL) {
-        kret = parse_residual(KRCC_DEFAULT_UNIQUE_COLLECTION, &anchor_name,
-                              &collection_name, &subsidiary_name);
-        if (kret)
-            return kret;
+        ret = parse_residual(KRCC_DEFAULT_UNIQUE_COLLECTION, &anchor_name,
+                             &collection_name, &subsidiary_name);
+        if (ret)
+            return ret;
     }
     if (subsidiary_name != NULL) {
         krb5_set_error_message(context, KRB5_DCC_CANNOT_CREATE,
                                _("Can't create new subsidiary cache because "
                                  "default cache is already a subsdiary"));
-        kret = KRB5_DCC_CANNOT_CREATE;
+        ret = KRB5_DCC_CANNOT_CREATE;
         goto cleanup;
     }
 
     /* Allocate memory */
-    lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
-    if (lid == NULL) {
-        kret = ENOMEM;
+    id = malloc(sizeof(struct _krb5_ccache));
+    if (id == NULL) {
+        ret = ENOMEM;
         goto cleanup;
     }
 
-    lid->ops = &krb5_krcc_ops;
+    id->ops = &krb5_krcc_ops;
 
     /* Make a unique keyring within the chosen collection. */
-    kret = get_collection(anchor_name, collection_name, &collection_id);
-    if (kret)
+    ret = get_collection(anchor_name, collection_name, &collection_id);
+    if (ret)
         goto cleanup;
-    kret = unique_keyring(context, collection_id, &new_subsidiary_name,
-                          &cache_id);
-    if (kret)
-        goto cleanup;
-
-    kret = krb5_krcc_new_data(anchor_name, collection_name,
-                              new_subsidiary_name, cache_id, collection_id,
-                              &d);
-    if (kret)
+    ret = unique_keyring(context, collection_id, &new_subsidiary_name,
+                         &cache_id);
+    if (ret)
         goto cleanup;
 
-    lid->data = d;
+    ret = make_krcc_data(anchor_name, collection_name, new_subsidiary_name,
+                         cache_id, collection_id, &data);
+    if (ret)
+        goto cleanup;
+
+    id->data = data;
     krb5_change_cache();
 
 cleanup:
@@ -1459,150 +1193,134 @@ cleanup:
     free(subsidiary_name);
     free(new_subsidiary_name);
     free(new_residual);
-    if (kret) {
-        free(lid);
-        return kret;
+    if (ret) {
+        free(id);
+        return ret;
     }
-    *id = lid;
-    return KRB5_OK;
+    *id_out = id;
+    return 0;
 }
 
-/*
- * Requires:
- * id is a keyring credential cache
- *
- * Returns:
- * The name of the keyring cred cache id.
- */
+/* Return an alias to the residual string of the cache. */
 static const char *KRB5_CALLCONV
-krb5_krcc_get_name(krb5_context context, krb5_ccache id)
+krcc_get_name(krb5_context context, krb5_ccache id)
 {
-    DEBUG_PRINT(("krb5_krcc_get_name: entered\n"));
-    return (char *) ((krb5_krcc_data *) id->data)->name;
+    return ((krcc_data *)id->data)->name;
 }
 
-/*
- * Modifies:
- * id, princ
- *
- * Effects:
- * Retrieves the primary principal from id, as set with
- * krb5_krcc_initialize.  The principal is returned is allocated
- * storage that must be freed by the caller via krb5_free_principal.
- *
- * Errors:
- * system errors
- * KRB5_CC_NOMEM
- */
+/* Retrieve a copy of the default principal, if the cache is initialized. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_get_principal(krb5_context context, krb5_ccache id,
-                        krb5_principal * princ)
+krcc_get_principal(krb5_context context, krb5_ccache id,
+                   krb5_principal *princ_out)
 {
-    DEBUG_PRINT(("krb5_krcc_get_principal: entered\n"));
+    krcc_data *data = id->data;
+    krb5_error_code ret;
+    void *payload = NULL;
+    int psize;
 
-    return krb5_krcc_retrieve_principal(context, id, princ);
+    *princ_out = NULL;
+    k5_cc_mutex_lock(context, &data->lock);
+
+    if (!data->cache_id || !data->princ_id) {
+        ret = KRB5_FCC_NOFILE;
+        krb5_set_error_message(context, ret,
+                               _("Credentials cache keyring '%s' not found"),
+                               data->name);
+        goto errout;
+    }
+
+    psize = keyctl_read_alloc(data->princ_id, &payload);
+    if (psize == -1) {
+        DEBUG_PRINT(("Reading principal key %d: %s\n",
+                     data->princ_id, strerror(errno)));
+        ret = KRB5_CC_IO;
+        goto errout;
+    }
+
+    /* Unmarshal the principal using the file ccache version 4 format. */
+    ret = k5_unmarshal_princ(payload, psize, 4, princ_out);
+
+errout:
+    free(payload);
+    k5_cc_mutex_unlock(context, &data->lock);
+    return ret;
 }
 
+/* Search for a credential within the cache keyring. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_retrieve(krb5_context context, krb5_ccache id,
-                   krb5_flags whichfields, krb5_creds * mcreds,
-                   krb5_creds * creds)
+krcc_retrieve(krb5_context context, krb5_ccache id,
+              krb5_flags whichfields, krb5_creds *mcreds,
+              krb5_creds *creds)
 {
-    DEBUG_PRINT(("krb5_krcc_retrieve: entered\n"));
-
     return k5_cc_retrieve_cred_default(context, id, whichfields, mcreds,
                                        creds);
 }
 
-/*
- * Non-functional stub implementation for krb5_krcc_remove
- *
- * Errors:
- *    KRB5_CC_NOSUPP - not implemented
- */
+/* Non-functional stub for removing a cred from the cache keyring. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_remove_cred(krb5_context context, krb5_ccache cache,
-                      krb5_flags flags, krb5_creds * creds)
+krcc_remove_cred(krb5_context context, krb5_ccache cache,
+                 krb5_flags flags, krb5_creds *creds)
 {
-    DEBUG_PRINT(("krb5_krcc_remove_cred: entered (returning KRB5_CC_NOSUPP)\n"));
-
     return KRB5_CC_NOSUPP;
 }
 
-/*
- * Requires:
- * id is a cred cache returned by krb5_krcc_resolve or
- * krb5_krcc_generate_new, but has not been opened by krb5_krcc_initialize.
- *
- * Modifies:
- * id
- *
- * Effects:
- * Sets the operational flags of id to flags.
- */
+/* Set flags on the cache.  (We don't care about any flags.) */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
+krcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
 {
-    DEBUG_PRINT(("krb5_krcc_set_flags: entered\n"));
-
-    return KRB5_OK;
+    return 0;
 }
 
+/* Get the current operational flags (of which we have none) for the cache. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_get_flags(krb5_context context, krb5_ccache id, krb5_flags * flags)
+krcc_get_flags(krb5_context context, krb5_ccache id, krb5_flags *flags_out)
 {
-    DEBUG_PRINT(("krb5_krcc_get_flags: entered\n"));
-
-    *flags = 0;
-    return KRB5_OK;
+    *flags_out = 0;
+    return 0;
 }
 
-/* store: Save away creds in the ccache keyring.  */
+/* Store a credential in the cache keyring. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
+krcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
 {
-    krb5_error_code kret;
-    krb5_krcc_data *d = (krb5_krcc_data *) id->data;
-    char   *payload = NULL;
-    unsigned int payloadlen;
-    char   *keyname = NULL;
+    krb5_error_code ret;
+    krcc_data *data = id->data;
+    unsigned char *payload = NULL;
+    char *keyname = NULL;
+    size_t payloadlen;
     key_serial_t cred_key;
     krb5_timestamp now;
 
-    DEBUG_PRINT(("krb5_krcc_store: entered\n"));
+    k5_cc_mutex_lock(context, &data->lock);
 
-    k5_cc_mutex_lock(context, &d->lock);
-
-    if (!d->cache_id) {
-        k5_cc_mutex_unlock(context, &d->lock);
+    if (!data->cache_id) {
+        k5_cc_mutex_unlock(context, &data->lock);
         return KRB5_FCC_NOFILE;
     }
 
     /* Get the service principal name and use it as the key name */
-    kret = krb5_unparse_name(context, creds->server, &keyname);
-    if (kret) {
-        DEBUG_PRINT(("Error unparsing service principal name!\n"));
+    ret = krb5_unparse_name(context, creds->server, &keyname);
+    if (ret)
         goto errout;
-    }
 
-    /* Serialize credential into memory */
-    kret = krb5_krcc_unparse_cred_alloc(context, creds, &payload, &payloadlen);
-    if (kret != KRB5_OK)
+    /* Serialize credential using the file ccache version 4 format. */
+    ret = k5_marshal_cred(creds, 4, &payload, &payloadlen);
+    if (ret)
         goto errout;
 
     /* Add new key (credentials) into keyring */
-    DEBUG_PRINT(("krb5_krcc_store: adding new key '%s' to keyring %d\n",
-                 keyname, d->cache_id));
-    kret = add_cred_key(keyname, payload, payloadlen, d->cache_id,
-                        d->is_legacy_type, &cred_key);
-    if (kret)
+    DEBUG_PRINT(("krcc_store: adding new key '%s' to keyring %d\n",
+                 keyname, data->cache_id));
+    ret = add_cred_key(keyname, payload, payloadlen, data->cache_id,
+                       data->is_legacy_type, &cred_key);
+    if (ret)
         goto errout;
 
-    krb5_krcc_update_change_time(d);
+    krcc_update_change_time(data);
 
     /* Set appropriate timeouts on cache keys. */
-    kret = krb5_timeofday(context, &now);
-    if (kret)
+    ret = krb5_timeofday(context, &now);
+    if (ret)
         goto errout;
 
     if (creds->times.endtime > now)
@@ -1610,23 +1328,20 @@ krb5_krcc_store(krb5_context context, krb5_ccache id, krb5_creds * creds)
 
     update_keyring_expiration(context, id);
 
-    kret = KRB5_OK;
-
 errout:
-    if (keyname)
-        krb5_free_unparsed_name(context, keyname);
-    if (payload)
-        free(payload);
-
-    k5_cc_mutex_unlock(context, &d->lock);
-    return kret;
+    krb5_free_unparsed_name(context, keyname);
+    free(payload);
+    k5_cc_mutex_unlock(context, &data->lock);
+    return ret;
 }
 
+/* Get the cache's last modification time.  (This is currently broken; it
+ * returns only the last change made using this handle.) */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_last_change_time(krb5_context context, krb5_ccache id,
-                           krb5_timestamp *change_time)
+krcc_last_change_time(krb5_context context, krb5_ccache id,
+                      krb5_timestamp *change_time)
 {
-    krb5_krcc_data *data = (krb5_krcc_data *) id->data;
+    krcc_data *data = id->data;
 
     k5_cc_mutex_lock(context, &data->lock);
     *change_time = data->changetime;
@@ -1634,179 +1349,119 @@ krb5_krcc_last_change_time(krb5_context context, krb5_ccache id,
     return 0;
 }
 
+/* Lock the cache handle against other threads.  (This does not lock the cache
+ * keyring against other processes.) */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_lock(krb5_context context, krb5_ccache id)
+krcc_lock(krb5_context context, krb5_ccache id)
 {
-    krb5_krcc_data *data = (krb5_krcc_data *) id->data;
+    krcc_data *data = id->data;
 
     k5_cc_mutex_lock(context, &data->lock);
     return 0;
 }
 
+/* Unlock the cache handle. */
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_unlock(krb5_context context, krb5_ccache id)
+krcc_unlock(krb5_context context, krb5_ccache id)
 {
-    krb5_krcc_data *data = (krb5_krcc_data *) id->data;
+    krcc_data *data = id->data;
 
     k5_cc_mutex_unlock(context, &data->lock);
     return 0;
 }
 
-
-static  krb5_error_code
-krb5_krcc_save_principal(krb5_context context, krb5_ccache id,
-                         krb5_principal princ)
+static krb5_error_code
+save_principal(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
-    krb5_krcc_data *d;
-    krb5_error_code kret;
-    char *payload = NULL;
+    krcc_data *data = id->data;
+    krb5_error_code ret;
+    unsigned char *payload = NULL;
     key_serial_t newkey;
-    unsigned int payloadsize;
-    krb5_krcc_bc bc;
+    size_t payloadsize;
 
-    k5_cc_mutex_assert_locked(context, &((krb5_krcc_data *) id->data)->lock);
+    k5_cc_mutex_assert_locked(context, &data->lock);
 
-    d = (krb5_krcc_data *) id->data;
-
-    /* Do a dry run first to calculate the size. */
-    bc.bpp = bc.endp = NULL;
-    bc.size = 0;
-    kret = krb5_krcc_unparse_principal(context, princ, &bc);
-    CHECK_N_GO(kret, errout);
-
-    /* Allocate a buffer and serialize for real. */
-    payload = malloc(bc.size);
-    if (payload == NULL)
-        return KRB5_CC_NOMEM;
-    bc.bpp = payload;
-    bc.endp = payload + bc.size;
-    kret = krb5_krcc_unparse_principal(context, princ, &bc);
-    CHECK_N_GO(kret, errout);
+    /* Serialize princ using the file ccache version 4 format. */
+    ret = k5_marshal_princ(princ, 4, &payload, &payloadsize);
+    if (ret)
+        goto errout;
 
     /* Add new key into keyring */
-    payloadsize = bc.bpp - payload;
 #ifdef KRCC_DEBUG
     {
         krb5_error_code rc;
         char *princname = NULL;
         rc = krb5_unparse_name(context, princ, &princname);
-        DEBUG_PRINT(("krb5_krcc_save_principal: adding new key '%s' "
+        DEBUG_PRINT(("save_principal: adding new key '%s' "
                      "to keyring %d for principal '%s'\n",
-                     KRCC_SPEC_PRINC_KEYNAME, d->cache_id,
+                     KRCC_SPEC_PRINC_KEYNAME, data->cache_id,
                      rc ? "<unknown>" : princname));
         if (rc == 0)
             krb5_free_unparsed_name(context, princname);
     }
 #endif
     newkey = add_key(KRCC_KEY_TYPE_USER, KRCC_SPEC_PRINC_KEYNAME, payload,
-                     payloadsize, d->cache_id);
+                     payloadsize, data->cache_id);
     if (newkey < 0) {
-        kret = errno;
-        DEBUG_PRINT(("Error adding principal key: %s\n", strerror(kret)));
+        ret = errno;
+        DEBUG_PRINT(("Error adding principal key: %s\n", strerror(ret)));
     } else {
-        d->princ_id = newkey;
-        kret = KRB5_OK;
-        krb5_krcc_update_change_time(d);
+        data->princ_id = newkey;
+        ret = 0;
+        krcc_update_change_time(data);
     }
 
 errout:
     free(payload);
-    return kret;
+    return ret;
 }
 
-static  krb5_error_code
-krb5_krcc_retrieve_principal(krb5_context context, krb5_ccache id,
-                             krb5_principal * princ)
+/* Add a key to the cache keyring containing the given time offsets. */
+static krb5_error_code
+save_time_offsets(krb5_context context, krb5_ccache id, int32_t time_offset,
+                  int32_t usec_offset)
 {
-    krb5_krcc_data *d = (krb5_krcc_data *) id->data;
-    krb5_error_code kret;
-    void   *payload = NULL;
-    int     psize;
-    krb5_krcc_bc bc;
-
-    k5_cc_mutex_lock(context, &d->lock);
-
-    if (!d->cache_id || !d->princ_id) {
-        princ = 0L;
-        kret = KRB5_FCC_NOFILE;
-        krb5_set_error_message(context, kret,
-                               _("Credentials cache keyring '%s' not found"),
-                               d->name);
-        goto errout;
-    }
-
-    psize = keyctl_read_alloc(d->princ_id, &payload);
-    if (psize == -1) {
-        DEBUG_PRINT(("Reading principal key %d: %s\n",
-                     d->princ_id, strerror(errno)));
-        kret = KRB5_CC_IO;
-        goto errout;
-    }
-    bc.bpp = payload;
-    bc.endp = (char *)payload + psize;
-    kret = krb5_krcc_parse_principal(context, princ, &bc);
-
-errout:
-    if (payload)
-        free(payload);
-    k5_cc_mutex_unlock(context, &d->lock);
-    return kret;
-}
-
-static  krb5_error_code
-krb5_krcc_save_time_offsets(krb5_context context, krb5_ccache id,
-                            krb5_int32 time_offset, krb5_int32 usec_offset)
-{
-    krb5_krcc_data *d = (krb5_krcc_data *)id->data;
-    krb5_error_code kret;
+    krcc_data *data = id->data;
     key_serial_t newkey;
-    void *payload = NULL;
-    int psize;
+    unsigned char payload[8];
 
-    k5_cc_mutex_assert_locked(context, &d->lock);
+    k5_cc_mutex_assert_locked(context, &data->lock);
 
     /* Prepare the payload. */
-    kret = krb5_krcc_unparse_offsets(context, time_offset, usec_offset,
-                                     &payload, &psize);
-    CHECK_N_GO(kret, errout);
+    store_32_be(time_offset, payload);
+    store_32_be(usec_offset, payload + 4);
 
     /* Add new key into keyring. */
-    newkey = add_key(KRCC_KEY_TYPE_USER, KRCC_TIME_OFFSETS, payload, psize,
-                     d->cache_id);
-    if (newkey == -1) {
-        kret = errno;
-        DEBUG_PRINT(("Error adding time offsets key: %s\n", strerror(kret)));
-    } else {
-        kret = KRB5_OK;
-        krb5_krcc_update_change_time(d);
-    }
-
-errout:
-    free(payload);
-    return kret;
+    newkey = add_key(KRCC_KEY_TYPE_USER, KRCC_TIME_OFFSETS, payload, 8,
+                     data->cache_id);
+    if (newkey == -1)
+        return errno;
+    krcc_update_change_time(data);
+    return 0;
 }
 
+/* Retrieve and parse the key in the cache keyring containing time offsets. */
 static krb5_error_code
-krb5_krcc_get_time_offsets(krb5_context context, krb5_ccache id,
-                           krb5_int32 *time_offset, krb5_int32 *usec_offset)
+get_time_offsets(krb5_context context, krb5_ccache id, int32_t *time_offset,
+                 int32_t *usec_offset)
 {
-    krb5_krcc_data *d = (krb5_krcc_data *)id->data;
-    krb5_error_code kret;
+    krcc_data *data = id->data;
+    krb5_error_code ret;
     key_serial_t key;
-    krb5_int32 t, u;
     void *payload = NULL;
     int psize;
 
-    k5_cc_mutex_lock(context, &d->lock);
+    k5_cc_mutex_lock(context, &data->lock);
 
-    if (!d->cache_id) {
-        kret = KRB5_FCC_NOFILE;
+    if (!data->cache_id) {
+        ret = KRB5_FCC_NOFILE;
         goto errout;
     }
 
-    key = keyctl_search(d->cache_id, KRCC_KEY_TYPE_USER, KRCC_TIME_OFFSETS, 0);
+    key = keyctl_search(data->cache_id, KRCC_KEY_TYPE_USER, KRCC_TIME_OFFSETS,
+                        0);
     if (key == -1) {
-        kret = ENOENT;
+        ret = ENOENT;
         goto errout;
     }
 
@@ -1814,21 +1469,21 @@ krb5_krcc_get_time_offsets(krb5_context context, krb5_ccache id,
     if (psize == -1) {
         DEBUG_PRINT(("Reading time offsets key %d: %s\n",
                      key, strerror(errno)));
-        kret = KRB5_CC_IO;
+        ret = KRB5_CC_IO;
         goto errout;
     }
 
-    kret = krb5_krcc_parse_offsets(context, &t, &u, payload, psize);
-    if (kret)
+    if (psize < 8) {
+        ret = KRB5_CC_END;
         goto errout;
-
-    *time_offset = t;
-    *usec_offset = u;
+    }
+    *time_offset = load_32_be(payload);
+    *usec_offset = load_32_be((char *)payload + 4);
 
 errout:
     free(payload);
-    k5_cc_mutex_unlock(context, &d->lock);
-    return kret;
+    k5_cc_mutex_unlock(context, &data->lock);
+    return ret;
 }
 
 struct krcc_ptcursor_data {
@@ -1844,70 +1499,72 @@ struct krcc_ptcursor_data {
 };
 
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor_out)
+krcc_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor_out)
 {
-    struct krcc_ptcursor_data *data;
+    struct krcc_ptcursor_data *ptd;
     krb5_cc_ptcursor cursor;
     krb5_error_code ret;
+    void *keys;
     long size;
 
     *cursor_out = NULL;
 
-    cursor = k5alloc(sizeof(struct krb5_cc_ptcursor_s), &ret);
+    cursor = k5alloc(sizeof(*cursor), &ret);
     if (cursor == NULL)
         return ENOMEM;
-    data = k5alloc(sizeof(struct krcc_ptcursor_data), &ret);
-    if (data == NULL)
+    ptd = k5alloc(sizeof(*ptd), &ret);
+    if (ptd == NULL)
         goto error;
     cursor->ops = &krb5_krcc_ops;
-    cursor->data = data;
-    data->first = TRUE;
+    cursor->data = ptd;
+    ptd->first = TRUE;
 
-    ret = get_default(context, &data->anchor_name, &data->collection_name,
-                      &data->subsidiary_name);
+    ret = get_default(context, &ptd->anchor_name, &ptd->collection_name,
+                      &ptd->subsidiary_name);
     if (ret)
         goto error;
 
     /* If there is no default collection, return an empty cursor. */
-    if (data->anchor_name == NULL) {
+    if (ptd->anchor_name == NULL) {
         *cursor_out = cursor;
         return 0;
     }
 
-    ret = get_collection(data->anchor_name, data->collection_name,
-                         &data->collection_id);
+    ret = get_collection(ptd->anchor_name, ptd->collection_name,
+                         &ptd->collection_id);
     if (ret)
         goto error;
 
-    if (data->subsidiary_name == NULL) {
-        ret = get_primary_name(context, data->anchor_name,
-                               data->collection_name, data->collection_id,
-                               &data->primary_name);
+    if (ptd->subsidiary_name == NULL) {
+        ret = get_primary_name(context, ptd->anchor_name,
+                               ptd->collection_name, ptd->collection_id,
+                               &ptd->primary_name);
         if (ret)
             goto error;
 
-        size = keyctl_read_alloc(data->collection_id, (void **)&data->keys);
+        size = keyctl_read_alloc(ptd->collection_id, &keys);
         if (size == -1) {
             ret = errno;
             goto error;
         }
-        data->num_keys = size / sizeof(key_serial_t);
+        ptd->keys = keys;
+        ptd->num_keys = size / sizeof(key_serial_t);
     }
 
     *cursor_out = cursor;
     return 0;
 
 error:
-    krb5_krcc_ptcursor_free(context, &cursor);
+    krcc_ptcursor_free(context, &cursor);
     return ret;
 }
 
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
-                        krb5_ccache *cache_out)
+krcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
+                   krb5_ccache *cache_out)
 {
     krb5_error_code ret;
-    struct krcc_ptcursor_data *data;
+    struct krcc_ptcursor_data *ptd = cursor->data;
     key_serial_t key, cache_id = 0;
     const char *first_name, *keytype, *sep, *subsidiary_name;
     size_t keytypelen;
@@ -1915,35 +1572,33 @@ krb5_krcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
 
     *cache_out = NULL;
 
-    data = cursor->data;
-
     /* No keyring available */
-    if (data->collection_id == 0)
+    if (ptd->collection_id == 0)
         return 0;
 
-    if (data->first) {
+    if (ptd->first) {
         /* Look for the primary cache for a collection cursor, or the
          * subsidiary cache for a subsidiary cursor. */
-        data->first = FALSE;
-        first_name = (data->primary_name != NULL) ? data->primary_name :
-            data->subsidiary_name;
-        cache_id = keyctl_search(data->collection_id, KRCC_KEY_TYPE_KEYRING,
+        ptd->first = FALSE;
+        first_name = (ptd->primary_name != NULL) ? ptd->primary_name :
+            ptd->subsidiary_name;
+        cache_id = keyctl_search(ptd->collection_id, KRCC_KEY_TYPE_KEYRING,
                                  first_name, 0);
         if (cache_id != -1) {
-            return make_cache(context, data->collection_id, cache_id,
-                              data->anchor_name, data->collection_name,
+            return make_cache(context, ptd->collection_id, cache_id,
+                              ptd->anchor_name, ptd->collection_name,
                               first_name, cache_out);
         }
     }
 
     /* A subsidiary cursor yields at most the first cache. */
-    if (data->subsidiary_name != NULL)
+    if (ptd->subsidiary_name != NULL)
         return 0;
 
     keytype = KRCC_KEY_TYPE_KEYRING ";";
     keytypelen = strlen(keytype);
 
-    for (; data->next_key < data->num_keys; data->next_key++) {
+    for (; ptd->next_key < ptd->num_keys; ptd->next_key++) {
         /* Free any previously retrieved key description. */
         free(description);
         description = NULL;
@@ -1952,7 +1607,7 @@ krb5_krcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
          * Get the key description, which should have the form:
          *   typename;UID;GID;permissions;description
          */
-        key = data->keys[data->next_key];
+        key = ptd->keys[ptd->next_key];
         if (keyctl_describe_alloc(key, &description) < 0)
             continue;
         sep = strrchr(description, ';');
@@ -1965,13 +1620,13 @@ krb5_krcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
             continue;
 
         /* Don't repeat the primary cache. */
-        if (strcmp(subsidiary_name, data->primary_name) == 0)
+        if (strcmp(subsidiary_name, ptd->primary_name) == 0)
             continue;
 
         /* We found a valid key */
-        data->next_key++;
-        ret = make_cache(context, data->collection_id, key, data->anchor_name,
-                         data->collection_name, subsidiary_name, cache_out);
+        ptd->next_key++;
+        ret = make_cache(context, ptd->collection_id, key, ptd->anchor_name,
+                         ptd->collection_name, subsidiary_name, cache_out);
         free(description);
         return ret;
     }
@@ -1981,17 +1636,17 @@ krb5_krcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
 }
 
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor)
+krcc_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor)
 {
-    struct krcc_ptcursor_data *data = (*cursor)->data;
+    struct krcc_ptcursor_data *ptd = (*cursor)->data;
 
-    if (data != NULL) {
-        free(data->anchor_name);
-        free(data->collection_name);
-        free(data->subsidiary_name);
-        free(data->primary_name);
-        free(data->keys);
-        free(data);
+    if (ptd != NULL) {
+        free(ptd->anchor_name);
+        free(ptd->collection_name);
+        free(ptd->subsidiary_name);
+        free(ptd->primary_name);
+        free(ptd->keys);
+        free(ptd);
     }
     free(*cursor);
     *cursor = NULL;
@@ -1999,9 +1654,9 @@ krb5_krcc_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor)
 }
 
 static krb5_error_code KRB5_CALLCONV
-krb5_krcc_switch_to(krb5_context context, krb5_ccache cache)
+krcc_switch_to(krb5_context context, krb5_ccache cache)
 {
-    krb5_krcc_data *data = cache->data;
+    krcc_data *data = cache->data;
     krb5_error_code ret;
     char *anchor_name = NULL, *collection_name = NULL, *subsidiary_name = NULL;
     key_serial_t collection_id;
@@ -2014,6 +1669,7 @@ krb5_krcc_switch_to(krb5_context context, krb5_ccache cache)
     if (ret)
         goto cleanup;
     ret = set_primary_name(context, collection_id, subsidiary_name);
+
 cleanup:
     free(anchor_name);
     free(collection_name);
@@ -2022,943 +1678,19 @@ cleanup:
 }
 
 /*
- * ===============================================================
- * INTERNAL functions to parse a credential from a key payload
- * (Borrowed heavily from krb5_fcc_{read|store}_ funtions.)
- * ===============================================================
- */
-
-/*
- * Effects:
- * Copies len bytes from the key payload buffer into buf.
- * Updates payload pointer and returns KRB5_CC_END if we
- * try to read past the end of the payload buffer's data.
- *
- * Requires:
- * Must be called with mutex locked.
- *
- * Errors:
- * KRB5_CC_END - there were not len bytes available
- */
-static  krb5_error_code
-krb5_krcc_parse(krb5_context context, krb5_pointer buf, unsigned int len,
-                krb5_krcc_bc * bc)
-{
-    DEBUG_PRINT(("krb5_krcc_parse: entered\n"));
-
-    if ((bc->endp == bc->bpp) || (bc->endp - bc->bpp) < len)
-        return KRB5_CC_END;
-
-    memcpy(buf, bc->bpp, len);
-    bc->bpp += len;
-
-    return KRB5_OK;
-}
-
-/*
- * Take a key (credential) read from a keyring entry
- * and parse it into a credential structure.
- */
-static  krb5_error_code
-krb5_krcc_parse_cred(krb5_context context, krb5_creds * creds, char *payload,
-                     int psize)
-{
-    krb5_error_code kret;
-    krb5_octet octet;
-    krb5_int32 int32;
-    krb5_krcc_bc bc;
-
-    /* Parse the pieces of the credential */
-    bc.bpp = payload;
-    bc.endp = bc.bpp + psize;
-    kret = krb5_krcc_parse_principal(context, &creds->client, &bc);
-    CHECK_N_GO(kret, out);
-
-    kret = krb5_krcc_parse_principal(context, &creds->server, &bc);
-    CHECK_N_GO(kret, cleanclient);
-
-    kret = krb5_krcc_parse_keyblock(context, &creds->keyblock, &bc);
-    CHECK_N_GO(kret, cleanserver);
-
-    kret = krb5_krcc_parse_times(context, &creds->times, &bc);
-    CHECK_N_GO(kret, cleanserver);
-
-    kret = krb5_krcc_parse_octet(context, &octet, &bc);
-    CHECK_N_GO(kret, cleanserver);
-    creds->is_skey = octet;
-
-    kret = krb5_krcc_parse_int32(context, &int32, &bc);
-    CHECK_N_GO(kret, cleanserver);
-    creds->ticket_flags = int32;
-
-    kret = krb5_krcc_parse_addrs(context, &creds->addresses, &bc);
-    CHECK_N_GO(kret, cleanblock);
-
-    kret = krb5_krcc_parse_authdata(context, &creds->authdata, &bc);
-    CHECK_N_GO(kret, cleanaddrs);
-
-    kret = krb5_krcc_parse_krb5data(context, &creds->ticket, &bc);
-    CHECK_N_GO(kret, cleanauthdata);
-
-    kret = krb5_krcc_parse_krb5data(context, &creds->second_ticket, &bc);
-    CHECK_N_GO(kret, cleanticket);
-
-    kret = KRB5_OK;
-    goto out;
-
-cleanticket:
-    memset(creds->ticket.data, 0, (unsigned) creds->ticket.length);
-    free(creds->ticket.data);
-cleanauthdata:
-    krb5_free_authdata(context, creds->authdata);
-cleanaddrs:
-    krb5_free_addresses(context, creds->addresses);
-cleanblock:
-    free(creds->keyblock.contents);
-cleanserver:
-    krb5_free_principal(context, creds->server);
-cleanclient:
-    krb5_free_principal(context, creds->client);
-
-out:
-    return kret;
-}
-
-static  krb5_error_code
-krb5_krcc_parse_principal(krb5_context context, krb5_principal * princ,
-                          krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    register krb5_principal tmpprinc;
-    krb5_int32 length, type;
-    int     i;
-
-    /* Read principal type */
-    kret = krb5_krcc_parse_int32(context, &type, bc);
-    if (kret != KRB5_OK)
-        return kret;
-
-    /* Read the number of components */
-    kret = krb5_krcc_parse_int32(context, &length, bc);
-    if (kret != KRB5_OK)
-        return kret;
-
-    if (length < 0)
-        return KRB5_CC_NOMEM;
-
-    tmpprinc = (krb5_principal) malloc(sizeof(krb5_principal_data));
-    if (tmpprinc == NULL)
-        return KRB5_CC_NOMEM;
-    if (length) {
-        tmpprinc->data = calloc(length, sizeof(krb5_data));
-        if (tmpprinc->data == 0) {
-            free(tmpprinc);
-            return KRB5_CC_NOMEM;
-        }
-    } else
-        tmpprinc->data = 0;
-    tmpprinc->magic = KV5M_PRINCIPAL;
-    tmpprinc->length = length;
-    tmpprinc->type = type;
-
-    kret = krb5_krcc_parse_krb5data(context, &tmpprinc->realm, bc);
-    i = 0;
-    CHECK(kret);
-
-    for (i = 0; i < length; i++) {
-        kret = krb5_krcc_parse_krb5data(context, &tmpprinc->data[i], bc);
-        CHECK(kret);
-    }
-    *princ = tmpprinc;
-    return KRB5_OK;
-
-errout:
-    while (--i >= 0)
-        free(tmpprinc->data[i].data);
-    free(tmpprinc->realm.data);
-    free(tmpprinc->data);
-    free(tmpprinc);
-    return kret;
-}
-
-static  krb5_error_code
-krb5_krcc_parse_keyblock(krb5_context context, krb5_keyblock * keyblock,
-                         krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    krb5_ui_2 ui2;
-    krb5_int32 int32;
-
-    keyblock->magic = KV5M_KEYBLOCK;
-    keyblock->contents = 0;
-
-    kret = krb5_krcc_parse_ui_2(context, &ui2, bc);
-    CHECK(kret);
-    keyblock->enctype = ui2;
-
-    kret = krb5_krcc_parse_int32(context, &int32, bc);
-    CHECK(kret);
-    if (int32 < 0)
-        return KRB5_CC_NOMEM;
-    keyblock->length = int32;
-    if (keyblock->length == 0)
-        return KRB5_OK;
-    keyblock->contents = malloc(keyblock->length);
-    if (keyblock->contents == NULL)
-        return KRB5_CC_NOMEM;
-
-    kret = krb5_krcc_parse(context, keyblock->contents, keyblock->length, bc);
-    CHECK(kret);
-
-    return KRB5_OK;
-errout:
-    if (keyblock->contents)
-        free(keyblock->contents);
-    return kret;
-}
-
-static  krb5_error_code
-krb5_krcc_parse_times(krb5_context context, krb5_ticket_times * t,
-                      krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    krb5_int32 i;
-
-    kret = krb5_krcc_parse_int32(context, &i, bc);
-    CHECK(kret);
-    t->authtime = i;
-
-    kret = krb5_krcc_parse_int32(context, &i, bc);
-    CHECK(kret);
-    t->starttime = i;
-
-    kret = krb5_krcc_parse_int32(context, &i, bc);
-    CHECK(kret);
-    t->endtime = i;
-
-    kret = krb5_krcc_parse_int32(context, &i, bc);
-    CHECK(kret);
-    t->renew_till = i;
-
-    return 0;
-errout:
-    return kret;
-}
-
-static  krb5_error_code
-krb5_krcc_parse_krb5data(krb5_context context, krb5_data * data,
-                         krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    krb5_int32 len;
-
-    data->magic = KV5M_DATA;
-    data->data = 0;
-
-    kret = krb5_krcc_parse_int32(context, &len, bc);
-    CHECK(kret);
-    if (len < 0)
-        return KRB5_CC_NOMEM;
-    data->length = len;
-    if (data->length + 1 == 0)
-        return KRB5_CC_NOMEM;
-
-    if (data->length == 0) {
-        data->data = 0;
-        return KRB5_OK;
-    }
-
-    data->data = (char *) malloc(data->length + 1);
-    if (data->data == NULL)
-        return KRB5_CC_NOMEM;
-
-    kret = krb5_krcc_parse(context, data->data, (unsigned) data->length, bc);
-    CHECK(kret);
-
-    data->data[data->length] = 0;       /* Null terminate, just in case.... */
-    return KRB5_OK;
-errout:
-    if (data->data)
-        free(data->data);
-    return kret;
-}
-
-static  krb5_error_code
-krb5_krcc_parse_int32(krb5_context context, krb5_int32 * i, krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    unsigned char buf[4];
-
-    kret = krb5_krcc_parse(context, buf, 4, bc);
-    if (kret)
-        return kret;
-    *i = load_32_be(buf);
-    return 0;
-}
-
-static  krb5_error_code
-krb5_krcc_parse_octet(krb5_context context, krb5_octet * i, krb5_krcc_bc * bc)
-{
-    return krb5_krcc_parse(context, (krb5_pointer) i, 1, bc);
-}
-
-static  krb5_error_code
-krb5_krcc_parse_addrs(krb5_context context, krb5_address *** addrs,
-                      krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    krb5_int32 length;
-    size_t  msize;
-    int     i;
-
-    *addrs = 0;
-
-    /* Read the number of components */
-    kret = krb5_krcc_parse_int32(context, &length, bc);
-    CHECK(kret);
-
-    /*
-     * Make *addrs able to hold length pointers to krb5_address structs
-     * Add one extra for a null-terminated list
-     */
-    msize = (size_t)length + 1;
-    if (msize == 0 || length < 0)
-        return KRB5_CC_NOMEM;
-    *addrs = calloc(msize, sizeof(krb5_address *));
-    if (*addrs == NULL)
-        return KRB5_CC_NOMEM;
-
-    for (i = 0; i < length; i++) {
-        (*addrs)[i] = (krb5_address *) malloc(sizeof(krb5_address));
-        if ((*addrs)[i] == NULL) {
-            krb5_free_addresses(context, *addrs);
-            return KRB5_CC_NOMEM;
-        }
-        kret = krb5_krcc_parse_addr(context, (*addrs)[i], bc);
-        CHECK(kret);
-    }
-
-    return KRB5_OK;
-errout:
-    if (*addrs)
-        krb5_free_addresses(context, *addrs);
-    return kret;
-}
-
-static  krb5_error_code
-krb5_krcc_parse_addr(krb5_context context, krb5_address * addr,
-                     krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    krb5_ui_2 ui2;
-    krb5_int32 int32;
-
-    addr->magic = KV5M_ADDRESS;
-    addr->contents = 0;
-
-    kret = krb5_krcc_parse_ui_2(context, &ui2, bc);
-    CHECK(kret);
-    addr->addrtype = ui2;
-
-    kret = krb5_krcc_parse_int32(context, &int32, bc);
-    CHECK(kret);
-    if ((int32 & VALID_INT_BITS) != int32)      /* Overflow int??? */
-        return KRB5_CC_NOMEM;
-    addr->length = int32;
-    if (addr->length == 0)
-        return KRB5_OK;
-
-    addr->contents = (krb5_octet *) malloc(addr->length);
-    if (addr->contents == NULL)
-        return KRB5_CC_NOMEM;
-
-    kret = krb5_krcc_parse(context, addr->contents, addr->length, bc);
-    CHECK(kret);
-
-    return KRB5_OK;
-errout:
-    if (addr->contents)
-        free(addr->contents);
-    return kret;
-}
-
-static  krb5_error_code
-krb5_krcc_parse_authdata(krb5_context context, krb5_authdata *** a,
-                         krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    krb5_int32 length;
-    size_t  msize;
-    int     i;
-
-    *a = 0;
-
-    /* Read the number of components */
-    kret = krb5_krcc_parse_int32(context, &length, bc);
-    CHECK(kret);
-
-    if (length == 0)
-        return KRB5_OK;
-
-    /*
-     * Make *a able to hold length pointers to krb5_authdata structs
-     * Add one extra for a null-terminated list
-     */
-    msize = (size_t)length + 1;
-    if (msize == 0 || length < 0)
-        return KRB5_CC_NOMEM;
-    *a = calloc(msize, sizeof(krb5_authdata *));
-    if (*a == NULL)
-        return KRB5_CC_NOMEM;
-
-    for (i = 0; i < length; i++) {
-        (*a)[i] = (krb5_authdata *) malloc(sizeof(krb5_authdata));
-        if ((*a)[i] == NULL) {
-            krb5_free_authdata(context, *a);
-            *a = NULL;
-            return KRB5_CC_NOMEM;
-        }
-        kret = krb5_krcc_parse_authdatum(context, (*a)[i], bc);
-        CHECK(kret);
-    }
-
-    return KRB5_OK;
-errout:
-    if (*a) {
-        krb5_free_authdata(context, *a);
-        *a = NULL;
-    }
-    return kret;
-}
-
-static  krb5_error_code
-krb5_krcc_parse_authdatum(krb5_context context, krb5_authdata * a,
-                          krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    krb5_int32 int32;
-    krb5_ui_2 ui2;
-
-    a->magic = KV5M_AUTHDATA;
-    a->contents = NULL;
-
-    kret = krb5_krcc_parse_ui_2(context, &ui2, bc);
-    CHECK(kret);
-    a->ad_type = (krb5_authdatatype) ui2;
-    kret = krb5_krcc_parse_int32(context, &int32, bc);
-    CHECK(kret);
-    if ((int32 & VALID_INT_BITS) != int32)      /* Overflow int??? */
-        return KRB5_CC_NOMEM;
-    a->length = int32;
-    if (a->length == 0)
-        return KRB5_OK;
-
-    a->contents = (krb5_octet *) malloc(a->length);
-    if (a->contents == NULL)
-        return KRB5_CC_NOMEM;
-
-    kret = krb5_krcc_parse(context, a->contents, a->length, bc);
-    CHECK(kret);
-
-    return KRB5_OK;
-errout:
-    if (a->contents)
-        free(a->contents);
-    return kret;
-
-}
-
-static  krb5_error_code
-krb5_krcc_parse_ui_2(krb5_context context, krb5_ui_2 * i, krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    unsigned char buf[2];
-
-    kret = krb5_krcc_parse(context, buf, 2, bc);
-    if (kret)
-        return kret;
-    *i = load_16_be(buf);
-    return 0;
-}
-
-/*
- * Requires:
- * locked mutex
- *
- * Effects:
- * Copies len bytes from buf into the payload buffer (bc->bpp).
- * Detects attempts to write past end of the payload buffer.
- * Updates payload buffer pointer accordingly.
- *
- * Errors:
- * system errors
- */
-static  krb5_error_code
-krb5_krcc_unparse(krb5_context context, krb5_pointer buf, unsigned int len,
-                  krb5_krcc_bc * bc)
-{
-    if (bc->bpp == NULL) {
-        /* This is a dry run; just increase size and return. */
-        bc->size += len;
-        return KRB5_OK;
-    }
-
-    if (bc->bpp + len > bc->endp)
-        return KRB5_CC_WRITE;
-
-    memcpy(bc->bpp, buf, len);
-    bc->bpp += len;
-
-    return KRB5_OK;
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_principal(krb5_context context, krb5_principal princ,
-                            krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    krb5_int32 i, length, tmp, type;
-
-    type = princ->type;
-    tmp = length = princ->length;
-
-    kret = krb5_krcc_unparse_int32(context, type, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_int32(context, tmp, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_krb5data(context, &princ->realm, bc);
-    CHECK_OUT(kret);
-
-    for (i = 0; i < length; i++) {
-        kret = krb5_krcc_unparse_krb5data(context, &princ->data[i], bc);
-        CHECK_OUT(kret);
-    }
-
-    return KRB5_OK;
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_keyblock(krb5_context context, krb5_keyblock * keyblock,
-                           krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-
-    kret = krb5_krcc_unparse_ui_2(context, keyblock->enctype, bc);
-    CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_ui_4(context, keyblock->length, bc);
-    CHECK_OUT(kret);
-    return krb5_krcc_unparse(context, (char *) keyblock->contents,
-                             keyblock->length, bc);
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_times(krb5_context context, krb5_ticket_times * t,
-                        krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-
-    kret = krb5_krcc_unparse_int32(context, t->authtime, bc);
-    CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_int32(context, t->starttime, bc);
-    CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_int32(context, t->endtime, bc);
-    CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_int32(context, t->renew_till, bc);
-    CHECK_OUT(kret);
-    return 0;
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_krb5data(krb5_context context, krb5_data * data,
-                           krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-
-    kret = krb5_krcc_unparse_ui_4(context, data->length, bc);
-    CHECK_OUT(kret);
-    return krb5_krcc_unparse(context, data->data, data->length, bc);
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_int32(krb5_context context, krb5_int32 i, krb5_krcc_bc * bc)
-{
-    return krb5_krcc_unparse_ui_4(context, (krb5_ui_4) i, bc);
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_octet(krb5_context context, krb5_int32 i, krb5_krcc_bc * bc)
-{
-    krb5_octet ibuf;
-
-    ibuf = (krb5_octet) i;
-    return krb5_krcc_unparse(context, (char *) &ibuf, 1, bc);
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_addrs(krb5_context context, krb5_address ** addrs,
-                        krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    krb5_address **temp;
-    krb5_int32 i, length = 0;
-
-    /* Count the number of components */
-    if (addrs) {
-        temp = addrs;
-        while (*temp++)
-            length += 1;
-    }
-
-    kret = krb5_krcc_unparse_int32(context, length, bc);
-    CHECK_OUT(kret);
-    for (i = 0; i < length; i++) {
-        kret = krb5_krcc_unparse_addr(context, addrs[i], bc);
-        CHECK_OUT(kret);
-    }
-
-    return KRB5_OK;
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_addr(krb5_context context, krb5_address * addr,
-                       krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-
-    kret = krb5_krcc_unparse_ui_2(context, addr->addrtype, bc);
-    CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_ui_4(context, addr->length, bc);
-    CHECK_OUT(kret);
-    return krb5_krcc_unparse(context, (char *) addr->contents,
-                             addr->length, bc);
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_authdata(krb5_context context,
-                           krb5_authdata ** a, krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-    krb5_authdata **temp;
-    krb5_int32 i, length = 0;
-
-    if (a != NULL) {
-        for (temp = a; *temp; temp++)
-            length++;
-    }
-
-    kret = krb5_krcc_unparse_int32(context, length, bc);
-    CHECK_OUT(kret);
-    for (i = 0; i < length; i++) {
-        kret = krb5_krcc_unparse_authdatum(context, a[i], bc);
-        CHECK_OUT(kret);
-    }
-    return KRB5_OK;
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_authdatum(krb5_context context, krb5_authdata * a,
-                            krb5_krcc_bc * bc)
-{
-    krb5_error_code kret;
-
-    kret = krb5_krcc_unparse_ui_2(context, a->ad_type, bc);
-    CHECK_OUT(kret);
-    kret = krb5_krcc_unparse_ui_4(context, a->length, bc);
-    CHECK_OUT(kret);
-    return krb5_krcc_unparse(context, (krb5_pointer) a->contents,
-                             a->length, bc);
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_ui_4(krb5_context context, krb5_ui_4 i, krb5_krcc_bc * bc)
-{
-    unsigned char buf[4];
-
-    store_32_be(i, buf);
-    return krb5_krcc_unparse(context, buf, 4, bc);
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_ui_2(krb5_context context, krb5_int32 i, krb5_krcc_bc * bc)
-{
-    unsigned char buf[2];
-
-    store_16_be(i, buf);
-    return krb5_krcc_unparse(context, buf, 2, bc);
-}
-
-/*
- * ===============================================================
- * INTERNAL functions to unparse a credential into a key payload
- * (Borrowed heavily from krb5_fcc_{read|store}_ funtions.)
- * ===============================================================
- */
-
-/*
- * Take a credential structure and unparse it (serialize)
- * for storage into a keyring key entry.
- * Caller is responsible for freeing returned buffer.
- */
-static  krb5_error_code
-krb5_krcc_unparse_cred(krb5_context context, krb5_creds * creds,
-                       krb5_krcc_bc *bc)
-{
-    krb5_error_code kret;
-
-    kret = krb5_krcc_unparse_principal(context, creds->client, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_principal(context, creds->server, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_keyblock(context, &creds->keyblock, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_times(context, &creds->times, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_octet(context, (krb5_int32) creds->is_skey, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_int32(context, creds->ticket_flags, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_addrs(context, creds->addresses, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_authdata(context, creds->authdata, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_krb5data(context, &creds->ticket, bc);
-    CHECK_OUT(kret);
-    CHECK(kret);
-
-    kret = krb5_krcc_unparse_krb5data(context, &creds->second_ticket, bc);
-    CHECK_OUT(kret);
-
-    /* Success! */
-    kret = KRB5_OK;
-
-errout:
-    return kret;
-}
-
-static  krb5_error_code
-krb5_krcc_unparse_cred_alloc(krb5_context context, krb5_creds * creds,
-                             char **datapp, unsigned int *lenptr)
-{
-    krb5_error_code kret;
-    char *buf = NULL;
-    krb5_krcc_bc bc;
-
-    if (!creds || !datapp || !lenptr)
-        return EINVAL;
-
-    *datapp = NULL;
-    *lenptr = 0;
-
-    /* Do a dry run first to calculate the size. */
-    bc.bpp = bc.endp = NULL;
-    bc.size = 0;
-    kret = krb5_krcc_unparse_cred(context, creds, &bc);
-    CHECK(kret);
-    if (bc.size > MAX_CRED_SIZE)
-        return KRB5_CC_WRITE;
-
-    /* Allocate a buffer and unparse for real. */
-    buf = malloc(bc.size);
-    if (buf == NULL)
-        return KRB5_CC_NOMEM;
-    bc.bpp = buf;
-    bc.endp = buf + bc.size;
-    kret = krb5_krcc_unparse_cred(context, creds, &bc);
-    CHECK(kret);
-
-    /* Success! */
-    *datapp = buf;
-    *lenptr = bc.bpp - buf;
-    buf = NULL;
-    kret = KRB5_OK;
-
-errout:
-    free(buf);
-    return kret;
-}
-
-static krb5_error_code
-krb5_krcc_parse_index(krb5_context context, krb5_int32 *version,
-                      char **primary, void *payload, int psize)
-{
-    krb5_error_code kret;
-    krb5_krcc_bc bc;
-    krb5_data data;
-
-    bc.bpp = payload;
-    bc.endp = bc.bpp + psize;
-
-    kret = krb5_krcc_parse_int32(context, version, &bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_parse_krb5data(context, &data, &bc);
-    CHECK_OUT(kret);
-
-    *primary = (char *)data.data;
-    return KRB5_OK;
-}
-
-static krb5_error_code
-krb5_krcc_unparse_index_internal(krb5_context context, krb5_int32 version,
-                                 const char *primary, krb5_krcc_bc *bc)
-{
-    krb5_error_code kret;
-    krb5_data data;
-
-    data.length = strlen(primary) + 1;
-    data.data = (void *)primary;
-
-    kret = krb5_krcc_unparse_int32(context, version, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_krb5data(context, &data, bc);
-    CHECK_OUT(kret);
-
-    return KRB5_OK;
-}
-
-static krb5_error_code
-krb5_krcc_unparse_index(krb5_context context, krb5_int32 version,
-                        const char *primary, void **datapp, int *lenptr)
-{
-    krb5_error_code kret;
-    krb5_krcc_bc bc;
-    char *buf;
-
-    if (!primary || !datapp || !lenptr)
-        return EINVAL;
-
-    *datapp = NULL;
-    *lenptr = 0;
-
-    /* Do a dry run first to calculate the size. */
-    bc.bpp = bc.endp = NULL;
-    bc.size = 0;
-    kret = krb5_krcc_unparse_index_internal(context, version, primary, &bc);
-    CHECK_OUT(kret);
-
-    buf = malloc(bc.size);
-    if (buf == NULL)
-        return ENOMEM;
-
-    bc.bpp = buf;
-    bc.endp = buf + bc.size;
-    kret = krb5_krcc_unparse_index_internal(context, version, primary, &bc);
-    CHECK(kret);
-
-    /* Success! */
-    *datapp = buf;
-    *lenptr = bc.bpp - buf;
-    kret = KRB5_OK;
-
-errout:
-    if (kret)
-        free(buf);
-    return kret;
-}
-
-static krb5_error_code
-krb5_krcc_parse_offsets(krb5_context context, krb5_int32 *time_offset,
-                        krb5_int32 *usec_offset, void *payload, int psize)
-{
-    krb5_error_code kret;
-    krb5_krcc_bc bc;
-
-    bc.bpp = payload;
-    bc.endp = bc.bpp + psize;
-
-    kret = krb5_krcc_parse_int32(context, time_offset, &bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_parse_int32(context, usec_offset, &bc);
-    CHECK_OUT(kret);
-
-    return KRB5_OK;
-}
-
-static krb5_error_code
-krb5_krcc_unparse_offsets_internal(krb5_context context,
-                                   krb5_int32 time_offset,
-                                   krb5_int32 usec_offset,
-                                   krb5_krcc_bc *bc)
-{
-    krb5_error_code kret;
-
-    kret = krb5_krcc_unparse_int32(context, time_offset, bc);
-    CHECK_OUT(kret);
-
-    kret = krb5_krcc_unparse_int32(context, usec_offset, bc);
-    CHECK_OUT(kret);
-
-    return KRB5_OK;
-}
-
-static krb5_error_code
-krb5_krcc_unparse_offsets(krb5_context context, krb5_int32 time_offset,
-                          krb5_int32 usec_offset, void **datapp, int *lenptr)
-{
-    krb5_error_code kret;
-    krb5_krcc_bc bc;
-    char *buf;
-
-    if (!datapp || !lenptr)
-        return EINVAL;
-
-    *datapp = NULL;
-    *lenptr = 0;
-
-    /* Do a dry run first to calculate the size. */
-    bc.bpp = bc.endp = NULL;
-    bc.size = 0;
-    kret = krb5_krcc_unparse_offsets_internal(context, time_offset,
-                                              usec_offset, &bc);
-    CHECK_OUT(kret);
-
-    buf = malloc(bc.size);
-    if (buf == NULL)
-        return ENOMEM;
-
-    bc.bpp = buf;
-    bc.endp = buf + bc.size;
-    kret = krb5_krcc_unparse_offsets_internal(context, time_offset,
-                                              usec_offset, &bc);
-    CHECK(kret);
-
-    /* Success! */
-    *datapp = buf;
-    *lenptr = bc.bpp - buf;
-    kret = KRB5_OK;
-
-errout:
-    if (kret)
-        free(buf);
-    return kret;
-}
-/*
- * Utility routine: called by krb5_krcc_* functions to keep
- * result of krb5_krcc_last_change_time up to date.
+ * Utility routine: called by krcc_* functions to keep
+ * result of krcc_last_change_time up to date.
  * Value monotonically increases -- based on but not guaranteed to be actual
  * system time.
  */
 
 static void
-krb5_krcc_update_change_time(krb5_krcc_data *d)
+krcc_update_change_time(krcc_data *data)
 {
     krb5_timestamp now_time = time(NULL);
-    d->changetime = (d->changetime >= now_time) ?
-        d->changetime + 1 : now_time;
+    data->changetime = (data->changetime >= now_time) ?
+        data->changetime + 1 : now_time;
 }
-
 
 /*
  * ccache implementation storing credentials in the Linux keyring facility
@@ -2969,30 +1701,30 @@ krb5_krcc_update_change_time(krb5_krcc_data *d)
 const krb5_cc_ops krb5_krcc_ops = {
     0,
     "KEYRING",
-    krb5_krcc_get_name,
-    krb5_krcc_resolve,
-    krb5_krcc_generate_new,
-    krb5_krcc_initialize,
-    krb5_krcc_destroy,
-    krb5_krcc_close,
-    krb5_krcc_store,
-    krb5_krcc_retrieve,
-    krb5_krcc_get_principal,
-    krb5_krcc_start_seq_get,
-    krb5_krcc_next_cred,
-    krb5_krcc_end_seq_get,
-    krb5_krcc_remove_cred,
-    krb5_krcc_set_flags,
-    krb5_krcc_get_flags,        /* added after 1.4 release */
-    krb5_krcc_ptcursor_new,
-    krb5_krcc_ptcursor_next,
-    krb5_krcc_ptcursor_free,
+    krcc_get_name,
+    krcc_resolve,
+    krcc_generate_new,
+    krcc_initialize,
+    krcc_destroy,
+    krcc_close,
+    krcc_store,
+    krcc_retrieve,
+    krcc_get_principal,
+    krcc_start_seq_get,
+    krcc_next_cred,
+    krcc_end_seq_get,
+    krcc_remove_cred,
+    krcc_set_flags,
+    krcc_get_flags,        /* added after 1.4 release */
+    krcc_ptcursor_new,
+    krcc_ptcursor_next,
+    krcc_ptcursor_free,
     NULL, /* move */
-    krb5_krcc_last_change_time, /* lastchange */
+    krcc_last_change_time, /* lastchange */
     NULL, /* wasdefault */
-    krb5_krcc_lock,
-    krb5_krcc_unlock,
-    krb5_krcc_switch_to,
+    krcc_lock,
+    krcc_unlock,
+    krcc_switch_to,
 };
 
 #else /* !USE_KEYRING_CCACHE */

@@ -21,6 +21,7 @@ STLIBOBJS= \
 	cccursor.o \
 	ccdefault.o \
 	ccdefops.o \
+	ccmarshal.o \
 	ccselect.o \
 	ccselect_k5identity.o \
 	ccselect_realm.o \
@@ -37,6 +38,7 @@ OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cccursor.$(OBJEXT) \
 	$(OUTPRE)ccdefault.$(OBJEXT) \
 	$(OUTPRE)ccdefops.$(OBJEXT) \
+	$(OUTPRE)ccmarshal.$(OBJEXT) \
 	$(OUTPRE)ccselect.$(OBJEXT) \
 	$(OUTPRE)ccselect_k5identity.$(OBJEXT) \
 	$(OUTPRE)ccselect_realm.$(OBJEXT) \
@@ -53,6 +55,7 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cccursor.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c \
+	$(srcdir)/ccmarshal.c \
 	$(srcdir)/ccselect.c \
 	$(srcdir)/ccselect_k5identity.c \
 	$(srcdir)/ccselect_realm.c \
@@ -67,7 +70,8 @@ SRCS=	$(srcdir)/ccbase.c \
 EXTRADEPSRCS= \
 	$(srcdir)/t_cc.c \
 	$(srcdir)/t_cccol.c \
-	$(srcdir)/t_cccursor.c
+	$(srcdir)/t_cccursor.c \
+	$(srcdir)/t_marshal.c
 
 ##DOS##OBJS=$(OBJS) $(OUTPRE)ccfns.$(OBJEXT)
 
@@ -112,15 +116,22 @@ T_CCCURSOR_OBJS = t_cccursor.o
 t_cccursor: $(T_CCCURSOR_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ $(T_CCCURSOR_OBJS) $(KRB5_BASE_LIBS)
 
-check-unix:: t_cc
+T_MARSHAL_OBJS = t_marshal.o
+t_marshal: $(T_MARSHAL_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ $(T_MARSHAL_OBJS) $(KRB5_BASE_LIBS)
+
+check-unix:: t_cc t_marshal
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
 	$(RUN_SETUP) $(VALGRIND) ./t_cc
+	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
+	$(RUN_SETUP) $(VALGRIND) ./t_marshal testcache
 
 check-pytests:: t_cccursor t_cccol
 	$(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
 
 clean-unix::
 	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o t_cccol t_cccol.o
+	$(RM) t_marshal t_marshal.o testcache
 
 ##WIN32## $(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(top_srcdir)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
 
