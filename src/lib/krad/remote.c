@@ -243,7 +243,7 @@ on_timeout(verto_ctx *ctx, verto_ev *ev)
     req->timer = NULL;          /* Void the timer event. */
 
     /* If we have more retries to perform, resend the packet. */
-    if (req->retries-- > 1) {
+    if (req->retries-- > 0) {
         req->sent = 0;
         retval = remote_add_flags(req->rr, FLAGS_WRITE);
         if (retval == 0)
