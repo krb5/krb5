@@ -36,6 +36,17 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
+/*
+ * Versions 1 and 2 of the ccache format use native byte order representations
+ * of integers.  The test data below is from a little-endian platform.  Skip
+ * those tests on big-endian platforms by starting at version 3.
+ */
+#ifdef K5_BE
+#define FIRST_VERSION 3
+#else
+#define FIRST_VERSION 1
+#endif
+
 /* Each test contains the expected binary representation of a credential cache
  * divided into the header, the default principal, and two credentials. */
 const struct test {
@@ -275,13 +286,8 @@ main(int argc, char **argv)
     if (krb5_init_context(&context) != 0)
         abort();
 
-    for (version = 1; version <= 4; version++) {
+    for (version = FIRST_VERSION; version <= 4; version++) {
         t = &tests[version - 1];
-#ifdef K5_BE
-        /* The version 1 and 2 test data use little-endian integers. */
-        if (version == 0 || version == 1)
-            continue;
-#endif
 
         /* Test principal unmarshalling and marshalling. */
         if (k5_unmarshal_princ(t->princ, t->princlen, version, &princ) != 0)
