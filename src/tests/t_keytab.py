@@ -20,6 +20,9 @@ if 'no suitable keys' not in output:
 
 # Test kinit and klist with client keytab defaults.
 realm.extract_keytab(realm.user_princ, realm.client_keytab);
+realm.run([kinit, '-k', '-i'])
+realm.klist(realm.user_princ)
+realm.run([kdestroy])
 realm.kinit(realm.user_princ, flags=['-k', '-i'])
 realm.klist(realm.user_princ)
 out = realm.run([klist, '-k', '-i'])
