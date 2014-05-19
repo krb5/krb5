@@ -504,29 +504,31 @@ kadmin_startup(int argc, char *argv[])
      * use it.  Otherwise, use/prompt for the password.
      */
     if (ccache_name) {
-        printf(_("Authenticating as principal %s with existing "
+        fprintf(stderr, _("Authenticating as principal %s with existing "
                  "credentials.\n"), princstr);
         retval = kadm5_init_with_creds(context, princstr, cc, svcname, &params,
                                        KADM5_STRUCT_VERSION,
                                        KADM5_API_VERSION_4, db_args, &handle);
     } else if (use_anonymous) {
-        printf(_("Authenticating as principal %s with password; "
+        fprintf(stderr, _("Authenticating as principal %s with password; "
                  "anonymous requested.\n"), princstr);
         retval = kadm5_init_anonymous(context, princstr, svcname, &params,
                                       KADM5_STRUCT_VERSION,
                                       KADM5_API_VERSION_4, db_args, &handle);
     } else if (use_keytab) {
         if (keytab_name)
-            printf(_("Authenticating as principal %s with keytab %s.\n"),
+            fprintf(stderr,
+                   _("Authenticating as principal %s with keytab %s.\n"),
                    princstr, keytab_name);
         else
-            printf(_("Authenticating as principal %s with default keytab.\n"),
+            fprintf(stderr,
+                   _("Authenticating as principal %s with default keytab.\n"),
                    princstr);
         retval = kadm5_init_with_skey(context, princstr, keytab_name, svcname,
                                       &params, KADM5_STRUCT_VERSION,
                                       KADM5_API_VERSION_4, db_args, &handle);
     } else {
-        printf(_("Authenticating as principal %s with password.\n"),
+        fprintf(stderr, _("Authenticating as principal %s with password.\n"),
                princstr);
         retval = kadm5_init_with_password(context, princstr, password, svcname,
                                           &params, KADM5_STRUCT_VERSION,
