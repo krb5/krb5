@@ -250,7 +250,7 @@ Scripts may use the following realm methods and attributes:
   realm.
 
 * realm.addprinc(princname, password=None): Using kadmin.local, create
-  a principle in the KDB named princname, with either a random or
+  a principal in the KDB named princname, with either a random or
   specified key.
 
 * realm.extract_keytab(princname, keytab): Using kadmin.local, create
