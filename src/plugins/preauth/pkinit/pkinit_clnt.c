@@ -570,7 +570,7 @@ verify_kdc_san(krb5_context context,
         for (j = 0; cfghosts != NULL && cfghosts[j] != NULL; j++) {
             pkiDebug("%s: comparing cert name '%s' with config name '%s'\n",
                      __FUNCTION__, certhosts[i], cfghosts[j]);
-            if (strcmp(certhosts[i], cfghosts[j]) == 0) {
+            if (strcasecmp(certhosts[i], cfghosts[j]) == 0) {
                 TRACE_PKINIT_CLIENT_SAN_MATCH_DNSNAME(context, certhosts[i]);
                 pkiDebug("%s: we have a dnsName match\n", __FUNCTION__);
                 *valid_san = 1;
