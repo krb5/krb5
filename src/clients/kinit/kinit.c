@@ -25,6 +25,7 @@
  */
 
 #include "autoconf.h"
+#include <k5-int.h>
 #include "k5-platform.h"        /* for asprintf */
 #include <krb5.h>
 #include "extern.h"
@@ -470,6 +471,7 @@ k5_begin(opts, k5)
     int flags = opts->enterprise ? KRB5_PRINCIPAL_PARSE_ENTERPRISE : 0;
     krb5_ccache defcache = NULL;
     krb5_principal defcache_princ = NULL, princ;
+    krb5_keytab keytab;
     const char *deftype = NULL;
     char *defrealm, *name;
 
@@ -531,6 +533,21 @@ k5_begin(opts, k5)
         krb5_free_default_realm(k5->ctx, defrealm);
         if (code) {
             com_err(progname, code, _("while building principal"));
+            goto cleanup;
+        }
+    } else if (opts->action == INIT_KT && opts->use_client_keytab) {
+        /* Use the first entry from the client keytab. */
+        code = krb5_kt_client_default(k5->ctx, &keytab);
+        if (code) {
+            com_err(progname, code,
+                    _("When resolving the default client keytab"));
+            goto cleanup;
+        }
+        code = k5_kt_get_principal(k5->ctx, keytab, &k5->me);
+        krb5_kt_close(k5->ctx, keytab);
+        if (code) {
+            com_err(progname, code,
+                    _("When determining client principal name from keytab"));
             goto cleanup;
         }
     } else if (opts->action == INIT_KT) {
