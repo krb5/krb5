@@ -136,6 +136,7 @@ testlog
 /src/lib/crypto/crypto_tests/t_cksum5
 /src/lib/crypto/crypto_tests/t_cksums
 /src/lib/crypto/crypto_tests/t_cmac
+/src/lib/crypto/crypto_tests/t_combine
 /src/lib/crypto/crypto_tests/t_crc
 /src/lib/crypto/crypto_tests/t_cts
 /src/lib/crypto/crypto_tests/t_decrypt
