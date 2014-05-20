@@ -155,6 +155,7 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
     randbits.data = (char *) rnd;
     tkeyblock.length = keylength;
     tkeyblock.contents = output;
+    tkeyblock.enctype = key1->enctype;
 
     ret = (*ktp->rand2key)(&randbits, &tkeyblock);
     if (ret)
