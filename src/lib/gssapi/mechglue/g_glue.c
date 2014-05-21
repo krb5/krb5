@@ -647,6 +647,8 @@ OM_uint32 gssint_convert_name_to_union_name(minor_status, mech,
 	    major_status = GSS_S_FAILURE;
 	    goto allocation_failure;
     }
+    union_name->external_name->length = 0;
+    union_name->external_name->value = NULL;
 
     major_status = mech->gss_display_name(minor_status,
 					  internal_name,

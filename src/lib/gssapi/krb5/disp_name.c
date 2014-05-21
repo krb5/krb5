@@ -37,14 +37,16 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
     krb5_gss_name_t k5name = (krb5_gss_name_t) input_name;
     gss_OID nametype = (gss_OID) gss_nt_krb5_name;
 
+    output_name_buffer->length = 0;
+    output_name_buffer->value = NULL;
+    if (output_name_type)
+        *output_name_type = GSS_C_NO_OID;
+
     code = krb5_gss_init_context(&context);
     if (code) {
         *minor_status = code;
         return GSS_S_FAILURE;
     }
-
-    output_name_buffer->length = 0;
-    output_name_buffer->value = NULL;
 
     if (krb5_princ_type(context, k5name->princ) == KRB5_NT_WELLKNOWN) {
         if (krb5_principal_compare(context, k5name->princ,
