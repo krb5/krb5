@@ -3744,23 +3744,22 @@ pkinit_open_session(krb5_context context,
     }
 
     /* Get the list of available slots */
-    if (cctx->slotid != PK_NOSLOT) {
-        /* A slot was specified, so that's the only one in the list */
-        count = 1;
-        slotlist = malloc(sizeof(CK_SLOT_ID));
-        slotlist[0] = cctx->slotid;
-    } else {
-        if (cctx->p11->C_GetSlotList(TRUE, NULL, &count) != CKR_OK)
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-        if (count == 0)
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-        slotlist = malloc(count * sizeof (CK_SLOT_ID));
-        if (cctx->p11->C_GetSlotList(TRUE, slotlist, &count) != CKR_OK)
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-    }
+    if (cctx->p11->C_GetSlotList(TRUE, NULL, &count) != CKR_OK)
+        return KRB5KDC_ERR_PREAUTH_FAILED;
+    if (count == 0)
+        return KRB5KDC_ERR_PREAUTH_FAILED;
+    slotlist = calloc(count, sizeof(CK_SLOT_ID));
+    if (slotlist == NULL)
+        return ENOMEM;
+    if (cctx->p11->C_GetSlotList(TRUE, slotlist, &count) != CKR_OK)
+        return KRB5KDC_ERR_PREAUTH_FAILED;
 
     /* Look for the given token label, or if none given take the first one */
     for (i = 0; i < count; i++) {
+        /* Skip slots that don't match the specified slotid, if given. */
+        if (cctx->slotid != PK_NOSLOT && cctx->slotid != slotlist[i])
+            continue;
+
         /* Open session */
         if ((r = cctx->p11->C_OpenSession(slotlist[i], CKF_SERIAL_SESSION,
                                           NULL, NULL, &cctx->session)) != CKR_OK) {
