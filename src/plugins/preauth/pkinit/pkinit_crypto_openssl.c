@@ -3779,6 +3779,7 @@ pkinit_open_session(krb5_context context,
 {
     CK_ULONG i, r;
     unsigned char *cp;
+    size_t label_len;
     CK_ULONG count = 0;
     CK_SLOT_ID_PTR slotlist;
     CK_TOKEN_INFO tinfo;
@@ -3829,13 +3830,20 @@ pkinit_open_session(krb5_context context,
             pkiDebug("C_GetTokenInfo: %s\n", pkinit_pkcs11_code_to_text(r));
             return KRB5KDC_ERR_PREAUTH_FAILED;
         }
-        for (cp = tinfo.label + sizeof (tinfo.label) - 1;
-             *cp == '\0' || *cp == ' '; cp--)
-            *cp = '\0';
-        pkiDebug("open_session: slotid %d token \"%s\"\n",
-                 (int) slotlist[i], tinfo.label);
+
+        /* tinfo.label is zero-filled but not necessarily zero-terminated.
+         * Find the length, ignoring any trailing spaces. */
+        for (cp = tinfo.label + sizeof(tinfo.label); cp > tinfo.label; cp--) {
+            if (cp[-1] != '\0' && cp[-1] != ' ')
+                break;
+        }
+        label_len = cp - tinfo.label;
+
+        pkiDebug("open_session: slotid %d token \"%.*s\"\n",
+                 (int)slotlist[i], (int)label_len, tinfo.label);
         if (cctx->token_label == NULL ||
-            !strcmp((char *) cctx->token_label, (char *) tinfo.label))
+            (strlen(cctx->token_label) == label_len &&
+             memcmp(cctx->token_label, tinfo.label, label_len) == 0))
             break;
         cctx->p11->C_CloseSession(cctx->session);
     }
@@ -3854,15 +3862,15 @@ pkinit_open_session(krb5_context context,
         if (cctx->p11_module_name != NULL) {
             if (cctx->slotid != PK_NOSLOT) {
                 if (asprintf(&p11name,
-                             "PKCS11:module_name=%s:slotid=%ld:token=%s",
+                             "PKCS11:module_name=%s:slotid=%ld:token=%.*s",
                              cctx->p11_module_name, (long)cctx->slotid,
-                             tinfo.label) < 0)
+                             (int)label_len, tinfo.label) < 0)
                     p11name = NULL;
             } else {
                 if (asprintf(&p11name,
-                             "PKCS11:module_name=%s,token=%s",
+                             "PKCS11:module_name=%s,token=%.*s",
                              cctx->p11_module_name,
-                             tinfo.label) < 0)
+                             (int)label_len, tinfo.label) < 0)
                     p11name = NULL;
             }
         } else {
