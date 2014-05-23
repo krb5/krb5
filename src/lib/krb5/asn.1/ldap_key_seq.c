@@ -57,14 +57,14 @@ DEFCOUNTEDSTRINGTYPE(ui2_octetstring, unsigned char *, krb5_ui_2,
                      ASN1_OCTETSTRING);
 
 static int
-is_salt_present(const void *p)
+is_value_present(const void *p)
 {
     const krb5_key_data *val = p;
     return (val->key_data_length[1] != 0);
 }
 DEFCOUNTEDTYPE(krbsalt_salt, krb5_key_data, key_data_contents[1],
                key_data_length[1], ui2_octetstring);
-DEFOPTIONALTYPE(krbsalt_salt_if_present, is_salt_present, NULL, krbsalt_salt);
+DEFOPTIONALTYPE(krbsalt_salt_if_present, is_value_present, NULL, krbsalt_salt);
 DEFFIELD(krbsalt_0, krb5_key_data, key_data_type[1], 0, int16);
 DEFCTAGGEDTYPE(krbsalt_1, 1, krbsalt_salt_if_present);
 static const struct atype_info *krbsalt_fields[] = {
@@ -80,7 +80,20 @@ static const struct atype_info *encryptionkey_fields[] = {
 };
 DEFSEQTYPE(encryptionkey, krb5_key_data, encryptionkey_fields);
 
-DEFCTAGGEDTYPE(key_data_0, 0, krbsalt);
+static int
+is_salt_present(const void *p)
+{
+    const krb5_key_data *val = p;
+    return val->key_data_ver > 1;
+}
+static void
+no_salt(void *p)
+{
+    krb5_key_data *val = p;
+    val->key_data_ver = 1;
+}
+DEFOPTIONALTYPE(key_data_salt_if_present, is_salt_present, no_salt, krbsalt);
+DEFCTAGGEDTYPE(key_data_0, 0, key_data_salt_if_present);
 DEFCTAGGEDTYPE(key_data_1, 1, encryptionkey);
 #if 0 /* We don't support this field currently.  */
 DEFCTAGGEDTYPE(key_data_2, 2, s2kparams),

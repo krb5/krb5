@@ -120,7 +120,7 @@ static krb5_key_data keys[] = {
           U("expsalt") }
     },
     {
-        1,                          /* key_data_ver */
+        2,                          /* key_data_ver */
         2,                          /* key_data_kvno */
         { ENCTYPE_AES128_CTS_HMAC_SHA1_96, 0 },
         { 16, 0 },

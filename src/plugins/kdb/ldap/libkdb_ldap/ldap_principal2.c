@@ -390,8 +390,10 @@ asn1_decode_sequence_of_keys(krb5_data *in, krb5_key_data **out,
     /* Set kvno and key_data_ver in each key_data element. */
     for (i = 0; i < p->n_key_data; i++) {
         p->key_data[i].key_data_kvno = p->kvno;
-        p->key_data[i].key_data_ver =
-            (p->key_data[i].key_data_length[1] == 0) ? 1 : 2;
+        /* The decoder sets key_data_ver to 1 if no salt is present, but leaves
+         * it at 0 if salt is present. */
+        if (p->key_data[i].key_data_ver == 0)
+            p->key_data[i].key_data_ver = 2;
     }
 
     *out = p->key_data;
