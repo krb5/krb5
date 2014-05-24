@@ -92,8 +92,8 @@ grow_find_authdata(krb5_context context, struct find_authdata_context *fctx,
     if (fctx->length == fctx->space) {
         krb5_authdata **new;
         if (fctx->space >= 256) {
-            krb5_set_error_message(context, ERANGE,
-                                   "More than 256 authdata matched a query");
+            k5_setmsg(context, ERANGE,
+                      "More than 256 authdata matched a query");
             return ERANGE;
         }
         new       = realloc(fctx->out,

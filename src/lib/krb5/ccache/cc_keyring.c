@@ -1147,9 +1147,9 @@ krcc_generate_new(krb5_context context, krb5_ccache *id_out)
             return ret;
     }
     if (subsidiary_name != NULL) {
-        krb5_set_error_message(context, KRB5_DCC_CANNOT_CREATE,
-                               _("Can't create new subsidiary cache because "
-                                 "default cache is already a subsdiary"));
+        k5_setmsg(context, KRB5_DCC_CANNOT_CREATE,
+                  _("Can't create new subsidiary cache because default cache "
+                    "is already a subsidiary"));
         ret = KRB5_DCC_CANNOT_CREATE;
         goto cleanup;
     }
@@ -1216,9 +1216,8 @@ krcc_get_principal(krb5_context context, krb5_ccache id,
 
     if (!data->cache_id || !data->princ_id) {
         ret = KRB5_FCC_NOFILE;
-        krb5_set_error_message(context, ret,
-                               _("Credentials cache keyring '%s' not found"),
-                               data->name);
+        k5_setmsg(context, ret, _("Credentials cache keyring '%s' not found"),
+                  data->name);
         goto errout;
     }
 

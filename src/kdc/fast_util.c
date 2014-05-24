@@ -59,26 +59,25 @@ static krb5_error_code armor_ap_request
                          kdc_active_realm->realm_keytab,  NULL, &ticket);
     if (retval != 0) {
         const char * errmsg = krb5_get_error_message(kdc_context, retval);
-        krb5_set_error_message(kdc_context, retval,
-                               _("%s while handling ap-request armor"),
-                               errmsg);
+        k5_setmsg(kdc_context, retval, _("%s while handling ap-request armor"),
+                  errmsg);
         krb5_free_error_message(kdc_context, errmsg);
     }
     if (retval == 0) {
         if (!krb5_principal_compare_any_realm(kdc_context,
                                               tgs_server,
                                               ticket->server)) {
-            krb5_set_error_message(kdc_context, KRB5KDC_ERR_SERVER_NOMATCH,
-                                   _("ap-request armor for something other "
-                                     "than the local TGS"));
+            k5_setmsg(kdc_context, KRB5KDC_ERR_SERVER_NOMATCH,
+                      _("ap-request armor for something other than the local "
+                        "TGS"));
             retval = KRB5KDC_ERR_SERVER_NOMATCH;
         }
     }
     if (retval == 0) {
         retval = krb5_auth_con_getrecvsubkey(kdc_context, authcontext, &subkey);
         if (retval != 0 || subkey == NULL) {
-            krb5_set_error_message(kdc_context, KRB5KDC_ERR_POLICY,
-                                   _("ap-request armor without subkey"));
+            k5_setmsg(kdc_context, KRB5KDC_ERR_POLICY,
+                      _("ap-request armor without subkey"));
             retval = KRB5KDC_ERR_POLICY;
         }
     }
@@ -159,17 +158,16 @@ kdc_find_fast(krb5_kdc_req **requestptr,
             case KRB5_FAST_ARMOR_AP_REQUEST:
                 if (tgs_subkey) {
                     retval = KRB5KDC_ERR_PREAUTH_FAILED;
-                    krb5_set_error_message(kdc_context, retval,
-                                           _("Ap-request armor not permitted "
-                                             "with TGS"));
+                    k5_setmsg(kdc_context, retval,
+                              _("Ap-request armor not permitted with TGS"));
                     break;
                 }
                 retval = armor_ap_request(state, fast_armored_req->armor);
                 break;
             default:
-                krb5_set_error_message(kdc_context, KRB5KDC_ERR_PREAUTH_FAILED,
-                                       _("Unknown FAST armor type %d"),
-                                       fast_armored_req->armor->armor_type);
+                k5_setmsg(kdc_context, KRB5KDC_ERR_PREAUTH_FAILED,
+                          _("Unknown FAST armor type %d"),
+                          fast_armored_req->armor->armor_type);
                 retval = KRB5KDC_ERR_PREAUTH_FAILED;
             }
         }
@@ -181,9 +179,8 @@ kdc_find_fast(krb5_kdc_req **requestptr,
                                               &state->armor_key);
             else {
                 retval = KRB5KDC_ERR_PREAUTH_FAILED;
-                krb5_set_error_message(kdc_context, retval,
-                                       _("No armor key but FAST armored "
-                                         "request present"));
+                k5_setmsg(kdc_context, retval,
+                          _("No armor key but FAST armored request present"));
             }
         }
         if (retval == 0) {
@@ -218,15 +215,14 @@ kdc_find_fast(krb5_kdc_req **requestptr,
                                             &cksum_valid);
         if (retval == 0 && !cksum_valid) {
             retval = KRB5KRB_AP_ERR_MODIFIED;
-            krb5_set_error_message(kdc_context, retval,
-                                   _("FAST req_checksum invalid; request "
-                                     "modified"));
+            k5_setmsg(kdc_context, retval,
+                      _("FAST req_checksum invalid; request modified"));
         }
         if (retval == 0) {
             if (!krb5_c_is_keyed_cksum(cksum->checksum_type)) {
                 retval = KRB5KDC_ERR_POLICY;
-                krb5_set_error_message(kdc_context, retval,
-                                       _("Unkeyed checksum used in fast_req"));
+                k5_setmsg(kdc_context, retval,
+                          _("Unkeyed checksum used in fast_req"));
             }
         }
         if (retval == 0) {

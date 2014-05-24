@@ -53,7 +53,7 @@ krb5_ldap_create_policy(krb5_context context, krb5_ldap_policy_params *policy,
     /* validate the input parameters */
     if (policy == NULL || policy->policy == NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st, _("Ticket Policy Name missing"));
+        k5_setmsg(context, st, _("Ticket Policy Name missing"));
         goto cleanup;
     }
 
@@ -129,7 +129,7 @@ krb5_ldap_modify_policy(krb5_context context, krb5_ldap_policy_params *policy,
     /* validate the input parameters */
     if (policy == NULL || policy->policy==NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st, _("Ticket Policy Name missing"));
+        k5_setmsg(context, st, _("Ticket Policy Name missing"));
         goto cleanup;
     }
 
@@ -206,8 +206,7 @@ krb5_ldap_read_policy(krb5_context context, char *policyname,
     /* validate the input parameters */
     if (policyname == NULL  || policy == NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st,
-                               _("Ticket Policy Object information missing"));
+        k5_setmsg(context, st, _("Ticket Policy Object information missing"));
         goto cleanup;
     }
 

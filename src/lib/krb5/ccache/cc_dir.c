@@ -118,16 +118,15 @@ split_path(krb5_context context, const char *path, char **dirname_out,
 
     if (*dirname == '\0') {
         ret = KRB5_CC_BADNAME;
-        krb5_set_error_message(context, ret,
-                               _("Subsidiary cache path %s has no parent "
-                                 "directory"), path);
+        k5_setmsg(context, ret,
+                  _("Subsidiary cache path %s has no parent directory"), path);
         goto error;
     }
     if (!filename_is_cache(filename)) {
         ret = KRB5_CC_BADNAME;
-        krb5_set_error_message(context, ret,
-                               _("Subsidiary cache path %s filename does not "
-                                 "begin with \"tkt\""), path);
+        k5_setmsg(context, ret,
+                  _("Subsidiary cache path %s filename does not begin with "
+                    "\"tkt\""), path);
         goto error;
     }
 
@@ -167,9 +166,8 @@ read_primary_file(krb5_context context, const char *primary_path,
      * filename, or isn't a single-component filename. */
     if (buf[len - 1] != '\n' || !filename_is_cache(buf) ||
         strchr(buf, '/') || strchr(buf, '\\')) {
-        krb5_set_error_message(context, KRB5_CC_FORMAT,
-                               _("%s contains invalid filename"),
-                               primary_path);
+        k5_setmsg(context, KRB5_CC_FORMAT, _("%s contains invalid filename"),
+                  primary_path);
         return KRB5_CC_FORMAT;
     }
     buf[len - 1] = '\0';
@@ -227,15 +225,15 @@ verify_dir(krb5_context context, const char *dirname)
     if (stat(dirname, &st) < 0) {
         if (errno == ENOENT && mkdir(dirname, S_IRWXU) == 0)
             return 0;
-        krb5_set_error_message(context, KRB5_FCC_NOFILE,
-                               _("Credential cache directory %s does not "
-                                 "exist"), dirname);
+        k5_setmsg(context, KRB5_FCC_NOFILE,
+                  _("Credential cache directory %s does not exist"),
+                  dirname);
         return KRB5_FCC_NOFILE;
     }
     if (!S_ISDIR(st.st_mode)) {
-        krb5_set_error_message(context, KRB5_CC_FORMAT,
-                               _("Credential cache directory %s exists but is"
-                                 "not a directory"), dirname);
+        k5_setmsg(context, KRB5_CC_FORMAT,
+                  _("Credential cache directory %s exists but is not a "
+                    "directory"), dirname);
         return KRB5_CC_FORMAT;
     }
     return 0;
@@ -398,10 +396,9 @@ dcc_gen_new(krb5_context context, krb5_ccache *cache_out)
     if (ret)
         return ret;
     if (dirname == NULL) {
-        krb5_set_error_message(context, KRB5_DCC_CANNOT_CREATE,
-                               _("Can't create new subsidiary cache because "
-                                 "default cache is not a directory "
-                                 "collection"));
+        k5_setmsg(context, KRB5_DCC_CANNOT_CREATE,
+                  _("Can't create new subsidiary cache because default cache "
+                    "is not a directory collection"));
         return KRB5_DCC_CANNOT_CREATE;
     }
     ret = k5_path_join(dirname, "tktXXXXXX", &template);

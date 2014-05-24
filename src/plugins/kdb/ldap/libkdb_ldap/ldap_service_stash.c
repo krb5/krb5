@@ -46,15 +46,14 @@ dec_password(krb5_context context, const char *str,
     *password_out = NULL;
 
     if (strncmp(str, "{HEX}", 5) != 0) {
-        krb5_set_error_message(context, EINVAL,
-                               _("Not a hexadecimal password"));
+        k5_setmsg(context, EINVAL, _("Not a hexadecimal password"));
         return EINVAL;
     }
     str += 5;
 
     len = strlen(str);
     if (len % 2 != 0) {
-        krb5_set_error_message(context, EINVAL, _("Password corrupt"));
+        k5_setmsg(context, EINVAL, _("Password corrupt"));
         return EINVAL;
     }
 
@@ -65,7 +64,7 @@ dec_password(krb5_context context, const char *str,
     for (p = (unsigned char *)str; *p != '\0'; p += 2) {
         if (!isxdigit(*p) || !isxdigit(p[1])) {
             free(password);
-            krb5_set_error_message(context, EINVAL, _("Password corrupt"));
+            k5_setmsg(context, EINVAL, _("Password corrupt"));
             return EINVAL;
         }
         sscanf((char *)p, "%2x", &k);
@@ -99,9 +98,8 @@ krb5_ldap_readpassword(krb5_context context, krb5_ldap_context *ldap_context,
     fptr = fopen(file, "r");
     if (fptr == NULL) {
         st = errno;
-        krb5_set_error_message(context, st,
-                               _("Cannot open LDAP password file '%s': %s"),
-                               file, error_message(st));
+        k5_setmsg(context, st, _("Cannot open LDAP password file '%s': %s"),
+                  file, error_message(st));
         goto rp_exit;
     }
     set_cloexec_file(fptr);
@@ -129,9 +127,9 @@ krb5_ldap_readpassword(krb5_context context, krb5_ldap_context *ldap_context,
 
     if (entryfound == 0)  {
         st = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_set_error_message(context, st, _("Bind DN entry '%s' missing in "
-                                              "LDAP password file '%s'"),
-                               ldap_context->bind_dn, file);
+        k5_setmsg(context, st,
+                  _("Bind DN entry '%s' missing in LDAP password file '%s'"),
+                  ldap_context->bind_dn, file);
         goto rp_exit;
     }
     /* replace the \n with \0 */
@@ -143,7 +141,7 @@ krb5_ldap_readpassword(krb5_context context, krb5_ldap_context *ldap_context,
     if (start == NULL) {
         /* password field missing */
         st = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_set_error_message(context, st, _("Stash file entry corrupt"));
+        k5_setmsg(context, st, _("Stash file entry corrupt"));
         goto rp_exit;
     }
     ++ start;

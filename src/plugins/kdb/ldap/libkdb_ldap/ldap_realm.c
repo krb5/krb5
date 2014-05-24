@@ -220,8 +220,7 @@ krb5_ldap_delete_realm (krb5_context context, char *lrealm)
 
     if (lrealm == NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st,
-                               _("Realm information not available"));
+        k5_setmsg(context, st, _("Realm information not available"));
         goto cleanup;
     }
 
@@ -306,8 +305,8 @@ krb5_ldap_delete_realm (krb5_context context, char *lrealm)
     if ((st=ldap_delete_ext_s(ld, ldap_context->lrparams->realmdn, NULL, NULL)) != LDAP_SUCCESS) {
         int ost = st;
         st = translate_ldap_error (st, OP_DEL);
-        krb5_set_error_message(context, st, _("Realm Delete FAILED: %s"),
-                               ldap_err2string(ost));
+        k5_setmsg(context, st, _("Realm Delete FAILED: %s"),
+                  ldap_err2string(ost));
     }
 
 cleanup:
@@ -480,8 +479,7 @@ krb5_ldap_create_krbcontainer(krb5_context context, const char *dn)
 
     if (dn == NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st,
-                               _("Kerberos Container information is missing"));
+        k5_setmsg(context, st, _("Kerberos Container information is missing"));
         goto cleanup;
     }
 
@@ -493,8 +491,7 @@ krb5_ldap_create_krbcontainer(krb5_context context, const char *dn)
     rdns = ldap_explode_dn(dn, 1);
     if (rdns == NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st,
-                               _("Invalid Kerberos container DN"));
+        k5_setmsg(context, st, _("Invalid Kerberos container DN"));
         goto cleanup;
     }
 
@@ -510,9 +507,8 @@ krb5_ldap_create_krbcontainer(krb5_context context, const char *dn)
     if (st != LDAP_SUCCESS) {
         int ost = st;
         st = translate_ldap_error (st, OP_ADD);
-        krb5_set_error_message(context, st,
-                               _("Kerberos Container create FAILED: %s"),
-                               ldap_err2string(ost));
+        k5_setmsg(context, st, _("Kerberos Container create FAILED: %s"),
+                  ldap_err2string(ost));
         goto cleanup;
     }
 
@@ -546,8 +542,7 @@ krb5_ldap_delete_krbcontainer(krb5_context context, const char *dn)
 
     if (dn == NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st,
-                               _("Kerberos Container information is missing"));
+        k5_setmsg(context, st, _("Kerberos Container information is missing"));
         goto cleanup;
     }
 
@@ -555,9 +550,8 @@ krb5_ldap_delete_krbcontainer(krb5_context context, const char *dn)
     if ((st = ldap_delete_ext_s(ld, dn, NULL, NULL)) != LDAP_SUCCESS) {
         int ost = st;
         st = translate_ldap_error (st, OP_ADD);
-        krb5_set_error_message(context, st,
-                               _("Kerberos Container delete FAILED: %s"),
-                               ldap_err2string(ost));
+        k5_setmsg(context, st, _("Kerberos Container delete FAILED: %s"),
+                  ldap_err2string(ost));
         goto cleanup;
     }
 
@@ -923,6 +917,6 @@ krb5_ldap_delete_realm_1(krb5_context kcontext, char *conf_section,
                          char **db_args)
 {
     krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
+    k5_setmsg(kcontext, status, "LDAP %s", error_message(status));
     return status;
 }

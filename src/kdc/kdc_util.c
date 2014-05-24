@@ -286,8 +286,8 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
     if (retval != 0)
         goto cleanup_authenticator;
     if (authdata&& authdata[0]) {
-        krb5_set_error_message(kdc_context, KRB5KDC_ERR_POLICY,
-                               "ticket valid only as FAST armor");
+        k5_setmsg(kdc_context, KRB5KDC_ERR_POLICY,
+                  "ticket valid only as FAST armor");
         retval = KRB5KDC_ERR_POLICY;
         krb5_free_authdata(kdc_context, authdata);
         goto cleanup_authenticator;

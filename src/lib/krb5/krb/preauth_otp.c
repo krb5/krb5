@@ -698,9 +698,8 @@ filter_tokeninfos(krb5_context context, const char *otpvalue,
     /* It is an error if we have no matching tokeninfos. */
     if (filtered[0] == NULL) {
         free(filtered);
-        krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
-                               _("OTP value doesn't match "
-                                 "any token formats"));
+        k5_setmsg(context, KRB5_PREAUTH_FAILED,
+                  _("OTP value doesn't match any token formats"));
         return KRB5_PREAUTH_FAILED; /* We have no supported tokeninfos. */
     }
 
@@ -912,8 +911,7 @@ filter_supported_tokeninfos(krb5_context context, krb5_otp_tokeninfo **tis)
     if (tis[0] != NULL)
         return 0;
 
-    krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
-                           _("No supported tokens"));
+    k5_setmsg(context, KRB5_PREAUTH_FAILED, _("No supported tokens"));
     return KRB5_PREAUTH_FAILED; /* We have no supported tokeninfos. */
 }
 

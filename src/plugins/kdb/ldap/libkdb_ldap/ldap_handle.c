@@ -70,7 +70,6 @@ krb5_update_server_info(krb5_ldap_server_handle *ldap_server_handle,
             if ((st=ldap_result2error(ldap_server_handle->ldap_handle, result, 1)) == LDAP_SUCCESS) {
                 server_info->server_status = ON;
             } else {
-                /* ?? */        krb5_set_error_message(0, 0, "%s", ldap_err2string(st));
                 server_info->server_status = OFF;
                 time(&server_info->downtime);
             }

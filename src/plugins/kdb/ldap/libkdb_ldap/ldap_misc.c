@@ -84,8 +84,8 @@ prof_get_integer_def(krb5_context ctx, const char *conf_section,
                                KDB_MODULE_SECTION, conf_section, name,
                                0, &out_temp);
     if (err) {
-        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
-                               name, error_message(err));
+        k5_setmsg(ctx, err, _("Error reading '%s' attribute: %s"), name,
+                  error_message(err));
         return err;
     }
     if (out_temp != 0) {
@@ -96,8 +96,8 @@ prof_get_integer_def(krb5_context ctx, const char *conf_section,
                                KDB_MODULE_DEF_SECTION, name, 0,
                                dfl, &out_temp);
     if (err) {
-        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
-                               name, error_message(err));
+        k5_setmsg(ctx, err, _("Error reading '%s' attribute: %s"), name,
+                  error_message(err));
         return err;
     }
     *out = out_temp;
@@ -116,8 +116,8 @@ prof_get_boolean_def(krb5_context ctx, const char *conf_section,
     err = profile_get_boolean(ctx->profile, KDB_MODULE_SECTION, conf_section,
                               name, -1, &out_temp);
     if (err) {
-        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
-                               name, error_message(err));
+        k5_setmsg(ctx, err, _("Error reading '%s' attribute: %s"), name,
+                  error_message(err));
         return err;
     }
     if (out_temp != -1) {
@@ -127,8 +127,8 @@ prof_get_boolean_def(krb5_context ctx, const char *conf_section,
     err = profile_get_boolean(ctx->profile, KDB_MODULE_DEF_SECTION, name, 0,
                               dfl, &out_temp);
     if (err) {
-        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
-                               name, error_message(err));
+        k5_setmsg(ctx, err, _("Error reading '%s' attribute: %s"), name,
+                  error_message(err));
         return err;
     }
     *out = out_temp;
@@ -147,8 +147,8 @@ prof_get_string_def(krb5_context ctx, const char *conf_section,
                               KDB_MODULE_SECTION, conf_section, name,
                               0, out);
     if (err) {
-        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
-                               name, error_message(err));
+        k5_setmsg(ctx, err, _("Error reading '%s' attribute: %s"), name,
+                  error_message(err));
         return err;
     }
     if (*out != 0)
@@ -157,8 +157,8 @@ prof_get_string_def(krb5_context ctx, const char *conf_section,
                               KDB_MODULE_DEF_SECTION, name, 0,
                               0, out);
     if (err) {
-        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
-                               name, error_message(err));
+        k5_setmsg(ctx, err, _("Error reading '%s' attribute: %s"), name,
+                  error_message(err));
         return err;
     }
     return 0;
@@ -248,15 +248,14 @@ krb5_ldap_parse_db_params(krb5_context context, char **db_args)
             /* "temporary" is passed by kdb5_util load without -update,
              * which we don't support. */
             status = EINVAL;
-            krb5_set_error_message(context, status,
-                                   _("KDB module requires -update argument"));
+            k5_setmsg(context, status,
+                      _("KDB module requires -update argument"));
             goto cleanup;
         }
 
         if (val == NULL) {
             status = EINVAL;
-            krb5_set_error_message(context, status, _("'%s' value missing"),
-                                   opt);
+            k5_setmsg(context, status, _("'%s' value missing"), opt);
             goto cleanup;
         }
 
@@ -286,8 +285,7 @@ krb5_ldap_parse_db_params(krb5_context context, char **db_args)
             lctx->ldap_debug = atoi(val);
         } else {
             status = EINVAL;
-            krb5_set_error_message(context, status, _("unknown option '%s'"),
-                                   opt);
+            k5_setmsg(context, status, _("unknown option '%s'"), opt);
             goto cleanup;
         }
 
@@ -359,8 +357,8 @@ krb5_ldap_read_server_params(krb5_context context, char *conf_section,
 
     if (ldap_context->max_server_conns < 2) {
         st = EINVAL;
-        krb5_set_error_message(context, st, _("Minimum connections required "
-                                              "per server is 2"));
+        k5_setmsg(context, st,
+                  _("Minimum connections required per server is 2"));
         goto cleanup;
     }
 
@@ -406,8 +404,8 @@ krb5_ldap_read_server_params(krb5_context context, char *conf_section,
     if (ldap_context->server_info_list == NULL) {
         if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
                                    KRB5_CONF_LDAP_SERVERS, NULL, &tempval)) != 0) {
-            krb5_set_error_message(context, st, _("Error reading "
-                                                  "'ldap_servers' attribute"));
+            k5_setmsg(context, st,
+                      _("Error reading 'ldap_servers' attribute"));
             goto cleanup;
         }
 
@@ -1327,7 +1325,7 @@ krb5_error_code
 krb5_ldap_lock(krb5_context kcontext, int mode)
 {
     krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
+    k5_setmsg(kcontext, status, "LDAP %s", error_message(status));
     return status;
 }
 
@@ -1335,7 +1333,7 @@ krb5_error_code
 krb5_ldap_unlock(krb5_context kcontext)
 {
     krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
+    k5_setmsg(kcontext, status, "LDAP %s", error_message(status));
     return status;
 }
 

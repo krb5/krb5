@@ -160,8 +160,8 @@ parse_modstr(krb5_context context, const char *modstr,
 
     sep = strchr(modstr, ':');
     if (sep == NULL) {
-        krb5_set_error_message(context, KRB5_PLUGIN_BAD_MODULE_SPEC,
-                               _("Invalid module specifier %s"), modstr);
+        k5_setmsg(context, KRB5_PLUGIN_BAD_MODULE_SPEC,
+                  _("Invalid module specifier %s"), modstr);
         return KRB5_PLUGIN_BAD_MODULE_SPEC;
     }
 
@@ -397,9 +397,9 @@ k5_plugin_load(krb5_context context, int interface_id, const char *modname,
             break;
         }
     }
-    krb5_set_error_message(context, KRB5_PLUGIN_NAME_NOTFOUND,
-                           _("Could not find %s plugin module named '%s'"),
-                           interface_names[interface_id], modname);
+    k5_setmsg(context, KRB5_PLUGIN_NAME_NOTFOUND,
+              _("Could not find %s plugin module named '%s'"),
+              interface_names[interface_id], modname);
     return KRB5_PLUGIN_NAME_NOTFOUND;
 }
 

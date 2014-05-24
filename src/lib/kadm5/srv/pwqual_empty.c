@@ -26,7 +26,7 @@
 
 /* Password quality module to reject empty passwords */
 
-#include "k5-platform.h"
+#include "k5-int.h"
 #include <krb5/pwqual_plugin.h>
 #include "server_internal.h"
 
@@ -38,8 +38,8 @@ empty_check(krb5_context context, krb5_pwqual_moddata data,
     /* Unlike other built-in modules, this one operates even for principals
      * with no password policy. */
     if (*password == '\0') {
-        krb5_set_error_message(context, KADM5_PASS_Q_TOOSHORT,
-                               _("Empty passwords are not allowed"));
+        k5_setmsg(context, KADM5_PASS_Q_TOOSHORT,
+                  _("Empty passwords are not allowed"));
         return KADM5_PASS_Q_TOOSHORT;
     }
     return 0;

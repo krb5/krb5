@@ -58,9 +58,8 @@ expand_temp_folder(krb5_context context, PTYPE param, const char *postfix,
     size_t len;
 
     if (!GetTempPath(sizeof(tpath) / sizeof(tpath[0]), tpath)) {
-        krb5_set_error_message(context, EINVAL,
-                               "Failed to get temporary path (GLE=%d)",
-                               GetLastError());
+        k5_setmsg(context, EINVAL, "Failed to get temporary path (GLE=%d)",
+                  GetLastError());
         return EINVAL;
     }
 
@@ -167,23 +166,22 @@ expand_userid(krb5_context context, PTYPE param, const char *postfix,
         }
 
         if (le != 0) {
-            krb5_set_error_message(context, rv,
-                                   "Can't open thread token (GLE=%d)", le);
+            k5_setmsg(context, rv, "Can't open thread token (GLE=%d)", le);
             goto cleanup;
         }
     }
 
     if (!GetTokenInformation(hToken, TokenOwner, NULL, 0, &len)) {
         if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-            krb5_set_error_message(context, rv,
-                                   "Unexpected error reading token "
-                                   "information (GLE=%d)", GetLastError());
+            k5_setmsg(context, rv,
+                      "Unexpected error reading token information (GLE=%d)",
+                      GetLastError());
             goto cleanup;
         }
 
         if (len == 0) {
-            krb5_set_error_message(context, rv, "GetTokenInformation() "
-                                   "returned truncated buffer");
+            k5_setmsg(context, rv,
+                      "GetTokenInformation() returned truncated buffer");
             goto cleanup;
         }
 
@@ -193,20 +191,20 @@ expand_userid(krb5_context context, PTYPE param, const char *postfix,
             goto cleanup;
         }
     } else {
-        krb5_set_error_message(context, rv, "GetTokenInformation() returned "
-                               "truncated buffer");
+        k5_setmsg(context, rv,
+                  "GetTokenInformation() returned truncated buffer");
         goto cleanup;
     }
 
     if (!GetTokenInformation(hToken, TokenOwner, pOwner, len, &len)) {
-        krb5_set_error_message(context, rv, "GetTokenInformation() failed. "
-                               "GLE=%d", GetLastError());
+        k5_setmsg(context, rv,
+                  "GetTokenInformation() failed.  GLE=%d", GetLastError());
         goto cleanup;
     }
 
     if (!ConvertSidToStringSid(pOwner->Owner, &strSid)) {
-        krb5_set_error_message(context, rv, "Can't convert SID to string. "
-                               "GLE=%d", GetLastError());
+        k5_setmsg(context, rv,
+                  "Can't convert SID to string.  GLE=%d", GetLastError());
         goto cleanup;
     }
 
@@ -243,8 +241,7 @@ expand_csidl(krb5_context context, PTYPE folder, const char *postfix,
 
     if (SHGetFolderPath(NULL, folder, NULL, SHGFP_TYPE_CURRENT,
                         path) != S_OK) {
-        krb5_set_error_message(context, EINVAL,
-                               "Unable to determine folder path");
+        k5_setmsg(context, EINVAL, "Unable to determine folder path");
         return EINVAL;
     }
 
@@ -316,9 +313,8 @@ expand_username(krb5_context context, PTYPE param, const char *postfix,
     char pwbuf[BUFSIZ];
 
     if (k5_getpwuid_r(euid, &pwx, pwbuf, sizeof(pwbuf), &pw) != 0) {
-        krb5_set_error_message(context, ENOENT,
-                               _("Can't find username for uid %lu"),
-                               (unsigned long)euid);
+        k5_setmsg(context, ENOENT, _("Can't find username for uid %lu"),
+                  (unsigned long)euid);
         return ENOENT;
     }
     *str = strdup(pw->pw_name);
@@ -406,7 +402,7 @@ expand_token(krb5_context context, const char *token, const char *token_end,
 
     if (token[0] != '%' || token[1] != '{' || token_end[0] != '}' ||
         token_end - token <= 2) {
-        krb5_set_error_message(context, EINVAL, _("Invalid token"));
+        k5_setmsg(context, EINVAL, _("Invalid token"));
         return EINVAL;
     }
 
@@ -422,7 +418,7 @@ expand_token(krb5_context context, const char *token, const char *token_end,
         }
     }
 
-    krb5_set_error_message(context, EINVAL, _("Invalid token"));
+    k5_setmsg(context, EINVAL, _("Invalid token"));
     return EINVAL;
 }
 
@@ -506,7 +502,7 @@ k5_expand_path_tokens_extra(krb5_context context, const char *path_in,
         tok_end = strchr(tok_begin, '}');
         if (tok_end == NULL) {
             ret = EINVAL;
-            krb5_set_error_message(context, ret, _("variable missing }"));
+            k5_setmsg(context, ret, _("variable missing }"));
             goto cleanup;
         }
 

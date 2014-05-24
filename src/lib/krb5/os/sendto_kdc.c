@@ -488,9 +488,9 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
         if (err == KDC_ERR_SVC_UNAVAILABLE) {
             retval = KRB5KDC_ERR_SVC_UNAVAILABLE;
         } else {
-            krb5_set_error_message(context, retval,
-                                   _("Cannot contact any KDC for realm "
-                                     "'%.*s'"), realm->length, realm->data);
+            k5_setmsg(context, retval,
+                      _("Cannot contact any KDC for realm '%.*s'"),
+                      realm->length, realm->data);
         }
     }
     if (retval)

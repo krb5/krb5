@@ -71,9 +71,8 @@ ec_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
 
     if (armor_key == NULL) {
         retval = ENOENT;
-        krb5_set_error_message(context, ENOENT,
-                               _("Encrypted Challenge used outside of FAST "
-                                 "tunnel"));
+        k5_setmsg(context, ENOENT,
+                  _("Encrypted Challenge used outside of FAST tunnel"));
     }
     scratch.data = (char *) data->contents;
     scratch.length = data->length;
@@ -107,9 +106,8 @@ ec_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
         }
         if (client_keys[i].enctype == 0) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
-            krb5_set_error_message(context, retval,
-                                   _("Incorrect password in encrypted "
-                                     "challenge"));
+            k5_setmsg(context, retval,
+                      _("Incorrect password in encrypted challenge"));
         }
     }
     if (retval == 0)

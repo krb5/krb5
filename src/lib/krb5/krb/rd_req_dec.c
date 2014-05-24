@@ -142,15 +142,13 @@ keytab_fetch_error(krb5_context context, krb5_error_code code,
         return ret;
     if (krb5_principal_compare(context, princ, tkt_server)) {
         ret = KRB5KRB_AP_ERR_BADKEYVER;
-        krb5_set_error_message(context, ret,
-                               _("Cannot find key for %s kvno %d in keytab"),
-                               sname, (int)tkt_kvno);
+        k5_setmsg(context, ret, _("Cannot find key for %s kvno %d in keytab"),
+                  sname, (int)tkt_kvno);
     } else {
         ret = KRB5KRB_AP_ERR_NOT_US;
-        krb5_set_error_message(context, ret,
-                               _("Cannot find key for %s kvno %d in keytab "
-                                 "(request ticket server %s)"),
-                               sname, (int)tkt_kvno, tsname);
+        k5_setmsg(context, ret,
+                  _("Cannot find key for %s kvno %d in keytab (request ticket "
+                    "server %s)"), sname, (int)tkt_kvno, tsname);
     }
     krb5_free_unparsed_name(context, sname);
     krb5_free_unparsed_name(context, tsname);
@@ -173,9 +171,9 @@ integrity_error(krb5_context context, krb5_const_principal server,
 
     ret = krb5_principal_compare(context, server, tkt_server) ?
         KRB5KRB_AP_ERR_BAD_INTEGRITY : KRB5KRB_AP_ERR_NOT_US;
-    krb5_set_error_message(context, ret,
-                           _("Cannot decrypt ticket for %s using keytab "
-                             "key for %s"), tsname, sname);
+    k5_setmsg(context, ret,
+              _("Cannot decrypt ticket for %s using keytab key for %s"),
+              tsname, sname);
     krb5_free_unparsed_name(context, sname);
     krb5_free_unparsed_name(context, tsname);
     return ret;
@@ -195,9 +193,9 @@ nomatch_error(krb5_context context, krb5_const_principal server,
     if (ret)
         return ret;
 
-    krb5_set_error_message(context, KRB5KRB_AP_ERR_NOT_US,
-                           _("Server principal %s does not match request "
-                             "ticket server %s"), sname, tsname);
+    k5_setmsg(context, KRB5KRB_AP_ERR_NOT_US,
+              _("Server principal %s does not match request ticket server %s"),
+              sname, tsname);
     krb5_free_unparsed_name(context, sname);
     krb5_free_unparsed_name(context, tsname);
     return KRB5KRB_AP_ERR_NOT_US;
@@ -225,52 +223,49 @@ iteration_error(krb5_context context, krb5_const_principal server,
     if (!found_server_match) {
         ret = KRB5KRB_AP_ERR_NOKEY;
         if (sname == NULL)  {
-            krb5_set_error_message(context, ret, _("No keys in keytab"));
+            k5_setmsg(context, ret, _("No keys in keytab"));
         } else {
-            krb5_set_error_message(context, ret,
-                                   _("Server principal %s does not match any "
-                                     "keys in keytab"), sname);
+            k5_setmsg(context, ret,
+                      _("Server principal %s does not match any keys in "
+                        "keytab"), sname);
         }
     } else if (tkt_server_mismatch) {
         assert(sname != NULL);  /* Null server princ would match anything. */
         ret = KRB5KRB_AP_ERR_NOT_US;
-        krb5_set_error_message(context, ret,
-                               _("Request ticket server %s found in keytab "
-                                 "but does not match server principal %s"),
-                               tsname, sname);
+        k5_setmsg(context, ret,
+                  _("Request ticket server %s found in keytab but does not "
+                    "match server principal %s"), tsname, sname);
     } else if (!found_tkt_server) {
         ret = KRB5KRB_AP_ERR_NOT_US;
-        krb5_set_error_message(context, ret,
-                               _("Request ticket server %s not found in "
-                                 "keytab (ticket kvno %d)"),
-                               tsname, (int)tkt_kvno);
+        k5_setmsg(context, ret,
+                  _("Request ticket server %s not found in keytab (ticket "
+                    "kvno %d)"), tsname, (int)tkt_kvno);
     } else if (!found_kvno) {
         ret = KRB5KRB_AP_ERR_BADKEYVER;
         if (found_higher_kvno) {
-            krb5_set_error_message(context, ret,
-                                   _("Request ticket server %s kvno %d not "
-                                     "found in keytab; ticket is likely out "
-                                     "of date"), tsname, (int)tkt_kvno);
+            k5_setmsg(context, ret,
+                      _("Request ticket server %s kvno %d not found in "
+                        "keytab; ticket is likely out of date"),
+                      tsname, (int)tkt_kvno);
         } else {
-            krb5_set_error_message(context, ret,
-                                   _("Request ticket server %s kvno %d not "
-                                     "found in keytab; keytab is likely out "
-                                     "of date"), tsname, (int)tkt_kvno);
+            k5_setmsg(context, ret,
+                      _("Request ticket server %s kvno %d not found in "
+                        "keytab; keytab is likely out of date"),
+                      tsname, (int)tkt_kvno);
         }
     } else if (!found_enctype) {
         /* There's no defined error for having the key version but not the
          * enctype. */
         ret = KRB5KRB_AP_ERR_BADKEYVER;
-        krb5_set_error_message(context, ret,
-                               _("Request ticket server %s kvno %d found in "
-                                 "keytab but not with enctype %s"),
-                               tsname, (int)tkt_kvno, encname);
+        k5_setmsg(context, ret,
+                  _("Request ticket server %s kvno %d found in keytab but not "
+                    "with enctype %s"), tsname, (int)tkt_kvno, encname);
     } else {
         ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
-        krb5_set_error_message(context, ret,
-                               _("Request ticket server %s kvno %d enctype %s "
-                                 "found in keytab but cannot decrypt ticket"),
-                               tsname, (int)tkt_kvno, encname);
+        k5_setmsg(context, ret,
+                  _("Request ticket server %s kvno %d enctype %s found in "
+                    "keytab but cannot decrypt ticket"),
+                  tsname, (int)tkt_kvno, encname);
     }
 
     krb5_free_unparsed_name(context, sname);
@@ -905,9 +900,8 @@ negotiate_etype(krb5_context context,
             if (krb5_enctype_to_string(desired_etypes[i],
                                        enctype_name,
                                        sizeof(enctype_name)) == 0)
-                krb5_set_error_message(context, KRB5_NOPERM_ETYPE,
-                                       _("Encryption type %s not permitted"),
-                                       enctype_name);
+                k5_setmsg(context, KRB5_NOPERM_ETYPE,
+                          _("Encryption type %s not permitted"), enctype_name);
             return KRB5_NOPERM_ETYPE;
         }
     }
