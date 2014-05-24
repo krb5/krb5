@@ -2257,16 +2257,4 @@ krb5_boolean k5_etypes_contains(const krb5_enctype *list, krb5_enctype etype);
 void k5_change_error_message_code(krb5_context ctx, krb5_error_code oldcode,
                                   krb5_error_code newcode);
 
-#ifdef DEBUG_ERROR_LOCATIONS
-#define krb5_set_error_message(ctx, code, ...)                          \
-    krb5_set_error_message_fl(ctx, code, __FILE__, __LINE__, __VA_ARGS__)
-#endif
-void KRB5_CALLCONV_C
-krb5_set_error_message_fl(krb5_context ctx, krb5_error_code code,
-                          const char *file, int line, const char *fmt, ...)
-#ifdef __GNUC__
-    __attribute__((__format__(printf,5,6)))
-#endif
-    ;
-
 #endif /* _KRB5_INT_H */
