@@ -40,37 +40,18 @@ krb5int_err_init (void)
 #define lock()          k5_mutex_lock(&krb5int_error_info_support_mutex)
 #define unlock()        k5_mutex_unlock(&krb5int_error_info_support_mutex)
 
-#undef k5_set_error
 void
 k5_set_error(struct errinfo *ep, long code, const char *fmt, ...)
 {
     va_list args;
 
     va_start(args, fmt);
-    k5_vset_error_fl(ep, code, NULL, 0, fmt, args);
-    va_end(args);
-}
-
-void
-k5_set_error_fl(struct errinfo *ep, long code, const char *file, int line,
-                const char *fmt, ...)
-{
-    va_list args;
-
-    va_start(args, fmt);
-    k5_vset_error_fl(ep, code, file, line, fmt, args);
+    k5_vset_error(ep, code, fmt, args);
     va_end(args);
 }
 
 void
 k5_vset_error(struct errinfo *ep, long code, const char *fmt, va_list args)
-{
-    k5_vset_error_fl(ep, code, NULL, 0, fmt, args);
-}
-
-void
-k5_vset_error_fl(struct errinfo *ep, long code, const char *file, int line,
-                 const char *fmt, va_list args)
 {
     char *str, *slash;
 
@@ -80,17 +61,6 @@ k5_vset_error_fl(struct errinfo *ep, long code, const char *file, int line,
     if (vasprintf(&str, fmt, args) < 0)
         return;
     ep->msg = str;
-
-    if (line) {
-        /* Try to add file and line suffix. */
-        slash = strrchr(file, '/');
-        if (slash)
-            file = slash + 1;
-        if (asprintf(&str, "%s (%s: %d)", ep->msg, file, line) > 0) {
-            free(ep->msg);
-            ep->msg = str;
-        }
-    }
 }
 
 static inline const char *
