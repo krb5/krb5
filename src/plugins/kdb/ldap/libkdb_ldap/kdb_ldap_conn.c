@@ -46,14 +46,13 @@ krb5_validate_ldap_context(krb5_context context,
 
     if (ldap_context->bind_dn == NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st, _("LDAP bind dn value missing "));
+        k5_setmsg(context, st, _("LDAP bind dn value missing "));
         goto err_out;
     }
 
     if (ldap_context->bind_pwd == NULL && ldap_context->service_password_file == NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st,
-                               _("LDAP bind password value missing "));
+        k5_setmsg(context, st, _("LDAP bind password value missing "));
         goto err_out;
     }
 
@@ -71,8 +70,7 @@ krb5_validate_ldap_context(krb5_context context,
     /* NULL password not allowed */
     if (ldap_context->bind_pwd != NULL && strlen(ldap_context->bind_pwd) == 0) {
         st = EINVAL;
-        krb5_set_error_message(context, st,
-                               _("Service password length is zero"));
+        k5_setmsg(context, st, _("Service password length is zero"));
         goto err_out;
     }
 
@@ -113,9 +111,9 @@ krb5_ldap_initialize(krb5_ldap_context *ldap_context,
 
     /* ldap init */
     if ((st = ldap_initialize(&ldap_server_handle->ldap_handle, server_info->server_name)) != 0) {
-        krb5_set_error_message(ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR,
-                               _("Cannot create LDAP handle for '%s': %s"),
-                               server_info->server_name, ldap_err2string(st));
+        k5_setmsg(ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR,
+                  _("Cannot create LDAP handle for '%s': %s"),
+                  server_info->server_name, ldap_err2string(st));
         st = KRB5_KDB_ACCESS_ERROR;
         goto err_out;
     }
@@ -125,10 +123,10 @@ krb5_ldap_initialize(krb5_ldap_context *ldap_context,
         server_info->server_status = ON;
         krb5_update_ldap_handle(ldap_server_handle, server_info);
     } else {
-        krb5_set_error_message(ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR,
-                               _("Cannot bind to LDAP server '%s' as '%s'"
-                                 ": %s"), server_info->server_name,
-                               ldap_context->bind_dn, ldap_err2string(st));
+        k5_setmsg(ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR,
+                  _("Cannot bind to LDAP server '%s' as '%s': %s"),
+                  server_info->server_name, ldap_context->bind_dn,
+                  ldap_err2string(st));
         st = KRB5_KDB_ACCESS_ERROR;
         server_info->server_status = OFF;
         time(&server_info->downtime);

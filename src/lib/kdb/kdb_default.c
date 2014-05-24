@@ -160,9 +160,9 @@ krb5_def_store_mkey_list(krb5_context       context,
         /* if keyfile exists it better be a regular file */
         if (!S_ISREG(stb.st_mode)) {
             retval = EINVAL;
-            krb5_set_error_message(context, retval,
-                                   _("keyfile (%s) is not a regular file: %s"),
-                                   keyfile, error_message(retval));
+            k5_setmsg(context, retval,
+                      _("keyfile (%s) is not a regular file: %s"),
+                      keyfile, error_message(retval));
             goto out;
         }
     }
@@ -173,8 +173,8 @@ krb5_def_store_mkey_list(krb5_context       context,
      */
     retval = asprintf(&tmp_ktname, "FILE:%s_tmp", keyfile);
     if (retval < 0) {
-        krb5_set_error_message(context, retval,
-                               _("Could not create temp keytab file name."));
+        k5_setmsg(context, retval,
+                  _("Could not create temp keytab file name."));
         goto out;
     }
 
@@ -198,9 +198,8 @@ krb5_def_store_mkey_list(krb5_context       context,
         goto out;
     } else if (statrc == 0) {
         retval = EEXIST;
-        krb5_set_error_message(context, retval,
-                               _("Temporary stash file already exists: %s."),
-                               tmp_ktpath);
+        k5_setmsg(context, retval,
+                  _("Temporary stash file already exists: %s."), tmp_ktpath);
         goto out;
     }
 
@@ -227,10 +226,9 @@ krb5_def_store_mkey_list(krb5_context       context,
         /* Atomically rename temp keyfile to original filename. */
         if (rename(tmp_ktpath, keyfile) < 0) {
             retval = errno;
-            krb5_set_error_message(context, retval,
-                                   _("rename of temporary keyfile (%s) to "
-                                     "(%s) failed: %s"), tmp_ktpath, keyfile,
-                                   error_message(errno));
+            k5_setmsg(context, retval,
+                      _("rename of temporary keyfile (%s) to (%s) failed: %s"),
+                      tmp_ktpath, keyfile, error_message(errno));
         }
     }
 
@@ -417,9 +415,9 @@ krb5_db_def_fetch_mkey(krb5_context   context,
      * key, but set a message indicating the actual error.
      */
     if (retval != 0) {
-        krb5_set_error_message(context, KRB5_KDB_CANTREAD_STORED,
-                               _("Can not fetch master key (error: %s)."),
-                               error_message(retval));
+        k5_setmsg(context, KRB5_KDB_CANTREAD_STORED,
+                  _("Can not fetch master key (error: %s)."),
+                  error_message(retval));
         return KRB5_KDB_CANTREAD_STORED;
     } else
         return 0;
@@ -480,9 +478,9 @@ krb5_def_fetch_mkey_list(krb5_context        context,
             }
         }
         if (found_key != TRUE) {
-            krb5_set_error_message(context, KRB5_KDB_BADMASTERKEY,
-                                   _("Unable to decrypt latest master key "
-                                     "with the provided master key\n"));
+            k5_setmsg(context, KRB5_KDB_BADMASTERKEY,
+                      _("Unable to decrypt latest master key with the "
+                        "provided master key\n"));
             retval = KRB5_KDB_BADMASTERKEY;
             goto clean_n_exit;
         }

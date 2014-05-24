@@ -203,9 +203,8 @@ krb5_init_creds_set_keytab(krb5_context context,
     if (etype_list == NULL) {
         ret = krb5_unparse_name(context, ctx->request->client, &name);
         if (ret == 0) {
-            krb5_set_error_message(context, KRB5_KT_NOTFOUND,
-                                   _("Keytab contains no suitable keys for "
-                                     "%s"), name);
+            k5_setmsg(context, KRB5_KT_NOTFOUND,
+                      _("Keytab contains no suitable keys for %s"), name);
         }
         krb5_free_unparsed_name(context, name);
         return KRB5_KT_NOTFOUND;

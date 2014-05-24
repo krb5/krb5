@@ -128,8 +128,7 @@ cleanup:
         int rc;
         rc = krb5_ldap_delete_krbcontainer(context,
                                            ldap_context->container_dn);
-        krb5_set_error_message(context, rc,
-                               _("could not complete roll-back, error "
+        k5_setmsg(context, rc, _("could not complete roll-back, error "
                                  "deleting Kerberos Container"));
     }
 

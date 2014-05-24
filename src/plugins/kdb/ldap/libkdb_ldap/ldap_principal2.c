@@ -105,8 +105,7 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
 
     if (is_principal_in_realm(ldap_context, searchfor) != 0) {
         st = KRB5_KDB_NOENTRY;
-        krb5_set_error_message(context, st,
-                               _("Principal does not belong to realm"));
+        k5_setmsg(context, st, _("Principal does not belong to realm"));
         goto cleanup;
     }
 
@@ -276,9 +275,8 @@ process_db_args(krb5_context context, char **db_args, xargs_t *xargs,
                         xargs->dn != NULL || xargs->containerdn != NULL ||
                         xargs->linkdn != NULL) {
                         st = EINVAL;
-                        krb5_set_error_message(context, st,
-                                               _("%s option not supported"),
-                                               arg);
+                        k5_setmsg(context, st, _("%s option not supported"),
+                                  arg);
                         goto cleanup;
                     }
                     dptr = &xargs->dn;
@@ -286,41 +284,36 @@ process_db_args(krb5_context context, char **db_args, xargs_t *xargs,
                     if (optype == MODIFY_PRINCIPAL ||
                         xargs->dn != NULL || xargs->containerdn != NULL) {
                         st = EINVAL;
-                        krb5_set_error_message(context, st,
-                                               _("%s option not supported"),
-                                               arg);
+                        k5_setmsg(context, st, _("%s option not supported"),
+                                  arg);
                         goto cleanup;
                     }
                     dptr = &xargs->containerdn;
                 } else if (strcmp(arg, LINKDN_ARG) == 0) {
                     if (xargs->dn != NULL || xargs->linkdn != NULL) {
                         st = EINVAL;
-                        krb5_set_error_message(context, st,
-                                               _("%s option not supported"),
-                                               arg);
+                        k5_setmsg(context, st, _("%s option not supported"),
+                                  arg);
                         goto cleanup;
                     }
                     dptr = &xargs->linkdn;
                 } else {
                     st = EINVAL;
-                    krb5_set_error_message(context, st,
-                                           _("unknown option: %s"), arg);
+                    k5_setmsg(context, st, _("unknown option: %s"), arg);
                     goto cleanup;
                 }
 
                 xargs->dn_from_kbd = TRUE;
                 if (arg_val == NULL || strlen(arg_val) == 0) {
                     st = EINVAL;
-                    krb5_set_error_message(context, st,
-                                           _("%s option value missing"), arg);
+                    k5_setmsg(context, st, _("%s option value missing"), arg);
                     goto cleanup;
                 }
             }
 
             if (arg_val == NULL) {
                 st = EINVAL;
-                krb5_set_error_message(context, st,
-                                       _("%s option value missing"), arg);
+                k5_setmsg(context, st, _("%s option value missing"), arg);
                 goto cleanup;
             }
             arg_val_len = strlen(arg_val) + 1;
@@ -522,8 +515,8 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
 
     if (is_principal_in_realm(ldap_context, entry->princ) != 0) {
         st = EINVAL;
-        krb5_set_error_message(context, st, _("Principal does not belong to "
-                                              "the default realm"));
+        k5_setmsg(context, st,
+                  _("Principal does not belong to the default realm"));
         goto cleanup;
     }
 
@@ -592,11 +585,10 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                     ldap_msgfree(result);
                     free(filter);
                     st = EINVAL;
-                    krb5_set_error_message(context, st,
-                                           _("operation can not continue, "
-                                             "more than one entry with "
-                                             "principal name \"%s\" found"),
-                                           user);
+                    k5_setmsg(context, st,
+                              _("operation can not continue, more than one "
+                                "entry with principal name \"%s\" found"),
+                              user);
                     goto cleanup;
                 } else if (numlentries == 1) {
                     found_entry = TRUE;
@@ -739,8 +731,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
 
         if (outofsubtree == TRUE) {
             st = EINVAL;
-            krb5_set_error_message(context, st,
-                                   _("DN is out of the realm subtree"));
+            k5_setmsg(context, st, _("DN is out of the realm subtree"));
             goto cleanup;
         }
 
@@ -796,7 +787,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         st = EINVAL;
         snprintf(errbuf, sizeof(errbuf),
                  _("ldap object is already kerberized"));
-        krb5_set_error_message(context, st, "%s", errbuf);
+        k5_setmsg(context, st, "%s", errbuf);
         goto cleanup;
     }
 
@@ -817,7 +808,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
             snprintf(errbuf, sizeof(errbuf),
                      _("link information can not be set/updated as the "
                        "kerberos principal belongs to an ldap object"));
-            krb5_set_error_message(context, st, "%s", errbuf);
+            k5_setmsg(context, st, "%s", errbuf);
             goto cleanup;
         }
         /*
@@ -831,7 +822,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
             if ((st=krb5_get_linkdn(context, entry, &linkdns)) != 0) {
                 snprintf(errbuf, sizeof(errbuf),
                          _("Failed getting object references"));
-                krb5_set_error_message(context, st, "%s", errbuf);
+                k5_setmsg(context, st, "%s", errbuf);
                 goto cleanup;
             }
             if (linkdns != NULL) {
@@ -839,7 +830,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                 snprintf(errbuf, sizeof(errbuf),
                          _("kerberos principal is already linked to a ldap "
                            "object"));
-                krb5_set_error_message(context, st, "%s", errbuf);
+                k5_setmsg(context, st, "%s", errbuf);
                 for (j=0; linkdns[j] != NULL; ++j)
                     free (linkdns[j]);
                 free (linkdns);
@@ -1001,7 +992,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                 goto cleanup;
         } else {
             st = EINVAL;
-            krb5_set_error_message(context, st, "Password policy value null");
+            k5_setmsg(context, st, "Password policy value null");
             goto cleanup;
         }
     } else if (entry->mask & KADM5_LOAD && found_entry == TRUE) {
@@ -1196,7 +1187,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                          _("Principal delete failed (trying to replace "
                            "entry): %s"), ldap_err2string(st));
                 st = translate_ldap_error (st, OP_ADD);
-                krb5_set_error_message(context, st, "%s", errbuf);
+                k5_setmsg(context, st, "%s", errbuf);
                 goto cleanup;
             } else {
                 st = ldap_add_ext_s(ld, standalone_principal_dn, mods, NULL, NULL);
@@ -1206,7 +1197,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
             snprintf(errbuf, sizeof(errbuf), _("Principal add failed: %s"),
                      ldap_err2string(st));
             st = translate_ldap_error (st, OP_ADD);
-            krb5_set_error_message(context, st, "%s", errbuf);
+            k5_setmsg(context, st, "%s", errbuf);
             goto cleanup;
         }
     } else {
@@ -1244,7 +1235,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
             snprintf(errbuf, sizeof(errbuf), _("User modification failed: %s"),
                      ldap_err2string(st));
             st = translate_ldap_error (st, OP_MOD);
-            krb5_set_error_message(context, st, "%s", errbuf);
+            k5_setmsg(context, st, "%s", errbuf);
             goto cleanup;
         }
 
@@ -1373,9 +1364,9 @@ krb5_decode_krbsecretkey(krb5_context context, krb5_db_entry *entries,
         if (st != 0) {
             const char *msg = error_message(st);
             st = -1; /* Something more appropriate ? */
-            krb5_set_error_message(context, st, _("unable to decode stored "
-                                                  "principal key data (%s)"),
-                                   msg);
+            k5_setmsg(context, st,
+                      _("unable to decode stored principal key data (%s)"),
+                      msg);
             goto cleanup;
         }
         noofkeys += n_kd;

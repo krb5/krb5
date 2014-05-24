@@ -569,9 +569,8 @@ open_cache_file(krb5_context context, krb5_ccache id, int mode)
     if (f == NO_FILE) {
         if (errno == ENOENT) {
             ret = KRB5_FCC_NOFILE;
-            krb5_set_error_message(context, ret,
-                                   _("Credentials cache file '%s' not found"),
-                                   data->filename);
+            k5_setmsg(context, ret, _("Credentials cache file '%s' not found"),
+                      data->filename);
             return ret;
         } else {
             return interpret_errno(context, errno);
@@ -1577,9 +1576,9 @@ interpret_errno(krb5_context context, int errnum)
     case ENXIO:
     default:
         ret = KRB5_CC_IO;
-        krb5_set_error_message(context, ret,
-                               _("Credentials cache I/O operation failed "
-                                 "(%s)"), strerror(errnum));
+        k5_setmsg(context, ret,
+                  _("Credentials cache I/O operation failed (%s)"),
+                  strerror(errnum));
     }
     return ret;
 }
