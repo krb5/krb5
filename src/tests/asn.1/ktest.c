@@ -908,6 +908,7 @@ ktest_make_sample_key_data(krb5_key_data *p, int i)
     len = asprintf(&str, "key%d", i);
     if (len < 0)
         abort();
+    p->key_data_ver = 2;
     p->key_data_type[0] = 2;
     p->key_data_length[0] = (unsigned int) len;
     p->key_data_contents[0] = (krb5_octet *)str;
