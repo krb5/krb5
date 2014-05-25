@@ -404,16 +404,34 @@ asn1_decode_sequence_of_keys(krb5_data *in, krb5_key_data **out,
 
 /* Decoding ASN.1 encoded key */
 static struct berval **
-krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data,
+krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
                          krb5_kvno mkvno) {
     struct berval **ret = NULL;
     int currkvno;
     int num_versions = 1;
     int i, j, last;
     krb5_error_code err = 0;
+    krb5_key_data *key_data;
 
     if (n_key_data <= 0)
         return NULL;
+
+    /* Make a shallow copy of the key data so we can alter it. */
+    key_data = k5calloc(n_key_data, sizeof(*key_data), &err);
+    if (key_data_in == NULL)
+        goto cleanup;
+    memcpy(key_data, key_data_in, n_key_data * sizeof(*key_data));
+
+    /* Unpatched krb5 1.11 and 1.12 cannot decode KrbKey sequences with no salt
+     * field.  For compatibility, always encode a salt field. */
+    for (i = 0; i < n_key_data; i++) {
+        if (key_data[i].key_data_ver == 1) {
+            key_data[i].key_data_ver = 2;
+            key_data[i].key_data_type[1] = KRB5_KDB_SALTTYPE_NORMAL;
+            key_data[i].key_data_length[1] = 0;
+            key_data[i].key_data_contents[1] = NULL;
+        }
+    }
 
     /* Find the number of key versions */
     for (i = 0; i < n_key_data - 1; i++)
@@ -450,6 +468,7 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data,
 
 cleanup:
 
+    free(key_data);
     if (err != 0) {
         if (ret != NULL) {
             for (i = 0; i <= num_versions; i++)
