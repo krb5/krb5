@@ -1,6 +1,7 @@
 /* lib/rpc/bindresvport.c */
 /*
  * Copyright (c) 2010, Oracle America, Inc.
+ * Copyright (c) 2014, Andreas Schneider <asn@samba.org>
  *
  * All rights reserved.
  *
@@ -33,6 +34,8 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/errno.h>
@@ -40,27 +43,31 @@
 #include <netinet/in.h>
 #include <gssrpc/rpc.h>
 #include <errno.h>
+#include "socket-utils.h"
 
 /*
  * Bind a socket to a privileged IP port
  */
 int
-bindresvport(int sd, struct sockaddr_in *sockin)
+bindresvport_sa(int sd, struct sockaddr *sa)
 {
 	int res;
 	static short port;
-	struct sockaddr_in myaddr;
+	struct sockaddr_storage myaddr;
+	socklen_t salen;
 	int i;
 
 #define STARTPORT 600
 #define ENDPORT (IPPORT_RESERVED - 1)
 #define NPORTS	(ENDPORT - STARTPORT + 1)
-
-	if (sockin == (struct sockaddr_in *)0) {
-		sockin = &myaddr;
-		memset(sockin, 0, sizeof (*sockin));
-		sockin->sin_family = AF_INET;
-	} else if (sockin->sin_family != AF_INET) {
+	if (sa == NULL) {
+		salen = sizeof(myaddr);
+		sa = ss2sa(&myaddr);
+		res = getsockname(sd, sa, &salen);
+		if (res < 0)
+			return (-1);
+	}
+	if (!sa_is_inet(sa)) {
 		errno = EPFNOSUPPORT;
 		return (-1);
 	}
@@ -70,12 +77,17 @@ bindresvport(int sd, struct sockaddr_in *sockin)
 	res = -1;
 	errno = EADDRINUSE;
 	for (i = 0; i < NPORTS && res < 0 && errno == EADDRINUSE; i++) {
-		sockin->sin_port = htons(port++);
+		sa_setport(sa, htons(port++));
 		if (port > ENDPORT) {
 			port = STARTPORT;
 		}
-		res = bind(sd, (struct sockaddr *) sockin,
-			   sizeof(struct sockaddr_in));
+		res = bind(sd, sa, socklen(sa));
 	}
 	return (res);
+}
+
+int
+bindresvport(int sd, struct sockaddr_in *sockin)
+{
+	return (bindresvport_sa(sd, (struct sockaddr *)sockin));
 }
