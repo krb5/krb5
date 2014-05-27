@@ -116,35 +116,5 @@ bindresvport_sa(int sd, struct sockaddr *sa)
 int
 bindresvport(int sd, struct sockaddr_in *sockin)
 {
-	int res;
-	static short port;
-	struct sockaddr_in myaddr;
-	int i;
-
-#define STARTPORT 600
-#define ENDPORT (IPPORT_RESERVED - 1)
-#define NPORTS	(ENDPORT - STARTPORT + 1)
-
-	if (sockin == (struct sockaddr_in *)0) {
-		sockin = &myaddr;
-		memset(sockin, 0, sizeof (*sockin));
-		sockin->sin_family = AF_INET;
-	} else if (sockin->sin_family != AF_INET) {
-		errno = EPFNOSUPPORT;
-		return (-1);
-	}
-	if (port == 0) {
-		port = (getpid() % NPORTS) + STARTPORT;
-	}
-	res = -1;
-	errno = EADDRINUSE;
-	for (i = 0; i < NPORTS && res < 0 && errno == EADDRINUSE; i++) {
-		sockin->sin_port = htons(port++);
-		if (port > ENDPORT) {
-			port = STARTPORT;
-		}
-		res = bind(sd, (struct sockaddr *) sockin,
-			   sizeof(struct sockaddr_in));
-	}
-	return (res);
+	return bindresvport_sa(sd, (struct sockaddr *)sockin);
 }
