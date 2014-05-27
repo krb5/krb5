@@ -92,6 +92,7 @@
 GSSRPC__BEGIN_DECLS
 extern int get_myaddress(struct sockaddr_in *);
 extern int bindresvport(int, struct sockaddr_in *);
+extern int bindresvport_sa(int, struct sockaddr *);
 extern int callrpc(char *, rpcprog_t, rpcvers_t, rpcproc_t, xdrproc_t,
 		   char *, xdrproc_t , char *);
 extern int getrpcport(char *, rpcprog_t, rpcvers_t, rpcprot_t);
