@@ -27,12 +27,12 @@ and the path to the module, separated by a colon.  The module name
 will often be the same as the shared object's name, but in unusual
 cases (such as a shared object which implements multiple modules for
 the same interface) it might not be.  For example, to register a
-client preauthentication module named ``otp`` installed at
-``/path/to/otp.so``, you could write::
+client preauthentication module named ``mypreauth`` installed at
+``/path/to/mypreauth.so``, you could write::
 
     [plugins]
         clpreauth = {
-            module = otp:/path/to/otp.so
+            module = mypreauth:/path/to/mypreauth.so
         }
 
 Many of the pluggable behaviors in MIT krb5 contain built-in modules
