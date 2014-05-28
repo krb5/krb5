@@ -1439,7 +1439,7 @@ get_time_offsets(krb5_context context, krb5_ccache id, int32_t *time_offset,
                  int32_t *usec_offset)
 {
     krcc_data *data = id->data;
-    krb5_error_code ret;
+    krb5_error_code ret = 0;
     key_serial_t key;
     void *payload = NULL;
     int psize;
