@@ -801,8 +801,7 @@ static int parse_keysalts(Tcl_Interp *interp, const char *list,
         return retcode;
     }
     if (argc != num_keysalts) {
-        sprintf(interp->result, "%d keysalts specified, "
-                "but num_keysalts is %d", argc, num_keysalts);
+        Tcl_SetResult(interp, "wrong number of keysalts", TCL_STATIC);
         retcode = TCL_ERROR;
         goto finished;
     }
@@ -814,8 +813,7 @@ static int parse_keysalts(Tcl_Interp *interp, const char *list,
             goto finished;
         }
         if (argc1 != 2) {
-            sprintf(interp->result, "wrong # fields in keysalt "
-                    "(%d should be 2)", argc1);
+            Tcl_SetResult(interp, "wrong # of fields in keysalt", TCL_STATIC);
             retcode = TCL_ERROR;
             goto finished;
         }
@@ -856,8 +854,7 @@ static int parse_key_data(Tcl_Interp *interp, const char *list,
     *key_data = NULL;
     if (list == NULL) {
         if (n_key_data != 0) {
-            sprintf(interp->result, "0 key_datas specified, "
-                    "but n_key_data is %d", n_key_data);
+            Tcl_SetResult(interp, "wrong number of key_datas", TCL_STATIC);
             retcode = TCL_ERROR;
             goto finished;
         } else
@@ -868,14 +865,13 @@ static int parse_key_data(Tcl_Interp *interp, const char *list,
         return retcode;
     }
     if (argc != n_key_data) {
-        sprintf(interp->result, "%d key_datas specified, "
-                "but n_key_data is %d", argc, n_key_data);
+        Tcl_SetResult(interp, "wrong number of key_datas", TCL_STATIC);
         retcode = TCL_ERROR;
         goto finished;
     }
 
     if (argc != 0) {
-        sprintf(interp->result, "cannot parse key_data yet");
+        Tcl_SetResult(interp, "cannot parse key_data yet", TCL_STATIC);
         retcode = TCL_ERROR;
         goto finished;
     }
@@ -896,8 +892,7 @@ static int parse_tl_data(Tcl_Interp *interp, const char *list,
     *tlp = NULL;
     if (list == NULL) {
         if (n_tl_data != 0) {
-            sprintf(interp->result, "0 tl_datas specified, "
-                    "but n_tl_data is %d", n_tl_data);
+            Tcl_SetResult(interp, "wrong number of tl_datas", TCL_STATIC);
             retcode = TCL_ERROR;
             goto finished;
         } else
@@ -908,8 +903,7 @@ static int parse_tl_data(Tcl_Interp *interp, const char *list,
         return retcode;
     }
     if (argc != n_tl_data) {
-        sprintf(interp->result, "%d tl_datas specified, "
-                "but n_tl_data is %d", argc, n_tl_data);
+        Tcl_SetResult(interp, "wrong number of tl_datas", TCL_STATIC);
         retcode = TCL_ERROR;
         goto finished;
     }
@@ -929,8 +923,7 @@ static int parse_tl_data(Tcl_Interp *interp, const char *list,
             goto finished;
         }
         if (argc1 != 3) {
-            sprintf(interp->result, "wrong # fields in tl_data "
-                    "(%d should be 3)", argc1);
+            Tcl_SetResult(interp, "wrong # of fields in tl_data", TCL_STATIC);
             retcode = TCL_ERROR;
             goto finished;
         }
@@ -949,9 +942,7 @@ static int parse_tl_data(Tcl_Interp *interp, const char *list,
         }
         tl->tl_data_length = tmp;
         if (tl->tl_data_length != strlen(argv1[2])) {
-            sprintf(interp->result, "specified length %d does not "
-                    "match length %lu of string \"%s\"", tmp,
-                    (unsigned long) strlen(argv1[2]), argv1[2]);
+            Tcl_SetResult(interp, "length != string length", TCL_STATIC);
             retcode = TCL_ERROR;
             goto finished;
         }
@@ -962,7 +953,7 @@ static int parse_tl_data(Tcl_Interp *interp, const char *list,
         tl = tl->tl_data_next;
     }
     if (tl != NULL) {
-        sprintf(interp->result, "tl is not NULL!");
+        Tcl_SetResult(interp, "tl is not NULL!", TCL_STATIC);
         retcode = TCL_ERROR;
         goto finished;
     }
@@ -992,9 +983,8 @@ static int parse_config_params(Tcl_Interp *interp, char *list,
     }
 
     if (argc != 20) {
-        sprintf(interp->result,
-                "wrong # args in config params structure (%d should be 20)",
-                argc);
+        Tcl_SetResult(interp, "wrong # args in config params structure",
+                      TCL_STATIC);
         retcode = TCL_ERROR;
         goto finished;
     }
@@ -1129,9 +1119,8 @@ static int parse_principal_ent(Tcl_Interp *interp, char *list,
     }
 
     if (argc != 12 && argc != 20) {
-        sprintf(interp->result,
-                "wrong # args in principal structure (%d should be 12 or 20)",
-                argc);
+        Tcl_SetResult(interp, "wrong # args in principal structure",
+                      TCL_STATIC);
         retcode = TCL_ERROR;
         goto finished;
     }
@@ -1391,8 +1380,7 @@ static int parse_policy_ent(Tcl_Interp *interp, char *list,
     }
 
     if (argc != 7 && argc != 10) {
-        sprintf(interp->result, "wrong # args in policy structure (%d should be 7 or 10)",
-                argc);
+        Tcl_SetResult(interp, "wrong # args in policy structure", TCL_STATIC);
         retcode = TCL_ERROR;
         goto finished;
     }
