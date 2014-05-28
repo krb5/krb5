@@ -220,16 +220,32 @@ create_princ(kadm5_principal_ent_rec *princ, long mask, int n_ks,
         return kadm5_create_principal(handle, princ, mask, pass);
 }
 
-/* Randomize a principal's password using the oldest appropriate kadm5 API. */
-static krb5_error_code
-randkey_princ(krb5_principal princ, krb5_boolean keepold, int n_ks,
-              krb5_key_salt_tuple *ks)
+/* Randomize a principal's password using the appropriate kadm5 API. */
+krb5_error_code
+randkey_princ(void *lhandle, krb5_principal princ, krb5_boolean keepold,
+              int n_ks, krb5_key_salt_tuple *ks, krb5_keyblock **key,
+              int *n_keys)
 {
-    if (keepold || ks) {
-        return kadm5_randkey_principal_3(handle, princ, keepold, n_ks, ks,
-                                         NULL, NULL);
-    } else
-        return kadm5_randkey_principal(handle, princ, NULL, NULL);
+    krb5_error_code ret;
+
+    /*
+     * When the older API is called on a Solaris KDC,
+     * the KDC assumes the peer is a Solaris 9 client and
+     * uses DES enctypes only.
+     * To avoid that, try calling the newer API first.
+     */
+    ret = kadm5_randkey_principal_3(lhandle, princ, keepold,
+                                    n_ks, ks, key, n_keys);
+
+    /*
+     * If the newer version of the procedure does not exist
+     * on the server, and older version would suffice to process
+     * the request, try the older API.
+     */
+    if (ret == KADM5_RPC_ERROR && ! keepold && ks == NULL)
+        ret = kadm5_randkey_principal(lhandle, princ, key, n_keys);
+
+    return ret;
 }
 
 static krb5_boolean
@@ -830,7 +846,8 @@ kadmin_cpw(int argc, char *argv[])
         }
         printf(_("Password for \"%s\" changed.\n"), canon);
     } else if (randkey) {
-        retval = randkey_princ(princ, keepold, n_ks_tuple, ks_tuple);
+        retval = randkey_princ(handle, princ, keepold, n_ks_tuple, ks_tuple,
+                               NULL, NULL);
         if (retval) {
             com_err("change_password", retval,
                     _("while randomizing key for \"%s\"."), canon);
@@ -1273,7 +1290,8 @@ kadmin_addprinc(int argc, char *argv[])
     }
     if (old_style_randkey) {
         /* Randomize the password and re-enable tickets. */
-        retval = randkey_princ(princ.principal, FALSE, n_ks_tuple, ks_tuple);
+        retval = randkey_princ(handle, princ.principal, FALSE, n_ks_tuple,
+                               ks_tuple, NULL, NULL);
         if (retval) {
             com_err("add_principal", retval,
                     _("while randomizing key for \"%s\"."), canon);
