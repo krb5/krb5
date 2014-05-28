@@ -54,7 +54,7 @@ ignored.  Lines containing ACL entries have the format:
     m  [Dis]allows the modification of principals or policies
     p  [Dis]allows the propagation of the principal database (used in :ref:`incr_db_prop`)
     s  [Dis]allows the explicit setting of the key for a principal
-    x  Short for admcil. All privileges
+    x  Short for admcilsp. All privileges
     \* Same as x.
     == ======================================================
 
