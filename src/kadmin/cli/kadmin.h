@@ -57,6 +57,13 @@ extern void kadmin_getstrings(int argc, char *argv[]);
 extern void kadmin_setstring(int argc, char *argv[]);
 extern void kadmin_delstring(int argc, char *argv[]);
 
+#include <kdb.h>
+
+krb5_error_code
+randkey_princ(void *lhandle, krb5_principal princ, krb5_boolean keepold,
+              int n_ks, krb5_key_salt_tuple *ks, krb5_keyblock **key,
+              int *n_keys);
+
 #include "autoconf.h"
 
 #ifdef TIME_WITH_SYS_TIME
