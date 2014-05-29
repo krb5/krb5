@@ -402,38 +402,45 @@ check_link_mtime(const char *filename, time_t *mtime_out)
 	return (st1.st_mtime > st2.st_mtime) ? st1.st_mtime : st2.st_mtime;
 }
 
+/* Load pathname if it is newer than last.  Update *highest to the maximum of
+ * its current value and pathname's mod time. */
+static void
+load_if_changed(const char *pathname, time_t last, time_t *highest)
+{
+	time_t mtime;
+
+	mtime = check_link_mtime(pathname, &mtime);
+	if (mtime == (time_t)-1)
+		return;
+	if (mtime > *highest)
+		*highest = mtime;
+	if (mtime > last)
+		loadConfigFile(pathname);
+}
+
 /* Try to load any config files which have changed since the last call.  Config
  * files are MECH_CONF and any files matching MECH_CONF_PATTERN. */
 static void
 loadConfigFiles()
 {
 	glob_t globbuf;
-	time_t highest_mtime = 0, mtime, now;
-	char **pathptr;
+	time_t highest = 0, now;
+	char **path;
 
 	/* Don't glob and stat more than once per second. */
 	if (time(&now) == (time_t)-1 || now == g_confLastCall)
 		return;
 	g_confLastCall = now;
 
-	globbuf.gl_offs = 1;
-	if (glob(MECH_CONF_PATTERN, GLOB_DOOFFS, NULL, &globbuf) != 0)
-		return;
-	globbuf.gl_pathv[0] = MECH_CONF;
+	load_if_changed(MECH_CONF, g_confFileModTime, &highest);
 
-	for (pathptr = globbuf.gl_pathv; *pathptr != NULL; pathptr++) {
-		mtime = check_link_mtime(*pathptr, &mtime);
-		if (mtime == (time_t)-1)
-			continue;
-		if (mtime > highest_mtime)
-			highest_mtime = mtime;
-		if (mtime > g_confFileModTime)
-			loadConfigFile(*pathptr);
+	if (glob(MECH_CONF_PATTERN, 0, NULL, &globbuf) == 0) {
+		for (path = globbuf.gl_pathv; *path != NULL; path++)
+			load_if_changed(*path, g_confFileModTime, &highest);
+		globfree(&globbuf);
 	}
-	g_confFileModTime = highest_mtime;
 
-	globbuf.gl_pathv[0] = NULL;
-	globfree(&globbuf);
+	g_confFileModTime = highest;
 }
 
 /*
