@@ -204,19 +204,18 @@ krb5int_process_tgs_reply(krb5_context context,
         if (err_reply->text.length > 0) {
             switch (err_reply->error) {
             case KRB_ERR_GENERIC:
-                krb5_set_error_message(context, retval,
-                                       _("KDC returned error string: %.*s"),
-                                       err_reply->text.length,
-                                       err_reply->text.data);
+                k5_setmsg(context, retval,
+                          _("KDC returned error string: %.*s"),
+                          err_reply->text.length, err_reply->text.data);
                 break;
             case KDC_ERR_S_PRINCIPAL_UNKNOWN:
             {
                 char *s_name;
                 if (err_reply->server &&
                     krb5_unparse_name(context, err_reply->server, &s_name) == 0) {
-                    krb5_set_error_message(context, retval,
-                                           _("Server %s not found in Kerberos "
-                                             "database"), s_name);
+                    k5_setmsg(context, retval,
+                              _("Server %s not found in Kerberos database"),
+                              s_name);
                     krb5_free_unparsed_name(context, s_name);
                 } else
                     /* In case there's a stale S_PRINCIPAL_UNKNOWN

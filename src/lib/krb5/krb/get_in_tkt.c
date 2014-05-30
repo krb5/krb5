@@ -131,8 +131,8 @@ cleanup:
     return ret;
 verification_error:
     ret = KRB5_KDCREP_MODIFIED;
-    krb5_set_error_message(context, ret, _("Reply has wrong form of session "
-                                           "key for anonymous request"));
+    k5_setmsg(context, ret,
+              _("Reply has wrong form of session key for anonymous request"));
     goto cleanup;
 }
 
@@ -1641,8 +1641,7 @@ init_creds_step_reply(krb5_context context,
         if (code !=0) {
             const char *msg;
             msg = krb5_get_error_message(context, code);
-            krb5_set_error_message(context, code,
-                                   _("%s while storing credentials"), msg);
+            k5_setmsg(context, code, _("%s while storing credentials"), msg);
             krb5_free_error_message(context, msg);
         }
     }
@@ -1729,9 +1728,9 @@ cleanup:
         /* See if we can produce a more detailed error message */
         code2 = krb5_unparse_name(context, ctx->request->client, &client_name);
         if (code2 == 0) {
-            krb5_set_error_message(context, code,
-                                   _("Client '%s' not found in Kerberos "
-                                     "database"), client_name);
+            k5_setmsg(context, code,
+                      _("Client '%s' not found in Kerberos database"),
+                      client_name);
             krb5_free_unparsed_name(context, client_name);
         }
     }

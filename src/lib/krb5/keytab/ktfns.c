@@ -123,8 +123,8 @@ krb5_kt_have_content(krb5_context context, krb5_keytab keytab)
 
 no_entries:
     if (krb5_kt_get_name(context, keytab, name, sizeof(name)) == 0) {
-        krb5_set_error_message(context, KRB5_KT_NOTFOUND,
-                               _("Keytab %s is nonexistent or empty"), name);
+        k5_setmsg(context, KRB5_KT_NOTFOUND,
+                  _("Keytab %s is nonexistent or empty"), name);
     }
     return KRB5_KT_NOTFOUND;
 }

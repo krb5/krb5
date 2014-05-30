@@ -26,7 +26,7 @@
 
 /* Password quality module to check passwords against principal components */
 
-#include "k5-platform.h"
+#include "k5-int.h"
 #include <krb5/pwqual_plugin.h>
 #include "server_internal.h"
 
@@ -50,8 +50,8 @@ princ_check(krb5_context context, krb5_pwqual_moddata data,
     for (i = 0; i < n; i++) {
         cp = krb5_princ_component(handle->context, princ, i)->data;
         if (strcasecmp(cp, password) == 0) {
-            krb5_set_error_message(context, KADM5_PASS_Q_DICT,
-                                   _("Password may not match principal name"));
+            k5_setmsg(context, KADM5_PASS_Q_DICT,
+                      _("Password may not match principal name"));
             return KADM5_PASS_Q_DICT;
         }
     }

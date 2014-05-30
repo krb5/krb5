@@ -13,8 +13,6 @@ k5_buf_len
 k5_free_buf
 k5_set_error
 k5_vset_error
-k5_set_error_fl
-k5_vset_error_fl
 k5_get_error
 k5_free_error
 k5_clear_error

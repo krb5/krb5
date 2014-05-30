@@ -55,8 +55,7 @@ krb5_ldap_read_krbcontainer_dn(krb5_context context, char **container_dn)
         if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, ldap_context->conf_section,
                                    KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
                                    &dn)) != 0) {
-            krb5_set_error_message(context, st,
-                                   _("Error reading kerberos container "
+            k5_setmsg(context, st, _("Error reading kerberos container "
                                      "location from krb5.conf"));
             goto cleanup;
         }
@@ -67,8 +66,7 @@ krb5_ldap_read_krbcontainer_dn(krb5_context context, char **container_dn)
         if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
                                    KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
                                    NULL, &dn)) != 0) {
-            krb5_set_error_message(context, st,
-                                   _("Error reading kerberos container "
+            k5_setmsg(context, st, _("Error reading kerberos container "
                                      "location from krb5.conf"));
             goto cleanup;
         }
@@ -76,8 +74,7 @@ krb5_ldap_read_krbcontainer_dn(krb5_context context, char **container_dn)
 
     if (dn == NULL) {
         st = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_set_error_message(context, st,
-                               _("Kerberos container location not specified"));
+        k5_setmsg(context, st, _("Kerberos container location not specified"));
         goto cleanup;
     }
 

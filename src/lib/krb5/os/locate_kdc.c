@@ -544,8 +544,8 @@ k5_locate_server(krb5_context context, const krb5_data *realm,
     *serverlist = al;
 
     if (realm == NULL || realm->data == NULL || realm->data[0] == 0) {
-        krb5_set_error_message(context, KRB5_REALM_CANT_RESOLVE,
-                               "Cannot find KDC for invalid realm name \"\"");
+        k5_setmsg(context, KRB5_REALM_CANT_RESOLVE,
+                  "Cannot find KDC for invalid realm name \"\"");
         return KRB5_REALM_CANT_RESOLVE;
     }
 
@@ -580,9 +580,9 @@ k5_locate_server(krb5_context context, const krb5_data *realm,
     }
     if (al.nservers == 0) {       /* No good servers */
         k5_free_serverlist(&al);
-        krb5_set_error_message(context, KRB5_REALM_UNKNOWN,
-                               _("Cannot find KDC for realm \"%.*s\""),
-                               realm->length, realm->data);
+        k5_setmsg(context, KRB5_REALM_UNKNOWN,
+                  _("Cannot find KDC for realm \"%.*s\""),
+                  realm->length, realm->data);
         return KRB5_REALM_UNKNOWN;
     }
     *serverlist = al;

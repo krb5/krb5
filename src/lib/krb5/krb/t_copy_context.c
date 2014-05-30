@@ -153,7 +153,7 @@ main(int argc, char **argv)
     ctx->prompt_types = ptypes;
     check(k5_plugin_load_all(ctx, PLUGIN_INTERFACE_PWQUAL, &mods) == 0);
     k5_plugin_free_modules(ctx, mods);
-    krb5_set_error_message(ctx, ENOMEM, "nooooooooo");
+    k5_setmsg(ctx, ENOMEM, "nooooooooo");
     krb5_set_trace_callback(ctx, trace, ctx);
 
     /* Copy the intentionally messy context and verify the result. */

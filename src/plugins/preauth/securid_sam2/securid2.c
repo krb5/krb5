@@ -306,9 +306,9 @@ verify_securid_data_2(krb5_context context, krb5_db_entry *client,
     if ((sr2->sam_enc_nonce_or_sad.ciphertext.data == NULL) ||
         (sr2->sam_enc_nonce_or_sad.ciphertext.length <= 0)) {
         retval = KRB5KDC_ERR_PREAUTH_FAILED;
-        krb5_set_error_message(context, retval,
-                               "No preauth data supplied in "
-                               "verify_securid_data_2 (%s)", user);
+        k5_setmsg(context, retval,
+                  "No preauth data supplied in verify_securid_data_2 (%s)",
+                  user);
         goto cleanup;
     }
 

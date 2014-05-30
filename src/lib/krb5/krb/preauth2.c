@@ -1014,8 +1014,8 @@ krb5_preauth_supply_preauth_data(krb5_context context,
         k5_init_preauth_context(context);
         pctx = context->preauth_context;
         if (pctx == NULL) {
-            krb5_set_error_message(context, EINVAL,
-                                   _("Unable to initialize preauth context"));
+            k5_setmsg(context, EINVAL,
+                      _("Unable to initialize preauth context"));
             return EINVAL;
         }
     }
@@ -1029,8 +1029,8 @@ krb5_preauth_supply_preauth_data(krb5_context context,
         ret = clpreauth_gic_opts(context, h, opt, attr, value);
         if (ret) {
             emsg = krb5_get_error_message(context, ret);
-            krb5_set_error_message(context, ret, _("Preauth module %s: %s"),
-                                   h->vt.name, emsg);
+            k5_setmsg(context, ret, _("Preauth module %s: %s"), h->vt.name,
+                      emsg);
             krb5_free_error_message(context, emsg);
             return ret;
         }

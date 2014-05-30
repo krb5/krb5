@@ -29,7 +29,7 @@
  * passwd information, if the tree is compiled with Hesiod support.
  */
 
-#include "k5-platform.h"
+#include "k5-int.h"
 #include <krb5/pwqual_plugin.h>
 #include "server_internal.h"
 #include <ctype.h>
@@ -110,9 +110,8 @@ hesiod_check(krb5_context context, krb5_pwqual_moddata data,
     for (i = 0; i < n; i++) {
         ent = hes_getpwnam(cp);
         if (ent && ent->pw_gecos && str_check_gecos(ent->pw_gecos, password)) {
-            krb5_set_error_message(context, KADM5_PASS_Q_DICT,
-                                   _("Password may not match user "
-                                     "information."));
+            k5_setmsg(context, KADM5_PASS_Q_DICT,
+                      _("Password may not match user information."));
             return KADM5_PASS_Q_DICT;
         }
     }

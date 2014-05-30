@@ -208,9 +208,9 @@ krb5_cc_cache_match(krb5_context context, krb5_principal client,
     if (cache == NULL) {
         ret = krb5_unparse_name(context, client, &name);
         if (ret == 0) {
-            krb5_set_error_message(context, KRB5_CC_NOTFOUND,
-                                   _("Can't find client principal %s in "
-                                     "cache collection"), name);
+            k5_setmsg(context, KRB5_CC_NOTFOUND,
+                      _("Can't find client principal %s in cache collection"),
+                      name);
             krb5_free_unparsed_name(context, name);
         }
         ret = KRB5_CC_NOTFOUND;
@@ -249,7 +249,7 @@ krb5_cccol_have_content(krb5_context context)
         return 0;
 
 no_entries:
-    krb5_set_error_message(context, KRB5_CC_NOTFOUND,
-                           _("No Kerberos credentials available"));
+    k5_setmsg(context, KRB5_CC_NOTFOUND,
+              _("No Kerberos credentials available"));
     return KRB5_CC_NOTFOUND;
 }

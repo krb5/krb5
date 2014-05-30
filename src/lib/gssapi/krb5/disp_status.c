@@ -142,7 +142,7 @@ void krb5_gss_save_error_info(OM_uint32 minor_code, krb5_context ctx)
     save_error_string(minor_code, s);
     /* The get_error_message call above resets the error message in
        ctx.  Put it back, in case we make this call again *sigh*.  */
-    krb5_set_error_message(ctx, (krb5_error_code)minor_code, "%s", s);
+    k5_setmsg(ctx, (krb5_error_code)minor_code, "%s", s);
     krb5_free_error_message(ctx, s);
 }
 void krb5_gss_delete_error_info(void *p)

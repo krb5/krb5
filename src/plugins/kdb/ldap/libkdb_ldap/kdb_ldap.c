@@ -215,10 +215,10 @@ has_sasl_external_mech(krb5_context context, char *ldap_server)
                           "supportedSASLMechanisms", "EXTERNAL");
     switch (ret) {
     case 1: /* not supported */
-        krb5_set_error_message(context, 1, "%s", ERR_MSG2);
+        k5_setmsg(context, 1, "%s", ERR_MSG2);
         break;
     case 2: /* don't know */
-        krb5_set_error_message(context, 1, "%s", ERR_MSG1);
+        k5_setmsg(context, 1, "%s", ERR_MSG1);
         break;
     default:
         break;
@@ -298,7 +298,7 @@ int
 set_ldap_error(krb5_context ctx, int st, int op)
 {
     int translated_st = translate_ldap_error(st, op);
-    krb5_set_error_message(ctx, translated_st, "%s", ldap_err2string(st));
+    k5_setmsg(ctx, translated_st, "%s", ldap_err2string(st));
     return translated_st;
 }
 
@@ -309,7 +309,7 @@ prepend_err_str(krb5_context ctx, const char *str, krb5_error_code err,
     const char *omsg;
 
     omsg = krb5_get_error_message(ctx, oerr);
-    krb5_set_error_message(ctx, err, "%s %s", str, omsg);
+    k5_setmsg(ctx, err, "%s %s", str, omsg);
     krb5_free_error_message(ctx, omsg);
 }
 
