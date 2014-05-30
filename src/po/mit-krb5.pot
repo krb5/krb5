@@ -4480,7 +4480,7 @@ msgstr ""
 
 #: ../../src/lib/krb5/ccache/cc_dir.c:237
 #, c-format
-msgid "Credential cache directory %s exists but isnot a directory"
+msgid "Credential cache directory %s exists but is not a directory"
 msgstr ""
 
 #: ../../src/lib/krb5/ccache/cc_dir.c:402
