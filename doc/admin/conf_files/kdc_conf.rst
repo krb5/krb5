@@ -580,10 +580,6 @@ For information about the syntax of some of these options, see
 **pkinit_kdc_ocsp**
     Specifies the location of the KDC's OCSP.
 
-**pkinit_mapping_file**
-    Specifies the name of the ACL pkinit mapping file.  This file maps
-    principals to the certificates that they can use.
-
 **pkinit_pool**
     Specifies the location of intermediate certificates which may be
     used by the KDC to complete the trust chain between a client's
