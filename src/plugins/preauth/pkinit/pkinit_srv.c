@@ -1177,10 +1177,6 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
                              KRB5_CONF_PKINIT_KDC_OCSP,
                              &plgctx->idopts->ocsp);
 
-    pkinit_kdcdefault_string(context, plgctx->realmname,
-                             KRB5_CONF_PKINIT_MAPPING_FILE,
-                             &plgctx->idopts->dn_mapping_file);
-
     pkinit_kdcdefault_integer(context, plgctx->realmname,
                               KRB5_CONF_PKINIT_DH_MIN_BITS,
                               PKINIT_DEFAULT_DH_MIN_BITS,
