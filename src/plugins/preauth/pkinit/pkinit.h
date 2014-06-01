@@ -89,7 +89,6 @@ extern int longhorn;	    /* XXX Talking to a Longhorn server? */
 #define KRB5_CONF_PKINIT_KDC_HOSTNAME           "pkinit_kdc_hostname"
 #define KRB5_CONF_PKINIT_KDC_OCSP               "pkinit_kdc_ocsp"
 #define KRB5_CONF_PKINIT_LONGHORN               "pkinit_longhorn"
-#define KRB5_CONF_PKINIT_MAPPING_FILE           "pkinit_mapping_file"
 #define KRB5_CONF_PKINIT_POOL                   "pkinit_pool"
 #define KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING   "pkinit_require_crl_checking"
 #define KRB5_CONF_PKINIT_REVOKE                 "pkinit_revoke"
@@ -194,7 +193,6 @@ typedef struct _pkinit_identity_opts {
     char **intermediates;
     char **crls;
     char *ocsp;
-    char *dn_mapping_file;
     int  idtype;
     char *cert_filename;
     char *key_filename;

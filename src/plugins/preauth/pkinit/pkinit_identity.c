@@ -126,7 +126,6 @@ pkinit_init_identity_opts(pkinit_identity_opts **idopts)
     opts->intermediates = NULL;
     opts->crls = NULL;
     opts->ocsp = NULL;
-    opts->dn_mapping_file = NULL;
 
     opts->cert_filename = NULL;
     opts->key_filename = NULL;
