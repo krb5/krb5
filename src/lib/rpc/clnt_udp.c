@@ -187,7 +187,7 @@ clntudp_bufcreate(
 			goto fooy;
 		}
 		/* attempt to bind to prov port */
-		(void)bindresvport(*sockp, (struct sockaddr_in *)0);
+		(void)bindresvport_sa(*sockp, NULL);
 		/* the sockets rpc controls are non-blocking */
 		(void)ioctl(*sockp, FIONBIO, (char *) &dontblock);
 		cu->cu_closeit = TRUE;
