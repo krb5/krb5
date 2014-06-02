@@ -96,6 +96,31 @@ struct svcudp_data {
 };
 #define	su_data(xprt)	((struct svcudp_data *)(xprt->xp_p2))
 
+static u_short
+getport(struct sockaddr *addr)
+{
+	u_short port;
+
+	switch (addr->sa_family) {
+	case AF_INET: {
+		struct sockaddr_in *sinp = (struct sockaddr_in *)addr;
+
+		port = ntohs(sinp->sin_port);
+		break;
+	}
+	case AF_INET6: {
+		struct sockaddr_in6 *sin6p = (struct sockaddr_in6 *)addr;
+
+		port = ntohs(sin6p->sin6_port);
+		break;
+	}
+	default:
+		port = 0;
+	}
+
+	return port;
+}
+
 /*
  * Usage:
  *	xprt = svcudp_create(sock);
@@ -118,8 +143,12 @@ svcudp_bufcreate(
 	bool_t madesock = FALSE;
 	register SVCXPRT *xprt;
 	register struct svcudp_data *su;
-	struct sockaddr_in addr;
-	GETSOCKNAME_ARG3_TYPE len = sizeof(struct sockaddr_in);
+	struct sockaddr_storage addr;
+	socklen_t len = sizeof(addr);
+	u_short port;
+	int rc;
+
+	memset(&addr, 0, len);
 
 	if (sock == RPC_ANYSOCK) {
 		if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
@@ -128,36 +157,42 @@ svcudp_bufcreate(
 		}
 		set_cloexec_fd(sock);
 		madesock = TRUE;
+	} else {
+		rc = getsockname(sock, (struct sockaddr *)&addr, &len);
+		if (rc < 0) {
+			perror("svc_tcp.c - getsockname failed");
+			goto error;
+		}
 	}
-	memset(&addr, 0, sizeof (addr));
-#if HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
-	addr.sin_len = sizeof(addr);
-#endif
-	addr.sin_family = AF_INET;
-	if (bindresvport(sock, &addr)) {
-		addr.sin_port = 0;
-		(void)bind(sock, (struct sockaddr *)&addr, len);
+
+	/* Check if the socket is already bound */
+	port = getport((struct sockaddr *)&addr);
+	if (port == 0) {
+		rc = bindresvport_sa(sock, (struct sockaddr *)&addr);
+		if (rc < 0) {
+			memset(&addr, 0, len);
+			rc = bind(sock, (struct sockaddr *)&addr, len);
+			if (rc < 0) {
+				perror("svc_tcp.c - cannot bind");
+				goto error;
+			}
+		}
 	}
-	if (getsockname(sock, (struct sockaddr *)&addr, &len) != 0) {
-		perror("svcudp_create - cannot getsockname");
-		if (madesock)
-			(void)close(sock);
-		return ((SVCXPRT *)NULL);
-	}
+
 	xprt = (SVCXPRT *)mem_alloc(sizeof(SVCXPRT));
 	if (xprt == NULL) {
 		(void)fprintf(stderr, "svcudp_create: out of memory\n");
-		return (NULL);
+		goto error;
 	}
 	su = (struct svcudp_data *)mem_alloc(sizeof(*su));
 	if (su == NULL) {
 		(void)fprintf(stderr, "svcudp_create: out of memory\n");
-		return (NULL);
+		goto error;
 	}
 	su->su_iosz = ((MAX(sendsz, recvsz) + 3) / 4) * 4;
 	if ((rpc_buffer(xprt) = mem_alloc(su->su_iosz)) == NULL) {
 		(void)fprintf(stderr, "svcudp_create: out of memory\n");
-		return (NULL);
+		goto error;
 	}
 	xdrmem_create(
 	    &(su->su_xdrs), rpc_buffer(xprt), su->su_iosz, XDR_DECODE);
@@ -166,10 +201,16 @@ svcudp_bufcreate(
 	xprt->xp_auth = NULL;
 	xprt->xp_verf.oa_base = su->su_verfbody;
 	xprt->xp_ops = &svcudp_op;
-	xprt->xp_port = ntohs(addr.sin_port);
+	xprt->xp_port = getport((struct sockaddr *)&addr);
 	xprt->xp_sock = sock;
 	xprt_register(xprt);
 	return (xprt);
+error:
+	if (madesock) {
+		(void)closesocket(sock);
+	}
+
+	return ((SVCXPRT *)NULL);
 }
 
 SVCXPRT *

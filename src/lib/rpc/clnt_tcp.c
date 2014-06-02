@@ -167,7 +167,10 @@ clnttcp_create(
 	 */
 	if (*sockp < 0) {
 		*sockp = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		(void)bindresvport(*sockp, (struct sockaddr_in *)0);
+
+		/* If we're root, try to bind a privileged port for the connection. */
+		(void)bindresvport_sa(*sockp, NULL);
+
 		if ((*sockp < 0)
 		    || (connect(*sockp, (struct sockaddr *)raddr,
 		    sizeof(*raddr)) < 0)) {
