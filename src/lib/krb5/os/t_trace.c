@@ -112,7 +112,7 @@ main (int argc, char *argv[])
     TRACE(ctx, "size_t and const char *, as four-character hex hash: "
           "{hashlenstr}", 1, NULL);
 
-    ra.type = SOCK_STREAM;
+    ra.transport = TCP;
     addr_in = (struct sockaddr_in *)&ra.saddr;
     addr_in->sin_family = AF_INET;
     addr_in->sin_addr.s_addr = INADDR_ANY;
@@ -121,10 +121,10 @@ main (int argc, char *argv[])
     ra.family = AF_INET;
     TRACE(ctx, "struct remote_address *, show socket type, address, port: "
           "{raddr}", &ra);
-    ra.type = SOCK_DGRAM;
+    ra.transport = UDP;
     TRACE(ctx, "struct remote_address *, show socket type, address, port: "
           "{raddr}", &ra);
-    ra.type = 1234;
+    ra.transport = 1234;
     addr_in->sin_family = AF_UNSPEC;
     ra.family = AF_UNSPEC;
     TRACE(ctx, "struct remote_address *, show socket type, address, port: "

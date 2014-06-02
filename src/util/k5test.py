@@ -177,6 +177,12 @@ Scripts may use the following functions and variables:
 
 * args: Positional arguments left over after flags are processed.
 
+* runenv: The contents of $srctop/runenv.py, containing a dictionary
+  'env' which specifies additional variables to be added to the realm
+  environment, and a variable 'proxy_tls_impl', which indicates which
+  SSL implementation (if any) is being used by libkrb5's support for
+  contacting KDCs and kpasswd servers over HTTPS.
+
 * verbose: Whether the script is running verbosely.
 
 * testpass: The command-line test pass argument.  The script does not
@@ -526,9 +532,9 @@ def _match_cmdnum(cmdnum, ind):
 # Return an environment suitable for running programs in the build
 # tree.  It is safe to modify the result.
 def _build_env():
-    global buildtop, _runenv
+    global buildtop, runenv
     env = os.environ.copy()
-    for (k, v) in _runenv.iteritems():
+    for (k, v) in runenv.env.iteritems():
         if v.find('./') == 0:
             env[k] = os.path.join(buildtop, v)
         else:
@@ -544,8 +550,7 @@ def _import_runenv():
     runenv_py = os.path.join(buildtop, 'runenv.py')
     if not os.path.exists(runenv_py):
         fail('You must run "make runenv.py" in %s first.' % buildtop)
-    module = imp.load_source('runenv', runenv_py)
-    return module.env
+    return imp.load_source('runenv', runenv_py)
 
 
 # Merge the nested dictionaries cfg1 and cfg2 into a new dictionary.
@@ -1174,7 +1179,7 @@ _cmd_index = 1
 buildtop = _find_buildtop()
 srctop = _find_srctop()
 plugins = os.path.join(buildtop, 'plugins')
-_runenv = _import_runenv()
+runenv = _import_runenv()
 hostname = _get_hostname()
 null_input = open(os.devnull, 'r')
 

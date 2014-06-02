@@ -734,6 +734,14 @@ main(argc, argv)
         encode_run(d, "pa_otp_enc_req", "", encode_krb5_pa_otp_enc_req);
         ktest_empty_data(&d);
     }
+    /****************************************************************/
+    /* encode_krb5_kkdcp_message */
+    {
+        krb5_kkdcp_message info;
+        ktest_make_sample_kkdcp_message(&info);
+        encode_run(info, "kkdcp_message", "", encode_krb5_kkdcp_message);
+        ktest_empty_kkdcp_message(&info);
+    }
 #ifndef DISABLE_PKINIT
     /****************************************************************/
     /* encode_krb5_pa_pk_as_req */

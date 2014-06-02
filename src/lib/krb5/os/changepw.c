@@ -59,25 +59,25 @@ struct sendto_callback_context {
 
 static krb5_error_code
 locate_kpasswd(krb5_context context, const krb5_data *realm,
-               struct serverlist *serverlist, int socktype)
+               struct serverlist *serverlist, krb5_boolean no_udp)
 {
     krb5_error_code code;
 
     code = k5_locate_server(context, realm, serverlist, locate_service_kpasswd,
-                            socktype);
+                            no_udp);
 
     if (code == KRB5_REALM_CANT_RESOLVE || code == KRB5_REALM_UNKNOWN) {
         code = k5_locate_server(context, realm, serverlist,
-                                locate_service_kadmin, SOCK_STREAM);
+                                locate_service_kadmin, TRUE);
         if (!code) {
-            /* Success with admin_server but now we need to change the
-               port number to use DEFAULT_KPASSWD_PORT and the socktype.  */
+            /* Success with admin_server but now we need to change the port
+             * number to use DEFAULT_KPASSWD_PORT and the transport. */
             size_t i;
             for (i = 0; i < serverlist->nservers; i++) {
                 struct server_entry *s = &serverlist->servers[i];
                 krb5_ui_2 kpasswd_port = htons(DEFAULT_KPASSWD_PORT);
-                if (socktype != SOCK_STREAM)
-                    s->socktype = socktype;
+                if (!no_udp && s->transport == TCP)
+                    s->transport = TCP_OR_UDP;
                 if (s->hostname != NULL)
                     s->port = kpasswd_port;
                 else if (s->family == AF_INET)
@@ -214,7 +214,7 @@ change_set_password(krb5_context context,
                     krb5_data *result_string)
 {
     krb5_data                   chpw_rep;
-    krb5_boolean                use_tcp = 0;
+    krb5_boolean                no_udp = FALSE;
     GETSOCKNAME_ARG3_TYPE       addrlen;
     krb5_error_code             code = 0;
     char                        *code_string;
@@ -247,9 +247,10 @@ change_set_password(krb5_context context,
     callback_ctx.local_seq_num = callback_ctx.auth_context->local_seq_number;
 
     do {
-        int socktype = (use_tcp ? SOCK_STREAM : SOCK_DGRAM);
+        k5_transport_strategy strategy = no_udp ? NO_UDP : UDP_FIRST;
+
         code = locate_kpasswd(callback_ctx.context, &creds->server->realm, &sl,
-                              socktype);
+                              no_udp);
         if (code)
             break;
 
@@ -260,9 +261,9 @@ change_set_password(krb5_context context,
         callback_info.pfn_cleanup = kpasswd_sendto_msg_cleanup;
         krb5_free_data_contents(callback_ctx.context, &chpw_rep);
 
-        code = k5_sendto(callback_ctx.context, NULL, &sl, socktype, 0,
-                         &callback_info, &chpw_rep, ss2sa(&remote_addr),
-                         &addrlen, NULL, NULL, NULL);
+        code = k5_sendto(callback_ctx.context, NULL, &creds->server->realm,
+                         &sl, strategy, &callback_info, &chpw_rep,
+                         ss2sa(&remote_addr), &addrlen, NULL, NULL, NULL);
         if (code) {
             /*
              * Here we may want to switch to TCP on some errors.
@@ -277,9 +278,9 @@ change_set_password(krb5_context context,
                                    result_string);
 
         if (code) {
-            if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !use_tcp) {
+            if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !no_udp) {
                 k5_free_serverlist(&sl);
-                use_tcp = 1;
+                no_udp = 1;
                 continue;
             }
 
@@ -305,9 +306,9 @@ change_set_password(krb5_context context,
             strncpy(result_code_string->data, code_string, result_code_string->length);
         }
 
-        if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !use_tcp) {
+        if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !no_udp) {
             k5_free_serverlist(&sl);
-            use_tcp = 1;
+            no_udp = 1;
         } else {
             break;
         }

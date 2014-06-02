@@ -428,6 +428,11 @@ PKINIT_CRYPTO_IMPL		= @PKINIT_CRYPTO_IMPL@
 PKINIT_CRYPTO_IMPL_CFLAGS	= @PKINIT_CRYPTO_IMPL_CFLAGS@
 PKINIT_CRYPTO_IMPL_LIBS		= @PKINIT_CRYPTO_IMPL_LIBS@
 
+# TLS implementation selection for HTTPS proxy support
+PROXY_TLS_IMPL                  = @PROXY_TLS_IMPL@
+PROXY_TLS_IMPL_CFLAGS           = @PROXY_TLS_IMPL_CFLAGS@
+PROXY_TLS_IMPL_LIBS             = @PROXY_TLS_IMPL_LIBS@
+
 # error table rules
 #
 ### /* these are invoked as $(...) foo.et, which works, but could be better */

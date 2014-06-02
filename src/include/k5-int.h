@@ -212,6 +212,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_EXTRA_ADDRESSES             "extra_addresses"
 #define KRB5_CONF_FORWARDABLE                 "forwardable"
 #define KRB5_CONF_HOST_BASED_SERVICES         "host_based_services"
+#define KRB5_CONF_HTTP_ANCHORS                "http_anchors"
 #define KRB5_CONF_IGNORE_ACCEPTOR_HOSTNAME    "ignore_acceptor_hostname"
 #define KRB5_CONF_IPROP_ENABLE                "iprop_enable"
 #define KRB5_CONF_IPROP_MASTER_ULOGSIZE       "iprop_master_ulogsize"
@@ -517,6 +518,12 @@ typedef struct _krb5_pa_otp_req {
     krb5_data alg_id;
     krb5_data vendor;
 } krb5_pa_otp_req;
+
+typedef struct _krb5_kkdcp_message {
+    krb5_data kerb_message;
+    krb5_data target_domain;
+    krb5_int32 dclocator_hint;
+} krb5_kkdcp_message;
 
 #include <stdlib.h>
 #include <string.h>
@@ -898,6 +905,7 @@ void k5_free_otp_tokeninfo(krb5_context context, krb5_otp_tokeninfo *val);
 void k5_free_pa_otp_challenge(krb5_context context,
                               krb5_pa_otp_challenge *val);
 void k5_free_pa_otp_req(krb5_context context, krb5_pa_otp_req *val);
+void k5_free_kkdcp_message(krb5_context context, krb5_kkdcp_message *val);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1438,6 +1446,9 @@ encode_krb5_pa_otp_req(const krb5_pa_otp_req *, krb5_data **);
 krb5_error_code
 encode_krb5_pa_otp_enc_req(const krb5_data *, krb5_data **);
 
+krb5_error_code
+encode_krb5_kkdcp_message(const krb5_kkdcp_message *, krb5_data **);
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1607,6 +1618,9 @@ decode_krb5_pa_otp_req(const krb5_data *, krb5_pa_otp_req **);
 
 krb5_error_code
 decode_krb5_pa_otp_enc_req(const krb5_data *, krb5_data **);
+
+krb5_error_code
+decode_krb5_kkdcp_message(const krb5_data *, krb5_kkdcp_message **);
 
 struct _krb5_key_data;          /* kdb.h */
 
