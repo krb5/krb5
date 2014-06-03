@@ -363,6 +363,10 @@ cleanup:
  *
  * This function also implements key rollover support for kvno 0 cross-realm
  * TGTs issued by AD.
+ *
+ * If the ticket was successfully decrypted, it will be returned in *ticket
+ * even if we return an error because the ticket was invalid (e.g. if it was
+ * expired).
  */
 static
 krb5_error_code
@@ -371,11 +375,13 @@ kdc_rd_ap_req(kdc_realm_t *kdc_active_realm,
               krb5_db_entry **server, krb5_keyblock **tgskey,
               krb5_ticket **ticket)
 {
-    krb5_error_code     retval;
+    krb5_error_code     retval, ret2;
     krb5_enctype        search_enctype = apreq->ticket->enc_part.enctype;
     krb5_boolean        match_enctype = 1;
     krb5_kvno           kvno;
     size_t              tries = 3;
+
+    *ticket = NULL;
 
     /*
      * When we issue tickets we use the first key in the principals' highest
@@ -413,7 +419,17 @@ kdc_rd_ap_req(kdc_realm_t *kdc_active_realm,
         retval = krb5_rd_req_decoded_anyflag(kdc_context, &auth_context, apreq,
                                              apreq->ticket->server,
                                              kdc_active_realm->realm_keytab,
-                                             NULL, ticket);
+                                             NULL, NULL);
+
+        /* If the ticket was decrypted, save it even if it didn't validate, and
+         * don't try any more keys. */
+        if (apreq->ticket->enc_part2 != NULL) {
+            ret2 = krb5_copy_ticket(kdc_context, apreq->ticket, ticket);
+            if (!retval)
+                retval = ret2;
+            break;
+        }
+
     } while (retval && apreq->ticket->enc_part.kvno == 0 && kvno-- > 1 &&
              --tries > 0);
 
