@@ -791,13 +791,6 @@ cleanup:
     if (permitted_etypes != NULL &&
         permitted_etypes != (*auth_context)->permitted_etypes)
         free(permitted_etypes);
-    if (retval) {
-        /* only free if we're erroring out...otherwise some
-           applications will need the output. */
-        if (req->ticket->enc_part2)
-            krb5_free_enc_tkt_part(context, req->ticket->enc_part2);
-        req->ticket->enc_part2 = NULL;
-    }
     if (check_valid_flag)
         krb5_free_keyblock_contents(context, &decrypt_key);
 
