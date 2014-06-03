@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2014 Red Hat, Inc.  All rights reserved.
  *
@@ -118,7 +119,7 @@ get_cert_sans(X509 *x)
 
 /* Fetch a CN value from the subjct name field, returning its length, or -1 if
  * there is no subject name or it contains no CN value. */
-static ssize_t
+static int
 get_cert_cn(X509 *x, char *buf, size_t bufsize)
 {
     X509_NAME *name;
@@ -142,29 +143,23 @@ k5_check_cert_address(X509 *x, const char *text)
     ASN1_OCTET_STRING *ip;
     krb5_boolean found_ip_san = FALSE, matched = FALSE;
     int n_sans, i;
-    size_t name_length;
-    union {
-        struct in_addr in;
-        struct in6_addr in6;
-    } name;
+    int name_length;
+    struct in_addr sin;
+    struct in6_addr sin6;
 
     /* Parse the IP address into an octet string. */
     ip = M_ASN1_OCTET_STRING_new();
     if (ip == NULL)
         return FALSE;
 
-    if (inet_aton(text, &name.in) == 1)
-        name_length = sizeof(name.in);
-    else if (inet_pton(AF_INET6, text, &name.in6) == 1)
-        name_length = sizeof(name.in6);
-    else
-        name_length = 0;
-
-    if (name_length == 0) {
+    if (inet_pton(AF_INET, text, &sin)) {
+        M_ASN1_OCTET_STRING_set(ip, &sin, sizeof(sin));
+    } else if (inet_pton(AF_INET6, text, &sin6)) {
+        M_ASN1_OCTET_STRING_set(ip, &sin6, sizeof(sin6));
+    } else {
         ASN1_OCTET_STRING_free(ip);
         return FALSE;
     }
-    M_ASN1_OCTET_STRING_set(ip, &name, name_length);
 
     /* Check for matches in ipaddress subjectAltName values. */
     sans = get_cert_sans(x);
@@ -175,7 +170,7 @@ k5_check_cert_address(X509 *x, const char *text)
             if (san->type != GEN_IPADD)
                 continue;
             found_ip_san = TRUE;
-            matched = ASN1_OCTET_STRING_cmp(ip, san->d.iPAddress) == 0;
+            matched = (ASN1_OCTET_STRING_cmp(ip, san->d.iPAddress) == 0);
             if (matched)
                 break;
         }
@@ -183,8 +178,6 @@ k5_check_cert_address(X509 *x, const char *text)
     }
     ASN1_OCTET_STRING_free(ip);
 
-    if (matched)
-        return TRUE;
     if (found_ip_san)
         return matched;
 
@@ -192,7 +185,7 @@ k5_check_cert_address(X509 *x, const char *text)
     name_length = get_cert_cn(x, buf, sizeof(buf));
     if (name_length >= 0) {
         /* Do a string compare to check if it's an acceptable value. */
-        return strlen(text) == name_length &&
+        return strlen(text) == (size_t)name_length &&
                strncmp(text, buf, name_length) == 0;
     }
 
