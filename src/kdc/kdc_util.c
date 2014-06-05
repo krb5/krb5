@@ -72,8 +72,7 @@ static krb5_error_code kdc_rd_ap_req(kdc_realm_t *kdc_active_realm,
                                      krb5_ap_req *apreq,
                                      krb5_auth_context auth_context,
                                      krb5_db_entry **server,
-                                     krb5_keyblock **tgskey,
-                                     krb5_ticket **ticket);
+                                     krb5_keyblock **tgskey);
 static krb5_error_code find_server_key(krb5_context,
                                        krb5_db_entry *, krb5_enctype,
                                        krb5_kvno, krb5_keyblock **,
@@ -194,10 +193,11 @@ comp_cksum(krb5_context kcontext, krb5_data *source, krb5_ticket *ticket,
     return(0);
 }
 
+/* If a header ticket is decrypted, *ticket_out is filled in even on error. */
 krb5_error_code
 kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
                     krb5_kdc_req *request, const krb5_fulladdr *from,
-                    krb5_data *pkt, krb5_ticket **ticket,
+                    krb5_data *pkt, krb5_ticket **ticket_out,
                     krb5_db_entry **krbtgt_ptr,
                     krb5_keyblock **tgskey,
                     krb5_keyblock **subkey,
@@ -214,7 +214,9 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
     krb5_authenticator  * authenticator = NULL;
     krb5_checksum       * his_cksum = NULL;
     krb5_db_entry       * krbtgt = NULL;
+    krb5_ticket         * ticket;
 
+    *ticket_out = NULL;
     *krbtgt_ptr = NULL;
     *tgskey = NULL;
 
@@ -227,6 +229,7 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
     scratch1.data = (char *)tmppa->contents;
     if ((retval = decode_krb5_ap_req(&scratch1, &apreq)))
         return retval;
+    ticket = apreq->ticket;
 
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
         isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
@@ -260,13 +263,13 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
         goto cleanup_auth_context;
 
     retval = kdc_rd_ap_req(kdc_active_realm,
-                           apreq, auth_context, &krbtgt, tgskey, ticket);
+                           apreq, auth_context, &krbtgt, tgskey);
     if (retval)
         goto cleanup_auth_context;
 
     /* "invalid flag" tickets can must be used to validate */
-    if (isflagset((*ticket)->enc_part2->flags, TKT_FLG_INVALID)
-        && !isflagset(request->kdc_options, KDC_OPT_VALIDATE)) {
+    if (isflagset(ticket->enc_part2->flags, TKT_FLG_INVALID) &&
+        !isflagset(request->kdc_options, KDC_OPT_VALIDATE)) {
         retval = KRB5KRB_AP_ERR_TKT_INVALID;
         goto cleanup_auth_context;
     }
@@ -280,7 +283,7 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
         goto cleanup_auth_context;
 
     retval = krb5_find_authdata(kdc_context,
-                                (*ticket)->enc_part2->authorization_data,
+                                ticket->enc_part2->authorization_data,
                                 authenticator->authorization_data,
                                 KRB5_AUTHDATA_FX_ARMOR, &authdata);
     if (retval != 0)
@@ -306,7 +309,7 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
         !krb5int_find_pa_data(kdc_context,
                               request->padata, KRB5_PADATA_FOR_USER)) {
         if (is_local_principal(kdc_active_realm,
-                               (*ticket)->enc_part2->client)) {
+                               ticket->enc_part2->client)) {
             /* someone in a foreign realm claiming to be local */
             krb5_klog_syslog(LOG_INFO, _("PROCESS_TGS: failed lineage check"));
             retval = KRB5KDC_ERR_POLICY;
@@ -324,9 +327,9 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
      */
     if (pkt && (fetch_asn1_field((unsigned char *) pkt->data,
                                  1, 4, &scratch1) >= 0)) {
-        if (comp_cksum(kdc_context, &scratch1, *ticket, his_cksum)) {
+        if (comp_cksum(kdc_context, &scratch1, ticket, his_cksum)) {
             if (!(retval = encode_krb5_kdc_req_body(request, &scratch)))
-                retval = comp_cksum(kdc_context, scratch, *ticket, his_cksum);
+                retval = comp_cksum(kdc_context, scratch, ticket, his_cksum);
             krb5_free_data(kdc_context, scratch);
             if (retval)
                 goto cleanup_authenticator;
@@ -348,6 +351,11 @@ cleanup:
         krb5_free_keyblock(kdc_context, *tgskey);
         *tgskey = NULL;
     }
+    if (apreq->ticket->enc_part2 != NULL) {
+        /* Steal the decrypted ticket pointer, even on error. */
+        *ticket_out = apreq->ticket;
+        apreq->ticket = NULL;
+    }
     krb5_free_ap_req(kdc_context, apreq);
     krb5_db_free_principal(kdc_context, krbtgt);
     return retval;
@@ -363,25 +371,18 @@ cleanup:
  *
  * This function also implements key rollover support for kvno 0 cross-realm
  * TGTs issued by AD.
- *
- * If the ticket was successfully decrypted, it will be returned in *ticket
- * even if we return an error because the ticket was invalid (e.g. if it was
- * expired).
  */
 static
 krb5_error_code
 kdc_rd_ap_req(kdc_realm_t *kdc_active_realm,
               krb5_ap_req *apreq, krb5_auth_context auth_context,
-              krb5_db_entry **server, krb5_keyblock **tgskey,
-              krb5_ticket **ticket)
+              krb5_db_entry **server, krb5_keyblock **tgskey)
 {
-    krb5_error_code     retval, ret2;
+    krb5_error_code     retval;
     krb5_enctype        search_enctype = apreq->ticket->enc_part.enctype;
     krb5_boolean        match_enctype = 1;
     krb5_kvno           kvno;
     size_t              tries = 3;
-
-    *ticket = NULL;
 
     /*
      * When we issue tickets we use the first key in the principals' highest
@@ -421,14 +422,9 @@ kdc_rd_ap_req(kdc_realm_t *kdc_active_realm,
                                              kdc_active_realm->realm_keytab,
                                              NULL, NULL);
 
-        /* If the ticket was decrypted, save it even if it didn't validate, and
-         * don't try any more keys. */
-        if (apreq->ticket->enc_part2 != NULL) {
-            ret2 = krb5_copy_ticket(kdc_context, apreq->ticket, ticket);
-            if (!retval)
-                retval = ret2;
+        /* If the ticket was decrypted, don't try any more keys. */
+        if (apreq->ticket->enc_part2 != NULL)
             break;
-        }
 
     } while (retval && apreq->ticket->enc_part.kvno == 0 && kvno-- > 1 &&
              --tries > 0);
