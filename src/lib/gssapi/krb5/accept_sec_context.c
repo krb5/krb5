@@ -607,6 +607,7 @@ kg_accept_krb5(minor_status, context_handle,
         major_status = GSS_S_FAILURE;
         goto done;
     }
+    ticket = request->ticket;
 
     /* decode the message */
 
@@ -644,7 +645,7 @@ kg_accept_krb5(minor_status, context_handle,
     }
 
     code = krb5_rd_req_decoded(context, &auth_context, request, accprinc,
-                               cred->keytab, &ap_req_options, &ticket);
+                               cred->keytab, &ap_req_options, NULL);
 
     krb5_free_principal(context, accprinc);
     if (code) {
@@ -968,8 +969,6 @@ kg_accept_krb5(minor_status, context_handle,
         ctx->gss_flags |= GSS_C_DELEG_FLAG;
     }
 
-    krb5_free_ticket(context, ticket); /* Done with ticket */
-
     {
         krb5_int32 seq_temp;
         krb5_auth_con_getremoteseqnumber(context, auth_context, &seq_temp);
@@ -1234,7 +1233,7 @@ fail:
         (void) krb5_us_timeofday(context, &krb_error_data.stime,
                                  &krb_error_data.susec);
 
-        krb_error_data.server = request->ticket->server;
+        krb_error_data.server = ticket->server;
         code = krb5_mk_error(context, &krb_error_data, &scratch);
         if (code)
             goto done;

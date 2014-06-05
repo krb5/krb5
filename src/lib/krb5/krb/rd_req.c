@@ -85,7 +85,12 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
 #endif /* LEAN_CLIENT */
 
     retval = krb5_rd_req_decoded(context, auth_context, request, server,
-                                 keytab, ap_req_options, ticket);
+                                 keytab, ap_req_options, NULL);
+    if (!retval && ticket != NULL) {
+        /* Steal the ticket pointer for the caller. */
+        *ticket = request->ticket;
+        request->ticket = NULL;
+    }
 
 #ifndef LEAN_CLIENT
     if (new_keytab != NULL)
