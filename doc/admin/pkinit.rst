@@ -9,16 +9,25 @@ PKINIT can also be used to enable anonymity support, allowing clients
 to communicate securely with the KDC or with application servers
 without authenticating as a particular client principal.
 
-Configuring PKINIT requires establishing a certificate authority (or
-using an existing one), and using the authority to sign certificates
-for the KDC and for each client principal.  These instructions will
-describe how to generate the necessary certificates using OpenSSL, and
-then explain how to configure the KDC and clients once the
-certificates are in hand.
+
+Creating certificates
+---------------------
+
+PKINIT requires an X.509 certificate for the KDC and one for each
+client principal which will authenticate using PKINIT.  For anonymous
+PKINIT, a KDC certificate is required, but client certificates are
+not.  A commercially issued server certificate can be used for the KDC
+certificate, but generally cannot be used for client certificates.
+
+The instruction in this section describe how to establish a
+certificate authority and create standard PKINIT certificates.  Skip
+this section if you are using a commercially issued server certificate
+as the KDC certificate for anonymous PKINIT, or if you are configuring
+a client to use an Active Directory KDC.
 
 
 Generating a certificate authority certificate
-----------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can establish a new certificate authority (CA) for use with a
 PKINIT deployment with the commands::
@@ -43,7 +52,7 @@ certificates.
 
 
 Generating a KDC certificate
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A KDC certificate for use with PKINIT is required to have some unusual
 fields, which makes generating them with OpenSSL somewhat complicated.
@@ -91,9 +100,15 @@ kdc.pem.  Both files must be placed in the KDC's filesystem.
 kdckey.pem, which contains the KDC's private key, must be carefully
 protected.
 
+If you examine the KDC certificate with ``openssl x509 -in kdc.pem
+-text -noout``, OpenSSL will not know how to display the KDC principal
+name in the Subject Alternative Name extension, so it will appear as
+``othername:<unsupported>``.  This is normal and does not mean
+anything is wrong with the KDC certificate.
+
 
 Generating client certificates
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 PKINIT client certificates also must have some unusual certificate
 fields.  To generate a client certificate with OpenSSL, you will need
@@ -145,22 +160,31 @@ client.pem.  Both files must be present on the client's host;
 clientkey.pem, which contains the client's private key, must be
 protected from access by others.
 
+As in the KDC certificate, OpenSSL will display the client principal
+name as ``othername:<unsupported>`` in the Subject Alternative Name
+extension of a PKINIT client certificate.
+
 
 Configuring the KDC
 -------------------
 
-The KDC must have filesystem access to the CA certificate
-(cacert.pem), the KDC certificate (kdc.pem), and the KDC private key
-(kdckey.pem).  Configure the following relations in the KDC's
-:ref:`kdc.conf(5)` file, either in the :ref:`kdcdefaults` section or
-in a :ref:`kdc_realms` subsection::
+The KDC must have filesystem access to the KDC certificate (kdc.pem)
+and the KDC private key (kdckey.pem).  Configure the following
+relation in the KDC's :ref:`kdc.conf(5)` file, either in the
+:ref:`kdcdefaults` section or in a :ref:`kdc_realms` subsection (with
+appropriate pathnames)::
 
     pkinit_identity = FILE:/var/lib/krb5kdc/kdc.pem,/var/lib/krb5kdc/kdckey.pem
+
+If any clients will authenticate using regular (as opposed to
+anonymous) PKINIT, the KDC must also have filesystem access to the CA
+certificate (cacert.pem), and the following configuration (with the
+appropriate pathname)::
+
     pkinit_anchors = FILE:/var/lib/krb5kdc/cacert.pem
 
-Adjust the pathnames to match the paths of the three files.  Because
-of the larger size of requests and responses using PKINIT, you may
-also need to allow TCP access to the KDC::
+Because of the larger size of requests and responses using PKINIT, you
+may also need to allow TCP access to the KDC::
 
     kdc_tcp_ports = 88
 
@@ -188,16 +212,42 @@ time as follows::
 Configuring the clients
 -----------------------
 
-To perform PKINIT authentication, a client host must have filesystem
-access to the CA certificate (cacert.pem), the client certificate
-(client.pem), and the client private key (clientkey.pem).  Configure
-the following relations in the client host's :ref:`krb5.conf(5)` file
-in the appropriate :ref:`realms` subsection::
+Client hosts must be configured to trust the issuing authority for the
+KDC certificate.  For a newly established certificate authority, the
+client host must have filesystem access to the CA certificate
+(cacert.pem) and the following relation in :ref:`krb5.conf(5)` in the
+appropriate :ref:`realms` subsection (with appropriate pathnames)::
 
     pkinit_anchors = FILE:/etc/krb5/cacert.pem
-    pkinit_identities = FILE:/etc/krb5/client.pem,/etc/krb5/clientkey.pem
 
-Adjust the pathnames to match the paths of the three files.
+If the KDC certificate is a commercially issued server certificate,
+the issuing certificate is most likely included in a system directory.
+You can specify it by filename as above, or specify the whole
+directory like so::
+
+    pkinit_anchors = DIR:/etc/ssl/certs
+
+A commercially issued server certificate will usually not have the
+standard PKINIT principal name or Extended Key Usage extensions, so
+the following additional configuration is required::
+
+    pkinit_eku_checking = kpServerAuth
+    pkinit_kdc_hostname = hostname.of.kdc.certificate
+
+Multiple **pkinit_kdc_hostname** relations can be configured to
+recognize multiple KDC certificates.  If the KDC is an Active
+Directory domain controller, setting **pkinit_kdc_hostname** is
+necessary, but it should not be necessary to set
+**pkinit_eku_checking**.
+
+To perform regular (as opposed to anonymous) PKINIT authentication, a
+client host must have filesystem access to a client certificate
+(client.pem), and the corresponding private key (clientkey.pem).
+Configure the following relations in the client host's
+:ref:`krb5.conf(5)` file in the appropriate :ref:`realms` subsection
+(with appropriate pathnames)::
+
+    pkinit_identities = FILE:/etc/krb5/client.pem,/etc/krb5/clientkey.pem
 
 If the KDC and client are properly configured, it should now be
 possible to run ``kinit username`` without entering a password.
@@ -213,15 +263,16 @@ without authenticating as any particular principal.  Such a ticket can
 be used as a FAST armor ticket, or to securely communicate with an
 application server anonymously.
 
-To configure anonymity support, you must follow the steps above for
-generating a KDC certificate and configuring the KDC host, but you do
-not need to generate any client certificates.  On the KDC, you must
-set the **pkinit_identity** variable to provide the KDC certificate,
-but do not need to set the **pkinit_anchors** variable or store the
-cacert.pem file if you won't have any client certificates to verify.
-On client hosts, you must store the cacert.pem file and set the
-**pkinit_anchors** variable in order to verify the KDC certificate,
-but do not need to set the **pkinit_identities** variable.
+To configure anonymity support, you must generate or otherwise procure
+a KDC certificate and configure the KDC host, but you do not need to
+generate any client certificates.  On the KDC, you must set the
+**pkinit_identity** variable to provide the KDC certificate, but do
+not need to set the **pkinit_anchors** variable or store the issuing
+certificate if you won't have any client certificates to verify.  On
+client hosts, you must set the **pkinit_anchors** variable (and
+possibly **pkinit_kdc_hostname** and **pkinit_eku_checking**) in order
+to trust the issuing authority for the KDC certificate, but do not
+need to set the **pkinit_identities** variable.
 
 Anonymity support is not enabled by default.  To enable it, you must
 create the principal ``WELLKNOWN/ANONYMOUS`` using the command::
