@@ -1000,7 +1000,8 @@ PKINIT krb5.conf options
 
     **kpServerAuth**
         If **kpServerAuth** is specified, a KDC certificate with the
-        id-kp-serverAuth EKU as used by Microsoft will be accepted.
+        id-kp-serverAuth EKU will be accepted.  This key usage value
+        is used in most commercially issued server certificates.
 
     **none**
         If **none** is specified, then the KDC certificate will not be
