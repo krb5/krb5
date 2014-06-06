@@ -977,11 +977,6 @@ PKINIT krb5.conf options
     of the KDC certificate presented.  This option may be specified
     multiple times.
 
-**pkinit_win2k**
-    This flag specifies whether the target realm is assumed to support
-    only the old, pre-RFC version of the protocol.  The default is
-    false.
-
 **pkinit_win2k_require_binding**
     If this flag is set to true, it expects that the target KDC is
     patched to return a reply with a checksum rather than a nonce.
