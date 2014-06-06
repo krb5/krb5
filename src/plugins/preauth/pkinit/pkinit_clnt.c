@@ -949,10 +949,6 @@ pkinit_client_profile(krb5_context context,
              context, plgctx, reqctx, realm);
 
     pkinit_libdefault_boolean(context, realm,
-                              KRB5_CONF_PKINIT_WIN2K,
-                              reqctx->opts->win2k_target,
-                              &reqctx->opts->win2k_target);
-    pkinit_libdefault_boolean(context, realm,
                               KRB5_CONF_PKINIT_WIN2K_REQUIRE_BINDING,
                               reqctx->opts->win2k_require_cksum,
                               &reqctx->opts->win2k_require_cksum);
