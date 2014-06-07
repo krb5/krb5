@@ -64,7 +64,6 @@ pkinit_init_req_opts(pkinit_req_opts **reqopts)
     opts->require_crl_checking = 0;
     opts->dh_size = PKINIT_DEFAULT_DH_MIN_BITS;
     opts->win2k_target = 0;
-    opts->win2k_require_cksum = 0;
 
     *reqopts = opts;
 

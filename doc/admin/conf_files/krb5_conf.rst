@@ -1087,11 +1087,6 @@ PKINIT krb5.conf options
     only the old, pre-RFC version of the protocol.  The default is
     false.
 
-**pkinit_win2k_require_binding**
-    If this flag is set to true, it expects that the target KDC is
-    patched to return a reply with a checksum rather than a nonce.
-    The default is false.
-
 
 .. _parameter_expansion:
 
