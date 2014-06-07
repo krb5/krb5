@@ -1145,7 +1145,7 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
             if (lport > 65535)
                 return EAI_SOCKTYPE;
             service_is_numeric = 1;
-            service_port = htons(lport);
+            service_port = lport;
 #ifdef AI_NUMERICSERV
             if (hint && hint->ai_flags & AI_NUMERICSERV)
                 serv = "9";
@@ -1281,14 +1281,7 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
             if (socket_type != 0 && ai->ai_socktype == 0)
                 /* Is this check actually needed?  */
                 ai->ai_socktype = socket_type;
-            switch (ai->ai_family) {
-            case AF_INET:
-                ((struct sockaddr_in *)ai->ai_addr)->sin_port = service_port;
-                break;
-            case AF_INET6:
-                ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port = service_port;
-                break;
-            }
+            sa_setport(ai->ai_addr, service_port);
         }
     }
 #endif

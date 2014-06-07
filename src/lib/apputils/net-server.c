@@ -66,22 +66,6 @@
 static int tcp_or_rpc_data_counter;
 static int max_tcp_or_rpc_data_connections = 45;
 
-/* Misc utility routines.  */
-static void
-set_sa_port(struct sockaddr *addr, int port)
-{
-    switch (addr->sa_family) {
-    case AF_INET:
-        sa2sin(addr)->sin_port = port;
-        break;
-    case AF_INET6:
-        sa2sin6(addr)->sin6_port = port;
-        break;
-    default:
-        break;
-    }
-}
-
 static int
 ipv6_enabled()
 {
@@ -740,7 +724,7 @@ setup_tcp_listener_ports(struct socksetup *data)
     FOREACH_ELT (tcp_port_data, i, port) {
         int s4, s6;
 
-        set_sa_port((struct sockaddr *)&sin4, htons(port));
+        sa_setport((struct sockaddr *)&sin4, port);
         if (!ipv6_enabled()) {
             s4 = setup_a_tcp_listener(data, (struct sockaddr *)&sin4);
             if (s4 < 0)
@@ -749,7 +733,7 @@ setup_tcp_listener_ports(struct socksetup *data)
         } else {
             s4 = s6 = -1;
 
-            set_sa_port((struct sockaddr *)&sin6, htons(port));
+            sa_setport((struct sockaddr *)&sin6, port);
 
             s6 = setup_a_tcp_listener(data, (struct sockaddr *)&sin6);
             if (s6 < 0)
@@ -809,7 +793,7 @@ setup_rpc_listener_ports(struct socksetup *data)
         int s4;
         int s6;
 
-        set_sa_port((struct sockaddr *)&sin4, htons(svc.port));
+        sa_setport((struct sockaddr *)&sin4, svc.port);
         s4 = create_server_socket(data, (struct sockaddr *)&sin4, SOCK_STREAM);
         if (s4 < 0)
             return -1;
@@ -821,7 +805,7 @@ setup_rpc_listener_ports(struct socksetup *data)
                              s4, paddr((struct sockaddr *)&sin4));
 
         if (ipv6_enabled()) {
-            set_sa_port((struct sockaddr *)&sin6, htons(svc.port));
+            sa_setport((struct sockaddr *)&sin6, svc.port);
             s6 = create_server_socket(data, (struct sockaddr *)&sin6,
                                       SOCK_STREAM);
             if (s6 < 0)
@@ -903,7 +887,7 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
     u_short port;
 
     FOREACH_ELT (udp_port_data, i, port) {
-        set_sa_port(addr, htons(port));
+        sa_setport(addr, port);
         sock = create_server_socket(data, addr, SOCK_DGRAM);
         if (sock == -1)
             return 1;

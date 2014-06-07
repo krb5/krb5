@@ -53,6 +53,7 @@ static char sccsid[] = "@(#)svc_tcp.c 1.21 87/08/11 Copyr 1984 Sun Micro";
 #include "autoconf.h"
 #include "k5-platform.h"	/* set_cloexec_fd */
 #include <port-sockets.h>
+#include <socket-utils.h>
 /*extern bool_t abort();
 extern errno;
 */
@@ -117,17 +118,6 @@ struct tcp_conn {  /* kept in xprt->xp_p1 */
 	XDR xdrs;
 	char verf_body[MAX_AUTH_BYTES];
 };
-
-static u_short
-getport(struct sockaddr *addr)
-{
-    if (addr->sa_family == AF_INET)
-	return ntohs(((struct sockaddr_in *) addr)->sin_port);
-    else if (addr->sa_family == AF_INET6)
-	return ntohs(((struct sockaddr_in6 *) addr)->sin6_port);
-    else
-	return 0;
-}
 
 /*
  * Usage:
@@ -208,7 +198,7 @@ svctcp_create(
 	xprt->xp_auth = NULL;
 	xprt->xp_verf = gssrpc__null_auth;
 	xprt->xp_ops = &svctcp_rendezvous_op;
-	xprt->xp_port = getport((struct sockaddr *) &addr);
+	xprt->xp_port = sa_getport((struct sockaddr *) &addr);
 	xprt->xp_sock = sock;
 	xprt->xp_laddrlen = 0;
 	xprt_register(xprt);
