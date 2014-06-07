@@ -1083,11 +1083,6 @@ PKINIT krb5.conf options
     of the KDC certificate presented.  This option may be specified
     multiple times.
 
-**pkinit_win2k_require_binding**
-    If this flag is set to true, it expects that the target KDC is
-    patched to return a reply with a checksum rather than a nonce.
-    The default is false.
-
 
 .. _parameter_expansion:
 

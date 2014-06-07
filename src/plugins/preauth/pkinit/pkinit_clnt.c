@@ -174,13 +174,7 @@ pa_pkinit_gen_req(krb5_context context,
     return_pa_data[0]->contents = (krb5_octet *) out_data->data;
     *out_data = empty_data();
 
-    /*
-     * LH Beta 3 requires the extra pa-data, even for RFC requests,
-     * in order to get the Checksum rather than a Nonce in the reply.
-     * This can be removed when LH SP1 is released.
-     */
-    if (return_pa_data[0]->pa_type == KRB5_PADATA_PK_AS_REP_OLD &&
-        reqctx->opts->win2k_require_cksum) {
+    if (return_pa_data[0]->pa_type == KRB5_PADATA_PK_AS_REP_OLD) {
         return_pa_data[1] = k5alloc(sizeof(*return_pa_data[1]), &retval);
         if (return_pa_data[1] == NULL)
             goto cleanup;
@@ -650,7 +644,6 @@ pkinit_as_rep_parse(krb5_context context,
     krb5_pa_pk_as_rep *kdc_reply = NULL;
     krb5_kdc_dh_key_info *kdc_dh = NULL;
     krb5_reply_key_pack *key_pack = NULL;
-    krb5_reply_key_pack_draft9 *key_pack9 = NULL;
     krb5_data dh_data = { 0, 0, NULL };
     unsigned char *client_key = NULL, *kdc_hostname = NULL;
     unsigned int client_key_len = 0;
@@ -813,27 +806,10 @@ pkinit_as_rep_parse(krb5_context context,
         print_buffer_bin(dh_data.data, dh_data.length,
                          "/tmp/client_key_pack");
 #endif
-        if ((retval = k5int_decode_krb5_reply_key_pack(&k5data,
-                                                       &key_pack)) != 0) {
+        retval = k5int_decode_krb5_reply_key_pack(&k5data, &key_pack);
+        if (retval) {
             pkiDebug("failed to decode reply_key_pack\n");
-            if (pa_type == KRB5_PADATA_PK_AS_REP)
-                goto cleanup;
-            retval = k5int_decode_krb5_reply_key_pack_draft9(&k5data,
-                                                             &key_pack9);
-            if (retval) {
-                pkiDebug("failed to decode reply_key_pack_draft9\n");
-                goto cleanup;
-            }
-            pkiDebug("decode reply_key_pack_draft9\n");
-            if (key_pack9->nonce != request->nonce) {
-                pkiDebug("nonce in AS_REP=%d doesn't match AS_REQ=%d\n",
-                         key_pack9->nonce, request->nonce);
-                retval = -1;
-                goto cleanup;
-            }
-            krb5_copy_keyblock_contents(context, &key_pack9->replyKey,
-                                        key_block);
-            break;
+            goto cleanup;
         }
         /*
          * This is hack but Windows sends back SHA1 checksum
@@ -901,8 +877,6 @@ cleanup:
         free_krb5_reply_key_pack(&key_pack);
         free(cksum.contents);
     }
-    if (key_pack9 != NULL)
-        free_krb5_reply_key_pack_draft9(&key_pack9);
 
     free(kdc_hostname);
 
@@ -925,10 +899,6 @@ pkinit_client_profile(krb5_context context,
     pkiDebug("pkinit_client_profile %p %p %p %p\n",
              context, plgctx, reqctx, realm);
 
-    pkinit_libdefault_boolean(context, realm,
-                              KRB5_CONF_PKINIT_WIN2K_REQUIRE_BINDING,
-                              reqctx->opts->win2k_require_cksum,
-                              &reqctx->opts->win2k_require_cksum);
     pkinit_libdefault_boolean(context, realm,
                               KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING,
                               reqctx->opts->require_crl_checking,

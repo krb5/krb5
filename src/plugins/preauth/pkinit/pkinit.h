@@ -77,7 +77,6 @@
 #define KRB5_CONF_PKINIT_POOL                   "pkinit_pool"
 #define KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING   "pkinit_require_crl_checking"
 #define KRB5_CONF_PKINIT_REVOKE                 "pkinit_revoke"
-#define KRB5_CONF_PKINIT_WIN2K_REQUIRE_BINDING  "pkinit_win2k_require_binding"
 
 /* Make pkiDebug(fmt,...) print, or not.  */
 #ifdef DEBUG
@@ -162,7 +161,6 @@ typedef struct _pkinit_req_opts {
     int require_crl_checking;
     int dh_size;	    /* initial request DH modulus size (default=1024) */
     int require_hostname_match;
-    int win2k_require_cksum;
 } pkinit_req_opts;
 
 /*
