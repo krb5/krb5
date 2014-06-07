@@ -1055,9 +1055,6 @@ PKINIT krb5.conf options
     times.  Its value should contain the acceptable hostname for the
     KDC (as contained in its certificate).
 
-**pkinit_longhorn**
-    If this flag is set to true, we are talking to the Longhorn KDC.
-
 **pkinit_pool**
     Specifies the location of intermediate certificates which may be
     used by the client to complete the trust chain between a KDC

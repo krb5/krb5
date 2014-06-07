@@ -155,16 +155,9 @@ create_krb5_invalidCertificates(krb5_context context,
 static krb5_error_code
 create_identifiers_from_stack(STACK_OF(X509) *sk,
                               krb5_external_principal_identifier *** ids);
-#ifdef LONGHORN_BETA_COMPAT
-static int
-wrap_signeddata(unsigned char *data, unsigned int data_len,
-                unsigned char **out, unsigned int *out_len,
-                int is_longhorn_server);
-#else
 static int
 wrap_signeddata(unsigned char *data, unsigned int data_len,
                 unsigned char **out, unsigned int *out_len);
-#endif
 
 static char *
 pkinit_pkcs11_code_to_text(int err);
@@ -1953,29 +1946,6 @@ cms_envelopeddata_verify(krb5_context context,
      * For draft9-compatible, we don't do anything because it
      * is already wrapped.
      */
-#ifdef LONGHORN_BETA_COMPAT
-    /*
-     * The Longhorn server returns the expected RFC-style data, but
-     * it is missing the sequence tag and length, so it requires
-     * special processing when wrapping.
-     * This will hopefully be fixed before the final release and
-     * this can all be removed.
-     */
-    if (msg_type == CMS_ENVEL_SERVER || longhorn == 1) {
-        retval = wrap_signeddata(tmp_buf, tmp_buf_len,
-                                 &tmp_buf2, &tmp_buf2_len, longhorn);
-        if (retval) {
-            pkiDebug("failed to encode signeddata\n");
-            goto cleanup;
-        }
-        vfy_buf = tmp_buf2;
-        vfy_buf_len = tmp_buf2_len;
-
-    } else {
-        vfy_buf = tmp_buf;
-        vfy_buf_len = tmp_buf_len;
-    }
-#else
     if (msg_type == CMS_ENVEL_SERVER) {
         retval = wrap_signeddata(tmp_buf, tmp_buf_len,
                                  &tmp_buf2, &tmp_buf2_len);
@@ -1990,7 +1960,6 @@ cms_envelopeddata_verify(krb5_context context,
         vfy_buf = tmp_buf;
         vfy_buf_len = tmp_buf_len;
     }
-#endif
 
 #ifdef DEBUG_ASN1
     print_buffer_bin(vfy_buf, vfy_buf_len, "/tmp/client_enc_keypack2");
@@ -3458,112 +3427,6 @@ pkinit_pkcs7type2oid(pkinit_plg_crypto_context cryptoctx, int pkcs7_type)
 
 }
 
-#ifdef LONGHORN_BETA_COMPAT
-#if 0
-/*
- * This is a version that worked with Longhorn Beta 3.
- */
-static int
-wrap_signeddata(unsigned char *data, unsigned int data_len,
-                unsigned char **out, unsigned int *out_len,
-                int is_longhorn_server)
-{
-
-    unsigned int orig_len = 0, oid_len = 0, tot_len = 0;
-    ASN1_OBJECT *oid = NULL;
-    unsigned char *p = NULL;
-
-    pkiDebug("%s: This is the Longhorn version and is_longhorn_server = %d\n",
-             __FUNCTION__, is_longhorn_server);
-
-    /* Get length to wrap the original data with SEQUENCE tag */
-    tot_len = orig_len = ASN1_object_size(1, (int)data_len, V_ASN1_SEQUENCE);
-
-    if (is_longhorn_server == 0) {
-        /* Add the signedData OID and adjust lengths */
-        oid = OBJ_nid2obj(NID_pkcs7_signed);
-        oid_len = i2d_ASN1_OBJECT(oid, NULL);
-
-        tot_len = ASN1_object_size(1, (int)(orig_len+oid_len), V_ASN1_SEQUENCE);
-    }
-
-    p = *out = malloc(tot_len);
-    if (p == NULL) return -1;
-
-    if (is_longhorn_server == 0) {
-        ASN1_put_object(&p, 1, (int)(orig_len+oid_len),
-                        V_ASN1_SEQUENCE, V_ASN1_UNIVERSAL);
-
-        i2d_ASN1_OBJECT(oid, &p);
-
-        ASN1_put_object(&p, 1, (int)data_len, 0, V_ASN1_CONTEXT_SPECIFIC);
-    } else {
-        ASN1_put_object(&p, 1, (int)data_len, V_ASN1_SEQUENCE, V_ASN1_UNIVERSAL);
-    }
-    memcpy(p, data, data_len);
-
-    *out_len = tot_len;
-
-    return 0;
-}
-#else
-/*
- * This is a version that works with a patched Longhorn KDC.
- * (Which should match SP1 ??).
- */
-static int
-wrap_signeddata(unsigned char *data, unsigned int data_len,
-                unsigned char **out, unsigned int *out_len,
-                int is_longhorn_server)
-{
-
-    unsigned int oid_len = 0, tot_len = 0, wrap_len = 0, tag_len = 0;
-    ASN1_OBJECT *oid = NULL;
-    unsigned char *p = NULL;
-
-    pkiDebug("%s: This is the Longhorn version and is_longhorn_server = %d\n",
-             __FUNCTION__, is_longhorn_server);
-
-    /* New longhorn is missing another sequence */
-    if (is_longhorn_server == 1)
-        wrap_len = ASN1_object_size(1, (int)(data_len), V_ASN1_SEQUENCE);
-    else
-        wrap_len = data_len;
-
-    /* Get length to wrap the original data with SEQUENCE tag */
-    tag_len = ASN1_object_size(1, (int)wrap_len, V_ASN1_SEQUENCE);
-
-    /* Always add oid */
-    oid = OBJ_nid2obj(NID_pkcs7_signed);
-    oid_len = i2d_ASN1_OBJECT(oid, NULL);
-    oid_len += tag_len;
-
-    tot_len = ASN1_object_size(1, (int)(oid_len), V_ASN1_SEQUENCE);
-
-    p = *out = malloc(tot_len);
-    if (p == NULL)
-        return -1;
-
-    ASN1_put_object(&p, 1, (int)(oid_len),
-                    V_ASN1_SEQUENCE, V_ASN1_UNIVERSAL);
-
-    i2d_ASN1_OBJECT(oid, &p);
-
-    ASN1_put_object(&p, 1, (int)wrap_len, 0, V_ASN1_CONTEXT_SPECIFIC);
-
-    /* Wrap in extra seq tag */
-    if (is_longhorn_server == 1) {
-        ASN1_put_object(&p, 1, (int)data_len, V_ASN1_SEQUENCE, V_ASN1_UNIVERSAL);
-    }
-    memcpy(p, data, data_len);
-
-    *out_len = tot_len;
-
-    return 0;
-}
-
-#endif
-#else
 static int
 wrap_signeddata(unsigned char *data, unsigned int data_len,
                 unsigned char **out, unsigned int *out_len)
@@ -3597,7 +3460,6 @@ wrap_signeddata(unsigned char *data, unsigned int data_len,
 
     return 0;
 }
-#endif
 
 static int
 prepare_enc_data(unsigned char *indata,
@@ -5643,50 +5505,39 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
         krb5_cas[i]->issuerAndSerialNumber.magic = 0;
         krb5_cas[i]->issuerAndSerialNumber.data = NULL;
 
-#ifdef LONGHORN_BETA_COMPAT
-        if (longhorn == 0) { /* XXX Longhorn doesn't like this */
-#endif
-            is = PKCS7_ISSUER_AND_SERIAL_new();
-            X509_NAME_set(&is->issuer, X509_get_issuer_name(x));
-            M_ASN1_INTEGER_free(is->serial);
-            is->serial = M_ASN1_INTEGER_dup(X509_get_serialNumber(x));
-            len = i2d_PKCS7_ISSUER_AND_SERIAL(is, NULL);
-            if ((p = malloc((size_t) len)) == NULL)
-                goto cleanup;
-            krb5_cas[i]->issuerAndSerialNumber.data = (char *)p;
-            i2d_PKCS7_ISSUER_AND_SERIAL(is, &p);
-            krb5_cas[i]->issuerAndSerialNumber.length = len;
-#ifdef LONGHORN_BETA_COMPAT
-        }
-#endif
+        is = PKCS7_ISSUER_AND_SERIAL_new();
+        X509_NAME_set(&is->issuer, X509_get_issuer_name(x));
+        M_ASN1_INTEGER_free(is->serial);
+        is->serial = M_ASN1_INTEGER_dup(X509_get_serialNumber(x));
+        len = i2d_PKCS7_ISSUER_AND_SERIAL(is, NULL);
+        p = malloc(len);
+        if (p == NULL)
+            goto cleanup;
+        krb5_cas[i]->issuerAndSerialNumber.data = (char *)p;
+        i2d_PKCS7_ISSUER_AND_SERIAL(is, &p);
+        krb5_cas[i]->issuerAndSerialNumber.length = len;
 
         /* fill-in subjectKeyIdentifier */
         krb5_cas[i]->subjectKeyIdentifier.length = 0;
         krb5_cas[i]->subjectKeyIdentifier.magic = 0;
         krb5_cas[i]->subjectKeyIdentifier.data = NULL;
 
+        if (X509_get_ext_by_NID(x, NID_subject_key_identifier, -1) >= 0) {
+            ASN1_OCTET_STRING *ikeyid;
 
-#ifdef LONGHORN_BETA_COMPAT
-        if (longhorn == 0) {    /* XXX Longhorn doesn't like this */
-#endif
-            if (X509_get_ext_by_NID(x, NID_subject_key_identifier, -1) >= 0) {
-                ASN1_OCTET_STRING *ikeyid = NULL;
-
-                if ((ikeyid = X509_get_ext_d2i(x, NID_subject_key_identifier, NULL,
-                                               NULL))) {
-                    len = i2d_ASN1_OCTET_STRING(ikeyid, NULL);
-                    if ((p = malloc((size_t) len)) == NULL)
-                        goto cleanup;
-                    krb5_cas[i]->subjectKeyIdentifier.data = (char *)p;
-                    i2d_ASN1_OCTET_STRING(ikeyid, &p);
-                    krb5_cas[i]->subjectKeyIdentifier.length = len;
-                }
-                if (ikeyid != NULL)
-                    ASN1_OCTET_STRING_free(ikeyid);
+            ikeyid = X509_get_ext_d2i(x, NID_subject_key_identifier, NULL,
+                                      NULL);
+            if (ikeyid != NULL) {
+                len = i2d_ASN1_OCTET_STRING(ikeyid, NULL);
+                p = malloc(len);
+                if (p == NULL)
+                    goto cleanup;
+                krb5_cas[i]->subjectKeyIdentifier.data = (char *)p;
+                i2d_ASN1_OCTET_STRING(ikeyid, &p);
+                krb5_cas[i]->subjectKeyIdentifier.length = len;
+                ASN1_OCTET_STRING_free(ikeyid);
             }
-#ifdef LONGHORN_BETA_COMPAT
         }
-#endif
         if (is != NULL) {
             if (is->issuer != NULL)
                 X509_NAME_free(is->issuer);
