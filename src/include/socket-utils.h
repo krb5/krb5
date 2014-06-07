@@ -89,6 +89,36 @@ static inline struct sockaddr_in6 *ss2sin6 (struct sockaddr_storage *ss)
     return (struct sockaddr_in6 *) ss;
 }
 
+/* Set the IPv4 or IPv6 port on sa to port.  Do nothing if sa is not an
+ * Internet socket. */
+static inline void
+sa_setport(struct sockaddr *sa, uint16_t port)
+{
+    if (sa->sa_family == AF_INET)
+        sa2sin(sa)->sin_port = htons(port);
+    else if (sa->sa_family == AF_INET6)
+        sa2sin6(sa)->sin6_port = htons(port);
+}
+
+/* Get the Internet port number of sa, or 0 if it is not an Internet socket. */
+static inline uint16_t
+sa_getport(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET)
+        return ntohs(sa2sin(sa)->sin_port);
+    else if (sa->sa_family == AF_INET6)
+        return ntohs(sa2sin6(sa)->sin6_port);
+    else
+        return 0;
+}
+
+/* Return true if sa is an IPv4 or IPv6 socket address. */
+static inline int
+sa_is_inet(struct sockaddr *sa)
+{
+    return sa->sa_family == AF_INET || sa->sa_family == AF_INET6;
+}
+
 #if !defined (socklen)
 /* socklen_t socklen (struct sockaddr *) */
 #  ifdef HAVE_SA_LEN
