@@ -103,7 +103,7 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
 
     CHECK_LDAP_HANDLE(ldap_context);
 
-    if (is_principal_in_realm(ldap_context, searchfor) != 0) {
+    if (!is_principal_in_realm(ldap_context, searchfor)) {
         st = KRB5_KDB_NOENTRY;
         k5_setmsg(context, st, _("Principal does not belong to realm"));
         goto cleanup;
@@ -536,7 +536,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     /* get ldap handle */
     GET_HANDLE();
 
-    if (is_principal_in_realm(ldap_context, entry->princ) != 0) {
+    if (!is_principal_in_realm(ldap_context, entry->princ)) {
         st = EINVAL;
         k5_setmsg(context, st,
                   _("Principal does not belong to the default realm"));
@@ -1411,7 +1411,6 @@ krb5_decode_krbsecretkey(krb5_context context, krb5_db_entry *entries,
     entries->key_data = key_data;
 
 cleanup:
-    ldap_value_free_len(bvalues);
     free (user);
     return st;
 }

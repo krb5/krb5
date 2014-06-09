@@ -28,7 +28,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
-#include "kdb_xdr.h"
+#include <kdb.h>
 
 #define safe_realloc(p,n) ((p)?(realloc(p,n)):(malloc(n)))
 

@@ -40,7 +40,6 @@ krb5_error_code
 krb5_ldap_read_krbcontainer_dn(krb5_context context, char **container_dn)
 {
     krb5_error_code                 st=0;
-    LDAP                            *ld=NULL;
     char                            *dn=NULL;
     kdb5_dal_handle                 *dal_handle=NULL;
     krb5_ldap_context               *ldap_context=NULL;
@@ -48,7 +47,6 @@ krb5_ldap_read_krbcontainer_dn(krb5_context context, char **container_dn)
 
     *container_dn = NULL;
     SETUP_CONTEXT();
-    GET_HANDLE();
 
     /* read kerberos containter location from [dbmodules] section of krb5.conf file */
     if (ldap_context->conf_section) {

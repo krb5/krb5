@@ -32,9 +32,6 @@
 #define _LDAP_HANDLE_H_
 
 krb5_error_code
-krb5_update_ldap_handle(krb5_ldap_server_handle *, krb5_ldap_server_info *);
-
-krb5_error_code
 krb5_ldap_request_handle_from_pool(krb5_ldap_context *, krb5_ldap_server_handle **);
 
 krb5_error_code
