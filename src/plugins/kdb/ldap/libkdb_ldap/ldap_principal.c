@@ -189,7 +189,7 @@ krb5_ldap_iterate(krb5_context context, char *match_expr,
                         continue;
                     if (krb5_parse_name(context, princ_name, &principal) != 0)
                         continue;
-                    if (is_principal_in_realm(ldap_context, principal) == 0) {
+                    if (is_principal_in_realm(ldap_context, principal)) {
                         if ((st = populate_krb5_db_entry(context, ldap_context, ld, ent, principal,
                                                          &entry)) != 0)
                             goto cleanup;

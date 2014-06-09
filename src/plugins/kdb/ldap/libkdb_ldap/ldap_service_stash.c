@@ -35,8 +35,7 @@
 
 /* Decode a password of the form {HEX}<hexstring>. */
 static krb5_error_code
-dec_password(krb5_context context, const char *str,
-             unsigned char **password_out)
+dec_password(krb5_context context, const char *str, char **password_out)
 {
     size_t len;
     const unsigned char *p;
@@ -72,85 +71,62 @@ dec_password(krb5_context context, const char *str,
     }
     *q = '\0';
 
-    *password_out = password;
+    *password_out = (char *)password;
     return 0;
 }
 
 krb5_error_code
-krb5_ldap_readpassword(krb5_context context, krb5_ldap_context *ldap_context,
-                       unsigned char **password)
+krb5_ldap_readpassword(krb5_context context, const char *filename,
+                       const char *name, char **password_out)
 {
-    int                         entryfound=0;
-    krb5_error_code             st=0;
-    char                        line[RECORDLEN]="0", *start=NULL, *file=NULL;
-    FILE                        *fptr=NULL;
+    krb5_error_code ret;
+    char line[RECORDLEN], *end;
+    const char *start, *sep, *val = NULL;
+    int namelen = strlen(name);
+    FILE *fp;
 
-    *password = NULL;
+    *password_out = NULL;
 
-    if (ldap_context->service_password_file)
-        file = ldap_context->service_password_file;
-
-    fptr = fopen(file, "r");
-    if (fptr == NULL) {
-        st = errno;
-        k5_setmsg(context, st, _("Cannot open LDAP password file '%s': %s"),
-                  file, error_message(st));
-        goto rp_exit;
+    fp = fopen(filename, "r");
+    if (fp == NULL) {
+        ret = errno;
+        k5_setmsg(context, ret, _("Cannot open LDAP password file '%s': %s"),
+                  filename, error_message(ret));
+        return ret;
     }
-    set_cloexec_file(fptr);
+    set_cloexec_file(fp);
 
-    /* get the record from the file */
-    while (fgets(line, RECORDLEN, fptr)!= NULL) {
-        char tmp[RECORDLEN];
+    while (fgets(line, RECORDLEN, fp) != NULL) {
+        /* Remove trailing newline. */
+        end = line + strlen(line);
+        if (end > line && end[-1] == '\n')
+            end[-1] = '\0';
 
-        tmp[0] = '\0';
-        /* Handle leading white-spaces */
+        /* Skip past leading whitespace. */
         for (start = line; isspace(*start); ++start);
 
-        /* Handle comment lines */
+        /* Ignore comment lines */
         if (*start == '!' || *start == '#')
             continue;
-        sscanf(line, "%*[ \t]%[^#]", tmp);
-        if (tmp[0] == '\0')
-            sscanf(line, "%[^#]", tmp);
-        if (strcasecmp(tmp, ldap_context->bind_dn) == 0) {
-            entryfound = 1; /* service_dn record found !!! */
+
+        sep = strchr(start, '#');
+        if (sep != NULL && sep - start == namelen &&
+            strncasecmp(start, name, namelen) == 0) {
+            val = sep + 1;
             break;
         }
     }
-    fclose (fptr);
+    fclose(fp);
 
-    if (entryfound == 0)  {
-        st = KRB5_KDB_SERVER_INTERNAL_ERR;
-        k5_setmsg(context, st,
+    if (val == NULL) {
+        k5_setmsg(context, KRB5_KDB_SERVER_INTERNAL_ERR,
                   _("Bind DN entry '%s' missing in LDAP password file '%s'"),
-                  ldap_context->bind_dn, file);
-        goto rp_exit;
+                  name, filename);
+        return KRB5_KDB_SERVER_INTERNAL_ERR;
     }
-    /* replace the \n with \0 */
-    start = strchr(line, '\n');
-    if (start)
-        *start = '\0';
-
-    start = strchr(line, '#');
-    if (start == NULL) {
-        /* password field missing */
-        st = KRB5_KDB_SERVER_INTERNAL_ERR;
-        k5_setmsg(context, st, _("Stash file entry corrupt"));
-        goto rp_exit;
-    }
-    ++ start;
 
     /* Extract the plain password information. */
-    st = dec_password(context, start, password);
-
-rp_exit:
-    if (st) {
-        if (*password)
-            free (*password);
-        *password = NULL;
-    }
-    return st;
+    return dec_password(context, val, password_out);
 }
 
 /* Encodes a sequence of bytes in hexadecimal */
