@@ -1020,7 +1020,7 @@ checkattributevalue(LDAP *ld, char *dn, char *attribute, char **attrvalues,
                                 LDAP_NO_LIMIT,
                                 &result)) != LDAP_SUCCESS) {
         st = set_ldap_error(0, st, OP_SEARCH);
-        return st;
+        goto cleanup;
     }
 
     /*

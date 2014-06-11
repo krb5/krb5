@@ -170,7 +170,6 @@ krb5_ldap_list_realm(krb5_context context, char ***realms)
             ldap_value_free(values);
         }
     } /* for (ent= ... */
-    ldap_msgfree(result);
 
 cleanup:
 
@@ -187,6 +186,7 @@ cleanup:
 
     /* If there are no elements, still return a NULL terminated array */
 
+    ldap_msgfree(result);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
 }
@@ -284,7 +284,6 @@ krb5_ldap_delete_realm (krb5_context context, char *lrealm)
                 ldap_value_free(values);
             }
         }
-        ldap_msgfree(result);
     }
 
     /* Delete all password policies */
@@ -317,6 +316,12 @@ cleanup:
                 free (subtrees[l]);
         }
         free (subtrees);
+    }
+
+    if (result_arr != NULL) {
+        for (l = 0; l < ntree; l++)
+            ldap_msgfree(result_arr[l]);
+        free(result_arr);
     }
 
     if (policy != NULL) {
@@ -844,7 +849,6 @@ krb5_ldap_read_realm_params(krb5_context context, char *lrealm,
         }
 
     }
-    ldap_msgfree(result);
 
     rlparams->mask = *mask;
     *rlparamp = rlparams;
@@ -857,6 +861,7 @@ cleanup:
         krb5_ldap_free_realm_params(rlparams);
         *rlparamp=NULL;
     }
+    ldap_msgfree(result);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
 }

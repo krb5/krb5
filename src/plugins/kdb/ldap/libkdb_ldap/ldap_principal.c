@@ -206,6 +206,7 @@ krb5_ldap_iterate(krb5_context context, char *match_expr,
             }
         } /* end of for (ent= ... */
         ldap_msgfree(result);
+        result = NULL;
     } /* end of for (tree= ... */
 
 cleanup:
@@ -215,7 +216,9 @@ cleanup:
     for (;ntree; --ntree)
         if (subtree[ntree-1])
             free (subtree[ntree-1]);
+    free(subtree);
 
+    ldap_msgfree(result);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
 }

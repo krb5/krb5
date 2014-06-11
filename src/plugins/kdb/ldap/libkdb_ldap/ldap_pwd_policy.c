@@ -452,15 +452,17 @@ krb5_ldap_iterate_password_policy(krb5_context context, char *match_expr,
             goto cleanup;
 
         (*func)(func_arg, entry);
-        /* XXX this will free policy so don't free it */
         krb5_ldap_free_password_policy(context, entry);
         entry = NULL;
+
+        free(policy);
+        policy = NULL;
     }
-    ldap_msgfree(result);
 
 cleanup:
     free(entry);
-
+    free(policy);
+    ldap_msgfree(result);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
 }
@@ -472,6 +474,7 @@ krb5_ldap_free_password_policy (context, entry)
 {
     if (entry) {
         free(entry->name);
+        free(entry->allowed_keysalts);
         free(entry);
     }
     return;

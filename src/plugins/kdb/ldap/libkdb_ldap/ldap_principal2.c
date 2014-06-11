@@ -448,18 +448,18 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
     for (i = 0, last = 0, j = 0, currkvno = key_data[0].key_data_kvno; i < n_key_data; i++) {
         krb5_data *code;
         if (i == n_key_data - 1 || key_data[i + 1].key_data_kvno != currkvno) {
-            asn1_encode_sequence_of_keys (key_data+last,
-                                          (krb5_int16) i - last + 1,
-                                          mkvno,
-                                          &code);
-            ret[j] = malloc (sizeof (struct berval));
-            if (ret[j] == NULL) {
-                err = ENOMEM;
+            ret[j] = k5alloc(sizeof(struct berval), &err);
+            if (ret[j] == NULL)
                 goto cleanup;
-            }
+            err = asn1_encode_sequence_of_keys(key_data + last,
+                                               (krb5_int16)i - last + 1,
+                                               mkvno, &code);
+            if (err)
+                goto cleanup;
             /*CHECK_NULL(ret[j]); */
             ret[j]->bv_len = code->length;
             ret[j]->bv_val = code->data;
+            free(code);
             j++;
             last = i + 1;
 
@@ -509,9 +509,11 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                         char **db_args)
 {
     int                         l=0, kerberos_principal_object_type=0;
+    unsigned int                ntrees=0, tre=0;
     krb5_error_code             st=0, tempst=0;
     LDAP                        *ld=NULL;
     LDAPMessage                 *result=NULL, *ent=NULL;
+    char                        **subtreelist = NULL;
     char                        *user=NULL, *subtree=NULL, *principal_dn=NULL;
     char                        **values=NULL, *strval[10]={NULL}, errbuf[1024];
     char                        *filtuser=NULL;
@@ -525,7 +527,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
-    osa_princ_ent_rec           princ_ent;
+    osa_princ_ent_rec           princ_ent = {0};
     xargs_t                     xargs = {0};
     char                        *polname = NULL;
     OPERATION optype;
@@ -576,9 +578,9 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         goto cleanup;
 
     if (entry->mask & KADM5_LOAD) {
-        unsigned int     tree = 0, ntrees = 0;
+        unsigned int     tree = 0;
         int              numlentries = 0;
-        char             **subtreelist = NULL, *filter = NULL;
+        char             *filter = NULL;
 
         /*  A load operation is special, will do a mix-in (add krbprinc
          *  attrs to a non-krb object entry) if an object exists with a
@@ -600,7 +602,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         found_entry = FALSE;
         /* search for entry with matching krbprincipalname attribute */
         for (tree = 0; found_entry == FALSE && tree < ntrees; ++tree) {
-            result = NULL;
             if (principal_dn == NULL) {
                 LDAP_SEARCH_1(subtreelist[tree], ldap_context->lrparams->search_scope, filter, principal_attributes, IGNORE_STATUS);
             } else {
@@ -610,7 +611,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
             if (st == LDAP_SUCCESS) {
                 numlentries = ldap_count_entries(ld, result);
                 if (numlentries > 1) {
-                    ldap_msgfree(result);
                     free(filter);
                     st = EINVAL;
                     krb5_set_error_message(context, st,
@@ -628,21 +628,20 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                             if ((principal_dn = ldap_get_dn(ld, ent)) == NULL) {
                                 ldap_get_option (ld, LDAP_OPT_RESULT_CODE, &st);
                                 st = set_ldap_error (context, st, 0);
-                                ldap_msgfree(result);
                                 free(filter);
                                 goto cleanup;
                             }
                         }
                     }
                 }
-                if (result)
-                    ldap_msgfree(result);
             } else if (st != LDAP_NO_SUCH_OBJECT) {
                 /* could not perform search, return with failure */
                 st = set_ldap_error (context, st, 0);
                 free(filter);
                 goto cleanup;
             }
+            ldap_msgfree(result);
+            result = NULL;
             /*
              * If it isn't found then assume a standalone princ entry is to
              * be created.
@@ -717,9 +716,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
      */
     if (xargs.dn_from_kbd == TRUE) {
         /* make sure the DN falls in the subtree */
-        unsigned int     tre=0, ntrees=0;
         int              dnlen=0, subtreelen=0;
-        char             **subtreelist=NULL;
         char             *dn=NULL;
         krb5_boolean     outofsubtree=TRUE;
 
@@ -736,9 +733,12 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
             dn = standalone_principal_dn;
         }
 
-        /* get the current subtree list */
-        if ((st = krb5_get_subtree_info(ldap_context, &subtreelist, &ntrees)) != 0)
-            goto cleanup;
+        /* Get the current subtree list if we haven't already done so. */
+        if (subtreelist == NULL) {
+            st = krb5_get_subtree_info(ldap_context, &subtreelist, &ntrees);
+            if (st)
+                goto cleanup;
+        }
 
         for (tre=0; tre<ntrees; ++tre) {
             if (subtreelist[tre] == NULL || strlen(subtreelist[tre]) == 0) {
@@ -752,10 +752,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                     break;
                 }
             }
-        }
-
-        for (tre=0; tre < ntrees; ++tre) {
-            free(subtreelist[tre]);
         }
 
         if (outofsubtree == TRUE) {
@@ -785,6 +781,8 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
              */
             char  *attributes[]={"krbticketpolicyreference", "krbprincipalname", NULL};
 
+            ldap_msgfree(result);
+            result = NULL;
             LDAP_SEARCH_1(dn, LDAP_SCOPE_BASE, 0, attributes, IGNORE_STATUS);
             if (st == LDAP_SUCCESS) {
                 ent = ldap_first_entry(ld, result);
@@ -798,7 +796,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                         ldap_value_free(values);
                     }
                 }
-                ldap_msgfree(result);
             } else {
                 st = set_ldap_error(context, st, OP_SEARCH);
                 goto cleanup;
@@ -1006,10 +1003,10 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         memset(&princ_ent, 0, sizeof(princ_ent));
         for (tl_data=entry->tl_data; tl_data; tl_data=tl_data->tl_data_next) {
             if (tl_data->tl_data_type == KRB5_TL_KADM_DATA) {
-                /* FIX ME: I guess the princ_ent should be freed after this call */
                 if ((st = krb5_lookup_tl_kadm_data(tl_data, &princ_ent)) != 0) {
                     goto cleanup;
                 }
+                break;
             }
         }
 
@@ -1291,6 +1288,10 @@ cleanup:
     if (polname != NULL)
         free(polname);
 
+    for (tre = 0; tre < ntrees; tre++)
+        free(subtreelist[tre]);
+    free(subtreelist);
+
     if (subtree)
         free (subtree);
 
@@ -1307,6 +1308,8 @@ cleanup:
         free (keys);
 
     ldap_mods_free(mods, 1);
+    ldap_osa_free_princ_ent(&princ_ent);
+    ldap_msgfree(result);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return(st);
 }
