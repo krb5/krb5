@@ -2903,6 +2903,7 @@ krb5_kt_start_seq_get(krb5_context context, krb5_keytab keytab,
  * @param [in]  cursor          Key table cursor
  *
  * Return the next sequential entry in @a keytab and advance @a cursor.
+ * Callers must release the returned entry with krb5_kt_free_entry().
  *
  * @sa krb5_kt_start_seq_get(), krb5_kt_end_seq_get()
  *
