@@ -249,7 +249,6 @@ krb5_ldap_read_policy(krb5_context context, char *policyname,
         if (krb5_ldap_get_value(ld, ent, "krbticketflags", (int *) &(lpolicy->tktflags)) == 0)
             *omask |= LDAP_POLICY_TKTFLAGS;
     }
-    ldap_msgfree(result);
 
     lpolicy->mask = *omask;
     store_tl_data(lpolicy->tl_data, KDB_TL_MASK, omask);
@@ -260,6 +259,7 @@ cleanup:
         krb5_ldap_free_policy(context, lpolicy);
         *policy = NULL;
     }
+    ldap_msgfree(result);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
 }
@@ -467,7 +467,6 @@ krb5_ldap_list(krb5_context context, char ***list, char *objectclass,
         }
         ldap_memfree(dn);
     }
-    ldap_msgfree(result);
 
 cleanup:
     if (filter)
@@ -482,6 +481,7 @@ cleanup:
             *list = NULL;
         }
     }
+    ldap_msgfree(result);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
 }

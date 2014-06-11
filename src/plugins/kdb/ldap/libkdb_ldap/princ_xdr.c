@@ -176,9 +176,8 @@ ldap_osa_free_princ_ent(osa_princ_ent_t val)
     XDR xdrs;
 
     xdrmem_create(&xdrs, NULL, 0, XDR_FREE);
-
     ldap_xdr_osa_princ_ent_rec(&xdrs, val);
-    free(val);
+    xdr_destroy(&xdrs);
 }
 
 krb5_error_code
