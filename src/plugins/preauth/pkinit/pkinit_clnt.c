@@ -43,19 +43,6 @@
 #include "pkinit.h"
 #include "k5-json.h"
 
-/*
- * It is anticipated that all the special checks currently
- * required when talking to a Longhorn server will go away
- * by the time it is officially released and all references
- * to the longhorn global can be removed and any code
- * #ifdef'd with LONGHORN_BETA_COMPAT can be removed.
- *
- * Current testing (20070620) is against a patched Beta 3
- * version of Longhorn.  Most, if not all, problems should
- * be fixed in SP1 of Longhorn.
- */
-int longhorn = 0;       /* Talking to a Longhorn server? */
-
 /**
  * Return true if we should use ContentInfo rather than SignedData. This
  * happens if we are talking to what might be an old (pre-6112) MIT KDC and
@@ -187,13 +174,7 @@ pa_pkinit_gen_req(krb5_context context,
     return_pa_data[0]->contents = (krb5_octet *) out_data->data;
     *out_data = empty_data();
 
-    /*
-     * LH Beta 3 requires the extra pa-data, even for RFC requests,
-     * in order to get the Checksum rather than a Nonce in the reply.
-     * This can be removed when LH SP1 is released.
-     */
-    if ((return_pa_data[0]->pa_type == KRB5_PADATA_PK_AS_REP_OLD
-         && reqctx->opts->win2k_require_cksum) || (longhorn == 1)) {
+    if (return_pa_data[0]->pa_type == KRB5_PADATA_PK_AS_REP_OLD) {
         return_pa_data[1] = k5alloc(sizeof(*return_pa_data[1]), &retval);
         if (return_pa_data[1] == NULL)
             goto cleanup;
@@ -663,7 +644,6 @@ pkinit_as_rep_parse(krb5_context context,
     krb5_pa_pk_as_rep *kdc_reply = NULL;
     krb5_kdc_dh_key_info *kdc_dh = NULL;
     krb5_reply_key_pack *key_pack = NULL;
-    krb5_reply_key_pack_draft9 *key_pack9 = NULL;
     krb5_data dh_data = { 0, 0, NULL };
     unsigned char *client_key = NULL, *kdc_hostname = NULL;
     unsigned int client_key_len = 0;
@@ -826,37 +806,10 @@ pkinit_as_rep_parse(krb5_context context,
         print_buffer_bin(dh_data.data, dh_data.length,
                          "/tmp/client_key_pack");
 #endif
-        if ((retval = k5int_decode_krb5_reply_key_pack(&k5data,
-                                                       &key_pack)) != 0) {
+        retval = k5int_decode_krb5_reply_key_pack(&k5data, &key_pack);
+        if (retval) {
             pkiDebug("failed to decode reply_key_pack\n");
-#ifdef LONGHORN_BETA_COMPAT
-            /*
-             * LH Beta 3 requires the extra pa-data, even for RFC requests,
-             * in order to get the Checksum rather than a Nonce in the reply.
-             * This can be removed when LH SP1 is released.
-             */
-            if (pa_type == KRB5_PADATA_PK_AS_REP && longhorn == 0)
-#else
-                if (pa_type == KRB5_PADATA_PK_AS_REP)
-#endif
-                    goto cleanup;
-                else {
-                    if ((retval =
-                         k5int_decode_krb5_reply_key_pack_draft9(&k5data,
-                                                                 &key_pack9)) != 0) {
-                        pkiDebug("failed to decode reply_key_pack_draft9\n");
-                        goto cleanup;
-                    }
-                    pkiDebug("decode reply_key_pack_draft9\n");
-                    if (key_pack9->nonce != request->nonce) {
-                        pkiDebug("nonce in AS_REP=%d doesn't match AS_REQ=%d\n",                                 key_pack9->nonce, request->nonce);
-                        retval = -1;
-                        goto cleanup;
-                    }
-                    krb5_copy_keyblock_contents(context, &key_pack9->replyKey,
-                                                key_block);
-                    break;
-                }
+            goto cleanup;
         }
         /*
          * This is hack but Windows sends back SHA1 checksum
@@ -924,8 +877,6 @@ cleanup:
         free_krb5_reply_key_pack(&key_pack);
         free(cksum.contents);
     }
-    if (key_pack9 != NULL)
-        free_krb5_reply_key_pack_draft9(&key_pack9);
 
     free(kdc_hostname);
 
@@ -952,10 +903,6 @@ pkinit_client_profile(krb5_context context,
                               KRB5_CONF_PKINIT_WIN2K,
                               reqctx->opts->win2k_target,
                               &reqctx->opts->win2k_target);
-    pkinit_libdefault_boolean(context, realm,
-                              KRB5_CONF_PKINIT_WIN2K_REQUIRE_BINDING,
-                              reqctx->opts->win2k_require_cksum,
-                              &reqctx->opts->win2k_require_cksum);
     pkinit_libdefault_boolean(context, realm,
                               KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING,
                               reqctx->opts->require_crl_checking,
@@ -990,13 +937,6 @@ pkinit_client_profile(krb5_context context,
         }
         free(eku_string);
     }
-#ifdef LONGHORN_BETA_COMPAT
-    /* Temporarily just set global flag from config file */
-    pkinit_libdefault_boolean(context, realm,
-                              KRB5_CONF_PKINIT_LONGHORN,
-                              0,
-                              &longhorn);
-#endif
 
     /* Only process anchors here if they were not specified on command line */
     if (reqctx->idopts->anchors == NULL)

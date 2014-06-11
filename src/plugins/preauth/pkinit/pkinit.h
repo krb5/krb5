@@ -40,20 +40,6 @@
 #include "pkinit_accessor.h"
 #include "pkinit_trace.h"
 
-/*
- * It is anticipated that all the special checks currently
- * required when talking to a Longhorn server will go away
- * by the time it is officially released and all references
- * to the longhorn global can be removed and any code
- * #ifdef'd with LONGHORN_BETA_COMPAT can be removed.
- * And this #define!
- */
-#define LONGHORN_BETA_COMPAT 1
-#ifdef LONGHORN_BETA_COMPAT
-extern int longhorn;	    /* XXX Talking to a Longhorn server? */
-#endif
-
-
 #ifndef WITHOUT_PKCS11
 #include "pkcs11.h"
 
@@ -88,12 +74,10 @@ extern int longhorn;	    /* XXX Talking to a Longhorn server? */
 #define KRB5_CONF_PKINIT_IDENTITY               "pkinit_identity"
 #define KRB5_CONF_PKINIT_KDC_HOSTNAME           "pkinit_kdc_hostname"
 #define KRB5_CONF_PKINIT_KDC_OCSP               "pkinit_kdc_ocsp"
-#define KRB5_CONF_PKINIT_LONGHORN               "pkinit_longhorn"
 #define KRB5_CONF_PKINIT_POOL                   "pkinit_pool"
 #define KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING   "pkinit_require_crl_checking"
 #define KRB5_CONF_PKINIT_REVOKE                 "pkinit_revoke"
 #define KRB5_CONF_PKINIT_WIN2K                  "pkinit_win2k"
-#define KRB5_CONF_PKINIT_WIN2K_REQUIRE_BINDING  "pkinit_win2k_require_binding"
 
 /* Make pkiDebug(fmt,...) print, or not.  */
 #ifdef DEBUG
@@ -179,7 +163,6 @@ typedef struct _pkinit_req_opts {
     int dh_size;	    /* initial request DH modulus size (default=1024) */
     int require_hostname_match;
     int win2k_target;
-    int win2k_require_cksum;
 } pkinit_req_opts;
 
 /*
