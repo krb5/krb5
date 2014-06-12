@@ -30,17 +30,13 @@ installed as |keytab|.
 The **-S** option allows for a different keytab than the default.
 
 sserver is normally invoked out of inetd(8), using a line in
-``/etc/inetd.conf`` that looks like this:
-
- ::
+``/etc/inetd.conf`` that looks like this::
 
     sample stream tcp nowait root /usr/local/sbin/sserver sserver
 
 Since ``sample`` is normally not a port defined in ``/etc/services``,
 you will usually have to add a line to ``/etc/services`` which looks
-like this:
-
- ::
+like this::
 
     sample          13135/tcp
 
@@ -52,9 +48,7 @@ connecting to, be sure that both hosts have an entry in /etc/services
 for the sample tcp port, and that the same port number is in both
 files.
 
-When you run sclient you should see something like this:
-
- ::
+When you run sclient you should see something like this::
 
     sendauth succeeded, reply is:
     reply len 32, contents:
@@ -64,49 +58,39 @@ When you run sclient you should see something like this:
 COMMON ERROR MESSAGES
 ---------------------
 
-1) kinit returns the error:
-
-    ::
+1) kinit returns the error::
 
        kinit: Client not found in Kerberos database while getting
-           initial credentials
+              initial credentials
 
    This means that you didn't create an entry for your username in the
    Kerberos database.
 
-2) sclient returns the error:
-
-    ::
+2) sclient returns the error::
 
        unknown service sample/tcp; check /etc/services
 
    This means that you don't have an entry in /etc/services for the
    sample tcp port.
 
-3) sclient returns the error:
-
-    ::
+3) sclient returns the error::
 
        connect: Connection refused
 
    This probably means you didn't edit /etc/inetd.conf correctly, or
    you didn't restart inetd after editing inetd.conf.
 
-4) sclient returns the error:
-
-    ::
+4) sclient returns the error::
 
        sclient: Server not found in Kerberos database while using
-           sendauth
+                sendauth
 
    This means that the ``sample/hostname@LOCAL.REALM`` service was not
    defined in the Kerberos database; it should be created using
    :ref:`kadmin(1)`, and a keytab file needs to be generated to make
    the key for that service principal available for sclient.
 
-5) sclient returns the error:
-
-    ::
+5) sclient returns the error::
 
        sendauth rejected, error reply is:
            "No such file or directory"

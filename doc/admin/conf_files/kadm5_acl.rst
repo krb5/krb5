@@ -19,9 +19,7 @@ SYNTAX
 ------
 
 Empty lines and lines starting with the sharp sign (``#``) are
-ignored.  Lines containing ACL entries have the format:
-
- ::
+ignored.  Lines containing ACL entries have the format::
 
     principal  permissions  [target_principal  [restrictions] ]
 
@@ -98,9 +96,7 @@ ignored.  Lines containing ACL entries have the format:
 EXAMPLE
 -------
 
-Here is an example of a kadm5.acl file.
-
- ::
+Here is an example of a kadm5.acl file::
 
     */admin@ATHENA.MIT.EDU    *                               # line 1
     joeadmin@ATHENA.MIT.EDU   ADMCIL                          # line 2

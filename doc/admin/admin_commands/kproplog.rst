@@ -53,9 +53,7 @@ OPTIONS
 
 **-v**
     Display individual attributes per update.  An example of the
-    output generated for one entry:
-
-     ::
+    output generated for one entry::
 
         Update Entry
            Update serial # : 4
