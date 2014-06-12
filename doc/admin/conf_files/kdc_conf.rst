@@ -490,9 +490,7 @@ In the following example, the logging messages from the KDC will go to
 the console and to the system log under the facility LOG_DAEMON with
 default severity of LOG_INFO; and the logging messages from the
 administrative server will be appended to the file
-``/var/adm/kadmin.log`` and sent to the device ``/dev/tty04``.
-
- ::
+``/var/adm/kadmin.log`` and sent to the device ``/dev/tty04``. ::
 
     [logging]
         kdc = CONSOLE
@@ -512,18 +510,14 @@ PKINIT options
           realm-specific value over-rides, does not add to, a generic
           [kdcdefaults] specification.  The search order is:
 
-1. realm-specific subsection of [realms],
-
-    ::
+1. realm-specific subsection of [realms]::
 
        [realms]
            EXAMPLE.COM = {
                pkinit_anchors = FILE:/usr/local/example.com.crt
            }
 
-2. generic value in the [kdcdefaults] section.
-
-    ::
+2. generic value in the [kdcdefaults] section::
 
        [kdcdefaults]
            pkinit_anchors = DIR:/usr/local/generic_trusted_cas/
@@ -666,9 +660,7 @@ commands and configuration parameters that affect generation of keys
 take lists of enctype-salttype ("keysalt") pairs, known as *keysalt
 lists*.  Each keysalt pair is an enctype name followed by a salttype
 name, in the format *enc*:*salt*.  Individual keysalt list members are
-separated by comma (",") characters or space characters.  For example:
-
- ::
+separated by comma (",") characters or space characters.  For example::
 
     kadmin -e aes256-cts:normal,aes128-cts:normal
 
@@ -694,9 +686,7 @@ special           generate a random salt
 Sample kdc.conf File
 --------------------
 
-Here's an example of a kdc.conf file:
-
- ::
+Here's an example of a kdc.conf file::
 
     [kdcdefaults]
         kdc_ports = 88

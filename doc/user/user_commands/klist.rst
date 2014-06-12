@@ -44,9 +44,7 @@ OPTIONS
 
 **-f**
     Shows the flags present in the credentials, using the following
-    abbreviations:
-
-     ::
+    abbreviations::
 
         F    Forwardable
         f    forwarded
