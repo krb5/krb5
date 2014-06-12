@@ -71,9 +71,7 @@ krb5-config is particularly useful for compiling against a Kerberos
 installation that was installed in a non-standard location.  For example,
 a Kerberos installation that is installed in ``/opt/krb5/`` but uses
 libraries in ``/usr/local/lib/`` for text localization would produce
-the following output:
-
- ::
+the following output::
 
     shell% krb5-config --libs krb5
     -L/opt/krb5/lib -Wl,-rpath -Wl,/opt/krb5/lib -L/usr/local/lib -lkrb5 -lk5crypto -lcom_err

@@ -27,9 +27,7 @@ credentials for a client using a password.  An application that needs
 to verify the credentials can call :c:func:`krb5_verify_init_creds`.
 Here is an example of code to obtain and verify TGT credentials, given
 strings *princname* and *password* for the client principal name and
-password:
-
-  ::
+password::
 
     krb5_error_code ret;
     krb5_creds creds;
@@ -57,9 +55,7 @@ The function :c:func:`krb5_get_init_creds_password` takes an options
 parameter (which can be a null pointer).  Use the function
 :c:func:`krb5_get_init_creds_opt_alloc` to allocate an options
 structure, and :c:func:`krb5_get_init_creds_opt_free` to free it.  For
-example:
-
-  ::
+example::
 
     krb5_error_code ret;
     krb5_get_init_creds_opt *opt = NULL;
@@ -97,9 +93,7 @@ with the KDC's realm and a single empty data component (the principal
 obtained by parsing ``@``\ *realmname*).  Authentication will take
 place using anonymous PKINIT; if successful, the client principal of
 the resulting tickets will be
-``WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS``.  Here is an example:
-
-  ::
+``WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS``.  Here is an example::
 
     krb5_get_init_creds_opt_set_anonymous(opt, 1);
     ret = krb5_build_principal(context, &client_princ, strlen(myrealm),
@@ -155,9 +149,7 @@ type information is available.
 Text-based applications can use a built-in text prompter
 implementation by supplying :c:func:`krb5_prompter_posix` as the
 *prompter* parameter and a null pointer as the *data* parameter.  For
-example:
-
-  ::
+example::
 
     ret = krb5_get_init_creds_password(context, &creds, client_princ,
                                        NULL, krb5_prompter_posix, NULL, 0,
@@ -229,9 +221,7 @@ be called multiple times.
 Example
 #######
 
-Here is an example of using a responder callback:
-
-  ::
+Here is an example of using a responder callback::
 
     static krb5_error_code
     my_responder(krb5_context context, void *data,
@@ -291,9 +281,7 @@ credentials.  It takes an options structure (which can be a null
 pointer).  Use :c:func:`krb5_verify_init_creds_opt_init` to initialize
 the caller-allocated options structure, and
 :c:func:`krb5_verify_init_creds_opt_set_ap_req_nofail` to set the
-"nofail" option.  For example:
-
-  ::
+"nofail" option.  For example::
 
     krb5_verify_init_creds_opt vopt;
 

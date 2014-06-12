@@ -34,9 +34,7 @@ file, the slave Kerberos server will have an up-to-date KDC database.
 
 Where incremental propagation is not used, kpropd is commonly invoked
 out of inetd(8) as a nowait service.  This is done by adding a line to
-the ``/etc/inetd.conf`` file which looks like this:
-
- ::
+the ``/etc/inetd.conf`` file which looks like this::
 
     kprop  stream  tcp  nowait  root  /usr/local/sbin/kpropd  kpropd
 

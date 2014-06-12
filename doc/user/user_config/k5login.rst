@@ -18,9 +18,7 @@ EXAMPLES
 --------
 
 Suppose the user ``alice`` had a .k5login file in her home directory
-containing just the following line:
-
- ::
+containing just the following line::
 
     bob@FOOBAR.ORG
 
@@ -35,9 +33,7 @@ machine's default realm to access the ``alice`` account.
 
 Let us further suppose that ``alice`` is a system administrator.
 Alice and the other system administrators would have their principals
-in root's .k5login file on each host:
-
- ::
+in root's .k5login file on each host::
 
     alice@BLEEP.COM
 
