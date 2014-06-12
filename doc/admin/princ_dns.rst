@@ -38,12 +38,10 @@ the hostname.  They obtain the "canonical" name of the host when doing
 so.  By default, MIT Kerberos clients will also then do reverse DNS
 resolution (looking up the hostname associated with the IPv4 or IPv6
 address using ``getnameinfo()``) of the hostname.  Using the
-:ref:`krb5.conf(5)` setting
+:ref:`krb5.conf(5)` setting::
 
-    ::
-
-        [libdefaults]
-            rdns = false
+    [libdefaults]
+        rdns = false
 
 will disable reverse DNS lookup on clients.  The default setting is
 "true".
@@ -74,12 +72,10 @@ Overriding application behavior
 Applications can choose to use a default hostname component in their
 service principal name when accepting authentication, which avoids
 some sorts of hostname mismatches.  Because not all relevant
-applications do this yet, using the :ref:`krb5.conf(5)` setting
+applications do this yet, using the :ref:`krb5.conf(5)` setting::
 
-    ::
-
-        [libdefaults]
-            ignore_acceptor_hostname = true
+    [libdefaults]
+        ignore_acceptor_hostname = true
 
 will allow the Kerberos library to override the application's choice
 of service principal hostname and will allow a server program to

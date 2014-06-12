@@ -140,7 +140,7 @@ type the following::
     Principal "david@ATHENA.MIT.EDU" created.
     kadmin:
 
-If you want to delete a principal ::
+If you want to delete a principal::
 
     kadmin: delprinc jennifer
     Are you sure you want to delete the principal

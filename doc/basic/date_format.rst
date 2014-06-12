@@ -108,7 +108,7 @@ following ways:
 
 (See :ref:`abbreviation`.)
 
-Example ::
+Example::
 
     Set the default expiration date to July 27, 2012 at 20:30
     default_principal_expiration = 20120727203000

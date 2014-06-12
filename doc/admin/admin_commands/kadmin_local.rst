@@ -350,9 +350,7 @@ Options:
         - *dn* and *containerdn* should be within the subtrees or
           principal container configured in the realm.
 
-Example:
-
- ::
+Example::
 
     kadmin: addprinc jennifer
     WARNING: no policy specified for "jennifer@ATHENA.MIT.EDU";
@@ -457,9 +455,7 @@ The following options are available:
     Keeps the existing keys in the database.  This flag is usually not
     necessary except perhaps for ``krbtgt`` principals.
 
-Example:
-
- ::
+Example::
 
     kadmin: cpw systest
     Enter password for principal systest@BLEEP.COM:
@@ -501,9 +497,7 @@ running the the program to be the same as the one being listed.
 
 Alias: **getprinc**
 
-Examples:
-
- ::
+Examples::
 
     kadmin: getprinc tlyu/admin
     Principal: tlyu/admin@BLEEP.COM
@@ -549,9 +543,7 @@ This command requires the **list** privilege.
 
 Alias: **listprincs**, **get_principals**, **get_princs**
 
-Example:
-
- ::
+Example::
 
     kadmin:  listprincs test*
     test3@SECURE-TEST.OV.COM
@@ -684,9 +676,7 @@ The following options are available:
     with commas (',') only.  To clear the allowed key/salt policy use
     a value of '-'.
 
-Example:
-
- ::
+Example::
 
     kadmin: add_policy -maxlife "2 days" -minlength 5 guests
     kadmin:
@@ -724,9 +714,7 @@ This command requires the **delete** privilege.
 
 Alias: **delpol**
 
-Example:
-
- ::
+Example::
 
     kadmin: del_policy guests
     Are you sure you want to delete the policy "guests"?
@@ -750,9 +738,7 @@ This command requires the **inquire** privilege.
 
 Alias: getpol
 
-Examples:
-
- ::
+Examples::
 
     kadmin: get_policy admin
     Policy: admin
@@ -790,9 +776,7 @@ This command requires the **list** privilege.
 
 Aliases: **listpols**, **get_policies**, **getpols**.
 
-Examples:
-
- ::
+Examples::
 
     kadmin:  listpols
     test-pol
@@ -846,9 +830,7 @@ An entry for each of the principal's unique encryption types is added,
 ignoring multiple keys with the same encryption type but different
 salt types.
 
-Example:
-
- ::
+Example::
 
     kadmin: ktadd -k /tmp/foo-new-keytab host/foo.mit.edu
     Entry for principal host/foo.mit.edu@ATHENA.MIT.EDU with kvno 3,
@@ -883,9 +865,7 @@ The options are:
 **-q**
     Display less verbose information.
 
-Example:
-
- ::
+Example::
 
     kadmin: ktremove kadmin/admin all
     Entry for principal kadmin/admin with kvno 3 removed from keytab
