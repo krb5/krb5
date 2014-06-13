@@ -50,7 +50,7 @@ ignored.  Lines containing ACL entries have the format:
     c  [Dis]allows the changing of passwords for principals
     d  [Dis]allows the deletion of principals or policies
     i  [Dis]allows inquiries about principals or policies
-    l  [Dis]allows the listing of principals or policies
+    l  [Dis]allows the listing of all principals or policies
     m  [Dis]allows the modification of principals or policies
     p  [Dis]allows the propagation of the principal database (used in :ref:`incr_db_prop`)
     s  [Dis]allows the explicit setting of the key for a principal
@@ -102,12 +102,12 @@ Here is an example of a kadm5.acl file.
 
  ::
 
-    */admin@ATHENA.MIT.EDU        *                           # line 1
+    */admin@ATHENA.MIT.EDU    *                               # line 1
     joeadmin@ATHENA.MIT.EDU   ADMCIL                          # line 2
-    joeadmin/*@ATHENA.MIT.EDU il  */root@ATHENA.MIT.EDU       # line 3
-    */root@ATHENA.MIT.EDU     cil *1@ATHENA.MIT.EDU           # line 4
-    */*@ATHENA.MIT.EDU        i                               # line 5
-    */admin@EXAMPLE.COM       x   * -maxlife 9h -postdateable # line 6
+    joeadmin/*@ATHENA.MIT.EDU i   */root@ATHENA.MIT.EDU       # line 3
+    */root@ATHENA.MIT.EDU     ci  *1@ATHENA.MIT.EDU           # line 4
+    */root@ATHENA.MIT.EDU     l   *                           # line 5
+    sms@ATHENA.MIT.EDU        x   * -maxlife 9h -postdateable # line 6
 
 (line 1) Any principal in the ``ATHENA.MIT.EDU`` realm with
 an ``admin`` instance has all administrative privileges.
@@ -117,22 +117,24 @@ an ``admin`` instance has all administrative privileges.
 1).  He has no permissions at all with his null instance,
 ``joeadmin@ATHENA.MIT.EDU`` (matches line 2).  His ``root`` and other
 non-``admin``, non-null instances (e.g., ``extra`` or ``dbadmin``) have
-inquire and list permissions with any principal that has the
-instance ``root`` (matches line 3).
+inquire permissions with any principal that has the instance ``root``
+(matches line 3).
 
-(line 4) Any ``root`` principal in ``ATHENA.MIT.EDU`` can inquire, list,
+(line 4) Any ``root`` principal in ``ATHENA.MIT.EDU`` can inquire
 or change the password of their null instance, but not any other
 null instance.  (Here, ``*1`` denotes a back-reference to the
 component matching the first wildcard in the actor principal.)
 
-(line 5) Any principal in the realm ``ATHENA.MIT.EDU`` (except for
-``joeadmin@ATHENA.MIT.EDU``, as mentioned above) has inquire
-privileges.
+(line 5) Any ``root`` principal in ``ATHENA.MIT.EDU`` can generate
+the list of principals in the database, and the list of policies
+in the database.  This line is separate from line 4, because list
+permission can only be granted globally, not to specific target
+principals.
 
-(line 6) Finally, any principal with an ``admin`` instance in ``EXAMPLE.COM``
-has all permissions, but any principal that they create or modify will
-not be able to get postdateable tickets or tickets with a life of
-longer than 9 hours.
+(line 6) Finally, the Service Management System principal
+``sms@ATHENA.MIT.EDU`` has all permissions, but any principal that it
+creates or modifies will not be able to get postdateable tickets or
+tickets with a life of longer than 9 hours.
 
 SEE ALSO
 --------
