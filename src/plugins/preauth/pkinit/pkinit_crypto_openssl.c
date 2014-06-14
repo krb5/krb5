@@ -5461,7 +5461,6 @@ static krb5_error_code
 create_identifiers_from_stack(STACK_OF(X509) *sk,
                               krb5_external_principal_identifier *** ids)
 {
-    krb5_error_code retval = ENOMEM;
     int i = 0, sk_size = sk_X509_num(sk);
     krb5_external_principal_identifier **krb5_cas = NULL;
     X509 *x = NULL;
@@ -5473,11 +5472,9 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
 
     *ids = NULL;
 
-    krb5_cas =
-        malloc((sk_size + 1) * sizeof(krb5_external_principal_identifier *));
+    krb5_cas = calloc(sk_size + 1, sizeof(*krb5_cas));
     if (krb5_cas == NULL)
         return ENOMEM;
-    krb5_cas[sk_size] = NULL;
 
     for (i = 0; i < sk_size; i++) {
         krb5_cas[i] = malloc(sizeof(krb5_external_principal_identifier));
@@ -5495,7 +5492,7 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
         xn = X509_get_subject_name(x);
         len = i2d_X509_NAME(xn, NULL);
         if ((p = malloc((size_t) len)) == NULL)
-            goto cleanup;
+            goto oom;
         krb5_cas[i]->subjectName.data = (char *)p;
         i2d_X509_NAME(xn, &p);
         krb5_cas[i]->subjectName.length = len;
@@ -5506,13 +5503,17 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
         krb5_cas[i]->issuerAndSerialNumber.data = NULL;
 
         is = PKCS7_ISSUER_AND_SERIAL_new();
+        if (is == NULL)
+            goto oom;
         X509_NAME_set(&is->issuer, X509_get_issuer_name(x));
         M_ASN1_INTEGER_free(is->serial);
         is->serial = M_ASN1_INTEGER_dup(X509_get_serialNumber(x));
+        if (is->serial == NULL)
+            goto oom;
         len = i2d_PKCS7_ISSUER_AND_SERIAL(is, NULL);
         p = malloc(len);
         if (p == NULL)
-            goto cleanup;
+            goto oom;
         krb5_cas[i]->issuerAndSerialNumber.data = (char *)p;
         i2d_PKCS7_ISSUER_AND_SERIAL(is, &p);
         krb5_cas[i]->issuerAndSerialNumber.length = len;
@@ -5531,30 +5532,24 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
                 len = i2d_ASN1_OCTET_STRING(ikeyid, NULL);
                 p = malloc(len);
                 if (p == NULL)
-                    goto cleanup;
+                    goto oom;
                 krb5_cas[i]->subjectKeyIdentifier.data = (char *)p;
                 i2d_ASN1_OCTET_STRING(ikeyid, &p);
                 krb5_cas[i]->subjectKeyIdentifier.length = len;
                 ASN1_OCTET_STRING_free(ikeyid);
             }
         }
-        if (is != NULL) {
-            if (is->issuer != NULL)
-                X509_NAME_free(is->issuer);
-            if (is->serial != NULL)
-                ASN1_INTEGER_free(is->serial);
-            free(is);
-        }
+        PKCS7_ISSUER_AND_SERIAL_free(is);
+        is = NULL;
     }
 
     *ids = krb5_cas;
+    return 0;
 
-    retval = 0;
-cleanup:
-    if (retval)
-        free_krb5_external_principal_identifier(&krb5_cas);
-
-    return retval;
+oom:
+    free_krb5_external_principal_identifier(&krb5_cas);
+    PKCS7_ISSUER_AND_SERIAL_free(is);
+    return ENOMEM;
 }
 
 static krb5_error_code
