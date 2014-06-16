@@ -273,7 +273,7 @@ stashsrvpw
 
     **stashsrvpw**
     [**-f** *filename*]
-    *servicedn*
+    *name*
 
 Allows an administrator to store the password for service object in a
 file so that KDC and Administration server can use it to authenticate
@@ -283,9 +283,15 @@ to the LDAP server.  Options:
     Specifies the complete path of the service password file. By
     default, ``/usr/local/var/service_passwd`` is used.
 
-*servicedn*
-    Specifies Distinguished Name (DN) of the service object whose
-    password is to be stored in file.
+*name*
+    Specifies the name of the object whose password is to be stored.
+    If :ref:`krb5kdc(8)` or :ref:`kadmind(8)` are configured for
+    simple binding, this should be the distinguished name it will
+    use as given by the **ldap_kdc_dn** or **ldap_kadmind_dn**
+    variable in :ref:`kdc.conf(5)`.  If the KDC or kadmind is
+    configured for SASL binding, this should be the authentication
+    name it will use as given by the **ldap_kdc_sasl_authcid** or
+    **ldap_kadmind_sasl_authcid** variable.
 
 Example::
 
