@@ -555,6 +555,7 @@ pyrunenv.vals: Makefile
 		eval echo 'env['\\\'$$i\\\''] = '\\\'\$$$$i\\\'; \
 	done > $@
 	echo "tls_impl = '$(TLS_IMPL)'" >> $@
+	echo "have_sasl = '$(HAVE_SASL)'" >> $@
 
 runenv.py: pyrunenv.vals
 	echo 'env = {}' > $@

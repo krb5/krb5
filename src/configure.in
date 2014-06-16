@@ -1171,6 +1171,12 @@ if test -n "$OPENLDAP_PLUGIN"; then
   AC_DEFINE([ENABLE_LDAP], 1, [Define if LDAP KDB support within the Kerberos library (mainly ASN.1 code) should be enabled.])
   AC_SUBST(LDAP_LIBS)
 
+  AC_CHECK_HEADERS([sasl/sasl.h], [HAVE_SASL=yes], [HAVE_SASL=no])
+  AC_SUBST(HAVE_SASL)
+  if test "$HAVE_SASL" = no; then
+    AC_MSG_WARN([not building LDAP SASL support])
+  fi
+
   K5_GEN_MAKEFILE(plugins/kdb/ldap)
   K5_GEN_MAKEFILE(plugins/kdb/ldap/ldap_util)
   K5_GEN_MAKEFILE(plugins/kdb/ldap/libkdb_ldap)

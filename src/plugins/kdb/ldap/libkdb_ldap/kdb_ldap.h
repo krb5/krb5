@@ -199,6 +199,10 @@ typedef struct _krb5_ldap_context {
     char                          *bind_dn;
     char                          *bind_pwd;
     char                          *service_password_file;
+    char                          *sasl_mech;
+    char                          *sasl_authcid;
+    char                          *sasl_authzid;
+    char                          *sasl_realm;
     char                          *root_certificate_file;
     krb5_ui_4                     cert_count; /* certificate count */
     k5_mutex_t                    hndl_lock;
