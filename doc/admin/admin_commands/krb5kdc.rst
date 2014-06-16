@@ -80,33 +80,8 @@ any other worker process exits.
           starts.
 
 The **-x** *db_args* option specifies database-specific arguments.
-Options supported for the LDAP database module are:
-
-    **-x** nconns=<number_of_connections>
-        Specifies the number of connections to be maintained per
-        LDAP server.
-
-    **-x** host=<ldapuri>
-        Specifies the LDAP server to connect to by URI.
-
-    **-x** binddn=<binddn>
-        Specifies the DN of the object used by the KDC server to bind
-        to the LDAP server.  This object should have read and write
-        privileges to the realm container, the principal container,
-        and the subtree that is referenced by the realm.
-
-    **-x** bindpwd=<bind_password>
-        Specifies the password for the above mentioned binddn.  Using
-        this option may expose the password to other users on the
-        system via the process list; to avoid this, instead stash the
-        password using the **stashsrvpw** command of
-        :ref:`kdb5_ldap_util(8)`.
-
-    **-x debug=**\ *level*
-        sets the OpenLDAP client library debug level.  *level* is an
-        integer to be interpreted by the library.  Debugging messages
-        are printed to standard error, so this option must be used
-        with the **-n** option to be useful.  New in release 1.12.
+See :ref:`Database Options <dboptions>` in :ref:`kadmin(1)` for
+supported arguments.
 
 The **-T** *offset* option specifies a time offset, in seconds, which
 the KDC will operate under.  It is intended only for testing purposes.

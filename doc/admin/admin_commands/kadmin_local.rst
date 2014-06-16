@@ -138,18 +138,29 @@ OPTIONS
     Prevent fallback to AUTH_GSSAPI authentication flavor.
 
 **-x** *db_args*
-    Specifies the database specific arguments.  Options supported for
-    the LDAP database module are:
+    Specifies the database specific arguments.  See the next section
+    for supported options.
 
-    **-x host=**\ *hostname*
+.. _kadmin_options_end:
+
+.. _dboptions:
+
+DATABASE OPTIONS
+----------------
+
+Database options can be used to override database-specific defaults.
+Supported options for the DB2 module are:
+
+    **-x dbname=**\ \*filename*
+        Specifies the base filename of the DB2 database.
+
+Supported options for the LDAP module are:
+
+    **-x host=**\ *ldapuri*
         Specifies the LDAP server to connect to by a LDAP URI.
 
     **-x binddn=**\ *bind_dn*
-        Specifies the DN of the object used by the administration
-        server to bind to the LDAP server.  This object should have
-        the read and write privileges on the realm container, the
-        principal container, and the subtree that is referenced by the
-        realm.
+        Specifies the DN used to bind to the LDAP server.
 
     **-x bindpwd=**\ *bind_password*
         Specifies the password for the above mentioned binddn.  Using
@@ -162,8 +173,6 @@ OPTIONS
         sets the OpenLDAP client library debug level.  *level* is an
         integer to be interpreted by the library.  Debugging messages
         are printed to standard error.  New in release 1.12.
-
-.. _kadmin_options_end:
 
 
 COMMANDS
