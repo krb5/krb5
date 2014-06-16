@@ -243,6 +243,34 @@ krb5_ldap_parse_db_params(krb5_context context, char **db_args)
                 ret = ENOMEM;
                 goto cleanup;
             }
+        } else if (!strcmp(opt, "sasl_mech")) {
+            free(ctx->sasl_mech);
+            ctx->sasl_mech = strdup(val);
+            if (ctx->sasl_mech == NULL) {
+                ret = ENOMEM;
+                goto cleanup;
+            }
+        } else if (!strcmp(opt, "sasl_authcid")) {
+            free(ctx->sasl_authcid);
+            ctx->sasl_authcid = strdup(val);
+            if (ctx->sasl_authcid == NULL) {
+                ret = ENOMEM;
+                goto cleanup;
+            }
+        } else if (!strcmp(opt, "sasl_authzid")) {
+            free(ctx->sasl_authzid);
+            ctx->sasl_authzid = strdup(val);
+            if (ctx->sasl_authzid == NULL) {
+                ret = ENOMEM;
+                goto cleanup;
+            }
+        } else if (!strcmp(opt, "sasl_realm")) {
+            free(ctx->sasl_realm);
+            ctx->sasl_realm = strdup(val);
+            if (ctx->sasl_realm == NULL) {
+                ret = ENOMEM;
+                goto cleanup;
+            }
         } else if (!strcmp(opt, "host")) {
             ret = add_server_entry(context, val);
             if (ret)
@@ -334,6 +362,42 @@ krb5_ldap_read_server_params(krb5_context context, char *conf_section,
             return ret;
     }
 
+    if (ldap_context->sasl_mech == NULL) {
+        name = choose_var(srv_type, KRB5_CONF_LDAP_KDC_SASL_MECH,
+                          KRB5_CONF_LDAP_KADMIND_SASL_MECH);
+        ret = prof_get_string_def(context, conf_section, name,
+                                  &ldap_context->sasl_mech);
+        if (ret)
+            return ret;
+    }
+
+    if (ldap_context->sasl_authcid == NULL) {
+        name = choose_var(srv_type, KRB5_CONF_LDAP_KDC_SASL_AUTHCID,
+                          KRB5_CONF_LDAP_KADMIND_SASL_AUTHCID);
+        ret = prof_get_string_def(context, conf_section, name,
+                                  &ldap_context->sasl_authcid);
+        if (ret)
+            return ret;
+    }
+
+    if (ldap_context->sasl_authzid == NULL) {
+        name = choose_var(srv_type, KRB5_CONF_LDAP_KDC_SASL_AUTHZID,
+                          KRB5_CONF_LDAP_KADMIND_SASL_AUTHZID);
+        ret = prof_get_string_def(context, conf_section, name,
+                                  &ldap_context->sasl_authzid);
+        if (ret)
+            return ret;
+    }
+
+    if (ldap_context->sasl_realm == NULL) {
+        name = choose_var(srv_type, KRB5_CONF_LDAP_KDC_SASL_REALM,
+                          KRB5_CONF_LDAP_KADMIND_SASL_REALM);
+        ret = prof_get_string_def(context, conf_section, name,
+                                  &ldap_context->sasl_realm);
+        if (ret)
+            return ret;
+    }
+
     /* Read the LDAP server URL list. */
     if (ldap_context->server_info_list == NULL) {
         ret = profile_get_string(context->profile, KDB_MODULE_SECTION,
@@ -394,6 +458,10 @@ krb5_ldap_free_server_context_params(krb5_ldap_context *ctx)
     free(list);
     ctx->server_info_list = NULL;
 
+    free(ctx->sasl_mech);
+    free(ctx->sasl_authcid);
+    free(ctx->sasl_authzid);
+    free(ctx->sasl_realm);
     free(ctx->conf_section);
     free(ctx->bind_dn);
     zapfreestr(ctx->bind_pwd);

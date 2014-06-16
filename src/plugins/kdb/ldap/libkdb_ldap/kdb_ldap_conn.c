@@ -36,6 +36,9 @@
 #include "ldap_main.h"
 #include "ldap_service_stash.h"
 #include <kdb5.h>
+#ifdef HAVE_SASL_SASL_H
+#include <sasl/sasl.h>
+#endif
 
 /* Ensure that we have the parameters we need to authenticate to the LDAP
  * server.  Read the password if necessary. */
@@ -43,6 +46,19 @@ static krb5_error_code
 validate_context(krb5_context context, krb5_ldap_context *ctx)
 {
     krb5_error_code ret;
+
+    if (ctx->sasl_mech != NULL) {
+        /* Read the password for use as the SASL secret if we can, but do not
+         * require one as not all mechanisms need it. */
+        if (ctx->bind_pwd == NULL && ctx->sasl_authcid != NULL &&
+            ctx->service_password_file != NULL) {
+            (void)krb5_ldap_readpassword(context, ctx->service_password_file,
+                                         ctx->sasl_authcid, &ctx->bind_pwd);
+        }
+        return 0;
+    }
+
+    /* For a simple bind, a DN and password are required. */
 
     if (ctx->bind_dn == NULL) {
         k5_setmsg(context, EINVAL, _("LDAP bind dn value missing"));
@@ -77,22 +93,73 @@ validate_context(krb5_context context, krb5_ldap_context *ctx)
  * Internal Functions called by init functions.
  */
 
+#ifdef HAVE_SASL_SASL_H
+
+static int
+interact(LDAP *ld, unsigned flags, void *defaults, void *sin)
+{
+    sasl_interact_t *in = NULL;
+    krb5_ldap_context *ctx = defaults;
+
+    for (in = sin; in != NULL && in->id != SASL_CB_LIST_END; in++) {
+        if (in->id == SASL_CB_AUTHNAME)
+            in->result = ctx->sasl_authcid;
+        else if (in->id == SASL_CB_USER)
+            in->result = ctx->sasl_authzid;
+        else if (in->id == SASL_CB_GETREALM)
+            in->result = ctx->sasl_realm;
+        else if (in->id == SASL_CB_PASS)
+            in->result = ctx->bind_pwd;
+        else
+            return LDAP_OTHER;
+        in->len = (in->result != NULL) ? strlen(in->result) : 0;
+    }
+
+    return LDAP_SUCCESS;
+}
+
+#else /* HAVE_SASL_SASL_H */
+
+/* We can't define an interaction function, so only non-interactive mechs like
+ * EXTERNAL can work. */
+static int
+interact(LDAP *ld, unsigned flags, void *defaults, void *sin)
+{
+    return LDAP_OTHER;
+}
+
+#endif
+
 static krb5_error_code
 authenticate(krb5_ldap_context *ctx, krb5_ldap_server_handle *server)
 {
     int st;
     struct berval bv;
 
-    bv.bv_val = ctx->bind_pwd;
-    bv.bv_len = strlen(ctx->bind_pwd);
-    st = ldap_sasl_bind_s(server->ldap_handle, ctx->bind_dn, NULL, &bv, NULL,
-                          NULL, NULL);
-    if (st != LDAP_SUCCESS) {
-        k5_setmsg(ctx->kcontext, KRB5_KDB_ACCESS_ERROR,
-                  _("Cannot bind to LDAP server '%s' as '%s': %s"),
-                  server->server_info->server_name, ctx->bind_dn,
-                  ldap_err2string(st));
-        return KRB5_KDB_ACCESS_ERROR;
+    if (ctx->sasl_mech != NULL) {
+        st = ldap_sasl_interactive_bind_s(server->ldap_handle, NULL,
+                                          ctx->sasl_mech, NULL, NULL,
+                                          LDAP_SASL_QUIET, interact, ctx);
+        if (st != LDAP_SUCCESS) {
+            k5_setmsg(ctx->kcontext, KRB5_KDB_ACCESS_ERROR,
+                      _("Cannot bind to LDAP server '%s' with SASL mechanism "
+                        "'%s': %s"), server->server_info->server_name,
+                      ctx->sasl_mech, ldap_err2string(st));
+            return KRB5_KDB_ACCESS_ERROR;
+        }
+    } else {
+        /* Do a simple bind with DN and password. */
+        bv.bv_val = ctx->bind_pwd;
+        bv.bv_len = strlen(ctx->bind_pwd);
+        st = ldap_sasl_bind_s(server->ldap_handle, ctx->bind_dn, NULL, &bv,
+                              NULL, NULL, NULL);
+        if (st != LDAP_SUCCESS) {
+            k5_setmsg(ctx->kcontext, KRB5_KDB_ACCESS_ERROR,
+                      _("Cannot bind to LDAP server '%s' as '%s': %s"),
+                      server->server_info->server_name, ctx->bind_dn,
+                      ldap_err2string(st));
+            return KRB5_KDB_ACCESS_ERROR;
+        }
     }
     return 0;
 }
