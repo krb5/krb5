@@ -162,12 +162,31 @@ Supported options for the LDAP module are:
     **-x binddn=**\ *bind_dn*
         Specifies the DN used to bind to the LDAP server.
 
-    **-x bindpwd=**\ *bind_password*
-        Specifies the password for the above mentioned binddn.  Using
-        this option may expose the password to other users on the
-        system via the process list; to avoid this, instead stash the
-        password using the **stashsrvpw** command of
+    **-x bindpwd=**\ *password*
+        Specifies the password or SASL secret used to bind to the LDAP
+        server.  Using this option may expose the password to other
+        users on the system via the process list; to avoid this,
+        instead stash the password using the **stashsrvpw** command of
         :ref:`kdb5_ldap_util(8)`.
+
+    **-x sasl_mech=**\ *mechanism*
+        Specifies the SASL mechanism used to bind to the LDAP server.
+        The bind DN is ignored if a SASL mechanism is used.  New in
+        release 1.13.
+
+    **-x sasl_authcid=**\ *name*
+        Specifies the authentication name used when binding to the
+        LDAP server with a SASL mechanism, if the mechanism requires
+        one.  New in release 1.13.
+
+    **-x sasl_authzid=**\ *name*
+        Specifies the authorization name used when binding to the LDAP
+        server with a SASL mechanism.  New in release 1.13.
+
+    **-x sasl_realm=**\ *realm*
+        Specifies the realm used when binding to the LDAP server with
+        a SASL mechanism, if the mechanism uses one.  New in release
+        1.13.
 
     **-x debug=**\ *level*
         sets the OpenLDAP client library debug level.  *level* is an
