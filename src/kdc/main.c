@@ -665,9 +665,11 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     }
 
     /*
-     * Loop through the option list.  Each time we encounter a realm name,
-     * use the previously scanned options to fill in for defaults.
+     * Loop through the option list.  Each time we encounter a realm name, use
+     * the previously scanned options to fill in for defaults.  We do this
+     * twice if worker processes are used, so we must initialize optind.
      */
+    optind = 1;
     while ((c = getopt(argc, argv, "x:r:d:mM:k:R:e:P:p:s:nw:4:T:X3")) != -1) {
         switch(c) {
         case 'x':
