@@ -71,7 +71,14 @@ kg_unseal_v1_iov(krb5_context context,
         return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    if (header->buffer.length < token_wrapper_len + 14) {
+    if (ctx->seq == NULL) {
+        /* ctx was established using a newer enctype, and cannot process RFC
+         * 1964 tokens. */
+        *minor_status = 0;
+        return GSS_S_DEFECTIVE_TOKEN;
+    }
+
+    if (header->buffer.length < token_wrapper_len + 22) {
         *minor_status = 0;
         return GSS_S_DEFECTIVE_TOKEN;
     }
