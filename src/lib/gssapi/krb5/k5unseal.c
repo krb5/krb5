@@ -74,6 +74,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     int conflen = 0;
     int signalg;
     int sealalg;
+    int bad_pad = 0;
     gss_buffer_desc token;
     krb5_checksum cksum;
     krb5_checksum md5cksum;
@@ -86,6 +87,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     krb5_ui_4 seqnum;
     OM_uint32 retval;
     size_t sumlen;
+    size_t padlen;
     krb5_keyusage sign_usage = KG_USAGE_SIGN;
 
     if (toktype == KG_TOK_SEAL_MSG) {
@@ -93,17 +95,22 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
         message_buffer->value = NULL;
     }
 
-    /* get the sign and seal algorithms */
-
-    signalg = ptr[0] + (ptr[1]<<8);
-    sealalg = ptr[2] + (ptr[3]<<8);
-
     /* Sanity checks */
 
-    if ((ptr[4] != 0xff) || (ptr[5] != 0xff)) {
+    if (ctx->seq == NULL) {
+        /* ctx was established using a newer enctype, and cannot process RFC
+         * 1964 tokens. */
         *minor_status = 0;
         return GSS_S_DEFECTIVE_TOKEN;
     }
+
+    if ((bodysize < 22) || (ptr[4] != 0xff) || (ptr[5] != 0xff)) {
+        *minor_status = 0;
+        return GSS_S_DEFECTIVE_TOKEN;
+    }
+
+    signalg = ptr[0] + (ptr[1]<<8);
+    sealalg = ptr[2] + (ptr[3]<<8);
 
     if ((toktype != KG_TOK_SEAL_MSG) &&
         (sealalg != 0xffff)) {
@@ -149,6 +156,11 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
         cksum_len = 20;
         break;
     default:
+        *minor_status = 0;
+        return GSS_S_DEFECTIVE_TOKEN;
+    }
+
+    if ((size_t)bodysize < 14 + cksum_len) {
         *minor_status = 0;
         return GSS_S_DEFECTIVE_TOKEN;
     }
@@ -207,7 +219,20 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
         plainlen = tmsglen;
 
         conflen = kg_confounder_size(context, ctx->enc->keyblock.enctype);
-        token.length = tmsglen - conflen - plain[tmsglen-1];
+        if (tmsglen < conflen) {
+            if (sealalg != 0xffff)
+                xfree(plain);
+            *minor_status = 0;
+            return(GSS_S_DEFECTIVE_TOKEN);
+        }
+        padlen = plain[tmsglen - 1];
+        if (tmsglen - conflen < padlen) {
+            /* Don't error out yet, to avoid padding oracle attacks.  We will
+             * treat this as a checksum failure later on. */
+            padlen = 0;
+            bad_pad = 1;
+        }
+        token.length = tmsglen - conflen - padlen;
 
         if (token.length) {
             if ((token.value = (void *) gssalloc_malloc(token.length)) == NULL) {
@@ -403,7 +428,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 
     /* compare the computed checksum against the transmitted checksum */
 
-    if (code) {
+    if (code || bad_pad) {
         if (toktype == KG_TOK_SEAL_MSG)
             gssalloc_free(token.value);
         *minor_status = 0;
