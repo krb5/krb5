@@ -293,6 +293,7 @@ testlog
 /src/tests/gssapi/t_gssexts
 /src/tests/gssapi/t_imp_cred
 /src/tests/gssapi/t_imp_name
+/src/tests/gssapi/t_invalid
 /src/tests/gssapi/t_inq_cred
 /src/tests/gssapi/t_inq_mechs_name
 /src/tests/gssapi/t_namingexts

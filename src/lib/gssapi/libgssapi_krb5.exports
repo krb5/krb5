@@ -157,3 +157,4 @@ gss_inquire_name
 gss_acquire_cred_from
 gss_add_cred_from
 gss_store_cred_into
+gssint_g_seqstate_init
