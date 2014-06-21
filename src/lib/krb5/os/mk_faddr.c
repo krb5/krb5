@@ -42,7 +42,7 @@ krb5_make_fulladdr(krb5_context context, krb5_address *kaddr,
     krb5_int32 tmp32;
     krb5_int16 tmp16;
 
-    if ((kport == NULL) || (kport == NULL))
+    if (kaddr == NULL || kport == NULL)
         return EINVAL;
 
     raddr->length = kaddr->length + kport->length + (4 * sizeof(krb5_int32));
