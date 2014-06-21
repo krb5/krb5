@@ -1957,7 +1957,7 @@ int
 ure_exec(ure_dfa_t dfa, int flags, ucs2_t *text, unsigned long textlen,
          unsigned long *match_start, unsigned long *match_end)
 {
-    int i, j, matched, found, skip;
+    int i, j, matched, found;
     unsigned long ms, me;
     ucs4_t c;
     ucs2_t *sp, *ep, *lp;
@@ -1983,7 +1983,7 @@ ure_exec(ure_dfa_t dfa, int flags, ucs2_t *text, unsigned long textlen,
 
     stp = dfa->states;
 
-    for (found = skip = 0; found == 0 && sp < ep; ) {
+    for (found = 0; found == 0 && sp < ep; ) {
         lp = sp;
         c = *sp++;
 
