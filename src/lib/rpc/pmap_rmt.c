@@ -411,7 +411,9 @@ clnt_broadcast(
 		}
 	}
 done_broad:
-        (void)closesocket(sock);
+	if (sock >= 0) {
+		(void)closesocket(sock);
+	}
 	AUTH_DESTROY(unix_auth);
 	return (stat);
 }

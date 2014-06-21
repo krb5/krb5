@@ -94,7 +94,9 @@ callrpc(
 		/* reuse old client */
 	} else {
 		crp->valid = 0;
-                (void)closesocket(crp->socket);
+		if (crp->socket >= 0) {
+			(void)closesocket(crp->socket);
+		}
 		crp->socket = RPC_ANYSOCK;
 		if (crp->client) {
 			clnt_destroy(crp->client);
