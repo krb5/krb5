@@ -481,6 +481,7 @@ k5_expand_path_tokens_extra(krb5_context context, const char *path_in,
             extra_tokens[i] = strdup(va_arg(ap, const char *));
             if (extra_tokens[i] == NULL) {
                 ret = ENOMEM;
+                va_end(ap);
                 goto cleanup;
             }
         }
