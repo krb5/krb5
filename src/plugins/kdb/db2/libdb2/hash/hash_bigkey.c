@@ -194,12 +194,10 @@ __find_bigpair(hashp, cursorp, key, size)
 	PAGE16 *pagep, *hold_pagep;
 	db_pgno_t  next_pgno;
 	int32_t ksize;
-	u_int16_t bytes;
 	int8_t *kkey;
 
 	ksize = size;
 	kkey = key;
-	bytes = 0;
 
 	hold_pagep = NULL;
 	/* Chances are, hashp->cpage is the base page. */
