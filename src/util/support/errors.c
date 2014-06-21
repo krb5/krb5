@@ -53,7 +53,7 @@ k5_set_error(struct errinfo *ep, long code, const char *fmt, ...)
 void
 k5_vset_error(struct errinfo *ep, long code, const char *fmt, va_list args)
 {
-    char *str, *slash;
+    char *str;
 
     k5_clear_error(ep);
     ep->code = code;
