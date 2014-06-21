@@ -418,11 +418,10 @@ hget_header(hashp, page_size)
 	HTAB *hashp;
 	u_int32_t page_size;
 {
-	u_int32_t num_copied, i;
+	u_int32_t num_copied;
 	u_int8_t *hdr_dest;
 
 	num_copied = 0;
-	i = 0;
 
 	hdr_dest = (u_int8_t *)&hashp->hdr;
 
@@ -450,9 +449,9 @@ hput_header(hashp)
 #if DB_BYTE_ORDER == DB_LITTLE_ENDIAN
 	HASHHDR whdr;
 #endif
-	u_int32_t num_copied, i;
+	u_int32_t num_copied;
 
-	num_copied = i = 0;
+	num_copied = 0;
 
 	whdrp = &hashp->hdr;
 #if DB_BYTE_ORDER == DB_LITTLE_ENDIAN
