@@ -144,7 +144,8 @@ request_start_timer(request *r, verto_ctx *vctx)
 static void
 remote_disconnect(krad_remote *rr)
 {
-    close(rr->fd);
+    if (rr->fd >= 0)
+        close(rr->fd);
     verto_del(rr->io);
     rr->fd = -1;
     rr->io = NULL;
