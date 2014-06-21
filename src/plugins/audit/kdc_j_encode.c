@@ -191,11 +191,6 @@ kau_j_tgs_req(const krb5_boolean ev_success, krb5_audit_state *state,
 
     *jout = NULL;
 
-    if (!state) {
-        *jout = NULL_STATE;
-        return 0;
-    }
-
     /* Main object. */
     if (k5_json_object_create(&obj))
         return ENOMEM;
@@ -322,11 +317,6 @@ kau_j_tgs_s4u2proxy(const krb5_boolean ev_success, krb5_audit_state *state,
 
     *jout = NULL;
 
-    if (!state) {
-        *jout = NULL_STATE;
-        return 0;
-    }
-
     /* Main object. */
     if (k5_json_object_create(&obj))
         return ENOMEM;
@@ -384,11 +374,6 @@ kau_j_tgs_u2u(const krb5_boolean ev_success, krb5_audit_state *state,
     krb5_error_code ret = 0;
     k5_json_object obj = NULL;
     krb5_kdc_req *req = state->request;
-
-    if (!state) {
-        *jout = NULL_STATE;
-        return 0;
-    }
 
     *jout = NULL;
 
