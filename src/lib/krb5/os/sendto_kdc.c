@@ -105,10 +105,6 @@ struct select_state {
     int nfds;
 };
 
-static const char *const state_strings[] = {
-    "INITIALIZING", "CONNECTING", "WRITING", "READING", "FAILED"
-};
-
 /* connection states */
 enum conn_states { INITIALIZING, CONNECTING, WRITING, READING, FAILED };
 struct incoming_message {
