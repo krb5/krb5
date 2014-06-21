@@ -311,9 +311,7 @@ init_hash(hashp, file, info)
 	const HASHINFO *info;
 {
 	struct stat statbuf;
-	int32_t nelem;
 
-	nelem = 1;
 	hashp->hdr.nkeys = 0;
 	hashp->hdr.lorder = DB_BYTE_ORDER;
 	hashp->hdr.bsize = DEF_BUCKET_SIZE;
