@@ -20,6 +20,7 @@ SUBDIRS=util include lib \
 	@ldap_plugin_dir@ \
 	plugins/preauth/otp \
 	plugins/preauth/pkinit \
+	plugins/tls/k5tls \
 	kdc kadmin slave clients appl tests \
 	config-files build-tools man doc @po@
 WINSUBDIRS=include util lib ccapi windows clients appl
@@ -62,7 +63,7 @@ INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
 		$(KRB5_LIBDIR) $(KRB5_INCDIR) \
 		$(KRB5_DB_MODULE_DIR) $(KRB5_PA_MODULE_DIR) \
 		$(KRB5_AD_MODULE_DIR) \
-		$(KRB5_LIBKRB5_MODULE_DIR) \
+		$(KRB5_LIBKRB5_MODULE_DIR) $(KRB5_TLS_MODULE_DIR) \
 		@localstatedir@ @localstatedir@/krb5kdc \
 		@runstatedir@ @runstatedir@/krb5kdc \
 		$(KRB5_INCSUBDIRS) $(datadir) $(EXAMPLEDIR) \

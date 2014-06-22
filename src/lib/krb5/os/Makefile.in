@@ -2,7 +2,7 @@ mydir=lib$(S)krb5$(S)os
 BUILDTOP=$(REL)..$(S)..$(S)..
 DEFINES=-DLIBDIR=\"$(KRB5_LIBDIR)\" -DBINDIR=\"$(CLIENT_BINDIR)\" \
 	-DSBINDIR=\"$(ADMIN_BINDIR)\"
-LOCALINCLUDES= $(PROXY_TLS_IMPL_CFLAGS) -I$(top_srcdir)/util/profile
+LOCALINCLUDES= -I$(top_srcdir)/util/profile
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=os
@@ -13,7 +13,6 @@ STLIBOBJS= \
 	c_ustime.o	\
 	ccdefname.o	\
 	changepw.o	\
-	checkhost.o	\
 	dnsglue.o	\
 	dnssrv.o	\
 	expand_path.o	\

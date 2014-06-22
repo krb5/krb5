@@ -319,6 +319,7 @@ krb5_free_context(krb5_context ctx)
     k5_localauth_free_context(ctx);
     k5_plugin_free_context(ctx);
     free(ctx->plugin_base_dir);
+    free(ctx->tls);
 
     ctx->magic = 0;
     free(ctx);
