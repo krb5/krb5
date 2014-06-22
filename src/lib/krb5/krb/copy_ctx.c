@@ -81,6 +81,7 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     nctx->ccselect_handles = NULL;
     nctx->localauth_handles = NULL;
     nctx->hostrealm_handles = NULL;
+    nctx->tls = NULL;
     nctx->kdblog_context = NULL;
     nctx->trace_callback = NULL;
     nctx->trace_callback_data = NULL;

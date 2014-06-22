@@ -324,23 +324,11 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Resolving hostname {str}", hostname)
 #define TRACE_SENDTO_KDC_RESPONSE(c, len, raddr)                        \
     TRACE(c, "Received answer ({int} bytes) from {raddr}", len, raddr)
-#define TRACE_SENDTO_KDC_HTTPS_SERVER_NAME_MISMATCH(c, hostname)        \
-    TRACE(c, "HTTPS certificate name mismatch: server certificate is "  \
-          "not for \"{str}\"", hostname)
-#define TRACE_SENDTO_KDC_HTTPS_SERVER_NAME_MATCH(c, hostname)           \
-    TRACE(c, "HTTPS certificate name matched \"{str}\"", hostname)
-#define TRACE_SENDTO_KDC_HTTPS_NO_REMOTE_CERTIFICATE(c)                 \
-    TRACE(c, "HTTPS server certificate not received")
-#define TRACE_SENDTO_KDC_HTTPS_PROXY_CERTIFICATE_ERROR(c, depth,        \
-                                                       namelen, name,   \
-                                                       err, errs)       \
-    TRACE(c, "HTTPS certificate error at {int} ({lenstr}): "            \
-          "{int} ({str})", depth, namelen, name, err, errs)
-#define TRACE_SENDTO_KDC_HTTPS_ERROR_CONNECT(c, raddr)                  \
+#define TRACE_SENDTO_KDC_HTTPS_ERROR_CONNECT(c, raddr)          \
     TRACE(c, "HTTPS error connecting to {raddr}", raddr)
-#define TRACE_SENDTO_KDC_HTTPS_ERROR_RECV(c, raddr, err)                \
-    TRACE(c, "HTTPS error receiving from {raddr}: {errno}", raddr, err)
-#define TRACE_SENDTO_KDC_HTTPS_ERROR_SEND(c, raddr)                     \
+#define TRACE_SENDTO_KDC_HTTPS_ERROR_RECV(c, raddr)             \
+    TRACE(c, "HTTPS error receiving from {raddr}", raddr)
+#define TRACE_SENDTO_KDC_HTTPS_ERROR_SEND(c, raddr)     \
     TRACE(c, "HTTPS error sending to {raddr}", raddr)
 #define TRACE_SENDTO_KDC_HTTPS_SEND(c, raddr)                           \
     TRACE(c, "Sending HTTPS request to {raddr}", raddr)
@@ -382,6 +370,19 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_TGS_REPLY_DECODE_SESSION(c, keyblock)                     \
     TRACE(c, "TGS reply didn't decode with subkey; trying session key " \
           "({keyblock)}", keyblock)
+
+#define TRACE_TLS_ERROR(c, errs)                \
+    TRACE(c, "TLS error: {str}", errs)
+#define TRACE_TLS_NO_REMOTE_CERTIFICATE(c)              \
+    TRACE(c, "TLS server certificate not received")
+#define TRACE_TLS_CERT_ERROR(c, depth, namelen, name, err, errs)        \
+    TRACE(c, "TLS certificate error at {int} ({lenstr}): {int} ({str})", \
+          depth, namelen, name, err, errs)
+#define TRACE_TLS_SERVER_NAME_MISMATCH(c, hostname)                     \
+    TRACE(c, "TLS certificate name mismatch: server certificate is "    \
+          "not for \"{str}\"", hostname)
+#define TRACE_TLS_SERVER_NAME_MATCH(c, hostname)                        \
+    TRACE(c, "TLS certificate name matched \"{str}\"", hostname)
 
 #define TRACE_TKT_CREDS(c, creds, cache)                            \
     TRACE(c, "Getting credentials {creds} using ccache {ccache}",   \

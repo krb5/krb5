@@ -177,7 +177,6 @@ oom:
     return ENOMEM;
 }
 
-#ifdef PROXY_TLS_IMPL_OPENSSL
 static void
 parse_uri_if_https(char *host_or_uri, k5_transport *transport, char **host,
                    char **uri_path)
@@ -195,13 +194,6 @@ parse_uri_if_https(char *host_or_uri, k5_transport *transport, char **host,
         }
     }
 }
-#else
-static void
-parse_uri_if_https(char *host_or_uri, k5_transport *transport, char **host,
-                   char **uri)
-{
-}
-#endif
 
 /* Return true if server is identical to an entry in list. */
 static krb5_boolean

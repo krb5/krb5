@@ -54,6 +54,7 @@
  * as necessary. */
 
 #include "k5-int.h"
+#include "k5-tls.h"
 #include "fake-addrinfo.h"
 
 #include "os-proto.h"
@@ -72,15 +73,6 @@
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif
-#endif
-
-#ifdef PROXY_TLS_IMPL_OPENSSL
-#include <openssl/err.h>
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <dirent.h>
-#include "checkhost.h"
 #endif
 
 #define MAX_PASS                    3
@@ -147,29 +139,30 @@ struct conn_state {
         const char *uri_path;
         const char *servername;
         char *https_request;
-#ifdef PROXY_TLS_IMPL_OPENSSL
-        SSL *ssl;
-#endif
+        k5_tls_handle tls;
     } http;
 };
 
-#ifdef PROXY_TLS_IMPL_OPENSSL
-/* Extra-data identifier, used to pass context into the verify callback. */
-static int ssl_ex_context_id = -1;
-static int ssl_ex_conn_id = -1;
-#endif
-
-void
-k5_sendto_kdc_initialize(void)
+/* Set up context->tls.  On allocation failure, return ENOMEM.  On plugin load
+ * failure, set context->tls to point to a nulled vtable and return 0. */
+static krb5_error_code
+init_tls_vtable(krb5_context context)
 {
-#ifdef PROXY_TLS_IMPL_OPENSSL
-    SSL_library_init();
-    SSL_load_error_strings();
-    OpenSSL_add_all_algorithms();
+    krb5_plugin_initvt_fn initfn;
 
-    ssl_ex_context_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
-    ssl_ex_conn_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
-#endif
+    if (context->tls != NULL)
+        return 0;
+
+    context->tls = calloc(1, sizeof(*context->tls));
+    if (context->tls == NULL)
+        return ENOMEM;
+
+    /* Attempt to load the module; just let it stay nulled out on failure. */
+    k5_plugin_register_dyn(context, PLUGIN_INTERFACE_TLS, "k5tls", "tls");
+    if (k5_plugin_load(context, PLUGIN_INTERFACE_TLS, "k5tls", &initfn) == 0)
+        (*initfn)(context, 0, 0, (krb5_plugin_vtable)context->tls);
+
+    return 0;
 }
 
 /* Get current time in milliseconds. */
@@ -184,21 +177,15 @@ get_curtime_ms(time_ms *time_out)
     return 0;
 }
 
-#ifdef PROXY_TLS_IMPL_OPENSSL
 static void
-free_http_ssl_data(struct conn_state *state)
+free_http_tls_data(krb5_context context, struct conn_state *state)
 {
-    SSL_free(state->http.ssl);
-    state->http.ssl = NULL;
+    if (state->http.tls != NULL)
+        context->tls->free_handle(context, state->http.tls);
+    state->http.tls = NULL;
     free(state->http.https_request);
     state->http.https_request = NULL;
 }
-#else
-static void
-free_http_ssl_data(struct conn_state *state)
-{
-}
-#endif
 
 #ifdef USE_POLL
 
@@ -532,7 +519,6 @@ static fd_handler_fn service_udp_read;
 static fd_handler_fn service_https_write;
 static fd_handler_fn service_https_read;
 
-#ifdef PROXY_TLS_IMPL_OPENSSL
 static krb5_error_code
 make_proxy_request(struct conn_state *state, const krb5_data *realm,
                    const krb5_data *message, char **req_out, size_t *len_out)
@@ -585,14 +571,6 @@ cleanup:
     krb5_free_data(NULL, encoded_pm);
     return ret;
 }
-#else
-static krb5_error_code
-make_proxy_request(struct conn_state *state, const krb5_data *realm,
-                   const krb5_data *message, char **req_out, size_t *len_out)
-{
-    abort();
-}
-#endif
 
 /* Set up the actual message we will send across the underlying transport to
  * communicate the payload message, using one or both of state->out.sgbuf. */
@@ -963,7 +941,7 @@ static void
 kill_conn(krb5_context context, struct conn_state *conn,
           struct select_state *selstate)
 {
-    free_http_ssl_data(conn);
+    free_http_tls_data(context, conn);
 
     if (socktype_for_transport(conn->addr.transport) == SOCK_STREAM)
         TRACE_SENDTO_KDC_TCP_DISCONNECT(context, &conn->addr);
@@ -1145,249 +1123,44 @@ service_udp_read(krb5_context context, const krb5_data *realm,
     return TRUE;
 }
 
-#ifdef PROXY_TLS_IMPL_OPENSSL
-/* Output any error strings that OpenSSL's accumulated as tracing messages. */
-static void
-flush_ssl_errors(krb5_context context)
+/* Set up conn->http.tls.  Return true on success. */
+static krb5_boolean
+setup_tls(krb5_context context, const krb5_data *realm,
+          struct conn_state *conn, struct select_state *selstate)
 {
-    unsigned long err;
-    char buf[128];
+    krb5_error_code ret;
+    krb5_boolean ok = FALSE;
+    char **anchors = NULL, *realmstr = NULL;
+    const char *names[4];
 
-    while ((err = ERR_get_error()) != 0) {
-        ERR_error_string_n(err, buf, sizeof(buf));
-        TRACE_SENDTO_KDC_HTTPS_ERROR(context, buf);
-    }
-}
+    if (init_tls_vtable(context) != 0 || context->tls->setup == NULL)
+        return FALSE;
 
-static krb5_error_code
-load_http_anchor_file(X509_STORE *store, const char *path)
-{
-    FILE *fp;
-    STACK_OF(X509_INFO) *sk = NULL;
-    X509_INFO *xi;
-    int i;
-
-    fp = fopen(path, "r");
-    if (fp == NULL)
-        return errno;
-    sk = PEM_X509_INFO_read(fp, NULL, NULL, NULL);
-    fclose(fp);
-    if (sk == NULL)
-        return ENOENT;
-    for (i = 0; i < sk_X509_INFO_num(sk); i++) {
-        xi = sk_X509_INFO_value(sk, i);
-        if (xi->x509 != NULL)
-            X509_STORE_add_cert(store, xi->x509);
-    }
-    sk_X509_INFO_pop_free(sk, X509_INFO_free);
-    return 0;
-}
-
-static krb5_error_code
-load_http_anchor_dir(X509_STORE *store, const char *path)
-{
-    DIR *d = NULL;
-    struct dirent *dentry = NULL;
-    char filename[1024];
-    krb5_boolean found_any = FALSE;
-
-    d = opendir(path);
-    if (d == NULL)
-        return ENOENT;
-    while ((dentry = readdir(d)) != NULL) {
-        if (dentry->d_name[0] != '.') {
-            snprintf(filename, sizeof(filename), "%s/%s",
-                     path, dentry->d_name);
-            if (load_http_anchor_file(store, filename) == 0)
-                found_any = TRUE;
-        }
-    }
-    closedir(d);
-    return found_any ? 0 : ENOENT;
-}
-
-static krb5_error_code
-load_http_anchor(SSL_CTX *ctx, const char *location)
-{
-    X509_STORE *store;
-    const char *envloc;
-
-    store = SSL_CTX_get_cert_store(ctx);
-    if (strncmp(location, "FILE:", 5) == 0) {
-        return load_http_anchor_file(store, location + 5);
-    } else if (strncmp(location, "DIR:", 4) == 0) {
-        return load_http_anchor_dir(store, location + 4);
-    } else if (strncmp(location, "ENV:", 4) == 0) {
-        envloc = getenv(location + 4);
-        if (envloc == NULL)
-            return ENOENT;
-        return load_http_anchor(ctx, envloc);
-    }
-    return EINVAL;
-}
-
-static krb5_error_code
-load_http_verify_anchors(krb5_context context, const krb5_data *realm,
-                         SSL_CTX *sctx)
-{
-    const char *anchors[4];
-    char **values = NULL, *realmz;
-    unsigned int i;
-    krb5_error_code err;
-
-    realmz = k5memdup0(realm->data, realm->length, &err);
-    if (realmz == NULL)
+    realmstr = k5memdup0(realm->data, realm->length, &ret);
+    if (realmstr == NULL)
         goto cleanup;
 
     /* Load the configured anchors. */
-    anchors[0] = KRB5_CONF_REALMS;
-    anchors[1] = realmz;
-    anchors[2] = KRB5_CONF_HTTP_ANCHORS;
-    anchors[3] = NULL;
-    if (profile_get_values(context->profile, anchors, &values) == 0) {
-        for (i = 0; values[i] != NULL; i++) {
-            err = load_http_anchor(sctx, values[i]);
-            if (err != 0)
-                break;
-        }
-        profile_free_list(values);
-    } else {
-        /* Use the library defaults. */
-        if (SSL_CTX_set_default_verify_paths(sctx) != 1)
-            err = ENOENT;
+    names[0] = KRB5_CONF_REALMS;
+    names[1] = realmstr;
+    names[2] = KRB5_CONF_HTTP_ANCHORS;
+    names[3] = NULL;
+    ret = profile_get_values(context->profile, names, &anchors);
+    if (ret != 0 && ret != PROF_NO_RELATION)
+        goto cleanup;
+
+    if (context->tls->setup(context, conn->fd, conn->http.servername, anchors,
+                            &conn->http.tls) != 0) {
+        TRACE_SENDTO_KDC_HTTPS_ERROR_CONNECT(context, &conn->addr);
+        goto cleanup;
     }
+
+    ok = TRUE;
 
 cleanup:
-    free(realmz);
-    return err;
-}
-
-static krb5_boolean
-ssl_check_name_or_ip(X509 *x, const char *expected_name)
-{
-    struct in_addr in;
-    struct in6_addr in6;
-
-    if (inet_aton(expected_name, &in) != 0 ||
-        inet_pton(AF_INET6, expected_name, &in6) != 0) {
-        return k5_check_cert_address(x, expected_name);
-    } else {
-        return k5_check_cert_servername(x, expected_name);
-    }
-}
-
-static int
-ssl_verify_callback(int preverify_ok, X509_STORE_CTX *store_ctx)
-{
-    X509 *x;
-    SSL *ssl;
-    BIO *bio;
-    krb5_context context;
-    int err, depth;
-    struct conn_state *conn = NULL;
-    const char *cert = NULL, *errstr, *expected_name;
-    size_t count;
-
-    ssl = X509_STORE_CTX_get_ex_data(store_ctx,
-                                     SSL_get_ex_data_X509_STORE_CTX_idx());
-    context = SSL_get_ex_data(ssl, ssl_ex_context_id);
-    conn = SSL_get_ex_data(ssl, ssl_ex_conn_id);
-    /* We do have the peer's cert, right? */
-    x = X509_STORE_CTX_get_current_cert(store_ctx);
-    if (x == NULL) {
-        TRACE_SENDTO_KDC_HTTPS_NO_REMOTE_CERTIFICATE(context);
-        return 0;
-    }
-    /* Figure out where we are. */
-    depth = X509_STORE_CTX_get_error_depth(store_ctx);
-    if (depth < 0)
-        return 0;
-    /* If there's an error at this level that we're not ignoring, fail. */
-    err = X509_STORE_CTX_get_error(store_ctx);
-    if (err != X509_V_OK) {
-        bio = BIO_new(BIO_s_mem());
-        if (bio != NULL) {
-            X509_NAME_print_ex(bio, x->cert_info->subject, 0, 0);
-            count = BIO_get_mem_data(bio, &cert);
-            errstr = X509_verify_cert_error_string(err);
-            TRACE_SENDTO_KDC_HTTPS_PROXY_CERTIFICATE_ERROR(context, depth,
-                                                           count, cert, err,
-                                                           errstr);
-            BIO_free(bio);
-        }
-        return 0;
-    }
-    /* If we're not looking at the peer, we're done and everything's ok. */
-    if (depth != 0)
-        return 1;
-    /* Check if the name we expect to find is in the certificate. */
-    expected_name = conn->http.servername;
-    if (ssl_check_name_or_ip(x, expected_name)) {
-        TRACE_SENDTO_KDC_HTTPS_SERVER_NAME_MATCH(context, expected_name);
-        return 1;
-    } else {
-        TRACE_SENDTO_KDC_HTTPS_SERVER_NAME_MISMATCH(context, expected_name);
-    }
-    /* The name didn't match. */
-    return 0;
-}
-
-/*
- * Set up structures that we use to manage the SSL handling for this connection
- * and apply any non-default settings.  Kill the connection and return false if
- * anything goes wrong while we're doing that; return true otherwise.
- */
-static krb5_boolean
-setup_ssl(krb5_context context, const krb5_data *realm,
-          struct conn_state *conn, struct select_state *selstate)
-{
-    int e;
-    long options;
-    SSL_CTX *ctx = NULL;
-    SSL *ssl = NULL;
-
-    if (ssl_ex_context_id == -1 || ssl_ex_conn_id == -1)
-        goto kill_conn;
-
-    /* Do general SSL library setup. */
-    ctx = SSL_CTX_new(SSLv23_client_method());
-    if (ctx == NULL)
-        goto kill_conn;
-    options = SSL_CTX_get_options(ctx);
-    SSL_CTX_set_options(ctx, options | SSL_OP_NO_SSLv2);
-
-    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ssl_verify_callback);
-    X509_STORE_set_flags(SSL_CTX_get_cert_store(ctx), 0);
-    e = load_http_verify_anchors(context, realm, ctx);
-    if (e != 0)
-        goto kill_conn;
-
-    ssl = SSL_new(ctx);
-    if (ssl == NULL)
-        goto kill_conn;
-
-    if (!SSL_set_ex_data(ssl, ssl_ex_context_id, context))
-        goto kill_conn;
-    if (!SSL_set_ex_data(ssl, ssl_ex_conn_id, conn))
-        goto kill_conn;
-
-    /* Tell the SSL library about the socket. */
-    if (!SSL_set_fd(ssl, conn->fd))
-        goto kill_conn;
-    SSL_set_connect_state(ssl);
-
-    SSL_CTX_free(ctx);
-    conn->http.ssl = ssl;
-
-    return TRUE;
-
-kill_conn:
-    TRACE_SENDTO_KDC_HTTPS_ERROR_CONNECT(context, &conn->addr);
-    flush_ssl_errors(context);
-    SSL_free(ssl);
-    SSL_CTX_free(ctx);
-    kill_conn(context, conn, selstate);
-    return FALSE;
+    free(realmstr);
+    profile_free_list(anchors);
+    return ok;
 }
 
 /* Set conn->state to READING when done; otherwise, call a cm_set_. */
@@ -1395,50 +1168,41 @@ static krb5_boolean
 service_https_write(krb5_context context, const krb5_data *realm,
                     struct conn_state *conn, struct select_state *selstate)
 {
-    ssize_t nwritten;
-    int e;
+    k5_tls_status st;
 
     /* If this is our first time in here, set up the SSL context. */
-    if (conn->http.ssl == NULL && !setup_ssl(context, realm, conn, selstate))
-        return FALSE;
-
-    /* Try to transmit our request to the server. */
-    nwritten = SSL_write(conn->http.ssl, SG_BUF(conn->out.sgp),
-                         SG_LEN(conn->out.sgbuf));
-    if (nwritten <= 0) {
-        e = SSL_get_error(conn->http.ssl, nwritten);
-        if (e == SSL_ERROR_WANT_READ) {
-            cm_read(selstate, conn->fd);
-            return FALSE;
-        } else if (e == SSL_ERROR_WANT_WRITE) {
-            cm_write(selstate, conn->fd);
-            return FALSE;
-        }
-        TRACE_SENDTO_KDC_HTTPS_ERROR_SEND(context, &conn->addr);
-        flush_ssl_errors(context);
+    if (conn->http.tls == NULL && !setup_tls(context, realm, conn, selstate)) {
         kill_conn(context, conn, selstate);
         return FALSE;
     }
 
-    /* Done writing, switch to reading. */
-    TRACE_SENDTO_KDC_HTTPS_SEND(context, &conn->addr);
-    cm_read(selstate, conn->fd);
-    conn->state = READING;
+    /* Try to transmit our request to the server. */
+    st = context->tls->write(context, conn->http.tls, SG_BUF(conn->out.sgp),
+                             SG_LEN(conn->out.sgbuf));
+    if (st == DONE) {
+        TRACE_SENDTO_KDC_HTTPS_SEND(context, &conn->addr);
+        cm_read(selstate, conn->fd);
+        conn->state = READING;
+    } else if (st == WANT_READ) {
+        cm_read(selstate, conn->fd);
+    } else if (st == WANT_WRITE) {
+        cm_write(selstate, conn->fd);
+    } else if (st == ERROR_TLS) {
+        TRACE_SENDTO_KDC_HTTPS_ERROR_SEND(context, &conn->addr);
+        kill_conn(context, conn, selstate);
+    }
+
     return FALSE;
 }
 
-/*
- * Return true on readable data, call a cm_read/write function and return
- * false if the SSL layer needs it, kill the connection otherwise.
- */
+/* Return true on finished data.  Call a cm_read/write function and return
+ * false if the TLS layer needs it.  Kill the connection on error. */
 static krb5_boolean
 https_read_bytes(krb5_context context, struct conn_state *conn,
                  struct select_state *selstate)
 {
-    size_t bufsize;
-    ssize_t nread;
-    krb5_boolean readbytes = FALSE;
-    int e = 0;
+    size_t bufsize, nread;
+    k5_tls_status st;
     char *tmp;
     struct incoming_message *in = &conn->in;
 
@@ -1458,31 +1222,26 @@ https_read_bytes(krb5_context context, struct conn_state *conn,
             in->bufsize = bufsize;
         }
 
-        nread = SSL_read(conn->http.ssl, &in->buf[in->pos],
-                         in->bufsize - in->pos - 1);
-        if (nread <= 0)
+        st = context->tls->read(context, conn->http.tls, &in->buf[in->pos],
+                                in->bufsize - in->pos - 1, &nread);
+        if (st != DATA_READ)
             break;
+
         in->pos += nread;
         in->buf[in->pos] = '\0';
-        readbytes = TRUE;
     }
 
-    e = SSL_get_error(conn->http.ssl, nread);
-    if (e == SSL_ERROR_WANT_READ) {
-        cm_read(selstate, conn->fd);
-        return FALSE;
-    } else if (e == SSL_ERROR_WANT_WRITE) {
-        cm_write(selstate, conn->fd);
-        return FALSE;
-    } else if ((e == SSL_ERROR_ZERO_RETURN) ||
-               (e == SSL_ERROR_SYSCALL && nread == 0 && readbytes)) {
+    if (st == DONE)
         return TRUE;
-    }
 
-    e = readbytes ? SOCKET_ERRNO : ECONNRESET;
-    TRACE_SENDTO_KDC_HTTPS_ERROR_RECV(context, &conn->addr, e);
-    flush_ssl_errors(context);
-    kill_conn(context, conn, selstate);
+    if (st == WANT_READ) {
+        cm_read(selstate, conn->fd);
+    } else if (st == WANT_WRITE) {
+        cm_write(selstate, conn->fd);
+    } else if (st == ERROR_TLS) {
+        TRACE_SENDTO_KDC_HTTPS_ERROR_RECV(context, &conn->addr);
+        kill_conn(context, conn, selstate);
+    }
     return FALSE;
 }
 
@@ -1531,20 +1290,6 @@ kill_conn:
     kill_conn(context, conn, selstate);
     return FALSE;
 }
-#else
-static krb5_boolean
-service_https_write(krb5_context context, const krb5_data *realm,
-                    struct conn_state *conn, struct select_state *selstate)
-{
-    abort();
-}
-static krb5_boolean
-service_https_read(krb5_context context, const krb5_data *realm,
-                   struct conn_state *conn, struct select_state *selstate)
-{
-    abort();
-}
-#endif
 
 /* Return the maximum of endtime and the endtime fields of all currently active
  * TCP connections. */
@@ -1765,7 +1510,7 @@ cleanup:
             if (socktype_for_transport(state->addr.transport) == SOCK_STREAM)
                 TRACE_SENDTO_KDC_TCP_DISCONNECT(context, &state->addr);
             closesocket(state->fd);
-            free_http_ssl_data(state);
+            free_http_tls_data(context, state);
         }
         if (state->state == READING && state->in.buf != udpbuf)
             free(state->in.buf);

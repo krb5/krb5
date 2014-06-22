@@ -55,7 +55,8 @@ const char *interface_names[] = {
     "ccselect",
     "localauth",
     "hostrealm",
-    "audit"
+    "audit",
+    "tls"
 };
 
 /* Return the context's interface structure for id, or NULL if invalid. */
