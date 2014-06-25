@@ -45,6 +45,20 @@
 
 #include "k5-platform.h"
 
+#if USE_DLOPEN
+#ifdef RTLD_GROUP
+#define GROUP RTLD_GROUP
+#else
+#define GROUP 0
+#endif
+#ifdef RTLD_NODELETE
+#define NODELETE RTLD_NODELETE
+#else
+#define NODELETE 0
+#endif
+#define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | GROUP | NODELETE)
+#endif
+
 #if USE_DLOPEN && USE_CFBUNDLE
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -257,11 +271,6 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
         }
 #endif /* USE_CFBUNDLE */
 
-#ifdef RTLD_GROUP
-#define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | RTLD_GROUP)
-#else
-#define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL)
-#endif
         if (!err) {
             handle = dlopen(filepath, PLUGIN_DLOPEN_FLAGS);
             if (handle == NULL) {
