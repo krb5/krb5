@@ -158,9 +158,12 @@ svctcp_create(
 	bool_t madesock = FALSE;
 	register SVCXPRT *xprt;
 	register struct tcp_rendezvous *r;
-	struct sockaddr_in sin;
 	struct sockaddr_storage addr;
 	socklen_t len = sizeof(addr);
+	u_short port;
+	int rc;
+
+	memset(&addr, 0, len);
 
 	if (sock == RPC_ANYSOCK) {
 		if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
@@ -169,27 +172,33 @@ svctcp_create(
 		}
 		set_cloexec_fd(sock);
 		madesock = TRUE;
+
+		addr.ss_family = AF_INET;
+	} else {
+		rc = getsockname(sock, (struct sockaddr *)&addr, &len);
+		if (rc < 0) {
+			perror("svc_tcp.c - getsockname failed");
+			goto error;
+		}
 	}
-	memset(&sin, 0, sizeof(sin));
-#if HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
-	sin.sin_len = sizeof(sin);
-#endif
-	sin.sin_family = AF_INET;
-	if (bindresvport(sock, &sin)) {
-		sin.sin_port = 0;
-		(void)bind(sock, (struct sockaddr *)&sin, sizeof(sin));
+
+	/* Check if the socket is already bound */
+	port = getport((struct sockaddr *)&addr);
+	if (port == 0) {
+		rc = bindresvport_sa(sock, (struct sockaddr *)&addr);
+		if (rc < 0) {
+			memset(&addr, 0, len);
+			rc = bind(sock, (struct sockaddr *)&addr, len);
+			if (rc < 0) {
+				perror("svc_tcp.c - cannot bind");
+				goto error;
+			}
+		}
 	}
-	if (getsockname(sock, (struct sockaddr *)&addr, &len) != 0) {
-		perror("svc_tcp.c - cannot getsockname");
-                if (madesock)
-                        (void)closesocket(sock);
-		return ((SVCXPRT *)NULL);
-	}
+
 	if (listen(sock, 2) != 0) {
 		perror("svctcp_.c - cannot listen");
-                if (madesock)
-                        (void)closesocket(sock);
-		return ((SVCXPRT *)NULL);
+		goto error;
 	}
 	r = (struct tcp_rendezvous *)mem_alloc(sizeof(*r));
 	if (r == NULL) {
@@ -213,6 +222,12 @@ svctcp_create(
 	xprt->xp_laddrlen = 0;
 	xprt_register(xprt);
 	return (xprt);
+error:
+	if (madesock) {
+		(void)closesocket(sock);
+	}
+
+	return ((SVCXPRT *)NULL);
 }
 
 /*

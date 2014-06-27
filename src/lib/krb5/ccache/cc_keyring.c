@@ -1472,6 +1472,7 @@ get_time_offsets(krb5_context context, krb5_ccache id, int32_t *time_offset,
     *time_offset = load_32_be(payload);
     *usec_offset = load_32_be((char *)payload + 4);
 
+    ret = 0;
 errout:
     free(payload);
     k5_cc_mutex_unlock(context, &data->lock);

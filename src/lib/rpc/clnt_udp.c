@@ -186,8 +186,10 @@ clntudp_bufcreate(
 			rpc_createerr.cf_error.re_errno = errno;
 			goto fooy;
 		}
-		/* attempt to bind to prov port */
-		(void)bindresvport(*sockp, (struct sockaddr_in *)0);
+
+		/* If we're root, try to bind a privileged port for the connection. */
+		(void)bindresvport_sa(*sockp, NULL);
+
 		/* the sockets rpc controls are non-blocking */
 		(void)ioctl(*sockp, FIONBIO, (char *) &dontblock);
 		cu->cu_closeit = TRUE;
