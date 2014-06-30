@@ -198,7 +198,9 @@ k5_make_tgs_req(krb5_context context,
         req.nktypes = 1;
     } else {
         /* Get the default TGS enctypes. */
-        krb5_get_tgs_ktypes(context, desired->server, &defenctypes);
+        ret = krb5_get_tgs_ktypes(context, desired->server, &defenctypes);
+        if (ret)
+            goto cleanup;
         for (count = 0; defenctypes[count]; count++);
         req.ktype = defenctypes;
         req.nktypes = count;
