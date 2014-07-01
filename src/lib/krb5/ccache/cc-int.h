@@ -139,13 +139,11 @@ krb5_error_code
 k5_unmarshal_princ(const unsigned char *data, size_t len, int version,
                    krb5_principal *princ_out);
 
-krb5_error_code
-k5_marshal_cred(krb5_creds *creds, int version, unsigned char **bytes_out,
-                size_t *len_out);
+void
+k5_marshal_cred(struct k5buf *buf, int version, krb5_creds *creds);
 
-krb5_error_code
-k5_marshal_princ(krb5_principal princ, int version, unsigned char **bytes_out,
-                 size_t *len_out);
+void
+k5_marshal_princ(struct k5buf *buf, int version, krb5_principal princ);
 
 /*
  * Per-type ccache cursor.

@@ -370,8 +370,8 @@ put_data(struct k5buf *buf, int version, krb5_data *data)
     put_len_bytes(buf, version, data->data, data->length);
 }
 
-static void
-marshal_princ(struct k5buf *buf, int version, krb5_principal princ)
+void
+k5_marshal_princ(struct k5buf *buf, int version, krb5_principal princ)
 {
     int32_t i, ncomps;
 
@@ -425,52 +425,23 @@ marshal_authdata(struct k5buf *buf, int version, krb5_authdata **authdata)
 
 /* Marshal a credential using the specified file ccache version (expressed as
  * an integer from 1 to 4). */
-krb5_error_code
-k5_marshal_cred(krb5_creds *creds, int version, unsigned char **bytes_out,
-                size_t *len_out)
+void
+k5_marshal_cred(struct k5buf *buf, int version, krb5_creds *creds)
 {
-    struct k5buf buf;
     char is_skey;
 
-    *bytes_out = NULL;
-    *len_out = 0;
-    k5_buf_init_dynamic(&buf);
-    marshal_princ(&buf, version, creds->client);
-    marshal_princ(&buf, version, creds->server);
-    marshal_keyblock(&buf, version, &creds->keyblock);
-    put32(&buf, version, creds->times.authtime);
-    put32(&buf, version, creds->times.starttime);
-    put32(&buf, version, creds->times.endtime);
-    put32(&buf, version, creds->times.renew_till);
+    k5_marshal_princ(buf, version, creds->client);
+    k5_marshal_princ(buf, version, creds->server);
+    marshal_keyblock(buf, version, &creds->keyblock);
+    put32(buf, version, creds->times.authtime);
+    put32(buf, version, creds->times.starttime);
+    put32(buf, version, creds->times.endtime);
+    put32(buf, version, creds->times.renew_till);
     is_skey = creds->is_skey;
-    k5_buf_add_len(&buf, &is_skey, 1);
-    put32(&buf, version, creds->ticket_flags);
-    marshal_addrs(&buf, version, creds->addresses);
-    marshal_authdata(&buf, version, creds->authdata);
-    put_data(&buf, version, &creds->ticket);
-    put_data(&buf, version, &creds->second_ticket);
-    if (k5_buf_status(&buf) != 0)
-        return ENOMEM;
-    *bytes_out = buf.data;
-    *len_out = buf.len;
-    return 0;
-}
-
-/* Marshal a principal using the specified file ccache version (expressed as an
- * integer from 1 to 4). */
-krb5_error_code
-k5_marshal_princ(krb5_principal princ, int version, unsigned char **bytes_out,
-                 size_t *len_out)
-{
-    struct k5buf buf;
-
-    *bytes_out = NULL;
-    *len_out = 0;
-    k5_buf_init_dynamic(&buf);
-    marshal_princ(&buf, version, princ);
-    if (k5_buf_status(&buf) != 0)
-        return ENOMEM;
-    *bytes_out = buf.data;
-    *len_out = buf.len;
-    return 0;
+    k5_buf_add_len(buf, &is_skey, 1);
+    put32(buf, version, creds->ticket_flags);
+    marshal_addrs(buf, version, creds->addresses);
+    marshal_authdata(buf, version, creds->authdata);
+    put_data(buf, version, &creds->ticket);
+    put_data(buf, version, &creds->second_ticket);
 }
