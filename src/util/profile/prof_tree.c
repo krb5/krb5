@@ -166,7 +166,7 @@ errcode_t profile_add_node(struct profile_node *section, const char *name,
     for (p=section->first_child, last = 0; p; last = p, p = p->next) {
         int cmp;
         cmp = strcmp(p->name, name);
-        if (cmp > 0)
+        if (cmp > 0 || (cmp == 0 && p->deleted))
             break;
     }
     retval = profile_create_node(name, value, &new);
