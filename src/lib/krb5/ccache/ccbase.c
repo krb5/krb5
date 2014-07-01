@@ -80,6 +80,11 @@ extern const krb5_cc_ops krb5_dcc_ops;
 static struct krb5_cc_typelist cc_dcc_entry = { &krb5_dcc_ops, NEXT };
 #undef NEXT
 #define NEXT &cc_dcc_entry
+
+extern const krb5_cc_ops krb5_kcm_ops;
+static struct krb5_cc_typelist cc_kcm_entry = { &krb5_kcm_ops, NEXT };
+#undef NEXT
+#define NEXT &cc_kcm_entry
 #endif /* not _WIN32 */
 
 

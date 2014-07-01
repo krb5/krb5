@@ -225,6 +225,8 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_K5LOGIN_AUTHORITATIVE        "k5login_authoritative"
 #define KRB5_CONF_K5LOGIN_DIRECTORY            "k5login_directory"
 #define KRB5_CONF_KADMIND_PORT                 "kadmind_port"
+#define KRB5_CONF_KCM_MACH_SERVICE             "kcm_mach_service"
+#define KRB5_CONF_KCM_SOCKET                   "kcm_socket"
 #define KRB5_CONF_KDC                          "kdc"
 #define KRB5_CONF_KDCDEFAULTS                  "kdcdefaults"
 #define KRB5_CONF_KDC_DEFAULT_OPTIONS          "kdc_default_options"

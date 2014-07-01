@@ -143,6 +143,9 @@ void
 k5_marshal_cred(struct k5buf *buf, int version, krb5_creds *creds);
 
 void
+k5_marshal_mcred(struct k5buf *buf, krb5_creds *mcred);
+
+void
 k5_marshal_princ(struct k5buf *buf, int version, krb5_principal princ);
 
 /*
