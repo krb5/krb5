@@ -271,11 +271,10 @@ main(int argc, char **argv)
     krb5_creds cred1, cred2;
     krb5_cc_cursor cursor;
     const char *filename;
-    char *ccname, buf[256];
+    char *ccname, filebuf[256];
     int version, fd;
     const struct test *t;
-    unsigned char *bytes;
-    size_t len;
+    struct k5buf buf;
 
     if (argc != 2)
         abort();
@@ -293,31 +292,31 @@ main(int argc, char **argv)
         if (k5_unmarshal_princ(t->princ, t->princlen, version, &princ) != 0)
             abort();
         verify_princ(princ);
-        if (k5_marshal_princ(princ, version, &bytes, &len) != 0)
-            abort();
-        assert(len == t->princlen);
-        assert(memcmp(t->princ, bytes, len) == 0);
-        free(bytes);
+        k5_buf_init_dynamic(&buf);
+        k5_marshal_princ(&buf, version, princ);
+        assert(buf.len == t->princlen);
+        assert(memcmp(t->princ, buf.data, buf.len) == 0);
+        k5_buf_free(&buf);
 
         /* Test cred1 unmarshalling and marshalling. */
         if (k5_unmarshal_cred(t->cred1, t->cred1len, version, &cred1) != 0)
             abort();
         verify_cred1(&cred1);
-        if (k5_marshal_cred(&cred1, version, &bytes, &len) != 0)
-            abort();
-        assert(len == t->cred1len);
-        assert(memcmp(t->cred1, bytes, len) == 0);
-        free(bytes);
+        k5_buf_init_dynamic(&buf);
+        k5_marshal_cred(&buf, version, &cred1);
+        assert(buf.len == t->cred1len);
+        assert(memcmp(t->cred1, buf.data, buf.len) == 0);
+        k5_buf_free(&buf);
 
         /* Test cred2 unmarshalling and marshalling. */
         if (k5_unmarshal_cred(t->cred2, t->cred2len, version, &cred2) != 0)
             abort();
         verify_cred2(&cred2);
-        if (k5_marshal_cred(&cred2, version, &bytes, &len) != 0)
-            abort();
-        assert(len == t->cred2len);
-        assert(memcmp(t->cred2, bytes, len) == 0);
-        free(bytes);
+        k5_buf_init_dynamic(&buf);
+        k5_marshal_cred(&buf, version, &cred2);
+        assert(buf.len == t->cred2len);
+        assert(memcmp(t->cred2, buf.data, buf.len) == 0);
+        k5_buf_free(&buf);
 
         /* Write a ccache containing the principal and creds.  Use the same
          * time offset as the version 4 test data used. */
@@ -340,18 +339,18 @@ main(int argc, char **argv)
         fd = open(filename, O_RDONLY);
         if (fd == -1)
             abort();
-        if (read(fd, buf, t->headerlen) != (ssize_t)t->headerlen)
+        if (read(fd, filebuf, t->headerlen) != (ssize_t)t->headerlen)
             abort();
-        assert(memcmp(buf, t->header, t->headerlen) == 0);
-        if (read(fd, buf, t->princlen) != (ssize_t)t->princlen)
+        assert(memcmp(filebuf, t->header, t->headerlen) == 0);
+        if (read(fd, filebuf, t->princlen) != (ssize_t)t->princlen)
             abort();
-        assert(memcmp(buf, t->princ, t->princlen) == 0);
-        if (read(fd, buf, t->cred1len) != (ssize_t)t->cred1len)
+        assert(memcmp(filebuf, t->princ, t->princlen) == 0);
+        if (read(fd, filebuf, t->cred1len) != (ssize_t)t->cred1len)
             abort();
-        assert(memcmp(buf, t->cred1, t->cred1len) == 0);
-        if (read(fd, buf, t->cred2len) != (ssize_t)t->cred2len)
+        assert(memcmp(filebuf, t->cred1, t->cred1len) == 0);
+        if (read(fd, filebuf, t->cred2len) != (ssize_t)t->cred2len)
             abort();
-        assert(memcmp(buf, t->cred2, t->cred2len) == 0);
+        assert(memcmp(filebuf, t->cred2, t->cred2len) == 0);
         close(fd);
 
         krb5_free_principal(context, princ);

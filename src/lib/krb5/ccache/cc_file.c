@@ -479,15 +479,15 @@ static krb5_error_code
 store_principal(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
     krb5_error_code ret;
-    unsigned char *bytes;
-    size_t len;
+    struct k5buf buf;
 
     k5_cc_mutex_assert_locked(context, &((fcc_data *)id->data)->lock);
-    ret = k5_marshal_princ(princ, version(id), &bytes, &len);
-    if (ret)
-        return ret;
-    ret = write_bytes(context, id, bytes, len);
-    free(bytes);
+    k5_buf_init_dynamic(&buf);
+    k5_marshal_princ(&buf, version(id), princ);
+    if (k5_buf_status(&buf) != 0)
+        return ENOMEM;
+    ret = write_bytes(context, id, buf.data, buf.len);
+    k5_buf_free(&buf);
     return ret;
 }
 
@@ -1331,8 +1331,7 @@ static krb5_error_code KRB5_CALLCONV
 fcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
 {
     krb5_error_code ret;
-    unsigned char *bytes;
-    size_t len;
+    struct k5buf buf;
 
     k5_cc_mutex_lock(context, &((fcc_data *)id->data)->lock);
 
@@ -1348,12 +1347,14 @@ fcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
         return interpret_errno(context, errno);
     }
 
-    ret = k5_marshal_cred(creds, version(id), &bytes, &len);
-    if (ret == 0) {
-        ret = write_bytes(context, id, bytes, len);
-        free(bytes);
-    }
+    k5_buf_init_dynamic(&buf);
+    k5_marshal_cred(&buf, version(id), creds);
+    if (k5_buf_status(&buf) == 0)
+        ret = write_bytes(context, id, buf.data, buf.len);
+    else
+        ret = ENOMEM;
 
+    k5_buf_free(&buf);
     MAYBE_CLOSE(context, id, ret);
     k5_cc_mutex_unlock(context, &((fcc_data *)id->data)->lock);
     krb5_change_cache();

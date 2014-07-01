@@ -1277,9 +1277,8 @@ krcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
 {
     krb5_error_code ret;
     krcc_data *data = id->data;
-    unsigned char *payload = NULL;
+    struct k5buf buf = EMPTY_K5BUF;
     char *keyname = NULL;
-    size_t payloadlen;
     key_serial_t cred_key;
     krb5_timestamp now;
 
@@ -1296,14 +1295,16 @@ krcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
         goto errout;
 
     /* Serialize credential using the file ccache version 4 format. */
-    ret = k5_marshal_cred(creds, 4, &payload, &payloadlen);
+    k5_buf_init_dynamic(&buf);
+    k5_marshal_cred(&buf, 4, creds);
+    ret = k5_buf_status(&buf);
     if (ret)
         goto errout;
 
     /* Add new key (credentials) into keyring */
     DEBUG_PRINT(("krcc_store: adding new key '%s' to keyring %d\n",
                  keyname, data->cache_id));
-    ret = add_cred_key(keyname, payload, payloadlen, data->cache_id,
+    ret = add_cred_key(keyname, buf.data, buf.len, data->cache_id,
                        data->is_legacy_type, &cred_key);
     if (ret)
         goto errout;
@@ -1321,8 +1322,8 @@ krcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
     update_keyring_expiration(context, id);
 
 errout:
+    k5_buf_free(&buf);
     krb5_free_unparsed_name(context, keyname);
-    free(payload);
     k5_cc_mutex_unlock(context, &data->lock);
     return ret;
 }
@@ -1367,16 +1368,16 @@ save_principal(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
     krcc_data *data = id->data;
     krb5_error_code ret;
-    unsigned char *payload = NULL;
+    struct k5buf buf;
     key_serial_t newkey;
-    size_t payloadsize;
 
     k5_cc_mutex_assert_locked(context, &data->lock);
 
     /* Serialize princ using the file ccache version 4 format. */
-    ret = k5_marshal_princ(princ, 4, &payload, &payloadsize);
-    if (ret)
-        goto errout;
+    k5_buf_init_dynamic(&buf);
+    k5_marshal_princ(&buf, 4, princ);
+    if (k5_buf_status(&buf) != 0)
+        return ENOMEM;
 
     /* Add new key into keyring */
 #ifdef KRCC_DEBUG
@@ -1392,8 +1393,8 @@ save_principal(krb5_context context, krb5_ccache id, krb5_principal princ)
             krb5_free_unparsed_name(context, princname);
     }
 #endif
-    newkey = add_key(KRCC_KEY_TYPE_USER, KRCC_SPEC_PRINC_KEYNAME, payload,
-                     payloadsize, data->cache_id);
+    newkey = add_key(KRCC_KEY_TYPE_USER, KRCC_SPEC_PRINC_KEYNAME, buf.data,
+                     buf.len, data->cache_id);
     if (newkey < 0) {
         ret = errno;
         DEBUG_PRINT(("Error adding principal key: %s\n", strerror(ret)));
@@ -1403,8 +1404,7 @@ save_principal(krb5_context context, krb5_ccache id, krb5_principal princ)
         krcc_update_change_time(data);
     }
 
-errout:
-    free(payload);
+    k5_buf_free(&buf);
     return ret;
 }
 
