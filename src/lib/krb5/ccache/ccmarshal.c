@@ -445,3 +445,72 @@ k5_marshal_cred(struct k5buf *buf, int version, krb5_creds *creds)
     put_data(buf, version, &creds->ticket);
     put_data(buf, version, &creds->second_ticket);
 }
+
+#define SC_CLIENT_PRINCIPAL  0x0001
+#define SC_SERVER_PRINCIPAL  0x0002
+#define SC_SESSION_KEY       0x0004
+#define SC_TICKET            0x0008
+#define SC_SECOND_TICKET     0x0010
+#define SC_AUTHDATA          0x0020
+#define SC_ADDRESSES         0x0040
+
+/* Construct the header flags field for a matching credential for the Heimdal
+ * KCM format. */
+static uint32_t
+mcred_header(krb5_creds *mcred)
+{
+    uint32_t header = 0;
+
+    if (mcred->client != NULL)
+        header |= SC_CLIENT_PRINCIPAL;
+    if (mcred->server != NULL)
+        header |= SC_SERVER_PRINCIPAL;
+    if (mcred->keyblock.enctype != ENCTYPE_NULL)
+        header |= SC_SESSION_KEY;
+    if (mcred->ticket.length > 0)
+        header |= SC_TICKET;
+    if (mcred->second_ticket.length > 0)
+        header |= SC_SECOND_TICKET;
+    if (mcred->authdata != NULL && *mcred->authdata != NULL)
+        header |= SC_AUTHDATA;
+    if (mcred->addresses != NULL && *mcred->addresses != NULL)
+        header |= SC_ADDRESSES;
+    return header;
+}
+
+/*
+ * Marshal a matching credential in the Heimdal KCM format.  Matching
+ * credentials are used to identify an existing credential to retrieve or
+ * remove from a cache.
+ */
+void
+k5_marshal_mcred(struct k5buf *buf, krb5_creds *mcred)
+{
+    const int version = 4;      /* subfields use v4 file format */
+    uint32_t header;
+    char is_skey;
+
+    header = mcred_header(mcred);
+    put32(buf, version, header);
+    if (mcred->client != NULL)
+        k5_marshal_princ(buf, version, mcred->client);
+    if (mcred->server != NULL)
+        k5_marshal_princ(buf, version, mcred->server);
+    if (mcred->keyblock.enctype != ENCTYPE_NULL)
+        marshal_keyblock(buf, version, &mcred->keyblock);
+    put32(buf, version, mcred->times.authtime);
+    put32(buf, version, mcred->times.starttime);
+    put32(buf, version, mcred->times.endtime);
+    put32(buf, version, mcred->times.renew_till);
+    is_skey = mcred->is_skey;
+    k5_buf_add_len(buf, &is_skey, 1);
+    put32(buf, version, mcred->ticket_flags);
+    if (mcred->addresses != NULL && *mcred->addresses != NULL)
+        marshal_addrs(buf, version, mcred->addresses);
+    if (mcred->authdata != NULL && *mcred->authdata != NULL)
+        marshal_authdata(buf, version, mcred->authdata);
+    if (mcred->ticket.length > 0)
+        put_data(buf, version, &mcred->ticket);
+    if (mcred->second_ticket.length > 0)
+        put_data(buf, version, &mcred->second_ticket);
+}

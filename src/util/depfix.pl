@@ -146,6 +146,12 @@ sub do_subs_2 {
 	# Here com_err.h is used from the current directory.
 	s;com_err.h ;\$(COM_ERR_DEPS) ;g;
     }
+    if ($thisdir eq "lib/krb5/ccache") {
+	# These files are only used (and kcmrpc.h only generated) on OS X.
+	# There are conditional dependencies in Makefile.in.
+	s;kcmrpc.h ;;g;
+	s;kcmrpc_types.h ;;g;
+    }
 
     $_ = &uniquify($_);
 
