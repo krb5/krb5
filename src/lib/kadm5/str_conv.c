@@ -187,14 +187,14 @@ krb5_flags_to_string(flags, sep, buffer, buflen)
     /* Blast through the table matching all we can */
     for (i=0; i<flags_table_nents; i++) {
         if (flags & flags_table[i].fl_flags) {
-            if (k5_buf_len(&buf) > 0)
+            if (buf.len > 0)
                 k5_buf_add(&buf, sepstring);
             k5_buf_add(&buf, _(flags_table[i].fl_output));
             /* Keep track of what we matched */
             pflags |= flags_table[i].fl_flags;
         }
     }
-    if (k5_buf_data(&buf) == NULL)
+    if (k5_buf_status(&buf) != 0)
         return(ENOMEM);
 
     /* See if there's any leftovers */

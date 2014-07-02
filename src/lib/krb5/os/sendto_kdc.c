@@ -558,13 +558,13 @@ make_proxy_request(struct conn_state *state, const krb5_data *realm,
     k5_buf_add(&buf, "Content-type: application/kerberos\r\n");
     k5_buf_add_fmt(&buf, "Content-Length: %d\r\n\r\n", encoded_pm->length);
     k5_buf_add_len(&buf, encoded_pm->data, encoded_pm->length);
-    if (k5_buf_data(&buf) == NULL) {
+    if (k5_buf_status(&buf) != 0) {
         ret = ENOMEM;
         goto cleanup;
     }
 
-    *req_out = k5_buf_data(&buf);
-    *len_out = k5_buf_len(&buf);
+    *req_out = buf.data;
+    *len_out = buf.len;
 
 cleanup:
     krb5_free_data_contents(NULL, &pm.kerb_message);

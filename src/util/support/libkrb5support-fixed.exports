@@ -8,9 +8,8 @@ k5_buf_add_len
 k5_buf_add_fmt
 k5_buf_get_space
 k5_buf_truncate
-k5_buf_data
-k5_buf_len
-k5_free_buf
+k5_buf_status
+k5_buf_free
 k5_set_error
 k5_vset_error
 k5_get_error

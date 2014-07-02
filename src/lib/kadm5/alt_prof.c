@@ -66,7 +66,7 @@ krb5_aprof_init(char *fname, char *envname, krb5_pointer *acontextp)
     krb5_error_code ret;
     profile_t profile;
     const char *kdc_config;
-    char *profile_path, **filenames;
+    char **filenames;
     int i;
     struct k5buf buf;
 
@@ -79,17 +79,16 @@ krb5_aprof_init(char *fname, char *envname, krb5_pointer *acontextp)
     if (kdc_config)
         k5_buf_add(&buf, kdc_config);
     for (i = 0; filenames[i] != NULL; i++) {
-        if (k5_buf_len(&buf) > 0)
+        if (buf.len > 0)
             k5_buf_add(&buf, ":");
         k5_buf_add(&buf, filenames[i]);
     }
     krb5_free_config_files(filenames);
-    profile_path = k5_buf_data(&buf);
-    if (profile_path == NULL)
+    if (k5_buf_status(&buf) != 0)
         return ENOMEM;
     profile = (profile_t) NULL;
-    ret = profile_init_path(profile_path, &profile);
-    free(profile_path);
+    ret = profile_init_path(buf.data, &profile);
+    k5_buf_free(&buf);
     if (ret)
         return ret;
     *acontextp = profile;

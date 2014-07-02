@@ -59,7 +59,7 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
 {
     const unsigned char *p = NULL, *base = NULL;
     char host[MAXDNAME];
-    int size, ret, rdlen, nlen, len;
+    int size, ret, rdlen, nlen;
     unsigned short priority, weight, port;
     struct krb5int_dns_state *ds = NULL;
     struct k5buf buf;
@@ -93,11 +93,10 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
        a search on the prefix alone then the intention is to allow
        the local domain or domain search lists to be expanded.  */
 
-    len = k5_buf_len(&buf);
-    if (len > 0 && host[len - 1] != '.')
+    if (buf.len > 0 && host[buf.len - 1] != '.')
         k5_buf_add(&buf, ".");
 
-    if (k5_buf_data(&buf) == NULL)
+    if (k5_buf_status(&buf) != 0)
         return 0;
 
 #ifdef TEST

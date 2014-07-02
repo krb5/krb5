@@ -130,8 +130,10 @@ do_replacement(const char *regstr, const char *repl, krb5_boolean doall,
     }
     regfree(&re);
     k5_buf_add(&buf, instr);
-    *outstr = k5_buf_data(&buf);
-    return *outstr == NULL ? ENOMEM : 0;
+    if (k5_buf_status(&buf) != 0)
+        return ENOMEM;
+    *outstr = buf.data;
+    return 0;
 }
 
 /*
@@ -207,7 +209,7 @@ aname_get_selstring(krb5_context context, krb5_const_principal aname,
                     const char **contextp, char **selstring_out)
 {
     const char *current;
-    char *end, *str;
+    char *end;
     long num_comps, ind;
     const krb5_data *datap;
     struct k5buf selstring;
@@ -257,16 +259,15 @@ aname_get_selstring(krb5_context context, krb5_const_principal aname,
 
     /* Check that we hit a ']' and not the end of the string. */
     if (*current != ']') {
-        k5_free_buf(&selstring);
+        k5_buf_free(&selstring);
         return KRB5_CONFIG_BADFORMAT;
     }
 
-    str = k5_buf_data(&selstring);
-    if (str == NULL)
+    if (k5_buf_status(&selstring) != 0)
         return ENOMEM;
 
     *contextp = current + 1;
-    *selstring_out = str;
+    *selstring_out = selstring.data;
     return 0;
 }
 

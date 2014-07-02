@@ -27,62 +27,47 @@
 #ifndef K5_BUF_H
 #define K5_BUF_H
 
-#if defined(_MSDOS) || defined(_WIN32)
-#include <win-mac.h>
-#endif
-#ifndef KRB5_CALLCONV
-#define KRB5_CALLCONV
-#define KRB5_CALLCONV_C
-#endif
-
 #include <stdarg.h>
 #include <string.h>
-#ifndef _WIN32
-#include <unistd.h>
-#endif
 
 /*
  * The k5buf module is intended to allow multi-step string construction in a
  * fixed or dynamic buffer without the need to check for a failure at each step
  * (and without aborting on malloc failure).  If an allocation failure occurs
- * or if the fixed buffer runs out of room, the error will be discovered when
- * the caller retrieves the C string value or checks the length of the
- * resulting buffer.
+ * or the fixed buffer runs out of room, the buffer will be set to an error
+ * state which can be detected with k5_buf_status.  Data in a buffer is
+ * terminated with a zero byte so that it can be used as a C string.
  *
- * k5buf structures are stack-allocated, but are intended to be opaque, so do
- * not access the fields directly.  This is a tool, not a way of life, so do
- * not put k5buf structure pointers into the public API or into significant
- * internal APIs.
+ * k5buf structures are usually stack-allocated.  Do not put k5buf structure
+ * pointers into public APIs.  It is okay to reference the data and len fields
+ * of a buffer (they will be NULL/0 if the buffer is in an error state), but do
+ * not change them.
  */
 
-/*
- * We must define the k5buf structure here to allow stack allocation.  The
- * structure is intended to be opaque, so the fields have funny names.
- */
+/* Buffer type values */
+enum k5buftype { K5BUF_ERROR, K5BUF_FIXED, K5BUF_DYNAMIC };
+
 struct k5buf {
-    int xx_buftype;
-    char *xx_data;
-    size_t xx_space;
-    size_t xx_len;
+    enum k5buftype buftype;
+    void *data;
+    size_t space;
+    size_t len;
 };
+
+#define EMPTY_K5BUF { K5BUF_ERROR }
 
 /* Initialize a k5buf using a fixed-sized, existing buffer.  SPACE must be
  * more than zero, or an assertion failure will result. */
 void k5_buf_init_fixed(struct k5buf *buf, char *data, size_t space);
 
-/* Initialize a k5buf using an internally allocated dynamic buffer.  The
- * buffer contents must be freed with k5_free_buf. */
+/* Initialize a k5buf using an internally allocated dynamic buffer. */
 void k5_buf_init_dynamic(struct k5buf *buf);
 
 /* Add a C string to BUF. */
 void k5_buf_add(struct k5buf *buf, const char *data);
 
-/*
- * Add a counted set of bytes to BUF.  It is okay for DATA[0..LEN-1]
- * to contain null bytes if you are prepared to deal with that in the
- * output (use k5_buf_len to retrieve the length of the output).
- */
-void k5_buf_add_len(struct k5buf *buf, const char *data, size_t len);
+/* Add a counted series of bytes to BUF. */
+void k5_buf_add_len(struct k5buf *buf, const void *data, size_t len);
 
 /* Add sprintf-style formatted data to BUF. */
 void k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
@@ -99,36 +84,16 @@ void *k5_buf_get_space(struct k5buf *buf, size_t len);
  * length, or an assertion failure will result. */
 void k5_buf_truncate(struct k5buf *buf, size_t len);
 
-/*
- * Retrieve the byte array value of BUF, or NULL if there has been an
- * allocation failure or the fixed buffer ran out of room.
- *
- * The byte array will be a C string unless binary data was added with
- * k5_buf_add_len; it will be null-terminated regardless.  Modifying the byte
- * array does not invalidate the buffer, as long as its length is not changed.
- *
- * For a fixed buffer, the return value will always be equal to the passed-in
- * value of DATA at initialization time if it is not NULL.
- *
- * For a dynamic buffer, any buffer modification operation except
- * k5_buf_truncate may invalidate the byte array address.
- */
-char *k5_buf_data(struct k5buf *buf);
-
-/*
- * Retrieve the length of BUF, or -1 if there has been an allocation failure or
- * the fixed buffer ran out of room.  The length is equal to
- * strlen(k5_buf_data(buf)) unless binary data was added with k5_buf_add_len.
- */
-ssize_t k5_buf_len(struct k5buf *buf);
+/* Return ENOMEM if buf is in an error state, 0 otherwise. */
+int k5_buf_status(struct k5buf *buf);
 
 /*
  * Free the storage used in the dynamic buffer BUF.  The caller may choose to
- * take responsibility for freeing the return value of k5_buf_data instead of
- * using this function.  If BUF is a fixed buffer, an assertion failure will
- * result.  It is unnecessary (though harmless) to free a buffer after an error
- * is detected; the storage will already have been freed in that case.
+ * take responsibility for freeing the data pointer instead of using this
+ * function.  If BUF is a fixed buffer, an assertion failure will result.
+ * Freeing a buffer in the error state, a buffer initialized with EMPTY_K5BUF,
+ * or a zeroed k5buf structure is a no-op.
  */
-void k5_free_buf(struct k5buf *buf);
+void k5_buf_free(struct k5buf *buf);
 
 #endif /* K5_BUF_H */

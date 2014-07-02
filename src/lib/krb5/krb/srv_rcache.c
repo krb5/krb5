@@ -35,10 +35,10 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
                        krb5_rcache *rcptr)
 {
     krb5_rcache rcache = 0;
-    char *cachename = 0, *cachetype;
+    char *cachetype;
     krb5_error_code retval;
     unsigned int i;
-    struct k5buf buf;
+    struct k5buf buf = EMPTY_K5BUF;
 #ifdef HAVE_GETEUID
     unsigned long uid = geteuid();
 #endif
@@ -63,11 +63,10 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
     k5_buf_add_fmt(&buf, "_%lu", uid);
 #endif
 
-    cachename = k5_buf_data(&buf);
-    if (cachename == NULL)
+    if (k5_buf_status(&buf) != 0)
         return ENOMEM;
 
-    retval = krb5_rc_resolve_full(context, &rcache, cachename);
+    retval = krb5_rc_resolve_full(context, &rcache, buf.data);
     if (retval)
         goto cleanup;
 
@@ -83,7 +82,6 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
 cleanup:
     if (rcache)
         krb5_rc_close(context, rcache);
-    if (cachename)
-        free(cachename);
+    k5_buf_free(&buf);
     return retval;
 }

@@ -454,7 +454,7 @@ k5_expand_path_tokens_extra(krb5_context context, const char *path_in,
 {
     krb5_error_code ret;
     struct k5buf buf;
-    char *tok_begin, *tok_end, *tok_val, *path, **extra_tokens = NULL;
+    char *tok_begin, *tok_end, *tok_val, **extra_tokens = NULL;
     const char *path_left;
     size_t nargs = 0, i;
     va_list ap;
@@ -517,26 +517,25 @@ k5_expand_path_tokens_extra(krb5_context context, const char *path_in,
         path_left = tok_end + 1;
     }
 
-    path = k5_buf_data(&buf);
-    if (path == NULL) {
-        ret = ENOMEM;
+    ret = k5_buf_status(&buf);
+    if (ret)
         goto cleanup;
-    }
+
 #ifdef _WIN32
     /* Also deal with slashes. */
     {
         char *p;
-        for (p = path; *p != '\0'; p++) {
+        for (p = buf.data; *p != '\0'; p++) {
             if (*p == '/')
                 *p = '\\';
         }
     }
 #endif
-    *path_out = path;
+    *path_out = buf.data;
+    memset(&buf, 0, sizeof(buf));
 
 cleanup:
-    if (*path_out == NULL)
-        k5_free_buf(&buf);
+    k5_buf_free(&buf);
     free_extra_tokens(extra_tokens);
     return 0;
 }

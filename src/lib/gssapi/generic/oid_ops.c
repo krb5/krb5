@@ -276,10 +276,6 @@ generic_gss_oid_to_str(OM_uint32 *minor_status,
         }
     }
     k5_buf_add_len(&buf, "}\0", 2);
-    if (k5_buf_data(&buf) == NULL) {
-        *minor_status = ENOMEM;
-        return(GSS_S_FAILURE);
-    }
     return k5buf_to_gss(minor_status, &buf, oid_str);
 }
 
