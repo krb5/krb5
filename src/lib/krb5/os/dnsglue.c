@@ -389,11 +389,10 @@ k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
            the local domain or domain search lists to be expanded.
         */
 
-        len = k5_buf_len(&buf);
-        if (len > 0 && host[len - 1] != '.')
+        if (buf.len > 0 && host[buf.len - 1] != '.')
             k5_buf_add(&buf, ".");
     }
-    if (k5_buf_data(&buf) == NULL)
+    if (k5_buf_status(&buf) != 0)
         return KRB5_ERR_HOST_REALM_UNKNOWN;
     ret = krb5int_dns_init(&ds, host, C_IN, T_TXT);
     if (ret < 0) {

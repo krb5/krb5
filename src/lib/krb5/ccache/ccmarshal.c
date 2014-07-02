@@ -449,10 +449,10 @@ k5_marshal_cred(krb5_creds *creds, int version, unsigned char **bytes_out,
     marshal_authdata(&buf, version, creds->authdata);
     put_data(&buf, version, &creds->ticket);
     put_data(&buf, version, &creds->second_ticket);
-    if (k5_buf_data(&buf) == NULL)
+    if (k5_buf_status(&buf) != 0)
         return ENOMEM;
-    *bytes_out = (unsigned char *)k5_buf_data(&buf);
-    *len_out = k5_buf_len(&buf);
+    *bytes_out = buf.data;
+    *len_out = buf.len;
     return 0;
 }
 
@@ -468,9 +468,9 @@ k5_marshal_princ(krb5_principal princ, int version, unsigned char **bytes_out,
     *len_out = 0;
     k5_buf_init_dynamic(&buf);
     marshal_princ(&buf, version, princ);
-    if (k5_buf_data(&buf) == NULL)
+    if (k5_buf_status(&buf) != 0)
         return ENOMEM;
-    *bytes_out = (unsigned char *)k5_buf_data(&buf);
-    *len_out = k5_buf_len(&buf);
+    *bytes_out = buf.data;
+    *len_out = buf.len;
     return 0;
 }

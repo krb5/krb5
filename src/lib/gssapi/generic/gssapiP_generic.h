@@ -273,13 +273,18 @@ k5buf_to_gss(OM_uint32 *minor,
              gss_buffer_t output_buffer)
 {
     OM_uint32 status = GSS_S_COMPLETE;
-    char *bp = k5_buf_data(input_k5buf);
-    output_buffer->length = k5_buf_len(input_k5buf);
+
+    if (k5_buf_status(input_k5buf) != 0) {
+        *minor = ENOMEM;
+        return GSS_S_FAILURE;
+    }
+    output_buffer->length = input_k5buf->len;
 #if defined(_WIN32) || defined(DEBUG_GSSALLOC)
     if (output_buffer->length > 0) {
         output_buffer->value = gssalloc_malloc(output_buffer->length);
         if (output_buffer->value) {
-            memcpy(output_buffer->value, bp, output_buffer->length);
+            memcpy(output_buffer->value, input_k5buf->data,
+                   output_buffer->length);
         } else {
             status = GSS_S_FAILURE;
             *minor = ENOMEM;
@@ -287,13 +292,10 @@ k5buf_to_gss(OM_uint32 *minor,
     } else {
         output_buffer->value = NULL;
     }
-    k5_free_buf(input_k5buf);
+    k5_buf_free(input_k5buf);
 #else
-    output_buffer->value = bp;
-    /*
-     * it would be nice to invalidate input_k5buf here
-     * but there is no api for that currently...
-     */
+    output_buffer->value = input_k5buf->data;
+    memset(input_k5buf, 0, sizeof(*input_k5buf));
 #endif
     return status;
 }

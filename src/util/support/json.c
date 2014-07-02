@@ -696,11 +696,13 @@ k5_json_encode(k5_json_value val, char **json_out)
     k5_buf_init_dynamic(&buf);
     ret = encode_value(&buf, val);
     if (ret) {
-        k5_free_buf(&buf);
+        k5_buf_free(&buf);
         return ret;
     }
-    *json_out = k5_buf_data(&buf);
-    return (*json_out == NULL) ? ENOMEM : 0;
+    if (k5_buf_status(&buf) != 0)
+        return ENOMEM;
+    *json_out = buf.data;
+    return 0;
 }
 
 /*** JSON decoding ***/

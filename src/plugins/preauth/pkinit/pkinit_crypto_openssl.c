@@ -4450,11 +4450,11 @@ reassemble_pkcs11_name(pkinit_identity_opts *idopts)
         k5_buf_add_fmt(&buf, "%sslotid=%ld", n++ ? ":" : "",
                        (long)idopts->slotid);
     }
-    if (k5_buf_len(&buf) >= 0)
-        ret = strdup(k5_buf_data(&buf));
+    if (k5_buf_status(&buf) == 0)
+        ret = strdup(buf.data);
     else
         ret = NULL;
-    k5_free_buf(&buf);
+    k5_buf_free(&buf);
     return ret;
 }
 

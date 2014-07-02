@@ -175,9 +175,9 @@ marshal_lucid_context(const gss_krb5_lucid_context_v1_t *lctx,
             add_lucid_key(&buf, &lctx->cfx_kd.acceptor_subkey);
     } else
         abort();
-    assert(k5_buf_data(&buf) != NULL);
-    *data_out = (unsigned char *)k5_buf_data(&buf);
-    *len_out = k5_buf_len(&buf);
+    assert(k5_buf_status(&buf) == 0);
+    *data_out = buf.data;
+    *len_out = buf.len;
 }
 
 /* Export ctx as a lucid context, marshal it, and write it to fd. */

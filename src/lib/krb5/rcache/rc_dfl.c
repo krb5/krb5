@@ -642,11 +642,10 @@ krb5_rc_io_store(krb5_context context, struct dfl_data *t,
                  krb5_donot_replay *rep)
 {
     size_t clientlen, serverlen;
-    ssize_t buflen;
     unsigned int len;
     krb5_error_code ret;
     struct k5buf buf, extbuf;
-    char *bufptr, *extstr;
+    char *extstr;
 
     clientlen = strlen(rep->client);
     serverlen = strlen(rep->server);
@@ -663,9 +662,9 @@ krb5_rc_io_store(krb5_context context, struct dfl_data *t,
         k5_buf_add_fmt(&extbuf, "HASH:%s %lu:%s %lu:%s", rep->msghash,
                        (unsigned long)clientlen, rep->client,
                        (unsigned long)serverlen, rep->server);
-        extstr = k5_buf_data(&extbuf);
-        if (!extstr)
+        if (k5_buf_status(&extbuf) != 0)
             return KRB5_RC_MALLOC;
+        extstr = extbuf.data;
 
         /*
          * Put the extension value into the server field of a
@@ -693,13 +692,11 @@ krb5_rc_io_store(krb5_context context, struct dfl_data *t,
     k5_buf_add_len(&buf, (char *)&rep->cusec, sizeof(rep->cusec));
     k5_buf_add_len(&buf, (char *)&rep->ctime, sizeof(rep->ctime));
 
-    bufptr = k5_buf_data(&buf);
-    buflen = k5_buf_len(&buf);
-    if (bufptr == NULL || buflen < 0)
+    if (k5_buf_status(&buf) != 0)
         return KRB5_RC_MALLOC;
 
-    ret = krb5_rc_io_write(context, &t->d, bufptr, buflen);
-    k5_free_buf(&buf);
+    ret = krb5_rc_io_write(context, &t->d, buf.data, buf.len);
+    k5_buf_free(&buf);
     return ret;
 }
 

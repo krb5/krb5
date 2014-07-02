@@ -384,7 +384,7 @@ struct ad_policy_info {
 static void
 add_spaces(struct k5buf *buf)
 {
-    if (k5_buf_len(buf) > 0)
+    if (buf->len > 0)
         k5_buf_add(buf, "  ");
 }
 
@@ -394,7 +394,6 @@ decode_ad_policy_info(const krb5_data *data, char **msg_out)
     struct ad_policy_info policy;
     uint64_t password_days;
     const char *p;
-    char *msg;
     struct k5buf buf;
 
     *msg_out = NULL;
@@ -465,14 +464,13 @@ decode_ad_policy_info(const krb5_data *data, char **msg_out)
                        (int)password_days);
     }
 
-    msg = k5_buf_data(&buf);
-    if (msg == NULL)
+    if (k5_buf_status(&buf) != 0)
         return ENOMEM;
 
-    if (*msg != '\0')
-        *msg_out = msg;
+    if (buf.len > 0)
+        *msg_out = buf.data;
     else
-        free(msg);
+        k5_buf_free(&buf);
     return 0;
 }
 

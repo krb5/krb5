@@ -30,19 +30,35 @@
  * needs to be generated with error tables, after util/et, which builds after
  * this directory.
  */
-#include "k5buf-int.h"
+#include "k5-platform.h"
+#include "k5-buf.h"
 #include <assert.h>
 
 /*
  * Structure invariants:
  *
- * buftype is BUFTYPE_FIXED, BUFTYPE_DYNAMIC, or BUFTYPE_ERROR
- * if buftype is not BUFTYPE_ERROR:
+ * buftype is K5BUF_FIXED, K5BUF_DYNAMIC, or K5BUF_ERROR
+ * if buftype is K5BUF_ERROR, the other fields are NULL or 0
+ * if buftype is not K5BUF_ERROR:
  *   space > 0
- *   space <= floor(SIZE_MAX / 2) (to fit within ssize_t)
  *   len < space
  *   data[len] = '\0'
  */
+
+/* Return a character pointer to the current end of buf. */
+static inline char *
+endptr(struct k5buf *buf)
+{
+    return (char *)buf->data + buf->len;
+}
+
+static inline void
+set_error(struct k5buf *buf)
+{
+    buf->buftype = K5BUF_ERROR;
+    buf->data = NULL;
+    buf->space = buf->len = 0;
+}
 
 /*
  * Make sure there is room for LEN more characters in BUF, in addition to the
@@ -55,18 +71,19 @@ ensure_space(struct k5buf *buf, size_t len)
     size_t new_space;
     char *new_data;
 
-    if (buf->buftype == BUFTYPE_ERROR)
+    if (buf->buftype == K5BUF_ERROR)
         return 0;
     if (buf->space - 1 - buf->len >= len) /* Enough room already. */
         return 1;
-    if (buf->buftype == BUFTYPE_FIXED) /* Can't resize a fixed buffer. */
+    if (buf->buftype == K5BUF_FIXED) /* Can't resize a fixed buffer. */
         goto error_exit;
-    assert(buf->buftype == BUFTYPE_DYNAMIC);
+    assert(buf->buftype == K5BUF_DYNAMIC);
     new_space = buf->space * 2;
-    while (new_space <= SPACE_MAX && new_space - buf->len - 1 < len)
+    while (new_space - buf->len - 1 < len) {
+        if (new_space > SIZE_MAX / 2)
+            goto error_exit;
         new_space *= 2;
-    if (new_space > SPACE_MAX)
-        goto error_exit;
+    }
     new_data = realloc(buf->data, new_space);
     if (new_data == NULL)
         goto error_exit;
@@ -75,11 +92,9 @@ ensure_space(struct k5buf *buf, size_t len)
     return 1;
 
 error_exit:
-    if (buf->buftype == BUFTYPE_DYNAMIC) {
+    if (buf->buftype == K5BUF_DYNAMIC)
         free(buf->data);
-        buf->data = NULL;
-    }
-    buf->buftype = BUFTYPE_ERROR;
+    set_error(buf);
     return 0;
 }
 
@@ -87,25 +102,25 @@ void
 k5_buf_init_fixed(struct k5buf *buf, char *data, size_t space)
 {
     assert(space > 0);
-    buf->buftype = BUFTYPE_FIXED;
+    buf->buftype = K5BUF_FIXED;
     buf->data = data;
     buf->space = space;
     buf->len = 0;
-    buf->data[0] = '\0';
+    *endptr(buf) = '\0';
 }
 
 void
 k5_buf_init_dynamic(struct k5buf *buf)
 {
-    buf->buftype = BUFTYPE_DYNAMIC;
-    buf->space = DYNAMIC_INITIAL_SIZE;
+    buf->buftype = K5BUF_DYNAMIC;
+    buf->space = 128;
     buf->data = malloc(buf->space);
     if (buf->data == NULL) {
-        buf->buftype = BUFTYPE_ERROR;
+        set_error(buf);
         return;
     }
     buf->len = 0;
-    buf->data[0] = '\0';
+    *endptr(buf) = '\0';
 }
 
 void
@@ -115,14 +130,14 @@ k5_buf_add(struct k5buf *buf, const char *data)
 }
 
 void
-k5_buf_add_len(struct k5buf *buf, const char *data, size_t len)
+k5_buf_add_len(struct k5buf *buf, const void *data, size_t len)
 {
     if (!ensure_space(buf, len))
         return;
     if (len > 0)
-        memcpy(buf->data + buf->len, data, len);
+        memcpy(endptr(buf), data, len);
     buf->len += len;
-    buf->data[buf->len] = '\0';
+    *endptr(buf) = '\0';
 }
 
 void
@@ -133,26 +148,26 @@ k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
     size_t remaining;
     char *tmp;
 
-    if (buf->buftype == BUFTYPE_ERROR)
+    if (buf->buftype == K5BUF_ERROR)
         return;
     remaining = buf->space - buf->len;
 
-    if (buf->buftype == BUFTYPE_FIXED) {
+    if (buf->buftype == K5BUF_FIXED) {
         /* Format the data directly into the fixed buffer. */
         va_start(ap, fmt);
-        r = vsnprintf(buf->data + buf->len, remaining, fmt, ap);
+        r = vsnprintf(endptr(buf), remaining, fmt, ap);
         va_end(ap);
         if (SNPRINTF_OVERFLOW(r, remaining))
-            buf->buftype = BUFTYPE_ERROR;
+            set_error(buf);
         else
             buf->len += (unsigned int) r;
         return;
     }
 
     /* Optimistically format the data directly into the dynamic buffer. */
-    assert(buf->buftype == BUFTYPE_DYNAMIC);
+    assert(buf->buftype == K5BUF_DYNAMIC);
     va_start(ap, fmt);
-    r = vsnprintf(buf->data + buf->len, remaining, fmt, ap);
+    r = vsnprintf(endptr(buf), remaining, fmt, ap);
     va_end(ap);
     if (!SNPRINTF_OVERFLOW(r, remaining)) {
         buf->len += (unsigned int) r;
@@ -165,10 +180,10 @@ k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
             return;
         remaining = buf->space - buf->len;
         va_start(ap, fmt);
-        r = vsnprintf(buf->data + buf->len, remaining, fmt, ap);
+        r = vsnprintf(endptr(buf), remaining, fmt, ap);
         va_end(ap);
         if (SNPRINTF_OVERFLOW(r, remaining))  /* Shouldn't ever happen. */
-            buf->buftype = BUFTYPE_ERROR;
+            k5_buf_free(buf);
         else
             buf->len += (unsigned int) r;
         return;
@@ -180,12 +195,12 @@ k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
     r = vasprintf(&tmp, fmt, ap);
     va_end(ap);
     if (r < 0) {
-        buf->buftype = BUFTYPE_ERROR;
+        k5_buf_free(buf);
         return;
     }
     if (ensure_space(buf, r)) {
         /* Copy the temporary string into buf, including terminator. */
-        memcpy(buf->data + buf->len, tmp, r + 1);
+        memcpy(endptr(buf), tmp, r + 1);
         buf->len += r;
     }
     free(tmp);
@@ -197,40 +212,32 @@ k5_buf_get_space(struct k5buf *buf, size_t len)
     if (!ensure_space(buf, len))
         return NULL;
     buf->len += len;
-    buf->data[buf->len] = '\0';
-    return &buf->data[buf->len - len];
+    *endptr(buf) = '\0';
+    return endptr(buf) - len;
 }
 
 void
 k5_buf_truncate(struct k5buf *buf, size_t len)
 {
-    if (buf->buftype == BUFTYPE_ERROR)
+    if (buf->buftype == K5BUF_ERROR)
         return;
     assert(len <= buf->len);
     buf->len = len;
-    buf->data[buf->len] = '\0';
+    *endptr(buf) = '\0';
 }
 
-
-char *
-k5_buf_data(struct k5buf *buf)
+int
+k5_buf_status(struct k5buf *buf)
 {
-    return (buf->buftype == BUFTYPE_ERROR) ? NULL : buf->data;
-}
-
-ssize_t
-k5_buf_len(struct k5buf *buf)
-{
-    return (buf->buftype == BUFTYPE_ERROR) ? -1 : (ssize_t) buf->len;
+    return (buf->buftype == K5BUF_ERROR) ? ENOMEM : 0;
 }
 
 void
-k5_free_buf(struct k5buf *buf)
+k5_buf_free(struct k5buf *buf)
 {
-    if (buf->buftype == BUFTYPE_ERROR)
+    if (buf->buftype == K5BUF_ERROR)
         return;
-    assert(buf->buftype == BUFTYPE_DYNAMIC);
+    assert(buf->buftype == K5BUF_DYNAMIC);
     free(buf->data);
-    buf->data = NULL;
-    buf->buftype = BUFTYPE_ERROR;
+    set_error(buf);
 }
