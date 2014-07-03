@@ -107,9 +107,6 @@ callrpc(
 		memset(&server_addr, 0, sizeof(server_addr));
 		memmove((char *)&server_addr.sin_addr, hp->h_addr,
 			sizeof(server_addr.sin_addr));
-#if HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
-		server_addr.sin_len = sizeof(server_addr);
-#endif
 		server_addr.sin_family = AF_INET;
 		server_addr.sin_port =  0;
 		if ((crp->client = clntudp_create(&server_addr, prognum,

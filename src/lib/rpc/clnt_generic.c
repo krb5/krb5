@@ -76,9 +76,6 @@ clnt_create(
 		return (NULL);
 	}
 	memset(&sockin, 0, sizeof(sockin));
-#if HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
-	sockin.sin_len = sizeof(sockin);
-#endif
 	sockin.sin_family = h->h_addrtype;
 	sockin.sin_port = 0;
 	memmove((char*)&sockin.sin_addr, h->h_addr, sizeof(sockin.sin_addr));

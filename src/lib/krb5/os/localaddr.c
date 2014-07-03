@@ -243,11 +243,6 @@ addr_eq (const struct sockaddr *s1, const struct sockaddr *s2)
 {
     if (s1->sa_family != s2->sa_family)
         return 0;
-#ifdef HAVE_SA_LEN
-    if (s1->sa_len != s2->sa_len)
-        return 0;
-    return !memcmp (s1, s2, s1->sa_len);
-#else
 #define CMPTYPE(T,F) (!memcmp(&((const T*)s1)->F,&((const T*)s2)->F,sizeof(((const T*)s1)->F)))
     switch (s1->sa_family) {
     case AF_INET:
@@ -258,7 +253,6 @@ addr_eq (const struct sockaddr *s1, const struct sockaddr *s2)
         /* Err on side of duplicate listings.  */
         return 0;
     }
-#endif
 }
 #endif
 
@@ -1402,9 +1396,6 @@ get_localaddrs (krb5_context context, krb5_address ***addr, int use_profile)
                 struct sockaddr_in *sinp = ss2sin (&ss);
                 sinp->sin_family = AF_INET;
                 addrp = &sinp->sin_addr;
-#ifdef HAVE_SA_LEN
-                sinp->sin_len = sizeof (struct sockaddr_in);
-#endif
                 break;
             }
             case ADDRTYPE_INET6:
@@ -1412,9 +1403,6 @@ get_localaddrs (krb5_context context, krb5_address ***addr, int use_profile)
                 struct sockaddr_in6 *sin6p = ss2sin6 (&ss);
                 sin6p->sin6_family = AF_INET6;
                 addrp = &sin6p->sin6_addr;
-#ifdef HAVE_SA_LEN
-                sin6p->sin6_len = sizeof (struct sockaddr_in6);
-#endif
                 break;
             }
             default:

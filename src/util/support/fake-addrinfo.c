@@ -566,9 +566,6 @@ static inline int fai_add_entry (struct addrinfo **result, void *addr,
         sin4->sin_family = AF_INET;
         sin4->sin_addr = *(struct in_addr *)addr;
         sin4->sin_port = port;
-#ifdef HAVE_SA_LEN
-        sin4->sin_len = sizeof (struct sockaddr_in);
-#endif
     }
     if (template->ai_family == AF_INET6) {
         struct sockaddr_in6 *sin6;
@@ -580,9 +577,6 @@ static inline int fai_add_entry (struct addrinfo **result, void *addr,
         sin6->sin6_family = AF_INET6;
         sin6->sin6_addr = *(struct in6_addr *)addr;
         sin6->sin6_port = port;
-#ifdef HAVE_SA_LEN
-        sin6->sin6_len = sizeof (struct sockaddr_in6);
-#endif
     }
     n->ai_next = *result;
     *result = n;
@@ -1294,9 +1288,6 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
            just leftover from previous contents of the memory
            block?).  So, always override what libc returned.  */
         ai->ai_addr->sa_family = ai->ai_family;
-#ifdef HAVE_SA_LEN /* always true on AIX, actually */
-        ai->ai_addr->sa_len = ai->ai_addrlen;
-#endif
     }
 #endif
 

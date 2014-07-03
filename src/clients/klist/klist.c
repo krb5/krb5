@@ -822,9 +822,6 @@ void one_addr(a)
         {
             struct sockaddr_in *sinp = ss2sin (&ss);
             sinp->sin_family = AF_INET;
-#ifdef HAVE_SA_LEN
-            sinp->sin_len = sizeof (struct sockaddr_in);
-#endif
             memcpy (&sinp->sin_addr, a->contents, 4);
         }
         break;
@@ -834,9 +831,6 @@ void one_addr(a)
         {
             struct sockaddr_in6 *sin6p = ss2sin6 (&ss);
             sin6p->sin6_family = AF_INET6;
-#ifdef HAVE_SA_LEN
-            sin6p->sin6_len = sizeof (struct sockaddr_in6);
-#endif
             memcpy (&sin6p->sin6_addr, a->contents, 16);
         }
         break;
