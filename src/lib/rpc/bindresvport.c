@@ -81,7 +81,7 @@ bindresvport_sa(int sd, struct sockaddr *sa)
 		if (port > ENDPORT) {
 			port = STARTPORT;
 		}
-		res = bind(sd, sa, socklen(sa));
+		res = bind(sd, sa, sa_socklen(sa));
 	}
 	return (res);
 }

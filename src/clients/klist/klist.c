@@ -846,7 +846,7 @@ void one_addr(a)
     }
 
     namebuf[0] = 0;
-    err = getnameinfo (ss2sa (&ss), socklen (ss2sa (&ss)),
+    err = getnameinfo (ss2sa (&ss), sa_socklen (ss2sa (&ss)),
                        namebuf, sizeof (namebuf), 0, 0,
                        no_resolve ? NI_NUMERICHOST : 0U);
     if (err) {

@@ -165,7 +165,7 @@ printaddr(struct sockaddr *sa)
     int err;
 
     printf ("%p ", (void *) sa);
-    err = getnameinfo (sa, socklen (sa), buf, sizeof (buf), 0, 0,
+    err = getnameinfo (sa, sa_socklen (sa), buf, sizeof (buf), 0, 0,
                        NI_NUMERICHOST);
     if (err)
         printf ("<getnameinfo error %d: %s> family=%d",
@@ -1085,7 +1085,7 @@ static int print_addr (/*@unused@*/ void *dataptr, struct sockaddr *sa)
     socklen_t len;
 
     printf ("  --> family %2d ", sa->sa_family);
-    len = socklen (sa);
+    len = sa_socklen (sa);
     err = getnameinfo (sa, len, hostbuf, (socklen_t) sizeof (hostbuf),
                        (char *) NULL, 0, NI_NUMERICHOST);
     if (err) {
@@ -1423,7 +1423,7 @@ get_localaddrs (krb5_context context, krb5_address ***addr, int use_profile)
             }
             if (addrp)
                 memcpy (addrp, addr[0][j]->contents, addr[0][j]->length);
-            err2 = getnameinfo (ss2sa(&ss), socklen (ss2sa (&ss)),
+            err2 = getnameinfo (ss2sa(&ss), sa_socklen (ss2sa (&ss)),
                                 namebuf, sizeof (namebuf), 0, 0,
                                 NI_NUMERICHOST);
             if (err2 == 0)

@@ -174,7 +174,7 @@ svctcp_create(
 
 	if (bindresvport_sa(sock, sa)) {
 		sa_setport(sa, 0);
-		(void)bind(sock, sa, socklen(sa));
+		(void)bind(sock, sa, sa_socklen(sa));
 	}
 	len = sizeof(struct sockaddr_storage);
 	if (getsockname(sock, sa, &len) != 0) {

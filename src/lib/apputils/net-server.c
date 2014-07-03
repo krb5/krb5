@@ -139,7 +139,7 @@ paddr(struct sockaddr *sa)
 {
     static char buf[100];
     char portbuf[10];
-    if (getnameinfo(sa, socklen(sa),
+    if (getnameinfo(sa, sa_socklen(sa),
                     buf, sizeof(buf), portbuf, sizeof(portbuf),
                     NI_NUMERICHOST|NI_NUMERICSERV))
         strlcpy(buf, "<unprintable>", sizeof(buf));
@@ -592,7 +592,7 @@ create_server_socket(struct socksetup *data, struct sockaddr *addr, int type)
 #endif /* IPV6_V6ONLY */
     }
 
-    if (bind(sock, addr, socklen(addr)) == -1) {
+    if (bind(sock, addr, sa_socklen(addr)) == -1) {
         data->retval = errno;
         com_err(data->prog, errno, _("Cannot bind server socket on %s"),
                 paddr(addr));

@@ -119,13 +119,17 @@ sa_is_inet(struct sockaddr *sa)
     return sa->sa_family == AF_INET || sa->sa_family == AF_INET6;
 }
 
-#if !defined (socklen)
-/* socklen_t socklen (struct sockaddr *) */
-#  ifdef HAVE_SA_LEN
-#    define socklen(X) ((X)->sa_len)
-#  else
-#    define socklen(X) ((X)->sa_family == AF_INET6 ? (socklen_t) sizeof (struct sockaddr_in6) : (X)->sa_family == AF_INET ? (socklen_t) sizeof (struct sockaddr_in) : (socklen_t) sizeof (struct sockaddr))
-#  endif
-#endif
+/* Return the length of an IPv4 or IPv6 socket structure; abort if it is
+ * neither. */
+static inline socklen_t
+sa_socklen(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET6)
+        return sizeof(struct sockaddr_in6);
+    else if (sa->sa_family == AF_INET)
+        return sizeof(struct sockaddr_in);
+    else
+        abort();
+}
 
 #endif /* SOCKET_UTILS_H */
