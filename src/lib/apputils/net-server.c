@@ -1026,8 +1026,12 @@ routing_update_needed(struct rt_msghdr *rtm)
     case RTM_NEWADDR:
     case RTM_DELADDR:
     case RTM_IFINFO:
+#ifdef RTM_OLDADD
     case RTM_OLDADD:
+#endif
+#ifdef RTM_OLDDEL
     case RTM_OLDDEL:
+#endif
         /*
          * Some flags indicate routing table updates that don't
          * indicate local address changes.  They may come from
