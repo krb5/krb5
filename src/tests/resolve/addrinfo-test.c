@@ -266,12 +266,6 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-#if defined(SIN6_LEN)
-    if (ap->ai_addr->sa_len == 0)
-        printf ("BAD: sa_len not set!\n");
-#endif
-
-
     for (ap2 = ap; ap2; ap2 = ap2->ai_next) {
         char hbuf[NI_MAXHOST], pbuf[NI_MAXSERV];
         /* If we don't do this, even AIX's own getnameinfo will reject

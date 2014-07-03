@@ -132,9 +132,6 @@ svcudp_bufcreate(
 		madesock = TRUE;
 		memset(&ss, 0, sizeof(ss));
 		sa->sa_family = AF_INET;
-#ifdef HAVE_SA_LEN
-		sa->sa_len = sizeof(struct sockaddr_in);
-#endif
 	} else {
 		len = sizeof(struct sockaddr_storage);
 		if (getsockname(sock, sa, &len) < 0) {

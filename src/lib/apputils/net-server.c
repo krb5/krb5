@@ -708,16 +708,10 @@ setup_tcp_listener_ports(struct socksetup *data)
 
     memset(&sin4, 0, sizeof(sin4));
     sin4.sin_family = AF_INET;
-#ifdef HAVE_SA_LEN
-    sin4.sin_len = sizeof(sin4);
-#endif
     sin4.sin_addr.s_addr = INADDR_ANY;
 
     memset(&sin6, 0, sizeof(sin6));
     sin6.sin6_family = AF_INET6;
-#ifdef SIN6_LEN
-    sin6.sin6_len = sizeof(sin6);
-#endif
     sin6.sin6_addr = in6addr_any;
 
     FOREACH_ELT (tcp_port_data, i, port) {
@@ -776,16 +770,10 @@ setup_rpc_listener_ports(struct socksetup *data)
 
     memset(&sin4, 0, sizeof(sin4));
     sin4.sin_family = AF_INET;
-#ifdef HAVE_SA_LEN
-    sin4.sin_len = sizeof(sin4);
-#endif
     sin4.sin_addr.s_addr = INADDR_ANY;
 
     memset(&sin6, 0, sizeof(sin6));
     sin6.sin6_family = AF_INET6;
-#ifdef HAVE_SA_LEN
-    sin6.sin6_len = sizeof(sin6);
-#endif
     sin6.sin6_addr = in6addr_any;
 
     FOREACH_ELT (rpc_svc_data, i, svc) {
@@ -846,9 +834,6 @@ setup_udp_pktinfo_ports(struct socksetup *data)
 
         memset(&sa, 0, sizeof(sa));
         sa.sin_family = AF_INET;
-#ifdef HAVE_SA_LEN
-        sa.sin_len = sizeof(sa);
-#endif
         r = setup_udp_port_1(data, (struct sockaddr *)&sa, 4);
         if (r == 0)
             data->do_ipv4_udp_all = FALSE;
@@ -861,9 +846,6 @@ setup_udp_pktinfo_ports(struct socksetup *data)
 
         memset(&sa, 0, sizeof(sa));
         sa.sin6_family = AF_INET6;
-#ifdef HAVE_SA_LEN
-        sa.sin6_len = sizeof(sa);
-#endif
         r = setup_udp_port_1(data, (struct sockaddr *)&sa, 6);
         if (r == 0)
             data->do_ipv6_udp_all = FALSE;
