@@ -381,9 +381,8 @@ struct socksetup {
     void *handle;
     const char *prog;
     krb5_error_code retval;
-    int udp_flags;
-#define UDP_DO_IPV4 1
-#define UDP_DO_IPV6 2
+    krb5_boolean do_ipv4_udp_all;
+    krb5_boolean do_ipv6_udp_all;
 };
 
 static void
@@ -835,8 +834,7 @@ union pktinfo {
 };
 
 static int
-setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
-                 char *haddrbuf, int pktinfo);
+setup_udp_port_1(struct socksetup *data, struct sockaddr *addr, int pktinfo);
 
 static void
 setup_udp_pktinfo_ports(struct socksetup *data)
@@ -851,9 +849,9 @@ setup_udp_pktinfo_ports(struct socksetup *data)
 #ifdef HAVE_SA_LEN
         sa.sin_len = sizeof(sa);
 #endif
-        r = setup_udp_port_1(data, (struct sockaddr *) &sa, "0.0.0.0", 4);
+        r = setup_udp_port_1(data, (struct sockaddr *)&sa, 4);
         if (r == 0)
-            data->udp_flags &= ~UDP_DO_IPV4;
+            data->do_ipv4_udp_all = FALSE;
     }
 #endif
 #ifdef IPV6_PKTINFO
@@ -866,9 +864,9 @@ setup_udp_pktinfo_ports(struct socksetup *data)
 #ifdef HAVE_SA_LEN
         sa.sin6_len = sizeof(sa);
 #endif
-        r = setup_udp_port_1(data, (struct sockaddr *) &sa, "::", 6);
+        r = setup_udp_port_1(data, (struct sockaddr *)&sa, 6);
         if (r == 0)
-            data->udp_flags &= ~UDP_DO_IPV6;
+            data->do_ipv6_udp_all = FALSE;
     }
 #endif
 }
@@ -880,8 +878,7 @@ setup_udp_pktinfo_ports(struct socksetup *data)
 #endif
 
 static int
-setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
-                 char *haddrbuf, int pktinfo)
+setup_udp_port_1(struct socksetup *data, struct sockaddr *addr, int pktinfo)
 {
     int sock = -1, i, r;
     u_short port;
@@ -902,14 +899,13 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
             if (r) {
                 com_err(data->prog, r,
                         _("Cannot request packet info for udp socket address "
-                          "%s port %d"), haddrbuf, port);
+                          "%s port %d"), paddr(addr), port);
                 close(sock);
                 return 1;
             }
         }
         krb5_klog_syslog(LOG_INFO, _("listening on fd %d: udp %s%s"), sock,
-                         paddr((struct sockaddr *)addr),
-                         pktinfo ? " (pktinfo)" : "");
+                         paddr(addr), pktinfo ? " (pktinfo)" : "");
         if (add_udp_fd (data, sock, pktinfo) == 0) {
             close(sock);
             return 1;
@@ -919,49 +915,14 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
 }
 
 static int
-setup_udp_port(void *P_data, struct sockaddr *addr)
+setup_udp_port(void *arg, struct sockaddr *addr)
 {
-    struct socksetup *data = P_data;
-    char haddrbuf[NI_MAXHOST];
-    int err;
+    struct socksetup *data = arg;
 
-    if (addr->sa_family == AF_INET && !(data->udp_flags & UDP_DO_IPV4))
-        return 0;
-#ifdef AF_INET6
-    if (addr->sa_family == AF_INET6 && !(data->udp_flags & UDP_DO_IPV6))
-        return 0;
-#endif
-    err = getnameinfo(addr, socklen(addr), haddrbuf, sizeof(haddrbuf),
-                      0, 0, NI_NUMERICHOST);
-    if (err)
-        strlcpy(haddrbuf, "<unprintable>", sizeof(haddrbuf));
-
-    switch (addr->sa_family) {
-    case AF_INET:
-        break;
-#ifdef AF_INET6
-    case AF_INET6:
-        break;
-#endif
-#ifdef AF_LINK /* some BSD systems, AIX */
-    case AF_LINK:
-        return 0;
-#endif
-#ifdef AF_DLI /* Direct Link Interface - DEC Ultrix/OSF1 link layer? */
-    case AF_DLI:
-        return 0;
-#endif
-#ifdef AF_APPLETALK
-    case AF_APPLETALK:
-        return 0;
-#endif
-    default:
-        krb5_klog_syslog(LOG_INFO,
-                         _("skipping unrecognized local address family %d"),
-                         addr->sa_family);
-        return 0;
-    }
-    return setup_udp_port_1(data, addr, haddrbuf, 0);
+    if ((addr->sa_family == AF_INET && data->do_ipv4_udp_all) ||
+        (addr->sa_family == AF_INET6 && data->do_ipv6_udp_all))
+        return setup_udp_port_1(data, addr, 0);
+    return 0;
 }
 
 #ifdef HAVE_STRUCT_RT_MSGHDR
@@ -1141,14 +1102,14 @@ loop_setup_network(verto_ctx *ctx, void *handle, const char *prog)
     krb5_klog_syslog(LOG_INFO, _("setting up network..."));
 
     /*
-     * To do: Use RFC 2292 interface (or follow-on) and IPV6_PKTINFO,
-     * so we might need only one UDP socket; fall back to binding
-     * sockets on each address only if IPV6_PKTINFO isn't
-     * supported.
+     * Start by assuming we need a UDP listener socket for each address for
+     * IPv4 and IPv6.  setup_udp_pktinfo_ports will unset appropriate flags if
+     * it sets up a wildcard socket using IP_PKTINFO or IPV6_PKTINFO.
      */
-    setup_data.udp_flags = UDP_DO_IPV4 | UDP_DO_IPV6;
+    setup_data.do_ipv4_udp_all = TRUE;
+    setup_data.do_ipv6_udp_all = TRUE;
     setup_udp_pktinfo_ports(&setup_data);
-    if (setup_data.udp_flags) {
+    if (setup_data.do_ipv4_udp_all || setup_data.do_ipv6_udp_all) {
         if (foreach_localaddr (&setup_data, setup_udp_port, 0, 0)) {
             return setup_data.retval;
         }
