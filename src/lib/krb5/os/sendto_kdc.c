@@ -727,8 +727,9 @@ translate_ai_error (int err)
         return errno;
 #endif
     default:
-        /* An error code we haven't handled?  */
-        return EINVAL;
+        /* Treat unknown error codes as non-fatal, because glibc can return
+         * EAI_NODATA but doesn't declare EAI_NODATA without _GNU_SOURCE. */
+        return 0;
     }
 }
 
