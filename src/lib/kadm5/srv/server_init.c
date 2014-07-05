@@ -10,11 +10,8 @@
  * Use is subject to license terms.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#include "k5-int.h"
 #include <com_err.h>
-#include "k5-int.h"             /* needed for gssapiP_krb5.h */
 #include <kadm5/admin.h>
 #include <krb5.h>
 #include <kdb_log.h>

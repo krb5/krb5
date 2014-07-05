@@ -34,9 +34,7 @@
   Id: svc_auth_gss.c,v 1.28 2002/10/15 21:29:36 kwc Exp
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "k5-platform.h"
 #include <gssrpc/rpc.h>
 #include <gssrpc/auth_gssapi.h>
 #ifdef HAVE_HEIMDAL
@@ -46,7 +44,6 @@
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 #endif
-#include "k5-platform.h"	/* SIZE_MAX */
 
 #ifdef DEBUG_GSSAPI
 int svc_debug_gss = DEBUG_GSSAPI;

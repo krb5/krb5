@@ -51,12 +51,14 @@
  */
 
 
+#include "k5-int.h"
+#include "com_err.h"
+#include "fake-addrinfo.h"
+
 #include <locale.h>
-#include <stdio.h>
 #include <ctype.h>
 #include <sys/file.h>
 #include <signal.h>
-#include <string.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -68,11 +70,6 @@
 #include <sys/param.h>
 #include <netdb.h>
 #include <syslog.h>
-
-#include "k5-int.h"
-#include "com_err.h"
-#include "fake-addrinfo.h"
-#include <errno.h>
 
 #include "kprop.h"
 #include <iprop_hdr.h>

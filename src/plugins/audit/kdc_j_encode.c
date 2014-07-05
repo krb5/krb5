@@ -30,12 +30,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <syslog.h>
 #include <k5-int.h>
 #include <k5-json.h>
 #include "kdc_j_encode.h"
 #include "j_dict.h"
 #include <krb5/audit_plugin.h>
+#include <syslog.h>
 
 static krb5_error_code
 string_to_value(const char *in, k5_json_object obj, const char *key);

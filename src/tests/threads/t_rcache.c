@@ -24,10 +24,8 @@
  * or implied warranty.
  */
 
-#include <stdio.h>
-#include <com_err.h>
-
 #include "k5-int.h"
+#include <com_err.h>
 #include <krb5.h>
 #include <pthread.h>
 

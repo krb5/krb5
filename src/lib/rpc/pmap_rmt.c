@@ -41,6 +41,7 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
  * remote call and broadcast service
  */
 
+#include "k5-platform.h"
 #include <unistd.h>
 #include <gssrpc/rpc.h>
 #include <gssrpc/pmap_prot.h>
@@ -50,8 +51,6 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
 #ifdef sun
 #include <sys/sockio.h>
 #endif
-#include <stdio.h>
-#include <errno.h>
 #ifdef OSF1
 #include <net/route.h>
 #include <sys/mbuf.h>
@@ -60,9 +59,7 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
 #define MAX_BROADCAST_SIZE 1400
-#include <string.h>
 #include <port-sockets.h>
-#include "k5-platform.h"	/* set_cloexec_fd */
 
 static struct timeval timeout = { 3, 0 };
 

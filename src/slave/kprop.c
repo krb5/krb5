@@ -24,13 +24,10 @@
  * or implied warranty.
  */
 
-#include <errno.h>
+#include "k5-int.h"
 #include <locale.h>
-#include <stdio.h>
-#include <ctype.h>
 #include <sys/file.h>
 #include <signal.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -40,7 +37,6 @@
 #include <netdb.h>
 #include <fcntl.h>
 
-#include "k5-int.h"
 #include "com_err.h"
 #include "fake-addrinfo.h"
 #include "kprop.h"

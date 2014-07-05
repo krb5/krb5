@@ -41,19 +41,15 @@ static char sccsid[] = "@(#)svc_udp.c 1.24 87/08/11 Copyr 1984 Sun Micro";
  * achieving execute-at-most-once semantics.)
  */
 
-#include <stdio.h>
-#include <string.h>
+#include "k5-platform.h"
 #include <unistd.h>
 #include <gssrpc/rpc.h>
 #include <sys/socket.h>
-#include <errno.h>
-#include "autoconf.h"
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
 #include <port-sockets.h>
 #include <socket-utils.h>
-#include "k5-platform.h"
 
 
 #ifndef GETSOCKNAME_ARG3_TYPE

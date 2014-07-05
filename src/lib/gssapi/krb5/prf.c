@@ -24,10 +24,8 @@
  * or implied warranty.
  */
 
-#include <assert.h>
-#include "k5-int.h"          /* for zap() */
+#include "k5-int.h"
 #include "gssapiP_krb5.h"
-#include <stdarg.h>
 
 #ifndef MIN             /* Usually found in <sys/param.h>. */
 #define MIN(_a,_b)  ((_a)<(_b)?(_a):(_b))

@@ -1,8 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
+#include "k5-platform.h"
 #include "port-sockets.h"
+#include <sys/types.h>
 #include <com_err.h>
 
 #define TEST

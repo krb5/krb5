@@ -28,7 +28,6 @@
  * Use is subject to license terms.
  */
 
-#include <stdio.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
 #include <kadm5/server_internal.h>

@@ -31,9 +31,6 @@
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-#include <string.h>
-#include <time.h>
-#include <ctype.h>
 #include "kdb_ldap.h"
 #include "ldap_misc.h"
 #include "ldap_handle.h"
@@ -41,6 +38,8 @@
 #include "ldap_principal.h"
 #include "princ_xdr.h"
 #include "ldap_pwd_policy.h"
+#include <time.h>
+#include <ctype.h>
 
 #ifdef NEED_STRPTIME_PROTO
 extern char *strptime (const char *, const char *, struct tm *);

@@ -24,11 +24,8 @@
  * or implied warranty.
  */
 
-#include <assert.h>
-#include "k5-platform.h"        /* for 64-bit support */
-#include "k5-int.h"          /* for zap() */
+#include "k5-int.h"
 #include "gssapiP_krb5.h"
-#include <stdarg.h>
 
 krb5_error_code
 gss_krb5int_make_seal_token_v3_iov(krb5_context context,

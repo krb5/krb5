@@ -24,8 +24,6 @@
  * or implied warranty.
  */
 
-#include <string.h>
-
 #include "k5-int.h"
 #include "int-proto.h"
 #include "os-proto.h"

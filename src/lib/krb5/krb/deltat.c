@@ -75,9 +75,8 @@
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 
-#include <ctype.h>
-#include <errno.h>
 #include "k5-int.h"
+#include <ctype.h>
 
 struct param {
     krb5_int32 delta;

@@ -30,15 +30,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include "port-sockets.h"
-#include <com_err.h>
-
-#define TEST
 #include "k5-int.h"
+#include "port-sockets.h"
 #include "os-proto.h"
+#include <com_err.h>
 
 const char *prog;
 

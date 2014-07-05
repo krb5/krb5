@@ -24,9 +24,8 @@
  * or implied warranty.
  */
 
-#include "ksu.h"
-#include <stdarg.h>
 #include "k5-platform.h"
+#include "ksu.h"
 
 void *xmalloc (size_t sz)
 {

@@ -43,15 +43,10 @@ static char sccsid[] = "@(#)svc_tcp.c 1.21 87/08/11 Copyr 1984 Sun Micro";
  * and a record/tcp stream.
  */
 
-#include <stdio.h>
-#include <string.h>
+#include "k5-platform.h"
 #include <unistd.h>
 #include <gssrpc/rpc.h>
 #include <sys/socket.h>
-#include <errno.h>
-#include <stdlib.h>
-#include "autoconf.h"
-#include "k5-platform.h"	/* set_cloexec_fd */
 #include <port-sockets.h>
 #include <socket-utils.h>
 /*extern bool_t abort();

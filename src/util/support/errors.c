@@ -4,14 +4,9 @@
  * needs to be generated with error tables, after util/et, which builds after
  * this directory.
  */
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include "k5-err.h"
-
-#include "k5-thread.h"
 #include "k5-platform.h"
+#include "k5-err.h"
+#include "k5-thread.h"
 #include "supp-int.h"
 
 /*

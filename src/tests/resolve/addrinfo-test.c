@@ -36,15 +36,11 @@
  *   on whether "-P" is given).
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
+#include <k5-platform.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h> /* needed for IPPROTO_* on NetBSD */
-#include <k5-platform.h>
 #ifdef USE_FAKE_ADDRINFO
 #include "fake-addrinfo.h"
 #endif

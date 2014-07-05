@@ -29,19 +29,12 @@
  * SUCH DAMAGES.
  */
 
-#include <errno.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "pkinit_crypto_openssl.h"
+#include "k5-buf.h"
 #include <dlfcn.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <arpa/inet.h>
-
-#include "k5-platform.h"
-#include "k5-buf.h"
-
-#include "pkinit_crypto_openssl.h"
 
 static krb5_error_code pkinit_init_pkinit_oids(pkinit_plg_crypto_context );
 static void pkinit_fini_pkinit_oids(pkinit_plg_crypto_context );

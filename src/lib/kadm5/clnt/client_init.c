@@ -29,23 +29,14 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <stdio.h>
+#include <k5-int.h>
 #include <netdb.h>
-#include "autoconf.h"
-#ifdef HAVE_MEMORY_H
-#include <memory.h>
-#endif
-#include <string.h>
 #include <com_err.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <fake-addrinfo.h>
-#include <k5-int.h> /* for KRB5_ADM_DEFAULT_PORT */
 #include <krb5.h>
-#ifdef __STDC__
-#include <stdlib.h>
-#endif
 
 #include <kadm5/admin.h>
 #include <kadm5/kadm_rpc.h>

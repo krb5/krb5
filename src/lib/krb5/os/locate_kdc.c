@@ -24,10 +24,9 @@
  * or implied warranty.
  */
 
-#include "fake-addrinfo.h"
 #include "k5-int.h"
+#include "fake-addrinfo.h"
 #include "os-proto.h"
-#include <stdio.h>
 #ifdef KRB5_DNS_LOOKUP
 #ifdef WSHELPER
 #include <wshelper.h>

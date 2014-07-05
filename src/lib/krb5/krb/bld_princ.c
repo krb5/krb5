@@ -24,7 +24,6 @@
  * or implied warranty.
  */
 
-#include <stdarg.h>
 #include "k5-int.h"
 
 static krb5_error_code

@@ -24,11 +24,10 @@
  * or implied warranty.
  */
 
-#include <stdio.h>
+#include "k5-int.h"
 #include <syslog.h>
 #include <sys/param.h>
 #include <gssapi/gssapi_generic.h>
-#include "k5-int.h"
 #include <kadm5/server_internal.h>
 #include <kadm5/admin.h>
 #include "adm_proto.h"

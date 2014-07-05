@@ -31,11 +31,8 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 #include <k5-int.h>
+#include <ctype.h>
 #include <kdb.h>
 #include <kadm5/admin.h>
 #include <adm_proto.h>

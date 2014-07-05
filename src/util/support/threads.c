@@ -24,12 +24,9 @@
  * or implied warranty.
  */
 
-#include <assert.h>
-#include <stdlib.h>
-#include <errno.h>
 #define THREAD_SUPPORT_IMPL
-#include "k5-thread.h"
 #include "k5-platform.h"
+#include "k5-thread.h"
 #include "supp-int.h"
 
 MAKE_INIT_FUNCTION(krb5int_thread_support_init);

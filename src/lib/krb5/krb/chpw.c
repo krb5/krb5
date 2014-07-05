@@ -2,7 +2,6 @@
 /*
 ** set password functions added by Paul W. Nelson, Thursby Software Systems, Inc.
 */
-#include <string.h>
 
 #include "k5-int.h"
 #include "k5-unicode.h"

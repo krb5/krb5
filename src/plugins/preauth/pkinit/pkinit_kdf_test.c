@@ -31,17 +31,8 @@
  * document, currently draft-ietf-krb-wg-pkinit-alg-agility-04.txt.
  */
 
-#include <errno.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <dlfcn.h>
-#include <unistd.h>
-#include <dirent.h>
-
 #include "k5-platform.h"
-
-#include "pkinit_crypto_openssl.h"
+#include "pkinit.h"
 
 /**
  * Initialize a krb5_data from @a s, a constant string. Note @a s is evaluated

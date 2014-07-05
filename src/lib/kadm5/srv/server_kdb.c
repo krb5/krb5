@@ -10,8 +10,6 @@
  * Use is subject to license terms.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "k5-int.h"
 #include <kadm5/admin.h>
 #include "server_internal.h"

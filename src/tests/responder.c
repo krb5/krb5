@@ -55,13 +55,11 @@
  *  Any missing data or mismatches are treated as errors.
  */
 
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
-#include <krb5.h>
 #include <k5-platform.h>
 #include <k5-json.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <krb5.h>
 
 struct responder_data {
     krb5_boolean called;

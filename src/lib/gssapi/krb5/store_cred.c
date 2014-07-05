@@ -24,10 +24,8 @@
  * or implied warranty.
  */
 
-#include <assert.h>
-#include "k5-int.h"          /* for zap() */
+#include "k5-int.h"
 #include "gssapiP_krb5.h"
-#include <stdarg.h>
 
 static int
 has_unexpired_creds(krb5_gss_cred_id_t kcred,

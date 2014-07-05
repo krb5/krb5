@@ -36,7 +36,6 @@
  * functions manage the service objects.
  */
 
-#include <stdio.h>
 #include <k5-int.h>
 #include "kdb5_ldap_util.h"
 #include "kdb5_ldap_list.h"

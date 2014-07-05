@@ -35,14 +35,10 @@
  * decoder code paths but won't validate the results.
  */
 
-#include <stdio.h>
 #include "k5-int.h"
 #include "com_err.h"
 #include "utility.h"
-
 #include "ktest.h"
-#include <string.h>
-
 #include "debug.h"
 
 krb5_context test_context;

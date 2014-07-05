@@ -20,15 +20,9 @@
  * provided "as is" without express or implied warranty.
  */
 
-#include "autoconf.h"
-#include <stdio.h>
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#include <string.h>
+#include "k5-platform.h"
 #include "com_err.h"
 #include "error_table.h"
-#include "k5-platform.h"
 
 static struct et_list *et_list;
 static k5_mutex_t et_list_lock = K5_MUTEX_PARTIAL_INITIALIZER;

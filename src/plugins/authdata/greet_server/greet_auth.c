@@ -28,8 +28,6 @@
  * Sample authorization data plugin
  */
 
-#include <string.h>
-#include <errno.h>
 #include <k5-int.h>
 #include <krb5/authdata_plugin.h>
 #include <kdb.h>

@@ -33,8 +33,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sechash.h"
 #include "k5-int.h"
+#include "sechash.h"
 
 krb5_error_code k5_nss_gen_hash(HASH_HashType hashType, unsigned int icount,
                                 const krb5_data *input, krb5_data *output);

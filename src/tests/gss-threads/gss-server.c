@@ -44,6 +44,7 @@
  * or implied warranty.
  */
 
+#include "autoconf.h"
 #include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>
@@ -56,7 +57,6 @@
 #include <pthread.h>
 #include <signal.h>
 #endif
-#include "autoconf.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

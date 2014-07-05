@@ -24,17 +24,14 @@
  * or implied warranty.
  */
 
+#include "k5-int.h"
+#include "com_err.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-
-#include "k5-int.h"
-#include "com_err.h"
 
 int main (int argc, char *argv[])
 {

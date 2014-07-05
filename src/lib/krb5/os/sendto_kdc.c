@@ -53,8 +53,8 @@
 /* Send packet to KDC for realm; wait for response, retransmitting
  * as necessary. */
 
-#include "fake-addrinfo.h"
 #include "k5-int.h"
+#include "fake-addrinfo.h"
 
 #include "os-proto.h"
 

@@ -28,10 +28,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ctype.h>
 #include "ldap_main.h"
 #include "kdb_ldap.h"
 #include "ldap_service_stash.h"
+#include <ctype.h>
 
 /* Decode a password of the form {HEX}<hexstring>. */
 static krb5_error_code

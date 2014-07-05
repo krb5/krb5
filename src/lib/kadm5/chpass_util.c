@@ -4,11 +4,8 @@
  */
 
 
-#include <stdio.h>
 #include "autoconf.h"
-#ifdef HAVE_MEMORY_H
-#include <memory.h>
-#endif
+#include <stdio.h>
 #include <time.h>
 #include <string.h>
 

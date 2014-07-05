@@ -4,8 +4,8 @@
  *      values from the krb5 config file(s).
  */
 
-#include "fake-addrinfo.h"
 #include "k5-int.h"
+#include "fake-addrinfo.h"
 
 #include <stdio.h>
 #include <string.h>

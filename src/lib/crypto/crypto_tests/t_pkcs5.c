@@ -26,11 +26,6 @@
 
 /* Test vectors for PBKDF2 (from PKCS #5v2), based on RFC 3211. */
 
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-
 #include "k5-int.h"
 
 static void printhex (size_t len, const char *p)

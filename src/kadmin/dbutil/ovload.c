@@ -1,13 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-#include    <unistd.h>
-#include    <string.h>
-#include    <stdlib.h>
-#include    "autoconf.h"
-#ifdef HAVE_MEMORY_H
-#include    <memory.h>
-#endif
-
 #include    <k5-int.h>
+#include    <unistd.h>
+
 #include <kadm5/admin.h>
 #include <kadm5/server_internal.h>
 #include    <kdb.h>

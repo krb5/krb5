@@ -59,10 +59,6 @@
  */
 /* #pragma ident	"@(#)spnego_mech.c	1.7	04/09/28 SMI" */
 
-#include	<assert.h>
-#include	<stdio.h>
-#include	<stdlib.h>
-#include	<string.h>
 #include	<k5-int.h>
 #include	<krb5.h>
 #include	<mglueP.h>

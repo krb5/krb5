@@ -24,9 +24,6 @@
  * or implied warranty.
  */
 
-#include <stdio.h>
-#include <errno.h>
-
 #include <k5-int.h>
 #include <kadm5/admin.h>
 #include <kdb.h>

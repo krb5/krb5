@@ -29,19 +29,13 @@
  * SUCH DAMAGES.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <unistd.h>
-#include <string.h>
-#include <ctype.h>
-#include <assert.h>
-#include <dlfcn.h>
-#include <sys/stat.h>
-
 #include "k5-int.h"
 #include "pkinit.h"
 #include "k5-json.h"
+
+#include <unistd.h>
+#include <dlfcn.h>
+#include <sys/stat.h>
 
 /**
  * Return true if we should use ContentInfo rather than SignedData. This

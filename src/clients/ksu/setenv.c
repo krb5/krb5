@@ -34,11 +34,11 @@
 
 /* based on @(#)setenv.c        5.2 (Berkeley) 6/27/88 */
 
+#include "autoconf.h"
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "autoconf.h"
 
 static char *_findenv(char *, int *);
 

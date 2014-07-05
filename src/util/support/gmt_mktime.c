@@ -1,8 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* This code placed in the public domain by Mark W. Eichin */
 
-#include <stdio.h>
 #include "autoconf.h"
+#include <stdio.h>
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

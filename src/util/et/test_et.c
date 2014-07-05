@@ -1,10 +1,10 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+#include "autoconf.h"
 #include <stdio.h>
 #include <errno.h>
 #include "com_err.h"
 #include "test1.h"
 #include "test2.h"
-#include "autoconf.h"
 
 #ifdef _WIN32
 # define EXPORT_LIST
