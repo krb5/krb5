@@ -47,6 +47,7 @@ k5_json_string_utf8
 k5_path_isabs
 k5_path_join
 k5_path_split
+k5_strerror_r
 krb5int_key_register
 krb5int_key_delete
 krb5int_getspecific

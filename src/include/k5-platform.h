@@ -38,6 +38,7 @@
  * + strlcpy/strlcat
  * + fnmatch
  * + [v]asprintf
+ * + strerror_r
  * + mkstemp
  * + zap (support function; macro is in k5-int.h)
  * + constant time memory comparison
@@ -997,6 +998,11 @@ extern int asprintf(char **, const char *, ...)
 */
 #define SNPRINTF_OVERFLOW(result, size) \
     ((unsigned int)(result) >= (size_t)(size))
+
+#if defined(_WIN32) || !defined(HAVE_STRERROR_R) || defined(STRERROR_R_CHAR_P)
+#define strerror_r k5_strerror_r
+#endif
+extern int k5_strerror_r(int errnum, char *buf, size_t buflen);
 
 #ifndef HAVE_MKSTEMP
 extern int krb5int_mkstemp(char *);
