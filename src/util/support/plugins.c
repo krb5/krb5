@@ -446,15 +446,6 @@ krb5int_close_plugin (struct plugin_file_handle *h)
 #endif
 #endif
 
-
-#ifdef HAVE_STRERROR_R
-#define ERRSTR(ERR, BUF)                                                \
-    (strerror_r (ERR, BUF, sizeof(BUF)) == 0 ? BUF : strerror (ERR))
-#else
-#define ERRSTR(ERR, BUF)                        \
-    (strerror (ERR))
-#endif
-
 static long
 krb5int_plugin_file_handle_array_init (struct plugin_file_handle ***harray)
 {
