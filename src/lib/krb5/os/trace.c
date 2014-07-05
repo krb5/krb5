@@ -229,14 +229,9 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
                 subfmt(context, &buf, "{hexlenstr}", d->length, d->data);
         } else if (strcmp(tmpbuf, "errno") == 0) {
             err = va_arg(ap, int);
-            p = NULL;
-#ifdef HAVE_STRERROR_R
+            k5_buf_add_fmt(&buf, "%d", err);
             if (strerror_r(err, tmpbuf, sizeof(tmpbuf)) == 0)
-                p = tmpbuf;
-#endif
-            if (p == NULL)
-                p = strerror(err);
-            k5_buf_add_fmt(&buf, "%d/%s", err, p);
+                k5_buf_add_fmt(&buf, "/%s", tmpbuf);
         } else if (strcmp(tmpbuf, "kerr") == 0) {
             kerr = va_arg(ap, krb5_error_code);
             p = krb5_get_error_message(context, kerr);

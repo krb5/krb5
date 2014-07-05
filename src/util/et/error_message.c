@@ -30,11 +30,6 @@
 #include "error_table.h"
 #include "k5-platform.h"
 
-#if !defined(HAVE_STRERROR) && !defined(SYS_ERRLIST_DECLARED)
-extern char const * const sys_errlist[];
-extern const int sys_nerr;
-#endif
-
 static struct et_list *et_list;
 static k5_mutex_t et_list_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 static int terminated = 0;      /* for debugging shlib fini sequence errors */
@@ -142,20 +137,10 @@ error_message(long code)
         /* This could trip if int is 16 bits.  */
         if ((unsigned long)(int)code != (unsigned long)code)
             abort ();
-#ifdef HAVE_STRERROR_R
         cp = get_thread_buffer();
-        if (cp && strerror_r((int) code, cp, ET_EBUFSIZ) == 0)
+        if (cp && strerror_r(code, cp, ET_EBUFSIZ) == 0)
             return cp;
-#endif
-#ifdef HAVE_STRERROR
-        cp = strerror((int) code);
-        if (cp)
-            return cp;
-#elif defined HAVE_SYS_ERRLIST
-        if (offset < sys_nerr)
-            return(sys_errlist[offset]);
-#endif
-        goto oops;
+        return strerror(code);
     }
 
     k5_mutex_lock(&et_list_lock);

@@ -84,10 +84,8 @@ k5_get_error(struct errinfo *ep, long code)
     lock();
     if (fptr == NULL) {
         unlock();
-#ifdef HAVE_STRERROR_R
         if (strerror_r(code, buf, sizeof(buf)) == 0)
             return oom_check(strdup(buf));
-#endif
         return oom_check(strdup(strerror(code)));
     }
     r = fptr(code);
