@@ -2,17 +2,17 @@
  * prof-int.h
  */
 
+#include "k5-platform.h"
+#include "k5-thread.h"
+#include "k5-plugin.h"
+
 #include <time.h>
-#include <stdio.h>
 
 #if defined(__MACH__) && defined(__APPLE__)
 #include <TargetConditionals.h>
 #define PROFILE_SUPPORTS_FOREIGN_NEWLINES
 #endif
 
-#include "k5-thread.h"
-#include "k5-platform.h"
-#include "k5-plugin.h"
 #include "com_err.h"
 #include "profile.h"
 

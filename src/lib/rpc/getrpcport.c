@@ -32,13 +32,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "autoconf.h"
 #include <stdio.h>
 #include <string.h>
 #include <gssrpc/rpc.h>
 #include <gssrpc/pmap_clnt.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#include "autoconf.h"
 
 int
 gssrpc_getrpcport(

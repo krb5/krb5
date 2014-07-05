@@ -1,5 +1,4 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-#include <stdio.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
 

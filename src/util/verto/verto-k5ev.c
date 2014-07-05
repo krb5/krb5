@@ -28,6 +28,7 @@
  * directory for reference, although it is not built here.
  */
 
+#include "autoconf.h"
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -35,7 +36,6 @@
 #include <verto.h>
 #include <verto-module.h>
 #include "rename.h"
-#include "autoconf.h"
 #define EV_STANDALONE 1
 /* Avoid using clock_gettime, which would create a dependency on librt. */
 #define EV_USE_MONOTONIC 0

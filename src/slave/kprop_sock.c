@@ -26,12 +26,11 @@
 
 /* sockaddr2krbaddr() utility function used by kprop and kpropd */
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
 #include "k5-int.h"
 #include "kprop.h"
+
+#include <sys/types.h>
+#include <sys/socket.h>
 
 /*
  * Convert an IPv4 or IPv6 socket address to a newly allocated krb5_address.

@@ -26,11 +26,8 @@
 
 /* draft-ietf-krb-wg-gssapi-cfx-05 */
 
-#include <assert.h>
-#include "k5-platform.h"        /* for 64-bit support */
-#include "k5-int.h"             /* for zap() */
+#include "k5-int.h"
 #include "gssapiP_krb5.h"
-#include <stdarg.h>
 
 int
 gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc)

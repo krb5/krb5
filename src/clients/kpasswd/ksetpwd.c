@@ -1,10 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-#include <krb5.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <time.h>
 #include <k5-platform.h>
+#include <krb5.h>
+#include <unistd.h>
+#include <time.h>
 
 #define TKTTIMELEFT     60*10   /* ten minutes */
 

@@ -29,8 +29,8 @@
  */
 
 /* Implement alternate profile file handling. */
-#include "fake-addrinfo.h"
 #include "k5-int.h"
+#include "fake-addrinfo.h"
 #include <kadm5/admin.h>
 #include "adm_proto.h"
 #include <stdio.h>

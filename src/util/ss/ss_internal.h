@@ -7,15 +7,8 @@
 
 #ifndef _ss_ss_internal_h
 #define _ss_ss_internal_h __FILE__
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include "autoconf.h"
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-
 #include "k5-platform.h"
+#include <unistd.h>
 
 typedef void * pointer;
 

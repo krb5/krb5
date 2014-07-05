@@ -30,20 +30,7 @@
  * for SHA-1, SHA-256 and SHA-512.
  */
 
-#include <errno.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <dlfcn.h>
-#include <unistd.h>
-#include <dirent.h>
-
-#include "k5-platform.h"
-#include "krb5.h"
-#include "k5-int-pkinit.h"
-
 #include "pkinit.h"
-#include "pkinit_crypto.h"
 
 /* statically declare OID constants for all three algorithms */
 const krb5_octet krb5_pkinit_sha1_oid[8] =

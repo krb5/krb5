@@ -101,14 +101,11 @@
  *   these functions, and throw all this away.  Pleeease?  :-)
  */
 
-#include "port-sockets.h"
-#include "socket-utils.h"
 #include "k5-platform.h"
 #include "k5-thread.h"
+#include "port-sockets.h"
+#include "socket-utils.h"
 #include "supp-int.h"
-
-#include <stdio.h>
-#include <errno.h>
 
 #define IMPLEMENT_FAKE_GETADDRINFO
 #include "fake-addrinfo.h"

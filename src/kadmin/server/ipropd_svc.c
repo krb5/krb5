@@ -7,14 +7,12 @@
 /* #pragma ident	"@(#)ipropd_svc.c	1.2	04/02/20 SMI" */
 
 
-#include <stdio.h>
-#include <stdlib.h> /* getenv, exit */
+#include "k5-platform.h"
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/resource.h> /* rlimit */
 #include <syslog.h>
 
-#include "k5-platform.h"
 #include <kadm5/admin.h>
 #include <kadm5/kadm_rpc.h>
 #include <kadm5/server_internal.h>

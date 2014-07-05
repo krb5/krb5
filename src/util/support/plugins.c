@@ -24,11 +24,11 @@
  * or implied warranty.
  */
 
+#include "k5-platform.h"
 #include "k5-plugin.h"
 #if USE_DLOPEN
 #include <dlfcn.h>
 #endif
-#include <stdio.h>
 #include <sys/types.h>
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -36,14 +36,9 @@
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#include "k5-platform.h"
 
 #if USE_DLOPEN
 #ifdef RTLD_GROUP

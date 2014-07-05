@@ -81,7 +81,6 @@
  * Create / Modify / Destroy / View / List realm(s)
  */
 
-#include <stdio.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
 #include <adm_proto.h>

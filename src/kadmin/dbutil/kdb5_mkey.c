@@ -4,14 +4,13 @@
  * Use is subject to license terms.
  */
 
-#include <stdio.h>
-#include <time.h>
 #include <k5-int.h>
 #include <kdb.h>
 #include <kadm5/server_internal.h>
 #include <kadm5/admin.h>
 #include <adm_proto.h>
 #include "kdb5_util.h"
+#include <time.h>
 
 #if defined(HAVE_COMPILE) && defined(HAVE_STEP)
 #define SOLARIS_REGEXPS

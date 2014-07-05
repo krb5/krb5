@@ -29,11 +29,6 @@
  * SUCH DAMAGES.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <string.h>
-
 #include "k5-int.h"
 #include "pkinit.h"
 

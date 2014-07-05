@@ -29,17 +29,11 @@
  * initially contributed by Ken Raeburn
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <assert.h>
+#include "k5-platform.h"
 #include <unistd.h>
 #include <pthread.h>
 #include <krb5.h>
 #include <profile.h>
-/* for SIZE_MAX: */
-#include "k5-platform.h"
 
 #include <sys/time.h>
 #include <sys/resource.h>

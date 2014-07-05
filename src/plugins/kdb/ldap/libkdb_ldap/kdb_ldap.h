@@ -32,6 +32,12 @@
 #ifndef _KDB_LDAP_H
 #define _KDB_LDAP_H 1
 
+#include "k5-int.h"
+#include <k5-thread.h>
+#include <kdb5.h>
+#include "ldap_krbcontainer.h"
+#include "ldap_realm.h"
+
 /* We want the interfaces marked "deprecated" in OpenLDAP.  */
 #define LDAP_DEPRECATED 1
 #include <ldap.h>
@@ -50,12 +56,6 @@
 #  endif
 # endif
 #endif /* BUILD_WITH_BROKEN_LDAP */
-
-#include <k5-thread.h>
-#include <kdb5.h>
-#include "k5-int.h"
-#include "ldap_krbcontainer.h"
-#include "ldap_realm.h"
 
 extern struct timeval timelimit;
 

@@ -9,10 +9,10 @@
 /*
  * An implementation for the default replay cache type.
  */
+#include "k5-int.h"
 #include "rc_base.h"
 #include "rc_dfl.h"
 #include "rc_io.h"
-#include "k5-int.h"
 #include "rc-int.h"
 
 /*

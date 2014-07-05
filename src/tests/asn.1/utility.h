@@ -27,9 +27,9 @@
 #ifndef __UTILITY_H__
 #define __UTILITY_H__
 
+#include "k5-int.h"
 #include "krbasn1.h"
 #include "asn1buf.h"
-#include "k5-int.h"
 
 /* Aborts on failure.  ealloc returns zero-filled memory. */
 void *ealloc(size_t size);

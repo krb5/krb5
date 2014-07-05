@@ -32,15 +32,15 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <errno.h>
-
 #include "k5-platform.h"
 #include "k5-buf.h"
 #include "k5-utf8.h"
 #include "krb5.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <errno.h>
 
 #include <prerror.h>
 #include <prmem.h>

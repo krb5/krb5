@@ -29,16 +29,6 @@
  * SUCH DAMAGES.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <unistd.h>
-#include <string.h>
-#include <ctype.h>
-#include <assert.h>
-
-#include "k5-platform.h"
-
 #include "pkinit.h"
 
 #define FAKECERT

@@ -44,9 +44,7 @@
  * or implied warranty.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "k5-platform.h"
 #ifdef _WIN32
 #include <windows.h>
 #include <winsock.h>
@@ -57,7 +55,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <errno.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <pthread.h>
@@ -67,7 +64,6 @@
 #include "gss-misc.h"
 #include "port-sockets.h"
 #include "fake-addrinfo.h"
-#include "k5-platform.h"
 
 static int verbose = 1;
 

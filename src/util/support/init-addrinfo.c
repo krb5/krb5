@@ -46,13 +46,10 @@
    require pulling in socket/nsl/whatever libraries for code not using
    getaddrinfo.  */
 
-#include "port-sockets.h"
-#include "socket-utils.h"
 #include "k5-platform.h"
 #include "k5-thread.h"
-
-#include <stdio.h>
-#include <errno.h>
+#include "port-sockets.h"
+#include "socket-utils.h"
 
 #define IMPLEMENT_FAKE_GETADDRINFO
 #include "fake-addrinfo.h"

@@ -5,10 +5,10 @@
  * $Header$
  */
 
+#include        <k5-int.h>
 #include        <sys/file.h>
 #include        <fcntl.h>
 #include        <unistd.h>
-#include        <k5-int.h>
 #include        "policy_db.h"
 #include        <stdlib.h>
 #include        <db.h>

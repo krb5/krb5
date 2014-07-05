@@ -1,8 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-#include <assert.h>
 
-#include "autoconf.h"
-#include "com_err.h"
 #include "k5-int.h"
 
 #if defined(_WIN32) || defined(USE_CCAPI)

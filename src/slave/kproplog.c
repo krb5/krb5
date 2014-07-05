@@ -8,15 +8,14 @@
  * This module will parse the update logs on the master or slave servers.
  */
 
+#include "k5-int.h"
 #include <locale.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <time.h>
 #include <limits.h>
 #include <locale.h>
 #include <syslog.h>
-#include "k5-int.h"
 #include <kdb_log.h>
 #include <kadm5/admin.h>
 

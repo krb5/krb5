@@ -24,13 +24,9 @@
  * or implied warranty.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include "autoconf.h"
+#include "k5-platform.h"
 #include "krb5.h"
 #include "gssapi/gssapi.h"
-#include "k5-platform.h"
 #define HAVE_DLOPEN 1
 
 static int verbose = 1;

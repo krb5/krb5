@@ -23,8 +23,6 @@
  * or implied warranty.
  */
 
-#include <string.h>
-#include <errno.h>
 #include "k5-int.h"
 #include <krb5/authdata_plugin.h>
 #include <assert.h>

@@ -37,10 +37,7 @@
  * Include files
  */
 
-#include <stdio.h>
-#include <string.h>
 #include <k5-int.h>
-#include <osconf.h>
 #include "kdb5.h"
 #include "kdb_log.h"
 #include "kdb5int.h"

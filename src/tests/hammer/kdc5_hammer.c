@@ -23,11 +23,9 @@
  * or implied warranty.
  */
 
-#include <stdio.h>
-#include <sys/time.h>
-
 #include "k5-int.h"
 #include "com_err.h"
+#include <sys/time.h>
 
 #define KRB5_DEFAULT_OPTIONS 0
 #define KRB5_DEFAULT_LIFE 60*60*8 /* 8 hours */

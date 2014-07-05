@@ -23,16 +23,6 @@
  * or implied warranty.
  */
 
-#include <locale.h>
-#include <stdio.h>
-#include <syslog.h>
-#include <signal.h>
-#include <errno.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <sys/wait.h>
-
 #include "k5-int.h"
 #include "com_err.h"
 #include <kadm5/admin.h>
@@ -46,6 +36,14 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+
+#include <locale.h>
+#include <syslog.h>
+#include <signal.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <sys/wait.h>
 
 #if defined(NEED_DAEMON_PROTO)
 extern int daemon(int, int);

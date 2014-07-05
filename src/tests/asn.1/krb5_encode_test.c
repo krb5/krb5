@@ -24,7 +24,6 @@
  * or implied warranty.
  */
 
-#include <stdio.h>
 #include "k5-int.h"
 #include "com_err.h"
 #include "utility.h"

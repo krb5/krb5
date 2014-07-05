@@ -24,10 +24,8 @@
  * or implied warranty.
  */
 
-#include <assert.h>
-#include "k5-int.h"          /* for zap() */
+#include "k5-int.h"
 #include "gssapiP_krb5.h"
-#include <stdarg.h>
 
 krb5_error_code
 kg_init_name(krb5_context context, krb5_principal principal,

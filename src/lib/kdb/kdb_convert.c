@@ -10,13 +10,12 @@
  * This file contains api's for conversion of the kdb_incr_update_t
  * struct(s) into krb5_db_entry struct(s) and vice-versa.
  */
+#include <k5-int.h>
 #include <sys/types.h>
 #include <com_err.h>
 #include <locale.h>
-#include <errno.h>
 #include <iprop_hdr.h>
 #include "iprop.h"
-#include <k5-int.h>
 #include <kdb.h>
 #include <kdb_log.h>
 

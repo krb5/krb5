@@ -2,14 +2,14 @@
 #ifndef _KRB5_KDB5_H_
 #define _KRB5_KDB5_H_
 
+#include <k5-int.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
 #include <errno.h>
 #include <utime.h>
-#include <utime.h>
-#include <k5-int.h>
 #include "kdb.h"
 
 #define KRB5_DB_GET_DB_CONTEXT(kcontext) (((kdb5_dal_handle*) (kcontext)->dal_handle)->db_context)

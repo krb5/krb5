@@ -34,6 +34,7 @@
  * host.  On Solaris, it prints out 0.0.0.0.
  */
 
+#include "autoconf.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -43,7 +44,6 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
-#include "autoconf.h"
 
 int
 main(argc, argv)

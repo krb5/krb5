@@ -29,11 +29,9 @@
  * For copyright information, see copyright.h.
  */
 
-#include <stdio.h>
-
-#include "copyright.h"
-#include "com_err.h"
 #include "ss_internal.h"
+#include "com_err.h"
+#include "copyright.h"
 
 char * ss_name(sci_idx)
     int sci_idx;

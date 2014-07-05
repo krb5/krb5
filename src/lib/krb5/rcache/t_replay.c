@@ -24,11 +24,6 @@
  * or implied warranty.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-
 #include "k5-int.h"
 
 static void

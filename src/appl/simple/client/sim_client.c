@@ -29,24 +29,19 @@
  * This program performs no useful function.
  */
 
+#include <k5-int.h>
+#include "com_err.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
-#include <errno.h>
-
-#include <k5-int.h>
-#include "com_err.h"
-
-#include "simple.h"
-
-#include <stdlib.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
+#include "simple.h"
 
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN

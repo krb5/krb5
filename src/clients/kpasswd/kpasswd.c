@@ -1,8 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-#include <locale.h>
-#include <stdio.h>
-#include <sys/types.h>
 #include "k5-platform.h"
+#include <locale.h>
+#include <sys/types.h>
 
 #ifndef _WIN32
 #include <unistd.h>

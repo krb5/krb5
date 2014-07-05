@@ -1,6 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #undef NDEBUG
-#include <assert.h>
 #include "k5-platform.h"
 
 int main ()

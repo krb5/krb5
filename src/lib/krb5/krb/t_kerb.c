@@ -4,8 +4,8 @@
  * routines.
  */
 
-#include "krb5.h"
 #include "autoconf.h"
+#include "krb5.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

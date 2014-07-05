@@ -5,11 +5,11 @@
  *
  */
 
+#include "autoconf.h"
 #include <stdio.h>
 #include <string.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#include "autoconf.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

@@ -31,8 +31,6 @@
  * Create / Delete / Modify / View / List policy objects.
  */
 
-#include <stdio.h>
-#include <time.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
 #include "kdb5_ldap_util.h"

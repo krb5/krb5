@@ -30,6 +30,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include <k5-platform.h>
 #include <errno.h>
 #include <locale.h>
 #include <stdio.h>

@@ -32,7 +32,6 @@
  * Use is subject to license terms.
  */
 
-#include <time.h>
 #include "ldap_main.h"
 #include "kdb_ldap.h"
 #include "ldap_principal.h"
@@ -41,6 +40,7 @@
 #include "ldap_pwd_policy.h"
 #include "ldap_err.h"
 #include <kadm5/admin.h>
+#include <time.h>
 
 extern char* principal_attributes[];
 extern char* max_pwd_life_attr[];

@@ -75,11 +75,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <locale.h>
-#include <stdio.h>
-#include <time.h>
-
 #include <k5-int.h>
+#include <locale.h>
+#include <time.h>
 #include <kadm5/admin.h>
 #include <adm_proto.h>
 #include "kdb5_ldap_util.h"
