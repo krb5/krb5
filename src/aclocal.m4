@@ -50,6 +50,9 @@ AC_DEFUN(CONFIG_RULES,[dnl
 AC_REQUIRE([V5_SET_TOPDIR]) dnl
 EXTRA_FILES=""
 AC_SUBST(EXTRA_FILES)
+dnl Consider using AC_USE_SYSTEM_EXTENSIONS when we require autoconf
+dnl 2.59c or later, but be sure to test on Solaris first.
+AC_DEFINE([_GNU_SOURCE], 1, [Define to enable extensions in glibc])
 WITH_CC dnl
 AC_REQUIRE_CPP
 if test -z "$LD" ; then LD=$CC; fi
