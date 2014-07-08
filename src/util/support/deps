@@ -77,3 +77,6 @@ json.so json.po $(OUTPRE)json.$(OBJEXT): $(top_srcdir)/include/k5-base64.h \
 bcmp.so bcmp.po $(OUTPRE)bcmp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   bcmp.c
+strerror_r.so strerror_r.po $(OUTPRE)strerror_r.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-thread.h strerror_r.c

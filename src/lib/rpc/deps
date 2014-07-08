@@ -51,13 +51,15 @@ auth_gssapi_misc.so auth_gssapi_misc.po $(OUTPRE)auth_gssapi_misc.$(OBJEXT): \
   $(top_srcdir)/include/gssrpc/xdr.h auth_gssapi_misc.c \
   gssrpcint.h
 bindresvport.so bindresvport.po $(OUTPRE)bindresvport.$(OBJEXT): \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
-  $(top_srcdir)/include/gssrpc/auth.h $(top_srcdir)/include/gssrpc/auth_gss.h \
-  $(top_srcdir)/include/gssrpc/auth_unix.h $(top_srcdir)/include/gssrpc/clnt.h \
-  $(top_srcdir)/include/gssrpc/rename.h $(top_srcdir)/include/gssrpc/rpc.h \
-  $(top_srcdir)/include/gssrpc/rpc_msg.h $(top_srcdir)/include/gssrpc/svc.h \
-  $(top_srcdir)/include/gssrpc/svc_auth.h $(top_srcdir)/include/gssrpc/xdr.h \
-  bindresvport.c
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(top_srcdir)/include/gssrpc/auth.h \
+  $(top_srcdir)/include/gssrpc/auth_gss.h $(top_srcdir)/include/gssrpc/auth_unix.h \
+  $(top_srcdir)/include/gssrpc/clnt.h $(top_srcdir)/include/gssrpc/rename.h \
+  $(top_srcdir)/include/gssrpc/rpc.h $(top_srcdir)/include/gssrpc/rpc_msg.h \
+  $(top_srcdir)/include/gssrpc/svc.h $(top_srcdir)/include/gssrpc/svc_auth.h \
+  $(top_srcdir)/include/gssrpc/xdr.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h bindresvport.c
 clnt_generic.so clnt_generic.po $(OUTPRE)clnt_generic.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/types.h $(top_srcdir)/include/gssrpc/auth.h \
@@ -285,7 +287,8 @@ svc_tcp.so svc_tcp.po $(OUTPRE)svc_tcp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/gssrpc/rpc_msg.h $(top_srcdir)/include/gssrpc/svc.h \
   $(top_srcdir)/include/gssrpc/svc_auth.h $(top_srcdir)/include/gssrpc/xdr.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/port-sockets.h svc_tcp.c
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  svc_tcp.c
 svc_udp.so svc_udp.po $(OUTPRE)svc_udp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(top_srcdir)/include/gssrpc/auth.h $(top_srcdir)/include/gssrpc/auth_gss.h \
@@ -294,7 +297,8 @@ svc_udp.so svc_udp.po $(OUTPRE)svc_udp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/gssrpc/rpc_msg.h $(top_srcdir)/include/gssrpc/svc.h \
   $(top_srcdir)/include/gssrpc/svc_auth.h $(top_srcdir)/include/gssrpc/xdr.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/port-sockets.h svc_udp.c
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  svc_udp.c
 xdr.so xdr.po $(OUTPRE)xdr.$(OBJEXT): $(BUILDTOP)/include/gssrpc/types.h \
   $(top_srcdir)/include/gssrpc/rename.h $(top_srcdir)/include/gssrpc/xdr.h \
   xdr.c
