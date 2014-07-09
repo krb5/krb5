@@ -146,9 +146,6 @@ get_ticket_policy(krb5_ldap_realm_params *rparams, int *i, char *argv[],
     time_t now;
     int mask = 0;
     krb5_error_code retval = 0;
-    krb5_boolean no_msg = FALSE;
-
-    krb5_boolean print_usage = FALSE;
     char *me = progname;
 
     time(&now);
@@ -291,10 +288,7 @@ get_ticket_policy(krb5_ldap_realm_params *rparams, int *i, char *argv[],
         mask |=LDAP_REALM_KRBTICKETFLAGS;
     }
 err_usage:
-    print_usage = TRUE;
-
 err_nomsg:
-    no_msg = TRUE;
 
     return mask;
 }

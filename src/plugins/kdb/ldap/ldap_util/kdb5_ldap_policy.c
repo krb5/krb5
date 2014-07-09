@@ -797,7 +797,6 @@ kdb5_ldap_list_policies(int argc, char *argv[])
     char *me = progname;
     krb5_error_code retval = 0;
     krb5_boolean print_usage = FALSE;
-    char *basedn = NULL;
     char **list = NULL;
     char **plist = NULL;
 
@@ -809,7 +808,7 @@ kdb5_ldap_list_policies(int argc, char *argv[])
     if ((retval = init_ldap_realm (argc, argv)))
         goto cleanup;
 
-    retval = krb5_ldap_list_policy(util_context, basedn, &list);
+    retval = krb5_ldap_list_policy(util_context, NULL, &list);
     if ((retval != 0) || (list == NULL))
         goto cleanup;
 
@@ -827,9 +826,6 @@ cleanup:
         krb5_free_list_entries (list);
         free (list);
     }
-
-    if (basedn)
-        free (basedn);
 
     if (print_usage) {
         db_usage(LIST_POLICY);

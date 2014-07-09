@@ -409,7 +409,7 @@ krb5_ldap_parse_principal_name(char *i_princ_name, char **o_princ_name)
     at_rlm_name = strrchr(i_princ_name, '@');
     if (!at_rlm_name) {
         *o_princ_name = strdup(i_princ_name);
-        if (!o_princ_name)
+        if (!*o_princ_name)
             return ENOMEM;
     } else {
         k5_buf_init_dynamic(&buf);
