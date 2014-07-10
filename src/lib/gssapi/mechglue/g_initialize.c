@@ -614,8 +614,10 @@ gssint_register_mechinfo(gss_mech_info template)
 		if (krb5int_get_plugin_func(_dl, \
 					    #_symbol, \
 					    (void (**)())&(_mech)->_symbol, \
-					    &errinfo) || errinfo.code) \
+					    &errinfo) || errinfo.code) {  \
 			(_mech)->_symbol = NULL; \
+			k5_clear_error(&errinfo); \
+			} \
 	} while (0)
 
 /*
@@ -727,8 +729,10 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 					    "gssi" #_nsym,		\
 					    (void (**)())&(_mech)->_psym \
 					    ## _nsym,			\
-					    &errinfo) || errinfo.code)	\
+					    &errinfo) || errinfo.code) { \
 			(_mech)->_psym ## _nsym = NULL;			\
+			k5_clear_error(&errinfo);			\
+		}							\
 	} while (0)
 
 /* Build an interposer mechanism function table from dl. */
