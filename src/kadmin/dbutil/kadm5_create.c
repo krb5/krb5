@@ -145,7 +145,7 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
 static int add_admin_princs(void *handle, krb5_context context, char *realm)
 {
     krb5_error_code ret = 0;
-    char *service_name = 0, *p;
+    char *service_name = 0, *kiprop_name = 0, *p;
     char localname[MAXHOSTNAMELEN];
     struct addrinfo *ai, ai_hints;
     int gai_error;
@@ -191,6 +191,12 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
         freeaddrinfo(ai);
         goto clean_and_exit;
     }
+    if (asprintf(&kiprop_name, "kiprop/%s", ai->ai_canonname) < 0) {
+        ret = ENOMEM;
+        fprintf(stderr, _("Out of memory\n"));
+        freeaddrinfo(ai);
+        goto clean_and_exit;
+    }
     freeaddrinfo(ai);
 
     if ((ret = add_admin_princ(handle, context,
@@ -212,8 +218,11 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
                                CHANGEPW_LIFETIME)))
         goto clean_and_exit;
 
+    ret = add_admin_princ(handle, context, kiprop_name, realm, 0, 0);
+
 clean_and_exit:
     free(service_name);
+    free(kiprop_name);
 
     return ret;
 }
@@ -253,6 +262,7 @@ int add_admin_princ(void *handle, krb5_context context,
     char *fullname;
     krb5_error_code ret;
     kadm5_principal_ent_rec ent;
+    long flags;
 
     memset(&ent, 0, sizeof(ent));
 
@@ -268,9 +278,10 @@ int add_admin_princ(void *handle, krb5_context context,
     ent.max_life = lifetime;
     ent.attributes = attrs;
 
-    ret = kadm5_create_principal(handle, &ent,
-                                 (KADM5_PRINCIPAL | KADM5_MAX_LIFE |
-                                  KADM5_ATTRIBUTES), NULL);
+    flags = KADM5_PRINCIPAL | KADM5_ATTRIBUTES;
+    if (lifetime)
+        flags |= KADM5_MAX_LIFE;
+    ret = kadm5_create_principal(handle, &ent, flags, NULL);
     if (ret && ret != KADM5_DUP) {
         com_err(progname, ret, _("while creating principal %s"), fullname);
         krb5_free_principal(context, ent.principal);

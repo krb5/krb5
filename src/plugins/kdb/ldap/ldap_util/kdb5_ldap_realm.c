@@ -371,6 +371,13 @@ create_special_princs(krb5_context context, krb5_principal master_princ,
     if (ret)
         return ret;
 
+    /* Create kiprop/<hostname>. */
+    rblock.max_life = global_params.max_life;
+    rblock.flags = 0;
+    ret = create_hostbased_special(context, &rblock, mkey, "kiprop");
+    if (ret)
+        return ret;
+
     /* Create kadmin/changepw. */
     rblock.max_life = CHANGEPW_LIFETIME;
     rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED | KRB5_KDB_PWCHANGE_SERVICE;
