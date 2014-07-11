@@ -361,13 +361,16 @@ create_special_princs(krb5_context context, krb5_principal master_princ,
     if (ret)
         return ret;
 
-    /* Create kadmin/admin and kadmin/<hostname>. */
+    /* Create kadmin/admin, kadmin/<hostname> and kiprop/<hostname>. */
     rblock.max_life = ADMIN_LIFETIME;
     rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED;
     ret = create_fixed_special(context, &rblock, mkey, "kadmin", "admin");
     if (ret)
         return ret;
     ret = create_hostbased_special(context, &rblock, mkey, "kadmin");
+    if (ret)
+        return ret;
+    ret = create_hostbased_special(context, &rblock, mkey, "kiprop");
     if (ret)
         return ret;
 

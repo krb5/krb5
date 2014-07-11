@@ -53,8 +53,9 @@ and policy updates incrementally instead of receiving full dumps of
 the database.  This facility can be enabled in the :ref:`kdc.conf(5)`
 file with the **iprop_enable** option.  Incremental propagation
 requires the principal ``kiprop/MASTER\@REALM`` (where MASTER is the
-master KDC's canonical host name, and REALM the realm name) to be
-registered in the database.
+master KDC's canonical host name, and REALM the realm name). In release
+1.13, this principal is automatically created and registered into the 
+datebase.
 
 
 OPTIONS
