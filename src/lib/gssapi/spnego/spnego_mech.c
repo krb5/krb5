@@ -796,7 +796,6 @@ init_ctx_reselect(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 	OM_uint32 tmpmin;
 	size_t i;
 
-	generic_gss_release_oid(&tmpmin, &sc->internal_mech);
 	gss_delete_sec_context(&tmpmin, &sc->ctx_handle,
 			       GSS_C_NO_BUFFER);
 
