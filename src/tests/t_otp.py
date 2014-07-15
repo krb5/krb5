@@ -42,16 +42,18 @@ except ImportError:
     success('Warning: skipping OTP tests due to missing pyrad or old Python')
     exit(0)
 
+DICTIONARY_ATTRIBUTES = '''
+ATTRIBUTE    User-Name    1    string
+ATTRIBUTE    User-Password   2    string
+ATTRIBUTE    NAS-Identifier  32    string
+'''
+
 class RadiusDaemon(Process):
     MAX_PACKET_SIZE = 4096
 
     # We could use a dictionary file, but since we need
     # such few attributes, we'll just include them here
-    DICTIONARY = dictionary.Dictionary(StringIO.StringIO("""
-ATTRIBUTE    User-Name    1    string
-ATTRIBUTE    User-Password   2    string
-ATTRIBUTE    NAS-Identifier  32    string
-"""))
+    DICTIONARY = dictionary.Dictionary(StringIO.StringIO(DICTIONARY_ATTRIBUTES))
 
     def listen(self, addr):
         raise NotImplementedError()
