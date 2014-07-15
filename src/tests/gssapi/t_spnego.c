@@ -56,6 +56,8 @@ main(int argc, char *argv[])
     gss_ctx_id_t initiator_context, acceptor_context;
     gss_name_t target_name, source_name = GSS_C_NO_NAME;
     gss_OID mech = GSS_C_NO_OID;
+    gss_OID_desc pref_oids[2];
+    gss_OID_set_desc pref_mechs;
     const unsigned char *atok_oid;
 
     if (argc < 2 || argc > 3) {
@@ -70,20 +72,35 @@ main(int argc, char *argv[])
         check_gsserr("krb5_gss_register_acceptor_identity", major, 0);
     }
 
+    /* Get default initiator cred. */
+    major = gss_acquire_cred(&minor, GSS_C_NO_NAME, GSS_C_INDEFINITE,
+                             &mechset_spnego, GSS_C_INITIATE,
+                             &initiator_cred_handle, NULL, NULL);
+    check_gsserr("gss_acquire_cred(initiator)", major, minor);
+
+    /* Make the initiator prefer IAKERB and offer krb5 as an alternative. */
+    pref_oids[0] = mech_iakerb;
+    pref_oids[1] = mech_krb5;
+    pref_mechs.count = 2;
+    pref_mechs.elements = pref_oids;
+    major = gss_set_neg_mechs(&minor, initiator_cred_handle, &pref_mechs);
+    check_gsserr("gss_set_neg_mechs(initiator)", major, minor);
+
     /* Get default acceptor cred. */
     major = gss_acquire_cred(&minor, GSS_C_NO_NAME, GSS_C_INDEFINITE,
                              &mechset_spnego, GSS_C_ACCEPT,
                              &verifier_cred_handle, &actual_mechs, NULL);
-    check_gsserr("gss_acquire_cred", major, minor);
+    check_gsserr("gss_acquire_cred(acceptor)", major, minor);
 
-    /* Restrict the acceptor to krb5, to exercise the neg_mechs logic. */
+    /* Restrict the acceptor to krb5 (which will force a reselection). */
     major = gss_set_neg_mechs(&minor, verifier_cred_handle, &mechset_krb5);
-    check_gsserr("gss_set_neg_mechs", major, minor);
+    check_gsserr("gss_set_neg_mechs(acceptor)", major, minor);
 
     flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
-    establish_contexts(&mech_spnego, GSS_C_NO_CREDENTIAL, verifier_cred_handle,
-                       target_name, flags, &initiator_context,
-                       &acceptor_context, &source_name, &mech, NULL);
+    establish_contexts(&mech_spnego, initiator_cred_handle,
+                       verifier_cred_handle, target_name, flags,
+                       &initiator_context, &acceptor_context, &source_name,
+                       &mech, NULL);
 
     display_canon_name("Source name", source_name, &mech_krb5);
     display_oid("Source mech", mech);
@@ -91,6 +108,7 @@ main(int argc, char *argv[])
     (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);
     (void)gss_release_name(&minor, &source_name);
+    (void)gss_release_cred(&minor, &initiator_cred_handle);
     (void)gss_release_cred(&minor, &verifier_cred_handle);
     (void)gss_release_oid_set(&minor, &actual_mechs);
 
