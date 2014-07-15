@@ -90,6 +90,8 @@
 #define GSS_MECH_IAKERB_OID_LENGTH 6
 #define GSS_MECH_IAKERB_OID "\053\006\001\005\002\005"
 
+extern const gss_OID_set_desc * const kg_all_mechs;
+
 #define CKSUMTYPE_KG_CB         0x8003
 
 #define KG_TOK_CTX_AP_REQ       0x0100

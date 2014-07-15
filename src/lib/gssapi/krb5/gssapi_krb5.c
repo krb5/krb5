@@ -160,14 +160,14 @@ const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME = krb5_gss_oid_array+5;
 static const gss_OID_set_desc oidsets[] = {
     {1, (gss_OID) krb5_gss_oid_array+0}, /* RFC OID */
     {1, (gss_OID) krb5_gss_oid_array+1}, /* pre-RFC OID */
-    {4, (gss_OID) krb5_gss_oid_array+0}, /* includes wrong OID & IAKERB */
-    {1, (gss_OID) krb5_gss_oid_array+2},
-    {3, (gss_OID) krb5_gss_oid_array+0},
+    {3, (gss_OID) krb5_gss_oid_array+0}, /* all names for krb5 mech */
+    {4, (gss_OID) krb5_gss_oid_array+0}, /* all krb5 names and IAKERB */
 };
 
 const gss_OID_set_desc * const gss_mech_set_krb5 = oidsets+0;
 const gss_OID_set_desc * const gss_mech_set_krb5_old = oidsets+1;
 const gss_OID_set_desc * const gss_mech_set_krb5_both = oidsets+2;
+const gss_OID_set_desc * const kg_all_mechs = oidsets+3;
 
 g_set kg_vdb = G_SET_INIT;
 
