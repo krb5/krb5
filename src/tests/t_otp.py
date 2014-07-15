@@ -47,11 +47,13 @@ class RadiusDaemon(Process):
 
     # We could use a dictionary file, but since we need
     # such few attributes, we'll just include them here
-    DICTIONARY = dictionary.Dictionary(StringIO.StringIO("""
-ATTRIBUTE    User-Name    1    string
-ATTRIBUTE    User-Password   2    string
-ATTRIBUTE    NAS-Identifier  32    string
-"""))
+    DICTIONARY = dictionary.Dictionary(
+                            StringIO.StringIO(
+                            """
+                            ATTRIBUTE    User-Name    1    string
+                            ATTRIBUTE    User-Password   2    string
+                            ATTRIBUTE    NAS-Identifier  32    string
+                            """))
 
     def listen(self, addr):
         raise NotImplementedError()
