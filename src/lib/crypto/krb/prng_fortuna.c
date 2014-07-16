@@ -423,6 +423,10 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *outdata)
 
     if (!have_entropy) {
         k5_mutex_unlock(&fortuna_lock);
+        if (context != NULL) {
+            k5_set_error(&context->err, KRB5_CRYPTO_INTERNAL,
+                         _("Random number generator could not be seeded"));
+        }
         return KRB5_CRYPTO_INTERNAL;
     }
 
