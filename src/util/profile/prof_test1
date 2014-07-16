@@ -234,10 +234,84 @@ proc test5 {} {
     puts "OK: test5: syntax independence of included files"
 }
 
+proc test6 {} {
+    global wd verbose
+
+    # If a section is deleted and replaced, the new section should be
+    # used when retrieving values.
+    set p [profile_init_path $wd/test2.ini]
+    set sect {{test section 1}}
+    set newrel [concat $sect testkey]
+    set oldrel [concat $sect child]
+    if $verbose { puts "Removing and replacing {$sect}" }
+    profile_rename_section $p $sect
+    profile_add_relation $p $sect
+    if $verbose { puts "Adding {$newrel}" }
+    profile_add_relation $p $newrel 6
+    set x [profile_get_values $p $newrel]
+    if $verbose { puts "Read from new relation {$newrel}: $x" }
+    if { $x != 6 } {
+	puts stderr, "Error: test6: Could not get value from new section"
+	exit 1
+    }
+    if $verbose { puts "Reading old relation {$oldrel} which should be gone" }
+    catch {
+	profile_get_values $p $oldrel
+	puts stderr, "Error: test6: Got value from deleted section"
+	exit 1
+    }
+
+    puts "OK: test6: section replacement"
+}
+
+proc test7 {} {
+    global wd verbose
+
+    # A deleted node at the end of a relation's value set should not cause
+    # profile_clear_relation to error, as long as some value is present.
+    set p [profile_init_path $wd/test2.ini]
+    set rel {{test section 1} testkey}
+    if $verbose { puts "Adding values 1 2 at {$rel}" }
+    profile_add_relation $p $rel 1
+    profile_add_relation $p $rel 2
+    if $verbose { puts "Removing value 2 at {$rel}" }
+    profile_update_relation $p $rel 2
+    if $verbose { puts "Clearing values at {$rel}" }
+    profile_clear_relation $p $rel
+    puts "OK: test7: profile_clear_relation with deleted node at end"
+}
+
+proc test8 {} {
+    global wd verbose
+
+    # Order of relation operations should be reflected even if some of
+    # the relations were deleted.
+    set p [profile_init_path $wd/test2.ini]
+    set rel {{test section 1} testkey}
+    if $verbose { puts "Adding values 1 2 3 at {$rel}" }
+    profile_add_relation $p $rel 1
+    profile_add_relation $p $rel 2
+    profile_add_relation $p $rel 3
+    if $verbose { puts "Removing values 2 and adding 4 at {$rel}" }
+    profile_update_relation $p $rel 2
+    profile_add_relation $p $rel 4
+    set x [profile_get_values $p $rel]
+    if $verbose { puts "Read values from {$rel}: $x" }
+    if { $x != {1 3 4} } {
+	puts stderr, "Error: test8: Wrong order of values: $x"
+	exit 1
+    }
+
+    puts "OK: test8: relation order in the presence of deletions"
+}
+
 test1
 test2
 test3
 test4
 test5
+test6
+test7
+test8
 
 exit 0
