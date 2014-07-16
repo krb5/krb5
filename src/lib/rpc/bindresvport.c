@@ -1,7 +1,6 @@
 /* lib/rpc/bindresvport.c */
 /*
  * Copyright (c) 2010, Oracle America, Inc.
- * Copyright (c) 2014, Andreas Schneider <asn@samba.org>
  *
  * All rights reserved.
  *
