@@ -207,7 +207,7 @@ profile_rename_section(profile_t profile, const char **names,
     if (retval)
         return retval;
 
-    if (names == 0 || names[0] == 0 || names[1] == 0)
+    if (names == 0 || names[0] == 0)
         return PROF_BAD_NAMESET;
 
     k5_mutex_lock(&profile->first_file->data->lock);
@@ -264,7 +264,8 @@ profile_add_relation(profile_t profile, const char **names,
     if (retval)
         return retval;
 
-    if (names == 0 || names[0] == 0 || names[1] == 0)
+    /* Require at least two names for a new relation, one for a new section. */
+    if (names == 0 || names[0] == 0 || (names[1] == 0 && new_value))
         return PROF_BAD_NAMESET;
 
     k5_mutex_lock(&profile->first_file->data->lock);
@@ -282,6 +283,7 @@ profile_add_relation(profile_t profile, const char **names,
     }
 
     if (new_value == 0) {
+        state = 0;
         retval = profile_find_node(section, *cpp, 0, 1, &state, 0);
         if (retval == 0) {
             k5_mutex_unlock(&profile->first_file->data->lock);
