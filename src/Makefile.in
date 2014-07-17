@@ -554,7 +554,7 @@ pyrunenv.vals: Makefile
 	for i in $(RUN_VARS); do \
 		eval echo 'env['\\\'$$i\\\''] = '\\\'\$$$$i\\\'; \
 	done > $@
-	echo "proxy_tls_impl = '$(PROXY_TLS_IMPL)'" >> $@
+	echo "tls_impl = '$(TLS_IMPL)'" >> $@
 
 runenv.py: pyrunenv.vals
 	echo 'env = {}' > $@

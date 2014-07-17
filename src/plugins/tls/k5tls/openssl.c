@@ -31,7 +31,7 @@
 #include "k5-utf8.h"
 #include "k5-tls.h"
 
-#ifdef PROXY_TLS_IMPL_OPENSSL
+#ifdef TLS_IMPL_OPENSSL
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include <openssl/x509.h>
@@ -567,4 +567,4 @@ tls_k5tls_initvt(krb5_context context, int maj_ver, int min_ver,
     return 0;
 }
 
-#endif /* PROXY_TLS_IMPL_OPENSSL */
+#endif /* TLS_IMPL_OPENSSL */

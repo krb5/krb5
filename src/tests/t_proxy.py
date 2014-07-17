@@ -2,9 +2,8 @@
 from k5test import *
 
 # Skip this test if we're missing proxy functionality or parts of the proxy.
-if runenv.proxy_tls_impl == 'no':
-    success('Warning: not testing proxy support because feature ' +
-            'was not enabled')
+if runenv.tls_impl == 'no':
+    success('Warning: not testing proxy support because TLS was not enabled')
     exit(0)
 try:
     from paste import httpserver

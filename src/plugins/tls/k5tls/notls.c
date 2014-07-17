@@ -36,7 +36,7 @@
 #include "k5-utf8.h"
 #include "k5-tls.h"
 
-#ifdef PROXY_TLS_IMPL_NONE
+#ifdef TLS_IMPL_NONE
 
 krb5_error_code
 tls_k5tls_initvt(krb5_context context, int maj_ver, int min_ver,
@@ -50,4 +50,4 @@ tls_k5tls_initvt(krb5_context context, int maj_ver, int min_ver,
     return 0;
 }
 
-#endif /* PROXY_TLS_IMPL_NONE */
+#endif /* TLS_IMPL_NONE */

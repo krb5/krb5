@@ -179,8 +179,8 @@ Scripts may use the following functions and variables:
 
 * runenv: The contents of $srctop/runenv.py, containing a dictionary
   'env' which specifies additional variables to be added to the realm
-  environment, and a variable 'proxy_tls_impl', which indicates which
-  SSL implementation (if any) is being used by libkrb5's support for
+  environment, and a variable 'tls_impl', which indicates which TLS
+  implementation (if any) is being used by libkrb5's support for
   contacting KDCs and kpasswd servers over HTTPS.
 
 * verbose: Whether the script is running verbosely.
