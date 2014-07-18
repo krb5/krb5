@@ -36,106 +36,169 @@
 #include "ldap_main.h"
 #include "ldap_service_stash.h"
 #include <kdb5.h>
+#ifdef HAVE_SASL_SASL_H
+#include <sasl/sasl.h>
+#endif
 
+/* Ensure that we have the parameters we need to authenticate to the LDAP
+ * server.  Read the password if necessary. */
 static krb5_error_code
-krb5_validate_ldap_context(krb5_context context,
-                           krb5_ldap_context *ldap_context)
+validate_context(krb5_context context, krb5_ldap_context *ctx)
 {
-    krb5_error_code             st=0;
-    unsigned char               *password=NULL;
+    krb5_error_code ret;
 
-    if (ldap_context->bind_dn == NULL) {
-        st = EINVAL;
-        k5_setmsg(context, st, _("LDAP bind dn value missing "));
-        goto err_out;
-    }
-
-    if (ldap_context->bind_pwd == NULL && ldap_context->service_password_file == NULL) {
-        st = EINVAL;
-        k5_setmsg(context, st, _("LDAP bind password value missing "));
-        goto err_out;
-    }
-
-    if (ldap_context->bind_pwd == NULL &&
-        ldap_context->service_password_file != NULL) {
-        if ((st=krb5_ldap_readpassword(context, ldap_context, &password)) != 0) {
-            prepend_err_str(context, _("Error reading password from stash: "),
-                            st, st);
-            goto err_out;
+    if (ctx->sasl_mech != NULL) {
+        /* Read the password for use as the SASL secret if we can, but do not
+         * require one as not all mechanisms need it. */
+        if (ctx->bind_pwd == NULL && ctx->sasl_authcid != NULL &&
+            ctx->service_password_file != NULL) {
+            (void)krb5_ldap_readpassword(context, ctx->service_password_file,
+                                         ctx->sasl_authcid, &ctx->bind_pwd);
         }
-
-        ldap_context->bind_pwd = (char *)password;
+        return 0;
     }
 
-    /* NULL password not allowed */
-    if (ldap_context->bind_pwd != NULL && strlen(ldap_context->bind_pwd) == 0) {
-        st = EINVAL;
-        k5_setmsg(context, st, _("Service password length is zero"));
-        goto err_out;
+    /* For a simple bind, a DN and password are required. */
+
+    if (ctx->bind_dn == NULL) {
+        k5_setmsg(context, EINVAL, _("LDAP bind dn value missing"));
+        return EINVAL;
     }
 
-err_out:
-    return st;
+    if (ctx->bind_pwd == NULL && ctx->service_password_file == NULL) {
+        k5_setmsg(context, EINVAL, _("LDAP bind password value missing"));
+        return EINVAL;
+    }
+
+    if (ctx->bind_pwd == NULL && ctx->service_password_file != NULL) {
+        ret = krb5_ldap_readpassword(context, ctx->service_password_file,
+                                     ctx->bind_dn, &ctx->bind_pwd);
+        if (ret) {
+            prepend_err_str(context, _("Error reading password from stash: "),
+                            ret, ret);
+            return ret;
+        }
+    }
+
+    /* An empty password is not allowed. */
+    if (*ctx->bind_pwd == '\0') {
+        k5_setmsg(context, EINVAL, _("Service password length is zero"));
+        return EINVAL;
+    }
+
+    return 0;
 }
 
 /*
  * Internal Functions called by init functions.
  */
 
-static krb5_error_code
-krb5_ldap_bind(krb5_ldap_context *ldap_context,
-               krb5_ldap_server_handle *ldap_server_handle)
-{
-    struct berval               bv={0, NULL};
+#ifdef HAVE_SASL_SASL_H
 
-    bv.bv_val = ldap_context->bind_pwd;
-    bv.bv_len = strlen(ldap_context->bind_pwd);
-    return ldap_sasl_bind_s(ldap_server_handle->ldap_handle,
-                            ldap_context->bind_dn, NULL, &bv, NULL,
-                            NULL, NULL);
+static int
+interact(LDAP *ld, unsigned flags, void *defaults, void *sin)
+{
+    sasl_interact_t *in = NULL;
+    krb5_ldap_context *ctx = defaults;
+
+    for (in = sin; in != NULL && in->id != SASL_CB_LIST_END; in++) {
+        if (in->id == SASL_CB_AUTHNAME)
+            in->result = ctx->sasl_authcid;
+        else if (in->id == SASL_CB_USER)
+            in->result = ctx->sasl_authzid;
+        else if (in->id == SASL_CB_GETREALM)
+            in->result = ctx->sasl_realm;
+        else if (in->id == SASL_CB_PASS)
+            in->result = ctx->bind_pwd;
+        else
+            return LDAP_OTHER;
+        in->len = (in->result != NULL) ? strlen(in->result) : 0;
+    }
+
+    return LDAP_SUCCESS;
+}
+
+#else /* HAVE_SASL_SASL_H */
+
+/* We can't define an interaction function, so only non-interactive mechs like
+ * EXTERNAL can work. */
+static int
+interact(LDAP *ld, unsigned flags, void *defaults, void *sin)
+{
+    return LDAP_OTHER;
+}
+
+#endif
+
+static krb5_error_code
+authenticate(krb5_ldap_context *ctx, krb5_ldap_server_handle *server)
+{
+    int st;
+    struct berval bv;
+
+    if (ctx->sasl_mech != NULL) {
+        st = ldap_sasl_interactive_bind_s(server->ldap_handle, NULL,
+                                          ctx->sasl_mech, NULL, NULL,
+                                          LDAP_SASL_QUIET, interact, ctx);
+        if (st != LDAP_SUCCESS) {
+            k5_setmsg(ctx->kcontext, KRB5_KDB_ACCESS_ERROR,
+                      _("Cannot bind to LDAP server '%s' with SASL mechanism "
+                        "'%s': %s"), server->server_info->server_name,
+                      ctx->sasl_mech, ldap_err2string(st));
+            return KRB5_KDB_ACCESS_ERROR;
+        }
+    } else {
+        /* Do a simple bind with DN and password. */
+        bv.bv_val = ctx->bind_pwd;
+        bv.bv_len = strlen(ctx->bind_pwd);
+        st = ldap_sasl_bind_s(server->ldap_handle, ctx->bind_dn, NULL, &bv,
+                              NULL, NULL, NULL);
+        if (st != LDAP_SUCCESS) {
+            k5_setmsg(ctx->kcontext, KRB5_KDB_ACCESS_ERROR,
+                      _("Cannot bind to LDAP server '%s' as '%s': %s"),
+                      server->server_info->server_name, ctx->bind_dn,
+                      ldap_err2string(st));
+            return KRB5_KDB_ACCESS_ERROR;
+        }
+    }
+    return 0;
 }
 
 static krb5_error_code
-krb5_ldap_initialize(krb5_ldap_context *ldap_context,
-                     krb5_ldap_server_info *server_info)
+initialize_server(krb5_ldap_context *ldap_context, krb5_ldap_server_info *info)
 {
-    krb5_error_code             st=0;
-    krb5_ldap_server_handle     *ldap_server_handle=NULL;
+    krb5_ldap_server_handle *server;
+    krb5_error_code ret;
+    int st;
 
+    server = calloc(1, sizeof(krb5_ldap_server_handle));
+    if (server == NULL)
+        return ENOMEM;
+    server->server_info = info;
 
-    ldap_server_handle = calloc(1, sizeof(krb5_ldap_server_handle));
-    if (ldap_server_handle == NULL) {
-        st = ENOMEM;
-        goto err_out;
-    }
-
-    /* ldap init */
-    if ((st = ldap_initialize(&ldap_server_handle->ldap_handle, server_info->server_name)) != 0) {
+    st = ldap_initialize(&server->ldap_handle, info->server_name);
+    if (st) {
+        free(server);
         k5_setmsg(ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR,
                   _("Cannot create LDAP handle for '%s': %s"),
-                  server_info->server_name, ldap_err2string(st));
-        st = KRB5_KDB_ACCESS_ERROR;
-        goto err_out;
+                  info->server_name, ldap_err2string(st));
+        return KRB5_KDB_ACCESS_ERROR;
     }
 
-    if ((st=krb5_ldap_bind(ldap_context, ldap_server_handle)) == 0) {
-        ldap_server_handle->server_info_update_pending = FALSE;
-        server_info->server_status = ON;
-        krb5_update_ldap_handle(ldap_server_handle, server_info);
-    } else {
-        k5_setmsg(ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR,
-                  _("Cannot bind to LDAP server '%s' as '%s': %s"),
-                  server_info->server_name, ldap_context->bind_dn,
-                  ldap_err2string(st));
-        st = KRB5_KDB_ACCESS_ERROR;
-        server_info->server_status = OFF;
-        time(&server_info->downtime);
-        /* ldap_unbind_s(ldap_server_handle->ldap_handle); */
-        free(ldap_server_handle);
+    ret = authenticate(ldap_context, server);
+    if (ret) {
+        info->server_status = OFF;
+        time(&info->downtime);
+        free(server);
+        return ret;
     }
 
-err_out:
-    return st;
+    server->server_info_update_pending = FALSE;
+    server->next = info->ldap_server_handles;
+    info->ldap_server_handles = server;
+    info->num_conns++;
+    info->server_status = ON;
+    return 0;
 }
 
 /*
@@ -143,17 +206,20 @@ err_out:
  */
 
 krb5_error_code
-krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
+krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ctx)
 {
-    krb5_error_code             st=0;
-    int                         cnt=0, version=LDAP_VERSION3;
-    struct timeval              local_timelimit = {10,0};
+    krb5_error_code ret;
+    int i, version = LDAP_VERSION3;
+    unsigned int conns;
+    krb5_ldap_server_info *info;
+    struct timeval local_timelimit = { 10, 0 };
 
-    if ((st=krb5_validate_ldap_context(context, ldap_context)) != 0)
-        return st;
+    ret = validate_context(context, ctx);
+    if (ret)
+        return ret;
 
 #ifdef LDAP_OPT_DEBUG_LEVEL
-    ldap_set_option(NULL, LDAP_OPT_DEBUG_LEVEL, &ldap_context->ldap_debug);
+    ldap_set_option(NULL, LDAP_OPT_DEBUG_LEVEL, &ctx->ldap_debug);
 #endif
     ldap_set_option(NULL, LDAP_OPT_PROTOCOL_VERSION, &version);
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
@@ -162,37 +228,33 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
     ldap_set_option(NULL, LDAP_X_OPT_CONNECT_TIMEOUT, &local_timelimit);
 #endif
 
-    HNDL_LOCK(ldap_context);
-    while (ldap_context->server_info_list[cnt] != NULL) {
-        krb5_ldap_server_info *server_info=NULL;
-
-        server_info = ldap_context->server_info_list[cnt];
-
-        if (server_info->server_status == NOTSET) {
-            unsigned int conns=0;
-
+    HNDL_LOCK(ctx);
+    for (i = 0; ctx->server_info_list[i] != NULL; i++) {
+        info = ctx->server_info_list[i];
+        if (info->server_status == NOTSET) {
             krb5_clear_error_message(context);
 
 #ifdef LDAP_MOD_INCREMENT
-            server_info->modify_increment =
-                (has_modify_increment(context, server_info->server_name) == 0);
+            info->modify_increment = has_modify_increment(context,
+                                                          info->server_name);
 #else
-            server_info->modify_increment = 0;
-#endif /* LDAP_MOD_INCREMENT */
+            info->modify_increment = 0;
+#endif
 
-            for (conns=0; conns < ldap_context->max_server_conns; ++conns) {
-                if ((st=krb5_ldap_initialize(ldap_context, server_info)) != 0)
+            for (conns = 0; conns < ctx->max_server_conns; conns++) {
+                ret = initialize_server(ctx, info);
+                if (ret)
                     break;
-            } /* for (conn= ... */
+            }
 
-            if (server_info->server_status == ON)
-                break;  /* server init successful, so break */
+            /* If we opened a connection, don't try any more servers. */
+            if (info->server_status == ON)
+                break;
         }
-        ++cnt;
     }
-    HNDL_UNLOCK(ldap_context);
+    HNDL_UNLOCK(ctx);
 
-    return st;
+    return ret;
 }
 
 
@@ -211,7 +273,7 @@ krb5_ldap_db_single_init(krb5_ldap_context *ldap_context)
         server_info = ldap_context->server_info_list[cnt];
         if ((server_info->server_status == NOTSET || server_info->server_status == ON)) {
             if (server_info->num_conns < ldap_context->max_server_conns-1) {
-                st = krb5_ldap_initialize(ldap_context, server_info);
+                st = initialize_server(ldap_context, server_info);
                 if (st == LDAP_SUCCESS)
                     goto cleanup;
             }
@@ -224,7 +286,7 @@ krb5_ldap_db_single_init(krb5_ldap_context *ldap_context)
     cnt = 0;
     while (ldap_context->server_info_list[cnt] != NULL) {
         server_info = ldap_context->server_info_list[cnt];
-        st = krb5_ldap_initialize(ldap_context, server_info);
+        st = initialize_server(ldap_context, server_info);
         if (st == LDAP_SUCCESS)
             goto cleanup;
         ++cnt;
@@ -237,12 +299,15 @@ krb5_error_code
 krb5_ldap_rebind(krb5_ldap_context *ldap_context,
                  krb5_ldap_server_handle **ldap_server_handle)
 {
-    krb5_ldap_server_handle     *handle = *ldap_server_handle;
+    krb5_ldap_server_handle *handle = *ldap_server_handle;
 
     ldap_unbind_ext_s(handle->ldap_handle, NULL, NULL);
-    if ((ldap_initialize(&handle->ldap_handle, handle->server_info->server_name) != LDAP_SUCCESS)
-        || (krb5_ldap_bind(ldap_context, handle) != LDAP_SUCCESS))
-        return krb5_ldap_request_next_handle_from_pool(ldap_context, ldap_server_handle);
+    if (ldap_initialize(&handle->ldap_handle,
+                        handle->server_info->server_name) != LDAP_SUCCESS ||
+        authenticate(ldap_context, handle) != 0) {
+        return krb5_ldap_request_next_handle_from_pool(ldap_context,
+                                                       ldap_server_handle);
+    }
     return LDAP_SUCCESS;
 }
 

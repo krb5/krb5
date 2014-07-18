@@ -342,7 +342,15 @@ definitions of these relations.
 
 * **ldap_kerberos_container_dn**
 * **ldap_kdc_dn**
+* **ldap_kdc_sasl_authcid**
+* **ldap_kdc_sasl_authzid**
+* **ldap_kdc_sasl_mech**
+* **ldap_kdc_sasl_realm**
 * **ldap_kadmind_dn**
+* **ldap_kadmind_sasl_authcid**
+* **ldap_kadmind_sasl_authzid**
+* **ldap_kadmind_sasl_mech**
+* **ldap_kadmind_sasl_realm**
 * **ldap_service_password_file**
 * **ldap_servers**
 * **ldap_conns_per_server**
@@ -394,18 +402,41 @@ The following tags may be specified in a [dbmodules] subsection:
     This LDAP-specific tag indicates the number of connections to be
     maintained per LDAP server.
 
-**ldap_kadmind_dn**
-    This LDAP-specific tag indicates the default bind DN for the
-    :ref:`kadmind(8)` daemon.  kadmind does a login to the directory
-    as this object.  This object should have the rights to read and
-    write the Kerberos data in the LDAP database.
+**ldap_kdc_dn** and **ldap_kadmind_dn**
+    These LDAP-specific tags indicate the default DN for binding to
+    the LDAP server.  The :ref:`krb5kdc(8)` daemon uses
+    **ldap_kdc_dn**, while the :ref:`kadmind(8)` daemon and other
+    administrative programs use **ldap_kadmind_dn**.  The kadmind DN
+    must have the rights to read and write the Kerberos data in the
+    LDAP database.  The KDC DN must have the same rights, unless
+    **disable_lockout** and **disable_last_success** are true, in
+    which case it only needs to have rights to read the Kerberos data.
+    These tags are ignored if a SASL mechanism is set with
+    **ldap_kdc_sasl_mech** or **ldap_kadmind_sasl_mech**.
 
-**ldap_kdc_dn**
-    This LDAP-specific tag indicates the default bind DN for the
-    :ref:`krb5kdc(8)` daemon.  The KDC does a login to the directory
-    as this object.  This object should have the rights to read the
-    Kerberos data in the LDAP database, and to write data unless
-    **disable_lockout** and **disable_last_success** are true.
+**ldap_kdc_sasl_mech** and **ldap_kadmind_sasl_mech**
+    These LDAP-specific tags specify the SASL mechanism (such as
+    ``EXTERNAL``) to use when binding to the LDAP server.  New in
+    release 1.13.
+
+**ldap_kdc_sasl_authcid** and **ldap_kadmind_sasl_authcid**
+    These LDAP-specific tags specify the SASL authentication identity
+    to use when binding to the LDAP server.  Not all SASL mechanisms
+    require an authentication identity.  If the SASL mechanism
+    requires a secret (such as the password for ``DIGEST-MD5``), these
+    tags also determine the name within the
+    **ldap_service_password_file** where the secret is stashed.  New
+     in release 1.13.
+
+**ldap_kdc_sasl_authzid** and **ldap_kadmind_sasl_authzid**
+    These LDAP-specific tags specify the SASL authorization identity
+    to use when binding to the LDAP server.  In most circumstances
+    they do not need to be specified.  New in release 1.13.
+
+**ldap_kdc_sasl_realm** and **ldap_kadmind_sasl_realm**
+    These LDAP-specific tags specify the SASL realm to use when
+    binding to the LDAP server.  In most circumstances they do not
+    need to be set.  New in release 1.13.
 
 **ldap_kerberos_container_dn**
     This LDAP-specific tag indicates the DN of the container object
@@ -421,8 +452,9 @@ The following tags may be specified in a [dbmodules] subsection:
 **ldap_service_password_file**
     This LDAP-specific tag indicates the file containing the stashed
     passwords (created by ``kdb5_ldap_util stashsrvpw``) for the
-    **ldap_kadmind_dn** and **ldap_kdc_dn** objects.  This file must
-    be kept secure.
+    **ldap_kdc_dn** and **ldap_kadmind_dn** objects, or for the
+    **ldap_kdc_sasl_authcid** or **ldap_kadmind_sasl_authcid** names
+    for SASL authentication.  This file must be kept secure.
 
 The following tag may be specified directly in the [dbmodules]
 section to control where database modules are loaded from:

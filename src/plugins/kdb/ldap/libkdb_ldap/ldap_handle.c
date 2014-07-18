@@ -163,27 +163,6 @@ krb5_put_ldap_handle(krb5_ldap_server_handle *ldap_server_handle)
 }
 
 /*
- * Add a new ldap server handle structure to the server info structure.
- * This function name can be changed to krb5_insert_ldap_handle.
- * Do not lock the mutex here. The caller should lock it
- */
-
-krb5_error_code
-krb5_update_ldap_handle(krb5_ldap_server_handle *ldap_server_handle,
-                        krb5_ldap_server_info *server_info)
-{
-
-    if (ldap_server_handle == NULL || server_info == NULL)
-        return 0;
-
-    ldap_server_handle->next = server_info->ldap_server_handles;
-    server_info->ldap_server_handles = ldap_server_handle;
-    server_info->num_conns++;
-    ldap_server_handle->server_info = server_info;
-    return 0;
-}
-
-/*
  * Free up all the ldap server handles of the server info.
  * This function is called when the ldap server returns LDAP_SERVER_DOWN.
  */

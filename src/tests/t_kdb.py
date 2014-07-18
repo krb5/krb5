@@ -42,17 +42,29 @@ os.mkdir(dbdir)
 # directory.  Try to defeat this by copying the binary.
 shutil.copy(system_slapd, slapd)
 
+# Find the core schema file if we can.
+core_schema = None
+if os.path.isfile('/etc/ldap/schema/core.schema'):
+    core_schema = '/etc/ldap/schema/core.schema'
+
 # Make a slapd config file.  This is deprecated in OpenLDAP 2.3 and
-# later, but it's easier than using LDIF and slapadd.
+# later, but it's easier than using LDIF and slapadd.  Include some
+# authz-regexp entries for SASL authentication tests.  Load the core
+# schema if we found it, for use in the DIGEST-MD5 test.
 file = open(slapd_conf, 'w')
 file.write('pidfile %s\n' % slapd_pidfile)
 file.write('include %s\n' % schema)
+if core_schema:
+    file.write('include %s\n' % core_schema)
 file.write('moduleload back_bdb\n')
 file.write('database bdb\n')
 file.write('suffix %s\n' % top_dn)
 file.write('rootdn %s\n' % admin_dn)
 file.write('rootpw %s\n' % admin_pw)
 file.write('directory %s\n' % dbdir)
+file.write('authz-regexp .*uidNumber=%d,cn=peercred,cn=external,cn=auth %s\n' %
+           (os.geteuid(), admin_dn))
+file.write('authz-regexp uid=digestuser,cn=digest-md5,cn=auth %s\n' % admin_dn)
 file.close()
 
 slapd_pid = -1
@@ -300,6 +312,58 @@ kldaputil(['destroy', '-f'])
 out = kldaputil(['list'])
 if out:
     fail('Unexpected kdb5_ldap_util list output after destroy')
+
+# Test SASL EXTERNAL auth.  Remove the DNs and service password file
+# from the DB module config.  EXTERNAL auth can work even if we didn't
+# build with the SASL header file, because no interaction is required.
+os.remove(ldap_pwfile)
+dbmod = conf['dbmodules']['ldap']
+dbmod['ldap_kdc_sasl_mech'] = dbmod['ldap_kadmind_sasl_mech'] = 'EXTERNAL'
+del dbmod['ldap_service_password_file']
+del dbmod['ldap_kdc_dn'], dbmod['ldap_kadmind_dn']
+realm = K5Realm(create_kdb=False, kdc_conf=conf)
+realm.run([kdb5_ldap_util, 'create', '-s', '-P', 'master'])
+realm.start_kdc()
+realm.addprinc(realm.user_princ, password('user'))
+realm.kinit(realm.user_princ, password('user'))
+realm.stop()
+realm.run([kdb5_ldap_util, 'destroy', '-f'])
+
+if not core_schema:
+    success('Warning: skipping some LDAP tests because core schema not found')
+    sys.exit(0)
+
+if runenv.have_sasl != 'yes':
+    success('Warning: skipping some LDAP tests because SASL support not built')
+    sys.exit(0)
+
+# Test SASL DIGEST-MD5 auth.  We need to set a clear-text password for
+# the admin DN, so create a person entry (requires the core schema).
+# Restore the service password file in the config and set authcids.
+ldap_add('cn=admin,cn=krb5', 'person',
+         ['sn: dummy', 'userPassword: admin'])
+dbmod['ldap_kdc_sasl_mech'] = dbmod['ldap_kadmind_sasl_mech'] = 'DIGEST-MD5'
+dbmod['ldap_kdc_sasl_authcid'] = 'digestuser'
+dbmod['ldap_kadmind_sasl_authcid'] = 'digestuser'
+dbmod['ldap_service_password_file'] = ldap_pwfile
+realm = K5Realm(create_kdb=False, kdc_conf=conf)
+input = admin_pw + '\n' + admin_pw + '\n'
+realm.run([kdb5_ldap_util, 'stashsrvpw', 'digestuser'], input=input)
+realm.run([kdb5_ldap_util, 'create', '-s', '-P', 'master'])
+realm.start_kdc()
+realm.addprinc(realm.user_princ, password('user'))
+realm.kinit(realm.user_princ, password('user'))
+realm.stop()
+# Exercise DB options, which should cause binding to fail.
+out = realm.run([kadmin_local, '-x', 'sasl_authcid=ab', '-q', 'getprinc user'],
+                expected_code=1)
+if 'Cannot bind to LDAP server' not in out:
+    fail('Expected error not seen in kadmin.local output')
+out = realm.run([kadmin_local, '-x', 'bindpwd=wrong', '-q', 'getprinc user'],
+                expected_code=1)
+if 'Cannot bind to LDAP server' not in out:
+    fail('Expected error not seen in kadmin.local output')
+realm.run([kdb5_ldap_util, 'destroy', '-f'])
 
 # We could still use tests to exercise:
 # * DB arg handling in krb5_ldap_create

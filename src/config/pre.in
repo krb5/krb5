@@ -433,6 +433,9 @@ PROXY_TLS_IMPL                  = @PROXY_TLS_IMPL@
 PROXY_TLS_IMPL_CFLAGS           = @PROXY_TLS_IMPL_CFLAGS@
 PROXY_TLS_IMPL_LIBS             = @PROXY_TLS_IMPL_LIBS@
 
+# Whether we have the SASL header file for the LDAP KDB module
+HAVE_SASL = @HAVE_SASL@
+
 # error table rules
 #
 ### /* these are invoked as $(...) foo.et, which works, but could be better */
