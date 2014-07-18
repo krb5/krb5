@@ -407,7 +407,7 @@ krb5_authdata_context_init(krb5_context kcontext,
     }
 
     context = calloc(1, sizeof(*context));
-    if (kcontext == NULL) {
+    if (context == NULL) {
         code = ENOMEM;
         goto cleanup;
     }
