@@ -426,7 +426,7 @@ The following tags may be specified in a [dbmodules] subsection:
     requires a secret (such as the password for ``DIGEST-MD5``), these
     tags also determine the name within the
     **ldap_service_password_file** where the secret is stashed.  New
-     in release 1.13.
+    in release 1.13.
 
 **ldap_kdc_sasl_authzid** and **ldap_kadmind_sasl_authzid**
     These LDAP-specific tags specify the SASL authorization identity
