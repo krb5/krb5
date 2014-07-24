@@ -27,6 +27,7 @@
  */
 
 #include "ksu.h"
+#include "k5-base64.h"
 #include "adm_proto.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -504,10 +505,28 @@ show_credential(context, cred, cc)
     free(sname);
 }
 
-int gen_sym(){
-    static int i = 0;
-    i ++;
-    return i;
+/* Create a random string suitable for a filename extension. */
+krb5_error_code
+gen_sym(krb5_context context, char **sym_out)
+{
+    krb5_error_code retval;
+    char bytes[6], *p, *sym;
+    krb5_data data = make_data(bytes, sizeof(bytes));
+
+    *sym_out = NULL;
+    retval = krb5_c_random_make_octets(context, &data);
+    if (retval)
+        return retval;
+    sym = k5_base64_encode(data.data, data.length);
+    if (sym == NULL)
+        return ENOMEM;
+    /* Tweak the output alphabet just a bit. */
+    while ((p = strchr(sym, '/')) != NULL)
+        *p = '_';
+    while ((p = strchr(sym, '+')) != NULL)
+        *p = '-';
+    *sym_out = sym;
+    return 0;
 }
 
 krb5_error_code krb5_ccache_overwrite(context, ccs, cct, primary_principal)

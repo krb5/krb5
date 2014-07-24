@@ -130,7 +130,7 @@ extern krb5_error_code krb5_get_login_princ
 extern void show_credential
 (krb5_context, krb5_creds *, krb5_ccache);
 
-extern int gen_sym (void);
+krb5_error_code gen_sym(krb5_context context, char **sym);
 
 extern krb5_error_code krb5_ccache_overwrite
 (krb5_context, krb5_ccache, krb5_ccache, krb5_principal);
