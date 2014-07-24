@@ -854,7 +854,7 @@ resolve_target_cache(krb5_context context, krb5_principal princ,
     krb5_error_code retval;
     krb5_boolean switchable, reused = FALSE;
     krb5_ccache ccache = NULL;
-    char *sep, *ccname = NULL, *target;
+    char *sep, *ccname = NULL, *sym = NULL, *target;
 
     *ccache_out = NULL;
     *ccache_reused = FALSE;
@@ -874,12 +874,20 @@ resolve_target_cache(krb5_context context, krb5_principal princ,
          * the name of a cache that doesn't exist yet. */
         do {
             free(ccname);
-            if (asprintf(&ccname, "%s.%d", target, gen_sym()) < 0) {
+            retval = gen_sym(context, &sym);
+            if (retval) {
+                com_err(prog_name, retval,
+                        _("while generating part of the target ccache name"));
+                return retval;
+            }
+            if (asprintf(&ccname, "%s.%s", target, sym) < 0) {
                 retval = ENOMEM;
-                com_err(prog_name, ENOMEM,
-                        _("while allocating memory for target ccache name"));
+                free(sym);
+                com_err(prog_name, retval, _("while allocating memory for the "
+                                             "target ccache name"));
                 goto cleanup;
             }
+            free(sym);
         } while (ks_ccache_name_is_initialized(context, ccname));
         retval = krb5_cc_resolve(context, ccname, &ccache);
     } else {
