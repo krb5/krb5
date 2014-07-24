@@ -117,6 +117,7 @@ main (argc, argv)
     krb5_principal  kdc_server;
     krb5_boolean zero_password;
     char * dir_of_cc_target;
+    krb5_boolean restrict_creds;
 
     options.opt = KRB5_DEFAULT_OPTIONS;
     options.lifetime = KRB5_DEFAULT_TKT_LIFE;
@@ -464,25 +465,13 @@ main (argc, argv)
        then only the credentials for that particular user
        should be copied */
 
-    if ((source_uid == 0) && (target_uid != 0)) {
-
-        if ((retval = krb5_ccache_copy_restricted(ksu_context,  cc_source,
-                                                  cc_target_tag, client,
-                                                  &cc_target, &stored,
-                                                  target_uid))){
-            com_err(prog_name, retval, _("while copying cache %s to %s"),
-                    krb5_cc_get_name(ksu_context, cc_source), cc_target_tag);
-            exit(1);
-        }
-
-    } else {
-        if ((retval = krb5_ccache_copy(ksu_context, cc_source, cc_target_tag,
-                                       client,&cc_target, &stored, target_uid))) {
-            com_err(prog_name, retval, _("while copying cache %s to %s"),
-                    krb5_cc_get_name(ksu_context, cc_source), cc_target_tag);
-            exit(1);
-        }
-
+    restrict_creds = (source_uid == 0) && (target_uid != 0);
+    retval = krb5_ccache_copy(ksu_context, cc_source, cc_target_tag, client,
+                              restrict_creds, &cc_target, &stored, target_uid);
+    if (retval) {
+        com_err(prog_name, retval, _("while copying cache %s to %s"),
+                krb5_cc_get_name(ksu_context, cc_source), cc_target_tag);
+        exit(1);
     }
 
     /* Become root for authentication*/
