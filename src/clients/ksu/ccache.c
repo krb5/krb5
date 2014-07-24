@@ -47,12 +47,14 @@ void show_credential();
 */
 
 krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag,
-                                  primary_principal, cc_out, stored, target_uid)
+                                  primary_principal, restrict_creds, cc_out,
+                                  stored, target_uid)
 /* IN */
     krb5_context context;
     krb5_ccache cc_def;
     char *cc_other_tag;
     krb5_principal primary_principal;
+    krb5_boolean restrict_creds;
     uid_t target_uid;
     /* OUT */
     krb5_ccache *cc_out;
@@ -83,9 +85,6 @@ krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag,
         }
     }
 
-    *stored = krb5_find_princ_in_cred_list(context, cc_def_creds_arr,
-                                           primary_principal);
-
     if (!lstat( cc_other_name, &st_temp))
         return EINVAL;
 
@@ -98,8 +97,16 @@ krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag,
         return retval;
     }
 
-    retval = krb5_store_all_creds(context, * cc_other, cc_def_creds_arr,
-                                  cc_other_creds_arr);
+    if (restrict_creds) {
+        retval = krb5_store_some_creds(context, *cc_other, cc_def_creds_arr,
+                                       cc_other_creds_arr, primary_principal,
+                                       stored);
+    } else {
+        *stored = krb5_find_princ_in_cred_list(context, cc_def_creds_arr,
+                                               primary_principal);
+        retval = krb5_store_all_creds(context, *cc_other, cc_def_creds_arr,
+                                      cc_other_creds_arr);
+    }
 
     if (cc_def_creds_arr){
         while (cc_def_creds_arr[i]){
@@ -622,93 +629,6 @@ krb5_error_code krb5_store_some_creds(context, cc, creds_def, creds_other, prst,
 
     *stored = temp_stored;
     return 0;
-}
-/******************************************************************
-krb5_cache_copy_restricted
-
-gets rid of any expired tickets in the secondary cache,
-copies the default cache into the secondary cache,
-only credentials that are for prst are copied.
-
-the algorithm may look a bit funny,
-but I had to do it this way, since cc_remove function did not come
-with k5 beta 3 release.
-************************************************************************/
-
-krb5_error_code krb5_ccache_copy_restricted (context, cc_def, cc_other_tag,
-                                             prst, cc_out, stored, target_uid)
-    krb5_context context;
-    krb5_ccache cc_def;
-    char *cc_other_tag;
-    krb5_principal prst;
-    uid_t target_uid;
-    /* OUT */
-    krb5_ccache *cc_out;
-    krb5_boolean *stored;
-{
-
-    int i=0;
-    krb5_ccache  * cc_other;
-    const char * cc_def_name;
-    const char * cc_other_name;
-    krb5_error_code retval=0;
-    krb5_creds ** cc_def_creds_arr = NULL;
-    krb5_creds ** cc_other_creds_arr = NULL;
-    struct stat st_temp;
-
-    cc_other = (krb5_ccache *)  xcalloc(1, sizeof (krb5_ccache));
-
-    if ((retval = krb5_cc_resolve(context, cc_other_tag, cc_other))){
-        com_err(prog_name, retval, _("resolving ccache %s"), cc_other_tag);
-        return retval;
-    }
-
-    cc_def_name = krb5_cc_get_name(context, cc_def);
-    cc_other_name = krb5_cc_get_name(context, *cc_other);
-
-    if ( ! stat(cc_def_name, &st_temp)){
-        if((retval = krb5_get_nonexp_tkts(context,cc_def,&cc_def_creds_arr))){
-            return retval;
-        }
-
-    }
-
-    if (!lstat( cc_other_name, &st_temp)) {
-        return EINVAL;
-    }
-
-    if (krb5_seteuid(0)||krb5_seteuid(target_uid)) {
-        return errno;
-    }
-
-
-    if ((retval = krb5_cc_initialize(context, *cc_other, prst))){
-        return retval;
-    }
-
-    retval = krb5_store_some_creds(context, * cc_other,
-                                   cc_def_creds_arr, cc_other_creds_arr, prst, stored);
-
-
-
-    if (cc_def_creds_arr){
-        while (cc_def_creds_arr[i]){
-            krb5_free_creds(context, cc_def_creds_arr[i]);
-            i++;
-        }
-    }
-
-    i=0;
-
-    if(cc_other_creds_arr){
-        while (cc_other_creds_arr[i]){
-            krb5_free_creds(context, cc_other_creds_arr[i]);
-            i++;
-        }
-    }
-
-    *cc_out = *cc_other;
-    return retval;
 }
 
 krb5_error_code krb5_ccache_filter (context, cc, prst)
