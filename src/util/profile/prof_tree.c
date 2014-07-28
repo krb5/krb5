@@ -294,6 +294,8 @@ errcode_t profile_find_node(struct profile_node *section, const char *name,
             if (value && (strcmp(p->value, value)))
                 continue;
         }
+        if (p->deleted)
+            continue;
         /* A match! */
         break;
     }
@@ -519,7 +521,7 @@ get_new_file:
         assert(section != NULL);
         for (cpp = iter->names; cpp[iter->done_idx]; cpp++) {
             for (p=section->first_child; p; p = p->next) {
-                if (!strcmp(p->name, *cpp) && !p->value)
+                if (!strcmp(p->name, *cpp) && !p->value && !p->deleted)
                     break;
             }
             if (!p) {
