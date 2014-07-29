@@ -237,6 +237,19 @@ The libdefaults section may contain any of the following relations:
     For security reasons, .k5login files must be owned by
     the local user or by root.
 
+**kcm_mach_service**
+    On OS X only, determines the name of the bootstrap service used to
+    contact the KCM daemon for the KCM credential cache type.  If the
+    value is ``-``, Mach RPC will not be used to contact the KCM
+    daemon.  The default value is ``org.h5l.kcm``.
+
+**kcm_socket**
+    Determines the path to the Unix domain socket used to access the
+    KCM daemon for the KCM credential cache type.  If the value is
+    ``-``, Unix domain sockets will not be used to contact the KCM
+    daemon.  The default value is
+    ``/var/run/.heim_org.h5l.kcm-socket``.
+
 **kdc_default_options**
     Default KDC options (Xored for multiple values) when requesting
     initial tickets.  By default it is set to 0x00000010

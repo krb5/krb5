@@ -2034,10 +2034,9 @@ krb5_dbe_set_string(krb5_context context, krb5_db_entry *entry,
 {
     krb5_error_code code;
     const char *pos, *end, *mapkey, *mapval;
-    struct k5buf buf;
+    struct k5buf buf = EMPTY_K5BUF;
     krb5_boolean found = FALSE;
     krb5_tl_data tl_data;
-    ssize_t len;
 
     /* Copy the current mapping to buf, updating key with value if found. */
     code = begin_attrs(context, entry, &pos, &end);
@@ -2063,17 +2062,20 @@ krb5_dbe_set_string(krb5_context context, krb5_db_entry *entry,
         k5_buf_add_len(&buf, value, strlen(value) + 1);
     }
 
-    len = k5_buf_len(&buf);
-    if (len == -1)
+    if (k5_buf_status(&buf) != 0)
         return ENOMEM;
-    if (len > 65535)
-        return KRB5_KDB_STRINGS_TOOLONG;
+    if (buf.len > 65535) {
+        code = KRB5_KDB_STRINGS_TOOLONG;
+        goto cleanup;
+    }
     tl_data.tl_data_type = KRB5_TL_STRING_ATTRS;
-    tl_data.tl_data_contents = (krb5_octet *)k5_buf_data(&buf);
-    tl_data.tl_data_length = len;
+    tl_data.tl_data_contents = buf.data;
+    tl_data.tl_data_length = buf.len;
 
     code = krb5_dbe_update_tl_data(context, entry, &tl_data);
-    k5_free_buf(&buf);
+
+cleanup:
+    k5_buf_free(&buf);
     return code;
 }
 

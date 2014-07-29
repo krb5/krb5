@@ -106,13 +106,9 @@ gss_export_cred(OM_uint32 * minor_status, gss_cred_id_t cred_handle,
         gss_release_buffer(&tmpmin, &mech_token);
     }
 
-    if (k5_buf_data(&buf) == NULL) {
-        *minor_status = ENOMEM;
-        return GSS_S_FAILURE;
-    }
     return k5buf_to_gss(minor_status, &buf, token);
 
 error:
-    k5_free_buf(&buf);
+    k5_buf_free(&buf);
     return status;
 }

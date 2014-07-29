@@ -250,7 +250,7 @@ static void test_hmac()
         k5_buf_add(&buf, "0x");
         for (j = 0; j < out.length; j++)
             k5_buf_add_fmt(&buf, "%02x", 0xff & outbuf[j]);
-        if (k5_buf_data(&buf) == NULL)
+        if (k5_buf_status(&buf) != 0)
             abort();
         if (strcmp(stroutbuf, md5tests[i].hexdigest)) {
             printf("*** CHECK FAILED!\n"

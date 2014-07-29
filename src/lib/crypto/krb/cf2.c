@@ -59,12 +59,11 @@ prf_plus(krb5_context context, krb5_keyblock *k, const char *pepper,
     buffer = k5calloc(iterations, prflen, &retval);
     if (retval)
         goto cleanup;
-    if (k5_buf_len(&prf_inbuf) == -1) {
-        retval = ENOMEM;
+    retval = k5_buf_status(&prf_inbuf);
+    if (retval)
         goto cleanup;
-    }
-    in_data.length = (krb5_int32)k5_buf_len(&prf_inbuf);
-    in_data.data = k5_buf_data(&prf_inbuf);
+    in_data.length = prf_inbuf.len;
+    in_data.data = prf_inbuf.data;
     out_data.length = prflen;
     out_data.data = buffer;
 
@@ -82,7 +81,7 @@ prf_plus(krb5_context context, krb5_keyblock *k, const char *pepper,
 
 cleanup:
     free(buffer);
-    k5_free_buf(&prf_inbuf);
+    k5_buf_free(&prf_inbuf);
     return retval;
 }
 

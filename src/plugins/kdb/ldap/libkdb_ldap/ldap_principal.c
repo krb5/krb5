@@ -422,9 +422,9 @@ krb5_ldap_parse_principal_name(char *i_princ_name, char **o_princ_name)
             k5_buf_add_len(&buf, p, 1);
         }
         k5_buf_add(&buf, at_rlm_name);
-        *o_princ_name = k5_buf_data(&buf);
-        if (!*o_princ_name)
+        if (k5_buf_status(&buf) != 0)
             return ENOMEM;
+        *o_princ_name = buf.data;
     }
     return 0;
 }

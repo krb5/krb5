@@ -54,7 +54,20 @@ library.
 
 #. **FILE** caches are the simplest and most portable. A simple flat
    file format is used to store one credential after another.  This is
-   the default ccache type.
+   the default ccache type if no type is specified in a ccache name.
+
+#. **KCM** caches work by contacting a daemon process called ``kcm``
+   to perform cache operations.  If the cache name is just ``KCM:``,
+   the default cache as determined by the KCM daemon will be used.
+   Newly created caches must generally be named ``KCM:uid:name``,
+   where *uid* is the effective user ID of the running process.
+
+   KCM client support is new in release 1.13.  A KCM daemon has not
+   yet been implemented in MIT krb5, but the client will interoperate
+   with the KCM daemon implemented by Heimdal.  OS X 10.7 and higher
+   provides a KCM daemon as part of the operating system, and the
+   **KCM** cache type is used as the default cache on that platform in
+   a default build.
 
 #. **KEYRING** is Linux-specific, and uses the kernel keyring support
    to store credential data in unswappable kernel memory where only
@@ -104,8 +117,10 @@ select between the caches in the collection based on criteria such as
 the target service realm.
 
 Credential cache collections are new in release 1.10, with support
-from the **DIR** and **API** ccache types.  In release 1.12, the
-**KEYRING** ccache type also supports collections.
+from the **DIR** and **API** ccache types.  Starting in release 1.12,
+collections are also supported by the **KEYRING** ccache type.
+Collections are supported by the **KCM** ccache type in release 1.13.
+
 
 Tool alterations to use cache collection
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
