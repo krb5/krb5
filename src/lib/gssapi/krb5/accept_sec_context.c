@@ -314,8 +314,10 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
     if (mech_type)
         *mech_type = GSS_C_NULL_OID;
     /* return a bogus cred handle */
-    if (delegated_cred_handle)
+    if (delegated_cred_handle) {
+        ctx->gss_flags &= ~GSS_C_DELEG_FLAG;
         *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
+    }
 
     ctx = (krb5_gss_ctx_id_rec *)*context_handle;
 
@@ -499,8 +501,10 @@ kg_accept_krb5(minor_status, context_handle,
     if (mech_type)
         *mech_type = GSS_C_NULL_OID;
     /* return a bogus cred handle */
-    if (delegated_cred_handle)
+    if (delegated_cred_handle) {
         *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
+        ctx->gss_flags &= GSS_C_DELEG_FLAG;
+    }
 
     /* handle default cred handle */
     if (verifier_cred_handle == GSS_C_NO_CREDENTIAL) {
