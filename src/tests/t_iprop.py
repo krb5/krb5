@@ -153,7 +153,6 @@ if not os.path.exists(ulog):
 
 # Create the principal used to authenticate kpropd to kadmind.
 kiprop_princ = 'kiprop/' + hostname
-realm.addprinc(kiprop_princ)
 realm.extract_keytab(kiprop_princ, realm.keytab)
 
 # Create the initial slave1 and slave2 databases.

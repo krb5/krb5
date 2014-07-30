@@ -93,16 +93,6 @@ extern time_t get_date(char *); /* kadmin/cli/getdate.o */
 char *yes = "yes\n"; /* \n to compare against result of fgets */
 krb5_key_salt_tuple def_kslist = {ENCTYPE_DES_CBC_CRC, KRB5_KDB_SALTTYPE_NORMAL};
 
-struct realm_info rblock = {
-    KRB5_KDB_MAX_LIFE,
-    KRB5_KDB_MAX_RLIFE,
-    KRB5_KDB_EXPIRATION,
-    KRB5_KDB_DEF_FLAGS,
-    (krb5_keyblock *) NULL,
-    1,
-    &def_kslist
-};
-
 krb5_data tgt_princ_entries[] = {
     {0, KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME},
     {0, 0, 0} };
@@ -299,6 +289,104 @@ err_nomsg:
     return mask;
 }
 
+/* Create a special principal using two specified components. */
+static krb5_error_code
+create_fixed_special(krb5_context context, struct realm_info *rinfo,
+                     krb5_keyblock *mkey, const char *comp1, const char *comp2)
+{
+    krb5_error_code ret;
+    krb5_principal princ;
+    const char *realm = global_params.realm;
+
+    ret = krb5_build_principal(context, &princ, strlen(realm), realm, comp1,
+                               comp2, (const char *)NULL);
+    if (ret)
+        return ret;
+    ret = kdb_ldap_create_principal(context, princ, TGT_KEY, rinfo, mkey);
+    krb5_free_principal(context, princ);
+    return ret;
+
+}
+
+/* Create a special principal using one specified component and the
+ * canonicalized local hostname. */
+static krb5_error_code
+create_hostbased_special(krb5_context context, struct realm_info *rinfo,
+                         krb5_keyblock *mkey, const char *comp1)
+{
+    krb5_error_code ret;
+    krb5_principal princ = NULL;
+
+    ret = krb5_sname_to_principal(context, NULL, "kadmin", KRB5_NT_SRV_HST,
+                                  &princ);
+    if (ret)
+        goto cleanup;
+    ret = krb5_set_principal_realm(context, princ, global_params.realm);
+    if (ret)
+        goto cleanup;
+    ret = kdb_ldap_create_principal(context, princ, TGT_KEY, rinfo, mkey);
+
+cleanup:
+    krb5_free_principal(context, princ);
+    return ret;
+}
+
+/* Create all special principals for the realm. */
+static krb5_error_code
+create_special_princs(krb5_context context, krb5_principal master_princ,
+                      krb5_keyblock *mkey)
+{
+    krb5_error_code ret;
+    struct realm_info rblock;
+
+    rblock.max_life = global_params.max_life;
+    rblock.max_rlife = global_params.max_rlife;
+    rblock.expiration = global_params.expiration;
+    rblock.flags = global_params.flags;
+    rblock.key = mkey;
+    rblock.nkslist = global_params.num_keysalts;
+    rblock.kslist = global_params.keysalts;
+
+    /* Create master principal. */
+    rblock.flags |= KRB5_KDB_DISALLOW_ALL_TIX;
+    ret = kdb_ldap_create_principal(context, master_princ, MASTER_KEY, &rblock,
+                                    mkey);
+    if (ret)
+        return ret;
+
+    /* Create local krbtgt principal. */
+    rblock.flags = 0;
+    ret = create_fixed_special(context, &rblock, mkey, KRB5_TGS_NAME,
+                               global_params.realm);
+    if (ret)
+        return ret;
+
+    /* Create kadmin/admin, kadmin/<hostname> and kiprop/<hostname>. */
+    rblock.max_life = ADMIN_LIFETIME;
+    rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED;
+    ret = create_fixed_special(context, &rblock, mkey, "kadmin", "admin");
+    if (ret)
+        return ret;
+    ret = create_hostbased_special(context, &rblock, mkey, "kadmin");
+    if (ret)
+        return ret;
+    ret = create_hostbased_special(context, &rblock, mkey, "kiprop");
+    if (ret)
+        return ret;
+
+    /* Create kadmin/changepw. */
+    rblock.max_life = CHANGEPW_LIFETIME;
+    rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED | KRB5_KDB_PWCHANGE_SERVICE;
+    ret = create_fixed_special(context, &rblock, mkey, "kadmin", "changepw");
+    if (ret)
+        return ret;
+
+    /* Create kadmin/history. */
+    rblock.max_life = global_params.max_life;
+    rblock.flags = 0;
+    return create_fixed_special(context, &rblock, mkey, "kadmin", "history");
+}
+
 /*
  * This function will create a realm on the LDAP Server, with
  * the specified attributes.
@@ -413,18 +501,6 @@ kdb5_ldap_create(int argc, char *argv[])
             goto err_usage;
         }
     }
-
-    /* If the default enctype/salttype is not provided, use the
-     * default values and also add to the list of supported
-     * enctypes/salttype
-     */
-
-    rblock.max_life = global_params.max_life;
-    rblock.max_rlife = global_params.max_rlife;
-    rblock.expiration = global_params.expiration;
-    rblock.flags = global_params.flags;
-    rblock.nkslist = global_params.num_keysalts;
-    rblock.kslist = global_params.keysalts;
 
     krb5_princ_set_realm_data(util_context, &db_create_princ, global_params.realm);
     krb5_princ_set_realm_length(util_context, &db_create_princ, strlen(global_params.realm));
@@ -550,147 +626,17 @@ kdb5_ldap_create(int argc, char *argv[])
                     _("while transforming master key from password"));
             goto err_nomsg;
         }
-
-        rblock.key = &master_keyblock;
     }
 
-    /* Create special principals inside the realm subtree */
-    {
-        char princ_name[MAX_PRINC_SIZE];
-        krb5_principal_data tgt_princ = {
-            0,                                  /* magic number */
-            {0, 0, 0},                          /* krb5_data realm */
-            tgt_princ_entries,                  /* krb5_data *data */
-            2,                                  /* int length */
-            KRB5_NT_SRV_INST                    /* int type */
-        };
-        krb5_principal p, temp_p=NULL;
-
-        krb5_princ_set_realm_data(util_context, &tgt_princ, global_params.realm);
-        krb5_princ_set_realm_length(util_context, &tgt_princ, strlen(global_params.realm));
-        krb5_princ_component(util_context, &tgt_princ,1)->data = global_params.realm;
-        krb5_princ_component(util_context, &tgt_princ,1)->length = strlen(global_params.realm);
-        /* The container reference value is set to NULL, to avoid service principals
-         * getting created within the container reference at realm creation */
-        if (ldap_context->lrparams->containerref != NULL) {
-            oldcontainerref = ldap_context->lrparams->containerref;
-            ldap_context->lrparams->containerref = NULL;
-        }
-
-        /* Create 'K/M' ... */
-        rblock.flags |= KRB5_KDB_DISALLOW_ALL_TIX;
-        if ((retval = kdb_ldap_create_principal(util_context, master_princ,
-                                                MASTER_KEY, &rblock,
-                                                &master_keyblock))) {
-            com_err(progname, retval,
-                    _("while adding entries to the database"));
-            goto err_nomsg;
-        }
-
-        /* Create 'krbtgt' ... */
-        rblock.flags = 0; /* reset the flags */
-        if ((retval = kdb_ldap_create_principal(util_context, &tgt_princ,
-                                                TGT_KEY, &rblock,
-                                                &master_keyblock))) {
-            com_err(progname, retval,
-                    _("while adding entries to the database"));
-            goto err_nomsg;
-        }
-
-        /* Create 'kadmin/admin' ... */
-        snprintf(princ_name, sizeof(princ_name), "%s@%s", KADM5_ADMIN_SERVICE, global_params.realm);
-        if ((retval = krb5_parse_name(util_context, princ_name, &p))) {
-            com_err(progname, retval,
-                    _("while adding entries to the database"));
-            goto err_nomsg;
-        }
-        rblock.max_life = ADMIN_LIFETIME;
-        rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED;
-        if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY,
-                                                &rblock, &master_keyblock))) {
-            krb5_free_principal(util_context, p);
-            com_err(progname, retval,
-                    _("while adding entries to the database"));
-            goto err_nomsg;
-        }
-        krb5_free_principal(util_context, p);
-
-        /* Create 'kadmin/changepw' ... */
-        snprintf(princ_name, sizeof(princ_name), "%s@%s", KADM5_CHANGEPW_SERVICE, global_params.realm);
-        if ((retval = krb5_parse_name(util_context, princ_name, &p))) {
-            com_err(progname, retval,
-                    _("while adding entries to the database"));
-            goto err_nomsg;
-        }
-        rblock.max_life = CHANGEPW_LIFETIME;
-        rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED |
-            KRB5_KDB_PWCHANGE_SERVICE;
-        if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY,
-                                                &rblock, &master_keyblock))) {
-            krb5_free_principal(util_context, p);
-            com_err(progname, retval,
-                    _("while adding entries to the database"));
-            goto err_nomsg;
-        }
-        krb5_free_principal(util_context, p);
-
-        /* Create 'kadmin/history' ... */
-        snprintf(princ_name, sizeof(princ_name), "%s@%s", KADM5_HIST_PRINCIPAL, global_params.realm);
-        if ((retval = krb5_parse_name(util_context, princ_name, &p))) {
-            com_err(progname, retval,
-                    _("while adding entries to the database"));
-            goto err_nomsg;
-        }
-        rblock.max_life = global_params.max_life;
-        rblock.flags = 0;
-        if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY,
-                                                &rblock, &master_keyblock))) {
-            krb5_free_principal(util_context, p);
-            com_err(progname, retval,
-                    _("while adding entries to the database"));
-            goto err_nomsg;
-        }
-        krb5_free_principal(util_context, p);
-
-        /* Create 'kadmin/<hostname>' ... */
-        if ((retval=krb5_sname_to_principal(util_context, NULL, "kadmin", KRB5_NT_SRV_HST, &p))) {
-            com_err(progname, retval, _("krb5_sname_to_principal, while "
-                                        "adding entries to the database"));
-            goto err_nomsg;
-        }
-
-        if ((retval=krb5_copy_principal(util_context, p, &temp_p))) {
-            com_err(progname, retval, _("krb5_copy_principal, while adding "
-                                        "entries to the database"));
-            goto err_nomsg;
-        }
-
-        /* change the realm portion to the default realm */
-        free(temp_p->realm.data);
-        temp_p->realm.length = strlen(util_context->default_realm);
-        temp_p->realm.data = strdup(util_context->default_realm);
-        if (temp_p->realm.data == NULL) {
-            com_err(progname, ENOMEM,
-                    _("while adding entries to the database"));
-            goto err_nomsg;
-        }
-
-        rblock.max_life = ADMIN_LIFETIME;
-        rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED;
-        if ((retval = kdb_ldap_create_principal(util_context, temp_p, TGT_KEY,
-                                                &rblock, &master_keyblock))) {
-            krb5_free_principal(util_context, p);
-            com_err(progname, retval,
-                    _("while adding entries to the database"));
-            goto err_nomsg;
-        }
-        krb5_free_principal(util_context, temp_p);
-        krb5_free_principal(util_context, p);
-
-        if (oldcontainerref != NULL) {
-            ldap_context->lrparams->containerref = oldcontainerref;
-            oldcontainerref=NULL;
-        }
+    /* Create special principals (not in the container reference). */
+    oldcontainerref = ldap_context->lrparams->containerref;
+    ldap_context->lrparams->containerref = NULL;
+    retval = create_special_princs(util_context, master_princ,
+                                   &master_keyblock);
+    ldap_context->lrparams->containerref = oldcontainerref;
+    if (retval) {
+        com_err(progname, retval, _("while adding entries to the database"));
+        goto err_nomsg;
     }
 
     /* The Realm creation is completed. Here is the end of transaction */

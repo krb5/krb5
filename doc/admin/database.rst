@@ -805,7 +805,8 @@ Both master and slave sides must have a principal named
 ``kiprop/hostname`` (where *hostname* is the lowercase,
 fully-qualified, canonical name for the host) registered in the
 Kerberos database, and have keys for that principal stored in the
-default keytab file (|keytab|).
+default keytab file (|keytab|). In release 1.13, on the master KDC 
+side, the ``kiprop/hostname`` principal is created automatically.
 
 On the master KDC side, the ``kiprop/hostname`` principal must be
 listed in the kadmind ACL file :ref:`kadm5.acl(5)`, and given the

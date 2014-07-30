@@ -145,7 +145,7 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
 static int add_admin_princs(void *handle, krb5_context context, char *realm)
 {
     krb5_error_code ret = 0;
-    char *service_name = 0, *p;
+    char *service_name = 0, *kiprop_name = 0, *p;
     char localname[MAXHOSTNAMELEN];
     struct addrinfo *ai, ai_hints;
     int gai_error;
@@ -191,10 +191,22 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
         freeaddrinfo(ai);
         goto clean_and_exit;
     }
+    if (asprintf(&kiprop_name, "kiprop/%s", ai->ai_canonname) < 0) {
+        ret = ENOMEM;
+        fprintf(stderr, _("Out of memory\n"));
+        freeaddrinfo(ai);
+        goto clean_and_exit;
+    }
     freeaddrinfo(ai);
 
     if ((ret = add_admin_princ(handle, context,
                                service_name, realm,
+                               KRB5_KDB_DISALLOW_TGT_BASED,
+                               ADMIN_LIFETIME)))
+        goto clean_and_exit;
+
+    if ((ret = add_admin_princ(handle, context,
+                               kiprop_name, realm,
                                KRB5_KDB_DISALLOW_TGT_BASED,
                                ADMIN_LIFETIME)))
         goto clean_and_exit;
@@ -214,6 +226,7 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
 
 clean_and_exit:
     free(service_name);
+    free(kiprop_name);
 
     return ret;
 }

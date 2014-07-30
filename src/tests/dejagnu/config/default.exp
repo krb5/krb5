@@ -1254,7 +1254,7 @@ proc setup_kerberos_db { standalone } {
     }
 
     # Add an incremental-propagation service.
-    set test "kadmin.local ank kiprop/$hostname"
+    set test "kadmin.local ank krbtest/fast"
     set body {
 	if $failall {
 	    break
@@ -1263,18 +1263,6 @@ proc setup_kerberos_db { standalone } {
 	verbose "starting $test"
 	expect_after $def_exp_after
 
-	expect "kadmin.local: "
-	send "ank kiprop/$hostname@$REALMNAME\r"
-	# It echos...
-	expect "ank kiprop/$hostname@$REALMNAME\r"
-	expect "Enter password for principal \"kiprop/$hostname@$REALMNAME\":"
-	send "kiproppass$KEY\r"
-	expect "Re-enter password for principal \"kiprop/$hostname@$REALMNAME\":"
-	send "kiproppass$KEY\r"
-	expect {
-	    "Principal \"kiprop/$hostname@$REALMNAME\" created" { }
-	    "Principal or policy already exists while creating*" { }
-	}
 	expect "kadmin.local: "
 	send "ank +requires_preauth krbtest/fast@$REALMNAME\r"
 	expect "Enter password for principal \"krbtest/fast@$REALMNAME\":"
