@@ -463,7 +463,8 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
             j++;
             last = i + 1;
 
-            currkvno = key_data[i].key_data_kvno;
+            if (i < n_key_data - 1)
+                currkvno = key_data[i + 1].key_data_kvno;
         }
     }
     ret[num_versions] = NULL;
