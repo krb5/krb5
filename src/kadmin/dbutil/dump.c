@@ -1229,7 +1229,7 @@ dump_db(int argc, char **argv)
     kdb_log_context *log_ctx;
     unsigned int ipropx_version = IPROPX_VERSION_0;
     krb5_kvno kt_kvno;
-    krb5_boolean conditional = FALSE, db_locked = FALSE;
+    krb5_boolean conditional = FALSE;
     kdb_last_t last;
 
     /* Parse the arguments. */
@@ -1396,15 +1396,6 @@ dump_db(int argc, char **argv)
     fprintf(args.ofile, "%s", dump->header);
 
     if (dump_sno) {
-        /* Make sure the dump reflects the serial number we're recording. */
-        ret = krb5_db_lock(util_context, KRB5_DB_LOCKMODE_SHARED);
-        if (ret == 0) {
-            db_locked = TRUE;
-        } else if (ret != KRB5_PLUGIN_OP_NOTSUPP) {
-            fprintf(stderr, _("%s: Couldn't grab lock\n"), progname);
-            goto error;
-        }
-
         ret = ulog_get_last(util_context, &last);
         if (ret) {
             com_err(progname, ret, _("while reading update log header"));
@@ -1442,8 +1433,6 @@ dump_db(int argc, char **argv)
     return;
 
 error:
-    if (db_locked)
-        krb5_db_unlock(util_context);
     if (tmpofile != NULL)
         unlink(tmpofile);
     free(tmpofile);
