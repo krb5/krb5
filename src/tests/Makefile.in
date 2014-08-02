@@ -51,6 +51,10 @@ t_init_creds: t_init_creds.o $(KRB5_BASE_DEPLIBS)
 t_localauth: t_localauth.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_localauth.o $(KRB5_BASE_LIBS)
 
+unlockiter: unlockiter.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ unlockiter.o $(KDB5_LIBS) $(KADMSRV_LIBS) \
+		$(KRB5_BASE_LIBS)
+
 check-unix:: kdb_check
 
 kdc.conf: Makefile
@@ -94,7 +98,7 @@ kdb_check: kdc.conf krb5.conf
 	$(RM) $(TEST_DB)* stash_file
 
 check-pytests:: gcred hist hrealm kdbtest plugorder rdreq responder s2p
-check-pytests:: t_init_creds t_localauth
+check-pytests:: t_init_creds t_localauth unlockiter
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_iprop.py $(PYTESTFLAGS)
@@ -136,6 +140,7 @@ check-pytests:: t_init_creds t_localauth
 	$(RUNPYTEST) $(srcdir)/t_bogus_kdc_req.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kdc_log.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_proxy.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_unlockiter.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) gcred hist hrealm kdbtest plugorder rdreq responder s2p
