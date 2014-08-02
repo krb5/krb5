@@ -278,6 +278,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_SUPPORTED_ENCTYPES           "supported_enctypes"
 #define KRB5_CONF_TICKET_LIFETIME              "ticket_lifetime"
 #define KRB5_CONF_UDP_PREFERENCE_LIMIT         "udp_preference_limit"
+#define KRB5_CONF_UNLOCKITER                   "unlockiter"
 #define KRB5_CONF_V4_INSTANCE_CONVERT          "v4_instance_convert"
 #define KRB5_CONF_V4_REALM                     "v4_realm"
 #define KRB5_CONF_VERIFY_AP_REQ_NOFAIL         "verify_ap_req_nofail"

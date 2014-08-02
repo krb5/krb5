@@ -47,6 +47,7 @@ typedef struct _krb5_db2_context {
     krb5_boolean        tempdb;
     krb5_boolean        disable_last_success;
     krb5_boolean        disable_lockout;
+    krb5_boolean        unlockiter;
 } krb5_db2_context;
 
 krb5_error_code krb5_db2_init(krb5_context);
