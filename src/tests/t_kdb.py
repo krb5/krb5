@@ -285,6 +285,17 @@ realm.run([kvno, 'alias'])
 realm.kinit(realm.user_princ, flags=['-R', '-S', 'alias'])
 realm.klist(realm.user_princ, 'alias@KRBTEST.COM')
 
+# Regression test for #7980 (fencepost when dividing keys up by kvno).
+realm.run_kadminl('addprinc -randkey -e aes256-cts,aes128-cts kvnoprinc')
+realm.run_kadminl('cpw -randkey -keepold -e aes256-cts,aes128-cts kvnoprinc')
+out = realm.run_kadminl('getprinc kvnoprinc')
+if 'Number of keys: 4' not in out:
+    fail('After cpw -keepold, wrong number of keys')
+realm.run_kadminl('cpw -randkey -keepold -e aes256-cts,aes128-cts kvnoprinc')
+out = realm.run_kadminl('getprinc kvnoprinc')
+if 'Number of keys: 6' not in out:
+    fail('After cpw -keepold, wrong number of keys')
+
 realm.stop()
 
 # Briefly test dump and load.
