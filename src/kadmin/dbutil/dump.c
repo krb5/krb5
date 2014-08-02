@@ -1231,6 +1231,7 @@ dump_db(int argc, char **argv)
     krb5_kvno kt_kvno;
     krb5_boolean conditional = FALSE;
     kdb_last_t last;
+    krb5_flags iterflags = 0;
 
     /* Parse the arguments. */
     dump = &r1_11_version;
@@ -1278,10 +1279,11 @@ dump_db(int argc, char **argv)
         } else if (!strcmp(argv[aindex], "-new_mkey_file")) {
             new_mkey_file = argv[++aindex];
             mkey_convert = 1;
-        } else if (!strcmp(argv[aindex], "-rev") ||
-                   !strcmp(argv[aindex], "-recurse")) {
-            /* Accept these for compatibility, but do nothing since
-             * krb5_db_iterate doesn't support them. */
+        } else if (!strcmp(argv[aindex], "-rev")) {
+            iterflags |= KRB5_DB_ITER_REV;
+        } else if (!strcmp(argv[aindex], "-recurse")) {
+            /* Accept this for compatibility, but do nothing since
+             * krb5_db_iterate doesn't support it. */
         } else {
             break;
         }
@@ -1411,7 +1413,7 @@ dump_db(int argc, char **argv)
     if (dump->header[strlen(dump->header)-1] != '\n')
         fputc('\n', args.ofile);
 
-    ret = krb5_db_iterate(util_context, NULL, dump_iterator, &args, 0);
+    ret = krb5_db_iterate(util_context, NULL, dump_iterator, &args, iterflags);
     if (ret) {
         com_err(progname, ret, _("performing %s dump"), dump->name);
         goto error;
