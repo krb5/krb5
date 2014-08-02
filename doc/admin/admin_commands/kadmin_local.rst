@@ -154,6 +154,19 @@ Supported options for the DB2 module are:
     **-x dbname=**\ \*filename*
         Specifies the base filename of the DB2 database.
 
+    **-x lockiter**
+        Make iteration operations hold the lock for the duration of
+        the entire operation, rather than temporarily releasing the
+        lock while handling each principal.  This is the default
+        behavior, but this option exists to allow command line
+        override of a [dbmodules] setting.  First introduced in
+        release 1.13.
+
+    **-x unlockiter**
+        Make iteration operations unlock the database for each
+        principal, instead of holding the lock for the duration of the
+        entire operation.  First introduced in release 1.13.
+
 Supported options for the LDAP module are:
 
     **-x host=**\ *ldapuri*

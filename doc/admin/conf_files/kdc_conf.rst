@@ -456,6 +456,13 @@ The following tags may be specified in a [dbmodules] subsection:
     **ldap_kdc_sasl_authcid** or **ldap_kadmind_sasl_authcid** names
     for SASL authentication.  This file must be kept secure.
 
+**unlockiter**
+    If set to ``true``, this DB2-specific tag causes iteration
+    operations to release the database lock while processing each
+    principal.  Setting this flag to ``true`` can prevent extended
+    blocking of KDC or kadmin operations when dumps of large databases
+    are in progress.  First introduced in release 1.13.
+
 The following tag may be specified directly in the [dbmodules]
 section to control where database modules are loaded from:
 
