@@ -437,7 +437,7 @@ kdb_iter_entry(kadm5_server_handle_t handle, char *match_entry,
     id.func = iter_fct;
     id.data = data;
 
-    ret = krb5_db_iterate(handle->context, match_entry, kdb_iter_func, &id);
+    ret = krb5_db_iterate(handle->context, match_entry, kdb_iter_func, &id, 0);
     if (ret)
         return(ret);
 

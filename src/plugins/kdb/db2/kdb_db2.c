@@ -928,7 +928,7 @@ typedef krb5_error_code (*ctx_iterate_cb)(krb5_pointer, krb5_db_entry *);
 
 static krb5_error_code
 ctx_iterate(krb5_context context, krb5_db2_context *dbc,
-            ctx_iterate_cb func, krb5_pointer func_arg)
+            ctx_iterate_cb func, krb5_pointer func_arg, krb5_flags iterflags)
 {
     DBT key, contents;
     krb5_data contdata;
@@ -969,12 +969,12 @@ ctx_iterate(krb5_context context, krb5_db2_context *dbc,
 
 krb5_error_code
 krb5_db2_iterate(krb5_context context, char *match_expr, ctx_iterate_cb func,
-                 krb5_pointer func_arg)
+                 krb5_pointer func_arg, krb5_flags iterflags)
 {
     if (!inited(context))
         return KRB5_KDB_DBNOTINITED;
     return ctx_iterate(context, context->dal_handle->db_context, func,
-                       func_arg);
+                       func_arg, iterflags);
 }
 
 krb5_boolean
@@ -1257,7 +1257,7 @@ ctx_merge_nra(krb5_context context, krb5_db2_context *dbc_temp,
 
     nra.kcontext = context;
     nra.db_context = dbc_real;
-    return ctx_iterate(context, dbc_temp, krb5_db2_merge_nra_iterator, &nra);
+    return ctx_iterate(context, dbc_temp, krb5_db2_merge_nra_iterator, &nra, 0);
 }
 
 /*

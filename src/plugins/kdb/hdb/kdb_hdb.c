@@ -888,7 +888,7 @@ static krb5_error_code
 kh_db_iterate(krb5_context context,
               char *match_entry,
               int (*func)(krb5_pointer, krb5_db_entry *),
-              krb5_pointer func_arg)
+              krb5_pointer func_arg, krb5_flags iterflags)
 {
     krb5_error_code code;
     kh_db_context *kh = KH_DB_CONTEXT(context);

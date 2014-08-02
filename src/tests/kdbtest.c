@@ -388,7 +388,7 @@ main()
 
     /* Exercise principal iteration code. */
     count = 0;
-    CHECK(krb5_db_iterate(ctx, "xy*", iter_princ_handler, &count));
+    CHECK(krb5_db_iterate(ctx, "xy*", iter_princ_handler, &count, 0));
     CHECK_COND(count == 1);
 
     CHECK(krb5_db_fini(ctx));

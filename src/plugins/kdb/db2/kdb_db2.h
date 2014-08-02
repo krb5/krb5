@@ -60,7 +60,7 @@ krb5_error_code krb5_db2_put_principal(krb5_context, krb5_db_entry *,
 krb5_error_code krb5_db2_iterate(krb5_context, char *,
                                  krb5_error_code (*)(krb5_pointer,
                                                      krb5_db_entry *),
-                                 krb5_pointer);
+                                 krb5_pointer, krb5_flags);
 krb5_error_code krb5_db2_set_nonblocking(krb5_context, krb5_boolean,
                                          krb5_boolean *);
 krb5_boolean krb5_db2_set_lockmode(krb5_context, krb5_boolean);

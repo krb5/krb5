@@ -69,7 +69,7 @@
 
 /* This version will be incremented when incompatible changes are made to the
  * KDB API, and will be kept in sync with the libkdb major version. */
-#define KRB5_KDB_API_VERSION 7
+#define KRB5_KDB_API_VERSION 8
 
 /* Salt types */
 #define KRB5_KDB_SALTTYPE_NORMAL        0
@@ -130,6 +130,10 @@
 
 #define KRB5_KDB_FLAGS_S4U                      ( KRB5_KDB_FLAG_PROTOCOL_TRANSITION | \
                                                   KRB5_KDB_FLAG_CONSTRAINED_DELEGATION )
+
+/* KDB iteration flags */
+#define KRB5_DB_ITER_WRITE      0x00000001
+#define KRB5_DB_ITER_REV        0x00000002
 
 /* String attribute names recognized by krb5 */
 #define KRB5_KDB_SK_SESSION_ENCTYPES            "session_enctypes"
@@ -380,7 +384,7 @@ krb5_error_code krb5_db_delete_principal ( krb5_context kcontext,
 krb5_error_code krb5_db_iterate ( krb5_context kcontext,
                                   char *match_entry,
                                   int (*func) (krb5_pointer, krb5_db_entry *),
-                                  krb5_pointer func_arg );
+                                  krb5_pointer func_arg, krb5_flags iterflags );
 
 
 krb5_error_code krb5_db_store_master_key  ( krb5_context kcontext,
@@ -1016,7 +1020,7 @@ typedef struct _kdb_vftabl {
     krb5_error_code (*iterate)(krb5_context kcontext,
                                char *match_entry,
                                int (*func)(krb5_pointer, krb5_db_entry *),
-                               krb5_pointer func_arg);
+                               krb5_pointer func_arg, krb5_flags iterflags);
 
     /*
      * Optional: Create a password policy entry.  Return an error if the policy

@@ -131,7 +131,7 @@ krb5_ldap_free_principal(krb5_context kcontext, krb5_db_entry *entry)
 krb5_error_code
 krb5_ldap_iterate(krb5_context context, char *match_expr,
                   krb5_error_code (*func)(krb5_pointer, krb5_db_entry *),
-                  krb5_pointer func_arg)
+                  krb5_pointer func_arg, krb5_flags iterflags)
 {
     krb5_db_entry            entry;
     krb5_principal           principal;

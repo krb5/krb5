@@ -950,7 +950,7 @@ krb5_db_delete_principal(krb5_context kcontext, krb5_principal search_for)
 krb5_error_code
 krb5_db_iterate(krb5_context kcontext, char *match_entry,
                 int (*func)(krb5_pointer, krb5_db_entry *),
-                krb5_pointer func_arg)
+                krb5_pointer func_arg, krb5_flags iterflags)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
@@ -960,7 +960,7 @@ krb5_db_iterate(krb5_context kcontext, char *match_entry,
         return status;
     if (v->iterate == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->iterate(kcontext, match_entry, func, func_arg);
+    return v->iterate(kcontext, match_entry, func, func_arg, iterflags);
 }
 
 /* Return a read only pointer alias to mkey list.  Do not free this! */

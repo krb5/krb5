@@ -1033,7 +1033,7 @@ kdb5_update_princ_encryption(int argc, char *argv[])
     }
 
     retval = krb5_db_iterate(util_context, name_pattern,
-                             update_princ_encryption_1, &data);
+                             update_princ_encryption_1, &data, 0);
     /* If exit_status is set, then update_princ_encryption_1 already
        printed a message.  */
     if (retval != 0 && exit_status == 0) {
@@ -1209,7 +1209,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
     if ((retval = krb5_db_iterate(util_context,
                                   NULL,
                                   find_mkvnos_in_use,
-                                  (krb5_pointer) &args))) {
+                                  (krb5_pointer) &args, 0))) {
         com_err(progname, retval, _("while finding master keys in use"));
         exit_status++;
         goto cleanup_return;

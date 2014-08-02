@@ -135,8 +135,8 @@ WRAP_K (krb5_db2_iterate,
         (krb5_context ctx, char *s,
          krb5_error_code (*f) (krb5_pointer,
                                krb5_db_entry *),
-         krb5_pointer p),
-        (ctx, s, f, p));
+         krb5_pointer p, krb5_flags flags),
+        (ctx, s, f, p, flags));
 
 WRAP_K (krb5_db2_create_policy,
         (krb5_context context, osa_policy_ent_t entry),

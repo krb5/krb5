@@ -1420,7 +1420,7 @@ dump_db(int argc, char **argv)
     if (dump->header[strlen(dump->header)-1] != '\n')
         fputc('\n', args.ofile);
 
-    ret = krb5_db_iterate(util_context, NULL, dump_iterator, &args);
+    ret = krb5_db_iterate(util_context, NULL, dump_iterator, &args, 0);
     if (ret) {
         com_err(progname, ret, _("performing %s dump"), dump->name);
         goto error;
