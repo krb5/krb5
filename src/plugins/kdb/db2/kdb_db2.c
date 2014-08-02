@@ -935,8 +935,14 @@ ctx_iterate(krb5_context context, krb5_db2_context *dbc,
     krb5_db_entry *entry;
     krb5_error_code retval;
     int dbret;
+    int lockmode;
 
-    retval = ctx_lock(context, dbc, KRB5_LOCKMODE_SHARED);
+    if (iterflags & KRB5_DB_ITER_WRITE)
+        lockmode = KRB5_LOCKMODE_EXCLUSIVE;
+    else
+        lockmode = KRB5_LOCKMODE_SHARED;
+
+    retval = ctx_lock(context, dbc, lockmode);
     if (retval)
         return retval;
 
