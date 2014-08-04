@@ -555,7 +555,7 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.43.1
 ##### KrbKeySet ::= SEQUENCE {
 ##### attribute-major-vno       [0] UInt16,
 ##### attribute-minor-vno       [1] UInt16,
-##### kvno                      [2] UInt32,
+##### kvno                      [2] UInt32, -- actual order of the set of keys by descending age (0 ... oldest password)
 ##### mkvno                     [3] UInt32 OPTIONAL -- actually kadmin/history key,
 ##### keys                      [4] SEQUENCE OF KrbKey,
 ##### ...

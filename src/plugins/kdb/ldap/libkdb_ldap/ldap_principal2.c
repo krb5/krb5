@@ -396,26 +396,10 @@ asn1_decode_sequence_of_keys(krb5_data *in, krb5_key_data **out,
     return 0;
 }
 
-
-/* Decoding ASN.1 encoded key */
-static struct berval **
-krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
-                         krb5_kvno mkvno) {
-    struct berval **ret = NULL;
-    int currkvno;
-    int num_versions = 1;
-    int i, j, last;
-    krb5_error_code err = 0;
-    krb5_key_data *key_data;
-
-    if (n_key_data <= 0)
-        return NULL;
-
-    /* Make a shallow copy of the key data so we can alter it. */
-    key_data = k5calloc(n_key_data, sizeof(*key_data), &err);
-    if (key_data_in == NULL)
-        goto cleanup;
-    memcpy(key_data, key_data_in, n_key_data * sizeof(*key_data));
+static krb5_error_code
+krb5_encode_keys_per_kvno(krb5_key_data *key_data, int n_key_data,
+                          krb5_kvno mkvno, struct berval **ret) {
+    int i, j, k, last, currkvno;
 
     /* Unpatched krb5 1.11 and 1.12 cannot decode KrbKey sequences with no salt
      * field.  For compatibility, always encode a salt field. */
@@ -428,6 +412,52 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
         }
     }
 
+    for (i = 0, last = 0, j = 0, currkvno = key_data[0].key_data_kvno;
+         i < n_key_data; i++) {
+        krb5_data *code;
+        if (i == n_key_data - 1 || key_data[i + 1].key_data_kvno != currkvno) {
+            asn1_encode_sequence_of_keys(key_data+last,
+                                         (krb5_int16) i - last + 1,
+                                         mkvno,
+                                         &code);
+            ret[j] = malloc(sizeof (struct berval));
+            if (ret[j] == NULL) {
+                for (k = 0; k < j; k++)
+                    free(ret[k]);
+                return ENOMEM;
+            }
+            ret[j]->bv_len = code->length;
+            ret[j]->bv_val = code->data;
+            j++;
+            last = i + 1;
+
+            if (1 < n_key_data - 1)
+                    currkvno = key_data[i+1].key_data_kvno;
+        }
+    }
+    ret[j] = NULL;
+    return 0;
+}
+
+/* ASN.1 encoding of secret key */
+static struct berval **
+krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
+                         krb5_kvno mkvno) {
+    struct berval **ret = NULL;
+    int num_versions = 1;
+    int i;
+    krb5_error_code err = 0;
+    krb5_key_data *key_data;
+
+    if (n_key_data <= 0)
+        return NULL;
+
+    /* Make a shallow copy of the key data so we can alter it. */
+    key_data = k5calloc(n_key_data, sizeof(*key_data), &err);
+    if (key_data == NULL || key_data_in == NULL)
+        goto cleanup;
+    memcpy(key_data, key_data_in, n_key_data * sizeof(*key_data));
+
     /* Find the number of key versions */
     for (i = 0; i < n_key_data - 1; i++)
         if (key_data[i].key_data_kvno != key_data[i + 1].key_data_kvno)
@@ -438,40 +468,65 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
         err = ENOMEM;
         goto cleanup;
     }
-    for (i = 0, last = 0, j = 0, currkvno = key_data[0].key_data_kvno; i < n_key_data; i++) {
-        krb5_data *code;
-        if (i == n_key_data - 1 || key_data[i + 1].key_data_kvno != currkvno) {
-            ret[j] = k5alloc(sizeof(struct berval), &err);
-            if (ret[j] == NULL)
-                goto cleanup;
-            err = asn1_encode_sequence_of_keys(key_data + last,
-                                               (krb5_int16)i - last + 1,
-                                               mkvno, &code);
-            if (err)
-                goto cleanup;
-            /*CHECK_NULL(ret[j]); */
-            ret[j]->bv_len = code->length;
-            ret[j]->bv_val = code->data;
-            free(code);
-            j++;
-            last = i + 1;
 
-            currkvno = key_data[i].key_data_kvno;
-        }
-    }
-    ret[num_versions] = NULL;
+    err = krb5_encode_keys_per_kvno(key_data, n_key_data, mkvno, ret);
 
 cleanup:
 
     free(key_data);
     if (err != 0) {
-        if (ret != NULL) {
-            for (i = 0; i <= num_versions; i++)
-                if (ret[i] != NULL)
-                    free (ret[i]);
-            free (ret);
-            ret = NULL;
+        free(ret);
+        ret = NULL;
+    }
+
+    return ret;
+}
+
+static struct berval **
+krb5_encode_histkey(osa_princ_ent_rec *princ_ent) {
+    unsigned int i;
+    int j, k, idx, oldest, n_key_data;
+    krb5_key_data *key_data = NULL;
+    krb5_error_code err = 0;
+    struct berval **ret = NULL;
+
+    if (princ_ent->old_key_len <= 0)
+        return NULL;
+
+    /* Count all the keys */
+    for (n_key_data = 0, i = 0; i < princ_ent->old_key_len; i++)
+        n_key_data += princ_ent->old_keys[i].n_key_data;
+
+    /* Flatten keys in history into single array */
+    key_data = k5calloc(n_key_data, sizeof(krb5_key_data), &err);
+    if (key_data == NULL)
+        goto cleanup;
+    oldest = (princ_ent->old_key_next < princ_ent->old_key_len) ?
+              princ_ent->old_key_next : 0;
+    for (i = 0, k = 0; i < princ_ent->old_key_len; i++) {
+        idx = (oldest + i) % princ_ent->old_key_len;
+        for (j = 0; j < princ_ent->old_keys[idx].n_key_data; j++) {
+            memcpy(&key_data[k], &princ_ent->old_keys[idx].key_data[j],
+                   sizeof (krb5_key_data));
+            /* For key history, use kvno for ordering by age */
+            key_data[k++].key_data_kvno = i;
         }
+    }
+
+    ret = (struct berval **) k5calloc (princ_ent->old_key_len + 1,
+                                     sizeof (struct berval *), &err);
+    if (ret == NULL)
+        goto cleanup;
+
+    err = krb5_encode_keys_per_kvno(key_data, n_key_data,
+                                    princ_ent->admin_history_kvno, ret);
+
+cleanup:
+
+    free(key_data);
+    if (err != 0) {
+        free (ret);
+        ret = NULL;
     }
 
     return ret;
@@ -990,7 +1045,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         free (strval[0]);
     }
 
-    if (entry->mask & KADM5_POLICY) {
+    if (entry->mask & KADM5_POLICY || entry->mask & KADM5_KEY_HIST) {
         memset(&princ_ent, 0, sizeof(princ_ent));
         for (tl_data=entry->tl_data; tl_data; tl_data=tl_data->tl_data_next) {
             if (tl_data->tl_data_type == KRB5_TL_KADM_DATA) {
@@ -1000,7 +1055,9 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                 break;
             }
         }
+    }
 
+    if (entry->mask & KADM5_POLICY) {
         if (princ_ent.aux_attributes & KADM5_POLICY) {
             memset(strval, 0, sizeof(strval));
             if ((st = krb5_ldap_name_to_policydn (context, princ_ent.policy, &polname)) != 0)
@@ -1025,6 +1082,16 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
 
     if (entry->mask & KADM5_POLICY_CLR) {
         if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdpolicyreference", LDAP_MOD_DELETE, NULL)) != 0)
+            goto cleanup;
+    }
+
+    if (entry->mask & KADM5_KEY_HIST) {
+        bersecretkey = krb5_encode_histkey(&princ_ent);
+
+        st = krb5_add_ber_mem_ldap_mod(&mods, "krbpwdhistory",
+                                       LDAP_MOD_REPLACE | LDAP_MOD_BVALUES,
+                                       bersecretkey);
+        if (st != 0)
             goto cleanup;
     }
 
@@ -1414,6 +1481,66 @@ cleanup:
     free (user);
     return st;
 }
+
+krb5_error_code
+krb5_decode_histkey(krb5_context context, krb5_db_entry *entries,
+                         struct berval **bvalues,
+                         osa_princ_ent_rec *princ_ent)
+{
+    unsigned int                i = 0, j = 0;
+    krb5_error_code             st = 0;
+
+    /* count passwords in history */
+    for (i = 0; bvalues[i] != NULL; ++i)
+            ;
+    princ_ent->old_key_len = i;
+    princ_ent->old_keys = calloc(i, sizeof (osa_pw_hist_ent));
+    if (princ_ent->old_keys == NULL) {
+        st = ENOMEM;
+        goto cleanup;
+    }
+
+    for (i = 0; bvalues[i] != NULL; ++i) {
+        krb5_int16 n_kd;
+        krb5_key_data *kd;
+        krb5_data in;
+
+        if (bvalues[i]->bv_len == 0)
+            continue;
+        in.length = bvalues[i]->bv_len;
+        in.data = bvalues[i]->bv_val;
+
+        st = asn1_decode_sequence_of_keys(&in,
+                                          &kd,
+                                          &n_kd,
+                                          &princ_ent->admin_history_kvno);
+
+        if (st != 0) {
+            const char *msg = error_message(st);
+            st = -1; /* Something more appropriate ? */
+            k5_setmsg(context, st,
+                      _("unable to decode stored principal pw history (%s)"),
+                      msg);
+            goto cleanup;
+        }
+        j = kd[0].key_data_kvno;
+        if (j >= princ_ent->old_key_len){
+            st = EINVAL;
+            k5_setmsg(context, st, _("invalid kvno in password history"));
+            goto cleanup;
+        }
+        princ_ent->old_keys[j].n_key_data = n_kd;
+        princ_ent->old_keys[j].key_data = kd;
+
+    }
+
+    princ_ent->aux_attributes |= KADM5_KEY_HIST;
+    princ_ent->old_key_next = princ_ent->old_key_len;
+
+cleanup:
+    return st;
+}
+
 
 static char *
 getstringtime(krb5_timestamp epochtime)

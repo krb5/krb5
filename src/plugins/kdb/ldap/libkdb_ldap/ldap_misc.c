@@ -40,6 +40,7 @@
 #include "ldap_pwd_policy.h"
 #include <time.h>
 #include <ctype.h>
+#include <kadm5/admin.h>
 
 #ifdef NEED_STRPTIME_PROTO
 extern char *strptime(const char *, const char *, struct tm *);
@@ -1333,6 +1334,7 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
     char **pnvalues = NULL, **ocvalues = NULL, **a2d2 = NULL;
     struct berval **ber_key_data = NULL, **ber_tl_data = NULL;
     krb5_tl_data userinfo_tl_data = { NULL }, **endp, *tl;
+    osa_princ_ent_rec princ_ent;
 
     ret = krb5_copy_principal(context, princ, &entry->princ);
     if (ret)
@@ -1441,6 +1443,8 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
             goto cleanup;
     }
 
+    memset(&princ_ent, 0, sizeof(osa_princ_ent_rec));
+
     ret = krb5_ldap_get_string(ld, ent, "krbpwdpolicyreference", &pwdpolicydn,
                                &attr_present);
     if (ret)
@@ -1452,8 +1456,21 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
         ret = krb5_ldap_policydn_to_name(context, pwdpolicydn, &polname);
         if (ret)
             goto cleanup;
+        princ_ent.policy = polname;
+        princ_ent.aux_attributes |= KADM5_POLICY;
+    }
 
-        ret = krb5_update_tl_kadm_data(context, entry, polname);
+    ber_key_data = ldap_get_values_len(ld, ent, "krbpwdhistory");
+    if (ber_key_data != NULL) {
+        mask |= KDB_PWD_HISTORY_ATTR;
+        ret = krb5_decode_histkey(context, entry, ber_key_data, &princ_ent);
+        if (ret)
+            goto cleanup;
+        ldap_value_free_len(ber_key_data);
+    }
+
+    if (princ_ent.aux_attributes) {
+        ret = krb5_update_tl_kadm_data(context, entry, &princ_ent);
         if (ret)
             goto cleanup;
     }
