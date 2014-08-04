@@ -35,7 +35,8 @@
  */
 
 #include <sys/types.h>
-#include <sys/socket.h>
+#include <sys/select.h>
+#include <sys/time.h>
 #include <sys/wait.h>
 
 #include <errno.h>
@@ -43,6 +44,7 @@
 #include <kadm5/admin.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <string.h>             /* Some platforms need memset() for FD_ZERO */
 #include <unistd.h>
 
 struct cb_arg {
