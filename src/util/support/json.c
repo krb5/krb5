@@ -70,10 +70,7 @@
  * Heimdal.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <errno.h>
+#include <k5-platform.h>
 #include <k5-base64.h>
 #include <k5-json.h>
 #include <k5-buf.h>

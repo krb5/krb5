@@ -37,6 +37,7 @@
  * sockets are used instead.
  */
 
+#ifndef _WIN32
 #include "k5-int.h"
 #include "k5-input.h"
 #include "cc-int.h"
@@ -48,8 +49,6 @@
 #include <servers/bootstrap.h>
 #include "kcmrpc.h"
 #endif
-
-#ifndef _WIN32
 
 #define MAX_REPLY_SIZE (10 * 1024 * 1024)
 

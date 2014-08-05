@@ -41,7 +41,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <glob.h>
+#endif
 
 #define	M_DEFAULT	"default"
 
@@ -418,6 +420,7 @@ load_if_changed(const char *pathname, time_t last, time_t *highest)
 		loadConfigFile(pathname);
 }
 
+#ifndef _WIN32
 /* Try to load any config files which have changed since the last call.  Config
  * files are MECH_CONF and any files matching MECH_CONF_PATTERN. */
 static void
@@ -442,6 +445,7 @@ loadConfigFiles()
 
 	g_confFileModTime = highest;
 }
+#endif
 
 /*
  * determines if the mechList needs to be updated from file

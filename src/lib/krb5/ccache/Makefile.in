@@ -15,10 +15,16 @@ LOCALINCLUDES = -I$(srcdir)$(S)ccapi -I$(srcdir) -I. $(WIN_INCLUDES)
 ##WIN32##MSLSA_OBJ = $(OUTPRE)cc_mslsa.$(OBJEXT)
 ##WIN32##MSLSA_SRC = $(srcdir)/cc_mslsa.c
 
+##WIN32##!if 0
 KCMRPC_DEPS-osx = kcmrpc.h kcmrpc_types.h
 KCMRPC_OBJ-osx = kcmrpc.o
 KCMRPC_DEPS-no = # empty
 KCMRPC_OBJ-no = # empty
+
+KCMRPC_DEPS = $(KCMRPC_DEPS-@OSX@)
+KCMRPC_OBJS = $(KCMRPC_OBJS-@OSX@)
+##WIN32##!endif
+
 
 STLIBOBJS= \
 	ccbase.o \
@@ -37,7 +43,7 @@ STLIBOBJS= \
 	cc_memory.o \
 	cc_keyring.o \
 	ccfns.o \
-	ser_cc.o $(KCMRPC_OBJ-@OSX@)
+	ser_cc.o $(KCMRPC_OBJ)
 
 OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cccopy.$(OBJEXT) \
@@ -144,11 +150,11 @@ clean-unix::
 	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o t_cccol t_cccol.o
 	$(RM) t_marshal t_marshal.o testcache
 
-depend:: $(KCMRPC_DEPS-@OSX@)
+depend:: $(KCMRPC_DEPS)
 
-##WIN32## $(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(top_srcdir)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
+##WIN32##$(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(top_srcdir)/include/k5-int.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
 
-cc_kcm.so cc_kcm.o: $(KCMRPC_DEPS-@OSX@)
+cc_kcm.so cc_kcm.o: $(KCMRPC_DEPS)
 kcmrpc.so kcmrpc.o: kcmrpc.h kcmrpc_types.h
 
 @libobj_frag@
