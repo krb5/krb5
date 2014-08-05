@@ -437,8 +437,8 @@ loadConfigFiles()
 	if (glob(MECH_CONF_PATTERN, 0, NULL, &globbuf) == 0) {
 		for (path = globbuf.gl_pathv; *path != NULL; path++)
 			load_if_changed(*path, g_confFileModTime, &highest);
-		globfree(&globbuf);
 	}
+	globfree(&globbuf);
 
 	g_confFileModTime = highest;
 }
