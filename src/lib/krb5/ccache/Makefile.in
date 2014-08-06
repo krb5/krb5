@@ -22,7 +22,7 @@ KCMRPC_DEPS-no = # empty
 KCMRPC_OBJ-no = # empty
 
 KCMRPC_DEPS = $(KCMRPC_DEPS-@OSX@)
-KCMRPC_OBJS = $(KCMRPC_OBJS-@OSX@)
+KCMRPC_OBJ = $(KCMRPC_OBJ-@OSX@)
 ##WIN32##!endif
 
 
