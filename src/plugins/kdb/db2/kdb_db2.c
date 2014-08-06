@@ -386,6 +386,9 @@ open_db(krb5_db2_context *dbc, int flags, int mode)
         break;
     }
 
+    /* Don't try unlocked iteration with a hash database. */
+    if (db != NULL && dbc->hashfirst)
+        dbc->unlockiter = FALSE;
 done:
     free(fname);
     return db;
