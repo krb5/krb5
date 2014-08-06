@@ -60,14 +60,11 @@ krb5_decrypt_tkt_part(krb5_context context, const krb5_keyblock *srv_key, regist
         return retval;
     }
 
-#define clean_scratch() {memset(scratch.data, 0, scratch.length);       \
-        free(scratch.data);}
-
     /*  now decode the decrypted stuff */
     retval = decode_krb5_enc_tkt_part(&scratch, &dec_tkt_part);
     if (!retval) {
         ticket->enc_part2 = dec_tkt_part;
     }
-    clean_scratch();
+    zapfree(scratch.data, scratch.length);
     return retval;
 }
