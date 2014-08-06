@@ -200,20 +200,14 @@ krb5_lookup_tl_kadm_data(krb5_tl_data *tl_data, osa_princ_ent_rec *princ_entry)
 
 krb5_error_code
 krb5_update_tl_kadm_data(krb5_context context, krb5_db_entry *entry,
-			 char *policy_dn)
+			 osa_princ_ent_rec *princ_entry)
 {
     XDR xdrs;
-    osa_princ_ent_rec princ_entry;
     krb5_tl_data tl_data;
     krb5_error_code retval;
 
-    memset(&princ_entry, 0, sizeof(osa_princ_ent_rec));
-    princ_entry.admin_history_kvno = 2;
-    princ_entry.aux_attributes = KADM5_POLICY;
-    princ_entry.policy = policy_dn;
-
     xdralloc_create(&xdrs, XDR_ENCODE);
-    if (! ldap_xdr_osa_princ_ent_rec(&xdrs, &princ_entry)) {
+    if (! ldap_xdr_osa_princ_ent_rec(&xdrs, princ_entry)) {
 	xdr_destroy(&xdrs);
 	return KADM5_XDR_FAILURE;
     }
