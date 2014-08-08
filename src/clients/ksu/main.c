@@ -598,12 +598,12 @@ main (argc, argv)
     }
 
     if (all_rest_copy){
-        retval = krb5_cc_initialize(ksu_context, cc_tmp, client);
+        retval = krb5_cc_initialize(ksu_context, cc_tmp, tmp_princ);
         if (retval) {
             com_err(prog_name, retval, _("while erasing target cache"));
             exit(1);
         }
-
+        stored = FALSE;
     }
 
     /* get the shell of the user, this will be the shell used by su */
@@ -685,7 +685,7 @@ main (argc, argv)
         exit(1);
     retval = krb5_cc_get_full_name(ksu_context, cc_target, &cc_target_tag);
     if (retval) {
-        com_err(prog_name, retval, _("while getting name of target ccache"));
+        com_err(prog_name, retval, _("while computing name of target ccache"));
         sweep_up(ksu_context, cc_target);
         exit(1);
     }
@@ -694,19 +694,22 @@ main (argc, argv)
     if (cc_reused)
         keep_target_cache = TRUE;
 
-    retval = krb5_ccache_copy(ksu_context, cc_tmp, client, cc_target,
-                              FALSE, client, &stored);
-    if (retval) {
-        com_err(prog_name, retval, _("while copying cache %s to %s"),
-                KS_TEMPORARY_CACHE, cc_target_tag);
-        exit(1);
-    }
+    if (stored) {
+        retval = krb5_ccache_copy(ksu_context, cc_tmp, client, cc_target,
+                                  FALSE, client, &stored);
+        if (retval) {
+            com_err(prog_name, retval, _("while copying cache %s to %s"),
+                    KS_TEMPORARY_CACHE, cc_target_tag);
+            exit(1);
+        }
 
-    if (stored && !ks_ccache_is_initialized(ksu_context, cc_target)) {
-        com_err(prog_name, errno,
-                _("%s does not have correct permissions for %s, %s aborted"),
-                target_user, cc_target_tag, prog_name);
-        exit(1);
+        if (!ks_ccache_is_initialized(ksu_context, cc_target)) {
+            com_err(prog_name, errno,
+                    _("%s does not have correct permissions for %s, "
+                      "%s aborted"),
+                    target_user, cc_target_tag, prog_name);
+            exit(1);
+        }
     }
 
     krb5_free_string(ksu_context, cc_target_tag);
@@ -904,6 +907,12 @@ resolve_target_cache(krb5_context context, krb5_principal princ,
                 com_err(prog_name, retval,
                         _("while creating new target ccache"));
                 goto cleanup;
+            }
+            retval = krb5_cc_initialize(context, ccache, princ);
+            if (retval) {
+                com_err(prog_name, retval,
+                        _("while initializing target cache"));
+                exit(1);
             }
         }
     }
