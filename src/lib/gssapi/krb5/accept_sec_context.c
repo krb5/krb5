@@ -360,10 +360,10 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
     if (time_rec)
         *time_rec = ctx->krb_times.endtime - now;
 
+    /* Never return GSS_C_DELEG_FLAG since we don't support DCE credential
+     * delegation yet. */
     if (ret_flags)
-        *ret_flags = ctx->gss_flags;
-
-    /* XXX no support for delegated credentials yet */
+        *ret_flags = (ctx->gss_flags & ~GSS_C_DELEG_FLAG);
 
     *minor_status = 0;
 
@@ -467,6 +467,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5int_access kaccess;
     int cred_rcache = 0;
     int no_encap = 0;
+    int token_deleg_flag = 0;
     krb5_flags ap_req_options = 0;
     krb5_enctype negotiated_etype;
     krb5_authdata_context ad_context = NULL;
@@ -776,17 +777,16 @@ kg_accept_krb5(minor_status, context_handle,
         xfree(reqcksum.contents);
         reqcksum.contents = 0;
 
+        /* Read the token flags.  Remember if GSS_C_DELEG_FLAG was set, but
+         * mask it out until we actually read a delegated credential. */
         TREAD_INT(ptr, gss_flags, 0);
-#if 0
-        gss_flags &= ~GSS_C_DELEG_FLAG; /* mask out the delegation flag; if
-                                           there's a delegation, we'll set
-                                           it below */
-#endif
+        token_deleg_flag = (gss_flags & GSS_C_DELEG_FLAG);
+        gss_flags &= ~GSS_C_DELEG_FLAG;
 
         /* if the checksum length > 24, there are options to process */
 
         i = authdat->checksum->length - 24;
-        if (i && (gss_flags & GSS_C_DELEG_FLAG)) {
+        if (i && token_deleg_flag) {
             if (i >= 4) {
                 TREAD_INT16(ptr, option_id, 0);
                 TREAD_INT16(ptr, option.length, 0);
@@ -821,6 +821,7 @@ kg_accept_krb5(minor_status, context_handle,
                     goto fail;
                 }
 
+                gss_flags |= GSS_C_DELEG_FLAG;
             } /* if i >= 4 */
             /* ignore any additional trailing data, for now */
         }
