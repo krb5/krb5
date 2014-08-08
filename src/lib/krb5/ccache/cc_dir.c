@@ -404,6 +404,9 @@ dcc_gen_new(krb5_context context, krb5_ccache *cache_out)
     ret = k5_path_join(dirname, "tktXXXXXX", &template);
     if (ret)
         goto cleanup;
+    ret = verify_dir(context, dirname);
+    if (ret)
+        goto cleanup;
     ret = krb5int_fcc_new_unique(context, template, &fcc);
     if (ret)
         goto cleanup;
