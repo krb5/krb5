@@ -401,6 +401,9 @@ dcc_gen_new(krb5_context context, krb5_ccache *cache_out)
                     "is not a directory collection"));
         return KRB5_DCC_CANNOT_CREATE;
     }
+    ret = verify_dir(context, dirname);
+    if (ret)
+        goto cleanup;
     ret = k5_path_join(dirname, "tktXXXXXX", &template);
     if (ret)
         goto cleanup;
