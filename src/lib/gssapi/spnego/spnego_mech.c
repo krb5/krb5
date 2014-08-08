@@ -806,6 +806,11 @@ init_ctx_nego(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 	return ret;
 }
 
+/* iso(1) org(3) dod(6) internet(1) private(4) enterprise(1) Microsoft(311)
+ * security(2) mechanisms(2) NTLM(10) */
+static const gss_OID_desc gss_mech_ntlmssp_oid =
+	{ 10, "\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a" };
+
 /*
  * Handle acceptor's counter-proposal of an alternative mechanism.
  */
@@ -831,17 +836,21 @@ init_ctx_reselect(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 	sc->internal_mech = &sc->mech_set->elements[i];
 
 	/*
-	 * Windows 2003 and earlier don't correctly send a
-	 * negState of request-mic when counter-proposing a
-	 * mechanism.  They probably don't handle mechListMICs
-	 * properly either.
+	 * A server conforming to RFC4178 MUST set REQUEST_MIC here, but
+	 * Windows Server 2003 and earlier implement (roughly) RFC2478 instead,
+	 * and send ACCEPT_INCOMPLETE.  Tolerate that only if we are falling
+	 * back to NTLMSSP.
 	 */
-	if (acc_negState != REQUEST_MIC)
+	if (acc_negState == ACCEPT_INCOMPLETE) {
+		if (!g_OID_equal(supportedMech, &gss_mech_ntlmssp_oid))
+			return GSS_S_DEFECTIVE_TOKEN;
+	} else if (acc_negState != REQUEST_MIC) {
 		return GSS_S_DEFECTIVE_TOKEN;
+	}
 
 	sc->mech_complete = 0;
-	sc->mic_reqd = 1;
-	*negState = REQUEST_MIC;
+	sc->mic_reqd = (acc_negState == REQUEST_MIC);
+	*negState = acc_negState;
 	*tokflag = CONT_TOKEN_SEND;
 	return GSS_S_CONTINUE_NEEDED;
 }
