@@ -42,16 +42,22 @@ char * gb_err = NULL;
 int quiet = 0;
 /***********/
 
+#define KS_TEMPORARY_CACHE "MEMORY:_ksu"
+#define KS_TEMPORARY_PRINC "_ksu/_ksu@_ksu"
 #define _DEF_CSH "/bin/csh"
 static int set_env_var (char *, char *);
 static void sweep_up (krb5_context, krb5_ccache);
 static char * ontty (void);
+static krb5_error_code set_ccname_env(krb5_context, krb5_ccache);
 static void print_status( const char *fmt, ...)
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
     __attribute__ ((__format__ (__printf__, 1, 2)))
 #endif
     ;
-char * get_dir_of_file();
+static krb5_error_code resolve_target_cache(krb5_context ksu_context,
+                                            krb5_principal princ,
+                                            krb5_ccache *ccache_out,
+                                            krb5_boolean *ccache_reused);
 
 /* Note -e and -a options are mutually exclusive */
 /* insure the proper specification of target user as well as catching
@@ -85,8 +91,8 @@ main (argc, argv)
     int option=0;
     int statusp=0;
     krb5_error_code retval = 0;
-    krb5_principal client = NULL;
-    krb5_ccache cc_target = NULL;
+    krb5_principal client = NULL, tmp_princ = NULL;
+    krb5_ccache cc_tmp = NULL, cc_target = NULL;
     krb5_context ksu_context;
     char * cc_target_tag = NULL;
     char * target_user = NULL;
@@ -94,9 +100,7 @@ main (argc, argv)
 
     krb5_ccache cc_source = NULL;
     const char * cc_source_tag = NULL;
-    uid_t source_gid;
     const char * cc_source_tag_tmp = NULL;
-    char * cc_target_tag_tmp=NULL;
     char * cmd = NULL, * exec_cmd = NULL;
     int errflg = 0;
     krb5_boolean auth_val;
@@ -112,11 +116,10 @@ main (argc, argv)
     extern char * getpass(), *crypt();
     int pargc;
     char ** pargv;
-    struct stat  st_temp;
-    krb5_boolean stored = FALSE;
+    krb5_boolean stored = FALSE, cc_reused = FALSE;
     krb5_principal  kdc_server;
     krb5_boolean zero_password;
-    char * dir_of_cc_target;
+    krb5_boolean restrict_creds;
 
     options.opt = KRB5_DEFAULT_OPTIONS;
     options.lifetime = KRB5_DEFAULT_TKT_LIFE;
@@ -265,9 +268,10 @@ main (argc, argv)
                 if ( strchr(cc_source_tag, ':')){
                     cc_source_tag_tmp = strchr(cc_source_tag, ':') + 1;
 
-                    if( stat( cc_source_tag_tmp, &st_temp)){
+                    if (!ks_ccache_name_is_initialized(ksu_context,
+                                                       cc_source_tag)) {
                         com_err(prog_name, errno,
-                                _("while looking for credentials file %s"),
+                                _("while looking for credentials cache %s"),
                                 cc_source_tag_tmp);
                         exit (1);
                     }
@@ -344,8 +348,6 @@ main (argc, argv)
     /* allocate space and copy the usernamane there */
     source_user = xstrdup(pwd->pw_name);
     source_uid = pwd->pw_uid;
-    source_gid = pwd->pw_gid;
-
 
     if (!strcmp(SOURCE_USER_LOGIN, target_user)){
         target_user = xstrdup (source_user);
@@ -418,72 +420,43 @@ main (argc, argv)
         exit(1);
     }
 
-    if (cc_target_tag == NULL) {
-
-        cc_target_tag = (char *)xcalloc(KRB5_SEC_BUFFSIZE ,sizeof(char));
-        /* make sure that the new ticket file does not already exist
-           This is run as source_uid because it is reasonable to
-           require the source user to have write to where the target
-           cache will be created.*/
-
-        do {
-            snprintf(cc_target_tag, KRB5_SEC_BUFFSIZE, "%s%ld.%d",
-                     KRB5_SECONDARY_CACHE,
-                     (long) target_uid, gen_sym());
-            cc_target_tag_tmp = strchr(cc_target_tag, ':') + 1;
-
-        }while ( !stat ( cc_target_tag_tmp, &st_temp));
-    }
-
-
-    dir_of_cc_target = get_dir_of_file(cc_target_tag_tmp);
-
-    if (access(dir_of_cc_target, R_OK | W_OK )){
-        fprintf(stderr,
-                _("%s does not have correct permissions for %s\n"),
-                source_user, cc_target_tag);
-        exit(1);
-    }
-
-    if (auth_debug){
+    if (auth_debug)
         fprintf(stderr, " source cache =  %s\n", cc_source_tag);
-        fprintf(stderr, " target cache =  %s\n", cc_target_tag);
-    }
 
     /*
-      Only when proper authentication and authorization
-      takes place, the target user becomes the owner of the cache.
-    */
+     * After proper authentication and authorization, populate a cache for the
+     * target user.
+     */
 
-    /* we continue to run as source uid until
-       the middle of the copy, when becomewe become the target user
-       The cache is owned by the target user.*/
-
+    /*
+     * We read the set of creds we want to copy from the source ccache as the
+     * source uid, become root for authentication, and then become the target
+     * user to handle authorization and creating the target user's cache.
+     */
 
     /* if root ksu's to a regular user, then
        then only the credentials for that particular user
        should be copied */
 
-    if ((source_uid == 0) && (target_uid != 0)) {
-
-        if ((retval = krb5_ccache_copy_restricted(ksu_context,  cc_source,
-                                                  cc_target_tag, client,
-                                                  &cc_target, &stored,
-                                                  target_uid))){
-            com_err(prog_name, retval, _("while copying cache %s to %s"),
-                    krb5_cc_get_name(ksu_context, cc_source), cc_target_tag);
-            exit(1);
-        }
-
-    } else {
-        if ((retval = krb5_ccache_copy(ksu_context, cc_source, cc_target_tag,
-                                       client,&cc_target, &stored, target_uid))) {
-            com_err(prog_name, retval, _("while copying cache %s to %s"),
-                    krb5_cc_get_name(ksu_context, cc_source), cc_target_tag);
-            exit(1);
-        }
-
+    restrict_creds = (source_uid == 0) && (target_uid != 0);
+    retval = krb5_parse_name(ksu_context, KS_TEMPORARY_PRINC, &tmp_princ);
+    if (retval) {
+        com_err(prog_name, retval, _("while parsing temporary name"));
+        exit(1);
     }
+    retval = krb5_cc_resolve(ksu_context, KS_TEMPORARY_CACHE, &cc_tmp);
+    if (retval) {
+        com_err(prog_name, retval, _("while creating temporary cache"));
+        exit(1);
+    }
+    retval = krb5_ccache_copy(ksu_context, cc_source, tmp_princ, cc_tmp,
+                              restrict_creds, client, &stored);
+    if (retval) {
+        com_err(prog_name, retval, _("while copying cache %s to %s"),
+                krb5_cc_get_name(ksu_context, cc_source), KS_TEMPORARY_CACHE);
+        exit(1);
+    }
+    krb5_cc_close(ksu_context, cc_source);
 
     /* Become root for authentication*/
 
@@ -501,7 +474,6 @@ main (argc, argv)
                                       &kdc_server))){
                 com_err(prog_name, retval,
                         _("while creating tgt for local realm"));
-                sweep_up(ksu_context, cc_target);
                 exit(1);
             }
 
@@ -509,13 +481,12 @@ main (argc, argv)
                               "enter it here and are logged\n"));
             fprintf(stderr, _("         in remotely using an unsecure "
                               "(non-encrypted) channel.\n"));
-            if (krb5_get_tkt_via_passwd (ksu_context, &cc_target, client,
-                                         kdc_server, &options,
-                                         &zero_password) == FALSE){
+            if (krb5_get_tkt_via_passwd(ksu_context, &cc_tmp, client,
+                                        kdc_server, &options,
+                                        &zero_password) == FALSE){
 
                 if (zero_password == FALSE){
                     fprintf(stderr, _("Goodbye\n"));
-                    sweep_up(ksu_context, cc_target);
                     exit(1);
                 }
 
@@ -534,48 +505,20 @@ main (argc, argv)
     if (source_uid && (source_uid != target_uid)) {
         char * client_name;
 
-        auth_val = krb5_auth_check(ksu_context, client, localhostname, &options,
-                                   target_user,cc_target, &path_passwd, target_uid);
+        auth_val = krb5_auth_check(ksu_context, client, localhostname,
+                                   &options, target_user, cc_tmp,
+                                   &path_passwd, target_uid);
 
         /* if Kerberos authentication failed then exit */
         if (auth_val ==FALSE){
             fprintf(stderr, _("Authentication failed.\n"));
             syslog(LOG_WARNING, "'%s %s' authentication failed for %s%s",
                    prog_name,target_user,source_user,ontty());
-            sweep_up(ksu_context, cc_target);
             exit(1);
         }
 
-#if 0
-        /* At best, this avoids a single kdc request
-           It is hard to implement dealing with file permissions and
-           is unnecessary.  It is important
-           to properly handle races in chown if this code is ever re-enabled.
-        */
-        /* cache the tickets if possible in the source cache */
-        if (!path_passwd){
-
-            if ((retval = krb5_ccache_overwrite(ksu_context, cc_target, cc_source,
-                                                client))){
-                com_err (prog_name, retval,
-                         "while copying cache %s to %s",
-                         krb5_cc_get_name(ksu_context, cc_target),
-                         krb5_cc_get_name(ksu_context, cc_source));
-                sweep_up(ksu_context, cc_target);
-                exit(1);
-            }
-            if (chown(cc_source_tag_tmp, source_uid, source_gid)){
-                com_err(prog_name, errno,
-                        "while changing owner for %s",
-                        cc_source_tag_tmp);
-                exit(1);
-            }
-        }
-#endif /*0*/
-
         if ((retval = krb5_unparse_name(ksu_context, client, &client_name))) {
             com_err(prog_name, retval, _("When unparsing name"));
-            sweep_up(ksu_context, cc_target);
             exit(1);
         }
 
@@ -588,7 +531,6 @@ main (argc, argv)
         if (krb5_seteuid(target_uid)) {
             com_err(prog_name, errno, _("while switching to target for "
                                         "authorization check"));
-            sweep_up(ksu_context, cc_target);
             exit(1);
         }
 
@@ -596,14 +538,12 @@ main (argc, argv)
                                          cmd, &authorization_val, &exec_cmd))){
             com_err(prog_name,retval, _("while checking authorization"));
             krb5_seteuid(0); /*So we have some chance of sweeping up*/
-            sweep_up(ksu_context, cc_target);
             exit(1);
         }
 
         if (krb5_seteuid(0)) {
             com_err(prog_name, errno, _("while switching back from target "
                                         "after authorization check"));
-            sweep_up(ksu_context, cc_target);
             exit(1);
         }
         if (authorization_val == TRUE){
@@ -645,25 +585,25 @@ main (argc, argv)
 
             }
 
-            sweep_up(ksu_context, cc_target);
             exit(1);
         }
     }
 
     if( some_rest_copy){
-        if ((retval = krb5_ccache_filter(ksu_context, cc_target, client))){
+        retval = krb5_ccache_filter(ksu_context, cc_tmp, client);
+        if (retval) {
             com_err(prog_name,retval, _("while calling cc_filter"));
-            sweep_up(ksu_context, cc_target);
             exit(1);
         }
     }
 
     if (all_rest_copy){
-        if ((retval = krb5_cc_initialize(ksu_context, cc_target, client))){
+        retval = krb5_cc_initialize(ksu_context, cc_tmp, tmp_princ);
+        if (retval) {
             com_err(prog_name, retval, _("while erasing target cache"));
             exit(1);
         }
-
+        stored = FALSE;
     }
 
     /* get the shell of the user, this will be the shell used by su */
@@ -681,7 +621,6 @@ main (argc, argv)
 
     if (!standard_shell(target_pwd->pw_shell) && source_uid) {
         fprintf(stderr, _("ksu: permission denied (shell).\n"));
-        sweep_up(ksu_context, cc_target);
         exit(1);
     }
 #endif /* HAVE_GETUSERSHELL */
@@ -691,43 +630,28 @@ main (argc, argv)
         if(set_env_var("USER", target_pwd->pw_name)){
             fprintf(stderr,
                     _("ksu: couldn't set environment variable USER\n"));
-            sweep_up(ksu_context, cc_target);
             exit(1);
         }
     }
 
     if(set_env_var( "HOME", target_pwd->pw_dir)){
         fprintf(stderr, _("ksu: couldn't set environment variable HOME\n"));
-        sweep_up(ksu_context, cc_target);
         exit(1);
     }
 
     if(set_env_var( "SHELL", shell)){
         fprintf(stderr, _("ksu: couldn't set environment variable SHELL\n"));
-        sweep_up(ksu_context, cc_target);
-        exit(1);
-    }
-
-    /* set the cc env name to target */
-
-    if(set_env_var( KRB5_ENV_CCNAME, cc_target_tag)){
-        fprintf(stderr, _("ksu: couldn't set environment variable %s\n"),
-                KRB5_ENV_CCNAME);
-        sweep_up(ksu_context, cc_target);
         exit(1);
     }
 
     /* set permissions */
     if (setgid(target_pwd->pw_gid) < 0) {
         perror("ksu: setgid");
-        sweep_up(ksu_context, cc_target);
         exit(1);
     }
 
-
     if (initgroups(target_user, target_pwd->pw_gid)) {
         fprintf(stderr, _("ksu: initgroups failed.\n"));
-        sweep_up(ksu_context, cc_target);
         exit(1);
     }
 
@@ -747,26 +671,55 @@ main (argc, argv)
      */
     if (setluid((uid_t) pwd->pw_uid) < 0) {
         perror("setluid");
-        sweep_up(ksu_context, cc_target);
         exit(1);
     }
 #endif  /* HAVE_SETLUID */
 
     if (setuid(target_pwd->pw_uid) < 0) {
         perror("ksu: setuid");
+        exit(1);
+    }
+
+    retval = resolve_target_cache(ksu_context, client, &cc_target, &cc_reused);
+    if (retval)
+        exit(1);
+    retval = krb5_cc_get_full_name(ksu_context, cc_target, &cc_target_tag);
+    if (retval) {
+        com_err(prog_name, retval, _("while computing name of target ccache"));
         sweep_up(ksu_context, cc_target);
         exit(1);
     }
+    if (auth_debug)
+        fprintf(stderr, " target cache =  %s\n", cc_target_tag);
+    if (cc_reused)
+        keep_target_cache = TRUE;
 
-    if (access( cc_target_tag_tmp, R_OK | W_OK )){
-        com_err(prog_name, errno,
-                _("%s does not have correct permissions for %s, %s aborted"),
-                target_user, cc_target_tag_tmp, prog_name);
-        exit(1);
+    if (stored) {
+        retval = krb5_ccache_copy(ksu_context, cc_tmp, client, cc_target,
+                                  FALSE, client, &stored);
+        if (retval) {
+            com_err(prog_name, retval, _("while copying cache %s to %s"),
+                    KS_TEMPORARY_CACHE, cc_target_tag);
+            exit(1);
+        }
+
+        if (!ks_ccache_is_initialized(ksu_context, cc_target)) {
+            com_err(prog_name, errno,
+                    _("%s does not have correct permissions for %s, "
+                      "%s aborted"),
+                    target_user, cc_target_tag, prog_name);
+            exit(1);
+        }
     }
 
-    if ( cc_source)
-        krb5_cc_close(ksu_context, cc_source);
+    krb5_free_string(ksu_context, cc_target_tag);
+
+    /* Set the cc env name to target. */
+    retval = set_ccname_env(ksu_context, cc_target);
+    if (retval != 0) {
+        sweep_up(ksu_context, cc_target);
+        exit(1);
+    }
 
     if (cmd){
         if ((source_uid == 0) || (source_uid == target_uid )){
@@ -834,6 +787,144 @@ main (argc, argv)
     }
 }
 
+/* Set KRB5CCNAME in the environment to point to ccache.  Print an error
+ * message on failure. */
+static krb5_error_code
+set_ccname_env(krb5_context ksu_context, krb5_ccache ccache)
+{
+    krb5_error_code retval;
+    char *ccname;
+
+    retval = krb5_cc_get_full_name(ksu_context, ccache, &ccname);
+    if (retval) {
+        com_err(prog_name, retval, _("while reading cache name from ccache"));
+        return retval;
+    }
+    if (set_env_var(KRB5_ENV_CCNAME, ccname)) {
+        retval = errno;
+        fprintf(stderr,
+                _("ksu: couldn't set environment variable %s\n"),
+                KRB5_ENV_CCNAME);
+    }
+    krb5_free_string(ksu_context, ccname);
+    return retval;
+}
+
+/*
+ * Get the configured default ccache name.  Unset KRB5CCNAME and force a
+ * recomputation so we don't use values for the source user.  Print an error
+ * message on failure.
+ */
+static krb5_error_code
+get_configured_defccname(krb5_context context, char **target_out)
+{
+    krb5_error_code retval;
+    const char *defname;
+    char *target;
+
+    *target_out = NULL;
+
+    if (unsetenv(KRB5_ENV_CCNAME) != 0) {
+        retval = errno;
+        com_err(prog_name, retval, _("while clearing the value of %s"),
+                KRB5_ENV_CCNAME);
+        return retval;
+    }
+
+    /* Make sure we don't have a cached value for a different uid. */
+    retval = krb5_cc_set_default_name(context, NULL);
+    if (retval != 0) {
+        com_err(prog_name, retval, _("while resetting target ccache name"));
+        return retval;
+    }
+
+    defname = krb5_cc_default_name(context);
+    target = (defname == NULL) ? NULL : strdup(defname);
+    if (target == NULL) {
+        com_err(prog_name, ENOMEM, _("while determining target ccache name"));
+        return ENOMEM;
+    }
+    *target_out = target;
+    return 0;
+}
+
+/* Determine where the target user's creds should be stored.  Print an error
+ * message on failure. */
+static krb5_error_code
+resolve_target_cache(krb5_context context, krb5_principal princ,
+                     krb5_ccache *ccache_out, krb5_boolean *ccache_reused)
+{
+    krb5_error_code retval;
+    krb5_boolean switchable, reused = FALSE;
+    krb5_ccache ccache = NULL;
+    char *sep, *ccname = NULL, *sym = NULL, *target;
+
+    *ccache_out = NULL;
+    *ccache_reused = FALSE;
+
+    retval = get_configured_defccname(context, &target);
+    if (retval != 0)
+        return retval;
+
+    /* Check if the configured default name uses a switchable type. */
+    sep = strchr(target, ':');
+    *sep = '\0';
+    switchable = krb5_cc_support_switch(context, target);
+    *sep = ':';
+
+    if (!switchable) {
+        /* Try to avoid destroying an in-use target ccache by coming up with
+         * the name of a cache that doesn't exist yet. */
+        do {
+            free(ccname);
+            retval = gen_sym(context, &sym);
+            if (retval) {
+                com_err(prog_name, retval,
+                        _("while generating part of the target ccache name"));
+                return retval;
+            }
+            if (asprintf(&ccname, "%s.%s", target, sym) < 0) {
+                retval = ENOMEM;
+                free(sym);
+                com_err(prog_name, retval, _("while allocating memory for the "
+                                             "target ccache name"));
+                goto cleanup;
+            }
+            free(sym);
+        } while (ks_ccache_name_is_initialized(context, ccname));
+        retval = krb5_cc_resolve(context, ccname, &ccache);
+    } else {
+        /* Look for a cache in the collection that we can reuse. */
+        retval = krb5_cc_cache_match(context, princ, &ccache);
+        if (retval == 0) {
+            reused = TRUE;
+        } else {
+            /* There isn't one, so create a new one. */
+            *sep = '\0';
+            retval = krb5_cc_new_unique(context, target, NULL, &ccache);
+            *sep = ':';
+            if (retval) {
+                com_err(prog_name, retval,
+                        _("while creating new target ccache"));
+                goto cleanup;
+            }
+            retval = krb5_cc_initialize(context, ccache, princ);
+            if (retval) {
+                com_err(prog_name, retval,
+                        _("while initializing target cache"));
+                exit(1);
+            }
+        }
+    }
+
+    *ccache_out = ccache;
+    *ccache_reused = reused;
+
+cleanup:
+    free(target);
+    return retval;
+}
+
 #ifdef HAVE_GETUSERSHELL
 
 int standard_shell(sh)
@@ -884,8 +975,6 @@ static void sweep_up(context, cc)
     krb5_ccache cc;
 {
     krb5_error_code retval;
-    const char * cc_name;
-    struct stat  st_temp;
 
     krb5_seteuid(0);
     if (krb5_seteuid(target_uid) < 0) {
@@ -894,8 +983,7 @@ static void sweep_up(context, cc)
         exit(1);
     }
 
-    cc_name = krb5_cc_get_name(context, cc);
-    if ( ! stat(cc_name, &st_temp)){
+    if (ks_ccache_is_initialized(context, cc)) {
         if ((retval = krb5_cc_destroy(context, cc)))
             com_err(prog_name, retval, _("while destroying cache"));
     }
@@ -946,26 +1034,6 @@ void print_status(const char *fmt, ...)
         vfprintf(stderr, fmt, ap);
         va_end(ap);
     }
-}
-
-
-char *get_dir_of_file(path)
-    const char *path;
-{
-    char * temp_path;
-    char * ptr;
-
-    temp_path =  xstrdup(path);
-
-    if ((ptr = strrchr( temp_path, '/'))) {
-        *ptr = '\0';
-    } else {
-        free (temp_path);
-        temp_path = xmalloc(MAXPATHLEN);
-        if (temp_path)
-            getcwd(temp_path, MAXPATHLEN);
-    }
-    return temp_path;
 }
 
 krb5_error_code
