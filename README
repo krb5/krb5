@@ -73,6 +73,103 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.12.2 (2014-08-11)
+------------------------------------
+
+* Work around a gcc optimizer bug that could cause DB2 KDC database
+  operations to spin in an infinite loop
+
+* Fix a backward compatibility problem with the LDAP KDB schema that
+  could prevent krb5-1.11 and later from decoding entries created by
+  krb5-1.6.
+
+* Avoid an infinite loop under some circumstances when the GSS
+  mechglue loads a dynamic mechanism.
+
+* Fix krb5kdc argument parsing so "-w" and "-r" options work together
+  reliably.
+
+* Handle certain invalid RFC 1964 GSS tokens correctly to avoid
+  invalid memory reference vulnerabilities.  [CVE-2014-4341
+  CVE-2014-4342]
+
+* Fix memory management vulnerabilities in GSSAPI SPNEGO.
+  [CVE-2014-4343 CVE-2014-4344]
+
+* Fix buffer overflow vulnerability in LDAP KDB back end.
+  [CVE-2014-4345]
+
+krb5-1.12.2 changes by ticket ID
+--------------------------------
+
+3277    configure --sysconfdir=/etc can make redundant entries in
+        profile search paths
+7793    preauth context leaks on failure
+7818    Clean up rcache if GSS krb5 acquire_cred fails
+7820    gss_init_sec_context() can ignore time sync with keyring
+        caches
+7822    Avoid assertion failure in error_message
+7836    Allow empty store in gss_acquire_cred_from
+7839    Reinitialize ulog when wrapping serial number
+7849    kdc.conf(5) - 1.11 / 1.12 - inaccurate
+        re. iprop_master_ulogsize
+7853    Check for unstable ulog in ulog_get_entries
+7854    Fix kpropd -x
+7856    Support referrals from Windows Server 2003
+7858    SPNEGO server responds incorrectly to Microsoft krb5 mech type
+7860    libdb2 tests hang
+7862    ksu broken with 2FA principals
+7864    Update doc build instructions
+7865    kdb5_util doc update: -update with -ov dump not needed since
+        -r13
+7866    improper malloc() handling in process_chpw_request()
+7870    Conditionalize use of LDAP_OPT_DEBUG_LEVEL
+7872    GSS krb5 sequence number checking fails on initial gap token
+7874    Initialize err variable in krb5_sendto_kdc
+7875    Fix memory leak in krb5_verify_init_creds
+7876    Mention k5login_authoritative in k5login docs
+7878    Fix unlikely double free in PKINIT client code
+7881    Fix returning KDB_NOENTRY in find_alternate_tgs()
+7890    Update example kadmin getprinc enctype display
+7894    Get getopt from unistd.h (not getopt.h) in tests
+7897    Fix leak in kadm5_flush with LDAP KDB
+7902    Check for asprintf failure in kdb5_util create
+7911    OTP RADIUS tries one too few times and times out too quickly
+7912    Fix invalid JSON handling in KDC OTP module
+7914    Problem with krb5int_c_combine_keys()
+7916    pkinit doesn't handle slotid parameter properly
+7917    pkinit doesn't deal with token label properly
+7919    LDAP key data encoder/decoder does not treat KrbKey salt as
+        optional
+7920    Change example module name in host_config.rst
+7924    tcl_kadm5.c is incompatible with Tcl 8.6
+7926    1.12 breaks gssapi mechanisms that recursively call into
+        libgssapi
+7928    Do not document pkinit_mapping_file
+7930    Add missing profile functions to libkrb5 exports
+7931    Improve PKINIT certificate documentation
+7932    Do not document pkinit_win2k
+7941    Fix several memory leaks in LDAP KDB modules
+7943    Fix error checking in PKINIT authdata creation
+7945    krb5kdc -w and -r do not work together
+7946    Consolidate DB option documentation
+7948    Fix unlikely null dereference in mk_cred()
+7949    Handle invalid RFC 1964 tokens [CVE-2014-4341 CVE-2014-4342]
+7952    Fix unlikely null dereference in TGS client code
+7954    Remove indent workaround in man page RST sources
+7955    Fix build on systems without RTM_OLD*
+7966    Fix leak on GSS module symbol resolution error
+7967    Error when building with "make -j8"
+7969    Double-free in initiator during SPNEGO renegotiation
+        [CVE-2014-4343]
+7970    NULL dereference in SPNEGO acceptor for continuation tokens
+        [CVE-2014-4344]
+7971    Fix deleted node handling in libprofile
+7972    Fix creation/rename of top-level profile sections
+7973    Bad calloc test in krb5_authdata_context_init()
+7980    LDAP key data segmentation buffer overflow [CVE-2014-4345]
+7982    Use zapfree in krb5_decrypt_tkt_part
+
 Major changes in 1.12.1 (2014-01-15)
 ------------------------------------
 
@@ -440,9 +537,12 @@ reports, suggestions, and valuable resources:
     Holger Isenberg
     Pavel Jindra
     Joel Johnson
+    Anders Kaseorg
     W. Trevor King
     Mikkel Kruse
     Reinhard Kugler
+    Tomas Kuthan
+    Pierre Labastie
     Volker Lendecke
     Jan iankko Lieskovsky
     Oliver Loch
@@ -474,6 +574,7 @@ reports, suggestions, and valuable resources:
     Robert Relyea
     Martin Rex
     Jason Rogers
+    Nate Rosenblum
     Mike Roszkowski
     Guillaume Rousse
     Tom Shaw
@@ -485,6 +586,7 @@ reports, suggestions, and valuable resources:
     Bjørn Tore Sund
     Joe Travaglini
     Rathor Vipin
+    Denis Vlasenko
     Jorgen Wahlsten
     Stef Walter
     Max (Weijun) Wang
@@ -499,6 +601,7 @@ reports, suggestions, and valuable resources:
     Nicolas Williams
     Ross Wilper
     Augustin Wolf
+    David Woodhouse
     Xu Qiang
     Nickolai Zeldovich
     Hanz van Zijst
