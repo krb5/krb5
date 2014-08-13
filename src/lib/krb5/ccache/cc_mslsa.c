@@ -466,6 +466,11 @@ PackageConnectLookup(HANDLE *pLogonHandle, ULONG *pPackageId)
 
 }
 
+/*
+ * This runtime check is only needed on Windows XP and Server 2003.
+ * It can safely be removed when we no longer wish to support any
+ * versions of those platforms.
+ */
 static BOOL
 does_query_ticket_cache_ex2 (void)
 {
