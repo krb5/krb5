@@ -317,48 +317,6 @@ MSTicketToMITTicket(KERB_EXTERNAL_TICKET *msticket, krb5_context context, krb5_d
     return TRUE;
 }
 
-/*
- * PreserveInitialTicketIdentity()
- *
- * This will find the "PreserveInitialTicketIdentity" key in the registry.
- * Returns 1 to preserve and 0 to not.
- */
-
-static DWORD
-PreserveInitialTicketIdentity(void)
-{
-    HKEY hKey;
-    DWORD size = sizeof(DWORD);
-    DWORD type = REG_DWORD;
-    const char *key_path = "Software\\MIT\\Kerberos5";
-    const char *value_name = "PreserveInitialTicketIdentity";
-    DWORD retval = 1;     /* default to Preserve */
-
-    if (RegOpenKeyExA(HKEY_CURRENT_USER, key_path, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
-        goto syskey;
-    if (RegQueryValueExA(hKey, value_name, 0, &type, (LPBYTE)&retval, &size) != ERROR_SUCCESS)
-    {
-        RegCloseKey(hKey);
-        goto syskey;
-    }
-    RegCloseKey(hKey);
-    goto done;
-
-syskey:
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, key_path, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
-        goto done;
-    if (RegQueryValueExA(hKey, value_name, 0, &type, (LPBYTE)&retval, &size) != ERROR_SUCCESS)
-    {
-        RegCloseKey(hKey);
-        goto done;
-    }
-    RegCloseKey(hKey);
-
-done:
-    return retval;
-}
-
-
 static BOOL
 MSCredToMITCred(KERB_EXTERNAL_TICKET *msticket, UNICODE_STRING ClientRealm,
                 krb5_context context, krb5_creds *creds)
@@ -596,43 +554,6 @@ GetSecurityLogonSessionData(PSECURITY_LOGON_SESSION_DATA * ppSessionData)
         return FALSE;
 
     return TRUE;
-}
-
-//
-// IsKerberosLogon() does not validate whether or not there are valid tickets in the
-// cache.  It validates whether or not it is reasonable to assume that if we
-// attempted to retrieve valid tickets we could do so.  Microsoft does not
-// automatically renew expired tickets.  Therefore, the cache could contain
-// expired or invalid tickets.  Microsoft also caches the user's password
-// and will use it to retrieve new TGTs if the cache is empty and tickets
-// are requested.
-
-static BOOL
-IsKerberosLogon(VOID)
-{
-    PSECURITY_LOGON_SESSION_DATA pSessionData = NULL;
-    BOOL    Success = FALSE;
-
-    if ( GetSecurityLogonSessionData(&pSessionData) ) {
-        if ( pSessionData->AuthenticationPackage.Buffer ) {
-            WCHAR buffer[256];
-            WCHAR *usBuffer;
-            int usLength;
-
-            Success = FALSE;
-            usBuffer = (pSessionData->AuthenticationPackage).Buffer;
-            usLength = (pSessionData->AuthenticationPackage).Length;
-            if (usLength < 256)
-            {
-                lstrcpynW (buffer, usBuffer, usLength);
-                lstrcatW (buffer,L"");
-                if ( !lstrcmpW(L"Kerberos",buffer) )
-                    Success = TRUE;
-            }
-        }
-        LsaFreeReturnBuffer(pSessionData);
-    }
-    return Success;
 }
 
 static DWORD
@@ -957,7 +878,6 @@ krb5_is_permitted_tgs_enctype(krb5_context context, krb5_const_principal princ, 
     return(ret);
 }
 
-#define ENABLE_PURGING 1
 // to allow the purging of expired tickets from LSA cache.  This is necessary
 // to force the retrieval of new TGTs.  Microsoft does not appear to retrieve
 // new tickets when they expire.  Instead they continue to accept the expired
@@ -989,9 +909,7 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
     PKERB_RETRIEVE_TKT_RESPONSE pTicketResponse = NULL;
     ULONG RequestSize;
     ULONG ResponseSize;
-#ifdef ENABLE_PURGING
     int    purge_cache = 0;
-#endif /* ENABLE_PURGING */
     int    ignore_cache = 0;
     krb5_enctype *etype_list = NULL, *ptr = NULL, etype = 0;
 
@@ -1085,9 +1003,6 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
          * a credential we can use.
          */
 
-#ifdef PURGE_ALL
-        purge_cache = 1;
-#else
         /* Check Supported Enctypes */
         if ( !enforce_tgs_enctypes ||
              IsMSSessionKeyNull(&pTicketResponse->Ticket.SessionKey) ||
@@ -1108,11 +1023,7 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
             MinLife.dwHighDateTime = (DWORD)((temp >> 32) & 0xFFFFFFFF);
             MinLife.dwLowDateTime = (DWORD)(temp & 0xFFFFFFFF);
             if (CompareFileTime(&MinLife, &LocalEndTime) >= 0) {
-#ifdef ENABLE_PURGING
                 purge_cache = 1;
-#else
-                ignore_cache = 1;
-#endif /* ENABLE_PURGING */
             }
             if (pTicketResponse->Ticket.TicketFlags & KERB_TICKET_FLAGS_invalid) {
                 ignore_cache = 1;   // invalid, need to attempt a TGT request
@@ -1122,7 +1033,6 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
             // not supported
             ignore_cache = 1;
         }
-#endif /* PURGE_ALL */
 
         Error = ConstructTicketRequest(pTicketResponse->Ticket.TargetDomainName,
                                        &pTicketRequest, &RequestSize);
@@ -1140,7 +1050,6 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
             pTicketResponse = NULL;
         }
 
-#ifdef ENABLE_PURGING
         if ( purge_cache ) {
             //
             // Purge the existing tickets which we cannot use so new ones can
@@ -1149,7 +1058,6 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
             //
             PurgeAllTickets(LogonHandle, PackageId);
         }
-#endif /* ENABLE_PURGING */
     }
 
     //
@@ -1160,12 +1068,8 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
     pTicketRequest->LogonId.LowPart = 0;
     pTicketRequest->LogonId.HighPart = 0;
     // Note: pTicketRequest->TargetName set up above
-#ifdef ENABLE_PURGING
     pTicketRequest->CacheOptions = ((ignore_cache || !purge_cache) ?
                                     KERB_RETRIEVE_TICKET_DONT_USE_CACHE : 0L);
-#else
-    pTicketRequest->CacheOptions = (ignore_cache ? KERB_RETRIEVE_TICKET_DONT_USE_CACHE : 0L);
-#endif /* ENABLE_PURGING */
     pTicketRequest->TicketFlags = 0L;
     pTicketRequest->EncryptionType = 0L;
 
@@ -1622,18 +1526,6 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     ULONG  PackageId;
     KERB_EXTERNAL_TICKET *msticket;
     krb5_error_code retval = KRB5_OK;
-
-#ifdef COMMENT
-    /* In at least one case on Win2003 it appears that it is possible
-     * for the logon session to be authenticated via NTLM and yet for
-     * there to be Kerberos credentials obtained by the LSA on behalf
-     * of the logged in user.  Therefore, we are removing this test
-     * which was meant to avoid the need to perform GetMSTGT() when
-     * there was no possibility of credentials being found.
-     */
-    if (!IsKerberosLogon())
-        return KRB5_FCC_NOFILE;
-#endif
 
     if (!PackageConnectLookup(&LogonHandle, &PackageId))
         return KRB5_FCC_NOFILE;
