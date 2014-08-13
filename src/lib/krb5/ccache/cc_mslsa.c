@@ -649,8 +649,8 @@ PurgeAllTickets(HANDLE LogonHandle, ULONG  PackageId)
 }
 
 static BOOL
-PurgeTicketXP( HANDLE LogonHandle, ULONG  PackageId,
-               krb5_context context, krb5_flags flags, krb5_creds *cred)
+PurgeTicketEx(HANDLE LogonHandle, ULONG  PackageId,
+              krb5_context context, krb5_flags flags, krb5_creds *cred)
 {
     NTSTATUS Status = 0;
     NTSTATUS SubStatus = 0;
@@ -1182,8 +1182,8 @@ cleanup:
 }
 
 static BOOL
-GetQueryTktCacheResponseXP( HANDLE LogonHandle, ULONG PackageId,
-                            PKERB_QUERY_TKT_CACHE_EX_RESPONSE * ppResponse)
+GetQueryTktCacheResponseEx(HANDLE LogonHandle, ULONG PackageId,
+                           PKERB_QUERY_TKT_CACHE_EX_RESPONSE * ppResponse)
 {
     NTSTATUS Status = 0;
     NTSTATUS SubStatus = 0;
@@ -1215,8 +1215,8 @@ GetQueryTktCacheResponseXP( HANDLE LogonHandle, ULONG PackageId,
 }
 
 static BOOL
-GetQueryTktCacheResponseEX2( HANDLE LogonHandle, ULONG PackageId,
-                             PKERB_QUERY_TKT_CACHE_EX2_RESPONSE * ppResponse)
+GetQueryTktCacheResponseEx2(HANDLE LogonHandle, ULONG PackageId,
+                            PKERB_QUERY_TKT_CACHE_EX2_RESPONSE * ppResponse)
 {
     NTSTATUS Status = 0;
     NTSTATUS SubStatus = 0;
@@ -1297,8 +1297,9 @@ GetMSCacheTicketFromMITCred( HANDLE LogonHandle, ULONG PackageId,
 }
 
 static BOOL
-GetMSCacheTicketFromCacheInfoXP( HANDLE LogonHandle, ULONG PackageId,
-                                 PKERB_TICKET_CACHE_INFO_EX tktinfo, PKERB_EXTERNAL_TICKET *ticket)
+GetMSCacheTicketFromCacheInfoEx(HANDLE LogonHandle, ULONG PackageId,
+                                PKERB_TICKET_CACHE_INFO_EX tktinfo,
+                                PKERB_EXTERNAL_TICKET *ticket)
 {
     NTSTATUS Status = 0;
     NTSTATUS SubStatus = 0;
@@ -1361,8 +1362,9 @@ GetMSCacheTicketFromCacheInfoXP( HANDLE LogonHandle, ULONG PackageId,
 }
 
 static BOOL
-GetMSCacheTicketFromCacheInfoEX2( HANDLE LogonHandle, ULONG PackageId,
-                                  PKERB_TICKET_CACHE_INFO_EX2 tktinfo, PKERB_EXTERNAL_TICKET *ticket)
+GetMSCacheTicketFromCacheInfoEx2(HANDLE LogonHandle, ULONG PackageId,
+                                 PKERB_TICKET_CACHE_INFO_EX2 tktinfo,
+                                 PKERB_EXTERNAL_TICKET *ticket)
 {
     NTSTATUS Status = 0;
     NTSTATUS SubStatus = 0;
@@ -1705,14 +1707,15 @@ krb5_lcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cur
     }
 
     if ( does_query_ticket_cache_ex2() ) {
-        if ( !GetQueryTktCacheResponseEX2(data->LogonHandle, data->PackageId, &lcursor->response.ex2) ) {
+        if (!GetQueryTktCacheResponseEx2(data->LogonHandle, data->PackageId,
+                                         &lcursor->response.ex2)) {
             LsaFreeReturnBuffer(lcursor->mstgt);
             free(lcursor);
             *cursor = 0;
             return KRB5_FCC_INTERNAL;
         }
     } else
-        if (!GetQueryTktCacheResponseXP(data->LogonHandle, data->PackageId,
+        if (!GetQueryTktCacheResponseEx(data->LogonHandle, data->PackageId,
                                         &lcursor->response.xp)) {
             LsaFreeReturnBuffer(lcursor->mstgt);
             free(lcursor);
@@ -1774,7 +1777,8 @@ next_cred:
             }
             return KRB5_OK;
         } else {
-            if (!GetMSCacheTicketFromCacheInfoEX2(data->LogonHandle, data->PackageId,
+            if (!GetMSCacheTicketFromCacheInfoEx2(data->LogonHandle,
+                                                  data->PackageId,
                                                   &lcursor->response.ex2->Tickets[lcursor->index++],&msticket)) {
                 retval = KRB5_FCC_INTERNAL;
                 goto next_cred;
@@ -1793,7 +1797,7 @@ next_cred:
             }
         }
 
-        if (!GetMSCacheTicketFromCacheInfoXP(data->LogonHandle,
+        if (!GetMSCacheTicketFromCacheInfoEx(data->LogonHandle,
                                              data->PackageId,
                                              &lcursor->response.xp->Tickets[lcursor->index++],
                                              &msticket)) {
@@ -1986,14 +1990,14 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
      * cache contents until we find the matching service ticket.
      */
 
-    if (!GetQueryTktCacheResponseXP(data->LogonHandle, data->PackageId,
+    if (!GetQueryTktCacheResponseEx(data->LogonHandle, data->PackageId,
         &pResponse)) {
         kret = KRB5_FCC_INTERNAL;
         goto cleanup;
     }
 
     for (i = 0; i < pResponse->CountOfTickets; i++) {
-        if (!GetMSCacheTicketFromCacheInfoXP(data->LogonHandle,
+        if (!GetMSCacheTicketFromCacheInfoEx(data->LogonHandle,
                                              data->PackageId,
                                              &pResponse->Tickets[i], &mstmp)) {
             continue;
@@ -2104,7 +2108,7 @@ krb5_lcc_remove_cred(krb5_context context, krb5_ccache id, krb5_flags flags,
 {
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
 
-    if (PurgeTicketXP(data->LogonHandle, data->PackageId, context, flags,
+    if (PurgeTicketEx(data->LogonHandle, data->PackageId, context, flags,
                       creds))
         return KRB5_OK;
 
