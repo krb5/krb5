@@ -199,17 +199,23 @@ MITPrincToMSPrinc(krb5_context context, krb5_principal principal, UNICODE_STRING
 }
 
 static BOOL
-UnicodeStringToMITPrinc(UNICODE_STRING *service, WCHAR *realm, krb5_context context,
-                        krb5_principal *principal)
+UnicodeStringToMITPrinc(UNICODE_STRING *service, UNICODE_STRING *realm,
+                        krb5_context context, krb5_principal *principal)
 {
     WCHAR princbuf[512];
+    WCHAR realmbuf[512];
     char aname[512];
 
+    /* Convert the realm to a wchar string. */
+    realmbuf[0] = '\0';
+    wcsncpy(realmbuf, realm->Buffer, realm->Length / sizeof(WCHAR));
+    realmbuf[realm->Length / sizeof(WCHAR)] = 0;
+    /* Convert the principal components to a wchar string. */
     princbuf[0]=0;
     wcsncpy(princbuf, service->Buffer, service->Length/sizeof(WCHAR));
     princbuf[service->Length/sizeof(WCHAR)]=0;
     wcscat(princbuf, L"@");
-    wcscat(princbuf, realm);
+    wcscat(princbuf, realmbuf);
     if (UnicodeToANSI(princbuf, aname, sizeof(aname))) {
         if (krb5_parse_name(context, aname, principal) == 0)
             return TRUE;
@@ -354,21 +360,17 @@ static BOOL
 CacheInfoEx2ToMITCred(KERB_TICKET_CACHE_INFO_EX2 *info,
                       krb5_context context, krb5_creds *creds)
 {
-    WCHAR wrealm[128];
     ZeroMemory(creds, sizeof(krb5_creds));
     creds->magic=KV5M_CREDS;
 
     // construct Client Principal
-    wcsncpy(wrealm, info->ClientRealm.Buffer, info->ClientRealm.Length/sizeof(WCHAR));
-    wrealm[info->ClientRealm.Length/sizeof(WCHAR)]=0;
-    if (!UnicodeStringToMITPrinc(&info->ClientName, wrealm, context, &creds->client))
+    if (!UnicodeStringToMITPrinc(&info->ClientName, &info->ClientRealm,
+                                 context, &creds->client))
         return FALSE;
 
     // construct Service Principal
-    wcsncpy(wrealm, info->ServerRealm.Buffer,
-            info->ServerRealm.Length/sizeof(WCHAR));
-    wrealm[info->ServerRealm.Length/sizeof(WCHAR)]=0;
-    if (!UnicodeStringToMITPrinc(&info->ServerName, wrealm, context, &creds->server))
+    if (!UnicodeStringToMITPrinc(&info->ServerName, &info->ServerRealm,
+                                 context, &creds->server))
         return FALSE;
 
     creds->keyblock.magic = KV5M_KEYBLOCK;
