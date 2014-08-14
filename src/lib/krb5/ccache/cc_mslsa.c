@@ -1527,9 +1527,8 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     krb5_ccache lid;
     krb5_lcc_data *data;
     HANDLE LogonHandle;
-    ULONG  PackageId;
-    KERB_EXTERNAL_TICKET *msticket;
-    krb5_error_code retval = KRB5_OK;
+    ULONG  PackageId, i;
+    PKERB_QUERY_TKT_CACHE_EX_RESPONSE pResponse;
 
     if (!PackageConnectLookup(&LogonHandle, &PackageId))
         return KRB5_FCC_NOFILE;
@@ -1553,7 +1552,7 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     data = (krb5_lcc_data *)lid->data;
     data->LogonHandle = LogonHandle;
     data->PackageId = PackageId;
-    data->princ = 0;
+    data->princ = NULL;
 
     data->cc_name = (char *)malloc(strlen(residual)+1);
     if (data->cc_name == NULL) {
@@ -1564,19 +1563,18 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     }
     strcpy(data->cc_name, residual);
 
-    /*
-     * we must obtain a tgt from the cache in order to determine the principal
-     */
-    if (GetMSTGT(context, data->LogonHandle, data->PackageId, &msticket, FALSE)) {
-        /* convert the ticket */
-        krb5_creds creds;
-        if (!MSCredToMITCred(msticket, msticket->DomainName, context, &creds))
-            retval = KRB5_FCC_INTERNAL;
-        LsaFreeReturnBuffer(msticket);
+    /* If there are already tickets present, grab a client principal name. */
+    if (GetQueryTktCacheResponseEx(LogonHandle, PackageId, &pResponse)) {
+        /* Take the first client principal we find; they should all be the
+         * same anyway. */
+        for (i = 0; i < pResponse->CountOfTickets; i++) {
+            if (UnicodeStringToMITPrinc(&pResponse->Tickets[0].ClientName,
+                                        &pResponse->Tickets[0].ClientRealm,
+                                        context, &data->princ))
+                break;
 
-        if (retval == KRB5_OK)
-            krb5_copy_principal(context, creds.client, &data->princ);
-        krb5_free_cred_contents(context,&creds);
+        }
+        LsaFreeReturnBuffer(pResponse);
     }
 
     /*
@@ -1584,7 +1582,7 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
      * if cache is non-existent/unusable
      */
     *id = lid;
-    return retval;
+    return KRB5_OK;
 }
 
 /*
@@ -1904,29 +1902,27 @@ krb5_lcc_get_name (krb5_context context, krb5_ccache id)
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_get_principal(krb5_context context, krb5_ccache id, krb5_principal *princ)
 {
+    PKERB_QUERY_TKT_CACHE_EX_RESPONSE pResponse;
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
+    ULONG  i;
 
     /* obtain principal */
     if (data->princ)
         return krb5_copy_principal(context, data->princ, princ);
     else {
-        /*
-         * we must obtain a tgt from the cache in order to determine the principal
-         */
-        KERB_EXTERNAL_TICKET *msticket;
-        if (GetMSTGT(context, data->LogonHandle, data->PackageId, &msticket, FALSE)) {
-            /* convert the ticket */
-            krb5_creds creds;
-            if (!MSCredToMITCred(msticket, msticket->DomainName, context, &creds))
-            {
-                LsaFreeReturnBuffer(msticket);
-                return KRB5_FCC_INTERNAL;
+        if (GetQueryTktCacheResponseEx(data->LogonHandle, data->PackageId,
+                                       &pResponse)) {
+            /* Take the first client principal we find; they should all be the
+             * same anyway. */
+            for (i = 0; i < pResponse->CountOfTickets; i++) {
+                if (UnicodeStringToMITPrinc(&pResponse->Tickets[0].ClientName,
+                                            &pResponse->Tickets[0].ClientRealm,
+                                            context, &data->princ))
+                    break;
             }
-            LsaFreeReturnBuffer(msticket);
-
-            krb5_copy_principal(context, creds.client, &data->princ);
-            krb5_free_cred_contents(context,&creds);
-            return krb5_copy_principal(context, data->princ, princ);
+            LsaFreeReturnBuffer(pResponse);
+            if (data->princ)
+                return krb5_copy_principal(context, data->princ, princ);
         }
     }
     return KRB5_CC_NOTFOUND;
