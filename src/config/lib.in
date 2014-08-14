@@ -72,20 +72,20 @@ osf1.exports: $(SHLIB_EXPORT_FILE) Makefile
 	done; echo " $$a" >> osf1.tmp
 	mv -f osf1.tmp osf1.exports
 
-hpux10.exports: $(SHLIB_EXPORT_FILE) Makefile
-	$(RM) hpux10.tmp hpux10.exports
-	sed "s/^/+e /" < $(SHLIB_EXPORT_FILE) > hpux10.tmp
+hpux.exports: $(SHLIB_EXPORT_FILE) Makefile
+	$(RM) hpux.tmp hpux.exports
+	sed "s/^/+e /" < $(SHLIB_EXPORT_FILE) > hpux.tmp
 	a=""; \
 	for f in . $(LIBFINIFUNC); do \
 	  if test "$$f" != .; then \
 	    a="+I $${f}__auxfini $$a"; \
 	  else :; fi; \
-	done; echo "$$a" >> hpux10.tmp
-	echo "+e errno" >> hpux10.tmp
+	done; echo "$$a" >> hpux.tmp
+	echo "+e errno" >> hpux.tmp
 	base=`echo "$(LIBBASE)" | sed -e 's/-/_/'`; \
-	echo "+e _GLOBAL__FD_lib$${base}_$(LIBMAJOR)_$(LIBMINOR)" >> hpux10.tmp; \
-	echo "+e _GLOBAL__FI_lib$${base}_$(LIBMAJOR)_$(LIBMINOR)" >> hpux10.tmp
-	mv -f hpux10.tmp hpux10.exports
+	echo "+e _GLOBAL__FD_lib$${base}_$(LIBMAJOR)_$(LIBMINOR)" >> hpux.tmp; \
+	echo "+e _GLOBAL__FI_lib$${base}_$(LIBMAJOR)_$(LIBMINOR)" >> hpux.tmp
+	mv -f hpux.tmp hpux.exports
 
 lib$(LIBBASE)$(PFLIBEXT): $(PFOBJLISTS)
 	$(RM) $@
@@ -120,7 +120,7 @@ clean-libs:
 	$(RM) lib$(LIBBASE)$(SHLIBSEXT)
 	$(RM) lib$(LIBBASE)$(SHLIBEXT)
 	$(RM) lib$(LIBBASE)$(PFLIBEXT)
-	$(RM) binutils.versions osf1.exports darwin.exports hpux10.exports
+	$(RM) binutils.versions osf1.exports darwin.exports hpux.exports
 
 clean-liblinks:
 	$(RM) $(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)
