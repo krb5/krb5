@@ -1,14 +1,14 @@
 K5_AC_INIT([aclocal.m4])
 
 # If $runstatedir isn't set by autoconf (<2.70), set it manually.
-if test x"$runstatedir" == x; then
+if test x"$runstatedir" = x; then
   runstatedir=$localstatedir/run
 fi
 AC_SUBST(runstatedir)
 
 # Don't make duplicate profile path entries for /etc/krb5.conf if
 # $sysconfdir is /etc
-if test "$sysconfdir" == /etc; then
+if test "$sysconfdir" = /etc; then
   SYSCONFCONF=""
 else
   SYSCONFCONF=":${sysconfdir}/krb5.conf"
