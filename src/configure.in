@@ -242,6 +242,7 @@ case "$withval" in
 builtin|openssl)
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info, PKINIT_CRYPTO_IMPL_LIBS=-lcrypto)
   PKINIT_CRYPTO_IMPL=openssl
+  AC_CHECK_LIB(crypto, CMS_get0_content, AC_DEFINE([HAVE_OPENSSL_CMS], 1, [Define to 1 if the openssl implementation supports cms.]))
   ;;
 nss)
   if test "${PKINIT_CRYPTO_IMPL_CFLAGS+set}" != set; then

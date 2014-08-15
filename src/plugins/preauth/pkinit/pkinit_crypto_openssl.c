@@ -156,8 +156,8 @@ static char *
 pkinit_pkcs11_code_to_text(int err);
 
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000000L
-/* Use CMS support present in OpenSSL 1.0 and later. */
+#ifdef HAVE_OPENSSL_CMS
+/* Use CMS support present in OpenSSL */
 #include <openssl/cms.h>
 #define pkinit_CMS_get0_content_signed(_cms) CMS_get0_content(_cms)
 #define pkinit_CMS_get0_content_data(_cms) CMS_get0_content(_cms)
