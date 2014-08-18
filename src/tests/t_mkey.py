@@ -279,6 +279,12 @@ update_princ_encryption(False, 3, nprincs - 1, 0)
 check_mkey_list((3, aes128, True, True), (2, defetype, True, False))
 check_mkvno(realm.user_princ, 3)
 
+# Regression test for #7994 (randkey does not update principal mkvno).
+add_mkey([])
+realm.run([kdb5_util, 'use_mkey', '4', 'now-1day'])
+realm.run_kadminl('cpw -randkey %s' % realm.user_princ)
+check_mkvno(realm.user_princ, 4)
+
 realm.stop()
 
 # Load a dump file created with krb5 1.6, before the master key
