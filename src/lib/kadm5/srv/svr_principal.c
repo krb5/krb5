@@ -1597,6 +1597,7 @@ kadm5_randkey_principal_3(void *server_handle,
     krb5_boolean                have_pol = FALSE;
     kadm5_server_handle_t       handle = server_handle;
     krb5_keyblock               *act_mkey;
+    krb5_kvno                   act_kvno;
     int                         new_n_ks_tuple = 0;
     krb5_key_salt_tuple         *new_ks_tuple = NULL;
 
@@ -1626,12 +1627,16 @@ kadm5_randkey_principal_3(void *server_handle,
         new_n_ks_tuple = 1;
     }
 
-    ret = kdb_get_active_mkey(handle, NULL, &act_mkey);
+    ret = kdb_get_active_mkey(handle, &act_kvno, &act_mkey);
     if (ret)
         goto done;
 
     ret = krb5_dbe_crk(handle->context, act_mkey, new_ks_tuple, new_n_ks_tuple,
                        keepold, kdb);
+    if (ret)
+        goto done;
+
+    ret = krb5_dbe_update_mkvno(handle->context, kdb, act_kvno);
     if (ret)
         goto done;
 
