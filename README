@@ -76,8 +76,113 @@ beginning with krb5-1.8.
 Major changes in 1.13
 ---------------------
 
+Administrator experience:
+
+* Add support for accessing KDCs via an HTTPS proxy server using the
+  MS-KKDCP protocol.
+
+* Add support for hierarchical incremental propagation, where slaves
+  can act as intermediates between an upstream master and other
+  downstream slaves.
+
+* Add support for configuring GSS mechanisms using
+  /etc/gss/mech.d/*.conf files in addition to /etc/gss/mech.
+
+* Add support to the LDAP KDB module for binding to the LDAP server using SASL.
+
+User experience:
+
+* Add client support for the Kerberos Cache Manager protocol. If the
+  host is running a Heimdal kcm daemon, caches served by the daemon
+  can be accessed with the KCM: cache type.
+
+* When built on OS X 10.7 and higher, use "KCM:" as the default cache
+  type, unless overridden by command-line options or krb5-config
+  values.
+
+Performance:
+
+* Add support for doing unlocked database dumps for the DB2 KDC back
+  end, which would allow the KDC and kadmind to continue accessing the
+  database during lengthy database dumps.
+
+
 krb5-1.13 changes by ticket ID
 ------------------------------
+
+884     having "-" in key:salt separator list prevents salttype
+        defaulting from working
+1794    don't use mktemp
+5958    kadmin salttype "no salt" means really means "default/normal
+        salt"
+6034    rework gic_opt_ext to be more portable
+6042    krb5_string_to_keysalts should default to normal salt rather
+        than "ignore salttype"
+6413    pkinit thread safety
+6550    old_stash_bendian is a keytab
+7232    Confusing error message for key version mismatch
+7704    Anonymous kadmin does not work
+7728    ksu assumes the invoking user's using a FILE: ccache
+7795    Allow ":port" suffixes in sn2princ hostnames
+7800    krb5-1.11/1.12: kadm5_init_with_* interface
+7816    Don't produce context deletion token in krb5 mech
+7819    Add rcache feature to gss_acquire_cred_from
+7838    Fix gss_pseudo_random leak on zero length output
+7840    Remove krb5-send-pr
+7850    Remove kdb5_util load iprop safety net
+7855    Add hierarchical iprop support
+7857    Web Documentation: Missing reference to 1.12
+7859    Move OTP sockets to KDC_RUN_DIR
+7861    iprop can deadlock on master KDC
+7868    krb5_get_init_creds_password ignores preauth options when
+        changing password
+7869    In kdb5_util dump, only lock DB for iprop dumps
+7879    Rewrite GSS sequence state tracking code
+7882    Load mechglue config files from /etc/gss/mech.d
+7883    Try compatible keys in rd_req_dec "any" path
+7884    profile writes may not be immediately detected within same
+        process
+7886    Don't check kpasswd reply address
+7889    PKINIT use of OpenSSL OID table is not thread-safe or
+        application-friendly
+7891    Don't free cred handle used in kadm5 server handle
+7892    mismatch between client keytab default principal for kinit and
+        GSS-API
+7901    Update sample configs to include master_kdc
+7906    Don't remove ccache creds before storing them
+7907    Allow GSS mechs to force mechlistMIC in SPNEGO
+7908    Fix unlikely memory error in krb5_rd_cred
+7910    KDC does not log client principal if TGS header ticket
+        verification fails
+7913    Use case insensitive DNS SAN matching in PKINIT
+7915    Improve pointer hygiene around gss_display_name
+7918    LDAP key data decoder ignores salt type if salt value is empty
+7923    x-deltat.y is not compatible with bison 3
+7925    05cbef80d53 breaks /etc/gss/mech
+7929    HTTP proxy support
+7933    pkinit_win2k_require_binding behavior does not match
+        documentation
+7934    Remove PKINIT longhorn compatibility option
+7935    Add a family-independent bindresvport_sa function
+7939    kadm5.acl docs wrongly imply that list permission can have a
+        target
+7944    Add SASL support to LDAP KDB module
+7947    Load plugins with RTLD_NODELETE if possible
+7961    Define _GNU_SOURCE as part of build
+7964    Add KCM credential cache type (client only)
+7968    Improve error message for PRNG seeding failure
+7974    Don't equate IAKERB and krb5 in SPNEGO initiator
+7975    Negotiating NTLM with SPNEGO against Windows Server 2003
+        doesn't work
+7977    Enable unlocked KDB iteration
+7978    Support kdb5_util dump -rev again
+7979    Add kiprop/<master-hostname> during KDB creation
+7981    Minor memory leak in GSS-API mechanism initialization
+7983    In ksu, without the -e flag, also check .k5users
+7984    Make ksu respect the default_ccache_name setting
+7986    Copy config entries to the ksu target ccache
+7987    Fix GSS krb5 GSS_C_DELEG_FLAG ret_flags result
+7988    Make krb5_cc_new_unique create DIR: directories
 
 Acknowledgements
 ----------------
@@ -243,13 +348,17 @@ reports, suggestions, and valuable resources:
     Holger Isenberg
     Pavel Jindra
     Joel Johnson
+    Anders Kaseorg
     W. Trevor King
     Mikkel Kruse
     Reinhard Kugler
+    Tomas Kuthan
+    Pierre Labastie
     Volker Lendecke
     Jan iankko Lieskovsky
     Oliver Loch
     Kevin Longfellow
+    Jon Looney
     Nuno Lopes
     Ryan Lynch
     Nathaniel McCallum
@@ -271,14 +380,17 @@ reports, suggestions, and valuable resources:
     Javier Palacios
     Tom Parker
     Ezra Peisach
+    Zoran Pericic
     W. Michael Petullo
     Mark Phalan
     Jonathan Reams
     Robert Relyea
     Martin Rex
     Jason Rogers
+    Nate Rosenblum
     Mike Roszkowski
     Guillaume Rousse
+    Andreas Schneider
     Tom Shaw
     Jim Shi
     Peter Shoults
@@ -288,6 +400,7 @@ reports, suggestions, and valuable resources:
     Bjørn Tore Sund
     Joe Travaglini
     Rathor Vipin
+    Denis Vlasenko
     Jorgen Wahlsten
     Stef Walter
     Max (Weijun) Wang
@@ -302,7 +415,9 @@ reports, suggestions, and valuable resources:
     Nicolas Williams
     Ross Wilper
     Augustin Wolf
+    David Woodhouse
     Xu Qiang
+    Neng Xue
     Nickolai Zeldovich
     Hanz van Zijst
     Gertjan Zwartjes
