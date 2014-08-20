@@ -49,9 +49,9 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     krb5_ccache cc;
     int *path_passwd;
 {
-    krb5_principal client, server;
+    krb5_principal client;
     krb5_verify_init_creds_opt vfy_opts;
-    krb5_creds tgt, tgtq, in_creds, * out_creds;
+    krb5_creds tgt, tgtq;
     krb5_error_code retval =0;
     int got_it = 0;
     krb5_boolean zero_password;
@@ -59,45 +59,11 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     *path_passwd = 0;
     memset(&tgtq, 0, sizeof(tgtq));
     memset(&tgt, 0, sizeof(tgt));
-    memset(&in_creds, 0, sizeof(krb5_creds));
-
 
     if ((retval= krb5_copy_principal(context,  client_pname, &client))){
         com_err(prog_name, retval, _("while copying client principal"));
         return (FALSE) ;
     }
-
-    if (auth_debug) {
-        dump_principal(context, "krb5_auth_check: Client principal name",
-                       client);
-    }
-
-    if ((retval = krb5_sname_to_principal(context, hostname, NULL,
-                                          KRB5_NT_SRV_HST, &server))){
-        com_err(prog_name, retval,
-                _("while creating server %s principal name"), hostname);
-        krb5_free_principal(context, client);
-        return (FALSE) ;
-    }
-
-    if (auth_debug) {
-        dump_principal(context, "krb5_auth_check: Server principal name",
-                       server);
-    }
-
-
-
-    /* check if ticket is already in the cache, if it is
-       then use it.
-    */
-    if( krb5_fast_auth(context, client, server, target_user, cc) == TRUE){
-        if (auth_debug ){
-            fprintf (stderr,"Authenticated via fast_auth \n");
-        }
-        return TRUE;
-    }
-
-    /* check to see if the local tgt is in the cache */
 
     if ((retval= krb5_copy_principal(context,  client, &tgtq.client))){
         com_err(prog_name, retval, _("while copying client principal"));
@@ -109,7 +75,6 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
                               &tgtq.server))){
         com_err(prog_name, retval, _("while creating tgt for local realm"));
         krb5_free_principal(context, client);
-        krb5_free_principal(context, server);
         return (FALSE) ;
     }
 
@@ -167,33 +132,10 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
 
     }
 
-    if ((retval= krb5_copy_principal(context, client, &in_creds.client))){
-        com_err(prog_name, retval, _("while copying client principal"));
-        return (FALSE) ;
-    }
-
-    if ((retval= krb5_copy_principal(context, server, &in_creds.server))){
-        com_err(prog_name, retval, _("while copying client principal"));
-        return (FALSE) ;
-    }
-
-    if ((retval = krb5_get_credentials(context, 0, cc, &in_creds,
-                                       &out_creds))){
-        com_err(prog_name, retval, _("while getting credentials from kdc"));
-        return (FALSE);
-    }
-
-
-    if (auth_debug){
-        fprintf(stderr,"krb5_auth_check: got ticket for end server \n");
-        dump_principal(context, "out_creds->server", out_creds->server );
-    }
-
-
     krb5_verify_init_creds_opt_init(&vfy_opts);
     krb5_verify_init_creds_opt_set_ap_req_nofail( &vfy_opts, 1);
-    retval = krb5_verify_init_creds(context, out_creds, server, NULL /*keytab*/,
-                                    NULL /*output ccache*/,
+    retval = krb5_verify_init_creds(context, &tgt, NULL /* server */,
+                                    NULL /*keytab*/, NULL /* output cache */,
                                     &vfy_opts);
     if (retval) {
         com_err(prog_name, retval, _("while verifying ticket for server"));
@@ -202,57 +144,6 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
 
     return (TRUE);
 }
-
-/* krb5_fast_auth checks if ticket for the end server is already in
-   the cache, if it is, we don't need a tgt */
-
-krb5_boolean krb5_fast_auth(context, client, server, target_user, cc)
-    krb5_context context;
-    krb5_principal client;
-    krb5_principal server;
-    char *target_user;
-    krb5_ccache cc;
-{
-
-    krb5_creds tgt, tgtq;
-    krb5_verify_init_creds_opt vfy_opts;
-    krb5_error_code retval;
-
-    memset(&tgtq, 0, sizeof(tgtq));
-    memset(&tgt, 0, sizeof(tgt));
-
-    if ((retval= krb5_copy_principal(context, client, &tgtq.client))){
-        com_err(prog_name, retval, _("while copying client principal"));
-        return (FALSE) ;
-    }
-
-    if ((retval= krb5_copy_principal(context, server, &tgtq.server))){
-        com_err(prog_name, retval, _("while copying client principal"));
-        return (FALSE) ;
-    }
-
-    if ((retval = krb5_cc_retrieve_cred(context, cc,
-                                        KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
-                                        &tgtq, &tgt))){
-        if (auth_debug)
-            com_err(prog_name, retval, _("while Retrieving credentials"));
-        return (FALSE) ;
-
-    }
-    krb5_verify_init_creds_opt_init(&vfy_opts);
-    krb5_verify_init_creds_opt_set_ap_req_nofail( &vfy_opts, 1);
-    retval = krb5_verify_init_creds(context, &tgt, server, NULL /*keytab*/,
-                                    NULL /*output ccache*/,
-                                    &vfy_opts);
-    if (retval){
-        com_err(prog_name, retval, _("while verifying ticket for server"));
-        return (FALSE);
-    }
-
-    return TRUE;
-}
-
-
 
 krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
                                       options, zero_password)
