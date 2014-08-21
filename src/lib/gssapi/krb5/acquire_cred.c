@@ -464,7 +464,8 @@ get_cache_for_name(krb5_context context, krb5_gss_cred_id_rec *cred)
 
     assert(cred->name != NULL && cred->ccache == NULL);
 #ifdef USE_LEASH
-    return get_ccache_leash(context, cred->name->princ, &cred->ccache);
+    code = get_ccache_leash(context, cred->name->princ, &cred->ccache);
+    return code ? code : scan_ccache(context, cred);
 #else
     /* Check first whether we can acquire tickets, to avoid overwriting the
      * extended error message from krb5_cc_cache_match. */
