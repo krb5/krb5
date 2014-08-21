@@ -139,6 +139,19 @@
                     <Component Win64="$(var.Win64)" Id="cmf_krb5_32_dll" Guid="$(var.cmf_krb5_32_dll_guid)" DiskId="1">
 	                    <File Id="fil_krb5_32_dll" Name="$(var.cmf_krb5_32_dll_name)" KeyPath="yes" />
 	                    <Environment Id="env_kclient_path" Action="set" Name="PATH" Part="last" System="yes" Value="[KERBEROSDIR]bin" />
+	                    <RegistryKey Root="HKLM" Key="SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Domains\ATHENA.MIT.EDU">
+	                      <RegistryValue Name="KdcNames" Type="multiString">
+	                        <MultiStringValue>kerberos.mit.edu</MultiStringValue>
+	                        <MultiStringValue>kerberos-1.mit.edu</MultiStringValue>
+	                        <MultiStringValue>kerberos-2.mit.edu</MultiStringValue>
+	                      </RegistryValue>
+	                    </RegistryKey>
+	                    <RegistryKey Root="HKLM" Key="SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Domains\CSAIL.MIT.EDU">
+	                      <RegistryValue Name="KdcNames" Type="multiString">
+	                        <MultiStringValue>kerberos-1.mit.edu</MultiStringValue>
+	                        <MultiStringValue>kerberos-2.mit.edu</MultiStringValue>
+	                      </RegistryValue>
+	                    </RegistryKey>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_k5sprt32_dll" Guid="$(var.cmf_k5sprt32_dll_guid)" DiskId="1">
 	                    <File Id="fil_k5sprt32_dll" Name="$(var.cmf_k5sprt32_dll_name)" />
