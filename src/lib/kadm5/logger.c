@@ -594,7 +594,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
                  */
                 else if (!strcasecmp(cp, "STDERR")) {
                     log_control.log_entries[i].lfu_filep =
-                        fdopen(fileno(stderr), "a+");
+                        fdopen(fileno(stderr), "w");
                     if (log_control.log_entries[i].lfu_filep) {
                         log_control.log_entries[i].log_type = K_LOG_STDERR;
                         log_control.log_entries[i].lfu_fname =
