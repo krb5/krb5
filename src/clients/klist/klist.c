@@ -533,6 +533,7 @@ do_ccache(krb5_ccache cache)
         }
         krb5_free_cred_contents(kcontext, &creds);
     }
+    krb5_free_principal(kcontext, princ);
     if (code == KRB5_CC_END) {
         if ((code = krb5_cc_end_seq_get(kcontext, cache, &cur))) {
             if (!status_only)
@@ -555,7 +556,6 @@ do_ccache(krb5_ccache cache)
             com_err(progname, code, _("while retrieving a ticket"));
         return 1;
     }
-    krb5_free_principal(kcontext, princ);
 }
 
 char *
