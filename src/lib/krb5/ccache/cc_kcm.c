@@ -84,8 +84,10 @@ struct kcm_cache_data {
 };
 
 struct kcm_ptcursor {
-    struct uuid_list *uuids;
+    char *residual;             /* primary or singleton subsidiary */
+    struct uuid_list *uuids;    /* NULL for singleton subsidiary */
     struct kcmio *io;
+    krb5_boolean first;
 };
 
 /* Map EINVAL or KRB5_CC_FORMAT to KRB5_KCM_MALFORMED_REPLY; pass through all
@@ -481,16 +483,24 @@ kcmreq_free(struct kcmreq *req)
     free(req->reply_mem);
 }
 
-/* Create a krb5_ccache structure.  Always take ownership of io. */
+/* Create a krb5_ccache structure.  If io is NULL, make a new connection for
+ * the cache.  Otherwise, always take ownership of io. */
 static krb5_error_code
-make_cache(const char *residual, struct kcmio *io, krb5_ccache *cache_out)
+make_cache(krb5_context context, const char *residual, struct kcmio *io,
+           krb5_ccache *cache_out)
 {
+    krb5_error_code ret;
     krb5_ccache cache = NULL;
     struct kcm_cache_data *data = NULL;
     char *residual_copy = NULL;
 
     *cache_out = NULL;
-    assert(io != NULL);
+
+    if (io == NULL) {
+        ret = kcmio_connect(context, &io);
+        if (ret)
+            return ret;
+    }
 
     cache = malloc(sizeof(*cache));
     if (cache == NULL)
@@ -605,7 +615,7 @@ kcm_resolve(krb5_context context, krb5_ccache *cache_out, const char *residual)
         residual = defname;
     }
 
-    ret = make_cache(residual, io, cache_out);
+    ret = make_cache(context, residual, io, cache_out);
     io = NULL;
 
 cleanup:
@@ -634,7 +644,7 @@ kcm_gen_new(krb5_context context, krb5_ccache *cache_out)
     ret = kcmreq_get_name(&req, &name);
     if (ret)
         goto cleanup;
-    ret = make_cache(name, io, cache_out);
+    ret = make_cache(context, name, io, cache_out);
     io = NULL;
 
 cleanup:
@@ -814,14 +824,20 @@ kcm_get_flags(krb5_context context, krb5_ccache cache, krb5_flags *flags_out)
 
 /* Construct a per-type cursor, always taking ownership of io and uuids. */
 static krb5_error_code
-make_ptcursor(struct uuid_list *uuids, struct kcmio *io,
+make_ptcursor(const char *residual, struct uuid_list *uuids, struct kcmio *io,
               krb5_cc_ptcursor *cursor_out)
 {
     krb5_cc_ptcursor cursor = NULL;
     struct kcm_ptcursor *data = NULL;
+    char *residual_copy = NULL;
 
     *cursor_out = NULL;
 
+    if (residual != NULL) {
+        residual_copy = strdup(residual);
+        if (residual_copy == NULL)
+            goto oom;
+    }
     cursor = malloc(sizeof(*cursor));
     if (cursor == NULL)
         goto oom;
@@ -829,8 +845,10 @@ make_ptcursor(struct uuid_list *uuids, struct kcmio *io,
     if (data == NULL)
         goto oom;
 
+    data->residual = residual_copy;
     data->uuids = uuids;
     data->io = io;
+    data->first = TRUE;
     cursor->ops = &krb5_kcm_ops;
     cursor->data = data;
     *cursor_out = cursor;
@@ -839,6 +857,7 @@ make_ptcursor(struct uuid_list *uuids, struct kcmio *io,
 oom:
     kcmio_close(io);
     free_uuid_list(uuids);
+    free(residual_copy);
     free(data);
     free(cursor);
     return ENOMEM;
@@ -851,7 +870,7 @@ kcm_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor_out)
     struct kcmreq req = EMPTY_KCMREQ;
     struct kcmio *io = NULL;
     struct uuid_list *uuids;
-    const char *defname;
+    const char *defname, *primary;
 
     *cursor_out = NULL;
 
@@ -859,27 +878,39 @@ kcm_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor_out)
      * name has the KCM type. */
     defname = krb5_cc_default_name(context);
     if (defname == NULL || strncmp(defname, "KCM:", 4) != 0)
-        return make_ptcursor(NULL, NULL, cursor_out);
+        return make_ptcursor(NULL, NULL, NULL, cursor_out);
 
     ret = kcmio_connect(context, &io);
     if (ret)
-        goto cleanup;
+        return ret;
+
+    /* If defname is a subsidiary cache, return a singleton cursor. */
+    if (strlen(defname) > 4)
+        return make_ptcursor(defname + 4, NULL, io, cursor_out);
 
     kcmreq_init(&req, KCM_OP_GET_CACHE_UUID_LIST, NULL);
     ret = kcmio_call(context, io, &req);
     if (ret == KRB5_FCC_NOFILE) {
         /* There are no accessible caches; return an empty cursor. */
-        ret = make_ptcursor(NULL, NULL, cursor_out);
+        ret = make_ptcursor(NULL, NULL, NULL, cursor_out);
         goto cleanup;
     }
     if (ret)
         goto cleanup;
-
     ret = kcmreq_get_uuid_list(&req, &uuids);
     if (ret)
         goto cleanup;
 
-    ret = make_ptcursor(uuids, io, cursor_out);
+    kcmreq_free(&req);
+    kcmreq_init(&req, KCM_OP_GET_DEFAULT_CACHE, NULL);
+    ret = kcmio_call(context, io, &req);
+    if (ret)
+        goto cleanup;
+    ret = kcmreq_get_name(&req, &primary);
+    if (ret)
+        goto cleanup;
+
+    ret = make_ptcursor(primary, uuids, io, cursor_out);
     io = NULL;
 
 cleanup:
@@ -888,38 +919,64 @@ cleanup:
     return ret;
 }
 
+/* Return true if name is an initialized cache. */
+static krb5_boolean
+name_exists(krb5_context context, struct kcmio *io, const char *name)
+{
+    krb5_error_code ret;
+    struct kcmreq req;
+
+    kcmreq_init(&req, KCM_OP_GET_PRINCIPAL, NULL);
+    k5_buf_add_len(&req.reqbuf, name, strlen(name) + 1);
+    ret = kcmio_call(context, io, &req);
+    kcmreq_free(&req);
+    return ret == 0;
+}
+
 static krb5_error_code KRB5_CALLCONV
 kcm_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
                   krb5_ccache *cache_out)
 {
-    krb5_error_code ret;
+    krb5_error_code ret = 0;
     struct kcmreq req = EMPTY_KCMREQ;
-    struct kcmio *io;
     struct kcm_ptcursor *data = cursor->data;
-    struct uuid_list *uuids = data->uuids;
+    struct uuid_list *uuids;
+    const unsigned char *id;
     const char *name;
 
     *cache_out = NULL;
 
-    if (uuids == NULL || uuids->pos >= uuids->count)
+    /* Return the primary or specified subsidiary cache if we haven't yet. */
+    if (data->first && data->residual != NULL) {
+        data->first = FALSE;
+        if (name_exists(context, data->io, data->residual))
+            return make_cache(context, data->residual, NULL, cache_out);
+    }
+
+    uuids = data->uuids;
+    if (uuids == NULL)
         return 0;
 
-    kcmreq_init(&req, KCM_OP_GET_CACHE_BY_UUID, NULL);
-    k5_buf_add_len(&req.reqbuf, uuids->uuidbytes + (uuids->pos * KCM_UUID_LEN),
-                   KCM_UUID_LEN);
-    uuids->pos++;
-    ret = kcmio_call(context, data->io, &req);
-    if (ret)
-        goto cleanup;
+    while (uuids->pos < uuids->count) {
+        /* Get the name of the next cache. */
+        id = &uuids->uuidbytes[KCM_UUID_LEN * uuids->pos++];
+        kcmreq_free(&req);
+        kcmreq_init(&req, KCM_OP_GET_CACHE_BY_UUID, NULL);
+        k5_buf_add_len(&req.reqbuf, id, KCM_UUID_LEN);
+        ret = kcmio_call(context, data->io, &req);
+        if (ret)
+            goto cleanup;
+        ret = kcmreq_get_name(&req, &name);
+        if (ret)
+            goto cleanup;
 
-    ret = kcmreq_get_name(&req, &name);
-    if (ret)
-        goto cleanup;
+        /* Don't yield the primary cache twice. */
+        if (strcmp(name, data->residual) == 0)
+            continue;
 
-    ret = kcmio_connect(context, &io);
-    if (ret)
-        goto cleanup;
-    ret = make_cache(name, io, cache_out);
+        ret = make_cache(context, name, NULL, cache_out);
+        break;
+    }
 
 cleanup:
     kcmreq_free(&req);
@@ -931,6 +988,7 @@ kcm_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor)
 {
     struct kcm_ptcursor *data = (*cursor)->data;
 
+    free(data->residual);
     free_uuid_list(data->uuids);
     kcmio_close(data->io);
     free(data);
