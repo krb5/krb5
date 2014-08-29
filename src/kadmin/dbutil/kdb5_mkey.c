@@ -912,7 +912,7 @@ kdb5_update_princ_encryption(int argc, char *argv[])
     char *regexp = NULL;
     krb5_keyblock *act_mkey;
     krb5_keylist_node *master_keylist = krb5_db_mkey_list_alias(util_context);
-    krb5_flags iterflags;
+    krb5_flags iterflags = 0;
 
     while ((optchar = getopt(argc, argv, "fnv")) != -1) {
         switch (optchar) {
