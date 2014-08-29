@@ -15,6 +15,7 @@ gssrpc_authnone_create
 gssrpc_authunix_create
 gssrpc_authunix_create_default
 gssrpc_bindresvport
+gssrpc_bindresvport_sa
 gssrpc_callrpc
 gssrpc_clnt_broadcast
 gssrpc_clnt_create
