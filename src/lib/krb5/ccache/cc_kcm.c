@@ -869,7 +869,7 @@ kcm_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor_out)
     krb5_error_code ret;
     struct kcmreq req = EMPTY_KCMREQ;
     struct kcmio *io = NULL;
-    struct uuid_list *uuids;
+    struct uuid_list *uuids = NULL;
     const char *defname, *primary;
 
     *cursor_out = NULL;
@@ -911,9 +911,11 @@ kcm_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor_out)
         goto cleanup;
 
     ret = make_ptcursor(primary, uuids, io, cursor_out);
+    uuids = NULL;
     io = NULL;
 
 cleanup:
+    free_uuid_list(uuids);
     kcmio_close(io);
     kcmreq_free(&req);
     return ret;
