@@ -126,6 +126,12 @@ The libdefaults section may contain any of the following relations:
     library will tolerate before assuming that a Kerberos message is
     invalid.  The default value is 300 seconds, or five minutes.
 
+    The clockskew setting is also used when evaluating ticket start
+    and expiration times.  For example, tickets that have reached
+    their expiration time can still be used (and renewed if they are
+    renewable tickets) if they have been expired for a shorter
+    duration than the **clockskew** setting.
+
 **default_ccache_name**
     This relation specifies the name of the default credential cache.
     The default is |ccache|.  This relation is subject to parameter
