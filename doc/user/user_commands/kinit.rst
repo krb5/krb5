@@ -103,6 +103,11 @@ OPTIONS
     expired ticket cannot be renewed, even if the ticket is still
     within its renewable life.
 
+    Note that renewable tickets that have expired as reported by
+    :ref:`klist(1)` may sometimes be renewed using this option,
+    because the KDC applies a grace period to account for client-KDC
+    clock skew.  See :ref:`krb5.conf(5)` **clockskew** setting.
+
 **-k** [**-i** | **-t** *keytab_file*]
     requests a ticket, obtained from a key in the local host's keytab.
     The location of the keytab may be specified with the **-t**
