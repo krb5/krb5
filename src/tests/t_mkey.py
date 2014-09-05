@@ -279,11 +279,19 @@ update_princ_encryption(False, 3, nprincs - 1, 0)
 check_mkey_list((3, aes128, True, True), (2, defetype, True, False))
 check_mkvno(realm.user_princ, 3)
 
-# Regression test for #7994 (randkey does not update principal mkvno).
-add_mkey([])
+# Regression test for #7994 (randkey does not update principal mkvno)
+# and #7995 (-keepold does not re-encrypt old keys).
+add_mkey(['-s'])
 realm.run([kdb5_util, 'use_mkey', '4', 'now-1day'])
-realm.run_kadminl('cpw -randkey %s' % realm.user_princ)
+realm.run_kadminl('cpw -randkey -keepold %s' % realm.user_princ)
+# With #7994 unfixed, mkvno of user will still be 3.
 check_mkvno(realm.user_princ, 4)
+# With #7995 unfixed, old keys are still encrypted with mkvno 3.
+update_princ_encryption(False, 4, nprincs - 2, 1)
+realm.run([kdb5_util, 'purge_mkeys', '-f'])
+out = realm.run_kadminl('xst -norandkey %s' % realm.user_princ)
+if 'Decrypt integrity check failed' in out or 'added to keytab' not in out:
+    fail('Preserved old key data not updated to new master key')
 
 realm.stop()
 
