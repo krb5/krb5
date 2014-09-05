@@ -227,7 +227,7 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
             continue;
 
         if ((retval = krb5_dbe_create_key_data(context, db_entry)))
-            goto add_key_rnd_err;
+            return retval;
 
         /* there used to be code here to extract the old key, and derive
            a new key from it.  Now that there's a unified prng, that isn't
@@ -236,7 +236,7 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
         /* make new key */
         if ((retval = krb5_c_make_random_key(context, ks_tuple[i].ks_enctype,
                                              &key)))
-            goto add_key_rnd_err;
+            return retval;
 
         memset( &tmp_key_data, 0, sizeof(tmp_key_data));
         retval = krb5_dbe_encrypt_key_data(context, master_key, &key, NULL,
@@ -244,18 +244,17 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
 
         krb5_free_keyblock_contents(context, &key);
         if( retval )
-            goto add_key_rnd_err;
+            return retval;
 
         /* Copy the result to ensure we use db_alloc storage. */
         retval = copy_key_data(context, &tmp_key_data,
                                &db_entry->key_data[db_entry->n_key_data - 1]);
         krb5_dbe_free_key_data_contents(context, &tmp_key_data);
         if (retval)
-            goto add_key_rnd_err;
+            return retval;
     }
 
-add_key_rnd_err:
-    return(retval);
+    return 0;
 }
 
 /* Construct a random explicit salt. */
