@@ -819,7 +819,7 @@ get_configured_defccname(krb5_context context, char **target_out)
 {
     krb5_error_code retval;
     const char *defname;
-    char *target;
+    char *target = NULL;
 
     *target_out = NULL;
 
@@ -838,7 +838,14 @@ get_configured_defccname(krb5_context context, char **target_out)
     }
 
     defname = krb5_cc_default_name(context);
-    target = (defname == NULL) ? NULL : strdup(defname);
+    if (defname != NULL) {
+        if (strchr(defname, ':') != NULL) {
+            target = strdup(defname);
+        } else {
+            if (asprintf(&target, "FILE:%s", defname) < 0)
+                target = NULL;
+        }
+    }
     if (target == NULL) {
         com_err(prog_name, ENOMEM, _("while determining target ccache name"));
         return ENOMEM;
