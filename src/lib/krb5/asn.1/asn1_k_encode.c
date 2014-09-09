@@ -1160,10 +1160,14 @@ DEFSEQTYPE(iakerb_finished, krb5_iakerb_finished, iakerb_finished_fields);
 /* Exported complete encoders -- these produce a krb5_data with
    the encoding in the correct byte order.  */
 
-MAKE_CODEC(krb5_authenticator, authenticator);
-MAKE_CODEC(krb5_ticket, ticket);
-MAKE_CODEC(krb5_encryption_key, encryption_key);
-MAKE_CODEC(krb5_enc_tkt_part, enc_tkt_part);
+MAKE_ENCODER(encode_krb5_authenticator, authenticator);
+MAKE_DECODER(decode_krb5_authenticator, authenticator);
+MAKE_ENCODER(encode_krb5_ticket, ticket);
+MAKE_DECODER(decode_krb5_ticket, ticket);
+MAKE_ENCODER(encode_krb5_encryption_key, encryption_key);
+MAKE_DECODER(decode_krb5_encryption_key, encryption_key);
+MAKE_ENCODER(encode_krb5_enc_tkt_part, enc_tkt_part);
+MAKE_DECODER(decode_krb5_enc_tkt_part, enc_tkt_part);
 
 krb5_error_code KRB5_CALLCONV
 krb5_decode_ticket(const krb5_data *code, krb5_ticket **repptr)
@@ -1201,17 +1205,24 @@ decode_krb5_enc_kdc_rep_part(const krb5_data *code,
     return 0;
 }
 
-MAKE_CODEC(krb5_as_rep, as_rep);
-MAKE_CODEC(krb5_tgs_rep, tgs_rep);
-MAKE_CODEC(krb5_ap_req, ap_req);
-MAKE_CODEC(krb5_ap_rep, ap_rep);
-MAKE_CODEC(krb5_ap_rep_enc_part, ap_rep_enc_part);
+MAKE_ENCODER(encode_krb5_as_rep, as_rep);
+MAKE_DECODER(decode_krb5_as_rep, as_rep);
+MAKE_ENCODER(encode_krb5_tgs_rep, tgs_rep);
+MAKE_DECODER(decode_krb5_tgs_rep, tgs_rep);
+MAKE_ENCODER(encode_krb5_ap_req, ap_req);
+MAKE_DECODER(decode_krb5_ap_req, ap_req);
+MAKE_ENCODER(encode_krb5_ap_rep, ap_rep);
+MAKE_DECODER(decode_krb5_ap_rep, ap_rep);
+MAKE_ENCODER(encode_krb5_ap_rep_enc_part, ap_rep_enc_part);
+MAKE_DECODER(decode_krb5_ap_rep_enc_part, ap_rep_enc_part);
 MAKE_ENCODER(encode_krb5_as_req, as_req_encode);
 MAKE_DECODER(decode_krb5_as_req, as_req);
 MAKE_ENCODER(encode_krb5_tgs_req, tgs_req_encode);
 MAKE_DECODER(decode_krb5_tgs_req, tgs_req);
-MAKE_CODEC(krb5_kdc_req_body, kdc_req_body);
-MAKE_CODEC(krb5_safe, safe);
+MAKE_ENCODER(encode_krb5_kdc_req_body, kdc_req_body);
+MAKE_DECODER(decode_krb5_kdc_req_body, kdc_req_body);
+MAKE_ENCODER(encode_krb5_safe, safe);
+MAKE_DECODER(decode_krb5_safe, safe);
 
 /* encode_krb5_safe_with_body takes a saved KRB-SAFE-BODY encoding to avoid
  * mismatches from re-encoding if the sender isn't quite DER-compliant. */
@@ -1251,24 +1262,40 @@ decode_krb5_safe_with_body(const krb5_data *code, krb5_safe **rep_out,
     return 0;
 }
 
-MAKE_CODEC(krb5_priv, priv);
-MAKE_CODEC(krb5_enc_priv_part, priv_enc_part);
-MAKE_CODEC(krb5_checksum, checksum);
+MAKE_ENCODER(encode_krb5_priv, priv);
+MAKE_DECODER(decode_krb5_priv, priv);
+MAKE_ENCODER(encode_krb5_enc_priv_part, priv_enc_part);
+MAKE_DECODER(decode_krb5_enc_priv_part, priv_enc_part);
+MAKE_ENCODER(encode_krb5_checksum, checksum);
+MAKE_DECODER(decode_krb5_checksum, checksum);
 
-MAKE_CODEC(krb5_cred, krb5_cred);
-MAKE_CODEC(krb5_enc_cred_part, enc_cred_part);
-MAKE_CODEC(krb5_error, krb5_error);
-MAKE_CODEC(krb5_authdata, auth_data);
-MAKE_CODEC(krb5_etype_info, etype_info);
-MAKE_CODEC(krb5_etype_info2, etype_info2);
-MAKE_CODEC(krb5_enc_data, encrypted_data);
-MAKE_CODEC(krb5_pa_enc_ts, pa_enc_ts);
-MAKE_CODEC(krb5_padata_sequence, seqof_pa_data);
+MAKE_ENCODER(encode_krb5_cred, krb5_cred);
+MAKE_DECODER(decode_krb5_cred, krb5_cred);
+MAKE_ENCODER(encode_krb5_enc_cred_part, enc_cred_part);
+MAKE_DECODER(decode_krb5_enc_cred_part, enc_cred_part);
+MAKE_ENCODER(encode_krb5_error, krb5_error);
+MAKE_DECODER(decode_krb5_error, krb5_error);
+MAKE_ENCODER(encode_krb5_authdata, auth_data);
+MAKE_DECODER(decode_krb5_authdata, auth_data);
+MAKE_ENCODER(encode_krb5_etype_info, etype_info);
+MAKE_DECODER(decode_krb5_etype_info, etype_info);
+MAKE_ENCODER(encode_krb5_etype_info2, etype_info2);
+MAKE_DECODER(decode_krb5_etype_info2, etype_info2);
+MAKE_ENCODER(encode_krb5_enc_data, encrypted_data);
+MAKE_DECODER(decode_krb5_enc_data, encrypted_data);
+MAKE_ENCODER(encode_krb5_pa_enc_ts, pa_enc_ts);
+MAKE_DECODER(decode_krb5_pa_enc_ts, pa_enc_ts);
+MAKE_ENCODER(encode_krb5_padata_sequence, seqof_pa_data);
+MAKE_DECODER(decode_krb5_padata_sequence, seqof_pa_data);
 /* sam preauth additions */
-MAKE_CODEC(krb5_sam_challenge_2, sam_challenge_2);
-MAKE_CODEC(krb5_sam_challenge_2_body, sam_challenge_2_body);
-MAKE_CODEC(krb5_enc_sam_response_enc_2, enc_sam_response_enc_2);
-MAKE_CODEC(krb5_sam_response_2, sam_response_2);
+MAKE_ENCODER(encode_krb5_sam_challenge_2, sam_challenge_2);
+MAKE_DECODER(decode_krb5_sam_challenge_2, sam_challenge_2);
+MAKE_ENCODER(encode_krb5_sam_challenge_2_body, sam_challenge_2_body);
+MAKE_DECODER(decode_krb5_sam_challenge_2_body, sam_challenge_2_body);
+MAKE_ENCODER(encode_krb5_enc_sam_response_enc_2, enc_sam_response_enc_2);
+MAKE_DECODER(decode_krb5_enc_sam_response_enc_2, enc_sam_response_enc_2);
+MAKE_ENCODER(encode_krb5_sam_response_2, sam_response_2);
+MAKE_DECODER(decode_krb5_sam_response_2, sam_response_2);
 
 /* setpw_req has an odd decoder interface which should probably be
  * normalized. */
@@ -1299,22 +1326,33 @@ decode_krb5_setpw_req(const krb5_data *code, krb5_data **password_out,
     return 0;
 }
 
-MAKE_CODEC(krb5_pa_for_user, pa_for_user);
+MAKE_ENCODER(encode_krb5_pa_for_user, pa_for_user);
+MAKE_DECODER(decode_krb5_pa_for_user, pa_for_user);
 MAKE_ENCODER(encode_krb5_s4u_userid, s4u_userid);
-MAKE_CODEC(krb5_pa_s4u_x509_user, pa_s4u_x509_user);
+MAKE_ENCODER(encode_krb5_pa_s4u_x509_user, pa_s4u_x509_user);
+MAKE_DECODER(decode_krb5_pa_s4u_x509_user, pa_s4u_x509_user);
 MAKE_DECODER(decode_krb5_pa_pac_req, pa_pac_req);
-MAKE_CODEC(krb5_etype_list, etype_list);
+MAKE_ENCODER(encode_krb5_etype_list, etype_list);
+MAKE_DECODER(decode_krb5_etype_list, etype_list);
 
-MAKE_CODEC(krb5_pa_fx_fast_request, pa_fx_fast_request);
-MAKE_CODEC(krb5_fast_req, fast_req);
-MAKE_CODEC(krb5_pa_fx_fast_reply, pa_fx_fast_reply);
-MAKE_CODEC(krb5_fast_response, fast_response);
+MAKE_ENCODER(encode_krb5_pa_fx_fast_request, pa_fx_fast_request);
+MAKE_DECODER(decode_krb5_pa_fx_fast_request, pa_fx_fast_request);
+MAKE_ENCODER(encode_krb5_fast_req, fast_req);
+MAKE_DECODER(decode_krb5_fast_req, fast_req);
+MAKE_ENCODER(encode_krb5_pa_fx_fast_reply, pa_fx_fast_reply);
+MAKE_DECODER(decode_krb5_pa_fx_fast_reply, pa_fx_fast_reply);
+MAKE_ENCODER(encode_krb5_fast_response, fast_response);
+MAKE_DECODER(decode_krb5_fast_response, fast_response);
 
-MAKE_CODEC(krb5_ad_kdcissued, ad_kdc_issued);
+MAKE_ENCODER(encode_krb5_ad_kdcissued, ad_kdc_issued);
+MAKE_DECODER(decode_krb5_ad_kdcissued, ad_kdc_issued);
 MAKE_ENCODER(encode_krb5_ad_signedpath_data, ad_signedpath_data);
-MAKE_CODEC(krb5_ad_signedpath, ad_signedpath);
-MAKE_CODEC(krb5_iakerb_header, iakerb_header);
-MAKE_CODEC(krb5_iakerb_finished, iakerb_finished);
+MAKE_ENCODER(encode_krb5_ad_signedpath, ad_signedpath);
+MAKE_DECODER(decode_krb5_ad_signedpath, ad_signedpath);
+MAKE_ENCODER(encode_krb5_iakerb_header, iakerb_header);
+MAKE_DECODER(decode_krb5_iakerb_header, iakerb_header);
+MAKE_ENCODER(encode_krb5_iakerb_finished, iakerb_finished);
+MAKE_DECODER(decode_krb5_iakerb_finished, iakerb_finished);
 
 krb5_error_code KRB5_CALLCONV
 krb5int_get_authdata_containee_types(krb5_context context,
@@ -1593,18 +1631,29 @@ DEFCHOICETYPE(pa_pk_as_rep_draft9_choice,
 DEFCOUNTEDTYPE_SIGNED(pa_pk_as_rep_draft9, krb5_pa_pk_as_rep_draft9, u, choice,
                       pa_pk_as_rep_draft9_choice);
 
-MAKE_CODEC(krb5_pa_pk_as_req, pa_pk_as_req);
+MAKE_ENCODER(encode_krb5_pa_pk_as_req, pa_pk_as_req);
+MAKE_DECODER(decode_krb5_pa_pk_as_req, pa_pk_as_req);
 MAKE_ENCODER(encode_krb5_pa_pk_as_req_draft9, pa_pk_as_req_draft9);
 MAKE_DECODER(decode_krb5_pa_pk_as_req_draft9, pa_pk_as_req_draft9_decode);
-MAKE_CODEC(krb5_pa_pk_as_rep, pa_pk_as_rep);
+MAKE_ENCODER(encode_krb5_pa_pk_as_rep, pa_pk_as_rep);
+MAKE_DECODER(decode_krb5_pa_pk_as_rep, pa_pk_as_rep);
 MAKE_ENCODER(encode_krb5_pa_pk_as_rep_draft9, pa_pk_as_rep_draft9);
-MAKE_CODEC(krb5_auth_pack, auth_pack);
-MAKE_CODEC(krb5_auth_pack_draft9, auth_pack_draft9);
-MAKE_CODEC(krb5_kdc_dh_key_info, kdc_dh_key_info);
-MAKE_CODEC(krb5_reply_key_pack, reply_key_pack);
-MAKE_CODEC(krb5_reply_key_pack_draft9, reply_key_pack_draft9);
-MAKE_CODEC(krb5_td_trusted_certifiers, seqof_external_principal_identifier);
-MAKE_CODEC(krb5_td_dh_parameters, seqof_algorithm_identifier);
+MAKE_ENCODER(encode_krb5_auth_pack, auth_pack);
+MAKE_DECODER(decode_krb5_auth_pack, auth_pack);
+MAKE_ENCODER(encode_krb5_auth_pack_draft9, auth_pack_draft9);
+MAKE_DECODER(decode_krb5_auth_pack_draft9, auth_pack_draft9);
+MAKE_ENCODER(encode_krb5_kdc_dh_key_info, kdc_dh_key_info);
+MAKE_DECODER(decode_krb5_kdc_dh_key_info, kdc_dh_key_info);
+MAKE_ENCODER(encode_krb5_reply_key_pack, reply_key_pack);
+MAKE_DECODER(decode_krb5_reply_key_pack, reply_key_pack);
+MAKE_ENCODER(encode_krb5_reply_key_pack_draft9, reply_key_pack_draft9);
+MAKE_DECODER(decode_krb5_reply_key_pack_draft9, reply_key_pack_draft9);
+MAKE_ENCODER(encode_krb5_td_trusted_certifiers,
+             seqof_external_principal_identifier);
+MAKE_DECODER(decode_krb5_td_trusted_certifiers,
+             seqof_external_principal_identifier);
+MAKE_ENCODER(encode_krb5_td_dh_parameters, seqof_algorithm_identifier);
+MAKE_DECODER(decode_krb5_td_dh_parameters, seqof_algorithm_identifier);
 MAKE_DECODER(decode_krb5_principal_name, pkinit_krb5_principal_name_data);
 
 #else /* DISABLE_PKINIT */
@@ -1636,7 +1685,8 @@ DEFSEQTYPE(typed_data, krb5_pa_data, typed_data_fields);
 DEFPTRTYPE(typed_data_ptr, typed_data);
 
 DEFNULLTERMSEQOFTYPE(seqof_typed_data, typed_data_ptr);
-MAKE_CODEC(krb5_typed_data, seqof_typed_data);
+MAKE_ENCODER(encode_krb5_typed_data, seqof_typed_data);
+MAKE_DECODER(decode_krb5_typed_data, seqof_typed_data);
 
 /* Definitions for OTP preauth (RFC 6560) */
 
@@ -1659,7 +1709,8 @@ static const struct atype_info *otp_tokeninfo_fields[] = {
     &k5_atype_tokinfo_6, &k5_atype_tokinfo_7, &k5_atype_tokinfo_8
 };
 DEFSEQTYPE(otp_tokeninfo, krb5_otp_tokeninfo, otp_tokeninfo_fields);
-MAKE_CODEC(krb5_otp_tokeninfo, otp_tokeninfo);
+MAKE_ENCODER(encode_krb5_otp_tokeninfo, otp_tokeninfo);
+MAKE_DECODER(decode_krb5_otp_tokeninfo, otp_tokeninfo);
 
 DEFPTRTYPE(otp_tokeninfo_ptr, otp_tokeninfo);
 DEFNONEMPTYNULLTERMSEQOFTYPE(seqof_otp_tokeninfo, otp_tokeninfo_ptr);
@@ -1677,7 +1728,8 @@ static const struct atype_info *pa_otp_challenge_fields[] = {
     &k5_atype_otp_ch_3, &k5_atype_otp_ch_4
 };
 DEFSEQTYPE(pa_otp_challenge, krb5_pa_otp_challenge, pa_otp_challenge_fields);
-MAKE_CODEC(krb5_pa_otp_challenge, pa_otp_challenge);
+MAKE_ENCODER(encode_krb5_pa_otp_challenge, pa_otp_challenge);
+MAKE_DECODER(decode_krb5_pa_otp_challenge, pa_otp_challenge);
 
 DEFFIELD_IMPLICIT(otp_req_0, krb5_pa_otp_req, flags, 0, krb5_flags);
 DEFFIELD_IMPLICIT(otp_req_1, krb5_pa_otp_req, nonce, 1, opt_ostring_data);
@@ -1703,14 +1755,16 @@ static const struct atype_info *pa_otp_req_fields[] = {
     &k5_atype_otp_req_12, &k5_atype_otp_req_13
 };
 DEFSEQTYPE(pa_otp_req, krb5_pa_otp_req, pa_otp_req_fields);
-MAKE_CODEC(krb5_pa_otp_req, pa_otp_req);
+MAKE_ENCODER(encode_krb5_pa_otp_req, pa_otp_req);
+MAKE_DECODER(decode_krb5_pa_otp_req, pa_otp_req);
 
 DEFCTAGGEDTYPE_IMPLICIT(pa_otp_enc_req_0, 0, ostring_data);
 static const struct atype_info *pa_otp_enc_req_fields[] = {
     &k5_atype_pa_otp_enc_req_0
 };
 DEFSEQTYPE(pa_otp_enc_req, krb5_data, pa_otp_enc_req_fields);
-MAKE_CODEC(krb5_pa_otp_enc_req, pa_otp_enc_req);
+MAKE_ENCODER(encode_krb5_pa_otp_enc_req, pa_otp_enc_req);
+MAKE_DECODER(decode_krb5_pa_otp_enc_req, pa_otp_enc_req);
 
 DEFFIELD(kkdcp_message_0, krb5_kkdcp_message,
          kerb_message, 0, ostring_data);
@@ -1724,4 +1778,5 @@ static const struct atype_info *kkdcp_message_fields[] = {
 };
 DEFSEQTYPE(kkdcp_message, krb5_kkdcp_message,
            kkdcp_message_fields);
-MAKE_CODEC(krb5_kkdcp_message, kkdcp_message);
+MAKE_ENCODER(encode_krb5_kkdcp_message, kkdcp_message);
+MAKE_DECODER(decode_krb5_kkdcp_message, kkdcp_message);
