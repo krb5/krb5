@@ -574,10 +574,6 @@ k5_asn1_full_decode(const krb5_data *code, const struct atype_info *a,
     }                                                                   \
     extern int dummy /* gobble semicolon */
 
-#define MAKE_CODEC(TYPENAME, DESC)              \
-    MAKE_ENCODER(encode_##TYPENAME, DESC);      \
-    MAKE_DECODER(decode_##TYPENAME, DESC)
-
 #include <stddef.h>
 /*
  * Ugly hack!
