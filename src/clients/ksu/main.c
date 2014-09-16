@@ -87,7 +87,7 @@ main (argc, argv)
     int some_rest_copy = 0;
     int all_rest_copy = 0;
     char *localhostname = NULL;
-    opt_info options;
+    krb5_get_init_creds_opt *options = NULL;
     int option=0;
     int statusp=0;
     krb5_error_code retval = 0;
@@ -117,22 +117,22 @@ main (argc, argv)
     int pargc;
     char ** pargv;
     krb5_boolean stored = FALSE, cc_reused = FALSE;
-    krb5_principal  kdc_server;
     krb5_boolean zero_password;
     krb5_boolean restrict_creds;
-
-    options.opt = KRB5_DEFAULT_OPTIONS;
-    options.lifetime = KRB5_DEFAULT_TKT_LIFE;
-    options.rlife =0;
-    options.princ =0;
+    krb5_deltat lifetime, rlife;
 
     params = (char **) xcalloc (2, sizeof (char *));
     params[1] = NULL;
 
-
     unsetenv ("KRB5_CONFIG");
 
     retval = krb5_init_secure_context(&ksu_context);
+    if (retval) {
+        com_err(argv[0], retval, _("while initializing krb5"));
+        exit(1);
+    }
+
+    retval = krb5_get_init_creds_opt_alloc(ksu_context, &options);
     if (retval) {
         com_err(argv[0], retval, _("while initializing krb5"));
         exit(1);
@@ -189,14 +189,14 @@ main (argc, argv)
     while(!done && ((option = getopt(pargc, pargv,"n:c:r:a:zZDfpkql:e:")) != -1)){
         switch (option) {
         case 'r':
-            options.opt |= KDC_OPT_RENEWABLE;
             if (strlen (optarg) >= 14)
                 optarg = "bad-time";
-            retval = krb5_string_to_deltat(optarg, &options.rlife);
-            if (retval != 0 || options.rlife == 0) {
+            retval = krb5_string_to_deltat(optarg, &rlife);
+            if (retval != 0 || rlife == 0) {
                 fprintf(stderr, _("Bad lifetime value (%s hours?)\n"), optarg);
                 errflg++;
             }
+            krb5_get_init_creds_opt_set_renew_life(options, rlife);
             break;
         case 'a':
             /* when integrating this remember to pass in pargc, pargv and
@@ -212,10 +212,10 @@ main (argc, argv)
             done = 1;
             break;
         case 'p':
-            options.opt |= KDC_OPT_PROXIABLE;
+            krb5_get_init_creds_opt_set_proxiable(options, 1);
             break;
         case 'f':
-            options.opt |= KDC_OPT_FORWARDABLE;
+            krb5_get_init_creds_opt_set_forwardable(options, 1);
             break;
         case 'k':
             keep_target_cache =1;
@@ -226,20 +226,18 @@ main (argc, argv)
         case 'l':
             if (strlen (optarg) >= 14)
                 optarg = "bad-time";
-            retval = krb5_string_to_deltat(optarg, &options.lifetime);
-            if (retval != 0 || options.lifetime == 0) {
+            retval = krb5_string_to_deltat(optarg, &lifetime);
+            if (retval != 0 || lifetime == 0) {
                 fprintf(stderr, _("Bad lifetime value (%s hours?)\n"), optarg);
                 errflg++;
             }
+            krb5_get_init_creds_opt_set_tkt_life(options, lifetime);
             break;
         case 'n':
             if ((retval = krb5_parse_name(ksu_context, optarg, &client))){
                 com_err(prog_name, retval, _("when parsing name %s"), optarg);
                 errflg++;
             }
-
-            options.princ = 1;
-
             break;
 #ifdef DEBUG
         case 'D':
@@ -386,7 +384,7 @@ main (argc, argv)
     if ((retval = get_best_princ_for_target(ksu_context, source_uid,
                                             target_uid, source_user,
                                             target_user, cc_source,
-                                            &options, cmd, localhostname,
+                                            options, cmd, localhostname,
                                             &client, &hp))){
         com_err(prog_name,retval, _("while selecting the best principal"));
         exit(1);
@@ -458,6 +456,8 @@ main (argc, argv)
     }
     krb5_cc_close(ksu_context, cc_source);
 
+    krb5_get_init_creds_opt_set_out_ccache(ksu_context, options, cc_tmp);
+
     /* Become root for authentication*/
 
     if (krb5_seteuid(0)) {
@@ -467,23 +467,13 @@ main (argc, argv)
 
     if ((source_uid == 0) || (target_uid == source_uid)){
 #ifdef GET_TGT_VIA_PASSWD
-        if ((!all_rest_copy) && options.princ && (stored == FALSE)){
-            if ((retval = ksu_tgtname(ksu_context,
-                                      krb5_princ_realm (ksu_context, client),
-                                      krb5_princ_realm(ksu_context, client),
-                                      &kdc_server))){
-                com_err(prog_name, retval,
-                        _("while creating tgt for local realm"));
-                exit(1);
-            }
-
+        if ((!all_rest_copy) && client != NULL && (stored == FALSE)){
             fprintf(stderr, _("WARNING: Your password may be exposed if you "
                               "enter it here and are logged\n"));
             fprintf(stderr, _("         in remotely using an unsecure "
                               "(non-encrypted) channel.\n"));
-            if (krb5_get_tkt_via_passwd(ksu_context, &cc_tmp, client,
-                                        kdc_server, &options,
-                                        &zero_password) == FALSE){
+            if (ksu_get_tgt_via_passwd(ksu_context, client, options,
+                                       &zero_password, NULL) == FALSE) {
 
                 if (zero_password == FALSE){
                     fprintf(stderr, _("Goodbye\n"));
@@ -506,7 +496,7 @@ main (argc, argv)
         char * client_name;
 
         auth_val = krb5_auth_check(ksu_context, client, localhostname,
-                                   &options, target_user, cc_tmp,
+                                   options, target_user, cc_tmp,
                                    &path_passwd, target_uid);
 
         /* if Kerberos authentication failed then exit */

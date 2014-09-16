@@ -527,7 +527,7 @@ krb5_error_code get_best_princ_for_target(context, source_uid, target_uid,
     char *source_user;
     char *target_user;
     krb5_ccache cc_source;
-    opt_info *options;
+    krb5_get_init_creds_opt *options;
     char *cmd;
     char *hostname;
     krb5_principal *client;
@@ -550,7 +550,7 @@ krb5_error_code get_best_princ_for_target(context, source_uid, target_uid,
     *path_out = 0;
 
     /* -n option was specified client is set we are done */
-    if (options->princ)
+    if (*client != NULL)
         return 0;
 
     if (ks_ccache_is_initialized(context, cc_source)) {

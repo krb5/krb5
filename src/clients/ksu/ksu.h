@@ -69,25 +69,18 @@ extern char k5users_path[MAXPATHLEN];
 extern char * gb_err;
 /***********/
 
-typedef struct opt_info{
-    int opt;
-    krb5_deltat lifetime;
-    krb5_deltat rlife;
-    int princ;
-}opt_info;
-
 /* krb_auth_su.c */
 extern krb5_boolean krb5_auth_check
-(krb5_context, krb5_principal, char *, opt_info *,
+(krb5_context, krb5_principal, char *, krb5_get_init_creds_opt *,
  char *, krb5_ccache, int *, uid_t);
 
 extern krb5_boolean krb5_fast_auth
 (krb5_context, krb5_principal, krb5_principal, char *,
  krb5_ccache);
 
-extern krb5_boolean krb5_get_tkt_via_passwd
-(krb5_context, krb5_ccache *, krb5_principal,
- krb5_principal, opt_info *, krb5_boolean *);
+extern krb5_boolean ksu_get_tgt_via_passwd
+(krb5_context,
+ krb5_principal, krb5_get_init_creds_opt *, krb5_boolean *, krb5_creds *);
 
 extern void dump_principal
 (krb5_context, char *, krb5_principal);
@@ -229,7 +222,7 @@ extern krb5_error_code find_princ_in_list
 
 extern krb5_error_code get_best_princ_for_target
 (krb5_context, uid_t, uid_t, char *, char *, krb5_ccache,
- opt_info *, char *, char *, krb5_principal *, int *);
+ krb5_get_init_creds_opt *, char *, char *, krb5_principal *, int *);
 
 extern krb5_error_code ksu_tgtname (krb5_context, const krb5_data *,
                                     const krb5_data *,
