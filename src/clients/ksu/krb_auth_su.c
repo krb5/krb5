@@ -31,19 +31,12 @@
 
 void plain_dump_principal ();
 
-/*
- * Try no preauthentication first; then try the encrypted timestamp
- */
-krb5_preauthtype * preauth_ptr = NULL;
-
-
-
 krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
                              target_user, cc, path_passwd, target_uid)
     krb5_context context;
     krb5_principal client_pname;
     char *hostname;
-    opt_info *options;
+    krb5_get_init_creds_opt *options;
     char *target_user;
     uid_t target_uid;
     krb5_ccache cc;
@@ -109,9 +102,9 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
         fprintf(stderr, _("         in remotely using an unsecure "
                           "(non-encrypted) channel. \n"));
 
-        /*get the ticket granting ticket, via passwd(promt for passwd)*/
-        if (krb5_get_tkt_via_passwd (context, &cc, client, tgtq.server,
-                                     options, & zero_password) == FALSE){
+        /*get the ticket granting ticket, via passwd(prompt for passwd)*/
+        if (ksu_get_tgt_via_passwd(context, client, options, &zero_password,
+                                   &tgt) == FALSE) {
             krb5_seteuid(0);
 
             return FALSE;
@@ -144,54 +137,36 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     return (TRUE);
 }
 
-krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
-                                      options, zero_password)
+krb5_boolean ksu_get_tgt_via_passwd(context, client, options, zero_password,
+                                    creds_out)
     krb5_context context;
-    krb5_ccache *ccache;
     krb5_principal client;
-    krb5_principal server;
-    opt_info *options;
+    krb5_get_init_creds_opt *options;
     krb5_boolean *zero_password;
+    krb5_creds *creds_out;
 {
     krb5_error_code code;
-    krb5_creds my_creds;
+    krb5_creds creds;
     krb5_timestamp now;
     unsigned int pwsize;
     char password[255], *client_name, prompt[255];
     int result;
 
     *zero_password = FALSE;
+    if (creds_out != NULL)
+        memset(creds_out, 0, sizeof(*creds_out));
 
     if ((code = krb5_unparse_name(context, client, &client_name))) {
         com_err (prog_name, code, _("when unparsing name"));
         return (FALSE);
     }
 
-    memset(&my_creds, 0, sizeof(my_creds));
-
-    if ((code = krb5_copy_principal(context, client, &my_creds.client))){
-        com_err (prog_name, code, _("while copying principal"));
-        return (FALSE);
-    }
-
-    if ((code = krb5_copy_principal(context, server, &my_creds.server))){
-        com_err (prog_name, code, _("while copying principal"));
-        return (FALSE);
-    }
+    memset(&creds, 0, sizeof(creds));
 
     if ((code = krb5_timeofday(context, &now))) {
         com_err(prog_name, code, _("while getting time of day"));
         return (FALSE);
     }
-
-    my_creds.times.starttime = 0;       /* start timer when request
-                                           gets to KDC */
-
-    my_creds.times.endtime = now + options->lifetime;
-    if (options->opt & KDC_OPT_RENEWABLE) {
-        my_creds.times.renew_till = now + options->rlife;
-    } else
-        my_creds.times.renew_till = 0;
 
     result = snprintf(prompt, sizeof(prompt), _("Kerberos password for %s: "),
                       client_name);
@@ -219,9 +194,8 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
         return (FALSE);
     }
 
-    code = krb5_get_in_tkt_with_password(context, options->opt,
-                                         0, NULL, preauth_ptr,
-                                         password, *ccache, &my_creds, 0);
+    code = krb5_get_init_creds_password(context, &creds, client, password,
+                                        NULL, NULL, 0, NULL, options);
     memset(password, 0, sizeof(password));
 
 
@@ -232,6 +206,10 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
             com_err(prog_name, code, _("while getting initial credentials"));
         return (FALSE);
     }
+    if (creds_out != NULL)
+        *creds_out = creds;
+    else
+        krb5_free_cred_contents(context, &creds);
     return (TRUE);
 }
 
