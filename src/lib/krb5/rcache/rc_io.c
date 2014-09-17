@@ -158,7 +158,7 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 {
     krb5_int16 rc_vno = htons(KRB5_RC_VNO);
     krb5_error_code retval = 0;
-    int do_not_unlink = 0;
+    int flags, do_not_unlink = 0;
     char *dir;
     size_t dirlen;
 
@@ -166,9 +166,13 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
     if (fn && *fn) {
         if (asprintf(&d->fn, "%s%s%s", dir, PATH_SEPARATOR, *fn) < 0)
             return KRB5_RC_IO_MALLOC;
-        unlink(d->fn);
-        d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC | O_EXCL |
-                               O_BINARY, 0600);
+        d->fd = -1;
+        do {
+            if (unlink(d->fn) == -1 && errno != ENOENT)
+                break;
+            flags = O_WRONLY | O_CREAT | O_TRUNC | O_EXCL | O_BINARY;
+            d->fd = THREEPARAMOPEN(d->fn, flags, 0600);
+        } while (d->fd == -1 && errno == EEXIST);
     } else {
         retval = krb5_rc_io_mkstemp(context, d, dir);
         if (retval)
