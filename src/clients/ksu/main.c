@@ -485,6 +485,7 @@ main (argc, argv)
                 fprintf(stderr, "\n");
 
             }
+            stored = TRUE;
         }
 #endif /* GET_TGT_VIA_PASSWD */
     }
@@ -506,6 +507,7 @@ main (argc, argv)
                    prog_name,target_user,source_user,ontty());
             exit(1);
         }
+        stored = TRUE;
 
         if ((retval = krb5_unparse_name(ksu_context, client, &client_name))) {
             com_err(prog_name, retval, _("When unparsing name"));
