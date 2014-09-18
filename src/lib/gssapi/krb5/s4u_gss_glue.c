@@ -55,6 +55,11 @@ kg_impersonate_name(OM_uint32 *minor_status,
     in_creds.client = user->princ;
     in_creds.server = impersonator_cred->name->princ;
 
+    if (impersonator_cred->ccache == NULL) {
+        *minor_status = KG_CCACHE_NOMATCH;
+        return GSS_S_DEFECTIVE_CREDENTIAL;
+    }
+
     if (impersonator_cred->req_enctypes != NULL)
         in_creds.keyblock.enctype = impersonator_cred->req_enctypes[0];
 
