@@ -216,6 +216,12 @@ Kerberos which interact with credential caches on the same host.
 Sets the maximum allowable amount of clockskew in seconds that the
 library will tolerate before assuming that a Kerberos message is
 invalid.  The default value is 300 seconds, or five minutes.
+.sp
+The clockskew setting is also used when evaluating ticket start
+and expiration times.  For example, tickets that have reached
+their expiration time can still be used (and renewed if they are
+renewable tickets) if they have been expired for a shorter
+duration than the \fBclockskew\fP setting.
 .TP
 .B \fBdefault_ccache_name\fP
 This relation specifies the name of the default credential cache.

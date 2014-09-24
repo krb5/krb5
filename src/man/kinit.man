@@ -123,6 +123,11 @@ with the validated ticket.
 requests renewal of the ticket\-granting ticket.  Note that an
 expired ticket cannot be renewed, even if the ticket is still
 within its renewable life.
+.sp
+Note that renewable tickets that have expired as reported by
+\fIklist(1)\fP may sometimes be renewed using this option,
+because the KDC applies a grace period to account for client\-KDC
+clock skew.  See \fIkrb5.conf(5)\fP \fBclockskew\fP setting.
 .TP
 .B \fB\-k\fP [\fB\-i\fP | \fB\-t\fP \fIkeytab_file\fP]
 requests a ticket, obtained from a key in the local host\(aqs keytab.
