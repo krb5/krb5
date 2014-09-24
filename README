@@ -90,6 +90,12 @@ Administrator experience:
 
 * Add support to the LDAP KDB module for binding to the LDAP server using SASL.
 
+* The KDC listens for TCP connections by default.
+
+* Fix a minor key disclosure vulnerability where using the "keepold"
+  option to the kadmin randkey operation could return the old keys.
+  [CVE-2014-5351]
+
 User experience:
 
 * Add client support for the Kerberos Cache Manager protocol. If the
@@ -113,6 +119,7 @@ krb5-1.13 changes by ticket ID
 884     having "-" in key:salt separator list prevents salttype
         defaulting from working
 1794    don't use mktemp
+3498    race opening/creating replay cache.
 5958    kadmin salttype "no salt" means really means "default/normal
         salt"
 6034    rework gic_opt_ext to be more portable
@@ -120,6 +127,7 @@ krb5-1.13 changes by ticket ID
         than "ignore salttype"
 6413    pkinit thread safety
 6550    old_stash_bendian is a keytab
+6731    KDC should listen to TCP by default
 7232    Confusing error message for key version mismatch
 7704    Anonymous kadmin does not work
 7728    ksu assumes the invoking user's using a FILE: ccache
@@ -183,6 +191,30 @@ krb5-1.13 changes by ticket ID
 7986    Copy config entries to the ksu target ccache
 7987    Fix GSS krb5 GSS_C_DELEG_FLAG ret_flags result
 7988    Make krb5_cc_new_unique create DIR: directories
+7990    Fix HP-UX build support
+7992    Fix test syntax in configure.in
+7993    Autodetect OpenSSL CMS for LibreSSL compatibility
+7994    randkey does not update principal's master key version
+7995    kadmin change_password -keepold does not work with master key
+        migration
+7996    Simplify and improve ksu cred verification
+7997    kadm5_randkey_principal interop with Solaris KDC
+7998    gssapi.dll tries to get initial creds even when some are
+        present
+8000    gssapi.dll fails to detect TGTs in the MSLSA cache when UAC is
+        enabled
+8001    Allow logger.c to work with redirected stderr
+8003    Export gssrpc_bindresvport_sa
+8004    Map .hin files to the C language for doxygen
+8005    Initialize iterflags in update_princ_encryption
+8006    Update NOTICE for 1.13
+8007    In ksu, handle typeless default_ccache_name values
+8008    Document clock skew tolerance for ticket times
+8015    Fix ksu crash in cases where it obtains the TGT
+8016    Restore providing password TGTs for the ksu target
+8017    gss_acquire_cred_impersonate_name crashes with acceptor-only
+        impersonator creds
+8018    Return only new keys in randkey [CVE-2014-5351]
 
 Acknowledgements
 ----------------
@@ -375,6 +407,7 @@ reports, suggestions, and valuable resources:
     Edward Murrell
     Nikos Nikoleris
     Felipe Ortega
+    Michael Osipov
     Andrej Ota
     Dmitri Pal
     Javier Palacios
@@ -383,11 +416,13 @@ reports, suggestions, and valuable resources:
     Zoran Pericic
     W. Michael Petullo
     Mark Phalan
+    Brett Randall
     Jonathan Reams
     Robert Relyea
     Martin Rex
     Jason Rogers
     Nate Rosenblum
+    Solly Ross
     Mike Roszkowski
     Guillaume Rousse
     Andreas Schneider
