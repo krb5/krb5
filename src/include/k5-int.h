@@ -1097,7 +1097,8 @@ struct plugin_interface {
 #define PLUGIN_INTERFACE_HOSTREALM   6
 #define PLUGIN_INTERFACE_AUDIT       7
 #define PLUGIN_INTERFACE_TLS         8
-#define PLUGIN_NUM_INTERFACES        9
+#define PLUGIN_INTERFACE_KDCAUTHDATA 9
+#define PLUGIN_NUM_INTERFACES        10
 
 /* Retrieve the plugin module of type interface_id and name modname,
  * storing the result into module. */

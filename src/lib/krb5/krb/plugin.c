@@ -56,7 +56,8 @@ const char *interface_names[] = {
     "localauth",
     "hostrealm",
     "audit",
-    "tls"
+    "tls",
+    "kdcauthdata"
 };
 
 /* Return the context's interface structure for id, or NULL if invalid. */
