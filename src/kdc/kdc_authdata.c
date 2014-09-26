@@ -33,233 +33,75 @@
 #include <syslog.h>
 
 #include <assert.h>
-#include <krb5/authdata_plugin.h>
+#include <krb5/kdcauthdata_plugin.h>
 
-#if TARGET_OS_MAC
-static const char *objdirs[] = { KRB5_AUTHDATA_PLUGIN_BUNDLE_DIR,
-                                 LIBDIR "/krb5/plugins/authdata",
-                                 NULL }; /* should be a list */
-#else
-static const char *objdirs[] = { LIBDIR "/krb5/plugins/authdata", NULL };
-#endif
+typedef struct kdcauthdata_handle_st {
+    struct krb5_kdcauthdata_vtable_st vt;
+    krb5_kdcauthdata_moddata data;
+} kdcauthdata_handle;
 
-/* MIT Kerberos 1.6 (V0) authdata plugin callback */
-typedef krb5_error_code (*authdata_proc_0)(
-    krb5_context,
-    krb5_db_entry *client,
-    krb5_data *req_pkt,
-    krb5_kdc_req *request,
-    krb5_enc_tkt_part * enc_tkt_reply);
-/* MIT Kerberos 1.8 (V2) authdata plugin callback */
-typedef krb5_error_code (*authdata_proc_2)(
-    krb5_context, unsigned int flags,
-    krb5_db_entry *client, krb5_db_entry *server,
-    krb5_db_entry *krbtgt,
-    krb5_keyblock *client_key,
-    krb5_keyblock *server_key,
-    krb5_keyblock *krbtgt_key,
-    krb5_data *req_pkt,
-    krb5_kdc_req *request,
-    krb5_const_principal for_user_princ,
-    krb5_enc_tkt_part *enc_tkt_request,
-    krb5_enc_tkt_part *enc_tkt_reply);
-typedef krb5_error_code (*init_proc)(krb5_context, void **);
-typedef void (*fini_proc)(krb5_context, void *);
+static kdcauthdata_handle *authdata_modules;
+static size_t n_authdata_modules;
 
-typedef struct _krb5_authdata_systems {
-    const char *name;
-#define AUTHDATA_SYSTEM_UNKNOWN -1
-#define AUTHDATA_SYSTEM_V0      0
-#define AUTHDATA_SYSTEM_V2      2
-    int         type;
-    void       *plugin_context;
-    init_proc   init;
-    fini_proc   fini;
-    union {
-        authdata_proc_2 v2;
-        authdata_proc_0 v0;
-    } handle_authdata;
-} krb5_authdata_systems;
-
-static krb5_authdata_systems *authdata_systems;
-static int n_authdata_systems;
-static struct plugin_dir_handle authdata_plugins;
-
-/* Load both v0 and v2 authdata plugins */
+/* Load authdata plugin modules. */
 krb5_error_code
 load_authdata_plugins(krb5_context context)
 {
-    void **authdata_plugins_ftables_v0 = NULL;
-    void **authdata_plugins_ftables_v2 = NULL;
-    size_t module_count;
-    size_t i, k;
-    init_proc server_init_proc = NULL;
-    krb5_error_code code;
+    krb5_error_code ret;
+    krb5_plugin_initvt_fn *modules = NULL, *mod;
+    kdcauthdata_handle *list, *h;
+    size_t count;
 
-    /* Attempt to load all of the authdata plugins we can find. */
-    PLUGIN_DIR_INIT(&authdata_plugins);
-    if (PLUGIN_DIR_OPEN(&authdata_plugins) == 0) {
-        if (krb5int_open_plugin_dirs(objdirs, NULL,
-                                     &authdata_plugins, &context->err) != 0) {
-            return KRB5_PLUGIN_NO_HANDLE;
-        }
+    ret = k5_plugin_load_all(context, PLUGIN_INTERFACE_KDCAUTHDATA, &modules);
+    if (ret)
+        return ret;
+
+    /* Allocate a large enough list of handles. */
+    for (count = 0; modules[count] != NULL; count++);
+    list = calloc(count + 1, sizeof(*list));
+    if (list == NULL) {
+        k5_plugin_free_modules(context, modules);
+        return ENOMEM;
     }
 
-    /* Get the method tables provided by the loaded plugins. */
-    authdata_plugins_ftables_v0 = NULL;
-    authdata_plugins_ftables_v2 = NULL;
-    n_authdata_systems = 0;
-
-    if (krb5int_get_plugin_dir_data(&authdata_plugins,
-                                    "authdata_server_2",
-                                    &authdata_plugins_ftables_v2,
-                                    &context->err) != 0 ||
-        krb5int_get_plugin_dir_data(&authdata_plugins,
-                                    "authdata_server_0",
-                                    &authdata_plugins_ftables_v0,
-                                    &context->err) != 0) {
-        code = KRB5_PLUGIN_NO_HANDLE;
-        goto cleanup;
-    }
-
-    /* Count the valid modules. */
-    module_count = 0;
-
-    if (authdata_plugins_ftables_v2 != NULL) {
-        struct krb5plugin_authdata_server_ftable_v2 *ftable;
-
-        for (i = 0; authdata_plugins_ftables_v2[i] != NULL; i++) {
-            ftable = authdata_plugins_ftables_v2[i];
-            if (ftable->authdata_proc != NULL)
-                module_count++;
-        }
-    }
-
-    if (authdata_plugins_ftables_v0 != NULL) {
-        struct krb5plugin_authdata_server_ftable_v0 *ftable;
-
-        for (i = 0; authdata_plugins_ftables_v0[i] != NULL; i++) {
-            ftable = authdata_plugins_ftables_v0[i];
-            if (ftable->authdata_proc != NULL)
-                module_count++;
-        }
-    }
-
-    /* Build the complete list of supported authdata options, and
-     * leave room for a terminator entry.
-     */
-    authdata_systems = calloc(module_count + 1, sizeof(krb5_authdata_systems));
-    if (authdata_systems == NULL) {
-        code = ENOMEM;
-        goto cleanup;
-    }
-
-    k = 0;
-
-    /* Add dynamically loaded V2 plugins */
-    if (authdata_plugins_ftables_v2 != NULL) {
-        struct krb5plugin_authdata_server_ftable_v2 *ftable;
-
-        for (i = 0; authdata_plugins_ftables_v2[i] != NULL; i++) {
-            krb5_error_code initerr;
-            void *pctx = NULL;
-
-            ftable = authdata_plugins_ftables_v2[i];
-            if (ftable->authdata_proc == NULL) {
+    /* Initialize each module's vtable and module data. */
+    count = 0;
+    for (mod = modules; *mod != NULL; mod++) {
+        h = &list[count];
+        memset(h, 0, sizeof(*h));
+        ret = (*mod)(context, 1, 1, (krb5_plugin_vtable)&h->vt);
+        if (ret)                /* Version mismatch, keep going. */
+            continue;
+        if (h->vt.init != NULL) {
+            ret = h->vt.init(context, &h->data);
+            if (ret) {
+                kdc_err(context, ret, _("while loading authdata module %s"),
+                        h->vt.name);
                 continue;
             }
-            server_init_proc = ftable->init_proc;
-            if ((server_init_proc != NULL) &&
-                ((initerr = (*server_init_proc)(context, &pctx)) != 0)) {
-                const char *emsg;
-                emsg = krb5_get_error_message(context, initerr);
-                krb5_klog_syslog(LOG_ERR,
-                                 _("authdata %s failed to initialize: %s"),
-                                 ftable->name, emsg);
-                krb5_free_error_message(context, emsg);
-                memset(&authdata_systems[k], 0, sizeof(authdata_systems[k]));
-
-                continue;
-            }
-
-            authdata_systems[k].name = ftable->name;
-            authdata_systems[k].type = AUTHDATA_SYSTEM_V2;
-            authdata_systems[k].init = server_init_proc;
-            authdata_systems[k].fini = ftable->fini_proc;
-            authdata_systems[k].handle_authdata.v2 = ftable->authdata_proc;
-            authdata_systems[k].plugin_context = pctx;
-            k++;
         }
+        count++;
     }
 
-    /* Add dynamically loaded V0 plugins */
-    if (authdata_plugins_ftables_v0 != NULL) {
-        struct krb5plugin_authdata_server_ftable_v0 *ftable;
-
-        for (i = 0; authdata_plugins_ftables_v0[i] != NULL; i++) {
-            krb5_error_code initerr;
-            void *pctx = NULL;
-
-            ftable = authdata_plugins_ftables_v0[i];
-            if (ftable->authdata_proc == NULL) {
-                continue;
-            }
-            server_init_proc = ftable->init_proc;
-            if ((server_init_proc != NULL) &&
-                ((initerr = (*server_init_proc)(context, &pctx)) != 0)) {
-                const char *emsg;
-                emsg = krb5_get_error_message(context, initerr);
-                krb5_klog_syslog(LOG_ERR,
-                                 _("authdata %s failed to initialize: %s"),
-                                 ftable->name, emsg);
-                krb5_free_error_message(context, emsg);
-                memset(&authdata_systems[k], 0, sizeof(authdata_systems[k]));
-
-                continue;
-            }
-
-            authdata_systems[k].name = ftable->name;
-            authdata_systems[k].type = AUTHDATA_SYSTEM_V0;
-            authdata_systems[k].init = server_init_proc;
-            authdata_systems[k].fini = ftable->fini_proc;
-            authdata_systems[k].handle_authdata.v0 = ftable->authdata_proc;
-            authdata_systems[k].plugin_context = pctx;
-            k++;
-        }
-    }
-
-    n_authdata_systems = k;
-    /* Add the end-of-list marker. */
-    authdata_systems[k].name = "[end]";
-    authdata_systems[k].type = AUTHDATA_SYSTEM_UNKNOWN;
-    code = 0;
-
-cleanup:
-    if (authdata_plugins_ftables_v2 != NULL)
-        krb5int_free_plugin_dir_data(authdata_plugins_ftables_v2);
-    if (authdata_plugins_ftables_v0 != NULL)
-        krb5int_free_plugin_dir_data(authdata_plugins_ftables_v0);
-
-    return code;
+    authdata_modules = list;
+    n_authdata_modules = count;
+    k5_plugin_free_modules(context, modules);
+    return 0;
 }
 
 krb5_error_code
 unload_authdata_plugins(krb5_context context)
 {
-    int i;
-    if (authdata_systems != NULL) {
-        for (i = 0; i < n_authdata_systems; i++) {
-            if (authdata_systems[i].fini != NULL) {
-                (*authdata_systems[i].fini)(context,
-                                            authdata_systems[i].plugin_context);
-            }
-            memset(&authdata_systems[i], 0, sizeof(authdata_systems[i]));
-        }
-        free(authdata_systems);
-        authdata_systems = NULL;
-        n_authdata_systems = 0;
-        krb5int_close_plugin_dirs(&authdata_plugins);
+    kdcauthdata_handle *h;
+    size_t i;
+
+    for (i = 0; i < n_authdata_modules; i++) {
+        h = &authdata_modules[i];
+        if (h->vt.fini != NULL)
+            h->vt.fini(context, h->data);
     }
+    free(authdata_modules);
+    authdata_modules = NULL;
     return 0;
 }
 
@@ -962,8 +804,9 @@ handle_authdata (krb5_context context,
                  krb5_enc_tkt_part *enc_tkt_request,
                  krb5_enc_tkt_part *enc_tkt_reply)
 {
+    kdcauthdata_handle *h;
     krb5_error_code code = 0;
-    int i;
+    size_t i;
 
     if (request->msg_type == KRB5_TGS_REQ &&
         request->authorization_data.ciphertext.data != NULL) {
@@ -976,39 +819,16 @@ handle_authdata (krb5_context context,
             return code;
     }
 
-    for (i = 0; i < n_authdata_systems; i++) {
-        const krb5_authdata_systems *asys = &authdata_systems[i];
-        if (isflagset(enc_tkt_reply->flags, TKT_FLG_ANONYMOUS))
-            continue;
-
-        switch (asys->type) {
-        case AUTHDATA_SYSTEM_V0:
-            /* V0 was only in AS-REQ code path */
-            if (request->msg_type != KRB5_AS_REQ)
-                continue;
-
-            code = (*asys->handle_authdata.v0)(context, client, req_pkt,
-                                               request, enc_tkt_reply);
-            break;
-        case AUTHDATA_SYSTEM_V2:
-            code = (*asys->handle_authdata.v2)(context, flags,
-                                               client, server, krbtgt,
-                                               client_key, server_key, krbtgt_key,
-                                               req_pkt, request, for_user_princ,
-                                               enc_tkt_request,
-                                               enc_tkt_reply);
-            break;
-        default:
-            code = 0;
-            break;
-        }
-        if (code != 0) {
-            const char *emsg;
-
-            emsg = krb5_get_error_message (context, code);
-            krb5_klog_syslog(LOG_INFO, _("authdata (%s) handling failure: %s"),
-                             asys->name, emsg);
-            krb5_free_error_message (context, emsg);
+    /* Invoke loaded module handlers. */
+    if (!isflagset(enc_tkt_reply->flags, TKT_FLG_ANONYMOUS)) {
+        for (i = 0; i < n_authdata_modules; i++) {
+            h = &authdata_modules[i];
+            code = h->vt.handle(context, h->data, flags, client, server,
+                                krbtgt, client_key, server_key, krbtgt_key,
+                                req_pkt, request, for_user_princ,
+                                enc_tkt_request, enc_tkt_reply);
+            if (code)
+                kdc_err(context, code, "from authdata module %s", h->vt.name);
         }
     }
 
