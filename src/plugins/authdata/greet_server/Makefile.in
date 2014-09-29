@@ -1,6 +1,5 @@
 mydir=plugins$(S)authdata$(S)greet_server
 BUILDTOP=$(REL)..$(S)..$(S)..
-MODULE_INSTALL_DIR = $(KRB5_AD_MODULE_DIR)
 
 LIBBASE=greet_server
 LIBMAJOR=1
@@ -14,7 +13,7 @@ STLIBOBJS= greet_auth.o
 SRCS=	greet_auth.c
 
 all-unix:: all-libs
-install-unix:: install-libs
+install-unix::
 clean-unix:: clean-libs clean-libobjs
 
 @libnover_frag@

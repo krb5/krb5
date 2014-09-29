@@ -6,7 +6,6 @@ mydir=.
 #	plugins/locate/python
 #	plugins/preauth/wpse
 #	plugins/preauth/cksum_body
-#	plugins/authdata/greet
 SUBDIRS=util include lib \
 	@sam2_plugin@ \
 	plugins/audit \
@@ -16,6 +15,8 @@ SUBDIRS=util include lib \
 	plugins/hostrealm/test \
 	plugins/localauth/test \
 	plugins/pwqual/test \
+	plugins/authdata/greet_server \
+	plugins/authdata/greet_client \
 	plugins/kdb/db2 \
 	@ldap_plugin_dir@ \
 	plugins/kdb/test \

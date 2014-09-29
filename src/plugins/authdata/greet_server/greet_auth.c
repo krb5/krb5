@@ -29,19 +29,7 @@
  */
 
 #include <k5-int.h>
-#include <krb5/authdata_plugin.h>
-#include <kdb.h>
-
-static krb5_error_code
-greet_init(krb5_context ctx, void **blob)
-{
-    return 0;
-}
-
-static void
-greet_fini(krb5_context ctx, void *blob)
-{
-}
+#include <krb5/kdcauthdata_plugin.h>
 
 static krb5_error_code greet_hello(krb5_context context, krb5_data **ret)
 {
@@ -51,49 +39,6 @@ static krb5_error_code greet_hello(krb5_context context, krb5_data **ret)
     tmp.length = strlen(tmp.data);
 
     return krb5_copy_data(context, &tmp, ret);
-}
-
-static krb5_error_code
-greet_kdc_verify(krb5_context context,
-                 krb5_enc_tkt_part *enc_tkt_request,
-                 krb5_data **greeting)
-{
-    krb5_error_code code;
-    krb5_authdata **tgt_authdata = NULL;
-    krb5_authdata **kdc_issued = NULL;
-    krb5_authdata **greet = NULL;
-
-    code = krb5_find_authdata(context, enc_tkt_request->authorization_data,
-                              NULL, KRB5_AUTHDATA_KDC_ISSUED, &tgt_authdata);
-    if (code != 0 || tgt_authdata == NULL)
-        return 0;
-
-    code = krb5_verify_authdata_kdc_issued(context,
-                                           enc_tkt_request->session,
-                                           tgt_authdata[0],
-                                           NULL,
-                                           &kdc_issued);
-    if (code != 0) {
-        krb5_free_authdata(context, tgt_authdata);
-        return code;
-    }
-
-    code = krb5_find_authdata(context, kdc_issued, NULL, -42, &greet);
-    if (code == 0) {
-        krb5_data tmp;
-
-        tmp.data = (char *)greet[0]->contents;
-        tmp.length = greet[0]->length;
-
-        code = krb5_copy_data(context, &tmp, greeting);
-    } else
-        code = 0;
-
-    krb5_free_authdata(context, tgt_authdata);
-    krb5_free_authdata(context, kdc_issued);
-    krb5_free_authdata(context, greet);
-
-    return code;
 }
 
 static krb5_error_code
@@ -149,6 +94,7 @@ greet_kdc_sign(krb5_context context,
 
 static krb5_error_code
 greet_authdata(krb5_context context,
+               krb5_kdcauthdata_moddata moddata,
                unsigned int flags,
                krb5_db_entry *client,
                krb5_db_entry *server,
@@ -179,9 +125,17 @@ greet_authdata(krb5_context context,
     return code;
 }
 
-krb5plugin_authdata_server_ftable_v2 authdata_server_2 = {
-    "greet",
-    greet_init,
-    greet_fini,
-    greet_authdata,
-};
+krb5_error_code
+kdcauthdata_greet_initvt(krb5_context context, int maj_ver, int min_ver,
+                         krb5_plugin_vtable vtable);
+
+krb5_error_code
+kdcauthdata_greet_initvt(krb5_context context, int maj_ver, int min_ver,
+                         krb5_plugin_vtable vtable)
+{
+    krb5_kdcauthdata_vtable vt = (krb5_kdcauthdata_vtable)vtable;
+
+    vt->name = "greet";
+    vt->handle = greet_authdata;
+    return 0;
+}
