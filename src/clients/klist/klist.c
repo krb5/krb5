@@ -439,7 +439,7 @@ show_all_ccaches(void)
     first = TRUE;
     while (!(code = krb5_cccol_cursor_next(kcontext, cursor, &cache)) &&
            cache != NULL) {
-        if (!first)
+        if (!status_only && !first)
             printf("\n");
         first = FALSE;
         st = status_only ? check_ccache(cache) : show_ccache(cache);
