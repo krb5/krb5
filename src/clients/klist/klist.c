@@ -542,7 +542,7 @@ check_ccache(krb5_ccache cache)
     krb5_cc_cursor cur;
     krb5_creds creds;
     krb5_principal princ;
-    int exit_status = 1;
+    krb5_boolean found_tgt, found_current_tgt, found_current_cred;
 
     if (krb5_cc_set_flags(kcontext, cache, 0) != 0)
         return 1;
@@ -550,10 +550,16 @@ check_ccache(krb5_ccache cache)
         return 1;
     if (krb5_cc_start_seq_get(kcontext, cache, &cur) != 0)
         return 1;
+    found_tgt = found_current_tgt = found_current_cred = FALSE;
     while (!(ret = krb5_cc_next_cred(kcontext, cache, &cur, &creds))) {
-        if (is_local_tgt(creds.server, &princ->realm) &&
-            creds.times.endtime > now)
-            exit_status = 0;
+        if (is_local_tgt(creds.server, &princ->realm)) {
+            found_tgt = TRUE;
+            if (creds.times.endtime > now)
+                found_current_tgt = TRUE;
+        } else if (!krb5_is_config_principal(kcontext, creds.server) &&
+                   creds.times.endtime > now) {
+            found_current_cred = TRUE;
+        }
         krb5_free_cred_contents(kcontext, &creds);
     }
     krb5_free_principal(kcontext, princ);
@@ -563,7 +569,12 @@ check_ccache(krb5_ccache cache)
         return 1;
     if (krb5_cc_set_flags(kcontext, cache, KRB5_TC_OPENCLOSE) != 0)
         return 1;
-    return exit_status;
+
+    /* If the cache contains at least one local TGT, require that it be
+     * current.  Otherwise accept any current cred. */
+    if (found_tgt)
+        return found_current_tgt ? 0 : 1;
+    return found_current_cred ? 0 : 1;
 }
 
 /* Return true if princ is the local krbtgt principal for local_realm. */
