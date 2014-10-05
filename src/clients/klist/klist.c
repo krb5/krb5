@@ -67,6 +67,7 @@ unsigned int timestamp_width;
 
 krb5_context kcontext;
 
+krb5_boolean is_local_tgt (krb5_principal princ, krb5_data *realm);
 char * etype_string (krb5_enctype );
 void show_credential (krb5_creds *);
 
@@ -74,7 +75,8 @@ void list_all_ccaches (void);
 int list_ccache (krb5_ccache);
 void show_all_ccaches (void);
 void do_ccache_name (char *);
-int do_ccache (krb5_ccache);
+int show_ccache (krb5_ccache);
+int check_ccache (krb5_ccache);
 void do_keytab (char *);
 void printtime (time_t);
 void one_addr (krb5_address *);
@@ -403,8 +405,7 @@ list_ccache(krb5_ccache cache)
     if (code)
         goto cleanup;
 
-    status_only = 1;
-    expired = do_ccache(cache);
+    expired = check_ccache(cache);
 
     printf("%-30.30s %s", princname, ccname);
     if (expired)
@@ -426,7 +427,7 @@ show_all_ccaches(void)
     krb5_ccache cache;
     krb5_cccol_cursor cursor;
     krb5_boolean first;
-    int exit_status;
+    int exit_status, st;
 
     code = krb5_cccol_cursor_new(kcontext, &cursor);
     if (code) {
@@ -441,7 +442,8 @@ show_all_ccaches(void)
         if (!first)
             printf("\n");
         first = FALSE;
-        exit_status = do_ccache(cache) && exit_status;
+        st = status_only ? check_ccache(cache) : show_ccache(cache);
+        exit_status = st && exit_status;
         krb5_cc_close(kcontext, cache);
     }
     krb5_cccol_cursor_free(kcontext, &cursor);
@@ -468,94 +470,109 @@ do_ccache_name(char *name)
             exit(1);
         }
     }
-    exit(do_ccache(cache));
+    exit(status_only ? check_ccache(cache) : show_ccache(cache));
 }
 
+/* Display the contents of cache. */
 int
-do_ccache(krb5_ccache cache)
+show_ccache(krb5_ccache cache)
 {
     krb5_cc_cursor cur;
     krb5_creds creds;
     krb5_principal princ;
     krb5_flags flags;
     krb5_error_code code;
-    int exit_status = 0;
-
-    /* For status_only, exit_status is reset to 0 if a valid tgt is found. */
-    exit_status = (status_only) ? 1 : 0;
 
     flags = 0;                          /* turns off OPENCLOSE mode */
     if ((code = krb5_cc_set_flags(kcontext, cache, flags))) {
-        if (!status_only)
-            com_err(progname, code, "");
+        com_err(progname, code, "");
         return 1;
     }
     if ((code = krb5_cc_get_principal(kcontext, cache, &princ))) {
-        if (!status_only)
-            com_err(progname, code, "");
+        com_err(progname, code, "");
         return 1;
     }
     if ((code = krb5_unparse_name(kcontext, princ, &defname))) {
-        if (!status_only)
-            com_err(progname, code, _("while unparsing principal name"));
+        com_err(progname, code, _("while unparsing principal name"));
         return 1;
     }
-    if (!status_only) {
-        printf(_("Ticket cache: %s:%s\nDefault principal: %s\n\n"),
-               krb5_cc_get_type(kcontext, cache),
-               krb5_cc_get_name(kcontext, cache), defname);
-        /* XXX Translating would disturb table alignment; skip for now. */
-        fputs("Valid starting", stdout);
-        fillit(stdout, timestamp_width - sizeof("Valid starting") + 3,
-               (int) ' ');
-        fputs("Expires", stdout);
-        fillit(stdout, timestamp_width - sizeof("Expires") + 3,
-               (int) ' ');
-        fputs("Service principal\n", stdout);
-    }
+
+    printf(_("Ticket cache: %s:%s\nDefault principal: %s\n\n"),
+           krb5_cc_get_type(kcontext, cache),
+           krb5_cc_get_name(kcontext, cache), defname);
+    /* XXX Translating would disturb table alignment; skip for now. */
+    fputs("Valid starting", stdout);
+    fillit(stdout, timestamp_width - sizeof("Valid starting") + 3, (int) ' ');
+    fputs("Expires", stdout);
+    fillit(stdout, timestamp_width - sizeof("Expires") + 3, (int) ' ');
+    fputs("Service principal\n", stdout);
+
     if ((code = krb5_cc_start_seq_get(kcontext, cache, &cur))) {
-        if (!status_only)
-            com_err(progname, code, _("while starting to retrieve tickets"));
+        com_err(progname, code, _("while starting to retrieve tickets"));
         return 1;
     }
     while (!(code = krb5_cc_next_cred(kcontext, cache, &cur, &creds))) {
-        if (!show_config && krb5_is_config_principal(kcontext, creds.server)) {
-            /* Do nothing with this entry. */
-        } else if (status_only) {
-            if (exit_status && creds.server->length == 2 &&
-                data_eq(creds.server->realm, princ->realm) &&
-                data_eq_string(creds.server->data[0], "krbtgt") &&
-                data_eq(creds.server->data[1], princ->realm) &&
-                creds.times.endtime > now)
-                exit_status = 0;
-        } else {
+        if (show_config || !krb5_is_config_principal(kcontext, creds.server))
             show_credential(&creds);
-        }
         krb5_free_cred_contents(kcontext, &creds);
     }
     krb5_free_principal(kcontext, princ);
     if (code == KRB5_CC_END) {
         if ((code = krb5_cc_end_seq_get(kcontext, cache, &cur))) {
-            if (!status_only)
-                com_err(progname, code, _("while finishing ticket retrieval"));
+            com_err(progname, code, _("while finishing ticket retrieval"));
             return 1;
         }
         flags = KRB5_TC_OPENCLOSE;      /* turns on OPENCLOSE mode */
         if ((code = krb5_cc_set_flags(kcontext, cache, flags))) {
-            if (!status_only)
-                com_err(progname, code, _("while closing ccache"));
+            com_err(progname, code, _("while closing ccache"));
             return 1;
         }
-#ifdef KRB5_KRB4_COMPAT
-        if (name == NULL && !status_only)
-            do_v4_ccache(0);
-#endif
-        return exit_status;
+        return 0;
     } else {
-        if (!status_only)
-            com_err(progname, code, _("while retrieving a ticket"));
+        com_err(progname, code, _("while retrieving a ticket"));
         return 1;
     }
+}
+
+/* Return 0 if cache is accessible, present, and unexpired; return 1 if not. */
+int
+check_ccache(krb5_ccache cache)
+{
+    krb5_error_code ret;
+    krb5_cc_cursor cur;
+    krb5_creds creds;
+    krb5_principal princ;
+    int exit_status = 1;
+
+    if (krb5_cc_set_flags(kcontext, cache, 0) != 0)
+        return 1;
+    if (krb5_cc_get_principal(kcontext, cache, &princ) != 0)
+        return 1;
+    if (krb5_cc_start_seq_get(kcontext, cache, &cur) != 0)
+        return 1;
+    while (!(ret = krb5_cc_next_cred(kcontext, cache, &cur, &creds))) {
+        if (is_local_tgt(creds.server, &princ->realm) &&
+            creds.times.endtime > now)
+            exit_status = 0;
+        krb5_free_cred_contents(kcontext, &creds);
+    }
+    krb5_free_principal(kcontext, princ);
+    if (ret != KRB5_CC_END)
+        return 1;
+    if (krb5_cc_end_seq_get(kcontext, cache, &cur) != 0)
+        return 1;
+    if (krb5_cc_set_flags(kcontext, cache, KRB5_TC_OPENCLOSE) != 0)
+        return 1;
+    return exit_status;
+}
+
+/* Return true if princ is the local krbtgt principal for local_realm. */
+krb5_boolean
+is_local_tgt(krb5_principal princ, krb5_data *realm)
+{
+    return princ->length == 2 && data_eq(princ->realm, *realm) &&
+        data_eq_string(princ->data[0], KRB5_TGS_NAME) &&
+        data_eq(princ->data[1], *realm);
 }
 
 char *
