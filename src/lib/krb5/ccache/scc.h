@@ -71,9 +71,6 @@
 #define TKT_ROOT "/tmp/tkt"
 #endif
 
-/* macros to make checking flags easier */
-#define OPENCLOSE(id) (((krb5_scc_data *)id->data)->flags & KRB5_TC_OPENCLOSE)
-
 typedef struct _krb5_scc_data {
     char *filename;
     FILE *file;
@@ -86,18 +83,6 @@ typedef struct _krb5_scc_data {
 typedef struct _krb5_scc_cursor {
     long pos;
 } krb5_scc_cursor;
-
-#define MAYBE_OPEN(context, ID, MODE)                                   \
-    {                                                                   \
-        if (OPENCLOSE (ID)) {                                           \
-            krb5_error_code maybe_open_ret = krb5_scc_open_file (context, ID,MODE); \
-            if (maybe_open_ret) return maybe_open_ret; } }
-
-#define MAYBE_CLOSE(context, ID, RET)                                   \
-    {                                                                   \
-        if (OPENCLOSE (ID)) {                                           \
-            krb5_error_code maybe_close_ret = krb5_scc_close_file (context, ID); \
-            if (!(RET)) RET = maybe_close_ret; } }
 
 /* DO NOT ADD ANYTHING AFTER THIS #endif */
 #endif /* __KRB5_FILE_CCACHE__ */

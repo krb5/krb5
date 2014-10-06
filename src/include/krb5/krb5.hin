@@ -2230,7 +2230,7 @@ typedef struct _krb5_cccol_cursor *krb5_cccol_cursor;
 
 /* Flags for krb5_cc_set_flags and similar. */
 /** Open and close the file for each cache operation. */
-#define KRB5_TC_OPENCLOSE          0x00000001
+#define KRB5_TC_OPENCLOSE          0x00000001 /**< @deprecated has no effect */
 #define KRB5_TC_NOTICKET           0x00000002
 
 /**
