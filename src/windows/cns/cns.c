@@ -2021,18 +2021,9 @@ k5_get_num_cred(int verbose)
   krb5_creds c;
   int ncreds = 0;
 
-  /* Turn off OPENCLOSE and leave open while we use ccache */
-  if (code = krb5_cc_set_flags(k5_context, k5_ccache, 0)) {
+  if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
     if (code == KRB5_FCC_NOFILE)
       return 0;
-    if (verbose)
-      com_err(NULL, code,
-	      "while setting cache flags (ticket cache %s)",
-	      krb5_cc_get_name(k5_context, k5_ccache));
-    return -1;
-  }
-
-  if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
     if (verbose)
       com_err(NULL, code, "while starting to retrieve tickets.");
     return -1;
@@ -2052,10 +2043,6 @@ k5_get_num_cred(int verbose)
   }
 
   if (code = krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor)) {
-    if (verbose)
-      com_err(NULL, code, "while closing ccache.");
-  } else if (code = krb5_cc_set_flags(k5_context, k5_ccache,
-				      KRB5_TC_OPENCLOSE)) {
     if (verbose)
       com_err(NULL, code, "while closing ccache.");
   }

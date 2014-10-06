@@ -376,8 +376,7 @@ scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred)
     krb5_timestamp endtime;
     krb5_boolean is_tgt;
 
-    /* Turn off OPENCLOSE mode while extensive frobbing is going on.
-     * Turn on NOTICKET, as we don't need session keys here. */
+    /* Turn on NOTICKET, as we don't need session keys here. */
     code = krb5_cc_set_flags(context, ccache, KRB5_TC_NOTICKET);
     if (code)
         return code;
@@ -444,10 +443,8 @@ scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred)
         goto cleanup;
     }
 
-    (void)krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE);
-
 cleanup:
-    (void)krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE);
+    (void)krb5_cc_set_flags(context, ccache, 0);
     krb5_free_principal(context, ccache_princ);
     krb5_free_principal(context, tgt_princ);
     return code;

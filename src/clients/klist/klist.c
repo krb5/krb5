@@ -480,14 +480,8 @@ show_ccache(krb5_ccache cache)
     krb5_cc_cursor cur;
     krb5_creds creds;
     krb5_principal princ;
-    krb5_flags flags;
     krb5_error_code code;
 
-    flags = 0;                          /* turns off OPENCLOSE mode */
-    if ((code = krb5_cc_set_flags(kcontext, cache, flags))) {
-        com_err(progname, code, "");
-        return 1;
-    }
     if ((code = krb5_cc_get_principal(kcontext, cache, &princ))) {
         com_err(progname, code, "");
         return 1;
@@ -522,11 +516,6 @@ show_ccache(krb5_ccache cache)
             com_err(progname, code, _("while finishing ticket retrieval"));
             return 1;
         }
-        flags = KRB5_TC_OPENCLOSE;      /* turns on OPENCLOSE mode */
-        if ((code = krb5_cc_set_flags(kcontext, cache, flags))) {
-            com_err(progname, code, _("while closing ccache"));
-            return 1;
-        }
         return 0;
     } else {
         com_err(progname, code, _("while retrieving a ticket"));
@@ -544,8 +533,6 @@ check_ccache(krb5_ccache cache)
     krb5_principal princ;
     krb5_boolean found_tgt, found_current_tgt, found_current_cred;
 
-    if (krb5_cc_set_flags(kcontext, cache, 0) != 0)
-        return 1;
     if (krb5_cc_get_principal(kcontext, cache, &princ) != 0)
         return 1;
     if (krb5_cc_start_seq_get(kcontext, cache, &cur) != 0)
@@ -566,8 +553,6 @@ check_ccache(krb5_ccache cache)
     if (ret != KRB5_CC_END)
         return 1;
     if (krb5_cc_end_seq_get(kcontext, cache, &cur) != 0)
-        return 1;
-    if (krb5_cc_set_flags(kcontext, cache, KRB5_TC_OPENCLOSE) != 0)
         return 1;
 
     /* If the cache contains at least one local TGT, require that it be

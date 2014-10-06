@@ -99,7 +99,6 @@ ticket_init_list (HWND hwnd)
   krb5_cc_cursor cursor;
   krb5_error_code code;
   krb5_creds c;
-  krb5_flags flags;
   char *sname;                            /* Name of the service */
   char *flags_string(krb5_creds *cred);
 #endif
@@ -156,15 +155,11 @@ ticket_init_list (HWND hwnd)
 #ifdef KRB5
 
   ncred = 0;
-  flags = 0;
-  if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
+  if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
     if (code != KRB5_FCC_NOFILE) {
       return -1;
     }
   } else {
-    if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
-      return -1;
-    }
     while (1) {
       code = krb5_cc_next_cred(k5_context, k5_ccache, &cursor, &c);
       if (code != 0)
@@ -209,10 +204,6 @@ ticket_init_list (HWND hwnd)
     }
     if (code == KRB5_CC_END) {               /* End of ccache */
       if (code = krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor)) {
-	return -1;
-      }
-      flags = KRB5_TC_OPENCLOSE;          /* turns on OPENCLOSE mode */
-      if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
 	return -1;
       }
     } else {

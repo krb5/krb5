@@ -197,7 +197,7 @@ do_ccache(krb5_context ctx,
     TICKETINFO *ticketinfo = NULL;
     int retval = 1;
 
-    // Don't need the actual ticket, also turns off OPENCLOSE mode
+    // Don't need the actual ticket.
     flags = KRB5_TC_NOTICKET;
     code = pkrb5_cc_set_flags(ctx, cache, flags);
     if (code) {
@@ -264,7 +264,7 @@ do_ccache(krb5_context ctx,
             functionName = "krb5_cc_end_seq_get";
             goto cleanup;
         }
-        flags = KRB5_TC_OPENCLOSE;      /* turns on OPENCLOSE mode */
+        flags = 0;
         code = pkrb5_cc_set_flags(ctx, cache, flags);
         if (code) {
             functionName = "krb5_cc_set_flags";

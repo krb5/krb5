@@ -376,11 +376,6 @@ main (argc, argv)
         exit(1);
     }
 
-    if (((retval = krb5_cc_set_flags(ksu_context,  cc_source, 0x0)) != 0)
-        && (retval != KRB5_FCC_NOFILE)) {
-        com_err(prog_name, retval, _("while opening ccache"));
-        exit(1);
-    }
     if ((retval = get_best_princ_for_target(ksu_context, source_uid,
                                             target_uid, source_user,
                                             target_user, cc_source,
