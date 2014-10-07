@@ -163,14 +163,7 @@ fcc_lseek(fcc_data *data, off_t offset, int whence)
     return lseek(data->fd, offset, whence);
 }
 
-struct fcc_set {
-    struct fcc_set *next;
-    fcc_data *data;
-    unsigned int refcount;
-};
-
 k5_cc_mutex krb5int_cc_file_mutex = K5_CC_MUTEX_PARTIAL_INITIALIZER;
-static struct fcc_set *fccs = NULL;
 
 /* Iterator over file caches.  */
 struct krb5_fcc_ptcursor_data {
@@ -769,47 +762,27 @@ fcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
     return ret;
 }
 
-/* Drop the ref count.  If it hits zero, remove the entry from the fcc_set list
- * and free it. */
-static krb5_error_code dereference(krb5_context context, fcc_data *data)
+/* Release an fcc_data object. */
+static void
+free_fccdata(krb5_context context, fcc_data *data)
 {
-    struct fcc_set **fccsp, *temp;
-
-    k5_cc_mutex_lock(context, &krb5int_cc_file_mutex);
-    for (fccsp = &fccs; *fccsp != NULL; fccsp = &(*fccsp)->next) {
-        if ((*fccsp)->data == data)
-            break;
+    k5_cc_mutex_assert_unlocked(context, &data->lock);
+    free(data->filename);
+    zap(data->buf, sizeof(data->buf));
+    if (data->fd >= 0) {
+        k5_cc_mutex_lock(context, &data->lock);
+        close_cache_file(context, data);
+        k5_cc_mutex_unlock(context, &data->lock);
     }
-    assert(*fccsp != NULL);
-    assert((*fccsp)->data == data);
-    (*fccsp)->refcount--;
-    if ((*fccsp)->refcount == 0) {
-        data = (*fccsp)->data;
-        temp = *fccsp;
-        *fccsp = (*fccsp)->next;
-        free(temp);
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-        k5_cc_mutex_assert_unlocked(context, &data->lock);
-        free(data->filename);
-        zap(data->buf, sizeof(data->buf));
-        if (data->fd >= 0) {
-            k5_cc_mutex_lock(context, &data->lock);
-            close_cache_file(context, data);
-            k5_cc_mutex_unlock(context, &data->lock);
-        }
-        k5_cc_mutex_destroy(&data->lock);
-        free(data);
-    } else {
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-    }
-    return 0;
+    k5_cc_mutex_destroy(&data->lock);
+    free(data);
 }
 
 /* Release the ccache handle. */
 static krb5_error_code KRB5_CALLCONV
 fcc_close(krb5_context context, krb5_ccache id)
 {
-    dereference(context, id->data);
+    free_fccdata(context, id->data);
     free(id);
     return 0;
 }
@@ -922,7 +895,7 @@ fcc_destroy(krb5_context context, krb5_ccache id)
 
 cleanup:
     k5_cc_mutex_unlock(context, &data->lock);
-    dereference(context, data);
+    free_fccdata(context, data);
     free(id);
 
     krb5_change_cache();
@@ -938,65 +911,30 @@ fcc_resolve(krb5_context context, krb5_ccache *id, const char *residual)
     krb5_ccache lid;
     krb5_error_code ret;
     fcc_data *data;
-    struct fcc_set *setptr;
 
-    k5_cc_mutex_lock(context, &krb5int_cc_file_mutex);
-    for (setptr = fccs; setptr; setptr = setptr->next) {
-        if (!strcmp(setptr->data->filename, residual))
-            break;
+    data = malloc(sizeof(fcc_data));
+    if (data == NULL)
+        return KRB5_CC_NOMEM;
+    data->filename = strdup(residual);
+    if (data->filename == NULL) {
+        free(data);
+        return KRB5_CC_NOMEM;
     }
-    if (setptr) {
-        data = setptr->data;
-        assert(setptr->refcount != 0);
-        setptr->refcount++;
-        assert(setptr->refcount != 0);
-        k5_cc_mutex_lock(context, &data->lock);
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-    } else {
-        data = malloc(sizeof(fcc_data));
-        if (data == NULL) {
-            k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-            return KRB5_CC_NOMEM;
-        }
-        data->filename = strdup(residual);
-        if (data->filename == NULL) {
-            k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-            free(data);
-            return KRB5_CC_NOMEM;
-        }
-        ret = k5_cc_mutex_init(&data->lock);
-        if (ret) {
-            k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-            free(data->filename);
-            free(data);
-            return ret;
-        }
-        k5_cc_mutex_lock(context, &data->lock);
-        /* data->version,mode filled in for real later */
-        data->version = data->mode = 0;
-        data->fd = -1;
-        data->valid_bytes = 0;
-        setptr = malloc(sizeof(struct fcc_set));
-        if (setptr == NULL) {
-            k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-            k5_cc_mutex_unlock(context, &data->lock);
-            k5_cc_mutex_destroy(&data->lock);
-            free(data->filename);
-            free(data);
-            return KRB5_CC_NOMEM;
-        }
-        setptr->refcount = 1;
-        setptr->data = data;
-        setptr->next = fccs;
-        fccs = setptr;
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
+    ret = k5_cc_mutex_init(&data->lock);
+    if (ret) {
+        free(data->filename);
+        free(data);
+        return ret;
     }
 
-    k5_cc_mutex_assert_locked(context, &data->lock);
-    k5_cc_mutex_unlock(context, &data->lock);
+    /* data->version,mode filled in for real later */
+    data->version = data->mode = 0;
+    data->fd = -1;
+    data->valid_bytes = 0;
+
     lid = malloc(sizeof(struct _krb5_ccache));
     if (lid == NULL) {
-        dereference(context, data);
+        free_fccdata(context, data);
         return KRB5_CC_NOMEM;
     }
 
@@ -1118,22 +1056,15 @@ krb5int_fcc_new_unique(krb5_context context, char *template, krb5_ccache *id)
     char fcc_fvno[2];
     int16_t fcc_flen = 0;
     int errsave, cnt;
-    struct fcc_set *setptr;
-
-    /* Set master lock */
-    k5_cc_mutex_lock(context, &krb5int_cc_file_mutex);
 
     fd = mkstemp(template);
-    if (fd == -1) {
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
+    if (fd == -1)
         return interpret_errno(context, errno);
-    }
     set_cloexec_fd(fd);
 
     /* Allocate memory */
     data = malloc(sizeof(fcc_data));
     if (data == NULL) {
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
         close(fd);
         unlink(template);
         return KRB5_CC_NOMEM;
@@ -1141,7 +1072,6 @@ krb5int_fcc_new_unique(krb5_context context, char *template, krb5_ccache *id)
 
     data->filename = strdup(template);
     if (data->filename == NULL) {
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
         free(data);
         close(fd);
         unlink(template);
@@ -1150,7 +1080,6 @@ krb5int_fcc_new_unique(krb5_context context, char *template, krb5_ccache *id)
 
     ret = k5_cc_mutex_init(&data->lock);
     if (ret) {
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
         free(data->filename);
         free(data);
         close(fd);
@@ -1202,27 +1131,11 @@ krb5int_fcc_new_unique(krb5_context context, char *template, krb5_ccache *id)
         goto err_out;
     }
 
-    setptr = malloc(sizeof(struct fcc_set));
-    if (setptr == NULL) {
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-        k5_cc_mutex_unlock(context, &data->lock);
-        k5_cc_mutex_destroy(&data->lock);
-        free(data->filename);
-        free(data);
-        (void)unlink(template);
-        return KRB5_CC_NOMEM;
-    }
-    setptr->refcount = 1;
-    setptr->data = data;
-    setptr->next = fccs;
-    fccs = setptr;
-    k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-
     k5_cc_mutex_assert_locked(context, &data->lock);
     k5_cc_mutex_unlock(context, &data->lock);
     lid = malloc(sizeof(*lid));
     if (lid == NULL) {
-        dereference(context, data);
+        free_fccdata(context, data);
         return KRB5_CC_NOMEM;
     }
 
@@ -1236,7 +1149,6 @@ krb5int_fcc_new_unique(krb5_context context, char *template, krb5_ccache *id)
     return 0;
 
 err_out:
-    k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
     k5_cc_mutex_unlock(context, &data->lock);
     k5_cc_mutex_destroy(&data->lock);
     free(data->filename);
