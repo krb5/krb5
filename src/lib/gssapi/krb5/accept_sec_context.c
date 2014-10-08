@@ -1243,7 +1243,7 @@ fail:
         toktype = KG_TOK_CTX_ERROR;
 
         token.length = g_token_size(mech_used, tmsglen);
-        token.value = (unsigned char *) xmalloc(token.length);
+        token.value = gssalloc_malloc(token.length);
         if (!token.value)
             goto done;
 
