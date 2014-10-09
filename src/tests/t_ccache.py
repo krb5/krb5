@@ -36,6 +36,17 @@ output = realm.run([klist], expected_code=1)
 if ' not found' not in output:
     fail('Expected error message not seen in klist output')
 
+# Test klist -s with a single ccache.
+realm.run([klist, '-s'], expected_code=1)
+realm.kinit(realm.user_princ, password('user'))
+realm.run([klist, '-s'])
+realm.kinit(realm.user_princ, password('user'), ['-l', '-1s'])
+realm.run([klist, '-s'], expected_code=1)
+realm.kinit(realm.user_princ, password('user'), ['-S', 'kadmin/admin'])
+realm.run([klist, '-s'])
+realm.run([kdestroy])
+realm.run([klist, '-s'], expected_code=1)
+
 realm.addprinc('alice', password('alice'))
 realm.addprinc('bob', password('bob'))
 realm.addprinc('carol', password('carol'))
@@ -43,10 +54,12 @@ realm.addprinc('carol', password('carol'))
 def collection_test(realm, ccname):
     realm.env['KRB5CCNAME'] = ccname
 
+    realm.run([klist, '-A', '-s'], expected_code=1)
     realm.kinit('alice', password('alice'))
     output = realm.run([klist])
     if 'Default principal: alice@' not in output:
         fail('Initial kinit failed to get credentials for alice.')
+    realm.run([klist, '-A', '-s'])
     realm.run([kdestroy])
     output = realm.run([klist], expected_code=1)
     if ' not found' not in output:
@@ -54,6 +67,7 @@ def collection_test(realm, ccname):
     output = realm.run([klist, '-l'], expected_code=1)
     if not output.endswith('---\n') or output.count('\n') != 2:
         fail('Initial kdestroy failed to empty cache collection.')
+    realm.run([klist, '-A', '-s'], expected_code=1)
 
     realm.kinit('alice', password('alice'))
     realm.kinit('carol', password('carol'))
@@ -77,10 +91,13 @@ def collection_test(realm, ccname):
     output = realm.run([klist, '-l'])
     if 'carol@' in output or 'bob@' not in output or output.count('\n') != 4:
         fail('kdestroy failed to remove only primary ccache.')
+    realm.run([klist, '-s'], expected_code=1)
+    realm.run([klist, '-A', '-s'])
     realm.run([kdestroy, '-A'])
     output = realm.run([klist, '-l'], expected_code=1)
     if not output.endswith('---\n') or output.count('\n') != 2:
         fail('kdestroy -a failed to empty cache collection.')
+    realm.run([klist, '-A', '-s'], expected_code=1)
 
 
 collection_test(realm, 'DIR:' + os.path.join(realm.testdir, 'cc'))
