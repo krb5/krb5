@@ -30,16 +30,20 @@ Obtaining the software
 
 The source code can be obtained from MIT Kerberos Distribution page,
 at http://web.mit.edu/kerberos/dist/index.html.
-The MIT Kerberos distribution comes in an archive file, generally named
-krb5-VERSION.tar, where *VERSION* is a placeholder for the major and minor
-versions of MIT Kerberos.  (For example, MIT Kerberos 1.9
-has major version "1" and minor version "9".)
+The MIT Kerberos distribution comes in an archive file, generally
+named krb5-VERSION-signed.tar, where *VERSION* is a placeholder for
+the major and minor versions of MIT Kerberos.  (For example, MIT
+Kerberos 1.9 has major version "1" and minor version "9".)
 
-The krb5-VERSION.tar contains a compressed tar file consisting of the
-sources for all of Kerberos (generally krb5-VERSION.tar.gz) and
-a PGP signature file for this source tree (generally
-krb5-VERSION.tar.gz.asc).  MIT highly recommends that you verify
-the integrity of the source code using this signature.
+The krb5-VERSION-signed.tar contains a compressed tar file consisting
+of the sources for all of Kerberos (generally named
+krb5-VERSION.tar.gz) and a PGP signature file for this source tree
+(generally named krb5-VERSION.tar.gz.asc).  MIT highly recommends that
+you verify the integrity of the source code using this signature,
+e.g., by running::
+
+    tar xf krb5-VERSION-signed.tar
+    gpg --verify krb5-VERSION.tar.gz.asc
 
 Unpack krb5-VERSION.tar.gz in some directory. In this section we will assume
 that you have chosen the top directory of the distribution the directory
