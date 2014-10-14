@@ -7515,7 +7515,7 @@ krb5_tkt_creds_get_times(krb5_context context, krb5_tkt_creds_context ctx,
  * @param [in]  client          Client principal
  * @param [in]  arg_keytab      Key table handle
  * @param [in]  start_time      Time when ticket becomes valid (0 for now)
- * @param [in]  in_tkt_service  Service name of initial credentials (or NLUL)
+ * @param [in]  in_tkt_service  Service name of initial credentials (or NULL)
  * @param [in]  k5_gic_options  Initial credential options
  *
  * This function requests KDC for an initial credentials for @a client using a
