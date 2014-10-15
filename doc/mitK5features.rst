@@ -19,7 +19,8 @@ Quick facts
 License - :ref:`mitK5license`
 
 Releases:
-    - Latest stable: http://web.mit.edu/kerberos/krb5-1.12/
+    - Latest stable: http://web.mit.edu/kerberos/krb5-1.13/
+    - Supported: http://web.mit.edu/kerberos/krb5-1.12/
     - Supported: http://web.mit.edu/kerberos/krb5-1.11/
     - Release cycle: 9 -- 12 months
 
@@ -83,6 +84,7 @@ Starting from release 1.8:
 
 * Support for reading Heimdal database starting from release 1.8
 
+* Support for KCM credential cache starting from release 1.13
 
 Feature list
 ------------
@@ -140,6 +142,36 @@ Release 1.12
  -   FAST OTP preauthentication module for the KDC which uses RADIUS to validate OTP token values :ref:`otp_preauth`
  -   Experimental Audit plugin for KDC processing `Audit project <http://k5wiki.kerberos.org/wiki/Projects/Audit>`_
 
+Release 1.13
+
+ -   Add support for accessing KDCs via an HTTPS proxy server using
+     the `MS-KKDCP
+     <http://msdn.microsoft.com/en-us/library/hh553774.aspx>`_
+     protocol.
+ -   Add support for `hierarchical incremental propagation
+     <http://k5wiki.kerberos.org/wiki/Projects/Hierarchical_iprop>`_,
+     where slaves can act as intermediates between an upstream master
+     and other downstream slaves.
+ -   Add support for configuring GSS mechanisms using
+     ``/etc/gss/mech.d/*.conf`` files in addition to
+     ``/etc/gss/mech``.
+ -   Add support to the LDAP KDB module for `binding to the LDAP
+     server using SASL
+     <http://k5wiki.kerberos.org/wiki/Projects/LDAP_SASL_support>`_.
+ -   The KDC listens for TCP connections by default.
+ -   Fix a minor key disclosure vulnerability where using the
+     "keepold" option to the kadmin randkey operation could return the
+     old keys. `[CVE-2014-5351]
+     <http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-5351>`_
+ -   Add client support for the Kerberos Cache Manager protocol. If
+     the host is running a Heimdal kcm daemon, caches served by the
+     daemon can be accessed with the KCM: cache type.
+ -   When built on OS X 10.7 and higher, use "KCM:" as the default
+     cachetype, unless overridden by command-line options or
+     krb5-config values.
+ -   Add support for doing unlocked database dumps for the DB2 KDC
+     back end, which would allow the KDC and kadmind to continue
+     accessing the database during lengthy database dumps.
 
 `Pre-authentication mechanisms`
 
