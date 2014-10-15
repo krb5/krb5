@@ -73,8 +73,8 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.13
----------------------
+Major changes in 1.13 (2014-10-15)
+----------------------------------
 
 Administrator experience:
 
@@ -88,7 +88,8 @@ Administrator experience:
 * Add support for configuring GSS mechanisms using
   /etc/gss/mech.d/*.conf files in addition to /etc/gss/mech.
 
-* Add support to the LDAP KDB module for binding to the LDAP server using SASL.
+* Add support to the LDAP KDB module for binding to the LDAP server
+  using SASL.
 
 * The KDC listens for TCP connections by default.
 
@@ -131,6 +132,7 @@ krb5-1.13 changes by ticket ID
 7232    Confusing error message for key version mismatch
 7704    Anonymous kadmin does not work
 7728    ksu assumes the invoking user's using a FILE: ccache
+7761    Document that newer AFS supports stronger crypto
 7795    Allow ":port" suffixes in sn2princ hostnames
 7800    krb5-1.11/1.12: kadm5_init_with_* interface
 7816    Don't produce context deletion token in krb5 mech
@@ -167,6 +169,7 @@ krb5-1.13 changes by ticket ID
 7918    LDAP key data decoder ignores salt type if salt value is empty
 7923    x-deltat.y is not compatible with bison 3
 7925    05cbef80d53 breaks /etc/gss/mech
+7927    Better document how to verify PGP signature
 7929    HTTP proxy support
 7933    pkinit_win2k_require_binding behavior does not match
         documentation
