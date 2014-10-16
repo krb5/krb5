@@ -47,9 +47,7 @@ static char *etype_string(krb5_enctype enctype);
 
 static int quiet;
 
-#ifdef KADMIN_LOCAL
 static int norandkey;
-#endif
 
 static void
 add_usage()
@@ -130,9 +128,7 @@ kadmin_keytab_add(int argc, char **argv)
 
     argc--; argv++;
     quiet = 0;
-#ifdef KADMIN_LOCAL
     norandkey = 0;
-#endif
     while (argc) {
         if (strncmp(*argv, "-k", 2) == 0) {
             argc--; argv++;
@@ -143,9 +139,13 @@ kadmin_keytab_add(int argc, char **argv)
             keytab_str = *argv;
         } else if (strcmp(*argv, "-q") == 0) {
             quiet++;
-#ifdef KADMIN_LOCAL
         } else if (strcmp(*argv, "-norandkey") == 0) {
+#ifdef KADMIN_LOCAL
             norandkey++;
+#else
+            fprintf(stderr,
+                    _("-norandkey option only valid for kadmin.local\n"));
+            return;
 #endif
         } else if (strcmp(*argv, "-e") == 0) {
             argc--;
@@ -171,13 +171,11 @@ kadmin_keytab_add(int argc, char **argv)
         return;
     }
 
-#ifdef KADMIN_LOCAL
     if (norandkey && ks_tuple) {
         fprintf(stderr,
                 _("cannot specify keysaltlist when not changing key\n"));
         return;
     }
-#endif
 
     if (process_keytab(context, &keytab_str, &keytab))
         return;
