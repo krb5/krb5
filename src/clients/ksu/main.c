@@ -239,11 +239,11 @@ main (argc, argv)
                 errflg++;
             }
             break;
-#ifdef DEBUG
         case 'D':
+#ifdef DEBUG
             auth_debug = 1;
-            break;
 #endif
+            break;
         case 'z':
             some_rest_copy = 1;
             if(all_rest_copy) {
