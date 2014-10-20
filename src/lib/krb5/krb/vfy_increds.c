@@ -56,7 +56,7 @@ copy_creds_except(krb5_context context, krb5_ccache incc,
                   krb5_ccache outcc, krb5_principal princ)
 {
     krb5_error_code ret, ret2;
-    krb5_cc_cursor cur;
+    krb5_cc_cursor cur = NULL;
     krb5_creds creds;
 
     /* Turn off TC_OPENCLOSE on input ccache. */
@@ -79,9 +79,13 @@ copy_creds_except(krb5_context context, krb5_ccache incc,
 
     if (ret != KRB5_CC_END)
         goto cleanup;
-    ret = 0;
+
+    ret = krb5_cc_end_seq_get(context, incc, &cur);
+    cur = NULL;
 
 cleanup:
+    if (cur != NULL)
+        (void)krb5_cc_end_seq_get(context, incc, &cur);
     ret2 = krb5_cc_set_flags(context, incc, KRB5_TC_OPENCLOSE);
     return (ret == 0) ? ret2 : ret;
 }
