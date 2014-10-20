@@ -1652,7 +1652,6 @@ init_creds_step_reply(krb5_context context,
     k5_preauth_request_context_fini(context);
 
     /* success */
-    code = 0;
     ctx->complete = TRUE;
 
 cleanup:
