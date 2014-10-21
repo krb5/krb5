@@ -123,6 +123,9 @@ struct _profile_t {
 errcode_t profile_parse_file
 	(FILE *f, struct profile_node **root, char **ret_modspec);
 
+errcode_t profile_process_directory
+	(const char *dirname, struct profile_node **root);
+
 errcode_t profile_write_tree_file
 	(struct profile_node *root, FILE *dstfile);
 
