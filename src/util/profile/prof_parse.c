@@ -451,6 +451,25 @@ errcode_t profile_parse_file(FILE *f, struct profile_node **root,
     return 0;
 }
 
+errcode_t profile_process_directory(const char *dirname,
+                                    struct profile_node **root)
+{
+    errcode_t retval;
+    struct profile_node *node;
+
+    *root = NULL;
+    retval = profile_create_node("(root)", 0, &node);
+    if (retval)
+        return retval;
+    retval = parse_include_dir(dirname, node);
+    if (retval) {
+        profile_free_node(node);
+        return retval;
+    }
+    *root = node;
+    return 0;
+}
+
 /*
  * Return TRUE if the string begins or ends with whitespace
  */
