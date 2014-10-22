@@ -57,7 +57,6 @@ static char *file = KPROP_DEFAULT_FILE;
 /* The Kerberos principal we'll be sending as, initialized in get_tickets. */
 static krb5_principal my_principal;
 
-static krb5_ccache ccache;      /* Credentials cache which we'll be using */
 static krb5_creds creds;
 static krb5_address *sender_addr;
 static krb5_address *receiver_addr;
@@ -174,7 +173,6 @@ parse_args(int argc, char **argv)
 static void
 get_tickets(krb5_context context)
 {
-    char const ccname[] = "MEMORY:kpropcc";
     char *def_realm, *server;
     krb5_error_code retval;
     krb5_keytab keytab = NULL;
@@ -211,27 +209,12 @@ get_tickets(krb5_context context)
         }
     }
 
-    /* Use a memory cache to avoid possible filesystem conflicts. */
-    retval = krb5_cc_resolve(context, ccname, &ccache);
-    if (retval) {
-        com_err(progname, retval, _("while opening credential cache %s"),
-                ccname);
-        exit(1);
-    }
-
-    retval = krb5_cc_initialize(context, ccache, my_principal);
-    if (retval) {
-        com_err(progname, retval, _("when initializing cache %s"), ccname);
-        exit(1);
-    }
-
     /* Construct the principal name for the slave host. */
     memset(&creds, 0, sizeof(creds));
     retval = krb5_sname_to_principal(context, slave_host, KPROP_SERVICE_NAME,
                                      KRB5_NT_SRV_HST, &server_princ);
     if (retval) {
         com_err(progname, errno, _("while setting server principal name"));
-        krb5_cc_destroy(context, ccache);
         exit(1);
     }
     retval = krb5_unparse_name_flags(context, server_princ,
@@ -245,7 +228,6 @@ get_tickets(krb5_context context)
     retval = krb5_copy_principal(context, my_principal, &creds.client);
     if (retval) {
         com_err(progname, retval, _("while copying client principal"));
-        krb5_cc_destroy(context, ccache);
         exit(1);
     }
 
@@ -253,7 +235,6 @@ get_tickets(krb5_context context)
         retval = krb5_kt_resolve(context, srvtab, &keytab);
         if (retval) {
             com_err(progname, retval, _("while resolving keytab"));
-            krb5_cc_destroy(context, ccache);
             exit(1);
         }
     }
@@ -262,7 +243,6 @@ get_tickets(krb5_context context)
                                         0, server, NULL);
     if (retval) {
         com_err(progname, retval, _("while getting initial credentials\n"));
-        krb5_cc_destroy(context, ccache);
         exit(1);
     }
 
