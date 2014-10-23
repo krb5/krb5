@@ -4,8 +4,9 @@ Environment variables
 The following environment variables can be used during runtime:
 
 **KRB5_CONFIG**
-    Main Kerberos configuration file.  (See :ref:`mitK5defaults` for
-    the default name.)
+    Main Kerberos configuration file.  Multiple filenames can be
+    specified, separated by a colon; all files which are present will
+    be read.  (See :ref:`mitK5defaults` for the default path.)
 
 **KRB5_KDC_PROFILE**
     KDC configuration file.  (See :ref:`mitK5defaults` for the default
