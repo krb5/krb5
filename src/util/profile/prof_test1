@@ -200,6 +200,16 @@ proc test4 {} {
     }
     profile_release $p
 
+    # Directly list the directory in the profile path and try again.
+    set p [profile_init_path $wd/test_include_dir]
+    set x [profile_get_values $p {{test section 1} bar}]
+    if $verbose { puts "Read $x from directory" }
+    if ![string equal $x "foo foo"] {
+	puts stderr, "Error: test4: Did not get expected result from directory."
+	exit 1
+    }
+    profile_release $p
+
     puts "OK: test4: include and includedir directives"
 }
 
