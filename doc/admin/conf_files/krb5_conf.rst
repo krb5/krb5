@@ -11,7 +11,10 @@ Normally, you should install your krb5.conf file in the directory
 ``/etc``.  You can override the default location by setting the
 environment variable **KRB5_CONFIG**.  Multiple colon-separated
 filenames may be specified in **KRB5_CONFIG**; all files which are
-present will be read.
+present will be read.  Starting in release 1.14, directory names can
+also be specified in **KRB5_CONFIG**; all files within the directory
+whose names consist solely of alphanumeric characters, dashes, or
+underscores will be read.
 
 
 Structure
