@@ -199,23 +199,24 @@ static errcode_t parse_std_line(char *line, struct parse_state *state)
 }
 
 /* Open and parse an included profile file. */
-static errcode_t parse_include_file(char *filename, struct parse_state *state)
+static errcode_t parse_include_file(const char *filename,
+                                    struct profile_node *root_section)
 {
     FILE    *fp;
     errcode_t retval = 0;
-    struct parse_state incstate;
+    struct parse_state state;
 
-    /* Create a new state so that fragments are syntactically independent,
-     * sharing the root section with the existing state. */
-    incstate.state = STATE_INIT_COMMENT;
-    incstate.group_level = 0;
-    incstate.root_section = state->root_section;
-    incstate.current_section = NULL;
+    /* Create a new state so that fragments are syntactically independent but
+     * share a root section. */
+    state.state = STATE_INIT_COMMENT;
+    state.group_level = 0;
+    state.root_section = root_section;
+    state.current_section = NULL;
 
     fp = fopen(filename, "r");
     if (fp == NULL)
         return PROF_FAIL_INCLUDE_FILE;
-    retval = parse_file(fp, &incstate, NULL);
+    retval = parse_file(fp, &state, NULL);
     fclose(fp);
     return retval;
 }
@@ -238,7 +239,8 @@ static int valid_name(const char *filename)
  * alphanumeric chracters, dashes, and underscores are included, in order to
  * avoid including editor backup files, .rpmsave files, and the like.
  */
-static errcode_t parse_include_dir(char *dirname, struct parse_state *state)
+static errcode_t parse_include_dir(const char *dirname,
+                                   struct profile_node *root_section)
 {
 #ifdef _WIN32
     char *wildcard = NULL, *pathname;
@@ -262,7 +264,7 @@ static errcode_t parse_include_dir(char *dirname, struct parse_state *state)
             retval = ENOMEM;
             break;
         }
-        retval = parse_include_file(pathname, state);
+        retval = parse_include_file(pathname, root_section);
         free(pathname);
         if (retval)
             break;
@@ -291,7 +293,7 @@ cleanup:
             retval = ENOMEM;
             break;
         }
-        retval = parse_include_file(pathname, state);
+        retval = parse_include_file(pathname, root_section);
         free(pathname);
         if (retval)
             break;
@@ -309,12 +311,12 @@ static errcode_t parse_line(char *line, struct parse_state *state,
     if (strncmp(line, "include", 7) == 0 && isspace(line[7])) {
         cp = skip_over_blanks(line + 7);
         strip_line(cp);
-        return parse_include_file(cp, state);
+        return parse_include_file(cp, state->root_section);
     }
     if (strncmp(line, "includedir", 10) == 0 && isspace(line[10])) {
         cp = skip_over_blanks(line + 10);
         strip_line(cp);
-        return parse_include_dir(cp, state);
+        return parse_include_dir(cp, state->root_section);
     }
     switch (state->state) {
     case STATE_INIT_COMMENT:
