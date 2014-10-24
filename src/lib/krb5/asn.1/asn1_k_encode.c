@@ -1766,3 +1766,30 @@ DEFSEQTYPE(kkdcp_message, krb5_kkdcp_message,
            kkdcp_message_fields);
 MAKE_ENCODER(encode_krb5_kkdcp_message, kkdcp_message);
 MAKE_DECODER(decode_krb5_kkdcp_message, kkdcp_message);
+
+DEFFIELD(vmac_0, krb5_verifier_mac, princ, 0, opt_principal);
+DEFFIELD(vmac_1, krb5_verifier_mac, kvno, 1, opt_kvno);
+DEFFIELD(vmac_2, krb5_verifier_mac, enctype, 2, opt_int32);
+DEFFIELD(vmac_3, krb5_verifier_mac, checksum, 3, checksum);
+static const struct atype_info *vmac_fields[] = {
+    &k5_atype_vmac_0, &k5_atype_vmac_1, &k5_atype_vmac_2, &k5_atype_vmac_3
+};
+DEFSEQTYPE(vmac, krb5_verifier_mac, vmac_fields);
+DEFPTRTYPE(vmac_ptr, vmac);
+DEFOPTIONALZEROTYPE(opt_vmac_ptr, vmac_ptr);
+DEFNONEMPTYNULLTERMSEQOFTYPE(vmacs, vmac_ptr);
+DEFPTRTYPE(vmacs_ptr, vmacs);
+DEFOPTIONALEMPTYTYPE(opt_vmacs_ptr, vmacs_ptr);
+
+DEFFIELD(cammac_0, krb5_cammac, elements, 0, auth_data_ptr);
+DEFFIELD(cammac_1, krb5_cammac, kdc_verifier, 1, opt_vmac_ptr);
+DEFFIELD(cammac_2, krb5_cammac, svc_verifier, 2, opt_vmac_ptr);
+DEFFIELD(cammac_3, krb5_cammac, other_verifiers, 3, opt_vmacs_ptr);
+static const struct atype_info *cammac_fields[] = {
+    &k5_atype_cammac_0, &k5_atype_cammac_1, &k5_atype_cammac_2,
+    &k5_atype_cammac_3
+};
+DEFSEQTYPE(cammac, krb5_cammac, cammac_fields);
+
+MAKE_ENCODER(encode_krb5_cammac, cammac);
+MAKE_DECODER(decode_krb5_cammac, cammac);

@@ -1515,3 +1515,60 @@ encode_krb5_kkdcp_message:
       17 04 15 6b 72 62 41 53 4e 2e 31 20 74 65 73 74     ...krbASN.1 test
       20 6d 65 73 73 61 67 65                              message
 .  [1] [General string] "krb5data"
+
+encode_krb5_cammac(optionals NULL):
+
+[Sequence/Sequence Of]
+.  [0] [Sequence/Sequence Of]
+.  .  [Sequence/Sequence Of]
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Octet String] "ad1"
+
+encode_krb5_cammac:
+
+[Sequence/Sequence Of]
+.  [0] [Sequence/Sequence Of]
+.  .  [Sequence/Sequence Of]
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Octet String] "ad1"
+.  .  [Sequence/Sequence Of]
+.  .  .  [0] [Integer] 2
+.  .  .  [1] [Octet String] "ad2"
+.  [1] [Sequence/Sequence Of]
+.  .  [0] [Sequence/Sequence Of]
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Sequence/Sequence Of]
+.  .  .  .  [General string] "hftsai"
+.  .  .  .  [General string] "extra"
+.  .  [1] [Integer] 5
+.  .  [2] [Integer] 16
+.  .  [3] [Sequence/Sequence Of]
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Octet String] "cksumkdc"
+.  [2] [Sequence/Sequence Of]
+.  .  [0] [Sequence/Sequence Of]
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Sequence/Sequence Of]
+.  .  .  .  [General string] "hftsai"
+.  .  .  .  [General string] "extra"
+.  .  [1] [Integer] 5
+.  .  [2] [Integer] 16
+.  .  [3] [Sequence/Sequence Of]
+.  .  .  [0] [Integer] 1
+.  .  .  [1] [Octet String] "cksumsvc"
+.  [3] [Sequence/Sequence Of]
+.  .  [Sequence/Sequence Of]
+.  .  .  [3] [Sequence/Sequence Of]
+.  .  .  .  [0] [Integer] 1
+.  .  .  .  [1] [Octet String] "cksum1"
+.  .  [Sequence/Sequence Of]
+.  .  .  [0] [Sequence/Sequence Of]
+.  .  .  .  [0] [Integer] 1
+.  .  .  .  [1] [Sequence/Sequence Of]
+.  .  .  .  .  [General string] "hftsai"
+.  .  .  .  .  [General string] "extra"
+.  .  .  [1] [Integer] 5
+.  .  .  [2] [Integer] 16
+.  .  .  [3] [Sequence/Sequence Of]
+.  .  .  .  [0] [Integer] 1
+.  .  .  .  [1] [Octet String] "cksum2"

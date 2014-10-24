@@ -844,6 +844,26 @@ typedef struct _krb5_iakerb_finished {
     krb5_checksum checksum;
 } krb5_iakerb_finished;
 
+typedef struct _krb5_verifier_mac {
+    krb5_principal princ;
+    krb5_kvno kvno;
+    krb5_enctype enctype;
+    krb5_checksum checksum;
+} krb5_verifier_mac;
+
+/*
+ * AD-CAMMAC's other-verifiers field is a sequence of Verifier, which is an
+ * extensible choice with only one selection, Verifier-MAC.  For the time being
+ * we will represent this field directly as an array of krb5_verifier_mac.
+ * That will have to change if other selections are added.
+ */
+typedef struct _krb5_cammac {
+    krb5_authdata **elements;
+    krb5_verifier_mac *kdc_verifier;
+    krb5_verifier_mac *svc_verifier;
+    krb5_verifier_mac **other_verifiers;
+} krb5_cammac;
+
 krb5_pa_data *
 krb5int_find_pa_data(krb5_context, krb5_pa_data *const *, krb5_preauthtype);
 /* Does not return a copy; original padata sequence responsible for freeing*/
@@ -920,6 +940,7 @@ void k5_free_pa_otp_challenge(krb5_context context,
                               krb5_pa_otp_challenge *val);
 void k5_free_pa_otp_req(krb5_context context, krb5_pa_otp_req *val);
 void k5_free_kkdcp_message(krb5_context context, krb5_kkdcp_message *val);
+void k5_free_cammac(krb5_context context, krb5_cammac *val);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1470,6 +1491,9 @@ encode_krb5_pa_otp_enc_req(const krb5_data *, krb5_data **);
 krb5_error_code
 encode_krb5_kkdcp_message(const krb5_kkdcp_message *, krb5_data **);
 
+krb5_error_code
+encode_krb5_cammac(const krb5_cammac *, krb5_data **);
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1642,6 +1666,9 @@ decode_krb5_pa_otp_enc_req(const krb5_data *, krb5_data **);
 
 krb5_error_code
 decode_krb5_kkdcp_message(const krb5_data *, krb5_kkdcp_message **);
+
+krb5_error_code
+decode_krb5_cammac(const krb5_data *, krb5_cammac **);
 
 struct _krb5_key_data;          /* kdb.h */
 

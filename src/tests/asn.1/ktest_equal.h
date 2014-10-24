@@ -147,5 +147,6 @@ generic(ktest_equal_reply_key_pack_draft9, krb5_reply_key_pack_draft9);
 
 int ktest_equal_kkdcp_message(krb5_kkdcp_message *ref,
                               krb5_kkdcp_message *var);
+int ktest_equal_cammac(krb5_cammac *ref, krb5_cammac *var);
 
 #endif

@@ -741,6 +741,16 @@ main(argc, argv)
         encode_run(info, "kkdcp_message", "", encode_krb5_kkdcp_message);
         ktest_empty_kkdcp_message(&info);
     }
+    /* encode_krb5_cammac */
+    {
+        krb5_cammac req;
+        ktest_make_minimal_cammac(&req);
+        encode_run(req, "cammac", "(optionals NULL)", encode_krb5_cammac);
+        ktest_empty_cammac(&req);
+        ktest_make_maximal_cammac(&req);
+        encode_run(req, "cammac", "", encode_krb5_cammac);
+        ktest_empty_cammac(&req);
+    }
 #ifndef DISABLE_PKINIT
     /****************************************************************/
     /* encode_krb5_pa_pk_as_req */

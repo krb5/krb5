@@ -28,7 +28,7 @@
  * This program generates test vectors using asn1c, to be included in other
  * test programs which exercise the krb5 ASN.1 encoder and decoder functions.
  * It is intended to be used via "make test-vectors".  Currently, test vectors
- * are only generated for OTP preauth objects.
+ * are only generated for a subset of newer ASN.1 objects.
  */
 
 #include <PrincipalName.h>
@@ -39,6 +39,7 @@
 #include <PA-OTP-CHALLENGE.h>
 #include <PA-OTP-REQUEST.h>
 #include <PA-OTP-ENC-REQUEST.h>
+#include <AD-CAMMAC.h>
 
 static unsigned char buf[8192];
 static size_t buf_pos;
@@ -124,6 +125,48 @@ static PA_OTP_REQUEST_t request_2 = { { "\x60\0\0\0", 4, 0 }, &nonce,
 
 /* PA-OTP-ENC-REQUEST */
 static PA_OTP_ENC_REQUEST_t enc_request = { { "krb5data", 8 } };
+
+/*
+ * There is no ASN.1 name for a single authorization data element, so asn1c
+ * declares it as "struct Member" in an inner scope.  This structure must be
+ * laid out identically to that one.
+ */
+struct ad_element {
+    Int32_t ad_type;
+    OCTET_STRING_t ad_data;
+    asn_struct_ctx_t _asn_ctx;
+};
+
+/* Authorization data elements and lists, for use in CAMMAC */
+static struct ad_element ad_1 = { 1, { "ad1", 3 } };
+static struct ad_element ad_2 = { 2, { "ad2", 3 } };
+static struct ad_element *adlist_1[] = { &ad_1 };
+static struct ad_element *adlist_2[] = { &ad_1, &ad_2 };
+
+/* Minimal Verifier */
+static Verifier_t verifier_1 = { Verifier_PR_mac,
+                                 { { NULL, NULL, NULL,
+                                     { 1, { "cksum1", 6 } } } } };
+
+/* Maximal Verifier */
+static Int32_t enctype = 16;
+static Verifier_t verifier_2 = { Verifier_PR_mac,
+                                 { { &princ, &kvno, &enctype,
+                                     { 1, { "cksum2", 6 } } } } };
+
+/* Minimal CAMMAC */
+static AD_CAMMAC_t cammac_1 = { { { (void *)adlist_1, 1, 1 } },
+                                NULL, NULL, NULL };
+
+/* Maximal CAMMAC */
+static Verifier_MAC_t vmac_1 = { &princ, &kvno, &enctype,
+                                 { 1, { "cksumkdc", 8 } } };
+static Verifier_MAC_t vmac_2 = { &princ, &kvno, &enctype,
+                                 { 1, { "cksumsvc", 8 } } };
+static Verifier_t *verifiers[] = { &verifier_1, &verifier_2 };
+static struct other_verifiers overfs = { { verifiers, 2, 2 } };
+static AD_CAMMAC_t cammac_2 = { { { (void *)adlist_2, 2, 2 } },
+                                &vmac_1, &vmac_2, &overfs };
 
 static int
 consume(const void *data, size_t size, void *dummy)
@@ -211,6 +254,22 @@ main()
 
     printf("\nPA-OTP-ENC-REQUEST:\n");
     der_encode(&asn_DEF_PA_OTP_ENC_REQUEST, &enc_request, consume, NULL);
+    printbuf();
+
+    printf("\nMinimal Verifier:\n");
+    der_encode(&asn_DEF_Verifier, &verifier_1, consume, NULL);
+    printbuf();
+
+    printf("\nMaximal Verifier:\n");
+    der_encode(&asn_DEF_Verifier, &verifier_2, consume, NULL);
+    printbuf();
+
+    printf("\nMinimal AD-CAMMAC:\n");
+    der_encode(&asn_DEF_AD_CAMMAC, &cammac_1, consume, NULL);
+    printbuf();
+
+    printf("\nMaximal AD-CAMMAC:\n");
+    der_encode(&asn_DEF_AD_CAMMAC, &cammac_2, consume, NULL);
     printbuf();
 
     printf("\n");

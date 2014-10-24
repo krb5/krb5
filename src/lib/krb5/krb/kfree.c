@@ -831,3 +831,28 @@ k5_free_kkdcp_message(krb5_context context, krb5_kkdcp_message *val)
     free(val->kerb_message.data);
     free(val);
 }
+
+static void
+free_vmac(krb5_context context, krb5_verifier_mac *val)
+{
+    if (val == NULL)
+        return;
+    krb5_free_principal(context, val->princ);
+    krb5_free_checksum_contents(context, &val->checksum);
+}
+
+void
+k5_free_cammac(krb5_context context, krb5_cammac *val)
+{
+    krb5_verifier_mac **vp;
+
+    if (val == NULL)
+        return;
+    krb5_free_authdata(context, val->elements);
+    free_vmac(context, val->kdc_verifier);
+    free_vmac(context, val->svc_verifier);
+    for (vp = val->other_verifiers; vp != NULL && *vp != NULL; vp++)
+        free_vmac(context, *vp);
+    free(val->other_verifiers);
+    free(val);
+}

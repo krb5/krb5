@@ -729,7 +729,7 @@ ktest_equal_array_of_data(int length, krb5_data *ref, krb5_data *var)
 {
     int i,p = TRUE;
 
-    if (ref == var) return TRUE;
+    if (length == 0 || ref == var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     for (i=0; i<(length); i++) {
         p = p && ktest_equal_data(&(ref[i]),&(var[i]));
@@ -743,7 +743,7 @@ ktest_equal_array_of_octet(unsigned int length, krb5_octet *ref,
 {
     unsigned int i, p = TRUE;
 
-    if (ref == var) return TRUE;
+    if (length == 0 || ref == var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     for (i=0; i<length; i++)
         p = p && (ref[i] == var[i]);
@@ -755,7 +755,7 @@ ktest_equal_array_of_char(unsigned int length, char *ref, char *var)
 {
     unsigned int i, p = TRUE;
 
-    if (ref == var) return TRUE;
+    if (length == 0 || ref == var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     for (i=0; i<length; i++)
         p = p && (ref[i] == var[i]);
@@ -767,7 +767,7 @@ ktest_equal_array_of_enctype(int length, krb5_enctype *ref, krb5_enctype *var)
 {
     int i, p = TRUE;
 
-    if (ref == var) return TRUE;
+    if (length == 0 || ref == var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     for (i=0; i<length; i++)
         p = p && (ref[i] == var[i]);
@@ -1049,5 +1049,37 @@ ktest_equal_kkdcp_message(krb5_kkdcp_message *ref, krb5_kkdcp_message *var)
     p = p && data_eq(ref->kerb_message, var->kerb_message);
     p = p && data_eq(ref->target_domain, var->target_domain);
     p = p && (ref->dclocator_hint == var->dclocator_hint);
+    return p;
+}
+
+static int
+vmac_eq(krb5_verifier_mac *ref, krb5_verifier_mac *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && ptr_equal(princ, ktest_equal_principal_data);
+    p = p && scalar_equal(kvno);
+    p = p && scalar_equal(enctype);
+    p = p && struct_equal(checksum, ktest_equal_checksum);
+    return p;
+}
+
+static int
+vmac_list_eq(krb5_verifier_mac **ref, krb5_verifier_mac **var)
+{
+    array_compare(vmac_eq);
+}
+
+int
+ktest_equal_cammac(krb5_cammac *ref, krb5_cammac *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && ptr_equal(elements, ktest_equal_authorization_data);
+    p = p && ptr_equal(kdc_verifier, vmac_eq);
+    p = p && ptr_equal(svc_verifier, vmac_eq);
+    p = p && ptr_equal(other_verifiers, vmac_list_eq);
     return p;
 }
