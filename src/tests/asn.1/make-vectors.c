@@ -101,7 +101,7 @@ static PA_OTP_CHALLENGE_t challenge_2 = { { "maxnonce", 8 }, &service,
                                           &s2kparams };
 
 /* Minimal PA-OTP-REQUEST */
-static UInt32_t kvno;           /* Initialized to 5 in main(). */
+static UInt32_t kvno = 5;
 static PA_OTP_REQUEST_t request_1 = { { "\0\0\0\0", 4, 0 }, NULL,
                                       { 0, &kvno,
                                         { "krbASN.1 test message", 21 } } };
@@ -153,7 +153,6 @@ main()
 {
     /* Initialize values which can't use static initializers. */
     asn_long2INTEGER(&otp_format, 2);  /* Alphanumeric */
-    asn_long2INTEGER(&kvno, 5);
     OBJECT_IDENTIFIER_set_arcs(&alg_sha256.algorithm, sha256_arcs,
                                sizeof(*sha256_arcs),
                                sizeof(sha256_arcs) / sizeof(*sha256_arcs));
