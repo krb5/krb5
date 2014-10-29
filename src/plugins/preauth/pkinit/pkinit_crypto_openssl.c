@@ -4293,6 +4293,7 @@ pkinit_get_certs_pkcs12(krb5_context context,
                         krb5_principal princ)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
+    char *prompt_string = NULL;
     X509 *x = NULL;
     PKCS12 *p12 = NULL;
     int ret;
@@ -4333,8 +4334,7 @@ pkinit_get_certs_pkcs12(krb5_context context,
         krb5_data rdat;
         krb5_prompt kprompt;
         krb5_prompt_type prompt_type;
-        int r = 0;
-        char prompt_string[128];
+        krb5_error_code r;
         char prompt_reply[128];
         char *prompt_prefix = _("Pass phrase for");
         char *p12name = reassemble_pkcs12_name(idopts->cert_filename);
@@ -4366,11 +4366,9 @@ pkinit_get_certs_pkcs12(krb5_context context,
             rdat.data = prompt_reply;
             rdat.length = sizeof(prompt_reply);
 
-            r = snprintf(prompt_string, sizeof(prompt_string), "%s %s",
-                         prompt_prefix, idopts->cert_filename);
-            if (r >= (int)sizeof(prompt_string)) {
-                pkiDebug("Prompt string, '%s %s', is too long!\n",
-                         prompt_prefix, idopts->cert_filename);
+            if (asprintf(&prompt_string, "%s %s", prompt_prefix,
+                         idopts->cert_filename) < 0) {
+                prompt_string = NULL;
                 goto cleanup;
             }
             kprompt.prompt = prompt_string;
@@ -4382,6 +4380,10 @@ pkinit_get_certs_pkcs12(krb5_context context,
             r = (*id_cryptoctx->prompter)(context, id_cryptoctx->prompter_data,
                                           NULL, NULL, 1, &kprompt);
             k5int_set_prompt_types(context, 0);
+            if (r) {
+                pkiDebug("Failed to prompt for PKCS12 password");
+                goto cleanup;
+            }
         }
 
         ret = PKCS12_parse(p12, rdat.data, &y, &x, NULL);
@@ -4406,6 +4408,7 @@ pkinit_get_certs_pkcs12(krb5_context context,
     retval = 0;
 
 cleanup:
+    free(prompt_string);
     if (p12)
         PKCS12_free(p12);
     if (retval) {
