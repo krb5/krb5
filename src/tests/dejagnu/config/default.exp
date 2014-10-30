@@ -2193,7 +2193,7 @@ proc do_klist_err { testname } {
     spawn $KLIST -5
     # Might say "credentials cache" or "credentials cache file".
     expect {
-	-re "klist: Credentials cache file .* not found.*\r\n" {
+	-re "klist: No credentials cache found.*\r\n" {
 	    verbose "klist started"
 	}
 	timeout {

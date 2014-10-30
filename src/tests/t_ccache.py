@@ -33,7 +33,7 @@ test_keyring = (keyctl is not None and
 # Test kdestroy and klist of a non-existent ccache.
 realm.run([kdestroy])
 output = realm.run([klist], expected_code=1)
-if ' not found' not in output:
+if 'No credentials cache found' not in output:
     fail('Expected error message not seen in klist output')
 
 # Test kinit with an inaccessible ccache.
@@ -68,7 +68,7 @@ def collection_test(realm, ccname):
     realm.run([klist, '-A', '-s'])
     realm.run([kdestroy])
     output = realm.run([klist], expected_code=1)
-    if ' not found' not in output:
+    if 'No credentials cache' not in output and 'not found' not in output:
         fail('Initial kdestroy failed to destroy primary cache.')
     output = realm.run([klist, '-l'], expected_code=1)
     if not output.endswith('---\n') or output.count('\n') != 2:

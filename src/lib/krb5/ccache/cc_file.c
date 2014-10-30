@@ -112,6 +112,15 @@ typedef struct _krb5_fcc_cursor {
 
 k5_cc_mutex krb5int_cc_file_mutex = K5_CC_MUTEX_PARTIAL_INITIALIZER;
 
+/* Add fname to the standard error message for ret. */
+static krb5_error_code
+set_errmsg_filename(krb5_context context, krb5_error_code ret,
+                    const char *fname)
+{
+    k5_setmsg(context, ret, "%s (filename: %s)", error_message(ret), fname);
+    return ret;
+}
+
 /* Get the size of the cache file as a size_t, or SIZE_MAX if it is too
  * large to be represented as a size_t. */
 static krb5_error_code
@@ -329,16 +338,8 @@ open_cache_file(krb5_context context, const char *filename,
 
     flags = writable ? (O_RDWR | O_APPEND) : O_RDONLY;
     fd = open(filename, flags | O_BINARY | O_CLOEXEC, 0600);
-    if (fd == -1) {
-        if (errno == ENOENT) {
-            ret = KRB5_FCC_NOFILE;
-            k5_setmsg(context, ret, _("Credentials cache file '%s' not found"),
-                      filename);
-            return ret;
-        } else {
-            return interpret_errno(context, errno);
-        }
-    }
+    if (fd == -1)
+        return interpret_errno(context, errno);
     set_cloexec_fd(fd);
 
     lockmode = writable ? KRB5_LOCKMODE_EXCLUSIVE : KRB5_LOCKMODE_SHARED;
@@ -522,7 +523,7 @@ cleanup:
         close(fd);
     k5_cc_mutex_unlock(context, &data->lock);
     krb5_change_cache();
-    return ret;
+    return set_errmsg_filename(context, ret, data->filename);
 }
 
 /* Release an fcc_data object. */
@@ -648,7 +649,7 @@ cleanup:
     free(id);
 
     krb5_change_cache();
-    return ret;
+    return set_errmsg_filename(context, ret, data->filename);
 }
 
 extern const krb5_cc_ops krb5_fcc_ops;
@@ -737,7 +738,7 @@ cleanup:
     free(fcursor);
     krb5_free_principal(context, princ);
     k5_cc_mutex_unlock(context, &data->lock);
-    return ret;
+    return set_errmsg_filename(context, ret, data->filename);
 }
 
 /* Get the next credential from the cache file. */
@@ -780,7 +781,7 @@ cleanup:
         (void)krb5_unlock_file(context, fileno(fcursor->fp));
     k5_cc_mutex_unlock(context, &data->lock);
     k5_buf_free(&buf);
-    return ret;
+    return set_errmsg_filename(context, ret, data->filename);
 }
 
 /* Release an iteration cursor. */
@@ -896,7 +897,7 @@ err_out:
     k5_cc_mutex_destroy(&data->lock);
     free(data->filename);
     free(data);
-    return ret;
+    return set_errmsg_filename(context, ret, data->filename);
 }
 
 /*
@@ -941,7 +942,7 @@ fcc_get_principal(krb5_context context, krb5_ccache id, krb5_principal *princ)
 cleanup:
     (void)close_cache_file(context, fp);
     k5_cc_mutex_unlock(context, &data->lock);
-    return ret;
+    return set_errmsg_filename(context, ret, data->filename);
 }
 
 /* Search for a credential within the cache file. */
@@ -949,8 +950,10 @@ static krb5_error_code KRB5_CALLCONV
 fcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
              krb5_creds *mcreds, krb5_creds *creds)
 {
-    return k5_cc_retrieve_cred_default(context, id, whichfields, mcreds,
-                                       creds);
+    krb5_error_code ret;
+
+    ret = k5_cc_retrieve_cred_default(context, id, whichfields, mcreds, creds);
+    return set_errmsg_filename(context, ret, ((fcc_data *)id->data)->filename);
 }
 
 /* Store a credential in the cache file. */
@@ -992,7 +995,7 @@ cleanup:
     k5_buf_free(&buf);
     ret2 = close_cache_file(context, fp);
     k5_cc_mutex_unlock(context, &data->lock);
-    return ret ? ret : ret2;
+    return set_errmsg_filename(context, ret ? ret : ret2, data->filename);
 }
 
 /* Non-functional stub for removing a cred from the cache file. */
@@ -1075,7 +1078,7 @@ fcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
 
     ret = krb5_cc_resolve(context, defname, &cache);
     if (ret)
-        return ret;
+        return set_errmsg_filename(context, ret, defname);
     *cache_out = cache;
     return 0;
 }
@@ -1112,7 +1115,7 @@ fcc_last_change_time(krb5_context context, krb5_ccache id,
 
     k5_cc_mutex_unlock(context, &data->lock);
 
-    return ret;
+    return set_errmsg_filename(context, ret, data->filename);
 }
 
 /* Lock the cache handle against other threads.  (This does not lock the cache
@@ -1142,6 +1145,13 @@ interpret_errno(krb5_context context, int errnum)
 
     switch (errnum) {
     case ENOENT:
+    case ENOTDIR:
+#ifdef ELOOP
+    case ELOOP:
+#endif
+#ifdef ENAMETOOLONG
+    case ENAMETOOLONG:
+#endif
         ret = KRB5_FCC_NOFILE;
         break;
     case EPERM:
@@ -1149,14 +1159,6 @@ interpret_errno(krb5_context context, int errnum)
 #ifdef EISDIR
     case EISDIR:                /* Mac doesn't have EISDIR */
 #endif
-    case ENOTDIR:
-#ifdef ELOOP
-    case ELOOP:                 /* Bad symlink is like no file. */
-#endif
-#ifdef ETXTBSY
-    case ETXTBSY:
-#endif
-    case EBUSY:
     case EROFS:
         ret = KRB5_FCC_PERM;
         break;
@@ -1164,27 +1166,27 @@ interpret_errno(krb5_context context, int errnum)
     case EEXIST:
     case EFAULT:
     case EBADF:
-#ifdef ENAMETOOLONG
-    case ENAMETOOLONG:
-#endif
 #ifdef EWOULDBLOCK
     case EWOULDBLOCK:
 #endif
         ret = KRB5_FCC_INTERNAL;
         break;
-#ifdef EDQUOT
-    case EDQUOT:
-#endif
-    case ENOSPC:
-    case EIO:
-    case ENFILE:
-    case EMFILE:
-    case ENXIO:
+    /*
+     * The rest all map to KRB5_CC_IO.  These errnos are listed to
+     * document that they've been considered explicitly:
+     *
+     *  - EDQUOT
+     *  - ENOSPC
+     *  - EIO
+     *  - ENFILE
+     *  - EMFILE
+     *  - ENXIO
+     *  - EBUSY
+     *  - ETXTBSY
+     */
     default:
         ret = KRB5_CC_IO;
-        k5_setmsg(context, ret,
-                  _("Credentials cache I/O operation failed (%s)"),
-                  strerror(errnum));
+        break;
     }
     return ret;
 }

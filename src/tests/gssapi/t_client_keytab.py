@@ -135,7 +135,7 @@ if bob not in out:
     fail('Authenticated as wrong principal')
 # Make sure the tickets we acquired didn't become the default
 out = realm.run([klist], expected_code=1)
-if ' not found' not in out:
+if 'No credentials cache found' not in out:
     fail('Expected error not seen')
 realm.run([kdestroy, '-A'])
 
