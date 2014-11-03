@@ -119,6 +119,7 @@ get_size(krb5_context context, FILE *fp, size_t *size_out)
 {
     struct stat sb;
 
+    *size_out = 0;
     if (fstat(fileno(fp), &sb) == -1)
         return interpret_errno(context, errno);
     if (sizeof(off_t) > sizeof(size_t) && sb.st_size > (off_t)SIZE_MAX)
