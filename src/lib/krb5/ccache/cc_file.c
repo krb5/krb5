@@ -446,7 +446,7 @@ fcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
     char i16buf[2], i32buf[4];
     uint16_t fields_len;
     ssize_t nwritten;
-    int st, fd, flags, version;
+    int st, flags, version, fd = -1;
     struct k5buf buf = EMPTY_K5BUF;
     krb5_boolean file_locked = FALSE;
 
@@ -518,7 +518,8 @@ cleanup:
     k5_buf_free(&buf);
     if (file_locked)
         krb5_unlock_file(context, fd);
-    close(fd);
+    if (fd != -1)
+        close(fd);
     k5_cc_mutex_unlock(context, &data->lock);
     krb5_change_cache();
     return ret;
