@@ -759,8 +759,8 @@ Here's an example of a kdc.conf file::
             kadmind_port = 749
             max_life = 12h 0m 0s
             max_renewable_life = 7d 0h 0m 0s
-            master_key_type = des3-hmac-sha1
-            supported_enctypes = des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4
+            master_key_type = aes256-cts-hmac-sha1-96
+            supported_enctypes = aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal
             database_module = openldap_ldapconf
         }
 
