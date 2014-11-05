@@ -45,6 +45,11 @@ krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
     *minor_status = 0;
 
     ctx = (krb5_gss_ctx_id_t) *context_handle;
+    if (ctx->terminated) {
+        *minor_status = KG_CTX_INCOMPLETE;
+        return (GSS_S_NO_CONTEXT);
+    }
+
     context = ctx->k5_context;
     kret = krb5_gss_ser_init(context);
     if (kret)

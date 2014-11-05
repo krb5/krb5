@@ -369,7 +369,7 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-    if (!ctx->established)
+    if (ctx->terminated || !ctx->established)
         return GSS_S_NO_CONTEXT;
 
     for (i = 0; i < sizeof(krb5_gss_inquire_sec_context_by_oid_ops)/
