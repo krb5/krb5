@@ -127,6 +127,7 @@ main(int argc, char *argv[])
     uctx.mech_type = &mech_krb5;
     uctx.internal_ctx_id = (gss_ctx_id_t)&kgctx;
     kgctx.k5_context = NULL;
+    kgctx.established = 1;
     kgctx.have_acceptor_subkey = 1;
     kb1.contents = k1buf;
     kb2.contents = k2buf;

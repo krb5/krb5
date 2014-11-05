@@ -95,7 +95,7 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
     }
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
-    if (! ctx->established) {
+    if (ctx->terminated || !ctx->established) {
         *minor_status = KG_CTX_INCOMPLETE;
         return(GSS_S_NO_CONTEXT);
     }

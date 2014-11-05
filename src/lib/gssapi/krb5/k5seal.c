@@ -342,7 +342,7 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-    if (! ctx->established) {
+    if (ctx->terminated || !ctx->established) {
         *minor_status = KG_CTX_INCOMPLETE;
         return(GSS_S_NO_CONTEXT);
     }
