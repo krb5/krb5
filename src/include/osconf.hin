@@ -101,8 +101,7 @@
 
 #define KRB5_DEFAULT_SUPPORTED_ENCTYPES                 \
     "aes256-cts-hmac-sha1-96:normal "                   \
-    "aes128-cts-hmac-sha1-96:normal "                   \
-    "des3-cbc-sha1:normal arcfour-hmac-md5:normal"
+    "aes128-cts-hmac-sha1-96:normal"
 
 #define MAX_DGRAM_SIZE  65536
 
