@@ -219,20 +219,6 @@ krb5_cc_cache_match(krb5_context context, krb5_principal client,
     return ret;
 }
 
-static void
-accumulate_error(krb5_context context, krb5_error_code code, char **buf)
-{
-    const char *msg = krb5_get_error_message(context, code);
-    char *acc;
-
-    if (asprintf(&acc, "%s%s%s",
-                 (*buf == NULL) ? "" : *buf,
-                 (*buf == NULL) ? "" : "\n", msg) != -1) {
-        free(*buf);
-        *buf = acc;
-    }
-}
-
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_have_content(krb5_context context)
 {
@@ -242,18 +228,21 @@ krb5_cccol_have_content(krb5_context context)
     krb5_creds creds;
     krb5_boolean found = FALSE;
     krb5_error_code ret;
-    char *acc = NULL;
+    const char *last_err = NULL;
 
     ret = krb5_cccol_cursor_new(context, &col_cursor);
-    if (ret)
+    if (ret) {
+        last_err = krb5_get_error_message(context, ret);
         goto no_entries;
+    }
 
     while (!found &&
            !(ret = krb5_cccol_cursor_next(context, col_cursor, &cache)) &&
            cache != NULL) {
         ret = krb5_cc_start_seq_get(context, cache, &cache_cursor);
         if (ret) {
-            accumulate_error(context, ret, &acc);
+            krb5_free_error_message(context, last_err);
+            last_err = krb5_get_error_message(context, ret);
             continue;
         }
         while (!found &&
@@ -263,8 +252,10 @@ krb5_cccol_have_content(krb5_context context)
                 found = TRUE;
             krb5_free_cred_contents(context, &creds);
         }
-        if (!found && ret && ret != KRB5_CC_END)
-            accumulate_error(context, ret, &acc);
+        if (!found && ret && ret != KRB5_CC_END) {
+            krb5_free_error_message(context, last_err);
+            last_err = krb5_get_error_message(context, ret);
+        }
         ret = 0;
         /* We can ignore errors from these two calls */
         krb5_cc_end_seq_get(context, cache, &cache_cursor);
@@ -272,19 +263,19 @@ krb5_cccol_have_content(krb5_context context)
     }
     krb5_cccol_cursor_free(context, &col_cursor);
     if (found) {
-        free(acc);
+        krb5_clear_error_message(context);
+        krb5_free_error_message(context, last_err);
         return 0;
     }
 
 no_entries:
-    if (ret && ret != KRB5_CC_END)
-        accumulate_error(context, ret, &acc);
-    if (acc != NULL) {
+    if (last_err != NULL) {
         k5_setmsg(context, KRB5_CC_NOTFOUND,
-                  _("No Kerberos credentials available: %s"), acc);
+                  _("No Kerberos credentials available (%s)"), last_err);
     } else {
         k5_setmsg(context, KRB5_CC_NOTFOUND,
                   _("No Kerberos credentials available"));
     }
+    krb5_free_error_message(context, last_err);
     return KRB5_CC_NOTFOUND;
 }
