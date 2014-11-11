@@ -141,6 +141,7 @@ check-pytests:: t_init_creds t_localauth unlockiter
 	$(RUNPYTEST) $(srcdir)/t_kdc_log.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_proxy.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_unlockiter.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_errmsg.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) gcred hist hrealm kdbtest plugorder rdreq responder s2p
