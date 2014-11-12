@@ -293,7 +293,8 @@ krb5_ldap_delete_policy(krb5_context context, char *policyname)
 
     if (policyname == NULL) {
         st = EINVAL;
-        prepend_err_str(context, _("Ticket Policy Object DN missing"), st, st);
+        krb5_prepend_error_message(context, st,
+                                   _("Ticket Policy Object DN missing"));
         goto cleanup;
     }
 
@@ -307,21 +308,21 @@ krb5_ldap_delete_policy(krb5_context context, char *policyname)
     /* Checking for policy count for 0 and will not permit delete if
      * it is greater than 0.  */
 
-    if ((st = krb5_ldap_get_reference_count (context, policy_dn,
+    if ((st = krb5_ldap_get_reference_count(context, policy_dn,
                                              "krbTicketPolicyReference", &refcount, ld)) != 0)
         goto cleanup;
 
     if (refcount == 0) {
         if ((st=ldap_delete_ext_s(ld, policy_dn, NULL, NULL)) != 0) {
-            prepend_err_str (context,ldap_err2string(st),st,st);
+            krb5_prepend_error_message(context, st, "%s", ldap_err2string(st));
 
             goto cleanup;
         }
     } else {
         st = EINVAL;
-        prepend_err_str(context,
-                        _("Delete Failed: One or more Principals associated "
-                          "with the Ticket Policy"), st, st);
+        krb5_prepend_error_message(context, st,
+                                   _("Delete Failed: One or more Principals "
+                                     "associated with the Ticket Policy"));
         goto cleanup;
     }
 
@@ -428,8 +429,8 @@ krb5_ldap_list(krb5_context context, char ***list, char *objectclass,
     /* check if the containerdn exists */
     if (containerdn) {
         if ((st=checkattributevalue(ld, containerdn, NULL, NULL, NULL)) != 0) {
-            prepend_err_str(context, _("Error reading container object: "),
-                            st, st);
+            krb5_prepend_error_message(context, st,
+                                       _("Error reading container object: "));
             goto cleanup;
         }
     }

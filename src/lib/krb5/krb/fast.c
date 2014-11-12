@@ -212,11 +212,8 @@ krb5int_fast_as_armor(krb5_context context,
                                            target_principal);
         }
         if (retval != 0) {
-            const char * errmsg;
-            errmsg = krb5_get_error_message(context, retval);
-            k5_setmsg(context, retval, _("%s constructing AP-REQ armor"),
-                      errmsg);
-            krb5_free_error_message(context, errmsg);
+            krb5_prepend_error_message(context, retval,
+                                       _("Error constructing AP-REQ armor"));
         }
     }
     if (ccache)
@@ -394,11 +391,8 @@ decrypt_fast_reply(krb5_context context,
                                 KRB5_KEYUSAGE_FAST_REP, NULL,
                                 encrypted_response, &scratch);
     if (retval != 0) {
-        const char * errmsg;
-        errmsg = krb5_get_error_message(context, retval);
-        k5_setmsg(context, retval, _("%s while decrypting FAST reply"),
-                  errmsg);
-        krb5_free_error_message(context, errmsg);
+        krb5_prepend_error_message(context, retval,
+                                   _("Failed to decrypt FAST reply"));
     }
     if (retval == 0)
         retval = decode_krb5_fast_response(&scratch, &local_resp);

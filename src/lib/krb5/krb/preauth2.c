@@ -1008,7 +1008,6 @@ krb5_preauth_supply_preauth_data(krb5_context context,
     struct krb5_preauth_context_st *pctx = context->preauth_context;
     clpreauth_handle *hp, h;
     krb5_error_code ret;
-    const char *emsg = NULL;
 
     if (pctx == NULL) {
         k5_init_preauth_context(context);
@@ -1028,10 +1027,8 @@ krb5_preauth_supply_preauth_data(krb5_context context,
         h = *hp;
         ret = clpreauth_gic_opts(context, h, opt, attr, value);
         if (ret) {
-            emsg = krb5_get_error_message(context, ret);
-            k5_setmsg(context, ret, _("Preauth module %s: %s"), h->vt.name,
-                      emsg);
-            krb5_free_error_message(context, emsg);
+            krb5_prepend_error_message(context, ret, _("Preauth module %s"),
+                                       h->vt.name);
             return ret;
         }
     }

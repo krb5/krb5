@@ -83,14 +83,14 @@ extern struct timeval timelimit;
 #define GET_HANDLE()  ld = NULL;                                        \
     st = krb5_ldap_request_handle_from_pool(ldap_context, &ldap_server_handle); \
     if (st != 0) {                                                      \
-        prepend_err_str(context, "LDAP handle unavailable: ", KRB5_KDB_ACCESS_ERROR, st); \
+        krb5_prepend_error_message2(context, st, KRB5_KDB_ACCESS_ERROR, \
+                                    "LDAP handle unavailable: ");       \
         st = KRB5_KDB_ACCESS_ERROR;                                     \
         goto cleanup;                                                   \
     }                                                                   \
     ld = ldap_server_handle->ldap_handle;
 
 extern int set_ldap_error (krb5_context ctx, int st, int op);
-extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code err, krb5_error_code oerr);
 
 #define LDAP_SEARCH(base, scope, filter, attrs)   LDAP_SEARCH_1(base, scope, filter, attrs, CHECK_STATUS)
 
@@ -110,7 +110,9 @@ extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code er
                                                                         \
     if (status_check != IGNORE_STATUS) {                                \
         if (tempst != 0) {                                              \
-            prepend_err_str(context, "LDAP handle unavailable: ", KRB5_KDB_ACCESS_ERROR, st); \
+            krb5_prepend_error_message2(context, st,                    \
+                                        KRB5_KDB_ACCESS_ERROR,          \
+                                        "LDAP handle unavailable: ");   \
             st = KRB5_KDB_ACCESS_ERROR;                                 \
             goto cleanup;                                               \
         }                                                               \
@@ -126,7 +128,7 @@ extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code er
         if (st == 0 && mask == 0) {                                     \
             st = set_ldap_error(context, LDAP_OBJECT_CLASS_VIOLATION, OP_SEARCH); \
         }                                                               \
-        prepend_err_str(context, str, st, st);                          \
+        krb5_prepend_error_message(context, st, str);                   \
         goto cleanup;                                                   \
     }
 

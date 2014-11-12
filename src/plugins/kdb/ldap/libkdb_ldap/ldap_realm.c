@@ -291,8 +291,8 @@ krb5_ldap_delete_realm (krb5_context context, char *lrealm)
     /* Delete all ticket policies */
     {
         if ((st = krb5_ldap_list_policy (context, ldap_context->lrparams->realmdn, &policy)) != 0) {
-            prepend_err_str(context, _("Error reading ticket policy: "), st,
-                            st);
+            krb5_prepend_error_message(context, st,
+                                       _("Error reading ticket policy: "));
             goto cleanup;
         }
 
