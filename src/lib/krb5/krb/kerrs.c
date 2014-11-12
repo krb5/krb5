@@ -135,16 +135,58 @@ krb5_copy_error_message(krb5_context dest_ctx, krb5_context src_ctx)
     }
 }
 
+/* Re-format msg using the format string err_fmt.  Return an allocated result,
+ * or NULL if err_fmt is NULL or on allocation failure. */
+static char *
+err_fmt_fmt(const char *err_fmt, long code, const char *msg)
+{
+    struct k5buf buf;
+    const char *p, *s;
+
+    if (err_fmt == NULL)
+        return NULL;
+
+    k5_buf_init_dynamic(&buf);
+
+    s = err_fmt;
+    while ((p = strchr(s, '%')) != NULL) {
+        k5_buf_add_len(&buf, s, p - s);
+        s = p;
+        if (p[1] == '\0')
+            break;
+        else if (p[1] == 'M')
+            k5_buf_add(&buf, msg);
+        else if (p[1] == 'C')
+            k5_buf_add_fmt(&buf, "%ld", code);
+        else if (p[1] == '%')
+            k5_buf_add(&buf, "%");
+        else
+            k5_buf_add_fmt(&buf, "%%%c", p[1]);
+        s += 2;
+    }
+    k5_buf_add(&buf, s);        /* Remainder after last token */
+    return buf.data;
+}
+
 const char * KRB5_CALLCONV
 krb5_get_error_message(krb5_context ctx, krb5_error_code code)
 {
+    const char *std, *custom;
+
 #ifdef DEBUG
     if (ERROR_MESSAGE_DEBUG())
         fprintf(stderr, "krb5_get_error_message(%p, %ld)\n", ctx, (long)code);
 #endif
     if (ctx == NULL)
         return error_message(code);
-    return k5_get_error(&ctx->err, code);
+
+    std = k5_get_error(&ctx->err, code);
+    custom = err_fmt_fmt(ctx->err_fmt, code, std);
+    if (custom != NULL) {
+        free((char *)std);
+        return custom;
+    }
+    return std;
 }
 
 void KRB5_CALLCONV

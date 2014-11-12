@@ -206,6 +206,11 @@ The libdefaults section may contain any of the following relations:
     data), and anything the fake KDC sends will not be trusted without
     verification using some secret that it won't know.
 
+**err_fmt**
+    This relation allows for custom error message formatting.  If a
+    value is set, error messages will be formatted by substituting a
+    normal error message for %M and an error code for %C in the value.
+
 **extra_addresses**
     This allows a computer to use multiple local addresses, in order
     to allow Kerberos to work in a network that uses NATs while still
@@ -362,7 +367,6 @@ The libdefaults section may contain any of the following relations:
     If this flag is true, then an attempt to verify initial
     credentials will fail if the client machine does not have a
     keytab.  The default value is false.
-
 
 .. _realms:
 

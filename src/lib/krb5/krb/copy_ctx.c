@@ -85,6 +85,9 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     nctx->kdblog_context = NULL;
     nctx->trace_callback = NULL;
     nctx->trace_callback_data = NULL;
+    nctx->err_fmt = NULL;
+    if (ctx->err_fmt != NULL)
+        nctx->err_fmt = strdup(ctx->err_fmt);   /* It's OK if this fails */
     nctx->plugin_base_dir = NULL;
     nctx->os_context.default_ccname = NULL;
 
