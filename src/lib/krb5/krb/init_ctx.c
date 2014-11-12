@@ -281,6 +281,10 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
     ctx->prompt_types = 0;
     ctx->use_conf_ktypes = 0;
     ctx->udp_pref_limit = -1;
+
+    /* It's OK if this fails */
+    (void)profile_get_string(ctx->profile, KRB5_CONF_LIBDEFAULTS,
+                             KRB5_CONF_ERR_FMT, NULL, NULL, &ctx->err_fmt);
     *context_out = ctx;
     return 0;
 
@@ -308,6 +312,7 @@ krb5_free_context(krb5_context ctx)
     }
 
     krb5_clear_error_message(ctx);
+    free(ctx->err_fmt);
 
 #ifndef DISABLE_TRACING
     if (ctx->trace_callback)

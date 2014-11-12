@@ -477,6 +477,12 @@ attempt fails.
 If this flag is true, then an attempt to verify initial
 credentials will fail if the client machine does not have a
 keytab.  The default value is false.
+.TP
+.B \fBerr_fmt\fP
+If this is set, error messages will be formatted by substituting a
+normal error message for %M and an error code for %C in the value of
+this parameter.  By default this is not set.  This allows for custom
+error message formatting.
 .UNINDENT
 .SS [realms]
 .sp

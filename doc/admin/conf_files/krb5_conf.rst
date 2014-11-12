@@ -363,6 +363,11 @@ The libdefaults section may contain any of the following relations:
     credentials will fail if the client machine does not have a
     keytab.  The default value is false.
 
+**err_fmt**
+    If this is set, error messages will be formatted by substituting a
+    normal error message for %M and an error code for %C in the value of
+    this parameter.  By default this is not set.  This allows for custom
+    error message formatting.
 
 .. _realms:
 

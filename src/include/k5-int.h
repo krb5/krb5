@@ -211,6 +211,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_DNS_LOOKUP_REALM             "dns_lookup_realm"
 #define KRB5_CONF_DOMAIN_REALM                 "domain_realm"
 #define KRB5_CONF_ENABLE_ONLY                  "enable_only"
+#define KRB5_CONF_ERR_FMT                      "err_fmt"
 #define KRB5_CONF_EXTRA_ADDRESSES              "extra_addresses"
 #define KRB5_CONF_FORWARDABLE                  "forwardable"
 #define KRB5_CONF_HOST_BASED_SERVICES          "host_based_services"
@@ -1187,6 +1188,7 @@ struct _krb5_context {
 
     /* error detail info */
     struct errinfo err;
+    char *err_fmt;
 
     /* For Sun iprop code; does this really have to be here?  */
     struct _kdb_log_context *kdblog_context;
