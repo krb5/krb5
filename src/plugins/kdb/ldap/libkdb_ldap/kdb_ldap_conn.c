@@ -74,8 +74,8 @@ validate_context(krb5_context context, krb5_ldap_context *ctx)
         ret = krb5_ldap_readpassword(context, ctx->service_password_file,
                                      ctx->bind_dn, &ctx->bind_pwd);
         if (ret) {
-            prepend_err_str(context, _("Error reading password from stash: "),
-                            ret, ret);
+            k5_prependmsg(context, ret,
+                          _("Error reading password from stash"));
             return ret;
         }
     }

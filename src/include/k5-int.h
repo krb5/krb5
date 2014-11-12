@@ -2288,7 +2288,9 @@ krb5_boolean k5_etypes_contains(const krb5_enctype *list, krb5_enctype etype);
 void k5_change_error_message_code(krb5_context ctx, krb5_error_code oldcode,
                                   krb5_error_code newcode);
 
-/* Define a shorter internal name for krb5_set_error_message. */
+/* Define shorter internal names for setting error messages. */
 #define k5_setmsg krb5_set_error_message
+#define k5_prependmsg krb5_prepend_error_message
+#define k5_wrapmsg krb5_wrap_error_message
 
 #endif /* _KRB5_INT_H */

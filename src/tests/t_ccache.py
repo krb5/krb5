@@ -39,7 +39,7 @@ if ' not found' not in output:
 # Test kinit with an inaccessible ccache.
 out = realm.run([kinit, '-c', 'testdir/xx/yy', realm.user_princ],
                 input=(password('user') + '\n'), expected_code=1)
-if ' while storing credentials' not in out:
+if 'Failed to store credentials' not in out:
     fail('Expected error message not seen in kinit output')
 
 # Test klist -s with a single ccache.

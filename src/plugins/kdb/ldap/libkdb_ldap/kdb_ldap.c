@@ -65,13 +65,12 @@ krb5_ldap_read_startup_information(krb5_context context)
 
     SETUP_CONTEXT();
     if ((retval=krb5_ldap_read_krbcontainer_dn(context, &(ldap_context->container_dn)))) {
-        prepend_err_str(context, _("Unable to read Kerberos container"),
-                        retval, retval);
+        k5_prependmsg(context, retval, _("Unable to read Kerberos container"));
         goto cleanup;
     }
 
     if ((retval=krb5_ldap_read_realm_params(context, context->default_realm, &(ldap_context->lrparams), &mask))) {
-        prepend_err_str(context, _("Unable to read Realm"), retval, retval);
+        k5_prependmsg(context, retval, _("Unable to read Realm"));
         goto cleanup;
     }
 
@@ -212,15 +211,13 @@ krb5_ldap_open(krb5_context context, char *conf_section, char **db_args,
 
     status = krb5_ldap_parse_db_params(context, db_args);
     if (status) {
-        prepend_err_str(context, _("Error processing LDAP DB params:"),
-                        status, status);
+        k5_prependmsg(context, status, _("Error processing LDAP DB params"));
         goto clean_n_exit;
     }
 
     status = krb5_ldap_read_server_params(context, conf_section, mode & 0x0300);
     if (status) {
-        prepend_err_str(context, _("Error reading LDAP server params:"),
-                        status, status);
+        k5_prependmsg(context, status, _("Error reading LDAP server params"));
         goto clean_n_exit;
     }
     if ((status=krb5_ldap_db_init(context, ldap_context)) != 0) {
@@ -246,17 +243,6 @@ set_ldap_error(krb5_context ctx, int st, int op)
     int translated_st = translate_ldap_error(st, op);
     k5_setmsg(ctx, translated_st, "%s", ldap_err2string(st));
     return translated_st;
-}
-
-void
-prepend_err_str(krb5_context ctx, const char *str, krb5_error_code err,
-                krb5_error_code oerr)
-{
-    const char *omsg;
-
-    omsg = krb5_get_error_message(ctx, oerr);
-    k5_setmsg(ctx, err, "%s %s", str, omsg);
-    krb5_free_error_message(ctx, omsg);
 }
 
 extern krb5int_access accessor;
