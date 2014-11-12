@@ -77,6 +77,50 @@ krb5_vset_error_message(krb5_context ctx, krb5_error_code code,
 #endif
 }
 
+void KRB5_CALLCONV
+krb5_prepend_error_message(krb5_context ctx, krb5_error_code code,
+                           const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    krb5_vwrap_error_message(ctx, code, code, fmt, ap);
+    va_end(ap);
+}
+
+void KRB5_CALLCONV
+krb5_vprepend_error_message(krb5_context ctx, krb5_error_code code,
+                            const char *fmt, va_list ap)
+{
+    krb5_wrap_error_message(ctx, code, code, fmt, ap);
+}
+
+void KRB5_CALLCONV
+krb5_wrap_error_message(krb5_context ctx, krb5_error_code old_code,
+                        krb5_error_code code, const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    krb5_vwrap_error_message(ctx, old_code, code, fmt, ap);
+    va_end(ap);
+}
+
+void KRB5_CALLCONV
+krb5_vwrap_error_message(krb5_context ctx, krb5_error_code old_code,
+                         krb5_error_code code, const char *fmt, va_list ap)
+{
+    const char *prev_msg;
+    char *prepend;
+
+    if (ctx == NULL || vasprintf(&prepend, fmt, ap) < 0)
+        return;
+    prev_msg = k5_get_error(&ctx->err, old_code);
+    k5_set_error(&ctx->err, code, "%s: %s", prepend, prev_msg);
+    k5_free_error(&ctx->err, prev_msg);
+    free(prepend);
+}
+
 /* Set the error message state of dest_ctx to that of src_ctx. */
 void KRB5_CALLCONV
 krb5_copy_error_message(krb5_context dest_ctx, krb5_context src_ctx)

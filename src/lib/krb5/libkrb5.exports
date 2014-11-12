@@ -467,6 +467,7 @@ krb5_pac_sign
 krb5_pac_verify
 krb5_parse_name
 krb5_parse_name_flags
+krb5_prepend_error_message
 krb5_principal2salt
 krb5_principal2salt_norealm
 krb5_principal_compare
@@ -601,8 +602,11 @@ krb5_verify_authdata_kdc_issued
 krb5_verify_init_creds
 krb5_verify_init_creds_opt_init
 krb5_verify_init_creds_opt_set_ap_req_nofail
+krb5_vprepend_error_message
 krb5_vset_error_message
+krb5_vwrap_error_message
 krb5_walk_realm_tree
+krb5_wrap_error_message
 krb5_write_message
 krb5int_accessor
 krb5int_cc_default

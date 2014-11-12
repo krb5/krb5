@@ -7786,6 +7786,85 @@ krb5_vset_error_message(krb5_context  ctx, krb5_error_code code,
     ;
 
 /**
+ * Add a prefix to the message for an error code.
+ *
+ * @param [in] ctx              Library context
+ * @param [in] code             Error code
+ * @param [in] fmt              Format string for error message prefix
+ * @param [in] ...              printf(3) style parameters
+ *
+ * Format a message and prepend it to the current message for @a code.  The
+ * prefix will be separated from the old message with a colon and space.
+ */
+void KRB5_CALLCONV_C
+krb5_prepend_error_message(krb5_context ctx, krb5_error_code code,
+                           const char *fmt, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 4)))
+#endif
+    ;
+
+/**
+ * Add a prefix to the message for an error code using a va_list.
+ *
+ * @param [in] ctx              Library context
+ * @param [in] code             Error code
+ * @param [in] fmt              Format string for error message prefix
+ * @param [in] args             List of vprintf(3) style arguments
+ *
+ * This function is similar to krb5_prepend_error_message(), but uses a
+ * va_list instead of variadic arguments.
+ */
+void KRB5_CALLCONV
+krb5_vprepend_error_message(krb5_context  ctx, krb5_error_code code,
+                        const char *fmt, va_list args)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 0)))
+#endif
+    ;
+
+/**
+ * Add a prefix to a different error code's message.
+ *
+ * @param [in] ctx              Library context
+ * @param [in] old_code         Previous error code
+ * @param [in] code             Error code
+ * @param [in] fmt              Format string for error message prefix
+ * @param [in] ...              printf(3) style parameters
+ *
+ * Format a message and prepend it to the message for @a old_code.  The prefix
+ * will be separated from the old message with a colon and space.  Set the
+ * resulting message as the extended error message for @a code.
+ */
+void KRB5_CALLCONV_C
+krb5_wrap_error_message(krb5_context ctx, krb5_error_code old_code,
+                        krb5_error_code code, const char *fmt, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 4, 5)))
+#endif
+    ;
+
+/**
+ * Add a prefix to a different error code's message using a va_list.
+ *
+ * @param [in] ctx              Library context
+ * @param [in] old_code         Previous error code
+ * @param [in] code             Error code
+ * @param [in] fmt              Format string for error message prefix
+ * @param [in] args             List of vprintf(3) style arguments
+ *
+ * This function is similar to krb5_wrap_error_message(), but uses a
+ * va_list instead of variadic arguments.
+ */
+void KRB5_CALLCONV
+krb5_vwrap_error_message(krb5_context ctx, krb5_error_code old_code,
+                         krb5_error_code code, const char *fmt, va_list args)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 4, 0)))
+#endif
+    ;
+
+/**
  * Copy the most recent extended error message from one context to another.
  *
  * @param [in] dest_ctx         Library context to copy message to
