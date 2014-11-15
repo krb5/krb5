@@ -11,7 +11,6 @@ SYNOPSIS
 [ **-n** *target_principal_name* ]
 [ **-c** *source_cache_name* ]
 [ **-k** ]
-[ **-D** ]
 [ **-r** time ]
 [ **-pf** ]
 [ **-l** *lifetime* ]
@@ -228,9 +227,6 @@ OPTIONS
     Do not delete the target cache upon termination of the target
     shell or a command (**-e** command).  Without **-k**, ksu deletes
     the target cache.
-
-**-D**
-    Turn on debug mode.
 
 **-z**
     Restrict the copy of tickets from the source cache to the target

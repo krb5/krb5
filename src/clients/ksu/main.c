@@ -66,7 +66,7 @@ static krb5_error_code resolve_target_cache(krb5_context ksu_context,
 void usage (){
     fprintf(stderr,
             _("Usage: %s [target user] [-n principal] [-c source cachename] "
-              "[-k] [-D] [-r time] [-pf] [-l lifetime] [-zZ] [-q] "
+              "[-k] [-r time] [-pf] [-l lifetime] [-zZ] [-q] "
               "[-e command [args... ] ] [-a [args... ] ]\n"), prog_name);
 }
 
