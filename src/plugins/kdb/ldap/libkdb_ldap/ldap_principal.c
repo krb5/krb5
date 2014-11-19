@@ -237,7 +237,6 @@ krb5_ldap_delete_principal(krb5_context context,
     int                       j=0, ptype=0, pcount=0, attrsetmask=0;
     krb5_error_code           st=0;
     krb5_boolean              singleentry=FALSE;
-    KEY                       *secretkey=NULL;
     kdb5_dal_handle           *dal_handle=NULL;
     krb5_ldap_context         *ldap_context=NULL;
     krb5_ldap_server_handle   *ldap_server_handle=NULL;
@@ -283,13 +282,7 @@ krb5_ldap_delete_principal(krb5_context context,
             goto cleanup;
 
         singleentry = (pcount == 1) ? TRUE: FALSE;
-        if (singleentry == FALSE) {
-            if (secretkey != NULL) {
-                if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbprincipalkey", LDAP_MOD_DELETE | LDAP_MOD_BVALUES,
-                                                  secretkey->keys)) != 0)
-                    goto cleanup;
-            }
-        } else {
+        if (singleentry == TRUE) {
             /*
              * If the Kerberos user principal to be deleted happens to be the last one associated
              * with the directory user object, then it is time to delete the other kerberos
@@ -342,17 +335,6 @@ cleanup:
 
     if (DN)
         free (DN);
-
-    if (secretkey != NULL) {
-        int i=0;
-        while (i < secretkey->nkey) {
-            free (secretkey->keys[i]->bv_val);
-            free (secretkey->keys[i]);
-            ++i;
-        }
-        free (secretkey->keys);
-        free (secretkey);
-    }
 
     krb5_ldap_free_principal(context, entry);
 
