@@ -300,18 +300,17 @@ krb5_string_to_keysalts(const char *string, const char *tupleseps,
             goto cleanup;
 
         /* Ignore duplicate keysalts if caller asks. */
-        if (!dups && krb5_keysalt_is_present(ksalts, nksalts, etype, stype))
-            continue;
-
-        ksalts_new = realloc(ksalts, (nksalts + 1) * sizeof(*ksalts));
-        if (ksalts_new == NULL) {
-            ret = ENOMEM;
-            goto cleanup;
+        if (dups || !krb5_keysalt_is_present(ksalts, nksalts, etype, stype)) {
+            ksalts_new = realloc(ksalts, (nksalts + 1) * sizeof(*ksalts));
+            if (ksalts_new == NULL) {
+                ret = ENOMEM;
+                goto cleanup;
+            }
+            ksalts = ksalts_new;
+            ksalts[nksalts].ks_enctype = etype;
+            ksalts[nksalts].ks_salttype = stype;
+            nksalts++;
         }
-        ksalts = ksalts_new;
-        ksalts[nksalts].ks_enctype = etype;
-        ksalts[nksalts].ks_salttype = stype;
-        nksalts++;
         ksp = strtok_r(NULL, tseps, &tlasts);
     }
     *ksaltp = ksalts;
