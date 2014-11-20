@@ -35,6 +35,29 @@ for e1, string in salts:
     for e2 in second_kstypes:
         test_salt(realm, e1, string, e2)
 
+def test_dup(realm, ks):
+    query = 'ank -e ' + ks + ' -pw password ks_princ'
+    realm.run_kadminl(query)
+    out = realm.run_kadminl('getprinc ks_princ')
+    lines = out.split('\n')
+    keys = [l for l in lines if 'Key: ' in l]
+    uniq = set(keys)
+    # 'Key:' matches 'MKey:' as well so len(keys) has one extra
+    if (len(uniq) != len(keys)) or len(keys) > len(ks.split(',')):
+        fail('Duplicate keysalt detection failed for keysalt ' + ks)
+    realm.run_kadminl('delprinc -force ks_princ')
+
+# All in-tree callers request duplicate suppression from
+# krb5_string_to_keysalts(); we should check that it works, respects
+# aliases, and doesn't result in an infinite loop.
+dup_kstypes = ['arcfour-hmac-md5:normal,rc4-hmac:normal',
+               'aes256-cts-hmac-sha1-96:normal,aes128-cts,aes256-cts',
+               'aes256-cts-hmac-sha1-96:normal,aes256-cts:special,' +
+               'aes256-cts-hmac-sha1-96:normal']
+
+for ks in dup_kstypes:
+    test_dup(realm, ks)
+
 # Attempt to create a principal with a non-des enctype and the afs3 salt,
 # verifying that the expected error is received and the principal creation
 # fails.
