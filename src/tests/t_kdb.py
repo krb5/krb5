@@ -308,6 +308,23 @@ out = realm.run_kadminl('getprinc kvnoprinc')
 if 'Number of keys: 6' not in out:
     fail('After cpw -keepold, wrong number of keys')
 
+# Regression test for #8041 (NULL dereference on keyless principals).
+out = realm.run_kadminl('addprinc -nokey keylessprinc')
+if 'Principal "keylessprinc@KRBTEST.COM" created' not in out:
+    fail('Failed to create keyless principal')
+out = realm.run_kadminl('getprinc keylessprinc')
+if 'Number of keys: 0' not in out:
+    fail('Failed to create a principal with no keys')
+realm.run_kadminl('cpw -randkey -e aes256-cts,aes128-cts keylessprinc')
+realm.run_kadminl('cpw -randkey -keepold -e aes256-cts,aes128-cts keylessprinc')
+out = realm.run_kadminl('getprinc keylessprinc')
+if 'Number of keys: 4' not in out:
+    fail('Failed to add keys to keylessprinc')
+realm.run_kadminl('purgekeys -all keylessprinc')
+out = realm.run_kadminl('getprinc keylessprinc')
+if 'Number of keys: 0' not in out:
+    fail('After purgekeys -all, keys remain')
+
 realm.stop()
 
 # Briefly test dump and load.
