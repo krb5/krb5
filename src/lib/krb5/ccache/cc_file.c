@@ -348,7 +348,7 @@ open_cache_file(krb5_context context, const char *filename,
         return ret;
     }
 
-    fp = fdopen(fd, writable ? "a+b" : "rb");
+    fp = fdopen(fd, writable ? "r+b" : "rb");
     if (fp == NULL) {
         (void)krb5_unlock_file(context, fd);
         (void)close(fd);
