@@ -455,3 +455,9 @@ EXPORTS
 
 ; new in 1.13
 	k5_change_error_message_code			@426 ; PRIVATE GSSAPI
+
+; new in 1.14
+	krb5_prepend_error_message			@427
+	krb5_prepend_error_message2			@428
+	krb5_vprepend_error_message			@429
+	krb5_vprepend_error_message2			@430

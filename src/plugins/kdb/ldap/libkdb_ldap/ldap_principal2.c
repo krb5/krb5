@@ -671,9 +671,10 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                 if (st == KRB5_KDB_NOENTRY || st == KRB5_KDB_CONSTRAINT_VIOLATION) {
                     int ost = st;
                     st = EINVAL;
-                    snprintf(errbuf, sizeof(errbuf), _("'%s' not found: "),
-                             xargs.containerdn);
-                    prepend_err_str(context, errbuf, st, ost);
+                    krb5_prepend_error_message2(context, ost, st,
+                                                _("Container DN '%s' not "
+                                                  "found"),
+                                                xargs.containerdn);
                 }
                 goto cleanup;
             }
@@ -1324,8 +1325,8 @@ krb5_read_tkt_policy(krb5_context context, krb5_ldap_context *ldap_context,
     if (policy != NULL) {
         st = krb5_ldap_read_policy(context, policy, &tktpoldnparam, &omask);
         if (st && st != KRB5_KDB_NOENTRY) {
-            prepend_err_str(context, _("Error reading ticket policy. "), st,
-                            st);
+            krb5_prepend_error_message(context, st,
+                                       _("Error reading ticket policy"));
             goto cleanup;
         }
 

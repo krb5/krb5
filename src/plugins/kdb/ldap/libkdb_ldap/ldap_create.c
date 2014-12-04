@@ -70,15 +70,15 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
 
     status = krb5_ldap_parse_db_params(context, db_args);
     if (status) {
-        prepend_err_str(context, _("Error processing LDAP DB params:"),
-                        status, status);
+        krb5_prepend_error_message(context, status,
+                                   _("Error processing LDAP DB params:"));
         goto cleanup;
     }
 
     status = krb5_ldap_read_server_params(context, conf_section, KRB5_KDB_SRV_TYPE_ADMIN);
     if (status) {
-        prepend_err_str(context, _("Error reading LDAP server params:"),
-                        status, status);
+        krb5_prepend_error_message(context, status,
+                                   _("Error reading LDAP server params:"));
         goto cleanup;
     }
     status = krb5_ldap_db_init(context, ldap_context);

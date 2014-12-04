@@ -254,6 +254,8 @@ Rarely used public interfaces
    krb5_pac_parse.rst
    krb5_pac_sign.rst
    krb5_pac_verify.rst
+   krb5_prepend_error_message.rst
+   krb5_prepend_error_message2.rst
    krb5_principal2salt.rst
    krb5_rd_cred.rst
    krb5_rd_error.rst
@@ -285,6 +287,8 @@ Rarely used public interfaces
    krb5_verify_init_creds.rst
    krb5_verify_init_creds_opt_init.rst
    krb5_verify_init_creds_opt_set_ap_req_nofail.rst
+   krb5_vprepend_error_message.rst
+   krb5_vprepend_error_message2.rst
    krb5_vset_error_message.rst
 
 
