@@ -314,10 +314,11 @@ krb5_ldap_get_password_policy_from_dn(krb5_context context, char *pol_name,
     LDAP_SEARCH(pol_dn, LDAP_SCOPE_BASE, "(objectclass=krbPwdPolicy)", password_policy_attributes);
 
     ent=ldap_first_entry(ld, result);
-    if (ent != NULL) {
-        if ((st = populate_policy(context, ld, ent, pol_name, *policy)) != 0)
-            goto cleanup;
+    if (ent == NULL) {
+        st = KRB5_KDB_NOENTRY;
+        goto cleanup;
     }
+    st = populate_policy(context, ld, ent, pol_name, *policy);
 
 cleanup:
     ldap_msgfree(result);
