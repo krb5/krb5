@@ -228,6 +228,27 @@ if out:
 # Create another ticket policy to be destroyed with the realm.
 kldaputil(['create_policy', 'tktpol2'])
 
+# Try to create a password policy conflicting with a ticket policy.
+out = realm.run_kadminl('addpol tktpol2')
+if 'Already exists while creating policy "tktpol2"' not in out:
+    fail('Expected error not seen in kadmin.local output')
+
+# Try to create a ticket policy conflicting with a password policy.
+realm.run_kadminl('addpol pwpol')
+out = kldaputil(['create_policy', 'pwpol'], expected_code=1)
+if 'Already exists while creating policy object' not in out:
+    fail('Expected error not seen in kdb5_ldap_util output')
+
+# Try to use a password policy as a ticket policy.
+out = realm.run_kadminl('modprinc -x tktpolicy=pwpol princ4')
+if 'Object class violation' not in out:
+    fail('Expected error not seem in kadmin.local output')
+
+# Try to use a ticket policy as a password policy (CVE-2014-5353).
+out = realm.run_kadminl('modprinc -policy tktpol2 princ4')
+if 'WARNING: policy "tktpol2" does not exist' not in out:
+    fail('Expected error not seen in kadmin.local output')
+
 # Do some basic tests with a KDC against the LDAP module, exercising the
 # db_args processing code.
 realm.start_kdc(['-x', 'nconns=3', '-x', 'host=' + ldap_uri,
