@@ -396,6 +396,24 @@ asn1_decode_sequence_of_keys(krb5_data *in, krb5_key_data **out,
     return 0;
 }
 
+/*
+ * Free a NULL-terminated struct berval *array[] and all its contents.
+ * Does not set array to NULL after freeing it.
+ */
+static void
+free_berdata(struct berval **array)
+{
+    int i;
+
+    if (array != NULL) {
+        for (i = 0; array[i] != NULL; i++) {
+            if (array[i]->bv_val != NULL)
+                free(array[i]->bv_val);
+            free(array[i]);
+        }
+        free(array);
+    }
+}
 
 /* Decoding ASN.1 encoded key */
 static struct berval **
@@ -466,12 +484,8 @@ cleanup:
 
     free(key_data);
     if (err != 0) {
-        if (ret != NULL) {
-            for (i = 0; ret[i] != NULL; i++)
-                free (ret[i]);
-            free (ret);
-            ret = NULL;
-        }
+        free_berdata(ret);
+        ret = NULL;
     }
 
     return ret;
@@ -1131,11 +1145,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                                              LDAP_MOD_REPLACE |
                                              LDAP_MOD_BVALUES, ber_tl_data);
             }
-            for (j = 0; ber_tl_data[j] != NULL; j++) {
-                free(ber_tl_data[j]->bv_val);
-                free(ber_tl_data[j]);
-            }
-            free(ber_tl_data);
+            free_berdata(ber_tl_data);
             if (st != 0)
                 goto cleanup;
         }
