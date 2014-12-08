@@ -526,7 +526,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     char                        *filtuser=NULL;
     struct berval               **bersecretkey=NULL;
     LDAPMod                     **mods=NULL;
-    krb5_boolean                create_standalone_prinicipal=FALSE;
+    krb5_boolean                create_standalone=FALSE;
     krb5_boolean                krb_identity_exists=FALSE, establish_links=FALSE;
     char                        *standalone_principal_dn=NULL;
     krb5_tl_data                *tl_data=NULL;
@@ -660,10 +660,10 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
             /*
              * if principal_dn is null then there is code further down to
              * deal with setting standalone_principal_dn.  Also note that
-             * this will set create_standalone_prinicipal true for
+             * this will set create_standalone true for
              * non-mix-in entries which is okay if loading from a dump.
              */
-            create_standalone_prinicipal = TRUE;
+            create_standalone = TRUE;
             standalone_principal_dn = strdup(principal_dn);
             CHECK_NULL(standalone_principal_dn);
         }
@@ -707,9 +707,9 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         CHECK_NULL(standalone_principal_dn);
         /*
          * free subtree when you are done using the subtree
-         * set the boolean create_standalone_prinicipal to TRUE
+         * set the boolean create_standalone to TRUE
          */
-        create_standalone_prinicipal = TRUE;
+        create_standalone = TRUE;
         free(subtree);
         subtree = NULL;
     }
@@ -1055,7 +1055,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         }
         /* An empty list of bervals is only accepted for modify operations,
          * not add operations. */
-        if (bersecretkey[0] != NULL || !create_standalone_prinicipal) {
+        if (bersecretkey[0] != NULL || !create_standalone) {
             st = krb5_add_ber_mem_ldap_mod(&mods, "krbprincipalkey",
                                            LDAP_MOD_REPLACE | LDAP_MOD_BVALUES,
                                            bersecretkey);
@@ -1206,7 +1206,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     if (mods == NULL)
         goto cleanup;
 
-    if (create_standalone_prinicipal == TRUE) {
+    if (create_standalone == TRUE) {
         memset(strval, 0, sizeof(strval));
         strval[0] = "krbprincipal";
         strval[1] = "krbprincipalaux";
