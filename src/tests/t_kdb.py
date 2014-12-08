@@ -324,9 +324,16 @@ out = kldaputil(['list'])
 if out:
     fail('Unexpected kdb5_ldap_util list output after destroy')
 
+if not core_schema:
+    success('Warning: skipping some LDAP tests because core schema not found')
+    sys.exit(0)
+
+if runenv.have_sasl != 'yes':
+    success('Warning: skipping some LDAP tests because SASL support not built')
+    sys.exit(0)
+
 # Test SASL EXTERNAL auth.  Remove the DNs and service password file
-# from the DB module config.  EXTERNAL auth can work even if we didn't
-# build with the SASL header file, because no interaction is required.
+# from the DB module config.
 os.remove(ldap_pwfile)
 dbmod = conf['dbmodules']['ldap']
 dbmod['ldap_kdc_sasl_mech'] = dbmod['ldap_kadmind_sasl_mech'] = 'EXTERNAL'
@@ -339,14 +346,6 @@ realm.addprinc(realm.user_princ, password('user'))
 realm.kinit(realm.user_princ, password('user'))
 realm.stop()
 realm.run([kdb5_ldap_util, 'destroy', '-f'])
-
-if not core_schema:
-    success('Warning: skipping some LDAP tests because core schema not found')
-    sys.exit(0)
-
-if runenv.have_sasl != 'yes':
-    success('Warning: skipping some LDAP tests because SASL support not built')
-    sys.exit(0)
 
 # Test SASL DIGEST-MD5 auth.  We need to set a clear-text password for
 # the admin DN, so create a person entry (requires the core schema).
