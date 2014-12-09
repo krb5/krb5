@@ -113,8 +113,10 @@ int main(argc, argv)
     }
 #endif
 
+    /* principal name must be sent null-terminated. */
     retval = krb5_read_message(context, (krb5_pointer) &sock, &pname_data);
-    if (retval) {
+    if (retval || pname_data.length == 0 ||
+        pname_data.data[pname_data.length - 1] != '\0') {
         com_err ("uu-server", retval, "reading pname");
         return 2;
     }
