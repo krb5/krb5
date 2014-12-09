@@ -59,6 +59,7 @@ recvauth_common(krb5_context context,
     krb5_rcache           rcache = 0;
     krb5_octet            response;
     krb5_data             null_server;
+    krb5_data             d;
     int                   need_error_free = 0;
     int                   local_rcache = 0, local_authcon = 0;
 
@@ -77,7 +78,8 @@ recvauth_common(krb5_context context,
          */
         if ((retval = krb5_read_message(context, fd, &inbuf)))
             return(retval);
-        if (strcmp(inbuf.data, sendauth_version)) {
+        d = make_data((char *)sendauth_version, strlen(sendauth_version) + 1);
+        if (!data_eq(inbuf, d)) {
             problem = KRB5_SENDAUTH_BADAUTHVERS;
             response = 1;
         }
@@ -93,8 +95,9 @@ recvauth_common(krb5_context context,
      */
     if ((retval = krb5_read_message(context, fd, &inbuf)))
         return(retval);
-    if (appl_version && strcmp(inbuf.data, appl_version)) {
-        if (!problem) {
+    if (appl_version != NULL && !problem) {
+        d = make_data(appl_version, strlen(appl_version) + 1);
+        if (!data_eq(inbuf, d)) {
             problem = KRB5_SENDAUTH_BADAPPLVERS;
             response = 2;
         }
