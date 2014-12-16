@@ -117,6 +117,8 @@ static krb5_error_code
 set_errmsg_filename(krb5_context context, krb5_error_code ret,
                     const char *fname)
 {
+    if (!ret)
+        return 0;
     k5_setmsg(context, ret, "%s (filename: %s)", error_message(ret), fname);
     return ret;
 }
@@ -644,12 +646,13 @@ fcc_destroy(krb5_context context, krb5_ccache id)
 #endif /* MSDOS_FILESYSTEM */
 
 cleanup:
+    (void)set_errmsg_filename(context, ret, data->filename);
     k5_cc_mutex_unlock(context, &data->lock);
     free_fccdata(context, data);
     free(id);
 
     krb5_change_cache();
-    return set_errmsg_filename(context, ret, data->filename);
+    return ret;
 }
 
 extern const krb5_cc_ops krb5_fcc_ops;
@@ -893,11 +896,12 @@ krb5int_fcc_new_unique(krb5_context context, char *template, krb5_ccache *id)
     return 0;
 
 err_out:
+    (void)set_errmsg_filename(context, ret, data->filename);
     k5_cc_mutex_unlock(context, &data->lock);
     k5_cc_mutex_destroy(&data->lock);
     free(data->filename);
     free(data);
-    return set_errmsg_filename(context, ret, data->filename);
+    return ret;
 }
 
 /*
