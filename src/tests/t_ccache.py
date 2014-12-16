@@ -36,6 +36,12 @@ output = realm.run([klist], expected_code=1)
 if ' not found' not in output:
     fail('Expected error message not seen in klist output')
 
+# Test kinit with an inaccessible ccache.
+out = realm.run([kinit, '-c', 'testdir/xx/yy', realm.user_princ],
+                input=(password('user') + '\n'), expected_code=1)
+if ' while storing credentials' not in out:
+    fail('Expected error message not seen in kinit output')
+
 realm.addprinc('alice', password('alice'))
 realm.addprinc('bob', password('bob'))
 realm.addprinc('carol', password('carol'))
