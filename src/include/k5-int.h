@@ -968,6 +968,9 @@ struct _krb5_authdata_context {
 
 typedef struct _krb5_authdata_context *krb5_authdata_context;
 
+void
+k5_free_data_ptr_list(krb5_data **list);
+
 void KRB5_CALLCONV
 krb5int_free_data_list(krb5_context context, krb5_data *data);
 
@@ -1494,6 +1497,9 @@ encode_krb5_kkdcp_message(const krb5_kkdcp_message *, krb5_data **);
 krb5_error_code
 encode_krb5_cammac(const krb5_cammac *, krb5_data **);
 
+krb5_error_code
+encode_utf8_strings(krb5_data *const *ut8fstrings, krb5_data **);
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1669,6 +1675,9 @@ decode_krb5_kkdcp_message(const krb5_data *, krb5_kkdcp_message **);
 
 krb5_error_code
 decode_krb5_cammac(const krb5_data *, krb5_cammac **);
+
+krb5_error_code
+decode_utf8_strings(const krb5_data *, krb5_data ***);
 
 struct _krb5_key_data;          /* kdb.h */
 

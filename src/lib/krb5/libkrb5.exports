@@ -47,6 +47,7 @@ decode_krb5_tgs_rep
 decode_krb5_tgs_req
 decode_krb5_ticket
 decode_krb5_typed_data
+decode_utf8_strings
 encode_krb5_ad_kdcissued
 encode_krb5_ad_signedpath_data
 encode_krb5_ad_signedpath
@@ -96,6 +97,7 @@ encode_krb5_tgs_rep
 encode_krb5_tgs_req
 encode_krb5_ticket
 encode_krb5_typed_data
+encode_utf8_strings
 et_asn1_error_table
 et_k524_error_table
 et_kdb5_error_table
@@ -117,6 +119,7 @@ k5_expand_path_tokens
 k5_expand_path_tokens_extra
 k5_free_algorithm_identifier
 k5_free_cammac
+k5_free_data_ptr_list
 k5_free_otp_tokeninfo
 k5_free_kkdcp_message
 k5_free_pa_otp_challenge

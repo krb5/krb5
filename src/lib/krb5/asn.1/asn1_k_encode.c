@@ -92,6 +92,7 @@ DEFCOUNTEDSTRINGTYPE(utf8string, char *, unsigned int,
 DEFCOUNTEDTYPE(utf8_data, krb5_data, data, length, utf8string);
 DEFOPTIONALTYPE(opt_utf8_data, nonempty_data, NULL, utf8_data);
 DEFPTRTYPE(utf8_data_ptr, utf8_data);
+DEFNULLTERMSEQOFTYPE(seqof_utf8_data, utf8_data_ptr);
 
 DEFCOUNTEDSTRINGTYPE(object_identifier, char *, unsigned int,
                      k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
@@ -1793,3 +1794,6 @@ DEFSEQTYPE(cammac, krb5_cammac, cammac_fields);
 
 MAKE_ENCODER(encode_krb5_cammac, cammac);
 MAKE_DECODER(decode_krb5_cammac, cammac);
+
+MAKE_ENCODER(encode_utf8_strings, seqof_utf8_data);
+MAKE_DECODER(decode_utf8_strings, seqof_utf8_data);
