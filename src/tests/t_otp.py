@@ -46,7 +46,7 @@ except ImportError:
 # we'll just include them here.
 radius_attributes = '''
 ATTRIBUTE    User-Name    1    string
-ATTRIBUTE    User-Password   2    string
+ATTRIBUTE    User-Password   2    octets
 ATTRIBUTE    NAS-Identifier  32    string
 '''
 
