@@ -161,6 +161,7 @@ struct as_req_state {
     char *sname, *cname;
     void *pa_context;
     const krb5_fulladdr *from;
+    krb5_data **auth_indicators;
 
     krb5_error_code preauth_err;
 
@@ -430,6 +431,7 @@ egress:
     krb5_free_data(kdc_context, state->inner_body);
     kdc_free_rstate(state->rstate);
     krb5_free_kdc_req(kdc_context, state->request);
+    k5_free_data_ptr_list(state->auth_indicators);
     assert(did_log != 0);
 
     free(state);
@@ -556,6 +558,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->rock.inner_body = state->inner_body;
     state->rock.rstate = state->rstate;
     state->rock.vctx = vctx;
+    state->rock.auth_indicators = &state->auth_indicators;
     if (!state->request->client) {
         state->status = "NULL_CLIENT";
         errcode = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;

@@ -542,6 +542,13 @@ client_keyblock(krb5_context context, krb5_kdcpreauth_rock rock)
     return rock->client_keyblock;
 }
 
+static krb5_error_code
+add_auth_indicator(krb5_context context, krb5_kdcpreauth_rock rock,
+                   const char *indicator)
+{
+    return authind_add(context, indicator, rock->auth_indicators);
+}
+
 static struct krb5_kdcpreauth_callbacks_st callbacks = {
     3,
     max_time_skew,
@@ -554,7 +561,8 @@ static struct krb5_kdcpreauth_callbacks_st callbacks = {
     client_entry,
     event_context,
     have_client_keys,
-    client_keyblock
+    client_keyblock,
+    add_auth_indicator
 };
 
 static krb5_error_code

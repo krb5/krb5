@@ -421,6 +421,7 @@ struct krb5_kdcpreauth_rock_st {
     krb5_keyblock *client_keyblock;
     struct kdc_request_state *rstate;
     verto_ctx *vctx;
+    krb5_data ***auth_indicators;
 };
 
 #define isflagset(flagfield, flag) (flagfield & (flag))

@@ -192,6 +192,12 @@ typedef struct krb5_kdcpreauth_callbacks_st {
     const krb5_keyblock *(*client_keyblock)(krb5_context context,
                                             krb5_kdcpreauth_rock rock);
 
+    /* Assert an authentication indicator in the AS-REP authdata.  Duplicate
+     * indicators will be ignored. */
+    krb5_error_code (*add_auth_indicator)(krb5_context context,
+                                          krb5_kdcpreauth_rock rock,
+                                          const char *indicator);
+
     /* End of version 3 kdcpreauth callbacks. */
 
 } *krb5_kdcpreauth_callbacks;
