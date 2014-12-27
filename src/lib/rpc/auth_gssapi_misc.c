@@ -322,7 +322,6 @@ bool_t auth_gssapi_unwrap_data(
      if (! (*xdr_func)(&temp_xdrs, xdr_ptr)) {
 	  PRINTF(("gssapi_unwrap_data: deserializing arguments failed\n"));
 	  gss_release_buffer(minor, &out_buf);
-	  xdr_free(xdr_func, xdr_ptr);
 	  XDR_DESTROY(&temp_xdrs);
 	  return FALSE;
      }
