@@ -4,7 +4,7 @@
  *
  */
 
-#include <k5-platform.h>
+#include <k5-int.h>
 #include <gssrpc/rpc.h>
 #include <gssapi/gssapi_krb5.h> /* for gss_nt_krb5_name */
 #include <syslog.h>
@@ -301,14 +301,8 @@ check_rpcsec_auth(struct svc_req *rqstp)
      c1 = krb5_princ_component(kctx, princ, 0);
      c2 = krb5_princ_component(kctx, princ, 1);
      realm = krb5_princ_realm(kctx, princ);
-     if (strncmp(handle->params.realm, realm->data, realm->length) == 0
-	 && strncmp("kadmin", c1->data, c1->length) == 0) {
-
-	  if (strncmp("history", c2->data, c2->length) == 0)
-	       goto fail_princ;
-	  else
-	       success = 1;
-     }
+     success = data_eq_string(*realm, handle->params.realm) &&
+	     data_eq_string(*c1, "kadmin") && !data_eq_string(*c2, "history");
 
 fail_princ:
      if (!success) {
