@@ -25,7 +25,6 @@ do {								\
  */
 typedef struct gss_union_ctx_id_struct {
 	struct gss_union_ctx_id_struct *loopback;
-	struct gss_union_ctx_id_struct *interposer;
 	gss_OID			mech_type;
 	gss_ctx_id_t		internal_ctx_id;
 } gss_union_ctx_id_desc, *gss_union_ctx_id_t;
