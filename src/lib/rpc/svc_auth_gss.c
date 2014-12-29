@@ -68,16 +68,6 @@ extern const gss_OID_desc * const gss_mech_spkm3;
 
 extern SVCAUTH svc_auth_none;
 
-/*
- * from mit-krb5-1.2.1 mechglue/mglueP.h:
- * Array of context IDs typed by mechanism OID
- */
-typedef struct gss_union_ctx_id_t {
-  gss_OID     mech_type;
-  gss_ctx_id_t    internal_ctx_id;
-} gss_union_ctx_id_desc, *gss_union_ctx_id_t;
-
-
 static auth_gssapi_log_badauth_func log_badauth = NULL;
 static caddr_t log_badauth_data = NULL;
 static auth_gssapi_log_badverf_func log_badverf = NULL;
@@ -235,16 +225,8 @@ svcauth_gss_accept_sec_context(struct svc_req *rqst,
 		gd->ctx = GSS_C_NO_CONTEXT;
 		goto errout;
 	}
-	/*
-	 * ANDROS: krb5 mechglue returns ctx of size 8 - two pointers,
-	 * one to the mechanism oid, one to the internal_ctx_id
-	 */
-	if ((gr->gr_ctx.value = mem_alloc(sizeof(gss_union_ctx_id_desc))) == NULL) {
-		fprintf(stderr, "svcauth_gss_accept_context: out of memory\n");
-		goto errout;
-	}
-	memcpy(gr->gr_ctx.value, gd->ctx, sizeof(gss_union_ctx_id_desc));
-	gr->gr_ctx.length = sizeof(gss_union_ctx_id_desc);
+	gr->gr_ctx.value = "xxxx";
+	gr->gr_ctx.length = 4;
 
 	/* gr->gr_win = 0x00000005; ANDROS: for debugging linux kernel version...  */
 	gr->gr_win = sizeof(gd->seqmask) * 8;
@@ -516,8 +498,6 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 
 		if (!svcauth_gss_nextverf(rqst, htonl(gr.gr_win))) {
 			gss_release_buffer(&min_stat, &gr.gr_token);
-			mem_free(gr.gr_ctx.value,
-				 sizeof(gss_union_ctx_id_desc));
 			ret_freegc (AUTH_FAILED);
 		}
 		*no_dispatch = TRUE;
@@ -527,7 +507,6 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 
 		gss_release_buffer(&min_stat, &gr.gr_token);
 		gss_release_buffer(&min_stat, &gd->checksum);
-		mem_free(gr.gr_ctx.value, sizeof(gss_union_ctx_id_desc));
 		if (!call_stat)
 			ret_freegc (AUTH_FAILED);
 
