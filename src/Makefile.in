@@ -539,6 +539,11 @@ install-windows::
 	copy windows\leash\htmlhelp\*.chm "$(KRB_INSTALL_DIR)\bin\."
 
 check-prerecurse: runenv.py
+	$(RM) $(SKIPTESTS)
+	touch $(SKIPTESTS)
+
+check-postrecurse:
+	cat $(SKIPTESTS)
 
 # Create a test realm and spawn a shell in an environment pointing to it.
 # If CROSSNUM is set, create that many fully connected test realms and

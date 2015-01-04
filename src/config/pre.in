@@ -226,6 +226,7 @@ KRB5_INCSUBDIRS = \
 # Macros used by the KADM5 (OV-based) unit test system.
 # XXX check which of these are actually used!
 #
+SKIPTESTS	= $(BUILDTOP)/skiptests
 TESTDIR		= $(BUILDTOP)/kadmin/testing
 STESTDIR	= $(top_srcdir)/kadmin/testing
 ENV_SETUP	= $(TESTDIR)/scripts/env-setup.sh
