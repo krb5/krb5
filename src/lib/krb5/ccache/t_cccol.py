@@ -7,6 +7,8 @@ keyctl = which('keyctl')
 out = realm.run([klist, '-c', 'KEYRING:process:abcd'], expected_code=1)
 test_keyring = (keyctl is not None and
                 'Unknown credential cache type' not in out)
+if not test_keyring:
+    skipped('keyring collection tests', 'keyring support not built')
 
 # Run the collection test program against each collection-enabled type.
 realm.run(['./t_cccol', 'DIR:' + os.path.join(realm.testdir, 'cc')])

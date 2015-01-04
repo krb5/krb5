@@ -220,9 +220,11 @@ check-unix-locate:: t_locate_kdc
 		$(RUN_SETUP) $(VALGRIND) ./t_locate_kdc $(LOCREALM); \
 	    else \
 		echo '*** WARNING: skipped t_locate_kdc test: known DNS name not found'; \
+		echo 'Skipped t_locate_kdc test: known DNS name found' >> $(SKIPTESTS); \
 	    fi; \
 	else \
 		echo '*** WARNING: skipped t_locate_kdc test: OFFLINE'; \
+		echo 'Skipped t_locate_kdc test: OFFINE' >> $(SKIPTESTS); \
 	fi
 
 check-unix-trace:: t_trace

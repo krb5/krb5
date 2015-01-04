@@ -37,10 +37,12 @@ import struct
 
 try:
     from pyrad import packet, dictionary
+except ImportError:
+    skip_rest('OTP tests', 'Python pyrad module not found')
+try:
     from multiprocessing import Process, Queue
 except ImportError:
-    success('Warning: skipping OTP tests due to missing pyrad or old Python')
-    exit(0)
+    skip_rest('OTP tests', 'Python version 2.6 required')
 
 # We could use a dictionary file, but since we need so few attributes,
 # we'll just include them here.
@@ -198,9 +200,7 @@ try:
     auth = packet.Packet.CreateAuthenticator()
     packet.Packet(authenticator=auth, secret="").ReplyPacket()
 except AssertionError:
-    success('Warning: skipping UNIX domain socket tests because of pyrad '
-            'assertion bug')
-    exit(0)
+    skip_rest('OTP UNIX domain socket tests', 'pyrad assertion bug detected')
 
 ## Test Unix fail / custom username
 daemon = UnixRadiusDaemon(args=(socket_file, '', 'accept', queue))

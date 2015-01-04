@@ -23,6 +23,7 @@ all-::
 	@echo "+++"
 	@echo "+++ WARNING: Tcl not available.  The kadm5 tests will not be run."
 	@echo "+++"
+	@echo 'Skipped kadm5 tests: Tcl not found' >> $(SKIPTESTS)
 
 all-tcl:: $(CLNTPROG) $(SRVPROG)
 

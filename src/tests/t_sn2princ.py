@@ -62,12 +62,8 @@ testnc('example.com.:123', 'example.com:123', 'R2')
 testnc('Example.COM:xyZ', 'example.com:xyZ', 'R2')
 testnc('example.com.::123', 'example.com.::123', '')
 
-def skip_rest(msg):
-    success('Warning: skipping online krb5_sname_to_principal tests: %s' % msg)
-    sys.exit(0)
-
 if offline:
-    skip_rest('offline mode requested')
+    skip_rest('sn2princ tests', 'offline mode requested')
 
 # For the online tests, we rely on ptr-mismatch.kerberos.org forward
 # and reverse resolving to these names.
@@ -79,10 +75,11 @@ rname = 'kerberos-org.mit.edu'
 try:
     ai = socket.getaddrinfo(oname, None, 0, 0, 0, socket.AI_CANONNAME)
 except socket.gaierror:
-    skip_rest('cannot forward resolve %s' % oname)
+    skip_rest('sn2princ tests', 'cannot forward resolve %s' % oname)
 (family, socktype, proto, canonname, sockaddr) = ai[0]
 if canonname.lower() != fname:
-    skip_rest('%s forward resolves to %s, not %s' % (oname, canonname, fname))
+    skip_rest('sn2princ tests',
+              '%s forward resolves to %s, not %s' % (oname, canonname, fname))
 
 # Test forward-only canonicalization (rdns=false).
 testnr(oname, fname, 'R1')
@@ -93,9 +90,10 @@ testnr(oname + ':xyZ', fname + ':xyZ', 'R1')
 try:
     names = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
 except socket.gaierror:
-    skip_rest('cannot reverse resolve %s' % oname)
+    skip_rest('reverse sn2princ tests', 'cannot reverse resolve %s' % oname)
 if names[0].lower() != rname:
-    skip_rest('%s reverse resolves to %s, not %s' % (oname, names[0], rname))
+    skip_rest('reverse sn2princ tests',
+              '%s reverse resolves to %s, not %s' % (oname, names[0], rname))
 
 # Test default canonicalization (forward and reverse lookup).
 test(oname, rname, 'R3')

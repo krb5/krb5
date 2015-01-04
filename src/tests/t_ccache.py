@@ -29,6 +29,8 @@ keyctl = which('keyctl')
 out = realm.run([klist, '-c', 'KEYRING:process:abcd'], expected_code=1)
 test_keyring = (keyctl is not None and
                 'Unknown credential cache type' not in out)
+if not test_keyring:
+    skipped('keyring ccache tests', 'keyring support not built')
 
 # Test kdestroy and klist of a non-existent ccache.
 realm.run([kdestroy])

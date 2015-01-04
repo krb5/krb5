@@ -3,8 +3,7 @@ from k5test import *
 
 # Skip this test if pkinit wasn't built.
 if not os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so')):
-    success('Warning: not testing pkinit because it is not built')
-    exit(0)
+    skip_rest('PKINIT tests', 'PKINIT module not built')
 
 # Check if soft-pkcs11.so is available.
 try:
@@ -316,6 +315,6 @@ if have_soft_pkcs11:
     realm.klist('user@%s' % realm.realm)
     realm.run([kvno, realm.host_princ])
 else:
-    output('soft-pkcs11.so not found: skipping tests with PKCS11 identities\n')
+    skipped('PKINIT PKCS11 tests', 'soft-pkcs11.so not found')
 
 success('Authenticated PKINIT')

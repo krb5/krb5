@@ -3,20 +3,15 @@ from k5test import *
 
 # Skip this test if we're missing proxy functionality or parts of the proxy.
 if runenv.tls_impl == 'no':
-    success('Warning: not testing proxy support because TLS was not enabled')
-    exit(0)
+    skip_rest('HTTP proxy tests', 'TLS build support not enabled')
 try:
     from paste import httpserver
 except:
-    success('Warning: not testing proxy support because python ' +
-            'paste.httpserver module not found')
-    exit(0)
+    skip_rest('HTTP proxy tests', 'Python paste module not found')
 try:
     import kdcproxy
 except:
-    success('Warning: not testing proxy support because python ' +
-            'kdcproxy module not found')
-    exit(0)
+    skip_rest('HTTP proxy tests', 'Python kdcproxy module not found')
 
 # Construct a krb5.conf fragment configuring the client to use a local proxy
 # server.

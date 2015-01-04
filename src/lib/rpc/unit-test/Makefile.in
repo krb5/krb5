@@ -37,6 +37,7 @@ unit-test-:
 	@echo "+++ WARNING: lib/rpc unit tests not run."
 	@echo "+++ Either tcl, runtest, or Perl is unavailable."
 	@echo "+++"
+	@echo 'Skipped rpc tests: runtest or Perl not found' >> $(SKIPTESTS)
 
 unit-test-ok:: unit-test-body
 

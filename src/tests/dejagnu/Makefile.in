@@ -16,6 +16,7 @@ check-runtest-no::
 	@echo "+++ WARNING: tests/dejagnu tests not run."
 	@echo "+++ runtest is unavailable."
 	@echo "+++"
+	@echo 'Skipped dejagnu tests: runtest not found' >> $(SKIPTESTS)
 
 # Set VALGRIND at run time, that may be changed when running 'make'.
 check-runtest-yes:: t_inetd site.exp

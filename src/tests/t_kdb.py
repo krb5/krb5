@@ -10,13 +10,11 @@ realm.run(['./kdbtest'])
 
 if (not os.path.exists(os.path.join(plugins, 'kdb', 'kldap.so')) and
     not os.path.exists(os.path.join(buildtop, 'lib', 'libkdb_ldap.a'))):
-    success('Warning: not testing LDAP back end because it is not built')
-    exit(0)
+    skip_rest('LDAP KDB tests', 'LDAP KDB module not built')
 
 system_slapd = which('slapd')
 if not system_slapd:
-    success('Warning: not testing LDAP module because slapd not found')
-    exit(0)
+    skip_rest('LDAP KDB tests', 'slapd not found')
 
 ldapdir = os.path.abspath('ldap')
 slapd = os.path.join(ldapdir, 'slapd')
@@ -114,8 +112,7 @@ kldaputil(['destroy', '-f'])
 
 ldapmodify = which('ldapmodify')
 if not ldapmodify:
-    success('Warning: skipping some LDAP tests because ldapmodify not found')
-    exit(0)
+    skip_rest('some LDAP KDB tests', 'ldapmodify not found')
 
 def ldap_modify(ldif, args=[]):
     proc = subprocess.Popen([ldapmodify, '-H', ldap_uri, '-D', admin_dn,
@@ -363,12 +360,10 @@ if out:
     fail('Unexpected kdb5_ldap_util list output after destroy')
 
 if not core_schema:
-    success('Warning: skipping some LDAP tests because core schema not found')
-    sys.exit(0)
+    skip_rest('LDAP SASL tests', 'core schema not found')
 
 if runenv.have_sasl != 'yes':
-    success('Warning: skipping some LDAP tests because SASL support not built')
-    sys.exit(0)
+    skip_rest('LDAP SASL tests', 'SASL support not built')
 
 # Test SASL EXTERNAL auth.  Remove the DNs and service password file
 # from the DB module config.
