@@ -167,7 +167,8 @@ atexit.register(lambda: os.remove(secret_file))
 conf = {'plugins': {'kdcpreauth': {'enable_only': 'otp'}},
         'otp': {'udp': {'server': '127.0.0.1:$port9',
                         'secret': secret_file,
-                        'strip_realm': 'true'},
+                        'strip_realm': 'true',
+                        'indicator': ['indotp1', 'indotp2']},
                 'unix': {'server': socket_file,
                          'strip_realm': 'false'}}}
 
@@ -194,6 +195,10 @@ queue.get()
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', otpconfig('udp')])
 realm.kinit(realm.user_princ, 'accept', flags=flags)
 verify(daemon, queue, True, realm.user_princ.split('@')[0], 'accept')
+realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
+out = realm.run(['./adata', realm.krbtgt_princ])
+if '+97: [indotp1, indotp2]' not in out:
+    fail('auth indicators not seen in OTP ticket')
 
 # Detect upstream pyrad bug
 #   https://github.com/wichert/pyrad/pull/18

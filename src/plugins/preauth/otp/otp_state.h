@@ -43,7 +43,8 @@ typedef enum otp_response {
 
 typedef struct otp_state_st otp_state;
 typedef void
-(*otp_cb)(void *data, krb5_error_code retval, otp_response response);
+(*otp_cb)(void *data, krb5_error_code retval, otp_response response,
+          char *const *indicators);
 
 krb5_error_code
 otp_state_new(krb5_context ctx, otp_state **self);

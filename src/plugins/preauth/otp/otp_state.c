@@ -52,6 +52,7 @@ typedef struct token_type_st {
     int timeout;
     size_t retries;
     krb5_boolean strip_realm;
+    char **indicators;
 } token_type;
 
 typedef struct token_st {
@@ -133,6 +134,7 @@ token_type_free(token_type *type)
     free(type->name);
     free(type->server);
     free(type->secret);
+    profile_free_list(type->indicators);
 }
 
 /* Construct the internal default token type. */
@@ -172,6 +174,8 @@ static krb5_error_code
 token_type_decode(profile_t profile, const char *name, token_type *out)
 {
     char *server = NULL, *name_copy = NULL, *secret = NULL, *pstr = NULL;
+    char **indicators = NULL;
+    const char *keys[4];
     int strip_realm, timeout, retries;
     krb5_error_code retval;
 
@@ -241,18 +245,32 @@ token_type_decode(profile_t profile, const char *name, token_type *out)
     if (retval != 0)
         goto cleanup;
 
+    /* Get the authentication indicators to assert if this token is used. */
+    keys[0] = "otp";
+    keys[1] = name;
+    keys[2] = "indicator";
+    keys[3] = NULL;
+    retval = profile_get_values(profile, keys, &indicators);
+    if (retval == PROF_NO_RELATION)
+        retval = 0;
+    if (retval != 0)
+        goto cleanup;
+
     out->name = name_copy;
     out->server = server;
     out->secret = secret;
     out->timeout = timeout;
     out->retries = retries;
     out->strip_realm = strip_realm;
+    out->indicators = indicators;
     name_copy = server = secret = NULL;
+    indicators = NULL;
 
 cleanup:
     free(name_copy);
     free(server);
     free(secret);
+    profile_free_list(indicators);
     return retval;
 }
 
@@ -545,6 +563,7 @@ callback(krb5_error_code retval, const krad_packet *rqst,
          const krad_packet *resp, void *data)
 {
     request *req = data;
+    char *const *indicators = req->tokens[req->index].type->indicators;
 
     req->index++;
 
@@ -554,7 +573,7 @@ callback(krb5_error_code retval, const krad_packet *rqst,
     /* If we received an accept packet, success! */
     if (krad_packet_get_code(resp) ==
         krad_code_name2num("Access-Accept")) {
-        req->cb(req->data, retval, otp_response_success);
+        req->cb(req->data, retval, otp_response_success, indicators);
         request_free(req);
         return;
     }
@@ -567,7 +586,7 @@ callback(krb5_error_code retval, const krad_packet *rqst,
     request_send(req);
 
 error:
-    req->cb(req->data, retval, otp_response_fail);
+    req->cb(req->data, retval, otp_response_fail, NULL);
     request_free(req);
 }
 
@@ -594,7 +613,7 @@ request_send(request *req)
     return;
 
 error:
-    req->cb(req->data, retval, otp_response_fail);
+    req->cb(req->data, retval, otp_response_fail, NULL);
     request_free(req);
 }
 
@@ -615,7 +634,7 @@ otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
 
     rqst = calloc(1, sizeof(request));
     if (rqst == NULL) {
-        (*cb)(data, ENOMEM, otp_response_fail);
+        (*cb)(data, ENOMEM, otp_response_fail, NULL);
         return;
     }
     rqst->state = state;
@@ -646,6 +665,6 @@ otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
     return;
 
 error:
-    (*cb)(data, retval, otp_response_fail);
+    (*cb)(data, retval, otp_response_fail, NULL);
     request_free(rqst);
 }
