@@ -579,7 +579,7 @@ profile_iterator(void **iter_p, char **ret_name, char **ret_value)
         *ret_name = NULL;
     if (ret_value)
         *ret_value = NULL;
-    if (iter->magic != PROF_MAGIC_ITERATOR)
+    if (iter == NULL || iter->magic != PROF_MAGIC_ITERATOR)
         return PROF_MAGIC_ITERATOR;
     profile = iter->profile;
 
