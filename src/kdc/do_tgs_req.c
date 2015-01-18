@@ -660,6 +660,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
                               s4u_x509_user ?
                               s4u_x509_user->user_id.user : NULL,
                               subject_tkt,
+                              NULL,
                               &enc_tkt_reply);
     if (errcode) {
         krb5_klog_syslog(LOG_INFO, _("TGS_REQ : handle_authdata (%d)"),

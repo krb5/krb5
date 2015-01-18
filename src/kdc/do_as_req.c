@@ -282,6 +282,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                               state->request,
                               NULL, /* for_user_princ */
                               NULL, /* enc_tkt_request */
+                              state->auth_indicators,
                               &state->enc_tkt_reply);
     if (errcode) {
         krb5_klog_syslog(LOG_INFO, _("AS_REQ : handle_authdata (%d)"),

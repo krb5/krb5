@@ -738,6 +738,46 @@ cleanup:
     return ret;
 }
 
+/* Add authentication indicator authdata to enc_tkt_reply, wrapped in a CAMMAC
+ * and an IF-RELEVANT container. */
+static krb5_error_code
+add_auth_indicators(krb5_context context, krb5_data *const *auth_indicators,
+                    krb5_keyblock *server_key, krb5_db_entry *krbtgt,
+                    krb5_enc_tkt_part *enc_tkt_reply)
+{
+    krb5_error_code ret;
+    krb5_data *der_indicators = NULL;
+    krb5_authdata ad, *list[2], **cammac = NULL;
+
+    /* Format the authentication indicators into an authdata list. */
+    ret = encode_utf8_strings(auth_indicators, &der_indicators);
+    if (ret)
+        goto cleanup;
+    ad.ad_type = KRB5_AUTHDATA_AUTH_INDICATOR;
+    ad.length = der_indicators->length;
+    ad.contents = (uint8_t *)der_indicators->data;
+    list[0] = &ad;
+    list[1] = NULL;
+
+    /* Wrap the list in CAMMAC and IF-RELEVANT containers. */
+    ret = cammac_create(context, enc_tkt_reply, server_key, krbtgt, list,
+                        &cammac);
+    if (ret)
+        goto cleanup;
+
+    /* Add the wrapped authdata to the ticket, without copying or filtering. */
+    ret = merge_authdata(context, cammac, &enc_tkt_reply->authorization_data,
+                         FALSE, FALSE);
+    if (ret)
+        goto cleanup;
+    cammac = NULL;              /* merge_authdata() freed */
+
+cleanup:
+    krb5_free_data(context, der_indicators);
+    krb5_free_authdata(context, cammac);
+    return ret;
+}
+
 krb5_error_code
 handle_authdata(krb5_context context, unsigned int flags,
                 krb5_db_entry *client, krb5_db_entry *server,
@@ -746,6 +786,7 @@ handle_authdata(krb5_context context, unsigned int flags,
                 krb5_keyblock *header_key, krb5_data *req_pkt,
                 krb5_kdc_req *req, krb5_const_principal for_user_princ,
                 krb5_enc_tkt_part *enc_tkt_req,
+                krb5_data *const *auth_indicators,
                 krb5_enc_tkt_part *enc_tkt_reply)
 {
     kdcauthdata_handle *h;
@@ -779,6 +820,15 @@ handle_authdata(krb5_context context, unsigned int flags,
         /* Copy authdata from the TGT to the issued ticket. */
         ret = copy_tgt_authdata(context, req, enc_tkt_req->authorization_data,
                                 &enc_tkt_reply->authorization_data);
+        if (ret)
+            return ret;
+    }
+
+    /* Add auth indicators if any were given. */
+    if (auth_indicators != NULL && *auth_indicators != NULL &&
+        !isflagset(server->attributes, KRB5_KDB_NO_AUTH_DATA_REQUIRED)) {
+        ret = add_auth_indicators(context, auth_indicators, server_key,
+                                  local_tgt, enc_tkt_reply);
         if (ret)
             return ret;
     }

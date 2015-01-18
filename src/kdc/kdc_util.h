@@ -249,6 +249,7 @@ handle_authdata (krb5_context context,
                  krb5_kdc_req *request,
                  krb5_const_principal for_user_princ,
                  krb5_enc_tkt_part *enc_tkt_request,
+                 krb5_data *const *auth_indicators,
                  krb5_enc_tkt_part *enc_tkt_reply);
 
 /* replay.c */
