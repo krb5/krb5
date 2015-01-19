@@ -964,6 +964,7 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_ENC_CHALLENGE_CLIENT 54
 #define KRB5_KEYUSAGE_ENC_CHALLENGE_KDC 55
 #define KRB5_KEYUSAGE_AS_REQ 56
+#define KRB5_KEYUSAGE_CAMMAC 64
 /** @} */ /* end of KRB5_KEYUSAGE group */
 
 /**
@@ -1828,10 +1829,12 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_AUTHDATA_INITIAL_VERIFIED_CAS      9
 #define KRB5_AUTHDATA_OSF_DCE   64
 #define KRB5_AUTHDATA_SESAME    65
+#define KRB5_AUTHDATA_CAMMAC    96
 #define KRB5_AUTHDATA_WIN2K_PAC 128
 #define KRB5_AUTHDATA_ETYPE_NEGOTIATION 129     /**< RFC 4537 */
 #define KRB5_AUTHDATA_SIGNTICKET        512     /**< formerly 142 in krb5 1.8 */
 #define KRB5_AUTHDATA_FX_ARMOR 71
+#define KRB5_AUTHDATA_AUTH_INDICATOR 97
 /** @} */ /* end of KRB5_AUTHDATA group */
 
 /* password change constants */
