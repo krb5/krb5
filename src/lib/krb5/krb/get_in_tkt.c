@@ -1397,33 +1397,23 @@ note_req_timestamp(krb5_context context, krb5_init_creds_context ctx,
         AUTH_OFFSET : UNAUTH_OFFSET;
 }
 
-/* Determine whether the client realm in a KRB-ERROR is empty. */
-static krb5_boolean
-is_empty_crealm(krb5_error *err)
-{
-
-    return (err->client == NULL || err->client->realm.length == 0);
-}
-
 /*
- * Determine whether a KRB-ERROR is a referral to another realm.
+ * Determine whether err is a client referral to another realm, given the
+ * previously requested client principal name.
  *
- * RFC 6806 Section 7 requires that KDCs return the referral realm in
- * an error type WRONG_REALM, but Microsoft Windows Server 2003 (and
- * possibly others) return the realm in a PRINCIPAL_UNKNOWN message.
- * Detect this case by looking for a non-empty client.realm field in
- * such responses.
+ * RFC 6806 Section 7 requires that KDCs return the referral realm in an error
+ * type WRONG_REALM, but Microsoft Windows Server 2003 (and possibly others)
+ * return the realm in a PRINCIPAL_UNKNOWN message.
  */
 static krb5_boolean
-is_referral(krb5_init_creds_context ctx)
+is_referral(krb5_context context, krb5_error *err, krb5_principal client)
 {
-    krb5_error *err = ctx->err_reply;
-
-    if (err->error == KDC_ERR_WRONG_REALM)
-        return TRUE;
-    if (err->error != KDC_ERR_C_PRINCIPAL_UNKNOWN)
+    if (err->error != KDC_ERR_WRONG_REALM &&
+        err->error != KDC_ERR_C_PRINCIPAL_UNKNOWN)
         return FALSE;
-    return !is_empty_crealm(err);
+    if (err->client == NULL)
+        return FALSE;
+    return !krb5_realm_compare(context, err->client, client);
 }
 
 static krb5_error_code
@@ -1484,12 +1474,8 @@ init_creds_step_reply(krb5_context context,
                                              ctx->preauth_to_use);
             ctx->preauth_required = TRUE;
 
-        } else if (canon_flag && is_referral(ctx)) {
-            if (is_empty_crealm(ctx->err_reply)) {
-                /* Only WRONG_REALM referral types can reach this. */
-                code = KRB5KDC_ERR_WRONG_REALM;
-                goto cleanup;
-            }
+        } else if (canon_flag && is_referral(context, ctx->err_reply,
+                                             ctx->request->client)) {
             TRACE_INIT_CREDS_REFERRAL(context, &ctx->err_reply->client->realm);
             /* Rewrite request.client with realm from error reply */
             krb5_free_data_contents(context, &ctx->request->client->realm);
