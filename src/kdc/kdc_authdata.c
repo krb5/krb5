@@ -132,6 +132,8 @@ is_kdc_issued_authdatum(krb5_context context, krb5_authdata *authdata,
         case KRB5_AUTHDATA_SIGNTICKET:
         case KRB5_AUTHDATA_KDC_ISSUED:
         case KRB5_AUTHDATA_WIN2K_PAC:
+        case KRB5_AUTHDATA_CAMMAC:
+        case KRB5_AUTHDATA_AUTH_INDICATOR:
             result = desired_type ? (desired_type == ad_types[i]) : TRUE;
             break;
         default:

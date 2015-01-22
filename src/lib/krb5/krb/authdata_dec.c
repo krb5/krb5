@@ -142,6 +142,8 @@ find_authdata_1(krb5_context context, krb5_authdata *const *in_authdat,
         case KRB5_AUTHDATA_SIGNTICKET:
         case KRB5_AUTHDATA_KDC_ISSUED:
         case KRB5_AUTHDATA_WIN2K_PAC:
+        case KRB5_AUTHDATA_CAMMAC:
+        case KRB5_AUTHDATA_AUTH_INDICATOR:
             if (from_ap_req)
                 continue;
         default:
