@@ -33,6 +33,13 @@ realm.stop()
 
 realm = K5Realm(create_host=False)
 
+# Test that WRONG_REALM responses aren't treated as referrals unless
+# they contain a crealm field pointing to a different realm.
+# (Regression test for #8060.)
+out = realm.run([kinit, '-C', 'notfoundprinc'], expected_code=1)
+if 'not found in Kerberos database' not in out:
+    fail('Expected error message not seen in kinit -C output')
+
 # Spot-check KRB5_TRACE output
 tracefile = os.path.join(realm.testdir, 'trace')
 realm.run(['env', 'KRB5_TRACE=' + tracefile, kinit, realm.user_princ],
