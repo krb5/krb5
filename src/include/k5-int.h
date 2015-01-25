@@ -333,6 +333,8 @@ typedef unsigned char   u_char;
                                             * available that is
                                             * required to process the
                                             * request */
+#define KDC_ERR_MORE_PREAUTH_DATA_REQUIRED 91
+
 /* Application errors */
 #define KRB_AP_ERR_BAD_INTEGRITY 31     /* Decrypt integrity check failed */
 #define KRB_AP_ERR_TKT_EXPIRED  32      /* Ticket expired */

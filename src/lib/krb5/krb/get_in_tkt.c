@@ -1398,6 +1398,21 @@ is_referral(krb5_context context, krb5_error *err, krb5_principal client)
     return !krb5_realm_compare(context, err->client, client);
 }
 
+static krb5_boolean
+try_again(krb5_context context, krb5_init_creds_context ctx,
+          krb5_boolean retry)
+{
+    switch (ctx->err_reply->error) {
+    case KDC_ERR_MORE_PREAUTH_DATA_REQUIRED:
+        k5_reset_preauth_types_tried(context);
+        return retry;
+    case KDC_ERR_PREAUTH_REQUIRED:
+        return retry;
+    }
+
+    return FALSE;
+}
+
 static krb5_error_code
 init_creds_step_reply(krb5_context context,
                       krb5_init_creds_context ctx,
@@ -1441,8 +1456,7 @@ init_creds_step_reply(krb5_context context,
             ctx->err_reply = NULL;
             krb5_free_pa_data(context, ctx->err_padata);
             ctx->err_padata = NULL;
-        } else if (ctx->err_reply->error == KDC_ERR_PREAUTH_REQUIRED &&
-                   retry) {
+        } else if (try_again(context, ctx, retry)) {
             /* reset the list of preauth types to try */
             krb5_free_pa_data(context, ctx->preauth_to_use);
             ctx->preauth_to_use = ctx->err_padata;
