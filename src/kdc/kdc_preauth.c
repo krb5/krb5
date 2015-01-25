@@ -1000,6 +1000,8 @@ finish_check_padata(struct padata_state *state, krb5_error_code code)
     case KRB5KDC_ERR_DISCARD:
         /* pkinit alg-agility */
     case KRB5KDC_ERR_NO_ACCEPTABLE_KDF:
+        /* rfc 6113 */
+    case KRB5KDC_ERR_MORE_PREAUTH_DATA_REQUIRED:
         (*oldrespond)(oldarg, code);
         return;
     default:

@@ -21,9 +21,9 @@ A clpreauth module is generally responsible for:
   just returns ``PA_REAL``, indicating that it implements a normal
   preauthentication type.
 
-* Examining the padata information included in the preauth_required
-  error and producing padata values for the next AS request.  This is
-  done with the **process** method.
+* Examining the padata information included in a PREAUTH_REQUIRED or
+  MORE_PREAUTH_DATA_REQUIRED error and producing padata values for the
+  next AS request.  This is done with the **process** method.
 
 * Examining the padata information included in a successful ticket
   reply, possibly verifying the KDC identity and computing a reply

@@ -391,6 +391,7 @@ typedef unsigned char   u_char;
                                                       not find a KDC */
 #define KRB_AP_ERR_IAKERB_KDC_NO_RESPONSE       86 /* The KDC did not respond
                                                       to the IAKERB proxy */
+#define KDC_ERR_MORE_PREAUTH_DATA_REQUIRED      91 /* RFC 6113 */
 #define KRB_ERR_MAX 127 /* err table base max offset for protocol err codes */
 
 /*

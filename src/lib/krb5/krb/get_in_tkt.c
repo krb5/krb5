@@ -1239,7 +1239,8 @@ init_creds_step_request(krb5_context context,
     clear_cc_config_out_data(context, ctx);
 
     if (ctx->err_reply == NULL) {
-        /* either our first attempt, or retrying after PREAUTH_NEEDED */
+        /* Either our first attempt, or retrying after KDC_ERR_PREAUTH_REQUIRED
+         * or KDC_ERR_MORE_PREAUTH_DATA_REQUIRED. */
         code = k5_preauth(context, ctx, ctx->preauth_to_use,
                           ctx->preauth_required, &ctx->request->padata,
                           &ctx->selected_preauth_type);
@@ -1408,6 +1409,7 @@ init_creds_step_reply(krb5_context context,
     krb5_preauthtype kdc_pa_type;
     krb5_boolean retry = FALSE;
     int canon_flag = 0;
+    uint32_t reply_code;
     krb5_keyblock *strengthen_key = NULL;
     krb5_keyblock encrypting_key;
     krb5_boolean fast_avail;
@@ -1431,6 +1433,7 @@ init_creds_step_reply(krb5_context context,
                                           &retry);
         if (code != 0)
             goto cleanup;
+        reply_code = ctx->err_reply->error;
         if (negotiation_requests_restart(context, ctx, ctx->err_padata)) {
             ctx->have_restarted = 1;
             k5_preauth_request_context_fini(context);
@@ -1441,9 +1444,10 @@ init_creds_step_reply(krb5_context context,
             ctx->err_reply = NULL;
             krb5_free_pa_data(context, ctx->err_padata);
             ctx->err_padata = NULL;
-        } else if (ctx->err_reply->error == KDC_ERR_PREAUTH_REQUIRED &&
-                   retry) {
+        } else if ((reply_code == KDC_ERR_MORE_PREAUTH_DATA_REQUIRED ||
+                    reply_code == KDC_ERR_PREAUTH_REQUIRED) && retry) {
             /* reset the list of preauth types to try */
+            k5_reset_preauth_types_tried(context);
             krb5_free_pa_data(context, ctx->preauth_to_use);
             ctx->preauth_to_use = ctx->err_padata;
             ctx->err_padata = NULL;
@@ -1480,8 +1484,7 @@ init_creds_step_reply(krb5_context context,
                 code = 0;
             } else {
                 /* error + no hints = give up */
-                code = (krb5_error_code)ctx->err_reply->error +
-                    ERROR_TABLE_BASE_krb5;
+                code = (krb5_error_code)reply_code + ERROR_TABLE_BASE_krb5;
             }
         }
 
