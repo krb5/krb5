@@ -713,27 +713,13 @@ static const struct atype_info *authenticator_fields[] = {
 DEFSEQTYPE(untagged_authenticator, krb5_authenticator, authenticator_fields);
 DEFAPPTAGGEDTYPE(authenticator, 2, untagged_authenticator);
 
-static int
-is_enc_tkt_start_set(const void *p)
-{
-    const krb5_enc_tkt_part *val = p;
-    return (val->times.starttime != 0);
-}
-static void
-init_enc_tkt_start(void *p)
-{
-    krb5_enc_tkt_part *val = p;
-    val->times.starttime = val->times.authtime;
-}
 DEFFIELD(enc_tkt_0, krb5_enc_tkt_part, flags, 0, krb5_flags);
 DEFFIELD(enc_tkt_1, krb5_enc_tkt_part, session, 1, ptr_encryption_key);
 DEFFIELD(enc_tkt_2, krb5_enc_tkt_part, client, 2, realm_of_principal);
 DEFFIELD(enc_tkt_3, krb5_enc_tkt_part, client, 3, principal);
 DEFFIELD(enc_tkt_4, krb5_enc_tkt_part, transited, 4, transited);
 DEFFIELD(enc_tkt_5, krb5_enc_tkt_part, times.authtime, 5, kerberos_time);
-DEFFIELD(enc_tkt_6_def, krb5_enc_tkt_part, times.starttime, 6, kerberos_time);
-DEFOPTIONALTYPE(enc_tkt_6, is_enc_tkt_start_set, init_enc_tkt_start,
-                enc_tkt_6_def);
+DEFFIELD(enc_tkt_6, krb5_enc_tkt_part, times.starttime, 6, opt_kerberos_time);
 DEFFIELD(enc_tkt_7, krb5_enc_tkt_part, times.endtime, 7, kerberos_time);
 DEFFIELD(enc_tkt_8, krb5_enc_tkt_part, times.renew_till, 8, opt_kerberos_time);
 DEFFIELD(enc_tkt_9, krb5_enc_tkt_part, caddrs, 9,

@@ -210,16 +210,19 @@ check_tgs_svc_policy(krb5_kdc_req *req, krb5_db_entry server, krb5_ticket *tkt,
 }
 
 /*
- * Check some timestamps in the TGS-REQ.
+ * Check header ticket timestamps against the current time.
  */
 static int
-check_tgs_times(krb5_kdc_req *req, krb5_ticket *tkt,
+check_tgs_times(krb5_kdc_req *req, krb5_ticket_times *times,
                 krb5_timestamp kdc_time, const char **status)
 {
+    krb5_timestamp starttime;
+
     /* For validating a postdated ticket, check the start time vs. the
        KDC time. */
     if (req->kdc_options & KDC_OPT_VALIDATE) {
-        if (tkt->enc_part2->times.starttime > kdc_time) {
+        starttime = times->starttime ? times->starttime : times->authtime;
+        if (starttime > kdc_time) {
             *status = "NOT_YET_VALID";
             return KRB_AP_ERR_TKT_NYV;
         }
@@ -228,8 +231,7 @@ check_tgs_times(krb5_kdc_req *req, krb5_ticket *tkt,
      * Check the renew_till time.  The endtime was already
      * been checked in the initial authentication check.
      */
-    if ((req->kdc_options & KDC_OPT_RENEW) &&
-        (tkt->enc_part2->times.renew_till < kdc_time)) {
+    if ((req->kdc_options & KDC_OPT_RENEW) && times->renew_till < kdc_time) {
         *status = "TKT_EXPIRED";
         return KRB_AP_ERR_TKT_EXPIRED;
     }
@@ -329,8 +331,9 @@ validate_tgs_request(kdc_realm_t *kdc_active_realm,
     if (errcode != 0)
         return errcode;
 
-    /* Depends only on request, ticket, and time. */
-    errcode = check_tgs_times(request, ticket, kdc_time, status);
+    /* Depends only on request, ticket times, and current time. */
+    errcode = check_tgs_times(request, &ticket->enc_part2->times, kdc_time,
+                              status);
     if (errcode != 0)
         return errcode;
 

@@ -383,12 +383,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     if (isflagset(server->attributes, KRB5_KDB_OK_AS_DELEGATE))
         setflag(enc_tkt_reply.flags, TKT_FLG_OK_AS_DELEGATE);
 
-    /*
-     * Fix header_ticket's starttime; if it's zero, fill in the
-     * authtime's value.
-     */
-    if (!(header_enc_tkt->times.starttime))
-        header_enc_tkt->times.starttime = authtime;
+    /* Indicate support for encrypted padata (RFC 6806). */
     setflag(enc_tkt_reply.flags, TKT_FLG_ENC_PA_REP);
 
     /* don't use new addresses unless forwarded, see below */
