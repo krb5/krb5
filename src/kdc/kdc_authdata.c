@@ -778,6 +778,48 @@ cleanup:
     return ret;
 }
 
+/* Extract any properly verified authentication indicators from the authdata in
+ * enc_tkt. */
+krb5_error_code
+get_auth_indicators(krb5_context context, krb5_enc_tkt_part *enc_tkt,
+                    krb5_db_entry *local_tgt, krb5_data ***indicators_out)
+{
+    krb5_error_code ret;
+    krb5_authdata **cammacs = NULL, **adp;
+    krb5_cammac *cammac = NULL;
+    krb5_data **indicators = NULL, der_cammac;
+
+    *indicators_out = NULL;
+
+    ret = krb5_find_authdata(context, enc_tkt->authorization_data, NULL,
+                             KRB5_AUTHDATA_CAMMAC, &cammacs);
+    if (ret)
+        goto cleanup;
+
+    for (adp = cammacs; adp != NULL && *adp != NULL; adp++) {
+        der_cammac = make_data((*adp)->contents, (*adp)->length);
+        ret = decode_krb5_cammac(&der_cammac, &cammac);
+        if (ret)
+            goto cleanup;
+        if (cammac_check_kdcver(context, cammac, enc_tkt, local_tgt)) {
+            ret = authind_extract(context, cammac->elements, &indicators);
+            if (ret)
+                goto cleanup;
+        }
+        k5_free_cammac(context, cammac);
+        cammac = NULL;
+    }
+
+    *indicators_out = indicators;
+    indicators = NULL;
+
+cleanup:
+    krb5_free_authdata(context, cammacs);
+    k5_free_cammac(context, cammac);
+    k5_free_data_ptr_list(indicators);
+    return ret;
+}
+
 krb5_error_code
 handle_authdata(krb5_context context, unsigned int flags,
                 krb5_db_entry *client, krb5_db_entry *server,

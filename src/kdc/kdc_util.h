@@ -236,6 +236,10 @@ krb5_error_code
 unload_authdata_plugins(krb5_context context);
 
 krb5_error_code
+get_auth_indicators(krb5_context context, krb5_enc_tkt_part *enc_tkt,
+                    krb5_db_entry *local_tgt, krb5_data ***indicators_out);
+
+krb5_error_code
 handle_authdata (krb5_context context,
                  unsigned int flags,
                  krb5_db_entry *client,

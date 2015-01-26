@@ -138,6 +138,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_pa_data **e_data = NULL;
     kdc_realm_t *kdc_active_realm = NULL;
     krb5_audit_state *au_state = NULL;
+    krb5_data **auth_indicators = NULL;
 
     memset(&reply, 0, sizeof(reply));
     memset(&reply_encpart, 0, sizeof(reply_encpart));
@@ -379,6 +380,17 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     else
         subject_tkt = header_enc_tkt;
     authtime = subject_tkt->times.authtime;
+
+    /* Extract auth indicators from the subject ticket, except for S4U2Proxy
+     * requests (where the client didn't authenticate). */
+    if (s4u_x509_user == NULL) {
+        errcode = get_auth_indicators(kdc_context, subject_tkt, local_tgt,
+                                      &auth_indicators);
+        if (errcode) {
+            status = "GET_AUTH_INDICATORS";
+            goto cleanup;
+        }
+    }
 
     if (is_referral)
         ticket_reply.server = server->princ;
@@ -660,7 +672,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
                               s4u_x509_user ?
                               s4u_x509_user->user_id.user : NULL,
                               subject_tkt,
-                              NULL,
+                              auth_indicators,
                               &enc_tkt_reply);
     if (errcode) {
         krb5_klog_syslog(LOG_INFO, _("TGS_REQ : handle_authdata (%d)"),
@@ -873,6 +885,7 @@ cleanup:
     if (enc_tkt_reply.authorization_data != NULL)
         krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
     krb5_free_pa_data(kdc_context, e_data);
+    k5_free_data_ptr_list(auth_indicators);
 
     return retval;
 }
