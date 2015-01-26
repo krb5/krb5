@@ -36,7 +36,7 @@
  * a count byte  to get enough bits of output.
  */
 static krb5_error_code
-prf_plus(krb5_context context, krb5_keyblock *k, const char *pepper,
+prf_plus(krb5_context context, const krb5_keyblock *k, const char *pepper,
          size_t keybytes, char **out)
 {
     krb5_error_code retval = 0;
@@ -88,8 +88,8 @@ cleanup:
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_fx_cf2_simple(krb5_context context,
-                     krb5_keyblock *k1, const char *pepper1,
-                     krb5_keyblock *k2, const char *pepper2,
+                     const krb5_keyblock *k1, const char *pepper1,
+                     const krb5_keyblock *k2, const char *pepper2,
                      krb5_keyblock **out)
 {
     const struct krb5_keytypes *out_enctype;

@@ -662,8 +662,8 @@ krb5_c_prf_length(krb5_context context, krb5_enctype enctype, size_t *len);
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_fx_cf2_simple(krb5_context context,
-                     krb5_keyblock *k1, const char *pepper1,
-                     krb5_keyblock *k2, const char *pepper2,
+                     const krb5_keyblock *k1, const char *pepper1,
+                     const krb5_keyblock *k2, const char *pepper2,
                      krb5_keyblock **out);
 
 /**
