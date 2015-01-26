@@ -14,13 +14,14 @@ SYNOPSIS
 DESCRIPTION
 -----------
 
-k5srvutil allows an administrator to list or change keys currently in
-a keytab or to add new keys to the keytab.
+k5srvutil allows an administrator to list keys currently in
+a keytab, to obtain new keys for a principal currently in a keytab,
+or to delete non-current keys from a keytab.
 
 *operation* must be one of the following:
 
 **list**
-    Lists the keys in a keytab showing version number and principal
+    Lists the keys in a keytab, showing version number and principal
     name.
 
 **change**
@@ -28,13 +29,14 @@ a keytab or to add new keys to the keytab.
     database to new randomly-generated keys, and updates the keys in
     the keytab to match.  If a key's version number doesn't match the
     version number stored in the Kerberos server's database, then the
-    operation will fail.  Old keys are retained in the keytab so that
-    existing tickets continue to work.  If the **-i** flag is given,
-    k5srvutil will prompt for confirmation before changing each key.
-    If the **-k** option is given, the old and new keys will be
-    displayed.  Ordinarily, keys will be generated with the default
-    encryption types and key salts.  This can be overridden with the
-    **-e** option.
+    operation will fail.  If the **-i** flag is given, k5srvutil will
+    prompt for confirmation before changing each key.  If the **-k**
+    option is given, the old and new keys will be displayed.
+    Ordinarily, keys will be generated with the default encryption
+    types and key salts.  This can be overridden with the **-e**
+    option.  Old keys are retained in the keytab so that existing
+    tickets continue to work, but **delold** should be used after
+    such tickets expire, to prevent attacks against the old keys.
 
 **delold**
     Deletes keys that are not the most recent version from the keytab.

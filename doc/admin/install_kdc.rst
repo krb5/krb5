@@ -330,8 +330,8 @@ Next, extract ``host`` random keys for all participating KDCs and
 store them in each host's default keytab file.  Ideally, you should
 extract each keytab locally on its own KDC.  If this is not feasible,
 you should use an encrypted session to send them across the network.
-To extract a keytab on a slave KDC called ``kerberos-1.mit.edu``, you
-would execute the following command::
+To extract a keytab directly on a slave KDC called
+``kerberos-1.mit.edu``, you would execute the following command::
 
     kadmin: ktadd host/kerberos-1.mit.edu
     Entry for principal host/kerberos-1.mit.edu with kvno 2, encryption
@@ -342,6 +342,19 @@ would execute the following command::
         type des3-cbc-sha1 added to keytab FILE:/etc/krb5.keytab.
     Entry for principal host/kerberos-1.mit.edu with kvno 2, encryption
         type arcfour-hmac added to keytab FILE:/etc/krb5.keytab.
+
+If you are instead extracting a keytab for the slave KDC called
+``kerberos-1.mit.edu`` on the master KDC, you should use a dedicated
+temporary keytab file for that machine's keytab:
+
+    kadmin: ktadd -k /tmp/kerberos-1.keytab host/kerberos-1.mit.edu
+    Entry for principal host/kerberos-1.mit.edu with kvno 2, encryption
+        type aes256-cts-hmac-sha1-96 added to keytab FILE:/etc/krb5.keytab.
+    Entry for principal host/kerberos-1.mit.edu with kvno 2, encryption
+        type aes128-cts-hmac-sha1-96 added to keytab FILE:/etc/krb5.keytab.
+
+The file ``/tmp/kerberos-1.keytab`` can then be installed as
+``/etc/krb5.keytab`` on the host ``kerberos-1.mit.edu``.
 
 
 Configure slave KDCs
