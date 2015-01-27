@@ -560,11 +560,6 @@ already_tried(krb5_context context, krb5_preauthtype pa_type)
     size_t count;
     krb5_preauthtype *newptr;
 
-    /* Allow multi-hop SAM-2 exchanges using repeated preauth-required errors
-     * for historical compatibility. */
-    if (pa_type == KRB5_PADATA_SAM_CHALLENGE_2)
-        return FALSE;
-
     for (count = 0; pctx->tried != NULL && pctx->tried[count] != 0; count++) {
         if (pctx->tried[count] == pa_type)
             return TRUE;
