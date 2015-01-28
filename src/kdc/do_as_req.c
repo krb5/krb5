@@ -198,6 +198,13 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
         goto egress;
     }
 
+    errcode = check_indicators(kdc_context, state->server,
+                               state->auth_indicators);
+    if (errcode) {
+        state->status = "HIGHER_AUTHENTICATION_REQUIRED";
+        goto egress;
+    }
+
     state->ticket_reply.enc_part2 = &state->enc_tkt_reply;
 
     /*

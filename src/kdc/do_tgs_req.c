@@ -392,6 +392,12 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         }
     }
 
+    errcode = check_indicators(kdc_context, server, auth_indicators);
+    if (errcode) {
+        status = "HIGHER_AUTHENTICATION_REQUIRED";
+        goto cleanup;
+    }
+
     if (is_referral)
         ticket_reply.server = server->princ;
     else

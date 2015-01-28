@@ -137,6 +137,7 @@
 
 /* String attribute names recognized by krb5 */
 #define KRB5_KDB_SK_SESSION_ENCTYPES            "session_enctypes"
+#define KRB5_KDB_SK_REQUIRE_AUTH                "require_auth"
 
 #if !defined(_WIN32)
 

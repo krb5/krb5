@@ -95,6 +95,10 @@ validate_tgs_request (kdc_realm_t *, krb5_kdc_req *, krb5_db_entry,
                       krb5_ticket *, krb5_timestamp,
                       const char **, krb5_pa_data ***);
 
+krb5_error_code
+check_indicators(krb5_context context, krb5_db_entry *server,
+                 krb5_data *const *indicators);
+
 int
 fetch_asn1_field (unsigned char *, unsigned int, unsigned int, krb5_data *);
 
