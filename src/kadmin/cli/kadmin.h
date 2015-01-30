@@ -33,7 +33,8 @@
 #define __KADMIN_H__
 
 /* It would be nice if ss produced a header file we could reference */
-extern char *kadmin_startup(int argc, char *argv[]);
+extern void kadmin_startup(int argc, char *argv[], char **request_out,
+                           char ***args_out);
 extern int quit (void);
 extern void kadmin_lock(int argc, char *argv[]);
 extern void kadmin_unlock(int argc, char *argv[]);

@@ -16,6 +16,7 @@ SYNOPSIS
 [[**-c** *cache_name*]\|[**-k** [**-t** *keytab*]]\|\ **-n**]
 [**-w** *password*]
 [**-s** *admin_server*\ [:*port*]]
+[command args...]
 
 **kadmin.local**
 [**-r** *realm*]
@@ -25,6 +26,7 @@ SYNOPSIS
 [**-e** *enc*:*salt* ...]
 [**-m**]
 [**-x** *db_args*]
+[command args...]
 
 .. _kadmin_synopsis_end:
 
@@ -112,8 +114,7 @@ OPTIONS
     via the process list.
 
 **-q** *query*
-    Perform the specified query and then exit.  This can be useful for
-    writing scripts.
+    Perform the specified query and then exit.
 
 **-d** *dbname*
     Specifies the name of the KDC database.  This option does not
@@ -142,6 +143,24 @@ OPTIONS
     for supported options.
 
 .. _kadmin_options_end:
+
+Starting with release 1.14, if any command-line arguments remain after
+the options, they will be treated as a single query to be executed.
+This mode of operation is intended for scripts and behaves differently
+from the interactive mode in several respects:
+
+* Query arguments are split by the shell, not by kadmin.
+* Informational and warning messages are suppressed.  Error messages
+  and query output (e.g. for **get_principal**) will still be
+  displayed.
+* Confirmation prompts are disabled (as if **-force** was given).
+  Password prompts will still be issued as required.
+* The exit status will be non-zero if the query fails.
+
+The **-q** option does not carry these behavior differences; the query
+will be processed as if it was entered interactively.  The **-q**
+option cannot be used in combination with a query in the remaining
+arguments.
 
 .. _dboptions:
 
