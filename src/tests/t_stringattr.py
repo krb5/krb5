@@ -27,26 +27,18 @@ realm = K5Realm(start_kadmind=True, create_host=False, get_creds=False)
 
 realm.prep_kadmin()
 
-output = realm.run_kadmin('getstrs user')
-if '(No string attributes.)' not in output:
+out = realm.run_kadmin(['getstrs', 'user'])
+if '(No string attributes.)' not in out:
     fail('Empty attribute query')
 
-output = realm.run_kadmin('setstr user attr1 value1')
-if 'Attribute set for principal' not in output:
-    fail('Setting attr1')
-output = realm.run_kadmin('setstr user attr2 value2')
-if 'Attribute set for principal' not in output:
-    fail('Setting attr2')
-output = realm.run_kadmin('delstr user attr1')
-if 'Attribute removed from principal' not in output:
-    fail('Deleting attr1')
-output = realm.run_kadmin('setstr user attr3 value3')
-if 'Attribute set for principal' not in output:
-    fail('Setting attr3')
+realm.run_kadmin(['setstr', 'user', 'attr1', 'value1'])
+realm.run_kadmin(['setstr', 'user', 'attr2', 'value2'])
+realm.run_kadmin(['delstr', 'user', 'attr1'])
+realm.run_kadmin(['setstr', 'user', 'attr3', 'value3'])
 
-output = realm.run_kadmin('getstrs user')
-if 'attr2: value2' not in output or 'attr3: value3' not in output or \
-        'attr1:' in output:
+out = realm.run_kadmin(['getstrs', 'user'])
+if ('attr2: value2' not in out or 'attr3: value3' not in out or
+    'attr1:' in out):
     fail('Final attribute query')
 
 success('KDB string attributes')

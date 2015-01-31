@@ -9,7 +9,6 @@ realm, refrealm = cross_realms(2, xtgts=((0,1),),
                                      {'realm': 'REFREALM',
                                       'create_user': False}),
                                create_host=False)
-realm.addprinc('krbtgt/REFREALM')
 refrealm.addprinc('a/x.d')
 
 savefile = os.path.join(realm.testdir, 'ccache.copy')

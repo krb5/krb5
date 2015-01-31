@@ -16,15 +16,15 @@ realm = K5Realm()
 # Create some host-based principals and put most of them into the
 # keytab.  Rename one principal so that the keytab name matches the
 # key but not the client name.
-realm.run_kadminl('addprinc -randkey service1/abraham')
-realm.run_kadminl('addprinc -randkey service1/barack')
-realm.run_kadminl('addprinc -randkey service2/calvin')
-realm.run_kadminl('addprinc -randkey service2/dwight')
-realm.run_kadminl('addprinc -randkey host/-nomatch-')
-realm.run_kadminl('xst service1/abraham')
-realm.run_kadminl('xst service1/barack')
-realm.run_kadminl('xst service2/calvin')
-realm.run_kadminl('renprinc -force service1/abraham service1/andrew')
+realm.run([kadminl, 'addprinc', '-randkey', 'service1/abraham'])
+realm.run([kadminl, 'addprinc', '-randkey', 'service1/barack'])
+realm.run([kadminl, 'addprinc', '-randkey', 'service2/calvin'])
+realm.run([kadminl, 'addprinc', '-randkey', 'service2/dwight'])
+realm.run([kadminl, 'addprinc', '-randkey', 'host/-nomatch-'])
+realm.run([kadminl, 'xst', 'service1/abraham'])
+realm.run([kadminl, 'xst', 'service1/barack'])
+realm.run([kadminl, 'xst', 'service2/calvin'])
+realm.run([kadminl, 'renprinc', 'service1/abraham', 'service1/andrew'])
 
 # Test with no acceptor name, including client/keytab principal
 # mismatch (non-fatal) and missing keytab entry (fatal).
@@ -114,8 +114,8 @@ realm.stop()
 # and the principal for the mismatching hostname in the keytab.
 ignore_conf = {'libdefaults': {'ignore_acceptor_hostname': 'true'}}
 realm = K5Realm(krb5_conf=ignore_conf)
-realm.run_kadminl('addprinc -randkey host/-nomatch-')
-realm.run_kadminl('xst host/-nomatch-')
+realm.run([kadminl, 'addprinc', '-randkey', 'host/-nomatch-'])
+realm.run([kadminl, 'xst', 'host/-nomatch-'])
 output = realm.run(['./t_accname', 'p:host/-nomatch-',
                     'h:host@%s' % socket.gethostname()])
 if 'host/-nomatch-' not in output:

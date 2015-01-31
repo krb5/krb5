@@ -14,13 +14,13 @@ realm.addprinc(princ2)
 realm.run([kvno, realm.host_princ])
 
 # Change key for TGS, keeping old key.
-realm.run_kadminl('cpw -randkey -e aes256-cts:normal -keepold krbtgt/%s@%s' %
-                  (realm.realm, realm.realm))
+realm.run([kadminl, 'cpw', '-randkey', '-e', 'aes256-cts', '-keepold',
+           realm.krbtgt_princ])
 
 # Ensure that kvno still works with an old TGT.
 realm.run([kvno, princ1])
 
-realm.run_kadminl('purgekeys krbtgt/%s@%s' % (realm.realm, realm.realm))
+realm.run([kadminl, 'purgekeys', realm.krbtgt_princ])
 # Make sure an old TGT fails after purging old TGS key.
 realm.run([kvno, princ2], expected_code=1)
 output = realm.run([klist, '-e'])
@@ -47,17 +47,17 @@ if expected not in output:
 # local-realm TGS request.  To set this up, we abuse an edge-case
 # behavior of modprinc -kvno.  First, set up a DES3 krbtgt entry at
 # kvno 1 and cache a krbtgt ticket.
-realm.run_kadminl('cpw -randkey -e des3-cbc-sha1:normal krbtgt/%s' %
-                  realm.realm)
-realm.run_kadminl('modprinc -kvno 1 krbtgt/%s' % realm.realm)
+realm.run([kadminl, 'cpw', '-randkey', '-e', 'des3-cbc-sha1',
+           realm.krbtgt_princ])
+realm.run([kadminl, 'modprinc', '-kvno', '1', realm.krbtgt_princ])
 realm.kinit(realm.user_princ, password('user'))
 # Add an AES krbtgt entry at kvno 2, and then reset it to kvno 1
 # (modprinc -kvno sets the kvno on all entries without deleting any).
-realm.run_kadminl('cpw -randkey -keepold -e aes256-cts:normal krbtgt/%s' %
-                  realm.realm)
-realm.run_kadminl('modprinc -kvno 1 krbtgt/%s' % realm.realm)
-output = realm.run_kadminl('getprinc krbtgt/%s' % realm.realm)
-if 'vno 1, aes256' not in output or 'vno 1, des3' not in output:
+realm.run([kadminl, 'cpw', '-randkey', '-keepold', '-e', 'aes256-cts',
+           realm.krbtgt_princ])
+realm.run([kadminl, 'modprinc', '-kvno', '1', realm.krbtgt_princ])
+out = realm.run([kadminl, 'getprinc', realm.krbtgt_princ])
+if 'vno 1, aes256' not in out or 'vno 1, des3' not in out:
     fail('keyrollover: setup for TGS enctype test failed')
 # Now present the DES3 ticket to the KDC and make sure it's rejected.
 realm.run([kvno, realm.host_princ], expected_code=1)
@@ -71,11 +71,12 @@ realm.stop()
 # r2's KDC with no kvno to identify it, forcing the KDC to try
 # multiple keys.
 r1, r2 = cross_realms(2)
-r1.run_kadminl('modprinc -kvno 0 krbtgt/%s' % r2.realm)
+crosstgt_princ = 'krbtgt/%s@%s' % (r2.realm, r1.realm)
+r1.run([kadminl, 'modprinc', '-kvno', '0', crosstgt_princ])
 r1.run([kvno, r2.host_princ])
-r2.run_kadminl('cpw -pw newcross -keepold krbtgt/%s@%s' % (r2.realm, r1.realm))
-r1.run_kadminl('cpw -pw newcross krbtgt/%s' % r2.realm)
-r1.run_kadminl('modprinc -kvno 0 krbtgt/%s' % r2.realm)
+r2.run([kadminl, 'cpw', '-pw', 'newcross', '-keepold', crosstgt_princ])
+r1.run([kadminl, 'cpw', '-pw', 'newcross', crosstgt_princ])
+r1.run([kadminl, 'modprinc', '-kvno', '0', crosstgt_princ])
 r1.run([kvno, r2.user_princ])
 
 success('keyrollover')

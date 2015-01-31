@@ -8,12 +8,12 @@ realm = K5Realm(create_user=False)
 # matched with and not to subsequent keys.  e1 and e2 are enctypes,
 # and salt is a non-default salt type.
 def test_salt(realm, e1, salt, e2):
-    query = 'ank -e %s:%s,%s -pw password user' % (e1, salt, e2)
-    realm.run_kadminl(query)
-    out = realm.run_kadminl('getprinc user')
+    keysalts = e1 + ':' + salt + ',' + e2
+    realm.run([kadminl, 'ank', '-e', keysalts, '-pw', 'password', 'user'])
+    out = realm.run([kadminl, 'getprinc', 'user'])
     if len(re.findall(':' + salt, out)) != 1:
         fail(salt + ' present in second enctype or not present')
-    realm.run_kadminl('delprinc -force user')
+    realm.run([kadminl, 'delprinc', 'user'])
 
 # Enctype/salt pairs chosen with non-default salt types.
 # The enctypes are mostly arbitrary, though afs3 must only be used with des.
@@ -36,16 +36,15 @@ for e1, string in salts:
         test_salt(realm, e1, string, e2)
 
 def test_dup(realm, ks):
-    query = 'ank -e ' + ks + ' -pw password ks_princ'
-    realm.run_kadminl(query)
-    out = realm.run_kadminl('getprinc ks_princ')
+    realm.run([kadminl, 'ank', '-e', ks, '-pw', 'password', 'ks_princ'])
+    out = realm.run([kadminl, 'getprinc', 'ks_princ'])
     lines = out.split('\n')
     keys = [l for l in lines if 'Key: ' in l]
     uniq = set(keys)
     # 'Key:' matches 'MKey:' as well so len(keys) has one extra
     if (len(uniq) != len(keys)) or len(keys) > len(ks.split(',')):
         fail('Duplicate keysalt detection failed for keysalt ' + ks)
-    realm.run_kadminl('delprinc -force ks_princ')
+    realm.run([kadminl, 'delprinc', 'ks_princ'])
 
 # All in-tree callers request duplicate suppression from
 # krb5_string_to_keysalts(); we should check that it works, respects
@@ -63,10 +62,11 @@ for ks in dup_kstypes:
 # fails.
 def test_reject_afs3(realm, etype):
     query = 'ank -e ' + etype + ':afs3 -pw password princ1'
-    out = realm.run_kadminl(query)
+    out = realm.run([kadminl, 'ank', '-e', etype + ':afs3', '-pw', 'password',
+                     'princ1'], expected_code=1)
     if 'Invalid key generation parameters from KDC' not in out:
         fail('Allowed afs3 salt for ' + etype)
-    out = realm.run_kadminl('getprinc princ1')
+    out = realm.run([kadminl, 'getprinc', 'princ1'], expected_code=1)
     if 'Principal does not exist' not in out:
         fail('Created principal with afs3 salt and enctype ' + etype)
 

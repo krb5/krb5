@@ -66,7 +66,7 @@ test(princ3, matchprinc,
 
 # Service ticket is out of date.
 os.remove(realm.keytab)
-realm.run_kadminl('ktadd %s' % princ1)
+realm.run([kadminl, 'ktadd', princ1])
 test(princ1, None,
      '44 Request ticket server host/1@KRBTEST.COM kvno 1 not found in keytab; '
      'ticket is likely out of date')
@@ -79,7 +79,7 @@ test(princ2, princ1,
      'ticket server host/2@KRBTEST.COM)')
 
 # Keytab is out of date.
-realm.run_kadminl('cpw -randkey %s' % princ1)
+realm.run([kadminl, 'cpw', '-randkey', princ1])
 realm.kinit(realm.user_princ, password('user'))
 test(princ1, None,
      '44 Request ticket server host/1@KRBTEST.COM kvno 3 not found in keytab; '
@@ -105,8 +105,8 @@ test(princ1, None,
 test(princ1, princ1, '45 No key table entry found for host/1@KRBTEST.COM')
 
 # Ticket server, kvno, and enctype matched, but key does not work.
-realm.run_kadminl('cpw -randkey %s' % princ1)
-realm.run_kadminl('modprinc -kvno 3 %s' % princ1)
+realm.run([kadminl, 'cpw', '-randkey', princ1])
+realm.run([kadminl, 'modprinc', '-kvno', '3', princ1])
 os.remove(realm.keytab)
 realm.extract_keytab(princ1, realm.keytab)
 test(princ1, None,
@@ -118,7 +118,7 @@ test(princ1, princ1,
 
 # Test that aliases work.  The ticket server (princ4) isn't present in
 # keytab, but there is a usable princ1 entry with the same key.
-realm.run_kadminl('renprinc -force %s %s' % (princ1, princ4))
+realm.run([kadminl, 'renprinc', princ1, princ4])
 test(princ4, None, '0 success')
 test(princ4, princ1, '0 success')
 test(princ4, matchprinc, '0 success')

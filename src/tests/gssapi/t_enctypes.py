@@ -99,7 +99,7 @@ test('init des3', 'des3', None,
 
 # Force the ticket session key to be rc4, so we can test some subkey
 # upgrade cases.  The ticket encryption key remains aes256.
-realm.run_kadminl('setstr %s session_enctypes rc4' % realm.host_princ)
+realm.run([kadminl, 'setstr', realm.host_princ, 'session_enctypes', 'rc4'])
 
 # With no arguments, the initiator should send an upgrade list of
 # [aes256 aes128 des3] and the acceptor should upgrade to an aes256

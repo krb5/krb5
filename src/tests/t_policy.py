@@ -5,82 +5,74 @@ import re
 realm = K5Realm(create_host=False)
 
 # Test password quality enforcement.
-realm.run_kadminl('addpol -minlength 6 -minclasses 2 pwpol')
-realm.run_kadminl('addprinc -randkey -policy pwpol pwuser')
-out = realm.run_kadminl('cpw -pw sh0rt pwuser')
+realm.run([kadminl, 'addpol', '-minlength', '6', '-minclasses', '2', 'pwpol'])
+realm.run([kadminl, 'addprinc', '-randkey', '-policy', 'pwpol', 'pwuser'])
+out = realm.run([kadminl, 'cpw', '-pw', 'sh0rt', 'pwuser'], expected_code=1)
 if 'Password is too short' not in out:
     fail('short password')
-out = realm.run_kadminl('cpw -pw longenough pwuser')
+out = realm.run([kadminl, 'cpw', '-pw', 'longenough', 'pwuser'],
+                expected_code=1)
 if 'Password does not contain enough character classes' not in out:
     fail('insufficient character classes')
-out = realm.run_kadminl('cpw -pw l0ngenough pwuser')
-if ' changed.' not in out:
-    fail('acceptable password')
+realm.run([kadminl, 'cpw', '-pw', 'l0ngenough', 'pwuser'])
 
 # Test some password history enforcement.  Even with no history value,
 # the current password should be denied.
-out = realm.run_kadminl('cpw -pw l0ngenough pwuser')
+out = realm.run([kadminl, 'cpw', '-pw', 'l0ngenough', 'pwuser'],
+                expected_code=1)
 if 'Cannot reuse password' not in out:
     fail('reuse of current password')
-realm.run_kadminl('modpol -history 2 pwpol')
-realm.run_kadminl('cpw -pw an0therpw pwuser')
-out = realm.run_kadminl('cpw -pw l0ngenough pwuser')
+realm.run([kadminl, 'modpol', '-history', '2', 'pwpol'])
+realm.run([kadminl, 'cpw', '-pw', 'an0therpw', 'pwuser'])
+out = realm.run([kadminl, 'cpw', '-pw', 'l0ngenough', 'pwuser'],
+                expected_code=1)
 if 'Cannot reuse password' not in out:
     fail('reuse of old password')
-realm.run_kadminl('cpw -pw 3rdpassword pwuser')
-out = realm.run_kadminl('cpw -pw l0ngenough pwuser')
-if ' changed.' not in out:
-    fail('reuse of third-oldest password with history 2')
+realm.run([kadminl, 'cpw', '-pw', '3rdpassword', 'pwuser'])
+realm.run([kadminl, 'cpw', '-pw', 'l0ngenough', 'pwuser'])
 
 # Test references to nonexistent policies.
-out = realm.run_kadminl('addprinc -randkey -policy newpol newuser')
-if ('WARNING: policy "newpol" does not exist' not in out or
-    ' created.' not in out):
-    fail('creation with nonexistent policy')
-out = realm.run_kadminl('getprinc newuser')
+realm.run([kadminl, 'addprinc', '-randkey', '-policy', 'newpol', 'newuser'])
+out = realm.run([kadminl, 'getprinc', 'newuser'])
 if 'Policy: newpol [does not exist]\n' not in out:
     fail('getprinc output for principal referencing nonexistent policy')
-out = realm.run_kadminl('modprinc -policy newpol pwuser')
-if ('WARNING: policy "newpol" does not exist' not in out or
-    ' modified.' not in out):
-    fail('modification to nonexistent policy')
+realm.run([kadminl, 'modprinc', '-policy', 'newpol', 'pwuser'])
 # pwuser should allow reuse of the current password since newpol doesn't exist.
-out = realm.run_kadminl('cpw -pw 3rdpassword pwuser')
-if ' changed.' not in out:
-    fail('reuse of current password with nonexistent policy')
+realm.run([kadminl, 'cpw', '-pw', '3rdpassword', 'pwuser'])
 
 # Create newpol and verify that it is enforced.
-realm.run_kadminl('addpol -minlength 3 newpol')
-out = realm.run_kadminl('getprinc pwuser')
+realm.run([kadminl, 'addpol', '-minlength', '3', 'newpol'])
+out = realm.run([kadminl, 'getprinc', 'pwuser'])
 if 'Policy: newpol\n' not in out:
     fail('getprinc after creating policy (pwuser)')
-out = realm.run_kadminl('cpw -pw aa pwuser')
+out = realm.run([kadminl, 'cpw', '-pw', 'aa', 'pwuser'], expected_code=1)
 if 'Password is too short' not in out:
     fail('short password after creating policy (pwuser)')
-out = realm.run_kadminl('cpw -pw 3rdpassword pwuser')
+out = realm.run([kadminl, 'cpw', '-pw', '3rdpassword', 'pwuser'],
+                expected_code=1)
 if 'Cannot reuse password' not in out:
     fail('reuse of current password after creating policy')
 
-out = realm.run_kadminl('getprinc newuser')
+out = realm.run([kadminl, 'getprinc', 'newuser'])
 if 'Policy: newpol\n' not in out:
     fail('getprinc after creating policy (newuser)')
-out = realm.run_kadminl('cpw -pw aa newuser')
+out = realm.run([kadminl, 'cpw', '-pw', 'aa', 'newuser'], expected_code=1)
 if 'Password is too short' not in out:
     fail('short password after creating policy (newuser)')
 
 # Delete the policy and verify that it is no longer enforced.
-realm.run_kadminl('delpol -force newpol')
-out = realm.run_kadminl('getpol newpol')
+realm.run([kadminl, 'delpol', 'newpol'])
+out = realm.run([kadminl, 'getpol', 'newpol'], expected_code=1)
 if 'Policy does not exist' not in out:
     fail('deletion of referenced policy')
-out = realm.run_kadminl('cpw -pw aa pwuser')
-if ' changed.' not in out:
-    fail('short password after deleting policy')
+realm.run([kadminl, 'cpw', '-pw', 'aa', 'pwuser'])
 
 # Test basic password lockout support.
 
-realm.run_kadminl('addpol -maxfailure 2 -failurecountinterval 5m lockout')
-realm.run_kadminl('modprinc +requires_preauth -policy lockout user')
+realm.run([kadminl, 'addpol', '-maxfailure', '2', '-failurecountinterval',
+           '5m', 'lockout'])
+realm.run([kadminl, 'modprinc', '+requires_preauth', '-policy', 'lockout',
+           'user'])
 
 # kinit twice with the wrong password.
 output = realm.run([kinit, realm.user_princ], input='wrong\n', expected_code=1)
@@ -97,11 +89,11 @@ if 'Clients credentials have been revoked while getting initial credentials' \
     fail('Expected lockout error message not seen in kinit output')
 
 # Check that modprinc -unlock allows a further attempt.
-output = realm.run_kadminl('modprinc -unlock user')
+realm.run([kadminl, 'modprinc', '-unlock', 'user'])
 realm.kinit(realm.user_princ, password('user'))
 
 # Make sure a nonexistent policy reference doesn't prevent authentication.
-realm.run_kadminl('delpol -force lockout')
+realm.run([kadminl, 'delpol', 'lockout'])
 realm.kinit(realm.user_princ, password('user'))
 
 # Regression test for issue #7099: databases created prior to krb5 1.3 have
@@ -112,14 +104,15 @@ realm.stop()
 realm = K5Realm(start_kdc=False)
 # Create a history principal with two keys.
 realm.run(['./hist', 'make'])
-realm.run_kadminl('addpol -history 2 pol')
-realm.run_kadminl('modprinc -policy pol user')
-realm.run_kadminl('cpw -pw pw2 user')
+realm.run([kadminl, 'addpol', '-history', '2', 'pol'])
+realm.run([kadminl, 'modprinc', '-policy', 'pol', 'user'])
+realm.run([kadminl, 'cpw', '-pw', 'pw2', 'user'])
 # Swap the keys, simulating older kadmin having chosen the second entry.
 realm.run(['./hist', 'swap'])
 # Make sure we can read the history entry.
-output = realm.run_kadminl('cpw -pw %s user' % password('user'))
-if 'Cannot reuse password' not in output:
+out = realm.run([kadminl, 'cpw', '-pw', password('user'), 'user'],
+                expected_code=1)
+if 'Cannot reuse password' not in out:
     fail('Expected error not seen in output')
 
 # Test key/salt constraints.
@@ -129,84 +122,53 @@ krb5_conf1 = {'libdefaults': {'supported_enctypes': 'aes256-cts'}}
 realm = K5Realm(krb5_conf=krb5_conf1, create_host=False, get_creds=False)
 
 # Add policy.
-realm.run_kadminl('addpol -allowedkeysalts aes256-cts:normal ak')
-realm.run_kadminl('addprinc -randkey -e aes256-cts:normal server')
+realm.run([kadminl, 'addpol', '-allowedkeysalts', 'aes256-cts', 'ak'])
+realm.run([kadminl, 'addprinc', '-randkey', '-e', 'aes256-cts', 'server'])
 
 # Test with one-enctype allowed_keysalts.
-realm.run_kadminl('modprinc -policy ak server')
-realm.run_kadminl('getprinc server')
-output = realm.run_kadminl('cpw -randkey -e aes128-cts:normal server')
-if not 'Invalid key/salt tuples' in output:
+realm.run([kadminl, 'modprinc', '-policy', 'ak', 'server'])
+out = realm.run([kadminl, 'cpw', '-randkey', '-e', 'aes128-cts', 'server'],
+                expected_code=1)
+if not 'Invalid key/salt tuples' in out:
     fail('allowed_keysalts policy not applied properly')
-realm.run_kadminl('getprinc server')
-output = realm.run_kadminl('cpw -randkey -e aes256-cts:normal server')
-if 'Invalid key/salt tuples' in output:
-    fail('allowed_keysalts policy not applied properly')
-realm.run_kadminl('getprinc server')
+realm.run([kadminl, 'cpw', '-randkey', '-e', 'aes256-cts', 'server'])
 
 # Now test a multi-enctype allowed_keysalts.  Test that subsets are allowed,
 # the the complete set is allowed, that order doesn't matter, and that
 # enctypes outside the set are not allowed.
 
 # Test modpol.
-realm.run_kadminl('modpol -allowedkeysalts '
-                  'aes256-cts:normal,rc4-hmac:normal ak')
-output = realm.run_kadminl('getpol ak')
-if not 'Allowed key/salt types: aes256-cts:normal,rc4-hmac:normal' in output:
+realm.run([kadminl, 'modpol', '-allowedkeysalts', 'aes256-cts,rc4-hmac', 'ak'])
+out = realm.run([kadminl, 'getpol', 'ak'])
+if not 'Allowed key/salt types: aes256-cts,rc4-hmac' in out:
     fail('getpol does not implement allowedkeysalts?')
 
-# Test one subset.
-output = realm.run_kadminl('cpw -randkey -e rc4-hmac:normal server')
-if 'Invalid key/salt tuples' in output:
-    fail('allowed_keysalts policy not applied properly')
-realm.run_kadminl('getprinc server')
-
-# Test another subset.
-output = realm.run_kadminl('cpw -randkey -e aes256-cts:normal server')
-if 'Invalid key/salt tuples' in output:
-    fail('allowed_keysalts policy not applied properly')
-realm.run_kadminl('getprinc server')
-output = realm.run_kadminl('cpw -randkey -e '
-                           'rc4-hmac:normal,aes256-cts:normal server')
-if 'Invalid key/salt tuples' in output:
-    fail('allowed_keysalts policy not applied properly')
-realm.run_kadminl('getprinc server')
-
-# Test full set.
-output = realm.run_kadminl('cpw -randkey -e aes256-cts:normal,rc4-hmac:normal '
-                           'server')
-if 'Invalid key/salt tuples' in output:
-    fail('allowed_keysalts policy not applied properly')
-realm.run_kadminl('getprinc server')
-output = realm.run_kadminl('cpw -randkey -e rc4-hmac:normal,aes128-cts:normal '
-                           'server')
-if not 'Invalid key/salt tuples' in output:
-    fail('allowed_keysalts policy not applied properly')
-realm.run_kadminl('getprinc server')
-output = realm.run_kadminl('getprinc -terse server')
-if not '2\t1\t6\t18\t0\t1\t6\t23\t0' in output:
-    fail('allowed_keysalts policy did not preserve order')
-
-# Test full set in opposite order.
-output = realm.run_kadminl('cpw -randkey -e rc4-hmac:normal,aes256-cts:normal,'
-                           'aes128-cts:normal server')
-if not 'Invalid key/salt tuples' in output:
-    fail('allowed_keysalts policy not applied properly')
+# Test subsets and full set.
+realm.run([kadminl, 'cpw', '-randkey', '-e', 'rc4-hmac', 'server'])
+realm.run([kadminl, 'cpw', '-randkey', '-e', 'aes256-cts', 'server'])
+realm.run([kadminl, 'cpw', '-randkey', '-e', 'aes256-cts,rc4-hmac', 'server'])
+realm.run([kadminl, 'cpw', '-randkey', '-e', 'rc4-hmac,aes256-cts', 'server'])
 
 # Check that the order we got is the one from the policy.
-realm.run_kadminl('getprinc server')
-output = realm.run_kadminl('getprinc -terse server')
-if not '2\t1\t6\t18\t0\t1\t6\t23\t0' in output:
+out = realm.run([kadminl, 'getprinc', '-terse', 'server'])
+if not '2\t1\t6\t18\t0\t1\t6\t23\t0' in out:
     fail('allowed_keysalts policy did not preserve order')
 
+# Test partially intersecting sets.
+out = realm.run([kadminl, 'cpw', '-randkey', '-e', 'rc4-hmac,aes128-cts',
+                 'server'], expected_code=1)
+if not 'Invalid key/salt tuples' in out:
+    fail('allowed_keysalts policy not applied properly')
+out = realm.run([kadminl, 'cpw', '-randkey', '-e',
+                 'rc4-hmac,aes256-cts,aes128-cts', 'server'], expected_code=1)
+if not 'Invalid key/salt tuples' in out:
+    fail('allowed_keysalts policy not applied properly')
+
 # Test reset of allowedkeysalts.
-realm.run_kadminl('modpol -allowedkeysalts - ak')
-output = realm.run_kadminl('getpol ak')
-if 'Allowed key/salt types' in output:
+realm.run([kadminl, 'modpol', '-allowedkeysalts', '-', 'ak'])
+out = realm.run([kadminl, 'getpol', 'ak'])
+if 'Allowed key/salt types' in out:
     fail('failed to clear allowedkeysalts')
-output = realm.run_kadminl('cpw -randkey -e aes128-cts:normal server')
-if 'Invalid key/salt tuples' in output:
-    fail('key change rejected that should have been permitted')
-realm.run_kadminl('getprinc server')
+realm.run([kadminl, 'cpw', '-randkey', '-e', 'aes128-cts', 'server'])
 
 success('Policy tests')

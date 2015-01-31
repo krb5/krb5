@@ -16,7 +16,7 @@ realm.prep_kadmin()
 stash_file = os.path.join(realm.testdir, 'stash')
 
 # Count the number of principals in the realm.
-nprincs = len(realm.run_kadminl('listprincs').splitlines()) - 1
+nprincs = len(realm.run([kadminl, 'listprincs']).splitlines())
 
 # List the currently active mkeys and compare against expected
 # results.  Each argument must be a sequence of four elements: an
@@ -51,7 +51,7 @@ def check_mkey_list(*expected):
 # key version and an expected enctype.
 keyline_re = re.compile(r'^Key: vno (\d+), (\S+)$')
 def check_master_dbent(expected_mkvno, *expected_keys):
-    outlines = realm.run_kadminl('getprinc K/M').splitlines()
+    outlines = realm.run([kadminl, 'getprinc', 'K/M']).splitlines()
     mkeyline = [l for l in outlines if l.startswith('MKey: vno ')]
     if len(mkeyline) != 1 or mkeyline[0] != ('MKey: vno %d' % expected_mkvno):
         fail('Unexpected mkvno in K/M DB entry')
@@ -92,7 +92,7 @@ def check_stash(*expected):
 
 # Verify that the user principal has the expected mkvno.
 def check_mkvno(princ, expected_mkvno):
-    out = realm.run_kadminl('getprinc ' + princ)
+    out = realm.run([kadminl, 'getprinc', princ])
     if ('MKey: vno %d\n' % expected_mkvno) not in out:
         fail('Unexpected mkvno in user DB entry')
 
@@ -101,10 +101,11 @@ def check_mkvno(princ, expected_mkvno):
 # the mkvno of the principal against expected_mkvno and verify that
 # the running KDC can access the new key.
 def change_password_check_mkvno(local, princ, password, expected_mkvno):
-    cmd = 'cpw -pw %s %s' % (password, princ)
-    out = local and realm.run_kadminl(cmd) or realm.run_kadmin(cmd)
-    if 'changed.' not in out:
-        fail('Failed to change password')
+    cmd = ['cpw', '-pw', password, princ]
+    if local:
+        realm.run([kadminl] + cmd)
+    else:
+        realm.run_kadmin(cmd)
     check_mkvno(princ, expected_mkvno)
     realm.kinit(princ, password)
 
@@ -252,7 +253,7 @@ check_mkey_list((2, defetype, True, True))
 check_master_dbent(2, (2, defetype))
 os.rename(stash_file, stash_file + '.save')
 os.rename(stash_file + '.old', stash_file)
-out = realm.run([kadmin_local, '-q', 'getprinc user'], expected_code=1)
+out = realm.run([kadminl, 'getprinc', 'user'], expected_code=1)
 if 'Unable to decrypt latest master key' not in out:
     fail('Unexpected error from kadmin.local with old stash file')
 os.rename(stash_file + '.save', stash_file)
@@ -283,13 +284,13 @@ check_mkvno(realm.user_princ, 3)
 # and #7995 (-keepold does not re-encrypt old keys).
 add_mkey(['-s'])
 realm.run([kdb5_util, 'use_mkey', '4', 'now-1day'])
-realm.run_kadminl('cpw -randkey -keepold %s' % realm.user_princ)
+realm.run([kadminl, 'cpw', '-randkey', '-keepold', realm.user_princ])
 # With #7994 unfixed, mkvno of user will still be 3.
 check_mkvno(realm.user_princ, 4)
 # With #7995 unfixed, old keys are still encrypted with mkvno 3.
 update_princ_encryption(False, 4, nprincs - 2, 1)
 realm.run([kdb5_util, 'purge_mkeys', '-f'])
-out = realm.run_kadminl('xst -norandkey %s' % realm.user_princ)
+out = realm.run([kadminl, 'xst', '-norandkey', realm.user_princ])
 if 'Decrypt integrity check failed' in out or 'added to keytab' not in out:
     fail('Preserved old key data not updated to new master key')
 
@@ -310,7 +311,7 @@ f.write(struct.pack('=HL24s', 16, 24,
                     '\x94\xAD\x6D\x86\xB5\x16\x37\xEC\x7C\x8A\xBC\x86'))
 f.close()
 realm.run([kdb5_util, 'load', dumpfile])
-nprincs = len(realm.run_kadminl('listprincs').splitlines()) - 1
+nprincs = len(realm.run([kadminl, 'listprincs']).splitlines())
 check_mkvno('K/M', 1)
 check_mkey_list((1, des3, True, True))
 
@@ -322,7 +323,7 @@ check_mkey_list((1, des3, True, True))
 add_mkey([])
 check_mkey_list((2, defetype, False, False), (1, des3, True, True))
 update_princ_encryption(False, 1, 0, nprincs - 1)
-realm.run_kadminl('addprinc -randkey ' + realm.user_princ)
+realm.run([kadminl, 'addprinc', '-randkey', realm.user_princ])
 check_mkvno(realm.user_princ, 1)
 realm.run([kdb5_util, 'use_mkey', '2', 'now-1day'])
 check_mkey_list((2, defetype, True, True), (1, des3, True, False))

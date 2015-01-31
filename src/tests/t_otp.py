@@ -149,13 +149,13 @@ def verify(daemon, queue, reply, usernm, passwd):
     assert data['pass'] == [passwd]
     daemon.join()
 
-def setstr(princ, type, username=None):
-    cmd = 'setstr %s otp "[{""type"": ""%s""' % (princ, type)
+def otpconfig(toktype, username=None):
+    val = '[{"type": "%s"' % toktype
     if username is None:
-        cmd += '}]"'
+        val += '}]'
     else:
-        cmd += ', ""username"": ""%s""}]"' % username
-    return cmd
+        val += ', "username": "%s"}]' % username
+    return val
 
 prefix = "/tmp/%d" % os.getpid()
 secret_file = prefix + ".secret"
@@ -174,7 +174,7 @@ conf = {'plugins': {'kdcpreauth': {'enable_only': 'otp'}},
 queue = Queue()
 
 realm = K5Realm(kdc_conf=conf)
-realm.run_kadminl('modprinc +requires_preauth %s' % realm.user_princ)
+realm.run([kadminl, 'modprinc', '+requires_preauth', realm.user_princ])
 flags = ['-T', realm.ccache]
 server_addr = '127.0.0.1:' + str(realm.portbase + 9)
 
@@ -182,7 +182,8 @@ server_addr = '127.0.0.1:' + str(realm.portbase + 9)
 daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', queue))
 daemon.start()
 queue.get()
-realm.run_kadminl(setstr(realm.user_princ, 'udp', 'custom'))
+realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
+           otpconfig('udp', 'custom')])
 realm.kinit(realm.user_princ, 'reject', flags=flags, expected_code=1)
 verify(daemon, queue, False, 'custom', 'reject')
 
@@ -190,7 +191,7 @@ verify(daemon, queue, False, 'custom', 'reject')
 daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', queue))
 daemon.start()
 queue.get()
-realm.run_kadminl(setstr(realm.user_princ, 'udp'))
+realm.run([kadminl, 'setstr', realm.user_princ, 'otp', otpconfig('udp')])
 realm.kinit(realm.user_princ, 'accept', flags=flags)
 verify(daemon, queue, True, realm.user_princ.split('@')[0], 'accept')
 
@@ -206,7 +207,8 @@ except AssertionError:
 daemon = UnixRadiusDaemon(args=(socket_file, '', 'accept', queue))
 daemon.start()
 queue.get()
-realm.run_kadminl(setstr(realm.user_princ, 'unix', 'custom'))
+realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
+           otpconfig('unix', 'custom')])
 realm.kinit(realm.user_princ, 'reject', flags=flags, expected_code=1)
 verify(daemon, queue, False, 'custom', 'reject')
 
@@ -214,7 +216,7 @@ verify(daemon, queue, False, 'custom', 'reject')
 daemon = UnixRadiusDaemon(args=(socket_file, '', 'accept', queue))
 daemon.start()
 queue.get()
-realm.run_kadminl(setstr(realm.user_princ, 'unix'))
+realm.run([kadminl, 'setstr', realm.user_princ, 'otp', otpconfig('unix')])
 realm.kinit(realm.user_princ, 'accept', flags=flags)
 verify(daemon, queue, True, realm.user_princ, 'accept')
 

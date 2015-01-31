@@ -14,7 +14,8 @@ for realm in multipass_realms(create_host=False):
 
     # Test FAST kinit.
     fastpw = password('fast')
-    realm.run_kadminl('ank -pw %s +requires_preauth user/fast' % fastpw)
+    realm.run([kadminl, 'ank', '-pw', fastpw, '+requires_preauth',
+               'user/fast'])
     realm.kinit('user/fast', fastpw)
     realm.kinit('user/fast', fastpw, flags=['-T', realm.ccache])
     realm.klist('user/fast@%s' % realm.realm)
@@ -27,7 +28,7 @@ for realm in multipass_realms(create_host=False):
 # principal with an empty password.  (Regression test for #7642.)
 conf={'plugins': {'pwqual': {'disable': 'empty'}}}
 realm = K5Realm(create_user=False, create_host=False, krb5_conf=conf)
-realm.run_kadminl('addprinc -pw "" user')
+realm.run([kadminl, 'addprinc', '-pw', '', 'user'])
 realm.run(['./t_init_creds', 'user', ''])
 realm.stop()
 

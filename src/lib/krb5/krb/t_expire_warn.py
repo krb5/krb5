@@ -28,10 +28,12 @@ from k5test import *
 realm = K5Realm(create_user=False, create_host=False)
 
 # Create principals with various password expirations.
-realm.run_kadminl('addprinc -pw pass noexpire')
-realm.run_kadminl('addprinc -pw pass -pwexpire "30 minutes" minutes')
-realm.run_kadminl('addprinc -pw pass -pwexpire "12 hours" hours')
-realm.run_kadminl('addprinc -pw pass -pwexpire "3 days" days')
+realm.run([kadminl, 'addprinc', '-pw', 'pass', 'noexpire'])
+realm.run([kadminl, 'addprinc', '-pw', 'pass', '-pwexpire', '30 minutes',
+           'minutes'])
+realm.run([kadminl, 'addprinc', '-pw', 'pass', '-pwexpire', '12 hours',
+           'hours'])
+realm.run([kadminl, 'addprinc', '-pw', 'pass', '-pwexpire', '3 days', 'days'])
 
 # Check for expected prompter warnings when no expire callback is used.
 output = realm.run(['./t_expire_warn', 'noexpire', 'pass', '0'])

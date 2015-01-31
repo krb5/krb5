@@ -170,25 +170,25 @@ check_ulog(0, 0, 0, [])
 realm.addprinc(pr1)
 realm.addprinc(pr3)
 realm.addprinc(pr2)
-realm.run_kadminl('modprinc -allow_tix ' + pr2)
-realm.run_kadminl('modprinc +allow_tix ' + pr2)
+realm.run([kadminl, 'modprinc', '-allow_tix', pr2])
+realm.run([kadminl, 'modprinc', '+allow_tix', pr2])
 check_ulog(5, 1, 5, [pr1, pr3, pr2, pr2, pr2])
 
 # Start kpropd for slave1 and get a full dump from master.
 kpropd1 = realm.start_kpropd(slave1, ['-d'])
 wait_for_prop(kpropd1, True, 0, 5)
-out = realm.run_kadminl('listprincs', slave1)
+out = realm.run([kadminl, 'listprincs'], env=slave1)
 if pr1 not in out or pr2 not in out or pr3 not in out:
     fail('slave1 does not have all principals from master')
 check_ulog(0, 0, 5, [], slave1)
 
 # Make a change and check that it propagates incrementally.
-realm.run_kadminl('modprinc -allow_tix ' + pr2)
+realm.run([kadminl, 'modprinc', '-allow_tix', pr2])
 check_ulog(6, 1, 6, [pr1, pr3, pr2, pr2, pr2, pr2])
 kpropd1.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd1, False, 5, 6)
 check_ulog(1, 6, 6, [pr2], slave1)
-out = realm.run_kadminl('getprinc ' + pr2, slave1)
+out = realm.run([kadminl, 'getprinc', pr2], env=slave1)
 if 'Attributes: DISALLOW_ALL_TIX' not in out:
     fail('slave1 does not have modification from master')
 
@@ -211,24 +211,24 @@ kpropd2 = realm.start_server([kpropd, '-d', '-D', '-P', slave2_kprop_port,
                               '-a', acl_file, '-A', hostname], 'ready', slave2)
 wait_for_prop(kpropd2, True, 0, 6)
 check_ulog(0, 0, 6, [], slave2)
-out = realm.run_kadminl('listprincs', slave1)
+out = realm.run([kadminl, 'listprincs'], env=slave1)
 if pr1 not in out or pr2 not in out or pr3 not in out:
     fail('slave2 does not have all principals from slave1')
 
 # Make another change and check that it propagates incrementally to
 # both slaves.
-realm.run_kadminl('modprinc -maxrenewlife "22 hours" ' + pr1)
+realm.run([kadminl, 'modprinc', '-maxrenewlife', '22 hours', pr1])
 check_ulog(7, 1, 7, [pr1, pr3, pr2, pr2, pr2, pr2, pr1])
 kpropd1.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd1, False, 6, 7)
 check_ulog(2, 6, 7, [pr2, pr1], slave1)
-out = realm.run_kadminl('getprinc ' + pr1, slave1)
+out = realm.run([kadminl, 'getprinc', pr1], env=slave1)
 if 'Maximum renewable life: 0 days 22:00:00\n' not in out:
     fail('slave1 does not have modification from master')
 kpropd2.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd2, False, 6, 7)
 check_ulog(1, 7, 7, [pr1], slave2)
-out = realm.run_kadminl('getprinc ' + pr1, slave2)
+out = realm.run([kadminl, 'getprinc', pr1], env=slave2)
 if 'Maximum renewable life: 0 days 22:00:00\n' not in out:
     fail('slave2 does not have modification from slave1')
 
@@ -247,66 +247,66 @@ check_ulog(1, 7, 7, [pr1], slave2)
 
 # Make another change and check that it propagates incrementally to
 # both slaves.
-realm.run_kadminl('modprinc +allow_tix w')
+realm.run([kadminl, 'modprinc', '+allow_tix', 'w'])
 check_ulog(8, 1, 8, [pr1, pr3, pr2, pr2, pr2, pr2, pr1, pr2])
 kpropd1.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd1, False, 7, 8)
 check_ulog(3, 6, 8, [pr2, pr1, pr2], slave1)
-out = realm.run_kadminl('getprinc ' + pr2, slave1)
+out = realm.run([kadminl, 'getprinc', pr2], env=slave1)
 if 'Attributes:\n' not in out:
     fail('slave1 does not have modification from master')
 kpropd2.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd2, False, 7, 8)
 check_ulog(2, 7, 8, [pr1, pr2], slave2)
-out = realm.run_kadminl('getprinc ' + pr2, slave2)
+out = realm.run([kadminl, 'getprinc', pr2], env=slave2)
 if 'Attributes:\n' not in out:
     fail('slave2 does not have modification from slave1')
 
 # Create a policy and check that it propagates via full resync.
-realm.run_kadminl('addpol -minclasses 2 testpol')
+realm.run([kadminl, 'addpol', '-minclasses', '2', 'testpol'])
 check_ulog(0, 0, 0, [])
 kpropd1.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd1, True, 8, 0)
 check_ulog(0, 0, 0, [], slave1)
-out = realm.run_kadminl('getpol testpol', slave1)
+out = realm.run([kadminl, 'getpol', 'testpol'], env=slave1)
 if 'Minimum number of password character classes: 2' not in out:
     fail('slave1 does not have policy from master')
 kpropd2.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd2, True, 8, 0)
 check_ulog(0, 0, 0, [], slave2)
-out = realm.run_kadminl('getpol testpol', slave2)
+out = realm.run([kadminl, 'getpol', 'testpol'], env=slave2)
 if 'Minimum number of password character classes: 2' not in out:
     fail('slave2 does not have policy from slave1')
 
 # Modify the policy and test that it also propagates via full resync.
-realm.run_kadminl('modpol -minlength 17 testpol')
+realm.run([kadminl, 'modpol', '-minlength', '17', 'testpol'])
 check_ulog(0, 0, 0, [])
 kpropd1.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd1, True, 0, 0)
 check_ulog(0, 0, 0, [], slave1)
-out = realm.run_kadminl('getpol testpol', slave1)
+out = realm.run([kadminl, 'getpol', 'testpol'], env=slave1)
 if 'Minimum password length: 17' not in out:
     fail('slave1 does not have policy change from master')
 kpropd2.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd2, True, 0, 0)
 check_ulog(0, 0, 0, [], slave2)
-out = realm.run_kadminl('getpol testpol', slave2)
+out = realm.run([kadminl, 'getpol', 'testpol'], env=slave2)
 if 'Minimum password length: 17' not in out:
     fail('slave2 does not have policy change from slave1')
 
 # Delete the policy and test that it propagates via full resync.
-realm.run_kadminl('delpol -force testpol')
+realm.run([kadminl, 'delpol', 'testpol'])
 check_ulog(0, 0, 0, [])
 kpropd1.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd1, True, 0, 0)
 check_ulog(0, 0, 0, [], slave1)
-out = realm.run_kadminl('getpol testpol', slave1)
+out = realm.run([kadminl, 'getpol', 'testpol'], env=slave1, expected_code=1)
 if 'Policy does not exist' not in out:
     fail('slave1 did not get policy deletion from master')
 kpropd2.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd2, True, 0, 0)
 check_ulog(0, 0, 0, [], slave2)
-out = realm.run_kadminl('getpol testpol', slave2)
+out = realm.run([kadminl, 'getpol', 'testpol'], env=slave2, expected_code=1)
 if 'Policy does not exist' not in out:
     fail('slave2 did not get policy deletion from slave1')
 
@@ -314,18 +314,18 @@ if 'Policy does not exist' not in out:
 # full resync.  (The master's ulog does not remember the timestamp it
 # had at serial number 0, so it does not know that an incremental
 # propagation is possible.)
-realm.run_kadminl('modprinc -maxlife "10 minutes" ' + pr1)
+realm.run([kadminl, 'modprinc', '-maxlife', '10 minutes', pr1])
 check_ulog(1, 1, 1, [pr1])
 kpropd1.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd1, True, 0, 1)
 check_ulog(0, 0, 1, [], slave1)
-out = realm.run_kadminl('getprinc ' + pr1, slave1)
+out = realm.run([kadminl, 'getprinc', pr1], env=slave1)
 if 'Maximum ticket life: 0 days 00:10:00' not in out:
     fail('slave1 does not have modification from master')
 kpropd2.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd2, True, 0, 1)
 check_ulog(0, 0, 1, [], slave2)
-out = realm.run_kadminl('getprinc ' + pr1, slave2)
+out = realm.run([kadminl, 'getprinc', pr1], env=slave2)
 if 'Maximum ticket life: 0 days 00:10:00' not in out:
     fail('slave2 does not have modification from slave1')
 
@@ -333,18 +333,18 @@ if 'Maximum ticket life: 0 days 00:10:00' not in out:
 # slave1.  slave2 needs another full resync because slave1 no longer
 # has serial number 1 in its ulog after processing its first
 # incremental update.
-realm.run_kadminl('delprinc -force ' + pr3)
+realm.run([kadminl, 'delprinc', pr3])
 check_ulog(2, 1, 2, [pr1, pr3])
 kpropd1.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd1, False, 1, 2)
 check_ulog(1, 2, 2, [pr3], slave1)
-out = realm.run_kadminl('getprinc ' + pr3, slave1)
+out = realm.run([kadminl, 'getprinc', pr3], env=slave1, expected_code=1)
 if 'Principal does not exist' not in out:
     fail('slave1 does not have principal deletion from master')
 kpropd2.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd2, True, 1, 2)
 check_ulog(0, 0, 2, [], slave2)
-out = realm.run_kadminl('getprinc ' + pr3, slave2)
+out = realm.run([kadminl, 'getprinc', pr3], env=slave2, expected_code=1)
 if 'Principal does not exist' not in out:
     fail('slave2 does not have principal deletion from slave1')
 

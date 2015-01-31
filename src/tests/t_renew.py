@@ -34,14 +34,14 @@ if "KDC can't fulfill requested option" not in out:
     fail('expected error not seen renewing non-renewable ticket')
 
 # Test that -allow_renewable on the client principal works.
-realm.run_kadminl('modprinc -allow_renewable user')
+realm.run([kadminl, 'modprinc', '-allow_renewable', 'user'])
 test('disallowed client', '1h', '2h', False)
-realm.run_kadminl('modprinc +allow_renewable user')
+realm.run([kadminl, 'modprinc', '+allow_renewable', 'user'])
 
 # Test that -allow_renewable on the server principal works.
-realm.run_kadminl('modprinc -allow_renewable %s' % realm.krbtgt_princ)
+realm.run([kadminl, 'modprinc', '-allow_renewable',  realm.krbtgt_princ])
 test('disallowed server', '1h', '2h', False)
-realm.run_kadminl('modprinc +allow_renewable %s' % realm.krbtgt_princ)
+realm.run([kadminl, 'modprinc', '+allow_renewable', realm.krbtgt_princ])
 
 # Test that non-renewable tickets are issued if renew_till < till.
 test('short', '2h', '1h', False)
@@ -50,24 +50,26 @@ test('short', '2h', '1h', False)
 # default, but not if we configure away the RENEWABLE-OK option.
 no_opts_conf = {'libdefaults': {'kdc_default_options': '0'}}
 no_opts = realm.special_env('no_opts', False, krb5_conf=no_opts_conf)
-realm.run_kadminl('modprinc -maxlife "10 hours" user')
+realm.run([kadminl, 'modprinc', '-maxlife', '10 hours', 'user'])
 test('long', '15h', None, True)
 test('long noopts', '15h', None, False, env=no_opts)
-realm.run_kadminl('modprinc -maxlife "20 hours" user')
+realm.run([kadminl, 'modprinc', '-maxlife', '20 hours', 'user'])
 
 # Test maximum renewable life on the client principal.
-realm.run_kadminl('modprinc -maxrenewlife "5 hours" user')
+realm.run([kadminl, 'modprinc', '-maxrenewlife', '5 hours', 'user'])
 test('maxrenewlife client yes', '4h', '5h', True)
 test('maxrenewlife client no', '6h', '10h', False)
 
 # Test maximum renewable life on the server principal.
-realm.run_kadminl('modprinc -maxrenewlife "3 hours" %s' % realm.krbtgt_princ)
+realm.run([kadminl, 'modprinc', '-maxrenewlife', '3 hours',
+           realm.krbtgt_princ])
 test('maxrenewlife server yes', '2h', '3h', True)
 test('maxrenewlife server no', '4h', '8h', False)
 
 # Test realm maximum life.
-realm.run_kadminl('modprinc -maxrenewlife "40 hours" user')
-realm.run_kadminl('modprinc -maxrenewlife "40 hours" %s' % realm.krbtgt_princ)
+realm.run([kadminl, 'modprinc', '-maxrenewlife', '40 hours', 'user'])
+realm.run([kadminl, 'modprinc', '-maxrenewlife', '40 hours',
+           realm.krbtgt_princ])
 test('maxrenewlife realm yes', '10h', '20h', True)
 test('maxrenewlife realm no', '21h', '40h', False)
 

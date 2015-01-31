@@ -73,10 +73,8 @@ f = open(os.path.join(realm.testdir, 'acl'), 'a')
 f.write('WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS a *')
 f.close()
 realm.start_kadmind()
-out = realm.run([kadmin, '-n', '-q', 'addprinc -pw test testadd'])
-if 'created.' not in out:
-    fail('Could not create principal with anonymous kadmin')
-out = realm.run([kadmin, '-n', '-q', 'getprinc testadd'])
+realm.run([kadmin, '-n', 'addprinc', '-pw', 'test', 'testadd'])
+out = realm.run([kadmin, '-n', 'getprinc', 'testadd'], expected_code=1)
 if "Operation requires ``get'' privilege" not in out:
     fail('Anonymous kadmin has too much privilege')
 realm.stop_kadmind()
@@ -94,7 +92,7 @@ if 'KDC policy rejects request' not in out:
 # Go back to a normal KDC and disable anonymous PKINIT.
 realm.stop_kdc()
 realm.start_kdc()
-realm.run_kadminl('delprinc -force WELLKNOWN/ANONYMOUS')
+realm.run([kadminl, 'delprinc', 'WELLKNOWN/ANONYMOUS'])
 
 # Run the basic test - PKINIT with FILE: identity, with no password on the key.
 realm.run(['./responder', '-x', 'pkinit=',

@@ -6,7 +6,7 @@ conf = {'plugins': {'audit': {
 
 realm = K5Realm(krb5_conf=conf, get_creds=False)
 realm.addprinc('target')
-realm.run_kadminl('modprinc +ok_to_auth_as_delegate ' + realm.host_princ)
+realm.run([kadminl, 'modprinc', '+ok_to_auth_as_delegate', realm.host_princ])
 
 # Make normal AS and TGS requests so they will be audited.
 realm.kinit(realm.host_princ, flags=['-k', '-f'])

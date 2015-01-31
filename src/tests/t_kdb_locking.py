@@ -28,7 +28,7 @@ if 'A service is not available' not in output:
 f = open(kadm5_lock, 'w')
 f.close()
 
-output = realm.run_kadminl('modprinc -allow_tix ' + p)
+output = realm.run([kadminl, 'modprinc', '-allow_tix', p])
 if 'Cannot lock database' in output:
     fail('krb5kdc still holds a lock on the principal db')
 

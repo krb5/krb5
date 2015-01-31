@@ -28,8 +28,8 @@ from k5test import *
 realm = K5Realm(create_user=False, create_host=False)
 
 # Create principals with various password expirations.
-realm.run_kadminl('addprinc -pw pass nopreauth')
-realm.run_kadminl('addprinc -pw pass +requires_preauth preauth')
+realm.run([kadminl, 'addprinc', '-pw', 'pass', 'nopreauth'])
+realm.run([kadminl, 'addprinc', '-pw', 'pass', '+requires_preauth', 'preauth'])
 
 # Check that we can get creds without preauth without an in_ccache.  This is
 # the default behavior for kinit.

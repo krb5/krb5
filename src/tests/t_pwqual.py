@@ -15,31 +15,30 @@ f = open(dictfile, 'w')
 f.write('birds\nbees\napples\noranges\n')
 f.close()
 
-realm.run_kadminl('addpol pol')
+realm.run([kadminl, 'addpol', 'pol'])
 
 # The built-in "empty" module rejects empty passwords even without a policy.
-out = realm.run_kadminl('addprinc -pw "" p1')
+out = realm.run([kadminl, 'addprinc', '-pw', '', 'p1'], expected_code=1)
 if 'Empty passwords are not allowed' not in out:
     fail('Expected error not seen for empty password')
 
 # The built-in "dict" module rejects dictionary words, but only with a policy.
-out = realm.run_kadminl('addprinc -pw birds p2')
-if 'created.' not in out:
-    fail('Unexpected failure from dictionary password without policy')
-out = realm.run_kadminl('addprinc -pw birds -policy pol p3')
+realm.run([kadminl, 'addprinc', '-pw', 'birds', 'p2'])
+out = realm.run([kadminl, 'addprinc', '-pw', 'birds', '-policy', 'pol', 'p3'],
+                expected_code=1)
 if 'Password is in the password dictionary' not in out:
     fail('Expected error not seen from dictionary password')
 
 # The built-in "princ" module rejects principal components, only with a policy.
-out = realm.run_kadminl('addprinc -pw p4 p4')
-if 'created.' not in out:
-    fail('Unexpected failure from principal component without policy')
-out = realm.run_kadminl('addprinc -pw p5 -policy pol p5')
+realm.run([kadminl, 'addprinc', '-pw', 'p4', 'p4'])
+out = realm.run([kadminl, 'addprinc', '-pw', 'p5', '-policy', 'pol', 'p5'],
+                expected_code=1)
 if 'Password may not match principal name' not in out:
     fail('Expected error not seen from principal component')
 
 # The dynamic "combo" module rejects pairs of dictionary words.
-out = realm.run_kadminl('addprinc -pw birdsoranges p6')
+out = realm.run([kadminl, 'addprinc', '-pw', 'birdsoranges', 'p6'],
+                expected_code=1)
 if 'Password may not be a pair of dictionary words' not in out:
     fail('Expected error not seen from combo module')
 

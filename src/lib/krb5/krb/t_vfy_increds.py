@@ -32,13 +32,13 @@ realm.run(['./t_vfy_increds', '-n'])
 
 # Verify after updating the keytab (so the keytab contains an outdated
 # version 1 key followed by an up-to-date version 2 key).
-realm.run_kadminl('ktadd ' + realm.host_princ)
+realm.run([kadminl, 'ktadd', realm.host_princ])
 realm.run(['./t_vfy_increds'])
 realm.run(['./t_vfy_increds', '-n'])
 
 # Bump the host key without updating the keytab and make sure that
 # verification fails as we expect it to.
-realm.run_kadminl('change_password -randkey ' + realm.host_princ)
+realm.run([kadminl, 'change_password', '-randkey', realm.host_princ])
 realm.run(['./t_vfy_increds'], expected_code=1)
 realm.run(['./t_vfy_increds', '-n'], expected_code=1)
 
@@ -47,8 +47,8 @@ realm.run(['./t_vfy_increds', '-n'], expected_code=1)
 # matches.  Verify after updating the keytab with a host service
 # principal that has hostname that doesn't match the host running the
 # test.  Verify should succeed, with or without nofail.
-realm.run_kadminl('addprinc -randkey host/wrong.hostname')
-realm.run_kadminl('ktadd host/wrong.hostname')
+realm.run([kadminl, 'addprinc', '-randkey', 'host/wrong.hostname'])
+realm.run([kadminl, 'ktadd', 'host/wrong.hostname'])
 realm.run(['./t_vfy_increds'])
 realm.run(['./t_vfy_increds', '-n'])
 
@@ -73,8 +73,8 @@ os.remove(realm.keytab)
 # Add an NFS service principal to keytab.  Verify should ignore it by
 # default (succeeding unless nofail is set), but should verify with it
 # when it is specifically requested.
-realm.run_kadminl('addprinc -randkey ' + realm.nfs_princ)
-realm.run_kadminl('ktadd ' + realm.nfs_princ)
+realm.run([kadminl, 'addprinc', '-randkey', realm.nfs_princ])
+realm.run([kadminl, 'ktadd', realm.nfs_princ])
 realm.run(['./t_vfy_increds'])
 realm.run(['./t_vfy_increds', '-n'], expected_code=1)
 realm.run(['./t_vfy_increds', realm.nfs_princ])
@@ -83,7 +83,7 @@ realm.run(['./t_vfy_increds', '-n', realm.nfs_princ])
 # Invalidating the NFS keys in the keytab.  We should get the same
 # results with the default principal argument, but verification should
 # now fail if we request it specifically.
-realm.run_kadminl('change_password -randkey ' + realm.nfs_princ)
+realm.run([kadminl, 'change_password', '-randkey', realm.nfs_princ])
 realm.run(['./t_vfy_increds'])
 realm.run(['./t_vfy_increds', '-n'], expected_code=1)
 realm.run(['./t_vfy_increds', realm.nfs_princ], expected_code=1)

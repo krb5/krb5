@@ -60,7 +60,7 @@ if ('Warning: no delegated cred handle' not in output or
 
 # Correct that problem and try again.  As above, the S4U2Proxy step
 # won't actually succeed since we don't support that in DB2.
-realm.run_kadminl('modprinc +ok_to_auth_as_delegate ' + service1)
+realm.run([kadminl, 'modprinc', '+ok_to_auth_as_delegate', service1])
 output = realm.run(['./t_s4u', puser, pservice2], expected_code=1)
 if 'NOT_ALLOWED_TO_DELEGATE' not in output:
     fail('s4u2self')

@@ -45,13 +45,13 @@ realm.klist(realm.user_princ)
 princ = 'foo/bar@%s' % realm.realm
 realm.addprinc(princ)
 os.remove(realm.keytab)
-realm.run_kadminl('modprinc -kvno 252 %s' % princ)
+realm.run([kadminl, 'modprinc', '-kvno', '252', princ])
 for kvno in range(253, 259):
-    realm.run_kadminl('ktadd -k %s %s' % (realm.keytab, princ))
+    realm.run([kadminl, 'ktadd', '-k', realm.keytab, princ])
     realm.kinit(princ, flags=['-k'])
     realm.klist_keytab(princ)
     os.remove(realm.keytab)
-output = realm.run_kadminl('getprinc %s' % princ)
+output = realm.run([kadminl, 'getprinc', princ])
 if 'Key: vno 258,' not in output:
     fail('Expected vno not seen in kadmin.local output')
 

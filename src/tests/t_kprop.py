@@ -37,7 +37,7 @@ for realm in multipass_realms(create_user=False):
         if 'Rejected connection' in line:
             fail('kpropd rejected connection from kprop')
 
-            out = realm.run_kadminl('listprincs', slave)
+            out = realm.run([kadminl, 'listprincs', slave])
             if 'wakawaka' not in out:
                 fail('Slave does not have all principals from master')
 

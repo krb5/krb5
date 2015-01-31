@@ -7,12 +7,12 @@ from k5test import *
 realm = K5Realm(create_host=False, get_creds=False, start_kadmind=True)
 
 # Mark a principal as expired and change its password through kinit.
-realm.run_kadminl('modprinc -pwexpire "1 day ago" user')
+realm.run([kadminl, 'modprinc', '-pwexpire', '1 day ago', 'user'])
 pwinput = password('user') + '\nabcd\nabcd\n'
 realm.run([kinit, realm.user_princ], input=pwinput)
 
 # Do the same thing with FAST, with tracing turned on.
-realm.run_kadminl('modprinc -pwexpire "1 day ago" user')
+realm.run([kadminl, 'modprinc', '-pwexpire', '1 day ago', 'user'])
 pwinput = 'abcd\nefgh\nefgh\n'
 tracefile = os.path.join(realm.testdir, 'trace')
 realm.run(['env', 'KRB5_TRACE=' + tracefile, kinit, '-T', realm.ccache,
