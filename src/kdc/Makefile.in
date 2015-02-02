@@ -9,6 +9,8 @@ all:: krb5kdc rtest
 LOCALINCLUDES = -I.
 SRCS= \
 	kdc5_err.c \
+	$(srcdir)/authind.c \
+	$(srcdir)/cammac.c \
 	$(srcdir)/dispatch.c \
 	$(srcdir)/do_as_req.c \
 	$(srcdir)/do_tgs_req.c \
@@ -29,6 +31,8 @@ SRCS= \
 
 OBJS= \
 	kdc5_err.o \
+	authind.o \
+	cammac.o \
 	dispatch.o \
 	do_as_req.o \
 	do_tgs_req.o \

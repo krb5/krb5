@@ -112,6 +112,31 @@ ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype);
 void
 rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep);
 
+/* authind.c */
+krb5_boolean
+authind_contains(krb5_data *const *indicators, const char *ind);
+
+krb5_error_code
+authind_add(krb5_context context, const char *ind, krb5_data ***indicators);
+
+krb5_error_code
+authind_extract(krb5_context context, krb5_authdata **authdata,
+                krb5_data ***indicators);
+
+/* cammac.c */
+krb5_error_code
+cammac_create(krb5_context context, krb5_enc_tkt_part *enc_tkt_reply,
+              krb5_keyblock *server_key, krb5_db_entry *krbtgt,
+              krb5_authdata **contents, krb5_authdata ***cammac_out);
+
+krb5_boolean
+cammac_check_kdcver(krb5_context context, krb5_cammac *cammac,
+                    krb5_enc_tkt_part *enc_tkt, krb5_db_entry *krbtgt);
+
+krb5_boolean
+cammac_check_svcver(krb5_context context, krb5_cammac *cammac,
+                    krb5_keyblock *server_key);
+
 /* do_as_req.c */
 void
 process_as_req (krb5_kdc_req *, krb5_data *,
