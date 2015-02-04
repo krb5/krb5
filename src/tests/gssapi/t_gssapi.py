@@ -7,6 +7,7 @@ for realm in multipass_realms():
     realm.run(['./t_spnego','p:' + realm.host_princ, realm.keytab])
     realm.run(['./t_iov', 'p:' + realm.host_princ])
     realm.run(['./t_iov', '-s', 'p:' + realm.host_princ])
+    realm.run(['./t_pcontok', 'p:' + realm.host_princ])
 
 ### Test acceptor name behavior.
 
