@@ -124,8 +124,10 @@ main(int argc, char *argv[])
      * implementation.
      */
     context = (gss_ctx_id_t)&uctx;
+    memset(&uctx, 0, sizeof(uctx));
     uctx.mech_type = &mech_krb5;
     uctx.internal_ctx_id = (gss_ctx_id_t)&kgctx;
+    memset(&kgctx, 0, sizeof(kgctx));
     kgctx.k5_context = NULL;
     kgctx.established = 1;
     kgctx.have_acceptor_subkey = 1;
