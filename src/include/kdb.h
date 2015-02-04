@@ -817,7 +817,7 @@ krb5_dbe_free_string(krb5_context, char *);
  * This number indicates the date of the last incompatible change to the DAL.
  * The maj_ver field of the module's vtable structure must match this version.
  */
-#define KRB5_KDB_DAL_MAJOR_VERSION 4
+#define KRB5_KDB_DAL_MAJOR_VERSION 5
 
 /*
  * A krb5_context can hold one database object.  Modules should use
