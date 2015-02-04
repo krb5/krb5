@@ -39,9 +39,16 @@ krb5_gss_process_context_token(minor_status, context_handle,
 
     ctx = (krb5_gss_ctx_id_t) context_handle;
 
-    if (! ctx->established) {
+    if (ctx->terminated || !ctx->established) {
         *minor_status = KG_CTX_INCOMPLETE;
         return(GSS_S_NO_CONTEXT);
+    }
+
+    /* We only support context deletion tokens for now, and RFC 4121 does not
+     * define a context deletion token. */
+    if (ctx->proto) {
+        *minor_status = 0;
+        return(GSS_S_DEFECTIVE_TOKEN);
     }
 
     /* "unseal" the token */
@@ -52,8 +59,8 @@ krb5_gss_process_context_token(minor_status, context_handle,
                                      KG_TOK_DEL_CTX)))
         return(majerr);
 
-    /* that's it.  delete the context */
-
-    return(krb5_gss_delete_sec_context(minor_status, &context_handle,
-                                       GSS_C_NO_BUFFER));
+    /* Mark the context as terminated, but do not delete it (as that would
+     * leave the caller with a dangling context handle). */
+    ctx->terminated = 1;
+    return(GSS_S_COMPLETE);
 }
