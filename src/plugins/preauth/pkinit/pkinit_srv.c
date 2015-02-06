@@ -429,6 +429,12 @@ pkinit_server_verify_padata(krb5_context context,
             goto cleanup;
         }
 
+        /* check pkAuthenticator timestamp */
+        retval = krb5_check_clockskew(context, auth_pack->pkAuthenticator.ctime)
+        if (retval) {
+            goto cleanup;
+        }
+
         /* check dh parameters */
         if (auth_pack->clientPublicValue != NULL) {
             retval = server_check_dh(context, plgctx->cryptoctx,
