@@ -430,7 +430,7 @@ pkinit_server_verify_padata(krb5_context context,
         }
 
         /* check pkAuthenticator timestamp */
-        retval = krb5_check_clockskew(context, auth_pack->pkAuthenticator.ctime)
+        retval = krb5_check_clockskew(context, auth_pack->pkAuthenticator.ctime);
         if (retval) {
             goto cleanup;
         }
