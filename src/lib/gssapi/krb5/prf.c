@@ -60,6 +60,10 @@ krb5_gss_pseudo_random(OM_uint32 *minor_status,
     ns.data = NULL;
 
     ctx = (krb5_gss_ctx_id_t)context;
+    if (ctx->terminated || !ctx->established) {
+        *minor_status = KG_CTX_INCOMPLETE;
+        return GSS_S_NO_CONTEXT;
+    }
 
     switch (prf_key) {
     case GSS_C_PRF_KEY_FULL:

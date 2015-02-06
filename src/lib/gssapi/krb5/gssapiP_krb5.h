@@ -204,6 +204,7 @@ typedef struct _krb5_gss_ctx_id_rec {
     unsigned int established : 1;
     unsigned int have_acceptor_subkey : 1;
     unsigned int seed_init : 1;  /* XXX tested but never actually set */
+    unsigned int terminated : 1;
     OM_uint32 gss_flags;
     unsigned char seed[16];
     krb5_gss_name_t here;
