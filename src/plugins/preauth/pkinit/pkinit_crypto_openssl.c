@@ -5407,8 +5407,6 @@ load_cas_pkcs11(krb5_context context,
 
     STACK_OF(X509_INFO) *sk = NULL;
     STACK_OF(X509) *ca_certs = NULL;
-    STACK_OF(X509_CRL) *ca_crls = NULL;
-    BIO *in = NULL;
     krb5_error_code retval = ENOMEM;
     int i = 0;
 
