@@ -75,6 +75,8 @@ static krb5_error_code
 pa_pkinit_gen_req(krb5_context context,
                   pkinit_context plgctx,
                   pkinit_req_context reqctx,
+                  krb5_clpreauth_callbacks cb,
+                  krb5_clpreauth_rock rock,
                   krb5_kdc_req * request,
                   krb5_preauthtype pa_type,
                   krb5_pa_data *** out_padata,
@@ -127,7 +129,7 @@ pa_pkinit_gen_req(krb5_context context,
     print_buffer(der_req->data, der_req->length);
 #endif
 
-    retval = krb5_us_timeofday(context, &ctsec, &cusec);
+    retval = cb->get_preauth_time(context, rock, TRUE, &ctsec, &cusec);
     if (retval)
         goto cleanup;
 
@@ -1238,7 +1240,7 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
                      retval, error_message(retval));
             return retval;
         }
-        retval = pa_pkinit_gen_req(context, plgctx, reqctx, request,
+        retval = pa_pkinit_gen_req(context, plgctx, reqctx, cb, rock, request,
                                    in_padata->pa_type, out_padata, prompter,
                                    prompter_data, gic_opt);
     } else {
@@ -1327,9 +1329,9 @@ pkinit_client_tryagain(krb5_context context, krb5_clpreauth_moddata moddata,
 
     if (do_again) {
         TRACE_PKINIT_CLIENT_TRYAGAIN(context);
-        retval = pa_pkinit_gen_req(context, plgctx, reqctx, request, pa_type,
-                                   out_padata, prompter, prompter_data,
-                                   gic_opt);
+        retval = pa_pkinit_gen_req(context, plgctx, reqctx, cb, rock, request,
+                                   pa_type, out_padata, prompter,
+                                   prompter_data, gic_opt);
         if (retval)
             goto cleanup;
     }
