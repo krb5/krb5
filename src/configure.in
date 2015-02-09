@@ -22,6 +22,40 @@ AC_SUBST(KRB5_VERSION)
 
 AC_REQUIRE_CPP
 
+AC_CACHE_CHECK([whether integers are two's complement],
+  [krb5_cv_ints_twos_compl],
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_BOOL_COMPILE_TRY(
+[#include <limits.h>
+],
+	[/* Basic two's complement check */
+	  ~(-1) == 0 && ~(-1L) == 0L &&
+	  /* Check that values with sign bit 1 and value bits 0 are valid */
+	  -(INT_MIN + 1) == INT_MAX && -(LONG_MIN + 1) == LONG_MAX &&
+	  /* Check that unsigned-to-signed conversions preserve bit patterns */
+	  (int)((unsigned int)INT_MAX + 1) == INT_MIN &&
+	  (long)((unsigned long)LONG_MAX + 1) == LONG_MIN])],
+    [krb5_cv_ints_twos_compl=yes],
+    [krb5_cv_ints_twos_compl=no])])
+
+if test "$krb5_cv_ints_twos_compl" = "no"; then
+  AC_MSG_ERROR([integers are not two's complement])
+fi
+
+AC_CACHE_CHECK([whether CHAR_BIT is 8],
+  [krb5_cv_char_bit_8],
+  [AC_PREPROC_IFELSE([AC_LANG_SOURCE(
+[[#include <limits.h>
+#if CHAR_BIT != 8
+  #error CHAR_BIT != 8
+#endif
+]])],
+    [krb5_cv_char_bit_8=yes], [krb5_cv_char_bit_8=no])])
+
+if test "$krb5_cv_char_bit_8" = "no"; then
+  AC_MSG_ERROR([CHAR_BIT is not 8])
+fi
+
 AC_CACHE_CHECK(if va_copy is available, krb5_cv_va_copy,
 [AC_LINK_IFELSE([AC_LANG_SOURCE([
 #include <stdarg.h>
