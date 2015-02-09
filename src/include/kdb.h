@@ -1223,9 +1223,11 @@ typedef struct _kdb_vftabl {
      *
      *   server: The DB entry of the service principal.
      *
-     *   krbtgt: For TGS requests, the DB entry of the (possibly foreign)
-     *     ticket granting service of the TGT.  For AS requests, the DB entry
-     *     of the service principal.
+     *   krbtgt: For TGS requests, the DB entry of the server of the ticket in
+     *     the PA-TGS-REQ padata; this is usually a local or cross-realm krbtgt
+     *     principal, but not always.  For AS requests, the DB entry of the
+     *     service principal; this is usually a local krbtgt principal, but not
+     *     always.
      *
      *   client_key: The reply key for the KDC request, before any FAST armor
      *     is applied.  For AS requests, this may be the client's long-term key
@@ -1234,9 +1236,9 @@ typedef struct _kdb_vftabl {
      *
      *   server_key: The server key used to encrypt the returned ticket.
      *
-     *   krbtgt_key: For TGS requests, the key of the (possibly foreign) ticket
-     *     granting service of the TGT.  for AS requests, the service
-     *     principal's key.
+     *   krbtgt_key: For TGS requests, the key used to decrypt the ticket in
+     *     the PA-TGS-REQ padata.  For AS requests, the server key used to
+     *     encrypt the returned ticket.
      *
      *   session_key: The session key of the ticket being granted to the
      *     requestor.

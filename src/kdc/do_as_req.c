@@ -260,10 +260,10 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                               state->c_flags,
                               state->client,
                               state->server,
-                              state->server,
+                              NULL,
                               &state->client_keyblock,
                               &state->server_keyblock,
-                              &state->server_keyblock,
+                              NULL,
                               state->req_pkt,
                               state->request,
                               NULL, /* for_user_princ */

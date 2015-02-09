@@ -314,8 +314,8 @@ copy_tgt_authdata(krb5_context context, krb5_kdc_req *request,
 static krb5_error_code
 fetch_kdb_authdata(krb5_context context, unsigned int flags,
                    krb5_db_entry *client, krb5_db_entry *server,
-                   krb5_db_entry *krbtgt, krb5_keyblock *client_key,
-                   krb5_keyblock *server_key, krb5_keyblock *krbtgt_key,
+                   krb5_db_entry *header_server, krb5_keyblock *client_key,
+                   krb5_keyblock *server_key, krb5_keyblock *header_key,
                    krb5_kdc_req *req, krb5_const_principal for_user_princ,
                    krb5_enc_tkt_part *enc_tkt_req,
                    krb5_enc_tkt_part *enc_tkt_reply)
@@ -324,6 +324,8 @@ fetch_kdb_authdata(krb5_context context, unsigned int flags,
     krb5_authdata **tgt_authdata, **db_authdata = NULL;
     krb5_boolean tgs_req = (req->msg_type == KRB5_TGS_REQ);
     krb5_const_principal actual_client;
+    krb5_db_entry *krbtgt;
+    krb5_keyblock *krbtgt_key;
 
     /*
      * Check whether KDC issued authorization data should be included.
@@ -360,6 +362,15 @@ fetch_kdb_authdata(krb5_context context, unsigned int flags,
         actual_client = for_user_princ;
     else
         actual_client = enc_tkt_reply->client;
+
+    /*
+     * For DAL major version 5, always pass "krbtgt" and "krbtgt_key"
+     * parameters which are usually, but not always, for local or cross-realm
+     * TGT principals.  In the future we might rename the parameters and pass
+     * NULL for AS requests.
+     */
+    krbtgt = (header_server != NULL) ? header_server : server;
+    krbtgt_key = (header_key != NULL) ? header_key : server_key;
 
     tgt_authdata = tgs_req ? enc_tkt_req->authorization_data : NULL;
     ret = krb5_db_sign_authdata(context, flags, actual_client, client,
@@ -694,8 +705,8 @@ cleanup:
 krb5_error_code
 handle_authdata(krb5_context context, unsigned int flags,
                 krb5_db_entry *client, krb5_db_entry *server,
-                krb5_db_entry *krbtgt, krb5_keyblock *client_key,
-                krb5_keyblock *server_key, krb5_keyblock *krbtgt_key,
+                krb5_db_entry *header_server, krb5_keyblock *client_key,
+                krb5_keyblock *server_key, krb5_keyblock *header_key,
                 krb5_data *req_pkt, krb5_kdc_req *req,
                 krb5_const_principal for_user_princ,
                 krb5_enc_tkt_part *enc_tkt_req,
@@ -720,9 +731,9 @@ handle_authdata(krb5_context context, unsigned int flags,
         for (i = 0; i < n_authdata_modules; i++) {
             h = &authdata_modules[i];
             ret = h->vt.handle(context, h->data, flags, client, server,
-                               krbtgt, client_key, server_key, krbtgt_key,
-                               req_pkt, req, for_user_princ, enc_tkt_req,
-                               enc_tkt_reply);
+                               header_server, client_key, server_key,
+                               header_key, req_pkt, req, for_user_princ,
+                               enc_tkt_req, enc_tkt_reply);
             if (ret)
                 kdc_err(context, ret, "from authdata module %s", h->vt.name);
         }
@@ -738,15 +749,16 @@ handle_authdata(krb5_context context, unsigned int flags,
 
     if (!isflagset(enc_tkt_reply->flags, TKT_FLG_ANONYMOUS)) {
         /* Fetch authdata from the KDB if appropriate. */
-        ret = fetch_kdb_authdata(context, flags, client, server, krbtgt,
-                                 client_key, server_key, krbtgt_key, req,
+        ret = fetch_kdb_authdata(context, flags, client, server, header_server,
+                                 client_key, server_key, header_key, req,
                                  for_user_princ, enc_tkt_req, enc_tkt_reply);
         if (ret)
             return ret;
 
         /* Validate and insert AD-SIGNTICKET authdata.  This must happen last
          * since it contains a signature over the other authdata. */
-        ret = handle_signticket(context, flags, client, server, krbtgt_key,
+        ret = handle_signticket(context, flags, client, server,
+                                (header_key != NULL) ? header_key : server_key,
                                 req, for_user_princ, enc_tkt_req,
                                 enc_tkt_reply);
         if (ret)
