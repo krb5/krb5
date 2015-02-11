@@ -125,6 +125,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* TGT */
     krb5_enc_tkt_part *subject_tkt = NULL; /* TGT or evidence ticket */
     krb5_db_entry *client = NULL, *header_server = NULL;
+    krb5_db_entry *local_tgt, *local_tgt_storage = NULL;
     krb5_pa_s4u_x509_user *s4u_x509_user = NULL; /* protocol transition request */
     krb5_authdata **kdc_issued_auth_data = NULL; /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;       /* client/server KDB flags */
@@ -211,6 +212,13 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     sprinc = request->server;
     if (errcode !=0) {
         status = "FIND_FAST";
+        goto cleanup;
+    }
+
+    errcode = get_local_tgt(kdc_context, &sprinc->realm, header_server,
+                            &local_tgt, &local_tgt_storage);
+    if (errcode) {
+        status = "GET_LOCAL_TGT";
         goto cleanup;
     }
 
@@ -844,6 +852,7 @@ cleanup:
     krb5_db_free_principal(kdc_context, server);
     krb5_db_free_principal(kdc_context, header_server);
     krb5_db_free_principal(kdc_context, client);
+    krb5_db_free_principal(kdc_context, local_tgt_storage);
     if (session_key.contents != NULL)
         krb5_free_keyblock_contents(kdc_context, &session_key);
     if (newtransited)

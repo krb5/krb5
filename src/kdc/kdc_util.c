@@ -540,6 +540,45 @@ errout:
     return retval;
 }
 
+/*
+ * If candidate is the local TGT for realm, set *alias_out to candidate and
+ * *storage_out to NULL.  Otherwise, load the local TGT into *storage_out and
+ * set *alias_out to *storage_out.
+ *
+ * In the future we might generalize this to a small per-request principal
+ * cache.  For now, it saves a load operation in the common case where the AS
+ * server or TGS header ticket server is the local TGT.
+ */
+krb5_error_code
+get_local_tgt(krb5_context context, const krb5_data *realm,
+              krb5_db_entry *candidate, krb5_db_entry **alias_out,
+              krb5_db_entry **storage_out)
+{
+    krb5_error_code ret;
+    krb5_principal princ;
+    krb5_db_entry *tgt;
+
+    *alias_out = NULL;
+    *storage_out = NULL;
+
+    ret = krb5_build_principal_ext(context, &princ, realm->length, realm->data,
+                                   KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
+                                   realm->length, realm->data, 0);
+    if (ret)
+        return ret;
+
+    if (!krb5_principal_compare(context, candidate->princ, princ)) {
+        ret = krb5_db_get_principal(context, princ, 0, &tgt);
+        if (!ret)
+            *storage_out = *alias_out = tgt;
+    } else {
+        *alias_out = candidate;
+    }
+
+    krb5_free_principal(context, princ);
+    return ret;
+}
+
 /* This probably wants to be updated if you support last_req stuff */
 
 static krb5_last_req_entry nolrentry = { KV5M_LAST_REQ_ENTRY, KRB5_LRQ_NONE, 0 };

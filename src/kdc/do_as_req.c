@@ -102,6 +102,8 @@ struct as_req_state {
     krb5_keyblock client_keyblock;
     krb5_db_entry *client;
     krb5_db_entry *server;
+    krb5_db_entry *local_tgt;
+    krb5_db_entry *local_tgt_storage;
     krb5_kdc_req *request;
     struct krb5_kdcpreauth_rock_st rock;
     const char *status;
@@ -404,6 +406,7 @@ egress:
         free(state->sname);
     krb5_db_free_principal(kdc_context, state->client);
     krb5_db_free_principal(kdc_context, state->server);
+    krb5_db_free_principal(kdc_context, state->local_tgt_storage);
     if (state->session_key.contents != NULL)
         krb5_free_keyblock_contents(kdc_context, &state->session_key);
     if (state->ticket_reply.enc_part.ciphertext.data != NULL) {
@@ -632,6 +635,14 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         goto errout;
     } else if (errcode) {
         state->status = "LOOKING_UP_SERVER";
+        goto errout;
+    }
+
+    errcode = get_local_tgt(kdc_context, &state->request->server->realm,
+                            state->server, &state->local_tgt,
+                            &state->local_tgt_storage);
+    if (errcode) {
+        state->status = "GET_LOCAL_TGT";
         goto errout;
     }
 

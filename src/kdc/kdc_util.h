@@ -75,6 +75,11 @@ kdc_get_server_key (krb5_context, krb5_ticket *, unsigned int,
                     krb5_boolean match_enctype,
                     krb5_db_entry **, krb5_keyblock **, krb5_kvno *);
 
+krb5_error_code
+get_local_tgt(krb5_context context, const krb5_data *realm,
+              krb5_db_entry *candidate, krb5_db_entry **alias_out,
+              krb5_db_entry **storage_out);
+
 int
 validate_as_request (kdc_realm_t *, krb5_kdc_req *, krb5_db_entry,
                      krb5_db_entry, krb5_timestamp,
