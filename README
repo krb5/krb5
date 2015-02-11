@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2014 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2015 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -72,6 +72,50 @@ krb5-1.7 release contains measures to encourage sites to migrate away
 from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
+
+
+Major changes in 1.13.1 (2015-02-11)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix multiple vulnerabilities in the LDAP KDC back end.
+  [CVE-2014-5354] [CVE-2014-5353]
+
+* Fix multiple kadmind vulnerabilities, some of which are based in the
+  gssrpc library. [CVE-2014-5352 CVE-2014-5352 CVE-2014-9421
+  CVE-2014-9422 CVE-2014-9423]
+
+
+krb5-1.13.1 changes by ticket ID
+--------------------------------
+
+7880    Fix typo in doc for krb5_get_init_creds_keytab()
+7962    remote kadmin client doesn't parse "-norandkey"
+8011    PKINIT PKCS12 prompt length constraint limits certificate path
+        length
+8024    Use gssalloc_malloc for GSS error tokens
+8028    Report output ccache errors getting initial creds
+8029    Fix cursor leak in krb5_verify_init_creds
+8034    Fix input race condition in t_skew.py
+8035    Update example enctypes in kdc_conf.rst
+8038    Kadmind/kadmin.local issues after migration from version
+        1.12.2 to 1.13
+8041    kadmind with ldap backend crashes when putting keyless entries
+        [CVE-2014-5354]
+8049    Fix LDAP tests when sasl.h not found
+8051    Fix LDAP misused policy name crash [CVE-2014-5353]
+8053    Fix OTP tests with pyrad 2.x
+8055    Fix gss_process_context_token() [CVE-2014-5352]
+8056    Fix kadm5/gssrpc XDR double free [CVE-2014-9421]
+8057    Fix kadmind server validation [CVE-2014-9422]
+8058    Fix gssrpc data leakage [CVE-2014-9423]
+8059    Check for null *iter_p in profile_iterator()
+8060    kinit -C loops chasing realm referrals against MIT KDC
+8061    Export function gss_add_cred_with_password
+8066    Bump DAL major version for iterate change
+8072    Avoid uninitialized data in t_prf.c
+
 
 Major changes in 1.13 (2014-10-15)
 ----------------------------------
@@ -385,6 +429,7 @@ reports, suggestions, and valuable resources:
     Joel Johnson
     Anders Kaseorg
     W. Trevor King
+    Patrik Kis
     Mikkel Kruse
     Reinhard Kugler
     Tomas Kuthan
@@ -396,6 +441,7 @@ reports, suggestions, and valuable resources:
     Jon Looney
     Nuno Lopes
     Ryan Lynch
+    Andrei Maslennikov
     Nathaniel McCallum
     Greg McClement
     Cameron Meadors
