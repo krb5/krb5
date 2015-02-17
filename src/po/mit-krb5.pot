@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.12.2\n"
+"Project-Id-Version: mit-krb5 1.12.2-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-08-11 17:02-0400\n"
+"POT-Creation-Date: 2015-02-17 16:20-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -541,16 +541,16 @@ msgstr ""
 msgid "while getting default keytab"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:292 ../../src/kadmin/cli/keytab.c:115
+#: ../../src/clients/klist/klist.c:292 ../../src/kadmin/cli/keytab.c:113
 #, c-format
 msgid "while resolving keytab %s"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:298 ../../src/kadmin/cli/keytab.c:99
+#: ../../src/clients/klist/klist.c:298 ../../src/kadmin/cli/keytab.c:97
 msgid "while getting keytab name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:305 ../../src/kadmin/cli/keytab.c:409
+#: ../../src/clients/klist/klist.c:305 ../../src/kadmin/cli/keytab.c:407
 msgid "while starting keytab scan"
 msgstr ""
 
@@ -559,11 +559,11 @@ msgstr ""
 msgid "while unparsing principal name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:350 ../../src/kadmin/cli/keytab.c:453
+#: ../../src/clients/klist/klist.c:350 ../../src/kadmin/cli/keytab.c:451
 msgid "while scanning keytab"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:354 ../../src/kadmin/cli/keytab.c:458
+#: ../../src/clients/klist/klist.c:354 ../../src/kadmin/cli/keytab.c:456
 msgid "while ending keytab scan"
 msgstr ""
 
@@ -1144,7 +1144,7 @@ msgid "One of -c or -p must be specified\n"
 msgstr ""
 
 #: ../../src/clients/kswitch/kswitch.c:110 ../../src/clients/kvno/kvno.c:213
-#: ../../src/clients/kvno/kvno.c:247 ../../src/kadmin/cli/keytab.c:360
+#: ../../src/clients/kvno/kvno.c:247 ../../src/kadmin/cli/keytab.c:358
 #: ../../src/kadmin/dbutil/kdb5_util.c:578
 #, c-format
 msgid "while parsing principal name %s"
@@ -1937,118 +1937,123 @@ msgstr ""
 msgid "Attribute removed from principal \"%s\".\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:63
+#: ../../src/kadmin/cli/keytab.c:61
 #, c-format
 msgid ""
 "Usage: ktadd [-k[eytab] keytab] [-q] [-e keysaltlist] [-norandkey] "
 "[principal | -glob princ-exp] [...]\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:66
+#: ../../src/kadmin/cli/keytab.c:64
 #, c-format
 msgid ""
 "Usage: ktadd [-k[eytab] keytab] [-q] [-e keysaltlist] [principal | -glob "
 "princ-exp] [...]\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:74
+#: ../../src/kadmin/cli/keytab.c:72
 #, c-format
 msgid ""
 "Usage: ktremove [-k[eytab] keytab] [-q] principal [kvno|\"all\"|\"old\"]\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:88 ../../src/kadmin/cli/keytab.c:109
+#: ../../src/kadmin/cli/keytab.c:86 ../../src/kadmin/cli/keytab.c:107
 msgid "while creating keytab name"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:93
+#: ../../src/kadmin/cli/keytab.c:91
 msgid "while opening default keytab"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:182
+#: ../../src/kadmin/cli/keytab.c:152
+#, c-format
+msgid "-norandkey option only valid for kadmin.local\n"
+msgstr ""
+
+#: ../../src/kadmin/cli/keytab.c:181
 #, c-format
 msgid "cannot specify keysaltlist when not changing key\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:199
+#: ../../src/kadmin/cli/keytab.c:197
 #, c-format
 msgid "while expanding expression \"%s\"."
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:218 ../../src/kadmin/cli/keytab.c:258
+#: ../../src/kadmin/cli/keytab.c:216 ../../src/kadmin/cli/keytab.c:256
 msgid "while closing keytab"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:282
+#: ../../src/kadmin/cli/keytab.c:280
 #, c-format
 msgid "while parsing -add principal name %s"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:299
+#: ../../src/kadmin/cli/keytab.c:297
 #, c-format
 msgid "%s: Principal %s does not exist.\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:302
+#: ../../src/kadmin/cli/keytab.c:300
 #, c-format
 msgid "while changing %s's key"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:309
+#: ../../src/kadmin/cli/keytab.c:307
 msgid "while retrieving principal"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:321
+#: ../../src/kadmin/cli/keytab.c:319
 msgid "while adding key to keytab"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:327
+#: ../../src/kadmin/cli/keytab.c:325
 #, c-format
 msgid ""
 "Entry for principal %s with kvno %d, encryption type %s added to keytab %s.\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:336
+#: ../../src/kadmin/cli/keytab.c:334
 msgid "while freeing principal entry"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:383
+#: ../../src/kadmin/cli/keytab.c:381
 #, c-format
 msgid "%s: Keytab %s does not exist.\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:387
+#: ../../src/kadmin/cli/keytab.c:385
 #, c-format
 msgid "%s: No entry for principal %s exists in keytab %s\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:391
+#: ../../src/kadmin/cli/keytab.c:389
 #, c-format
 msgid "%s: No entry for principal %s with kvno %d exists in keytab %s\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:397
+#: ../../src/kadmin/cli/keytab.c:395
 msgid "while retrieving highest kvno from keytab"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:430
+#: ../../src/kadmin/cli/keytab.c:428
 msgid "while temporarily ending keytab scan"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:435
+#: ../../src/kadmin/cli/keytab.c:433
 msgid "while deleting entry from keytab"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:440
+#: ../../src/kadmin/cli/keytab.c:438
 msgid "while restarting keytab scan"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:446
+#: ../../src/kadmin/cli/keytab.c:444
 #, c-format
 msgid "Entry for principal %s with kvno %d removed from keytab %s.\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/keytab.c:468
+#: ../../src/kadmin/cli/keytab.c:466
 #, c-format
 msgid "%s: There is only one entry for principal %s in keytab %s\n"
 msgstr ""
@@ -3112,7 +3117,7 @@ msgid "check_rpcsec_auth: failed inquire_context, stat=%u"
 msgstr ""
 
 #: ../../src/kadmin/server/ipropd_svc.c:517
-#: ../../src/kadmin/server/kadm_rpc_svc.c:310
+#: ../../src/kadmin/server/kadm_rpc_svc.c:304
 #, c-format
 msgid "bad service principal %.*s%s"
 msgstr ""
@@ -3142,7 +3147,7 @@ msgstr ""
 msgid "RPC svc_freeargs failed (%s)"
 msgstr ""
 
-#: ../../src/kadmin/server/kadm_rpc_svc.c:331
+#: ../../src/kadmin/server/kadm_rpc_svc.c:325
 #, c-format
 msgid "gss_to_krb5_name: failed display_name status %d"
 msgstr ""
@@ -3894,111 +3899,106 @@ msgstr ""
 msgid "skipping unrecognized local address family %d"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1015
+#: ../../src/lib/apputils/net-server.c:991
 msgid "Failed to reconfigure network, exiting"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1081
+#: ../../src/lib/apputils/net-server.c:1052
 #, c-format
 msgid ""
 "unhandled routing message type %d, will reconfigure just for the fun of it"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1115
+#: ../../src/lib/apputils/net-server.c:1086
 #, c-format
 msgid "short read (%d/%d) from routing socket"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1122
-#, c-format
-msgid "got routing msg type %d(%s) v%d"
-msgstr ""
-
-#: ../../src/lib/apputils/net-server.c:1131
+#: ../../src/lib/apputils/net-server.c:1096
 #, c-format
 msgid "read %d from routing socket but msglen is %d"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1163
+#: ../../src/lib/apputils/net-server.c:1128
 #, c-format
 msgid "couldn't set up routing socket: %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1166
+#: ../../src/lib/apputils/net-server.c:1131
 #, c-format
 msgid "routing socket is fd %d"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1192
+#: ../../src/lib/apputils/net-server.c:1157
 msgid "setting up network..."
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1209
+#: ../../src/lib/apputils/net-server.c:1174
 #, c-format
 msgid "set up %d sockets"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1211
+#: ../../src/lib/apputils/net-server.c:1176
 msgid "no sockets set up?"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1459
-#: ../../src/lib/apputils/net-server.c:1513
+#: ../../src/lib/apputils/net-server.c:1424
+#: ../../src/lib/apputils/net-server.c:1478
 msgid "while dispatching (udp)"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1488
+#: ../../src/lib/apputils/net-server.c:1453
 #, c-format
 msgid "while sending reply to %s/%s from %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1493
+#: ../../src/lib/apputils/net-server.c:1458
 #, c-format
 msgid "short reply write %d vs %d\n"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1538
+#: ../../src/lib/apputils/net-server.c:1503
 msgid "while receiving from network"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1554
+#: ../../src/lib/apputils/net-server.c:1519
 #, c-format
 msgid "pktinfo says local addr is %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1587
+#: ../../src/lib/apputils/net-server.c:1552
 msgid "too many connections"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1610
+#: ../../src/lib/apputils/net-server.c:1575
 #, c-format
 msgid "dropping %s fd %d from %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1688
+#: ../../src/lib/apputils/net-server.c:1653
 #, c-format
 msgid "allocating buffer for new TCP session from %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1718
+#: ../../src/lib/apputils/net-server.c:1683
 msgid "while dispatching (tcp)"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1750
+#: ../../src/lib/apputils/net-server.c:1715
 msgid "error allocating tcp dispatch private!"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1797
+#: ../../src/lib/apputils/net-server.c:1762
 #, c-format
 msgid "TCP client %s wants %lu bytes, cap is %lu"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1805
+#: ../../src/lib/apputils/net-server.c:1770
 #, c-format
 msgid "error constructing KRB_ERR_FIELD_TOOLONG error! %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1984
+#: ../../src/lib/apputils/net-server.c:1949
 #, c-format
 msgid "accepted RPC connection on socket %d from %s"
 msgstr ""
@@ -4655,12 +4655,12 @@ msgstr ""
 msgid "Reply has wrong form of session key for anonymous request"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1661
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1647
 #, c-format
 msgid "%s while storing credentials"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1749
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1734
 #, c-format
 msgid "Client '%s' not found in Kerberos database"
 msgstr ""
@@ -5344,72 +5344,72 @@ msgstr ""
 msgid "%s option value missing"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:549
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:548
 msgid "Principal does not belong to the default realm"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:618
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:617
 #, c-format
 msgid ""
 "operation can not continue, more than one entry with principal name \"%s\" "
 "found"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:682
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:681
 #, c-format
 msgid "'%s' not found: "
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:761
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:760
 msgid "DN is out of the realm subtree"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:817
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:816
 #, c-format
 msgid "ldap object is already kerberized"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:837
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:836
 #, c-format
 msgid ""
 "link information can not be set/updated as the kerberos principal belongs to "
 "an ldap object"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:852
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:851
 #, c-format
 msgid "Failed getting object references"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:859
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:858
 #, c-format
 msgid "kerberos principal is already linked to a ldap object"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1167
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1176
 msgid "ticket policy object value: "
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1215
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1224
 #, c-format
 msgid "Principal delete failed (trying to replace entry): %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1225
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1234
 #, c-format
 msgid "Principal add failed: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1263
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1272
 #, c-format
 msgid "User modification failed: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1336
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1345
 msgid "Error reading ticket policy. "
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1401
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1410
 #, c-format
 msgid "unable to decode stored principal key data (%s)"
 msgstr ""
@@ -5526,7 +5526,7 @@ msgstr ""
 msgid "wrong oid\n"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:6190
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:6193
 #, c-format
 msgid "unknown code 0x%x"
 msgstr ""
