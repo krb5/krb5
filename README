@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2014 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2015 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -72,6 +72,49 @@ krb5-1.7 release contains measures to encourage sites to migrate away
 from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
+
+Major changes in 1.12.3 (2015-02-18)
+------------------------------------
+
+This is a bugfix release.  The krb5-1.12 release series is in
+maintenance, and for new deployments, installers should prefer the
+krb5-1.13 release series or later.
+
+* Fix multiple vulnerabilities in the LDAP KDC back end.
+  [CVE-2014-5354] [CVE-2014-5353]
+
+* Fix multiple kadmind vulnerabilities, some of which are based in the
+  gssrpc library. [CVE-2014-5352 CVE-2014-5352 CVE-2014-9421
+  CVE-2014-9422 CVE-2014-9423]
+
+krb5-1.12.3 changes by ticket ID
+--------------------------------
+
+8012    gssapi.dll tries to get initial creds even when some are
+        present
+8013    gssapi.dll fails to detect TGTs in the MSLSA cache when UAC is
+        enabled
+8036    Remove rtm_type_name()
+8064    Add missing salt from enctype in t_kdb.py test
+8067    Fix gss_process_context_token() [CVE-2014-5352]
+8068    Fix kadm5/gssrpc XDR double free [CVE-2014-9421]
+8069    Fix kadmind server validation [CVE-2014-9422]
+8070    Fix gssrpc data leakage [CVE-2014-9423]
+8125    Do not loop on principal unknown errors
+8126    Export function gss_add_cred_with_password
+8127    Check for null *iter_p in profile_iterator()
+8128    Fix OTP tests with pyrad 2.x
+8129    Use gssalloc_malloc for GSS error tokens
+8130    Fix typo in doc for krb5_get_init_creds_keytab()
+8131    Parse "ktadd -norandkey" in remote kadmin client
+8132    Report output ccache errors getting initial creds
+8133    Fix cursor leak in krb5_verify_init_creds
+8134    Remove length limit on PKINIT PKCS#12 prompt
+8135    Fix input race condition in t_skew.py
+8136    Update example enctypes in kdc_conf.rst
+8137    Fix LDAP misused policy name crash [CVE-2014-5353]
+8138    kadmind with ldap backend crashes when putting keyless entries
+        [CVE-2014-5354]
 
 Major changes in 1.12.2 (2014-08-11)
 ------------------------------------
