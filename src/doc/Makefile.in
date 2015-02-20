@@ -21,6 +21,7 @@ RST_SOURCES= _static \
 	appdev \
 	basic \
 	build \
+	formats \
 	plugindev \
 	user \
 	about.rst \
