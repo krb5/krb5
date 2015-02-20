@@ -422,9 +422,11 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
         return NULL;
 
     /* Make a shallow copy of the key data so we can alter it. */
-    key_data = k5calloc(n_key_data, sizeof(*key_data), &err);
-    if (key_data_in == NULL)
+    key_data = calloc(n_key_data, sizeof(*key_data));
+    if (key_data_in == NULL) {
+        err = ENOMEM;
         goto cleanup;
+    }
     memcpy(key_data, key_data_in, n_key_data * sizeof(*key_data));
 
     /* Unpatched krb5 1.11 and 1.12 cannot decode KrbKey sequences with no salt
