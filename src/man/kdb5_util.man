@@ -1,3 +1,5 @@
+.\" Man page generated from reStructuredText.
+.
 .TH "KDB5_UTIL" "8" " " "1.11.5" "MIT Kerberos"
 .SH NAME
 kdb5_util \- Kerberos database maintenance utility
@@ -28,8 +30,6 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.\" Man page generated from reStructuredText.
-.
 .SH SYNOPSIS
 .sp
 \fBkdb5_util\fP
@@ -63,14 +63,14 @@ specifies the Kerberos realm of the database.
 .TP
 .B \fB\-d\fP \fIdbname\fP
 specifies the name under which the principal database is stored;
-by default the database is that listed in \fIkdc.conf(5)\fP.  The
+by default the database is that listed in \fIkdc.conf(5)\fP\&.  The
 password policy database and lock files are also derived from this
 value.
 .TP
 .B \fB\-k\fP \fImkeytype\fP
 specifies the key type of the master key in the database.  The
 default is given by the \fBmaster_key_type\fP variable in
-\fIkdc.conf(5)\fP.
+\fIkdc.conf(5)\fP\&.
 .TP
 .B \fB\-kv\fP \fImkeyVNO\fP
 Specifies the version number of the master key in the database;
@@ -79,7 +79,7 @@ the default is 1.  Note that 0 is not allowed.
 .B \fB\-M\fP \fImkeyname\fP
 principal name for the master key in the database.  If not
 specified, the name is determined by the \fBmaster_key_name\fP
-variable in \fIkdc.conf(5)\fP.
+variable in \fIkdc.conf(5)\fP\&.
 .TP
 .B \fB\-m\fP
 specifies that the master database password should be read from
@@ -88,7 +88,7 @@ the keyboard rather than fetched from a file on disk.
 .B \fB\-sf\fP \fIstash_file\fP
 specifies the stash filename of the master database password.  If
 not specified, the filename is determined by the
-\fBkey_stash_file\fP variable in \fIkdc.conf(5)\fP.
+\fBkey_stash_file\fP variable in \fIkdc.conf(5)\fP\&.
 .TP
 .B \fB\-P\fP \fIpassword\fP
 specifies the master database password.  Using this option may
@@ -126,13 +126,13 @@ the \fB\-f\fP argument, does not prompt the user.
 .sp
 Stores the master principal\(aqs keys in a stash file.  The \fB\-f\fP
 argument can be used to override the \fIkeyfile\fP specified in
-\fIkdc.conf(5)\fP.
+\fIkdc.conf(5)\fP\&.
 .SS dump
 .INDENT 0.0
 .INDENT 3.5
 \fBdump\fP [\fB\-old\fP|\fB\-b6\fP|\fB\-b7\fP|\fB\-ov\fP|\fB\-r13\fP]
 [\fB\-verbose\fP] [\fB\-mkey_convert\fP] [\fB\-new_mkey_file\fP \fImkey_file\fP]
-[\fB\-rev\fP] [\fB\-recurse\fP] [\fIfilename\fP [\fIprincipals\fP...]]
+[\fB\-rev\fP] [\fB\-recurse\fP] [\fIfilename\fP [\fIprincipals\fP\&...]]
 .UNINDENT
 .UNINDENT
 .sp
@@ -222,7 +222,8 @@ requires the database to be in the Kerberos 5 Beta 6 format
 .TP
 .B \fB\-b7\fP
 requires the database to be in the Kerberos 5 Beta 7 format
-("kdb5_util load_dump version 4").
+("kdb5_util load_dump version 4").  This was the dump format
+produced on releases prior to 1.2.2.
 .TP
 .B \fB\-ov\fP
 requires the database to be in "ovsec_adm_import" format.  Must be
@@ -250,10 +251,7 @@ is dumped.
 .TP
 .B \fB\-update\fP
 records from the dump file are added to or updated in the existing
-database.  (This is useful in conjunction with an ovsec_adm_export
-format dump if you want to preserve per\-principal policy
-information, since the current default format does not contain
-this data.)  Otherwise, a new database is created containing only
+database.  Otherwise, a new database is created containing only
 what is in the dump file and the old one destroyed upon successful
 completion.
 .UNINDENT
@@ -286,7 +284,7 @@ values.  The \fB\-s\fP option stashes the new master key in the stash
 file, which will be created if it doesn\(aqt already exist.
 .sp
 After a new master key is added, it should be propagated to slave
-servers via a manual or periodic invocation of \fIkprop(8)\fP.  Then,
+servers via a manual or periodic invocation of \fIkprop(8)\fP\&.  Then,
 the stash files on the slave servers should be updated with the
 kdb5_util \fBstash\fP command.  Once those steps are complete, the key
 is ready to be marked active with the kdb5_util \fBuse_mkey\fP command.
@@ -297,7 +295,7 @@ is ready to be marked active with the kdb5_util \fBuse_mkey\fP command.
 .UNINDENT
 .UNINDENT
 .sp
-Sets the activation time of the master key specified by \fImkeyVNO\fP.
+Sets the activation time of the master key specified by \fImkeyVNO\fP\&.
 Once a master key becomes active, it will be used to encrypt newly
 created principal keys.  If no \fItime\fP argument is given, the current
 time is used, causing the specified master key version to become
@@ -315,7 +313,7 @@ principal keys to be encrypted in the new master key.
 .sp
 List all master keys, from most recent to earliest, in the master key
 principal.  The output will show the kvno, enctype, and salt type for
-each mkey, similar to the output of \fIkadmin(1)\fP \fBgetprinc\fP.  A
+each mkey, similar to the output of \fIkadmin(1)\fP \fBgetprinc\fP\&.  A
 \fB*\fP following an mkey denotes the currently active master key.
 .SS purge_mkeys
 .INDENT 0.0
@@ -362,6 +360,6 @@ showing the actions which would have been taken.
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
-1985-2014, MIT
+1985-2015, MIT
 .\" Generated by docutils manpage writer.
 .

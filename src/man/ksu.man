@@ -1,3 +1,5 @@
+.\" Man page generated from reStructuredText.
+.
 .TH "KSU" "1" " " "1.11.5" "MIT Kerberos"
 .SH NAME
 ksu \- Kerberized super-user
@@ -28,8 +30,6 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.\" Man page generated from reStructuredText.
-.
 .SH SYNOPSIS
 .sp
 \fBksu\fP
@@ -53,14 +53,18 @@ Kerberos version 5 server running to use ksu.
 ksu is a Kerberized version of the su program that has two missions:
 one is to securely change the real and effective user ID to that of
 the target user, and the other is to create a new security context.
-.IP Note
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
 For the sake of clarity, all references to and attributes of
 the user invoking the program will start with "source"
 (e.g., "source user", "source cache", etc.).
 .sp
 Likewise, all references to and attributes of the target
 account will start with "target".
-.RE
+.UNINDENT
+.UNINDENT
 .SH AUTHENTICATION
 .sp
 To fulfill the first mission, ksu operates in two phases:
@@ -70,7 +74,7 @@ principal name with the \fB\-n\fP option (e.g., \fB\-n jqpublic@USC.EDU\fP)
 or a default principal name will be assigned using a heuristic
 described in the OPTIONS section (see \fB\-n\fP option).  The target user
 name must be the first argument to ksu; if not specified root is the
-default.  If \fB.\fP is specified then the target user will be the
+default.  If \fB\&.\fP is specified then the target user will be the
 source user (e.g., \fBksu .\fP).  If the source user is root or the
 target user is the source user, no authentication or authorization
 takes place.  Otherwise, ksu looks for an appropriate Kerberos ticket
@@ -96,12 +100,13 @@ option, see the OPTIONS section.
 Upon successful authentication, ksu checks whether the target
 principal is authorized to access the target account.  In the target
 user\(aqs home directory, ksu attempts to access two authorization files:
-\fI.k5login(5)\fP and .k5users.  In the .k5login file each line
+\fI\&.k5login(5)\fP and .k5users.  In the .k5login file each line
 contains the name of a principal that is authorized to access the
 account.
+.sp
+For example:
 .INDENT 0.0
-.TP
-.B For example:
+.INDENT 3.5
 .sp
 .nf
 .ft C
@@ -110,6 +115,7 @@ jqpublic/secure@USC.EDU
 jqpublic/admin@USC.EDU
 .ft P
 .fi
+.UNINDENT
 .UNINDENT
 .sp
 The format of .k5users is the same, except the principal name may be
@@ -165,11 +171,15 @@ server and stored in the target cache.  Otherwise, if a password is
 not provided (user hit return) ksu continues in a normal mode of
 operation (the target cache will not contain the desired TGT).  If the
 wrong password is typed in, ksu fails.
-.IP Note
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
 During authentication, only the tickets that could be
 obtained without providing a password are cached in in the
 source cache.
-.RE
+.UNINDENT
+.UNINDENT
 .SH OPTIONS
 .INDENT 0.0
 .TP
@@ -186,10 +196,10 @@ Case 1: source user is non\-root.
 If the target user is the source user the default principal name
 is set to the default principal of the source cache.  If the
 cache does not exist then the default principal name is set to
-\fBtarget_user@local_realm\fP.  If the source and target users are
+\fBtarget_user@local_realm\fP\&.  If the source and target users are
 different and neither \fB~target_user/.k5users\fP nor
 \fB~target_user/.k5login\fP exist then the default principal name
-is \fBtarget_user_login_name@local_realm\fP.  Otherwise, starting
+is \fBtarget_user_login_name@local_realm\fP\&.  Otherwise, starting
 with the first principal listed below, ksu checks if the
 principal is authorized to access the target account and whether
 there is a legitimate ticket for that principal in the source
@@ -218,15 +228,15 @@ principal name equal to the prefix of the candidate.  For
 example if candidate a) is \fBjqpublic@ISI.EDU\fP and
 \fBjqpublic/secure@ISI.EDU\fP is authorized to access the target
 account then the default principal is set to
-\fBjqpublic/secure@ISI.EDU\fP.
+\fBjqpublic/secure@ISI.EDU\fP\&.
 .IP \(bu 2
 Case 2: source user is root.
 .sp
 If the target user is non\-root then the default principal name
-is \fBtarget_user@local_realm\fP.  Else, if the source cache
+is \fBtarget_user@local_realm\fP\&.  Else, if the source cache
 exists the default principal name is set to the default
 principal of the source cache.  If the source cache does not
-exist, default principal name is set to \fBroot\e@local_realm\fP.
+exist, default principal name is set to \fBroot\e@local_realm\fP\&.
 .UNINDENT
 .UNINDENT
 .sp
@@ -236,7 +246,7 @@ exist, default principal name is set to \fBroot\e@local_realm\fP.
 Specify source cache name (e.g., \fB\-c FILE:/tmp/my_cache\fP).  If
 \fB\-c\fP option is not used then the name is obtained from
 \fBKRB5CCNAME\fP environment variable.  If \fBKRB5CCNAME\fP is not
-defined the source cache name is set to \fBkrb5cc_<source uid>\fP.
+defined the source cache name is set to \fBkrb5cc_<source uid>\fP\&.
 The target cache name is automatically set to \fBkrb5cc_<target
 uid>.(gen_sym())\fP, where gen_sym generates a new number such that
 the resulting cache does not already exist.  For example:
@@ -376,7 +386,7 @@ full path or just the program name.
 .B \fB\-a\fP \fIargs\fP
 Specify arguments to be passed to the target shell.  Note that all
 flags and parameters following \-a will be passed to the shell,
-thus all options intended for ksu must precede \fB\-a\fP.
+thus all options intended for ksu must precede \fB\-a\fP\&.
 .sp
 The \fB\-a\fP option can be used to simulate the \fB\-e\fP option if
 used as follows:
@@ -421,14 +431,18 @@ If the source user is non\-root, ksu insists that the target user\(aqs
 shell to be invoked is a "legal shell".  \fIgetusershell(3)\fP is
 called to obtain the names of "legal shells".  Note that the
 target user\(aqs shell is obtained from the passwd file.
-.TP
-.B Sample configuration:
+.UNINDENT
+.sp
+Sample configuration:
+.INDENT 0.0
+.INDENT 3.5
 .sp
 .nf
 .ft C
 KSU_OPTS = \-DGET_TGT_VIA_PASSWD \-DPRINC_LOOK_AHEAD \-DCMD_PATH=\(aq"/bin /usr/ucb /local/bin"
 .ft P
 .fi
+.UNINDENT
 .UNINDENT
 .sp
 ksu should be owned by root and have the set user id bit turned on.
@@ -446,6 +460,6 @@ GENNADY (ARI) MEDVINSKY
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
-1985-2014, MIT
+1985-2015, MIT
 .\" Generated by docutils manpage writer.
 .

@@ -1,3 +1,5 @@
+.\" Man page generated from reStructuredText.
+.
 .TH "KADMIN" "1" " " "1.11.5" "MIT Kerberos"
 .SH NAME
 kadmin \- Kerberos V5 database administration program
@@ -28,8 +30,6 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.\" Man page generated from reStructuredText.
-.
 .SH SYNOPSIS
 .sp
 \fBkadmin\fP
@@ -54,7 +54,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 kadmin and kadmin.local are command\-line interfaces to the Kerberos V5
 administration system.  They provide nearly identical functionalities;
 the difference is that kadmin.local directly accesses the KDC
-database, while kadmin performs operations using \fIkadmind(8)\fP.
+database, while kadmin performs operations using \fIkadmind(8)\fP\&.
 Except as explicitly noted otherwise, this man page will use "kadmin"
 to refer to both versions.  kadmin provides for the maintenance of
 Kerberos principals, password policies, and service key tables
@@ -62,7 +62,7 @@ Kerberos principals, password policies, and service key tables
 .sp
 The remote kadmin client uses Kerberos to authenticate to kadmind
 using the service principal \fBkadmin/ADMINHOST\fP (where \fIADMINHOST\fP is
-the fully\-qualified hostname of the admin server) or \fBkadmin/admin\fP.
+the fully\-qualified hostname of the admin server) or \fBkadmin/admin\fP\&.
 If the credentials cache contains a ticket for one of these
 principals, and the \fB\-c\fP credentials_cache option is specified, that
 ticket is used to authenticate to kadmind.  Otherwise, the \fB\-p\fP and
@@ -90,7 +90,7 @@ obtained with getpwuid, in order of preference.
 .B \fB\-k\fP
 Use a keytab to decrypt the KDC response instead of prompting for
 a password.  In this case, the default principal will be
-\fBhost/hostname\fP.  If there is no keytab specified with the
+\fBhost/hostname\fP\&.  If there is no keytab specified with the
 \fB\-t\fP option, then the default keytab will be used.
 .TP
 .B \fB\-t\fP \fIkeytab\fP
@@ -101,7 +101,7 @@ with the \fB\-k\fP option.
 Requests anonymous processing.  Two types of anonymous principals
 are supported.  For fully anonymous Kerberos, configure PKINIT on
 the KDC and configure \fBpkinit_anchors\fP in the client\(aqs
-\fIkrb5.conf(5)\fP.  Then use the \fB\-n\fP option with a principal
+\fIkrb5.conf(5)\fP\&.  Then use the \fB\-n\fP option with a principal
 of the form \fB@REALM\fP (an empty principal name followed by the
 at\-sign and a realm name).  If permitted by the KDC, an anonymous
 ticket will be returned.  A second form of anonymous tickets is
@@ -172,7 +172,7 @@ Specifies the password for the above mentioned binddn.  Using
 this option may expose the password to other users on the
 system via the process list; to avoid this, instead stash the
 password using the \fBstashsrvpw\fP command of
-\fIkdb5_ldap_util(8)\fP.
+\fIkdb5_ldap_util(8)\fP\&.
 .UNINDENT
 .UNINDENT
 .SH COMMANDS
@@ -326,8 +326,11 @@ principal is to be created.
 .B \fB\-x tktpolicy=\fP\fIpolicy\fP
 Associates a ticket policy to the Kerberos principal.
 .UNINDENT
-.IP Note
+.sp
+\fBNOTE:\fP
 .INDENT 7.0
+.INDENT 3.5
+.INDENT 0.0
 .IP \(bu 2
 The \fBcontainerdn\fP and \fBlinkdn\fP options cannot be
 specified with the \fBdn\fP option.
@@ -340,7 +343,8 @@ container.
 \fIdn\fP and \fIcontainerdn\fP should be within the subtrees or
 principal container configured in the realm.
 .UNINDENT
-.RE
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .sp
 Example:
@@ -391,7 +395,7 @@ to its password policy) so that it can successfully authenticate.
 .UNINDENT
 .UNINDENT
 .sp
-Renames the specified \fIold_principal\fP to \fInew_principal\fP.  This
+Renames the specified \fIold_principal\fP to \fInew_principal\fP\&.  This
 command prompts for confirmation, unless the \fB\-force\fP option is
 given.
 .sp
@@ -418,7 +422,7 @@ Alias: \fBdelprinc\fP
 .UNINDENT
 .UNINDENT
 .sp
-Changes the password of \fIprincipal\fP.  Prompts for a new password if
+Changes the password of \fIprincipal\fP\&.  Prompts for a new password if
 neither \fB\-randkey\fP or \fB\-pw\fP is specified.
 .sp
 This command requires the \fBchangepw\fP privilege, or that the
@@ -471,8 +475,8 @@ kadmin:
 .UNINDENT
 .sp
 Purges previously retained old keys (e.g., from \fBchange_password
-\-keepold\fP) from \fIprincipal\fP.  If \fB\-keepkvno\fP is specified, then
-only purges keys with kvnos lower than \fIoldest_kvno_to_keep\fP.
+\-keepold\fP) from \fIprincipal\fP\&.  If \fB\-keepkvno\fP is specified, then
+only purges keys with kvnos lower than \fIoldest_kvno_to_keep\fP\&.
 .sp
 This command requires the \fBmodify\fP privilege.
 .SS get_principal
@@ -508,8 +512,8 @@ Last successful authentication: [never]
 Last failed authentication: [never]
 Failed password attempts: 0
 Number of keys: 2
-Key: vno 1, DES cbc mode with CRC\-32, no salt
-Key: vno 1, DES cbc mode with CRC\-32, Version 4
+Key: vno 1, des\-cbc\-crc, no salt
+Key: vno 1, des\-cbc\-crc, Version 4
 Attributes:
 Policy: [none]
 
@@ -531,7 +535,7 @@ kadmin:
 .sp
 Retrieves all or some principal names.  \fIexpression\fP is a shell\-style
 glob expression that can contain the wild\-card characters \fB?\fP,
-\fB*\fP, and \fB[]\fP.  All principal names matching the expression are
+\fB*\fP, and \fB[]\fP\&.  All principal names matching the expression are
 printed.  If no expression is provided, all principal names are
 printed.  If the expression does not contain an \fB@\fP character, an
 \fB@\fP character followed by the local realm is appended to the
@@ -564,7 +568,7 @@ kadmin:
 .UNINDENT
 .UNINDENT
 .sp
-Displays string attributes on \fIprincipal\fP.
+Displays string attributes on \fIprincipal\fP\&.
 .sp
 This command requires the \fBinquire\fP privilege.
 .sp
@@ -576,7 +580,7 @@ Alias: \fBgetstr\fP
 .UNINDENT
 .UNINDENT
 .sp
-Sets a string attribute on \fIprincipal\fP.  String attributes are used to
+Sets a string attribute on \fIprincipal\fP\&.  String attributes are used to
 supply per\-principal configuration to the KDC and some KDC plugin
 modules.  The following string attributes are recognized by the KDC:
 .INDENT 0.0
@@ -598,7 +602,7 @@ Alias: \fBsetstr\fP
 .UNINDENT
 .UNINDENT
 .sp
-Deletes a string attribute from \fIprincipal\fP.
+Deletes a string attribute from \fIprincipal\fP\&.
 .sp
 This command requires the \fBdelete\fP privilege.
 .sp
@@ -663,7 +667,7 @@ is locked from authenticating if too many authentication failures
 occur without the specified failure count interval elapsing.
 A duration of 0 (the default) means the principal remains locked
 out until it is administratively unlocked with \fBmodprinc
-\-unlock\fP.
+\-unlock\fP\&.
 .TP
 .B \fB\-allowedkeysalts\fP
 Specifies the key/salt tuples supported for long\-term keys when
@@ -693,8 +697,8 @@ kadmin:
 .UNINDENT
 .UNINDENT
 .sp
-Modifies the password policy named \fIpolicy\fP.  Options are as described
-for \fBadd_policy\fP.
+Modifies the password policy named \fIpolicy\fP\&.  Options are as described
+for \fBadd_policy\fP\&.
 .sp
 This command requires the \fBmodify\fP privilege.
 .sp
@@ -706,7 +710,7 @@ Alias: \fBmodpol\fP
 .UNINDENT
 .UNINDENT
 .sp
-Deletes the password policy named \fIpolicy\fP.  Prompts for confirmation
+Deletes the password policy named \fIpolicy\fP\&.  Prompts for confirmation
 before deletion.  The command will fail if the policy is in use by any
 principals.
 .sp
@@ -735,7 +739,7 @@ kadmin:
 .UNINDENT
 .UNINDENT
 .sp
-Displays the values of the password policy named \fIpolicy\fP.  With the
+Displays the values of the password policy named \fIpolicy\fP\&.  With the
 \fB\-terse\fP flag, outputs the fields as quoted strings separated by
 tabs.
 .sp
@@ -778,13 +782,13 @@ meaningful.
 .sp
 Retrieves all or some policy names.  \fIexpression\fP is a shell\-style
 glob expression that can contain the wild\-card characters \fB?\fP,
-\fB*\fP, and \fB[]\fP.  All policy names matching the expression are
+\fB*\fP, and \fB[]\fP\&.  All policy names matching the expression are
 printed.  If no expression is provided, all existing policy names are
 printed.
 .sp
 This command requires the \fBlist\fP privilege.
 .sp
-Aliases: \fBlistpols\fP, \fBget_policies\fP, \fBgetpols\fP.
+Aliases: \fBlistpols\fP, \fBget_policies\fP, \fBgetpols\fP\&.
 .sp
 Examples:
 .INDENT 0.0
@@ -933,6 +937,6 @@ interface to the OpenVision Kerberos administration program.
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
-1985-2014, MIT
+1985-2015, MIT
 .\" Generated by docutils manpage writer.
 .
