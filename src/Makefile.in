@@ -18,6 +18,7 @@ SUBDIRS=util include lib \
 	plugins/pwqual/test \
 	plugins/kdb/db2 \
 	@ldap_plugin_dir@ \
+	plugins/kdb/test \
 	plugins/preauth/otp \
 	plugins/preauth/pkinit \
 	plugins/tls/k5tls \
