@@ -73,4 +73,42 @@ output = realm.run(['./t_s4u', '--spnego', puser, pservice2], expected_code=1)
 if 'NOT_ALLOWED_TO_DELEGATE' not in output:
     fail('s4u2self')
 
+realm.stop()
+
+# Set up a realm using the test KDB module so that we can do
+# successful S4U2Proxy delegations.
+testprincs = {'krbtgt/KRBTEST.COM': {'keys': 'aes128-cts'},
+              'user': {'keys': 'aes128-cts'},
+              'service/1': {'flags': '+ok-to-auth-as-delegate',
+                            'keys': 'aes128-cts'},
+              'service/2': {'keys': 'aes128-cts'}}
+conf = {'realms': {'$realm': {'database_module': 'test'}},
+        'dbmodules': {'test': {'db_library': 'test',
+                               'princs': testprincs,
+                               'delegation': {'service/1': 'service/2'}}}}
+realm = K5Realm(create_kdb=False, kdc_conf=conf)
+userkeytab = 'FILE:' + os.path.join(realm.testdir, 'userkeytab')
+realm.extract_keytab(realm.user_princ, userkeytab)
+realm.extract_keytab(service1, realm.keytab)
+realm.extract_keytab(service2, realm.keytab)
+realm.start_kdc()
+
+# Get forwardable creds for service1 in the default cache.
+realm.kinit(service1, None, ['-f', '-k'])
+
+# Successful krb5 -> S4U2Proxy, with krb5 and SPNEGO mechs.
+realm.kinit(realm.user_princ, None, ['-f', '-k', '-c', usercache,
+                                     '-t', userkeytab])
+out = realm.run(['./t_s4u2proxy_krb5', usercache, storagecache, '-',
+                 pservice1, pservice2])
+if 'auth1: user@' not in out or 'auth2: user@' not in out:
+    fail('krb5 -> s4u2proxy')
+out = realm.run(['./t_s4u2proxy_krb5', '--spnego', usercache, storagecache,
+                 '-', pservice1, pservice2])
+if 'auth1: user@' not in out or 'auth2: user@' not in out:
+    fail('krb5 -> s4u2proxy')
+
+# Successful S4U2Self -> S4U2Proxy.
+out = realm.run(['./t_s4u', puser, pservice2])
+
 success('S4U test cases')
