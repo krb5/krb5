@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2014 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2015 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -73,6 +73,103 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.11.6 (2015-02-24)
+------------------------------------
+
+This is a bugfix release.  The krb5-1.11 release series has reached
+the end of its maintenance period, and krb5-1.11.6 is the last planned
+release in the krb5-1.11 series.  For new deployments, installers
+should prefer the krb5-1.13 release series or later.
+
+* Work around a gcc optimizer bug that could cause DB2 KDC database
+  operations to spin in an infinite loop
+
+* Fix a backward compatibility problem with the LDAP KDB schema that
+  could prevent krb5-1.11 and later from decoding entries created by
+  krb5-1.6.
+
+* Handle certain invalid RFC 1964 GSS tokens correctly to avoid
+  invalid memory reference vulnerabilities.  [CVE-2014-4341
+  CVE-2014-4342]
+
+* Fix memory management vulnerabilities in GSSAPI SPNEGO.
+  [CVE-2014-4343 CVE-2014-4344]
+
+* Fix buffer overflow vulnerability in LDAP KDB back end.
+  [CVE-2014-4345]
+
+* Fix multiple vulnerabilities in the LDAP KDC back end.
+  [CVE-2014-5354 CVE-2014-5353]
+
+* Fix multiple kadmind vulnerabilities, some of which are based in the
+  gssrpc library. [CVE-2014-5352 CVE-2014-9421 CVE-2014-9422
+  CVE-2014-9423]
+
+krb5-1.11.6 changes by ticket ID
+--------------------------------
+
+7867    Fix memory leak in patch for #7831
+8073    Fix gss_process_context_token() [CVE-2014-5352]
+8074    Fix kadm5/gssrpc XDR double free [CVE-2014-9421]
+8075    Fix kadmind server validation [CVE-2014-9422]
+8076    Fix gssrpc data leakage [CVE-2014-9423]
+8077    Clean up rcache if GSS krb5 acquire_cred fails
+8078    Avoid assertion failure in error_message
+8079    Allow empty store in gss_acquire_cred_from
+8080    Fix kpropd -x
+8081    Properly reflect MS krb5 mech in SPNEGO acceptor
+8082    Update doc build instructions
+8083    Support referrals from Windows Server 2003
+8084    Avoid duplicate "/etc/krb5.conf" in profile path
+8085    Correct docs for "kdb5_util load" switches
+8086    Check for malloc failure in process_chpw_request
+8087    Update iprop_master_ulogsize documentation
+8088    Initialize err variable in krb5_sendto_kdc
+8089    Fix memory leak in krb5_verify_init_creds
+8090    Mention k5login_authoritative in k5login docs
+8091    Fix unlikely double free in PKINIT client code
+8092    Fix returning KDB_NOENTRY in find_alternate_tgs()
+8093    Update example kadmin getprinc enctype display
+8094    Fix GSS krb5 initial sequence number gap handling
+8095    Get getopt from unistd.h (not getopt.h) in tests
+8096    Fix leak in kadm5_flush with LDAP KDB
+8097    Check for asprintf failure in kdb5_util create
+8098    Fix krb5int_c_combine_keys
+8099    Add tests for krb5int_c_combine_keys
+8100    Don't blindly use PKCS11 slot IDs in PKINIT
+8101    Do not document pkinit_mapping_file
+8102    Always include salt in LDAP KrbKey encoding
+8103    Add missing profile functions to libkrb5 exports
+8104    Do not document pkinit_win2k
+8105    Improve PKINIT certificate documentation
+8106    Fix error checking in PKINIT authdata creation
+8107    Fix unlikely null dereference in mk_cred()
+8108    Handle invalid RFC 1964 tokens [CVE-2014-4341 CVE-2014-4342]
+8109    Fix KDC worker process argument parsing
+8110    Fix build on systems without RTM_OLD*
+8111    Fix race in util/profile/Makefile.in
+8112    Fix calloc check in krb5_authdata_context_init
+8113    Fix double-free in SPNEGO [CVE-2014-4343]
+8114    NULL dereference in SPNEGO acceptor for continuation tokens
+        [CVE-2014-4344]
+8115    Remove indent workaround in man page RST sources
+8116    Use TAILQ macros instead of CIRCLEQ in libdb2
+8117    Fix deleted node handling in libprofile
+8118    Fix creation/rename of top-level profile sections
+8119    Use zapfree in krb5_decrypt_tkt_part
+8120    Fix LDAP key data segmentation [CVE-2014-4345]
+8121    Make tcl_kadm5.c work with Tcl 8.6
+8122    kinit -C loops chasing realm referrals against MIT KDC
+8140    Export function gss_add_cred_with_password
+8141    Check for null *iter_p in profile_iterator()
+8142    Fix LDAP misused policy name crash [CVE-2014-5353]
+8143    Update example enctypes in kdc_conf.rst
+8144    Fix cursor leak in krb5_verify_init_creds
+8145    Report output ccache errors getting initial creds
+8146    Fix typo in doc for krb5_get_init_creds_keytab()
+8147    Fix input race condition in t_skew.py
+8148    Parse "ktadd -norandkey" in remote kadmin client
+
 Major changes in 1.11.5 (2014-01-21)
 ------------------------------------
 
@@ -83,7 +180,7 @@ Major changes in 1.11.5 (2014-01-21)
 
 * Improve documentation.
 
-krb5-1.11.4 changes by ticket ID
+krb5-1.11.5 changes by ticket ID
 --------------------------------
 
 7760    Fix use-before-init in two test programs
