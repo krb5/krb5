@@ -11,6 +11,7 @@ MIT Kerberos Documentation (|release|)
    plugindev/index.rst
    build/index.rst
    basic/index.rst
+   formats/index.rst
    mitK5features.rst
    build_this.rst
    about.rst
