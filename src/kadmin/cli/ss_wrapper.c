@@ -49,17 +49,25 @@ main(int argc, char *argv[])
         ss_perror(sci_idx, retval, _("creating invocation"));
         exit(1);
     }
-    if (request == NULL && *args == NULL) {
-        (void)ss_listen(sci_idx);
-    } else {
-        if (request != NULL)
-            code = ss_execute_line(sci_idx, request);
-        else
-            code = ss_execute_command(sci_idx, args);
+
+    if (*args != NULL) {
+        /* Execute post-option arguments as a single script-mode command. */
+        code = ss_execute_command(sci_idx, args);
+        if (code) {
+            ss_perror(sci_idx, code, *args);
+            exit_status = 1;
+        }
+    } else if (request != NULL) {
+        /* Execute the -q option as a single interactive command. */
+        code = ss_execute_line(sci_idx, request);
         if (code != 0) {
             ss_perror(sci_idx, code, request);
             exit_status = 1;
         }
+    } else {
+        /* Prompt for commands. */
+        (void)ss_listen(sci_idx);
     }
+
     return quit() ? 1 : exit_status;
 }
