@@ -650,7 +650,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     }
 
     errcode = handle_authdata(kdc_context, c_flags, client, server,
-                              header_server,
+                              header_server, local_tgt,
                               subkey != NULL ? subkey :
                               header_ticket->enc_part2->session,
                               &encrypting_key, /* U2U or server key */

@@ -263,6 +263,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                               state->client,
                               state->server,
                               NULL,
+                              state->local_tgt,
                               &state->client_keyblock,
                               &state->server_keyblock,
                               NULL,
