@@ -31,6 +31,7 @@ the key entry.  Key entries use the following informal grammar::
         enctype (16 bits)
         key length (32 bits)
         key contents
+        key version (32 bits) [in release 1.14 and later]
 
     principal ::=
         count of components (32 bits) [includes realm in version 1]
@@ -44,8 +45,7 @@ the key entry.  Key entries use the following informal grammar::
         length (16 bits)
         value (length bytes)
 
-Some implementations of Kerberos recognize a 32-bit key version at the
-end of an entry, if the record length is at least 4 bytes longer than
-the entry and the value of those 32 bits is not 0.  If present, this
-key version supersedes the 8-bit key version.  MIT krb5 does not yet
-implement this extension.
+The 32-bit key version overrides the 8-bit key version.  To determine
+if it is present, the implementation must check that at least 4 bytes
+remain in the record after the other fields are read, and that the
+value of the 32-bit integer contained in those bytes is non-zero.

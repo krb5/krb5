@@ -1185,10 +1185,11 @@ krb5_ktfileint_internal_read_entry(krb5_context context, krb5_keytab id, krb5_ke
     krb5_int16 princ_size;
     register int i;
     krb5_int32 size;
-    krb5_int32 start_pos;
+    krb5_int32 start_pos, pos;
     krb5_error_code error;
     char        *tmpdata;
     krb5_data   *princ;
+    uint32_t    vno32;
 
     KTCHECKLOCK(id);
     memset(ret_entry, 0, sizeof(krb5_keytab_entry));
@@ -1367,6 +1368,20 @@ krb5_ktfileint_internal_read_entry(krb5_context context, krb5_keytab id, krb5_ke
         goto fail;
     }
 
+    /* Check for a 32-bit kvno extension if four or more bytes remain. */
+    pos = ftell(KTFILEP(id));
+    if (pos - start_pos + 4 <= size) {
+        if (!fread(&vno32, sizeof(vno32), 1, KTFILEP(id))) {
+            error = KRB5_KT_END;
+            goto fail;
+        }
+        if (KTVERSION(id) != KRB5_KT_VNO_1)
+            vno32 = ntohl(vno32);
+        /* If the value is 0, the bytes are just zero-fill. */
+        if (vno32)
+            ret_entry->vno = vno32;
+    }
+
     /*
      * Reposition file pointer to the next inter-record length field.
      */
@@ -1406,6 +1421,7 @@ krb5_ktfileint_write_entry(krb5_context context, krb5_keytab id, krb5_keytab_ent
     krb5_int32  princ_type;
     krb5_int32  size_needed;
     krb5_int32  commit_point = -1;
+    uint32_t    vno32;
     int         i;
 
     KTCHECKLOCK(id);
@@ -1508,6 +1524,13 @@ krb5_ktfileint_write_entry(krb5_context context, krb5_keytab id, krb5_keytab_ent
         goto abend;
     }
 
+    /* 32-bit key version number */
+    vno32 = entry->vno;
+    if (KTVERSION(id) != KRB5_KT_VNO_1)
+        vno32 = htonl(vno32);
+    if (!fwrite(&vno32, sizeof(vno32), 1, KTFILEP(id)))
+        goto abend;
+
     if (fflush(KTFILEP(id)))
         goto abend;
 
@@ -1556,6 +1579,7 @@ krb5_ktfileint_size_entry(krb5_context context, krb5_keytab_entry *entry, krb5_i
     total_size += sizeof(krb5_octet);
     total_size += sizeof(krb5_int16);
     total_size += sizeof(krb5_int16) + entry->key.length;
+    total_size += sizeof(uint32_t);
 
     *size_needed = total_size;
     return retval;
