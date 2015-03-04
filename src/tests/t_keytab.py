@@ -5,7 +5,7 @@ for realm in multipass_realms(create_user=False):
     # Test kinit with a keytab.
     realm.kinit(realm.host_princ, flags=['-k'])
 
-realm = K5Realm(get_creds=False)
+realm = K5Realm(get_creds=False, start_kadmind=True)
 
 # Test kinit with a partial keytab.
 pkeytab = realm.keytab + '.partial'
@@ -41,19 +41,78 @@ if 'keytab specified, forcing -k' not in output:
     fail('Expected output not seen from kinit -i')
 realm.klist(realm.user_princ)
 
-# Test handling of kvno values beyond 255.
+# Test handling of kvno values beyond 255.  Use kadmin over the
+# network since we used to have an 8-bit limit on kvno marshalling.
+
+# Test one key rotation, verifying that the expected new kvno appears
+# in the keytab and in the principal entry.
+def test_key_rotate(realm, princ, expected_kvno):
+    realm.run_kadmin(['ktadd', '-k', realm.keytab, princ])
+    realm.run([kadminl, 'ktrem', princ, 'old'])
+    realm.kinit(princ, flags=['-k'])
+    out = realm.run([klist, '-k'])
+    if ('%d %s' % (expected_kvno, princ)) not in out:
+        fail('kvno %d not listed in keytab' % expected_kvno)
+    out = realm.run_kadmin(['getprinc', princ])
+    if ('Key: vno %d,' % expected_kvno) not in out:
+        fail('vno %d not seen in getprinc output' % expected_kvno)
+
+realm.prep_kadmin()
 princ = 'foo/bar@%s' % realm.realm
 realm.addprinc(princ)
 os.remove(realm.keytab)
-realm.run([kadminl, 'modprinc', '-kvno', '252', princ])
-for kvno in range(253, 259):
-    realm.run([kadminl, 'ktadd', '-k', realm.keytab, princ])
-    realm.kinit(princ, flags=['-k'])
-    realm.klist_keytab(princ)
-    os.remove(realm.keytab)
-output = realm.run([kadminl, 'getprinc', princ])
-if 'Key: vno 258,' not in output:
-    fail('Expected vno not seen in kadmin.local output')
+realm.run([kadminl, 'modprinc', '-kvno', '253', princ])
+test_key_rotate(realm, princ, 254)
+test_key_rotate(realm, princ, 255)
+test_key_rotate(realm, princ, 256)
+test_key_rotate(realm, princ, 257)
+realm.run([kadminl, 'modprinc', '-kvno', '32766', princ])
+test_key_rotate(realm, princ, 32767)
+test_key_rotate(realm, princ, 32768)
+test_key_rotate(realm, princ, 32769)
+realm.run([kadminl, 'modprinc', '-kvno', '65534', princ])
+test_key_rotate(realm, princ, 65535)
+test_key_rotate(realm, princ, 1)
+test_key_rotate(realm, princ, 2)
+
+# Test that klist -k can read a keytab entry without a 32-bit kvno and
+# reports the 8-bit key version.
+record = '\x00\x01'             # principal component count
+record += '\x00\x0bKRBTEST.COM' # realm
+record += '\x00\x04user'        # principal component
+record += '\x00\x00\x00\x01'    # name type (NT-PRINCIPAL)
+record += '\x54\xf7\x4d\x35'    # timestamp
+record += '\x02'                # key version
+record += '\x00\x12'            # enctype
+record += '\x00\x20'            # key length
+record += '\x00' * 32           # key bytes
+f = open(realm.keytab, 'w')
+f.write('\x05\x02\x00\x00\x00' + chr(len(record)))
+f.write(record)
+f.close()
+out = realm.run([klist, '-k'])
+if ('   2 %s' % realm.user_princ) not in out:
+    fail('Expected entry not seen in klist -k output')
+
+# Make sure zero-fill isn't treated as a 32-bit kvno.
+f = open(realm.keytab, 'w')
+f.write('\x05\x02\x00\x00\x00' + chr(len(record) + 4))
+f.write(record)
+f.write('\x00\x00\x00\x00')
+f.close()
+out = realm.run([klist, '-k'])
+if ('   2 %s' % realm.user_princ) not in out:
+    fail('Expected entry not seen in klist -k output')
+
+# Make sure a hand-crafted 32-bit kvno is recognized.
+f = open(realm.keytab, 'w')
+f.write('\x05\x02\x00\x00\x00' + chr(len(record) + 4))
+f.write(record)
+f.write('\x00\x00\x00\x03')
+f.close()
+out = realm.run([klist, '-k'])
+if ('   3 %s' % realm.user_princ) not in out:
+    fail('Expected entry not seen in klist -k output')
 
 # Test parameter expansion in profile variables
 realm.stop()
