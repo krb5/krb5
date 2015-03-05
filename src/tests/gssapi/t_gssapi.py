@@ -191,6 +191,11 @@ output = realm.run(['./t_export_name', '-s', 'p:a@b'])
 if output != '0401000806062B060105050200000003614062\n':
     fail('Unexpected output from t_export_name (SPNEGO krb5 principal)')
 
+# Test that composite-export tokens can be imported.
+output = realm.run(['./t_export_name', '-c', 'p:a@b'])
+if (output != '0402000B06092A864886F7120102020000000361406200000000\n'):
+    fail('Unexpected output from t_export_name (using COMPOSITE_EXPORT)')
+
 # Test gss_inquire_mechs_for_name behavior.
 krb5_mech = '{ 1 2 840 113554 1 2 2 }'
 spnego_mech = '{ 1 3 6 1 5 5 2 }'
