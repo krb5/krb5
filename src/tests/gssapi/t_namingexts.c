@@ -32,11 +32,26 @@
 static int use_spnego = 0;
 
 static void
+display_name(const char *tag, gss_name_t name)
+{
+    OM_uint32 major, minor;
+    gss_buffer_desc buf;
+
+    major = gss_display_name(&minor, name, &buf, NULL);
+    check_gsserr("gss_display_name", major, minor);
+
+    printf("%s:\t%.*s\n", tag, (int)buf.length, (char *)buf.value);
+
+    (void)gss_release_buffer(&minor, &buf);
+}
+
+static void
 test_export_import_name(gss_name_t name)
 {
     OM_uint32 major, minor;
     gss_buffer_desc exported_name = GSS_C_EMPTY_BUFFER;
     gss_name_t imported_name = GSS_C_NO_NAME;
+    gss_name_t imported_name_comp = GSS_C_NO_NAME;
     unsigned int i;
 
     major = gss_export_name_composite(&minor, name, &exported_name);
@@ -53,6 +68,10 @@ test_export_import_name(gss_name_t name)
     major = gss_import_name(&minor, &exported_name, GSS_C_NT_EXPORT_NAME,
                             &imported_name);
     check_gsserr("gss_import_name", major, minor);
+
+    major = gss_import_name(&minor, &exported_name, GSS_C_NT_COMPOSITE_EXPORT,
+                            &imported_name_comp);
+    check_gsserr("gss_import_name", major, minor);
     (void)gss_release_buffer(&minor, &exported_name);
 
     printf("\n");
@@ -60,7 +79,12 @@ test_export_import_name(gss_name_t name)
     printf("Re-imported attributes:\n\n");
     enumerate_attributes(imported_name, 0);
 
+    display_name("Re-imported (as composite) name", imported_name_comp);
+    printf("Re-imported (as composite) attributes:\n\n");
+    enumerate_attributes(imported_name_comp, 0);
+
     (void)gss_release_name(&minor, &imported_name);
+    (void)gss_release_name(&minor, &imported_name_comp);
 }
 
 static void

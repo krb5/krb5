@@ -36,7 +36,7 @@
 #include <errno.h>
 
 /* local function to import GSS_C_EXPORT_NAME names */
-static OM_uint32 importExportName(OM_uint32 *, gss_union_name_t);
+static OM_uint32 importExportName(OM_uint32 *, gss_union_name_t, gss_OID);
 
 static OM_uint32
 val_imp_name_args(
@@ -151,8 +151,9 @@ gss_name_t *		output_name;
      * do however make this an MN for names of GSS_C_NT_EXPORT_NAME type.
      */
     if (input_name_type != GSS_C_NULL_OID &&
-	g_OID_equal(input_name_type, GSS_C_NT_EXPORT_NAME)) {
-	major_status = importExportName(minor_status, union_name);
+	(g_OID_equal(input_name_type, GSS_C_NT_EXPORT_NAME) ||
+	 g_OID_equal(input_name_type, GSS_C_NT_COMPOSITE_EXPORT))) {
+	major_status = importExportName(minor_status, union_name, input_name_type);
 	if (major_status != GSS_S_COMPLETE)
 	    goto allocation_failure;
     }
@@ -188,9 +189,10 @@ static const unsigned int mechOidLenLen = 2;
 static const unsigned int nameTypeLenLen = 2;
 
 static OM_uint32
-importExportName(minor, unionName)
+importExportName(minor, unionName, inputNameType)
     OM_uint32 *minor;
     gss_union_name_t unionName;
+    gss_OID inputNameType;
 {
     gss_OID_desc mechOid;
     gss_buffer_desc expName;
@@ -263,11 +265,10 @@ importExportName(minor, unionName)
     if (mech->gss_export_name) {
 	if (mech->gssspi_import_name_by_mech) {
 	    major = mech->gssspi_import_name_by_mech(minor, &mechOid, &expName,
-						     GSS_C_NT_EXPORT_NAME,
+						     inputNameType,
 						     &unionName->mech_name);
 	} else {
-	    major = mech->gss_import_name(minor, &expName,
-					  GSS_C_NT_EXPORT_NAME,
+	    major = mech->gss_import_name(minor, &expName, inputNameType,
 					  &unionName->mech_name);
 	}
 	if (major != GSS_S_COMPLETE)
