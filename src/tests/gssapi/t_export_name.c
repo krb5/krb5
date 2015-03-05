@@ -57,6 +57,8 @@ main(int argc, char *argv[])
     gss_OID mech = (gss_OID)gss_mech_krb5;
     gss_name_t name, mechname, impname;
     gss_buffer_desc buf, buf2;
+    krb5_boolean use_composite = FALSE;
+    gss_OID ntype;
     const char *name_arg;
     char opt;
 
@@ -68,6 +70,8 @@ main(int argc, char *argv[])
             mech = &mech_krb5;
         else if (opt == 's')
             mech = &mech_spnego;
+        else if (opt == 'c')
+            use_composite = TRUE;
         else
             usage();
     }
@@ -81,13 +85,20 @@ main(int argc, char *argv[])
     /* Canonicalize and export the name. */
     major = gss_canonicalize_name(&minor, name, mech, &mechname);
     check_gsserr("gss_canonicalize_name", major, minor);
-    major = gss_export_name(&minor, mechname, &buf);
+    if (use_composite)
+        major = gss_export_name_composite(&minor, mechname, &buf);
+    else
+        major = gss_export_name(&minor, mechname, &buf);
     check_gsserr("gss_export_name", major, minor);
 
     /* Import and re-export the name, and compare the results. */
-    major = gss_import_name(&minor, &buf, GSS_C_NT_EXPORT_NAME, &impname);
+    ntype = use_composite ? GSS_C_NT_COMPOSITE_EXPORT : GSS_C_NT_EXPORT_NAME;
+    major = gss_import_name(&minor, &buf, ntype, &impname);
     check_gsserr("gss_export_name", major, minor);
-    major = gss_export_name(&minor, impname, &buf2);
+    if (use_composite)
+        major = gss_export_name_composite(&minor, mechname, &buf2);
+    else
+        major = gss_export_name(&minor, mechname, &buf2);
     check_gsserr("gss_export_name", major, minor);
     if (buf.length != buf2.length ||
         memcmp(buf.value, buf2.value, buf.length) != 0) {
