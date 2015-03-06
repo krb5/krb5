@@ -1568,8 +1568,8 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
         /* Take the first client principal we find; they should all be the
          * same anyway. */
         for (i = 0; i < pResponse->CountOfTickets; i++) {
-            if (UnicodeStringToMITPrinc(&pResponse->Tickets[0].ClientName,
-                                        &pResponse->Tickets[0].ClientRealm,
+            if (UnicodeStringToMITPrinc(&pResponse->Tickets[i].ClientName,
+                                        &pResponse->Tickets[i].ClientRealm,
                                         context, &data->princ))
                 break;
 
@@ -1915,8 +1915,8 @@ krb5_lcc_get_principal(krb5_context context, krb5_ccache id, krb5_principal *pri
             /* Take the first client principal we find; they should all be the
              * same anyway. */
             for (i = 0; i < pResponse->CountOfTickets; i++) {
-                if (UnicodeStringToMITPrinc(&pResponse->Tickets[0].ClientName,
-                                            &pResponse->Tickets[0].ClientRealm,
+                if (UnicodeStringToMITPrinc(&pResponse->Tickets[i].ClientName,
+                                            &pResponse->Tickets[i].ClientRealm,
                                             context, &data->princ))
                     break;
             }
