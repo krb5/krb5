@@ -167,7 +167,7 @@ typedef struct krb5_string_attr_st {
  */
 typedef struct _krb5_key_data {
     krb5_int16            key_data_ver;         /* Version */
-    krb5_int16            key_data_kvno;        /* Key Version */
+    krb5_ui_2             key_data_kvno;        /* Key Version */
     krb5_int16            key_data_type[2];     /* Array of types */
     krb5_ui_2             key_data_length[2];   /* Array of lengths */
     krb5_octet          * key_data_contents[2]; /* Array of pointers */

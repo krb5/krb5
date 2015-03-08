@@ -704,7 +704,7 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
                 krb5_key_data *kp = &ent->key_data[j];
                 kdbe_key_t *kv = &ULOG_ENTRY_KEYVAL(update, i, j);
                 kp->key_data_ver = (krb5_int16)kv->k_ver;
-                kp->key_data_kvno = (krb5_int16)kv->k_kvno;
+                kp->key_data_kvno = (krb5_ui_2)kv->k_kvno;
                 if (kp->key_data_ver > 2) {
                     return EINVAL; /* XXX ? */
                 }

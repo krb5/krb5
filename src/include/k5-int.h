@@ -1646,7 +1646,7 @@ struct _krb5_key_data;          /* kdb.h */
 
 struct ldap_seqof_key_data {
     krb5_int32 mkvno;           /* Master key version number */
-    krb5_int16 kvno;            /* kvno of key_data elements (all the same) */
+    krb5_ui_2 kvno;             /* kvno of key_data elements (all the same) */
     struct _krb5_key_data *key_data;
     krb5_int16 n_key_data;
 };

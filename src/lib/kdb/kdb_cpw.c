@@ -436,6 +436,10 @@ rekey(krb5_context context, krb5_keyblock *mkey, krb5_key_salt_tuple *ks_tuple,
     old_kvno = krb5_db_get_key_data_kvno(context, n_key_data, key_data);
     if (new_kvno < old_kvno + 1)
         new_kvno = old_kvno + 1;
+    /* Wrap from 65535 to 1; we can only store 16-bit kvno values in key_data,
+     * and we assign special meaning to kvno 0. */
+    if (new_kvno == (1 << 16))
+        new_kvno = 1;
 
     /* Add new keys to the front of the list. */
     if (password != NULL) {
