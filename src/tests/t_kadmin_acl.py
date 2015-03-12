@@ -65,6 +65,8 @@ restricted_modify  im  *         +preauth
 restricted_rename  ad  *         +preauth
 
 */*                d   *2/*1
+# The next line is a regression test for #8154; it is not used directly.
+one/*/*/five       l
 */two/*/*          d   *3/*1/*2
 */admin            a
 wctarget           a   wild/*
