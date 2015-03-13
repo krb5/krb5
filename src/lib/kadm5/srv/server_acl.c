@@ -349,6 +349,10 @@ kadm5int_acl_parse_restrictions(s, rpp)
                     }
                 }
             }
+            if (code) {
+                krb5_klog_syslog(LOG_ERR, _("%s: invalid restrictions: %s"),
+                                 acl_acl_file, s);
+            }
         }
     }
     if (sp)
