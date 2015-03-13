@@ -72,8 +72,8 @@ ignored.  Lines containing ACL entries have the format::
 
         {+\|-}\ *flagname*
             flag is forced to the indicated value.  The permissible flags
-            are the same as the + and - flags for the kadmin
-            :ref:`add_principal` and :ref:`modify_principal` commands.
+            are the same as those for the **default_principal_flags**
+            variable in :ref:`kdc.conf(5)`.
 
         *-clearpolicy*
             policy is forced to be empty.
