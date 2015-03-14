@@ -152,6 +152,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
     rpcvers_t rpc_vers;
     krb5_ccache ccache;
     krb5_principal client = NULL, server = NULL;
+    struct timeval timeout;
 
     kadm5_server_handle_t handle;
     kadm5_config_params params_local;
@@ -261,6 +262,12 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
 #endif
         goto error;
     }
+
+    /* Set a one-hour timeout. */
+    timeout.tv_sec = 3600;
+    timeout.tv_usec = 0;
+    (void)clnt_control(handle->clnt, CLSET_TIMEOUT, &timeout);
+
     handle->client_socket = fd;
     handle->lhandle->clnt = handle->clnt;
     handle->lhandle->client_socket = fd;
