@@ -94,17 +94,12 @@ clnt_create(
 		if (client == NULL) {
 			return (NULL);
 		}
-		tv.tv_sec = 120;
-		clnt_control(client, CLSET_TIMEOUT, &tv);
 		break;
 	case IPPROTO_TCP:
 		client = clnttcp_create(&sockin, prog, vers, &sock, 0, 0);
 		if (client == NULL) {
 			return (NULL);
 		}
-		tv.tv_sec = 120;
-		tv.tv_usec = 0;
-		clnt_control(client, CLSET_TIMEOUT, &tv);
 		break;
 	default:
 		rpc_createerr.cf_stat = RPC_SYSTEMERROR;
