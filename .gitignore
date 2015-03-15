@@ -261,6 +261,7 @@ testlog
 /src/tests/rdreq
 /src/tests/responder
 /src/tests/s2p
+/src/tests/s4u2proxy
 /src/tests/t_init_creds
 /src/tests/t_localauth
 

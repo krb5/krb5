@@ -45,9 +45,9 @@
  * Multiple prefixes may be specified for nested container.
  *
  * In the output, authdata containers will be flattened and displayed with the
- * above prefixes, with AD-KDC-ISSUED containers verified using the ticket
- * session key.  Nested containers only display the prefix for the innermost
- * container.
+ * above prefixes or '+' for an AD-CAMMAC container.  AD-KDC-ISSUED and
+ * AD-CAMMAC containers will be verified with the appropriate key.  Nested
+ * containers only display the prefix for the innermost container.
  */
 
 #include <k5-int.h>
@@ -80,6 +80,8 @@ get_type_for_prefix(int prefix_byte)
         return KRB5_AUTHDATA_MANDATORY_FOR_KDC;
     if (prefix_byte == '^')
         return KRB5_AUTHDATA_KDC_ISSUED;
+    if (prefix_byte == '+')
+        return KRB5_AUTHDATA_CAMMAC;
     abort();
 }
 
@@ -92,6 +94,8 @@ get_prefix_byte(krb5_authdata *ad)
         return '!';
     if (ad->ad_type == KRB5_AUTHDATA_KDC_ISSUED)
         return '^';
+    if (ad->ad_type == KRB5_AUTHDATA_CAMMAC)
+        return '+';
     abort();
 }
 
@@ -142,6 +146,28 @@ make_authdata(const char *typestr, const char *contents)
     return ad;
 }
 
+/* Verify a CAMMAC's svc_verifier and return its contents. */
+static krb5_authdata **
+unwrap_cammac(krb5_authdata *ad, krb5_keyblock *tktkey)
+{
+    krb5_data *der_elements, ad_data = make_data(ad->contents, ad->length);
+    krb5_authdata **elements;
+    krb5_cammac *cammac;
+    krb5_boolean valid;
+
+    check(decode_krb5_cammac(&ad_data, &cammac));
+    check(encode_krb5_authdata(cammac->elements, &der_elements));
+    assert(cammac->svc_verifier != NULL);
+    krb5_c_verify_checksum(ctx, tktkey, KRB5_KEYUSAGE_CAMMAC, der_elements,
+                           &cammac->svc_verifier->checksum, &valid);
+    assert(valid);
+    elements = cammac->elements;
+    cammac->elements = NULL;
+    krb5_free_data(ctx, der_elements);
+    k5_free_cammac(ctx, cammac);
+    return elements;
+}
+
 static krb5_authdata **
 get_container_contents(krb5_authdata *ad, krb5_keyblock *skey,
                        krb5_keyblock *tktkey)
@@ -150,9 +176,28 @@ get_container_contents(krb5_authdata *ad, krb5_keyblock *skey,
 
     if (ad->ad_type == KRB5_AUTHDATA_KDC_ISSUED)
         check(krb5_verify_authdata_kdc_issued(ctx, skey, ad, NULL, &inner_ad));
+    else if (ad->ad_type == KRB5_AUTHDATA_CAMMAC)
+        inner_ad = unwrap_cammac(ad, tktkey);
     else
         check(krb5_decode_authdata_container(ctx, ad->ad_type, ad, &inner_ad));
     return inner_ad;
+}
+
+/* Decode and display authentication indicator authdata. */
+static void
+display_auth_indicator(krb5_authdata *ad)
+{
+    krb5_data **strs, **p, d = make_data(ad->contents, ad->length);
+
+    check(decode_utf8_strings(&d, &strs));
+    printf("[");
+    for (p = strs; *p != NULL; p++) {
+        printf("%.*s", (int)(*p)->length, (*p)->data);
+        if (*(p + 1) != NULL)
+            printf(", ");
+    }
+    printf("]");
+    k5_free_data_ptr_list(strs);
 }
 
 /* Display ad as either a hex dump or ASCII text. */
@@ -184,7 +229,8 @@ display_authdata(krb5_authdata *ad, krb5_keyblock *skey, krb5_keyblock *tktkey,
 
     if (ad->ad_type == KRB5_AUTHDATA_IF_RELEVANT ||
         ad->ad_type == KRB5_AUTHDATA_MANDATORY_FOR_KDC ||
-        ad->ad_type == KRB5_AUTHDATA_KDC_ISSUED) {
+        ad->ad_type == KRB5_AUTHDATA_KDC_ISSUED ||
+        ad->ad_type == KRB5_AUTHDATA_CAMMAC) {
         /* Decode and display the contents. */
         inner_ad = get_container_contents(ad, skey, tktkey);
         display_authdata_list(inner_ad, skey, tktkey, get_prefix_byte(ad));
@@ -194,7 +240,11 @@ display_authdata(krb5_authdata *ad, krb5_keyblock *skey, krb5_keyblock *tktkey,
 
     printf("%c", prefix_byte);
     printf("%d: ", (int)ad->ad_type);
-    display_binary_or_ascii(ad);
+
+    if (ad->ad_type == KRB5_AUTHDATA_AUTH_INDICATOR)
+        display_auth_indicator(ad);
+    else
+        display_binary_or_ascii(ad);
     printf("\n");
 }
 

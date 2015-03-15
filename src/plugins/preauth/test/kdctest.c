@@ -31,12 +31,17 @@
  */
 
 /*
- * This module is used to test preauth interface features.  Currently, it
- * retrieves the "teststring" attribute from the client principal and sends it
- * to the client, encrypted in the reply key.  (The plain text "no key" is sent
- * if there is no reply key; the encrypted message "no attr" is sent if there
- * is no string attribute.)  Upon receiving padata from the client, it always
- * succeeds in preauthenticating the request.
+ * This module is used to test preauth interface features.  Currently, the
+ * kdcpreauth module does two things:
+ *
+ * - It retrieves the "teststring" attribute from the client principal and
+ *   sends it to the client, encrypted in the reply key.  (The plain text "no
+ *   key" is sent if there is no reply key; the encrypted message "no attr" is
+ *   sent if there is no string attribute.)
+ *
+ * - It receives a space-separated list from the clpreauth module and asserts
+ *   each string as an authentication indicator.  It always succeeds in
+ *   pre-authenticating the request.
  *
  * To use this module, a test script should:
  * - Register this module and the corresponding clpreauth module
@@ -98,6 +103,18 @@ test_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
             krb5_kdcpreauth_moddata moddata,
             krb5_kdcpreauth_verify_respond_fn respond, void *arg)
 {
+    krb5_error_code ret;
+    char *str, *ind, *toksave = NULL;
+
+    str = k5memdup0(data->contents, data->length, &ret);
+    if (ret)
+        abort();
+    ind = strtok_r(str, " ", &toksave);
+    while (ind != NULL) {
+        cb->add_auth_indicator(context, rock, ind);
+        ind = strtok_r(NULL, " ", &toksave);
+    }
+    free(str);
     enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
     (*respond)(arg, 0, NULL, NULL, NULL);
 }

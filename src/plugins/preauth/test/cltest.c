@@ -32,9 +32,15 @@
 
 /*
  * This module is used to test preauth interface features.  At this time, the
- * clpreauth module decrypts a message from the initial KDC padata using the
- * reply key and prints it to stdout.  (The unencrypted message "no key" can
- * also be displayed.)  An empty padata message is then sent to the KDC.
+ * clpreauth module does two things:
+ *
+ * - It decrypts a message from the initial KDC padata using the reply key and
+ *   prints it to stdout.  (The unencrypted message "no key" can also be
+ *   displayed.)
+ *
+ * - It pulls an "indicators" attribute from the gic preauth options and sends
+ *   it to the server, instructing the kdcpreauth module to assert one or more
+ *   space-separated authentication indicators.
  */
 
 #include "k5-int.h"
@@ -43,6 +49,31 @@
 #define TEST_PA_TYPE -123
 
 static krb5_preauthtype pa_types[] = { TEST_PA_TYPE, 0 };
+
+struct client_state {
+    char *indicators;
+};
+
+static krb5_error_code
+test_init(krb5_context context, krb5_clpreauth_moddata *moddata_out)
+{
+    struct client_state *st;
+
+    st = malloc(sizeof(*st));
+    assert(st != NULL);
+    st->indicators = NULL;
+    *moddata_out = (krb5_clpreauth_moddata)st;
+    return 0;
+}
+
+static void
+test_fini(krb5_context context, krb5_clpreauth_moddata moddata)
+{
+    struct client_state *st = (struct client_state *)moddata;
+
+    free(st->indicators);
+    free(st);
+}
 
 static krb5_error_code
 test_process(krb5_context context, krb5_clpreauth_moddata moddata,
@@ -53,17 +84,21 @@ test_process(krb5_context context, krb5_clpreauth_moddata moddata,
              krb5_prompter_fct prompter, void *prompter_data,
              krb5_pa_data ***out_pa_data)
 {
+    struct client_state *st = (struct client_state *)moddata;
     krb5_error_code ret;
     krb5_pa_data **list, *pa;
     krb5_keyblock *k;
     krb5_enc_data enc;
     krb5_data plain;
+    const char *indstr;
 
     if (pa_data->length == 6 && memcmp(pa_data->contents, "no key", 6) == 0) {
         printf("no key\n");
     } else {
+        /* This fails during s4u_identify_user(), so don't assert. */
         ret = cb->get_as_key(context, rock, &k);
-        assert(!ret);
+        if (ret)
+            return ret;
         ret = alloc_data(&plain, pa_data->length);
         assert(!ret);
         enc.enctype = k->enctype;
@@ -74,16 +109,32 @@ test_process(krb5_context context, krb5_clpreauth_moddata moddata,
         free(plain.data);
     }
 
+    indstr = (st->indicators != NULL) ? st->indicators : "";
     list = k5calloc(2, sizeof(*list), &ret);
     assert(!ret);
     pa = k5alloc(sizeof(*pa), &ret);
     assert(!ret);
     pa->pa_type = TEST_PA_TYPE;
-    pa->contents = NULL;
-    pa->length = 0;
+    pa->contents = (uint8_t *)strdup(indstr);
+    assert(pa->contents != NULL);
+    pa->length = strlen(indstr);
     list[0] = pa;
     list[1] = NULL;
     *out_pa_data = list;
+    return 0;
+}
+
+static krb5_error_code
+test_gic_opt(krb5_context kcontext, krb5_clpreauth_moddata moddata,
+             krb5_get_init_creds_opt *opt, const char *attr, const char *value)
+{
+    struct client_state *st = (struct client_state *)moddata;
+
+    if (strcmp(attr, "indicators") == 0) {
+        free(st->indicators);
+        st->indicators = strdup(value);
+        assert(st->indicators != NULL);
+    }
     return 0;
 }
 
@@ -102,6 +153,9 @@ clpreauth_test_initvt(krb5_context context, int maj_ver,
     vt = (krb5_clpreauth_vtable)vtable;
     vt->name = "test";
     vt->pa_type_list = pa_types;
+    vt->init = test_init;
+    vt->fini = test_fini;
     vt->process = test_process;
+    vt->gic_opts = test_gic_opt;
     return 0;
 }

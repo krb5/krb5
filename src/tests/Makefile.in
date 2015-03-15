@@ -6,9 +6,9 @@ SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
 
 OBJS= adata.o etinfo.o gcred.o hist.o hrealm.o kdbtest.o plugorder.o \
-	t_init_creds.o t_localauth.o rdreq.o responder.o s2p.o
+	t_init_creds.o t_localauth.o rdreq.o responder.o s2p.o s4u2proxy.o
 EXTRADEPSRCS= adata.c etinfo.c gcred.c hist.c hrealm.c kdbtest.c plugorder.c \
-	t_init_creds.c t_localauth.c rdreq.o responder.c s2p.c
+	t_init_creds.c t_localauth.c rdreq.o responder.c s2p.c s4u2proxy.c
 
 TEST_DB = ./testdb
 TEST_REALM = FOO.TEST.REALM
@@ -50,6 +50,9 @@ responder: responder.o $(KRB5_BASE_DEPLIBS)
 
 s2p: s2p.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ s2p.o $(KRB5_BASE_LIBS)
+
+s4u2proxy: s4u2proxy.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ s4u2proxy.o $(KRB5_BASE_LIBS)
 
 t_init_creds: t_init_creds.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_init_creds.o $(KRB5_BASE_LIBS)
@@ -104,7 +107,7 @@ kdb_check: kdc.conf krb5.conf
 	$(RM) $(TEST_DB)* stash_file
 
 check-pytests:: adata etinfo gcred hist hrealm kdbtest plugorder rdreq
-check-pytests:: responder s2p t_init_creds t_localauth unlockiter
+check-pytests:: responder s2p s4u2proxy t_init_creds t_localauth unlockiter
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_iprop.py $(PYTESTFLAGS)
@@ -155,6 +158,6 @@ check-pytests:: responder s2p t_init_creds t_localauth unlockiter
 clean::
 	$(RM) gcred hist hrealm kdbtest plugorder rdreq responder s2p
 	$(RM) adata etinfo gcred hist hrealm kdbtest plugorder rdreq responder
-	$(RM) s2p t_init_creds t_localauth krb5.conf kdc.conf
+	$(RM) s2p s4u2proxy t_init_creds t_localauth krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap
 	$(RM) au.log
