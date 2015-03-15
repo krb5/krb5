@@ -1450,6 +1450,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/preauth/cksum_body
 	plugins/preauth/otp
 	plugins/preauth/securid_sam2
+	plugins/preauth/test
 	plugins/preauth/wpse
 	plugins/authdata/greet_client
 	plugins/authdata/greet_server

@@ -323,7 +323,7 @@ load_preauth_plugins(struct server_handle *handle, krb5_context context,
         }
 
         /* Add this module to the systems list once for each pa type. */
-        for (j = 0; vt->pa_type_list[j] > 0; j++) {
+        for (j = 0; vt->pa_type_list[j] != 0; j++) {
             sys = &preauth_systems[n_systems];
             sys->name = vt->name;
             sys->type = vt->pa_type_list[j];
