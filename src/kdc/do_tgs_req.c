@@ -461,6 +461,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     }
 
     if (isflagset(request->kdc_options, KDC_OPT_RENEW)) {
+        krb5_timestamp old_starttime;
         krb5_deltat old_life;
 
         assert(isflagset(c_flags, KRB5_KDB_FLAGS_S4U) == 0);
@@ -470,7 +471,9 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         enc_tkt_reply = *(header_ticket->enc_part2);
         enc_tkt_reply.authorization_data = NULL;
 
-        old_life = enc_tkt_reply.times.endtime - enc_tkt_reply.times.starttime;
+        old_starttime = enc_tkt_reply.times.starttime ?
+            enc_tkt_reply.times.starttime : enc_tkt_reply.times.authtime;
+        old_life = enc_tkt_reply.times.endtime - old_starttime;
 
         enc_tkt_reply.times.starttime = kdc_time;
         enc_tkt_reply.times.endtime =

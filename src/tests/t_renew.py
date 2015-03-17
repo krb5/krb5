@@ -27,6 +27,9 @@ realm.kinit(realm.user_princ, flags=['-R'])
 realm.kinit(realm.user_princ, flags=['-R'])
 realm.klist(realm.user_princ)
 
+# Make sure we can use a renewed ticket.
+realm.run([kvno, realm.user_princ])
+
 # Make sure we can't renew non-renewable tickets.
 test('non-renewable', '1h', '1h', False)
 out = realm.kinit(realm.user_princ, flags=['-R'], expected_code=1)
