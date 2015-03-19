@@ -7,7 +7,7 @@ not present in the Unix krb5 distribution, most notably the
 MIT Kerberos Ticket Manager application.
 
 To build Kerberos 5 on Windows, you will need the Windows SDK (XP SP3
-or later), VisualStudio (2010 Professional), a version of Perl, and some
+or later), VisualStudio (2010 Professional SP1), a version of Perl, and some
 common Unix utilities such as sed/awk/cp/cat installed in the
 command-line path.  To build an MSI installer, you will additionally
 need the Windows Installer XML (WiX) toolkit, and to ensure that
