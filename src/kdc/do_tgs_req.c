@@ -576,25 +576,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
 
-    errcode = handle_authdata(kdc_context, c_flags, client, server, krbtgt,
-                              subkey != NULL ? subkey :
-                              header_ticket->enc_part2->session,
-                              &encrypting_key, /* U2U or server key */
-                              tgskey,
-                              pkt,
-                              request,
-                              s4u_x509_user ?
-                              s4u_x509_user->user_id.user : NULL,
-                              subject_tkt,
-                              &enc_tkt_reply);
-    if (errcode) {
-        krb5_klog_syslog(LOG_INFO, _("TGS_REQ : handle_authdata (%d)"),
-                         errcode);
-        status = "HANDLE_AUTHDATA";
-        goto cleanup;
-    }
-
-
     /*
      * Only add the realm of the presented tgt to the transited list if
      * it is different than the local realm (cross-realm) and it is different
@@ -656,6 +637,24 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
         errcode = KRB5KDC_ERR_POLICY;
         status = "BAD_TRANSIT";
         au_state->violation = LOCAL_POLICY;
+        goto cleanup;
+    }
+
+    errcode = handle_authdata(kdc_context, c_flags, client, server, krbtgt,
+                              subkey != NULL ? subkey :
+                              header_ticket->enc_part2->session,
+                              &encrypting_key, /* U2U or server key */
+                              tgskey,
+                              pkt,
+                              request,
+                              s4u_x509_user ?
+                              s4u_x509_user->user_id.user : NULL,
+                              subject_tkt,
+                              &enc_tkt_reply);
+    if (errcode) {
+        krb5_klog_syslog(LOG_INFO, _("TGS_REQ : handle_authdata (%d)"),
+                         errcode);
+        status = "HANDLE_AUTHDATA";
         goto cleanup;
     }
 
@@ -730,11 +729,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
 
     /* copy the time fields */
     reply_encpart.times = enc_tkt_reply.times;
-
-    /* starttime is optional, and treated as authtime if not present.
-       so we can nuke it if it matches */
-    if (enc_tkt_reply.times.starttime == enc_tkt_reply.times.authtime)
-        enc_tkt_reply.times.starttime = 0;
 
     nolrentry.lr_type = KRB5_LRQ_NONE;
     nolrentry.value = 0;
