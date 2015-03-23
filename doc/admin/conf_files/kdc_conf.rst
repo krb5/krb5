@@ -578,6 +578,11 @@ For each token type, the following tags may be specified:
     passed to the RADIUS server.  Otherwise, the realm will be
     included.  The default value is ``true``.
 
+**indicator**
+    This tag specifies an authentication indicator to be included in
+    the ticket if this token type is used to authenticate.  This
+    option may be specified multiple times.  (New in release 1.14.)
+
 In the following example, requests are sent to a remote server via UDP::
 
     [otp]
@@ -670,6 +675,11 @@ For information about the syntax of some of these options, see
 **pkinit_identity**
     Specifies the location of the KDC's X.509 identity information.
     This option is required if pkinit is to be supported by the KDC.
+
+**pkinit_indicator**
+    Specifies an authentication indicator to include in the ticket if
+    pkinit is used to authenticate.  This option may be specified
+    multiple times.  (New in release 1.14.)
 
 **pkinit_kdc_ocsp**
     Specifies the location of the KDC's OCSP.

@@ -18,6 +18,7 @@ For administrators
    princ_dns.rst
    enctypes.rst
    https.rst
+   auth_indicator.rst
 
 .. toctree::
    :maxdepth: 1

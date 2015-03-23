@@ -50,7 +50,10 @@ to a callback function and handle (called a "rock") which can be used
 to get additional information about the current request, including the
 maximum allowable clock skew, the client's long-term keys, the
 DER-encoded request body, the FAST armor key, string attributes on the
-client's database entry, and the client's database entry itself.
+client's database entry, and the client's database entry itself.  The
+**verify** method can assert one or more authentication indicators to
+be included in the issued ticket using the ``add_auth_indicator``
+callback (new in release 1.14).
 
 The **edata** and **verify** methods can be implemented
 asynchronously.  Because of this, they do not return values directly

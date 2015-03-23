@@ -632,6 +632,12 @@ supply per-principal configuration to the KDC and some KDC plugin
 modules.  The following string attribute names are recognized by the
 KDC:
 
+**require_auth**
+    Specifies an authentication indicator which is required to
+    authenticate to the principal as a service.  Multiple indicators
+    can be specified, separated by spaces; in this case any of the
+    specified indicators will be accepted.  (New in release 1.14.)
+
 **session_enctypes**
     Specifies the encryption types supported for session keys when the
     principal is authenticated to as a server.  See
