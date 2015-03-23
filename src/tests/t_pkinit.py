@@ -31,7 +31,8 @@ pkinit_krb5_conf = {'realms': {'$realm': {
 pkinit_kdc_conf = {'realms': {'$realm': {
             'default_principal_flags': '+preauth',
             'pkinit_eku_checking': 'none',
-            'pkinit_identity': 'FILE:%s,%s' % (kdc_pem, privkey_pem)}}}
+            'pkinit_identity': 'FILE:%s,%s' % (kdc_pem, privkey_pem),
+            'pkinit_indicator': ['indpkinit1', 'indpkinit2']}}}
 restrictive_kdc_conf = {'realms': {'$realm': {
             'restrict_anonymous_to_tgt': 'true' }}}
 
@@ -67,6 +68,9 @@ realm.addprinc('WELLKNOWN/ANONYMOUS')
 realm.kinit('@%s' % realm.realm, flags=['-n'])
 realm.klist('WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS')
 realm.run([kvno, realm.host_princ])
+out = realm.run(['./adata', realm.host_princ])
+if '97:' in out:
+    fail('auth indicators seen in anonymous PKINIT ticket')
 
 # Test anonymous kadmin.
 f = open(os.path.join(realm.testdir, 'acl'), 'a')
@@ -113,6 +117,9 @@ realm.kinit(realm.user_princ,
             password='encrypted')
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
+out = realm.run(['./adata', realm.host_princ])
+if '+97: [indpkinit1, indpkinit2]' not in out:
+    fail('auth indicators not seen in PKINIT ticket')
 
 # Run the basic test - PKINIT with FILE: identity, with a password on the key,
 # supplied by the responder.

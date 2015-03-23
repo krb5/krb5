@@ -66,6 +66,7 @@
 #define KRB5_CONF_REALMS                        "realms"
 #define KRB5_CONF_PKINIT_ALLOW_UPN              "pkinit_allow_upn"
 #define KRB5_CONF_PKINIT_ANCHORS                "pkinit_anchors"
+#define KRB5_CONF_PKINIT_INDICATOR              "pkinit_indicator"
 #define KRB5_CONF_PKINIT_CERT_MATCH             "pkinit_cert_match"
 #define KRB5_CONF_PKINIT_DH_MIN_BITS            "pkinit_dh_min_bits"
 #define KRB5_CONF_PKINIT_EKU_CHECKING           "pkinit_eku_checking"
@@ -226,6 +227,7 @@ struct _pkinit_kdc_context {
     pkinit_identity_opts *idopts;
     char *realmname;
     unsigned int realmname_len;
+    char **auth_indicators;
 };
 typedef struct _pkinit_kdc_context *pkinit_kdc_context;
 

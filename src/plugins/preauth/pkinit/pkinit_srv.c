@@ -298,6 +298,7 @@ pkinit_server_verify_padata(krb5_context context,
     int is_signed = 1;
     krb5_pa_data **e_data = NULL;
     krb5_kdcpreauth_modreq modreq = NULL;
+    char **sp;
 
     pkiDebug("pkinit_verify_padata: entered!\n");
     if (data == NULL || data->length <= 0 || data->contents == NULL) {
@@ -523,6 +524,15 @@ pkinit_server_verify_padata(krb5_context context,
         reqctx->rcv_auth_pack9 = auth_pack9;
         auth_pack9 = NULL;
         break;
+    }
+
+    if (is_signed && plgctx->auth_indicators != NULL) {
+        /* Assert configured authentication indicators. */
+        for (sp = plgctx->auth_indicators; *sp != NULL; sp++) {
+            retval = cb->add_auth_indicator(context, rock, *sp);
+            if (retval)
+                goto cleanup;
+        }
     }
 
     /* remember to set the PREAUTH flag in the reply */
@@ -1217,6 +1227,9 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
         free(eku_string);
     }
 
+    pkinit_kdcdefault_strings(context, plgctx->realmname,
+                              KRB5_CONF_PKINIT_INDICATOR,
+                              &plgctx->auth_indicators);
 
     return 0;
 errout:
@@ -1369,6 +1382,8 @@ errout:
 static void
 pkinit_server_plugin_fini_realm(krb5_context context, pkinit_kdc_context plgctx)
 {
+    char **sp;
+
     if (plgctx == NULL)
         return;
 
@@ -1377,6 +1392,9 @@ pkinit_server_plugin_fini_realm(krb5_context context, pkinit_kdc_context plgctx)
     pkinit_fini_identity_crypto(plgctx->idctx);
     pkinit_fini_plg_crypto(plgctx->cryptoctx);
     pkinit_fini_plg_opts(plgctx->opts);
+    for (sp = plgctx->auth_indicators; sp != NULL && *sp != NULL; sp++)
+        free(*sp);
+    free(plgctx->auth_indicators);
     free(plgctx->realmname);
     free(plgctx);
 }
