@@ -42,6 +42,7 @@ static krb5_preauthtype otp_pa_type_list[] =
 struct request_state {
     krb5_kdcpreauth_verify_respond_fn respond;
     void *arg;
+    krb5_enc_tkt_part *enc_tkt_reply;
 };
 
 static krb5_error_code
@@ -159,6 +160,9 @@ on_response(void *data, krb5_error_code retval, otp_response response)
     if (retval == 0 && response != otp_response_success)
         retval = KRB5_PREAUTH_FAILED;
 
+    if (retval == 0)
+        rs.enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
+
     rs.respond(rs.arg, retval, NULL, NULL, NULL);
 }
 
@@ -263,8 +267,6 @@ otp_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     krb5_data d, plaintext;
     char *config;
 
-    enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
-
     /* Get the FAST armor key. */
     armor_key = cb->fast_armor(context, rock);
     if (armor_key == NULL) {
@@ -298,12 +300,14 @@ otp_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
         goto error;
     }
 
-    /* Create the request state. */
+    /* Create the request state.  Save the response callback, and the
+     * enc_tkt_reply pointer so we can set the TKT_FLG_PRE_AUTH flag later. */
     rs = k5alloc(sizeof(struct request_state), &retval);
     if (rs == NULL)
         goto error;
     rs->arg = arg;
     rs->respond = respond;
+    rs->enc_tkt_reply = enc_tkt_reply;
 
     /* Get the principal's OTP configuration string. */
     retval = cb->get_string(context, rock, "otp", &config);
