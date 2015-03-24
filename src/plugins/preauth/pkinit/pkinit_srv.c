@@ -301,7 +301,7 @@ pkinit_server_verify_padata(krb5_context context,
 
     pkiDebug("pkinit_verify_padata: entered!\n");
     if (data == NULL || data->length <= 0 || data->contents == NULL) {
-        (*respond)(arg, 0, NULL, NULL, NULL);
+        (*respond)(arg, EINVAL, NULL, NULL, NULL);
         return;
     }
 
@@ -313,7 +313,7 @@ pkinit_server_verify_padata(krb5_context context,
 
     plgctx = pkinit_find_realm_context(context, moddata, request->server);
     if (plgctx == NULL) {
-        (*respond)(arg, 0, NULL, NULL, NULL);
+        (*respond)(arg, EINVAL, NULL, NULL, NULL);
         return;
     }
 
