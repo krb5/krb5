@@ -782,6 +782,7 @@ kadm5_rename_principal(void *server_handle,
     kadm5_server_handle_t handle = server_handle;
     krb5_int16 stype, i;
     krb5_data *salt = NULL;
+    krb5_tl_data tl;
 
     CHECK_HANDLE(server_handle);
 
@@ -797,6 +798,18 @@ kadm5_rename_principal(void *server_handle,
 
     if ((ret = kdb_get_entry(handle, source, &kdb, &adb)))
         return ret;
+
+    /*
+     * This rename procedure does not work with the LDAP KDB module (see issue
+     * #8065).  As a stopgap, look for tl-data indicating LDAP and error out.
+     * 0x7FFE is KDB_TL_USER_INFO as defined in kdb_ldap.h.
+     */
+    tl.tl_data_type = 0x7FFE;
+    if (krb5_dbe_lookup_tl_data(handle->context, kdb, &tl) == 0 &&
+        tl.tl_data_length > 0) {
+        ret = KRB5_PLUGIN_OP_NOTSUPP;
+        goto done;
+    }
 
     /* Transform salts as necessary. */
     for (i = 0; i < kdb->n_key_data; i++) {
