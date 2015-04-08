@@ -274,7 +274,7 @@ realm.run([kvno, realm.host_princ])
 realm.klist(realm.user_princ, realm.host_princ)
 
 # Test service principal aliases.
-realm.addprinc('canon')
+realm.addprinc('canon', password('canon'))
 ldap_modify('dn: krbPrincipalName=canon@KRBTEST.COM,cn=t1,cn=krb5\n'
             'changetype: modify\n'
             'add: krbPrincipalName\n'
@@ -293,6 +293,8 @@ realm.run([kvno, 'canon'])
 out = realm.run([klist])
 if 'alias@KRBTEST.COM\n' not in out or 'canon@KRBTEST.COM' not in out:
     fail('After fetching alias and canon, klist is missing one or both')
+realm.kinit(realm.user_princ, password('user'), ['-S', 'alias'])
+realm.klist(realm.user_princ, 'alias@KRBTEST.COM')
 
 # Make sure an alias to the local TGS is still treated like an alias.
 ldap_modify('dn: krbPrincipalName=krbtgt/KRBTEST.COM@KRBTEST.COM,'
@@ -306,10 +308,9 @@ ldap_modify('dn: krbPrincipalName=krbtgt/KRBTEST.COM@KRBTEST.COM,'
 out = realm.run([kadminl, 'getprinc', 'tgtalias'])
 if 'Principal: krbtgt/KRBTEST.COM@KRBTEST.COM' not in out:
     fail('Could not fetch krbtgt through tgtalias')
+realm.kinit(realm.user_princ, password('user'))
 realm.run([kvno, 'tgtalias'])
-out = realm.run([klist])
-if 'tgtalias@KRBTEST.COM\n' not in out:
-    fail('After fetching tgtalias, klist is missing it')
+realm.klist(realm.user_princ, 'tgtalias@KRBTEST.COM')
 
 # Make sure aliases work in header tickets.
 realm.run([kadminl, 'modprinc', '-maxrenewlife', '3 hours', 'user'])
@@ -319,6 +320,18 @@ realm.kinit(realm.user_princ, password('user'), ['-l', '1h', '-r', '2h'])
 realm.run([kvno, 'alias'])
 realm.kinit(realm.user_princ, flags=['-R', '-S', 'alias'])
 realm.klist(realm.user_princ, 'alias@KRBTEST.COM')
+
+# Test client principal aliases, with and without preauth.
+realm.kinit('canon', password('canon'))
+out = realm.kinit('alias', password('canon'), expected_code=1)
+if 'not found in Kerberos database' not in out:
+    fail('Wrong error message for kinit to alias without -C flag')
+realm.kinit('alias', password('canon'), ['-C'])
+realm.run([kvno, 'alias'])
+realm.klist('canon@KRBTEST.COM', 'alias@KRBTEST.COM')
+realm.run([kadminl, 'modprinc', '+requires_preauth', 'canon'])
+realm.kinit('canon', password('canon'))
+realm.kinit('alias', password('canon'), ['-C'])
 
 # Regression test for #7980 (fencepost when dividing keys up by kvno).
 realm.run([kadminl, 'addprinc', '-randkey', '-e', 'aes256-cts,aes128-cts',
