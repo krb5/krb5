@@ -444,7 +444,7 @@ do_standalone()
              * process that it should poll for incremental updates. */
             if (fullprop_child == 0)
                 kill(getppid(), SIGUSR1);
-            if (runonce)
+            else if (runonce)
                 exit(0);
         }
     }
@@ -963,7 +963,7 @@ reinit:
             break;
         }
 
-        if (runonce == 1)
+        if (runonce == 1 && incr_ret->ret != UPDATE_FULL_RESYNC_NEEDED)
             goto done;
 
         /*

@@ -15,6 +15,7 @@ SYNOPSIS
 [**-p** *kdb5_util_prog*]
 [**-P** *port*]
 [**-d**]
+[**-t**]
 
 DESCRIPTION
 -----------
@@ -88,6 +89,12 @@ OPTIONS
     itself from the current job and run in the background.  Instead,
     it will run in the foreground and print out debugging messages
     during the database propagation.
+
+**-t**
+    In standalone mode without incremental propagation, exit after one
+    dump file is received.  In incremental propagation mode, exit as
+    soon as the database is up to date, or if the master returns an
+    error.
 
 **-P**
     Allow for an alternate port number for kpropd to listen on.  This
