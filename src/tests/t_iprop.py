@@ -10,7 +10,7 @@ from k5test import *
 # versa.
 def wait_for_prop(kpropd, full_expected, expected_old, expected_new):
     output('*** Waiting for sync from kpropd\n')
-    full_seen = sleep_seen = prodded_after_dump = False
+    full_seen = sleep_seen = False
     old_sno = new_sno = -1
     while True:
         line = kpropd.stdout.readline()
@@ -39,12 +39,6 @@ def wait_for_prop(kpropd, full_expected, expected_old, expected_new):
             sleep_seen = True
         if 'load process for full propagation completed' in line:
             full_seen = True
-        if sleep_seen and full_seen and not prodded_after_dump:
-            # Prod the kpropd parent into getting incrementals after
-            # it finishes a DB load.  This will be unnecessary if
-            # kpropd is simplified to use a single process.
-            kpropd.send_signal(signal.SIGUSR1)
-            prodded_after_dump = True
 
         # Detect some failure conditions.
         if 'Still waiting for full resync' in line:

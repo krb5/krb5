@@ -298,7 +298,7 @@ main(int argc, char **argv)
     /*
      * This is the iprop case.  We'll fork a child to run do_standalone().  The
      * parent will run do_iprop().  We try to kill the child if we get killed.
-     * Catch SIGUSR1 so tests can use it to interrupt the sleep timer and force
+     * Catch SIGUSR1, which can be used to interrupt the sleep timer and force
      * an iprop request.
      */
     signal_wrapper(SIGHUP, kill_do_standalone);
@@ -440,6 +440,10 @@ do_standalone()
 
             close(s);
 
+            /* If we are the fullprop child in iprop mode, notify the parent
+             * process that it should poll for incremental updates. */
+            if (fullprop_child == 0)
+                kill(getppid(), SIGUSR1);
             if (runonce)
                 exit(0);
         }
