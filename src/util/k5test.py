@@ -309,6 +309,11 @@ Scripts may use the following realm methods and attributes:
   is given, it contains a list of additional kpropd arguments.
   Returns a handle to the kpropd process.
 
+* realm.run_kpropd_once(env, args=[]): Run kpropd once, using the -t
+  flag.  Pass an environment created with realm.special_env() for the
+  slave.  If args is given, it contains a list of additional kpropd
+  arguments.  Returns the kpropd output.
+
 * realm.realm: The realm's name.
 
 * realm.testdir: The realm's storage directory (absolute path).
@@ -925,15 +930,19 @@ class K5Realm(object):
         stop_daemon(self._kadmind_proc)
         self._kadmind_proc = None
 
-    def start_kpropd(self, env, args=[]):
-        global krb5kdc
+    def _kpropd_args(self):
         slavedump_path = os.path.join(self.testdir, 'incoming-slave-datatrans')
         kpropdacl_path = os.path.join(self.testdir, 'kpropd-acl')
-        proc = _start_daemon([kpropd, '-D', '-P', str(self.kprop_port()),
-                              '-f', slavedump_path, '-p', kdb5_util,
-                              '-a', kpropdacl_path] + args, env, 'ready')
+        return [kpropd, '-D', '-P', str(self.kprop_port()),
+                '-f', slavedump_path, '-p', kdb5_util, '-a', kpropdacl_path]
+
+    def start_kpropd(self, env, args=[]):
+        proc = _start_daemon(self._kpropd_args() + args, env, 'ready')
         self._kpropd_procs.append(proc)
         return proc
+
+    def run_kpropd_once(self, env, args=[]):
+        return self.run(self._kpropd_args() + ['-t'] + args, env=env)
 
     def stop(self):
         if self._kdc_proc:

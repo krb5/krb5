@@ -352,4 +352,50 @@ kpropd2.send_signal(signal.SIGUSR1)
 wait_for_prop(kpropd2, True, 2, 0)
 check_ulog(0, 0, 0, [], slave2)
 
+# Stop the kprop daemons so we can test kpropd -t.
+stop_daemon(kpropd1)
+stop_daemon(kpropd2)
+
+# Test the case where no updates are needed.
+out = realm.run_kpropd_once(slave1, ['-d'])
+if 'KDC is synchronized' not in out:
+    fail('Expected synchronized from kpropd -t')
+check_ulog(0, 0, 0, [], slave1)
+
+# Make a change on the master; this will cause a full resync since the
+# master was recently reinitialized.
+realm.run([kadminl, 'modprinc', '-maxlife', '5 minutes', pr1])
+check_ulog(1, 1, 1, [pr1])
+out = realm.run_kpropd_once(slave1, ['-d'])
+if ('Full propagation transfer finished' not in out or
+    'KDC is synchronized' not in out):
+    fail('Expected full dump and synchronized from kpropd -t')
+check_ulog(0, 0, 1, [], slave1)
+out = realm.run([kadminl, 'getprinc', pr1], env=slave1)
+if 'Maximum ticket life: 0 days 00:05:00' not in out:
+    fail('slave1 does not have modification from master after kpropd -t')
+
+# Make another change and get it via incremental update.
+realm.run([kadminl, 'modprinc', '-maxlife', '15 minutes', pr1])
+check_ulog(2, 1, 2, [pr1, pr1])
+out = realm.run_kpropd_once(slave1, ['-d'])
+if 'Got incremental updates (sno=2 ' not in out:
+    fail('Expected incremental updates from kpropd -t')
+check_ulog(1, 2, 2, [pr1], slave1)
+out = realm.run([kadminl, 'getprinc', pr1], env=slave1)
+if 'Maximum ticket life: 0 days 00:15:00' not in out:
+    fail('slave1 does not have modification from master after kpropd -t')
+
+# Propagate a policy change via full resync.
+realm.run([kadminl, 'addpol', '-minclasses', '3', 'testpol'])
+check_ulog(0, 0, 0, [])
+out = realm.run_kpropd_once(slave1, ['-d'])
+if ('Full propagation transfer finished' not in out or
+    'KDC is synchronized' not in out):
+    fail('Expected full dump and synchronized from kpropd -t')
+check_ulog(0, 0, 0, [], slave1)
+out = realm.run([kadminl, 'getpol', 'testpol'], env=slave1)
+if 'Minimum number of password character classes: 3' not in out:
+    fail('slave1 does not have policy from master after kpropd -t')
+
 success('iprop tests')
