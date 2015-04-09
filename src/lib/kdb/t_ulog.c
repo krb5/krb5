@@ -77,12 +77,12 @@ main(int argc, char **argv)
     ulog->kdb_first_sno = ulog->kdb_last_sno - ulog->kdb_num + 1;
 
     /* Add an empty update.  This should reinitialize the ulog, then add the
-     * update with serial number 1. */
+     * update with serial number 2. */
     memset(&upd, 0, sizeof(kdb_incr_update_t));
     if (ulog_add_update(context, &upd) != 0)
         abort();
-    assert(ulog->kdb_num == 1);
+    assert(ulog->kdb_num == 2);
     assert(ulog->kdb_first_sno == 1);
-    assert(ulog->kdb_last_sno == 1);
+    assert(ulog->kdb_last_sno == 2);
     return 0;
 }

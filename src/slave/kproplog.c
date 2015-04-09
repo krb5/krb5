@@ -357,6 +357,17 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, uint32_t ulogentries,
             exit(1);
         }
 
+        printf("---\n");
+        printf(_("Update Entry\n"));
+
+        printf(_("\tUpdate serial # : %u\n"), indx_log->kdb_entry_sno);
+
+        /* The initial entry after a reset is a dummy entry; skip it. */
+        if (indx_log->kdb_entry_size == 0) {
+            printf(_("\tDummy entry\n"));
+            continue;
+        }
+
         memset(&upd, 0, sizeof(kdb_incr_update_t));
         xdrmem_create(&xdrs, (char *)indx_log->entry_data,
                       indx_log->kdb_entry_size, XDR_DECODE);
@@ -364,11 +375,6 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, uint32_t ulogentries,
             printf(_("Entry data decode failure\n\n"));
             exit(1);
         }
-
-        printf("---\n");
-        printf(_("Update Entry\n"));
-
-        printf(_("\tUpdate serial # : %u\n"), indx_log->kdb_entry_sno);
 
         printf(_("\tUpdate operation : "));
         if (upd.kdb_deleted)
