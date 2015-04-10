@@ -57,6 +57,8 @@ OBJS=   \
 	$(OUTPRE)LeashFrame.obj \
 	$(OUTPRE)LeashMessageBox.obj \
 	$(OUTPRE)LeashProperties.obj \
+	$(OUTPRE)LeashUIApplication.obj \
+	$(OUTPRE)LeashUICommandHandler.obj \
 	$(OUTPRE)LeashView.obj \
 	$(OUTPRE)lglobals.obj \
 	$(OUTPRE)MainFrm.obj \
@@ -108,7 +110,9 @@ $(OUTPRE)$(EXE_NAME).exe: $(OBJS) $(XOBJS) $(LIBS)
 kfwribbon.bml kfwribbon.h kfwribbon.rc: kfwribbon.xml
 	uicc.exe kfwribbon.xml kfwribbon.bml /res:kfwribbon.rc /header:kfwribbon.h /name:KFW_RIBBON
 
-$(RESFILE): Leash.rc res/Leash.rc2 ver.rc ../version.rc ../kerberos.ver
+$(RESFILE): Leash.rc res/Leash.rc2 kfwribbon.rc ver.rc ../version.rc ../kerberos.ver
+
+$(OUTPRE)LeashUIApplication.obj $(OUTPRE)LeashUICommandHandler.obj: kfwribbon.h
 
 clean::
 	if exist $(OUTPRE)*.exe del $(OUTPRE)*.exe
