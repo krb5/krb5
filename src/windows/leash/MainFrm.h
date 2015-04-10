@@ -21,6 +21,7 @@
 #endif // _MSC_VER >= 1000
 
 #include "LeashFrame.h"
+#include "LeashUIApplication.h"
 
 class CMainFrame : public CLeashFrame
 {
@@ -31,6 +32,7 @@ private:
 	int m_winRectBottom;
     BOOL m_bOwnerCreated;
     CDialog m_MainFrameOwner;
+    IUIApplication *pApplication;
 
 protected: // create from serialization only
     // Ribbon bar for the application
@@ -86,6 +88,7 @@ protected:
 	afx_msg void OnResetWindowSize();
 	afx_msg void OnSizing(UINT fwSide, LPRECT pRect);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
+	afx_msg void OnRibbonResize();
     afx_msg void OnClose(void);
     //afx_msg void OnContextHelp();
     //}}AFX_MSG
