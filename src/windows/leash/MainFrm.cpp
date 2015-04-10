@@ -14,6 +14,7 @@
 
 
 #include "stdafx.h"
+#include "LeashUIApplication.h"
 #include "Leash.h"
 #include "MainFrm.h"
 #include "lglobals.h"
@@ -57,6 +58,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CLeashFrame)
 	ON_COMMAND(ID_HELP_LEASH_, CMainFrame::OnHelpFinder)
 	ON_COMMAND(ID_HELP, CMainFrame::OnHelp)
 	ON_COMMAND(ID_CONTEXT_HELP, CMainFrame::OnContextHelp)
+	ON_MESSAGE_VOID(WM_RIBBON_RESIZE, OnRibbonResize)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -81,6 +83,7 @@ CMainFrame::CMainFrame()
 	m_isMinimum = FALSE;
     m_isBeingResized = FALSE;
     m_bOwnerCreated = FALSE;
+    pApplication = NULL;
 }
 
 CMainFrame::~CMainFrame()
@@ -90,6 +93,8 @@ CMainFrame::~CMainFrame()
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
     if (CLeashApp::m_useRibbon) {
+        HWND hwnd;
+        HRESULT hr;
         // Fixup tooltips (cribbed from http://social.msdn.microsoft.com/Forums/en/vcmfcatl/thread/5c5b4879-d278-4d79-8894-99e7f9b322df)
 
         CMFCToolTipInfo ttParams;
@@ -108,15 +113,17 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
         CDockingManager::SetDockingMode(DT_SMART);
         m_wndRibbonBar.SetWindows7Look(TRUE);
 
-        // Create the ribbon bar
-        if (!m_wndRibbonBar.Create(this))
-            return -1;   // Failed to create ribbon bar
-
-        m_wndRibbonBar.LoadFromResource(IDR_RIBBON1);
-
-        m_wndApplicationButton.SetVisible(FALSE);
-        // Uncomment the next line to hide the application button
-        //m_wndRibbonBar.SetApplicationButton(&m_wndApplicationButton, CSize());
+        // Initialize the ribbon, keeping a handle to the IUIApplication
+        // so that we can query the ribbon height and save space for it
+        // when calculating our layout.
+        hwnd = this->GetSafeHwnd();
+        if (hwnd == NULL)
+            printf("Failed to get HWND\n");
+        hr = LeashUIApplication::CreateInstance(&pApplication, hwnd);
+        if (FAILED(hr)) {
+            MessageBox("LeashUIApplication::CreateInstance!", "Error", MB_OK);
+            return -1;
+        }
     }
 
 	if (CLeashFrame::OnCreate(lpCreateStruct) == -1)
@@ -333,6 +340,13 @@ void CMainFrame::RecalcLayout(BOOL bNotify)
 { // MINSIZE - Insurance that we have a minimum Leash window size
 	int width = MIN_RIGHT - MIN_LEFT;
 	int height = MIN_BOTTOM - MIN_TOP;
+        LeashUIApplication *leashUI;
+        RECT border;
+        border.left = border.right = border.bottom = 0;
+        // Leave room for the ribbon.
+        leashUI = static_cast<LeashUIApplication*>(pApplication);
+        border.top = (leashUI != NULL) ? leashUI->GetRibbonHeight() : 0;
+        NegotiateBorderSpace(CFrameWnd::borderSet, &border);
 
     BOOL change = FALSE;
 	WINDOWPLACEMENT wndpl;
@@ -427,6 +441,13 @@ LRESULT CMainFrame::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
         }
     }
     return CLeashFrame::WindowProc(message, wParam, lParam);
+}
+
+// Signalled by LeashUIApplication::OnViewChanged when the ribbon height
+// changes.
+void CMainFrame::OnRibbonResize()
+{
+    RecalcLayout(TRUE);
 }
 
 /*
