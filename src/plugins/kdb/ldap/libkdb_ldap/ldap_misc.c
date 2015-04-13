@@ -1402,19 +1402,18 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
         entry->fail_auth_count = val;
         mask |= KDB_FAIL_AUTH_COUNT_ATTR;
     }
-
-    if (krb5_ldap_get_value(ld, ent, "krbmaxticketlife",
-                            &entry->max_life) == 0)
+    if (krb5_ldap_get_value(ld, ent, "krbmaxticketlife", &val) == 0) {
+        entry->max_life = val;
         mask |= KDB_MAX_LIFE_ATTR;
-
-    if (krb5_ldap_get_value(ld, ent, "krbmaxrenewableage",
-                            &entry->max_renewable_life) == 0)
+    }
+    if (krb5_ldap_get_value(ld, ent, "krbmaxrenewableage", &val) == 0) {
+        entry->max_renewable_life = val;
         mask |= KDB_MAX_RLIFE_ATTR;
-
-    if (krb5_ldap_get_value(ld, ent, "krbticketflags",
-                            &entry->attributes) == 0)
+    }
+    if (krb5_ldap_get_value(ld, ent, "krbticketflags", &val) == 0) {
+        entry->attributes = val;
         mask |= KDB_TKT_FLAGS_ATTR;
-
+    }
     ret = get_time(ld, ent, "krbprincipalexpiration", &entry->expiration,
                    &attr_present);
     if (ret)
