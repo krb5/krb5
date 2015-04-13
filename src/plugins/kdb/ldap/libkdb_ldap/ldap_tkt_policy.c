@@ -193,7 +193,7 @@ krb5_ldap_read_policy(krb5_context context, char *policyname,
                       krb5_ldap_policy_params **policy, int *omask)
 {
     krb5_error_code             st=0, tempst=0;
-    int                         objectmask=0;
+    int                         objectmask=0, val=0;
     LDAP                        *ld=NULL;
     LDAPMessage                 *result=NULL,*ent=NULL;
     char                        *attributes[] = { "krbMaxTicketLife", "krbMaxRenewableAge", "krbTicketFlags", NULL};
@@ -240,14 +240,18 @@ krb5_ldap_read_policy(krb5_context context, char *policyname,
 
     ent=ldap_first_entry(ld, result);
     if (ent != NULL) {
-        if (krb5_ldap_get_value(ld, ent, "krbmaxticketlife", (int *) &(lpolicy->maxtktlife)) == 0)
+        if (krb5_ldap_get_value(ld, ent, "krbmaxticketlife", &val) == 0) {
+            lpolicy->maxtktlife = val;
             *omask |= LDAP_POLICY_MAXTKTLIFE;
-
-        if (krb5_ldap_get_value(ld, ent, "krbmaxrenewableage", (int *) &(lpolicy->maxrenewlife)) == 0)
+        }
+        if (krb5_ldap_get_value(ld, ent, "krbmaxrenewableage", &val) == 0) {
+            lpolicy->maxrenewlife = val;
             *omask |= LDAP_POLICY_MAXRENEWLIFE;
-
-        if (krb5_ldap_get_value(ld, ent, "krbticketflags", (int *) &(lpolicy->tktflags)) == 0)
+        }
+        if (krb5_ldap_get_value(ld, ent, "krbticketflags", &val) == 0) {
+            lpolicy->tktflags = val;
             *omask |= LDAP_POLICY_TKTFLAGS;
+        }
     }
 
     lpolicy->mask = *omask;
