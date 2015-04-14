@@ -27,7 +27,7 @@ LeashKRB5FreeTicketInfo(TICKETINFO *ticketinfo)
         ticketinfo->principal = NULL;
     }
     if (ticketinfo->ccache_name) {
-        free(ticketinfo->ccache_name);
+        pkrb5_free_string(NULL, ticketinfo->ccache_name);
         ticketinfo->ccache_name = NULL;
     }
     if (ticketinfo->ticket_list)
