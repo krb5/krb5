@@ -1078,7 +1078,7 @@ curs_run_cb(iter_curs *curs, ctx_iterate_cb func, krb5_pointer func_arg)
 
     k5_mutex_unlock(krb5_db2_mutex);
     retval = (*func)(func_arg, entry);
-    krb5_db2_free(ctx, entry);
+    krb5_dbe_free(ctx, entry);
     k5_mutex_lock(krb5_db2_mutex);
     if (dbc->unlockiter) {
         lockerr = curs_lock(curs);
