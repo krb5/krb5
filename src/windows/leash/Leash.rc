@@ -882,9 +882,6 @@ END
 //
 
 IDR_MAINFRAME           BITMAP                  "res\\Leash_toolbar.bmp"
-IDB_HOMESMALL           BITMAP                  "res\\homesmall.bmp"
-IDB_HOMELARGE           BITMAP                  "res\\homelarge.bmp"
-IDB_BITMAP2             BITMAP                  "res\\main.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////

@@ -87,10 +87,6 @@
 #define IDI_LEASH_TICKET_ADDRESS        262
 #define IDI_LEASH_TICKET_SESSION        263
 #define IDI_LEASH_TICKET_ENCRYPTION     264
-#define IDR_RIBBON1                     265
-#define IDB_HOMESMALL                   266
-#define IDB_HOMELARGE                   267
-#define IDB_BITMAP2                     268
 #define IDC_PROGRESS1                   1000
 #define IDC_TRACKBAR1                   1001
 #define IDC_TRACKBAR2                   1002
