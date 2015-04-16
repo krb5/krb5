@@ -111,8 +111,8 @@ leash_error_message(
 #ifdef USE_MESSAGE_BOX
     *p = 0; /* ensure NULL termination of message */
     if ( displayMB )
-        MessageBox(NULL, message, "Leash", MB_OK | MB_ICONERROR | MB_TASKMODAL |
-                    MB_SETFOREGROUND);
+        MessageBox(NULL, message, "MIT Kerberos",
+                   MB_OK | MB_ICONERROR | MB_TASKMODAL | MB_SETFOREGROUND);
 #endif /* USE_MESSAGE_BOX */
     if (rc5) return rc5;
     if (rcL) return rcL;
