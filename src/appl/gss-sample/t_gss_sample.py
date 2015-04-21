@@ -41,7 +41,6 @@ def server_client_test(realm, options):
     if 'Signature verified.' not in output:
         fail('Expected message not seen in gss-client output')
     stop_daemon(server)
-    realm.klist(realm.user_princ, realm.host_princ)
 
 # Make up a filename to hold user's initial credentials.
 def ccache_savefile(realm):
@@ -59,19 +58,25 @@ def ccache_restore(realm):
 def tgs_test(realm, options):
     ccache_restore(realm)
     server_client_test(realm, options)
+    realm.klist(realm.user_princ, realm.host_princ)
 
 # Perform a test of the server and client with initial credentials
 # obtained through gss_acquire_cred_with_password().
 def pw_test(realm, options):
-    os.remove(realm.ccache)
+    if os.path.exists(realm.ccache):
+        os.remove(realm.ccache)
     server_client_test(realm, options + ['-user', realm.user_princ,
                                          '-pass', password('user')])
+    if os.path.exists(realm.ccache):
+        fail('gss_acquire_cred_with_password created ccache')
 
 # Perform a test of the server and client with initial credentials
 # obtained with the client keytab
 def kt_test(realm, options):
-    os.remove(realm.ccache)
+    if os.path.exists(realm.ccache):
+        os.remove(realm.ccache)
     server_client_test(realm, options)
+    realm.klist(realm.user_princ, realm.host_princ)
 
 for realm in multipass_realms():
     ccache_save(realm)

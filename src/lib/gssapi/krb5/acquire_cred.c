@@ -655,7 +655,21 @@ acquire_init_cred(krb5_context context,
     if (GSS_ERROR(kg_caller_provided_ccache_name(minor_status,
                                                  &caller_ccname)))
         return GSS_S_FAILURE;
-    if (req_ccache != NULL) {
+
+    if (password != GSS_C_NO_BUFFER) {
+        pwdata = make_data(password->value, password->length);
+        code = krb5int_copy_data_contents_add0(context, &pwdata, &pwcopy);
+        if (code)
+            goto error;
+        cred->password = pwcopy.data;
+
+        /* We will fetch the credential into a private memory ccache. */
+        assert(req_ccache == NULL);
+        code = krb5_cc_new_unique(context, "MEMORY", NULL, &cred->ccache);
+        if (code)
+            goto error;
+        cred->destroy_ccache = 1;
+    } else if (req_ccache != NULL) {
         code = krb5_cc_dup(context, req_ccache, &cred->ccache);
         if (code)
             goto error;
@@ -672,14 +686,6 @@ acquire_init_cred(krb5_context context,
         code = krb5_kt_client_default(context, &cred->client_keytab);
     if (code)
         goto error;
-
-    if (password != GSS_C_NO_BUFFER) {
-        pwdata = make_data(password->value, password->length);
-        code = krb5int_copy_data_contents_add0(context, &pwdata, &pwcopy);
-        if (code)
-            goto error;
-        cred->password = pwcopy.data;
-    }
 
     if (cred->ccache != NULL) {
         /* The caller specified a ccache; check what's in it. */
