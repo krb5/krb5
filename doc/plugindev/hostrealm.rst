@@ -29,7 +29,7 @@ credentials.
 The optional **fallback_realm** method allows a module to determine
 fallback mappings for a hostname.  The first fallback mapping is tried
 if there is no authoritative mapping for a realm, and KDC referrals
-failed to produce a succesful result.
+failed to produce a successful result.
 
 The optional **default_realm** method allows a module to determine the
 local default realm.
