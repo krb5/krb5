@@ -49,7 +49,7 @@ Part A:    Transforming Doxygen XML output into reStructuredText (rst)  without 
 Part B:    Bridge to Doxygen HTML output.
 
 1. Transform Doxygen XML output into reStructuredText.
-   In src/Doxygen configuration file request genetation of the tag file and XML output:
+   In src/Doxygen configuration file request generation of the tag file and XML output:
        GENERATE_TAGFILE       = krb5doxy.tag
        GENERATE_XML           = YES
 
@@ -60,6 +60,3 @@ Part B:    Bridge to Doxygen HTML output.
    where doxy_html_dir is the location of the Doxygen HTML output
 
 3.  Continue with steps 3 - 6 of Part A.
-
-
-
