@@ -7,7 +7,7 @@ b) Old kadmin protocol - which was in the beta code (kadmin/v5passwdd)
 c) Newer kadm5 gssrpc based code (kadmin/server)
 
 d) Simple password changing protocol implemented in our kadmin server
-with client in clients/kpasswd. 
+with client in clients/kpasswd.
 
 
 
@@ -16,31 +16,31 @@ the code is used in the source tree.
 
 
 - kpasswd.protocol: Describes the password changing protocol in
-			src/kadmin/v5passwdd. 
-			include/adm.h has some defintions.
+			src/kadmin/v5passwdd.
+			include/adm.h has some definitions.
 
 		    Client and server provided
 
-- kadmin.protocol: Describes other administrative protocol options that 
+- kadmin.protocol: Describes other administrative protocol options that
 			src/kadmin/v5passwdd supports
 
 		    No client in the source tree uses it.
 
-- draft-ietf-cat-kerb-chg-password-02.txt: Describes the 
-		    password changing service that 
-		    clients/kpasswd uses through krb5_change_password() 
+- draft-ietf-cat-kerb-chg-password-02.txt: Describes the
+		    password changing service that
+		    clients/kpasswd uses through krb5_change_password()
 		    located in lib/krb5/os/changepw.c
 
 		    kadmin/server/schpw.c implements this as part of
 		    the kadmin server.
 
 		    This is version 1 of the protocol. Version 2 is
-		    in the IETF draft stage and is very different. 
+		    in the IETF draft stage and is very different.
 
-		    Currently: Version 1 is supported - but we may not 
+		    Currently: Version 1 is supported - but we may not
 		    be implementing the TCP handling aspects.
 
-- ../doc/kadm5: Describes the current protocol. 
+- ../doc/kadm5: Describes the current protocol.
 
 		    kadmin/passwd (which is not installed) uses
  		    the kadm5 protocol for password changing.
