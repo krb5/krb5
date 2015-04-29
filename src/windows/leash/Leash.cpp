@@ -693,6 +693,7 @@ DECL_FUNC_PTR(krb5_get_renewed_creds);
 DECL_FUNC_PTR(krb5_cc_initialize);
 DECL_FUNC_PTR(krb5_cc_store_cred);
 DECL_FUNC_PTR(krb5_cc_get_full_name);
+DECL_FUNC_PTR(krb5_free_string);
 DECL_FUNC_PTR(krb5_enctype_to_name);
 DECL_FUNC_PTR(krb5_cc_get_type);
 DECL_FUNC_PTR(krb5int_cc_user_set_default_name);
@@ -736,6 +737,7 @@ FUNC_INFO krb5_fi[] = {
     MAKE_FUNC_INFO(krb5_cc_initialize),
     MAKE_FUNC_INFO(krb5_cc_store_cred),
     MAKE_FUNC_INFO(krb5_cc_get_full_name),
+    MAKE_FUNC_INFO(krb5_free_string),
     MAKE_FUNC_INFO(krb5_enctype_to_name),
     MAKE_FUNC_INFO(krb5_cc_get_type),
     MAKE_FUNC_INFO(krb5int_cc_user_set_default_name),

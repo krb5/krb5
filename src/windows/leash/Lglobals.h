@@ -181,6 +181,7 @@ extern DECL_FUNC_PTR(krb5_get_renewed_creds);
 extern DECL_FUNC_PTR(krb5_cc_initialize);
 extern DECL_FUNC_PTR(krb5_cc_store_cred);
 extern DECL_FUNC_PTR(krb5_cc_get_full_name);
+extern DECL_FUNC_PTR(krb5_free_string);
 extern DECL_FUNC_PTR(krb5_enctype_to_name);
 extern DECL_FUNC_PTR(krb5_cc_get_type);
 extern DECL_FUNC_PTR(krb5int_cc_user_set_default_name);
