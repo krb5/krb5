@@ -149,4 +149,7 @@ int ktest_equal_kkdcp_message(krb5_kkdcp_message *ref,
                               krb5_kkdcp_message *var);
 int ktest_equal_cammac(krb5_cammac *ref, krb5_cammac *var);
 
+int ktest_equal_secure_cookie(krb5_secure_cookie *ref,
+                              krb5_secure_cookie *var);
+
 #endif

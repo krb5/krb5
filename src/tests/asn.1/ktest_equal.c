@@ -1083,3 +1083,14 @@ ktest_equal_cammac(krb5_cammac *ref, krb5_cammac *var)
     p = p && ptr_equal(other_verifiers, vmac_list_eq);
     return p;
 }
+
+int
+ktest_equal_secure_cookie(krb5_secure_cookie *ref, krb5_secure_cookie *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && ktest_equal_sequence_of_pa_data(ref->data, var->data);
+    p = p && ref->time == ref->time;
+    return p;
+}

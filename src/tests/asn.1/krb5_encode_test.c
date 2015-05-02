@@ -751,6 +751,14 @@ main(argc, argv)
         encode_run(req, "cammac", "", encode_krb5_cammac);
         ktest_empty_cammac(&req);
     }
+    /****************************************************************/
+    /* encode_krb5_secure_cookie */
+    {
+        krb5_secure_cookie cookie;
+        ktest_make_sample_secure_cookie(&cookie);
+        encode_run(cookie, "secure_cookie", "", encode_krb5_secure_cookie);
+        ktest_empty_secure_cookie(&cookie);
+    }
 #ifndef DISABLE_PKINIT
     /****************************************************************/
     /* encode_krb5_pa_pk_as_req */

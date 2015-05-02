@@ -588,7 +588,7 @@ store_int(intmax_t intval, size_t size, void *val)
     case 8:
         if ((int64_t)intval != intval)
             return ASN1_OVERFLOW;
-        *(int64_t *)intval = intval;
+        *(int64_t *)val = intval;
         return 0;
     default:
         abort();

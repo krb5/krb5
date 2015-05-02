@@ -866,3 +866,12 @@ k5_free_cammac(krb5_context context, krb5_cammac *val)
     free(val->other_verifiers);
     free(val);
 }
+
+void
+k5_free_secure_cookie(krb5_context context, krb5_secure_cookie *val)
+{
+    if (val == NULL)
+        return;
+    krb5_free_pa_data(context, val->data);
+    free(val);
+}

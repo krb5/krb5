@@ -123,6 +123,7 @@ void ktest_make_sample_ldap_seqof_key_data(ldap_seqof_key_data *p);
 void ktest_make_sample_kkdcp_message(krb5_kkdcp_message *p);
 void ktest_make_minimal_cammac(krb5_cammac *p);
 void ktest_make_maximal_cammac(krb5_cammac *p);
+void ktest_make_sample_secure_cookie(krb5_secure_cookie *p);
 
 /*----------------------------------------------------------------------*/
 
@@ -207,6 +208,7 @@ void ktest_empty_ldap_seqof_key_data(krb5_context, ldap_seqof_key_data *p);
 
 void ktest_empty_kkdcp_message(krb5_kkdcp_message *p);
 void ktest_empty_cammac(krb5_cammac *p);
+void ktest_empty_secure_cookie(krb5_secure_cookie *p);
 
 extern krb5_context test_context;
 extern char *sample_principal_name;

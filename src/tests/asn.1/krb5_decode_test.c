@@ -1098,6 +1098,14 @@ int main(argc, argv)
         ktest_empty_cammac(&ref);
     }
 
+    /****************************************************************/
+    /* decode_krb5_secure_cookie */
+    {
+        setup(krb5_secure_cookie,ktest_make_sample_secure_cookie);
+        decode_run("secure_cookie","","30 2C 02 04 2D F8 02 25 30 24 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61",decode_krb5_secure_cookie,ktest_equal_secure_cookie,k5_free_secure_cookie);
+        ktest_empty_secure_cookie(&ref);
+    }
+
 #ifndef DISABLE_PKINIT
 
     /****************************************************************/

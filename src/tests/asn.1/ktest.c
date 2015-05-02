@@ -1009,6 +1009,13 @@ ktest_make_maximal_cammac(krb5_cammac *p)
     p->other_verifiers[2] = NULL;
 }
 
+void
+ktest_make_sample_secure_cookie(krb5_secure_cookie *p)
+{
+    ktest_make_sample_pa_data_array(&p->data);
+    p->time = SAMPLE_TIME;
+}
+
 /****************************************************************/
 /* destructors */
 
@@ -1840,4 +1847,10 @@ ktest_empty_cammac(krb5_cammac *p)
         destroy_verifier_mac(vmacp);
     free(p->other_verifiers);
     p->other_verifiers = NULL;
+}
+
+void
+ktest_empty_secure_cookie(krb5_secure_cookie *p)
+{
+    ktest_empty_pa_data_array(p->data);
 }

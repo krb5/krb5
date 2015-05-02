@@ -1797,3 +1797,20 @@ MAKE_DECODER(decode_krb5_cammac, cammac);
 
 MAKE_ENCODER(encode_utf8_strings, seqof_utf8_data);
 MAKE_DECODER(decode_utf8_strings, seqof_utf8_data);
+
+/*
+ * SecureCookie ::= SEQUENCE {
+ *     time     INTEGER,
+ *     data     SEQUENCE OF PA-DATA,
+ *     ...
+ * }
+ */
+DEFINTTYPE(inttime, time_t);
+DEFOFFSETTYPE(secure_cookie_0, krb5_secure_cookie, time, inttime);
+DEFOFFSETTYPE(secure_cookie_1, krb5_secure_cookie, data, ptr_seqof_pa_data);
+static const struct atype_info *secure_cookie_fields[] = {
+    &k5_atype_secure_cookie_0, &k5_atype_secure_cookie_1
+};
+DEFSEQTYPE(secure_cookie, krb5_secure_cookie, secure_cookie_fields);
+MAKE_ENCODER(encode_krb5_secure_cookie, secure_cookie);
+MAKE_DECODER(decode_krb5_secure_cookie, secure_cookie);

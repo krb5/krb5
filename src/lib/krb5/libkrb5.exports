@@ -42,6 +42,7 @@ decode_krb5_safe
 decode_krb5_sam_challenge_2
 decode_krb5_sam_challenge_2_body
 decode_krb5_sam_response_2
+decode_krb5_secure_cookie
 decode_krb5_setpw_req
 decode_krb5_tgs_rep
 decode_krb5_tgs_req
@@ -92,6 +93,7 @@ encode_krb5_safe
 encode_krb5_sam_challenge_2
 encode_krb5_sam_challenge_2_body
 encode_krb5_sam_response_2
+encode_krb5_secure_cookie
 encode_krb5_sp80056a_other_info
 encode_krb5_tgs_rep
 encode_krb5_tgs_req
@@ -124,6 +126,7 @@ k5_free_otp_tokeninfo
 k5_free_kkdcp_message
 k5_free_pa_otp_challenge
 k5_free_pa_otp_req
+k5_free_secure_cookie
 k5_free_serverlist
 k5_hostrealm_free_context
 k5_init_trace
