@@ -68,7 +68,7 @@
 
     <?ifndef VersionMajor?>
         <?define VersionMajor="4"?>
-        <?define VersionMinor="0"?>
+        <?define VersionMinor="1"?>
         <?define VersionPatch="0"?>
     <?else?>
         <?if Not ($(var.VersionMinor) And $(var.VersionPatch))?>
