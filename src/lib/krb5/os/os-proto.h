@@ -171,6 +171,9 @@ void k5_hostrealm_free_context(krb5_context);
 krb5_error_code hostrealm_profile_initvt(krb5_context context, int maj_ver,
                                          int min_ver,
                                          krb5_plugin_vtable vtable);
+krb5_error_code hostrealm_registry_initvt(krb5_context context, int maj_ver,
+                                          int min_ver,
+                                          krb5_plugin_vtable vtable);
 krb5_error_code hostrealm_dns_initvt(krb5_context context, int maj_ver,
                                      int min_ver, krb5_plugin_vtable vtable);
 krb5_error_code hostrealm_domain_initvt(krb5_context context, int maj_ver,
