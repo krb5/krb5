@@ -74,6 +74,41 @@ variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
 
+Major changes in 1.13.2 (2015-05-08)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a minor vulnerability in krb5_read_message, which is primarily
+  used in the BSD-derived kcmd suite of applications.  [CVE-2014-5355]
+
+* Fix a bypass of requires_preauth in KDCs that have PKINIT enabled.
+  [CVE-2015-2694]
+
+* Fix some issues with the LDAP KDC database back end.
+
+* Fix an iteration-related memory leak in the DB2 KDC database back
+  end.
+
+* Fix issues with some less-used kadm5.acl functionality.
+
+* Improve documentation.
+
+krb5-1.13.2 changes by ticket ID
+--------------------------------
+
+8050    Fix krb5_read_message handling [CVE-2014-5355]
+8149    Add formats section to documentation
+8153    Import names immediately with COMPOSITE_EXPORT
+8154    kadmind ACL back-references can affect later lines
+8155    kadm5.acl flag restrictions don't use documented syntax
+8160    requires_preauth bypass in PKINIT-enabled KDC [CVE-2015-2694]
+8162    Disable principal renames for LDAP
+8166    Fix LDAP ticket policies on big-endian LP64
+8168    Fix memory leak in DB2 iteration
+8170    Fix minor documentation errors
+
+
 Major changes in 1.13.1 (2015-02-11)
 ------------------------------------
 
@@ -389,6 +424,7 @@ reports, suggestions, and valuable resources:
     Alex Dehnert
     Mark Deneen
     Günther Deschner
+    John Devitofranceschi
     Roland Dowdeswell
     Viktor Dukhovni
     Jason Edgecombe
@@ -441,7 +477,9 @@ reports, suggestions, and valuable resources:
     Jon Looney
     Nuno Lopes
     Ryan Lynch
+    Roland Mainz
     Andrei Maslennikov
+    Michael Mattioli
     Nathaniel McCallum
     Greg McClement
     Cameron Meadors
@@ -483,6 +521,7 @@ reports, suggestions, and valuable resources:
     Michael Ströder
     Bjørn Tore Sund
     Joe Travaglini
+    Tim Uglow
     Rathor Vipin
     Denis Vlasenko
     Jorgen Wahlsten
