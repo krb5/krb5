@@ -162,8 +162,8 @@ in which \fB*number\fP matches the corresponding wildcard in
 .TP
 .B {+|\-}\fIflagname\fP
 flag is forced to the indicated value.  The permissible flags
-are the same as the + and \- flags for the kadmin
-\fIadd_principal\fP and \fImodify_principal\fP commands.
+are the same as those for the \fBdefault_principal_flags\fP
+variable in \fIkdc.conf(5)\fP\&.
 .TP
 .B \fI\-clearpolicy\fP
 policy is forced to be empty.
