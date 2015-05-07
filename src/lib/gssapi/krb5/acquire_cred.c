@@ -717,6 +717,8 @@ acquire_init_cred(krb5_context context,
     if (code)
         goto error;
 
+    cred->no_ci_flags = GSS_C_INTEG_FLAG | GSS_C_CONF_FLAG;
+
     *minor_status = 0;
     return GSS_S_COMPLETE;
 

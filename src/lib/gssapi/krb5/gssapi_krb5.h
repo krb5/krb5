@@ -43,6 +43,9 @@ GSS_DLLIMP extern const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME;
  * krb5(2) krb5_name(1)}.  The recommended symbolic name for this type
  * is "GSS_KRB5_NT_PRINCIPAL_NAME". */
 
+/* GSS_KRB5_CRED_NO_CI_FLAGS_X - 1.2.752.43.13.29 */
+GSS_DLLIMP extern const gss_OID_desc * const GSS_KRB5_CRED_NO_CI_FLAGS_X;
+
 /* 2.1.2. Host-Based Service Name Form */
 #define GSS_KRB5_NT_HOSTBASED_SERVICE_NAME GSS_C_NT_HOSTBASED_SERVICE
 /* This name form shall be represented by the Object Identifier {iso(1)
