@@ -758,6 +758,7 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
     cred->keytab = NULL;
 #endif /* LEAN_CLIENT */
     cred->destroy_ccache = 0;
+    cred->suppress_ci_flags = 0;
     cred->ccache = NULL;
 
     code = k5_mutex_init(&cred->lock);

@@ -86,6 +86,16 @@ GSS_DLLIMP extern const gss_OID_desc * const gss_nt_krb5_principal;
 
 GSS_DLLIMP extern const gss_OID_desc krb5_gss_oid_array[];
 
+/*
+ * This OID can be used with gss_set_cred_option() to suppress the
+ * confidentiality and integrity flags from being asserted in initial context
+ * tokens.
+ *
+ * iso(1) member-body(2) Sweden(752) Stockholm University(43) Heimdal GSS-API
+ * Extensions(13) no_ci_flags(29)
+ */
+GSS_DLLIMP extern const gss_OID_desc * const GSS_KRB5_CRED_NO_CI_FLAGS_X;
+
 #define gss_krb5_nt_general_name        gss_nt_krb5_name
 #define gss_krb5_nt_principal           gss_nt_krb5_principal
 #define gss_krb5_nt_service_name        gss_nt_service_name

@@ -124,6 +124,9 @@
  * except the last in each value's encoding.
  */
 
+#define NO_CI_FLAGS_X_OID_LENGTH 6
+#define NO_CI_FLAGS_X_OID "\x2a\x85\x70\x2b\x0d\x1d"
+
 const gss_OID_desc krb5_gss_oid_array[] = {
     /* this is the official, rfc-specified OID */
     {GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID},
@@ -144,6 +147,7 @@ const gss_OID_desc krb5_gss_oid_array[] = {
     {10, "\052\206\110\206\367\022\001\002\002\001"},
     /* gss_nt_krb5_principal.  Object identifier for a krb5_principal. Do not use. */
     {10, "\052\206\110\206\367\022\001\002\002\002"},
+    {NO_CI_FLAGS_X_OID_LENGTH, NO_CI_FLAGS_X_OID},
     { 0, 0 }
 };
 
@@ -156,6 +160,8 @@ const gss_OID_desc * const gss_mech_iakerb            = krb5_gss_oid_array+3;
 const gss_OID_desc * const gss_nt_krb5_name           = krb5_gss_oid_array+5;
 const gss_OID_desc * const gss_nt_krb5_principal      = krb5_gss_oid_array+6;
 const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME = krb5_gss_oid_array+5;
+
+const gss_OID_desc * const GSS_KRB5_CRED_NO_CI_FLAGS_X = krb5_gss_oid_array+7;
 
 static const gss_OID_set_desc oidsets[] = {
     {1, (gss_OID) krb5_gss_oid_array+0}, /* RFC OID */
@@ -497,6 +503,20 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
     return GSS_S_UNAVAILABLE;
 }
 
+static OM_uint32
+no_ci_flags(OM_uint32 *minor_status,
+            gss_cred_id_t *cred_handle,
+            const gss_OID desired_oid,
+            const gss_buffer_t value)
+{
+    krb5_gss_cred_id_t cred;
+
+    cred = (krb5_gss_cred_id_t) *cred_handle;
+    cred->suppress_ci_flags = 1;
+
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
+}
 /*
  * gssspi_set_cred_option() methods
  */
@@ -519,6 +539,10 @@ static struct {
     {
         {GSS_KRB5_IMPORT_CRED_OID_LENGTH, GSS_KRB5_IMPORT_CRED_OID},
         gss_krb5int_import_cred
+    },
+    {
+        {NO_CI_FLAGS_X_OID_LENGTH, NO_CI_FLAGS_X_OID},
+        no_ci_flags
     },
 };
 
