@@ -184,6 +184,7 @@
         <Custom Action="RollbackNetProvider" After="EnableTgtSessionKey">&amp;feaKfwClient=3</Custom>
         <Custom Action="InstallNetProvider" After="RollbackNetProvider">&amp;feaKfwClient=3</Custom>
         <Custom Action="RemoveNetProvider" After="InstallNetProvider">&amp;feaKfwClient=2</Custom>
+        <ScheduleReboot After="InstallFinalize" />
         </InstallExecuteSequence>
 
         <!-- Upgrade paths -->
