@@ -227,16 +227,22 @@ krb5_cccol_have_content(krb5_context context)
     krb5_ccache cache;
     krb5_creds creds;
     krb5_boolean found = FALSE;
+    krb5_error_code ret;
+    int checked_one = 0;
+    const char *name;
 
-    if (krb5_cccol_cursor_new(context, &col_cursor))
+    if ((ret = krb5_cccol_cursor_new(context, &col_cursor)))
         goto no_entries;
 
-    while (!found && !krb5_cccol_cursor_next(context, col_cursor, &cache) &&
+    while (!found &&
+           !krb5_cccol_cursor_next(context, col_cursor, &cache) &&
            cache != NULL) {
-        if (krb5_cc_start_seq_get(context, cache, &cache_cursor))
+        checked_one = 1;
+        if ((ret = krb5_cc_start_seq_get(context, cache, &cache_cursor)))
             continue;
         while (!found &&
-               !krb5_cc_next_cred(context, cache, &cache_cursor, &creds)) {
+               !(ret = krb5_cc_next_cred(context, cache, &cache_cursor,
+                                         &creds))) {
             if (!krb5_is_config_principal(context, creds.server))
                 found = TRUE;
             krb5_free_cred_contents(context, &creds);
@@ -249,7 +255,23 @@ krb5_cccol_have_content(krb5_context context)
         return 0;
 
 no_entries:
-    k5_setmsg(context, KRB5_CC_NOTFOUND,
-              _("No Kerberos credentials available"));
+    if (!checked_one) {
+        const char *krb5ccname = getenv(KRB5_ENV_CCNAME);
+
+        cache = NULL;
+        if (krb5_cc_default(context, &cache)) {
+            name = krb5_cc_get_name(context, cache);
+        } else {
+            name = _("<unknown>");
+        }
+        krb5_set_error_message(context, KRB5_CC_NOTFOUND,
+                               _("No Kerberos credentials available "
+                                 "(default ccache: %s; %s=%s)"),
+                               name, KRB5_ENV_CCNAME,
+                               krb5ccname ? krb5ccname : _("<not set>"));
+        krb5_cc_close(context, cache);
+    }
+    krb5_wrap_error_message(context, ret, KRB5_CC_NOTFOUND,
+                            _("No Kerberos credentials available"));
     return KRB5_CC_NOTFOUND;
 }
