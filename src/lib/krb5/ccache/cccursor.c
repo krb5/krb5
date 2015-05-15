@@ -227,29 +227,55 @@ krb5_cccol_have_content(krb5_context context)
     krb5_ccache cache;
     krb5_creds creds;
     krb5_boolean found = FALSE;
+    krb5_error_code ret;
+    const char *last_err = NULL;
 
-    if (krb5_cccol_cursor_new(context, &col_cursor))
+    ret = krb5_cccol_cursor_new(context, &col_cursor);
+    if (ret) {
+        last_err = krb5_get_error_message(context, ret);
         goto no_entries;
+    }
 
-    while (!found && !krb5_cccol_cursor_next(context, col_cursor, &cache) &&
+    while (!found &&
+           !(ret = krb5_cccol_cursor_next(context, col_cursor, &cache)) &&
            cache != NULL) {
-        if (krb5_cc_start_seq_get(context, cache, &cache_cursor))
+        ret = krb5_cc_start_seq_get(context, cache, &cache_cursor);
+        if (ret) {
+            krb5_free_error_message(context, last_err);
+            last_err = krb5_get_error_message(context, ret);
             continue;
+        }
         while (!found &&
-               !krb5_cc_next_cred(context, cache, &cache_cursor, &creds)) {
+               !(ret = krb5_cc_next_cred(context, cache,
+                                         &cache_cursor, &creds))) {
             if (!krb5_is_config_principal(context, creds.server))
                 found = TRUE;
             krb5_free_cred_contents(context, &creds);
         }
+        if (!found && ret && ret != KRB5_CC_END) {
+            krb5_free_error_message(context, last_err);
+            last_err = krb5_get_error_message(context, ret);
+        }
+        ret = 0;
+        /* We can ignore errors from these two calls */
         krb5_cc_end_seq_get(context, cache, &cache_cursor);
         krb5_cc_close(context, cache);
     }
     krb5_cccol_cursor_free(context, &col_cursor);
-    if (found)
+    if (found) {
+        krb5_clear_error_message(context);
+        krb5_free_error_message(context, last_err);
         return 0;
+    }
 
 no_entries:
-    k5_setmsg(context, KRB5_CC_NOTFOUND,
-              _("No Kerberos credentials available"));
+    if (last_err != NULL) {
+        k5_setmsg(context, KRB5_CC_NOTFOUND,
+                  _("No Kerberos credentials available (%s)"), last_err);
+    } else {
+        k5_setmsg(context, KRB5_CC_NOTFOUND,
+                  _("No Kerberos credentials available"));
+    }
+    krb5_free_error_message(context, last_err);
     return KRB5_CC_NOTFOUND;
 }
