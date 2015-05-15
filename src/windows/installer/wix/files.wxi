@@ -148,8 +148,8 @@
 	                    </RegistryKey>
 	                    <RegistryKey Root="HKLM" Key="SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Domains\CSAIL.MIT.EDU">
 	                      <RegistryValue Name="KdcNames" Type="multiString">
-	                        <MultiStringValue>kerberos-1.mit.edu</MultiStringValue>
-	                        <MultiStringValue>kerberos-2.mit.edu</MultiStringValue>
+	                        <MultiStringValue>kerberos-1.csail.mit.edu</MultiStringValue>
+	                        <MultiStringValue>kerberos-2.csail.mit.edu</MultiStringValue>
 	                      </RegistryValue>
 	                    </RegistryKey>
                     </Component>
