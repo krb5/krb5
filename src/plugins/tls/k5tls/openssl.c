@@ -463,6 +463,10 @@ setup(krb5_context context, SOCKET fd, const char *servername,
 
     if (!SSL_set_fd(ssl, fd))
         goto error;
+#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+    if (!SSL_set_tlsext_host_name(ssl, servername))
+        goto error;
+#endif
     SSL_set_connect_state(ssl);
 
     /* Create a handle and allow verify_callback to access it. */
