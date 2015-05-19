@@ -76,7 +76,7 @@ bindresvport_sa(int sd, struct sockaddr *sa)
 	res = -1;
 	errno = EADDRINUSE;
 	for (i = 0; i < NPORTS && res < 0 && errno == EADDRINUSE; i++) {
-		sa_setport(sa, htons(port++));
+		sa_setport(sa, port++);
 		if (port > ENDPORT) {
 			port = STARTPORT;
 		}
