@@ -339,6 +339,7 @@
 #define ID_EXPORT_TICKET                32837
 #define ID_AUTO_IMPORT_TICKET           32838
 #define ID_AUTO_IMPORT_TICKETS          32840
+#define ID_CCACHE_NAME                  32841
 
 // Next default values for new objects
 //
