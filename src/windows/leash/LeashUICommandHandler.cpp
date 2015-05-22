@@ -154,6 +154,9 @@ LeashUICommandHandler::Execute(UINT32 commandId, UI_EXECUTIONVERB verb,
             SendMessage(mainwin, WM_COMMAND, MAKEWPARAM(ID_SHOW_TICKET_FLAGS,
                                                         1), 0);
             break;
+        case cmdCcacheNameCheckBox:
+            SendMessage(mainwin, WM_COMMAND, MAKEWPARAM(ID_CCACHE_NAME, 1), 0);
+            break;
         case cmdAutoRenewCheckBox:
             SendMessage(mainwin, WM_COMMAND, MAKEWPARAM(ID_AUTO_RENEW, 1), 0);
             break;
@@ -245,6 +248,8 @@ LeashUICommandHandler::UpdateProperty(UINT32 commandId, REFPROPERTYKEY key,
             return RegKeyToProperty("Encryption Type", false, newValue);
         case cmdFlagsCheckBox:
             return RegKeyToProperty("Flags", false, newValue);
+        case cmdCcacheNameCheckBox:
+            return RegKeyToProperty("Credential Cache", false, newValue);
         case cmdAutoRenewCheckBox:
             return RegKeyToProperty("AutoRenewTickets", true, newValue);
         case cmdExpireAlarmCheckBox:

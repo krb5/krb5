@@ -83,6 +83,7 @@ enum eViewColumn {
     VALID_UNTIL,
     ENCRYPTION_TYPE,
     TICKET_FLAGS,
+    CACHE_NAME,
     NUM_VIEW_COLUMNS
 };
 
@@ -221,7 +222,8 @@ private:
                                long valid_until,
                                long renew_until,
                                char *encTypes,
-                               unsigned long flags);
+                               unsigned long flags,
+                               char *cache_name);
 
     void   SetTrayIcon(int nim, int state=0);
     void   SetTrayText(int nim, CString tip);
@@ -305,6 +307,7 @@ protected:
 	afx_msg VOID OnRenewableUntil();
 	afx_msg VOID OnShowTicketFlags();
 	afx_msg VOID OnEncryptionType();
+	afx_msg VOID OnCcacheName();
 	afx_msg VOID OnUppercaseRealm();
 	afx_msg VOID OnKillTixOnExit();
 	afx_msg VOID OnDestroy();
@@ -317,6 +320,7 @@ protected:
 	afx_msg VOID OnUpdateRenewableUntil(CCmdUI* pCmdUI);
 	afx_msg VOID OnUpdateShowTicketFlags(CCmdUI* pCmdUI);
 	afx_msg VOID OnUpdateEncryptionType(CCmdUI* pCmdUI);
+	afx_msg VOID OnUpdateCcacheName(CCmdUI* pCmdUI);
 	afx_msg VOID OnUpdateUppercaseRealm(CCmdUI* pCmdUI);
 	afx_msg VOID OnUpdateKillTixOnExit(CCmdUI* pCmdUI);
 	afx_msg VOID OnUpdateLowTicketAlarm(CCmdUI* pCmdUI);

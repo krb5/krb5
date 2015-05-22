@@ -66,11 +66,13 @@ BEGIN_MESSAGE_MAP(CLeashView, CListView)
 	ON_COMMAND(ID_RENEWABLE_UNTIL, OnRenewableUntil)
 	ON_COMMAND(ID_SHOW_TICKET_FLAGS, OnShowTicketFlags)
 	ON_COMMAND(ID_ENCRYPTION_TYPE, OnEncryptionType)
+	ON_COMMAND(ID_CCACHE_NAME, OnCcacheName)
 	ON_UPDATE_COMMAND_UI(ID_TIME_ISSUED, OnUpdateTimeIssued)
 	ON_UPDATE_COMMAND_UI(ID_VALID_UNTIL, OnUpdateValidUntil)
 	ON_UPDATE_COMMAND_UI(ID_RENEWABLE_UNTIL, OnUpdateRenewableUntil)
 	ON_UPDATE_COMMAND_UI(ID_SHOW_TICKET_FLAGS, OnUpdateShowTicketFlags)
 	ON_UPDATE_COMMAND_UI(ID_ENCRYPTION_TYPE, OnUpdateEncryptionType)
+	ON_UPDATE_COMMAND_UI(ID_CCACHE_NAME, OnUpdateCcacheName)
 	ON_COMMAND(ID_UPPERCASE_REALM, OnUppercaseRealm)
 	ON_COMMAND(ID_KILL_TIX_ONEXIT, OnKillTixOnExit)
 	ON_UPDATE_COMMAND_UI(ID_UPPERCASE_REALM, OnUpdateUppercaseRealm)
@@ -149,6 +151,7 @@ ViewColumnInfo CLeashView::sm_viewColumns[] =
     {"Valid Until", true, ID_VALID_UNTIL, 100},          // VALID_UNTIL
     {"Encryption Type", false, ID_ENCRYPTION_TYPE, 100}, // ENCRYPTION_TYPE
     {"Flags", false, ID_SHOW_TICKET_FLAGS, 100},         // TICKET_FLAGS
+    {"Credential Cache", false, ID_CCACHE_NAME, 105},    // CACHE_NAME
 };
 
 static struct TicketFlag {
@@ -1126,7 +1129,8 @@ void CLeashView::AddDisplayItem(CListCtrl &list,
                                 long valid_until,
                                 long renew_until,
                                 char *encTypes,
-                                unsigned long flags)
+                                unsigned long flags,
+                                char *ccache_name)
 {
     TCHAR* localTimeStr=NULL;
     TCHAR* durationStr=NULL;
@@ -1184,6 +1188,9 @@ void CLeashView::AddDisplayItem(CListCtrl &list,
     if (sm_viewColumns[TICKET_FLAGS].m_enabled) {
         krb5TicketFlagsToString(flags, &flagsStr);
         list.SetItemText(iItem, iSubItem++, flagsStr);
+    }
+    if (sm_viewColumns[CACHE_NAME].m_enabled) {
+        list.SetItemText(iItem, iSubItem++, ccache_name);
     }
     if (flagsStr)
         free(flagsStr);
@@ -1477,7 +1484,8 @@ VOID CLeashView::OnUpdateDisplay()
                        principal->valid_until,
                        principal->renew_until,
                        "",
-                       principal->flags);
+                       principal->flags,
+                       principal->ccache_name);
         if (elem->m_expanded) {
             for (tempList = principal->ticket_list;
                  tempList != NULL;
@@ -1490,7 +1498,8 @@ VOID CLeashView::OnUpdateDisplay()
                                tempList->valid_until,
                                tempList->renew_until,
                                tempList->encTypes,
-                               tempList->flags);
+                               tempList->flags,
+                               principal->ccache_name);
             }
         }
         if ((elem->m_focus >= 0) &&
@@ -1801,6 +1810,16 @@ VOID CLeashView::OnEncryptionType()
 VOID CLeashView::OnUpdateEncryptionType(CCmdUI *pCmdUI)
 {
     pCmdUI->SetCheck(sm_viewColumns[ENCRYPTION_TYPE].m_enabled);
+}
+
+VOID CLeashView::OnCcacheName()
+{
+    ToggleViewColumn(CACHE_NAME);
+}
+
+VOID CLeashView::OnUpdateCcacheName(CCmdUI *pCmdUI)
+{
+    pCmdUI->SetCheck(sm_viewColumns[CACHE_NAME].m_enabled);
 }
 
 VOID CLeashView::OnLargeIcons()

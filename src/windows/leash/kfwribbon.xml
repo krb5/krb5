@@ -62,6 +62,9 @@
     <Command Name="cmdFlagsCheckBox"
              LabelTitle="Flags"
              Keytip="F" />
+    <Command Name="cmdCcacheNameCheckBox"
+             LabelTitle="Credential Cache Name"
+             Keytip="N" />
     <Command Name="cmdAutoRenewCheckBox"
              LabelTitle="Automatic Ticket Renewal"
              Keytip="R" />
@@ -117,6 +120,7 @@
             <CheckBox CommandName="cmdValidUntilCheckBox" />
             <CheckBox CommandName="cmdEncTypeCheckBox" />
             <CheckBox CommandName="cmdFlagsCheckBox" />
+            <CheckBox CommandName="cmdCcacheNameCheckBox" />
           </Group>
           <Group CommandName="cmdTicketOptionsGroup" >
             <CheckBox CommandName="cmdAutoRenewCheckBox" />

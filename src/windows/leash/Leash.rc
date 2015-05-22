@@ -124,6 +124,7 @@ BEGIN
         MENUITEM "&Valid Until",                ID_VALID_UNTIL
         MENUITEM "&Encryption Type",            ID_ENCRYPTION_TYPE
         MENUITEM "&Flags",                      ID_SHOW_TICKET_FLAGS
+        MENUITEM "&Credential Cache Name",      ID_CCACHE_NAME
     END
     POPUP "&Options"
     BEGIN
@@ -968,6 +969,7 @@ BEGIN
     ID_FORGET_PRINCIPALS    "Clear the Principal history.  This only affects autocompletion in the Get Tickets and Change Password dialogs.\n Forget Principals"
     ID_ENCRYPTION_TYPE      "Display column showing the encryption type for your tickets and session keys.\n Encryption Type"
     ID_VALID_UNTIL          "Display column showing when your tickets will expire.\n Valid Until"
+    ID_CCACHE_NAME          "Display column showing the name of the credential cache containing this ticket.\n Cache Name"
 END
 
 STRINGTABLE
