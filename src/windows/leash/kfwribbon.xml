@@ -9,7 +9,7 @@
     <Command Name="cmdHomeTab" LabelTitle="Home" Keytip="H" />
     <Command Name="cmdOptionsTab" LabelTitle="Options" Keytip="O" />
     <Command Name="cmdChangePasswordGroup" LabelTitle="" />
-    <Command Name="cmdTicketGroup" LabelTitle="" />
+    <Command Name="cmdTicketGroup" LabelTitle=" " />
     <Command Name="cmdViewOptionsGroup" LabelTitle="View Options" />
     <Command Name="cmdTicketOptionsGroup" LabelTitle="Ticket Options" />
     <Command Name="cmdGetTicketButton"
