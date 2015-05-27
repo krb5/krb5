@@ -68,15 +68,15 @@
                 
 		    <!-- Kerberos V options -->
 		    <Component Win64="$(var.Win64)" Id="rcm_krb5_1" Guid="$(var.rcm_krb5_1_guid)" DiskId="1">
-		    	<Registry Id="reg_krb5_1" Root="HKLM" Key="Software\MIT\kerberos5" Name="config" Type="string" Value="[KRB5CONFIG]" KeyPath="yes" />
+			<RegistryValue Id="reg_krb5_1" Root="HKLM" Key="Software\MIT\kerberos5" Name="config" Type="string" Value="[KRB5CONFIG]" KeyPath="yes" />
 		    	<Condition>KRB5CONFIG</Condition>
 		    </Component>
 		    <Component Win64="$(var.Win64)" Id="rcm_krb5_2" Guid="$(var.rcm_krb5_2_guid)" DiskId="1">
-		    	<Registry Id="reg_krb5_2" Root="HKLM" Key="Software\MIT\kerberos5" Name="ccname" Type="string" Value="[KRB5CCNAME]" KeyPath="yes" />
+			<RegistryValue Id="reg_krb5_2" Root="HKLM" Key="Software\MIT\kerberos5" Name="ccname" Type="string" Value="[KRB5CCNAME]" KeyPath="yes" />
 		    	<Condition>KRB5CCNAME</Condition>
 		    </Component>
 		    <Component Win64="$(var.Win64)" Id="rcm_krb5_3" Guid="$(var.rcm_krb5_3_guid)" DiskId="1">
-		    	<Registry Id="reg_krb5_3" Root="HKLM" Key="Software\MIT\kerberos5" Name="PreserveInitialTicketIdentity" Type="integer" Value="[KRB5PRESERVEIDENTITY]" KeyPath="yes" />
+			<RegistryValue Id="reg_krb5_3" Root="HKLM" Key="Software\MIT\kerberos5" Name="PreserveInitialTicketIdentity" Type="integer" Value="[KRB5PRESERVEIDENTITY]" KeyPath="yes" />
 		    	<Condition>KRB5PRESERVEIDENTITY</Condition>
 		    </Component>
                 
@@ -85,56 +85,56 @@
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_gss_client_exe" Guid="$(var.cmf_gss_client_exe_guid)" DiskId="1">
 	                    <File Id="fil_gss_client_exe" Name="gss-client.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_gss_client_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_gss_client_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_gss_client_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_gss_client_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_gss_server_exe" Guid="$(var.cmf_gss_server_exe_guid)" DiskId="1">
 	                    <File Id="fil_gss_server_exe" Name="gss-server.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_gss_server_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_gss_server_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_gss_server_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_gss_server_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_gssapi32_dll" Guid="$(var.cmf_gssapi32_dll_guid)" DiskId="1">
 	                    <File Id="fil_gssapi32_dll" Name="$(var.cmf_gssapi32_dll_name)" KeyPath="yes" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_kdestroy_exe" Guid="$(var.cmf_kdestroy_exe_guid)" DiskId="1">
 	                    <File Id="fil_kdestroy_exe" Name="kdestroy.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_kdestroy_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_kdestroy_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_kdestroy_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_kdestroy_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_kcpytkt_exe" Guid="$(var.cmf_kcpytkt_exe_guid)" DiskId="1">
 	                    <File Id="fil_kcpytkt_exe" Name="kcpytkt.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_kcpytkt_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_kcpytkt_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_kcpytkt_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_kcpytkt_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_kdeltkt_exe" Guid="$(var.cmf_kdeltkt_exe_guid)" DiskId="1">
 	                    <File Id="fil_kdeltkt_exe" Name="kdeltkt.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_kdeltkt_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_kdeltkt_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_kdeltkt_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_kdeltkt_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_kinit_exe" Guid="$(var.cmf_kinit_exe_guid)" DiskId="1">
 	                    <File Id="fil_kinit_exe" Name="kinit.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_kinit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_kinit_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_kinit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_kinit_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_klist_exe" Guid="$(var.cmf_klist_exe_guid)" DiskId="1">
 	                    <File Id="fil_klist_exe" Name="klist.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_klist_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_klist_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_klist_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_klist_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_kpasswd_exe" Guid="$(var.cmf_kpasswd_exe_guid)" DiskId="1">
 	                    <File Id="fil_kpasswd_exe" Name="kpasswd.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_kpasswd_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_kpasswd_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_kpasswd_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_kpasswd_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_kswitch_exe" Guid="$(var.cmf_kswitch_exe_guid)" DiskId="1">
                       <File Id="fil_kswitch_exe" Name="kswitch.exe" KeyPath="yes" />
-                      <Registry Id="reg_ts_kswitch_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kswitch" Action="createKeyAndRemoveKeyOnUninstall" />
-                      <Registry Id="reg_ts_kswitch_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kswitch" Name="Flags" Type="integer" Value="1032" />
+                      <RegistryKey Id="reg_ts_kswitch_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kswitch" Action="createAndRemoveOnUninstall" />
+                      <RegistryValue Id="reg_ts_kswitch_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kswitch" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_kvno_exe" Guid="$(var.cmf_kvno_exe_guid)" DiskId="1">
 	                    <File Id="fil_kvno_exe" Name="kvno.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_kvno_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_kvno_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_kvno_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_kvno_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_krb5_32_dll" Guid="$(var.cmf_krb5_32_dll_guid)" DiskId="1">
 	                    <File Id="fil_krb5_32_dll" Name="$(var.cmf_krb5_32_dll_name)" KeyPath="yes" />
@@ -161,14 +161,14 @@
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_ccapiserver_exe" Guid="$(var.cmf_ccapiserver_exe_guid)" DiskId="1">
 	                    <File Id="fil_ccapiserver_exe" Name="$(var.cmf_ccapiserver_exe_name)" KeyPath="yes" />
-	                    <Registry Id="reg_ts_krbcc32s_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ccapiserver" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_krbcc32s_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ccapiserver" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_krbcc32s_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ccapiserver" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_krbcc32s_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ccapiserver" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_leash_exe" Guid="$(var.cmf_leash_exe_guid)" DiskId="1">
                       <File Id="fil_leash_exe" Name="MIT Kerberos.exe" KeyPath="yes">
                       </File>
-                      <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_leash32_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Name="Flags" Type="integer" Value="1032" />
+                      <RegistryKey Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_leash32_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Name="Flags" Type="integer" Value="1032" />
                     </Component>
 
 <!--                    <Component Win64="$(var.Win64)" Id="csc_leash32_exe" Guid="$(var.csc_leash32_exe_guid)" DiskId="1">
@@ -178,32 +178,27 @@
 
                     <!-- Leash32 configuration -->
                     <Component Win64="$(var.Win64)" Id="rcm_leash_1" Guid="$(var.rcm_leash_1_guid)" DiskId="1">
-	                    <Registry Id="reg_leash_1" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="AfsStatus" Type="integer" Value="[LEASHAFSSTATUS]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leash_1" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="AfsStatus" Type="integer" Value="[LEASHAFSSTATUS]" KeyPath="yes"/>
 	                    <Condition>LEASHAFSSTATUS</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leash_2" Guid="$(var.rcm_leash_2_guid)" DiskId="1">
-	                    <Registry Id="reg_leash_2" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="createmissingconfig" Type="integer" Value="[LEASHCREATEMISSINGCONFIG]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leash_2" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="createmissingconfig" Type="integer" Value="[LEASHCREATEMISSINGCONFIG]" KeyPath="yes"/>
 	                    <Condition>LEASHCREATEMISSINGCONFIG</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leash_3" Guid="$(var.rcm_leash_3_guid)" DiskId="1">
-	                    <Registry Id="reg_leash_3" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="AutoRenewTickets" Type="integer" Value="[LEASHAUTORENEWTICKETS]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leash_3" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="AutoRenewTickets" Type="integer" Value="[LEASHAUTORENEWTICKETS]" KeyPath="yes"/>
 	                    <Condition>LEASHAUTORENEWTICKETS</Condition>
                     </Component>
-                    <!--
-                    <Component Win64="$(var.Win64)" Id="rcm_leash_4" Guid="$(var.rcm_leash_4_guid)" DiskId="1">
-	                    <Registry Id="reg_leash_4" Root="HKLM" Key="Software\MIT\Leash" Action="createKey" KeyPath="yes"/>
-                    </Component>
-                    -->
                     <Component Win64="$(var.Win64)" Id="rcm_leash_5" Guid="$(var.rcm_leash_5_guid)" DiskId="1">
-	                    <Registry Id="reg_leash_5" Root="HKLM" Key="Software\MIT\Leash" Name="lock_file_locations" Type="integer" Value="[LEASHLOCKFILELOCATIONS]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leash_5" Root="HKLM" Key="Software\MIT\Leash" Name="lock_file_locations" Type="integer" Value="[LEASHLOCKFILELOCATIONS]" KeyPath="yes"/>
 	                    <Condition>LEASHLOCKFILELOCATIONS</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leash_6" Guid="$(var.rcm_leash_6_guid)" DiskId="1">
-	                    <Registry Id="reg_leash_6" Root="HKLM" Key="Software\MIT\Leash" Name="MsLsaImport" Type="integer" Value="[LEASHMSLSAIMPORT]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leash_6" Root="HKLM" Key="Software\MIT\Leash" Name="MsLsaImport" Type="integer" Value="[LEASHMSLSAIMPORT]" KeyPath="yes"/>
 	                    <Condition>LEASHMSLSAIMPORT</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="csc_LeashStartup" Guid="$(var.csc_LeashStartup_guid)" DiskId="1">
-                        <Registry Id="reg_sc_leash_marker" Root="HKCU" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
+                        <RegistryValue Id="reg_sc_leash_marker" Root="HKCU" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
                         <Shortcut Id="sc_leash_exe_startup" Advertise="no" Directory="StartupFolder" Name="MIT Kerberos.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]MIT Kerberos.exe" Show="minimized" />
                     </Component>
 
@@ -217,84 +212,79 @@
                     
                     <!-- Leash DLL configuration -->
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_1" Guid="$(var.rcm_leashdll_1_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_1" Root="HKLM" Key="Software\MIT\Leash" Name="lifetime" Type="integer" Value="[LEASHLIFETIME]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_1" Root="HKLM" Key="Software\MIT\Leash" Name="lifetime" Type="integer" Value="[LEASHLIFETIME]" KeyPath="yes"/>
 	                    <Condition>LEASHLIFETIME</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_2" Guid="$(var.rcm_leashdll_2_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_2" Root="HKLM" Key="Software\MIT\Leash" Name="renew_till" Type="integer" Value="[LEASHRENEWTILL]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_2" Root="HKLM" Key="Software\MIT\Leash" Name="renew_till" Type="integer" Value="[LEASHRENEWTILL]" KeyPath="yes"/>
 	                    <Condition>LEASHRENEWTILL</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_3" Guid="$(var.rcm_leashdll_3_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_3" Root="HKLM" Key="Software\MIT\Leash" Name="renewable" Type="integer" Value="[LEASHRENEWABLE]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_3" Root="HKLM" Key="Software\MIT\Leash" Name="renewable" Type="integer" Value="[LEASHRENEWABLE]" KeyPath="yes"/>
 	                    <Condition>LEASHRENEWABLE</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_4" Guid="$(var.rcm_leashdll_4_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_4" Root="HKLM" Key="Software\MIT\Leash" Name="forwardable" Type="integer" Value="[LEASHFORWARDABLE]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_4" Root="HKLM" Key="Software\MIT\Leash" Name="forwardable" Type="integer" Value="[LEASHFORWARDABLE]" KeyPath="yes"/>
 	                    <Condition>LEASHFORWARDABLE</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_5" Guid="$(var.rcm_leashdll_5_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_5" Root="HKLM" Key="Software\MIT\Leash" Name="noaddresses" Type="integer" Value="[LEASHNOADDRESSES]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_5" Root="HKLM" Key="Software\MIT\Leash" Name="noaddresses" Type="integer" Value="[LEASHNOADDRESSES]" KeyPath="yes"/>
 	                    <Condition>LEASHNOADDRESSES</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_6" Guid="$(var.rcm_leashdll_6_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_6" Root="HKLM" Key="Software\MIT\Leash" Name="proxiable" Type="integer" Value="[LEASHPROXIABLE]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_6" Root="HKLM" Key="Software\MIT\Leash" Name="proxiable" Type="integer" Value="[LEASHPROXIABLE]" KeyPath="yes"/>
 	                    <Condition>LEASHPROXIABLE</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_7" Guid="$(var.rcm_leashdll_7_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_7" Root="HKLM" Key="Software\MIT\Leash" Name="publicip" Type="integer" Value="[LEASHPUBLICIP]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_7" Root="HKLM" Key="Software\MIT\Leash" Name="publicip" Type="integer" Value="[LEASHPUBLICIP]" KeyPath="yes"/>
 	                    <Condition>LEASHPUBLICIP</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_8" Guid="$(var.rcm_leashdll_8_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_8" Root="HKLM" Key="Software\MIT\Leash" Name="usekrb4" Type="integer" Value="[LEASHUSEKRB4]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_8" Root="HKLM" Key="Software\MIT\Leash" Name="usekrb4" Type="integer" Value="[LEASHUSEKRB4]" KeyPath="yes"/>
 	                    <Condition>LEASHUSEKRB4</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_9" Guid="$(var.rcm_leashdll_9_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_9" Root="HKLM" Key="Software\MIT\Leash" Name="hide_kinit_options" Type="integer" Value="[LEASHHIDEKINITOPTIONS]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_9" Root="HKLM" Key="Software\MIT\Leash" Name="hide_kinit_options" Type="integer" Value="[LEASHHIDEKINITOPTIONS]" KeyPath="yes"/>
 	                    <Condition>LEASHHIDEKINITOPTIONS</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_10" Guid="$(var.rcm_leashdll_10_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_10" Root="HKLM" Key="Software\MIT\Leash" Name="life_min" Type="integer" Value="[LEASHLIFEMIN]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_10" Root="HKLM" Key="Software\MIT\Leash" Name="life_min" Type="integer" Value="[LEASHLIFEMIN]" KeyPath="yes"/>
 	                    <Condition>LEASHLIFEMIN</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_11" Guid="$(var.rcm_leashdll_11_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_11" Root="HKLM" Key="Software\MIT\Leash" Name="life_max" Type="integer" Value="[LEASHLIFEMAX]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_11" Root="HKLM" Key="Software\MIT\Leash" Name="life_max" Type="integer" Value="[LEASHLIFEMAX]" KeyPath="yes"/>
 	                    <Condition>LEASHLIFEMAX</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_12" Guid="$(var.rcm_leashdll_12_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_12" Root="HKLM" Key="Software\MIT\Leash" Name="renew_min" Type="integer" Value="[LEASHRENEWMIN]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_12" Root="HKLM" Key="Software\MIT\Leash" Name="renew_min" Type="integer" Value="[LEASHRENEWMIN]" KeyPath="yes"/>
 	                    <Condition>LEASHRENEWMIN</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_13" Guid="$(var.rcm_leashdll_13_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_13" Root="HKLM" Key="Software\MIT\Leash" Name="renew_max" Type="integer" Value="[LEASHRENEWMAX]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_13" Root="HKLM" Key="Software\MIT\Leash" Name="renew_max" Type="integer" Value="[LEASHRENEWMAX]" KeyPath="yes"/>
 	                    <Condition>LEASHRENEWMAX</Condition>
                     </Component>
-                    <!--
-                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_14" Guid="$(var.rcm_leashdll_14_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_14" Root="HKLM" Key="Software\MIT\Leash32\Settings" Action="createKey" />
-                    </Component>
-                    -->
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_15" Guid="$(var.rcm_leashdll_15_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_15" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="uppercaserealm" Type="integer" Value="[LEASHUPPERCASEREALM]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_15" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="uppercaserealm" Type="integer" Value="[LEASHUPPERCASEREALM]" KeyPath="yes"/>
 	                    <Condition>LEASHUPPERCASEREALM</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_16" Guid="$(var.rcm_leashdll_16_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_16" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="timehost" Type="string" Value="[LEASHTIMEHOST]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_16" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="timehost" Type="string" Value="[LEASHTIMEHOST]" KeyPath="yes"/>
 	                    <Condition>LEASHTIMEHOST</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_17" Guid="$(var.rcm_leashdll_17_guid)" DiskId="1">
-	                    <Registry Id="reg_leashdll_17" Root="HKLM" Key="Software\MIT\Leash" Name="preserve_kinit_options" Type="integer" Value="[LEASHPRESERVEKINITOPTIONS]" KeyPath="yes"/>
+	                    <RegistryValue Id="reg_leashdll_17" Root="HKLM" Key="Software\MIT\Leash" Name="preserve_kinit_options" Type="integer" Value="[LEASHPRESERVEKINITOPTIONS]" KeyPath="yes"/>
 	                    <Condition>LEASHPRESERVEKINITOPTIONS</Condition>
                     </Component>
                     
                     <Component Win64="$(var.Win64)" Id="cmf_ms2mit_exe" Guid="$(var.cmf_ms2mit_exe_guid)" DiskId="1">
 	                    <File Id="fil_ms2mit_exe" Name="ms2mit.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_ms2mit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_ms2mit_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_ms2mit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_ms2mit_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_mit2ms_exe" Guid="$(var.cmf_mit2ms_exe_guid)" DiskId="1">
 	                    <File Id="fil_mit2ms_exe" Name="mit2ms.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_mit2ms_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_mit2ms_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" Name="Flags" Type="integer" Value="1032" />
+	                    <RegistryKey Id="reg_ts_mit2ms_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" Action="createAndRemoveOnUninstall" />
+	                    <RegistryValue Id="reg_ts_mit2ms_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" Name="Flags" Type="integer" Value="1032" />
                     </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_wshelp32_dll" Guid="$(var.cmf_wshelp32_dll_guid)" DiskId="1">
 	                    <File Id="fil_wshelp32_dll" Name="$(var.cmf_wshelp32_dll_name)" KeyPath="yes" />
@@ -488,110 +478,103 @@
     </Directory>
     
     <Component Win64="$(var.Win64)" Id="rcm_common" Guid="486D84B6-CCE5-4b95-B8E2-7DFBDB4CF9A2">
-        <Registry Id="reg_common0" Root="HKLM" Key="$(var.KfwRegRoot)" Action="createKeyAndRemoveKeyOnUninstall" />
-        <Registry Id="reg_common1" Root="HKLM" Key="$(var.KfwRegRoot)" KeyPath="yes" />
-        <Registry Id="reg_common2" Root="HKLM" Key="$(var.KfwRegRoot)" Name="InstallDir" Type="string" Value="[KERBEROSDIR]"/>
+        <RegistryKey Id="reg_common0" Root="HKLM" Key="$(var.KfwRegRoot)" Action="createAndRemoveOnUninstall" />
+        <RegistryValue Id="reg_common2" Root="HKLM" Key="$(var.KfwRegRoot)" Name="InstallDir" Type="string" Value="[KERBEROSDIR]" KeyPath="yes" />
     <?ifdef Debug?>
-        <Registry Id="reg_common3" Root="HKLM" Key="$(var.KfwRegRoot)\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
-        <Registry Id="reg_common4" Root="HKLM" Key="$(var.KfwRegRoot)\CurrentVersion" Name="Debug" Type="integer" Value="1"/>
-        <Registry Id="reg_common5" Root="HKLM" Key="$(var.KfwRegRoot)\$(var.VersionString)" Action="createKeyAndRemoveKeyOnUninstall"/>
-        <Registry Id="reg_common6" Root="HKLM" Key="$(var.KfwRegRoot)\$(var.VersionString)" Name="Debug" Type="integer" Value="1"/>
+        <RegistryKey Id="reg_common3" Root="HKLM" Key="$(var.KfwRegRoot)\CurrentVersion" Action="createAndRemoveOnUninstall"/>
+        <RegistryValue Id="reg_common4" Root="HKLM" Key="$(var.KfwRegRoot)\CurrentVersion" Name="Debug" Type="integer" Value="1"/>
+        <RegistryKey Id="reg_common5" Root="HKLM" Key="$(var.KfwRegRoot)\$(var.VersionString)" Action="createAndRemoveOnUninstall"/>
+        <RegistryValue Id="reg_common6" Root="HKLM" Key="$(var.KfwRegRoot)\$(var.VersionString)" Name="Debug" Type="integer" Value="1"/>
     <?else?>
-        <Registry Id="reg_common7" Root="HKLM" Key="$(var.KfwRegRoot)\CurrentVersion" Action="removeKeyOnInstall"/>
-        <Registry Id="reg_common8" Root="HKLM" Key="$(var.KfwRegRoot)\$(var.VersionString)" Action="removeKeyOnInstall"/>
+        <RemoveRegistryKey Id="reg_common7" Root="HKLM" Key="$(var.KfwRegRoot)\CurrentVersion" Action="removeOnInstall"/>
+        <RemoveRegistryKey Id="reg_common8" Root="HKLM" Key="$(var.KfwRegRoot)\$(var.VersionString)" Action="removeOnInstall"/>
     <?endif?>
     <?if $(var.Platform) = "x64"?>
-        <Registry Id="reg_common0_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)" Action="createKeyAndRemoveKeyOnUninstall" />
+        <RegistryKey Id="reg_common0_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)" Action="createAndRemoveOnUninstall" />
         <!-- Cannot set KeyPath twice in one Component -->
-        <Registry Id="reg_common2_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)" Name="InstallDir" Type="string" Value="[KERBEROSDIR]"/>
+        <RegistryValue Id="reg_common2_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)" Name="InstallDir" Type="string" Value="[KERBEROSDIR]"/>
     <?ifdef Debug?>
-        <Registry Id="reg_common3_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
-        <Registry Id="reg_common4_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\CurrentVersion" Name="Debug" Type="integer" Value="1"/>
-        <Registry Id="reg_common5_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\$(var.VersionString)" Action="createKeyAndRemoveKeyOnUninstall"/>
-        <Registry Id="reg_common6_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\$(var.VersionString)" Name="Debug" Type="integer" Value="1"/>
+        <RegistryKey Id="reg_common3_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\CurrentVersion" Action="createAndRemoveOnUninstall"/>
+        <RegistryValue Id="reg_common4_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\CurrentVersion" Name="Debug" Type="integer" Value="1"/>
+        <RegistryKey Id="reg_common5_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\$(var.VersionString)" Action="createAndRemoveOnUninstall"/>
+        <RegistryValue Id="reg_common6_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\$(var.VersionString)" Name="Debug" Type="integer" Value="1"/>
     <?else?>
-        <Registry Id="reg_common7_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\CurrentVersion" Action="removeKeyOnInstall"/>
-        <Registry Id="reg_common8_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\$(var.VersionString)" Action="removeKeyOnInstall"/>
+        <RemoveRegistryKey Id="reg_common7_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\CurrentVersion" Action="removeOnInstall"/>
+        <RemoveRegistryKey Id="reg_common8_32" Root="HKLM" Key="$(var.KfwRegWow6432Root)\$(var.VersionString)" Action="removeOnInstall"/>
     <?endif?>
     <?endif?>
     </Component>
     
     <Component Win64="$(var.Win64)" Id="rcm_client" Guid="901179B2-7369-43b1-ACF3-4C7F37482CC7">
-        <Registry Id="reg_client0" Root="HKLM" Key="$(var.KfwRegRoot)\Client" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <RegistryKey Id="reg_client0" Root="HKLM" Key="$(var.KfwRegRoot)\Client" Action="createAndRemoveOnUninstall"/>
 
-        <Registry Id="reg_client1" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
-        <Registry Id="reg_client2" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" />
-        <Registry Id="reg_client3" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="VersionString" Type="string" Value="$(var.VersionString)" />
-        <Registry Id="reg_client4" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="Title" Type="string" Value="KfW" />
-        <Registry Id="reg_client5" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="Description" Type="string" Value="$(var.ProductFullName)" />
-        <Registry Id="reg_client6" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
-        <Registry Id="reg_client7" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="Software Type" Type="string" Value="Authentication" />
-        <Registry Id="reg_client8" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
-        <Registry Id="reg_client9" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
-        <Registry Id="reg_client10" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+        <RegistryKey Id="reg_client1" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Action="createAndRemoveOnUninstall"/>
+        <RegistryValue Id="reg_client3" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="VersionString" Type="string" Value="$(var.VersionString)" />
+        <RegistryValue Id="reg_client4" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="Title" Type="string" Value="KfW" />
+        <RegistryValue Id="reg_client5" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <RegistryValue Id="reg_client6" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <RegistryValue Id="reg_client7" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="Software Type" Type="string" Value="Authentication" />
+        <RegistryValue Id="reg_client8" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <RegistryValue Id="reg_client9" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <RegistryValue Id="reg_client10" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
 
-        <Registry Id="reg_client11" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Action="createKeyAndRemoveKeyOnUninstall"/>
-        <Registry Id="reg_client12" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" KeyPath="yes" />
-        <Registry Id="reg_client13" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="VersionString" Type="string" Value="$(var.VersionString)" />
-        <Registry Id="reg_client14" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="Title" Type="string" Value="KfW" />
-        <Registry Id="reg_client15" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="Description" Type="string" Value="$(var.ProductFullName)" />
-        <Registry Id="reg_client16" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
-        <Registry Id="reg_client17" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="Software Type" Type="string" Value="Authentication" />
-        <Registry Id="reg_client18" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
-        <Registry Id="reg_client19" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
-        <Registry Id="reg_client20" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+        <RegistryKey Id="reg_client11" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Action="createAndRemoveOnUninstall"/>
+        <RegistryValue Id="reg_client13" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="VersionString" Type="string" Value="$(var.VersionString)" KeyPath="yes" />
+        <RegistryValue Id="reg_client14" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="Title" Type="string" Value="KfW" />
+        <RegistryValue Id="reg_client15" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <RegistryValue Id="reg_client16" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <RegistryValue Id="reg_client17" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="Software Type" Type="string" Value="Authentication" />
+        <RegistryValue Id="reg_client18" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <RegistryValue Id="reg_client19" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <RegistryValue Id="reg_client20" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
     </Component>
 
     <Component Win64="$(var.Win64)" Id="rcm_sdk" Guid="96AA90C7-8C60-4341-A15B-3DEDF29DA9F1">
-        <Registry Id="reg_sdk0" Root="HKLM" Key="$(var.KfwRegRoot)\SDK" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <RegistryKey Id="reg_sdk0" Root="HKLM" Key="$(var.KfwRegRoot)\SDK" Action="createAndRemoveOnUninstall"/>
 
-        <Registry Id="reg_sdk1" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
-        <Registry Id="reg_sdk2" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" />
-        <Registry Id="reg_sdk3" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="VersionString" Type="string" Value="$(var.VersionString)" />
-        <Registry Id="reg_sdk4" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="Title" Type="string" Value="KfW" />
-        <Registry Id="reg_sdk5" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="Description" Type="string" Value="$(var.ProductFullName)" />
-        <Registry Id="reg_sdk6" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
-        <Registry Id="reg_sdk7" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="Software Type" Type="string" Value="Authentication" />
-        <Registry Id="reg_sdk8" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
-        <Registry Id="reg_sdk9" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
-        <Registry Id="reg_sdk10" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+        <RegistryKey Id="reg_sdk1" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Action="createAndRemoveOnUninstall"/>
+        <RegistryValue Id="reg_sdk3" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="VersionString" Type="string" Value="$(var.VersionString)" />
+        <RegistryValue Id="reg_sdk4" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="Title" Type="string" Value="KfW" />
+        <RegistryValue Id="reg_sdk5" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <RegistryValue Id="reg_sdk6" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <RegistryValue Id="reg_sdk7" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="Software Type" Type="string" Value="Authentication" />
+        <RegistryValue Id="reg_sdk8" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <RegistryValue Id="reg_sdk9" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <RegistryValue Id="reg_sdk10" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
 
-        <Registry Id="reg_sdk11" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Action="createKeyAndRemoveKeyOnUninstall"/>
-        <Registry Id="reg_sdk12" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" KeyPath="yes" />
-        <Registry Id="reg_sdk13" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="VersionString" Type="string" Value="$(var.VersionString)" />
-        <Registry Id="reg_sdk14" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="Title" Type="string" Value="KfW" />
-        <Registry Id="reg_sdk15" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="Description" Type="string" Value="$(var.ProductFullName)" />
-        <Registry Id="reg_sdk16" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
-        <Registry Id="reg_sdk17" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="Software Type" Type="string" Value="Authentication" />
-        <Registry Id="reg_sdk18" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
-        <Registry Id="reg_sdk19" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
-        <Registry Id="reg_sdk20" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+        <RegistryKey Id="reg_sdk11" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Action="createAndRemoveOnUninstall"/>
+        <RegistryValue Id="reg_sdk13" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="VersionString" Type="string" Value="$(var.VersionString)" KeyPath="yes" />
+        <RegistryValue Id="reg_sdk14" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="Title" Type="string" Value="KfW" />
+        <RegistryValue Id="reg_sdk15" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <RegistryValue Id="reg_sdk16" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <RegistryValue Id="reg_sdk17" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="Software Type" Type="string" Value="Authentication" />
+        <RegistryValue Id="reg_sdk18" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <RegistryValue Id="reg_sdk19" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <RegistryValue Id="reg_sdk20" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
     </Component>
     
     <Component Win64="$(var.Win64)" Id="rcm_docs" Guid="C7EADA0F-8FF7-4e7b-9372-5553BDD5812F">
-        <Registry Id="reg_docs0" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <RegistryKey Id="reg_docs0" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation" Action="createAndRemoveOnUninstall"/>
 
-        <Registry Id="reg_docs1" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
-        <Registry Id="reg_docs2" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" />
-        <Registry Id="reg_docs3" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="VersionString" Type="string" Value="$(var.VersionString)" />
-        <Registry Id="reg_docs4" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="Title" Type="string" Value="KfW" />
-        <Registry Id="reg_docs5" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="Description" Type="string" Value="$(var.ProductFullName)" />
-        <Registry Id="reg_docs6" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
-        <Registry Id="reg_docs7" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="Software Type" Type="string" Value="Authentication" />
-        <Registry Id="reg_docs8" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
-        <Registry Id="reg_docs9" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
-        <Registry Id="reg_docs10" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+        <RegistryKey Id="reg_docs1" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Action="createAndRemoveOnUninstall"/>
+        <RegistryValue Id="reg_docs3" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="VersionString" Type="string" Value="$(var.VersionString)" />
+        <RegistryValue Id="reg_docs4" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="Title" Type="string" Value="KfW" />
+        <RegistryValue Id="reg_docs5" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <RegistryValue Id="reg_docs6" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <RegistryValue Id="reg_docs7" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="Software Type" Type="string" Value="Authentication" />
+        <RegistryValue Id="reg_docs8" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <RegistryValue Id="reg_docs9" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <RegistryValue Id="reg_docs10" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
 
-        <Registry Id="reg_docs11" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Action="createKeyAndRemoveKeyOnUninstall"/>
-        <Registry Id="reg_docs12" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" KeyPath="yes" />
-        <Registry Id="reg_docs13" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="VersionString" Type="string" Value="$(var.VersionString)" />
-        <Registry Id="reg_docs14" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="Title" Type="string" Value="KfW" />
-        <Registry Id="reg_docs15" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="Description" Type="string" Value="$(var.ProductFullName)" />
-        <Registry Id="reg_docs16" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
-        <Registry Id="reg_docs17" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="Software Type" Type="string" Value="Authentication" />
-        <Registry Id="reg_docs18" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
-        <Registry Id="reg_docs19" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
-        <Registry Id="reg_docs20" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+        <RegistryKey Id="reg_docs11" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Action="createAndRemoveOnUninstall"/>
+        <RegistryValue Id="reg_docs13" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="VersionString" Type="string" Value="$(var.VersionString)" KeyPath="yes" />
+        <RegistryValue Id="reg_docs14" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="Title" Type="string" Value="KfW" />
+        <RegistryValue Id="reg_docs15" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <RegistryValue Id="reg_docs16" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <RegistryValue Id="reg_docs17" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="Software Type" Type="string" Value="Authentication" />
+        <RegistryValue Id="reg_docs18" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <RegistryValue Id="reg_docs19" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <RegistryValue Id="reg_docs20" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
     </Component>
 
     <!-- Shared assembly runtime for VS 2010 -->
