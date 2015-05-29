@@ -73,6 +73,43 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+
+Major changes in 1.12.4 (2015-05-29)
+------------------------------------
+
+This is a bugfix release.  The krb5-1.12 release series is in
+maintenance, and for new deployments, installers should prefer the
+krb5-1.13 release series or later.
+
+* Fix a minor vulnerability in krb5_read_message, which is primarily
+  used in the BSD-derived kcmd suite of applications.  [CVE-2014-5355]
+
+* Fix a bypass of requires_preauth in KDCs that have PKINIT enabled.
+  [CVE-2015-2694]
+
+* Fix some issues with the LDAP KDC database back end.
+
+* Fix an iteration-related memory leak in the DB2 KDC database back
+  end.
+
+* Fix issues with some less-used kadm5.acl functionality.
+
+* Improve documentation.
+
+krb5-1.12.4 changes by ticket ID
+--------------------------------
+
+8180    Fix krb5_read_message handling [CVE-2014-5355]
+8181    Add formats section to documentation
+8182    Import names immediately with COMPOSITE_EXPORT
+8183    kadmind ACL back-references can affect later lines
+8184    kadm5.acl flag restrictions don't use documented syntax
+8186    Disable principal renames for LDAP
+8193    Fix LDAP ticket policies on big-endian LP64
+8194    requires_preauth bypass in PKINIT-enabled KDC [CVE-2015-2694]
+8195    Fix minor documentation errors
+
+
 Major changes in 1.12.3 (2015-02-18)
 ------------------------------------
 
@@ -542,6 +579,7 @@ reports, suggestions, and valuable resources:
     Alex Dehnert
     Mark Deneen
     Günther Deschner
+    John Devitofranceschi
     Roland Dowdeswell
     Viktor Dukhovni
     Jason Edgecombe
@@ -582,6 +620,7 @@ reports, suggestions, and valuable resources:
     Joel Johnson
     Anders Kaseorg
     W. Trevor King
+    Patrik Kis
     Mikkel Kruse
     Reinhard Kugler
     Tomas Kuthan
@@ -590,8 +629,12 @@ reports, suggestions, and valuable resources:
     Jan iankko Lieskovsky
     Oliver Loch
     Kevin Longfellow
+    Jon Looney
     Nuno Lopes
     Ryan Lynch
+    Roland Mainz
+    Andrei Maslennikov
+    Michael Mattioli
     Nathaniel McCallum
     Greg McClement
     Cameron Meadors
@@ -606,20 +649,25 @@ reports, suggestions, and valuable resources:
     Edward Murrell
     Nikos Nikoleris
     Felipe Ortega
+    Michael Osipov
     Andrej Ota
     Dmitri Pal
     Javier Palacios
     Tom Parker
     Ezra Peisach
+    Zoran Pericic
     W. Michael Petullo
     Mark Phalan
+    Brett Randall
     Jonathan Reams
     Robert Relyea
     Martin Rex
     Jason Rogers
     Nate Rosenblum
+    Solly Ross
     Mike Roszkowski
     Guillaume Rousse
+    Andreas Schneider
     Tom Shaw
     Jim Shi
     Peter Shoults
@@ -628,6 +676,7 @@ reports, suggestions, and valuable resources:
     Michael Ströder
     Bjørn Tore Sund
     Joe Travaglini
+    Tim Uglow
     Rathor Vipin
     Denis Vlasenko
     Jorgen Wahlsten
@@ -646,6 +695,7 @@ reports, suggestions, and valuable resources:
     Augustin Wolf
     David Woodhouse
     Xu Qiang
+    Neng Xue
     Nickolai Zeldovich
     Hanz van Zijst
     Gertjan Zwartjes
