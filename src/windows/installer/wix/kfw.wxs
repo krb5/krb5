@@ -72,7 +72,7 @@
         <?endif?>
 
         <!-- Custom actions -->
-        <Binary Id="binCustom" src="custom\custom.dll" />
+        <Binary Id="binCustom" SourceFile="custom\custom.dll" />
         
         <CustomAction 
             Id="EnableTgtSessionKey"

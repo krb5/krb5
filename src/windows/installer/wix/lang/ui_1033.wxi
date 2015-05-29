@@ -446,7 +446,7 @@
         </Control>
         <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="374" Height="44" TabSkip="no" Text="[BannerBitmap]" />
         <Control Id="AgreementText" Type="ScrollableText" X="20" Y="60" Width="330" Height="120" Sunken="yes" TabSkip="no">
-          <Text src=".\lang\license.rtf"/>
+          <Text SourceFile=".\lang\license.rtf"/>
         </Control>
         <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="374" Height="0" />
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="374" Height="0" />
@@ -1226,15 +1226,15 @@
     <Property Id="IAgree"><![CDATA[No]]></Property>
     <Property Id="BannerBitmap"><![CDATA[bannrbmp]]></Property>
     <Property Id="DialogBitmap"><![CDATA[dlgbmp]]></Property>
-    <Binary Id="bannrbmp" src="Binary\bannrbmp.bmp" />
-    <Binary Id="completi" src="Binary\completi.ico" />
-    <Binary Id="custicon" src="Binary\custicon.ico" />
-    <Binary Id="dlgbmp" src="Binary\dlgbmp.bmp" />
-    <Binary Id="exclamic" src="Binary\exclamic.ico" />
-    <Binary Id="info" src="Binary\info.bmp" />
-    <Binary Id="insticon" src="Binary\insticon.ico" />
-    <Binary Id="New" src="Binary\New.bmp" />
-    <Binary Id="removico" src="Binary\removico.ico" />
-    <Binary Id="repairic" src="Binary\repairic.ico" />
-    <Binary Id="Up" src="Binary\up.bmp" />
+    <Binary Id="bannrbmp" SourceFile="Binary\bannrbmp.bmp" />
+    <Binary Id="completi" SourceFile="Binary\completi.ico" />
+    <Binary Id="custicon" SourceFile="Binary\custicon.ico" />
+    <Binary Id="dlgbmp" SourceFile="Binary\dlgbmp.bmp" />
+    <Binary Id="exclamic" SourceFile="Binary\exclamic.ico" />
+    <Binary Id="info" SourceFile="Binary\info.bmp" />
+    <Binary Id="insticon" SourceFile="Binary\insticon.ico" />
+    <Binary Id="New" SourceFile="Binary\New.bmp" />
+    <Binary Id="removico" SourceFile="Binary\removico.ico" />
+    <Binary Id="repairic" SourceFile="Binary\repairic.ico" />
+    <Binary Id="Up" SourceFile="Binary\up.bmp" />
 </Include>
