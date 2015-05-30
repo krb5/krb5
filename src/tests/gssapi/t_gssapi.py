@@ -213,4 +213,7 @@ if krb5_mech not in out or spnego_mech not in out:
 # init_sec_context can interpret it.
 realm.run(['./t_err', 'p:' + realm.host_princ])
 
+# Test the GSS_KRB5_CRED_NO_CI_FLAGS_X cred option.
+realm.run(['./t_ciflags', 'p:' + realm.host_princ])
+
 success('GSSAPI tests')
