@@ -536,8 +536,14 @@ have_client_keys(krb5_context context, krb5_kdcpreauth_rock rock)
     return FALSE;
 }
 
+static const krb5_keyblock *
+client_keyblock(krb5_context context, krb5_kdcpreauth_rock rock)
+{
+    return rock->client_keyblock;
+}
+
 static struct krb5_kdcpreauth_callbacks_st callbacks = {
-    2,
+    3,
     max_time_skew,
     client_keys,
     free_keys,
@@ -547,7 +553,8 @@ static struct krb5_kdcpreauth_callbacks_st callbacks = {
     free_string,
     client_entry,
     event_context,
-    have_client_keys
+    have_client_keys,
+    client_keyblock
 };
 
 static krb5_error_code

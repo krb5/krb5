@@ -34,7 +34,7 @@
  * Declarations for kdcpreauth plugin module implementors.
  *
  * The kdcpreauth interface has a single supported major version, which is 1.
- * Major version 1 has a current minor version of 2.  kdcpreauth modules should
+ * Major version 1 has a current minor version of 3.  kdcpreauth modules should
  * define a function named kdcpreauth_<modulename>_initvt, matching the
  * signature:
  *
@@ -180,6 +180,19 @@ typedef struct krb5_kdcpreauth_callbacks_st {
                                      krb5_kdcpreauth_rock rock);
 
     /* End of version 2 kdcpreauth callbacks. */
+
+    /*
+     * Get the decrypted client long-term key chosen according to the request
+     * enctype list, or NULL if no matching key was found.  The returned
+     * pointer is an alias and should not be freed.  If invoked from
+     * return_padata, the result will be the same as the encrypting_key
+     * parameter if it is not NULL, and will therefore reflect the modified
+     * reply key if a return_padata handler has replaced the reply key.
+     */
+    const krb5_keyblock *(*client_keyblock)(krb5_context context,
+                                            krb5_kdcpreauth_rock rock);
+
+    /* End of version 3 kdcpreauth callbacks. */
 
 } *krb5_kdcpreauth_callbacks;
 
