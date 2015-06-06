@@ -90,6 +90,46 @@ get_key_exp(krb5_db_entry *entry)
     return min(entry->expiration, entry->pw_expiration);
 }
 
+/*
+ * Find the key in client for the most preferred enctype in req_enctypes.  Fill
+ * in *kb_out with the decrypted keyblock (which the caller must free) and set
+ * *kd_out to an alias to that key data entry.  Set *kd_out to NULL and leave
+ * *kb_out zeroed if no key is found for any of the requested enctypes.
+ * kb_out->enctype may differ from the enctype of *kd_out for DES enctypes; in
+ * this case, kb_out->enctype is the requested enctype used to match the key
+ * data entry.
+ */
+static krb5_error_code
+select_client_key(krb5_context context, krb5_db_entry *client,
+                  krb5_enctype *req_enctypes, int n_req_enctypes,
+                  krb5_keyblock *kb_out, krb5_key_data **kd_out)
+{
+    krb5_error_code ret;
+    krb5_key_data *kd;
+    krb5_enctype etype;
+    int i;
+
+    memset(kb_out, 0, sizeof(*kb_out));
+    *kd_out = NULL;
+
+    for (i = 0; i < n_req_enctypes; i++) {
+        etype = req_enctypes[i];
+        if (!krb5_c_valid_enctype(etype))
+            continue;
+        if (krb5_dbe_find_enctype(context, client, etype, -1, 0, &kd) == 0) {
+            /* Decrypt the client key data and set its enctype to the request
+             * enctype (which may differ from the key data enctype for DES). */
+            ret = krb5_dbe_decrypt_key_data(context, NULL, kd, kb_out, NULL);
+            if (ret)
+                return ret;
+            kb_out->enctype = etype;
+            *kd_out = kd;
+            return 0;
+        }
+    }
+    return 0;
+}
+
 struct as_req_state {
     loop_respond_fn respond;
     void *arg;
@@ -104,6 +144,7 @@ struct as_req_state {
     krb5_db_entry *server;
     krb5_db_entry *local_tgt;
     krb5_db_entry *local_tgt_storage;
+    krb5_key_data *client_key;
     krb5_kdc_req *request;
     struct krb5_kdcpreauth_rock_st rock;
     const char *status;
@@ -131,13 +172,10 @@ static void
 finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
 {
     krb5_key_data *server_key;
-    krb5_key_data *client_key;
     krb5_keyblock *as_encrypting_key = NULL;
     krb5_data *response = NULL;
     const char *emsg = 0;
     int did_log = 0;
-    register int i;
-    krb5_enctype useenctype;
     loop_respond_fn oldrespond;
     void *oldarg;
     kdc_realm_t *kdc_active_realm = state->active_realm;
@@ -185,34 +223,6 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                                              NULL))) {
         state->status = "DECRYPT_SERVER_KEY";
         goto egress;
-    }
-
-    /*
-     * Find the appropriate client key.  We search in the order specified
-     * by request keytype list.
-     */
-    client_key = NULL;
-    useenctype = 0;
-    for (i = 0; i < state->request->nktypes; i++) {
-        useenctype = state->request->ktype[i];
-        if (!krb5_c_valid_enctype(useenctype))
-            continue;
-
-        if (!krb5_dbe_find_enctype(kdc_context, state->client,
-                                   useenctype, -1, 0, &client_key))
-            break;
-    }
-
-    if (client_key != NULL) {
-        /* Decrypt the client key data entry to get the real reply key. */
-        errcode = krb5_dbe_decrypt_key_data(kdc_context, NULL, client_key,
-                                            &state->client_keyblock, NULL);
-        if (errcode) {
-            state->status = "DECRYPT_CLIENT_KEY";
-            goto egress;
-        }
-        state->client_keyblock.enctype = useenctype;
-        state->rock.client_key = client_key;
     }
 
     /* Start assembling the response */
@@ -327,8 +337,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                                   &state->reply_encpart, 0,
                                   as_encrypting_key,
                                   &state->reply, &response);
-    if (client_key != NULL)
-        state->reply.enc_part.kvno = client_key->key_data_kvno;
+    if (state->client_key != NULL)
+        state->reply.enc_part.kvno = state->client_key->key_data_kvno;
     if (errcode) {
         state->status = "ENCODE_KDC_REP";
         goto egress;
@@ -770,6 +780,18 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         }
         state->enc_tkt_reply.client = state->request->client;
         setflag(state->client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH);
+    }
+
+    errcode = select_client_key(kdc_context, state->client,
+                                state->request->ktype, state->request->nktypes,
+                                &state->client_keyblock, &state->client_key);
+    if (errcode) {
+        state->status = "DECRYPT_CLIENT_KEY";
+        goto errout;
+    }
+    if (state->client_key != NULL) {
+        state->rock.client_key = state->client_key;
+        state->rock.client_keyblock = &state->client_keyblock;
     }
 
     /*
