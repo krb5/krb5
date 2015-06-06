@@ -5,9 +5,9 @@ SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
 
-OBJS= adata.o gcred.o hist.o hrealm.o kdbtest.o plugorder.o t_init_creds.o \
-	t_localauth.o rdreq.o responder.o s2p.o
-EXTRADEPSRCS= adata.c gcred.c hist.c hrealm.c kdbtest.c plugorder.c \
+OBJS= adata.o etinfo.o gcred.o hist.o hrealm.o kdbtest.o plugorder.o \
+	t_init_creds.o t_localauth.o rdreq.o responder.o s2p.o
+EXTRADEPSRCS= adata.c etinfo.c gcred.c hist.c hrealm.c kdbtest.c plugorder.c \
 	t_init_creds.c t_localauth.c rdreq.o responder.c s2p.c
 
 TEST_DB = ./testdb
@@ -22,6 +22,9 @@ KTEST_OPTS= $(KADMIN_OPTS) -p $(TEST_PREFIX) -n $(TEST_NUM) -D $(TEST_DEPTH)
 
 adata: adata.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ adata.o $(KRB5_BASE_LIBS)
+
+etinfo: etinfo.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ etinfo.o $(KRB5_BASE_LIBS)
 
 gcred: gcred.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ gcred.o $(KRB5_BASE_LIBS)
@@ -100,8 +103,8 @@ kdb_check: kdc.conf krb5.conf
 	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
 
-check-pytests:: adata gcred hist hrealm kdbtest plugorder rdreq responder
-check-pytests:: s2p t_init_creds t_localauth unlockiter
+check-pytests:: adata etinfo gcred hist hrealm kdbtest plugorder rdreq
+check-pytests:: responder s2p t_init_creds t_localauth unlockiter
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_iprop.py $(PYTESTFLAGS)
@@ -140,6 +143,7 @@ check-pytests:: s2p t_init_creds t_localauth unlockiter
 	$(RUNPYTEST) $(srcdir)/jsonwalker.py -d $(srcdir)/au_dict.json \
 			-i au.log
 	$(RUNPYTEST) $(srcdir)/t_salt.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_etype_info.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_bogus_kdc_req.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kdc_log.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_proxy.py $(PYTESTFLAGS)
@@ -148,7 +152,8 @@ check-pytests:: s2p t_init_creds t_localauth unlockiter
 	$(RUNPYTEST) $(srcdir)/t_authdata.py $(PYTESTFLAGS)
 
 clean::
-	$(RM) adata gcred hist hrealm kdbtest plugorder rdreq responder s2p
-	$(RM) t_init_creds t_localauth krb5.conf kdc.conf
+	$(RM) gcred hist hrealm kdbtest plugorder rdreq responder s2p
+	$(RM) adata etinfo gcred hist hrealm kdbtest plugorder rdreq responder
+	$(RM) s2p t_init_creds t_localauth krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap
 	$(RM) au.log

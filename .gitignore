@@ -250,6 +250,7 @@ testlog
 /src/slave/kproplog
 
 /src/tests/adata
+/src/tests/etinfo
 /src/tests/gcred
 /src/tests/hist
 /src/tests/hrealm
