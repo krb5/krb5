@@ -216,4 +216,8 @@ realm.run(['./t_err', 'p:' + realm.host_princ])
 # Test the GSS_KRB5_CRED_NO_CI_FLAGS_X cred option.
 realm.run(['./t_ciflags', 'p:' + realm.host_princ])
 
+# Test that inquire_context works properly, even on incomplete
+# contexts.
+realm.run(['./t_inq_ctx', 'p:%s' % realm.host_princ])
+
 success('GSSAPI tests')

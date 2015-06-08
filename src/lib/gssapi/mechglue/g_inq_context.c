@@ -130,6 +130,7 @@ gss_inquire_context(
     /* need to convert names */
 
     if (src_name) {
+	if (localSourceName) {
 	    status = gssint_convert_name_to_union_name(minor_status, mech,
 						      localSourceName, src_name);
 
@@ -138,7 +139,9 @@ gss_inquire_context(
 		    mech->gss_release_name(&temp_minor, &localTargName);
 		return (status);
 	    }
-
+	} else {
+	    *src_name = GSS_C_NO_NAME;
+	}
     }
 
     if (targ_name) {
