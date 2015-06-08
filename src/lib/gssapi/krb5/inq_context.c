@@ -104,55 +104,66 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
         *acceptor_name = (gss_name_t) NULL;
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
-
-    if (ctx->terminated || !ctx->established) {
-        *minor_status = KG_CTX_INCOMPLETE;
-        return(GSS_S_NO_CONTEXT);
-    }
-
-    initiator = NULL;
-    acceptor = NULL;
     context = ctx->k5_context;
 
-    if ((code = krb5_timeofday(context, &now))) {
-        *minor_status = code;
-        save_error_info(*minor_status, context);
-        return(GSS_S_FAILURE);
-    }
+    /* RFC 2743 states that a partially completed context must return
+     * flags, locally_initiated, and open, and *may* return mech_type. */
+    if (ctx->established) {
+        initiator = NULL;
+        acceptor = NULL;
 
-    if ((lifetime = ctx->krb_times.endtime - now) < 0)
+        if ((code = krb5_timeofday(context, &now))) {
+            *minor_status = code;
+            save_error_info(*minor_status, context);
+            return(GSS_S_FAILURE);
+        }
+
+        if ((lifetime = ctx->krb_times.endtime - now) < 0)
+            lifetime = 0;
+
+        if (initiator_name) {
+            code = kg_duplicate_name(context,
+                                     ctx->initiate ? ctx->here : ctx->there,
+                                     &initiator);
+            if (code) {
+                *minor_status = code;
+                save_error_info(*minor_status, context);
+                return(GSS_S_FAILURE);
+            }
+        }
+
+        if (acceptor_name) {
+            code = kg_duplicate_name(context,
+                                     ctx->initiate ? ctx->there : ctx->here,
+                                     &acceptor);
+            if (code) {
+                if (initiator)
+                    kg_release_name(context, &initiator);
+                *minor_status = code;
+                save_error_info(*minor_status, context);
+                return(GSS_S_FAILURE);
+            }
+        }
+
+        if (initiator_name)
+            *initiator_name = (gss_name_t) initiator;
+
+        if (acceptor_name)
+            *acceptor_name = (gss_name_t) acceptor;
+
+        if (lifetime_rec)
+            *lifetime_rec = lifetime;
+    } else {
         lifetime = 0;
+        if (initiator_name)
+            *initiator_name = GSS_C_NO_NAME;
 
-    if (initiator_name) {
-        if ((code = kg_duplicate_name(context,
-                                      ctx->initiate ? ctx->here : ctx->there,
-                                      &initiator))) {
-            *minor_status = code;
-            save_error_info(*minor_status, context);
-            return(GSS_S_FAILURE);
-        }
+        if (acceptor_name)
+            *acceptor_name = GSS_C_NO_NAME;
+
+        if (lifetime_rec)
+            *lifetime_rec = 0;
     }
-
-    if (acceptor_name) {
-        if ((code = kg_duplicate_name(context,
-                                      ctx->initiate ? ctx->there : ctx->here,
-                                      &acceptor))) {
-            if (initiator)
-                kg_release_name(context, &initiator);
-            *minor_status = code;
-            save_error_info(*minor_status, context);
-            return(GSS_S_FAILURE);
-        }
-    }
-
-    if (initiator_name)
-        *initiator_name = (gss_name_t) initiator;
-
-    if (acceptor_name)
-        *acceptor_name = (gss_name_t) acceptor;
-
-    if (lifetime_rec)
-        *lifetime_rec = lifetime;
 
     if (mech_type)
         *mech_type = (gss_OID) ctx->mech_used;
@@ -167,7 +178,10 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
         *opened = ctx->established;
 
     *minor_status = 0;
-    return((lifetime == 0)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
+    if (ctx->established)
+        return((lifetime == 0)?GSS_S_CONTEXT_EXPIRED:GSS_S_COMPLETE);
+    else
+        return GSS_S_COMPLETE;
 }
 
 OM_uint32
