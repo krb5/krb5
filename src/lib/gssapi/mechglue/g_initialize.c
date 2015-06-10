@@ -168,7 +168,7 @@ gss_OID *oid;
 	OM_uint32 major;
 	gss_mech_info aMech;
 
-	if (minor_status == NULL)
+	if (minor_status == NULL || oid == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
 	*minor_status = gssint_mechglue_initialize_library();
