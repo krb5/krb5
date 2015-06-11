@@ -175,6 +175,9 @@ gss_OID *oid;
 	if (*minor_status != 0)
 		return (GSS_S_FAILURE);
 
+	if (oid == NULL)
+		return (GSS_S_COMPLETE);
+
 	k5_mutex_lock(&g_mechListLock);
 	aMech = g_mechList;
 	while (aMech != NULL) {
