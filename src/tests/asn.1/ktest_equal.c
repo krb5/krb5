@@ -853,6 +853,13 @@ ktest_equal_sequence_of_otp_tokeninfo(krb5_otp_tokeninfo **ref,
     array_compare(ktest_equal_otp_tokeninfo);
 }
 
+int
+ktest_equal_sequence_of_spake_factor(krb5_spake_factor **ref,
+                                     krb5_spake_factor **var)
+{
+    array_compare(ktest_equal_spake_factor);
+}
+
 #ifndef DISABLE_PKINIT
 
 static int
@@ -1092,5 +1099,47 @@ ktest_equal_secure_cookie(krb5_secure_cookie *ref, krb5_secure_cookie *var)
     else if (ref == NULL || var == NULL) return FALSE;
     p = p && ktest_equal_sequence_of_pa_data(ref->data, var->data);
     p = p && ref->time == ref->time;
+    return p;
+}
+
+int
+ktest_equal_spake_factor(krb5_spake_factor *ref, krb5_spake_factor *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && scalar_equal(type);
+    p = p && ptr_equal(data,ktest_equal_data);
+    return p;
+}
+
+int
+ktest_equal_pa_spake(krb5_pa_spake *ref, krb5_pa_spake *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    else if (ref->choice != var->choice) return FALSE;
+    switch (ref->choice) {
+    case SPAKE_MSGTYPE_SUPPORT:
+        p = p && scalar_equal(u.support.ngroups);
+        p = p && (memcmp(ref->u.support.groups,var->u.support.groups,
+                         ref->u.support.ngroups * sizeof(int32_t)) == 0);
+        break;
+    case SPAKE_MSGTYPE_CHALLENGE:
+        p = p && struct_equal(u.challenge.pubkey,ktest_equal_data);
+        p = p && ptr_equal(u.challenge.factors,
+                           ktest_equal_sequence_of_spake_factor);
+        break;
+    case SPAKE_MSGTYPE_RESPONSE:
+        p = p && struct_equal(u.response.pubkey,ktest_equal_data);
+        p = p && struct_equal(u.response.factor,ktest_equal_enc_data);
+        break;
+    case SPAKE_MSGTYPE_ENCDATA:
+        p = p && struct_equal(u.encdata,ktest_equal_enc_data);
+        break;
+    default:
+        break;
+    }
     return p;
 }

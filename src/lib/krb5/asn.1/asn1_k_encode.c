@@ -25,7 +25,7 @@
  */
 
 #include "asn1_encode.h"
-#include <assert.h>
+#include "k5-spake.h"
 
 DEFINT_IMMEDIATE(krb5_version, KVNO, KRB5KDC_ERR_BAD_PVNO);
 
@@ -1814,3 +1814,53 @@ static const struct atype_info *secure_cookie_fields[] = {
 DEFSEQTYPE(secure_cookie, krb5_secure_cookie, secure_cookie_fields);
 MAKE_ENCODER(encode_krb5_secure_cookie, secure_cookie);
 MAKE_DECODER(decode_krb5_secure_cookie, secure_cookie);
+
+DEFFIELD(spake_factor_0, krb5_spake_factor, type, 0, int32);
+DEFFIELD(spake_factor_1, krb5_spake_factor, data, 1, opt_ostring_data_ptr);
+static const struct atype_info *spake_factor_fields[] = {
+    &k5_atype_spake_factor_0, &k5_atype_spake_factor_1
+};
+DEFSEQTYPE(spake_factor, krb5_spake_factor, spake_factor_fields);
+DEFPTRTYPE(spake_factor_ptr, spake_factor);
+DEFNULLTERMSEQOFTYPE(seqof_spake_factor, spake_factor_ptr);
+DEFPTRTYPE(ptr_seqof_spake_factor, seqof_spake_factor);
+MAKE_ENCODER(encode_krb5_spake_factor, spake_factor);
+MAKE_DECODER(decode_krb5_spake_factor, spake_factor);
+
+DEFCNFIELD(spake_support_0, krb5_spake_support, groups, ngroups, 0,
+           cseqof_int32);
+static const struct atype_info *spake_support_fields[] = {
+    &k5_atype_spake_support_0
+};
+DEFSEQTYPE(spake_support, krb5_spake_support, spake_support_fields);
+
+DEFFIELD(spake_challenge_0, krb5_spake_challenge, group, 0, int32);
+DEFFIELD(spake_challenge_1, krb5_spake_challenge, pubkey, 1, ostring_data);
+DEFFIELD(spake_challenge_2, krb5_spake_challenge, factors, 2,
+         ptr_seqof_spake_factor);
+static const struct atype_info *spake_challenge_fields[] = {
+    &k5_atype_spake_challenge_0, &k5_atype_spake_challenge_1,
+    &k5_atype_spake_challenge_2
+};
+DEFSEQTYPE(spake_challenge, krb5_spake_challenge, spake_challenge_fields);
+
+DEFFIELD(spake_response_0, krb5_spake_response, pubkey, 0, ostring_data);
+DEFFIELD(spake_response_1, krb5_spake_response, factor, 1, encrypted_data);
+static const struct atype_info *spake_response_fields[] = {
+    &k5_atype_spake_response_0, &k5_atype_spake_response_1,
+};
+DEFSEQTYPE(spake_response, krb5_spake_response, spake_response_fields);
+
+DEFCTAGGEDTYPE(pa_spake_0, 0, spake_support);
+DEFCTAGGEDTYPE(pa_spake_1, 1, spake_challenge);
+DEFCTAGGEDTYPE(pa_spake_2, 2, spake_response);
+DEFCTAGGEDTYPE(pa_spake_3, 3, encrypted_data);
+static const struct atype_info *pa_spake_alternatives[] = {
+    &k5_atype_pa_spake_0, &k5_atype_pa_spake_1, &k5_atype_pa_spake_2,
+    &k5_atype_pa_spake_3
+};
+DEFCHOICETYPE(pa_spake_choice, union krb5_spake_message_choices,
+              enum krb5_spake_msgtype, pa_spake_alternatives);
+DEFCOUNTEDTYPE_SIGNED(pa_spake, krb5_pa_spake, u, choice, pa_spake_choice);
+MAKE_ENCODER(encode_krb5_pa_spake, pa_spake);
+MAKE_DECODER(decode_krb5_pa_spake, pa_spake);

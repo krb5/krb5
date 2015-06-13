@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "k5-spake.h"
 #include "ktest.h"
 #include "com_err.h"
 #include "utility.h"
@@ -1105,6 +1106,42 @@ int main(argc, argv)
         setup(krb5_secure_cookie,ktest_make_sample_secure_cookie);
         decode_run("secure_cookie","","30 2C 02 04 2D F8 02 25 30 24 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61",decode_krb5_secure_cookie,ktest_equal_secure_cookie,k5_free_secure_cookie);
         ktest_empty_secure_cookie(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_krb5_spake_factor */
+    {
+        setup(krb5_spake_factor,ktest_make_minimal_spake_factor);
+        decode_run("spake_factor","(optionals NULL)","30 05 A0 03 02 01 01",decode_krb5_spake_factor,ktest_equal_spake_factor,k5_free_spake_factor);
+        ktest_empty_spake_factor(&ref);
+    }
+    {
+        setup(krb5_spake_factor,ktest_make_maximal_spake_factor);
+        decode_run("spake_factor","","30 0E A0 03 02 01 02 A1 07 04 05 66 64 61 74 61",decode_krb5_spake_factor,ktest_equal_spake_factor,k5_free_spake_factor);
+        ktest_empty_spake_factor(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_krb5_pa_spake */
+    {
+        setup(krb5_pa_spake,ktest_make_support_pa_spake);
+        decode_run("pa_spake","(support)","A0 0C 30 0A A0 08 30 06 02 01 01 02 01 02",decode_krb5_pa_spake,ktest_equal_pa_spake,k5_free_pa_spake);
+        ktest_empty_pa_spake(&ref);
+    }
+    {
+        setup(krb5_pa_spake,ktest_make_challenge_pa_spake);
+        decode_run("pa_spake","(challenge)","A1 2D 30 2B A0 03 02 01 01 A1 09 04 07 54 20 76 61 6C 75 65 A2 19 30 17 30 05 A0 03 02 01 01 30 0E A0 03 02 01 02 A1 07 04 05 66 64 61 74 61",decode_krb5_pa_spake,ktest_equal_pa_spake,k5_free_pa_spake);
+        ktest_empty_pa_spake(&ref);
+    }
+    {
+        setup(krb5_pa_spake,ktest_make_response_pa_spake);
+        decode_run("pa_spake","(response)","A2 34 30 32 A0 09 04 07 53 20 76 61 6C 75 65 A1 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_pa_spake,ktest_equal_pa_spake,k5_free_pa_spake);
+        ktest_empty_pa_spake(&ref);
+    }
+    {
+        setup(krb5_pa_spake,ktest_make_encdata_pa_spake);
+        decode_run("pa_spake","(encdata)","A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_pa_spake,ktest_equal_pa_spake,k5_free_pa_spake);
+        ktest_empty_pa_spake(&ref);
     }
 
 #ifndef DISABLE_PKINIT

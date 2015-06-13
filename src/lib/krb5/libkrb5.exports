@@ -36,6 +36,7 @@ decode_krb5_pa_otp_req
 decode_krb5_pa_otp_enc_req
 decode_krb5_pa_pac_req
 decode_krb5_pa_s4u_x509_user
+decode_krb5_pa_spake
 decode_krb5_padata_sequence
 decode_krb5_priv
 decode_krb5_safe
@@ -44,6 +45,7 @@ decode_krb5_sam_challenge_2_body
 decode_krb5_sam_response_2
 decode_krb5_secure_cookie
 decode_krb5_setpw_req
+decode_krb5_spake_factor
 decode_krb5_tgs_rep
 decode_krb5_tgs_req
 decode_krb5_ticket
@@ -85,6 +87,7 @@ encode_krb5_pa_otp_challenge
 encode_krb5_pa_otp_req
 encode_krb5_pa_otp_enc_req
 encode_krb5_pa_s4u_x509_user
+encode_krb5_pa_spake
 encode_krb5_padata_sequence
 encode_krb5_pkinit_supp_pub_info
 encode_krb5_priv
@@ -95,6 +98,7 @@ encode_krb5_sam_challenge_2_body
 encode_krb5_sam_response_2
 encode_krb5_secure_cookie
 encode_krb5_sp80056a_other_info
+encode_krb5_spake_factor
 encode_krb5_tgs_rep
 encode_krb5_tgs_req
 encode_krb5_ticket
@@ -128,7 +132,9 @@ k5_free_kkdcp_message
 k5_free_pa_otp_challenge
 k5_free_pa_otp_req
 k5_free_secure_cookie
+k5_free_pa_spake
 k5_free_serverlist
+k5_free_spake_factor
 k5_hostrealm_free_context
 k5_init_trace
 k5_is_string_numeric

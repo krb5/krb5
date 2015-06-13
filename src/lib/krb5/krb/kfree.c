@@ -51,6 +51,7 @@
  */
 
 #include "k5-int.h"
+#include "k5-spake.h"
 #include <assert.h>
 
 void KRB5_CALLCONV
@@ -888,5 +889,44 @@ k5_free_secure_cookie(krb5_context context, krb5_secure_cookie *val)
     if (val == NULL)
         return;
     k5_zapfree_pa_data(val->data);
+    free(val);
+}
+
+void
+k5_free_spake_factor(krb5_context context, krb5_spake_factor *val)
+{
+    if (val == NULL)
+        return;
+    krb5_free_data(context, val->data);
+    free(val);
+}
+
+void
+k5_free_pa_spake(krb5_context context, krb5_pa_spake *val)
+{
+    krb5_spake_factor **f;
+
+    if (val == NULL)
+        return;
+    switch (val->choice) {
+    case SPAKE_MSGTYPE_SUPPORT:
+        free(val->u.support.groups);
+        break;
+    case SPAKE_MSGTYPE_CHALLENGE:
+        krb5_free_data_contents(context, &val->u.challenge.pubkey);
+        for (f = val->u.challenge.factors; f != NULL && *f != NULL; f++)
+            k5_free_spake_factor(context, *f);
+        free(val->u.challenge.factors);
+        break;
+    case SPAKE_MSGTYPE_RESPONSE:
+        krb5_free_data_contents(context, &val->u.response.pubkey);
+        krb5_free_data_contents(context, &val->u.response.factor.ciphertext);
+        break;
+    case SPAKE_MSGTYPE_ENCDATA:
+        krb5_free_data_contents(context, &val->u.encdata.ciphertext);
+        break;
+    default:
+        break;
+    }
     free(val);
 }

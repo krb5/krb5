@@ -759,6 +759,35 @@ main(argc, argv)
         encode_run(cookie, "secure_cookie", "", encode_krb5_secure_cookie);
         ktest_empty_secure_cookie(&cookie);
     }
+    /****************************************************************/
+    /* encode_krb5_spake_factor */
+    {
+        krb5_spake_factor factor;
+        ktest_make_minimal_spake_factor(&factor);
+        encode_run(factor, "spake_factor", "(optionals NULL)",
+                   encode_krb5_spake_factor);
+        ktest_empty_spake_factor(&factor);
+        ktest_make_maximal_spake_factor(&factor);
+        encode_run(factor, "spake_factor", "", encode_krb5_spake_factor);
+        ktest_empty_spake_factor(&factor);
+    }
+    /****************************************************************/
+    /* encode_krb5_pa_spake */
+    {
+        krb5_pa_spake pa_spake;
+        ktest_make_support_pa_spake(&pa_spake);
+        encode_run(pa_spake, "pa_spake", "(support)", encode_krb5_pa_spake);
+        ktest_empty_pa_spake(&pa_spake);
+        ktest_make_challenge_pa_spake(&pa_spake);
+        encode_run(pa_spake, "pa_spake", "(challenge)", encode_krb5_pa_spake);
+        ktest_empty_pa_spake(&pa_spake);
+        ktest_make_response_pa_spake(&pa_spake);
+        encode_run(pa_spake, "pa_spake", "(response)", encode_krb5_pa_spake);
+        ktest_empty_pa_spake(&pa_spake);
+        ktest_make_encdata_pa_spake(&pa_spake);
+        encode_run(pa_spake, "pa_spake", "(encdata)", encode_krb5_pa_spake);
+        ktest_empty_pa_spake(&pa_spake);
+    }
 #ifndef DISABLE_PKINIT
     /****************************************************************/
     /* encode_krb5_pa_pk_as_req */

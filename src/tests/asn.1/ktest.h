@@ -28,6 +28,7 @@
 #define __KTEST_H__
 
 #include "k5-int.h"
+#include "k5-spake.h"
 #include "kdb.h"
 
 #define SAMPLE_USEC 123456
@@ -124,6 +125,12 @@ void ktest_make_sample_kkdcp_message(krb5_kkdcp_message *p);
 void ktest_make_minimal_cammac(krb5_cammac *p);
 void ktest_make_maximal_cammac(krb5_cammac *p);
 void ktest_make_sample_secure_cookie(krb5_secure_cookie *p);
+void ktest_make_minimal_spake_factor(krb5_spake_factor *p);
+void ktest_make_maximal_spake_factor(krb5_spake_factor *p);
+void ktest_make_support_pa_spake(krb5_pa_spake *p);
+void ktest_make_challenge_pa_spake(krb5_pa_spake *p);
+void ktest_make_response_pa_spake(krb5_pa_spake *p);
+void ktest_make_encdata_pa_spake(krb5_pa_spake *p);
 
 /*----------------------------------------------------------------------*/
 
@@ -209,6 +216,8 @@ void ktest_empty_ldap_seqof_key_data(krb5_context, ldap_seqof_key_data *p);
 void ktest_empty_kkdcp_message(krb5_kkdcp_message *p);
 void ktest_empty_cammac(krb5_cammac *p);
 void ktest_empty_secure_cookie(krb5_secure_cookie *p);
+void ktest_empty_spake_factor(krb5_spake_factor *p);
+void ktest_empty_pa_spake(krb5_pa_spake *p);
 
 extern krb5_context test_context;
 extern char *sample_principal_name;

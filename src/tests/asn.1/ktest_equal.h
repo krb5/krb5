@@ -28,6 +28,7 @@
 #define __KTEST_EQUAL_H__
 
 #include "k5-int.h"
+#include "k5-spake.h"
 #include "kdb.h"
 
 /* int ktest_equal_structure(krb5_structure *ref, *var) */
@@ -97,6 +98,8 @@ ktest_equal_sequence_of_algorithm_identifier(krb5_algorithm_identifier **ref,
                                              krb5_algorithm_identifier **var);
 int ktest_equal_sequence_of_otp_tokeninfo(krb5_otp_tokeninfo **ref,
                                           krb5_otp_tokeninfo **var);
+int ktest_equal_sequence_of_spake_factor(krb5_spake_factor **ref,
+                                         krb5_spake_factor **var);
 
 len_array(ktest_equal_array_of_enctype,krb5_enctype);
 len_array(ktest_equal_array_of_data,krb5_data);
@@ -151,5 +154,8 @@ int ktest_equal_cammac(krb5_cammac *ref, krb5_cammac *var);
 
 int ktest_equal_secure_cookie(krb5_secure_cookie *ref,
                               krb5_secure_cookie *var);
+
+generic(ktest_equal_spake_factor, krb5_spake_factor);
+generic(ktest_equal_pa_spake, krb5_pa_spake);
 
 #endif

@@ -1584,3 +1584,53 @@ encode_krb5_secure_cookie:
 .  .  [Sequence/Sequence Of]
 .  .  .  [1] [Integer] 13
 .  .  .  [2] [Octet String] "pa-data"
+
+encode_krb5_spake_factor(optionals NULL):
+
+[Sequence/Sequence Of]
+.  [0] [Integer] 1
+
+encode_krb5_spake_factor:
+
+[Sequence/Sequence Of]
+.  [0] [Integer] 2
+.  [1] [Octet String] "fdata"
+
+encode_krb5_pa_spake(support):
+
+[CONT 0]
+.  [Sequence/Sequence Of]
+.  .  [0] [Sequence/Sequence Of]
+.  .  .  [Integer] 1
+.  .  .  [Integer] 2
+
+encode_krb5_pa_spake(challenge):
+
+[CONT 1]
+.  [Sequence/Sequence Of]
+.  .  [0] [Integer] 1
+.  .  [1] [Octet String] "T value"
+.  .  [2] [Sequence/Sequence Of]
+.  .  .  [Sequence/Sequence Of]
+.  .  .  .  [0] [Integer] 1
+.  .  .  [Sequence/Sequence Of]
+.  .  .  .  [0] [Integer] 2
+.  .  .  .  [1] [Octet String] "fdata"
+
+encode_krb5_pa_spake(response):
+
+[CONT 2]
+.  [Sequence/Sequence Of]
+.  .  [0] [Octet String] "S value"
+.  .  [1] [Sequence/Sequence Of]
+.  .  .  [0] [Integer] 0
+.  .  .  [1] [Integer] 5
+.  .  .  [2] [Octet String] "krbASN.1 test message"
+
+encode_krb5_pa_spake(encdata):
+
+[CONT 3]
+.  [Sequence/Sequence Of]
+.  .  [0] [Integer] 0
+.  .  [1] [Integer] 5
+.  .  [2] [Octet String] "krbASN.1 test message"
