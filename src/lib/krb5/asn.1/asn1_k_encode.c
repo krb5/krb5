@@ -1766,3 +1766,12 @@ DEFSEQTYPE(kkdcp_message, krb5_kkdcp_message,
            kkdcp_message_fields);
 MAKE_ENCODER(encode_krb5_kkdcp_message, kkdcp_message);
 MAKE_DECODER(decode_krb5_kkdcp_message, kkdcp_message);
+
+DEFFIELD(secure_cookie_0, krb5_secure_cookie, time, 0, kerberos_time);
+DEFFIELD(secure_cookie_1, krb5_secure_cookie, data, 1, pa_data);
+static const struct atype_info *secure_cookie_fields[] = {
+    &k5_atype_secure_cookie_0, &k5_atype_secure_cookie_1
+};
+DEFSEQTYPE(secure_cookie, krb5_secure_cookie, secure_cookie_fields);
+MAKE_ENCODER(encode_krb5_secure_cookie, secure_cookie);
+MAKE_DECODER(decode_krb5_secure_cookie, secure_cookie);

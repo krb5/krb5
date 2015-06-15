@@ -73,6 +73,7 @@
 #include <kadm5/admin.h>
 #include "adm_proto.h"
 #include "extern.h"
+#include "cookies.h"
 
 static krb5_error_code
 prepare_error_as(struct kdc_request_state *, krb5_kdc_req *,
@@ -478,6 +479,12 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     struct as_req_state *state;
     krb5_audit_state *au_state = NULL;
 
+    errcode = cookies_decrypt(kdc_context, request->server, request->padata);
+    if (errcode != 0) {
+        (*respond)(arg, errcode, NULL);
+        return;
+    }
+
     state = k5alloc(sizeof(*state), &errcode);
     if (state == NULL) {
         (*respond)(arg, errcode, NULL);
@@ -800,6 +807,9 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
     errpkt.text = string2data((char *)status);
 
     if (e_data != NULL) {
+        retval = cookies_encrypt(kdc_context, request->server, e_data);
+        if (retval)
+            goto cleanup;
         if (typed_e_data)
             retval = encode_krb5_typed_data(e_data, &e_data_asn1);
         else
