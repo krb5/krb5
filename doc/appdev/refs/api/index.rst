@@ -304,6 +304,7 @@ Public interfaces that should not be called directly
    krb5_c_crypto_length_iov.rst
    krb5_c_decrypt.rst
    krb5_c_decrypt_iov.rst
+   krb5_c_derive_prfplus.rst
    krb5_c_encrypt.rst
    krb5_c_encrypt_iov.rst
    krb5_c_encrypt_length.rst
@@ -320,6 +321,7 @@ Public interfaces that should not be called directly
    krb5_c_make_random_key.rst
    krb5_c_padding_length.rst
    krb5_c_prf.rst
+   krb5_c_prfplus.rst
    krb5_c_prf_length.rst
    krb5_c_random_add_entropy.rst
    krb5_c_random_make_octets.rst

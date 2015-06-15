@@ -643,6 +643,48 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_prf_length(krb5_context context, krb5_enctype enctype, size_t *len);
 
 /**
+ * Generate pseudo-random bytes using RFC 6113 PRF+.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  k               KDC contribution key
+ * @param [in]  input           Input data
+ * @param [in]  output          Pseudo-random output buffer
+ *
+ * This function fills @a output with PRF+(k, input) as defined in RFC 6113
+ * section 5.1.  The caller must preinitialize @a output and allocate the
+ * desired amount of space.  The length of the pseudo-random output will match
+ * the length of @a output.
+ *
+ * @note RFC 4402 defines a different PRF+ operation.  This function does not
+ * implement that operation.
+ *
+ * @return 0 on success, @c E2BIG if output->length is too large for PRF+ to
+ * generate, @c ENOMEM on allocation failure, or an error code from
+ * krb5_c_prf()
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_c_prfplus(krb5_context context, const krb5_keyblock *k,
+               const krb5_data *input, krb5_data *output);
+
+/**
+ * Derive a key using some input data (via RFC 6113 PRF+).
+ *
+ * @param [in]  context         Library context
+ * @param [in]  k               KDC contribution key
+ * @param [in]  input           Input string
+ * @param [in]  enctype         Output key enctype (or @c ENCTYPE_NULL)
+ * @param [in]  output          Derived keyblock
+ *
+ * This function uses PRF+ as defined in RFC 6113 to derive a key from another
+ * key and an input string.  If @a enctype is @c ENCTYPE_NULL, the output key
+ * will have the same enctype as the input key.
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_c_derive_prfplus(krb5_context context, const krb5_keyblock *k,
+                      const krb5_data *input, krb5_enctype enctype,
+                      krb5_keyblock **output);
+
+/**
  * Compute the KRB-FX-CF2 combination of two keys and pepper strings.
  *
  * @param [in]  context         Library context

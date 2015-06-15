@@ -1,8 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/crypto/krb/cf2.c */
 /*
- * Copyright (C) 2009 by the Massachusetts Institute of Technology.
- * All rights reserved.
+ * Copyright (C) 2009, 2015 by the Massachusetts Institute of Technology.  All
+ * rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -31,60 +31,94 @@
 
 #include "crypto_int.h"
 
-/*
- * Call the PRF function multiple times with the pepper prefixed with
- * a count byte  to get enough bits of output.
- */
-static krb5_error_code
-prf_plus(krb5_context context, const krb5_keyblock *k, const char *pepper,
-         size_t keybytes, char **out)
+#ifndef MIN
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_prfplus(krb5_context context, const krb5_keyblock *k,
+               const krb5_data *input, krb5_data *output)
 {
-    krb5_error_code retval = 0;
-    size_t prflen, iterations;
-    krb5_data out_data;
-    krb5_data in_data;
-    char *buffer = NULL;
-    struct k5buf prf_inbuf;
+    krb5_error_code ret;
+    krb5_data prf_in = empty_data(), prf_out = empty_data();
+    size_t prflen, nblocks, i;
 
-    k5_buf_init_dynamic(&prf_inbuf);
-    k5_buf_add_len(&prf_inbuf, "\001", 1);
-    k5_buf_add(&prf_inbuf, pepper);
-    retval = krb5_c_prf_length( context, k->enctype, &prflen);
-    if (retval)
-        goto cleanup;
-    iterations = keybytes / prflen;
-    if (keybytes % prflen != 0)
-        iterations++;
-    assert(iterations <= 254);
-    buffer = k5calloc(iterations, prflen, &retval);
-    if (retval)
-        goto cleanup;
-    retval = k5_buf_status(&prf_inbuf);
-    if (retval)
-        goto cleanup;
-    in_data.length = prf_inbuf.len;
-    in_data.data = prf_inbuf.data;
-    out_data.length = prflen;
-    out_data.data = buffer;
+    /* Calculate the number of PRF invocations we will need. */
+    ret = krb5_c_prf_length(context, k->enctype, &prflen);
+    if (ret)
+        return ret;
+    nblocks = (output->length + prflen - 1)/ prflen;
+    if (nblocks > 255)
+        return E2BIG;
 
-    while (iterations > 0) {
-        retval = krb5_c_prf(context, k, &in_data, &out_data);
-        if (retval)
+    /* Allocate PRF input and output buffers. */
+    ret = alloc_data(&prf_in, input->length + 1);
+    if (ret)
+        goto cleanup;
+    ret = alloc_data(&prf_out, prflen);
+    if (ret)
+        goto cleanup;
+
+    /* Concatenate PRF(k, 1||input) || PRF(k, 2||input) || ... to produce the
+     * desired number of bytes. */
+    memcpy(&prf_in.data[1], input->data, input->length);
+    for (i = 0; i < nblocks; i++) {
+        prf_in.data[0] = i + 1;
+        ret = krb5_c_prf(context, k, &prf_in, &prf_out);
+        if (ret)
             goto cleanup;
-        out_data.data += prflen;
-        in_data.data[0]++;
-        iterations--;
+
+        memcpy(&output->data[i * prflen], prf_out.data,
+               MIN(prflen, output->length - i * prflen));
     }
 
-    *out = buffer;
-    buffer = NULL;
-
 cleanup:
-    free(buffer);
-    k5_buf_free(&prf_inbuf);
-    return retval;
+    zapfree(prf_out.data, prf_out.length);
+    zapfree(prf_in.data, prf_in.length);
+    return ret;
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_c_derive_prfplus(krb5_context context, const krb5_keyblock *k,
+                      const krb5_data *input, krb5_enctype enctype,
+                      krb5_keyblock **out)
+{
+    krb5_error_code ret;
+    const struct krb5_keytypes *ktp;
+    krb5_data rnd = empty_data();
+    krb5_keyblock *kb = NULL;
+
+    *out = NULL;
+
+    ktp = find_enctype((enctype == ENCTYPE_NULL) ? k->enctype : enctype);
+    if (ktp == NULL)
+        return KRB5_BAD_ENCTYPE;
+
+    /* Generate enough pseudo-random bytes for the random-to-key function. */
+    ret = alloc_data(&rnd, ktp->enc->keybytes);
+    if (ret)
+        goto cleanup;
+    ret = krb5_c_prfplus(context, k, input, &rnd);
+    if (ret)
+        goto cleanup;
+
+    /* Generate a key from the pseudo-random bytes. */
+    ret = krb5int_c_init_keyblock(context, ktp->etype, ktp->enc->keylength,
+                                  &kb);
+    if (ret)
+        goto cleanup;
+    ret = (*ktp->rand2key)(&rnd, kb);
+    if (ret)
+        goto cleanup;
+
+    *out = kb;
+    kb = NULL;
+
+cleanup:
+    zapfree(rnd.data, rnd.length);
+    krb5int_c_free_keyblock(context, kb);
+    return ret;
+}
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_fx_cf2_simple(krb5_context context,
@@ -92,56 +126,51 @@ krb5_c_fx_cf2_simple(krb5_context context,
                      const krb5_keyblock *k2, const char *pepper2,
                      krb5_keyblock **out)
 {
-    const struct krb5_keytypes *out_enctype;
-    size_t keybytes, keylength, i;
-    char *prf1 = NULL, *prf2 = NULL;
-    krb5_data keydata;
-    krb5_enctype out_enctype_num;
-    krb5_error_code retval = 0;
-    krb5_keyblock *out_key = NULL;
+    krb5_error_code ret;
+    const struct krb5_keytypes *ktp = NULL;
+    const krb5_data pepper1_data = string2data((char *)pepper1);
+    const krb5_data pepper2_data = string2data((char *)pepper2);
+    krb5_data prf1 = empty_data(), prf2 = empty_data();
+    unsigned int i;
+    krb5_keyblock *kb = NULL;
 
-    if (k1 == NULL || !krb5_c_valid_enctype(k1->enctype))
+    *out = NULL;
+
+    ktp = find_enctype(k1->enctype);
+    if (ktp == NULL)
         return KRB5_BAD_ENCTYPE;
-    if (k2 == NULL || !krb5_c_valid_enctype(k2->enctype))
-        return KRB5_BAD_ENCTYPE;
-    out_enctype_num = k1->enctype;
-    assert(out != NULL);
-    out_enctype = find_enctype(out_enctype_num);
-    assert(out_enctype != NULL);
-    if (out_enctype->prf == NULL) {
-        if (context) {
-            k5_set_error(&(context->err), KRB5_CRYPTO_INTERNAL,
-                         _("Enctype %d has no PRF"), out_enctype_num);
-        }
-        return KRB5_CRYPTO_INTERNAL;
-    }
-    keybytes = out_enctype->enc->keybytes;
-    keylength = out_enctype->enc->keylength;
 
-    retval = prf_plus(context, k1, pepper1, keybytes, &prf1);
-    if (retval)
+    /* Generate PRF+(k1, pepper1) and PRF+(k2, kepper2). */
+    ret = alloc_data(&prf1, ktp->enc->keybytes);
+    if (ret)
         goto cleanup;
-    retval = prf_plus(context, k2, pepper2, keybytes, &prf2);
-    if (retval)
+    ret = krb5_c_prfplus(context, k1, &pepper1_data, &prf1);
+    if (ret)
         goto cleanup;
-    for (i = 0; i < keybytes; i++)
-        prf1[i] ^= prf2[i];
-    retval = krb5int_c_init_keyblock(context, out_enctype_num, keylength,
-                                     &out_key);
-    if (retval)
+    ret = alloc_data(&prf2, ktp->enc->keybytes);
+    if (ret)
         goto cleanup;
-    keydata.data = prf1;
-    keydata.length = keybytes;
-    retval = (*out_enctype->rand2key)(&keydata, out_key);
-    if (retval)
+    ret = krb5_c_prfplus(context, k2, &pepper2_data, &prf2);
+    if (ret)
         goto cleanup;
 
-    *out = out_key;
-    out_key = NULL;
+    /* Compute the XOR of the two PRF+ values and generate a key. */
+    for (i = 0; i < prf1.length; i++)
+        prf1.data[i] ^= prf2.data[i];
+    ret = krb5int_c_init_keyblock(context, ktp->etype, ktp->enc->keylength,
+                                  &kb);
+    if (ret)
+        goto cleanup;
+    ret = (*ktp->rand2key)(&prf1, kb);
+    if (ret)
+        goto cleanup;
+
+    *out = kb;
+    kb = NULL;
 
 cleanup:
-    krb5int_c_free_keyblock( context, out_key);
-    zapfree(prf1, keybytes);
-    zapfree(prf2, keybytes);
-    return retval;
+    zapfree(prf2.data, prf2.length);
+    zapfree(prf1.data, prf1.length);
+    krb5int_c_free_keyblock(context, kb);
+    return ret;
 }
