@@ -555,7 +555,7 @@ make_signedpath_checksum(krb5_context context,
                          krb5_enctype *enctype_out)
 {
     krb5_error_code ret;
-    krb5_data *data;
+    krb5_data *data = NULL;
     krb5_const_principal client;
     krb5_key_data *kd;
     krb5_keyblock tgtkey;
