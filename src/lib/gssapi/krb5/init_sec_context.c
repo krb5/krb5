@@ -552,12 +552,13 @@ kg_new_connection(
     }
 
     ctx->initiate = 1;
-    ctx->gss_flags = (GSS_C_INTEG_FLAG | GSS_C_CONF_FLAG |
-                      GSS_C_TRANS_FLAG |
-                      ((req_flags) & (GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
+    ctx->gss_flags = (GSS_C_TRANS_FLAG | cred->no_ci_flags |
+                      ((req_flags) & (GSS_C_INTEG_FLAG | GSS_C_CONF_FLAG |
+                                      GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
                                       GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG |
                                       GSS_C_DCE_STYLE | GSS_C_IDENTIFY_FLAG |
                                       GSS_C_EXTENDED_ERROR_FLAG)));
+
     ctx->seed_init = 0;
     ctx->seqstate = 0;
 

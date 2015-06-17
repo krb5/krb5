@@ -180,3 +180,5 @@ EXPORTS
 	gss_get_mic_iov					@144
 	gss_get_mic_iov_length				@145
 	gss_verify_mic_iov				@146
+; Added in 1.14
+	GSS_KRB5_CRED_NO_CI_FLAGS_X			@147	DATA
