@@ -496,6 +496,9 @@ gss_add_cred_with_password(minor_status, input_cred_handle,
 					    selected_mech,
 					   &allocated_name);
 
+    if (target_mechs)
+	(void)gss_release_oid_set(&temp_minor_status, &target_mechs);
+
     return (GSS_S_COMPLETE);
 
 errout:
