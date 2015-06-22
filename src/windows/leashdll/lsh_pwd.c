@@ -1506,7 +1506,7 @@ AuthenticateProc(
         SetActiveWindow(hDialog);
         SetForegroundWindow(hDialog);
         /* put focus on password if princ is read-only */
-        hFocusCtrl = bReadOnlyPrinc ?
+        hFocusCtrl = (bReadOnlyPrinc || principal[0] != '\0') ?
             GetDlgItem(hDialog, IDC_EDIT_PASSWORD) : hEditCtrl;
         if (((HWND)wParam) != hFocusCtrl) {
             SetFocus(hFocusCtrl);
