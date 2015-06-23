@@ -85,6 +85,7 @@ typedef struct {
 typedef struct {
 	gss_cred_id_t mcred;	/* mechglue union of obtainable creds */
 	gss_OID_set neg_mechs;	/* app-specified list of allowable mechs */
+	int no_ask_integ;	/* do not request integ from mechs */
 } spnego_gss_cred_id_rec, *spnego_gss_cred_id_t;
 
 /* Structure for context handle */

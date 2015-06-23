@@ -90,6 +90,8 @@ main(int argc, char *argv[])
     check_gsserr("gss_acquire_cred", major, minor);
     flagtest(&mech_krb5, icred, tname, 0,
              GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
+    flagtest(&mech_spnego, icred, tname, 0,
+             GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
 
     /* Suppress confidentiality and integrity flags on the initiator cred and
      * check that they are suppressed, but can still be asserted explicitly. */
@@ -104,15 +106,11 @@ main(int argc, char *argv[])
              GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
     flagtest(&mech_krb5, icred, tname, GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG,
              GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
-
-    /* Currently we cannot suppress the integ flag through SPNEGO, since SPNEGO
-     * always requests integrity from the underlying mech. */
-    flagtest(&mech_spnego, icred, tname, 0,
-             GSS_C_TRANS_FLAG | GSS_C_INTEG_FLAG);
+    flagtest(&mech_spnego, icred, tname, 0, GSS_C_TRANS_FLAG);
     flagtest(&mech_spnego, icred, tname, GSS_C_INTEG_FLAG,
              GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
     flagtest(&mech_spnego, icred, tname, GSS_C_CONF_FLAG,
-             GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
+             GSS_C_CONF_FLAG | GSS_C_TRANS_FLAG);
     flagtest(&mech_spnego, icred, tname, GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG,
              GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
 

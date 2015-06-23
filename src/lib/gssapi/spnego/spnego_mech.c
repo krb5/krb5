@@ -888,16 +888,21 @@ init_ctx_call_init(OM_uint32 *minor_status,
 		   OM_uint32 *negState,
 		   send_token_flag *send_token)
 {
-	OM_uint32 ret, tmpret, tmpmin;
+	OM_uint32 ret, tmpret, tmpmin, mech_req_flags;
 	gss_cred_id_t mcred;
 
 	mcred = (spcred == NULL) ? GSS_C_NO_CREDENTIAL : spcred->mcred;
+
+	mech_req_flags = req_flags;
+	if (spcred == NULL || !spcred->no_ask_integ)
+		mech_req_flags |= GSS_C_INTEG_FLAG;
+
 	ret = gss_init_sec_context(minor_status,
 				   mcred,
 				   &sc->ctx_handle,
 				   target_name,
 				   sc->internal_mech,
-				   (req_flags | GSS_C_INTEG_FLAG),
+				   mech_req_flags,
 				   time_req,
 				   GSS_C_NO_CHANNEL_BINDINGS,
 				   mechtok_in,
@@ -2373,6 +2378,13 @@ spnego_gss_inquire_cred_by_oid(
 	return (ret);
 }
 
+/* This is the same OID as KRB5_NO_CI_FLAGS_X_OID. */
+#define NO_CI_FLAGS_X_OID_LENGTH 6
+#define NO_CI_FLAGS_X_OID "\x2a\x85\x70\x2b\x0d\x1d"
+static const gss_OID_desc no_ci_flags_oid[] = {
+	{NO_CI_FLAGS_X_OID_LENGTH, NO_CI_FLAGS_X_OID},
+};
+
 OM_uint32 KRB5_CALLCONV
 spnego_gss_set_cred_option(
 		OM_uint32 *minor_status,
@@ -2404,7 +2416,14 @@ spnego_gss_set_cred_option(
 		*cred_handle = (gss_cred_id_t)spcred;
 	}
 
-	return (ret);
+	if (ret != GSS_S_COMPLETE)
+		return (ret);
+
+	/* Recognize KRB5_NO_CI_FLAGS_X_OID and avoid asking for integrity. */
+	if (g_OID_equal(desired_object, no_ci_flags_oid))
+		spcred->no_ask_integ = 1;
+
+	return (GSS_S_COMPLETE);
 }
 
 OM_uint32 KRB5_CALLCONV
