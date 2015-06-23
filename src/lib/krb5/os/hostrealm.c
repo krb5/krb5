@@ -75,12 +75,12 @@ get_modules(krb5_context context, krb5_plugin_initvt_fn **modules_out)
     *modules_out = NULL;
 
     /* Register built-in modules. */
-    ret = k5_plugin_register(context, intf, "profile",
-                             hostrealm_profile_initvt);
-    if (ret)
-        return ret;
     ret = k5_plugin_register(context, intf, "registry",
                              hostrealm_registry_initvt);
+    if (ret)
+        return ret;
+    ret = k5_plugin_register(context, intf, "profile",
+                             hostrealm_profile_initvt);
     if (ret)
         return ret;
     ret = k5_plugin_register(context, intf, "dns", hostrealm_dns_initvt);
