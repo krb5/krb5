@@ -145,7 +145,7 @@ BOOL CLeashView::m_importedTickets = 0;
 LONG CLeashView::m_timerMsgNotInProgress = 1;
 ViewColumnInfo CLeashView::sm_viewColumns[] =
 {
-    {"Principal", true, -1, 100},                        // PRINCIPAL
+    {"Principal", true, -1, 200},                        // PRINCIPAL
     {"Issued", false, ID_TIME_ISSUED, 100},              // TIME_ISSUED
     {"Renewable Until", false, ID_RENEWABLE_UNTIL, 100}, // RENEWABLE_UNTIL
     {"Valid Until", true, ID_VALID_UNTIL, 100},          // VALID_UNTIL
