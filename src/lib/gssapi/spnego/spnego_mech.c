@@ -329,6 +329,26 @@ void gss_spnegoint_lib_fini(void)
 {
 }
 
+static OM_uint32
+gss_new_cred_handle(OM_uint32 *minor_status,
+		    gss_cred_id_t mcred,
+		    spnego_gss_cred_id_t *output_cred_handle)
+{
+	spnego_gss_cred_id_t spcred;
+
+	spcred = calloc(1, sizeof(spnego_gss_cred_id_rec));
+	if (spcred == NULL) {
+		*minor_status = ENOMEM;
+		return (GSS_S_FAILURE);
+	}
+	spcred->mcred = mcred;
+
+	*output_cred_handle = spcred;
+
+	return GSS_S_COMPLETE;
+}
+
+
 /*ARGSUSED*/
 OM_uint32 KRB5_CALLCONV
 spnego_gss_acquire_cred(OM_uint32 *minor_status,
@@ -372,12 +392,10 @@ spnego_gss_acquire_cred_from(OM_uint32 *minor_status,
 
 	/* We will obtain a mechglue credential and wrap it in a
 	 * spnego_gss_cred_id_rec structure.  Allocate the wrapper. */
-	spcred = malloc(sizeof(spnego_gss_cred_id_rec));
-	if (spcred == NULL) {
-		*minor_status = ENOMEM;
-		return (GSS_S_FAILURE);
+	status = gss_new_cred_handle(minor_status, mcred, &spcred);
+	if (status != GSS_S_COMPLETE) {
+		return (status);
 	}
-	spcred->neg_mechs = GSS_C_NULL_OID_SET;
 
 	/*
 	 * Always use get_available_mechs to collect a list of
@@ -2382,14 +2400,11 @@ spnego_gss_set_cred_option(
 		 * we need to wrap it up in an SPNEGO credential handle.
 		 */
 
-		spcred = malloc(sizeof(spnego_gss_cred_id_rec));
-		if (spcred == NULL) {
+		ret = gss_new_cred_handle(minor_status, mcred, &spcred);
+		if (ret != GSS_S_COMPLETE) {
 			gss_release_cred(&tmp_minor_status, &mcred);
-			*minor_status = ENOMEM;
-			return (GSS_S_FAILURE);
+			return (ret);
 		}
-		spcred->mcred = mcred;
-		spcred->neg_mechs = GSS_C_NULL_OID_SET;
 		*cred_handle = (gss_cred_id_t)spcred;
 	}
 
@@ -2570,14 +2585,11 @@ spnego_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 	if (amechs != GSS_C_NULL_OID_SET)
 		(void) gss_release_oid_set(minor_status, &amechs);
 
-	out_spcred = malloc(sizeof(spnego_gss_cred_id_rec));
-	if (out_spcred == NULL) {
+	status = gss_new_cred_handle(minor_status, out_mcred, &out_spcred);
+	if (status != GSS_S_COMPLETE) {
 		gss_release_cred(minor_status, &out_mcred);
-		*minor_status = ENOMEM;
-		return (GSS_S_FAILURE);
+		return (status);
 	}
-	out_spcred->mcred = out_mcred;
-	out_spcred->neg_mechs = GSS_C_NULL_OID_SET;
 	*output_cred_handle = (gss_cred_id_t)out_spcred;
 
 	dsyslog("Leaving spnego_gss_acquire_cred_impersonate_name\n");
@@ -2621,14 +2633,10 @@ spnego_gss_acquire_cred_with_password(OM_uint32 *minor_status,
 	if (status != GSS_S_COMPLETE)
 	    goto cleanup;
 
-	spcred = malloc(sizeof(spnego_gss_cred_id_rec));
-	if (spcred == NULL) {
-		*minor_status = ENOMEM;
-		status = GSS_S_FAILURE;
+	status = gss_new_cred_handle(minor_status, mcred, &spcred);
+	if (status != GSS_S_COMPLETE) {
 		goto cleanup;
 	}
-	spcred->neg_mechs = GSS_C_NULL_OID_SET;
-	spcred->mcred = mcred;
 	mcred = GSS_C_NO_CREDENTIAL;
 	*output_cred_handle = (gss_cred_id_t)spcred;
 
