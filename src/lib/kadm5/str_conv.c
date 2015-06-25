@@ -279,7 +279,7 @@ krb5_string_to_keysalts(const char *string, const char *tupleseps,
                         const char *ksaltseps, krb5_boolean dups,
                         krb5_key_salt_tuple **ksaltp, krb5_int32 *nksaltp)
 {
-    char *p, *ksp;
+    char *copy, *p, *ksp;
     char *tlasts = NULL;
     const char *tseps = (tupleseps != NULL) ? tupleseps : default_tupleseps;
     krb5_int32 nksalts = 0;
@@ -290,35 +290,36 @@ krb5_string_to_keysalts(const char *string, const char *tupleseps,
 
     *ksaltp = NULL;
     *nksaltp = 0;
-    p = strdup(string);
+    p = copy = strdup(string);
     if (p == NULL)
         return ENOMEM;
-    ksp = strtok_r(p, tseps, &tlasts);
-    while (ksp != NULL) {
+    while ((ksp = strtok_r(p, tseps, &tlasts)) != NULL) {
+        /* Pass a null pointer to subsequent calls to strtok_r(). */
+        p = NULL;
         ret = string_to_keysalt(ksp, ksaltseps, &etype, &stype);
         if (ret)
             goto cleanup;
 
         /* Ignore duplicate keysalts if caller asks. */
-        if (dups || !krb5_keysalt_is_present(ksalts, nksalts, etype, stype)) {
-            ksalts_new = realloc(ksalts, (nksalts + 1) * sizeof(*ksalts));
-            if (ksalts_new == NULL) {
-                ret = ENOMEM;
-                goto cleanup;
-            }
-            ksalts = ksalts_new;
-            ksalts[nksalts].ks_enctype = etype;
-            ksalts[nksalts].ks_salttype = stype;
-            nksalts++;
+        if (!dups && krb5_keysalt_is_present(ksalts, nksalts, etype, stype))
+            continue;
+
+        ksalts_new = realloc(ksalts, (nksalts + 1) * sizeof(*ksalts));
+        if (ksalts_new == NULL) {
+            ret = ENOMEM;
+            goto cleanup;
         }
-        ksp = strtok_r(NULL, tseps, &tlasts);
+        ksalts = ksalts_new;
+        ksalts[nksalts].ks_enctype = etype;
+        ksalts[nksalts].ks_salttype = stype;
+        nksalts++;
     }
     *ksaltp = ksalts;
     *nksaltp = nksalts;
 cleanup:
     if (ret)
         free(ksalts);
-    free(p);
+    free(copy);
     return ret;
 }
 
