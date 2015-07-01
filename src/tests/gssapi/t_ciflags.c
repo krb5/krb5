@@ -60,6 +60,7 @@ main(int argc, char *argv[])
 {
     OM_uint32 minor, major;
     gss_cred_id_t icred;
+    gss_cred_id_t spcred;
     gss_name_t tname;
     gss_buffer_desc empty_buffer = GSS_C_EMPTY_BUFFER;
 
@@ -87,7 +88,7 @@ main(int argc, char *argv[])
     major = gss_acquire_cred(&minor, GSS_C_NO_NAME, GSS_C_INDEFINITE,
                              GSS_C_NO_OID_SET, GSS_C_INITIATE, &icred, NULL,
                              NULL);
-    check_gsserr("gss_acquire_cred", major, minor);
+    check_gsserr("gss_acquire_cred(krb5)", major, minor);
     flagtest(&mech_krb5, icred, tname, 0,
              GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
 
@@ -96,7 +97,7 @@ main(int argc, char *argv[])
     major = gss_set_cred_option(&minor, &icred,
                                 (gss_OID)GSS_KRB5_CRED_NO_CI_FLAGS_X,
                                 &empty_buffer);
-    check_gsserr("gss_set_cred_option", major, minor);
+    check_gsserr("gss_set_cred_option(krb5)", major, minor);
     flagtest(&mech_krb5, icred, tname, 0, GSS_C_TRANS_FLAG);
     flagtest(&mech_krb5, icred, tname, GSS_C_CONF_FLAG,
              GSS_C_CONF_FLAG | GSS_C_TRANS_FLAG);
@@ -105,18 +106,32 @@ main(int argc, char *argv[])
     flagtest(&mech_krb5, icred, tname, GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG,
              GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
 
-    /* Currently we cannot suppress the integ flag through SPNEGO, since SPNEGO
-     * always requests integrity from the underlying mech. */
-    flagtest(&mech_spnego, icred, tname, 0,
-             GSS_C_TRANS_FLAG | GSS_C_INTEG_FLAG);
-    flagtest(&mech_spnego, icred, tname, GSS_C_INTEG_FLAG,
-             GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
-    flagtest(&mech_spnego, icred, tname, GSS_C_CONF_FLAG,
+    /* Get a spnego initiator cred and re-test with no flags. */
+    major = gss_acquire_cred(&minor, GSS_C_NO_NAME, GSS_C_INDEFINITE,
+                             (gss_OID_set)&mechset_spnego, GSS_C_INITIATE,
+                             &spcred, NULL, NULL);
+    check_gsserr("gss_acquire_cred(spnego)", major, minor);
+
+    flagtest(&mech_spnego, spcred, tname, 0,
              GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
-    flagtest(&mech_spnego, icred, tname, GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG,
+
+    /* Suppress the integrity flag on the initiator cred and check
+     * they got removed, but still can be requested */
+    major = gss_set_cred_option(&minor, &spcred,
+                                (gss_OID)GSS_KRB5_CRED_NO_CI_FLAGS_X,
+                                &empty_buffer);
+    check_gsserr("gss_set_cred_option(spnego)", major, minor);
+
+    flagtest(&mech_spnego, spcred, tname, 0, GSS_C_TRANS_FLAG);
+    flagtest(&mech_spnego, spcred, tname, GSS_C_INTEG_FLAG,
+             GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
+    flagtest(&mech_krb5, icred, tname, GSS_C_INTEG_FLAG,
+             GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
+    flagtest(&mech_krb5, icred, tname, GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG,
              GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG | GSS_C_TRANS_FLAG);
 
     (void)gss_release_name(&minor, &tname);
     (void)gss_release_cred(&minor, &icred);
+    (void)gss_release_cred(&minor, &spcred);
     return 0;
 }
