@@ -150,6 +150,7 @@ check-pytests:: responder s2p t_init_creds t_localauth unlockiter
 	$(RUNPYTEST) $(srcdir)/t_unlockiter.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_errmsg.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_authdata.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_princflags.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) gcred hist hrealm kdbtest plugorder rdreq responder s2p

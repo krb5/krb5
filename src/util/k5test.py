@@ -22,7 +22,7 @@
 
 """A module for krb5 test scripts
 
-To run test scripts during "make check" (if Python 2.4 or later is
+To run test scripts during "make check" (if Python 2.5 or later is
 available), add rules like the following to Makefile.in:
 
     check-pytests::
