@@ -47,60 +47,6 @@
 #include <time.h>
 #include "kadmin.h"
 
-/* special struct to convert flag names for principals
-   to actual krb5_flags for a principal */
-struct pflag {
-    char *flagname;             /* name of flag as typed to CLI */
-    size_t flaglen;             /* length of string (not counting -,+) */
-    krb5_flags theflag;         /* actual principal flag to set/clear */
-    int set;                    /* 0 means clear, 1 means set (on '-') */
-};
-
-static struct pflag flags[] = {
-    {"allow_postdated",     15,     KRB5_KDB_DISALLOW_POSTDATED,    1 },
-    {"allow_forwardable",   17,     KRB5_KDB_DISALLOW_FORWARDABLE,  1 },
-    {"allow_tgs_req",       13,     KRB5_KDB_DISALLOW_TGT_BASED,    1 },
-    {"allow_renewable",     15,     KRB5_KDB_DISALLOW_RENEWABLE,    1 },
-    {"allow_proxiable",     15,     KRB5_KDB_DISALLOW_PROXIABLE,    1 },
-    {"allow_dup_skey",      14,     KRB5_KDB_DISALLOW_DUP_SKEY,     1 },
-    {"allow_tix",            9,     KRB5_KDB_DISALLOW_ALL_TIX,      1 },
-    {"requires_preauth",    16,     KRB5_KDB_REQUIRES_PRE_AUTH,     0 },
-    {"requires_hwauth",     15,     KRB5_KDB_REQUIRES_HW_AUTH,      0 },
-    {"needchange",          10,     KRB5_KDB_REQUIRES_PWCHANGE,     0 },
-    {"allow_svr",            9,     KRB5_KDB_DISALLOW_SVR,          1 },
-    {"password_changing_service", 25, KRB5_KDB_PWCHANGE_SERVICE,    0 },
-    {"support_desmd5",      14,     KRB5_KDB_SUPPORT_DESMD5,        0 },
-    {"ok_as_delegate",      14,     KRB5_KDB_OK_AS_DELEGATE,        0 },
-    {"ok_to_auth_as_delegate", 22,  KRB5_KDB_OK_TO_AUTH_AS_DELEGATE, 0 },
-    {"no_auth_data_required", 21,   KRB5_KDB_NO_AUTH_DATA_REQUIRED, 0 },
-};
-
-static char *prflags[] = {
-    "DISALLOW_POSTDATED",       /* 0x00000001 */
-    "DISALLOW_FORWARDABLE",     /* 0x00000002 */
-    "DISALLOW_TGT_BASED",       /* 0x00000004 */
-    "DISALLOW_RENEWABLE",       /* 0x00000008 */
-    "DISALLOW_PROXIABLE",       /* 0x00000010 */
-    "DISALLOW_DUP_SKEY",        /* 0x00000020 */
-    "DISALLOW_ALL_TIX",         /* 0x00000040 */
-    "REQUIRES_PRE_AUTH",        /* 0x00000080 */
-    "REQUIRES_HW_AUTH",         /* 0x00000100 */
-    "REQUIRES_PWCHANGE",        /* 0x00000200 */
-    "UNKNOWN_0x00000400",       /* 0x00000400 */
-    "UNKNOWN_0x00000800",       /* 0x00000800 */
-    "DISALLOW_SVR",             /* 0x00001000 */
-    "PWCHANGE_SERVICE",         /* 0x00002000 */
-    "SUPPORT_DESMD5",           /* 0x00004000 */
-    "NEW_PRINC",                /* 0x00008000 */
-    "UNKNOWN_0x00010000",       /* 0x00010000 */
-    "UNKNOWN_0x00020000",       /* 0x00020000 */
-    "UNKNOWN_0x00040000",       /* 0x00040000 */
-    "UNKNOWN_0x00080000",       /* 0x00080000 */
-    "OK_AS_DELEGATE",           /* 0x00100000 */
-    "OK_TO_AUTH_AS_DELEGATE",   /* 0x00200000 */
-    "NO_AUTH_DATA_REQUIRED",    /* 0x00400000 */
-};
-
 static krb5_boolean script_mode = FALSE;
 int exit_status = 0;
 char *def_realm = NULL;
@@ -1005,8 +951,7 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
                         krb5_boolean *nokey, krb5_key_salt_tuple **ks_tuple,
                         int *n_ks_tuple, char *caller)
 {
-    int i, attrib_set;
-    size_t j;
+    int i;
     time_t date;
     time_t now;
     krb5_error_code retval;
@@ -1019,7 +964,6 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
     *randkey = FALSE;
     *nokey = FALSE;
     for (i = 1; i < argc - 1; i++) {
-        attrib_set = 0;
         if (!strcmp("-x",argv[i])) {
             if (++i > argc - 2)
                 return -1;
@@ -1127,29 +1071,12 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
             }
             continue;
         }
-        for (j = 0; j < sizeof(flags) / sizeof(struct pflag); j++) {
-            if (strlen(argv[i]) == flags[j].flaglen + 1 &&
-                !strcmp(flags[j].flagname,
-                        &argv[i][1] /* strip off leading + or - */)) {
-                if ((flags[j].set && argv[i][0] == '-') ||
-                    (!flags[j].set && argv[i][0] == '+')) {
-                    oprinc->attributes |= flags[j].theflag;
-                    *mask |= KADM5_ATTRIBUTES;
-                    attrib_set++;
-                    break;
-                } else if ((flags[j].set && argv[i][0] == '+') ||
-                           (!flags[j].set && argv[i][0] == '-')) {
-                    oprinc->attributes &= ~flags[j].theflag;
-                    *mask |= KADM5_ATTRIBUTES;
-                    attrib_set++;
-                    break;
-                } else {
-                    return -1;
-                }
-            }
-        }
-        if (!attrib_set)
-            return -1;          /* nothing was parsed */
+        retval = krb5_flagspec_to_mask(argv[i], &oprinc->attributes,
+                                       &oprinc->attributes);
+        if (retval)
+            return -1;
+        else
+            *mask |= KADM5_ATTRIBUTES;
     }
     if (i != argc - 1)
         return -1;
@@ -1423,8 +1350,8 @@ kadmin_getprinc(int argc, char *argv[])
     krb5_error_code retval;
     const char *polname, *noexist;
     char *canon = NULL, *princstr = NULL, *modprincstr = NULL;
+    char **sp = NULL, **attrstrs = NULL;
     int i;
-    size_t j;
 
     if (!(argc == 2 || (argc == 3 && !strcmp("-terse", argv[1])))) {
         error(_("usage: get_principal [-terse] principal\n"));
@@ -1504,10 +1431,16 @@ kadmin_getprinc(int argc, char *argv[])
         printf(_("MKey: vno %d\n"), dprinc.mkvno);
 
         printf(_("Attributes:"));
-        for (j = 0; j < sizeof(prflags) / sizeof(char *); j++) {
-            if (dprinc.attributes & (krb5_flags) 1 << j)
-                printf(" %s", prflags[j]);
+        retval = krb5_flags_to_strings(dprinc.attributes, &attrstrs);
+        if (retval) {
+            com_err("get_principal", retval, _("while printing flags"));
+            return;
         }
+        for (sp = attrstrs; sp != NULL && *sp != NULL; sp++) {
+            printf(" %s", *sp);
+            free(*sp);
+        }
+        free(attrstrs);
         printf("\n");
         polname = (dprinc.policy != NULL) ? dprinc.policy : _("[none]");
         noexist = (dprinc.policy != NULL && !policy_exists(dprinc.policy)) ?

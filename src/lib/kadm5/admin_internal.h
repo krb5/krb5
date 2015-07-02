@@ -74,8 +74,4 @@ krb5_string_to_keysalts(const char *string, const char *tupleseps,
                         const char *ksaltseps, krb5_boolean dups,
                         krb5_key_salt_tuple **ksaltp, krb5_int32 *nksaltp);
 
-krb5_error_code
-krb5_string_to_flags(char* string, const char* positive, const char* negative,
-                     krb5_flags *flagsp);
-
 #endif /* __KADM5_ADMIN_INTERNAL_H__ */

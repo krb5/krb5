@@ -265,7 +265,7 @@ kadm5int_acl_parse_line(lp)
  * kadm5int_acl_parse_restrictions() - Parse optional restrictions field
  *
  * Allowed restrictions are:
- *      [+-]flagname            (recognized by krb5_string_to_flags)
+ *      [+-]flagname            (recognized by krb5_flagspec_to_mask)
  *                              flag is forced to indicated value
  *      -clearpolicy            policy is forced clear
  *      -policy pol             policy is forced to be "pol"
@@ -283,7 +283,6 @@ kadm5int_acl_parse_restrictions(s, rpp)
     char                *sp = NULL, *tp, *ap, *save;
     static const char   *delims = "\t\n\f\v\r ,";
     krb5_deltat         dt;
-    krb5_flags          flag;
     krb5_error_code     code;
 
     DPRINT(DEBUG_CALLS, acl_debug_level,
@@ -297,18 +296,11 @@ kadm5int_acl_parse_restrictions(s, rpp)
             code = ENOMEM;
         } else {
             memset(*rpp, 0, sizeof(**rpp));
+            (*rpp)->forbid_attrs = ~(krb5_flags)0;
             for (tp = strtok_r(sp, delims, &save); tp;
                  tp = strtok_r(NULL, delims, &save)) {
-                flag = 0;
-                if (!krb5_string_to_flags(tp, "+", "-", &flag)) {
-                    /* OK, but was it in the positive or negative sense? */
-                    if (flag) {
-                        (*rpp)->require_attrs |= flag;
-                    } else {
-                        flag = ~0;
-                        (void) krb5_string_to_flags(tp, "+", "-", &flag);
-                        (*rpp)->forbid_attrs |= ~flag;
-                    }
+                if (!krb5_flagspec_to_mask(tp, &(*rpp)->require_attrs,
+                                           &(*rpp)->forbid_attrs)) {
                     (*rpp)->mask |= KADM5_ATTRIBUTES;
                 } else if (!strcmp(tp, "-clearpolicy")) {
                     (*rpp)->mask |= KADM5_POLICY_CLR;
@@ -396,7 +388,7 @@ kadm5int_acl_impose_restrictions(kcontext, recp, maskp, rp)
 
     if (rp->mask & KADM5_ATTRIBUTES) {
         recp->attributes |= rp->require_attrs;
-        recp->attributes &= ~(rp->forbid_attrs);
+        recp->attributes &= rp->forbid_attrs;
         *maskp |= KADM5_ATTRIBUTES;
     }
     if (rp->mask & KADM5_POLICY_CLR) {

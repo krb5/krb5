@@ -1,219 +1,259 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/kadm5/str_conv.c */
 /*
- * Copyright 1995 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright (C) 1995-2015 by the Massachusetts Institute of Technology.
+ * All rights reserved.
  *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /* Convert between strings and Kerberos internal data. */
-
-/*
- * Table of contents:
- *
- * String decoding:
- * ----------------
- * krb5_string_to_flags()       - Convert string to krb5_flags.
- *
- * String encoding:
- * ----------------
- * krb5_flags_to_string()       - Convert krb5_flags to string.
- */
 
 #include "k5-int.h"
 #include "admin_internal.h"
 #include "adm_proto.h"
 
-/*
- * Local data structures.
- */
-struct flags_lookup_entry {
-    krb5_flags          fl_flags;               /* Flag                 */
-    krb5_boolean        fl_sense;               /* Sense of the flag    */
-    const char *        fl_specifier;           /* How to recognize it  */
-    const char *        fl_output;              /* How to spit it out   */
-};
-
-/*
- * Local strings
- */
+#include <ctype.h>
 
 static const char default_tupleseps[]   = ", \t";
 static const char default_ksaltseps[]   = ":";
 
-/* Keytype strings */
-/* Flags strings */
-static const char flags_pdate_in[]      = "postdateable";
-static const char flags_fwd_in[]        = "forwardable";
-static const char flags_tgtbased_in[]   = "tgt-based";
-static const char flags_renew_in[]      = "renewable";
-static const char flags_proxy_in[]      = "proxiable";
-static const char flags_dup_skey_in[]   = "dup-skey";
-static const char flags_tickets_in[]    = "allow-tickets";
-static const char flags_preauth_in[]    = "preauth";
-static const char flags_hwauth_in[]     = "hwauth";
-static const char flags_ok_as_delegate_in[]     = "ok-as-delegate";
-static const char flags_pwchange_in[]   = "pwchange";
-static const char flags_service_in[]    = "service";
-static const char flags_pwsvc_in[]      = "pwservice";
-static const char flags_md5_in[]        = "md5";
-static const char flags_ok_to_auth_as_delegate_in[] = "ok-to-auth-as-delegate";
-static const char flags_no_auth_data_required_in[] = "no-auth-data-required";
-static const char flags_pdate_out[]     = N_("Not Postdateable");
-static const char flags_fwd_out[]       = N_("Not Forwardable");
-static const char flags_tgtbased_out[]  = N_("No TGT-based requests");
-static const char flags_renew_out[]     = N_("Not renewable");
-static const char flags_proxy_out[]     = N_("Not proxiable");
-static const char flags_dup_skey_out[]  = N_("No DUP_SKEY requests");
-static const char flags_tickets_out[]   = N_("All Tickets Disallowed");
-static const char flags_preauth_out[]   = N_("Preauthentication required");
-static const char flags_hwauth_out[]    = N_("HW authentication required");
-static const char flags_ok_as_delegate_out[]    = N_("OK as Delegate");
-static const char flags_pwchange_out[]  = N_("Password Change required");
-static const char flags_service_out[]   = N_("Service Disabled");
-static const char flags_pwsvc_out[]     = N_("Password Changing Service");
-static const char flags_md5_out[]       = N_("RSA-MD5 supported");
-static const char flags_ok_to_auth_as_delegate_out[] = N_("Protocol transition with delegation allowed");
-static const char flags_no_auth_data_required_out[] = N_("No authorization data required");
-static const char flags_default_neg[]   = "-";
-static const char flags_default_sep[]   = " ";
+struct flag_table_row {
+    const char *spec;           /* Input specifier string */
+    krb5_flags flag;            /* Flag */
+    int invert;                 /* Whether to invert the sense */
+};
+
+static const struct flag_table_row ftbl[] = {
+    {"allow_postdated",         KRB5_KDB_DISALLOW_POSTDATED,    1},
+    {"postdateable",            KRB5_KDB_DISALLOW_POSTDATED,    1},
+    {"disallow_postdated",      KRB5_KDB_DISALLOW_POSTDATED,    0},
+    {"allow_forwardable",       KRB5_KDB_DISALLOW_FORWARDABLE,  1},
+    {"forwardable",             KRB5_KDB_DISALLOW_FORWARDABLE,  1},
+    {"disallow_forwardable",    KRB5_KDB_DISALLOW_FORWARDABLE,  0},
+    {"allow_tgs_req",           KRB5_KDB_DISALLOW_TGT_BASED,    1},
+    {"tgt_based",               KRB5_KDB_DISALLOW_TGT_BASED,    1},
+    {"disallow_tgt_based",      KRB5_KDB_DISALLOW_TGT_BASED,    0},
+    {"allow_renewable",         KRB5_KDB_DISALLOW_RENEWABLE,    1},
+    {"renewable",               KRB5_KDB_DISALLOW_RENEWABLE,    1},
+    {"disallow_renewable",      KRB5_KDB_DISALLOW_RENEWABLE,    0},
+    {"allow_proxiable",         KRB5_KDB_DISALLOW_PROXIABLE,    1},
+    {"proxiable",               KRB5_KDB_DISALLOW_PROXIABLE,    1},
+    {"disallow_proxiable",      KRB5_KDB_DISALLOW_PROXIABLE,    0},
+    {"allow_dup_skey",          KRB5_KDB_DISALLOW_DUP_SKEY,     1},
+    {"dup_skey",                KRB5_KDB_DISALLOW_DUP_SKEY,     1},
+    {"disallow_dup_skey",       KRB5_KDB_DISALLOW_DUP_SKEY,     0},
+    {"allow_tickets",           KRB5_KDB_DISALLOW_ALL_TIX,      1},
+    {"allow_tix",               KRB5_KDB_DISALLOW_ALL_TIX,      1},
+    {"disallow_all_tix",        KRB5_KDB_DISALLOW_ALL_TIX,      0},
+    {"preauth",                 KRB5_KDB_REQUIRES_PRE_AUTH,     0},
+    {"requires_pre_auth",       KRB5_KDB_REQUIRES_PRE_AUTH,     0},
+    {"requires_preauth",        KRB5_KDB_REQUIRES_PRE_AUTH,     0},
+    {"hwauth",                  KRB5_KDB_REQUIRES_HW_AUTH,      0},
+    {"requires_hw_auth",        KRB5_KDB_REQUIRES_HW_AUTH,      0},
+    {"requires_hwauth",         KRB5_KDB_REQUIRES_HW_AUTH,      0},
+    {"needchange",              KRB5_KDB_REQUIRES_PWCHANGE,     0},
+    {"pwchange",                KRB5_KDB_REQUIRES_PWCHANGE,     0},
+    {"requires_pwchange",       KRB5_KDB_REQUIRES_PWCHANGE,     0},
+    {"allow_svr",               KRB5_KDB_DISALLOW_SVR,          1},
+    {"service",                 KRB5_KDB_DISALLOW_SVR,          1},
+    {"disallow_svr",            KRB5_KDB_DISALLOW_SVR,          0},
+    {"password_changing_service", KRB5_KDB_PWCHANGE_SERVICE,    0},
+    {"pwchange_service",        KRB5_KDB_PWCHANGE_SERVICE,      0},
+    {"pwservice",               KRB5_KDB_PWCHANGE_SERVICE,      0},
+    {"md5",                     KRB5_KDB_SUPPORT_DESMD5,        0},
+    {"support_desmd5",          KRB5_KDB_SUPPORT_DESMD5,        0},
+    {"new_princ",               KRB5_KDB_NEW_PRINC,             0},
+    {"ok_as_delegate",          KRB5_KDB_OK_AS_DELEGATE,        0},
+    {"ok_to_auth_as_delegate",  KRB5_KDB_OK_TO_AUTH_AS_DELEGATE, 0},
+    {"no_auth_data_required",   KRB5_KDB_NO_AUTH_DATA_REQUIRED, 0},
+};
+#define NFTBL (sizeof(ftbl) / sizeof(ftbl[0]))
+
+static const char *outflags[] = {
+    "DISALLOW_POSTDATED",       /* 0x00000001 */
+    "DISALLOW_FORWARDABLE",     /* 0x00000002 */
+    "DISALLOW_TGT_BASED",       /* 0x00000004 */
+    "DISALLOW_RENEWABLE",       /* 0x00000008 */
+    "DISALLOW_PROXIABLE",       /* 0x00000010 */
+    "DISALLOW_DUP_SKEY",        /* 0x00000020 */
+    "DISALLOW_ALL_TIX",         /* 0x00000040 */
+    "REQUIRES_PRE_AUTH",        /* 0x00000080 */
+    "REQUIRES_HW_AUTH",         /* 0x00000100 */
+    "REQUIRES_PWCHANGE",        /* 0x00000200 */
+    NULL,                       /* 0x00000400 */
+    NULL,                       /* 0x00000800 */
+    "DISALLOW_SVR",             /* 0x00001000 */
+    "PWCHANGE_SERVICE",         /* 0x00002000 */
+    "SUPPORT_DESMD5",           /* 0x00004000 */
+    "NEW_PRINC",                /* 0x00008000 */
+    NULL,                       /* 0x00010000 */
+    NULL,                       /* 0x00020000 */
+    NULL,                       /* 0x00040000 */
+    NULL,                       /* 0x00080000 */
+    "OK_AS_DELEGATE",           /* 0x00100000 */
+    "OK_TO_AUTH_AS_DELEGATE",   /* 0x00200000 */
+    "NO_AUTH_DATA_REQUIRED",    /* 0x00400000 */
+};
+#define NOUTFLAGS (sizeof(outflags) / sizeof(outflags[0]))
 
 /*
- * Lookup tables.
+ * Given s, which is a normalized flagspec with the prefix stripped off, and
+ * req_neg indicating whether the flagspec is negated, update the toset and
+ * toclear masks.
  */
-
-static const struct flags_lookup_entry flags_table[] = {
-/* flag                         sense   input specifier    output string     */
-/*----------------------------- ------- ------------------ ------------------*/
-    { KRB5_KDB_DISALLOW_POSTDATED,  0,      flags_pdate_in,    flags_pdate_out   },
-    { KRB5_KDB_DISALLOW_FORWARDABLE,0,      flags_fwd_in,      flags_fwd_out     },
-    { KRB5_KDB_DISALLOW_TGT_BASED,  0,      flags_tgtbased_in, flags_tgtbased_out},
-    { KRB5_KDB_DISALLOW_RENEWABLE,  0,      flags_renew_in,    flags_renew_out   },
-    { KRB5_KDB_DISALLOW_PROXIABLE,  0,      flags_proxy_in,    flags_proxy_out   },
-    { KRB5_KDB_DISALLOW_DUP_SKEY,   0,      flags_dup_skey_in, flags_dup_skey_out},
-    { KRB5_KDB_DISALLOW_ALL_TIX,    0,      flags_tickets_in,  flags_tickets_out },
-    { KRB5_KDB_REQUIRES_PRE_AUTH,   1,      flags_preauth_in,  flags_preauth_out },
-    { KRB5_KDB_REQUIRES_HW_AUTH,    1,      flags_hwauth_in,   flags_hwauth_out  },
-    { KRB5_KDB_OK_AS_DELEGATE,      1,      flags_ok_as_delegate_in, flags_ok_as_delegate_out },
-    { KRB5_KDB_REQUIRES_PWCHANGE,   1,      flags_pwchange_in, flags_pwchange_out},
-    { KRB5_KDB_DISALLOW_SVR,        0,      flags_service_in,  flags_service_out },
-    { KRB5_KDB_PWCHANGE_SERVICE,    1,      flags_pwsvc_in,    flags_pwsvc_out   },
-    { KRB5_KDB_SUPPORT_DESMD5,      1,      flags_md5_in,      flags_md5_out     },
-    { KRB5_KDB_OK_TO_AUTH_AS_DELEGATE,  1,  flags_ok_to_auth_as_delegate_in, flags_ok_to_auth_as_delegate_out },
-    { KRB5_KDB_NO_AUTH_DATA_REQUIRED,   1,  flags_no_auth_data_required_in, flags_no_auth_data_required_out }
-};
-static const int flags_table_nents = sizeof(flags_table)/
-    sizeof(flags_table[0]);
-
-
-krb5_error_code
-krb5_string_to_flags(string, positive, negative, flagsp)
-    char        * string;
-    const char  * positive;
-    const char  * negative;
-    krb5_flags  * flagsp;
+static krb5_error_code
+raw_flagspec_to_mask(const char *s, int req_neg, krb5_flags *toset,
+                     krb5_flags *toclear)
 {
-    int         i;
-    int         found;
-    const char  *neg;
-    size_t      nsize, psize;
-    int         cpos;
-    int         sense;
+    int found = 0, invert = 0;
+    size_t i;
+    krb5_flags flag;
+    unsigned long ul;
 
-    found = 0;
-    /* We need to have a way to negate it. */
-    neg = (negative) ? negative : flags_default_neg;
-    nsize = strlen(neg);
-    psize = (positive) ? strlen(positive) : 0;
-
-    cpos = 0;
-    sense = 1;
-    /* First check for positive or negative sense */
-    if (!strncasecmp(neg, string, nsize)) {
-        sense = 0;
-        cpos += (int) nsize;
+    for (i = 0; !found && i < NFTBL; i++) {
+        if (strcmp(s, ftbl[i].spec) != 0)
+            continue;
+        /* Found a match */
+        found = 1;
+        invert = ftbl[i].invert;
+        flag = ftbl[i].flag;
     }
-    else if (psize && !strncasecmp(positive, string, psize)) {
-        cpos += (int) psize;
+    /* Accept hexadecimal numbers. */
+    if (!found && strncmp(s, "0x", 2) == 0) {
+        /* Assume that krb5_flags are 32 bits long. */
+        ul = strtoul(s, NULL, 16) & 0xffffffff;
+        flag = (krb5_flags)ul;
+        found = 1;
     }
-
-    for (i=0; i<flags_table_nents; i++) {
-        if (!strcasecmp(&string[cpos], flags_table[i].fl_specifier)) {
-            found = 1;
-            if (sense == (int) flags_table[i].fl_sense)
-                *flagsp |= flags_table[i].fl_flags;
-            else
-                *flagsp &= ~flags_table[i].fl_flags;
-
-            break;
-        }
-    }
-    return((found) ? 0 : EINVAL);
+    if (!found)
+        return EINVAL;
+    if (req_neg)
+        invert = !invert;
+    if (invert)
+        *toclear &= ~flag;
+    else
+        *toset |= flag;
+    return 0;
 }
 
+/*
+ * Update the toset and toclear flag masks according to flag specifier string
+ * spec, which is of the form {+|-}flagname.  toset and toclear can point to
+ * the same flag word.
+ */
 krb5_error_code
-krb5_flags_to_string(flags, sep, buffer, buflen)
-    krb5_flags  flags;
-    const char  * sep;
-    char        * buffer;
-    size_t      buflen;
+krb5_flagspec_to_mask(const char *spec, krb5_flags *toset, krb5_flags *toclear)
 {
-    int                 i;
-    krb5_flags          pflags;
-    const char          *sepstring;
-    struct k5buf        buf;
+    int req_neg = 0;
+    char *copy, *cp, *s;
+    krb5_error_code retval;
 
-    pflags = 0;
-    sepstring = (sep) ? sep : flags_default_sep;
-    k5_buf_init_fixed(&buf, buffer, buflen);
-    /* Blast through the table matching all we can */
-    for (i=0; i<flags_table_nents; i++) {
-        if (flags & flags_table[i].fl_flags) {
-            if (buf.len > 0)
-                k5_buf_add(&buf, sepstring);
-            k5_buf_add(&buf, _(flags_table[i].fl_output));
-            /* Keep track of what we matched */
-            pflags |= flags_table[i].fl_flags;
-        }
-    }
-    if (k5_buf_status(&buf) != 0)
-        return(ENOMEM);
-
-    /* See if there's any leftovers */
-    if (flags & ~pflags)
-        return(EINVAL);
-
-    return(0);
-}
-
-krb5_error_code
-krb5_input_flag_to_string(flag, buffer, buflen)
-    int         flag;
-    char        * buffer;
-    size_t      buflen;
-{
-    if(flag < 0 || flag >= flags_table_nents) return ENOENT; /* End of list */
-    if(strlcpy(buffer, flags_table[flag].fl_specifier, buflen) >= buflen)
+    s = copy = strdup(spec);
+    if (s == NULL)
         return ENOMEM;
-    return  0;
+
+    if (*s == '-') {
+        req_neg = 1;
+        s++;
+    } else if (*s == '+')
+        s++;
+
+    for (cp = s; *cp != '\0'; cp++) {
+        /* Transform hyphens to underscores.*/
+        if (*cp == '-')
+            *cp = '_';
+        /* Downcase. */
+        if (isupper((unsigned char)*cp))
+            *cp = tolower((unsigned char)*cp);
+    }
+    retval = raw_flagspec_to_mask(s, req_neg, toset, toclear);
+    free(copy);
+    return retval;
+}
+
+/*
+ * Copy the flag name of flagnum to outstr.
+ */
+krb5_error_code
+krb5_flagnum_to_string(int flagnum, char **outstr)
+{
+    const char *s = NULL;
+
+    *outstr = NULL;
+    if ((unsigned int)flagnum < NOUTFLAGS) {
+        s = outflags[flagnum];
+    }
+    if (s == NULL)
+        /* Assume that krb5_flags are 32 bits long. */
+        asprintf(outstr, "0x%08lx", 1UL<<flagnum);
+    else
+        *outstr = strdup(s);
+    if (*outstr == NULL)
+        return ENOMEM;
+    return 0;
+}
+
+/*
+ * Create a null-terminated array of string representations of flags.  Store a
+ * null pointer into outarray if there would be no strings.
+ */
+krb5_error_code
+krb5_flags_to_strings(krb5_int32 flags, char ***outarray)
+{
+    char **a = NULL, **a_new = NULL, **ap;
+    size_t amax = 0, i;
+    krb5_error_code retval;
+
+    *outarray = NULL;
+
+    /* Assume that krb5_flags are 32 bits long. */
+    for (i = 0; i < 32; i++) {
+        if (!(flags & (1UL << i)))
+            continue;
+
+        a_new = realloc(a, (amax + 2) * sizeof(*a));
+        if (a_new == NULL) {
+            retval = ENOMEM;
+            goto cleanup;
+        }
+        a = a_new;
+        retval = krb5_flagnum_to_string(i, &a[amax++]);
+        if (retval)
+            goto cleanup;
+        a[amax] = NULL;
+    }
+    *outarray = a;
+    return 0;
+cleanup:
+    for (ap = a; ap != NULL && *ap != NULL; ap++) {
+        free(ap);
+    }
+    free(a);
+    return retval;
 }
 
 /*

@@ -324,8 +324,10 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
     check(krb5_parse_name(context, ename, &ent->princ));
 
     flagstr = get_string(h, "princs", ename, "flags");
-    if (flagstr != NULL)
-        check(krb5_string_to_flags(flagstr, "+", "-", &ent->attributes));
+    if (flagstr != NULL) {
+        check(krb5_flagspec_to_mask(flagstr, &ent->attributes,
+                                    &ent->attributes));
+    }
     free(flagstr);
 
     ent->max_life = get_duration(h, "princs", ename, "maxlife");

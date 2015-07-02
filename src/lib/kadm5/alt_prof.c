@@ -689,7 +689,7 @@ krb5_error_code kadm5_get_config_params(krb5_context context,
                     ep++;
             }
             /* Convert this flag. */
-            if (krb5_string_to_flags(sp, "+", "-", &params.flags))
+            if (krb5_flagspec_to_mask(sp, &params.flags, &params.flags))
                 break;
             sp = ep;
         }

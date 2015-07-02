@@ -72,10 +72,10 @@ krb5_error_code krb5_aprof_get_int32(krb5_pointer, const char **,
 krb5_error_code krb5_aprof_finish(krb5_pointer);
 
 /* str_conv.c */
-krb5_error_code krb5_string_to_flags(char *, const char *, const char *,
-                                     krb5_flags *);
-krb5_error_code krb5_flags_to_string(krb5_flags, const char *, char *, size_t);
-krb5_error_code krb5_input_flag_to_string (int, char *, size_t);
+krb5_error_code krb5_flagspec_to_mask(const char *,
+                                      krb5_flags *, krb5_flags *);
+krb5_error_code krb5_flagnum_to_string(int, char **);
+krb5_error_code krb5_flags_to_strings(krb5_int32, char ***);
 
 /* keysalt.c */
 krb5_boolean krb5_keysalt_is_present(krb5_key_salt_tuple *, krb5_int32,
