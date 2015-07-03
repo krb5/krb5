@@ -515,7 +515,7 @@ verify_kdc_san(krb5_context context,
 {
     krb5_error_code retval;
     char **certhosts = NULL, **cfghosts = NULL, **hostptr;
-    krb5_principal *princs = NULL, *princptr;
+    krb5_principal *princs = NULL;
     unsigned char ***get_dns;
     int i, j;
 
@@ -547,8 +547,8 @@ verify_kdc_san(krb5_context context,
         retval = KRB5KDC_ERR_KDC_NAME_MISMATCH;
         goto out;
     }
-    for (princptr = princs; *princptr != NULL; princptr++)
-        TRACE_PKINIT_CLIENT_SAN_KDCCERT_PRINC(context, *princptr);
+    for (i = 0; princs != NULL && princs[i] != NULL; i++)
+        TRACE_PKINIT_CLIENT_SAN_KDCCERT_PRINC(context, princs[i]);
     if (certhosts != NULL) {
         for (hostptr = certhosts; *hostptr != NULL; hostptr++)
             TRACE_PKINIT_CLIENT_SAN_KDCCERT_DNSNAME(context, *hostptr);
