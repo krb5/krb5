@@ -81,6 +81,13 @@ create(krb5_context context,
     return 0;
 }
 
+static kadm5_ret_t
+rename_hook(krb5_context context, kadm5_hook_modinfo *modinfo, int stage,
+            krb5_principal oprinc, krb5_principal nprinc)
+{
+    log_call(context, "rename", stage, oprinc);
+    return 0;
+}
 
 krb5_error_code
 kadm5_hook_test_initvt(krb5_context context, int maj_ver, int min_ver,
@@ -97,5 +104,6 @@ kadm5_hook_test_initvt(krb5_context context, int maj_ver, int min_ver,
     vt->name = "test";
     vt->chpass = chpass;
     vt->create = create;
+    vt->rename = rename_hook;
     return 0;
 }
