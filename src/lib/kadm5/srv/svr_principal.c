@@ -835,8 +835,16 @@ kadm5_rename_principal(void *server_handle,
         goto done;
     }
 
+    ret = k5_kadm5_hook_rename(handle->context, handle->hook_handles,
+                               KADM5_HOOK_STAGE_PRECOMMIT, source, target);
+    if (ret)
+        goto done;
+
     if ((ret = kdb_put_entry(handle, kdb, &adb)))
         goto done;
+
+    (void) k5_kadm5_hook_rename(handle->context, handle->hook_handles,
+                                KADM5_HOOK_STAGE_POSTCOMMIT, source, target);
 
     ret = kdb_delete_entry(handle, source);
 

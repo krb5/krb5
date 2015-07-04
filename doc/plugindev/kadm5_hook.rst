@@ -8,8 +8,9 @@ changes are made to the Kerberos database through :ref:`kadmin(1)`.
 For a detailed description of the kadm5_hook interface, see the header
 file ``<krb5/kadm5_hook_plugin.h>``.
 
-The kadm5_hook interface has four primary methods: **chpass**,
-**create**, **modify**, and **remove**.  Each of these methods is
+The kadm5_hook interface has five primary methods: **chpass**,
+**create**, **modify**, **remove**, and **rename**.  (The **rename**
+method was introduced in release 1.14.)  Each of these methods is
 called twice when the corresponding administrative action takes place,
 once before the action is committed and once afterwards.  A module can
 prevent the action from taking place by returning an error code during

@@ -11,4 +11,8 @@ output = realm.run([kadminl, 'addprinc', '-randkey', 'test'])
 if "create: stage precommit" not in output:
     fail('kadm5_hook test output not found')
 
+output = realm.run([kadminl, 'renprinc', 'test', 'test2'])
+if "rename: stage precommit" not in output:
+    fail('kadm5_hook test output not found')
+
 success('kadm5_hook')

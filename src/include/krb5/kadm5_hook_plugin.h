@@ -46,6 +46,9 @@
  * This interface depends on kadm5/admin.h. As such, the interface
  * does not provide strong guarantees of ABI stability.
  *
+ * The kadm5_hook interface currently has only one supported major version,
+ * which is 1.  Major version 1 has a current minor version number of 2.
+ *
  * kadm5_hook plugins should:
  * kadm5_hook_<modulename>_initvt, matching the signature:
  *
@@ -138,6 +141,14 @@ typedef struct kadm5_hook_vtable_1_st {
                           int stage, krb5_principal);
 
     /* End of minor version 1. */
+
+    /** Indicate a principal is renamed. */
+    kadm5_ret_t (*rename)(krb5_context,
+                          kadm5_hook_modinfo *modinfo,
+                          int stage, krb5_principal, krb5_principal);
+
+    /* End of minor version 2. */
+
 } kadm5_hook_vftable_1;
 
 #endif /*H_KRB5_KADM5_HOOK_PLUGIN*/
