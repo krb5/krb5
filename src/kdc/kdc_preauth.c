@@ -463,36 +463,57 @@ max_time_skew(krb5_context context, krb5_kdcpreauth_rock rock)
 }
 
 static krb5_error_code
+client_key(krb5_context context, const krb5_kdc_req *request,
+           krb5_db_entry *client, krb5_key_data **entry_key,
+           krb5_keyblock *key)
+{
+    int i;
+
+    for (i = 0; i < request->nktypes; i++) {
+        krb5_key_data *kd = NULL;
+        krb5_keyblock kb;
+
+        if (!krb5_is_permitted_enctype(context, request->ktype[i]))
+            continue;
+
+        if (krb5_dbe_find_enctype(context, client, request->ktype[i],
+                                  -1, 0, &kd) != 0)
+            continue;
+
+        if (krb5_dbe_decrypt_key_data(context, NULL, kd, &kb, NULL) != 0)
+            continue;
+
+        if (entry_key != NULL)
+            *entry_key = kd;
+
+        if (key != NULL)
+            *key = kb;
+
+        return 0;
+    }
+
+    return ENOENT;
+}
+
+static krb5_error_code
 client_keys(krb5_context context, krb5_kdcpreauth_rock rock,
             krb5_keyblock **keys_out)
 {
-    krb5_kdc_req *request = rock->request;
-    krb5_db_entry *client = rock->client;
-    krb5_keyblock *keys, key;
-    krb5_key_data *entry_key;
-    int i, k;
+    krb5_error_code retval;
+    krb5_keyblock *keys;
 
-    keys = calloc(request->nktypes + 1, sizeof(krb5_keyblock));
+    keys = calloc(2, sizeof(krb5_keyblock));
     if (keys == NULL)
         return ENOMEM;
 
-    k = 0;
-    for (i = 0; i < request->nktypes; i++) {
-        entry_key = NULL;
-        if (krb5_dbe_find_enctype(context, client, request->ktype[i],
-                                  -1, 0, &entry_key) != 0)
-            continue;
-        if (krb5_dbe_decrypt_key_data(context, NULL, entry_key,
-                                      &key, NULL) != 0)
-            continue;
-        keys[k++] = key;
-    }
-    if (k == 0) {
+    retval = client_key(context, rock->request, rock->client, NULL, &keys[0]);
+    if (retval != 0) {
         free(keys);
-        return ENOENT;
+        return retval;
     }
+
     *keys_out = keys;
-    return 0;
+    return retval;
 }
 
 static void free_keys(krb5_context context, krb5_kdcpreauth_rock rock,
@@ -1288,17 +1309,6 @@ cleanup:
     return (retval);
 }
 
-static krb5_boolean
-request_contains_enctype(krb5_context context,  const krb5_kdc_req *request,
-                         krb5_enctype enctype)
-{
-    int i;
-    for (i =0; i < request->nktypes; i++)
-        if (request->ktype[i] == enctype)
-            return 1;
-    return 0;
-}
-
 static krb5_error_code
 _make_etype_info_entry(krb5_context context,
                        krb5_principal client_princ, krb5_key_data *client_key,
@@ -1354,87 +1364,46 @@ cleanup:
 }
 
 /* Create etype information for a client for the preauth-required hint list,
- * for either etype-info or etype-info2. */
+ * for either etype-info or etype-info2. Since we know both the supported
+ * client etypes as well as the keys we have, we will just make a decision
+ * here on which etype to use and send only a single supported etype to
+ * the client. */
 static void
 etype_info_helper(krb5_context context, krb5_kdc_req *request,
                   krb5_db_entry *client, krb5_preauthtype pa_type,
                   krb5_kdcpreauth_edata_respond_fn respond, void *arg)
 {
+    krb5_key_data *key;
     krb5_error_code retval;
     krb5_pa_data *pa = NULL;
     krb5_etype_info_entry **entry = NULL;
     krb5_data *scratch = NULL;
-    krb5_key_data *client_key;
-    krb5_enctype db_etype;
-    int i = 0, start = 0, seen_des = 0;
     int etype_info2 = (pa_type == KRB5_PADATA_ETYPE_INFO2);
 
-    entry = k5calloc(client->n_key_data * 2 + 1, sizeof(*entry), &retval);
+    /* Find the only key we should use. */
+    retval = client_key(context, request, client, &key, NULL);
+    if (retval != 0)
+        goto cleanup;
+
+    /* Create the entry array. */
+    entry = k5calloc(2, sizeof(*entry), &retval);
     if (entry == NULL)
         goto cleanup;
-    entry[0] = NULL;
-
-    while (1) {
-        retval = krb5_dbe_search_enctype(context, client, &start, -1,
-                                         -1, 0, &client_key);
-        if (retval == KRB5_KDB_NO_MATCHING_KEY)
-            break;
-        if (retval)
-            goto cleanup;
-        db_etype = client_key->key_data_type[0];
-        if (db_etype == ENCTYPE_DES_CBC_MD4)
-            db_etype = ENCTYPE_DES_CBC_MD5;
-
-        if (request_contains_enctype(context, request, db_etype)) {
-            assert(etype_info2 ||
-                   !enctype_requires_etype_info_2(db_etype));
-            retval = _make_etype_info_entry(context, client->princ, client_key,
-                                            db_etype, &entry[i], etype_info2);
-            if (retval != 0)
-                goto cleanup;
-            i++;
-        }
-
-        /*
-         * If there is a des key in the kdb, try the "similar" enctypes,
-         * avoid duplicate entries.
-         */
-        if (!seen_des) {
-            switch (db_etype) {
-            case ENCTYPE_DES_CBC_MD5:
-                db_etype = ENCTYPE_DES_CBC_CRC;
-                break;
-            case ENCTYPE_DES_CBC_CRC:
-                db_etype = ENCTYPE_DES_CBC_MD5;
-                break;
-            default:
-                continue;
-
-            }
-            if (krb5_is_permitted_enctype(context, db_etype) &&
-                request_contains_enctype(context, request, db_etype)) {
-                retval = _make_etype_info_entry(context, client->princ,
-                                                client_key, db_etype,
-                                                &entry[i], etype_info2);
-                if (retval != 0)
-                    goto cleanup;
-                entry[i+1] = 0;
-                i++;
-            }
-            seen_des++;
-        }
-    }
-
-    /* If the list is empty, don't send it at all. */
-    if (i == 0)
+    retval = _make_etype_info_entry(context, client->princ, key,
+                                    key->key_data_type[0], &entry[0],
+                                    etype_info2);
+    if (retval != 0)
         goto cleanup;
 
+    /* Create the return structure. */
     if (etype_info2)
         retval = encode_krb5_etype_info2(entry, &scratch);
     else
         retval = encode_krb5_etype_info(entry, &scratch);
     if (retval)
         goto cleanup;
+
+    /* Create the padata. */
     pa = k5alloc(sizeof(*pa), &retval);
     if (pa == NULL)
         goto cleanup;
