@@ -235,7 +235,7 @@ get_plugin_vtables(krb5_context context,
             n_tables++;
     }
     for (i = 0, n_systems = 0; i < n_tables; i++) {
-        for (count = 0; vtables[i].pa_type_list[count] > 0; count++);
+        for (count = 0; vtables[i].pa_type_list[count] != 0; count++);
         n_systems += count;
     }
     *vtables_out = vtables;
