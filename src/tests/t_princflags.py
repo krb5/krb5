@@ -103,6 +103,18 @@ def one_aclcheck(ftuple, doset):
             fail('Failed to keep flag ' + outname + ' clear')
 
 
+# Set all flags simultaneously, even the ones that aren't defined yet.
+def lamptest():
+    pat = re.compile('^Attributes: ' +
+                     ' '.join(flags2namelist(0xffffffff)) +
+                     '$', re.MULTILINE)
+    realm.run([kadminl, 'ank', '-pw', 'password', '+0xffffffff', 'test'])
+    out = realm.run([kadminl, 'getprinc', 'test'])
+    if not pat.search(out):
+        fail('Failed to simultaenously set all flags')
+    realm.run([kadminl, 'delprinc', 'test'])
+
+
 for ftuple in kadmin_ftuples:
     one_kadmin_flag(ftuple)
 
@@ -122,5 +134,6 @@ for ftuple in strconv_ftuples:
     one_aclcheck(ftuple, True)
     one_aclcheck(ftuple, False)
 
+lamptest()
 
 success('KDB principal flags')

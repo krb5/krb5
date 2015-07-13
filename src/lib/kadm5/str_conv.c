@@ -196,7 +196,8 @@ krb5_flagspec_to_mask(const char *spec, krb5_flags *toset, krb5_flags *toclear)
 }
 
 /*
- * Copy the flag name of flagnum to outstr.
+ * Copy the flag name of flagnum to outstr.  On error, outstr points to a null
+ * pointer.
  */
 krb5_error_code
 krb5_flagnum_to_string(int flagnum, char **outstr)
@@ -204,14 +205,15 @@ krb5_flagnum_to_string(int flagnum, char **outstr)
     const char *s = NULL;
 
     *outstr = NULL;
-    if ((unsigned int)flagnum < NOUTFLAGS) {
+    if ((unsigned int)flagnum < NOUTFLAGS)
         s = outflags[flagnum];
-    }
-    if (s == NULL)
+    if (s == NULL) {
         /* Assume that krb5_flags are 32 bits long. */
-        asprintf(outstr, "0x%08lx", 1UL<<flagnum);
-    else
+        if (asprintf(outstr, "0x%08lx", 1UL << flagnum) == -1)
+            *outstr = NULL;
+    } else {
         *outstr = strdup(s);
+    }
     if (*outstr == NULL)
         return ENOMEM;
     return 0;
@@ -242,15 +244,15 @@ krb5_flags_to_strings(krb5_int32 flags, char ***outarray)
         }
         a = a_new;
         retval = krb5_flagnum_to_string(i, &a[amax++]);
+        a[amax] = NULL;
         if (retval)
             goto cleanup;
-        a[amax] = NULL;
     }
     *outarray = a;
     return 0;
 cleanup:
     for (ap = a; ap != NULL && *ap != NULL; ap++) {
-        free(ap);
+        free(*ap);
     }
     free(a);
     return retval;
