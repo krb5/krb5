@@ -132,6 +132,11 @@ vresize(void *mem, size_t size)
 {
     if (!resize_cb)
         resize_cb = &realloc;
+    if (size == 0 && resize_cb == &realloc) {
+        /* avoid memleak as realloc(X,0) can return a free-able pointer */
+        free(mem);
+        return NULL;
+    }
     return (*resize_cb)(mem, size);
 }
 
