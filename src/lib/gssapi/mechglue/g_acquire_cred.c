@@ -135,6 +135,8 @@ OM_uint32 *			time_rec;
     OM_uint32 first_major = GSS_S_COMPLETE, first_minor = 0;
     OM_uint32 initTimeOut, acceptTimeOut, outTime = GSS_C_INDEFINITE;
     gss_OID_set mechs = GSS_C_NO_OID_SET;
+    gss_OID_set_desc except_attrs;
+    gss_OID_desc attr_oids[1];
     unsigned int i;
     gss_union_cred_t creds = NULL;
 
@@ -152,10 +154,15 @@ OM_uint32 *			time_rec;
 
     /*
      * if desired_mechs equals GSS_C_NULL_OID_SET, then try to
-     * acquire credentials for all mechanisms.
+     * acquire credentials for all non-deprecated mechanisms.
      */
     if (desired_mechs == GSS_C_NULL_OID_SET) {
-	major = gss_indicate_mechs(minor_status, &mechs);
+	attr_oids[0] = *GSS_C_MA_DEPRECATED;
+	except_attrs.count = 1;
+	except_attrs.elements = attr_oids;
+	major = gss_indicate_mechs_by_attrs(minor_status, GSS_C_NO_OID_SET,
+					    &except_attrs, GSS_C_NO_OID_SET,
+					    &mechs);
 	if (major != GSS_S_COMPLETE)
 	    goto cleanup;
     } else

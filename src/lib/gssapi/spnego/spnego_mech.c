@@ -2995,7 +2995,7 @@ release_spnego_ctx(spnego_gss_ctx_id_t *ctx)
  * SPNEGO because it will also return the SPNEGO mech and we do not
  * want to consider SPNEGO as an available security mech for
  * negotiation. For this reason, get_available_mechs will return
- * all available mechs except SPNEGO.
+ * all available, non-deprecated mechs except SPNEGO.
  *
  * If a ptr to a creds list is given, this function will attempt
  * to acquire creds for the creds given and trim the list of
@@ -3012,8 +3012,16 @@ get_available_mechs(OM_uint32 *minor_status,
 	int		found = 0;
 	OM_uint32 major_status = GSS_S_COMPLETE, tmpmin;
 	gss_OID_set mechs, goodmechs;
+	gss_OID_set_desc except_attrs;
+	gss_OID_desc attr_oids[1];
 
-	major_status = gss_indicate_mechs(minor_status, &mechs);
+	attr_oids[0] = *GSS_C_MA_DEPRECATED;
+	except_attrs.count = 1;
+	except_attrs.elements = attr_oids;
+	major_status = gss_indicate_mechs_by_attrs(minor_status,
+						   GSS_C_NO_OID_SET,
+						   &except_attrs,
+						   GSS_C_NO_OID_SET, &mechs);
 
 	if (major_status != GSS_S_COMPLETE) {
 		return (major_status);
