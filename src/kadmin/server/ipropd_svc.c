@@ -51,6 +51,7 @@ static char *reply_unknown_str	= "<UNKNOWN_CODE>";
 #ifdef	DPRINT
 #undef	DPRINT
 #endif
+#ifdef DEBUG
 #define	DPRINT(...)				\
     do {					\
 	if (nofork) {				\
@@ -58,7 +59,9 @@ static char *reply_unknown_str	= "<UNKNOWN_CODE>";
 	    fflush(stderr);			\
 	}					\
     } while (0)
-
+#else
+#define	DPRINT(...)
+#endif
 
 static void
 debprret(char *w, update_status_t ret, kdb_sno_t sno)
