@@ -958,41 +958,61 @@ process_r1_11_policy(krb5_context context, const char *fname, FILE *filep,
     char namebuf[1024];
     char keysaltbuf[KRB5_KDB_MAX_ALLOWED_KS_LEN + 1];
     unsigned int refcnt;
-    int nread, ret = 0;
+    int nread, c, ret = 0;
 
     memset(&rec, 0, sizeof(rec));
 
     (*linenop)++;
     rec.name = namebuf;
-    rec.allowed_keysalts = keysaltbuf;
 
-    nread = fscanf(filep, "%1023s\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t"
-                   "%u\t%u\t%u\t"
-                   K5CONST_WIDTH_SCANF_STR(KRB5_KDB_MAX_ALLOWED_KS_LEN)
-                   "\t%hd", rec.name, &rec.pw_min_life, &rec.pw_max_life,
+    /*
+     * Due to a historical error, iprop dumps use the same version before and
+     * after the 1.11 policy extensions.  So we need to accept both 1.8-format
+     * and 1.11-format policy entries.  Begin by reading the 1.8 fields.
+     */
+    nread = fscanf(filep, "%1023s\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u",
+                   rec.name, &rec.pw_min_life, &rec.pw_max_life,
                    &rec.pw_min_length, &rec.pw_min_classes,
                    &rec.pw_history_num, &refcnt, &rec.pw_max_fail,
-                   &rec.pw_failcnt_interval, &rec.pw_lockout_duration,
-                   &rec.attributes, &rec.max_life, &rec.max_renewable_life,
-                   rec.allowed_keysalts, &rec.n_tl_data);
+                   &rec.pw_failcnt_interval, &rec.pw_lockout_duration);
     if (nread == EOF)
         return -1;
-    if (nread != 15) {
+    if (nread != 10) {
         fprintf(stderr, _("cannot parse policy (%d read)\n"), nread);
         return 1;
     }
 
-    if (rec.allowed_keysalts && !strcmp(rec.allowed_keysalts, "-"))
-        rec.allowed_keysalts = NULL;
+    /* The next character should be a newline (1.8) or a tab (1.11). */
+    c = getc(filep);
+    if (c == EOF)
+        return -1;
+    if (c != '\n') {
+        /* Read the additional 1.11-format fields. */
+        rec.allowed_keysalts = keysaltbuf;
+        nread = fscanf(filep, "%u\t%u\t%u\t"
+                       K5CONST_WIDTH_SCANF_STR(KRB5_KDB_MAX_ALLOWED_KS_LEN)
+                       "\t%hd", &rec.attributes, &rec.max_life,
+                       &rec.max_renewable_life, rec.allowed_keysalts,
+                       &rec.n_tl_data);
+        if (nread == EOF)
+            return -1;
+        if (nread != 5) {
+            fprintf(stderr, _("cannot parse policy (%d read)\n"), nread);
+            return 1;
+        }
 
-    /* Get TL data */
-    ret = alloc_tl_data(rec.n_tl_data, &rec.tl_data);
-    if (ret)
-        goto cleanup;
+        if (rec.allowed_keysalts && !strcmp(rec.allowed_keysalts, "-"))
+            rec.allowed_keysalts = NULL;
 
-    ret = process_tl_data(fname, filep, *linenop, rec.tl_data);
-    if (ret)
-        goto cleanup;
+        /* Get TL data */
+        ret = alloc_tl_data(rec.n_tl_data, &rec.tl_data);
+        if (ret)
+            goto cleanup;
+
+        ret = process_tl_data(fname, filep, *linenop, rec.tl_data);
+        if (ret)
+            goto cleanup;
+    }
 
     ret = krb5_db_create_policy(context, &rec);
     if (ret)
