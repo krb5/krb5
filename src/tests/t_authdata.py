@@ -81,8 +81,7 @@ realm.stop()
 # can control the indicators asserted.
 testpreauth = os.path.join(buildtop, 'plugins', 'preauth', 'test', 'test.so')
 krb5conf = {'plugins': {'kdcpreauth': {'module': 'test:' + testpreauth},
-                        'clpreauth': {'module': 'test:' + testpreauth,
-                                      'disable': 'encrypted_timestamp'}}}
+                        'clpreauth': {'module': 'test:' + testpreauth}}}
 realm, realm2 = cross_realms(2, args=({'realm': 'LOCAL'},
                                       {'realm': 'FOREIGN'}),
                              krb5_conf=krb5conf, get_creds=False)
