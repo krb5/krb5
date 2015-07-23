@@ -79,8 +79,7 @@ realm.stop()
 # indicated by the etype info, and returns NULL if key was selected.
 testpreauth = os.path.join(buildtop, 'plugins', 'preauth', 'test', 'test.so')
 plugconf = {'plugins': {'kdcpreauth': {'module': 'test:' + testpreauth},
-                        'clpreauth': {'module': 'test:' + testpreauth,
-                                      'disable': 'encrypted_timestamp'}}}
+                        'clpreauth': {'module': 'test:' + testpreauth}}}
 conf.update(plugconf)
 realm = K5Realm(create_host=False, get_creds=False, krb5_conf=conf)
 realm.run([kadminl, 'modprinc', '+requires_preauth', realm.user_princ])

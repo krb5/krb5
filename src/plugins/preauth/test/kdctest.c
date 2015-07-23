@@ -42,11 +42,6 @@
  * - It receives a space-separated list from the clpreauth module and asserts
  *   each string as an authentication indicator.  It always succeeds in
  *   pre-authenticating the request.
- *
- * To use this module, a test script should:
- * - Register this module and the corresponding clpreauth module
- * - Disable the encrypted_timestamp clpreauth or kdcpreauth module
- * - Set the requires_preauth flag on the client principal
  */
 
 #include "k5-int.h"
