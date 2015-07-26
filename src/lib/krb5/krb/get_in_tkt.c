@@ -1443,6 +1443,8 @@ init_creds_step_reply(krb5_context context,
         ctx->request->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL;
 
     if (ctx->err_reply != NULL) {
+        krb5_free_pa_data(context, ctx->err_padata);
+        ctx->err_padata = NULL;
         code = krb5int_fast_process_error(context, ctx->fast_state,
                                           &ctx->err_reply, &ctx->err_padata,
                                           &retry);
