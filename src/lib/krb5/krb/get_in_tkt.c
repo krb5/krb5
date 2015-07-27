@@ -1387,6 +1387,11 @@ init_creds_step_reply(krb5_context context,
             ctx->enc_pa_rep_permitted = FALSE;
             ctx->restarted = TRUE;
             code = restart_init_creds_loop(context, ctx, FALSE);
+        } else if (reply_code == KDC_ERR_PREAUTH_EXPIRED) {
+            /* We sent an expired KDC cookie.  Start over, allowing another
+             * FAST upgrade. */
+            code = restart_init_creds_loop(context, ctx, FALSE);
+            ctx->restarted = FALSE;
         } else if ((reply_code == KDC_ERR_MORE_PREAUTH_DATA_REQUIRED ||
                     reply_code == KDC_ERR_PREAUTH_REQUIRED) && retry) {
             /* reset the list of preauth types to try */
