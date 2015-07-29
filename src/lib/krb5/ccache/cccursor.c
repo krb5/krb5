@@ -29,6 +29,7 @@
  */
 
 #include "cc-int.h"
+#include "../krb/int-proto.h"
 
 #include <assert.h>
 
@@ -219,24 +220,49 @@ krb5_cc_cache_match(krb5_context context, krb5_principal client,
     return ret;
 }
 
+/* Store the error state for code from context into errsave, but only if code
+ * indicates an error and errsave is empty. */
+static void
+save_first_error(krb5_context context, krb5_error_code code,
+                 struct errinfo *errsave)
+{
+    if (code && code != KRB5_CC_END && !errsave->code)
+        k5_save_ctx_error(context, code, errsave);
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_have_content(krb5_context context)
 {
+    krb5_error_code ret;
     krb5_cccol_cursor col_cursor;
     krb5_cc_cursor cache_cursor;
     krb5_ccache cache;
     krb5_creds creds;
     krb5_boolean found = FALSE;
+    struct errinfo errsave = EMPTY_ERRINFO;
+    const char *defname;
 
-    if (krb5_cccol_cursor_new(context, &col_cursor))
+    ret = krb5_cccol_cursor_new(context, &col_cursor);
+    save_first_error(context, ret, &errsave);
+    if (ret)
         goto no_entries;
 
-    while (!found && !krb5_cccol_cursor_next(context, col_cursor, &cache) &&
-           cache != NULL) {
-        if (krb5_cc_start_seq_get(context, cache, &cache_cursor))
+    while (!found) {
+        ret = krb5_cccol_cursor_next(context, col_cursor, &cache);
+        save_first_error(context, ret, &errsave);
+        if (ret || cache == NULL)
+            break;
+
+        ret = krb5_cc_start_seq_get(context, cache, &cache_cursor);
+        save_first_error(context, ret, &errsave);
+        if (ret)
             continue;
-        while (!found &&
-               !krb5_cc_next_cred(context, cache, &cache_cursor, &creds)) {
+        while (!found) {
+            ret = krb5_cc_next_cred(context, cache, &cache_cursor, &creds);
+            save_first_error(context, ret, &errsave);
+            if (ret)
+                break;
+
             if (!krb5_is_config_principal(context, creds.server))
                 found = TRUE;
             krb5_free_cred_contents(context, &creds);
@@ -249,7 +275,19 @@ krb5_cccol_have_content(krb5_context context)
         return 0;
 
 no_entries:
-    k5_setmsg(context, KRB5_CC_NOTFOUND,
-              _("No Kerberos credentials available"));
+    if (errsave.code) {
+        /* Report the first error we encountered. */
+        ret = k5_restore_ctx_error(context, &errsave);
+        k5_wrapmsg(context, ret, KRB5_CC_NOTFOUND,
+                   _("No Kerberos credentials available"));
+    } else {
+        /* Report the default cache name. */
+        defname = krb5_cc_default_name(context);
+        if (defname != NULL) {
+            k5_setmsg(context, KRB5_CC_NOTFOUND,
+                      _("No Kerberos credentials available "
+                        "(default cache: %s)"), defname);
+        }
+    }
     return KRB5_CC_NOTFOUND;
 }
