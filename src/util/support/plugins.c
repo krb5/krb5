@@ -96,7 +96,7 @@ struct dirent {
 };
 
 typedef struct {
-    long handle;                /* _findfirst/_findnext handle */
+    intptr_t handle;            /* _findfirst/_findnext handle */
     short offset;               /* offset into directory */
     short finished;             /* 1 if there are not more files */
     struct _finddata_t fileinfo;/* from _findfirst/_findnext */
@@ -108,7 +108,7 @@ DIR * opendir(const char *dir)
 {
     DIR *dp;
     char *filespec;
-    long handle;
+    intptr_t handle;
     int index;
 
     filespec = malloc(strlen(dir) + 2 + 1);
