@@ -183,21 +183,6 @@ gss_inquire_attrs_for_mech(
             return status;
     }
 
-    if (mech_attrs != NULL && mech != gssint_get_mechanism(NULL)) {
-        if (*mech_attrs == GSS_C_NO_OID_SET) {
-            status = generic_gss_create_empty_oid_set(minor, mech_attrs);
-            if (GSS_ERROR(status))
-                return status;
-        }
-
-        status = generic_gss_add_oid_set_member(minor, GSS_C_MA_NOT_DFLT_MECH,
-                                                mech_attrs);
-        if (GSS_ERROR(status)) {
-            gss_release_oid_set(&tmpMinor, mech_attrs);
-            return status;
-        }
-    }
-
     if (known_mech_attrs != NULL && *known_mech_attrs == GSS_C_NO_OID_SET) {
         status = generic_gss_copy_oid_set(minor,
                                           gss_ma_known_attrs,
