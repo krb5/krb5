@@ -136,7 +136,7 @@ OM_uint32 *			time_rec;
     OM_uint32 initTimeOut, acceptTimeOut, outTime = GSS_C_INDEFINITE;
     gss_OID_set mechs = GSS_C_NO_OID_SET;
     gss_OID_set_desc except_attrs;
-    gss_OID_desc attr_oids[1];
+    gss_OID_desc attr_oids[2];
     unsigned int i;
     gss_union_cred_t creds = NULL;
 
@@ -158,7 +158,8 @@ OM_uint32 *			time_rec;
      */
     if (desired_mechs == GSS_C_NULL_OID_SET) {
 	attr_oids[0] = *GSS_C_MA_DEPRECATED;
-	except_attrs.count = 1;
+	attr_oids[1] = *GSS_C_MA_NOT_DFLT_MECH;
+	except_attrs.count = 2;
 	except_attrs.elements = attr_oids;
 	major = gss_indicate_mechs_by_attrs(minor_status, GSS_C_NO_OID_SET,
 					    &except_attrs, GSS_C_NO_OID_SET,

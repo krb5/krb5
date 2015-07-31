@@ -3013,10 +3013,11 @@ get_available_mechs(OM_uint32 *minor_status,
 	OM_uint32 major_status = GSS_S_COMPLETE, tmpmin;
 	gss_OID_set mechs, goodmechs;
 	gss_OID_set_desc except_attrs;
-	gss_OID_desc attr_oids[1];
+	gss_OID_desc attr_oids[2];
 
 	attr_oids[0] = *GSS_C_MA_DEPRECATED;
-	except_attrs.count = 1;
+	attr_oids[1] = *GSS_C_MA_NOT_DFLT_MECH;
+	except_attrs.count = 2;
 	except_attrs.elements = attr_oids;
 	major_status = gss_indicate_mechs_by_attrs(minor_status,
 						   GSS_C_NO_OID_SET,

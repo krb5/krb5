@@ -29,18 +29,23 @@ gss_client = os.path.join(appdir, 'gss-client')
 gss_server = os.path.join(appdir, 'gss-server')
 
 # Run a gss-server process and a gss-client process, with additional
-# gss-client flags given by options.  Verify that gss-client displayed
-# the expected output for a successful negotiation, and that we
-# obtained credentials for the host service.
-def server_client_test(realm, options):
+# gss-client flags given by options and additional gss-server flags
+# given by server_options.  Return the output of gss-client.
+def run_client_server(realm, options, server_options, expected_code=0):
     portstr = str(realm.server_port())
-    server = realm.start_server([gss_server, '-port', portstr, 'host'],
-                                'starting...')
-    output = realm.run([gss_client, '-port', portstr] + options +
-                       [hostname, 'host', 'testmsg'])
-    if 'Signature verified.' not in output:
-        fail('Expected message not seen in gss-client output')
+    server_args = [gss_server, '-port', portstr] + server_options + ['host']
+    server = realm.start_server(server_args, 'starting...')
+    out = realm.run([gss_client, '-port', portstr] + options +
+                    [hostname, 'host', 'testmsg'], expected_code=expected_code)
     stop_daemon(server)
+    return out
+
+# Run a gss-server and gss-client process, and verify that gss-client
+# displayed the expected output for a successful negotiation.
+def server_client_test(realm, options, server_options):
+    out = run_client_server(realm, options, server_options)
+    if 'Signature verified.' not in out:
+        fail('Expected message not seen in gss-client output')
 
 # Make up a filename to hold user's initial credentials.
 def ccache_savefile(realm):
@@ -55,27 +60,37 @@ def ccache_restore(realm):
     shutil.copyfile(ccache_savefile(realm), realm.ccache)
 
 # Perform a regular (TGS path) test of the server and client.
-def tgs_test(realm, options):
+def tgs_test(realm, options, server_options=[]):
     ccache_restore(realm)
-    server_client_test(realm, options)
+    server_client_test(realm, options, server_options)
     realm.klist(realm.user_princ, realm.host_princ)
 
 # Perform a test of the server and client with initial credentials
 # obtained through gss_acquire_cred_with_password().
-def pw_test(realm, options):
+def pw_test(realm, options, server_options=[]):
     if os.path.exists(realm.ccache):
         os.remove(realm.ccache)
-    server_client_test(realm, options + ['-user', realm.user_princ,
-                                         '-pass', password('user')])
+    options = options + ['-user', realm.user_princ, '-pass', password('user')]
+    server_client_test(realm, options, server_options)
     if os.path.exists(realm.ccache):
         fail('gss_acquire_cred_with_password created ccache')
 
+# Perform a test using the wrong password, and make sure that failure
+# occurs during the expected operation (gss_init_sec_context() for
+# IAKERB, gss_aqcuire_cred_with_password() otherwise).
+def wrong_pw_test(realm, options, server_options=[], iakerb=False):
+    options = options + ['-user', realm.user_princ, '-pass', 'wrongpw']
+    out = run_client_server(realm, options, server_options, expected_code=1)
+    failed_op = 'initializing context' if iakerb else 'acquiring creds'
+    if 'GSS-API error ' + failed_op not in out:
+        fail('Expected error not seen in gss-client output')
+
 # Perform a test of the server and client with initial credentials
 # obtained with the client keytab
-def kt_test(realm, options):
+def kt_test(realm, options, server_options=[]):
     if os.path.exists(realm.ccache):
         os.remove(realm.ccache)
-    server_client_test(realm, options)
+    server_client_test(realm, options, server_options)
     realm.klist(realm.user_princ, realm.host_princ)
 
 for realm in multipass_realms():
@@ -83,19 +98,24 @@ for realm in multipass_realms():
 
     tgs_test(realm, ['-krb5'])
     tgs_test(realm, ['-spnego'])
-    tgs_test(realm, ['-iakerb'])
+    tgs_test(realm, ['-iakerb'], ['-iakerb'])
     # test default (i.e., krb5) mechanism with GSS_C_DCE_STYLE
     tgs_test(realm, ['-dce'])
 
     pw_test(realm, ['-krb5'])
     pw_test(realm, ['-spnego'])
-    pw_test(realm, ['-iakerb'])
+    pw_test(realm, ['-iakerb'], ['-iakerb'])
     pw_test(realm, ['-dce'])
+
+    wrong_pw_test(realm, ['-krb5'])
+    wrong_pw_test(realm, ['-spnego'])
+    wrong_pw_test(realm, ['-iakerb'], ['-iakerb'], True)
+    wrong_pw_test(realm, ['-dce'])
 
     realm.extract_keytab(realm.user_princ, realm.client_keytab)
     kt_test(realm, ['-krb5'])
     kt_test(realm, ['-spnego'])
-    kt_test(realm, ['-iakerb'])
+    kt_test(realm, ['-iakerb'], ['-iakerb'])
     kt_test(realm, ['-dce'])
 
 success('GSS sample application')

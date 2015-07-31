@@ -98,6 +98,7 @@ int     verbose = 0;
  * Arguments:
  *
  *      service_name    (r) the ASCII service name
+ *      mech            (r) the desired mechanism (or GSS_C_NO_OID)
  *      server_creds    (w) the GSS-API service credentials
  *
  * Returns: 0 on success, -1 on failure
@@ -107,15 +108,19 @@ int     verbose = 0;
  * The service name is imported with gss_import_name, and service
  * credentials are acquired with gss_acquire_cred.  If either opertion
  * fails, an error message is displayed and -1 is returned; otherwise,
- * 0 is returned.
+ * 0 is returned.  If mech is given, credentials are acquired for the
+ * specified mechanism.
  */
 
 static int
-server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
+server_acquire_creds(char *service_name, gss_OID mech,
+                     gss_cred_id_t *server_creds)
 {
     gss_buffer_desc name_buf;
     gss_name_t server_name;
     OM_uint32 maj_stat, min_stat;
+    gss_OID_set_desc mechlist;
+    gss_OID_set mechs = GSS_C_NO_OID_SET;
 
     name_buf.value = service_name;
     name_buf.length = strlen(name_buf.value) + 1;
@@ -126,8 +131,12 @@ server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
         return -1;
     }
 
-    maj_stat = gss_acquire_cred(&min_stat, server_name, 0,
-                                GSS_C_NO_OID_SET, GSS_C_ACCEPT,
+    if (mech != GSS_C_NO_OID) {
+        mechlist.count = 1;
+        mechlist.elements = mech;
+        mechs = &mechlist;
+    }
+    maj_stat = gss_acquire_cred(&min_stat, server_name, 0, mechs, GSS_C_ACCEPT,
                                 server_creds, NULL, NULL);
     if (maj_stat != GSS_S_COMPLETE) {
         display_status("acquiring credentials", maj_stat, min_stat);
@@ -652,6 +661,7 @@ main(int argc, char **argv)
 {
     char   *service_name;
     gss_cred_id_t server_creds;
+    gss_OID mech = GSS_C_NO_OID;
     OM_uint32 min_stat;
     u_short port = 4444;
     int     once = 0;
@@ -715,6 +725,8 @@ main(int argc, char **argv)
                 fprintf(stderr, "failed to register keytab\n");
                 exit(1);
             }
+        } else if (strcmp(*argv, "-iakerb") == 0) {
+            mech = (gss_OID)gss_mech_iakerb;
         } else
             break;
         argc--;
@@ -741,7 +753,7 @@ main(int argc, char **argv)
 
     service_name = *argv;
 
-    if (server_acquire_creds(service_name, &server_creds) < 0)
+    if (server_acquire_creds(service_name, mech, &server_creds) < 0)
         return -1;
 
     if (do_inetd) {

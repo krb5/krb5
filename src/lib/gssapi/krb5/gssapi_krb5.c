@@ -749,6 +749,7 @@ krb5_gss_inquire_attrs_for_mech(OM_uint32 *minor_status,
 
     if (g_OID_equal(mech, gss_mech_iakerb)) {
         MA_SUPPORTED(GSS_C_MA_AUTH_INIT_INIT);
+        MA_SUPPORTED(GSS_C_MA_NOT_DFLT_MECH);
     } else if (!g_OID_equal(mech, gss_mech_krb5)) {
         MA_SUPPORTED(GSS_C_MA_DEPRECATED);
     }
