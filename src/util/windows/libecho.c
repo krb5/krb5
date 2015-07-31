@@ -38,7 +38,7 @@ main(int argc, char *argv[])
 void
 echo_files(char *prefix, char *f)
 {
-    long ff;
+    intptr_t ff;
     struct _finddata_t fdt;
     char *slash;
     char filepath[256];
