@@ -16,7 +16,8 @@ To use authentication indicators with PKINIT or OTP, first configure
 the KDC to include an indicator when that preauthentication mechanism
 is used.  For PKINIT, use the **pkinit_indicator** variable in
 :ref:`kdc.conf(5)`.  For OTP, use the **indicator** variable in the
-token type definition.
+token type definition, or specify the indicators in the **otp** user
+string as described in :ref:`otp_preauth`.
 
 To require an indicator to be present in order to authenticate to a
 service principal, set the **require_auth** string attribute on the

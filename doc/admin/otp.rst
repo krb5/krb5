@@ -30,6 +30,7 @@ Token types are defined in either :ref:`krb5.conf(5)` or
             timeout = <integer> (default: 5 [seconds])
             retries = <integer> (default: 3)
             strip_realm = <boolean> (default: true)
+            indicator = <string> (default: none)
         }
 
 If the server field begins with '/', it will be interpreted as a UNIX
@@ -42,6 +43,11 @@ When forwarding the request over RADIUS, by default the principal is
 used in the User-Name attribute of the RADIUS packet.  The strip_realm
 parameter controls whether the principal is forwarded with or without
 the realm portion.
+
+If an indicator field is present, tickets issued using this token type
+will be annotated with the specified authentication indicator (see
+:ref:`auth_indicator`).  This key may be specified multiple times to
+add multiple indicators.
 
 
 The default token type
@@ -71,7 +77,8 @@ format:
 
     [{
         "type": <string>,
-        "username": <string>
+        "username": <string>,
+        "indicators": [<string>, ...]
      }, ...]
 
 This is an array of token objects.  Both fields of token objects are
@@ -79,7 +86,9 @@ optional.  The **type** field names the token type of this token; if
 not specified, it defaults to ``DEFAULT``.  The **username** field
 specifies the value to be sent in the User-Name RADIUS attribute.  If
 not specified, the principal name is sent, with or without realm as
-defined in the token type.
+defined in the token type.  The **indicators** field specifies a list
+of authentication indicators to annotate tickets with, overriding any
+indicators specified in the token type.
 
 For ease of configuration, an empty array (``[]``) is treated as
 equivalent to one DEFAULT token (``[{}]``).

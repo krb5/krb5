@@ -149,12 +149,15 @@ def verify(daemon, queue, reply, usernm, passwd):
     assert data['pass'] == [passwd]
     daemon.join()
 
-def otpconfig(toktype, username=None):
+def otpconfig(toktype, username=None, indicators=None):
     val = '[{"type": "%s"' % toktype
-    if username is None:
-        val += '}]'
-    else:
-        val += ', "username": "%s"}]' % username
+    if username is not None:
+        val += ', "username": "%s"' % username
+    if indicators is not None:
+        qind = ['"%s"' % s for s in indicators]
+        jsonlist = '[' + ', '.join(qind) + ']'
+        val += ', "indicators":' + jsonlist
+    val += '}]'
     return val
 
 prefix = "/tmp/%d" % os.getpid()
@@ -198,6 +201,19 @@ verify(daemon, queue, True, realm.user_princ.split('@')[0], 'accept')
 realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
 out = realm.run(['./adata', realm.krbtgt_princ])
 if '+97: [indotp1, indotp2]' not in out:
+    fail('auth indicators not seen in OTP ticket')
+
+# Repeat with an indicators override in the string attribute.
+daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', queue))
+daemon.start()
+queue.get()
+oconf = otpconfig('udp', indicators=['indtok1', 'indtok2'])
+realm.run([kadminl, 'setstr', realm.user_princ, 'otp', oconf])
+realm.kinit(realm.user_princ, 'accept', flags=flags)
+verify(daemon, queue, True, realm.user_princ.split('@')[0], 'accept')
+realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
+out = realm.run(['./adata', realm.krbtgt_princ])
+if '+97: [indtok1, indtok2]' not in out:
     fail('auth indicators not seen in OTP ticket')
 
 # Detect upstream pyrad bug
