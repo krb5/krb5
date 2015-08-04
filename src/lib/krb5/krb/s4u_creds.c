@@ -440,6 +440,24 @@ cleanup:
     return code;
 }
 
+/* Unparse princ and re-parse it as an enterprise principal. */
+static krb5_error_code
+convert_to_enterprise(krb5_context context, krb5_principal princ,
+                      krb5_principal *eprinc_out)
+{
+    krb5_error_code code;
+    char *str;
+
+    *eprinc_out = NULL;
+    code = krb5_unparse_name(context, princ, &str);
+    if (code != 0)
+        return code;
+    code = krb5_parse_name_flags(context, str, KRB5_PRINCIPAL_PARSE_ENTERPRISE,
+                                 eprinc_out);
+    krb5_free_unparsed_name(context, str);
+    return code;
+}
+
 static krb5_error_code
 krb5_get_self_cred_from_kdc(krb5_context context,
                             krb5_flags options,
@@ -450,7 +468,8 @@ krb5_get_self_cred_from_kdc(krb5_context context,
                             krb5_creds **out_creds)
 {
     krb5_error_code code;
-    krb5_principal tgs = NULL;
+    krb5_principal tgs = NULL, eprinc = NULL;
+    krb5_principal_data sprinc;
     krb5_creds tgtq, s4u_creds, *tgt = NULL, *tgtptr;
     krb5_creds *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_pa_s4u_x509_user s4u_user;
@@ -458,7 +477,6 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     krb5_flags kdcopt;
 
     memset(&tgtq, 0, sizeof(tgtq));
-    memset(&s4u_creds, 0, sizeof(s4u_creds));
     memset(referral_tgts, 0, sizeof(referral_tgts));
     *out_creds = NULL;
 
@@ -510,18 +528,16 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
     tgtptr = tgt;
 
-    code = k5_copy_creds_contents(context, in_creds, &s4u_creds);
+    /* Convert the server principal to an enterprise principal, for use with
+     * foreign realms. */
+    code = convert_to_enterprise(context, in_creds->server, &eprinc);
     if (code != 0)
         goto cleanup;
 
-    if (s4u_creds.client != NULL) {
-        krb5_free_principal(context, s4u_creds.client);
-        s4u_creds.client = NULL;
-    }
-
-    code = krb5_copy_principal(context, in_creds->server, &s4u_creds.client);
-    if (code != 0)
-        goto cleanup;
+    /* Make a shallow copy of in_creds with client pointing to the server
+     * principal.  We will set s4u_creds.server for each request. */
+    s4u_creds = *in_creds;
+    s4u_creds.client = in_creds->server;
 
     /* Then, walk back the referral path to S4U2Self for user */
     kdcopt = 0;
@@ -556,15 +572,15 @@ krb5_get_self_cred_from_kdc(krb5_context context,
             }
         }
 
-        /* Rewrite server realm to match TGS realm */
-        krb5_free_data_contents(context, &s4u_creds.server->realm);
-
-        code = krb5int_copy_data_contents(context,
-                                          &tgtptr->server->data[1],
-                                          &s4u_creds.server->realm);
-        if (code != 0) {
-            krb5_free_pa_data(context, in_padata);
-            goto cleanup;
+        if (data_eq(tgtptr->server->data[1], in_creds->server->realm)) {
+            /* When asking the server realm, use the real principal. */
+            s4u_creds.server = in_creds->server;
+        } else {
+            /* When asking a foreign realm, use the enterprise principal, with
+             * the realm set to the TGS realm. */
+            sprinc = *eprinc;
+            sprinc.realm = tgtptr->server->data[1];
+            s4u_creds.server = &sprinc;
         }
 
         code = krb5_get_cred_via_tkt_ext(context, tgtptr,
@@ -635,8 +651,8 @@ cleanup:
             krb5_free_creds(context, referral_tgts[i]);
     }
     krb5_free_principal(context, tgs);
+    krb5_free_principal(context, eprinc);
     krb5_free_creds(context, tgt);
-    krb5_free_cred_contents(context, &s4u_creds);
     krb5_free_principal(context, s4u_user.user_id.user);
     krb5_free_checksum_contents(context, &s4u_user.cksum);
 

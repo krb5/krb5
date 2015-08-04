@@ -142,4 +142,21 @@ out = realm.run(['./t_s4u2proxy_krb5', usercache, storagecache, '-',
 if 'auth1: user@' not in out or 'auth2: user@' not in out:
     fail('krb5 -> s4u2proxy')
 
+realm.stop()
+
+# Exercise cross-realm S4U2Self.  The query in the foreign realm will
+# fail, but we can check that the right server principal was used.
+r1, r2 = cross_realms(2, create_user=False)
+r1.run([kinit, '-k', r1.host_princ])
+out = r1.run(['./t_s4u', 'p:' + r2.host_princ], expected_code=1)
+if 'Server not found in Kerberos database' not in out:
+    fail('cross-realm s4u2self (t_s4u output)')
+r1.stop()
+r2.stop()
+with open(os.path.join(r2.testdir, 'kdc.log')) as f:
+    kdclog = f.read()
+exp_princ = r1.host_princ.replace('/', '\\/').replace('@', '\\@')
+if ('for %s@%s, Server not found' % (exp_princ, r2.realm)) not in kdclog:
+    fail('cross-realm s4u2self (kdc log)')
+
 success('S4U test cases')
