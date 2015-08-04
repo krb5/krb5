@@ -670,13 +670,15 @@ kg_accept_krb5(minor_status, context_handle,
 #endif
 
     if (authdat->checksum == NULL) {
-        /* missing checksum counts as "inappropriate type" */
-        code = KRB5KRB_AP_ERR_INAPP_CKSUM;
-        major_status = GSS_S_FAILURE;
-        goto fail;
-    }
-
-    if (authdat->checksum->checksum_type != CKSUMTYPE_KG_CB) {
+        /*
+         * Some SMB client implementations use handcrafted GSSAPI code that
+         * does not provide a checksum.  MS-KILE documents that the Microsoft
+         * implementation considers a missing checksum acceptable; the server
+         * assumes all flags are unset in this case, and does not check channel
+         * bindings.
+         */
+        gss_flags = 0;
+    } else if (authdat->checksum->checksum_type != CKSUMTYPE_KG_CB) {
         /* Samba does not send 0x8003 GSS-API checksums */
         krb5_boolean valid;
         krb5_key subkey;
