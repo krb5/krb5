@@ -251,7 +251,8 @@ krad_client_free(krad_client *client);
  *  - hostname:service
  *
  * The timeout parameter (milliseconds) is the total timeout across all remote
- * hosts (when DNS returns multiple entries) and all retries.
+ * hosts (when DNS returns multiple entries) and all retries.  For stream
+ * sockets, the retries parameter is ignored and no retries are performed.
  *
  * The cb function will be called with the data argument when either a response
  * is received or the request times out on all possible remote hosts.
