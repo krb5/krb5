@@ -448,6 +448,9 @@ kr_remote_send(krad_remote *rr, krad_code code, krad_attrset *attrs,
     krb5_error_code retval;
     request *r;
 
+    if (rr->info->ai_socktype == SOCK_STREAM)
+        retries = 0;
+
     r = TAILQ_FIRST(&rr->list);
     retval = krad_packet_new_request(rr->kctx, rr->secret, code, attrs,
                                      (krad_packet_iter_cb)iterator, &r, &tmp);
