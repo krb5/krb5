@@ -853,8 +853,8 @@ BOOL CLeashApp::InitDLLs()
                  !LoadFuncs(KERB5_PPROFILE_DLL, profile_fi, 0, 0, 1, 0, 0))
         {
             MessageBox(hwnd,
-                       "Unexpected error while loading "KERB5_PPROFILE_DLL".\n"
-                       "Kerberos 5 functionality will be disabled.\n",
+                       "Unexpected error while loading " KERB5_PPROFILE_DLL "."
+                       "\nKerberos 5 functionality will be disabled.\n",
                        "Error", MB_OK);
             AfxFreeLibrary(m_hKrb5ProfileDLL);
             m_hKrb5ProfileDLL = 0;

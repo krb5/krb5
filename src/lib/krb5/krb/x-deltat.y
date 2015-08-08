@@ -131,7 +131,7 @@ static int yyparse(struct param *);
 %lex-param {struct param *tmv}
 %define api.pure
 
-%token <val> NUM LONGNUM OVERFLOW
+%token <val> tok_NUM tok_LONGNUM tok_OVERFLOW
 %token '-' ':' 'd' 'h' 'm' 's' tok_WS
 
 %type <val> num opt_hms opt_ms opt_s wsnum posnum
@@ -141,20 +141,21 @@ static int yyparse(struct param *);
 %%
 
 start: deltat;
-posnum: NUM | LONGNUM ;
+posnum: tok_NUM | tok_LONGNUM ;
 num: posnum | '-' posnum { $$ = - $2; } ;
 ws: /* nothing */ | tok_WS ;
 wsnum: ws num { $$ = $2; }
-        | ws OVERFLOW { YYERROR; };
+        | ws tok_OVERFLOW { YYERROR; };
 deltat:
-	  wsnum 'd' opt_hms		{ DO ($1,  0,  0, $3); }
-	| wsnum 'h' opt_ms		{ DO ( 0, $1,  0, $3); }
-	| wsnum 'm' opt_s		{ DO ( 0,  0, $1, $3); }
-	| wsnum 's'			{ DO ( 0,  0,  0, $1); }
-	| wsnum '-' NUM ':' NUM ':' NUM	{ DO ($1, $3, $5, $7); }
-	| wsnum ':' NUM ':' NUM		{ DO ( 0, $1, $3, $5); }
-	| wsnum ':' NUM			{ DO ( 0, $1, $3,  0); }
-	| wsnum 			{ DO ( 0,  0,  0, $1); } /* default to 's' */
+	  wsnum 'd' opt_hms                          { DO ($1,  0,  0, $3); }
+	| wsnum 'h' opt_ms                           { DO ( 0, $1,  0, $3); }
+	| wsnum 'm' opt_s                            { DO ( 0,  0, $1, $3); }
+	| wsnum 's'                                  { DO ( 0,  0,  0, $1); }
+	| wsnum '-' tok_NUM ':' tok_NUM ':' tok_NUM  { DO ($1, $3, $5, $7); }
+	| wsnum ':' tok_NUM ':' tok_NUM              { DO ( 0, $1, $3, $5); }
+	| wsnum ':' tok_NUM                          { DO ( 0, $1, $3,  0); }
+	| wsnum                                      { DO ( 0,  0,  0, $1); }
+	                                             /* default to 's' */
 	;
 
 opt_hms:
@@ -208,14 +209,14 @@ mylex(int *intp, struct param *tmv)
 	num = c - '0';
 	while (isdigit ((int) *P)) {
 	  if (num > MAX_TIME / 10)
-	    return OVERFLOW;
+	    return tok_OVERFLOW;
 	    num *= 10;
 	    if (num > MAX_TIME - (*P - '0'))
-	      return OVERFLOW;
+	      return tok_OVERFLOW;
 	    num += *P++ - '0';
 	}
 	*intp = num;
-	return (P - orig_p > 2) ? LONGNUM : NUM;
+	return (P - orig_p > 2) ? tok_LONGNUM : tok_NUM;
     case ' ':
     case '\t':
     case '\n':
