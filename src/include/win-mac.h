@@ -119,6 +119,9 @@ typedef _W64 int         ssize_t;
 #define NO_PASSWORD
 #define HAVE_STRERROR
 #define SYS_ERRLIST_DECLARED
+#if _MSC_VER >= 1900
+#define HAVE_VSNPRINTF
+#endif
 /* Visual Studio 2012 errors out when we macroize keywords in C++ mode */
 #ifndef __cplusplus
 #define inline __inline
