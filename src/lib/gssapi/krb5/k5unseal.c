@@ -436,7 +436,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     }
 
 
-    /* it got through unscathed.  Make sure the context is unexpired */
+    /* It got through unscathed.  Make sure the context is unexpired. */
 
     if (toktype == KG_TOK_SEAL_MSG)
         *message_buffer = token;
