@@ -166,7 +166,7 @@ In brief:
   4. Specify the password change service host for the realm with:
      *KSETUP /AddKpasswd <realm> <Kpwdhost>*
   5. Assign the realm of the local machine with: *KSETUP /SetRealm
-     <realm>* where realm must be all upper case.   
+     <realm>* where realm must be all upper case.
   6. Assign the local machine's password with: *KSETUP
      /SetComputerPassword <Password>
      *
@@ -176,9 +176,9 @@ In brief:
   8. Map principal names to local accounts with: *KSETUP /MapUser
      <principal> <account>*
 
-On the MIT KDC, you must then create service principals using the "Password" 
-assigned to the machine.  So far the minimum list of principals required appear 
-to be for a machine named "mymachine" in the realm "EXAMPLE.COM" with a 
+On the MIT KDC, you must then create service principals using the "Password"
+assigned to the machine.  So far the minimum list of principals required appear
+to be for a machine named "mymachine" in the realm "EXAMPLE.COM" with a
 domain name of "example.com":
 
    * host/mymachine@EXAMPLE.COM
@@ -186,12 +186,12 @@ domain name of "example.com":
    * cifs/mymachine@EXAMPLE.COM
    * cifs/mymachine.example.com@EXAMPLE.COM
 
-There may very well be other serivces for which principals must be created depending 
+There may very well be other services for which principals must be created depending 
 on what services are being executed on the machine.
 
-It is very important to note that while you can successfully log into a Windows 
-workstation by authenticating to the KDC without creating a host key; the logon 
-session you receive will not be a Kerberos Logon Session.  There will be no Kerberos 
+It is very important to note that while you can successfully log into a Windows
+workstation by authenticating to the KDC without creating a host key; the logon
+session you receive will not be a Kerberos Logon Session.  There will be no Kerberos
 principal and no LSA cache to access.
 
 The result of a real KSETUP configuration looks like this:
@@ -238,7 +238,7 @@ On server platforms the key is specified as:
   HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters
     AllowTGTSessionKey = 0x01 (DWORD)
 
-On workstation platforms the key is specified as: 
+On workstation platforms the key is specified as:
 
   HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos
     AllowTGTSessionKey = 0x01 (DWORD)
@@ -246,32 +246,32 @@ On workstation platforms the key is specified as:
 The Kerberos for Windows installer automatically sets this key on installation
 and unsets it on uninstall, allowing the MSLSA: cache type to be used.
 
-It has been noted that the Microsoft Kerberos LSA does not provide enough 
+It has been noted that the Microsoft Kerberos LSA does not provide enough
 information within its KERB_EXTERNAL_TICKET structure to properly construct
 the Client Principal simply by examining a single ticket. From the MSDN
 Library:
 
-  ClientName 
-    KERB_EXTERNAL_NAME structure that contains the client name in the ticket. 
-    This name is relative to the current domain. 
+  ClientName
+    KERB_EXTERNAL_NAME structure that contains the client name in the ticket.
+    This name is relative to the current domain.
 
-  DomainName 
-    UNICODE_STRING that contains the name of the domain that corresponds to 
-    the ServiceName member. This is the domain that issued the ticket. 
+  DomainName
+    UNICODE_STRING that contains the name of the domain that corresponds to
+    the ServiceName member. This is the domain that issued the ticket.
 
-  TargetDomainName 
+  TargetDomainName
     UNICODE_STRING that contains the name of the domain in which the ticket is
-    valid. For an interdomain ticket, this is the destination domain. 
+    valid. For an interdomain ticket, this is the destination domain.
 
-  AltTargetDomainName 
-    UNICODE_STRING that contains a synonym for the destination domain. Every 
-    domain has two names: a DNS name and a NetBIOS name. If the name returned 
-    in the ticket is different from the name used to request the ticket (the 
-    Kerberos Key Distribution Center (KDC) may do name mapping), this string 
-    contains the original name. 
+  AltTargetDomainName
+    UNICODE_STRING that contains a synonym for the destination domain. Every
+    domain has two names: a DNS name and a NetBIOS name. If the name returned
+    in the ticket is different from the name used to request the ticket (the
+    Kerberos Key Distribution Center (KDC) may do name mapping), this string
+    contains the original name.
 
 Unfortunately, there is no field here which contains the domain of the client.
-In order for the krb5_ccache to properly report the client principal name, the 
+In order for the krb5_ccache to properly report the client principal name, the
 client principal name is constructed by utilizing the ClientName and DomainName
 fields of the Initial TGT associated with the Kerberos LSA credential cache.
 To disable the use of the TGT info and instead simply use the "DomainName" field
@@ -290,8 +290,8 @@ GSSAPI Sample Client:
 The GSS API Sample Client provided in this distribution is compatible with the
 gss-server application built on Unix/Linux systems.  This client is not compatible
 with the Platform SDK/Samples/Security/SSPI/GSS/ samples which Microsoft has been
-shipping as of January 2004.  Revised versions of these samples are available upon 
-request to krbdev@mit.edu.  
+shipping as of January 2004.  Revised versions of these samples are available upon
+request to krbdev@mit.edu.
 
 More Information:
 ----------------

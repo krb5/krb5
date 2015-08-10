@@ -106,7 +106,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
     if (mechanisms) *mechanisms = NULL;
 
     /* check for default credential */
-    /*SUPPRESS 29*/
+    /* SUPPRESS 29 */
     if (cred_handle == GSS_C_NO_CREDENTIAL) {
         major = kg_get_defcred(minor_status, &defcred);
         if (GSS_ERROR(major)) {
