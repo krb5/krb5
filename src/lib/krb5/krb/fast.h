@@ -99,9 +99,9 @@ krb5int_fast_verify_nego(krb5_context context,
                          krb5_boolean *fast_avail);
 
 krb5_boolean
-krb5int_upgrade_to_fast_p(krb5_context context,
-                          struct krb5int_fast_request_state *state,
-                          krb5_pa_data **padata);
+k5_upgrade_to_fast_p(krb5_context context,
+                     struct krb5int_fast_request_state *state,
+                     krb5_pa_data **padata);
 
 krb5_error_code
 krb5int_fast_tgs_armor(krb5_context context,

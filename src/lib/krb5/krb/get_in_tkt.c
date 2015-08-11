@@ -713,37 +713,34 @@ set_request_times(krb5_context context, krb5_init_creds_context ctx)
 }
 
 /**
- * Throw away any state related to specific realm either at the beginning of a
- * request, or when a realm changes, or when we start to use FAST after
- * assuming we would not do so.
- *
- * @param padata padata from an error if an error from the realm we now expect
- * to talk to caused the restart.  Used to infer negotiation characteristics
- * such as whether FAST is used.
+ * Throw away any pre-authentication realm state and begin with a
+ * unauthenticated or optimistically authenticated request.  If fast_upgrade is
+ * set, use FAST for this request.
  */
 static krb5_error_code
 restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
-                        krb5_pa_data **padata)
+                        krb5_boolean fast_upgrade)
 {
     krb5_error_code code = 0;
 
-    if (ctx->preauth_to_use) {
-        krb5_free_pa_data(context, ctx->preauth_to_use);
-        ctx->preauth_to_use = NULL;
-    }
+    krb5_free_pa_data(context, ctx->preauth_to_use);
+    krb5_free_pa_data(context, ctx->err_padata);
+    krb5_free_error(context, ctx->err_reply);
+    ctx->preauth_to_use = ctx->err_padata = NULL;
+    ctx->err_reply = NULL;
 
-    if (ctx->fast_state) {
-        krb5int_fast_free_state(context, ctx->fast_state);
-        ctx->fast_state = NULL;
-    }
+    krb5int_fast_free_state(context, ctx->fast_state);
+    ctx->fast_state = NULL;
     code = krb5int_fast_make_state(context, &ctx->fast_state);
     if (code != 0)
         goto cleanup;
+    if (fast_upgrade)
+        ctx->fast_state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
+
+    k5_preauth_request_context_fini(context);
     k5_preauth_request_context_init(context);
-    if (ctx->outer_request_body) {
-        krb5_free_data(context, ctx->outer_request_body);
-        ctx->outer_request_body = NULL;
-    }
+    krb5_free_data(context, ctx->outer_request_body);
+    ctx->outer_request_body = NULL;
     if (ctx->opt->flags & KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST) {
         code = make_preauth_list(context, ctx->opt->preauth_list,
                                  ctx->opt->preauth_list_length,
@@ -765,12 +762,6 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
                                  ctx->request);
     if (code != 0)
         goto cleanup;
-    if (krb5int_upgrade_to_fast_p(context, ctx->fast_state, padata)) {
-        code = krb5int_fast_as_armor(context, ctx->fast_state, ctx->opt,
-                                     ctx->request);
-        if (code != 0)
-            goto cleanup;
-    }
     /* give the preauth plugins a chance to prep the request body */
     k5_preauth_prepare_request(context, ctx->opt, ctx->request);
 
@@ -806,7 +797,7 @@ krb5_init_creds_init(krb5_context context,
     ctx->request = k5alloc(sizeof(krb5_kdc_req), &code);
     if (code != 0)
         goto cleanup;
-    ctx->enc_pa_rep_permitted = 1;
+    ctx->enc_pa_rep_permitted = TRUE;
     code = krb5_copy_principal(context, client, &ctx->request->client);
     if (code != 0)
         goto cleanup;
@@ -978,7 +969,7 @@ krb5_init_creds_init(krb5_context context,
         ctx->request->kdc_options |= KDC_OPT_REQUEST_ANONYMOUS;
         ctx->request->client->type = KRB5_NT_WELLKNOWN;
     }
-    code = restart_init_creds_loop(context, ctx, NULL);
+    code = restart_init_creds_loop(context, ctx, FALSE);
     if (code)
         goto cleanup;
 
@@ -1008,8 +999,7 @@ krb5_init_creds_set_service(krb5_context context,
     free(ctx->in_tkt_service);
     ctx->in_tkt_service = s;
 
-    k5_preauth_request_context_fini(context);
-    return restart_init_creds_loop(context, ctx, NULL);
+    return restart_init_creds_loop(context, ctx, FALSE);
 }
 
 static krb5_error_code
@@ -1273,7 +1263,7 @@ init_creds_step_request(krb5_context context,
         ctx->encoded_previous_request = NULL;
     }
     if (ctx->request->padata)
-        ctx->sent_nontrivial_preauth = 1;
+        ctx->sent_nontrivial_preauth = TRUE;
     if (ctx->enc_pa_rep_permitted)
         code = request_enc_pa_rep(&ctx->request->padata);
     if (code)
@@ -1295,59 +1285,6 @@ cleanup:
     krb5_free_pa_data(context, ctx->request->padata);
     ctx->request->padata = NULL;
     return code;
-}
-
-/*
- * The control flow is complicated.  In order to switch from non-FAST mode to
- * FAST mode, we need to reset our pre-authentication state.  FAST negotiation
- * attempts to make sure we rarely have to do this.  When FAST negotiation is
- * working, we record whether FAST is available when we obtain an armor ticket;
- * if so, we start out with FAST enabled .  There are two complicated
- * situations.
- *
- * First, if we get a PREAUTH_REQUIRED error including PADATA_FX_FAST back from
- * a KDC in a case where we were not expecting to use FAST, and we have an
- * armor ticket available, then we want to use FAST.  That involves clearing
- * out the pre-auth state, reinitializing the plugins and trying again with an
- * armor key.
- *
- * Secondly, using the negotiation can cause problems with some older KDCs.
- * Negotiation involves including a special padata item.  Some KDCs, including
- * MIT prior to 1.7, will return PREAUTH_FAILED rather than PREAUTH_REQUIRED in
- * pre-authentication is required and unknown padata are included in the
- * request.  To make matters worse, these KDCs typically do not include a list
- * of padata in PREAUTH_FAILED errors.  So, if we get PREAUTH_FAILED and we
- * generated no pre-authentication other than the negotiation then we want to
- * retry without negotiation.  In this case it is probably also desirable to
- * retry with the preauth plugin state cleared.
- *
- * In all these cases we should not start over more than once.  Control flow is
- * managed by several variables.
- *
- *   sent_nontrivial_preauth: if true, we sent preauth other than negotiation;
- *   no restart on PREAUTH_FAILED
- *
- *   KRB5INT_FAST_ARMOR_AVAIL: fast_state_flag if desired we could generate
- *   armor; if not set, then we can't use FAST even if the KDC wants to.
- *
- *   have_restarted: true if we've already restarted
- */
-static krb5_boolean
-negotiation_requests_restart(krb5_context context, krb5_init_creds_context ctx,
-                             krb5_pa_data **padata)
-{
-    if (ctx->have_restarted)
-        return FALSE;
-    if (krb5int_upgrade_to_fast_p(context, ctx->fast_state, padata)) {
-        TRACE_INIT_CREDS_RESTART_FAST(context);
-        return TRUE;
-    }
-    if (ctx->err_reply->error == KDC_ERR_PREAUTH_FAILED &&
-        !ctx->sent_nontrivial_preauth) {
-        TRACE_INIT_CREDS_RESTART_PREAUTH_FAILED(context);
-        return TRUE;
-    }
-    return FALSE;
 }
 
 /* Ensure that the reply enctype was among the requested enctypes. */
@@ -1436,16 +1373,25 @@ init_creds_step_reply(krb5_context context,
         if (code != 0)
             goto cleanup;
         reply_code = ctx->err_reply->error;
-        if (negotiation_requests_restart(context, ctx, ctx->err_padata)) {
-            ctx->have_restarted = 1;
-            k5_preauth_request_context_fini(context);
-            if ((ctx->fast_state->fast_state_flags & KRB5INT_FAST_DO_FAST) ==0)
-                ctx->enc_pa_rep_permitted = 0;
-            code = restart_init_creds_loop(context, ctx, ctx->err_padata);
-            krb5_free_error(context, ctx->err_reply);
-            ctx->err_reply = NULL;
-            krb5_free_pa_data(context, ctx->err_padata);
-            ctx->err_padata = NULL;
+        if (!ctx->restarted &&
+            k5_upgrade_to_fast_p(context, ctx->fast_state, ctx->err_padata)) {
+            /* Retry with FAST after discovering that the KDC supports
+             * it.  (FAST negotiation usually avoids this restart.) */
+            TRACE_FAST_PADATA_UPGRADE(context);
+            ctx->restarted = TRUE;
+            code = restart_init_creds_loop(context, ctx, TRUE);
+        } else if (!ctx->restarted && reply_code == KDC_ERR_PREAUTH_FAILED &&
+                   !ctx->sent_nontrivial_preauth) {
+            /* The KDC didn't like our informational padata (probably a pre-1.7
+             * MIT krb5 KDC).  Retry without it. */
+            ctx->enc_pa_rep_permitted = FALSE;
+            ctx->restarted = TRUE;
+            code = restart_init_creds_loop(context, ctx, FALSE);
+        } else if (reply_code == KDC_ERR_PREAUTH_EXPIRED) {
+            /* We sent an expired KDC cookie.  Start over, allowing another
+             * FAST upgrade. */
+            code = restart_init_creds_loop(context, ctx, FALSE);
+            ctx->restarted = FALSE;
         } else if ((reply_code == KDC_ERR_MORE_PREAUTH_DATA_REQUIRED ||
                     reply_code == KDC_ERR_PREAUTH_REQUIRED) && retry) {
             /* reset the list of preauth types to try */
@@ -1471,14 +1417,11 @@ init_creds_step_reply(krb5_context context,
             code = krb5int_copy_data_contents(context,
                                               &ctx->err_reply->client->realm,
                                               &ctx->request->client->realm);
-            /* This will trigger a new call to k5_preauth(). */
-            krb5_free_error(context, ctx->err_reply);
-            ctx->err_reply = NULL;
-            k5_preauth_request_context_fini(context);
-            /* Permit another negotiation based restart. */
-            ctx->have_restarted = 0;
-            ctx->sent_nontrivial_preauth = 0;
-            code = restart_init_creds_loop(context, ctx, NULL);
+            /* Reset per-realm negotiation state. */
+            ctx->restarted = FALSE;
+            ctx->sent_nontrivial_preauth = FALSE;
+            ctx->enc_pa_rep_permitted = TRUE;
+            code = restart_init_creds_loop(context, ctx, FALSE);
             if (code != 0)
                 goto cleanup;
         } else {
