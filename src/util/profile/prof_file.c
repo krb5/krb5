@@ -27,6 +27,9 @@
 #include <io.h>
 #define HAVE_STAT
 #define stat _stat
+#ifndef S_ISDIR
+#define S_ISDIR(x) (((x) & S_IFMT) == S_IFDIR)
+#endif
 #endif
 
 #include "k5-platform.h"
