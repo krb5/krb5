@@ -56,7 +56,7 @@ gss_inquire_name(OM_uint32 *minor_status,
     if (union_name->mech_type == GSS_C_NO_OID) {
         /* We don't yet support non-mechanism attributes */
         if (name_is_MN != NULL)
-            name_is_MN = 0;
+            *name_is_MN = 0;
         *minor_status = 0;
         return GSS_S_COMPLETE;
     }
