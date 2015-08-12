@@ -75,7 +75,7 @@
 #include "extern.h"
 
 static krb5_error_code
-prepare_error_as(struct kdc_request_state *, krb5_kdc_req *,
+prepare_error_as(struct kdc_request_state *, krb5_kdc_req *, krb5_db_entry *,
                  int, krb5_pa_data **, krb5_boolean, krb5_principal,
                  krb5_data **, const char *);
 
@@ -397,8 +397,8 @@ egress:
                 errcode = KRB_ERR_GENERIC;
 
             errcode = prepare_error_as(state->rstate, state->request,
-                                       errcode, state->e_data,
-                                       state->typed_e_data,
+                                       state->local_tgt, errcode,
+                                       state->e_data, state->typed_e_data,
                                        ((state->client != NULL) ?
                                         state->client->princ : NULL),
                                        &response, state->status);
@@ -805,6 +805,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         state->rock.client_keyblock = &state->client_keyblock;
     }
 
+    errcode = kdc_fast_read_cookie(kdc_context, state->rstate, state->request,
+                                   state->local_tgt);
+    if (errcode) {
+        state->status = "READ_COOKIE";
+        goto errout;
+    }
+
     /*
      * Check the preauthentication if it is there.
      */
@@ -822,15 +829,30 @@ errout:
 }
 
 static krb5_error_code
-prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
-                  int error, krb5_pa_data **e_data, krb5_boolean typed_e_data,
-                  krb5_principal canon_client, krb5_data **response,
-                  const char *status)
+prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
+                 krb5_db_entry *local_tgt, int error, krb5_pa_data **e_data_in,
+                 krb5_boolean typed_e_data, krb5_principal canon_client,
+                 krb5_data **response, const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
     krb5_data *scratch = NULL, *e_data_asn1 = NULL, *fast_edata = NULL;
+    krb5_pa_data **e_data = NULL, *cookie = NULL;
     kdc_realm_t *kdc_active_realm = rstate->realm_data;
+    size_t count;
+
+    if (e_data_in != NULL) {
+        /* Add a PA-FX-COOKIE to e_data_in.  e_data is a shallow copy
+         * containing aliases. */
+        for (count = 0; e_data_in[count] != NULL; count++);
+        e_data = calloc(count + 2, sizeof(*e_data));
+        if (e_data == NULL)
+            return ENOMEM;
+        memcpy(e_data, e_data_in, count * sizeof(*e_data));
+        retval = kdc_fast_make_cookie(kdc_context, rstate, local_tgt,
+                                      request->client, &cookie);
+        e_data[count] = cookie;
+    }
 
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
@@ -878,5 +900,9 @@ cleanup:
     krb5_free_data(kdc_context, fast_edata);
     krb5_free_data(kdc_context, e_data_asn1);
     free(scratch);
+    free(e_data);
+    if (cookie != NULL)
+        free(cookie->contents);
+    free(cookie);
     return retval;
 }

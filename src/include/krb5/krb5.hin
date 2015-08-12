@@ -1007,6 +1007,8 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_ENC_CHALLENGE_KDC 55
 #define KRB5_KEYUSAGE_AS_REQ 56
 #define KRB5_KEYUSAGE_CAMMAC 64
+
+#define KRB5_KEYUSAGE_PA_FX_COOKIE 513  /**< Used for encrypted FAST cookies */
 /** @} */ /* end of KRB5_KEYUSAGE group */
 
 /**

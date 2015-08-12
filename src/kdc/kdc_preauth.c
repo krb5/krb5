@@ -549,6 +549,20 @@ add_auth_indicator(krb5_context context, krb5_kdcpreauth_rock rock,
     return authind_add(context, indicator, rock->auth_indicators);
 }
 
+static krb5_boolean
+get_cookie(krb5_context context, krb5_kdcpreauth_rock rock,
+           krb5_preauthtype pa_type, krb5_data *out)
+{
+    return kdc_fast_search_cookie(rock->rstate, pa_type, out);
+}
+
+static krb5_error_code
+set_cookie(krb5_context context, krb5_kdcpreauth_rock rock,
+           krb5_preauthtype pa_type, const krb5_data *data)
+{
+    return kdc_fast_set_cookie(rock->rstate, pa_type, data);
+}
+
 static struct krb5_kdcpreauth_callbacks_st callbacks = {
     3,
     max_time_skew,
@@ -562,7 +576,9 @@ static struct krb5_kdcpreauth_callbacks_st callbacks = {
     event_context,
     have_client_keys,
     client_keyblock,
-    add_auth_indicator
+    add_auth_indicator,
+    get_cookie,
+    set_cookie
 };
 
 static krb5_error_code
@@ -752,9 +768,6 @@ hint_list_finish(struct hint_state *state, krb5_error_code code)
                              _("%spreauth required but hint list is empty"),
                              state->hw_only ? "hw" : "");
         }
-        /* If we fail to get the cookie it is probably still reasonable to
-         * continue with the response. */
-        kdc_preauth_get_cookie(state->rock->rstate, state->pa_cur);
 
         *state->e_data_out = state->pa_data;
         state->pa_data = NULL;
@@ -840,8 +853,7 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
     state->realm = rock->rstate->realm_data;
     state->e_data_out = e_data_out;
 
-    /* Allocate two extra entries for the cookie and the terminator. */
-    state->pa_data = calloc(n_preauth_systems + 2, sizeof(krb5_pa_data *));
+    state->pa_data = calloc(n_preauth_systems + 1, sizeof(krb5_pa_data *));
     if (!state->pa_data) {
         free(state);
         (*respond)(arg);

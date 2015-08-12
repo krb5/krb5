@@ -40,7 +40,8 @@
 struct kdc_request_state {
     krb5_keyblock *armor_key;
     krb5_keyblock *strengthen_key;
-    krb5_pa_data *cookie;
+    krb5_pa_data **in_cookie_padata;
+    krb5_pa_data **out_cookie_padata;
     krb5_int32 fast_options;
     krb5_int32 fast_internal_flags;
     kdc_realm_t *realm_data;

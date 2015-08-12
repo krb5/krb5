@@ -409,9 +409,6 @@ krb5_error_code kdc_fast_handle_reply_key(struct kdc_request_state *state,
                                           krb5_keyblock **out_key);
 
 
-krb5_error_code kdc_preauth_get_cookie(struct kdc_request_state *state,
-                                       krb5_pa_data **cookie);
-
 krb5_boolean
 kdc_fast_hide_client(struct kdc_request_state *state);
 
@@ -420,6 +417,23 @@ kdc_handle_protected_negotiation( krb5_context context,
                                   krb5_data *req_pkt, krb5_kdc_req *request,
                                   const krb5_keyblock *reply_key,
                                   krb5_pa_data ***out_enc_padata);
+
+krb5_error_code
+kdc_fast_read_cookie(krb5_context context, struct kdc_request_state *state,
+                     krb5_kdc_req *req, krb5_db_entry *local_tgt);
+
+krb5_boolean kdc_fast_search_cookie(struct kdc_request_state *state,
+                                    krb5_preauthtype pa_type, krb5_data *out);
+
+krb5_error_code kdc_fast_set_cookie(struct kdc_request_state *state,
+                                    krb5_preauthtype pa_type,
+                                    const krb5_data *data);
+
+krb5_error_code
+kdc_fast_make_cookie(krb5_context context, struct kdc_request_state *state,
+                     krb5_db_entry *local_tgt,
+                     krb5_const_principal client_princ,
+                     krb5_pa_data **cookie_out);
 
 /* Information handle for kdcpreauth callbacks.  All pointers are aliases. */
 struct krb5_kdcpreauth_rock_st {

@@ -1,7 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* kdc/fast_util.c */
 /*
- * Copyright (C) 2009 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2009, 2015 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -29,15 +29,8 @@
 #include "kdc_util.h"
 #include "extern.h"
 
-
-/*
- * This function will find the fast and cookie padata and if fast is
- * successfully processed, will throw away (and free) the outer
- * request and update the pointer to point to the inner request.  The
- * checksummed_data points to the data that is in the
- * armored_fast_request checksum; either the pa-tgs-req or the
- * kdc-req-body.
- */
+/* Let cookies be valid for ten minutes. */
+#define COOKIE_LIFETIME 600
 
 static krb5_error_code armor_ap_request
 (struct kdc_request_state *state, krb5_fast_armor *armor)
@@ -123,6 +116,12 @@ encrypt_fast_reply(struct kdc_request_state *state,
 }
 
 
+/*
+ * This function will find the FAST padata and, if FAST is successfully
+ * processed, will free the outer request and update the pointer to point to
+ * the inner request.  checksummed_data points to the data that is in the
+ * armored_fast_request checksum; either the pa-tgs-req or the kdc-req-body.
+ */
 krb5_error_code
 kdc_find_fast(krb5_kdc_req **requestptr,
               krb5_data *checksummed_data,
@@ -132,7 +131,7 @@ kdc_find_fast(krb5_kdc_req **requestptr,
               krb5_data **inner_body_out)
 {
     krb5_error_code retval = 0;
-    krb5_pa_data *fast_padata, *cookie_padata = NULL;
+    krb5_pa_data *fast_padata;
     krb5_data scratch, *inner_body = NULL;
     krb5_fast_req * fast_req = NULL;
     krb5_kdc_req *request = *requestptr;
@@ -229,36 +228,12 @@ kdc_find_fast(krb5_kdc_req **requestptr,
             if ((fast_req->fast_options & UNSUPPORTED_CRITICAL_FAST_OPTIONS) != 0)
                 retval = KRB5KDC_ERR_UNKNOWN_CRITICAL_FAST_OPTION;
         }
-        if (retval == 0)
-            cookie_padata = krb5int_find_pa_data(kdc_context,
-                                                 fast_req->req_body->padata,
-                                                 KRB5_PADATA_FX_COOKIE);
         if (retval == 0) {
             state->fast_options = fast_req->fast_options;
             fast_req->req_body->msg_type = request->msg_type;
             krb5_free_kdc_req( kdc_context, request);
             *requestptr = fast_req->req_body;
             fast_req->req_body = NULL;
-        }
-    }
-    else {
-        cookie_padata = krb5int_find_pa_data(kdc_context,
-                                             request->padata,
-                                             KRB5_PADATA_FX_COOKIE);
-    }
-    if (retval == 0 && cookie_padata != NULL) {
-        krb5_pa_data *new_padata = malloc(sizeof (krb5_pa_data));
-        if (new_padata == NULL) {
-            retval = ENOMEM;
-        } else {
-            new_padata->pa_type = KRB5_PADATA_FX_COOKIE;
-            new_padata->length = cookie_padata->length;
-            new_padata->contents =
-                k5memdup(cookie_padata->contents, new_padata->length, &retval);
-            if (new_padata->contents == NULL)
-                free(new_padata);
-            else
-                state->cookie = new_padata;
         }
     }
     if (retval == 0 && inner_body_out != NULL) {
@@ -295,10 +270,8 @@ kdc_free_rstate (struct kdc_request_state *s)
         krb5_free_keyblock(kdc_context, s->armor_key);
     if (s->strengthen_key)
         krb5_free_keyblock(kdc_context, s->strengthen_key);
-    if (s->cookie) {
-        free(s->cookie->contents);
-        free(s->cookie);
-    }
+    krb5_free_pa_data(NULL, s->in_cookie_padata);
+    krb5_free_pa_data(NULL, s->out_cookie_padata);
     free(s);
 }
 
@@ -403,7 +376,7 @@ kdc_fast_handle_error(krb5_context context,
     krb5_error fx_error;
     krb5_data *encoded_fx_error = NULL, *encrypted_reply = NULL;
     krb5_pa_data pa[1];
-    krb5_pa_data *outer_pa[3], *cookie = NULL;
+    krb5_pa_data *outer_pa[3];
     krb5_pa_data **inner_pa = NULL;
     size_t size = 0;
     kdc_realm_t *kdc_active_realm = state->realm_data;
@@ -416,8 +389,7 @@ kdc_fast_handle_error(krb5_context context,
     fx_error.e_data.data = NULL;
     fx_error.e_data.length = 0;
     for (size = 0; in_padata&&in_padata[size]; size++);
-    size +=3;
-    inner_pa = calloc(size, sizeof(krb5_pa_data *));
+    inner_pa = calloc(size + 2, sizeof(krb5_pa_data *));
     if (inner_pa == NULL)
         retval = ENOMEM;
     if (retval == 0)
@@ -430,12 +402,7 @@ kdc_fast_handle_error(krb5_context context,
         pa[0].length = encoded_fx_error->length;
         pa[0].contents = (unsigned char *) encoded_fx_error->data;
         inner_pa[size++] = &pa[0];
-        if (krb5int_find_pa_data(kdc_context,
-                                 inner_pa, KRB5_PADATA_FX_COOKIE) == NULL)
-            retval = kdc_preauth_get_cookie(state, &cookie);
     }
-    if (cookie != NULL)
-        inner_pa[size++] = cookie;
     if (retval == 0) {
         resp.padata = inner_pa;
         resp.nonce = request->nonce;
@@ -446,11 +413,6 @@ kdc_fast_handle_error(krb5_context context,
         retval = encrypt_fast_reply(state, &resp, &encrypted_reply);
     if (inner_pa)
         free(inner_pa); /*contained storage from caller and our stack*/
-    if (cookie) {
-        free(cookie->contents);
-        free(cookie);
-        cookie = NULL;
-    }
     if (retval == 0) {
         pa[0].pa_type = KRB5_PADATA_FX_FAST;
         pa[0].length = encrypted_reply->length;
@@ -483,38 +445,289 @@ kdc_fast_handle_reply_key(struct kdc_request_state *state,
     return retval;
 }
 
-
-krb5_error_code
-kdc_preauth_get_cookie(struct kdc_request_state *state,
-                       krb5_pa_data **cookie)
-{
-    char *contents;
-    krb5_pa_data *pa = NULL;
-
-    /* In our current implementation, the only purpose served by
-     * returning a cookie is to indicate that a conversation should
-     * continue on error.  Thus, the cookie can have a constant
-     * string.  If cookies are used for real, versioning so that KDCs
-     * can be upgraded, keying, expiration and many other issues need
-     * to be considered.
-     */
-    contents = strdup("MIT");
-    if (contents == NULL)
-        return ENOMEM;
-    pa = calloc(1, sizeof(krb5_pa_data));
-    if (pa == NULL) {
-        free(contents);
-        return ENOMEM;
-    }
-    pa->pa_type = KRB5_PADATA_FX_COOKIE;
-    pa->length = strlen(contents);
-    pa->contents = (unsigned char *) contents;
-    *cookie = pa;
-    return 0;
-}
-
 krb5_boolean
 kdc_fast_hide_client(struct kdc_request_state *state)
 {
     return (state->fast_options & KRB5_FAST_OPTION_HIDE_CLIENT_NAMES) != 0;
+}
+
+/* Allocate a pa-data entry with an uninitialized buffer of size len. */
+static krb5_error_code
+alloc_padata(krb5_preauthtype pa_type, size_t len, krb5_pa_data **out)
+{
+    krb5_pa_data *pa;
+    uint8_t *buf;
+
+    *out = NULL;
+    buf = malloc(len);
+    if (buf == NULL)
+        return ENOMEM;
+    pa = malloc(sizeof(*pa));
+    if (pa == NULL) {
+        free(buf);
+        return ENOMEM;
+    }
+    pa->magic = KV5M_PA_DATA;
+    pa->pa_type = pa_type;
+    pa->length = len;
+    pa->contents = buf;
+    *out = pa;
+    return 0;
+}
+
+/* Create a pa-data entry with the specified type and contents. */
+static krb5_error_code
+make_padata(krb5_preauthtype pa_type, const void *contents, size_t len,
+            krb5_pa_data **out)
+{
+    if (alloc_padata(pa_type, len, out) != 0)
+        return ENOMEM;
+    memcpy((*out)->contents, contents, len);
+    return 0;
+}
+
+/*
+ * Construct the secure cookie encryption key for the given local-realm TGT
+ * entry, kvno, and client principal.  The cookie key is derived from the first
+ * TGT key for the given kvno, using the concatenation of "COOKIE" and the
+ * unparsed client principal name as input.  If kvno is 0, the highest current
+ * kvno of the TGT is used.  If kvno_out is not null, *kvno_out is set to the
+ * kvno used.
+ */
+static krb5_error_code
+get_cookie_key(krb5_context context, krb5_db_entry *tgt, krb5_kvno kvno,
+               krb5_const_principal client_princ, krb5_keyblock **key_out,
+               krb5_kvno *kvno_out)
+{
+    krb5_error_code ret;
+    krb5_key_data *kd;
+    krb5_keyblock kb;
+    krb5_data d;
+    krb5_int32 start = 0;
+    char *princstr = NULL, *derive_input = NULL;
+
+    *key_out = NULL;
+    memset(&kb, 0, sizeof(kb));
+
+    /* Find the first krbtgt key with the specified kvno. */
+    ret = krb5_dbe_search_enctype(context, tgt, &start, -1, -1, kvno, &kd);
+    if (ret)
+        goto cleanup;
+
+    /* Decrypt the key. */
+    ret = krb5_dbe_decrypt_key_data(context, NULL, kd, &kb, NULL);
+    if (ret)
+        goto cleanup;
+
+    /* Construct the input string and derive the cookie key. */
+    ret = krb5_unparse_name(context, client_princ, &princstr);
+    if (ret)
+        goto cleanup;
+    if (asprintf(&derive_input, "COOKIE%s", princstr) < 0) {
+        ret = ENOMEM;
+        goto cleanup;
+    }
+    d = string2data(derive_input);
+    ret = krb5_c_derive_prfplus(context, &kb, &d, ENCTYPE_NULL, key_out);
+
+    if (kvno_out != NULL)
+        *kvno_out = kd->key_data_kvno;
+
+cleanup:
+    krb5_free_keyblock_contents(context, &kb);
+    krb5_free_unparsed_name(context, princstr);
+    free(derive_input);
+    return ret;
+}
+
+/* Return true if there is any overlap between padata types in cpadata
+ * (from the cookie) and rpadata (from the request). */
+static krb5_boolean
+is_relevant(krb5_pa_data *const *cpadata, krb5_pa_data *const *rpadata)
+{
+    krb5_pa_data *const *p;
+
+    for (p = cpadata; p != NULL && *p != NULL; p++) {
+        if (krb5int_find_pa_data(NULL, rpadata, (*p)->pa_type) != NULL)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+/*
+ * Locate and decode the FAST cookie in req, storing its contents in state for
+ * later access by preauth modules.  If the cookie is expired, return
+ * KRB5KDC_ERR_PREAUTH_EXPIRED if its contents are relevant to req, and ignore
+ * it if they aren't.
+ */
+krb5_error_code
+kdc_fast_read_cookie(krb5_context context, struct kdc_request_state *state,
+                     krb5_kdc_req *req, krb5_db_entry *local_tgt)
+{
+    krb5_error_code ret;
+    krb5_secure_cookie *cookie = NULL;
+    krb5_timestamp now;
+    krb5_keyblock *key = NULL;
+    krb5_enc_data enc;
+    krb5_pa_data *pa;
+    krb5_kvno kvno;
+    krb5_data plain = empty_data();
+
+    pa = krb5int_find_pa_data(context, req->padata, KRB5_PADATA_FX_COOKIE);
+    if (pa == NULL)
+        return 0;
+
+    /* If it's not an MIT version 1 cookie, ignore it.  It may be an empty
+     * "MIT" cookie or a cookie generated by a different KDC implementation. */
+    if (pa->length <= 8 || memcmp(pa->contents, "MIT1", 4) != 0)
+        return 0;
+
+    /* Extract the kvno and generate the corresponding cookie key. */
+    kvno = load_32_be(pa->contents + 4);
+    ret = get_cookie_key(context, local_tgt, kvno, req->client, &key, NULL);
+    if (ret)
+        goto cleanup;
+
+    /* Decrypt and decode the cookie. */
+    memset(&enc, 0, sizeof(enc));
+    enc.enctype = key->enctype;
+    enc.ciphertext = make_data(pa->contents + 8, pa->length - 8);
+    ret = alloc_data(&plain, pa->length - 8);
+    if (ret)
+        goto cleanup;
+    ret = krb5_c_decrypt(context, key, KRB5_KEYUSAGE_PA_FX_COOKIE, NULL, &enc,
+                         &plain);
+    if (ret)
+        goto cleanup;
+    ret = decode_krb5_secure_cookie(&plain, &cookie);
+    if (ret)
+        goto cleanup;
+
+    /* Check if the cookie is expired. */
+    ret = krb5_timeofday(context, &now);
+    if (ret)
+        goto cleanup;
+    if (now - COOKIE_LIFETIME > cookie->time) {
+        /* Don't accept the cookie contents.  Only return an error if the
+         * cookie is relevant to the request. */
+        if (is_relevant(cookie->data, req->padata))
+            ret = KRB5KDC_ERR_PREAUTH_EXPIRED;
+        goto cleanup;
+    }
+
+    /* Steal the pa-data list pointer from the cookie and store it in state. */
+    state->in_cookie_padata = cookie->data;
+    cookie->data = NULL;
+
+cleanup:
+    krb5_free_data_contents(context, &plain);
+    krb5_free_keyblock(context, key);
+    k5_free_secure_cookie(context, cookie);
+    return 0;
+}
+
+/* If state contains a cookie value for pa_type, set *out to the corresponding
+ * data and return true.  Otherwise set *out to empty and return false. */
+krb5_boolean
+kdc_fast_search_cookie(struct kdc_request_state *state,
+                       krb5_preauthtype pa_type, krb5_data *out)
+{
+    krb5_pa_data *pa;
+
+    pa = krb5int_find_pa_data(NULL, state->in_cookie_padata, pa_type);
+    if (pa == NULL) {
+        *out = empty_data();
+        return FALSE;
+    } else {
+        *out = make_data(pa->contents, pa->length);
+        return TRUE;
+    }
+}
+
+/* Set a cookie value in state for data, to be included in the outgoing
+ * cookie.  Duplicate values are ignored. */
+krb5_error_code
+kdc_fast_set_cookie(struct kdc_request_state *state, krb5_preauthtype pa_type,
+                    const krb5_data *data)
+{
+    krb5_pa_data **list = state->out_cookie_padata;
+    size_t count;
+
+    for (count = 0; list != NULL && list[count] != NULL; count++) {
+        if (list[count]->pa_type == pa_type)
+            return 0;
+    }
+
+    list = realloc(list, (count + 2) * sizeof(*list));
+    if (list == NULL)
+        return ENOMEM;
+    state->out_cookie_padata = list;
+    list[count] = list[count + 1] = NULL;
+    return make_padata(pa_type, data->data, data->length, &list[count]);
+}
+
+/* Construct a cookie pa-data item using the cookie values from state, or a
+ * trivial "MIT" cookie if no values are set. */
+krb5_error_code
+kdc_fast_make_cookie(krb5_context context, struct kdc_request_state *state,
+                     krb5_db_entry *local_tgt,
+                     krb5_const_principal client_princ,
+                     krb5_pa_data **cookie_out)
+{
+    krb5_error_code ret;
+    krb5_secure_cookie cookie;
+    krb5_pa_data **contents = state->out_cookie_padata, *pa;
+    krb5_keyblock *key = NULL;
+    krb5_timestamp now;
+    krb5_enc_data enc;
+    krb5_data *der_cookie = NULL;
+    krb5_kvno kvno;
+    size_t ctlen;
+
+    *cookie_out = NULL;
+    memset(&enc, 0, sizeof(enc));
+
+    /* Make a trivial cookie if there are no contents to marshal or we don't
+     * have a TGT entry to encrypt them. */
+    if (contents == NULL || *contents == NULL || local_tgt == NULL)
+        return make_padata(KRB5_PADATA_FX_COOKIE, "MIT", 3, cookie_out);
+
+    ret = get_cookie_key(context, local_tgt, 0, client_princ, &key, &kvno);
+    if (ret)
+        goto cleanup;
+
+    /* Encode the cookie. */
+    ret = krb5_timeofday(context, &now);
+    if (ret)
+        goto cleanup;
+    cookie.time = now;
+    cookie.data = contents;
+    ret = encode_krb5_secure_cookie(&cookie, &der_cookie);
+    if (ret)
+        goto cleanup;
+
+    /* Encrypt the cookie in key. */
+    ret = krb5_c_encrypt_length(context, key->enctype, der_cookie->length,
+                                &ctlen);
+    if (ret)
+        goto cleanup;
+    ret = alloc_data(&enc.ciphertext, ctlen);
+    if (ret)
+        goto cleanup;
+    ret = krb5_c_encrypt(context, key, KRB5_KEYUSAGE_PA_FX_COOKIE, NULL,
+                         der_cookie, &enc);
+    if (ret)
+        goto cleanup;
+
+    /* Construct the cookie pa-data entry. */
+    ret = alloc_padata(KRB5_PADATA_FX_COOKIE, 8 + enc.ciphertext.length, &pa);
+    memcpy(pa->contents, "MIT1", 4);
+    store_32_be(kvno, pa->contents + 4);
+    memcpy(pa->contents + 8, enc.ciphertext.data, enc.ciphertext.length);
+    *cookie_out = pa;
+
+cleanup:
+    krb5_free_data(context, der_cookie);
+    krb5_free_data_contents(context, &enc.ciphertext);
+    return ret;
 }
