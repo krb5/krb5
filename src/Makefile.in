@@ -189,7 +189,7 @@ WINMAKEFILES=Makefile \
 	util\windows\Makefile \
 	util\wshelper\Makefile \
 	windows\Makefile windows\lib\Makefile \
-	windows\cns\Makefile windows\gina\Makefile \
+	windows\cns\Makefile \
 	windows\ms2mit\Makefile \
 	windows\wintel\Makefile windows\kfwlogon\Makefile \
 	windows\leashdll\Makefile windows\leash\Makefile \
@@ -310,8 +310,6 @@ WINMAKEFILES=Makefile \
 ##DOS##windows\lib\Makefile: windows\lib\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\cns\Makefile: windows\cns\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\gina\Makefile: windows\gina\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\ms2mit\Makefile: windows\ms2mit\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
