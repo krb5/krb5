@@ -32,12 +32,18 @@
 
 /*
  * This module is used to test preauth interface features.  Currently, the
- * kdcpreauth module does two things:
+ * kdcpreauth module does the following:
  *
- * - It retrieves the "teststring" attribute from the client principal and
- *   sends it to the client, encrypted in the reply key.  (The plain text "no
- *   key" is sent if there is no reply key; the encrypted message "no attr" is
- *   sent if there is no string attribute.)
+ * - When generating initial method-data, it retrieves the "teststring"
+ *   attribute from the client principal and sends it to the client, encrypted
+ *   in the reply key.  (The plain text "no key" is sent if there is no reply
+ *   key; the encrypted message "no attr" is sent if there is no string
+ *   attribute.)  It also sets a cookie containing "method-data".
+ *
+ * - It retrieves the "2rt" attribute from the client principal.  If set, the
+ *   verify method sends the client a KDC_ERR_MORE_PREAUTH_DATA_REQUIRED error
+ *   with the contents of the 2rt attribute as pa-data, and sets a cookie
+ *   containing "more".
  *
  * - It receives a space-separated list from the clpreauth module and asserts
  *   each string as an authentication indicator.  It always succeeds in
@@ -87,6 +93,12 @@ test_edata(krb5_context context, krb5_kdc_req *req,
         assert(pa->contents != NULL);
         pa->length = 6;
     }
+
+    /* Exercise setting a cookie information from the edata method. */
+    d = string2data("method-data");
+    ret = cb->set_cookie(context, rock, TEST_PA_TYPE, &d);
+    assert(!ret);
+
     cb->free_string(context, rock, attr);
     (*respond)(arg, 0, pa);
 }
@@ -99,19 +111,48 @@ test_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
             krb5_kdcpreauth_verify_respond_fn respond, void *arg)
 {
     krb5_error_code ret;
-    char *str, *ind, *toksave = NULL;
+    krb5_boolean second_round_trip = FALSE;
+    krb5_pa_data **list;
+    krb5_data cookie_data, d;
+    char *str, *ind, *attr, *toksave = NULL;
 
-    str = k5memdup0(data->contents, data->length, &ret);
-    if (ret)
+    ret = cb->get_string(context, rock, "2rt", &attr);
+    assert(!ret);
+
+    /* Check the incoming cookie value. */
+    if (!cb->get_cookie(context, rock, TEST_PA_TYPE, &cookie_data))
         abort();
-    ind = strtok_r(str, " ", &toksave);
-    while (ind != NULL) {
-        cb->add_auth_indicator(context, rock, ind);
-        ind = strtok_r(NULL, " ", &toksave);
+    if (data_eq_string(cookie_data, "more"))
+        second_round_trip = TRUE;
+    else
+        assert(data_eq_string(cookie_data, "method-data"));
+
+    if (attr == NULL || second_round_trip) {
+        /* Parse and assert the indicators. */
+        str = k5memdup0(data->contents, data->length, &ret);
+        if (ret)
+            abort();
+        ind = strtok_r(str, " ", &toksave);
+        while (ind != NULL) {
+            cb->add_auth_indicator(context, rock, ind);
+            ind = strtok_r(NULL, " ", &toksave);
+        }
+        free(str);
+        enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
+        (*respond)(arg, 0, NULL, NULL, NULL);
+    } else {
+        d = string2data("more");
+        ret = cb->set_cookie(context, rock, TEST_PA_TYPE, &d);
+        list = k5calloc(2, sizeof(*list), &ret);
+        assert(!ret);
+        list[0] = k5alloc(sizeof(*list[0]), &ret);
+        assert(!ret);
+        list[0]->pa_type = TEST_PA_TYPE;
+        list[0]->contents = (uint8_t *)attr;
+        list[0]->length = strlen(attr);
+        (*respond)(arg, KRB5KDC_ERR_MORE_PREAUTH_DATA_REQUIRED, NULL, list,
+                   NULL);
     }
-    free(str);
-    enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
-    (*respond)(arg, 0, NULL, NULL, NULL);
 }
 
 static krb5_error_code

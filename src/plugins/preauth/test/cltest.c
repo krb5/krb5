@@ -34,13 +34,17 @@
  * This module is used to test preauth interface features.  At this time, the
  * clpreauth module does two things:
  *
- * - It decrypts a message from the initial KDC padata using the reply key and
+ * - It decrypts a message from the initial KDC pa-data using the reply key and
  *   prints it to stdout.  (The unencrypted message "no key" can also be
  *   displayed.)
  *
+ * - If a second round trip is requested, it prints the pa-data contents
+ *   accompanying the second round trip request.
+ *
  * - It pulls an "indicators" attribute from the gic preauth options and sends
  *   it to the server, instructing the kdcpreauth module to assert one or more
- *   space-separated authentication indicators.
+ *   space-separated authentication indicators.  (This string is sent on both
+ *   round trips if a second round trip is requested.)
  */
 
 #include "k5-int.h"
@@ -52,6 +56,10 @@ static krb5_preauthtype pa_types[] = { TEST_PA_TYPE, 0 };
 
 struct client_state {
     char *indicators;
+};
+
+struct client_request_state {
+    krb5_boolean second_round_trip;
 };
 
 static krb5_error_code
@@ -75,6 +83,25 @@ test_fini(krb5_context context, krb5_clpreauth_moddata moddata)
     free(st);
 }
 
+static void
+test_request_init(krb5_context context, krb5_clpreauth_moddata moddata,
+                  krb5_clpreauth_modreq *modreq_out)
+{
+    struct client_request_state *reqst;
+
+    reqst = malloc(sizeof(*reqst));
+    assert(reqst != NULL);
+    reqst->second_round_trip = FALSE;
+    *modreq_out = (krb5_clpreauth_modreq)reqst;
+}
+
+static void
+test_request_fini(krb5_context context, krb5_clpreauth_moddata moddata,
+                  krb5_clpreauth_modreq modreq)
+{
+    free(modreq);
+}
+
 static krb5_error_code
 test_process(krb5_context context, krb5_clpreauth_moddata moddata,
              krb5_clpreauth_modreq modreq, krb5_get_init_creds_opt *opt,
@@ -85,6 +112,7 @@ test_process(krb5_context context, krb5_clpreauth_moddata moddata,
              krb5_pa_data ***out_pa_data)
 {
     struct client_state *st = (struct client_state *)moddata;
+    struct client_request_state *reqst = (struct client_request_state *)modreq;
     krb5_error_code ret;
     krb5_pa_data **list, *pa;
     krb5_keyblock *k;
@@ -92,7 +120,10 @@ test_process(krb5_context context, krb5_clpreauth_moddata moddata,
     krb5_data plain;
     const char *indstr;
 
-    if (pa_data->length == 6 && memcmp(pa_data->contents, "no key", 6) == 0) {
+    if (reqst->second_round_trip) {
+        printf("2rt: %.*s\n", pa_data->length, pa_data->contents);
+    } else if (pa_data->length == 6 &&
+               memcmp(pa_data->contents, "no key", 6) == 0) {
         printf("no key\n");
     } else {
         /* This fails during s4u_identify_user(), so don't assert. */
@@ -108,6 +139,7 @@ test_process(krb5_context context, krb5_clpreauth_moddata moddata,
         printf("%.*s\n", plain.length, plain.data);
         free(plain.data);
     }
+    reqst->second_round_trip = TRUE;
 
     indstr = (st->indicators != NULL) ? st->indicators : "";
     list = k5calloc(2, sizeof(*list), &ret);
@@ -155,6 +187,8 @@ clpreauth_test_initvt(krb5_context context, int maj_ver,
     vt->pa_type_list = pa_types;
     vt->init = test_init;
     vt->fini = test_fini;
+    vt->request_init = test_request_init;
+    vt->request_fini = test_request_fini;
     vt->process = test_process;
     vt->gic_opts = test_gic_opt;
     return 0;

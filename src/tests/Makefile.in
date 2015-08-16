@@ -153,6 +153,7 @@ check-pytests:: responder s2p s4u2proxy t_init_creds t_localauth unlockiter
 	$(RUNPYTEST) $(srcdir)/t_unlockiter.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_errmsg.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_authdata.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_preauth.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_princflags.py $(PYTESTFLAGS)
 
 clean::
