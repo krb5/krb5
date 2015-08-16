@@ -55,6 +55,20 @@ client's database entry, and the client's database entry itself.  The
 be included in the issued ticket using the ``add_auth_indicator``
 callback (new in release 1.14).
 
+A module can generate state information to be included with the next
+client request using the ``set_cookie`` callback (new in release
+1.14).  On the next request, the module can read this state
+information using the ``get_cookie`` callback.  Cookie information is
+encrypted, timestamped, and transmitted to the client in a
+``PA-FX-COOKIE`` pa-data item.  Older clients may not support cookies
+and therefore may not transmit the cookie in the next request; in this
+case, ``get_cookie`` will not yield the saved information.
+
+If a module implements a mechanism which requires multiple round
+trips, its **verify** method can respond with the code
+``KRB5KDC_ERR_MORE_PREAUTH_DATA_REQUIRED`` and a list of pa-data in
+the *e_data* parameter to be processed by the client.
+
 The **edata** and **verify** methods can be implemented
 asynchronously.  Because of this, they do not return values directly
 to the caller, but must instead invoke responder functions with their
