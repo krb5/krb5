@@ -73,4 +73,16 @@ test_etinfo('user', 'des-cbc-md5 rc4',
 test_etinfo('rc4user', 'des3', [])
 test_etinfo('nokeyuser', 'des3', [])
 
+# Verify that etype-info2 is included in a MORE_PREAUTH_DATA_REQUIRED
+# error if the client does optimistic preauth.
+realm.stop()
+testpreauth = os.path.join(buildtop, 'plugins', 'preauth', 'test', 'test.so')
+conf = {'plugins': {'kdcpreauth': {'module': 'test:' + testpreauth},
+                    'clpreauth': {'module': 'test:' + testpreauth}}}
+realm = K5Realm(create_host=False, get_creds=False, krb5_conf=conf)
+realm.run([kadminl, 'setstr', realm.user_princ, '2rt', '2rtval'])
+out = realm.run(['./etinfo', realm.user_princ, 'aes128-cts', '-123'])
+if out != 'more etype_info2 aes128-cts KRBTEST.COMuser\n':
+    fail('Unexpected output for MORE_PREAUTH_DATA_REQUIRED test')
+
 success('KDC etype-info tests')

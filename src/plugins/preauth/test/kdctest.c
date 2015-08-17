@@ -120,12 +120,15 @@ test_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     assert(!ret);
 
     /* Check the incoming cookie value. */
-    if (!cb->get_cookie(context, rock, TEST_PA_TYPE, &cookie_data))
-        abort();
-    if (data_eq_string(cookie_data, "more"))
+    if (!cb->get_cookie(context, rock, TEST_PA_TYPE, &cookie_data)) {
+        /* Make sure we are seeing optimistic preauth and not a lost cookie. */
+        d = make_data(data->contents, data->length);
+        assert(data_eq_string(d, "optimistic"));
+    } else if (data_eq_string(cookie_data, "more")) {
         second_round_trip = TRUE;
-    else
+    } else {
         assert(data_eq_string(cookie_data, "method-data"));
+    }
 
     if (attr == NULL || second_round_trip) {
         /* Parse and assert the indicators. */

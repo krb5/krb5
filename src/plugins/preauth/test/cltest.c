@@ -120,7 +120,22 @@ test_process(krb5_context context, krb5_clpreauth_moddata moddata,
     krb5_data plain;
     const char *indstr;
 
-    if (reqst->second_round_trip) {
+    if (pa_data->length == 0) {
+        /* This is an optimistic preauth test.  Send a recognizable padata
+         * value so the KDC knows not to expect a cookie. */
+        list = k5calloc(2, sizeof(*list), &ret);
+        assert(!ret);
+        pa = k5alloc(sizeof(*pa), &ret);
+        assert(!ret);
+        pa->pa_type = TEST_PA_TYPE;
+        pa->contents = (uint8_t *)strdup("optimistic");
+        assert(pa->contents != NULL);
+        pa->length = 10;
+        list[0] = pa;
+        list[1] = NULL;
+        *out_pa_data = list;
+        return 0;
+    } else if (reqst->second_round_trip) {
         printf("2rt: %.*s\n", pa_data->length, pa_data->contents);
     } else if (pa_data->length == 6 &&
                memcmp(pa_data->contents, "no key", 6) == 0) {

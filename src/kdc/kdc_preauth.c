@@ -101,6 +101,11 @@ typedef struct preauth_system_st {
     krb5_kdcpreauth_loop_fn loop;
 } preauth_system;
 
+static krb5_error_code
+make_etype_info(krb5_context context, krb5_preauthtype pa_type,
+                krb5_principal client, krb5_key_data *client_key,
+                krb5_enctype enctype, krb5_pa_data **pa_out);
+
 static void
 get_etype_info(krb5_context context, krb5_kdc_req *request,
                krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
@@ -985,6 +990,47 @@ filter_preauth_error(krb5_error_code code)
     }
 }
 
+/*
+ * If the client performed optimistic pre-authentication for a multi-round-trip
+ * mechanism, it may need key information to complete the exchange, so send it
+ * a PA-ETYPE-INFO2 element in addition to the pa-data from the module.
+ */
+static krb5_error_code
+maybe_add_etype_info2(struct padata_state *state, krb5_error_code code)
+{
+    krb5_context context = state->context;
+    krb5_kdcpreauth_rock rock = state->rock;
+    krb5_pa_data **list = state->pa_e_data;
+    size_t count;
+
+    /* Only add key information when requesting another preauth round trip. */
+    if (code != KRB5KDC_ERR_MORE_PREAUTH_DATA_REQUIRED)
+        return 0;
+
+    /* Don't try to add key information when there is no key. */
+    if (rock->client_key == NULL)
+        return 0;
+
+    /* If the client sent a cookie, it has already seen a KDC response with key
+     * information. */
+    if (krb5int_find_pa_data(context, state->request->padata,
+                             KRB5_PADATA_FX_COOKIE) != NULL)
+        return 0;
+
+    /* Reallocate state->pa_e_data to make room for the etype-info2 element. */
+    for (count = 0; list != NULL && list[count] != NULL; count++);
+    list = realloc(list, (count + 2) * sizeof(*list));
+    if (list == NULL)
+        return ENOMEM;
+    list[count] = list[count + 1] = NULL;
+    state->pa_e_data = list;
+
+    /* Generate an etype-info2 element in the new slot. */
+    return make_etype_info(context, KRB5_PADATA_ETYPE_INFO2,
+                           rock->client->princ, rock->client_key,
+                           rock->client_keyblock->enctype, &list[count]);
+}
+
 /* Release state and respond to the AS-REQ processing code with the result of
  * checking pre-authentication data. */
 static void
@@ -997,6 +1043,12 @@ finish_check_padata(struct padata_state *state, krb5_error_code code)
         /* Return successfully.  If we didn't match a preauth system, we may
          * return PREAUTH_REQUIRED later, but we didn't fail to verify. */
         code = 0;
+        goto cleanup;
+    }
+
+    /* Add key information to the saved error pa-data if required. */
+    if (maybe_add_etype_info2(state, code) != 0) {
+        code = KRB5KDC_ERR_PREAUTH_FAILED;
         goto cleanup;
     }
 

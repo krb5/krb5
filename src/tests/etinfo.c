@@ -113,17 +113,19 @@ int
 main(int argc, char **argv)
 {
     krb5_principal client;
+    krb5_get_init_creds_opt *opt;
     krb5_init_creds_context icc;
     krb5_data reply, request, realm;
     krb5_error *error;
     krb5_kdc_rep *asrep;
     krb5_pa_data **padata;
     krb5_enctype *enctypes, def[] = { ENCTYPE_NULL };
+    krb5_preauthtype pa_type = KRB5_PADATA_NONE;
     unsigned int flags;
     int master = 0;
 
-    if (argc < 2 && argc > 3) {
-        fprintf(stderr, "Usage: %s princname [enctypes]\n", argv[0]);
+    if (argc < 2 && argc > 4) {
+        fprintf(stderr, "Usage: %s princname [enctypes] [patype]\n", argv[0]);
         exit(1);
     }
     check(krb5_init_context(&ctx));
@@ -133,8 +135,14 @@ main(int argc, char **argv)
         krb5_set_default_in_tkt_ktypes(ctx, enctypes);
         free(enctypes);
     }
+    if (argc >= 4)
+        pa_type = atoi(argv[3]);
 
-    check(krb5_init_creds_init(ctx, client, NULL, NULL, 0, NULL, &icc));
+    check(krb5_get_init_creds_opt_alloc(ctx, &opt));
+    if (pa_type != KRB5_PADATA_NONE)
+        krb5_get_init_creds_opt_set_preauth_list(opt, &pa_type, 1);
+
+    check(krb5_init_creds_init(ctx, client, NULL, NULL, 0, opt, &icc));
     reply = empty_data();
     check(krb5_init_creds_step(ctx, icc, &reply, &request, &realm, &flags));
     assert(flags == KRB5_INIT_CREDS_STEP_FLAG_CONTINUE);
@@ -142,11 +150,14 @@ main(int argc, char **argv)
 
     if (decode_krb5_error(&reply, &error) == 0) {
         decode_krb5_padata_sequence(&error->e_data, &padata);
-        if (error->error != KDC_ERR_PREAUTH_REQUIRED) {
+        if (error->error == KDC_ERR_PREAUTH_REQUIRED) {
+            display_padata(padata, "error");
+        } else if (error->error == KDC_ERR_MORE_PREAUTH_DATA_REQUIRED) {
+            display_padata(padata, "more");
+        } else {
             fprintf(stderr, "Unexpected error %d\n", (int)error->error);
             return 1;
         }
-        display_padata(padata, "error");
         krb5_free_pa_data(ctx, padata);
         krb5_free_error(ctx, error);
     } else if (decode_krb5_as_rep(&reply, &asrep) == 0) {
@@ -159,6 +170,7 @@ main(int argc, char **argv)
     krb5_free_data_contents(ctx, &request);
     krb5_free_data_contents(ctx, &reply);
     krb5_free_data_contents(ctx, &realm);
+    krb5_get_init_creds_opt_free(ctx, opt);
     krb5_init_creds_free(ctx, icc);
     krb5_free_principal(ctx, client);
     krb5_free_context(ctx);
