@@ -190,8 +190,9 @@ OM_uint32 *			time_rec;
 	major = gss_add_cred_from(&tmpMinor, (gss_cred_id_t)creds,
 				  desired_name, &mechs->elements[i],
 				  cred_usage, time_req, time_req,
-				  cred_store, NULL, NULL, &initTimeOut,
-				  &acceptTimeOut);
+				  cred_store, NULL, NULL,
+				  time_rec ? &initTimeOut : NULL,
+				  time_rec ? &acceptTimeOut : NULL);
 	if (major == GSS_S_COMPLETE) {
 	    /* update the credential's time */
 	    if (cred_usage == GSS_C_ACCEPT) {
@@ -356,7 +357,7 @@ gss_add_cred_from(minor_status, input_cred_handle,
     OM_uint32		*acceptor_time_rec;
 {
     OM_uint32		status, temp_minor_status;
-    OM_uint32		time_req, time_rec;
+    OM_uint32		time_req, time_rec = 0, *time_recp = NULL;
     gss_union_name_t	union_name;
     gss_union_cred_t	new_union_cred, union_cred;
     gss_name_t		internal_name = GSS_C_NO_NAME;
@@ -447,15 +448,18 @@ gss_add_cred_from(minor_status, input_cred_handle,
     if (status != GSS_S_COMPLETE)
 	goto errout;
 
+    if (initiator_time_rec != NULL || acceptor_time_rec != NULL)
+	time_recp = &time_rec;
+
     if (mech->gss_acquire_cred_from) {
 	status = mech->gss_acquire_cred_from(minor_status, internal_name,
 					     time_req, target_mechs,
 					     cred_usage, cred_store, &cred,
-					     NULL, &time_rec);
+					     NULL, time_recp);
     } else if (cred_store == GSS_C_NO_CRED_STORE) {
 	status = mech->gss_acquire_cred(minor_status, internal_name, time_req,
 					target_mechs, cred_usage, &cred, NULL,
-					&time_rec);
+					time_recp);
     } else {
 	return GSS_S_UNAVAILABLE;
     }
