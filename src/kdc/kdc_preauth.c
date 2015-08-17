@@ -939,43 +939,16 @@ struct padata_state {
     krb5_boolean *typed_e_data_out;
 };
 
-static void
-finish_check_padata(struct padata_state *state, krb5_error_code code)
+/* Return code if it is 0 or one of the codes we pass through to the client.
+ * Otherwise return KRB5KDC_ERR_PREAUTH_FAILED. */
+static krb5_error_code
+filter_preauth_error(krb5_error_code code)
 {
-    kdc_preauth_respond_fn oldrespond;
-    void *oldarg;
-
-    assert(state);
-    oldrespond = state->respond;
-    oldarg = state->arg;
-
-    if (!state->pa_ok) {
-        /* Return any saved preauth e-data. */
-        *state->e_data_out = state->pa_e_data;
-        *state->typed_e_data_out = state->typed_e_data_flag;
-    } else
-        krb5_free_pa_data(state->context, state->pa_e_data);
-
-    if (state->pa_ok) {
-        free(state);
-        (*oldrespond)(oldarg, 0);
-        return;
-    }
-
-    /* pa system was not found; we may return PREAUTH_REQUIRED later,
-       but we did not actually fail to verify the pre-auth. */
-    if (!state->pa_found) {
-        free(state);
-        (*oldrespond)(oldarg, 0);
-        return;
-    }
-    free(state);
-
     /* The following switch statement allows us
      * to return some preauth system errors back to the client.
      */
     switch(code) {
-    case 0: /* in case of PA-PAC-REQUEST with no PA-ENC-TIMESTAMP */
+    case 0:
     case KRB5KRB_AP_ERR_BAD_INTEGRITY:
     case KRB5KRB_AP_ERR_SKEW:
     case KRB5KDC_ERR_PREAUTH_REQUIRED:
@@ -1006,12 +979,40 @@ finish_check_padata(struct padata_state *state, krb5_error_code code)
     case KRB5KDC_ERR_NO_ACCEPTABLE_KDF:
         /* rfc 6113 */
     case KRB5KDC_ERR_MORE_PREAUTH_DATA_REQUIRED:
-        (*oldrespond)(oldarg, code);
-        return;
+        return code;
     default:
-        (*oldrespond)(oldarg, KRB5KDC_ERR_PREAUTH_FAILED);
-        return;
+        return KRB5KDC_ERR_PREAUTH_FAILED;
     }
+}
+
+/* Release state and respond to the AS-REQ processing code with the result of
+ * checking pre-authentication data. */
+static void
+finish_check_padata(struct padata_state *state, krb5_error_code code)
+{
+    kdc_preauth_respond_fn respond;
+    void *arg;
+
+    if (state->pa_ok || !state->pa_found) {
+        /* Return successfully.  If we didn't match a preauth system, we may
+         * return PREAUTH_REQUIRED later, but we didn't fail to verify. */
+        code = 0;
+        goto cleanup;
+    }
+
+    /* Return any saved error pa-data, stealing the pointer from state. */
+    *state->e_data_out = state->pa_e_data;
+    *state->typed_e_data_out = state->typed_e_data_flag;
+    state->pa_e_data = NULL;
+
+cleanup:
+    /* Discard saved error pa-data if we aren't returning it, free state, and
+     * respond to the AS-REQ processing code. */
+    respond = state->respond;
+    arg = state->arg;
+    krb5_free_pa_data(state->context, state->pa_e_data);
+    free(state);
+    (*respond)(arg, filter_preauth_error(code));
 }
 
 static void
