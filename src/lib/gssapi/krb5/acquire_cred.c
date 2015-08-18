@@ -825,8 +825,14 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
         if (code != 0)
             goto krb_error_out;
 
-        if (time_rec)
+        if (time_rec) {
+            ret = kg_cred_resolve(minor_status, context, (gss_cred_id_t)cred,
+                                  GSS_C_NO_NAME);
+            if (GSS_ERROR(ret))
+                goto error_out;
             *time_rec = (cred->expire > now) ? (cred->expire - now) : 0;
+            k5_mutex_unlock(&cred->lock);
+        }
     }
 
     *minor_status = 0;
