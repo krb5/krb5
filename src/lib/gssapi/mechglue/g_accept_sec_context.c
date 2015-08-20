@@ -86,6 +86,31 @@ val_acc_sec_ctx_args(
     return (GSS_S_COMPLETE);
 }
 
+/* Return true if mech should be accepted with no acceptor credential. */
+static int
+allow_mech_by_default(gss_OID mech)
+{
+    OM_uint32 status, minor;
+    gss_OID_set attrs;
+    int reject = 0, p;
+
+    status = gss_inquire_attrs_for_mech(&minor, mech, &attrs, NULL);
+    if (status)
+	return 0;
+
+    /* Check for each attribute which would cause us to exclude this mech from
+     * the default credential. */
+    if (generic_gss_test_oid_set_member(&minor, GSS_C_MA_DEPRECATED,
+					attrs, &p) != GSS_S_COMPLETE || p)
+	reject = 1;
+    else if (generic_gss_test_oid_set_member(&minor, GSS_C_MA_NOT_DFLT_MECH,
+					     attrs, &p) != GSS_S_COMPLETE || p)
+	reject = 1;
+
+    (void) gss_release_oid_set(&minor, &attrs);
+    return !reject;
+}
+
 OM_uint32 KRB5_CALLCONV
 gss_accept_sec_context (minor_status,
                         context_handle,
@@ -220,6 +245,9 @@ gss_cred_id_t *		d_cred;
 	    status = GSS_S_NO_CRED;
 	    goto error_out;
 	}
+    } else if (!allow_mech_by_default(selected_mech)) {
+	status = GSS_S_NO_CRED;
+	goto error_out;
     }
 
     /*
