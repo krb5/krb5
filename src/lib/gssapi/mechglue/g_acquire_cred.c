@@ -133,7 +133,7 @@ OM_uint32 *			time_rec;
 {
     OM_uint32 major = GSS_S_FAILURE, tmpMinor;
     OM_uint32 first_major = GSS_S_COMPLETE, first_minor = 0;
-    OM_uint32 initTimeOut, acceptTimeOut, outTime = GSS_C_INDEFINITE;
+    OM_uint32 initTimeOut = 0, acceptTimeOut = 0, outTime = GSS_C_INDEFINITE;
     gss_OID_set mechs = GSS_C_NO_OID_SET;
     gss_OID_set_desc except_attrs;
     gss_OID_desc attr_oids[2];
