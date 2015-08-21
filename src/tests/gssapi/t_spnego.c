@@ -192,6 +192,42 @@ test_mskrb_oid(gss_name_t tname, gss_cred_id_t acred)
     free(stok.value);
 }
 
+/* Check that we return a compatibility NegTokenInit2 message containing
+ * NegHints for an empty initiator token. */
+static void
+test_neghints()
+{
+    OM_uint32 major, minor;
+    gss_buffer_desc itok = GSS_C_EMPTY_BUFFER, atok;
+    gss_ctx_id_t actx = GSS_C_NO_CONTEXT;
+    const char *expected =
+        /* RFC 2743 token framing: [APPLICATION 0] IMPLICIT SEQUENCE followed
+         * by OBJECT IDENTIFIER and the SPNEGO OID */
+        "\x60\x47\x06\x06" "\x2B\x06\x01\x05\x05\x02"
+        /* [0] SEQUENCE for the NegotiationToken negtokenInit choice */
+        "\xA0\x3D\x30\x3B"
+        /* [0] MechTypeList containing the krb5 OID */
+        "\xA0\x0D\x30\x0B\x06\x09" "\x2A\x86\x48\x86\xF7\x12\x01\x02\x02"
+        /* [3] NegHints containing [0] GeneralString containing the dummy
+         * hintName string defined in [MS-SPNG] */
+        "\xA3\x2A\x30\x28\xA0\x26\x1B\x24"
+        "not_defined_in_RFC4178@please_ignore";
+
+    /* Produce a hint token. */
+    major = gss_accept_sec_context(&minor, &actx, GSS_C_NO_CREDENTIAL, &itok,
+                                   GSS_C_NO_CHANNEL_BINDINGS, NULL, NULL,
+                                   &atok, NULL, NULL, NULL);
+    check_gsserr("gss_accept_sec_context(neghints)", major, minor);
+
+    /* Verify it against the expected contents, which are fixed as long as we
+     * only list the krb5 mech in the token. */
+    assert(atok.length == strlen(expected));
+    assert(memcmp(atok.value, expected, atok.length) == 0);
+
+    (void)gss_release_buffer(&minor, &atok);
+    (void)gss_delete_sec_context(&minor, &actx, NULL);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -263,6 +299,8 @@ main(int argc, char *argv[])
      * acceptor cred. */
     test_mskrb_oid(target_name, verifier_cred_handle);
     test_mskrb_oid(target_name, GSS_C_NO_CREDENTIAL);
+
+    test_neghints();
 
     (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);

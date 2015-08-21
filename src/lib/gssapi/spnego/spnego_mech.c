@@ -191,7 +191,7 @@ static const gss_OID_set_desc spnego_oidsets[] = {
 };
 const gss_OID_set_desc * const gss_mech_set_spnego = spnego_oidsets+0;
 
-static int make_NegHints(OM_uint32 *, spnego_gss_cred_id_t, gss_buffer_t *);
+static int make_NegHints(OM_uint32 *, gss_buffer_t *);
 static int put_neg_hints(unsigned char **, gss_buffer_t, unsigned int);
 static OM_uint32
 acc_ctx_hints(OM_uint32 *, gss_ctx_id_t *, spnego_gss_cred_id_t,
@@ -1185,97 +1185,24 @@ put_neg_hints(unsigned char **buf_out, gss_buffer_t input_token,
 #define HOST_PREFIX	"host@"
 #define HOST_PREFIX_LEN	(sizeof(HOST_PREFIX) - 1)
 
+/* Encode the dummy hintname string (as specified in [MS-SPNG]) into a
+ * DER-encoded [0] tagged GeneralString, and place the result in *outbuf. */
 static int
-make_NegHints(OM_uint32 *minor_status,
-	      spnego_gss_cred_id_t spcred, gss_buffer_t *outbuf)
+make_NegHints(OM_uint32 *minor_status, gss_buffer_t *outbuf)
 {
-	gss_buffer_desc hintNameBuf;
-	gss_name_t hintName = GSS_C_NO_NAME;
-	gss_name_t hintKerberosName;
-	gss_OID hintNameType;
 	OM_uint32 major_status;
-	OM_uint32 minor;
 	unsigned int tlen = 0;
 	unsigned int hintNameSize = 0;
 	unsigned char *ptr;
 	unsigned char *t;
+	const char *hintname = "not_defined_in_RFC4178@please_ignore";
+	const size_t hintname_len = strlen(hintname);
 
 	*outbuf = GSS_C_NO_BUFFER;
-
-	if (spcred != NULL) {
-		major_status = gss_inquire_cred(minor_status,
-						spcred->mcred,
-						&hintName,
-						NULL,
-						NULL,
-						NULL);
-		if (major_status != GSS_S_COMPLETE)
-			return (major_status);
-	}
-
-	if (hintName == GSS_C_NO_NAME) {
-		krb5_error_code code;
-		krb5int_access kaccess;
-		char hostname[HOST_PREFIX_LEN + MAXHOSTNAMELEN + 1] = HOST_PREFIX;
-
-		code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
-		if (code != 0) {
-			*minor_status = code;
-			return (GSS_S_FAILURE);
-		}
-
-		/* this breaks mutual authentication but Samba relies on it */
-		code = (*kaccess.clean_hostname)(NULL, NULL,
-						 &hostname[HOST_PREFIX_LEN],
-						 MAXHOSTNAMELEN);
-		if (code != 0) {
-			*minor_status = code;
-			return (GSS_S_FAILURE);
-		}
-
-		hintNameBuf.value = hostname;
-		hintNameBuf.length = strlen(hostname);
-
-		major_status = gss_import_name(minor_status,
-					       &hintNameBuf,
-					       GSS_C_NT_HOSTBASED_SERVICE,
-					       &hintName);
-		if (major_status != GSS_S_COMPLETE) {
-			return (major_status);
-		}
-	}
-
-	hintNameBuf.value = NULL;
-	hintNameBuf.length = 0;
-
-	major_status = gss_canonicalize_name(minor_status,
-					     hintName,
-					     (gss_OID)&gss_mech_krb5_oid,
-					     &hintKerberosName);
-	if (major_status != GSS_S_COMPLETE) {
-		gss_release_name(&minor, &hintName);
-		return (major_status);
-	}
-	gss_release_name(&minor, &hintName);
-
-	major_status = gss_display_name(minor_status,
-					hintKerberosName,
-					&hintNameBuf,
-					&hintNameType);
-	if (major_status != GSS_S_COMPLETE) {
-		gss_release_name(&minor, &hintName);
-		return (major_status);
-	}
-	gss_release_name(&minor, &hintKerberosName);
-
-	/*
-	 * Now encode the name hint into a NegHints ASN.1 type
-	 */
 	major_status = GSS_S_FAILURE;
 
 	/* Length of DER encoded GeneralString */
-	tlen = 1 + gssint_der_length_size(hintNameBuf.length) +
-		hintNameBuf.length;
+	tlen = 1 + gssint_der_length_size(hintname_len) + hintname_len;
 	hintNameSize = tlen;
 
 	/* Length of DER encoded hintName */
@@ -1295,12 +1222,11 @@ make_NegHints(OM_uint32 *minor_status,
 		goto errout;
 
 	*ptr++ = GENERAL_STRING;
-	if (gssint_put_der_length(hintNameBuf.length,
-				  &ptr, tlen - (int)(ptr-t)))
+	if (gssint_put_der_length(hintname_len, &ptr, tlen - (int)(ptr-t)))
 		goto errout;
 
-	memcpy(ptr, hintNameBuf.value, hintNameBuf.length);
-	ptr += hintNameBuf.length;
+	memcpy(ptr, hintname, hintname_len);
+	ptr += hintname_len;
 
 	*outbuf = (gss_buffer_t)malloc(sizeof(gss_buffer_desc));
 	if (*outbuf == NULL) {
@@ -1319,8 +1245,6 @@ errout:
 	if (t != NULL) {
 		free(t);
 	}
-
-	gss_release_buffer(&minor, &hintNameBuf);
 
 	return (major_status);
 }
@@ -1357,7 +1281,7 @@ acc_ctx_hints(OM_uint32 *minor_status,
 	if (ret != GSS_S_COMPLETE)
 		goto cleanup;
 
-	ret = make_NegHints(minor_status, spcred, mechListMIC);
+	ret = make_NegHints(minor_status, mechListMIC);
 	if (ret != GSS_S_COMPLETE)
 		goto cleanup;
 
