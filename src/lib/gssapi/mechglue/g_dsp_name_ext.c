@@ -94,6 +94,7 @@ gss_display_name_ext (OM_uint32 *minor_status,
             status = GSS_S_BAD_NAME;
         else if (mech->gss_display_name_ext == NULL) {
             if (mech->gss_display_name != NULL &&
+                union_name->name_type != GSS_C_NO_OID &&
                 g_OID_equal(display_as_name_type, union_name->name_type)) {
                 status = (*mech->gss_display_name)(minor_status,
                                                    union_name->mech_name,
@@ -114,7 +115,8 @@ gss_display_name_ext (OM_uint32 *minor_status,
         return status;
     }
 
-    if (!g_OID_equal(display_as_name_type, union_name->name_type))
+    if (union_name->name_type == GSS_C_NO_OID ||
+        !g_OID_equal(display_as_name_type, union_name->name_type))
         return GSS_S_UNAVAILABLE;
 
     if ((output_name_buffer->value =
