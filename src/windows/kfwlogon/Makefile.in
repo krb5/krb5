@@ -7,7 +7,10 @@ DEFINES = -DNO_KRB4
 LOCALINCLUDES = -I$(BUILDTOP) -I$(BUILDTOP)\include -I$(BUILDTOP)\windows\include
 PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 
-SYSLIBS = kernel32.lib user32.lib advapi32.lib wsock32.lib secur32.lib userenv.lib
+!if defined(VISUALSTUDIOVERSION) && $(VISUALSTUDIOVERSION:.=) >= 140
+WINCRTEXTRA = ucrt.lib vcruntime.lib
+!endif
+SYSLIBS = kernel32.lib user32.lib advapi32.lib wsock32.lib secur32.lib userenv.lib $(WINCRTEXTRA)
 
 VERSIONRC = $(BUILDTOP)\windows\version.rc
 RCFLAGS=$(CPPFLAGS) -I$(top_srcdir) -D_WIN32 -DRES_ONLY
