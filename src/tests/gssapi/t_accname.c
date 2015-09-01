@@ -84,8 +84,10 @@ main(int argc, char *argv[])
 
     (void)gss_release_name(&minor, &target_name);
     (void)gss_release_name(&minor, &acceptor_name);
+    (void)gss_release_name(&minor, &real_acceptor_name);
     (void)gss_release_cred(&minor, &acceptor_cred);
     (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);
+    (void)gss_release_buffer(&minor, &namebuf);
     return 0;
 }
