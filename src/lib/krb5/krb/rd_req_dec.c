@@ -396,6 +396,7 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
         if (!krb5_sname_match(context, server, ent.principal)) {
             if (krb5_principal_compare(context, ent.principal, tkt_server))
                 tkt_server_mismatch = TRUE;
+            (void)krb5_free_keytab_entry_contents(context, &ent);
             continue;
         }
         found_server_match = TRUE;
