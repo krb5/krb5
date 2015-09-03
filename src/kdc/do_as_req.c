@@ -181,6 +181,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     void *oldarg;
     kdc_realm_t *kdc_active_realm = state->active_realm;
     krb5_audit_state *au_state = state->au_state;
+    krb5_principal client_princ = NULL;
 
     assert(state);
     oldrespond = state->respond;
@@ -392,6 +393,12 @@ egress:
             state->status = emsg;
         }
         if (errcode != KRB5KDC_ERR_DISCARD) {
+            client_princ = state->request->client;
+            if ((errcode == KRB5KDC_ERR_WRONG_REALM) &&
+                (state->client != NULL)) {
+                client_princ = state->client->princ;
+            }
+
             errcode -= ERROR_TABLE_BASE_krb5;
             if (errcode < 0 || errcode > KRB_ERR_MAX)
                 errcode = KRB_ERR_GENERIC;
@@ -399,8 +406,7 @@ egress:
             errcode = prepare_error_as(state->rstate, state->request,
                                        state->local_tgt, errcode,
                                        state->e_data, state->typed_e_data,
-                                       ((state->client != NULL) ?
-                                        state->client->princ : NULL),
+                                       client_princ,
                                        &response, state->status);
             state->status = 0;
         }
@@ -831,7 +837,7 @@ errout:
 static krb5_error_code
 prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
                  krb5_db_entry *local_tgt, int error, krb5_pa_data **e_data_in,
-                 krb5_boolean typed_e_data, krb5_principal canon_client,
+                 krb5_boolean typed_e_data, krb5_principal client,
                  krb5_data **response, const char *status)
 {
     krb5_error errpkt;
@@ -862,8 +868,7 @@ prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
         return retval;
     errpkt.error = error;
     errpkt.server = request->server;
-    errpkt.client = (error == KRB5KDC_ERR_WRONG_REALM) ? canon_client :
-        request->client;
+    errpkt.client = client;
     errpkt.text = string2data((char *)status);
 
     if (e_data != NULL) {
