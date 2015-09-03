@@ -39,6 +39,10 @@
  *         test = {
  *             alias = {
  *                 aliasname = canonname
+ *                 # For cross-realm aliases, only the realm part will
+ *                 # matter to the client.
+ *                 aliasname = @FOREIGN_REALM
+ *                 enterprise@PRINC = @FOREIGN_REALM
  *             }
  *             princs = {
  *                 krbtgt/KRBTEST.COM = {
@@ -296,9 +300,10 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
                    unsigned int flags, krb5_db_entry **entry)
 {
     krb5_error_code ret;
+    krb5_principal princ = NULL;
     krb5_principal_data empty_princ = { KV5M_PRINCIPAL };
     testhandle h = context->dal_handle->db_context;
-    char *search_name, *canon, *flagstr, **names, **key_strings;
+    char *search_name = NULL, *canon = NULL, *flagstr, **names, **key_strings;
     const char *ename;
     krb5_db_entry *ent;
 
@@ -308,20 +313,48 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
                                   KRB5_PRINCIPAL_UNPARSE_NO_REALM,
                                   &search_name));
     canon = get_string(h, "alias", search_name, NULL);
-    ename = (canon != NULL) ? canon : search_name;
+    if (canon != NULL) {
+        if (!(flags & KRB5_KDB_FLAG_ALIAS_OK)) {
+            ret = KRB5_KDB_NOENTRY;
+            goto cleanup;
+        }
+        check(krb5_parse_name(context, canon, &princ));
+        if (!krb5_realm_compare(context, search_for, princ)) {
+            if (flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) {
+                /* Return a client referral by creating an entry with only the
+                 * principal set. */
+                *entry = ealloc(sizeof(**entry));
+                (*entry)->princ = princ;
+                princ = NULL;
+                ret = 0;
+                goto cleanup;
+            } else {
+                /* We could look up a cross-realm TGS entry, but we don't need
+                 * that behavior yet. */
+                ret = KRB5_KDB_NOENTRY;
+                goto cleanup;
+            }
+        }
+        ename = canon;
+    } else {
+        check(krb5_copy_principal(context, search_for, &princ));
+        ename = search_name;
+    }
 
     /* Check that the entry exists. */
     set_names(h, "princs", ename, NULL);
     ret = profile_get_relation_names(h->profile, h->names, &names);
     if (ret == PROF_NO_RELATION) {
-        free(canon);
-        return KRB5_KDB_NOENTRY;
+        ret = KRB5_KDB_NOENTRY;
+        goto cleanup;
     }
     profile_free_list(names);
 
-    ent = ealloc(sizeof(*ent));
+    /* No error exits after this point. */
 
-    check(krb5_parse_name(context, ename, &ent->princ));
+    ent = ealloc(sizeof(*ent));
+    ent->princ = princ;
+    princ = NULL;
 
     flagstr = get_string(h, "princs", ename, "flags");
     if (flagstr != NULL) {
@@ -350,8 +383,12 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
     check(krb5_dbe_update_mod_princ_data(context, ent, 0, &empty_princ));
 
     *entry = ent;
+
+cleanup:
+    krb5_free_unparsed_name(context, search_name);
+    krb5_free_principal(context, princ);
     free(canon);
-    return 0;
+    return ret;
 }
 
 static void

@@ -102,5 +102,26 @@ trace = f.read()
 f.close()
 if 'back to same realm' in trace:
     fail('KDC returned referral to service realm')
+realm.stop()
+
+# Test client referrals.  Use the test KDB module for KRBTEST1.COM to
+# simulate referrals since our built-in modules do not support them.
+# No cross-realm TGTs are necessary.
+kdcconf = {'realms': {'$realm': {'database_module': 'test'}},
+           'dbmodules': {'test': {'db_library': 'test',
+                                  'alias': {'user': '@KRBTEST2.COM',
+                                            'abc@XYZ': '@KRBTEST2.COM'}}}}
+r1, r2 = cross_realms(2, xtgts=(),
+                      args=({'kdc_conf': kdcconf, 'create_kdb': False}, None),
+                      create_host=False)
+r2.addprinc('abc\@XYZ', 'pw')
+r1.start_kdc()
+out = r1.kinit('user', expected_code=1)
+if 'not found in Kerberos database' not in out:
+    fail('Expected error not seen for referral without canonicalize flag')
+r1.kinit('user', password('user'), ['-C'])
+r1.klist('user@KRBTEST2.COM', 'krbtgt/KRBTEST2.COM')
+r1.kinit('abc@XYZ', 'pw', ['-E'])
+r1.klist('abc\@XYZ@KRBTEST2.COM', 'krbtgt/KRBTEST2.COM')
 
 success('KDC host referral tests')
