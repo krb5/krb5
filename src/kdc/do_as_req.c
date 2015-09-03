@@ -862,7 +862,7 @@ prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
         return retval;
     errpkt.error = error;
     errpkt.server = request->server;
-    errpkt.client = (error == KRB5KDC_ERR_WRONG_REALM) ? canon_client :
+    errpkt.client = (error == KDC_ERR_WRONG_REALM) ? canon_client :
         request->client;
     errpkt.text = string2data((char *)status);
 
