@@ -409,6 +409,71 @@ unsigned char pkinit_4096_dhprime[4096/8] = {
 
 MAKE_INIT_FUNCTION(pkinit_openssl_init);
 
+static krb5_error_code oerr(krb5_context context, krb5_error_code code,
+                            const char *fmt, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 4)))
+#endif
+    ;
+
+/*
+ * Set an error string containing the formatted arguments and the first pending
+ * OpenSSL error.  Write the formatted arguments and all pending OpenSSL error
+ * messages to the trace log.  Return code, or KRB5KDC_ERR_PREAUTH_FAILED if
+ * code is 0.
+ */
+static krb5_error_code
+oerr(krb5_context context, krb5_error_code code, const char *fmt, ...)
+{
+    unsigned long err;
+    va_list ap;
+    char *str, buf[128];
+    int r;
+
+    if (!code)
+        code = KRB5KDC_ERR_PREAUTH_FAILED;
+
+    va_start(ap, fmt);
+    r = vasprintf(&str, fmt, ap);
+    va_end(ap);
+    if (r < 0)
+        return code;
+
+    err = ERR_peek_error();
+    if (err) {
+        krb5_set_error_message(context, code, _("%s: %s"), str,
+                               ERR_reason_error_string(err));
+    } else {
+        krb5_set_error_message(context, code, "%s", str);
+    }
+
+    TRACE_PKINIT_OPENSSL_ERROR(context, str);
+    while ((err = ERR_get_error()) != 0) {
+        ERR_error_string_n(err, buf, sizeof(buf));
+        TRACE_PKINIT_OPENSSL_ERROR(context, buf);
+    }
+
+    free(str);
+    return code;
+}
+
+/*
+ * Set an appropriate error string containing msg for a certificate
+ * verification failure from certctx.  Write the message and all pending
+ * OpenSSL error messages to the trace log.  Return code, or
+ * KRB5KDC_ERR_PREAUTH_FAILED if code is 0.
+ */
+static krb5_error_code
+oerr_cert(krb5_context context, krb5_error_code code, X509_STORE_CTX *certctx,
+          const char *msg)
+{
+    int depth = X509_STORE_CTX_get_error_depth(certctx);
+    int err = X509_STORE_CTX_get_error(certctx);
+    const char *errstr = X509_verify_cert_error_string(err);
+
+    return oerr(context, code, _("%s (depth %d): %s"), msg, depth, errstr);
+}
+
 krb5_error_code
 pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx)
 {
@@ -966,11 +1031,7 @@ cms_contentinfo_create(krb5_context context,                          /* IN */
         goto cleanup;
     *out_data_len = i2d_PKCS7(p7, NULL);
     if (!(*out_data_len)) {
-        unsigned long err = ERR_peek_error();
-        retval = KRB5KDC_ERR_PREAUTH_FAILED;
-        krb5_set_error_message(context, retval, "%s\n",
-                               ERR_error_string(err, NULL));
-        pkiDebug("failed to der encode pkcs7\n");
+        retval = oerr(context, 0, _("Failed to DER encode PKCS7"));
         goto cleanup;
     }
     retval = ENOMEM;
@@ -980,11 +1041,7 @@ cms_contentinfo_create(krb5_context context,                          /* IN */
     /* DER encode PKCS7 data */
     retval = i2d_PKCS7(p7, &p);
     if (!retval) {
-        unsigned long err = ERR_peek_error();
-        retval = KRB5KDC_ERR_PREAUTH_FAILED;
-        krb5_set_error_message(context, retval, "%s\n",
-                               ERR_error_string(err, NULL));
-        pkiDebug("failed to der encode pkcs7\n");
+        retval = oerr(context, 0, _("Failed to DER encode PKCS7"));
         goto cleanup;
     }
     retval = 0;
@@ -1071,14 +1128,8 @@ cms_signeddata_create(krb5_context context,
                                 id_cryptoctx->intermediateCAs);
             X509_STORE_CTX_trusted_stack(&certctx, id_cryptoctx->trustedCAs);
             if (!X509_verify_cert(&certctx)) {
-                int code = X509_STORE_CTX_get_error(&certctx);
-                const char *msg = X509_verify_cert_error_string(code);
-                pkiDebug("failed to create a certificate chain: %s\n", msg);
-                if (!sk_X509_num(id_cryptoctx->trustedCAs))
-                    pkiDebug("No trusted CAs found. Check your X509_anchors\n");
-                retval = KRB5KDC_ERR_PREAUTH_FAILED;
-                krb5_set_error_message(context, retval,
-                                       _("Cannot create cert chain: %s"), msg);
+                retval = oerr_cert(context, 0, &certctx,
+                                   _("Failed to verify own certificate"));
                 goto cleanup;
             }
             certstack = X509_STORE_CTX_get1_chain(&certctx);
@@ -1239,11 +1290,7 @@ cms_signeddata_create(krb5_context context,
         /* Add signature */
         if (!ASN1_STRING_set(p7si->enc_digest, (unsigned char *) sig,
                              (int)sig_len)) {
-            unsigned long err = ERR_peek_error();
-            retval = KRB5KDC_ERR_PREAUTH_FAILED;
-            krb5_set_error_message(context, retval, "%s\n",
-                                   ERR_error_string(err, NULL));
-            pkiDebug("failed to add a signed digest attribute\n");
+            retval = oerr(context, 0, _("Failed to add digest attribute"));
             goto cleanup2;
         }
         /* adder signer_info to pkcs7 signed */
@@ -1259,11 +1306,7 @@ cms_signeddata_create(krb5_context context,
 
     *signed_data_len = i2d_PKCS7(p7, NULL);
     if (!(*signed_data_len)) {
-        unsigned long err = ERR_peek_error();
-        retval = KRB5KDC_ERR_PREAUTH_FAILED;
-        krb5_set_error_message(context, retval, "%s\n",
-                               ERR_error_string(err, NULL));
-        pkiDebug("failed to der encode pkcs7\n");
+        retval = oerr(context, 0, _("Failed to DER encode PKCS7"));
         goto cleanup2;
     }
     retval = ENOMEM;
@@ -1273,11 +1316,7 @@ cms_signeddata_create(krb5_context context,
     /* DER encode PKCS7 data */
     retval = i2d_PKCS7(p7, &p);
     if (!retval) {
-        unsigned long err = ERR_peek_error();
-        retval = KRB5KDC_ERR_PREAUTH_FAILED;
-        krb5_set_error_message(context, retval, "%s\n",
-                               ERR_error_string(err, NULL));
-        pkiDebug("failed to der encode pkcs7\n");
+        retval = oerr(context, 0, _("Failed to DER encode PKCS7"));
         goto cleanup2;
     }
     retval = 0;
@@ -1383,11 +1422,7 @@ cms_signeddata_verify(krb5_context context,
 
     /* decode received CMS message */
     if ((cms = d2i_CMS_ContentInfo(NULL, &p, (int)signed_data_len)) == NULL) {
-        unsigned long err = ERR_peek_error();
-        krb5_set_error_message(context, retval, "%s\n",
-                               ERR_error_string(err, NULL));
-        pkiDebug("%s: failed to decode message: %s\n",
-                 __FUNCTION__, ERR_error_string(err, NULL));
+        retval = oerr(context, 0, _("Failed to decode CMS message"));
         goto cleanup;
     }
     etype = CMS_get0_eContentType(cms);
@@ -1570,6 +1605,8 @@ cms_signeddata_verify(krb5_context context,
             default:
                 retval = KRB5KDC_ERR_INVALID_CERTIFICATE;
             }
+            (void)oerr_cert(context, retval, &cert_ctx,
+                            _("Failed to verify received certificate"));
             if (reqctx->received_cert == NULL)
                 strlcpy(buf, "(none)", sizeof(buf));
             else
@@ -1577,8 +1614,6 @@ cms_signeddata_verify(krb5_context context,
                                   buf, sizeof(buf));
             pkiDebug("problem with cert DN = %s (error=%d) %s\n", buf, j,
                      X509_verify_cert_error_string(j));
-            krb5_set_error_message(context, retval, "%s\n",
-                                   X509_verify_cert_error_string(j));
 #ifdef DEBUG_CERTCHAIN
             size = sk_X509_num(signerCerts);
             pkiDebug("received cert chain of size %d\n", size);
@@ -1609,9 +1644,7 @@ cms_signeddata_verify(krb5_context context,
             default:
                 retval = KRB5KDC_ERR_INVALID_SIG;
             }
-            pkiDebug("CMS Verification failure\n");
-            krb5_set_error_message(context, retval, "%s\n",
-                                   ERR_error_string(err, NULL));
+            (void)oerr(context, retval, _("Failed to verify CMS message"));
             goto cleanup;
         }
     } /* message was signed */
@@ -1800,8 +1833,7 @@ cms_envelopeddata_create(krb5_context context,
 
     p7 = PKCS7_encrypt(encerts, in, cipher, flags);
     if (p7 == NULL) {
-        pkiDebug("failed to encrypt PKCS7 object\n");
-        retval = -1;
+        retval = oerr(context, 0, _("Failed to encrypt PKCS7 object"));
         goto cleanup;
     }
     switch (pa_type) {
@@ -1826,7 +1858,7 @@ cms_envelopeddata_create(krb5_context context,
     }
     retval = i2d_PKCS7(p7, &p);
     if (!retval) {
-        pkiDebug("unable to write pkcs7 object\n");
+        retval = oerr(context, 0, _("Failed to DER encode PKCS7"));
         goto cleanup;
     }
     retval = 0;
@@ -1876,10 +1908,7 @@ cms_envelopeddata_verify(krb5_context context,
 #endif
     /* decode received PKCS7 message */
     if ((p7 = d2i_PKCS7(NULL, &p, (int)enveloped_data_len)) == NULL) {
-        unsigned long err = ERR_peek_error();
-        pkiDebug("failed to decode pkcs7\n");
-        krb5_set_error_message(context, retval, "%s\n",
-                               ERR_error_string(err, NULL));
+        retval = oerr(context, 0, _("Failed to decode PKCS7"));
         goto cleanup;
     }
 
@@ -1896,11 +1925,7 @@ cms_envelopeddata_verify(krb5_context context,
     if (pkcs7_decrypt(context, id_cryptoctx, p7, out)) {
         pkiDebug("PKCS7 decryption successful\n");
     } else {
-        unsigned long err = ERR_peek_error();
-        if (err != 0)
-            krb5_set_error_message(context, retval, "%s\n",
-                                   ERR_error_string(err, NULL));
-        pkiDebug("PKCS7 decryption failed\n");
+        retval = oerr(context, 0, _("Failed to decrypt PKCS7 message"));
         goto cleanup;
     }
 
@@ -4270,13 +4295,14 @@ pkinit_load_fs_cert_and_key(krb5_context context,
     /* Load the certificate. */
     retval = get_cert(certname, &x);
     if (retval != 0 || x == NULL) {
-        pkiDebug("failed to load user's certificate from '%s'\n", certname);
+        retval = oerr(context, 0, _("Cannot read certificate file '%s'"),
+                      certname);
         goto cleanup;
     }
     /* Load the key. */
     retval = get_key(context, id_cryptoctx, keyname, fsname, &y, password);
     if (retval != 0 || y == NULL) {
-        pkiDebug("failed to load user's private key from '%s'\n", keyname);
+        retval = oerr(context, 0, _("Cannot read key file '%s'"), fsname);
         goto cleanup;
     }
 
@@ -5266,16 +5292,14 @@ load_cas_and_crls(krb5_context context,
     }
 
     if (!(in = BIO_new_file(filename, "r"))) {
-        retval = errno;
-        pkiDebug("%s: error opening file '%s': %s\n", __FUNCTION__,
-                 filename, error_message(errno));
+        retval = oerr(context, 0, _("Cannot open file '%s'"), filename);
         goto cleanup;
     }
 
     /* This loads from a file, a stack of x509/crl/pkey sets */
     if ((sk = PEM_X509_INFO_read_bio(in, NULL, NULL, NULL)) == NULL) {
         pkiDebug("%s: error reading file '%s'\n", __FUNCTION__, filename);
-        retval = EIO;
+        retval = oerr(context, 0, _("Cannot read file '%s'"), filename);
         goto cleanup;
     }
 

@@ -87,4 +87,8 @@
     TRACE(c, "PKINIT client found id-pkinit-san in KDC cert: {princ}", princ)
 #define TRACE_PKINIT_CLIENT_TRYAGAIN(c)                                 \
     TRACE(c, "PKINIT client trying again with KDC-provided parameters")
+
+#define TRACE_PKINIT_OPENSSL_ERROR(c, msg)              \
+    TRACE(c, "PKINIT OpenSSL error: {str}", msg)
+
 #endif /* PKINIT_TRACE_H */
