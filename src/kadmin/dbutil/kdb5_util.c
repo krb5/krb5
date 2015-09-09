@@ -97,6 +97,7 @@ void usage()
     fprintf(stderr,
             _("\tupdate_princ_encryption [-f] [-n] [-v] [princ-pattern]\n"
               "\tpurge_mkeys [-f] [-n] [-v]\n"
+              "\ttabdump [-H] [-c] [-e] [-n] [-o outfile] dumptype\n"
               "\nwhere,\n\t[-x db_args]* - any number of database specific "
               "arguments.\n"
               "\t\t\tLook at each database documentation for supported "
@@ -136,6 +137,7 @@ struct _cmd_table {
     {"list_mkeys", kdb5_list_mkeys, 1},
     {"update_princ_encryption", kdb5_update_princ_encryption, 1},
     {"purge_mkeys", kdb5_purge_mkeys, 1},
+    {"tabdump", tabdump, 1},
     {NULL, NULL, 0},
 };
 

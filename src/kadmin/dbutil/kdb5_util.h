@@ -83,6 +83,8 @@ extern void kdb5_add_mkey (int argc, char **argv);
 extern void kdb5_use_mkey (int argc, char **argv);
 extern void kdb5_list_mkeys (int argc, char **argv);
 extern void kdb5_update_princ_encryption (int argc, char **argv);
+extern void tabdump (int argc, char **argv);
+
 extern krb5_error_code master_key_convert(krb5_context context,
                                           krb5_db_entry *db_entry);
 extern void kdb5_purge_mkeys (int argc, char **argv);
