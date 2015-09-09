@@ -28,4 +28,12 @@ install::
 clean::
 	$(RM) $(PROG) $(OBJS) import_err.c import_err.h
 
+T_TDUMPUTIL_OBJS = t_tdumputil.o tdumputil.o
+
+t_tdumputil: $(T_TDUMPUTIL_OBJS) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ $(T_TDUMPUTIL_OBJS) $(SUPPORT_LIB)
+
 depend:: import_err.h
+
+check-pytests:: t_tdumputil
+	$(RUNPYTEST) $(srcdir)/t_tdumputil.py $(PYTESTFLAGS)
