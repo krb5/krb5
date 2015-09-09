@@ -330,6 +330,158 @@ principal processed to be listed, with an indication as to whether it
 needed updating or not.  The **-n** option performs a dry run, only
 showing the actions which would have been taken.
 
+tabdump
+~~~~~~~
+
+    **tabdump** [**-H**] [**-c**] [**-e**] [**-n**] [**-o** *outfile*]
+    *dumptype*
+
+Dump selected fields of the database in a tabular format suitable for
+reporting (e.g., using traditional Unix text processing tools) or
+importing into relational databases.  The data format is tab-separated
+(default), or optionally comma-separated (CSV), with a fixed number of
+columns.  The output begins with a header line containing field names,
+unless suppression is requested using the **-H** option.
+
+The *dumptype* parameter specifies the name of an output table (see
+below).
+
+Options:
+
+**-H**
+    suppress writing the field names in a header line
+
+**-c**
+    use comma separated values (CSV) format, with minimal quoting,
+    instead of the default tab-separated (unquoted, unescaped) format
+
+**-e**
+    write empty hexadecimal string fields as empty fields instead of
+    as "-1".
+
+**-n**
+    produce numeric output for fields that normally have symbolic
+    output, such as enctypes and flag names.  Also requests output of
+    time stamps as decimal POSIX time_t values.
+
+**-o** *outfile*
+    write the dump to the specified output file instead of to standard
+    output
+
+Dump types:
+
+**keydata**
+    principal encryption key information, including actual key data
+    (which is still encrypted in the master key)
+
+    **name**
+        principal name
+    **keyindex**
+        index of this key in the principal's key list
+    **kvno**
+        key version number
+    **enctype**
+        encryption type
+    **key**
+        key data as a hexadecimal string
+    **salttype**
+        salt type
+    **salt**
+        salt data as a hexadecimal string
+
+**keyinfo**
+    principal encryption key information (as in **keydata** above),
+    excluding actual key data
+
+**princ_flags**
+    principal boolean attributes.  Flag names print as hexadecimal
+    numbers if the **-n** option is specified, and all flag positions
+    are printed regardless of whether or not they are set.  If **-n**
+    is not specified, print all known flag names for each principal,
+    but only print hexadecimal flag names if the corresponding flag is
+    set.
+
+    **name**
+        principal name
+    **flag**
+        flag name
+    **value**
+        boolean value (0 for clear, or 1 for set)
+
+**princ_lockout**
+    state information used for tracking repeated password failures
+
+    **name**
+        principal name
+    **last_success**
+        time stamp of most recent successful authentication
+    **last_failed**
+        time stamp of most recent failed authentication
+    **fail_count**
+        count of failed attempts
+
+**princ_meta**
+    principal metadata
+
+    **name**
+        principal name
+    **modby**
+        name of last principal to modify this principal
+    **modtime**
+        timestamp of last modification
+    **lastpwd**
+        timestamp of last password change
+    **policy**
+        policy object name
+    **mkvno**
+        key version number of the master key that encrypts this
+        principal's key data
+    **hist_kvno**
+        key version number of the history key that encrypts the key
+        history data for this principal
+
+**princ_stringattrs**
+    string attributes (key/value pairs)
+
+    **name**
+        principal name
+    **key**
+        attribute name
+    **value**
+        attribute value
+
+**princ_tktpolicy**
+    per-principal ticket policy data, including maximum ticket
+    lifetimes
+
+    **name**
+        principal name
+    **expiration**
+        principal expiration date
+    **pw_expiration**
+        password expiration date
+    **max_life**
+        maximum ticket lifetime
+    **max_renew_life**
+        maximum renewable ticket lifetime
+
+Examples::
+
+    $ kdb5_util tabdump -o keyinfo.txt keyinfo
+    $ cat keyinfo.txt
+    name	keyindex	kvno	enctype	salttype	salt
+    foo@EXAMPLE.COM	0	1	aes128-cts-hmac-sha1-96	normal	-1
+    bar@EXAMPLE.COM	0	1	aes128-cts-hmac-sha1-96	normal	-1
+    bar@EXAMPLE.COM	1	1	des-cbc-crc	normal	-1
+    $ sqlite3
+    sqlite> .mode tabs
+    sqlite> .import keyinfo.txt keyinfo
+    sqlite> select * from keyinfo where enctype like 'des-cbc-%';
+    bar@EXAMPLE.COM	1	1	des-cbc-crc	normal	-1
+    sqlite> .quit
+    $ awk -F'\t' '$4 ~ /des-cbc-/ { print }' keyinfo.txt
+    bar@EXAMPLE.COM	1	1	des-cbc-crc	normal	-1
+
 
 SEE ALSO
 --------
