@@ -23,3 +23,5 @@ realm.run([kadminl, 'setstr', realm.user_princ, '2rt', 'secondtrip'])
 out = realm.run([kinit, realm.user_princ], input=password('user')+'\n')
 if '2rt: secondtrip' not in out:
     fail('multi round-trip cookie test')
+
+success('Pre-authentication framework tests')
