@@ -218,6 +218,6 @@ realm.run(['./t_ciflags', 'p:' + realm.host_princ])
 
 # Test that inquire_context works properly, even on incomplete
 # contexts.
-realm.run(['./t_inq_ctx', 'p:%s' % realm.host_princ])
+realm.run(['./t_inq_ctx', 'user', password('user'), 'p:%s' % realm.host_princ])
 
 success('GSSAPI tests')

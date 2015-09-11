@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "common.h"
@@ -40,9 +41,8 @@
  */
 
 static void
-check_inq_context(const char *header, gss_ctx_id_t context,
-                      int incomplete, OM_uint32 expected_flags,
-                      int expected_locally_init)
+check_inq_context(gss_ctx_id_t context, int incomplete, gss_OID expected_mech,
+                  OM_uint32 expected_flags, int expected_locally_init)
 {
     OM_uint32 major, minor;
     gss_name_t out_init_name, out_accept_name;
@@ -51,7 +51,6 @@ check_inq_context(const char *header, gss_ctx_id_t context,
     OM_uint32 out_flags;
     int out_locally_init;
     int out_open;
-    int mech_is_member;
 
     major = gss_inquire_context(&minor, context, &out_init_name,
                                 &out_accept_name, &out_lifetime,
@@ -59,12 +58,8 @@ check_inq_context(const char *header, gss_ctx_id_t context,
                                 &out_open);
     check_gsserr("gss_inquire_context", major, minor);
 
-    major = gss_test_oid_set_member(&minor, out_mech_type, &mechset_krb5,
-                                    &mech_is_member);
-    check_gsserr("gss_test_oid_set_member", major, minor);
-
-    assert(out_flags & expected_flags);
-    assert(mech_is_member);
+    assert(gss_oid_equal(out_mech_type, expected_mech));
+    assert(out_flags == expected_flags);
     assert(out_locally_init == expected_locally_init);
     if (incomplete) {
         assert(!out_open);
@@ -99,29 +94,144 @@ start_init_context(gss_OID mech, gss_cred_id_t cred, gss_name_t tname,
     (void)gss_release_buffer(&minor, &itok);
 }
 
+/* Call gss_init_sec_context() and gss_accept_sec_context() once to create an
+ * acceptor context. */
+static void
+start_accept_context(gss_OID mech, gss_cred_id_t icred, gss_cred_id_t acred,
+                     gss_name_t tname, OM_uint32 flags, gss_ctx_id_t *ctx)
+{
+    OM_uint32 major, minor;
+    gss_ctx_id_t ictx = GSS_C_NO_CONTEXT;
+    gss_buffer_desc itok = GSS_C_EMPTY_BUFFER, atok = GSS_C_EMPTY_BUFFER;
+
+    major = gss_init_sec_context(&minor, icred, &ictx, tname, mech, flags,
+                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
+                                 NULL, NULL, &itok, NULL, NULL);
+    check_gsserr("gss_init_sec_context", major, minor);
+
+    *ctx = GSS_C_NO_CONTEXT;
+    major = gss_accept_sec_context(&minor, ctx, acred, &itok,
+                                   GSS_C_NO_CHANNEL_BINDINGS, NULL, NULL,
+                                   &atok, NULL, NULL, NULL);
+    check_gsserr("gss_accept_sec_context", major, minor);
+
+    (void)gss_release_buffer(&minor, &itok);
+    (void)gss_release_buffer(&minor, &atok);
+    (void)gss_delete_sec_context(&minor, &ictx, NULL);
+}
+
+static void
+partial_iakerb_acceptor(const char *username, const char *password,
+                        gss_name_t tname, OM_uint32 flags, gss_ctx_id_t *ctx)
+{
+    OM_uint32 major, minor;
+    gss_name_t name;
+    gss_buffer_desc ubuf, pwbuf;
+    gss_OID_set_desc mechlist;
+    gss_cred_id_t icred, acred;
+
+    mechlist.count = 1;
+    mechlist.elements = &mech_iakerb;
+
+    /* Import the username. */
+    ubuf.value = (void *)username;
+    ubuf.length = strlen(username);
+    major = gss_import_name(&minor, &ubuf, GSS_C_NT_USER_NAME, &name);
+    check_gsserr("gss_import_name", major, minor);
+
+    /* Create an IAKERB initiator cred with the username and password. */
+    pwbuf.value = (void *)password;
+    pwbuf.length = strlen(password);
+    major = gss_acquire_cred_with_password(&minor, name, &pwbuf, 0,
+                                           &mechlist, GSS_C_INITIATE, &icred,
+                                           NULL, NULL);
+    check_gsserr("gss_acquire_cred_with_password", major, minor);
+
+    /* Create an acceptor cred with support for IAKERB. */
+    major = gss_acquire_cred(&minor, GSS_C_NO_NAME, GSS_C_INDEFINITE,
+                             &mechlist, GSS_C_ACCEPT, &acred, NULL, NULL);
+    check_gsserr("gss_acquire_cred", major, minor);
+
+    /* Begin context establishment to get a partial acceptor context. */
+    start_accept_context(&mech_iakerb, icred, acred, tname, flags, ctx);
+
+    (void)gss_release_name(&minor, &name);
+    (void)gss_release_cred(&minor, &icred);
+    (void)gss_release_cred(&minor, &acred);
+}
+
+/* Create a partially established SPNEGO acceptor. */
+static void
+partial_spnego_acceptor(gss_name_t tname, gss_ctx_id_t *ctx)
+{
+    OM_uint32 major, minor;
+    gss_buffer_desc itok = GSS_C_EMPTY_BUFFER, atok;
+
+    /*
+     * We could construct a fixed SPNEGO initiator token which forces a
+     * renegotiation, but a simpler approach is to pass an empty token to
+     * gss_accept_sec_context(), taking advantage of our compatibility support
+     * for SPNEGO NegHints.
+     */
+    *ctx = GSS_C_NO_CONTEXT;
+    major = gss_accept_sec_context(&minor, ctx, GSS_C_NO_CREDENTIAL, &itok,
+                                   GSS_C_NO_CHANNEL_BINDINGS, NULL, NULL,
+                                   &atok, NULL, NULL, NULL);
+    check_gsserr("gss_accept_sec_context(neghints)", major, minor);
+
+    (void)gss_release_buffer(&minor, &atok);
+}
+
 int
 main(int argc, char *argv[])
 {
-    OM_uint32 minor, flags;
+    OM_uint32 minor, flags, dce_flags;
     gss_name_t tname;
     gss_ctx_id_t ictx, actx;
+    const char *username, *password;
 
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s targetname\n", argv[0]);
+    if (argc != 4) {
+        fprintf(stderr, "Usage: %s username password targetname\n", argv[0]);
         return 1;
     }
-    tname = import_name(argv[1]);
+    username = argv[1];
+    password = argv[2];
+    tname = import_name(argv[3]);
 
-    flags = GSS_C_SEQUENCE_FLAG | GSS_C_MUTUAL_FLAG;
+    flags = GSS_C_SEQUENCE_FLAG | GSS_C_MUTUAL_FLAG | GSS_C_CONF_FLAG |
+        GSS_C_INTEG_FLAG;
     start_init_context(&mech_krb5, GSS_C_NO_CREDENTIAL, tname, flags, &ictx);
-    check_inq_context("Partial initiator", ictx, 1, flags, 1);
+    check_inq_context(ictx, 1, &mech_krb5, flags | GSS_C_TRANS_FLAG, 1);
     (void)gss_delete_sec_context(&minor, &ictx, NULL);
+
+    start_init_context(&mech_iakerb, GSS_C_NO_CREDENTIAL, tname, flags, &ictx);
+    check_inq_context(ictx, 1, &mech_iakerb, flags, 1);
+    (void)gss_delete_sec_context(&minor, &ictx, NULL);
+
+    start_init_context(&mech_spnego, GSS_C_NO_CREDENTIAL, tname, flags, &ictx);
+    check_inq_context(ictx, 1, &mech_spnego, flags, 1);
+    (void)gss_delete_sec_context(&minor, &ictx, NULL);
+
+    dce_flags = flags | GSS_C_DCE_STYLE;
+    start_accept_context(&mech_krb5, GSS_C_NO_CREDENTIAL, GSS_C_NO_CREDENTIAL,
+                         tname, dce_flags, &actx);
+    check_inq_context(actx, 1, &mech_krb5, dce_flags | GSS_C_TRANS_FLAG, 0);
+    (void)gss_delete_sec_context(&minor, &actx, NULL);
+
+    partial_iakerb_acceptor(username, password, tname, flags, &actx);
+    check_inq_context(actx, 1, &mech_iakerb, 0, 0);
+    (void)gss_delete_sec_context(&minor, &actx, NULL);
+
+    partial_spnego_acceptor(tname, &actx);
+    check_inq_context(actx, 1, &mech_spnego, 0, 0);
+    (void)gss_delete_sec_context(&minor, &actx, NULL);
 
     establish_contexts(&mech_krb5, GSS_C_NO_CREDENTIAL, GSS_C_NO_CREDENTIAL,
                        tname, flags, &ictx, &actx, NULL, NULL, NULL);
 
-    check_inq_context("Complete initiator", ictx, 0, flags, 1);
-    check_inq_context("Complete acceptor", actx, 0, flags, 0);
+    check_inq_context(ictx, 0, &mech_krb5, flags | GSS_C_TRANS_FLAG, 1);
+    check_inq_context(actx, 0, &mech_krb5,
+                      flags | GSS_C_TRANS_FLAG | GSS_C_PROT_READY_FLAG, 0);
 
     (void)gss_delete_sec_context(&minor, &ictx, NULL);
     (void)gss_delete_sec_context(&minor, &actx, NULL);
