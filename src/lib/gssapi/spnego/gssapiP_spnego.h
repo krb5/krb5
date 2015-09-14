@@ -102,6 +102,8 @@ typedef struct {
 	int firstpass;
 	int mech_complete;
 	int nego_done;
+	int initiate;
+	int opened;
 	OM_uint32 ctx_flags;
 	gss_name_t internal_name;
 	gss_OID actual_mech;
