@@ -133,6 +133,9 @@ gss_verify_mic_iov(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
 	return GSS_S_BAD_MECH;
     if (mech->gss_verify_mic_iov == NULL)
 	return GSS_S_UNAVAILABLE;
-    return mech->gss_verify_mic_iov(minor_status, ctx->internal_ctx_id,
-				    qop_state, iov, iov_count);
+    status = mech->gss_verify_mic_iov(minor_status, ctx->internal_ctx_id,
+				      qop_state, iov, iov_count);
+    if (status != GSS_S_COMPLETE)
+	map_error(minor_status, mech);
+    return status;
 }
