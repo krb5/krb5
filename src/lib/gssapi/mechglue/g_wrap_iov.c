@@ -195,8 +195,11 @@ gss_get_mic_iov(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
 	return GSS_S_BAD_MECH;
     if (mech->gss_get_mic_iov == NULL)
 	return GSS_S_UNAVAILABLE;
-    return mech->gss_get_mic_iov(minor_status, ctx->internal_ctx_id, qop_req,
-				 iov, iov_count);
+    status = mech->gss_get_mic_iov(minor_status, ctx->internal_ctx_id, qop_req,
+				   iov, iov_count);
+    if (status != GSS_S_COMPLETE)
+	map_error(minor_status, mech);
+    return status;
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -220,8 +223,11 @@ gss_get_mic_iov_length(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
 	return GSS_S_BAD_MECH;
     if (mech->gss_get_mic_iov_length == NULL)
 	return GSS_S_UNAVAILABLE;
-    return mech->gss_get_mic_iov_length(minor_status, ctx->internal_ctx_id,
-					qop_req, iov, iov_count);
+    status = mech->gss_get_mic_iov_length(minor_status, ctx->internal_ctx_id,
+					  qop_req, iov, iov_count);
+    if (status != GSS_S_COMPLETE)
+	map_error(minor_status, mech);
+    return status;
 }
 
 OM_uint32 KRB5_CALLCONV
