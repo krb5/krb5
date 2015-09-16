@@ -34,7 +34,7 @@
 
 
 ########################################################################
-# 		      Attribute Type Definitions                       #
+#                     Attribute Type Definitions                       #
 ########################################################################
 
 ##### This is the principal name in the RFC 1964 specified format
@@ -45,7 +45,7 @@ add: attributetypes
 attributetypes: ( 2.16.840.1.113719.1.301.4.1.1
                 NAME 'krbPrincipalName'
                 EQUALITY caseExactIA5Match
-		SUBSTR caseExactSubstringsMatch
+                SUBSTR caseExactSubstringsMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.26)
 
 
@@ -108,8 +108,8 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.6.1
 ##### The values (0x00000001 - 0x00800000) are reserved for standards and 
 ##### values (0x01000000 - 0x80000000) can be used for proprietary extensions.
 ##### The flags and values as per RFC 4120 and MIT implementation are,
-##### DISALLOW_POSTDATED	0x00000001
-##### DISALLOW_FORWARDABLE	0x00000002
+##### DISALLOW_POSTDATED        0x00000001
+##### DISALLOW_FORWARDABLE      0x00000002
 ##### DISALLOW_TGT_BASED        0x00000004
 ##### DISALLOW_RENEWABLE        0x00000008
 ##### DISALLOW_PROXIABLE        0x00000010
@@ -732,7 +732,7 @@ attributetypes: ( 1.3.6.1.4.1.5322.21.2.4
 
 ########################################################################
 ########################################################################
-# 		        Object Class Definitions                       #
+#                       Object Class Definitions                       #
 ########################################################################
 
 #### This is a kerberos container for all the realms in a tree.
@@ -824,7 +824,7 @@ objectClasses: ( 2.16.840.1.113719.1.301.6.9.1
                 NAME 'krbPrincipal'
                 SUP ( top )
                 MUST ( krbPrincipalName )
-		MAY ( krbObjectReferences ) )
+                MAY ( krbObjectReferences ) )
 
 
 ###### The principal references auxiliary class. Holds all principals referred
