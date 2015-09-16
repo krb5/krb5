@@ -34,7 +34,7 @@
 
 
 ########################################################################
-# 		      Attribute Type Definitions                       #
+#                     Attribute Type Definitions                       #
 ########################################################################
 
 ##### This is the principal name in the RFC 1964 specified format
@@ -42,7 +42,7 @@
 attributetype ( 2.16.840.1.113719.1.301.4.1.1
                 NAME 'krbPrincipalName'
                 EQUALITY caseExactIA5Match
-		SUBSTR caseExactSubstringsMatch
+                SUBSTR caseExactSubstringsMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.26)
 
 ##### If there are multiple krbPrincipalName values for an entry, this
@@ -92,8 +92,8 @@ attributetype ( 2.16.840.1.113719.1.301.4.6.1
 ##### The values (0x00000001 - 0x00800000) are reserved for standards and 
 ##### values (0x01000000 - 0x80000000) can be used for proprietary extensions.
 ##### The flags and values as per RFC 4120 and MIT implementation are,
-##### DISALLOW_POSTDATED	0x00000001
-##### DISALLOW_FORWARDABLE	0x00000002
+##### DISALLOW_POSTDATED        0x00000001
+##### DISALLOW_FORWARDABLE      0x00000002
 ##### DISALLOW_TGT_BASED        0x00000004
 ##### DISALLOW_RENEWABLE        0x00000008
 ##### DISALLOW_PROXIABLE        0x00000010
@@ -585,7 +585,7 @@ attributetype ( 1.3.6.1.4.1.5322.21.2.4
 
 ########################################################################
 ########################################################################
-# 		        Object Class Definitions                       #
+#                       Object Class Definitions                       #
 ########################################################################
 
 #### This is a kerberos container for all the realms in a tree.
@@ -593,7 +593,7 @@ attributetype ( 1.3.6.1.4.1.5322.21.2.4
 objectclass ( 2.16.840.1.113719.1.301.6.1.1
                 NAME 'krbContainer'
                 SUP top
-		STRUCTURAL
+                STRUCTURAL
                 MUST ( cn ) )
 
 
@@ -602,7 +602,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.1.1
 objectclass ( 2.16.840.1.113719.1.301.6.2.1
                 NAME 'krbRealmContainer'
                 SUP top
-		STRUCTURAL
+                STRUCTURAL
                 MUST ( cn )
                 MAY ( krbMKey $ krbUPEnabled $ krbSubTrees $ krbSearchScope $ krbLdapServers $ krbSupportedEncSaltTypes $ krbDefaultEncSaltTypes $ krbTicketPolicyReference $ krbKdcServers $ krbPwdServers $ krbAdmServers $ krbPrincNamingAttr $ krbPwdPolicyReference $ krbPrincContainerRef ) )
 
@@ -632,7 +632,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.3.1
 objectclass ( 2.16.840.1.113719.1.301.6.4.1
                 NAME 'krbKdcService'
                 SUP krbService
-		STRUCTURAL )
+                STRUCTURAL )
 
 
 ##### Representative object for the Kerberos Password server to bind into a LDAP directory
@@ -642,7 +642,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.4.1
 objectclass ( 2.16.840.1.113719.1.301.6.5.1
                 NAME 'krbPwdService'
                 SUP krbService
-		STRUCTURAL )
+                STRUCTURAL )
 
 
 ###### The principal data auxiliary class. Holds principal information
@@ -650,7 +650,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.5.1
 
 objectclass ( 2.16.840.1.113719.1.301.6.8.1
                 NAME 'krbPrincipalAux'
-		SUP top
+                SUP top
                 AUXILIARY
                 MAY ( krbPrincipalName $ krbCanonicalName $ krbUPEnabled $ krbPrincipalKey $ krbTicketPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration $ krbPwdPolicyReference $ krbPrincipalType $ krbPwdHistory $ krbLastPwdChange $ krbLastAdminUnlock $ krbPrincipalAliases $ krbLastSuccessfulAuth $ krbLastFailedAuth $ krbLoginFailedCount $ krbExtraData $ krbAllowedToDelegateTo ) )
 
@@ -661,7 +661,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.9.1
                 NAME 'krbPrincipal'
                 SUP top
                 MUST ( krbPrincipalName )
-		MAY ( krbObjectReferences ) )
+                MAY ( krbObjectReferences ) )
 
 
 ###### The principal references auxiliary class. Holds all principals referred
@@ -680,7 +680,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.11.1
 objectclass ( 2.16.840.1.113719.1.301.6.13.1
                 NAME 'krbAdmService'
                 SUP krbService 
-		STRUCTURAL )
+                STRUCTURAL )
 
 
 ##### The krbPwdPolicy object is a template password policy that 
