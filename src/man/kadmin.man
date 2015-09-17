@@ -1,4 +1,6 @@
-.TH "KADMIN" "1" " " "1.13" "MIT Kerberos"
+.\" Man page generated from reStructuredText.
+.
+.TH "KADMIN" "1" " " "1.14" "MIT Kerberos"
 .SH NAME
 kadmin \- Kerberos V5 database administration program
 .
@@ -28,8 +30,6 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.\" Man page generated from reStructuredText.
-.
 .SH SYNOPSIS
 .sp
 \fBkadmin\fP
@@ -40,6 +40,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 [[\fB\-c\fP \fIcache_name\fP]|[\fB\-k\fP [\fB\-t\fP \fIkeytab\fP]]|\fB\-n\fP]
 [\fB\-w\fP \fIpassword\fP]
 [\fB\-s\fP \fIadmin_server\fP[:\fIport\fP]]
+[command args...]
 .sp
 \fBkadmin.local\fP
 [\fB\-r\fP \fIrealm\fP]
@@ -49,12 +50,13 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 [\fB\-e\fP \fIenc\fP:\fIsalt\fP ...]
 [\fB\-m\fP]
 [\fB\-x\fP \fIdb_args\fP]
+[command args...]
 .SH DESCRIPTION
 .sp
 kadmin and kadmin.local are command\-line interfaces to the Kerberos V5
 administration system.  They provide nearly identical functionalities;
 the difference is that kadmin.local directly accesses the KDC
-database, while kadmin performs operations using \fIkadmind(8)\fP.
+database, while kadmin performs operations using \fIkadmind(8)\fP\&.
 Except as explicitly noted otherwise, this man page will use "kadmin"
 to refer to both versions.  kadmin provides for the maintenance of
 Kerberos principals, password policies, and service key tables
@@ -62,7 +64,7 @@ Kerberos principals, password policies, and service key tables
 .sp
 The remote kadmin client uses Kerberos to authenticate to kadmind
 using the service principal \fBkadmin/ADMINHOST\fP (where \fIADMINHOST\fP is
-the fully\-qualified hostname of the admin server) or \fBkadmin/admin\fP.
+the fully\-qualified hostname of the admin server) or \fBkadmin/admin\fP\&.
 If the credentials cache contains a ticket for one of these
 principals, and the \fB\-c\fP credentials_cache option is specified, that
 ticket is used to authenticate to kadmind.  Otherwise, the \fB\-p\fP and
@@ -90,7 +92,7 @@ obtained with getpwuid, in order of preference.
 .B \fB\-k\fP
 Use a keytab to decrypt the KDC response instead of prompting for
 a password.  In this case, the default principal will be
-\fBhost/hostname\fP.  If there is no keytab specified with the
+\fBhost/hostname\fP\&.  If there is no keytab specified with the
 \fB\-t\fP option, then the default keytab will be used.
 .TP
 .B \fB\-t\fP \fIkeytab\fP
@@ -101,7 +103,7 @@ with the \fB\-k\fP option.
 Requests anonymous processing.  Two types of anonymous principals
 are supported.  For fully anonymous Kerberos, configure PKINIT on
 the KDC and configure \fBpkinit_anchors\fP in the client\(aqs
-\fIkrb5.conf(5)\fP.  Then use the \fB\-n\fP option with a principal
+\fIkrb5.conf(5)\fP\&.  Then use the \fB\-n\fP option with a principal
 of the form \fB@REALM\fP (an empty principal name followed by the
 at\-sign and a realm name).  If permitted by the KDC, an anonymous
 ticket will be returned.  A second form of anonymous tickets is
@@ -127,8 +129,7 @@ care, as it may expose the password to other users on the system
 via the process list.
 .TP
 .B \fB\-q\fP \fIquery\fP
-Perform the specified query and then exit.  This can be useful for
-writing scripts.
+Perform the specified query and then exit.
 .TP
 .B \fB\-d\fP \fIdbname\fP
 Specifies the name of the KDC database.  This option does not
@@ -153,31 +154,101 @@ Force use of old AUTH_GSSAPI authentication flavor.
 Prevent fallback to AUTH_GSSAPI authentication flavor.
 .TP
 .B \fB\-x\fP \fIdb_args\fP
-Specifies the database specific arguments.  Options supported for
-the LDAP database module are:
-.INDENT 7.0
+Specifies the database specific arguments.  See the next section
+for supported options.
+.UNINDENT
+.sp
+Starting with release 1.14, if any command\-line arguments remain after
+the options, they will be treated as a single query to be executed.
+This mode of operation is intended for scripts and behaves differently
+from the interactive mode in several respects:
+.INDENT 0.0
+.IP \(bu 2
+Query arguments are split by the shell, not by kadmin.
+.IP \(bu 2
+Informational and warning messages are suppressed.  Error messages
+and query output (e.g. for \fBget_principal\fP) will still be
+displayed.
+.IP \(bu 2
+Confirmation prompts are disabled (as if \fB\-force\fP was given).
+Password prompts will still be issued as required.
+.IP \(bu 2
+The exit status will be non\-zero if the query fails.
+.UNINDENT
+.sp
+The \fB\-q\fP option does not carry these behavior differences; the query
+will be processed as if it was entered interactively.  The \fB\-q\fP
+option cannot be used in combination with a query in the remaining
+arguments.
+.SH DATABASE OPTIONS
+.sp
+Database options can be used to override database\-specific defaults.
+Supported options for the DB2 module are:
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
 .TP
-.B \fB\-x host=\fP\fIhostname\fP
+.B \fB\-x dbname=\fP*filename*
+Specifies the base filename of the DB2 database.
+.TP
+.B \fB\-x lockiter\fP
+Make iteration operations hold the lock for the duration of
+the entire operation, rather than temporarily releasing the
+lock while handling each principal.  This is the default
+behavior, but this option exists to allow command line
+override of a [dbmodules] setting.  First introduced in
+release 1.13.
+.TP
+.B \fB\-x unlockiter\fP
+Make iteration operations unlock the database for each
+principal, instead of holding the lock for the duration of the
+entire operation.  First introduced in release 1.13.
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.sp
+Supported options for the LDAP module are:
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.TP
+.B \fB\-x host=\fP\fIldapuri\fP
 Specifies the LDAP server to connect to by a LDAP URI.
 .TP
 .B \fB\-x binddn=\fP\fIbind_dn\fP
-Specifies the DN of the object used by the administration
-server to bind to the LDAP server.  This object should have
-the read and write privileges on the realm container, the
-principal container, and the subtree that is referenced by the
-realm.
+Specifies the DN used to bind to the LDAP server.
 .TP
-.B \fB\-x bindpwd=\fP\fIbind_password\fP
-Specifies the password for the above mentioned binddn.  Using
-this option may expose the password to other users on the
-system via the process list; to avoid this, instead stash the
-password using the \fBstashsrvpw\fP command of
-\fIkdb5_ldap_util(8)\fP.
+.B \fB\-x bindpwd=\fP\fIpassword\fP
+Specifies the password or SASL secret used to bind to the LDAP
+server.  Using this option may expose the password to other
+users on the system via the process list; to avoid this,
+instead stash the password using the \fBstashsrvpw\fP command of
+\fIkdb5_ldap_util(8)\fP\&.
+.TP
+.B \fB\-x sasl_mech=\fP\fImechanism\fP
+Specifies the SASL mechanism used to bind to the LDAP server.
+The bind DN is ignored if a SASL mechanism is used.  New in
+release 1.13.
+.TP
+.B \fB\-x sasl_authcid=\fP\fIname\fP
+Specifies the authentication name used when binding to the
+LDAP server with a SASL mechanism, if the mechanism requires
+one.  New in release 1.13.
+.TP
+.B \fB\-x sasl_authzid=\fP\fIname\fP
+Specifies the authorization name used when binding to the LDAP
+server with a SASL mechanism.  New in release 1.13.
+.TP
+.B \fB\-x sasl_realm=\fP\fIrealm\fP
+Specifies the realm used when binding to the LDAP server with
+a SASL mechanism, if the mechanism uses one.  New in release
+1.13.
 .TP
 .B \fB\-x debug=\fP\fIlevel\fP
 sets the OpenLDAP client library debug level.  \fIlevel\fP is an
 integer to be interpreted by the library.  Debugging messages
 are printed to standard error.  New in release 1.12.
+.UNINDENT
 .UNINDENT
 .UNINDENT
 .SH COMMANDS
@@ -344,8 +415,11 @@ principal is to be created.
 .B \fB\-x tktpolicy=\fP\fIpolicy\fP
 Associates a ticket policy to the Kerberos principal.
 .UNINDENT
-.IP Note
+.sp
+\fBNOTE:\fP
 .INDENT 7.0
+.INDENT 3.5
+.INDENT 0.0
 .IP \(bu 2
 The \fBcontainerdn\fP and \fBlinkdn\fP options cannot be
 specified with the \fBdn\fP option.
@@ -358,7 +432,8 @@ container.
 \fIdn\fP and \fIcontainerdn\fP should be within the subtrees or
 principal container configured in the realm.
 .UNINDENT
-.RE
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .sp
 Example:
@@ -409,7 +484,7 @@ to its password policy) so that it can successfully authenticate.
 .UNINDENT
 .UNINDENT
 .sp
-Renames the specified \fIold_principal\fP to \fInew_principal\fP.  This
+Renames the specified \fIold_principal\fP to \fInew_principal\fP\&.  This
 command prompts for confirmation, unless the \fB\-force\fP option is
 given.
 .sp
@@ -436,7 +511,7 @@ Alias: \fBdelprinc\fP
 .UNINDENT
 .UNINDENT
 .sp
-Changes the password of \fIprincipal\fP.  Prompts for a new password if
+Changes the password of \fIprincipal\fP\&.  Prompts for a new password if
 neither \fB\-randkey\fP or \fB\-pw\fP is specified.
 .sp
 This command requires the \fBchangepw\fP privilege, or that the
@@ -489,8 +564,8 @@ kadmin:
 .UNINDENT
 .sp
 Purges previously retained old keys (e.g., from \fBchange_password
-\-keepold\fP) from \fIprincipal\fP.  If \fB\-keepkvno\fP is specified, then
-only purges keys with kvnos lower than \fIoldest_kvno_to_keep\fP.  If
+\-keepold\fP) from \fIprincipal\fP\&.  If \fB\-keepkvno\fP is specified, then
+only purges keys with kvnos lower than \fIoldest_kvno_to_keep\fP\&.  If
 \fB\-all\fP is specified, then all keys are purged.  The \fB\-all\fP option
 is new in release 1.12.
 .sp
@@ -528,8 +603,8 @@ Last successful authentication: [never]
 Last failed authentication: [never]
 Failed password attempts: 0
 Number of keys: 2
-Key: vno 1, DES cbc mode with CRC\-32, no salt
-Key: vno 1, DES cbc mode with CRC\-32, Version 4
+Key: vno 1, des\-cbc\-crc
+Key: vno 1, des\-cbc\-crc:v4
 Attributes:
 Policy: [none]
 
@@ -551,7 +626,7 @@ kadmin:
 .sp
 Retrieves all or some principal names.  \fIexpression\fP is a shell\-style
 glob expression that can contain the wild\-card characters \fB?\fP,
-\fB*\fP, and \fB[]\fP.  All principal names matching the expression are
+\fB*\fP, and \fB[]\fP\&.  All principal names matching the expression are
 printed.  If no expression is provided, all principal names are
 printed.  If the expression does not contain an \fB@\fP character, an
 \fB@\fP character followed by the local realm is appended to the
@@ -584,7 +659,7 @@ kadmin:
 .UNINDENT
 .UNINDENT
 .sp
-Displays string attributes on \fIprincipal\fP.
+Displays string attributes on \fIprincipal\fP\&.
 .sp
 This command requires the \fBinquire\fP privilege.
 .sp
@@ -592,25 +667,50 @@ Alias: \fBgetstr\fP
 .SS set_string
 .INDENT 0.0
 .INDENT 3.5
-\fBset_string\fP \fIprincipal\fP \fIkey\fP \fIvalue\fP
+\fBset_string\fP \fIprincipal\fP \fIname\fP \fIvalue\fP
 .UNINDENT
 .UNINDENT
 .sp
-Sets a string attribute on \fIprincipal\fP.  String attributes are used to
+Sets a string attribute on \fIprincipal\fP\&.  String attributes are used to
 supply per\-principal configuration to the KDC and some KDC plugin
-modules.  The following string attributes are recognized by the KDC:
+modules.  The following string attribute names are recognized by the
+KDC:
 .INDENT 0.0
+.TP
+.B \fBrequire_auth\fP
+Specifies an authentication indicator which is required to
+authenticate to the principal as a service.  Multiple indicators
+can be specified, separated by spaces; in this case any of the
+specified indicators will be accepted.  (New in release 1.14.)
 .TP
 .B \fBsession_enctypes\fP
 Specifies the encryption types supported for session keys when the
 principal is authenticated to as a server.  See
 \fIEncryption_types\fP in \fIkdc.conf(5)\fP for a list of the
 accepted values.
+.TP
+.B \fBotp\fP
+Enables One Time Passwords (OTP) preauthentication for a client
+\fIprincipal\fP\&.  The \fIvalue\fP is a JSON string representing an array
+of objects, each having optional \fBtype\fP and \fBusername\fP fields.
 .UNINDENT
 .sp
 This command requires the \fBmodify\fP privilege.
 .sp
 Alias: \fBsetstr\fP
+.sp
+Example:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+set_string host/foo.mit.edu session_enctypes aes128\-cts
+set_string user@FOO.COM otp [{"type":"hotp","username":"custom"}]
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
 .SS del_string
 .INDENT 0.0
 .INDENT 3.5
@@ -618,7 +718,7 @@ Alias: \fBsetstr\fP
 .UNINDENT
 .UNINDENT
 .sp
-Deletes a string attribute from \fIprincipal\fP.
+Deletes a string attribute from \fIprincipal\fP\&.
 .sp
 This command requires the \fBdelete\fP privilege.
 .sp
@@ -683,7 +783,7 @@ is locked from authenticating if too many authentication failures
 occur without the specified failure count interval elapsing.
 A duration of 0 (the default) means the principal remains locked
 out until it is administratively unlocked with \fBmodprinc
-\-unlock\fP.
+\-unlock\fP\&.
 .TP
 .B \fB\-allowedkeysalts\fP
 Specifies the key/salt tuples supported for long\-term keys when
@@ -713,8 +813,8 @@ kadmin:
 .UNINDENT
 .UNINDENT
 .sp
-Modifies the password policy named \fIpolicy\fP.  Options are as described
-for \fBadd_policy\fP.
+Modifies the password policy named \fIpolicy\fP\&.  Options are as described
+for \fBadd_policy\fP\&.
 .sp
 This command requires the \fBmodify\fP privilege.
 .sp
@@ -726,7 +826,7 @@ Alias: \fBmodpol\fP
 .UNINDENT
 .UNINDENT
 .sp
-Deletes the password policy named \fIpolicy\fP.  Prompts for confirmation
+Deletes the password policy named \fIpolicy\fP\&.  Prompts for confirmation
 before deletion.  The command will fail if the policy is in use by any
 principals.
 .sp
@@ -755,7 +855,7 @@ kadmin:
 .UNINDENT
 .UNINDENT
 .sp
-Displays the values of the password policy named \fIpolicy\fP.  With the
+Displays the values of the password policy named \fIpolicy\fP\&.  With the
 \fB\-terse\fP flag, outputs the fields as quoted strings separated by
 tabs.
 .sp
@@ -798,13 +898,13 @@ meaningful.
 .sp
 Retrieves all or some policy names.  \fIexpression\fP is a shell\-style
 glob expression that can contain the wild\-card characters \fB?\fP,
-\fB*\fP, and \fB[]\fP.  All policy names matching the expression are
+\fB*\fP, and \fB[]\fP\&.  All policy names matching the expression are
 printed.  If no expression is provided, all existing policy names are
 printed.
 .sp
 This command requires the \fBlist\fP privilege.
 .sp
-Aliases: \fBlistpols\fP, \fBget_policies\fP, \fBgetpols\fP.
+Aliases: \fBlistpols\fP, \fBget_policies\fP, \fBgetpols\fP\&.
 .sp
 Examples:
 .INDENT 0.0
@@ -953,6 +1053,6 @@ interface to the OpenVision Kerberos administration program.
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
-1985-2013, MIT
+1985-2015, MIT
 .\" Generated by docutils manpage writer.
 .

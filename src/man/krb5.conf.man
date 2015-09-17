@@ -1,4 +1,6 @@
-.TH "KRB5.CONF" "5" " " "1.13" "MIT Kerberos"
+.\" Man page generated from reStructuredText.
+.
+.TH "KRB5.CONF" "5" " " "1.14" "MIT Kerberos"
 .SH NAME
 krb5.conf \- Kerberos configuration file
 .
@@ -28,16 +30,19 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.\" Man page generated from reStructuredText.
-.
 .sp
 The krb5.conf file contains Kerberos configuration information,
 including the locations of KDCs and admin servers for the Kerberos
 realms of interest, defaults for the current realm and for Kerberos
 applications, and mappings of hostnames onto Kerberos realms.
 Normally, you should install your krb5.conf file in the directory
-\fB/etc\fP.  You can override the default location by setting the
-environment variable \fBKRB5_CONFIG\fP.
+\fB/etc\fP\&.  You can override the default location by setting the
+environment variable \fBKRB5_CONFIG\fP\&.  Multiple colon\-separated
+filenames may be specified in \fBKRB5_CONFIG\fP; all files which are
+present will be read.  Starting in release 1.14, directory names can
+also be specified in \fBKRB5_CONFIG\fP; all files within the directory
+whose names consist solely of alphanumeric characters, dashes, or
+underscores will be read.
 .SH STRUCTURE
 .sp
 The krb5.conf file is set up in the style of a Windows INI file.
@@ -53,9 +58,10 @@ foo = bar
 .fi
 .UNINDENT
 .UNINDENT
+.sp
+or:
 .INDENT 0.0
-.TP
-.B or
+.INDENT 3.5
 .sp
 .nf
 .ft C
@@ -66,14 +72,16 @@ fubar = {
 .ft P
 .fi
 .UNINDENT
+.UNINDENT
 .sp
 Placing a \(aq*\(aq at the end of a line indicates that this is the \fIfinal\fP
 value for the tag.  This means that neither the remainder of this
 configuration file nor any other configuration file will be checked
 for any other values for this tag.
+.sp
+For example, if you have the following lines:
 .INDENT 0.0
-.TP
-.B For example, if you have the following lines:
+.INDENT 3.5
 .sp
 .nf
 .ft C
@@ -81,6 +89,7 @@ foo = bar*
 foo = baz
 .ft P
 .fi
+.UNINDENT
 .UNINDENT
 .sp
 then the second value of \fBfoo\fP (\fBbaz\fP) would never be read.
@@ -181,7 +190,7 @@ The libdefaults section may contain any of the following relations:
 If this flag is set to false, then weak encryption types (as noted
 in \fIEncryption_types\fP in \fIkdc.conf(5)\fP) will be filtered
 out of the lists \fBdefault_tgs_enctypes\fP,
-\fBdefault_tkt_enctypes\fP, and \fBpermitted_enctypes\fP.  The default
+\fBdefault_tkt_enctypes\fP, and \fBpermitted_enctypes\fP\&.  The default
 value for this tag is false, which may cause authentication
 failures in existing Kerberos infrastructures that do not support
 strong crypto.  Users in affected environments should set this tag
@@ -212,28 +221,34 @@ Kerberos which interact with credential caches on the same host.
 Sets the maximum allowable amount of clockskew in seconds that the
 library will tolerate before assuming that a Kerberos message is
 invalid.  The default value is 300 seconds, or five minutes.
+.sp
+The clockskew setting is also used when evaluating ticket start
+and expiration times.  For example, tickets that have reached
+their expiration time can still be used (and renewed if they are
+renewable tickets) if they have been expired for a shorter
+duration than the \fBclockskew\fP setting.
 .TP
 .B \fBdefault_ccache_name\fP
 This relation specifies the name of the default credential cache.
-The default is \fB@CCNAME@\fP.  This relation is subject to parameter
+The default is \fB@CCNAME@\fP\&.  This relation is subject to parameter
 expansion (see below).  New in release 1.11.
 .TP
 .B \fBdefault_client_keytab_name\fP
 This relation specifies the name of the default keytab for
-obtaining client credentials.  The default is \fB@CKTNAME@\fP.  This
+obtaining client credentials.  The default is \fB@CKTNAME@\fP\&.  This
 relation is subject to parameter expansion (see below).
 New in release 1.11.
 .TP
 .B \fBdefault_keytab_name\fP
 This relation specifies the default keytab name to be used by
-application servers such as sshd.  The default is \fB@KTNAME@\fP.  This
+application servers such as sshd.  The default is \fB@KTNAME@\fP\&.  This
 relation is subject to parameter expansion (see below).
 .TP
 .B \fBdefault_realm\fP
 Identifies the default Kerberos realm for the client.  Set its
 value to your Kerberos realm.  If this value is not set, then a
 realm must be specified with every Kerberos principal when
-invoking programs such as \fIkinit(1)\fP.
+invoking programs such as \fIkinit(1)\fP\&.
 .TP
 .B \fBdefault_tgs_enctypes\fP
 Identifies the supported list of session key encryption types that
@@ -287,6 +302,11 @@ it (besides the initial ticket request, which has no encrypted
 data), and anything the fake KDC sends will not be trusted without
 verification using some secret that it won\(aqt know.
 .TP
+.B \fBerr_fmt\fP
+This relation allows for custom error message formatting.  If a
+value is set, error messages will be formatted by substituting a
+normal error message for %M and an error code for %C in the value.
+.TP
 .B \fBextra_addresses\fP
 This allows a computer to use multiple local addresses, in order
 to allow Kerberos to work in a network that uses NATs while still
@@ -310,7 +330,7 @@ default value is false.  New in release 1.10.
 .TP
 .B \fBk5login_authoritative\fP
 If this flag is true, principals must be listed in a local user\(aqs
-k5login file to be granted login access, if a \fI.k5login(5)\fP
+k5login file to be granted login access, if a \fI\&.k5login(5)\fP
 file exists.  If this flag is false, a principal may still be
 granted login access through other mechanisms even if a k5login
 file exists but does not list the principal.  The default value is
@@ -323,6 +343,19 @@ local username.  If not set, the library will look for k5login
 files in the user\(aqs home directory, with the filename .k5login.
 For security reasons, .k5login files must be owned by
 the local user or by root.
+.TP
+.B \fBkcm_mach_service\fP
+On OS X only, determines the name of the bootstrap service used to
+contact the KCM daemon for the KCM credential cache type.  If the
+value is \fB\-\fP, Mach RPC will not be used to contact the KCM
+daemon.  The default value is \fBorg.h5l.kcm\fP\&.
+.TP
+.B \fBkcm_socket\fP
+Determines the path to the Unix domain socket used to access the
+KCM daemon for the KCM credential cache type.  If the value is
+\fB\-\fP, Unix domain sockets will not be used to contact the KCM
+daemon.  The default value is
+\fB/var/run/.heim_org.h5l.kcm\-socket\fP\&.
 .TP
 .B \fBkdc_default_options\fP
 Default KDC options (Xored for multiple values) when requesting
@@ -468,7 +501,7 @@ ticket requests.  The default value is 1 day.
 .B \fBudp_preference_limit\fP
 When sending a message to the KDC, the library will try using TCP
 before UDP if the size of the message is above
-\fBudp_preference_limit\fP.  If the message is smaller than
+\fBudp_preference_limit\fP\&.  If the message is smaller than
 \fBudp_preference_limit\fP, then UDP will be tried before TCP.
 Regardless of the size, both protocols will be tried if the first
 attempt fails.
@@ -500,9 +533,9 @@ translated. The possible values are:
 .INDENT 7.0
 .TP
 .B \fBRULE:\fP\fIexp\fP
-The local name will be formulated from \fIexp\fP.
+The local name will be formulated from \fIexp\fP\&.
 .sp
-The format for \fIexp\fP is \fB[\fP\fIn\fP\fB:\fP\fIstring\fP\fB](\fP\fIregexp\fP\fB)s/\fP\fIpattern\fP\fB/\fP\fIreplacement\fP\fB/g\fP.
+The format for \fIexp\fP is \fB[\fP\fIn\fP\fB:\fP\fIstring\fP\fB](\fP\fIregexp\fP\fB)s/\fP\fIpattern\fP\fB/\fP\fIreplacement\fP\fB/g\fP\&.
 The integer \fIn\fP indicates how many components the target
 principal should have.  If this matches, then a string will be
 formed from \fIstring\fP, substituting the realm of the principal
@@ -513,15 +546,18 @@ for \fB$0\fP and the \fIn\fP\(aqth component of the principal for
 the \fBs//[g]\fP substitution command will be run over the
 string.  The optional \fBg\fP will cause the substitution to be
 global over the \fIstring\fP, instead of replacing only the first
-match in the \fIstring\fP.
+match in the \fIstring\fP\&.
 .TP
 .B \fBDEFAULT\fP
 The principal name will be used as the local user name.  If
 the principal has more than one component or is not in the
 default realm, this rule is not applicable and the conversion
 will fail.
-.TP
-.B For example:
+.UNINDENT
+.sp
+For example:
+.INDENT 7.0
+.INDENT 3.5
 .sp
 .nf
 .ft C
@@ -535,14 +571,15 @@ will fail.
 .ft P
 .fi
 .UNINDENT
+.UNINDENT
 .sp
 would result in any principal without \fBroot\fP or \fBadmin\fP as the
 second component to be translated with the default rule.  A
 principal with a second component of \fBadmin\fP will become its
 first component.  \fBroot\fP will be used as the local name for any
-principal with a second component of \fBroot\fP.  The exception to
+principal with a second component of \fBroot\fP\&.  The exception to
 these two rules are any principals \fBjohndoe/*\fP, which will
-always get the local name \fBguest\fP.
+always get the local name \fBguest\fP\&.
 .TP
 .B \fBauth_to_local_names\fP
 This subsection allows you to set explicit mappings from principal
@@ -554,6 +591,32 @@ This tag specifies the domain used to expand hostnames when
 translating Kerberos 4 service principals to Kerberos 5 principals
 (for example, when converting \fBrcmd.hostname\fP to
 \fBhost/hostname.domain\fP).
+.TP
+.B \fBhttp_anchors\fP
+When KDCs and kpasswd servers are accessed through HTTPS proxies, this tag
+can be used to specify the location of the CA certificate which should be
+trusted to issue the certificate for a proxy server.  If left unspecified,
+the system\-wide default set of CA certificates is used.
+.sp
+The syntax for values is similar to that of values for the
+\fBpkinit_anchors\fP tag:
+.sp
+\fBFILE:\fP \fIfilename\fP
+.sp
+\fIfilename\fP is assumed to be the name of an OpenSSL\-style ca\-bundle file.
+.sp
+\fBDIR:\fP \fIdirname\fP
+.sp
+\fIdirname\fP is assumed to be an directory which contains CA certificates.
+All files in the directory will be examined; if they contain certificates
+(in PEM format), they will be used.
+.sp
+\fBENV:\fP \fIenvvar\fP
+.sp
+\fIenvvar\fP specifies the name of an environment variable which has been set
+to a value conforming to one of the previous values.  For example,
+\fBENV:X509_PROXY_CA\fP, where environment variable \fBX509_PROXY_CA\fP has
+been set to \fBFILE:/tmp/my_proxy.pem\fP\&.
 .TP
 .B \fBkdc\fP
 The name or address of a host running a KDC for that realm.  An
@@ -597,7 +660,7 @@ is the Kerberos V4 realm name.
 The [domain_realm] section provides a translation from a domain name
 or hostname to a Kerberos realm name.  The tag name can be a host name
 or domain name, where domain names are indicated by a prefix of a
-period (\fB.\fP).  The value of the relation is the Kerberos realm name
+period (\fB\&.\fP).  The value of the relation is the Kerberos realm name
 for that particular host or domain.  A host name relation implicitly
 provides the corresponding domain name relation, unless an explicit domain
 name relation is provided.  The Kerberos realm may be
@@ -620,10 +683,10 @@ Host names and domain names should be in lower case.  For example:
 maps the host with the name \fBcrash.mit.edu\fP into the
 \fBTEST.ATHENA.MIT.EDU\fP realm.  The second entry maps all hosts under the
 domain \fBdev.mit.edu\fP into the \fBTEST.ATHENA.MIT.EDU\fP realm, but not
-the host with the name \fBdev.mit.edu\fP.  That host is matched
+the host with the name \fBdev.mit.edu\fP\&.  That host is matched
 by the third entry, which maps the host \fBmit.edu\fP and all hosts
 under the domain \fBmit.edu\fP that do not match a preceding rule
-into the realm \fBATHENA.MIT.EDU\fP.
+into the realm \fBATHENA.MIT.EDU\fP\&.
 .sp
 If no translation entry applies to a hostname used for a service
 principal for a service ticket request, the library will try to get a
@@ -660,7 +723,7 @@ a subtag of the server realm.
 For example, \fBANL.GOV\fP, \fBPNL.GOV\fP, and \fBNERSC.GOV\fP all wish to
 use the \fBES.NET\fP realm as an intermediate realm.  ANL has a sub
 realm of \fBTEST.ANL.GOV\fP which will authenticate with \fBNERSC.GOV\fP
-but not \fBPNL.GOV\fP.  The [capaths] section for \fBANL.GOV\fP systems
+but not \fBPNL.GOV\fP\&.  The [capaths] section for \fBANL.GOV\fP systems
 would look like this:
 .INDENT 0.0
 .INDENT 3.5
@@ -732,9 +795,10 @@ important to servers.
 Each tag in the [appdefaults] section names a Kerberos V5 application
 or an option that is used by some Kerberos V5 application[s].  The
 value of the tag defines the default behaviors for that application.
+.sp
+For example:
 .INDENT 0.0
-.TP
-.B For example:
+.INDENT 3.5
 .sp
 .nf
 .ft C
@@ -754,6 +818,7 @@ value of the tag defines the default behaviors for that application.
     option2 = true
 .ft P
 .fi
+.UNINDENT
 .UNINDENT
 .sp
 The above four ways of specifying the value of an option are shown in
@@ -809,7 +874,7 @@ form \fBmodulename:pathname\fP, which causes the shared object
 located at \fIpathname\fP to be registered as a dynamic module named
 \fImodulename\fP for the pluggable interface.  If \fIpathname\fP is not an
 absolute path, it will be treated as relative to the
-\fBplugin_base_dir\fP value from \fI\%[libdefaults]\fP.
+\fBplugin_base_dir\fP value from \fI\%[libdefaults]\fP\&.
 .UNINDENT
 .sp
 For pluggable interfaces where module order matters, modules
@@ -930,21 +995,25 @@ realm\(aqs section, and applies the default method if no
 .TP
 .B \fBk5login\fP
 This module authorizes a principal to a local account according to
-the account\(aqs \fI.k5login(5)\fP file.
+the account\(aqs \fI\&.k5login(5)\fP file.
 .TP
 .B \fBan2ln\fP
 This module authorizes a principal to a local account if the
 principal name maps to the local account name.
 .UNINDENT
 .SH PKINIT OPTIONS
-.IP Note
+.sp
+\fBNOTE:\fP
+.INDENT 0.0
+.INDENT 3.5
 The following are PKINIT\-specific options.  These values may
 be specified in [libdefaults] as global defaults, or within
 a realm\-specific subsection of [libdefaults], or may be
 specified as realm\-specific values in the [realms] section.
 A realm\-specific value overrides, not adds to, a generic
 [libdefaults] specification.  The search order is:
-.RE
+.UNINDENT
+.UNINDENT
 .INDENT 0.0
 .IP 1. 3
 realm\-specific subsection of [libdefaults]:
@@ -962,7 +1031,7 @@ realm\-specific subsection of [libdefaults]:
 .UNINDENT
 .UNINDENT
 .IP 2. 3
-realm\-specific value in the [realms] section,
+realm\-specific value in the [realms] section:
 .INDENT 3.0
 .INDENT 3.5
 .sp
@@ -977,7 +1046,7 @@ realm\-specific value in the [realms] section,
 .UNINDENT
 .UNINDENT
 .IP 3. 3
-generic value in the [libdefaults] section.
+generic value in the [libdefaults] section:
 .INDENT 3.0
 .INDENT 3.5
 .sp
@@ -1015,19 +1084,19 @@ In \fBpkinit_identity\fP or \fBpkinit_identities\fP, \fIdirname\fP
 specifies a directory with files named \fB*.crt\fP and \fB*.key\fP
 where the first part of the file name is the same for matching
 pairs of certificate and private key files.  When a file with a
-name ending with \fB.crt\fP is found, a matching file ending with
-\fB.key\fP is assumed to contain the private key.  If no such file
-is found, then the certificate in the \fB.crt\fP is not used.
+name ending with \fB\&.crt\fP is found, a matching file ending with
+\fB\&.key\fP is assumed to contain the private key.  If no such file
+is found, then the certificate in the \fB\&.crt\fP is not used.
 .sp
 In \fBpkinit_anchors\fP or \fBpkinit_pool\fP, \fIdirname\fP is assumed to
 be an OpenSSL\-style hashed CA directory where each CA cert is
-stored in a file named \fBhash\-of\-ca\-cert.#\fP.  This infrastructure
+stored in a file named \fBhash\-of\-ca\-cert.#\fP\&.  This infrastructure
 is encouraged, but all files in the directory will be examined and
 if they contain certificates (in PEM format), they will be used.
 .sp
 In \fBpkinit_revoke\fP, \fIdirname\fP is assumed to be an OpenSSL\-style
 hashed CA directory where each revocation list is stored in a file
-named \fBhash\-of\-ca\-cert.r#\fP.  This infrastructure is encouraged,
+named \fBhash\-of\-ca\-cert.r#\fP\&.  This infrastructure is encouraged,
 but all files in the directory will be examined and if they
 contain a revocation list (in PEM format), they will be used.
 .TP
@@ -1038,8 +1107,8 @@ user\(aqs certificate and private key.
 .B \fBPKCS11:\fP[\fBmodule_name=\fP]\fImodname\fP[\fB:slotid=\fP\fIslot\-id\fP][\fB:token=\fP\fItoken\-label\fP][\fB:certid=\fP\fIcert\-id\fP][\fB:certlabel=\fP\fIcert\-label\fP]
 All keyword/values are optional.  \fImodname\fP specifies the location
 of a library implementing PKCS #11.  If a value is encountered
-with no keyword, it is assumed to be the \fImodname\fP.  If no
-module\-name is specified, the default is \fBopensc\-pkcs11.so\fP.
+with no keyword, it is assumed to be the \fImodname\fP\&.  If no
+module\-name is specified, the default is \fBopensc\-pkcs11.so\fP\&.
 \fBslotid=\fP and/or \fBtoken=\fP may be specified to force the use of
 a particular smard card reader or token if there is more than one
 available.  \fBcertid=\fP and/or \fBcertlabel=\fP may be specified to
@@ -1051,7 +1120,7 @@ to select a particular certificate to use for PKINIT.
 \fIenvvar\fP specifies the name of an environment variable which has
 been set to a value conforming to one of the previous values.  For
 example, \fBENV:X509_PROXY\fP, where environment variable
-\fBX509_PROXY\fP has been set to \fBFILE:/tmp/my_proxy.pem\fP.
+\fBX509_PROXY\fP has been set to \fBFILE:/tmp/my_proxy.pem\fP\&.
 .UNINDENT
 .SS PKINIT krb5.conf options
 .INDENT 0.0
@@ -1089,7 +1158,7 @@ where:
 .B \fIrelation\-operator\fP
 can be either \fB&&\fP, meaning all component rules must match,
 or \fB||\fP, meaning only one component rule must match.  The
-default is \fB&&\fP.
+default is \fB&&\fP\&.
 .TP
 .B \fIcomponent\-rule\fP
 can be one of the following.  Note that there is no
@@ -1158,11 +1227,12 @@ recognized in the krb5.conf file are:
 .TP
 .B \fBkpKDC\fP
 This is the default value and specifies that the KDC must have
-the id\-pkinit\-KPKdc EKU as defined in \fI\%RFC 4556\fP.
+the id\-pkinit\-KPKdc EKU as defined in \fI\%RFC 4556\fP\&.
 .TP
 .B \fBkpServerAuth\fP
 If \fBkpServerAuth\fP is specified, a KDC certificate with the
-id\-kp\-serverAuth EKU as used by Microsoft will be accepted.
+id\-kp\-serverAuth EKU will be accepted.  This key usage value
+is used in most commercially issued server certificates.
 .TP
 .B \fBnone\fP
 If \fBnone\fP is specified, then the KDC certificate will not be
@@ -1187,12 +1257,9 @@ these values are not used if the user specifies
 The presense of this option indicates that the client is willing
 to accept a KDC certificate with a dNSName SAN (Subject
 Alternative Name) rather than requiring the id\-pkinit\-san as
-defined in \fI\%RFC 4556\fP.  This option may be specified multiple
+defined in \fI\%RFC 4556\fP\&.  This option may be specified multiple
 times.  Its value should contain the acceptable hostname for the
 KDC (as contained in its certificate).
-.TP
-.B \fBpkinit_longhorn\fP
-If this flag is set to true, we are talking to the Longhorn KDC.
 .TP
 .B \fBpkinit_pool\fP
 Specifies the location of intermediate certificates which may be
@@ -1221,16 +1288,6 @@ Specifies the location of Certificate Revocation List (CRL)
 information to be used by the client when verifying the validity
 of the KDC certificate presented.  This option may be specified
 multiple times.
-.TP
-.B \fBpkinit_win2k\fP
-This flag specifies whether the target realm is assumed to support
-only the old, pre\-RFC version of the protocol.  The default is
-false.
-.TP
-.B \fBpkinit_win2k_require_binding\fP
-If this flag is set to true, it expects that the target KDC is
-patched to return a reply with a checksum rather than a nonce.
-The default is false.
 .UNINDENT
 .SH PARAMETER EXPANSION
 .sp
@@ -1352,8 +1409,6 @@ Here is an example of a generic krb5.conf file:
 .ft C
 [libdefaults]
     default_realm = ATHENA.MIT.EDU
-    default_tkt_enctypes = des3\-hmac\-sha1 des\-cbc\-crc
-    default_tgs_enctypes = des3\-hmac\-sha1 des\-cbc\-crc
     dns_lookup_kdc = true
     dns_lookup_realm = false
 
@@ -1364,7 +1419,6 @@ Here is an example of a generic krb5.conf file:
         kdc = kerberos\-2.mit.edu:750
         admin_server = kerberos.mit.edu
         master_kdc = kerberos.mit.edu
-        default_domain = mit.edu
     }
     EXAMPLE.COM = {
         kdc = kerberos.example.com
@@ -1373,7 +1427,6 @@ Here is an example of a generic krb5.conf file:
     }
 
 [domain_realm]
-    .mit.edu = ATHENA.MIT.EDU
     mit.edu = ATHENA.MIT.EDU
 
 [capaths]
@@ -1396,6 +1449,6 @@ syslog(3)
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
-1985-2013, MIT
+1985-2015, MIT
 .\" Generated by docutils manpage writer.
 .

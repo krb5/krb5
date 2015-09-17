@@ -1,4 +1,6 @@
-.TH "KDB5_UTIL" "8" " " "1.13" "MIT Kerberos"
+.\" Man page generated from reStructuredText.
+.
+.TH "KDB5_UTIL" "8" " " "1.14" "MIT Kerberos"
 .SH NAME
 kdb5_util \- Kerberos database maintenance utility
 .
@@ -28,8 +30,6 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.\" Man page generated from reStructuredText.
-.
 .SH SYNOPSIS
 .sp
 \fBkdb5_util\fP
@@ -63,14 +63,14 @@ specifies the Kerberos realm of the database.
 .TP
 .B \fB\-d\fP \fIdbname\fP
 specifies the name under which the principal database is stored;
-by default the database is that listed in \fIkdc.conf(5)\fP.  The
+by default the database is that listed in \fIkdc.conf(5)\fP\&.  The
 password policy database and lock files are also derived from this
 value.
 .TP
 .B \fB\-k\fP \fImkeytype\fP
 specifies the key type of the master key in the database.  The
 default is given by the \fBmaster_key_type\fP variable in
-\fIkdc.conf(5)\fP.
+\fIkdc.conf(5)\fP\&.
 .TP
 .B \fB\-kv\fP \fImkeyVNO\fP
 Specifies the version number of the master key in the database;
@@ -79,7 +79,7 @@ the default is 1.  Note that 0 is not allowed.
 .B \fB\-M\fP \fImkeyname\fP
 principal name for the master key in the database.  If not
 specified, the name is determined by the \fBmaster_key_name\fP
-variable in \fIkdc.conf(5)\fP.
+variable in \fIkdc.conf(5)\fP\&.
 .TP
 .B \fB\-m\fP
 specifies that the master database password should be read from
@@ -88,7 +88,7 @@ the keyboard rather than fetched from a file on disk.
 .B \fB\-sf\fP \fIstash_file\fP
 specifies the stash filename of the master database password.  If
 not specified, the filename is determined by the
-\fBkey_stash_file\fP variable in \fIkdc.conf(5)\fP.
+\fBkey_stash_file\fP variable in \fIkdc.conf(5)\fP\&.
 .TP
 .B \fB\-P\fP \fIpassword\fP
 specifies the master database password.  Using this option may
@@ -126,13 +126,13 @@ the \fB\-f\fP argument, does not prompt the user.
 .sp
 Stores the master principal\(aqs keys in a stash file.  The \fB\-f\fP
 argument can be used to override the \fIkeyfile\fP specified in
-\fIkdc.conf(5)\fP.
+\fIkdc.conf(5)\fP\&.
 .SS dump
 .INDENT 0.0
 .INDENT 3.5
 \fBdump\fP [\fB\-b7\fP|\fB\-ov\fP|\fB\-r13\fP] [\fB\-verbose\fP]
 [\fB\-mkey_convert\fP] [\fB\-new_mkey_file\fP \fImkey_file\fP] [\fB\-rev\fP]
-[\fB\-recurse\fP] [\fIfilename\fP [\fIprincipals\fP...]]
+[\fB\-recurse\fP] [\fIfilename\fP [\fIprincipals\fP\&...]]
 .UNINDENT
 .UNINDENT
 .sp
@@ -206,7 +206,8 @@ Options:
 .TP
 .B \fB\-b7\fP
 requires the database to be in the Kerberos 5 Beta 7 format
-("kdb5_util load_dump version 4").
+("kdb5_util load_dump version 4").  This was the dump format
+produced on releases prior to 1.2.2.
 .TP
 .B \fB\-ov\fP
 requires the database to be in "ovsec_adm_import" format.  Must be
@@ -234,10 +235,7 @@ is dumped.
 .TP
 .B \fB\-update\fP
 records from the dump file are added to or updated in the existing
-database.  (This is useful in conjunction with an ovsec_adm_export
-format dump if you want to preserve per\-principal policy
-information, since the current default format does not contain
-this data.)  Otherwise, a new database is created containing only
+database.  Otherwise, a new database is created containing only
 what is in the dump file and the old one destroyed upon successful
 completion.
 .UNINDENT
@@ -270,7 +268,7 @@ values.  The \fB\-s\fP option stashes the new master key in the stash
 file, which will be created if it doesn\(aqt already exist.
 .sp
 After a new master key is added, it should be propagated to slave
-servers via a manual or periodic invocation of \fIkprop(8)\fP.  Then,
+servers via a manual or periodic invocation of \fIkprop(8)\fP\&.  Then,
 the stash files on the slave servers should be updated with the
 kdb5_util \fBstash\fP command.  Once those steps are complete, the key
 is ready to be marked active with the kdb5_util \fBuse_mkey\fP command.
@@ -281,7 +279,7 @@ is ready to be marked active with the kdb5_util \fBuse_mkey\fP command.
 .UNINDENT
 .UNINDENT
 .sp
-Sets the activation time of the master key specified by \fImkeyVNO\fP.
+Sets the activation time of the master key specified by \fImkeyVNO\fP\&.
 Once a master key becomes active, it will be used to encrypt newly
 created principal keys.  If no \fItime\fP argument is given, the current
 time is used, causing the specified master key version to become
@@ -299,7 +297,7 @@ principal keys to be encrypted in the new master key.
 .sp
 List all master keys, from most recent to earliest, in the master key
 principal.  The output will show the kvno, enctype, and salt type for
-each mkey, similar to the output of \fIkadmin(1)\fP \fBgetprinc\fP.  A
+each mkey, similar to the output of \fIkadmin(1)\fP \fBgetprinc\fP\&.  A
 \fB*\fP following an mkey denotes the currently active master key.
 .SS purge_mkeys
 .INDENT 0.0
@@ -340,12 +338,212 @@ before starting to make changes.  The \fB\-v\fP option causes each
 principal processed to be listed, with an indication as to whether it
 needed updating or not.  The \fB\-n\fP option performs a dry run, only
 showing the actions which would have been taken.
+.SS tabdump
+.INDENT 0.0
+.INDENT 3.5
+\fBtabdump\fP [\fB\-H\fP] [\fB\-c\fP] [\fB\-e\fP] [\fB\-n\fP] [\fB\-o\fP \fIoutfile\fP]
+\fIdumptype\fP
+.UNINDENT
+.UNINDENT
+.sp
+Dump selected fields of the database in a tabular format suitable for
+reporting (e.g., using traditional Unix text processing tools) or
+importing into relational databases.  The data format is tab\-separated
+(default), or optionally comma\-separated (CSV), with a fixed number of
+columns.  The output begins with a header line containing field names,
+unless suppression is requested using the \fB\-H\fP option.
+.sp
+The \fIdumptype\fP parameter specifies the name of an output table (see
+below).
+.sp
+Options:
+.INDENT 0.0
+.TP
+.B \fB\-H\fP
+suppress writing the field names in a header line
+.TP
+.B \fB\-c\fP
+use comma separated values (CSV) format, with minimal quoting,
+instead of the default tab\-separated (unquoted, unescaped) format
+.TP
+.B \fB\-e\fP
+write empty hexadecimal string fields as empty fields instead of
+as "\-1".
+.TP
+.B \fB\-n\fP
+produce numeric output for fields that normally have symbolic
+output, such as enctypes and flag names.  Also requests output of
+time stamps as decimal POSIX time_t values.
+.TP
+.B \fB\-o\fP \fIoutfile\fP
+write the dump to the specified output file instead of to standard
+output
+.UNINDENT
+.sp
+Dump types:
+.INDENT 0.0
+.TP
+.B \fBkeydata\fP
+principal encryption key information, including actual key data
+(which is still encrypted in the master key)
+.INDENT 7.0
+.TP
+.B \fBname\fP
+principal name
+.TP
+.B \fBkeyindex\fP
+index of this key in the principal\(aqs key list
+.TP
+.B \fBkvno\fP
+key version number
+.TP
+.B \fBenctype\fP
+encryption type
+.TP
+.B \fBkey\fP
+key data as a hexadecimal string
+.TP
+.B \fBsalttype\fP
+salt type
+.TP
+.B \fBsalt\fP
+salt data as a hexadecimal string
+.UNINDENT
+.TP
+.B \fBkeyinfo\fP
+principal encryption key information (as in \fBkeydata\fP above),
+excluding actual key data
+.TP
+.B \fBprinc_flags\fP
+principal boolean attributes.  Flag names print as hexadecimal
+numbers if the \fB\-n\fP option is specified, and all flag positions
+are printed regardless of whether or not they are set.  If \fB\-n\fP
+is not specified, print all known flag names for each principal,
+but only print hexadecimal flag names if the corresponding flag is
+set.
+.INDENT 7.0
+.TP
+.B \fBname\fP
+principal name
+.TP
+.B \fBflag\fP
+flag name
+.TP
+.B \fBvalue\fP
+boolean value (0 for clear, or 1 for set)
+.UNINDENT
+.TP
+.B \fBprinc_lockout\fP
+state information used for tracking repeated password failures
+.INDENT 7.0
+.TP
+.B \fBname\fP
+principal name
+.TP
+.B \fBlast_success\fP
+time stamp of most recent successful authentication
+.TP
+.B \fBlast_failed\fP
+time stamp of most recent failed authentication
+.TP
+.B \fBfail_count\fP
+count of failed attempts
+.UNINDENT
+.TP
+.B \fBprinc_meta\fP
+principal metadata
+.INDENT 7.0
+.TP
+.B \fBname\fP
+principal name
+.TP
+.B \fBmodby\fP
+name of last principal to modify this principal
+.TP
+.B \fBmodtime\fP
+timestamp of last modification
+.TP
+.B \fBlastpwd\fP
+timestamp of last password change
+.TP
+.B \fBpolicy\fP
+policy object name
+.TP
+.B \fBmkvno\fP
+key version number of the master key that encrypts this
+principal\(aqs key data
+.TP
+.B \fBhist_kvno\fP
+key version number of the history key that encrypts the key
+history data for this principal
+.UNINDENT
+.TP
+.B \fBprinc_stringattrs\fP
+string attributes (key/value pairs)
+.INDENT 7.0
+.TP
+.B \fBname\fP
+principal name
+.TP
+.B \fBkey\fP
+attribute name
+.TP
+.B \fBvalue\fP
+attribute value
+.UNINDENT
+.TP
+.B \fBprinc_tktpolicy\fP
+per\-principal ticket policy data, including maximum ticket
+lifetimes
+.INDENT 7.0
+.TP
+.B \fBname\fP
+principal name
+.TP
+.B \fBexpiration\fP
+principal expiration date
+.TP
+.B \fBpw_expiration\fP
+password expiration date
+.TP
+.B \fBmax_life\fP
+maximum ticket lifetime
+.TP
+.B \fBmax_renew_life\fP
+maximum renewable ticket lifetime
+.UNINDENT
+.UNINDENT
+.sp
+Examples:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+$ kdb5_util tabdump \-o keyinfo.txt keyinfo
+$ cat keyinfo.txt
+name        keyindex        kvno    enctype salttype        salt
+foo@EXAMPLE.COM     0       1       aes128\-cts\-hmac\-sha1\-96 normal  \-1
+bar@EXAMPLE.COM     0       1       aes128\-cts\-hmac\-sha1\-96 normal  \-1
+bar@EXAMPLE.COM     1       1       des\-cbc\-crc     normal  \-1
+$ sqlite3
+sqlite> .mode tabs
+sqlite> .import keyinfo.txt keyinfo
+sqlite> select * from keyinfo where enctype like \(aqdes\-cbc\-%\(aq;
+bar@EXAMPLE.COM     1       1       des\-cbc\-crc     normal  \-1
+sqlite> .quit
+$ awk \-F\(aq\et\(aq \(aq$4 ~ /des\-cbc\-/ { print }\(aq keyinfo.txt
+bar@EXAMPLE.COM     1       1       des\-cbc\-crc     normal  \-1
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
 .SH SEE ALSO
 .sp
 \fIkadmin(1)\fP
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
-1985-2013, MIT
+1985-2015, MIT
 .\" Generated by docutils manpage writer.
 .
