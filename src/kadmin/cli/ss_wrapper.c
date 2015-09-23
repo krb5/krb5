@@ -29,6 +29,10 @@
 #include <ss/ss.h>
 #include "kadmin.h"
 
+#ifdef NEED_SS_EXECUTE_COMMAND_PROTO
+int ss_execute_command(int, char **);
+#endif
+
 extern ss_request_table kadmin_cmds;
 extern int exit_status;
 extern char *whoami;
