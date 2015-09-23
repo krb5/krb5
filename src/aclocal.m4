@@ -1483,6 +1483,7 @@ int main(int argc, char *argv[]) {
 }], krb5_cv_system_ss_okay=yes, AC_MSG_ERROR(cannot run test program),
   krb5_cv_system_ss_okay="assumed")])
   LIBS="$old_LIBS"
+  KRB5_NEED_PROTO([#include <ss/ss.h>],ss_execute_command,1)
 else
   SS_VERSION=k5
   AC_MSG_RESULT(krb5)
