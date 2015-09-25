@@ -25,6 +25,7 @@ SUBDIRS=util include lib \
 	plugins/kdcpolicy/test \
 	plugins/preauth/otp \
 	plugins/preauth/pkinit \
+	plugins/preauth/spake \
 	plugins/preauth/test \
 	plugins/tls/k5tls \
 	kdc kadmin slave clients appl tests \
@@ -523,6 +524,7 @@ pyrunenv.vals: Makefile
 	done > $@
 	echo "tls_impl = '$(TLS_IMPL)'" >> $@
 	echo "have_sasl = '$(HAVE_SASL)'" >> $@
+	echo "have_spake_openssl = '$(HAVE_SPAKE_OPENSSL)'" >> $@
 	echo "sizeof_time_t = $(SIZEOF_TIME_T)" >> $@
 
 runenv.py: pyrunenv.vals

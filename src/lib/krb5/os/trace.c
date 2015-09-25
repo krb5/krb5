@@ -163,6 +163,7 @@ padata_type_string(krb5_preauthtype type)
     case KRB5_PADATA_PKINIT_KX: return "PA-PKINIT-KX";
     case KRB5_ENCPADATA_REQ_ENC_PA_REP: return "PA-REQ-ENC-PA-REP";
     case KRB5_PADATA_AS_FRESHNESS: return "PA_AS_FRESHNESS";
+    case KRB5_PADATA_SPAKE: return "PA-SPAKE";
     default: return NULL;
     }
 }

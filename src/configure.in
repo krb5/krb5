@@ -321,6 +321,25 @@ AC_SUBST(TLS_IMPL)
 AC_SUBST(TLS_IMPL_CFLAGS)
 AC_SUBST(TLS_IMPL_LIBS)
 
+# The SPAKE preauth plugin currently supports edwards25519 natively,
+# and can support three NIST groups using OpenSSL.
+HAVE_SPAKE_OPENSSL=no
+AC_ARG_WITH([spake-openssl],
+AC_HELP_STRING([--with-spake-openssl],
+               [use OpenSSL for SPAKE preauth @<:@auto@:>@]),,[withval=auto])
+if test "$withval" = auto -o "$withval" = yes; then
+  AC_CHECK_LIB([crypto],[EC_POINT_new],[have_crypto=true],[have_crypto=false])
+  if test "$have_crypto" = true; then
+    AC_DEFINE(SPAKE_OPENSSL,1,[Define to use OpenSSL for SPAKE preauth])
+    SPAKE_OPENSSL_LIBS=-lcrypto
+    HAVE_SPAKE_OPENSSL=yes
+  elif test "$withval" = yes; then
+    AC_MSG_ERROR([OpenSSL libcrypto not found])
+  fi
+fi
+AC_SUBST(HAVE_SPAKE_OPENSSL)
+AC_SUBST(SPAKE_OPENSSL_LIBS)
+
 AC_ARG_ENABLE([aesni],
 AC_HELP_STRING([--disable-aesni],[Do not build with AES-NI support]), ,
 enable_aesni=check)
@@ -1436,6 +1455,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/kdb/test
 	plugins/kdcpolicy/test
 	plugins/preauth/otp
+	plugins/preauth/spake
 	plugins/preauth/test
 	plugins/authdata/greet_client
 	plugins/authdata/greet_server

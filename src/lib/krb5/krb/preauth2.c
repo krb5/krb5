@@ -132,6 +132,8 @@ k5_init_preauth_context(krb5_context context)
     /* Auto-register built-in modules. */
     k5_plugin_register_dyn(context, PLUGIN_INTERFACE_CLPREAUTH, "pkinit",
                            "preauth");
+    k5_plugin_register_dyn(context, PLUGIN_INTERFACE_CLPREAUTH, "spake",
+                           "preauth");
     k5_plugin_register(context, PLUGIN_INTERFACE_CLPREAUTH,
                        "encrypted_challenge",
                        clpreauth_encrypted_challenge_initvt);

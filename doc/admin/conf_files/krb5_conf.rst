@@ -365,6 +365,21 @@ The libdefaults section may contain any of the following relations:
     with the session key type.  See the **kdc_req_checksum_type**
     configuration option for the possible values and their meanings.
 
+**spake_preauth_groups**
+    A whitespace or comma-separated list of words which specifies the
+    groups allowed for SPAKE preauthentication.  The possible values
+    are:
+
+    ============ ================================
+    edwards25519 Edwards25519 curve (:rfc:`7748`)
+    P-256        NIST P-256 curve (:rfc:`5480`)
+    P-384        NIST P-384 curve (:rfc:`5480`)
+    P-521        NIST P-521 curve (:rfc:`5480`)
+    ============ ================================
+
+    The default value for the client is ``edwards25519``.  The default
+    value for the KDC is empty.  New in release 1.17.
+
 **ticket_lifetime**
     (:ref:`duration` string.)  Sets the default lifetime for initial
     ticket requests.  The default value is 1 day.

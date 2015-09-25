@@ -130,6 +130,7 @@ check-pytests: unlockiter
 	$(RUNPYTEST) $(srcdir)/t_changepw.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_pkinit.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_otp.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_spake.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_localauth.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadm5_hook.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadm5_auth.py $(PYTESTFLAGS)

@@ -58,3 +58,40 @@ mechanisms which have separate request and reply types, the request
 type is used; this allows the KDC to determine whether a cookie is
 relevant to a request by comparing the request pa-data types to the
 cookie data types.
+
+SPAKE cookie format (version 1)
+-------------------------------
+
+Inside the SecureCookie wrapper, a data value of type 151 contains
+state for SPAKE pre-authentication.  This data is the concatenation of
+the following:
+
+* a two-byte big-endian version number with the value 1
+* a two-byte big-endian stage number
+* a four-byte big-endian group number
+* a four-byte big-endian length and data for the SPAKE value
+* a four-byte big-endian length and data for the transcript hash
+* zero or more second factor records, each consisting of:
+  - a four-byte big-endian second-factor type
+  - a four-byte big-endian length and data
+
+The stage value is 0 if the cookie was sent with a challenge message.
+Otherwise it is 1 for the first encdata message sent by the KDC during
+an exchange, 2 for the second, etc..
+
+The group value indicates the group number used in the SPAKE challenge.
+
+For a stage-0 cookie, the SPAKE value is the KDC private key,
+represented in the scalar marshalling form of the group.  For other
+cookies, the SPAKE value is the SPAKE result K, represented in the
+group element marshalling form.
+
+For a stage-0 cookie, the transcript hash is the intermediate hash
+after updating with the client support message (if one was sent) and
+challenge.  For other cookies it is the final hash.
+
+For a stage-0 cookie, there may be any number of second-factor
+records, including none; a second-factor type need not create a state
+field if it does not need one, and no record is created for SF-NONE.
+For other cookies, there must be exactly one second-factor record
+corresponding to the factor type chosen by the client.

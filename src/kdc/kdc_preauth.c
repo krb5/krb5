@@ -131,6 +131,8 @@ get_plugin_vtables(krb5_context context,
                            "preauth");
     k5_plugin_register_dyn(context, PLUGIN_INTERFACE_KDCPREAUTH, "otp",
                            "preauth");
+    k5_plugin_register_dyn(context, PLUGIN_INTERFACE_KDCPREAUTH, "spake",
+                           "preauth");
     k5_plugin_register(context, PLUGIN_INTERFACE_KDCPREAUTH,
                        "encrypted_challenge",
                        kdcpreauth_encrypted_challenge_initvt);

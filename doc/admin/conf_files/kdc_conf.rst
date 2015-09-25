@@ -43,10 +43,10 @@ The kdc.conf file may contain the following sections:
 [kdcdefaults]
 ~~~~~~~~~~~~~
 
-With two exceptions, relations in the [kdcdefaults] section specify
-default values for realm variables, to be used if the [realms]
-subsection does not contain a relation for the tag.  See the
-:ref:`kdc_realms` section for the definitions of these relations.
+Some relations in the [kdcdefaults] section specify default values for
+realm variables, to be used if the [realms] subsection does not
+contain a relation for the tag.  See the :ref:`kdc_realms` section for
+the definitions of these relations.
 
 * **host_based_services**
 * **kdc_listen**
@@ -56,6 +56,8 @@ subsection does not contain a relation for the tag.  See the
 * **no_host_referral**
 * **restrict_anonymous_to_tgt**
 
+The following [kdcdefaults] variables have no per-realm equivalent:
+
 **kdc_max_dgram_reply_size**
     Specifies the maximum packet size that can be sent over UDP.  The
     default value is 4096 bytes.
@@ -64,6 +66,12 @@ subsection does not contain a relation for the tag.  See the
     (Integer.)  Set the size of the listen queue length for the KDC
     daemon.  The value may be limited by OS settings.  The default
     value is 5.
+
+**spake_preauth_kdc_challenge**
+    (String.)  Specifies the group for a SPAKE optimistic challenge.
+    See the **spake_preauth_groups** variable in :ref:`libdefaults`
+    for possible values.  The default is not to issue an optimistic
+    challenge.  (New in release 1.17.)
 
 
 .. _kdc_realms:
@@ -402,6 +410,12 @@ The following tags may be specified in a [realms] subsection:
     anonymous PKINIT to be enabled for use as FAST armor tickets
     without allowing anonymous authentication to services.  The
     default value is false.  New in release 1.9.
+
+**spake_preauth_indicator**
+    (String.)  Specifies an authentication indicator value that the
+    KDC asserts into tickets obtained using SPAKE pre-authentication.
+    The default is not to add any indicators.  This option may be
+    specified multiple times.  New in release 1.17.
 
 **supported_enctypes**
     (List of *key*:*salt* strings.)  Specifies the default key/salt

@@ -15,6 +15,7 @@ For administrators
    backup_host.rst
    pkinit.rst
    otp.rst
+   spake.rst
    princ_dns.rst
    enctypes.rst
    https.rst

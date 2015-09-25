@@ -440,8 +440,14 @@ TLS_IMPL	= @TLS_IMPL@
 TLS_IMPL_CFLAGS = @TLS_IMPL_CFLAGS@
 TLS_IMPL_LIBS	= @TLS_IMPL_LIBS@
 
+# SPAKE preauth back-end libraries
+SPAKE_OPENSSL_LIBS = @SPAKE_OPENSSL_LIBS@
+
 # Whether we have the SASL header file for the LDAP KDB module
 HAVE_SASL = @HAVE_SASL@
+
+# Whether we are building support for NIST SPAKE groups using OpenSSL
+HAVE_SPAKE_OPENSSL = @HAVE_SPAKE_OPENSSL@
 
 # Whether we have libresolv 1.1.5 for URI discovery tests
 HAVE_RESOLV_WRAPPER = @HAVE_RESOLV_WRAPPER@
