@@ -84,7 +84,7 @@ k5_utf8s_to_ucs2s(krb5_ucs2 *ucs2str,
     }
 
     /* Examine next UTF-8 character.  */
-    while (*utf8str && ucs2len < count) {
+    while (ucs2len < count && *utf8str != '\0') {
         /* Get UTF-8 sequence length from 1st byte */
         utflen = KRB5_UTF8_CHARLEN2(utf8str, utflen);
 
