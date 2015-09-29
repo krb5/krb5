@@ -437,9 +437,10 @@ TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
 	t_in_ccache t_cc_config t_copy_context \
 	t_princ t_etypes t_vfy_increds t_response_items
 
+OWN_CONF = KRB5_CONFIG=$(srcdir)/t_krb5.conf
+
 check-unix:: $(TEST_PROGS)
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(VALGRIND) ./t_kerb \
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) ./t_kerb \
 		parse_name tytso \
 		parse_name tytso@SHAZAAM \
 		parse_name tytso/root@VEGGIE.COM \
@@ -462,20 +463,16 @@ check-unix:: $(TEST_PROGS)
 		> test.out
 	cmp test.out $(srcdir)/t_ref_kerb.out
 	$(RM) test.out
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) ./t_ser
-	$(RUN_SETUP) $(VALGRIND) ./t_deltat
-	$(RUN_SETUP) $(VALGRIND) sh $(srcdir)/transit-tests
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) sh $(srcdir)/walktree-tests
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(VALGRIND) ./t_authdata
-	$(RUN_SETUP) $(VALGRIND) ./t_pac
-	$(RUN_SETUP) $(VALGRIND) ./t_princ
-	$(RUN_SETUP) $(VALGRIND) ./t_etypes
-	$(RUN_SETUP) $(VALGRIND) ./t_response_items
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) ./t_copy_context
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) ./t_ser
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) ./t_deltat
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) sh $(srcdir)/transit-tests
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) sh $(srcdir)/walktree-tests
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) ./t_authdata
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) ./t_pac
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) ./t_princ
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) ./t_etypes
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) ./t_response_items
+	$(RUN_SETUP) $(OWN_CONF) $(VALGRIND) ./t_copy_context
 
 check-pytests:: t_expire_warn t_vfy_increds
 	$(RUNPYTEST) $(srcdir)/t_expire_warn.py $(PYTESTFLAGS)

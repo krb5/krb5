@@ -32,13 +32,15 @@ install-unix:: install-libs
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
+HIDE_CONFIG = KRB5_CONFIG=/dev/null
+
 check-unix:: t_attr t_attrset t_code t_packet t_remote t_client
-	$(RUN_SETUP) $(VALGRIND) ./t_attr
-	$(RUN_SETUP) $(VALGRIND) ./t_attrset
-	$(RUN_SETUP) $(VALGRIND) ./t_code
-	$(RUN_SETUP) $(VALGRIND) ./t_packet $(PYTHON) $(srcdir)/t_daemon.py
-	$(RUN_SETUP) $(VALGRIND) ./t_remote $(PYTHON) $(srcdir)/t_daemon.py
-	$(RUN_SETUP) $(VALGRIND) ./t_client $(PYTHON) $(srcdir)/t_daemon.py
+	$(RUN_SETUP) $(HIDE_CONFIG) $(VALGRIND) ./t_attr
+	$(RUN_SETUP) $(HIDE_CONFIG) $(VALGRIND) ./t_attrset
+	$(RUN_SETUP) $(HIDE_CONFIG) $(VALGRIND) ./t_code
+	$(RUN_SETUP) $(HIDE_CONFIG) $(VALGRIND) ./t_packet $(PYTHON) $(srcdir)/t_daemon.py
+	$(RUN_SETUP) $(HIDE_CONFIG) $(VALGRIND) ./t_remote $(PYTHON) $(srcdir)/t_daemon.py
+	$(RUN_SETUP) $(HIDE_CONFIG) $(VALGRIND) ./t_client $(PYTHON) $(srcdir)/t_daemon.py
 
 TESTDEPS=t_test.o $(KRB5_BASE_DEPLIBS)
 TESTLIBS=t_test.o $(KRB5_BASE_LIBS)
