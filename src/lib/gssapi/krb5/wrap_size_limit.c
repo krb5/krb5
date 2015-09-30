@@ -91,7 +91,7 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
     /* only default qop is allowed */
     if (qop_req != GSS_C_QOP_DEFAULT) {
         *minor_status = (OM_uint32) G_UNKNOWN_QOP;
-        return(GSS_S_FAILURE);
+        return GSS_S_BAD_QOP;
     }
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;

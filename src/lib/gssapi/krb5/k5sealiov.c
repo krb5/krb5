@@ -277,7 +277,7 @@ kg_seal_iov(OM_uint32 *minor_status,
 
     if (qop_req != 0) {
         *minor_status = (OM_uint32)G_UNKNOWN_QOP;
-        return GSS_S_FAILURE;
+        return GSS_S_BAD_QOP;
     }
 
     ctx = (krb5_gss_ctx_id_rec *)context_handle;
@@ -342,7 +342,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
     if (qop_req != GSS_C_QOP_DEFAULT) {
         *minor_status = (OM_uint32)G_UNKNOWN_QOP;
-        return GSS_S_FAILURE;
+        return GSS_S_BAD_QOP;
     }
 
     ctx = (krb5_gss_ctx_id_rec *)context_handle;
