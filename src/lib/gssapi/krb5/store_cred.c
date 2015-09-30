@@ -217,7 +217,7 @@ krb5_gss_store_cred_into(OM_uint32 *minor_status,
         return GSS_S_CREDENTIALS_EXPIRED;
 
     if (actual_usage != GSS_C_INITIATE && actual_usage != GSS_C_BOTH) {
-        *minor_status = G_BAD_USAGE;
+        *minor_status = G_STORE_ACCEPTOR_CRED_NOSUPP;
         return GSS_S_FAILURE;
     }
 
