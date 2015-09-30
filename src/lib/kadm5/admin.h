@@ -64,7 +64,9 @@ KADM5INT_BEGIN_DECLS
 #define KADM5_ADMIN_SERVICE     "kadmin/admin"
 #define KADM5_CHANGEPW_SERVICE  "kadmin/changepw"
 #define KADM5_HIST_PRINCIPAL    "kadmin/history"
+
 #define KADM5_KIPROP_HOST_SERVICE "kiprop"
+#define KADM5_ADMIN_HOST_SERVICE  "kadmin"
 
 typedef krb5_principal  kadm5_princ_t;
 typedef char            *kadm5_policy_t;
