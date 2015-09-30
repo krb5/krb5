@@ -251,7 +251,7 @@ gss_buffer_t outStr;
 
 		case GSS_S_UNAUTHORIZED:
 			errStr = _("The operation is forbidden by local "
-				   " security policy");
+				   "security policy");
 			break;
 
 		case GSS_S_UNAVAILABLE:
