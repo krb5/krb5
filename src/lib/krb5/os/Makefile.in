@@ -232,8 +232,8 @@ check-unix-locate:: t_locate_kdc
 
 check-unix-trace:: t_trace
 	rm -f t_trace.out
-	KRB5_TRACE=t_trace.out ; export KRB5_TRACE ; \
-	$(RUN_SETUP) $(VALGRIND) ./t_trace
+	$(RUN_SETUP) KRB5_TRACE=t_trace.out KRB5_CONFIG=/dev/null \
+		$(VALGRIND) ./t_trace
 	sed -e 's/^[^:]*: //' t_trace.out | cmp - $(srcdir)/t_trace.ref
 	rm -f t_trace.out
 
