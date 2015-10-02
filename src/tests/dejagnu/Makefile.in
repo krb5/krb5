@@ -32,7 +32,7 @@ clean-unix::
 	$(RM) -rf tmpdir dbg.log krb.log krb.sum
 
 runenv.vals: Makefile
-	$(RUN_SETUP) for i in $(RUN_VARS); do \
+	$(RUN_SETUP); for i in $(RUN_VARS); do \
 		eval echo "{$$i=\$$$$i}"; done > runenv.vals
 
 site.exp: runenv.vals Makefile

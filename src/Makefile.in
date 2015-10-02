@@ -555,7 +555,7 @@ testrealm: runenv.py
 # environment variable settings to propagate to Python-based tests
 
 pyrunenv.vals: Makefile
-	$(RUN_SETUP) \
+	$(RUN_SETUP); \
 	for i in $(RUN_VARS); do \
 		eval echo 'env['\\\'$$i\\\''] = '\\\'\$$$$i\\\'; \
 	done > $@
