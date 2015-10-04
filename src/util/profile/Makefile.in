@@ -136,8 +136,8 @@ clean-windows::
 	$(RM) $(PROFILE_HDR)
 
 check-unix:: test_parse test_profile test_vtable test_load modtest.conf
-	$(RUN_SETUP) $(VALGRIND) ./test_vtable
-	$(RUN_SETUP) $(VALGRIND) ./test_load
+	$(RUN_TEST) ./test_vtable
+	$(RUN_TEST) ./test_load
 
 DO_TCL=@DO_TCL@
 check-unix:: check-unix-tcl-$(DO_TCL)
@@ -149,7 +149,7 @@ check-unix-tcl-:
 
 check-unix-tcl-ok: profile_tcl
 	cp $(srcdir)/test.ini test2.ini
-	$(RUN_SETUP) $(VALGRIND) ./profile_tcl $(srcdir)/prof_test1
+	$(RUN_TEST) ./profile_tcl $(srcdir)/prof_test1
 
 check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
 	$(RM) $(OUTPRE)*.obj

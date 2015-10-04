@@ -59,10 +59,10 @@ destest$(EXEEXT): destest.$(OBJEXT) $(TOBJS) $(SUPPORT_DEPLIB)
 all-unix:: all-libobjs
 
 check-unix:: verify destest
-	$(RUN_SETUP) $(VALGRIND) ./verify -z
-	$(RUN_SETUP) $(VALGRIND) ./verify -m
-	$(RUN_SETUP) $(VALGRIND) ./verify
-	$(RUN_SETUP) $(VALGRIND) ./destest < $(srcdir)/keytest.data
+	$(RUN_TEST) ./verify -z
+	$(RUN_TEST) ./verify -m
+	$(RUN_TEST) ./verify
+	$(RUN_TEST) ./destest < $(srcdir)/keytest.data
 
 includes:: depend
 

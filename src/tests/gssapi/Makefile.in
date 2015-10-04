@@ -34,9 +34,9 @@ all:: ccinit ccrefresh t_accname t_ccselect t_ciflags t_credstore t_enctypes \
 	t_oid t_pcontok t_prf t_s4u t_s4u2proxy_krb5 t_saslname t_spnego
 
 check-unix:: t_oid
-	$(RUN_SETUP) $(VALGRIND) ./t_invalid
-	$(RUN_SETUP) $(VALGRIND) ./t_oid
-	$(RUN_SETUP) $(VALGRIND) ./t_prf
+	$(RUN_TEST) ./t_invalid
+	$(RUN_TEST) ./t_oid
+	$(RUN_TEST) ./t_prf
 
 check-pytests:: ccinit ccrefresh t_accname t_ccselect t_ciflags t_credstore \
 	t_enctypes t_err t_export_cred t_export_name t_imp_cred t_inq_cred \

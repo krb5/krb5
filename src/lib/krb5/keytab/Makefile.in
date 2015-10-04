@@ -54,8 +54,7 @@ all-unix:: all-libobjs
 clean-unix:: clean-libobjs
 
 check-unix:: t_keytab
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(VALGRIND) ./t_keytab
+	$(RUN_TEST) ./t_keytab
 
 T_KEYTAB_OBJS = t_keytab.o
 t_keytab: $(T_KEYTAB_OBJS) $(KRB5_BASE_DEPLIBS)

@@ -9,7 +9,7 @@ SRCS=$(srcdir)/t_loader.c
 all::
 
 run-t_loader: t_loader
-	$(RUN_SETUP) $(VALGRIND) ./t_loader
+	$(RUN_TEST) ./t_loader
 
 t_loader: t_loader.o
 	$(CC_LINK) -o t_loader t_loader.o $(DL_LIB)

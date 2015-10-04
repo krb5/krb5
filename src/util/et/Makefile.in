@@ -103,8 +103,8 @@ clean-unix::
 # test_et doesn't have an interesting exit status, but it'll exercise
 # some cases that t_com_err doesn't, so let's see if it crashes.
 check-unix:: t_com_err test_et
-	$(RUN_SETUP) $(VALGRIND) ./test_et
-	$(RUN_SETUP) $(VALGRIND) ./t_com_err
+	$(RUN_TEST) ./test_et
+	$(RUN_TEST) ./t_com_err
 
 check-windows:: $(OUTPRE)test_et$(EXEEXT)
 	set path=$(BUILDTOP)\lib\$(OUTPRE);%path%;

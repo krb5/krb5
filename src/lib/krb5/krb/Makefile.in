@@ -3,6 +3,10 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../os -I$(top_srcdir)
 DEFINES=-DLIBDIR=\"$(KRB5_LIBDIR)\" -DDYNOBJEXT=\"$(DYNOBJEXT)\"
 
+# Like RUN_TEST, but use t_krb5.conf from this directory.
+RUN_TEST_LOCAL_CONF=$(RUN_SETUP) KRB5_CONFIG=$(srcdir)/t_krb5.conf LC_ALL=C \
+	$(VALGRIND)
+
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=krb
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
@@ -438,8 +442,7 @@ TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
 	t_princ t_etypes t_vfy_increds t_response_items
 
 check-unix:: $(TEST_PROGS)
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(VALGRIND) ./t_kerb \
+	$(RUN_TEST_LOCAL_CONF) ./t_kerb \
 		parse_name tytso \
 		parse_name tytso@SHAZAAM \
 		parse_name tytso/root@VEGGIE.COM \
@@ -462,20 +465,16 @@ check-unix:: $(TEST_PROGS)
 		> test.out
 	cmp test.out $(srcdir)/t_ref_kerb.out
 	$(RM) test.out
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) ./t_ser
-	$(RUN_SETUP) $(VALGRIND) ./t_deltat
-	$(RUN_SETUP) $(VALGRIND) sh $(srcdir)/transit-tests
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) sh $(srcdir)/walktree-tests
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(VALGRIND) ./t_authdata
-	$(RUN_SETUP) $(VALGRIND) ./t_pac
-	$(RUN_SETUP) $(VALGRIND) ./t_princ
-	$(RUN_SETUP) $(VALGRIND) ./t_etypes
-	$(RUN_SETUP) $(VALGRIND) ./t_response_items
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) ./t_copy_context
+	$(RUN_TEST) ./t_ser
+	$(RUN_TEST) ./t_deltat
+	$(RUN_TEST) sh $(srcdir)/transit-tests
+	$(RUN_TEST_LOCAL_CONF) sh $(srcdir)/walktree-tests
+	$(RUN_TEST) ./t_authdata
+	$(RUN_TEST) ./t_pac
+	$(RUN_TEST) ./t_princ
+	$(RUN_TEST) ./t_etypes
+	$(RUN_TEST) ./t_response_items
+	$(RUN_TEST) ./t_copy_context
 
 check-pytests:: t_expire_warn t_vfy_increds
 	$(RUNPYTEST) $(srcdir)/t_expire_warn.py $(PYTESTFLAGS)

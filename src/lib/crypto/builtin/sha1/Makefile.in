@@ -28,8 +28,8 @@ t_shs3: t_shs3.o shs.o $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o t_shs3 t_shs3.o shs.o $(SUPPORT_LIB)
 
 check-unix:: t_shs t_shs3
-	$(RUN_SETUP) $(VALGRIND) $(C)t_shs -x
-	$(RUN_SETUP) $(VALGRIND) $(C)t_shs3
+	$(RUN_TEST) $(C)t_shs -x
+	$(RUN_TEST) $(C)t_shs3
 
 check-windows:: $(OUTPRE)t_shs.exe $(OUTPRE)t_shs3.exe
 	$(OUTPRE)$(C)t_shs.exe -x
