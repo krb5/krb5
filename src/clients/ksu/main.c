@@ -810,12 +810,7 @@ get_configured_defccname(krb5_context context, char **target_out)
 
     *target_out = NULL;
 
-    if (unsetenv(KRB5_ENV_CCNAME) != 0) {
-        retval = errno;
-        com_err(prog_name, retval, _("while clearing the value of %s"),
-                KRB5_ENV_CCNAME);
-        return retval;
-    }
+    unsetenv(KRB5_ENV_CCNAME);
 
     /* Make sure we don't have a cached value for a different uid. */
     retval = krb5_cc_set_default_name(context, NULL);
