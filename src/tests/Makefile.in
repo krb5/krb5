@@ -3,7 +3,8 @@ BUILDTOP=$(REL)..
 SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 	gss-threads misc
 
-RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
+RUN_DB_TEST = $(RUN_SETUP) KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf \
+	LC_ALL=C $(VALGRIND)
 
 OBJS= adata.o etinfo.o gcred.o hist.o hrealm.o kdbtest.o plugorder.o \
 	t_init_creds.o t_localauth.o rdreq.o responder.o s2p.o s4u2proxy.o
@@ -81,29 +82,29 @@ krb5.conf: Makefile
 
 kdb_check: kdc.conf krb5.conf
 	$(RM) $(TEST_DB)*
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create -W
-	$(RUN_SETUP) $(VALGRIND) ../tests/create/kdb5_mkdums $(KTEST_OPTS) 
-	$(RUN_SETUP) $(VALGRIND) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -ov $(TEST_DB).ovdump
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
+	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create -W
+	$(RUN_DB_TEST) ../tests/create/kdb5_mkdums $(KTEST_OPTS)
+	$(RUN_DB_TEST) ../tests/verify/kdb5_verify $(KTEST_OPTS)
+	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump
+	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -ov $(TEST_DB).ovdump
+	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	@echo "====> NOTE!"
 	@echo "The following 'create' command is needed due to a change"
 	@echo "in functionality caused by DAL integration.  See ticket 3973."
 	@echo ====
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create -W
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load $(TEST_DB).dump 
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load -update -ov $(TEST_DB).ovdump 
-	$(RUN_SETUP) $(VALGRIND) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump2
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -ov $(TEST_DB).ovdump2
+	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create -W
+	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load $(TEST_DB).dump
+	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load -update -ov $(TEST_DB).ovdump
+	$(RUN_DB_TEST) ../tests/verify/kdb5_verify $(KTEST_OPTS)
+	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump2
+	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -ov $(TEST_DB).ovdump2
 	sort $(TEST_DB).dump > $(TEST_DB).sort
 	sort $(TEST_DB).dump2 > $(TEST_DB).sort2
 	sort $(TEST_DB).ovdump > $(TEST_DB).ovsort
 	sort $(TEST_DB).ovdump2 > $(TEST_DB).ovsort2
 	cmp $(TEST_DB).sort $(TEST_DB).sort2
 	cmp $(TEST_DB).ovsort $(TEST_DB).ovsort2
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
+	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
 
 check-pytests:: adata etinfo gcred hist hrealm kdbtest plugorder rdreq
