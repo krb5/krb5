@@ -413,6 +413,12 @@ APPUTILS_LIB	= -lapputils
 RUN_SETUP=@KRB5_RUN_ENV@
 RUN_VARS=@KRB5_RUN_VARS@
 
+# Appropriate command prefix for most C test programs: use libraries
+# from the build tree, avoid referencing the installed krb5.conf and
+# message catalog, and use valgrind when asked.
+RUN_TEST=$(RUN_SETUP) KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf \
+    LC_ALL=C $(VALGRIND)
+
 #
 # variables for --with-tcl=
 TCL_LIBS	= @TCL_LIBS@
