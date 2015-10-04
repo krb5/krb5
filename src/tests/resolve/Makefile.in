@@ -17,9 +17,9 @@ fake-addrinfo-test: fake-addrinfo-test.o
 	$(CC_LINK) -o $@ fake-addrinfo-test.o $(SUPPORT_LIB) $(LIBS)
 
 check:: resolve addrinfo-test fake-addrinfo-test
-	$(RUN_SETUP) $(VALGRIND) ./resolve
-	$(RUN_SETUP) $(VALGRIND) ./addrinfo-test -p telnet
-	$(RUN_SETUP) $(VALGRIND) ./fake-addrinfo-test -p telnet
+	$(RUN_TEST) ./resolve
+	$(RUN_TEST) ./addrinfo-test -p telnet
+	$(RUN_TEST) ./fake-addrinfo-test -p telnet
 
 install::
 

@@ -18,13 +18,13 @@ SRCS=\
 all:: test_getpw test_chpw_message
 
 check:: test_getpw test_chpw_message test_cxx_krb5 test_cxx_gss test_cxx_rpc test_cxx_k5int test_cxx_kadm5
-	$(RUN_SETUP) $(VALGRIND) ./test_getpw
-	$(RUN_SETUP) $(VALGRIND) ./test_chpw_message
-	$(RUN_SETUP) $(VALGRIND) ./test_cxx_krb5
-	$(RUN_SETUP) $(VALGRIND) ./test_cxx_k5int
-	$(RUN_SETUP) $(VALGRIND) ./test_cxx_gss
-	$(RUN_SETUP) $(VALGRIND) ./test_cxx_rpc
-	$(RUN_SETUP) $(VALGRIND) ./test_cxx_kadm5
+	$(RUN_TEST) ./test_getpw
+	$(RUN_TEST) ./test_chpw_message
+	$(RUN_TEST) ./test_cxx_krb5
+	$(RUN_TEST) ./test_cxx_k5int
+	$(RUN_TEST) ./test_cxx_gss
+	$(RUN_TEST) ./test_cxx_rpc
+	$(RUN_TEST) ./test_cxx_kadm5
 
 test_getpw: $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) $(ALL_CFLAGS) -o test_getpw $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_LIB)

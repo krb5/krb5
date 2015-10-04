@@ -54,7 +54,7 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 	$(RM) t_ulog.o t_ulog test.ulog
 
 check-unix:: t_ulog
-	$(RUN_SETUP) $(VALGRIND) ./t_ulog test.ulog
+	$(RUN_TEST) ./t_ulog test.ulog
 
 check-pytests:: t_stringattr
 	$(RUNPYTEST) $(srcdir)/t_stringattr.py $(PYTESTFLAGS)

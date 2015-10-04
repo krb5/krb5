@@ -28,7 +28,7 @@ $(OUTPRE)t_sha256.exe: $(OUTPRE)t_sha256.obj $(OUTPRE)sha256.obj
 
 
 check-unix:: t_sha256
-	$(RUN_SETUP) $(VALGRIND) $(C)t_sha256
+	$(RUN_TEST) $(C)t_sha256
 
 clean::
 	$(RM) t_sha256$(EXEEXT) t_sha256.$(OBJEXT)

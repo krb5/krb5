@@ -4,6 +4,10 @@ DEFINES=-DLIBDIR=\"$(KRB5_LIBDIR)\" -DBINDIR=\"$(CLIENT_BINDIR)\" \
 	-DSBINDIR=\"$(ADMIN_BINDIR)\"
 LOCALINCLUDES= -I$(top_srcdir)/util/profile
 
+# Like RUN_TEST, but use td_krb5.conf from this directory.
+RUN_TEST_LOCAL_CONF=$(RUN_SETUP) KRB5_CONFIG=$(srcdir)/td_krb5.conf LC_ALL=C \
+	$(VALGRIND)
+
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=os
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
@@ -199,8 +203,7 @@ check-unix:: check-unix-stdconf check-unix-locate check-unix-trace \
 	check-unix-expand
 
 check-unix-stdconf:: t_std_conf
-	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(VALGRIND) ./t_std_conf  -d -s NEW.DEFAULT.REALM -d \
+	$(RUN_TEST_LOCAL_CONF) ./t_std_conf  -d -s NEW.DEFAULT.REALM -d \
 		-D DEFAULT_REALM.TST -r bad.idea -r itar.bad.idea \
 		-r really.BAD.IDEA. -r clipper.bad.idea -r KeYEsCrOW.BaD.IDea \
 		-r pgp.good.idea -r no_domain > test.out
@@ -219,8 +222,7 @@ check-unix-locate:: t_locate_kdc
 	if [ "$(OFFLINE)" = no ]; then \
 	    if $(DIG) $(SRVNAME) srv | grep -i $(DIGPAT) || \
 		$(NSLOOKUP) -q=srv $(SRVNAME) | grep -i $(NSPAT); then \
-		KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) ./t_locate_kdc $(LOCREALM); \
+		$(RUN_TEST) ./t_locate_kdc $(LOCREALM); \
 	    else \
 		echo '*** WARNING: skipped t_locate_kdc test: known DNS name not found'; \
 		echo 'Skipped t_locate_kdc test: known DNS name found' >> $(SKIPTESTS); \
@@ -233,15 +235,15 @@ check-unix-locate:: t_locate_kdc
 check-unix-trace:: t_trace
 	rm -f t_trace.out
 	KRB5_TRACE=t_trace.out ; export KRB5_TRACE ; \
-	$(RUN_SETUP) $(VALGRIND) ./t_trace
+	$(RUN_TEST) ./t_trace
 	sed -e 's/^[^:]*: //' t_trace.out | cmp - $(srcdir)/t_trace.ref
 	rm -f t_trace.out
 
 check-unix-expand:: t_expand_path
-	$(RUN_SETUP) $(VALGRIND) ./t_expand_path '%{null}' ''
-	$(RUN_SETUP) $(VALGRIND) ./t_expand_path ' %{BINDIR}%{LIBDIR} ' \
+	$(RUN_TEST) ./t_expand_path '%{null}' ''
+	$(RUN_TEST) ./t_expand_path ' %{BINDIR}%{LIBDIR} ' \
 		' $(CLIENT_BINDIR)$(KRB5_LIBDIR) '
-	$(RUN_SETUP) $(VALGRIND) ./t_expand_path \
+	$(RUN_TEST) ./t_expand_path \
 		'the %{animal}%{s} on the %{place}%{s}' \
 		'the frogs on the pads'
 

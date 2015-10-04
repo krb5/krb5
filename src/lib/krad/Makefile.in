@@ -2,7 +2,6 @@ mydir=lib$(S)krad
 BUILDTOP=$(REL)..$(S)..
 RELDIR=krad
 
-RUN_SETUP=@KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -33,12 +32,12 @@ install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 check-unix:: t_attr t_attrset t_code t_packet t_remote t_client
-	$(RUN_SETUP) $(VALGRIND) ./t_attr
-	$(RUN_SETUP) $(VALGRIND) ./t_attrset
-	$(RUN_SETUP) $(VALGRIND) ./t_code
-	$(RUN_SETUP) $(VALGRIND) ./t_packet $(PYTHON) $(srcdir)/t_daemon.py
-	$(RUN_SETUP) $(VALGRIND) ./t_remote $(PYTHON) $(srcdir)/t_daemon.py
-	$(RUN_SETUP) $(VALGRIND) ./t_client $(PYTHON) $(srcdir)/t_daemon.py
+	$(RUN_TEST) ./t_attr
+	$(RUN_TEST) ./t_attrset
+	$(RUN_TEST) ./t_code
+	$(RUN_TEST) ./t_packet $(PYTHON) $(srcdir)/t_daemon.py
+	$(RUN_TEST) ./t_remote $(PYTHON) $(srcdir)/t_daemon.py
+	$(RUN_TEST) ./t_client $(PYTHON) $(srcdir)/t_daemon.py
 
 TESTDEPS=t_test.o $(KRB5_BASE_DEPLIBS)
 TESTLIBS=t_test.o $(KRB5_BASE_LIBS)

@@ -151,7 +151,7 @@ t_seqstate: t_seqstate.o util_seqstate.o $(SUPPORT_DEPLIB)
 		$(SUPPORT_LIB)
 
 check-unix:: t_seqstate
-	$(RUN_SETUP) $(VALGRIND) ./t_seqstate
+	$(RUN_TEST) ./t_seqstate
 
 generate-files-mac: gssapi.h errmap.h
 

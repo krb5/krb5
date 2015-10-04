@@ -69,8 +69,7 @@ rtest: $(RT_OBJS) $(KDB5_DEPLIBS) $(KADM_COMM_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o rtest $(RT_OBJS) $(KDB5_LIBS) $(KADM_COMM_LIBS) $(KRB5_BASE_LIBS)
 
 check-unix:: rtest
-	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; export KRB5_CONFIG ; \
-	$(RUN_SETUP) $(VALGRIND) $(srcdir)/rtscript > test.out
+	$(RUN_TEST) $(srcdir)/rtscript > test.out
 	cmp test.out $(srcdir)/rtest.good
 	$(RM) test.out
 

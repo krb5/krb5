@@ -38,14 +38,10 @@ check:: check-encode check-encode-trval check-decode check-leak
 # Does not actually test for leaks unless using valgrind or a similar
 # tool, but does exercise a bunch of code.
 check-leak: krb5_decode_leak
-	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; \
-		export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) ./krb5_decode_leak
+	$(RUN_TEST) ./krb5_decode_leak
 
 check-decode: krb5_decode_test
-	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; \
-		export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) ./krb5_decode_test
+	$(RUN_TEST) ./krb5_decode_test
 
 PKINIT_ENCODE_OUT=$(PKINIT_ENCODE_OUT-@PKINIT@)
 PKINIT_ENCODE_OUT-yes=$(srcdir)/pkinit_encode.out
@@ -68,15 +64,11 @@ expected_trval.out: trval_reference.out pkinit_trval.out ldap_trval.out
 		$(LDAP_TRVAL_OUT) > $@
 
 check-encode: krb5_encode_test expected_encode.out
-	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; \
-		export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test > test.out
+	$(RUN_TEST) ./krb5_encode_test > test.out
 	cmp test.out expected_encode.out
 
 check-encode-trval: krb5_encode_test expected_trval.out
-	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; \
-		export KRB5_CONFIG ;\
-		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test -t > trval.out
+	$(RUN_TEST) ./krb5_encode_test -t > trval.out
 	cmp trval.out expected_trval.out
 
 # This target uses asn1c to generate encodings of sample objects, to

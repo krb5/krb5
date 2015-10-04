@@ -45,7 +45,7 @@ clean::
 	$(RM) pkinit_kdf_test pkinit_kdf_test.o
 
 check-unix:: pkinit_kdf_test
-	$(RUN_SETUP) $(VALGRIND) ./pkinit_kdf_test
+	$(RUN_TEST) ./pkinit_kdf_test
 
 pkinit_kdf_test: pkinit_kdf_test.o $(STLIBOBJS) $(SHLIB_EXPDEPS)
 	$(CC_LINK) -o $@ pkinit_kdf_test.o $(STLIBOBJS) $(SHLIB_EXPLIBS)

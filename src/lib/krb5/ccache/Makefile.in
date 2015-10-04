@@ -138,10 +138,8 @@ t_marshal: $(T_MARSHAL_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ $(T_MARSHAL_OBJS) $(KRB5_BASE_LIBS)
 
 check-unix:: t_cc t_marshal
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(VALGRIND) ./t_cc
-	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(VALGRIND) ./t_marshal testcache
+	$(RUN_TEST) ./t_cc
+	$(RUN_TEST) ./t_marshal testcache
 
 check-pytests:: t_cccursor t_cccol
 	$(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
