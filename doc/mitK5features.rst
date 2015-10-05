@@ -21,7 +21,6 @@ License - :ref:`mitK5license`
 Releases:
     - Latest stable: http://web.mit.edu/kerberos/krb5-1.13/
     - Supported: http://web.mit.edu/kerberos/krb5-1.12/
-    - Supported: http://web.mit.edu/kerberos/krb5-1.11/
     - Release cycle: 9 -- 12 months
 
 Supported platforms \/ OS distributions:
@@ -172,6 +171,96 @@ Release 1.13
  -   Add support for doing unlocked database dumps for the DB2 KDC
      back end, which would allow the KDC and kadmind to continue
      accessing the database during lengthy database dumps.
+
+Release 1.14
+
+ * Administrator experience
+
+   - Add a new kdb5_util tabdump command to provide reporting-friendly
+     tabular dump formats (tab-separated or CSV) for the KDC database.
+     Unlike the normal dump format, each output table has a fixed number
+     of fields.  Some tables include human-readable forms of data that
+     are opaque in ordinary dump files.  This format is also suitable for
+     importing into relational databases for complex queries.
+   - Add support to kadmin and kadmin.local for specifying a single
+     command line following any global options, where the command
+     arguments are split by the shell--for example, "kadmin getprinc
+     principalname".  Commands issued this way do not prompt for
+     confirmation or display warning messages, and exit with non-zero
+     status if the operation fails.
+   - Accept the same principal flag names in kadmin as we do for the
+     default_principal_flags kdc.conf variable, and vice versa.  Also
+     accept flag specifiers in the form that kadmin prints, as well as
+     hexadecimal numbers.
+   - Remove the triple-DES and RC4 encryption types from the default
+     value of supported_enctypes, which determines the default key and
+     salt types for new password-derived keys.  By default, keys will
+     only created only for AES128 and AES256.  This mitigates some types
+     of password guessing attacks.
+   - Add support for directory names in the KRB5_CONFIG and
+     KRB5_KDC_PROFILE environment variables.
+   - Add support for authentication indicators, which are ticket
+     annotations to indicate the strength of the initial authentication.
+     Add support for the "require_auth" string attribute, which can be
+     set on server principal entries to require an indicator when
+     authenticating to the server.
+   - Add support for key version numbers larger than 255 in keytab files,
+     and for version numbers up to 65535 in KDC databases.
+   - Transmit only one ETYPE-INFO and/or ETYPE-INFO2 entry from the KDC
+     during pre-authentication, corresponding to the client's most
+     preferred encryption type.
+   - Add support for server name identification (SNI) when proxying KDC
+     requests over HTTPS.
+   - Add support for the err_fmt profile parameter, which can be used to
+     generate custom-formatted error messages.
+
+ * Developer experience:
+
+   - Change gss_acquire_cred_with_password() to acquire credentials into
+     a private memory credential cache.  Applications can use
+     gss_store_cred() to make the resulting credentials visible to other
+     processes.
+   - Change gss_acquire_cred() and SPNEGO not to acquire credentials for
+     IAKERB or for non-standard variants of the krb5 mechanism OID unless
+     explicitly requested.  (SPNEGO will still accept the Microsoft
+     variant of the krb5 mechanism OID during negotiation.)
+   - Change gss_accept_sec_context() not to accept tokens for IAKERB or
+     for non-standard variants of the krb5 mechanism OID unless an
+     acceptor credential is acquired for those mechanisms.
+   - Change gss_acquire_cred() to immediately resolve credentials if the
+     time_rec parameter is not NULL, so that a correct expiration time
+     can be returned.  Normally credential resolution is delayed until
+     the target name is known.
+   - Add krb5_prepend_error_message() and krb5_wrap_error_message() APIs,
+     which can be used by plugin modules or applications to add prefixes
+     to existing detailed error messages.
+   - Add krb5_c_prfplus() and krb5_c_derive_prfplus() APIs, which
+     implement the RFC 6113 PRF+ operation and key derivation using PRF+.
+   - Add support for pre-authentication mechanisms which use multiple
+     round trips, using the the KDC_ERR_MORE_PREAUTH_DATA_REQUIRED error
+     code.  Add get_cookie() and set_cookie() callbacks to the kdcpreauth
+     interface; these callbacks can be used to save marshalled state
+     information in an encrypted cookie for the next request.
+   - Add a client_key() callback to the kdcpreauth interface to retrieve
+     the chosen client key, corresponding to the ETYPE-INFO2 entry sent
+     by the KDC.
+   - Add an add_auth_indicator() callback to the kdcpreauth interface,
+     allowing pre-authentication modules to assert authentication
+     indicators.
+   - Add support for the GSS_KRB5_CRED_NO_CI_FLAGS_X cred option to
+     suppress sending the confidentiality and integrity flags in GSS
+     initiator tokens unless they are requested by the caller.  These
+     flags control the negotiated SASL security layer for the Microsoft
+     GSS-SPNEGO SASL mechanism.
+   - Make the FILE credential cache implementation less prone to
+     corruption issues in multi-threaded programs, especially on
+     platforms with support for open file description locks.
+
+ * Performance:
+
+   - On slave KDCs, poll the master KDC immediately after processing a
+     full resync, and do not require two full resyncs after the master
+     KDC's log file is reset.
 
 `Pre-authentication mechanisms`
 
