@@ -48,7 +48,7 @@ struct sendto_callback_context {
     krb5_context        context;
     krb5_auth_context   auth_context;
     krb5_principal      set_password_for;
-    char                *newpw;
+    const char          *newpw;
     krb5_data           ap_req;
     krb5_ui_4           remote_seq_num, local_seq_num;
 };
@@ -207,7 +207,7 @@ cleanup:
 static krb5_error_code
 change_set_password(krb5_context context,
                     krb5_creds *creds,
-                    char *newpw,
+                    const char *newpw,
                     krb5_principal set_password_for,
                     int *result_code,
                     krb5_data *result_code_string,
@@ -328,7 +328,7 @@ cleanup:
 krb5_error_code KRB5_CALLCONV
 krb5_change_password(krb5_context context,
                      krb5_creds *creds,
-                     char *newpw,
+                     const char *newpw,
                      int *result_code,
                      krb5_data *result_code_string,
                      krb5_data *result_string)
@@ -345,7 +345,7 @@ krb5_change_password(krb5_context context,
 krb5_error_code KRB5_CALLCONV
 krb5_set_password(krb5_context context,
                   krb5_creds *creds,
-                  char *newpw,
+                  const char *newpw,
                   krb5_principal change_password_for,
                   int *result_code,
                   krb5_data *result_code_string,
@@ -359,7 +359,7 @@ krb5_set_password(krb5_context context,
 krb5_error_code KRB5_CALLCONV
 krb5_set_password_using_ccache(krb5_context context,
                                krb5_ccache ccache,
-                               char *newpw,
+                               const char *newpw,
                                krb5_principal change_password_for,
                                int *result_code,
                                krb5_data *result_code_string,
