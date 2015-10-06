@@ -5037,9 +5037,9 @@ krb5_sname_match(krb5_context context, krb5_const_principal matching,
  * @retval 0 Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
-krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw,
-                     int *result_code, krb5_data *result_code_string,
-                     krb5_data *result_string);
+krb5_change_password(krb5_context context, krb5_creds *creds,
+                     const char *newpw, int *result_code,
+                     krb5_data *result_code_string, krb5_data *result_string);
 
 /**
  * Set a password for a principal using specified credentials.
@@ -5072,7 +5072,7 @@ krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw,
  * Kerberos error codes.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_set_password(krb5_context context, krb5_creds *creds, char *newpw,
+krb5_set_password(krb5_context context, krb5_creds *creds, const char *newpw,
                   krb5_principal change_password_for, int *result_code,
                   krb5_data *result_code_string, krb5_data *result_string);
 
@@ -5108,7 +5108,8 @@ krb5_set_password(krb5_context context, krb5_creds *creds, char *newpw,
  */
 krb5_error_code KRB5_CALLCONV
 krb5_set_password_using_ccache(krb5_context context, krb5_ccache ccache,
-                               char *newpw, krb5_principal change_password_for,
+                               const char *newpw,
+                               krb5_principal change_password_for,
                                int *result_code, krb5_data *result_code_string,
                                krb5_data *result_string);
 
