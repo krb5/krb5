@@ -118,7 +118,12 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
             return(GSS_S_FAILURE);
         }
 
-        if ((lifetime = ctx->krb_times.endtime - now) < 0)
+        /* Add the maximum allowable clock skew as a grace period for context
+         * expiration, just as we do for the ticket during authentication. */
+        lifetime = ctx->krb_times.endtime - now;
+        if (!ctx->initiate)
+            lifetime += context->clockskew;
+        if (lifetime < 0)
             lifetime = 0;
 
         if (initiator_name) {
