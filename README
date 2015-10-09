@@ -223,6 +223,7 @@ krb5-1.14 changes by ticket ID
 8215    Unify KDB principal flag specifiers
 8217    Limit use of deprecated krb5 mech OIDs
 8219    Conditionalize iprop stderr output in kadmind
+8221    Fail during configure if stdint.h missing
 8224    Add KDC_ERR_PREAUTH_EXPIRED support
 8225    Improve krb5_cccol_have_content() error messages
 8227    Allow missing authenticator checksum with GSSAPI
@@ -235,6 +236,14 @@ krb5-1.14 changes by ticket ID
 8243    Add tabular dump capability to kdb5_util
 8245    kerberos.ldif file has malformed entries
 8246    Fix error mappings for IOV MIC mechglue funcs
+8251    Fix kadmin with e2fsprogs libss
+8253    Fix minor utf8-to-ucs2s read overrun bug
+8255    Define error status GSS_S_BAD_MIC
+8256    Fix typo in GSS_S_UNAUTHORIZED error message
+8257    Fix gss_inquire_names_for_mech() on MS krb5 mech
+8258    Correct GSS major code for non-default QOP values
+8259    Check output params on GSS OID set functions
+8260    Fix gss_store_cred() minor code on acceptor cred
 
 
 Acknowledgements
@@ -343,6 +352,7 @@ reports, suggestions, and valuable resources:
     Radoslav Bodo
     Sumit Bose
     Emmanuel Bouillon
+    Philip Brown
     Michael Calmer
     Andrea Campi
     Julien Chaffraix
