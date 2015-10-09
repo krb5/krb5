@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mit-krb5 1.14-alpha1-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-18 15:24-0400\n"
+"POT-Creation-Date: 2015-10-09 14:17-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2057,7 +2057,7 @@ msgstr ""
 msgid "%s: There is only one entry for principal %s in keytab %s\n"
 msgstr ""
 
-#: ../../src/kadmin/cli/ss_wrapper.c:49 ../../src/kadmin/ktutil/ktutil.c:58
+#: ../../src/kadmin/cli/ss_wrapper.c:53 ../../src/kadmin/ktutil/ktutil.c:58
 msgid "creating invocation"
 msgstr ""
 
@@ -4077,7 +4077,7 @@ msgid "The quality-of-protection (QOP) requested could not be provided"
 msgstr ""
 
 #: ../../src/lib/gssapi/mechglue/g_dsp_status.c:253
-msgid "The operation is forbidden by local  security policy"
+msgid "The operation is forbidden by local security policy"
 msgstr ""
 
 #: ../../src/lib/gssapi/mechglue/g_dsp_status.c:258
