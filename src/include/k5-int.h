@@ -979,6 +979,9 @@ typedef struct _krb5_authdata_context *krb5_authdata_context;
 void
 k5_free_data_ptr_list(krb5_data **list);
 
+void
+k5_zapfree_pa_data(krb5_pa_data **val);
+
 void KRB5_CALLCONV
 krb5int_free_data_list(krb5_context context, krb5_data *data);
 

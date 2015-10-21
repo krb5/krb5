@@ -366,6 +366,20 @@ krb5_free_last_req(krb5_context context, krb5_last_req_entry **val)
     free(val);
 }
 
+void
+k5_zapfree_pa_data(krb5_pa_data **val)
+{
+    krb5_pa_data **pa;
+
+    if (val == NULL)
+        return;
+    for (pa = val; *pa != NULL; pa++) {
+        zapfree((*pa)->contents, (*pa)->length);
+        zapfree(*pa, sizeof(**pa));
+    }
+    free(val);
+}
+
 void KRB5_CALLCONV
 krb5_free_pa_data(krb5_context context, krb5_pa_data **val)
 {
@@ -872,6 +886,6 @@ k5_free_secure_cookie(krb5_context context, krb5_secure_cookie *val)
 {
     if (val == NULL)
         return;
-    krb5_free_pa_data(context, val->data);
+    k5_zapfree_pa_data(val->data);
     free(val);
 }
