@@ -144,6 +144,7 @@ k5_plugin_register
 k5_plugin_register_dyn
 k5_unmarshal_cred
 k5_unmarshal_princ
+k5_zapfree_pa_data
 krb524_convert_creds_kdc
 krb524_init_ets
 krb5_425_conv_principal

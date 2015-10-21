@@ -270,8 +270,8 @@ kdc_free_rstate (struct kdc_request_state *s)
         krb5_free_keyblock(kdc_context, s->armor_key);
     if (s->strengthen_key)
         krb5_free_keyblock(kdc_context, s->strengthen_key);
-    krb5_free_pa_data(NULL, s->in_cookie_padata);
-    krb5_free_pa_data(NULL, s->out_cookie_padata);
+    k5_zapfree_pa_data(s->in_cookie_padata);
+    k5_zapfree_pa_data(s->out_cookie_padata);
     free(s);
 }
 
@@ -620,7 +620,7 @@ kdc_fast_read_cookie(krb5_context context, struct kdc_request_state *state,
     cookie->data = NULL;
 
 cleanup:
-    krb5_free_data_contents(context, &plain);
+    zapfree(plain.data, plain.length);
     krb5_free_keyblock(context, key);
     k5_free_secure_cookie(context, cookie);
     return 0;
@@ -727,7 +727,11 @@ kdc_fast_make_cookie(krb5_context context, struct kdc_request_state *state,
     *cookie_out = pa;
 
 cleanup:
-    krb5_free_data(context, der_cookie);
+    krb5_free_keyblock(context, key);
+    if (der_cookie != NULL) {
+        zapfree(der_cookie->data, der_cookie->length);
+        free(der_cookie);
+    }
     krb5_free_data_contents(context, &enc.ciphertext);
     return ret;
 }
