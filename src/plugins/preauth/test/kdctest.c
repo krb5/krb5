@@ -142,6 +142,7 @@ test_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
         }
         free(str);
         enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
+        cb->free_string(context, rock, attr);
         (*respond)(arg, 0, NULL, NULL, NULL);
     } else {
         d = string2data("more");
