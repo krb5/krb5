@@ -33,6 +33,7 @@ EOF
 
 foo=`sed -e 's/(//g' -e 's/)//g' -e 's/\\\$\\\$/\$/g' /tmp/env_setup$$`
 eval $foo
+export @KRB5_RUN_VARS@
 
 # This will get put in setup.csh for convenience
 KRB5_RUN_ENV_CSH=`eval echo "$foo" | \
