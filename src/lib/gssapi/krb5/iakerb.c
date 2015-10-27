@@ -727,10 +727,6 @@ cleanup:
     return code;
 }
 
-/*
- * Delete an IAKERB context. This can also accept Kerberos context
- * handles. The heuristic is similar to SPNEGO's delete_sec_context.
- */
 OM_uint32 KRB5_CALLCONV
 iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
@@ -1077,7 +1073,7 @@ iakerb_gss_export_sec_context(OM_uint32 *minor_status,
 }
 
 /*
- * Until we implement partial context exports, there are no SPNEGO exported
+ * Until we implement partial context exports, there are no IAKERB exported
  * context tokens, only tokens for the underlying krb5 context.  So we do not
  * need to implement an iakerb_gss_import_sec_context() yet; it would be
  * unreachable except via a manually constructed token.
