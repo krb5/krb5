@@ -1397,6 +1397,11 @@ OM_uint32 KRB5_CALLCONV
 iakerb_gss_export_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
                               gss_buffer_t interprocess_token);
+
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_import_sec_context(OM_uint32 *minor_status,
+                              const gss_buffer_t interprocess_token,
+                              gss_ctx_id_t *context_handle);
 #endif /* LEAN_CLIENT */
 
 OM_uint32 KRB5_CALLCONV
