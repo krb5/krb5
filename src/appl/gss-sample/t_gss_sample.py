@@ -33,7 +33,8 @@ gss_server = os.path.join(appdir, 'gss-server')
 # given by server_options.  Return the output of gss-client.
 def run_client_server(realm, options, server_options, expected_code=0):
     portstr = str(realm.server_port())
-    server_args = [gss_server, '-port', portstr] + server_options + ['host']
+    server_args = [gss_server, '-export', '-port', portstr]
+    server_args += server_options + ['host']
     server = realm.start_server(server_args, 'starting...')
     out = realm.run([gss_client, '-port', portstr] + options +
                     [hostname, 'host', 'testmsg'], expected_code=expected_code)
