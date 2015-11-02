@@ -945,7 +945,7 @@ static struct gss_config iakerb_mechanism = {
     NULL,
 #else
     iakerb_gss_export_sec_context,
-    NULL,
+    iakerb_gss_import_sec_context,
 #endif
     krb5_gss_inquire_cred_by_mech,
     krb5_gss_inquire_names_for_mech,
