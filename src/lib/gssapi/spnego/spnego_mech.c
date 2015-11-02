@@ -2197,12 +2197,33 @@ spnego_gss_import_sec_context(
 	const gss_buffer_t	interprocess_token,
 	gss_ctx_id_t		*context_handle)
 {
-	/*
-	 * Until we implement partial context exports, there are no SPNEGO
-	 * exported context tokens, only tokens for underlying mechs.  So just
-	 * return an error for now.
-	 */
-	return GSS_S_UNAVAILABLE;
+	OM_uint32 ret, tmpmin;
+	gss_ctx_id_t mctx;
+	spnego_gss_ctx_id_t sc;
+	int initiate, opened;
+
+	ret = gss_import_sec_context(minor_status, interprocess_token, &mctx);
+	if (ret != GSS_S_COMPLETE)
+		return ret;
+
+	ret = gss_inquire_context(&tmpmin, mctx, NULL, NULL, NULL, NULL, NULL,
+				  &initiate, &opened);
+	if (ret != GSS_S_COMPLETE || !opened) {
+		/* We don't currently support importing partially established
+		 * contexts. */
+		(void) gss_delete_sec_context(&tmpmin, &mctx, GSS_C_NO_BUFFER);
+		return GSS_S_FAILURE;
+	}
+
+	sc = create_spnego_ctx(initiate);
+	if (sc == NULL) {
+		(void) gss_delete_sec_context(&tmpmin, &mctx, GSS_C_NO_BUFFER);
+		return GSS_S_FAILURE;
+	}
+	sc->ctx_handle = mctx;
+	sc->opened = 1;
+	*context_handle = (gss_ctx_id_t)sc;
+	return GSS_S_COMPLETE;
 }
 #endif /* LEAN_CLIENT */
 
