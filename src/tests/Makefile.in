@@ -6,10 +6,10 @@ SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 RUN_DB_TEST = $(RUN_SETUP) KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf \
 	LC_ALL=C $(VALGRIND)
 
-OBJS= adata.o etinfo.o gcred.o hist.o hrealm.o kdbtest.o plugorder.o \
-	t_init_creds.o t_localauth.o rdreq.o responder.o s2p.o s4u2proxy.o
-EXTRADEPSRCS= adata.c etinfo.c gcred.c hist.c hrealm.c kdbtest.c plugorder.c \
-	t_init_creds.c t_localauth.c rdreq.o responder.c s2p.c s4u2proxy.c
+OBJS= adata.o etinfo.o gcred.o hist.o hrealm.o icred.o kdbtest.o localauth.o \
+	plugorder.o rdreq.o responder.o s2p.o s4u2proxy.o
+EXTRADEPSRCS= adata.c etinfo.c gcred.c hist.c hrealm.c icred.c kdbtest.c \
+	localauth.c plugorder.c rdreq.o responder.c s2p.c s4u2proxy.c
 
 TEST_DB = ./testdb
 TEST_REALM = FOO.TEST.REALM
@@ -36,9 +36,15 @@ hist: hist.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 hrealm: hrealm.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ hrealm.o $(KRB5_BASE_LIBS)
 
+icred: icred.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ icred.o $(KRB5_BASE_LIBS)
+
 kdbtest: kdbtest.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kdbtest.o $(KDB5_LIBS) $(KADMSRV_LIBS) \
 		$(KRB5_BASE_LIBS)
+
+localauth: localauth.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ localauth.o $(KRB5_BASE_LIBS)
 
 plugorder: plugorder.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ plugorder.o $(KRB5_BASE_LIBS)
@@ -54,12 +60,6 @@ s2p: s2p.o $(KRB5_BASE_DEPLIBS)
 
 s4u2proxy: s4u2proxy.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ s4u2proxy.o $(KRB5_BASE_LIBS)
-
-t_init_creds: t_init_creds.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ t_init_creds.o $(KRB5_BASE_LIBS)
-
-t_localauth: t_localauth.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ t_localauth.o $(KRB5_BASE_LIBS)
 
 unlockiter: unlockiter.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ unlockiter.o $(KDB5_LIBS) $(KADMSRV_LIBS) \
@@ -107,8 +107,8 @@ kdb_check: kdc.conf krb5.conf
 	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
 
-check-pytests:: adata etinfo gcred hist hrealm kdbtest plugorder rdreq
-check-pytests:: responder s2p s4u2proxy t_init_creds t_localauth unlockiter
+check-pytests:: adata etinfo gcred hist hrealm icred kdbtest localauth
+check-pytests:: plugorder rdreq responder s2p s4u2proxy unlockiter
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_iprop.py $(PYTESTFLAGS)
@@ -159,8 +159,7 @@ check-pytests:: responder s2p s4u2proxy t_init_creds t_localauth unlockiter
 	$(RUNPYTEST) $(srcdir)/t_tabdump.py $(PYTESTFLAGS)
 
 clean::
-	$(RM) gcred hist hrealm kdbtest plugorder rdreq responder s2p
-	$(RM) adata etinfo gcred hist hrealm kdbtest plugorder rdreq responder
-	$(RM) s2p s4u2proxy t_init_creds t_localauth krb5.conf kdc.conf
+	$(RM) adata etinfo gcred hist hrealm icred kdbtest localauth plugorder
+	$(RM) rdreq responder s2p s4u2proxy krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap
 	$(RM) au.log

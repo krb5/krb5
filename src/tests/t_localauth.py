@@ -9,17 +9,17 @@ conf = {'plugins': {'localauth': { 'disable': 'k5login'}}}
 realm = K5Realm(create_kdb=False, krb5_conf=conf)
 
 def test_an2ln(env, aname, result, msg):
-    out = realm.run(['./t_localauth', aname], env=env)
+    out = realm.run(['./localauth', aname], env=env)
     if out != result + '\n':
         fail(msg)
 
 def test_an2ln_err(env, aname, err, msg):
-    out = realm.run(['./t_localauth', aname], env=env, expected_code=1)
+    out = realm.run(['./localauth', aname], env=env, expected_code=1)
     if err not in out:
         fail(msg)
 
 def test_userok(env, aname, lname, ok, msg):
-    out = realm.run(['./t_localauth', aname, lname], env=env)
+    out = realm.run(['./localauth', aname, lname], env=env)
     if ((ok and out != 'yes\n') or
         (not ok and out != 'no\n')):
         fail(msg)

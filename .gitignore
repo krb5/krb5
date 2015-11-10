@@ -254,16 +254,16 @@ testlog
 /src/tests/gcred
 /src/tests/hist
 /src/tests/hrealm
+/src/tests/icred
 /src/tests/kdbtest
 /src/tests/kdc.conf
 /src/tests/krb5.conf
+/src/tests/localauth
 /src/tests/plugorder
 /src/tests/rdreq
 /src/tests/responder
 /src/tests/s2p
 /src/tests/s4u2proxy
-/src/tests/t_init_creds
-/src/tests/t_localauth
 
 /src/tests/asn.1/expected_encode.out
 /src/tests/asn.1/expected_trval.out

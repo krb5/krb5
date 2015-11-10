@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* tests/t_init_creds.c - test harness for getting initial creds */
+/* tests/localauth.c - test harness for kuserok and aname_to_lname */
 /*
  * Copyright (C) 2013 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -30,11 +30,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * This program exercises the init_creds APIs in ways kinit doesn't.  Right now
- * it is very simplistic, but it can be extended as needed.
- */
-
 #include <krb5.h>
 #include <stdio.h>
 
@@ -56,33 +51,22 @@ check(krb5_error_code code)
 int
 main(int argc, char **argv)
 {
-    const char *princstr, *password;
-    krb5_principal client;
-    krb5_init_creds_context icc;
-    krb5_creds creds;
+    krb5_principal princ;
+    char buf[1024];
 
-    if (argc != 3) {
-        fprintf(stderr, "Usage: t_init_creds princname password\n");
-        exit(1);
+    if (argc < 2 || argc > 3) {
+        fprintf(stderr, "Usage: localauth principal [localuser]\n");
+        return 1;
     }
-    princstr = argv[1];
-    password = argv[2];
-
     check(krb5_init_context(&ctx));
-    check(krb5_parse_name(ctx, princstr, &client));
-
-    /* Try once with the traditional interface. */
-    check(krb5_get_init_creds_password(ctx, &creds, client, password, NULL,
-                                       NULL, 0, NULL, NULL));
-    krb5_free_cred_contents(ctx, &creds);
-
-    /* Try again with the step interface. */
-    check(krb5_init_creds_init(ctx, client, NULL, NULL, 0, NULL, &icc));
-    check(krb5_init_creds_set_password(ctx, icc, password));
-    check(krb5_init_creds_get(ctx, icc));
-    krb5_init_creds_free(ctx, icc);
-
-    krb5_free_principal(ctx, client);
+    check(krb5_parse_name(ctx, argv[1], &princ));
+    if (argc == 3) {
+        printf("%s\n", krb5_kuserok(ctx, princ, argv[2]) ? "yes" : "no");
+    } else {
+        check(krb5_aname_to_localname(ctx, princ, sizeof(buf), buf));
+        printf("%s\n", buf);
+    }
+    krb5_free_principal(ctx, princ);
     krb5_free_context(ctx);
     return 0;
 }
