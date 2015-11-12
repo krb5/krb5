@@ -125,6 +125,15 @@ Administrator experience:
 * Add support for the err_fmt profile parameter, which can be used to
   generate custom-formatted error messages.
 
+Code quality:
+
+* Fix memory aliasing issues in SPNEGO and IAKERB mechanisms that
+  could cause server crashes. [CVE-2015-2695] [CVE-2015-2696]
+  [CVE-2015-2698]
+
+* Fix build_principal memory bug that could cause a KDC
+  crash. [CVE-2015-2697]
+
 Developer experience:
 
 * Change gss_acquire_cred_with_password() to acquire credentials into
@@ -183,6 +192,12 @@ Performance:
   full resync, and do not require two full resyncs after the master
   KDC's log file is reset.
 
+User experience:
+
+* Make gss_accept_sec_context() accept tickets near their expiration
+  but within clock skew tolerances, rather than rejecting them
+  immediately after the server's view of the ticket expiration time.
+
 
 krb5-1.14 changes by ticket ID
 ------------------------------
@@ -234,16 +249,27 @@ krb5-1.14 changes by ticket ID
 8236    Update SPNEGO hintName value to current spec
 8242    Improve PKINIT OpenSSL error reporting
 8243    Add tabular dump capability to kdb5_util
+8244    SPNEGO and IAKERB context aliasing bugs [CVE-2015-2695][CVE-2015-2696]
 8245    kerberos.ldif file has malformed entries
 8246    Fix error mappings for IOV MIC mechglue funcs
 8251    Fix kadmin with e2fsprogs libss
+8252    Fix build_principal memory bug [CVE-2015-2697]
 8253    Fix minor utf8-to-ucs2s read overrun bug
+8254    use appropriate default for krb5_cv_sys_rcdir when cross-compiling
 8255    Define error status GSS_S_BAD_MIC
 8256    Fix typo in GSS_S_UNAUTHORIZED error message
 8257    Fix gss_inquire_names_for_mech() on MS krb5 mech
 8258    Correct GSS major code for non-default QOP values
 8259    Check output params on GSS OID set functions
 8260    Fix gss_store_cred() minor code on acceptor cred
+8262    Set plugin_base_dir for kadmin tests
+8264    kdb_check test target uses installed message catalog
+8266    Installed krb5.conf files can affect test suite
+8267    unsetenv() returns void
+8268    krb5 gss_accept_sec_context() does not allow clock skew
+8269    Accept new passwords as const char pointers
+8271    Zap secure cookie contents when freeing
+8273    Fix IAKERB context export/import [CVE-2015-2698]
 
 
 Acknowledgements
@@ -346,6 +372,7 @@ reports, suggestions, and valuable resources:
     David Bantz
     Alex Baule
     David Benjamin
+    Thomas Bernard
     Adam Bernstein
     Arlene Berry
     Jeff Blaine
@@ -388,6 +415,7 @@ reports, suggestions, and valuable resources:
     Bill Fellows
     JC Ferguson
     Remi Ferrand
+    Paul Fertser
     William Fiveash
     Ákos Frohner
     Sebastian Galiano
