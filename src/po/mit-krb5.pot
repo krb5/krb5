@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mit-krb5 1.14-beta1-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-09 16:51-0400\n"
+"POT-Creation-Date: 2015-11-12 16:01-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -83,7 +83,7 @@ msgstr ""
 msgid "while getting default ccache"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:170 ../../src/clients/ksu/main.c:981
+#: ../../src/clients/kdestroy/kdestroy.c:170 ../../src/clients/ksu/main.c:976
 msgid "while destroying cache"
 msgstr ""
 
@@ -1102,41 +1102,36 @@ msgstr ""
 msgid "ksu: couldn't set environment variable %s\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:815
-#, c-format
-msgid "while clearing the value of %s"
-msgstr ""
-
-#: ../../src/clients/ksu/main.c:823
+#: ../../src/clients/ksu/main.c:818
 msgid "while resetting target ccache name"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:837
+#: ../../src/clients/ksu/main.c:832
 msgid "while determining target ccache name"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:876
+#: ../../src/clients/ksu/main.c:871
 msgid "while generating part of the target ccache name"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:882
+#: ../../src/clients/ksu/main.c:877
 msgid "while allocating memory for the target ccache name"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:901
+#: ../../src/clients/ksu/main.c:896
 msgid "while creating new target ccache"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:907
+#: ../../src/clients/ksu/main.c:902
 msgid "while initializing target cache"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:947
+#: ../../src/clients/ksu/main.c:942
 #, c-format
 msgid "terminal name %s too long\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:975
+#: ../../src/clients/ksu/main.c:970
 msgid "while changing to target uid for destroying ccache"
 msgstr ""
 
@@ -4096,23 +4091,23 @@ msgstr ""
 msgid "An expected per-message token was not received"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1804
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1797
 msgid "SPNEGO cannot find mechanisms to negotiate"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1809
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1802
 msgid "SPNEGO failed to acquire creds"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1814
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1807
 msgid "SPNEGO acceptor did not select a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1819
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1812
 msgid "SPNEGO failed to negotiate a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1824
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1817
 msgid "SPNEGO acceptor did not return a valid token"
 msgstr ""
 
