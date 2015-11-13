@@ -353,7 +353,7 @@ gss_add_cred_impersonate_name(OM_uint32 *minor_status,
     mech = gssint_get_mechanism(desired_mech);
     if (!mech)
 	return GSS_S_BAD_MECH;
-    else if (!mech->gss_acquire_cred)
+    else if (!mech->gss_acquire_cred_impersonate_name)
 	return (GSS_S_UNAVAILABLE);
 
     if (input_cred_handle == GSS_C_NO_CREDENTIAL) {
