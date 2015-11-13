@@ -2619,7 +2619,7 @@ spnego_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 					 gss_OID_set *actual_mechs,
 					 OM_uint32 *time_rec)
 {
-	OM_uint32 status;
+	OM_uint32 status, tmpmin;
 	gss_OID_set amechs = GSS_C_NULL_OID_SET;
 	spnego_gss_cred_id_t imp_spcred = NULL, out_spcred = NULL;
 	gss_cred_id_t imp_mcred, out_mcred;
@@ -2634,30 +2634,29 @@ spnego_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 
 	imp_spcred = (spnego_gss_cred_id_t)impersonator_cred_handle;
 	imp_mcred = imp_spcred ? imp_spcred->mcred : GSS_C_NO_CREDENTIAL;
-	if (desired_mechs == GSS_C_NO_OID_SET) {
-		status = gss_inquire_cred(minor_status, imp_mcred, NULL, NULL,
-					  NULL, &amechs);
-		if (status != GSS_S_COMPLETE)
-			return status;
-
-		desired_mechs = amechs;
-	}
+	status = gss_inquire_cred(minor_status, imp_mcred, NULL, NULL,
+				  NULL, &amechs);
+	if (status != GSS_S_COMPLETE)
+		return status;
 
 	status = gss_acquire_cred_impersonate_name(minor_status, imp_mcred,
 						   desired_name, time_req,
-						   desired_mechs, cred_usage,
+						   amechs, cred_usage,
 						   &out_mcred, actual_mechs,
 						   time_rec);
-
-	if (amechs != GSS_C_NULL_OID_SET)
-		(void) gss_release_oid_set(minor_status, &amechs);
+	if (status != GSS_S_COMPLETE)
+	    goto cleanup;
 
 	status = create_spnego_cred(minor_status, out_mcred, &out_spcred);
-	if (status != GSS_S_COMPLETE) {
-		gss_release_cred(minor_status, &out_mcred);
-		return (status);
-	}
+	if (status != GSS_S_COMPLETE)
+		goto cleanup;
+
+	out_mcred = GSS_C_NO_CREDENTIAL;
 	*output_cred_handle = (gss_cred_id_t)out_spcred;
+
+cleanup:
+	(void) gss_release_oid_set(&tmpmin, &amechs);
+	(void) gss_release_cred(&tmpmin, &out_mcred);
 
 	dsyslog("Leaving spnego_gss_acquire_cred_impersonate_name\n");
 	return (status);
