@@ -145,59 +145,29 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
 static int add_admin_princs(void *handle, krb5_context context, char *realm)
 {
     krb5_error_code ret = 0;
-    char *service_name = 0, *kiprop_name = 0, *p;
+    char *service_name = 0, *kiprop_name = 0, *canonhost = 0;
     char localname[MAXHOSTNAMELEN];
-    struct addrinfo *ai, ai_hints;
-    int gai_error;
 
     if (gethostname(localname, MAXHOSTNAMELEN)) {
         ret = errno;
         perror("gethostname");
         goto clean_and_exit;
     }
-    memset(&ai_hints, 0, sizeof(ai_hints));
-    ai_hints.ai_flags = AI_CANONNAME | AI_ADDRCONFIG;
-    gai_error = getaddrinfo(localname, (char *)NULL, &ai_hints, &ai);
-    if (gai_error) {
-        ret = EINVAL;
-        fprintf(stderr, "getaddrinfo(%s): %s\n", localname,
-                gai_strerror(gai_error));
+    ret = krb5_expand_hostname(context, localname, &canonhost);
+    if (ret) {
+        com_err(progname, ret, _("while canonicalizing local hostname"));
         goto clean_and_exit;
     }
-    if (ai->ai_canonname == NULL) {
-        ret = EINVAL;
-        fprintf(stderr, _("getaddrinfo(%s): Cannot determine canonical "
-                          "hostname.\n"), localname);
-        freeaddrinfo(ai);
-        goto clean_and_exit;
-    }
-    for (p = ai->ai_canonname; *p; p++) {
-#ifdef isascii
-        if (!isascii(*p))
-            continue;
-#else
-        if (*p < ' ')
-            continue;
-        if (*p > '~')
-            continue;
-#endif
-        if (!isupper(*p))
-            continue;
-        *p = tolower(*p);
-    }
-    if (asprintf(&service_name, "kadmin/%s", ai->ai_canonname) < 0) {
+    if (asprintf(&service_name, "kadmin/%s", canonhost) < 0) {
         ret = ENOMEM;
         fprintf(stderr, _("Out of memory\n"));
-        freeaddrinfo(ai);
         goto clean_and_exit;
     }
-    if (asprintf(&kiprop_name, "kiprop/%s", ai->ai_canonname) < 0) {
+    if (asprintf(&kiprop_name, "kiprop/%s", canonhost) < 0) {
         ret = ENOMEM;
         fprintf(stderr, _("Out of memory\n"));
-        freeaddrinfo(ai);
         goto clean_and_exit;
     }
-    freeaddrinfo(ai);
 
     if ((ret = add_admin_princ(handle, context,
                                service_name, realm,
@@ -224,6 +194,7 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
     ret = add_admin_princ(handle, context, kiprop_name, realm, 0, 0);
 
 clean_and_exit:
+    krb5_free_string(context, canonhost);
     free(service_name);
     free(kiprop_name);
 
