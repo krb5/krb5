@@ -44,11 +44,10 @@ testu('ptr-mismatch.kerberos.org', 'ptr-mismatch.kerberos.org', 'R1')
 testu('Example.COM', 'Example.COM', 'R2')
 testu('abcde', 'abcde', '')
 
-# A ':port' or ':instance' trailer should be ignored for hostname
-# adjustment and realm lookup.  If there is more than one colon in the
-# name, we assume it's an IPv6 address and don't treat it as having a
-# trailer.
-testu('example.com.:123', 'example.com:123', 'R2')
+# A ':port' or ':instance' trailer should be ignored for realm lookup.
+# If there is more than one colon in the name, we assume it's an IPv6
+# address and don't treat it as having a trailer.
+testu('example.com.:123', 'example.com.:123', 'R2')
 testu('Example.COM:xyZ', 'Example.COM:xyZ', 'R2')
 testu('example.com.::123', 'example.com.::123', '')
 

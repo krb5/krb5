@@ -282,6 +282,7 @@ krb5_encode_authdata_container
 krb5_encode_kdc_rep
 krb5_encrypt_helper
 krb5_encrypt_tkt_part
+krb5_expand_hostname
 krb5_externalize_data
 krb5_externalize_opaque
 krb5_fcc_ops

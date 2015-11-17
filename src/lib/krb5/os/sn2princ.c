@@ -53,11 +53,9 @@ use_reverse_dns(krb5_context context)
     return value;
 }
 
-/* Set *name_out to the canonicalized form of name, obeying relevant
- * configuration settings.  The caller must free the result. */
-static krb5_error_code
-canon_hostname(krb5_context context, krb5_int32 type, const char *host,
-               char **canonhost_out)
+krb5_error_code KRB5_CALLCONV
+krb5_expand_hostname(krb5_context context, const char *host,
+                     char **canonhost_out)
 {
     struct addrinfo *ai = NULL, hint;
     char namebuf[NI_MAXHOST], *copy, *p;
@@ -67,7 +65,7 @@ canon_hostname(krb5_context context, krb5_int32 type, const char *host,
     *canonhost_out = NULL;
 
     canonhost = host;
-    if (type == KRB5_NT_SRV_HST && context->dns_canonicalize_hostname) {
+    if (context->dns_canonicalize_hostname) {
         /* Try a forward lookup of the hostname. */
         memset(&hint, 0, sizeof(hint));
         hint.ai_flags = AI_CANONNAME;
@@ -92,12 +90,10 @@ canon_hostname(krb5_context context, krb5_int32 type, const char *host,
     if (copy == NULL)
         goto cleanup;
 
-    if (type == KRB5_NT_SRV_HST) {
-        /* Convert the hostname to lower case. */
-        for (p = copy; *p != '\0'; p++) {
-            if (isupper((unsigned char)*p))
-                *p = tolower((unsigned char)*p);
-        }
+    /* Convert the hostname to lower case. */
+    for (p = copy; *p != '\0'; p++) {
+        if (isupper((unsigned char)*p))
+            *p = tolower((unsigned char)*p);
     }
 
     /* Remove any trailing dot. */
@@ -167,10 +163,12 @@ krb5_sname_to_principal(krb5_context context, const char *hostname,
     }
 
     /* Canonicalize the hostname if appropriate. */
-    ret = canon_hostname(context, type, hostname, &canonhost);
-    if (ret)
-        goto cleanup;
-    hostname = canonhost;
+    if (type == KRB5_NT_SRV_HST) {
+        ret = krb5_expand_hostname(context, hostname, &canonhost);
+        if (ret)
+            goto cleanup;
+        hostname = canonhost;
+    }
 
     /* Find the realm of the host. */
     ret = krb5_get_host_realm(context, hostname, &hrealms);

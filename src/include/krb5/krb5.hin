@@ -4968,6 +4968,23 @@ void KRB5_CALLCONV
 krb5_free_default_realm(krb5_context context, char *lrealm);
 
 /**
+ * Canonicalize a hostname, possibly using name service.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  host            Input hostname
+ * @param [out] canonhost_out   Canonicalized hostname
+ *
+ * This function canonicalizes orig_hostname, possibly using name service
+ * lookups if configuration permits.  Use krb5_free_string() to free @a
+ * canonhost_out when it is no longer needed.
+ *
+ * @version New in 1.15
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_expand_hostname(krb5_context context, const char *host,
+                     char **canonhost_out);
+
+/**
  * Generate a full principal name from a service name.
  *
  * @param [in]  context         Library context
