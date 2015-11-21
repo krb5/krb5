@@ -21,6 +21,8 @@ extern gss_name_t                       gss_changepw_name;
 extern gss_name_t                       gss_oldchangepw_name;
 extern void *                           global_server_handle;
 
+extern void ipropx_notify_clients(krb5_context context);
+
 #define CHANGEPW_SERVICE(rqstp)                                         \
     (cmp_gss_names_rel_1(acceptor_name(rqstp->rq_svccred), gss_changepw_name) | \
      (gss_oldchangepw_name &&                                           \
@@ -419,6 +421,7 @@ create_principal_2_svc(cprinc_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -463,6 +466,7 @@ create_principal3_2_svc(cprinc3_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -528,6 +532,7 @@ delete_principal_2_svc(dprinc_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -580,6 +585,7 @@ modify_principal_2_svc(mprinc_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -673,6 +679,7 @@ rename_principal_2_svc(rprinc_arg *arg, generic_ret *ret,
 
     }
 exit_func:
+    ipropx_notify_clients(handle->context);
     free(prime_arg1);
     free(prime_arg2);
     stub_cleanup(handle, NULL, &client_name, &service_name);
@@ -818,6 +825,7 @@ chpass_principal_2_svc(chpass_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -873,6 +881,7 @@ chpass_principal3_2_svc(chpass3_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -923,6 +932,7 @@ setv4key_principal_2_svc(setv4key_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -974,6 +984,7 @@ setkey_principal_2_svc(setkey_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1025,6 +1036,7 @@ setkey_principal3_2_svc(setkey3_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1075,6 +1087,7 @@ setkey_principal4_2_svc(setkey4_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1152,6 +1165,7 @@ chrand_principal_2_svc(chrand_arg *arg, chrand_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1212,6 +1226,7 @@ chrand_principal3_2_svc(chrand3_arg *arg, chrand_ret *ret,
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1254,6 +1269,7 @@ create_policy_2_svc(cpol_arg *arg, generic_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, NULL, &client_name, &service_name);
     return TRUE;
 }
@@ -1295,6 +1311,7 @@ delete_policy_2_svc(dpol_arg *arg, generic_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, NULL, &client_name, &service_name);
     return TRUE;
 }
@@ -1336,6 +1353,7 @@ modify_policy_2_svc(mpol_arg *arg, generic_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, NULL, &client_name, &service_name);
     return TRUE;
 }
@@ -1513,6 +1531,7 @@ purgekeys_2_svc(purgekeys_arg *arg, generic_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1593,6 +1612,7 @@ set_string_2_svc(sstring_arg *arg, generic_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    ipropx_notify_clients(handle->context);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }

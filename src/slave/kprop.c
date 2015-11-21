@@ -49,6 +49,7 @@ static char *kprop_version = KPROP_PROT_VERSION;
 
 static char *progname = NULL;
 static int debug = 0;
+static int iprop_notify = 0;
 static char *srvtab = NULL;
 static char *slave_host;
 static char *realm = NULL;
@@ -82,7 +83,7 @@ static void update_last_prop_file(char *hostname, char *file_name);
 
 static void usage()
 {
-    fprintf(stderr, _("\nUsage: %s [-r realm] [-f file] [-d] [-P port] "
+    fprintf(stderr, _("\nUsage: %s [-r realm] [-f file] [-d] [-N] [-P port] "
                       "[-s srvtab] slave_host\n\n"), progname);
     exit(1);
 }
@@ -104,6 +105,17 @@ main(int argc, char **argv)
     }
     parse_args(context, argc, argv);
     get_tickets(context);
+
+    if (iprop_notify) {
+        open_connection(context, slave_host, &fd);
+        kerberos_authenticate(context, &auth_context, fd, my_principal,
+                              &my_creds);
+        /* XXX - Should we allocate a new error code? */
+        send_error(context, my_creds, fd, _("iprop_notify: update available"),
+                   KRB5KRB_ERR_GENERIC);
+        krb5_free_cred_contents(context, my_creds);
+        exit(0);
+    }
 
     database_fd = open_database(context, file, &database_size);
     open_connection(context, slave_host, &fd);
@@ -150,6 +162,9 @@ parse_args(krb5_context context, int argc, char **argv)
                 break;
             case 'd':
                 debug++;
+                break;
+            case 'N':
+                iprop_notify++;
                 break;
             case 'P':
                 port = (*word != '\0') ? word : *argv++;

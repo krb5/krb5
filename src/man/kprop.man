@@ -35,6 +35,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 \fBkprop\fP
 [\fB\-r\fP \fIrealm\fP]
 [\fB\-f\fP \fIfile\fP]
+[\fB\-N\fP]
 [\fB\-d\fP]
 [\fB\-P\fP \fIport\fP]
 [\fB\-s\fP \fIkeytab\fP]
@@ -59,6 +60,12 @@ to be found; by default the dumped database file is normally
 .B \fB\-P\fP \fIport\fP
 Specifies the port to use to contact the \fIkpropd(8)\fP server
 on the remote host.
+.TP
+.B \fB\-N\fP
+Send a notification to the slave Kerberos server indicating new updates
+may be available for retrieval. Upon receipt of the notification, the
+slave server will reset its incremental propagation timer and initiate
+another poll for Kerberos updates.
 .TP
 .B \fB\-d\fP
 Prints debugging information.
