@@ -74,6 +74,7 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
     if (ret_pw)
         *ret_pw = NULL;
 
+    pwsize = 0;
     if (new_pw != NULL) {
         new_password = new_pw;
     } else { /* read the password */
