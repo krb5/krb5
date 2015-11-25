@@ -1032,7 +1032,8 @@ spnego_gss_init_sec_context(
 
 	/* Step 1: perform mechanism negotiation. */
 	spcred = (spnego_gss_cred_id_t)claimant_cred_handle;
-	if (*context_handle == GSS_C_NO_CONTEXT) {
+	spnego_ctx = (spnego_gss_ctx_id_t)*context_handle;
+	if (spnego_ctx == NULL) {
 		ret = init_ctx_new(minor_status, spcred,
 				   context_handle, &send_token);
 		if (ret != GSS_S_CONTINUE_NEEDED) {
