@@ -722,31 +722,6 @@ AC_CACHE_CHECK([for in6addr_any definition in library],
   fi
 fi
 
-
-
-# check for ANSI stdio, esp "b" option to fopen().  This (unfortunately)
-# requires a run check...
-
-AC_MSG_CHECKING([for ANSI stdio])
-AC_CACHE_VAL(krb5_cv_has_ansi_stdio,
-[AC_TRY_RUN(
-[#include <stdio.h>
-int main()
-{
-  FILE *conftest;
-  if ((conftest = fopen("conftest.dat", "w")) == NULL) exit(1);
-  if (fclose(conftest)) exit(1);
-  if ((conftest = fopen("conftest.dat", "rb+")) == NULL) exit(1);
-  if (fputs("testing ANSI for stdio\n", conftest) == EOF) exit(1);
-  exit(0);
-}],
-krb5_cv_has_ansi_stdio=yes, krb5_cv_has_ansi_stdio=no,
-krb5_cv_has_ansi_stdio=yes)])# assume ANSI in cross environment
-AC_MSG_RESULT($krb5_cv_has_ansi_stdio)
-if test $krb5_cv_has_ansi_stdio = yes; then
-AC_DEFINE(ANSI_STDIO,1,[Define if ANSI stdio is present (in particular "b" option to fopen)])
-fi
-
 # then from osconf.h, we have
 
 AC_HEADER_TIME

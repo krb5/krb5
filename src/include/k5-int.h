@@ -109,7 +109,6 @@
 #define INI_FILES       "Files"
 #define INI_KRB_CCACHE  "krb5cc"        /* Location of the ccache */
 #define INI_KRB5_CONF   "krb5.ini"      /* Location of krb5.conf file */
-#define ANSI_STDIO
 #endif
 
 #include "autoconf.h"

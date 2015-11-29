@@ -1013,14 +1013,6 @@ typedef krb5_int16  krb5_kt_vno;
 
 #define krb5_kt_default_vno ((krb5_kt_vno)KRB5_KT_DEFAULT_VNO)
 
-#ifdef ANSI_STDIO
-static char *const fopen_mode_rbplus= "rb+";
-static char *const fopen_mode_rb = "rb";
-#else
-static char *const fopen_mode_rbplus= "r+";
-static char *const fopen_mode_rb = "r";
-#endif
-
 static krb5_error_code
 krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
 {
@@ -1031,14 +1023,13 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
     KTCHECKLOCK(id);
     errno = 0;
     KTFILEP(id) = fopen(KTFILENAME(id),
-                        (mode == KRB5_LOCKMODE_EXCLUSIVE) ?
-                        fopen_mode_rbplus : fopen_mode_rb);
+                        (mode == KRB5_LOCKMODE_EXCLUSIVE) ? "rb+" : "rb");
     if (!KTFILEP(id)) {
         if ((mode == KRB5_LOCKMODE_EXCLUSIVE) && (errno == ENOENT)) {
             /* try making it first time around */
             k5_create_secure_file(context, KTFILENAME(id));
             errno = 0;
-            KTFILEP(id) = fopen(KTFILENAME(id), fopen_mode_rbplus);
+            KTFILEP(id) = fopen(KTFILENAME(id), "rb+");
             if (!KTFILEP(id))
                 goto report_errno;
             writevno = 1;

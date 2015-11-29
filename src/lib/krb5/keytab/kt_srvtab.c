@@ -341,12 +341,6 @@ const struct _krb5_kt_ops krb5_kts_ops = {
 
 #include <stdio.h>
 
-#ifdef ANSI_STDIO
-#define         READ_MODE       "rb"
-#else
-#define         READ_MODE       "r"
-#endif
-
 /* The maximum sizes for V4 aname, realm, sname, and instance +1 */
 /* Taken from krb.h */
 #define         ANAME_SZ        40
@@ -373,7 +367,7 @@ read_field(FILE *fp, char *s, int len)
 krb5_error_code
 krb5_ktsrvint_open(krb5_context context, krb5_keytab id)
 {
-    KTFILEP(id) = fopen(KTFILENAME(id), READ_MODE);
+    KTFILEP(id) = fopen(KTFILENAME(id), "rb");
     if (!KTFILEP(id))
         return errno;
     set_cloexec_file(KTFILEP(id));

@@ -250,12 +250,8 @@ krb5_db_def_fetch_mkey_stash(krb5_context   context,
     krb5_ui_4 keylength;
     FILE *kf = NULL;
 
-#ifdef ANSI_STDIO
     if (!(kf = fopen(keyfile, "rb")))
-#else
-        if (!(kf = fopen(keyfile, "r")))
-#endif
-            return KRB5_KDB_CANTREAD_STORED;
+        return KRB5_KDB_CANTREAD_STORED;
     set_cloexec_file(kf);
 
     if (fread((krb5_pointer) &enctype, 2, 1, kf) != 1) {
