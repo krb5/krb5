@@ -479,6 +479,7 @@ create_spnego_ctx(int initiate)
 	spnego_ctx->nego_done = 0;
 	spnego_ctx->opened = 0;
 	spnego_ctx->initiate = initiate;
+	spnego_ctx->imported = 0;
 	spnego_ctx->internal_name = GSS_C_NO_NAME;
 	spnego_ctx->actual_mech = GSS_C_NO_OID;
 
@@ -2173,18 +2174,151 @@ spnego_gss_export_sec_context(
 			    gss_ctx_id_t *context_handle,
 			    gss_buffer_t interprocess_token)
 {
-	OM_uint32 ret;
 	spnego_gss_ctx_id_t sc = *(spnego_gss_ctx_id_t *)context_handle;
 
-	/* We don't currently support exporting partially established
-	 * contexts. */
-	if (!sc->opened)
-		return GSS_S_UNAVAILABLE;
+	spnego_gss_ctx_id_t sc2;
+	gss_buffer_desc internal_context_exp_tok, encoded_mech_set;
+	size_t tok_siz;
+	OM_uint32 ret = GSS_S_FAILURE;
+	OM_uint32 junk;
+	unsigned char *p, *end;
 
-	ret = gss_export_sec_context(minor_status,
-				    &sc->ctx_handle,
-				    interprocess_token);
+	/* XXX For error cases we need to set/wrap useful minor_status codes */
+
+	if (context_handle == NULL)
+		return (GSS_S_CALL_INACCESSIBLE_READ);
+	if (*context_handle == GSS_C_NO_CONTEXT)
+		return (GSS_S_NO_CONTEXT);
+
+	encoded_mech_set.length = 0;
+	encoded_mech_set.value = NULL;
+	internal_context_exp_tok.length = 0;
+	internal_context_exp_tok.value = NULL;
+
+	/*
+	 * The exported SPNEGO security context token layout is be as follows:
+	 *
+	 *  - A copy of the spnego_gss_ctx_id_rec
+	 *  - An encoding of sc->internal_mech if it isn't GSS_C_NO_OID
+	 *  - An encoding of sc->actual_mech if it isn't GSS_C_NO_OID
+	 *  - An encoding of sc->mech_set if it isn't GSS_C_NO_OID_SET
+	 *  - An exported security context for the sc->ctx_handle if that's not
+	 *    GSS_C_NO_CONTEXT
+	 */
+
+	/* Compute length of token */
+	tok_siz = sizeof(*sc);
+	tok_siz += sc->DER_mechTypes.length;
+	if (put_mech_set(sc->mech_set, &encoded_mech_set) != 0) {
+		/* It'd be nice to be able to indicate what went wrong */
+		return (GSS_S_FAILURE);
+	}
+	tok_siz += encoded_mech_set.length;
+	if (sc->internal_mech != GSS_C_NO_OID) {
+		/* put_mech_oid() adds two bytes */
+		tok_siz += sc->internal_mech->length + 2;
+	}
+	if (sc->actual_mech != GSS_C_NO_OID) {
+		/* put_mech_oid() adds two bytes */
+		tok_siz += sc->actual_mech->length + 2;
+	}
+
+	if (sc->ctx_handle != GSS_C_NO_CONTEXT) {
+		ret = gss_export_sec_context(minor_status,
+					    &sc->ctx_handle,
+					    &internal_context_exp_tok);
+		if (ret != GSS_S_COMPLETE)
+			goto cleanup;
+	}
+	tok_siz += internal_context_exp_tok.length;
+
+	/* Begin encoding */
+
+	ret = GSS_S_FAILURE;
+
+	interprocess_token->length = tok_siz;
+	interprocess_token->value = gssalloc_calloc(1, tok_siz);
+
+	if (interprocess_token->value == NULL)
+		goto cleanup;
+
+	/* Encode the ints in our context */
+	sc2 = (spnego_gss_ctx_id_t)interprocess_token->value;
+	*sc2 = *sc;
+
+	/*
+	 * Paranoia: clear unneede pointer values in the encoded spnego ctx.
+	 *
+	 * Other pointer values will act as indicators that there are
+	 * corresponding encoded values to decode.
+	 */
+	sc2->DER_mechTypes.value = NULL;	    /* But leave length */
+	sc2->optionStr = NULL;			    /* Not used anyways */
+	sc2->default_cred = GSS_C_NO_CREDENTIAL;    /* Not used anyways */
+	sc2->ctx_handle = GSS_C_NO_CONTEXT;
+	sc2 = NULL;
+
+	/* Encode remaining things */
+	p = (unsigned char *)interprocess_token->value + sizeof(*sc);
+	end = (unsigned char *)interprocess_token->value + tok_siz;
+	assert(p <= end && sizeof(*sc) <= tok_siz);
+	tok_siz -= sizeof(*sc);
+
+	if (sc->DER_mechTypes.length > 0) {
+		assert(tok_siz >= sc->DER_mechTypes.length);
+		(void) memcpy(p, sc->DER_mechTypes.value,
+			      sc->DER_mechTypes.length);
+		p += sc->DER_mechTypes.length;
+		tok_siz -= sc->DER_mechTypes.length;
+	}
+
+	if (sc->internal_mech != GSS_C_NO_OID) {
+		/* put_mech_oid() updates the pointer, but not the size */
+		if (put_mech_oid(&p, sc->internal_mech, tok_siz) != 0)
+			goto cleanup;
+		assert(p <= end);
+		tok_siz = end - p;
+	}
+
+	if (sc->actual_mech != GSS_C_NO_OID) {
+		if (put_mech_oid(&p, sc->actual_mech, tok_siz) != 0)
+			goto cleanup;
+		assert(p <= end);
+		tok_siz = end - p;
+	}
+
+	if (sc->mech_set != GSS_C_NO_OID_SET && sc->mech_set->count > 0) {
+		assert(encoded_mech_set.length > 0);
+		(void) memcpy(p, encoded_mech_set.value, encoded_mech_set.length);
+		tok_siz -= encoded_mech_set.length;
+		p += encoded_mech_set.length;
+	}
+
+	/* The underlying mech's token goes last, needs no length prefix */
+	assert(tok_siz == internal_context_exp_tok.length);
+	if (internal_context_exp_tok.length > 0) {
+		if (internal_context_exp_tok.length != tok_siz)
+			goto cleanup;
+		(void) memcpy(p, internal_context_exp_tok.value,
+			      internal_context_exp_tok.length);
+	}
+
+	ret = GSS_S_COMPLETE;
+
+cleanup:
+	gssalloc_free(encoded_mech_set.value);
+	gss_release_buffer(&junk, &internal_context_exp_tok);
+	if (ret != GSS_S_COMPLETE) {
+		gssalloc_free(interprocess_token->value);
+		interprocess_token->length = 0;
+		interprocess_token->value = NULL;
+	}
 	if (sc->ctx_handle == GSS_C_NO_CONTEXT) {
+		/*
+		 * If the mechanism deleted its context (success or some
+		 * failures) we propagate that deletion as we must in the case
+		 * of success and as we couldn't recover in failure cases.
+		 */
 		release_spnego_ctx(&sc);
 		*context_handle = GSS_C_NO_CONTEXT;
 	}
@@ -2197,33 +2331,116 @@ spnego_gss_import_sec_context(
 	const gss_buffer_t	interprocess_token,
 	gss_ctx_id_t		*context_handle)
 {
-	OM_uint32 ret, tmpmin;
-	gss_ctx_id_t mctx;
 	spnego_gss_ctx_id_t sc;
-	int initiate, opened;
+	OM_uint32 ret = GSS_S_FAILURE;
+	OM_uint32 junk;
+	unsigned char *p, *end;
+	size_t bytes_left;
+	gss_OID internal_mech, actual_mech;
+	gss_OID_set mech_set;
 
-	ret = gss_import_sec_context(minor_status, interprocess_token, &mctx);
-	if (ret != GSS_S_COMPLETE)
-		return ret;
+	internal_mech = GSS_C_NO_OID;
+	actual_mech = GSS_C_NO_OID;
+	mech_set = GSS_C_NO_OID_SET;
 
-	ret = gss_inquire_context(&tmpmin, mctx, NULL, NULL, NULL, NULL, NULL,
-				  &initiate, &opened);
-	if (ret != GSS_S_COMPLETE || !opened) {
-		/* We don't currently support importing partially established
-		 * contexts. */
-		(void) gss_delete_sec_context(&tmpmin, &mctx, GSS_C_NO_BUFFER);
-		return GSS_S_FAILURE;
+	*minor_status = ERANGE; /* XXX */
+	if (interprocess_token->length < sizeof(*sc))
+		return (GSS_S_FAILURE);
+
+	*minor_status = ENOMEM;
+	/* XXX initiate flag is never set properly! (ghudson) */
+	sc = create_spnego_ctx(0);
+	if (sc == NULL)
+		return (GSS_S_FAILURE);
+
+	/* Decode the first part */
+	memcpy(sc, interprocess_token->value, sizeof(*sc));
+	sc->DER_mechTypes.value = NULL;
+	sc->optionStr = NULL;			/* Not used anyways */
+	sc->default_cred = GSS_C_NO_CREDENTIAL; /* Not used anyways */
+	sc->ctx_handle = GSS_C_NO_CONTEXT;
+
+	p = (unsigned char *)interprocess_token->value + sizeof(*sc);
+	end = (unsigned char *)interprocess_token->value +
+	    interprocess_token->length;
+	bytes_left = interprocess_token->length - sizeof(*sc);
+
+	*minor_status = ERANGE; /* XXX */
+	sc->DER_mechTypes.value = NULL;
+	if (sc->DER_mechTypes.length != 0) {
+		if (sc->DER_mechTypes.length > bytes_left)
+			goto cleanup;
+		sc->DER_mechTypes.value =
+		    gssalloc_malloc(sc->DER_mechTypes.length);
+		if (sc->DER_mechTypes.value == NULL) {
+			*minor_status = ENOMEM;
+			goto cleanup;
+		}
+		memcpy(sc->DER_mechTypes.value, p, sc->DER_mechTypes.length);
+		p += sc->DER_mechTypes.length;
+		bytes_left -= sc->DER_mechTypes.length;
 	}
 
-	sc = create_spnego_ctx(initiate);
-	if (sc == NULL) {
-		(void) gss_delete_sec_context(&tmpmin, &mctx, GSS_C_NO_BUFFER);
-		return GSS_S_FAILURE;
+	if (sc->internal_mech != GSS_C_NO_OID) {
+		internal_mech = get_mech_oid(minor_status, &p, bytes_left);
+		if (internal_mech == GSS_C_NO_OID)
+			goto cleanup;
+		*minor_status = ERANGE; /* XXX */
+		if (p > end)
+			goto cleanup;
+		bytes_left = end - p;
 	}
-	sc->ctx_handle = mctx;
-	sc->opened = 1;
+
+	if (sc->actual_mech != GSS_C_NO_OID) {
+		actual_mech = get_mech_oid(minor_status, &p, bytes_left);
+		if (actual_mech == GSS_C_NO_OID)
+			goto cleanup;
+		*minor_status = ERANGE; /* XXX */
+		if (p > end)
+			goto cleanup;
+		bytes_left = end - p;
+	}
+
+	if (sc->mech_set != GSS_C_NO_OID_SET) {
+		mech_set = get_mech_set(minor_status, &p, bytes_left);
+		if (mech_set == GSS_C_NO_OID_SET)
+			goto cleanup;
+		*minor_status = ERANGE; /* XXX */
+		if (p > end)
+			goto cleanup;
+		bytes_left = end - p;
+	}
+
+	if (bytes_left > 0) {
+		gss_buffer_desc remainder;
+
+		remainder.length = bytes_left;
+		remainder.value = p;
+		ret = gss_import_sec_context(minor_status,
+					     &remainder,
+					     &sc->ctx_handle);
+		if (ret != GSS_S_COMPLETE)
+			goto cleanup;
+	}
+
+	sc->imported = 1;
+	sc->internal_mech = internal_mech;
+	sc->actual_mech = actual_mech;
+	sc->mech_set = mech_set;
+	internal_mech = GSS_C_NO_OID;
+	actual_mech = GSS_C_NO_OID;
+	mech_set = GSS_C_NO_OID_SET;
+
+	*minor_status = 0;
+
+cleanup:
+	(void) generic_gss_release_oid(&junk, &internal_mech);
+	(void) generic_gss_release_oid(&junk, &actual_mech);
+	(void) generic_gss_release_oid_set(&junk, &mech_set);
 	*context_handle = (gss_ctx_id_t)sc;
-	return GSS_S_COMPLETE;
+	if (ret != GSS_S_COMPLETE)
+		spnego_gss_delete_sec_context(&junk, context_handle, NULL);
+	return (ret);
 }
 #endif /* LEAN_CLIENT */
 
@@ -3044,21 +3261,25 @@ release_spnego_ctx(spnego_gss_ctx_id_t *ctx)
 	OM_uint32 minor_stat;
 	context = *ctx;
 
-	if (context != NULL) {
-		(void) gss_release_buffer(&minor_stat,
-					&context->DER_mechTypes);
+	if (context == NULL)
+		return;
 
-		(void) gss_release_oid_set(&minor_stat, &context->mech_set);
+	(void) gss_release_buffer(&minor_stat, &context->DER_mechTypes);
+	(void) gss_release_oid_set(&minor_stat, &context->mech_set);
+	(void) gss_release_name(&minor_stat, &context->internal_name);
 
-		(void) gss_release_name(&minor_stat, &context->internal_name);
-
-		if (context->optionStr != NULL) {
-			free(context->optionStr);
-			context->optionStr = NULL;
-		}
-		free(context);
-		*ctx = NULL;
+	if (context->imported) {
+		(void) generic_gss_release_oid(&minor_stat,
+					       &context->internal_mech);
+		(void) generic_gss_release_oid(&minor_stat,
+					       &context->actual_mech);
 	}
+
+	if (context->optionStr != NULL) {
+		free(context->optionStr);
+		context->optionStr = NULL;
+	}
+	free(context);
 }
 
 /*
