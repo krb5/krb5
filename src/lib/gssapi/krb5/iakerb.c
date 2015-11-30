@@ -1051,25 +1051,114 @@ iakerb_gss_context_time(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
 
 #ifndef LEAN_CLIENT
 
+struct iakerb_serialized_context_header {
+    int initiate;
+    int established;
+    unsigned int count;
+    enum iakerb_state state;
+    size_t conv_sz;
+    size_t inner_token_sz;
+};
+
 OM_uint32 KRB5_CALLCONV
 iakerb_gss_export_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
                               gss_buffer_t interprocess_token)
 {
-    OM_uint32 maj;
-    iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)*context_handle;
+    iakerb_ctx_id_t iakerb_ctx;
+    gss_buffer_desc exported_inner;
+    OM_uint32 maj, junk;
+    unsigned char *p;
+    size_t sz;
+    struct iakerb_serialized_context_header *token_header;
 
-    /* We don't currently support exporting partially established contexts. */
-    if (!ctx->established)
-        return GSS_S_UNAVAILABLE;
+    if (context_handle == NULL || interprocess_token == NULL)
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
+    if (*context_handle == GSS_C_NO_CONTEXT)
+        return GSS_S_CALL_INACCESSIBLE_READ;
 
-    maj = krb5_gss_export_sec_context(minor_status, &ctx->gssc,
-                                      interprocess_token);
-    if (ctx->gssc == GSS_C_NO_CONTEXT) {
-        iakerb_release_context(ctx);
-        *context_handle = GSS_C_NO_CONTEXT;
+    iakerb_ctx = *(iakerb_ctx_id_t *)context_handle;
+    *minor_status = 0;
+
+    if (iakerb_ctx->initiate &&
+        (!iakerb_ctx->established || iakerb_ctx->gssc == GSS_C_NO_CONTEXT)) {
+        /*
+         * XXX Implement.
+         *
+         * This is tricky because there's a fair bit of state to serialize, but
+         * we might be able to take some shortcuts:
+         *
+         *  - iakerb_ctx->def_cred
+         *
+         *    There is no shortcut when this is not GSS_C_NO_CREDENTIAL.  We
+         *    have to export either a reference or the value.
+         *
+         *  - iakerb_ctx->state -> trivial
+         *
+         *  - iakerb_ctx->icc
+         *
+         *    Shortcut: don't serialiaze, the initiator can start from scratch
+         *    and find whatever tickets cached.
+         *
+         *  - iakerb_ctx->tcc
+         *
+         *    Shortcut: don't serialiaze, the initiator can start from scratch
+         *    and find whatever tickets cached.  EXCEPT that referral TGTs
+         *    don't get cached, so this shortcut doesn't work.
+         *
+         * For now we leave this unimplemented.
+         */
+        return GSS_S_UNAVAILABLE; /* XXX Implement */
     }
-    return maj;
+
+    exported_inner.length = 0;
+    exported_inner.value = NULL;
+
+    if (iakerb_ctx->gssc != GSS_C_NO_CONTEXT) {
+        maj = krb5_gss_export_sec_context(minor_status, &iakerb_ctx->gssc,
+                                          &exported_inner);
+        if (maj != GSS_S_COMPLETE)
+            return maj;
+    }
+
+    *context_handle = GSS_C_NO_CONTEXT;
+
+    if (iakerb_ctx->established && iakerb_ctx->conv.length >= 0) {
+        krb5_free_data_contents(iakerb_ctx->k5c, &iakerb_ctx->conv);
+        iakerb_ctx->conv.length = 0;
+    }
+
+    sz = sizeof(*token_header) + iakerb_ctx->conv.length +
+        exported_inner.length;
+    interprocess_token->value = gssalloc_malloc(sz);
+    if (interprocess_token->value == NULL) {
+        (void) gss_release_buffer(&junk, &exported_inner);
+        iakerb_release_context(iakerb_ctx);
+        *minor_status = ENOMEM;
+        return maj;
+    }
+    interprocess_token->length = sz;
+
+    token_header = interprocess_token->value;
+    token_header->initiate = iakerb_ctx->initiate;
+    token_header->established = iakerb_ctx->established;
+    token_header->count = iakerb_ctx->count;
+    token_header->state = iakerb_ctx->state;
+    token_header->conv_sz = iakerb_ctx->conv.length;
+    token_header->inner_token_sz = exported_inner.length;
+
+    p = (unsigned char *)interprocess_token->value + sizeof(*token_header);
+    (void) memcpy(p, iakerb_ctx->conv.data, iakerb_ctx->conv.length);
+    p += iakerb_ctx->conv.length;
+
+    (void) memcpy(p, exported_inner.value, exported_inner.length);
+    p += exported_inner.length;
+    assert(p - sz == interprocess_token->value);
+    (void) gss_release_buffer(&junk, &exported_inner);
+
+    iakerb_release_context(iakerb_ctx);
+
+    return GSS_S_COMPLETE;
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -1077,34 +1166,117 @@ iakerb_gss_import_sec_context(OM_uint32 *minor_status,
                               gss_buffer_t interprocess_token,
                               gss_ctx_id_t *context_handle)
 {
-    OM_uint32 maj, tmpmin;
-    krb5_error_code code;
-    gss_ctx_id_t gssc;
-    krb5_gss_ctx_id_t kctx;
-    iakerb_ctx_id_t ctx;
+    iakerb_ctx_id_t iakerb_ctx;
+    gss_buffer_desc exported_inner;
+    OM_uint32 maj;
+    void *aligned;
+    unsigned char *p;
+    size_t sz;
+    struct iakerb_serialized_context_header *token_header;
 
-    maj = krb5_gss_import_sec_context(minor_status, interprocess_token, &gssc);
-    if (maj != GSS_S_COMPLETE)
-        return maj;
-    kctx = (krb5_gss_ctx_id_t)gssc;
+    *minor_status = 0;
+    if (context_handle == NULL)
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
+    *context_handle = GSS_C_NO_CONTEXT;
+    if (interprocess_token == NULL || interprocess_token->length == 0 ||
+        interprocess_token->value == NULL)
+        return GSS_S_CALL_INACCESSIBLE_READ;
 
-    if (!kctx->established) {
-        /* We don't currently support importing partially established
-         * contexts. */
-        krb5_gss_delete_sec_context(&tmpmin, &gssc, GSS_C_NO_BUFFER);
+    sz = interprocess_token->length;
+    if (sz < sizeof(*token_header)) {
+        *minor_status = EINVAL;                 /* XXX */
+        return GSS_S_CALL_INACCESSIBLE_READ;    /* XXX */
+    }
+
+    *minor_status = iakerb_alloc_context(&iakerb_ctx, 0);
+    aligned = malloc(sz);
+    if (iakerb_ctx == NULL || aligned == NULL) {
+        iakerb_release_context(iakerb_ctx);
+        free(aligned);
+        *minor_status = ENOMEM;
         return GSS_S_FAILURE;
     }
 
-    code = iakerb_alloc_context(&ctx, kctx->initiate);
-    if (code != 0) {
-        krb5_gss_delete_sec_context(&tmpmin, &gssc, GSS_C_NO_BUFFER);
-        *minor_status = code;
-        return GSS_S_FAILURE;
+    p = aligned;
+    (void) memcpy(p, interprocess_token->value, sz);
+    token_header = aligned;
+    p += sizeof(*token_header);
+    sz -= sizeof(*token_header);
+
+    iakerb_ctx->initiate = token_header->initiate;
+    iakerb_ctx->established = token_header->established;
+    iakerb_ctx->count = token_header->count;
+    iakerb_ctx->state = token_header->state;
+    iakerb_ctx->gssc = GSS_C_NO_CONTEXT;
+
+    if (token_header->conv_sz > sz) {
+        iakerb_release_context(iakerb_ctx);
+        free(aligned);
+        *minor_status = EINVAL;                 /* XXX */
+        return GSS_S_CALL_INACCESSIBLE_READ;    /* XXX */
     }
 
-    ctx->gssc = gssc;
-    ctx->established = 1;
-    *context_handle = (gss_ctx_id_t)ctx;
+    if (token_header->conv_sz > 0) {
+        iakerb_ctx->conv.data = malloc(token_header->conv_sz);
+        if (iakerb_ctx->conv.data == NULL) {
+            iakerb_release_context(iakerb_ctx);
+            free(aligned);
+            *minor_status = ENOMEM;
+            return GSS_S_FAILURE;
+        }
+        memcpy(iakerb_ctx->conv.data, p, token_header->conv_sz);
+        iakerb_ctx->conv.length = token_header->conv_sz;
+        p += token_header->conv_sz;
+        sz -= token_header->conv_sz;
+    }
+
+    if (token_header->inner_token_sz > sz) {
+        iakerb_release_context(iakerb_ctx);
+        free(aligned);
+        *minor_status = EINVAL;                 /* XXX */
+        return GSS_S_CALL_INACCESSIBLE_READ;    /* XXX */
+    }
+
+    if (token_header->inner_token_sz > 0) {
+        exported_inner.value = malloc(token_header->inner_token_sz);
+        if (exported_inner.value == NULL) {
+            iakerb_release_context(iakerb_ctx);
+            free(aligned);
+            *minor_status = ENOMEM;
+            return GSS_S_FAILURE;
+        }
+        memcpy(exported_inner.value, p, token_header->inner_token_sz);
+        exported_inner.length = token_header->inner_token_sz;
+        p += token_header->inner_token_sz;
+        sz -= token_header->inner_token_sz;
+    } else {
+        exported_inner.length = 0;
+        exported_inner.value = NULL;
+    }
+
+    assert(sz == 0);
+
+    free(aligned);
+    aligned = 0;
+
+    *minor_status = 0;
+    if (iakerb_ctx->initiate && !iakerb_ctx->established) {
+        /* XXX Implement.  See comment block in export side.  */
+        iakerb_release_context(iakerb_ctx);
+        free(exported_inner.value);
+        return GSS_S_UNAVAILABLE; /* XXX Implement */
+    }
+
+    if (exported_inner.length > 0) {
+        maj = krb5_gss_import_sec_context(minor_status, &exported_inner,
+                                          &iakerb_ctx->gssc);
+        /* XXX value of maj is discarded! (ghudson) */
+        free(exported_inner.value);
+        exported_inner.value = NULL;
+    }
+
+    *context_handle = (gss_ctx_id_t)iakerb_ctx;
+
     return GSS_S_COMPLETE;
 }
 #endif /* LEAN_CLIENT */
