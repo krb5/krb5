@@ -95,8 +95,6 @@ typedef struct {
 	gss_OID_set mech_set;
 	gss_OID internal_mech;  /* alias into mech_set->elements */
 	gss_ctx_id_t ctx_handle;
-	char  *optionStr;
-	gss_cred_id_t default_cred;
 	int mic_reqd;
 	int mic_sent;
 	int mic_rcvd;

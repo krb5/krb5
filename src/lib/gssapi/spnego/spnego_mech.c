@@ -101,7 +101,6 @@ static OM_uint32 get_available_mechs(OM_uint32 *, gss_name_t, gss_cred_usage_t,
 static OM_uint32 get_negotiable_mechs(OM_uint32 *, spnego_gss_cred_id_t,
 				      gss_cred_usage_t, gss_OID_set *);
 static void release_spnego_ctx(spnego_gss_ctx_id_t *);
-static void check_spnego_options(spnego_gss_ctx_id_t);
 static spnego_gss_ctx_id_t create_spnego_ctx(int);
 static int put_mech_set(gss_OID_set mechSet, gss_buffer_t buf);
 static int put_input_token(unsigned char **, gss_buffer_t, unsigned int);
@@ -446,13 +445,6 @@ spnego_gss_release_cred(OM_uint32 *minor_status,
 	return (GSS_S_COMPLETE);
 }
 
-static void
-check_spnego_options(spnego_gss_ctx_id_t spnego_ctx)
-{
-	spnego_ctx->optionStr = gssint_get_modOptions(
-		(const gss_OID)&spnego_oids[0]);
-}
-
 static spnego_gss_ctx_id_t
 create_spnego_ctx(int initiate)
 {
@@ -468,10 +460,8 @@ create_spnego_ctx(int initiate)
 	spnego_ctx->ctx_handle = GSS_C_NO_CONTEXT;
 	spnego_ctx->mech_set = NULL;
 	spnego_ctx->internal_mech = NULL;
-	spnego_ctx->optionStr = NULL;
 	spnego_ctx->DER_mechTypes.length = 0;
 	spnego_ctx->DER_mechTypes.value = NULL;
-	spnego_ctx->default_cred = GSS_C_NO_CREDENTIAL;
 	spnego_ctx->mic_reqd = 0;
 	spnego_ctx->mic_sent = 0;
 	spnego_ctx->mic_rcvd = 0;
@@ -481,8 +471,6 @@ create_spnego_ctx(int initiate)
 	spnego_ctx->initiate = initiate;
 	spnego_ctx->internal_name = GSS_C_NO_NAME;
 	spnego_ctx->actual_mech = GSS_C_NO_OID;
-
-	check_spnego_options(spnego_ctx);
 
 	return (spnego_ctx);
 }
@@ -3052,10 +3040,6 @@ release_spnego_ctx(spnego_gss_ctx_id_t *ctx)
 
 		(void) gss_release_name(&minor_stat, &context->internal_name);
 
-		if (context->optionStr != NULL) {
-			free(context->optionStr);
-			context->optionStr = NULL;
-		}
 		free(context);
 		*ctx = NULL;
 	}
