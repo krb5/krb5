@@ -334,7 +334,8 @@ make_preauth_list(krb5_context  context,
 #define MAX_IN_TKT_LOOPS 16
 
 static krb5_error_code
-request_enc_pa_rep(krb5_pa_data ***padptr)
+request_padata_type(krb5_pa_data ***padptr, krb5_preauthtype pa_type,
+                    krb5_octet *contents, unsigned int length)
 {
     size_t size = 0;
     krb5_pa_data **pad = *padptr;
@@ -350,8 +351,16 @@ request_enc_pa_rep(krb5_pa_data ***padptr)
     if (pa == NULL)
         return ENOMEM;
     pa->contents = NULL;
-    pa->length = 0;
-    pa->pa_type = KRB5_ENCPADATA_REQ_ENC_PA_REP;
+    pa->length = length;
+    if (contents != NULL) {
+        pa->contents = malloc(length);
+        if (pa->contents == NULL) {
+            free(pa);
+            return ENOMEM;
+        }
+        memcpy(pa->contents, contents, length);
+    }
+    pa->pa_type = pa_type;
     pad[size] = pa;
     *padptr = pad;
     return 0;
@@ -1265,7 +1274,10 @@ init_creds_step_request(krb5_context context,
     if (ctx->request->padata)
         ctx->sent_nontrivial_preauth = TRUE;
     if (ctx->enc_pa_rep_permitted)
-        code = request_enc_pa_rep(&ctx->request->padata);
+        code = request_padata_type(&ctx->request->padata,
+                                   KRB5_ENCPADATA_REQ_ENC_PA_REP,
+                                   NULL,
+                                   0);
     if (code)
         goto cleanup;
     code = krb5int_fast_prep_req(context, ctx->fast_state,
