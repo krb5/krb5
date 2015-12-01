@@ -1197,6 +1197,29 @@ save_cc_config_out_data(krb5_context context, krb5_ccache ccache,
     return code;
 }
 
+/* Add a KERB-PA-PAC-REQUEST pa-data item if the gic options require one. */
+static krb5_error_code
+maybe_add_pac_request(krb5_context context, krb5_init_creds_context ctx)
+{
+    krb5_error_code code;
+    krb5_pa_pac_req pac_req;
+    krb5_data *encoded;
+    int val;
+
+    val = k5_gic_opt_pac_request(ctx->opt);
+    if (val == -1)
+        return 0;
+
+    pac_req.include_pac = val;
+    code = encode_krb5_pa_pac_req(&pac_req, &encoded);
+    if (code)
+        return code;
+    code = add_padata(&ctx->request->padata, KRB5_PADATA_PAC_REQUEST,
+                      encoded->data, encoded->length);
+    krb5_free_data(context, encoded);
+    return code;
+}
+
 static krb5_error_code
 init_creds_step_request(krb5_context context,
                         krb5_init_creds_context ctx,
@@ -1280,6 +1303,11 @@ init_creds_step_request(krb5_context context,
     }
     if (code)
         goto cleanup;
+
+    code = maybe_add_pac_request(context, ctx);
+    if (code)
+        goto cleanup;
+
     code = krb5int_fast_prep_req(context, ctx->fast_state,
                                  ctx->request, ctx->outer_request_body,
                                  encode_krb5_as_req,

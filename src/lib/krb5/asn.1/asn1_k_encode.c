@@ -1318,6 +1318,7 @@ MAKE_DECODER(decode_krb5_pa_for_user, pa_for_user);
 MAKE_ENCODER(encode_krb5_s4u_userid, s4u_userid);
 MAKE_ENCODER(encode_krb5_pa_s4u_x509_user, pa_s4u_x509_user);
 MAKE_DECODER(decode_krb5_pa_s4u_x509_user, pa_s4u_x509_user);
+MAKE_ENCODER(encode_krb5_pa_pac_req, pa_pac_req);
 MAKE_DECODER(decode_krb5_pa_pac_req, pa_pac_req);
 MAKE_ENCODER(encode_krb5_etype_list, etype_list);
 MAKE_DECODER(decode_krb5_etype_list, etype_list);

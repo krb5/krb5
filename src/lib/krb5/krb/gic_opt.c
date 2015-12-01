@@ -28,6 +28,7 @@ struct extended_options {
     void *expire_data;
     krb5_responder_fn responder;
     void *responder_data;
+    int pac_request;            /* -1 unset, 0 false, 1 true */
 };
 #if TARGET_OS_MAC
 #pragma pack(pop)
@@ -148,6 +149,7 @@ krb5_get_init_creds_opt_alloc(krb5_context context,
     if (opte == NULL)
         return ENOMEM;
     opte->opt.flags = DEFAULT_FLAGS | GIC_OPT_EXTENDED;
+    opte->pac_request = -1;
     *opt = (krb5_get_init_creds_opt *)opte;
     return 0;
 }
@@ -472,4 +474,27 @@ k5_gic_opt_shallow_copy(krb5_get_init_creds_opt *opt)
         opte->opt = *opt;
     opte->opt.flags |= GIC_OPT_SHALLOW_COPY;
     return (krb5_get_init_creds_opt *)opte;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_set_pac_request(krb5_context context,
+                                        krb5_get_init_creds_opt *opt,
+                                        krb5_boolean req_pac)
+{
+    struct extended_options *opte = (struct extended_options *)opt;
+
+    if (opt == NULL || !(opt->flags & GIC_OPT_EXTENDED))
+        return EINVAL;
+    opte->pac_request = !!req_pac;
+    return 0;
+}
+
+int
+k5_gic_opt_pac_request(krb5_get_init_creds_opt *opt)
+{
+    struct extended_options *opte = (struct extended_options *)opt;
+
+    if (opt == NULL || !(opt->flags & GIC_OPT_EXTENDED))
+        return -1;
+    return opte->pac_request;
 }

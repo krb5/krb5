@@ -7100,6 +7100,26 @@ krb5_get_init_creds_opt_set_out_ccache(krb5_context context,
                                        krb5_ccache ccache);
 
 /**
+ * @brief Ask the KDC to include or not include a PAC in the ticket
+ *
+ * @param [in] context          Library context
+ * @param [in] opt              Options structure
+ * @param [in] req_pac          Whether to request a PAC or not
+ *
+ * If this option is set, the AS request will include a PAC-REQUEST pa-data
+ * item explicitly asking the KDC to either include or not include a privilege
+ * attribute certificate in the ticket authorization data.  By default, no
+ * request is made; typically the KDC will default to including a PAC if it
+ * supports them.
+ *
+ * @version New in 1.15
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_set_pac_request(krb5_context context,
+                                        krb5_get_init_creds_opt *opt,
+                                        krb5_boolean req_pac);
+
+/**
  * Set FAST flags in initial credential options.
  *
  * @param [in] context          Library context

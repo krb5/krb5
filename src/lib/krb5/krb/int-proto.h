@@ -322,4 +322,9 @@ k5_gic_opt_get_responder(krb5_get_init_creds_opt *opt,
 krb5_get_init_creds_opt *
 k5_gic_opt_shallow_copy(krb5_get_init_creds_opt *opt);
 
+/* Return -1 if no PAC request option was specified, or the option value as a
+ * boolean (0 or 1). */
+int
+k5_gic_opt_pac_request(krb5_get_init_creds_opt *opt);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */

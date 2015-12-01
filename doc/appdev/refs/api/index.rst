@@ -50,6 +50,7 @@ Frequently used public interfaces
    krb5_get_init_creds_opt_set_in_ccache.rst
    krb5_get_init_creds_opt_set_out_ccache.rst
    krb5_get_init_creds_opt_set_pa.rst
+   krb5_get_init_creds_opt_set_pac_request.rst
    krb5_get_init_creds_opt_set_preauth_list.rst
    krb5_get_init_creds_opt_set_proxiable.rst
    krb5_get_init_creds_opt_set_renew_life.rst
