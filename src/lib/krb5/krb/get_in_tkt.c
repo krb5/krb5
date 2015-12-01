@@ -794,6 +794,7 @@ krb5_init_creds_init(krb5_context context,
 {
     krb5_error_code code;
     krb5_init_creds_context ctx;
+    krb5_boolean pac_request_enabled = FALSE;
     int tmp;
     char *str = NULL;
 
@@ -864,6 +865,9 @@ krb5_init_creds_init(krb5_context context,
         tmp = 0;
     if (tmp)
         ctx->request->kdc_options |= KDC_OPT_CANONICALIZE;
+
+    /* request_pac */
+    ctx->pac_request = k5_gic_opt_pac_request(ctx->opt);
 
     /* allow_postdate */
     if (ctx->start_time > 0)
@@ -1280,6 +1284,20 @@ init_creds_step_request(krb5_context context,
                                    0);
     if (code)
         goto cleanup;
+
+    if (ctx->pac_request != -1) {
+        krb5_octet req;
+
+        req = ctx->pac_request;
+        code = request_padata_type(&ctx->request->padata,
+                                   KRB5_PADATA_PAC_REQUEST,
+                                   &req,
+                                   sizeof(req));
+        if (code != 0) {
+            goto cleanup;
+        }
+    }
+
     code = krb5int_fast_prep_req(context, ctx->fast_state,
                                  ctx->request, ctx->outer_request_body,
                                  encode_krb5_as_req,

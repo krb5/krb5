@@ -467,3 +467,4 @@ EXPORTS
 ; new in 1.15
 	krb5_set_kdc_send_hook				@433
 	krb5_set_kdc_recv_hook				@434
+	krb5_get_init_creds_opt_set_pac_request		@435

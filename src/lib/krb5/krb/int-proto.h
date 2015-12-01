@@ -322,4 +322,16 @@ k5_gic_opt_get_responder(krb5_get_init_creds_opt *opt,
 krb5_get_init_creds_opt *
 k5_gic_opt_shallow_copy(krb5_get_init_creds_opt *opt);
 
+/*
+ * Check if the user forced a pac request state or if it is unset.
+ *
+ * Possible return values:
+ *
+ *  -1      PAC request unset
+ *   0      PAC request disabled
+ *   1      PAC request enabled
+ */
+krb5_int32
+k5_gic_opt_pac_request(krb5_get_init_creds_opt *opt);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */
