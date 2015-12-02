@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.13.2\n"
+"Project-Id-Version: mit-krb5 1.13.2-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-06 14:59-0400\n"
+"POT-Creation-Date: 2015-12-02 17:03-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -863,9 +863,8 @@ msgstr ""
 #: ../../src/clients/ksu/main.c:68
 #, c-format
 msgid ""
-"Usage: %s [target user] [-n principal] [-c source cachename] [-k] [-D] [-r "
-"time] [-pf] [-l lifetime] [-zZ] [-q] [-e command [args... ] ] [-a "
-"[args... ] ]\n"
+"Usage: %s [target user] [-n principal] [-c source cachename] [-k] [-r time] "
+"[-pf] [-l lifetime] [-zZ] [-q] [-e command [args... ] ] [-a [args... ] ]\n"
 msgstr ""
 
 #: ../../src/clients/ksu/main.c:147
@@ -2194,13 +2193,13 @@ msgid "while storing %s"
 msgstr ""
 
 #: ../../src/kadmin/dbutil/dump.c:896 ../../src/kadmin/dbutil/dump.c:935
-#: ../../src/kadmin/dbutil/dump.c:981
+#: ../../src/kadmin/dbutil/dump.c:981 ../../src/kadmin/dbutil/dump.c:1000
 #, c-format
 msgid "cannot parse policy (%d read)\n"
 msgstr ""
 
 #: ../../src/kadmin/dbutil/dump.c:904 ../../src/kadmin/dbutil/dump.c:943
-#: ../../src/kadmin/dbutil/dump.c:1001
+#: ../../src/kadmin/dbutil/dump.c:1021
 msgid "while creating policy"
 msgstr ""
 
@@ -2209,138 +2208,138 @@ msgstr ""
 msgid "created policy %s\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1038
+#: ../../src/kadmin/dbutil/dump.c:1058
 #, c-format
 msgid "unknown record type \"%s\"\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1167
+#: ../../src/kadmin/dbutil/dump.c:1187
 #, c-format
 msgid "%s: Unknown iprop dump version %d\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1270 ../../src/kadmin/dbutil/dump.c:1498
+#: ../../src/kadmin/dbutil/dump.c:1290 ../../src/kadmin/dbutil/dump.c:1518
 #, c-format
 msgid "Iprop not enabled\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1308
+#: ../../src/kadmin/dbutil/dump.c:1328
 msgid "Conditional dump is an undocumented option for use only for iprop dumps"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1321
+#: ../../src/kadmin/dbutil/dump.c:1341
 msgid "Database not currently opened!"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1335
+#: ../../src/kadmin/dbutil/dump.c:1355
 #: ../../src/kadmin/dbutil/kdb5_stash.c:116
 #: ../../src/kadmin/dbutil/kdb5_util.c:479
 msgid "while reading master key"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1341
+#: ../../src/kadmin/dbutil/dump.c:1361
 msgid "while verifying master key"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1360 ../../src/kadmin/dbutil/dump.c:1370
+#: ../../src/kadmin/dbutil/dump.c:1380 ../../src/kadmin/dbutil/dump.c:1390
 msgid "while reading new master key"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1364
+#: ../../src/kadmin/dbutil/dump.c:1384
 #, c-format
 msgid "Please enter new master key....\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1388
+#: ../../src/kadmin/dbutil/dump.c:1408
 #, c-format
 msgid "while opening %s for writing"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1403
+#: ../../src/kadmin/dbutil/dump.c:1423
 msgid "while reading update log header"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1418 ../../src/kadmin/dbutil/dump.c:1425
+#: ../../src/kadmin/dbutil/dump.c:1438 ../../src/kadmin/dbutil/dump.c:1445
 #, c-format
 msgid "performing %s dump"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1455
+#: ../../src/kadmin/dbutil/dump.c:1475
 #, c-format
 msgid "%s: error processing line %d of %s\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1507
+#: ../../src/kadmin/dbutil/dump.c:1527
 msgid "while parsing options"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1522
+#: ../../src/kadmin/dbutil/dump.c:1542
 #, c-format
 msgid "while opening %s"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1527 ../../src/kadmin/dbutil/dump.c:1626
+#: ../../src/kadmin/dbutil/dump.c:1547 ../../src/kadmin/dbutil/dump.c:1646
 msgid "standard input"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1532
+#: ../../src/kadmin/dbutil/dump.c:1552
 #, c-format
 msgid "%s: can't read dump header in %s\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1540 ../../src/kadmin/dbutil/dump.c:1557
+#: ../../src/kadmin/dbutil/dump.c:1560 ../../src/kadmin/dbutil/dump.c:1577
 #, c-format
 msgid "%s: dump header bad in %s\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1566
+#: ../../src/kadmin/dbutil/dump.c:1586
 #, c-format
 msgid "Could not open iprop ulog\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1571
+#: ../../src/kadmin/dbutil/dump.c:1591
 #, c-format
 msgid "%s: dump version %s can only be loaded with the -update flag\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1580 ../../src/kadmin/dbutil/dump.c:1585
+#: ../../src/kadmin/dbutil/dump.c:1600 ../../src/kadmin/dbutil/dump.c:1605
 msgid "computing parameters for database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1591
+#: ../../src/kadmin/dbutil/dump.c:1611
 msgid "while creating database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1600
+#: ../../src/kadmin/dbutil/dump.c:1620
 msgid "while opening database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1610
+#: ../../src/kadmin/dbutil/dump.c:1630
 msgid "while permanently locking database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1628
+#: ../../src/kadmin/dbutil/dump.c:1648
 #, c-format
 msgid "%s: %s restore failed\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1633
+#: ../../src/kadmin/dbutil/dump.c:1653
 msgid "while unlocking database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1643 ../../src/kadmin/dbutil/dump.c:1662
+#: ../../src/kadmin/dbutil/dump.c:1663 ../../src/kadmin/dbutil/dump.c:1682
 msgid "while reinitializing update log"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1653
+#: ../../src/kadmin/dbutil/dump.c:1673
 msgid "while making newly loaded database live"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1669
+#: ../../src/kadmin/dbutil/dump.c:1689
 msgid "while writing update log header"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1683
+#: ../../src/kadmin/dbutil/dump.c:1703
 #, c-format
 msgid "while deleting bad database %s"
 msgstr ""
@@ -4093,7 +4092,7 @@ msgid "The quality-of-protection (QOP) requested could not be provided"
 msgstr ""
 
 #: ../../src/lib/gssapi/mechglue/g_dsp_status.c:253
-msgid "The operation is forbidden by local  security policy"
+msgid "The operation is forbidden by local security policy"
 msgstr ""
 
 #: ../../src/lib/gssapi/mechglue/g_dsp_status.c:258
@@ -4112,23 +4111,23 @@ msgstr ""
 msgid "An expected per-message token was not received"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1860
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1853
 msgid "SPNEGO cannot find mechanisms to negotiate"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1865
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1858
 msgid "SPNEGO failed to acquire creds"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1870
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1863
 msgid "SPNEGO acceptor did not select a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1875
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1868
 msgid "SPNEGO failed to negotiate a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1880
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1873
 msgid "SPNEGO acceptor did not return a valid token"
 msgstr ""
 
@@ -4569,12 +4568,12 @@ msgstr ""
 msgid "Reply has wrong form of session key for anonymous request"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1628
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1630
 #, c-format
 msgid "%s while storing credentials"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1715
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1717
 #, c-format
 msgid "Client '%s' not found in Kerberos database"
 msgstr ""
@@ -4780,7 +4779,7 @@ msgid ""
 "decrypt ticket"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/rd_req_dec.c:897
+#: ../../src/lib/krb5/krb/rd_req_dec.c:898
 #, c-format
 msgid "Encryption type %s not permitted"
 msgstr ""
