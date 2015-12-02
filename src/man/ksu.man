@@ -37,7 +37,6 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 [ \fB\-n\fP \fItarget_principal_name\fP ]
 [ \fB\-c\fP \fIsource_cache_name\fP ]
 [ \fB\-k\fP ]
-[ \fB\-D\fP ]
 [ \fB\-r\fP time ]
 [ \fB\-pf\fP ]
 [ \fB\-l\fP \fIlifetime\fP ]
@@ -268,9 +267,6 @@ krb5cc_1984.2
 Do not delete the target cache upon termination of the target
 shell or a command (\fB\-e\fP command).  Without \fB\-k\fP, ksu deletes
 the target cache.
-.TP
-.B \fB\-D\fP
-Turn on debug mode.
 .TP
 .B \fB\-z\fP
 Restrict the copy of tickets from the source cache to the target

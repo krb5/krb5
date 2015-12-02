@@ -37,7 +37,9 @@ realms of interest, defaults for the current realm and for Kerberos
 applications, and mappings of hostnames onto Kerberos realms.
 Normally, you should install your krb5.conf file in the directory
 \fB/etc\fP\&.  You can override the default location by setting the
-environment variable \fBKRB5_CONFIG\fP\&.
+environment variable \fBKRB5_CONFIG\fP\&.  Multiple colon\-separated
+filenames may be specified in \fBKRB5_CONFIG\fP; all files which are
+present will be read.
 .SH STRUCTURE
 .sp
 The krb5.conf file is set up in the style of a Windows INI file.
