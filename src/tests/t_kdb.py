@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from k5test import *
 import time
+from itertools import imap
 
 # Run kdbtest against the BDB module.
 realm = K5Realm(create_kdb=False)
@@ -41,9 +42,11 @@ os.mkdir(dbdir)
 shutil.copy(system_slapd, slapd)
 
 # Find the core schema file if we can.
-core_schema = None
-if os.path.isfile('/etc/ldap/schema/core.schema'):
-    core_schema = '/etc/ldap/schema/core.schema'
+ldap_homes = ['/etc/ldap', '/etc/openldap', '/usr/local/etc/openldap',
+              '/usr/local/etc/ldap']
+local_schema_path = '/schema/core.schema'
+core_schema = next((i for i in imap(lambda x:x+local_schema_path, ldap_homes)
+                    if os.path.isfile(i)), None)
 
 # Make a slapd config file.  This is deprecated in OpenLDAP 2.3 and
 # later, but it's easier than using LDIF and slapadd.  Include some
