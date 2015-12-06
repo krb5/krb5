@@ -423,14 +423,16 @@ typedef struct _krb5_crypto_iov {
 #define ENCTYPE_RSA_ES_OAEP_ENV 0x000e  /**< RSA w/OEAP encryption, CMS enveloped data */
 #define ENCTYPE_DES3_CBC_ENV    0x000f  /**< DES-3 cbc mode, CMS enveloped data */
 
-#define ENCTYPE_DES3_CBC_SHA1           0x0010
-#define ENCTYPE_AES128_CTS_HMAC_SHA1_96 0x0011 /**< RFC 3962 */
-#define ENCTYPE_AES256_CTS_HMAC_SHA1_96 0x0012 /**< RFC 3962 */
-#define ENCTYPE_ARCFOUR_HMAC            0x0017
-#define ENCTYPE_ARCFOUR_HMAC_EXP        0x0018
-#define ENCTYPE_CAMELLIA128_CTS_CMAC    0x0019 /**< RFC 6803 */
-#define ENCTYPE_CAMELLIA256_CTS_CMAC    0x001a /**< RFC 6803 */
-#define ENCTYPE_UNKNOWN                 0x01ff
+#define ENCTYPE_DES3_CBC_SHA1               0x0010
+#define ENCTYPE_AES128_CTS_HMAC_SHA1_96     0x0011 /**< RFC 3962 */
+#define ENCTYPE_AES256_CTS_HMAC_SHA1_96     0x0012 /**< RFC 3962 */
+#define ENCTYPE_AES128_CTS_HMAC_SHA256_128  0x0013
+#define ENCTYPE_AES256_CTS_HMAC_SHA384_192  0x0014
+#define ENCTYPE_ARCFOUR_HMAC                0x0017
+#define ENCTYPE_ARCFOUR_HMAC_EXP            0x0018
+#define ENCTYPE_CAMELLIA128_CTS_CMAC        0x0019 /**< RFC 6803 */
+#define ENCTYPE_CAMELLIA256_CTS_CMAC        0x001a /**< RFC 6803 */
+#define ENCTYPE_UNKNOWN                     0x01ff
 
 #define CKSUMTYPE_CRC32         0x0001
 #define CKSUMTYPE_RSA_MD4       0x0002
@@ -446,6 +448,8 @@ typedef struct _krb5_crypto_iov {
                                                 ENCTYPE_AES128_CTS_HMAC_SHA1_96 */
 #define CKSUMTYPE_HMAC_SHA1_96_AES256 0x0010 /**< RFC 3962. Used with
                                                 ENCTYPE_AES256_CTS_HMAC_SHA1_96 */
+#define CKSUMTYPE_HMAC_SHA256_128_AES128 0x0013
+#define CKSUMTYPE_HMAC_SHA384_192_AES256 0x0014
 #define CKSUMTYPE_CMAC_CAMELLIA128 0x0011 /**< RFC 6803 */
 #define CKSUMTYPE_CMAC_CAMELLIA256 0x0012 /**< RFC 6803 */
 #define CKSUMTYPE_MD5_HMAC_ARCFOUR -137 /*Microsoft netlogon cksumtype*/

@@ -48,7 +48,8 @@ krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,
         goto cleanup;
 
     /* Derive a key using the PRF constant. */
-    ret = krb5int_derive_key(ktp->enc, key, &kp, &prfconst, DERIVE_RFC3961);
+    ret = krb5int_derive_key(ktp->enc, NULL, key, &kp, &prfconst,
+                             DERIVE_RFC3961);
     if (ret != 0)
         goto cleanup;
 

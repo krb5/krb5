@@ -64,13 +64,15 @@ derive_keys(const struct krb5_enc_provider *enc, krb5_key key,
     /* Derive the encryption key. */
     store_32_be(usage, buf);
     buf[4] = 0xAA;
-    ret = krb5int_derive_key(enc, key, &ke, &constant, DERIVE_SP800_108_CMAC);
+    ret = krb5int_derive_key(enc, NULL, key, &ke, &constant,
+                             DERIVE_SP800_108_CMAC);
     if (ret != 0)
         return ret;
 
     /* Derive the integrity key. */
     buf[4] = 0x55;
-    ret = krb5int_derive_key(enc, key, &ki, &constant, DERIVE_SP800_108_CMAC);
+    ret = krb5int_derive_key(enc, NULL, key, &ki, &constant,
+                             DERIVE_SP800_108_CMAC);
     if (ret != 0) {
         krb5_k_free_key(NULL, ke);
         return ret;
