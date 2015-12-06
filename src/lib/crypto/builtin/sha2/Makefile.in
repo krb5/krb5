@@ -5,11 +5,11 @@ BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 ##DOS##PREFIXDIR = builtin\sha2
 ##DOS##OBJFILE = ..\..\$(OUTPRE)sha2.lst
 
-STLIBOBJS= sha256.o
+STLIBOBJS= sha256.o sha512.o
 
-OBJS= $(OUTPRE)sha256.$(OBJEXT) 
+OBJS= $(OUTPRE)sha256.$(OBJEXT) $(OUTPRE)sha512.$(OBJEXT) 
 
-SRCS= $(srcdir)/sha256.c
+SRCS= $(srcdir)/sha256.c $(srcdir)/sha512.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -18,20 +18,6 @@ all-unix: all-libobjs
 includes: depend
 
 depend: $(SRCS)
-
-t_sha256: t_sha256.o sha256.o $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o t_sha256 t_sha256.o sha256.o $(SUPPORT_LIB)
-
-
-$(OUTPRE)t_sha256.exe: $(OUTPRE)t_sha256.obj $(OUTPRE)sha256.obj
-	link -out:$@ $**
-
-
-check-unix: t_sha256
-	$(RUN_TEST) $(C)t_sha256
-
-clean:
-	$(RM) t_sha256$(EXEEXT) t_sha256.$(OBJEXT)
 
 clean-unix:: clean-libobjs
 
