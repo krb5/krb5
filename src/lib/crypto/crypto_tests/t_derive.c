@@ -259,7 +259,7 @@ main(int argc, char **argv)
         ret = krb5_k_create_key(context, &kb, &inkey);
         assert(!ret);
         enc = get_enc_provider(test->enctype);
-        ret = krb5int_derive_key(enc, inkey, &outkey, &test->constant,
+        ret = krb5int_derive_key(enc, NULL, inkey, &outkey, &test->constant,
                                  test->alg);
         assert(!ret);
         if (verbose) {

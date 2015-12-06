@@ -14,6 +14,7 @@ STLIBOBJS=\
 	checksum_confounder.o	\
 	checksum_dk_cmac.o	\
 	checksum_dk_hmac.o	\
+	checksum_etm.o		\
 	checksum_hmac_md5.o	\
 	checksum_unkeyed.o	\
 	checksum_length.o	\
@@ -35,6 +36,7 @@ STLIBOBJS=\
 	enctype_util.o		\
 	enc_dk_cmac.o		\
 	enc_dk_hmac.o		\
+	enc_etm.o		\
 	enc_old.o		\
 	enc_raw.o		\
 	enc_rc4.o		\
@@ -51,6 +53,7 @@ STLIBOBJS=\
 	nfold.o			\
 	old_api_glue.o		\
 	prf.o			\
+	prf_aes2.o		\
 	prf_cmac.o		\
 	prf_des.o		\
 	prf_dk.o		\
@@ -76,6 +79,7 @@ OBJS=\
 	$(OUTPRE)checksum_confounder.$(OBJEXT)	\
 	$(OUTPRE)checksum_dk_cmac.$(OBJEXT)	\
 	$(OUTPRE)checksum_dk_hmac.$(OBJEXT)	\
+	$(OUTPRE)checksum_etm.$(OBJEXT)		\
 	$(OUTPRE)checksum_hmac_md5.$(OBJEXT)	\
 	$(OUTPRE)checksum_unkeyed.$(OBJEXT)	\
 	$(OUTPRE)checksum_length.$(OBJEXT)	\
@@ -97,6 +101,7 @@ OBJS=\
 	$(OUTPRE)enctype_util.$(OBJEXT)		\
 	$(OUTPRE)enc_dk_cmac.$(OBJEXT)		\
 	$(OUTPRE)enc_dk_hmac.$(OBJEXT)		\
+	$(OUTPRE)enc_etm.$(OBJEXT)		\
 	$(OUTPRE)enc_old.$(OBJEXT)		\
 	$(OUTPRE)enc_raw.$(OBJEXT)		\
 	$(OUTPRE)enc_rc4.$(OBJEXT)		\
@@ -113,6 +118,7 @@ OBJS=\
 	$(OUTPRE)nfold.$(OBJEXT)		\
 	$(OUTPRE)old_api_glue.$(OBJEXT)		\
 	$(OUTPRE)prf.$(OBJEXT)			\
+	$(OUTPRE)prf_aes2.$(OBJEXT)		\
 	$(OUTPRE)prf_cmac.$(OBJEXT)		\
 	$(OUTPRE)prf_des.$(OBJEXT)		\
 	$(OUTPRE)prf_dk.$(OBJEXT)		\
@@ -138,6 +144,7 @@ SRCS=\
 	$(srcdir)/checksum_confounder.c	\
 	$(srcdir)/checksum_dk_cmac.c	\
 	$(srcdir)/checksum_dk_hmac.c	\
+	$(srcdir)/checksum_etm.c	\
 	$(srcdir)/checksum_hmac_md5.c	\
 	$(srcdir)/checksum_unkeyed.c	\
 	$(srcdir)/checksum_length.c	\
@@ -159,6 +166,7 @@ SRCS=\
 	$(srcdir)/enctype_util.c	\
 	$(srcdir)/enc_dk_cmac.c		\
 	$(srcdir)/enc_dk_hmac.c		\
+	$(srcdir)/enc_etm.c		\
 	$(srcdir)/enc_old.c		\
 	$(srcdir)/enc_raw.c		\
 	$(srcdir)/enc_rc4.c		\
@@ -175,6 +183,7 @@ SRCS=\
 	$(srcdir)/nfold.c		\
 	$(srcdir)/old_api_glue.c	\
 	$(srcdir)/prf.c			\
+	$(srcdir)/prf_aes2.c		\
 	$(srcdir)/prf_cmac.c		\
 	$(srcdir)/prf_des.c		\
 	$(srcdir)/prf_dk.c		\

@@ -139,9 +139,9 @@ cleanup:
  *   - Four bytes are used to encode the output length in the PRF input.
  */
 static krb5_error_code
-derive_random_sp800_108_cmac(const struct krb5_enc_provider *enc,
-                             krb5_key inkey, krb5_data *outrnd,
-                             const krb5_data *in_constant)
+derive_random_sp800_108_feedback_cmac(const struct krb5_enc_provider *enc,
+                                      krb5_key inkey, krb5_data *outrnd,
+                                      const krb5_data *in_constant)
 {
     size_t blocksize, keybytes, n;
     krb5_crypto_iov iov[6];
@@ -204,16 +204,75 @@ cleanup:
     return ret;
 }
 
+/*
+ * NIST SP800-108 KDF in counter mode (section 5.1).
+ * Parameters:
+ *   - HMAC (with hash as the hash provider) is the PRF.
+ *   - A block counter of four bytes is used.
+ *   - Four bytes are used to encode the output length in the PRF input.
+ *
+ * There are no uses requiring more than a single PRF invocation.
+ */
+krb5_error_code
+k5_sp800_108_counter_hmac(const struct krb5_hash_provider *hash,
+                          krb5_key inkey, krb5_data *outrnd,
+                          const krb5_data *label, const krb5_data *context)
+{
+    krb5_crypto_iov iov[5];
+    krb5_error_code ret;
+    krb5_data prf;
+    unsigned char ibuf[4], lbuf[4];
+
+    if (hash == NULL || outrnd->length > hash->hashsize)
+        return KRB5_CRYPTO_INTERNAL;
+
+    /* Allocate encryption data buffer. */
+    ret = alloc_data(&prf, hash->hashsize);
+    if (ret)
+        return ret;
+
+    /* [i]2: four-byte big-endian binary string giving the block counter (1) */
+    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[0].data = make_data(ibuf, sizeof(ibuf));
+    store_32_be(1, ibuf);
+    /* Label */
+    iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[1].data = *label;
+    /* 0x00: separator byte */
+    iov[2].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[2].data = make_data("", 1);
+    /* Context */
+    iov[3].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[3].data = *context;
+    /* [L]2: four-byte big-endian binary string giving the output length */
+    iov[4].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[4].data = make_data(lbuf, sizeof(lbuf));
+    store_32_be(outrnd->length * 8, lbuf);
+
+    ret = krb5int_hmac(hash, inkey, iov, 5, &prf);
+    if (!ret)
+        memcpy(outrnd->data, prf.data, outrnd->length);
+    zapfree(prf.data, prf.length);
+    return ret;
+}
+
 krb5_error_code
 krb5int_derive_random(const struct krb5_enc_provider *enc,
+                      const struct krb5_hash_provider *hash,
                       krb5_key inkey, krb5_data *outrnd,
                       const krb5_data *in_constant, enum deriv_alg alg)
 {
+    krb5_data empty = empty_data();
+
     switch (alg) {
     case DERIVE_RFC3961:
         return derive_random_rfc3961(enc, inkey, outrnd, in_constant);
     case DERIVE_SP800_108_CMAC:
-        return derive_random_sp800_108_cmac(enc, inkey, outrnd, in_constant);
+        return derive_random_sp800_108_feedback_cmac(enc, inkey, outrnd,
+                                                     in_constant);
+    case DERIVE_SP800_108_HMAC:
+        return k5_sp800_108_counter_hmac(hash, inkey, outrnd, in_constant,
+                                         &empty);
     default:
         return EINVAL;
     }
@@ -227,6 +286,7 @@ krb5int_derive_random(const struct krb5_enc_provider *enc,
  */
 krb5_error_code
 krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
+                        const struct krb5_hash_provider *hash,
                         krb5_key inkey, krb5_keyblock *outkey,
                         const krb5_data *in_constant, enum deriv_alg alg)
 {
@@ -239,7 +299,7 @@ krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
         goto cleanup;
 
     /* Derive pseudo-random data for the key bytes. */
-    ret = krb5int_derive_random(enc, inkey, &rawkey, in_constant, alg);
+    ret = krb5int_derive_random(enc, hash, inkey, &rawkey, in_constant, alg);
     if (ret)
         goto cleanup;
 
@@ -253,6 +313,7 @@ cleanup:
 
 krb5_error_code
 krb5int_derive_key(const struct krb5_enc_provider *enc,
+                   const struct krb5_hash_provider *hash,
                    krb5_key inkey, krb5_key *outkey,
                    const krb5_data *in_constant, enum deriv_alg alg)
 {
@@ -275,7 +336,8 @@ krb5int_derive_key(const struct krb5_enc_provider *enc,
     keyblock.enctype = inkey->keyblock.enctype;
     if (keyblock.contents == NULL)
         return ENOMEM;
-    ret = krb5int_derive_keyblock(enc, inkey, &keyblock, in_constant, alg);
+    ret = krb5int_derive_keyblock(enc, hash, inkey, &keyblock, in_constant,
+                                  alg);
     if (ret)
         goto cleanup;
 
