@@ -79,6 +79,18 @@ hash_sha1(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
     return hash_evp(EVP_sha1(), data, num_data, output);
 }
 
+static krb5_error_code
+hash_sha256(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
+{
+    return hash_evp(EVP_sha256(), data, num_data, output);
+}
+
+static krb5_error_code
+hash_sha384(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
+{
+    return hash_evp(EVP_sha384(), data, num_data, output);
+}
+
 const struct krb5_hash_provider krb5int_hash_md4 = {
     "MD4", 16, 64, hash_md4
 };
@@ -89,4 +101,12 @@ const struct krb5_hash_provider krb5int_hash_md5 = {
 
 const struct krb5_hash_provider krb5int_hash_sha1 = {
     "SHA1", 20, 64, hash_sha1
+};
+
+const struct krb5_hash_provider krb5int_hash_sha256 = {
+    "SHA-256", 32, 64, hash_sha256
+};
+
+const struct krb5_hash_provider krb5int_hash_sha384 = {
+    "SHA-384", 48, 128, hash_sha384
 };

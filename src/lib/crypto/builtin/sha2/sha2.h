@@ -39,6 +39,12 @@
 #include <k5-int.h>
 
 #define SHA256_DIGEST_LENGTH 32
+#define SHA384_DIGEST_LENGTH 48
+#define SHA512_DIGEST_LENGTH 64
+
+#define SHA256_BLOCK_SIZE 64
+#define SHA384_BLOCK_SIZE 128
+#define SHA512_BLOCK_SIZE 128
 
 struct sha256state {
   unsigned int sz[2];
@@ -46,10 +52,27 @@ struct sha256state {
   unsigned char save[64];
 };
 
+struct sha512state {
+  uint64_t sz[2];
+  uint64_t counter[8];
+  unsigned char save[128];
+};
+
+/* SHA-384 and SHA-512 use the same state object. */
 typedef struct sha256state SHA256_CTX;
+typedef struct sha512state SHA384_CTX;
+typedef struct sha512state SHA512_CTX;
 
 void k5_sha256_init(SHA256_CTX *);
 void k5_sha256_update(SHA256_CTX *, const void *, size_t);
 void k5_sha256_final(void *, SHA256_CTX *);
+
+void k5_sha384_init(SHA384_CTX *);
+void k5_sha384_update(SHA384_CTX *, const void *, size_t);
+void k5_sha384_final(void *, SHA384_CTX *);
+
+void k5_sha512_init(SHA512_CTX *);
+void k5_sha512_update(SHA512_CTX *, const void *, size_t);
+void k5_sha512_final(void *, SHA512_CTX *);
 
 #endif /* SHA2_H */
