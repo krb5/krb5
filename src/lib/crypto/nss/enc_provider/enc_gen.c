@@ -307,7 +307,7 @@ k5_nss_gen_stream_iov(krb5_key krb_key, krb5_data *state,
         int return_length;
         iov = &data[i];
         if (iov->data.length <= 0)
-            break;
+            continue;
 
         if (ENCRYPT_IOV(iov)) {
             rv = PK11_CipherOp(ctx, (unsigned char *)iov->data.data,
