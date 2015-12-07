@@ -457,13 +457,13 @@ krb5_error_code krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
 
 /*
  * Compute the PBKDF2 (see RFC 2898) of password and salt, with the specified
- * count, using HMAC-SHA-1 as the pseudorandom function, storing the result
- * into out (caller-allocated).
+ * count, using HMAC with the specified hash as the pseudo-random function,
+ * storing the result into out (caller-allocated).
  */
-krb5_error_code krb5int_pbkdf2_hmac_sha1(const krb5_data *out,
-                                         unsigned long count,
-                                         const krb5_data *password,
-                                         const krb5_data *salt);
+krb5_error_code krb5int_pbkdf2_hmac(const struct krb5_hash_provider *hash,
+                                    const krb5_data *out, unsigned long count,
+                                    const krb5_data *password,
+                                    const krb5_data *salt);
 
 /* The following are used by test programs and are just handler functions from
  * the AES and Camellia enc providers. */

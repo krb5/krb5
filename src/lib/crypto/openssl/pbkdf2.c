@@ -30,15 +30,24 @@
 #include <openssl/hmac.h>
 
 krb5_error_code
-krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
-                          const krb5_data *pass, const krb5_data *salt)
+krb5int_pbkdf2_hmac(const struct krb5_hash_provider *hash,
+                    const krb5_data *out, unsigned long count,
+                    const krb5_data *pass, const krb5_data *salt)
 {
-/*
- * This is an implementation of PKCS#5 v2.0
- * Does not return an error
- */
-    PKCS5_PBKDF2_HMAC_SHA1(pass->data, pass->length,
-                           (unsigned char *)salt->data, salt->length, count,
-                           out->length, (unsigned char *)out->data);
+    const EVP_MD *md = NULL;
+
+    /* Get the message digest handle corresponding to the hash. */
+    if (hash == &krb5int_hash_sha1)
+        md = EVP_sha1();
+    else if (hash == &krb5int_hash_sha256)
+        md = EVP_sha256();
+    else if (hash == &krb5int_hash_sha384)
+        md = EVP_sha384();
+    if (md == NULL)
+        return KRB5_CRYPTO_INTERNAL;
+
+    PKCS5_PBKDF2_HMAC(pass->data, pass->length, (unsigned char *)salt->data,
+                      salt->length, count, md, out->length,
+                      (unsigned char *)out->data);
     return 0;
 }
