@@ -167,7 +167,7 @@ if test $dosrc = t; then
 			make)
 	fi
 	echo "Creating configure scripts..."
-	(cd $reldir/src; util/reconf)
+	(cd $reldir/src; bootstrap)
 
 	if test -d $reldir/src/util/autoconf; then
 		echo "Cleaning src/util/autoconf..."
