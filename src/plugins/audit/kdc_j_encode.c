@@ -616,7 +616,7 @@ addr_to_obj(krb5_address *a, k5_json_object obj)
     if (ret)
         goto error;
 
-    if (a->addrtype == ADDRTYPE_INET) {
+    if (a->addrtype == ADDRTYPE_INET || a->addrtype == ADDRTYPE_INET6) {
         ret = k5_json_array_create(&arr);
         if (ret)
             goto error;
@@ -629,7 +629,7 @@ addr_to_obj(krb5_address *a, k5_json_object obj)
             if (ret)
                 goto error;
         }
-        ret = k5_json_object_set(obj, AU_IPV4, arr);
+        ret = k5_json_object_set(obj, AU_IP, arr);
         if (ret)
             goto error;
     }

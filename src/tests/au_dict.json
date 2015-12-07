@@ -6,7 +6,7 @@
 "fromaddr":{
 	"type":0,
 	"length":0,
-	"ipv4":[]},
+	"ip":[]},
 "kdc_status":"",
 "rep_etype":0,
 "rep.ticket":{
