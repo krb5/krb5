@@ -198,7 +198,8 @@ unmarshal_keyblock(struct k5input *in, int version, krb5_keyblock *kb)
 {
     memset(kb, 0, sizeof(*kb));
     kb->magic = KV5M_KEYBLOCK;
-    kb->enctype = get16(in, version);
+    /* enctypes can be negative, so sign-extend the 16-bit result. */
+    kb->enctype = (int16_t)get16(in, version);
     /* Version 3 stores the enctype twice. */
     if (version == 3)
         (void)get16(in, version);
