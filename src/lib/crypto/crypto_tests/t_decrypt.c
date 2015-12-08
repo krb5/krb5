@@ -34,14 +34,14 @@
 
 struct test {
     krb5_enctype enctype;
-    const char *plaintext;
+    krb5_data plaintext;
     krb5_keyusage usage;
     krb5_data keybits;
     krb5_data ciphertext;
 } test_cases[] = {
     {
         ENCTYPE_DES_CBC_CRC,
-        "", 0,
+        { KV5M_DATA, 0, "" }, 0,
         { KV5M_DATA, 8,
           "\x45\xE6\x08\x7C\xDF\x13\x8F\xB5" },
         { KV5M_DATA, 16,
@@ -49,7 +49,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_CRC,
-        "1", 1,
+        { KV5M_DATA, 1, "1" }, 1,
         { KV5M_DATA, 8,
           "\x92\xA7\x15\x58\x10\x58\x6B\x2F" },
         { KV5M_DATA, 16,
@@ -57,7 +57,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_CRC,
-        "9 bytesss", 2,
+        { KV5M_DATA, 9, "9 bytesss" }, 2,
         { KV5M_DATA, 8,
           "\xA4\xB9\x51\x4A\x61\x64\x64\x23" },
         { KV5M_DATA, 24,
@@ -66,7 +66,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_CRC,
-        "13 bytes byte", 3,
+        { KV5M_DATA, 13, "13 bytes byte", }, 3,
         { KV5M_DATA, 8,
           "\x2F\x16\xA2\xA7\xFD\xB0\x57\x68" },
         { KV5M_DATA, 32,
@@ -75,7 +75,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_CRC,
-        "30 bytes bytes bytes bytes byt", 4,
+        { KV5M_DATA, 30, "30 bytes bytes bytes bytes byt", }, 4,
         { KV5M_DATA, 8,
           "\xBC\x8F\x70\xFD\x20\x97\xD6\x7C" },
         { KV5M_DATA, 48,
@@ -86,7 +86,7 @@ struct test {
 
     {
         ENCTYPE_DES_CBC_MD4,
-        "", 0,
+        { KV5M_DATA, 0, "", }, 0,
         { KV5M_DATA, 8,
           "\x13\xEF\x45\xD0\xD6\xD9\xA1\x5D" },
         { KV5M_DATA, 24,
@@ -95,7 +95,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_MD4,
-        "1", 1,
+        { KV5M_DATA, 1, "1", }, 1,
         { KV5M_DATA, 8,
           "\x64\x68\x86\x54\xDC\x26\x9E\x67" },
         { KV5M_DATA, 32,
@@ -104,7 +104,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_MD4,
-        "9 bytesss", 2,
+        { KV5M_DATA, 9, "9 bytesss", }, 2,
         { KV5M_DATA, 8,
           "\x68\x04\xFB\x26\xDF\x8A\x4C\x32" },
         { KV5M_DATA, 40,
@@ -114,7 +114,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_MD4,
-        "13 bytes byte", 3,
+        { KV5M_DATA, 13, "13 bytes byte", }, 3,
         { KV5M_DATA, 8,
           "\x23\x4A\x43\x6E\xC7\x2F\xA8\x0B" },
         { KV5M_DATA, 40,
@@ -124,7 +124,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_MD4,
-        "30 bytes bytes bytes bytes byt", 4,
+        { KV5M_DATA, 30, "30 bytes bytes bytes bytes byt", }, 4,
         { KV5M_DATA, 8,
           "\x1F\xD5\xF7\x43\x34\xC4\xFB\x8C" },
         { KV5M_DATA, 56,
@@ -136,7 +136,7 @@ struct test {
 
     {
         ENCTYPE_DES_CBC_MD5,
-        "", 0,
+        { KV5M_DATA, 0, "", }, 0,
         { KV5M_DATA, 8,
           "\x4A\x54\x5E\x0B\xF7\xA2\x26\x31" },
         { KV5M_DATA, 24,
@@ -145,7 +145,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_MD5,
-        "1", 1,
+        { KV5M_DATA, 1, "1", }, 1,
         { KV5M_DATA, 8,
           "\xD5\x80\x4A\x26\x9D\xC4\xE6\x45" },
         { KV5M_DATA, 32,
@@ -154,7 +154,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_MD5,
-        "9 bytesss", 2,
+        { KV5M_DATA, 9, "9 bytesss", }, 2,
         { KV5M_DATA, 8,
           "\xC8\x31\x2F\x7F\x83\xEA\x46\x40" },
         { KV5M_DATA, 40,
@@ -164,7 +164,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_MD5,
-        "13 bytes byte", 3,
+        { KV5M_DATA, 13, "13 bytes byte", }, 3,
         { KV5M_DATA, 8,
           "\x7F\xDA\x3E\x62\xAD\x8A\xF1\x8C" },
         { KV5M_DATA, 40,
@@ -174,7 +174,7 @@ struct test {
     },
     {
         ENCTYPE_DES_CBC_MD5,
-        "30 bytes bytes bytes bytes byt", 4,
+        { KV5M_DATA, 30, "30 bytes bytes bytes bytes byt", }, 4,
         { KV5M_DATA, 8,
           "\xD3\xD6\x83\x29\x70\xA7\x37\x52" },
         { KV5M_DATA, 56,
@@ -186,7 +186,7 @@ struct test {
 
     {
         ENCTYPE_DES3_CBC_SHA1,
-        "", 0,
+        { KV5M_DATA, 0, "", }, 0,
         { KV5M_DATA, 24,
           "\x7A\x25\xDF\x89\x92\x29\x6D\xCE\xDA\x0E\x13\x5B\xC4\x04\x6E\x23"
           "\x75\xB3\xC1\x4C\x98\xFB\xC1\x62" },
@@ -196,7 +196,7 @@ struct test {
     },
     {
         ENCTYPE_DES3_CBC_SHA1,
-        "1", 1,
+        { KV5M_DATA, 1, "1", }, 1,
         { KV5M_DATA, 24,
           "\xBC\x07\x83\x89\x15\x13\xD5\xCE\x57\xBC\x13\x8F\xD3\xC1\x1A\xE6"
           "\x40\x45\x23\x85\x32\x29\x62\xB6" },
@@ -207,7 +207,7 @@ struct test {
     },
     {
         ENCTYPE_DES3_CBC_SHA1,
-        "9 bytesss", 2,
+        { KV5M_DATA, 9, "9 bytesss", }, 2,
         { KV5M_DATA, 24,
           "\x2F\xD0\xF7\x25\xCE\x04\x10\x0D\x2F\xC8\xA1\x80\x98\x83\x1F\x85"
           "\x0B\x45\xD9\xEF\x85\x0B\xD9\x20" },
@@ -218,7 +218,7 @@ struct test {
     },
     {
         ENCTYPE_DES3_CBC_SHA1,
-        "13 bytes byte", 3,
+        { KV5M_DATA, 13, "13 bytes byte", }, 3,
         { KV5M_DATA, 24,
           "\x0D\xD5\x20\x94\xE0\xF4\x1C\xEC\xCB\x5B\xE5\x10\xA7\x64\xB3\x51"
           "\x76\xE3\x98\x13\x32\xF1\xE5\x98" },
@@ -229,7 +229,7 @@ struct test {
     },
     {
         ENCTYPE_DES3_CBC_SHA1,
-        "30 bytes bytes bytes bytes byt", 4,
+        { KV5M_DATA, 30, "30 bytes bytes bytes bytes byt", }, 4,
         { KV5M_DATA, 24,
           "\xF1\x16\x86\xCB\xBC\x9E\x23\xEA\x54\xFE\xCD\x2A\x3D\xCD\xFB\x20"
           "\xB6\xFE\x98\xBF\x26\x45\xC4\xC4" },
@@ -242,7 +242,7 @@ struct test {
 
     {
         ENCTYPE_ARCFOUR_HMAC,
-        "", 0,
+        { KV5M_DATA, 0, "", }, 0,
         { KV5M_DATA, 16,
           "\xF8\x1F\xEC\x39\x25\x5F\x57\x84\xE8\x50\xC4\x37\x7C\x88\xBD\x85" },
         { KV5M_DATA, 24,
@@ -251,7 +251,7 @@ struct test {
     },
     {
         ENCTYPE_ARCFOUR_HMAC,
-        "1", 1,
+        { KV5M_DATA, 1, "1", }, 1,
         { KV5M_DATA, 16,
           "\x67\xD1\x30\x0D\x28\x12\x23\x86\x7F\x96\x47\xFF\x48\x72\x12\x73" },
         { KV5M_DATA, 25,
@@ -260,7 +260,7 @@ struct test {
     },
     {
         ENCTYPE_ARCFOUR_HMAC,
-        "9 bytesss", 2,
+        { KV5M_DATA, 9, "9 bytesss", }, 2,
         { KV5M_DATA, 16,
           "\x3E\x40\xAB\x60\x93\x69\x52\x81\xB3\xAC\x1A\x93\x04\x22\x4D\x98" },
         { KV5M_DATA, 33,
@@ -270,7 +270,7 @@ struct test {
     },
     {
         ENCTYPE_ARCFOUR_HMAC,
-        "13 bytes byte", 3,
+        { KV5M_DATA, 13, "13 bytes byte", }, 3,
         { KV5M_DATA, 16,
           "\x4B\xA2\xFB\xF0\x37\x9F\xAE\xD8\x7A\x25\x4D\x3B\x35\x3D\x5A\x7E" },
         { KV5M_DATA, 37,
@@ -280,7 +280,7 @@ struct test {
     },
     {
         ENCTYPE_ARCFOUR_HMAC,
-        "30 bytes bytes bytes bytes byt", 4,
+        { KV5M_DATA, 30, "30 bytes bytes bytes bytes byt", }, 4,
         { KV5M_DATA, 16,
           "\x68\xF2\x63\xDB\x3F\xCE\x15\xD0\x31\xC9\xEA\xB0\x2D\x67\x10\x7A" },
         { KV5M_DATA, 54,
@@ -292,7 +292,7 @@ struct test {
 
     {
         ENCTYPE_ARCFOUR_HMAC_EXP,
-        "", 0,
+        { KV5M_DATA, 0, "", }, 0,
         { KV5M_DATA, 16,
           "\xF7\xD3\xA1\x55\xAF\x5E\x23\x8A\x0B\x7A\x87\x1A\x96\xBA\x2A\xB2" },
         { KV5M_DATA, 24,
@@ -301,7 +301,7 @@ struct test {
     },
     {
         ENCTYPE_ARCFOUR_HMAC_EXP,
-        "1", 1,
+        { KV5M_DATA, 1, "1", }, 1,
         { KV5M_DATA, 16,
           "\xDE\xEA\xA0\x60\x7D\xB7\x99\xE2\xFD\xD6\xDB\x29\x86\xBB\x8D\x65" },
         { KV5M_DATA, 25,
@@ -310,7 +310,7 @@ struct test {
     },
     {
         ENCTYPE_ARCFOUR_HMAC_EXP,
-        "9 bytesss", 2,
+        { KV5M_DATA, 9, "9 bytesss", }, 2,
         { KV5M_DATA, 16,
           "\x33\xAD\x7F\xC2\x67\x86\x15\x56\x9B\x2B\x09\x83\x6E\x0A\x3A\xB6" },
         { KV5M_DATA, 33,
@@ -320,7 +320,7 @@ struct test {
     },
     {
         ENCTYPE_ARCFOUR_HMAC_EXP,
-        "13 bytes byte", 3,
+        { KV5M_DATA, 13, "13 bytes byte", }, 3,
         { KV5M_DATA, 16,
           "\x39\xF2\x5C\xD4\xF0\xD4\x1B\x2B\x2D\x9D\x30\x0F\xCB\x29\x81\xCB" },
         { KV5M_DATA, 37,
@@ -330,7 +330,7 @@ struct test {
     },
     {
         ENCTYPE_ARCFOUR_HMAC_EXP,
-        "30 bytes bytes bytes bytes byt", 4,
+        { KV5M_DATA, 30, "30 bytes bytes bytes bytes byt", }, 4,
         { KV5M_DATA, 16,
           "\x9F\x72\x55\x42\xD9\xF7\x2A\xA1\xF3\x86\xCB\xE7\x89\x69\x84\xFC" },
         { KV5M_DATA, 54,
@@ -342,7 +342,7 @@ struct test {
 
     {
         ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        "", 0,
+        { KV5M_DATA, 0, "", }, 0,
         { KV5M_DATA, 16,
           "\x5A\x5C\x0F\x0B\xA5\x4F\x38\x28\xB2\x19\x5E\x66\xCA\x24\xA2\x89" },
         { KV5M_DATA, 28,
@@ -351,7 +351,7 @@ struct test {
     },
     {
         ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        "1", 1,
+        { KV5M_DATA, 1, "1", }, 1,
         { KV5M_DATA, 16,
           "\x98\x45\x0E\x3F\x3B\xAA\x13\xF5\xC9\x9B\xEB\x93\x69\x81\xB0\x6F" },
         { KV5M_DATA, 29,
@@ -360,7 +360,7 @@ struct test {
     },
     {
         ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        "9 bytesss", 2,
+        { KV5M_DATA, 9, "9 bytesss", }, 2,
         { KV5M_DATA, 16,
           "\x90\x62\x43\x0C\x8C\xDA\x33\x88\x92\x2E\x6D\x6A\x50\x9F\x5B\x7A" },
         { KV5M_DATA, 37,
@@ -370,7 +370,7 @@ struct test {
     },
     {
         ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        "13 bytes byte", 3,
+        { KV5M_DATA, 13, "13 bytes byte", }, 3,
         { KV5M_DATA, 16,
           "\x03\x3E\xE6\x50\x2C\x54\xFD\x23\xE2\x77\x91\xE9\x87\x98\x38\x27" },
         { KV5M_DATA, 41,
@@ -380,7 +380,7 @@ struct test {
     },
     {
         ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-        "30 bytes bytes bytes bytes byt", 4,
+        { KV5M_DATA, 30, "30 bytes bytes bytes bytes byt", }, 4,
         { KV5M_DATA, 16,
           "\xDC\xEE\xB7\x0B\x3D\xE7\x65\x62\xE6\x89\x22\x6C\x76\x42\x91\x48" },
         { KV5M_DATA, 58,
@@ -392,7 +392,7 @@ struct test {
 
     {
         ENCTYPE_AES256_CTS_HMAC_SHA1_96,
-        "", 0,
+        { KV5M_DATA, 0, "", }, 0,
         { KV5M_DATA, 32,
           "\x17\xF2\x75\xF2\x95\x4F\x2E\xD1\xF9\x0C\x37\x7B\xA7\xF4\xD6\xA3"
           "\x69\xAA\x01\x36\xE0\xBF\x0C\x92\x7A\xD6\x13\x3C\x69\x37\x59\xA9" },
@@ -402,7 +402,7 @@ struct test {
     },
     {
         ENCTYPE_AES256_CTS_HMAC_SHA1_96,
-        "1", 1,
+        { KV5M_DATA, 1, "1", }, 1,
         { KV5M_DATA, 32,
           "\xB9\x47\x7E\x1F\xF0\x32\x9C\x00\x50\xE2\x0C\xE6\xC7\x2D\x2D\xFF"
           "\x27\xE8\xFE\x54\x1A\xB0\x95\x44\x29\xA9\xCB\x5B\x4F\x7B\x1E\x2A" },
@@ -412,7 +412,7 @@ struct test {
     },
     {
         ENCTYPE_AES256_CTS_HMAC_SHA1_96,
-        "9 bytesss", 2,
+        { KV5M_DATA, 9, "9 bytesss", }, 2,
         { KV5M_DATA, 32,
           "\xB1\xAE\x4C\xD8\x46\x2A\xFF\x16\x77\x05\x3C\xC9\x27\x9A\xAC\x30"
           "\xB7\x96\xFB\x81\xCE\x21\x47\x4D\xD3\xDD\xBC\xFE\xA4\xEC\x76\xD7" },
@@ -423,7 +423,7 @@ struct test {
     },
     {
         ENCTYPE_AES256_CTS_HMAC_SHA1_96,
-        "13 bytes byte", 3,
+        { KV5M_DATA, 13, "13 bytes byte", }, 3,
         { KV5M_DATA, 32,
           "\xE5\xA7\x2B\xE9\xB7\x92\x6C\x12\x25\xBA\xFE\xF9\xC1\x87\x2E\x7B"
           "\xA4\xCD\xB2\xB1\x78\x93\xD8\x4A\xBD\x90\xAC\xDD\x87\x64\xD9\x66" },
@@ -434,7 +434,7 @@ struct test {
     },
     {
         ENCTYPE_AES256_CTS_HMAC_SHA1_96,
-        "30 bytes bytes bytes bytes byt", 4,
+        { KV5M_DATA, 30, "30 bytes bytes bytes bytes byt", }, 4,
         { KV5M_DATA, 32,
           "\xF1\xC7\x95\xE9\x24\x8A\x09\x33\x8D\x82\xC3\xF8\xD5\xB5\x67\x04"
           "\x0B\x01\x10\x73\x68\x45\x04\x13\x47\x23\x5B\x14\x04\x23\x13\x98" },
@@ -447,7 +447,7 @@ struct test {
 
     {
         ENCTYPE_CAMELLIA128_CTS_CMAC,
-        "", 0,
+        { KV5M_DATA, 0, "", }, 0,
         { KV5M_DATA, 16,
           "\x1D\xC4\x6A\x8D\x76\x3F\x4F\x93\x74\x2B\xCB\xA3\x38\x75\x76\xC3" },
         { KV5M_DATA, 32,
@@ -456,7 +456,7 @@ struct test {
     },
     {
         ENCTYPE_CAMELLIA128_CTS_CMAC,
-        "1", 1,
+        { KV5M_DATA, 1, "1", }, 1,
         { KV5M_DATA, 16,
           "\x50\x27\xBC\x23\x1D\x0F\x3A\x9D\x23\x33\x3F\x1C\xA6\xFD\xBE\x7C" },
         { KV5M_DATA, 33,
@@ -466,7 +466,7 @@ struct test {
     },
     {
         ENCTYPE_CAMELLIA128_CTS_CMAC,
-        "9 bytesss", 2,
+        { KV5M_DATA, 9, "9 bytesss", }, 2,
         { KV5M_DATA, 16,
           "\xA1\xBB\x61\xE8\x05\xF9\xBA\x6D\xDE\x8F\xDB\xDD\xC0\x5C\xDE\xA0" },
         { KV5M_DATA, 41,
@@ -476,7 +476,7 @@ struct test {
     },
     {
         ENCTYPE_CAMELLIA128_CTS_CMAC,
-        "13 bytes byte", 3,
+        { KV5M_DATA, 13, "13 bytes byte", }, 3,
         { KV5M_DATA, 16,
           "\x2C\xA2\x7A\x5F\xAF\x55\x32\x24\x45\x06\x43\x4E\x1C\xEF\x66\x76" },
         { KV5M_DATA, 45,
@@ -486,7 +486,7 @@ struct test {
     },
     {
         ENCTYPE_CAMELLIA128_CTS_CMAC,
-        "30 bytes bytes bytes bytes byt", 4,
+        { KV5M_DATA, 30, "30 bytes bytes bytes bytes byt", }, 4,
         { KV5M_DATA, 16,
           "\x78\x24\xF8\xC1\x6F\x83\xFF\x35\x4C\x6B\xF7\x51\x5B\x97\x3F\x43" },
         { KV5M_DATA, 62,
@@ -498,7 +498,7 @@ struct test {
 
     {
         ENCTYPE_CAMELLIA256_CTS_CMAC,
-        "", 0,
+        { KV5M_DATA, 0, "", }, 0,
         { KV5M_DATA, 32,
           "\xB6\x1C\x86\xCC\x4E\x5D\x27\x57\x54\x5A\xD4\x23\x39\x9F\xB7\x03"
           "\x1E\xCA\xB9\x13\xCB\xB9\x00\xBD\x7A\x3C\x6D\xD8\xBF\x92\x01\x5B" },
@@ -508,7 +508,7 @@ struct test {
     },
     {
         ENCTYPE_CAMELLIA256_CTS_CMAC,
-        "1", 1,
+        { KV5M_DATA, 1, "1", }, 1,
         { KV5M_DATA, 32,
           "\x1B\x97\xFE\x0A\x19\x0E\x20\x21\xEB\x30\x75\x3E\x1B\x6E\x1E\x77"
           "\xB0\x75\x4B\x1D\x68\x46\x10\x35\x58\x64\x10\x49\x63\x46\x38\x33" },
@@ -519,7 +519,7 @@ struct test {
     },
     {
         ENCTYPE_CAMELLIA256_CTS_CMAC,
-        "9 bytesss", 2,
+        { KV5M_DATA, 9, "9 bytesss", }, 2,
         { KV5M_DATA, 32,
           "\x32\x16\x4C\x5B\x43\x4D\x1D\x15\x38\xE4\xCF\xD9\xBE\x80\x40\xFE"
           "\x8C\x4A\xC7\xAC\xC4\xB9\x3D\x33\x14\xD2\x13\x36\x68\x14\x7A\x05" },
@@ -530,7 +530,7 @@ struct test {
     },
     {
         ENCTYPE_CAMELLIA256_CTS_CMAC,
-        "13 bytes byte", 3,
+        { KV5M_DATA, 13, "13 bytes byte", }, 3,
         { KV5M_DATA, 32,
           "\xB0\x38\xB1\x32\xCD\x8E\x06\x61\x22\x67\xFA\xB7\x17\x00\x66\xD8"
           "\x8A\xEC\xCB\xA0\xB7\x44\xBF\xC6\x0D\xC8\x9B\xCA\x18\x2D\x07\x15" },
@@ -541,7 +541,7 @@ struct test {
     },
     {
         ENCTYPE_CAMELLIA256_CTS_CMAC,
-        "30 bytes bytes bytes bytes byt", 4,
+        { KV5M_DATA, 30, "30 bytes bytes bytes bytes byt", }, 4,
         { KV5M_DATA, 32,
           "\xCC\xFC\xD3\x49\xBF\x4C\x66\x77\xE8\x6E\x4B\x02\xB8\xEA\xB9\x24"
           "\xA5\x46\xAC\x73\x1C\xF9\xBF\x69\x89\xB9\x96\xE7\xD6\xBF\xBB\xA7" },
@@ -550,6 +550,104 @@ struct test {
           "\x8E\x34\x9D\xE6\xFD\x9A\xDA\x0B\xAA\xA0\x48\xD6\x8E\x26\x5F\xEB"
           "\xF3\x4A\xD1\x25\x5A\x34\x49\x99\xAD\x37\x14\x68\x87\xA6\xC6\x84"
           "\x57\x31\xAC\x7F\x46\x37\x6A\x05\x04\xCD\x06\x57\x14\x74" }
+    },
+
+    {
+        ENCTYPE_AES128_CTS_HMAC_SHA256_128,
+        { KV5M_DATA, 0, "", }, 2,
+        { KV5M_DATA, 16,
+          "\x37\x05\xD9\x60\x80\xC1\x77\x28\xA0\xE8\x00\xEA\xB6\xE0\xD2\x3C" },
+        { KV5M_DATA, 32,
+          "\xEF\x85\xFB\x89\x0B\xB8\x47\x2F\x4D\xAB\x20\x39\x4D\xCA\x78\x1D"
+          "\xAD\x87\x7E\xDA\x39\xD5\x0C\x87\x0C\x0D\x5A\x0A\x8E\x48\xC7\x18" }
+    },
+    {
+        ENCTYPE_AES128_CTS_HMAC_SHA256_128,
+        { KV5M_DATA, 6, "\x00\x01\x02\x03\x04\x05", }, 2,
+        { KV5M_DATA, 16,
+          "\x37\x05\xD9\x60\x80\xC1\x77\x28\xA0\xE8\x00\xEA\xB6\xE0\xD2\x3C" },
+        { KV5M_DATA, 38,
+          "\x84\xD7\xF3\x07\x54\xED\x98\x7B\xAB\x0B\xF3\x50\x6B\xEB\x09\xCF"
+          "\xB5\x54\x02\xCE\xF7\xE6\x87\x7C\xE9\x9E\x24\x7E\x52\xD1\x6E\xD4"
+          "\x42\x1D\xFD\xF8\x97\x6C" }
+    },
+    {
+        ENCTYPE_AES128_CTS_HMAC_SHA256_128,
+        { KV5M_DATA, 16,
+          "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F" },
+        2,
+        { KV5M_DATA, 16,
+          "\x37\x05\xD9\x60\x80\xC1\x77\x28\xA0\xE8\x00\xEA\xB6\xE0\xD2\x3C" },
+        { KV5M_DATA, 48,
+          "\x35\x17\xD6\x40\xF5\x0D\xDC\x8A\xD3\x62\x87\x22\xB3\x56\x9D\x2A"
+          "\xE0\x74\x93\xFA\x82\x63\x25\x40\x80\xEA\x65\xC1\x00\x8E\x8F\xC2"
+          "\x95\xFB\x48\x52\xE7\xD8\x3E\x1E\x7C\x48\xC3\x7E\xEB\xE6\xB0\xD3" }
+    },
+    {
+        ENCTYPE_AES128_CTS_HMAC_SHA256_128,
+        { KV5M_DATA, 21,
+          "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
+          "\x10\x11\x12\x13\x14" },
+        2,
+        { KV5M_DATA, 16,
+          "\x37\x05\xD9\x60\x80\xC1\x77\x28\xA0\xE8\x00\xEA\xB6\xE0\xD2\x3C" },
+        { KV5M_DATA, 53,
+          "\x72\x0F\x73\xB1\x8D\x98\x59\xCD\x6C\xCB\x43\x46\x11\x5C\xD3\x36"
+          "\xC7\x0F\x58\xED\xC0\xC4\x43\x7C\x55\x73\x54\x4C\x31\xC8\x13\xBC"
+          "\xE1\xE6\xD0\x72\xC1\x86\xB3\x9A\x41\x3C\x2F\x92\xCA\x9B\x83\x34"
+          "\xA2\x87\xFF\xCB\xFC" }
+    },
+
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA384_192,
+        { KV5M_DATA, 0, "", }, 2,
+        { KV5M_DATA, 32,
+          "\x6D\x40\x4D\x37\xFA\xF7\x9F\x9D\xF0\xD3\x35\x68\xD3\x20\x66\x98"
+          "\x00\xEB\x48\x36\x47\x2E\xA8\xA0\x26\xD1\x6B\x71\x82\x46\x0C\x52" },
+        { KV5M_DATA, 40,
+          "\x41\xF5\x3F\xA5\xBF\xE7\x02\x6D\x91\xFA\xF9\xBE\x95\x91\x95\xA0"
+          "\x58\x70\x72\x73\xA9\x6A\x40\xF0\xA0\x19\x60\x62\x1A\xC6\x12\x74"
+          "\x8B\x9B\xBF\xBE\x7E\xB4\xCE\x3C" }
+    },
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA384_192,
+        { KV5M_DATA, 6, "\x00\x01\x02\x03\x04\x05", }, 2,
+        { KV5M_DATA, 32,
+          "\x6D\x40\x4D\x37\xFA\xF7\x9F\x9D\xF0\xD3\x35\x68\xD3\x20\x66\x98"
+          "\x00\xEB\x48\x36\x47\x2E\xA8\xA0\x26\xD1\x6B\x71\x82\x46\x0C\x52" },
+        { KV5M_DATA, 46,
+          "\x4E\xD7\xB3\x7C\x2B\xCA\xC8\xF7\x4F\x23\xC1\xCF\x07\xE6\x2B\xC7"
+          "\xB7\x5F\xB3\xF6\x37\xB9\xF5\x59\xC7\xF6\x64\xF6\x9E\xAB\x7B\x60"
+          "\x92\x23\x75\x26\xEA\x0D\x1F\x61\xCB\x20\xD6\x9D\x10\xF2" }
+    },
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA384_192,
+        { KV5M_DATA, 16,
+          "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F" },
+        2,
+        { KV5M_DATA, 32,
+          "\x6D\x40\x4D\x37\xFA\xF7\x9F\x9D\xF0\xD3\x35\x68\xD3\x20\x66\x98"
+          "\x00\xEB\x48\x36\x47\x2E\xA8\xA0\x26\xD1\x6B\x71\x82\x46\x0C\x52" },
+        { KV5M_DATA, 56,
+          "\xBC\x47\xFF\xEC\x79\x98\xEB\x91\xE8\x11\x5C\xF8\xD1\x9D\xAC\x4B"
+          "\xBB\xE2\xE1\x63\xE8\x7D\xD3\x7F\x49\xBE\xCA\x92\x02\x77\x64\xF6"
+          "\x8C\xF5\x1F\x14\xD7\x98\xC2\x27\x3F\x35\xDF\x57\x4D\x1F\x93\x2E"
+          "\x40\xC4\xFF\x25\x5B\x36\xA2\x66" }
+    },
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA384_192,
+        { KV5M_DATA, 21,
+          "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
+          "\x10\x11\x12\x13\x14" },
+        2,
+        { KV5M_DATA, 32,
+          "\x6D\x40\x4D\x37\xFA\xF7\x9F\x9D\xF0\xD3\x35\x68\xD3\x20\x66\x98"
+          "\x00\xEB\x48\x36\x47\x2E\xA8\xA0\x26\xD1\x6B\x71\x82\x46\x0C\x52" },
+        { KV5M_DATA, 61,
+          "\x40\x01\x3E\x2D\xF5\x8E\x87\x51\x95\x7D\x28\x78\xBC\xD2\xD6\xFE"
+          "\x10\x1C\xCF\xD5\x56\xCB\x1E\xAE\x79\xDB\x3C\x3E\xE8\x64\x29\xF2"
+          "\xB2\xA6\x02\xAC\x86\xFE\xF6\xEC\xB6\x47\xD6\x29\x5F\xAE\x07\x7A"
+          "\x1F\xEB\x51\x75\x08\xD2\xC1\x6B\x41\x92\xE0\x1F\x62" }
     },
 };
 
@@ -584,7 +682,9 @@ enctypes[] = {
     ENCTYPE_AES128_CTS_HMAC_SHA1_96,
     ENCTYPE_AES256_CTS_HMAC_SHA1_96,
     ENCTYPE_CAMELLIA128_CTS_CMAC,
-    ENCTYPE_CAMELLIA256_CTS_CMAC
+    ENCTYPE_CAMELLIA256_CTS_CMAC,
+    ENCTYPE_AES128_CTS_HMAC_SHA256_128,
+    ENCTYPE_AES256_CTS_HMAC_SHA384_192
 };
 
 static char *plaintexts[] = {
@@ -663,9 +763,9 @@ main(int argc, char **argv)
             printf("decrypt test %d failed to decrypt\n", (int)i);
             return 1;
         }
-        assert(plain.length >= strlen(test->plaintext));
-        if (memcmp(plain.data, test->plaintext,
-                   strlen(test->plaintext)) != 0) {
+        assert(plain.length >= test->plaintext.length);
+        if (memcmp(plain.data, test->plaintext.data,
+                   test->plaintext.length) != 0) {
             printf("decrypt test %d produced wrong result\n", (int)i);
             return 1;
         }

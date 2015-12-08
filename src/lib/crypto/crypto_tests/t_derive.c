@@ -200,6 +200,70 @@ struct test {
           "\xFA\x62\x4F\xA0\xE5\x23\x99\x3F\xA3\x88\xAE\xFD\xC6\x7E\x67\xEB"
           "\xCD\x8C\x08\xE8\xA0\x24\x6B\x1D\x73\xB0\xD1\xDD\x9F\xC5\x82\xB0" }
     },
+
+    /* Kc, Ke, Ki for an aes128-sha2 key. */
+    {
+        ENCTYPE_AES128_CTS_HMAC_SHA256_128,
+        { KV5M_DATA, 16,
+          "\x37\x05\xD9\x60\x80\xC1\x77\x28\xA0\xE8\x00\xEA\xB6\xE0\xD2\x3C" },
+        { KV5M_DATA, 5, "\0\0\0\2\x99" },
+        DERIVE_SP800_108_HMAC,
+        { KV5M_DATA, 16,
+          "\xB3\x1A\x01\x8A\x48\xF5\x47\x76\xF4\x03\xE9\xA3\x96\x32\x5D\xC3" }
+    },
+    {
+        ENCTYPE_AES128_CTS_HMAC_SHA256_128,
+        { KV5M_DATA, 16,
+          "\x37\x05\xD9\x60\x80\xC1\x77\x28\xA0\xE8\x00\xEA\xB6\xE0\xD2\x3C" },
+        { KV5M_DATA, 5, "\0\0\0\2\xAA" },
+        DERIVE_SP800_108_HMAC,
+        { KV5M_DATA, 16,
+          "\x9B\x19\x7D\xD1\xE8\xC5\x60\x9D\x6E\x67\xC3\xE3\x7C\x62\xC7\x2E" }
+    },
+    {
+        ENCTYPE_AES128_CTS_HMAC_SHA256_128,
+        { KV5M_DATA, 16,
+          "\x37\x05\xD9\x60\x80\xC1\x77\x28\xA0\xE8\x00\xEA\xB6\xE0\xD2\x3C" },
+        { KV5M_DATA, 5, "\0\0\0\2\x55" },
+        DERIVE_SP800_108_HMAC,
+        { KV5M_DATA, 16,
+          "\x9F\xDA\x0E\x56\xAB\x2D\x85\xE1\x56\x9A\x68\x86\x96\xC2\x6A\x6C" }
+    },
+
+    /* Kc, Ke, Ki for an aes256-sha2 key. */
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA384_192,
+        { KV5M_DATA, 32,
+          "\x6D\x40\x4D\x37\xFA\xF7\x9F\x9D\xF0\xD3\x35\x68\xD3\x20\x66\x98"
+          "\x00\xEB\x48\x36\x47\x2E\xA8\xA0\x26\xD1\x6B\x71\x82\x46\x0C\x52" },
+        { KV5M_DATA, 5, "\0\0\0\2\x99" },
+        DERIVE_SP800_108_HMAC,
+        { KV5M_DATA, 24,
+          "\xEF\x57\x18\xBE\x86\xCC\x84\x96\x3D\x8B\xBB\x50\x31\xE9\xF5\xC4"
+          "\xBA\x41\xF2\x8F\xAF\x69\xE7\x3D" }
+    },
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA384_192,
+        { KV5M_DATA, 32,
+          "\x6D\x40\x4D\x37\xFA\xF7\x9F\x9D\xF0\xD3\x35\x68\xD3\x20\x66\x98"
+          "\x00\xEB\x48\x36\x47\x2E\xA8\xA0\x26\xD1\x6B\x71\x82\x46\x0C\x52" },
+        { KV5M_DATA, 5, "\0\0\0\2\xAA" },
+        DERIVE_SP800_108_HMAC,
+        { KV5M_DATA, 32,
+          "\x56\xAB\x22\xBE\xE6\x3D\x82\xD7\xBC\x52\x27\xF6\x77\x3F\x8E\xA7"
+          "\xA5\xEB\x1C\x82\x51\x60\xC3\x83\x12\x98\x0C\x44\x2E\x5C\x7E\x49" }
+    },
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA384_192,
+        { KV5M_DATA, 32,
+          "\x6D\x40\x4D\x37\xFA\xF7\x9F\x9D\xF0\xD3\x35\x68\xD3\x20\x66\x98"
+          "\x00\xEB\x48\x36\x47\x2E\xA8\xA0\x26\xD1\x6B\x71\x82\x46\x0C\x52" },
+        { KV5M_DATA, 5, "\0\0\0\2\x55" },
+        DERIVE_SP800_108_HMAC,
+        { KV5M_DATA, 24,
+          "\x69\xB1\x65\x14\xE3\xCD\x8E\x56\xB8\x20\x10\xD5\xC7\x30\x12\xB6"
+          "\x22\xC4\xD0\x0F\xFC\x23\xED\x1F" }
+    },
 };
 
 static void
@@ -226,13 +290,25 @@ static const struct krb5_enc_provider *
 get_enc_provider(krb5_enctype enctype)
 {
     switch (enctype) {
-    case ENCTYPE_DES3_CBC_SHA1:           return &krb5int_enc_des3;
-    case ENCTYPE_AES128_CTS_HMAC_SHA1_96: return &krb5int_enc_aes128;
-    case ENCTYPE_AES256_CTS_HMAC_SHA1_96: return &krb5int_enc_aes256;
-    case ENCTYPE_CAMELLIA128_CTS_CMAC:    return &krb5int_enc_camellia128;
-    case ENCTYPE_CAMELLIA256_CTS_CMAC:    return &krb5int_enc_camellia256;
+    case ENCTYPE_DES3_CBC_SHA1:              return &krb5int_enc_des3;
+    case ENCTYPE_AES128_CTS_HMAC_SHA1_96:    return &krb5int_enc_aes128;
+    case ENCTYPE_AES256_CTS_HMAC_SHA1_96:    return &krb5int_enc_aes256;
+    case ENCTYPE_CAMELLIA128_CTS_CMAC:       return &krb5int_enc_camellia128;
+    case ENCTYPE_CAMELLIA256_CTS_CMAC:       return &krb5int_enc_camellia256;
+    case ENCTYPE_AES128_CTS_HMAC_SHA256_128: return &krb5int_enc_aes128;
+    case ENCTYPE_AES256_CTS_HMAC_SHA384_192: return &krb5int_enc_aes256;
     }
     abort();
+}
+
+static const struct krb5_hash_provider *
+get_hash_provider(krb5_enctype enctype)
+{
+    switch (enctype) {
+    case ENCTYPE_AES128_CTS_HMAC_SHA256_128: return &krb5int_hash_sha256;
+    case ENCTYPE_AES256_CTS_HMAC_SHA384_192: return &krb5int_hash_sha384;
+    }
+    return NULL;
 }
 
 int
@@ -243,8 +319,10 @@ main(int argc, char **argv)
     size_t i;
     struct test *test;
     krb5_keyblock kb;
-    krb5_key inkey, outkey;
+    krb5_key inkey = NULL, key = NULL;
+    krb5_data rnd = empty_data(), outcmp;
     const struct krb5_enc_provider *enc;
+    const struct krb5_hash_provider *hash;
     krb5_boolean verbose = FALSE;
     int status = 0;
 
@@ -259,9 +337,20 @@ main(int argc, char **argv)
         ret = krb5_k_create_key(context, &kb, &inkey);
         assert(!ret);
         enc = get_enc_provider(test->enctype);
-        ret = krb5int_derive_key(enc, NULL, inkey, &outkey, &test->constant,
-                                 test->alg);
-        assert(!ret);
+        hash = get_hash_provider(test->enctype);
+        if (test->expected_key.length == enc->keylength) {
+            ret = krb5int_derive_key(enc, hash, inkey, &key, &test->constant,
+                                     test->alg);
+            assert(!ret);
+            outcmp = make_data(key->keyblock.contents, key->keyblock.length);
+        } else {
+            ret = alloc_data(&rnd, test->expected_key.length);
+            assert(!ret);
+            ret = krb5int_derive_random(enc, hash, inkey, &rnd,
+                                        &test->constant, test->alg);
+            assert(!ret);
+            outcmp = rnd;
+        }
         if (verbose) {
             char buf[64];
             krb5_enctype_to_name(test->enctype, FALSE, buf, sizeof(buf));
@@ -270,19 +359,21 @@ main(int argc, char **argv)
             printhex("Input key: ", inkey->keyblock.contents,
                      inkey->keyblock.length);
             printhex("Constant: ", test->constant.data, test->constant.length);
-            printhex("Output key: ", outkey->keyblock.contents,
-                     outkey->keyblock.length);
+            printhex("Output: ", outcmp.data, outcmp.length);
         }
-        assert(outkey->keyblock.length == test->expected_key.length);
-        if (memcmp(outkey->keyblock.contents, test->expected_key.data,
-                   outkey->keyblock.length) != 0) {
+        assert(outcmp.length == test->expected_key.length);
+        if (memcmp(outcmp.data, test->expected_key.data, outcmp.length) != 0) {
             printf("derive test %d failed\n", (int)i);
             status = 1;
             if (!verbose)
                 break;
         }
+
         krb5_k_free_key(context, inkey);
-        krb5_k_free_key(context, outkey);
+        krb5_k_free_key(context, key);
+        zapfree(rnd.data, rnd.length);
+        inkey = key = NULL;
+        rnd = empty_data();
     }
     return status;
 }

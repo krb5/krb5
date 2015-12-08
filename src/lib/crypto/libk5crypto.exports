@@ -67,6 +67,8 @@ krb5int_c_free_keyblock
 krb5int_c_init_keyblock
 krb5int_hash_md4
 krb5int_hash_md5
+krb5int_hash_sha256
+krb5int_hash_sha384
 krb5int_enc_arcfour
 krb5int_hmac
 krb5_k_create_key
@@ -95,6 +97,7 @@ krb5int_enc_aes256
 krb5int_enc_camellia128
 krb5int_enc_camellia256
 krb5int_derive_key
+krb5int_derive_random
 krb5int_aes_enc_blk
 krb5int_aes_enc_key
 k5_sha256
