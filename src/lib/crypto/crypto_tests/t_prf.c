@@ -1,101 +1,127 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/crypto_tests/t_prf.c */
+/* lib/crypto/crypto_tests/t_prf.c - PRF test cases */
 /*
- * Copyright (C) 2004 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2015 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- */
-
-/*
- * This file contains tests for the PRF code in Kerberos.  IT reads an
- * input file, and writes an output file.  It is assumed that the
- * output file will be diffed against expected output to see whether
- * regression tests pass.  The input file is a very primitive format.
- * It includes an enctype and password to be string2keyed followed by
- * a number of bytes of input length, followed by that many bytes of
- * input.  The program outputs krb5_c_prf of that input and key as a
- * hex string.
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "k5-int.h"
-#include <assert.h>
 
-int main () {
+struct test {
+    krb5_enctype enctype;
+    krb5_data keybits;
+    krb5_data prf_input;
+    krb5_data expected;
+} tests[] = {
+    {
+        ENCTYPE_AES128_CTS_HMAC_SHA1_96,
+        { KV5M_DATA, 16,
+          "\xAE\x27\x2E\x7C\xDE\xC8\x6A\xC5\x13\x8C\xDB\x19\x6D\x8E\x29\x7D" },
+        { KV5M_DATA, 2, "\x01\x61" },
+        { KV5M_DATA, 16,
+          "\x77\xB3\x9A\x37\xA8\x68\x92\x0F\x2A\x51\xF9\xDD\x15\x0C\x57\x17" }
+    },
+    {
+        ENCTYPE_AES128_CTS_HMAC_SHA1_96,
+        { KV5M_DATA, 16,
+          "\x67\xAB\x1C\xFE\xF3\x5E\x4C\x27\xFF\xDE\xAC\x60\x38\x5A\x3E\x9C" },
+        { KV5M_DATA, 2, "\x01\x62" },
+        { KV5M_DATA, 16,
+          "\xE0\x6C\x0D\xD3\x1F\xF0\x20\x91\x99\x4F\x2E\xF5\x17\x8B\xFE\x3D" }
+    },
+
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA1_96,
+        { KV5M_DATA, 32,
+          "\xC0\x1F\x15\x72\x11\xF7\xB7\x7E\xAA\xF4\x57\xC3\xE1\x56\x69\x01"
+          "\x27\xEE\x12\x7D\x81\x0B\xA6\x39\x2E\x97\xBA\xA2\x43\xEB\x06\x16" },
+        { KV5M_DATA, 2, "\x01\x61" },
+        { KV5M_DATA, 16,
+          "\xB2\x62\x8C\x78\x8E\x2E\x9C\x4A\x9B\xB4\x64\x46\x78\xC2\x9F\x2F" }
+    },
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA1_96,
+        { KV5M_DATA, 32,
+          "\xC0\x1F\x15\x72\x11\xF7\xB7\x7E\xAA\xF4\x57\xC3\xE1\x56\x69\x01"
+          "\x27\xEE\x12\x7D\x81\x0B\xA6\x39\x2E\x97\xBA\xA2\x43\xEB\x06\x16" },
+        { KV5M_DATA, 2, "\x02\x61" },
+        { KV5M_DATA, 16,
+          "\xB4\x06\x37\x33\x50\xCE\xE8\xA6\x12\x6F\x4A\x9B\x65\xA0\xCD\x21" }
+    },
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA1_96,
+        { KV5M_DATA, 32,
+          "\x9D\x52\x0D\x2D\x98\x0A\xA7\xCB\x6B\x69\x36\x82\xB6\x2D\xA2\x58"
+          "\xB3\x33\x86\x79\x51\x64\x2C\xE6\x47\xAE\x62\xB1\xE5\xE0\xB5\xE9" },
+        { KV5M_DATA, 2, "\x01\x62" },
+        { KV5M_DATA, 16,
+          "\xFF\x0E\x28\x9E\xA7\x56\xC0\x55\x9A\x0E\x91\x18\x56\x96\x1A\x49" }
+    },
+    {
+        ENCTYPE_AES256_CTS_HMAC_SHA1_96,
+        { KV5M_DATA, 32,
+          "\x9D\x52\x0D\x2D\x98\x0A\xA7\xCB\x6B\x69\x36\x82\xB6\x2D\xA2\x58"
+          "\xB3\x33\x86\x79\x51\x64\x2C\xE6\x47\xAE\x62\xB1\xE5\xE0\xB5\xE9" },
+        { KV5M_DATA, 2, "\x02\x62" },
+        { KV5M_DATA, 16,
+          "\x0D\x67\x4D\xD0\xF9\xA6\x80\x65\x25\xA4\xD9\x2E\x82\x8B\xD1\x5A" }
+    },
+};
+
+int
+main()
+{
     krb5_error_code ret;
-    krb5_data input, output;
-    krb5_keyblock *key = NULL;
-    unsigned int in_length;
-    unsigned int i;
-    size_t prfsz;
+    krb5_data output;
+    krb5_keyblock kb;
+    size_t i, prfsz;
+    const struct test *test;
 
-    while (1) {
-        krb5_enctype enctype;
-        char s[1025];
+    for (i = 0; i < sizeof(tests) / sizeof(*tests); i++) {
+        test = &tests[i];
+        kb.magic = KV5M_KEYBLOCK;
+        kb.enctype = test->enctype;
+        kb.length = test->keybits.length;
+        kb.contents = (uint8_t *)test->keybits.data;
 
-        if (scanf( "%d", &enctype) == EOF)
-            break;
-        if (scanf("%1024s", &s[0]) == EOF)
-            break;
-        ret = krb5_init_keyblock(0, enctype, 0, &key);
+        ret = krb5_c_prf_length(NULL, test->enctype, &prfsz);
         assert(!ret);
-        input.data = &s[0];
-        input.length = strlen(s);
-        ret = krb5_c_string_to_key (0, enctype, &input, &input, key);
+        ret = alloc_data(&output, prfsz);
+        assert(!ret);
+        ret = krb5_c_prf(NULL, &kb, &tests[i].prf_input, &output);
         assert(!ret);
 
-        if (scanf("%u", &in_length) == EOF)
-            break;
-
-        if (in_length ) {
-            unsigned int lc;
-            ret = alloc_data(&input, in_length);
-            assert(!ret);
-            for (lc = in_length; lc > 0; lc--) {
-                scanf ("%2x",  &i);
-                input.data[in_length-lc] = (unsigned) (i&0xff);
-            }
-            ret = krb5_c_prf_length(0, enctype, &prfsz);
-            assert(!ret);
-            ret = alloc_data(&output, prfsz);
-            assert(!ret);
-            ret = krb5_c_prf(0, key, &input, &output);
-            assert(!ret);
-
-            free (input.data);
-            input.data = NULL;
-        } else {
-            prfsz = 0;
+        if (!data_eq(output, tests[i].expected)) {
+            printf("Test %d failed\n", (int)i);
+            exit(1);
         }
-
-        for (; prfsz > 0; prfsz--) {
-            printf ("%02x",
-                    (unsigned int) ((unsigned char ) output.data[output.length-prfsz]));
-        }
-        printf ("\n");
-
-        free (output.data);
-        output.data = NULL;
-        krb5_free_keyblock(0, key);
-        key = NULL;
+        free(output.data);
     }
 
-    return (0);
+    return 0;
 }
