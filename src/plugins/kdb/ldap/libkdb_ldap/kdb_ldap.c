@@ -132,7 +132,7 @@ has_rootdse_ava(krb5_context context, const char *server_name,
     LDAPMessage *msg, *res = NULL;
     struct berval cred;
 
-    attrs[0] = attribute;
+    attrs[0] = (char *)attribute;
     attrs[1] = NULL;
 
     st = ldap_initialize(&ld, server_name);

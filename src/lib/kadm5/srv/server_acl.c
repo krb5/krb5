@@ -69,8 +69,8 @@ static const aop_t acl_op_table[] = {
 };
 
 typedef struct _wildstate {
-    int         nwild;
-    krb5_data   *backref[9];
+    int nwild;
+    const krb5_data *backref[9];
 } wildstate_t;
 
 static aent_t   *acl_list_head = (aent_t *) NULL;
@@ -548,10 +548,8 @@ kadm5int_acl_load_acl_file()
  * Wildcarding is only supported for a whole component.
  */
 static krb5_boolean
-kadm5int_acl_match_data(e1, e2, targetflag, ws)
-    krb5_data   *e1, *e2;
-    int         targetflag;
-    wildstate_t *ws;
+kadm5int_acl_match_data(const krb5_data *e1, const krb5_data *e2,
+                        int targetflag, wildstate_t *ws)
 {
     krb5_boolean        retval;
 
@@ -594,10 +592,8 @@ kadm5int_acl_match_data(e1, e2, targetflag, ws)
  * kadm5int_acl_find_entry()    - Find a matching entry.
  */
 static aent_t *
-kadm5int_acl_find_entry(kcontext, principal, dest_princ)
-    krb5_context        kcontext;
-    krb5_principal      principal;
-    krb5_principal      dest_princ;
+kadm5int_acl_find_entry(krb5_context kcontext, krb5_const_principal principal,
+                        krb5_const_principal dest_princ)
 {
     aent_t              *entry;
     krb5_error_code     kret;
