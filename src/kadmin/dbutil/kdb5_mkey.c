@@ -178,7 +178,7 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
                                            mkey_aux_data_head))) {
         goto clean_n_exit;
     }
-    master_entry->mask |= KADM5_KEY_DATA;
+    master_entry->mask |= KADM5_KEY_DATA | KADM5_TL_DATA;
 
 clean_n_exit:
     krb5_dbe_free_mkey_aux_list(context, mkey_aux_data_head);
@@ -1366,7 +1366,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
         goto cleanup_return;
     }
 
-    master_entry->mask |= KADM5_KEY_DATA;
+    master_entry->mask |= KADM5_KEY_DATA | KADM5_TL_DATA;
 
     if ((retval = krb5_db_put_principal(util_context, master_entry))) {
         (void) krb5_db_fini(util_context);
