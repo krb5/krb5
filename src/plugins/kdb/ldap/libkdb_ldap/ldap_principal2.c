@@ -684,8 +684,8 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                 if (st == KRB5_KDB_NOENTRY || st == KRB5_KDB_CONSTRAINT_VIOLATION) {
                     int ost = st;
                     st = EINVAL;
-                    k5_prependmsg(context, ost, st, _("'%s' not found"),
-                                  xargs.containerdn);
+                    k5_wrapmsg(context, ost, st, _("'%s' not found"),
+                               xargs.containerdn);
                 }
                 goto cleanup;
             }
