@@ -124,20 +124,22 @@ Enctype compatibility
 
 See :ref:`Encryption_types` for additional information about enctypes.
 
-======================= ===== ======== =======
-enctype                 weak? krb5     Windows
-======================= ===== ======== =======
-des-cbc-crc             weak  all      >=2000
-des-cbc-md4             weak  all      ?
-des-cbc-md5             weak  all      >=2000
-des3-cbc-sha1                 >=1.1    none
-arcfour-hmac                  >=1.3    >=2000
-arcfour-hmac-exp        weak  >=1.3    >=2000
-aes128-cts-hmac-sha1-96       >=1.3    >=Vista
-aes256-cts-hmac-sha1-96       >=1.3    >=Vista
-camellia128-cts-cmac          >=1.9    none
-camellia256-cts-cmac          >=1.9    none
-======================= ===== ======== =======
+========================== ===== ======== =======
+enctype                    weak? krb5     Windows
+========================== ===== ======== =======
+des-cbc-crc                weak  all      >=2000
+des-cbc-md4                weak  all      ?
+des-cbc-md5                weak  all      >=2000
+des3-cbc-sha1                    >=1.1    none
+arcfour-hmac                     >=1.3    >=2000
+arcfour-hmac-exp           weak  >=1.3    >=2000
+aes128-cts-hmac-sha1-96          >=1.3    >=Vista
+aes256-cts-hmac-sha1-96          >=1.3    >=Vista
+aes128-cts-hmac-sha256-128       >=1.15   none
+aes256-cts-hmac-sha384-192       >=1.15   none
+camellia128-cts-cmac             >=1.9    none
+camellia256-cts-cmac             >=1.9    none
+========================== ===== ======== =======
 
 krb5 releases 1.8 and later disable the single-DES enctypes by
 default.  Microsoft Windows releases Windows 7 and later disable
