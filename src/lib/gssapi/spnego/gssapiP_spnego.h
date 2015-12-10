@@ -105,6 +105,7 @@ typedef struct {
 	int nego_done;
 	int initiate;
 	int opened;
+	int imported; /* Indicates need to release OIDs taken from token */
 	OM_uint32 ctx_flags;
 	gss_name_t internal_name;
 	gss_OID actual_mech;
