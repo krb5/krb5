@@ -5,9 +5,9 @@ LIBBASE=hostrealm_test
 LIBMAJOR=0
 LIBMINOR=0
 RELDIR=../plugins/hostrealm/test
-# Depends on libkrb5
-SHLIB_EXPDEPS= $(KRB5_DEPLIB)
-SHLIB_EXPLIBS= $(KRB5_LIB)
+# Depends on libkrb5 and possibly libkrb5support
+SHLIB_EXPDEPS= $(KRB5_BASE_DEPLIBS)
+SHLIB_EXPLIBS= $(KRB5_BASE_LIBS)
 
 STLIBOBJS=main.o
 
