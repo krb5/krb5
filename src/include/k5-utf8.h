@@ -68,37 +68,10 @@
 #ifndef K5_UTF8_H
 #define K5_UTF8_H
 
-#include "autoconf.h"
+#include "k5-platform.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-
-#if INT_MAX == 0x7fff
-typedef unsigned int    krb5_ucs2;
-#elif SHRT_MAX == 0x7fff
-typedef unsigned short  krb5_ucs2;
-#else
-#error undefined 16 bit type
-#endif
-
-#if INT_MAX == 0x7fffffffL
-typedef int     krb5_ucs4;
-#elif LONG_MAX == 0x7fffffffL
-typedef long    krb5_ucs4;
-#elif SHRT_MAX == 0x7fffffffL
-typedef short   krb5_ucs4;
-#else
-#error: undefined 32 bit type
-#endif
+typedef uint16_t krb5_ucs2;
+typedef uint32_t krb5_ucs4;
 
 #define KRB5_MAX_UTF8_LEN   (sizeof(krb5_ucs2) * 3/2)
 
