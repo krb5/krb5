@@ -28,8 +28,7 @@ krb5int_mk_chpw_req(krb5_context context,
                                       KRB5_AUTH_CONTEXT_DO_SEQUENCE)))
         goto cleanup;
 
-    clearpw.length = strlen(passwd);
-    clearpw.data = passwd;
+    clearpw = string2data((char *)passwd);
 
     if ((ret = krb5_mk_priv(context, auth_context,
                             &clearpw, &cipherpw, &replay)))
@@ -302,8 +301,7 @@ krb5int_mk_setpw_req(krb5_context context,
         return(ret);
 
     req.target = targprinc;
-    req.password.data = passwd;
-    req.password.length = strlen(passwd);
+    req.password = string2data((char *)passwd);
     ret = encode_krb5_setpw_req(&req, &encoded_setpw);
     if (ret) {
         return ret;

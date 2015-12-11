@@ -299,7 +299,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
     krb5_keyblock       * master_key;
     krb5_key_salt_tuple * ks_tuple;
     int                   ks_tuple_count;
-    char                * passwd;
+    const char          * passwd;
     krb5_db_entry       * db_entry;
     int                   kvno;
 {
@@ -383,8 +383,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
             return(KRB5_KDB_BAD_SALTTYPE);
         }
 
-        pwd.data = passwd;
-        pwd.length = strlen(passwd);
+        pwd = string2data((char *)passwd);
 
         retval = krb5_c_string_to_key_with_params(context,
                                                   ks_tuple[i].ks_enctype,
