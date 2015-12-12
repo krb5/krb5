@@ -71,9 +71,10 @@ path.so path.po $(OUTPRE)path.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 base64.so base64.po $(OUTPRE)base64.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-base64.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-thread.h base64.c
-json.so json.po $(OUTPRE)json.$(OBJEXT): $(top_srcdir)/include/k5-base64.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-json.h \
-  json.c
+json.so json.po $(OUTPRE)json.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(top_srcdir)/include/k5-base64.h $(top_srcdir)/include/k5-buf.h \
+  $(top_srcdir)/include/k5-json.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-thread.h json.c
 bcmp.so bcmp.po $(OUTPRE)bcmp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   bcmp.c
