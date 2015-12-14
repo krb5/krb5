@@ -74,6 +74,52 @@ variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
 
+Major changes in 1.12.5 (2015-12-16)
+------------------------------------
+
+This is a bugfix release.  The krb5-1.12 release series has reached
+the end of its maintenance period, and krb5-1.12.5 is the last planned
+release in the krb5-1.12 series.  For new deployments, installers
+should prefer the krb5-1.14 release series or later.
+
+* Fix memory aliasing issues in SPNEGO and IAKERB mechanisms that
+  could cause server crashes. [CVE-2015-2695] [CVE-2015-2696]
+  [CVE-2015-2698]
+
+* Fix build_principal memory bug that could cause a KDC
+  crash. [CVE-2015-2697]
+
+* Allow an iprop slave to receive full resyncs from KDCs running
+  krb5-1.10 or earlier.
+
+krb5-1.12.5 changes by ticket ID
+--------------------------------
+
+8302    Document multi-component profile paths
+8303    Tolerate null oid pointer in gss_release_oid()
+8304    Fix leak in gss_acquire_cred_with_password
+8305    Fix uncommon null dereference in PKINIT client
+8306    Fix uncommon leak in krb5_init_creds_step()
+8307    Do not allow stream socket retries in libkrad
+8308    Fix gss_inquire_name() name_is_MN result
+8310    Check for null name_type in gss_display_name_ext
+8311    Fix error handling in gss_export_sec_context()
+8312    Fix KDC client referrals
+8313    SPNEGO and IAKERB context aliasing bugs [CVE-2015-2695][CVE-2015-2696]
+8314    Fix mechglue gss_acquire_cred_impersonate_name
+8315    Fix build_principal memory bug [CVE-2015-2697]
+8316    Fix IAKERB context export/import [CVE-2015-2698]
+8317    Fix compatibility with pre-1.11 iprop dump files
+8318    Remove ksu -D flag documentation
+8319    Untabify kerberos.schema and kerberos.ldif
+8320    Fix error mappings for IOV MIC mechglue funcs
+8321    Fix minor utf8-to-ucs2s read overrun bug
+8322    Define error status GSS_S_BAD_MIC
+8323    Fix typo in GSS_S_UNAUTHORIZED error message
+8324    Fix gss_inquire_names_for_mech() on MS krb5 mech
+8325    Check output params on GSS OID set functions
+
+
 Major changes in 1.12.4 (2015-05-29)
 ------------------------------------
 
@@ -553,12 +599,14 @@ reports, suggestions, and valuable resources:
     David Bantz
     Alex Baule
     David Benjamin
+    Thomas Bernard
     Adam Bernstein
     Arlene Berry
     Jeff Blaine
     Radoslav Bodo
     Sumit Bose
     Emmanuel Bouillon
+    Philip Brown
     Michael Calmer
     Andrea Campi
     Julien Chaffraix
@@ -571,6 +619,7 @@ reports, suggestions, and valuable resources:
     Kevin Coffman
     Simon Cooper
     Sylvain Cortes
+    Ian Crowther
     Arran Cudbard-Bell
     Jeff D'Angelo
     Nalin Dahyabhai
@@ -592,6 +641,8 @@ reports, suggestions, and valuable resources:
     Ronni Feldt
     Bill Fellows
     JC Ferguson
+    Remi Ferrand
+    Paul Fertser
     William Fiveash
     Ákos Frohner
     Sebastian Galiano
@@ -660,6 +711,7 @@ reports, suggestions, and valuable resources:
     Mark Phalan
     Brett Randall
     Jonathan Reams
+    Jonathan Reed
     Robert Relyea
     Martin Rex
     Jason Rogers
@@ -694,6 +746,7 @@ reports, suggestions, and valuable resources:
     Ross Wilper
     Augustin Wolf
     David Woodhouse
+    Tsu-Phong Wu
     Xu Qiang
     Neng Xue
     Nickolai Zeldovich

@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "K5LOGIN" "5" " " "1.12.4" "MIT Kerberos"
+.TH "K5LOGIN" "5" " " "1.12.5" "MIT Kerberos"
 .SH NAME
 k5login \- Kerberos V5 acl file for host access
 .
