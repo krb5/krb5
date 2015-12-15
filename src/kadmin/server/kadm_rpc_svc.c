@@ -58,6 +58,7 @@ void kadm_1(rqstp, transp)
 	  chpass3_arg chpass_principal3_2_arg;
 	  chrand3_arg chrand_principal3_2_arg;
 	  setkey3_arg setkey_principal3_2_arg;
+	  setkey4_arg setkey_principal4_2_arg;
      } argument;
      char *result;
      bool_t (*xdr_argument)(), (*xdr_result)();
@@ -220,6 +221,12 @@ void kadm_1(rqstp, transp)
 	  xdr_argument = xdr_sstring_arg;
 	  xdr_result = xdr_generic_ret;
 	  local = (char *(*)()) set_string_2_svc;
+	  break;
+
+     case SETKEY_PRINCIPAL4:
+	  xdr_argument = xdr_setkey4_arg;
+	  xdr_result = xdr_generic_ret;
+	  local = (char *(*)()) setkey_principal4_2_svc;
 	  break;
 
      default:

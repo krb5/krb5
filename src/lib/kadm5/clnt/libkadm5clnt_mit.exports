@@ -41,6 +41,7 @@ kadm5_rename_principal
 kadm5_set_string
 kadm5_setkey_principal
 kadm5_setkey_principal_3
+kadm5_setkey_principal_4
 kadm5_setv4key_principal
 kadm5_unlock
 krb5_aprof_finish
@@ -81,6 +82,7 @@ xdr_gprinc_arg
 xdr_gprinc_ret
 xdr_gprincs_arg
 xdr_gprincs_ret
+xdr_kadm5_key_data
 xdr_kadm5_policy_ent_rec
 xdr_kadm5_principal_ent_rec
 xdr_kadm5_ret_t
@@ -105,6 +107,7 @@ xdr_nullstring
 xdr_nulltype
 xdr_rprinc_arg
 xdr_setkey3_arg
+xdr_setkey4_arg
 xdr_setkey_arg
 xdr_setv4key_arg
 xdr_ui_4
