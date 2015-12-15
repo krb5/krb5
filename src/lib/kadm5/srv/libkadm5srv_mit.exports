@@ -48,6 +48,7 @@ kadm5_rename_principal
 kadm5_set_string
 kadm5_setkey_principal
 kadm5_setkey_principal_3
+kadm5_setkey_principal_4
 kadm5_setv4key_principal
 kadm5_unlock
 kdb_delete_entry
@@ -131,6 +132,7 @@ xdr_osa_pw_hist_ent
 xdr_purgekeys_arg
 xdr_rprinc_arg
 xdr_setkey3_arg
+xdr_setkey4_arg
 xdr_setkey_arg
 xdr_setv4key_arg
 xdr_sstring_arg

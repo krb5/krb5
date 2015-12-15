@@ -192,6 +192,21 @@ setkey_principal3_2(setkey3_arg *argp, CLIENT *clnt)
 	return (&clnt_res);
 }
 
+generic_ret *
+setkey_principal4_2(setkey4_arg *argp, CLIENT *clnt)
+{
+	static generic_ret clnt_res;
+
+	memset(&clnt_res, 0, sizeof(clnt_res));
+	if (clnt_call(clnt, SETKEY_PRINCIPAL4,
+		      (xdrproc_t)xdr_setkey4_arg, (caddr_t)argp,
+		      (xdrproc_t)xdr_generic_ret, (caddr_t)&clnt_res,
+		      TIMEOUT) != RPC_SUCCESS) {
+		return NULL;
+	}
+	return &clnt_res;
+}
+
 chrand_ret *
 chrand_principal_2(chrand_arg *argp, CLIENT *clnt)
 {

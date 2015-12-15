@@ -362,6 +362,33 @@ kadm5_setkey_principal_3(void *server_handle,
 }
 
 kadm5_ret_t
+kadm5_setkey_principal_4(void *server_handle,
+                         krb5_principal princ,
+                         krb5_boolean keepold,
+                         kadm5_key_data *key_data,
+                         int n_key_data)
+{
+    setkey4_arg         arg;
+    generic_ret         *r;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    arg.api_version = handle->api_version;
+    arg.princ = princ;
+    arg.keepold = keepold;
+    arg.key_data = key_data;
+    arg.n_key_data = n_key_data;
+
+    if (princ == NULL || key_data == NULL || n_key_data == 0)
+        return EINVAL;
+    r = setkey_principal4_2(&arg, handle->clnt);
+    if (r == NULL)
+        eret();
+    return r->code;
+}
+
+kadm5_ret_t
 kadm5_randkey_principal_3(void *server_handle,
                           krb5_principal princ,
                           krb5_boolean keepold, int n_ks_tuple,

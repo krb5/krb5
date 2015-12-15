@@ -279,6 +279,12 @@ typedef struct _kadm5_config_params {
     int                 iprop_resync_timeout;
 } kadm5_config_params;
 
+typedef struct _kadm5_key_data {
+    krb5_kvno       kvno;
+    krb5_keyblock   key;
+    krb5_keysalt    salt;
+} kadm5_key_data;
+
 /*
  * functions
  */
@@ -402,6 +408,12 @@ kadm5_ret_t    kadm5_setkey_principal_3(void *server_handle,
                                         krb5_key_salt_tuple *ks_tuple,
                                         krb5_keyblock *keyblocks,
                                         int n_keys);
+
+kadm5_ret_t    kadm5_setkey_principal_4(void *server_handle,
+                                        krb5_principal principal,
+                                        krb5_boolean keepold,
+                                        kadm5_key_data *key_data,
+                                        int n_key_data);
 
 kadm5_ret_t    kadm5_decrypt_key(void *server_handle,
                                  kadm5_principal_ent_t entry, krb5_int32
