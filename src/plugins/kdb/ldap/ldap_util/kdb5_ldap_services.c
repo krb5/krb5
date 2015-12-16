@@ -40,6 +40,49 @@
 #include "kdb5_ldap_util.h"
 #include "kdb5_ldap_list.h"
 
+/* Get the configured LDAP service password file.  The caller should free the
+ * result with profile_release_string(). */
+static krb5_error_code
+get_conf_service_file(profile_t profile, const char *realm, char **path_out)
+{
+    char *subsection, *path;
+    long ret;
+
+    *path_out = NULL;
+
+    /* Get the [dbmodules] subsection for realm. */
+    ret = profile_get_string(profile, KDB_REALM_SECTION, realm,
+                             KDB_MODULE_POINTER, realm, &subsection);
+    if (ret)
+        return ret;
+
+    /* Look up the password file in the [dbmodules] subsection. */
+    ret = profile_get_string(profile, KDB_MODULE_SECTION, subsection,
+                             KRB5_CONF_LDAP_SERVICE_PASSWORD_FILE, NULL,
+                             &path);
+    profile_release_string(subsection);
+    if (ret)
+        return ret;
+
+    if (path == NULL) {
+        /* Look up the password file in [dbdefaults] as a fallback. */
+        ret = profile_get_string(profile, KDB_MODULE_DEF_SECTION,
+                                 KRB5_CONF_LDAP_SERVICE_PASSWORD_FILE, NULL,
+                                 NULL, &path);
+        if (ret)
+            return ret;
+    }
+
+    if (path == NULL) {
+        k5_setmsg(util_context, ENOENT,
+                  _("ldap_service_password_file not configured"));
+        return ENOENT;
+    }
+
+    *path_out = path;
+    return 0;
+}
+
 /*
  * Convert the user supplied password into hexadecimal and stash it. Only a
  * little more secure than storing plain password in the file ...
@@ -97,37 +140,19 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
             goto cleanup;
         }
     } else { /* argc == 2 */
-        char *section;
-
         service_object = strdup (argv[1]);
         if (service_object == NULL) {
             com_err(me, ENOMEM, _("while setting service object password"));
             goto cleanup;
         }
 
-        /* Pick up the stash-file name from krb5.conf */
-        profile_get_string(util_context->profile, KDB_REALM_SECTION,
-                           util_context->default_realm, KDB_MODULE_POINTER, NULL, &section);
-
-        if (section == NULL) {
-            profile_get_string(util_context->profile, KDB_MODULE_DEF_SECTION,
-                               KDB_MODULE_POINTER, NULL, NULL, &section);
-            if (section == NULL) {
-                /* Stash file path neither in krb5.conf nor on command line */
-                file_name = strdup(DEF_SERVICE_PASSWD_FILE);
-                if (file_name == NULL) {
-                    com_err(me, ENOMEM,
-                            _("while setting service object password"));
-                    goto cleanup;
-                }
-                goto done;
-            }
+        ret = get_conf_service_file(util_context->profile,
+                                    util_context->default_realm, &file_name);
+        if (ret) {
+            com_err(me, ret, _("while getting service password filename"));
+            goto cleanup;
         }
-
-        profile_get_string (util_context->profile, KDB_MODULE_SECTION, section,
-                            "ldap_service_password_file", NULL, &file_name);
     }
-done:
 
     /* Get password from user */
     {
@@ -296,8 +321,7 @@ cleanup:
     if (service_object)
         free(service_object);
 
-    if (file_name)
-        free(file_name);
+    profile_release_string(file_name);
 
     if (tmp_file)
         free(tmp_file);
