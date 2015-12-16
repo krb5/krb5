@@ -53,9 +53,6 @@ util
 ----
 
 The util directory contains several utility programs and libraries.
-  - the programs used to configure and build the code, such as
-    autoconf, lndir, kbuild, reconf, and makedepend, are in this
-    directory.
   - the profile directory contains most of the functions which parse
     the Kerberos configuration files (krb5.conf and kdc.conf).
   - the Kerberos error table library and utilities (et);
