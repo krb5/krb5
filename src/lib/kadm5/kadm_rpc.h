@@ -238,6 +238,21 @@ struct sstring_arg {
 };
 typedef struct sstring_arg sstring_arg;
 
+struct getpkeys_arg {
+	krb5_ui_4 api_version;
+	krb5_principal princ;
+	krb5_kvno kvno;
+};
+typedef struct getpkeys_arg getpkeys_arg;
+
+struct getpkeys_ret {
+	krb5_ui_4 api_version;
+	kadm5_ret_t code;
+	kadm5_key_data *key_data;
+	int n_key_data;
+};
+typedef struct getpkeys_ret getpkeys_ret;
+
 #define KADM 2112
 #define KADMVERS 2
 #define CREATE_PRINCIPAL 1
@@ -315,6 +330,9 @@ extern  generic_ret * set_string_2_svc(sstring_arg *, struct svc_req *);
 #define SETKEY_PRINCIPAL4 25
 extern  generic_ret * setkey_principal4_2(setkey4_arg *, CLIENT *);
 extern  generic_ret * setkey_principal4_2_svc(setkey4_arg *, struct svc_req *);
+#define EXTRACT_KEYS 26
+extern  getpkeys_ret * get_principal_keys_2(getpkeys_arg *, CLIENT *);
+extern  getpkeys_ret * get_principal_keys_2_svc(getpkeys_arg *, struct svc_req *);
 
 extern bool_t xdr_cprinc_arg ();
 extern bool_t xdr_cprinc3_arg ();
@@ -358,6 +376,7 @@ extern bool_t xdr_gstrings_ret ();
 extern bool_t xdr_sstring_arg ();
 extern bool_t xdr_krb5_string_attr ();
 extern bool_t xdr_kadm5_key_data ();
-
+extern bool_t xdr_getpkeys_arg ();
+extern bool_t xdr_getpkeys_ret ();
 
 #endif /* __KADM_RPC_H__ */

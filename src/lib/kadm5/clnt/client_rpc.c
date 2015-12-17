@@ -386,3 +386,18 @@ set_string_2(sstring_arg *argp, CLIENT *clnt)
      }
      return (&clnt_res);
 }
+
+getpkeys_ret *
+get_principal_keys_2(getpkeys_arg *argp, CLIENT *clnt)
+{
+     static getpkeys_ret clnt_res;
+
+     memset(&clnt_res, 0, sizeof(clnt_res));
+     if (clnt_call(clnt, EXTRACT_KEYS,
+		   (xdrproc_t)xdr_getpkeys_arg, (caddr_t)argp,
+		   (xdrproc_t)xdr_getpkeys_ret, (caddr_t)&clnt_res,
+		   TIMEOUT) != RPC_SUCCESS) {
+	  return NULL;
+     }
+     return &clnt_res;
+}

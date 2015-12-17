@@ -467,16 +467,11 @@ krb5_error_code kadm5_init_krb5_context (krb5_context *);
 
 krb5_error_code kadm5_init_iprop(void *server_handle, char **db_args);
 
-/*
- * kadm5_get_principal_keys is used only by kadmin.local to extract existing
- * keys from the database without changing them.  It should never be exposed
- * to the network protocol.
- */
 kadm5_ret_t    kadm5_get_principal_keys(void *server_handle,
                                         krb5_principal principal,
-                                        krb5_keyblock **keyblocks,
-                                        int *n_keys);
-
+                                        krb5_kvno kvno,
+                                        kadm5_key_data **key_data,
+                                        int *n_key_data);
 
 kadm5_ret_t    kadm5_purgekeys(void *server_handle,
                                krb5_principal principal,
@@ -495,6 +490,9 @@ kadm5_ret_t    kadm5_set_string(void *server_handle,
 kadm5_ret_t    kadm5_free_strings(void *server_handle,
                                   krb5_string_attr *strings,
                                   int count);
+
+kadm5_ret_t    kadm5_free_kadm5_key_data(krb5_context context, int n_key_data,
+                                         kadm5_key_data *key_data);
 
 KADM5INT_END_DECLS
 
