@@ -94,6 +94,12 @@ allow_mech_by_default(gss_OID mech)
     gss_OID_set attrs;
     int reject = 0, p;
 
+    /* Whether we accept an interposer mech depends on whether we accept the
+     * mech it interposes. */
+    mech = gssint_get_public_oid(mech);
+    if (mech == GSS_C_NO_OID)
+	return 0;
+
     status = gss_inquire_attrs_for_mech(&minor, mech, &attrs, NULL);
     if (status)
 	return 0;
