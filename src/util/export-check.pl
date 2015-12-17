@@ -32,13 +32,15 @@ $0 =~ s/^.*?([\w.-]+)$/$1/;
 # This code assumes the GNU version of nm.
 # For now, we'll only run it on GNU/Linux systems, so that's okay.
 
+my $nm = $ENV{'NM'} || "nm";
+
 if ($#ARGV != 1) {
     die "usage: $0 exportfile libfoo.so\n";
 }
 my($exfile, $libfile) = @ARGV;
 
 @missing = ();
-open NM, "nm -Dg --defined-only $libfile |" || die "can't run nm on $libfile: $!";
+open NM, "$nm -Dg --defined-only $libfile |" || die "can't run nm on $libfile: $!";
 open EXPORT, "< $exfile" || die "can't read $exfile: $!";
 
 @export = <EXPORT>;
