@@ -1192,3 +1192,37 @@ xdr_kadm5_key_data(XDR *xdrs, kadm5_key_data *objp)
 		return FALSE;
 	return TRUE;
 }
+
+bool_t
+xdr_getpkeys_arg(XDR *xdrs, getpkeys_arg *objp)
+{
+	if (!xdr_ui_4(xdrs, &objp->api_version)) {
+		return FALSE;
+	}
+	if (!xdr_krb5_principal(xdrs, &objp->princ)) {
+		return FALSE;
+	}
+	if (!xdr_krb5_kvno(xdrs, &objp->kvno)) {
+		return FALSE;
+	}
+	return TRUE;
+}
+
+bool_t
+xdr_getpkeys_ret(XDR *xdrs, getpkeys_ret *objp)
+{
+	if (!xdr_ui_4(xdrs, &objp->api_version)) {
+		return FALSE;
+	}
+	if (!xdr_kadm5_ret_t(xdrs, &objp->code)) {
+		return FALSE;
+	}
+	if (objp->code == KADM5_OK) {
+		if (!xdr_array(xdrs, (caddr_t *) &objp->key_data,
+			       (unsigned int *) &objp->n_key_data, ~0,
+			       sizeof(kadm5_key_data), xdr_kadm5_key_data)) {
+		    return FALSE;
+		}
+	}
+	return TRUE;
+}

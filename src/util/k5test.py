@@ -851,7 +851,7 @@ class K5Realm(object):
         global hostname
         filename = os.path.join(self.testdir, 'acl')
         file = open(filename, 'w')
-        file.write('%s *\n' % self.admin_princ)
+        file.write('%s *e\n' % self.admin_princ)
         file.write('kiprop/%s@%s p\n' % (hostname, self.realm))
         file.close()
 

@@ -119,3 +119,21 @@ kadm5_free_strings(void *server_handle, krb5_string_attr *strings,
     free(strings);
     return KADM5_OK;
 }
+
+kadm5_ret_t
+kadm5_free_kadm5_key_data(krb5_context context, int n_key_data,
+                          kadm5_key_data *key_data)
+{
+    int i;
+
+    if (key_data == NULL)
+        return KADM5_OK;
+
+    for (i = 0; i < n_key_data; i++) {
+        krb5_free_keyblock_contents(context, &key_data[i].key);
+        krb5_free_data_contents(context, &key_data[i].salt.data);
+    }
+    free(key_data);
+
+    return KADM5_OK;
+}

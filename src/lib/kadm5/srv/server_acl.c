@@ -65,6 +65,7 @@ static const aop_t acl_op_table[] = {
     { 's',      ACL_SETKEY },
     { 'x',      ACL_ALL_MASK },
     { '*',      ACL_ALL_MASK },
+    { 'e',      ACL_EXTRACT },
     { '\0',     0 }
 };
 

@@ -47,12 +47,13 @@ ignored.  Lines containing ACL entries have the format::
     a  [Dis]allows the addition of principals or policies
     c  [Dis]allows the changing of passwords for principals
     d  [Dis]allows the deletion of principals or policies
+    e  [Dis]allows the extraction of principal keys
     i  [Dis]allows inquiries about principals or policies
     l  [Dis]allows the listing of all principals or policies
     m  [Dis]allows the modification of principals or policies
     p  [Dis]allows the propagation of the principal database (used in :ref:`incr_db_prop`)
     s  [Dis]allows the explicit setting of the key for a principal
-    x  Short for admcilsp. All privileges
+    x  Short for admcilsp. All privileges (except ``e``)
     \* Same as x.
     == ======================================================
 

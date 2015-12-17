@@ -200,7 +200,7 @@ if [ $? -ne 0 ]; then
 fi
 
 cat > $K5ROOT/ovsec_adm.acl <<EOF
-admin@$REALM			admcils
+admin@$REALM			admcilse
 admin/get@$REALM		il
 admin/modify@$REALM		mc
 admin/delete@$REALM		d

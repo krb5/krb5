@@ -557,3 +557,30 @@ kadm5_set_string(void *server_handle, krb5_principal principal,
         eret();
     return r->code;
 }
+
+kadm5_ret_t
+kadm5_get_principal_keys(void *server_handle, krb5_principal princ,
+                         krb5_kvno kvno, kadm5_key_data **key_data,
+                         int *n_key_data)
+{
+    getpkeys_arg        arg;
+    getpkeys_ret        *r;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    arg.api_version = handle->api_version;
+    arg.princ = princ;
+    arg.kvno = kvno;
+
+    if (princ == NULL || key_data == NULL || n_key_data == 0)
+        return EINVAL;
+    r = get_principal_keys_2(&arg, handle->clnt);
+    if (r == NULL)
+        eret();
+    if (r->code == 0) {
+        *key_data = r->key_data;
+        *n_key_data = r->n_key_data;
+    }
+    return r->code;
+}

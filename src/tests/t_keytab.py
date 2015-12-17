@@ -41,6 +41,26 @@ if 'keytab specified, forcing -k' not in output:
     fail('Expected output not seen from kinit -i')
 realm.klist(realm.user_princ)
 
+# Test extracting keys with multiple key versions present.
+os.remove(realm.keytab)
+realm.run([kadminl, 'cpw', '-randkey', '-keepold', realm.host_princ])
+out = realm.run([kadminl, 'ktadd', '-norandkey', realm.host_princ])
+if 'with kvno 1,' not in out or 'with kvno 2,' not in out:
+    fail('Expected output not seen from kadmin.local ktadd -norandkey')
+out = realm.run([klist, '-k', '-e'])
+if ' 1 host/' not in out or ' 2 host/' not in out:
+    fail('Expected output not seen from klist -k -e')
+
+# Test again using kadmin over the network.
+realm.prep_kadmin()
+os.remove(realm.keytab)
+out = realm.run_kadmin(['ktadd', '-norandkey', realm.host_princ])
+if 'with kvno 1,' not in out or 'with kvno 2,' not in out:
+    fail('Expected output not seen from kadmin.local ktadd -norandkey')
+out = realm.run([klist, '-k', '-e'])
+if ' 1 host/' not in out or ' 2 host/' not in out:
+    fail('Expected output not seen from klist -k -e')
+
 # Test handling of kvno values beyond 255.  Use kadmin over the
 # network since we used to have an 8-bit limit on kvno marshalling.
 
@@ -57,7 +77,6 @@ def test_key_rotate(realm, princ, expected_kvno):
     if ('Key: vno %d,' % expected_kvno) not in out:
         fail('vno %d not seen in getprinc output' % expected_kvno)
 
-realm.prep_kadmin()
 princ = 'foo/bar@%s' % realm.realm
 realm.addprinc(princ)
 os.remove(realm.keytab)
