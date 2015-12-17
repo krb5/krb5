@@ -119,6 +119,7 @@ check-pytests:: plugorder rdreq responder s2p s4u2proxy unlockiter
 	$(RUNPYTEST) $(srcdir)/t_kprop.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_policy.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_changepw.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_kinit.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_pkinit.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_otp.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_localauth.py $(PYTESTFLAGS)
