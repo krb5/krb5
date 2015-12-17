@@ -354,7 +354,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
     const char  *logging_profent[3];
     const char  *logging_defent[3];
     char        **logging_specs;
-    int         i, ngood;
+    int         i, ngood, fd, append;
     char        *cp, *cp2;
     char        savec = '\0';
     int         error;
@@ -422,18 +422,21 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
                     /*
                      * Check for append/overwrite, then open the file.
                      */
-                    if (cp[4] == ':' || cp[4] == '=') {
-                        f = fopen(&cp[5], (cp[4] == ':') ? "a" : "w");
-                        if (f) {
-                            set_cloexec_file(f);
-                            log_control.log_entries[i].lfu_filep = f;
-                            log_control.log_entries[i].log_type = K_LOG_FILE;
-                            log_control.log_entries[i].lfu_fname = &cp[5];
-                        } else {
+                    append = (cp[4] == ':') ? O_APPEND : 0;
+                    if (append || cp[4] == '=') {
+                        fd = open(&cp[5], O_CREAT | O_WRONLY | append,
+                                  S_IRUSR | S_IWUSR | S_IRGRP);
+                        if (fd != -1)
+                            f = fdopen(fd, append ? "a" : "w");
+                        if (fd == -1 || f == NULL) {
                             fprintf(stderr,"Couldn't open log file %s: %s\n",
                                     &cp[5], error_message(errno));
                             continue;
                         }
+                        set_cloexec_file(f);
+                        log_control.log_entries[i].lfu_filep = f;
+                        log_control.log_entries[i].log_type = K_LOG_FILE;
+                        log_control.log_entries[i].lfu_fname = &cp[5];
                     }
                 }
 #ifdef  HAVE_SYSLOG
