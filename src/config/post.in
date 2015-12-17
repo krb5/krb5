@@ -150,7 +150,7 @@ clean:: clean-$(WHAT)
 clean-unix::
 	$(RM) $(OBJS) $(DEPTARGETS_CLEAN) $(EXTRA_FILES)
 	$(RM) et-[ch]-*.et et-[ch]-*.[ch] testlog
-	-$(RM) -r $(top_srcdir)/autom4te.cache testdir
+	-$(RM) -r testdir
 
 clean-windows::
 	$(RM) *.$(OBJEXT)
@@ -173,17 +173,12 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/deps $(BUILDTOP)/config.status \
 	cd $(BUILDTOP) && $(SHELL) config.status $(mydir)/Makefile
 $(BUILDTOP)/config.status: $(top_srcdir)/configure
 	cd $(BUILDTOP) && $(SHELL) config.status --recheck
-# autom4te.cache supposedly improves performance with multiple runs, but
-# it breaks across versions, and around MIT we've got plenty of version
-# mixing.  So nuke it.
 $(top_srcdir)/configure: @MAINT@ \
 		$(top_srcdir)/configure.in \
 		$(top_srcdir)/patchlevel.h \
 		$(top_srcdir)/aclocal.m4
-	-$(RM) -r $(top_srcdir)/autom4te.cache
 	cd $(top_srcdir) && \
 		$(AUTOCONF) --include=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS)
-	-$(RM) -r $(top_srcdir)/autom4te.cache
 
 RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
 	generate-files-mac-recurse \
