@@ -161,6 +161,7 @@ gss_inquire_attrs_for_mech(
 {
     OM_uint32       status, tmpMinor;
     gss_mechanism   mech;
+    gss_OID         selected_mech;
 
     if (minor == NULL)
         return GSS_S_CALL_INACCESSIBLE_WRITE;
@@ -173,7 +174,11 @@ gss_inquire_attrs_for_mech(
     if (known_mech_attrs != NULL)
         *known_mech_attrs = GSS_C_NO_OID_SET;
 
-    mech = gssint_get_mechanism((gss_OID)mech_oid);
+    status = gssint_select_mech_type(minor, mech_oid, &selected_mech);
+    if (status != GSS_S_COMPLETE)
+        return (status);
+
+    mech = gssint_get_mechanism(selected_mech);
     if (mech != NULL && mech->gss_inquire_attrs_for_mech != NULL) {
         status = mech->gss_inquire_attrs_for_mech(minor,
                                                   mech_oid,
