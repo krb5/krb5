@@ -561,6 +561,12 @@ SHLIB_EXPORT_FILE=$(srcdir)/$(LIBPREFIX)$(LIBBASE).exports
 # it to another, intermediate form for the linker.
 SHLIB_EXPORT_FILE_DEP=@SHLIB_EXPORT_FILE_DEP@
 
+# Export file checker to run when building in maintainer mode on
+# Linux.  This gets included in LDCOMBINE_TAIL.
+EXPORT_CHECK_CMD = && $(PERL) -w $(top_srcdir)/util/export-check.pl \
+	$(SHLIB_EXPORT_FILE) $@
+EXPORT_CHECK = @MAINT@ $(EXPORT_CHECK_CMD)
+
 # Command to run to build a shared library.
 # In systems that require multiple commands, like AIX, it may need
 # to change to rearrange where the various parameters fit in.
