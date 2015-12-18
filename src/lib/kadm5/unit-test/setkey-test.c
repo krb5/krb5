@@ -137,6 +137,8 @@ main(int argc, char **argv)
      */
     for (test = 0; tests[test] != NULL; test++) {
         krb5_keyblock *testp = tests[test];
+        kadm5_key_data *extracted;
+        int n_extracted, match;
         printf("+ Test %d:\n", test);
 
         for (encnum = 0; testp[encnum].magic != -1; encnum++) {
@@ -165,8 +167,30 @@ main(int argc, char **argv)
             exit(1);
         }
 
+        ret = kadm5_get_principal_keys(handle, princ, 0, &extracted,
+                                       &n_extracted);
+        if (ret) {
+            com_err(whoami, ret, "while extracting keys");
+            exit(1);
+        }
+
         for (encnum = 0; testp[encnum].magic != -1; encnum++) {
             printf("+   enctype %d\n", testp[encnum].enctype);
+
+            for (match = 0; match < n_extracted; match++) {
+                if (extracted[match].key.enctype == testp[encnum].enctype)
+                    break;
+            }
+            if (match >= n_extracted) {
+                com_err(whoami, KRB5_WRONG_ETYPE, "while matching enctypes");
+                exit(1);
+            }
+            if ((extracted[match].key.length != testp[encnum].length) ||
+                (memcmp(extracted[match].key.contents, testp[encnum].contents,
+                        testp[encnum].length) != 0)) {
+                com_err(whoami, KRB5_KDB_NO_MATCHING_KEY, "verifying keys");
+                exit(1);
+            }
 
             memset(&ktent, 0, sizeof(ktent));
             ktent.principal = princ;
@@ -206,6 +230,8 @@ main(int argc, char **argv)
                 exit(1);
             }
         }
+
+        (void)kadm5_free_kadm5_key_data(context, n_extracted, extracted);
     }
 
     ret = krb5_kt_close(context, kt);
