@@ -500,6 +500,7 @@ add_principal(context, princ, op, pblock)
     entry->mask = (KADM5_KEY_DATA | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
                    KADM5_MAX_LIFE | KADM5_MAX_RLIFE | KADM5_TL_DATA |
                    KADM5_PRINC_EXPIRE_TIME);
+    entry->attributes |= KRB5_KDB_LOCKDOWN_KEYS;
 
     retval = krb5_db_put_principal(context, entry);
 
