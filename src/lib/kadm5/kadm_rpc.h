@@ -258,96 +258,117 @@ typedef struct getpkeys_ret getpkeys_ret;
 #define CREATE_PRINCIPAL 1
 extern  enum clnt_stat create_principal_2(cprinc_arg *, generic_ret *,
 					  CLIENT *);
-extern  generic_ret * create_principal_2_svc(cprinc_arg *, struct svc_req *);
+extern  bool_t create_principal_2_svc(cprinc_arg *, generic_ret *,
+				      struct svc_req *);
 #define DELETE_PRINCIPAL 2
 extern  enum clnt_stat delete_principal_2(dprinc_arg *, generic_ret *,
 					  CLIENT *);
-extern  generic_ret * delete_principal_2_svc(dprinc_arg *, struct svc_req *);
+extern  bool_t delete_principal_2_svc(dprinc_arg *, generic_ret *,
+				      struct svc_req *);
 #define MODIFY_PRINCIPAL 3
 extern  enum clnt_stat modify_principal_2(mprinc_arg *, generic_ret *,
 					  CLIENT *);
-extern  generic_ret * modify_principal_2_svc(mprinc_arg *, struct svc_req *);
+extern  bool_t modify_principal_2_svc(mprinc_arg *, generic_ret *,
+				      struct svc_req *);
 #define RENAME_PRINCIPAL 4
 extern  enum clnt_stat rename_principal_2(rprinc_arg *, generic_ret *,
 					  CLIENT *);
-extern  generic_ret * rename_principal_2_svc(rprinc_arg *, struct svc_req *);
+extern  bool_t rename_principal_2_svc(rprinc_arg *, generic_ret *,
+				      struct svc_req *);
 #define GET_PRINCIPAL 5
 extern  enum clnt_stat get_principal_2(gprinc_arg *, gprinc_ret *, CLIENT *);
-extern  gprinc_ret * get_principal_2_svc(gprinc_arg *, struct svc_req *);
+extern  bool_t get_principal_2_svc(gprinc_arg *, gprinc_ret *,
+				   struct svc_req *);
 #define CHPASS_PRINCIPAL 6
 extern  enum clnt_stat chpass_principal_2(chpass_arg *, generic_ret *,
 					  CLIENT *);
-extern  generic_ret * chpass_principal_2_svc(chpass_arg *, struct svc_req *);
+extern  bool_t chpass_principal_2_svc(chpass_arg *, generic_ret *,
+				      struct svc_req *);
 #define CHRAND_PRINCIPAL 7
 extern  enum clnt_stat chrand_principal_2(chrand_arg *, chrand_ret *,
 					  CLIENT *);
-extern  chrand_ret * chrand_principal_2_svc(chrand_arg *, struct svc_req *);
+extern  bool_t chrand_principal_2_svc(chrand_arg *, chrand_ret *,
+				      struct svc_req *);
 #define CREATE_POLICY 8
 extern  enum clnt_stat create_policy_2(cpol_arg *, generic_ret *, CLIENT *);
-extern  generic_ret * create_policy_2_svc(cpol_arg *, struct svc_req *);
+extern  bool_t create_policy_2_svc(cpol_arg *, generic_ret *,
+				   struct svc_req *);
 #define DELETE_POLICY 9
 extern  enum clnt_stat delete_policy_2(dpol_arg *, generic_ret *, CLIENT *);
-extern  generic_ret * delete_policy_2_svc(dpol_arg *, struct svc_req *);
+extern  bool_t delete_policy_2_svc(dpol_arg *, generic_ret *,
+				   struct svc_req *);
 #define MODIFY_POLICY 10
 extern  enum clnt_stat modify_policy_2(mpol_arg *, generic_ret *, CLIENT *);
-extern  generic_ret * modify_policy_2_svc(mpol_arg *, struct svc_req *);
+extern  bool_t modify_policy_2_svc(mpol_arg *, generic_ret *,
+				   struct svc_req *);
 #define GET_POLICY 11
 extern  enum clnt_stat get_policy_2(gpol_arg *, gpol_ret *, CLIENT *);
-extern  gpol_ret * get_policy_2_svc(gpol_arg *, struct svc_req *);
+extern  bool_t get_policy_2_svc(gpol_arg *, gpol_ret *, struct svc_req *);
 #define GET_PRIVS 12
 extern  enum clnt_stat get_privs_2(void *, getprivs_ret *, CLIENT *);
-extern  getprivs_ret * get_privs_2_svc(krb5_ui_4 *, struct svc_req *);
+extern  bool_t get_privs_2_svc(krb5_ui_4 *, getprivs_ret *, struct svc_req *);
 #define INIT 13
 extern  enum clnt_stat init_2(void *, generic_ret *, CLIENT *);
-extern  generic_ret * init_2_svc(krb5_ui_4 *, struct svc_req *);
+extern  bool_t init_2_svc(krb5_ui_4 *, generic_ret *, struct svc_req *);
 #define GET_PRINCS 14
 extern  enum clnt_stat get_princs_2(gprincs_arg *, gprincs_ret *, CLIENT *);
-extern  gprincs_ret * get_princs_2_svc(gprincs_arg *, struct svc_req *);
+extern  bool_t get_princs_2_svc(gprincs_arg *, gprincs_ret *,
+				struct svc_req *);
 #define GET_POLS 15
 extern  enum clnt_stat get_pols_2(gpols_arg *, gpols_ret *, CLIENT *);
-extern  gpols_ret * get_pols_2_svc(gpols_arg *, struct svc_req *);
+extern  bool_t get_pols_2_svc(gpols_arg *, gpols_ret *, struct svc_req *);
 #define SETKEY_PRINCIPAL 16
 extern  enum clnt_stat setkey_principal_2(setkey_arg *, generic_ret *,
 					  CLIENT *);
-extern  generic_ret * setkey_principal_2_svc(setkey_arg *, struct svc_req *);
+extern  bool_t setkey_principal_2_svc(setkey_arg *, generic_ret *,
+				      struct svc_req *);
 #define SETV4KEY_PRINCIPAL 17
 extern  enum clnt_stat setv4key_principal_2(setv4key_arg *, generic_ret *,
 					    CLIENT *);
-extern  generic_ret * setv4key_principal_2_svc(setv4key_arg *, struct svc_req *);
+extern  bool_t setv4key_principal_2_svc(setv4key_arg *, generic_ret *,
+					struct svc_req *);
 #define CREATE_PRINCIPAL3 18
 extern  enum clnt_stat create_principal3_2(cprinc3_arg *, generic_ret *,
 					   CLIENT *);
-extern  generic_ret * create_principal3_2_svc(cprinc3_arg *, struct svc_req *);
+extern  bool_t create_principal3_2_svc(cprinc3_arg *, generic_ret *,
+				       struct svc_req *);
 #define CHPASS_PRINCIPAL3 19
 extern  enum clnt_stat chpass_principal3_2(chpass3_arg *, generic_ret *,
 					   CLIENT *);
-extern  generic_ret * chpass_principal3_2_svc(chpass3_arg *, struct svc_req *);
+extern  bool_t chpass_principal3_2_svc(chpass3_arg *, generic_ret *,
+				       struct svc_req *);
 #define CHRAND_PRINCIPAL3 20
 extern  enum clnt_stat chrand_principal3_2(chrand3_arg *, chrand_ret *,
 					   CLIENT *);
-extern  chrand_ret * chrand_principal3_2_svc(chrand3_arg *, struct svc_req *);
+extern  bool_t chrand_principal3_2_svc(chrand3_arg *, chrand_ret *,
+				       struct svc_req *);
 #define SETKEY_PRINCIPAL3 21
 extern  enum clnt_stat setkey_principal3_2(setkey3_arg *, generic_ret *,
 					   CLIENT *);
-extern  generic_ret * setkey_principal3_2_svc(setkey3_arg *, struct svc_req *);
+extern  bool_t setkey_principal3_2_svc(setkey3_arg *, generic_ret *,
+				       struct svc_req *);
 #define PURGEKEYS 22
 extern  enum clnt_stat purgekeys_2(purgekeys_arg *, generic_ret *, CLIENT *);
-extern  generic_ret * purgekeys_2_svc(purgekeys_arg *, struct svc_req *);
+extern  bool_t purgekeys_2_svc(purgekeys_arg *, generic_ret *,
+			       struct svc_req *);
 #define GET_STRINGS 23
 extern  enum clnt_stat get_strings_2(gstrings_arg *, gstrings_ret *, CLIENT *);
-extern  gstrings_ret * get_strings_2_svc(gstrings_arg *, struct svc_req *);
+extern  bool_t get_strings_2_svc(gstrings_arg *, gstrings_ret *,
+				 struct svc_req *);
 #define SET_STRING 24
 extern  enum clnt_stat set_string_2(sstring_arg *, generic_ret *, CLIENT *);
-extern  generic_ret * set_string_2_svc(sstring_arg *, struct svc_req *);
+extern  bool_t set_string_2_svc(sstring_arg *, generic_ret *,
+				struct svc_req *);
 #define SETKEY_PRINCIPAL4 25
 extern  enum clnt_stat setkey_principal4_2(setkey4_arg *, generic_ret *,
 					   CLIENT *);
-extern  generic_ret * setkey_principal4_2_svc(setkey4_arg *, struct svc_req *);
+extern  bool_t setkey_principal4_2_svc(setkey4_arg *, generic_ret *,
+				       struct svc_req *);
 #define EXTRACT_KEYS 26
 extern enum clnt_stat get_principal_keys_2(getpkeys_arg *, getpkeys_ret *,
 					   CLIENT *);
-extern  getpkeys_ret * get_principal_keys_2_svc(getpkeys_arg *,
-						struct svc_req *);
+extern  bool_t get_principal_keys_2_svc(getpkeys_arg *, getpkeys_ret *,
+					struct svc_req *);
 
 extern bool_t xdr_cprinc_arg ();
 extern bool_t xdr_cprinc3_arg ();
