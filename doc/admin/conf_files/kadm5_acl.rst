@@ -57,6 +57,16 @@ ignored.  Lines containing ACL entries have the format::
     \* Same as x.
     == ======================================================
 
+.. note::
+
+        The ``extract`` privilege is not included in the wildcard
+        privilege; it must be explicitly assigned.  This privilege
+        allows the user to extract keys from the database, and must be
+        handled with great care to avoid disclosure of important keys
+        like those of the kadmin/* or krbtgt/* principals.  The
+        **lockdown_keys** principal attribute can be used to prevent
+        key extraction from specific principals regardless of the
+        granted privilege.
 
 *target_principal*
     (Optional. Partially or fully qualified Kerberos principal name.)

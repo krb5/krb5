@@ -353,6 +353,17 @@ Options:
     **+no_auth_data_required** prevents PAC or AD-SIGNEDPATH data from
     being added to service tickets for the principal.
 
+{-\|+}\ **lockdown_keys**
+    **+lockdown_keys** prevents keys for this principal from leaving
+    the KDC via kadmind.  The chpass and extract operations are denied
+    for a principal with this attribute.  The chrand operation is
+    allowed, but will not return the new keys.  The delete and rename
+    operations are also denied if this attribute is set, in order to
+    prevent a malicious administrator from replacing principals like
+    krbtgt/* or kadmin/* with new principals without the attribute.
+    This attribute can be set via the network protocol, but can only
+    be removed using kadmin.local.
+
 **-randkey**
     Sets the key of the principal to a random value.
 
@@ -891,8 +902,8 @@ The options are:
 
 **-norandkey**
     Do not randomize the keys. The keys and their version numbers stay
-    unchanged.  This option is only available in kadmin.local, and
-    cannot be specified in combination with the **-e** option.
+    unchanged.  This option cannot be specified in combination with the
+    **-e** option.
 
 An entry for each of the principal's unique encryption types is added,
 ignoring multiple keys with the same encryption type but different
