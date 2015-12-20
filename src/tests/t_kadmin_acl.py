@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from k5test import *
+import os
 
 realm = K5Realm(create_host=False, create_user=False)
 
@@ -23,6 +24,8 @@ all_inquire = make_client('all_inquire')
 all_list = make_client('all_list')
 all_modify = make_client('all_modify')
 all_rename = make_client('all_rename')
+all_wildcard = make_client('all_wildcard')
+all_extract = make_client('all_extract')
 some_add = make_client('some_add')
 some_changepw = make_client('some_changepw')
 some_delete = make_client('some_delete')
@@ -49,6 +52,8 @@ all_inquire        i
 all_list           l
 all_modify         im
 all_rename         ad
+all_wildcard       x
+all_extract        ie
 some_add           a   selected
 some_changepw      c   selected
 some_delete        d   selected
@@ -317,5 +322,42 @@ kadmin_as(restrictions, ['addprinc', '-pw', 'pw', '-maxrenewlife', '1 day',
 out = realm.run([kadminl, 'getprinc', 'type3'])
 if 'Maximum renewable life: 0 days 02:00:00' not in out:
     fail('restriction (maxrenewlife high)')
+
+realm.run([kadminl, 'addprinc', '-pw', 'pw', 'extractkeys'])
+out = kadmin_as(all_wildcard, ['ktadd', '-k', realm.client_keytab,
+                               '-norandkey', 'extractkeys'], expected_code=1)
+if 'Operation requires ``extract-keys\'\' privilege' not in out:
+    fail('extractkeys failure (all_wildcard)')
+kadmin_as(all_extract, ['ktadd', '-norandkey', '-k', realm.client_keytab,
+                        'extractkeys'])
+realm.kinit('extractkeys', flags=['-k', '-t', realm.client_keytab])
+os.remove(realm.client_keytab)
+
+kadmin_as(all_modify, ['modprinc', '+lockdown_keys', 'extractkeys'])
+out = kadmin_as(all_changepw, ['cpw', '-pw', 'newpw', 'extractkeys'],
+                expected_code=1)
+if 'Operation requires ``change-password\'\' privilege' not in out:
+    fail('extractkeys failure (all_changepw)')
+kadmin_as(all_changepw, ['cpw', '-randkey', 'extractkeys'])
+out = kadmin_as(all_extract, ['ktadd', '-k', realm.client_keytab,
+                              '-norandkey', 'extractkeys'], expected_code=1)
+if 'Operation requires ``extract-keys\'\' privilege' not in out:
+    fail('extractkeys failure (all_extract)')
+out = kadmin_as(all_delete, ['delprinc', 'extractkeys'], expected_code=1)
+if 'Operation requires ``delete\'\' privilege' not in out:
+    fail('extractkeys failure (all_delete)')
+out = kadmin_as(all_rename, ['renprinc', 'extractkeys', 'renamedprinc'],
+                expected_code=1)
+if 'Operation requires ``delete\'\' privilege' not in out:
+    fail('extractkeys failure (all_rename)')
+out = kadmin_as(all_modify, ['modprinc', '-lockdown_keys', 'extractkeys'],
+                expected_code=1)
+if 'Operation requires ``modify\'\' privilege' not in out:
+    fail('extractkeys failure (all_modify)')
+realm.run([kadminl, 'modprinc', '-lockdown_keys', 'extractkeys'])
+kadmin_as(all_extract, ['ktadd', '-k', realm.client_keytab, '-norandkey',
+                        'extractkeys'])
+realm.kinit('extractkeys', flags=['-k', '-t', realm.client_keytab])
+os.remove(realm.client_keytab)
 
 success('kadmin ACL enforcement')
