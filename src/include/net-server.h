@@ -31,6 +31,9 @@
 
 #include <verto.h>
 
+/* The delimeter characters supported by the addresses string. */
+#define ADDRESSES_DELIM ",; "
+
 typedef struct _krb5_fulladdr {
     krb5_address *      address;
     krb5_ui_4           port;
@@ -41,10 +44,28 @@ void init_addr(krb5_fulladdr *, struct sockaddr *);
 
 /* exported from net-server.c */
 verto_ctx *loop_init(verto_ev_type types);
-krb5_error_code loop_add_udp_port(int port);
-krb5_error_code loop_add_tcp_port(int port);
-krb5_error_code loop_add_rpc_service(int port, u_long prognum, u_long versnum,
-                                     void (*dispatch)());
+
+/*
+ * Add listener addresses to the loop configuration.
+ *
+ * Arguments:
+ *
+ * - default_port
+ *      The port for the sockets if not specified in addresses.
+ * - addresses
+ *      The optional addresses for the listener sockets.  Pass NULL for the
+ *      wildcard address.  Addresses may be delimited by the characters in
+ *      ADDRESSES_DELIM.  Addresses are parsed with k5_parse_host_string().
+ * - prognum, versnum, dispatchfn
+ *      For RPC listener sockets, the svc_register() arguments to use when new
+ *      TCP connections are created.
+ */
+krb5_error_code loop_add_udp_address(int default_port, const char *addresses);
+krb5_error_code loop_add_tcp_address(int default_port, const char *addresses);
+krb5_error_code loop_add_rpc_service(int default_port, const char *addresses,
+                                     u_long prognum, u_long versnum,
+                                     void (*dispatchfn)());
+
 krb5_error_code loop_setup_network(verto_ctx *ctx, void *handle,
                                    const char *progname);
 krb5_error_code loop_setup_signals(verto_ctx *ctx, void *handle,

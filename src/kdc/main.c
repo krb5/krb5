@@ -979,7 +979,7 @@ int main(int argc, char **argv)
             port = strtol(cp, &cp, 10);
             if (cp == 0)
                 break;
-            retval = loop_add_udp_port(port);
+            retval = loop_add_udp_address(port, NULL);
             if (retval)
                 goto net_init_error;
         }
@@ -993,7 +993,7 @@ int main(int argc, char **argv)
             port = strtol(cp, &cp, 10);
             if (cp == 0)
                 break;
-            retval = loop_add_tcp_port(port);
+            retval = loop_add_tcp_address(port, NULL);
             if (retval)
                 goto net_init_error;
         }
