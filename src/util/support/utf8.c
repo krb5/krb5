@@ -107,7 +107,7 @@ const char krb5int_utf8_lentab[] = {
     0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-    4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 0, 0 };
+    4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 int krb5int_utf8_charlen(const char *p)
 {
@@ -121,16 +121,14 @@ int krb5int_utf8_charlen(const char *p)
  * Make sure the UTF-8 char used the shortest possible encoding
  * returns charlen if valid, 0 if not.
  *
- * Here are the valid UTF-8 encodings, taken from RFC 2279 page 4.
+ * Here are the valid UTF-8 encodings, taken from RFC 3629 page 4.
  * The table is slightly modified from that of the RFC.
  *
  * UCS-4 range (hex)      UTF-8 sequence (binary)
  * 0000 0000-0000 007F   0.......
  * 0000 0080-0000 07FF   110++++. 10......
  * 0000 0800-0000 FFFF   1110++++ 10+..... 10......
- * 0001 0000-001F FFFF   11110+++ 10++.... 10...... 10......
- * 0020 0000-03FF FFFF   111110++ 10+++... 10...... 10...... 10......
- * 0400 0000-7FFF FFFF   1111110+ 10++++.. 10...... 10...... 10...... 10......
+ * 0001 0000-0010 FFFF   11110+++ 10++.... 10...... 10......
  *
  * The '.' bits are "don't cares". When validating a UTF-8 sequence,
  * at least one of the '+' bits must be set, otherwise the character
@@ -145,8 +143,8 @@ int krb5int_utf8_charlen(const char *p)
 c krb5int_utf8_mintab[] = {
     (c)0x20, (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x80,
     (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x80,
-    (c)0x30, (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x80,
-    (c)0x38, (c)0x80, (c)0x80, (c)0x80, (c)0x3c, (c)0x80, (c)0x00, (c)0x00 };
+    (c)0x30, (c)0x80, (c)0x80, (c)0x80, (c)0x80, (c)0x00, (c)0x00, (c)0x00,
+    (c)0x00, (c)0x00, (c)0x00, (c)0x00, (c)0x00, (c)0x00, (c)0x00, (c)0x00 };
 #undef c
 
 int krb5int_utf8_charlen2(const char *p)
@@ -171,7 +169,7 @@ int krb5int_utf8_to_ucs4(const char *p, krb5_ucs4 *out)
     krb5_ucs4 ch;
     int len, i;
     static unsigned char mask[] = {
-        0, 0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
+        0, 0x7f, 0x1f, 0x0f, 0x07 };
 
     *out = 0;
     len = KRB5_UTF8_CHARLEN2(p, len);
@@ -188,6 +186,9 @@ int krb5int_utf8_to_ucs4(const char *p, krb5_ucs4 *out)
         ch <<= 6;
         ch |= c[i] & 0x3f;
     }
+
+    if (ch > 0x10ffff)
+        return -1;
 
     *out = ch;
     return 0;
@@ -211,7 +212,7 @@ size_t krb5int_ucs4_to_utf8(krb5_ucs4 c, char *buf)
     unsigned char *p = (unsigned char *) buf;
 
     /* not a valid Unicode character */
-    if (c < 0)
+    if (c > 0x10ffff)
         return 0;
 
     /* Just return length, don't convert */
@@ -219,9 +220,7 @@ size_t krb5int_ucs4_to_utf8(krb5_ucs4 c, char *buf)
         if (c < 0x80) return 1;
         else if (c < 0x800) return 2;
         else if (c < 0x10000) return 3;
-        else if (c < 0x200000) return 4;
-        else if (c < 0x4000000) return 5;
-        else return 6;
+        else return 4;
     }
 
     if (c < 0x80) {
@@ -233,21 +232,8 @@ size_t krb5int_ucs4_to_utf8(krb5_ucs4 c, char *buf)
         p[len++] = 0xe0 | ( c >> 12 );
         p[len++] = 0x80 | ( (c >> 6) & 0x3f );
         p[len++] = 0x80 | ( c & 0x3f );
-    } else if (c < 0x200000) {
+    } else /* if (c < 0x110000) */ {
         p[len++] = 0xf0 | ( c >> 18 );
-        p[len++] = 0x80 | ( (c >> 12) & 0x3f );
-        p[len++] = 0x80 | ( (c >> 6) & 0x3f );
-        p[len++] = 0x80 | ( c & 0x3f );
-    } else if (c < 0x4000000) {
-        p[len++] = 0xf8 | ( c >> 24 );
-        p[len++] = 0x80 | ( (c >> 18) & 0x3f );
-        p[len++] = 0x80 | ( (c >> 12) & 0x3f );
-        p[len++] = 0x80 | ( (c >> 6) & 0x3f );
-        p[len++] = 0x80 | ( c & 0x3f );
-    } else /* if( c < 0x80000000 ) */ {
-        p[len++] = 0xfc | ( c >> 30 );
-        p[len++] = 0x80 | ( (c >> 24) & 0x3f );
-        p[len++] = 0x80 | ( (c >> 18) & 0x3f );
         p[len++] = 0x80 | ( (c >> 12) & 0x3f );
         p[len++] = 0x80 | ( (c >> 6) & 0x3f );
         p[len++] = 0x80 | ( c & 0x3f );
@@ -260,10 +246,6 @@ size_t krb5int_ucs2_to_utf8(krb5_ucs2 c, char *buf)
 {
     return krb5int_ucs4_to_utf8((krb5_ucs4)c, buf);
 }
-
-#define KRB5_UCS_UTF8LEN(c)                                             \
-    c < 0 ? 0 : (c < 0x80 ? 1 : (c < 0x800 ? 2 : (c < 0x10000 ? 3 :     \
-                                                  (c < 0x200000 ? 4 : (c < 0x4000000 ? 5 : 6)))))
 
 /*
  * Advance to the next UTF-8 character
