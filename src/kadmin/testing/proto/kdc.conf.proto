@@ -1,6 +1,6 @@
 [kdcdefaults]
 	kdc_ports = 1750 
-
+	kdc_tcp_ports = 1750
 [realms]
 	__REALM__ = {
 		profile = __K5ROOT__/krb5.conf
