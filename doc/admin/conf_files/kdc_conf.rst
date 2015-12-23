@@ -232,10 +232,21 @@ The following tags may be specified in a [realms] subsection:
     **database_name** is used.  Determination of the **iprop_logfile**
     default value will not use values from the [dbmodules] section.)
 
+**kadmind_listen**
+    (Comma-separated list.)  Tells the :ref:`kadmind(8)` daemon to only
+    bind to certain addresses.  An optional port number, separated from
+    the address by a colon, may be included.  If the name or address
+    contains colons (for example, if it is an IPv6 address), enclose
+    it in square brackets to distinguish the colon from a port separator.
+    (NOTE: The daemon expects all addresses specified to exist and be able to
+    be bound to.  If it fails binding to any of the addresses then the daemon
+    will fail to start.)
+
 **kadmind_port**
     (Port number.)  Specifies the port on which the :ref:`kadmind(8)`
-    daemon is to listen for this realm.  The assigned port for kadmind
-    is 749, which is used by default.
+    daemon is to listen for this realm if not specified in an address in
+    ``kadmind_listen``.  The assigned port for kadmind is 749, which is used
+    by default.
 
 **key_stash_file**
     (String.)  Specifies the location where the master key has been
@@ -257,6 +268,17 @@ The following tags may be specified in a [realms] subsection:
     If this relation is not specified, the default is to listen on TCP
     port 88 (the standard port).  Prior to release 1.13, the default
     was not to listen for TCP connections at all.
+
+**kpasswd_listen**
+    (Comma-separated list.)  Tells the :ref:`kadmind(8)` daemon to only
+    bind to certain addresses for kpasswd.  An optional port number,
+    separated from the address by a colon, may be included.  If the
+    name or address contains colons (for example, if it is an IPv6 address),
+    enclose it in square brackets to distinguish the colon from a port
+    separator.
+    (NOTE: The daemon expects all addresses specified to exist and be able to
+    be bound to.  If it fails binding to any of the addresses then the daemon
+    will fail to start.)
 
 **master_key_name**
     (String.)  Specifies the name of the principal associated with the

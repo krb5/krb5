@@ -146,6 +146,7 @@ typedef long            kadm5_ret_t;
 #define KADM5_CONFIG_ADBNAME            0x00000400
 #define KADM5_CONFIG_ADB_LOCKFILE       0x00000800
 /*#define KADM5_CONFIG_PROFILE          0x00001000*/
+#define KADM5_CONFIG_KADMIND_LISTEN     0x00001000
 #define KADM5_CONFIG_ACL_FILE           0x00002000
 #define KADM5_CONFIG_KADMIND_PORT       0x00004000
 #define KADM5_CONFIG_ENCTYPES           0x00008000
@@ -166,6 +167,7 @@ typedef long            kadm5_ret_t;
 #define KADM5_CONFIG_IPROP_PORT         0x10000000
 #define KADM5_CONFIG_KVNO               0x20000000
 #define KADM5_CONFIG_IPROP_RESYNC_TIMEOUT   0x40000000
+#define KADM5_CONFIG_KPASSWD_LISTEN     0x80000000
 /*
  * permission bits
  */
@@ -242,6 +244,8 @@ typedef struct _kadm5_policy_ent_t {
 typedef struct _kadm5_config_params {
     long               mask;
     char *             realm;
+    char *             kadmind_listen;
+    char *             kpasswd_listen;
     int                kadmind_port;
     int                kpasswd_port;
 

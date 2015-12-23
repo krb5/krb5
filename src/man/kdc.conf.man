@@ -291,10 +291,21 @@ back end is being used, or the file name is specified in the
 \fBdatabase_name\fP is used.  Determination of the \fBiprop_logfile\fP
 default value will not use values from the [dbmodules] section.)
 .TP
+.B \fBkadmind_listen\fP
+(Comma\-separated list.)  Tells the \fIkadmind(8)\fP daemon to only
+bind to certain addresses.  An optional port number, separated from
+the address by a colon, may be included.  If the name or address
+contains colons (for example, if it is an IPv6 address), enclose
+it in square brackets to distinguish the colon from a port separator.
+(NOTE: The daemon expects all addresses specified to exist and be able to
+be bound to.  If it fails binding to any of the addresses then the daemon
+will fail to start.)
+.TP
 .B \fBkadmind_port\fP
 (Port number.)  Specifies the port on which the \fIkadmind(8)\fP
-daemon is to listen for this realm.  The assigned port for kadmind
-is 749, which is used by default.
+daemon is to listen for this realm if not specified in an address in
+\fBkadmind_listen\fP\&.  The assigned port for kadmind is 749, which is used
+by default.
 .TP
 .B \fBkey_stash_file\fP
 (String.)  Specifies the location where the master key has been
@@ -315,6 +326,17 @@ set this relation to the empty string with \fBkdc_tcp_ports = ""\fP\&.
 If this relation is not specified, the default is to listen on TCP
 port 88 (the standard port).  Prior to release 1.13, the default
 was not to listen for TCP connections at all.
+.TP
+.B \fBkpasswd_listen\fP
+(Comma\-separated list.)  Tells the \fIkadmind(8)\fP daemon to only
+bind to certain addresses for kpasswd.  An optional port number,
+separated from the address by a colon, may be included.  If the
+name or address contains colons (for example, if it is an IPv6 address),
+enclose it in square brackets to distinguish the colon from a port
+separator.
+(NOTE: The daemon expects all addresses specified to exist and be able to
+be bound to.  If it fails binding to any of the addresses then the daemon
+will fail to start.)
 .TP
 .B \fBmaster_key_name\fP
 (String.)  Specifies the name of the principal associated with the
