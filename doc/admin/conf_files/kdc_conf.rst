@@ -210,10 +210,26 @@ The following tags may be specified in a [realms] subsection:
     new updates from the master.  The default value is ``2m`` (that
     is, two minutes).
 
+**iprop_listen**
+    (Whitespace- or comma-separated list.)  Specifies the iprop RPC
+    listening addresses and/or ports for the :ref:`kadmind(8)` daemon.
+    Each entry may be an interface address, a port number, or an
+    address and port number separated by a colon.  If the address
+    contains colons, enclose it in square brackets.  If no address is
+    specified, the wildcard address is used.  If kadmind fails to bind
+    to any of the specified addresses, it will fail to start.  The
+    default (when **iprop_enable** is true) is to bind to the wildcard
+    address at the port specified in **iprop_port**.  New in release
+    1.15.
+
 **iprop_port**
     (Port number.)  Specifies the port number to be used for
-    incremental propagation.  This is required in both master and
-    slave configuration files.
+    incremental propagation.  When **iprop_enable** is true, this
+    relation is required in the slave configuration file, and this
+    relation or **iprop_listen** is required in the master
+    configuration file, as there is no default port number.  Port
+    numbers specified in **iprop_listen** entries will override this
+    port number for the :ref:`kadmind(8)` daemon.
 
 **iprop_resync_timeout**
     (Delta time string.)  Specifies the amount of time to wait for a
@@ -232,10 +248,23 @@ The following tags may be specified in a [realms] subsection:
     **database_name** is used.  Determination of the **iprop_logfile**
     default value will not use values from the [dbmodules] section.)
 
+**kadmind_listen**
+    (Whitespace- or comma-separated list.)  Specifies the kadmin RPC
+    listening addresses and/or ports for the :ref:`kadmind(8)` daemon.
+    Each entry may be an interface address, a port number, or an
+    address and port number separated by a colon.  If the address
+    contains colons, enclose it in square brackets.  If no address is
+    specified, the wildcard address is used.  If kadmind fails to bind
+    to any of the specified addresses, it will fail to start.  The
+    default is to bind to the wildcard address at the port specified
+    in **kadmind_port**, or the standard kadmin port (749).  New in
+    release 1.15.
+
 **kadmind_port**
     (Port number.)  Specifies the port on which the :ref:`kadmind(8)`
-    daemon is to listen for this realm.  The assigned port for kadmind
-    is 749, which is used by default.
+    daemon is to listen for this realm.  Port numbers specified in
+    **kadmind_listen** entries will override this port number.  The
+    assigned port for kadmind is 749, which is used by default.
 
 **key_stash_file**
     (String.)  Specifies the location where the master key has been
@@ -257,6 +286,24 @@ The following tags may be specified in a [realms] subsection:
     If this relation is not specified, the default is to listen on TCP
     port 88 (the standard port).  Prior to release 1.13, the default
     was not to listen for TCP connections at all.
+
+**kpasswd_listen**
+    (Comma-separated list.)  Specifies the kpasswd listening addresses
+    and/or ports for the :ref:`kadmind(8)` daemon.  Each entry may be
+    an interface address, a port number, or an address and port number
+    separated by a colon.  If the address contains colons, enclose it
+    in square brackets.  If no address is specified, the wildcard
+    address is used.  If kadmind fails to bind to any of the specified
+    addresses, it will fail to start.  The default is to bind to the
+    wildcard address at the port specified in **kpasswd_port**, or the
+    standard kpasswd port (464).  New in release 1.15.
+
+**kpasswd_port**
+    (Port number.)  Specifies the port on which the :ref:`kadmind(8)`
+    daemon is to listen for password change requests for this realm.
+    Port numbers specified in **kpasswd_listen** entries will override
+    this port number.  The assigned port for password change requests
+    is 464, which is used by default.
 
 **master_key_name**
     (String.)  Specifies the name of the principal associated with the

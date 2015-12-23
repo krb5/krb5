@@ -150,20 +150,24 @@ setup_loop(int proponly, verto_ctx **ctx_out)
     if (ret)
         return ret;
     if (!proponly) {
-        ret = loop_add_udp_address(handle->params.kpasswd_port, NULL);
+        ret = loop_add_udp_address(handle->params.kpasswd_port,
+                                   handle->params.kpasswd_listen);
         if (ret)
             return ret;
-        ret = loop_add_tcp_address(handle->params.kpasswd_port, NULL);
+        ret = loop_add_tcp_address(handle->params.kpasswd_port,
+                                   handle->params.kpasswd_listen);
         if (ret)
             return ret;
-        ret = loop_add_rpc_service(handle->params.kadmind_port, NULL, KADM,
-                                   KADMVERS, kadm_1);
+        ret = loop_add_rpc_service(handle->params.kadmind_port,
+                                   handle->params.kadmind_listen,
+                                   KADM, KADMVERS, kadm_1);
         if (ret)
             return ret;
     }
 #ifndef DISABLE_IPROP
     if (handle->params.iprop_enabled) {
-        ret = loop_add_rpc_service(handle->params.iprop_port, NULL,
+        ret = loop_add_rpc_service(handle->params.iprop_port,
+                                   handle->params.iprop_listen,
                                    KRB5_IPROP_PROG, KRB5_IPROP_VERS,
                                    krb5_iprop_prog_1);
         if (ret)

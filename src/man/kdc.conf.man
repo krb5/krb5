@@ -269,10 +269,26 @@ Prior to release 1.11, the maximum value was 2500.
 new updates from the master.  The default value is \fB2m\fP (that
 is, two minutes).
 .TP
+.B \fBiprop_listen\fP
+(Whitespace\- or comma\-separated list.)  Specifies the iprop RPC
+listening addresses and/or ports for the \fIkadmind(8)\fP daemon.
+Each entry may be an interface address, a port number, or an
+address and port number separated by a colon.  If the address
+contains colons, enclose it in square brackets.  If no address is
+specified, the wildcard address is used.  If kadmind fails to bind
+to any of the specified addresses, it will fail to start.  The
+default (when \fBiprop_enable\fP is true) is to bind to the wildcard
+address at the port specified in \fBiprop_port\fP\&.  New in release
+1.15.
+.TP
 .B \fBiprop_port\fP
 (Port number.)  Specifies the port number to be used for
-incremental propagation.  This is required in both master and
-slave configuration files.
+incremental propagation.  When \fBiprop_enable\fP is true, this
+relation is required in the slave configuration file, and this
+relation or \fBiprop_listen\fP is required in the master
+configuration file, as there is no default port number.  Port
+numbers specified in \fBiprop_listen\fP entries will override this
+port number for the \fIkadmind(8)\fP daemon.
 .TP
 .B \fBiprop_resync_timeout\fP
 (Delta time string.)  Specifies the amount of time to wait for a
@@ -291,10 +307,23 @@ back end is being used, or the file name is specified in the
 \fBdatabase_name\fP is used.  Determination of the \fBiprop_logfile\fP
 default value will not use values from the [dbmodules] section.)
 .TP
+.B \fBkadmind_listen\fP
+(Whitespace\- or comma\-separated list.)  Specifies the kadmin RPC
+listening addresses and/or ports for the \fIkadmind(8)\fP daemon.
+Each entry may be an interface address, a port number, or an
+address and port number separated by a colon.  If the address
+contains colons, enclose it in square brackets.  If no address is
+specified, the wildcard address is used.  If kadmind fails to bind
+to any of the specified addresses, it will fail to start.  The
+default is to bind to the wildcard address at the port specified
+in \fBkadmind_port\fP, or the standard kadmin port (749).  New in
+release 1.15.
+.TP
 .B \fBkadmind_port\fP
 (Port number.)  Specifies the port on which the \fIkadmind(8)\fP
-daemon is to listen for this realm.  The assigned port for kadmind
-is 749, which is used by default.
+daemon is to listen for this realm.  Port numbers specified in
+\fBkadmind_listen\fP entries will override this port number.  The
+assigned port for kadmind is 749, which is used by default.
 .TP
 .B \fBkey_stash_file\fP
 (String.)  Specifies the location where the master key has been
@@ -315,6 +344,24 @@ set this relation to the empty string with \fBkdc_tcp_ports = ""\fP\&.
 If this relation is not specified, the default is to listen on TCP
 port 88 (the standard port).  Prior to release 1.13, the default
 was not to listen for TCP connections at all.
+.TP
+.B \fBkpasswd_listen\fP
+(Comma\-separated list.)  Specifies the kpasswd listening addresses
+and/or ports for the \fIkadmind(8)\fP daemon.  Each entry may be
+an interface address, a port number, or an address and port number
+separated by a colon.  If the address contains colons, enclose it
+in square brackets.  If no address is specified, the wildcard
+address is used.  If kadmind fails to bind to any of the specified
+addresses, it will fail to start.  The default is to bind to the
+wildcard address at the port specified in \fBkpasswd_port\fP, or the
+standard kpasswd port (464).  New in release 1.15.
+.TP
+.B \fBkpasswd_port\fP
+(Port number.)  Specifies the port on which the \fIkadmind(8)\fP
+daemon is to listen for password change requests for this realm.
+Port numbers specified in \fBkpasswd_listen\fP entries will override
+this port number.  The assigned port for password change requests
+is 464, which is used by default.
 .TP
 .B \fBmaster_key_name\fP
 (String.)  Specifies the name of the principal associated with the
@@ -546,8 +593,8 @@ modules.  The value should be an absolute path.
 .SS [logging]
 .sp
 The [logging] section indicates how \fIkrb5kdc(8)\fP and
-\fIkadmind(8)\fP perform logging.  The keys in this section are
-daemon names, which may be one of:
+\fIkadmind(8)\fP perform logging.  It may contain the following
+relations:
 .INDENT 0.0
 .TP
 .B \fBadmin_server\fP
@@ -559,9 +606,16 @@ Specifies how \fIkrb5kdc(8)\fP performs logging.
 .B \fBdefault\fP
 Specifies how either daemon performs logging in the absence of
 relations specific to the daemon.
+.TP
+.B \fBdebug\fP
+(Boolean value.)  Specifies whether debugging messages are
+included in log outputs other than SYSLOG.  Debugging messages are
+always included in the system log output because syslog performs
+its own priority filtering.  The default value is false.  New in
+release 1.15.
 .UNINDENT
 .sp
-Values are of the following forms:
+Logging specifications may have the following forms:
 .INDENT 0.0
 .TP
 .B \fBFILE=\fP\fIfilename\fP or \fBFILE:\fP\fIfilename\fP
