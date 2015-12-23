@@ -127,7 +127,8 @@ SRCS=\
 	$(srcdir)/base64.c \
 	$(srcdir)/json.c \
 	$(srcdir)/bcmp.c \
-	$(srcdir)/strerror_r.c
+	$(srcdir)/strerror_r.c \
+	$(srcdir)/t_utf8.c
 
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
@@ -199,7 +200,10 @@ t_json: $(T_JSON_OBJS)
 t_unal: t_unal.o
 	$(CC_LINK) -o t_unal t_unal.o
 
-TEST_PROGS= t_k5buf t_path t_path_win t_base64 t_json t_unal
+t_utf8: t_utf8.o utf8.o
+	$(CC_LINK) -o t_utf8 t_utf8.o utf8.o
+
+TEST_PROGS= t_k5buf t_path t_path_win t_base64 t_json t_unal t_utf8
 
 check-unix:: $(TEST_PROGS)
 	./t_k5buf
@@ -208,11 +212,12 @@ check-unix:: $(TEST_PROGS)
 	./t_base64
 	./t_json
 	./t_unal
+	./t_utf8
 
 clean::
 	$(RM) t_k5buf.o t_k5buf t_unal.o t_unal path_win.o path_win
 	$(RM) t_path_win.o t_path_win t_path.o t_path t_base64.o t_base64
-	$(RM) t_json.o t_json libkrb5support.exports
+	$(RM) t_json.o t_json libkrb5support.exports t_utf8.o t_utf8
 
 @lib_frag@
 @libobj_frag@
