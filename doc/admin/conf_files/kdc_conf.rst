@@ -49,7 +49,9 @@ subsection does not contain a relation for the tag.  See the
 :ref:`kdc_realms` section for the definitions of these relations.
 
 * **host_based_services**
+* **kdc_listen**
 * **kdc_ports**
+* **kdc_tcp_listen**
 * **kdc_tcp_ports**
 * **no_host_referral**
 * **restrict_anonymous_to_tgt**
@@ -271,21 +273,44 @@ The following tags may be specified in a [realms] subsection:
     stored (via kdb5_util stash).  The default is |kdcdir|\
     ``/.k5.REALM``, where *REALM* is the Kerberos realm.
 
+**kdc_listen**
+    (Whitespace- or comma-separated list.)  Specifies the UDP
+    listening addresses and/or ports for the :ref:`krb5kdc(8)` daemon.
+    Each entry may be an interface address, a port number, or an
+    address and port number separated by a colon.  If the address
+    contains colons, enclose it in square brackets.  If no address is
+    specified, the wildcard address is used.  If no port is specified,
+    the standard port (88) is used.  If the KDC daemon fails to bind
+    to any of the specified addresses, it will fail to start.  The
+    default is to bind to the wildcard address on the standard port.
+    New in release 1.15.
+
 **kdc_ports**
-    (Whitespace- or comma-separated list.)  Lists the ports on which
-    the Kerberos server should listen for UDP requests, as a
-    comma-separated list of integers.  The default value is
-    ``88,750``, which are the assigned Kerberos port and the port
-    historically used by Kerberos V4.
+    (Whitespace- or comma-separated list, deprecated.)  Prior to
+    release 1.15, this relation lists the ports for the
+    :ref:`krb5kdc(8)` daemon to listen on for UDP requests.  In
+    release 1.15 and later, it has the same meaning as **kdc_listen**
+    if that relation is not defined.
+
+**kdc_tcp_listen**
+    (Whitespace- or comma-separated list.)  Specifies the TCP
+    listening addresses and/or ports for the :ref:`krb5kdc(8)` daemon.
+    Each entry may be an interface address, a port number, or an
+    address and port number separated by a colon.  If the address
+    contains colons, enclose it in square brackets.  If no address is
+    specified, the wildcard address is used.  If no port is specified,
+    the standard port (88) is used.  To disable listening on TCP, set
+    this relation to the empty string with ``kdc_tcp_listen = ""``.
+    If the KDC daemon fails to bind to any of the specified addresses,
+    it will fail to start.  The default is to bind to the wildcard
+    address on the standard port.  New in release 1.15.
 
 **kdc_tcp_ports**
-    (Whitespace- or comma-separated list.)  Lists the ports on which
-    the Kerberos server should listen for TCP connections, as a
-    comma-separated list of integers.  To disable listening on TCP,
-    set this relation to the empty string with ``kdc_tcp_ports = ""``.
-    If this relation is not specified, the default is to listen on TCP
-    port 88 (the standard port).  Prior to release 1.13, the default
-    was not to listen for TCP connections at all.
+    (Whitespace- or comma-separated list, deprecated.)  Prior to
+    release 1.15, this relation lists the ports for the
+    :ref:`krb5kdc(8)` daemon to listen on for UDP requests.  In
+    release 1.15 and later, it has the same meaning as
+    **kdc_tcp_listen** if that relation is not defined.
 
 **kpasswd_listen**
     (Comma-separated list.)  Specifies the kpasswd listening addresses
@@ -853,8 +878,8 @@ Sample kdc.conf File
 Here's an example of a kdc.conf file::
 
     [kdcdefaults]
-        kdc_ports = 88
-
+        kdc_listen = 88
+        kdc_tcp_listen = 88
     [realms]
         ATHENA.MIT.EDU = {
             kadmind_port = 749

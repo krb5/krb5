@@ -782,8 +782,8 @@ proc setup_kerberos_files { } {
 	    || $last_passname_conf != $multipass_name } {
 	set conffile [open $tmppwd/kdc.conf w]
 	puts $conffile "\[kdcdefaults\]"
-	puts $conffile "	kdc_ports = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
-	puts $conffile "	kdc_tcp_ports = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
+	puts $conffile "	kdc_listen = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
+	puts $conffile "	kdc_tcp_listen = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
 	puts $conffile ""
 	puts $conffile "\[realms\]"
 	puts $conffile "	$REALMNAME = \{"
@@ -803,11 +803,11 @@ proc setup_kerberos_files { } {
 	    puts $conffile "		supported_enctypes = $supported_enctypes"
 	}
 	if { $mode == "tcp" } {
-	    puts $conffile "		kdc_ports = [expr 3 + $portbase]"
-	    puts $conffile "		kdc_tcp_ports = [expr 1 + $portbase],[expr 3 + $portbase]"
+	    puts $conffile "		kdc_listen = [expr 3 + $portbase]"
+	    puts $conffile "		kdc_tcp_listen = [expr 1 + $portbase],[expr 3 + $portbase]"
 	} else {
-	    puts $conffile "		kdc_ports = [expr 1 + $portbase]"
-	    puts $conffile "		kdc_tcp_ports = [expr 3 + $portbase]"
+	    puts $conffile "		kdc_listen = [expr 1 + $portbase]"
+	    puts $conffile "		kdc_tcp_listen = [expr 3 + $portbase]"
 	}
 	puts $conffile "		default_principal_expiration = 2037.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable forwardable"
@@ -830,8 +830,8 @@ proc setup_kerberos_files { } {
 	    || $last_passname_conf != $multipass_name } {
 	set conffile [open $tmppwd/slave.conf w]
 	puts $conffile "\[kdcdefaults\]"
-	puts $conffile "	kdc_ports = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
-	puts $conffile "	kdc_tcp_ports = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
+	puts $conffile "	kdc_listen = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
+	puts $conffile "	kdc_tcp_listen = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
 	puts $conffile ""
 	puts $conffile "\[realms\]"
 	puts $conffile "	$REALMNAME = \{"
@@ -851,11 +851,11 @@ proc setup_kerberos_files { } {
 	    puts $conffile "		supported_enctypes = $supported_enctypes"
 	}
 	if { $mode == "tcp" } {
-	    puts $conffile "		kdc_ports = [expr 3 + $portbase]"
-	    puts $conffile "		kdc_tcp_ports = [expr 1 + $portbase],[expr 3 + $portbase]"
+	    puts $conffile "		kdc_listen = [expr 3 + $portbase]"
+	    puts $conffile "		kdc_tcp_listen = [expr 1 + $portbase],[expr 3 + $portbase]"
 	} else {
-	    puts $conffile "		kdc_ports = [expr 1 + $portbase]"
-	    puts $conffile "		kdc_tcp_ports = [expr 3 + $portbase]"
+	    puts $conffile "		kdc_listen = [expr 1 + $portbase]"
+	    puts $conffile "		kdc_tcp_listen = [expr 3 + $portbase]"
 	}
 	puts $conffile "		default_principal_expiration = 2037.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable forwardable"
