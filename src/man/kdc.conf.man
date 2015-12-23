@@ -96,9 +96,9 @@ subsection does not contain a relation for the tag.  See the
 .IP \(bu 2
 \fBhost_based_services\fP
 .IP \(bu 2
-\fBkdc_ports\fP
+\fBkdc_listen\fP
 .IP \(bu 2
-\fBkdc_tcp_ports\fP
+\fBkdc_tcp_listen\fP
 .IP \(bu 2
 \fBno_host_referral\fP
 .IP \(bu 2
@@ -311,21 +311,29 @@ by default.
 (String.)  Specifies the location where the master key has been
 stored (via kdb5_util stash).  The default is \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/.k5.REALM\fP, where \fIREALM\fP is the Kerberos realm.
 .TP
-.B \fBkdc_ports\fP
-(Whitespace\- or comma\-separated list.)  Lists the ports on which
-the Kerberos server should listen for UDP requests, as a
-comma\-separated list of integers.  The default value is
-\fB88,750\fP, which are the assigned Kerberos port and the port
-historically used by Kerberos V4.
+.B \fBkdc_listen\fP
+(Comma\-separated list.)  Tells the \fIkrb5kdc(8)\fP daemon to only
+bind to certain udp addresses.  The format may be a port number to bind
+to the wildcard address and the port, with or without a colon before
+it, or an ip address with an optional port number, separated from
+the address by a colon.  If the address contains colons (for example,
+if it is an IPv6 address), enclose it in square brackets to distinguish
+the colon from a port separator.
+(NOTE: The daemon expects all addresses specified to exist and be able to
+be bound to.  If it fails binding to any of the addresses then the daemon
+will fail to start.)
 .TP
-.B \fBkdc_tcp_ports\fP
-(Whitespace\- or comma\-separated list.)  Lists the ports on which
-the Kerberos server should listen for TCP connections, as a
-comma\-separated list of integers.  To disable listening on TCP,
-set this relation to the empty string with \fBkdc_tcp_ports = ""\fP\&.
-If this relation is not specified, the default is to listen on TCP
-port 88 (the standard port).  Prior to release 1.13, the default
-was not to listen for TCP connections at all.
+.B \fBkdc_tcp_listen\fP
+(Comma\-separated list.)  Tells the \fIkrb5kdc(8)\fP daemon to only
+bind to certain tcp addresses.  The format may be a port number to bind
+to the wildcard address and the port, with or without a colon before
+it, or an ip address with an optional port number, separated from
+the address by a colon.  If the address contains colons (for example,
+if it is an IPv6 address), enclose it in square brackets to distinguish
+the colon from a port separator.
+(NOTE: The daemon expects all addresses specified to exist and be able to
+be bound to.  If it fails binding to any of the addresses then the daemon
+will fail to start.)
 .TP
 .B \fBkpasswd_listen\fP
 (Comma\-separated list.)  Tells the \fIkadmind(8)\fP daemon to only
@@ -1064,8 +1072,8 @@ Here\(aqs an example of a kdc.conf file:
 .nf
 .ft C
 [kdcdefaults]
-    kdc_ports = 88
-
+    kdc_listen = 88
+    kdc_tcp_listen = 88
 [realms]
     ATHENA.MIT.EDU = {
         kadmind_port = 749

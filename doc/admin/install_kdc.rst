@@ -108,7 +108,8 @@ and location, and logging.
 An example kdc.conf file::
 
     [kdcdefaults]
-        kdc_ports = 88
+        kdc_listen = 88
+        kdc_tcp_listen = 88
 
     [realms]
         ATHENA.MIT.EDU = {
