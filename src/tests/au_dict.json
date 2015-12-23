@@ -33,7 +33,7 @@
 	"type":0},
 "req_id":"",
 "req.kdc_options":0,
-"req.pa_type":[]
+"req.pa_type":[],
 "req.server":{
 	"components":[],
 	"realm":"",
