@@ -79,7 +79,7 @@ gss_buffer_t		interprocess_token;
 {
     OM_uint32		status;
     OM_uint32 		length;
-    gss_union_ctx_id_t	ctx = (gss_union_ctx_id_t) *context_handle;
+    gss_union_ctx_id_t	ctx = NULL;
     gss_mechanism	mech;
     gss_buffer_desc	token = GSS_C_EMPTY_BUFFER;
     char		*buf;
@@ -94,6 +94,7 @@ gss_buffer_t		interprocess_token;
      * call it.
      */
 
+    ctx = (gss_union_ctx_id_t) *context_handle;
     mech = gssint_get_mechanism (ctx->mech_type);
     if (!mech)
 	return GSS_S_BAD_MECH;
@@ -131,7 +132,7 @@ gss_buffer_t		interprocess_token;
 
 cleanup:
     (void) gss_release_buffer(minor_status, &token);
-    if (ctx->internal_ctx_id == GSS_C_NO_CONTEXT) {
+    if (ctx != NULL && ctx->internal_ctx_id == GSS_C_NO_CONTEXT) {
 	/* If the mech deleted its context, delete the union context. */
 	free(ctx->mech_type->elements);
 	free(ctx->mech_type);
