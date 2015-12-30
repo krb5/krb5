@@ -386,7 +386,7 @@ parse_counted_string(char **strptr, char **result)
 /*
  * Hash extension records have the format:
  *  client = <empty string>
- *  server = HASH:<msghash> <clientlen>:<client> <serverlen>:<server>
+ *  server = SHA256:<msghash> <clientlen>:<client> <serverlen>:<server>
  * Spaces in the client and server string are represented with
  * with backslashes.  Client and server lengths are represented in
  * ASCII decimal (which is different from the 32-bit binary we use
@@ -403,11 +403,11 @@ check_hash_extension(krb5_donot_replay *rep)
     /* Check if this appears to match the hash extension format. */
     if (*rep->client)
         return 0;
-    if (strncmp(rep->server, "HASH:", 5) != 0)
+    if (strncmp(rep->server, "SHA256:", 7) != 0)
         return 0;
 
     /* Parse out the message hash. */
-    str = rep->server + 5;
+    str = rep->server + 7;
     end = strchr(str, ' ');
     if (!end)
         return 0;
@@ -659,7 +659,7 @@ krb5_rc_io_store(krb5_context context, struct dfl_data *t,
 
         /* Format the extension value so we know its length. */
         k5_buf_init_dynamic(&extbuf);
-        k5_buf_add_fmt(&extbuf, "HASH:%s %lu:%s %lu:%s", rep->msghash,
+        k5_buf_add_fmt(&extbuf, "SHA256:%s %lu:%s %lu:%s", rep->msghash,
                        (unsigned long)clientlen, rep->client,
                        (unsigned long)serverlen, rep->server);
         if (k5_buf_status(&extbuf) != 0)
