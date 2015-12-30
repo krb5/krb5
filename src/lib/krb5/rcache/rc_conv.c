@@ -38,9 +38,12 @@ krb5_auth_to_rep(krb5_context context, krb5_tkt_authent *auth, krb5_donot_replay
  * Generate a printable hash value for a message for use in a replay
  * record.  It is not necessary for this hash function to be
  * collision-proof (the only thing you can do with a second preimage
- * is produce a false replay error) but it is necessary for the
- * function to be consistent across implementations.  We do an unkeyed
- * MD5 hash of the message and convert it into uppercase hex
+ * is produce a false replay error) but for fine granularity replay detection
+ * it is necessary for the function to be consistent across implementations.
+ * When two implementations sharing a single replay cache don't agree on hash
+ * function, the code falls back to legacy replay detection based on
+ * (client, server, timestamp, usec) tuples.  We do an unkeyed
+ * SHA256 hash of the message and convert it into uppercase hex
  * representation.
  */
 krb5_error_code
@@ -48,29 +51,26 @@ krb5_rc_hash_message(krb5_context context, const krb5_data *message,
                      char **out)
 {
     krb5_error_code retval;
-    krb5_checksum cksum;
+    uint8_t cksum[K5_SHA256_HASHLEN];
     char *hash, *ptr;
     unsigned int i;
 
     *out = NULL;
 
     /* Calculate the binary checksum. */
-    retval = krb5_c_make_checksum(context, CKSUMTYPE_RSA_MD5, 0, 0,
-                                  message, &cksum);
+    retval = k5_sha256(message, cksum);
     if (retval)
         return retval;
 
     /* Convert the checksum into printable form. */
-    hash = malloc(cksum.length * 2 + 1);
+    hash = malloc(K5_SHA256_HASHLEN * 2 + 1);
     if (!hash) {
-        krb5_free_checksum_contents(context, &cksum);
         return KRB5_RC_MALLOC;
     }
 
-    for (i = 0, ptr = hash; i < cksum.length; i++, ptr += 2)
-        snprintf(ptr, 3, "%02X", cksum.contents[i]);
+    for (i = 0, ptr = hash; i < K5_SHA256_HASHLEN; i++, ptr += 2)
+        snprintf(ptr, 3, "%02X", cksum[i]);
     *ptr = '\0';
     *out = hash;
-    krb5_free_checksum_contents(context, &cksum);
     return 0;
 }
