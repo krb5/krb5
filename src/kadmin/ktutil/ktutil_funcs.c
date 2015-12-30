@@ -151,7 +151,12 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     lp->next = NULL;
     lp->entry = entry;
 
-    if (use_pass) {
+    if (use_pass < 0) {
+        retval = krb5_c_make_random_key(context,enctype,&(lp->entry->key));
+        if (retval)
+            goto cleanup;
+        
+    } else if (use_pass > 0) {
         password.length = pwsize;
         password.data = (char *) malloc(pwsize);
         if (!password.data) {
@@ -303,6 +308,173 @@ close_kt:
     krb5_kt_close(context, kt);
     return retval;
 }
+
+
+/*
+ * Extract recent entries from a keytab and append it to list after rekeying
+ * and vno increase.
+ * If list starts as NULL, allocate a new one if necessary.
+ */
+krb5_error_code ktutil_upgrade_keytab(context, name, princ_str, list)
+    krb5_context context;
+    char *name;
+    char *princ_str;
+    krb5_kt_list *list;
+{
+    krb5_timestamp now;
+    krb5_principal princ;
+    krb5_kt_list head = NULL, lp = NULL, tail = NULL, back = NULL, lt = NULL;
+    krb5_keytab kt;
+    krb5_keytab_entry *entry, *ent;
+    krb5_kt_cursor cursor;
+    krb5_error_code retval;
+    int found;
+
+    retval = krb5_timeofday(context, &now);
+    if (retval)
+        return retval;
+
+    if ( princ_str != NULL) {
+        retval = krb5_parse_name(context, princ_str, &princ);
+        if (retval) {
+            fprintf(stderr,_("ukt: Unable to initialize principal %s"
+                             ", aborting\n"),princ_str);
+            return retval;
+        }
+    }
+
+    if (*list) {
+        /* point lp at the tail of the list */
+        for (lp = *list; lp->next; lp = lp->next);
+        back = lp;
+        head = *list;
+    }
+
+    retval = krb5_kt_resolve(context, name, &kt);
+    if (retval)
+        goto exit_princ;
+    retval = krb5_kt_start_seq_get(context, kt, &cursor);
+    if (retval)
+        goto close_kt;
+
+    /* extract only entries with different enctype and highest vnos */
+    for (;;) {
+        entry = (krb5_keytab_entry *)malloc(sizeof (krb5_keytab_entry));
+        if (!entry) {
+            retval = ENOMEM;
+            break;
+        }
+        memset(entry, 0, sizeof (*entry));
+        retval = krb5_kt_next_entry(context, kt, entry, &cursor);
+        if (retval)
+            break;
+
+        if (princ_str != NULL && 
+            !krb5_principal_compare(context,princ,entry->principal)) {
+            krb5_kt_free_entry(context,entry);
+            free(entry);
+            entry = NULL;
+            continue;
+        }
+        
+        found = 0;
+        for(lt = head; lt ; lt = lt->next) {
+            if (!krb5_principal_compare(context,lt->entry->principal,entry->principal))
+                continue;
+            if (lt->entry->key.enctype == entry->key.enctype 
+                && lt->entry->vno >= entry->vno) {
+                /* previous one has a higher kvno, skip the addition */
+                found++;
+                break;
+            } else if (lt->entry->key.enctype == entry->key.enctype) {
+                /* swap the previous one with this one having a higher kvno */
+                ent = lt->entry;
+                lt->entry = entry;
+                entry = ent;
+                found++;
+                break;
+            }
+        }
+        
+        /* if already a slot for this enctype, skip the addition to the list */
+        if (found) {
+            krb5_kt_free_entry(context,entry);
+            free(entry);
+            entry = NULL;
+            continue;
+        }
+
+        /* add the entry to the list */
+        if (!lp) {              /* if list is empty, start one */
+            lp = (krb5_kt_list)malloc(sizeof (*lp));
+            if (!lp) {
+                retval = ENOMEM;
+                break;
+            }
+            head = lp;
+        } else {
+            lp->next = (krb5_kt_list)malloc(sizeof (*lp));
+            if (!lp->next) {
+                retval = ENOMEM;
+                break;
+            }
+            lp = lp->next;
+        }
+        if (!tail)
+            tail = lp;
+        lp->next = NULL;
+        lp->entry = entry;
+    }
+    if (entry)
+        free(entry);
+    if (retval) {
+        if (retval == KRB5_KT_END)
+            retval = 0;
+        else {
+            ktutil_free_kt_list(context, tail);
+            tail = NULL;
+            if (back)
+                back->next = NULL;
+        }
+    }
+    if (!tail) {
+        fprintf(stdout,"Nothing to upgrade\n");
+    } else {
+        int i = 0;
+        krb5_enctype enctype;
+        for(lt = tail; lt ; lt = lt->next) {
+            enctype = lt->entry->key.enctype;
+            lt->entry->vno++;
+            lt->entry->timestamp = now;
+            krb5_free_keyblock_contents(context, &(lt->entry->key));
+            retval = krb5_c_make_random_key(context,enctype,&(lt->entry->key));
+            if (retval) {
+                fprintf(stderr,_("ukt: Unable to generate "
+                                 "random key, aborting\n"));
+                break;
+            }
+            i++;
+        }
+        if (retval) {
+            ktutil_free_kt_list(context, tail);
+            tail = NULL;
+            if (back)
+                back->next = NULL;
+            i = 0;
+        }
+        fprintf(stdout,"%d entry(s) upgraded\n",i);
+    }
+    if (!*list)
+        *list = tail;
+    krb5_kt_end_seq_get(context, kt, &cursor);
+close_kt:
+    krb5_kt_close(context, kt);
+exit_princ:
+    if (princ_str)
+        krb5_free_principal(context,princ);
+    return retval;
+}
+
 
 /*
  * Takes a kt_list and writes it to the named keytab.

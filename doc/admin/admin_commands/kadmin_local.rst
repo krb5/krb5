@@ -942,6 +942,67 @@ Example::
 
 .. _ktremove_end:
 
+.. _ktsync:
+
+ktsync
+~~~~~~
+
+    **ktsync** [options] *principal* 
+
+Synchronize KDC entries for the specified *principal* from a keytab.
+
+This command starts by getting the attributes of the specified *principal*
+to establish the list of the associated keys enctype and vno.
+It then searches for the corresponding upgraded entries in the *keytab*,
+that is to say entries of same enctype and with a kvno incremented by one.
+If all the upgraded entries are found in the keytab, then ktsync pushes
+the entries to the KDC, otherwise, it prints the missing entries and aborts.
+
+This command requires the **inquire** privilege, or that the principal
+running the program to be the same as the one being listed, as well
+as the **setkey** privilege.
+
+The options are:
+
+**-k[eytab]** *keytab*
+    Use *keytab* as the keytab file.  Otherwise, the default keytab is
+    used.
+
+**-q**
+    Display less verbose information.
+
+**ktsync** is commonly used in conjunction with the **upgrade_kt** function of 
+*ktutil* to rekey principal keys stored on the KDC from the client side.
+It enables to generate and push the upgraded keytab on a remote server before
+applying the changes on the KDC, ensuring no window of inadequacy between KDC
+known keys and server stored keys.
+
+Example:
+
+ ::
+    ktutil:  ukt
+    ukt: must specify keytab to upgrade
+         usage: ukt keytab [principal]
+    ktutil:  ukt /etc/krb5.keytab
+    6 entry(s) upgraded
+    ktutil:  l
+    slot KVNO Principal
+    ---- ---- ---------------------------------------------------------------------
+       1    3 host/foo.mit.edu@ATHENA.MIT.EDU
+       2    3 host/foo.mit.edu@ATHENA.MIT.EDU
+       3    3 host/foo.mit.edu@ATHENA.MIT.EDU
+       4    3 host/foo.mit.edu@ATHENA.MIT.EDU
+       5    3 host/foo.mit.edu@ATHENA.MIT.EDU
+       6    3 host/foo.mit.edu@ATHENA.MIT.EDU
+    ktutil:  wkt /etc/krb5.keytab
+
+    kadmin: ktsync -k /etc/krb5.keytab host/foo.mit.edu
+    6 KDC entry(s) for principal host/foo.mit.edu synced from keytab
+         FILE:/etc/krb5.keytab.
+    kadmin:
+
+.. _ktsync_end:
+
 lock
 ~~~~
 

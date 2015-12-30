@@ -43,6 +43,8 @@ static void add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,
                           char *princ_str);
 static void remove_principal(char *keytab_str, krb5_keytab keytab,
                              char *princ_str, char *kvno_str);
+static void sync_principal(void *lhandle,char *keytab_str,
+                           krb5_keytab keytab, char *princ_str);
 static char *etype_string(krb5_enctype enctype);
 
 static int quiet;
@@ -66,6 +68,12 @@ rem_usage()
 {
     fprintf(stderr, _("Usage: ktremove [-k[eytab] keytab] [-q] principal "
                       "[kvno|\"all\"|\"old\"]\n"));
+}
+
+static void
+sync_usage()
+{
+    fprintf(stderr, _("Usage: ktsync [-k[eytab] keytab] [-q] principal\n"));
 }
 
 static int
@@ -245,6 +253,46 @@ kadmin_keytab_remove(int argc, char **argv)
         return;
 
     remove_principal(keytab_str, keytab, argv[0], argv[1]);
+
+    code = krb5_kt_close(context, keytab);
+    if (code != 0)
+        com_err(whoami, code, _("while closing keytab"));
+
+    free(keytab_str);
+}
+
+void
+kadmin_keytab_sync(int argc, char **argv)
+{
+    krb5_keytab keytab = 0;
+    char *keytab_str = NULL;
+    int code;
+
+    argc--; argv++;
+    quiet = 0;
+    while (argc) {
+        if (strncmp(*argv, "-k", 2) == 0) {
+            argc--; argv++;
+            if (argc<2 || keytab_str) {
+                sync_usage();
+                return;
+            }
+            keytab_str = *argv;
+        } else if (strcmp(*argv, "-q") == 0) {
+            quiet++;
+        } else
+            break;
+        argc--; argv++;
+    }
+
+    if (argc != 1) {
+        sync_usage();
+        return;
+    }
+    if (process_keytab(context, &keytab_str, &keytab))
+        return;
+
+    sync_principal(handle,keytab_str, keytab, argv[0]);
 
     code = krb5_kt_close(context, keytab);
     if (code != 0)
@@ -458,6 +506,108 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
         fprintf(stderr, _("%s: There is only one entry for principal %s in "
                           "keytab %s\n"), whoami, princ_str, keytab_str);
     }
+}
+
+static void
+sync_principal(void *lhandle,char *keytab_str,
+               krb5_keytab keytab, char *princ_str)
+{
+    kadm5_principal_ent_rec dprinc;
+    krb5_principal princ;
+    krb5_keytab_entry entry;
+    int code, nent, i, kvno;
+    krb5_keyblock *keylist;
+
+    code = krb5_parse_name(context, princ_str, &princ);
+    if (code != 0) {
+        com_err(whoami, code, _("while parsing principal name %s"), princ_str);
+        return;
+    }
+
+    code = kadm5_get_principal(lhandle, princ, &dprinc,
+                               KADM5_PRINCIPAL_NORMAL_MASK | KADM5_KEY_DATA);
+    if (code != 0) {
+        com_err(whoami, code, _("while retrieving \"%s\"."), princ_str);
+        goto cleanup;
+    }
+
+    keylist = (krb5_keyblock *) malloc(dprinc.n_key_data*sizeof(krb5_keyblock));
+    if (!keylist) {
+        com_err(whoami, ENOMEM, _("while initializing keyblocks"));
+        goto cleanup_dprinc;
+    }
+
+    /* Iterate over the princ keys as stored in the KDC and look for
+     * associated upgraded entries in the keytab.
+     * All the entries have to be found otherwise the function will exit
+     * after that loop, printing what is missing.
+     * A copy of keytab keyblocks will be made for further use in setkey.
+     */
+    nent = 0;
+    for (i = 0; i < dprinc.n_key_data; i++) {
+        krb5_key_data *key_data = &dprinc.key_data[i];
+        char enctype[BUFSIZ];
+        kvno = key_data->key_data_kvno + 1;
+
+        if (krb5_enctype_to_name(key_data->key_data_type[0], FALSE,
+                                 enctype, sizeof(enctype)))
+            snprintf(enctype, sizeof(enctype), _("<Encryption type 0x%x>"),
+                     key_data->key_data_type[0]);
+
+        code = krb5_kt_get_entry(context, keytab, princ, kvno,
+                                 key_data->key_data_type[0], &entry);
+        if (code != 0) {
+            if (code == ENOENT) {
+                fprintf(stderr, _("%s: Keytab %s does not exist.\n"),
+                        whoami, keytab_str);
+                goto cleanup_key;
+            } else {
+                com_err(whoami, code,
+                        _("while looking for key of kvno %d and enctype %s"),
+                        kvno, enctype);
+            }
+        } else {
+            code = krb5int_c_copy_keyblock_contents(context,&(entry.key),
+                                                    &keylist[nent]);
+            if (code != 0) {
+                com_err(whoami, code, _("while copying key of kvno %d and "
+                                        "enctype %s"),
+                        key_data->key_data_kvno + 1,enctype);
+            } else
+                nent++;
+            krb5_kt_free_entry(context, &entry);
+        }
+    }
+
+    /* push the collected entries to the KDC if all the entries 
+     * were detected otherwise print the abort message */
+    if (nent != dprinc.n_key_data) {
+        fprintf(stderr, _("%s: Missing key(s) detected in the keytab %s, "
+                          "aborting...\n"), whoami, keytab_str);
+        goto cleanup_key;
+    }
+    code = kadm5_setkey_principal(handle,princ,keylist,nent);
+    if (code != 0) {
+        com_err(whoami, code, _("while syncing %d entry(s) for principal %s"
+                                " from keytab %s."),
+                nent, princ_str, keytab_str);
+    } else if (!quiet) {
+        printf(_("%d KDC entry(s) for principal %s synced from keytab %s.\n"),
+               nent, princ_str, keytab_str);
+    }
+
+cleanup_key:
+    for (i=0; i < nent; i++) {
+        krb5int_c_free_keyblock_contents(context,&keylist[i]);
+    }
+    free(keylist);
+
+cleanup_dprinc:
+    kadm5_free_principal_ent(lhandle, &dprinc);
+
+cleanup:
+    krb5_free_principal(context, princ);    
+    return;
 }
 
 /*

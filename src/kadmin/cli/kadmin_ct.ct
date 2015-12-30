@@ -71,6 +71,9 @@ request kadmin_keytab_add, "Add entry(s) to a keytab",
 request kadmin_keytab_remove, "Remove entry(s) from a keytab",
 	ktremove, ktrem;
 
+request kadmin_keytab_sync, "Synchronize entry(s) from a keytab",
+	ktsync;
+
 request kadmin_lock, "Lock database exclusively (use with extreme caution!)",
 	lock;
 

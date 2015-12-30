@@ -65,6 +65,23 @@ Write the current keylist into the Kerberos V4 srvtab file *srvtab*.
 
 Alias: **wst**
 
+upgrade_kt
+~~~~~~~~~~
+
+    **upgrade_kt** *keytab* *[principal]* 
+
+Upgrade the Kerberos V5 keytab file *keytab* most recent entries
+(highest kvno for same enctype) into the current keylist.
+
+Upgrading is the process of rekeying and increasing the vno of an entry.
+The upgrade can be restricted to a particular principal of the keytab if
+necessary.
+
+Can be used prior to the **ktsync** function of *kadmin[.local]*
+to upgrade principal keys stored on the KDC from the client side.
+
+Alias: **ukt**
+
 clear_list
 ~~~~~~~~~~
 
@@ -86,10 +103,10 @@ Alias: **delent**
 add_entry
 ~~~~~~~~~
 
-    **add_entry** {**-key**\|\ **-password**} **-p** *principal*
+    **add_entry** {**-key**\|\ **-password** \|\ **-randkey**} **-p** *principal*
     **-k** *kvno* **-e** *enctype*
 
-Add *principal* to keylist using key or password.
+Add *principal* to keylist using key, password or a randomly generated key.
 
 Alias: **addent**
 

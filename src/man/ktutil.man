@@ -89,6 +89,24 @@ Alias: \fBwkt\fP
 Write the current keylist into the Kerberos V4 srvtab file \fIsrvtab\fP.
 .sp
 Alias: \fBwst\fP
+.SS upgrade_kt
+.INDENT 0.0
+.INDENT 3.5
+\fBupgrade_kt\fP \fIkeytab\fP \fI[principal]\fP
+.UNINDENT
+.UNINDENT
+.sp
+Upgrade the Kerberos V5 keytab file \fIkeytab\fP most recent entries
+(highest kvno for same enctype) into the current keylist.
+.sp
+Upgrading is the process of rekeying and increasing the vno of an entry.
+The upgrade can be restricted to a particular principal of the keytab if
+necessary.
+.sp
+Can be used prior to the \fBktsync\fP function of \fIkadmin[.local]\fP
+to upgrade principal keys stored on the KDC from the client side.
+.sp
+Alias: \fBukt\fP
 .SS clear_list
 .INDENT 0.0
 .INDENT 3.5
@@ -112,12 +130,12 @@ Alias: \fBdelent\fP
 .SS add_entry
 .INDENT 0.0
 .INDENT 3.5
-\fBadd_entry\fP {\fB\-key\fP|\fB\-password\fP} \fB\-p\fP \fIprincipal\fP
+\fBadd_entry\fP {\fB\-key\fP|\fB\-password\fP|\fB\-randkey\fP} \fB\-p\fP \fIprincipal\fP
 \fB\-k\fP \fIkvno\fP \fB\-e\fP \fIenctype\fP
 .UNINDENT
 .UNINDENT
 .sp
-Add \fIprincipal\fP to keylist using key or password.
+Add \fIprincipal\fP to keylist using key, password or a randomly generated key.
 .sp
 Alias: \fBaddent\fP
 .SS list_requests

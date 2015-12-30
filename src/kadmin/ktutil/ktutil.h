@@ -48,6 +48,10 @@ krb5_error_code ktutil_write_keytab (krb5_context,
                                      krb5_kt_list,
                                      char *);
 
+krb5_error_code ktutil_upgrade_keytab (krb5_context,
+                                       char *, char*,
+                                       krb5_kt_list *);
+
 krb5_error_code ktutil_read_srvtab (krb5_context,
                                     char *,
                                     krb5_kt_list *);
@@ -57,6 +61,8 @@ void ktutil_add_entry (int, char *[]);
 void ktutil_clear_list (int, char *[]);
 
 void ktutil_read_v5 (int, char *[]);
+
+void ktutil_upgrade_v5 (int, char *[]);
 
 void ktutil_read_v4 (int, char *[]);
 

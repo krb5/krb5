@@ -94,6 +94,28 @@ void ktutil_read_v5(argc, argv)
         com_err(argv[0], retval, _("while reading keytab \"%s\""), argv[1]);
 }
 
+void ktutil_upgrade_v5(argc, argv)
+    int argc;
+    char *argv[];
+{
+    krb5_error_code retval;
+    char* princ_str;
+
+    if (argc < 2) {
+        fprintf(stderr, _("%s: must specify keytab to upgrade\n"
+                          "\tusage: %s keytab [principal]\n"),
+                argv[0],argv[0]);
+        return;
+    } else if (argc == 3)
+        princ_str = argv[2];
+    else
+        princ_str = NULL;
+
+    retval = ktutil_upgrade_keytab(kcontext, argv[1], princ_str, &ktlist);
+    if (retval)
+        com_err(argv[0], retval, _("while upgrading keytab \"%s\""), argv[1]);
+}
+
 void ktutil_read_v4(argc, argv)
     int argc;
     char *argv[];
@@ -140,7 +162,7 @@ void ktutil_add_entry(argc, argv)
     char *princ = NULL;
     char *enctype = NULL;
     krb5_kvno kvno = 0;
-    int use_pass = 0, use_key = 0, i;
+    int use_pass = 0, use_key = 0, randkey = 0, i;
 
     for (i = 1; i < argc; i++) {
         if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-p", 2)) {
@@ -163,13 +185,22 @@ void ktutil_add_entry(argc, argv)
             use_key++;
             continue;
         }
+        if ((strlen(argv[i]) == 8) && !strncmp(argv[i], "-randkey", 8)) {
+            use_key++;
+            randkey++;
+            continue;
+        }
     }
 
     if (argc != 8 || !(princ && kvno && enctype) || (use_pass+use_key != 1)) {
-        fprintf(stderr, _("usage: %s (-key | -password) -p principal "
-                          "-k kvno -e enctype\n"), argv[0]);
+        fprintf(stderr, _("usage: %s (-key | -randkey | -password) -p principal"
+                          " -k kvno -e enctype\n"), argv[0]);
         return;
     }
+
+    /* use_pass==1 -> password ; use_pass==0 -> key ; use_pass<0 -> randey */
+    if (randkey)
+        use_pass = -1;
 
     retval = ktutil_add(kcontext, &ktlist, princ, kvno, enctype, use_pass);
     if (retval)

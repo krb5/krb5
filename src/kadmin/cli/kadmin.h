@@ -53,6 +53,7 @@ extern void kadmin_getpols(int argc, char *argv[]);
 extern void kadmin_getprivs(int argc, char *argv[]);
 extern void kadmin_keytab_add(int argc, char *argv[]);
 extern void kadmin_keytab_remove(int argc, char *argv[]);
+extern void kadmin_keytab_sync(int argc, char *argv[]);
 extern void kadmin_purgekeys(int argc, char *argv[]);
 extern void kadmin_getstrings(int argc, char *argv[]);
 extern void kadmin_setstring(int argc, char *argv[]);
