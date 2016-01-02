@@ -123,6 +123,55 @@ init_accept_sec_context(gss_cred_id_t claimant_cred_handle,
 }
 
 static void
+check_ticket_count(gss_cred_id_t gcreds, const char *user, int expected)
+{
+    krb5_context kcontext = NULL;
+    krb5_creds kcreds;
+    krb5_error_code ret;
+    krb5_cc_cursor cur;
+    krb5_ccache ccache = NULL;
+    krb5_principal princ = NULL;
+    OM_uint32 major, minor;
+    int count = 0;
+
+    ret = krb5_init_context(&kcontext);
+    check_k5err(kcontext, "krb5_init_context", ret);
+
+    ret = krb5_parse_name(kcontext, user, &princ);
+    check_k5err(kcontext, "krb5_parse_name", ret);
+
+    ret = krb5_cc_new_unique(kcontext, "MEMORY", NULL, &ccache);
+    check_k5err(kcontext, "krb5_cc_new_unique", ret);
+
+    ret = krb5_cc_initialize(kcontext, ccache, princ);
+    check_k5err(kcontext, "krb5_cc_initialize", ret);
+
+    major = gss_krb5_copy_ccache(&minor, gcreds, ccache);
+    check_gsserr("gss_krb5_copy_ccache", major, minor);
+
+    ret = krb5_cc_start_seq_get(kcontext, ccache, &cur);
+    check_k5err(kcontext, "krb5_cc_start_seq_get", ret);
+
+    while (!krb5_cc_next_cred(kcontext, ccache, &cur, &kcreds)) {
+        if (!krb5_is_config_principal(kcontext, kcreds.server))
+            count ++;
+        krb5_free_cred_contents(kcontext, &kcreds);
+    }
+
+    ret = krb5_cc_end_seq_get(kcontext, ccache, &cur);
+    check_k5err(kcontext, "krb5_cc_end_seq_get", ret);
+
+    if (expected != count) {
+        printf("Expected %d tickets but got %d\n", expected, count);
+        exit(1);
+    }
+
+    krb5_cc_destroy(kcontext, ccache);
+    krb5_free_principal(kcontext, princ);
+    krb5_free_context(kcontext);
+}
+
+static void
 constrained_delegate(gss_OID_set desired_mechs, gss_name_t target,
                      gss_cred_id_t delegated_cred_handle,
                      gss_cred_id_t verifier_cred_handle)
@@ -132,7 +181,7 @@ constrained_delegate(gss_OID_set desired_mechs, gss_name_t target,
     gss_name_t cred_name = GSS_C_NO_NAME;
     OM_uint32 time_rec, lifetime;
     gss_cred_usage_t usage;
-    gss_buffer_desc token;
+    gss_buffer_desc token, buf;
     gss_OID_set mechs;
 
     printf("Constrained delegation tests follow\n");
@@ -148,6 +197,10 @@ constrained_delegate(gss_OID_set desired_mechs, gss_name_t target,
                          &lifetime, &usage, &mechs) == GSS_S_COMPLETE) {
         display_canon_name("Delegated name", cred_name, &mech_krb5);
         display_oid("Delegated mech", &mechs->elements[0]);
+
+        major = gss_display_name(&minor, cred_name, &buf, NULL);
+        check_gsserr("gss_display_name", major, minor);
+
         (void)gss_release_name(&minor, &cred_name);
     }
 
@@ -165,6 +218,25 @@ constrained_delegate(gss_OID_set desired_mechs, gss_name_t target,
     (void)gss_release_buffer(&minor, &token);
     (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_release_oid_set(&minor, &mechs);
+
+    /* Ensure a second call does not acquire new ticket */
+    major = gss_init_sec_context(&minor, delegated_cred_handle,
+                                 &initiator_context, target,
+                                 mechs ? &mechs->elements[0] : &mech_krb5,
+                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
+                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
+                                 GSS_C_NO_BUFFER, NULL, &token, NULL,
+                                 &time_rec);
+    check_gsserr("gss_init_sec_context", major, minor);
+
+    (void)gss_release_buffer(&minor, &token);
+    (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
+    (void)gss_release_oid_set(&minor, &mechs);
+
+    /* We expect 3 tickets: own, to delegator and to target */
+    check_ticket_count(delegated_cred_handle, buf.value, 3);
+
+    (void)gss_release_buffer(&minor, &buf);
 }
 
 int
