@@ -81,3 +81,6 @@ bcmp.so bcmp.po $(OUTPRE)bcmp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 strerror_r.so strerror_r.po $(OUTPRE)strerror_r.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-thread.h strerror_r.c
+t_utf8.so t_utf8.po $(OUTPRE)t_utf8.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  $(top_srcdir)/include/k5-utf8.h t_utf8.c
