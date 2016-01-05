@@ -224,12 +224,15 @@ OM_uint32 *		time_rec;
 
     if (status != GSS_S_COMPLETE && status != GSS_S_CONTINUE_NEEDED) {
 	/*
-	 * the spec says (the preferred) method is to delete all
-	 * context info on the first call to init, and on all
-	 * subsequent calls make the caller responsible for
-	 * calling gss_delete_sec_context
+	 * The spec says the preferred method is to delete all context info on
+	 * the first call to init, and on all subsequent calls make the caller
+	 * responsible for calling gss_delete_sec_context.  However, if the
+	 * mechanism decided to delete the internal context, we should also
+	 * delete the union context.
 	 */
 	map_error(minor_status, mech);
+	if (union_ctx_id->internal_ctx_id == GSS_C_NO_CONTEXT)
+	    *context_handle = GSS_C_NO_CONTEXT;
 	if (*context_handle == GSS_C_NO_CONTEXT) {
 	    free(union_ctx_id->mech_type->elements);
 	    free(union_ctx_id->mech_type);
