@@ -250,7 +250,7 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 {
     static kdb_fullresync_result_t ret;
     char *ubuf = 0;
-    char clhost[MAXHOSTNAMELEN] = {0};
+    char clhost[NI_MAXHOST] = {0};
     int pret, fret;
     FILE *p;
     kadm5_server_handle_t handle = global_server_handle;
