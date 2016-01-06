@@ -379,7 +379,7 @@ static krb5_error_code
 kcmio_call(krb5_context context, struct kcmio *io, struct kcmreq *req)
 {
     krb5_error_code ret;
-    size_t reply_len;
+    size_t reply_len = 0;
 
     if (k5_buf_status(&req->reqbuf) != 0)
         return ENOMEM;
