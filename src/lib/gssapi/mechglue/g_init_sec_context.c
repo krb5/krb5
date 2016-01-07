@@ -228,8 +228,13 @@ OM_uint32 *		time_rec;
 	 * context info on the first call to init, and on all
 	 * subsequent calls make the caller responsible for
 	 * calling gss_delete_sec_context
+	 * However if the mechanism decided to null the internal context
+	 * we should also null the union context to avoid dereferencing
+	 * a null pointer in other gssapi calls
 	 */
 	map_error(minor_status, mech);
+	if (union_ctx_id->internal_ctx_id == GSS_C_NO_CONTEXT)
+	    *context_handle = GSS_C_NO_CONTEXT;
 	if (*context_handle == GSS_C_NO_CONTEXT) {
 	    free(union_ctx_id->mech_type->elements);
 	    free(union_ctx_id->mech_type);
