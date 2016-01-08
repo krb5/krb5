@@ -195,7 +195,8 @@ krb5_boolean ksu_get_tgt_via_passwd(context, client, options, zero_password,
     }
 
     code = krb5_get_init_creds_password(context, &creds, client, password,
-                                        NULL, NULL, 0, NULL, options);
+                                        krb5_prompter_posix, NULL, 0, NULL,
+                                        options);
     memset(password, 0, sizeof(password));
 
 
