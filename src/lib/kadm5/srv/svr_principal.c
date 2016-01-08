@@ -395,6 +395,8 @@ kadm5_create_principal_3(void *server_handle,
     /*
      * Argument sanity checking, and opening up the DB
      */
+    if (entry == NULL)
+        return EINVAL;
     if(!(mask & KADM5_PRINCIPAL) || (mask & KADM5_MOD_NAME) ||
        (mask & KADM5_MOD_TIME) || (mask & KADM5_LAST_PWD_CHANGE) ||
        (mask & KADM5_MKVNO) || (mask & KADM5_AUX_ATTRIBUTES) ||
@@ -403,12 +405,12 @@ kadm5_create_principal_3(void *server_handle,
         return KADM5_BAD_MASK;
     if ((mask & KADM5_KEY_DATA) && entry->n_key_data != 0)
         return KADM5_BAD_MASK;
+    if((mask & KADM5_POLICY) && entry->policy == NULL)
+        return KADM5_BAD_MASK;
     if((mask & KADM5_POLICY) && (mask & KADM5_POLICY_CLR))
         return KADM5_BAD_MASK;
     if((mask & ~ALL_PRINC_MASK))
         return KADM5_BAD_MASK;
-    if (entry == NULL)
-        return EINVAL;
 
     /*
      * Check to see if the principal exists
@@ -643,6 +645,8 @@ kadm5_modify_principal(void *server_handle,
 
     krb5_clear_error_message(handle->context);
 
+    if(entry == NULL)
+        return EINVAL;
     if((mask & KADM5_PRINCIPAL) || (mask & KADM5_LAST_PWD_CHANGE) ||
        (mask & KADM5_MOD_TIME) || (mask & KADM5_MOD_NAME) ||
        (mask & KADM5_MKVNO) || (mask & KADM5_AUX_ATTRIBUTES) ||
@@ -651,10 +655,10 @@ kadm5_modify_principal(void *server_handle,
         return KADM5_BAD_MASK;
     if((mask & ~ALL_PRINC_MASK))
         return KADM5_BAD_MASK;
+    if((mask & KADM5_POLICY) && entry->policy == NULL)
+        return KADM5_BAD_MASK;
     if((mask & KADM5_POLICY) && (mask & KADM5_POLICY_CLR))
         return KADM5_BAD_MASK;
-    if(entry == (kadm5_principal_ent_t) NULL)
-        return EINVAL;
     if (mask & KADM5_TL_DATA) {
         tl_data_orig = entry->tl_data;
         while (tl_data_orig) {
