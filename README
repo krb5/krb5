@@ -352,7 +352,7 @@ krb5-1.13 changes by ticket ID
 Acknowledgements
 ----------------
 
-Past and present Sponsors of the MIT Kerberos Consortium:
+Past Sponsors of the MIT Kerberos Consortium:
 
     Apple
     Carnegie Mellon University
@@ -366,10 +366,14 @@ Past and present Sponsors of the MIT Kerberos Consortium:
     MIT
     Michigan State University
     Microsoft
+    MITRE Corporation
+    Morgan-Stanley
     The National Aeronautics and Space Administration
         of the United States of America (NASA)
     Network Appliance (NetApp)
     Nippon Telephone and Telegraph (NTT)
+    US Government Office of the National Coordinator for Health
+        Information Technology (ONC)
     Oracle
     Pennsylvania State University
     Red Hat
@@ -394,6 +398,7 @@ Past and present members of the Kerberos Team at MIT:
     John Carr
     Mark Colan
     Don Davis
+    Sarah Day
     Alexandra Ellwood
     Carlos Garay
     Dan Geer
