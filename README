@@ -82,7 +82,7 @@ krb5-1.14 changes by ticket ID
 Acknowledgements
 ----------------
 
-Past and present Sponsors of the MIT Kerberos Consortium:
+Past Sponsors of the MIT Kerberos Consortium:
 
     Apple
     Carnegie Mellon University
@@ -96,10 +96,14 @@ Past and present Sponsors of the MIT Kerberos Consortium:
     MIT
     Michigan State University
     Microsoft
+    MITRE Corporation
+    Morgan-Stanley
     The National Aeronautics and Space Administration
         of the United States of America (NASA)
     Network Appliance (NetApp)
     Nippon Telephone and Telegraph (NTT)
+    US Government Office of the National Coordinator for Health
+        Information Technology (ONC)
     Oracle
     Pennsylvania State University
     Red Hat
@@ -124,6 +128,7 @@ Past and present members of the Kerberos Team at MIT:
     John Carr
     Mark Colan
     Don Davis
+    Sarah Day
     Alexandra Ellwood
     Carlos Garay
     Dan Geer
@@ -179,12 +184,14 @@ reports, suggestions, and valuable resources:
     David Bantz
     Alex Baule
     David Benjamin
+    Thomas Bernard
     Adam Bernstein
     Arlene Berry
     Jeff Blaine
     Radoslav Bodo
     Sumit Bose
     Emmanuel Bouillon
+    Philip Brown
     Michael Calmer
     Andrea Campi
     Julien Chaffraix
@@ -197,6 +204,7 @@ reports, suggestions, and valuable resources:
     Kevin Coffman
     Simon Cooper
     Sylvain Cortes
+    Ian Crowther
     Arran Cudbard-Bell
     Jeff D'Angelo
     Nalin Dahyabhai
@@ -218,6 +226,8 @@ reports, suggestions, and valuable resources:
     Ronni Feldt
     Bill Fellows
     JC Ferguson
+    Remi Ferrand
+    Paul Fertser
     William Fiveash
     Ákos Frohner
     Sebastian Galiano
@@ -286,6 +296,7 @@ reports, suggestions, and valuable resources:
     Mark Phalan
     Brett Randall
     Jonathan Reams
+    Jonathan Reed
     Robert Relyea
     Martin Rex
     Jason Rogers
@@ -320,6 +331,7 @@ reports, suggestions, and valuable resources:
     Ross Wilper
     Augustin Wolf
     David Woodhouse
+    Tsu-Phong Wu
     Xu Qiang
     Neng Xue
     Nickolai Zeldovich
