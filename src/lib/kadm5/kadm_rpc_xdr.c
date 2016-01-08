@@ -64,7 +64,14 @@ bool_t xdr_nullstring(XDR *xdrs, char **objp)
 		    return FALSE;
 	       }
 	  }
-	  return (xdr_opaque(xdrs, *objp, size));
+	  if (!xdr_opaque(xdrs, *objp, size))
+		  return FALSE;
+	  /* Check that the unmarshalled bytes are a C string. */
+	  if ((*objp)[size - 1] != '\0')
+		  return FALSE;
+	  if (memchr(*objp, '\0', size - 1) != NULL)
+		  return FALSE;
+	  return TRUE;
 
      case XDR_ENCODE:
 	  if (size != 0)
