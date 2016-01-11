@@ -160,6 +160,7 @@ gss_inquire_attrs_for_mech(
     gss_OID_set       *known_mech_attrs)
 {
     OM_uint32       status, tmpMinor;
+    gss_OID         selected_mech, public_mech;
     gss_mechanism   mech;
 
     if (minor == NULL)
@@ -173,14 +174,20 @@ gss_inquire_attrs_for_mech(
     if (known_mech_attrs != NULL)
         *known_mech_attrs = GSS_C_NO_OID_SET;
 
-    mech = gssint_get_mechanism((gss_OID)mech_oid);
+    status = gssint_select_mech_type(minor, mech_oid, &selected_mech);
+    if (status != GSS_S_COMPLETE)
+        return status;
+
+    mech = gssint_get_mechanism(selected_mech);
     if (mech != NULL && mech->gss_inquire_attrs_for_mech != NULL) {
-        status = mech->gss_inquire_attrs_for_mech(minor,
-                                                  mech_oid,
+        public_mech = gssint_get_public_oid(selected_mech);
+        status = mech->gss_inquire_attrs_for_mech(minor, public_mech,
                                                   mech_attrs,
                                                   known_mech_attrs);
-        if (GSS_ERROR(status))
+        if (GSS_ERROR(status)) {
+            map_error(minor, mech);
             return status;
+        }
     }
 
     if (known_mech_attrs != NULL && *known_mech_attrs == GSS_C_NO_OID_SET) {
