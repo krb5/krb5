@@ -415,6 +415,8 @@ void k5_iov_cursor_put(struct iov_cursor *cursor, unsigned char *block);
 
 /*** Crypto module declarations ***/
 
+/* Modules must implement the k5_sha256() function prototyped in k5-int.h. */
+
 /* Modules must implement the following enc_providers and hash_providers: */
 extern const struct krb5_enc_provider krb5int_enc_des;
 extern const struct krb5_enc_provider krb5int_enc_des3;
