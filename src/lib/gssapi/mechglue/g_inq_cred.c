@@ -169,7 +169,7 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
     gss_mechanism	mech;
     OM_uint32		status, temp_minor_status;
     gss_name_t		internal_name;
-    gss_OID		selected_mech;
+    gss_OID		selected_mech, public_mech;
 
     if (minor_status != NULL)
 	*minor_status = 0;
@@ -198,8 +198,9 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
 	return (GSS_S_DEFECTIVE_CREDENTIAL);
 #endif
 
+    public_mech = gssint_get_public_oid(selected_mech);
     status = mech->gss_inquire_cred_by_mech(minor_status,
-					    mech_cred, selected_mech,
+					    mech_cred, public_mech,
 					    name ? &internal_name : NULL,
 					    initiator_lifetime,
 					    acceptor_lifetime, cred_usage);

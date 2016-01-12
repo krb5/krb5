@@ -24,15 +24,17 @@ store_cred_fallback(
 	gss_OID_set *elements_stored,
 	gss_cred_usage_t *cred_usage_stored)
 {
+	gss_OID public_mech = gssint_get_public_oid(desired_mech);
+
 	if (mech->gss_store_cred_into != NULL) {
 		return mech->gss_store_cred_into(minor_status, mech_cred,
-						 cred_usage, desired_mech,
+						 cred_usage, public_mech,
 						 overwrite_cred, default_cred,
 						 cred_store, elements_stored,
 						 cred_usage_stored);
 	} else if (cred_store == GSS_C_NO_CRED_STORE) {
 		return mech->gss_store_cred(minor_status, mech_cred,
-					    cred_usage, desired_mech,
+					    cred_usage, public_mech,
 					    overwrite_cred, default_cred,
 					    elements_stored,
 					    cred_usage_stored);
