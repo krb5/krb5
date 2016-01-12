@@ -113,7 +113,8 @@ OM_uint32 KRB5_CALLCONV gss_inquire_saslname_for_mech(
     gss_buffer_t   mech_name,
     gss_buffer_t   mech_description)
 {
-    OM_uint32       status = GSS_S_BAD_MECH;
+    OM_uint32       status;
+    gss_OID         selected_mech, public_mech;
     gss_mechanism   mech;
 
     if (minor_status == NULL)
@@ -136,15 +137,26 @@ OM_uint32 KRB5_CALLCONV gss_inquire_saslname_for_mech(
         mech_description->value = NULL;
     }
 
+    status = gssint_select_mech_type(minor_status, desired_mech,
+                                     &selected_mech);
+    if (status != GSS_S_COMPLETE)
+        return status;
+
     mech = gssint_get_mechanism(desired_mech);
-    if (mech != NULL && mech->gss_inquire_saslname_for_mech != NULL) {
-        status = mech->gss_inquire_saslname_for_mech(minor_status,
-                                                     desired_mech,
-                                                     sasl_mech_name,
-                                                     mech_name,
+    if (mech == NULL) {
+        return GSS_S_BAD_MECH;
+    } else if (mech->gss_inquire_saslname_for_mech == NULL) {
+        status = GSS_S_UNAVAILABLE;
+    } else {
+        public_mech = gssint_get_public_oid(selected_mech);
+        status = mech->gss_inquire_saslname_for_mech(minor_status, public_mech,
+                                                     sasl_mech_name, mech_name,
                                                      mech_description);
+        if (status != GSS_S_COMPLETE)
+            map_error(minor_status, mech);
     }
-    if (status == GSS_S_BAD_MECH) {
+
+    if (status == GSS_S_UNAVAILABLE) {
         if (sasl_mech_name != GSS_C_NO_BUFFER)
             status = oidToSaslNameAlloc(minor_status, desired_mech,
                                         sasl_mech_name);
@@ -155,6 +167,7 @@ OM_uint32 KRB5_CALLCONV gss_inquire_saslname_for_mech(
     return status;
 }
 
+/* We cannot interpose this function as mech_type is an output parameter. */
 OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
     OM_uint32           *minor_status,
     const gss_buffer_t   sasl_mech_name,
