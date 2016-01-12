@@ -32,7 +32,6 @@ Supported platforms \/ OS distributions:
 Crypto backends:
     - builtin - MIT Kerberos native crypto library
     - OpenSSL (1.0\+) - http://www.openssl.org
-    - NSS (3.12.9\+) - http://www.mozilla.org/projects/security/pki/nss
 
 Database backends: LDAP, DB2
 

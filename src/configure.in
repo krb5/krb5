@@ -225,24 +225,6 @@ builtin)
 openssl)
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
   ;;
-nss)
-  if test "${CRYPTO_IMPL_CFLAGS+set}" != set; then
-    CRYPTO_IMPL_CFLAGS=`pkg-config --cflags nss`
-  fi
-  if test "${CRYPTO_IMPL_LIBS+set}" != set; then
-    CRYPTO_IMPL_LIBS="-lnss3 $(pkg-config --libs nss-util)"
-  fi
-  AC_DEFINE(CRYPTO_IMPL_NSS,1,[Define if crypto implementation is NSS])
-  save_CFLAGS=$CFLAGS
-  CFLAGS="$CFLAGS $CRYPTO_IMPL_CFLAGS"
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-#include <nss.h>
-#if NSS_VMAJOR < 3 || (NSS_VMAJOR == 3 && NSS_VMINOR < 13)
-#error
-#endif
-  ])], [], [AC_MSG_ERROR([NSS version 3.13 or later required.])])
-  CFLAGS=$save_CFLAGS
-  ;;
 *)
   AC_MSG_ERROR([Unknown crypto implementation $withval])
   ;;
@@ -252,15 +234,11 @@ AC_SUBST(CRYPTO_IMPL)
 AC_SUBST(CRYPTO_IMPL_CFLAGS)
 AC_SUBST(CRYPTO_IMPL_LIBS)
 
-if test "$CRYPTO_IMPL" = nss; then
-	PRNG_ALG="nss"
-else
 AC_ARG_WITH([prng-alg],
-AC_HELP_STRING([--with-prng-alg=ALG], [use specified PRNG algorithm. Ignored for nss. @<:@fortuna@:>@]),
+AC_HELP_STRING([--with-prng-alg=ALG], [use specified PRNG algorithm. @<:@fortuna@:>@]),
 [PRNG_ALG=$withval
 AC_MSG_NOTICE(k5crypto will use '$withval')
 ], PRNG_ALG=fortuna)
-fi
 AC_CONFIG_COMMANDS(PRNG_ALG, , PRNG_ALG=$PRNG_ALG)
 AC_SUBST(PRNG_ALG)
 if test "$PRNG_ALG" = fortuna; then

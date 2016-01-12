@@ -492,12 +492,12 @@ void krb5int_crypto_impl_cleanup(void);
  * These functions must never fail on valid inputs, and contexts must remain
  * valid across forks.  If the module cannot meet those constraints, then it
  * should provide its own PRNG module and the build system should ensure that
- * it is used; for an example, see how nss uses prng_nss.
+ * it is used.
  *
  * The function symbols named above are also in the library export list (so
  * they can be used by the t_fortuna.c test code), so even if the module
  * defines them away or doesn't work with Fortuna, the module must provide
- * stubs; see stubs.c in the openssl or nss modules for examples.
+ * stubs; see stubs.c in the openssl module for examples.
  */
 
 #include <crypto_mod.h>

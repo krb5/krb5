@@ -26,7 +26,7 @@
 
 /*
  * Test basic libk5crypto behavior across forks.  This is primarily interesting
- * for back ends with PKCS11-based constraints, such as the NSS back end.
+ * for back ends with PKCS11-based constraints.
  */
 
 #include "k5-int.h"
@@ -92,13 +92,8 @@ main()
     t(krb5_c_decrypt(ctx, &kb_aes, 0, NULL, &out_aes, &decrypted));
     assert(data_eq(plain, decrypted));
 
-    /*
-     * Encrypt another RC4 message.  This may fail because RC4 cipher state in
-     * the NSS back end includes a PKCS11 handle which won't work across forks,
-     * but make sure it fails in the expected manner.
-     */
-    ret = krb5_k_encrypt(ctx, key_rc4, 0, &state_rc4, &plain, &out_rc4);
-    assert(ret == 0 || ret == EINVAL);
+    /* Encrypt another RC4 message. */
+    t(krb5_k_encrypt(ctx, key_rc4, 0, &state_rc4, &plain, &out_rc4));
     t(krb5_c_free_state(ctx, &kb_rc4, &state_rc4));
 
     /* If we're the parent, make sure the child succeeded. */
