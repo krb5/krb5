@@ -40,7 +40,7 @@ gss_OID_set *	name_types;
 
 {
     OM_uint32		status;
-    gss_OID		selected_mech = GSS_C_NO_OID;
+    gss_OID		selected_mech = GSS_C_NO_OID, public_mech;
     gss_mechanism	mech;
 
     /* Initialize outputs. */
@@ -70,23 +70,17 @@ gss_OID_set *	name_types;
 	return (status);
 
     mech = gssint_get_mechanism(selected_mech);
+    if (mech == NULL)
+	return GSS_S_BAD_MECH;
+    else if (mech->gss_inquire_names_for_mech == NULL)
+	return GSS_S_UNAVAILABLE;
+    public_mech = gssint_get_public_oid(selected_mech);
+    status = mech->gss_inquire_names_for_mech(minor_status, public_mech,
+					      name_types);
+    if (status != GSS_S_COMPLETE)
+	map_error(minor_status, mech);
 
-    if (mech) {
-
-	if (mech->gss_inquire_names_for_mech) {
-	    status = mech->gss_inquire_names_for_mech(
-				minor_status,
-				selected_mech,
-				name_types);
-	    if (status != GSS_S_COMPLETE)
-		map_error(minor_status, mech);
-	} else
-	    status = GSS_S_UNAVAILABLE;
-
-	return(status);
-    }
-
-    return (GSS_S_BAD_MECH);
+    return status;
 }
 
 static OM_uint32
