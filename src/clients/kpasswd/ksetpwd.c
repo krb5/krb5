@@ -227,7 +227,7 @@ static int init_creds()
 
 int main( int argc, char ** argv )
 {
-    char * new_password = NULL;
+    char * new_password;
     char * new_password2;
     krb5_context    kcontext;
     krb5_error_code kerr;
@@ -266,17 +266,15 @@ int main( int argc, char ** argv )
 /*
 ** get the new password -
 */
-    while( !new_password )
+    for (;;)
     {
         new_password = getpass("Enter new password: ");
         new_password2 = getpass("Verify new password: ");
-        if( strcmp( new_password, new_password2 ) )
-        {
-            printf("Passwords do not match\n");
-            free( new_password );
-            free( new_password2 );
-            continue;
-        }
+        if( strcmp( new_password, new_password2 ) == 0)
+            break;
+        printf("Passwords do not match\n");
+        free( new_password );
+        free( new_password2 );
     }
 /*
 ** change the password -
