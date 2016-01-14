@@ -1439,8 +1439,7 @@ service_fds(krb5_context context, struct select_state *selstate,
  * If P=3, Total = 3*U + T + 14.
  * If P=4, Total = 4*U + T + 30.
  *
- * Note that if you try to reach two ports (e.g., both 88 and 750) on
- * one server, it counts as two.
+ * Note that if you try to reach two ports on one server, it counts as two.
  *
  * There is one exception to the above rules.  Whenever a TCP connection is
  * established, we wait up to ten seconds for it to finish or fail before

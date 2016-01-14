@@ -24,7 +24,6 @@ Master key default enctype                  |defmkey|
 Default :ref:`keysalt list<Keysalt_lists>`  |defkeysalts|
 Permitted enctypes                          |defetypes|
 KDC default port                            88
-Second KDC default port                     750
 Admin server port                           749
 Password change port                        464
 ========================================== =============================  ====================

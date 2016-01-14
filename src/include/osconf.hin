@@ -80,16 +80,12 @@
 #define KDCRCACHE               "dfl:krb5kdc_rcache"
 
 #define KDC_PORTNAME            "kerberos" /* for /etc/services or equiv. */
-#define KDC_SECONDARY_PORTNAME  "kerberos-sec" /* For backwards */
-/* compatibility with */
-/* port 750 clients */
 
 #define KRB5_DEFAULT_PORT       88
-#define KRB5_DEFAULT_SEC_PORT   750
 
 #define DEFAULT_KPASSWD_PORT    464
 
-#define DEFAULT_KDC_UDP_PORTLIST "88,750"
+#define DEFAULT_KDC_UDP_PORTLIST "88"
 #define DEFAULT_KDC_TCP_PORTLIST "88"
 
 /*

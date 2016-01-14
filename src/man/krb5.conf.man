@@ -1416,7 +1416,7 @@ Here is an example of a generic krb5.conf file:
     ATHENA.MIT.EDU = {
         kdc = kerberos.mit.edu
         kdc = kerberos\-1.mit.edu
-        kdc = kerberos\-2.mit.edu:750
+        kdc = kerberos\-2.mit.edu
         admin_server = kerberos.mit.edu
         master_kdc = kerberos.mit.edu
     }

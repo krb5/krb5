@@ -216,7 +216,7 @@ server_list_contains(struct serverlist *list, struct server_entry *server)
 static krb5_error_code
 locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                   const char * name, struct serverlist *serverlist,
-                  k5_transport transport, int udpport, int sec_udpport)
+                  k5_transport transport, int udpport)
 {
     const char  *realm_srv_names[4];
     char **hostlist, *host, *port, *cp;
@@ -224,7 +224,7 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     int i;
 
     Tprintf ("looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
-             realm->data, name, ntohs (udpport), ntohs (sec_udpport));
+             realm->data, name, ntohs(udpport));
 
     if ((host = malloc(realm->length + 1)) == NULL)
         return ENOMEM;
@@ -250,7 +250,7 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     }
 
     for (i=0; hostlist[i]; i++) {
-        int p1, p2;
+        int port_num;
         k5_transport this_transport = transport;
         char *uri_path = NULL;
 
@@ -276,14 +276,11 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
             /* L is unsigned, don't need to check <0.  */
             if (l > 65535)
                 return EINVAL;
-            p1 = htons (l);
-            p2 = 0;
+            port_num = htons(l);
         } else if (this_transport == HTTPS) {
-            p1 = htons(443);
-            p2 = 0;
+            port_num = htons(443);
         } else {
-            p1 = udpport;
-            p2 = sec_udpport;
+            port_num = udpport;
         }
 
         /* If the hostname was in brackets, strip those off now. */
@@ -292,15 +289,8 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
             *cp = '\0';
         }
 
-        code = add_host_to_list(serverlist, host, p1, this_transport,
+        code = add_host_to_list(serverlist, host, port_num, this_transport,
                                 AF_UNSPEC, uri_path);
-        /* Second port is for IPv4 UDP only, and should possibly go away as
-         * it was originally a krb4 compatibility measure. */
-        if (code == 0 && p2 != 0 &&
-            (this_transport == TCP_OR_UDP || this_transport == UDP)) {
-            code = add_host_to_list(serverlist, host, p2, UDP, AF_INET,
-                                    uri_path);
-        }
         if (code)
             goto cleanup;
     }
@@ -313,13 +303,11 @@ cleanup:
 #ifdef TEST
 static krb5_error_code
 krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
-                     const char *name, struct serverlist *al, int udpport,
-                     int sec_udpport)
+                     const char *name, struct serverlist *al, int udpport)
 {
     krb5_error_code ret;
 
-    ret = locate_srv_conf_1(context, realm, name, al, TCP_OR_UDP, udpport,
-                            sec_udpport);
+    ret = locate_srv_conf_1(context, realm, name, al, TCP_OR_UDP, udpport);
     if (ret)
         return ret;
     if (al->nservers == 0)        /* Couldn't resolve any KDC names */
@@ -505,7 +493,7 @@ prof_locate_server(krb5_context context, const krb5_data *realm,
                    k5_transport transport)
 {
     const char *profname;
-    int dflport1, dflport2 = 0;
+    int dflport = 0;
     struct servent *serv;
 
     switch (svc) {
@@ -515,31 +503,30 @@ prof_locate_server(krb5_context context, const krb5_data *realm,
            have old, crufty, wrong settings that this is probably
            better.  */
     kdc_ports:
-        dflport1 = htons(KRB5_DEFAULT_PORT);
-        dflport2 = htons(KRB5_DEFAULT_SEC_PORT);
+        dflport = htons(KRB5_DEFAULT_PORT);
         break;
     case locate_service_master_kdc:
         profname = KRB5_CONF_MASTER_KDC;
         goto kdc_ports;
     case locate_service_kadmin:
         profname = KRB5_CONF_ADMIN_SERVER;
-        dflport1 = htons(DEFAULT_KADM5_PORT);
+        dflport = htons(DEFAULT_KADM5_PORT);
         break;
     case locate_service_krb524:
         profname = KRB5_CONF_KRB524_SERVER;
         serv = getservbyname("krb524", "udp");
-        dflport1 = serv ? serv->s_port : htons(4444);
+        dflport = serv ? serv->s_port : htons(4444);
         break;
     case locate_service_kpasswd:
         profname = KRB5_CONF_KPASSWD_SERVER;
-        dflport1 = htons(DEFAULT_KPASSWD_PORT);
+        dflport = htons(DEFAULT_KPASSWD_PORT);
         break;
     default:
         return EBUSY;           /* XXX */
     }
 
     return locate_srv_conf_1(context, realm, profname, serverlist, transport,
-                             dflport1, dflport2);
+                             dflport);
 }
 
 #ifdef KRB5_DNS_LOOKUP

@@ -62,7 +62,7 @@ which the KDC should listen on for Kerberos version 5 requests, as a
 comma-separated list.  This value overrides the UDP port numbers
 specified in the :ref:`kdcdefaults` section of :ref:`kdc.conf(5)`, but
 may be overridden by realm-specific values.  If no value is given from
-any source, the default ports are 88 and 750.
+any source, the default port is 88.
 
 The **-w** *numworkers* option tells the KDC to fork *numworkers*
 processes to listen to the KDC ports and process requests in parallel.
