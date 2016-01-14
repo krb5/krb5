@@ -359,7 +359,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
     char        savec = '\0';
     int         error;
     int         do_openlog, log_facility;
-    FILE        *f;
+    FILE        *f = NULL;
 
     /* Initialize */
     do_openlog = 0;
