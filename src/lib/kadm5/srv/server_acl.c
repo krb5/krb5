@@ -115,7 +115,9 @@ kadm5int_acl_get_line(fp, lnp)
             int byte;
             byte = fgetc(fp);
             acl_buf[i] = byte;
-            if (byte == (char)EOF) {
+
+            /* fgetc()'s return value, EOF, and `byte` are all ints. */
+            if (byte == EOF) {
                 if (i > 0 && acl_buf[i-1] == '\\')
                     i--;
                 break;          /* it gets nulled-out below */
