@@ -137,6 +137,7 @@ k5_marshal_cred
 k5_marshal_princ
 k5_os_free_context
 k5_os_init_context
+k5_parse_host_string
 k5_plugin_free_modules
 k5_plugin_load
 k5_plugin_load_all

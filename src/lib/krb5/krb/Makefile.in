@@ -75,6 +75,7 @@ STLIBOBJS= \
 	pac.o		\
 	pac_sign.o	\
 	parse.o		\
+	parse_host_string.o	\
 	plugin.o	\
 	pr_to_salt.o	\
 	preauth2.o	\
@@ -184,6 +185,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)pac.$(OBJEXT)		\
 	$(OUTPRE)pac_sign.$(OBJEXT)	\
 	$(OUTPRE)parse.$(OBJEXT)	\
+	$(OUTPRE)parse_host_string.$(OBJEXT)	\
 	$(OUTPRE)plugin.$(OBJEXT)	\
 	$(OUTPRE)pr_to_salt.$(OBJEXT)	\
 	$(OUTPRE)preauth2.$(OBJEXT)	\
@@ -293,6 +295,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/pac.c		\
 	$(srcdir)/pac_sign.c	\
 	$(srcdir)/parse.c	\
+	$(srcdir)/parse_host_string.c	\
 	$(srcdir)/plugin.c	\
 	$(srcdir)/pr_to_salt.c	\
 	$(srcdir)/preauth2.c	\
