@@ -34,8 +34,8 @@
 #include <ctype.h>
 
 /* Return true if s is composed solely of digits. */
-static krb5_boolean
-is_string_numeric(const char *s)
+krb5_boolean
+k5_is_string_numeric(const char *s)
 {
     if (*s == '\0')
         return FALSE;
@@ -80,13 +80,13 @@ k5_parse_host_string(const char *address, int default_port, char **host_out,
     *host_out = NULL;
     *port_out = 0;
 
-    if (address == NULL || *address == '\0')
+    if (address == NULL || *address == '\0' || *address == ':')
         return EINVAL;
     if (default_port < 0 || default_port > 65535)
         return EINVAL;
 
     /* Find the bounds of the host string and the start of the port string. */
-    if (is_string_numeric(address)) {
+    if (k5_is_string_numeric(address)) {
         port = address;
     } else if (*address == '[' && (p = strchr(address, ']')) != NULL) {
         host = address + 1;

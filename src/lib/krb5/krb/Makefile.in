@@ -354,6 +354,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/t_deltat.c	\
 	$(srcdir)/t_expand.c	\
 	$(srcdir)/t_pac.c	\
+	$(srcdir)/t_parse_host_string.c	\
 	$(srcdir)/t_princ.c	\
 	$(srcdir)/t_etypes.c    \
 	$(srcdir)/t_expire_warn.c \
@@ -398,6 +399,8 @@ T_PRINC_OBJS= t_princ.o parse.o unparse.o
 
 T_ETYPES_OBJS= t_etypes.o init_ctx.o etype_list.o plugin.o
 
+T_PARSE_HOST_STRING_OBJS= t_parse_host_string.o parse_host_string.o
+
 t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(KRB5_BASE_LIBS)
 t_ad_fx_armor: t_ad_fx_armor.o
@@ -410,7 +413,7 @@ t_kerb: $(T_KERB_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_kerb $(T_KERB_OBJS) $(KRB5_BASE_LIBS)
 
 t_ser: $(T_SER_OBJS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_ser $(T_SER_OBJS) $(KRB5_BASE_LIBS) 
+	$(CC_LINK) -o t_ser $(T_SER_OBJS) $(KRB5_BASE_LIBS)
 
 t_deltat : $(T_DELTAT_OBJS) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o t_deltat $(T_DELTAT_OBJS) $(SUPPORT_LIB)
@@ -428,6 +431,10 @@ t_princ: $(T_PRINC_OBJS) $(KRB5_BASE_DEPLIBS)
 
 t_etypes: $(T_ETYPES_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_etypes $(T_ETYPES_OBJS) $(KRB5_BASE_LIBS)
+
+t_parse_host_string: $(T_PARSE_HOST_STRING_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ $(T_PARSE_HOST_STRING_OBJS) $(CMOCKA_LIBS) \
+		$(KRB5_BASE_LIBS)
 
 t_expire_warn: t_expire_warn.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_expire_warn.o $(KRB5_BASE_LIBS)
@@ -495,6 +502,9 @@ check-pytests: t_expire_warn t_vfy_increds
 	$(RUNPYTEST) $(srcdir)/t_vfy_increds.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_in_ccache_patypes.py $(PYTESTFLAGS)
 
+check-cmocka: t_parse_host_string
+	$(RUN_TEST) ./t_parse_host_string > /dev/null
+
 clean:
 	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT) \
 		$(OUTPRE)t_kerb$(EXEEXT) $(OUTPRE)t_kerb.$(OBJEXT)	\
@@ -513,7 +523,9 @@ clean:
 	$(OUTPRE)t_vfy_increds$(EXEEXT) $(OUTPRE)t_vfy_increds.$(OBJEXT) \
 	$(OUTPRE)t_response_items$(EXEEXT) \
 	$(OUTPRE)t_response_items.$(OBJEXT) $(OUTPRE)t_sname_match$(EXEEXT) \
-	$(OUTPRE)t_sname_match.$(OBJEXT)
+	$(OUTPRE)t_sname_match.$(OBJEXT) \
+	$(OUTPRE)t_parse_host_string$(EXEEXT) \
+	$(OUTPRE)t_parse_host_string.$(OBJEXT)
 
 @libobj_frag@
 

@@ -331,6 +331,7 @@ local.properties
 /src/lib/krb5/krb/t_in_ccache
 /src/lib/krb5/krb/t_kerb
 /src/lib/krb5/krb/t_pac
+/src/lib/krb5/krb/t_parse_host_string
 /src/lib/krb5/krb/t_princ
 /src/lib/krb5/krb/t_ser
 /src/lib/krb5/krb/t_vfy_increds

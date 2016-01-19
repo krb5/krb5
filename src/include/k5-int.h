@@ -1758,6 +1758,10 @@ krb5_encode_kdc_rep(krb5_context, krb5_msgtype, const krb5_enc_kdc_rep_part *,
                     int using_subkey, const krb5_keyblock *, krb5_kdc_rep *,
                     krb5_data ** );
 
+/* Return true if s is non-empty and composed solely of digits. */
+krb5_boolean
+k5_is_string_numeric(const char *s);
+
 krb5_error_code
 k5_parse_host_string(const char *address, int default_port, char **host_out,
                      int *port_out);
