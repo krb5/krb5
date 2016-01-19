@@ -219,9 +219,9 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                   k5_transport transport, int udpport)
 {
     const char  *realm_srv_names[4];
-    char **hostlist, *host, *port, *cp;
+    char **hostlist, *host = NULL;
     krb5_error_code code;
-    int i;
+    int i, default_port;
 
     Tprintf ("looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
              realm->data, name, ntohs(udpport));
@@ -259,43 +259,25 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
         parse_uri_if_https(host, &this_transport, &host, &uri_path);
 
-        /* Find port number, and strip off any excess characters. */
-        if (*host == '[' && (cp = strchr(host, ']')))
-            cp = cp + 1;
-        else
-            cp = host + strcspn(host, " \t:");
-        port = (*cp == ':') ? cp + 1 : NULL;
-        *cp = '\0';
-
-        if (port) {
-            unsigned long l;
-            char *endptr;
-            l = strtoul (port, &endptr, 10);
-            if (endptr == NULL || *endptr != 0)
-                return EINVAL;
-            /* L is unsigned, don't need to check <0.  */
-            if (l > 65535)
-                return EINVAL;
-            port_num = htons(l);
-        } else if (this_transport == HTTPS) {
-            port_num = htons(443);
-        } else {
-            port_num = udpport;
-        }
-
-        /* If the hostname was in brackets, strip those off now. */
-        if (*host == '[' && (cp = strchr(host, ']'))) {
-            host++;
-            *cp = '\0';
-        }
-
-        code = add_host_to_list(serverlist, host, port_num, this_transport,
-                                AF_UNSPEC, uri_path);
+        default_port = (this_transport == HTTPS) ? htons(443) : udpport;
+        code = k5_parse_host_string(hostlist[i], default_port, &host,
+                                    &port_num);
+        if (code == 0 && host == NULL)
+            code = EINVAL;
         if (code)
             goto cleanup;
+
+        code = add_host_to_list(serverlist, host, htons(port_num),
+                                this_transport, AF_UNSPEC, uri_path);
+        if (code)
+            goto cleanup;
+
+        free(host);
+        host = NULL;
     }
 
 cleanup:
+    free(host);
     profile_free_list(hostlist);
     return code;
 }
