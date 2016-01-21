@@ -367,6 +367,13 @@ out = realm.run([kadminl, 'getprinc', 'keylessprinc'])
 if 'Number of keys: 0' not in out:
     fail('After purgekeys -all, keys remain')
 
+# Test for 8354 (old password history entries when -keepold is used)
+realm.run([kadminl, 'addpol', '-history', '2', 'keepoldpasspol'])
+realm.run([kadminl, 'addprinc', '-policy', 'keepoldpasspol', '-pw', 'aaaa',
+           'keepoldpassprinc'])
+map(lambda p: realm.run([kadminl, 'cpw', '-keepold', '-pw', p,
+                     'keepoldpassprinc']), ['bbbb', 'cccc', 'aaaa'])
+
 realm.stop()
 
 # Briefly test dump and load.
