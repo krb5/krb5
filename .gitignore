@@ -298,6 +298,7 @@ local.properties
 
 /src/lib/kdb/adb_err.[ch]
 
+/src/lib/kdb/t_sort_key_data
 /src/lib/kdb/t_stringattr
 /src/lib/kdb/t_ulog
 /src/lib/kdb/test.ulog
