@@ -60,6 +60,30 @@ static void usage()
     exit(2);
 }
 
+/* Print a warning if there are still un-destroyed caches in the collection. */
+static void
+print_remaining_cc_warning(krb5_context context)
+{
+    krb5_error_code retval;
+    krb5_ccache cache;
+    krb5_cccol_cursor cursor;
+
+    retval = krb5_cccol_cursor_new(context, &cursor);
+    if (retval) {
+        com_err(progname, retval, _("while listing credential caches"));
+        exit(1);
+    }
+
+    retval = krb5_cccol_cursor_next(context, cursor, &cache);
+    if (retval == 0 && cache != NULL) {
+        fprintf(stderr,
+                _("Other credential caches present, use -A to destroy all\n"));
+        krb5_cc_close(context, cache);
+    }
+
+    krb5_cccol_cursor_free(context, &cursor);
+}
+
 int
 main(argc, argv)
     int argc;
@@ -172,5 +196,9 @@ main(argc, argv)
             errflg = 1;
         }
     }
+
+    if (!quiet && !errflg)
+        print_remaining_cc_warning(kcontext);
+
     return errflg;
 }
