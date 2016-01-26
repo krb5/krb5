@@ -336,6 +336,31 @@ realm.run([kadminl, 'modprinc', '+requires_preauth', 'canon'])
 realm.kinit('canon', password('canon'))
 realm.kinit('alias', password('canon'), ['-C'])
 
+# Test password history.
+def test_pwhist(nhist):
+    def cpw(n, **kwargs):
+        realm.run([kadminl, 'cpw', '-pw', str(n), princ], **kwargs)
+    def cpw_fail(n):
+        cpw(n, expected_code=1)
+    output('*** Testing password history of size %d\n' % nhist)
+    princ = 'pwhistprinc' + str(nhist)
+    pol = 'pwhistpol' + str(nhist)
+    realm.run([kadminl, 'addpol', '-history', str(nhist), pol])
+    realm.run([kadminl, 'addprinc', '-policy', pol, '-nokey', princ])
+    for i in range(nhist):
+        # Set a password, then check that all previous passwords fail.
+        cpw(i)
+        for j in range(i + 1):
+            cpw_fail(j)
+    # Set one more new password, and make sure the oldest key is
+    # rotated out.
+    cpw(nhist)
+    cpw_fail(1)
+    cpw(0)
+
+for n in (1, 2, 3, 4, 5):
+    test_pwhist(n)
+
 # Regression test for #7980 (fencepost when dividing keys up by kvno).
 realm.run([kadminl, 'addprinc', '-randkey', '-e', 'aes256-cts,aes128-cts',
            'kvnoprinc'])

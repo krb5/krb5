@@ -59,6 +59,7 @@ char     *principal_attributes[] = { "krbprincipalname",
                                      "krbExtraData",
                                      "krbObjectReferences",
                                      "krbAllowedToDelegateTo",
+                                     "krbPwdHistory",
                                      NULL };
 
 /* Must match KDB_*_ATTR macros in ldap_principal.h.  */
@@ -77,14 +78,38 @@ static char *attributes_set[] = { "krbmaxticketlife",
                                   "krbLastFailedAuth",
                                   "krbLoginFailedCount",
                                   "krbLastAdminUnlock",
+                                  "krbPwdHistory",
                                   NULL };
+
+
+static void
+k5_free_key_data_contents(krb5_key_data *key)
+{
+    int16_t i;
+
+    for (i = 0; i < key->key_data_ver; i++) {
+        zapfree(key->key_data_contents[i], key->key_data_length[i]);
+        key->key_data_contents[i] = NULL;
+    }
+}
+
+void
+k5_free_key_data(krb5_int16 n_key_data, krb5_key_data *key_data)
+{
+    int16_t i;
+
+    if (key_data == NULL)
+        return;
+    for (i = 0; i < n_key_data; i++)
+        k5_free_key_data_contents(&key_data[i]);
+    free(key_data);
+}
 
 void
 krb5_dbe_free_contents(krb5_context context, krb5_db_entry *entry)
 {
     krb5_tl_data        *tl_data_next=NULL;
     krb5_tl_data        *tl_data=NULL;
-    int i, j;
 
     if (entry->e_data)
         free(entry->e_data);
@@ -96,24 +121,7 @@ krb5_dbe_free_contents(krb5_context context, krb5_db_entry *entry)
             free(tl_data->tl_data_contents);
         free(tl_data);
     }
-    if (entry->key_data) {
-        for (i = 0; i < entry->n_key_data; i++) {
-            for (j = 0; j < entry->key_data[i].key_data_ver; j++) {
-                if (entry->key_data[i].key_data_length[j]) {
-                    if (entry->key_data[i].key_data_contents[j]) {
-                        memset(entry->key_data[i].key_data_contents[j],
-                               0,
-                               (unsigned) entry->key_data[i].key_data_length[j]);
-                        free (entry->key_data[i].key_data_contents[j]);
-                    }
-                }
-                entry->key_data[i].key_data_contents[j] = NULL;
-                entry->key_data[i].key_data_length[j] = 0;
-                entry->key_data[i].key_data_type[j] = 0;
-            }
-        }
-        free(entry->key_data);
-    }
+    k5_free_key_data(entry->n_key_data, entry->key_data);
     memset(entry, 0, sizeof(*entry));
     return;
 }

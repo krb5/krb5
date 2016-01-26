@@ -1612,6 +1612,9 @@ kadm5_chpass_principal_3(void *server_handle,
         KADM5_FAIL_AUTH_COUNT;
     /* | KADM5_CPW_FUNCTION */
 
+    if (hist_added)
+        kdb->mask |= KADM5_KEY_HIST;
+
     ret = k5_kadm5_hook_chpass(handle->context, handle->hook_handles,
                                KADM5_HOOK_STAGE_PRECOMMIT, principal, keepold,
                                new_n_ks_tuple, new_ks_tuple, password);

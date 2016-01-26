@@ -110,7 +110,7 @@ typedef long            kadm5_ret_t;
 #define KADM5_RANDKEY_USED      0x100000
 #endif
 #define KADM5_LOAD              0x200000
-#define KADM5_NOKEY             0x400000
+#define KADM5_KEY_HIST          0x400000
 
 /* all but KEY_DATA, TL_DATA, LOAD */
 #define KADM5_PRINCIPAL_NORMAL_MASK 0x41ffff

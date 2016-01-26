@@ -1,6 +1,35 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c */
 /*
+ * Copyright (C) 2016 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+/*
  * Copyright (c) 2004-2005, Novell, Inc.
  * All rights reserved.
  *
@@ -361,12 +390,13 @@ asn1_encode_sequence_of_keys(krb5_key_data *key_data, krb5_int16 n_key_data,
 }
 
 static krb5_error_code
-asn1_decode_sequence_of_keys(krb5_data *in, krb5_key_data **out,
-                             krb5_int16 *n_key_data, krb5_kvno *mkvno)
+asn1_decode_sequence_of_keys(krb5_data *in, ldap_seqof_key_data *out)
 {
     krb5_error_code err;
     ldap_seqof_key_data *p;
     int i;
+
+    memset(out, 0, sizeof(*out));
 
     /*
      * This should be pushed back into other library initialization
@@ -389,9 +419,7 @@ asn1_decode_sequence_of_keys(krb5_data *in, krb5_key_data **out,
             p->key_data[i].key_data_ver = 2;
     }
 
-    *out = p->key_data;
-    *n_key_data = p->n_key_data;
-    *mkvno = p->mkvno;
+    *out = *p;
     free(p);
     return 0;
 }
@@ -415,19 +443,24 @@ free_berdata(struct berval **array)
     }
 }
 
-/* Decoding ASN.1 encoded key */
-static struct berval **
-krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
-                         krb5_kvno mkvno) {
-    struct berval **ret = NULL;
-    int currkvno;
-    int num_versions = 1;
-    int i, j, last;
+/*
+ * Encode krb5_key_data into a berval struct for insertion into LDAP.
+ */
+static krb5_error_code
+encode_keys(krb5_key_data *key_data_in, int n_key_data, krb5_kvno mkvno,
+            struct berval **bval_out)
+{
     krb5_error_code err = 0;
+    int i;
     krb5_key_data *key_data = NULL;
+    struct berval *bval = NULL;
+    krb5_data *code;
 
-    if (n_key_data < 0)
-        return NULL;
+    *bval_out = NULL;
+    if (n_key_data <= 0) {
+        err = EINVAL;
+        goto cleanup;
+    }
 
     /* Make a shallow copy of the key data so we can alter it. */
     key_data = k5calloc(n_key_data, sizeof(*key_data), &err);
@@ -446,31 +479,68 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
         }
     }
 
-    /* Find the number of key versions */
-    for (i = 0; i < n_key_data - 1; i++)
-        if (key_data[i].key_data_kvno != key_data[i + 1].key_data_kvno)
-            num_versions++;
+    bval = k5alloc(sizeof(struct berval), &err);
+    if (bval == NULL)
+        goto cleanup;
 
-    ret = (struct berval **) calloc (num_versions + 1, sizeof (struct berval *));
+    err = asn1_encode_sequence_of_keys(key_data, n_key_data, mkvno, &code);
+    if (err)
+        goto cleanup;
+
+    /* Steal the data pointer from code for bval and discard code. */
+    bval->bv_len = code->length;
+    bval->bv_val = code->data;
+    free(code);
+
+    *bval_out = bval;
+    bval = NULL;
+
+cleanup:
+    free(key_data);
+    free(bval);
+    return err;
+}
+
+/* Decoding ASN.1 encoded key */
+static struct berval **
+krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data,
+                         krb5_kvno mkvno)
+{
+    struct berval **ret = NULL;
+    int currkvno;
+    int num_versions = 0;
+    int i, j, last;
+    krb5_error_code err = 0;
+
+    if (n_key_data < 0)
+        return NULL;
+
+    /* Find the number of key versions */
+    if (n_key_data > 0) {
+        for (i = 0, num_versions = 1; i < n_key_data - 1; i++) {
+            if (key_data[i].key_data_kvno != key_data[i + 1].key_data_kvno)
+                num_versions++;
+        }
+    }
+
+    ret = calloc(num_versions + 1, sizeof(struct berval *));
     if (ret == NULL) {
         err = ENOMEM;
         goto cleanup;
     }
-    for (i = 0, last = 0, j = 0, currkvno = key_data[0].key_data_kvno; i < n_key_data; i++) {
-        krb5_data *code;
+    ret[num_versions] = NULL;
+
+    /* n_key_data may be 0 if a principal is created without a key. */
+    if (n_key_data == 0)
+        goto cleanup;
+
+    currkvno = key_data[0].key_data_kvno;
+    for (i = 0, last = 0, j = 0; i < n_key_data; i++) {
         if (i == n_key_data - 1 || key_data[i + 1].key_data_kvno != currkvno) {
-            ret[j] = k5alloc(sizeof(struct berval), &err);
-            if (ret[j] == NULL)
-                goto cleanup;
-            err = asn1_encode_sequence_of_keys(key_data + last,
-                                               (krb5_int16)i - last + 1,
-                                               mkvno, &code);
+            err = encode_keys(key_data + last, (krb5_int16)i - last + 1, mkvno,
+                              &ret[j]);
             if (err)
                 goto cleanup;
-            /*CHECK_NULL(ret[j]); */
-            ret[j]->bv_len = code->length;
-            ret[j]->bv_val = code->data;
-            free(code);
             j++;
             last = i + 1;
 
@@ -478,11 +548,48 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data_in, int n_key_data,
                 currkvno = key_data[i + 1].key_data_kvno;
         }
     }
-    ret[num_versions] = NULL;
 
 cleanup:
+    if (err != 0) {
+        free_berdata(ret);
+        ret = NULL;
+    }
 
-    free(key_data);
+    return ret;
+}
+
+/*
+ * Encode a principal's key history for insertion into ldap.
+ */
+static struct berval **
+krb5_encode_histkey(osa_princ_ent_rec *princ_ent)
+{
+    unsigned int i;
+    krb5_error_code err = 0;
+    struct berval **ret = NULL;
+
+    if (princ_ent->old_key_len <= 0)
+        return NULL;
+
+    ret = k5calloc(princ_ent->old_key_len + 1, sizeof(struct berval *), &err);
+    if (ret == NULL)
+        goto cleanup;
+
+    for (i = 0; i < princ_ent->old_key_len; i++) {
+        if (princ_ent->old_keys[i].n_key_data <= 0) {
+            err = EINVAL;
+            goto cleanup;
+        }
+        err = encode_keys(princ_ent->old_keys[i].key_data,
+                          princ_ent->old_keys[i].n_key_data,
+                          princ_ent->admin_history_kvno, &ret[i]);
+        if (err)
+            goto cleanup;
+    }
+
+    ret[princ_ent->old_key_len] = NULL;
+
+cleanup:
     if (err != 0) {
         free_berdata(ret);
         ret = NULL;
@@ -1003,7 +1110,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         free (strval[0]);
     }
 
-    if (entry->mask & KADM5_POLICY) {
+    if (entry->mask & KADM5_POLICY || entry->mask & KADM5_KEY_HIST) {
         memset(&princ_ent, 0, sizeof(princ_ent));
         for (tl_data=entry->tl_data; tl_data; tl_data=tl_data->tl_data_next) {
             if (tl_data->tl_data_type == KRB5_TL_KADM_DATA) {
@@ -1013,7 +1120,9 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                 break;
             }
         }
+    }
 
+    if (entry->mask & KADM5_POLICY) {
         if (princ_ent.aux_attributes & KADM5_POLICY) {
             memset(strval, 0, sizeof(strval));
             if ((st = krb5_ldap_name_to_policydn (context, princ_ent.policy, &polname)) != 0)
@@ -1039,6 +1148,22 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     if (entry->mask & KADM5_POLICY_CLR) {
         if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdpolicyreference", LDAP_MOD_DELETE, NULL)) != 0)
             goto cleanup;
+    }
+
+    if (entry->mask & KADM5_KEY_HIST) {
+        bersecretkey = krb5_encode_histkey(&princ_ent);
+        if (bersecretkey == NULL) {
+            st = ENOMEM;
+            goto cleanup;
+        }
+
+        st = krb5_add_ber_mem_ldap_mod(&mods, "krbpwdhistory",
+                                       LDAP_MOD_REPLACE | LDAP_MOD_BVALUES,
+                                       bersecretkey);
+        if (st != 0)
+            goto cleanup;
+        free_berdata(bersecretkey);
+        bersecretkey = NULL;
     }
 
     if (entry->mask & KADM5_KEY_DATA || entry->mask & KADM5_KVNO) {
@@ -1375,22 +1500,62 @@ cleanup:
     return st;
 }
 
-krb5_error_code
-krb5_decode_krbsecretkey(krb5_context context, krb5_db_entry *entries,
-                         struct berval **bvalues,
-                         krb5_tl_data *userinfo_tl_data, krb5_kvno *mkvno)
+static void
+free_ldap_seqof_key_data(ldap_seqof_key_data *keysets, krb5_int16 n_keysets)
 {
-    char                        *user=NULL;
-    int                         i=0, j=0, noofkeys=0;
-    krb5_key_data               *key_data=NULL, *tmp;
-    krb5_error_code             st=0;
+    int i;
 
-    if ((st=krb5_unparse_name(context, entries->princ, &user)) != 0)
+    if (keysets == NULL)
+        return;
+
+    for (i = 0; i < n_keysets; i++)
+        k5_free_key_data(keysets[i].n_key_data, keysets[i].key_data);
+    free(keysets);
+}
+
+/*
+ * Decode keys from ldap search results.
+ *
+ * Arguments:
+ *  - bvalues
+ *      The ldap search results containing the key data.
+ *  - mkvno
+ *      The master kvno that the keys were encrypted with.
+ *  - keysets_out
+ *      The decoded keys in a ldap_seqof_key_data struct.  Must be freed using
+ *      free_ldap_seqof_key_data.
+ *  - n_keysets_out
+ *      The number of entries in keys_out.
+ *  - total_keys_out
+ *      An optional argument that if given will be set to the total number of
+ *      keys found throughout all the entries: sum(keys_out.n_key_data)
+ *      May be NULL.
+ */
+static krb5_error_code
+decode_keys(struct berval **bvalues, ldap_seqof_key_data **keysets_out,
+            krb5_int16 *n_keysets_out, krb5_int16 *total_keys_out)
+{
+    krb5_error_code err = 0;
+    krb5_int16 n_keys, i, ki, total_keys;
+    ldap_seqof_key_data *keysets = NULL;
+
+    *keysets_out = NULL;
+    *n_keysets_out = 0;
+    if (total_keys_out)
+        *total_keys_out = 0;
+
+    /* Precount the number of keys. */
+    for (n_keys = 0, i = 0; bvalues[i] != NULL; i++) {
+        if (bvalues[i]->bv_len > 0)
+            n_keys++;
+    }
+
+    keysets = k5calloc(n_keys, sizeof(ldap_seqof_key_data), &err);
+    if (keysets == NULL)
         goto cleanup;
+    memset(keysets, 0, n_keys * sizeof(ldap_seqof_key_data));
 
-    for (i=0; bvalues[i] != NULL; ++i) {
-        krb5_int16 n_kd;
-        krb5_key_data *kd;
+    for (i = 0, ki = 0, total_keys = 0; bvalues[i] != NULL; i++) {
         krb5_data in;
 
         if (bvalues[i]->bv_len == 0)
@@ -1398,39 +1563,131 @@ krb5_decode_krbsecretkey(krb5_context context, krb5_db_entry *entries,
         in.length = bvalues[i]->bv_len;
         in.data = bvalues[i]->bv_val;
 
-        st = asn1_decode_sequence_of_keys (&in,
-                                           &kd,
-                                           &n_kd,
-                                           mkvno);
+        err = asn1_decode_sequence_of_keys(&in, &keysets[ki]);
+        if (err)
+            goto cleanup;
 
-        if (st != 0) {
-            const char *msg = error_message(st);
-            st = -1; /* Something more appropriate ? */
-            k5_setmsg(context, st,
-                      _("unable to decode stored principal key data (%s)"),
-                      msg);
-            goto cleanup;
-        }
-        noofkeys += n_kd;
-        tmp = key_data;
-        /* Allocate an extra key data to avoid allocating zero bytes. */
-        key_data = realloc(key_data, (noofkeys + 1) * sizeof (krb5_key_data));
-        if (key_data == NULL) {
-            key_data = tmp;
-            st = ENOMEM;
-            goto cleanup;
-        }
-        for (j = 0; j < n_kd; j++)
-            key_data[noofkeys - n_kd + j] = kd[j];
-        free (kd);
+        if (total_keys_out)
+            total_keys += keysets[ki].n_key_data;
+        ki++;
     }
 
-    entries->n_key_data = noofkeys;
-    entries->key_data = key_data;
+    if (total_keys_out)
+        *total_keys_out = total_keys;
+
+    *n_keysets_out = n_keys;
+    *keysets_out = keysets;
+    keysets = NULL;
+    n_keys = 0;
 
 cleanup:
-    free (user);
-    return st;
+    free_ldap_seqof_key_data(keysets, n_keys);
+    return err;
+}
+
+krb5_error_code
+krb5_decode_krbsecretkey(krb5_context context, krb5_db_entry *entries,
+                         struct berval **bvalues, krb5_kvno *mkvno)
+{
+    krb5_key_data *key_data = NULL, *tmp;
+    krb5_error_code err = 0;
+    ldap_seqof_key_data *keysets = NULL;
+    krb5_int16 i, n_keysets = 0, total_keys = 0;
+
+    err = decode_keys(bvalues, &keysets, &n_keysets, &total_keys);
+    if (err != 0) {
+        k5_prependmsg(context, err,
+                      _("unable to decode stored principal key data"));
+        goto cleanup;
+    }
+
+    key_data = k5calloc(total_keys, sizeof(krb5_key_data), &err);
+    if (key_data == NULL)
+        goto cleanup;
+    memset(key_data, 0, total_keys * sizeof(krb5_key_data));
+
+    if (n_keysets > 0)
+        *mkvno = keysets[0].mkvno;
+
+    /* Transfer key data values from keysets to a flat list in entries. */
+    tmp = key_data;
+    for (i = 0; i < n_keysets; i++) {
+        memcpy(tmp, keysets[i].key_data,
+               sizeof(krb5_key_data) * keysets[i].n_key_data);
+        tmp += keysets[i].n_key_data;
+        keysets[i].n_key_data = 0;
+    }
+    entries->n_key_data = total_keys;
+    entries->key_data = key_data;
+    key_data = NULL;
+
+cleanup:
+    free_ldap_seqof_key_data(keysets, n_keysets);
+    k5_free_key_data(total_keys, key_data);
+    return err;
+}
+
+static int
+compare_osa_pw_hist_ent(const void *left_in, const void *right_in)
+{
+    int kvno_left, kvno_right;
+    osa_pw_hist_ent *left = (osa_pw_hist_ent *)left_in;
+    osa_pw_hist_ent *right = (osa_pw_hist_ent *)right_in;
+
+    kvno_left = left->n_key_data ? left->key_data[0].key_data_kvno : 0;
+    kvno_right = right->n_key_data ? right->key_data[0].key_data_kvno : 0;
+    return kvno_left - kvno_right;
+}
+
+/*
+ * Decode the key history entries from an LDAP search.
+ *
+ * NOTE: the caller must free princ_ent->old_keys even on error.
+ */
+krb5_error_code
+krb5_decode_histkey(krb5_context context, struct berval **bvalues,
+                    osa_princ_ent_rec *princ_ent)
+{
+    krb5_error_code err = 0;
+    krb5_int16 i, n_keysets = 0;
+    ldap_seqof_key_data *keysets = NULL;
+
+    err = decode_keys(bvalues, &keysets, &n_keysets, NULL);
+    if (err != 0) {
+        k5_prependmsg(context, err,
+                      _("unable to decode stored principal pw history"));
+        goto cleanup;
+    }
+
+    princ_ent->old_keys = k5calloc(n_keysets, sizeof(osa_pw_hist_ent), &err);
+    if (princ_ent->old_keys == NULL)
+        goto cleanup;
+    princ_ent->old_key_len = n_keysets;
+
+    if (n_keysets > 0)
+        princ_ent->admin_history_kvno = keysets[0].mkvno;
+
+    /* Transfer key data pointers from keysets to princ_ent. */
+    for (i = 0; i < n_keysets; i++) {
+        princ_ent->old_keys[i].n_key_data = keysets[i].n_key_data;
+        princ_ent->old_keys[i].key_data = keysets[i].key_data;
+        keysets[i].n_key_data = 0;
+        keysets[i].key_data = NULL;
+    }
+
+    /* Sort the principal entries by kvno in ascending order. */
+    qsort(princ_ent->old_keys, princ_ent->old_key_len, sizeof(osa_pw_hist_ent),
+          &compare_osa_pw_hist_ent);
+
+    princ_ent->aux_attributes |= KADM5_KEY_HIST;
+
+    /* Set the next key to the end of the list.  The queue will be lengthened
+     * if it isn't full yet; the first entry will be replaced if it is full. */
+    princ_ent->old_key_next = princ_ent->old_key_len;
+
+cleanup:
+    free_ldap_seqof_key_data(keysets, n_keysets);
+    return err;
 }
 
 static char *
