@@ -40,6 +40,7 @@
 #include "ldap_pwd_policy.h"
 #include <time.h>
 #include <ctype.h>
+#include <kadm5/admin.h>
 
 #ifdef NEED_STRPTIME_PROTO
 extern char *strptime(const char *, const char *, struct tm *);
@@ -1313,6 +1314,20 @@ remove_overlapping_subtrees(char **list, int *subtcount, int sscope)
     *subtcount = count;
 }
 
+void
+free_princ_ent(osa_princ_ent_t princ_ent)
+{
+    unsigned int i;
+
+    for (i = 0; i < princ_ent->old_key_len; i++) {
+        k5_free_key_data(princ_ent->old_keys[i].n_key_data,
+                         princ_ent->old_keys[i].key_data);
+        princ_ent->old_keys[i].n_key_data = 0;
+        princ_ent->old_keys[i].key_data = NULL;
+    }
+    free(princ_ent->old_keys);
+}
+
 /*
  * Fill out a krb5_db_entry princ entry struct given a LDAP message containing
  * the results of a principal search of the directory.
@@ -1333,6 +1348,7 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
     char **pnvalues = NULL, **ocvalues = NULL, **a2d2 = NULL;
     struct berval **ber_key_data = NULL, **ber_tl_data = NULL;
     krb5_tl_data userinfo_tl_data = { NULL }, **endp, *tl;
+    osa_princ_ent_rec princ_ent;
 
     ret = krb5_copy_principal(context, princ, &entry->princ);
     if (ret)
@@ -1440,6 +1456,8 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
             goto cleanup;
     }
 
+    memset(&princ_ent, 0, sizeof(osa_princ_ent_rec));
+
     ret = krb5_ldap_get_string(ld, ent, "krbpwdpolicyreference", &pwdpolicydn,
                                &attr_present);
     if (ret)
@@ -1451,8 +1469,21 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
         ret = krb5_ldap_policydn_to_name(context, pwdpolicydn, &polname);
         if (ret)
             goto cleanup;
+        princ_ent.policy = polname;
+        princ_ent.aux_attributes |= KADM5_POLICY;
+    }
 
-        ret = krb5_update_tl_kadm_data(context, entry, polname);
+    ber_key_data = ldap_get_values_len(ld, ent, "krbpwdhistory");
+    if (ber_key_data != NULL) {
+        mask |= KDB_PWD_HISTORY_ATTR;
+        ret = krb5_decode_histkey(context, ber_key_data, &princ_ent);
+        if (ret)
+            goto cleanup;
+        ldap_value_free_len(ber_key_data);
+    }
+
+    if (princ_ent.aux_attributes) {
+        ret = krb5_update_tl_kadm_data(context, entry, &princ_ent);
         if (ret)
             goto cleanup;
     }
@@ -1460,8 +1491,7 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
     ber_key_data = ldap_get_values_len(ld, ent, "krbprincipalkey");
     if (ber_key_data != NULL) {
         mask |= KDB_SECRET_KEY_ATTR;
-        ret = krb5_decode_krbsecretkey(context, entry, ber_key_data,
-                                       &userinfo_tl_data, &mkvno);
+        ret = krb5_decode_krbsecretkey(context, entry, ber_key_data, &mkvno);
         if (ret)
             goto cleanup;
         if (mkvno != 0) {
@@ -1567,6 +1597,7 @@ cleanup:
     free(tktpolname);
     free(policydn);
     krb5_free_unparsed_name(context, user);
+    free_princ_ent(&princ_ent);
     return ret;
 }
 

@@ -97,7 +97,7 @@ static krb5_tl_data tl3 = { &tl4, KRB5_TL_KADM_DATA, 32,
                             U("\x12\x34\x5C\x01\x00\x00\x00\x08"
                               "\x3C\x74\x65\x73\x74\x2A\x3E\x00"
                               "\x00\x00\x08\x00\x00\x00\x00\x00"
-                              "\x00\x00\x00\x02\x00\x00\x00\x00") };
+                              "\x00\x00\x00\x00\x00\x00\x00\x00") };
 static krb5_tl_data tl2 = { &tl3, KRB5_TL_MOD_PRINC, 8, U("\5\6\7\0x@Y\0") };
 static krb5_tl_data tl1 = { &tl2, KRB5_TL_LAST_PWD_CHANGE, 4, U("\1\2\3\4") };
 

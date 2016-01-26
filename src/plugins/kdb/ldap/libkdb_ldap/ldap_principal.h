@@ -32,6 +32,7 @@
 #define _LDAP_PRINCIPAL_H 1
 
 #include "ldap_tkt_policy.h"
+#include "princ_xdr.h"
 
 #define  KEYHEADER  12
 
@@ -82,6 +83,7 @@
 #define KDB_LAST_FAILED_ATTR                 0x001000
 #define KDB_FAIL_AUTH_COUNT_ATTR             0x002000
 #define KDB_LAST_ADMIN_UNLOCK_ATTR           0x004000
+#define KDB_PWD_HISTORY_ATTR                 0x008000
 
 /*
  * This is a private contract between krb5_ldap_lockout_audit()
@@ -112,6 +114,12 @@ krb5_ldap_iterate(krb5_context, char *,
                   krb5_pointer, krb5_flags);
 
 void
+k5_free_key_data(krb5_int16 n_key_data, krb5_key_data *key_data);
+
+void
+krb5_dbe_free_contents(krb5_context context, krb5_db_entry *entry);
+
+void
 krb5_dbe_free_contents(krb5_context, krb5_db_entry *);
 
 krb5_error_code
@@ -121,8 +129,11 @@ krb5_error_code
 krb5_ldap_parse_principal_name(char *, char **);
 
 krb5_error_code
+krb5_decode_histkey(krb5_context, struct berval **, osa_princ_ent_rec *);
+
+krb5_error_code
 krb5_decode_krbsecretkey(krb5_context, krb5_db_entry *, struct berval **,
-                         krb5_tl_data *, krb5_kvno *);
+                         krb5_kvno *);
 
 krb5_error_code
 berval2tl_data(struct berval *in, krb5_tl_data **out);
