@@ -179,15 +179,16 @@ gss_inquire_attrs_for_mech(
         return status;
 
     mech = gssint_get_mechanism(selected_mech);
-    if (mech != NULL && mech->gss_inquire_attrs_for_mech != NULL) {
-        public_mech = gssint_get_public_oid(selected_mech);
-        status = mech->gss_inquire_attrs_for_mech(minor, public_mech,
-                                                  mech_attrs,
-                                                  known_mech_attrs);
-        if (GSS_ERROR(status)) {
-            map_error(minor, mech);
-            return status;
-        }
+    if (mech == NULL)
+        return GSS_S_BAD_MECH;
+    else if (mech->gss_inquire_attrs_for_mech == NULL)
+        return GSS_S_UNAVAILABLE;
+    public_mech = gssint_get_public_oid(selected_mech);
+    status = mech->gss_inquire_attrs_for_mech(minor, public_mech, mech_attrs,
+                                              known_mech_attrs);
+    if (GSS_ERROR(status)) {
+        map_error(minor, mech);
+        return status;
     }
 
     if (known_mech_attrs != NULL && *known_mech_attrs == GSS_C_NO_OID_SET) {
