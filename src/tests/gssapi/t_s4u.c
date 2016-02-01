@@ -123,6 +123,55 @@ init_accept_sec_context(gss_cred_id_t claimant_cred_handle,
 }
 
 static void
+check_ticket_count(gss_cred_id_t cred, int expected)
+{
+    krb5_error_code ret;
+    krb5_context context = NULL;
+    krb5_creds kcred;
+    krb5_cc_cursor cur;
+    krb5_ccache ccache;
+    int count = 0;
+    gss_key_value_set_desc store;
+    gss_key_value_element_desc elem;
+    OM_uint32 major, minor;
+    const char *ccname = "MEMORY:count";
+
+    store.count = 1;
+    store.elements = &elem;
+    elem.key = "ccache";
+    elem.value = ccname;
+    major = gss_store_cred_into(&minor, cred, GSS_C_INITIATE, &mech_krb5, 1, 0,
+                                &store, NULL, NULL);
+    check_gsserr("gss_store_cred_into", major, minor);
+
+    ret = krb5_init_context(&context);
+    check_k5err(context, "krb5_init_context", ret);
+
+    ret = krb5_cc_resolve(context, ccname, &ccache);
+    check_k5err(context, "krb5_cc_resolve", ret);
+
+    ret = krb5_cc_start_seq_get(context, ccache, &cur);
+    check_k5err(context, "krb5_cc_start_seq_get", ret);
+
+    while (!krb5_cc_next_cred(context, ccache, &cur, &kcred)) {
+        if (!krb5_is_config_principal(context, kcred.server))
+            count++;
+        krb5_free_cred_contents(context, &kcred);
+    }
+
+    ret = krb5_cc_end_seq_get(context, ccache, &cur);
+    check_k5err(context, "krb5_cc_end_seq_get", ret);
+
+    if (expected != count) {
+        printf("Expected %d tickets but got %d\n", expected, count);
+        exit(1);
+    }
+
+    krb5_cc_destroy(context, ccache);
+    krb5_free_context(context);
+}
+
+static void
 constrained_delegate(gss_OID_set desired_mechs, gss_name_t target,
                      gss_cred_id_t delegated_cred_handle,
                      gss_cred_id_t verifier_cred_handle)
@@ -164,7 +213,24 @@ constrained_delegate(gss_OID_set desired_mechs, gss_name_t target,
 
     (void)gss_release_buffer(&minor, &token);
     (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
+
+    /* Ensure a second call does not acquire new ticket. */
+    major = gss_init_sec_context(&minor, delegated_cred_handle,
+                                 &initiator_context, target,
+                                 mechs ? &mechs->elements[0] : &mech_krb5,
+                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
+                                 GSS_C_INDEFINITE, GSS_C_NO_CHANNEL_BINDINGS,
+                                 GSS_C_NO_BUFFER, NULL, &token, NULL,
+                                 &time_rec);
+    check_gsserr("gss_init_sec_context", major, minor);
+
+    (void)gss_release_buffer(&minor, &token);
+    (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_release_oid_set(&minor, &mechs);
+
+    /* We expect three tickets: our TGT, the evidence ticket, and the ticket to
+     * the target service. */
+    check_ticket_count(delegated_cred_handle, 3);
 }
 
 int

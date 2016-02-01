@@ -127,7 +127,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
     krb5_creds **out_creds;
 {
     krb5_error_code     code;
-    krb5_creds          in_creds, evidence_creds, *result_creds = NULL;
+    krb5_creds          in_creds, evidence_creds, mcreds, *result_creds = NULL;
     krb5_flags          flags = 0;
 
     *out_creds = NULL;
@@ -139,37 +139,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
     assert(cred->name != NULL);
 
-    /*
-     * Do constrained delegation if we have proxy credentials and
-     * we're not trying to get a ticket to ourselves (in which case
-     * we can just use the S4U2Self or evidence ticket directly).
-     */
-    if (cred->impersonator &&
-        !krb5_principal_compare(context, cred->impersonator, server->princ)) {
-        krb5_creds mcreds;
-
-        flags |= KRB5_GC_CANONICALIZE | KRB5_GC_CONSTRAINED_DELEGATION;
-
-        memset(&mcreds, 0, sizeof(mcreds));
-
-        mcreds.magic = KV5M_CREDS;
-        mcreds.server = cred->impersonator;
-        mcreds.client = cred->name->princ;
-
-        code = krb5_cc_retrieve_cred(context, cred->ccache,
-                                     KRB5_TC_MATCH_AUTHDATA, &mcreds,
-                                     &evidence_creds);
-        if (code)
-            goto cleanup;
-
-        assert(evidence_creds.ticket_flags & TKT_FLG_FORWARDABLE);
-
-        in_creds.client = cred->impersonator;
-        in_creds.second_ticket = evidence_creds.ticket;
-    } else {
-        in_creds.client = cred->name->princ;
-    }
-
+    in_creds.client = cred->name->princ;
     in_creds.server = server->princ;
     in_creds.times.endtime = endtime;
     in_creds.authdata = NULL;
@@ -188,12 +158,45 @@ static krb5_error_code get_credentials(context, cred, server, now,
             goto cleanup;
     }
 
-    /* Don't go out over the network if we used IAKERB */
-    if (cred->iakerb_mech)
+    /*
+     * For IAKERB or constrained delegation, only check the cache in this step.
+     * For IAKERB we will ask the server to make any necessary TGS requests;
+     * for constrained delegation we will adjust in_creds and make an S4U2Proxy
+     * request below if the cache lookup fails.
+     */
+    if (cred->impersonator != NULL || cred->iakerb_mech)
         flags |= KRB5_GC_CACHED;
 
     code = krb5_get_credentials(context, flags, cred->ccache,
                                 &in_creds, &result_creds);
+
+    /*
+     * Try constrained delegation if we have proxy credentials, unless
+     * we are trying to get a ticket to ourselves (in which case we could
+     * just use the evidence ticket directly from cache).
+     */
+    if (code == KRB5_CC_NOTFOUND && cred->impersonator != NULL &&
+        !cred->iakerb_mech &&
+        !krb5_principal_compare(context, cred->impersonator, server->princ)) {
+
+        memset(&mcreds, 0, sizeof(mcreds));
+        mcreds.magic = KV5M_CREDS;
+        mcreds.server = cred->impersonator;
+        mcreds.client = cred->name->princ;
+        code = krb5_cc_retrieve_cred(context, cred->ccache,
+                                     KRB5_TC_MATCH_AUTHDATA, &mcreds,
+                                     &evidence_creds);
+        if (code)
+            goto cleanup;
+
+        assert(evidence_creds.ticket_flags & TKT_FLG_FORWARDABLE);
+        in_creds.client = cred->impersonator;
+        in_creds.second_ticket = evidence_creds.ticket;
+        flags = KRB5_GC_CANONICALIZE | KRB5_GC_CONSTRAINED_DELEGATION;
+        code = krb5_get_credentials(context, flags, cred->ccache,
+                                    &in_creds, &result_creds);
+    }
+
     if (code)
         goto cleanup;
 
