@@ -118,14 +118,13 @@ int krb5_gss_dbg_client_expcreds = 0;
  * ccache.
  */
 static krb5_error_code get_credentials(context, cred, server, now,
-                                       endtime, out_creds, probe)
+                                       endtime, out_creds)
     krb5_context context;
     krb5_gss_cred_id_t cred;
     krb5_gss_name_t server;
     krb5_timestamp now;
     krb5_timestamp endtime;
     krb5_creds **out_creds;
-    int probe;
 {
     krb5_error_code     code;
     krb5_creds          in_creds, evidence_creds, *result_creds = NULL;
@@ -145,11 +144,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
      * we're not trying to get a ticket to ourselves (in which case
      * we can just use the S4U2Self or evidence ticket directly).
      */
-    if (probe) {
-        flags |= KRB5_GC_CACHED;
-        in_creds.client = cred->name->princ;
-    }
-    else if (cred->impersonator &&
+    if (cred->impersonator &&
         !krb5_principal_compare(context, cred->impersonator, server->princ)) {
         krb5_creds mcreds;
 
@@ -587,18 +582,8 @@ kg_new_connection(
                                   &ctx->there)))
         goto cleanup;
 
-    if (cred->impersonator) {
-        code = get_credentials(context, cred, ctx->there, now,
-                           ctx->krb_times.endtime, &k_cred, 1);
-
-        if (code == KRB5_CC_NOTFOUND)
-            code = get_credentials(context, cred, ctx->there, now,
-                               ctx->krb_times.endtime, &k_cred, 0);
-    }
-    else {
-        code = get_credentials(context, cred, ctx->there, now,
-                           ctx->krb_times.endtime, &k_cred, 0);
-    }
+    code = get_credentials(context, cred, ctx->there, now,
+                           ctx->krb_times.endtime, &k_cred);
     if (code)
         goto cleanup;
 
