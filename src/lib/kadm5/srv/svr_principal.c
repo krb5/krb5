@@ -1084,6 +1084,16 @@ check_pw_reuse(krb5_context context,
     return(0);
 }
 
+static
+void free_history_entry(krb5_context context, osa_pw_hist_ent *hist)
+{
+    int i;
+
+    for (i = 0; i < hist->n_key_data; i++)
+        krb5_free_key_data_contents(context, &hist->key_data[i]);
+    free(hist->key_data);
+}
+
 /*
  * Function: create_history_entry
  *
@@ -1097,7 +1107,7 @@ check_pw_reuse(krb5_context context,
  *      hist_key        (r) history keyblock to encrypt key data with
  *      n_key_data      (r) number of elements in key_data
  *      key_data        (r) keys to add to the history entry
- *      hist            (w) history entry to fill in
+ *      hist_out        (w) history entry to fill in
  *
  * Effects:
  *
@@ -1109,45 +1119,64 @@ check_pw_reuse(krb5_context context,
 static
 int create_history_entry(krb5_context context,
                          krb5_keyblock *hist_key, int n_key_data,
-                         krb5_key_data *key_data, osa_pw_hist_ent *hist)
+                         krb5_key_data *key_data, osa_pw_hist_ent *hist_out)
 {
-    krb5_error_code ret;
+    int i;
+    krb5_error_code ret = 0;
     krb5_keyblock key;
     krb5_keysalt salt;
-    int i;
+    krb5_ui_2 kvno;
+    osa_pw_hist_ent hist;
 
-    hist->key_data = k5calloc(n_key_data, sizeof(krb5_key_data), &ret);
-    if (hist->key_data == NULL)
-        return ret;
+    hist_out->key_data = NULL;
+    hist_out->n_key_data = 0;
+
+    if (n_key_data < 0)
+        return EINVAL;
+
+    memset(&key, 0, sizeof(key));
+    memset(&hist, 0, sizeof(hist));
+
+    if (n_key_data == 0)
+        goto cleanup;
+
+    hist.key_data = k5calloc(n_key_data, sizeof(krb5_key_data), &ret);
+    if (hist.key_data == NULL)
+        goto cleanup;
+
+    /*
+     * We only want to store the most recent kvno, and key_data should already
+     * be sorted in descending order by kvno.
+     */
+    kvno = key_data[0].key_data_kvno;
 
     for (i = 0; i < n_key_data; i++) {
-        ret = krb5_dbe_decrypt_key_data(context, NULL, &key_data[i], &key,
+        if (key_data[i].key_data_kvno < kvno)
+            break;
+        ret = krb5_dbe_decrypt_key_data(context, NULL,
+                                        &key_data[i], &key,
                                         &salt);
         if (ret)
-            return ret;
+            goto cleanup;
 
         ret = krb5_dbe_encrypt_key_data(context, hist_key, &key, &salt,
                                         key_data[i].key_data_kvno,
-                                        &hist->key_data[i]);
+                                        &hist.key_data[hist.n_key_data]);
         if (ret)
-            return ret;
-
+            goto cleanup;
+        hist.n_key_data++;
         krb5_free_keyblock_contents(context, &key);
         /* krb5_free_keysalt(context, &salt); */
     }
 
-    hist->n_key_data = n_key_data;
-    return 0;
-}
+    *hist_out = hist;
+    hist.n_key_data = 0;
+    hist.key_data = NULL;
 
-static
-void free_history_entry(krb5_context context, osa_pw_hist_ent *hist)
-{
-    int i;
-
-    for (i = 0; i < hist->n_key_data; i++)
-        krb5_free_key_data_contents(context, &hist->key_data[i]);
-    free(hist->key_data);
+cleanup:
+    krb5_free_keyblock_contents(context, &key);
+    free_history_entry(context, &hist);
+    return ret;
 }
 
 /*
@@ -1526,11 +1555,14 @@ kadm5_chpass_principal_3(void *server_handle,
                     goto done;
             }
 
-            ret = add_to_history(handle->context, hist_kvno, &adb, &pol,
-                                 &hist);
-            if (ret)
-                goto done;
-            hist_added = 1;
+            /* Don't save empty history. */
+            if (hist.n_key_data > 0) {
+                ret = add_to_history(handle->context, hist_kvno, &adb, &pol,
+                                     &hist);
+                if (ret)
+                    goto done;
+                hist_added = 1;
+            }
         }
 
         if (pol.pw_max_life)
@@ -1581,6 +1613,9 @@ kadm5_chpass_principal_3(void *server_handle,
     kdb->mask = KADM5_KEY_DATA | KADM5_ATTRIBUTES |
         KADM5_FAIL_AUTH_COUNT;
     /* | KADM5_CPW_FUNCTION */
+
+    if (hist_added == 1)
+        kdb->mask |= KADM5_KEY_HIST;
 
     ret = k5_kadm5_hook_chpass(handle->context, handle->hook_handles,
                                KADM5_HOOK_STAGE_PRECOMMIT, principal, keepold,

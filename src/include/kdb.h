@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 1991, 2016 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -209,6 +209,8 @@ typedef struct _krb5_db_entry_new {
 
     krb5_principal        princ;                /* Length, data */
     krb5_tl_data        * tl_data;              /* Linked list */
+
+    /* key_data must be sorted by kvno in descending order */
     krb5_key_data       * key_data;             /* Array */
 } krb5_db_entry;
 
@@ -682,6 +684,18 @@ krb5_error_code krb5_db_check_allowed_to_delegate(krb5_context kcontext,
                                                   krb5_const_principal client,
                                                   const krb5_db_entry *server,
                                                   krb5_const_principal proxy);
+
+/**
+ * Sort an array of @a krb5_key_data keys in descending order by their kvno.
+ *
+ * @param key_data
+ *     The @a krb5_key_data array to sort.  This is sorted in place so the
+ *     array will be modified. Key data order within a kvno is preserved.
+ * @param key_data_length
+ *     The legnth of @a key_data.
+ */
+void
+krb5_dbe_sort_key_data(krb5_key_data *key_data, size_t key_data_length);
 
 /* default functions. Should not be directly called */
 /*

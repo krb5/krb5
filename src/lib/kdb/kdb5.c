@@ -1,6 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright 2006, 2009, 2010 by the Massachusetts Institute of Technology.
+ * Copyright 2006, 2009, 2010, 2016 by the Massachusetts Institute of
+ * Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -752,7 +753,15 @@ krb5_db_get_principal(krb5_context kcontext, krb5_const_principal search_for,
         return status;
     if (v->get_principal == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->get_principal(kcontext, search_for, flags, entry);
+    status = v->get_principal(kcontext, search_for, flags, entry);
+    if (status)
+        return status;
+
+    /* Sort the keys in the db entry as some parts of krb5 expect it to be. */
+    if ((*entry)->key_data != NULL)
+        krb5_dbe_sort_key_data((*entry)->key_data, (*entry)->n_key_data);
+
+    return 0;
 }
 
 void
@@ -942,6 +951,26 @@ krb5_db_delete_principal(krb5_context kcontext, krb5_principal search_for)
     return status;
 }
 
+/*
+ * Use a proxy function for iterate so that we can sort the keys before sending
+ * them to the callback.
+ */
+struct callback_proxy_args {
+    int (*func)(krb5_pointer, krb5_db_entry *);
+    krb5_pointer func_arg;
+};
+
+static int
+sort_entry_callback_proxy(krb5_pointer func_arg, krb5_db_entry *entry)
+{
+    struct callback_proxy_args *args = (struct callback_proxy_args *)func_arg;
+
+    /* Sort the keys in the db entry as some parts of krb5 expect it to be. */
+    if (entry && entry->key_data)
+        krb5_dbe_sort_key_data(entry->key_data, entry->n_key_data);
+    return args->func(args->func_arg, entry);
+}
+
 krb5_error_code
 krb5_db_iterate(krb5_context kcontext, char *match_entry,
                 int (*func)(krb5_pointer, krb5_db_entry *),
@@ -949,13 +978,22 @@ krb5_db_iterate(krb5_context kcontext, char *match_entry,
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
+    struct callback_proxy_args proxy_args;
 
     status = get_vftabl(kcontext, &v);
     if (status)
         return status;
     if (v->iterate == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->iterate(kcontext, match_entry, func, func_arg, iterflags);
+
+    /*
+     * Use the proxy function so that the keys will be sorted before passed to
+     * the callback.
+     */
+    proxy_args.func = func;
+    proxy_args.func_arg = func_arg;
+    return v->iterate(kcontext, match_entry, &sort_entry_callback_proxy,
+                      &proxy_args, iterflags);
 }
 
 /* Return a read only pointer alias to mkey list.  Do not free this! */
@@ -2563,4 +2601,24 @@ krb5_db_check_allowed_to_delegate(krb5_context kcontext,
     if (v->check_allowed_to_delegate == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
     return v->check_allowed_to_delegate(kcontext, client, server, proxy);
+}
+
+void
+krb5_dbe_sort_key_data(krb5_key_data *key_data, size_t key_data_length)
+{
+    size_t i, j;
+    krb5_key_data tmp;
+
+    /* Use insertion sort as a stable sort. */
+    for (i = 1; i < key_data_length; i++) {
+        j = i;
+        while (j > 0 &&
+               key_data[j - 1].key_data_kvno <
+               key_data[j].key_data_kvno) {
+            tmp = key_data[j];
+            key_data[j] = key_data[j - 1];
+            key_data[j - 1] = tmp;
+            j--;
+        }
+    }
 }
