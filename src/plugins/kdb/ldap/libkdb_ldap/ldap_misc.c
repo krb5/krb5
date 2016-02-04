@@ -1352,6 +1352,8 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
     krb5_tl_data userinfo_tl_data = { NULL }, **endp, *tl;
     osa_princ_ent_rec princ_ent;
 
+    memset(&princ_ent, 0, sizeof(princ_ent));
+
     ret = krb5_copy_principal(context, princ, &entry->princ);
     if (ret)
         goto cleanup;
@@ -1457,8 +1459,6 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
         if (ret)
             goto cleanup;
     }
-
-    memset(&princ_ent, 0, sizeof(osa_princ_ent_rec));
 
     ret = krb5_ldap_get_string(ld, ent, "krbpwdpolicyreference", &pwdpolicydn,
                                &attr_present);
