@@ -59,6 +59,7 @@
 #include <kadm5/admin.h>
 #include <adm_proto.h>
 #include "kdb5_util.h"
+#include <libgen.h>
 
 enum ap_op {
     NULL_KEY,                           /* setup null keys */
@@ -183,6 +184,23 @@ void kdb5_create(argc, argv)
         default:
             usage();
             return;
+        }
+    }
+
+    // check if global_params.dbname is writable if it exists and check if the parent is writable if it doesn't
+    if (fopen(global_params.dbname, "r") != NULL) {
+        if (access(global_params.dbname, W_OK) != 0) {
+            printf(_("Existing database file '%s' can't be written. Please check permissions\n"), global_params.dbname);
+            exit_status++; return;
+        }
+    }else {
+        char* buf = malloc(strlen(global_params.dbname));
+        char* dbparent = dirname(strcpy(buf, global_params.dbname));
+        if (fopen(dbparent, "r") != NULL) {
+            if (access(dbparent, W_OK) != 0) {
+                printf(_("Impossible to create file '%s' due to missing permissions in parent directory '%s'\n"), global_params.dbname, dbparent);
+                exit_status++; return;
+            }
         }
     }
 
