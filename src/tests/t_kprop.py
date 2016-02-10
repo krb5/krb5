@@ -24,21 +24,21 @@ for realm in multipass_realms(create_user=False):
     realm.addprinc('wakawaka')
 
     # Start kpropd.
-    kpropd = realm.start_kpropd(slave, ['-d', '-t'])
+    kpropd = realm.start_kpropd(slave, ['-d'])
 
     realm.run([kdb5_util, 'dump', dumpfile])
     realm.run([kprop, '-f', dumpfile, '-P', str(realm.kprop_port()), hostname])
     output('*** kpropd output follows\n')
     while True:
         line = kpropd.stdout.readline()
-        if line == '':
+        if 'Database load process for full propagation completed' in line:
             break
         output('kpropd: ' + line)
         if 'Rejected connection' in line:
             fail('kpropd rejected connection from kprop')
 
-            out = realm.run([kadminl, 'listprincs', slave])
-            if 'wakawaka' not in out:
-                fail('Slave does not have all principals from master')
+    out = realm.run([kadminl, 'listprincs'], slave)
+    if 'wakawaka' not in out:
+        fail('Slave does not have all principals from master')
 
 success('kprop tests')
