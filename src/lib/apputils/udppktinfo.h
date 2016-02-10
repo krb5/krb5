@@ -52,8 +52,7 @@ recv_from_to(int socket, void *buf, size_t len, int flags,
 
 krb5_error_code
 send_to_from(int socket, void *buf, size_t len, int flags,
-             const struct sockaddr *to, socklen_t tolen,
-             const struct sockaddr *from, socklen_t fromlen,
-             aux_addressing_info *auxaddr);
+             const struct sockaddr *to, socklen_t tolen, struct sockaddr *from,
+             socklen_t fromlen, aux_addressing_info *auxaddr);
 
 #endif /* UDPPKTINFO_H */
