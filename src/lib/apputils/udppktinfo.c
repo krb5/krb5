@@ -36,7 +36,8 @@
 #define HAVE_IPV6_PKTINFO
 #endif
 
-#if defined(HAVE_IP_PKTINFO) || defined(HAVE_IPV6_PKTINFO)
+#if defined(HAVE_IP_PKTINFO) || defined(IP_SENDSRCADDR) ||                    \
+    defined(HAVE_IPV6_PKTINFO)
 #define HAVE_PKTINFO_SUPPORT
 #endif
 
@@ -54,9 +55,12 @@
 #if defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) &&                    \
 defined(HAVE_PKTINFO_SUPPORT)
 union pktinfo {
-#ifdef HAVE_IP_PKTINFO
+#ifdef HAVE_STRUCT_IN_PKTINFO
     struct in_pktinfo pi4;
 #endif /* HAVE_IP_PKTINFO */
+#ifdef IP_RECVDSTADDR
+    struct in_addr iaddr;
+#endif
 #ifdef HAVE_IPV6_PKTINFO
     struct in6_pktinfo pi6;
 #endif /* HAVE_IPV6_PKTINFO */
@@ -96,6 +100,15 @@ set_ipv4_recvpktinfo(int sock)
 {
     int sockopt = 1;
     return setsockopt(sock, IPPROTO_IP, IP_RECVPKTINFO, &sockopt,
+                      sizeof(sockopt));
+}
+#elif defined(IP_RECVDSTADDR) /* HAVE_IP_PKTINFO */
+#define set_ipv4_pktinfo set_ipv4_recvdstaddr
+static inline krb5_error_code
+set_ipv4_recvdstaddr(int sock)
+{
+    int sockopt = 1;
+    return setsockopt(sock, IPPROTO_IP, IP_RECVDSTADDR, &sockopt,
                       sizeof(sockopt));
 }
 #else /* HAVE_IP_PKTINFO */
@@ -158,6 +171,32 @@ check_cmsg_ip_pktinfo(struct cmsghdr *cmsgptr, struct sockaddr *to,
         memset(to, 0, sizeof(struct sockaddr_in));
         pktinfo = cmsg2pktinfo(cmsgptr);
         sa2sin(to)->sin_addr = pktinfo->ipi_addr;
+        sa2sin(to)->sin_family = AF_INET;
+        *tolen = sizeof(struct sockaddr_in);
+        return 1;
+    }
+    return 0;
+}
+#elif defined(IP_RECVDSTADDR) /* HAVE_IP_PKTINFO */
+static inline struct in_addr *
+cmsg2sin(struct cmsghdr *cmsgptr)
+{
+    return (struct in_addr *)(void *)CMSG_DATA(cmsgptr);
+}
+
+#define check_cmsg_v4_pktinfo check_cmsg_ip_recvdstaddr
+static int
+check_cmsg_ip_recvdstaddr(struct cmsghdr *cmsgptr, struct sockaddr *to,
+                          socklen_t *tolen, aux_addressing_info * auxaddr)
+{
+    if (cmsgptr->cmsg_level == IPPROTO_IP &&
+        cmsgptr->cmsg_type == IP_RECVDSTADDR &&
+        *tolen >= sizeof(struct sockaddr_in)) {
+        struct in_addr *sin_addr;
+
+        memset(to, 0, sizeof(struct sockaddr_in));
+        sin_addr = cmsg2sin(cmsgptr);
+        sa2sin(to)->sin_addr = *sin_addr;
         sa2sin(to)->sin_family = AF_INET;
         *tolen = sizeof(struct sockaddr_in);
         return 1;
@@ -303,6 +342,24 @@ set_msg_from_ip_pktinfo(struct msghdr *msg, struct cmsghdr *cmsgptr,
     p->ipi_spec_dst = from4->sin_addr;
 
     msg->msg_controllen = CMSG_SPACE(sizeof(struct in_pktinfo));
+    return 0;
+}
+#elif defined(IP_SENDSRCADDR) /* HAVE_IP_PKTINFO */
+#define set_msg_from_ipv4 set_msg_from_ip_sendsrcaddr
+static krb5_error_code
+set_msg_from_ip_sendsrcaddr(struct msghdr *msg, struct cmsghdr *cmsgptr,
+                            struct sockaddr *from, socklen_t fromlen,
+                            aux_addressing_info *auxaddr)
+{
+    struct in_addr *sin_addr = cmsg2sin(cmsgptr);
+    const struct sockaddr_in *from4 = sa2sin(from);
+    if (fromlen != sizeof(struct sockaddr_in))
+        return EINVAL;
+    cmsgptr->cmsg_level = IPPROTO_IP;
+    cmsgptr->cmsg_type = IP_SENDSRCADDR;
+    cmsgptr->cmsg_len = CMSG_LEN(sizeof(struct in_addr));
+    msg->msg_controllen = CMSG_SPACE(sizeof(struct in_addr));
+    *sin_addr = from4->sin_addr;
     return 0;
 }
 #else /* HAVE_IP_PKTINFO */
