@@ -567,7 +567,7 @@ const krb5_ser_entry krb5_ktfile_ser_entry = {
     krb5_ktf_keytab_externalize,        /* Externalize routine  */
     krb5_ktf_keytab_internalize         /* Internalize routine  */
 };
-
+
 /*
  * krb5_ktf_keytab_size()       - Determine the size required to externalize
  *                                this krb5_keytab variant.
@@ -612,7 +612,7 @@ krb5_ktf_keytab_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     }
     return(kret);
 }
-
+
 /*
  * krb5_ktf_keytab_externalize()        - Externalize the krb5_keytab.
  */
@@ -708,7 +708,7 @@ krb5_ktf_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet 
     }
     return(kret);
 }
-
+
 /*
  * krb5_ktf_keytab_internalize()        - Internalize the krb5_ktf_keytab.
  */

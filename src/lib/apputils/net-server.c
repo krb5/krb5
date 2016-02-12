@@ -133,7 +133,6 @@ set_pktinfo(int sock, int family)
     return 0;
 }
 
-
 static const char *
 paddr(struct sockaddr *sa)
 {
@@ -197,7 +196,6 @@ struct connection {
     int rpc_force_close;
 };
 
-
 #define SET(TYPE) struct { TYPE *data; size_t n, max; }
 
 /* Start at the top and work down -- this should allow for deletions
@@ -369,7 +367,6 @@ loop_add_rpc_service(int port, u_long prognum,
     return 0;
 }
 
-
 #define USE_AF AF_INET
 #define USE_TYPE SOCK_DGRAM
 #define USE_PROTO 0
@@ -660,7 +657,7 @@ setkeepalive(int sock)
 {
     return setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &one, sizeof(one));
 }
-
+
 static int
 setnolinger(int s)
 {

@@ -66,7 +66,7 @@
 #define log_notice_string       _("Notice")
 #define log_info_string         _("info")
 #define log_debug_string        _("debug")
-
+
 /*
  * Output logging.
  *
@@ -161,7 +161,6 @@ static struct log_entry def_log_entry;
                                  -1)
 #define DEVICE_CLOSE(d)         fclose(d)
 
-
 /*
  * klog_com_err_proc()  - Handle com_err(3) messages as specified by the
  *                        profile.
@@ -326,7 +325,7 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
         }
     }
 }
-
+
 /*
  * krb5_klog_init()     - Initialize logging.
  *

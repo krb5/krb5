@@ -114,7 +114,7 @@ krb5_salttype_to_string(krb5_int32 salttype, char *buffer, size_t buflen)
     else
         return(EINVAL);
 }
-
+
 /* (absolute) time conversions */
 
 #ifndef HAVE_STRFTIME
@@ -263,7 +263,7 @@ krb5_timestamp_to_sfstring(krb5_timestamp timestamp, char *buffer, size_t buflen
     }
     return((ndone) ? 0 : ENOMEM);
 }
-
+
 /* relative time (delta-t) conversions */
 
 /* string->deltat is in deltat.y */

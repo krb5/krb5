@@ -285,7 +285,6 @@ foreach_realm (krb5_error_code (*fn)(krb5_data *comp,void *data), void *data,
     return 0;
 }
 
-
 struct check_data {
     krb5_context ctx;
     krb5_principal *tgs;
@@ -355,7 +354,7 @@ krb5_check_transited_list (krb5_context ctx, const krb5_data *trans_in,
     krb5_free_realm_tree (ctx, cdata.tgs);
     return r;
 }
-
+
 #ifdef TEST
 
 static krb5_error_code

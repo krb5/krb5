@@ -60,7 +60,7 @@ static const krb5_ser_entry krb5_auth_context_ser_entry = {
     krb5_auth_context_externalize,      /* Externalize routine  */
     krb5_auth_context_internalize       /* Internalize routine  */
 };
-
+
 /*
  * krb5_auth_context_size()     - Determine the size required to externalize
  *                                the krb5_auth_context.
@@ -172,7 +172,7 @@ krb5_auth_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
         *sizep += required;
     return(kret);
 }
-
+
 /*
  * krb5_auth_context_externalize()      - Externalize the krb5_auth_context.
  */
@@ -316,7 +316,7 @@ krb5_auth_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octe
     }
     return(kret);
 }
-
+
 /* Internalize a keyblock and convert it to a key. */
 static krb5_error_code
 intern_key(krb5_context ctx, krb5_key *key, krb5_octet **bp, size_t *sp)
@@ -515,7 +515,7 @@ krb5_auth_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_oc
     }
     return(kret);
 }
-
+
 /*
  * Register the auth_context serializer.
  */

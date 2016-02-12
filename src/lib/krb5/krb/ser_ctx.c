@@ -169,7 +169,7 @@ krb5_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
         *sizep += required;
     return(kret);
 }
-
+
 /*
  * krb5_context_externalize()   - Externalize the krb5_context.
  */
@@ -335,7 +335,7 @@ krb5_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **b
 
     return (0);
 }
-
+
 /*
  * krb5_context_internalize()   - Internalize the krb5_context.
  */
@@ -513,7 +513,7 @@ cleanup:
         krb5_free_context(context);
     return(kret);
 }
-
+
 /*
  * krb5_oscontext_size()        - Determine the size required to externalize
  *                                the krb5_os_context.
@@ -529,7 +529,7 @@ krb5_oscontext_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     *sizep += (5*sizeof(krb5_int32));
     return(0);
 }
-
+
 /*
  * krb5_oscontext_externalize() - Externalize the krb5_os_context.
  */
@@ -566,7 +566,7 @@ krb5_oscontext_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet *
     }
     return(kret);
 }
-
+
 /*
  * krb5_oscontext_internalize() - Internalize the krb5_os_context.
  */
@@ -619,7 +619,7 @@ krb5_oscontext_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet
     }
     return(kret);
 }
-
+
 /*
  * Register the context serializers.
  */

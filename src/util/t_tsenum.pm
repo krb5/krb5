@@ -32,7 +32,7 @@ sub output {
 1;
 
 __DATA__
-
+
 /*
  */
 #include "k5-thread.h"
@@ -108,7 +108,7 @@ static inline int
     *added = 0;
     return 0;
 }
-
+
 static inline int
 <NAME>_get(<NAME> *en, size_t idx, <TYPE> *value)
 {

@@ -93,7 +93,6 @@ static const char *acl_syn_err_msg = N_("%s: syntax error at line %d "
                                         "<%10s...>");
 static const char *acl_cantopen_msg = N_("%s while opening ACL file %s");
 
-
 /*
  * kadm5int_acl_get_line() - Get a line from the ACL file.
  *                      Lines ending with \ are continued on the next line
@@ -157,7 +156,7 @@ kadm5int_acl_get_line(fp, lnp)
     else
         return(acl_buf);
 }
-
+
 /*
  * kadm5int_acl_parse_line() - Parse the contents of an ACL line.
  */
@@ -260,7 +259,7 @@ kadm5int_acl_parse_line(lp)
            ("X kadm5int_acl_parse_line() = %x\n", (long) acle));
     return(acle);
 }
-
+
 /*
  * kadm5int_acl_parse_restrictions() - Parse optional restrictions field
  *
@@ -360,7 +359,7 @@ kadm5int_acl_parse_restrictions(s, rpp)
             code, (*rpp) ? (*rpp)->mask : 0));
     return code;
 }
-
+
 /*
  * kadm5int_acl_impose_restrictions()   - impose restrictions, modifying *recp, *maskp
  *
@@ -434,7 +433,7 @@ kadm5int_acl_impose_restrictions(kcontext, recp, maskp, rp)
            ("X kadm5int_acl_impose_restrictions() = 0, *maskp=0x%08x\n", *maskp));
     return 0;
 }
-
+
 /*
  * kadm5int_acl_free_entries() - Free all ACL entries.
  */
@@ -468,7 +467,7 @@ kadm5int_acl_free_entries()
     acl_inited = 0;
     DPRINT(DEBUG_CALLS, acl_debug_level, ("X kadm5int_acl_free_entries()\n"));
 }
-
+
 /*
  * kadm5int_acl_load_acl_file() - Open and parse the ACL file.
  */
@@ -541,7 +540,7 @@ kadm5int_acl_load_acl_file()
            ("X kadm5int_acl_load_acl_file() = %d\n", retval));
     return(retval);
 }
-
+
 /*
  * kadm5int_acl_match_data()    - See if two data entries match.
  *
@@ -587,7 +586,7 @@ kadm5int_acl_match_data(const krb5_data *e1, const krb5_data *e2,
     DPRINT(DEBUG_CALLS, acl_debug_level, ("X acl_match_entry()=%d\n",retval));
     return(retval);
 }
-
+
 /*
  * kadm5int_acl_find_entry()    - Find a matching entry.
  */
@@ -693,7 +692,7 @@ kadm5int_acl_find_entry(krb5_context kcontext, krb5_const_principal principal,
     DPRINT(DEBUG_CALLS, acl_debug_level, ("X kadm5int_acl_find_entry()=%x\n",entry));
     return(entry);
 }
-
+
 /*
  * kadm5int_acl_init()  - Initialize ACL context.
  */
@@ -716,7 +715,7 @@ kadm5int_acl_init(kcontext, debug_level, acl_file)
     DPRINT(DEBUG_CALLS, acl_debug_level, ("X kadm5int_acl_init() = %d\n", kret));
     return(kret);
 }
-
+
 /*
  * kadm5int_acl_finish  - Terminate ACL context.
  */
@@ -729,7 +728,7 @@ kadm5int_acl_finish(kcontext, debug_level)
     kadm5int_acl_free_entries();
     DPRINT(DEBUG_CALLS, acl_debug_level, ("X kadm5int_acl_finish()\n"));
 }
-
+
 /*
  * kadm5int_acl_check_krb()     - Is this operation permitted for this principal?
  */

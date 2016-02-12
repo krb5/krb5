@@ -32,7 +32,7 @@ sub output {
 1;
 
 __DATA__
-
+
 /*
  * an enumerated collection type, generated from template
  *
@@ -108,7 +108,7 @@ static inline long
     en->used++;
     return en->used-1;
 }
-
+
 static inline <TYPE>
 <NAME>_get(<NAME> *en, size_t idx)
 {

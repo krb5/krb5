@@ -47,7 +47,7 @@ static const krb5_ser_entry krb5_principal_ser_entry = {
     krb5_principal_externalize,         /* Externalize routine  */
     krb5_principal_internalize          /* Internalize routine  */
 };
-
+
 /*
  * krb5_principal_size()        - Determine the size required to externalize
  *                                the krb5_principal.
@@ -74,7 +74,7 @@ krb5_principal_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     }
     return(kret);
 }
-
+
 /*
  * krb5_principal_externalize() - Externalize the krb5_principal.
  */
@@ -113,7 +113,7 @@ krb5_principal_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet *
     }
     return(kret);
 }
-
+
 /*
  * krb5_principal_internalize() - Internalize the krb5_principal.
  */
@@ -166,7 +166,7 @@ cleanup:
     free(tmpname);
     return kret;
 }
-
+
 /*
  * Register the context serializer.
  */

@@ -20,7 +20,7 @@ sub new { # no args
 }
 
 __DATA__
-
+
 /*
  * array type, derived from template
  *
@@ -75,7 +75,7 @@ static inline unsigned long
 	upper_bound = ULONG_MAX;
     return (unsigned long) upper_bound;
 }
-
+
 static inline int
 <NAME>_grow(<NAME> *arr, unsigned long newcount)
 {

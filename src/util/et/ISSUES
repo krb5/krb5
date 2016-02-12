@@ -1,5 +1,6 @@
 Issues to be addressed for src/util/et: -*- text -*-
-
+
+
 Non-thread-safe aspects:
 
 error_message uses a static buffer for "unknown error code" messages;
@@ -13,7 +14,8 @@ likewise, but can be changed without externally visible effect.
 
 Workaround: Use a global lock for all calls to error_message and
 com_err, and when adding or removing error tables.
-
+
+
 API divergence:
 
 Transarc and Heimdal both have APIs that are different from this
@@ -22,7 +24,8 @@ version.  (Specifics?)
 Karl Ramm has offered to try to combine them.
 
 Workaround:
-
+
+
 Reference counting:
 
 If libraries are dynamically loaded and unloaded, and the init/fini
@@ -37,7 +40,8 @@ discarded.
 It's not implemented as a reference count, but the effect is the same.
 
 Fix needed: Update documentation.
-
+
+
 64-bit support:
 
 Values are currently computed as 32-bit values, sign-extended to
@@ -52,9 +56,9 @@ to keep in mind....
 
 Workaround: Always use signed types of at least 32 bits for error
 codes.
-
+
+
 man page:
 
 No documentation on add_error_table/remove_error_table interfaces,
 even though they're the new, preferred interface.
-

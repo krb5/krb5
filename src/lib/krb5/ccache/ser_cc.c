@@ -49,7 +49,7 @@ static const krb5_ser_entry krb5_ccache_ser_entry = {
     krb5_ccache_externalize,            /* Externalize routine  */
     krb5_ccache_internalize             /* Internalize routine  */
 };
-
+
 /*
  * krb5_ccache_size()   - Determine the size required to externalize
  *                                this krb5_ccache variant.
@@ -84,7 +84,7 @@ krb5_ccache_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     }
     return(kret);
 }
-
+
 /*
  * krb5_ccache_externalize()    - Externalize the krb5_ccache.
  */
@@ -139,7 +139,7 @@ krb5_ccache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **bu
     }
     return(kret);
 }
-
+
 /*
  * krb5_ccache_internalize()    - Internalize the krb5_ccache.
  */
@@ -204,7 +204,7 @@ cleanup:
     free(ccname);
     return(kret);
 }
-
+
 /*
  * Register the ccache serializer.
  */

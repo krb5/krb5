@@ -47,7 +47,7 @@ static const krb5_ser_entry krb5_keyblock_ser_entry = {
     krb5_keyblock_externalize,          /* Externalize routine  */
     krb5_keyblock_internalize           /* Internalize routine  */
 };
-
+
 /*
  * krb5_keyblock_size() - Determine the size required to externalize
  *                                the krb5_keyblock.
@@ -78,7 +78,7 @@ krb5_keyblock_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     }
     return(kret);
 }
-
+
 /*
  * krb5_keyblock_externalize()  - Externalize the krb5_keyblock.
  */
@@ -125,7 +125,7 @@ krb5_keyblock_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **
     }
     return(kret);
 }
-
+
 /*
  * krb5_keyblock_internalize()  - Internalize the krb5_keyblock.
  */
@@ -183,7 +183,7 @@ krb5_keyblock_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet 
     }
     return(kret);
 }
-
+
 /*
  * Register the keyblock serializer.
  */

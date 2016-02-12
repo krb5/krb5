@@ -35,7 +35,7 @@
 # define KRB5_CALLCONV_C
 #endif
 
-/* Interface (tentative):
+/* Interface (tentative):
 
      Mutex support:
 
@@ -134,7 +134,6 @@
      More to be added, perhaps.  */
 
 #include <assert.h>
-
 
 /* The mutex structure we use, k5_mutex_t, is defined to some
    OS-specific bits.  The use of multiple layers of typedefs are an
@@ -362,9 +361,6 @@ static inline int k5_os_mutex_lock(k5_os_mutex *m)
 
 #endif
 
-
-
-
 typedef k5_os_mutex k5_mutex_t;
 #define K5_MUTEX_PARTIAL_INITIALIZER    K5_OS_MUTEX_PARTIAL_INITIALIZER
 static inline int k5_mutex_init(k5_mutex_t *m)
@@ -395,7 +391,6 @@ static inline void k5_mutex_unlock(k5_mutex_t *m)
 #define k5_assert_locked        k5_mutex_assert_locked
 #define k5_assert_unlocked      k5_mutex_assert_unlocked
 
-
 /* Thread-specific data; implemented in a support file, because we'll
    need to keep track of some global data for cleanup purposes.
 

@@ -47,7 +47,7 @@ static const krb5_ser_entry krb5_address_ser_entry = {
     krb5_address_externalize,           /* Externalize routine  */
     krb5_address_internalize            /* Internalize routine  */
 };
-
+
 /*
  * krb5_address_size()  - Determine the size required to externalize
  *                                the krb5_address.
@@ -77,7 +77,7 @@ krb5_address_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     }
     return(kret);
 }
-
+
 /*
  * krb5_address_externalize()   - Externalize the krb5_address.
  */
@@ -124,7 +124,7 @@ krb5_address_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **b
     }
     return(kret);
 }
-
+
 /*
  * krb5_address_internalize()   - Internalize the krb5_address.
  */
@@ -187,7 +187,7 @@ krb5_address_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
     }
     return(kret);
 }
-
+
 /*
  * Register the address serializer.
  */

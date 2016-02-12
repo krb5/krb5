@@ -49,7 +49,7 @@ static const krb5_ser_entry krb5_authenticator_ser_entry = {
     krb5_authenticator_externalize,     /* Externalize routine  */
     krb5_authenticator_internalize      /* Internalize routine  */
 };
-
+
 /*
  * krb5_authenticator_size()    - Determine the size required to externalize
  *                                the krb5_authenticator.
@@ -114,7 +114,7 @@ krb5_authenticator_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
         *sizep += required;
     return(kret);
 }
-
+
 /*
  * krb5_authenticator_externalize()     - Externalize the krb5_authenticator.
  */
@@ -216,7 +216,7 @@ krb5_authenticator_externalize(krb5_context kcontext, krb5_pointer arg, krb5_oct
     }
     return(kret);
 }
-
+
 /*
  * krb5_authenticator_internalize()     - Internalize the krb5_authenticator.
  */

@@ -47,7 +47,7 @@ static const krb5_ser_entry krb5_checksum_ser_entry = {
     krb5_checksum_externalize,          /* Externalize routine  */
     krb5_checksum_internalize           /* Internalize routine  */
 };
-
+
 /*
  * krb5_checksum_esize()        - Determine the size required to externalize
  *                                the krb5_checksum.
@@ -77,7 +77,7 @@ krb5_checksum_esize(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     }
     return(kret);
 }
-
+
 /*
  * krb5_checksum_externalize()  - Externalize the krb5_checksum.
  */
@@ -124,7 +124,7 @@ krb5_checksum_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **
     }
     return(kret);
 }
-
+
 /*
  * krb5_checksum_internalize()  - Internalize the krb5_checksum.
  */
@@ -185,7 +185,7 @@ krb5_checksum_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet 
     }
     return(kret);
 }
-
+
 /*
  * Register the checksum serializer.
  */

@@ -63,7 +63,7 @@ sub output {
 1;
 
 __DATA__
-
+
 /* for use in cases where text substitutions may not work, like putting
    "const" before a type that turns out to be "char *"  */
 typedef <LEFT> <NAME>__left_t;

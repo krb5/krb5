@@ -51,7 +51,7 @@ static const krb5_ser_entry krb5_rcache_ser_entry = {
     krb5_rcache_externalize,            /* Externalize routine  */
     krb5_rcache_internalize             /* Internalize routine  */
 };
-
+
 /*
  * krb5_rcache_size()   - Determine the size required to externalize
  *                                this krb5_rcache variant.
@@ -86,7 +86,7 @@ krb5_rcache_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     }
     return(kret);
 }
-
+
 /*
  * krb5_rcache_externalize()    - Externalize the krb5_rcache.
  */
@@ -141,7 +141,7 @@ krb5_rcache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **bu
     }
     return(kret);
 }
-
+
 /*
  * krb5_rcache_internalize()    - Internalize the krb5_rcache.
  */
@@ -201,7 +201,7 @@ cleanup:
         krb5_rc_close(kcontext, rcache);
     return kret;
 }
-
+
 /*
  * Register the rcache serializer.
  */

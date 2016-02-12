@@ -90,7 +90,6 @@ typedef cc_int32  cc_time_t;
 #define CC_ERR_CACHE_FULL    15
 #define CC_ERR_CRED_VERSION  16
 
-
 /*
 ** types, structs, & constants
 */
@@ -142,7 +141,6 @@ typedef struct _cc_creds {
     cc_data **  authdata;
 } cc_creds;
 
-
 // begin V4 stuff
 // use an enumerated type so all callers infer the same meaning
 // these values are what krbv4win uses internally.
@@ -203,7 +201,6 @@ typedef struct _infoNC {
     cc_int32  vers;
 } infoNC;
 
-
 /*
 ** The official (externally visible) API
 */
@@ -236,7 +233,6 @@ cc_get_change_time(
     cc_time_t* time      // <  time of last change to main cache
     );
 
-
 /*
 ** Named Cache (NC) routines
 **   create, open, close, destroy, get_principal, get_cred_version, &
@@ -372,7 +368,6 @@ cc_lock_request(
                                 //   lock types
     );
 
-
 /*
 ** Credentials routines (work within an NC)
 ** store, remove_cred, seq_fetch_creds
