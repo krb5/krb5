@@ -220,7 +220,7 @@ cleanup:
         kh = NULL;
     }
 
-    krb5int_free_error(&errinfo, NULL);
+    k5_free_error(&errinfo, NULL);
 
     *pkh = kh;
 
@@ -527,9 +527,7 @@ kh_db_create(krb5_context context,
     if (kh == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
+    k5_mutex_lock(kh->lock);
 
     code = kh_hdb_open(context, kh, kh->mode, 0);
 
@@ -548,9 +546,7 @@ kh_db_lock(krb5_context context, int kmode)
     if (kh == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
+    k5_mutex_lock(kh->lock);
 
     if (kmode & KRB5_DB_LOCKMODE_EXCLUSIVE)
         hmode = HDB_WLOCK;
@@ -573,9 +569,7 @@ kh_db_unlock(krb5_context context)
     if (kh == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
+    k5_mutex_lock(kh->lock);
 
     code = kh_hdb_unlock(context, kh);
 
@@ -725,9 +719,7 @@ kh_db_get_principal(krb5_context context,
     if (kh_is_master_key_principal(context, princ))
         return kh_get_master_key_principal(context, kh, princ, kentry);
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
+    k5_mutex_lock(kh->lock);
 
     hflags = 0;
     if (kflags & KRB5_KDB_FLAG_CANONICALIZE)
@@ -751,11 +743,8 @@ kh_db_free_principal(krb5_context context,
                      krb5_db_entry *entry)
 {
     kh_db_context *kh = KH_DB_CONTEXT(context);
-    krb5_error_code code;
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return;
+    k5_mutex_lock(kh->lock);
 
     kh_kdb_free_entry(context, kh, entry);
 
@@ -826,9 +815,7 @@ kh_db_put_principal(krb5_context context,
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
+    k5_mutex_lock(kh->lock);
 
     code = kh_put_principal(context, kh, entry);
 
@@ -873,9 +860,7 @@ kh_db_delete_principal(krb5_context context,
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
+    k5_mutex_lock(kh->lock);
 
     code = kh_delete_principal(context, kh, princ);
 
@@ -898,9 +883,7 @@ kh_db_iterate(krb5_context context,
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
+    k5_mutex_lock(kh->lock);
 
     memset(&hentry, 0, sizeof(hentry));
 
@@ -959,7 +942,6 @@ static krb5_error_code
 kh_fetch_master_key_list(krb5_context context,
                          krb5_principal mname,
                          const krb5_keyblock *key,
-                         krb5_kvno kvno,
                          krb5_keylist_node **mkeys_list)
 {
     /* just create a dummy one so that the KDC doesn't balk */
@@ -1009,11 +991,7 @@ kh_promote_db(krb5_context context,
     if (asprintf(&name, "%s~", kh->hdb->hdb_name) < 0)
         return ENOMEM;
 
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0) {
-        free(name);
-        return code;
-    }
+    k5_mutex_lock(kh->lock);
 
     code = kh_hdb_rename(context, kh, name);
 
@@ -1238,8 +1216,6 @@ kdb_vftabl kdb_function_table = {
     NULL, /* free_policy */
     kh_db_alloc,
     kh_db_free,
-    NULL, /* set_master_key_list */
-    NULL, /* get_master_key_list */
     kh_fetch_master_key,
     kh_fetch_master_key_list,
     NULL, /* store_master_key_list */
