@@ -8,6 +8,14 @@
 
 #define DEFAULT_FLAGS KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT
 
+#if defined(__MACH__) && defined(__APPLE__)
+#include <TargetConditionals.h>
+#endif
+
+/* Match struct packing of krb5_get_init_creds_opt on MacOS X. */
+#if TARGET_OS_MAC
+#pragma pack(push,2)
+#endif
 struct extended_options {
     krb5_get_init_creds_opt opt;
     int num_preauth_data;
@@ -21,6 +29,9 @@ struct extended_options {
     krb5_responder_fn responder;
     void *responder_data;
 };
+#if TARGET_OS_MAC
+#pragma pack(pop)
+#endif
 
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_init(krb5_get_init_creds_opt *opt)
