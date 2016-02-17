@@ -60,6 +60,8 @@
 #include "net-server.h"
 #include <signal.h>
 
+#include "udppktinfo.h"
+
 /* XXX */
 #define KDC5_NONET                               (-1779992062L)
 
@@ -95,43 +97,6 @@ setv6only(int sock, int value)
     return setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, &value, sizeof(value));
 }
 #endif
-
-/* Use RFC 3542 API below, but fall back from IPV6_RECVPKTINFO to
-   IPV6_PKTINFO for RFC 2292 implementations.  */
-#ifndef IPV6_RECVPKTINFO
-#define IPV6_RECVPKTINFO IPV6_PKTINFO
-#endif
-/* Parallel, though not standardized.  */
-#ifndef IP_RECVPKTINFO
-#define IP_RECVPKTINFO IP_PKTINFO
-#endif
-
-static int
-set_pktinfo(int sock, int family)
-{
-    int sockopt = 1;
-    int option = 0, proto = 0;
-
-    switch (family) {
-#if defined(IP_PKTINFO) && defined(HAVE_STRUCT_IN_PKTINFO)
-    case AF_INET:
-        proto = IPPROTO_IP;
-        option = IP_RECVPKTINFO;
-        break;
-#endif
-#if defined(IPV6_PKTINFO) && defined(HAVE_STRUCT_IN6_PKTINFO)
-    case AF_INET6:
-        proto = IPPROTO_IPV6;
-        option = IPV6_RECVPKTINFO;
-        break;
-#endif
-    default:
-        return EINVAL;
-    }
-    if (setsockopt(sock, proto, option, &sockopt, sizeof(sockopt)))
-        return errno;
-    return 0;
-}
 
 static const char *
 paddr(struct sockaddr *sa)
@@ -806,55 +771,29 @@ setup_rpc_listener_ports(struct socksetup *data)
     return 0;
 }
 
-#if defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) &&      \
-    (defined(IP_PKTINFO) || defined(IPV6_PKTINFO))
-union pktinfo {
-#ifdef HAVE_STRUCT_IN6_PKTINFO
-    struct in6_pktinfo pi6;
-#endif
-#ifdef HAVE_STRUCT_IN_PKTINFO
-    struct in_pktinfo pi4;
-#endif
-    char c;
-};
-
 static int
 setup_udp_port_1(struct socksetup *data, struct sockaddr *addr, int pktinfo);
 
 static void
 setup_udp_pktinfo_ports(struct socksetup *data)
 {
-#ifdef IP_PKTINFO
-    {
-        struct sockaddr_in sa;
-        int r;
+    struct sockaddr_in sa;
+    struct sockaddr_in6 sa6;
+    int r;
 
-        memset(&sa, 0, sizeof(sa));
-        sa.sin_family = AF_INET;
-        r = setup_udp_port_1(data, (struct sockaddr *)&sa, 4);
-        if (r == 0)
-            data->do_ipv4_udp_all = FALSE;
-    }
-#endif
-#ifdef IPV6_PKTINFO
-    {
-        struct sockaddr_in6 sa;
-        int r;
+    memset(&sa, 0, sizeof(sa));
+    sa.sin_family = AF_INET;
+    r = setup_udp_port_1(data, (struct sockaddr *)&sa, 4);
+    if (r == 0)
+        data->do_ipv4_udp_all = FALSE;
 
-        memset(&sa, 0, sizeof(sa));
-        sa.sin6_family = AF_INET6;
-        r = setup_udp_port_1(data, (struct sockaddr *)&sa, 6);
-        if (r == 0)
-            data->do_ipv6_udp_all = FALSE;
-    }
-#endif
+    memset(&sa6, 0, sizeof(sa6));
+    sa6.sin6_family = AF_INET6;
+    r = setup_udp_port_1(data, (struct sockaddr *)&sa6, 6);
+    if (r == 0)
+        data->do_ipv6_udp_all = FALSE;
+
 }
-#else /* no pktinfo compile-time support */
-static void
-setup_udp_pktinfo_ports(struct socksetup *data)
-{
-}
-#endif
 
 static int
 setup_udp_port_1(struct socksetup *data, struct sockaddr *addr, int pktinfo)
@@ -869,10 +808,6 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr, int pktinfo)
             return 1;
         setnbio(sock);
 
-#if !(defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) &&    \
-      (defined(IP_PKTINFO) || defined(IPV6_PKTINFO)))
-        assert(pktinfo == 0);
-#endif
         if (pktinfo) {
             r = set_pktinfo(sock, addr->sa_family);
             if (r) {
@@ -1135,193 +1070,6 @@ init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
     }
 }
 
-/*
- * This holds whatever additional information might be needed to
- * properly send back to the client from the correct local address.
- *
- * In this case, we only need one datum so far: On Mac OS X, the
- * kernel doesn't seem to like sending from link-local addresses
- * unless we specify the correct interface.
- */
-
-union aux_addressing_info {
-    int ipv6_ifindex;
-};
-
-static int
-recv_from_to(int s, void *buf, size_t len, int flags,
-             struct sockaddr *from, socklen_t *fromlen,
-             struct sockaddr *to, socklen_t *tolen,
-             union aux_addressing_info *auxaddr)
-{
-#if (!defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)) || !defined(CMSG_SPACE)
-    if (to && tolen) {
-        /* Clobber with something recognizeable in case we try to use
-           the address.  */
-        memset(to, 0x40, *tolen);
-        *tolen = 0;
-    }
-
-    return recvfrom(s, buf, len, flags, from, fromlen);
-#else
-    int r;
-    struct iovec iov;
-    char cmsg[CMSG_SPACE(sizeof(union pktinfo))];
-    struct cmsghdr *cmsgptr;
-    struct msghdr msg;
-
-    if (!to || !tolen)
-        return recvfrom(s, buf, len, flags, from, fromlen);
-
-    /* Clobber with something recognizeable in case we can't extract
-       the address but try to use it anyways.  */
-    memset(to, 0x40, *tolen);
-
-    iov.iov_base = buf;
-    iov.iov_len = len;
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_name = from;
-    msg.msg_namelen = *fromlen;
-    msg.msg_iov = &iov;
-    msg.msg_iovlen = 1;
-    msg.msg_control = cmsg;
-    msg.msg_controllen = sizeof(cmsg);
-
-    r = recvmsg(s, &msg, flags);
-    if (r < 0)
-        return r;
-    *fromlen = msg.msg_namelen;
-
-    /* On Darwin (and presumably all *BSD with KAME stacks),
-       CMSG_FIRSTHDR doesn't check for a non-zero controllen.  RFC
-       3542 recommends making this check, even though the (new) spec
-       for CMSG_FIRSTHDR says it's supposed to do the check.  */
-    if (msg.msg_controllen) {
-        cmsgptr = CMSG_FIRSTHDR(&msg);
-        while (cmsgptr) {
-#ifdef IP_PKTINFO
-            if (cmsgptr->cmsg_level == IPPROTO_IP
-                && cmsgptr->cmsg_type == IP_PKTINFO
-                && *tolen >= sizeof(struct sockaddr_in)) {
-                struct in_pktinfo *pktinfo;
-                memset(to, 0, sizeof(struct sockaddr_in));
-                pktinfo = (struct in_pktinfo *)CMSG_DATA(cmsgptr);
-                ((struct sockaddr_in *)to)->sin_addr = pktinfo->ipi_addr;
-                ((struct sockaddr_in *)to)->sin_family = AF_INET;
-                *tolen = sizeof(struct sockaddr_in);
-                return r;
-            }
-#endif
-#if defined(IPV6_PKTINFO) && defined(HAVE_STRUCT_IN6_PKTINFO)
-            if (cmsgptr->cmsg_level == IPPROTO_IPV6
-                && cmsgptr->cmsg_type == IPV6_PKTINFO
-                && *tolen >= sizeof(struct sockaddr_in6)) {
-                struct in6_pktinfo *pktinfo;
-                memset(to, 0, sizeof(struct sockaddr_in6));
-                pktinfo = (struct in6_pktinfo *)CMSG_DATA(cmsgptr);
-                ((struct sockaddr_in6 *)to)->sin6_addr = pktinfo->ipi6_addr;
-                ((struct sockaddr_in6 *)to)->sin6_family = AF_INET6;
-                *tolen = sizeof(struct sockaddr_in6);
-                auxaddr->ipv6_ifindex = pktinfo->ipi6_ifindex;
-                return r;
-            }
-#endif
-            cmsgptr = CMSG_NXTHDR(&msg, cmsgptr);
-        }
-    }
-    /* No info about destination addr was available.  */
-    *tolen = 0;
-    return r;
-#endif
-}
-
-static int
-send_to_from(int s, void *buf, size_t len, int flags,
-             const struct sockaddr *to, socklen_t tolen,
-             const struct sockaddr *from, socklen_t fromlen,
-             union aux_addressing_info *auxaddr)
-{
-#if (!defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)) || !defined(CMSG_SPACE)
-    return sendto(s, buf, len, flags, to, tolen);
-#else
-    struct iovec iov;
-    struct msghdr msg;
-    struct cmsghdr *cmsgptr;
-    char cbuf[CMSG_SPACE(sizeof(union pktinfo))];
-
-    if (from == 0 || fromlen == 0 || from->sa_family != to->sa_family) {
-    use_sendto:
-        return sendto(s, buf, len, flags, to, tolen);
-    }
-
-    iov.iov_base = buf;
-    iov.iov_len = len;
-    /* Truncation?  */
-    if (iov.iov_len != len)
-        return EINVAL;
-    memset(cbuf, 0, sizeof(cbuf));
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_name = (void *) to;
-    msg.msg_namelen = tolen;
-    msg.msg_iov = &iov;
-    msg.msg_iovlen = 1;
-    msg.msg_control = cbuf;
-    /* CMSG_FIRSTHDR needs a non-zero controllen, or it'll return NULL
-       on Linux.  */
-    msg.msg_controllen = sizeof(cbuf);
-    cmsgptr = CMSG_FIRSTHDR(&msg);
-    msg.msg_controllen = 0;
-
-    switch (from->sa_family) {
-#if defined(IP_PKTINFO)
-    case AF_INET:
-        if (fromlen != sizeof(struct sockaddr_in))
-            goto use_sendto;
-        cmsgptr->cmsg_level = IPPROTO_IP;
-        cmsgptr->cmsg_type = IP_PKTINFO;
-        cmsgptr->cmsg_len = CMSG_LEN(sizeof(struct in_pktinfo));
-        {
-            struct in_pktinfo *p = (struct in_pktinfo *)CMSG_DATA(cmsgptr);
-            const struct sockaddr_in *from4 = (const struct sockaddr_in *)from;
-            p->ipi_spec_dst = from4->sin_addr;
-        }
-        msg.msg_controllen = CMSG_SPACE(sizeof(struct in_pktinfo));
-        break;
-#endif
-#if defined(IPV6_PKTINFO) && defined(HAVE_STRUCT_IN6_PKTINFO)
-    case AF_INET6:
-        if (fromlen != sizeof(struct sockaddr_in6))
-            goto use_sendto;
-        cmsgptr->cmsg_level = IPPROTO_IPV6;
-        cmsgptr->cmsg_type = IPV6_PKTINFO;
-        cmsgptr->cmsg_len = CMSG_LEN(sizeof(struct in6_pktinfo));
-        {
-            struct in6_pktinfo *p = (struct in6_pktinfo *)CMSG_DATA(cmsgptr);
-            const struct sockaddr_in6 *from6 =
-                (const struct sockaddr_in6 *)from;
-            p->ipi6_addr = from6->sin6_addr;
-            /*
-             * Because of the possibility of asymmetric routing, we
-             * normally don't want to specify an interface.  However,
-             * Mac OS X doesn't like sending from a link-local address
-             * (which can come up in testing at least, if you wind up
-             * with a "foo.local" name) unless we do specify the
-             * interface.
-             */
-            if (IN6_IS_ADDR_LINKLOCAL(&from6->sin6_addr))
-                p->ipi6_ifindex = auxaddr->ipv6_ifindex;
-            /* otherwise, already zero */
-        }
-        msg.msg_controllen = CMSG_SPACE(sizeof(struct in6_pktinfo));
-        break;
-#endif
-    default:
-        goto use_sendto;
-    }
-    return sendmsg(s, &msg, flags);
-#endif
-}
-
 struct udp_dispatch_state {
     void *handle;
     const char *prog;
@@ -1332,7 +1080,7 @@ struct udp_dispatch_state {
     socklen_t daddr_len;
     struct sockaddr_storage saddr;
     struct sockaddr_storage daddr;
-    union aux_addressing_info auxaddr;
+    aux_addressing_info auxaddr;
     krb5_data request;
     char pktbuf[MAX_DGRAM_SIZE];
 };
@@ -1350,7 +1098,7 @@ process_packet_response(void *arg, krb5_error_code code, krb5_data *response)
         goto out;
 
     cc = send_to_from(state->port_fd, response->data,
-                      (socklen_t) response->length, 0,
+                      (socklen_t)response->length, 0,
                       (struct sockaddr *)&state->saddr, state->saddr_len,
                       (struct sockaddr *)&state->daddr, state->daddr_len,
                       &state->auxaddr);
@@ -1411,10 +1159,10 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
     state->saddr_len = sizeof(state->saddr);
     state->daddr_len = sizeof(state->daddr);
     memset(&state->auxaddr, 0, sizeof(state->auxaddr));
-    cc = recv_from_to(state->port_fd, state->pktbuf, sizeof(state->pktbuf), 0,
-                      (struct sockaddr *)&state->saddr, &state->saddr_len,
-                      (struct sockaddr *)&state->daddr, &state->daddr_len,
-                      &state->auxaddr);
+    cc = recv_from_to(state->port_fd, state->pktbuf, sizeof(state->pktbuf),
+                      0, (struct sockaddr *)&state->saddr,
+                      &state->saddr_len, (struct sockaddr *)&state->daddr,
+                      &state->daddr_len, &state->auxaddr);
     if (cc == -1) {
         if (errno != EINTR && errno != EAGAIN
             /*
