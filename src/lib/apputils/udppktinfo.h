@@ -42,16 +42,16 @@ typedef union aux_addressing_info
 } aux_addressing_info;
 
 krb5_error_code
-set_pktinfo(int socket, int family);
+set_pktinfo(int sock, int family);
 
 krb5_error_code
-recv_from_to(int socket, void *buf, size_t len, int flags,
+recv_from_to(int sock, void *buf, size_t len, int flags,
              struct sockaddr *from, socklen_t *fromlen,
              struct sockaddr *to, socklen_t *tolen,
              aux_addressing_info *auxaddr);
 
 krb5_error_code
-send_to_from(int socket, void *buf, size_t len, int flags,
+send_to_from(int sock, void *buf, size_t len, int flags,
              const struct sockaddr *to, socklen_t tolen, struct sockaddr *from,
              socklen_t fromlen, aux_addressing_info *auxaddr);
 

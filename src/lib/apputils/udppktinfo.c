@@ -68,31 +68,6 @@ union pktinfo {
 };
 #endif /* HAVE_IPV6_PKTINFO && HAVE_STRUCT_CMSGHDR && HAVE_PKTINFO_SUPPORT */
 
-/*
- * Check if a socket is bound to a wildcard address.
- * Returns 1 if it is, 0 if it's bound to a specific address, or -1 on error
- * with errno set to the error.
- */
-static int
-is_socket_bound_to_wildcard(int sock)
-{
-    struct sockaddr_storage bound_addr;
-    socklen_t bound_addr_len = sizeof(bound_addr);
-
-    if (getsockname(sock, ss2sa(&bound_addr), &bound_addr_len) < 0)
-        return -1;
-
-    switch (ss2sa(&bound_addr)->sa_family) {
-    case AF_INET:
-        return ss2sin(&bound_addr)->sin_addr.s_addr == INADDR_ANY;
-    case AF_INET6:
-        return IN6_IS_ADDR_UNSPECIFIED(&ss2sin6(&bound_addr)->sin6_addr);
-    default:
-        errno = EINVAL;
-        return -1;
-    }
-}
-
 #ifdef HAVE_IP_PKTINFO
 
 #define set_ipv4_pktinfo set_ipv4_recvpktinfo
@@ -155,6 +130,31 @@ set_pktinfo(int sock, int family)
 }
 
 #if defined(HAVE_PKTINFO_SUPPORT) && defined(CMSG_SPACE)
+
+/*
+ * Check if a socket is bound to a wildcard address.
+ * Returns 1 if it is, 0 if it's bound to a specific address, or -1 on error
+ * with errno set to the error.
+ */
+static int
+is_socket_bound_to_wildcard(int sock)
+{
+    struct sockaddr_storage bound_addr;
+    socklen_t bound_addr_len = sizeof(bound_addr);
+
+    if (getsockname(sock, ss2sa(&bound_addr), &bound_addr_len) < 0)
+        return -1;
+
+    switch (ss2sa(&bound_addr)->sa_family) {
+    case AF_INET:
+        return ss2sin(&bound_addr)->sin_addr.s_addr == INADDR_ANY;
+    case AF_INET6:
+        return IN6_IS_ADDR_UNSPECIFIED(&ss2sin6(&bound_addr)->sin6_addr);
+    default:
+        errno = EINVAL;
+        return -1;
+    }
+}
 
 #ifdef HAVE_IP_PKTINFO
 
@@ -262,7 +262,7 @@ check_cmsg_pktinfo(struct cmsghdr *cmsgptr, struct sockaddr *to,
  * Receive a message from a socket.
  *
  * Arguments:
- *  socket
+ *  sock
  *  buf     - The buffer to store the message in.
  *  len     - buf length
  *  flags
@@ -277,7 +277,7 @@ check_cmsg_pktinfo(struct cmsghdr *cmsgptr, struct sockaddr *to,
  * Returns 0 on success, otherwise an error code.
  */
 krb5_error_code
-recv_from_to(int socket, void *buf, size_t len, int flags,
+recv_from_to(int sock, void *buf, size_t len, int flags,
              struct sockaddr *from, socklen_t * fromlen,
              struct sockaddr *to, socklen_t * tolen,
              aux_addressing_info *auxaddr)
@@ -290,12 +290,12 @@ recv_from_to(int socket, void *buf, size_t len, int flags,
     struct msghdr msg;
 
     /* Don't use pktinfo if the socket isn't bound to a wildcard address. */
-    r = is_socket_bound_to_wildcard(socket);
+    r = is_socket_bound_to_wildcard(sock);
     if (r < 0)
         return errno;
 
     if (!to || !tolen || !r)
-        return recvfrom(socket, buf, len, flags, from, fromlen);
+        return recvfrom(sock, buf, len, flags, from, fromlen);
 
     /* Clobber with something recognizeable in case we can't extract the
      * address but try to use it anyways. */
@@ -311,7 +311,7 @@ recv_from_to(int socket, void *buf, size_t len, int flags,
     msg.msg_control = cmsg;
     msg.msg_controllen = sizeof(cmsg);
 
-    r = recvmsg(socket, &msg, flags);
+    r = recvmsg(sock, &msg, flags);
     if (r < 0)
         return r;
     *fromlen = msg.msg_namelen;
@@ -438,7 +438,7 @@ set_msg_from(int family, struct msghdr *msg, struct cmsghdr *cmsgptr,
  * Send a message to an address.
  *
  * Arguments:
- *  socket
+ *  sock
  *  buf     - The message to send.
  *  len     - buf length
  *  flags
@@ -451,7 +451,7 @@ set_msg_from(int family, struct msghdr *msg, struct cmsghdr *cmsgptr,
  * Returns 0 on success, otherwise an error code.
  */
 krb5_error_code
-send_to_from(int socket, void *buf, size_t len, int flags,
+send_to_from(int sock, void *buf, size_t len, int flags,
              const struct sockaddr *to, socklen_t tolen, struct sockaddr *from,
              socklen_t fromlen, aux_addressing_info *auxaddr)
 {
@@ -462,7 +462,7 @@ send_to_from(int socket, void *buf, size_t len, int flags,
     char cbuf[CMSG_SPACE(sizeof(union pktinfo))];
 
     /* Don't use pktinfo if the socket isn't bound to a wildcard address. */
-    r = is_socket_bound_to_wildcard(socket);
+    r = is_socket_bound_to_wildcard(sock);
     if (r < 0)
         return errno;
 
@@ -489,16 +489,16 @@ send_to_from(int socket, void *buf, size_t len, int flags,
 
     if (set_msg_from(from->sa_family, &msg, cmsgptr, from, fromlen, auxaddr))
         goto use_sendto;
-    return sendmsg(socket, &msg, flags);
+    return sendmsg(sock, &msg, flags);
 
 use_sendto:
-    return sendto(socket, buf, len, flags, to, tolen);
+    return sendto(sock, buf, len, flags, to, tolen);
 }
 
 #else /* HAVE_PKTINFO_SUPPORT && CMSG_SPACE */
 
 krb5_error_code
-recv_from_to(int socket, void *buf, size_t len, int flags,
+recv_from_to(int sock, void *buf, size_t len, int flags,
              struct sockaddr *from, socklen_t *fromlen,
              struct sockaddr *to, socklen_t *tolen,
              aux_addressing_info *auxaddr)
@@ -510,16 +510,16 @@ recv_from_to(int socket, void *buf, size_t len, int flags,
         *tolen = 0;
     }
 
-    return recvfrom(socket, buf, len, flags, from, fromlen);
+    return recvfrom(sock, buf, len, flags, from, fromlen);
 }
 
 krb5_error_code
-send_to_from(int socket, void *buf, size_t len, int flags,
+send_to_from(int sock, void *buf, size_t len, int flags,
              const struct sockaddr *to, socklen_t tolen,
-             const struct sockaddr *from, socklen_t fromlen,
+             struct sockaddr *from, socklen_t fromlen,
              aux_addressing_info *auxaddr)
 {
-    return sendto(socket, buf, len, flags, to, tolen);
+    return sendto(sock, buf, len, flags, to, tolen);
 }
 
 #endif /* HAVE_PKTINFO_SUPPORT && CMSG_SPACE */
