@@ -772,6 +772,26 @@ xdr_setkey3_arg(XDR *xdrs, setkey3_arg *objp)
 }
 
 bool_t
+xdr_setkey4_arg(XDR *xdrs, setkey4_arg *objp)
+{
+	if (!xdr_ui_4(xdrs, &objp->api_version)) {
+		return FALSE;
+	}
+	if (!xdr_krb5_principal(xdrs, &objp->princ)) {
+		return FALSE;
+	}
+	if (!xdr_krb5_boolean(xdrs, &objp->keepold)) {
+		return FALSE;
+	}
+	if (!xdr_array(xdrs, (caddr_t *) &objp->key_data,
+		       (unsigned int *) &objp->n_key_data, ~0,
+		       sizeof(kadm5_key_data), xdr_kadm5_key_data)) {
+		return FALSE;
+	}
+	return TRUE;
+}
+
+bool_t
 xdr_chrand_arg(XDR *xdrs, chrand_arg *objp)
 {
 	if (!xdr_ui_4(xdrs, &objp->api_version)) {
@@ -1155,5 +1175,54 @@ xdr_krb5_string_attr(XDR *xdrs, krb5_string_attr *objp)
 	if (xdrs->x_op == XDR_DECODE &&
 	    (objp->key == NULL || objp->value == NULL))
 		return FALSE;
+	return TRUE;
+}
+
+bool_t
+xdr_kadm5_key_data(XDR *xdrs, kadm5_key_data *objp)
+{
+	if (!xdr_krb5_kvno(xdrs, &objp->kvno))
+		return FALSE;
+	if (!xdr_krb5_keyblock(xdrs, &objp->key))
+		return FALSE;
+	if (!xdr_krb5_int16(xdrs, &objp->salt.type))
+		return FALSE;
+	if (!xdr_bytes(xdrs, &objp->salt.data.data,
+		       &objp->salt.data.length, ~0))
+		return FALSE;
+	return TRUE;
+}
+
+bool_t
+xdr_getpkeys_arg(XDR *xdrs, getpkeys_arg *objp)
+{
+	if (!xdr_ui_4(xdrs, &objp->api_version)) {
+		return FALSE;
+	}
+	if (!xdr_krb5_principal(xdrs, &objp->princ)) {
+		return FALSE;
+	}
+	if (!xdr_krb5_kvno(xdrs, &objp->kvno)) {
+		return FALSE;
+	}
+	return TRUE;
+}
+
+bool_t
+xdr_getpkeys_ret(XDR *xdrs, getpkeys_ret *objp)
+{
+	if (!xdr_ui_4(xdrs, &objp->api_version)) {
+		return FALSE;
+	}
+	if (!xdr_kadm5_ret_t(xdrs, &objp->code)) {
+		return FALSE;
+	}
+	if (objp->code == KADM5_OK) {
+		if (!xdr_array(xdrs, (caddr_t *) &objp->key_data,
+			       (unsigned int *) &objp->n_key_data, ~0,
+			       sizeof(kadm5_key_data), xdr_kadm5_key_data)) {
+		    return FALSE;
+		}
+	}
 	return TRUE;
 }

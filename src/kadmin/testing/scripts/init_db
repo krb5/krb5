@@ -176,6 +176,9 @@ set cmds {
 	    [simple_principal $whoami] \
 	    {KADM5_PRINCIPAL} $whoami}
 
+    {kadm5_create_principal $server_handle \
+	    [simple_principal testkeys@$r] {KADM5_PRINCIPAL} testkeys}
+
     {kadm5_destroy $server_handle}
 }
 
@@ -197,7 +200,7 @@ if [ $? -ne 0 ]; then
 fi
 
 cat > $K5ROOT/ovsec_adm.acl <<EOF
-admin@$REALM			admcil
+admin@$REALM			admcilse
 admin/get@$REALM		il
 admin/modify@$REALM		mc
 admin/delete@$REALM		d

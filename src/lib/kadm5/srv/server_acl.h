@@ -54,7 +54,7 @@
 #define ACL_CHANGEPW            8
 /* #define ACL_CHANGE_OWN_PW    16 */
 #define ACL_INQUIRE             32
-/* #define ACL_EXTRACT          64 */
+#define ACL_EXTRACT             64
 #define ACL_LIST                128
 #define ACL_SETKEY              256
 #define ACL_IPROP               512

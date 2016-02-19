@@ -91,6 +91,9 @@ test-noauth: init-test
 test-destroy: destroy-test
 	$(ENV_SETUP) $(VALGRIND) ./destroy-test
 
+test-setkey-client: client-setkey-test
+	$(ENV_SETUP) $(VALGRIND) ./client-setkey-test testkeys admin admin
+
 unit-test-client-setup::
 	$(ENV_SETUP) $(VALGRIND) $(START_SERVERS)
 
@@ -103,7 +106,8 @@ unit-test-server-setup::
 unit-test-server-cleanup::
 	$(ENV_SETUP) $(STOP_SERVERS_LOCAL)
 
-unit-test-client-body: site.exp test-noauth test-destroy test-handle-client 
+unit-test-client-body: site.exp test-noauth test-destroy test-handle-client \
+	test-setkey-client
 	$(ENV_SETUP) $(RUNTEST) --tool api RPC=1 API=$(CLNTTCL) \
 		KINIT=$(BUILDTOP)/clients/kinit/kinit \
 		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \

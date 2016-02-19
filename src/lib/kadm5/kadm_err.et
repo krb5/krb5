@@ -63,4 +63,7 @@ error_code KADM5_XDR_FAILURE,		"XDR encoding error"
 error_code KADM5_CANT_RESOLVE, "Cannot resolve network address for admin server in requested realm"
 error_code KADM5_PASS_Q_GENERIC, "Unspecified password quality failure"
 error_code KADM5_BAD_KEYSALTS, "Invalid key/salt tuples"
+error_code KADM5_SETKEY_BAD_KVNO, "Invalid multiple or duplicate kvnos in setkey operation"
+error_code KADM5_AUTH_EXTRACT, "Operation requires ``extract-keys'' privilege"
+error_code KADM5_PROTECT_KEYS, "Principal keys are locked down"
 end

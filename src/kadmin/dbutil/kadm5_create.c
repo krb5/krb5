@@ -201,20 +201,23 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
 
     if ((ret = add_admin_princ(handle, context,
                                service_name, realm,
-                               KRB5_KDB_DISALLOW_TGT_BASED,
+                               KRB5_KDB_DISALLOW_TGT_BASED |
+                               KRB5_KDB_LOCKDOWN_KEYS,
                                ADMIN_LIFETIME)))
         goto clean_and_exit;
 
     if ((ret = add_admin_princ(handle, context,
                                KADM5_ADMIN_SERVICE, realm,
-                               KRB5_KDB_DISALLOW_TGT_BASED,
+                               KRB5_KDB_DISALLOW_TGT_BASED |
+                               KRB5_KDB_LOCKDOWN_KEYS,
                                ADMIN_LIFETIME)))
         goto clean_and_exit;
 
     if ((ret = add_admin_princ(handle, context,
                                KADM5_CHANGEPW_SERVICE, realm,
                                KRB5_KDB_DISALLOW_TGT_BASED |
-                               KRB5_KDB_PWCHANGE_SERVICE,
+                               KRB5_KDB_PWCHANGE_SERVICE |
+                               KRB5_KDB_LOCKDOWN_KEYS,
                                CHANGEPW_LIFETIME)))
         goto clean_and_exit;
 

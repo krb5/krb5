@@ -3,6 +3,7 @@
 	default_keytab_name = FILE:__K5ROOT__/v5srvtab
 	dns_fallback = no
 	plugin_base_dir = __PLUGIN_DIR__
+        allow_weak_crypto = true
 
 [realms]
 	__REALM__ = {

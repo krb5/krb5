@@ -362,6 +362,33 @@ kadm5_setkey_principal_3(void *server_handle,
 }
 
 kadm5_ret_t
+kadm5_setkey_principal_4(void *server_handle,
+                         krb5_principal princ,
+                         krb5_boolean keepold,
+                         kadm5_key_data *key_data,
+                         int n_key_data)
+{
+    setkey4_arg         arg;
+    generic_ret         *r;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    arg.api_version = handle->api_version;
+    arg.princ = princ;
+    arg.keepold = keepold;
+    arg.key_data = key_data;
+    arg.n_key_data = n_key_data;
+
+    if (princ == NULL || key_data == NULL || n_key_data == 0)
+        return EINVAL;
+    r = setkey_principal4_2(&arg, handle->clnt);
+    if (r == NULL)
+        eret();
+    return r->code;
+}
+
+kadm5_ret_t
 kadm5_randkey_principal_3(void *server_handle,
                           krb5_principal princ,
                           krb5_boolean keepold, int n_ks_tuple,
@@ -530,3 +557,33 @@ kadm5_set_string(void *server_handle, krb5_principal principal,
         eret();
     return r->code;
 }
+
+kadm5_ret_t
+kadm5_get_principal_keys(void *server_handle,
+                         krb5_principal princ,
+                         krb5_kvno kvno,
+                         kadm5_key_data **key_data,
+                         int *n_key_data)
+{
+    getpkeys_arg        arg;
+    getpkeys_ret        *r;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    arg.api_version = handle->api_version;
+    arg.princ = princ;
+    arg.kvno = kvno;
+
+    if (princ == NULL || key_data == NULL || n_key_data == 0)
+        return EINVAL;
+    r = get_principal_keys_2(&arg, handle->clnt);
+    if (r == NULL)
+        eret();
+    if (r->code == 0) {
+        *key_data = r->key_data;
+        *n_key_data = r->n_key_data;
+    }
+    return r->code;
+}
+
