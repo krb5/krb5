@@ -128,7 +128,7 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     ds->ansp = NULL;
     ds->anslen = 0;
     ds->ansmax = 0;
-    nextincr = 2048;
+    nextincr = 4096;
     maxincr = INT_MAX;
 
 #if HAVE_NS_INITPARSE
