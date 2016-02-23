@@ -701,8 +701,7 @@ ctx_create_db(krb5_context context, krb5_db2_context *dbc)
         retval = errno;
         goto cleanup;
     }
-    retval = krb5_lock_file(context, dbc->db_lf_file,
-                            KRB5_LOCKMODE_EXCLUSIVE | KRB5_LOCKMODE_DONTBLOCK);
+    retval = krb5_lock_file(context, dbc->db_lf_file, KRB5_LOCKMODE_EXCLUSIVE);
     if (retval != 0)
         goto cleanup;
     set_cloexec_fd(dbc->db_lf_file);
