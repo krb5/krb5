@@ -635,11 +635,10 @@ BSDFILES = \
 	lib/krb5/krb/strftime.c \
 	lib/krb5/krb/strptime.c \
 	slave/kpropd_rpc.c \
+	util/support/getopt.c \
+	util/support/getopt_long.c \
 	util/support/mkstemp.c \
-	util/support/strlcpy.c \
-	util/windows/getopt.c \
-	util/windows/getopt.h \
-	util/windows/getopt_long.c
+	util/support/strlcpy.c
 
 OTHEREXCLUDES = \
 	include/iprop.h \

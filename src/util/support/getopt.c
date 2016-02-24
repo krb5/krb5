@@ -34,6 +34,7 @@
  * SUCH DAMAGE.
  */
 
+#if !defined(HAVE_GETOPT) || !defined(HAVE_UNISTD_H)
 #if 0
 static char sccsid[] = "@(#)getopt.c	8.3 (Berkeley) 4/27/95";
 #endif
@@ -42,20 +43,16 @@ static char sccsid[] = "@(#)getopt.c	8.3 (Berkeley) 4/27/95";
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include "k5-platform.h"
 
 #define __P(x) x
 #define _DIAGASSERT(x) assert(x)
 
-#ifdef __weak_alias
-__weak_alias(getopt,_getopt);
-#endif
-
-
-int	opterr = 1,		/* if error message should be printed */
-	optind = 1,		/* index into parent argv vector */
-	optopt,			/* character checked for validity */
-	optreset;		/* reset getopt */
-char	*optarg;		/* argument associated with option */
+/* These are defined to their regular names in k5-platform.h */
+int opterr = 1;		/* if error message should be printed */
+int optind = 1;		/* index into parent argv vector */
+int optopt;			/* character checked for validity */
+char *optarg;		/* argument associated with option */
 
 static char * _progname __P((char *));
 int getopt_internal __P((int, char * const *, const char *));
@@ -98,8 +95,7 @@ getopt(nargc, nargv, ostr)
 	_DIAGASSERT(nargv != NULL);
 	_DIAGASSERT(ostr != NULL);
 
-	if (optreset || !*place) {		/* update scanning pointer */
-		optreset = 0;
+	if (!*place) {		/* update scanning pointer */
 		if (optind >= nargc || *(place = nargv[optind]) != '-') {
 			place = EMSG;
 			return (-1);
@@ -151,3 +147,4 @@ getopt(nargc, nargv, ostr)
 	}
 	return (optopt);			/* dump back option letter */
 }
+#endif

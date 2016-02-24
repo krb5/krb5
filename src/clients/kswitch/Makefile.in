@@ -19,7 +19,7 @@ all-unix:: kswitch
 kswitch: kswitch.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kswitch.o $(KRB5_BASE_LIBS)
 
-##WIN32##$(KSWITCH): $(OUTPRE)kswitch.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
+##WIN32##$(KSWITCH): $(OUTPRE)kswitch.obj $(SLIB) $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $**
 ##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
