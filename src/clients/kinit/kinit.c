@@ -26,7 +26,7 @@
 
 #include "autoconf.h"
 #include <k5-int.h>
-#include "k5-platform.h"        /* for asprintf */
+#include "k5-platform.h"        /* for asprintf and getopt */
 #include <krb5.h>
 #include "extern.h"
 #include <locale.h>
@@ -35,23 +35,6 @@
 #include <time.h>
 #include <errno.h>
 #include <com_err.h>
-
-#ifdef GETOPT_LONG
-#include <getopt.h>
-#else
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#ifdef sun
-/* SunOS4 unistd didn't declare these; okay to make unconditional?  */
-extern int optind;
-extern char *optarg;
-#endif /* sun */
-#else
-extern int optind;
-extern char *optarg;
-extern int getopt();
-#endif /* HAVE_UNISTD_H */
-#endif /* GETOPT_LONG */
 
 #ifndef _WIN32
 #define GET_PROGNAME(x) (strrchr((x), '/') ? strrchr((x), '/')+1 : (x))
@@ -140,7 +123,6 @@ struct k5_data
     krb5_boolean switch_to_cache;
 };
 
-#ifdef GETOPT_LONG
 /* if struct[2] == NULL, then long_getopt acts as if the short flag
    struct[3] was specified.  If struct[2] != NULL, then struct[3] is
    stored in *(struct[2]), the array index which was specified is
@@ -158,31 +140,19 @@ struct option long_options[] = {
     { NULL, 0, NULL, 0 }
 };
 
-#define GETOPT(argc, argv, str) getopt_long(argc, argv, str, long_options, 0)
-#else
-#define GETOPT(argc, argv, str) getopt(argc, argv, str)
-#endif
+const char *shopts = "r:fpFPn54aAVl:s:c:kit:T:RS:vX:CEI:";
 
 static void
 usage()
 {
 #define USAGE_BREAK "\n\t"
 
-#ifdef GETOPT_LONG
 #define USAGE_LONG_FORWARDABLE  " | --forwardable | --noforwardable"
 #define USAGE_LONG_PROXIABLE    " | --proxiable | --noproxiable"
 #define USAGE_LONG_ADDRESSES    " | --addresses | --noaddresses"
 #define USAGE_LONG_CANONICALIZE " | --canonicalize"
 #define USAGE_LONG_ENTERPRISE   " | --enterprise"
 #define USAGE_BREAK_LONG       USAGE_BREAK
-#else
-#define USAGE_LONG_FORWARDABLE  ""
-#define USAGE_LONG_PROXIABLE    ""
-#define USAGE_LONG_ADDRESSES    ""
-#define USAGE_LONG_CANONICALIZE ""
-#define USAGE_LONG_ENTERPRISE   ""
-#define USAGE_BREAK_LONG        ""
-#endif
 
     fprintf(stderr, "Usage: %s [-V] "
             "[-l lifetime] [-s start_time] "
@@ -288,8 +258,7 @@ parse_options(argc, argv, opts)
     int errflg = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv,
-                       "r:fpFPn54aAVl:s:c:kit:T:RS:vX:CEI:")) != -1) {
+    while ((i = getopt_long(argc, argv, shopts, long_options, 0)) != -1) {
         switch (i) {
         case 'V':
             opts->verbose = 1;

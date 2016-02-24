@@ -145,6 +145,26 @@ EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS krb5int_strlcpy krb5int_strlcat"])
 AC_SUBST(STRLCPY_OBJ)
 AC_SUBST(STRLCPY_ST_OBJ)
 
+AC_CHECK_FUNC(getopt,
+[GETOPT_ST_OBJ=
+GETOPT_OBJ=
+AC_DEFINE(HAVE_GETOPT, 1, [Define if system getopt should be used.])],
+[GETOPT_ST_OBJ='getopt.o'
+GETOPT_OBJ='$(OUTPRE)getopt.$(OBJEXT)'
+EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS k5_optind k5_optarg k5_opterr k5_optopt k5_getopt"])
+AC_SUBST(GETOPT_OBJ)
+AC_SUBST(GETOPT_ST_OBJ)
+
+AC_CHECK_FUNC(getopt_long,
+[GETOPT_LONG_ST_OBJ=
+GETOPT_LONG_OBJ=
+AC_DEFINE(HAVE_GETOPT_LONG, 1, [Define if system getopt_long should be used.])],
+[GETOPT_LONG_ST_OBJ='getopt_long.o'
+GETOPT_LONG_OBJ='$(OUTPRE)getopt_long.$(OBJEXT)'
+EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS k5_getopt_long"])
+AC_SUBST(GETOPT_LONG_OBJ)
+AC_SUBST(GETOPT_LONG_ST_OBJ)
+
 AC_CHECK_FUNC(fnmatch,
 [FNMATCH_ST_OBJ=
 FNMATCH_OBJ=],

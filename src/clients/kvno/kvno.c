@@ -30,10 +30,6 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef _WIN32
-#include <getopt.h>
-#endif
-
 #include <string.h>
 
 extern int optind;

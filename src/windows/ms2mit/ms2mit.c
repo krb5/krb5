@@ -29,9 +29,6 @@
 #include <string.h>
 #include <time.h>
 
-extern int optind;
-extern char *optarg;
-
 static char *prog;
 
 static void

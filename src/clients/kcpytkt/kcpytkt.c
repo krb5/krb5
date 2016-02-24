@@ -2,14 +2,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include <string.h>
 #include <krb5.h>
-
-extern int optind;
-extern char *optarg;
+#include "k5-platform.h"
 
 static char *prog;
 

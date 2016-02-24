@@ -418,7 +418,6 @@
                     <Directory Id="dirlib_i386" Name="i386" FileSource="$(var.LibDir)">
                         <Component Win64="$(var.Win64)" Id="cmp_dirlib_i386" Guid="CFEE3ED4-92D4-49e1-BB78-8BCBC60C3E57" DiskId="1">
                             <File Id="fil_comerr32_lib" Name="comerr32.lib" />
-                            <File Id="fil_getopt_32_lib" Name="getopt.lib" />
                             <File Id="fil_gssapi32_lib" Name="gssapi32.lib" />
                             <File Id="fil_krb5_32_lib" Name="krb5_32.lib" KeyPath="yes" />
                             <File Id="fil_krbcc32_lib" Name="krbcc32.lib" />
@@ -432,7 +431,6 @@
                     <Directory Id="dirlib_amd64" Name="amd64" FileSource="$(var.LibDir)">
                         <Component Win64="$(var.Win64)" Id="cmp_dirlib_amd64" Guid="F9A54201-FFD6-4a45-B021-276D9F6C40A2" DiskId="1">
                             <File Id="fil_comerr64_lib" Name="comerr64.lib" />
-                            <File Id="fil_getopt_64_lib" Name="getopt.lib" />
                             <File Id="fil_gssapi64_lib" Name="gssapi64.lib" />
                             <File Id="fil_krb5_64_lib" Name="krb5_64.lib" KeyPath="yes" />
                             <File Id="fil_krbcc64_lib" Name="krbcc64.lib" />

@@ -511,7 +511,6 @@ install-windows::
 	copy windows\kfwlogon\$(OUTPRE)*.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy windows\kfwlogon\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) windows\kfwlogon\$(OUTPRE)*.pdb "$(KRB_INSTALL_DIR)\bin\."
-	copy util\windows\$(OUTPRE)*.lib $(KRB_INSTALL_DIR)\lib\."
 	copy util\wshelper\$(OUTPRE)$(DLIB).lib "$(KRB_INSTALL_DIR)\lib\."
 	copy util\wshelper\$(OUTPRE)$(DLIB).dll "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) util\wshelper\$(OUTPRE)$(DLIB).pdb "$(KRB_INSTALL_DIR)\bin\."
@@ -635,11 +634,10 @@ BSDFILES = \
 	lib/krb5/krb/strftime.c \
 	lib/krb5/krb/strptime.c \
 	slave/kpropd_rpc.c \
+	util/support/getopt.c \
+	util/support/getopt_long.c \
 	util/support/mkstemp.c \
-	util/support/strlcpy.c \
-	util/windows/getopt.c \
-	util/windows/getopt.h \
-	util/windows/getopt_long.c
+	util/support/strlcpy.c
 
 OTHEREXCLUDES = \
 	include/iprop.h \

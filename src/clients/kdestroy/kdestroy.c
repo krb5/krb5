@@ -30,12 +30,6 @@
 #include <locale.h>
 #include <string.h>
 #include <stdio.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef _WIN32
-#include <getopt.h>
-#endif
 
 #ifdef __STDC__
 #define BELL_CHAR '\a'
