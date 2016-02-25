@@ -869,6 +869,7 @@ cleanup:
     if (state)
         kdc_free_rstate(state);
     krb5_db_free_principal(kdc_context, server);
+    krb5_db_free_principal(kdc_context, stkt_server);
     krb5_db_free_principal(kdc_context, header_server);
     krb5_db_free_principal(kdc_context, client);
     krb5_db_free_principal(kdc_context, local_tgt_storage);
