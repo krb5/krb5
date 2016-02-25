@@ -618,6 +618,38 @@ tl_data2berval (krb5_tl_data *in, struct berval **out)
     return 0;
 }
 
+/* Parse the "require_auth" string for auth indicators, adding them to the
+ * krbPrincipalAuthInd attribute. */
+static krb5_error_code
+update_ldap_mod_auth_ind(krb5_context context, krb5_db_entry *entry,
+                         LDAPMod ***mods)
+{
+    int i = 0;
+    krb5_error_code ret;
+    char *auth_ind = NULL;
+    char *strval[10] = {};
+    char *ai, *ai_save = NULL;
+    int sv_num = sizeof(strval) / sizeof(*strval);
+
+    ret = krb5_dbe_get_string(context, entry, KRB5_KDB_SK_REQUIRE_AUTH,
+                              &auth_ind);
+    if (auth_ind == NULL || ret != 0)
+        goto cleanup;
+
+    ai = strtok_r(auth_ind, " ", &ai_save);
+    while (ai != NULL && i < sv_num) {
+        strval[i++] = ai;
+        ai = strtok_r(NULL, " ", &ai_save);
+    }
+
+    ret = krb5_add_str_mem_ldap_mod(mods, "krbPrincipalAuthInd",
+                                    LDAP_MOD_REPLACE, strval);
+
+cleanup:
+    krb5_dbe_free_string(context, auth_ind);
+    return ret;
+}
+
 krb5_error_code
 krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                         char **db_args)
@@ -1221,6 +1253,12 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         }
 
     } /* Modify Key data ends here */
+
+    /* Auth indicators will also be updated in krbExtraData when processing
+     * tl_data. */
+    st = update_ldap_mod_auth_ind(context, entry, &mods);
+    if (st != 0)
+        goto cleanup;
 
     /* Set tl_data */
     if (entry->tl_data != NULL) {

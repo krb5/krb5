@@ -73,7 +73,7 @@
 #define KDB_TKT_FLAGS_ATTR                   0x000004
 #define KDB_PRINC_EXPIRE_TIME_ATTR           0x000008
 #define KDB_POL_REF_ATTR                     0x000010
-#define KDB_UP_FLAG_ATTR                     0x000020
+#define KDB_AUTH_IND_ATTR                    0x000020
 #define KDB_PWD_POL_REF_ATTR                 0x000040
 #define KDB_PWD_EXPIRE_TIME_ATTR             0x000080
 #define KDB_SECRET_KEY_ATTR                  0x000100
