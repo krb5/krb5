@@ -335,8 +335,8 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
      * and timestamp are in the ulog (then the slaves can get the
      * subsequent updates very iprop).
      */
-    if (asprintf(&ubuf, "%s dump -i%d -c %s",
-		 kdb5_util, vers, dump_file) < 0) {
+    if (asprintf(&ubuf, "%s -r %s dump -i%d -c %s", kdb5_util,
+		 handle->params.realm, vers, dump_file) < 0) {
 	krb5_klog_syslog(LOG_ERR,
 			 _("%s: cannot construct kdb5 util dump string too long; out of memory"),
 			 whoami);
@@ -390,14 +390,15 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 	    _exit(1);
 	}
 
-	DPRINT("%s: exec `kprop -f %s %s' ...\n",
-		whoami, dump_file, clhost);
+	DPRINT("%s: exec `kprop -r %s -f %s %s' ...\n",
+	       handle->params.realm, whoami, dump_file, clhost);
 	/* XXX Yuck!  */
 	if (getenv("KPROP_PORT")) {
-	    pret = execl(kprop, "kprop", "-f", dump_file, "-P",
-			 getenv("KPROP_PORT"), clhost, NULL);
+	    pret = execl(kprop, "kprop", "-r", handle->params.realm, "-f",
+			 dump_file, "-P", getenv("KPROP_PORT"), clhost, NULL);
 	} else {
-	    pret = execl(kprop, "kprop", "-f", dump_file, clhost, NULL);
+	    pret = execl(kprop, "kprop", "-r", handle->params.realm, "-f",
+			 dump_file, clhost, NULL);
 	}
 	perror(whoami);
 	krb5_klog_syslog(LOG_ERR,
