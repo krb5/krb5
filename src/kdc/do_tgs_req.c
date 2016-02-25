@@ -849,6 +849,7 @@ cleanup:
         kdc_free_rstate(state);
     krb5_db_free_principal(kdc_context, server);
     krb5_db_free_principal(kdc_context, krbtgt);
+    krb5_db_free_principal(kdc_context, stkt_server);
     krb5_db_free_principal(kdc_context, client);
     if (session_key.contents != NULL)
         krb5_free_keyblock_contents(kdc_context, &session_key);
