@@ -7,8 +7,10 @@ DEFINES = -DNO_KRB4
 LOCALINCLUDES = -I$(BUILDTOP) -I$(BUILDTOP)\include -I$(BUILDTOP)\windows\include
 PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 
-!if defined(VISUALSTUDIOVERSION) && $(VISUALSTUDIOVERSION:.=) >= 140
+!if defined(VISUALSTUDIOVERSION)
+!if $(VISUALSTUDIOVERSION:.=) >= 140
 WINCRTEXTRA = ucrt.lib vcruntime.lib
+!endif
 !endif
 SYSLIBS = kernel32.lib user32.lib advapi32.lib wsock32.lib secur32.lib userenv.lib $(WINCRTEXTRA)
 
