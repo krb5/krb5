@@ -741,18 +741,15 @@ init_ctx_nego(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 	*tokflag = ERROR_TOKEN_SEND;
 	ret = GSS_S_DEFECTIVE_TOKEN;
 	/*
-	 * Both supportedMech and negState must be present in first
-	 * acceptor token.
-	 */
+	 * According to RFC 4178 both supportedMech and negState must be
+	 * present in the first acceptor token.
+	 * However some Java implementations omit everytihng but the
+	 * responseToken in the SPNEGO acceptor token.
+	 * In this case we have sc->internal_mech so we know what mechanism
+	 * we tried to negotiate and we can cope even when all other
+	 * information is absent. */
 	if (supportedMech == GSS_C_NO_OID) {
-		*minor_status = ERR_SPNEGO_NO_MECH_FROM_ACCEPTOR;
-		map_errcode(minor_status);
-		return GSS_S_DEFECTIVE_TOKEN;
-	}
-	if (acc_negState == ACCEPT_DEFECTIVE_TOKEN) {
-		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
-		map_errcode(minor_status);
-		return GSS_S_DEFECTIVE_TOKEN;
+		supportedMech = sc->internal_mech;
 	}
 
 	/*
