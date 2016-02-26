@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KPROPD" "8" " " "1.14" "MIT Kerberos"
+.TH "KPROPD" "8" " " "1.14.1" "MIT Kerberos"
 .SH NAME
 kpropd \- Kerberos V5 slave KDC update server
 .

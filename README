@@ -73,6 +73,43 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+
+Major changes in 1.14.1 (2016-02-29)
+------------------------------------
+
+* Fix some moderate-severity vulnerabilities [CVE-2015-8629,
+  CVE-2015-8630, CVE-2015-8631] in kadmind.
+
+* Improve behavior on hosts with long hostnames.
+
+* Avoid spurious failures when doing normal kprop to heavily loaded
+  slave KDCs.
+
+krb5-1.14.1 changes by ticket ID
+--------------------------------
+
+8276    Fix mechglue gss_acquire_cred_impersonate_name
+8281    Fix memory leak in SPNEGO gss_init_sec_context()
+8300    Fix k5crypto NSS iov processing bug
+8301    Correctly use k5_wrapmsg() in ldap_principal2.c
+8326    hostrealm code won't compile in debug mode using Solaris
+        Studio C
+8327    Set TL_DATA mask flag for master key operations
+8334    Check context handle in gss_export_sec_context()
+8335    Work around uninitialized warning in cc_kcm.c
+8336    MAXHOSTNAMELEN is too short for some FQDNs
+8337    Check internal context on init context errors
+8338    Fix interposed gss_accept_sec_context()
+8339    Add .travis.yml
+8340    ksu broken with 2FA principals again
+8341    Verify decoded kadmin C strings [CVE-2015-8629]
+8342    Check for null kadm5 policy name [CVE-2015-8630]
+8343    Fix leaks in kadmin server stubs [CVE-2015-8631]
+8346    Fix EOF check in kadm5.acl line processing
+8347    Fix iprop server stub error management
+8367    Use blocking lock when creating db2 KDB
+
+
 Major changes in 1.14 (2015-11-20)
 ----------------------------------
 
