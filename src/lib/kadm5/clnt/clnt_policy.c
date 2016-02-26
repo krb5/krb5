@@ -18,7 +18,8 @@ kadm5_create_policy(void *server_handle,
                     kadm5_policy_ent_t policy, long mask)
 {
     cpol_arg            arg;
-    generic_ret         *r;
+    generic_ret         r = { 0, 0 };
+    enum clnt_stat      s;
     kadm5_server_handle_t handle = server_handle;
 
     CHECK_HANDLE(server_handle);
@@ -29,18 +30,18 @@ kadm5_create_policy(void *server_handle,
     arg.mask = mask;
     arg.api_version = handle->api_version;
     memcpy(&arg.rec, policy, sizeof(kadm5_policy_ent_rec));
-    r = create_policy_2(&arg, handle->clnt);
-    if(r == NULL)
+    s = create_policy_2(&arg, &r, handle->clnt);
+    if (s != RPC_SUCCESS)
         return KADM5_RPC_ERROR;
-
-    return r->code;
+    return r.code;
 }
 
 kadm5_ret_t
 kadm5_delete_policy(void *server_handle, char *name)
 {
     dpol_arg            arg;
-    generic_ret         *r;
+    generic_ret         r = { 0, 0 };
+    enum clnt_stat      s;
     kadm5_server_handle_t handle = server_handle;
 
     CHECK_HANDLE(server_handle);
@@ -51,11 +52,10 @@ kadm5_delete_policy(void *server_handle, char *name)
     arg.name = name;
     arg.api_version = handle->api_version;
 
-    r = delete_policy_2(&arg, handle->clnt);
-    if(r == NULL)
+    s = delete_policy_2(&arg, &r, handle->clnt);
+    if (s != RPC_SUCCESS)
         return KADM5_RPC_ERROR;
-
-    return r->code;
+    return r.code;
 }
 
 kadm5_ret_t
@@ -63,7 +63,8 @@ kadm5_modify_policy(void *server_handle,
                     kadm5_policy_ent_t policy, long mask)
 {
     mpol_arg            arg;
-    generic_ret         *r;
+    generic_ret         r = { 0, 0 };
+    enum clnt_stat      s;
     kadm5_server_handle_t handle = server_handle;
 
     CHECK_HANDLE(server_handle);
@@ -75,18 +76,18 @@ kadm5_modify_policy(void *server_handle,
     arg.api_version = handle->api_version;
 
     memcpy(&arg.rec, policy, sizeof(kadm5_policy_ent_rec));
-    r = modify_policy_2(&arg, handle->clnt);
-    if(r == NULL)
+    s = modify_policy_2(&arg, &r, handle->clnt);
+    if (s != RPC_SUCCESS)
         return KADM5_RPC_ERROR;
-
-    return r->code;
+    return r.code;
 }
 
 kadm5_ret_t
 kadm5_get_policy(void *server_handle, char *name, kadm5_policy_ent_t ent)
 {
     gpol_arg        arg;
-    gpol_ret        *r;
+    gpol_ret        r;
+    enum clnt_stat  s;
     kadm5_server_handle_t handle = server_handle;
 
     memset(ent, 0, sizeof(*ent));
@@ -99,13 +100,14 @@ kadm5_get_policy(void *server_handle, char *name, kadm5_policy_ent_t ent)
     if(name == NULL)
         return EINVAL;
 
-    r = get_policy_2(&arg, handle->clnt);
-    if(r == NULL)
-        return KADM5_RPC_ERROR;
-    if (r->code == 0)
-        memcpy(ent, &r->rec, sizeof(r->rec));
+    memset(&r, 0, sizeof(gpol_ret));
 
-    return r->code;
+    s = get_policy_2(&arg, &r, handle->clnt);
+    if (s != RPC_SUCCESS)
+        return KADM5_RPC_ERROR;
+    if (r.code == 0)
+        memcpy(ent, &r.rec, sizeof(r.rec));
+    return r.code;
 }
 
 kadm5_ret_t
@@ -113,25 +115,29 @@ kadm5_get_policies(void *server_handle,
                    char *exp, char ***pols, int *count)
 {
     gpols_arg   arg;
-    gpols_ret   *r;
+    gpols_ret   r;
+    enum clnt_stat s;
     kadm5_server_handle_t handle = server_handle;
 
     CHECK_HANDLE(server_handle);
 
     if(pols == NULL || count == NULL)
         return EINVAL;
+
     arg.exp = exp;
     arg.api_version = handle->api_version;
-    r = get_pols_2(&arg, handle->clnt);
-    if(r == NULL)
+    memset(&r, 0, sizeof(gpols_ret));
+
+    s = get_pols_2(&arg, &r, handle->clnt);
+    if (s != RPC_SUCCESS)
         return KADM5_RPC_ERROR;
-    if(r->code == 0) {
-        *count = r->count;
-        *pols = r->pols;
+    if (r.code == 0) {
+        *count = r.count;
+        *pols = r.pols;
     } else {
         *count = 0;
         *pols = NULL;
     }
 
-    return r->code;
+    return r.code;
 }

@@ -158,7 +158,8 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
     kadm5_config_params params_local;
 
     int code = 0;
-    generic_ret *r;
+    generic_ret r = { 0, 0 };
+    enum clnt_stat s;
 
     initialize_ovk_error_table();
 /*      initialize_adb_error_table(); */
@@ -295,8 +296,8 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
         goto cleanup;
     }
 
-    r = init_2(&handle->api_version, handle->clnt);
-    if (r == NULL) {
+    s = init_2(&handle->api_version, &r, handle->clnt);
+    if (s != RPC_SUCCESS) {
         code = KADM5_RPC_ERROR;
 #ifdef DEBUG
         clnt_perror(handle->clnt, "init_2 null resp");
@@ -304,27 +305,29 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
         goto error;
     }
     /* Drop down to v3 wire protocol if server does not support v4 */
-    if (r->code == KADM5_NEW_SERVER_API_VERSION &&
+    if (r.code == KADM5_NEW_SERVER_API_VERSION &&
         handle->api_version == KADM5_API_VERSION_4) {
         handle->api_version = KADM5_API_VERSION_3;
-        r = init_2(&handle->api_version, handle->clnt);
-        if (r == NULL) {
+        memset(&r, 0, sizeof(generic_ret));
+        s = init_2(&handle->api_version, &r, handle->clnt);
+        if (s != RPC_SUCCESS) {
             code = KADM5_RPC_ERROR;
             goto error;
         }
     }
     /* Drop down to v2 wire protocol if server does not support v3 */
-    if (r->code == KADM5_NEW_SERVER_API_VERSION &&
+    if (r.code == KADM5_NEW_SERVER_API_VERSION &&
         handle->api_version == KADM5_API_VERSION_3) {
         handle->api_version = KADM5_API_VERSION_2;
-        r = init_2(&handle->api_version, handle->clnt);
-        if (r == NULL) {
+        memset(&r, 0, sizeof(generic_ret));
+        s = init_2(&handle->api_version, &r, handle->clnt);
+        if (s != RPC_SUCCESS) {
             code = KADM5_RPC_ERROR;
             goto error;
         }
     }
-    if (r->code) {
-        code = r->code;
+    if (r.code) {
+        code = r.code;
         goto error;
     }
 
