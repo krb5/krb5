@@ -183,12 +183,15 @@ proc test4 {} {
     }
     profile_release $p
 
-    # Test including a directory.  (Put two copies of test2.ini inside
-    # it and check that we get two values for one of the variables.)
+    # Test including a directory.  Put four copies of test2.ini inside
+    # the directory, two with invalid names.  Check that we get two
+    # values for one of the variables.
     catch [file delete -force $wd/test_include_dir]
     exec mkdir $wd/test_include_dir
     exec cp $wd/test2.ini $wd/test_include_dir/a
-    exec cp $wd/test2.ini $wd/test_include_dir/b
+    exec cp $wd/test2.ini $wd/test_include_dir/a~
+    exec cp $wd/test2.ini $wd/test_include_dir/b.conf
+    exec cp $wd/test2.ini $wd/test_include_dir/b.conf.rpmsave
     catch [file delete $wd/testinc.ini]
     exec echo "includedir $wd/test_include_dir" >$wd/testinc.ini
     set p [profile_init_path $wd/testinc.ini]

@@ -222,10 +222,14 @@ static errcode_t parse_include_file(const char *filename,
 }
 
 /* Return non-zero if filename contains only alphanumeric characters, dashes,
- * and underscores. */
+ * and underscores, or if the filename ends in ".conf". */
 static int valid_name(const char *filename)
 {
     const char *p;
+    size_t len = strlen(filename);
+
+    if (len >= 5 && !strcmp(filename + len - 5, ".conf"))
+        return 1;
 
     for (p = filename; *p != '\0'; p++) {
         if (!isalnum((unsigned char)*p) && *p != '-' && *p != '_')
@@ -235,9 +239,10 @@ static int valid_name(const char *filename)
 }
 
 /*
- * Include files within dirname.  Only files with names consisting entirely of
- * alphanumeric chracters, dashes, and underscores are included, in order to
- * avoid including editor backup files, .rpmsave files, and the like.
+ * Include files within dirname.  Only files with names ending in ".conf", or
+ * consisting entirely of alphanumeric characters, dashes, and underscores are
+ * included.  This restriction avoids including editor backup files, .rpmsave
+ * files, and the like.
  */
 static errcode_t parse_include_dir(const char *dirname,
                                    struct profile_node *root_section)
