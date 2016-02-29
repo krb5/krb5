@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.13.3\n"
+"Project-Id-Version: mit-krb5 1.13.3-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-03 16:38-0500\n"
+"POT-Creation-Date: 2016-02-29 17:44-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -845,17 +845,17 @@ msgstr ""
 msgid "No password given\n"
 msgstr ""
 
-#: ../../src/clients/ksu/krb_auth_su.c:204
+#: ../../src/clients/ksu/krb_auth_su.c:205
 #, c-format
 msgid "%s: Password incorrect\n"
 msgstr ""
 
-#: ../../src/clients/ksu/krb_auth_su.c:206
+#: ../../src/clients/ksu/krb_auth_su.c:207
 msgid "while getting initial credentials"
 msgstr ""
 
-#: ../../src/clients/ksu/krb_auth_su.c:226
-#: ../../src/clients/ksu/krb_auth_su.c:240
+#: ../../src/clients/ksu/krb_auth_su.c:227
+#: ../../src/clients/ksu/krb_auth_su.c:241
 #, c-format
 msgid " %s while unparsing name\n"
 msgstr ""
@@ -3054,107 +3054,107 @@ msgid "Unauthorized request: %s, client=%s, service=%s, addr=%s"
 msgstr ""
 
 #: ../../src/kadmin/server/ipropd_svc.c:49
-#: ../../src/kadmin/server/ipropd_svc.c:212
+#: ../../src/kadmin/server/ipropd_svc.c:210
 #, c-format
 msgid "Request: %s, %s, %s, client=%s, service=%s, addr=%s"
 msgstr ""
 
 #: ../../src/kadmin/server/ipropd_svc.c:146
-#: ../../src/kadmin/server/ipropd_svc.c:271
+#: ../../src/kadmin/server/ipropd_svc.c:269
 #, c-format
 msgid "%s: server handle is NULL"
 msgstr ""
 
 #: ../../src/kadmin/server/ipropd_svc.c:156
-#: ../../src/kadmin/server/ipropd_svc.c:284
+#: ../../src/kadmin/server/ipropd_svc.c:282
 #, c-format
 msgid "%s: setup_gss_names failed"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:166
-#: ../../src/kadmin/server/ipropd_svc.c:295
+#: ../../src/kadmin/server/ipropd_svc.c:164
+#: ../../src/kadmin/server/ipropd_svc.c:291
 #, c-format
 msgid "%s: out of memory recording principal names"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:195
+#: ../../src/kadmin/server/ipropd_svc.c:193
 #, c-format
 msgid "%s; Incoming SerialNo=%lu; Outgoing SerialNo=%lu"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:201
+#: ../../src/kadmin/server/ipropd_svc.c:199
 #, c-format
 msgid "%s; Incoming SerialNo=%lu; Outgoing SerialNo=N/A"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:320
+#: ../../src/kadmin/server/ipropd_svc.c:316
 #, c-format
 msgid "%s: getclhoststr failed"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:342
+#: ../../src/kadmin/server/ipropd_svc.c:338
 #, c-format
 msgid "%s: cannot construct kdb5 util dump string too long; out of memory"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:362
+#: ../../src/kadmin/server/ipropd_svc.c:358
 #, c-format
 msgid "%s: fork failed: %s"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:374
+#: ../../src/kadmin/server/ipropd_svc.c:370
 #, c-format
 msgid "%s: popen failed: %s"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:388
+#: ../../src/kadmin/server/ipropd_svc.c:384
 #, c-format
 msgid "%s: pclose(popen) failed: %s"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:405
+#: ../../src/kadmin/server/ipropd_svc.c:401
 #, c-format
 msgid "%s: exec failed: %s"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:421
+#: ../../src/kadmin/server/ipropd_svc.c:417
 #, c-format
 msgid "Request: %s, spawned resync process %d, client=%s, service=%s, addr=%s"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:485
+#: ../../src/kadmin/server/ipropd_svc.c:481
 #: ../../src/kadmin/server/kadm_rpc_svc.c:275
 #, c-format
 msgid "check_rpcsec_auth: failed inquire_context, stat=%u"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:515
+#: ../../src/kadmin/server/ipropd_svc.c:511
 #: ../../src/kadmin/server/kadm_rpc_svc.c:304
 #, c-format
 msgid "bad service principal %.*s%s"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:538
+#: ../../src/kadmin/server/ipropd_svc.c:534
 #, c-format
 msgid "authentication attempt failed: %s, RPC authentication flavor %d"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:572
+#: ../../src/kadmin/server/ipropd_svc.c:568
 #, c-format
 msgid "RPC unknown request: %d (%s)"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:580
+#: ../../src/kadmin/server/ipropd_svc.c:576
 #, c-format
 msgid "RPC svc_getargs failed (%s)"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:590
+#: ../../src/kadmin/server/ipropd_svc.c:586
 #, c-format
 msgid "RPC svc_sendreply failed (%s)"
 msgstr ""
 
-#: ../../src/kadmin/server/ipropd_svc.c:596
+#: ../../src/kadmin/server/ipropd_svc.c:592
 #, c-format
 msgid "RPC svc_freeargs failed (%s)"
 msgstr ""
@@ -3339,8 +3339,8 @@ msgid ""
 msgstr ""
 
 #: ../../src/kadmin/server/server_stubs.c:314
-#: ../../src/kadmin/server/server_stubs.c:649
-#: ../../src/kadmin/server/server_stubs.c:1792
+#: ../../src/kadmin/server/server_stubs.c:650
+#: ../../src/kadmin/server/server_stubs.c:1795
 msgid "success"
 msgstr ""
 
@@ -3349,21 +3349,21 @@ msgstr ""
 msgid "Request: %s, %.*s%s, %s, client=%.*s%s, service=%.*s%s, addr=%s"
 msgstr ""
 
-#: ../../src/kadmin/server/server_stubs.c:628
+#: ../../src/kadmin/server/server_stubs.c:629
 #, c-format
 msgid ""
 "Unauthorized request: kadm5_rename_principal, %.*s%s to %.*s%s, client=%.*s"
 "%s, service=%.*s%s, addr=%s"
 msgstr ""
 
-#: ../../src/kadmin/server/server_stubs.c:644
+#: ../../src/kadmin/server/server_stubs.c:645
 #, c-format
 msgid ""
 "Request: kadm5_rename_principal, %.*s%s to %.*s%s, %s, client=%.*s%s, "
 "service=%.*s%s, addr=%s"
 msgstr ""
 
-#: ../../src/kadmin/server/server_stubs.c:1788
+#: ../../src/kadmin/server/server_stubs.c:1791
 #, c-format
 msgid ""
 "Request: kadm5_init, %.*s%s, %s, client=%.*s%s, service=%.*s%s, addr=%s, "
@@ -4111,23 +4111,23 @@ msgstr ""
 msgid "An expected per-message token was not received"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1853
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1854
 msgid "SPNEGO cannot find mechanisms to negotiate"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1858
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1859
 msgid "SPNEGO failed to acquire creds"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1863
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1864
 msgid "SPNEGO acceptor did not select a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1868
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1869
 msgid "SPNEGO failed to negotiate a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1873
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1874
 msgid "SPNEGO acceptor did not return a valid token"
 msgstr ""
 
@@ -4863,7 +4863,7 @@ msgid "Can't destroy replay cache: %s"
 msgstr ""
 
 #: ../../src/plugins/kdb/db2/kdb_db2.c:245
-#: ../../src/plugins/kdb/db2/kdb_db2.c:830
+#: ../../src/plugins/kdb/db2/kdb_db2.c:829
 #, c-format
 msgid "Unsupported argument \"%s\" for db2"
 msgstr ""
