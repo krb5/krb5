@@ -92,27 +92,32 @@ gss_OID_set *		mechanisms;
 	mech_cred = GSS_C_NO_CREDENTIAL;
 	mech = gssint_get_mechanism(GSS_C_NULL_OID);
     }
-    if (mech == NULL)
-	return (GSS_S_DEFECTIVE_CREDENTIAL);
-    if (!mech->gss_inquire_cred)
-	return (GSS_S_UNAVAILABLE);
 
-    status = mech->gss_inquire_cred(minor_status, mech_cred,
-				    name ? &mech_name : NULL,
-				    lifetime, cred_usage, NULL);
-    if (status != GSS_S_COMPLETE) {
-	map_error(minor_status, mech);
-	return(status);
-    }
+    /* Skip the call into the mech if the caller doesn't care about any of the
+     * values we would ask for. */
+    if (name != NULL || lifetime != NULL || cred_usage != NULL) {
+	if (mech == NULL)
+	    return (GSS_S_DEFECTIVE_CREDENTIAL);
+	if (!mech->gss_inquire_cred)
+	    return (GSS_S_UNAVAILABLE);
 
-    if (name) {
-	/* Convert mech_name into a union_name equivalent. */
-	status = gssint_convert_name_to_union_name(&temp_minor_status,
-						   mech, mech_name, name);
+	status = mech->gss_inquire_cred(minor_status, mech_cred,
+					name ? &mech_name : NULL,
+					lifetime, cred_usage, NULL);
 	if (status != GSS_S_COMPLETE) {
-	    *minor_status = temp_minor_status;
 	    map_error(minor_status, mech);
-	    return (status);
+	    return(status);
+	}
+
+	if (name) {
+	    /* Convert mech_name into a union_name equivalent. */
+	    status = gssint_convert_name_to_union_name(&temp_minor_status,
+						       mech, mech_name, name);
+	    if (status != GSS_S_COMPLETE) {
+		*minor_status = temp_minor_status;
+		map_error(minor_status, mech);
+		return (status);
+	    }
 	}
     }
 
