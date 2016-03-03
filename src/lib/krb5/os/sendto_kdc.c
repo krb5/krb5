@@ -399,6 +399,22 @@ check_for_svc_unavailable (krb5_context context,
     return 1;
 }
 
+void
+krb5_set_kdc_send_hook(krb5_context context, krb5_pre_send_fn send_hook,
+                       void *data)
+{
+    context->kdc_send_hook = send_hook;
+    context->kdc_send_hook_data = data;
+}
+
+void
+krb5_set_kdc_recv_hook(krb5_context context, krb5_post_recv_fn recv_hook,
+                       void *data)
+{
+    context->kdc_recv_hook = recv_hook;
+    context->kdc_recv_hook_data = data;
+}
+
 /*
  * send the formatted request 'message' to a KDC for realm 'realm' and
  * return the response (if any) in 'reply'.
@@ -412,13 +428,16 @@ check_for_svc_unavailable (krb5_context context,
 
 krb5_error_code
 krb5_sendto_kdc(krb5_context context, const krb5_data *message,
-                const krb5_data *realm, krb5_data *reply, int *use_master,
+                const krb5_data *realm, krb5_data *reply_out, int *use_master,
                 int no_udp)
 {
     krb5_error_code retval, err;
     struct serverlist servers;
     int server_used;
     k5_transport_strategy strategy;
+    krb5_data reply = empty_data(), *hook_message = NULL, *hook_reply = NULL;
+
+    *reply_out = empty_data();
 
     /*
      * find KDC location(s) for realm
@@ -463,9 +482,26 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
     if (retval)
         return retval;
 
+    if (context->kdc_send_hook != NULL) {
+        retval = context->kdc_send_hook(context, context->kdc_send_hook_data,
+                                        realm, message, &hook_message,
+                                        &hook_reply);
+        if (retval)
+            goto cleanup;
+
+        if (hook_reply != NULL) {
+            *reply_out = *hook_reply;
+            free(hook_reply);
+            goto cleanup;
+        }
+
+        if (hook_message != NULL)
+            message = hook_message;
+    }
+
     err = 0;
     retval = k5_sendto(context, message, realm, &servers, strategy, NULL,
-                       reply, NULL, NULL, &server_used,
+                       &reply, NULL, NULL, &server_used,
                        check_for_svc_unavailable, &err);
     if (retval == KRB5_KDC_UNREACH) {
         if (err == KDC_ERR_SVC_UNAVAILABLE) {
@@ -476,8 +512,22 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
                       realm->length, realm->data);
         }
     }
+
+    if (context->kdc_recv_hook != NULL) {
+        retval = context->kdc_recv_hook(context, context->kdc_recv_hook_data,
+                                        retval, realm, message, &reply,
+                                        &hook_reply);
+    }
     if (retval)
         goto cleanup;
+
+    if (hook_reply != NULL) {
+        *reply_out = *hook_reply;
+        free(hook_reply);
+    } else {
+        *reply_out = reply;
+        reply = empty_data();
+    }
 
     /* Set use_master to 1 if we ended up talking to a master when we didn't
      * explicitly request to. */
@@ -488,6 +538,8 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
     }
 
 cleanup:
+    krb5_free_data(context, hook_message);
+    krb5_free_data_contents(context, &reply);
     k5_free_serverlist(&servers);
     return retval;
 }

@@ -268,6 +268,8 @@ Rarely used public interfaces
    krb5_server_decrypt_ticket_keytab.rst
    krb5_set_default_tgs_enctypes.rst
    krb5_set_error_message.rst
+   krb5_set_kdc_recv_hook.rst
+   krb5_set_kdc_send_hook.rst
    krb5_set_real_time.rst
    krb5_string_to_cksumtype.rst
    krb5_string_to_deltat.rst

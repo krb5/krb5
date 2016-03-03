@@ -57,6 +57,8 @@ Public
    krb5_pa_svr_referral_data.rst
    krb5_pa_data.rst
    krb5_pointer.rst
+   krb5_post_recv_fn.rst
+   krb5_pre_send_fn.rst
    krb5_preauthtype.rst
    krb5_principal.rst
    krb5_principal_data.rst

@@ -1242,6 +1242,12 @@ struct _krb5_context {
     krb5_trace_callback trace_callback;
     void *trace_callback_data;
 
+    krb5_pre_send_fn kdc_send_hook;
+    void *kdc_send_hook_data;
+
+    krb5_post_recv_fn kdc_recv_hook;
+    void *kdc_recv_hook_data;
+
     struct plugin_interface plugins[PLUGIN_NUM_INTERFACES];
     char *plugin_base_dir;
 };

@@ -8292,6 +8292,110 @@ krb5_set_trace_callback(krb5_context context, krb5_trace_callback fn,
 krb5_error_code KRB5_CALLCONV
 krb5_set_trace_filename(krb5_context context, const char *filename);
 
+
+/**
+ * Hook function for inspecting or modifying messages sent to KDCs.
+ *
+ * If the hook function returns an error code, the KDC communication will be
+ * aborted and the error code will be returned to the library operation which
+ * initiated the communication.
+ *
+ * If the hook function sets @a reply_out, @a message will not be sent to the
+ * KDC, and the given reply will used instead.
+ *
+ * If the hook function sets @a new_message_out, the given message will be sent
+ * to the KDC in place of @a message.
+ *
+ * If the hook function returns successfully without setting either output,
+ * @a message will be sent to the KDC normally.
+ *
+ * The hook function should use krb5_copy_data() to construct the value for
+ * @a new_message_out or @a reply_out, to ensure that it can be freed correctly
+ * by the library.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  data            Callback data
+ * @param [in]  realm           The realm the message will be sent to
+ * @param [in]  message         The original message to be sent to the KDC
+ * @param [out] new_message_out Optional replacement message to be sent
+ * @param [out] reply_out       Optional synthetic reply
+ *
+ * @retval 0 Success
+ * @return A Kerberos error code
+ */
+typedef krb5_error_code
+(KRB5_CALLCONV *krb5_pre_send_fn)(krb5_context context, void *data,
+                                  const krb5_data *realm,
+                                  const krb5_data *message,
+                                  krb5_data **new_message_out,
+                                  krb5_data **new_reply_out);
+
+/**
+ * Hook function for inspecting or overriding KDC replies.
+ *
+ * If @a code is zero, @a reply contains the reply received from the KDC.  The
+ * hook function may return an error code to simulate an error, may synthesize
+ * a different reply by setting @a new_reply_out, or may simply return
+ * successfully to do nothing.
+ *
+ * If @a code is non-zero, KDC communication failed and @a reply should be
+ * ignored.  The hook function may return @a code or a different error code, or
+ * may synthesize a reply by setting @a new_reply_out and return successfully.
+ *
+ * The hook function should use krb5_copy_data() to construct the value for
+ * @a new_reply_out, to ensure that it can be freed correctly by the library.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  data            Callback data
+ * @param [in]  code            Status of KDC communication
+ * @param [in]  realm           The realm the reply was received from
+ * @param [in]  message         The message sent to the realm's KDC
+ * @param [in]  reply           The reply received from the KDC
+ * @param [out] new_reply_out   Optional replacement reply
+ *
+ * @retval 0 Success
+ * @return A Kerberos error code
+ */
+typedef krb5_error_code
+(KRB5_CALLCONV *krb5_post_recv_fn)(krb5_context context, void *data,
+                                   krb5_error_code code,
+                                   const krb5_data *realm,
+                                   const krb5_data *message,
+                                   const krb5_data *reply,
+                                   krb5_data **new_reply_out);
+
+/**
+ * Set a KDC pre-send hook function.
+ *
+ * @a send_hook will be called before messages are sent to KDCs by library
+ * functions such as krb5_get_credentials().  The hook function may inspect,
+ * override, or synthesize its own reply to the message.
+ *
+ * @param [in] context          Library context
+ * @param [in] send_hook        Hook function (or NULL to disable the hook)
+ * @param [in] data             Callback data to be passed to @a send_hook
+ */
+void KRB5_CALLCONV
+krb5_set_kdc_send_hook(krb5_context context, krb5_pre_send_fn send_hook,
+                       void *data);
+
+/**
+ * Set a KDC post-receive hook function.
+ *
+ * @a recv_hook will be called after a reply is received from a KDC during a
+ * call to a library function such as krb5_get_credentials().  The hook
+ * function may inspect or override the reply.  This hook will not be executed
+ * if the pre-send hook returns a synthetic reply.
+ *
+ * @param [in] context          The library context.
+ * @param [in] recv_hook        Hook function (or NULL to disable the hook)
+ * @param [in] data             Callback data to be passed to @a recv_hook
+ */
+void KRB5_CALLCONV
+krb5_set_kdc_recv_hook(krb5_context context, krb5_post_recv_fn recv_hook,
+                       void *data);
+
+
 #if TARGET_OS_MAC
 #    pragma pack(pop)
 #endif
