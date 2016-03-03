@@ -8292,6 +8292,114 @@ krb5_set_trace_callback(krb5_context context, krb5_trace_callback fn,
 krb5_error_code KRB5_CALLCONV
 krb5_set_trace_filename(krb5_context context, const char *filename);
 
+
+/**
+ * @brief A function which will be executed as a hook to inspect or modify the
+ *        message being sent to the KDC.
+ *
+ * If a new a message is being created and returned, it will override the message
+ * which is being sent to the KDC. It is also possible to create a direct reply.
+ * If a new reply is created, the message will not be transmitted to the KDC but
+ * the sendto_kdc function will return the new reply to the library.
+ *
+ * @param[in]                  The library context to set the hook.
+ *
+ * @param[in]  data            User data passed via the set function.
+ *
+ * @param[in]  realm           The realm the message will be sent to.
+ *
+ * @param[in]  message         The original message we plan to send to the KDC.
+ *
+ * @param[in]  new_message_out A newly allocated message which will be sent to
+ *                             the KDC. The message will be freed using
+ *                             krb5_free_data().
+ *
+ * @param[in]  new_reply_out   A newly allocated fake reply we will return
+ *                             without sending any data to the KDC. The new
+ *                             reply will be freed using krb5_free_data().
+ *
+ * @retval 0 Success
+ * @return An Kerberos error code
+ */
+typedef krb5_error_code
+(KRB5_CALLCONV * krb5_pre_send_fn)(krb5_context context,
+                                   void *data,
+                                   const krb5_data *realm,
+                                   const krb5_data *message,
+                                   krb5_data **new_message_out,
+                                   krb5_data **new_reply_out);
+
+/**
+ * @brief A function poninter used as a hook to inspect the KDC reply or override
+ *        with a new reply.
+ *
+ * If a new reply is created, the reply received from the KDC will be discarded.
+ *
+ * @param[in]             The library context to set the hook.
+ *
+ * @param[in]  data       The user data passed via the set function.
+ *
+ * @param[in]  kdc_retval The return value of the sendto_kdc function. This
+ *                        return value should be returned by the receive hook
+ *                        too unless you want to override the reply or a serious
+ *                        error occurred.
+ *
+ * @param[in]  realm      The realm the reply was received from.
+ *
+ * @param[in]  message    The message sent to the KDC of the specified realm.
+ *
+ * @param[in]  reply      The reply received from the KDC.
+ *
+ * @param[in]  new_reply_out A new reply which will override the reply received by the
+ *                           KDC.
+ *
+ * @return The kdc_retval or an appropriate error code which will override the
+ *         KDC return value.
+ */
+typedef krb5_error_code
+(KRB5_CALLCONV * krb5_post_recv_fn)(krb5_context context,
+                                    void *data,
+                                    krb5_error_code kdc_retval,
+                                    const krb5_data *realm,
+                                    const krb5_data *message,
+                                    const krb5_data *reply,
+                                    krb5_data **new_reply_out);
+
+/**
+ * @brief Set a KDC pre-send hook.
+ *
+ * The hook will be called before the message is sent to the KDC.
+ *
+ * @param[in]  context  The library context.
+ *
+ * @param[in]  func     The pre-send hook to execute or NULL to disable it.
+ *
+ * @param[in]  data     User data which will be passed to the pre-send hook.:w
+ */
+void KRB5_CALLCONV
+krb5_set_kdc_send_hook(krb5_context context,
+                       krb5_pre_send_fn func,
+                       void *data);
+
+/**
+ * @brief Set a KDC post-receive hook.
+ *
+ * The hook will be called after a reply has been received from the KDC. It
+ * will not be executed if the pre-send hook retruns a crafted reply.
+ *
+ * @param[in]  context  The library context.
+ *
+ * @param[in]  func     The pre-send hook to execute or NULL to disable it.
+ *
+ * @param[in]  data     User data which will be passed to the post-receive
+ *                      hook.
+ */
+void KRB5_CALLCONV
+krb5_set_kdc_recv_hook(krb5_context context,
+                       krb5_post_recv_fn func,
+                       void *data);
+
+
 #if TARGET_OS_MAC
 #    pragma pack(pop)
 #endif
