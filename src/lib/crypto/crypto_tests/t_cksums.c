@@ -174,7 +174,8 @@ main(int argc, char **argv)
     krb5_keyblock kb, *kbp;
     krb5_data plain;
     krb5_checksum cksum;
-    krb5_boolean verbose = FALSE;
+    krb5_cksumtype mtype;
+    krb5_boolean valid, verbose = FALSE;
     int status = 0;
 
     if (argc >= 2 && strcmp(argv[1], "-v") == 0)
@@ -214,6 +215,31 @@ main(int argc, char **argv)
             if (!verbose)
                 break;
         }
+
+        /* Test that the checksum verifies successfully. */
+        ret = krb5_c_verify_checksum(context, kbp, test->usage, &plain, &cksum,
+                                     &valid);
+        assert(!ret);
+        if (!valid) {
+            printf("test %d verify failed\n", (int)i);
+            status = 1;
+            if (!verbose)
+                break;
+        }
+
+        if (kbp != NULL) {
+            ret = krb5int_c_mandatory_cksumtype(context, kbp->enctype, &mtype);
+            assert(!ret);
+            if (test->sumtype == mtype) {
+                /* Test that a checksum type of 0 uses the mandatory checksum
+                 * type for the key. */
+                cksum.checksum_type = 0;
+                ret = krb5_c_verify_checksum(context, kbp, test->usage, &plain,
+                                             &cksum, &valid);
+                assert(!ret && valid);
+            }
+        }
+
         krb5_free_checksum_contents(context, &cksum);
     }
     return status;

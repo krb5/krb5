@@ -904,8 +904,10 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
  *
  * This function verifies that @a cksum is a valid checksum for @a data.  If
  * the checksum type of @a cksum is a keyed checksum, @a key is used to verify
- * the checksum.  The actual checksum key will be derived from @a key and @a
- * usage if key derivation is specified for the checksum type.
+ * the checksum.  If the checksum type in @a cksum is 0 and @a key is not NULL,
+ * the mandatory checksum type for @a key will be used.  The actual checksum
+ * key will be derived from @a key and @a usage if key derivation is specified
+ * for the checksum type.
  *
  * @note This function is similar to krb5_k_verify_checksum(), but operates
  * on keyblock @a key.
@@ -1470,8 +1472,10 @@ krb5_k_make_checksum_iov(krb5_context context, krb5_cksumtype cksumtype,
  *
  * This function verifies that @a cksum is a valid checksum for @a data.  If
  * the checksum type of @a cksum is a keyed checksum, @a key is used to verify
- * the checksum.  The actual checksum key will be derived from @a key and @a
- * usage if key derivation is specified for the checksum type.
+ * the checksum.  If the checksum type in @a cksum is 0 and @a key is not NULL,
+ * the mandatory checksum type for @a key will be used.  The actual checksum
+ * key will be derived from @a key and @a usage if key derivation is specified
+ * for the checksum type.
  *
  * @note This function is similar to krb5_c_verify_checksum(), but operates
  * on opaque @a key.

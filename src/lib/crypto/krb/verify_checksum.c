@@ -33,6 +33,7 @@ krb5_k_verify_checksum(krb5_context context, krb5_key key,
                        const krb5_checksum *cksum, krb5_boolean *valid)
 {
     const struct krb5_cksumtypes *ctp;
+    krb5_cksumtype cksumtype;
     krb5_crypto_iov iov;
     krb5_error_code ret;
     krb5_data cksum_data;
@@ -41,7 +42,15 @@ krb5_k_verify_checksum(krb5_context context, krb5_key key,
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
     iov.data = *data;
 
-    ctp = find_cksumtype(cksum->checksum_type);
+    /* A 0 checksum type means use the mandatory checksum. */
+    cksumtype = cksum->checksum_type;
+    if (cksumtype == 0 && key != NULL) {
+        ret = krb5int_c_mandatory_cksumtype(context, key->keyblock.enctype,
+                                            &cksumtype);
+        if (ret)
+            return ret;
+    }
+    ctp = find_cksumtype(cksumtype);
     if (ctp == NULL)
         return KRB5_BAD_ENCTYPE;
 
