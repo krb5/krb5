@@ -39,6 +39,7 @@
 #include <assert.h>
 
 int main () {
+    krb5_error_code ret;
     krb5_data input, output;
     krb5_keyblock *key = NULL;
     unsigned int in_length;
@@ -53,26 +54,30 @@ int main () {
             break;
         if (scanf("%1024s", &s[0]) == EOF)
             break;
-        assert (krb5_init_keyblock(0, enctype, 0, &key) == 0);
+        ret = krb5_init_keyblock(0, enctype, 0, &key);
+        assert(!ret);
         input.data = &s[0];
         input.length = strlen(s);
-        assert(krb5_c_string_to_key (0, enctype, &input, &input, key) == 0);
+        ret = krb5_c_string_to_key (0, enctype, &input, &input, key);
+        assert(!ret);
 
         if (scanf("%u", &in_length) == EOF)
             break;
 
         if (in_length ) {
             unsigned int lc;
-            assert ((input.data = malloc(in_length)) != NULL);
+            ret = alloc_data(&input, in_length);
+            assert(!ret);
             for (lc = in_length; lc > 0; lc--) {
                 scanf ("%2x",  &i);
                 input.data[in_length-lc] = (unsigned) (i&0xff);
             }
-            input.length = in_length;
-            assert (krb5_c_prf_length(0, enctype, &prfsz) == 0);
-            assert (output.data = malloc(prfsz));
-            output.length = prfsz;
-            assert (krb5_c_prf(0, key, &input, &output) == 0);
+            ret = krb5_c_prf_length(0, enctype, &prfsz);
+            assert(!ret);
+            ret = alloc_data(&output, prfsz);
+            assert(!ret);
+            ret = krb5_c_prf(0, key, &input, &output);
+            assert(!ret);
 
             free (input.data);
             input.data = NULL;

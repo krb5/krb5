@@ -99,6 +99,7 @@ check_result(const char *name, const unsigned char *result,
 int
 main(int argc, char **argv)
 {
+    krb5_error_code ret;
     krb5_context context = NULL;
     krb5_keyblock keyblock;
     krb5_key key;
@@ -112,27 +113,32 @@ main(int argc, char **argv)
     keyblock.enctype = ENCTYPE_CAMELLIA128_CTS_CMAC;
     keyblock.length = 16;
     keyblock.contents = keybytes;
-    assert(krb5_k_create_key(context, &keyblock, &key) == 0);
+    ret = krb5_k_create_key(context, &keyblock, &key);
+    assert(!ret);
 
     /* Example 1. */
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
     iov.data = make_data(input, 0);
-    assert(krb5int_cmac_checksum(enc, key, &iov, 1, &result) == 0);
+    ret = krb5int_cmac_checksum(enc, key, &iov, 1, &result);
+    assert(!ret);
     check_result("example 1", resultbuf, cmac1);
 
     /* Example 2. */
     iov.data.length = 16;
-    assert(krb5int_cmac_checksum(enc, key, &iov, 1, &result) == 0);
+    ret = krb5int_cmac_checksum(enc, key, &iov, 1, &result);
+    assert(!ret);
     check_result("example 2", resultbuf, cmac2);
 
     /* Example 3. */
     iov.data.length = 40;
-    assert(krb5int_cmac_checksum(enc, key, &iov, 1, &result) == 0);
+    ret = krb5int_cmac_checksum(enc, key, &iov, 1, &result);
+    assert(!ret);
     check_result("example 3", resultbuf, cmac3);
 
     /* Example 4. */
     iov.data.length = 64;
-    assert(krb5int_cmac_checksum(enc, key, &iov, 1, &result) == 0);
+    ret = krb5int_cmac_checksum(enc, key, &iov, 1, &result);
+    assert(!ret);
     check_result("example 4", resultbuf, cmac4);
 
     printf("All CMAC tests passed.\n");

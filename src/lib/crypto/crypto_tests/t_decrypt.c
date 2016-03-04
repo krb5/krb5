@@ -598,6 +598,7 @@ static char *plaintexts[] = {
 static int
 generate(krb5_context context)
 {
+    krb5_error_code ret;
     size_t i, j;
     krb5_keyblock kb;
     krb5_data plain, seed = string2data("seed");
@@ -605,15 +606,20 @@ generate(krb5_context context)
     size_t enclen;
     char buf[64];
 
-    assert(krb5_c_random_seed(context, &seed) == 0);
+    ret = krb5_c_random_seed(context, &seed);
+    assert(!ret);
     for (i = 0; i < sizeof(enctypes) / sizeof(*enctypes); i++) {
         for (j = 0; j < sizeof(plaintexts) / sizeof(*plaintexts); j++) {
-            assert(krb5_c_make_random_key(context, enctypes[i], &kb) == 0);
+            ret = krb5_c_make_random_key(context, enctypes[i], &kb);
+            assert(!ret);
             plain = string2data(plaintexts[j]);
-            assert(krb5_c_encrypt_length(context, enctypes[i], plain.length,
-                                         &enclen) == 0);
-            assert(alloc_data(&enc.ciphertext, enclen) == 0);
-            assert(krb5_c_encrypt(context, &kb, j, NULL, &plain, &enc) == 0);
+            ret = krb5_c_encrypt_length(context, enctypes[i], plain.length,
+                                        &enclen);
+            assert(!ret);
+            ret = alloc_data(&enc.ciphertext, enclen);
+            assert(!ret);
+            ret = krb5_c_encrypt(context, &kb, j, NULL, &plain, &enc);
+            assert(!ret);
             krb5_enctype_to_name(enctypes[i], FALSE, buf, sizeof(buf));
             printf("\nEnctype: %s\n", buf);
             printf("Plaintext: %s\n", plaintexts[j]);
@@ -629,6 +635,7 @@ generate(krb5_context context)
 int
 main(int argc, char **argv)
 {
+    krb5_error_code ret;
     krb5_context context = NULL;
     krb5_data plain;
     size_t i;
@@ -645,7 +652,8 @@ main(int argc, char **argv)
         kb.enctype = test->enctype;
         kb.length = test->keybits.length;
         kb.contents = (unsigned char *)test->keybits.data;
-        assert(alloc_data(&plain, test->ciphertext.length) == 0);
+        ret = alloc_data(&plain, test->ciphertext.length);
+        assert(!ret);
         enc.magic = KV5M_ENC_DATA;
         enc.enctype = test->enctype;
         enc.kvno = 0;

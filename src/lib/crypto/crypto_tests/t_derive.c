@@ -238,6 +238,7 @@ get_enc_provider(krb5_enctype enctype)
 int
 main(int argc, char **argv)
 {
+    krb5_error_code ret;
     krb5_context context = NULL;
     size_t i;
     struct test *test;
@@ -255,10 +256,12 @@ main(int argc, char **argv)
         kb.enctype = test->enctype;
         kb.length = test->inkey.length;
         kb.contents = (unsigned char *)test->inkey.data;
-        assert(krb5_k_create_key(context, &kb, &inkey) == 0);
+        ret = krb5_k_create_key(context, &kb, &inkey);
+        assert(!ret);
         enc = get_enc_provider(test->enctype);
-        assert(krb5int_derive_key(enc, inkey, &outkey, &test->constant,
-                                  test->alg) == 0);
+        ret = krb5int_derive_key(enc, inkey, &outkey, &test->constant,
+                                 test->alg);
+        assert(!ret);
         if (verbose) {
             char buf[64];
             krb5_enctype_to_name(test->enctype, FALSE, buf, sizeof(buf));

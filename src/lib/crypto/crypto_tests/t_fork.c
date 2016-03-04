@@ -62,7 +62,7 @@ main()
     krb5_key key_aes, key_rc4;
     krb5_data state_rc4, plain = string2data("plain"), decrypted;
     krb5_enc_data out_aes, out_rc4;
-    pid_t pid;
+    pid_t pid, wpid;
     int status;
 
     /* Seed the PRNG instead of creating a context, so we don't need
@@ -98,7 +98,8 @@ main()
 
     /* If we're the parent, make sure the child succeeded. */
     if (pid != 0) {
-        assert(wait(&status) == pid);
+        wpid = wait(&status);
+        assert(wpid == pid);
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
             fprintf(stderr, "Child failed with status %d\n", status);
             return 1;

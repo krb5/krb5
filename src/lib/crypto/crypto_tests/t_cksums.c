@@ -167,6 +167,7 @@ printhex(const char *head, void *data, size_t len)
 int
 main(int argc, char **argv)
 {
+    krb5_error_code ret;
     krb5_context context = NULL;
     size_t i;
     struct test *test;
@@ -189,8 +190,9 @@ main(int argc, char **argv)
         } else
             kbp = NULL;
         plain = string2data(test->plaintext);
-        assert(krb5_c_make_checksum(context, test->sumtype, kbp, test->usage,
-                                    &plain, &cksum) == 0);
+        ret = krb5_c_make_checksum(context, test->sumtype, kbp, test->usage,
+                                   &plain, &cksum);
+        assert(!ret);
         if (verbose) {
             char buf[64];
             krb5_cksumtype_to_string(test->sumtype, buf, sizeof(buf));

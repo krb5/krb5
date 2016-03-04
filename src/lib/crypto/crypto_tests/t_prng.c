@@ -56,21 +56,22 @@ int main () {
             break;
         if (seed_length ) {
             unsigned int lc;
-            assert ((input.data = malloc(seed_length)) != NULL);
+            ret = alloc_data(&input, seed_length);
+            assert(!ret);
             for (lc = seed_length; lc > 0; lc--) {
                 scanf ("%2x",  &i);
                 input.data[seed_length-lc] = (unsigned) (i&0xff);
             }
-            input.length = seed_length;
-            assert (krb5_c_random_add_entropy (0, source_id, &input) == 0);
+            ret = krb5_c_random_add_entropy (0, source_id, &input);
+            assert(!ret);
             free (input.data);
             input.data = NULL;
         }
         if (scanf ("%u", &i) == EOF)
             break;
         if (i) {
-            assert ((output.data = malloc (i)) != NULL);
-            output.length = i;
+            ret = alloc_data(&output, i);
+            assert(!ret);
             ret = krb5_c_random_make_octets (0, &output);
             if (ret)
                 printf ("failed\n");

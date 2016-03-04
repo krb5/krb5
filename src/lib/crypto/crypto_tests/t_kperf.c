@@ -45,6 +45,7 @@
 int
 main(int argc, char **argv)
 {
+    krb5_error_code ret;
     krb5_keyblock kblock;
     krb5_key key;
     krb5_enctype enctype;
@@ -63,7 +64,8 @@ main(int argc, char **argv)
     intf = argv[1][0];
     assert(intf == 'c' || intf =='k');
     op = argv[1][1];
-    assert(krb5_string_to_enctype(argv[2], &enctype) == 0);
+    ret = krb5_string_to_enctype(argv[2], &enctype);
+    assert(!ret);
     blocksize = atoi(argv[3]);
     num_blocks = atoi(argv[4]);
 

@@ -726,7 +726,8 @@ main(int argc, char **argv)
         test = &test_cases[i];
         string = string2data(test->string);
         salt = string2data(test->salt);
-        assert(krb5_init_keyblock(context, test->enctype, 0, &keyblock) == 0);
+        ret = krb5_init_keyblock(context, test->enctype, 0, &keyblock);
+        assert(!ret);
         k5_allow_weak_pbkdf2iter = test->allow_weak;
         ret = krb5_c_string_to_key_with_params(context, test->enctype,
                                                &string, &salt, &test->params,
