@@ -63,8 +63,8 @@ krb5_k_verify_checksum(krb5_context context, krb5_key key,
     if (ret)
         return ret;
 
-    *valid = (memcmp(computed.contents, cksum->contents,
-                     ctp->output_size) == 0);
+    *valid = (k5_bcmp(computed.contents, cksum->contents,
+                      ctp->output_size) == 0);
 
     free(computed.contents);
     return 0;
