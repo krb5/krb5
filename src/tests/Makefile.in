@@ -6,10 +6,10 @@ SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 RUN_DB_TEST = $(RUN_SETUP) KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf \
 	LC_ALL=C $(VALGRIND)
 
-OBJS= adata.o etinfo.o gcred.o hist.o hrealm.o icred.o kdbtest.o localauth.o \
-	plugorder.o rdreq.o responder.o s2p.o s4u2proxy.o
-EXTRADEPSRCS= adata.c etinfo.c gcred.c hist.c hrealm.c icred.c kdbtest.c \
-	localauth.c plugorder.c rdreq.o responder.c s2p.c s4u2proxy.c
+OBJS= adata.o etinfo.o gcred.o hist.o hooks.o hrealm.o icred.o kdbtest.o \
+	localauth.o plugorder.o rdreq.o responder.o s2p.o s4u2proxy.o
+EXTRADEPSRCS= adata.c etinfo.c gcred.c hist.c hooks.c hrealm.c icred.c \
+	kdbtest.c localauth.c plugorder.c rdreq.o responder.c s2p.c s4u2proxy.c
 
 TEST_DB = ./testdb
 TEST_REALM = FOO.TEST.REALM
@@ -32,6 +32,9 @@ gcred: gcred.o $(KRB5_BASE_DEPLIBS)
 
 hist: hist.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ hist.o $(KDB5_LIBS) $(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
+
+hooks: hooks.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ hooks.o $(KRB5_BASE_LIBS)
 
 hrealm: hrealm.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ hrealm.o $(KRB5_BASE_LIBS)
@@ -107,9 +110,10 @@ kdb_check: kdc.conf krb5.conf
 	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
 
-check-pytests:: adata etinfo gcred hist hrealm icred kdbtest localauth
+check-pytests:: adata etinfo gcred hist hooks hrealm icred kdbtest localauth
 check-pytests:: plugorder rdreq responder s2p s4u2proxy unlockiter
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_hooks.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_iprop.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kprop.py $(PYTESTFLAGS)
@@ -159,7 +163,7 @@ check-pytests:: plugorder rdreq responder s2p s4u2proxy unlockiter
 	$(RUNPYTEST) $(srcdir)/t_tabdump.py $(PYTESTFLAGS)
 
 clean::
-	$(RM) adata etinfo gcred hist hrealm icred kdbtest localauth plugorder
-	$(RM) rdreq responder s2p s4u2proxy krb5.conf kdc.conf
+	$(RM) adata etinfo gcred hist hooks hrealm icred kdbtest localauth
+	$(RM) plugorder rdreq responder s2p s4u2proxy krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap
 	$(RM) au.log

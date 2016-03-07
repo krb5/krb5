@@ -361,6 +361,7 @@ local.properties
 /src/tests/etinfo
 /src/tests/gcred
 /src/tests/hist
+/src/tests/hooks
 /src/tests/hrealm
 /src/tests/icred
 /src/tests/kdbtest
