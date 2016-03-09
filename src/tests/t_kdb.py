@@ -114,8 +114,17 @@ def kldaputil(args, **kw):
 kldaputil(['destroy', '-f'])
 
 ldapmodify = which('ldapmodify')
-if not ldapmodify:
-    skip_rest('some LDAP KDB tests', 'ldapmodify not found')
+ldapsearch = which('ldapsearch')
+if not ldapmodify or not ldapsearch:
+    skip_rest('some LDAP KDB tests', 'ldapmodify or ldapsearch not found')
+
+def ldap_search(args):
+    proc = subprocess.Popen([ldapsearch, '-H', ldap_uri, '-b', top_dn,
+                             '-D', admin_dn, '-w', admin_pw, args],
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+    (out, dummy) = proc.communicate()
+    return out
 
 def ldap_modify(ldif, args=[]):
     proc = subprocess.Popen([ldapmodify, '-H', ldap_uri, '-D', admin_dn,
@@ -275,6 +284,21 @@ realm.extract_keytab(realm.host_princ, realm.keytab)
 realm.kinit(realm.user_princ, password('user'))
 realm.run([kvno, realm.host_princ])
 realm.klist(realm.user_princ, realm.host_princ)
+
+# Test auth indicator support
+realm.addprinc('authind', password('authind'))
+realm.run([kadminl, 'setstr', 'authind', 'require_auth', 'otp radius'])
+
+out = ldap_search('(krbPrincipalName=authind*)')
+if 'krbPrincipalAuthInd: otp' not in out:
+    fail('Expected krbPrincipalAuthInd value not in output')
+
+if 'krbPrincipalAuthInd: radius' not in out:
+    fail('Expected krbPrincipalAuthInd value not in output')
+
+out = realm.run([kadminl, 'getstrs', 'authind'])
+if 'require_auth: otp radius' not in out:
+    fail('Expected auth indicators value not in output')
 
 # Test service principal aliases.
 realm.addprinc('canon', password('canon'))
