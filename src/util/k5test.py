@@ -448,6 +448,14 @@ def _onexit():
         print '--stop-after=NUM to stop after a daemon is started in order to'
         print 'attach to it with a debugger.  Use --help to see other options.'
 
+
+def _onsigint(signum, frame):
+    # Exit without displaying a stack trace.  Suppress messages from _onexit.
+    global _success
+    _success = True
+    sys.exit(1)
+
+
 # Find the parent of dir which is at the root of a build or source directory.
 def _find_root(dir):
     while True:
@@ -1198,6 +1206,7 @@ _current_pass = None
 _daemons = []
 _parse_args()
 atexit.register(_onexit)
+signal.signal(signal.SIGINT, _onsigint)
 _outfile = open('testlog', 'w')
 _cmd_index = 1
 buildtop = _find_buildtop()
