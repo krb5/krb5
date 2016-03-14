@@ -267,6 +267,7 @@ process_db_args(krb5_context context, char **db_args, xargs_t *xargs,
     if (db_args) {
         for (i=0; db_args[i]; ++i) {
             arg = strtok_r(db_args[i], "=", &arg_val);
+            arg = (arg != NULL) ? arg : "";
             if (strcmp(arg, TKTPOLICY_ARG) == 0) {
                 dptr = &xargs->tktpolicydn;
             } else {
