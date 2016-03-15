@@ -181,8 +181,12 @@ gss_inquire_attrs_for_mech(
     mech = gssint_get_mechanism(selected_mech);
     if (mech == NULL)
         return GSS_S_BAD_MECH;
-    else if (mech->gss_inquire_attrs_for_mech == NULL)
-        return GSS_S_UNAVAILABLE;
+
+    /* If the mech does not implement RFC 5587, return success with an empty
+     * mech_attrs and known_mech_attrs. */
+    if (mech->gss_inquire_attrs_for_mech == NULL)
+        return GSS_S_COMPLETE;
+
     public_mech = gssint_get_public_oid(selected_mech);
     status = mech->gss_inquire_attrs_for_mech(minor, public_mech, mech_attrs,
                                               known_mech_attrs);
