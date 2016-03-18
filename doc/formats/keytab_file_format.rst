@@ -29,12 +29,12 @@ the key entry.  Key entries use the following informal grammar::
         timestamp (32 bits)
         key version (8 bits)
         enctype (16 bits)
-        key length (32 bits)
+        key length (16 bits)
         key contents
         key version (32 bits) [in release 1.14 and later]
 
     principal ::=
-        count of components (32 bits) [includes realm in version 1]
+        count of components (16 bits) [includes realm in version 1]
         realm (data)
         component1 (data)
         component2 (data)
