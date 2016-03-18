@@ -1001,7 +1001,7 @@ const krb5_kt_ops krb5_kt_dfl_ops = {
  * sizeof(krb5_int32) bytes for the timestamp
  * sizeof(krb5_octet) bytes for the key version number
  * sizeof(krb5_int16) bytes for the enctype
- * sizeof(krb5_int32) bytes for the key length, followed by the key
+ * sizeof(krb5_int16) bytes for the key length, followed by the key
  */
 
 #ifndef SEEK_SET
