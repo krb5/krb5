@@ -999,19 +999,8 @@ int main(int argc, char **argv)
         }
     }
 
-    /*
-     * Setup network listeners.  Disallow network reconfig in response to
-     * routing socket messages if we're using worker processes, since the
-     * children won't be able to re-open the listener sockets.  Hopefully our
-     * platform has pktinfo support and doesn't need reconfigs.
-     */
+    /* Setup network listeners. */
     if (workers == 0) {
-        retval = loop_setup_routing_socket(ctx, &shandle, kdc_progname);
-        if (retval) {
-            kdc_err(kcontext, retval, _("while initializing routing socket"));
-            finish_realms();
-            return 1;
-        }
         retval = loop_setup_signals(ctx, &shandle, reset_for_hangup);
         if (retval) {
             kdc_err(kcontext, retval, _("while initializing signal handlers"));

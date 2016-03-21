@@ -122,9 +122,8 @@ paddr(struct sockaddr *sa)
 /* KDC data.  */
 
 enum conn_type {
-    CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP,
-    CONN_RPC_LISTENER, CONN_RPC,
-    CONN_ROUTING
+    CONN_UDP, CONN_TCP_LISTENER, CONN_TCP,
+    CONN_RPC_LISTENER, CONN_RPC
 };
 
 /* Per-connection info.  */
@@ -343,8 +342,6 @@ struct socksetup {
     void *handle;
     const char *prog;
     krb5_error_code retval;
-    krb5_boolean do_ipv4_udp_all;
-    krb5_boolean do_ipv6_udp_all;
 };
 
 static void
@@ -481,9 +478,9 @@ static void accept_rpc_connection(verto_ctx *ctx, verto_ev *ev);
 static void process_rpc_connection(verto_ctx *ctx, verto_ev *ev);
 
 static verto_ev *
-add_udp_fd(struct socksetup *data, int sock, int pktinfo)
+add_udp_fd(struct socksetup *data, int sock)
 {
-    return add_fd(data, sock, pktinfo ? CONN_UDP_PKTINFO : CONN_UDP,
+    return add_fd(data, sock, CONN_UDP,
                   VERTO_EV_FLAG_IO_READ |
                   VERTO_EV_FLAG_PERSIST |
                   VERTO_EV_FLAG_REINITIABLE,
@@ -772,31 +769,26 @@ setup_rpc_listener_ports(struct socksetup *data)
 }
 
 static int
-setup_udp_port_1(struct socksetup *data, struct sockaddr *addr, int pktinfo);
+setup_udp_port_1(struct socksetup *data, struct sockaddr *addr);
 
 static void
-setup_udp_pktinfo_ports(struct socksetup *data)
+setup_udp_ports(struct socksetup *data)
 {
     struct sockaddr_in sa;
     struct sockaddr_in6 sa6;
-    int r;
 
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    r = setup_udp_port_1(data, (struct sockaddr *)&sa, 4);
-    if (r == 0)
-        data->do_ipv4_udp_all = FALSE;
+    setup_udp_port_1(data, (struct sockaddr *)&sa);
 
     memset(&sa6, 0, sizeof(sa6));
     sa6.sin6_family = AF_INET6;
-    r = setup_udp_port_1(data, (struct sockaddr *)&sa6, 6);
-    if (r == 0)
-        data->do_ipv6_udp_all = FALSE;
+    setup_udp_port_1(data, (struct sockaddr *)&sa6);
 
 }
 
 static int
-setup_udp_port_1(struct socksetup *data, struct sockaddr *addr, int pktinfo)
+setup_udp_port_1(struct socksetup *data, struct sockaddr *addr)
 {
     int sock = -1, i, r;
     u_short port;
@@ -807,193 +799,23 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr, int pktinfo)
         if (sock == -1)
             return 1;
         setnbio(sock);
-
-        if (pktinfo) {
-            r = set_pktinfo(sock, addr->sa_family);
-            if (r) {
-                com_err(data->prog, r,
-                        _("Cannot request packet info for udp socket address "
-                          "%s port %d"), paddr(addr), port);
-                close(sock);
-                return 1;
-            }
+        r = set_pktinfo(sock, addr->sa_family);
+        if (r) {
+            com_err(data->prog, r,
+                    _("Cannot request packet info for udp socket address "
+                      "%s port %d"), paddr(addr), port);
+            krb5_klog_syslog(LOG_INFO, _("System does not support pktinfo yet "
+                                         "binding to a wildcard address. "
+                                         "Packets are not guaranteed to "
+                                         "return on the received address."));
         }
         krb5_klog_syslog(LOG_INFO, _("listening on fd %d: udp %s%s"), sock,
-                         paddr(addr), pktinfo ? " (pktinfo)" : "");
-        if (add_udp_fd (data, sock, pktinfo) == 0) {
+                         paddr(addr), r ? "" : " (pktinfo)");
+        if (add_udp_fd(data, sock) == 0) {
             close(sock);
             return 1;
         }
     }
-    return 0;
-}
-
-static int
-setup_udp_port(void *arg, struct sockaddr *addr)
-{
-    struct socksetup *data = arg;
-
-    if ((addr->sa_family == AF_INET && data->do_ipv4_udp_all) ||
-        (addr->sa_family == AF_INET6 && data->do_ipv6_udp_all))
-        return setup_udp_port_1(data, addr, 0);
-    return 0;
-}
-
-#ifdef HAVE_STRUCT_RT_MSGHDR
-#include <net/route.h>
-
-static void
-do_network_reconfig(verto_ctx *ctx, verto_ev *ev)
-{
-    struct connection *conn = verto_get_private(ev);
-    if (loop_setup_network(ctx, conn->handle, conn->prog) != 0) {
-        krb5_klog_syslog(LOG_ERR, _("Failed to reconfigure network, exiting"));
-        verto_break(ctx);
-    }
-}
-
-static int
-routing_update_needed(struct rt_msghdr *rtm)
-{
-    switch (rtm->rtm_type) {
-    case RTM_ADD:
-    case RTM_DELETE:
-    case RTM_NEWADDR:
-    case RTM_DELADDR:
-    case RTM_IFINFO:
-#ifdef RTM_OLDADD
-    case RTM_OLDADD:
-#endif
-#ifdef RTM_OLDDEL
-    case RTM_OLDDEL:
-#endif
-        /*
-         * Some flags indicate routing table updates that don't
-         * indicate local address changes.  They may come from
-         * redirects, or ARP, etc.
-         *
-         * This set of symbols is just an initial guess based on
-         * some messages observed in real life; working out which
-         * other flags also indicate messages we should ignore,
-         * and which flags are portable to all system and thus
-         * don't need to be conditionalized, is left as a future
-         * exercise.
-         */
-#ifdef RTF_DYNAMIC
-        if (rtm->rtm_flags & RTF_DYNAMIC)
-            break;
-#endif
-#ifdef RTF_CLONED
-        if (rtm->rtm_flags & RTF_CLONED)
-            break;
-#endif
-#ifdef RTF_LLINFO
-        if (rtm->rtm_flags & RTF_LLINFO)
-            break;
-#endif
-        return 1;
-    case RTM_RESOLVE:
-#ifdef RTM_NEWMADDR
-    case RTM_NEWMADDR:
-    case RTM_DELMADDR:
-#endif
-    case RTM_MISS:
-    case RTM_REDIRECT:
-    case RTM_LOSING:
-    case RTM_GET:
-        /* Not interesting.  */
-#if 0
-        krb5_klog_syslog(LOG_DEBUG, "routing msg not interesting");
-#endif
-        break;
-    default:
-        krb5_klog_syslog(LOG_INFO,
-                         _("unhandled routing message type %d, "
-                           "will reconfigure just for the fun of it"),
-                         rtm->rtm_type);
-        return 1;
-    }
-
-    return 0;
-}
-
-static void
-process_routing_update(verto_ctx *ctx, verto_ev *ev)
-{
-    int fd;
-    ssize_t n_read;
-    size_t sz_read;
-    struct rt_msghdr rtm;
-    struct connection *conn;
-
-    fd = verto_get_fd(ev);
-    conn = verto_get_private(ev);
-    while ((n_read = read(fd, &rtm, sizeof(rtm))) > 0) {
-        sz_read = (size_t) n_read; /* Safe, since we just checked the sign */
-        if (sz_read < sizeof(rtm)) {
-            /* Quick hack to figure out if the interesting
-               fields are present in a short read.
-
-               A short read seems to be normal for some message types.
-               Only complain if we don't have the critical initial
-               header fields.  */
-#define RS(FIELD) (offsetof(struct rt_msghdr, FIELD) + sizeof(rtm.FIELD))
-            if (sz_read < RS(rtm_type) ||
-                sz_read < RS(rtm_version) ||
-                sz_read < RS(rtm_msglen)) {
-                krb5_klog_syslog(LOG_ERR,
-                                 _("short read (%d/%d) from routing socket"),
-                                 (int)sz_read, (int) sizeof(rtm));
-                return;
-            }
-        }
-        if (rtm.rtm_msglen > sizeof(rtm)) {
-            /* It appears we get a partial message and the rest is
-               thrown away?  */
-        } else if (rtm.rtm_msglen != sz_read) {
-            krb5_klog_syslog(LOG_ERR,
-                             _("read %d from routing socket but msglen is %d"),
-                             (int)sz_read, rtm.rtm_msglen);
-        }
-
-        if (routing_update_needed(&rtm)) {
-            /* Ideally we would use idle here instead of timeout. However, idle
-             * is not universally supported yet in all backends. So let's just
-             * use timeout for now to avoid locking into a loop. */
-            ev = verto_add_timeout(ctx, VERTO_EV_FLAG_NONE,
-                                   do_network_reconfig, 0);
-            verto_set_private(ev, conn, NULL);
-            assert(ev);
-        }
-    }
-}
-#endif
-
-krb5_error_code
-loop_setup_routing_socket(verto_ctx *ctx, void *handle, const char *progname)
-{
-#ifdef HAVE_STRUCT_RT_MSGHDR
-    struct socksetup data;
-    int sock;
-
-    data.ctx = ctx;
-    data.handle = handle;
-    data.prog = progname;
-    data.retval = 0;
-
-    sock = socket(PF_ROUTE, SOCK_RAW, 0);
-    if (sock < 0) {
-        int e = errno;
-        krb5_klog_syslog(LOG_INFO, _("couldn't set up routing socket: %s"),
-                         strerror(e));
-    } else {
-        krb5_klog_syslog(LOG_INFO, _("routing socket is fd %d"), sock);
-        setnbio(sock);
-        add_fd(&data, sock, CONN_ROUTING,
-               VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
-               process_routing_update, 0);
-    }
-#endif
     return 0;
 }
 
@@ -1015,19 +837,7 @@ loop_setup_network(verto_ctx *ctx, void *handle, const char *prog)
     setup_data.retval = 0;
     krb5_klog_syslog(LOG_INFO, _("setting up network..."));
 
-    /*
-     * Start by assuming we need a UDP listener socket for each address for
-     * IPv4 and IPv6.  setup_udp_pktinfo_ports will unset appropriate flags if
-     * it sets up a wildcard socket using IP_PKTINFO or IPV6_PKTINFO.
-     */
-    setup_data.do_ipv4_udp_all = TRUE;
-    setup_data.do_ipv6_udp_all = TRUE;
-    setup_udp_pktinfo_ports(&setup_data);
-    if (setup_data.do_ipv4_udp_all || setup_data.do_ipv6_udp_all) {
-        if (foreach_localaddr (&setup_data, setup_udp_port, 0, 0)) {
-            return setup_data.retval;
-        }
-    }
+    setup_udp_ports(&setup_data);
     setup_tcp_listener_ports(&setup_data);
     setup_rpc_listener_ports(&setup_data);
     krb5_klog_syslog (LOG_INFO, _("set up %d sockets"), (int) events.n);
@@ -1194,9 +1004,9 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
 
     if (state->daddr_len == 0 && conn->type == CONN_UDP) {
         /*
-         * If the PKTINFO option isn't set, this socket should be bound to a
-         * specific local address.  This info probably should've been saved in
-         * our socket data structure at setup time.
+         * An address couldn't be obtain, so the PKTINFO option probably isn't
+         * available.  If the socket is bound to a specific address, then try
+         * to get the address here. If it fails then oh well.
          */
         state->daddr_len = sizeof(state->daddr);
         if (getsockname(state->port_fd, (struct sockaddr *)&state->daddr,
