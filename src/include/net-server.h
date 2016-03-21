@@ -45,8 +45,6 @@ krb5_error_code loop_add_udp_port(int port);
 krb5_error_code loop_add_tcp_port(int port);
 krb5_error_code loop_add_rpc_service(int port, u_long prognum, u_long versnum,
                                      void (*dispatch)());
-krb5_error_code loop_setup_routing_socket(verto_ctx *ctx, void *handle,
-                                          const char *progname);
 krb5_error_code loop_setup_network(verto_ctx *ctx, void *handle,
                                    const char *progname);
 krb5_error_code loop_setup_signals(verto_ctx *ctx, void *handle,

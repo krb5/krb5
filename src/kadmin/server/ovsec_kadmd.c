@@ -169,9 +169,6 @@ setup_loop(int proponly, verto_ctx **ctx_out)
             return ret;
     }
 #endif
-    ret = loop_setup_routing_socket(ctx, global_server_handle, progname);
-    if (ret)
-        return ret;
     return loop_setup_network(ctx, global_server_handle, progname);
 }
 
