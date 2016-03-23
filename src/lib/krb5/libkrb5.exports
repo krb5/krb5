@@ -581,6 +581,8 @@ krb5_set_password
 krb5_set_password_using_ccache
 krb5_set_principal_realm
 krb5_set_real_time
+krb5_set_kdc_send_hook
+krb5_set_kdc_recv_hook
 krb5_set_time_offsets
 krb5_set_trace_callback
 krb5_set_trace_filename
