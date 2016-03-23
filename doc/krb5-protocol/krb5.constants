@@ -118,7 +118,7 @@ KDC_ERR_ETYPE_NOSUPP          14   KDC has no support for encryption type
 KDC_ERR_SUMTYPE_NOSUPP        15   KDC has no support for checksum type
 KDC_ERR_PADATA_TYPE_NOSUPP    16   KDC has no support for padata type
 KDC_ERR_TRTYPE_NOSUPP         17   KDC has no support for transited type
-KDC_ERR_CLIENT_REVOKED        18   Clients credentials have been revoked
+KDC_ERR_CLIENT_REVOKED        18   Client's credentials have been revoked
 KDC_ERR_SERVICE_REVOKED       19   Credentials for server have been revoked
 KDC_ERR_TGT_REVOKED           20   TGT has been revoked
 KDC_ERR_CLIENT_NOTYET         21   Client not yet valid - try again later

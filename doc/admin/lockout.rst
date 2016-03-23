@@ -58,7 +58,7 @@ might see::
     Password for user@KRBTEST.COM:
     kinit: Password incorrect while getting initial credentials
     $ kinit user
-    kinit: Clients credentials have been revoked while getting initial credentials
+    kinit: Client's credentials have been revoked while getting initial credentials
 
 
 Account lockout principal state

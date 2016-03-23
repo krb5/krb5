@@ -7139,7 +7139,7 @@ msgid "KDC has no support for transited type"
 msgstr ""
 
 #: ../lib/krb5/error_tables/krb5_err.c:41
-msgid "Clients credentials have been revoked"
+msgid "Client's credentials have been revoked"
 msgstr ""
 
 #: ../lib/krb5/error_tables/krb5_err.c:42

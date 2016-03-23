@@ -84,7 +84,7 @@ if 'Password incorrect while getting initial credentials' not in output:
 
 # Now the account should be locked out.
 output = realm.run([kinit, realm.user_princ], expected_code=1)
-if 'Clients credentials have been revoked while getting initial credentials' \
+if 'Client\'s credentials have been revoked while getting initial credentials' \
         not in output:
     fail('Expected lockout error message not seen in kinit output')
 
