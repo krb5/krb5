@@ -26,9 +26,7 @@
 #include "krb5.h"
 #include <stdio.h>
 #include <string.h>
-
-extern int optind;
-extern char *optarg;
+#include "k5-platform.h"
 
 static char *prog;
 

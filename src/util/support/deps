@@ -84,3 +84,5 @@ strerror_r.so strerror_r.po $(OUTPRE)strerror_r.$(OBJEXT): \
 t_utf8.so t_utf8.po $(OUTPRE)t_utf8.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/k5-utf8.h t_utf8.c
+getopt.so getopt.po $(OUTPRE)getopt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(top_srcdir)/include/k5-platform.h getopt.c getopt_long.c

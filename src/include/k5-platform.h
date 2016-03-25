@@ -63,6 +63,10 @@
 #include <fnmatch.h>
 #endif
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #ifdef _WIN32
 #define CAN_COPY_VA_LIST
 #endif
@@ -1059,5 +1063,40 @@ int k5_path_isabs(const char *path);
 #define bindtextdomain(p, d)
 #endif
 #define N_(s) s
+
+#if !defined(HAVE_GETOPT) || !defined(HAVE_UNISTD_H)
+extern int k5_opterr;
+extern int k5_optind;
+extern int k5_optopt;
+extern char *k5_optarg;
+#define opterr k5_opterr
+#define optind k5_optind
+#define optopt k5_optopt
+#define optarg k5_optarg
+
+extern int k5_getopt(int nargc, char * const nargv[], const char *ostr);
+#define getopt k5_getopt
+#endif /* HAVE_GETOPT */
+
+#ifdef HAVE_GETOPT_LONG
+#include <getopt.h>
+#else
+
+struct option
+{
+  const char *name;
+  int has_arg;
+  int *flag;
+  int val;
+};
+
+#define no_argument       0
+#define required_argument 1
+#define optional_argument 2
+
+extern int k5_getopt_long(int nargc, char **nargv, char *options,
+                          struct option *long_options, int *index);
+#define getopt_long k5_getopt_long
+#endif /* HAVE_GETOPT_LONG */
 
 #endif /* K5_PLATFORM_H */

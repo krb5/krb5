@@ -23,12 +23,9 @@
  * or implied warranty.
  */
 
-#include "krb5.h"
+#include "k5-int.h"
 #include <stdio.h>
 #include <string.h>
-
-extern int optind;
-extern char *optarg;
 
 static char *prog;
 

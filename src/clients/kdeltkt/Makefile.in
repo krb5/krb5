@@ -18,7 +18,7 @@ all-mac::
 kdeltkt: kdeltkt.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kdeltkt.o $(KRB5_BASE_LIBS)
 
-##WIN32##$(KDELTKT): $(OUTPRE)kdeltkt.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
+##WIN32##$(KDELTKT): $(OUTPRE)kdeltkt.obj $(SLIB) $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) /out:$@ $**
 ##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 

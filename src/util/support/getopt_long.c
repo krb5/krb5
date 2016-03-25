@@ -31,18 +31,17 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#ifndef HAVE_GETOPT_LONG
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "getopt.h"
+#include "k5-platform.h"
 
-extern int	  opterr;	/* if error message should be printed */
-extern int	  optind;	/* index into parent argv vector */
-extern int	  optopt;	/* character checked for validity */
-extern int	  optreset;	/* reset getopt */
-extern char *optarg;	/* argument associated with option */
+#ifdef HAVE_GETOPT
+#include <unistd.h>
+#endif
 
 #define __P(x) x
 #define _DIAGASSERT(x) assert(x)
@@ -86,8 +85,7 @@ getopt_internal(nargc, nargv, ostr)
 	_DIAGASSERT(nargv != NULL);
 	_DIAGASSERT(ostr != NULL);
 
-	if (optreset || !*place) {		/* update scanning pointer */
-		optreset = 0;
+	if (!*place) {		/* update scanning pointer */
 		if (optind >= nargc || *(place = nargv[optind]) != '-') {
 			place = EMSG;
 			return (-1);
@@ -235,3 +233,4 @@ getopt_long(nargc, nargv, options, long_options, index)
 	}
 	return(retval);
 }
+#endif

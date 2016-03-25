@@ -21,7 +21,7 @@ all-unix:: kdestroy
 kdestroy: kdestroy.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kdestroy.o $(KRB5_BASE_LIBS)
 
-##WIN32##$(KDESTROY): $(OUTPRE)kdestroy.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
+##WIN32##$(KDESTROY): $(OUTPRE)kdestroy.obj $(SLIB) $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $**
 ##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 

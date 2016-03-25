@@ -2,9 +2,7 @@ mydir=clients$(S)kinit
 BUILDTOP=$(REL)..$(S)..
 
 SRCS=kinit.c kinit_kdb.c
-
-##WIN32##LOCALINCLUDES=-I$(BUILDTOP)\util\windows
-##WIN32##DEFINES=-DGETOPT_LONG
+##WIN32##LOCALINCLUDES=-I$(BUILDTOP)\util\windows -I$(BUILDTOP)\util\support
 
 ##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
 ##WIN32##RCFLAGS=$(CPPFLAGS) -I$(top_srcdir) -D_WIN32 -DRES_ONLY
@@ -22,7 +20,7 @@ all-unix:: kinit
 kinit: kinit.o kinit_kdb.o $(KRB5_BASE_DEPLIBS) $(KADMSRV_DEPLIBS)
 	$(CC_LINK) -o $@ kinit.o kinit_kdb.o $(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
 
-##WIN32##$(KINIT): $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(KLIB) $(CLIB) $(EXERES)
+##WIN32##$(KINIT): $(OUTPRE)kinit.obj $(SLIB) $(KLIB) $(CLIB) $(EXERES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** advapi32.lib
 ##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
