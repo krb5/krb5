@@ -34,6 +34,14 @@
 #include "adb_err.h"
 #include <com_err.h>
 
+/* DB2 uses EFTYPE to indicate a database file of the wrong format, and falls
+ * back to EINVAL if the platform does not define EFTYPE. */
+#ifdef EFTYPE
+#define IS_EFTYPE(e) ((e) == EFTYPE || (e) == EINVAL)
+#else
+#define IS_EFTYPE(e) ((e) == EINVAL)
+#endif
+
 typedef long            osa_adb_ret_t;
 
 #define OSA_ADB_POLICY_DB_MAGIC 0x12345A00
