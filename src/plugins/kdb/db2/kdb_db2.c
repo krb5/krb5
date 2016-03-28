@@ -337,8 +337,9 @@ error:
  * dbc->hashfirst determines which is attempted first.  If dbc->hashfirst
  * indicated the wrong type, update it to indicate the correct type.
  */
-static DB *
-open_db(krb5_db2_context *dbc, int flags, int mode)
+static krb5_error_code
+open_db(krb5_context context, krb5_db2_context *dbc, int flags, int mode,
+        DB **db_out)
 {
     char *fname = NULL;
     DB *db;
@@ -352,10 +353,10 @@ open_db(krb5_db2_context *dbc, int flags, int mode)
     bti.compare = NULL;
     bti.prefix = NULL;
 
-    if (ctx_dbsuffix(dbc, SUFFIX_DB, &fname) != 0) {
-        errno = ENOMEM;
-        return NULL;
-    }
+    *db_out = NULL;
+
+    if (ctx_dbsuffix(dbc, SUFFIX_DB, &fname) != 0)
+        return ENOMEM;
 
     hashi.bsize = 4096;
     hashi.cachesize = 0;
@@ -368,11 +369,8 @@ open_db(krb5_db2_context *dbc, int flags, int mode)
     db = dbopen(fname, flags, mode,
                 dbc->hashfirst ? DB_HASH : DB_BTREE,
                 dbc->hashfirst ? (void *) &hashi : (void *) &bti);
-    if (db != NULL)
-        goto done;
 
-    /* If that was wrong, retry with the other type. */
-    if (IS_EFTYPE(errno)) {
+    if (db == NULL && IS_EFTYPE(errno)) {
         db = dbopen(fname, flags, mode,
                     dbc->hashfirst ? DB_BTREE : DB_HASH,
                     dbc->hashfirst ? (void *) &bti : (void *) &hashi);
@@ -384,9 +382,15 @@ open_db(krb5_db2_context *dbc, int flags, int mode)
     /* Don't try unlocked iteration with a hash database. */
     if (db != NULL && dbc->hashfirst)
         dbc->unlockiter = FALSE;
-done:
+
+    if (db == NULL) {
+        k5_prependmsg(context, errno, _("Cannot open DB2 database '%s'"),
+                      fname);
+    }
+
+    *db_out = db;
     free(fname);
-    return db;
+    return (db == NULL) ? errno : 0;
 }
 
 static krb5_error_code
@@ -446,11 +450,10 @@ ctx_lock(krb5_context context, krb5_db2_context *dbc, int lockmode)
         /* Open the DB (or re-open it for read/write). */
         if (dbc->db != NULL)
             dbc->db->close(dbc->db);
-        dbc->db = open_db(dbc,
-                          kmode == KRB5_LOCKMODE_SHARED ? O_RDONLY : O_RDWR,
-                          0600);
-        if (dbc->db == NULL) {
-            retval = errno;
+        retval = open_db(context, dbc,
+                         kmode == KRB5_LOCKMODE_SHARED ? O_RDONLY : O_RDWR,
+                         0600, &dbc->db);
+        if (retval) {
             dbc->db_locks_held = 0;
             dbc->db_lock_mode = 0;
             (void) osa_adb_release_lock(dbc->policy_db);
@@ -541,13 +544,14 @@ krb5_db2_fini(krb5_context context)
 static krb5_error_code
 check_openable(krb5_context context)
 {
+    krb5_error_code retval;
     DB     *db;
     krb5_db2_context *dbc;
 
     dbc = context->dal_handle->db_context;
-    db = open_db(dbc, O_RDONLY, 0);
-    if (db == NULL)
-        return errno;
+    retval = open_db(context, dbc, O_RDONLY, 0, &db);
+    if (retval)
+        return retval;
     db->close(db);
     return 0;
 }
@@ -711,11 +715,9 @@ ctx_create_db(krb5_context context, krb5_db2_context *dbc)
         (void) unlink(plockname);
     }
 
-    dbc->db = open_db(dbc, O_RDWR | O_CREAT | O_EXCL, 0600);
-    if (dbc->db == NULL) {
-        retval = errno;
+    retval = open_db(context, dbc, O_RDWR | O_CREAT | O_EXCL, 0600, &dbc->db);
+    if (retval)
         goto cleanup;
-    }
 
     /* Create the policy database, initialize a handle to it, and lock it. */
     retval = osa_adb_create_db(polname, plockname, OSA_ADB_POLICY_DB_MAGIC);
