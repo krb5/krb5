@@ -399,7 +399,7 @@ check_for_svc_unavailable (krb5_context context,
     return 1;
 }
 
-void
+void KRB5_CALLCONV
 krb5_set_kdc_send_hook(krb5_context context, krb5_pre_send_fn send_hook,
                        void *data)
 {
@@ -407,7 +407,7 @@ krb5_set_kdc_send_hook(krb5_context context, krb5_pre_send_fn send_hook,
     context->kdc_send_hook_data = data;
 }
 
-void
+void KRB5_CALLCONV
 krb5_set_kdc_recv_hook(krb5_context context, krb5_post_recv_fn recv_hook,
                        void *data)
 {
