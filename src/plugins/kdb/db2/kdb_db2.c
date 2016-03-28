@@ -372,18 +372,13 @@ open_db(krb5_db2_context *dbc, int flags, int mode)
         goto done;
 
     /* If that was wrong, retry with the other type. */
-    switch (errno) {
-#ifdef EFTYPE
-    case EFTYPE:
-#endif
-    case EINVAL:
+    if (IS_EFTYPE(errno)) {
         db = dbopen(fname, flags, mode,
                     dbc->hashfirst ? DB_BTREE : DB_HASH,
                     dbc->hashfirst ? (void *) &bti : (void *) &hashi);
         /* If that worked, update our guess for next time. */
         if (db != NULL)
             dbc->hashfirst = !dbc->hashfirst;
-        break;
     }
 
     /* Don't try unlocked iteration with a hash database. */

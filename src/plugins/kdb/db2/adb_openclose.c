@@ -324,15 +324,11 @@ osa_adb_open_and_lock(osa_adb_princ_t db, int locktype)
     db->db = dbopen(db->filename, O_RDWR, 0600, DB_BTREE, &db->btinfo);
     if (db->db != NULL)
         goto open_ok;
-    switch (errno) {
-#ifdef EFTYPE
-    case EFTYPE:
-#endif
-    case EINVAL:
+    if (IS_EFTYPE(errno)) {
         db->db = dbopen(db->filename, O_RDWR, 0600, DB_HASH, &db->info);
         if (db->db != NULL)
             goto open_ok;
-    default:
+    } else {
         (void) osa_adb_release_lock(db);
         if (errno == EINVAL)
             return OSA_ADB_BAD_DB;
