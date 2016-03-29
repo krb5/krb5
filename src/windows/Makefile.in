@@ -1,3 +1,6 @@
 BUILDTOP=..
 NO_OUTPRE=1
-SUBDIRS= lib leashdll leash cns ms2mit kfwlogon
+!ifndef NO_LEASH
+LEASH=leash
+!endif
+SUBDIRS= lib leashdll $(LEASH) cns ms2mit kfwlogon
