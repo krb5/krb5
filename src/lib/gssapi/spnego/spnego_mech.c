@@ -507,6 +507,48 @@ mech_requires_mechlistMIC(spnego_gss_ctx_id_t sc)
 	return result;
 }
 
+/* iso(1) org(3) dod(6) internet(1) private(4) enterprise(1) Microsoft(311)
+ * security(2) mechanisms(2) NTLM(10) */
+static const gss_OID_desc gss_mech_ntlmssp_oid =
+	{ 10, "\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a" };
+
+/* iso(1) org(3) dod(6) internet(1) private(4) enterprises(1) samba(7165)
+ * gssntlmssp(655) controls(1) ntlmssp_reset_crypto(3) */
+static const gss_OID_desc ntlmssp_reset_crypto_oid =
+	{ 11, "\x2B\x06\x01\x04\x01\xB7\x7D\x85\x0F\x01\x03" };
+
+/*
+ * MS-SPNG 3.3.5.1 warns hat the NTLM mechanism requires special handling of
+ * the crypto state to interop with Windows.
+ * This function calls a mechanism specific operation on the context and
+ * ignore a result of GSS_S_UNAVAILABLE for compatibility with older versions
+ * of the mechanism that do not support this functionality.
+ */
+static int
+ntlmssp_reset_crypto_state(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
+			   OM_uint32 verify)
+{
+	OM_uint32 major, minor;
+	gss_OID oid;
+	gss_buffer_desc value;
+
+	if (!g_OID_equal(sc->internal_mech, &gss_mech_ntlmssp_oid))
+		return GSS_S_COMPLETE;
+
+	oid = (gss_OID)&ntlmssp_reset_crypto_oid;
+	value.length = sizeof(OM_uint32);
+	value.value = &verify;
+	major =  gss_set_sec_context_option(&minor, &sc->ctx_handle, oid,
+					    &value);
+	/* ignore if not available */
+	if (major == GSS_S_UNAVAILABLE) {
+		major =  GSS_S_COMPLETE;
+	} else {
+		*minor_status = minor;
+	}
+	return major;
+}
+
 /*
  * Both initiator and acceptor call here to verify and/or create mechListMIC,
  * and to consistency-check the MIC state.  handle_mic is invoked only if the
@@ -588,6 +630,8 @@ process_mic(OM_uint32 *minor_status, gss_buffer_t mic_in,
 		ret = gss_verify_mic(minor_status, sc->ctx_handle,
 				     &sc->DER_mechTypes,
 				     mic_in, &qop_state);
+		if (ret == GSS_S_COMPLETE)
+			ret = ntlmssp_reset_crypto_state(minor_status, sc, 1);
 		if (ret != GSS_S_COMPLETE) {
 			*negState = REJECT;
 			*tokflag = ERROR_TOKEN_SEND;
@@ -602,6 +646,8 @@ process_mic(OM_uint32 *minor_status, gss_buffer_t mic_in,
 				  GSS_C_QOP_DEFAULT,
 				  &sc->DER_mechTypes,
 				  &tmpmic);
+		if (ret == GSS_S_COMPLETE)
+			ret = ntlmssp_reset_crypto_state(minor_status, sc, 0);
 		if (ret != GSS_S_COMPLETE) {
 			gss_release_buffer(&tmpmin, &tmpmic);
 			*tokflag = NO_TOKEN_SEND;
@@ -803,11 +849,6 @@ init_ctx_nego(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 	sc->nego_done = 1;
 	return ret;
 }
-
-/* iso(1) org(3) dod(6) internet(1) private(4) enterprise(1) Microsoft(311)
- * security(2) mechanisms(2) NTLM(10) */
-static const gss_OID_desc gss_mech_ntlmssp_oid =
-	{ 10, "\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a" };
 
 /*
  * Handle acceptor's counter-proposal of an alternative mechanism.
