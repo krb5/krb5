@@ -559,6 +559,7 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     test_free_principal,
     NULL, /* put_principal */
     NULL, /* delete_principal */
+    NULL, /* rename_principal */
     NULL, /* iterate */
     NULL, /* create_policy */
     NULL, /* get_policy */

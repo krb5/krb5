@@ -298,6 +298,8 @@ kdb_setup_opt_functions(db_library lib)
         lib->vftabl.decrypt_key_data = krb5_dbe_def_decrypt_key_data;
     if (lib->vftabl.encrypt_key_data == NULL)
         lib->vftabl.encrypt_key_data = krb5_dbe_def_encrypt_key_data;
+    if (lib->vftabl.rename_principal == NULL)
+        lib->vftabl.rename_principal = krb5_db_def_rename_principal;
 }
 
 #ifdef STATIC_PLUGINS
@@ -949,6 +951,37 @@ krb5_db_delete_principal(krb5_context kcontext, krb5_principal search_for)
     status = ulog_add_update(kcontext, &upd);
     free(princ_name);
     return status;
+}
+
+krb5_error_code
+krb5_db_rename_principal(krb5_context kcontext, krb5_principal source,
+                         krb5_principal target)
+{
+    kdb_vftabl *v;
+    krb5_error_code status = 0;
+    krb5_db_entry *entry;
+
+    status = get_vftabl(kcontext, &v);
+    if (status)
+        return status;
+
+    /*
+     * If the default rename function isn't used and logging is enabled, iprop
+     * would fail since it doesn't formally support renaming.  In that case
+     * return KRB5_PLUGIN_OP_NOTSUPP.
+     */
+    if (v->rename_principal != krb5_db_def_rename_principal &&
+        logging(kcontext))
+        return KRB5_PLUGIN_OP_NOTSUPP;
+
+    status = krb5_db_get_principal(kcontext, target, KRB5_KDB_FLAG_ALIAS_OK,
+                                   &entry);
+    if (status == 0) {
+        krb5_db_free_principal(kcontext, entry);
+        return KRB5_KDB_INUSE;
+    }
+
+    return v->rename_principal(kcontext, source, target);
 }
 
 /*

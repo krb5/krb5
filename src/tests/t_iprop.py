@@ -342,14 +342,40 @@ out = realm.run([kadminl, 'getprinc', pr3], env=slave2, expected_code=1)
 if 'Principal does not exist' not in out:
     fail('slave2 does not have principal deletion from slave1')
 
+# Rename a principal and test that it propagates incrementally
+# Test principal renaming and make sure last modified is changed
+def get_princ(princ):
+    out = realm.run([kadminl, 'getprinc', princ])
+    return dict(map(str.strip, x.split(":", 1)) for x in out.splitlines())
+
+renpr = "quacked@" + realm.realm
+realm.run([kadminl, 'renprinc', pr1, renpr])
+check_ulog(6, 1, 6, [None, pr1, pr3, renpr, pr1, renpr])
+kpropd1.send_signal(signal.SIGUSR1)
+wait_for_prop(kpropd1, False, 3, 6)
+check_ulog(6, 1, 6, [None, pr1, pr3, renpr, pr1, renpr], slave1)
+out = realm.run([kadminl, 'getprinc', pr1], env=slave1, expected_code=1)
+if 'Principal does not exist' not in out:
+    fail('slave1 does not have principal deletion from master')
+realm.run([kadminl, 'getprinc', renpr], env=slave1)
+kpropd2.send_signal(signal.SIGUSR1)
+wait_for_prop(kpropd2, False, 3, 6)
+check_ulog(6, 1, 6, [None, pr1, pr3, renpr, pr1, renpr], slave2)
+out = realm.run([kadminl, 'getprinc', pr1], env=slave2, expected_code=1)
+if 'Principal does not exist' not in out:
+    fail('slave2 does not have principal deletion from master')
+realm.run([kadminl, 'getprinc', renpr], env=slave2)
+
+pr1 = renpr
+
 # Reset the ulog on the master to force a full resync.
 realm.run([kproplog, '-R'])
 check_ulog(1, 1, 1, [None])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, True, 3, 1)
+wait_for_prop(kpropd1, True, 6, 1)
 check_ulog(1, 1, 1, [None], slave1)
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, True, 3, 1)
+wait_for_prop(kpropd2, True, 6, 1)
 check_ulog(1, 1, 1, [None], slave2)
 
 # Stop the kprop daemons so we can test kpropd -t.

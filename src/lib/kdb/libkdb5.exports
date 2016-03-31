@@ -24,6 +24,7 @@ krb5_db_lock
 krb5_db_mkey_list_alias
 krb5_db_put_principal
 krb5_db_refresh_config
+krb5_db_rename_principal
 krb5_db_set_context
 krb5_db_setup_mkey_name
 krb5_db_sign_authdata

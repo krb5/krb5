@@ -218,6 +218,7 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
     /* free_principal */                wrap_krb5_db2_free_principal,
     /* put_principal */                 wrap_krb5_db2_put_principal,
     /* delete_principal */              wrap_krb5_db2_delete_principal,
+    /* rename_principal */              NULL,
     /* iterate */                       wrap_krb5_db2_iterate,
     /* create_policy */                 wrap_krb5_db2_create_policy,
     /* get_policy */                    wrap_krb5_db2_get_policy,
