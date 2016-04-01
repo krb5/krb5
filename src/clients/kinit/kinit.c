@@ -179,7 +179,7 @@ usage()
             "\n\n",
             progname);
 
-    fprintf(stderr, "    options:");
+    fprintf(stderr, "    options:\n");
     fprintf(stderr, _("\t-V verbose\n"));
     fprintf(stderr, _("\t-l lifetime\n"));
     fprintf(stderr, _("\t-s start time\n"));
