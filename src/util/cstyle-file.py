@@ -37,12 +37,12 @@
 #   Assignment at the beginning of an if conditional
 #   Use of prohibited string functions
 #   Lack of braces around 2+ line flow control body
+#   Incorrect indentation as determined by emacs c-mode (if possible)
 #
 # This program does not check for the following:
 #
 #   Anything outside of a function body except line length/whitespace
 #   Anything non-syntactic (proper cleanup flow control, naming, etc.)
-#   Indentation or alignment of continuation lines
 #   UTF-8 violations
 #   Implicit tests against NULL or '\0'
 #   Inner-scope variable declarations
@@ -50,11 +50,38 @@
 #   Long or deeply nested function bodies
 #   Syntax of function calls through pointers
 
+import os
 import re
 import sys
+from subprocess import call
+from tempfile import NamedTemporaryFile
 
 def warn(ln, msg):
     print '%5d  %s' % (ln, msg)
+
+
+# If lines[0] indicates the krb5 C style, try to use emacs to reindent
+# a copy of lines.  Return None if the file does not use the krb5 C
+# style or if the emacs batch reindent is unsuccessful.
+def emacs_reindent(lines):
+    if 'c-basic-offset: 4; indent-tabs-mode: nil' not in lines[0]:
+        return None
+
+    util_dir = os.path.dirname(sys.argv[0])
+    cstyle_el = os.path.join(util_dir, 'krb5-c-style.el')
+    reindent_el = os.path.join(util_dir, 'krb5-batch-reindent.el')
+    with NamedTemporaryFile(suffix='.c') as f:
+        f.write(''.join(lines))
+        f.flush()
+        args = ['emacs', '-q', '-batch', '-l', cstyle_el, '-l', reindent_el,
+                f.name]
+        with open(os.devnull, 'w') as devnull:
+            if call(args, stdin=devnull, stdout=devnull, stderr=devnull) != 0:
+                return None
+        f.seek(0)
+        ilines = f.readlines()
+        f.close()
+        return ilines
 
 
 def check_length(line, ln):
@@ -202,12 +229,28 @@ def check_bad_string_fn(line, ln):
         warn(ln, 'Prohibited string function')
 
 
+def check_indentation(line, indented_lines, ln):
+    if not indented_lines:
+        return
+
+    if ln - 1 >= len(indented_lines):
+        # This should only happen when the emacs reindent removed
+        # blank lines from the input file, but check.
+        if line.strip() == '':
+            warn(ln, 'Trailing blank line')
+        return
+
+    if line != indented_lines[ln - 1].rstrip('\r\n'):
+        warn(ln, 'Indentation may be incorrect')
+
+
 def check_file(lines):
     # Check if this file allows tabs.
     if len(lines) == 0:
         return
     allow_tabs = 'indent-tabs-mode: nil' not in lines[0]
     seen_tab = False
+    indented_lines = emacs_reindent(lines)
 
     in_function = False
     comment = []
@@ -218,6 +261,7 @@ def check_file(lines):
         seen_tab = seen_tab or ('\t' in line)
 
         # Check line structure issues before altering the line.
+        check_indentation(line, indented_lines, ln)
         check_length(line, ln)
         check_tabs(line, ln, allow_tabs, seen_tab)
         check_trailing_whitespace(line, ln)
