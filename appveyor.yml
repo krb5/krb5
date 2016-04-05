@@ -5,7 +5,7 @@ build_script:
   - set CPU=i386
   - set NO_LEASH=1
   - set
-  - cd C:\Projects\krb5\src
+  - cd %APPVEYOR_BUILD_FOLDER%\src
   - nmake -f Makefile.in prep-windows
   - nmake
   - nmake install
