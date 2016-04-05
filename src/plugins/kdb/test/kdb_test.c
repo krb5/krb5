@@ -71,6 +71,8 @@
 #include "adm_proto.h"
 #include <ctype.h>
 
+#define TEST_AD_TYPE -456
+
 typedef struct {
     void *profile;
     char *section;
@@ -490,6 +492,29 @@ test_encrypt_key_data(krb5_context context, const krb5_keyblock *mkey,
 }
 
 static krb5_error_code
+test_sign_authdata(krb5_context context, unsigned int flags,
+                   krb5_const_principal client_princ, krb5_db_entry *client,
+                   krb5_db_entry *server, krb5_db_entry *krbtgt,
+                   krb5_keyblock *client_key, krb5_keyblock *server_key,
+                   krb5_keyblock *krbtgt_key, krb5_keyblock *session_key,
+                   krb5_timestamp authtime, krb5_authdata **tgt_auth_data,
+                   krb5_authdata ***signed_auth_data)
+{
+    krb5_authdata **list, *ad;
+
+    ad = ealloc(sizeof(*ad));
+    ad->magic = KV5M_AUTHDATA;
+    ad->ad_type = TEST_AD_TYPE;
+    ad->contents = (uint8_t *)estrdup("db-authdata-test");
+    ad->length = strlen((char *)ad->contents);
+    list = ealloc(2 * sizeof(*list));
+    list[0] = ad;
+    list[1] = NULL;
+    *signed_auth_data = list;
+    return 0;
+}
+
+static krb5_error_code
 test_check_allowed_to_delegate(krb5_context context,
                                krb5_const_principal client,
                                const krb5_db_entry *server,
@@ -551,7 +576,7 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     NULL, /* promote_db */
     test_decrypt_key_data,
     test_encrypt_key_data,
-    NULL, /* sign_authdata */
+    test_sign_authdata,
     NULL, /* check_transited_realms */
     NULL, /* check_policy_as */
     NULL, /* check_policy_tgs */

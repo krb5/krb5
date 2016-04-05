@@ -163,6 +163,7 @@ realm.run([kadminl, 'setstr', 'restricted', 'require_auth', 'a b c ind2'])
 realm.run([kvno, 'restricted'])
 
 realm.stop()
+realm2.stop()
 
 # Load the test KDB module to allow successful S4U2Proxy
 # auth-indicator requests.
@@ -170,7 +171,9 @@ testprincs = {'krbtgt/KRBTEST.COM': {'keys': 'aes128-cts'},
               'krbtgt/FOREIGN': {'keys': 'aes128-cts'},
               'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
               'service/1': {'keys': 'aes128-cts', 'flags': '+preauth'},
-              'service/2': {'keys': 'aes128-cts'}}
+              'service/2': {'keys': 'aes128-cts'},
+              'noauthdata': {'keys': 'aes128-cts',
+                             'flags': '+no_auth_data_required'}}
 kdcconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
                                   'princs': testprincs,
@@ -182,6 +185,7 @@ realm.extract_keytab('krbtgt/FOREIGN', realm.keytab)
 realm.extract_keytab(realm.user_princ, realm.keytab)
 realm.extract_keytab('service/1', realm.keytab)
 realm.extract_keytab('service/2', realm.keytab)
+realm.extract_keytab('noauthdata', realm.keytab)
 realm.start_kdc()
 
 # S4U2Self (should have no indicators since client did not authenticate)
@@ -199,16 +203,38 @@ out = realm.run(['./adata', '-p', realm.user_princ, 'service/2'])
 if '+97: [indcl]' not in out or '[inds1]' in out:
     fail('correct auth-indicator not seen for S4U2Proxy req')
 
-# KDB authdata is not tested here; we would need a test KDB module to
-# generate authdata, and also some additions to the test harness.  The
-# current rules we would want to test are:
-#
-# * The no_auth_data_required server flag suppresses KDB authdata in
-#   TGS requests.
-# * KDB authdata is also suppressed in TGS requests if the TGT
+# Test that KDB module authdata is included in an AS request, by
+# default or with an explicit PAC request.
+realm.kinit(realm.user_princ, None, ['-k'])
+out = realm.run(['./adata', realm.krbtgt_princ])
+if '-456: db-authdata-test' not in out:
+    fail('DB authdata not seen in default AS request')
+realm.kinit(realm.user_princ, None, ['-k', '--request-pac'])
+out = realm.run(['./adata', realm.krbtgt_princ])
+if '-456: db-authdata-test' not in out:
+    fail('DB authdata not seen with --request-pac')
+
+# Test that KDB module authdata is suppressed in an AS request by a
+# negative PAC request.
+realm.kinit(realm.user_princ, None, ['-k', '--no-request-pac'])
+out = realm.run(['./adata', realm.krbtgt_princ])
+if '-456: db-authdata-test' in out:
+    fail('DB authdata not suppressed by --no-request-pac')
+
+# Test that KDB authdata is included in a TGS request by default.
+out = realm.run(['./adata', 'service/1'])
+if '-456: db-authdata-test' not in out:
+    fail('DB authdata not seen in TGS request')
+
+# Test that KDB authdata is suppressed in a TGS request by the
+# +no_auth_data_required flag.
+out = realm.run(['./adata', 'noauthdata'])
+if '-456: db-authdata-test' in out:
+    fail('DB authdata not suppressed by +no_auth_data_required')
+
+# Additional KDB module authdata behavior we don't currently test:
+# * KDB module authdata is suppressed in TGS requests if the TGT
 #   contains no authdata and the request is not cross-realm or S4U.
-# * For AS requests, KDB authdata is suppressed if negative
-#   KRB5_PADATA_PAC_REQUEST padata is present in the request.
-# * KDB authdata is suppressed for anonymous tickets.
+# * KDB module authdata is suppressed for anonymous tickets.
 
 success('Authorization data tests')
