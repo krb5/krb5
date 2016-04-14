@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.14.1\n"
+"Project-Id-Version: mit-krb5 1.14.1-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-26 18:43-0500\n"
+"POT-Creation-Date: 2016-04-14 18:22-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -5193,91 +5193,91 @@ msgstr ""
 msgid "Principal does not belong to realm"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:278
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:287
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:295
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:279
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:288
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:296
 #, c-format
 msgid "%s option not supported"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:302
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:303
 #, c-format
 msgid "unknown option: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:309
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:316
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:310
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:317
 #, c-format
 msgid "%s option value missing"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:556
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:557
 msgid "Principal does not belong to the default realm"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:624
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:625
 #, c-format
 msgid ""
 "operation can not continue, more than one entry with principal name \"%s\" "
 "found"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:687
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:688
 #, c-format
 msgid "'%s' not found"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:764
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:765
 msgid "DN is out of the realm subtree"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:820
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:821
 #, c-format
 msgid "ldap object is already kerberized"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:840
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:841
 #, c-format
 msgid ""
 "link information can not be set/updated as the kerberos principal belongs to "
 "an ldap object"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:855
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:856
 #, c-format
 msgid "Failed getting object references"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:862
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:863
 #, c-format
 msgid "kerberos principal is already linked to a ldap object"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1176
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1177
 msgid "ticket policy object value: "
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1224
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1225
 #, c-format
 msgid "Principal delete failed (trying to replace entry): %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1234
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1235
 #, c-format
 msgid "Principal add failed: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1272
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1273
 #, c-format
 msgid "User modification failed: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1345
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1346
 #: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_realm.c:294
 msgid "Error reading ticket policy"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1410
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1411
 #, c-format
 msgid "unable to decode stored principal key data (%s)"
 msgstr ""
