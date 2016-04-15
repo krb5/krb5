@@ -74,8 +74,32 @@ variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
 
+Major changes in 1.13.5 (2016-04-18)
+------------------------------------
+
+This is a bug fix release.  The krb5-1.13 release series is in
+maintenance, and for new deployments, installers should prefer the
+krb5-1.14 release series or later.
+
+* Fix a moderate-severity vulnerability in the LDAP KDC back end that
+  could be exploited by a privileged kadmin user [CVE-2016-3119]
+
+krb5-1.13.5 changes by ticket ID
+--------------------------------
+
+8362    memleak in decrypt_2ndtkt()
+8363    s4u protocol transition tests revealing memleaks in krb5kdc
+8373    SPNEGO gss_init_sec_context() can fail or prematurely resolve creds
+8383    Fix LDAP null deref on empty arg [CVE-2016-3119]
+8390    Default to LSA when TGT in LSA is inaccessible
+
+
 Major changes in 1.13.4 (2016-03-07)
 ------------------------------------
+
+This is a bug fix release.  The krb5-1.13 release series is in
+maintenance, and for new deployments, installers should prefer the
+krb5-1.14 release series or later.
 
 * Fix some moderate-severity vulnerabilities [CVE-2015-8629,
   CVE-2015-8630, CVE-2015-8631] in kadmind.
