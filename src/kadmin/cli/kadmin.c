@@ -151,6 +151,50 @@ strdate(krb5_timestamp when)
     return out;
 }
 
+/* Parse a date string using getdate.y.  On failure, output an error message
+ * and return (time_t)-1. */
+static time_t
+parse_date(char *str)
+{
+    time_t date;
+
+    date = get_date(str);
+    if (date == (time_t)-1)
+        error(_("Invalid date specification \"%s\".\n"), str);
+    return date;
+}
+
+/*
+ * Parse a time interval.  Use krb5_string_to_deltat() if it works; otherwise
+ * use getdate.y and subtract now, with sanity checks.  On failure, output an
+ * error message and return (time_t)-1.
+ */
+static time_t
+parse_interval(char *str, time_t now)
+{
+    time_t date;
+    krb5_deltat delta;
+
+    if (krb5_string_to_deltat(str, &delta) == 0)
+        return delta;
+
+    date = parse_date(str);
+    if (date == (time_t)-1)
+        return date;
+
+    /* Interpret an absolute time of 0 (e.g. "never") as an interval of 0. */
+    if (date == 0)
+        return 0;
+
+    /* Don't return a negative interval if the date is in the past. */
+    if (date < now) {
+        error(_("Interval specification \"%s\" is in the past.\n"), str);
+        return (time_t)-1;
+    }
+
+    return date - now;
+}
+
 /* this is a wrapper to go around krb5_parse_principal so we can set
    the default realm up properly */
 static krb5_error_code
@@ -952,8 +996,7 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
                         int *n_ks_tuple, char *caller)
 {
     int i;
-    time_t date;
-    time_t now;
+    time_t now, date, interval;
     krb5_error_code retval;
 
     *mask = 0;
@@ -977,11 +1020,9 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
         if (!strcmp("-expire", argv[i])) {
             if (++i > argc - 2)
                 return -1;
-            date = get_date(argv[i]);
-            if (date == (time_t)-1) {
-                error(_("Invalid date specification \"%s\".\n"), argv[i]);
+            date = parse_date(argv[i]);
+            if (date == (time_t)-1)
                 return -1;
-            }
             oprinc->princ_expire_time = date;
             *mask |= KADM5_PRINC_EXPIRE_TIME;
             continue;
@@ -989,11 +1030,9 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
         if (!strcmp("-pwexpire", argv[i])) {
             if (++i > argc - 2)
                 return -1;
-            date = get_date(argv[i]);
-            if (date == (time_t)-1) {
-                error(_("Invalid date specification \"%s\".\n"), argv[i]);
+            date = parse_date(argv[i]);
+            if (date == (time_t)-1)
                 return -1;
-            }
             oprinc->pw_expiration = date;
             *mask |= KADM5_PW_EXPIRATION;
             continue;
@@ -1001,24 +1040,20 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
         if (!strcmp("-maxlife", argv[i])) {
             if (++i > argc - 2)
                 return -1;
-            date = get_date(argv[i]);
-            if (date == (time_t)-1) {
-                error(_("Invalid date specification \"%s\".\n"), argv[i]);
+            interval = parse_interval(argv[i], now);
+            if (interval == (time_t)-1)
                 return -1;
-            }
-            oprinc->max_life = date - now;
+            oprinc->max_life = interval;
             *mask |= KADM5_MAX_LIFE;
             continue;
         }
         if (!strcmp("-maxrenewlife", argv[i])) {
             if (++i > argc - 2)
                 return -1;
-            date = get_date(argv[i]);
-            if (date == (time_t)-1) {
-                error(_("Invalid date specification \"%s\".\n"), argv[i]);
+            interval = parse_interval(argv[i], now);
+            if (interval == (time_t)-1)
                 return -1;
-            }
-            oprinc->max_renewable_life = date - now;
+            oprinc->max_renewable_life = interval;
             *mask |= KADM5_MAX_RLIFE;
             continue;
         }
@@ -1502,7 +1537,7 @@ kadmin_parse_policy_args(int argc, char *argv[], kadm5_policy_ent_t policy,
 {
     krb5_error_code retval;
     int i;
-    time_t now, date;
+    time_t now, interval;
 
     time(&now);
     *mask = 0;
@@ -1510,23 +1545,19 @@ kadmin_parse_policy_args(int argc, char *argv[], kadm5_policy_ent_t policy,
         if (!strcmp(argv[i], "-maxlife")) {
             if (++i > argc -2)
                 return -1;
-            date = get_date(argv[i]);
-            if (date == (time_t)-1) {
-                error(_("Invalid date specification \"%s\".\n"), argv[i]);
+            interval = parse_interval(argv[i], now);
+            if (interval == (time_t)-1)
                 return -1;
-            }
-            policy->pw_max_life = date - now;
+            policy->pw_max_life = interval;
             *mask |= KADM5_PW_MAX_LIFE;
             continue;
         } else if (!strcmp(argv[i], "-minlife")) {
             if (++i > argc - 2)
                 return -1;
-            date = get_date(argv[i]);
-            if (date == (time_t)-1) {
-                error(_("Invalid date specification \"%s\".\n"), argv[i]);
+            interval = parse_interval(argv[i], now);
+            if (interval == (time_t)-1)
                 return -1;
-            }
-            policy->pw_min_life = date - now;
+            policy->pw_min_life = interval;
             *mask |= KADM5_PW_MIN_LIFE;
             continue;
         } else if (!strcmp(argv[i], "-minlength")) {
@@ -1558,32 +1589,20 @@ kadmin_parse_policy_args(int argc, char *argv[], kadm5_policy_ent_t policy,
                    !strcmp(argv[i], "-failurecountinterval")) {
             if (++i > argc - 2)
                 return -1;
-            /* Allow bare numbers for compatibility with 1.8-1.9. */
-            date = get_date(argv[i]);
-            if (date != (time_t)-1)
-                policy->pw_failcnt_interval = date - now;
-            else if (isdigit(*argv[i]))
-                policy->pw_failcnt_interval = atoi(argv[i]);
-            else {
-                error(_("Invalid date specification \"%s\".\n"), argv[i]);
+            interval = parse_interval(argv[i], now);
+            if (interval == (time_t)-1)
                 return -1;
-            }
+            policy->pw_failcnt_interval = interval;
             *mask |= KADM5_PW_FAILURE_COUNT_INTERVAL;
             continue;
         } else if (strlen(argv[i]) == 16 &&
                    !strcmp(argv[i], "-lockoutduration")) {
             if (++i > argc - 2)
                 return -1;
-            /* Allow bare numbers for compatibility with 1.8-1.9. */
-            date = get_date(argv[i]);
-            if (date != (time_t)-1)
-                policy->pw_lockout_duration = date - now;
-            else if (isdigit(*argv[i]))
-                policy->pw_lockout_duration = atoi(argv[i]);
-            else {
-                error(_("Invalid date specification \"%s\".\n"), argv[i]);
+            interval = parse_interval(argv[i], now);
+            if (interval == (time_t)-1)
                 return -1;
-            }
+            policy->pw_lockout_duration = interval;
             *mask |= KADM5_PW_LOCKOUT_DURATION;
             continue;
         } else if (!strcmp(argv[i], "-allowedkeysalts")) {

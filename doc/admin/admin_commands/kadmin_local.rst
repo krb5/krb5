@@ -260,11 +260,12 @@ Options:
     (:ref:`getdate` string) The password expiration date.
 
 **-maxlife** *maxlife*
-    (:ref:`getdate` string) The maximum ticket life for the principal.
+    (:ref:`duration` or :ref:`getdate` string) The maximum ticket life
+    for the principal.
 
 **-maxrenewlife** *maxrenewlife*
-    (:ref:`getdate` string) The maximum renewable life of tickets for
-    the principal.
+    (:ref:`duration` or :ref:`getdate` string) The maximum renewable
+    life of tickets for the principal.
 
 **-kvno** *kvno*
     The initial key version number.
@@ -702,10 +703,12 @@ Alias: **addpol**
 The following options are available:
 
 **-maxlife** *time*
-    (:ref:`getdate` string) Sets the maximum lifetime of a password.
+    (:ref:`duration` or :ref:`getdate` string) Sets the maximum
+    lifetime of a password.
 
 **-minlife** *time*
-    (:ref:`getdate` string) Sets the minimum lifetime of a password.
+    (:ref:`duration` or :ref:`getdate` string) Sets the minimum
+    lifetime of a password.
 
 **-minlength** *length*
     Sets the minimum length of a password.
@@ -731,21 +734,21 @@ The following options are available:
 .. _policy_failurecountinterval:
 
 **-failurecountinterval** *failuretime*
-    (:ref:`getdate` string) Sets the allowable time between
-    authentication failures.  If an authentication failure happens
-    after *failuretime* has elapsed since the previous failure,
-    the number of authentication failures is reset to 1.  A
+    (:ref:`duration` or :ref:`getdate` string) Sets the allowable time
+    between authentication failures.  If an authentication failure
+    happens after *failuretime* has elapsed since the previous
+    failure, the number of authentication failures is reset to 1.  A
     *failuretime* value of 0 (the default) means forever.
 
 .. _policy_lockoutduration:
 
 **-lockoutduration** *lockouttime*
-    (:ref:`getdate` string) Sets the duration for which the principal
-    is locked from authenticating if too many authentication failures
-    occur without the specified failure count interval elapsing.
-    A duration of 0 (the default) means the principal remains locked
-    out until it is administratively unlocked with ``modprinc
-    -unlock``.
+    (:ref:`duration` or :ref:`getdate` string) Sets the duration for
+    which the principal is locked from authenticating if too many
+    authentication failures occur without the specified failure count
+    interval elapsing.  A duration of 0 (the default) means the
+    principal remains locked out until it is administratively unlocked
+    with ``modprinc -unlock``.
 
 **-allowedkeysalts**
     Specifies the key/salt tuples supported for long-term keys when
