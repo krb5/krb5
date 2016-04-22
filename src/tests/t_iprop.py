@@ -127,10 +127,34 @@ conf_slave2 = {'realms': {'$realm': {'iprop_slave_poll': '600',
                                      'iprop_port': '$port8'}},
                'dbmodules': {'db': {'database_name': '$testdir/db.slave2'}}}
 
+conf_foo = {'libdefaults': {'default_realm': 'FOO'},
+            'domain_realm': {hostname: 'FOO'}}
+
 realm = K5Realm(kdc_conf=conf, create_user=False, start_kadmind=True)
 slave1 = realm.special_env('slave1', True, kdc_conf=conf_slave1)
-slave1m = realm.special_env('slave1m', True, kdc_conf=conf_slave1m)
+slave1m = realm.special_env('slave1m', True, krb5_conf=conf_foo,
+                            kdc_conf=conf_slave1m)
 slave2 = realm.special_env('slave2', True, kdc_conf=conf_slave2)
+
+# A default_realm and domain_realm that do not match the KDC's realm.
+# The FOO realm iprop_logfile setting is needed to run kproplog during
+# a slave3 test, since kproplog has no realm option.
+conf_slave3 = {'realms': {'$realm': {'iprop_slave_poll': '600',
+                                     'iprop_logfile': '$testdir/ulog.slave3',
+                                     'iprop_port': '$port8'},
+                          'FOO': {'iprop_logfile': '$testdir/ulog.slave3'}},
+               'dbmodules': {'db': {'database_name': '$testdir/db.slave3'}}}
+slave3 = realm.special_env('slave3', True, krb5_conf=conf_foo,
+                           kdc_conf=conf_slave3)
+
+# A default realm and a domain realm map that differ.
+krb5_conf_slave4 = {'domain_realm': {hostname: 'FOO'}}
+conf_slave4 = {'realms': {'$realm': {'iprop_slave_poll': '600',
+                                     'iprop_logfile': '$testdir/ulog.slave4',
+                                     'iprop_port': '$port8'}},
+               'dbmodules': {'db': {'database_name': '$testdir/db.slave4'}}}
+slave4 = realm.special_env('slave4', True, krb5_conf=krb5_conf_slave4,
+                            kdc_conf=conf_slave4)
 
 # Define some principal names.  pr3 is long enough to cause internal
 # reallocs, but not long enough to grow the basic ulog entry size.
@@ -155,11 +179,13 @@ if not os.path.exists(ulog):
 kiprop_princ = 'kiprop/' + hostname
 realm.extract_keytab(kiprop_princ, realm.keytab)
 
-# Create the initial slave1 and slave2 databases.
+# Create the initial slave databases.
 dumpfile = os.path.join(realm.testdir, 'dump')
 realm.run([kdb5_util, 'dump', dumpfile])
 realm.run([kdb5_util, 'load', dumpfile], slave1)
 realm.run([kdb5_util, 'load', dumpfile], slave2)
+realm.run([kdb5_util, '-r', realm.realm, 'load', dumpfile], slave3)
+realm.run([kdb5_util, 'load', dumpfile], slave4)
 
 # Reinitialize the master ulog so we know exactly what to expect in
 # it.
@@ -198,9 +224,49 @@ slave1_out_dump_path = os.path.join(realm.testdir, 'dump.slave1.out')
 slave2_in_dump_path = os.path.join(realm.testdir, 'dump.slave2.in')
 slave2_kprop_port = str(realm.portbase + 9)
 slave1m['KPROP_PORT'] = slave2_kprop_port
-realm.start_server([kadmind, '-nofork', '-proponly', '-W', '-p', kdb5_util,
-                    '-K', kprop, '-F', slave1_out_dump_path], 'starting...',
-                   slave1m)
+realm.start_server([kadmind, '-r', realm.realm, '-nofork', '-proponly', '-W',
+                    '-p', kdb5_util, '-K', kprop, '-F', slave1_out_dump_path],
+                   'starting...', slave1m)
+
+# Test similar default_realm and domain_realm map settings with -r realm.
+slave3_in_dump_path = os.path.join(realm.testdir, 'dump.slave3.in')
+kpropd3 = realm.start_server([kpropd, '-d', '-D', '-r', realm.realm, '-P',
+                              slave2_kprop_port, '-f', slave3_in_dump_path,
+                              '-p', kdb5_util, '-a', acl_file, '-A', hostname],
+                             'ready', slave3)
+wait_for_prop(kpropd3, True, 1, 7)
+out = realm.run([kadminl, '-r', realm.realm, 'listprincs'], env=slave3)
+if pr1 not in out or pr2 not in out or pr3 not in out:
+    fail('slave3 does not have all principals from slave1')
+check_ulog(1, 7, 7, [None], env=slave3)
+
+# Test an incremental propagation for the kpropd -r case.
+realm.run([kadminl, 'modprinc', '-maxlife', '20 minutes', pr1])
+check_ulog(8, 1, 8, [None, pr1, pr3, pr2, pr2, pr2, pr2, pr1])
+kpropd1.send_signal(signal.SIGUSR1)
+wait_for_prop(kpropd1, False, 7, 8)
+check_ulog(3, 6, 8, [None, pr2, pr1], slave1)
+out = realm.run([kadminl, 'getprinc', pr1], env=slave1)
+if 'Maximum ticket life: 0 days 00:20:00' not in out:
+    fail('slave1 does not have modification from master')
+kpropd3.send_signal(signal.SIGUSR1)
+wait_for_prop(kpropd3, False, 7, 8)
+check_ulog(2, 7, 8, [None, pr1], slave3)
+out = realm.run([kadminl, '-r', realm.realm, 'getprinc', pr1], env=slave3)
+if 'Maximum ticket life: 0 days 00:20:00' not in out:
+    fail('slave3 does not have modification from slave1')
+stop_daemon(kpropd3)
+
+# Test dissimilar default_realm and domain_realm map settings (no -r realm).
+slave4_in_dump_path = os.path.join(realm.testdir, 'dump.slave4.in')
+kpropd4 = realm.start_server([kpropd, '-d', '-D', '-P', slave2_kprop_port,
+                              '-f', slave4_in_dump_path, '-p', kdb5_util,
+                              '-a', acl_file, '-A', hostname], 'ready', slave4)
+wait_for_prop(kpropd4, True, 1, 8)
+out = realm.run([kadminl, 'listprincs'], env=slave4)
+if pr1 not in out or pr2 not in out or pr3 not in out:
+    fail('slave4 does not have all principals from slave1')
+stop_daemon(kpropd4)
 
 # Start kpropd for slave2.  The -A option isn't needed since we're
 # talking to the same host as master (we specify it anyway to exercise
@@ -209,8 +275,8 @@ realm.start_server([kadmind, '-nofork', '-proponly', '-W', '-p', kdb5_util,
 kpropd2 = realm.start_server([kpropd, '-d', '-D', '-P', slave2_kprop_port,
                               '-f', slave2_in_dump_path, '-p', kdb5_util,
                               '-a', acl_file, '-A', hostname], 'ready', slave2)
-wait_for_prop(kpropd2, True, 1, 7)
-check_ulog(1, 7, 7, [None], slave2)
+wait_for_prop(kpropd2, True, 1, 8)
+check_ulog(2, 7, 8, [None, pr1], slave2)
 out = realm.run([kadminl, 'listprincs'], env=slave1)
 if pr1 not in out or pr2 not in out or pr3 not in out:
     fail('slave2 does not have all principals from slave1')
@@ -218,16 +284,16 @@ if pr1 not in out or pr2 not in out or pr3 not in out:
 # Make another change and check that it propagates incrementally to
 # both slaves.
 realm.run([kadminl, 'modprinc', '-maxrenewlife', '22 hours', pr1])
-check_ulog(8, 1, 8, [None, pr1, pr3, pr2, pr2, pr2, pr2, pr1])
+check_ulog(9, 1, 9, [None, pr1, pr3, pr2, pr2, pr2, pr2, pr1, pr1])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, False, 7, 8)
-check_ulog(3, 6, 8, [None, pr2, pr1], slave1)
+wait_for_prop(kpropd1, False, 8, 9)
+check_ulog(4, 6, 9, [None, pr2, pr1, pr1], slave1)
 out = realm.run([kadminl, 'getprinc', pr1], env=slave1)
 if 'Maximum renewable life: 0 days 22:00:00\n' not in out:
     fail('slave1 does not have modification from master')
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, False, 7, 8)
-check_ulog(2, 7, 8, [None, pr1], slave2)
+wait_for_prop(kpropd2, False, 8, 9)
+check_ulog(3, 7, 9, [None, pr1, pr1], slave2)
 out = realm.run([kadminl, 'getprinc', pr1], env=slave2)
 if 'Maximum renewable life: 0 days 22:00:00\n' not in out:
     fail('slave2 does not have modification from slave1')
@@ -239,25 +305,25 @@ if 'Maximum renewable life: 0 days 22:00:00\n' not in out:
 realm.run([kproplog, '-R'], slave1)
 check_ulog(1, 1, 1, [None], slave1)
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, True, 1, 8)
-check_ulog(3, 6, 8, [None, pr2, pr1], slave1)
+wait_for_prop(kpropd1, True, 1, 9)
+check_ulog(4, 6, 9, [None, pr2, pr1, pr1], slave1)
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, False, 8, 8)
-check_ulog(2, 7, 8, [None, pr1], slave2)
+wait_for_prop(kpropd2, False, 9, 9)
+check_ulog(3, 7, 9, [None, pr1, pr1], slave2)
 
 # Make another change and check that it propagates incrementally to
 # both slaves.
-realm.run([kadminl, 'modprinc', '+allow_tix', 'w'])
-check_ulog(9, 1, 9, [None, pr1, pr3, pr2, pr2, pr2, pr2, pr1, pr2])
+realm.run([kadminl, 'modprinc', '+allow_tix', pr2])
+check_ulog(10, 1, 10, [None, pr1, pr3, pr2, pr2, pr2, pr2, pr1, pr1, pr2])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, False, 8, 9)
-check_ulog(4, 6, 9, [None, pr2, pr1, pr2], slave1)
+wait_for_prop(kpropd1, False, 9, 10)
+check_ulog(5, 6, 10, [None, pr2, pr1, pr1, pr2], slave1)
 out = realm.run([kadminl, 'getprinc', pr2], env=slave1)
 if 'Attributes:\n' not in out:
     fail('slave1 does not have modification from master')
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, False, 8, 9)
-check_ulog(3, 7, 9, [None, pr1, pr2], slave2)
+wait_for_prop(kpropd2, False, 9, 10)
+check_ulog(4, 7, 10, [None, pr1, pr1, pr2], slave2)
 out = realm.run([kadminl, 'getprinc', pr2], env=slave2)
 if 'Attributes:\n' not in out:
     fail('slave2 does not have modification from slave1')
@@ -266,13 +332,13 @@ if 'Attributes:\n' not in out:
 realm.run([kadminl, 'addpol', '-minclasses', '2', 'testpol'])
 check_ulog(1, 1, 1, [None])
 kpropd1.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd1, True, 9, 1)
+wait_for_prop(kpropd1, True, 10, 1)
 check_ulog(1, 1, 1, [None], slave1)
 out = realm.run([kadminl, 'getpol', 'testpol'], env=slave1)
 if 'Minimum number of password character classes: 2' not in out:
     fail('slave1 does not have policy from master')
 kpropd2.send_signal(signal.SIGUSR1)
-wait_for_prop(kpropd2, True, 9, 1)
+wait_for_prop(kpropd2, True, 10, 1)
 check_ulog(1, 1, 1, [None], slave2)
 out = realm.run([kadminl, 'getpol', 'testpol'], env=slave2)
 if 'Minimum number of password character classes: 2' not in out:
