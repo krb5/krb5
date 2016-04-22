@@ -328,4 +328,11 @@ check_mkvno(realm.user_princ, 1)
 realm.run([kdb5_util, 'use_mkey', '2', 'now-1day'])
 check_mkey_list((2, defetype, True, True), (1, des3, True, False))
 
+# Regression test for PR#437. Purge the master key and verify that
+# a master key fetch does not segfault.
+realm.run([kadminl, 'purgekeys', '-all', 'K/M'])
+out = realm.run([kadminl, 'getprinc', realm.user_princ], expected_code=1)
+if 'Cannot find master key record in database' not in out:
+    fail('Unexpected output from failed master key fetch')
+
 success('Master key rollover tests')
