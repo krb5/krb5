@@ -445,6 +445,11 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     if (retval)
         return (retval);
 
+    if (master_entry->n_key_data == 0) {
+        retval = KRB5_KDB_NOMASTERKEY;
+        goto clean_n_exit;
+    }
+
     /*
      * Check if the input mkey is the latest key and if it isn't then find the
      * latest mkey.
