@@ -137,6 +137,7 @@ struct log_control {
     char                *log_whoami;
     char                *log_hostname;
     krb5_boolean        log_opened;
+    krb5_boolean        log_debug;
 };
 
 static struct log_control log_control = {
@@ -253,6 +254,12 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
      * logging specification.
      */
     for (lindex = 0; lindex < log_control.log_nentries; lindex++) {
+        /* Omit messages marked as LOG_DEBUG for non-syslog outputs unless we
+         * are configured to include them. */
+        if (log_pri == LOG_DEBUG && !log_control.log_debug &&
+            log_control.log_entries[lindex].log_type != K_LOG_SYSLOG)
+            continue;
+
         switch (log_control.log_entries[lindex].log_type) {
         case K_LOG_FILE:
         case K_LOG_STDERR:
@@ -334,7 +341,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
     int         i, ngood, fd, append;
     char        *cp, *cp2;
     char        savec = '\0';
-    int         error;
+    int         error, debug;
     int         do_openlog, log_facility;
     FILE        *f = NULL;
 
@@ -343,6 +350,12 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
     log_facility = 0;
 
     err_context = kcontext;
+
+    /* Look up [logging]->debug in the profile to see if we should include
+     * debug messages for types other than syslog.  Default to false. */
+    if (!profile_get_boolean(kcontext->profile, KRB5_CONF_LOGGING,
+                             KRB5_CONF_DEBUG, NULL, 0, &debug))
+        log_control.log_debug = debug;
 
     /*
      * Look up [logging]-><ename> in the profile.  If that doesn't
@@ -820,6 +833,12 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
      * logging specification.
      */
     for (lindex = 0; lindex < log_control.log_nentries; lindex++) {
+        /* Omit LOG_DEBUG messages for non-syslog outputs unless we are
+         * configured to include them. */
+        if (priority == LOG_DEBUG && !log_control.log_debug &&
+            log_control.log_entries[lindex].log_type != K_LOG_SYSLOG)
+            continue;
+
         switch (log_control.log_entries[lindex].log_type) {
         case K_LOG_FILE:
         case K_LOG_STDERR:

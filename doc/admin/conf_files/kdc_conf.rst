@@ -474,8 +474,8 @@ section to control where database modules are loaded from:
 ~~~~~~~~~
 
 The [logging] section indicates how :ref:`krb5kdc(8)` and
-:ref:`kadmind(8)` perform logging.  The keys in this section are
-daemon names, which may be one of:
+:ref:`kadmind(8)` perform logging.  It may contain the following
+relations:
 
 **admin_server**
     Specifies how :ref:`kadmind(8)` performs logging.
@@ -487,7 +487,14 @@ daemon names, which may be one of:
     Specifies how either daemon performs logging in the absence of
     relations specific to the daemon.
 
-Values are of the following forms:
+**debug**
+    (Boolean value.)  Specifies whether debugging messages are
+    included in log outputs other than SYSLOG.  Debugging messages are
+    always included in the system log output because syslog performs
+    its own priority filtering.  The default value is false.  New in
+    release 1.15.
+
+Logging specifications may have the following forms:
 
 **FILE=**\ *filename* or **FILE:**\ *filename*
     This value causes the daemon's logging messages to go to the

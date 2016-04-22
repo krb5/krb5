@@ -189,6 +189,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_CLOCKSKEW                    "clockskew"
 #define KRB5_CONF_DATABASE_NAME                "database_name"
 #define KRB5_CONF_DB_MODULE_DIR                "db_module_dir"
+#define KRB5_CONF_DEBUG                        "debug"
 #define KRB5_CONF_DEFAULT                      "default"
 #define KRB5_CONF_DEFAULT_CCACHE_NAME          "default_ccache_name"
 #define KRB5_CONF_DEFAULT_CLIENT_KEYTAB_NAME   "default_client_keytab_name"
