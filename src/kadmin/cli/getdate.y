@@ -863,10 +863,11 @@ difftm(struct tm *a, struct tm *b)
 #include <krb5.h>
 int yyparse(void);
 
+time_t get_date_rel(char *, time_t);
 time_t get_date(char *);
 
 time_t
-get_date(char *p)
+get_date_rel(char *p, time_t nowtime)
 {
     struct my_timeb	*now = NULL;
     struct tm		*tm, gmt;
@@ -880,7 +881,7 @@ get_date(char *p)
     if (now == NULL) {
         now = &ftz;
 
-	ftz.time = time((time_t *) 0);
+	ftz.time = nowtime;
 
 	if (! (tm = gmtime (&ftz.time)))
 	    return -1;
@@ -1014,6 +1015,13 @@ get_date(char *p)
     /* Have to do *something* with a legitimate -1 so it's distinguishable
      * from the error return value.  (Alternately could set errno on error.) */
     return Start == -1 ? 0 : Start;
+}
+
+
+time_t
+get_date(char *p)
+{
+    return get_date_rel(p, time(NULL));
 }
 
 

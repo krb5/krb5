@@ -154,11 +154,11 @@ strdate(krb5_timestamp when)
 /* Parse a date string using getdate.y.  On failure, output an error message
  * and return (time_t)-1. */
 static time_t
-parse_date(char *str)
+parse_date(char *str, time_t now)
 {
     time_t date;
 
-    date = get_date(str);
+    date = get_date_rel(str, now);
     if (date == (time_t)-1)
         error(_("Invalid date specification \"%s\".\n"), str);
     return date;
@@ -178,7 +178,7 @@ parse_interval(char *str, time_t now)
     if (krb5_string_to_deltat(str, &delta) == 0)
         return delta;
 
-    date = parse_date(str);
+    date = parse_date(str, now);
     if (date == (time_t)-1)
         return date;
 
@@ -1020,7 +1020,7 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
         if (!strcmp("-expire", argv[i])) {
             if (++i > argc - 2)
                 return -1;
-            date = parse_date(argv[i]);
+            date = parse_date(argv[i], now);
             if (date == (time_t)-1)
                 return -1;
             oprinc->princ_expire_time = date;
@@ -1030,7 +1030,7 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
         if (!strcmp("-pwexpire", argv[i])) {
             if (++i > argc - 2)
                 return -1;
-            date = parse_date(argv[i]);
+            date = parse_date(argv[i], now);
             if (date == (time_t)-1)
                 return -1;
             oprinc->pw_expiration = date;

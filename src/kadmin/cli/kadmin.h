@@ -78,7 +78,7 @@ randkey_princ(void *lhandle, krb5_principal princ, krb5_boolean keepold,
 #endif
 #endif
 
-extern time_t get_date(char *);
+extern time_t get_date_rel(char *, time_t);
 
 /* Yucky global variables */
 extern krb5_context context;
