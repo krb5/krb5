@@ -131,9 +131,8 @@ fi
 AC_SUBST(po)
 
 # for kdc
-AC_CHECK_HEADERS(syslog.h sys/sockio.h ifaddrs.h unistd.h fnmatch.h)
-AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf vasprintf vsnprintf)
-AC_CHECK_FUNCS(strlcpy fnmatch)
+AC_CHECK_HEADERS(sys/sockio.h ifaddrs.h unistd.h fnmatch.h)
+AC_CHECK_FUNCS(strftime vsprintf vasprintf vsnprintf strlcpy fnmatch)
 
 EXTRA_SUPPORT_SYMS=
 AC_CHECK_FUNC(strlcpy,

@@ -35,9 +35,7 @@
 #include "com_err.h"
 #include <stdio.h>
 #include <ctype.h>
-#ifdef  HAVE_SYSLOG_H
 #include <syslog.h>
-#endif  /* HAVE_SYSLOG_H */
 #include <stdarg.h>
 
 #define KRB5_KLOG_MAX_ERRMSG_SIZE       2048
@@ -180,9 +178,7 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
     char        outbuf[KRB5_KLOG_MAX_ERRMSG_SIZE];
     int         lindex;
     const char  *actual_format;
-#ifdef  HAVE_SYSLOG
     int         log_pri = -1;
-#endif  /* HAVE_SYSLOG */
     char        *cp;
     char        *syslogp;
 
@@ -210,7 +206,6 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
     cp = &outbuf[strlen(outbuf)];
 
     actual_format = format;
-#ifdef  HAVE_SYSLOG
     /*
      * This is an unpleasant hack.  If the first character is less than
      * 8, then we assume that it is a priority.
@@ -222,48 +217,33 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
     if ((((unsigned char) *format) > 0) && (((unsigned char) *format) <= 8)) {
         actual_format = (format + 1);
         switch ((unsigned char) *format) {
-#ifdef  LOG_EMERG
         case 1:
             log_pri = LOG_EMERG;
             break;
-#endif /* LOG_EMERG */
-#ifdef  LOG_ALERT
         case 2:
             log_pri = LOG_ALERT;
             break;
-#endif /* LOG_ALERT */
-#ifdef  LOG_CRIT
         case 3:
             log_pri = LOG_CRIT;
             break;
-#endif /* LOG_CRIT */
         default:
         case 4:
             log_pri = LOG_ERR;
             break;
-#ifdef  LOG_WARNING
         case 5:
             log_pri = LOG_WARNING;
             break;
-#endif /* LOG_WARNING */
-#ifdef  LOG_NOTICE
         case 6:
             log_pri = LOG_NOTICE;
             break;
-#endif /* LOG_NOTICE */
-#ifdef  LOG_INFO
         case 7:
             log_pri = LOG_INFO;
             break;
-#endif /* LOG_INFO */
-#ifdef  LOG_DEBUG
         case 8:
             log_pri = LOG_DEBUG;
             break;
-#endif /* LOG_DEBUG */
         }
     }
-#endif  /* HAVE_SYSLOG */
 
     /* Now format the actual message */
     vsnprintf(cp, sizeof(outbuf) - (cp - outbuf), actual_format, ap);
@@ -301,7 +281,6 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
                         log_control.log_entries[lindex].ldu_devname);
             }
             break;
-#ifdef  HAVE_SYSLOG
         case K_LOG_SYSLOG:
             /*
              * System log.
@@ -319,7 +298,6 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
             /* Log the message with our header trimmed off */
             syslog(log_pri, "%s", syslogp);
             break;
-#endif /* HAVE_SYSLOG */
         default:
             break;
         }
@@ -438,7 +416,6 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
                         log_control.log_entries[i].lfu_fname = &cp[5];
                     }
                 }
-#ifdef  HAVE_SYSLOG
                 /*
                  * Is this a syslog?
                  */
@@ -466,46 +443,32 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
                         if (!strcasecmp(&cp[7], "ERR")) {
                             log_control.log_entries[i].lsu_severity = LOG_ERR;
                         }
-#ifdef  LOG_EMERG
                         else if (!strcasecmp(&cp[7], "EMERG")) {
                             log_control.log_entries[i].lsu_severity =
                                 LOG_EMERG;
                         }
-#endif  /* LOG_EMERG */
-#ifdef  LOG_ALERT
                         else if (!strcasecmp(&cp[7], "ALERT")) {
                             log_control.log_entries[i].lsu_severity =
                                 LOG_ALERT;
                         }
-#endif  /* LOG_ALERT */
-#ifdef  LOG_CRIT
                         else if (!strcasecmp(&cp[7], "CRIT")) {
                             log_control.log_entries[i].lsu_severity = LOG_CRIT;
                         }
-#endif  /* LOG_CRIT */
-#ifdef  LOG_WARNING
                         else if (!strcasecmp(&cp[7], "WARNING")) {
                             log_control.log_entries[i].lsu_severity =
                                 LOG_WARNING;
                         }
-#endif  /* LOG_WARNING */
-#ifdef  LOG_NOTICE
                         else if (!strcasecmp(&cp[7], "NOTICE")) {
                             log_control.log_entries[i].lsu_severity =
                                 LOG_NOTICE;
                         }
-#endif  /* LOG_NOTICE */
-#ifdef  LOG_INFO
                         else if (!strcasecmp(&cp[7], "INFO")) {
                             log_control.log_entries[i].lsu_severity = LOG_INFO;
                         }
-#endif  /* LOG_INFO */
-#ifdef  LOG_DEBUG
                         else if (!strcasecmp(&cp[7], "DEBUG")) {
                             log_control.log_entries[i].lsu_severity =
                                 LOG_DEBUG;
                         }
-#endif  /* LOG_DEBUG */
                         else
                             error = 1;
 
@@ -590,7 +553,6 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
                         log_facility = log_control.log_entries[i].lsu_facility;
                     }
                 }
-#endif  /* HAVE_SYSLOG */
                 /*
                  * Is this a standard error specification?
                  */
@@ -677,12 +639,10 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
             } else
                 log_control.log_hostname[MAXHOSTNAMELEN] = '\0';
         }
-#ifdef  HAVE_OPENLOG
         if (do_openlog) {
             openlog(whoami, LOG_NDELAY|LOG_PID, log_facility);
             log_control.log_opened = 1;
         }
-#endif /* HAVE_OPENLOG */
         if (do_com_err)
             (void) set_com_err_hook(klog_com_err_proc);
     }
@@ -713,13 +673,11 @@ krb5_klog_close(krb5_context kcontext)
              */
             DEVICE_CLOSE(log_control.log_entries[lindex].ldu_filep);
             break;
-#ifdef  HAVE_SYSLOG
         case K_LOG_SYSLOG:
             /*
              * System log.
              */
             break;
-#endif  /* HAVE_SYSLOG */
         default:
             break;
         }
@@ -736,10 +694,8 @@ krb5_klog_close(krb5_context kcontext)
     if (log_control.log_hostname)
         free(log_control.log_hostname);
     log_control.log_hostname = (char *) NULL;
-#ifdef  HAVE_CLOSELOG
     if (log_control.log_opened)
         closelog();
-#endif  /* HAVE_CLOSELOG */
 }
 
 /*
@@ -754,44 +710,30 @@ severity2string(int severity)
     s = severity & LOG_PRIMASK;
     ss = log_ufo_string;
     switch (s) {
-#ifdef  LOG_EMERG
     case LOG_EMERG:
         ss = log_emerg_string;
         break;
-#endif  /* LOG_EMERG */
-#ifdef  LOG_ALERT
     case LOG_ALERT:
         ss = log_alert_string;
         break;
-#endif  /* LOG_ALERT */
-#ifdef  LOG_CRIT
     case LOG_CRIT:
         ss = log_crit_string;
         break;
-#endif  /* LOG_CRIT */
     case LOG_ERR:
         ss = log_err_string;
         break;
-#ifdef  LOG_WARNING
     case LOG_WARNING:
         ss = log_warning_string;
         break;
-#endif  /* LOG_WARNING */
-#ifdef  LOG_NOTICE
     case LOG_NOTICE:
         ss = log_notice_string;
         break;
-#endif  /* LOG_NOTICE */
-#ifdef  LOG_INFO
     case LOG_INFO:
         ss = log_info_string;
         break;
-#endif  /* LOG_INFO */
-#ifdef  LOG_DEBUG
     case LOG_DEBUG:
         ss = log_debug_string;
         break;
-#endif  /* LOG_DEBUG */
     }
     return(ss);
 }
@@ -868,12 +810,10 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
      * If the user did not use krb5_klog_init() instead of dropping
      * the request on the floor, syslog it - if it exists
      */
-#ifdef HAVE_SYSLOG
     if (log_control.log_nentries == 0) {
         /* Log the message with our header trimmed off */
         syslog(priority, "%s", syslogp);
     }
-#endif
 
     /*
      * Now that we have the message formatted, perform the output to each
@@ -908,7 +848,6 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
                         log_control.log_entries[lindex].ldu_devname);
             }
             break;
-#ifdef  HAVE_SYSLOG
         case K_LOG_SYSLOG:
             /*
              * System log.
@@ -917,7 +856,6 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
             /* Log the message with our header trimmed off */
             syslog(priority, "%s", syslogp);
             break;
-#endif /* HAVE_SYSLOG */
         default:
             break;
         }
