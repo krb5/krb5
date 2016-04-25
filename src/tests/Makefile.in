@@ -137,6 +137,7 @@ check-pytests:: plugorder rdreq responder s2p s4u2proxy unlockiter
 	$(RUNPYTEST) $(srcdir)/t_skew.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_keytab.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadmin_acl.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_kadmin_parsing.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kdb.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_keydata.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_mkey.py $(PYTESTFLAGS)
