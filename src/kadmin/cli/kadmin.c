@@ -1431,7 +1431,7 @@ kadmin_getprinc(int argc, char *argv[])
                strdate(dprinc.last_pwd_change) : _("[never]"));
         printf(_("Password expiration date: %s\n"),
                dprinc.pw_expiration ?
-               strdate(dprinc.pw_expiration) : _("[none]"));
+               strdate(dprinc.pw_expiration) : _("[never]"));
         printf(_("Maximum ticket life: %s\n"), strdur(dprinc.max_life));
         printf(_("Maximum renewable life: %s\n"),
                strdur(dprinc.max_renewable_life));
@@ -1732,8 +1732,8 @@ kadmin_getpol(int argc, char *argv[])
     }
     if (argc == 2) {
         printf(_("Policy: %s\n"), policy.policy);
-        printf(_("Maximum password life: %ld\n"), policy.pw_max_life);
-        printf(_("Minimum password life: %ld\n"), policy.pw_min_life);
+        printf(_("Maximum password life: %s\n"), strdur(policy.pw_max_life));
+        printf(_("Minimum password life: %s\n"), strdur(policy.pw_min_life));
         printf(_("Minimum password length: %ld\n"), policy.pw_min_length);
         printf(_("Minimum number of password character classes: %ld\n"),
                policy.pw_min_classes);
