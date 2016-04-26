@@ -7100,6 +7100,19 @@ krb5_get_init_creds_opt_set_out_ccache(krb5_context context,
                                        krb5_ccache ccache);
 
 /**
+ * @brief Tell the KDC to add a PAC to the ticket or not adding it.
+ *
+ * @param[in]  opt               Options structure
+ * @param[in]  req_pac           Whether to request a PAC or not
+ *
+ * The default is undefined and lets the KDC decide what to do. It normally
+ * adds the PAC.
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_set_pac_request(krb5_get_init_creds_opt *opt,
+                                        int req_pac);
+
+/**
  * Set FAST flags in initial credential options.
  *
  * @param [in] context          Library context

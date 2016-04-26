@@ -67,6 +67,7 @@ struct _krb5_init_creds_context {
     krb5_timestamp pa_offset;
     krb5_int32 pa_offset_usec;
     enum { NO_OFFSET = 0, UNAUTH_OFFSET, AUTH_OFFSET } pa_offset_state;
+    krb5_int32 pac_request;
 };
 
 krb5_error_code

@@ -88,11 +88,13 @@ struct k_opts
 
     int forwardable;
     int proxiable;
+    int request_pac;
     int anonymous;
     int addresses;
 
     int not_forwardable;
     int not_proxiable;
+    int not_request_pac;
     int no_addresses;
 
     int verbose;
@@ -128,18 +130,6 @@ struct k5_data
    stored in *(struct[2]), the array index which was specified is
    stored in *index, and long_getopt() returns 0. */
 
-struct option long_options[] = {
-    { "noforwardable", 0, NULL, 'F' },
-    { "noproxiable", 0, NULL, 'P' },
-    { "addresses", 0, NULL, 'a'},
-    { "forwardable", 0, NULL, 'f' },
-    { "proxiable", 0, NULL, 'p' },
-    { "noaddresses", 0, NULL, 'A' },
-    { "canonicalize", 0, NULL, 'C' },
-    { "enterprise", 0, NULL, 'E' },
-    { NULL, 0, NULL, 0 }
-};
-
 const char *shopts = "r:fpFPn54aAVl:s:c:kit:T:RS:vX:CEI:";
 
 static void
@@ -152,6 +142,7 @@ usage()
 #define USAGE_LONG_ADDRESSES    " | --addresses | --noaddresses"
 #define USAGE_LONG_CANONICALIZE " | --canonicalize"
 #define USAGE_LONG_ENTERPRISE   " | --enterprise"
+#define USAGE_LONG_REQUESTPAC   "--request-pac | --no-request-pac"
 #define USAGE_BREAK_LONG       USAGE_BREAK
 
     fprintf(stderr, "Usage: %s [-V] "
@@ -164,6 +155,8 @@ usage()
             USAGE_BREAK_LONG
             "-n "
             "[-a | -A" USAGE_LONG_ADDRESSES "] "
+            USAGE_BREAK_LONG
+            "[" USAGE_LONG_REQUESTPAC "] "
             USAGE_BREAK_LONG
             "[-C" USAGE_LONG_CANONICALIZE "] "
             USAGE_BREAK
@@ -179,7 +172,7 @@ usage()
             "\n\n",
             progname);
 
-    fprintf(stderr, "    options:");
+    fprintf(stderr, "    options:\n");
     fprintf(stderr, _("\t-V verbose\n"));
     fprintf(stderr, _("\t-l lifetime\n"));
     fprintf(stderr, _("\t-s start time\n"));
@@ -254,6 +247,19 @@ parse_options(argc, argv, opts)
     char **argv;
     struct k_opts* opts;
 {
+    struct option long_options[] = {
+        { "noforwardable", 0, NULL, 'F' },
+        { "noproxiable", 0, NULL, 'P' },
+        { "addresses", 0, NULL, 'a'},
+        { "forwardable", 0, NULL, 'f' },
+        { "proxiable", 0, NULL, 'p' },
+        { "noaddresses", 0, NULL, 'A' },
+        { "canonicalize", 0, NULL, 'C' },
+        { "enterprise", 0, NULL, 'E' },
+        { "request-pac", 0, &opts->request_pac, 1 },
+        { "no-request-pac", 0, &opts->not_request_pac, 1 },
+        { NULL, 0, NULL, 0 }
+    };
     krb5_error_code code;
     int errflg = 0;
     int i;
@@ -383,6 +389,9 @@ parse_options(argc, argv, opts)
             break;
         case '5':
             break;
+        case 0:
+            /* If this option set a flag, do nothing else now. */
+            break;
         default:
             errflg++;
             break;
@@ -397,6 +406,11 @@ parse_options(argc, argv, opts)
     if (opts->proxiable && opts->not_proxiable)
     {
         fprintf(stderr, _("Only one of -p and -P allowed\n"));
+        errflg++;
+    }
+    if (opts->request_pac && opts->not_request_pac)
+    {
+        fprintf(stderr, _("Only --request-pac or --no-request-pac is allowed\n"));
         errflg++;
     }
     if (opts->addresses && opts->no_addresses)
@@ -727,6 +741,12 @@ k5_kinit(opts, k5)
         krb5_get_init_creds_opt_set_address_list(options, NULL);
     if (opts->armor_ccache)
         krb5_get_init_creds_opt_set_fast_ccache_name(k5->ctx, options, opts->armor_ccache);
+    if (opts->request_pac) {
+        krb5_get_init_creds_opt_set_pac_request(options, 1);
+    }
+    if (opts->not_request_pac) {
+        krb5_get_init_creds_opt_set_pac_request(options, 0);
+    }
 
 
     if ((opts->action == INIT_KT) && opts->keytab_name)
