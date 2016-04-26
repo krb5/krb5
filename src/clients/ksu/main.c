@@ -116,7 +116,7 @@ main (argc, argv)
     extern char * getpass(), *crypt();
     int pargc;
     char ** pargv;
-    krb5_boolean stored = FALSE, cc_reused = FALSE;
+    krb5_boolean stored = FALSE, cc_reused = FALSE, given_princ = FALSE;
     krb5_boolean zero_password;
     krb5_boolean restrict_creds;
     krb5_deltat lifetime, rlife;
@@ -238,6 +238,7 @@ main (argc, argv)
                 com_err(prog_name, retval, _("when parsing name %s"), optarg);
                 errflg++;
             }
+            given_princ = TRUE;
             break;
 #ifdef DEBUG
         case 'D':
@@ -462,7 +463,7 @@ main (argc, argv)
 
     if ((source_uid == 0) || (target_uid == source_uid)){
 #ifdef GET_TGT_VIA_PASSWD
-        if ((!all_rest_copy) && client != NULL && (stored == FALSE)){
+        if (!all_rest_copy && given_princ && client != NULL && !stored) {
             fprintf(stderr, _("WARNING: Your password may be exposed if you "
                               "enter it here and are logged\n"));
             fprintf(stderr, _("         in remotely using an unsecure "
