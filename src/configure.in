@@ -244,6 +244,10 @@ builtin)
   ;;
 openssl)
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
+  AC_CHECK_TYPES([HMAC_CTX, EVP_MD_CTX], [], [], [[
+#include <openssl/hmac.h>
+#include <openssl/evp.h>
+  ]])
   ;;
 *)
   AC_MSG_ERROR([Unknown crypto implementation $withval])
@@ -280,6 +284,10 @@ builtin|openssl)
   AC_CHECK_LIB(crypto, CMS_get0_content,
                [AC_DEFINE([HAVE_OPENSSL_CMS], 1,
                           [Define if OpenSSL supports cms.])])
+  AC_CHECK_TYPES([HMAC_CTX, EVP_MD_CTX], [], [], [[
+#include <openssl/hmac.h>
+#include <openssl/evp.h>
+  ]])
   ;;
 nss)
   if test "${PKINIT_CRYPTO_IMPL_CFLAGS+set}" != set; then

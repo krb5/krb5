@@ -1099,4 +1099,17 @@ extern int k5_getopt_long(int nargc, char **nargv, char *options,
 #define getopt_long k5_getopt_long
 #endif /* HAVE_GETOPT_LONG */
 
+/*
+ * Compatibility for changed APIs in openssl-1.1.0.
+ * Pre openssl-1.1.0 will have these defined.
+ */
+#if HAVE_HMAC_CTX
+# define HMAC_CTX_free HMAC_CTX_cleanup
+#endif /* HAVE_HMAC_CTX */
+
+#if HAVE_EVP_MD_CTX
+# define EVP_MD_CTX_new() EVP_MD_CTX_create()
+# define EVP_MD_CTX_free(x) EVP_MD_CTX_destroy(x)
+#endif /* HAVE_EVP_MD_CTX */
+
 #endif /* K5_PLATFORM_H */

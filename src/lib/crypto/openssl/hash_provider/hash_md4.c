@@ -32,21 +32,24 @@
 static krb5_error_code
 k5_md4_hash(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
-    EVP_MD_CTX ctx;
     unsigned int i;
+    EVP_MD_CTX *ctx;
 
     if (output->length != MD4_DIGEST_LENGTH)
         return KRB5_CRYPTO_INTERNAL;
 
-    EVP_MD_CTX_init(&ctx);
-    EVP_DigestInit_ex(&ctx, EVP_md4(), NULL);
+    ctx = EVP_MD_CTX_new();
+    if (!ctx)
+        return KRB5_CRYPTO_INTERNAL;
+
+    EVP_DigestInit_ex(ctx, EVP_md4(), NULL);
     for (i = 0; i < num_data; i++) {
         const krb5_data *d = &data[i].data;
         if (SIGN_IOV(&data[i]))
-            EVP_DigestUpdate(&ctx, (unsigned char *)d->data, d->length);
+            EVP_DigestUpdate(ctx, (unsigned char *)d->data, d->length);
     }
-    EVP_DigestFinal_ex(&ctx, (unsigned char *)output->data, NULL);
-    EVP_MD_CTX_cleanup(&ctx);
+    EVP_DigestFinal_ex(ctx, (unsigned char *)output->data, NULL);
+    EVP_MD_CTX_free(ctx);
     return 0;
 }
 

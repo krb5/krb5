@@ -88,7 +88,12 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
 {
     unsigned int i = 0, md_len = 0;
     unsigned char md[EVP_MAX_MD_SIZE];
-    HMAC_CTX c;
+
+    HMAC_CTX *c;
+#if HAVE_HMAC_CTX
+    HMAC_CTX hmac_ctx;
+#endif
+
     size_t hashsize, blocksize;
 
     hashsize = hash->hashsize;
@@ -102,20 +107,28 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
     if (!map_digest(hash))
         return(KRB5_CRYPTO_INTERNAL); // unsupported alg
 
-    HMAC_CTX_init(&c);
-    HMAC_Init(&c, keyblock->contents, keyblock->length, map_digest(hash));
+#if HAVE_HMAC_CTX
+    c = &hmac_ctx;
+    HMAC_CTX_init(c);
+#else
+    c = HMAC_CTX_new();
+    if (!c)
+        return KRB5_CRYPTO_INTERNAL;
+#endif
+
+    HMAC_Init(c, keyblock->contents, keyblock->length, map_digest(hash));
     for (i = 0; i < num_data; i++) {
         const krb5_crypto_iov *iov = &data[i];
 
         if (SIGN_IOV(iov))
-            HMAC_Update(&c, (unsigned char*) iov->data.data, iov->data.length);
+            HMAC_Update(c, (unsigned char*) iov->data.data, iov->data.length);
     }
-    HMAC_Final(&c,(unsigned char *)md, &md_len);
+    HMAC_Final(c,(unsigned char *)md, &md_len);
     if ( md_len <= output->length) {
         output->length = md_len;
         memcpy(output->data, md, output->length);
     }
-    HMAC_CTX_cleanup(&c);
+    HMAC_CTX_free(c);
     return 0;
 
 
