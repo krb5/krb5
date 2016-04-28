@@ -587,6 +587,13 @@ depends on configure-time options; if none were given, the default is to
 disable this option.  If the DNS support is not compiled in, this entry
 has no effect.
 
+@itemx dns_canonicalize_hostname
+Indicate whether name lookups will be used to canonicalize hostnames for
+use in service principal names. Setting this flag to false can improve 
+security by reducing reliance on DNS but means that short hostnames will
+not be canonicalized to fully-qualified hostnames. The default value is 
+false.
+
 @itemx dns_fallback
 General flag controlling the use of DNS for Kerberos information.  If
 both of the preceding options are specified, this option has no effect.

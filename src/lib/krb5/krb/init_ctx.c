@@ -178,6 +178,14 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
         goto cleanup;
     ctx->ignore_acceptor_hostname = tmp;
 
+    /* Disables canonicalizing hostnames for service principals. */
+    retval = profile_get_boolean(ctx->profile, KRB5_CONF_LIBDEFAULTS,
+				 KRB5_CONF_DNS_CANONICALIZE_HOSTNAME, NULL, 1,
+				 &tmp);
+    if (retval)
+     	goto cleanup;
+    ctx->dns_canonicalize_hostname = tmp;
+
     /* initialize the prng (not well, but passable) */
     if ((retval = krb5_c_random_os_entropy( ctx, 0, NULL)) !=0)
         goto cleanup;

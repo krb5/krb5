@@ -89,7 +89,7 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 
         /* copy the hostname into non-volatile storage */
 
-        if (type == KRB5_NT_SRV_HST) {
+        if (type == KRB5_NT_SRV_HST && context->dns_canonicalize_hostname) {
             struct addrinfo *ai = NULL, hints;
             int err;
             char hnamebuf[NI_MAXHOST];
