@@ -207,6 +207,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_DISABLE                     "disable"
 #define KRB5_CONF_DISABLE_LAST_SUCCESS        "disable_last_success"
 #define KRB5_CONF_DISABLE_LOCKOUT             "disable_lockout"
+#define KRB5_CONF_DNS_CANONICALIZE_HOSTNAME   "dns_canonicalize_hostname"
 #define KRB5_CONF_DNS_LOOKUP_KDC              "dns_lookup_kdc"
 #define KRB5_CONF_DNS_LOOKUP_REALM            "dns_lookup_realm"
 #define KRB5_CONF_DNS_FALLBACK                "dns_fallback"
@@ -1480,6 +1481,7 @@ struct _krb5_context {
 
     krb5_boolean allow_weak_crypto;
     krb5_boolean ignore_acceptor_hostname;
+    krb5_boolean dns_canonicalize_hostname;
 
     krb5_trace_callback trace_callback;
     void *trace_callback_data;
