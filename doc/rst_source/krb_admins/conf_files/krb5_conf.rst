@@ -101,6 +101,9 @@ The libdefaults section may contain any of the following relations:
 **default_tkt_enctypes**
     Identifies the supported list of session key encryption types that should be requested by the client. The format is the same as for default_tgs_enctypes. The default value for this tag is *aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4*. 
 
+**dns_canonicalize_hostname***
+    Indicate whether name lookups will be used to canonicalize hostnames for use in service principal names. Setting this flag to false can improve security by reducing reliance on DNS but means that short hostnames will not be canonicalized to fully-qualified hostnames. The default value is false.
+
 **dns_fallback**
     General flag controlling the use of DNS for Kerberos information. If both of the preceding options are specified, this option has no effect. 
 
