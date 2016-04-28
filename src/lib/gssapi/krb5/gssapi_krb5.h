@@ -37,7 +37,7 @@ extern "C" {
 /* Reserved static storage for GSS_oids.  See rfc 1964 for more details. */
 
 /* 2.1.1. Kerberos Principal Name Form: */
-GSS_DLLIMP extern const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME;
+GSS_DLLIMP extern const gss_OID GSS_KRB5_NT_PRINCIPAL_NAME;
 /* This name form shall be represented by the Object Identifier {iso(1)
  * member-body(2) United States(840) mit(113554) infosys(1) gssapi(2)
  * krb5(2) krb5_name(1)}.  The recommended symbolic name for this type
@@ -73,16 +73,16 @@ GSS_DLLIMP extern const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME;
  * generic(1) string_uid_name(3)}.  The recommended symbolic name for
  * this type is "GSS_KRB5_NT_STRING_UID_NAME". */
 
-GSS_DLLIMP extern const gss_OID_desc * const gss_mech_krb5;
-GSS_DLLIMP extern const gss_OID_desc * const gss_mech_krb5_old;
-GSS_DLLIMP extern const gss_OID_desc * const gss_mech_krb5_wrong;
-GSS_DLLIMP extern const gss_OID_desc * const gss_mech_iakerb;
-GSS_DLLIMP extern const gss_OID_set_desc * const gss_mech_set_krb5;
-GSS_DLLIMP extern const gss_OID_set_desc * const gss_mech_set_krb5_old;
-GSS_DLLIMP extern const gss_OID_set_desc * const gss_mech_set_krb5_both;
+GSS_DLLIMP extern const gss_OID gss_mech_krb5;
+GSS_DLLIMP extern const gss_OID gss_mech_krb5_old;
+GSS_DLLIMP extern const gss_OID gss_mech_krb5_wrong;
+GSS_DLLIMP extern const gss_OID gss_mech_iakerb;
+GSS_DLLIMP extern const gss_OID_set gss_mech_set_krb5;
+GSS_DLLIMP extern const gss_OID_set gss_mech_set_krb5_old;
+GSS_DLLIMP extern const gss_OID_set gss_mech_set_krb5_both;
 
-GSS_DLLIMP extern const gss_OID_desc * const gss_nt_krb5_name;
-GSS_DLLIMP extern const gss_OID_desc * const gss_nt_krb5_principal;
+GSS_DLLIMP extern const gss_OID gss_nt_krb5_name;
+GSS_DLLIMP extern const gss_OID gss_nt_krb5_principal;
 
 GSS_DLLIMP extern const gss_OID_desc krb5_gss_oid_array[];
 
@@ -94,7 +94,7 @@ GSS_DLLIMP extern const gss_OID_desc krb5_gss_oid_array[];
  * iso(1) member-body(2) Sweden(752) Stockholm University(43) Heimdal GSS-API
  * Extensions(13) no_ci_flags(29)
  */
-GSS_DLLIMP extern const gss_OID_desc * const GSS_KRB5_CRED_NO_CI_FLAGS_X;
+GSS_DLLIMP extern const gss_OID GSS_KRB5_CRED_NO_CI_FLAGS_X;
 
 #define gss_krb5_nt_general_name        gss_nt_krb5_name
 #define gss_krb5_nt_principal           gss_nt_krb5_principal

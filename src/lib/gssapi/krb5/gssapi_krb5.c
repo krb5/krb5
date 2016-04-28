@@ -151,29 +151,33 @@ const gss_OID_desc krb5_gss_oid_array[] = {
     { 0, 0 }
 };
 
-const gss_OID_desc * const gss_mech_krb5              = krb5_gss_oid_array+0;
-const gss_OID_desc * const gss_mech_krb5_old          = krb5_gss_oid_array+1;
-const gss_OID_desc * const gss_mech_krb5_wrong        = krb5_gss_oid_array+2;
-const gss_OID_desc * const gss_mech_iakerb            = krb5_gss_oid_array+3;
+#define kg_oids ((gss_OID)krb5_gss_oid_array)
+
+const gss_OID gss_mech_krb5             = &kg_oids[0];
+const gss_OID gss_mech_krb5_old         = &kg_oids[1];
+const gss_OID gss_mech_krb5_wrong       = &kg_oids[2];
+const gss_OID gss_mech_iakerb           = &kg_oids[3];
 
 
-const gss_OID_desc * const gss_nt_krb5_name           = krb5_gss_oid_array+5;
-const gss_OID_desc * const gss_nt_krb5_principal      = krb5_gss_oid_array+6;
-const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME = krb5_gss_oid_array+5;
+const gss_OID gss_nt_krb5_name                  = &kg_oids[5];
+const gss_OID gss_nt_krb5_principal             = &kg_oids[6];
+const gss_OID GSS_KRB5_NT_PRINCIPAL_NAME        = &kg_oids[5];
 
-const gss_OID_desc * const GSS_KRB5_CRED_NO_CI_FLAGS_X = krb5_gss_oid_array+7;
+const gss_OID GSS_KRB5_CRED_NO_CI_FLAGS_X       = &kg_oids[7];
 
 static const gss_OID_set_desc oidsets[] = {
-    {1, (gss_OID) krb5_gss_oid_array+0}, /* RFC OID */
-    {1, (gss_OID) krb5_gss_oid_array+1}, /* pre-RFC OID */
-    {3, (gss_OID) krb5_gss_oid_array+0}, /* all names for krb5 mech */
-    {4, (gss_OID) krb5_gss_oid_array+0}, /* all krb5 names and IAKERB */
+    {1, &kg_oids[0]}, /* RFC OID */
+    {1, &kg_oids[1]}, /* pre-RFC OID */
+    {3, &kg_oids[0]}, /* all names for krb5 mech */
+    {4, &kg_oids[0]}, /* all krb5 names and IAKERB */
 };
 
-const gss_OID_set_desc * const gss_mech_set_krb5 = oidsets+0;
-const gss_OID_set_desc * const gss_mech_set_krb5_old = oidsets+1;
-const gss_OID_set_desc * const gss_mech_set_krb5_both = oidsets+2;
-const gss_OID_set_desc * const kg_all_mechs = oidsets+3;
+#define kg_oidsets ((gss_OID_set)oidsets)
+
+const gss_OID_set gss_mech_set_krb5             = &kg_oidsets[0];
+const gss_OID_set gss_mech_set_krb5_old         = &kg_oidsets[1];
+const gss_OID_set gss_mech_set_krb5_both        = &kg_oidsets[2];
+const gss_OID_set kg_all_mechs                  = &kg_oidsets[3];
 
 g_set kg_vdb = G_SET_INIT;
 

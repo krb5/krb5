@@ -37,8 +37,9 @@ static const gss_OID_desc oid_array[] = {
     {GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID},
     {GSS_MECH_KRB5_OLD_OID_LENGTH, GSS_MECH_KRB5_OLD_OID}
 };
-const gss_OID_desc *const gss_mech_krb5     = oid_array+0;
-const gss_OID_desc *const gss_mech_krb5_old = oid_array+1;
+#define oids ((gss_OID)oid_array)
+const gss_OID gss_mech_krb5     = &oids[0];
+const gss_OID gss_mech_krb5_old = &oids[1];
 
 /* Create a key from key data in a lucid context. */
 static krb5_error_code
