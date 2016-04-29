@@ -503,7 +503,7 @@ cleanup:
 }
 
 /* Decoding ASN.1 encoded key */
-static struct berval **
+struct berval **
 krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data,
                          krb5_kvno mkvno)
 {
