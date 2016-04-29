@@ -799,6 +799,54 @@ get_str_from_tl_data(krb5_context context, krb5_db_entry *entry, int type,
     return 0;
 }
 
+/*
+ * Replace the rdn in a dn with a new one.
+ */
+krb5_error_code
+replace_rdn(krb5_context context, const char *dn, const char *newrdn,
+            char **newdn)
+{
+    krb5_error_code ret;
+    LDAPDN ldn = NULL;
+    LDAPRDN lrdn = NULL;
+    char *newdn_out = NULL, *next;
+
+    *newdn = NULL;
+    ret = ldap_str2dn(dn, &ldn, LDAP_DN_FORMAT_LDAPV3);
+    if (ret != LDAP_SUCCESS || ldn[0] == NULL) {
+        ret = EINVAL;
+        goto cleanup;
+    }
+
+    ret = ldap_str2rdn(newrdn, &lrdn, &next, LDAP_DN_FORMAT_LDAPV3);
+    if (ret != LDAP_SUCCESS) {
+        ret = EINVAL;
+        goto cleanup;
+    }
+
+    ldap_rdnfree(ldn[0]);
+    ldn[0] = lrdn;
+    lrdn = NULL;
+
+    ret = ldap_dn2str(ldn, &newdn_out, LDAP_DN_FORMAT_LDAPV3);
+    if (ret != LDAP_SUCCESS) {
+        ret = KRB5_KDB_SERVER_INTERNAL_ERR;
+        goto cleanup;
+    }
+
+    *newdn = newdn_out;
+    newdn_out = NULL;
+    ret = 0;
+
+cleanup:
+    free(newdn_out);
+    if (ldn != NULL)
+        ldap_dnfree(ldn);
+    if (lrdn != NULL)
+        ldap_rdnfree(lrdn);
+    return ret;
+}
+
 krb5_error_code
 krb5_get_userdn(krb5_context context, krb5_db_entry *entry, char **userdn)
 {
@@ -1066,6 +1114,16 @@ krb5_add_int_mem_ldap_mod(LDAPMod ***list, char *attribute, int op, int value)
     if (mod->mod_values[0] == NULL)
         return ENOMEM;
     return 0;
+}
+
+krb5_error_code
+krb5_ldap_modify_ext(krb5_context context, LDAP *ld, const char *dn,
+                     LDAPMod **mods, int op)
+{
+    int ret;
+
+    ret = ldap_modify_ext_s(ld, dn, mods, NULL, NULL);
+    return (ret == LDAP_SUCCESS) ? 0 : set_ldap_error(context, ret, op);
 }
 
 krb5_error_code

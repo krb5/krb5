@@ -60,6 +60,10 @@ krb5_error_code
 krb5_get_userdn(krb5_context, krb5_db_entry *, char **);
 
 krb5_error_code
+replace_rdn(krb5_context context, const char *dn, const char *newrdn,
+            char **newdn);
+
+krb5_error_code
 store_tl_data(krb5_tl_data *, int, void *);
 
 krb5_error_code
@@ -91,6 +95,10 @@ krb5_add_ber_mem_ldap_mod(LDAPMod  ***, char *, int, struct berval **);
 
 krb5_error_code
 krb5_add_int_mem_ldap_mod(LDAPMod  ***, char *, int , int);
+
+krb5_error_code
+krb5_ldap_modify_ext(krb5_context context, LDAP *ld, const char *dn,
+                     LDAPMod **mods, int op);
 
 krb5_error_code
 krb5_ldap_free_mod_array(LDAPMod **);

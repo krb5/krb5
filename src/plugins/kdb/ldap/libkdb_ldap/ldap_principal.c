@@ -352,6 +352,241 @@ cleanup:
     return st;
 }
 
+/*
+ * Check if a principal is a standalone principal. *res will be 1 if it is,
+ * 0 if it isn't, and undefined if an error occurs.
+ */
+static inline krb5_error_code
+is_standalone_principal(krb5_context kcontext, krb5_db_entry *entry, int *res)
+{
+    krb5_error_code code;
+
+    code = krb5_get_princ_type(kcontext, entry, res);
+    if (!code)
+        *res = *res == KDB_STANDALONE_PRINCIPAL_OBJECT ? 1 : 0;
+
+    return code;
+}
+
+/*
+ * Unparse a principal name from a krb5_principal, and store it in the user
+ * argument.
+ */
+static krb5_error_code
+unparse_principal_name(krb5_context context, krb5_const_principal princ,
+                       char **user)
+{
+    krb5_error_code res;
+    char *luser = NULL;
+
+    *user = NULL;
+    res = krb5_unparse_name(context, princ, &luser);
+    if (res)
+        goto cleanup;
+
+    res = krb5_ldap_unparse_principal_name(luser);
+    if (res)
+        goto cleanup;
+
+    *user = luser;
+    luser = NULL;
+
+cleanup:
+    free(luser);
+    return res;
+}
+
+/*
+ * Rename a principal's rdn.
+ *
+ * NOTE: Not every LDAP ds supports deleting the old rdn. If that is desired,
+ * it will have to be deleted afterwards.
+ */
+static krb5_error_code
+rename_principal_rdn(krb5_context context, LDAP *ld, const char *dn,
+                    const char *newprinc, char **newdn)
+{
+    int ret;
+    char *newrdn = NULL;
+    char *newdn_out = NULL;
+
+    *newdn = NULL;
+
+    ret = asprintf(&newrdn, "krbprincipalname=%s", newprinc);
+    if (ret < 0) {
+        newrdn = NULL;
+        return ENOMEM;
+    }
+
+    /*
+     * ldap_rename_s takes an integer to delete the old rdn when the new one is
+     * created, but this fails on at least one LDAP directory (389ds). Instead,
+     * it will have to be renamed and deleted at a later point in time.
+     */
+    ret = ldap_rename_s(ld, dn, newrdn, NULL, 0, NULL, NULL);
+    if (ret == -1) {
+        ldap_get_option(ld, LDAP_OPT_ERROR_NUMBER, &ret);
+        ret = set_ldap_error(context, ret, OP_MOD);
+        goto cleanup;
+    }
+
+    ret = replace_rdn(context, dn, newrdn, &newdn_out);
+    if (ret)
+        goto cleanup;
+
+    *newdn = newdn_out;
+    newdn_out = NULL;
+
+cleanup:
+    free(newrdn);
+    free(newdn_out);
+    return ret;
+}
+
+/*
+ * Rename a principal.
+ */
+krb5_error_code
+krb5_ldap_rename_principal(krb5_context context, krb5_const_principal source,
+                           krb5_const_principal target)
+{
+    int is_standalone;
+    krb5_error_code st;
+    char *suser = NULL, *tuser = NULL, *strval[2], *dn = NULL;
+    char *newdn = NULL;
+    krb5_db_entry *entry = NULL;
+    krb5_kvno mkvno;
+    struct berval **bersecretkey = NULL;
+    kdb5_dal_handle *dal_handle = NULL;
+    krb5_ldap_context *ldap_context = NULL;
+    krb5_ldap_server_handle *ldap_server_handle = NULL;
+    LDAP *ld = NULL;
+    LDAPMod **mods = NULL;
+
+    /* Clear the global error string */
+    krb5_clear_error_message(context);
+
+    SETUP_CONTEXT();
+    if (ldap_context->lrparams == NULL || ldap_context->container_dn == NULL)
+        return EINVAL;
+
+    /* get ldap handle */
+    GET_HANDLE();
+
+    /*
+     * Pass no flags. This means principal aliases won't be returned, which is
+     * a good thing since we don't support renaming aliases.
+     */
+    st = krb5_ldap_get_principal(context, source, 0, &entry);
+    if (st)
+        goto cleanup;
+
+    st = is_standalone_principal(context, entry, &is_standalone);
+    if (st)
+        goto cleanup;
+
+    st = krb5_get_userdn(context, entry, &dn);
+    if (st)
+        goto cleanup;
+    if (dn == NULL) {
+        st = EINVAL;
+        k5_setmsg(context, st, _("dn information missing"));
+        goto cleanup;
+    }
+
+    st = unparse_principal_name(context, source, &suser);
+    if (st)
+        goto cleanup;
+    st = unparse_principal_name(context, target, &tuser);
+    if (st)
+        goto cleanup;
+
+    /*
+     * Specialize the salt and store it first so that in case of an error the
+     * correct salt will still be used.
+     */
+    /* Transform salts as necessary. */
+    st = krb5_dbe_specialize_salt(context, entry);
+    if (st)
+        goto cleanup;
+
+    /* Store the new key */
+    st = krb5_dbe_lookup_mkvno(context, entry, &mkvno);
+    if (st)
+        goto cleanup;
+
+    bersecretkey = krb5_encode_krbsecretkey(entry->key_data, entry->n_key_data,
+                                            mkvno);
+    if (bersecretkey == NULL) {
+        st = ENOMEM;
+        goto cleanup;
+    }
+
+    st = krb5_add_ber_mem_ldap_mod(&mods, "krbPrincipalKey",
+                                   LDAP_MOD_REPLACE | LDAP_MOD_BVALUES,
+                                   bersecretkey);
+    if (st != 0)
+        goto cleanup;
+
+    /* Update the principal. */
+    st = krb5_ldap_modify_ext(context, ld, dn, mods, OP_MOD);
+    if (st)
+        goto cleanup;
+    ldap_mods_free(mods, 1);
+    mods = NULL;
+
+    /*
+     * If it's a standalone principal we want to rename the dn. If not, modify
+     * it in place.
+     */
+    if (is_standalone) {
+        st = rename_principal_rdn(context, ld, dn, tuser, &newdn);
+        if (st)
+            goto cleanup;
+        free(dn);
+        dn = newdn;
+        newdn = NULL;
+    }
+
+    memset(strval, 0, sizeof(strval));
+    strval[0] = suser;
+    st = krb5_add_str_mem_ldap_mod(&mods, "krbPrincipalName",
+                                   LDAP_MOD_DELETE, strval);
+    if (st)
+        goto cleanup;
+
+    memset(strval, 0, sizeof(strval));
+    strval[0] = tuser;
+    /*
+     * There can be more than one krbPrincipalName, so we have to delete
+     * the old one and add the new one.
+     */
+    if (!is_standalone) {
+        st = krb5_add_str_mem_ldap_mod(&mods, "krbPrincipalName", LDAP_MOD_ADD,
+                                       strval);
+        if (st)
+            goto cleanup;
+    }
+
+    st = krb5_add_str_mem_ldap_mod(&mods, "krbCanonicalName", LDAP_MOD_REPLACE,
+                                   strval);
+    if (st)
+        goto cleanup;
+
+    /* Update the principal. */
+    st = krb5_ldap_modify_ext(context, ld, dn, mods, OP_MOD);
+    if (st)
+        goto cleanup;
+
+cleanup:
+    free(dn);
+    free(suser);
+    free(tuser);
+    krb5_ldap_free_principal(context, entry);
+    ldap_mods_free(mods, 1);
+    krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
+    return st;
+}
 
 /*
  * Function: krb5_ldap_unparse_principal_name
