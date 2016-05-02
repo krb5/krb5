@@ -58,6 +58,7 @@ krb5_dbe_lookup_mod_princ_data
 krb5_dbe_lookup_tl_data
 krb5_dbe_search_enctype
 krb5_dbe_set_string
+krb5_dbe_specialize_salt
 krb5_dbe_update_actkvno
 krb5_dbe_update_last_admin_unlock
 krb5_dbe_update_last_pwd_change
