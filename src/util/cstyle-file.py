@@ -76,7 +76,12 @@ def emacs_reindent(lines):
         args = ['emacs', '-q', '-batch', '-l', cstyle_el, '-l', reindent_el,
                 f.name]
         with open(os.devnull, 'w') as devnull:
-            if call(args, stdin=devnull, stdout=devnull, stderr=devnull) != 0:
+            try:
+                st = call(args, stdin=devnull, stdout=devnull, stderr=devnull)
+                if st != 0:
+                    return None
+            except OSError:
+                # Fail gracefully if emacs isn't installed.
                 return None
         f.seek(0)
         ilines = f.readlines()
