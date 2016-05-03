@@ -49,9 +49,8 @@ static krb5_error_code pkinit_init_pkcs11(pkinit_identity_crypto_context ctx);
 static void pkinit_fini_pkcs11(pkinit_identity_crypto_context ctx);
 
 static krb5_error_code pkinit_encode_dh_params
-(BIGNUM *, BIGNUM *, BIGNUM *, unsigned char **, unsigned int *);
-static DH *pkinit_decode_dh_params
-(DH **, unsigned char **, unsigned int );
+(const BIGNUM *, const BIGNUM *, const BIGNUM *, uint8_t **, unsigned int *);
+static DH *decode_dh_params(const uint8_t *, unsigned int );
 static int pkinit_check_dh_params(DH *dh1, DH *dh2);
 
 static krb5_error_code pkinit_sign_data
@@ -65,12 +64,12 @@ static krb5_error_code create_signature
 
 static krb5_error_code pkinit_decode_data
 (krb5_context context, pkinit_identity_crypto_context cryptoctx,
- unsigned char *data, unsigned int data_len,
- unsigned char **decoded, unsigned int *decoded_len);
+ const uint8_t *data, unsigned int data_len, uint8_t **decoded,
+ unsigned int *decoded_len);
 
 static krb5_error_code decode_data
-(unsigned char **, unsigned int *, unsigned char *, unsigned int,
- EVP_PKEY *pkey, X509 *cert);
+(uint8_t **, unsigned int *, const uint8_t *, unsigned int, EVP_PKEY *pkey,
+ X509 *cert);
 
 #ifdef DEBUG_DH
 static void print_dh(DH *, char *);
@@ -78,8 +77,7 @@ static void print_pubkey(BIGNUM *, char *);
 #endif
 
 static int prepare_enc_data
-(unsigned char *indata, int indata_len, unsigned char **outdata,
- int *outdata_len);
+(const uint8_t *indata, int indata_len, uint8_t **outdata, int *outdata_len);
 
 static int openssl_callback (int, X509_STORE_CTX *);
 static int openssl_callback_ignore_crls (int, X509_STORE_CTX *);
@@ -125,8 +123,8 @@ static krb5_error_code pkinit_sign_data_pkcs11
  unsigned char **sig, unsigned int *sig_len);
 static krb5_error_code pkinit_decode_data_pkcs11
 (krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
- unsigned char *data, unsigned int data_len,
- unsigned char **decoded_data, unsigned int *decoded_data_len);
+ const uint8_t *data, unsigned int data_len, uint8_t **decoded_data,
+ unsigned int *decoded_data_len);
 #endif  /* WITHOUT_PKCS11 */
 
 static krb5_error_code pkinit_sign_data_fs
@@ -135,8 +133,8 @@ static krb5_error_code pkinit_sign_data_fs
  unsigned char **sig, unsigned int *sig_len);
 static krb5_error_code pkinit_decode_data_fs
 (krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
- unsigned char *data, unsigned int data_len,
- unsigned char **decoded_data, unsigned int *decoded_data_len);
+ const uint8_t *data, unsigned int data_len, uint8_t **decoded_data,
+ unsigned int *decoded_data_len);
 
 static krb5_error_code
 create_krb5_invalidCertificates(krb5_context context,
@@ -191,6 +189,66 @@ pkinit_pkcs11_code_to_text(int err);
 #define CMS_ContentInfo_free(_p7) PKCS7_free(_p7)
 #define pkinit_CMS_SignerInfo_get_cert(_p7,_si,_x509_pp)        \
     (*_x509_pp) = PKCS7_cert_from_signer_info(_p7,_si)
+#endif
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+
+/* 1.1 standardizes constructor and destructor names, renaming
+ * EVP_MD_CTX_{create,destroy} and deprecating ASN1_STRING_data. */
+
+#define EVP_MD_CTX_new EVP_MD_CTX_create
+#define EVP_MD_CTX_free EVP_MD_CTX_destroy
+#define ASN1_STRING_get0_data ASN1_STRING_data
+
+/* 1.1 makes many handle types opaque and adds accessors.  Add compatibility
+ * versions of the new accessors we use for pre-1.1. */
+
+#define OBJ_get0_data(o) ((o)->data)
+#define OBJ_length(o) ((o)->length)
+
+#define DH_set0_pqg compat_dh_set0_pqg
+static int compat_dh_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
+{
+    /* The real function frees the old values and does argument checking, but
+     * our code doesn't need that. */
+    dh->p = p;
+    dh->q = q;
+    dh->g = g;
+    return 1;
+}
+
+#define DH_get0_pqg compat_dh_get0_pqg
+static void compat_dh_get0_pqg(const DH *dh, const BIGNUM **p,
+                               const BIGNUM **q, const BIGNUM **g)
+{
+    if (p != NULL)
+        *p = dh->p;
+    if (q != NULL)
+        *q = dh->q;
+    if (g != NULL)
+        *g = dh->g;
+}
+
+#define DH_get0_key compat_dh_get0_key
+static void compat_dh_get0_key(const DH *dh, const BIGNUM **pub,
+                               const BIGNUM **priv)
+{
+    if (pub != NULL)
+        *pub = dh->pub_key;
+    if (priv != NULL)
+        *priv = dh->priv_key;
+}
+
+/* Return true if the cert c includes a key usage which doesn't include u.
+ * Define using direct member access for pre-1.1. */
+#define ku_reject(c, u)                                                 \
+    (((c)->ex_flags & EXFLAG_KUSAGE) && !((c)->ex_kusage & (u)))
+
+#else /* OPENSSL_VERSION_NUMBER >= 0x10100000L */
+
+/* Return true if the cert x includes a key usage which doesn't include u. */
+#define ku_reject(c, u) (!(X509_get_key_usage(c) & (u)))
+
 #endif
 
 static struct pkcs11_errstrings {
@@ -286,7 +344,7 @@ static struct pkcs11_errstrings {
 };
 
 /* DH parameters */
-unsigned char pkinit_1024_dhprime[128] = {
+static uint8_t oakley_1024[128] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC2, 0x34,
     0xC4, 0xC6, 0x62, 0x8B, 0x80, 0xDC, 0x1C, 0xD1,
@@ -305,7 +363,7 @@ unsigned char pkinit_1024_dhprime[128] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-unsigned char pkinit_2048_dhprime[2048/8] = {
+static uint8_t oakley_2048[2048/8] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC2, 0x34,
     0xC4, 0xC6, 0x62, 0x8B, 0x80, 0xDC, 0x1C, 0xD1,
@@ -340,7 +398,7 @@ unsigned char pkinit_2048_dhprime[2048/8] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-unsigned char pkinit_4096_dhprime[4096/8] = {
+static uint8_t oakley_4096[4096/8] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC2, 0x34,
     0xC4, 0xC6, 0x62, 0x8B, 0x80, 0xDC, 0x1C, 0xD1,
@@ -802,43 +860,56 @@ pkinit_fini_pkinit_oids(pkinit_plg_crypto_context ctx)
     ASN1_OBJECT_free(ctx->id_kp_serverAuth);
 }
 
+/* Construct an OpenSSL DH object for an Oakley group. */
+static DH *
+make_oakley_dh(uint8_t *prime, size_t len)
+{
+    DH *dh = NULL;
+    BIGNUM *p = NULL, *q = NULL, *g = NULL;
+
+    p = BN_bin2bn(prime, len, NULL);
+    if (p == NULL)
+        goto cleanup;
+    q = BN_new();
+    if (q == NULL)
+        goto cleanup;
+    if (!BN_rshift1(q, p))
+        goto cleanup;
+    g = BN_new();
+    if (g == NULL)
+        goto cleanup;
+    if (!BN_set_word(g, DH_GENERATOR_2))
+        goto cleanup;
+
+    dh = DH_new();
+    if (dh == NULL)
+        goto cleanup;
+    DH_set0_pqg(dh, p, q, g);
+    p = g = q = NULL;
+
+cleanup:
+    BN_free(p);
+    BN_free(q);
+    BN_free(g);
+    return dh;
+}
+
 static krb5_error_code
 pkinit_init_dh_params(pkinit_plg_crypto_context plgctx)
 {
     krb5_error_code retval = ENOMEM;
 
-    plgctx->dh_1024 = DH_new();
+    plgctx->dh_1024 = make_oakley_dh(oakley_1024, sizeof(oakley_1024));
     if (plgctx->dh_1024 == NULL)
         goto cleanup;
-    plgctx->dh_1024->p = BN_bin2bn(pkinit_1024_dhprime,
-                                   sizeof(pkinit_1024_dhprime), NULL);
-    if ((plgctx->dh_1024->g = BN_new()) == NULL ||
-        (plgctx->dh_1024->q = BN_new()) == NULL)
-        goto cleanup;
-    BN_set_word(plgctx->dh_1024->g, DH_GENERATOR_2);
-    BN_rshift1(plgctx->dh_1024->q, plgctx->dh_1024->p);
 
-    plgctx->dh_2048 = DH_new();
+    plgctx->dh_2048 = make_oakley_dh(oakley_2048, sizeof(oakley_2048));
     if (plgctx->dh_2048 == NULL)
         goto cleanup;
-    plgctx->dh_2048->p = BN_bin2bn(pkinit_2048_dhprime,
-                                   sizeof(pkinit_2048_dhprime), NULL);
-    if ((plgctx->dh_2048->g = BN_new()) == NULL ||
-        (plgctx->dh_2048->q = BN_new()) == NULL)
-        goto cleanup;
-    BN_set_word(plgctx->dh_2048->g, DH_GENERATOR_2);
-    BN_rshift1(plgctx->dh_2048->q, plgctx->dh_2048->p);
 
-    plgctx->dh_4096 = DH_new();
+    plgctx->dh_4096 = make_oakley_dh(oakley_4096, sizeof(oakley_4096));
     if (plgctx->dh_4096 == NULL)
         goto cleanup;
-    plgctx->dh_4096->p = BN_bin2bn(pkinit_4096_dhprime,
-                                   sizeof(pkinit_4096_dhprime), NULL);
-    if ((plgctx->dh_4096->g = BN_new()) == NULL ||
-        (plgctx->dh_4096->q = BN_new()) == NULL)
-        goto cleanup;
-    BN_set_word(plgctx->dh_4096->g, DH_GENERATOR_2);
-    BN_rshift1(plgctx->dh_4096->q, plgctx->dh_4096->p);
 
     retval = 0;
 
@@ -1072,7 +1143,7 @@ cms_signeddata_create(krb5_context context,
     unsigned char *p;
     STACK_OF(X509) * cert_stack = NULL;
     ASN1_OCTET_STRING *digest_attr = NULL;
-    EVP_MD_CTX ctx, ctx2;
+    EVP_MD_CTX *ctx;
     const EVP_MD *md_tmp = NULL;
     unsigned char md_data[EVP_MAX_MD_SIZE], md_data2[EVP_MAX_MD_SIZE];
     unsigned char *digestInfo_buf = NULL, *abuf = NULL;
@@ -1115,7 +1186,7 @@ cms_signeddata_create(krb5_context context,
         } else {
             /* create a cert chain */
             X509_STORE *certstore = NULL;
-            X509_STORE_CTX certctx;
+            X509_STORE_CTX *certctx;
             STACK_OF(X509) *certstack = NULL;
             char buf[DN_BUF_LEN];
             unsigned int i = 0, size = 0;
@@ -1123,16 +1194,19 @@ cms_signeddata_create(krb5_context context,
             if ((certstore = X509_STORE_new()) == NULL)
                 goto cleanup;
             pkiDebug("building certificate chain\n");
-            X509_STORE_set_verify_cb_func(certstore, openssl_callback);
-            X509_STORE_CTX_init(&certctx, certstore, cert,
+            X509_STORE_set_verify_cb(certstore, openssl_callback);
+            certctx = X509_STORE_CTX_new();
+            if (certctx == NULL)
+                goto cleanup;
+            X509_STORE_CTX_init(certctx, certstore, cert,
                                 id_cryptoctx->intermediateCAs);
-            X509_STORE_CTX_trusted_stack(&certctx, id_cryptoctx->trustedCAs);
-            if (!X509_verify_cert(&certctx)) {
-                retval = oerr_cert(context, 0, &certctx,
+            X509_STORE_CTX_trusted_stack(certctx, id_cryptoctx->trustedCAs);
+            if (!X509_verify_cert(certctx)) {
+                retval = oerr_cert(context, 0, certctx,
                                    _("Failed to verify own certificate"));
                 goto cleanup;
             }
-            certstack = X509_STORE_CTX_get1_chain(&certctx);
+            certstack = X509_STORE_CTX_get1_chain(certctx);
             size = sk_X509_num(certstack);
             pkiDebug("size of certificate chain = %d\n", size);
             for(i = 0; i < size - 1; i++) {
@@ -1141,7 +1215,7 @@ cms_signeddata_create(krb5_context context,
                 pkiDebug("cert #%d: %s\n", i, buf);
                 sk_X509_push(cert_stack, X509_dup(x));
             }
-            X509_STORE_CTX_cleanup(&certctx);
+            X509_STORE_CTX_free(certctx);
             X509_STORE_free(certstore);
             sk_X509_pop_free(certstack, X509_free);
         }
@@ -1157,9 +1231,9 @@ cms_signeddata_create(krb5_context context,
             goto cleanup;
         /* because ASN1_INTEGER_set is used to set a 'long' we will do
          * things the ugly way. */
-        M_ASN1_INTEGER_free(p7si->issuer_and_serial->serial);
+        ASN1_INTEGER_free(p7si->issuer_and_serial->serial);
         if (!(p7si->issuer_and_serial->serial =
-              M_ASN1_INTEGER_dup(X509_get_serialNumber(cert))))
+              ASN1_INTEGER_dup(X509_get_serialNumber(cert))))
             goto cleanup;
 
         /* will not fill-out EVP_PKEY because it's on the smartcard */
@@ -1188,11 +1262,14 @@ cms_signeddata_create(krb5_context context,
         } else {
             /* add signed attributes */
             /* compute sha1 digest over the EncapsulatedContentInfo */
-            EVP_MD_CTX_init(&ctx);
-            EVP_DigestInit_ex(&ctx, EVP_sha1(), NULL);
-            EVP_DigestUpdate(&ctx, data, data_len);
-            md_tmp = EVP_MD_CTX_md(&ctx);
-            EVP_DigestFinal_ex(&ctx, md_data, &md_len);
+            ctx = EVP_MD_CTX_new();
+            if (ctx == NULL)
+                goto cleanup;
+            EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
+            EVP_DigestUpdate(ctx, data, data_len);
+            md_tmp = EVP_MD_CTX_md(ctx);
+            EVP_DigestFinal_ex(ctx, md_data, &md_len);
+            EVP_MD_CTX_free(ctx);
 
             /* create a message digest attr */
             digest_attr = ASN1_OCTET_STRING_new();
@@ -1227,14 +1304,17 @@ cms_signeddata_create(krb5_context context,
         if (id_cryptoctx->pkcs11_method == 1 &&
             id_cryptoctx->mech == CKM_RSA_PKCS) {
             pkiDebug("mech = CKM_RSA_PKCS\n");
-            EVP_MD_CTX_init(&ctx2);
+            ctx = EVP_MD_CTX_new();
+            if (ctx == NULL)
+                goto cleanup;
             /* if this is not draft9 request, include digest signed attribute */
             if (cms_msg_type != CMS_SIGN_DRAFT9)
-                EVP_DigestInit_ex(&ctx2, md_tmp, NULL);
+                EVP_DigestInit_ex(ctx, md_tmp, NULL);
             else
-                EVP_DigestInit_ex(&ctx2, EVP_sha1(), NULL);
-            EVP_DigestUpdate(&ctx2, abuf, alen);
-            EVP_DigestFinal_ex(&ctx2, md_data2, &md_len2);
+                EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
+            EVP_DigestUpdate(ctx, abuf, alen);
+            EVP_DigestFinal_ex(ctx, md_data2, &md_len2);
+            EVP_MD_CTX_free(ctx);
 
             alg = X509_ALGOR_new();
             if (alg == NULL)
@@ -1339,11 +1419,9 @@ cms_signeddata_create(krb5_context context,
 cleanup2:
     if (p7si) {
         if (cms_msg_type != CMS_SIGN_DRAFT9)
-            EVP_MD_CTX_cleanup(&ctx);
 #ifndef WITHOUT_PKCS11
         if (id_cryptoctx->pkcs11_method == 1 &&
             id_cryptoctx->mech == CKM_RSA_PKCS) {
-            EVP_MD_CTX_cleanup(&ctx2);
             free(digest_buf);
             free(digestInfo_buf);
             free(alg_buf);
@@ -1396,7 +1474,7 @@ cms_signeddata_verify(krb5_context context,
     CMS_SignerInfo *si = NULL;
     X509 *x = NULL;
     X509_STORE *store = NULL;
-    X509_STORE_CTX cert_ctx;
+    X509_STORE_CTX *cert_ctx;
     STACK_OF(X509) *signerCerts = NULL;
     STACK_OF(X509) *intermediateCAs = NULL;
     STACK_OF(X509_CRL) *signerRevoked = NULL;
@@ -1450,8 +1528,7 @@ cms_signeddata_verify(krb5_context context,
             retval = ENOMEM;
             goto cleanup;
         }
-        memcpy(d, ASN1_STRING_data(*octets),
-               *data_len);
+        memcpy(d, ASN1_STRING_get0_data(*octets), *data_len);
         *data = d;
         goto out;
     } else {
@@ -1471,9 +1548,9 @@ cms_signeddata_verify(krb5_context context,
     /* check if we are inforcing CRL checking */
     vflags = X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL;
     if (require_crl_checking)
-        X509_STORE_set_verify_cb_func(store, openssl_callback);
+        X509_STORE_set_verify_cb(store, openssl_callback);
     else
-        X509_STORE_set_verify_cb_func(store, openssl_callback_ignore_crls);
+        X509_STORE_set_verify_cb(store, openssl_callback_ignore_crls);
     X509_STORE_set_flags(store, vflags);
 
     /*
@@ -1544,14 +1621,17 @@ cms_signeddata_verify(krb5_context context,
         /* initialize x509 context with the received certificate and
          * trusted and intermediate CA chains and CRLs
          */
-        if (!X509_STORE_CTX_init(&cert_ctx, store, x, intermediateCAs))
+        cert_ctx = X509_STORE_CTX_new();
+        if (cert_ctx == NULL)
+            goto cleanup;
+        if (!X509_STORE_CTX_init(cert_ctx, store, x, intermediateCAs))
             goto cleanup;
 
-        X509_STORE_CTX_set0_crls(&cert_ctx, revoked);
+        X509_STORE_CTX_set0_crls(cert_ctx, revoked);
 
         /* add trusted CAs certificates for cert verification */
         if (idctx->trustedCAs != NULL)
-            X509_STORE_CTX_trusted_stack(&cert_ctx, idctx->trustedCAs);
+            X509_STORE_CTX_trusted_stack(cert_ctx, idctx->trustedCAs);
         else {
             pkiDebug("unable to find any trusted CAs\n");
             goto cleanup;
@@ -1586,11 +1666,13 @@ cms_signeddata_verify(krb5_context context,
         }
 #endif
 
-        i = X509_verify_cert(&cert_ctx);
+        i = X509_verify_cert(cert_ctx);
         if (i <= 0) {
-            int j = X509_STORE_CTX_get_error(&cert_ctx);
+            int j = X509_STORE_CTX_get_error(cert_ctx);
+            X509 *cert;
 
-            reqctx->received_cert = X509_dup(cert_ctx.current_cert);
+            cert = X509_STORE_CTX_get_current_cert(cert_ctx);
+            reqctx->received_cert = X509_dup(cert);
             switch(j) {
             case X509_V_ERR_CERT_REVOKED:
                 retval = KRB5KDC_ERR_REVOKED_CERTIFICATE;
@@ -1605,7 +1687,7 @@ cms_signeddata_verify(krb5_context context,
             default:
                 retval = KRB5KDC_ERR_INVALID_CERTIFICATE;
             }
-            (void)oerr_cert(context, retval, &cert_ctx,
+            (void)oerr_cert(context, retval, cert_ctx,
                             _("Failed to verify received certificate"));
             if (reqctx->received_cert == NULL)
                 strlcpy(buf, "(none)", sizeof(buf));
@@ -1626,9 +1708,9 @@ cms_signeddata_verify(krb5_context context,
         } else {
             /* retrieve verified certificate chain */
             if (cms_msg_type == CMS_SIGN_CLIENT || cms_msg_type == CMS_SIGN_DRAFT9)
-                verified_chain = X509_STORE_CTX_get1_chain(&cert_ctx);
+                verified_chain = X509_STORE_CTX_get1_chain(cert_ctx);
         }
-        X509_STORE_CTX_cleanup(&cert_ctx);
+        X509_STORE_CTX_free(cert_ctx);
         if (i <= 0)
             goto cleanup;
         out = BIO_new(BIO_s_mem());
@@ -1670,8 +1752,7 @@ cms_signeddata_verify(krb5_context context,
         pkiDebug("CMS Verification successful\n");
     else {
         pkiDebug("wrong oid in eContentType\n");
-        print_buffer(etype->data,
-                     (unsigned int)etype->length);
+        print_buffer(OBJ_get0_data(etype), OBJ_length(etype));
         retval = KRB5KDC_ERR_PREAUTH_FAILED;
         krb5_set_error_message(context, retval, "wrong oid\n");
         goto cleanup;
@@ -2442,6 +2523,7 @@ pkinit_alg_agility_kdf(krb5_context context,
     krb5_data *other_info = NULL;
     krb5_data *supp_pub_info = NULL;
     krb5_algorithm_identifier alg_id;
+    EVP_MD_CTX *ctx = NULL;
     const EVP_MD *(*EVP_func)(void);
 
     /* initialize random_data here to make clean-up safe */
@@ -2512,23 +2594,26 @@ pkinit_alg_agility_kdf(krb5_context context,
      *     -   Increment counter (modulo 2^32)
      */
     for (counter = 1; counter <= reps; counter++) {
-        EVP_MD_CTX c;
         uint s = 0;
         uint32_t be_counter = htonl(counter);
 
-        EVP_MD_CTX_init(&c);
+        ctx = EVP_MD_CTX_new();
+        if (ctx == NULL) {
+            retval = KRB5_CRYPTO_INTERNAL;
+            goto cleanup;
+        }
 
         /* -   Compute Hashi = H(counter || Z || OtherInfo). */
-        if (0 == EVP_DigestInit(&c, EVP_func())) {
+        if (!EVP_DigestInit(ctx, EVP_func())) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestInit() returned an error.");
             retval = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
 
-        if ((0 == EVP_DigestUpdate(&c, &be_counter, 4)) ||
-            (0 == EVP_DigestUpdate(&c, secret->data, secret->length)) ||
-            (0 == EVP_DigestUpdate(&c, other_info->data, other_info->length))) {
+        if (!EVP_DigestUpdate(ctx, &be_counter, 4) ||
+            !EVP_DigestUpdate(ctx, secret->data, secret->length) ||
+            !EVP_DigestUpdate(ctx, other_info->data, other_info->length)) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestUpdate() returned an error.");
             retval = KRB5_CRYPTO_INTERNAL;
@@ -2536,7 +2621,7 @@ pkinit_alg_agility_kdf(krb5_context context,
         }
 
         /* 4.  Set key = Hash1 || Hash2 || ... so that length of key is K bytes. */
-        if (0 == EVP_DigestFinal(&c, (unsigned char *)(random_data.data + offset), &s)) {
+        if (!EVP_DigestFinal(ctx, (uint8_t *)random_data.data + offset, &s)) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestUpdate() returned an error.");
             retval = KRB5_CRYPTO_INTERNAL;
@@ -2545,13 +2630,16 @@ pkinit_alg_agility_kdf(krb5_context context,
         offset += s;
         assert(s == hash_len);
 
-        EVP_MD_CTX_cleanup(&c);
+        EVP_MD_CTX_free(ctx);
+        ctx = NULL;
     }
 
     retval = krb5_c_random_to_key(context, enctype, &random_data,
                                   key_block);
 
 cleanup:
+    EVP_MD_CTX_free(ctx);
+
     /* If this has been an error, free the allocated key_block, if any */
     if (retval) {
         krb5_free_keyblock_contents(context, key_block);
@@ -2597,38 +2685,22 @@ client_create_dh(krb5_context context,
     unsigned char *buf = NULL;
     int dh_err = 0;
     ASN1_INTEGER *pub_key = NULL;
+    const BIGNUM *pubkey_bn, *p, *q, *g;
 
     if (cryptoctx->dh == NULL) {
-        if ((cryptoctx->dh = DH_new()) == NULL)
+        if (dh_size == 1024)
+            cryptoctx->dh = make_oakley_dh(oakley_1024, sizeof(oakley_1024));
+        else if (dh_size == 2048)
+            cryptoctx->dh = make_oakley_dh(oakley_2048, sizeof(oakley_2048));
+        else if (dh_size == 4096)
+            cryptoctx->dh = make_oakley_dh(oakley_4096, sizeof(oakley_4096));
+        if (cryptoctx->dh == NULL)
             goto cleanup;
-        if ((cryptoctx->dh->g = BN_new()) == NULL ||
-            (cryptoctx->dh->q = BN_new()) == NULL)
-            goto cleanup;
-
-        switch(dh_size) {
-        case 1024:
-            pkiDebug("client uses 1024 DH keys\n");
-            cryptoctx->dh->p = get_rfc2409_prime_1024(NULL);
-            break;
-        case 2048:
-            pkiDebug("client uses 2048 DH keys\n");
-            cryptoctx->dh->p = BN_bin2bn(pkinit_2048_dhprime,
-                                         sizeof(pkinit_2048_dhprime), NULL);
-            break;
-        case 4096:
-            pkiDebug("client uses 4096 DH keys\n");
-            cryptoctx->dh->p = BN_bin2bn(pkinit_4096_dhprime,
-                                         sizeof(pkinit_4096_dhprime), NULL);
-            break;
-        default:
-            goto cleanup;
-        }
-
-        BN_set_word((cryptoctx->dh->g), DH_GENERATOR_2);
-        BN_rshift1(cryptoctx->dh->q, cryptoctx->dh->p);
     }
 
     DH_generate_key(cryptoctx->dh);
+    DH_get0_key(cryptoctx->dh, &pubkey_bn, NULL);
+
     DH_check(cryptoctx->dh, &dh_err);
     if (dh_err != 0) {
         pkiDebug("Warning: dh_check failed with %d\n", dh_err);
@@ -2646,7 +2718,7 @@ client_create_dh(krb5_context context,
     print_pubkey(cryptoctx->dh->pub_key, "client's pub_key=");
 #endif
 
-    DH_check_pub_key(cryptoctx->dh, cryptoctx->dh->pub_key, &dh_err);
+    DH_check_pub_key(cryptoctx->dh, pubkey_bn, &dh_err);
     if (dh_err != 0) {
         pkiDebug("dh_check_pub_key failed with %d\n", dh_err);
         goto cleanup;
@@ -2656,8 +2728,8 @@ client_create_dh(krb5_context context,
     /* aglo: usually we could just call i2d_DHparams to encode DH params
      * however, PKINIT requires RFC3279 encoding and openssl does pkcs#3.
      */
-    retval = pkinit_encode_dh_params(cryptoctx->dh->p, cryptoctx->dh->g,
-                                     cryptoctx->dh->q, dh_params, dh_params_len);
+    DH_get0_pqg(cryptoctx->dh, &p, &q, &g);
+    retval = pkinit_encode_dh_params(p, g, q, dh_params, dh_params_len);
     if (retval)
         goto cleanup;
 
@@ -2667,8 +2739,11 @@ client_create_dh(krb5_context context,
      * subjectPublicKey component (a BIT STRING) of the SubjectPublicKeyInfo
      * data element
      */
-    if ((pub_key = BN_to_ASN1_INTEGER(cryptoctx->dh->pub_key, NULL)) == NULL)
+    pub_key = BN_to_ASN1_INTEGER(pubkey_bn, NULL);
+    if (pub_key == NULL) {
+        retval = ENOMEM;
         goto cleanup;
+    }
     *dh_pubkey_len = i2d_ASN1_INTEGER(pub_key, NULL);
     if ((buf = *dh_pubkey = malloc(*dh_pubkey_len)) == NULL) {
         retval  = ENOMEM;
@@ -2786,20 +2861,19 @@ server_check_dh(krb5_context context,
                 int minbits)
 {
     DH *dh = NULL;
-    unsigned char *tmp = NULL;
+    const BIGNUM *p;
     int dh_prime_bits;
     krb5_error_code retval = KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED;
 
-    tmp = (unsigned char *)dh_params->data;
-    dh = DH_new();
-    dh = pkinit_decode_dh_params(&dh, &tmp, dh_params->length);
+    dh = decode_dh_params((uint8_t *)dh_params->data, dh_params->length);
     if (dh == NULL) {
         pkiDebug("failed to decode dhparams\n");
         goto cleanup;
     }
 
     /* KDC SHOULD check to see if the key parameters satisfy its policy */
-    dh_prime_bits = BN_num_bits(dh->p);
+    DH_get0_pqg(dh, &p, NULL, NULL);
+    dh_prime_bits = BN_num_bits(p);
     if (minbits && dh_prime_bits < minbits) {
         pkiDebug("client sent dh params with %d bits, we require %d\n",
                  dh_prime_bits, minbits);
@@ -2816,6 +2890,30 @@ cleanup:
         DH_free(dh);
 
     return retval;
+}
+
+/* Duplicate a DH handle (parameters only, not public or private key). */
+static DH *
+dup_dh_params(const DH *src)
+{
+    const BIGNUM *oldp, *oldq, *oldg;
+    BIGNUM *p = NULL, *q = NULL, *g = NULL;
+    DH *dh;
+
+    DH_get0_pqg(src, &oldp, &oldq, &oldg);
+    p = BN_dup(oldp);
+    q = BN_dup(oldq);
+    g = BN_dup(oldg);
+    dh = DH_new();
+    if (p == NULL || q == NULL || g == NULL || dh == NULL) {
+        BN_free(p);
+        BN_free(q);
+        BN_free(g);
+        DH_free(dh);
+        return NULL;
+    }
+    DH_set0_pqg(dh, p, q, g);
+    return dh;
 }
 
 /* kdc's dh function */
@@ -2835,43 +2933,42 @@ server_process_dh(krb5_context context,
     DH *dh = NULL, *dh_server = NULL;
     unsigned char *p = NULL;
     ASN1_INTEGER *pub_key = NULL;
+    BIGNUM *client_pubkey = NULL;
+    const BIGNUM *server_pubkey;
 
     *dh_pubkey = *server_key = NULL;
     *dh_pubkey_len = *server_key_len = 0;
 
     /* get client's received DH parameters that we saved in server_check_dh */
     dh = cryptoctx->dh;
-
-    dh_server = DH_new();
+    dh_server = dup_dh_params(dh);
     if (dh_server == NULL)
         goto cleanup;
-    dh_server->p = BN_dup(dh->p);
-    dh_server->g = BN_dup(dh->g);
-    dh_server->q = BN_dup(dh->q);
 
     /* decode client's public key */
     p = data;
     pub_key = d2i_ASN1_INTEGER(NULL, (const unsigned char **)&p, (int)data_len);
     if (pub_key == NULL)
         goto cleanup;
-    dh->pub_key = ASN1_INTEGER_to_BN(pub_key, NULL);
-    if (dh->pub_key == NULL)
+    client_pubkey = ASN1_INTEGER_to_BN(pub_key, NULL);
+    if (client_pubkey == NULL)
         goto cleanup;
     ASN1_INTEGER_free(pub_key);
 
     if (!DH_generate_key(dh_server))
         goto cleanup;
+    DH_get0_key(dh_server, &server_pubkey, NULL);
 
     /* generate DH session key */
     *server_key_len = DH_size(dh_server);
     if ((*server_key = malloc(*server_key_len)) == NULL)
         goto cleanup;
-    compute_dh(*server_key, *server_key_len, dh->pub_key, dh_server);
+    compute_dh(*server_key, *server_key_len, client_pubkey, dh_server);
 
 #ifdef DEBUG_DH
     print_dh(dh_server, "client&server's DH params\n");
-    print_pubkey(dh->pub_key, "client's pub_key=");
-    print_pubkey(dh_server->pub_key, "server's pub_key=");
+    print_pubkey(client_pubkey, "client's pub_key=");
+    print_pubkey(server_pubkey, "server's pub_key=");
     pkiDebug("server computed key=");
     print_buffer(*server_key, *server_key_len);
 #endif
@@ -2883,7 +2980,8 @@ server_process_dh(krb5_context context,
      * subjectPublicKey component (a BIT STRING) of the SubjectPublicKeyInfo
      * data element
      */
-    if ((pub_key = BN_to_ASN1_INTEGER(dh_server->pub_key, NULL)) == NULL)
+    pub_key = BN_to_ASN1_INTEGER(server_pubkey, NULL);
+    if (pub_key == NULL)
         goto cleanup;
     *dh_pubkey_len = i2d_ASN1_INTEGER(pub_key, NULL);
     if ((p = *dh_pubkey = malloc(*dh_pubkey_len)) == NULL)
@@ -2899,8 +2997,8 @@ server_process_dh(krb5_context context,
     return retval;
 
 cleanup:
-    if (dh_server != NULL)
-        DH_free(dh_server);
+    BN_free(client_pubkey);
+    DH_free(dh_server);
     free(*dh_pubkey);
     free(*server_key);
 
@@ -2911,15 +3009,14 @@ int
 pkinit_openssl_init()
 {
     /* Initialize OpenSSL. */
-    CRYPTO_malloc_init();
     ERR_load_crypto_strings();
     OpenSSL_add_all_algorithms();
     return 0;
 }
 
 static krb5_error_code
-pkinit_encode_dh_params(BIGNUM *p, BIGNUM *g, BIGNUM *q,
-                        unsigned char **buf, unsigned int *buf_len)
+pkinit_encode_dh_params(const BIGNUM *p, const BIGNUM *g, const BIGNUM *q,
+                        uint8_t **buf, unsigned int *buf_len)
 {
     krb5_error_code retval = ENOMEM;
     int bufsize = 0, r = 0;
@@ -2963,8 +3060,78 @@ cleanup:
     return retval;
 }
 
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+
+/*
+ * We need to decode DomainParameters from RFC 3279 section 2.3.3.  We would
+ * like to just call d2i_DHxparams(), but Microsoft's implementation may omit
+ * the q value in violation of the RFC.  Instead we must copy the internal
+ * structures and sequence declarations from dh_asn1.c, modified to make the q
+ * field optional.
+ */
+
+typedef struct {
+    ASN1_BIT_STRING *seed;
+    BIGNUM *counter;
+} int_dhvparams;
+
+typedef struct {
+    BIGNUM *p;
+    BIGNUM *q;
+    BIGNUM *g;
+    BIGNUM *j;
+    int_dhvparams *vparams;
+} int_dhx942_dh;
+
+ASN1_SEQUENCE(DHvparams) = {
+    ASN1_SIMPLE(int_dhvparams, seed, ASN1_BIT_STRING),
+    ASN1_SIMPLE(int_dhvparams, counter, BIGNUM)
+} static_ASN1_SEQUENCE_END_name(int_dhvparams, DHvparams)
+
+ASN1_SEQUENCE(DHxparams) = {
+    ASN1_SIMPLE(int_dhx942_dh, p, BIGNUM),
+    ASN1_SIMPLE(int_dhx942_dh, g, BIGNUM),
+    ASN1_OPT(int_dhx942_dh, q, BIGNUM),
+    ASN1_OPT(int_dhx942_dh, j, BIGNUM),
+    ASN1_OPT(int_dhx942_dh, vparams, DHvparams),
+} static_ASN1_SEQUENCE_END_name(int_dhx942_dh, DHxparams)
+
 static DH *
-pkinit_decode_dh_params(DH ** a, unsigned char **pp, unsigned int len)
+decode_dh_params(const uint8_t *p, unsigned int len)
+{
+    int_dhx942_dh *params;
+    DH *dh;
+
+    dh = DH_new();
+    if (dh == NULL)
+        return NULL;
+
+    params = (int_dhx942_dh *)ASN1_item_d2i(NULL, &p, len,
+                                            ASN1_ITEM_rptr(DHxparams));
+    if (params == NULL) {
+        DH_free(dh);
+        return NULL;
+    }
+
+    /* Steal the p, q, and g values from dhparams for dh.  Ignore j and
+     * vparams. */
+    DH_set0_pqg(dh, params->p, params->q, params->g);
+    params->p = params->q = params->g = NULL;
+    ASN1_item_free((ASN1_VALUE *)params, ASN1_ITEM_rptr(DHxparams));
+    return dh;
+}
+
+#else /* OPENSSL_VERSION_NUMBER < 0x10100000L */
+
+/*
+ * Do the same decoding (except without decoding j and vparams or checking the
+ * sequence length) using the pre-OpenSSL-1.1 asn1_mac.h.  Define an internal
+ * function in the form demanded by the macros, then wrap it for caller
+ * convenience.
+ */
+
+static DH *
+decode_dh_params_int(DH ** a, uint8_t **pp, unsigned int len)
 {
     ASN1_INTEGER ai, *aip = NULL;
     long length = (long) len;
@@ -2980,8 +3147,8 @@ pkinit_decode_dh_params(DH ** a, unsigned char **pp, unsigned int len)
     if (aip == NULL)
         return NULL;
     else {
-        (*a)->p = ASN1_INTEGER_to_BN(aip, NULL);
-        if ((*a)->p == NULL)
+        ret->p = ASN1_INTEGER_to_BN(aip, NULL);
+        if (ret->p == NULL)
             return NULL;
         if (ai.data != NULL) {
             OPENSSL_free(ai.data);
@@ -2993,8 +3160,8 @@ pkinit_decode_dh_params(DH ** a, unsigned char **pp, unsigned int len)
     if (aip == NULL)
         return NULL;
     else {
-        (*a)->g = ASN1_INTEGER_to_BN(aip, NULL);
-        if ((*a)->g == NULL)
+        ret->g = ASN1_INTEGER_to_BN(aip, NULL);
+        if (ret->g == NULL)
             return NULL;
         if (ai.data != NULL) {
             OPENSSL_free(ai.data);
@@ -3005,10 +3172,10 @@ pkinit_decode_dh_params(DH ** a, unsigned char **pp, unsigned int len)
     }
     M_ASN1_D2I_get_opt(aip, d2i_ASN1_INTEGER, V_ASN1_INTEGER);
     if (aip == NULL || ai.data == NULL)
-        (*a)->q = NULL;
+        ret->q = NULL;
     else {
-        (*a)->q = ASN1_INTEGER_to_BN(aip, NULL);
-        if ((*a)->q == NULL)
+        ret->q = ASN1_INTEGER_to_BN(aip, NULL);
+        if (ret->q == NULL)
             return NULL;
         if (ai.data != NULL) {
             OPENSSL_free(ai.data);
@@ -3021,6 +3188,16 @@ pkinit_decode_dh_params(DH ** a, unsigned char **pp, unsigned int len)
     M_ASN1_D2I_Finish(a, DH_free, 0);
 
 }
+
+static DH *
+decode_dh_params(const uint8_t *p, unsigned int len)
+{
+    uint8_t *ptr = (uint8_t *)p;
+
+    return decode_dh_params_int(NULL, &ptr, len);
+}
+
+#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
 
 static krb5_error_code
 pkinit_create_sequence_of_principal_identifiers(
@@ -3139,27 +3316,25 @@ pkinit_create_td_dh_parameters(krb5_context context,
     krb5_pa_data **pa_data = NULL;
     krb5_data *encoded_algId = NULL;
     krb5_algorithm_identifier **algId = NULL;
+    const BIGNUM *p, *q, *g;
 
     if (opts->dh_min_bits > 4096)
         goto cleanup;
 
     if (opts->dh_min_bits <= 1024) {
-        retval = pkinit_encode_dh_params(plg_cryptoctx->dh_1024->p,
-                                         plg_cryptoctx->dh_1024->g, plg_cryptoctx->dh_1024->q,
-                                         &buf1, &buf1_len);
+        DH_get0_pqg(plg_cryptoctx->dh_1024, &p, &q, &g);
+        retval = pkinit_encode_dh_params(p, g, q, &buf1, &buf1_len);
         if (retval)
             goto cleanup;
     }
     if (opts->dh_min_bits <= 2048) {
-        retval = pkinit_encode_dh_params(plg_cryptoctx->dh_2048->p,
-                                         plg_cryptoctx->dh_2048->g, plg_cryptoctx->dh_2048->q,
-                                         &buf2, &buf2_len);
+        DH_get0_pqg(plg_cryptoctx->dh_2048, &p, &q, &g);
+        retval = pkinit_encode_dh_params(p, g, q, &buf2, &buf2_len);
         if (retval)
             goto cleanup;
     }
-    retval = pkinit_encode_dh_params(plg_cryptoctx->dh_4096->p,
-                                     plg_cryptoctx->dh_4096->g, plg_cryptoctx->dh_4096->q,
-                                     &buf3, &buf3_len);
+    DH_get0_pqg(plg_cryptoctx->dh_4096, &p, &q, &g);
+    retval = pkinit_encode_dh_params(p, g, q, &buf3, &buf3_len);
     if (retval)
         goto cleanup;
 
@@ -3320,16 +3495,19 @@ pkinit_check_kdc_pkid(krb5_context context,
 static int
 pkinit_check_dh_params(DH *dh1, DH *dh2)
 {
+    const BIGNUM *p1, *p2, *g1, *g2;
 
-    if (BN_cmp(dh1->p, dh2->p) != 0) {
+    DH_get0_pqg(dh1, &p1, NULL, &g1);
+    DH_get0_pqg(dh2, &p2, NULL, &g2);
+    if (BN_cmp(p1, p2) != 0) {
         pkiDebug("p is not well-known group dhparameter\n");
         return -1;
     }
-    if (BN_cmp(dh1->g, dh2->g) != 0) {
+    if (BN_cmp(g1, g2) != 0) {
         pkiDebug("bad g dhparameter\n");
         return -1;
     }
-    pkiDebug("good %d dhparams\n", BN_num_bits(dh1->p));
+    pkiDebug("good %d dhparams\n", BN_num_bits(p1));
     return 0;
 }
 
@@ -3348,17 +3526,19 @@ pkinit_process_td_dh_params(krb5_context context,
 
     while (algId[i] != NULL) {
         DH *dh = NULL;
-        unsigned char *tmp = NULL;
+        const BIGNUM *p;
         int dh_prime_bits = 0;
 
         if (algId[i]->algorithm.length != dh_oid.length ||
             memcmp(algId[i]->algorithm.data, dh_oid.data, dh_oid.length))
             goto cleanup;
 
-        tmp = (unsigned char *)algId[i]->parameters.data;
-        dh = DH_new();
-        dh = pkinit_decode_dh_params(&dh, &tmp, algId[i]->parameters.length);
-        dh_prime_bits = BN_num_bits(dh->p);
+        dh = decode_dh_params((uint8_t *)algId[i]->parameters.data,
+                              algId[i]->parameters.length);
+        if (dh == NULL)
+            goto cleanup;
+        DH_get0_pqg(dh, &p, NULL, NULL);
+        dh_prime_bits = BN_num_bits(p);
         pkiDebug("client sent %d DH bits server prefers %d DH bits\n",
                  *new_dh_size, dh_prime_bits);
         ok = check_dh_wellknown(cryptoctx, dh, dh_prime_bits);
@@ -3416,15 +3596,9 @@ openssl_callback(int ok, X509_STORE_CTX * ctx)
 static int
 openssl_callback_ignore_crls(int ok, X509_STORE_CTX * ctx)
 {
-    if (!ok) {
-        switch (ctx->error) {
-        case X509_V_ERR_UNABLE_TO_GET_CRL:
-            return 1;
-        default:
-            return 0;
-        }
-    }
-    return ok;
+    if (ok)
+        return ok;
+    return X509_STORE_CTX_get_error(ctx) == X509_V_ERR_UNABLE_TO_GET_CRL;
 }
 
 static ASN1_OBJECT *
@@ -3480,43 +3654,33 @@ wrap_signeddata(unsigned char *data, unsigned int data_len,
 }
 
 static int
-prepare_enc_data(unsigned char *indata,
-                 int indata_len,
-                 unsigned char **outdata,
+prepare_enc_data(const uint8_t *indata, int indata_len, uint8_t **outdata,
                  int *outdata_len)
 {
-    int retval = -1;
-    ASN1_const_CTX c;
-    long length = indata_len;
-    int Ttag, Tclass;
-    long Tlen;
+    int tag, class;
+    long tlen, slen;
+    const uint8_t *p = indata, *oldp;
 
-    c.pp = (const unsigned char **)&indata;
-    c.q = *(const unsigned char **)&indata;
-    c.error = ERR_R_NESTED_ASN1_ERROR;
-    c.p= *(const unsigned char **)&indata;
-    c.max = (length == 0)?0:(c.p+length);
+    if (ASN1_get_object(&p, &slen, &tag, &class, indata_len) & 0x80)
+        return EINVAL;
+    if (tag != V_ASN1_SEQUENCE)
+        return EINVAL;
 
-    asn1_GetSequence(&c,&length);
+    oldp = p;
+    if (ASN1_get_object(&p, &tlen, &tag, &class, slen) & 0x80)
+        return EINVAL;
+    p += tlen;
+    slen -= (p - oldp);
 
-    ASN1_get_object(&c.p,&Tlen,&Ttag,&Tclass,c.slen);
-    c.p += Tlen;
-    ASN1_get_object(&c.p,&Tlen,&Ttag,&Tclass,c.slen);
+    if (ASN1_get_object(&p, &tlen, &tag, &class, slen) & 0x80)
+        return EINVAL;
 
-    asn1_const_Finish(&c);
-
-    *outdata = malloc((size_t)Tlen);
-    if (*outdata == NULL) {
-        retval = ENOMEM;
-        goto cleanup;
-    }
-    memcpy(*outdata, c.p, (size_t)Tlen);
-    *outdata_len = Tlen;
-
-    retval = 0;
-cleanup:
-
-    return retval;
+    *outdata = malloc(tlen);
+    if (*outdata == NULL)
+        return ENOMEM;
+    memcpy(*outdata, p, tlen);
+    *outdata_len = tlen;
+    return 0;
 }
 
 #ifndef WITHOUT_PKCS11
@@ -3813,10 +3977,8 @@ pkinit_find_private_key(pkinit_identity_crypto_context id_cryptoctx,
 static krb5_error_code
 pkinit_decode_data_fs(krb5_context context,
                       pkinit_identity_crypto_context id_cryptoctx,
-                      unsigned char *data,
-                      unsigned int data_len,
-                      unsigned char **decoded_data,
-                      unsigned int *decoded_data_len)
+                      const uint8_t *data, unsigned int data_len,
+                      uint8_t **decoded_data, unsigned int *decoded_data_len)
 {
     if (decode_data(decoded_data, decoded_data_len, data, data_len,
                     id_cryptoctx->my_key, sk_X509_value(id_cryptoctx->my_certs,
@@ -3856,15 +4018,14 @@ pkinit_C_Decrypt(pkinit_identity_crypto_context id_cryptoctx,
 static krb5_error_code
 pkinit_decode_data_pkcs11(krb5_context context,
                           pkinit_identity_crypto_context id_cryptoctx,
-                          unsigned char *data,
-                          unsigned int data_len,
-                          unsigned char **decoded_data,
+                          const uint8_t *data, unsigned int data_len,
+                          uint8_t **decoded_data,
                           unsigned int *decoded_data_len)
 {
     CK_OBJECT_HANDLE obj;
     CK_ULONG len;
     CK_MECHANISM mech;
-    unsigned char *cp;
+    uint8_t *cp;
     int r;
 
     if (pkinit_open_session(context, id_cryptoctx)) {
@@ -3891,8 +4052,9 @@ pkinit_decode_data_pkcs11(krb5_context context,
     pkiDebug("session %p edata %p edata_len %d data %p datalen @%p %d\n",
              (void *) id_cryptoctx->session, (void *) data, (int) data_len,
              (void *) cp, (void *) &len, (int) len);
-    if ((r = pkinit_C_Decrypt(id_cryptoctx, data, (CK_ULONG) data_len,
-                              cp, &len)) != CKR_OK) {
+    r = pkinit_C_Decrypt(id_cryptoctx, (CK_BYTE_PTR) data, (CK_ULONG) data_len,
+                         cp, &len);
+    if (r != CKR_OK) {
         pkiDebug("C_Decrypt: %s\n", pkinit_pkcs11_code_to_text(r));
         if (r == CKR_BUFFER_TOO_SMALL)
             pkiDebug("decrypt %d needs %d\n", (int) data_len, (int) len);
@@ -3909,10 +4071,8 @@ pkinit_decode_data_pkcs11(krb5_context context,
 krb5_error_code
 pkinit_decode_data(krb5_context context,
                    pkinit_identity_crypto_context id_cryptoctx,
-                   unsigned char *data,
-                   unsigned int data_len,
-                   unsigned char **decoded_data,
-                   unsigned int *decoded_data_len)
+                   const uint8_t *data, unsigned int data_len,
+                   uint8_t **decoded_data, unsigned int *decoded_data_len)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
 
@@ -4030,9 +4190,9 @@ pkinit_sign_data(krb5_context context,
 
 
 static krb5_error_code
-decode_data(unsigned char **out_data, unsigned int *out_data_len,
-            unsigned char *data, unsigned int data_len,
-            EVP_PKEY *pkey, X509 *cert)
+decode_data(uint8_t **out_data, unsigned int *out_data_len,
+            const uint8_t *data, unsigned int data_len, EVP_PKEY *pkey,
+            X509 *cert)
 {
     krb5_error_code retval = ENOMEM;
     unsigned char *buf = NULL;
@@ -4072,22 +4232,25 @@ create_signature(unsigned char **sig, unsigned int *sig_len,
                  unsigned char *data, unsigned int data_len, EVP_PKEY *pkey)
 {
     krb5_error_code retval = ENOMEM;
-    EVP_MD_CTX md_ctx;
+    EVP_MD_CTX *ctx;
 
     if (pkey == NULL)
         return retval;
 
-    EVP_VerifyInit(&md_ctx, EVP_sha1());
-    EVP_SignUpdate(&md_ctx, data, data_len);
+    ctx = EVP_MD_CTX_new();
+    if (ctx == NULL)
+        return ENOMEM;
+    EVP_SignInit(ctx, EVP_sha1());
+    EVP_SignUpdate(ctx, data, data_len);
     *sig_len = EVP_PKEY_size(pkey);
     if ((*sig = malloc(*sig_len)) == NULL)
         goto cleanup;
-    EVP_SignFinal(&md_ctx, *sig, sig_len, pkey);
+    EVP_SignFinal(ctx, *sig, sig_len, pkey);
 
     retval = 0;
 
 cleanup:
-    EVP_MD_CTX_cleanup(&md_ctx);
+    EVP_MD_CTX_free(ctx);
 
     return retval;
 }
@@ -5526,8 +5689,8 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
         if (is == NULL)
             goto oom;
         X509_NAME_set(&is->issuer, X509_get_issuer_name(x));
-        M_ASN1_INTEGER_free(is->serial);
-        is->serial = M_ASN1_INTEGER_dup(X509_get_serialNumber(x));
+        ASN1_INTEGER_free(is->serial);
+        is->serial = ASN1_INTEGER_dup(X509_get_serialNumber(x));
         if (is->serial == NULL)
             goto oom;
         len = i2d_PKCS7_ISSUER_AND_SERIAL(is, NULL);
@@ -5679,8 +5842,8 @@ create_issuerAndSerial(krb5_context context,
 
     is = PKCS7_ISSUER_AND_SERIAL_new();
     X509_NAME_set(&is->issuer, X509_get_issuer_name(cert));
-    M_ASN1_INTEGER_free(is->serial);
-    is->serial = M_ASN1_INTEGER_dup(X509_get_serialNumber(cert));
+    ASN1_INTEGER_free(is->serial);
+    is->serial = ASN1_INTEGER_dup(X509_get_serialNumber(cert));
     len = i2d_PKCS7_ISSUER_AND_SERIAL(is, NULL);
     if ((p = *out = malloc((size_t) len)) == NULL)
         goto cleanup;
@@ -5852,9 +6015,8 @@ pkcs7_dataDecode(krb5_context context,
 
     ri = sk_PKCS7_RECIP_INFO_value(rsk, 0);
     (void)pkinit_decode_data(context, id_cryptoctx,
-                             M_ASN1_STRING_data(ri->enc_key),
-                             (unsigned int)M_ASN1_STRING_length(ri->enc_key),
-                             &ek, &eklen);
+                             ASN1_STRING_get0_data(ri->enc_key),
+                             ASN1_STRING_length(ri->enc_key), &ek, &eklen);
 
     evp_ctx=NULL;
     BIO_get_cipher_ctx(etmp,&evp_ctx);
