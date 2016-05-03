@@ -181,13 +181,13 @@ check_cert_address(X509 *x, const char *text)
     struct in6_addr sin6;
 
     /* Parse the IP address into an octet string. */
-    ip = M_ASN1_OCTET_STRING_new();
+    ip = ASN1_OCTET_STRING_new();
     if (ip == NULL)
         return FALSE;
     if (inet_pton(AF_INET, text, &sin)) {
-        M_ASN1_OCTET_STRING_set(ip, &sin, sizeof(sin));
+        ASN1_OCTET_STRING_set(ip, (unsigned char *)&sin, sizeof(sin));
     } else if (inet_pton(AF_INET6, text, &sin6)) {
-        M_ASN1_OCTET_STRING_set(ip, &sin6, sizeof(sin6));
+        ASN1_OCTET_STRING_set(ip, (unsigned char *)&sin6, sizeof(sin6));
     } else {
         ASN1_OCTET_STRING_free(ip);
         return FALSE;
@@ -317,7 +317,7 @@ verify_callback(int preverify_ok, X509_STORE_CTX *store_ctx)
     if (err != X509_V_OK) {
         bio = BIO_new(BIO_s_mem());
         if (bio != NULL) {
-            X509_NAME_print_ex(bio, x->cert_info->subject, 0, 0);
+            X509_NAME_print_ex(bio, X509_get_subject_name(x), 0, 0);
             count = BIO_get_mem_data(bio, &cert);
             errstr = X509_verify_cert_error_string(err);
             TRACE_TLS_CERT_ERROR(context, depth, count, cert, err, errstr);
