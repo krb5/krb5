@@ -1072,7 +1072,6 @@ cms_signeddata_create(krb5_context context,
     unsigned char *p;
     STACK_OF(X509) * cert_stack = NULL;
     ASN1_OCTET_STRING *digest_attr = NULL;
-    EVP_MD_CTX ctx, ctx2;
     const EVP_MD *md_tmp = NULL;
     unsigned char md_data[EVP_MAX_MD_SIZE], md_data2[EVP_MAX_MD_SIZE];
     unsigned char *digestInfo_buf = NULL, *abuf = NULL;
@@ -1186,13 +1185,22 @@ cms_signeddata_create(krb5_context context,
             abuf = data;
             alen = data_len;
         } else {
+            EVP_MD_CTX *ctx;
+
+            ctx = EVP_MD_CTX_new();
+            if (!ctx) {
+                retval = ENOMEM;
+                goto cleanup2;
+            }
+
             /* add signed attributes */
             /* compute sha1 digest over the EncapsulatedContentInfo */
-            EVP_MD_CTX_init(&ctx);
-            EVP_DigestInit_ex(&ctx, EVP_sha1(), NULL);
-            EVP_DigestUpdate(&ctx, data, data_len);
-            md_tmp = EVP_MD_CTX_md(&ctx);
-            EVP_DigestFinal_ex(&ctx, md_data, &md_len);
+            EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
+            EVP_DigestUpdate(ctx, data, data_len);
+            md_tmp = EVP_MD_CTX_md(ctx);
+            EVP_DigestFinal_ex(ctx, md_data, &md_len);
+
+            EVP_MD_CTX_free(ctx);
 
             /* create a message digest attr */
             digest_attr = ASN1_OCTET_STRING_new();
@@ -1226,15 +1234,24 @@ cms_signeddata_create(krb5_context context,
          */
         if (id_cryptoctx->pkcs11_method == 1 &&
             id_cryptoctx->mech == CKM_RSA_PKCS) {
+            EVP_MD_CTX *ctx;
+
+            ctx = EVP_MD_CTX_new();
+            if (!ctx) {
+                retval = ENOMEM;
+                goto cleanup2;
+            }
+
             pkiDebug("mech = CKM_RSA_PKCS\n");
-            EVP_MD_CTX_init(&ctx2);
             /* if this is not draft9 request, include digest signed attribute */
             if (cms_msg_type != CMS_SIGN_DRAFT9)
-                EVP_DigestInit_ex(&ctx2, md_tmp, NULL);
+                EVP_DigestInit_ex(ctx, md_tmp, NULL);
             else
-                EVP_DigestInit_ex(&ctx2, EVP_sha1(), NULL);
-            EVP_DigestUpdate(&ctx2, abuf, alen);
-            EVP_DigestFinal_ex(&ctx2, md_data2, &md_len2);
+                EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
+            EVP_DigestUpdate(ctx, abuf, alen);
+            EVP_DigestFinal_ex(ctx, md_data2, &md_len2);
+
+            EVP_MD_CTX_free(ctx);
 
             alg = X509_ALGOR_new();
             if (alg == NULL)
@@ -1338,12 +1355,9 @@ cms_signeddata_create(krb5_context context,
 
 cleanup2:
     if (p7si) {
-        if (cms_msg_type != CMS_SIGN_DRAFT9)
-            EVP_MD_CTX_cleanup(&ctx);
 #ifndef WITHOUT_PKCS11
         if (id_cryptoctx->pkcs11_method == 1 &&
             id_cryptoctx->mech == CKM_RSA_PKCS) {
-            EVP_MD_CTX_cleanup(&ctx2);
             free(digest_buf);
             free(digestInfo_buf);
             free(alg_buf);
@@ -2512,40 +2526,47 @@ pkinit_alg_agility_kdf(krb5_context context,
      *     -   Increment counter (modulo 2^32)
      */
     for (counter = 1; counter <= reps; counter++) {
-        EVP_MD_CTX c;
         uint s = 0;
         uint32_t be_counter = htonl(counter);
+        EVP_MD_CTX *ctx;
 
-        EVP_MD_CTX_init(&c);
+        ctx = EVP_MD_CTX_new();
+        if (!ctx) {
+            retval = ENOMEM;
+            goto cleanup;
+        }
 
         /* -   Compute Hashi = H(counter || Z || OtherInfo). */
-        if (0 == EVP_DigestInit(&c, EVP_func())) {
+        if (0 == EVP_DigestInit(ctx, EVP_func())) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestInit() returned an error.");
+            EVP_MD_CTX_free(ctx);
             retval = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
 
-        if ((0 == EVP_DigestUpdate(&c, &be_counter, 4)) ||
-            (0 == EVP_DigestUpdate(&c, secret->data, secret->length)) ||
-            (0 == EVP_DigestUpdate(&c, other_info->data, other_info->length))) {
+        if ((0 == EVP_DigestUpdate(ctx, &be_counter, 4)) ||
+            (0 == EVP_DigestUpdate(ctx, secret->data, secret->length)) ||
+            (0 == EVP_DigestUpdate(ctx, other_info->data, other_info->length))) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestUpdate() returned an error.");
+            EVP_MD_CTX_free(ctx);
             retval = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
 
         /* 4.  Set key = Hash1 || Hash2 || ... so that length of key is K bytes. */
-        if (0 == EVP_DigestFinal(&c, (unsigned char *)(random_data.data + offset), &s)) {
+        if (0 == EVP_DigestFinal(ctx, (unsigned char *)(random_data.data + offset), &s)) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestUpdate() returned an error.");
+            EVP_MD_CTX_free(ctx);
             retval = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
         offset += s;
         assert(s == hash_len);
 
-        EVP_MD_CTX_cleanup(&c);
+        EVP_MD_CTX_free(ctx);
     }
 
     retval = krb5_c_random_to_key(context, enctype, &random_data,
@@ -4072,22 +4093,26 @@ create_signature(unsigned char **sig, unsigned int *sig_len,
                  unsigned char *data, unsigned int data_len, EVP_PKEY *pkey)
 {
     krb5_error_code retval = ENOMEM;
-    EVP_MD_CTX md_ctx;
+    EVP_MD_CTX *ctx;
 
     if (pkey == NULL)
         return retval;
 
-    EVP_VerifyInit(&md_ctx, EVP_sha1());
-    EVP_SignUpdate(&md_ctx, data, data_len);
+    ctx = EVP_MD_CTX_new();
+    if (!ctx)
+        return retval;
+
+    EVP_SignInit(ctx, EVP_sha1());
+    EVP_SignUpdate(ctx, data, data_len);
     *sig_len = EVP_PKEY_size(pkey);
     if ((*sig = malloc(*sig_len)) == NULL)
         goto cleanup;
-    EVP_SignFinal(&md_ctx, *sig, sig_len, pkey);
+    EVP_SignFinal(ctx, *sig, sig_len, pkey);
 
     retval = 0;
 
 cleanup:
-    EVP_MD_CTX_cleanup(&md_ctx);
+    EVP_MD_CTX_free(ctx);
 
     return retval;
 }

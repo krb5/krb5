@@ -36,13 +36,16 @@
 krb5_error_code
 k5_sha256(const krb5_data *in, uint8_t out[K5_SHA256_HASHLEN])
 {
-    EVP_MD_CTX ctx;
+    EVP_MD_CTX *ctx;
     int ok;
 
-    EVP_MD_CTX_init(&ctx);
-    ok = EVP_DigestInit_ex(&ctx, EVP_sha256(), NULL);
-    ok = ok && EVP_DigestUpdate(&ctx, in->data, in->length);
-    ok = ok && EVP_DigestFinal_ex(&ctx, out, NULL);
-    EVP_MD_CTX_cleanup(&ctx);
+    ctx = EVP_MD_CTX_new();
+    if (!ctx)
+        return ENOMEM;
+
+    ok = EVP_DigestInit_ex(ctx, EVP_sha256(), NULL);
+    ok = ok && EVP_DigestUpdate(ctx, in->data, in->length);
+    ok = ok && EVP_DigestFinal_ex(ctx, out, NULL);
+    EVP_MD_CTX_free(ctx);
     return ok ? 0 : ENOMEM;
 }
