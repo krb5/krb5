@@ -111,6 +111,12 @@ realm.kinit(realm.user_princ,
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
+# Try again using RSA instead of DH.
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % file_identity,
+                   '-X', 'flag_RSA_PROTOCOL=yes'])
+realm.klist(realm.user_princ)
+
 # Run the basic test - PKINIT with FILE: identity, with a password on the key,
 # supplied by the prompter.
 # Expect failure if the responder does nothing, and we have no prompter.
