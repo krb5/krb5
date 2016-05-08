@@ -9,7 +9,11 @@ PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 
 !if defined(VISUALSTUDIOVERSION)
 !if $(VISUALSTUDIOVERSION:.=) >= 140
+!ifdef NODEBUG
 WINCRTEXTRA = ucrt.lib vcruntime.lib
+!else
+WINCRTEXTRA = ucrtd.lib vcruntimed.lib
+!endif
 !endif
 !endif
 SYSLIBS = kernel32.lib user32.lib advapi32.lib wsock32.lib secur32.lib userenv.lib $(WINCRTEXTRA)

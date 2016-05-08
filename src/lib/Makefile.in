@@ -53,7 +53,11 @@ clean-windows::
 
 ##WIN32##!if defined(VISUALSTUDIOVERSION)
 ##WIN32##!if $(VISUALSTUDIOVERSION:.=) >= 140
+##WIN32##!ifdef NODEBUG
 ##WIN32##WINCRTEXTRA = ucrt.lib vcruntime.lib
+##WIN32##!else
+##WIN32##WINCRTEXTRA = ucrtd.lib vcruntimed.lib
+##WIN32##!endif
 ##WIN32##!endif
 ##WIN32##!endif
 ##WIN32##WINLIBS = kernel32.lib ws2_32.lib user32.lib shell32.lib oldnames.lib \
