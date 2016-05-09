@@ -342,10 +342,11 @@ request_enc_pa_rep(krb5_pa_data ***padptr)
     if (pad)
         for (size=0; pad[size]; size++);
     pad = realloc(pad, sizeof(*pad)*(size+2));
-
     if (pad == NULL)
         return ENOMEM;
-    pad[size+1] = NULL;
+    *padptr = pad;
+    pad[size] = pad[size + 1] = NULL;
+
     pa = malloc(sizeof(krb5_pa_data));
     if (pa == NULL)
         return ENOMEM;
@@ -353,7 +354,6 @@ request_enc_pa_rep(krb5_pa_data ***padptr)
     pa->length = 0;
     pa->pa_type = KRB5_ENCPADATA_REQ_ENC_PA_REP;
     pad[size] = pa;
-    *padptr = pad;
     return 0;
 }
 
