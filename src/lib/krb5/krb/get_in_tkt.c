@@ -344,10 +344,11 @@ add_padata(krb5_pa_data ***padptr, krb5_preauthtype pa_type,
     if (pad)
         for (size=0; pad[size]; size++);
     pad = realloc(pad, sizeof(*pad)*(size+2));
-
     if (pad == NULL)
         return ENOMEM;
-    pad[size+1] = NULL;
+    *padptr = pad;
+    pad[size] = pad[size + 1] = NULL;
+
     pa = malloc(sizeof(krb5_pa_data));
     if (pa == NULL)
         return ENOMEM;
@@ -363,7 +364,6 @@ add_padata(krb5_pa_data ***padptr, krb5_preauthtype pa_type,
     }
     pa->pa_type = pa_type;
     pad[size] = pa;
-    *padptr = pad;
     return 0;
 }
 
