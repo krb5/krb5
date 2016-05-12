@@ -320,6 +320,7 @@ local.properties
 /src/lib/krb5/krb/t_vfy_increds
 /src/lib/krb5/krb/t_walk_rtree
 /src/lib/krb5/krb/t_response_items
+/src/lib/krb5/krb/t_sname_match
 
 /src/lib/krb5/os/t_expand_path
 /src/lib/krb5/os/t_locate_kdc
