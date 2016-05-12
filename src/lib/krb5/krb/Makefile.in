@@ -18,6 +18,7 @@ STLIBOBJS= \
 	allow_weak.o	\
 	appdefault.o	\
 	auth_con.o	\
+	cammac_util.o	\
 	authdata.o	\
 	authdata_exp.o	\
 	authdata_enc.o	\
@@ -128,6 +129,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)allow_weak.$(OBJEXT)	\
 	$(OUTPRE)appdefault.$(OBJEXT)	\
 	$(OUTPRE)auth_con.$(OBJEXT)	\
+	$(OUTPRE)cammac_util.$(OBJEXT)	\
 	$(OUTPRE)authdata.$(OBJEXT)	\
 	$(OUTPRE)authdata_exp.$(OBJEXT)	\
 	$(OUTPRE)authdata_enc.$(OBJEXT)	\
@@ -237,6 +239,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/addr_srch.c	\
 	$(srcdir)/appdefault.c	\
 	$(srcdir)/auth_con.c	\
+	$(srcdir)/cammac_util.c	\
 	$(srcdir)/authdata.c	\
 	$(srcdir)/authdata_exp.c	\
 	$(srcdir)/authdata_enc.c	\
