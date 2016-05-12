@@ -349,6 +349,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/t_copy_context.c \
 	$(srcdir)/t_in_ccache.c	\
 	$(srcdir)/t_response_items.c \
+	$(srcdir)/t_sname_match.c \
 	$(srcdir)/t_vfy_increds.c
 
 # Someday, when we have a "maintainer mode", do this right:
@@ -433,9 +434,12 @@ t_copy_context: t_copy_context.o $(KRB5_BASE_DEPLIBS)
 t_response_items: t_response_items.o response_items.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_response_items.o response_items.o $(KRB5_BASE_LIBS)
 
+t_sname_match: t_sname_match.o sname_match.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_sname_match.o sname_match.o $(KRB5_BASE_LIBS)
+
 TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
 	t_in_ccache t_cc_config t_copy_context \
-	t_princ t_etypes t_vfy_increds t_response_items
+	t_princ t_etypes t_vfy_increds t_response_items t_sname_match
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
@@ -474,6 +478,7 @@ check-unix:: $(TEST_PROGS)
 	$(RUN_SETUP) $(VALGRIND) ./t_princ
 	$(RUN_SETUP) $(VALGRIND) ./t_etypes
 	$(RUN_SETUP) $(VALGRIND) ./t_response_items
+	$(RUN_SETUP) $(VALGRIND) ./t_sname_match
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./t_copy_context
 
@@ -498,7 +503,9 @@ clean::
 	$(OUTPRE)t_in_ccache$(EXEEXT) $(OUTPRE)t_in_ccache.$(OBJEXT)	\
 	$(OUTPRE)t_ad_fx_armor$(EXEEXT) $(OUTPRE)t_ad_fx_armor.$(OBJEXT) \
 	$(OUTPRE)t_vfy_increds$(EXEEXT) $(OUTPRE)t_vfy_increds.$(OBJEXT) \
-	$(OUTPRE)t_response_items$(EXEEXT) $(OUTPRE)t_response_items.$(OBJEXT)
+	$(OUTPRE)t_response_items$(EXEEXT) \
+	$(OUTPRE)t_response_items.$(OBJEXT) $(OUTPRE)t_sname_match(EXEEXT) \
+	$(OUTPRE)t_sname_match.$(OBJEXT)
 
 @libobj_frag@
 
