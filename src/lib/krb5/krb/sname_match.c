@@ -36,6 +36,9 @@ krb5_sname_match(krb5_context context, krb5_const_principal matching,
     if (matching->type != KRB5_NT_SRV_HST || matching->length != 2)
         return krb5_principal_compare(context, matching, princ);
 
+    if (princ->length != 2)
+        return FALSE;
+
     /* Check the realm if present in matching. */
     if (matching->realm.length != 0 && !data_eq(matching->realm, princ->realm))
         return FALSE;
