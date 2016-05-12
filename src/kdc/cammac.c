@@ -171,24 +171,3 @@ cleanup:
     krb5_free_data(context, der_enctkt);
     return valid;
 }
-
-/* Return true if cammac's service verifier is valid for server_key. */
-krb5_boolean
-cammac_check_svcver(krb5_context context, krb5_cammac *cammac,
-                    krb5_keyblock *server_key)
-{
-    krb5_error_code ret;
-    krb5_verifier_mac *ver = cammac->svc_verifier;
-    krb5_boolean valid = FALSE;
-    krb5_data *der_authdata = NULL;
-
-    if (ver == NULL)
-        return FALSE;
-    ret = encode_krb5_authdata(cammac->elements, &der_authdata);
-    if (ret)
-        return FALSE;
-    ret = krb5_c_verify_checksum(context, server_key, KRB5_KEYUSAGE_CAMMAC,
-                                 der_authdata, &ver->checksum, &valid);
-    krb5_free_data(context, der_authdata);
-    return valid;
-}

@@ -146,28 +146,6 @@ make_authdata(const char *typestr, const char *contents)
     return ad;
 }
 
-/* Verify a CAMMAC's svc_verifier and return its contents. */
-static krb5_authdata **
-unwrap_cammac(krb5_authdata *ad, krb5_keyblock *tktkey)
-{
-    krb5_data *der_elements, ad_data = make_data(ad->contents, ad->length);
-    krb5_authdata **elements;
-    krb5_cammac *cammac;
-    krb5_boolean valid;
-
-    check(decode_krb5_cammac(&ad_data, &cammac));
-    check(encode_krb5_authdata(cammac->elements, &der_elements));
-    assert(cammac->svc_verifier != NULL);
-    krb5_c_verify_checksum(ctx, tktkey, KRB5_KEYUSAGE_CAMMAC, der_elements,
-                           &cammac->svc_verifier->checksum, &valid);
-    assert(valid);
-    elements = cammac->elements;
-    cammac->elements = NULL;
-    krb5_free_data(ctx, der_elements);
-    k5_free_cammac(ctx, cammac);
-    return elements;
-}
-
 static krb5_authdata **
 get_container_contents(krb5_authdata *ad, krb5_keyblock *skey,
                        krb5_keyblock *tktkey)
@@ -177,7 +155,7 @@ get_container_contents(krb5_authdata *ad, krb5_keyblock *skey,
     if (ad->ad_type == KRB5_AUTHDATA_KDC_ISSUED)
         check(krb5_verify_authdata_kdc_issued(ctx, skey, ad, NULL, &inner_ad));
     else if (ad->ad_type == KRB5_AUTHDATA_CAMMAC)
-        inner_ad = unwrap_cammac(ad, tktkey);
+        check(k5_unwrap_cammac_svc(ctx, ad, tktkey, &inner_ad));
     else
         check(krb5_decode_authdata_container(ctx, ad->ad_type, ad, &inner_ad));
     return inner_ad;
@@ -187,9 +165,11 @@ get_container_contents(krb5_authdata *ad, krb5_keyblock *skey,
 static void
 display_auth_indicator(krb5_authdata *ad)
 {
-    krb5_data **strs, **p, d = make_data(ad->contents, ad->length);
+    krb5_data **strs = NULL, **p;
 
-    check(decode_utf8_strings(&d, &strs));
+    check(k5_authind_decode(ad, &strs));
+    assert(strs != NULL);
+
     printf("[");
     for (p = strs; *p != NULL; p++) {
         printf("%.*s", (int)(*p)->length, (*p)->data);

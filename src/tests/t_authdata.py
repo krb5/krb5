@@ -115,6 +115,13 @@ out = realm.run(['./adata', 'krbtgt/FOREIGN'])
 if '+97: [indcl]' not in out:
     fail('auth-indicator not seen for AS req to cross-realm TGT')
 
+# Multiple indicators
+realm.kinit(realm.user_princ, password('user'),
+            ['-X', 'indicators=indcl indcl2 indcl3'])
+out = realm.run(['./adata', realm.krbtgt_princ])
+if '+97: [indcl, indcl2, indcl3]' not in out:
+    fail('multiple auth-indicators not seen for normal AS req')
+
 # AS request to local TGT (resulting creds are used for TGS tests)
 realm.kinit(realm.user_princ, password('user'), ['-X', 'indicators=indcl'])
 out = realm.run(['./adata', realm.krbtgt_princ])

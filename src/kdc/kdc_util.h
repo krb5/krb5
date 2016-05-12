@@ -137,10 +137,6 @@ krb5_boolean
 cammac_check_kdcver(krb5_context context, krb5_cammac *cammac,
                     krb5_enc_tkt_part *enc_tkt, krb5_db_entry *krbtgt);
 
-krb5_boolean
-cammac_check_svcver(krb5_context context, krb5_cammac *cammac,
-                    krb5_keyblock *server_key);
-
 /* do_as_req.c */
 void
 process_as_req (krb5_kdc_req *, krb5_data *,
