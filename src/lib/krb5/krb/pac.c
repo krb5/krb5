@@ -1233,7 +1233,7 @@ mspac_copy(krb5_context kcontext,
 
 static krb5_authdatatype mspac_ad_types[] = { KRB5_AUTHDATA_WIN2K_PAC, 0 };
 
-krb5plugin_authdata_client_ftable_v0 krb5int_mspac_authdata_client_ftable = {
+krb5plugin_authdata_client_ftable_v0 k5_mspac_ad_client_ftable = {
     "mspac",
     mspac_ad_types,
     mspac_init,

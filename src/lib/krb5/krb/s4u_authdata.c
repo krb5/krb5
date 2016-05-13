@@ -577,7 +577,7 @@ s4u2proxy_copy(krb5_context kcontext,
 
 static krb5_authdatatype s4u2proxy_ad_types[] = { KRB5_AUTHDATA_SIGNTICKET, 0 };
 
-krb5plugin_authdata_client_ftable_v0 krb5int_s4u2proxy_authdata_client_ftable = {
+krb5plugin_authdata_client_ftable_v0 k5_s4u2proxy_ad_client_ftable = {
     "constrained-delegation",
     s4u2proxy_ad_types,
     s4u2proxy_init,
