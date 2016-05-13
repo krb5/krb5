@@ -78,6 +78,7 @@ struct krb5_pac_data {
 
 extern krb5plugin_authdata_client_ftable_v0 krb5int_mspac_authdata_client_ftable;
 extern krb5plugin_authdata_client_ftable_v0 krb5int_s4u2proxy_authdata_client_ftable;
+extern krb5plugin_authdata_client_ftable_v0 k5_authind_ad_client_ftable;
 
 krb5_error_code
 k5_pac_locate_buffer(krb5_context context,
