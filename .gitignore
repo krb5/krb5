@@ -419,6 +419,7 @@ local.properties
 /src/tests/gssapi/t_s4u2proxy_krb5
 /src/tests/gssapi/t_saslname
 /src/tests/gssapi/t_spnego
+/src/tests/gssapi/t_srcattrs
 /src/tests/gssapi/t_inq_ctx
 
 /src/tests/hammer/kdc5_hammer
