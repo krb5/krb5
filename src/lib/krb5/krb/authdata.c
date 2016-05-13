@@ -499,6 +499,7 @@ krb5_authdata_import_attributes(krb5_context kcontext,
     return k5_ad_internalize(kcontext, context, usage, &bp, &remain);
 }
 
+/* Returns 0 on verification failure. */
 static krb5_error_code
 k5_get_kdc_issued_authdata(krb5_context kcontext,
                            const krb5_ap_req *ap_req,
@@ -530,7 +531,11 @@ k5_get_kdc_issued_authdata(krb5_context kcontext,
                                            kdc_issuer,
                                            kdc_issued_authdata);
 
-    assert(code == 0 || *kdc_issued_authdata == NULL);
+    if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY ||
+        code == KRB5KRB_AP_ERR_INAPP_CKSUM ||
+        code == KRB5_BAD_ENCTYPE ||
+        code == KRB5_BAD_MSIZE)
+        code = 0;
 
     krb5_free_authdata(kcontext, authdata);
 
@@ -621,8 +626,11 @@ krb5int_authdata_verify(krb5_context kcontext,
 
     authen_authdata = (*auth_context)->authentp->authorization_data;
     ticket_authdata = ap_req->ticket->enc_part2->authorization_data;
-    k5_get_kdc_issued_authdata(kcontext, ap_req,
-                               &kdc_issuer, &kdc_issued_authdata);
+
+    code = k5_get_kdc_issued_authdata(kcontext, ap_req, &kdc_issuer,
+                                      &kdc_issued_authdata);
+    if (code)
+        goto cleanup;
 
     code = get_cammac_authdata(kcontext, ap_req, key, &cammac_authdata);
     if (code)
