@@ -43,8 +43,8 @@ static const char *objdirs[] = {
 
 /* Internal authdata systems */
 static krb5plugin_authdata_client_ftable_v0 *authdata_systems[] = {
-    &krb5int_mspac_authdata_client_ftable,
-    &krb5int_s4u2proxy_authdata_client_ftable,
+    &k5_mspac_ad_client_ftable,
+    &k5_s4u2proxy_ad_client_ftable,
     &k5_authind_ad_client_ftable,
     NULL
 };
