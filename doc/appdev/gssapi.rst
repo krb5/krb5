@@ -171,6 +171,26 @@ type which is mapped to a krb5 principal name, clients will only be
 allowed to authenticate to that principal in the default keytab.
 
 
+Name Attributes
+---------------
+
+In release 1.8 or later, the gss_inquire_name_ and
+gss_get_name_attribute_ functions, specified in :rfc:`6680`, can be
+used to retrieve name attributes from the *src_name* returned by
+gss_accept_sec_context_.  The following attributes are defined when
+the krb5 mechanism is used:
+
+.. _gssapi_authind_attr:
+
+* "auth-indicator" attribute:
+
+This attribute will be included in the gss_inquire_name_ output if the
+ticket contains :ref:`authentication indicators <auth_indicator>`.
+One indicator is returned per invocation of gss_get_name_attribute_,
+so multiple invocations may be necessary to retrieve all of the
+indicators from the ticket.  (New in release 1.15.)
+
+
 Importing and exporting credentials
 -----------------------------------
 
@@ -517,6 +537,8 @@ gss_get_mic_iov_length and gss_get_mic_iov::
 .. _gss_accept_sec_context: http://tools.ietf.org/html/rfc2744.html#section-5.1
 .. _gss_acquire_cred: http://tools.ietf.org/html/rfc2744.html#section-5.2
 .. _gss_export_name: http://tools.ietf.org/html/rfc2744.html#section-5.13
+.. _gss_get_name_attribute: http://tools.ietf.org/html/6680.html#section-7.5
 .. _gss_import_name: http://tools.ietf.org/html/rfc2744.html#section-5.16
 .. _gss_init_sec_context: http://tools.ietf.org/html/rfc2744.html#section-5.19
+.. _gss_inquire_name: http://tools.ietf.org/html/rfc6680.txt#section-7.4
 .. _gss_inquire_cred: http://tools.ietf.org/html/rfc2744.html#section-5.21

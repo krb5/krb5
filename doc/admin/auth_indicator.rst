@@ -51,3 +51,7 @@ but a user who authenticates with a password would not::
     $ kvno host/high.value.server
     kvno: KDC policy rejects request while getting credentials for
       host/high.value.server@KRBTEST.COM
+
+GSSAPI server applications can inspect authentication indicators
+through the :ref:`auth-indicator <gssapi_authind_attr>` name
+attribute.
