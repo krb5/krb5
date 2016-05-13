@@ -513,6 +513,39 @@ gss_get_mic_iov_length and gss_get_mic_iov::
     if (GSS_ERROR(major))
         handle_error(major, minor);
 
+Name Attributes
+---------------
+
+The following extensions (declared in ``<gssapi/gssapi_ext.h>``) can
+be used in release 1.8 or later to examine name attributes described
+in :rfc:`6680`::
+
+    OM_uint32 gss_inquire_name(OM_uint32 minor_status,
+                               gss_name_t name,
+                               int *name_is_MN,
+                               gss_OID *MN_mech,
+                               gss_buffer_set_t *attrs);
+
+    OM_uint32 gss_get_name_attribute(OM_uint32 minor_status,
+                                     gss_name_t name,
+                                     gss_buffer_t attr,
+                                     int *authenticated,
+                                     int *complete,
+                                     gss_buffer_t value,
+                                     gss_buffer_t display_value,
+                                     int *more);
+
+.. _gssapi_authind_attr:
+
+* "auth-indicator" attribute:
+
+In release 1.15 this name attribute type will be included in the
+gss_inquire_name output if the ticket contains :ref:`authentication
+indicators <auth_indicator>`.  When a client performs
+pre-authentication, the KDC may include authentication indicator values
+into the authorization data of a ticket.  These are site-defined strings
+that are intended to convey the type or strength of pre-authentication,
+allowing an application to make additional authorization policy checks.
 
 .. _gss_accept_sec_context: http://tools.ietf.org/html/rfc2744.html#section-5.1
 .. _gss_acquire_cred: http://tools.ietf.org/html/rfc2744.html#section-5.2

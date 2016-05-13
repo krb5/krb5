@@ -51,3 +51,6 @@ but a user who authenticates with a password would not::
     $ kvno host/high.value.server
     kvno: KDC policy rejects request while getting credentials for
       host/high.value.server@KRBTEST.COM
+
+Indicators present in a ticket are exposed to GSSAPI through the
+:ref:`auth-indicator <gssapi_authind_attr>` name attribute.
