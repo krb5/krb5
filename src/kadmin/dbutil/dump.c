@@ -712,10 +712,9 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
     krb5_tl_data *tl;
     krb5_error_code ret;
 
-    dbentry = krb5_db_alloc(context, NULL, sizeof(*dbentry));
+    dbentry = calloc(1, sizeof(*dbentry));
     if (dbentry == NULL)
         return 1;
-    memset(dbentry, 0, sizeof(*dbentry));
     (*linenop)++;
     nread = fscanf(filep, "%u\t%u\t%u\t%u\t%u\t", &u1, &u2, &u3, &u4, &u5);
     if (nread == EOF) {

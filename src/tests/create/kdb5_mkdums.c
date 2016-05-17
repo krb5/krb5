@@ -218,12 +218,11 @@ add_princ(context, str_newprinc)
     krb5_db_entry         *newentry;
     char                  princ_name[4096];
 
-    newentry = krb5_db_alloc(context, NULL, sizeof(*newentry));
+    newentry = calloc(1, sizeof(*newentry));
     if (newentry == NULL) {
         com_err(progname, ENOMEM, "while allocating DB entry");
         return;
     }
-    memset(newentry, 0, sizeof(*newentry));
     snprintf(princ_name, sizeof(princ_name), "%s@%s", str_newprinc, cur_realm);
     if ((retval = krb5_parse_name(context, princ_name, &newprinc))) {
         com_err(progname, retval, "while parsing '%s'", princ_name);

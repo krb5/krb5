@@ -49,12 +49,11 @@ main()
     assert(krb5int_init_context_kdc(&context) == 0);
 
     /* Start with an empty entry. */
-    ent = krb5_db_alloc(context, NULL, sizeof(*ent));
+    ent = calloc(1, sizeof(*ent));
     if (ent == NULL) {
         fprintf(stderr, "Can't allocate memory for entry.\n");
         return 1;
     }
-    memset(ent, 0, sizeof(*ent));
 
     /* Check that the entry has no strings to start. */
     assert(krb5_dbe_get_strings(context, ent, &strings, &count) == 0);

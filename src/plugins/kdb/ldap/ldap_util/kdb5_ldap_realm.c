@@ -1129,11 +1129,6 @@ krb5_dbe_update_tl_data_new(krb5_context context, krb5_db_entry *entry,
 
     /* copy the new data first, so we can fail cleanly if malloc()
      * fails */
-/*
-  if ((tmp =
-  (krb5_octet *) krb5_db_alloc(context, NULL,
-  new_tl_data->tl_data_length)) == NULL)
-*/
     if ((tmp = (krb5_octet *) malloc (new_tl_data->tl_data_length)) == NULL)
         return (ENOMEM);
 
@@ -1150,12 +1145,6 @@ krb5_dbe_update_tl_data_new(krb5_context context, krb5_db_entry *entry,
     /* if necessary, chain a new record in the beginning and point at it */
 
     if (!tl_data) {
-/*
-  if ((tl_data =
-  (krb5_tl_data *) krb5_db_alloc(context, NULL,
-  sizeof(krb5_tl_data)))
-  == NULL) {
-*/
         if ((tl_data = (krb5_tl_data *) malloc (sizeof(krb5_tl_data))) == NULL) {
             free(tmp);
             return (ENOMEM);
@@ -1168,8 +1157,7 @@ krb5_dbe_update_tl_data_new(krb5_context context, krb5_db_entry *entry,
 
     /* fill in the record */
 
-    if (tl_data->tl_data_contents)
-        krb5_db_free(context, tl_data->tl_data_contents);
+    free(tl_data->tl_data_contents);
 
     tl_data->tl_data_type = new_tl_data->tl_data_type;
     tl_data->tl_data_length = new_tl_data->tl_data_length;

@@ -78,55 +78,18 @@ cleanup_key_data(context, count, data)
     int                   count;
     krb5_key_data       * data;
 {
-    int i, j;
+    int i;
 
     /* If data is NULL, count is always 0 */
     if (data == NULL) return;
 
-    for (i = 0; i < count; i++) {
-        for (j = 0; j < data[i].key_data_ver; j++) {
-            if (data[i].key_data_length[j]) {
-                krb5_db_free(context, data[i].key_data_contents[j]);
-            }
-        }
-    }
-    krb5_db_free(context, data);
+    for (i = 0; i < count; i++)
+        krb5_dbe_free_key_data_contents(context, &data[i]);
+    free(data);
 }
 
-/* Copy key data from in to out, using krb5_db_alloc storage for out. */
-static krb5_error_code
-copy_key_data(krb5_context context, krb5_key_data *in, krb5_key_data *out)
-{
-    int i;
-    void *copies[2] = { NULL, NULL };
-
-    memset(out, 0, sizeof(*out));
-
-    /* Copy the key data contents using krb5_db_alloc storage. */
-    for (i = 0; i < in->key_data_ver && i < 2; i++) {
-        if (in->key_data_length[i] == 0)
-            continue;
-        copies[i] = krb5_db_alloc(context, NULL, in->key_data_length[i]);
-        if (copies[i] == NULL) {
-            while (--i >= 0) {
-                zap(copies[i], in->key_data_length[i]);
-                krb5_db_free(context, copies[i]);
-            }
-            return ENOMEM;
-        }
-        memcpy(copies[i], in->key_data_contents[i], in->key_data_length[i]);
-    }
-
-    /* Copy the structure and replace the allocated fields with the copies. */
-    *out = *in;
-    for (i = 0; i < 2; i++)
-        out->key_data_contents[i] = copies[i];
-
-    return 0;
-}
-
-/* Copy key data from old_kd to new_kd.  new_kd will be encrypted with mkey and
- * will use krb5_db_alloc storage. */
+/* Transfer key data from old_kd to new_kd, making sure that new_kd is
+ * encrypted with mkey.  May steal from old_kd and zero it out. */
 static krb5_error_code
 preserve_one_old_key(krb5_context context, krb5_keyblock *mkey,
                      krb5_db_entry *dbent, krb5_key_data *old_kd,
@@ -135,16 +98,15 @@ preserve_one_old_key(krb5_context context, krb5_keyblock *mkey,
     krb5_error_code ret;
     krb5_keyblock kb;
     krb5_keysalt salt;
-    krb5_key_data kd;
 
     memset(new_kd, 0, sizeof(*new_kd));
-    memset(&kd, 0, sizeof(kd));
 
     ret = krb5_dbe_decrypt_key_data(context, mkey, old_kd, &kb, NULL);
     if (ret == 0) {
-        /* old_kd is already encrypted in mkey, so just copy it. */
-        krb5_free_keyblock_contents(context, &kb);
-        return copy_key_data(context, old_kd, new_kd);
+        /* old_kd is already encrypted in mkey, so just move it. */
+        *new_kd = *old_kd;
+        memset(old_kd, 0, sizeof(*old_kd));
+        return 0;
     }
 
     /* Decrypt and re-encrypt old_kd using mkey. */
@@ -152,20 +114,17 @@ preserve_one_old_key(krb5_context context, krb5_keyblock *mkey,
     if (ret)
         return ret;
     ret = krb5_dbe_encrypt_key_data(context, mkey, &kb, &salt,
-                                    old_kd->key_data_kvno, &kd);
+                                    old_kd->key_data_kvno, new_kd);
     krb5_free_keyblock_contents(context, &kb);
     krb5_free_data_contents(context, &salt.data);
-    if (ret)
-        return ret;
-
-    /* Copy the result to ensure new_kd uses db_alloc storage. */
-    ret = copy_key_data(context, &kd, new_kd);
-    krb5_dbe_free_key_data_contents(context, &kd);
     return ret;
 }
 
-/* Add key_data to dbent, making sure that each entry is encrypted in mkey.  If
- * kvno is non-zero, preserve only keys of that kvno. */
+/*
+ * Add key_data to dbent, making sure that each entry is encrypted in mkey.  If
+ * kvno is non-zero, preserve only keys of that kvno.  May steal some elements
+ * from key_data and zero them out.
+ */
 static krb5_error_code
 preserve_old_keys(krb5_context context, krb5_keyblock *mkey,
                   krb5_db_entry *dbent, int kvno, int n_key_data,
@@ -200,7 +159,7 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
     krb5_keyblock         key;
     int                   i, j;
     krb5_error_code       retval;
-    krb5_key_data         tmp_key_data;
+    krb5_key_data        *kd_slot;
 
     for (i = 0; i < ks_tuple_count; i++) {
         krb5_boolean similar;
@@ -228,6 +187,7 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
 
         if ((retval = krb5_dbe_create_key_data(context, db_entry)))
             return retval;
+        kd_slot = &db_entry->key_data[db_entry->n_key_data - 1];
 
         /* there used to be code here to extract the old key, and derive
            a new key from it.  Now that there's a unified prng, that isn't
@@ -238,19 +198,11 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
                                              &key)))
             return retval;
 
-        memset( &tmp_key_data, 0, sizeof(tmp_key_data));
         retval = krb5_dbe_encrypt_key_data(context, master_key, &key, NULL,
-                                           kvno, &tmp_key_data);
+                                           kvno, kd_slot);
 
         krb5_free_keyblock_contents(context, &key);
         if( retval )
-            return retval;
-
-        /* Copy the result to ensure we use db_alloc storage. */
-        retval = copy_key_data(context, &tmp_key_data,
-                               &db_entry->key_data[db_entry->n_key_data - 1]);
-        krb5_dbe_free_key_data_contents(context, &tmp_key_data);
-        if (retval)
             return retval;
     }
 
@@ -309,7 +261,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
     krb5_data             pwd;
     krb5_data             afs_params = string2data("\1"), *s2k_params;
     int                   i, j;
-    krb5_key_data         tmp_key_data;
+    krb5_key_data        *kd_slot;
 
     for (i = 0; i < ks_tuple_count; i++) {
         krb5_boolean similar;
@@ -339,6 +291,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 
         if ((retval = krb5_dbe_create_key_data(context, db_entry)))
             return(retval);
+        kd_slot = &db_entry->key_data[db_entry->n_key_data - 1];
 
         /* Convert password string to key using appropriate salt */
         switch (key_salt.type = ks_tuple[i].ks_salttype) {
@@ -394,22 +347,14 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
             return retval;
         }
 
-        memset(&tmp_key_data, 0, sizeof(tmp_key_data));
         retval = krb5_dbe_encrypt_key_data(context, master_key, &key,
                                            (const krb5_keysalt *)&key_salt,
-                                           kvno, &tmp_key_data);
+                                           kvno, kd_slot);
         if (key_salt.data.data)
             free(key_salt.data.data);
         free(key.contents);
 
         if( retval )
-            return retval;
-
-        /* Copy the result to ensure we use db_alloc storage. */
-        retval = copy_key_data(context, &tmp_key_data,
-                               &db_entry->key_data[db_entry->n_key_data - 1]);
-        krb5_dbe_free_key_data_contents(context, &tmp_key_data);
-        if (retval)
             return retval;
     }
 
@@ -455,13 +400,15 @@ rekey(krb5_context context, krb5_keyblock *mkey, krb5_key_salt_tuple *ks_tuple,
         return ret;
     }
 
-    /* Possibly add some or all of the old keys to the back of the list. */
+    /* Possibly add some or all of the old keys to the back of the list.  May
+     * steal from and zero out some of the old key data entries. */
     if (savekeys != DISCARD_ALL) {
         save_kvno = (savekeys == KEEP_LAST_KVNO) ? old_kvno : 0;
         ret = preserve_old_keys(context, mkey, db_entry, save_kvno, n_key_data,
                                 key_data);
     }
 
+    /* Free any old key data entries not stolen and zeroed out above. */
     cleanup_key_data(context, n_key_data, key_data);
     return ret;
 }

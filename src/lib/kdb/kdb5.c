@@ -114,10 +114,6 @@ logging(krb5_context context)
         log_ctx->ulog != NULL;
 }
 
-/*
- * XXX eventually this should be consolidated with krb5_free_key_data_contents
- * so there is only a single version.
- */
 void
 krb5_dbe_free_key_data_contents(krb5_context context, krb5_key_data *key)
 {
@@ -795,14 +791,12 @@ krb5_db_free_principal(krb5_context kcontext, krb5_db_entry *entry)
 }
 
 static void
-free_db_args(krb5_context kcontext, char **db_args)
+free_db_args(char **db_args)
 {
     int i;
     if (db_args) {
-        /* XXX Is this right?  Or are we borrowing storage from
-           the caller?  */
         for (i = 0; db_args[i]; i++)
-            krb5_db_free(kcontext, db_args[i]);
+            free(db_args[i]);
         free(db_args);
     }
 }
@@ -854,7 +848,7 @@ extract_db_args_from_tl_data(krb5_context kcontext, krb5_tl_data **start,
                 prev->tl_data_next = curr->tl_data_next;
             }
             (*count)--;
-            krb5_db_free(kcontext, curr);
+            free(curr);
 
             /* previous does not change */
             curr = next;
@@ -866,7 +860,7 @@ extract_db_args_from_tl_data(krb5_context kcontext, krb5_tl_data **start,
     status = 0;
 clean_n_exit:
     if (status != 0) {
-        free_db_args(kcontext, db_args);
+        free_db_args(db_args);
         db_args = NULL;
     }
     *db_argsp = db_args;
@@ -891,7 +885,7 @@ krb5int_put_principal_no_log(krb5_context kcontext, krb5_db_entry *entry)
     if (status)
         return status;
     status = v->put_principal(kcontext, entry, db_args);
-    free_db_args(kcontext, db_args);
+    free_db_args(db_args);
     return status;
 }
 
@@ -1210,10 +1204,7 @@ krb5_db_fetch_mkey(krb5_context context, krb5_principal mname,
     }
 
 clean_n_exit:
-    if (tmp_key.contents) {
-        zap(tmp_key.contents, tmp_key.length);
-        krb5_db_free(context, tmp_key.contents);
-    }
+    zapfree(tmp_key.contents, tmp_key.length);
     return retval;
 }
 
@@ -1486,11 +1477,13 @@ krb5_dbe_lookup_tl_data(krb5_context context, krb5_db_entry *entry,
 krb5_error_code
 krb5_dbe_create_key_data(krb5_context context, krb5_db_entry *entry)
 {
-    if ((entry->key_data =
-         (krb5_key_data *) krb5_db_alloc(context, entry->key_data,
-                                         (sizeof(krb5_key_data) *
-                                          (entry->n_key_data + 1)))) == NULL)
-        return (ENOMEM);
+    krb5_key_data *newptr;
+
+    newptr = realloc(entry->key_data,
+                     (entry->n_key_data + 1) * sizeof(*entry->key_data));
+    if (newptr == NULL)
+        return ENOMEM;
+    entry->key_data = newptr;
 
     memset(entry->key_data + entry->n_key_data, 0, sizeof(krb5_key_data));
     entry->n_key_data++;
@@ -2195,9 +2188,8 @@ krb5_db_update_tl_data(krb5_context context, krb5_int16 *n_tl_datap,
      * Copy the new data first, so we can fail cleanly if malloc()
      * fails.
      */
-    if ((tmp =
-         (krb5_octet *) krb5_db_alloc(context, NULL,
-                                      new_tl_data->tl_data_length)) == NULL)
+    tmp = malloc(new_tl_data->tl_data_length);
+    if (tmp == NULL)
         return (ENOMEM);
 
     /*
@@ -2215,12 +2207,11 @@ krb5_db_update_tl_data(krb5_context context, krb5_int16 *n_tl_datap,
     /* If necessary, chain a new record in the beginning and point at it.  */
 
     if (!tl_data) {
-        tl_data = krb5_db_alloc(context, NULL, sizeof(krb5_tl_data));
+        tl_data = calloc(1, sizeof(*tl_data));
         if (tl_data == NULL) {
             free(tmp);
             return (ENOMEM);
         }
-        memset(tl_data, 0, sizeof(krb5_tl_data));
         tl_data->tl_data_next = *tl_datap;
         *tl_datap = tl_data;
         (*n_tl_datap)++;
@@ -2228,8 +2219,7 @@ krb5_db_update_tl_data(krb5_context context, krb5_int16 *n_tl_datap,
 
     /* fill in the record */
 
-    if (tl_data->tl_data_contents)
-        krb5_db_free(context, tl_data->tl_data_contents);
+    free(tl_data->tl_data_contents);
 
     tl_data->tl_data_type = new_tl_data->tl_data_type;
     tl_data->tl_data_length = new_tl_data->tl_data_length;
@@ -2301,9 +2291,8 @@ krb5_error_code
 krb5_dbe_specialize_salt(krb5_context context, krb5_db_entry *entry)
 {
     krb5_int16 stype, i;
-    krb5_data *salt = NULL;
-    krb5_error_code ret = 0;
-    uint8_t *data;
+    krb5_data *salt;
+    krb5_error_code ret;
 
     if (context == NULL || entry == NULL)
         return EINVAL;
@@ -2316,27 +2305,19 @@ krb5_dbe_specialize_salt(krb5_context context, krb5_db_entry *entry)
         ret = krb5_dbe_compute_salt(context, &entry->key_data[i], entry->princ,
                                     &stype, &salt);
         if (ret)
-            goto cleanup;
+            return ret;
 
-        data = krb5_db_alloc(context, NULL, salt->length);
-        if (data == NULL) {
-            ret = ENOMEM;
-            goto cleanup;
-        }
-        memcpy(data, salt->data, salt->length);
-
+        /* Steal the data pointer from salt and free the container. */
+        if (entry->key_data[i].key_data_ver >= 2)
+            free(entry->key_data[i].key_data_contents[1]);
         entry->key_data[i].key_data_type[1] = KRB5_KDB_SALTTYPE_SPECIAL;
-        krb5_db_free(context, entry->key_data[i].key_data_contents[1]);
-        entry->key_data[i].key_data_contents[1] = data;
+        entry->key_data[i].key_data_contents[1] = (uint8_t *)salt->data;
         entry->key_data[i].key_data_length[1] = salt->length;
         entry->key_data[i].key_data_ver = 2;
-        krb5_free_data(context, salt);
-        salt = NULL;
+        free(salt);
     }
 
-cleanup:
-    krb5_free_data(context, salt);
-    return ret;
+    return 0;
 }
 
 /* change password functions */

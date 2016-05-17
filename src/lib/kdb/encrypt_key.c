@@ -74,7 +74,7 @@ krb5_dbe_def_encrypt_key_data( krb5_context             context,
     krb5_enc_data                 cipher;
 
     for (i = 0; i < key_data->key_data_ver; i++) {
-        krb5_db_free(context, key_data->key_data_contents[i]);
+        free(key_data->key_data_contents[i]);
         key_data->key_data_contents[i] = NULL;
     }
 
@@ -89,7 +89,7 @@ krb5_dbe_def_encrypt_key_data( krb5_context             context,
                                         &len)))
         return(retval);
 
-    ptr = krb5_db_alloc(context, NULL, 2 + len);
+    ptr = malloc(2 + len);
     if (ptr == NULL)
         return(ENOMEM);
 
@@ -108,7 +108,7 @@ krb5_dbe_def_encrypt_key_data( krb5_context             context,
 
     if ((retval = krb5_c_encrypt(context, mkey, /* XXX */ 0, 0,
                                  &plain, &cipher))) {
-        krb5_db_free(context, key_data->key_data_contents[0]);
+        free(key_data->key_data_contents[0]);
         return retval;
     }
 
@@ -118,10 +118,9 @@ krb5_dbe_def_encrypt_key_data( krb5_context             context,
             key_data->key_data_ver++;
             key_data->key_data_type[1] = keysalt->type;
             if ((key_data->key_data_length[1] = keysalt->data.length) != 0) {
-                key_data->key_data_contents[1] =
-                    krb5_db_alloc(context, NULL, keysalt->data.length);
+                key_data->key_data_contents[1] = malloc(keysalt->data.length);
                 if (key_data->key_data_contents[1] == NULL) {
-                    krb5_db_free(context, key_data->key_data_contents[0]);
+                    free(key_data->key_data_contents[0]);
                     return ENOMEM;
                 }
                 memcpy(key_data->key_data_contents[1], keysalt->data.data,

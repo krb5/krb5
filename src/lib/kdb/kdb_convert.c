@@ -623,10 +623,9 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
      * Set ent->n_tl_data = 0 initially, if this is an ADD update
      */
     if (is_add) {
-        ent = krb5_db_alloc(context, NULL, sizeof(*ent));
+        ent = calloc(1, sizeof(*ent));
         if (ent == NULL)
             return (ENOMEM);
-        memset(ent, 0, sizeof(*ent));
         ent->n_tl_data = 0;
     }
 

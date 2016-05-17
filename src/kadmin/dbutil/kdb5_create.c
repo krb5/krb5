@@ -423,10 +423,9 @@ add_principal(context, princ, op, pblock)
     struct iterate_args   iargs;
     krb5_actkvno_node     actkvno;
 
-    entry = krb5_db_alloc(context, NULL, sizeof(*entry));
+    entry = calloc(1, sizeof(*entry));
     if (entry == NULL)
         return ENOMEM;
-    memset(entry, 0, sizeof(*entry));
 
     entry->len = KRB5_KDB_V1_BASE_LENGTH;
     entry->attributes = pblock->flags;

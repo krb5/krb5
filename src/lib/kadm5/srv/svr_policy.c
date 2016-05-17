@@ -249,7 +249,6 @@ kadm5_modify_policy(void *server_handle, kadm5_policy_ent_t entry, long mask)
     krb5_tl_data            *tl;
     osa_policy_ent_t         p;
     int                      ret;
-    size_t                   len;
 
     CHECK_HANDLE(server_handle);
 
@@ -329,17 +328,14 @@ kadm5_modify_policy(void *server_handle, kadm5_policy_ent_t entry, long mask)
         if ((mask & KADM5_POLICY_MAX_RLIFE))
             p->max_renewable_life = entry->max_renewable_life;
         if ((mask & KADM5_POLICY_ALLOWED_KEYSALTS)) {
-            krb5_db_free(handle->context, p->allowed_keysalts);
+            free(p->allowed_keysalts);
             p->allowed_keysalts = NULL;
             if (entry->allowed_keysalts != NULL) {
-                len = strlen(entry->allowed_keysalts) + 1;
-                p->allowed_keysalts = krb5_db_alloc(handle->context, NULL,
-                                                    len);
+                p->allowed_keysalts = strdup(entry->allowed_keysalts);
                 if (p->allowed_keysalts == NULL) {
                     ret = ENOMEM;
                     goto cleanup;
                 }
-                memcpy(p->allowed_keysalts, entry->allowed_keysalts, len);
             }
         }
         if ((mask & KADM5_POLICY_TL_DATA)) {
