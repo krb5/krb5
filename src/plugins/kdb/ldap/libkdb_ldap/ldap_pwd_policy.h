@@ -48,7 +48,4 @@ krb5_ldap_iterate_password_policy(krb5_context, char *,
                                   void (*)(krb5_pointer, osa_policy_ent_t),
                                   krb5_pointer);
 
-void
-krb5_ldap_free_password_policy(krb5_context kcontext, osa_policy_ent_t entry);
-
 #endif

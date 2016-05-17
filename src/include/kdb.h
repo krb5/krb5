@@ -548,10 +548,18 @@ krb5_dbe_update_mod_princ_data( krb5_context          context,
                                 krb5_timestamp        mod_date,
                                 krb5_const_principal  mod_princ);
 
+/*
+ * These are wrappers around realloc() and free().  Applications and KDB
+ * modules can use them when manipulating principal and policy entries to
+ * ensure that they allocate and free memory in a manner compatible with the
+ * library.  Using libkrb5 or libkbd5 functions to construct values (such as
+ * krb5_copy_principal() to construct the princ field of a krb5_db_entry) is
+ * also safe.  On Unix platforms, just using malloc() and free() is safe as
+ * long as the application or module does not use a malloc replacement.
+ */
 void *krb5_db_alloc( krb5_context kcontext,
                      void *ptr,
                      size_t size );
-
 void krb5_db_free( krb5_context kcontext,
                    void *ptr);
 
@@ -868,6 +876,11 @@ krb5_dbe_free_string(krb5_context, char *);
  * The documentation in these comments describes the DAL as it is currently
  * implemented and used, not as it should be.  So if anything seems off, that
  * probably means the current state of things is off.
+ *
+ * Modules must allocate memory for principal entries, policy entries, and
+ * other structures using an allocator compatible with malloc() as seen by
+ * libkdb5 and libkrb5.  Modules may link against libkdb5 and call
+ * krb5_db_alloc() to be certain that the same malloc implementation is used.
  */
 
 typedef struct _kdb_vftabl {
@@ -1015,14 +1028,6 @@ typedef struct _kdb_vftabl {
                                      krb5_db_entry **entry);
 
     /*
-     * Mandatory: Free a database entry.  The entry may have been constructed
-     * by the caller (using the db_alloc function to allocate associated
-     * memory); thus, a plugin must allocate each field of a principal entry
-     * separately.
-     */
-    void (*free_principal)(krb5_context kcontext, krb5_db_entry *entry);
-
-    /*
      * Optional: Create or modify a principal entry.  db_args communicates
      * command-line arguments for module-specific flags.
      *
@@ -1103,23 +1108,6 @@ typedef struct _kdb_vftabl {
      * an error if the entry does not exist.
      */
     krb5_error_code (*delete_policy)(krb5_context kcontext, char *policy);
-
-    /* Optional: Free a policy entry returned by db_get_policy. */
-    void (*free_policy)(krb5_context kcontext, osa_policy_ent_t val);
-
-    /*
-     * Mandatory: Has the semantics of realloc(ptr, size).  Callers use this to
-     * allocate memory for new or changed principal entries, so the module
-     * should expect to potentially see this memory in db_free_principal.
-     */
-    void *(*alloc)(krb5_context kcontext, void *ptr, size_t size);
-
-    /*
-     * Mandatory: Has the semantics of free(ptr).  Callers use this to free
-     * fields from a principal entry (such as key data) before changing it in
-     * place, and in some cases to free data they allocated with db_alloc.
-     */
-    void (*free)(krb5_context kcontext, void *ptr);
 
     /*
      * Optional with default: Retrieve a master keyblock from the stash file

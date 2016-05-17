@@ -766,16 +766,32 @@ krb5_db_get_principal(krb5_context kcontext, krb5_const_principal search_for,
     return 0;
 }
 
+static void
+free_tl_data(krb5_tl_data *list)
+{
+    krb5_tl_data *next;
+
+    for (; list != NULL; list = next) {
+        next = list->tl_data_next;
+        free(list->tl_data_contents);
+        free(list);
+    }
+}
+
 void
 krb5_db_free_principal(krb5_context kcontext, krb5_db_entry *entry)
 {
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
+    int i;
 
-    status = get_vftabl(kcontext, &v);
-    if (status)
+    if (entry == NULL)
         return;
-    v->free_principal(kcontext, entry);
+    free(entry->e_data);
+    krb5_free_principal(kcontext, entry->princ);
+    free_tl_data(entry->tl_data);
+    for (i = 0; i < entry->n_key_data; i++)
+        krb5_dbe_free_key_data_contents(kcontext, &entry->key_data[i]);
+    free(entry->key_data);
+    free(entry);
 }
 
 static void
@@ -1332,25 +1348,13 @@ krb5_dbe_find_mkey(krb5_context context, krb5_db_entry *entry,
 void   *
 krb5_db_alloc(krb5_context kcontext, void *ptr, size_t size)
 {
-    krb5_error_code status;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return NULL;
-    return v->alloc(kcontext, ptr, size);
+    return realloc(ptr, size);
 }
 
 void
 krb5_db_free(krb5_context kcontext, void *ptr)
 {
-    krb5_error_code status;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return;
-    v->free(kcontext, ptr);
+    free(ptr);
 }
 
 /* has to be modified */
@@ -2441,13 +2445,12 @@ krb5_db_delete_policy(krb5_context kcontext, char *policy)
 void
 krb5_db_free_policy(krb5_context kcontext, osa_policy_ent_t policy)
 {
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status || v->free_policy == NULL)
+    if (policy == NULL)
         return;
-    v->free_policy(kcontext, policy);
+    free(policy->name);
+    free(policy->allowed_keysalts);
+    free_tl_data(policy->tl_data);
+    free(policy);
 }
 
 krb5_error_code

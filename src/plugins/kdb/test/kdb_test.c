@@ -393,48 +393,6 @@ cleanup:
     return ret;
 }
 
-static void
-test_free_principal(krb5_context context, krb5_db_entry *entry)
-{
-    krb5_tl_data *tl, *next;
-    int i, j;
-
-    if (entry == NULL)
-        return;
-    free(entry->e_data);
-    krb5_free_principal(context, entry->princ);
-    for (tl = entry->tl_data; tl != NULL; tl = next) {
-        next = tl->tl_data_next;
-        free(tl->tl_data_contents);
-        free(tl);
-    }
-    for (i = 0; i < entry->n_key_data; i++) {
-        for (j = 0; j < entry->key_data[i].key_data_ver; j++) {
-            if (entry->key_data[i].key_data_length[j]) {
-                zapfree(entry->key_data[i].key_data_contents[j],
-                        entry->key_data[i].key_data_length[j]);
-            }
-            entry->key_data[i].key_data_contents[j] = NULL;
-            entry->key_data[i].key_data_length[j] = 0;
-            entry->key_data[i].key_data_type[j] = 0;
-        }
-    }
-    free(entry->key_data);
-    free(entry);
-}
-
-static void *
-test_alloc(krb5_context context, void *ptr, size_t size)
-{
-    return realloc(ptr, size);
-}
-
-static void
-test_free(krb5_context context, void *ptr)
-{
-    free(ptr);
-}
-
 static krb5_error_code
 test_fetch_master_key(krb5_context context, krb5_principal mname,
                       krb5_keyblock *key_out, krb5_kvno *kvno_out,
@@ -556,7 +514,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     NULL, /* lock */
     NULL, /* unlock */
     test_get_principal,
-    test_free_principal,
     NULL, /* put_principal */
     NULL, /* delete_principal */
     NULL, /* rename_principal */
@@ -566,9 +523,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     NULL, /* put_policy */
     NULL, /* iter_policy */
     NULL, /* delete_policy */
-    NULL, /* free_policy */
-    test_alloc,
-    test_free,
     test_fetch_master_key,
     test_fetch_master_key_list,
     NULL, /* store_master_key_list */

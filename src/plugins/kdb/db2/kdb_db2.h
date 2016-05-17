@@ -55,7 +55,6 @@ krb5_error_code krb5_db2_fini(krb5_context);
 krb5_error_code krb5_db2_get_age(krb5_context, char *, time_t *);
 krb5_error_code krb5_db2_get_principal(krb5_context, krb5_const_principal,
                                        unsigned int, krb5_db_entry **);
-void krb5_db2_free_principal(krb5_context, krb5_db_entry *);
 krb5_error_code krb5_db2_put_principal(krb5_context, krb5_db_entry *,
                                        char **db_args);
 krb5_error_code krb5_db2_iterate(krb5_context, char *,
@@ -93,8 +92,6 @@ krb5_error_code krb5_db2_destroy(krb5_context kcontext, char *conf_section,
                                  char **db_args);
 
 const char *krb5_db2_err2str(krb5_context kcontext, long err_code);
-void *krb5_db2_alloc(krb5_context kcontext, void *ptr, size_t size);
-void krb5_db2_free(krb5_context kcontext, void *ptr);
 
 
 /* policy management functions */
@@ -113,7 +110,6 @@ krb5_error_code krb5_db2_iter_policy(krb5_context kcontext, char *match_entry,
 
 krb5_error_code krb5_db2_delete_policy(krb5_context kcontext, char *policy);
 
-void krb5_db2_free_policy(krb5_context kcontext, osa_policy_ent_t entry);
 
 /* Thread-safety wrapper slapped on top of original implementation.  */
 extern k5_mutex_t *krb5_db2_mutex;

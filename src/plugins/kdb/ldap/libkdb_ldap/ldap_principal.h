@@ -108,8 +108,6 @@ krb5_ldap_delete_principal(krb5_context, krb5_const_principal);
 krb5_error_code
 krb5_ldap_rename_principal(krb5_context context, krb5_const_principal source,
                            krb5_const_principal target);
-void
-krb5_ldap_free_principal(krb5_context, krb5_db_entry *);
 
 krb5_error_code
 krb5_ldap_iterate(krb5_context, char *,

@@ -427,39 +427,6 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
     return 0;
 
 error_out:
-    krb5_dbe_free(context, entry);
+    krb5_db_free_principal(context, entry);
     return retval;
-}
-
-void
-krb5_dbe_free(krb5_context context, krb5_db_entry *entry)
-{
-    krb5_tl_data        * tl_data_next;
-    krb5_tl_data        * tl_data;
-    int i, j;
-
-    if (entry == NULL)
-        return;
-    free(entry->e_data);
-    krb5_free_principal(context, entry->princ);
-    for (tl_data = entry->tl_data; tl_data; tl_data = tl_data_next) {
-        tl_data_next = tl_data->tl_data_next;
-        free(tl_data->tl_data_contents);
-        free(tl_data);
-    }
-    if (entry->key_data) {
-        for (i = 0; i < entry->n_key_data; i++) {
-            for (j = 0; j < entry->key_data[i].key_data_ver; j++) {
-                if (entry->key_data[i].key_data_length[j]) {
-                    zapfree(entry->key_data[i].key_data_contents[j],
-                            entry->key_data[i].key_data_length[j]);
-                }
-                entry->key_data[i].key_data_contents[j] = NULL;
-                entry->key_data[i].key_data_length[j] = 0;
-                entry->key_data[i].key_data_type[j] = 0;
-            }
-        }
-        free(entry->key_data);
-    }
-    free(entry);
 }

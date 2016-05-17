@@ -75,7 +75,7 @@ lookup_lockout_policy(krb5_context context,
             *pw_max_fail = policy->pw_max_fail;
             *pw_failcnt_interval = policy->pw_failcnt_interval;
             *pw_lockout_duration = policy->pw_lockout_duration;
-            krb5_db2_free_policy(context, policy);
+            krb5_db_free_policy(context, policy);
         }
     }
 

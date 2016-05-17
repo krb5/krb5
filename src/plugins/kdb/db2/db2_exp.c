@@ -117,10 +117,6 @@ WRAP_K (krb5_db2_get_principal,
          unsigned int f,
          krb5_db_entry **d),
         (ctx, p, f, d));
-WRAP_VOID (krb5_db2_free_principal,
-           (krb5_context ctx,
-            krb5_db_entry *d),
-           (ctx, d));
 WRAP_K (krb5_db2_put_principal,
         (krb5_context ctx,
          krb5_db_entry *d,
@@ -158,9 +154,6 @@ WRAP_K (krb5_db2_iter_policy,
 WRAP_K (krb5_db2_delete_policy,
         ( krb5_context kcontext, char *policy ),
         (kcontext, policy));
-WRAP_VOID (krb5_db2_free_policy,
-           ( krb5_context kcontext, osa_policy_ent_t entry ),
-           (kcontext, entry));
 
 WRAP_K (krb5_db2_promote_db,
         ( krb5_context kcontext, char *conf_section, char **db_args ),
@@ -215,7 +208,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
     /* lock */                          wrap_krb5_db2_lock,
     /* unlock */                        wrap_krb5_db2_unlock,
     /* get_principal */                 wrap_krb5_db2_get_principal,
-    /* free_principal */                wrap_krb5_db2_free_principal,
     /* put_principal */                 wrap_krb5_db2_put_principal,
     /* delete_principal */              wrap_krb5_db2_delete_principal,
     /* rename_principal */              NULL,
@@ -225,9 +217,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
     /* put_policy */                    wrap_krb5_db2_put_policy,
     /* iter_policy */                   wrap_krb5_db2_iter_policy,
     /* delete_policy */                 wrap_krb5_db2_delete_policy,
-    /* free_policy */                   wrap_krb5_db2_free_policy,
-    /* alloc */                         krb5_db2_alloc,
-    /* free */                          krb5_db2_free,
     /* blah blah blah */ 0,0,0,0,0,
     /* promote_db */                    wrap_krb5_db2_promote_db,
     0, 0, 0, 0,

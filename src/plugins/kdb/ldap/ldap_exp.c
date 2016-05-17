@@ -58,7 +58,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_ldap, kdb_function_table) = {
     /* lock */                              krb5_ldap_lock,
     /* unlock */                            krb5_ldap_unlock,
     /* get_principal */                     krb5_ldap_get_principal,
-    /* free_principal */                    krb5_ldap_free_principal,
     /* put_principal */                     krb5_ldap_put_principal,
     /* delete_principal */                  krb5_ldap_delete_principal,
     /* rename_principal */                  krb5_ldap_rename_principal,
@@ -68,9 +67,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_ldap, kdb_function_table) = {
     /* put_policy */                        krb5_ldap_put_password_policy,
     /* iter_policy */                       krb5_ldap_iterate_password_policy,
     /* delete_policy */                     krb5_ldap_delete_password_policy,
-    /* free_policy */                       krb5_ldap_free_password_policy,
-    /* alloc */                             krb5_ldap_alloc,
-    /* free */                              krb5_ldap_free,
     /* optional functions */
     /* fetch_master_key */                  NULL /* krb5_ldap_fetch_mkey */,
     /* fetch_master_key_list */             NULL,

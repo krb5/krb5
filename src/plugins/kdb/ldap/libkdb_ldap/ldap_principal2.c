@@ -224,7 +224,7 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
 
 cleanup:
     ldap_msgfree(result);
-    krb5_ldap_free_principal(context, entry);
+    krb5_db_free_principal(context, entry);
 
     if (filter)
         free (filter);

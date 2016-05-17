@@ -802,13 +802,6 @@ cleanup:
     return retval;
 }
 
-/* Free an entry returned by krb5_db2_get_principal. */
-void
-krb5_db2_free_principal(krb5_context context, krb5_db_entry *entry)
-{
-    krb5_dbe_free(context, entry);
-}
-
 krb5_error_code
 krb5_db2_put_principal(krb5_context context, krb5_db_entry *entry,
                        char **db_args)
@@ -912,7 +905,7 @@ krb5_db2_delete_principal(krb5_context context, krb5_const_principal searchfor)
     }
 
     retval = krb5_encode_princ_entry(context, &contdata, entry);
-    krb5_dbe_free(context, entry);
+    krb5_db_free_principal(context, entry);
     if (retval)
         goto cleankey;
 
@@ -1074,7 +1067,7 @@ curs_run_cb(iter_curs *curs, ctx_iterate_cb func, krb5_pointer func_arg)
 
     k5_mutex_unlock(krb5_db2_mutex);
     retval = (*func)(func_arg, entry);
-    krb5_dbe_free(ctx, entry);
+    krb5_db_free_principal(ctx, entry);
     k5_mutex_lock(krb5_db2_mutex);
     if (dbc->unlockiter) {
         lockerr = curs_lock(curs);
@@ -1254,18 +1247,6 @@ cleanup:
     free(polname);
     free(plockname);
     return status;
-}
-
-void   *
-krb5_db2_alloc(krb5_context context, void *ptr, size_t size)
-{
-    return realloc(ptr, size);
-}
-
-void
-krb5_db2_free(krb5_context context, void *ptr)
-{
-    free(ptr);
 }
 
 /* policy functions */
