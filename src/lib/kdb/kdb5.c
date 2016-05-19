@@ -298,6 +298,8 @@ kdb_setup_opt_functions(db_library lib)
         lib->vftabl.decrypt_key_data = krb5_dbe_def_decrypt_key_data;
     if (lib->vftabl.encrypt_key_data == NULL)
         lib->vftabl.encrypt_key_data = krb5_dbe_def_encrypt_key_data;
+    if (lib->vftabl.rename_principal == NULL)
+        lib->vftabl.rename_principal = krb5_db_def_rename_principal;
 }
 
 #ifdef STATIC_PLUGINS
@@ -949,6 +951,37 @@ krb5_db_delete_principal(krb5_context kcontext, krb5_principal search_for)
     status = ulog_add_update(kcontext, &upd);
     free(princ_name);
     return status;
+}
+
+krb5_error_code
+krb5_db_rename_principal(krb5_context kcontext, krb5_principal source,
+                         krb5_principal target)
+{
+    kdb_vftabl *v;
+    krb5_error_code status = 0;
+    krb5_db_entry *entry;
+
+    status = get_vftabl(kcontext, &v);
+    if (status)
+        return status;
+
+    /*
+     * If the default rename function isn't used and logging is enabled, iprop
+     * would fail since it doesn't formally support renaming.  In that case
+     * return KRB5_PLUGIN_OP_NOTSUPP.
+     */
+    if (v->rename_principal != krb5_db_def_rename_principal &&
+        logging(kcontext))
+        return KRB5_PLUGIN_OP_NOTSUPP;
+
+    status = krb5_db_get_principal(kcontext, target, KRB5_KDB_FLAG_ALIAS_OK,
+                                   &entry);
+    if (status == 0) {
+        krb5_db_free_principal(kcontext, entry);
+        return KRB5_KDB_INUSE;
+    }
+
+    return v->rename_principal(kcontext, source, target);
 }
 
 /*
@@ -2258,6 +2291,48 @@ krb5_dbe_compute_salt(krb5_context context, const krb5_key_data *key,
     *salt = sdata;
     *salt_out = salt;
     return 0;
+}
+
+krb5_error_code
+krb5_dbe_specialize_salt(krb5_context context, krb5_db_entry *entry)
+{
+    krb5_int16 stype, i;
+    krb5_data *salt = NULL;
+    krb5_error_code ret = 0;
+    uint8_t *data;
+
+    if (context == NULL || entry == NULL)
+        return EINVAL;
+
+    /*
+     * Store salt values explicitly so that they don't depend on the principal
+     * name.
+     */
+    for (i = 0; i < entry->n_key_data; i++) {
+        ret = krb5_dbe_compute_salt(context, &entry->key_data[i], entry->princ,
+                                    &stype, &salt);
+        if (ret)
+            goto cleanup;
+
+        data = krb5_db_alloc(context, NULL, salt->length);
+        if (data == NULL) {
+            ret = ENOMEM;
+            goto cleanup;
+        }
+        memcpy(data, salt->data, salt->length);
+
+        entry->key_data[i].key_data_type[1] = KRB5_KDB_SALTTYPE_SPECIAL;
+        krb5_db_free(context, entry->key_data[i].key_data_contents[1]);
+        entry->key_data[i].key_data_contents[1] = data;
+        entry->key_data[i].key_data_length[1] = salt->length;
+        entry->key_data[i].key_data_ver = 2;
+        krb5_free_data(context, salt);
+        salt = NULL;
+    }
+
+cleanup:
+    krb5_free_data(context, salt);
+    return ret;
 }
 
 /* change password functions */

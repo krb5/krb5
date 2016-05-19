@@ -379,6 +379,9 @@ krb5_error_code krb5_db_put_principal ( krb5_context kcontext,
                                         krb5_db_entry *entry );
 krb5_error_code krb5_db_delete_principal ( krb5_context kcontext,
                                            krb5_principal search_for );
+krb5_error_code
+krb5_db_rename_principal(krb5_context kcontext, krb5_principal source,
+                         krb5_principal target);
 
 /*
  * Iterate over principals in the KDB.  If the callback may write to the DB,
@@ -602,6 +605,13 @@ krb5_dbe_compute_salt(krb5_context context, const krb5_key_data *key,
                       krb5_const_principal princ, krb5_int16 *salttype_out,
                       krb5_data **salt_out);
 
+/*
+ * Modify the key data of entry to explicitly store salt values using the
+ * KRB5_KDB_SALTTYPE_SPECIAL salt type.
+ */
+krb5_error_code
+krb5_dbe_specialize_salt(krb5_context context, krb5_db_entry *entry);
+
 krb5_error_code
 krb5_dbe_cpw( krb5_context        kcontext,
               krb5_keyblock       * master_key,
@@ -759,6 +769,11 @@ krb5_dbe_def_encrypt_key_data( krb5_context             context,
                                krb5_key_data          * key_data);
 
 krb5_error_code
+krb5_db_def_rename_principal(krb5_context kcontext,
+                             krb5_const_principal source,
+                             krb5_const_principal target);
+
+krb5_error_code
 krb5_db_create_policy( krb5_context kcontext,
                        osa_policy_ent_t policy);
 
@@ -834,7 +849,7 @@ krb5_dbe_free_string(krb5_context, char *);
  * This number indicates the date of the last incompatible change to the DAL.
  * The maj_ver field of the module's vtable structure must match this version.
  */
-#define KRB5_KDB_DAL_MAJOR_VERSION 5
+#define KRB5_KDB_DAL_MAJOR_VERSION 6
 
 /*
  * A krb5_context can hold one database object.  Modules should use
@@ -1027,6 +1042,18 @@ typedef struct _kdb_vftabl {
      */
     krb5_error_code (*delete_principal)(krb5_context kcontext,
                                         krb5_const_principal search_for);
+
+    /*
+     * Optional:  Rename a principal.  If the source principal does not exist,
+     * return KRB5_KDB_NOENTRY.  If the target exists, return an error.
+     *
+     * NOTE: If the module chooses to implement a custom function for renaming
+     * a principal instead of using krb5_db_def_rename_principal, then the
+     * rename will fail if iprop logging is enabled.
+     */
+    krb5_error_code (*rename_principal)(krb5_context kcontext,
+                                        krb5_const_principal source,
+                                        krb5_const_principal target);
 
     /*
      * Optional: For each principal entry in the database, invoke func with the

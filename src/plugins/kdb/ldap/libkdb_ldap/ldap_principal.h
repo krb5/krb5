@@ -105,6 +105,9 @@ krb5_ldap_get_principal(krb5_context , krb5_const_principal ,
 krb5_error_code
 krb5_ldap_delete_principal(krb5_context, krb5_const_principal);
 
+krb5_error_code
+krb5_ldap_rename_principal(krb5_context context, krb5_const_principal source,
+                           krb5_const_principal target);
 void
 krb5_ldap_free_principal(krb5_context, krb5_db_entry *);
 
@@ -127,6 +130,10 @@ krb5_ldap_unparse_principal_name(char *);
 
 krb5_error_code
 krb5_ldap_parse_principal_name(char *, char **);
+
+struct berval**
+krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data,
+                         krb5_kvno mkvno);
 
 krb5_error_code
 krb5_decode_histkey(krb5_context, struct berval **, osa_princ_ent_rec *);
