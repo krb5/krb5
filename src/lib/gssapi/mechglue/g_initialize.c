@@ -202,12 +202,55 @@ gss_OID *oid;
 	return (generic_gss_release_oid(minor_status, oid));
 } /* gss_release_oid */
 
+/*
+ * Wrapper around inquire_attrs_for_mech to determine whether a mechanism has
+ * the deprecated attribute.  Must be called without g_mechSetLock since it
+ * will call into the mechglue.
+ */
+static int
+is_deprecated(gss_OID element)
+{
+	OM_uint32 major, minor;
+	gss_OID_set mech_attrs = GSS_C_NO_OID_SET;
+	int deprecated = 0;
+
+	major = gss_inquire_attrs_for_mech(&minor, element, &mech_attrs, NULL);
+	if (major == GSS_S_COMPLETE) {
+		gss_test_oid_set_member(&minor, (gss_OID)GSS_C_MA_DEPRECATED,
+					mech_attrs, &deprecated);
+	}
+
+	if (mech_attrs != GSS_C_NO_OID_SET)
+		gss_release_oid_set(&minor, &mech_attrs);
+
+	return deprecated;
+}
+
+/*
+ * Removes mechs with the deprecated attribute from an OID set.  Must be
+ * called without g_mechSetLock held since it calls into the mechglue.
+ */
+static void
+prune_deprecated(gss_OID_set mech_set)
+{
+	OM_uint32 i, j;
+
+	j = 0;
+	for (i = 0; i < mech_set->count; i++) {
+	    if (!is_deprecated(&mech_set->elements[i]))
+		mech_set->elements[j++] = mech_set->elements[i];
+	    else
+		gssalloc_free(mech_set->elements[i].elements);
+	}
+	mech_set->count = j;
+}
 
 /*
  * this function will return an oid set indicating available mechanisms.
  * The set returned is based on configuration file entries and
  * NOT on the loaded mechanisms.  This function does not check if any
  * of these can actually be loaded.
+ * Deprecated mechanisms will not be returned.
  * This routine needs direct access to the mechanism list.
  * To avoid reading the configuration file each call, we will save a
  * a mech oid set, and only update it once the file has changed.
@@ -245,6 +288,10 @@ gss_OID_set *mechSet_out;
 	k5_mutex_lock(&g_mechSetLock);
 	status = generic_gss_copy_oid_set(minorStatus, &g_mechSet, mechSet_out);
 	k5_mutex_unlock(&g_mechSetLock);
+
+	if (*mechSet_out != GSS_C_NO_OID_SET)
+		prune_deprecated(*mechSet_out);
+
 	return (status);
 } /* gss_indicate_mechs */
 
