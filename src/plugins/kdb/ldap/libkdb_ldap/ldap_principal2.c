@@ -429,7 +429,7 @@ asn1_decode_sequence_of_keys(krb5_data *in, ldap_seqof_key_data *out)
  * Free a NULL-terminated struct berval *array[] and all its contents.
  * Does not set array to NULL after freeing it.
  */
-static void
+void
 free_berdata(struct berval **array)
 {
     int i;

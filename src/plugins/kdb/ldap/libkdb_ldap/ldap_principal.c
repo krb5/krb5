@@ -554,6 +554,7 @@ cleanup:
     free(dn);
     free(suser);
     free(tuser);
+    free_berdata(bersecretkey);
     krb5_db_free_principal(context, entry);
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
