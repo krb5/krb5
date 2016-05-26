@@ -1081,11 +1081,6 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     if (as_key == NULL)
         return ENOENT;
 
-    /* Use FAST armor key as response key. */
-    retval = cb->set_as_key(context, rock, as_key);
-    if (retval != 0)
-        return retval;
-
     /* Attempt to get token selection from the responder. */
     pin = empty_data();
     value = empty_data();
@@ -1112,6 +1107,11 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
 
     /* Encrypt the challenge's nonce and set it in the request. */
     retval = encrypt_nonce(context, as_key, chl, req);
+    if (retval != 0)
+        goto error;
+
+    /* Use FAST armor key as response key. */
+    retval = cb->set_as_key(context, rock, as_key);
     if (retval != 0)
         goto error;
 
