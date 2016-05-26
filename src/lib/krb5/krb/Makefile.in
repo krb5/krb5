@@ -504,7 +504,7 @@ clean::
 	$(OUTPRE)t_ad_fx_armor$(EXEEXT) $(OUTPRE)t_ad_fx_armor.$(OBJEXT) \
 	$(OUTPRE)t_vfy_increds$(EXEEXT) $(OUTPRE)t_vfy_increds.$(OBJEXT) \
 	$(OUTPRE)t_response_items$(EXEEXT) \
-	$(OUTPRE)t_response_items.$(OBJEXT) $(OUTPRE)t_sname_match(EXEEXT) \
+	$(OUTPRE)t_response_items.$(OBJEXT) $(OUTPRE)t_sname_match$(EXEEXT) \
 	$(OUTPRE)t_sname_match.$(OBJEXT)
 
 @libobj_frag@
