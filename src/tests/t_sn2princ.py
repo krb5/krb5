@@ -73,7 +73,6 @@ if offline:
 # and reverse resolving to these names.
 oname = 'ptr-mismatch.kerberos.org'
 fname = 'www.kerberos.org'
-rname = 'kerberos-org.mit.edu'
 
 # Verify forward resolution before testing for it.
 try:
@@ -94,8 +93,10 @@ try:
     names = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
 except socket.gaierror:
     skip_rest('cannot reverse resolve %s' % oname)
-if names[0].lower() != rname:
-    skip_rest('%s reverse resolves to %s, not %s' % (oname, names[0], rname))
+rname = names[0].lower()
+if rname == fname:
+    skip_rest('%s reverse resolves to %s '
+              'which should be different from %s' % (oname, rname, fname))
 
 # Test default canonicalization (forward and reverse lookup).
 test(oname, rname, 'R3')
