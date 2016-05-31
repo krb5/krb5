@@ -24,7 +24,7 @@ If a ticket is **forwardable**, then the KDC can issue a new ticket
 forwardable ticket.  This allows for authentication forwarding without
 requiring a password to be typed in again.  For example, if a user
 with a forwardable TGT logs into a remote system, the KDC could issue
-a new TGT for that user with the netword address of the remote system,
+a new TGT for that user with the network address of the remote system,
 allowing authentication on that host to work as though the user were
 logged in locally.
 
