@@ -497,6 +497,8 @@ test_check_allowed_to_delegate(krb5_context context,
             break;
         }
     }
+    krb5_free_unparsed_name(context, sprinc);
+    krb5_free_unparsed_name(context, tprinc);
     profile_free_list(values);
     return found ? 0 : KRB5KDC_ERR_POLICY;
 }
