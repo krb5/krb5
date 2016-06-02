@@ -489,17 +489,17 @@ test_check_allowed_to_delegate(krb5_context context,
                                   KRB5_PRINCIPAL_UNPARSE_NO_REALM, &tprinc));
     set_names(h, "delegation", sprinc, NULL);
     ret = profile_get_values(h->profile, h->names, &values);
-    if (ret == PROF_NO_RELATION)
-        return KRB5KDC_ERR_POLICY;
-    for (v = values; *v != NULL; v++) {
-        if (strcmp(*v, tprinc) == 0) {
-            found = TRUE;
-            break;
+    if (ret != PROF_NO_RELATION) {
+        for (v = values; *v != NULL; v++) {
+            if (strcmp(*v, tprinc) == 0) {
+                found = TRUE;
+                break;
+            }
         }
+        profile_free_list(values);
     }
     krb5_free_unparsed_name(context, sprinc);
     krb5_free_unparsed_name(context, tprinc);
-    profile_free_list(values);
     return found ? 0 : KRB5KDC_ERR_POLICY;
 }
 
