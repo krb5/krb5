@@ -218,29 +218,23 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                   const char * name, struct serverlist *serverlist,
                   k5_transport transport, int udpport)
 {
-    const char  *realm_srv_names[4];
-    char **hostlist, *host = NULL;
+    const char *realm_srv_names[4];
+    char **hostlist = NULL, *realmstr = NULL, *host = NULL, *hostspec;
     krb5_error_code code;
     int i, default_port;
 
     Tprintf ("looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
              realm->data, name, ntohs(udpport));
 
-    if ((host = malloc(realm->length + 1)) == NULL)
-        return ENOMEM;
-
-    strncpy(host, realm->data, realm->length);
-    host[realm->length] = '\0';
-    hostlist = 0;
+    realmstr = k5memdup0(realm->data, realm->length, &code);
+    if (realmstr == NULL)
+        goto cleanup;
 
     realm_srv_names[0] = KRB5_CONF_REALMS;
-    realm_srv_names[1] = host;
+    realm_srv_names[1] = realmstr;
     realm_srv_names[2] = name;
     realm_srv_names[3] = 0;
-
     code = profile_get_values(context->profile, realm_srv_names, &hostlist);
-    free(host);
-
     if (code) {
         Tprintf ("config file lookup failed: %s\n",
                  error_message(code));
@@ -254,14 +248,13 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
         k5_transport this_transport = transport;
         char *uri_path = NULL;
 
-        host = hostlist[i];
-        Tprintf ("entry %d is '%s'\n", i, host);
+        hostspec = hostlist[i];
+        Tprintf ("entry %d is '%s'\n", i, hostspec);
 
-        parse_uri_if_https(host, &this_transport, &host, &uri_path);
+        parse_uri_if_https(hostspec, &this_transport, &hostspec, &uri_path);
 
         default_port = (this_transport == HTTPS) ? htons(443) : udpport;
-        code = k5_parse_host_string(hostlist[i], default_port, &host,
-                                    &port_num);
+        code = k5_parse_host_string(hostspec, default_port, &host, &port_num);
         if (code == 0 && host == NULL)
             code = EINVAL;
         if (code)
@@ -277,6 +270,7 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     }
 
 cleanup:
+    free(realmstr);
     free(host);
     profile_free_list(hostlist);
     return code;
