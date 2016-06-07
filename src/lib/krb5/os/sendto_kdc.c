@@ -433,7 +433,7 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
 {
     krb5_error_code retval, err;
     struct serverlist servers;
-    int server_used;
+    int server_used = -1;
     k5_transport_strategy strategy;
     krb5_data reply = empty_data(), *hook_message = NULL, *hook_reply = NULL;
 
@@ -532,6 +532,10 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
     /* Set use_master to 1 if we ended up talking to a master when we didn't
      * explicitly request to. */
     if (*use_master == 0) {
+        if (server_used < 0 || server_used >= servers.nservers) {
+            retval = KDC_ERR_BADOPTION;
+            goto cleanup;
+        }
         *use_master = k5_kdc_is_master(context, realm,
                                        &servers.servers[server_used]);
         TRACE_SENDTO_KDC_MASTER(context, *use_master);
