@@ -2,7 +2,7 @@
 from k5test import *
 import re
 
-realm = K5Realm(create_host=False)
+realm = K5Realm(create_host=False, start_kadmind=True)
 
 # Test password quality enforcement.
 realm.run([kadminl, 'addpol', '-minlength', '6', '-minclasses', '2', 'pwpol'])
@@ -39,6 +39,9 @@ if 'Policy: newpol [does not exist]\n' not in out:
 realm.run([kadminl, 'modprinc', '-policy', 'newpol', 'pwuser'])
 # pwuser should allow reuse of the current password since newpol doesn't exist.
 realm.run([kadminl, 'cpw', '-pw', '3rdpassword', 'pwuser'])
+# Regression test for #8427 (min_life check with nonexistent policy).
+realm.run([kadmin, '-p', 'pwuser', '-w', '3rdpassword', 'cpw', '-pw',
+           '3rdpassword', 'pwuser'])
 
 # Create newpol and verify that it is enforced.
 realm.run([kadminl, 'addpol', '-minlength', '3', 'newpol'])
