@@ -177,10 +177,12 @@ check_min_life(void *server_handle, krb5_principal principal,
     if(ret)
         return ret;
     if(princ.aux_attributes & KADM5_POLICY) {
+        /* Look up the policy.  If it doesn't exist, treat this principal as if
+         * it had no policy. */
         if((ret=kadm5_get_policy(handle->lhandle,
                                  princ.policy, &pol)) != KADM5_OK) {
             (void) kadm5_free_principal_ent(handle->lhandle, &princ);
-            return ret;
+            return (ret == KADM5_UNK_POLICY) ? 0 : ret;
         }
         if((now - princ.last_pwd_change) < pol.pw_min_life &&
            !(princ.attributes & KRB5_KDB_REQUIRES_PWCHANGE)) {
