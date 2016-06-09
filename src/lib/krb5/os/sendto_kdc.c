@@ -431,7 +431,7 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
                 const krb5_data *realm, krb5_data *reply_out, int *use_master,
                 int no_udp)
 {
-    krb5_error_code retval, err;
+    krb5_error_code retval, oldret, err;
     struct serverlist servers;
     int server_used;
     k5_transport_strategy strategy;
@@ -514,9 +514,16 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
     }
 
     if (context->kdc_recv_hook != NULL) {
+        oldret = retval;
         retval = context->kdc_recv_hook(context, context->kdc_recv_hook_data,
                                         retval, realm, message, &reply,
                                         &hook_reply);
+        if (oldret && !retval) {
+            /* The hook must set a reply if it overrides an error from
+             * k5_sendto().  Treat this reply as coming from the master KDC. */
+            assert(hook_reply != NULL);
+            *use_master = 1;
+        }
     }
     if (retval)
         goto cleanup;
