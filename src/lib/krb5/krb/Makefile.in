@@ -17,7 +17,9 @@ STLIBOBJS= \
 	addr_srch.o	\
 	allow_weak.o	\
 	appdefault.o	\
+	ai_authdata.o   \
 	auth_con.o	\
+	cammac_util.o	\
 	authdata.o	\
 	authdata_exp.o	\
 	authdata_enc.o	\
@@ -127,7 +129,9 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)addr_srch.$(OBJEXT)	\
 	$(OUTPRE)allow_weak.$(OBJEXT)	\
 	$(OUTPRE)appdefault.$(OBJEXT)	\
+	$(OUTPRE)ai_authdata.$(OBJEXT)  \
 	$(OUTPRE)auth_con.$(OBJEXT)	\
+	$(OUTPRE)cammac_util.$(OBJEXT)	\
 	$(OUTPRE)authdata.$(OBJEXT)	\
 	$(OUTPRE)authdata_exp.$(OBJEXT)	\
 	$(OUTPRE)authdata_enc.$(OBJEXT)	\
@@ -237,6 +241,8 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/addr_srch.c	\
 	$(srcdir)/appdefault.c	\
 	$(srcdir)/auth_con.c	\
+	$(srcdir)/cammac_util.c	\
+	$(srcdir)/ai_authdata.c \
 	$(srcdir)/authdata.c	\
 	$(srcdir)/authdata_exp.c	\
 	$(srcdir)/authdata_enc.c	\
@@ -382,7 +388,7 @@ T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o set_realm.o str_conv.o
 
 T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
 	ser_ctx.o ser_key.o ser_princ.o serialize.o authdata.o pac.o \
-	pac_sign.o authdata_exp.o s4u_authdata.o copy_data.o etype_list.o
+	pac_sign.o ai_authdata.o authdata_exp.o s4u_authdata.o copy_data.o etype_list.o
 
 T_DELTAT_OBJS= t_deltat.o deltat.o
 

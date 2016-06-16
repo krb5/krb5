@@ -17,13 +17,15 @@ SRCS=	$(srcdir)/ccinit.c $(srcdir)/ccrefresh.c $(srcdir)/common.c \
 	$(srcdir)/t_inq_mechs_name.c $(srcdir)/t_iov.c \
 	$(srcdir)/t_namingexts.c $(srcdir)/t_oid.c $(srcdir)/t_pcontok.c \
 	$(srcdir)/t_prf.c $(srcdir)/t_s4u.c $(srcdir)/t_s4u2proxy_krb5.c \
-	$(srcdir)/t_saslname.c $(srcdir)/t_spnego.c
+	$(srcdir)/t_saslname.c $(srcdir)/t_spnego.c \
+	$(srcdir)/t_accname_authind.c
 
 OBJS=	ccinit.o ccrefresh.o common.o t_accname.o t_ccselect.o t_ciflags.o \
 	t_credstore.o t_enctypes.o t_err.o t_export_cred.o t_export_name.o \
 	t_gssexts.o t_imp_cred.o t_imp_name.o t_invalid.o t_inq_cred.o \
 	t_inq_ctx.o t_inq_mechs_name.o t_iov.o t_namingexts.o t_oid.o \
-	t_pcontok.o t_prf.o t_s4u.o t_s4u2proxy_krb5.o t_saslname.o t_spnego.o
+	t_pcontok.o t_prf.o t_s4u.o t_s4u2proxy_krb5.o t_saslname.o t_spnego.o \
+	t_accname_authind.o
 
 COMMON_DEPS= common.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 COMMON_LIBS= common.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
@@ -31,7 +33,8 @@ COMMON_LIBS= common.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 all:: ccinit ccrefresh t_accname t_ccselect t_ciflags t_credstore t_enctypes \
 	t_err t_export_cred t_export_name t_gssexts t_imp_cred t_imp_name \
 	t_invalid t_inq_cred t_inq_ctx t_inq_mechs_name t_iov t_namingexts \
-	t_oid t_pcontok t_prf t_s4u t_s4u2proxy_krb5 t_saslname t_spnego
+	t_oid t_pcontok t_prf t_s4u t_s4u2proxy_krb5 t_saslname t_spnego \
+	t_accname_authind
 
 check-unix:: t_oid
 	$(RUN_TEST) ./t_invalid
@@ -48,6 +51,7 @@ check-pytests:: ccinit ccrefresh t_accname t_ccselect t_ciflags t_credstore \
 	$(RUNPYTEST) $(srcdir)/t_enctypes.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_export_cred.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_s4u.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_authind.py $(PYTESTFLAGS)
 
 ccinit: ccinit.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o ccinit ccinit.o $(KRB5_BASE_LIBS)
@@ -55,6 +59,8 @@ ccrefresh: ccrefresh.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o ccrefresh ccrefresh.o $(KRB5_BASE_LIBS)
 t_accname: t_accname.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_accname.o $(COMMON_LIBS)
+t_accname_authind: t_accname_authind.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_accname_authind.o $(COMMON_LIBS)
 t_ccselect: t_ccselect.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_ccselect.o $(COMMON_LIBS)
 t_ciflags: t_ciflags.o $(COMMON_DEPS)
@@ -107,4 +113,4 @@ clean::
 	$(RM) t_enctypes t_err t_export_cred t_export_name t_gssexts t_imp_cred
 	$(RM) t_imp_name t_invalid t_inq_cred t_inq_ctx t_inq_mechs_name t_iov
 	$(RM) t_namingexts t_oid t_pcontok t_prf t_s4u t_s4u2proxy_krb5
-	$(RM) t_saslname t_spnego
+	$(RM) t_saslname t_spnego t_accname_authind
