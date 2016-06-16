@@ -5814,9 +5814,9 @@ pkcs7_dataDecode(krb5_context context,
                  pkinit_identity_crypto_context id_cryptoctx,
                  PKCS7 *p7)
 {
-    unsigned int jj = 0, tmp_len = 0;
+    unsigned int eklen=0, tkeylen=0;
     BIO *out=NULL,*etmp=NULL,*bio=NULL;
-    unsigned char *tmp=NULL;
+    unsigned char *ek=NULL, *tkey=NULL;
     ASN1_OCTET_STRING *data_body=NULL;
     const EVP_CIPHER *evp_cipher=NULL;
     EVP_CIPHER_CTX *evp_ctx=NULL;
@@ -5851,15 +5851,10 @@ pkcs7_dataDecode(krb5_context context,
     }
 
     ri = sk_PKCS7_RECIP_INFO_value(rsk, 0);
-    jj = pkinit_decode_data(context, id_cryptoctx,
-                            M_ASN1_STRING_data(ri->enc_key),
-                            (unsigned int)M_ASN1_STRING_length(ri->enc_key),
-                            &tmp, &tmp_len);
-    if (jj || tmp_len <= 0) {
-        PKCS7err(PKCS7_F_PKCS7_DATADECODE, ERR_R_EVP_LIB);
-        goto cleanup;
-    }
-    jj = tmp_len;
+    (void)pkinit_decode_data(context, id_cryptoctx,
+                             M_ASN1_STRING_data(ri->enc_key),
+                             (unsigned int)M_ASN1_STRING_length(ri->enc_key),
+                             &ek, &eklen);
 
     evp_ctx=NULL;
     BIO_get_cipher_ctx(etmp,&evp_ctx);
@@ -5868,21 +5863,33 @@ pkcs7_dataDecode(krb5_context context,
     if (EVP_CIPHER_asn1_to_param(evp_ctx,enc_alg->parameter) < 0)
         goto cleanup;
 
-    if (jj != (unsigned) EVP_CIPHER_CTX_key_length(evp_ctx)) {
+    /* Generate a random symmetric key to avoid exposing timing data if RSA
+     * decryption fails the padding check. */
+    tkeylen = EVP_CIPHER_CTX_key_length(evp_ctx);
+    tkey = OPENSSL_malloc(tkeylen);
+    if (tkey == NULL)
+        goto cleanup;
+    if (EVP_CIPHER_CTX_rand_key(evp_ctx, tkey) <= 0)
+        goto cleanup;
+    if (ek == NULL) {
+        ek = tkey;
+        eklen = tkeylen;
+        tkey = NULL;
+    }
+
+    if (eklen != (unsigned)EVP_CIPHER_CTX_key_length(evp_ctx)) {
         /* Some S/MIME clients don't use the same key
          * and effective key length. The key length is
          * determined by the size of the decrypted RSA key.
          */
-        if(!EVP_CIPHER_CTX_set_key_length(evp_ctx, (int)jj)) {
-            PKCS7err(PKCS7_F_PKCS7_DATADECODE,
-                     PKCS7_R_DECRYPTED_KEY_IS_WRONG_LENGTH);
-            goto cleanup;
+        if (!EVP_CIPHER_CTX_set_key_length(evp_ctx, (int)eklen)) {
+            ek = tkey;
+            eklen = tkeylen;
+            tkey = NULL;
         }
     }
-    if (EVP_CipherInit_ex(evp_ctx,NULL,NULL,tmp,NULL,0) <= 0)
+    if (EVP_CipherInit_ex(evp_ctx,NULL,NULL,ek,NULL,0) <= 0)
         goto cleanup;
-
-    OPENSSL_cleanse(tmp,jj);
 
     if (out == NULL)
         out=etmp;
@@ -5906,10 +5913,14 @@ pkcs7_dataDecode(krb5_context context,
         if (bio != NULL) BIO_free_all(bio);
         out=NULL;
     }
-
-    if (tmp != NULL)
-        free(tmp);
-
+    if (ek != NULL) {
+        OPENSSL_cleanse(ek, eklen);
+        OPENSSL_free(ek);
+    }
+    if (tkey != NULL) {
+        OPENSSL_cleanse(tkey, tkeylen);
+        OPENSSL_free(tkey);
+    }
     return(out);
 }
 
