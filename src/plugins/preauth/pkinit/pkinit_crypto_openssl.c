@@ -5814,7 +5814,6 @@ pkcs7_dataDecode(krb5_context context,
                  pkinit_identity_crypto_context id_cryptoctx,
                  PKCS7 *p7)
 {
-    int i = 0;
     unsigned int jj = 0, tmp_len = 0;
     BIO *out=NULL,*etmp=NULL,*bio=NULL;
     unsigned char *tmp=NULL;
@@ -5824,8 +5823,6 @@ pkcs7_dataDecode(krb5_context context,
     X509_ALGOR *enc_alg=NULL;
     STACK_OF(PKCS7_RECIP_INFO) *rsk=NULL;
     PKCS7_RECIP_INFO *ri=NULL;
-    X509 *cert = sk_X509_value(id_cryptoctx->my_certs,
-                               id_cryptoctx->cert_index);
 
     p7->state=PKCS7_S_HEADER;
 
@@ -5846,71 +5843,23 @@ pkcs7_dataDecode(krb5_context context,
     /* It was encrypted, we need to decrypt the secret key
      * with the private key */
 
-    /* Find the recipientInfo which matches the passed certificate
-     * (if any)
-     */
-
-    if (cert) {
-        for (i=0; i<sk_PKCS7_RECIP_INFO_num(rsk); i++) {
-            int tmp_ret = 0;
-            ri=sk_PKCS7_RECIP_INFO_value(rsk,i);
-            tmp_ret = X509_NAME_cmp(ri->issuer_and_serial->issuer,
-                                    cert->cert_info->issuer);
-            if (!tmp_ret) {
-                tmp_ret = M_ASN1_INTEGER_cmp(cert->cert_info->serialNumber,
-                                             ri->issuer_and_serial->serial);
-                if (!tmp_ret)
-                    break;
-            }
-            ri=NULL;
-        }
-        if (ri == NULL) {
-            PKCS7err(PKCS7_F_PKCS7_DATADECODE,
-                     PKCS7_R_NO_RECIPIENT_MATCHES_CERTIFICATE);
-            goto cleanup;
-        }
-
+    /* RFC 4556 section 3.2.3.2 requires that there be exactly one
+     * recipientInfo. */
+    if (sk_PKCS7_RECIP_INFO_num(rsk) != 1) {
+        pkiDebug("invalid number of EnvelopedData RecipientInfos\n");
+        goto cleanup;
     }
 
-    /* If we haven't got a certificate try each ri in turn */
-
-    if (cert == NULL) {
-        for (i=0; i<sk_PKCS7_RECIP_INFO_num(rsk); i++) {
-            ri=sk_PKCS7_RECIP_INFO_value(rsk,i);
-            jj = pkinit_decode_data(context, id_cryptoctx,
-                                    M_ASN1_STRING_data(ri->enc_key),
-                                    (unsigned int) M_ASN1_STRING_length(ri->enc_key),
-                                    &tmp, &tmp_len);
-            if (jj) {
-                PKCS7err(PKCS7_F_PKCS7_DATADECODE, ERR_R_EVP_LIB);
-                goto cleanup;
-            }
-
-            if (!jj && tmp_len > 0) {
-                jj = tmp_len;
-                break;
-            }
-
-            ERR_clear_error();
-            ri = NULL;
-        }
-
-        if (ri == NULL) {
-            PKCS7err(PKCS7_F_PKCS7_DATADECODE, PKCS7_R_NO_RECIPIENT_MATCHES_KEY);
-            goto cleanup;
-        }
+    ri = sk_PKCS7_RECIP_INFO_value(rsk, 0);
+    jj = pkinit_decode_data(context, id_cryptoctx,
+                            M_ASN1_STRING_data(ri->enc_key),
+                            (unsigned int)M_ASN1_STRING_length(ri->enc_key),
+                            &tmp, &tmp_len);
+    if (jj || tmp_len <= 0) {
+        PKCS7err(PKCS7_F_PKCS7_DATADECODE, ERR_R_EVP_LIB);
+        goto cleanup;
     }
-    else {
-        jj = pkinit_decode_data(context, id_cryptoctx,
-                                M_ASN1_STRING_data(ri->enc_key),
-                                (unsigned int) M_ASN1_STRING_length(ri->enc_key),
-                                &tmp, &tmp_len);
-        if (jj || tmp_len <= 0) {
-            PKCS7err(PKCS7_F_PKCS7_DATADECODE, ERR_R_EVP_LIB);
-            goto cleanup;
-        }
-        jj = tmp_len;
-    }
+    jj = tmp_len;
 
     evp_ctx=NULL;
     BIO_get_cipher_ctx(etmp,&evp_ctx);
