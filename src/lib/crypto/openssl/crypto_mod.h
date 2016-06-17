@@ -33,8 +33,16 @@
 #ifndef CRYPTO_MOD_H
 #define CRYPTO_MOD_H
 
+#include <openssl/crypto.h>
 #include <openssl/aes.h>
 #include <openssl/sha.h>
+
+/* 1.1 standardizes constructor and destructor names, renaming
+ * EVP_MD_CTX_create and EVP_MD_CTX_destroy. */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define EVP_MD_CTX_new EVP_MD_CTX_create
+#define EVP_MD_CTX_free EVP_MD_CTX_destroy
+#endif
 
 #define aes_ctx AES_KEY
 #define krb5int_aes_enc_key(k, len, ctx) AES_set_encrypt_key(k, 8*(len), ctx)

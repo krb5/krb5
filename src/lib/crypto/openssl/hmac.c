@@ -55,6 +55,33 @@
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+
+/* OpenSSL 1.1 makes HMAC_CTX opaque, while 1.0 does not have pointer
+ * constructors or destructors. */
+
+#define HMAC_CTX_new compat_hmac_ctx_new
+static HMAC_CTX *
+compat_hmac_ctx_new()
+{
+    HMAC_CTX *ctx;
+
+    ctx = calloc(1, sizeof(*ctx));
+    if (ctx != NULL)
+        HMAC_CTX_init(ctx);
+    return ctx;
+}
+
+#define HMAC_CTX_free compat_hmac_ctx_free
+static void
+compat_hmac_ctx_free(HMAC_CTX *ctx)
+{
+    HMAC_CTX_cleanup(ctx);
+    free(ctx);
+}
+
+#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
+
 /*
  * the HMAC transform looks like:
  *
@@ -88,7 +115,7 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
 {
     unsigned int i = 0, md_len = 0;
     unsigned char md[EVP_MAX_MD_SIZE];
-    HMAC_CTX c;
+    HMAC_CTX *ctx;
     size_t hashsize, blocksize;
 
     hashsize = hash->hashsize;
@@ -102,20 +129,23 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
     if (!map_digest(hash))
         return(KRB5_CRYPTO_INTERNAL); // unsupported alg
 
-    HMAC_CTX_init(&c);
-    HMAC_Init(&c, keyblock->contents, keyblock->length, map_digest(hash));
+    ctx = HMAC_CTX_new();
+    if (ctx == NULL)
+        return ENOMEM;
+
+    HMAC_Init(ctx, keyblock->contents, keyblock->length, map_digest(hash));
     for (i = 0; i < num_data; i++) {
         const krb5_crypto_iov *iov = &data[i];
 
         if (SIGN_IOV(iov))
-            HMAC_Update(&c, (unsigned char*) iov->data.data, iov->data.length);
+            HMAC_Update(ctx, (uint8_t *)iov->data.data, iov->data.length);
     }
-    HMAC_Final(&c,(unsigned char *)md, &md_len);
+    HMAC_Final(ctx, md, &md_len);
     if ( md_len <= output->length) {
         output->length = md_len;
         memcpy(output->data, md, output->length);
     }
-    HMAC_CTX_cleanup(&c);
+    HMAC_CTX_free(ctx);
     return 0;
 
 

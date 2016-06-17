@@ -89,22 +89,27 @@ cbc_enc(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 {
     int             ret, olen = BLOCK_SIZE;
     unsigned char   iblock[BLOCK_SIZE], oblock[BLOCK_SIZE];
-    EVP_CIPHER_CTX  ciph_ctx;
+    EVP_CIPHER_CTX  *ctx;
     struct iov_cursor cursor;
 
-    EVP_CIPHER_CTX_init(&ciph_ctx);
-    ret = EVP_EncryptInit_ex(&ciph_ctx, map_mode(key->keyblock.length),
+    ctx = EVP_CIPHER_CTX_new();
+    if (ctx == NULL)
+        return ENOMEM;
+
+    ret = EVP_EncryptInit_ex(ctx, map_mode(key->keyblock.length),
                              NULL, key->keyblock.contents, (ivec) ? (unsigned char*)ivec->data : NULL);
-    if (ret == 0)
+    if (ret == 0) {
+        EVP_CIPHER_CTX_free(ctx);
         return KRB5_CRYPTO_INTERNAL;
+    }
 
     k5_iov_cursor_init(&cursor, data, num_data, BLOCK_SIZE, FALSE);
     k5_iov_cursor_get(&cursor, iblock);
-    EVP_CIPHER_CTX_set_padding(&ciph_ctx,0);
-    ret = EVP_EncryptUpdate(&ciph_ctx, oblock, &olen, iblock, BLOCK_SIZE);
+    EVP_CIPHER_CTX_set_padding(ctx,0);
+    ret = EVP_EncryptUpdate(ctx, oblock, &olen, iblock, BLOCK_SIZE);
     if (ret == 1)
         k5_iov_cursor_put(&cursor, oblock);
-    EVP_CIPHER_CTX_cleanup(&ciph_ctx);
+    EVP_CIPHER_CTX_free(ctx);
 
     zap(iblock, BLOCK_SIZE);
     zap(oblock, BLOCK_SIZE);
@@ -118,22 +123,27 @@ cbc_decr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 {
     int              ret = 0, olen = BLOCK_SIZE;
     unsigned char    iblock[BLOCK_SIZE], oblock[BLOCK_SIZE];
-    EVP_CIPHER_CTX   ciph_ctx;
+    EVP_CIPHER_CTX   *ctx;
     struct iov_cursor cursor;
 
-    EVP_CIPHER_CTX_init(&ciph_ctx);
-    ret = EVP_DecryptInit_ex(&ciph_ctx, map_mode(key->keyblock.length),
+    ctx = EVP_CIPHER_CTX_new();
+    if (ctx == NULL)
+        return ENOMEM;
+
+    ret = EVP_DecryptInit_ex(ctx, map_mode(key->keyblock.length),
                              NULL, key->keyblock.contents, (ivec) ? (unsigned char*)ivec->data : NULL);
-    if (ret == 0)
+    if (ret == 0) {
+        EVP_CIPHER_CTX_free(ctx);
         return KRB5_CRYPTO_INTERNAL;
+    }
 
     k5_iov_cursor_init(&cursor, data, num_data, BLOCK_SIZE, FALSE);
     k5_iov_cursor_get(&cursor, iblock);
-    EVP_CIPHER_CTX_set_padding(&ciph_ctx,0);
-    ret = EVP_DecryptUpdate(&ciph_ctx, oblock, &olen, iblock, BLOCK_SIZE);
+    EVP_CIPHER_CTX_set_padding(ctx,0);
+    ret = EVP_DecryptUpdate(ctx, oblock, &olen, iblock, BLOCK_SIZE);
     if (ret == 1)
         k5_iov_cursor_put(&cursor, oblock);
-    EVP_CIPHER_CTX_cleanup(&ciph_ctx);
+    EVP_CIPHER_CTX_free(ctx);
 
     zap(iblock, BLOCK_SIZE);
     zap(oblock, BLOCK_SIZE);
