@@ -391,7 +391,7 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 	}
 
 	DPRINT("%s: exec `kprop -r %s -f %s %s' ...\n",
-	       handle->params.realm, whoami, dump_file, clhost);
+	       whoami, handle->params.realm, dump_file, clhost);
 	/* XXX Yuck!  */
 	if (getenv("KPROP_PORT")) {
 	    pret = execl(kprop, "kprop", "-r", handle->params.realm, "-f",
