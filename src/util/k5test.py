@@ -423,7 +423,7 @@ def password(name):
 # Exit handler which ensures processes are cleaned up and, on failure,
 # prints messages to help developers debug the problem.
 def _onexit():
-    global _daemons, _success, verbose
+    global _daemons, _success, srctop, verbose
     global _debug, _stop_before, _stop_after, _shell_before, _shell_after
     if _daemons is None:
         # In Python 2.5, if we exit as a side-effect of importing
@@ -442,7 +442,13 @@ def _onexit():
     if not _success:
         print
         if not verbose:
-            print 'See testlog for details, or re-run with -v flag.'
+            testlogfile = os.path.join(os.getcwd(), 'testlog')
+            utildir = os.path.join(srctop, 'util')
+            print 'For details, see: %s' % testlogfile
+            print 'Or re-run this test script with the -v flag:'
+            print '    cd %s' % os.getcwd()
+            print '    PYTHONPATH=%s %s %s -v' % \
+                (utildir, sys.executable, sys.argv[0])
             print
         print 'Use --debug=NUM to run a command under a debugger.  Use'
         print '--stop-after=NUM to stop after a daemon is started in order to'
