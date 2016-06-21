@@ -240,7 +240,7 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                  error_message(code));
         if (code == PROF_NO_SECTION || code == PROF_NO_RELATION)
             code = 0;
-        return code;
+        goto cleanup;
     }
 
     for (i=0; hostlist[i]; i++) {
