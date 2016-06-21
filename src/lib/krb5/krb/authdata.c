@@ -561,13 +561,13 @@ extract_cammacs(krb5_context kcontext, krb5_authdata **cammacs,
 
         /* Add the verified elements to list and free the container array. */
         for (n_elements = 0; elements[n_elements] != NULL; n_elements++);
-        new_list = realloc(list, (count + n_elements + 1) * sizeof(list));
+        new_list = realloc(list, (count + n_elements + 1) * sizeof(*list));
         if (new_list == NULL) {
             ret = ENOMEM;
             goto cleanup;
         }
         list = new_list;
-        memcpy(list + count, elements, n_elements * sizeof(list));
+        memcpy(list + count, elements, n_elements * sizeof(*list));
         count += n_elements;
         list[count] = NULL;
         free(elements);
