@@ -37,7 +37,6 @@
 
 struct authind_context {
     krb5_data **indicators;
-    int count;
 };
 
 static krb5_error_code
@@ -67,7 +66,6 @@ authind_request_init(krb5_context kcontext, krb5_authdata_context context,
     if (aictx == NULL)
         return ret;
     aictx->indicators = NULL;
-    aictx->count = 0;
     *request_context = aictx;
     return ret;
 }
@@ -81,7 +79,7 @@ authind_import_authdata(krb5_context kcontext, krb5_authdata_context context,
     struct authind_context *aictx = request_context;
     krb5_error_code ret = 0;
     krb5_data **indps = NULL;
-    int count, i;
+    int i;
 
     for (i = 0; authdata != NULL && authdata[i] != NULL; i++) {
         ret = k5_authind_decode(authdata[i], &indps);
@@ -89,10 +87,8 @@ authind_import_authdata(krb5_context kcontext, krb5_authdata_context context,
             goto cleanup;
     }
 
-    for (count = 0; indps != NULL && indps[count] != NULL; count++);
-    if (count != 0) {
+    if (indps != NULL && *indps != NULL) {
         aictx->indicators = indps;
-        aictx->count = count;
         indps = NULL;
     }
 
@@ -126,13 +122,13 @@ authind_get_attribute_types(krb5_context kcontext,
                             void *plugin_context, void *request_context,
                             krb5_data **out_attrs)
 {
-    struct authind_context *aictx = (struct authind_context *)request_context;
+    struct authind_context *aictx = request_context;
     krb5_error_code ret;
     krb5_data *attrs;
 
     *out_attrs = NULL;
 
-    if (aictx->count == 0)
+    if (aictx->indicators == NULL || *aictx->indicators == NULL)
         return ENOENT;
 
     attrs = k5calloc(2, sizeof(*attrs), &ret);
@@ -161,35 +157,31 @@ authind_get_attribute(krb5_context kcontext, krb5_authdata_context context,
                       krb5_boolean *complete, krb5_data *value,
                       krb5_data *display_value, int *more)
 {
-    struct authind_context *aictx = (struct authind_context *)request_context;
+    struct authind_context *aictx = request_context;
     krb5_error_code ret;
-    krb5_data *value_out;
-    int left;
+    int ind;
 
     if (!data_eq(*attribute, authind_attr))
         return ENOENT;
 
-    /* The caller should set more to -1 before the first call.  Successive
-     * calls return the number of indicators left, ending at 0. */
-    left = (*more < 0) ? aictx->count : *more;
-    if (left <= 0)
+    /* *more will be -1 on the first call, or the next index on subsequent
+     * calls. */
+    ind = (*more < 0) ? 0 : *more;
+    if (aictx->indicators == NULL || aictx->indicators[ind] == NULL)
         return ENOENT;
-    else if (left > aictx->count)
-        return EINVAL;
 
-    ret = krb5_copy_data(kcontext, aictx->indicators[aictx->count - left],
-                         &value_out);
+    ret = krb5int_copy_data_contents(kcontext, aictx->indicators[ind], value);
     if (ret)
         return ret;
 
-    *more = left - 1;
-    *value = *value_out;
+    /* Set *more to the next index, or to 0 if there are no more. */
+    *more = (aictx->indicators[ind + 1] == NULL) ? 0 : ind + 1;
+
     /* Indicators are delivered in a CAMMAC verified outside of this module,
      * so these are authenticated values. */
     *authenticated = TRUE;
     *complete = TRUE;
 
-    free(value_out);
     return ret;
 }
 
@@ -210,14 +202,14 @@ static krb5_error_code
 authind_size(krb5_context kcontext, krb5_authdata_context context,
              void *plugin_context, void *request_context, size_t *sizep)
 {
-    struct authind_context *aictx = (struct authind_context *)request_context;
+    struct authind_context *aictx = request_context;
     int i;
 
     /* Add the indicator count. */
     *sizep += sizeof(int32_t);
 
     /* Add each indicator's length and value. */
-    for (i = 0; i < aictx->count; i++)
+    for (i = 0; aictx->indicators != NULL && aictx->indicators[i] != NULL; i++)
         *sizep += sizeof(int32_t) + aictx->indicators[i]->length;
 
     return 0;
@@ -228,18 +220,26 @@ authind_externalize(krb5_context kcontext, krb5_authdata_context context,
                     void *plugin_context, void *request_context,
                     uint8_t **buffer, size_t *lenremain)
 {
-    struct authind_context *aictx = (struct authind_context *)request_context;
+    struct authind_context *aictx = request_context;
     krb5_error_code ret = 0;
     uint8_t *bp = *buffer;
     size_t remain = *lenremain;
-    int i;
+    int i, count;
+
+    if (aictx->indicators == NULL)
+        return krb5_ser_pack_int32(0, buffer, lenremain);
 
     /* Serialize the indicator count. */
-    krb5_ser_pack_int32(aictx->count, &bp, &remain);
+    for (count = 0; aictx->indicators[count] != NULL; count++);
+    ret = krb5_ser_pack_int32(count, &bp, &remain);
+    if (ret)
+        return ret;
 
-    for (i = 0; i < aictx->count; i++) {
+    for (i = 0; aictx->indicators[i] != NULL; i++) {
         /* Serialize the length and indicator value. */
-        krb5_ser_pack_int32(aictx->indicators[i]->length, &bp, &remain);
+        ret = krb5_ser_pack_int32(aictx->indicators[i]->length, &bp, &remain);
+        if (ret)
+            return ret;
         ret = krb5_ser_pack_bytes((uint8_t *)aictx->indicators[i]->data,
                                   aictx->indicators[i]->length, &bp, &remain);
         if (ret)
@@ -257,7 +257,7 @@ authind_internalize(krb5_context kcontext, krb5_authdata_context context,
                     void *plugin_context, void *request_context,
                     uint8_t **buffer, size_t *lenremain)
 {
-    struct authind_context *aictx = (struct authind_context *)request_context;
+    struct authind_context *aictx = request_context;
     krb5_error_code ret;
     int32_t count, len, i;
     uint8_t *bp = *buffer;
@@ -269,19 +269,21 @@ authind_internalize(krb5_context kcontext, krb5_authdata_context context,
     if (ret)
         return ret;
 
-    if ((size_t)count > remain)
+    if (count < 0 || (size_t)count > remain)
         return ERANGE;
 
-    inds = k5calloc(count, sizeof(*inds), &ret);
-    if (inds == NULL)
-        return errno;
+    if (count > 0) {
+        inds = k5calloc(count + 1, sizeof(*inds), &ret);
+        if (inds == NULL)
+            return errno;
+    }
 
     for (i = 0; i < count; i++) {
         /* Get the length. */
         ret = krb5_ser_unpack_int32(&len, &bp, &remain);
         if (ret)
             goto cleanup;
-        if ((size_t)len > remain) {
+        if (len < 0 || (size_t)len > remain) {
             ret = ERANGE;
             goto cleanup;
         }
@@ -300,7 +302,6 @@ authind_internalize(krb5_context kcontext, krb5_authdata_context context,
     }
 
     k5_free_data_ptr_list(aictx->indicators);
-    aictx->count = count;
     aictx->indicators = inds;
     inds = NULL;
 
