@@ -315,7 +315,7 @@ on_io_read(krad_remote *rr)
     request *tmp, *r;
     int i;
 
-    pktlen = sizeof(rr->buffer_);
+    pktlen = sizeof(rr->buffer_) - rr->buffer.length;
     if (rr->info->ai_socktype == SOCK_STREAM) {
         pktlen = krad_packet_bytes_needed(&rr->buffer);
         if (pktlen < 0) {
@@ -328,7 +328,7 @@ on_io_read(krad_remote *rr)
 
     /* Read the packet. */
     i = recv(verto_get_fd(rr->io), rr->buffer.data + rr->buffer.length,
-             pktlen - rr->buffer.length, 0);
+             pktlen, 0);
     if (i < 0) {
         /* Should we try again? */
         if (errno == EWOULDBLOCK || errno == EAGAIN || errno == EINTR)
