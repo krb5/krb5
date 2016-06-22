@@ -561,13 +561,13 @@ extract_cammacs(krb5_context kcontext, krb5_authdata **cammacs,
 
         /* Add the verified elements to list and free the container array. */
         for (n_elements = 0; elements[n_elements] != NULL; n_elements++);
-        new_list = realloc(list, (count + n_elements + 1) * sizeof(list));
+        new_list = realloc(list, (count + n_elements + 1) * sizeof(*list));
         if (new_list == NULL) {
             ret = ENOMEM;
             goto cleanup;
         }
         list = new_list;
-        memcpy(list + count, elements, n_elements * sizeof(list));
+        memcpy(list + count, elements, n_elements * sizeof(*list));
         count += n_elements;
         list[count] = NULL;
         free(elements);
@@ -657,7 +657,11 @@ krb5int_authdata_verify(krb5_context kcontext,
         }
 
         if (cammac_authdata != NULL && (module->flags & AD_CAMMAC_PROTECTED)) {
-            authdata = cammac_authdata;
+            code = krb5_find_authdata(kcontext, cammac_authdata, NULL,
+                                      module->ad_type, &authdata);
+            if (code)
+                break;
+
             kdc_issued_flag = TRUE;
         }
 
@@ -715,6 +719,7 @@ krb5int_authdata_verify(krb5_context kcontext,
 cleanup:
     krb5_free_principal(kcontext, kdc_issuer);
     krb5_free_authdata(kcontext, kdc_issued_authdata);
+    krb5_free_authdata(kcontext, cammac_authdata);
 
     return code;
 }
