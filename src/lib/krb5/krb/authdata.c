@@ -657,7 +657,11 @@ krb5int_authdata_verify(krb5_context kcontext,
         }
 
         if (cammac_authdata != NULL && (module->flags & AD_CAMMAC_PROTECTED)) {
-            authdata = cammac_authdata;
+            code = krb5_find_authdata(kcontext, cammac_authdata, NULL,
+                                      module->ad_type, &authdata);
+            if (code)
+                break;
+
             kdc_issued_flag = TRUE;
         }
 
@@ -715,6 +719,7 @@ krb5int_authdata_verify(krb5_context kcontext,
 cleanup:
     krb5_free_principal(kcontext, kdc_issuer);
     krb5_free_authdata(kcontext, kdc_issued_authdata);
+    krb5_free_authdata(kcontext, cammac_authdata);
 
     return code;
 }
