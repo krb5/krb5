@@ -40,7 +40,7 @@ proc test1 {} {
     #profile_iterator_free $iter
     catch {file delete $wd/test3.ini}
     profile_flush_to_file $p $wd/test3.ini
-    profile_release $p
+    profile_abandon $p
 
     if $verbose { puts "Reloading new profile" }
     set p [profile_init_path $wd/test3.ini]
@@ -318,6 +318,25 @@ proc test8 {} {
     puts "OK: test8: relation order in the presence of deletions"
 }
 
+proc test9 {} {
+    global wd verbose
+
+    # Regression test for #8431: profile_flush_to_file erroneously
+    # cleared the DIRTY and SHARED flags from the data object, which
+    # could lead to a dangling reference in g_shared_trees on release.
+    set p [profile_init_path $wd/test2.ini]
+    catch {file delete $wd/test3.ini}
+    profile_flush_to_file $p $wd/test3.ini
+    profile_release $p
+
+    # If a dangling reference was created in g_shared_trees, the next
+    # profile open will trigger an assertion failure.
+    set p [profile_init_path $wd/test2.ini]
+    profile_release $p
+
+    puts "OK: test9: profile_flush_to_file with no changes"
+}
+
 test1
 test2
 test3
@@ -326,5 +345,6 @@ test5
 test6
 test7
 test8
+test9
 
 exit 0
