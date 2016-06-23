@@ -461,7 +461,6 @@ static errcode_t write_data_to_file(prf_data_t data, const char *outfile,
         }
     }
 
-    data->flags = 0;
     retval = 0;
 
 errout:
@@ -497,6 +496,7 @@ errcode_t profile_flush_file_data(prf_data_t data)
     }
 
     retval = write_data_to_file(data, data->filespec, 0);
+    data->flags &= ~PROFILE_FILE_DIRTY;
     k5_mutex_unlock(&data->lock);
     return retval;
 }
