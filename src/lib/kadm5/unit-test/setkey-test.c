@@ -222,6 +222,7 @@ main(int argc, char **argv)
                 com_err(whoami, ret, "while acquiring initial ticket");
                 exit(1);
             }
+            krb5_free_cred_contents(context, &my_creds);
 
             /* since I can't specify enctype explicitly ... */
             ret = krb5_kt_remove_entry(context, kt, &ktent);
@@ -246,5 +247,8 @@ main(int argc, char **argv)
         exit(1);
     }
 
+    krb5_free_principal(context, princ);
+    krb5_free_principal(context, server);
+    krb5_free_context(context);
     return 0;
 }

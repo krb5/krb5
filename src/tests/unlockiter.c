@@ -137,6 +137,7 @@ iterator(struct cb_arg *cb_arg, char **db_args, pid_t child)
     retval = krb5_db_fini(ctx);
 
 cleanup:
+    krb5_free_context(ctx);
     if (retval) {
         com_err("iterator", retval, "");
         kill(child, SIGTERM);

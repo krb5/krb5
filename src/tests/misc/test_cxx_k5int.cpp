@@ -15,5 +15,6 @@ int main (int argc, char *argv[])
 	return 1;
     }
     printf("hello, world\n");
+    krb5_free_context(ctx);
     return 0;
 }

@@ -145,7 +145,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
          krb5_ui_4 api_version, char **db_args, void **server_handle)
 {
     int fd = -1;
-
+    OM_uint32 minor_stat;
     krb5_boolean iprop_enable;
     int port;
     rpcprog_t rpc_prog;
@@ -345,6 +345,7 @@ error:
     }
     if (handle->cache_name)
         free(handle->cache_name);
+    (void)gss_release_cred(&minor_stat, &handle->cred);
     if(handle->clnt && handle->clnt->cl_auth)
         AUTH_DESTROY(handle->clnt->cl_auth);
     if(handle->clnt)

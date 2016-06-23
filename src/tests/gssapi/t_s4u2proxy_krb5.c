@@ -133,6 +133,8 @@ main(int argc, char *argv[])
 
     (void)gss_delete_sec_context(&minor, &initiator_context, GSS_C_NO_BUFFER);
     (void)gss_delete_sec_context(&minor, &acceptor_context, GSS_C_NO_BUFFER);
+    (void)gss_release_name(&minor, &client_name);
+    (void)gss_release_cred(&minor, &deleg_cred);
 
     /* Establish contexts using the storage ccache. */
     service2_name = import_name(service2);

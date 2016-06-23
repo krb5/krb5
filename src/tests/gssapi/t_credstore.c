@@ -126,6 +126,7 @@ main(int argc, char *argv[])
                                        GSS_C_NO_CHANNEL_BINDINGS, NULL, NULL,
                                        &atok, NULL, NULL, NULL);
         check_gsserr("gss_accept_sec_context(2)", major, minor);
+        (void)gss_release_buffer(&minor, &itok);
         (void)gss_release_buffer(&minor, &atok);
         (void)gss_delete_sec_context(&minor, &actx, NULL);
     }

@@ -386,15 +386,18 @@ main(int argc, char **argv)
         if (krb5_cc_next_cred(context, cache, &cursor, &cred1) != 0)
             abort();
         verify_cred1(&cred1);
+        krb5_free_cred_contents(context, &cred1);
         if (krb5_cc_next_cred(context, cache, &cursor, &cred2) != 0)
             abort();
         verify_cred2(&cred2);
+        krb5_free_cred_contents(context, &cred2);
         if (krb5_cc_next_cred(context, cache, &cursor, &cred2) != KRB5_CC_END)
             abort();
         if (krb5_cc_end_seq_get(context, cache, &cursor) != 0)
             abort();
         if (krb5_cc_close(context, cache) != 0)
             abort();
+        krb5_free_principal(context, princ);
     }
 
     (void)unlink(filename);

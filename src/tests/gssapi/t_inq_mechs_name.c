@@ -58,5 +58,7 @@ main(int argc, char *argv[])
     check_gsserr("gss_inquire_mechs_for_name", major, minor);
     for (i = 0; i < mechs->count; i++)
         display_oid(NULL, &mechs->elements[i]);
+    (void)gss_release_oid_set(&minor, &mechs);
+    (void)gss_release_name(&minor, &name);
     return 0;
 }

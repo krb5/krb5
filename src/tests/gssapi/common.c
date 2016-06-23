@@ -240,11 +240,10 @@ enumerate_attributes(gss_name_t name, int noisy)
 {
     OM_uint32 major, minor;
     int is_mechname;
-    gss_OID mech = GSS_C_NO_OID;
     gss_buffer_set_t attrs = GSS_C_NO_BUFFER_SET;
     size_t i;
 
-    major = gss_inquire_name(&minor, name, &is_mechname, &mech, &attrs);
+    major = gss_inquire_name(&minor, name, &is_mechname, NULL, &attrs);
     check_gsserr("gss_inquire_name", major, minor);
 
     if (attrs != GSS_C_NO_BUFFER_SET) {

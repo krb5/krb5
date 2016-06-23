@@ -1312,6 +1312,7 @@ static void free_principal_ent(kadm5_principal_ent_t *princ)
 {
     krb5_free_principal(context, (*princ)->principal);
     krb5_free_principal(context, (*princ)->mod_name);
+    free((*princ)->policy);
     free(*princ);
     *princ = 0;
 }
@@ -1493,6 +1494,7 @@ finished:
 
 static void free_policy_ent(kadm5_policy_ent_t *policy)
 {
+    free((*policy)->policy);
     free(*policy);
     *policy = 0;
 }
@@ -1634,6 +1636,10 @@ static int _tcl_kadm5_init_any(enum init_type init_type, ClientData clientData,
     } else
         ret = kadm5_init(context, client_name, pass, service_name, &params,
                          struct_version, api_version, NULL, &server_handle);
+
+    /* The string fields of params are aliases into argv[3], but
+     * params.keysalts is allocated, so clean it up. */
+    free(params.keysalts);
 
     if (ret != KADM5_OK) {
         stash_error(interp, ret);

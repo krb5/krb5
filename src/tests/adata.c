@@ -133,7 +133,10 @@ make_authdata(const char *typestr, const char *contents)
 
     if (*typestr == '?' || *typestr == '!' || *typestr == '^') {
         inner_ad = make_authdata(typestr + 1, contents);
-        return make_container(get_type_for_prefix(*typestr), inner_ad);
+        ad = make_container(get_type_for_prefix(*typestr), inner_ad);
+        free(inner_ad->contents);
+        free(inner_ad);
+        return ad;
     }
 
     ad = malloc(sizeof(*ad));

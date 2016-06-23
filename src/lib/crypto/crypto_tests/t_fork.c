@@ -57,7 +57,6 @@ prepare_enc_data(krb5_key key, size_t in_len, krb5_enc_data *enc_data)
 int
 main()
 {
-    krb5_error_code ret;
     krb5_keyblock kb_aes, kb_rc4;
     krb5_key key_aes, key_rc4;
     krb5_data state_rc4, plain = string2data("plain"), decrypted;
@@ -95,6 +94,14 @@ main()
     /* Encrypt another RC4 message. */
     t(krb5_k_encrypt(ctx, key_rc4, 0, &state_rc4, &plain, &out_rc4));
     t(krb5_c_free_state(ctx, &kb_rc4, &state_rc4));
+
+    krb5_free_keyblock_contents(ctx, &kb_aes);
+    krb5_free_keyblock_contents(ctx, &kb_rc4);
+    krb5_k_free_key(ctx, key_aes);
+    krb5_k_free_key(ctx, key_rc4);
+    krb5_free_data_contents(ctx, &out_aes.ciphertext);
+    krb5_free_data_contents(ctx, &out_rc4.ciphertext);
+    krb5_free_data_contents(ctx, &decrypted);
 
     /* If we're the parent, make sure the child succeeded. */
     if (pid != 0) {

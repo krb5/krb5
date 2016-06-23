@@ -92,6 +92,7 @@ unset_config(krb5_context context, krb5_ccache ccache,
                         "Error storing non-config item to in-memory ccache",
                         krb5_cc_store_cred(context, tmp2, &creds));
         }
+        krb5_free_cred_contents(context, &creds);
     }
     bail_on_err(context, "Error ending traversal of first in-memory ccache",
                 krb5_cc_end_seq_get(context, tmp1, &cursor));
@@ -103,6 +104,8 @@ unset_config(krb5_context context, krb5_ccache ccache,
                 krb5_cc_destroy(context, tmp1));
     bail_on_err(context, "Error cleaning up second in-memory ccache",
                 krb5_cc_destroy(context, tmp2));
+    krb5_free_principal(context, mcreds.client);
+    krb5_free_principal(context, mcreds.server);
 }
 
 int
@@ -127,9 +130,10 @@ main(int argc, char **argv)
         case 'p':
             if (asprintf(&perr, "Error parsing principal name \"%s\"",
                          optarg) < 0)
-                perr = "Error parsing principal name";
+                abort();
             bail_on_err(context, perr,
                         krb5_parse_name(context, optarg, &server));
+            free(perr);
             break;
         }
     }
@@ -149,6 +153,7 @@ main(int argc, char **argv)
         if (ret == 0) {
             for (i = 0; i < data.length; i++)
                 putc((unsigned int)data.data[i], stdout);
+            krb5_free_data_contents(context, &data);
         }
     }
     krb5_free_principal(context, server);

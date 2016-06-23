@@ -94,11 +94,11 @@ main(int argc, char *argv[])
     /* Import and re-export the name, and compare the results. */
     ntype = use_composite ? GSS_C_NT_COMPOSITE_EXPORT : GSS_C_NT_EXPORT_NAME;
     major = gss_import_name(&minor, &buf, ntype, &impname);
-    check_gsserr("gss_export_name", major, minor);
+    check_gsserr("gss_import_name", major, minor);
     if (use_composite)
-        major = gss_export_name_composite(&minor, mechname, &buf2);
+        major = gss_export_name_composite(&minor, impname, &buf2);
     else
-        major = gss_export_name(&minor, mechname, &buf2);
+        major = gss_export_name(&minor, impname, &buf2);
     check_gsserr("gss_export_name", major, minor);
     if (buf.length != buf2.length ||
         memcmp(buf.value, buf2.value, buf.length) != 0) {
@@ -112,6 +112,7 @@ main(int argc, char *argv[])
 
     (void)gss_release_name(&minor, &name);
     (void)gss_release_name(&minor, &mechname);
+    (void)gss_release_name(&minor, &impname);
     (void)gss_release_buffer(&minor, &buf);
     (void)gss_release_buffer(&minor, &buf2);
     return 0;

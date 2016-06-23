@@ -194,6 +194,7 @@ main(argc, argv)
 	       clnt_perror(clnt, whoami);
      } else {
 	  fprintf(stderr, "bad seq didn't cause failure\n");
+	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
      }
 
      AUTH_PRIVATE(clnt->cl_auth)->seq_num -= 3;
@@ -205,6 +206,8 @@ main(argc, argv)
      echo_resp = rpc_test_echo_1(&echo_arg, clnt);
      if (echo_resp == NULL)
 	  clnt_perror(clnt, "Sequence number improperly reset");
+     else
+	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
 
      /*
       * Now simulate a lost server response, and see if
@@ -215,6 +218,8 @@ main(argc, argv)
      echo_resp = rpc_test_echo_1(&echo_arg, clnt);
      if (echo_resp == NULL)
 	  clnt_perror(clnt, "Auto-resynchronization failed");
+     else
+	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
 
      /*
       * Now make sure auto-resyncrhonization actually worked
@@ -223,6 +228,8 @@ main(argc, argv)
      echo_resp = rpc_test_echo_1(&echo_arg, clnt);
      if (echo_resp == NULL)
 	  clnt_perror(clnt, "Auto-resynchronization did not work");
+     else
+	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
 
      /*
       * Test fix for secure-rpc/586, part 1: btree keys must be

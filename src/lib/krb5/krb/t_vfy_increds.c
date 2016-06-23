@@ -45,6 +45,7 @@ check(krb5_error_code code)
 int
 main(int argc, char **argv)
 {
+    krb5_error_code ret;
     krb5_context context;
     krb5_ccache ccache;
     krb5_cc_cursor cursor;
@@ -70,7 +71,9 @@ main(int argc, char **argv)
     check(krb5_cc_end_seq_get(context, ccache, &cursor));
     check(krb5_cc_close(context, ccache));
 
-    if (krb5_verify_init_creds(context, &creds, princ, NULL, NULL, &opt) != 0)
-        return 1;
-    return 0;
+    ret = krb5_verify_init_creds(context, &creds, princ, NULL, NULL, &opt);
+    krb5_free_cred_contents(context, &creds);
+    krb5_free_principal(context, princ);
+    krb5_free_context(context);
+    return ret ? 1 : 0;
 }

@@ -1712,7 +1712,10 @@ static void my_tcl_setresult(Tcl_Interp *i, const char *str, Tcl_FreeProc *f)
 #endif
 
 
-typedef void **iter_t; /* ick */
+typedef struct {
+    void *handle;
+    char **args;
+} *iter_t;
 
 
 SWIGINTERN int
@@ -1789,50 +1792,49 @@ SWIG_From_int  (int value)
 }
 
 
+static void iter_free(iter_t it)
+{
+    int i;
+
+    for (i = 0; it->args != NULL && it->args[i] != NULL; i++)
+	free(it->args[i]);
+    free(it->args);
+    profile_iterator_free(&it->handle);
+    free(it);
+}
+
 static errcode_t iter_create(profile_t p, const char **nullterm,
 			     int flags, iter_t *OUTPUT)
 {
     iter_t it;
     errcode_t err;
-    const char **args;
 
     it = malloc(sizeof(*it));
     if (it == NULL)
 	return ENOMEM;
     {
-	/* Memory leak!
-
-	   The profile code seems to assume that I'll keep the string
-	   array around for as long as the iterator is valid; I can't
-	   create the iterator and then throw them away.
-
-	   But right now, I can't be bothered to track the necessary
-	   information to do the cleanup later.  */
+	/* The current implementation requires that the names be kept around
+	 * for the lifetime of the iterator. */
 	int count, j;
 	for (count = 0; nullterm[count]; count++) ;
-	args = calloc(count+1, sizeof(char *));
-	if (args == NULL)
+	it->args = calloc(count + 1, sizeof(*it->args));
+	if (it->args == NULL)
 	    return ENOMEM;
 	for (j = 0; j < count; j++) {
-	    args[j] = strdup(nullterm[j]);
-	    if (args[j] == NULL)
+	    it->args[j] = strdup(nullterm[j]);
+	    if (it->args[j] == NULL)
 		return ENOMEM;
 	}
-	args[j] = NULL;
+	it->args[j] = NULL;
     }
-    err = profile_iterator_create(p, args, flags, it);
+    err = profile_iterator_create(p, (const char **)it->args, flags,
+				  &it->handle);
     if (err)
-	free(it);
+	iter_free(it);
     else
 	*OUTPUT = it;
     return err;
 }
-static void iter_free(iter_t i)
-{
-    profile_iterator_free(i);
-    free(i);
-}
-
 
 
 /* A TCL_AppInit() function that lets you build a new copy
@@ -2137,6 +2139,7 @@ _wrap_profile_get_values(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, i
     for (i = 0; (*arg3)[i]; i++)
     Tcl_AppendElement(interp, (*arg3)[i]);
   }
+  profile_free_list(*arg3);
   {
     /* freearg char **nullterm */
     if (arg2) {
@@ -2642,7 +2645,7 @@ _wrap_profile_iterator(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "profile_iterator" "', argument " "1"" of type '" "iter_t""'");
   }
   arg1 = (iter_t)(argp1);
-  result = (errcode_t)profile_iterator(arg1,arg2,arg3);
+  result = (errcode_t)profile_iterator(&arg1->handle,arg2,arg3);
   {
     /* out errcode_t result */
     if (result) {
@@ -2659,6 +2662,7 @@ _wrap_profile_iterator(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int
     Tcl_ListObjAppendElement(interp, Tcl_GetObjResult(interp),
       Tcl_NewStringObj(s, strlen(s)));
   }
+  profile_release_string(*arg2);
   {
     /* argout char **OUTPUT */
     /*    Tcl_SetResult(interp, *arg3, TCL_DYNAMIC); */
@@ -2666,6 +2670,7 @@ _wrap_profile_iterator(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, int
     Tcl_ListObjAppendElement(interp, Tcl_GetObjResult(interp),
       Tcl_NewStringObj(s, strlen(s)));
   }
+  profile_release_string(*arg3);
   return TCL_OK;
 fail:
   return TCL_ERROR;

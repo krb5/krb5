@@ -106,5 +106,6 @@ main(int argc, char **argv)
     krb5_free_cred_contents(context, &ev_cred);
     krb5_free_ticket(context, ev_ticket);
     krb5_free_creds(context, new_cred);
+    krb5_free_context(context);
     return 0;
 }

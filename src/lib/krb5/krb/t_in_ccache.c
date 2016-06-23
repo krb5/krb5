@@ -70,6 +70,7 @@ main(int argc, char **argv)
     krb5_ccache in_ccache, out_ccache, armor_ccache;
     krb5_get_init_creds_opt *opt;
     char *user, *password, *armor_ccname = NULL, *in_ccname = NULL, *perr;
+    const char *err;
     krb5_principal client;
     krb5_creds creds;
     krb5_flags fast_flags;
@@ -124,14 +125,17 @@ main(int argc, char **argv)
     bail_on_err(ctx, "Error setting output ccache option",
                 krb5_get_init_creds_opt_set_out_ccache(ctx, opt, out_ccache));
     if (asprintf(&perr, "Error parsing principal name \"%s\"", user) < 0)
-        perr = "Error parsing principal name";
+        abort();
     bail_on_err(ctx, perr, krb5_parse_name(ctx, user, &client));
     ret = krb5_get_init_creds_password(ctx, &creds, client, password,
                                        prompter_cb, NULL, 0, NULL, opt);
-    if (ret)
-        printf("%s\n", krb5_get_error_message(ctx, ret));
-    else
+    if (ret) {
+        err = krb5_get_error_message(ctx, ret);
+        printf("%s\n", err);
+        krb5_free_error_message(ctx, err);
+    } else {
         krb5_free_cred_contents(ctx, &creds);
+    }
     krb5_get_init_creds_opt_free(ctx, opt);
     krb5_free_principal(ctx, client);
     krb5_cc_close(ctx, out_ccache);
@@ -140,5 +144,6 @@ main(int argc, char **argv)
     if (in_ccache != NULL)
         krb5_cc_close(ctx, in_ccache);
     krb5_free_context(ctx);
+    free(perr);
     return ret ? (ret - KRB5KDC_ERR_NONE) : 0;
 }

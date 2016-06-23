@@ -749,8 +749,10 @@ main(int argc, char **argv)
             else
                 printf("Expected error: %d\n", (int)test->expected_err);
         }
-        if (test->expected_err != 0)
+        if (test->expected_err != 0) {
+            krb5_free_keyblock(context, keyblock);
             continue;
+        }
         assert(keyblock->length == test->expected_key.length);
         if (memcmp(keyblock->contents, test->expected_key.data,
                    keyblock->length) != 0) {

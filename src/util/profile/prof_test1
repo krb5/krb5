@@ -21,7 +21,7 @@ proc test1 {} {
 	}
     }
     if $verbose { puts "" }
-    #profile_iterator_free $iter
+    profile_iterator_free $iter
 
     set iter [profile_iterator_create $p $sect 0]
     set done 0
@@ -37,7 +37,7 @@ proc test1 {} {
 	}
     }
     if $verbose { puts "" }
-    #profile_iterator_free $iter
+    profile_iterator_free $iter
     catch {file delete $wd/test3.ini}
     profile_flush_to_file $p $wd/test3.ini
     profile_abandon $p
@@ -58,7 +58,7 @@ proc test1 {} {
 	    if $verbose { puts -nonewline "\t$val" }
 	}
     }
-    #profile_iterator_free $iter
+    profile_iterator_free $iter
     profile_abandon $p
 
     if {$found_some} {
@@ -243,6 +243,7 @@ proc test5 {} {
 	puts stderr, "Error: test5: Wrong results from profile"
 	exit 1
     }
+    profile_release $p
 
     puts "OK: test5: syntax independence of included files"
 }
@@ -273,6 +274,7 @@ proc test6 {} {
 	puts stderr, "Error: test6: Got value from deleted section"
 	exit 1
     }
+    profile_abandon $p
 
     puts "OK: test6: section replacement"
 }
@@ -291,6 +293,7 @@ proc test7 {} {
     profile_update_relation $p $rel 2
     if $verbose { puts "Clearing values at {$rel}" }
     profile_clear_relation $p $rel
+    profile_abandon $p
     puts "OK: test7: profile_clear_relation with deleted node at end"
 }
 
@@ -314,6 +317,7 @@ proc test8 {} {
 	puts stderr, "Error: test8: Wrong order of values: $x"
 	exit 1
     }
+    profile_abandon $p
 
     puts "OK: test8: relation order in the presence of deletions"
 }

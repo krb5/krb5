@@ -91,5 +91,6 @@ main()
         check((*mod)(ctx, 1, 1, (krb5_plugin_vtable)&vt));
         printf("%s\n", vt.name);
     }
+    k5_plugin_free_modules(ctx, modules);
     return 0;
 }

@@ -38,6 +38,7 @@
 int
 main(int argc, char **argv)
 {
+    krb5_error_code ret;
     krb5_context ctx;
     krb5_cccol_cursor cursor;
     krb5_ccache cache, hold[64];
@@ -51,8 +52,11 @@ main(int argc, char **argv)
     if (argc > 2) {
         assert(argc < 60);
         for (i = 2; i < argc; i++) {
-            if (strcmp(argv[i], "CONTENT") == 0)
-                return (krb5_cccol_have_content(ctx) != 0);
+            if (strcmp(argv[i], "CONTENT") == 0) {
+                ret = krb5_cccol_have_content(ctx);
+                krb5_free_context(ctx);
+                return ret != 0;
+            }
             assert(krb5_cc_resolve(ctx, argv[i], &hold[i - 2]) == 0);
         }
     }
@@ -71,5 +75,7 @@ main(int argc, char **argv)
 
     for (i = 2; i < argc; i++)
         krb5_cc_close(ctx, hold[i - 2]);
+
+    krb5_free_context(ctx);
     return 0;
 }

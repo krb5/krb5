@@ -77,6 +77,7 @@ static void vk_test_1(int len)
 {
     int i;
 
+    enc_key.enctype = ENCTYPE_CAMELLIA128_CTS_CMAC;
     enc_key.length = len;
     printf("\nKEYSIZE=%d\n\n", len * 8);
     memset(plain, 0, sizeof(plain));
@@ -98,10 +99,11 @@ static void vk_test()
 }
 
 /* Variable-Text tests */
-static void vt_test_1(int len)
+static void vt_test_1(int len, krb5_enctype etype)
 {
     int i;
 
+    enc_key.enctype = etype;
     enc_key.length = len;
     printf("\nKEYSIZE=%d\n\n", len * 8);
     memset(key, 0, len);
@@ -118,8 +120,8 @@ static void vt_test_1(int len)
 }
 static void vt_test()
 {
-    vt_test_1(16);
-    vt_test_1(32);
+    vt_test_1(16, ENCTYPE_CAMELLIA128_CTS_CMAC);
+    vt_test_1(32, ENCTYPE_CAMELLIA256_CTS_CMAC);
 }
 
 int main (int argc, char *argv[])
