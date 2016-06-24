@@ -131,6 +131,12 @@ osa_adb_init_db(osa_adb_db_t *dbp, char *filename, char *lockfilename,
             return ENOMEM;
         }
         memset(lockp, 0, sizeof(*lockp));
+        lockp->lockinfo.filename = strdup(lockfilename);
+        if (lockp->lockinfo.filename == NULL) {
+            free(lockp);
+            free(db);
+            return ENOMEM;
+        }
         lockp->next = locklist;
         locklist = lockp;
     }
@@ -146,7 +152,6 @@ osa_adb_init_db(osa_adb_db_t *dbp, char *filename, char *lockfilename,
          * needs be open read/write so that write locking can work with
          * POSIX systems
          */
-        lockp->lockinfo.filename = strdup(lockfilename);
         if ((lockp->lockinfo.lockfile = fopen(lockfilename, "r+")) == NULL) {
             /*
              * maybe someone took away write permission so we could only
