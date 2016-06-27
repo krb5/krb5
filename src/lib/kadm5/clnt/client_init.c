@@ -351,7 +351,7 @@ error:
         clnt_destroy(handle->clnt);
     if (fd != -1)
         close(fd);
-
+    free(handle->lhandle);
     kadm5_free_config_params(handle->context, &handle->params);
 
 cleanup:
