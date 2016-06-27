@@ -863,6 +863,7 @@ free_vmac(krb5_context context, krb5_verifier_mac *val)
         return;
     krb5_free_principal(context, val->princ);
     krb5_free_checksum_contents(context, &val->checksum);
+    free(val);
 }
 
 void
