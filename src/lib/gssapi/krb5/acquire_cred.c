@@ -847,8 +847,12 @@ krb_error_out:
 
 error_out:
     if (cred != NULL) {
-        if (cred->ccache)
-            krb5_cc_close(context, cred->ccache);
+        if (cred->ccache) {
+            if (cred->destroy_ccache)
+                krb5_cc_destroy(context, cred->ccache);
+            else
+                krb5_cc_close(context, cred->ccache);
+        }
         if (cred->client_keytab)
             krb5_kt_close(context, cred->client_keytab);
 #ifndef LEAN_CLIENT
@@ -859,6 +863,8 @@ error_out:
             krb5_rc_close(context, cred->rcache);
         if (cred->name)
             kg_release_name(context, &cred->name);
+        krb5_free_principal(context, cred->impersonator);
+        zapfreestr(cred->password);
         k5_mutex_destroy(&cred->lock);
         xfree(cred);
     }
