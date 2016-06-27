@@ -36,6 +36,7 @@
 #include <verto.h>
 #include <verto-module.h>
 #include "rename.h"
+#define EV_API_STATIC 1
 #define EV_STANDALONE 1
 /* Avoid using clock_gettime, which would create a dependency on librt. */
 #define EV_USE_MONOTONIC 0
