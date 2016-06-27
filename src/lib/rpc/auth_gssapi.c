@@ -283,6 +283,7 @@ next_token:
 
 	  PRINTF(("gssapi_create: calling GSSAPI_INIT (%d)\n", init_func));
 
+	  xdr_free(xdr_authgssapi_init_res, &call_res);
 	  memset(&call_res, 0, sizeof(call_res));
 	  callstat = clnt_call(clnt, init_func,
 			       xdr_authgssapi_init_arg, &call_arg,
@@ -409,9 +410,6 @@ next_token:
 
 	       PRINTF(("gssapi_create: isn is %d\n",
 		       AUTH_PRIVATE(auth)->seq_num));
-
-	       /* we no longer need these results.. */
-	       xdr_free(xdr_authgssapi_init_res, &call_res);
 	  }
      } else if (call_res.signed_isn.length != 0) {
 	  PRINTF(("gssapi_create: got signed isn, can't check yet\n"));
@@ -438,6 +436,7 @@ next_token:
      /* don't assume the caller will want to change clnt->cl_auth */
      clnt->cl_auth = save_auth;
 
+     xdr_free(xdr_authgssapi_init_res, &call_res);
      return auth;
 
      /******************************************************************/
@@ -459,6 +458,7 @@ cleanup:
      if (rpc_createerr.cf_stat == 0)
 	  rpc_createerr.cf_stat = RPC_AUTHERROR;
 
+     xdr_free(xdr_authgssapi_init_res, &call_res);
      return auth;
 }
 
