@@ -442,6 +442,7 @@ krb5_get_init_creds_password(krb5_context context,
             /* the change succeeded.  go on */
 
             if (result_code == 0) {
+                free(code_string.data);
                 free(result_string.data);
                 break;
             }
@@ -451,6 +452,7 @@ krb5_get_init_creds_password(krb5_context context,
             ret = KRB5_CHPW_FAIL;
 
             if (result_code != KRB5_KPASSWD_SOFTERROR) {
+                free(code_string.data);
                 free(result_string.data);
                 goto cleanup;
             }
