@@ -1377,6 +1377,7 @@ krb5_db2_merge_nra_iterator(krb5_pointer ptr, krb5_db_entry *entry)
         retval = 0;
     }
 
+    krb5_db_free_principal(nra->kcontext, s_entry);
     return retval;
 }
 
