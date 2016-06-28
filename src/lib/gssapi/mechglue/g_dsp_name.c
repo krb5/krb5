@@ -102,36 +102,17 @@ gss_OID *		output_name_type;
 					    output_name_type));
     }
 
-    /*
-     * copy the value of the external_name component of the union
-     * name into the output_name_buffer and point the output_name_type
-     * to the name_type component of union_name
-     */
-    if (output_name_type != NULL &&
-	union_name->name_type != GSS_C_NULL_OID) {
-	major_status = generic_gss_copy_oid(minor_status,
-					    union_name->name_type,
-					    output_name_type);
-	if (major_status != GSS_S_COMPLETE) {
-	    map_errcode(minor_status);
-	    return (major_status);
-	}
-    }
-
     if ((output_name_buffer->value =
-	 gssalloc_malloc(union_name->external_name->length + 1)) == NULL) {
-	if (output_name_type && *output_name_type != GSS_C_NULL_OID) {
-	    (void) generic_gss_release_oid(minor_status,
-					   output_name_type);
-	    *output_name_type = NULL;
-	}
+	 gssalloc_malloc(union_name->external_name->length + 1)) == NULL)
 	return (GSS_S_FAILURE);
-    }
     output_name_buffer->length = union_name->external_name->length;
     (void) memcpy(output_name_buffer->value,
 		  union_name->external_name->value,
 		  union_name->external_name->length);
     ((char *)output_name_buffer->value)[output_name_buffer->length] = '\0';
+
+    if (output_name_type != NULL)
+	*output_name_type = union_name->name_type;
 
     return(GSS_S_COMPLETE);
 }
