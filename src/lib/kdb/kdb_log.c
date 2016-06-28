@@ -414,10 +414,6 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
             if (retval)
                 goto cleanup;
         } else {
-            entry = k5alloc(sizeof(krb5_db_entry), &retval);
-            if (entry == NULL)
-                goto cleanup;
-
             retval = ulog_conv_2dbentry(context, &entry, upd);
             if (retval)
                 goto cleanup;
