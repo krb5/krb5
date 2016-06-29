@@ -125,7 +125,7 @@ k5_client_realm_path(krb5_context context, const krb5_data *client,
                      const krb5_data *server, krb5_data **rpath_out)
 {
     krb5_error_code retval;
-    char **capvals;
+    char **capvals = NULL;
     size_t i;
     krb5_data *rpath = NULL, d;
 
@@ -160,6 +160,7 @@ k5_client_realm_path(krb5_context context, const krb5_data *client,
     rpath = NULL;
 
 cleanup:
+    profile_free_list(capvals);
     krb5int_free_data_list(context, rpath);
     return retval;
 }
