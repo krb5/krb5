@@ -1512,7 +1512,7 @@ cleanup:
             closesocket(state->fd);
             free_http_tls_data(context, state);
         }
-        if (state->state == READING && state->in.buf != udpbuf)
+        if (state->in.buf != udpbuf)
             free(state->in.buf);
         if (callback_info) {
             callback_info->pfn_cleanup(callback_info->data,
