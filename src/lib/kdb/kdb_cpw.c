@@ -106,6 +106,7 @@ preserve_one_old_key(krb5_context context, krb5_keyblock *mkey,
         /* old_kd is already encrypted in mkey, so just move it. */
         *new_kd = *old_kd;
         memset(old_kd, 0, sizeof(*old_kd));
+        krb5_free_keyblock_contents(context, &kb);
         return 0;
     }
 
