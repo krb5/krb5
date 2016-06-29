@@ -104,6 +104,7 @@ k5_kadm5_hook_free_handles(krb5_context context, kadm5_hook_handle *handles)
         handle = *hp;
         if (handle->vt.fini != NULL)
             handle->vt.fini(context, handle->data);
+        free(handle);
     }
     free(handles);
 }
