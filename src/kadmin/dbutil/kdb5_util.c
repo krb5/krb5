@@ -108,6 +108,7 @@ void usage()
 krb5_keyblock master_keyblock;
 krb5_kvno   master_kvno; /* fetched */
 extern krb5_principal master_princ;
+char *mkey_fullname;
 krb5_db_entry *master_entry = NULL;
 int     valid_master_key = 0;
 
@@ -309,7 +310,7 @@ int main(argc, argv)
             com_err(progname, retval, _("while getting default realm"));
             exit(1);
         }
-        util_context->default_realm = temp;
+        krb5_free_default_realm(util_context, temp);
     }
 
     retval = kadm5_get_config_params(util_context, 1,
@@ -350,8 +351,10 @@ int main(argc, argv)
     if( db5util_db_args )
         free(db5util_db_args);
 
+    quit();
     kadm5_free_config_params(util_context, &global_params);
     krb5_free_context(util_context);
+    free(cmd_argv);
     return exit_status;
 }
 
@@ -384,6 +387,7 @@ void set_dbname(argc, argv)
             valid_master_key = 0;
         }
         krb5_free_principal(util_context, master_princ);
+        free(mkey_fullname);
         dbactive = FALSE;
     }
 
@@ -421,7 +425,7 @@ static int open_db_and_mkey()
     if ((retval = krb5_db_setup_mkey_name(util_context,
                                           global_params.mkey_name,
                                           global_params.realm,
-                                          0, &master_princ))) {
+                                          &mkey_fullname, &master_princ))) {
         com_err(progname, retval, _("while setting up master key name"));
         exit_status++;
         return(1);
@@ -530,8 +534,10 @@ quit()
 
     if (finished)
         return 0;
+    ulog_fini(util_context);
     retval = krb5_db_fini(util_context);
-    memset(master_keyblock.contents, 0, master_keyblock.length);
+    zapfree(master_keyblock.contents, master_keyblock.length);
+    krb5_free_principal(util_context, master_princ);
     finished = TRUE;
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
         com_err(progname, retval, _("while closing database"));

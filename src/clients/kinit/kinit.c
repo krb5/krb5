@@ -896,6 +896,9 @@ k5_kinit(opts, k5)
     }
 
 cleanup:
+#ifndef _WIN32
+    kinit_kdb_fini();
+#endif
     if (options)
         krb5_get_init_creds_opt_free(k5->ctx, options);
     if (my_creds.client == k5->me) {

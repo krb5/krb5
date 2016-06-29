@@ -328,6 +328,7 @@ client_establish_context(int s, char *service_name, OM_uint32 gss_flags,
                 display_status("initializing context", maj_stat,
                                init_sec_min_stat);
                 (void) gss_release_name(&min_stat, &target_name);
+                (void) gss_release_cred(&min_stat, &cred);
                 if (*gss_context != GSS_C_NO_CONTEXT)
                     gss_delete_sec_context(&min_stat, gss_context,
                                            GSS_C_NO_BUFFER);

@@ -466,6 +466,7 @@ kdb5_ldap_create(int argc, char *argv[])
                         global_params.realm);
                 goto err_nomsg;
             }
+            free(rparams->containerref);
             rparams->containerref = strdup(argv[i]);
             if (rparams->containerref == NULL) {
                 retval = ENOMEM;
@@ -592,6 +593,7 @@ kdb5_ldap_create(int argc, char *argv[])
                 global_params.realm);
         goto err_nomsg;
     }
+    free(ldap_context->lrparams->realm_name);
     ldap_context->lrparams->realm_name = strdup(global_params.realm);
     if (ldap_context->lrparams->realm_name == NULL) {
         retval = ENOMEM;
@@ -699,7 +701,8 @@ cleanup:
         exit_status++;
     }
 
-    return;
+    krb5_free_keyblock_contents(util_context, &master_keyblock);
+    krb5_free_principal(util_context, master_princ);
 }
 
 
@@ -749,7 +752,9 @@ kdb5_ldap_modify(int argc, char *argv[])
                 if (rparams->subtree) {
                     for (k=0; k<rparams->subtreecount && rparams->subtree[k]; k++)
                         free(rparams->subtree[k]);
+                    free(rparams->subtree);
                     rparams->subtreecount=0;
+                    rparams->subtree = NULL;
                 }
             }
             if (strncmp(argv[i] ,"", strlen(argv[i]))!=0) {
@@ -787,6 +792,7 @@ kdb5_ldap_modify(int argc, char *argv[])
                         global_params.realm);
                 goto err_nomsg;
             }
+            free(rparams->containerref);
             rparams->containerref = strdup(argv[i]);
             if (rparams->containerref == NULL) {
                 retval = ENOMEM;

@@ -561,5 +561,7 @@ main(int argc, char **argv)
 
     printf("\n");
 
+    kadm5_free_config_params(context, &params);
+    krb5_free_context(context);
     return 0;
 }

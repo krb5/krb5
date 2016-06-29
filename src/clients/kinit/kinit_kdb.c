@@ -69,3 +69,9 @@ kinit_kdb_init(krb5_context *pcontext, char *realm)
     retval = krb5_kt_register(*pcontext, &krb5_kt_kdb_ops);
     return retval;
 }
+
+void
+kinit_kdb_fini()
+{
+    kadm5_destroy(server_handle);
+}

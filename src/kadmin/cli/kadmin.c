@@ -585,6 +585,7 @@ kadmin_startup(int argc, char *argv[], char **request_out, char ***args_out)
     if (freeprinc)
         free(princstr);
 
+    free(params.keysalts);
     free(db_name);
     free(db_args);
 

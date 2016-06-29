@@ -41,11 +41,14 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
         realm = r;
     }
 
+    krb5_free_principal(handle->context, master_princ);
+    master_princ = NULL;
     if ((ret = krb5_db_setup_mkey_name(handle->context,
                                        handle->params.mkey_name,
                                        realm, NULL, &master_princ)))
         goto done;
 
+    krb5_free_keyblock_contents(handle->context, &master_keyblock);
     master_keyblock.enctype = handle->params.enctype;
 
     /*

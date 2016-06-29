@@ -166,6 +166,7 @@ main(argc, argv)
             krb5_free_string(kcontext, cache_name);
         }
         krb5_cccol_cursor_free(kcontext, &cursor);
+        krb5_free_context(kcontext);
         return 0;
     }
 
@@ -200,5 +201,6 @@ main(argc, argv)
     if (!quiet && !errflg)
         print_remaining_cc_warning(kcontext);
 
+    krb5_free_context(kcontext);
     return errflg;
 }

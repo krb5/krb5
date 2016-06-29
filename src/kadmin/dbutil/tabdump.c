@@ -370,8 +370,10 @@ princ_flags(struct rec_args *args, const char *name, krb5_db_entry *dbe)
                 return ret;
             /* Don't print unknown flags if they're not set and numeric output
              * isn't requested. */
-            if (!(flags & (1UL << i)) && strncmp(s, "0x", 2) == 0)
+            if (!(flags & (1UL << i)) && strncmp(s, "0x", 2) == 0) {
+                free(s);
                 continue;
+            }
         }
         ret = princflag_rec(h, name, s, ((flags & (1UL << i)) != 0));
         free(s);

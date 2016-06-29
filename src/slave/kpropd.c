@@ -1000,6 +1000,8 @@ done:
     free(master_svc_princstr);
     krb5_free_default_realm(kpropd_context, def_realm);
     kadm5_destroy(server_handle);
+    krb5_db_fini(kpropd_context);
+    ulog_fini(kpropd_context);
     krb5_free_context(kpropd_context);
 
     return (runonce == 1) ? 0 : 1;

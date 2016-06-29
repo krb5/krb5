@@ -341,6 +341,7 @@ void do_keytab(name)
         }
         printf("\n");
         krb5_free_unparsed_name(kcontext, pname);
+        krb5_free_keytab_entry_contents(kcontext, &entry);
     }
     if (code && code != KRB5_KT_END) {
         com_err(progname, code, _("while scanning keytab"));
@@ -505,6 +506,8 @@ show_ccache(krb5_ccache cache)
         krb5_free_cred_contents(kcontext, &creds);
     }
     krb5_free_principal(kcontext, princ);
+    krb5_free_unparsed_name(kcontext, defname);
+    defname = NULL;
     if (code == KRB5_CC_END) {
         if ((code = krb5_cc_end_seq_get(kcontext, cache, &cur))) {
             com_err(progname, code, _("while finishing ticket retrieval"));

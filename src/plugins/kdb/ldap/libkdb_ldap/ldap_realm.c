@@ -881,6 +881,9 @@ krb5_ldap_free_realm_params(krb5_ldap_realm_params *rparams)
             free(rparams->subtree);
         }
 
+        if (rparams->containerref)
+            free(rparams->containerref);
+
         if (rparams->kdcservers) {
             for (i=0; rparams->kdcservers[i]; ++i)
                 free(rparams->kdcservers[i]);

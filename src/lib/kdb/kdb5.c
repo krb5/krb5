@@ -1728,6 +1728,7 @@ krb5_error_code
 krb5_dbe_update_mkey_aux(krb5_context context, krb5_db_entry *entry,
                          krb5_mkey_aux_node *mkey_aux_data_list)
 {
+    krb5_error_code status;
     krb5_tl_data tl_data;
     krb5_int16 version, tmp_kvno;
     unsigned char *nextloc;
@@ -1792,7 +1793,9 @@ krb5_dbe_update_mkey_aux(krb5_context context, krb5_db_entry *entry,
         }
     }
 
-    return (krb5_dbe_update_tl_data(context, entry, &tl_data));
+    status = krb5_dbe_update_tl_data(context, entry, &tl_data);
+    free(tl_data.tl_data_contents);
+    return status;
 }
 #endif /* KRB5_TL_MKEY_AUX_VER == 1 */
 

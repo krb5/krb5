@@ -354,6 +354,7 @@ kadm5_ret_t kadm5_destroy(void *server_handle)
     destroy_pwqual(handle);
 
     k5_kadm5_hook_free_handles(handle->context, handle->hook_handles);
+    ulog_fini(handle->context);
     krb5_db_fini(handle->context);
     krb5_free_principal(handle->context, handle->current_caller);
     kadm5_free_config_params(handle->context, &handle->params);

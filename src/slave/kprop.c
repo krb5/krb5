@@ -242,13 +242,6 @@ get_tickets(krb5_context context)
         exit(1);
     }
 
-    /* Fill in the client. */
-    retval = krb5_copy_principal(context, my_principal, &creds.client);
-    if (retval) {
-        com_err(progname, retval, _("while copying client principal"));
-        exit(1);
-    }
-
     if (srvtab != NULL) {
         retval = krb5_kt_resolve(context, srvtab, &keytab);
         if (retval) {
@@ -598,6 +591,7 @@ xmit_database(krb5_context context, krb5_auth_context auth_context,
                 send_size, database_size);
         exit(1);
     }
+    free(inbuf.data);
     free(outbuf.data);
 }
 

@@ -114,6 +114,7 @@ static krb5_error_code add_principal
 
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
+extern char *mkey_fullname;
 krb5_data master_salt;
 
 krb5_data tgt_princ_entries[] = {
@@ -155,7 +156,6 @@ void kdb5_create(argc, argv)
     int optchar;
 
     krb5_error_code retval;
-    char *mkey_fullname;
     char *pw_str = 0;
     unsigned int pw_size = 0;
     int do_stash = 0;
@@ -316,7 +316,6 @@ void kdb5_create(argc, argv)
 
     if ((retval = add_principal(util_context, master_princ, MASTER_KEY, &rblock)) ||
         (retval = add_principal(util_context, &tgt_princ, TGT_KEY, &rblock))) {
-        (void) krb5_db_fini(util_context);
         com_err(progname, retval, _("while adding entries to the database"));
         exit_status++; return;
     }
@@ -349,9 +348,6 @@ void kdb5_create(argc, argv)
         printf(_("Warning: couldn't stash master key.\n"));
     }
     /* clean up */
-    (void) krb5_db_fini(util_context);
-    memset(master_keyblock.contents, 0, master_keyblock.length);
-    free(master_keyblock.contents);
     if (pw_str) {
         memset(pw_str, 0, pw_size);
         free(pw_str);

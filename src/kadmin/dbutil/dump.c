@@ -204,8 +204,10 @@ prep_ok_file(krb5_context context, char *file_name, int *fd)
     retval = krb5_lock_file(context, *fd, KRB5_LOCKMODE_EXCLUSIVE);
     if (retval) {
         com_err(progname, retval, _("while locking 'ok' file, '%s'"), file_ok);
+        free(file_ok);
         return 0;
     }
+    free(file_ok);
     return 1;
 }
 
@@ -535,6 +537,7 @@ dump_ov_princ(krb5_context context, krb5_db_entry *entry, const char *name,
 
     fputc('\n', fp);
     free(princstr);
+    xdr_free(xdr_osa_princ_ent_rec, &adb);
     return 0;
 }
 

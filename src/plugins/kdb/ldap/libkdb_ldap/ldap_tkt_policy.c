@@ -35,6 +35,16 @@
 
 /* Ticket policy object management */
 
+static void
+free_list(char **list)
+{
+    int i;
+
+    for (i = 0; list != NULL && list[i] != NULL; i++)
+        free(list[i]);
+    free(list);
+}
+
 /*
  * create the Ticket policy object in Directory.
  */
@@ -263,6 +273,7 @@ cleanup:
         krb5_ldap_free_policy(context, lpolicy);
         *policy = NULL;
     }
+    free(policy_dn);
     ldap_msgfree(result);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
@@ -377,6 +388,7 @@ krb5_ldap_list_policy(krb5_context context, char *containerdn, char ***policy)
     }
 
 cleanup:
+    free_list(list);
     return st;
 }
 
@@ -477,12 +489,8 @@ cleanup:
 
     /* some error, free up all the memory */
     if (st != 0) {
-        if (*list) {
-            for (i=0; (*list)[i]; ++i)
-                free ((*list)[i]);
-            free (*list);
-            *list = NULL;
-        }
+        free_list(*list);
+        *list = NULL;
     }
     ldap_msgfree(result);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);

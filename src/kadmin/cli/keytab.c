@@ -361,7 +361,7 @@ static void
 remove_principal(char *keytab_str, krb5_keytab keytab,
                  char *princ_str, char *kvno_str)
 {
-    krb5_principal princ;
+    krb5_principal princ = NULL;
     krb5_keytab_entry entry;
     krb5_kt_cursor cursor;
     enum { UNDEF, SPEC, HIGH, ALL, OLD } mode;
@@ -371,7 +371,7 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
     code = krb5_parse_name(context, princ_str, &princ);
     if (code != 0) {
         com_err(whoami, code, _("while parsing principal name %s"), princ_str);
-        return;
+        goto cleanup;
     }
 
     mode = UNDEF;
@@ -409,7 +409,7 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
             com_err(whoami, code,
                     _("while retrieving highest kvno from keytab"));
         }
-        return;
+        goto cleanup;
     }
 
     /* set kvno to spec'ed value for SPEC, highest kvno otherwise */
@@ -420,7 +420,7 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
     code = krb5_kt_start_seq_get(context, keytab, &cursor);
     if (code != 0) {
         com_err(whoami, code, _("while starting keytab scan"));
-        return;
+        goto cleanup;
     }
 
     did_something = 0;
@@ -441,17 +441,17 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
             if (code != 0) {
                 com_err(whoami, code,
                         _("while temporarily ending keytab scan"));
-                return;
+                goto cleanup;
             }
             code = krb5_kt_remove_entry(context, keytab, &entry);
             if (code != 0) {
                 com_err(whoami, code, _("while deleting entry from keytab"));
-                return;
+                goto cleanup;
             }
             code = krb5_kt_start_seq_get(context, keytab, &cursor);
             if (code != 0) {
                 com_err(whoami, code, _("while restarting keytab scan"));
-                return;
+                goto cleanup;
             }
 
             did_something++;
@@ -464,12 +464,12 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
     }
     if (code && code != KRB5_KT_END) {
         com_err(whoami, code, _("while scanning keytab"));
-        return;
+        goto cleanup;
     }
     code = krb5_kt_end_seq_get(context, keytab, &cursor);
     if (code) {
         com_err(whoami, code, _("while ending keytab scan"));
-        return;
+        goto cleanup;
     }
 
     /*
@@ -481,6 +481,9 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
         fprintf(stderr, _("%s: There is only one entry for principal %s in "
                           "keytab %s\n"), whoami, princ_str, keytab_str);
     }
+
+cleanup:
+    krb5_free_principal(context, princ);
 }
 
 /*
