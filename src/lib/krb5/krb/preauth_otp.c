@@ -830,6 +830,7 @@ set_pa_data(const krb5_pa_otp_req *req, krb5_pa_data ***pa_data_out)
         goto error;
     out[0]->contents = (krb5_octet *)tmp->data;
     out[0]->length = tmp->length;
+    free(tmp);
 
     *pa_data_out = out;
     return 0;
