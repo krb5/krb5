@@ -77,6 +77,7 @@ update_status_t ulog_get_sno_status(krb5_context context,
                                     const kdb_last_t *last);
 krb5_error_code ulog_get_last(krb5_context context, kdb_last_t *last_out);
 krb5_error_code ulog_set_last(krb5_context context, const kdb_last_t *last);
+void ulog_fini(krb5_context context);
 
 typedef struct kdb_hlog {
     uint32_t        kdb_hmagic;     /* Log header magic # */

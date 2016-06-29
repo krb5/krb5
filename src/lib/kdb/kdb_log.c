@@ -672,3 +672,16 @@ ulog_set_last(krb5_context context, const kdb_last_t *last)
     unlock_ulog(context);
     return 0;
 }
+
+void
+ulog_fini(krb5_context context)
+{
+    kdb_log_context *log_ctx = context->kdblog_context;
+
+    if (log_ctx == NULL)
+        return;
+    if (log_ctx->ulog != NULL)
+        munmap(log_ctx->ulog, MAXLOGLEN);
+    free(log_ctx);
+    context->kdblog_context = NULL;
+}
