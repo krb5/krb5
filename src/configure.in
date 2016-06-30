@@ -399,6 +399,27 @@ if test "$enableval" = no ; then
 fi
 KRB5_RUN_FLAGS
 
+# asan is a gcc and clang facility to instrument the code with memory
+# error checking.  To use it, we compile C and C++ source files with
+# -fsanitize=address, and set ASAN=yes to suppress the undefined
+# symbols check when building shared libraries.
+AC_ARG_ENABLE([asan],
+AC_HELP_STRING([--enable-asan],[Build with asan memory checking]),[],
+               [enable_asan=no])
+if test "$enable_asan" != no; then
+    if test "$enable_asan" = yes; then
+        enable_asan=address
+    fi
+    ASAN_FLAGS="$DEFS -fsanitize=$enable_asan"
+    ASAN=yes
+    UNDEF_CHECK=
+else
+    ASAN_FLAGS=
+    ASAN=no
+fi
+AC_SUBST(ASAN_FLAGS)
+AC_SUBST(ASAN)
+
 AC_TYPE_SIGNAL
 
 # from old include/configure.in

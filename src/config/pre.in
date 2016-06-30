@@ -150,19 +150,22 @@ CONFIG_RELTOPDIR = @CONFIG_RELTOPDIR@
 # WARN_CFLAGS	user override but starts off set by configure
 # PTHREAD_CFLAGS set by configure, not included in CFLAGS so that we
 #		don't pull the pthreads library into shared libraries
+# ASAN_FLAGS    set by configure when --enable-asan is used
 ALL_CFLAGS = $(DEFS) $(DEFINES) $(KRB_INCLUDES) $(LOCALINCLUDES) \
 	-DKRB5_DEPRECATED=1 \
 	-DKRB5_PRIVATE \
-	$(CPPFLAGS) $(CFLAGS) $(WARN_CFLAGS) $(PTHREAD_CFLAGS)
+	$(CPPFLAGS) $(CFLAGS) $(WARN_CFLAGS) $(PTHREAD_CFLAGS) $(ASAN_FLAGS)
 ALL_CXXFLAGS = $(DEFS) $(DEFINES) $(KRB_INCLUDES) $(LOCALINCLUDES) \
 	-DKRB5_DEPRECATED=1 \
 	-DKRB5_PRIVATE \
-	$(CPPFLAGS) $(CXXFLAGS) $(WARN_CXXFLAGS) $(PTHREAD_CFLAGS)
+	$(CPPFLAGS) $(CXXFLAGS) $(WARN_CXXFLAGS) $(PTHREAD_CFLAGS) \
+	$(ASAN_FLAGS)
 
 CFLAGS = @CFLAGS@
 CXXFLAGS = @CXXFLAGS@
 WARN_CFLAGS = @WARN_CFLAGS@
 WARN_CXXFLAGS = @WARN_CXXFLAGS@
+ASAN_FLAGS = @ASAN_FLAGS@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 THREAD_LINKOPTS = $(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
@@ -281,8 +284,8 @@ EXEEXT =
 # prog: foo.o bar.o $(KRB5_BASE_DEPLIBS)
 # 	$(CC_LINK) -o $@ foo.o bar.o $(KRB5_BASE_LIBS)
 
-CC_LINK=@CC_LINK@
-CXX_LINK=@CXX_LINK@
+CC_LINK=@CC_LINK@ $(ASAN_FLAGS)
+CXX_LINK=@CXX_LINK@ $(ASAN_FLAGS)
 
 # Makefile.in files which build programs can override the list of
 # directories to look for dependent libraries in (in the form -Ldir1
@@ -552,6 +555,10 @@ DYNOBJEXT=@DYNOBJEXT@
 MAKE_DYNOBJ_COMMAND=@MAKE_DYNOBJ_COMMAND@
 DYNOBJ_EXPDEPS=@DYNOBJ_EXPDEPS@
 DYNOBJ_EXPFLAGS=@DYNOBJ_EXPFLAGS@
+
+# For some platforms, a flag which causes shared library creation to
+# check for undefined symbols.  Suppressed when using --enable-asan.
+UNDEF_CHECK=@UNDEF_CHECK@
 
 # File with symbol names to be exported, both functions and data,
 # currently not distinguished.

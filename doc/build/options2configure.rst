@@ -282,6 +282,11 @@ Optional features
 **-**\ **-disable-aesni**
     Disable support for using AES instructions on x86 platforms.
 
+**-**\ **-enable-asan**\ [=\ *ARG*]
+    Enable building with asan memory error checking.  If *ARG* is
+    given, it controls the -fsanitize compilation flag value (the
+    default is "address").
+
 
 Optional packages
 -----------------
