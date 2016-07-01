@@ -236,11 +236,13 @@ get_conf_section(krb5_context context, char **section)
     return 0;
 }
 
-static char *
-kdb_get_library_name(krb5_context kcontext)
+static krb5_error_code
+kdb_get_library_name(krb5_context kcontext, char **libname_out)
 {
     krb5_error_code status = 0;
-    char *result = NULL, *value = NULL, *lib = NULL, *defrealm = NULL;
+    char *value = NULL, *lib = NULL, *defrealm = NULL;
+
+    *libname_out = NULL;
 
     status = krb5_get_default_realm(kcontext, &defrealm);
     if (status)
@@ -269,12 +271,15 @@ kdb_get_library_name(krb5_context kcontext)
         goto clean_n_exit;
     }
 
-    result = strdup(lib);
+    *libname_out = strdup(lib);
+    if (*libname_out == NULL)
+        status = ENOMEM;
+
 clean_n_exit:
     krb5_free_default_realm(kcontext, defrealm);
     profile_release_string(value);
     profile_release_string(lib);
-    return result;
+    return status;
 }
 
 static void
@@ -553,9 +558,10 @@ krb5_db_setup_lib_handle(krb5_context kcontext)
         goto clean_n_exit;
     }
 
-    library = kdb_get_library_name(kcontext);
+    status = kdb_get_library_name(kcontext, &library);
     if (library == NULL) {
-        status = KRB5_KDB_DBTYPE_NOTFOUND;
+        k5_prependmsg(kcontext, status,
+                      _("Cannot initialize database library"));
         goto clean_n_exit;
     }
 
