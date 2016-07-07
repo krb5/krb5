@@ -47,7 +47,10 @@ Configuring Kerberos with OpenLDAP back-end
     container.
 
  5. Configure the LDAP server ACLs to enable the KDC and kadmin server
-    DNs to read and write the Kerberos data.
+    DNs to read and write the Kerberos data.  If
+    **disable_last_success** and **disable_lockout** are both set to
+    true in the :ref:`dbmodules` subsection for the realm, then the
+    KDC DN only requires read access to the Kerberos data.
 
     Sample access control information::
 
@@ -67,13 +70,13 @@ Configuring Kerberos with OpenLDAP back-end
 
        # Providing access to realm container
        access to dn.subtree= "cn=EXAMPLE.COM,cn=krbcontainer,dc=example,dc=com"
-           by dn.exact="cn=kdc-service,dc=example,dc=com" read
+           by dn.exact="cn=kdc-service,dc=example,dc=com" write
            by dn.exact="cn=adm-service,dc=example,dc=com" write
            by * none
 
        # Providing access to principals, if not underneath realm container
        access to dn.subtree= "ou=users,dc=example,dc=com"
-           by dn.exact="cn=kdc-service,dc=example,dc=com" read
+           by dn.exact="cn=kdc-service,dc=example,dc=com" write
            by dn.exact="cn=adm-service,dc=example,dc=com" write
            by * none
 
