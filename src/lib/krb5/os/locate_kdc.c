@@ -125,6 +125,7 @@ new_server_entry(struct serverlist *list)
     list->servers = newservers;
     entry = &newservers[list->nservers];
     memset(entry, 0, sizeof(*entry));
+    entry->master = -1;
     return entry;
 }
 
@@ -151,7 +152,8 @@ add_addr_to_list(struct serverlist *list, k5_transport transport, int family,
 /* Add a hostname entry to list. */
 static int
 add_host_to_list(struct serverlist *list, const char *hostname, int port,
-                 k5_transport transport, int family, char *uri_path)
+                 k5_transport transport, int family, char *uri_path,
+                 int master)
 {
     struct server_entry *entry;
 
@@ -169,6 +171,7 @@ add_host_to_list(struct serverlist *list, const char *hostname, int port,
             goto oom;
     }
     entry->port = port;
+    entry->master = master;
     list->nservers++;
     return 0;
 oom:
@@ -261,7 +264,7 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
             goto cleanup;
 
         code = add_host_to_list(serverlist, host, port_num, this_transport,
-                                AF_UNSPEC, uri_path);
+                                AF_UNSPEC, uri_path, -1);
         if (code)
             goto cleanup;
 
@@ -317,7 +320,7 @@ locate_srv_dns_1(const krb5_data *realm, const char *service,
     for (entry = head; entry != NULL; entry = entry->next) {
         transport = (strcmp(protocol, "_tcp") == 0) ? TCP : UDP;
         code = add_host_to_list(serverlist, entry->host, entry->port,
-                                transport, AF_UNSPEC, NULL);
+                                transport, AF_UNSPEC, NULL, -1);
         if (code)
             goto cleanup;
     }
@@ -644,6 +647,9 @@ k5_kdc_is_master(krb5_context context, const krb5_data *realm,
 {
     struct serverlist list;
     krb5_boolean found;
+
+    if (server->master != -1)
+        return server->master;
 
     if (locate_server(context, realm, &list, locate_service_master_kdc,
                       server->transport) != 0)
