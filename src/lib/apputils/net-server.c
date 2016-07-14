@@ -1,7 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/apputils/net-server.c - Network code for krb5 servers (kdc, kadmind) */
 /*
- * Copyright 1990,2000,2007,2008,2009,2010 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2007,2008,2009,2010,2016 by the Massachusetts Institute
+ * of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -29,6 +30,7 @@
 #include <syslog.h>
 
 #include <stddef.h>
+#include <string.h>
 #include "port-sockets.h"
 #include "socket-utils.h"
 
@@ -59,30 +61,21 @@
 #include "fake-addrinfo.h"
 #include "net-server.h"
 #include <signal.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 #include "udppktinfo.h"
 
 /* XXX */
 #define KDC5_NONET                               (-1779992062L)
 
+/**
+ * The maximum connections that can be accepted when a socket is set to listen.
+ */
+#define MAX_CONNECTIONS 5
+
 static int tcp_or_rpc_data_counter;
 static int max_tcp_or_rpc_data_connections = 45;
-
-static int
-ipv6_enabled()
-{
-    static int result = -1;
-    if (result == -1) {
-        int s;
-        s = socket(AF_INET6, SOCK_STREAM, 0);
-        if (s >= 0) {
-            result = 1;
-            close(s);
-        } else
-            result = 0;
-    }
-    return result;
-}
 
 static int
 setreuseaddr(int sock, int value)
@@ -122,9 +115,19 @@ paddr(struct sockaddr *sa)
 /* KDC data.  */
 
 enum conn_type {
-    CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP,
-    CONN_RPC_LISTENER, CONN_RPC,
-    CONN_ROUTING
+    CONN_UDP, CONN_TCP_LISTENER, CONN_TCP,
+    CONN_RPC_LISTENER, CONN_RPC
+};
+
+enum bind_type {
+    UDP, TCP, RPC
+};
+
+static const char *const bind_type_names[] =
+{
+    [UDP] = "UDP",
+    [TCP] = "TCP",
+    [RPC] = "RPC",
 };
 
 /* Per-connection info.  */
@@ -197,14 +200,20 @@ struct connection {
  * instead of the "u_short" we were using before.
  */
 struct rpc_svc_data {
-    u_short port;
     u_long prognum;
     u_long versnum;
     void (*dispatch)();
 };
-static SET(unsigned short) udp_port_data, tcp_port_data;
-static SET(struct rpc_svc_data) rpc_svc_data;
+
+struct bind_address {
+    char *address;
+    u_short port;
+    enum bind_type type;
+    struct rpc_svc_data rpc_svc_data;
+};
+
 static SET(verto_ev *) events;
+static SET(struct bind_address) bind_addresses;
 
 verto_ctx *
 loop_init(verto_ev_type types)
@@ -270,66 +279,209 @@ loop_setup_signals(verto_ctx *ctx, void *handle, void (*reset)())
     return 0;
 }
 
-krb5_error_code
-loop_add_udp_port(int port)
+/*
+ * Add a bind address to the loop.
+ *
+ * Arguments:
+ * - address
+ *      A string for the address. Pass NULL to use the wildcard address (binds
+ *      to all interfaces). An optional port number, separated from the address
+ *      by a colon, may be included.  If the name or address contains colons
+ *      (for example, if it is an IPv6 address), enclose it in square brackets
+ *      to distinguish the colon from a port separator.
+ *      NOTE: Currently getaddrinfo is used with no restrictions, so in theory
+ *      a hostname could work.
+ * - port
+ *      What port the socket should be set to.
+ * - type
+ *      bind_type for the socket.
+ * - rpc_data
+ *      An optional rpc_svc_data containing the rpc data needed for an rpc
+ *      connection. Required when type is rpc, otherwise should be NULL, but
+ *      the value is ignored.
+ *
+ * returns 0 on success, otherwise an error code.
+ *
+ */
+static krb5_error_code
+loop_add_address(const char *address, int port, enum bind_type type,
+                 struct rpc_svc_data *rpc_data)
 {
-    int i;
-    void *tmp;
-    u_short val;
-    u_short s_port = port;
+    int     i;
+    void   *tmp;
+    struct bind_address addr, val;
+    char   *addr_cpy = NULL;
+    krb5_error_code ret;
 
-    if (s_port != port)
+    /* Make sure that if this is an rpc address that the rpc_data is valid. */
+    if (type == RPC && rpc_data == NULL) {
+        krb5_klog_syslog(LOG_ERR, "rpc_svc_data required for rpc addresses");
         return EINVAL;
+    }
 
-    FOREACH_ELT (udp_port_data, i, val)
-        if (s_port == val)
-            return 0;
-    if (!ADD(udp_port_data, s_port, tmp))
-        return ENOMEM;
-    return 0;
+    /* Make sure a valid port number was passed. */
+    if (port < 0 || port > 65535) {
+        krb5_klog_syslog(LOG_ERR, _("Invalid port %d"), port);
+        return EINVAL;
+    }
+
+    /* Check for conflicting addresses. */
+    FOREACH_ELT(bind_addresses, i, val) {
+        if (!(type == val.type && port == val.port))
+            continue;
+
+        /* If a wildcard address is being added make sure to remove any
+         * direct addresses. */
+        if (address == NULL && val.address != NULL) {
+            krb5_klog_syslog(LOG_DEBUG,
+                             _("Removing address %s since wildcard address"
+                               " is being added"),
+                             val.address);
+            free(val.address);
+            DEL(bind_addresses, i);
+        } else if (val.address == NULL ||
+                   !strcmp(address, val.address)) {
+            krb5_klog_syslog(LOG_DEBUG,
+                             _("Address already added to server"));
+            ret = 0;
+            goto cleanup;
+        }
+    }
+
+    /* Copy the address if it is specified */
+    if (address != NULL) {
+        addr_cpy = strdup(address);
+        if (addr_cpy == NULL) {
+            ret = ENOMEM;
+            goto cleanup;
+        }
+    }
+
+    /* Clear addr and set the values */
+    memset(&addr, 0, sizeof(addr));
+    addr.address = addr_cpy;
+    addr.port = port;
+    addr.type = type;
+    if (rpc_data != NULL)
+        memcpy(&addr.rpc_svc_data, rpc_data, sizeof(addr.rpc_svc_data));
+
+    /* Add the address to the set. */
+    if (!ADD(bind_addresses, addr, tmp)) {
+        ret = ENOMEM;
+        goto cleanup;
+    }
+
+    addr_cpy = NULL;
+    ret = 0;
+
+cleanup:
+    free(addr_cpy);
+    return ret;
+}
+
+/*
+ * Add bind addresses to the loop.
+ *
+ * Arguments:
+ *
+ * - addresses
+ *      A string for the addresses. Pass NULL to use the wildcard address
+ *      (binds to all interfaces). Supported delimeters can be found in
+ *      ADDRESSES_DELIM.
+ *      NOTE: Currently getaddrinfo is used with no restrictions, so in theory
+ *      a hostname could work.
+ * - default_port
+ *      What port the socket should be set to if not specified in addresses.
+ * - type
+ *      bind_type for the socket.
+ * - rpc_data
+ *      An optional rpc_svc_data containing the rpc data needed for an rpc
+ *      connection. Required when type is rpc, otherwise should be NULL, but
+ *      the value is ignored.
+ */
+static krb5_error_code
+loop_add_addresses(const char *addresses, int default_port,
+                   enum bind_type type, struct rpc_svc_data *rpc_data)
+{
+    krb5_error_code ret;
+    char *addresses_copy = NULL;
+    char *saveptr;
+    char *host = NULL;
+    char *next;
+    int port;
+
+    /* If no addresses are set bind to the wildcard address. */
+    if (addresses == NULL) {
+        ret = loop_add_address(NULL, default_port, type, rpc_data);
+        goto cleanup;
+    }
+
+    /*
+     * We need to copy the addresses string because strtok modifies the string
+     * that it's tokenizing.
+     */
+    addresses_copy = strdup(addresses);
+    if (addresses_copy == NULL) {
+        ret = ENOMEM;
+        goto cleanup;
+    }
+
+    /*
+     * Start tokenizing the addresses string. If NULL is returned then the
+     * string contained no addresses, so bind to the wildcard address.
+     */
+    next = strtok_r(addresses_copy, ADDRESSES_DELIM, &saveptr);
+    if (next == NULL) {
+        ret = loop_add_address(NULL, default_port, type, rpc_data);
+        goto cleanup;
+    }
+
+    /* Loop through each address and add it to the loop. */
+    for (; next != NULL; next = strtok_r(NULL, ADDRESSES_DELIM, &saveptr)) {
+        /* Parse the host string. */
+        ret = k5_parse_host_string(next, default_port, &host, &port);
+        if (ret != 0)
+            goto cleanup;
+
+        ret = loop_add_address(host, port, type, rpc_data);
+        if (ret != 0)
+            goto cleanup;
+
+        free(host);
+        host = NULL;
+    }
+
+    ret = 0;
+
+cleanup:
+    free(addresses_copy);
+    free(host);
+    return ret;
 }
 
 krb5_error_code
-loop_add_tcp_port(int port)
+loop_add_udp_address(int default_port, const char *addresses)
 {
-    int i;
-    void *tmp;
-    u_short val;
-    u_short s_port = port;
-
-    if (s_port != port)
-        return EINVAL;
-
-    FOREACH_ELT (tcp_port_data, i, val)
-        if (s_port == val)
-            return 0;
-    if (!ADD(tcp_port_data, s_port, tmp))
-        return ENOMEM;
-    return 0;
+    return loop_add_addresses(addresses, default_port, UDP, NULL);
 }
 
 krb5_error_code
-loop_add_rpc_service(int port, u_long prognum,
-                     u_long versnum, void (*dispatchfn)())
+loop_add_tcp_address(int default_port, const char *addresses)
 {
-    int i;
-    void *tmp;
-    struct rpc_svc_data svc, val;
+    return loop_add_addresses(addresses, default_port, TCP, NULL);
+}
 
-    svc.port = port;
-    if (svc.port != port)
-        return EINVAL;
+krb5_error_code
+loop_add_rpc_service(int default_port, const char *addresses,
+                     u_long prognum, u_long versnum, void (*dispatchfn)())
+{
+    /* Set the rpc_svc_data values */
+    struct rpc_svc_data svc;
     svc.prognum = prognum;
     svc.versnum = versnum;
     svc.dispatch = dispatchfn;
 
-    FOREACH_ELT (rpc_svc_data, i, val) {
-        if (val.port == port)
-            return 0;
-    }
-    if (!ADD(rpc_svc_data, svc, tmp))
-        return ENOMEM;
-    return 0;
+    return loop_add_addresses(addresses, default_port, RPC, &svc);
 }
 
 #define USE_AF AF_INET
@@ -343,8 +495,6 @@ struct socksetup {
     void *handle;
     const char *prog;
     krb5_error_code retval;
-    krb5_boolean do_ipv4_udp_all;
-    krb5_boolean do_ipv6_udp_all;
 };
 
 static void
@@ -481,26 +631,6 @@ static void accept_rpc_connection(verto_ctx *ctx, verto_ev *ev);
 static void process_rpc_connection(verto_ctx *ctx, verto_ev *ev);
 
 static verto_ev *
-add_udp_fd(struct socksetup *data, int sock, int pktinfo)
-{
-    return add_fd(data, sock, pktinfo ? CONN_UDP_PKTINFO : CONN_UDP,
-                  VERTO_EV_FLAG_IO_READ |
-                  VERTO_EV_FLAG_PERSIST |
-                  VERTO_EV_FLAG_REINITIABLE,
-                  process_packet, 1);
-}
-
-static verto_ev *
-add_tcp_listener_fd(struct socksetup *data, int sock)
-{
-    return add_fd(data, sock, CONN_TCP_LISTENER,
-                  VERTO_EV_FLAG_IO_READ |
-                  VERTO_EV_FLAG_PERSIST |
-                  VERTO_EV_FLAG_REINITIABLE,
-                  accept_tcp_connection, 1);
-}
-
-static verto_ev *
 add_tcp_read_fd(struct socksetup *data, int sock)
 {
     return add_fd(data, sock, CONN_TCP,
@@ -566,42 +696,6 @@ create_server_socket(struct socksetup *data, struct sockaddr *addr, int type)
 }
 
 static verto_ev *
-add_rpc_listener_fd(struct socksetup *data, struct rpc_svc_data *svc, int sock)
-{
-    struct connection *conn;
-    verto_ev *ev;
-
-    ev = add_fd(data, sock, CONN_RPC_LISTENER,
-                VERTO_EV_FLAG_IO_READ |
-                VERTO_EV_FLAG_PERSIST |
-                VERTO_EV_FLAG_REINITIABLE,
-                accept_rpc_connection, 1);
-    if (ev == NULL)
-        return NULL;
-
-    conn = verto_get_private(ev);
-    conn->transp = svctcp_create(sock, 0, 0);
-    if (conn->transp == NULL) {
-        krb5_klog_syslog(LOG_ERR,
-                         _("Cannot create RPC service: %s; continuing"),
-                         strerror(errno));
-        verto_del(ev);
-        return NULL;
-    }
-
-    if (!svc_register(conn->transp, svc->prognum, svc->versnum,
-                      svc->dispatch, 0)) {
-        krb5_klog_syslog(LOG_ERR,
-                         _("Cannot register RPC service: %s; continuing"),
-                         strerror(errno));
-        verto_del(ev);
-        return NULL;
-    }
-
-    return ev;
-}
-
-static verto_ev *
 add_rpc_data_fd(struct socksetup *data, int sock)
 {
     return add_fd(data, sock, CONN_RPC,
@@ -630,371 +724,313 @@ setnolinger(int s)
     return setsockopt(s, SOL_SOCKET, SO_LINGER, &ling, sizeof(ling));
 }
 
-/* Returns -1 or socket fd.  */
-static int
-setup_a_tcp_listener(struct socksetup *data, struct sockaddr *addr)
+/**
+ * An enum containing the flags that can be set for setting up a socket.
+ */
+enum sock_flag
 {
-    int sock;
+    /**
+     * Set the socket to listen for connections.
+     */
+    LISTEN = 1 << 0,
+    /**
+     * Set the socket to non-blocking io mode.
+     */
+    NBIO = 1 << 1,
+    /**
+     * Turn off the linger socket option.
+     */
+    NOLINGER = 1 << 2,
+    /**
+     * Setup pktinfo on the socket.
+     */
+    PKTINFO = 1 << 3
+};
 
-    sock = create_server_socket(data, addr, SOCK_STREAM);
-    if (sock == -1)
-        return -1;
-    if (listen(sock, 5) < 0) {
-        com_err(data->prog, errno,
-                _("Cannot listen on TCP server socket on %s"), paddr(addr));
-        close(sock);
-        return -1;
-    }
-    if (setnbio(sock)) {
-        com_err(data->prog, errno,
-                _("cannot set listening tcp socket on %s non-blocking"),
-                paddr(addr));
-        close(sock);
-        return -1;
-    }
-    if (setnolinger(sock)) {
-        com_err(data->prog, errno,
-                _("disabling SO_LINGER on TCP socket on %s"), paddr(addr));
-        close(sock);
-        return -1;
-    }
-    return sock;
-}
-
-static int
-setup_tcp_listener_ports(struct socksetup *data)
+/**
+ * An enum map to sock families for each bind_type.
+ */
+static const int bind_families[] =
 {
-    struct sockaddr_in sin4;
-    struct sockaddr_in6 sin6;
-    int i, port;
+    [UDP] = SOCK_DGRAM,
+    [TCP] = SOCK_STREAM,
+    [RPC] = SOCK_STREAM
+};
 
-    memset(&sin4, 0, sizeof(sin4));
-    sin4.sin_family = AF_INET;
-    sin4.sin_addr.s_addr = INADDR_ANY;
-
-    memset(&sin6, 0, sizeof(sin6));
-    sin6.sin6_family = AF_INET6;
-    sin6.sin6_addr = in6addr_any;
-
-    FOREACH_ELT (tcp_port_data, i, port) {
-        int s4, s6;
-
-        sa_setport((struct sockaddr *)&sin4, port);
-        if (!ipv6_enabled()) {
-            s4 = setup_a_tcp_listener(data, (struct sockaddr *)&sin4);
-            if (s4 < 0)
-                return -1;
-            s6 = -1;
-        } else {
-            s4 = s6 = -1;
-
-            sa_setport((struct sockaddr *)&sin6, port);
-
-            s6 = setup_a_tcp_listener(data, (struct sockaddr *)&sin6);
-            if (s6 < 0)
-                return -1;
-
-            s4 = setup_a_tcp_listener(data, (struct sockaddr *)&sin4);
-        }
-
-        /* Sockets are created, prepare to listen on them. */
-        if (s4 >= 0) {
-            if (add_tcp_listener_fd(data, s4) == NULL)
-                close(s4);
-            else {
-                krb5_klog_syslog(LOG_INFO, _("listening on fd %d: tcp %s"),
-                                 s4, paddr((struct sockaddr *)&sin4));
-            }
-        }
-        if (s6 >= 0) {
-            if (add_tcp_listener_fd(data, s6) == NULL) {
-                close(s6);
-                s6 = -1;
-            } else {
-                krb5_klog_syslog(LOG_INFO, _("listening on fd %d: tcp %s"),
-                                 s6, paddr((struct sockaddr *)&sin6));
-            }
-            if (s4 < 0)
-                krb5_klog_syslog(LOG_INFO,
-                                 _("assuming IPv6 socket accepts IPv4"));
-        }
-    }
-    return 0;
-}
-
-static int
-setup_rpc_listener_ports(struct socksetup *data)
+/*
+ * An enum map containing conn_type for each bind_type.
+ */
+static const enum conn_type bind_conn_types[] =
 {
-    struct sockaddr_in sin4;
-    struct sockaddr_in6 sin6;
-    int i;
-    struct rpc_svc_data svc;
+    [UDP] = CONN_UDP,
+    [TCP] = CONN_TCP_LISTENER,
+    [RPC] = CONN_RPC_LISTENER
+};
 
-    memset(&sin4, 0, sizeof(sin4));
-    sin4.sin_family = AF_INET;
-    sin4.sin_addr.s_addr = INADDR_ANY;
-
-    memset(&sin6, 0, sizeof(sin6));
-    sin6.sin6_family = AF_INET6;
-    sin6.sin6_addr = in6addr_any;
-
-    FOREACH_ELT (rpc_svc_data, i, svc) {
-        int s4;
-        int s6;
-
-        sa_setport((struct sockaddr *)&sin4, svc.port);
-        s4 = create_server_socket(data, (struct sockaddr *)&sin4, SOCK_STREAM);
-        if (s4 < 0)
-            return -1;
-
-        if (add_rpc_listener_fd(data, &svc, s4) == NULL)
-            close(s4);
-        else
-            krb5_klog_syslog(LOG_INFO, _("listening on fd %d: rpc %s"),
-                             s4, paddr((struct sockaddr *)&sin4));
-
-        if (ipv6_enabled()) {
-            sa_setport((struct sockaddr *)&sin6, svc.port);
-            s6 = create_server_socket(data, (struct sockaddr *)&sin6,
-                                      SOCK_STREAM);
-            if (s6 < 0)
-                return -1;
-
-            if (add_rpc_listener_fd(data, &svc, s6) == NULL)
-                close(s6);
-            else
-                krb5_klog_syslog(LOG_INFO, _("listening on fd %d: rpc %s"),
-                                 s6, paddr((struct sockaddr *)&sin6));
-        }
-    }
-
-    return 0;
-}
-
-static int
-setup_udp_port_1(struct socksetup *data, struct sockaddr *addr, int pktinfo);
-
-static void
-setup_udp_pktinfo_ports(struct socksetup *data)
+/* Called when an RPC socket has been added to the event loop */
+static krb5_error_code
+on_rpc_fd_added(struct socksetup *data, struct bind_address *ba, int sock,
+                verto_ev *ev)
 {
-    struct sockaddr_in sa;
-    struct sockaddr_in6 sa6;
-    int r;
-
-    memset(&sa, 0, sizeof(sa));
-    sa.sin_family = AF_INET;
-    r = setup_udp_port_1(data, (struct sockaddr *)&sa, 4);
-    if (r == 0)
-        data->do_ipv4_udp_all = FALSE;
-
-    memset(&sa6, 0, sizeof(sa6));
-    sa6.sin6_family = AF_INET6;
-    r = setup_udp_port_1(data, (struct sockaddr *)&sa6, 6);
-    if (r == 0)
-        data->do_ipv6_udp_all = FALSE;
-
-}
-
-static int
-setup_udp_port_1(struct socksetup *data, struct sockaddr *addr, int pktinfo)
-{
-    int sock = -1, i, r;
-    u_short port;
-
-    FOREACH_ELT (udp_port_data, i, port) {
-        sa_setport(addr, port);
-        sock = create_server_socket(data, addr, SOCK_DGRAM);
-        if (sock == -1)
-            return 1;
-        setnbio(sock);
-
-        if (pktinfo) {
-            r = set_pktinfo(sock, addr->sa_family);
-            if (r) {
-                com_err(data->prog, r,
-                        _("Cannot request packet info for udp socket address "
-                          "%s port %d"), paddr(addr), port);
-                close(sock);
-                return 1;
-            }
-        }
-        krb5_klog_syslog(LOG_INFO, _("listening on fd %d: udp %s%s"), sock,
-                         paddr(addr), pktinfo ? " (pktinfo)" : "");
-        if (add_udp_fd (data, sock, pktinfo) == 0) {
-            close(sock);
-            return 1;
-        }
-    }
-    return 0;
-}
-
-static int
-setup_udp_port(void *arg, struct sockaddr *addr)
-{
-    struct socksetup *data = arg;
-
-    if ((addr->sa_family == AF_INET && data->do_ipv4_udp_all) ||
-        (addr->sa_family == AF_INET6 && data->do_ipv6_udp_all))
-        return setup_udp_port_1(data, addr, 0);
-    return 0;
-}
-
-#ifdef HAVE_STRUCT_RT_MSGHDR
-#include <net/route.h>
-
-static void
-do_network_reconfig(verto_ctx *ctx, verto_ev *ev)
-{
-    struct connection *conn = verto_get_private(ev);
-    if (loop_setup_network(ctx, conn->handle, conn->prog) != 0) {
-        krb5_klog_syslog(LOG_ERR, _("Failed to reconfigure network, exiting"));
-        verto_break(ctx);
-    }
-}
-
-static int
-routing_update_needed(struct rt_msghdr *rtm)
-{
-    switch (rtm->rtm_type) {
-    case RTM_ADD:
-    case RTM_DELETE:
-    case RTM_NEWADDR:
-    case RTM_DELADDR:
-    case RTM_IFINFO:
-#ifdef RTM_OLDADD
-    case RTM_OLDADD:
-#endif
-#ifdef RTM_OLDDEL
-    case RTM_OLDDEL:
-#endif
-        /*
-         * Some flags indicate routing table updates that don't
-         * indicate local address changes.  They may come from
-         * redirects, or ARP, etc.
-         *
-         * This set of symbols is just an initial guess based on
-         * some messages observed in real life; working out which
-         * other flags also indicate messages we should ignore,
-         * and which flags are portable to all system and thus
-         * don't need to be conditionalized, is left as a future
-         * exercise.
-         */
-#ifdef RTF_DYNAMIC
-        if (rtm->rtm_flags & RTF_DYNAMIC)
-            break;
-#endif
-#ifdef RTF_CLONED
-        if (rtm->rtm_flags & RTF_CLONED)
-            break;
-#endif
-#ifdef RTF_LLINFO
-        if (rtm->rtm_flags & RTF_LLINFO)
-            break;
-#endif
-        return 1;
-    case RTM_RESOLVE:
-#ifdef RTM_NEWMADDR
-    case RTM_NEWMADDR:
-    case RTM_DELMADDR:
-#endif
-    case RTM_MISS:
-    case RTM_REDIRECT:
-    case RTM_LOSING:
-    case RTM_GET:
-        /* Not interesting.  */
-#if 0
-        krb5_klog_syslog(LOG_DEBUG, "routing msg not interesting");
-#endif
-        break;
-    default:
-        krb5_klog_syslog(LOG_INFO,
-                         _("unhandled routing message type %d, "
-                           "will reconfigure just for the fun of it"),
-                         rtm->rtm_type);
-        return 1;
-    }
-
-    return 0;
-}
-
-static void
-process_routing_update(verto_ctx *ctx, verto_ev *ev)
-{
-    int fd;
-    ssize_t n_read;
-    size_t sz_read;
-    struct rt_msghdr rtm;
     struct connection *conn;
+    int ret;
 
-    fd = verto_get_fd(ev);
+    krb5_klog_syslog(LOG_DEBUG,
+                     _("RPC added to event loop, setting up rpc service"));
     conn = verto_get_private(ev);
-    while ((n_read = read(fd, &rtm, sizeof(rtm))) > 0) {
-        sz_read = (size_t) n_read; /* Safe, since we just checked the sign */
-        if (sz_read < sizeof(rtm)) {
-            /* Quick hack to figure out if the interesting
-               fields are present in a short read.
+    conn->transp = svctcp_create(sock, 0, 0);
+    if (conn->transp == NULL) {
+        ret = errno;
+        krb5_klog_syslog(LOG_ERR,
+                         _("Cannot create RPC service: %s"),
+                         strerror(ret));
+        return ret;
+    }
 
-               A short read seems to be normal for some message types.
-               Only complain if we don't have the critical initial
-               header fields.  */
-#define RS(FIELD) (offsetof(struct rt_msghdr, FIELD) + sizeof(rtm.FIELD))
-            if (sz_read < RS(rtm_type) ||
-                sz_read < RS(rtm_version) ||
-                sz_read < RS(rtm_msglen)) {
+    ret = svc_register(conn->transp, ba->rpc_svc_data.prognum,
+                       ba->rpc_svc_data.versnum, ba->rpc_svc_data.dispatch, 0);
+
+    if (!ret) {
+        ret = errno;
+        krb5_klog_syslog(LOG_ERR,
+                         _("Cannot register RPC service: %s"),
+                         strerror(ret));
+        return ret;
+    }
+
+    return 0;
+}
+
+/*
+ * Setup a socket for the server.
+ *
+ * Arguments:
+ *
+ * - ba
+ *      The bind address and port for the socket.
+ * - ai
+ *      The addrinfo struct to use for creating the socket.
+ * - flags
+ *      The sock_flag options for for setting up this socket.
+ * - ctype
+ *      The conn_type of this socket.
+ */
+static krb5_error_code
+setup_socket(struct socksetup *data, struct bind_address *ba,
+             struct sockaddr *sock_address, int flags, verto_callback vcb,
+             enum conn_type ctype)
+{
+    int      sock = -1;
+    int      ret;
+    verto_ev *ev = NULL;
+
+
+    krb5_klog_syslog(LOG_DEBUG, _("Setting up %s socket for address %s"),
+                     bind_type_names[ba->type], paddr(sock_address));
+
+    /* Create the socket. */
+    sock = create_server_socket(data, sock_address, bind_families[ba->type]);
+    if (sock == -1) {
+        ret = data->retval;
+        goto cleanup;
+    }
+
+    /* Set the socket to listen for connections if requested. */
+    if (flags & LISTEN && listen(sock, MAX_CONNECTIONS) < 0) {
+        ret = errno;
+        com_err(data->prog, errno,
+                _("Cannot listen on %s server socket on %s"),
+                bind_type_names[ba->type], paddr(sock_address));
+        goto cleanup;
+    }
+
+    /* Set the socket non-blocking io option if requested. */
+    if (flags & NBIO && setnbio(sock)) {
+        ret = errno;
+        com_err(data->prog, errno,
+                _("cannot set listening %s socket on %s non-blocking"),
+                bind_type_names[ba->type], paddr(sock_address));
+        goto cleanup;
+    }
+
+    /* Turn off the linger option if requested. */
+    if (flags & NOLINGER && setnolinger(sock)) {
+        ret = errno;
+        com_err(data->prog, errno,
+                _("cannot set SO_LINGER on %s socket on %s"),
+                bind_type_names[ba->type], paddr(sock_address));
+        goto cleanup;
+    }
+
+    /* Set pktinfo for the socket if requested and supported, or fail if not
+     * supported. */
+    if (flags & PKTINFO) {
+        krb5_klog_syslog(LOG_DEBUG, _("Setting pktinfo on socket %s"),
+                         paddr(sock_address));
+        ret = set_pktinfo(sock, sock_address->sa_family);
+        if (ret) {
+            com_err(data->prog, ret,
+                    _("Cannot request packet info for udp socket address "
+                      "%s port %d"), paddr(sock_address), ba->port);
+            krb5_klog_syslog(LOG_INFO, _("System does not support pktinfo yet "
+                                         "binding to a wildcard address. "
+                                         "Packets are not guaranteed to "
+                                         "return on the received address."));
+        }
+    }
+
+    /* Add the socket to the event loop. */
+    ev = add_fd(data, sock, ctype,
+                VERTO_EV_FLAG_IO_READ |
+                VERTO_EV_FLAG_PERSIST |
+                VERTO_EV_FLAG_REINITIABLE, vcb, 1);
+
+    if (ev == NULL) {
+        krb5_klog_syslog(LOG_ERR, _("Error attempting to add verto event"));
+        ret = data->retval;
+        goto cleanup;
+    }
+
+    if (ba->type == RPC) {
+        ret = on_rpc_fd_added(data, ba, sock, ev);
+        if (ret != 0) {
+            krb5_klog_syslog(LOG_ERR,
+                             _("Error in verto event rpc function"));
+            ret = data->retval;
+            goto cleanup;
+        }
+    }
+
+    ev = NULL;
+    sock = -1;
+    ret = 0;
+
+cleanup:
+    if (sock >= 0)
+        close(sock);
+    if (ev != NULL)
+        verto_del(ev);
+    return ret;
+}
+
+/*
+ * Setup all the socket addresses that the net-server should listen to.
+ *
+ * This function uses getaddrinfo to figure out all the addresses. This will
+ * automatically figure out which socket families that should be used on the
+ * host making it useful even for wildcard addresses.
+ *
+ * Arguments:
+ * - data
+ *      A pointer to the socksetup data.
+ */
+static krb5_error_code
+setup_addresses(struct socksetup *data)
+{
+    /* An bind_type enum map for the verto callback functions. */
+    static verto_callback *const verto_callbacks[] = {
+        [UDP] = &process_packet,
+        [TCP] = &accept_tcp_connection,
+        [RPC] = &accept_rpc_connection
+    };
+
+    size_t  i;
+    int ret, flags, err;
+    struct bind_address val;
+    struct addrinfo hints, *result = NULL, *r_next = NULL;
+    verto_callback vcb;
+    enum conn_type ctype;
+
+    /* Check to make sure addresses were added to the server. You can't
+     * really run a net server without the net. */
+    if (bind_addresses.n == 0) {
+        krb5_klog_syslog(LOG_ERR, _("No addresses added to the net server"));
+        ret = EINVAL;
+        goto cleanup;
+    }
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+
+    /* Setup the hints for getaddrinfo. */
+
+    /* Set the family to AF_UNSPEC to tell getaddrinfo to return both AF_INET
+     * and AF_INET6 addresses. */
+    hints.ai_family = AF_UNSPEC;
+    /*
+     * Add the AI_PASSIVE flag so that when the address is NULL that a wildcard
+     * address will be returned.
+     */
+    hints.ai_flags = AI_PASSIVE;
+
+    /* Add all the requested addresses. */
+    for (i = 0; i < bind_addresses.n; i++) {
+        val = bind_addresses.data[i];
+        hints.ai_socktype = bind_families[val.type];
+
+        /* Call getaddrinfo passing the port "0" to support cases when the
+         * address is NULL. */
+        err = getaddrinfo(val.address, "0", &hints, &result);
+        if (err) {
+            krb5_klog_syslog(LOG_ERR,
+                             _("Failed getting address info (for %s): %s"),
+                             val.address == NULL ? "<wildcard>" : val.address,
+                             gai_strerror(err));
+            ret = EIO;
+            goto cleanup;
+        }
+
+        /*
+         * Loop through all the sockets that getaddrinfo could find to match
+         * the requested address. In case of the default wildcard, this should
+         * usually have two results, one for each of ipv4 and ipv6, or one or
+         * the other, depending on the system.
+         *
+         * NOTE: This could be put in its own function to break this one up
+         * if it gets too big - @sarahday
+         */
+        for (r_next = result; r_next != NULL; r_next = r_next->ai_next) {
+            /* Make sure getaddrinfo returned a socket with the same type that
+             * was requested. */
+            assert(hints.ai_socktype == r_next->ai_socktype);
+            /* Set the port number for the socket. */
+            sa_setport(r_next->ai_addr, val.port);
+
+            ctype = bind_conn_types[val.type];
+
+            /* Setup the socket creation flags. */
+            flags = 0;
+            flags |= val.type == UDP || val.type == TCP ? NBIO : 0;
+            flags |= val.type == TCP ? LISTEN : 0;
+            flags |= val.type == TCP ? NOLINGER : 0;
+
+            /* When the family is udp and the wildcard address is requested we
+             * want to use ip PktInfo if it's available. */
+            flags |= val.type == UDP && val.address == NULL ? PKTINFO : 0;
+
+            /* Cross your fingers, it's time to setup the socket! */
+            err = setup_socket(data, &val, r_next->ai_addr, flags,
+                               verto_callbacks[val.type], ctype);
+            if (err != 0) {
+                /* Well, that didn't go very well... */
                 krb5_klog_syslog(LOG_ERR,
-                                 _("short read (%d/%d) from routing socket"),
-                                 (int)sz_read, (int) sizeof(rtm));
-                return;
+                                 _("Failed setting up a %s socket (for %s)"),
+                                 bind_type_names[val.type],
+                                 paddr(r_next->ai_addr));
+                ret = err;
+                goto cleanup;
             }
         }
-        if (rtm.rtm_msglen > sizeof(rtm)) {
-            /* It appears we get a partial message and the rest is
-               thrown away?  */
-        } else if (rtm.rtm_msglen != sz_read) {
-            krb5_klog_syslog(LOG_ERR,
-                             _("read %d from routing socket but msglen is %d"),
-                             (int)sz_read, rtm.rtm_msglen);
-        }
 
-        if (routing_update_needed(&rtm)) {
-            /* Ideally we would use idle here instead of timeout. However, idle
-             * is not universally supported yet in all backends. So let's just
-             * use timeout for now to avoid locking into a loop. */
-            ev = verto_add_timeout(ctx, VERTO_EV_FLAG_NONE,
-                                   do_network_reconfig, 0);
-            verto_set_private(ev, conn, NULL);
-            assert(ev);
-        }
+        if (result != NULL)
+            freeaddrinfo(result);
+        result = NULL;
+        ret = 0;
     }
-}
-#endif
 
-krb5_error_code
-loop_setup_routing_socket(verto_ctx *ctx, void *handle, const char *progname)
-{
-#ifdef HAVE_STRUCT_RT_MSGHDR
-    struct socksetup data;
-    int sock;
-
-    data.ctx = ctx;
-    data.handle = handle;
-    data.prog = progname;
-    data.retval = 0;
-
-    sock = socket(PF_ROUTE, SOCK_RAW, 0);
-    if (sock < 0) {
-        int e = errno;
-        krb5_klog_syslog(LOG_INFO, _("couldn't set up routing socket: %s"),
-                         strerror(e));
-    } else {
-        krb5_klog_syslog(LOG_INFO, _("routing socket is fd %d"), sock);
-        setnbio(sock);
-        add_fd(&data, sock, CONN_ROUTING,
-               VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
-               process_routing_update, 0);
-    }
-#endif
-    return 0;
+cleanup:
+    if (result != NULL)
+        freeaddrinfo(result);
+    return ret;
 }
 
 krb5_error_code
@@ -1002,7 +1038,11 @@ loop_setup_network(verto_ctx *ctx, void *handle, const char *prog)
 {
     struct socksetup setup_data;
     verto_ev *ev;
-    int i;
+    int i, ret;
+
+    /* Check to make sure that at least one address was added to the loop. */
+    if (bind_addresses.n == 0)
+        return EINVAL;
 
     /* Close any open connections. */
     FOREACH_ELT(events, i, ev)
@@ -1014,24 +1054,17 @@ loop_setup_network(verto_ctx *ctx, void *handle, const char *prog)
     setup_data.prog = prog;
     setup_data.retval = 0;
     krb5_klog_syslog(LOG_INFO, _("setting up network..."));
-
-    /*
-     * Start by assuming we need a UDP listener socket for each address for
-     * IPv4 and IPv6.  setup_udp_pktinfo_ports will unset appropriate flags if
-     * it sets up a wildcard socket using IP_PKTINFO or IPV6_PKTINFO.
-     */
-    setup_data.do_ipv4_udp_all = TRUE;
-    setup_data.do_ipv6_udp_all = TRUE;
-    setup_udp_pktinfo_ports(&setup_data);
-    if (setup_data.do_ipv4_udp_all || setup_data.do_ipv6_udp_all) {
-        if (foreach_localaddr (&setup_data, setup_udp_port, 0, 0)) {
-            return setup_data.retval;
-        }
+    ret = setup_addresses(&setup_data);
+    if (ret != 0) {
+        com_err(prog, ret, _("Error setting up network"));
+        exit(1);
     }
-    setup_tcp_listener_ports(&setup_data);
-    setup_rpc_listener_ports(&setup_data);
     krb5_klog_syslog (LOG_INFO, _("set up %d sockets"), (int) events.n);
     if (events.n == 0) {
+        /*
+         * If no sockets were setup then something bad happened. A net server
+         * without a socket isn't much of a net server.
+         */
         com_err(prog, 0, _("no sockets set up?"));
         exit (1);
     }
@@ -1194,9 +1227,9 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
 
     if (state->daddr_len == 0 && conn->type == CONN_UDP) {
         /*
-         * If the PKTINFO option isn't set, this socket should be bound to a
-         * specific local address.  This info probably should've been saved in
-         * our socket data structure at setup time.
+         * An address couldn't be obtain, so the PKTINFO option probably isn't
+         * available.  If the socket is bound to a specific address, then try
+         * to get the address here. If it fails then oh well.
          */
         state->daddr_len = sizeof(state->daddr);
         if (getsockname(state->port_fd, (struct sockaddr *)&state->daddr,
@@ -1535,11 +1568,17 @@ process_tcp_connection_write(verto_ctx *ctx, verto_ev *ev)
 void
 loop_free(verto_ctx *ctx)
 {
+    int i;
+    struct bind_address val;
+
     verto_free(ctx);
+
+    /* Free all the addresses added to net-server */
+    FOREACH_ELT(bind_addresses, i, val)
+        free(val.address);
+
+    FREE_SET_DATA(bind_addresses);
     FREE_SET_DATA(events);
-    FREE_SET_DATA(udp_port_data);
-    FREE_SET_DATA(tcp_port_data);
-    FREE_SET_DATA(rpc_svc_data);
 }
 
 static int

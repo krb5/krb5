@@ -31,6 +31,11 @@
 
 #include <verto.h>
 
+/**
+ * The delimeter characters supported by the addresses string.
+ */
+#define ADDRESSES_DELIM ",; "
+
 typedef struct _krb5_fulladdr {
     krb5_address *      address;
     krb5_ui_4           port;
@@ -41,12 +46,63 @@ void init_addr(krb5_fulladdr *, struct sockaddr *);
 
 /* exported from net-server.c */
 verto_ctx *loop_init(verto_ev_type types);
-krb5_error_code loop_add_udp_port(int port);
-krb5_error_code loop_add_tcp_port(int port);
-krb5_error_code loop_add_rpc_service(int port, u_long prognum, u_long versnum,
-                                     void (*dispatch)());
-krb5_error_code loop_setup_routing_socket(verto_ctx *ctx, void *handle,
-                                          const char *progname);
+
+/*
+ * Add UDP addresses to the loop.
+ *
+ * Arguments:
+ *
+ * - default_port
+ *      The port for the UDP socket(s) if not specified in the addresses.
+ * - addresses
+ *      The optional addresses for the UDP socket. Pass NULL for the wildcard
+ *      address. Supported delimeters are currently {@ref ADDRESSES_DELIM}.
+ *      An optional port number, separated from the address by a colon, may be
+ *      included.  If the name or address contains colons (for example, if it
+ *      is an IPv6 address), enclose it in square brackets to distinguish the
+ *      colon from a port separator.
+ */
+krb5_error_code loop_add_udp_address(int default_port,
+                                     /* NULL */ const char *addresses);
+
+/*
+ * Add TCP addresses to the loop.
+ *
+ * Arguments:
+ *
+ * - default_port
+ *      The port for the TCP socket(s) if not specified in the addresses.
+ * - addresses
+ *      The optional addresses for the TCP socket.  Pass NULL for the wildcard
+ *      address.  Supported delimeters are currently {@ref ADDRESSES_DELIM}.
+ *      An optional port number, separated from the address by a colon, may be
+ *      included.  If the name or address contains colons (for example, if it
+ *      is an IPv6 address), enclose it in square brackets to distinguish the
+ *      colon from a port separator.
+ */
+krb5_error_code loop_add_tcp_address(int default_port,
+                                     /* NULL */ const char *addresses);
+
+/*
+ * Add RPC service addresses to the loop.
+ *
+ * Arguments:
+ *
+ * - default_port:
+ *      The port for the RPC socket(s) if not specified in the addresses.
+ * - addresses:
+ *      The optional addresses for the RPC socket. Pass NULL for the wildcard
+ *      address. Supported delimeters are currently {@ref ADDRESSES_DELIM}.
+ *      An optional port number, separated from the address by a colon, may be
+ *      included.  If the name or address contains colons (for example, if it
+ *      is an IPv6 address), enclose it in square brackets to distinguish the
+ *      colon from a port separator.
+ */
+krb5_error_code loop_add_rpc_service(int default_port,
+                                     /* NULL */ const char *addresses,
+                                     u_long prognum, u_long versnum,
+                                     void (*dispatchfn)());
+
 krb5_error_code loop_setup_network(verto_ctx *ctx, void *handle,
                                    const char *progname);
 krb5_error_code loop_setup_signals(verto_ctx *ctx, void *handle,

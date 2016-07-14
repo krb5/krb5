@@ -1,6 +1,6 @@
 [kdcdefaults]
-	kdc_ports = 1750 
-	kdc_tcp_ports = 1750
+	kdc_listen = 1750
+	kdc_tcp_listen = 1750
 
 [realms]
 	__REALM__ = {

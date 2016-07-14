@@ -49,8 +49,8 @@ subsection does not contain a relation for the tag.  See the
 :ref:`kdc_realms` section for the definitions of these relations.
 
 * **host_based_services**
-* **kdc_ports**
-* **kdc_tcp_ports**
+* **kdc_listen**
+* **kdc_tcp_listen**
 * **no_host_referral**
 * **restrict_anonymous_to_tgt**
 
@@ -232,31 +232,61 @@ The following tags may be specified in a [realms] subsection:
     **database_name** is used.  Determination of the **iprop_logfile**
     default value will not use values from the [dbmodules] section.)
 
+**kadmind_listen**
+    (Comma-separated list.)  Tells the :ref:`kadmind(8)` daemon to only
+    bind to certain addresses.  An optional port number, separated from
+    the address by a colon, may be included.  If the name or address
+    contains colons (for example, if it is an IPv6 address), enclose
+    it in square brackets to distinguish the colon from a port separator.
+    (NOTE: The daemon expects all addresses specified to exist and be able to
+    be bound to.  If it fails binding to any of the addresses then the daemon
+    will fail to start.)
+
 **kadmind_port**
     (Port number.)  Specifies the port on which the :ref:`kadmind(8)`
-    daemon is to listen for this realm.  The assigned port for kadmind
-    is 749, which is used by default.
+    daemon is to listen for this realm if not specified in an address in
+    ``kadmind_listen``.  The assigned port for kadmind is 749, which is used
+    by default.
 
 **key_stash_file**
     (String.)  Specifies the location where the master key has been
     stored (via kdb5_util stash).  The default is |kdcdir|\
     ``/.k5.REALM``, where *REALM* is the Kerberos realm.
 
-**kdc_ports**
-    (Whitespace- or comma-separated list.)  Lists the ports on which
-    the Kerberos server should listen for UDP requests, as a
-    comma-separated list of integers.  The default value is
-    ``88,750``, which are the assigned Kerberos port and the port
-    historically used by Kerberos V4.
+**kdc_listen**
+    (Comma-separated list.)  Tells the :ref:`krb5kdc(8)` daemon to only
+    bind to certain udp addresses.  The format may be a port number to bind
+    to the wildcard address and the port, with or without a colon before
+    it, or an ip address with an optional port number, separated from
+    the address by a colon.  If the address contains colons (for example,
+    if it is an IPv6 address), enclose it in square brackets to distinguish
+    the colon from a port separator.
+    (NOTE: The daemon expects all addresses specified to exist and be able to
+    be bound to.  If it fails binding to any of the addresses then the daemon
+    will fail to start.)
 
-**kdc_tcp_ports**
-    (Whitespace- or comma-separated list.)  Lists the ports on which
-    the Kerberos server should listen for TCP connections, as a
-    comma-separated list of integers.  To disable listening on TCP,
-    set this relation to the empty string with ``kdc_tcp_ports = ""``.
-    If this relation is not specified, the default is to listen on TCP
-    port 88 (the standard port).  Prior to release 1.13, the default
-    was not to listen for TCP connections at all.
+**kdc_tcp_listen**
+    (Comma-separated list.)  Tells the :ref:`krb5kdc(8)` daemon to only
+    bind to certain tcp addresses.  The format may be a port number to bind
+    to the wildcard address and the port, with or without a colon before
+    it, or an ip address with an optional port number, separated from
+    the address by a colon.  If the address contains colons (for example,
+    if it is an IPv6 address), enclose it in square brackets to distinguish
+    the colon from a port separator.
+    (NOTE: The daemon expects all addresses specified to exist and be able to
+    be bound to.  If it fails binding to any of the addresses then the daemon
+    will fail to start.)
+
+**kpasswd_listen**
+    (Comma-separated list.)  Tells the :ref:`kadmind(8)` daemon to only
+    bind to certain addresses for kpasswd.  An optional port number,
+    separated from the address by a colon, may be included.  If the
+    name or address contains colons (for example, if it is an IPv6 address),
+    enclose it in square brackets to distinguish the colon from a port
+    separator.
+    (NOTE: The daemon expects all addresses specified to exist and be able to
+    be bound to.  If it fails binding to any of the addresses then the daemon
+    will fail to start.)
 
 **master_key_name**
     (String.)  Specifies the name of the principal associated with the
@@ -806,8 +836,8 @@ Sample kdc.conf File
 Here's an example of a kdc.conf file::
 
     [kdcdefaults]
-        kdc_ports = 88
-
+        kdc_listen = 88
+        kdc_tcp_listen = 88
     [realms]
         ATHENA.MIT.EDU = {
             kadmind_port = 749

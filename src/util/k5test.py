@@ -684,7 +684,7 @@ def _debug_cmd(args, env, input):
     if input:
         print
         print '*** Enter the following input when appropriate:'
-        print 
+        print
         print input
         print
     code = subprocess.call(args, env=env)
@@ -1071,7 +1071,7 @@ def cross_realms(num, xtgts=None, args=None, **keywords):
         if not 'portbase' in a:
             a['portbase'] = 61000 + 10 * realmnumber
         realm_args.append(a)
-        
+
     # Build a [realms] config fragment containing all of the realms.
     realmsection = { '$realm' : None }
     for a in realm_args:
@@ -1134,8 +1134,8 @@ _default_kdc_conf = {
             'dictfile': '$testdir/dictfile',
             'kadmind_port': '$port1',
             'kpasswd_port': '$port2',
-            'kdc_ports': '$port0',
-            'kdc_tcp_ports': '$port0'}},
+            'kdc_listen': '$port0',
+            'kdc_tcp_listen': '$port0'}},
     'dbmodules': {
         'db_module_dir': '$plugins/kdb',
         'db': {'db_library': 'db2', 'database_name' : '$testdir/db'}},

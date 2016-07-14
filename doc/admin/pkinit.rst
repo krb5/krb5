@@ -186,7 +186,7 @@ appropriate pathname)::
 Because of the larger size of requests and responses using PKINIT, you
 may also need to allow TCP access to the KDC::
 
-    kdc_tcp_ports = 88
+    kdc_tcp_listen = 88
 
 Restart the :ref:`krb5kdc(8)` daemon to pick up the configuration
 changes.
