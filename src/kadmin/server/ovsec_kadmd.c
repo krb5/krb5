@@ -72,6 +72,7 @@ int nofork = 0;
 char *kdb5_util = KPROPD_DEFAULT_KDB5_UTIL;
 char *kprop = KPROPD_DEFAULT_KPROP;
 char *dump_file = KPROP_DEFAULT_FILE;
+char *kprop_port = NULL;
 
 static krb5_context context;
 static char *progname;
@@ -86,7 +87,7 @@ usage()
     fprintf(stderr, _("Usage: kadmind [-x db_args]* [-r realm] [-m] [-nofork] "
                       "[-port port-number]\n"
                       "\t\t[-proponly] [-p path-to-kdb5_util] [-F dump-file]\n"
-                      "\t\t[-K path-to-kprop] [-P pid_file]\n"
+                      "\t\t[-K path-to-kprop] [-k kprop-port] [-P pid_file]\n"
                       "\nwhere,\n\t[-x db_args]* - any number of database "
                       "specific arguments.\n"
                       "\t\t\tLook at each database documentation for "
@@ -431,6 +432,11 @@ main(int argc, char *argv[])
             if (!argc)
                 usage();
             kprop = *argv;
+        } else if (strcmp(*argv, "-k") == 0) {
+            argc--, argv++;
+            if (!argc)
+                usage();
+            kprop_port = *argv;
         } else {
             break;
         }
@@ -526,6 +532,9 @@ main(int argc, char *argv[])
                     progname, KRB5_IPROP_PROG, KRB5_IPROP_VERS);
         }
     }
+
+    if (kprop_port == NULL)
+        kprop_port = getenv("KPROP_PORT");
 
     krb5_klog_syslog(LOG_INFO, _("starting"));
     if (nofork)
