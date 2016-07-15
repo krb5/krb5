@@ -537,5 +537,5 @@ k5_expand_path_tokens_extra(krb5_context context, const char *path_in,
 cleanup:
     k5_buf_free(&buf);
     free_extra_tokens(extra_tokens);
-    return 0;
+    return ret;
 }
