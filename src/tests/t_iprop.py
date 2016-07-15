@@ -223,10 +223,9 @@ if 'Attributes: DISALLOW_ALL_TIX' not in out:
 slave1_out_dump_path = os.path.join(realm.testdir, 'dump.slave1.out')
 slave2_in_dump_path = os.path.join(realm.testdir, 'dump.slave2.in')
 slave2_kprop_port = str(realm.portbase + 9)
-slave1m['KPROP_PORT'] = slave2_kprop_port
 realm.start_server([kadmind, '-r', realm.realm, '-nofork', '-proponly', '-W',
-                    '-p', kdb5_util, '-K', kprop, '-F', slave1_out_dump_path],
-                   'starting...', slave1m)
+                    '-p', kdb5_util, '-K', kprop, '-k', slave2_kprop_port,
+                    '-F', slave1_out_dump_path], 'starting...', slave1m)
 
 # Test similar default_realm and domain_realm map settings with -r realm.
 slave3_in_dump_path = os.path.join(realm.testdir, 'dump.slave3.in')
