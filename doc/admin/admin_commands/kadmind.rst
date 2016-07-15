@@ -16,6 +16,7 @@ SYNOPSIS
 [**-P** *pid_file*]
 [**-p** *kdb5_util_path*]
 [**-K** *kprop_path*]
+[**-k** *kprop_port*]
 [**-F** *dump_file*]
 
 DESCRIPTION
@@ -100,6 +101,11 @@ OPTIONS
 **-K** *kprop_path*
     specifies the path to the kprop command to use to send full dumps
     to slaves in response to full resync requests.
+
+**-k** *kprop_port*
+    specifies the port by which the kprop process that is spawned by kadmind
+    connects to the slave kpropd, in order to transfer the dump file during
+    an iprop full resync request.
 
 **-F** *dump_file*
     specifies the file path to be used for dumping the KDB in response

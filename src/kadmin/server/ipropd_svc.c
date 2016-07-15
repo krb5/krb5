@@ -36,6 +36,7 @@ extern short l_port;
 extern char *kdb5_util;
 extern char *kprop;
 extern char *dump_file;
+extern char *kprop_port;
 
 static char *reply_ok_str	= "UPDATE_OK";
 static char *reply_err_str	= "UPDATE_ERROR";
@@ -392,10 +393,9 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 
 	DPRINT("%s: exec `kprop -r %s -f %s %s' ...\n",
 	       whoami, handle->params.realm, dump_file, clhost);
-	/* XXX Yuck!  */
-	if (getenv("KPROP_PORT")) {
+	if (kprop_port != NULL) {
 	    pret = execl(kprop, "kprop", "-r", handle->params.realm, "-f",
-			 dump_file, "-P", getenv("KPROP_PORT"), clhost, NULL);
+			 dump_file, "-P", kprop_port, clhost, NULL);
 	} else {
 	    pret = execl(kprop, "kprop", "-r", handle->params.realm, "-f",
 			 dump_file, clhost, NULL);
