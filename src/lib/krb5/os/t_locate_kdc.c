@@ -58,8 +58,10 @@ print_addrs (void)
         char hostbuf[NI_MAXHOST], srvbuf[NI_MAXSERV];
 
         if (entry->hostname != NULL) {
-            printf("%2d: host %s\t%s\tport %d\n", (int)i, entry->hostname,
-                   ttypename(entry->transport), entry->port);
+            printf("%2d: host %s\t%s\tport %d\tm:%d\tp:%s\n", (int)i,
+                   entry->hostname, ttypename(entry->transport),
+                   entry->port, entry->master,
+                   entry->uri_path ? entry->uri_path : "");
             continue;
         }
         err = getnameinfo((struct sockaddr *)&entry->addr, entry->addrlen,
