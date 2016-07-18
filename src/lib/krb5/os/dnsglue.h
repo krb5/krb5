@@ -120,6 +120,10 @@
 
 #endif /* HAVE_RES_NSEARCH */
 
+#ifndef T_URI
+#define T_URI 256
+#endif
+
 /*
  * INCR_OK
  *
@@ -168,6 +172,10 @@ krb5_error_code krb5int_make_srv_query_realm(const krb5_data *realm,
                                              const char *protocol,
                                              struct srv_dns_entry **answers);
 void krb5int_free_srv_dns_data(struct srv_dns_entry *);
+
+krb5_error_code
+k5_make_uri_query(const krb5_data *realm, const char *service,
+                  struct srv_dns_entry **answers);
 
 #endif /* KRB5_DNS_LOOKUP */
 #endif /* !defined(KRB5_DNSGLUE_H) */
