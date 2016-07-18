@@ -45,6 +45,118 @@ krb5int_free_srv_dns_data (struct srv_dns_entry *p)
     }
 }
 
+/* Construct a DNS label of the form "service.[protocol.]realm.", placing the
+ * result into fixed_buf.  protocol may be NULL. */
+static krb5_error_code
+prepare_lookup_buf(const krb5_data *realm, const char *service,
+                   const char *protocol, char *fixed_buf, size_t bufsize)
+{
+    struct k5buf buf;
+
+    if (memchr(realm->data, 0, realm->length))
+        return EINVAL;
+
+    k5_buf_init_fixed(&buf, fixed_buf, bufsize);
+    k5_buf_add_fmt(&buf, "%s.", service);
+    if (protocol != NULL)
+        k5_buf_add_fmt(&buf, "%s.", protocol);
+    k5_buf_add_len(&buf, realm->data, realm->length);
+
+    /*
+     * Realm names don't (normally) end with ".", but if the query doesn't end
+     * with "." and doesn't get an answer as is, the resolv code will try
+     * appending the local domain.  Since the realm names are absolutes, let's
+     * stop that.
+     */
+
+    if (buf.len > 0 && ((char *)buf.data)[buf.len - 1] != '.')
+        k5_buf_add(&buf, ".");
+
+    return k5_buf_status(&buf);
+}
+
+/* Insert new into the list *head, ordering by priority.  Weight is not
+ * currently used. */
+static void
+place_srv_entry(struct srv_dns_entry **head, struct srv_dns_entry *new)
+{
+    struct srv_dns_entry *entry;
+
+    if (*head == NULL || (*head)->priority > new->priority) {
+        new->next = *head;
+        *head = new;
+        return;
+    }
+
+    for (entry = *head; entry != NULL; entry = entry->next) {
+        /*
+         * Insert an entry into the next spot if there is no next entry (we're
+         * at the end), or if the next entry has a higher priority (lower
+         * priorities are preferred).
+         */
+        if (entry->next == NULL || entry->next->priority > new->priority) {
+            new->next = entry->next;
+            entry->next = new;
+            break;
+        }
+    }
+}
+
+/* Query the URI RR, collecting weight, priority, and target. */
+krb5_error_code
+k5_make_uri_query(const krb5_data *realm, const char *service,
+                  struct srv_dns_entry **answers)
+{
+    const unsigned char *p = NULL, *base = NULL;
+    char host[MAXDNAME];
+    int size, ret, rdlen;
+    unsigned short priority, weight;
+    struct krb5int_dns_state *ds = NULL;
+    struct srv_dns_entry *head = NULL, *uri = NULL;
+
+    *answers = NULL;
+
+    /* Construct service.realm. */
+    ret = prepare_lookup_buf(realm, service, NULL, host, sizeof(host));
+    if (ret)
+        return 0;
+
+    size = krb5int_dns_init(&ds, host, C_IN, T_URI);
+    if (size < 0)
+        goto out;
+
+    for (;;) {
+        ret = krb5int_dns_nextans(ds, &base, &rdlen);
+        if (ret < 0 || base == NULL)
+            goto out;
+
+        p = base;
+
+        SAFE_GETUINT16(base, rdlen, p, 2, priority, out);
+        SAFE_GETUINT16(base, rdlen, p, 2, weight, out);
+
+        uri = k5alloc(sizeof(*uri), &ret);
+        if (uri == NULL)
+            goto out;
+
+        uri->priority = priority;
+        uri->weight = weight;
+        /* rdlen - 4 bytes remain after the priority and weight. */
+        uri->host = k5memdup0(p, rdlen - 4, &ret);
+        if (uri->host == NULL) {
+            ret = errno;
+            goto out;
+        }
+
+        place_srv_entry(&head, uri);
+    }
+
+out:
+    krb5int_dns_fini(ds);
+    *answers = head;
+    return 0;
+}
+
 /* Do DNS SRV query, return results in *answers.
 
    Make best effort to return all the data we can.  On memory or
@@ -62,10 +174,7 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
     int size, ret, rdlen, nlen;
     unsigned short priority, weight, port;
     struct krb5int_dns_state *ds = NULL;
-    struct k5buf buf;
-
-    struct srv_dns_entry *head = NULL;
-    struct srv_dns_entry *srv = NULL, *entry = NULL;
+    struct srv_dns_entry *head = NULL, *srv = NULL;
 
     /*
      * First off, build a query of the form:
@@ -78,25 +187,8 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
      *
      */
 
-    if (memchr(realm->data, 0, realm->length))
-        return 0;
-    k5_buf_init_fixed(&buf, host, sizeof(host));
-    k5_buf_add_fmt(&buf, "%s.%s.", service, protocol);
-    k5_buf_add_len(&buf, realm->data, realm->length);
-
-    /* Realm names don't (normally) end with ".", but if the query
-       doesn't end with "." and doesn't get an answer as is, the
-       resolv code will try appending the local domain.  Since the
-       realm names are absolutes, let's stop that.
-
-       But only if a name has been specified.  If we are performing
-       a search on the prefix alone then the intention is to allow
-       the local domain or domain search lists to be expanded.  */
-
-    if (buf.len > 0 && host[buf.len - 1] != '.')
-        k5_buf_add(&buf, ".");
-
-    if (k5_buf_status(&buf) != 0)
+    ret = prepare_lookup_buf(realm, service, protocol, host, sizeof(host));
+    if (ret)
         return 0;
 
 #ifdef TEST
@@ -146,35 +238,11 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
             goto out;
         }
 
-        if (head == NULL || head->priority > srv->priority) {
-            srv->next = head;
-            head = srv;
-        } else {
-            /*
-             * This is confusing.  Only insert an entry into this
-             * spot if:
-             * The next person has a higher priority (lower priorities
-             * are preferred).
-             * Or
-             * There is no next entry (we're at the end)
-             */
-            for (entry = head; entry != NULL; entry = entry->next) {
-                if ((entry->next &&
-                     entry->next->priority > srv->priority) ||
-                    entry->next == NULL) {
-                    srv->next = entry->next;
-                    entry->next = srv;
-                    break;
-                }
-            }
-        }
+        place_srv_entry(&head, srv);
     }
 
 out:
-    if (ds != NULL) {
-        krb5int_dns_fini(ds);
-        ds = NULL;
-    }
+    krb5int_dns_fini(ds);
     *answers = head;
     return 0;
 }
