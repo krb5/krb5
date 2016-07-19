@@ -93,6 +93,11 @@ out = realm.run([kvno, realm.host_princ], expected_code=1)
 if 'KDC policy rejects request' not in out:
     fail('Wrong error for restricted anonymous PKINIT')
 
+# Regression test for #8458: S4U2Self requests crash the KDC if
+# anonymous is restricted.
+realm.kinit(realm.host_princ, flags=['-k'])
+realm.run([kvno, '-U', 'user', realm.host_princ])
+
 # Go back to a normal KDC and disable anonymous PKINIT.
 realm.stop_kdc()
 realm.start_kdc()
