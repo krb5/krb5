@@ -638,8 +638,12 @@ process_pa_data(krb5_context context, krb5_init_creds_context ctx,
 
     if (must_preauth) {
         /* No real preauth types succeeded and we needed to preauthenticate. */
-        ret = (save.code != 0) ? k5_restore_ctx_error(context, &save) :
-            KRB5_PREAUTH_FAILED;
+        if (save.code != 0) {
+            ret = k5_restore_ctx_error(context, &save);
+            k5_wrapmsg(context, ret, KRB5_PREAUTH_FAILED,
+                       _("Pre-authentication failed"));
+        }
+        ret = KRB5_PREAUTH_FAILED;
     }
 
 cleanup:
