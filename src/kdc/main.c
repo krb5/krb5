@@ -648,7 +648,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         hierarchy[1] = KRB5_CONF_KDC_TCP_LISTEN;
         if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_tcp_listen)) {
             hierarchy[1] = KRB5_CONF_KDC_TCP_PORTS;
-            if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_udp_listen))
+            if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_tcp_listen))
                 def_tcp_listen = NULL;
         }
         hierarchy[1] = KRB5_CONF_KDC_MAX_DGRAM_REPLY_SIZE;
