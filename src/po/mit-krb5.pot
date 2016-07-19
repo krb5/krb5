@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.14.2\n"
+"Project-Id-Version: mit-krb5 1.14.2-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-04-14 19:34-0400\n"
+"POT-Creation-Date: 2016-07-19 18:18-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4237,32 +4237,36 @@ msgstr ""
 msgid "No default realm set; cannot initialize KDB"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:324
+#: ../../src/lib/kdb/kdb5.c:329
 #, c-format
 msgid "Unable to find requested database type: %s"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:405 ../lib/krb5/error_tables/kdb5_err.c:55
+#: ../../src/lib/kdb/kdb5.c:410 ../lib/krb5/error_tables/kdb5_err.c:55
 msgid "Unable to find requested database type"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:413
+#: ../../src/lib/kdb/kdb5.c:418
 msgid "plugin symbol 'kdb_function_table' lookup failed"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:421
+#: ../../src/lib/kdb/kdb5.c:426
 #, c-format
 msgid ""
 "Unable to load requested database module '%s': plugin symbol "
 "'kdb_function_table' not found"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:1645
+#: ../../src/lib/kdb/kdb5.c:565
+msgid "Cannot initialize database library"
+msgstr ""
+
+#: ../../src/lib/kdb/kdb5.c:1651
 #, c-format
 msgid "Illegal version number for KRB5_TL_MKEY_AUX %d\n"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:1814
+#: ../../src/lib/kdb/kdb5.c:1820
 #, c-format
 msgid "Illegal version number for KRB5_TL_ACTKVNO %d\n"
 msgstr ""
@@ -4291,7 +4295,7 @@ msgstr ""
 msgid "Can not fetch master key (error: %s)."
 msgstr ""
 
-#: ../../src/lib/kdb/kdb_default.c:482
+#: ../../src/lib/kdb/kdb_default.c:487
 msgid "Unable to decrypt latest master key with the provided master key\n"
 msgstr ""
 
@@ -4552,11 +4556,15 @@ msgstr ""
 msgid "Could not find %s plugin module named '%s'"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/preauth2.c:1012
+#: ../../src/lib/krb5/krb/preauth2.c:644
+msgid "Pre-authentication failed"
+msgstr ""
+
+#: ../../src/lib/krb5/krb/preauth2.c:1016
 msgid "Unable to initialize preauth context"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/preauth2.c:1025
+#: ../../src/lib/krb5/krb/preauth2.c:1029
 #, c-format
 msgid "Preauth module %s"
 msgstr ""
@@ -4778,9 +4786,14 @@ msgid "Can't destroy replay cache: %s"
 msgstr ""
 
 #: ../../src/plugins/kdb/db2/kdb_db2.c:245
-#: ../../src/plugins/kdb/db2/kdb_db2.c:829
+#: ../../src/plugins/kdb/db2/kdb_db2.c:826
 #, c-format
 msgid "Unsupported argument \"%s\" for db2"
+msgstr ""
+
+#: ../../src/plugins/kdb/db2/kdb_db2.c:387
+#, c-format
+msgid "Cannot open DB2 database '%s'"
 msgstr ""
 
 #: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_policy.c:69
