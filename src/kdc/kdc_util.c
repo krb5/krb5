@@ -739,7 +739,7 @@ validate_as_request(kdc_realm_t *kdc_active_realm,
         return(KDC_ERR_MUST_USE_USER2USER);
     }
 
-    if (check_anon(kdc_active_realm, request->client, request->server) != 0) {
+    if (check_anon(kdc_active_realm, client.princ, request->server) != 0) {
         *status = "ANONYMOUS NOT ALLOWED";
         return(KDC_ERR_POLICY);
     }
