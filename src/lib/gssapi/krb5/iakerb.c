@@ -454,9 +454,11 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
     if (cred->password != NULL) {
         code = krb5_init_creds_set_password(ctx->k5c, ctx->icc,
                                             cred->password);
-    } else {
+    } else if (cred->client_keytab != NULL) {
         code = krb5_init_creds_set_keytab(ctx->k5c, ctx->icc,
                                           cred->client_keytab);
+    } else {
+        code = KRB5_KT_NOTFOUND;
     }
     if (code != 0)
         goto cleanup;

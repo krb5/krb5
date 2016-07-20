@@ -180,6 +180,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_GIC_PWD_MASTER(c)                         \
     TRACE(c, "Retrying AS request with master KDC")
 
+#define TRACE_GSS_CLIENT_KEYTAB_FAIL(c, ret)                            \
+    TRACE(c, "Unable to resolve default client keytab: {kerr}", ret)
+
 #define TRACE_ENCTYPE_LIST_UNKNOWN(c, profvar, name)                    \
     TRACE(c, "Unrecognized enctype name in {str}: {str}", profvar, name)
 
