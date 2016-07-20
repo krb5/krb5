@@ -348,6 +348,9 @@ can_get_initial_creds(krb5_context context, krb5_gss_cred_id_rec *cred)
     if (cred->password != NULL)
         return TRUE;
 
+    if (cred->client_keytab == NULL)
+        return FALSE;
+
     /* If we don't know the client principal yet, check for any keytab keys. */
     if (cred->name == NULL)
         return !krb5_kt_have_content(context, cred->client_keytab);
@@ -522,6 +525,10 @@ get_name_from_client_keytab(krb5_context context, krb5_gss_cred_id_rec *cred)
     krb5_principal princ;
 
     assert(cred->name == NULL);
+
+    if (cred->client_keytab == NULL)
+        return KRB5_KT_NOTFOUND;
+
     code = k5_kt_get_principal(context, cred->client_keytab, &princ);
     if (code)
         return code;
@@ -601,9 +608,11 @@ get_initial_cred(krb5_context context, krb5_gss_cred_id_rec *cred)
         code = krb5_get_init_creds_password(context, &creds, cred->name->princ,
                                             cred->password, NULL, NULL, 0,
                                             NULL, opt);
-    } else {
+    } else if (cred->client_keytab) {
         code = krb5_get_init_creds_keytab(context, &creds, cred->name->princ,
                                           cred->client_keytab, 0, NULL, opt);
+    } else {
+        code = KRB5_KT_NOTFOUND;
     }
     if (code)
         goto cleanup;
@@ -680,10 +689,16 @@ acquire_init_cred(krb5_context context,
             goto error;
     }
 
-    if (client_keytab != NULL)
+    if (client_keytab != NULL) {
         code = krb5_kt_dup(context, client_keytab, &cred->client_keytab);
-    else
+    } else {
         code = krb5_kt_client_default(context, &cred->client_keytab);
+        if (code) {
+            TRACE(context, "Unable to access default client keytab: {kerr}",
+                  code);
+            code = 0; /* ignoring errors from krb5_kt_client_default() */
+        }
+    }
     if (code)
         goto error;
 
