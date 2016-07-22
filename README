@@ -74,6 +74,43 @@ variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
 
+Major changes in 1.13.6 (2016-07-25)
+------------------------------------
+
+This is a bug fix release.  The krb5-1.13 release series is in
+maintenance, and for new deployments, installers should prefer the
+krb5-1.14 release series or later.
+
+* Improve some error messages
+
+* Improve documentation
+
+* Allow a principal with nonexistent policy to bypass the minimum
+  password lifetime check, consistent with other aspects of
+  nonexistent policies
+
+* Fix a rare KDC denial of service vulnerability when anonymous client
+  principals are restricted to obtaining TGTs only [CVE-2016-3120]
+
+krb5-1.13.6 changes by ticket ID
+--------------------------------
+
+8392    Add missing newline in kinit usage message
+8395    Fetching master key list crashes if K/M has no key data
+8413    Fix unlikely pointer error in get_in_tkt.c
+8415    Uninitialized read in krb5_sname_match
+8417    Fix typo in doc/user/tkt_mgmt.rst
+8421    Avoid setting AS key when OTP preauth fails
+8422    Relax t_sn2princ.py reverse resolution test
+8427    kadmind minimum life check fails for nonexistent policies
+8430    Fix incorrect recv() size calculation in libkrad
+8431    profile_flush_to_file() can corrupt shared tree state
+8452    Update LDAP docs for password lockout
+8455    k5_expand_path_tokens_extra() always returns 0 even if
+        expand_token() fails
+8458    Fix S4U2Self KDC crash when anon is restricted [CVE-2016-3120]
+
+
 Major changes in 1.13.5 (2016-04-18)
 ------------------------------------
 
@@ -579,6 +616,8 @@ reports, suggestions, and valuable resources:
     Jeffrey Hutzelman
     Wyllys Ingersoll
     Holger Isenberg
+    Spencer Jackson
+    Diogenes S. Jesus
     Pavel Jindra
     Joel Johnson
     Anders Kaseorg
@@ -627,6 +666,7 @@ reports, suggestions, and valuable resources:
     Robert Relyea
     Martin Rex
     Jason Rogers
+    Matt Rogers
     Nate Rosenblum
     Solly Ross
     Mike Roszkowski
