@@ -28,6 +28,11 @@
  * This header contains trace macro definitions, which map trace points within
  * the code to krb5int_trace() calls with descriptive text strings.
  *
+ * A new trace macro must be defined in this file for each new location to
+ * be traced; the TRACE() macro should never be used directly.  This keeps
+ * the tracing logic centralized in one place, to facilitate integration with
+ * alternate tracing backends such as DTrace.
+ *
  * Trace logging is intended to aid power users in diagnosing configuration
  * problems by showing what's going on behind the scenes of complex operations.
  * Although trace logging is sometimes useful to developers, it is not intended
