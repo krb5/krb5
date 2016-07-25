@@ -684,9 +684,18 @@ kinit_prompter(
     krb5_prompt prompts[]
 )
 {
-    krb5_error_code rc =
-        krb5_prompter_posix(ctx, data, name, banner, num_prompts, prompts);
-    return rc;
+    krb5_boolean *pwprompt = data;
+    krb5_prompt_type *ptypes;
+    int i;
+
+    /* Make a note if we receive a password prompt. */
+    ptypes = krb5_get_prompt_types(ctx);
+    for (i = 0; i < num_prompts; i++) {
+        if (ptypes != NULL && ptypes[i] == KRB5_PROMPT_TYPE_PASSWORD)
+            *pwprompt = TRUE;
+    }
+
+    return krb5_prompter_posix(ctx, data, name, banner, num_prompts, prompts);
 }
 
 static int
@@ -699,6 +708,7 @@ k5_kinit(opts, k5)
     krb5_creds my_creds;
     krb5_error_code code = 0;
     krb5_get_init_creds_opt *options = NULL;
+    krb5_boolean pwprompt = FALSE;
     int i;
 
     memset(&my_creds, 0, sizeof(my_creds));
@@ -807,7 +817,7 @@ k5_kinit(opts, k5)
     switch (opts->action) {
     case INIT_PW:
         code = krb5_get_init_creds_password(k5->ctx, &my_creds, k5->me,
-                                            0, kinit_prompter, 0,
+                                            0, kinit_prompter, &pwprompt,
                                             opts->starttime,
                                             opts->service_name,
                                             options);
@@ -844,11 +854,15 @@ k5_kinit(opts, k5)
             break;
         }
 
-        if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
+        /* If reply decryption failed, or if pre-authentication failed and we
+         * were prompted for a password, assume the password was wrong. */
+        if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY ||
+            (pwprompt && code == KRB5KDC_ERR_PREAUTH_FAILED)) {
             fprintf(stderr, _("%s: Password incorrect while %s\n"), progname,
                     doing);
-        else
+        } else {
             com_err(progname, code, _("while %s"), doing);
+        }
         goto cleanup;
     }
 
