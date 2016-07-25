@@ -1097,6 +1097,23 @@ if test x"$PYTHON" != x; then
 fi
 AC_SUBST(HAVE_PYTHON)
 
+# For cmocka tests.
+CMOCKA_LIBS=
+HAVE_CMOCKA=no
+HAVE_CMOCKA_H=no
+HAVE_CMOCKA_LIB=no
+AC_CHECK_HEADER(cmocka.h, [HAVE_CMOCKA_H=yes], :, [
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h> ])
+AC_CHECK_LIB(cmocka, _cmocka_run_group_tests, [HAVE_CMOCKA_LIB=yes])
+if test "$HAVE_CMOCKA_LIB" = yes && test "$HAVE_CMOCKA_H" = yes; then
+    HAVE_CMOCKA=yes
+    CMOCKA_LIBS='-lcmocka'
+fi
+AC_SUBST(HAVE_CMOCKA)
+AC_SUBST(CMOCKA_LIBS)
+
 # for plugins/kdb/db2
 
 # AIX is unusual in that it wants all symbols resolved at link time

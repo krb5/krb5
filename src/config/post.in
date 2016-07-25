@@ -145,6 +145,13 @@ check-pytests-yes: check-pytests
 check-pytests-no:
 check-pytests:
 
+# cmocka tests
+check-unix: check-cmocka-@HAVE_CMOCKA@
+
+check-cmocka-yes: check-cmocka
+check-cmocka-no:
+check-cmocka:
+
 clean: clean-$(WHAT)
 
 clean-unix::

@@ -548,6 +548,9 @@ check-unix:
 
 check-pytests-no: check-postrecurse
 	@echo 'Skipped python test scripts: python 2.5 or later required' >> \
+
+check-cmocka-no:
+	@echo 'Skipped cmocka tests due to missing library or header file' >> \
 		$(SKIPTESTS)
 
 # Create a test realm and spawn a shell in an environment pointing to it.
