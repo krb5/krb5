@@ -229,7 +229,7 @@ check-unix-locate:: t_locate_kdc
 	    fi; \
 	else \
 		echo '*** WARNING: skipped t_locate_kdc test: OFFLINE'; \
-		echo 'Skipped t_locate_kdc test: OFFINE' >> $(SKIPTESTS); \
+		echo 'Skipped t_locate_kdc test: OFFLINE' >> $(SKIPTESTS); \
 	fi
 
 check-unix-trace:: t_trace
