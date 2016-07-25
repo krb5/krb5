@@ -92,7 +92,7 @@ if test "$krb5_cv_va_simple_copy" = yes; then
   AC_DEFINE(CAN_COPY_VA_LIST,1,[Define if va_list objects can be simply copied by assignment.])
 fi
 
-# The following lines are so that configure --help gives some global 
+# The following lines are so that configure --help gives some global
 # configuration options.
 
 KRB5_LIB_AUX
@@ -402,7 +402,7 @@ KRB5_RUN_FLAGS
 AC_TYPE_SIGNAL
 
 # from old include/configure.in
-AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE], 
+AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE],
 [Define if "struct sockaddr_storage" is available.])
 
 AC_CONFIG_HEADERS(include/autoconf.h, [echo timestamp > include/autoconf.stamp])
@@ -451,7 +451,7 @@ AC_TYPE_OFF_T
 # Fancy caching of perror result...
 AC_MSG_CHECKING(for perror declaration)
 AC_CACHE_VAL(krb5_cv_decl_perror,
-[AC_EGREP_HEADER(perror, errno.h, 
+[AC_EGREP_HEADER(perror, errno.h,
   krb5_cv_decl_perror=yes, krb5_cv_decl_perror=no)])
 AC_MSG_RESULT($krb5_cv_decl_perror)
 if test $krb5_cv_decl_perror = yes; then
@@ -700,7 +700,7 @@ AC_CHECK_HEADERS(poll.h stdlib.h string.h stddef.h sys/types.h sys/file.h sys/pa
 # If compiling with IPv6 support, test if in6addr_any functions.
 # Irix 6.5.16 defines it, but lacks support in the C library.
 if test $krb5_cv_inet6 = yes || test "$krb5_cv_inet6_with_dinet6" = yes ; then
-AC_CACHE_CHECK([for in6addr_any definition in library], 
+AC_CACHE_CHECK([for in6addr_any definition in library],
   krb5_cv_var_in6addr_any,
 [AC_TRY_LINK([
 #ifdef HAVE_SYS_TYPES_H
@@ -895,7 +895,7 @@ AC_CHECK_PROG(have_PERL,perl,perl)
 if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
  	DO_TEST=ok
 fi
-AC_SUBST(DO_TEST) 
+AC_SUBST(DO_TEST)
 
 # The following are substituted into kadmin/testing/scripts/env-setup.sh
 RBUILD=`pwd`
@@ -1175,11 +1175,11 @@ if test -n "$OPENLDAP_PLUGIN"; then
 
   BER_OKAY=0
   AC_CHECK_LIB(ldap, ber_init, [BER_OKAY=1])
-  if test "$BER_OKAY" = "1"; then 
+  if test "$BER_OKAY" = "1"; then
     LDAP_LIBS='-lldap'
   else
     AC_CHECK_LIB(lber, ber_init, [BER_OKAY=1], [AC_MSG_WARN([libber not found])])
-    if test "$BER_OKAY" = "1"; then 
+    if test "$BER_OKAY" = "1"; then
       LDAP_LIBS='-lldap -llber'
     else
       AC_ERROR("BER library missing - cannot build LDAP database module")
