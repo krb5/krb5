@@ -51,6 +51,7 @@ static char sccsid[] = "@(#)rec_open.c	8.12 (Berkeley) 11/18/94";
 #include <stdio.h>
 #include <unistd.h>
 
+#include "k5-int.h"
 #include "db-int.h"
 #include "recno.h"
 
@@ -68,7 +69,8 @@ __rec_open(fname, flags, mode, openinfo, dflags)
 	int rfd = -1, sverrno;
 
 	/* Open the user's file -- if this fails, we're done. */
-	if (fname != NULL && (rfd = open(fname, flags | O_BINARY, mode)) < 0)
+	if (fname != NULL &&
+        (rfd = THREEPARAMOPEN(fname, flags | O_BINARY, mode)) < 0)
 		return (NULL);
 
 	if (fname != NULL && fcntl(rfd, F_SETFD, 1) == -1) {

@@ -39,6 +39,7 @@
 #include <k5-int.h>
 #include "kdb5_ldap_util.h"
 #include "kdb5_ldap_list.h"
+#include "k5-label.h"
 
 /* Get the configured LDAP service password file.  The caller should free the
  * result with profile_release_string(). */
@@ -203,7 +204,7 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
 
     /* set password in the file */
     old_mode = umask(0177);
-    pfile = fopen(file_name, "a+");
+    pfile = WRITABLEFOPEN(file_name, "a+");
     if (pfile == NULL) {
         com_err(me, errno, _("Failed to open file %s: %s"), file_name,
                 strerror (errno));
@@ -244,6 +245,9 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
          * Delete the existing entry and add the new entry
          */
         FILE *newfile;
+#ifdef USE_SELINUX
+        void *selabel;
+#endif
 
         mode_t omask;
 
@@ -255,7 +259,14 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
         }
 
         omask = umask(077);
+#ifdef USE_SELINUX
+        selabel = k5_push_fscreatecon_for(file_name);
+#endif
+
         newfile = fopen(tmp_file, "w");
+#ifdef USE_SELINUX
+        k5_pop_fscreatecon(selabel);
+#endif
         umask (omask);
         if (newfile == NULL) {
             com_err(me, errno, _("Error creating file %s"), tmp_file);

@@ -1022,14 +1022,14 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
 
     KTCHECKLOCK(id);
     errno = 0;
-    KTFILEP(id) = fopen(KTFILENAME(id),
-                        (mode == KRB5_LOCKMODE_EXCLUSIVE) ? "rb+" : "rb");
+    KTFILEP(id) = WRITABLEFOPEN(KTFILENAME(id),
+                              (mode == KRB5_LOCKMODE_EXCLUSIVE) ? "rb+" : "rb");
     if (!KTFILEP(id)) {
         if ((mode == KRB5_LOCKMODE_EXCLUSIVE) && (errno == ENOENT)) {
             /* try making it first time around */
             k5_create_secure_file(context, KTFILENAME(id));
             errno = 0;
-            KTFILEP(id) = fopen(KTFILENAME(id), "rb+");
+            KTFILEP(id) = WRITABLEFOPEN(KTFILENAME(id), "rb+");
             if (!KTFILEP(id))
                 goto report_errno;
             writevno = 1;

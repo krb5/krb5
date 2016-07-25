@@ -128,6 +128,7 @@ typedef unsigned char   u_char;
 
 
 #include "k5-platform.h"
+#include "k5-label.h"
 
 #define KRB5_KDB_MAX_LIFE       (60*60*24) /* one day */
 #define KRB5_KDB_MAX_RLIFE      (60*60*24*7) /* one week */

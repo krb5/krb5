@@ -183,10 +183,19 @@ write_primary_file(const char *primary_path, const char *contents)
     char *newpath = NULL;
     FILE *fp = NULL;
     int fd = -1, status;
+#ifdef USE_SELINUX
+    void *selabel;
+#endif
 
     if (asprintf(&newpath, "%s.XXXXXX", primary_path) < 0)
         return ENOMEM;
+#ifdef USE_SELINUX
+    selabel = k5_push_fscreatecon_for(primary_path);
+#endif
     fd = mkstemp(newpath);
+#ifdef USE_SELINUX
+    k5_pop_fscreatecon(selabel);
+#endif
     if (fd < 0)
         goto cleanup;
 #ifdef HAVE_CHMOD
@@ -221,10 +230,23 @@ static krb5_error_code
 verify_dir(krb5_context context, const char *dirname)
 {
     struct stat st;
+    int status;
+#ifdef USE_SELINUX
+    void *selabel;
+#endif
 
     if (stat(dirname, &st) < 0) {
-        if (errno == ENOENT && mkdir(dirname, S_IRWXU) == 0)
-            return 0;
+        if (errno == ENOENT) {
+#ifdef USE_SELINUX
+            selabel = k5_push_fscreatecon_for(dirname);
+#endif
+            status = mkdir(dirname, S_IRWXU);
+#ifdef USE_SELINUX
+            k5_pop_fscreatecon(selabel);
+#endif
+            if (status == 0)
+                return 0;
+        }
         k5_setmsg(context, KRB5_FCC_NOFILE,
                   _("Credential cache directory %s does not exist"),
                   dirname);

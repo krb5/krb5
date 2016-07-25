@@ -87,6 +87,7 @@ AC_SUBST_FILE(libnodeps_frag)
 dnl
 KRB5_AC_PRAGMA_WEAK_REF
 WITH_LDAP
+KRB5_WITH_SELINUX
 KRB5_LIB_PARAMS
 KRB5_AC_INITFINI
 KRB5_AC_ENABLE_THREADS
@@ -1673,3 +1674,50 @@ AC_DEFUN(KRB5_AC_PERSISTENT_KEYRING,[
       ]))
 ])dnl
 dnl
+dnl Use libselinux to set file contexts on newly-created files.
+dnl
+AC_DEFUN(KRB5_WITH_SELINUX,[
+AC_ARG_WITH(selinux,[AC_HELP_STRING(--with-selinux,[compile with SELinux labeling support])],
+           withselinux="$withval",withselinux=auto)
+old_LIBS="$LIBS"
+if test "$withselinux" != no ; then
+       AC_MSG_RESULT([checking for libselinux...])
+       SELINUX_LIBS=
+       AC_CHECK_HEADERS(selinux/selinux.h selinux/label.h)
+       if test "x$ac_cv_header_selinux_selinux_h" != xyes ; then
+               if test "$withselinux" = auto ; then
+                       AC_MSG_RESULT([Unable to locate selinux/selinux.h.])
+                       withselinux=no
+               else
+                       AC_MSG_ERROR([Unable to locate selinux/selinux.h.])
+               fi
+       fi
+
+       LIBS=
+       unset ac_cv_func_setfscreatecon
+       AC_CHECK_FUNCS(setfscreatecon selabel_open)
+       if test "x$ac_cv_func_setfscreatecon" = xno ; then
+               AC_CHECK_LIB(selinux,setfscreatecon)
+               unset ac_cv_func_setfscreatecon
+               AC_CHECK_FUNCS(setfscreatecon selabel_open)
+               if test "x$ac_cv_func_setfscreatecon" = xyes ; then
+                       SELINUX_LIBS="$LIBS"
+               else
+                       if test "$withselinux" = auto ; then
+                               AC_MSG_RESULT([Unable to locate libselinux.])
+                               withselinux=no
+                       else
+                               AC_MSG_ERROR([Unable to locate libselinux.])
+                       fi
+               fi
+       fi
+       if test "$withselinux" != no ; then
+               AC_MSG_NOTICE([building with SELinux labeling support])
+               AC_DEFINE(USE_SELINUX,1,[Define if Kerberos-aware tools should set SELinux file contexts when creating files.])
+               SELINUX_LIBS="$LIBS"
+               EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS krb5int_labeled_open krb5int_labeled_fopen krb5int_push_fscreatecon_for krb5int_pop_fscreatecon"
+       fi
+fi
+LIBS="$old_LIBS"
+AC_SUBST(SELINUX_LIBS)
+])dnl

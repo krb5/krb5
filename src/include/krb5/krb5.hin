@@ -87,6 +87,12 @@
 #define THREEPARAMOPEN(x,y,z) open(x,y,z)
 #endif
 
+#if KRB5_PRIVATE
+#ifndef WRITABLEFOPEN
+#define WRITABLEFOPEN(x,y) fopen(x,y)
+#endif
+#endif
+
 #define KRB5_OLD_CRYPTO
 
 #include <stdlib.h>

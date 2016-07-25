@@ -69,6 +69,7 @@ IPC_SYMS= \
 
 STLIBOBJS= \
 	threads.o \
+	selinux.o \
 	init-addrinfo.o \
 	plugins.o \
 	errors.o \
@@ -148,7 +149,7 @@ SRCS=\
 
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
-SHLIB_EXPLIBS= $(LIBS) $(DL_LIB)
+SHLIB_EXPLIBS= $(LIBS) $(SELINUX_LIBS) $(DL_LIB)
 
 DEPLIBS=
 

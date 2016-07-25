@@ -794,6 +794,9 @@ krb5_rc_dfl_expunge_locked(krb5_context context, krb5_rcache id)
     krb5_error_code retval = 0;
     krb5_rcache tmp;
     krb5_deltat lifespan = t->lifespan;  /* save original lifespan */
+#ifdef USE_SELINUX
+    void *selabel;
+#endif
 
     if (! t->recovering) {
         name = t->name;
@@ -815,7 +818,17 @@ krb5_rc_dfl_expunge_locked(krb5_context context, krb5_rcache id)
     retval = krb5_rc_resolve(context, tmp, 0);
     if (retval)
         goto cleanup;
+#ifdef USE_SELINUX
+    if (t->d.fn != NULL)
+        selabel = k5_push_fscreatecon_for(t->d.fn);
+    else
+        selabel = NULL;
+#endif
     retval = krb5_rc_initialize(context, tmp, lifespan);
+#ifdef USE_SELINUX
+    if (selabel != NULL)
+        k5_pop_fscreatecon(selabel);
+#endif
     if (retval)
         goto cleanup;
     for (q = t->a; q; q = q->na) {

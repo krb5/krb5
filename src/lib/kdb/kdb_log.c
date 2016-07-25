@@ -476,7 +476,7 @@ ulog_map(krb5_context context, const char *logname, uint32_t ulogentries)
     int ulogfd = -1;
 
     if (stat(logname, &st) == -1) {
-        ulogfd = open(logname, O_RDWR | O_CREAT, 0600);
+        ulogfd = THREEPARAMOPEN(logname, O_RDWR | O_CREAT, 0600);
         if (ulogfd == -1)
             return errno;
 

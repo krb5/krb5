@@ -33,6 +33,7 @@
 #endif
 
 #include "k5-platform.h"
+#include "k5-label.h"
 
 struct global_shared_profile_data {
     /* This is the head of the global list of shared trees */
@@ -423,7 +424,7 @@ static errcode_t write_data_to_file(prf_data_t data, const char *outfile,
 
     errno = 0;
 
-    f = fopen(new_file, "w");
+    f = WRITABLEFOPEN(new_file, "w");
     if (!f) {
         retval = errno;
         if (retval == 0)

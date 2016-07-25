@@ -152,7 +152,8 @@ osa_adb_init_db(osa_adb_db_t *dbp, char *filename, char *lockfilename,
          * needs be open read/write so that write locking can work with
          * POSIX systems
          */
-        if ((lockp->lockinfo.lockfile = fopen(lockfilename, "r+")) == NULL) {
+        if ((lockp->lockinfo.lockfile = WRITABLEFOPEN(lockfilename,
+                                                      "r+")) == NULL) {
             /*
              * maybe someone took away write permission so we could only
              * get shared locks?

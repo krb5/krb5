@@ -43,9 +43,13 @@ k5_json_string_create_base64
 k5_json_string_create_len
 k5_json_string_unbase64
 k5_json_string_utf8
+k5_labeled_open
+k5_labeled_fopen
 k5_path_isabs
 k5_path_join
 k5_path_split
+k5_pop_fscreatecon
+k5_push_fscreatecon_for
 k5_strerror_r
 krb5int_key_register
 krb5int_key_delete

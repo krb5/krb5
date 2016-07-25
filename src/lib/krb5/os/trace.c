@@ -397,7 +397,7 @@ krb5_set_trace_filename(krb5_context context, const char *filename)
     fd = malloc(sizeof(*fd));
     if (fd == NULL)
         return ENOMEM;
-    *fd = open(filename, O_WRONLY|O_CREAT|O_APPEND, 0600);
+    *fd = THREEPARAMOPEN(filename, O_WRONLY|O_CREAT|O_APPEND, 0600);
     if (*fd == -1) {
         free(fd);
         return errno;

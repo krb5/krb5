@@ -694,8 +694,8 @@ ctx_create_db(krb5_context context, krb5_db2_context *dbc)
     if (retval)
         return retval;
 
-    dbc->db_lf_file = open(dbc->db_lf_name, O_CREAT | O_RDWR | O_TRUNC,
-                           0600);
+    dbc->db_lf_file = THREEPARAMOPEN(dbc->db_lf_name,
+                                     O_CREAT | O_RDWR | O_TRUNC, 0600);
     if (dbc->db_lf_file < 0) {
         retval = errno;
         goto cleanup;

@@ -464,6 +464,9 @@ doit(int fd)
     krb5_enctype etype;
     int database_fd;
     char host[INET6_ADDRSTRLEN + 1];
+#ifdef USE_SELINUX
+    void *selabel;
+#endif
 
     signal_wrapper(SIGALRM, alarm_handler);
     alarm(params.iprop_resync_timeout);
@@ -520,9 +523,15 @@ doit(int fd)
         free(name);
         exit(1);
     }
+#ifdef USE_SELINUX
+    selabel = k5_push_fscreatecon_for(file);
+#endif
     omask = umask(077);
     lock_fd = open(temp_file_name, O_RDWR | O_CREAT, 0600);
     (void)umask(omask);
+#ifdef USE_SELINUX
+    k5_pop_fscreatecon(selabel);
+#endif
     retval = krb5_lock_file(kpropd_context, lock_fd,
                             KRB5_LOCKMODE_EXCLUSIVE | KRB5_LOCKMODE_DONTBLOCK);
     if (retval) {

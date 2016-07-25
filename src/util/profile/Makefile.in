@@ -41,7 +41,7 @@ EXTRADEPSRCS=$(srcdir)/test_load.c $(srcdir)/test_parse.c \
 	$(srcdir)/profile_tcl.c
 
 DEPLIBS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
-MLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
+MLIBS = -lcom_err $(SUPPORT_LIB) $(SELINUX_LIBS) $(LIBS)
 
 LIBBASE=profile
 LIBMAJOR=1
