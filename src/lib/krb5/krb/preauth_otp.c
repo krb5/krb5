@@ -31,6 +31,7 @@
 #include "k5-int.h"
 #include "k5-json.h"
 #include "int-proto.h"
+#include "os-proto.h"
 
 #include <krb5/clpreauth_plugin.h>
 #include <ctype.h>
@@ -475,6 +476,7 @@ doprompt(krb5_context context, krb5_prompter_fct prompter, void *prompter_data,
     krb5_prompt prompt;
     krb5_data prompt_reply;
     krb5_error_code retval;
+    krb5_prompt_type prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
 
     if (prompttxt == NULL || out == NULL)
         return EINVAL;
@@ -486,7 +488,10 @@ doprompt(krb5_context context, krb5_prompter_fct prompter, void *prompter_data,
     prompt.prompt = (char *)prompttxt;
     prompt.hidden = 1;
 
+    /* PROMPTER_INVOCATION */
+    k5_set_prompt_types(context, &prompt_type);
     retval = (*prompter)(context, prompter_data, NULL, banner, 1, &prompt);
+    k5_set_prompt_types(context, NULL);
     if (retval != 0)
         return retval;
 
