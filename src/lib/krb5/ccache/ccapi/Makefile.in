@@ -20,7 +20,7 @@ SRCS 	= $(srcdir)/stdcc.c $(srcdir)/stdcc_util.c $(srcdir)/winccld.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
 @libobj_frag@

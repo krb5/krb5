@@ -19,8 +19,8 @@ STLIBOBJS=securid_sam2_main.o securid2.o grail.o
 
 SRCS= $(srcdir)/securid_sam2_main.c $(srcdir)/securid2.c $(srcdir)/grail.c
 
-all-unix:: all-libs
-install-unix:: install-libs
+all-unix: all-libs
+install-unix: install-libs
 clean-unix:: clean-libs clean-libobjs
 
 @libnover_frag@

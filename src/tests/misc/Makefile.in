@@ -15,9 +15,9 @@ SRCS=\
 	$(srcdir)/test_cxx_rpc.cpp \
 	$(srcdir)/test_cxx_kadm5.cpp
 
-all:: test_getpw test_chpw_message
+all: test_getpw test_chpw_message
 
-check:: test_getpw test_chpw_message test_cxx_krb5 test_cxx_gss test_cxx_rpc test_cxx_k5int test_cxx_kadm5
+check: test_getpw test_chpw_message test_cxx_krb5 test_cxx_gss test_cxx_rpc test_cxx_k5int test_cxx_kadm5
 	$(RUN_TEST) ./test_getpw
 	$(RUN_TEST) ./test_chpw_message
 	$(RUN_TEST) ./test_cxx_krb5
@@ -51,8 +51,8 @@ test_cxx_gss.$(OBJEXT): test_cxx_gss.cpp
 test_cxx_rpc.$(OBJEXT): test_cxx_rpc.cpp
 test_cxx_kadm5.$(OBJEXT): test_cxx_kadm5.cpp
 
-install::
+install:
 
-clean::
+clean:
 	$(RM) test_getpw test_chpw_message test_cxx_krb5 test_cxx_gss test_cxx_k5int test_cxx_rpc test_cxx_kadm5 *.o
 

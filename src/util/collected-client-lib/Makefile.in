@@ -67,7 +67,7 @@ SHLIB_EXPLIBS= $(LIBS) $(DL_LIB) $(LIBS_UTILS)
 DEPLIBS=
 
 #
-all-unix:: lib$(LIBBASE)$(SHLIBVEXT)
+all-unix: lib$(LIBBASE)$(SHLIBVEXT)
 
 clean-unix:: clean-libs
 

@@ -17,15 +17,15 @@ SRVPROG	=	kadm5_srv_tcl
 
 DO_ALL=@DO_ALL@
 
-all:: all-$(DO_ALL)
+all: all-$(DO_ALL)
 
-all-::
+all-:
 	@echo "+++"
 	@echo "+++ WARNING: Tcl not available.  The kadm5 tests will not be run."
 	@echo "+++"
 	@echo 'Skipped kadm5 tests: Tcl not found' >> $(SKIPTESTS)
 
-all-tcl:: $(CLNTPROG) $(SRVPROG)
+all-tcl: $(CLNTPROG) $(SRVPROG)
 
 $(SRVPROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $(SRVPROG) $(OBJS) $(TCL_MAYBE_RPATH) \
@@ -38,5 +38,5 @@ $(CLNTPROG): $(OBJS) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 bsddb_dump: bsddb_dump.o
 	$(CC_LINK) -o bsddb_dump bsddb_dump.o $(KADMSRV_LIBS)
 
-clean:: 
+clean:
 	$(RM) $(CLNTPROG) $(SRVPROG)

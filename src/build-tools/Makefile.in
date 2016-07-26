@@ -11,7 +11,7 @@ PKGCONFIG_FILES = \
 	krb5-gssapi.pc \
 	gssrpc.pc
 
-all-unix:: krb5-config $(PKGCONFIG_FILES)
+all-unix: krb5-config $(PKGCONFIG_FILES)
 
 krb5-config $(PKGCONFIG_FILES): $(BUILDTOP)/config.status
 	cd $(BUILDTOP) && $(SHELL) config.status $(mydir)/$@
@@ -25,7 +25,7 @@ mit-krb5-gssapi.pc: $(srcdir)/mit-krb5-gssapi.pc.in
 krb5-gssapi.pc: $(srcdir)/krb5-gssapi.pc.in
 gssrpc.pc: $(srcdir)/gssrpc.pc.in
 
-install-unix::
+install-unix:
 	$(INSTALL_SCRIPT) krb5-config $(DESTDIR)$(CLIENT_BINDIR)/krb5-config
 	$(INSTALL_DATA) kadm-client.pc \
 		$(DESTDIR)$(PKGCONFIG_DIR)/kadm-client.pc
@@ -43,5 +43,5 @@ install-unix::
 
 # Test to ensure that krb5-config does not spit out things like
 # $(PURE) or $(LDFLAGS) in case someone changes config/shlib.conf
-check-unix:: krb5-config
+check-unix: krb5-config
 	$(SHELL) $(srcdir)/t_krbconf

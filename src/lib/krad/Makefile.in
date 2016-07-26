@@ -26,12 +26,12 @@ SRCS=attr.c attrset.c client.c code.c packet.c remote.c \
 
 STOBJLISTS=OBJS.ST
 
-all-unix:: all-liblinks
-install-unix:: install-libs
+all-unix: all-liblinks
+install-unix: install-libs
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-check-unix:: t_attr t_attrset t_code t_packet t_remote t_client
+check-unix: t_attr t_attrset t_code t_packet t_remote t_client
 	$(RUN_TEST) ./t_attr
 	$(RUN_TEST) ./t_attrset
 	$(RUN_TEST) ./t_code

@@ -376,7 +376,7 @@ $(srcdir)/deltat.c : $(DELTAT_DEP)
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
 COMERRLIB=$(TOPLIBD)/libcom_err.a
@@ -454,7 +454,7 @@ TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
 	t_in_ccache t_cc_config t_copy_context \
 	t_princ t_etypes t_vfy_increds t_response_items t_sname_match
 
-check-unix:: $(TEST_PROGS)
+check-unix: $(TEST_PROGS)
 	$(RUN_TEST_LOCAL_CONF) ./t_kerb \
 		parse_name tytso \
 		parse_name tytso@SHAZAAM \
@@ -490,12 +490,12 @@ check-unix:: $(TEST_PROGS)
 	$(RUN_TEST) ./t_copy_context
 	$(RUN_TEST) ./t_sname_match
 
-check-pytests:: t_expire_warn t_vfy_increds
+check-pytests: t_expire_warn t_vfy_increds
 	$(RUNPYTEST) $(srcdir)/t_expire_warn.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_vfy_increds.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_in_ccache_patypes.py $(PYTESTFLAGS)
 
-clean::
+clean:
 	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT) \
 		$(OUTPRE)t_kerb$(EXEEXT) $(OUTPRE)t_kerb.$(OBJEXT)	\
 		$(OUTPRE)t_ser$(EXEEXT) $(OUTPRE)t_ser.$(OBJEXT)	\

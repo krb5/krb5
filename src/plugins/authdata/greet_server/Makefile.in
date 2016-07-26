@@ -12,8 +12,8 @@ STLIBOBJS= greet_auth.o
 
 SRCS=	greet_auth.c
 
-all-unix:: all-libs
-install-unix::
+all-unix: all-libs
+install-unix:
 clean-unix:: clean-libs clean-libobjs
 
 @libnover_frag@

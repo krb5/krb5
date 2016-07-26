@@ -50,18 +50,18 @@ LIBS 	 = $(KLIB) $(CLIB) $(WLIB) ../lib/$(OUTPRE)libwin.lib
 SYSLIBS = kernel32.lib ws2_32.lib user32.lib gdi32.lib advapi32.lib
 LFLAGS = /nologo $(LOPTS)
 
-all:: Makefile $(OUTPRE)$(NAME).exe
+all: Makefile $(OUTPRE)$(NAME).exe
 
 $(OUTPRE)$(NAME).exe: $(NAME).def $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
 	  $(LIBS) $(SYSLIBS) $(SCLIB)
 				$(_VC_MANIFEST_EMBED_EXE)
 
-install::
+install:
 	$(CP) $(OUTPRE)$(NAME).exe $(DESTDIR)
 	$(CP) krb5.hlp $(DESTDIR)
 
-clean:: 
+clean:
 	$(RM) $(OUTPRE)*.exe
 	$(RM) $(OUTPRE)*.res
 	$(RM) $(OUTPRE)*.map

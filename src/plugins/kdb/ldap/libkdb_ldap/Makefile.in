@@ -61,8 +61,8 @@ STLIBOBJS= kdb_ldap.o \
 	ldap_err.o \
 	lockout.o
 
-all-unix:: all-liblinks
-install-unix:: install-libs
+all-unix: all-liblinks
+install-unix: install-libs
 clean-unix:: clean-liblinks clean-libobjs clean-libs
 
 @lib_frag@

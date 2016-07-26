@@ -13,8 +13,8 @@ SRCS = $(srcdir)/kdb_test.c
 
 STLIBOBJS = kdb_test.o
 
-all-unix:: all-liblinks
-install-unix::
+all-unix: all-liblinks
+install-unix:
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 @libnover_frag@

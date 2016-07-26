@@ -3,15 +3,15 @@
 ##
 
 # in case there is no default target (very unlikely)
-all::
+all:
 
-check-windows::
+check-windows:
 
 ##############################
 # dependency generation
 #
 
-depend:: depend-postrecurse
+depend: depend-postrecurse
 depend-postrecurse: depend-recurse
 depend-recurse: depend-prerecurse
 
@@ -121,7 +121,7 @@ DEPTARGETS_@top_srcdir@_. = $(DEP_VERIFY)
 
 # Clear out dependencies.  Should only be used temporarily, e.g., while
 # moving or renaming headers and then rebuilding dependencies.
-undepend:: undepend-postrecurse
+undepend: undepend-postrecurse
 undepend-recurse:
 undepend-postrecurse: undepend-recurse
 	if test -n "$(SRCS)" ; then \
@@ -138,14 +138,14 @@ undepend-postrecurse: undepend-recurse
 ##############################
 
 # Python tests
-check-unix:: check-pytests-@HAVE_PYTHON@
+check-unix: check-pytests-@HAVE_PYTHON@
 
 # Makefile.in should add rules to check-pytests to execute Python tests.
-check-pytests-yes:: check-pytests
-check-pytests-no::
-check-pytests::
+check-pytests-yes: check-pytests
+check-pytests-no:
+check-pytests:
 
-clean:: clean-$(WHAT)
+clean: clean-$(WHAT)
 
 clean-unix::
 	$(RM) $(OBJS) $(DEPTARGETS_CLEAN) $(EXTRA_FILES)
@@ -156,7 +156,7 @@ clean-windows::
 	$(RM) *.$(OBJEXT)
 	$(RM) msvc.pdb *.err
 
-distclean:: distclean-$(WHAT)
+distclean: distclean-$(WHAT)
 
 distclean-normal-clean:
 	$(MAKE) NORECURSE=true clean

@@ -5,7 +5,7 @@ LOCALINCLUDES= -I$(srcdir)/.. -I$(srcdir)/../../common
 STLIBOBJS= stubs.o
 OBJS= $(OUTPRE)stubs.$(OBJEXT)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
 @libobj_frag@

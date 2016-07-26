@@ -20,15 +20,15 @@ OBJS = \
 	heuristic.o \
 	xmalloc.o @SETENVOBJ@
 
-all:: ksu
+all: ksu
 
 ksu: $(OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ $(OBJS) $(KRB5_BASE_LIBS) $(KSU_LIBS)
 
-clean::
+clean:
 	$(RM) ksu
 
-install::
+install:
 	-for f in ksu; do \
 	  $(INSTALL_SETUID) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \

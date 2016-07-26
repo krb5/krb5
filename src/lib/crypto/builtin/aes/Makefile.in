@@ -32,7 +32,7 @@ GEN_OBJS=\
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs # aes-gen
+all-unix: all-libobjs # aes-gen
 
 iaesx64@SHOBJEXT@: $(srcdir)/iaesx64.s
 	$(YASM) $(AESNI_FLAGS) -o $@ $(srcdir)/iaesx64.s
@@ -40,9 +40,9 @@ iaesx64@SHOBJEXT@: $(srcdir)/iaesx64.s
 iaesx86@SHOBJEXT@: $(srcdir)/iaesx86.s
 	$(YASM) $(AESNI_FLAGS) -o $@ $(srcdir)/iaesx86.s
 
-includes:: depend
+includes: depend
 
-depend:: $(SRCS)
+depend: $(SRCS)
 
 aes-gen: aes-gen.o $(GEN_OBJS)
 	$(CC_LINK) -o aes-gen aes-gen.o $(GEN_OBJS)
@@ -50,12 +50,12 @@ aes-gen: aes-gen.o $(GEN_OBJS)
 run-aes-gen: aes-gen
 	./aes-gen > kresults.out
 
-check:: run-aes-gen
+check: run-aes-gen
 
 
 clean-unix:: clean-libobjs
 
-clean::
+clean:
 	-$(RM) aes-gen aes-gen.o kresults.out
 
 @libobj_frag@

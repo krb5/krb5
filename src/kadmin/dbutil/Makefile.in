@@ -15,7 +15,7 @@ OBJS = kdb5_util.o kdb5_create.o kadm5_create.o kdb5_destroy.o \
 
 GETDATE = ../cli/getdate.o
 
-all:: $(PROG)
+all: $(PROG)
 
 $(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS) $(GETDATE)
 	$(CC_LINK) -o $(PROG) $(OBJS) $(GETDATE) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
@@ -24,10 +24,10 @@ import_err.c import_err.h: $(srcdir)/import_err.et
 
 $(OBJS): import_err.h
 
-install::
+install:
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
 
-clean::
+clean:
 	$(RM) $(PROG) $(OBJS) import_err.c import_err.h
 
 T_TDUMPUTIL_OBJS = t_tdumputil.o tdumputil.o
@@ -35,7 +35,7 @@ T_TDUMPUTIL_OBJS = t_tdumputil.o tdumputil.o
 t_tdumputil: $(T_TDUMPUTIL_OBJS) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ $(T_TDUMPUTIL_OBJS) $(SUPPORT_LIB)
 
-depend:: import_err.h
+depend: import_err.h
 
-check-pytests:: t_tdumputil
+check-pytests: t_tdumputil
 	$(RUNPYTEST) $(srcdir)/t_tdumputil.py $(PYTESTFLAGS)

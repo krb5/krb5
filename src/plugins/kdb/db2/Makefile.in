@@ -59,13 +59,13 @@ STLIBOBJS= \
 	db2_exp.o \
 	lockout.o
 
-all-unix:: all-liblinks
-install-unix:: install-libs
+all-unix: all-liblinks
+install-unix: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 $(DB_DEPS) $(DBOBJLISTS-k5) $(DBSHOBJLISTS): all-recurse
 
-clean::
+clean:
 	$(RM) .depend-verify-db
 
 @libnover_frag@

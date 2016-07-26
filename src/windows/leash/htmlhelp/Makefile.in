@@ -7,9 +7,9 @@ TARGET=..\$(OUTPRE)"MIT Kerberos.chm"
 HHP=MITKerberosHelp.hhp
 ERR=leash.log
 
-all:: $(HHCOUT)
+all: $(HHCOUT)
 
-clean::
+clean:
 	@if exist $(HHCOUT) del $(HHCOUT)
 	@if exist $(TARGET) del $(TARGET)
 	@if exist $(ERR) del $(ERR)

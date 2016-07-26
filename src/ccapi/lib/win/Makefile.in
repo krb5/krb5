@@ -64,7 +64,7 @@ LINK	= link
 LIBS	= ..\$(CLIB) ..\$(SLIB) kernel32.lib ws2_32.lib user32.lib advapi32.lib
 LFLAGS	= /nologo $(LOPTS)
 
-all:: Makefile copysrc midl $(OUTPRE)$(CCLIB).dll finish
+all: Makefile copysrc midl $(OUTPRE)$(CCLIB).dll finish
 
 ccs_request.h ccs_request_c.c ccs_request_s.c : ccs_request.idl ccs_request.acf
     midl $(MIDL_OPTIMIZATION) $(MIDLI) -oldnames -cpp_cmd $(CC) -cpp_opt "-E" \
@@ -110,10 +110,10 @@ finish:
     echo "Finished in ccapi/lib/win."
     cd ..
 
-install::
+install:
     echo "Doing nothing for make install"
 
-clean::
+clean:
 	if exist $(OUTPRE)*.exe del $(OUTPRE)*.exe
 	if exist $(OUTPRE)*.obj del $(OUTPRE)*.obj
 	if exist $(OUTPRE)*.res del $(OUTPRE)*.res

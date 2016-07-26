@@ -167,13 +167,13 @@ HDRDIR=$(BUILDTOP)/include/gssrpc
 
 all-prerecurse: all-liblinks
 
-all-windows:: $(OBJS)
+all-windows: $(OBJS)
 
 generate-files-mac: darwin.exports
 
-install-unix:: install-libs
+install-unix: install-libs
 
-install-unix::
+install-unix:
 	for i in $(SRC_HDRS); do \
 		(set -x; $(INSTALL_DATA) $(srcdir)/../../include/gssrpc/$$i $(DESTDIR)$(KRB5_INCDIR)$(S)gssrpc$(S)$$i) ; \
 	done
@@ -186,14 +186,14 @@ SRC_HDRS = auth.h auth_gss.h auth_gssapi.h auth_unix.h clnt.h \
 	netdb.h pmap_clnt.h pmap_prot.h pmap_rmt.h rename.h \
 	rpc.h rpc_msg.h svc.h svc_auth.h xdr.h
 
-check-windows::
+check-windows:
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 clean-windows::
 
 # stuff picked up from old "dyn" library
-#check-unix:: run-dyntest
+#check-unix: run-dyntest
 run-dyntest: dyntest
 	./dyntest
 dyntest: dyntest.o dyn.o
@@ -216,7 +216,7 @@ LCLINTOPTS=+posixlib \
         +ignoresigns -predboolint \
         +mod-uncon +modinternalstrict +modfilesys \
         -expect 2
-do-dyn-lclint::
+do-dyn-lclint:
 	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) $(DEFS) dyn.c dyntest.c
 
 $(BUILDTOP)/include/gssrpc/types.h: types.stamp

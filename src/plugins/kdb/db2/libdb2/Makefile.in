@@ -16,17 +16,17 @@ HDRS =	$(HDRDIR)/db.h $(HDRDIR)/db-config.h
 SHLIB_EXPDEPS=$(SUPPORT_DEPLIB)
 SHLIB_EXPLIBS=$(SUPPORT_LIB) $(LIBS)
 
-all-unix:: includes all-libs
+all-unix: includes all-libs
 all-prerecurse depend-prerecurse: $(HDRS)
 clean-unix:: clean-libs clean-includes
 
-includes:: $(HDRS)
+includes: $(HDRS)
 
 $(HDRDIR)/db.h: $(srcdir)/include/db.hin
 	$(CP) $(srcdir)/include/db.hin $@
 $(HDRDIR)/db-config.h: include/db-config.hin
 	$(CP) $(srcdir)/include/db-config.hin $@
 
-clean-includes::
+clean-includes:
 	$(RM) $(HDRS) include/*.stmp
 @lib_frag@

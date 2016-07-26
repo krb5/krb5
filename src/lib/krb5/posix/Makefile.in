@@ -8,7 +8,7 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 STLIBOBJS= # empty... @LIBOBJS@
 OBJS = # empty... @LIBOBJS@
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
 ##WIN32##LIBOBJS = $(OUTPRE)syslog.obj

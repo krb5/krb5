@@ -50,9 +50,9 @@ update-autoconf-h:
 config.status: $(top_srcdir)/config/shlib.conf
 ##DOS##!endif
 
-all-windows:: maybe-awk Makefile-windows
+all-windows: maybe-awk Makefile-windows
 
-world::
+world:
 	date
 	make $(MFLAGS) all
 	date
@@ -88,13 +88,13 @@ install-headers-mkdirs:
 	$(srcdir)/config/mkinstalldirs $(DESTDIR)$(KRB5_INCDIR)/gssrpc
 install-headers-prerecurse: install-headers-mkdirs
 
-# install::
+# install:
 #	$(MAKE) $(MFLAGS) install.man
 
 TAGS: $(SRCS)
 	etags $(SRCS)
 
-clean-:: clean-windows
+clean-: clean-windows
 clean-unix::
 	$(RM) *.o core
 
@@ -135,7 +135,7 @@ tgz-bin: pkgdir
 # Microsoft Windows build process...
 #
 
-config-windows:: Makefile-windows
+config-windows: Makefile-windows
 #	@echo Making in include
 #	cd include
 #	$(MAKE) -$(MFLAGS)
@@ -194,7 +194,7 @@ WINMAKEFILES=Makefile \
 	windows\leashdll\Makefile windows\leash\Makefile \
 	windows\leash\htmlhelp\Makefile
 
-##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
+##DOS##Makefile-windows: $(MKFDEP) $(WINMAKEFILES)
 
 ##DOS##Makefile: Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -453,17 +453,17 @@ awk-windows-mac: $(ETOUT) $(HOUT)
 # The maybe-awk target needs to happen after AWK is defined.
 #
 
-##DOS##maybe-awk::
+##DOS##maybe-awk:
 ##DOS##!ifdef WHICH_CMD
 ##DOS##!if ![ $(WHICH_CMD) $(AWK) ]
-##DOS##maybe-awk:: awk-windows-mac
+##DOS##maybe-awk: awk-windows-mac
 ##DOS##!endif
 ##DOS##!endif
 
 clean-windows-mac:
 	rm -f $(CLEANUP)
 
-distclean-windows:
+distclean-windows::
 	config\rm.bat $(CLEANUP:^/=^\)
 	config\rm.bat $(WINMAKEFILES)
 	config\rm.bat $(KBINDIR)\*.dll $(KBINDIR)\*.exe
@@ -471,7 +471,7 @@ distclean-windows:
 
 # Avoid using $(CP) here because the nul+ hack breaks implicit
 # destination filenames.
-install-windows::
+install-windows:
 	@if "$(KRB_INSTALL_DIR)"=="" @echo KRB_INSTALL_DIR is not defined!  Please define it.
 	@if "$(KRB_INSTALL_DIR)"=="" @dir /b \nul\nul
 	@if not exist "$(KRB_INSTALL_DIR)\$(NULL)" @echo The directory $(KRB_INSTALL_DIR) does not exist.  Please create it.
@@ -687,25 +687,25 @@ FIND_REINDENT = cd $(top_srcdir) && \
 	$(FIND) $(INDENTDIRS) \( $(EXCLUDES) \) -prune -o \
 	\( -name '*.[ch]' -o -name '*.hin' -o -name '*.[ch].in' \)
 
-show-reindentfiles::
+show-reindentfiles:
 	($(FIND_REINDENT) -print)
 
-reindent::
+reindent:
 	($(FIND_REINDENT) \
 	-print0 | $(XARGS) -0 $(EMACS) -q -batch \
 	-l util/krb5-c-style.el \
 	-l util/krb5-batch-reindent.el)
 
-mark-cstyle:: mark-cstyle-krb5 mark-cstyle-bsd
+mark-cstyle: mark-cstyle-krb5 mark-cstyle-bsd
 
-mark-cstyle-krb5::
+mark-cstyle-krb5:
 	(cd $(top_srcdir) && \
 	$(FIND) $(INDENTDIRS) \( $(EXCLUDES) \) -prune -o \
 	-name '*.[ch]' \
 	-print0 | $(XARGS) -0 $(PYTHON) util/krb5-mark-cstyle.py \
 	--cstyle=krb5)
 
-mark-cstyle-bsd::
+mark-cstyle-bsd:
 	(cd $(top_srcdir) && $(FIND) $(BSDFILES) -print0 | $(XARGS) -0 \
 	$(PYTHON) util/krb5-mark-cstyle.py --cstyle=bsd)
 

@@ -9,10 +9,10 @@ SRCS= $(srcdir)/gss-client.c $(srcdir)/gss-misc.c $(srcdir)/gss-server.c
 
 OBJS= gss-client.o gss-misc.o gss-server.o
 
-all-unix:: all-unix-@THREAD_SUPPORT@
-all-unix-1:: gss-server gss-client
-all-unix-0::
-all-windows:: $(OUTPRE)gss-server.exe $(OUTPRE)gss-client.exe
+all-unix: all-unix-@THREAD_SUPPORT@
+all-unix-1: gss-server gss-client
+all-unix-0:
+all-windows: $(OUTPRE)gss-server.exe $(OUTPRE)gss-client.exe
 
 gss-server: gss-server.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) $(PTHREAD_CFLAGS) -o gss-server gss-server.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(THREAD_LINKOPTS)
@@ -29,6 +29,6 @@ $(OUTPRE)gss-client.exe: $(OUTPRE)gss-client.obj $(OUTPRE)gss-misc.obj $(GLIB) $
 clean-unix::
 	$(RM) gss-server gss-client
 
-install-unix::
+install-unix:
 #	$(INSTALL_PROGRAM) gss-client $(DESTDIR)$(CLIENT_BINDIR)/gss-tclient
 #	$(INSTALL_PROGRAM) gss-server $(DESTDIR)$(SERVER_BINDIR)/gss-tserver

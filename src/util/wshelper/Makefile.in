@@ -46,8 +46,8 @@ DEFINES = $(DEFINES)
 DEFINES = $(DEFINES) -DDBG
 !endif
 
-all-windows::
-all-windows:: $(OUTPRE)$(DLL_NAME).dll
+all-windows:
+all-windows: $(OUTPRE)$(DLL_NAME).dll
 
 clean-windows::
 	$(RM) $(OUTPRE)$(DLL_NAME).dll

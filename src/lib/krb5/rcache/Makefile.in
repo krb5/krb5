@@ -38,7 +38,7 @@ SRCS=	\
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
 T_REPLAY_OBJS= t_replay.o

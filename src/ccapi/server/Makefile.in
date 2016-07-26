@@ -52,7 +52,7 @@ SRCS= \
 	ccs_pipe.c \
 	ccs_server.c
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
 @libobj_frag@

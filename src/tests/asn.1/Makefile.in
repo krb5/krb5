@@ -11,7 +11,7 @@ ASN1SRCS= $(srcdir)/krb5.asn1 $(srcdir)/pkix.asn1 $(srcdir)/otp.asn1 \
 	$(srcdir)/pkinit.asn1 $(srcdir)/pkinit-agility.asn1 \
 	$(srcdir)/cammac.asn1
 
-all:: krb5_encode_test krb5_decode_test krb5_decode_leak t_trval
+all: krb5_encode_test krb5_decode_test krb5_decode_leak t_trval
 
 LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1
 
@@ -33,7 +33,7 @@ krb5_decode_leak: $(LEAKOBJS) $(KRB5_BASE_DEPLIBS)
 t_trval: t_trval.o
 	$(CC) -o t_trval $(ALL_CFLAGS) t_trval.o
 
-check:: check-encode check-encode-trval check-decode check-leak
+check: check-encode check-encode-trval check-decode check-leak
 
 # Does not actually test for leaks unless using valgrind or a similar
 # tool, but does exercise a bunch of code.
@@ -82,9 +82,9 @@ test-vectors:
 	(cd vectors && $(CC) -I. -w *.c -o make-vectors)
 	(cd vectors && ./make-vectors)
 
-install::
+install:
 
-clean::
+clean:
 	rm -f *~ *.o krb5_encode_test krb5_decode_test krb5_decode_leak test.out trval t_trval expected_encode.out expected_trval.out trval.out
 
 

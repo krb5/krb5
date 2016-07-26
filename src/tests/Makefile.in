@@ -68,7 +68,7 @@ unlockiter: unlockiter.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ unlockiter.o $(KDB5_LIBS) $(KADMSRV_LIBS) \
 		$(KRB5_BASE_LIBS)
 
-check-unix:: kdb_check
+check-unix: kdb_check
 
 kdc.conf: Makefile
 	rm -rf kdc.conf
@@ -110,8 +110,8 @@ kdb_check: kdc.conf krb5.conf
 	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
 
-check-pytests:: adata etinfo gcred hist hooks hrealm icred kdbtest localauth
-check-pytests:: plugorder rdreq responder s2p s4u2proxy unlockiter
+check-pytests: adata etinfo gcred hist hooks hrealm icred kdbtest localauth
+check-pytests: plugorder rdreq responder s2p s4u2proxy unlockiter
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_hooks.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)
@@ -163,7 +163,7 @@ check-pytests:: plugorder rdreq responder s2p s4u2proxy unlockiter
 	$(RUNPYTEST) $(srcdir)/t_princflags.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_tabdump.py $(PYTESTFLAGS)
 
-clean::
+clean:
 	$(RM) adata etinfo gcred hist hooks hrealm icred kdbtest localauth
 	$(RM) plugorder rdreq responder s2p s4u2proxy krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap

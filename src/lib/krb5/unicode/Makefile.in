@@ -28,7 +28,7 @@ EXTRADEPSRCS =
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
 shared:
@@ -64,9 +64,9 @@ ucgendat: ucgendat.o
 
 $(XXSRCS) $(XXHEADERS) : .links
 
-clean:: 
+clean:
 	$(RM) *.dat .links $(XXHEADERS) $(XXSRCS) ucgendat
 
-depend:: .links
+depend: .links
 
 @libobj_frag@

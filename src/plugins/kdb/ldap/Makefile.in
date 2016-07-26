@@ -27,8 +27,8 @@ $(TOPLIBD)/libkdb_ldap$(SHLIBEXT) : all-recurse
 
 STLIBOBJS= ldap_exp.o
 
-all-unix:: all-liblinks
-install-unix:: install-libs
+all-unix: all-liblinks
+install-unix: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 @libnover_frag@

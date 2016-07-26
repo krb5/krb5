@@ -21,7 +21,7 @@ SRCS= asn1_err.c kdb5_err.c krb5_err.c k5e1_err.c kv5m_err.c krb524_err.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 all-libobjs: $(HDRS)
 
 includes: $(HDRS)

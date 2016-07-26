@@ -27,21 +27,21 @@ rename.h: $(srcdir)/Symbols.ev
 	$(RM) $@
 	$(SED) -e 's/.*/#define & k5&/' < $(srcdir)/Symbols.ev > $@
 
-all-unix:: all-liblinks includes
+all-unix: all-liblinks includes
 
-install-unix:: install-libs
+install-unix: install-libs
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 	$(RM) $(VERTO_HDR) rename.h
 
-includes:: $(VERTO_HDR)
-depend:: $(VERTO_HDR) rename.h
+includes: $(VERTO_HDR)
+depend: $(VERTO_HDR) rename.h
 
 $(VERTO_HDR): $(srcdir)/verto.h
 	$(RM) $@
 	$(CP) $(srcdir)/verto.h $@
 
-install::
+install:
 	$(INSTALL_DATA) $(srcdir)/verto.h $(DESTDIR)$(KRB5_INCDIR)/verto.h
 	$(INSTALL_DATA) $(srcdir)/verto-module.h \
 		$(DESTDIR)$(KRB5_INCDIR)/verto-module.h

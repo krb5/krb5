@@ -206,19 +206,19 @@ EXPORTED_HEADERS = mechglue.h
 
 $(OBJS): $(EXPORTED_HEADERS)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 
 ##DOS##LIBOBJS = $(OBJS)
 
 clean-unix:: clean-libobjs
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
-install::
+install:
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
 	do $(INSTALL_DATA) $(srcdir)$(S)$$f     \
 		$(DESTDIR)$(KRB5_INCDIR)$(S)gssapi$(S)$$f ; \
 	done
 
-includes::
+includes:
 
 @libobj_frag@

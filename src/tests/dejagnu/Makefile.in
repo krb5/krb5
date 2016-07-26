@@ -5,13 +5,13 @@ RUNTESTFLAGS =
 
 SRCS=$(srcdir)/t_inetd.c
 
-all:: t_inetd
+all: t_inetd
 
-install::
+install:
 
-check:: check-runtest-@HAVE_RUNTEST@
+check: check-runtest-@HAVE_RUNTEST@
 
-check-runtest-no::
+check-runtest-no:
 	@echo "+++"
 	@echo "+++ WARNING: tests/dejagnu tests not run."
 	@echo "+++ runtest is unavailable."
@@ -19,13 +19,13 @@ check-runtest-no::
 	@echo 'Skipped dejagnu tests: runtest not found' >> $(SKIPTESTS)
 
 # Set VALGRIND at run time, that may be changed when running 'make'.
-check-runtest-yes:: t_inetd site.exp
+check-runtest-yes: t_inetd site.exp
 	$(RUNTEST) --tool krb VALGRIND="$(VALGRIND)" $(RUNTESTFLAGS)
 
-t_inetd:: t_inetd.o $(KRB5_BASE_DEPLIBS)
+t_inetd: t_inetd.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_inetd t_inetd.o $(KRB5_BASE_LIBS)
 
-clean::
+clean:
 	$(RM) t_inetd t_inetd.o site.exp runenv.vars runenv.vals
 
 clean-unix::

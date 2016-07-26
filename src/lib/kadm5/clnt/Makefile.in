@@ -41,13 +41,13 @@ STLIBOBJS = \
 	clnt_privs.o \
 	clnt_chpass_util.o
 
-all-unix:: includes
-all-unix:: all-liblinks
-all-windows:: $(OBJS)
+all-unix: includes
+all-unix: all-liblinks
+all-windows: $(OBJS)
 
 generate-files-mac: includes darwin.exports
 
-includes:: client_internal.h
+includes: client_internal.h
 	if cmp $(srcdir)/client_internal.h \
 	$(BUILDTOP)/include/kadm5/client_internal.h >/dev/null 2>&1; then :; \
 	else \
@@ -59,20 +59,20 @@ includes:: client_internal.h
 clean-unix::
 	$(RM) $(BUILDTOP)/include/kadm5/client_internal.h
 
-check-windows::
+check-windows:
 
 clean-windows::
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-install:: install-libs
+install: install-libs
 
-install-unix::
+install-unix:
 	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/libkadm5clnt$(DEPLIBEXT)
 	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIBBASE)$(DEPLIBEXT) \
 		libkadm5clnt$(DEPLIBEXT))
 
-depend:: includes
+depend: includes
 
 @lib_frag@
 @libobj_frag@

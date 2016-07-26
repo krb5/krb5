@@ -30,17 +30,17 @@ LIBS	= $(KLIB) $(CLIB) $(WLIB)
 SYSLIBS	= kernel32.lib ws2_32.lib user32.lib gdi32.lib comdlg32.lib
 LFLAGS	= /nologo $(LOPTS)
 
-all:: Makefile $(OUTPRE)telnet.exe
+all: Makefile $(OUTPRE)telnet.exe
 
 $(OUTPRE)telnet.exe: telnet.def $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
 	  $(LIBS) $(SYSLIBS) $(SCLIB)
 	$(_VC_MANIFEST_EMBED_EXE)
 
-install::
+install:
 	copy $(OUTPRE)telnet.exe $(DESTDIR)
 
-clean:: 
+clean:
 	$(RM) $(OUTPRE)*.exe $(OUTPRE)*.res $(OUTPRE)*.map
 
 $(RESFILE): ..\version.rc

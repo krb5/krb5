@@ -73,13 +73,13 @@ STLIBOBJS = \
 	svr_chpass_util.o \
 	adb_xdr.o
 
-all-unix:: includes
-all-unix:: all-liblinks
-all-windows:: $(OBJS)
+all-unix: includes
+all-unix: all-liblinks
+all-windows: $(OBJS)
 
 generate-files-mac: includes darwin.exports
 
-includes:: server_acl.h
+includes: server_acl.h
 	if cmp $(srcdir)/server_acl.h \
 	$(BUILDTOP)/include/kadm5/server_acl.h >/dev/null 2>&1; then :; \
 	else \
@@ -91,20 +91,20 @@ includes:: server_acl.h
 clean-unix::
 	$(RM) $(BUILDTOP)/include/kadm5/server_acl.h
 
-check-windows::
+check-windows:
 
 clean-windows::
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-install:: install-libs
+install: install-libs
 
-install-unix::
+install-unix:
 	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/libkadm5srv$(DEPLIBEXT)
 	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIBBASE)$(DEPLIBEXT) \
 		libkadm5srv$(DEPLIBEXT))
 
-depend:: includes
+depend: includes
 
 @lib_frag@
 @libobj_frag@

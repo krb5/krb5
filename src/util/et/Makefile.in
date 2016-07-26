@@ -19,9 +19,9 @@ LIBMINOR=0
 LIBINITFUNC=com_err_initialize
 LIBFINIFUNC=com_err_terminate
 
-all-unix:: all-liblinks
+all-unix: all-liblinks
 clean-unix:: clean-liblinks clean-libs clean-libobjs
-install-unix:: install-libs
+install-unix: install-libs
 
 LINTFLAGS=-uhvb 
 LINTFILES= error_message.c et_name.c com_err.c
@@ -54,7 +54,7 @@ SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 
 COM_ERR_HDR=$(BUILDTOP)$(S)include$(S)com_err.h
 
-all-windows:: $(COM_ERR_HDR)
+all-windows: $(COM_ERR_HDR)
 
 $(COM_ERR_HDR): com_err.h
 	$(CP) com_err.h "$@"
@@ -86,9 +86,9 @@ $(OUTPRE)test_et.exe: $(OUTPRE)test_et.$(OBJEXT) $(OUTPRE)test1.$(OBJEXT) \
 	$(OUTPRE)test2.$(OBJEXT) $(CLIB)
 	link $(EXE_LINKOPTS) -out:$(OUTPRE)test_et$(EXEEXT) $**
 
-all-unix:: compile_et includes
+all-unix: compile_et includes
 
-includes:: com_err.h
+includes: com_err.h
 	if cmp $(srcdir)/com_err.h \
 	$(BUILDTOP)/include/com_err.h >/dev/null 2>&1; then :; \
 	else \
@@ -102,23 +102,24 @@ clean-unix::
 
 # test_et doesn't have an interesting exit status, but it'll exercise
 # some cases that t_com_err doesn't, so let's see if it crashes.
-check-unix:: t_com_err test_et
+check-unix: t_com_err test_et
 	$(RUN_TEST) ./test_et
 	$(RUN_TEST) ./t_com_err
 
-check-windows:: $(OUTPRE)test_et$(EXEEXT)
+check-windows: $(OUTPRE)test_et$(EXEEXT)
 	set path=$(BUILDTOP)\lib\$(OUTPRE);%path%;
 	path
 	$(OUTPRE)test_et$(EXEEXT)
 
-install-unix:: compile_et
+install-unix: compile_et compile_et.1
 	$(INSTALL) compile_et $(DESTDIR)$(bindir)/compile_et
 	test -d $(DESTDIR)$(mydatadir) || mkdir $(DESTDIR)$(mydatadir)
 	$(INSTALL_DATA) $(srcdir)/et_c.awk $(DESTDIR)$(mydatadir)
 	$(INSTALL_DATA) $(srcdir)/et_h.awk $(DESTDIR)$(mydatadir)
+	$(INSTALL_DATA) $(srcdir)/compile_et.1 $(DESTDIR)$(CLIENT_MANDIR)/compile_et.1
 
 
-install-headers:: compile_et
+install-headers: compile_et
 
 compile_et: $(srcdir)/compile_et.sh $(srcdir)/config_script
 	$(SHELL) $(srcdir)/config_script $(srcdir)/compile_et.sh \
@@ -136,20 +137,17 @@ rebuild-h:
 clean-unix::
 	$(RM) compile_et
 
-depend:: 
+depend:
 
-install:: com_err.h 
+install: com_err.h
 	$(INSTALL_DATA) $(srcdir)/com_err.h  $(DESTDIR)$(KRB5_INCDIR)/com_err.h
-
-install-unix:: compile_et.1
-	$(INSTALL_DATA) $(srcdir)/compile_et.1 $(DESTDIR)$(CLIENT_MANDIR)/compile_et.1
 
 
 ## install_library_target(com_err,$(LIBOBJS),$(LINTFILES),)
 
 clean-unix:: clean-files
 
-clean-files::
+clean-files:
 	rm -f *~ \#* *.bak \
 		*.otl *.aux *.toc *.PS *.dvi *.x9700 *.ps \
 		*.cp *.fn *.ky *.log *.pg *.tp *.vr \
@@ -175,7 +173,7 @@ archive:	et.tar
 TAGS:	et_name.c error_message.c
 	etags et_name.c error_message.c
 
-depend::  includes compile_et
+depend:  includes compile_et
 
 
 @lib_frag@

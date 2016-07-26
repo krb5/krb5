@@ -15,8 +15,8 @@ SRCS = klist.c
 ##WIN32##$(EXERES): $(VERSIONRC)
 ##WIN32##        $(RC) $(RCFLAGS) -DKLIST_APP -fo $@ -r $**
 
-all-unix:: klist
-##WIN32##all-windows:: $(KLIST)
+all-unix: klist
+##WIN32##all-windows: $(KLIST)
 
 klist: klist.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ klist.o $(KRB5_BASE_LIBS)
@@ -28,7 +28,7 @@ klist: klist.o $(KRB5_BASE_DEPLIBS)
 clean-unix::
 	$(RM) klist.o klist
 
-install-unix::
+install-unix:
 	for f in klist; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \

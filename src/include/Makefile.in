@@ -4,9 +4,9 @@ KRB5RCTMPDIR= @KRB5_RCTMPDIR@
 ##DOSBUILDTOP = ..
 NO_OUTPRE=1
 
-all-unix:: krb5/krb5.h
+all-unix: krb5/krb5.h
 
-all-unix:: maybe-make-db.h-@DB_HEADER_VERSION@
+all-unix: maybe-make-db.h-@DB_HEADER_VERSION@
 
 generate-files-mac: krb5/krb5.h
 
@@ -27,10 +27,10 @@ K5_ET_HEADERS = \
 	../lib/krb5/error_tables/asn1_err.h
 BUILT_HEADERS = osconf.h
 
-all-unix:: autoconf.h $(BUILT_HEADERS)
-all-windows:: autoconf.h $(BUILT_HEADERS) verify-calling-conventions-krb5
+all-unix: autoconf.h $(BUILT_HEADERS)
+all-windows: autoconf.h $(BUILT_HEADERS) verify-calling-conventions-krb5
 
-all-unix:: @MAINT@ verify-calling-conventions-krb5
+all-unix: @MAINT@ verify-calling-conventions-krb5
 
 $(srcdir)/autoconf.h.in: @MAINT@ $(srcdir)/autoconf.stmp
 $(srcdir)/autoconf.stmp: $(top_srcdir)/configure.in $(top_srcdir)/aclocal.m4
@@ -130,13 +130,13 @@ clean-windows::
 	$(RM) osconf.h autoconf.h autoconf.stamp
 	@echo Making clean in include
 
-clean::
+clean:
 	$(RM) osconf.new $(BUILT_HEADERS)
 
-distclean::
+distclean:
 	$(RM) autoconf.h
 
-install-headers-unix install:: krb5/krb5.h profile.h
+install-headers-unix install: krb5/krb5.h profile.h
 	$(INSTALL_DATA) $(srcdir)/krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h
 	$(INSTALL_DATA) $(srcdir)/kdb.h $(DESTDIR)$(KRB5_INCDIR)$(S)kdb.h
 	$(INSTALL_DATA) krb5/krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)krb5.h
@@ -154,4 +154,4 @@ install-headers-unix install:: krb5/krb5.h profile.h
 	$(INSTALL_DATA) $(srcdir)/gssapi.h $(DESTDIR)$(KRB5_INCDIR)$(S)gssapi.h
 	$(INSTALL_DATA) $(srcdir)/krad.h $(DESTDIR)$(KRB5_INCDIR)/krad.h
 
-depend:: krb5/krb5.h $(BUILT_HEADERS)
+depend: krb5/krb5.h $(BUILT_HEADERS)

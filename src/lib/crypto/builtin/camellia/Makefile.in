@@ -18,11 +18,11 @@ GEN_OBJS= $(OUTPRE)camellia.$(OBJEXT)
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs # camellia-gen
+all-unix: all-libobjs # camellia-gen
 
-includes:: depend
+includes: depend
 
-depend:: $(SRCS)
+depend: $(SRCS)
 
 camellia-gen: camellia-gen.o $(GEN_OBJS)
 	$(CC_LINK) -o camellia-gen camellia-gen.o $(GEN_OBJS)
@@ -30,12 +30,12 @@ camellia-gen: camellia-gen.o $(GEN_OBJS)
 run-camellia-gen: camellia-gen
 	./camellia-gen > kresults.out
 
-check:: run-camellia-gen
+check: run-camellia-gen
 
 
 clean-unix:: clean-libobjs
 
-clean::
+clean:
 	-$(RM) camellia-gen camellia-gen.o kresults.out
 
 @libobj_frag@

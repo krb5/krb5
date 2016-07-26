@@ -15,11 +15,11 @@ STLIBOBJS= au_simple_main.o
 
 SRCS= $(srcdir)/au_simple_main.c
 
-all-unix:: all-liblinks
-install-unix:: install-libs
+all-unix: all-liblinks
+install-unix: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-clean::
+clean:
 	$(RM) au_simple_main.o kdc_j_encode.o
 	$(RM) lib$(LIBBASE)$(SO_EXT)
 

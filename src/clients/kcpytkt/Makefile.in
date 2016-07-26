@@ -11,9 +11,9 @@ BUILDTOP=$(REL)..$(S)..
 ##WIN32##$(EXERES): $(VERSIONRC)
 ##WIN32##        $(RC) $(RCFLAGS) -DKCPYTKT_APP -fo $@ -r $**
 
-all-unix:: kcpytkt
-##WIN32##all-windows:: $(KCPYTKT)
-all-mac::
+all-unix: kcpytkt
+##WIN32##all-windows: $(KCPYTKT)
+all-mac:
 
 kcpytkt: kcpytkt.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kcpytkt.o $(KRB5_BASE_LIBS)
@@ -25,7 +25,7 @@ kcpytkt: kcpytkt.o $(KRB5_BASE_DEPLIBS)
 clean-unix::
 	$(RM) kcpytkt.o kcpytkt
 
-install-unix::
+install-unix:
 	for f in kcpytkt; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \

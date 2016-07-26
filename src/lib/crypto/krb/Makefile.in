@@ -196,12 +196,12 @@ SRCS=\
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
-includes:: depend
+all-unix: all-libobjs
+includes: depend
 
-depend:: $(SRCS)
+depend: $(SRCS)
 
-check-unix:: t_fortuna
+check-unix: t_fortuna
 	if [ $(PRNG_ALG) = fortuna ]; then \
 		$(RUN_TEST) ./t_fortuna > t_fortuna.output; \
 		cmp t_fortuna.output $(srcdir)/t_fortuna.expected; \

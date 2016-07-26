@@ -15,9 +15,9 @@ SRCS=kvno.c
 ##WIN32##$(EXERES): $(VERSIONRC)
 ##WIN32##        $(RC) $(RCFLAGS) -DKVNO_APP -fo $@ -r $**
 
-all-unix:: kvno
+all-unix: kvno
 
-##WIN32##all-windows:: $(KVNO)
+##WIN32##all-windows: $(KVNO)
 
 kvno: kvno.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kvno.o $(KRB5_BASE_LIBS)
@@ -29,7 +29,7 @@ kvno: kvno.o $(KRB5_BASE_DEPLIBS)
 clean-unix::
 	$(RM) kvno.o kvno
 
-install-unix::
+install-unix:
 	for f in kvno; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \

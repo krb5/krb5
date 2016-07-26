@@ -47,21 +47,21 @@ STLIBOBJS= \
 
 EXTRADEPSRCS= t_stringattr.c t_ulog.c
 
-all-unix:: all-liblinks
-install-unix:: install-libs
+all-unix: all-liblinks
+install-unix: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 	$(RM) adb_err.c adb_err.h t_stringattr.o t_stringattr
 	$(RM) t_ulog.o t_ulog test.ulog
 
-check-unix:: t_ulog
+check-unix: t_ulog
 	$(RUN_TEST) ./t_ulog test.ulog
 
-check-pytests:: t_stringattr
+check-pytests: t_stringattr
 	$(RUNPYTEST) $(srcdir)/t_stringattr.py $(PYTESTFLAGS)
 
 generate-files-mac: darwin.exports
 
-depend:: adb_err.h
+depend: adb_err.h
 
 t_stringattr: t_stringattr.o $(KDB5_DEPLIBS) $(KADM_COMM_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_stringattr.o $(KDB5_LIBS) $(KADM_COMM_LIBS) \

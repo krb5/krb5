@@ -2,20 +2,20 @@
 # Start of Win32 post-config lines (config/win-post.in)
 #
 
-setup-msg::
+setup-msg:
 	@set C_RULE_PRINT=	$(C_RULE_PRINT)
 	@set DO_C_RULE_PRINT=1
 
 !if defined(NO_OUTPRE) || defined(NO_OUTDIR)
-outpre-dir::
+outpre-dir:
 !else
-outpre-dir:: $(OUTPRE3)$(DIRNUL)
+outpre-dir: $(OUTPRE3)$(DIRNUL)
 !endif
 
 #
-# put all:: first just in case no other rules occur here
+# put all: first just in case no other rules occur here
 #
-all::
+all:
 
 #
 # Set the #define to indicate that we are compiling a DLL.  We default to 
@@ -46,19 +46,19 @@ all-recurse:
 	@for %d in ($(WINSUBDIRS)) do @(echo Making in $(mydir)\%d && \
 		pushd %d && $(MAKE) -$(MFLAGS) && popd) || exit 1
 	@echo Making in $(mydir)
-all-windows:: all-recurse
+all-windows: all-recurse
 
-clean-recurse::
+clean-recurse:
 	@for %d in ($(WINSUBDIRS)) do @(echo Making clean in $(mydir)\%d && \
 		pushd %d && $(MAKE) -$(MFLAGS) clean && popd) || exit 1
 	@echo Making clean in $(mydir)
 clean-windows:: clean-recurse
 
-check-recurse::
+check-recurse:
 	@for %d in ($(WINSUBDIRS)) do @(echo Making check in $(mydir)\%d && \
 		pushd %d && $(MAKE) -$(MFLAGS) check && popd) || exit 1
 	@echo Making check in $(mydir)
-check-windows:: check-recurse
+check-windows: check-recurse
 
 !endif # WINSUBDIRS
 
@@ -82,7 +82,7 @@ OBJFILELIST=@$(OBJFILE)
 OBJFILEDEP=$(OBJFILE)
 !endif
 
-all-windows:: $(LIBNAME)
+all-windows: $(LIBNAME)
 $(LIBNAME): $(OBJFILEDEP)
 	$(LIBCMD) /out:$(LIBNAME) /nologo $(OBJFILELIST)
 
@@ -91,7 +91,7 @@ $(LIBNAME): $(OBJFILEDEP)
 
 # Build an object file list if OBJFILE is defined.
 !if defined(OBJFILE)
-all-windows:: $(OBJFILE)
+all-windows: $(OBJFILE)
 !if defined(LIBOBJS)
 $(OBJFILE): $(LIBOBJS)
 	if exist $(OBJFILE) del $(OBJFILE)
@@ -104,15 +104,15 @@ $(OBJFILE): $(LIBOBJS)
 !endif # OBJFILE
 
 
-check::
-check-windows::
+check:
+check-windows:
 
 clean-windows:: clean-windows-files clean-windows-dir
 
 
 # This needs to be in the post because we need RM to be defined in terms
 # of BUILDTOP
-clean-windows-files::
+clean-windows-files:
 !if "$(OUTPRE3)" == ""
 !error ASSERTION FAILURE: OUTPRE3 must be defined!!!
 !endif

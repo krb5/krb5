@@ -14,7 +14,7 @@ STLIBOBJS= au_test.o
 
 SRCS= $(srcdir)/au_test.c
 
-all-unix:: all-liblinks
+all-unix: all-liblinks
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 @libnover_frag@

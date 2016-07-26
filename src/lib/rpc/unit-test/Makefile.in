@@ -4,7 +4,7 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 OBJS= client.o rpc_test_clnt.o rpc_test_svc.o server.o
 SRCS= client.c rpc_test_clnt.c rpc_test_svc.c server.c
 
-all:: client server
+all: client server
 
 client: client.o rpc_test_clnt.o $(GSSRPC_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o client client.o rpc_test_clnt.o \
@@ -26,11 +26,11 @@ client.o server.o: rpc_test.h
 # 	rpcgen -m rpc_test.x -o rpc_test_svc.c
 # 	rpcgen -h rpc_test.x -o rpc_test.h
 # 
-# clean::
+# clean:
 # 	rm -f rpc_test.h rpc_test_clnt.c rpc_test_svc.c
 # 
 
-check unit-test:: unit-test-@DO_TEST@
+check unit-test: unit-test-@DO_TEST@
 
 unit-test-:
 	@echo "+++"
@@ -39,7 +39,7 @@ unit-test-:
 	@echo "+++"
 	@echo 'Skipped rpc tests: runtest or Perl not found' >> $(SKIPTESTS)
 
-unit-test-ok:: unit-test-body
+unit-test-ok: unit-test-body
 
 PASS=@PASS@
 unit-test-body:
@@ -60,7 +60,7 @@ unit-test-body:
 		trap 0 ; exit 0 ; \
 	else exit 1 ; fi
 
-clean::
+clean:
 	$(RM) server client
 	$(RM) dbg.log rpc_test.log rpc_test.sum
 

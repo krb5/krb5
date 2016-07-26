@@ -58,16 +58,16 @@ SHLIB_EXPDEPS = \
 	$(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 SHLIB_EXPLIBS=-lk5crypto -lcom_err $(SUPPORT_LIB) @GEN_LIB@ $(LIBS)
 
-all-unix:: all-liblinks
+all-unix: all-liblinks
 
-all-windows::
+all-windows:
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 clean-windows::
 	$(RM) $(OUTPRE)krb5.lib krb5.bak
 
-install-unix:: install-libs
+install-unix: install-libs
 
 @lib_frag@
 @libobj_frag@

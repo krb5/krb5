@@ -8,11 +8,11 @@ OBJS= $(OUTPRE)des_keys.$(OBJEXT)
 
 SRCS= $(srcdir)/des_keys.c
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 
-includes:: depend
+includes: depend
 
-depend:: $(SRCS)
+depend: $(SRCS)
 
 clean-unix:: clean-libobjs
 

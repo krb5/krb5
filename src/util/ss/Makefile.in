@@ -5,7 +5,7 @@ SED = sed
 INSTALLLIB=cp
 INSTALLFILE=cp
 
-all::
+all:
 
 TOP=$(BUILDTOP)
 
@@ -15,7 +15,7 @@ LIBMINOR=0
 RELDIR=../util/ss
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
-install-unix:: install-libs
+install-unix: install-libs
 
 # hard coded srcdir/.. is so that ss/ss.h works
 
@@ -55,15 +55,15 @@ MKCMDSOBJS=	mk_cmds.o utils.o options.o ct.tab.o cmd_tbl.lex.o
 # stuff to build
 #
 
-all-unix::	mk_cmds ct_c.awk ct_c.sed includes # libss_p.a lint
-all-unix:: all-liblinks
-all-windows::  all-unix
+all-unix:	mk_cmds ct_c.awk ct_c.sed includes # libss_p.a lint
+all-unix: all-liblinks
+all-windows:  all-unix
 
 dist:	archives
 
-install::
+install:
 
-includes:: mk_cmds ct_c.sed ct_c.awk ss_err.h
+includes: mk_cmds ct_c.sed ct_c.awk ss_err.h
 
 HDRDIR=$(BUILDTOP)/include/ss
 HDRS =	$(HDRDIR)/ss.h \
@@ -75,7 +75,7 @@ SRC_HDRS_DEP = $(srcdir)/ss.h
 
 generate-files-mac: ct_c.awk ct_c.sed std_rqs.c ss_err.h
 
-includes:: $(HDRS)
+includes: $(HDRS)
 $(HDRDIR)/timestamp:
 	if [ -d $(HDRDIR) ] ; then :; else mkdir -p $(HDRDIR); fi
 	echo timestamp > $(HDRDIR)/timestamp
@@ -96,10 +96,7 @@ ss_err.h: ss_err.et
 
 ss_err.c: ss_err.et
 
-clean::
-	$(RM) ss_err.o ss_err.c ss_err.h std_rqs.c
-
-depend:: ss_err.h
+depend: ss_err.h
 
 ct.tab.c ct.tab.h: ct.y
 	$(RM) ct.tab.* y.*
@@ -114,7 +111,7 @@ ct.tab.c ct.tab.h: ct.y
 #
 #mk_cmds.o:	ss_err.h
 #
-#install::
+#install:
 #	$(INSTALLPROG) mk_cmds ${DESTDIR}$(PROGDIR)/mk_cmds
 
 mk_cmds: $(srcdir)/mk_cmds.sh $(srcdir)/config_script 
@@ -128,12 +125,9 @@ ct_c.awk: $(srcdir)/ct_c_awk.in
 ct_c.sed: $(srcdir)/ct_c_sed.in
 	$(SED) -e '/^#/d' $(srcdir)/ct_c_sed.in > ct_c.sed
 
-clean::
+clean:
+	$(RM) ss_err.o ss_err.c ss_err.h std_rqs.c
 	$(RM) mk_cmds ct_c.awk ct_c.sed $(MKCMDSOBJS)
-
-# 
-
-clean::
 	rm -f *.o *~ \#* *.bak core \
 		ss_err.h ct.tab.c ct.tab.h cmd_tbl.lex.c \
 		lex.yy.c y.tab.c \

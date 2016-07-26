@@ -1,18 +1,18 @@
 WHAT=windows
 
-all:: setup-msg outpre-dir
+all: setup-msg outpre-dir
 
-all:: all-$(WHAT)
-clean:: clean-$(WHAT)
-install:: install-$(WHAT)
-check:: check-$(WHAT)
+all: all-$(WHAT)
+clean: clean-$(WHAT)
+install: install-$(WHAT)
+check: check-$(WHAT)
 
-all-windows::
+all-windows:
 clean-windows::
-install-windows::
-check-windows::
+install-windows:
+check-windows:
 
-all-windows:: Makefile
+all-windows: Makefile
 clean-windows:: Makefile
 
 #
@@ -65,7 +65,7 @@ $(OUTPRE3)$(DIRNUL):
 	@if exist $(OUTPRE2)$(DIRNUL) if not exist $(OUTPRE3)$(DIRNUL) echo The directory $(OUTPRE3) could not be created.
 
 
-clean-windows-dir::
+clean-windows-dir:
 	-@if exist $(OUTPRE3)$(DIRNUL) rmdir $(OUTPRE3)
 	-@if exist $(OUTPRE2)$(DIRNUL) rmdir $(OUTPRE2)
 	-@if exist $(OUTPRE1)$(DIRNUL) rmdir $(OUTPRE1)

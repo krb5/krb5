@@ -26,7 +26,7 @@ OBJS= \
 	$(OUTPRE)cci_message.$(OBJEXT) \
 	$(OUTPRE)cci_stream.$(OBJEXT)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
 @libobj_frag@

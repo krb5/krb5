@@ -56,21 +56,21 @@ verify$(EXEEXT): t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
 destest$(EXEEXT): destest.$(OBJEXT) $(TOBJS) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ destest.$(OBJEXT) $(TOBJS) $(SUPPORT_LIB)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 
-check-unix:: verify destest
+check-unix: verify destest
 	$(RUN_TEST) ./verify -z
 	$(RUN_TEST) ./verify -m
 	$(RUN_TEST) ./verify
 	$(RUN_TEST) ./destest < $(srcdir)/keytest.data
 
-includes:: depend
+includes: depend
 
-depend:: $(SRCS)
+depend: $(SRCS)
 
-check-windows::
+check-windows:
 
-clean::
+clean:
 	$(RM) destest.$(OBJEXT) destest$(EXEEXT) verify$(EXEEXT) \
 	t_verify.$(OBJEXT) $(TOBJS)
 

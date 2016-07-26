@@ -15,8 +15,8 @@ SRCS=kdestroy.c
 ##WIN32##$(EXERES): $(VERSIONRC)
 ##WIN32##        $(RC) $(RCFLAGS) -DKDESTROY_APP -fo $@ -r $**
 
-all-unix:: kdestroy
-##WIN32##all-windows:: $(KDESTROY)
+all-unix: kdestroy
+##WIN32##all-windows: $(KDESTROY)
 
 kdestroy: kdestroy.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kdestroy.o $(KRB5_BASE_LIBS)
@@ -28,7 +28,7 @@ kdestroy: kdestroy.o $(KRB5_BASE_DEPLIBS)
 clean-unix::
 	$(RM) kdestroy.o kdestroy
 
-install-unix::
+install-unix:
 	for f in kdestroy; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \

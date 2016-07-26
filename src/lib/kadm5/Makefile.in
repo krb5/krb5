@@ -10,7 +10,7 @@ chpass_util_strings.$(OBJEXT): chpass_util_strings.c
 kadm_err.c kadm_err.h: $(srcdir)/kadm_err.et
 chpass_util_strings.c chpass_util_strings.h: $(srcdir)/chpass_util_strings.et
 
-clean::
+clean:
 	$(RM) kadm_err.c kadm_err.h kadm_err.o
 	$(RM) chpass_util_strings.c chpass_util_strings.h chpass_util_strings.o
 
@@ -57,7 +57,7 @@ SRC_HDRS = admin.h admin_internal.h admin_xdr.h kadm_rpc.h \
 
 $(HDRS): includes
 
-includes:: $(SRC_HDRS) $(BUILD_HDRS)
+includes: $(SRC_HDRS) $(BUILD_HDRS)
 	if [ -d $(HDRDIR) ]; then :; else mkdir -p $(HDRDIR); fi
 	for i in $(SRC_HDRS) ; do \
 		i=`basename $$i`; \
@@ -82,22 +82,22 @@ clean-unix::
 all-prerecurse: includes
 all-prerecurse: all-libobjs
 
-all-windows:: $(OBJS)
+all-windows: $(OBJS)
 
 generate-files-mac-prerecurse: includes
 
-check-windows::
+check-windows:
 
 clean-unix:: clean-libobjs
 
 clean-windows::
 
-install-headers-unix install:: $(BUILD_HDRS)
+install-headers-unix install: $(BUILD_HDRS)
 	$(INSTALL_DATA) $(srcdir)/admin.h $(DESTDIR)$(KRB5_INCDIR)$(S)kadm5$(S)admin.h
 	$(INSTALL_DATA) chpass_util_strings.h $(DESTDIR)$(KRB5_INCDIR)$(S)kadm5$(S)chpass_util_strings.h
 	$(INSTALL_DATA) kadm_err.h $(DESTDIR)$(KRB5_INCDIR)$(S)kadm5$(S)kadm_err.h
 
-depend:: includes
+depend: includes
 
 @libobj_frag@
 

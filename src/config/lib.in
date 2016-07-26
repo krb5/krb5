@@ -153,13 +153,13 @@ Makefile: $(top_srcdir)/config/lib.in
 $(BUILDTOP)/config.status: $(top_srcdir)/config/shlib.conf
 
 # Use the following if links need to be made to $(TOPLIBD):
-# all-unix:: all-liblinks
-# install-unix:: install-libs
+# all-unix: all-liblinks
+# install-unix: install-libs
 # clean-unix:: clean-liblinks clean-libs
 
 # Use the following if links need not be made:
-# all-unix:: all-libs
-# install-unix:: install-libs
+# all-unix: all-libs
+# install-unix: install-libs
 # clean-unix:: clean-libs
 
 ###

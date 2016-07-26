@@ -6,7 +6,7 @@ BUILDTOP=$(REL)..$(S)..
 
 SRCS=$(srcdir)/t_loader.c
 
-all::
+all:
 
 run-t_loader: t_loader
 	$(RUN_TEST) ./t_loader
@@ -14,10 +14,10 @@ run-t_loader: t_loader
 t_loader: t_loader.o
 	$(CC_LINK) -o t_loader t_loader.o $(DL_LIB)
 
-check-unix::
+check-unix:
 
-install::
+install:
 
-clean::
+clean:
 	$(RM) t_loader.o t_loader
 

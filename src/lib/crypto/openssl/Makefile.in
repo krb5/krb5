@@ -37,10 +37,10 @@ SUBDIROBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
 		hash_provider/OBJS.ST 		\
 		aes/OBJS.ST 
 
-all-unix:: all-libobjs
-includes:: depend
+all-unix: all-libobjs
+includes: depend
 
-depend:: $(SRCS)
+depend: $(SRCS)
 
 clean-unix:: clean-libobjs
 

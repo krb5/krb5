@@ -15,7 +15,7 @@ OBJS = $(OUTPRE)spnego_mech.$(OBJEXT)
 
 STLIBOBJS = spnego_mech.o
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 
 ##DOS##LIBOBJS = $(OBJS)
 

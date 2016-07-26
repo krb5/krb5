@@ -128,7 +128,7 @@ $(docsrc)/version.py: $(top_srcdir)/patchlevel.h $(srcdir)/version.py.in
 	rm -f $@
 	$(CC) -E -I$(top_srcdir) - < $(srcdir)/version.py.in > $@
 
-clean::
+clean:
 	rm -rf doxy rst_apiref rst_composite rst_notice html_subst \
 		Doxyfile paths.py $(docsrc)/version.py notice.txt \
 		$(docsrc)/html/.doctrees $(docsrc)/pdf/.doctrees \

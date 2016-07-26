@@ -158,7 +158,7 @@ EXTRADEPSRCS = \
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
 shared:
@@ -199,10 +199,10 @@ lclint-localaddr: localaddr.c
 	$(LCLINT) $(LCLINTOPTS) $(CPPFLAGS) $(LOCALINCLUDES) $(DEFS) \
 		-DTEST $(srcdir)/localaddr.c
 
-check-unix:: check-unix-stdconf check-unix-locate check-unix-trace \
+check-unix: check-unix-stdconf check-unix-locate check-unix-trace \
 	check-unix-expand
 
-check-unix-stdconf:: t_std_conf
+check-unix-stdconf: t_std_conf
 	$(RUN_TEST_LOCAL_CONF) ./t_std_conf  -d -s NEW.DEFAULT.REALM -d \
 		-D DEFAULT_REALM.TST -r bad.idea -r itar.bad.idea \
 		-r really.BAD.IDEA. -r clipper.bad.idea -r KeYEsCrOW.BaD.IDea \
@@ -218,7 +218,7 @@ NSPAT = '^_kerberos.*service'
 DIG = @DIG@
 NSLOOKUP = @NSLOOKUP@
 
-check-unix-locate:: t_locate_kdc
+check-unix-locate: t_locate_kdc
 	if [ "$(OFFLINE)" = no ]; then \
 	    if $(DIG) $(SRVNAME) srv | grep -i $(DIGPAT) || \
 		$(NSLOOKUP) -q=srv $(SRVNAME) | grep -i $(NSPAT); then \
@@ -232,14 +232,14 @@ check-unix-locate:: t_locate_kdc
 		echo 'Skipped t_locate_kdc test: OFFLINE' >> $(SKIPTESTS); \
 	fi
 
-check-unix-trace:: t_trace
+check-unix-trace: t_trace
 	rm -f t_trace.out
 	KRB5_TRACE=t_trace.out ; export KRB5_TRACE ; \
 	$(RUN_TEST) ./t_trace
 	sed -e 's/^[^:]*: //' t_trace.out | cmp - $(srcdir)/t_trace.ref
 	rm -f t_trace.out
 
-check-unix-expand:: t_expand_path
+check-unix-expand: t_expand_path
 	$(RUN_TEST) ./t_expand_path '%{null}' ''
 	$(RUN_TEST) ./t_expand_path ' %{BINDIR}%{LIBDIR} ' \
 		' $(CLIENT_BINDIR)$(KRB5_LIBDIR) '
@@ -247,7 +247,7 @@ check-unix-expand:: t_expand_path
 		'the %{animal}%{s} on the %{place}%{s}' \
 		'the frogs on the pads'
 
-clean:: 
+clean:
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_locate_kdc.o t_trace.o
 	$(RM) t_expand_path.o
 

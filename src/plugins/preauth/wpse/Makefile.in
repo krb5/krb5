@@ -16,8 +16,8 @@ STLIBOBJS=wpse_main.o
 
 SRCS=wpse_main.c
 
-all-unix:: all-libs
-install-unix:: install-libs
+all-unix: all-libs
+install-unix: install-libs
 clean-unix:: clean-libs clean-libobjs
 
 @libnover_frag@

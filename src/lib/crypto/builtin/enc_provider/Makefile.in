@@ -33,11 +33,11 @@ SRCS= \
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 
-includes:: depend
+includes: depend
 
-depend:: $(SRCS)
+depend: $(SRCS)
 
 clean-unix:: clean-libobjs
 

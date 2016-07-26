@@ -138,8 +138,8 @@ LIBS    = -lkrb5
 ##DOS##LIBS = $(CLIB) $(SLIB) advapi32.lib rpcrt4.lib user32.lib ws2_32.lib $(CCLIB).lib
 LFLAGS	= /nologo $(LOPTS)
 
-all-mac::     setup-test-dir pingtest simple_lock_test build-base build-tests link-tests copy-script success-message
-all-windows:: setup-windows build-base $(OUTPRE)pingtest.exe build-tests build-testall copy-script success-message
+all-mac:     setup-test-dir pingtest simple_lock_test build-base build-tests link-tests copy-script success-message
+all-windows: setup-windows build-base $(OUTPRE)pingtest.exe build-tests build-testall copy-script success-message
 
 # compile base files used by all tests
 build-base: $(PINGOBJS)
@@ -219,7 +219,7 @@ success-message:
 
 .PHONY: clean
 
-clean::
+clean:
 	-rm -rf "$(OBJDIR)"
 	-rm -rf $(LIBSRC)
 	-rm -rf $(WINH)

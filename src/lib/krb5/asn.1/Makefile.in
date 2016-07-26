@@ -27,7 +27,7 @@ OBJS= \
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 
 clean-unix:: clean-libobjs
 

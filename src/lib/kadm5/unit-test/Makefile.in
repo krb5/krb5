@@ -60,15 +60,15 @@ server-setkey-test: setkey-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 # The unit-test targets
 #
 
-check:: check-@DO_TEST@
+check: check-@DO_TEST@
 
-check-::
+check-:
 	@echo "+++"
 	@echo "+++ WARNING: lib/kadm5 unit tests not run."
 	@echo "+++ Either tcl, runtest, or Perl is unavailable."
 	@echo "+++"
 
-check-ok unit-test:: unit-test-client unit-test-server
+check-ok unit-test: unit-test-client unit-test-server
 
 unit-test-client: unit-test-client-setup unit-test-client-body \
 	unit-test-client-cleanup
@@ -76,13 +76,13 @@ unit-test-client: unit-test-client-setup unit-test-client-body \
 unit-test-server: unit-test-server-setup unit-test-server-body \
 	unit-test-server-cleanup
 
-test-randkey:: randkey-test
+test-randkey: randkey-test
 	$(ENV_SETUP) $(VALGRIND) ./randkey-test
 
-test-handle-server:: server-handle-test
+test-handle-server: server-handle-test
 	$(ENV_SETUP) $(VALGRIND) ./server-handle-test
 
-test-handle-client:: client-handle-test
+test-handle-client: client-handle-test
 	$(ENV_SETUP) $(VALGRIND) ./client-handle-test
 
 test-noauth: init-test
@@ -94,16 +94,16 @@ test-destroy: destroy-test
 test-setkey-client: client-setkey-test
 	$(ENV_SETUP) $(VALGRIND) ./client-setkey-test testkeys admin admin
 
-unit-test-client-setup::
+unit-test-client-setup:
 	$(ENV_SETUP) $(VALGRIND) $(START_SERVERS)
 
-unit-test-client-cleanup::
+unit-test-client-cleanup:
 	$(ENV_SETUP) $(STOP_SERVERS)
 
-unit-test-server-setup::
+unit-test-server-setup:
 	$(ENV_SETUP) $(VALGRIND) $(START_SERVERS_LOCAL)
 
-unit-test-server-cleanup::
+unit-test-server-cleanup:
 	$(ENV_SETUP) $(STOP_SERVERS_LOCAL)
 
 unit-test-client-body: site.exp test-noauth test-destroy test-handle-client \
@@ -126,7 +126,7 @@ unit-test-server-body: site.exp test-handle-server lock-test
 	-mv api.log sapi.log
 	-mv api.sum sapi.sum
 
-clean::
+clean:
 	$(RM) init-test client_init.o init-test.o
 	$(RM) destroy-test destroy-test.o
 	$(RM) client-handle-test handle-test.o client-handle-test.o

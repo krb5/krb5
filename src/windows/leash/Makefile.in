@@ -96,7 +96,7 @@ LIBS	= $(GLIB) $(CLIB) $(WLIB)
 SYSLIBS	= kernel32.lib Iphlpapi.lib ws2_32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib version.lib
 LFLAGS	= /nologo $(LOPTS)
 
-all:: Makefile $(OUTPRE)$(EXE_NAME).exe
+all: Makefile $(OUTPRE)$(EXE_NAME).exe
 
 $(OUTPRE)$(EXE_NAME).exe: $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) /out:$@ /ENTRY:WinMainCRTStartup $(OBJS) $(XOBJS) \
@@ -111,7 +111,7 @@ $(RESFILE): Leash.rc res/Leash.rc2 kfwribbon.rc ver.rc ../version.rc ../kerberos
 
 $(OUTPRE)LeashUIApplication.obj $(OUTPRE)LeashUICommandHandler.obj: kfwribbon.h
 
-clean::
+clean:
 	if exist $(OUTPRE)*.exe del $(OUTPRE)*.exe
 	if exist $(OUTPRE)*.obj del $(OUTPRE)*.obj
 	if exist $(OUTPRE)*.res del $(OUTPRE)*.res

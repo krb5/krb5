@@ -108,8 +108,8 @@ EXPORTED_BUILT_HEADERS= gssapi.h
 
 $(OBJS): $(EXPORTED_HEADERS) $(ETHDRS)
 
-all-unix:: $(EXPORTED_HEADERS) $(ETHDRS) $(HDRS)
-all-unix:: all-libobjs
+all-unix: $(EXPORTED_HEADERS) $(ETHDRS) $(HDRS)
+all-unix: all-libobjs
 
 errmap.h: $(top_srcdir)/util/gen.pl $(top_srcdir)/util/t_array.pm \
 		$(top_srcdir)/util/t_bimap.pm
@@ -131,8 +131,8 @@ maptest: maptest.o
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-windows:: win-create-ehdrdir
-all-windows:: $(HDRS)
+all-windows: win-create-ehdrdir
+all-windows: $(HDRS)
 
 win-create-ehdrdir:
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
@@ -150,13 +150,13 @@ t_seqstate: t_seqstate.o util_seqstate.o $(SUPPORT_DEPLIB)
 	$(CC_LINK) $(ALL_CFLAGS) -o $@ t_seqstate.o util_seqstate.o \
 		$(SUPPORT_LIB)
 
-check-unix:: t_seqstate
+check-unix: t_seqstate
 	$(RUN_TEST) ./t_seqstate
 
 generate-files-mac: gssapi.h errmap.h
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
-install-headers-unix install:: gssapi.h
+install-headers-unix install: gssapi.h
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
 	do $(INSTALL_DATA) $(srcdir)/$$f	\
 		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
@@ -166,7 +166,7 @@ install-headers-unix install:: gssapi.h
 		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
 	done
 
-depend:: $(ETSRCS) $(ETHDRS) $(HDRS) errmap.h maptest.h
+depend: $(ETSRCS) $(ETHDRS) $(HDRS) errmap.h maptest.h
 
 @libobj_frag@
 

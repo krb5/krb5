@@ -14,18 +14,18 @@ SRCS= $(srcdir)/md4.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 
-includes:: depend
+includes: depend
 
-depend:: $(SRCS)
+depend: $(SRCS)
 
 
-check-unix:: 
+check-unix:
 
-check-windows::
+check-windows:
 
-clean:: 
+clean:
 
 clean-unix:: clean-libobjs
 

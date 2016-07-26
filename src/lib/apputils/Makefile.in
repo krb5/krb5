@@ -15,9 +15,9 @@ SED = sed
 STLIBOBJS=net-server.o udppktinfo.o @LIBOBJS@
 LIBBASE=apputils
 
-all-unix:: all-liblinks
+all-unix: all-liblinks
 clean-unix:: clean-liblinks clean-libs clean-libobjs
-install-unix:: install-libs
+install-unix: install-libs
 
 LINTFLAGS=-uhvb 
 LINTFILES= daemon.c

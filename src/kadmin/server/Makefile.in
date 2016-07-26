@@ -10,13 +10,13 @@ PROG = kadmind
 OBJS = kadm_rpc_svc.o server_stubs.o ovsec_kadmd.o schpw.o misc.o ipropd_svc.o
 SRCS = kadm_rpc_svc.c server_stubs.c ovsec_kadmd.c schpw.c misc.c ipropd_svc.c
 
-all:: $(PROG)
+all: $(PROG)
 
 $(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS) $(APPUTILS_DEPLIB) $(VERTO_DEPLIB)
 	$(CC_LINK) -o $(PROG) $(OBJS) $(APPUTILS_LIB) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS) $(VERTO_LIBS)
 
-install::
+install:
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(SERVER_BINDIR)/$(PROG)
 
-clean::
+clean:
 	$(RM) $(PROG) $(OBJS)

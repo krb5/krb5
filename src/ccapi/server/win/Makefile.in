@@ -69,7 +69,7 @@ LIBS	= ..\$(SLIB) rpcrt4.lib advapi32.lib ws2_32.lib user32.lib
 LFLAGS	= /nologo $(LOPTS)
 
 
-all:: Makefile copysrc midl $(OUTPRE)ccapiserver.exe finish
+all: Makefile copysrc midl $(OUTPRE)ccapiserver.exe finish
 
 ccs_request.h ccs_request_c.c ccs_request_s.c : ccs_request.idl ccs_request.acf
     midl $(MIDL_OPTIMIZATION) $(MIDLI) -oldnames -cpp_cmd $(CC) -cpp_opt "-E" \
@@ -104,7 +104,7 @@ finish :
     @echo "Finished building ccapiserver.exe"
     cd
 
-clean::
+clean:
 	if exist $(OUTPRE)*.exe del $(OUTPRE)*.exe
 	if exist $(OUTPRE)*.obj del $(OUTPRE)*.obj
 	if exist $(OUTPRE)*.res del $(OUTPRE)*.res

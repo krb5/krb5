@@ -36,7 +36,7 @@ Makefile: $(top_srcdir)/config/libobj.in
 config.status: $(top_srcdir)/config/shlib.conf
 
 # clean-unix:: clean-libobjs
-# all-unix:: all-libobjs
+# all-unix: all-libobjs
 
 ###
 ### end config/libobj.in

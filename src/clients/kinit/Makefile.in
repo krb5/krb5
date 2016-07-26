@@ -14,8 +14,8 @@ SRCS=kinit.c kinit_kdb.c
 ##WIN32##$(EXERES): $(VERSIONRC)
 ##WIN32##        $(RC) $(RCFLAGS) -DKINIT_APP -fo $@ -r $**
 
-all-unix:: kinit
-##WIN32##all-windows:: $(KINIT)
+all-unix: kinit
+##WIN32##all-windows: $(KINIT)
 
 kinit: kinit.o kinit_kdb.o $(KRB5_BASE_DEPLIBS) $(KADMSRV_DEPLIBS)
 	$(CC_LINK) -o $@ kinit.o kinit_kdb.o $(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
@@ -27,7 +27,7 @@ kinit: kinit.o kinit_kdb.o $(KRB5_BASE_DEPLIBS) $(KADMSRV_DEPLIBS)
 clean-unix::
 	$(RM) kinit.o kinit_kdb.o kinit
 
-install-unix::
+install-unix:
 	for f in kinit; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \

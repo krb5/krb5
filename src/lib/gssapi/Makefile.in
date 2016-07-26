@@ -30,9 +30,9 @@ SHLIB_EXPDEPS=\
 SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
 RELDIR=gssapi
 
-all-unix:: all-liblinks @MAINT@ verify-calling-conventions-gssapi
+all-unix: all-liblinks @MAINT@ verify-calling-conventions-gssapi
 
-install-unix:: install-libs
+install-unix: install-libs
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs clean-misc-unix
 

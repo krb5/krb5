@@ -7,7 +7,7 @@ SRCS=$(srcdir)/t_rcache.c \
 	$(srcdir)/profread.c \
 	$(srcdir)/prof1.c
 
-all::
+all:
 
 run-t_rcache: t_rcache
 	$(RUN_TEST) ./t_rcache
@@ -29,9 +29,9 @@ init_ctx: init_ctx.o $(KRB5_BASE_DEPLIBS)
 profread: profread.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) $(PTHREAD_CFLAGS) -o profread profread.o $(KRB5_BASE_LIBS) $(THREAD_LINKOPTS)
 
-check-unix:: run-t_rcache
+check-unix: run-t_rcache
 
-install::
+install:
 
-clean::
+clean:
 	$(RM) *.o t_rcache syms prof1 gss-perf

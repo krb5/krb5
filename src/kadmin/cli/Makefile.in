@@ -11,7 +11,7 @@ SRCS = kadmin.c kadmin_ct.c ss_wrapper.c getdate.c keytab.c keytab_local.c
 
 LOCALINCLUDES=-I$(srcdir)
 
-all:: $(PROG).local $(PROG)
+all: $(PROG).local $(PROG)
 
 $(PROG).local: $(LOCAL_OBJS) $(SS_DEPLIB) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $(PROG).local $(LOCAL_OBJS) $(SS_LIB) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
@@ -21,14 +21,14 @@ $(PROG): $(KADMIN_OBJS) $(SS_DEPLIB) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 
 kadmin_ct.o: kadmin_ct.c
 
-install::
+install:
 	$(INSTALL_PROGRAM) $(PROG).local ${DESTDIR}$(ADMIN_BINDIR)/$(PROG).local
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(CLIENT_BINDIR)/$(PROG)
 	$(INSTALL_SCRIPT) $(srcdir)/k5srvutil.sh ${DESTDIR}$(CLIENT_BINDIR)/k5srvutil
 
 generate-files-mac: kadmin_ct.c getdate.c
 
-clean::
+clean:
 	$(RM) $(PROG).local $(PROG) $(COMMON_OBJS) $(KADMIN_OBJS) $(LOCAL_OBJS)
 clean-unix::
 	$(RM) datetest getdate.c kadmin_ct.c

@@ -89,13 +89,13 @@ EXTRADEPSRCS= \
 
 ##DOS##OBJS=$(OBJS) $(OUTPRE)ccfns.$(OBJEXT)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 
-all-windows:: subdirs $(OBJFILE) 
+all-windows: subdirs $(OBJFILE)
 
-##DOS##subdirs:: ccapi\$(OUTPRE)file.lst
+##DOS##subdirs: ccapi\$(OUTPRE)file.lst
 
-##DOS##ccapi\$(OUTPRE)file.lst::
+##DOS##ccapi\$(OUTPRE)file.lst:
 ##DOS##	cd ccapi
 ##DOS##	@echo Making in krb5\ccache\ccapi
 ##DOS##	$(MAKE) -$(MFLAGS)
@@ -137,18 +137,18 @@ T_MARSHAL_OBJS = t_marshal.o
 t_marshal: $(T_MARSHAL_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ $(T_MARSHAL_OBJS) $(KRB5_BASE_LIBS)
 
-check-unix:: t_cc t_marshal
+check-unix: t_cc t_marshal
 	$(RUN_TEST) ./t_cc
 	$(RUN_TEST) ./t_marshal testcache
 
-check-pytests:: t_cccursor t_cccol
+check-pytests: t_cccursor t_cccol
 	$(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
 
 clean-unix::
 	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o t_cccol t_cccol.o
 	$(RM) t_marshal t_marshal.o testcache
 
-depend:: $(KCMRPC_DEPS)
+depend: $(KCMRPC_DEPS)
 
 ##WIN32##$(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(top_srcdir)/include/k5-int.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
 

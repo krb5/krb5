@@ -4,13 +4,13 @@ KDB5_DEP_LIB=$(THREAD_LINKOPTS) $(DL_LIB)
 
 SRCS=$(srcdir)/kdb5_verify.c
 
-all:: kdb5_verify
+all: kdb5_verify
 
 kdb5_verify: kdb5_verify.o $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o kdb5_verify kdb5_verify.o $(KDB5_LIBS) $(KDB5_DEP_LIB) $(KRB5_BASE_LIBS)
 
-install::
+install:
 
-clean::
+clean:
 	$(RM) kdb5_verify.o kdb5_verify
 

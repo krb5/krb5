@@ -3,7 +3,7 @@ SUBDIRS=crypto krb5 gssapi rpc kdb kadm5 apputils krad
 WINSUBDIRS=crypto krb5 gssapi
 BUILDTOP=$(REL)..
 
-all-unix::
+all-unix:
 
 CLEANLIBS = libkrb5.a libkdb5.a libcrypto.a libgssapi_krb5.a libkadm.a \
 	libcom_err.a libpty.a ibss.a libgssapi.a libapputils.a libkrb5.so \
@@ -145,5 +145,5 @@ clean-windows::
 ##WIN32##gssapi.lib: $(GLIB)
 ##WIN32##profile.lib: $(PLIB)
 
-##WIN32##all-windows:: all-recurse lib-windows
-##WIN32##lib-windows:: krb5.lib gssapi.lib profile.lib
+##WIN32##all-windows: all-recurse lib-windows
+##WIN32##lib-windows: krb5.lib gssapi.lib profile.lib

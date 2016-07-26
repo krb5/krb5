@@ -16,8 +16,8 @@ STLIBOBJS=cksum_body_main.o
 
 SRCS= $(srcdir)/cksum_body_main.c
 
-all-unix:: $(LIBBASE)$(SO_EXT)
-install-unix:: install-libs
+all-unix: $(LIBBASE)$(SO_EXT)
+install-unix: install-libs
 clean-unix:: clean-libs clean-libobjs
 
 @libnover_frag@

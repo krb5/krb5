@@ -203,7 +203,7 @@ EXPORTED_HEADERS= gssapi_krb5.h
 
 GSSAPI_KRB5_HDR=$(EHDRDIR)$(S)gssapi_krb5.h
 
-all-windows:: $(EHDRDIR) $(GSSAPI_KRB5_HDR) $(SRCS) $(HDRS)
+all-windows: $(EHDRDIR) $(GSSAPI_KRB5_HDR) $(SRCS) $(HDRS)
 
 ##DOS##$(EHDRDIR):
 ##DOS##	mkdir $(EHDRDIR)
@@ -215,8 +215,8 @@ $(GSSAPI_KRB5_HDR): $(srcdir)$(S)gssapi_krb5.h
 	@$(MK_EHDRDIR)
 	$(CP) $(srcdir)$(S)gssapi_krb5.h "$@"
 
-all-unix:: $(SRCS) $(HDRS) $(GSSAPI_KRB5_HDR)
-all-unix:: all-libobjs
+all-unix: $(SRCS) $(HDRS) $(GSSAPI_KRB5_HDR)
+all-unix: all-libobjs
 
 error_map.h: $(top_srcdir)/util/gen-map.pl \
 		$(top_srcdir)/util/ktemplate.pm Makefile
@@ -245,15 +245,15 @@ clean-windows::
 
 generate-files-mac: error_map.h
 
-install-headers-unix install::
+install-headers-unix install:
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
 	do $(INSTALL_DATA) $(srcdir)/$$f	\
 		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
 	done
 
-depend:: $(ETSRCS) $(ETHDRS) $(GSSAPI_KRB5_HDR) error_map.h
+depend: $(ETSRCS) $(ETHDRS) $(GSSAPI_KRB5_HDR) error_map.h
 
-install::
+install:
 
 @libobj_frag@
 

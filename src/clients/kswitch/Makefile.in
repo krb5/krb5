@@ -13,8 +13,8 @@ SRCS=kswitch.c
 ##WIN32##$(EXERES): $(VERSIONRC)
 ##WIN32##        $(RC) $(RCFLAGS) -DKSWITCH_APP -fo $@ -r $**
 
-all-unix:: kswitch
-##WIN32##all-windows:: $(KSWITCH)
+all-unix: kswitch
+##WIN32##all-windows: $(KSWITCH)
 
 kswitch: kswitch.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kswitch.o $(KRB5_BASE_LIBS)
@@ -26,7 +26,7 @@ kswitch: kswitch.o $(KRB5_BASE_DEPLIBS)
 clean-unix::
 	$(RM) kswitch.o kswitch
 
-install-unix::
+install-unix:
 	for f in kswitch; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \

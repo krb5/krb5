@@ -24,7 +24,7 @@ CATALOGS=en_US.mo
 .po.mo:
 	msgfmt -o $@ $<
 
-all:: $(CATALOGS)
+all: $(CATALOGS)
 
 update-po: csrcs check_et_@COM_ERR_VERSION@
 	$(XGETTEXT) -k_ -kN_ -o $(POTFILE) -f csrcs
@@ -40,7 +40,7 @@ check_et_sys:
 
 always:
 
-install::
+install:
 	for c in $(CATALOGS); do \
 	  lang=`basename $$c .mo`; \
 	  $(top_srcdir)/config/mkinstalldirs \
@@ -49,5 +49,5 @@ install::
 	    $(DESTDIR)$(KRB5_LOCALEDIR)/$$lang/LC_MESSAGES/$(DOMAIN).mo; \
 	done
 
-clean::
+clean:
 	$(RM) $(CATALOGS)

@@ -32,7 +32,7 @@ $(LIBRES): $(VERSIONRC)
 $(EXERES): $(VERSIONRC)
         $(RC) $(RCFLAGS) -DKFWCPCC_APP -fo $@ -r $**
 
-all-windows:: $(OUTPRE)kfwlogon.dll $(OUTPRE)kfwcpcc.exe
+all-windows: $(OUTPRE)kfwlogon.dll $(OUTPRE)kfwcpcc.exe
 
 $(KFWLOGON): $(OUTPRE)kfwlogon.obj $(OUTPRE)kfwcommon.obj $(LIBRES)
     link $(DLL_LINKOPTS) -out:$@ $(OUTPRE)kfwlogon.obj $(OUTPRE)kfwcommon.obj -entry:DllEntryPoint -def:kfwlogon.def $(SYSLIBS) $(KLIB) $(CLIB) $(SCLIB) ../lib/$(OUTPRE)libwin.lib $(LIBRES)
@@ -42,10 +42,10 @@ $(KFWCPCC): $(OUTPRE)kfwcpcc.obj $(OUTPRE)kfwcommon.obj $(EXERES)
     link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)kfwcpcc.obj $(OUTPRE)kfwcommon.obj $(SYSLIBS) $(KLIB) $(CLIB) $(SCLIB) ../lib/$(OUTPRE)libwin.lib $(EXERES)
     $(_VC_MANIFEST_EMBED_EXE)
 
-install::
+install:
         copy $(OUTPRE)kfwlogon.dll $(DESTDIR)
         copy $(OUTPRE)kfwcpcc.exe  $(DESTDIR)
 
-clean::
+clean:
         $(RM) $(OUTPRE)*.exe $(OUTPRE)*.dll $(OUTPRE)*.res
 

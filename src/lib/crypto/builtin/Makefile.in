@@ -39,10 +39,10 @@ SUBDIROBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs
-includes:: depend
+all-unix: all-libobjs
+includes: depend
 
-depend:: $(SRCS)
+depend: $(SRCS)
 
 clean-unix:: clean-libobjs
 

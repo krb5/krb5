@@ -18,11 +18,11 @@ SRCS=	$(srcdir)/hash_crc32.c	\
 	$(srcdir)/hash_md5.c 	\
 	$(srcdir)/hash_sha1.c
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 
-includes:: depend
+includes: depend
 
-depend:: $(SRCS)
+depend: $(SRCS)
 
 clean-unix:: clean-libobjs
 

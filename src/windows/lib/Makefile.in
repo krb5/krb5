@@ -14,9 +14,9 @@ OBJS=	$(OUTPRE)vardlg.obj $(OUTPRE)gic.obj $(OUTPRE)registry.obj \
 $(OUTPRE)libwin.lib: $(OBJS)
        lib /nologo /out:$*.lib $(OBJS)
 
-all-windows:: lib-windows
+all-windows: lib-windows
 
 clean-windows::
 	$(RM) $(OUTPRE)*.exp $(OUTPRE)*.map $(OUTPRE)libwin.lib $(OUTPRE)*.obj
 
-install-windows::
+install-windows:

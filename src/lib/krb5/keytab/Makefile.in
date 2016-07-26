@@ -44,16 +44,16 @@ SRCS=	\
 EXTRADEPSRCS= \
 	$(srcdir)/t_keytab.c 
 
-all-windows:: $(OBJFILE)
+all-windows: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)
 ##DOS	$(RM) $(OBJFILE)
 ##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $(OUTPRE)*.obj > $(OBJFILE)
 
-all-unix:: all-libobjs
+all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
-check-unix:: t_keytab
+check-unix: t_keytab
 	$(RUN_TEST) ./t_keytab
 
 T_KEYTAB_OBJS = t_keytab.o

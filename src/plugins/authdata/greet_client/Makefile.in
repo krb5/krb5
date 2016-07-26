@@ -11,8 +11,8 @@ STLIBOBJS= greet.o
 
 SRCS=	greet.c
 
-all-unix:: all-libs
-install-unix::
+all-unix: all-libs
+install-unix:
 clean-unix:: clean-libs clean-libobjs
 
 @libnover_frag@

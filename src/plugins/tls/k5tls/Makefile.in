@@ -14,8 +14,8 @@ STLIBOBJS=openssl.o notls.o
 
 SRCS=$(srcdir)/openssl.c $(srcdir)/notls.c
 
-all-unix:: all-liblinks
-install-unix:: install-libs
+all-unix: all-liblinks
+install-unix: install-libs
 clean-unix:: clean-libs clean-libobjs
 
 @libnover_frag@

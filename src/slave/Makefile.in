@@ -1,7 +1,7 @@
 mydir=slave
 BUILDTOP=$(REL)..
 
-all::	kprop kpropd kproplog
+all:	kprop kpropd kproplog
 
 CLIENTSRCS= $(srcdir)/kprop.c $(srcdir)/kprop_sock.c
 CLIENTOBJS= kprop.o kprop_sock.o
@@ -24,14 +24,12 @@ kpropd: $(SERVEROBJS) $(KDB5_DEPLIB) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS) $(
 kproplog: $(LOGOBJS)
 	$(CC_LINK) -o kproplog $(LOGOBJS) $(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
 
-install::
+install:
 	for f in kprop kpropd kproplog; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(SERVER_BINDIR)/`echo $$f|sed '$(transform)'`; \
 	done
 
-clean::
+clean:
 	$(RM) $(CLIENTOBJS) $(SERVEROBJS) $(LOGOBJS)
-
-clean::
 	$(RM) kprop kpropd kproplog

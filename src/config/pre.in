@@ -20,17 +20,17 @@
 WHAT = unix
 SHELL=/bin/sh
 
-all:: all-$(WHAT)
+all: all-$(WHAT)
 
-clean:: clean-$(WHAT)
+clean: clean-$(WHAT)
 
-distclean:: distclean-$(WHAT)
+distclean: distclean-$(WHAT)
 
-install:: install-$(WHAT)
+install: install-$(WHAT)
 
-check:: check-$(WHAT)
+check: check-$(WHAT)
 
-install-headers:: install-headers-$(WHAT)
+install-headers: install-headers-$(WHAT)
 
 ##############################
 # Recursion rule support
@@ -60,16 +60,16 @@ install-headers:: install-headers-$(WHAT)
 # double-colon rules.
 #
 # e.g.
-# all:: includes foo
+# all: includes foo
 # foo:
 #	echo foo
-# includes::
+# includes:
 #	echo bar
-# includes::
+# includes:
 #	echo baz
 #
 # will result in "bar", "foo", "baz" on AIX, and possibly others.
-all-unix:: all-postrecurse
+all-unix: all-postrecurse
 all-postrecurse: all-recurse
 all-recurse: all-prerecurse
 
@@ -90,21 +90,21 @@ distclean-recurse: distclean-prerecurse
 distclean-prerecurse:
 distclean-postrecurse:
 
-install-unix:: install-postrecurse
+install-unix: install-postrecurse
 install-postrecurse: install-recurse
 install-recurse: install-prerecurse
 
 install-prerecurse:
 install-postrecurse:
 
-install-headers-unix:: install-headers-postrecurse
+install-headers-unix: install-headers-postrecurse
 install-headers-postrecurse: install-headers-recurse
 install-headers-recurse: install-headers-prerecurse
 
 install-headers-prerecurse:
 install-headers-postrecurse:
 
-check-unix:: check-postrecurse
+check-unix: check-postrecurse
 check-postrecurse: check-recurse
 check-recurse: check-prerecurse
 
