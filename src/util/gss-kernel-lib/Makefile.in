@@ -2,7 +2,7 @@ mydir=util/gss-kernel-lib
 BUILDTOP=$(REL)..$(S)..
 
 DEFINES=-DKRB5_KERNEL
-ALL_CFLAGS=$(CPPFLAGS) $(CFLAGS) $(WARN_CFLAGS) $(DEFS) $(DEFINES) -I. -Igssapi
+ALL_CFLAGS=$(WARN_CFLAGS) $(DEFS) $(DEFINES) -I. -Igssapi $(CPPFLAGS) $(CFLAGS)
 
 SHLIB_EXPDEPS = \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
