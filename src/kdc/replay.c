@@ -32,8 +32,8 @@
 #ifndef NOCACHE
 
 struct entry {
-    LIST_ENTRY(entry) bucket_links;
-    TAILQ_ENTRY(entry) expire_links;
+    K5_LIST_ENTRY(entry) bucket_links;
+    K5_TAILQ_ENTRY(entry) expire_links;
     int num_hits;
     krb5_timestamp timein;
     krb5_data req_packet;
@@ -47,8 +47,8 @@ struct entry {
 #define LOOKASIDE_MAX_SIZE (10 * 1024 * 1024)
 #endif
 
-LIST_HEAD(entry_list, entry);
-TAILQ_HEAD(entry_queue, entry);
+K5_LIST_HEAD(entry_list, entry);
+K5_TAILQ_HEAD(entry_queue, entry);
 
 static struct entry_list hash_table[LOOKASIDE_HASH_SIZE];
 static struct entry_queue expiration_queue;
@@ -115,8 +115,8 @@ static void
 discard_entry(krb5_context context, struct entry *entry)
 {
     total_size -= entry_size(&entry->req_packet, &entry->reply_packet);
-    LIST_REMOVE(entry, bucket_links);
-    TAILQ_REMOVE(&expiration_queue, entry, expire_links);
+    K5_LIST_REMOVE(entry, bucket_links);
+    K5_TAILQ_REMOVE(&expiration_queue, entry, expire_links);
     krb5_free_data_contents(context, &entry->req_packet);
     krb5_free_data_contents(context, &entry->reply_packet);
     free(entry);
@@ -129,7 +129,7 @@ find_entry(krb5_data *req_packet)
     krb5_ui_4 hash = murmurhash3(req_packet);
     struct entry *e;
 
-    LIST_FOREACH(e, &hash_table[hash], bucket_links) {
+    K5_LIST_FOREACH(e, &hash_table[hash], bucket_links) {
         if (data_eq(e->req_packet, *req_packet))
             return e;
     }
@@ -144,8 +144,8 @@ kdc_init_lookaside(krb5_context context)
     int i;
 
     for (i = 0; i < LOOKASIDE_HASH_SIZE; i++)
-        LIST_INIT(&hash_table[i]);
-    TAILQ_INIT(&expiration_queue);
+        K5_LIST_INIT(&hash_table[i]);
+    K5_TAILQ_INIT(&expiration_queue);
     return krb5_c_random_make_octets(context, &d);
 }
 
@@ -196,7 +196,7 @@ kdc_insert_lookaside(krb5_context kcontext, krb5_data *req_packet,
         return;
 
     /* Purge stale entries and limit the total size of the entries. */
-    TAILQ_FOREACH_SAFE(e, &expiration_queue, expire_links, next) {
+    K5_TAILQ_FOREACH_SAFE(e, &expiration_queue, expire_links, next) {
         if (!STALE(e, timenow) && total_size + esize <= LOOKASIDE_MAX_SIZE)
             break;
         max_hits_per_entry = max(max_hits_per_entry, e->num_hits);
@@ -220,8 +220,8 @@ kdc_insert_lookaside(krb5_context kcontext, krb5_data *req_packet,
         return;
     }
 
-    TAILQ_INSERT_TAIL(&expiration_queue, e, expire_links);
-    LIST_INSERT_HEAD(&hash_table[hash], e, bucket_links);
+    K5_TAILQ_INSERT_TAIL(&expiration_queue, e, expire_links);
+    K5_LIST_INSERT_HEAD(&hash_table[hash], e, bucket_links);
     num_entries++;
     total_size += esize;
     return;
@@ -233,7 +233,7 @@ kdc_free_lookaside(krb5_context kcontext)
 {
     struct entry *e, *next;
 
-    TAILQ_FOREACH_SAFE(e, &expiration_queue, expire_links, next) {
+    K5_TAILQ_FOREACH_SAFE(e, &expiration_queue, expire_links, next) {
         discard_entry(kcontext, e);
     }
 }

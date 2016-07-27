@@ -33,11 +33,11 @@
 
 #include <string.h>
 
-TAILQ_HEAD(attr_head, attr_st);
+K5_TAILQ_HEAD(attr_head, attr_st);
 
 typedef struct attr_st attr;
 struct attr_st {
-    TAILQ_ENTRY(attr_st) list;
+    K5_TAILQ_ENTRY(attr_st) list;
     krad_attr type;
     krb5_data attr;
     char buffer[MAX_ATTRSIZE];
@@ -57,7 +57,7 @@ krad_attrset_new(krb5_context ctx, krad_attrset **set)
     if (tmp == NULL)
         return ENOMEM;
     tmp->ctx = ctx;
-    TAILQ_INIT(&tmp->list);
+    K5_TAILQ_INIT(&tmp->list);
 
     *set = tmp;
     return 0;
@@ -71,9 +71,9 @@ krad_attrset_free(krad_attrset *set)
     if (set == NULL)
         return;
 
-    while (!TAILQ_EMPTY(&set->list)) {
-        a = TAILQ_FIRST(&set->list);
-        TAILQ_REMOVE(&set->list, a, list);
+    while (!K5_TAILQ_EMPTY(&set->list)) {
+        a = K5_TAILQ_FIRST(&set->list);
+        K5_TAILQ_REMOVE(&set->list, a, list);
         zap(a->buffer, sizeof(a->buffer));
         free(a);
     }
@@ -99,7 +99,7 @@ krad_attrset_add(krad_attrset *set, krad_attr type, const krb5_data *data)
     tmp->attr = make_data(tmp->buffer, data->length);
     memcpy(tmp->attr.data, data->data, data->length);
 
-    TAILQ_INSERT_TAIL(&set->list, tmp, list);
+    K5_TAILQ_INSERT_TAIL(&set->list, tmp, list);
     return 0;
 }
 
@@ -118,9 +118,9 @@ krad_attrset_del(krad_attrset *set, krad_attr type, size_t indx)
 {
     attr *a;
 
-    TAILQ_FOREACH(a, &set->list, list) {
+    K5_TAILQ_FOREACH(a, &set->list, list) {
         if (a->type == type && indx-- == 0) {
-            TAILQ_REMOVE(&set->list, a, list);
+            K5_TAILQ_REMOVE(&set->list, a, list);
             zap(a->buffer, sizeof(a->buffer));
             free(a);
             return;
@@ -133,7 +133,7 @@ krad_attrset_get(const krad_attrset *set, krad_attr type, size_t indx)
 {
     attr *a;
 
-    TAILQ_FOREACH(a, &set->list, list) {
+    K5_TAILQ_FOREACH(a, &set->list, list) {
         if (a->type == type && indx-- == 0)
             return &a->attr;
     }
@@ -152,7 +152,7 @@ krad_attrset_copy(const krad_attrset *set, krad_attrset **copy)
     if (retval != 0)
         return retval;
 
-    TAILQ_FOREACH(a, &set->list, list) {
+    K5_TAILQ_FOREACH(a, &set->list, list) {
         retval = krad_attrset_add(tmp, a->type, &a->attr);
         if (retval != 0) {
             krad_attrset_free(tmp);
@@ -179,7 +179,7 @@ kr_attrset_encode(const krad_attrset *set, const char *secret,
         return 0;
     }
 
-    TAILQ_FOREACH(a, &set->list, list) {
+    K5_TAILQ_FOREACH(a, &set->list, list) {
         retval = kr_attr_encode(set->ctx, secret, auth, a->type, &a->attr,
                                 buffer, &attrlen);
         if (retval != 0)

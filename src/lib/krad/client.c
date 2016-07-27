@@ -36,7 +36,7 @@
 #include <stdio.h>
 #include <limits.h>
 
-LIST_HEAD(server_head, server_st);
+K5_LIST_HEAD(server_head, server_st);
 
 typedef struct remote_state_st remote_state;
 typedef struct request_st request;
@@ -65,7 +65,7 @@ struct request_st {
 struct server_st {
     krad_remote *serv;
     time_t last;
-    LIST_ENTRY(server_st) list;
+    K5_LIST_ENTRY(server_st) list;
 };
 
 struct krad_client_st {
@@ -87,7 +87,7 @@ get_server(krad_client *rc, const struct addrinfo *ai, const char *secret,
     if (time(&currtime) == (time_t)-1)
         return errno;
 
-    LIST_FOREACH(srv, &rc->servers, list) {
+    K5_LIST_FOREACH(srv, &rc->servers, list) {
         if (kr_remote_equals(srv->serv, ai, secret)) {
             srv->last = currtime;
             *out = srv->serv;
@@ -106,7 +106,7 @@ get_server(krad_client *rc, const struct addrinfo *ai, const char *secret,
         return retval;
     }
 
-    LIST_INSERT_HEAD(&rc->servers, srv, list);
+    K5_LIST_INSERT_HEAD(&rc->servers, srv, list);
     *out = srv->serv;
     return 0;
 }
@@ -179,9 +179,9 @@ age(struct server_head *head, time_t currtime)
 {
     server *srv, *tmp;
 
-    LIST_FOREACH_SAFE(srv, head, list, tmp) {
+    K5_LIST_FOREACH_SAFE(srv, head, list, tmp) {
         if (currtime == (time_t)-1 || currtime - srv->last > 60 * 60) {
-            LIST_REMOVE(srv, list);
+            K5_LIST_REMOVE(srv, list);
             kr_remote_free(srv->serv);
             free(srv);
         }
