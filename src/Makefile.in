@@ -35,8 +35,6 @@ HDRS =
 # Why aren't these flags showing up in Windows builds?
 ##DOS##CPPFLAGS=$(CPPFLAGS) -D_X86_=1  -DWIN32 -D_WIN32 -W3 -D_WINNT
 
-DISTFILES = $(SRCS) $(HDRS) COPYING COPYING.LIB ChangeLog Makefile.in
-
 # Lots of things will start to depend on the thread support, which
 # needs autoconf.h, but building "all" in include requires that util/et
 # have been built first.  Until we can untangle this, let's just check
@@ -88,49 +86,9 @@ install-headers-mkdirs:
 	$(srcdir)/config/mkinstalldirs $(DESTDIR)$(KRB5_INCDIR)/gssrpc
 install-headers-prerecurse: install-headers-mkdirs
 
-# install:
-#	$(MAKE) $(MFLAGS) install.man
-
-TAGS: $(SRCS)
-	etags $(SRCS)
-
-clean-: clean-windows
+clean-:: clean-windows
 clean-unix::
 	$(RM) *.o core skiptests
-
-mostlyclean: clean
-
-# This doesn't work; if you think you need it, you should use a
-# separate build directory.
-# 
-# distclean: clean
-# 	rm -f Makefile config.status
-# 
-# realclean: distclean
-# 	rm -f TAGS
-
-dist: $(DISTFILES)
-	echo cpio-`sed -e '/version_string/!d' \
-	-e 's/[^0-9.]*\([0-9.]*\).*/\1/' -e q version.c` > .fname
-	rm -rf `cat .fname`
-	mkdir `cat .fname`
-	-ln $(DISTFILES) `cat .fname`
-	for file in $(DISTFILES); do \
-	  test -r `cat .fname`/$$file || cp -p $$file `cat .fname`; \
-	done
-	tar chzf `cat .fname`.tar.gz `cat .fname`
-	rm -rf `cat .fname` .fname
-
-GZIPPROG= gzip -9v
-PKGDIR=`pwd`/pkgdir
-pkgdir:
-	if test ! -d $(PKGDIR); then mkdir $(PKGDIR); else true; fi
-tgz-bin: pkgdir
-	rm -rf $(PKGDIR)/install cns5-bin.tgz
-	mkdir $(PKGDIR)/install
-	$(MAKE) install DESTDIR=$(PKGDIR)/install
-	(cd $(PKGDIR)/install && tar cf - usr/cygnus) | $(GZIPPROG) > cns5-bin.tgz
-	rm -rf $(PKGDIR)/install
 
 # Microsoft Windows build process...
 #
@@ -367,14 +325,6 @@ HOUT =	$(INC)krb5/krb5.h $(GG)gssapi.h $(PR)profile.h
 CLEANUP= Makefile $(ETOUT) $(HOUT) \
 	include/profile.h include/osconf.h
 
-
-kerbsrc.win: kerbsrc-is-obsolete
-
-kerbsrc-is-obsolete:
-	@echo "kerbsrc.zip is no longer supported.  It was intended to avoid"
-	@echo "needing Unix utilities on Windows, but these utilities are now"
-	@echo "available through the Utilities and SDK for UNIX-based"
-	@echo "Applications."
 
 dos-Makefile:
 	cat config/win-pre.in Makefile.in config/win-post.in | \
