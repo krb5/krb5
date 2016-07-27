@@ -80,8 +80,9 @@ k5_parse_host_string(const char *address, int default_port, char **host_out,
     *host_out = NULL;
     *port_out = 0;
 
-    if (address == NULL || *address == '\0')
+    if (address == NULL || *address == '\0' || *address == ':')
         return EINVAL;
+
     if (default_port < 0 || default_port > 65535)
         return EINVAL;
 
@@ -112,7 +113,7 @@ k5_parse_host_string(const char *address, int default_port, char **host_out,
     }
 
     /* Copy the host if it was specified. */
-    if (host != NULL) {
+    if (host != NULL && hostlen > 0) {
         hostname = k5memdup0(host, hostlen, &ret);
         if (hostname == NULL)
             return ENOMEM;
