@@ -131,6 +131,7 @@ k5_free_secure_cookie
 k5_free_serverlist
 k5_hostrealm_free_context
 k5_init_trace
+k5_is_string_numeric
 k5_kt_get_principal
 k5_localauth_free_context
 k5_locate_kdc
