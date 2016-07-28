@@ -667,3 +667,15 @@ check-copyright:
 	(cd $(top_srcdir) && \
 	$(FIND) . \( -name '*.[ch]' -o -name '*.hin' \) -print0 | \
 	$(XARGS) -0 python util/krb5-check-copyright.py)
+
+tags: FORCE
+	(cd $(top_srcdir) && \
+	$(FIND) . \( -name '*.[ch]' -o -name '*.hin' \) -print | \
+	etags --lang=c - && \
+	$(FIND) . -name '*.cpp' -print | etags --lang=c++ --append - && \
+	$(FIND) . -name '*.y' -print | etags --lang=yacc --append -)
+FORCE:
+.PHONY: FORCE tags
+
+distclean-unix:
+	$(RM) $(top_srcdir)/TAGS
