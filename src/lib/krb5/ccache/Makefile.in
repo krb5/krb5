@@ -146,7 +146,7 @@ check-pytests: t_cccursor t_cccol
 
 clean-unix::
 	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o t_cccol t_cccol.o
-	$(RM) t_marshal t_marshal.o testcache
+	$(RM) t_marshal t_marshal.o testcache kcmrpc.c kcmrpc.h
 
 depend: $(KCMRPC_DEPS)
 

@@ -12,6 +12,7 @@ lib*.so.*
 Makefile
 OBJS.*
 obj/
+skiptests
 testdir/
 testlog
 
@@ -182,6 +183,7 @@ local.properties
 /src/include/db.h
 /src/include/gssapi/
 /src/include/kadm5/
+/src/include/kdc_j_encode.h
 /src/include/krb5.stamp
 /src/include/osconf.h
 /src/include/private-and-public-decls
@@ -202,6 +204,7 @@ local.properties
 /src/kadmin/dbutil/import_err.c
 /src/kadmin/dbutil/import_err.h
 /src/kadmin/dbutil/kdb5_util
+/src/kadmin/dbutil/t_tdumputil
 
 /src/kadmin/ktutil/ktutil
 /src/kadmin/ktutil/ktutil_ct.c
@@ -296,7 +299,17 @@ local.properties
 /src/lib/kdb/t_ulog
 /src/lib/kdb/test.ulog
 
+/src/lib/krad/t_attr
+/src/lib/krad/t_attrset
+/src/lib/krad/t_client
+/src/lib/krad/t_code
+/src/lib/krad/t_packet
+/src/lib/krad/t_remote
+
+/src/lib/krb5/ccache/kcmrpc.c
+/src/lib/krb5/ccache/kcmrpc.h
 /src/lib/krb5/ccache/t_cc
+/src/lib/krb5/ccache/t_cccol
 /src/lib/krb5/ccache/t_cccursor
 /src/lib/krb5/ccache/t_marshal
 /src/lib/krb5/ccache/testcache
@@ -359,6 +372,7 @@ local.properties
 /src/slave/kproplog
 
 /src/tests/adata
+/src/tests/au.log
 /src/tests/etinfo
 /src/tests/gcred
 /src/tests/hist
@@ -374,6 +388,7 @@ local.properties
 /src/tests/responder
 /src/tests/s2p
 /src/tests/s4u2proxy
+/src/tests/unlockiter
 
 /src/tests/asn.1/expected_encode.out
 /src/tests/asn.1/expected_trval.out
@@ -403,6 +418,8 @@ local.properties
 /src/tests/gssapi/t_ccselect
 /src/tests/gssapi/t_ciflags
 /src/tests/gssapi/t_credstore
+/src/tests/gssapi/t_enctypes
+/src/tests/gssapi/t_err
 /src/tests/gssapi/t_export_cred
 /src/tests/gssapi/t_export_name
 /src/tests/gssapi/t_gssexts
@@ -411,6 +428,7 @@ local.properties
 /src/tests/gssapi/t_invalid
 /src/tests/gssapi/t_inq_cred
 /src/tests/gssapi/t_inq_mechs_name
+/src/tests/gssapi/t_iov
 /src/tests/gssapi/t_namingexts
 /src/tests/gssapi/t_oid
 /src/tests/gssapi/t_pcontok

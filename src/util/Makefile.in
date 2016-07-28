@@ -23,3 +23,6 @@ NO_OUTDIR=1
 
 install:
 	$(INSTALL_SCRIPT) $(srcdir)/krb5-send-pr.sh $(DESTDIR)$(ADMIN_BINDIR)/krb5-send-pr
+
+clean-unix::
+	$(RM) *.pyc

@@ -77,7 +77,7 @@ includes: $(SRC_HDRS) $(BUILD_HDRS)
 	done
 
 clean-unix::
-	$(RM) $(HDRS)
+	$(RM) -r $(HDRDIR)
 
 all-prerecurse: includes
 all-prerecurse: all-libobjs

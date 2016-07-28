@@ -15,7 +15,7 @@ SRCS= $(srcdir)/main.c
 
 all-unix: all-libs
 install-unix:
-clean-unix:: clean-libs clean-libobjs
+clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 @libnover_frag@
 @libobj_frag@

@@ -45,3 +45,6 @@ install-unix:
 # $(PURE) or $(LDFLAGS) in case someone changes config/shlib.conf
 check-unix: krb5-config
 	$(SHELL) $(srcdir)/t_krbconf
+
+distclean-unix:
+	$(RM) $(PKGCONFIG_FILES) krb5-config

@@ -96,7 +96,7 @@ TAGS: $(SRCS)
 
 clean-: clean-windows
 clean-unix::
-	$(RM) *.o core
+	$(RM) *.o core skiptests
 
 mostlyclean: clean
 
@@ -463,7 +463,7 @@ awk-windows-mac: $(ETOUT) $(HOUT)
 clean-windows-mac:
 	rm -f $(CLEANUP)
 
-distclean-windows::
+distclean-windows:
 	config\rm.bat $(CLEANUP:^/=^\)
 	config\rm.bat $(WINMAKEFILES)
 	config\rm.bat $(KBINDIR)\*.dll $(KBINDIR)\*.exe
