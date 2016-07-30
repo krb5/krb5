@@ -1,3 +1,6 @@
+# The Worst Preauthentication Scheme Ever is not built by default.  To
+# build it manually, run "make all-libs".
+
 mydir=plugins$(S)preauth$(S)wpse
 BUILDTOP=$(REL)..$(S)..$(S)..
 MODULE_INSTALL_DIR = $(KRB5_PA_MODULE_DIR)
@@ -16,8 +19,6 @@ STLIBOBJS=wpse_main.o
 
 SRCS=wpse_main.c
 
-all-unix: all-libs
-install-unix: install-libs
 clean-unix:: clean-libs clean-libobjs
 
 @libnover_frag@

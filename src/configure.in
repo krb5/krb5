@@ -1210,6 +1210,7 @@ old_CFLAGS=$CFLAGS
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 AC_CHECK_LIB(aceclnt, sd_init, [
 	     AC_MSG_NOTICE([Enabling RSA securID support])
+	     K5_GEN_MAKEFILE(plugins/preauth/securid_sam2)
 	     sam2_plugin=plugins/preauth/securid_sam2
 	     ])
 AC_SUBST(sam2_plugin)
@@ -1428,7 +1429,6 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/kdb/test
 	plugins/preauth/cksum_body
 	plugins/preauth/otp
-	plugins/preauth/securid_sam2
 	plugins/preauth/test
 	plugins/preauth/wpse
 	plugins/authdata/greet_client

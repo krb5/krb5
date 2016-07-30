@@ -1,3 +1,8 @@
+# The test programs here are not built or run by default.  You can
+# build a specific test program with "make gss-perf" or similar.
+# "make run-t_rcache" will run the replay cache test program in the
+# proper environment.
+
 mydir=tests$(S)threads
 BUILDTOP=$(REL)..$(S)..
 
@@ -28,8 +33,6 @@ init_ctx: init_ctx.o $(KRB5_BASE_DEPLIBS)
 
 profread: profread.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) $(PTHREAD_CFLAGS) -o profread profread.o $(KRB5_BASE_LIBS) $(THREAD_LINKOPTS)
-
-check-unix: run-t_rcache
 
 install:
 

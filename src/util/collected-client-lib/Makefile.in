@@ -1,3 +1,6 @@
+# The collected client library is not built by default.  To build it
+# manually, run "make all-libs".
+
 mydir=util$(S)collected-client-lib
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/collected-client-lib
@@ -65,9 +68,6 @@ LIBS_UTILS=-lresolv
 SHLIB_EXPLIBS= $(LIBS) $(DL_LIB) $(LIBS_UTILS)
 
 DEPLIBS=
-
-#
-all-unix: lib$(LIBBASE)$(SHLIBVEXT)
 
 clean-unix:: clean-libs
 

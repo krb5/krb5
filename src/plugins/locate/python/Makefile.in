@@ -1,3 +1,6 @@
+# The python locate module is not built by default.  To build it
+# manally, run "make all-liblinks".
+
 mydir=plugins$(S)locate$(S)python
 BUILDTOP=$(REL)..$(S)..$(S)..
 
@@ -14,8 +17,6 @@ SRCS= \
 	$(srcdir)/py-locate.c
 STLIBOBJS= py-locate.o
 
-all-unix: all-liblinks
-install-unix: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 @libnover_frag@
