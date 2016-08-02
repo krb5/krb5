@@ -164,6 +164,7 @@ check-pytests: plugorder rdreq responder s2p s4u2proxy unlockiter
 	$(RUNPYTEST) $(srcdir)/t_preauth.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_princflags.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_tabdump.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_selinux.py $(PYTESTFLAGS)
 
 clean:
 	$(RM) adata etinfo gcred hist hooks hrealm icred kdbtest localauth
