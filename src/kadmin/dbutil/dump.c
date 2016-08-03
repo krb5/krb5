@@ -1304,6 +1304,9 @@ dump_db(int argc, char **argv)
         } else if (!strcmp(argv[aindex], "-recurse")) {
             /* Accept this for compatibility, but do nothing since
              * krb5_db_iterate doesn't support it. */
+            fprintf(stderr,
+                    _("%s: WARNING: the -recurse option is currently "
+                      "unimplemented\n"), progname);
         } else {
             break;
         }
