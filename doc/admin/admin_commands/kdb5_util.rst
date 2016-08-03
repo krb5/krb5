@@ -182,6 +182,12 @@ load_dump version 7".  If filename is not specified, or is the string
     corruption, this option will probably retrieve more principals
     than the **-rev** option will.
 
+    .. note::
+        The **-recurse** option currently doesn't modify the dump
+        functionality as described above; it does a normal dump.
+
+    .. deprecated:: 1.5
+
 .. _kdb5_util_dump_end:
 
 load
