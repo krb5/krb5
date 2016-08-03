@@ -1216,16 +1216,6 @@ AC_CHECK_LIB(aceclnt, sd_init, [
 AC_SUBST(sam2_plugin)
 CFLAGS=$old_CFLAGS
 
-# This checks is for plugins/locate/python, which isn't built by
-# default, so it's not a big deal that it isn't very good.  We should
-# use python-config instead.
-PYTHON_LIB=
-AC_CHECK_HEADERS(Python.h python2.3/Python.h python2.5/Python.h)
-AC_CHECK_LIB(python2.3,main,[PYTHON_LIB=-lpython2.3],
-  AC_CHECK_LIB(python2.5,main,[PYTHON_LIB=-lpython2.5]))
-AC_SUBST(PYTHON_LIB)
-
-
 # Kludge for simple server --- FIXME is this the best way to do this?
 
 if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
@@ -1412,7 +1402,6 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	kdc slave config-files build-tools man doc include
 
 	plugins/hostrealm/test
-	plugins/locate/python
 	plugins/localauth/test
 	plugins/kadm5_hook/test
 	plugins/pwqual/test
@@ -1427,10 +1416,8 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/kdb/db2/libdb2/recno
 	plugins/kdb/db2/libdb2/test
 	plugins/kdb/test
-	plugins/preauth/cksum_body
 	plugins/preauth/otp
 	plugins/preauth/test
-	plugins/preauth/wpse
 	plugins/authdata/greet_client
 	plugins/authdata/greet_server
 	plugins/tls/k5tls
@@ -1449,6 +1436,5 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	tests tests/resolve tests/asn.1 tests/create tests/hammer
 	tests/verify tests/gssapi tests/dejagnu tests/threads tests/shlib
 	tests/gss-threads tests/misc
-	util/gss-kernel-lib util/collected-client-lib
 	po
 )
