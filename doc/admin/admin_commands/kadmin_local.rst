@@ -668,7 +668,7 @@ Alias: **setstr**
 Example::
 
     set_string host/foo.mit.edu session_enctypes aes128-cts
-    set_string user@FOO.COM otp [{"type":"hotp","username":"custom"}]
+    set_string user@FOO.COM otp "[{""type"":""hotp"",""username"":""al""}]"
 
 .. _set_string_end:
 
