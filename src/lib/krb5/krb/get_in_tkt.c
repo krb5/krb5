@@ -57,14 +57,101 @@ krb5int_addint32 (krb5_int32 x, krb5_int32 y)
     return x + y;
 }
 
+/*
+ * Decrypt the AS reply in ctx, populating ctx->reply->enc_part2.  If
+ * strengthen_key is not null, combine it with the reply key as specified in
+ * RFC 6113 section 5.4.3.  Place the key used in *key_out.
+ */
 static krb5_error_code
-decrypt_as_reply(krb5_context context, krb5_kdc_req *request,
-                 krb5_kdc_rep *as_reply, krb5_keyblock *key)
+decrypt_as_reply(krb5_context context, krb5_init_creds_context ctx,
+                 const krb5_keyblock *strengthen_key, krb5_keyblock *key_out)
 {
-    if (as_reply->enc_part2)
-        return 0;
+    krb5_error_code ret;
+    krb5_keyblock key;
+    krb5_responder_fn responder;
+    void *responder_data;
 
-    return krb5_kdc_rep_decrypt_proc(context, key, NULL, as_reply);
+    memset(key_out, 0, sizeof(*key_out));
+    memset(&key, 0, sizeof(key));
+
+    if (ctx->as_key.length) {
+        /* The reply key was computed or replaced during preauth processing;
+         * try it. */
+        TRACE_INIT_CREDS_AS_KEY_PREAUTH(context, &ctx->as_key);
+        ret = krb5int_fast_reply_key(context, strengthen_key, &ctx->as_key,
+                                     &key);
+        if (ret)
+            return ret;
+        ret = krb5_kdc_rep_decrypt_proc(context, &key, NULL, ctx->reply);
+        if (!ret) {
+            *key_out = key;
+            return 0;
+        }
+        krb5_free_keyblock_contents(context, &key);
+        TRACE_INIT_CREDS_PREAUTH_DECRYPT_FAIL(context, ret);
+
+        /*
+         * For two reasons, we fall back to trying or retrying the gak_fct if
+         * this fails:
+         *
+         * 1. The KDC might encrypt the reply using a different enctype than
+         *    the AS key we computed during preauth.
+         *
+         * 2. For 1.1.1 and prior KDC's, when SAM is used with USE_SAD_AS_KEY,
+         *    the AS-REP is encrypted in the client long-term key instead of
+         *    the SAD.
+         *
+         * The gak_fct for krb5_get_init_creds_with_password() caches the
+         * password, so this fallback does not result in a second password
+         * prompt.
+         */
+    } else {
+        /*
+         * No AS key was computed during preauth processing, perhaps because
+         * preauth was not used.  If the caller supplied a responder callback,
+         * possibly invoke it before calling the gak_fct for real.
+         */
+        k5_gic_opt_get_responder(ctx->opt, &responder, &responder_data);
+        if (responder != NULL) {
+            /* Indicate a need for the AS key by calling the gak_fct with a
+             * NULL as_key. */
+            ret = ctx->gak_fct(context, ctx->request->client, ctx->etype, NULL,
+                               NULL, NULL, NULL, NULL, ctx->gak_data,
+                               ctx->rctx.items);
+            if (ret)
+                return ret;
+
+            /* If that produced a responder question, invoke the responder. */
+            if (!k5_response_items_empty(ctx->rctx.items)) {
+                ret = (*responder)(context, responder_data, &ctx->rctx);
+                if (ret)
+                    return ret;
+            }
+        }
+    }
+
+    /* Compute or re-compute the AS key, prompting for the password if
+     * necessary. */
+    TRACE_INIT_CREDS_GAK(context, &ctx->salt, &ctx->s2kparams);
+    ret = ctx->gak_fct(context, ctx->request->client,
+                       ctx->reply->enc_part.enctype, ctx->prompter,
+                       ctx->prompter_data, &ctx->salt, &ctx->s2kparams,
+                       &ctx->as_key, ctx->gak_data, ctx->rctx.items);
+    if (ret)
+        return ret;
+    TRACE_INIT_CREDS_AS_KEY_GAK(context, &ctx->as_key);
+
+    ret = krb5int_fast_reply_key(context, strengthen_key, &ctx->as_key, &key);
+    if (ret)
+        return ret;
+    ret = krb5_kdc_rep_decrypt_proc(context, &key, NULL, ctx->reply);
+    if (ret) {
+        krb5_free_keyblock_contents(context, &key);
+        return ret;
+    }
+
+    *key_out = key;
+    return 0;
 }
 
 /**
@@ -1391,8 +1478,6 @@ init_creds_step_reply(krb5_context context,
     krb5_keyblock encrypting_key;
     krb5_boolean fast_avail;
     krb5_ccache out_ccache = k5_gic_opt_get_out_ccache(ctx->opt);
-    krb5_responder_fn responder;
-    void *responder_data;
 
     encrypting_key.length = 0;
     encrypting_key.contents = NULL;
@@ -1526,72 +1611,9 @@ init_creds_step_reply(krb5_context context,
             goto cleanup;
     }
 
-    /* XXX For 1.1.1 and prior KDC's, when SAM is used w/ USE_SAD_AS_KEY,
-       the AS_REP comes back encrypted in the user's longterm key
-       instead of in the SAD. If there was a SAM preauth, there
-       will be an as_key here which will be the SAD. If that fails,
-       use the gak_fct to get the password, and try again. */
-
-    /* XXX because etypes are handled poorly (particularly wrt SAM,
-       where the etype is fixed by the kdc), we may want to try
-       decrypt_as_reply twice.  If there's an as_key available, try
-       it.  If decrypting the as_rep fails, or if there isn't an
-       as_key at all yet, then use the gak_fct to get one, and try
-       again.  */
-    if (ctx->as_key.length) {
-        TRACE_INIT_CREDS_AS_KEY_PREAUTH(context, &ctx->as_key);
-        code = krb5int_fast_reply_key(context, strengthen_key, &ctx->as_key,
-                                      &encrypting_key);
-        if (code != 0)
-            goto cleanup;
-        code = decrypt_as_reply(context, NULL, ctx->reply, &encrypting_key);
-        if (code != 0)
-            TRACE_INIT_CREDS_PREAUTH_DECRYPT_FAIL(context, code);
-    } else
-        code = -1;
-
-    if (code != 0) {
-        /* If a responder was provided and we are using a password, ask for the
-         * password using the responder before falling back to the prompter. */
-        k5_gic_opt_get_responder(ctx->opt, &responder, &responder_data);
-        if (responder != NULL && !ctx->as_key.length) {
-            /* Indicate a need for the AS key by calling the gak_fct with a
-             * NULL as_key. */
-            code = ctx->gak_fct(context, ctx->request->client, ctx->etype,
-                                NULL, NULL, NULL, NULL, NULL, ctx->gak_data,
-                                ctx->rctx.items);
-            if (code != 0)
-                goto cleanup;
-
-            /* If that produced a responder question, invoke the responder. */
-            if (!k5_response_items_empty(ctx->rctx.items)) {
-                code = (*responder)(context, responder_data, &ctx->rctx);
-                if (code != 0)
-                    goto cleanup;
-            }
-        }
-
-        /* if we haven't get gotten a key, get it now */
-        TRACE_INIT_CREDS_GAK(context, &ctx->salt, &ctx->s2kparams);
-        code = (*ctx->gak_fct)(context, ctx->request->client,
-                               ctx->reply->enc_part.enctype,
-                               ctx->prompter, ctx->prompter_data,
-                               &ctx->salt, &ctx->s2kparams,
-                               &ctx->as_key, ctx->gak_data, ctx->rctx.items);
-        if (code != 0)
-            goto cleanup;
-        TRACE_INIT_CREDS_AS_KEY_GAK(context, &ctx->as_key);
-
-        code = krb5int_fast_reply_key(context, strengthen_key, &ctx->as_key,
-                                      &encrypting_key);
-        if (code != 0)
-            goto cleanup;
-
-        code = decrypt_as_reply(context, NULL, ctx->reply, &encrypting_key);
-        if (code != 0)
-            goto cleanup;
-    }
-
+    code = decrypt_as_reply(context, ctx, strengthen_key, &encrypting_key);
+    if (code)
+        goto cleanup;
     TRACE_INIT_CREDS_DECRYPTED_REPLY(context, ctx->reply->enc_part2->session);
 
     code = krb5int_fast_verify_nego(context, ctx->fast_state,
