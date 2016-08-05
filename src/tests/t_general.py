@@ -34,6 +34,11 @@ realm.stop()
 
 realm = K5Realm(create_host=False)
 
+# Regression test for #8454 (responder callback isn't used when
+# preauth is not required).
+realm.run(['./responder', '-r', 'password=%s' % password('user'),
+           realm.user_princ])
+
 # Test that WRONG_REALM responses aren't treated as referrals unless
 # they contain a crealm field pointing to a different realm.
 # (Regression test for #8060.)
