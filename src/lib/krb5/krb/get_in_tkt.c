@@ -1351,6 +1351,8 @@ init_creds_step_reply(krb5_context context,
     krb5_keyblock encrypting_key;
     krb5_boolean fast_avail;
     krb5_ccache out_ccache = k5_gic_opt_get_out_ccache(ctx->opt);
+    krb5_responder_fn responder;
+    void *responder_data;
 
     encrypting_key.length = 0;
     encrypting_key.contents = NULL;
@@ -1509,13 +1511,33 @@ init_creds_step_reply(krb5_context context,
         code = -1;
 
     if (code != 0) {
+        /* If a responder was provided and we are using a password, ask for the
+         * password using the responder before falling back to the prompter. */
+        k5_gic_opt_get_responder(ctx->opt, &responder, &responder_data);
+        if (responder != NULL && !ctx->as_key.length) {
+            /* Indicate a need for the AS key by calling the gak_fct with a
+             * NULL as_key. */
+            code = ctx->gak_fct(context, ctx->request->client, ctx->etype,
+                                NULL, NULL, NULL, NULL, NULL, ctx->gak_data,
+                                ctx->rctx.items);
+            if (code != 0)
+                goto cleanup;
+
+            /* If that produced a responder question, invoke the responder. */
+            if (!k5_response_items_empty(ctx->rctx.items)) {
+                code = (*responder)(context, responder_data, &ctx->rctx);
+                if (code != 0)
+                    goto cleanup;
+            }
+        }
+
         /* if we haven't get gotten a key, get it now */
         TRACE_INIT_CREDS_GAK(context, &ctx->salt, &ctx->s2kparams);
         code = (*ctx->gak_fct)(context, ctx->request->client,
                                ctx->reply->enc_part.enctype,
                                ctx->prompter, ctx->prompter_data,
                                &ctx->salt, &ctx->s2kparams,
-                               &ctx->as_key, ctx->gak_data, NULL);
+                               &ctx->as_key, ctx->gak_data, ctx->rctx.items);
         if (code != 0)
             goto cleanup;
         TRACE_INIT_CREDS_AS_KEY_GAK(context, &ctx->as_key);
