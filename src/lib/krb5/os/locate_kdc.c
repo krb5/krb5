@@ -254,7 +254,7 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
         parse_uri_if_https(hostspec, &this_transport, &hostspec, &uri_path);
 
         default_port = (this_transport == HTTPS) ? htons(443) : udpport;
-        code = k5_parse_host_string(hostspec, default_port, &host, &port_num);
+        code = k5_parse_host_string(hostspec, ntohs(default_port), &host, &port_num);
         if (code == 0 && host == NULL)
             code = EINVAL;
         if (code)
