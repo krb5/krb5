@@ -59,7 +59,7 @@ print_addrs (void)
 
         if (entry->hostname != NULL) {
             printf("%2d: host %s\t%s\tport %d\n", (int)i, entry->hostname,
-                   ttypename(entry->transport), ntohs(entry->port));
+                   ttypename(entry->transport), entry->port);
             continue;
         }
         err = getnameinfo((struct sockaddr *)&entry->addr, entry->addrlen,

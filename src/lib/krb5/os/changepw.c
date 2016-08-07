@@ -75,15 +75,15 @@ locate_kpasswd(krb5_context context, const krb5_data *realm,
             size_t i;
             for (i = 0; i < serverlist->nservers; i++) {
                 struct server_entry *s = &serverlist->servers[i];
-                krb5_ui_2 kpasswd_port = htons(DEFAULT_KPASSWD_PORT);
+
                 if (!no_udp && s->transport == TCP)
                     s->transport = TCP_OR_UDP;
                 if (s->hostname != NULL)
-                    s->port = kpasswd_port;
+                    s->port = DEFAULT_KPASSWD_PORT;
                 else if (s->family == AF_INET)
-                    ss2sin(&s->addr)->sin_port = kpasswd_port;
+                    ss2sin(&s->addr)->sin_port = htons(DEFAULT_KPASSWD_PORT);
                 else if (s->family == AF_INET6)
-                    ss2sin6(&s->addr)->sin6_port = kpasswd_port;
+                    ss2sin6(&s->addr)->sin6_port = htons(DEFAULT_KPASSWD_PORT);
             }
         }
     }

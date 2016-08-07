@@ -91,7 +91,7 @@ test_locate_kdc(krb5_context ctx, char *realm)
     for (i = 0; i < servers.nservers; i++) {
         struct server_entry *entry = &servers.servers[i];
         if (entry->hostname) {
-            printf(" host:%s/%d", entry->hostname, ntohs(entry->port));
+            printf(" host:%s/%d", entry->hostname, entry->port);
             continue;
         }
         switch (entry->family) {

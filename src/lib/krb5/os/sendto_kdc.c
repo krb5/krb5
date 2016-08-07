@@ -814,7 +814,7 @@ resolve_server(krb5_context context, const krb5_data *realm,
 #ifdef AI_NUMERICSERV
     hint.ai_flags |= AI_NUMERICSERV;
 #endif
-    result = snprintf(portbuf, sizeof(portbuf), "%d", ntohs(entry->port));
+    result = snprintf(portbuf, sizeof(portbuf), "%d", entry->port);
     if (SNPRINTF_OVERFLOW(result, sizeof(portbuf)))
         return EINVAL;
     TRACE_SENDTO_KDC_RESOLVING(context, entry->hostname);
