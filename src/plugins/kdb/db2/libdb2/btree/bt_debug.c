@@ -223,7 +223,7 @@ __bt_dpage(dbp, h)
 
 	(void)fprintf(tracefp, "\tprev %2d next %2d", h->prevpg, h->nextpg);
 	if (h->flags & P_OVERFLOW)
-		return;
+		return (0);
 
 	pgsize = ((BTREE *)dbp->internal)->bt_mp->pagesize;
 	lim = (pgsize - BTDATAOFF) / sizeof(indx_t);
