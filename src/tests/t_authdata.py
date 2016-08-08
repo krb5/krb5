@@ -169,6 +169,15 @@ realm.run([kvno, 'restricted'], expected_code=1)
 realm.run([kadminl, 'setstr', 'restricted', 'require_auth', 'a b c ind2'])
 realm.run([kvno, 'restricted'])
 
+# Regression test for one manifestation of #8139: ensure that
+# forwarded TGTs obtained across a TGT re-key still work when the
+# preferred krbtgt enctype changes.
+realm.kinit(realm.user_princ, password('user'), ['-f'])
+realm.run([kadminl, 'cpw', '-randkey', '-keepold', '-e', 'des3-cbc-sha1',
+           realm.krbtgt_princ])
+realm.run(['./forward'])
+realm.run([kvno, realm.host_princ])
+
 realm.stop()
 realm2.stop()
 

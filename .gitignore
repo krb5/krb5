@@ -379,6 +379,7 @@ local.properties
 /src/tests/adata
 /src/tests/au.log
 /src/tests/etinfo
+/src/tests/forward
 /src/tests/gcred
 /src/tests/hist
 /src/tests/hooks
