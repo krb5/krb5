@@ -63,6 +63,23 @@ typedef struct {
 #define	R_SETCURSOR	10		/* put (RECNO) */
 #define	R_RECNOSYNC	11		/* sync (RECNO) */
 
+/*
+ * Recursive sequential scan.
+ *
+ * This avoids using sibling pointers, permitting (possibly partial)
+ * recovery from some kinds of btree corruption.  Start a sequential
+ * scan as usual, but use R_RNEXT or R_RPREV to move forward or
+ * backward.
+ *
+ * This probably doesn't work with btrees that allow duplicate keys.
+ * Database modifications during the scan can also modify the parent
+ * page stack needed for correct functioning.  Intermixing
+ * non-recursive traversal by using R_NEXT or R_PREV can also make the
+ * page stack inconsistent with the cursor and cause problems.
+ */
+#define R_RNEXT		128		/* seq (BTREE, RECNO) */
+#define R_RPREV		129		/* seq (BTREE, RECNO) */
+
 typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 
 /*
@@ -166,10 +183,8 @@ typedef struct {
 #endif
 
 #define dbopen	kdb2_dbopen
-#define bt_rseq		kdb2_bt_rseq /* XXX kludge */
 __BEGIN_DECLS
 DB *dbopen __P((const char *, int, int, DBTYPE, const void *));
-int	 bt_rseq(const DB*, DBT *, DBT *, void **, u_int); /* XXX kludge */
 __END_DECLS
 
 #endif /* !_DB_H_ */

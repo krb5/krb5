@@ -94,6 +94,8 @@ void previous	__P((DB *, char **));
 void show	__P((DB *, char **));
 #endif
 void rlist	__P((DB *, char **));
+void rnext	__P((DB *, char **));
+void rprev	__P((DB *, char **));
 void usage	__P((void));
 void user	__P((DB *));
 
@@ -131,6 +133,8 @@ cmd_table commands[] = {
 	"p",	0, 0, previous, "previous", "move cursor back one record",
 	"q",	0, 0, NULL, "quit", "quit",
 	"rli",	1, 1, rlist, "rlist file", "list to a file (recursive)",
+	"rn",	0, 0, rnext, "rnext", "move cursor forward one record (recursive)",
+	"rp",	0, 0, rprev, "rprev", "move cursor back one record (recursive)",
 #ifdef DEBUG
 	"sh",	1, 0, show, "show page", "dump a page",
 #endif
@@ -652,17 +656,15 @@ rlist(db, argv)
 	DBT data, key;
 	FILE *fp;
 	int status;
-	void *cookie;
 
-	cookie = NULL;
 	if ((fp = fopen(argv[1], "w")) == NULL) {
 		(void)fprintf(stderr, "%s: %s\n", argv[1], strerror(errno));
 		return;
 	}
-	status = bt_rseq(db, &key, &data, &cookie, R_FIRST);
+	status = (*db->seq)(db, &key, &data, R_FIRST);
 	while (status == RET_SUCCESS) {
 		(void)fprintf(fp, "%.*s\n", (int)key.size, key.data);
-		status = bt_rseq(db, &key, &data, &cookie, R_NEXT);
+		status = (*db->seq)(db, &key, &data, R_RNEXT);
 	}
 	(void)fclose(fp);
 	if (status == RET_ERROR)
@@ -763,6 +765,52 @@ previous(db, argv)
 	switch (status) {
 	case RET_ERROR:
 		perror("previous/seq");
+		break;
+	case RET_SPECIAL:
+		(void)printf("no more keys\n");
+		break;
+	case RET_SUCCESS:
+		keydata(&key, &data);
+		break;
+	}
+}
+
+void
+rnext(db, argv)
+	DB *db;
+	char **argv;
+{
+	DBT data, key;
+	int status;
+
+	status = (*db->seq)(db, &key, &data, R_RNEXT);
+
+	switch (status) {
+	case RET_ERROR:
+		perror("rnext/seq");
+		break;
+	case RET_SPECIAL:
+		(void)printf("no more keys\n");
+		break;
+	case RET_SUCCESS:
+		keydata(&key, &data);
+		break;
+	}
+}
+
+void
+rprev(db, argv)
+	DB *db;
+	char **argv;
+{
+	DBT data, key;
+	int status;
+
+	status = (*db->seq)(db, &key, &data, R_RPREV);
+
+	switch (status) {
+	case RET_ERROR:
+		perror("rprev/seq");
 		break;
 	case RET_SPECIAL:
 		(void)printf("no more keys\n");

@@ -63,15 +63,6 @@
 #define __bt_dump	__kdb2_bt_dump
 #define __bt_stat	__kdb2_bt_stat
 
-#define bt_rcinit	kdb2_bt_rcinit
-#define bt_rcdestroy	kdb2_bt_rcdestroy
-#define bt_rcpush	kdb2_bt_rcpush
-#define bt_rcpop	kdb2_bt_rcpop
-#define bt_rcclr	kdb2_bt_rcclr
-#define bt_rcgrowstk	kdb2_bt_rcgrowstk
-#define bt_rseqset	kdb2_bt_rseqset
-#define bt_rseqadv	kdb2_bt_rseqadv
-
 int	 __bt_close __P((DB *));
 int	 __bt_cmp __P((BTREE *, const DBT *, EPG *));
 int	 __bt_crsrdel __P((BTREE *, EPGNO *));

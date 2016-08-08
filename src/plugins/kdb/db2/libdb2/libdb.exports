@@ -73,7 +73,6 @@ __kdb2_rec_sync
 __kdb2_rec_vmap
 __kdb2_rec_vpipe
 __kdb2_split_page
-kdb2_bt_rseq
 kdb2_dbm_clearerr
 kdb2_dbm_close
 kdb2_dbm_delete
