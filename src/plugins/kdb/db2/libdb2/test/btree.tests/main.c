@@ -232,8 +232,14 @@ user(db)
 	for (last = 0;;) {
 		(void)printf("> ");
 		(void)fflush(stdout);
-		if ((lbuf = fgets(&buf[0], 512, ifp)) == NULL)
+		if ((lbuf = fgets(&buf[0], 512, ifp)) == NULL) {
+			(void)printf("\n");
+			if (ferror(ifp) && errno == EINTR) {
+				clearerr(ifp);
+				continue;
+			}
 			break;
+		}
 		if (lbuf[0] == '\n') {
 			i = last;
 			goto uselast;
