@@ -636,7 +636,7 @@ list(db, argv)
 	}
 	status = (*db->seq)(db, &key, &data, R_FIRST);
 	while (status == RET_SUCCESS) {
-		(void)fprintf(fp, "%s\n", key.data);
+		(void)fprintf(fp, "%.*s\n", (int)key.size, key.data);
 		status = (*db->seq)(db, &key, &data, R_NEXT);
 	}
 	(void)fclose(fp);
@@ -661,7 +661,7 @@ rlist(db, argv)
 	}
 	status = bt_rseq(db, &key, &data, &cookie, R_FIRST);
 	while (status == RET_SUCCESS) {
-		(void)fprintf(fp, "%s\n", key.data);
+		(void)fprintf(fp, "%.*s\n", (int)key.size, key.data);
 		status = bt_rseq(db, &key, &data, &cookie, R_NEXT);
 	}
 	(void)fclose(fp);
@@ -822,9 +822,9 @@ keydata(key, data)
 	DBT *key, *data;
 {
 	if (!recno && key->size > 0)
-		(void)printf("%s/", key->data);
+		(void)printf("%.*s/", (int)key->size, key->data);
 	if (data->size > 0)
-		(void)printf("%s", data->data);
+		(void)printf("%.*s", (int)data->size, data->data);
 	(void)printf("\n");
 }
 
