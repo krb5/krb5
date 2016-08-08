@@ -214,7 +214,8 @@ mpool_get(mp, pgno, flags)
 		TAILQ_INSERT_TAIL(&mp->lqh, bp, q);
 
 		/* Return a pinned page. */
-		bp->flags |= MPOOL_PINNED;
+		if (!(flags & MPOOL_IGNOREPIN))
+			bp->flags |= MPOOL_PINNED;
 		return (bp->page);
 	}
 

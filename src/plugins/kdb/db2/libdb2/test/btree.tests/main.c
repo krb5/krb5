@@ -785,7 +785,7 @@ show(db, argv)
 
 	pg = atoi(argv[1]);
 	t = db->internal;
-	if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL) {
+	if ((h = mpool_get(t->bt_mp, pg, MPOOL_IGNOREPIN)) == NULL) {
 		(void)printf("getpage of %ld failed\n", pg);
 		return;
 	}
@@ -793,7 +793,6 @@ show(db, argv)
 		__bt_dmpage(h);
 	else
 		__bt_dpage(db, h);
-	mpool_put(t->bt_mp, h, 0);
 }
 #endif
 
