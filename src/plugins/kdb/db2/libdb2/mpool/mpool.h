@@ -111,7 +111,7 @@ int	 mpool_delete __P((MPOOL *, void *));
 int	 mpool_put __P((MPOOL *, void *, u_int));
 int	 mpool_sync __P((MPOOL *));
 int	 mpool_close __P((MPOOL *));
-#ifdef STATISTICS
+
 void	 mpool_stat __P((MPOOL *));
-#endif
+
 __END_DECLS

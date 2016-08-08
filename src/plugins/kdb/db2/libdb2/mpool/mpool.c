@@ -507,4 +507,10 @@ mpool_stat(mp)
 	}
 	(void)fprintf(stderr, "\n");
 }
+#else
+void
+mpool_stat(mp)
+	MPOOL *mp;
+{
+}
 #endif

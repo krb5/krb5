@@ -286,6 +286,27 @@ __bt_dpage(dbp, h)
 	(void)fflush(tracefp);
 	return (0);
 }
+#else
+int
+__bt_dump(DB *dbp)
+{
+	return (0);
+}
+int
+__bt_dmpage(PAGE *h)
+{
+	return (0);
+}
+int
+__bt_dnpage(DB *dbp, db_pgno_t pgno)
+{
+	return (0);
+}
+int
+__bt_dpage(DB *dbp, PAGE *h)
+{
+	return (0);
+}
 #endif
 
 #ifdef STATISTICS
@@ -373,6 +394,12 @@ __bt_stat(dbp)
 		(void)fprintf(tracefp, "prefix checking removed %lu bytes.\n",
 		    bt_pfxsaved);
 	(void)fflush(tracefp);
+	return (0);
+}
+#else
+int
+__bt_stat(DB *dbp)
+{
 	return (0);
 }
 #endif
