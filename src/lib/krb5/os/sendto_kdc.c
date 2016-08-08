@@ -78,6 +78,7 @@
 #define MAX_PASS                    3
 #define DEFAULT_UDP_PREF_LIMIT   1465
 #define HARD_UDP_LIMIT          32700 /* could probably do 64K-epsilon ? */
+#define PORT_LENGTH                 6 /* decimal repr of UINT16_MAX */
 
 /* Select state flags.  */
 #define SSF_READ 0x01
@@ -138,6 +139,7 @@ struct conn_state {
     struct {
         const char *uri_path;
         const char *servername;
+        char port[PORT_LENGTH];
         char *https_request;
         k5_tls_handle tls;
     } http;
@@ -552,6 +554,8 @@ make_proxy_request(struct conn_state *state, const krb5_data *realm,
     k5_buf_init_dynamic(&buf);
     uri_path = (state->http.uri_path != NULL) ? state->http.uri_path : "";
     k5_buf_add_fmt(&buf, "POST /%s HTTP/1.0\r\n", uri_path);
+    k5_buf_add_fmt(&buf, "Host: %s:%s\r\n", state->http.servername,
+                   state->http.port);
     k5_buf_add(&buf, "Cache-Control: no-cache\r\n");
     k5_buf_add(&buf, "Pragma: no-cache\r\n");
     k5_buf_add(&buf, "User-Agent: kerberos/1.0\r\n");
@@ -614,7 +618,7 @@ static krb5_error_code
 add_connection(struct conn_state **conns, k5_transport transport,
                krb5_boolean defer, struct addrinfo *ai, size_t server_index,
                const krb5_data *realm, const char *hostname,
-               const char *uri_path, char **udpbufp)
+               const char *port, const char *uri_path, char **udpbufp)
 {
     struct conn_state *state, **tailptr;
 
@@ -636,11 +640,13 @@ add_connection(struct conn_state **conns, k5_transport transport,
         state->service_write = service_tcp_write;
         state->service_read = service_tcp_read;
     } else if (transport == HTTPS) {
+        assert(hostname != NULL && port != NULL);
         state->service_connect = service_tcp_connect;
         state->service_write = service_https_write;
         state->service_read = service_https_read;
         state->http.uri_path = uri_path;
         state->http.servername = hostname;
+        strlcpy(state->http.port, port, PORT_LENGTH);
     } else {
         state->service_connect = NULL;
         state->service_write = NULL;
@@ -726,7 +732,7 @@ resolve_server(krb5_context context, const krb5_data *realm,
     struct addrinfo *addrs, *a, hint, ai;
     krb5_boolean defer;
     int err, result;
-    char portbuf[64];
+    char portbuf[PORT_LENGTH];
 
     /* Skip UDP entries if we don't want UDP. */
     if (strategy == NO_UDP && entry->transport == UDP)
@@ -741,7 +747,7 @@ resolve_server(krb5_context context, const krb5_data *realm,
         ai.ai_addr = (struct sockaddr *)&entry->addr;
         defer = (entry->transport != transport);
         return add_connection(conns, entry->transport, defer, &ai, ind, realm,
-                              NULL, entry->uri_path, udpbufp);
+                              NULL, NULL, entry->uri_path, udpbufp);
     }
 
     /* If the entry has a specified transport, use it. */
@@ -767,7 +773,8 @@ resolve_server(krb5_context context, const krb5_data *realm,
     retval = 0;
     for (a = addrs; a != 0 && retval == 0; a = a->ai_next) {
         retval = add_connection(conns, transport, FALSE, a, ind, realm,
-                                entry->hostname, entry->uri_path, udpbufp);
+                                entry->hostname, portbuf, entry->uri_path,
+                                udpbufp);
     }
 
     /* For TCP_OR_UDP entries, add each address again with the non-preferred
@@ -777,7 +784,8 @@ resolve_server(krb5_context context, const krb5_data *realm,
         for (a = addrs; a != 0 && retval == 0; a = a->ai_next) {
             a->ai_socktype = socktype_for_transport(transport);
             retval = add_connection(conns, transport, TRUE, a, ind, realm,
-                                    entry->hostname, entry->uri_path, udpbufp);
+                                    entry->hostname, portbuf,
+                                    entry->uri_path, udpbufp);
         }
     }
     freeaddrinfo(addrs);
