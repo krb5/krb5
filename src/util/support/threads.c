@@ -32,6 +32,8 @@
 MAKE_INIT_FUNCTION(krb5int_thread_support_init);
 MAKE_FINI_FUNCTION(krb5int_thread_support_fini);
 
+#undef k5_once
+
 #ifndef ENABLE_THREADS /* no thread support */
 
 static void (*destructors[K5_KEY_MAX])(void *);
@@ -42,6 +44,12 @@ static unsigned char destructors_set[K5_KEY_MAX];
 int krb5int_pthread_loaded (void)
 {
     return 0;
+}
+
+int
+k5_once(k5_once_t *once, void (*fn)(void))
+{
+    return k5_os_nothread_once(once, fn);
 }
 
 #elif defined(_WIN32)
@@ -77,8 +85,13 @@ void krb5int_thread_detach_hook (void)
     }
 }
 
-/* Stub function not used on Windows. */
+/* Stub functions not used on Windows. */
 int krb5int_pthread_loaded (void)
+{
+    return 0;
+}
+int
+k5_once(k5_once_t *once, void (*fn)(void))
 {
     return 0;
 }
@@ -114,6 +127,7 @@ struct tsd_block {
 # pragma weak pthread_key_delete
 # pragma weak pthread_create
 # pragma weak pthread_join
+# define K5_PTHREADS_LOADED     (krb5int_pthread_loaded())
 static volatile int flag_pthread_loaded = -1;
 static void loaded_test_aux(void)
 {
@@ -162,12 +176,29 @@ int krb5int_pthread_loaded (void)
        of any system with non-functional stubs for those.  */
     return flag_pthread_loaded;
 }
+
+int
+k5_once(k5_once_t *once, void (*fn)(void))
+{
+    if (krb5int_pthread_loaded())
+        return pthread_once(&once->o, fn);
+    else
+        return k5_os_nothread_once(&once->n, fn);
+}
+
 static struct tsd_block tsd_if_single;
 # define GET_NO_PTHREAD_TSD()   (&tsd_if_single)
 #else
+# define K5_PTHREADS_LOADED     (1)
 int krb5int_pthread_loaded (void)
 {
     return 1;
+}
+
+int
+k5_once(k5_once_t *once, void (*fn)(void))
+{
+    return pthread_once(once, fn);
 }
 # define GET_NO_PTHREAD_TSD()   (abort(),(struct tsd_block *)0)
 #endif
@@ -507,3 +538,72 @@ krb5int_mutex_unlock (k5_mutex_t *m)
 {
     k5_mutex_unlock (m);
 }
+
+#ifdef USE_PTHREAD_LOADED_MUTEX_FUNCTIONS
+
+int
+k5_os_mutex_init(k5_os_mutex *m)
+{
+    if (krb5int_pthread_loaded())
+        return pthread_mutex_init(m, 0);
+    else
+        return 0;
+}
+
+int
+k5_os_mutex_destroy(k5_os_mutex *m)
+{
+    if (krb5int_pthread_loaded())
+        return pthread_mutex_destroy(m);
+    else
+        return 0;
+}
+
+int
+k5_os_mutex_lock(k5_os_mutex *m)
+{
+    if (krb5int_pthread_loaded())
+        return pthread_mutex_lock(m);
+    else
+        return 0;
+}
+
+int
+k5_os_mutex_unlock(k5_os_mutex *m)
+{
+    if (krb5int_pthread_loaded())
+        return pthread_mutex_unlock(m);
+    else
+        return 0;
+}
+
+#else /* USE_PTHREAD_LOADED_MUTEX_FUNCTIONS */
+
+#undef k5_os_mutex_init
+#undef k5_os_mutex_destroy
+#undef k5_os_mutex_lock
+#undef k5_os_mutex_unlock
+
+/* Stub functions */
+int
+k5_os_mutex_init(k5_os_mutex *m)
+{
+    return 0;
+}
+int
+k5_os_mutex_destroy(k5_os_mutex *m)
+{
+    return 0;
+}
+int
+k5_os_mutex_lock(k5_os_mutex *m)
+{
+    return 0;
+}
+int
+k5_os_mutex_unlock(k5_os_mutex *m)
+{
+    return 0;
+}
+
+#endif /* USE_PTHREAD_LOADED_MUTEX_FUNCTIONS */
