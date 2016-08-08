@@ -24,6 +24,7 @@ __kdb2_bt_open
 __kdb2_bt_pgin
 __kdb2_bt_pgout
 __kdb2_bt_put
+__kdb2_bt_relink
 __kdb2_bt_ret
 __kdb2_bt_search
 __kdb2_bt_seq

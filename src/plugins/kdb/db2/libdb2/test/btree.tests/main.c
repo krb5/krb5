@@ -33,6 +33,35 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+/*
+ * Copyright (C) 2016 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)main.c	8.1 (Berkeley) 6/4/93";
@@ -98,6 +127,7 @@ void rnext	__P((DB *, char **));
 void rprev	__P((DB *, char **));
 void usage	__P((void));
 void user	__P((DB *));
+void unlinkpg	__P((DB *, char **));
 
 cmd_table commands[] = {
 	"?",	0, 0, help, "help", NULL,
@@ -138,6 +168,8 @@ cmd_table commands[] = {
 #ifdef DEBUG
 	"sh",	1, 0, show, "show page", "dump a page",
 #endif
+	"u",	1, 0, unlinkpg, "unlink pgno|internal|leaf", "unlink a page",
+
 	{ NULL },
 };
 
@@ -882,4 +914,60 @@ usage()
 	    "usage: %s [-bdluw] [-c cache] [-i file] [-p page] [file]\n",
 	    progname);
 	exit (1);
+}
+
+/* Find a candidate page to unlink. */
+static PAGE *
+candidatepg(BTREE *t, char *arg)
+{
+	PAGE *h = NULL;
+	db_pgno_t pg;
+	u_int32_t sflags;
+
+	if (arg[0] == 'i')
+		sflags = P_BINTERNAL | P_RINTERNAL;
+	if (arg[0] == 'l')
+		sflags = P_BLEAF | P_RLEAF;
+	for (pg = P_ROOT; pg < t->bt_mp->npages;
+	     mpool_put(t->bt_mp, h, 0), pg++) {
+		if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+			return h;
+		/* Look for a nonempty page of the correct
+		 * type that has both left and right siblings. */
+		if (h->prevpg == P_INVALID || h->nextpg == P_INVALID)
+			continue;
+		if ((h->flags & sflags) && NEXTINDEX(h) != 0)
+			break;
+	}
+	if (pg == t->bt_mp->npages)
+		h = NULL;
+	return h;
+}
+
+void
+unlinkpg(DB *db, char **argv)
+{
+	BTREE *t = db->internal;
+	PAGE *h = NULL;
+	db_pgno_t pg;
+
+	pg = atoi(argv[1]);
+	if (pg == 0)
+		h = candidatepg(t, argv[1]);
+	else
+		h = mpool_get(t->bt_mp, pg, 0);
+
+	if (h == NULL) {
+		fprintf(stderr, "unable to find appropriate page to unlink\n");
+		return;
+	}
+	printf("chain %d <- %d -> %d\n", h->prevpg, h->pgno, h->nextpg);
+	if (__bt_relink(t, h) != 0) {
+		perror("unlinkpg");
+		goto cleanup;
+	}
+	h->prevpg = P_INVALID;
+	h->nextpg = P_INVALID;
+cleanup:
+	mpool_put(t->bt_mp, h, MPOOL_DIRTY);
 }

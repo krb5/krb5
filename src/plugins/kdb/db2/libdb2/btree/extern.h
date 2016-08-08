@@ -62,6 +62,7 @@
 #define __bt_dpage	__kdb2_bt_dpage
 #define __bt_dump	__kdb2_bt_dump
 #define __bt_stat	__kdb2_bt_stat
+#define __bt_relink	__kdb2_bt_relink
 
 int	 __bt_close __P((DB *));
 int	 __bt_cmp __P((BTREE *, const DBT *, EPG *));
@@ -90,12 +91,11 @@ int	 __ovfl_delete __P((BTREE *, void *));
 int	 __ovfl_get __P((BTREE *, void *, size_t *, void **, size_t *));
 int	 __ovfl_put __P((BTREE *, const DBT *, db_pgno_t *));
 
-#ifdef DEBUG
 int	 __bt_dnpage __P((DB *, db_pgno_t));
 int	 __bt_dpage __P((DB *, PAGE *));
 int	 __bt_dmpage __P((PAGE *));
 int	 __bt_dump __P((DB *));
-#endif
-#ifdef STATISTICS
+
 int	 __bt_stat __P((DB *));
-#endif
+
+int	 __bt_relink __P((BTREE *, PAGE *));

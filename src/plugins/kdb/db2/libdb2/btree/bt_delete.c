@@ -50,7 +50,6 @@ static char sccsid[] = "@(#)bt_delete.c	8.13 (Berkeley) 7/28/94";
 static int __bt_bdelete __P((BTREE *, const DBT *));
 static int __bt_curdel __P((BTREE *, const DBT *, PAGE *, u_int));
 static int __bt_pdelete __P((BTREE *, PAGE *));
-static int __bt_relink __P((BTREE *, PAGE *));
 static int __bt_stkacq __P((BTREE *, PAGE **, CURSOR *));
 
 /*
@@ -634,7 +633,7 @@ dup2:				c->pg.pgno = e.page->pgno;
  *	t:	tree
  *	h:	page to be deleted
  */
-static int
+int
 __bt_relink(t, h)
 	BTREE *t;
 	PAGE *h;
