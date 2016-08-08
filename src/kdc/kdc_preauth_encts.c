@@ -59,7 +59,6 @@ enc_ts_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     krb5_key_data *             client_key;
     krb5_int32                  start;
     krb5_timestamp              timenow;
-    krb5_error_code             decrypt_err = 0;
 
     scratch.data = (char *)pa->contents;
     scratch.length = pa->length;
@@ -74,7 +73,6 @@ enc_ts_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
         goto cleanup;
 
     start = 0;
-    decrypt_err = 0;
     while (1) {
         if ((retval = krb5_dbe_search_enctype(context, rock->client,
                                               &start, enc_data->enctype,
@@ -92,8 +90,6 @@ enc_ts_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
         krb5_free_keyblock_contents(context, &key);
         if (retval == 0)
             break;
-        else
-            decrypt_err = retval;
     }
 
     if ((retval = decode_krb5_pa_enc_ts(&enc_ts_data, &pa_enc)) != 0)
@@ -119,14 +115,10 @@ cleanup:
     krb5_free_data_contents(context, &enc_ts_data);
     if (pa_enc)
         free(pa_enc);
-    /*
-     * If we get NO_MATCHING_KEY and decryption previously failed, and
-     * we failed to find any other keys of the correct enctype after
-     * that failed decryption, it probably means that the password was
-     * incorrect.
-     */
-    if (retval == KRB5_KDB_NO_MATCHING_KEY && decrypt_err != 0)
-        retval = decrypt_err;
+    /* If we get NO_MATCHING_KEY, it probably means that the password was
+     * incorrect. */
+    if (retval == KRB5_KDB_NO_MATCHING_KEY)
+        retval = KRB5KDC_ERR_PREAUTH_FAILED;
 
     (*respond)(arg, retval, NULL, NULL, NULL);
 }
