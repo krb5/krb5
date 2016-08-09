@@ -30,6 +30,35 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+/*
+ * Copyright (C) 2016 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #if !defined(lint) && defined(LIBC_SCCS)
 static char copyright[] =
@@ -54,9 +83,7 @@ static char sccsid[] = "@(#)dbtest.c	8.17 (Berkeley) 9/1/94";
 #include <unistd.h>
 
 #include "db-int.h"
-#ifdef STATISTICS
 #include "btree.h"
-#endif
 
 enum S { COMMAND, COMPARE, GET, PUT, REMOVE, SEQ, SEQFLAG, KEY, DATA };
 
@@ -68,7 +95,7 @@ enum S { COMMAND, COMPARE, GET, PUT, REMOVE, SEQ, SEQFLAG, KEY, DATA };
 
 void	 compare __P((DBT *, DBT *));
 DBTYPE	 dbtype __P((char *));
-void	 dump __P((DB *, int));
+void	 dump __P((DB *, int, int));
 void	 err __P((const char *, ...)) ATTR ((__format__(__printf__,1,2))) ATTR ((__noreturn__));
 void	 get __P((DB *, DBT *));
 void	 getdata __P((DB *, DBT *, DBT *));
@@ -80,6 +107,7 @@ void	*rfile __P((char *, size_t *));
 void	 seq __P((DB *, DBT *));
 u_int	 setflags __P((char *));
 void	*setinfo __P((DBTYPE, char *));
+void	 unlinkpg __P((DB *));
 void	 usage __P((void));
 void	*xmalloc __P((char *, size_t));
 
@@ -322,7 +350,13 @@ lkey:			switch (command) {
 			}
 			break;
 		case 'o':
-			dump(dbp, p[1] == 'r');
+			dump(dbp, p[1] == 'r', 0);
+			break;
+		case 'O':
+			dump(dbp, p[1] == 'r', 1);
+			break;
+		case 'u':
+			unlinkpg(dbp);
 			break;
 		default:
 			err("line %lu: %s: unknown command character",
@@ -517,19 +551,20 @@ seq(dbp, kp)
 }
 
 void
-dump(dbp, rev)
+dump(dbp, rev, recurse)
 	DB *dbp;
 	int rev;
+	int recurse;
 {
 	DBT key, data;
 	int lflags, nflags;
 
 	if (rev) {
 		lflags = R_LAST;
-		nflags = R_PREV;
+		nflags = recurse ? R_RPREV : R_PREV;
 	} else {
 		lflags = R_FIRST;
-		nflags = R_NEXT;
+		nflags = recurse ? R_RNEXT : R_NEXT;
 	}
 	for (;; lflags = nflags)
 		switch (dbp->seq(dbp, &key, &data, lflags)) {
@@ -550,6 +585,41 @@ dump(dbp, rev)
 			/* NOTREACHED */
 		}
 done:	return;
+}
+
+void
+unlinkpg(dbp)
+	DB *dbp;
+{
+	BTREE *t = dbp->internal;
+	PAGE *h = NULL;
+	db_pgno_t pg;
+
+	for (pg = P_ROOT; pg < t->bt_mp->npages;
+	     mpool_put(t->bt_mp, h, 0), pg++) {
+		if ((h = mpool_get(t->bt_mp, pg, 0)) == NULL)
+			break;
+		/* Look for a nonempty leaf page that has both left
+		 * and right siblings. */
+		if (h->prevpg == P_INVALID || h->nextpg == P_INVALID)
+			continue;
+		if (NEXTINDEX(h) == 0)
+			continue;
+		if ((h->flags & (P_BLEAF | P_RLEAF)))
+			break;
+	}
+	if (h == NULL || pg == t->bt_mp->npages) {
+		fprintf(stderr, "unlinkpg: no appropriate page found\n");
+		return;
+	}
+	if (__bt_relink(t, h) != 0) {
+		perror("unlinkpg");
+		goto cleanup;
+	}
+	h->prevpg = P_INVALID;
+	h->nextpg = P_INVALID;
+cleanup:
+	mpool_put(t->bt_mp, h, MPOOL_DIRTY);
 }
 
 u_int

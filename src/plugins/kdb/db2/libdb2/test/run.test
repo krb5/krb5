@@ -36,7 +36,7 @@ main()
 	find $bindir -type f -exec test -r {} \; -print | head -100 > $BINFILES
 
 	if [ $# -eq 0 ]; then
-		for t in 1 2 3 4 5 6 7 8 9 10 11 12 13 20 40 41; do
+		for t in 1 2 3 4 5 6 7 8 9 10 11 12 13 20 40 41 50; do
 			test$t
 		done
 	else
@@ -47,7 +47,7 @@ main()
 			[0-9]*)
 				test$1;;
 			btree)
-				for t in 1 2 3 7 8 9 10 12 13 40 41; do
+				for t in 1 2 3 7 8 9 10 12 13 40 41 50; do
 					test$t
 				done;;
 			hash)
@@ -911,6 +911,45 @@ EOF
 	if (cmp -s $TMP1 $TMP3); then :
 	else
 		echo "test41: btree: failed"
+		exit 1
+	fi
+}
+
+# Test for recursive traversal successfully retrieving records that
+# are inaccessible to normal sequential (sibling-link) traversal.
+# This works by unlinking a few leaf pages but leaving their parent
+# links intact.  To verify that the unlink actually makes records
+# inaccessible, the test first uses "o" to do a normal sequential
+# traversal, followed by "O" to do a recursive traversal.
+test50 () {
+	echo "Test 50: btree: recursive traversal"
+	fill="abcdefghijklmnopqrstuvwxyzy"
+	script='{
+		for (i = 0; i < 20000; i++) {
+			printf("p\nkAA%05d\nd%05d%s\n", i, i, $0);
+		}
+		print "u";
+		print "u";
+		print "u";
+		print "u";
+	}'
+	(echo $fill | awk "$script"; echo o) > $TMP2
+	echo $fill |
+	awk '{
+		for (i = 0; i < 20000; i++) {
+			printf("%05d%s\n", i, $0);
+		}
+	}' > $TMP1
+	$PROG -o $TMP3 -i psize=512 btree $TMP2
+	if (cmp -s $TMP1 $TMP3); then
+		echo "test50: btree: unexpected success after unlinking pages"
+		exit 1
+	fi
+	(echo $fill | awk "$script"; echo O) > $TMP2
+	$PROG -o $TMP3 -i psize=512 btree $TMP2
+	if (cmp -s $TMP1 $TMP3); then :
+	else
+		echo "test50: btree: failed"
 		exit 1
 	fi
 }
