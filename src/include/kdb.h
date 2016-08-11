@@ -135,6 +135,7 @@
 /* KDB iteration flags */
 #define KRB5_DB_ITER_WRITE      0x00000001
 #define KRB5_DB_ITER_REV        0x00000002
+#define KRB5_DB_ITER_RECURSE    0x00000004
 
 /* String attribute names recognized by krb5 */
 #define KRB5_KDB_SK_SESSION_ENCTYPES            "session_enctypes"

@@ -968,6 +968,10 @@ static krb5_error_code
 curs_init(iter_curs *curs, krb5_context ctx, krb5_db2_context *dbc,
           krb5_flags iterflags)
 {
+    int isrecurse = iterflags & KRB5_DB_ITER_RECURSE;
+    unsigned int prevflag = R_PREV;
+    unsigned int nextflag = R_NEXT;
+
     curs->keycopy.size = 0;
     curs->keycopy.data = NULL;
     curs->islocked = FALSE;
@@ -979,12 +983,27 @@ curs_init(iter_curs *curs, krb5_context ctx, krb5_db2_context *dbc,
     else
         curs->lockmode = KRB5_LOCKMODE_SHARED;
 
+    if (isrecurse) {
+#ifdef R_RNEXT
+        if (dbc->hashfirst) {
+            k5_setmsg(ctx, EINVAL, _("Recursive iteration is not supported "
+                                     "for hash databases"));
+            return EINVAL;
+        }
+        prevflag = R_RPREV;
+        nextflag = R_RNEXT;
+#else
+        k5_setmsg(ctx, EINVAL, _("Recursive iteration not supported "
+                                 "in this version of libdb"));
+        return EINVAL;
+#endif
+    }
     if (iterflags & KRB5_DB_ITER_REV) {
         curs->startflag = R_LAST;
-        curs->stepflag = R_PREV;
+        curs->stepflag = prevflag;
     } else {
         curs->startflag = R_FIRST;
-        curs->stepflag = R_NEXT;
+        curs->stepflag = nextflag;
     }
     return curs_lock(curs);
 }
