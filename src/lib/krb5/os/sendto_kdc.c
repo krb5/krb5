@@ -173,6 +173,8 @@ get_curtime_ms(time_ms *time_out)
 {
     struct timeval tv;
 
+    *time_out = 0;
+
     if (gettimeofday(&tv, 0))
         return errno;
     *time_out = (time_ms)tv.tv_sec * 1000 + tv.tv_usec / 1000;

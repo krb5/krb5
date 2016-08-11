@@ -180,6 +180,7 @@ int trval2(fp, enc, len, lev, rlen)
     int rlen_ext = 0;
 
     r = OK;
+    *rlen = -1;
 
     if (len < 2) {
         fprintf(fp, "missing id and length octets (%d)\n", len);
