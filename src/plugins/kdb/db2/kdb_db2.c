@@ -1105,6 +1105,8 @@ ctx_iterate(krb5_context context, krb5_db2_context *dbc,
     iter_curs curs;
 
     retval = curs_init(&curs, context, dbc, iterflags);
+    if (retval)
+        return retval;
     dbret = curs_start(&curs);
     while (dbret == 0) {
         retval = curs_run_cb(&curs, func, func_arg);
