@@ -152,7 +152,7 @@ add_addr_to_list(struct serverlist *list, k5_transport transport, int family,
 /* Add a hostname entry to list. */
 static int
 add_host_to_list(struct serverlist *list, const char *hostname, int port,
-                 k5_transport transport, int family, char *uri_path,
+                 k5_transport transport, int family, const char *uri_path,
                  int master)
 {
     struct server_entry *entry;
@@ -181,8 +181,8 @@ oom:
 }
 
 static void
-parse_uri_if_https(char *host_or_uri, k5_transport *transport, char **host,
-                   char **uri_path)
+parse_uri_if_https(const char *host_or_uri, k5_transport *transport,
+                   const char **host, const char **uri_path)
 {
     char *cp;
 
@@ -222,7 +222,8 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                   k5_transport transport, int udpport)
 {
     const char *realm_srv_names[4];
-    char **hostlist = NULL, *realmstr = NULL, *host = NULL, *hostspec;
+    char **hostlist = NULL, *realmstr = NULL, *host = NULL;
+    const char *hostspec;
     krb5_error_code code;
     int i, default_port;
 
@@ -249,7 +250,7 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     for (i=0; hostlist[i]; i++) {
         int port_num;
         k5_transport this_transport = transport;
-        char *uri_path = NULL;
+        const char *uri_path = NULL;
 
         hostspec = hostlist[i];
         Tprintf ("entry %d is '%s'\n", i, hostspec);
@@ -588,8 +589,8 @@ locate_uri(const krb5_data *realm, const char *req_service,
     krb5_error_code ret;
     k5_transport transport, host_trans;
     struct srv_dns_entry *answers, *entry;
-    char *path, *host;
-    const char *host_field;
+    char *host;
+    const char *host_field, *path;
     int port, def_port, master;
 
     ret = k5_make_uri_query(realm, req_service, &answers);
