@@ -158,11 +158,13 @@ out:
     return 0;
 }
 
-/* Do DNS SRV query, return results in *answers.
-
-   Make best effort to return all the data we can.  On memory or
-   decoding errors, just return what we've got.  Always return 0,
-   currently.  */
+/*
+ * Do DNS SRV query, return results in *answers.
+ *
+ * Make best effort to return all the data we can.  On memory or
+ * decoding errors, just return what we've got.  Always return 0,
+ * currently.
+ */
 
 krb5_error_code
 krb5int_make_srv_query_realm(const krb5_data *realm,
@@ -193,7 +195,7 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
         return 0;
 
 #ifdef TEST
-    fprintf (stderr, "sending DNS SRV query for %s\n", host);
+    fprintf(stderr, "sending DNS SRV query for %s\n", host);
 #endif
 
     size = krb5int_dns_init(&ds, host, C_IN, T_SRV);
@@ -225,7 +227,7 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
          * with the weight field
          */
 
-        srv = (struct srv_dns_entry *) malloc(sizeof(struct srv_dns_entry));
+        srv = malloc(sizeof(struct srv_dns_entry));
         if (srv == NULL)
             goto out;
 
@@ -233,7 +235,7 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
         srv->weight = weight;
         srv->port = port;
         /* The returned names are fully qualified.  Don't let the
-           local resolver code do domain search path stuff.  */
+         * local resolver code do domain search path stuff. */
         if (asprintf(&srv->host, "%s.", host) < 0) {
             free(srv);
             goto out;

@@ -55,9 +55,10 @@ maybe_use_dns (krb5_context context, const char *name, int defalt)
 
     code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
                               name, 0, 0, &value);
-    if (value == 0 && code == 0)
+    if (value == 0 && code == 0) {
         code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
                                   KRB5_CONF_DNS_FALLBACK, 0, 0, &value);
+    }
     if (code)
         return defalt;
 
@@ -72,19 +73,21 @@ maybe_use_dns (krb5_context context, const char *name, int defalt)
 int
 _krb5_use_dns_kdc(krb5_context context)
 {
-    return maybe_use_dns (context, KRB5_CONF_DNS_LOOKUP_KDC, DEFAULT_LOOKUP_KDC);
+    return maybe_use_dns(context, KRB5_CONF_DNS_LOOKUP_KDC,
+                         DEFAULT_LOOKUP_KDC);
 }
 
 int
 _krb5_use_dns_realm(krb5_context context)
 {
-    return maybe_use_dns (context, KRB5_CONF_DNS_LOOKUP_REALM, DEFAULT_LOOKUP_REALM);
+    return maybe_use_dns(context, KRB5_CONF_DNS_LOOKUP_REALM,
+                         DEFAULT_LOOKUP_REALM);
 }
 
 #endif /* KRB5_DNS_LOOKUP */
 
 /* Free up everything pointed to by the serverlist structure, but don't
-   free the structure itself.  */
+ * free the structure itself. */
 void
 k5_free_serverlist (struct serverlist *list)
 {
@@ -227,8 +230,8 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     krb5_error_code code;
     int i, default_port;
 
-    Tprintf ("looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
-             realm->data, name, udpport);
+    Tprintf("looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
+            realm->data, name, udpport);
 
     realmstr = k5memdup0(realm->data, realm->length, &code);
     if (realmstr == NULL)
@@ -240,20 +243,19 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     realm_srv_names[3] = 0;
     code = profile_get_values(context->profile, realm_srv_names, &hostlist);
     if (code) {
-        Tprintf ("config file lookup failed: %s\n",
-                 error_message(code));
+        Tprintf("config file lookup failed: %s\n", error_message(code));
         if (code == PROF_NO_SECTION || code == PROF_NO_RELATION)
             code = 0;
         goto cleanup;
     }
 
-    for (i=0; hostlist[i]; i++) {
+    for (i = 0; hostlist[i]; i++) {
         int port_num;
         k5_transport this_transport = transport;
         const char *uri_path = NULL;
 
         hostspec = hostlist[i];
-        Tprintf ("entry %d is '%s'\n", i, hostspec);
+        Tprintf("entry %d is '%s'\n", i, hostspec);
 
         parse_uri_if_https(hostspec, &this_transport, &hostspec, &uri_path);
 
@@ -335,9 +337,12 @@ cleanup:
 #include <krb5/locate_plugin.h>
 
 #if TARGET_OS_MAC
-static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/libkrb5", NULL }; /* should be a list */
+static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR,
+                                 LIBDIR "/krb5/plugins/libkrb5",
+                                 NULL }; /* should be a list */
 #else
-static const char *objdirs[] = { LIBDIR "/krb5/plugins/libkrb5", NULL };
+static const char *objdirs[] = { LIBDIR "/krb5/plugins/libkrb5",
+                                 NULL };
 #endif
 
 struct module_callback_data {
@@ -386,16 +391,16 @@ module_locate_server(krb5_context ctx, const krb5_data *realm,
 
     Tprintf("in module_locate_server\n");
     cbdata.list = serverlist;
-    if (!PLUGIN_DIR_OPEN (&ctx->libkrb5_plugins)) {
+    if (!PLUGIN_DIR_OPEN(&ctx->libkrb5_plugins)) {
 
-        code = krb5int_open_plugin_dirs (objdirs, NULL, &ctx->libkrb5_plugins,
-                                         &ctx->err);
+        code = krb5int_open_plugin_dirs(objdirs, NULL, &ctx->libkrb5_plugins,
+                                        &ctx->err);
         if (code)
             return KRB5_PLUGIN_NO_HANDLE;
     }
 
-    code = krb5int_get_plugin_dir_data (&ctx->libkrb5_plugins,
-                                        "service_locator", &ptrs, &ctx->err);
+    code = krb5int_get_plugin_dir_data(&ctx->libkrb5_plugins,
+                                       "service_locator", &ptrs, &ctx->err);
     if (code) {
         Tprintf("error looking up plugin symbols: %s\n",
                 (msg = krb5_get_error_message(ctx, code)));
@@ -419,7 +424,7 @@ module_locate_server(krb5_context ctx, const krb5_data *realm,
         Tprintf("element %d is %p\n", i, ptrs[i]);
 
         /* For now, don't keep the plugin data alive.  For long-lived
-           contexts, it may be desirable to change that later.  */
+         * contexts, it may be desirable to change that later. */
         code = vtbl->init(ctx, &blob);
         if (code)
             continue;
@@ -438,7 +443,8 @@ module_locate_server(krb5_context ctx, const krb5_data *realm,
         if (code == KRB5_PLUGIN_NO_HANDLE) {
             /* Module passes, keep going.  */
             /* XXX */
-            Tprintf("plugin doesn't handle this realm (KRB5_PLUGIN_NO_HANDLE)\n");
+            Tprintf("plugin doesn't handle this realm (KRB5_PLUGIN_NO_HANDLE)"
+                    "\n");
             continue;
         }
         if (code != 0) {
@@ -446,7 +452,7 @@ module_locate_server(krb5_context ctx, const krb5_data *realm,
             Tprintf("plugin lookup routine returned error %d: %s\n",
                     code, error_message(code));
             free(realmz);
-            krb5int_free_plugin_dir_data (ptrs);
+            krb5int_free_plugin_dir_data(ptrs);
             return code;
         }
         break;
@@ -454,16 +460,16 @@ module_locate_server(krb5_context ctx, const krb5_data *realm,
     if (ptrs[i] == NULL) {
         Tprintf("ran off end of plugin list\n");
         free(realmz);
-        krb5int_free_plugin_dir_data (ptrs);
+        krb5int_free_plugin_dir_data(ptrs);
         return KRB5_PLUGIN_NO_HANDLE;
     }
     Tprintf("stopped with plugin #%d, res=%p\n", i, res);
 
     /* Got something back, yippee.  */
     Tprintf("now have %lu addrs in list %p\n",
-            (unsigned long) serverlist->nservers, serverlist);
+            (unsigned long)serverlist->nservers, serverlist);
     free(realmz);
-    krb5int_free_plugin_dir_data (ptrs);
+    krb5int_free_plugin_dir_data(ptrs);
     return 0;
 }
 
@@ -479,9 +485,11 @@ prof_locate_server(krb5_context context, const krb5_data *realm,
     switch (svc) {
     case locate_service_kdc:
         profname = KRB5_CONF_KDC;
-        /* We used to use /etc/services for these, but enough systems
-           have old, crufty, wrong settings that this is probably
-           better.  */
+        /*
+         * We used to use /etc/services for these, but enough systems
+         * have old, crufty, wrong settings that this is probably
+         * better.
+         */
     kdc_ports:
         dflport = KRB5_DEFAULT_PORT;
         break;
