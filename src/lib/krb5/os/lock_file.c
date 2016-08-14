@@ -43,7 +43,29 @@
 
 #if defined(HAVE_FCNTL_H) && defined(F_SETLKW) && defined(F_RDLCK)
 #define POSIX_FILE_LOCKS
+
+/*
+ * Gnu libc bug 20251, currently unfixed, breaks OFD lock support on
+ * 32-bit platforms.  Work around this bug by explicitly using the
+ * fcntl64 system call and struct flock64.
+ */
+#if defined(__linux__) && __WORDSIZE == 32
+#include <sys/syscall.h>
+#ifdef SYS_fcntl64
+#define USE_FCNTL64
 #endif
+#endif
+#ifdef USE_FCNTL64
+/* Use the fcntl64 system call and struct flock64.  (Gnu libc does not
+ * define a fcntl64() function, so we must use syscall().) */
+#define fcntl(fd, cmd, arg) syscall(SYS_fcntl64, fd, cmd, arg)
+typedef struct flock64 fcntl_lock_st;
+#else
+/* Use regular fcntl() and struct flock. */
+typedef struct flock fcntl_lock_st;
+#endif
+
+#endif /* defined(HAVE_FCNTL_H) && defined(F_SETLKW) && defined(F_RDLCK) */
 
 #ifdef HAVE_FLOCK
 #ifndef sysvimp
@@ -66,7 +88,7 @@
  * older kernel than we were built with.
  */
 static int
-ofdlock(int fd, int cmd, struct flock *lock_arg)
+ofdlock(int fd, int cmd, fcntl_lock_st *lock_arg)
 {
 #ifdef F_OFD_SETLKW
     int st, ofdcmd;
@@ -89,7 +111,7 @@ krb5_lock_file(krb5_context context, int fd, int mode)
     krb5_error_code     retval = 0;
 #ifdef POSIX_FILE_LOCKS
     int lock_cmd = F_SETLKW;
-    struct flock lock_arg = { 0 };
+    fcntl_lock_st lock_arg = { 0 };
 #endif
 
     switch (mode & ~KRB5_LOCKMODE_DONTBLOCK) {
