@@ -1511,7 +1511,14 @@ ecb_binary32_to_binary16 (uint32_t x)
  * alternatively, you can remove this #error and link against libpthread,
  * which will then provide the memory fences.
  */
+/*
+ * krb5 change: per the comment below, we are allowing pthreads on platforms
+ * which are too old to have better memory thead support, as is the case on
+ * older Solaris versions.
+ */
+#if 0
 # error "memory fences not defined for your architecture, please report"
+#endif
 #endif
 
 #ifndef ECB_MEMORY_FENCE
