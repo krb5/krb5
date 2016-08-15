@@ -177,6 +177,10 @@ kdc_check_lookaside(krb5_context kcontext, krb5_data *req_packet,
 
     e->num_hits++;
     hits++;
+
+    if (e->reply_packet.length == 0)
+        return TRUE;
+
     return (krb5_copy_data(kcontext, &e->reply_packet,
                            reply_packet_out) == 0);
 }
