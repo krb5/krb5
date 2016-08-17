@@ -373,6 +373,11 @@ def fail(msg):
     """Print a message and exit with failure."""
     global _current_pass
     print "*** Failure:", msg
+    if _last_cmd:
+        print "*** Last command (#%d): %s" % (_cmd_index - 1, _last_cmd)
+    if _last_cmd_output:
+        print "*** Output of last command:"
+        sys.stdout.write(_last_cmd_output)
     if _current_pass:
         print "*** Failed in test pass:", _current_pass
     sys.exit(1)
@@ -643,15 +648,16 @@ def _stop_or_shell(stop, shell, env, ind):
 
 
 def _run_cmd(args, env, input=None, expected_code=0):
-    global null_input, _cmd_index, _debug
+    global null_input, _cmd_index, _last_cmd, _last_cmd_output, _debug
     global _stop_before, _stop_after, _shell_before, _shell_after
 
     if (_match_cmdnum(_debug, _cmd_index)):
         return _debug_cmd(args, env, input)
 
     args = _valgrind(args)
+    _last_cmd = _shell_equiv(args)
 
-    output('*** [%d] Executing: %s\n' % (_cmd_index, _shell_equiv(args)))
+    output('*** [%d] Executing: %s\n' % (_cmd_index, _last_cmd))
     _stop_or_shell(_stop_before, _shell_before, env, _cmd_index)
 
     if input:
@@ -663,6 +669,7 @@ def _run_cmd(args, env, input=None, expected_code=0):
     proc = subprocess.Popen(args, stdin=infile, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, env=env)
     (outdata, dummy_errdata) = proc.communicate(input)
+    _last_cmd_output = outdata
     code = proc.returncode
     output(outdata)
     output('*** [%d] Completed with return code %d\n' % (_cmd_index, code))
@@ -697,7 +704,7 @@ def _debug_cmd(args, env, input):
 # we see sentinel as a substring of a line on either stdout or stderr.
 # Clean up the daemon process on exit.
 def _start_daemon(args, env, sentinel):
-    global null_input, _cmd_index, _debug
+    global null_input, _cmd_index, _last_cmd, _last_cmd_output, _debug
     global _stop_before, _stop_after, _shell_before, _shell_after
 
     if (_match_cmdnum(_debug, _cmd_index)):
@@ -708,15 +715,17 @@ def _start_daemon(args, env, sentinel):
         sys.exit(1)
 
     args = _valgrind(args)
-    output('*** [%d] Starting: %s\n' %
-           (_cmd_index, _shell_equiv(args)))
+    _last_cmd = _shell_equiv(args)
+    output('*** [%d] Starting: %s\n' % (_cmd_index, _last_cmd))
     _stop_or_shell(_stop_before, _shell_before, env, _cmd_index)
 
     # Start the daemon and look for the sentinel in stdout or stderr.
     proc = subprocess.Popen(args, stdin=null_input, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, env=env)
+    _last_cmd_output = ''
     while True:
         line = proc.stdout.readline()
+        _last_cmd_output += line
         if line == "":
             code = proc.wait()
             fail('%s failed to start with code %d.' % (args[0], code))
@@ -1215,6 +1224,8 @@ atexit.register(_onexit)
 signal.signal(signal.SIGINT, _onsigint)
 _outfile = open('testlog', 'w')
 _cmd_index = 1
+_last_cmd = None
+_last_cmd_output = None
 buildtop = _find_buildtop()
 srctop = _find_srctop()
 plugins = os.path.join(buildtop, 'plugins')
