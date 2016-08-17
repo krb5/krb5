@@ -96,16 +96,58 @@ cleanup_fscreatecon(void)
     }
 }
 
+/*
+ * Try to derive a new security context that includes the current user context,
+ * replacing the one in configuredsc.  currentsc is freed here.
+ */
+static void
+derive_context(security_context_t currentsc, security_context_t *configuredsc)
+{
+    int res;
+    const char *cur_user;
+    context_t cur, der;
+    security_context_t dersc = NULL, new_confsc;
+    security_context_t confsc = *configuredsc;
+
+    if (currentsc == NULL)
+        return;
+
+    der = context_new(confsc);
+    cur = context_new(currentsc);
+    if (der == NULL || cur == NULL)
+        goto end;
+
+    cur_user = context_user_get(cur);
+    if (cur_user == NULL)
+        goto end;
+
+    res = context_user_set(der, cur_user);
+    if (res != 0)
+        goto end;
+
+    dersc = context_str(der);
+    if (dersc != NULL) {
+        new_confsc = strdup(dersc);
+        if (new_confsc == NULL)
+            goto end;
+        freecon(confsc);
+        *configuredsc = new_confsc;
+    }
+
+end:
+    context_free(cur);
+    context_free(der);
+    freecon(currentsc);
+}
+
 static security_context_t
 push_fscreatecon(const char *pathname, mode_t mode)
 {
-    security_context_t previous, configuredsc, currentsc, derivedsc;
-    context_t current, derived;
-    const char *fullpath, *currentuser;
+    security_context_t previous, configuredsc, currentsc;
+    const char *fullpath;
     char *genpath;
 
-    previous = configuredsc = currentsc = derivedsc = NULL;
-    current = derived = NULL;
+    previous = configuredsc = currentsc = NULL;
     genpath = NULL;
 
     fullpath = pathname;
@@ -173,36 +215,7 @@ push_fscreatecon(const char *pathname, mode_t mode)
 
     getcon(&currentsc);
 
-    /* AAAAAAAA */
-    if (currentsc != NULL) {
-        derived = context_new(configuredsc);
-
-        if (derived != NULL) {
-            current = context_new(currentsc);
-
-            if (current != NULL) {
-                currentuser = context_user_get(current);
-
-                if (currentuser != NULL) {
-                    if (context_user_set(derived,
-                                         currentuser) == 0) {
-                        derivedsc = context_str(derived);
-
-                        if (derivedsc != NULL) {
-                            freecon(configuredsc);
-                            configuredsc = strdup(derivedsc);
-                        }
-                    }
-                }
-
-                context_free(current);
-            }
-
-            context_free(derived);
-        }
-
-        freecon(currentsc);
-    }
+    derive_context(currentsc, &configuredsc);
 
     debug_log("Setting file creation context to \"%s\".\n", configuredsc);
     if (setfscreatecon(configuredsc) != 0) {
