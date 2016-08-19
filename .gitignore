@@ -233,6 +233,7 @@ local.properties
 /src/kdc/kdc5_err.[ch]
 /src/kdc/krb5kdc
 /src/kdc/rtest
+/src/kdc/t_replay
 
 /src/lib/crypto/builtin/aes/aes-gen
 /src/lib/crypto/builtin/aes/kresults.out

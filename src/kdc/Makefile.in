@@ -27,7 +27,8 @@ SRCS= \
 	$(srcdir)/kdc_audit.c \
 	$(srcdir)/kdc_transit.c \
 	$(srcdir)/tgs_policy.c \
-	$(srcdir)/kdc_log.c
+	$(srcdir)/kdc_log.c \
+	$(srcdir)/t_replay.c
 
 OBJS= \
 	kdc5_err.o \
@@ -73,6 +74,14 @@ check-unix: rtest
 	cmp test.out $(srcdir)/rtest.good
 	$(RM) test.out
 
+T_REPLAY_OBJS=t_replay.o
+
+t_replay: $(T_REPLAY_OBJS) replay.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ $(T_REPLAY_OBJS) $(CMOCKA_LIBS) $(KRB5_BASE_LIBS)
+
+check-cmocka: t_replay
+	$(RUN_TEST) ./t_replay > /dev/null
+
 check-pytests:
 	$(RUNPYTEST) $(srcdir)/t_workers.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_emptytgt.py $(PYTESTFLAGS)
@@ -81,5 +90,5 @@ install:
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
 
 clean:
-	$(RM) kdc5_err.h kdc5_err.c krb5kdc rtest.o rtest
+	$(RM) kdc5_err.h kdc5_err.c krb5kdc rtest.o rtest t_replay.o t_replay
 
