@@ -384,6 +384,15 @@ def test_pwhist(nhist):
 for n in (1, 2, 3, 4, 5):
     test_pwhist(n)
 
+# Test password character classes
+princ = 'charclassprinc'
+pol = 'charclasspol'
+realm.run([kadminl, 'addpol', '-minclasses', '3', pol])
+realm.run([kadminl, 'addprinc', '-policy', pol, '-nokey', princ])
+realm.run([kadminl, 'cpw', '-pw', 'abcdef', princ], expected_code=1)
+realm.run([kadminl, 'cpw', '-pw', 'Abcdef', princ], expected_code=1)
+realm.run([kadminl, 'cpw', '-pw', 'Abcdef1', princ])
+
 # Test principal renaming and make sure last modified is changed
 def get_princ(princ):
     out = realm.run([kadminl, 'getprinc', princ])
