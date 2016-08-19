@@ -110,11 +110,51 @@ entry_size(const krb5_data *req, const krb5_data *rep)
         ((rep == NULL) ? 0 : rep->length);
 }
 
+/* Insert an entry into the cache. */
+static struct entry *
+insert_entry(krb5_context context, krb5_data *req, krb5_data *rep,
+             krb5_timestamp time)
+{
+    krb5_error_code ret;
+    struct entry *entry;
+    krb5_ui_4 req_hash = murmurhash3(req);
+    size_t esize = entry_size(req, rep);
+
+    entry = calloc(1, sizeof(*entry));
+    if (entry == NULL)
+        return NULL;
+    entry->timein = time;
+
+    ret = krb5int_copy_data_contents(context, req, &entry->req_packet);
+    if (ret) {
+        free(entry);
+        return NULL;
+    }
+
+    if (rep != NULL) {
+        ret = krb5int_copy_data_contents(context, rep, &entry->reply_packet);
+        if (ret) {
+            krb5_free_data_contents(context, &entry->req_packet);
+            free(entry);
+            return NULL;
+        }
+    }
+
+    K5_TAILQ_INSERT_TAIL(&expiration_queue, entry, expire_links);
+    K5_LIST_INSERT_HEAD(&hash_table[req_hash], entry, bucket_links);
+    num_entries++;
+    total_size += esize;
+
+    return entry;
+}
+
+
 /* Remove entry from its hash bucket and the expiration queue, and free it. */
 static void
 discard_entry(krb5_context context, struct entry *entry)
 {
     total_size -= entry_size(&entry->req_packet, &entry->reply_packet);
+    num_entries--;
     K5_LIST_REMOVE(entry, bucket_links);
     K5_TAILQ_REMOVE(&expiration_queue, entry, expire_links);
     krb5_free_data_contents(context, &entry->req_packet);
@@ -160,8 +200,14 @@ kdc_remove_lookaside(krb5_context kcontext, krb5_data *req_packet)
         discard_entry(kcontext, e);
 }
 
-/* Return true and fill in reply_packet_out if req_packet is in the lookaside
- * cache; otherwise return false.  Also discard old entries in the cache. */
+/*
+ * Return true and fill in reply_packet_out if req_packet is in the lookaside
+ * cache; otherwise return false.
+ *
+ * If the request was inserted with a NULL reply_packet to indicate that a
+ * request is still being processed, then return TRUE with reply_packet_out set
+ * to NULL.
+ */
 krb5_boolean
 kdc_check_lookaside(krb5_context kcontext, krb5_data *req_packet,
                     krb5_data **reply_packet_out)
@@ -186,15 +232,19 @@ kdc_check_lookaside(krb5_context kcontext, krb5_data *req_packet,
                            reply_packet_out) == 0);
 }
 
-/* Insert a request and reply into the lookaside cache.  Assumes it's not
- * already there, and can fail silently on memory exhaustion. */
+/*
+ * Insert a request and reply into the lookaside cache.  Assumes it's not
+ * already there, and can fail silently on memory exhaustion.  Also discard old
+ * entries in the cache.
+ *
+ * The reply_packet may be NULL to indicate a request that is still processing.
+ */
 void
 kdc_insert_lookaside(krb5_context kcontext, krb5_data *req_packet,
                      krb5_data *reply_packet)
 {
     struct entry *e, *next;
     krb5_timestamp timenow;
-    krb5_ui_4 hash = murmurhash3(req_packet);
     size_t esize = entry_size(req_packet, reply_packet);
 
     if (krb5_timeofday(kcontext, &timenow))
@@ -208,27 +258,7 @@ kdc_insert_lookaside(krb5_context kcontext, krb5_data *req_packet,
         discard_entry(kcontext, e);
     }
 
-    /* Create a new entry for this request and reply. */
-    e = calloc(1, sizeof(*e));
-    if (e == NULL)
-        return;
-    e->timein = timenow;
-    if (krb5int_copy_data_contents(kcontext, req_packet, &e->req_packet)) {
-        free(e);
-        return;
-    }
-    if (reply_packet != NULL &&
-        krb5int_copy_data_contents(kcontext, reply_packet,
-                                   &e->reply_packet)) {
-        krb5_free_data_contents(kcontext, &e->req_packet);
-        free(e);
-        return;
-    }
-
-    K5_TAILQ_INSERT_TAIL(&expiration_queue, e, expire_links);
-    K5_LIST_INSERT_HEAD(&hash_table[hash], e, bucket_links);
-    num_entries++;
-    total_size += esize;
+    insert_entry(kcontext, req_packet, reply_packet, timenow);
     return;
 }
 
