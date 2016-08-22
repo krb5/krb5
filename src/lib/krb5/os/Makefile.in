@@ -200,7 +200,7 @@ lclint-localaddr: localaddr.c
 		-DTEST $(srcdir)/localaddr.c
 
 check-unix: check-unix-stdconf check-unix-locate check-unix-trace \
-	check-unix-expand
+	check-unix-expand check-unix-uri
 
 check-unix-stdconf: t_std_conf
 	$(RUN_TEST_LOCAL_CONF) ./t_std_conf  -d -s NEW.DEFAULT.REALM -d \
@@ -217,6 +217,7 @@ DIGPAT = '^_kerberos.*srv'
 NSPAT = '^_kerberos.*service'
 DIG = @DIG@
 NSLOOKUP = @NSLOOKUP@
+RESOLV_WRAP_HOSTS = resolv_hosts
 
 check-unix-locate: t_locate_kdc
 	if [ "$(OFFLINE)" = no ]; then \
@@ -230,6 +231,13 @@ check-unix-locate: t_locate_kdc
 	else \
 		echo '*** WARNING: skipped t_locate_kdc test: OFFLINE'; \
 		echo 'Skipped t_locate_kdc test: OFFLINE' >> $(SKIPTESTS); \
+	fi
+
+check-unix-uri: t_locate_kdc
+	if [ $(HAVE_RESOLV_WRAPPER) = 1 ]; then \
+	    $(RUNPYTEST) $(srcdir)/t_discover_uri.py $(RESOLV_WRAP_HOSTS) $(PYTESTFLAGS); \
+	else \
+	    echo '*** WARNING: skipped t_discover_uri.py due to not using resolv_wrapper'; \
 	fi
 
 check-unix-trace: t_trace
@@ -249,7 +257,7 @@ check-unix-expand: t_expand_path
 
 clean:
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_locate_kdc.o t_trace.o
-	$(RM) t_expand_path.o
+	$(RM) t_expand_path.o $(RESOLV_WRAP_HOSTS)
 
 @libobj_frag@
 
