@@ -200,7 +200,7 @@ lclint-localaddr: localaddr.c
 		-DTEST $(srcdir)/localaddr.c
 
 check-unix: check-unix-stdconf check-unix-locate check-unix-trace \
-	check-unix-expand
+	check-unix-expand check-unix-uri
 
 check-unix-stdconf: t_std_conf
 	$(RUN_TEST_LOCAL_CONF) ./t_std_conf  -d -s NEW.DEFAULT.REALM -d \
@@ -230,6 +230,14 @@ check-unix-locate: t_locate_kdc
 	else \
 		echo '*** WARNING: skipped t_locate_kdc test: OFFLINE'; \
 		echo 'Skipped t_locate_kdc test: OFFLINE' >> $(SKIPTESTS); \
+	fi
+
+check-unix-uri: t_locate_kdc
+	if [ $(HAVE_RESOLV_WRAPPER) = 1 ]; then \
+	    $(RUNPYTEST) $(srcdir)/t_discover_uri.py $(PYTESTFLAGS); \
+	else \
+	    echo '*** WARNING: skipped t_discover_uri.py due to not using resolv_wrapper'; \
+	    echo 'Skipped URI discovery tests: resolv_wrapper 1.1.5 not found' >> $(SKIPTESTS); \
 	fi
 
 check-unix-trace: t_trace

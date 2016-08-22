@@ -1135,6 +1135,14 @@ fi
 AC_SUBST(HAVE_CMOCKA)
 AC_SUBST(CMOCKA_LIBS)
 
+# For URI lookup tests. Requires resolv_wrapper >= 1.1.5 for URI
+# support.
+HAVE_RESOLV_WRAPPER=0
+if pkg-config --atleast-version=1.1.5 resolv_wrapper; then
+    HAVE_RESOLV_WRAPPER=1
+fi
+AC_SUBST(HAVE_RESOLV_WRAPPER)
+
 # for plugins/kdb/db2
 
 # AIX is unusual in that it wants all symbols resolved at link time
