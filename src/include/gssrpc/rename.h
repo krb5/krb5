@@ -257,8 +257,6 @@
 
 #define svc_debug_gss		gssrpc_svc_debug_gss
 
-#define svcauth_gss_creds	gssrpc_svc_auth_gss_creds
-
 /* svc_auth_gssapi.c */
 
 #define svc_debug_gssapi	gssrpc_svc_debug_gssapi
