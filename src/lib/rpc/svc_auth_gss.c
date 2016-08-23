@@ -91,6 +91,7 @@ struct svc_auth_ops svc_auth_gss_ops = {
 
 struct svc_rpc_gss_data {
 	bool_t			established;	/* context established */
+	gss_cred_id_t		cred;		/* credential */
 	gss_ctx_id_t		ctx;		/* context id */
 	struct rpc_gss_sec	sec;		/* security triple */
 	gss_buffer_desc		cname;		/* GSS client name */
@@ -139,39 +140,28 @@ svcauth_gss_set_svc_name(gss_name_t name)
 }
 
 static bool_t
-svcauth_gss_acquire_cred(void)
+svcauth_gss_acquire_cred(struct svc_rpc_gss_data *gd)
 {
 	OM_uint32	maj_stat, min_stat;
 
 	log_debug("in svcauth_gss_acquire_cred()");
 
+	/* We don't need to acquire a credential if using the default name. */
+	if (svcauth_gss_name == GSS_C_NO_NAME)
+		return (TRUE);
+
+	/* Only acquire a credential once per authentication. */
+	if (gd->cred != GSS_C_NO_CREDENTIAL)
+		return (TRUE);
+
 	maj_stat = gss_acquire_cred(&min_stat, svcauth_gss_name, 0,
 				    GSS_C_NULL_OID_SET, GSS_C_ACCEPT,
-				    &svcauth_gss_creds, NULL, NULL);
+				    &gd->cred, NULL, NULL);
 
 	if (maj_stat != GSS_S_COMPLETE) {
 		log_status("gss_acquire_cred", maj_stat, min_stat);
 		return (FALSE);
 	}
-	return (TRUE);
-}
-
-static bool_t
-svcauth_gss_release_cred(void)
-{
-	OM_uint32	maj_stat, min_stat;
-
-	log_debug("in svcauth_gss_release_cred()");
-
-	maj_stat = gss_release_cred(&min_stat, &svcauth_gss_creds);
-
-	if (maj_stat != GSS_S_COMPLETE) {
-		log_status("gss_release_cred", maj_stat, min_stat);
-		return (FALSE);
-	}
-
-	svcauth_gss_creds = NULL;
-
 	return (TRUE);
 }
 
@@ -210,7 +200,7 @@ svcauth_gss_accept_sec_context(struct svc_req *rqst,
 
 	gr->gr_major = gss_accept_sec_context(&gr->gr_minor,
 					      &gd->ctx,
-					      svcauth_gss_creds,
+					      gd->cred,
 					      &recv_tok,
 					      GSS_C_NO_CHANNEL_BINDINGS,
 					      &gd->client_name,
@@ -494,7 +484,7 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 		if (rqst->rq_proc != NULLPROC)
 			ret_freegc (AUTH_FAILED);		/* XXX ? */
 
-		if (!svcauth_gss_acquire_cred())
+		if (!svcauth_gss_acquire_cred(gd))
 			ret_freegc (AUTH_FAILED);
 
 		if (!svcauth_gss_accept_sec_context(rqst, &gr))
@@ -544,9 +534,6 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 
 		log_debug("sendreply in destroy: %d", call_stat);
 
-		if (!svcauth_gss_release_cred())
-			ret_freegc (AUTH_FAILED);
-
 		SVCAUTH_DESTROY(rqst->rq_xprt->xp_auth);
 		rqst->rq_xprt->xp_auth = &svc_auth_none;
 
@@ -574,6 +561,7 @@ svcauth_gss_destroy(SVCAUTH *auth)
 	gd = SVCAUTH_PRIVATE(auth);
 
 	gss_delete_sec_context(&min_stat, &gd->ctx, GSS_C_NO_BUFFER);
+	gss_release_cred(&min_stat, &gd->cred);
 	gss_release_buffer(&min_stat, &gd->cname);
 	gss_release_buffer(&min_stat, &gd->checksum);
 
