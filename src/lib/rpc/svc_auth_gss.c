@@ -107,7 +107,6 @@ struct svc_rpc_gss_data {
 	(*(struct svc_rpc_gss_data **)&(auth)->svc_ah_private)
 
 /* Global server credentials. */
-gss_cred_id_t		svcauth_gss_creds;
 static gss_name_t	svcauth_gss_name = NULL;
 
 bool_t

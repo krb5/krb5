@@ -43,7 +43,6 @@ gssrpc_pmap_set
 gssrpc_pmap_unset
 gssrpc_registerrpc
 gssrpc_rpc_createrr
-gssrpc_svc_auth_gss_creds
 gssrpc_svc_auth_gss_ops
 gssrpc_svc_auth_gssapi_ops
 gssrpc_svc_auth_none
