@@ -250,10 +250,11 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
     /* First do the easy stuff */
     nextloc = (unsigned char *)content->data;
     sizeleft = content->length;
-    if ((sizeleft -= KRB5_KDB_V1_BASE_LENGTH) < 0) {
+    if (sizeleft < KRB5_KDB_V1_BASE_LENGTH) {
         retval = KRB5_KDB_TRUNCATED_RECORD;
         goto error_out;
     }
+    sizeleft -= KRB5_KDB_V1_BASE_LENGTH;
 
     /* Base Length */
     krb5_kdb_decode_int16(nextloc, entry->len);
@@ -322,32 +323,35 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
      * Get the principal name for the entry
      * (stored as a string which gets unparsed.)
      */
-    if ((sizeleft -= 2) < 0) {
+    if (sizeleft < 2) {
         retval = KRB5_KDB_TRUNCATED_RECORD;
         goto error_out;
     }
+    sizeleft -= 2;
 
     i = 0;
     krb5_kdb_decode_int16(nextloc, i16);
     i = (int) i16;
     nextloc += 2;
-
-    if ((retval = krb5_parse_name(context, (char *)nextloc, &(entry->princ))))
-        goto error_out;
-    if (((size_t) i != (strlen((char *)nextloc) + 1)) || (sizeleft < i)) {
+    if (i <= 0 || i > sizeleft || nextloc[i - 1] != '\0' ||
+        memchr((char *)nextloc, '\0', i - 1) != NULL) {
         retval = KRB5_KDB_TRUNCATED_RECORD;
         goto error_out;
     }
+
+    if ((retval = krb5_parse_name(context, (char *)nextloc, &(entry->princ))))
+        goto error_out;
     sizeleft -= i;
     nextloc += i;
 
     /* tl_data is a linked list */
     tl_data = &entry->tl_data;
     for (i = 0; i < entry->n_tl_data; i++) {
-        if ((sizeleft -= 4) < 0) {
+        if (sizeleft < 4) {
             retval = KRB5_KDB_TRUNCATED_RECORD;
             goto error_out;
         }
+        sizeleft -= 4;
         if ((*tl_data = (krb5_tl_data *)
              malloc(sizeof(krb5_tl_data))) == NULL) {
             retval = ENOMEM;
@@ -360,10 +364,12 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
         krb5_kdb_decode_int16(nextloc, (*tl_data)->tl_data_length);
         nextloc += 2;
 
-        if ((sizeleft -= (*tl_data)->tl_data_length) < 0) {
+        if ((*tl_data)->tl_data_length < 0 ||
+            (*tl_data)->tl_data_length > sizeleft) {
             retval = KRB5_KDB_TRUNCATED_RECORD;
             goto error_out;
         }
+        sizeleft -= (*tl_data)->tl_data_length;
         (*tl_data)->tl_data_contents =
             k5memdup(nextloc, (*tl_data)->tl_data_length, &retval);
         if ((*tl_data)->tl_data_contents == NULL)
@@ -382,10 +388,11 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
         krb5_key_data * key_data;
         int j;
 
-        if ((sizeleft -= 4) < 0) {
+        if (sizeleft < 4) {
             retval = KRB5_KDB_TRUNCATED_RECORD;
             goto error_out;
         }
+        sizeleft -= 4;
         key_data = entry->key_data + i;
         memset(key_data, 0, sizeof(krb5_key_data));
         krb5_kdb_decode_int16(nextloc, key_data->key_data_ver);
@@ -394,21 +401,25 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
         nextloc += 2;
 
         /* key_data_ver determins number of elements and how to unparse them. */
-        if (key_data->key_data_ver <= KRB5_KDB_V1_KEY_DATA_ARRAY) {
+        if (key_data->key_data_ver >= 0 &&
+            key_data->key_data_ver <= KRB5_KDB_V1_KEY_DATA_ARRAY) {
             for (j = 0; j < key_data->key_data_ver; j++) {
-                if ((sizeleft -= 4) < 0) {
+                if (sizeleft < 4) {
                     retval = KRB5_KDB_TRUNCATED_RECORD;
                     goto error_out;
                 }
+                sizeleft -= 4;
                 krb5_kdb_decode_int16(nextloc, key_data->key_data_type[j]);
                 nextloc += 2;
                 krb5_kdb_decode_int16(nextloc, key_data->key_data_length[j]);
                 nextloc += 2;
 
-                if ((sizeleft -= key_data->key_data_length[j]) < 0) {
+                if (key_data->key_data_length[j] < 0 ||
+                    key_data->key_data_length[j] > sizeleft) {
                     retval = KRB5_KDB_TRUNCATED_RECORD;
                     goto error_out;
                 }
+                sizeleft -= key_data->key_data_length[j];
                 if (key_data->key_data_length[j]) {
                     key_data->key_data_contents[j] =
                         k5memdup(nextloc, key_data->key_data_length[j],
@@ -419,8 +430,8 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
                 }
             }
         } else {
-            /* This isn't right. I'll fix it later */
-            abort();
+            retval = KRB5_KDB_BAD_VERSION;
+            goto error_out;
         }
     }
     *entry_ptr = entry;
