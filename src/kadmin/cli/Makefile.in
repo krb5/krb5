@@ -37,3 +37,8 @@ clean-unix::
 # CC_LINK is not meant for compilation and this use may break in the future.
 datetest: getdate.c
 	$(CC_LINK) $(ALL_CFLAGS) -DTEST -o datetest getdate.c
+
+%.c: %.y
+	$(RM) y.tab.c $@
+	$(YACC.y) $<
+	$(CP) y.tab.c $@
