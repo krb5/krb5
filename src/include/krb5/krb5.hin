@@ -3641,7 +3641,7 @@ krb5_address_order(krb5_context context, const krb5_address *addr1,
  * @param [in] princ2           Second principal
  *
  * @retval
- * TRUE if the realm names are the same; FALSE otherwise
+ * TRUE if the realm names are the same; FALSE otherwise (including if NULL)
  */
 krb5_boolean KRB5_CALLCONV
 krb5_realm_compare(krb5_context context, krb5_const_principal princ1,
@@ -3655,7 +3655,7 @@ krb5_realm_compare(krb5_context context, krb5_const_principal princ1,
  * @param [in] princ2           Second principal
  *
  * @retval
- * TRUE if the principals are the same; FALSE otherwise
+ * TRUE if the principals are the same; FALSE otherwise (including if NULL)
  */
 krb5_boolean KRB5_CALLCONV
 krb5_principal_compare(krb5_context context,

@@ -36,6 +36,10 @@ realm_compare_flags(krb5_context context,
     const krb5_data *realm1 = &princ1->realm;
     const krb5_data *realm2 = &princ2->realm;
 
+    if (princ1 == NULL || princ2 == NULL)
+        return FALSE;
+    if (realm1 == NULL || realm2 == NULL)
+        return FALSE;
     if (realm1->length != realm2->length)
         return FALSE;
     if (realm1->length == 0)
@@ -87,6 +91,9 @@ krb5_principal_compare_flags(krb5_context context,
     krb5_principal upn1 = NULL;
     krb5_principal upn2 = NULL;
     krb5_boolean ret = FALSE;
+
+    if (princ1 == NULL || princ2 == NULL)
+        return FALSE;
 
     if (flags & KRB5_PRINCIPAL_COMPARE_ENTERPRISE) {
         /* Treat UPNs as if they were real principals */
