@@ -45,6 +45,7 @@
 #else
 #define DEFAULT_LOOKUP_REALM 0
 #endif
+#define DEFAULT_URI_LOOKUP TRUE
 
 static int
 maybe_use_dns (krb5_context context, const char *name, int defalt)
@@ -68,6 +69,18 @@ maybe_use_dns (krb5_context context, const char *name, int defalt)
     use_dns = _krb5_conf_boolean(value);
     profile_release_string(value);
     return use_dns;
+}
+
+static krb5_boolean
+use_dns_uri(krb5_context ctx)
+{
+    krb5_error_code ret;
+    krb5_boolean use;
+
+    ret = profile_get_boolean(ctx->profile, KRB5_CONF_LIBDEFAULTS,
+                              KRB5_CONF_DNS_URI_LOOKUP, NULL,
+                              DEFAULT_URI_LOOKUP, &use);
+    return ret ? DEFAULT_URI_LOOKUP : use;
 }
 
 int
@@ -652,7 +665,7 @@ dns_locate_server_uri(krb5_context context, const krb5_data *realm,
     int def_port;
     krb5_boolean find_master = FALSE;
 
-    if (!_krb5_use_dns_kdc(context))
+    if (!_krb5_use_dns_kdc(context) || !use_dns_uri(context))
         return 0;
 
     switch (svc) {
