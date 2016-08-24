@@ -997,7 +997,7 @@ __call_hash(hashp, k, len)
 	int8_t *k;
 	int32_t len;
 {
-	int32_t n, bucket;
+	u_int32_t n, bucket;
 
 	n = hashp->hash(k, len);
 	bucket = n & hashp->hdr.high_mask;

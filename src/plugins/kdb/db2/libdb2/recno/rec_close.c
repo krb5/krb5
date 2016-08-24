@@ -155,7 +155,8 @@ __rec_sync(dbp, flags)
 		 */
 		status = (dbp->seq)(dbp, &key, &data, R_FIRST);
 		while (status == RET_SUCCESS) {
-			if (write(t->bt_rfd, data.data, data.size) != data.size)
+			if (write(t->bt_rfd, data.data, data.size) !=
+			    (ssize_t)data.size)
 				return (RET_ERROR);
 			status = (dbp->seq)(dbp, &key, &data, R_NEXT);
 		}
@@ -167,7 +168,7 @@ __rec_sync(dbp, flags)
 		while (status == RET_SUCCESS) {
 			iov[0].iov_base = data.data;
 			iov[0].iov_len = data.size;
-			if (writev(t->bt_rfd, iov, 2) != data.size + 1)
+			if (writev(t->bt_rfd, iov, 2) != (ssize_t)data.size + 1)
 				return (RET_ERROR);
 			status = (dbp->seq)(dbp, &key, &data, R_NEXT);
 		}

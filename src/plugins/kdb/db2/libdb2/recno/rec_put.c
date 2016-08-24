@@ -213,8 +213,8 @@ __rec_iput(t, nrec, data, flags)
 			return (RET_ERROR);
 		tdata.data = db;
 		tdata.size = NOVFLSIZE;
-		*(db_pgno_t *)db = pg;
-		*(u_int32_t *)(db + sizeof(db_pgno_t)) = data->size;
+		memcpy(db, &pg, sizeof(pg));
+		*(u_int32_t *)(void *)(db + sizeof(db_pgno_t)) = data->size;
 		dflags = P_BIGDATA;
 		data = &tdata;
 	} else
@@ -256,7 +256,8 @@ __rec_iput(t, nrec, data, flags)
 	 * the offset array, shift the pointers up.
 	 */
 	nbytes = NRLEAFDBT(data->size);
-	if (h->upper - h->lower < nbytes + sizeof(indx_t)) {
+	if ((u_int32_t)h->upper - (u_int32_t)h->lower
+	    < nbytes + sizeof(indx_t)) {
 		status = __bt_split(t, h, NULL, data, dflags, nbytes, idx);
 		if (status == RET_SUCCESS)
 			++t->bt_nrecs;

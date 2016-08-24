@@ -231,7 +231,7 @@ putpair(p, key, val)
 {
 	u_int16_t *pagep, n, off;
 
-	pagep = (PAGE16 *)p;
+	pagep = (PAGE16 *)(void *)p;
 
 	/* Items on the page are 0-indexed. */
 	n = NUM_ENT(pagep);
@@ -888,7 +888,7 @@ __pgin_routine(pg_cookie, pgno, page)
 	if (is_bitmap_pgno(hashp, pgno)) {
 		max = hashp->hdr.bsize >> 2;	/* divide by 4 bytes */
 		for (i = 0; i < max; i++)
-			M_32_SWAP(((int32_t *)pagep)[i]);
+			M_32_SWAP(((int32_t *)(void *)pagep)[i]);
 	} else
 		swap_page_header_in(pagep);
 }
@@ -919,7 +919,7 @@ __pgout_routine(pg_cookie, pgno, page)
 	if (is_bitmap_pgno(hashp, pgno)) {
 		max = hashp->hdr.bsize >> 2;	/* divide by 4 bytes */
 		for (i = 0; i < max; i++)
-			M_32_SWAP(((int32_t *)pagep)[i]);
+			M_32_SWAP(((int32_t *)(void *)pagep)[i]);
 	} else
 		swap_page_header_out(pagep);
 }
@@ -1037,7 +1037,7 @@ __ibitmap(hashp, pnum, nbits, ndx)
 	/* make a new bitmap page */
 	if (__new_page(hashp, pnum, A_BITMAP) != 0)
 		return (1);
-	if (!(ip = (u_int32_t *)__get_page(hashp, pnum, A_BITMAP)))
+	if (!(ip = (u_int32_t *)(void *)__get_page(hashp, pnum, A_BITMAP)))
 		return (1);
 	hashp->nmaps++;
 	clearints = ((nbits - 1) >> INT32_T_BYTE_SHIFT) + 1;
@@ -1074,8 +1074,8 @@ overflow_page(hashp)
 	HTAB *hashp;
 {
 	u_int32_t *freep;
-	int32_t bit, first_page, free_bit, free_page, i, in_use_bits, j;
-	int32_t max_free, offset, splitnum;
+	u_int32_t bit, first_page, free_bit, free_page, i, in_use_bits, j;
+	u_int32_t max_free, offset, splitnum;
 	u_int16_t addr;
 #ifdef DEBUG2
 	int32_t tmp1, tmp2;
@@ -1299,7 +1299,7 @@ __free_ovflpage(hashp, pagep)
 	PAGE16 *pagep;
 {
 	u_int32_t *freep;
-	int32_t bit_address, free_page, free_bit;
+	u_int32_t bit_address, free_page, free_bit;
 	u_int16_t addr, ndx;
 
 	addr = page_to_oaddr(hashp, ADDR(pagep));
@@ -1340,7 +1340,7 @@ fetch_bitmap(hashp, ndx)
 	if (ndx >= hashp->nmaps)
 		return (NULL);
 	if (!hashp->mapp[ndx])
-	    hashp->mapp[ndx] = (u_int32_t *)__get_page(hashp,
+	    hashp->mapp[ndx] = (u_int32_t *)(void *)__get_page(hashp,
 	        hashp->hdr.bitmaps[ndx], A_BITMAP);
 
 	return (hashp->mapp[ndx]);

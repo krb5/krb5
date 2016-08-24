@@ -152,7 +152,8 @@ __bt_stkacq(t, hp, c)
 	indx_t idx = 0;
 	db_pgno_t pgno;
 	recno_t nextpg, prevpg;
-	int exact, level;
+	int exact;
+	unsigned int level;
 
 	/*
 	 * Find the first occurrence of the key in the tree.  Toss the

@@ -67,19 +67,19 @@ typedef struct hashhdr {	/* Disk resident portion */
 	int32_t	magic;		/* Magic NO for hash tables */
 	int32_t	version;	/* Version ID */
 	int32_t	lorder;		/* Byte Order */
-	int32_t	bsize;		/* Bucket/Page Size */
+	u_int32_t	bsize;	/* Bucket/Page Size */
 	int32_t	bshift;		/* Bucket shift */
 	int32_t	ovfl_point;	/* Where overflow pages are being allocated */
-	int32_t	last_freed;	/* Last overflow page freed */
-	int32_t	max_bucket;	/* ID of Maximum bucket in use */
-	int32_t	high_mask;	/* Mask to modulo into entire table */
-	int32_t	low_mask;	/* Mask to modulo into lower half of table */
-	int32_t	ffactor;	/* Fill factor */
+	u_int32_t	last_freed;	/* Last overflow page freed */
+	u_int32_t	max_bucket;	/* ID of Maximum bucket in use */
+	u_int32_t	high_mask;	/* Mask to modulo into entire table */
+	u_int32_t	low_mask;	/* Mask to modulo into lower half of table */
+	u_int32_t	ffactor;	/* Fill factor */
 	int32_t	nkeys;		/* Number of keys in hash table */
-	int32_t	hdrpages;	/* Size of table header */
-	int32_t	h_charkey;	/* value of hash(CHARKEY) */
+	u_int32_t	hdrpages;	/* Size of table header */
+	u_int32_t	h_charkey;	/* value of hash(CHARKEY) */
 #define NCACHED	32		/* number of bit maps and spare points */
-	int32_t	spares[NCACHED];/* spare pages for overflow */
+	u_int32_t	spares[NCACHED];/* spare pages for overflow */
 	u_int16_t	bitmaps[NCACHED];	/* address of overflow page bitmaps */
 } HASHHDR;
 
@@ -174,7 +174,7 @@ typedef struct item_info {
 	indx_t		ndx;
 	indx_t		pgndx;
 	u_int8_t	status;
-	int32_t		seek_size;
+	u_int32_t	seek_size;
 	db_pgno_t		seek_found_page;
 	indx_t		key_off;
 	indx_t		data_off;

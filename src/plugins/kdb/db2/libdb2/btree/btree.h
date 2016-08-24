@@ -128,7 +128,7 @@ typedef struct _binternal {
 
 /* Get the page's BINTERNAL structure at index indx. */
 #define	GETBINTERNAL(pg, indx)						\
-	((BINTERNAL *)((char *)(pg) + (pg)->linp[indx]))
+	((BINTERNAL *)(void *)((char *)(pg) + (pg)->linp[indx]))
 
 /* Get the number of bytes in the entry. */
 #define NBINTERNAL(len)							\
@@ -136,9 +136,9 @@ typedef struct _binternal {
 
 /* Copy a BINTERNAL entry to the page. */
 #define	WR_BINTERNAL(p, size, pgno, flags) {				\
-	*(u_int32_t *)p = size;						\
+	*(u_int32_t *)(void *)p = size;					\
 	p += sizeof(u_int32_t);						\
-	*(db_pgno_t *)p = pgno;						\
+	*(db_pgno_t *)(void *)p = pgno;					\
 	p += sizeof(db_pgno_t);						\
 	*(u_char *)p = flags;						\
 	p += sizeof(u_char);						\
@@ -155,7 +155,7 @@ typedef struct _rinternal {
 
 /* Get the page's RINTERNAL structure at index indx. */
 #define	GETRINTERNAL(pg, indx)						\
-	((RINTERNAL *)((char *)(pg) + (pg)->linp[indx]))
+	((RINTERNAL *)(void *)((char *)(void *)(pg) + (pg)->linp[indx]))
 
 /* Get the number of bytes in the entry. */
 #define NRINTERNAL							\
@@ -163,9 +163,9 @@ typedef struct _rinternal {
 
 /* Copy a RINTERAL entry to the page. */
 #define	WR_RINTERNAL(p, nrecs, pgno) {					\
-	*(recno_t *)p = nrecs;						\
+	*(recno_t *)(void *)p = nrecs;					\
 	p += sizeof(recno_t);						\
-	*(db_pgno_t *)p = pgno;						\
+	*(db_pgno_t *)(void *)p = pgno;					\
 }
 
 /* For the btree leaf pages, the item is a key and data pair. */
@@ -178,7 +178,7 @@ typedef struct _bleaf {
 
 /* Get the page's BLEAF structure at index indx. */
 #define	GETBLEAF(pg, indx)						\
-	((BLEAF *)((char *)(pg) + (pg)->linp[indx]))
+	((BLEAF *)(void *)((char *)(pg) + (pg)->linp[indx]))
 
 /* Get the number of bytes in the entry. */
 #define NBLEAF(p)	NBLEAFDBT((p)->ksize, (p)->dsize)
@@ -190,9 +190,9 @@ typedef struct _bleaf {
 
 /* Copy a BLEAF entry to the page. */
 #define	WR_BLEAF(p, key, data, flags) {					\
-	*(u_int32_t *)p = key->size;					\
+	*(u_int32_t *)(void *)p = key->size;				\
 	p += sizeof(u_int32_t);						\
-	*(u_int32_t *)p = data->size;					\
+	*(u_int32_t *)(void *)p = data->size;				\
 	p += sizeof(u_int32_t);						\
 	*(u_char *)p = flags;						\
 	p += sizeof(u_char);						\
@@ -210,7 +210,7 @@ typedef struct _rleaf {
 
 /* Get the page's RLEAF structure at index indx. */
 #define	GETRLEAF(pg, indx)						\
-	((RLEAF *)((char *)(pg) + (pg)->linp[indx]))
+	((RLEAF *)(void *)((char *)(pg) + (pg)->linp[indx]))
 
 /* Get the number of bytes in the entry. */
 #define NRLEAF(p)	NRLEAFDBT((p)->dsize)
@@ -221,7 +221,7 @@ typedef struct _rleaf {
 
 /* Copy a RLEAF entry to the page. */
 #define	WR_RLEAF(p, data, flags) {					\
-	*(u_int32_t *)p = data->size;					\
+	*(u_int32_t *)(void *)p = data->size;				\
 	p += sizeof(u_int32_t);						\
 	*(u_char *)p = flags;						\
 	p += sizeof(u_char);						\

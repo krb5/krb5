@@ -159,7 +159,7 @@ __bt_snext(t, h, key, exactp)
 	EPGNO *parent;
 	indx_t idx = 0;
 	db_pgno_t pgno;
-	int level;
+	unsigned int level;
 
 	/*
 	 * Get the next page.  The key is either an exact
@@ -239,7 +239,7 @@ __bt_sprev(t, h, key, exactp)
 	EPGNO *parent;
 	indx_t idx = 0;
 	db_pgno_t pgno;
-	int level;
+	unsigned int level;
 
 	/*
 	 * Get the previous page.  The key is either an exact

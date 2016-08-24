@@ -88,7 +88,7 @@
 #define PAIR_OVERHEAD	((sizeof(indx_t) << 1))
 
 /* Use this macro to extract a value of type T from page P at offset O. */
-#define REFERENCE(P, T, O)  (((T *)((u_int8_t *)(P) + O))[0])
+#define REFERENCE(P, T, O)  (((T *)(void *)((u_int8_t *)(void *)(P) + O))[0])
 
 /*
  * Use these macros to access fields on a page; P is a PAGE16 *.
