@@ -189,7 +189,6 @@ typedef unsigned char k5_os_nothread_once_t;
      : (assert(*(O) != 4), assert(*(O) == 2 || *(O) == 3), 0))
 
 
-
 #ifndef ENABLE_THREADS
 
 typedef k5_os_nothread_mutex k5_os_mutex;
@@ -241,12 +240,7 @@ typedef k5_os_nothread_mutex k5_os_mutex;
    If we find a platform with non-functional stubs and no weak
    references, we may have to resort to some hack like dlsym on the
    symbol tables of the current process.  */
-extern int krb5int_pthread_loaded(void)
-#ifdef __GNUC__
-/* We should always get the same answer for the life of the process.  */
-    __attribute__((const))
-#endif
-    ;
+
 #if defined(HAVE_PRAGMA_WEAK_REF) && !defined(NO_WEAK_PTHREADS)
 # pragma weak pthread_once
 # pragma weak pthread_mutex_lock
@@ -255,7 +249,6 @@ extern int krb5int_pthread_loaded(void)
 # pragma weak pthread_mutex_init
 # pragma weak pthread_self
 # pragma weak pthread_equal
-# define K5_PTHREADS_LOADED     (krb5int_pthread_loaded())
 # define USE_PTHREAD_LOCK_ONLY_IF_LOADED
 
 /* Can't rely on useful stubs -- see above regarding Solaris.  */
@@ -264,14 +257,12 @@ typedef struct {
     k5_os_nothread_once_t n;
 } k5_once_t;
 # define K5_ONCE_INIT   { PTHREAD_ONCE_INIT, K5_OS_NOTHREAD_ONCE_INIT }
-# define k5_once(O,F)   (K5_PTHREADS_LOADED                     \
-                         ? pthread_once(&(O)->o,F)              \
-                         : k5_os_nothread_once(&(O)->n,F))
 
+int
+k5_once(k5_once_t *once, void (*fn)(void));
 #else
 
 /* no pragma weak support */
-# define K5_PTHREADS_LOADED     (1)
 
 typedef pthread_once_t k5_once_t;
 # define K5_ONCE_INIT   PTHREAD_ONCE_INIT
@@ -295,16 +286,16 @@ typedef pthread_mutex_t k5_os_mutex;
 
 #ifdef USE_PTHREAD_LOCK_ONLY_IF_LOADED
 
+#define USE_PTHREAD_LOADED_MUTEX_FUNCTIONS
 # define k5_os_mutex_finish_init(M)             (0)
-# define k5_os_mutex_init(M)                                    \
-    (K5_PTHREADS_LOADED ? pthread_mutex_init((M), 0) : 0)
-# define k5_os_mutex_destroy(M)                                 \
-    (K5_PTHREADS_LOADED ? pthread_mutex_destroy((M)) : 0)
-# define k5_os_mutex_lock(M)                            \
-    (K5_PTHREADS_LOADED ? pthread_mutex_lock(M) : 0)
-# define k5_os_mutex_unlock(M)                          \
-    (K5_PTHREADS_LOADED ? pthread_mutex_unlock(M) : 0)
-
+int
+k5_os_mutex_init(k5_os_mutex *m);
+int
+k5_os_mutex_destroy(k5_os_mutex *m);
+int
+k5_os_mutex_lock(k5_os_mutex *m);
+int
+k5_os_mutex_unlock(k5_os_mutex *m);
 #else
 
 static inline int k5_os_mutex_finish_init(k5_os_mutex *m) { return 0; }
@@ -316,6 +307,8 @@ static inline int k5_os_mutex_finish_init(k5_os_mutex *m) { return 0; }
 #endif /* is pthreads always available? */
 
 #elif defined _WIN32
+
+#define k5_once_t k5_os_nothread_once_t
 
 typedef struct {
     HANDLE h;
@@ -332,8 +325,9 @@ typedef struct {
      ((M)->h = CreateMutex(NULL, FALSE, NULL)) ? 0 : GetLastError())
 # define k5_os_mutex_destroy(M)                                 \
     (CloseHandle((M)->h) ? ((M)->h = 0, 0) : GetLastError())
+#define k5_os_mutex_lock k5_win_mutex_lock
 
-static inline int k5_os_mutex_lock(k5_os_mutex *m)
+static inline int k5_win_mutex_lock(k5_os_mutex *m)
 {
     DWORD res;
     res = WaitForSingleObject(m->h, INFINITE);
