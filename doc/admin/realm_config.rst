@@ -194,6 +194,54 @@ explicit server locations, providing SRV records will still benefit
 unconfigured clients, and be useful for other sites.
 
 
+.. _kdc_discovery:
+
+KDC Discovery
+-------------
+
+As of MIT krb5 1.15, clients can also locate KDCs in DNS through URI
+records (:rfc:`7553`).  Limitations with the SRV record format may
+result in extra DNS queries in situations where a client must failover
+to other transport types, or find a master server.  The URI record can
+convey more information about a realm's KDCs with a single query.
+
+The client performs a query for the following URI records:
+
+* ``_kerberos.REALM`` for fiding KDCs.
+* ``_kerberos-adm.REALM`` for finding kadmin services.
+* ``_kpasswd.REALM`` for finding password services.
+
+The URI record includes a priority, weight, and a URI string that
+consists of case-insensitive colon separated fields, in the form
+``scheme:[flags]:transport:residual``.
+
+* *scheme* defines the registered URI type.  It should always be
+  ``krb5srv``.
+* *flags* contains zero or more flag characters.  Currently the only
+  valid flag is ``m``, which indicates that the record is for a master
+  server.
+* *transport* defines the transport type of the residual URL or
+  address.  Accepted values are ``tcp``, ``udp``, or ``kkdcp`` for the
+  MS-KKDCP type.
+* *residual* contains the hostname, IP address, or URL to be
+  contacted using the specified transport, with an optional port
+  extension.  The MS-KKDCP transport type uses a HTTPS URL, and can
+  include a port and/or path extension.
+
+An example of URI records in a zone file::
+
+  _kerberos.EXAMPLE.COM  URI  10 1 krb5srv:m:tcp:kdc1.example.com
+                         URI  20 1 krb5srv:m:udp:kdc2.example.com:89
+                         URI  40 1 krb5srv::udp:10.10.0.23
+                         URI  30 1 krb5srv::kkdcp:https://proxy:89/auth
+
+URI lookups are enabled by default, and can be disabled by setting
+**dns_uri_lookup** in the :ref:`libdefaults` section of
+:ref:`krb5.conf(5)` to False.  When enabled, URI lookups take
+precedence over SRV lookups, falling back to SRV lookups if no URI
+records are found.
+
+
 .. _db_prop:
 
 Database propagation
