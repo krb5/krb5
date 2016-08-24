@@ -23,7 +23,8 @@ Client machine configuration files
 
 Each machine running Kerberos should have a :ref:`krb5.conf(5)` file.
 At a minimum, it should define a **default_realm** setting in
-:ref:`libdefaults`.  If you are not using DNS SRV records, it must
+:ref:`libdefaults`.  If you are not using DNS SRV records
+(:ref:`kdc_hostnames`) or URI records (:ref:`kdc_discovery`), it must
 also contain a :ref:`realms` section containing information for your
 realm's KDCs.
 
