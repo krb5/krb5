@@ -99,8 +99,10 @@ krb5_server_decrypt_ticket_keytab(krb5_context context,
         retval = KRB5_KT_NOTFOUND;
         while ((code = krb5_kt_next_entry(context, keytab,
                                           &ktent, &cursor)) == 0) {
-            if (ktent.key.enctype != ticket->enc_part.enctype)
+            if (ktent.key.enctype != ticket->enc_part.enctype) {
+                (void) krb5_free_keytab_entry_contents(context, &ktent);
                 continue;
+            }
 
             retval = decrypt_ticket_keyblock(context, &ktent.key, ticket);
             if (retval == 0) {
