@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* slave/kprop_sock.c */
+/* slave/kprop_util.c */
 /*
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.

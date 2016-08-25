@@ -3,11 +3,11 @@ BUILDTOP=$(REL)..
 
 all:	kprop kpropd kproplog
 
-CLIENTSRCS= $(srcdir)/kprop.c $(srcdir)/kprop_sock.c
-CLIENTOBJS= kprop.o kprop_sock.o
+CLIENTSRCS= $(srcdir)/kprop.c $(srcdir)/kprop_util.c
+CLIENTOBJS= kprop.o kprop_util.o
 
-SERVERSRCS= $(srcdir)/kpropd.c $(srcdir)/kpropd_rpc.c $(srcdir)/kprop_sock.c
-SERVEROBJS= kpropd.o kpropd_rpc.o kprop_sock.o
+SERVERSRCS= $(srcdir)/kpropd.c $(srcdir)/kpropd_rpc.c $(srcdir)/kprop_util.c
+SERVEROBJS= kpropd.o kpropd_rpc.o kprop_util.o
 
 LOGSRCS= $(srcdir)/kproplog.c
 LOGOBJS= kproplog.o
