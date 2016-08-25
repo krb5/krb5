@@ -614,6 +614,7 @@ test13()
 				echo p
 				echo k$i
 				echo d$i
+				echo S
 				echo g
 				echo k$i
 			done > $TMP2
