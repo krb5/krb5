@@ -699,7 +699,14 @@ kg_accept_krb5(minor_status, context_handle,
             goto fail;
         }
 
-        gss_flags = GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+        /*
+         * If there is no checksum we use the ap_options from the request to
+         * guess the mutual flag.
+         */
+        gss_flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+        if (ap_req_options & AP_OPTS_MUTUAL_REQUIRED) {
+            gss_flags |= GSS_C_MUTUAL_FLAG;
+        }
     } else {
         /* gss krb5 v1 */
 
