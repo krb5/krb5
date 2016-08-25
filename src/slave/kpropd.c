@@ -601,34 +601,6 @@ full_resync(CLIENT *clnt)
     return (status == RPC_SUCCESS) ? &clnt_res : NULL;
 }
 
-/* Runs krb5_sname_to_principal with a substitute realm.
- * Duplicated in kprop.c, sharing TBD */
-static krb5_error_code
-sn2princ_with_realm(krb5_context context, const char *hostname,
-                    const char *sname, krb5_int32 type, const char *rrealm,
-                    krb5_principal *princ_out)
-{
-    krb5_error_code ret;
-    krb5_principal princ = NULL;
-
-    *princ_out = NULL;
-
-    if (rrealm == NULL)
-        return EINVAL;
-
-    ret = krb5_sname_to_principal(context, hostname, sname, type, &princ);
-    if (ret)
-        return ret;
-
-    ret = krb5_set_principal_realm(context, princ, rrealm);
-    if (ret) {
-        krb5_free_principal(context, princ);
-        return ret;
-    }
-
-    *princ_out = princ;
-    return 0;
-}
 /*
  * Beg for incrementals from the KDC.
  *
@@ -671,8 +643,8 @@ do_iprop()
         }
     }
 
-    retval = sn2princ_with_realm(kpropd_context, NULL, KIPROP_SVC_NAME,
-                                 KRB5_NT_SRV_HST, realm, &iprop_svc_principal);
+    retval = sn2princ_realm(kpropd_context, NULL, KIPROP_SVC_NAME, realm,
+                            &iprop_svc_principal);
     if (retval) {
         com_err(progname, retval,
                 _("while trying to construct host service principal"));
@@ -1176,8 +1148,8 @@ parse_args(char **argv)
     }
 
     /* Construct service name from local hostname. */
-    retval = sn2princ_with_realm(kpropd_context, NULL, KPROP_SERVICE_NAME,
-                                 KRB5_NT_SRV_HST, realm, &server);
+    retval = sn2princ_realm(kpropd_context, NULL, KPROP_SERVICE_NAME, realm,
+                            &server);
     if (retval) {
         com_err(progname, retval,
                 _("while trying to construct my service name"));

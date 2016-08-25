@@ -37,3 +37,7 @@
 
 int sockaddr2krbaddr(krb5_context context, int family, struct sockaddr *sa,
                      krb5_address **dest);
+
+krb5_error_code
+sn2princ_realm(krb5_context context, const char *hostname, const char *sname,
+               const char *realm, krb5_principal *princ_out);

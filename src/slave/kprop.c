@@ -182,35 +182,6 @@ parse_args(krb5_context context, int argc, char **argv)
     }
 }
 
-/* Runs krb5_sname_to_principal with a substitute realm
- * Duplicated in kpropd.c, sharing TBD */
-static krb5_error_code
-sn2princ_with_realm(krb5_context context, const char *hostname,
-                    const char *sname, krb5_int32 type, const char *rrealm,
-                    krb5_principal *princ_out)
-{
-    krb5_error_code ret;
-    krb5_principal princ = NULL;
-
-    *princ_out = NULL;
-
-    if (rrealm == NULL)
-        return EINVAL;
-
-    ret = krb5_sname_to_principal(context, hostname, sname, type, &princ);
-    if (ret)
-        return ret;
-
-    ret = krb5_set_principal_realm(context, princ, rrealm);
-    if (ret) {
-        krb5_free_principal(context, princ);
-        return ret;
-    }
-
-    *princ_out = princ;
-    return 0;
-}
-
 static void
 get_tickets(krb5_context context)
 {
@@ -220,8 +191,8 @@ get_tickets(krb5_context context)
     krb5_principal server_princ = NULL;
 
     /* Figure out what tickets we'll be using to send. */
-    retval = sn2princ_with_realm(context, NULL, NULL, KRB5_NT_SRV_HST, realm,
-                                 &my_principal);
+    retval = sn2princ_realm(context, NULL, KPROP_SERVICE_NAME, realm,
+                            &my_principal);
     if (retval) {
         com_err(progname, errno, _("while setting client principal name"));
         exit(1);
@@ -229,8 +200,8 @@ get_tickets(krb5_context context)
 
     /* Construct the principal name for the slave host. */
     memset(&creds, 0, sizeof(creds));
-    retval = sn2princ_with_realm(context, slave_host, KPROP_SERVICE_NAME,
-                                 KRB5_NT_SRV_HST, realm, &server_princ);
+    retval = sn2princ_realm(context, slave_host, KPROP_SERVICE_NAME, realm,
+                            &server_princ);
     if (retval) {
         com_err(progname, errno, _("while setting server principal name"));
         exit(1);
