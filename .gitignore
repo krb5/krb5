@@ -387,3 +387,6 @@ testlog
 /src/util/support/t_unal
 
 /src/util/verto/rename.h
+
+/src/plugins/kdb/db2/libdb2/test/t.be.db
+/src/plugins/kdb/db2/libdb2/test/t.le.db
