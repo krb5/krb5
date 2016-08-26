@@ -41,6 +41,7 @@ static char sccsid[] = "@(#)bt_conv.c	8.5 (Berkeley) 8/17/94";
 #include <sys/param.h>
 
 #include <stdio.h>
+#include <string.h>
 
 #include "db-int.h"
 #include "btree.h"
@@ -67,6 +68,7 @@ __bt_pgin(t, pg, pp)
 	indx_t i, top;
 	u_char flags;
 	char *p;
+	u_int32_t ksize;
 
 	if (!F_ISSET(((BTREE *)t), B_NEEDSWAP))
 		return;
@@ -104,6 +106,7 @@ __bt_pgin(t, pg, pp)
 			M_16_SWAP(h->linp[i]);
 			p = (char *)GETBLEAF(h, i);
 			P_32_SWAP(p);
+			memcpy(&ksize, p, sizeof(ksize));
 			p += sizeof(u_int32_t);
 			P_32_SWAP(p);
 			p += sizeof(u_int32_t);
@@ -112,11 +115,10 @@ __bt_pgin(t, pg, pp)
 				p += sizeof(u_char);
 				if (flags & P_BIGKEY) {
 					P_32_SWAP(p);
-					p += sizeof(db_pgno_t);
-					P_32_SWAP(p);
+					P_32_SWAP(p + sizeof(db_pgno_t));
 				}
 				if (flags & P_BIGDATA) {
-					p += sizeof(u_int32_t);
+					p += ksize;
 					P_32_SWAP(p);
 					p += sizeof(db_pgno_t);
 					P_32_SWAP(p);
@@ -135,6 +137,7 @@ __bt_pgout(t, pg, pp)
 	indx_t i, top;
 	u_char flags;
 	char *p;
+	u_int32_t ksize;
 
 	if (!F_ISSET(((BTREE *)t), B_NEEDSWAP))
 		return;
@@ -162,6 +165,7 @@ __bt_pgout(t, pg, pp)
 		}
 	else if ((h->flags & P_TYPE) == P_BLEAF)
 		for (i = 0; i < top; i++) {
+			ksize = GETBLEAF(h, i)->ksize;
 			p = (char *)GETBLEAF(h, i);
 			P_32_SWAP(p);
 			p += sizeof(u_int32_t);
@@ -172,11 +176,10 @@ __bt_pgout(t, pg, pp)
 				p += sizeof(u_char);
 				if (flags & P_BIGKEY) {
 					P_32_SWAP(p);
-					p += sizeof(db_pgno_t);
-					P_32_SWAP(p);
+					P_32_SWAP(p + sizeof(db_pgno_t));
 				}
 				if (flags & P_BIGDATA) {
-					p += sizeof(u_int32_t);
+					p += ksize;
 					P_32_SWAP(p);
 					p += sizeof(db_pgno_t);
 					P_32_SWAP(p);
