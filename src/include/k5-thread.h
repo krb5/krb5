@@ -243,14 +243,10 @@ typedef k5_os_nothread_mutex k5_os_mutex;
    symbol tables of the current process.  */
 
 #if defined(HAVE_PRAGMA_WEAK_REF) && !defined(NO_WEAK_PTHREADS)
-# pragma weak pthread_once
-# pragma weak pthread_mutex_lock
-# pragma weak pthread_mutex_unlock
-# pragma weak pthread_mutex_destroy
-# pragma weak pthread_mutex_init
-# pragma weak pthread_self
-# pragma weak pthread_equal
-# define USE_PTHREAD_LOCK_ONLY_IF_LOADED
+# define USE_CONDITIONAL_PTHREADS
+#endif
+
+#ifdef USE_CONDITIONAL_PTHREADS
 
 /* Can't rely on useful stubs -- see above regarding Solaris.  */
 typedef struct {
@@ -284,9 +280,8 @@ typedef pthread_mutex_t k5_os_mutex;
 # define K5_OS_MUTEX_PARTIAL_INITIALIZER        \
     PTHREAD_MUTEX_INITIALIZER
 
-#ifdef USE_PTHREAD_LOCK_ONLY_IF_LOADED
+#ifdef USE_CONDITIONAL_PTHREADS
 
-# define USE_PTHREAD_LOADED_MUTEX_FUNCTIONS
 # define k5_os_mutex_finish_init(M)             (0)
 int k5_os_mutex_init(k5_os_mutex *m);
 int k5_os_mutex_destroy(k5_os_mutex *m);

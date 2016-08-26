@@ -32,7 +32,9 @@
 MAKE_INIT_FUNCTION(krb5int_thread_support_init);
 MAKE_FINI_FUNCTION(krb5int_thread_support_fini);
 
-#undef k5_once
+/* This function used to be referenced from elsewhere in the tree, but is now
+ * only used internally.  Keep it linker-visible for now. */
+int krb5int_pthread_loaded(void);
 
 #ifndef ENABLE_THREADS /* no thread support */
 
@@ -44,12 +46,6 @@ static unsigned char destructors_set[K5_KEY_MAX];
 int krb5int_pthread_loaded (void)
 {
     return 0;
-}
-
-int
-k5_once(k5_once_t *once, void (*fn)(void))
-{
-    return k5_os_nothread_once(once, fn);
 }
 
 #elif defined(_WIN32)
@@ -85,13 +81,8 @@ void krb5int_thread_detach_hook (void)
     }
 }
 
-/* Stub functions not used on Windows. */
+/* Stub function not used on Windows. */
 int krb5int_pthread_loaded (void)
-{
-    return 0;
-}
-int
-k5_once(k5_once_t *once, void (*fn)(void))
 {
     return 0;
 }
@@ -121,6 +112,13 @@ struct tsd_block {
 };
 
 #ifdef HAVE_PRAGMA_WEAK_REF
+# pragma weak pthread_once
+# pragma weak pthread_mutex_lock
+# pragma weak pthread_mutex_unlock
+# pragma weak pthread_mutex_destroy
+# pragma weak pthread_mutex_init
+# pragma weak pthread_self
+# pragma weak pthread_equal
 # pragma weak pthread_getspecific
 # pragma weak pthread_setspecific
 # pragma weak pthread_key_create
@@ -177,15 +175,6 @@ int krb5int_pthread_loaded (void)
     return flag_pthread_loaded;
 }
 
-int
-k5_once(k5_once_t *once, void (*fn)(void))
-{
-    if (krb5int_pthread_loaded())
-        return pthread_once(&once->o, fn);
-    else
-        return k5_os_nothread_once(&once->n, fn);
-}
-
 static struct tsd_block tsd_if_single;
 # define GET_NO_PTHREAD_TSD()   (&tsd_if_single)
 #else
@@ -195,11 +184,6 @@ int krb5int_pthread_loaded (void)
     return 1;
 }
 
-int
-k5_once(k5_once_t *once, void (*fn)(void))
-{
-    return pthread_once(once, fn);
-}
 # define GET_NO_PTHREAD_TSD()   (abort(),(struct tsd_block *)0)
 #endif
 
@@ -539,7 +523,7 @@ krb5int_mutex_unlock (k5_mutex_t *m)
     k5_mutex_unlock (m);
 }
 
-#ifdef USE_PTHREAD_LOADED_MUTEX_FUNCTIONS
+#ifdef USE_CONDITIONAL_PTHREADS
 
 int
 k5_os_mutex_init(k5_os_mutex *m)
@@ -577,12 +561,28 @@ k5_os_mutex_unlock(k5_os_mutex *m)
         return 0;
 }
 
-#else /* USE_PTHREAD_LOADED_MUTEX_FUNCTIONS */
+int
+k5_once(k5_once_t *once, void (*fn)(void))
+{
+    if (krb5int_pthread_loaded())
+        return pthread_once(&once->o, fn);
+    else
+        return k5_os_nothread_once(&once->n, fn);
+}
+
+#else /* USE_CONDITIONAL_PTHREADS */
 
 #undef k5_os_mutex_init
 #undef k5_os_mutex_destroy
 #undef k5_os_mutex_lock
 #undef k5_os_mutex_unlock
+#undef k5_once
+
+int k5_os_mutex_init(k5_os_mutex *m);
+int k5_os_mutex_destroy(k5_os_mutex *m);
+int k5_os_mutex_lock(k5_os_mutex *m);
+int k5_os_mutex_unlock(k5_os_mutex *m);
+int k5_once(k5_once_t *once, void (*fn)(void));
 
 /* Stub functions */
 int
@@ -605,5 +605,10 @@ k5_os_mutex_unlock(k5_os_mutex *m)
 {
     return 0;
 }
+int
+k5_once(k5_once_t *once, void (*fn)(void))
+{
+    return 0;
+}
 
-#endif /* USE_PTHREAD_LOADED_MUTEX_FUNCTIONS */
+#endif /* not USE_CONDITIONAL_PTHREADS */
