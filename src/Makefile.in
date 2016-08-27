@@ -498,6 +498,7 @@ check-unix:
 
 check-pytests-no: check-postrecurse
 	@echo 'Skipped python test scripts: python 2.5 or later required' >> \
+		$(SKIPTESTS)
 
 check-cmocka-no: check-postrecurse
 	@echo 'Skipped cmocka tests due to missing library or header file' >> \
