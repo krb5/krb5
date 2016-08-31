@@ -136,9 +136,6 @@ if test $newstyle = t; then
 		sed -e '/#[a-z 	]*KRB5_RELDATE/c\
 #define KRB5_RELDATE "'"$reldate"'"' patchlevel.h > patchlevel.h.new && \
 		mv patchlevel.h.new patchlevel.h)
-	if test $checkout = t; then
-		(cd $reldir && git log --stat $reltag > doc/CHANGES)
-	fi
 else
 
 	(cd $reldir/src/lib/krb5/krb && \
