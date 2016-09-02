@@ -221,7 +221,7 @@ do-dyn-lclint:
 
 $(BUILDTOP)/include/gssrpc/types.h: types.stamp
 types.stamp: $(top_srcdir)/include/gssrpc/types.hin $(BUILDTOP)/config.status
-	cd $(BUILDTOP) && $(SHELL) config.status include/gssrpc/types.h
+	(cd $(BUILDTOP) && $(SHELL) config.status include/gssrpc/types.h)
 	touch types.stamp
 
 clean-unix::

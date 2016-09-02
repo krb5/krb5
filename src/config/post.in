@@ -177,15 +177,15 @@ Makefiles-prerecurse: Makefile
 # mydir = relative path from top to this Makefile
 Makefile: $(srcdir)/Makefile.in $(srcdir)/deps $(BUILDTOP)/config.status \
 		$(top_srcdir)/config/pre.in $(top_srcdir)/config/post.in
-	cd $(BUILDTOP) && $(SHELL) config.status $(mydir)/Makefile
+	(cd $(BUILDTOP) && $(SHELL) config.status $(mydir)/Makefile)
 $(BUILDTOP)/config.status: $(top_srcdir)/configure
-	cd $(BUILDTOP) && $(SHELL) config.status --recheck
+	(cd $(BUILDTOP) && $(SHELL) config.status --recheck)
 $(top_srcdir)/configure: @MAINT@ \
 		$(top_srcdir)/configure.in \
 		$(top_srcdir)/patchlevel.h \
 		$(top_srcdir)/aclocal.m4
-	cd $(top_srcdir) && \
-		$(AUTOCONF) --include=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS)
+	(cd $(top_srcdir) && \
+		$(AUTOCONF) --include=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS))
 
 RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
 	generate-files-mac-recurse \

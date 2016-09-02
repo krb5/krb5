@@ -34,7 +34,7 @@ all-unix: @MAINT@ verify-calling-conventions-krb5
 
 $(srcdir)/autoconf.h.in: @MAINT@ $(srcdir)/autoconf.stmp
 $(srcdir)/autoconf.stmp: $(top_srcdir)/configure.in $(top_srcdir)/aclocal.m4
-	cd $(top_srcdir) && $(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS)
+	(cd $(top_srcdir) && $(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS))
 	touch $(srcdir)/autoconf.stmp
 
 ##DOS##autoconf.h: win-mac.h

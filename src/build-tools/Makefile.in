@@ -14,7 +14,7 @@ PKGCONFIG_FILES = \
 all-unix: krb5-config $(PKGCONFIG_FILES)
 
 krb5-config $(PKGCONFIG_FILES): $(BUILDTOP)/config.status
-	cd $(BUILDTOP) && $(SHELL) config.status $(mydir)/$@
+	(cd $(BUILDTOP) && $(SHELL) config.status $(mydir)/$@)
 krb5-config: $(srcdir)/krb5-config.in
 kadm-client.pc: $(srcdir)/kadm-client.pc.in
 kadm-server.pc: $(srcdir)/kadm-server.pc.in
