@@ -93,8 +93,8 @@ pdf: $(PDFDIR)
 composite: Doxyfile $(docsrc)/version.py
 	rm -rf doxy rst_apiref rst_composite
 	$(DOXYGEN)
-	cwd=`pwd`; cd $(docsrc)/tools && \
-		$(PYTHON) doxy.py -i $$cwd/doxy/xml -o $$cwd/rst_apiref
+	(cwd=`pwd`; cd $(docsrc)/tools && \
+		$(PYTHON) doxy.py -i $$cwd/doxy/xml -o $$cwd/rst_apiref)
 	mkdir -p rst_composite
 	do_subdirs="$(RST_SOURCES)" ; \
 	for i in $$do_subdirs; do \

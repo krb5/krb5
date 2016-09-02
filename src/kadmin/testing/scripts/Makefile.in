@@ -14,9 +14,9 @@ all:: env-setup.sh $(GEN_SCRIPTS)
 env-setup.sh: env-setup.stamp
 env-setup.stamp: $(srcdir)/env-setup.shin $(BUILDTOP)/config.status \
 		Makefile 
-	cd $(BUILDTOP) && \
+	(cd $(BUILDTOP) && \
 		CONFIG_FILES=$(mydir)/env-setup.sh:$(mydir)/env-setup.shin $(SHELL) \
-		config.status
+		config.status)
 	chmod +x env-setup.sh
 	touch env-setup.stamp
 
