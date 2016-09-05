@@ -804,14 +804,14 @@ krb5_error_code
 krb5_rd_req_decoded(krb5_context context, krb5_auth_context *auth_context,
                     const krb5_ap_req *req, krb5_const_principal server,
                     krb5_keytab keytab, krb5_flags *ap_req_options,
-                    krb5_ticket **ticket)
+                    krb5_ticket **ticket, krb5_keyblock **keyblock)
 {
     krb5_error_code retval;
     retval = rd_req_decoded_opt(context, auth_context,
                                 req, server, keytab,
                                 ap_req_options, ticket,
                                 1, /* check_valid_flag */
-                                NULL); /* keyblock */
+                                keyblock); /* keyblock */
     return retval;
 }
 

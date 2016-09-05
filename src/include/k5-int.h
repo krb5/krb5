@@ -2179,7 +2179,8 @@ void KRB5_CALLCONV krb5_free_config_files(char **filenames);
 
 krb5_error_code krb5_rd_req_decoded(krb5_context, krb5_auth_context *,
                                     const krb5_ap_req *, krb5_const_principal,
-                                    krb5_keytab, krb5_flags *, krb5_ticket **);
+                                    krb5_keytab, krb5_flags *, krb5_ticket **,
+                                    krb5_keyblock **);
 
 krb5_error_code krb5_rd_req_decoded_anyflag(krb5_context, krb5_auth_context *,
                                             const krb5_ap_req *,
