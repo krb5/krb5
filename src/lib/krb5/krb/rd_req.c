@@ -36,10 +36,10 @@
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
-            const krb5_data *inbuf, krb5_const_principal server,
-            krb5_keytab keytab, krb5_flags *ap_req_options,
-            krb5_ticket **ticket)
+krb5_rd_req_key(krb5_context context, krb5_auth_context *auth_context,
+                const krb5_data *inbuf, krb5_const_principal server,
+                krb5_keytab keytab, krb5_flags *ap_req_options,
+                krb5_ticket **ticket, krb5_keyblock **keyblock)
 {
     krb5_error_code       retval;
     krb5_ap_req         * request;
@@ -78,7 +78,7 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
 #endif /* LEAN_CLIENT */
 
     retval = krb5_rd_req_decoded(context, auth_context, request, server,
-                                 keytab, ap_req_options, NULL, NULL);
+                                 keytab, ap_req_options, NULL, keyblock);
     if (!retval && ticket != NULL) {
         /* Steal the ticket pointer for the caller. */
         *ticket = request->ticket;
@@ -99,4 +99,14 @@ cleanup_auth_context:
 cleanup_request:
     krb5_free_ap_req(context, request);
     return retval;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
+            const krb5_data *inbuf, krb5_const_principal server,
+            krb5_keytab keytab, krb5_flags *ap_req_options,
+            krb5_ticket **ticket)
+{
+    return krb5_rd_req_key(context, auth_context, inbuf, server,
+                           keytab, ap_req_options, ticket, NULL);
 }

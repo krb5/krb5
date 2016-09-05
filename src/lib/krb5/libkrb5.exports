@@ -537,6 +537,7 @@ krb5_rd_priv
 krb5_rd_rep
 krb5_rd_rep_dce
 krb5_rd_req
+krb5_rd_req_key
 krb5_rd_req_decoded
 krb5_rd_req_decoded_anyflag
 krb5_rd_safe
