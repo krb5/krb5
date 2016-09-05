@@ -55,13 +55,6 @@
  *  rcache specifies a replay detection cache used to store authenticators and
  *  server names
  *
- *  keyproc specifies a procedure to generate a decryption key for the
- *  ticket.  If keyproc is non-NULL, keyprocarg is passed to it, and the result
- *  used as a decryption key. If keyproc is NULL, then fetchfrom is checked;
- *  if it is non-NULL, it specifies a parameter name from which to retrieve the
- *  decryption key.  If fetchfrom is NULL, then the default key store is
- *  consulted.
- *
  *  authdat is set to point at allocated storage structures; the caller
  *  should free them when finished.
  *
