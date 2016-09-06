@@ -364,8 +364,7 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
         krb5_kdb_decode_int16(nextloc, (*tl_data)->tl_data_length);
         nextloc += 2;
 
-        if ((*tl_data)->tl_data_length < 0 ||
-            (*tl_data)->tl_data_length > sizeleft) {
+        if ((*tl_data)->tl_data_length > sizeleft) {
             retval = KRB5_KDB_TRUNCATED_RECORD;
             goto error_out;
         }
@@ -414,8 +413,7 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
                 krb5_kdb_decode_int16(nextloc, key_data->key_data_length[j]);
                 nextloc += 2;
 
-                if (key_data->key_data_length[j] < 0 ||
-                    key_data->key_data_length[j] > sizeleft) {
+                if (key_data->key_data_length[j] > sizeleft) {
                     retval = KRB5_KDB_TRUNCATED_RECORD;
                     goto error_out;
                 }
