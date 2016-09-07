@@ -837,6 +837,13 @@ krb5_dbe_free_strings(krb5_context, krb5_string_attr *, int count);
 void
 krb5_dbe_free_string(krb5_context, char *);
 
+/*
+ * Register the KDB keytab type, allowing "KDB:" to be used as a keytab name.
+ * For this type to work, the context used for keytab operations must have an
+ * associated database handle (via krb5_db_open()).
+ */
+krb5_error_code krb5_db_register_keytab(krb5_context context);
+
 #define KRB5_KDB_DEF_FLAGS      0
 
 #define KDB_MAX_DB_NAME                 128

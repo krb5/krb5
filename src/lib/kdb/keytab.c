@@ -66,6 +66,12 @@ typedef struct krb5_ktkdb_data {
 } krb5_ktkdb_data;
 
 krb5_error_code
+krb5_db_register_keytab(krb5_context context)
+{
+    return krb5_kt_register(context, &krb5_kt_kdb_ops);
+}
+
+krb5_error_code
 krb5_ktkdb_resolve(context, name, id)
     krb5_context          context;
     const char          * name;
