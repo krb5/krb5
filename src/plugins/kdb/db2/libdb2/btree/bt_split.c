@@ -245,9 +245,12 @@ __bt_split(t, sp, key, data, flags, ilen, argskip)
 			WR_BINTERNAL(dest, nksize ? nksize : bl->ksize,
 			    rchild->pgno, bl->flags & P_BIGKEY);
 			memmove(dest, bl->bytes, nksize ? nksize : bl->ksize);
-			if (bl->flags & P_BIGKEY &&
-			    bt_preserve(t, *(db_pgno_t *)bl->bytes) == RET_ERROR)
-				goto err1;
+			if (bl->flags & P_BIGKEY) {
+				db_pgno_t pgno;
+				memcpy(&pgno, bl->bytes, sizeof(pgno));
+				if (bt_preserve(t, pgno) == RET_ERROR)
+					goto err1;
+			}
 			break;
 		case P_RINTERNAL:
 			/*
@@ -568,9 +571,12 @@ bt_broot(t, h, l, r)
 		 * If the key is on an overflow page, mark the overflow chain
 		 * so it isn't deleted when the leaf copy of the key is deleted.
 		 */
-		if (bl->flags & P_BIGKEY &&
-		    bt_preserve(t, *(db_pgno_t *)bl->bytes) == RET_ERROR)
-			return (RET_ERROR);
+		if (bl->flags & P_BIGKEY) {
+			db_pgno_t pgno;
+			memcpy(&pgno, bl->bytes, sizeof(pgno));
+			if (bt_preserve(t, pgno) == RET_ERROR)
+				return (RET_ERROR);
+		}
 		break;
 	case P_BINTERNAL:
 		bi = GETBINTERNAL(r, 0);
