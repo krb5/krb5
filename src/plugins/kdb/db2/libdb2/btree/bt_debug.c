@@ -59,7 +59,6 @@ static void
 __bt_dinit()
 {
 	static int first = 1;
-	char buf[1024];
 
 	if (!first)
 		return;
@@ -96,7 +95,7 @@ __bt_dump(dbp)
 	(void)fprintf(tracefp, "%s: pgsz %d",
 	    F_ISSET(t, B_INMEM) ? "memory" : "disk", t->bt_psize);
 	if (F_ISSET(t, R_RECNO))
-		(void)fprintf(tracefp, " keys %lu", t->bt_nrecs);
+		(void)fprintf(tracefp, " keys %lu", (u_long)t->bt_nrecs);
 #undef X
 #define	X(flag, name) \
 	if (F_ISSET(t, flag)) { \
@@ -137,12 +136,12 @@ __bt_dmpage(h)
 	__bt_dinit();
 
 	m = (BTMETA *)h;
-	(void)fprintf(tracefp, "magic %lx\n", m->magic);
-	(void)fprintf(tracefp, "version %lu\n", m->version);
-	(void)fprintf(tracefp, "psize %lu\n", m->psize);
-	(void)fprintf(tracefp, "free %lu\n", m->free);
-	(void)fprintf(tracefp, "nrecs %lu\n", m->nrecs);
-	(void)fprintf(tracefp, "flags %lu", m->flags);
+	(void)fprintf(tracefp, "magic %lx\n", (u_long)m->magic);
+	(void)fprintf(tracefp, "version %lu\n", (u_long)m->version);
+	(void)fprintf(tracefp, "psize %lu\n", (u_long)m->psize);
+	(void)fprintf(tracefp, "free %lu\n", (u_long)m->free);
+	(void)fprintf(tracefp, "nrecs %lu\n", (u_long)m->nrecs);
+	(void)fprintf(tracefp, "flags %lu", (u_long)m->flags);
 #undef X
 #define	X(flag, name) \
 	if (m->flags & flag) { \
@@ -201,6 +200,8 @@ __bt_dpage(dbp, h)
 	u_long pgsize;
 	indx_t cur, top, lim;
 	char *sep;
+	db_pgno_t pgno;
+	u_int32_t sz;
 
 	__bt_dinit();
 
@@ -222,8 +223,10 @@ __bt_dpage(dbp, h)
 #undef X
 
 	(void)fprintf(tracefp, "\tprev %2d next %2d", h->prevpg, h->nextpg);
-	if (h->flags & P_OVERFLOW)
+	if (h->flags & P_OVERFLOW) {
+		(void)fprintf(tracefp, "\n");
 		return (0);
+	}
 
 	pgsize = ((BTREE *)dbp->internal)->bt_mp->pagesize;
 	lim = (pgsize - BTDATAOFF) / sizeof(indx_t);
@@ -251,32 +254,38 @@ __bt_dpage(dbp, h)
 			break;
 		case P_BLEAF:
 			bl = GETBLEAF(h, cur);
-			if (bl->flags & P_BIGKEY)
+			if (bl->flags & P_BIGKEY) {
+				memcpy(&pgno, bl->bytes, sizeof(pgno));
+				memcpy(&sz, bl->bytes + sizeof(pgno),
+				       sizeof(sz));
 				(void)fprintf(tracefp,
-				    "big key page %lu size %u/",
-				    *(db_pgno_t *)bl->bytes,
-				    *(u_int32_t *)(bl->bytes + sizeof(db_pgno_t)));
-			else if (bl->ksize)
+					      "big key page %lu size %u/",
+					      (u_long)pgno, sz);
+			} else if (bl->ksize)
 				(void)fprintf(tracefp, "%.*s/",
 					      (int)bl->ksize, bl->bytes);
-			if (bl->flags & P_BIGDATA)
+			if (bl->flags & P_BIGDATA) {
+				memcpy(&pgno, bl->bytes + bl->ksize,
+				       sizeof(pgno));
+				memcpy(&sz, bl->bytes + bl->ksize +
+				       sizeof(pgno), sizeof(sz));
 				(void)fprintf(tracefp,
-				    "big data page %lu size %u",
-				    *(db_pgno_t *)(bl->bytes + bl->ksize),
-				    *(u_int32_t *)(bl->bytes + bl->ksize +
-				    sizeof(db_pgno_t)));
-			else if (bl->dsize)
+					      "big data page %lu size %u",
+					      (u_long)pgno, sz);
+			} else if (bl->dsize)
 				(void)fprintf(tracefp, "%.*s",
 				    (int)bl->dsize, bl->bytes + bl->ksize);
 			break;
 		case P_RLEAF:
 			rl = GETRLEAF(h, cur);
-			if (rl->flags & P_BIGDATA)
+			if (rl->flags & P_BIGDATA) {
+				memcpy(&pgno, rl->bytes, sizeof(pgno));
+				memcpy(&sz, rl->bytes + sizeof(pgno),
+				       sizeof(sz));
 				(void)fprintf(tracefp,
-				    "big data page %lu size %u",
-				    *(db_pgno_t *)rl->bytes,
-				    *(u_int32_t *)(rl->bytes + sizeof(db_pgno_t)));
-			else if (rl->dsize)
+					      "big data page %lu size %u",
+					      (u_long)pgno, sz);
+			} else if (rl->dsize)
 				(void)fprintf(tracefp,
 				    "%.*s", (int)rl->dsize, rl->bytes);
 			break;
@@ -369,10 +378,12 @@ __bt_stat(dbp)
 	(void)fprintf(tracefp, "%d level%s with %ld keys",
 	    levels, levels == 1 ? "" : "s", nkeys);
 	if (F_ISSET(t, R_RECNO))
-		(void)fprintf(tracefp, " (%ld header count)", t->bt_nrecs);
+		(void)fprintf(tracefp, " (%ld header count)",
+			      (long)t->bt_nrecs);
 	(void)fprintf(tracefp,
 	    "\n%lu pages (leaf %ld, internal %ld, overflow %ld)\n",
-	    pinternal + pleaf + pcont, pleaf, pinternal, pcont);
+		      (u_long)(pinternal + pleaf + pcont),
+		      (long)pleaf, (long)pinternal, (long)pcont);
 	(void)fprintf(tracefp, "%ld cache hits, %ld cache misses\n",
 	    bt_cache_hit, bt_cache_miss);
 	(void)fprintf(tracefp,
@@ -387,7 +398,7 @@ __bt_stat(dbp)
 	pinternal *= t->bt_psize - BTDATAOFF;
 	if (pinternal)
 		(void)fprintf(tracefp,
-		    "%.0f%% internal fill (%ld bytes used, %ld bytes free\n",
+		    "%.0f%% internal fill (%ld bytes used, %ld bytes free)\n",
 		    ((double)(pinternal - ifree) / pinternal) * 100,
 		    pinternal - ifree, ifree);
 	if (bt_pfxsaved)
