@@ -187,7 +187,7 @@ setup_kdb_keytab()
     ret = krb5_ktkdb_set_context(context);
     if (ret)
         return ret;
-    ret = krb5_kt_register(context, &krb5_kt_kdb_ops);
+    ret = krb5_db_register_keytab(context);
     if (ret)
         return ret;
     return krb5_gss_register_acceptor_identity("KDB:");
