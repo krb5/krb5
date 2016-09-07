@@ -36,7 +36,7 @@ main()
 	find $bindir -type f -exec test -r {} \; -print | head -100 > $BINFILES
 
 	if [ $# -eq 0 ]; then
-		for t in 1 2 3 4 5 6 7 8 9 10 11 12 13 20 40 41 50 60 61 62; do
+		for t in 1 2 3 4 5 6 7 8 9 10 11 12 13 20 40 41 50 60 61 62 63; do
 			test$t
 		done
 	else
@@ -47,7 +47,7 @@ main()
 			[0-9]*)
 				test$1;;
 			btree)
-				for t in 1 2 3 7 8 9 10 12 13 40 41 50 60 61 62; do
+				for t in 1 2 3 7 8 9 10 12 13 40 41 50 60 61 62 63; do
 					test$t
 				done;;
 			hash)
@@ -1007,6 +1007,28 @@ test62 () {
 			exit 1
 		fi
 	done
+}
+
+test63 () {
+	echo "Test 63: btree: big key, medium data, bt_split unaligned access"
+	# 488 = 512 - 20 (header) - 3 ("foo") - 1 (newline)
+	# 223 = 232 - 8 (key pointer)
+	# 232 = bt_ovflsize = (512 - 20 (header)) / 2 (DEFMINKEYPAGE)
+	#	- (2 (indx_t) + 12 (NBLEAFDBT(0,0)))
+	awk 'BEGIN {
+		s = "";
+		for (i = 0; i < 488; i++) {
+			s = s "x";
+		}
+		d = "";
+		for (i = 0; i < 223; i++) {
+			d = d "x";
+		}
+		for (i = 0; i < 128; i++) {
+			printf("p\nk%s%03d\nd%s\n", s, i, d);
+		}
+	}' /dev/null > $TMP2
+	$PROG -o $TMP3 -i psize=512 btree $TMP2
 }
 
 main $*
