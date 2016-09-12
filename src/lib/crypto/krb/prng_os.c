@@ -91,3 +91,9 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *outdata)
     }
     return 0;
 }
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
+{
+    return 0;
+}
