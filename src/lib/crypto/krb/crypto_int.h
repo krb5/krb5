@@ -510,6 +510,7 @@ void krb5int_crypto_impl_cleanup(void);
  * PRNG modules must implement the following APIs from krb5.h:
  *   krb5_c_random_add_entropy
  *   krb5_c_random_make_octets
+ *   krb5_c_random_os_entropy
  *
  * PRNG modules should implement these functions.  They are called from the
  * crypto library init and cleanup functions, and can be used to setup and tear
@@ -519,7 +520,7 @@ int k5_prng_init(void);
 void k5_prng_cleanup(void);
 
 /* Used by PRNG modules to gather OS entropy.  Returns true on success. */
-krb5_boolean k5_get_os_entropy(unsigned char *buf, size_t len);
+krb5_boolean k5_get_os_entropy(unsigned char *buf, size_t len, int strong);
 
 /*** Inline helper functions ***/
 
