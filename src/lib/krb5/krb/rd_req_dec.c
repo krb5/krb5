@@ -55,13 +55,6 @@
  *  rcache specifies a replay detection cache used to store authenticators and
  *  server names
  *
- *  keyproc specifies a procedure to generate a decryption key for the
- *  ticket.  If keyproc is non-NULL, keyprocarg is passed to it, and the result
- *  used as a decryption key. If keyproc is NULL, then fetchfrom is checked;
- *  if it is non-NULL, it specifies a parameter name from which to retrieve the
- *  decryption key.  If fetchfrom is NULL, then the default key store is
- *  consulted.
- *
  *  authdat is set to point at allocated storage structures; the caller
  *  should free them when finished.
  *
@@ -469,7 +462,8 @@ static krb5_error_code
 rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
                    const krb5_ap_req *req, krb5_const_principal server,
                    krb5_keytab keytab, krb5_flags *ap_req_options,
-                   krb5_ticket **ticket, int check_valid_flag)
+                   krb5_ticket **ticket, int check_valid_flag,
+                   krb5_keyblock **keyblock)
 {
     krb5_error_code       retval = 0;
     krb5_enctype         *desired_etypes = NULL;
@@ -775,6 +769,14 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     if (ticket)
         if ((retval = krb5_copy_ticket(context, req->ticket, ticket)))
             goto cleanup;
+    if (keyblock != NULL) {
+        retval = krb5_copy_keyblock(context,
+                                    &decrypt_key,
+                                    keyblock);
+        if (retval != 0) {
+            goto cleanup;
+        }
+    }
     if (ap_req_options) {
         *ap_req_options = req->ap_options & AP_OPTS_WIRE_MASK;
         if (rfc4537_etypes_len != 0)
@@ -802,13 +804,14 @@ krb5_error_code
 krb5_rd_req_decoded(krb5_context context, krb5_auth_context *auth_context,
                     const krb5_ap_req *req, krb5_const_principal server,
                     krb5_keytab keytab, krb5_flags *ap_req_options,
-                    krb5_ticket **ticket)
+                    krb5_ticket **ticket, krb5_keyblock **keyblock)
 {
     krb5_error_code retval;
     retval = rd_req_decoded_opt(context, auth_context,
                                 req, server, keytab,
                                 ap_req_options, ticket,
-                                1); /* check_valid_flag */
+                                1, /* check_valid_flag */
+                                keyblock); /* keyblock */
     return retval;
 }
 
@@ -817,13 +820,15 @@ krb5_rd_req_decoded_anyflag(krb5_context context,
                             krb5_auth_context *auth_context,
                             const krb5_ap_req *req,
                             krb5_const_principal server, krb5_keytab keytab,
-                            krb5_flags *ap_req_options, krb5_ticket **ticket)
+                            krb5_flags *ap_req_options, krb5_ticket **ticket,
+                            krb5_keyblock **keyblock)
 {
     krb5_error_code retval;
     retval = rd_req_decoded_opt(context, auth_context,
                                 req, server, keytab,
                                 ap_req_options, ticket,
-                                0); /* don't check_valid_flag */
+                                0, /* don't check_valid_flag */
+                                keyblock); /* keyblock */
     return retval;
 }
 

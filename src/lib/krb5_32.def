@@ -470,3 +470,4 @@ EXPORTS
 	krb5_get_init_creds_opt_set_pac_request		@435
 	krb5int_trace					@436 ; PRIVATE GSSAPI
 	krb5_expand_hostname				@437
+	krb5_rd_req_key					@438

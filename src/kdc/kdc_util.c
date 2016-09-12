@@ -420,7 +420,7 @@ kdc_rd_ap_req(kdc_realm_t *kdc_active_realm,
         retval = krb5_rd_req_decoded_anyflag(kdc_context, &auth_context, apreq,
                                              apreq->ticket->server,
                                              kdc_active_realm->realm_keytab,
-                                             NULL, NULL);
+                                             NULL, NULL, NULL);
 
         /* If the ticket was decrypted, don't try any more keys. */
         if (apreq->ticket->enc_part2 != NULL)

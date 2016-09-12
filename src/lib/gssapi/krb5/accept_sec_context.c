@@ -640,7 +640,7 @@ kg_accept_krb5(minor_status, context_handle,
     }
 
     code = krb5_rd_req_decoded(context, &auth_context, request, accprinc,
-                               cred->keytab, &ap_req_options, NULL);
+                               cred->keytab, &ap_req_options, NULL, NULL);
 
     krb5_free_principal(context, accprinc);
     if (code) {
