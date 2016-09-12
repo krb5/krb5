@@ -74,6 +74,60 @@ variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
 
+Major changes in 1.14.4 (2016-09-13)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix some rare btree data corruption bugs
+
+* Fix numerous minor memory leaks
+
+* Improve portability (Linux-ppc64el, FreeBSD)
+
+* Improve some error messages
+
+* Improve documentation
+
+krb5-1.14.4 changes by ticket ID
+--------------------------------
+
+8432    Fix memory leak in db2 policy DB initialization
+8433    Fix memory leak destroying DIR ccache
+8435    Fix leak on error in libkadm5_clnt initialization
+8437    Fix leaks on error in krb5 gss_acquire_cred()
+8438    Fix leak in k5_free_cammac()
+8439    Fix leak in gss_display_name() for non-MN names
+8440    Fix krb5_get_init_creds_password() pwchange leak
+8441    Fix leak in ulog_replay()
+8442    Fix leak in DB2 krb5_db_promote() implementation
+8443    Fix leak in FAST OTP client processing
+8444    Fix unlikely leak in sendto_kdc
+8445    Fix leak in kadm5_hook interface
+8447    Fix leak in capaths processing
+8453    Fix leak on error in libkadm5_srv initialization
+8454    Missing responder if there is no pre-auth
+8460    Fix SPNEGO imported cred initialization
+8469    Properly escape quotes for otp set_string example
+8470    Warn about dump -recurse nonfunctionality
+8472    Add Host HTTP header to MS-KKDCP requests
+8473    Handle errors from curs_init in db2 back end
+8474    gnu libc OFD lock bug affects krb5
+8475    Fix build with -O3 on ppc64el
+8477    Fix KDC to drop repeated in-progress requests
+8480    Fix GSSRPC server credential memory leak
+8481    Improve checking of decoded DB2 principal values
+8482    Memory leak in krb5_server_decrypt_ticket_keytab()
+8483    Avoid byte-swap cache corruption in libdb2
+8484    Avoid unaligned access in btree byte swapping
+8485    Fix btree byte swapping for overflow data
+8486    Guess Samba client mutual flag using ap_options
+8489    Update config.guess, config.sub
+8491    Remove meaningless checks decoding DB2 principals
+8492    Fix directory changes to use explicit subshells
+8493    Fix unaligned accesses in bt_split.c
+
+
 Major changes in 1.14.3 (2016-07-20)
 ------------------------------------
 
@@ -495,6 +549,7 @@ reports, suggestions, and valuable resources:
     Ravi Channavajhala
     Srinivas Cheruku
     Leonardo Chiquitto
+    Seemant Choudhary
     Howard Chu
     Andrea Cirulli
     Christopher D. Clausen
