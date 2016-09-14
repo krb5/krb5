@@ -67,7 +67,8 @@ krb5_error_code loop_add_rpc_service(int default_port, const char *addresses,
                                      void (*dispatchfn)());
 
 krb5_error_code loop_setup_network(verto_ctx *ctx, void *handle,
-                                   const char *progname);
+                                   const char *progname,
+                                   int tcp_listen_backlog);
 krb5_error_code loop_setup_signals(verto_ctx *ctx, void *handle,
                                    void (*reset)());
 void loop_free(verto_ctx *ctx);

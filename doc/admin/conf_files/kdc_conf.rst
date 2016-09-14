@@ -43,7 +43,7 @@ The kdc.conf file may contain the following sections:
 [kdcdefaults]
 ~~~~~~~~~~~~~
 
-With one exception, relations in the [kdcdefaults] section specify
+With two exceptions, relations in the [kdcdefaults] section specify
 default values for realm variables, to be used if the [realms]
 subsection does not contain a relation for the tag.  See the
 :ref:`kdc_realms` section for the definitions of these relations.
@@ -59,6 +59,11 @@ subsection does not contain a relation for the tag.  See the
 **kdc_max_dgram_reply_size**
     Specifies the maximum packet size that can be sent over UDP.  The
     default value is 4096 bytes.
+
+**kdc_tcp_listen_backlog**
+    (Integer.)  Set the size of the listen queue length for the KDC
+    daemon.  The value may be limited by OS settings.  The default
+    value is 5.
 
 
 .. _kdc_realms:

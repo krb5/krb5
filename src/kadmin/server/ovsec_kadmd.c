@@ -175,7 +175,8 @@ setup_loop(int proponly, verto_ctx **ctx_out)
             return ret;
     }
 #endif
-    return loop_setup_network(ctx, global_server_handle, progname);
+    return loop_setup_network(ctx, global_server_handle, progname,
+                              DEFAULT_TCP_LISTEN_BACKLOG);
 }
 
 /* Point GSSAPI at the KDB keytab so we don't need an actual file keytab. */
