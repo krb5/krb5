@@ -54,7 +54,8 @@ static void usage (char *);
 
 static krb5_error_code setup_sam (void);
 
-static void initialize_realms (krb5_context, int, char **);
+static void initialize_realms(krb5_context kcontext, int argc, char **argv,
+                              int *tcp_listen_backlog);
 
 static void finish_realms (void);
 
@@ -614,7 +615,8 @@ usage(char *name)
 
 
 static void
-initialize_realms(krb5_context kcontext, int argc, char **argv)
+initialize_realms(krb5_context kcontext, int argc, char **argv,
+                  int *tcp_listen_backlog)
 {
     int                 c;
     char                *db_name = (char *) NULL;
@@ -654,6 +656,12 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         hierarchy[1] = KRB5_CONF_KDC_MAX_DGRAM_REPLY_SIZE;
         if (krb5_aprof_get_int32(aprof, hierarchy, TRUE, &max_dgram_reply_size))
             max_dgram_reply_size = MAX_DGRAM_SIZE;
+        hierarchy[1] = KRB5_CONF_KDC_TCP_LISTEN_BACKLOG;
+        if (tcp_listen_backlog != NULL) {
+            if (krb5_aprof_get_int32(aprof, hierarchy, TRUE,
+                                     tcp_listen_backlog))
+                *tcp_listen_backlog = DEFAULT_TCP_LISTEN_BACKLOG;
+        }
         hierarchy[1] = KRB5_CONF_RESTRICT_ANONYMOUS_TO_TGT;
         if (krb5_aprof_get_boolean(aprof, hierarchy, TRUE, &def_restrict_anon))
             def_restrict_anon = FALSE;
@@ -918,6 +926,7 @@ int main(int argc, char **argv)
     krb5_context        kcontext;
     kdc_realm_t *realm;
     verto_ctx *ctx;
+    int tcp_listen_backlog;
     int errout = 0;
     int i;
 
@@ -958,7 +967,7 @@ int main(int argc, char **argv)
     /*
      * Scan through the argument list
      */
-    initialize_realms(kcontext, argc, argv);
+    initialize_realms(kcontext, argc, argv, &tcp_listen_backlog);
 
 #ifndef NOCACHE
     retval = kdc_init_lookaside(kcontext);
@@ -1011,7 +1020,8 @@ int main(int argc, char **argv)
             return 1;
         }
     }
-    if ((retval = loop_setup_network(ctx, &shandle, kdc_progname))) {
+    if ((retval = loop_setup_network(ctx, &shandle, kdc_progname,
+                                     tcp_listen_backlog))) {
     net_init_error:
         kdc_err(kcontext, retval, _("while initializing network"));
         finish_realms();
@@ -1038,7 +1048,7 @@ int main(int argc, char **argv)
             return 1;
         }
         /* We get here only in a worker child process; re-initialize realms. */
-        initialize_realms(kcontext, argc, argv);
+        initialize_realms(kcontext, argc, argv, NULL);
     }
 
     /* Initialize audit system and audit KDC startup. */

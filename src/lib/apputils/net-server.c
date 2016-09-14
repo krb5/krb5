@@ -67,9 +67,6 @@
 /* XXX */
 #define KDC5_NONET                               (-1779992062L)
 
-/* The number of backlogged connections we ask the kernel to listen for. */
-#define MAX_CONNECTIONS 5
-
 static int tcp_or_rpc_data_counter;
 static int max_tcp_or_rpc_data_connections = 45;
 
@@ -448,6 +445,7 @@ struct socksetup {
     void *handle;
     const char *prog;
     krb5_error_code retval;
+    int listen_backlog;
 };
 
 static void
@@ -728,7 +726,7 @@ setup_socket(struct socksetup *data, struct bind_address *ba,
 
     /* Listen for backlogged connections on TCP sockets.  (For RPC sockets this
      * will be done by svc_register().) */
-    if (ba->type == TCP && listen(sock, MAX_CONNECTIONS) != 0) {
+    if (ba->type == TCP && listen(sock, data->listen_backlog) != 0) {
         ret = errno;
         com_err(data->prog, errno,
                 _("Cannot listen on %s server socket on %s"),
@@ -907,7 +905,8 @@ cleanup:
 }
 
 krb5_error_code
-loop_setup_network(verto_ctx *ctx, void *handle, const char *prog)
+loop_setup_network(verto_ctx *ctx, void *handle, const char *prog,
+                   int tcp_listen_backlog)
 {
     struct socksetup setup_data;
     verto_ev *ev;
@@ -926,6 +925,8 @@ loop_setup_network(verto_ctx *ctx, void *handle, const char *prog)
     setup_data.handle = handle;
     setup_data.prog = prog;
     setup_data.retval = 0;
+    setup_data.listen_backlog = tcp_listen_backlog;
+
     krb5_klog_syslog(LOG_INFO, _("setting up network..."));
     ret = setup_addresses(&setup_data);
     if (ret != 0) {
