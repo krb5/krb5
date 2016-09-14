@@ -59,8 +59,14 @@ k5_get_os_entropy(unsigned char *buf, size_t len, int strong)
 #include <sys/stat.h>
 #endif
 
-/* Open device, ensure that it is not a regular file, and read entropy.  Return
- * true on success, false on failure. */
+#ifdef __linux__
+#include <sys/syscall.h>
+#endif /* __linux__ */
+
+/*
+ * Open device, ensure that it is not a regular file, and read entropy.  Return
+ * true on success, false on failure.
+ */
 static krb5_boolean
 read_entropy_from_device(const char *device, unsigned char *buf, size_t len)
 {
@@ -95,6 +101,34 @@ cleanup:
 krb5_boolean
 k5_get_os_entropy(unsigned char *buf, size_t len, int strong)
 {
+#if defined(__linux__) && defined(SYS_getrandom)
+    while (len > 0) {
+        int ret;
+
+        /*
+         * Pull from the /dev/urandom pool, but ensure that it has been fully
+         * seeded.  This ensures strong randomness while only blocking during
+         * system bringup.
+         *
+         * glibc does not currently provide a binding for getrandom:
+         * https://sourceware.org/bugzilla/show_bug.cgi?id=17252
+         */
+        errno = 0;
+        ret = syscall(SYS_getrandom, buf, len, 0);
+        if (ret <= 0) {
+            if (errno == EINTR)
+                continue;
+
+            /* ENOSYS or other unrecoverable failure */
+            break;
+        }
+        len -= ret;
+        buf += ret;
+    }
+    if (len == 0)
+        return TRUE;
+#endif /* __linux__ && SYS_getrandom */
+
     if (strong != 0)
         return read_entropy_from_device("/dev/random", buf, len);
     return read_entropy_from_device("/dev/urandom", buf, len);
