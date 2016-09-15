@@ -184,6 +184,17 @@ This may recover principals that do not dump normally, in cases
 where database corruption has occurred.  In cases of such
 corruption, this option will probably retrieve more principals
 than the \fB\-rev\fP option will.
+.sp
+\fBNOTE:\fP
+.INDENT 7.0
+.INDENT 3.5
+The \fB\-recurse\fP option currently doesn\(aqt modify the dump
+functionality as described above; it does a normal dump.
+.UNINDENT
+.UNINDENT
+.sp
+Deprecated since version 1.5.
+
 .UNINDENT
 .SS load
 .INDENT 0.0
