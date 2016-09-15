@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.13.6\n"
+"Project-Id-Version: mit-krb5 1.13.6-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-22 16:43-0400\n"
+"POT-Creation-Date: 2016-09-15 16:14-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2218,128 +2218,133 @@ msgstr ""
 msgid "%s: Unknown iprop dump version %d\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1290 ../../src/kadmin/dbutil/dump.c:1518
+#: ../../src/kadmin/dbutil/dump.c:1290 ../../src/kadmin/dbutil/dump.c:1521
 #, c-format
 msgid "Iprop not enabled\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1328
+#: ../../src/kadmin/dbutil/dump.c:1308
+#, c-format
+msgid "%s: WARNING: the -recurse option is currently unimplemented\n"
+msgstr ""
+
+#: ../../src/kadmin/dbutil/dump.c:1331
 msgid "Conditional dump is an undocumented option for use only for iprop dumps"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1341
+#: ../../src/kadmin/dbutil/dump.c:1344
 msgid "Database not currently opened!"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1355
+#: ../../src/kadmin/dbutil/dump.c:1358
 #: ../../src/kadmin/dbutil/kdb5_stash.c:116
 #: ../../src/kadmin/dbutil/kdb5_util.c:479
 msgid "while reading master key"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1361
+#: ../../src/kadmin/dbutil/dump.c:1364
 msgid "while verifying master key"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1380 ../../src/kadmin/dbutil/dump.c:1390
+#: ../../src/kadmin/dbutil/dump.c:1383 ../../src/kadmin/dbutil/dump.c:1393
 msgid "while reading new master key"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1384
+#: ../../src/kadmin/dbutil/dump.c:1387
 #, c-format
 msgid "Please enter new master key....\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1408
+#: ../../src/kadmin/dbutil/dump.c:1411
 #, c-format
 msgid "while opening %s for writing"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1423
+#: ../../src/kadmin/dbutil/dump.c:1426
 msgid "while reading update log header"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1438 ../../src/kadmin/dbutil/dump.c:1445
+#: ../../src/kadmin/dbutil/dump.c:1441 ../../src/kadmin/dbutil/dump.c:1448
 #, c-format
 msgid "performing %s dump"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1475
+#: ../../src/kadmin/dbutil/dump.c:1478
 #, c-format
 msgid "%s: error processing line %d of %s\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1527
+#: ../../src/kadmin/dbutil/dump.c:1530
 msgid "while parsing options"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1542
+#: ../../src/kadmin/dbutil/dump.c:1545
 #, c-format
 msgid "while opening %s"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1547 ../../src/kadmin/dbutil/dump.c:1646
+#: ../../src/kadmin/dbutil/dump.c:1550 ../../src/kadmin/dbutil/dump.c:1649
 msgid "standard input"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1552
+#: ../../src/kadmin/dbutil/dump.c:1555
 #, c-format
 msgid "%s: can't read dump header in %s\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1560 ../../src/kadmin/dbutil/dump.c:1577
+#: ../../src/kadmin/dbutil/dump.c:1563 ../../src/kadmin/dbutil/dump.c:1580
 #, c-format
 msgid "%s: dump header bad in %s\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1586
+#: ../../src/kadmin/dbutil/dump.c:1589
 #, c-format
 msgid "Could not open iprop ulog\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1591
+#: ../../src/kadmin/dbutil/dump.c:1594
 #, c-format
 msgid "%s: dump version %s can only be loaded with the -update flag\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1600 ../../src/kadmin/dbutil/dump.c:1605
+#: ../../src/kadmin/dbutil/dump.c:1603 ../../src/kadmin/dbutil/dump.c:1608
 msgid "computing parameters for database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1611
+#: ../../src/kadmin/dbutil/dump.c:1614
 msgid "while creating database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1620
+#: ../../src/kadmin/dbutil/dump.c:1623
 msgid "while opening database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1630
+#: ../../src/kadmin/dbutil/dump.c:1633
 msgid "while permanently locking database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1648
+#: ../../src/kadmin/dbutil/dump.c:1651
 #, c-format
 msgid "%s: %s restore failed\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1653
+#: ../../src/kadmin/dbutil/dump.c:1656
 msgid "while unlocking database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1663 ../../src/kadmin/dbutil/dump.c:1682
+#: ../../src/kadmin/dbutil/dump.c:1666 ../../src/kadmin/dbutil/dump.c:1685
 msgid "while reinitializing update log"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1673
+#: ../../src/kadmin/dbutil/dump.c:1676
 msgid "while making newly loaded database live"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1689
+#: ../../src/kadmin/dbutil/dump.c:1692
 msgid "while writing update log header"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1703
+#: ../../src/kadmin/dbutil/dump.c:1706
 #, c-format
 msgid "while deleting bad database %s"
 msgstr ""
@@ -4193,7 +4198,7 @@ msgstr ""
 msgid "Couldn't open log file %s: %s\n"
 msgstr ""
 
-#: ../../src/lib/kadm5/srv/kadm5_hook.c:119
+#: ../../src/lib/kadm5/srv/kadm5_hook.c:120
 #, c-format
 msgid "kadm5_hook %s failed postcommit %s: %s"
 msgstr ""
@@ -4568,12 +4573,12 @@ msgstr ""
 msgid "Reply has wrong form of session key for anonymous request"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1630
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1652
 #, c-format
 msgid "%s while storing credentials"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1717
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1739
 #, c-format
 msgid "Client '%s' not found in Kerberos database"
 msgstr ""
@@ -4612,7 +4617,7 @@ msgstr ""
 msgid "%s.  Please try again."
 msgstr ""
 
-#: ../../src/lib/krb5/krb/gic_pwd.c:471
+#: ../../src/lib/krb5/krb/gic_pwd.c:473
 #, c-format
 msgid "%.*s%s%s.  Please try again.\n"
 msgstr ""
@@ -4674,7 +4679,7 @@ msgstr ""
 msgid "Enter OTP Token Value"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/preauth_otp.c:914
+#: ../../src/lib/krb5/krb/preauth_otp.c:915
 msgid "No supported tokens"
 msgstr ""
 
@@ -4803,7 +4808,7 @@ msgstr ""
 msgid "Cannot find KDC for realm \"%.*s\""
 msgstr ""
 
-#: ../../src/lib/krb5/os/sendto_kdc.c:475
+#: ../../src/lib/krb5/os/sendto_kdc.c:477
 #, c-format
 msgid "Cannot contact any KDC for realm '%.*s'"
 msgstr ""
