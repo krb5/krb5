@@ -79,10 +79,11 @@ krb5.conf
 
 If you are not using DNS TXT records (see :ref:`mapping_hostnames`),
 you must specify the **default_realm** in the :ref:`libdefaults`
-section.  If you are not using DNS SRV records (see
-:ref:`kdc_hostnames`), you must include the **kdc** tag for each
-*realm* in the :ref:`realms` section.  To communicate with the kadmin
-server in each realm, the **admin_server** tag must be set in the
+section.  If you are not using DNS URI or SRV records (see
+:ref:`kdc_hostnames` and :ref:`kdc_discovery`), you must include the
+**kdc** tag for each *realm* in the :ref:`realms` section.  To
+communicate with the kadmin server in each realm, the **admin_server**
+tag must be set in the
 :ref:`realms` section.
 
 An example krb5.conf file::

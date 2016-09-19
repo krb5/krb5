@@ -212,6 +212,13 @@ The libdefaults section may contain any of the following relations:
     data), and anything the fake KDC sends will not be trusted without
     verification using some secret that it won't know.
 
+**dns_uri_lookup**
+    Indicate whether DNS URI records should be used to locate the KDCs
+    and other servers for a realm, if they are not listed in the
+    krb5.conf information for the realm.  SRV records are used as a
+    fallback if no URI records were found.  The default value is true.
+    New in release 1.15.
+
 **err_fmt**
     This relation allows for custom error message formatting.  If a
     value is set, error messages will be formatted by substituting a

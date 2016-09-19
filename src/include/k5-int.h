@@ -209,6 +209,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_DNS_FALLBACK                 "dns_fallback"
 #define KRB5_CONF_DNS_LOOKUP_KDC               "dns_lookup_kdc"
 #define KRB5_CONF_DNS_LOOKUP_REALM             "dns_lookup_realm"
+#define KRB5_CONF_DNS_URI_LOOKUP               "dns_uri_lookup"
 #define KRB5_CONF_DOMAIN_REALM                 "domain_realm"
 #define KRB5_CONF_ENABLE_ONLY                  "enable_only"
 #define KRB5_CONF_ERR_FMT                      "err_fmt"
