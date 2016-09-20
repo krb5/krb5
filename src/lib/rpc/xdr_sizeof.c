@@ -91,21 +91,21 @@ x_inline(xdrs, len)
 	if (xdrs->x_op != XDR_ENCODE) {
 		return (NULL);
 	}
-	if (len < (int) xdrs->x_base) {
+	if (len < (int) ((caddr_t) xdrs->x_private - xdrs->x_base)) {
 		/* x_private was already allocated */
 		xdrs->x_handy += len;
 		return ((rpc_inline_t *) xdrs->x_private);
 	} else {
 		/* Free the earlier space and allocate new area */
-		if (xdrs->x_private)
-			free(xdrs->x_private);
-		if ((xdrs->x_private = (caddr_t) malloc(len)) == NULL) {
-			xdrs->x_base = 0;
+		if (xdrs->x_base)
+			free(xdrs->x_base);
+		if ((xdrs->x_base = (caddr_t) malloc(len)) == NULL) {
+			xdrs->x_private = NULL;
 			return (NULL);
 		}
-		xdrs->x_base = (caddr_t) len;
+		xdrs->x_private = xdrs->x_base + len;
 		xdrs->x_handy += len;
-		return ((rpc_inline_t *) xdrs->x_private);
+		return ((rpc_inline_t *) (void *) xdrs->x_base);
 	}
 }
 
@@ -121,10 +121,10 @@ x_destroy(xdrs)
 	XDR *xdrs;
 {
 	xdrs->x_handy = 0;
-	xdrs->x_base = 0;
-	if (xdrs->x_private) {
-		free(xdrs->x_private);
-		xdrs->x_private = NULL;
+	xdrs->x_private = NULL;
+	if (xdrs->x_base) {
+		free(xdrs->x_base);
+		xdrs->x_base = NULL;
 	}
 	return;
 }
@@ -159,7 +159,7 @@ xdr_sizeof(func, data)
 	x.x_base = (caddr_t) 0;
 
 	stat = func(&x, data);
-	if (x.x_private)
-		free(x.x_private);
+	if (x.x_base)
+		free(x.x_base);
 	return (stat == TRUE ? (unsigned) x.x_handy: 0);
 }

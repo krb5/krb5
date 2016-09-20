@@ -362,17 +362,17 @@ xdr_enum(XDR *xdrs, enum_t *ep)
 		break;
 	}
 	if (sizeof (enum sizecheck) == sizeof (long)) {
-		return (xdr_long(xdrs, (long *)ep));
+		return (xdr_long(xdrs, (long *)(void *)ep));
 	} else if (sizeof (enum sizecheck) == sizeof (int)) {
-		return (xdr_int(xdrs, (int *)ep));
+		return (xdr_int(xdrs, (int *)(void *)ep));
 	} else if (sizeof (enum sizecheck) == sizeof (short)) {
-		return (xdr_short(xdrs, (short *)ep));
+		return (xdr_short(xdrs, (short *)(void *)ep));
 	} else {
 		return (FALSE);
 	}
 #else
-	(void) (xdr_short(xdrs, (short *)ep));
-	return (xdr_long(xdrs, (long *)ep));
+	(void) (xdr_short(xdrs, (short *)(void *)ep));
+	return (xdr_long(xdrs, (long *)(void *)ep));
 #endif
 }
 
