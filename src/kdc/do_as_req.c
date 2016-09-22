@@ -859,7 +859,7 @@ prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
 
     retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);
     if (retval)
-        return retval;
+        goto cleanup;
     errpkt.error = error;
     errpkt.server = request->server;
     errpkt.client = (error == KDC_ERR_WRONG_REALM) ? canon_client :
