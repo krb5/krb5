@@ -104,9 +104,9 @@ k5_get_os_entropy(unsigned char *buf, size_t len, int strong)
 
     while (len > 0) {
         /*
-         * Pull from the /dev/urandom pool, but it to have been seeded.  This
-         * ensures strong randomness while only blocking during first system
-         * boot.
+         * Pull from the /dev/urandom pool, but require it to have been seeded.
+         * This ensures strong randomness while only blocking during first
+         * system boot.
          *
          * glibc does not currently provide a binding for getrandom:
          * https://sourceware.org/bugzilla/show_bug.cgi?id=17252
