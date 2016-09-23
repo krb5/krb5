@@ -125,7 +125,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
     },
 
     { ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-      "aes128-cts-hmac-sha1-96", { "aes128-cts" },
+      "aes128-cts-hmac-sha1-96", { "aes128-cts", "aes128-sha1" },
       "AES-128 CTS mode with 96-bit SHA-1 HMAC",
       &krb5int_enc_aes128, &krb5int_hash_sha1,
       16,
@@ -135,7 +135,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       CKSUMTYPE_HMAC_SHA1_96_AES128,
       0 /*flags*/ },
     { ENCTYPE_AES256_CTS_HMAC_SHA1_96,
-      "aes256-cts-hmac-sha1-96", { "aes256-cts" },
+      "aes256-cts-hmac-sha1-96", { "aes256-cts", "aes256-sha1" },
       "AES-256 CTS mode with 96-bit SHA-1 HMAC",
       &krb5int_enc_aes256, &krb5int_hash_sha1,
       16,
