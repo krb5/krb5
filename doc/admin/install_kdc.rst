@@ -345,7 +345,7 @@ To extract a keytab directly on a slave KDC called
 
 If you are instead extracting a keytab for the slave KDC called
 ``kerberos-1.mit.edu`` on the master KDC, you should use a dedicated
-temporary keytab file for that machine's keytab:
+temporary keytab file for that machine's keytab::
 
     kadmin: ktadd -k /tmp/kerberos-1.keytab host/kerberos-1.mit.edu
     Entry for principal host/kerberos-1.mit.edu with kvno 2, encryption
