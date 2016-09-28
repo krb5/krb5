@@ -33,7 +33,10 @@ DESCRIPTION
 -----------
 
 kinit obtains and caches an initial ticket-granting ticket for
-*principal*.
+*principal*.  If *principal* is absent, kinit chooses an appropriate
+principal name based on existing credential cache contents or the
+local username of the user invoking kinit.  Some options modify the
+choice of principal name.
 
 
 OPTIONS
