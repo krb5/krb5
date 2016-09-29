@@ -75,7 +75,7 @@ static krb5_boolean
 use_dns_uri(krb5_context ctx)
 {
     krb5_error_code ret;
-    krb5_boolean use;
+    int use;
 
     ret = profile_get_boolean(ctx->profile, KRB5_CONF_LIBDEFAULTS,
                               KRB5_CONF_DNS_URI_LOOKUP, NULL,
