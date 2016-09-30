@@ -329,16 +329,15 @@ on_io_read(krad_remote *rr)
     /* Read the packet. */
     i = recv(verto_get_fd(rr->io), rr->buffer.data + rr->buffer.length,
              pktlen, 0);
-    if (i < 0) {
-        /* Should we try again? */
-        if (errno == EWOULDBLOCK || errno == EAGAIN || errno == EINTR)
-            return;
 
-        /* The socket is unrecoverable. */
+    /* On these errors, try again. */
+    if (i < 0 && (errno == EWOULDBLOCK || errno == EAGAIN || errno == EINTR))
+        return;
+
+    /* On any other errors or on EOF, the socket is unrecoverable. */
+    if (i <= 0) {
         remote_shutdown(rr);
         return;
-    } else if (i == 0) {
-        remote_del_flags(rr, FLAGS_READ);
     }
 
     /* If we have a partial read or just the header, try again. */
