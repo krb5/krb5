@@ -112,6 +112,18 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       &krb5int_enc_camellia256, NULL,
       krb5int_dk_cmac_checksum, NULL,
       16, 16, 0 },
+
+    { CKSUMTYPE_HMAC_SHA256_128_AES128,
+      "hmac-sha256-128-aes128", { 0 }, "HMAC-SHA256 AES128 key",
+      &krb5int_enc_aes128, &krb5int_hash_sha256,
+      krb5int_etm_checksum, NULL,
+      32, 16, 0 },
+
+    { CKSUMTYPE_HMAC_SHA384_192_AES256,
+      "hmac-sha384-192-aes256", { 0 }, "HMAC-SHA384 AES256 key",
+      &krb5int_enc_aes256, &krb5int_hash_sha384,
+      krb5int_etm_checksum, NULL,
+      48, 24, 0 },
 };
 
 const size_t krb5int_cksumtypes_length =

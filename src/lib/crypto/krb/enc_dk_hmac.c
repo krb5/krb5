@@ -131,13 +131,13 @@ krb5int_dk_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
 
     d1.data[4] = 0xAA;
 
-    ret = krb5int_derive_key(enc, key, &ke, &d1, DERIVE_RFC3961);
+    ret = krb5int_derive_key(enc, NULL, key, &ke, &d1, DERIVE_RFC3961);
     if (ret != 0)
         goto cleanup;
 
     d1.data[4] = 0x55;
 
-    ret = krb5int_derive_key(enc, key, &ki, &d1, DERIVE_RFC3961);
+    ret = krb5int_derive_key(enc, NULL, key, &ki, &d1, DERIVE_RFC3961);
     if (ret != 0)
         goto cleanup;
 
@@ -232,13 +232,13 @@ krb5int_dk_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
 
     d1.data[4] = 0xAA;
 
-    ret = krb5int_derive_key(enc, key, &ke, &d1, DERIVE_RFC3961);
+    ret = krb5int_derive_key(enc, NULL, key, &ke, &d1, DERIVE_RFC3961);
     if (ret != 0)
         goto cleanup;
 
     d1.data[4] = 0x55;
 
-    ret = krb5int_derive_key(enc, key, &ki, &d1, DERIVE_RFC3961);
+    ret = krb5int_derive_key(enc, NULL, key, &ki, &d1, DERIVE_RFC3961);
     if (ret != 0)
         goto cleanup;
 

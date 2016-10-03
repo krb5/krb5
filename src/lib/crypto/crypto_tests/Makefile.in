@@ -21,6 +21,7 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_crc.c	\
 	$(srcdir)/t_mddriver.c	\
 	$(srcdir)/t_kperf.c	\
+	$(srcdir)/t_sha2.c	\
 	$(srcdir)/t_short.c	\
 	$(srcdir)/t_str2key.c	\
 	$(srcdir)/t_derive.c	\
@@ -37,15 +38,15 @@ check-unix: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
 		aes-test  \
 		camellia-test  \
 		t_mddriver4 t_mddriver \
-		t_crc t_cts t_short t_str2key t_derive t_fork t_cf2 t_combine
+		t_crc t_cts t_sha2 t_short t_str2key t_derive t_fork t_cf2 \
+		t_combine
 	$(RUN_TEST) ./t_nfold
 	$(RUN_TEST) ./t_encrypt
 	$(RUN_TEST) ./t_decrypt
 	$(RUN_TEST) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output
 	$(RUN_TEST) ./t_cmac
 	$(RUN_TEST) ./t_hmac
-	$(RUN_TEST) ./t_prf <$(srcdir)/t_prf.in >t_prf.output
-	diff t_prf.output $(srcdir)/t_prf.expected
+	$(RUN_TEST) ./t_prf
 	$(RUN_TEST) ./t_cksum4 "this is a test" e3f76a07f3401e3536b43a3f54226c39422c35682c354835
 	$(RUN_TEST) ./t_cksum5 "this is a test" e3f76a07f3401e351143ee6f4c09be1edb4264d55015db53
 	$(RUN_TEST) ./t_cksums
@@ -59,6 +60,7 @@ check-unix: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
 	cmp camellia-vt.txt $(srcdir)/camellia-expect-vt.txt
 	$(RUN_TEST) $(C)t_mddriver4 -x
 	$(RUN_TEST) $(C)t_mddriver -x
+	$(RUN_TEST) ./t_sha2
 	$(RUN_TEST) ./t_short
 	$(RUN_TEST) ./t_str2key
 	$(RUN_TEST) ./t_derive
@@ -97,6 +99,10 @@ vectors$(EXEEXT): vectors.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
 
 t_cts$(EXEEXT): t_cts.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
+		$(KRB5_BASE_LIBS)
+
+t_sha2$(EXEEXT): t_sha2.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_sha2.$(OBJEXT) \
 		$(KRB5_BASE_LIBS)
 
 t_short$(EXEEXT): t_short.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
@@ -162,8 +168,8 @@ clean:
 		t_crc.o t_crc t_cts.o t_cts \
 		t_mddriver4.o t_mddriver4 t_mddriver.o t_mddriver \
 		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o t_cksums t_cksums.o \
-		t_kperf.o t_kperf t_short t_short.o t_str2key t_str2key.o \
-		t_derive t_derive.o t_fork t_fork.o \
+		t_kperf.o t_kperf t_sha2.o t_sha2 t_short t_short.o t_str2key \
+		t_str2key.o t_derive t_derive.o t_fork t_fork.o \
 		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT) \
 		camellia-test camellia-test.o camellia-vt.txt \
 		t_cf2 t_cf2.o t_cf2.output t_combine.o t_combine

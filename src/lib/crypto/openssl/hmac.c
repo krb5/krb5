@@ -99,6 +99,10 @@ map_digest(const struct krb5_hash_provider *hash)
 {
     if (!strncmp(hash->hash_name, "SHA1",4))
         return EVP_sha1();
+    else if (!strncmp(hash->hash_name, "SHA-256",7))
+        return EVP_sha256();
+    else if (!strncmp(hash->hash_name, "SHA-384",7))
+        return EVP_sha384();
     else if (!strncmp(hash->hash_name, "MD5", 3))
         return EVP_md5();
     else if (!strncmp(hash->hash_name, "MD4", 3))

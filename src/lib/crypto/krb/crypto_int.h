@@ -184,6 +184,8 @@ unsigned int krb5int_aes_crypto_length(const struct krb5_keytypes *ktp,
                                        krb5_cryptotype type);
 unsigned int krb5int_camellia_crypto_length(const struct krb5_keytypes *ktp,
                                             krb5_cryptotype type);
+unsigned int krb5int_aes2_crypto_length(const struct krb5_keytypes *ktp,
+                                        krb5_cryptotype type);
 
 /* Encrypt */
 krb5_error_code krb5int_old_encrypt(const struct krb5_keytypes *ktp,
@@ -208,6 +210,10 @@ krb5_error_code krb5int_dk_cmac_encrypt(const struct krb5_keytypes *ktp,
                                         const krb5_data *ivec,
                                         krb5_crypto_iov *data,
                                         size_t num_data);
+krb5_error_code krb5int_etm_encrypt(const struct krb5_keytypes *ktp,
+                                    krb5_key key, krb5_keyusage usage,
+                                    const krb5_data *ivec,
+                                    krb5_crypto_iov *data, size_t num_data);
 
 /* Decrypt */
 krb5_error_code krb5int_old_decrypt(const struct krb5_keytypes *ktp,
@@ -232,6 +238,10 @@ krb5_error_code krb5int_dk_cmac_decrypt(const struct krb5_keytypes *ktp,
                                         const krb5_data *ivec,
                                         krb5_crypto_iov *data,
                                         size_t num_data);
+krb5_error_code krb5int_etm_decrypt(const struct krb5_keytypes *ktp,
+                                    krb5_key key, krb5_keyusage usage,
+                                    const krb5_data *ivec,
+                                    krb5_crypto_iov *data, size_t num_data);
 
 /* String to key */
 krb5_error_code krb5int_des_string_to_key(const struct krb5_keytypes *ktp,
@@ -259,6 +269,11 @@ krb5_error_code krb5int_camellia_string_to_key(const struct krb5_keytypes *enc,
                                                const krb5_data *salt,
                                                const krb5_data *params,
                                                krb5_keyblock *key);
+krb5_error_code krb5int_aes2_string_to_key(const struct krb5_keytypes *enc,
+                                           const krb5_data *string,
+                                           const krb5_data *salt,
+                                           const krb5_data *params,
+                                           krb5_keyblock *key);
 
 /* Random to key */
 krb5_error_code k5_rand2key_direct(const krb5_data *randombits,
@@ -280,6 +295,8 @@ krb5_error_code krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,
 krb5_error_code krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp,
                                     krb5_key key, const krb5_data *in,
                                     krb5_data *out);
+krb5_error_code krb5int_aes2_prf(const struct krb5_keytypes *ktp, krb5_key key,
+                                 const krb5_data *in, krb5_data *out);
 
 /*** Prototypes for cksumtype handler functions ***/
 
@@ -317,26 +334,38 @@ krb5_error_code krb5int_confounder_verify(const struct krb5_cksumtypes *ctp,
                                           size_t num_data,
                                           const krb5_data *input,
                                           krb5_boolean *valid);
+krb5_error_code krb5int_etm_checksum(const struct krb5_cksumtypes *ctp,
+                                     krb5_key key, krb5_keyusage usage,
+                                     const krb5_crypto_iov *data,
+                                     size_t num_data, krb5_data *output);
 
 /*** Key derivation functions ***/
 
 enum deriv_alg {
     DERIVE_RFC3961,             /* RFC 3961 section 5.1 */
-    DERIVE_SP800_108_CMAC       /* NIST SP 800-108 with CMAC as PRF */
+    DERIVE_SP800_108_CMAC,      /* NIST SP 800-108 with CMAC as PRF */
+    DERIVE_SP800_108_HMAC       /* NIST SP 800-108 with HMAC as PRF */
 };
 
 krb5_error_code krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
+                                        const struct krb5_hash_provider *hash,
                                         krb5_key inkey, krb5_keyblock *outkey,
                                         const krb5_data *in_constant,
                                         enum deriv_alg alg);
 krb5_error_code krb5int_derive_key(const struct krb5_enc_provider *enc,
+                                   const struct krb5_hash_provider *hash,
                                    krb5_key inkey, krb5_key *outkey,
                                    const krb5_data *in_constant,
                                    enum deriv_alg alg);
 krb5_error_code krb5int_derive_random(const struct krb5_enc_provider *enc,
+                                      const struct krb5_hash_provider *hash,
                                       krb5_key inkey, krb5_data *outrnd,
                                       const krb5_data *in_constant,
                                       enum deriv_alg alg);
+krb5_error_code
+k5_sp800_108_counter_hmac(const struct krb5_hash_provider *hash,
+                          krb5_key inkey, krb5_data *outrnd,
+                          const krb5_data *label, const krb5_data *context);
 
 /*** Miscellaneous prototypes ***/
 
@@ -432,6 +461,8 @@ extern const struct krb5_hash_provider krb5int_hash_crc32;
 extern const struct krb5_hash_provider krb5int_hash_md4;
 extern const struct krb5_hash_provider krb5int_hash_md5;
 extern const struct krb5_hash_provider krb5int_hash_sha1;
+extern const struct krb5_hash_provider krb5int_hash_sha256;
+extern const struct krb5_hash_provider krb5int_hash_sha384;
 
 /* Modules must implement the following functions. */
 
@@ -455,13 +486,13 @@ krb5_error_code krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
 
 /*
  * Compute the PBKDF2 (see RFC 2898) of password and salt, with the specified
- * count, using HMAC-SHA-1 as the pseudorandom function, storing the result
- * into out (caller-allocated).
+ * count, using HMAC with the specified hash as the pseudo-random function,
+ * storing the result into out (caller-allocated).
  */
-krb5_error_code krb5int_pbkdf2_hmac_sha1(const krb5_data *out,
-                                         unsigned long count,
-                                         const krb5_data *password,
-                                         const krb5_data *salt);
+krb5_error_code krb5int_pbkdf2_hmac(const struct krb5_hash_provider *hash,
+                                    const krb5_data *out, unsigned long count,
+                                    const krb5_data *password,
+                                    const krb5_data *salt);
 
 /* The following are used by test programs and are just handler functions from
  * the AES and Camellia enc providers. */
