@@ -1319,8 +1319,7 @@ cms_signeddata_create(krb5_context context,
             alg = X509_ALGOR_new();
             if (alg == NULL)
                 goto cleanup2;
-            alg->algorithm = OBJ_nid2obj(NID_sha1);
-            alg->parameter = NULL;
+            X509_ALGOR_set0(alg, OBJ_nid2obj(NID_sha1), V_ASN1_NULL, NULL);
             alg_len = i2d_X509_ALGOR(alg, NULL);
             alg_buf = malloc(alg_len);
             if (alg_buf == NULL)
