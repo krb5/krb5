@@ -97,7 +97,6 @@ F(char *output, char *u_tmp1, char *u_tmp2,
   const krb5_data *salt, unsigned long count, int i)
 {
     unsigned char ibytes[4];
-    size_t tlen;
     unsigned int j, k;
     krb5_data sdata;
     krb5_data out;
@@ -111,19 +110,15 @@ F(char *output, char *u_tmp1, char *u_tmp2,
     /* Compute U_1.  */
     store_32_be(i, ibytes);
 
-    tlen = salt->length;
-    memcpy(u_tmp2, salt->data, tlen);
-    memcpy(u_tmp2 + tlen, ibytes, 4);
-    tlen += 4;
-    sdata.data = u_tmp2;
-    sdata.length = tlen;
+    memcpy(u_tmp2, salt->data, salt->length);
+    memcpy(u_tmp2 + salt->length, ibytes, 4);
+    sdata = make_data(u_tmp2, salt->length + 4);
 
 #if 0
     printd("initial salt", &sdata);
 #endif
 
-    out.data = u_tmp1;
-    out.length = hlen;
+    out = make_data(u_tmp1, hlen);
 
 #if 0
     printf("F: computing hmac #1 (U_1) with %s\n", pdata.contents);
