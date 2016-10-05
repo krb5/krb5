@@ -36,10 +36,7 @@
 
 #ifndef NOCACHE
 
-#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
+#include "k5-cmocka.h"
 
 /* For wrapping functions */
 #include "k5-int.h"

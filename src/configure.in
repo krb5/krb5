@@ -1131,6 +1131,7 @@ AC_CHECK_LIB(cmocka, _cmocka_run_group_tests, [HAVE_CMOCKA_LIB=yes])
 if test "$HAVE_CMOCKA_LIB" = yes && test "$HAVE_CMOCKA_H" = yes; then
     HAVE_CMOCKA=yes
     CMOCKA_LIBS='-lcmocka'
+    AC_DEFINE([HAVE_CMOCKA],1,[Define if cmocka library is available.])
 fi
 AC_SUBST(HAVE_CMOCKA)
 AC_SUBST(CMOCKA_LIBS)
