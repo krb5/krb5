@@ -2,9 +2,9 @@
 # Generated makefile dependencies follow.
 #
 main.so main.po $(OUTPRE)main.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(COM_ERR_DEPS) $(top_srcdir)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/kadm5/admin.h \
+  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/include/gssrpc/auth.h \
   $(top_srcdir)/include/gssrpc/auth_gss.h $(top_srcdir)/include/gssrpc/auth_unix.h \
   $(top_srcdir)/include/gssrpc/clnt.h $(top_srcdir)/include/gssrpc/rename.h \
   $(top_srcdir)/include/gssrpc/rpc.h $(top_srcdir)/include/gssrpc/rpc_msg.h \
