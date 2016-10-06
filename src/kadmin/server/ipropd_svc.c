@@ -391,12 +391,15 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 	    _exit(1);
 	}
 
-	DPRINT("%s: exec `kprop -r %s -f %s %s' ...\n",
-	       whoami, handle->params.realm, dump_file, clhost);
 	if (kprop_port != NULL) {
+	    DPRINT("%s: exec `kprop -r %s -f %s -P %s %s' ...\n",
+		   whoami, handle->params.realm, dump_file, kprop_port,
+		   clhost);
 	    pret = execl(kprop, "kprop", "-r", handle->params.realm, "-f",
 			 dump_file, "-P", kprop_port, clhost, NULL);
 	} else {
+	    DPRINT("%s: exec `kprop -r %s -f %s %s' ...\n",
+		   whoami, handle->params.realm, dump_file, clhost);
 	    pret = execl(kprop, "kprop", "-r", handle->params.realm, "-f",
 			 dump_file, clhost, NULL);
 	}
