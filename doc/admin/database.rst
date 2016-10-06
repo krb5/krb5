@@ -527,9 +527,13 @@ availability.  To roll over the master key, follow these steps:
 
 #. On the master KDC, run ``kdb5_util update_princ_encryption``.  This
    command will iterate over the database and re-encrypt all keys in
-   the new master key.  If the database is large, the master KDC will
-   become unavailable while this command runs, but clients should fail
-   over to slave KDCs (if any are present) during this time period.
+   the new master key.  If the database is large and uses DB2, the
+   master KDC will become unavailable while this command runs, but
+   clients should fail over to slave KDCs (if any are present) during
+   this time period.  In release 1.13 and later, you can instead run
+   ``kdb5_util -x unlockiter update_princ_encryption`` to use unlocked
+   iteration; this variant will take longer, but will keep the
+   database available to the KDC and kadmind while it runs.
 
 #. On the master KDC, run ``kdb5_util purge_mkeys`` to clean up the
    old master key.
