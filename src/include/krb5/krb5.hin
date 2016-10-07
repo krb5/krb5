@@ -4213,13 +4213,14 @@ krb5_524_convert_creds(krb5_context context, krb5_creds *v5creds,
  * @param [out] ktid            Key table handle
  *
  * Resolve the key table name @a name and set @a ktid to a handle identifying
- * the key table.  The key table is not opened.
+ * the key table.  Use krb5_kt_close() to free @a ktid when it is no longer
+ * needed.
  *
- * @note @a name must be of the form @c type:residual, where @a type must be a
- * type known to the library and @a residual portion should be specific to the
- * particular keytab type.
+ * @a name must be of the form @c type:residual, where @a type must be a type
+ * known to the library and @a residual portion should be specific to the
+ * particular keytab type.  If no @a type is given, the default is @c FILE.
  *
- * @sa krb5_kt_close()
+ * If @a name is of type @c FILE, the keytab file is not opened by this call.
  *
  * @code
  *  Example: krb5_kt_resolve(context, "FILE:/tmp/filename", &ktid);
