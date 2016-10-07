@@ -548,7 +548,7 @@ parse_uri_fields(const char *uri, k5_transport *transport_out,
     *host_out = NULL;
     *master_out = -1;
 
-    /* Confirm the scheme name. */
+    /* Confirm the scheme name.  Case-insensitive per BCP 35 - 3.8. */
     if (strncasecmp(uri, "krb5srv", 7) != 0)
         return;
 
@@ -560,23 +560,24 @@ parse_uri_fields(const char *uri, k5_transport *transport_out,
     if (*uri == '\0')
         return;
 
-    /* Check the flags field for supported flags. */
+    /* Check the flags field for supported flags.  Case-sensitive per IANA
+     * values. */
     for (; *uri != ':' && *uri != '\0'; uri++) {
-        if (*uri == 'm' || *uri == 'M')
+        if (*uri == 'm')
             master = TRUE;
     }
     if (*uri != ':')
         return;
 
-    /* Look for the transport type. */
+    /* Look for the transport type.  Case-sensitive per IANA values. */
     uri++;
-    if (strncasecmp(uri, "udp", 3) == 0) {
+    if (strncmp(uri, "udp", 3) == 0) {
         transport = UDP;
         uri += 3;
-    } else if (strncasecmp(uri, "tcp", 3) == 0) {
+    } else if (strncmp(uri, "tcp", 3) == 0) {
         transport = TCP;
         uri += 3;
-    } else if (strncasecmp(uri, "kkdcp", 5) == 0) {
+    } else if (strncmp(uri, "kkdcp", 5) == 0) {
         /* Currently the only MS-KKDCP transport type is HTTPS. */
         transport = HTTPS;
         uri += 5;
