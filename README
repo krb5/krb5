@@ -79,6 +79,78 @@ Major changes in 1.16
 krb5-1.16 changes by ticket ID
 ------------------------------
 
+5889    password history doesn't work with LDAP KDB
+6666    some non-default plugin directories don't build in 1.8 branch
+7852    kadmin.local's ktadd -norandkey does not handle multiple kvnos
+        in the KDB
+7985    Add krb5_get_init_creds_opt_set_pac_request
+8065    Renaming principals with LDAP KDB deletes the principal
+8277    iprop can choose wrong realm
+8278    Add krb5_expand_hostname() API
+8280    Fix impersonate_name to work with interposers
+8295    kdb5_ldap_stash_service_password() stash file logic needs tweaking
+8297    jsonwalker.py test fails
+8298    Audit Test fails when system has IPV6 address
+8299    Remove util/reconf
+8329    Only run export-check.pl in maintainer mode
+8344    Create KDC and kadmind log files with mode 0640
+8345    Remove nss libk5crypto implementation
+8348    Remove workaround when binding to udp addresses and pktinfo
+        isn't supported by the system
+8353    Replace MD5 use in rcache with SHA-256
+8354    Only store latest keys in key history entry
+8355    Add kadm5_setkey_principal_4 RPC to kadmin
+8364    Add get_principal_keys RPC to kadmin
+8365    Add the ability to lock down principal keys
+8366    Increase initial DNS buffer size
+8368    Remove hdb KDB module
+8371    Improve libkadm5 client RPC thread safety
+8372    Use cached S4U2Proxy tickets in GSSAPI
+8374    Interoperate with incomplete SPNEGO responses
+8375    Allow zero cksumtype in krb5_k_verify_checksum()
+8379    Add auth indicator handling to libkdb_ldap
+8381    Don't fall back to master on password read error
+8386    Add KDC pre-send and post-receive KDC hooks
+8388    Remove port 750 from the KDC default ports
+8389    Make profile includedir accept all *.conf files
+8391    Add kinit long option support for all platforms
+8393    Password Expiration "Never" Inconsistently Applied
+8394    Add debug message filtering to krb5_klog_syslog
+8396    Skip password prompt when running ksu as root
+8398    Add libk5crypto support for OpenSSL 1.1.0
+8399    Unconstify some krb5 GSS OIDs
+8404    Remove non-DFSG documentation
+8405    Work around python-ldap bug in kerberos.ldif
+8412    Link correct VS2015 C libraries for debug builds
+8414    Use library malloc for principal, policy entries
+8418    Add libkdb function to specialize principal's salt
+8419    Do not indicate deprecated GSS mechanisms
+8423    Add SPNEGO special case for NTLMSSP+MechListMIC
+8425    Add auth-indicator authdata module
+8426    test_check_allowed_to_delegate() should free unparsed princ output
+8428    Minimize timing leaks in PKINIT decryption
+8429    Fix Makefile for paths containing '+' character
+8434    Fix memory leak in old gssrpc authentication
+8436    Update libev sources to 4.22
+8446    Fix leak in key change operations
+8451    Add hints for -A flag to kdestroy
+8456    Add the kprop-port option to kadmind
+8462    Better handle failures to resolve client keytab
+8464    Set prompt type for OTP preauth prompt
+8465    Improve bad password inference in kinit
+8466    Rename k5-queue.h macros
+8471    Change KDC error for encrypted timestamp preauth
+8476    Restore recursive dump functionality
+8478    usability improvements for bttest
+8488    Stop generating doc/CHANGES
+8490    Add aes-sha2 enctype support
+8494    Add krb5_db_register_keytab()
+8496    Add KDC discovery from URI records
+8499    Use getrandom system call on recent Linux kernels
+8502    ret_boolean in profile_get_boolean() should be krb5_boolean *
+        instead of int *
+
+
 Acknowledgements
 ----------------
 
@@ -198,6 +270,7 @@ reports, suggestions, and valuable resources:
     Ravi Channavajhala
     Srinivas Cheruku
     Leonardo Chiquitto
+    Seemant Choudhary
     Howard Chu
     Andrea Cirulli
     Christopher D. Clausen
@@ -252,6 +325,8 @@ reports, suggestions, and valuable resources:
     Jeffrey Hutzelman
     Wyllys Ingersoll
     Holger Isenberg
+    Spencer Jackson
+    Diogenes S. Jesus
     Pavel Jindra
     Joel Johnson
     Anders Kaseorg
@@ -300,6 +375,7 @@ reports, suggestions, and valuable resources:
     Robert Relyea
     Martin Rex
     Jason Rogers
+    Matt Rogers
     Nate Rosenblum
     Solly Ross
     Mike Roszkowski
