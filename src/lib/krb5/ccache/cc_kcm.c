@@ -604,7 +604,7 @@ kcm_resolve(krb5_context context, krb5_ccache *cache_out, const char *residual)
     if (ret)
         goto cleanup;
 
-    if (*residual == '\0') {
+    if (*residual == '\0' || strchr(residual, ':') == NULL) {
         kcmreq_init(&req, KCM_OP_GET_DEFAULT_CACHE, NULL);
         ret = kcmio_call(context, io, &req);
         if (ret)
