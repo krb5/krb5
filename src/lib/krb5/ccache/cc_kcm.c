@@ -885,7 +885,8 @@ kcm_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor_out)
         return ret;
 
     /* If defname is a subsidiary cache, return a singleton cursor. */
-    if (strlen(defname) > 4)
+    /* subsidiary is denoted as KCM:UID:SUBSIDIARY_ID */
+    if (strlen(defname) > 4 && (strchr(defname+4, ':') != NULL))
         return make_ptcursor(defname + 4, NULL, io, cursor_out);
 
     kcmreq_init(&req, KCM_OP_GET_CACHE_UUID_LIST, NULL);
