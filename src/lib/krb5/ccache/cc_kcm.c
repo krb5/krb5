@@ -612,7 +612,23 @@ kcm_resolve(krb5_context context, krb5_ccache *cache_out, const char *residual)
         ret = kcmreq_get_name(&req, &defname);
         if (ret)
             goto cleanup;
-        residual = defname;
+
+        if (strchr(defname, ':') == NULL) {
+            /* Heimdal's KCM get_default_cache operation returns "KCM:UID" if
+             * there was no previous cache for this UID, IOW it always returns
+             * a collection name. Explicitly call gen_new to resolve
+             * a subsidiary
+             */
+            kcmreq_init(&req, KCM_OP_GEN_NEW, NULL);
+            ret = kcmio_call(context, io, &req);
+            if (ret)
+                goto cleanup;
+            ret = kcmreq_get_name(&req, &residual);
+            if (ret)
+                goto cleanup;
+        } else {
+            residual = defname;
+        }
     }
 
     ret = make_cache(context, residual, io, cache_out);
