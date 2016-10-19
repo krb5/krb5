@@ -56,7 +56,10 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH DESCRIPTION
 .sp
 kinit obtains and caches an initial ticket\-granting ticket for
-\fIprincipal\fP\&.
+\fIprincipal\fP\&.  If \fIprincipal\fP is absent, kinit chooses an appropriate
+principal name based on existing credential cache contents or the
+local username of the user invoking kinit.  Some options modify the
+choice of principal name.
 .SH OPTIONS
 .INDENT 0.0
 .TP

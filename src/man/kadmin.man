@@ -284,11 +284,12 @@ Options:
 (\fIgetdate\fP string) The password expiration date.
 .TP
 .B \fB\-maxlife\fP \fImaxlife\fP
-(\fIgetdate\fP string) The maximum ticket life for the principal.
+(\fIduration\fP or \fIgetdate\fP string) The maximum ticket life
+for the principal.
 .TP
 .B \fB\-maxrenewlife\fP \fImaxrenewlife\fP
-(\fIgetdate\fP string) The maximum renewable life of tickets for
-the principal.
+(\fIduration\fP or \fIgetdate\fP string) The maximum renewable
+life of tickets for the principal.
 .TP
 .B \fB\-kvno\fP \fIkvno\fP
 The initial key version number.
@@ -717,7 +718,7 @@ Example:
 .nf
 .ft C
 set_string host/foo.mit.edu session_enctypes aes128\-cts
-set_string user@FOO.COM otp [{"type":"hotp","username":"custom"}]
+set_string user@FOO.COM otp "[{""type"":""hotp"",""username"":""al""}]"
 .ft P
 .fi
 .UNINDENT
@@ -751,10 +752,12 @@ The following options are available:
 .INDENT 0.0
 .TP
 .B \fB\-maxlife\fP \fItime\fP
-(\fIgetdate\fP string) Sets the maximum lifetime of a password.
+(\fIduration\fP or \fIgetdate\fP string) Sets the maximum
+lifetime of a password.
 .TP
 .B \fB\-minlife\fP \fItime\fP
-(\fIgetdate\fP string) Sets the minimum lifetime of a password.
+(\fIduration\fP or \fIgetdate\fP string) Sets the minimum
+lifetime of a password.
 .TP
 .B \fB\-minlength\fP \fIlength\fP
 Sets the minimum length of a password.
@@ -780,21 +783,21 @@ resets to 0 after a successful attempt to authenticate.  A
 .INDENT 0.0
 .TP
 .B \fB\-failurecountinterval\fP \fIfailuretime\fP
-(\fIgetdate\fP string) Sets the allowable time between
-authentication failures.  If an authentication failure happens
-after \fIfailuretime\fP has elapsed since the previous failure,
-the number of authentication failures is reset to 1.  A
+(\fIduration\fP or \fIgetdate\fP string) Sets the allowable time
+between authentication failures.  If an authentication failure
+happens after \fIfailuretime\fP has elapsed since the previous
+failure, the number of authentication failures is reset to 1.  A
 \fIfailuretime\fP value of 0 (the default) means forever.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \fB\-lockoutduration\fP \fIlockouttime\fP
-(\fIgetdate\fP string) Sets the duration for which the principal
-is locked from authenticating if too many authentication failures
-occur without the specified failure count interval elapsing.
-A duration of 0 (the default) means the principal remains locked
-out until it is administratively unlocked with \fBmodprinc
-\-unlock\fP\&.
+(\fIduration\fP or \fIgetdate\fP string) Sets the duration for
+which the principal is locked from authenticating if too many
+authentication failures occur without the specified failure count
+interval elapsing.  A duration of 0 (the default) means the
+principal remains locked out until it is administratively unlocked
+with \fBmodprinc \-unlock\fP\&.
 .TP
 .B \fB\-allowedkeysalts\fP
 Specifies the key/salt tuples supported for long\-term keys when
