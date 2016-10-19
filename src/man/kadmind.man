@@ -42,6 +42,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 [\fB\-P\fP \fIpid_file\fP]
 [\fB\-p\fP \fIkdb5_util_path\fP]
 [\fB\-K\fP \fIkprop_path\fP]
+[\fB\-k\fP \fIkprop_port\fP]
 [\fB\-F\fP \fIdump_file\fP]
 .SH DESCRIPTION
 .sp
@@ -124,6 +125,11 @@ KDB in response to full resync requests when iprop is enabled.
 .B \fB\-K\fP \fIkprop_path\fP
 specifies the path to the kprop command to use to send full dumps
 to slaves in response to full resync requests.
+.TP
+.B \fB\-k\fP \fIkprop_port\fP
+specifies the port by which the kprop process that is spawned by kadmind
+connects to the slave kpropd, in order to transfer the dump file during
+an iprop full resync request.
 .TP
 .B \fB\-F\fP \fIdump_file\fP
 specifies the file path to be used for dumping the KDB in response
