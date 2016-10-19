@@ -2,9 +2,9 @@
 # Generated makefile dependencies follow.
 #
 kdb5.so kdb5.po $(OUTPRE)kdb5.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(top_srcdir)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/gssrpc/auth.h \
   $(top_srcdir)/include/gssrpc/auth_gss.h $(top_srcdir)/include/gssrpc/auth_unix.h \
   $(top_srcdir)/include/gssrpc/clnt.h $(top_srcdir)/include/gssrpc/rename.h \
   $(top_srcdir)/include/gssrpc/rpc.h $(top_srcdir)/include/gssrpc/rpc_msg.h \
@@ -67,17 +67,18 @@ kdb_cpw.so kdb_cpw.po $(OUTPRE)kdb_cpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
 adb_err.so adb_err.po $(OUTPRE)adb_err.$(OBJEXT): $(COM_ERR_DEPS) \
   adb_err.c
 iprop_xdr.so iprop_xdr.po $(OUTPRE)iprop_xdr.$(OBJEXT): \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(top_srcdir)/include/gssrpc/auth.h \
-  $(top_srcdir)/include/gssrpc/auth_gss.h $(top_srcdir)/include/gssrpc/auth_unix.h \
-  $(top_srcdir)/include/gssrpc/clnt.h $(top_srcdir)/include/gssrpc/rename.h \
-  $(top_srcdir)/include/gssrpc/rpc.h $(top_srcdir)/include/gssrpc/rpc_msg.h \
-  $(top_srcdir)/include/gssrpc/svc.h $(top_srcdir)/include/gssrpc/svc_auth.h \
-  $(top_srcdir)/include/gssrpc/xdr.h $(top_srcdir)/include/iprop.h \
-  iprop_xdr.c
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(top_srcdir)/include/gssrpc/auth.h $(top_srcdir)/include/gssrpc/auth_gss.h \
+  $(top_srcdir)/include/gssrpc/auth_unix.h $(top_srcdir)/include/gssrpc/clnt.h \
+  $(top_srcdir)/include/gssrpc/rename.h $(top_srcdir)/include/gssrpc/rpc.h \
+  $(top_srcdir)/include/gssrpc/rpc_msg.h $(top_srcdir)/include/gssrpc/svc.h \
+  $(top_srcdir)/include/gssrpc/svc_auth.h $(top_srcdir)/include/gssrpc/xdr.h \
+  $(top_srcdir)/include/iprop.h iprop_xdr.c
 kdb_convert.so kdb_convert.po $(OUTPRE)kdb_convert.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/gssrpc/auth.h \
   $(top_srcdir)/include/gssrpc/auth_gss.h $(top_srcdir)/include/gssrpc/auth_unix.h \
   $(top_srcdir)/include/gssrpc/clnt.h $(top_srcdir)/include/gssrpc/rename.h \
   $(top_srcdir)/include/gssrpc/rpc.h $(top_srcdir)/include/gssrpc/rpc_msg.h \
@@ -93,9 +94,9 @@ kdb_convert.so kdb_convert.po $(OUTPRE)kdb_convert.$(OBJEXT): \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h kdb_convert.c
 kdb_log.so kdb_log.po $(OUTPRE)kdb_log.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(top_srcdir)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/gssrpc/auth.h \
   $(top_srcdir)/include/gssrpc/auth_gss.h $(top_srcdir)/include/gssrpc/auth_unix.h \
   $(top_srcdir)/include/gssrpc/clnt.h $(top_srcdir)/include/gssrpc/rename.h \
   $(top_srcdir)/include/gssrpc/rpc.h $(top_srcdir)/include/gssrpc/rpc_msg.h \
@@ -134,9 +135,9 @@ t_stringattr.so t_stringattr.po $(OUTPRE)t_stringattr.$(OBJEXT): \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h t_stringattr.c
 t_ulog.so t_ulog.po $(OUTPRE)t_ulog.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(top_srcdir)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/gssrpc/auth.h \
   $(top_srcdir)/include/gssrpc/auth_gss.h $(top_srcdir)/include/gssrpc/auth_unix.h \
   $(top_srcdir)/include/gssrpc/clnt.h $(top_srcdir)/include/gssrpc/rename.h \
   $(top_srcdir)/include/gssrpc/rpc.h $(top_srcdir)/include/gssrpc/rpc_msg.h \
@@ -151,3 +152,6 @@ t_ulog.so t_ulog.po $(OUTPRE)t_ulog.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h t_ulog.c
+t_sort_key_data.so t_sort_key_data.po $(OUTPRE)t_sort_key_data.$(OBJEXT): \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/include/kdb.h \
+  $(top_srcdir)/include/krb5.h t_sort_key_data.c
