@@ -255,8 +255,10 @@ krb5_cccol_have_content(krb5_context context)
 
         ret = krb5_cc_start_seq_get(context, cache, &cache_cursor);
         save_first_error(context, ret, &errsave);
-        if (ret)
+        if (ret) {
+            krb5_cc_close(context, cache);
             continue;
+        }
         while (!found) {
             ret = krb5_cc_next_cred(context, cache, &cache_cursor, &creds);
             save_first_error(context, ret, &errsave);
