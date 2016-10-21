@@ -14,4 +14,5 @@ User commands
    ksu.rst
    kswitch.rst
    kvno.rst
+   khostrealm.rst
    sclient.rst

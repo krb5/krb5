@@ -288,6 +288,7 @@ man_pages = [
     ('user/user_commands/kswitch', 'kswitch', u'switch primary ticket cache', [u'MIT'], 1),
     ('user/user_commands/kpasswd', 'kpasswd', u'change a user\'s Kerberos password', [u'MIT'], 1),
     ('user/user_commands/kvno', 'kvno', u'print key version numbers of Kerberos principals', [u'MIT'], 1),
+    ('user/user_commands/khostrealm', 'khostrealm', u'lookup realm for a host name', [u'MIT'], 1),
     ('user/user_commands/ksu', 'ksu', u'Kerberized super-user', [u'MIT'], 1),
     ('user/user_commands/krb5-config', 'krb5-config', u'tool for linking against MIT Kerberos libraries', [u'MIT'], 1),
     ('user/user_config/k5login', 'k5login', u'Kerberos V5 acl file for host access', [u'MIT'], 5),

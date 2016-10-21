@@ -40,6 +40,7 @@
 #include "dnsglue.h"
 
 #define DEFAULT_LOOKUP_KDC 1
+#define DEFAULT_LOOKUP_REALM_SECURE 1
 #if KRB5_DNS_LOOKUP_REALM
 #define DEFAULT_LOOKUP_REALM 1
 #else
@@ -95,6 +96,13 @@ _krb5_use_dns_realm(krb5_context context)
 {
     return maybe_use_dns(context, KRB5_CONF_DNS_LOOKUP_REALM,
                          DEFAULT_LOOKUP_REALM);
+}
+
+int
+_krb5_use_dnssec_realm(krb5_context context)
+{
+    return maybe_use_dns(context, KRB5_CONF_DNSSEC_LOOKUP_REALM,
+                         DEFAULT_LOOKUP_REALM_SECURE);
 }
 
 #endif /* KRB5_DNS_LOOKUP */

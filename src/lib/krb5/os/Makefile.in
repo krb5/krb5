@@ -28,6 +28,7 @@ STLIBOBJS= \
 	hostrealm.o	\
 	hostrealm_dns.o \
 	hostrealm_domain.o \
+	hostrealm_unbound.o \
 	hostrealm_profile.o \
 	hostrealm_registry.o \
 	init_os_ctx.o	\
@@ -75,6 +76,7 @@ OBJS= \
 	$(OUTPRE)hostrealm.$(OBJEXT)	\
 	$(OUTPRE)hostrealm_dns.$(OBJEXT) \
 	$(OUTPRE)hostrealm_domain.$(OBJEXT) \
+	$(OUTPRE)hostrealm_unbound.$(OBJEXT) \
 	$(OUTPRE)hostrealm_profile.$(OBJEXT) \
 	$(OUTPRE)hostrealm_registry.$(OBJEXT) \
 	$(OUTPRE)init_os_ctx.$(OBJEXT)	\
@@ -122,6 +124,7 @@ SRCS= \
 	$(srcdir)/hostrealm.c	\
 	$(srcdir)/hostrealm_dns.c \
 	$(srcdir)/hostrealm_domain.c \
+	$(srcdir)/hostrealm_unbound.c \
 	$(srcdir)/hostrealm_profile.c \
 	$(srcdir)/hostrealm_registry.c \
 	$(srcdir)/init_os_ctx.c	\

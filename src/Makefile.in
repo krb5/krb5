@@ -119,7 +119,7 @@ WINMAKEFILES=Makefile \
 	clients\kinit\Makefile clients\klist\Makefile \
 	clients\kpasswd\Makefile clients\kvno\Makefile \
 	clients\kcpytkt\Makefile clients\kdeltkt\Makefile \
-	clients\kswitch\Makefile \
+	clients\kswitch\Makefile clients\khostrealm\Makefile \
 	include\Makefile \
 	lib\Makefile lib\crypto\Makefile lib\crypto\krb\Makefile \
 	lib\crypto\builtin\Makefile lib\crypto\builtin\aes\Makefile \
@@ -472,6 +472,7 @@ install-windows:
 	copy ccapi\lib\win\srctmp\$(CCLIB).lib "$(KRB_INSTALL_DIR)\lib\."
 	copy ccapi\server\win\srctmp\$(OUTPRE)ccapiserver.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy clients\kvno\$(OUTPRE)kvno.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy clients\khostrealm\$(OUTPRE)kvno.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy clients\klist\$(OUTPRE)klist.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy clients\kinit\$(OUTPRE)kinit.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy clients\kdestroy\$(OUTPRE)kdestroy.exe "$(KRB_INSTALL_DIR)\bin\."
@@ -481,6 +482,7 @@ install-windows:
 	copy clients\kswitch\$(OUTPRE)kswitch.exe "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) ccapi\server\win\srctmp\$(OUTPRE)ccapiserver.pdb "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) clients\kvno\$(OUTPRE)kvno.pdb "$(KRB_INSTALL_DIR)\bin\."
+	$(INSTALLDBGSYMS) clients\khostrealm\$(OUTPRE)khostrealm.pdb "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) clients\klist\$(OUTPRE)klist.pdb "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) clients\kinit\$(OUTPRE)kinit.pdb "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) clients\kdestroy\$(OUTPRE)kdestroy.pdb "$(KRB_INSTALL_DIR)\bin\."

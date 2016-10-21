@@ -212,6 +212,31 @@ The libdefaults section may contain any of the following relations:
     data), and anything the fake KDC sends will not be trusted without
     verification using some secret that it won't know.
 
+**dns_lookup_realm**
+    Indicate whether DNS TXT records should be used to determine the
+    realm name for a given host name.  When not found, the parent is
+    triend, and so on, until the root zone.  This option is not safe,
+    as Kerberos has no mechanisms for validating what it finds.  Do
+    not use it, but use **dnssec_lookup_realm** instead.
+
+**dnssec_lookup_realm**
+    Indicate whether DNS TXT records with DNSSEC validation should be
+    used to determine the realm name for a given host name.  When not
+    found, this method will not iterate upwards the DNS tree, because
+    it may cross over a zone apex without noticing.  The method rejects
+    unsigned domains.
+
+    This option is safe, and should be used instead of **dns_lookup_realm**.
+    It is only available when a secure hostrealm plugin has been compiled
+    in, such as Unbound.  The method is enabled by default.
+
+**dnssec_trust_anchor_unbound**
+    Indicate the file that holds the trust anchor from which Unbound derives
+    security validation status for DNSSEC.  The file generally holds the
+    outcome of ``dig . dnskey``, but should have been scrutinised.  Ideally,
+    you would receive it as part of your software distribution.  When unset,
+    the value defaults to ``/etc/unbound/root.key``.
+
 **dns_uri_lookup**
     Indicate whether DNS URI records should be used to locate the KDCs
     and other servers for a realm, if they are not listed in the
@@ -1133,6 +1158,7 @@ Here is an example of a generic krb5.conf file::
         default_realm = ATHENA.MIT.EDU
         dns_lookup_kdc = true
         dns_lookup_realm = false
+	dnssec_lookup_realm = true
 
     [realms]
         ATHENA.MIT.EDU = {

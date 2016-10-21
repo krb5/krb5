@@ -52,6 +52,14 @@ Most commonly used options
     for information about using DNS to determine the default realm.
     DNS lookups for realm names are disabled by default.
 
+**-**\ **-enable-unbound-for-realm**
+    Enable the use of Unbound to look up a host's Kerberos realm, and
+    to enforce DNSSEC.  (Note that DNSSEC will not be enforced for the
+    fallback and default procedures in the hostrealm API, just for the
+    primary host-to-realm translation.)  This option introduces a
+    dependency on an external Unbound library.
+    Unbound lookups realm names are enabled by default.
+
 **-**\ **-with-system-et**
     Use an installed version of the error-table (et) support software,
     the compile_et program, the com_err.h header file and the com_err

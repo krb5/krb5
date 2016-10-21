@@ -113,6 +113,7 @@ krb5_error_code krb5_make_full_ipaddr(krb5_context,
 krb5_error_code k5_try_realm_txt_rr(krb5_context context, const char *prefix,
                                     const char *name, char **realm);
 
+int _krb5_use_dnssec_realm (krb5_context);
 int _krb5_use_dns_realm (krb5_context);
 int _krb5_use_dns_kdc (krb5_context);
 int _krb5_conf_boolean (const char *);
@@ -175,6 +176,8 @@ krb5_error_code hostrealm_profile_initvt(krb5_context context, int maj_ver,
 krb5_error_code hostrealm_registry_initvt(krb5_context context, int maj_ver,
                                           int min_ver,
                                           krb5_plugin_vtable vtable);
+krb5_error_code hostrealm_unbound_initvt(krb5_context context, int maj_ver,
+                                         int min_ver, krb5_plugin_vtable vtable);
 krb5_error_code hostrealm_dns_initvt(krb5_context context, int maj_ver,
                                      int min_ver, krb5_plugin_vtable vtable);
 krb5_error_code hostrealm_domain_initvt(krb5_context context, int maj_ver,

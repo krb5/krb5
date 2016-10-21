@@ -15,7 +15,7 @@ MANSUBS=k5identity.sub k5login.sub k5srvutil.sub kadm5.acl.sub kadmin.sub \
 	kadmind.sub kdb5_ldap_util.sub kdb5_util.sub kdc.conf.sub \
 	kdestroy.sub kinit.sub klist.sub kpasswd.sub kprop.sub kpropd.sub \
 	kproplog.sub krb5.conf.sub krb5-config.sub krb5kdc.sub ksu.sub \
-	kswitch.sub ktutil.sub kvno.sub sclient.sub sserver.sub
+	kswitch.sub ktutil.sub kvno.sub khostrealm.sub sclient.sub sserver.sub
 
 docsrc=$(top_srcdir)/../doc
 
@@ -72,6 +72,7 @@ install-clientman:
 	$(INSTALL_DATA) kswitch.sub $(DESTDIR)$(CLIENT_MANDIR)/kswitch.1
 	$(INSTALL_DATA) ktutil.sub $(DESTDIR)$(CLIENT_MANDIR)/ktutil.1
 	$(INSTALL_DATA) kvno.sub $(DESTDIR)$(CLIENT_MANDIR)/kvno.1
+	$(INSTALL_DATA) khostrealm.sub $(DESTDIR)$(CLIENT_MANDIR)/khostrealm.1
 	$(INSTALL_DATA) sclient.sub $(DESTDIR)$(CLIENT_MANDIR)/sclient.1
 
 install-fileman:
@@ -112,6 +113,7 @@ install-clientcat:
 	$(GROFF_MAN) kswitch.sub > $(DESTDIR)$(CLIENT_CATDIR)/kswitch.1
 	$(GROFF_MAN) ktutil.sub > $(DESTDIR)$(CLIENT_CATDIR)/ktutil.1
 	$(GROFF_MAN) kvno.sub > $(DESTDIR)$(CLIENT_CATDIR)/kvno.1
+	$(GROFF_MAN) khostrealm.sub > $(DESTDIR)$(CLIENT_CATDIR)/khostrealm.1
 	$(GROFF_MAN) sclient.sub > $(DESTDIR)$(CLIENT_CATDIR)/sclient.1
 
 install-filecat:

@@ -1273,6 +1273,22 @@ ns_initparse ns_name_uncompress dn_skipname res_search)
 	  [AC_ERROR([cannot find res_nsearch or res_search])])
     fi
   fi
+dnl Extensions for Unbound
+  KRB5_AC_DISABLE_UNBOUND
+  AS_IF([test "x$enable_unbound_for_realm" != "xno"],[
+    # We assume that if libunbound has ub_resolve in it that we can link against it.
+    dnl WHAT? AC_CHECK_LIB(unbound, ub_resolve)
+  
+    dnl WHAT? _KRB5_AC_CHECK_UB_FUNCS(ub_ctx_create ub_ctx_delete ub_resolve ub_resolve_cleanup)
+    dnl if test $krb5_cv_func_ub_resolve = no; then
+      AC_CHECK_LIB(unbound, ub_resolve,
+        [AC_DEFINE(HAVE_UB_RESOLVE, 1,
+	  [Define to 1 if you have the `ub_resolve' function])],
+        [AC_ERROR([cannot find ub_resolve])])
+      UNBOUND_LIB=-lunbound
+      AC_SUBST(UNBOUND_LIB)
+    dnl fi
+  ])
 ])
 AC_DEFUN([_KRB5_AC_CHECK_RES_FUNCS],
 [AC_FOREACH([AC_Func], [$1],
@@ -1317,6 +1333,17 @@ enable_dns=yes
 
 AC_DEFINE(KRB5_DNS_LOOKUP, 1,[Define for DNS support of locating realms and KDCs])
 
+])
+dnl
+dnl
+dnl KRB5_AC_DISABLE_UNBOUND
+dnl
+AC_DEFUN(KRB5_AC_DISABLE_UNBOUND, [
+  AC_ARG_ENABLE([unbound-for-realm],
+    AS_HELP_STRING([--disable-unbound-for-realm],[disable Unbound-secured DNS for Kerberos realm names]))
+  AS_IF([test "x$enable_unbound_for_realm" != "xno"],[
+    AC_DEFINE(KRB5_UNBOUND_LOOKUP_REALM,1,[Define to enable Unbound-secured DNS lookups of Kerberos realm names])
+  ])
 ])
 dnl
 dnl
