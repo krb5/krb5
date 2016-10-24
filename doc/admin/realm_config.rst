@@ -78,7 +78,23 @@ would be::
 
 The value of the first TXT record found is taken as the realm name.
 
-Even if you do not choose to use this mechanism within your site,
+As a secure alternative to these DNS TXT records, there is a separate
+backend based on the Unbound library.  This library is used to enforce
+a signed chain from a trust anchor (normally the DNS root) down to the
+``_kerberos`` TXT record.  In addition, the client will not search for
+parent domains up to the top level.  Parent zones are often maintained
+by separate parties, and those may or may not be considered a good
+source of trust.
+
+The Unbound mechanism is only available for the translation from a
+host or domain name to a realm; unlike SRV lookups which lead to a
+service that is based on keys that authenticate the newly found
+connection, a similar security check is absent for host-to-realm
+lookups.  For this reason, when both DNS and Unbound mechanisms are
+enabled, the Unbound mechanism prevails.  This should make it easier
+to rely on plain DNS queries for the remaining lookups.
+
+Even if you do not choose to use these mechanism within your site,
 you may wish to set it up anyway, for use when interacting with other sites.
 
 
