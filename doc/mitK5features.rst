@@ -19,8 +19,8 @@ Quick facts
 License - :ref:`mitK5license`
 
 Releases:
-    - Latest stable: http://web.mit.edu/kerberos/krb5-1.14/
-    - Supported: http://web.mit.edu/kerberos/krb5-1.13/
+    - Latest stable: http://web.mit.edu/kerberos/krb5-1.15/
+    - Supported: http://web.mit.edu/kerberos/krb5-1.14/
     - Release cycle: 9 -- 12 months
 
 Supported platforms \/ OS distributions:
@@ -79,8 +79,6 @@ Starting from release 1.8:
 
 
 `Heimdal`
-
-* Support for reading Heimdal database starting from release 1.8
 
 * Support for KCM credential cache starting from release 1.13
 
@@ -260,6 +258,56 @@ Release 1.14
    - On slave KDCs, poll the master KDC immediately after processing a
      full resync, and do not require two full resyncs after the master
      KDC's log file is reset.
+
+Release 1.15
+
+* Administrator experience:
+
+  - Add support to kadmin for remote extraction of current keys
+    without changing them (requires a special kadmin permission that
+    is excluded from the wildcard permission), with the exception of
+    highly protected keys.
+
+  - Add a lockdown_keys principal attribute to prevent retrieval of
+    the principal's keys (old or new) via the kadmin protocol.  In
+    newly created databases, this attribute is set on the krbtgt and
+    kadmin principals.
+
+  - Restore recursive dump capability for DB2 back end, so sites can
+    more easily recover from database corruption resulting from power
+    failure events.
+
+  - Add DNS auto-discovery of KDC and kpasswd servers from URI
+    records, in addition to SRV records.  URI records can convey TCP
+    and UDP servers and master KDC status in a single DNS lookup, and
+    can also point to HTTPS proxy servers.
+
+  - Add support for password history to the LDAP back end.
+
+  - Add support for principal renaming to the LDAP back end.
+
+  - Use the getrandom system call on supported Linux kernels to avoid
+    blocking problems when getting entropy from the operating system.
+
+* Code quality:
+
+  - Clean up numerous compilation warnings.
+
+  - Remove various infrequently built modules, including some preauth
+    modules that were not built by default.
+
+* Developer experience:
+
+  - Add support for building with OpenSSL 1.1.
+
+  - Use SHA-256 instead of MD5 for (non-cryptographic) hashing of
+    authenticators in the replay cache.  This helps sites that must
+    build with FIPS 140 conformant libraries that lack MD5.
+
+* Protocol evolution:
+
+  - Add support for the AES-SHA2 enctypes, which allows sites to
+    conform to Suite B crypto requirements.
 
 `Pre-authentication mechanisms`
 
