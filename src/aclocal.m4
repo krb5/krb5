@@ -53,6 +53,8 @@ AC_SUBST(EXTRA_FILES)
 dnl Consider using AC_USE_SYSTEM_EXTENSIONS when we require autoconf
 dnl 2.59c or later, but be sure to test on Solaris first.
 AC_DEFINE([_GNU_SOURCE], 1, [Define to enable extensions in glibc])
+AC_DEFINE([__STDC_WANT_LIB_EXT1__], 1, [Define to enable C11 extensions])
+
 WITH_CC dnl
 AC_REQUIRE_CPP
 if test -z "$LD" ; then LD=$CC; fi

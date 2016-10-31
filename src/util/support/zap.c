@@ -34,5 +34,8 @@
 
 void krb5int_zap(void *ptr, size_t len)
 {
-    memset(ptr, 0, len);
+    volatile char *p = ptr;
+
+    while (len--)
+        *p++ = '\0';
 }
