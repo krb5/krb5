@@ -266,9 +266,9 @@ free_lucid_key_data(
 {
     if (key) {
         if (key->data && key->length) {
-            memset(key->data, 0, key->length);
+            zap(key->data, key->length);
             xfree(key->data);
-            memset(key, 0, sizeof(gss_krb5_lucid_key_t));
+            zap(key, sizeof(gss_krb5_lucid_key_t));
         }
     }
 }

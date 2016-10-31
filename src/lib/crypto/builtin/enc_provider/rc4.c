@@ -144,10 +144,8 @@ k5_arcfour_docrypt(krb5_key key, const krb5_data *state, krb5_crypto_iov *data,
                              (const unsigned char *)iov->data.data, iov->data.length);
     }
 
-    if (state == NULL) {
-        memset(arcfour_ctx, 0, sizeof(ArcfourContext));
-        free(arcfour_ctx);
-    }
+    if (state == NULL)
+        zapfree(arcfour_ctx, sizeof(ArcfourContext));
 
     return 0;
 }

@@ -125,14 +125,9 @@ krb5_pac_free(krb5_context context,
               krb5_pac pac)
 {
     if (pac != NULL) {
-        if (pac->data.data != NULL) {
-            memset(pac->data.data, 0, pac->data.length);
-            free(pac->data.data);
-        }
-        if (pac->pac != NULL)
-            free(pac->pac);
-        memset(pac, 0, sizeof(*pac));
-        free(pac);
+        zapfree(pac->data.data, pac->data.length);
+        free(pac->pac);
+        zapfree(pac, sizeof(*pac));
     }
 }
 

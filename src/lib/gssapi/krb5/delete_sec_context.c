@@ -87,7 +87,7 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
         krb5_free_context(ctx->k5_context);
 
     /* Zero out context */
-    memset(ctx, 0, sizeof(*ctx));
+    zap(ctx, sizeof(*ctx));
     xfree(ctx);
 
     /* zero the handle itself */

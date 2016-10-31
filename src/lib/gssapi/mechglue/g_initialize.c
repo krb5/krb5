@@ -560,10 +560,8 @@ releaseMechInfo(gss_mech_info *pCf)
 	if (cf->mech_type != GSS_C_NO_OID &&
 	    cf->mech_type != &cf->mech->mech_type)
 		generic_gss_release_oid(&minor_status, &cf->mech_type);
-	if (cf->mech != NULL && cf->freeMech) {
-		memset(cf->mech, 0, sizeof(*cf->mech));
-		free(cf->mech);
-	}
+	if (cf->freeMech)
+		zapfree(cf->mech, sizeof(*cf->mech));
 	if (cf->dl_handle != NULL)
 		krb5int_close_plugin(cf->dl_handle);
 	if (cf->int_mech_type != GSS_C_NO_OID)

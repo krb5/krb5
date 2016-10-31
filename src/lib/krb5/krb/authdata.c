@@ -480,8 +480,7 @@ krb5_authdata_context_free(krb5_context kcontext,
         context->modules = NULL;
     }
     krb5int_close_plugin_dirs(&context->plugins);
-    memset(context, 0, sizeof(*context));
-    free(context);
+    zapfree(context, sizeof(*context));
 }
 
 krb5_error_code KRB5_CALLCONV

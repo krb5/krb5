@@ -48,13 +48,8 @@ kadm5_ret_t krb5_copy_key_data_contents(context, from, to)
         if ( from->key_data_length[i] ) {
             to->key_data_contents[i] = malloc(from->key_data_length[i]);
             if (to->key_data_contents[i] == NULL) {
-                for (i = 0; i < idx; i++) {
-                    if (to->key_data_contents[i]) {
-                        memset(to->key_data_contents[i], 0,
-                               to->key_data_length[i]);
-                        free(to->key_data_contents[i]);
-                    }
-                }
+                for (i = 0; i < idx; i++)
+                    zapfree(to->key_data_contents[i], to->key_data_length[i]);
                 return ENOMEM;
             }
             memcpy(to->key_data_contents[i], from->key_data_contents[i],
