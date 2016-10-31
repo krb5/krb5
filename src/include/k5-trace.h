@@ -155,6 +155,20 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "ccselect choosing default cache {ccache} for server " \
           "principal {princ}", cache, server)
 
+#define TRACE_DNS_SRV_ANS(c, host, port, prio, weight)                \
+    TRACE(c, "SRV answer: {int} {int} {int} \"{str}\"", prio, weight, \
+          port, host)
+#define TRACE_DNS_SRV_NOTFOUND(c)               \
+    TRACE(c, "No SRV records found")
+#define TRACE_DNS_SRV_SEND(c, domain)                   \
+    TRACE(c, "Sending DNS SRV query for {str}", domain)
+#define TRACE_DNS_URI_ANS(c, uri, prio, weight)                         \
+    TRACE(c, "URI answer: {int} {int} \"{str}\"", prio, weight, uri)
+#define TRACE_DNS_URI_NOTFOUND(c)               \
+    TRACE(c, "No URI records found")
+#define TRACE_DNS_URI_SEND(c, domain)                   \
+    TRACE(c, "Sending DNS URI query for {str}", domain)
+
 #define TRACE_FAST_ARMOR_CCACHE(c, ccache_name)         \
     TRACE(c, "FAST armor ccache: {str}", ccache_name)
 #define TRACE_FAST_ARMOR_CCACHE_KEY(c, keyblock)                \
