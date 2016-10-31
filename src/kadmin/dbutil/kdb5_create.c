@@ -350,12 +350,8 @@ void kdb5_create(argc, argv)
     }
     /* clean up */
     (void) krb5_db_fini(util_context);
-    memset(master_keyblock.contents, 0, master_keyblock.length);
-    free(master_keyblock.contents);
-    if (pw_str) {
-        memset(pw_str, 0, pw_size);
-        free(pw_str);
-    }
+    zapfree(master_keyblock.contents, master_keyblock.length);
+    zapfree(pw_str, pw_size);
     free(master_salt.data);
 
     if (kadm5_create(&global_params)) {

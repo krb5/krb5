@@ -91,7 +91,7 @@ error_out:
         if (kret != 0 && context != 0)
             save_error_info((OM_uint32)kret, context);
     if (obuffer && bufsize) {
-        memset(obuffer, 0, bufsize);
+        zap(obuffer, bufsize);
         xfree(obuffer);
     }
     if (*minor_status == 0)
