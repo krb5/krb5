@@ -170,8 +170,7 @@ finish_realm(kdc_realm_t *rdp)
             krb5_free_principal(rdp->realm_context, rdp->realm_tgsprinc);
         krb5_free_context(rdp->realm_context);
     }
-    memset(rdp, 0, sizeof(*rdp));
-    free(rdp);
+    zapfree(rdp, sizeof(*rdp));
 }
 
 /* Set *val_out to an allocated string containing val1 and/or val2, separated

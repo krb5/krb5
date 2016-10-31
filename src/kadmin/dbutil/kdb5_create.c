@@ -348,10 +348,7 @@ void kdb5_create(argc, argv)
         printf(_("Warning: couldn't stash master key.\n"));
     }
     /* clean up */
-    if (pw_str) {
-        memset(pw_str, 0, pw_size);
-        free(pw_str);
-    }
+    zapfree(pw_str, pw_size);
     free(master_salt.data);
 
     if (kadm5_create(&global_params)) {
