@@ -56,6 +56,7 @@ int Dflag;
 
 int
 main(argc,argv)
+    int argc;
     char **argv;
 {
     char *argp;
