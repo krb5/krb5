@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.15-beta1\n"
+"Project-Id-Version: mit-krb5 1.15-beta1-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-19 17:22-0400\n"
+"POT-Creation-Date: 2016-11-14 17:27-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,7 +64,7 @@ msgstr ""
 #: ../../src/clients/kdestroy/kdestroy.c:144
 #: ../../src/clients/klist/klist.c:249 ../../src/clients/ksu/main.c:131
 #: ../../src/clients/ksu/main.c:137 ../../src/clients/kswitch/kswitch.c:97
-#: ../../src/kadmin/ktutil/ktutil.c:52 ../../src/kdc/main.c:954
+#: ../../src/kadmin/ktutil/ktutil.c:52 ../../src/kdc/main.c:953
 #: ../../src/slave/kprop.c:102 ../../src/slave/kpropd.c:1031
 msgid "while initializing krb5"
 msgstr ""
@@ -3273,7 +3273,7 @@ msgstr ""
 msgid "starting"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:544 ../../src/kdc/main.c:1063
+#: ../../src/kadmin/server/ovsec_kadmd.c:544 ../../src/kdc/main.c:1062
 #, c-format
 msgid "%s: starting...\n"
 msgstr ""
@@ -3483,71 +3483,71 @@ msgstr ""
 msgid "Required auth indicators not present in ticket: %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:234
+#: ../../src/kdc/main.c:233
 #, c-format
 msgid "while getting context for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:342
+#: ../../src/kdc/main.c:341
 #, c-format
 msgid "while setting default realm to %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:350
+#: ../../src/kdc/main.c:349
 #, c-format
 msgid "while initializing database for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:359
+#: ../../src/kdc/main.c:358
 #, c-format
 msgid "while setting up master key name %s for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:372
+#: ../../src/kdc/main.c:371
 #, c-format
 msgid "while fetching master key %s for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:380
+#: ../../src/kdc/main.c:379
 #, c-format
 msgid "while fetching master keys list for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:389
+#: ../../src/kdc/main.c:388
 #, c-format
 msgid "while resolving kdb keytab for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:398
+#: ../../src/kdc/main.c:397
 #, c-format
 msgid "while building TGS name for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:516
+#: ../../src/kdc/main.c:515
 #, c-format
 msgid "creating %d worker processes"
 msgstr ""
 
-#: ../../src/kdc/main.c:526
+#: ../../src/kdc/main.c:525
 msgid "Unable to reinitialize main loop"
 msgstr ""
 
-#: ../../src/kdc/main.c:531
+#: ../../src/kdc/main.c:530
 #, c-format
 msgid "Unable to initialize signal handlers in pid %d"
 msgstr ""
 
-#: ../../src/kdc/main.c:561
+#: ../../src/kdc/main.c:560
 #, c-format
 msgid "worker %ld exited with status %d"
 msgstr ""
 
-#: ../../src/kdc/main.c:585
+#: ../../src/kdc/main.c:584
 #, c-format
 msgid "signal %d received in supervisor"
 msgstr ""
 
-#: ../../src/kdc/main.c:604
+#: ../../src/kdc/main.c:603
 #, c-format
 msgid ""
 "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n"
@@ -3561,86 +3561,86 @@ msgid ""
 "arguments\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:679 ../../src/kdc/main.c:686 ../../src/kdc/main.c:800
+#: ../../src/kdc/main.c:678 ../../src/kdc/main.c:685 ../../src/kdc/main.c:799
 #, c-format
 msgid " KDC cannot initialize. Not enough memory\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:705 ../../src/kdc/main.c:748 ../../src/kdc/main.c:759
+#: ../../src/kdc/main.c:704 ../../src/kdc/main.c:747 ../../src/kdc/main.c:758
 #, c-format
 msgid "%s: KDC cannot initialize. Not enough memory\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:725 ../../src/kdc/main.c:842
+#: ../../src/kdc/main.c:724 ../../src/kdc/main.c:841
 #, c-format
 msgid "%s: cannot initialize realm %s - see log file for details\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:736
+#: ../../src/kdc/main.c:735
 #, c-format
 msgid "%s: cannot initialize realm %s. Not enough memory\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:787
+#: ../../src/kdc/main.c:786
 #, c-format
 msgid "invalid enctype %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:830
+#: ../../src/kdc/main.c:829
 msgid "while attempting to retrieve default realm"
 msgstr ""
 
-#: ../../src/kdc/main.c:832
+#: ../../src/kdc/main.c:831
 #, c-format
 msgid "%s: %s, attempting to retrieve default realm\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:940
+#: ../../src/kdc/main.c:939
 #, c-format
 msgid "%s: cannot get memory for realm list\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:975
+#: ../../src/kdc/main.c:974
 msgid "while initializing lookaside cache"
 msgstr ""
 
-#: ../../src/kdc/main.c:983
+#: ../../src/kdc/main.c:982
 msgid "while creating main loop"
 msgstr ""
 
-#: ../../src/kdc/main.c:993
+#: ../../src/kdc/main.c:992
 msgid "while initializing SAM"
 msgstr ""
 
-#: ../../src/kdc/main.c:1018
+#: ../../src/kdc/main.c:1017
 msgid "while initializing signal handlers"
 msgstr ""
 
-#: ../../src/kdc/main.c:1026
+#: ../../src/kdc/main.c:1025
 msgid "while initializing network"
 msgstr ""
 
-#: ../../src/kdc/main.c:1031
+#: ../../src/kdc/main.c:1030
 msgid "while detaching from tty"
 msgstr ""
 
-#: ../../src/kdc/main.c:1038
+#: ../../src/kdc/main.c:1037
 msgid "while creating PID file"
 msgstr ""
 
-#: ../../src/kdc/main.c:1047
+#: ../../src/kdc/main.c:1046
 msgid "creating worker processes"
 msgstr ""
 
-#: ../../src/kdc/main.c:1057
+#: ../../src/kdc/main.c:1056
 msgid "while loading audit plugin module(s)"
 msgstr ""
 
-#: ../../src/kdc/main.c:1061
+#: ../../src/kdc/main.c:1060
 msgid "commencing operation"
 msgstr ""
 
-#: ../../src/kdc/main.c:1069
+#: ../../src/kdc/main.c:1068
 msgid "shutting down"
 msgstr ""
 
@@ -4326,11 +4326,11 @@ msgstr ""
 msgid "Can't find client principal %s in cache collection"
 msgstr ""
 
-#: ../../src/lib/krb5/ccache/cccursor.c:282
+#: ../../src/lib/krb5/ccache/cccursor.c:284
 msgid "No Kerberos credentials available"
 msgstr ""
 
-#: ../../src/lib/krb5/ccache/cccursor.c:288
+#: ../../src/lib/krb5/ccache/cccursor.c:290
 #, c-format
 msgid "No Kerberos credentials available (default cache: %s)"
 msgstr ""
