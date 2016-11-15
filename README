@@ -104,6 +104,9 @@ Administrator experience:
 * Use the getrandom system call on supported Linux kernels to avoid
   blocking problems when getting entropy from the operating system.
 
+* In the PKINIT client, use the correct DigestInfo encoding for PKCS
+  #1 signatures, so that some especially strict smart cards will work.
+
 Code quality:
 
 * Clean up numerous compilation warnings.
@@ -167,6 +170,7 @@ krb5-1.15 changes by ticket ID
 8396    Skip password prompt when running ksu as root
 8398    Add libk5crypto support for OpenSSL 1.1.0
 8399    Unconstify some krb5 GSS OIDs
+8403    kinit documentation page
 8404    Remove non-DFSG documentation
 8405    Work around python-ldap bug in kerberos.ldif
 8412    Link correct VS2015 C libraries for debug builds
@@ -194,9 +198,21 @@ krb5-1.15 changes by ticket ID
 8490    Add aes-sha2 enctype support
 8494    Add krb5_db_register_keytab()
 8496    Add KDC discovery from URI records
+8498    Potential memory leak in prepare_error_as()
 8499    Use getrandom system call on recent Linux kernels
+8500    Document krb5_kt_next_entry() requirement
 8502    ret_boolean in profile_get_boolean() should be krb5_boolean *
         instead of int *
+8504    Properly handle EOF condition on libkrad sockets
+8506    PKINIT fails with PKCS#11 middlware that implements PKCS#1 V2.1
+8507    Suggest unlocked iteration for mkey rollover
+8508    Clarify krb5_kt_resolve() API documentation
+8509    Leak in krb5_cccol_have_content with truncated ccache
+8510    Update features list for 1.15
+8512    Fix detection of libaceclnt for securid_sam2
+8513    Add doxygen comments for RFC 8009, RFC 4757
+8514    Make zap() more reliable
+8516    Fix declaration without type in t_shs3.c
 
 
 Acknowledgements
@@ -350,6 +366,7 @@ reports, suggestions, and valuable resources:
     Remi Ferrand
     Paul Fertser
     William Fiveash
+    Jacques Florent
     Ákos Frohner
     Sebastian Galiano
     Marcus Granado
@@ -376,6 +393,7 @@ reports, suggestions, and valuable resources:
     Spencer Jackson
     Diogenes S. Jesus
     Pavel Jindra
+    Brian Johannesmeyer
     Joel Johnson
     Anders Kaseorg
     W. Trevor King
@@ -386,6 +404,7 @@ reports, suggestions, and valuable resources:
     Pierre Labastie
     Volker Lendecke
     Jan iankko Lieskovsky
+    Todd Lipcon
     Oliver Loch
     Kevin Longfellow
     Jon Looney
@@ -458,6 +477,7 @@ reports, suggestions, and valuable resources:
     Tsu-Phong Wu
     Xu Qiang
     Neng Xue
+    Zhaomo Yang
     Nickolai Zeldovich
     Hanz van Zijst
     Gertjan Zwartjes
