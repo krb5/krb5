@@ -1214,11 +1214,7 @@ ldap_plugin_dir=""
 ldap_lib=""
 if test -n "$OPENLDAP_PLUGIN"; then
   AC_CHECK_HEADERS(ldap.h lber.h, :, [AC_MSG_ERROR($ac_header not found)])
-  AC_CHECK_LIB(ldap, ldap_init, :, [AC_MSG_ERROR(libldap not found or missing ldap_init)])
-  old_LIBS="$LIBS"
-  LIBS="$LIBS -lldap"
-  AC_CHECK_FUNCS(ldap_initialize ldap_url_parse_nodn ldap_unbind_ext_s ldap_str2dn ldap_explode_dn)
-  LIBS="$old_LIBS"
+  AC_CHECK_LIB(ldap, ldap_str2dn, :, [AC_MSG_ERROR(libldap not found or missing ldap_str2dn)])
 
   BER_OKAY=0
   AC_CHECK_LIB(ldap, ber_init, [BER_OKAY=1])

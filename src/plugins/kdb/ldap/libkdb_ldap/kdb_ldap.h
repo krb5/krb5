@@ -300,15 +300,6 @@ krb5_ldap_lock( krb5_context, int );
 krb5_error_code
 krb5_ldap_unlock( krb5_context );
 
-#ifndef HAVE_LDAP_INITIALIZE
-int
-ldap_initialize(LDAP **, char *);
-#endif
-#ifndef HAVE_LDAP_UNBIND_EXT_S
-int
-ldap_unbind_ext_s(LDAP *, LDAPControl **, LDAPControl **);
-#endif
-
 /* lockout.c */
 krb5_error_code
 krb5_ldap_lockout_check_policy(krb5_context context,
