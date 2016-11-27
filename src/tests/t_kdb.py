@@ -13,12 +13,10 @@ if (not os.path.exists(os.path.join(plugins, 'kdb', 'kldap.so')) and
     not os.path.exists(os.path.join(buildtop, 'lib', 'libkdb_ldap.a'))):
     skip_rest('LDAP KDB tests', 'LDAP KDB module not built')
 
-system_slapd = which('slapd')
-if not system_slapd:
+if 'SLAPD' not in os.environ and not which('slapd'):
     skip_rest('LDAP KDB tests', 'slapd not found')
 
 ldapdir = os.path.abspath('ldap')
-slapd = os.path.join(ldapdir, 'slapd')
 dbdir = os.path.join(ldapdir, 'ldap')
 slapd_conf = os.path.join(ldapdir, 'slapd.conf')
 slapd_out = os.path.join(ldapdir, 'slapd.out')
@@ -36,10 +34,15 @@ shutil.rmtree(ldapdir, True)
 os.mkdir(ldapdir)
 os.mkdir(dbdir)
 
-# Some Linux installations have AppArmor or similar restrictions on
-# the slapd binary, which would prevent it from accessing the build
-# directory.  Try to defeat this by copying the binary.
-shutil.copy(system_slapd, slapd)
+if 'SLAPD' in os.environ:
+    slapd = os.environ['SLAPD']
+else:
+    # Some Linux installations have AppArmor or similar restrictions
+    # on the slapd binary, which would prevent it from accessing the
+    # build directory.  Try to defeat this by copying the binary.
+    system_slapd = which('slapd')
+    slapd = os.path.join(ldapdir, 'slapd')
+    shutil.copy(system_slapd, slapd)
 
 # Find the core schema file if we can.
 ldap_homes = ['/etc/ldap', '/etc/openldap', '/usr/local/etc/openldap',
