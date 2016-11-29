@@ -1,26 +1,32 @@
+/* ccapi/common/win/OldCC/autolock.hxx */
 /*
-
-   Copyright (C) 1998 Danilo Almeida.  All rights reserved.
-
-   automatic stack-based locking object
-
-   This file is part of FIFS (Framework for Implementing File Systems). 
-
-   This software is distributed with NO WARRANTY OF ANY KIND.  No
-   author or distributor accepts any responsibility for the
-   consequences of using it, or for whether it serves any particular
-   purpose or works at all, unless he or she says so in writing.
-   Refer to the included modified Alladin Free Public License (the
-   "License") for full details.
-
-   Every copy of this software must include a copy of the License, in
-   a plain ASCII text file named COPYING.  The License grants you the
-   right to copy, modify and redistribute this software, but only
-   under certain conditions described in the License.  Among other
-   things, the License requires that the copyright notice and this
-   notice be preserved on all copies.
-
-*/
+ * Copyright (C) 1998 by Danilo Almeida.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #ifndef __AUTOLOCK_HXX__
 #define __AUTOLOCK_HXX__
