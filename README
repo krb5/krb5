@@ -73,8 +73,8 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.15
----------------------
+Major changes in 1.15 (2016-12-01)
+----------------------------------
 
 Administrator experience:
 
@@ -213,6 +213,8 @@ krb5-1.15 changes by ticket ID
 8513    Add doxygen comments for RFC 8009, RFC 4757
 8514    Make zap() more reliable
 8516    Fix declaration without type in t_shs3.c
+8520    Relicense ccapi/common/win/OldCC/autolock.hxx
+8521    Allow slapd path configuration in t_kdb.py
 
 
 Acknowledgements
