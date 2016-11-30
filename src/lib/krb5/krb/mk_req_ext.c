@@ -213,6 +213,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     }
 
     /* Generate authenticator */
+    if ((*auth_context)->authentp == NULL) /* do not double allocate */
     if (((*auth_context)->authentp = (krb5_authenticator *)malloc(sizeof(
                                                                       krb5_authenticator))) == NULL) {
         retval = ENOMEM;
