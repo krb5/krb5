@@ -53,6 +53,7 @@ static char *prog;
 static unsigned int n_threads = N_THREADS;
 static int iter_count = ITER_COUNT;
 static int do_pause;
+static int do_copy;
 
 static void usage (void) __attribute__((noreturn));
 
@@ -67,6 +68,7 @@ usage ()
              ITER_COUNT);
     fprintf (stderr, "\t-K\tinitialize a krb5_context for the duration\n");
     fprintf (stderr, "\t-P\tpause briefly after starting, to allow attaching dtrace/strace/etc\n");
+    fprintf (stderr, "\t-C\tcopy, don't initialise context for each iteration\n");
     exit (1);
 }
 
@@ -88,7 +90,7 @@ numarg (char *arg)
     usage ();
 }
 
-static char optstring[] = "t:i:KP";
+static char optstring[] = "t:i:KPC";
 
 static void
 process_options (int argc, char *argv[])
@@ -126,6 +128,10 @@ process_options (int argc, char *argv[])
         case 'P':
             do_pause = 1;
             break;
+
+        case 'C':
+            do_copy = 1;
+            break;
         }
     }
     if (argc != optind)
@@ -151,7 +157,7 @@ now (void)
     return tv;
 }
 
-static void run_iterations (struct resource_info *r)
+static void run_iterations_init (struct resource_info *r)
 {
     int i;
     krb5_error_code err;
@@ -170,9 +176,41 @@ static void run_iterations (struct resource_info *r)
 }
 
 static void *
-thread_proc (void *p)
+thread_proc_init (void *p)
 {
-    run_iterations (p);
+    run_iterations_init (p);
+    return 0;
+}
+
+static void run_iterations_copy (struct resource_info *r)
+{
+    int i;
+    krb5_error_code err;
+    krb5_context ctx, nctx;
+
+    err = krb5_init_context(&ctx);
+    if (err) {
+        com_err(prog, err, "initializing krb5 context");
+        exit(1);
+
+    }
+
+    r->start_time = now ();
+    for (i = 0; i < iter_count; i++) {
+        err = krb5_copy_context(ctx, &nctx);
+        if (err) {
+            com_err(prog, err, "copying krb5 context");
+            exit(1);
+        }
+        krb5_free_context(nctx);
+    }
+    r->end_time = now ();
+}
+
+static void *
+thread_proc_copy (void *p)
+{
+    run_iterations_copy (p);
     return 0;
 }
 
@@ -219,7 +257,7 @@ main (int argc, char *argv[])
     foreach_thread (i) {
         int err;
 
-        err = pthread_create (&tinfo[i].tid, NULL, thread_proc, &tinfo[i].r);
+        err = pthread_create (&tinfo[i].tid, NULL, do_copy ? thread_proc_copy : thread_proc_init, &tinfo[i].r);
         if (err) {
             fprintf (stderr, "pthread_create: %s\n", strerror (err));
             exit (1);
