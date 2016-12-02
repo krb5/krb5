@@ -878,7 +878,7 @@ objectClasses: ( 2.16.840.1.113719.1.301.6.14.1
                 NAME 'krbPwdPolicy' 
                 SUP top
                 MUST ( cn )
-                MAY ( krbMaxPwdLife $ krbMinPwdLife $ krbPwdMinDiffChars $ krbPwdMinLength $ krbPwdHistoryLength $ krbPwdMaxFailure $ krbPwdFailureCountInterval $ krbPwdLockoutDuration ) )
+                MAY ( krbMaxPwdLife $ krbMinPwdLife $ krbPwdMinDiffChars $ krbPwdMinLength $ krbPwdHistoryLength $ krbPwdMaxFailure $ krbPwdFailureCountInterval $ krbPwdLockoutDuration $ krbPwdAttributes $ krbPwdMaxLife $ krbPwdMaxRenewableLife $ krbPwdAllowedKeysalts ) )
 
 
 ##### The krbTicketPolicyAux holds Kerberos ticket policy attributes.
