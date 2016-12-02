@@ -517,7 +517,7 @@ errout:
         free(rep->server);
     if (rep->msghash)
         free(rep->msghash);
-    rep->client = rep->server = 0;
+    rep->client = rep->server = rep->msghash = NULL;
     return retval;
 }
 
