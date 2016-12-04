@@ -88,6 +88,7 @@ realm, realm2 = cross_realms(2, args=({'realm': 'LOCAL'},
 realm.run([kadminl, 'modprinc', '+requires_preauth', '-maxrenewlife', '2 days',
            realm.user_princ])
 realm.run([kadminl, 'modprinc', '-maxrenewlife', '2 days', realm.host_princ])
+realm.run([kadminl, 'modprinc', '-maxrenewlife', '2 days', realm.krbtgt_princ])
 realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
 realm.extract_keytab(realm.host_princ, realm.keytab)
 realm.extract_keytab('krbtgt/FOREIGN', realm.keytab)
@@ -176,6 +177,13 @@ realm.kinit(realm.user_princ, password('user'), ['-f'])
 realm.run([kadminl, 'cpw', '-randkey', '-keepold', '-e', 'des3-cbc-sha1',
            realm.krbtgt_princ])
 realm.run(['./forward'])
+realm.run([kvno, realm.host_princ])
+
+# Repeat the above test using a renewed TGT.
+realm.kinit(realm.user_princ, password('user'), ['-r', '2d'])
+realm.run([kadminl, 'cpw', '-randkey', '-keepold', '-e', 'aes128-cts',
+           realm.krbtgt_princ])
+realm.kinit(realm.user_princ, None, ['-R'])
 realm.run([kvno, realm.host_princ])
 
 realm.stop()
