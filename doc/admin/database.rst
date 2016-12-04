@@ -765,6 +765,24 @@ database as well as the new key.  For example::
              with older kvnos, ideally first making sure that all
              tickets issued with the old keys have expired.
 
+Only the first krbtgt key of the newest key version is used to encrypt
+ticket-granting tickets.  However, the set of encryption types present
+in the krbtgt keys is used by default to determine the session key
+types supported by the krbtgt service (see
+:ref:`session_key_selection`).  Because non-MIT Kerberos clients
+sometimes send a limited set of encryption types when making AS
+requests, it can be important to for the krbtgt service to support
+multiple encryption types.  This can be accomplished by giving the
+krbtgt principal multiple keys, which is usually as simple as not
+specifying any **-e** option when changing the krbtgt key, or by
+setting the **session_enctypes** string attribute on the krbtgt
+principal (see :ref:`set_string`).
+
+Due to a bug in releases 1.8 through 1.13, renewed and forwarded
+tickets may not work if the original ticket was obtained prior to a
+krbtgt key change and the modified ticket is obtained afterwards.
+Upgrading the KDC to release 1.14 or later will correct this bug.
+
 
 .. _incr_db_prop:
 
