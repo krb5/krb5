@@ -221,6 +221,19 @@ typedef struct krb5_kdcpreauth_callbacks_st {
 
     /* End of version 3 kdcpreauth callbacks. */
 
+    /*
+     * Return true if princ matches the principal named in the request or the
+     * client principal (possibly canonicalized).  If princ does not match,
+     * attempt a database lookup of princ with aliases allowed and compare the
+     * result to the client principal, returning true if it matches.
+     * Otherwise, return false.
+     */
+    krb5_boolean (*match_client)(krb5_context context,
+                                 krb5_kdcpreauth_rock rock,
+                                 krb5_principal princ);
+
+    /* End of version 4 kdcpreauth callbacks. */
+
 } *krb5_kdcpreauth_callbacks;
 
 /* Optional: preauth plugin initialization function. */

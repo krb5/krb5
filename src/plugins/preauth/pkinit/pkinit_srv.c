@@ -121,6 +121,8 @@ static krb5_error_code
 verify_client_san(krb5_context context,
                   pkinit_kdc_context plgctx,
                   pkinit_kdc_req_context reqctx,
+                  krb5_kdcpreauth_callbacks cb,
+                  krb5_kdcpreauth_rock rock,
                   krb5_principal client,
                   int *valid_san)
 {
@@ -171,7 +173,7 @@ verify_client_san(krb5_context context,
                  __FUNCTION__, client_string, san_string);
         krb5_free_unparsed_name(context, san_string);
 #endif
-        if (krb5_principal_compare(context, princs[i], client)) {
+        if (cb->match_client(context, rock, princs[i])) {
             pkiDebug("%s: pkinit san match found\n", __FUNCTION__);
             *valid_san = 1;
             retval = 0;
@@ -199,7 +201,7 @@ verify_client_san(krb5_context context,
                  __FUNCTION__, client_string, san_string);
         krb5_free_unparsed_name(context, san_string);
 #endif
-        if (krb5_principal_compare(context, upns[i], client)) {
+        if (cb->match_client(context, rock, upns[i])) {
             pkiDebug("%s: upn san match found\n", __FUNCTION__);
             *valid_san = 1;
             retval = 0;
@@ -387,8 +389,8 @@ pkinit_server_verify_padata(krb5_context context,
     }
     if (is_signed) {
 
-        retval = verify_client_san(context, plgctx, reqctx, request->client,
-                                   &valid_san);
+        retval = verify_client_san(context, plgctx, reqctx, cb, rock,
+                                   request->client, &valid_san);
         if (retval)
             goto cleanup;
         if (!valid_san) {

@@ -2186,7 +2186,9 @@ crypto_retrieve_X509_sans(krb5_context context,
                     /* Prevent abuse of embedded null characters. */
                     if (memchr(name.data, '\0', name.length))
                         break;
-                    ret = krb5_parse_name(context, name.data, &upns[u]);
+                    ret = krb5_parse_name_flags(context, name.data,
+                                                KRB5_PRINCIPAL_PARSE_ENTERPRISE,
+                                                &upns[u]);
                     if (ret) {
                         pkiDebug("%s: failed parsing ms-upn san value\n",
                                  __FUNCTION__);
