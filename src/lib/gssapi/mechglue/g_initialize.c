@@ -57,6 +57,7 @@
 
 #define MECH_SYM "gss_mech_initialize"
 #define MECH_INTERPOSER_SYM "gss_mech_interposer"
+#define MECH_DESTROY_HOOK "gss_mech_destroy_hook"
 
 #ifndef MECH_CONF
 #define	MECH_CONF "/etc/gss/mech"
@@ -538,6 +539,35 @@ initMechList(void)
 }
 
 static void
+gssint_plugin_destroyer_hook(void *ptr)
+{
+	/* neutralize dl_handle, so we do not call dlclose() twice */
+	gss_mech_info mechinfo = (gss_mech_info)ptr;
+	mechinfo->dl_handle_no_close = 1;
+}
+
+static void
+gssint_set_mechinfo_handle(gss_mech_info mechinfo, void *handle)
+{
+	struct errinfo errinfo;
+	void (*sym)();
+
+	mechinfo->dl_handle = handle;
+
+	/*
+	 * Register a destructor hook, if it fails unset mark handle as
+	 * no_close so we do not try to double close the handle (which may
+	 * cause an assert to be thrown in glibc
+	 */
+	if (krb5int_get_plugin_func(handle, MECH_DESTROY_HOOK,
+				    (void (**)())&sym, &errinfo) == 0) {
+		(*sym)(gssint_plugin_destroyer_hook, mechinfo);
+	} else {
+		mechinfo->dl_handle_no_close = 1;
+	}
+}
+
+static void
 releaseMechInfo(gss_mech_info *pCf)
 {
 	gss_mech_info cf;
@@ -562,7 +592,7 @@ releaseMechInfo(gss_mech_info *pCf)
 		generic_gss_release_oid(&minor_status, &cf->mech_type);
 	if (cf->freeMech)
 		zapfree(cf->mech, sizeof(*cf->mech));
-	if (cf->dl_handle != NULL)
+	if (cf->dl_handle != NULL && cf->dl_handle_no_close == 0)
 		krb5int_close_plugin(cf->dl_handle);
 	if (cf->int_mech_type != GSS_C_NO_OID)
 		generic_gss_release_oid(&minor_status, &cf->int_mech_type);
@@ -955,7 +985,7 @@ loadInterMech(gss_mech_info minfo)
 	}
 	(void)gss_release_oid_set(&min, &list);
 
-	minfo->dl_handle = dl;
+	gssint_set_mechinfo_handle(minfo, dl);
 	dl = NULL;
 
 cleanup:
@@ -1188,7 +1218,7 @@ gssint_get_mechanism(gss_const_OID oid)
 		return ((gss_mechanism)NULL);
 	}
 
-	aMech->dl_handle = dl;
+	gssint_set_mechinfo_handle(aMech, dl);
 
 	k5_mutex_unlock(&g_mechListLock);
 	return (aMech->mech);
