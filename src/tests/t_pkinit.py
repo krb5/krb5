@@ -23,6 +23,9 @@ privkey_pem = os.path.join(certs, 'privkey.pem')
 privkey_enc_pem = os.path.join(certs, 'privkey-enc.pem')
 user_p12 = os.path.join(certs, 'user.p12')
 user_enc_p12 = os.path.join(certs, 'user-enc.p12')
+user_upn_p12 = os.path.join(certs, 'user-upn.p12')
+user_upn2_p12 = os.path.join(certs, 'user-upn2.p12')
+user_upn3_p12 = os.path.join(certs, 'user-upn3.p12')
 path = os.path.join(os.getcwd(), 'testdir', 'tmp-pkinit-certs')
 path_enc = os.path.join(os.getcwd(), 'testdir', 'tmp-pkinit-certs-enc')
 
@@ -36,6 +39,20 @@ pkinit_kdc_conf = {'realms': {'$realm': {
 restrictive_kdc_conf = {'realms': {'$realm': {
             'restrict_anonymous_to_tgt': 'true' }}}
 
+testprincs = {'krbtgt/KRBTEST.COM': {'keys': 'aes128-cts'},
+              'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
+              'user2': {'keys': 'aes128-cts', 'flags': '+preauth'}}
+alias_kdc_conf = {'realms': {'$realm': {
+            'default_principal_flags': '+preauth',
+            'pkinit_eku_checking': 'none',
+            'pkinit_allow_upn': 'true',
+            'pkinit_identity': 'FILE:%s,%s' % (kdc_pem, privkey_pem),
+            'database_module': 'test'}},
+                  'dbmodules': {'test': {
+                      'db_library': 'test',
+                      'alias': {'user@krbtest.com': 'user'},
+                      'princs': testprincs}}}
+
 file_identity = 'FILE:%s,%s' % (user_pem, privkey_pem)
 file_enc_identity = 'FILE:%s,%s' % (user_pem, privkey_enc_pem)
 dir_identity = 'DIR:%s' % path
@@ -45,10 +62,50 @@ dir_file_identity = 'FILE:%s,%s' % (os.path.join(path, 'user.crt'),
 dir_file_enc_identity = 'FILE:%s,%s' % (os.path.join(path_enc, 'user.crt'),
                                         os.path.join(path_enc, 'user.key'))
 p12_identity = 'PKCS12:%s' % user_p12
+p12_upn_identity = 'PKCS12:%s' % user_upn_p12
+p12_upn2_identity = 'PKCS12:%s' % user_upn2_p12
+p12_upn3_identity = 'PKCS12:%s' % user_upn3_p12
 p12_enc_identity = 'PKCS12:%s' % user_enc_p12
 p11_identity = 'PKCS11:soft-pkcs11.so'
 p11_token_identity = ('PKCS11:module_name=soft-pkcs11.so:'
                       'slotid=1:token=SoftToken (token)')
+
+# Start a realm with the test kdb module for the following UPN SAN tests.
+realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=alias_kdc_conf,
+                create_kdb=False)
+realm.start_kdc()
+
+# Compatibility check: cert contains UPN "user", which matches the
+# request principal user@KRBTEST.COM if parsed as a normal principal.
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % p12_upn2_identity])
+
+# Compatibility check: cert contains UPN "user@KRBTEST.COM", which matches
+# the request principal user@KRBTEST.COM if parsed as a normal principal.
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % p12_upn3_identity])
+
+# Cert contains UPN "user@krbtest.com" which is aliased to the request
+# principal.
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % p12_upn_identity])
+
+# Test an id-pkinit-san match to a post-canonical principal.
+realm.kinit('user@krbtest.com',
+            flags=['-E', '-X', 'X509_user_identity=%s' % p12_identity])
+
+# Test a UPN match to a post-canonical principal.  (This only works
+# for the cert with the UPN containing just "user", as we don't allow
+# UPN reparsing when comparing to the canonicalized client principal.)
+realm.kinit('user@krbtest.com',
+            flags=['-E', '-X', 'X509_user_identity=%s' % p12_upn2_identity])
+
+# Test a mismatch.
+out = realm.run([kinit, '-X', 'X509_user_identity=%s' % p12_upn2_identity,
+                 'user2'], expected_code=1)
+if 'kinit: Client name mismatch while getting initial credentials' not in out:
+    fail('Wrong error for UPN SAN mismatch')
+realm.stop()
 
 realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
                 get_creds=False)
