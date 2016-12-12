@@ -157,21 +157,12 @@ main(int argc, char *argv[])
         goto cleanup;
     }
 
-    if (code = krb5_cc_get_principal(kcontext, mslsa_ccache, &princ)) {
-        com_err(argv[0], code, "while obtaining MS LSA principal");
-        goto cleanup;
-    }
-
     if (ccachestr)
         code = krb5_cc_resolve(kcontext, ccachestr, &ccache);
     else
         code = krb5_cc_resolve(kcontext, "API:", &ccache);
     if (code) {
         com_err(argv[0], code, "while getting default ccache");
-        goto cleanup;
-    }
-    if (code = krb5_cc_initialize(kcontext, ccache, princ)) {
-        com_err (argv[0], code, "when initializing ccache");
         goto cleanup;
     }
 
@@ -191,7 +182,6 @@ main(int argc, char *argv[])
     }
 
 cleanup:
-    krb5_free_principal(kcontext, princ);
     if (ccache != NULL)
         krb5_cc_close(kcontext, ccache);
     if (mslsa_ccache != NULL)

@@ -7,6 +7,18 @@ krb5_cc_copy_creds(krb5_context context, krb5_ccache incc, krb5_ccache outcc)
     krb5_error_code code;
     krb5_cc_cursor cur = 0;
     krb5_creds creds;
+    krb5_principal princ = NULL;
+
+    code = krb5_cc_get_principal(context, incc, &princ);
+    if (code != 0) {
+        goto cleanup;
+    }
+
+    code = krb5_cc_initialize(context, outcc, princ);
+    krb5_free_principal(context, princ);
+    if (code != 0) {
+        goto cleanup;
+    }
 
     if ((code = krb5_cc_start_seq_get(context, incc, &cur)))
         goto cleanup;

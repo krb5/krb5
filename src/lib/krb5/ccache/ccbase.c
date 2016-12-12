@@ -366,16 +366,6 @@ krb5_cc_move(krb5_context context, krb5_ccache src, krb5_ccache dst)
         return ret;
     }
 
-    ret = krb5_cc_get_principal(context, src, &princ);
-    if (!ret) {
-        ret = krb5_cc_initialize(context, dst, princ);
-    }
-    if (ret) {
-        krb5_cc_unlock(context, src);
-        krb5_cccol_unlock(context);
-        return ret;
-    }
-
     ret = krb5_cc_lock(context, dst);
     if (!ret) {
         ret = krb5_cc_copy_creds(context, src, dst);
