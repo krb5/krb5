@@ -169,6 +169,11 @@ OM_uint32 KRB5_CALLCONV gss_krb5_get_tkt_flags(
     gss_ctx_id_t context_handle,
     krb5_flags *ticket_flags);
 
+/*
+ * Copy krb5 creds from cred_handle into out_ccache, which must already be
+ * initialized.  Use gss_store_cred_into() (new in krb5 1.11) instead, if
+ * possible.
+ */
 OM_uint32 KRB5_CALLCONV gss_krb5_copy_ccache(
     OM_uint32 *minor_status,
     gss_cred_id_t cred_handle,
