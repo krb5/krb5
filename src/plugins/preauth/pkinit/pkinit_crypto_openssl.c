@@ -4188,24 +4188,24 @@ pkinit_sign_data(krb5_context context,
 }
 
 
-static krb5_error_code
+static int
 decode_data(uint8_t **out_data, unsigned int *out_data_len,
             const uint8_t *data, unsigned int data_len, EVP_PKEY *pkey,
             X509 *cert)
 {
-    krb5_error_code retval = ENOMEM;
+    int retval;
     unsigned char *buf = NULL;
     int buf_len = 0;
 
     if (cert && !X509_check_private_key(cert, pkey)) {
         pkiDebug("private key does not match certificate\n");
-        goto cleanup;
+        return 0;
     }
 
     buf_len = EVP_PKEY_size(pkey);
     buf = malloc((size_t) buf_len + 10);
     if (buf == NULL)
-        goto cleanup;
+        return 0;
 
 #if OPENSSL_VERSION_NUMBER >= 0x00909000L
     retval = EVP_PKEY_decrypt_old(buf, data, (int)data_len, pkey);
@@ -4214,16 +4214,13 @@ decode_data(uint8_t **out_data, unsigned int *out_data_len,
 #endif
     if (retval <= 0) {
         pkiDebug("unable to decrypt received data (len=%d)\n", data_len);
-        goto cleanup;
+        free(buf);
+        return 0;
     }
     *out_data = buf;
     *out_data_len = retval;
 
-cleanup:
-    if (retval == ENOMEM)
-        free(buf);
-
-    return retval;
+    return 1;
 }
 
 static krb5_error_code
