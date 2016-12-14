@@ -67,10 +67,6 @@ static krb5_error_code pkinit_decode_data
  const uint8_t *data, unsigned int data_len, uint8_t **decoded,
  unsigned int *decoded_len);
 
-static krb5_error_code decode_data
-(uint8_t **, unsigned int *, const uint8_t *, unsigned int, EVP_PKEY *pkey,
- X509 *cert);
-
 #ifdef DEBUG_DH
 static void print_dh(DH *, char *);
 static void print_pubkey(BIGNUM *, char *);
@@ -3979,12 +3975,34 @@ pkinit_decode_data_fs(krb5_context context,
                       const uint8_t *data, unsigned int data_len,
                       uint8_t **decoded_data, unsigned int *decoded_data_len)
 {
-    if (decode_data(decoded_data, decoded_data_len, data, data_len,
-                    id_cryptoctx->my_key, sk_X509_value(id_cryptoctx->my_certs,
-                                                        id_cryptoctx->cert_index)) <= 0) {
-        pkiDebug("failed to decode data\n");
+    X509 *cert = sk_X509_value(id_cryptoctx->my_certs,
+                               id_cryptoctx->cert_index);
+    EVP_PKEY *pkey = id_cryptoctx->my_key;
+    uint8_t *buf;
+    int buf_len, decrypt_len;
+
+    *decoded_data = NULL;
+    *decoded_data_len = 0;
+
+    if (cert != NULL && !X509_check_private_key(cert, pkey)) {
+        pkiDebug("private key does not match certificate\n");
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
+
+    buf_len = EVP_PKEY_size(pkey);
+    buf = malloc(buf_len + 10);
+    if (buf == NULL)
+        return KRB5KDC_ERR_PREAUTH_FAILED;
+
+    decrypt_len = EVP_PKEY_decrypt_old(buf, data, data_len, pkey);
+    if (decrypt_len <= 0) {
+        pkiDebug("unable to decrypt received data (len=%d)\n", data_len);
+        free(buf);
+        return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+
+    *decoded_data = buf;
+    *decoded_data_len = decrypt_len;
     return 0;
 }
 
@@ -4026,6 +4044,9 @@ pkinit_decode_data_pkcs11(krb5_context context,
     CK_MECHANISM mech;
     uint8_t *cp;
     int r;
+
+    *decoded_data = NULL;
+    *decoded_data_len = 0;
 
     if (pkinit_open_session(context, id_cryptoctx)) {
         pkiDebug("can't open pkcs11 session\n");
@@ -4074,6 +4095,9 @@ pkinit_decode_data(krb5_context context,
                    uint8_t **decoded_data, unsigned int *decoded_data_len)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
+
+    *decoded_data = NULL;
+    *decoded_data_len = 0;
 
     if (id_cryptoctx->pkcs11_method != 1)
         retval = pkinit_decode_data_fs(context, id_cryptoctx, data, data_len,
@@ -4187,41 +4211,6 @@ pkinit_sign_data(krb5_context context,
     return retval;
 }
 
-
-static int
-decode_data(uint8_t **out_data, unsigned int *out_data_len,
-            const uint8_t *data, unsigned int data_len, EVP_PKEY *pkey,
-            X509 *cert)
-{
-    int retval;
-    unsigned char *buf = NULL;
-    int buf_len = 0;
-
-    if (cert && !X509_check_private_key(cert, pkey)) {
-        pkiDebug("private key does not match certificate\n");
-        return 0;
-    }
-
-    buf_len = EVP_PKEY_size(pkey);
-    buf = malloc((size_t) buf_len + 10);
-    if (buf == NULL)
-        return 0;
-
-#if OPENSSL_VERSION_NUMBER >= 0x00909000L
-    retval = EVP_PKEY_decrypt_old(buf, data, (int)data_len, pkey);
-#else
-    retval = EVP_PKEY_decrypt(buf, data, (int)data_len, pkey);
-#endif
-    if (retval <= 0) {
-        pkiDebug("unable to decrypt received data (len=%d)\n", data_len);
-        free(buf);
-        return 0;
-    }
-    *out_data = buf;
-    *out_data_len = retval;
-
-    return 1;
-}
 
 static krb5_error_code
 create_signature(unsigned char **sig, unsigned int *sig_len,
