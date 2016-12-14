@@ -34,7 +34,7 @@
  * Declarations for kdcpreauth plugin module implementors.
  *
  * The kdcpreauth interface has a single supported major version, which is 1.
- * Major version 1 has a current minor version of 3.  kdcpreauth modules should
+ * Major version 1 has a current minor version of 2.  kdcpreauth modules should
  * define a function named kdcpreauth_<modulename>_initvt, matching the
  * signature:
  *
