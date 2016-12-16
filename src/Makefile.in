@@ -501,7 +501,7 @@ check-pytests-no: check-postrecurse
 		$(SKIPTESTS)
 
 check-cmocka-no: check-postrecurse
-	@echo 'Skipped cmocka tests due to missing library or header file' >> \
+	@echo 'Skipped cmocka tests: cmocka library or header not found' >> \
 		$(SKIPTESTS)
 
 # Create a test realm and spawn a shell in an environment pointing to it.
