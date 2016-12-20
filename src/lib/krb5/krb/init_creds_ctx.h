@@ -6,6 +6,8 @@
 #include "k5-json.h"
 #include "int-proto.h"
 
+typedef struct krb5_preauth_req_context_st *krb5_preauth_req_context;
+
 struct krb5_responder_context_st {
     k5_response_items *items;
 };
@@ -67,6 +69,7 @@ struct _krb5_init_creds_context {
     krb5_timestamp pa_offset;
     krb5_int32 pa_offset_usec;
     enum { NO_OFFSET = 0, UNAUTH_OFFSET, AUTH_OFFSET } pa_offset_state;
+    krb5_preauth_req_context preauth_reqctx;
 };
 
 krb5_error_code

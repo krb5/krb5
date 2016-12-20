@@ -583,7 +583,7 @@ krb5_init_creds_free(krb5_context context,
     k5_response_items_free(ctx->rctx.items);
     free(ctx->in_tkt_service);
     zapfree(ctx->gakpw.storage.data, ctx->gakpw.storage.length);
-    k5_preauth_request_context_fini(context);
+    k5_preauth_request_context_fini(context, ctx);
     krb5_free_error(context, ctx->err_reply);
     krb5_free_pa_data(context, ctx->err_padata);
     krb5_free_cred_contents(context, &ctx->cred);
@@ -834,8 +834,8 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
     if (fast_upgrade)
         ctx->fast_state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
 
-    k5_preauth_request_context_fini(context);
-    k5_preauth_request_context_init(context);
+    k5_preauth_request_context_fini(context, ctx);
+    k5_preauth_request_context_init(context, ctx);
     krb5_free_data(context, ctx->outer_request_body);
     ctx->outer_request_body = NULL;
     if (ctx->opt->flags & KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST) {
@@ -1522,7 +1522,7 @@ init_creds_step_reply(krb5_context context,
         } else if ((reply_code == KDC_ERR_MORE_PREAUTH_DATA_REQUIRED ||
                     reply_code == KDC_ERR_PREAUTH_REQUIRED) && retry) {
             /* reset the list of preauth types to try */
-            k5_reset_preauth_types_tried(context);
+            k5_reset_preauth_types_tried(ctx);
             krb5_free_pa_data(context, ctx->preauth_to_use);
             ctx->preauth_to_use = ctx->err_padata;
             ctx->err_padata = NULL;
@@ -1573,7 +1573,7 @@ init_creds_step_reply(krb5_context context,
         goto cleanup;
 
     /* process any preauth data in the as_reply */
-    k5_reset_preauth_types_tried(context);
+    k5_reset_preauth_types_tried(ctx);
     code = krb5int_fast_process_response(context, ctx->fast_state,
                                          ctx->reply, &strengthen_key);
     if (code != 0)
@@ -1658,7 +1658,7 @@ init_creds_step_reply(krb5_context context,
             k5_prependmsg(context, code, _("Failed to store credentials"));
     }
 
-    k5_preauth_request_context_fini(context);
+    k5_preauth_request_context_fini(context, ctx);
 
     /* success */
     ctx->complete = TRUE;

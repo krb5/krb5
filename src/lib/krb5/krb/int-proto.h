@@ -196,17 +196,19 @@ void
 k5_free_preauth_context(krb5_context context);
 
 void
-k5_reset_preauth_types_tried(krb5_context context);
+k5_reset_preauth_types_tried(krb5_init_creds_context ctx);
 
 void
 k5_preauth_prepare_request(krb5_context context, krb5_get_init_creds_opt *opt,
                            krb5_kdc_req *request);
 
 void
-k5_preauth_request_context_init(krb5_context context);
+k5_preauth_request_context_init(krb5_context context,
+                                krb5_init_creds_context ctx);
 
 void
-k5_preauth_request_context_fini(krb5_context context);
+k5_preauth_request_context_fini(krb5_context context,
+                                krb5_init_creds_context ctx);
 
 krb5_error_code
 k5_response_items_new(k5_response_items **ri_out);

@@ -305,6 +305,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Preauth tryagain input types: {patypes}", padata)
 #define TRACE_PREAUTH_TRYAGAIN_OUTPUT(c, padata)                        \
     TRACE(c, "Followup preauth for next request: {patypes}", padata)
+#define TRACE_PREAUTH_WRONG_CONTEXT(c)                                  \
+    TRACE(c, "Wrong context passed to krb5_init_creds_free(); leaking " \
+          "modreq objects")
 
 #define TRACE_PROFILE_ERR(c,subsection, section, retval)             \
     TRACE(c, "Bad value of {str} from [{str}] in conf file: {kerr}", \
