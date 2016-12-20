@@ -161,7 +161,7 @@ k5_init_preauth_context(krb5_context context)
     list[count] = NULL;
 
     /* Place the constructed preauth context into the krb5 context. */
-    context->preauth_context = malloc(sizeof(struct krb5_preauth_context_st));
+    context->preauth_context = malloc(sizeof(*context->preauth_context));
     if (context->preauth_context == NULL)
         goto cleanup;
     context->preauth_context->tried = NULL;
@@ -181,7 +181,7 @@ cleanup:
 void
 k5_reset_preauth_types_tried(krb5_context context)
 {
-    struct krb5_preauth_context_st *pctx = context->preauth_context;
+    krb5_preauth_context pctx = context->preauth_context;
 
     if (pctx == NULL)
         return;
@@ -196,7 +196,7 @@ k5_reset_preauth_types_tried(krb5_context context)
 void
 k5_free_preauth_context(krb5_context context)
 {
-    struct krb5_preauth_context_st *pctx = context->preauth_context;
+    krb5_preauth_context pctx = context->preauth_context;
 
     if (pctx == NULL)
         return;
@@ -211,7 +211,7 @@ k5_free_preauth_context(krb5_context context)
 void
 k5_preauth_request_context_init(krb5_context context)
 {
-    struct krb5_preauth_context_st *pctx = context->preauth_context;
+    krb5_preauth_context pctx = context->preauth_context;
     clpreauth_handle *hp, h;
 
     if (pctx == NULL) {
@@ -233,7 +233,7 @@ k5_preauth_request_context_init(krb5_context context)
 void
 k5_preauth_request_context_fini(krb5_context context)
 {
-    struct krb5_preauth_context_st *pctx = context->preauth_context;
+    krb5_preauth_context pctx = context->preauth_context;
     clpreauth_handle *hp, h;
 
     if (pctx == NULL)
@@ -495,7 +495,7 @@ void
 k5_preauth_prepare_request(krb5_context context, krb5_get_init_creds_opt *opt,
                            krb5_kdc_req *req)
 {
-    struct krb5_preauth_context_st *pctx = context->preauth_context;
+    krb5_preauth_context pctx = context->preauth_context;
     clpreauth_handle *hp, h;
     krb5_enctype *ep;
 
@@ -556,7 +556,7 @@ pa_type_allowed(krb5_init_creds_context ctx, krb5_preauthtype pa_type)
 static krb5_boolean
 already_tried(krb5_context context, krb5_preauthtype pa_type)
 {
-    struct krb5_preauth_context_st *pctx = context->preauth_context;
+    krb5_preauth_context pctx = context->preauth_context;
     size_t count;
     krb5_preauthtype *newptr;
 
@@ -580,7 +580,7 @@ process_pa_data(krb5_context context, krb5_init_creds_context ctx,
                 krb5_pa_data ***out_pa_list, int *out_pa_list_size,
                 krb5_preauthtype *out_type)
 {
-    struct krb5_preauth_context_st *pctx = context->preauth_context;
+    krb5_preauth_context pctx = context->preauth_context;
     struct errinfo save = EMPTY_ERRINFO;
     krb5_pa_data *pa, **pa_ptr, **mod_pa;
     krb5_error_code ret = 0;
@@ -858,7 +858,7 @@ krb5_error_code
 k5_preauth_tryagain(krb5_context context, krb5_init_creds_context ctx,
                     krb5_pa_data **in_padata, krb5_pa_data ***padata_out)
 {
-    struct krb5_preauth_context_st *pctx = context->preauth_context;
+    krb5_preauth_context pctx = context->preauth_context;
     krb5_error_code ret;
     krb5_pa_data **mod_pa;
     clpreauth_handle h;
@@ -897,7 +897,7 @@ static krb5_error_code
 fill_response_items(krb5_context context, krb5_init_creds_context ctx,
                     krb5_pa_data **in_padata)
 {
-    struct krb5_preauth_context_st *pctx = context->preauth_context;
+    krb5_preauth_context pctx = context->preauth_context;
     krb5_error_code ret;
     krb5_pa_data *pa;
     clpreauth_handle h;
@@ -1004,7 +1004,7 @@ krb5_preauth_supply_preauth_data(krb5_context context,
                                  krb5_get_init_creds_opt *opt,
                                  const char *attr, const char *value)
 {
-    struct krb5_preauth_context_st *pctx = context->preauth_context;
+    krb5_preauth_context pctx = context->preauth_context;
     clpreauth_handle *hp, h;
     krb5_error_code ret;
 
