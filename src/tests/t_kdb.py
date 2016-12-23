@@ -16,22 +16,27 @@ if (not os.path.exists(os.path.join(plugins, 'kdb', 'kldap.so')) and
 if 'SLAPD' not in os.environ and not which('slapd'):
     skip_rest('LDAP KDB tests', 'slapd not found')
 
+slapadd = which('slapadd')
+if not slapadd:
+    skip_rest('LDAP KDB tests', 'slapadd not found')
+
 ldapdir = os.path.abspath('ldap')
 dbdir = os.path.join(ldapdir, 'ldap')
-slapd_conf = os.path.join(ldapdir, 'slapd.conf')
+slapd_conf = os.path.join(ldapdir, 'slapd.d')
 slapd_out = os.path.join(ldapdir, 'slapd.out')
 slapd_pidfile = os.path.join(ldapdir, 'pid')
 ldap_pwfile = os.path.join(ldapdir, 'pw')
 ldap_sock = os.path.join(ldapdir, 'sock')
 ldap_uri = 'ldapi://%s/' % ldap_sock.replace(os.path.sep, '%2F')
 schema = os.path.join(srctop, 'plugins', 'kdb', 'ldap', 'libkdb_ldap',
-                      'kerberos.schema')
+                      'kerberos.openldap.ldif')
 top_dn = 'cn=krb5'
 admin_dn = 'cn=admin,cn=krb5'
 admin_pw = 'admin'
 
 shutil.rmtree(ldapdir, True)
 os.mkdir(ldapdir)
+os.mkdir(slapd_conf)
 os.mkdir(dbdir)
 
 if 'SLAPD' in os.environ:
@@ -44,32 +49,61 @@ else:
     slapd = os.path.join(ldapdir, 'slapd')
     shutil.copy(system_slapd, slapd)
 
-# Find the core schema file if we can.
+def slap_add(ldif):
+    proc = subprocess.Popen([slapadd, '-b', 'cn=config', '-F', slapd_conf],
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+    (out, dummy) = proc.communicate(ldif)
+    output(out)
+    return proc.wait()
+
+
+# Configure the pid file and some authorization rules we will need for
+# SASL testing.
+if slap_add('dn: cn=config\n'
+            'objectClass: olcGlobal\n'
+            'olcPidFile: %s\n'
+            'olcAuthzRegexp: '
+            '".*uidNumber=%d,cn=peercred,cn=external,cn=auth" "%s"\n'
+            'olcAuthzRegexp: "uid=digestuser,cn=digest-md5,cn=auth" "%s"\n' %
+            (slapd_pidfile, os.geteuid(), admin_dn, admin_dn)) != 0:
+    skip_rest('LDAP KDB tests', 'slapd basic configuration failed')
+
+# Find a working writable database type, trying mdb (added in OpenLDAP
+# 2.4.27) and bdb (deprecated and sometimes not built due to licensing
+# incompatibilities).
+for dbtype in ('mdb', 'bdb'):
+    # Try to load the module.  This could fail if OpenLDAP is built
+    # without module support, so ignore errors.
+    slap_add('dn: cn=module,cn=config\n'
+             'objectClass: olcModuleList\n'
+             'olcModuleLoad: back_%s\n' % dbtype)
+
+    dbclass = 'olc%sConfig' % dbtype.capitalize()
+    if slap_add('dn: olcDatabase=%s,cn=config\n'
+                'objectClass: olcDatabaseConfig\n'
+                'objectClass: %s\n'
+                'olcSuffix: %s\n'
+                'olcRootDN: %s\n'
+                'olcRootPW: %s\n'
+                'olcDbDirectory: %s\n' %
+                (dbtype, dbclass, top_dn, admin_dn, admin_pw, dbdir)) == 0:
+        break
+else:
+    skip_rest('LDAP KDB tests', 'could not find working slapd db type')
+
+if slap_add('include: file://%s\n' % schema) != 0:
+    skip_rest('LDAP KDB tests', 'failed to load Kerberos schema')
+
+# Load the core schema if we can.
 ldap_homes = ['/etc/ldap', '/etc/openldap', '/usr/local/etc/openldap',
               '/usr/local/etc/ldap']
-local_schema_path = '/schema/core.schema'
+local_schema_path = '/schema/core.ldif'
 core_schema = next((i for i in imap(lambda x:x+local_schema_path, ldap_homes)
                     if os.path.isfile(i)), None)
-
-# Make a slapd config file.  This is deprecated in OpenLDAP 2.3 and
-# later, but it's easier than using LDIF and slapadd.  Include some
-# authz-regexp entries for SASL authentication tests.  Load the core
-# schema if we found it, for use in the DIGEST-MD5 test.
-file = open(slapd_conf, 'w')
-file.write('pidfile %s\n' % slapd_pidfile)
-file.write('include %s\n' % schema)
 if core_schema:
-    file.write('include %s\n' % core_schema)
-file.write('moduleload back_bdb\n')
-file.write('database bdb\n')
-file.write('suffix %s\n' % top_dn)
-file.write('rootdn %s\n' % admin_dn)
-file.write('rootpw %s\n' % admin_pw)
-file.write('directory %s\n' % dbdir)
-file.write('authz-regexp .*uidNumber=%d,cn=peercred,cn=external,cn=auth %s\n' %
-           (os.geteuid(), admin_dn))
-file.write('authz-regexp uid=digestuser,cn=digest-md5,cn=auth %s\n' % admin_dn)
-file.close()
+    if slap_add('include: file://%s\n' % core_schema) != 0:
+        core_schema = None
 
 slapd_pid = -1
 def kill_slapd():
@@ -80,7 +114,7 @@ def kill_slapd():
 atexit.register(kill_slapd)
 
 out = open(slapd_out, 'w')
-subprocess.call([slapd, '-h', ldap_uri, '-f', slapd_conf], stdout=out,
+subprocess.call([slapd, '-h', ldap_uri, '-F', slapd_conf], stdout=out,
                 stderr=out)
 out.close()
 pidf = open(slapd_pidfile, 'r')
