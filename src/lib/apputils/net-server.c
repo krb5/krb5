@@ -834,7 +834,7 @@ setup_addresses(struct socksetup *data)
     };
     krb5_error_code ret = 0;
     size_t i;
-    int err;
+    int err, bound_any;
     struct bind_address addr;
     struct addrinfo hints, *ai_list = NULL, *ai = NULL;
     verto_callback vcb;
@@ -871,8 +871,12 @@ setup_addresses(struct socksetup *data)
          * Loop through all the sockets that getaddrinfo could find to match
          * the requested address.  For wildcard listeners, this should usually
          * have two results, one for each of IPv4 and IPv6, or one or the
-         * other, depending on the system.
+         * other, depending on the system.  On IPv4-only systems, getaddrinfo()
+         * may return both IPv4 and IPv6 addresses, but creating an IPv6 socket
+         * may give an EAFNOSUPPORT error, so tolerate that error as long as we
+         * can bind at least one socket.
          */
+        bound_any = 0;
         for (ai = ai_list; ai != NULL; ai = ai->ai_next) {
             /* Make sure getaddrinfo returned a socket with the same type that
              * was requested. */
@@ -889,9 +893,15 @@ setup_addresses(struct socksetup *data)
                                  _("Failed setting up a %s socket (for %s)"),
                                  bind_type_names[addr.type],
                                  paddr(ai->ai_addr));
-                goto cleanup;
+                if (ret != EAFNOSUPPORT)
+                    goto cleanup;
+            } else {
+                bound_any = 1;
             }
         }
+        if (!bound_any)
+            goto cleanup;
+        ret = 0;
 
         if (ai_list != NULL)
             freeaddrinfo(ai_list);
