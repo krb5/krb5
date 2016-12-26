@@ -105,6 +105,17 @@ paddr(struct sockaddr *sa)
     return buf;
 }
 
+/* Return true if sa is an IPv4 or IPv6 wildcard address. */
+static int
+is_wildcard(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET6)
+        return IN6_IS_ADDR_UNSPECIFIED(&sa2sin6(sa)->sin6_addr);
+    else if (sa->sa_family == AF_INET)
+        return sa2sin(sa)->sin_addr.s_addr == INADDR_ANY;
+    return 0;
+}
+
 /* KDC data.  */
 
 enum conn_type {
@@ -753,7 +764,7 @@ setup_socket(struct socksetup *data, struct bind_address *ba,
     }
 
     /* Try to turn on pktinfo for UDP wildcard sockets. */
-    if (ba->type == UDP && ba->address == NULL) {
+    if (ba->type == UDP && is_wildcard(sock_address)) {
         krb5_klog_syslog(LOG_DEBUG, _("Setting pktinfo on socket %s"),
                          paddr(sock_address));
         ret = set_pktinfo(sock, sock_address->sa_family);
