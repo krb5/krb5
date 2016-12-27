@@ -45,7 +45,7 @@ else:
 
 # General information about the project.
 project = u'MIT Kerberos'
-copyright = u'1985-2016, MIT'
+copyright = u'1985-2017, MIT'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
