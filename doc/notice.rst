@@ -1,4 +1,4 @@
-Copyright |copy| 1985-2016 by the Massachusetts Institute of Technology.
+Copyright |copy| 1985-2017 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
