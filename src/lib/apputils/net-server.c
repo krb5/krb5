@@ -514,7 +514,7 @@ free_socket(verto_ctx *ctx, verto_ev *ev)
 
 static verto_ev *
 make_event(verto_ctx *ctx, verto_ev_flag flags, verto_callback callback,
-           int sock, struct connection *conn, int addevent)
+           int sock, struct connection *conn)
 {
     verto_ev *ev;
     void *tmp;
@@ -525,12 +525,10 @@ make_event(verto_ctx *ctx, verto_ev_flag flags, verto_callback callback,
         return NULL;
     }
 
-    if (addevent) {
-        if (!ADD(events, ev, tmp)) {
-            com_err(conn->prog, ENOMEM, _("cannot save event"));
-            verto_del(ev);
-            return NULL;
-        }
+    if (!ADD(events, ev, tmp)) {
+        com_err(conn->prog, ENOMEM, _("cannot save event"));
+        verto_del(ev);
+        return NULL;
     }
 
     verto_set_private(ev, conn, free_socket);
@@ -539,7 +537,7 @@ make_event(verto_ctx *ctx, verto_ev_flag flags, verto_callback callback,
 
 static krb5_error_code
 add_fd(int sock, enum conn_type conntype, verto_ev_flag flags, void *handle,
-       const char *prog, verto_ctx *ctx, verto_callback callback, int addevent,
+       const char *prog, verto_ctx *ctx, verto_callback callback,
        verto_ev **ev_out)
 {
     struct connection *newconn;
@@ -563,7 +561,7 @@ add_fd(int sock, enum conn_type conntype, verto_ev_flag flags, void *handle,
     newconn->prog = prog;
     newconn->type = conntype;
 
-    *ev_out = make_event(ctx, flags, callback, sock, newconn, addevent);
+    *ev_out = make_event(ctx, flags, callback, sock, newconn);
     return 0;
 }
 
@@ -747,7 +745,7 @@ setup_socket(struct bind_address *ba, struct sockaddr *sock_address,
     /* Add the socket to the event loop. */
     flags = VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST |
         VERTO_EV_FLAG_REINITIABLE;
-    ret = add_fd(sock, ctype, flags, handle, prog, ctx, vcb, 1, &ev);
+    ret = add_fd(sock, ctype, flags, handle, prog, ctx, vcb, &ev);
     if (ret) {
         krb5_klog_syslog(LOG_ERR, _("Error attempting to add verto event"));
         goto cleanup;
@@ -1160,7 +1158,7 @@ accept_tcp_connection(verto_ctx *ctx, verto_ev *ev)
 
     flags = VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST;
     if (add_fd(s, CONN_TCP, flags, conn->handle, conn->prog, ctx,
-               process_tcp_connection_read, 1, &newev) != 0) {
+               process_tcp_connection_read, &newev) != 0) {
         close(s);
         return;
     }
@@ -1238,7 +1236,7 @@ process_tcp_response(void *arg, krb5_error_code code, krb5_data *response)
     state->conn->sgnum = 2;
 
     ev = make_event(state->ctx, VERTO_EV_FLAG_IO_WRITE | VERTO_EV_FLAG_PERSIST,
-                    process_tcp_connection_write, state->sock, state->conn, 1);
+                    process_tcp_connection_write, state->sock, state->conn);
     if (ev) {
         free(state);
         return;
@@ -1466,7 +1464,7 @@ accept_rpc_connection(verto_ctx *ctx, verto_ev *ev)
 
         flags = VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST;
         if (add_fd(s, CONN_RPC, flags, conn->handle, conn->prog, ctx,
-                   process_rpc_connection, 1, &newev) != 0)
+                   process_rpc_connection, &newev) != 0)
             continue;
         newconn = verto_get_private(newev);
 
