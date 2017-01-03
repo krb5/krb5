@@ -182,7 +182,7 @@ the krb5 mechanism is used:
 
 .. _gssapi_authind_attr:
 
-* "auth-indicator" attribute:
+* "auth-indicators" attribute:
 
 This attribute will be included in the gss_inquire_name_ output if the
 ticket contains :ref:`authentication indicators <auth_indicator>`.
