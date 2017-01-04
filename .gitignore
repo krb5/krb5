@@ -386,6 +386,7 @@ local.properties
 /src/tests/hist
 /src/tests/hooks
 /src/tests/hrealm
+/src/tests/icinterleave
 /src/tests/icred
 /src/tests/kdbtest
 /src/tests/kdc.conf

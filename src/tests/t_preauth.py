@@ -18,4 +18,17 @@ realm.kinit('nokeyuser', password('user'), expected_code=1,
 realm.run([kadminl, 'setstr', realm.user_princ, '2rt', 'secondtrip'])
 realm.kinit(realm.user_princ, password('user'), expected_msg='2rt: secondtrip')
 
+# Test that multiple stepwise initial creds operations can be
+# performed with the same krb5_context, with proper tracking of
+# clpreauth module request handles.
+realm.run([kadminl, 'addprinc', '-pw', 'pw', 'u1'])
+realm.run([kadminl, 'addprinc', '+requires_preauth', '-pw', 'pw', 'u2'])
+realm.run([kadminl, 'addprinc', '+requires_preauth', '-pw', 'pw', 'u3'])
+realm.run([kadminl, 'setstr', 'u2', '2rt', 'extra'])
+out = realm.run(['./icinterleave', 'pw', 'u1', 'u2', 'u3'])
+if out != ('step 1\nstep 2\nstep 3\nstep 1\nfinish 1\nstep 2\nno attr\n'
+           'step 3\nno attr\nstep 2\n2rt: extra\nstep 3\nfinish 3\nstep 2\n'
+           'finish 2\n'):
+    fail('unexpected output from icinterleave')
+
 success('Pre-authentication framework tests')
