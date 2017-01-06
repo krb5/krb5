@@ -78,6 +78,10 @@ Major changes in 1.15 (2016-12-01)
 
 Administrator experience:
 
+* Improve support for multihomed Kerberos servers by adding options
+  for specifying restricted listening addresses for the KDC and
+  kadmind.
+
 * Add support to kadmin for remote extraction of current keys without
   changing them (requires a special kadmin permission that is excluded
   from the wildcard permission), with the exception of highly
@@ -122,6 +126,9 @@ Developer experience:
   authenticators in the replay cache.  This helps sites that must
   build with FIPS 140 conformant libraries that lack MD5.
 
+* Eliminate util/reconf and allow the use of autoreconf alone to
+  regenerate the configure script.
+
 Protocol evolution:
 
 * Add support for the AES-SHA2 enctypes, which allows sites to conform
@@ -130,6 +137,7 @@ Protocol evolution:
 krb5-1.15 changes by ticket ID
 ------------------------------
 
+1093    KDC could use feature to limit listening interfaces
 5889    password history doesn't work with LDAP KDB
 6666    some non-default plugin directories don't build in 1.8 branch
 7852    kadmin.local's ktadd -norandkey does not handle multiple kvnos
