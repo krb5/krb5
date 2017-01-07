@@ -450,13 +450,13 @@ krb5_ac_warn_cflags_set=${WARN_CFLAGS+set}
 krb5_ac_warn_cxxflags_set=${WARN_CXXFLAGS+set}
 ])
 dnl
-AC_DEFUN(TRY_WARN_CC_FLAG,[dnl
+AC_DEFUN(TRY_WARN_CC_FLAG_1,[dnl
   cachevar=`echo "krb5_cv_cc_flag_$1" | sed -e s/=/_eq_/g -e s/-/_dash_/g -e s/[[^a-zA-Z0-9_]]/_/g`
   AC_CACHE_CHECK([if C compiler supports $1], [$cachevar],
   [# first try without, then with
   AC_TRY_COMPILE([], 1;,
     [old_cflags="$CFLAGS"
-     CFLAGS="$CFLAGS $1"
+     CFLAGS="$CFLAGS $cflags_warning_test_flags $1"
      AC_TRY_COMPILE([], 1;, eval $cachevar=yes, eval $cachevar=no)
      CFLAGS="$old_cflags"],
     [AC_MSG_ERROR(compiling simple test program with $CFLAGS failed)])])
@@ -464,6 +464,21 @@ AC_DEFUN(TRY_WARN_CC_FLAG,[dnl
     WARN_CFLAGS="$WARN_CFLAGS $1"
   fi
   eval flag_supported='${'$cachevar'}'
+])dnl
+dnl
+dnl Are additional flags needed to make unsupported warning options
+dnl get reported as errors?
+AC_DEFUN(CHECK_CC_WARNING_TEST_FLAGS,[dnl
+  cflags_warning_test_flags=
+  TRY_WARN_CC_FLAG_1(-Werror=unknown-warning-option)
+  if test $flag_supported = yes; then
+    cflags_warning_test_flags=-Werror=unknown-warning-option
+  fi
+])dnl
+dnl
+AC_DEFUN(TRY_WARN_CC_FLAG,[dnl
+AC_REQUIRE([CHECK_CC_WARNING_TEST_FLAGS])dnl
+TRY_WARN_CC_FLAG_1($1)dnl
 ])dnl
 dnl
 AC_DEFUN(WITH_CC,[dnl
