@@ -296,6 +296,19 @@ k5_preauth_request_context_fini(krb5_context context,
     ctx->preauth_reqctx = NULL;
 }
 
+krb5_error_code
+k5_preauth_check_context(krb5_context context, krb5_init_creds_context ctx)
+{
+    krb5_preauth_req_context reqctx = ctx->preauth_reqctx;
+
+    if (reqctx != NULL && reqctx->orig_context != context) {
+        k5_setmsg(context, EINVAL,
+                  _("krb5_init_creds calls must use same library context"));
+        return EINVAL;
+    }
+    return 0;
+}
+
 /* Return 1 if pa_type is a real preauthentication mechanism according to the
  * module h.  Return 0 if it is not. */
 static int

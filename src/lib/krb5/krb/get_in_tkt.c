@@ -1685,7 +1685,7 @@ krb5_init_creds_step(krb5_context context,
                      krb5_data *realm,
                      unsigned int *flags)
 {
-    krb5_error_code code = 0, code2;
+    krb5_error_code code, code2;
 
     *flags = 0;
 
@@ -1697,6 +1697,10 @@ krb5_init_creds_step(krb5_context context,
 
     if (ctx->complete)
         return EINVAL;
+
+    code = k5_preauth_check_context(context, ctx);
+    if (code)
+        return code;
 
     if (in->length != 0) {
         code = init_creds_step_reply(context, ctx, in);

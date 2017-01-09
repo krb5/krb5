@@ -211,6 +211,9 @@ k5_preauth_request_context_fini(krb5_context context,
                                 krb5_init_creds_context ctx);
 
 krb5_error_code
+k5_preauth_check_context(krb5_context context, krb5_init_creds_context ctx);
+
+krb5_error_code
 k5_response_items_new(k5_response_items **ri_out);
 
 void
