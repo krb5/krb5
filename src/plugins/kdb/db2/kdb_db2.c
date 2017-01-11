@@ -1314,13 +1314,6 @@ krb5_db2_delete_policy(krb5_context context, char *policy)
     return osa_adb_destroy_policy(dbc->policy_db, policy);
 }
 
-void
-krb5_db2_free_policy(krb5_context context, osa_policy_ent_t entry)
-{
-    osa_free_policy_ent(entry);
-}
-
-
 /*
  * Merge non-replicated attributes from src into dst, setting
  * changed to non-zero if dst was changed.
