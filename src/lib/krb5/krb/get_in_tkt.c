@@ -1514,8 +1514,6 @@ init_creds_step_reply(krb5_context context,
             code = restart_init_creds_loop(context, ctx, FALSE);
         } else if ((reply_code == KDC_ERR_MORE_PREAUTH_DATA_REQUIRED ||
                     reply_code == KDC_ERR_PREAUTH_REQUIRED) && retry) {
-            /* reset the list of preauth types to try */
-            k5_reset_preauth_types_tried(ctx);
             krb5_free_pa_data(context, ctx->preauth_to_use);
             ctx->preauth_to_use = ctx->err_padata;
             ctx->err_padata = NULL;
@@ -1565,7 +1563,6 @@ init_creds_step_reply(krb5_context context,
         goto cleanup;
 
     /* process any preauth data in the as_reply */
-    k5_reset_preauth_types_tried(ctx);
     code = krb5int_fast_process_response(context, ctx->fast_state,
                                          ctx->reply, &strengthen_key);
     if (code != 0)

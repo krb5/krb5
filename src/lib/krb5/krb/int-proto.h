@@ -199,6 +199,9 @@ k5_free_preauth_context(krb5_context context);
 void
 k5_reset_preauth_types_tried(krb5_init_creds_context ctx);
 
+krb5_error_code
+k5_preauth_note_failed(krb5_init_creds_context ctx, krb5_preauthtype pa_type);
+
 void
 k5_preauth_prepare_request(krb5_context context, krb5_get_init_creds_opt *opt,
                            krb5_kdc_req *request);

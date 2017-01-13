@@ -54,7 +54,7 @@ struct krb5_preauth_context_st {
 
 struct krb5_preauth_req_context_st {
     krb5_context orig_context;
-    krb5_preauthtype *tried;
+    krb5_preauthtype *failed;
     krb5_clpreauth_modreq *modreqs;
 };
 
@@ -201,11 +201,7 @@ cleanup:
     free_handles(context, list);
 }
 
-/*
- * Reset the memory of which preauth types we have already tried, because we
- * are entering a new phase of padata processing (such as the padata in an
- * AS-REP).
- */
+/* Reset the memory of which preauth types we have already tried. */
 void
 k5_reset_preauth_types_tried(krb5_init_creds_context ctx)
 {
@@ -213,10 +209,27 @@ k5_reset_preauth_types_tried(krb5_init_creds_context ctx)
 
     if (reqctx == NULL)
         return;
-    free(reqctx->tried);
-    reqctx->tried = NULL;
+    free(reqctx->failed);
+    reqctx->failed = NULL;
 }
 
+/* Add pa_type to the list of types which has previously failed. */
+krb5_error_code
+k5_preauth_note_failed(krb5_init_creds_context ctx, krb5_preauthtype pa_type)
+{
+    krb5_preauth_req_context reqctx = ctx->preauth_reqctx;
+    krb5_preauthtype *newptr;
+    size_t i;
+
+    for (i = 0; reqctx->failed != NULL && reqctx->failed[i] != 0; i++);
+    newptr = realloc(reqctx->failed, (i + 2) * sizeof(*newptr));
+    if (newptr == NULL)
+        return ENOMEM;
+    reqctx->failed = newptr;
+    reqctx->failed[i] = pa_type;
+    reqctx->failed[i + 1] = 0;
+    return 0;
+}
 
 /* Free the per-krb5_context preauth_context. This means clearing any
  * plugin-specific context which may have been created, and then
@@ -291,7 +304,7 @@ k5_preauth_request_context_fini(krb5_context context,
         TRACE_PREAUTH_WRONG_CONTEXT(context);
     }
     free(reqctx->modreqs);
-    free(reqctx->tried);
+    free(reqctx->failed);
     free(reqctx);
     ctx->preauth_reqctx = NULL;
 }
@@ -612,28 +625,17 @@ pa_type_allowed(krb5_init_creds_context ctx, krb5_preauthtype pa_type)
         pa_type == ctx->allowed_preauth_type;
 }
 
-/*
- * If pa_type has already been tried as a real preauth type for this
- * authentication, return true.  Otherwise ass pa_type to the list of tried
- * types and return false.
- */
+/* Return true if pa_type previously failed during this authentication. */
 static krb5_boolean
-already_tried(krb5_init_creds_context ctx, krb5_preauthtype pa_type)
+previously_failed(krb5_init_creds_context ctx, krb5_preauthtype pa_type)
 {
     krb5_preauth_req_context reqctx = ctx->preauth_reqctx;
     size_t i;
-    krb5_preauthtype *newptr;
 
-    for (i = 0; reqctx->tried != NULL && reqctx->tried[i] != 0; i++) {
-        if (reqctx->tried[i] == pa_type)
+    for (i = 0; reqctx->failed != NULL && reqctx->failed[i] != 0; i++) {
+        if (reqctx->failed[i] == pa_type)
             return TRUE;
     }
-    newptr = realloc(reqctx->tried, (i + 2) * sizeof(*newptr));
-    if (newptr == NULL)
-        return FALSE;
-    reqctx->tried = newptr;
-    reqctx->tried[i] = pa_type;
-    reqctx->tried[i + 1] = ENCTYPE_NULL;
     return FALSE;
 }
 
@@ -665,8 +667,8 @@ process_pa_data(krb5_context context, krb5_init_creds_context ctx,
             /* Make sure this type is for the current pass. */
             if (clpreauth_is_real(context, h, pa->pa_type) != real)
                 continue;
-            /* Only try a real mechanism once per authentication. */
-            if (real && already_tried(ctx, pa->pa_type))
+            /* Don't try a real mechanism again after failure. */
+            if (real && previously_failed(ctx, pa->pa_type))
                 continue;
             mod_pa = NULL;
             ret = clpreauth_process(context, h, modreq, ctx->opt, &callbacks,
@@ -693,6 +695,12 @@ process_pa_data(krb5_context context, krb5_init_creds_context ctx,
             } else if (real && save.code == 0) {
                 /* Save the first error we get from a real preauth type. */
                 k5_save_ctx_error(context, ret, &save);
+            }
+            if (real && ret) {
+                /* Don't try this mechanism again for this authentication. */
+                ret = k5_preauth_note_failed(ctx, pa->pa_type);
+                if (ret)
+                    goto cleanup;
             }
         }
     }
@@ -944,9 +952,10 @@ k5_preauth_tryagain(krb5_context context, krb5_init_creds_context ctx,
     TRACE_PREAUTH_TRYAGAIN(context, h->vt.name, pa_type, ret);
     if (!ret && mod_pa == NULL)
         ret = KRB5KRB_ERR_GENERIC;
-    if (ret)
+    if (ret) {
+        k5_preauth_note_failed(ctx, pa_type);
         return ret;
-
+    }
 
     for (count = 0; mod_pa[count] != NULL; count++);
     ret = copy_cookie(context, err_padata, &mod_pa, &count);
