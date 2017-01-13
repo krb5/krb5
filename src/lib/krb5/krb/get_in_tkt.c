@@ -809,6 +809,31 @@ set_request_times(krb5_context context, krb5_init_creds_context ctx)
     return 0;
 }
 
+static void
+read_allowed_preauth_type(krb5_context context, krb5_init_creds_context ctx)
+{
+    krb5_error_code ret;
+    krb5_data config;
+    char *tmp, *p;
+    krb5_ccache in_ccache = k5_gic_opt_get_in_ccache(ctx->opt);
+
+    ctx->allowed_preauth_type = KRB5_PADATA_NONE;
+    if (in_ccache == NULL)
+        return;
+    memset(&config, 0, sizeof(config));
+    if (krb5_cc_get_config(context, in_ccache, ctx->request->server,
+                           KRB5_CC_CONF_PA_TYPE, &config) != 0)
+        return;
+    tmp = k5memdup0(config.data, config.length, &ret);
+    krb5_free_data_contents(context, &config);
+    if (tmp == NULL)
+        return;
+    ctx->allowed_preauth_type = strtol(tmp, &p, 10);
+    if (p == NULL || *p != '\0')
+        ctx->allowed_preauth_type = KRB5_PADATA_NONE;
+    free(tmp);
+}
+
 /**
  * Throw away any pre-authentication realm state and begin with a
  * unauthenticated or optimistically authenticated request.  If fast_upgrade is
@@ -825,6 +850,7 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
     krb5_free_error(context, ctx->err_reply);
     ctx->preauth_to_use = ctx->err_padata = NULL;
     ctx->err_reply = NULL;
+    ctx->selected_preauth_type = KRB5_PADATA_NONE;
 
     krb5int_fast_free_state(context, ctx->fast_state);
     ctx->fast_state = NULL;
@@ -867,6 +893,11 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
                                       &ctx->outer_request_body);
     if (code != 0)
         goto cleanup;
+
+    /* Read the allowed preauth type for this server principal from the input
+     * ccache, if the application supplied one. */
+    read_allowed_preauth_type(context, ctx);
+
 cleanup:
     return code;
 }
@@ -1172,31 +1203,6 @@ init_creds_validate_reply(krb5_context context,
     return 0;
 }
 
-static void
-read_allowed_preauth_type(krb5_context context, krb5_init_creds_context ctx)
-{
-    krb5_error_code ret;
-    krb5_data config;
-    char *tmp, *p;
-    krb5_ccache in_ccache = k5_gic_opt_get_in_ccache(ctx->opt);
-
-    ctx->allowed_preauth_type = KRB5_PADATA_NONE;
-    if (in_ccache == NULL)
-        return;
-    memset(&config, 0, sizeof(config));
-    if (krb5_cc_get_config(context, in_ccache, ctx->request->server,
-                           KRB5_CC_CONF_PA_TYPE, &config) != 0)
-        return;
-    tmp = k5memdup0(config.data, config.length, &ret);
-    krb5_free_data_contents(context, &config);
-    if (tmp == NULL)
-        return;
-    ctx->allowed_preauth_type = strtol(tmp, &p, 10);
-    if (p == NULL || *p != '\0')
-        ctx->allowed_preauth_type = KRB5_PADATA_NONE;
-    free(tmp);
-}
-
 static krb5_error_code
 save_selected_preauth_type(krb5_context context, krb5_ccache ccache,
                            krb5_init_creds_context ctx)
@@ -1334,11 +1340,6 @@ init_creds_step_request(krb5_context context,
     code = encode_krb5_kdc_req_body(ctx->request, &ctx->inner_request_body);
     if (code)
         goto cleanup;
-
-    /* Read the allowed patype for this server principal from the in_ccache,
-     * if the application supplied one. */
-    read_allowed_preauth_type(context, ctx);
-    ctx->selected_preauth_type = KRB5_PADATA_NONE;
 
     /*
      * Read cached preauth configuration data for this server principal from
