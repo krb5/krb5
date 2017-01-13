@@ -227,8 +227,19 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Looked up etypes in keytab: {etypes}", etypes)
 #define TRACE_INIT_CREDS_KEYTAB_LOOKUP_FAILED(c, code)          \
     TRACE(c, "Couldn't lookup etypes in keytab: {kerr}", code)
+#define TRACE_INIT_CREDS_PREAUTH(c)                     \
+    TRACE(c, "Preauthenticating using KDC method data")
 #define TRACE_INIT_CREDS_PREAUTH_DECRYPT_FAIL(c, code)                  \
     TRACE(c, "Decrypt with preauth AS key failed: {kerr}", code)
+#define TRACE_INIT_CREDS_PREAUTH_MORE(c, patype)                \
+    TRACE(c, "Continuing preauth mech {int}", (int)patype)
+#define TRACE_INIT_CREDS_PREAUTH_NONE(c)        \
+    TRACE(c, "Sending unauthenticated request")
+#define TRACE_INIT_CREDS_PREAUTH_OPTIMISTIC(c)  \
+    TRACE(c, "Attempting optimistic preauth")
+#define TRACE_INIT_CREDS_PREAUTH_TRYAGAIN(c, patype, code)              \
+    TRACE(c, "Recovering from KDC error {int} using preauth mech {int}", \
+          (int)patype, (int)code)
 #define TRACE_INIT_CREDS_RESTART_FAST(c)        \
     TRACE(c, "Restarting to upgrade to FAST")
 #define TRACE_INIT_CREDS_RESTART_PREAUTH_FAILED(c)                      \
