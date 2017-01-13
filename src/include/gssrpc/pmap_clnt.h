@@ -40,6 +40,8 @@
 #ifndef GSSRPC_PMAP_CLNT_H
 #define GSSRPC_PMAP_CLNT_H
 
+#include <gssrpc/auth.h>
+
 /*
  * Usage:
  *	success = pmap_set(program, version, protocol, port);

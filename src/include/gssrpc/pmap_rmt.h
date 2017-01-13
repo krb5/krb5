@@ -39,6 +39,9 @@
 
 #ifndef GSSRPC_PMAP_RMT_H
 #define GSSRPC_PMAP_RMT_H
+
+#include <gssrpc/auth.h>
+
 GSSRPC__BEGIN_DECLS
 
 struct rmtcallargs {

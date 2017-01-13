@@ -45,6 +45,8 @@
 #define GSSRPC_SVC_AUTH_H
 
 #include <gssapi/gssapi.h>
+#include <gssrpc/types.h>
+#include <gssrpc/xdr.h>
 
 GSSRPC__BEGIN_DECLS
 

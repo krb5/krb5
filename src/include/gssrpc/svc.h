@@ -39,6 +39,7 @@
 #ifndef GSSRPC_SVC_H
 #define GSSRPC_SVC_H
 
+#include <gssrpc/auth.h>
 #include <gssrpc/svc_auth.h>
 
 GSSRPC__BEGIN_DECLS

@@ -69,6 +69,9 @@
 
 #ifndef GSSRPC_PMAP_PROT_H
 #define GSSRPC_PMAP_PROT_H
+
+#include <gssrpc/auth.h>
+
 GSSRPC__BEGIN_DECLS
 
 #define PMAPPORT		((u_short)111)

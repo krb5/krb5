@@ -41,6 +41,7 @@
 #define GSSRPC_XDR_H
 
 #include <stdio.h>		/* for FILE */
+#include <gssrpc/types.h>
 
 GSSRPC__BEGIN_DECLS
 /*

@@ -41,6 +41,8 @@
 #ifndef GSSRPC_RPC_MSG_H
 #define GSSRPC_RPC_MSG_H
 
+#include <gssrpc/auth.h>
+
 GSSRPC__BEGIN_DECLS
 
 #define RPC_MSG_VERSION		((uint32_t) 2)

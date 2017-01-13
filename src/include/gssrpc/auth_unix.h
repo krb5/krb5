@@ -40,6 +40,8 @@
 #ifndef GSSRPC_AUTH_UNIX_H
 #define GSSRPC_AUTH_UNIX_H
 
+#include <gssrpc/auth.h>
+
 GSSRPC__BEGIN_DECLS
 /*
  * The system is very weak.  The client uses no encryption for  it
