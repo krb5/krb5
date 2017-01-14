@@ -911,49 +911,53 @@ add_s4u_x509_user_padata(krb5_context context, krb5_s4u_userid *userid,
 }
 
 /*
- * If one of the modules can adjust its AS_REQ data using the contents of the
- * err_reply, return 0.  If it's the sort of correction which requires that we
- * ask the user another question, we let the calling application deal with it.
+ * If the module for pa_type can adjust its AS_REQ data using the contents of
+ * err and err_padata, return 0 with *padata_out set to a padata list for the
+ * next request.  If it's the sort of correction which requires that we ask the
+ * user another question, we let the calling application deal with it.
  */
 krb5_error_code
 k5_preauth_tryagain(krb5_context context, krb5_init_creds_context ctx,
-                    krb5_pa_data **in_padata, krb5_pa_data ***padata_out)
+                    krb5_preauthtype pa_type, krb5_error *err,
+                    krb5_pa_data **err_padata, krb5_pa_data ***padata_out)
 {
     krb5_error_code ret;
     krb5_pa_data **mod_pa;
     krb5_clpreauth_modreq modreq;
     clpreauth_handle h;
-    int i, count;
+    int count;
 
     *padata_out = NULL;
 
-    TRACE_PREAUTH_TRYAGAIN_INPUT(context, in_padata);
+    TRACE_PREAUTH_TRYAGAIN_INPUT(context, pa_type, err_padata);
 
-    for (i = 0; in_padata[i] != NULL; i++) {
-        h = find_module(context, ctx, in_padata[i]->pa_type, &modreq);
-        if (h == NULL)
-            continue;
-        mod_pa = NULL;
-        ret = clpreauth_tryagain(context, h, modreq, ctx->opt, &callbacks,
-                                 (krb5_clpreauth_rock)ctx, ctx->request,
-                                 ctx->inner_request_body,
-                                 ctx->encoded_previous_request,
-                                 in_padata[i]->pa_type,
-                                 ctx->err_reply, ctx->err_padata,
-                                 ctx->prompter, ctx->prompter_data, &mod_pa);
-        if (ret == 0 && mod_pa != NULL) {
-            for (count = 0; mod_pa[count] != NULL; count++);
-            ret = copy_cookie(context, ctx->err_padata, &mod_pa, &count);
-            if (ret) {
-                krb5_free_pa_data(context, mod_pa);
-                return ret;
-            }
-            TRACE_PREAUTH_TRYAGAIN_OUTPUT(context, mod_pa);
-            *padata_out = mod_pa;
-            return 0;
-        }
+    h = find_module(context, ctx, pa_type, &modreq);
+    if (h == NULL)
+        return KRB5KRB_ERR_GENERIC;
+    mod_pa = NULL;
+    ret = clpreauth_tryagain(context, h, modreq, ctx->opt, &callbacks,
+                             (krb5_clpreauth_rock)ctx, ctx->request,
+                             ctx->inner_request_body,
+                             ctx->encoded_previous_request, pa_type, err,
+                             err_padata, ctx->prompter, ctx->prompter_data,
+                             &mod_pa);
+    TRACE_PREAUTH_TRYAGAIN(context, h->vt.name, pa_type, ret);
+    if (!ret && mod_pa == NULL)
+        ret = KRB5KRB_ERR_GENERIC;
+    if (ret)
+        return ret;
+
+
+    for (count = 0; mod_pa[count] != NULL; count++);
+    ret = copy_cookie(context, err_padata, &mod_pa, &count);
+    if (ret) {
+        krb5_free_pa_data(context, mod_pa);
+        return ret;
     }
-    return KRB5KRB_ERR_GENERIC;
+
+    TRACE_PREAUTH_TRYAGAIN_OUTPUT(context, mod_pa);
+    *padata_out = mod_pa;
+    return 0;
 }
 
 /* Compile the set of response items for in_padata by invoke each module's

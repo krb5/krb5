@@ -301,8 +301,11 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_PREAUTH_SKIP(c, name, patype)                           \
     TRACE(c, "Skipping previously used preauth module {str} ({int})", \
           name, (int) patype)
-#define TRACE_PREAUTH_TRYAGAIN_INPUT(c, padata)                 \
-    TRACE(c, "Preauth tryagain input types: {patypes}", padata)
+#define TRACE_PREAUTH_TRYAGAIN_INPUT(c, patype, padata)                 \
+    TRACE(c, "Preauth tryagain input types ({int}): {patypes}", patype, padata)
+#define TRACE_PREAUTH_TRYAGAIN(c, name, patype, code)                   \
+    TRACE(c, "Preauth module {str} ({int}) tryagain returned: {kerr}",  \
+          name, (int)patype, code)
 #define TRACE_PREAUTH_TRYAGAIN_OUTPUT(c, padata)                        \
     TRACE(c, "Followup preauth for next request: {patypes}", padata)
 #define TRACE_PREAUTH_WRONG_CONTEXT(c)                                  \

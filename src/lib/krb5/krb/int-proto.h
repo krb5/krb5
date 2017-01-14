@@ -187,7 +187,8 @@ k5_preauth(krb5_context context, krb5_init_creds_context ctx,
 
 krb5_error_code
 k5_preauth_tryagain(krb5_context context, krb5_init_creds_context ctx,
-                    krb5_pa_data **in_padata, krb5_pa_data ***padata_out);
+                    krb5_preauthtype pa_type, krb5_error *err,
+                    krb5_pa_data **err_padata, krb5_pa_data ***padata_out);
 
 void
 k5_init_preauth_context(krb5_context context);

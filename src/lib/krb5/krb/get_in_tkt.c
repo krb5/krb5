@@ -1358,17 +1358,11 @@ init_creds_step_request(krb5_context context,
         if (code != 0)
             goto cleanup;
     } else {
-        if (ctx->preauth_to_use != NULL) {
-            /*
-             * Retry after an error other than PREAUTH_NEEDED,
-             * using ctx->err_padata to figure out what to change.
-             */
-            code = k5_preauth_tryagain(context, ctx, ctx->preauth_to_use,
-                                       &ctx->request->padata);
-        } else {
-            /* No preauth supplied, so can't query the plugins. */
-            code = KRB5KRB_ERR_GENERIC;
-        }
+        /* Retry after an error other than PREAUTH_NEEDED, using error padata
+         * to figure out what to change. */
+        code = k5_preauth_tryagain(context, ctx, ctx->selected_preauth_type,
+                                   ctx->err_reply, ctx->err_padata,
+                                   &ctx->request->padata);
         if (code != 0) {
             /* couldn't come up with anything better */
             code = ctx->err_reply->error + ERROR_TABLE_BASE_krb5;
@@ -1553,10 +1547,10 @@ init_creds_step_reply(krb5_context context,
             ctx->enc_pa_rep_permitted = TRUE;
             code = restart_init_creds_loop(context, ctx, FALSE);
         } else {
-            if (retry) {
+            if (retry && ctx->selected_preauth_type != KRB5_PADATA_NONE) {
                 code = 0;
             } else {
-                /* error + no hints = give up */
+                /* error + no hints (or no preauth mech) = give up */
                 code = (krb5_error_code)reply_code + ERROR_TABLE_BASE_krb5;
             }
         }
