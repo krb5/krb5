@@ -1325,6 +1325,7 @@ init_creds_step_request(krb5_context context,
 {
     krb5_error_code code;
     krb5_preauthtype pa_type;
+    struct errinfo save = EMPTY_ERRINFO;
 
     if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
         code = KRB5_GET_IN_TKT_LOOP;
@@ -1359,38 +1360,51 @@ init_creds_step_request(krb5_context context,
     if (ctx->optimistic_padata != NULL) {
         /* Our first attempt, using an optimistic padata list. */
         TRACE_INIT_CREDS_PREAUTH_OPTIMISTIC(context);
-        code = k5_preauth(context, ctx, ctx->optimistic_padata, FALSE,
+        code = k5_preauth(context, ctx, ctx->optimistic_padata, TRUE,
                           &ctx->request->padata, &ctx->selected_preauth_type);
         krb5_free_pa_data(context, ctx->optimistic_padata);
         ctx->optimistic_padata = NULL;
-        if (code != 0)
-            goto cleanup;
+        if (code) {
+            /* Make an unauthenticated request, and possibly try again using
+             * the same mechanisms as we tried optimistically. */
+            k5_reset_preauth_types_tried(ctx);
+            krb5_clear_error_message(context);
+            code = 0;
+        }
     } if (ctx->more_padata != NULL) {
         /* Continuing after KDC_ERR_MORE_PREAUTH_DATA_REQUIRED. */
         TRACE_INIT_CREDS_PREAUTH_MORE(context, ctx->selected_preauth_type);
         code = k5_preauth(context, ctx, ctx->more_padata, TRUE,
                           &ctx->request->padata, &pa_type);
-        if (code != 0)
-            goto cleanup;
     } else if (ctx->err_reply != NULL &&
-               ctx->err_reply->error == KDC_ERR_PREAUTH_REQUIRED) {
-        /* Continuing after KDC_ERR_PREAUTH_REQUIRED, using method data. */
-        TRACE_INIT_CREDS_PREAUTH(context);
-        code = k5_preauth(context, ctx, ctx->method_padata, TRUE,
-                          &ctx->request->padata, &ctx->selected_preauth_type);
-        if (code != 0)
-            goto cleanup;
-    } else if (ctx->err_reply != NULL) {
-        /* Retry after an error other than PREAUTH_REQUIRED, using error padata
-         * to figure out what to change. */
+               ctx->err_reply->error != KDC_ERR_PREAUTH_REQUIRED) {
+        /* Retrying after an error (possibly mechanism-specific), using error
+         * padata to figure out what to change. */
         TRACE_INIT_CREDS_PREAUTH_TRYAGAIN(context, ctx->err_reply->error,
                                           ctx->selected_preauth_type);
         code = k5_preauth_tryagain(context, ctx, ctx->selected_preauth_type,
                                    ctx->err_reply, ctx->err_padata,
                                    &ctx->request->padata);
-        if (code != 0) {
-            /* couldn't come up with anything better */
+        if (code) {
+            krb5_clear_error_message(context);
             code = ctx->err_reply->error + ERROR_TABLE_BASE_krb5;
+        }
+    }
+    if (code) {
+        /* See if we can try a different preauth mech before giving up. */
+        k5_save_ctx_error(context, code, &save);
+        ctx->selected_preauth_type = KRB5_PADATA_NONE;
+    }
+
+    if (ctx->request->padata == NULL && ctx->method_padata != NULL) {
+        /* Retrying after KDC_ERR_PREAUTH_REQUIRED, or trying again with a
+         * different mechanism after a client-side failure. */
+        TRACE_INIT_CREDS_PREAUTH(context);
+        code = k5_preauth(context, ctx, ctx->method_padata, TRUE,
+                          &ctx->request->padata, &ctx->selected_preauth_type);
+        if (code) {
+            if (save.code != 0)
+                code = k5_restore_ctx_error(context, &save);
             goto cleanup;
         }
     }
@@ -1431,6 +1445,7 @@ init_creds_step_request(krb5_context context,
 cleanup:
     krb5_free_pa_data(context, ctx->request->padata);
     ctx->request->padata = NULL;
+    k5_clear_error(&save);
     return code;
 }
 
