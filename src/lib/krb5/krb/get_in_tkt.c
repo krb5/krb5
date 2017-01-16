@@ -1377,8 +1377,6 @@ init_creds_step_request(krb5_context context,
         krb5_free_data(context, ctx->encoded_previous_request);
         ctx->encoded_previous_request = NULL;
     }
-    if (ctx->request->padata)
-        ctx->sent_nontrivial_preauth = TRUE;
     if (ctx->enc_pa_rep_permitted) {
         code = add_padata(&ctx->request->padata, KRB5_ENCPADATA_REQ_ENC_PA_REP,
                           NULL, 0);
@@ -1503,7 +1501,7 @@ init_creds_step_reply(krb5_context context,
             ctx->restarted = TRUE;
             code = restart_init_creds_loop(context, ctx, TRUE);
         } else if (!ctx->restarted && reply_code == KDC_ERR_PREAUTH_FAILED &&
-                   !ctx->sent_nontrivial_preauth) {
+                   ctx->selected_preauth_type == KRB5_PADATA_NONE) {
             /* The KDC didn't like our informational padata (probably a pre-1.7
              * MIT krb5 KDC).  Retry without it. */
             ctx->enc_pa_rep_permitted = FALSE;
@@ -1543,7 +1541,6 @@ init_creds_step_reply(krb5_context context,
                 goto cleanup;
             /* Reset per-realm negotiation state. */
             ctx->restarted = FALSE;
-            ctx->sent_nontrivial_preauth = FALSE;
             ctx->enc_pa_rep_permitted = TRUE;
             code = restart_init_creds_loop(context, ctx, FALSE);
         } else {
