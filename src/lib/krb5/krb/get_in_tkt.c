@@ -1326,6 +1326,7 @@ init_creds_step_request(krb5_context context,
     krb5_error_code code;
     krb5_preauthtype pa_type;
     struct errinfo save = EMPTY_ERRINFO;
+    uint32_t rcode = (ctx->err_reply == NULL) ? 0 : ctx->err_reply->error;
 
     if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
         code = KRB5_GET_IN_TKT_LOOP;
@@ -1376,8 +1377,10 @@ init_creds_step_request(krb5_context context,
         TRACE_INIT_CREDS_PREAUTH_MORE(context, ctx->selected_preauth_type);
         code = k5_preauth(context, ctx, ctx->more_padata, TRUE,
                           &ctx->request->padata, &pa_type);
-    } else if (ctx->err_reply != NULL &&
-               ctx->err_reply->error != KDC_ERR_PREAUTH_REQUIRED) {
+    } else if (rcode == KDC_ERR_PREAUTH_FAILED) {
+        /* Report the KDC-side failure code if we can't try another mech. */
+        code = KRB5KDC_ERR_PREAUTH_FAILED;
+    } else if (rcode && rcode != KDC_ERR_PREAUTH_REQUIRED) {
         /* Retrying after an error (possibly mechanism-specific), using error
          * padata to figure out what to change. */
         TRACE_INIT_CREDS_PREAUTH_TRYAGAIN(context, ctx->err_reply->error,
@@ -1398,7 +1401,7 @@ init_creds_step_request(krb5_context context,
 
     if (ctx->request->padata == NULL && ctx->method_padata != NULL) {
         /* Retrying after KDC_ERR_PREAUTH_REQUIRED, or trying again with a
-         * different mechanism after a client-side failure. */
+         * different mechanism after a failure. */
         TRACE_INIT_CREDS_PREAUTH(context);
         code = k5_preauth(context, ctx, ctx->method_padata, TRUE,
                           &ctx->request->padata, &ctx->selected_preauth_type);
@@ -1498,6 +1501,18 @@ is_referral(krb5_context context, krb5_error *err, krb5_principal client)
     return !krb5_realm_compare(context, err->client, client);
 }
 
+/* Transfer error padata to method data in ctx and sort it according to
+ * configuration. */
+static krb5_error_code
+accept_method_data(krb5_context context, krb5_init_creds_context ctx)
+{
+    krb5_free_pa_data(context, ctx->method_padata);
+    ctx->method_padata = ctx->err_padata;
+    ctx->err_padata = NULL;
+    return sort_krb5_padata_sequence(context, &ctx->request->client->realm,
+                                     ctx->method_padata);
+}
+
 static krb5_error_code
 init_creds_step_reply(krb5_context context,
                       krb5_init_creds_context ctx,
@@ -1556,14 +1571,26 @@ init_creds_step_reply(krb5_context context,
             ctx->restarted = FALSE;
             code = restart_init_creds_loop(context, ctx, FALSE);
         } else if (reply_code == KDC_ERR_PREAUTH_REQUIRED && retry) {
-            krb5_free_pa_data(context, ctx->method_padata);
-            ctx->method_padata = ctx->err_padata;
-            ctx->err_padata = NULL;
             note_req_timestamp(context, ctx, ctx->err_reply->stime,
                                ctx->err_reply->susec);
-            code = sort_krb5_padata_sequence(context,
-                                             &ctx->request->client->realm,
-                                             ctx->method_padata);
+            code = accept_method_data(context, ctx);
+        } else if (reply_code == KDC_ERR_PREAUTH_FAILED && retry) {
+            note_req_timestamp(context, ctx, ctx->err_reply->stime,
+                               ctx->err_reply->susec);
+            if (ctx->method_padata == NULL) {
+                /* Optimistic preauth failed on the KDC.  Allow all mechanisms
+                 * to be tried again using method data. */
+                k5_reset_preauth_types_tried(ctx);
+            } else {
+                /* Don't try again with the mechanism that failed. */
+                code = k5_preauth_note_failed(ctx, ctx->selected_preauth_type);
+                if (code)
+                    goto cleanup;
+            }
+            ctx->selected_preauth_type = KRB5_PADATA_NONE;
+            /* Accept or update method data if the KDC sent it. */
+            if (ctx->err_padata != NULL)
+                code = accept_method_data(context, ctx);
         } else if (reply_code == KDC_ERR_MORE_PREAUTH_DATA_REQUIRED && retry) {
             ctx->more_padata = ctx->err_padata;
             ctx->err_padata = NULL;
