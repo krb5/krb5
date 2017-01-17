@@ -47,21 +47,13 @@ if 'not found in Kerberos database' not in out:
     fail('Expected error message not seen in kinit -C output')
 
 # Spot-check KRB5_TRACE output
-tracefile = os.path.join(realm.testdir, 'trace')
-realm.run(['env', 'KRB5_TRACE=' + tracefile, kinit, realm.user_princ],
-          input=(password('user') + "\n"))
-f = open(tracefile, 'r')
-trace = f.read()
-f.close()
-expected = ('Sending initial UDP request',
-            'Received answer',
-            'Selected etype info',
-            'AS key obtained',
-            'Decrypted AS reply',
-            'FAST negotiation: available',
-            'Storing user@KRBTEST.COM')
-for e in expected:
-    if e not in trace:
-        fail('Expected output not in kinit trace log')
+expected_trace = ('Sending initial UDP request',
+                  'Received answer',
+                  'Selected etype info',
+                  'AS key obtained',
+                  'Decrypted AS reply',
+                  'FAST negotiation: available',
+                  'Storing user@KRBTEST.COM')
+realm.kinit(realm.user_princ, password('user'), expected_trace=expected_trace)
 
 success('FAST kinit, trace logging')

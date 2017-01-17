@@ -176,19 +176,16 @@ realm.klist(realm.user_princ)
 
 # Test a DH parameter renegotiation by temporarily setting a 4096-bit
 # minimum on the KDC.
-tracefile = os.path.join(realm.testdir, 'trace')
 minbits_kdc_conf = {'realms': {'$realm': {'pkinit_dh_min_bits': '4096'}}}
 minbits_env = realm.special_env('restrict', True, kdc_conf=minbits_kdc_conf)
 realm.stop_kdc()
 realm.start_kdc(env=minbits_env)
-realm.run(['env', 'KRB5_TRACE=' + tracefile, kinit, '-X',
-           'X509_user_identity=' + file_identity, realm.user_princ])
-with open(tracefile, 'r') as f:
-    trace = f.read()
-if ('Key parameters not accepted' not in trace or
-    'Preauth tryagain input types' not in trace or
-    'trying again with KDC-provided parameters' not in trace):
-    fail('DH renegotiation steps not found in kinit trace log')
+expected_trace = ('Key parameters not accepted',
+                  'Preauth tryagain input types',
+                  'trying again with KDC-provided parameters')
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % file_identity],
+            expected_trace=expected_trace)
 realm.stop_kdc()
 realm.start_kdc()
 
