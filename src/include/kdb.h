@@ -1382,6 +1382,17 @@ typedef struct _kdb_vftabl {
                                                  krb5_const_principal client,
                                                  const krb5_db_entry *server,
                                                  krb5_const_principal proxy);
+
+    /* End of minor version 0. */
+
+    /*
+     * Optional: Free the e_data pointer of a database entry.  If this method
+     * is not implemented, the e_data pointer in principal entries will be
+     * freed with free() as seen by libkdb5.
+     */
+    void (*free_principal_e_data)(krb5_context kcontext, krb5_octet *e_data);
+
+    /* End of minor version 1 for major version 6. */
 } kdb_vftabl;
 
 #endif /* !defined(_WIN32) */
