@@ -101,10 +101,9 @@ realm.kinit('user@krbtest.com',
             flags=['-E', '-X', 'X509_user_identity=%s' % p12_upn2_identity])
 
 # Test a mismatch.
-out = realm.run([kinit, '-X', 'X509_user_identity=%s' % p12_upn2_identity,
-                 'user2'], expected_code=1)
-if 'kinit: Client name mismatch while getting initial credentials' not in out:
-    fail('Wrong error for UPN SAN mismatch')
+msg = 'kinit: Client name mismatch while getting initial credentials'
+realm.run([kinit, '-X', 'X509_user_identity=%s' % p12_upn2_identity, 'user2'],
+          expected_code=1, expected_msg=msg)
 realm.stop()
 
 realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
@@ -118,9 +117,8 @@ realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
 # Test anonymous PKINIT.
-out = realm.kinit('@%s' % realm.realm, flags=['-n'], expected_code=1)
-if 'not found in Kerberos database' not in out:
-    fail('Wrong error for anonymous PKINIT without anonymous enabled')
+realm.kinit('@%s' % realm.realm, flags=['-n'], expected_code=1,
+            expected_msg='not found in Kerberos database')
 realm.addprinc('WELLKNOWN/ANONYMOUS')
 realm.kinit('@%s' % realm.realm, flags=['-n'])
 realm.klist('WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS')
@@ -135,9 +133,8 @@ f.write('WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS a *')
 f.close()
 realm.start_kadmind()
 realm.run([kadmin, '-n', 'addprinc', '-pw', 'test', 'testadd'])
-out = realm.run([kadmin, '-n', 'getprinc', 'testadd'], expected_code=1)
-if "Operation requires ``get'' privilege" not in out:
-    fail('Anonymous kadmin has too much privilege')
+realm.run([kadmin, '-n', 'getprinc', 'testadd'], expected_code=1,
+          expected_msg="Operation requires ``get'' privilege")
 realm.stop_kadmind()
 
 # Test with anonymous restricted; FAST should work but kvno should fail.
@@ -146,9 +143,8 @@ realm.stop_kdc()
 realm.start_kdc(env=r_env)
 realm.kinit('@%s' % realm.realm, flags=['-n'])
 realm.kinit('@%s' % realm.realm, flags=['-n', '-T', realm.ccache])
-out = realm.run([kvno, realm.host_princ], expected_code=1)
-if 'KDC policy rejects request' not in out:
-    fail('Wrong error for restricted anonymous PKINIT')
+realm.run([kvno, realm.host_princ], expected_code=1,
+          expected_msg='KDC policy rejects request')
 
 # Regression test for #8458: S4U2Self requests crash the KDC if
 # anonymous is restricted.
@@ -200,9 +196,8 @@ realm.kinit(realm.user_princ,
             password='encrypted')
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
-out = realm.run(['./adata', realm.host_princ])
-if '+97: [indpkinit1, indpkinit2]' not in out:
-    fail('auth indicators not seen in PKINIT ticket')
+realm.run(['./adata', realm.host_princ],
+          expected_msg='+97: [indpkinit1, indpkinit2]')
 
 # Run the basic test - PKINIT with FILE: identity, with a password on the key,
 # supplied by the responder.

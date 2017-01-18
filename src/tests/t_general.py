@@ -3,10 +3,9 @@ from k5test import *
 
 for realm in multipass_realms(create_host=False):
     # Check that kinit fails appropriately with the wrong password.
-    output = realm.run([kinit, realm.user_princ], input='wrong\n',
-                       expected_code=1)
-    if 'Password incorrect while getting initial credentials' not in output:
-        fail('Expected error message not seen in kinit output')
+    msg = 'Password incorrect while getting initial credentials'
+    realm.run([kinit, realm.user_princ], input='wrong\n', expected_code=1,
+              expected_msg=msg)
 
     # Check that we can kinit as a different principal.
     realm.kinit(realm.admin_princ, password('admin'))
@@ -42,9 +41,8 @@ realm.run(['./responder', '-r', 'password=%s' % password('user'),
 # Test that WRONG_REALM responses aren't treated as referrals unless
 # they contain a crealm field pointing to a different realm.
 # (Regression test for #8060.)
-out = realm.run([kinit, '-C', 'notfoundprinc'], expected_code=1)
-if 'not found in Kerberos database' not in out:
-    fail('Expected error message not seen in kinit -C output')
+realm.run([kinit, '-C', 'notfoundprinc'], expected_code=1,
+          expected_msg='not found in Kerberos database')
 
 # Spot-check KRB5_TRACE output
 expected_trace = ('Sending initial UDP request',

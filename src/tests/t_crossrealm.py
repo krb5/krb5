@@ -25,9 +25,7 @@
 from k5test import *
 
 def test_kvno(r, princ, test, env=None):
-    output = r.run([kvno, princ], env=env)
-    if princ not in output:
-        fail('%s: principal %s not in kvno output' % (test, princ))
+    r.run([kvno, princ], env=env, expected_msg=princ)
 
 
 def stop(*realms):
@@ -85,9 +83,8 @@ capaths = {'capaths': {'A': {'C': 'B'}}}
 r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)),
                           args=({'realm': 'A', 'krb5_conf': capaths},
                                 {'realm': 'B'}, {'realm': 'C'}))
-output = r1.run([kvno, r3.host_princ], expected_code=1)
-if 'KDC policy rejects request' not in output:
-    fail('transited 1: Expected error message not in output')
+r1.run([kvno, r3.host_princ], expected_code=1,
+       expected_msg='KDC policy rejects request')
 stop(r1, r2, r3)
 
 # Test a different kind of transited error.  The KDC for D does not
@@ -99,9 +96,8 @@ r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
                                     {'realm': 'B', 'krb5_conf': capaths},
                                     {'realm': 'C', 'krb5_conf': capaths},
                                     {'realm': 'D'}))
-output = r1.run([kvno, r4.host_princ], expected_code=1)
-if 'Illegal cross-realm ticket' not in output:
-    fail('transited 2: Expected error message not in output')
+r1.run([kvno, r4.host_princ], expected_code=1,
+       expected_msg='Illegal cross-realm ticket')
 stop(r1, r2, r3, r4)
 
 success('Cross-realm tests')

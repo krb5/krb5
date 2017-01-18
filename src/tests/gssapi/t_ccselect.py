@@ -45,9 +45,8 @@ refserver = 'p:host/' + hostname + '@'
 
 # Verify that we can't get initiator creds with no credentials in the
 # collection.
-output = r1.run(['./t_ccselect', host1, '-'], expected_code=1)
-if 'No Kerberos credentials available' not in output:
-    fail('Expected error not seen in output when no credentials available')
+r1.run(['./t_ccselect', host1, '-'], expected_code=1,
+       expected_msg='No Kerberos credentials available')
 
 # Make a directory collection and use it for client commands in both realms.
 ccdir = os.path.join(r1.testdir, 'cc')
@@ -117,8 +116,7 @@ if output != (zaphod + '\n'):
 output = r1.run(['./t_ccselect', refserver])
 if output != (bob + '\n'):
     fail('bob not chosen via primary cache when no .k5identity line matches.')
-output = r1.run(['./t_ccselect', 'h:bogus@' + hostname], expected_code=1)
-if 'Can\'t find client principal noprinc' not in output:
-    fail('Expected error not seen when k5identity selects bad principal.')
+r1.run(['./t_ccselect', 'h:bogus@' + hostname], expected_code=1,
+       expected_msg="Can't find client principal noprinc")
 
 success('GSSAPI credential selection tests')

@@ -23,9 +23,8 @@ def testref(realm, nametype):
 # Get credentials and check that we get an error, not a referral.
 def testfail(realm, nametype):
     shutil.copyfile(savefile, realm.ccache)
-    out = realm.run(['./gcred', nametype, 'a/x.d'], expected_code=1)
-    if 'not found in Kerberos database' not in out:
-        fail('unexpected error')
+    realm.run(['./gcred', nametype, 'a/x.d'], expected_code=1,
+              expected_msg='not found in Kerberos database')
 
 # Create a modified KDC environment and restart the KDC.
 def restart_kdc(realm, kdc_conf):
@@ -116,9 +115,8 @@ r1, r2 = cross_realms(2, xtgts=(),
                       create_host=False)
 r2.addprinc('abc\@XYZ', 'pw')
 r1.start_kdc()
-out = r1.kinit('user', expected_code=1)
-if 'not found in Kerberos database' not in out:
-    fail('Expected error not seen for referral without canonicalize flag')
+r1.kinit('user', expected_code=1,
+         expected_msg='not found in Kerberos database')
 r1.kinit('user', password('user'), ['-C'])
 r1.klist('user@KRBTEST2.COM', 'krbtgt/KRBTEST2.COM')
 r1.kinit('abc@XYZ', 'pw', ['-E'])

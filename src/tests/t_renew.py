@@ -32,9 +32,8 @@ realm.run([kvno, realm.user_princ])
 
 # Make sure we can't renew non-renewable tickets.
 test('non-renewable', '1h', '1h', False)
-out = realm.kinit(realm.user_princ, flags=['-R'], expected_code=1)
-if "KDC can't fulfill requested option" not in out:
-    fail('expected error not seen renewing non-renewable ticket')
+realm.kinit(realm.user_princ, flags=['-R'], expected_code=1,
+            expected_msg="KDC can't fulfill requested option")
 
 # Test that -allow_renewable on the client principal works.
 realm.run([kadminl, 'modprinc', '-allow_renewable', 'user'])
