@@ -323,6 +323,12 @@ copy_vtable(const kdb_vftabl *in, kdb_vftabl *out)
     out->refresh_config = in->refresh_config;
     out->check_allowed_to_delegate = in->check_allowed_to_delegate;
 
+    /* Copy fields for minor version 1 (major version 6). */
+    assert(KRB5_KDB_DAL_MAJOR_VERSION == 6);
+    out->free_principal_e_data = NULL;
+    if (in->min_ver >= 1)
+        out->free_principal_e_data = in->free_principal_e_data;
+
     /* Set defaults for optional fields. */
     if (out->fetch_master_key == NULL)
         out->fetch_master_key = krb5_db_def_fetch_mkey;
@@ -820,11 +826,17 @@ free_tl_data(krb5_tl_data *list)
 void
 krb5_db_free_principal(krb5_context kcontext, krb5_db_entry *entry)
 {
+    kdb_vftabl *v;
     int i;
 
     if (entry == NULL)
         return;
-    free(entry->e_data);
+    if (entry->e_data != NULL) {
+        if (get_vftabl(kcontext, &v) == 0 && v->free_principal_e_data != NULL)
+            v->free_principal_e_data(kcontext, entry->e_data);
+        else
+            free(entry->e_data);
+    }
     krb5_free_principal(kcontext, entry->princ);
     free_tl_data(entry->tl_data);
     for (i = 0; i < entry->n_key_data; i++)
