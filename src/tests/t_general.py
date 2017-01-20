@@ -29,6 +29,7 @@ conf={'plugins': {'pwqual': {'disable': 'empty'}}}
 realm = K5Realm(create_user=False, create_host=False, krb5_conf=conf)
 realm.run([kadminl, 'addprinc', '-pw', '', 'user'])
 realm.run(['./icred', 'user', ''])
+realm.run(['./icred', '-s', 'user', ''])
 realm.stop()
 
 realm = K5Realm(create_host=False)
