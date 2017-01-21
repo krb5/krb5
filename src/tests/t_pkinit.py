@@ -171,14 +171,16 @@ realm.kinit(realm.user_princ,
 realm.klist(realm.user_princ)
 
 # Test a DH parameter renegotiation by temporarily setting a 4096-bit
-# minimum on the KDC.
+# minimum on the KDC.  (Preauth type 16 is PKINIT PA_PK_AS_REQ;
+# 133 is FAST PA-FX-COOKIE.)
 minbits_kdc_conf = {'realms': {'$realm': {'pkinit_dh_min_bits': '4096'}}}
 minbits_env = realm.special_env('restrict', True, kdc_conf=minbits_kdc_conf)
 realm.stop_kdc()
 realm.start_kdc(env=minbits_env)
 expected_trace = ('Key parameters not accepted',
                   'Preauth tryagain input types',
-                  'trying again with KDC-provided parameters')
+                  'trying again with KDC-provided parameters',
+                  'Followup preauth for next request: 16, 133')
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % file_identity],
             expected_trace=expected_trace)

@@ -923,7 +923,7 @@ k5_preauth_tryagain(krb5_context context, krb5_init_creds_context ctx,
     krb5_pa_data **mod_pa;
     krb5_clpreauth_modreq modreq;
     clpreauth_handle h;
-    int i;
+    int i, count;
 
     *padata_out = NULL;
 
@@ -942,6 +942,12 @@ k5_preauth_tryagain(krb5_context context, krb5_init_creds_context ctx,
                                  ctx->err_reply, ctx->err_padata,
                                  ctx->prompter, ctx->prompter_data, &mod_pa);
         if (ret == 0 && mod_pa != NULL) {
+            for (count = 0; mod_pa[count] != NULL; count++);
+            ret = copy_cookie(context, ctx->err_padata, &mod_pa, &count);
+            if (ret) {
+                krb5_free_pa_data(context, mod_pa);
+                return ret;
+            }
             TRACE_PREAUTH_TRYAGAIN_OUTPUT(context, mod_pa);
             *padata_out = mod_pa;
             return 0;
