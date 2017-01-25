@@ -7,6 +7,119 @@ application servers, or KDCs, can be configured using
 you might want to make.
 
 
+Default realm
+-------------
+
+In the :ref:`libdefaults` section, the **default_realm** realm
+relation sets the default Kerberos realm.  For example::
+
+    [libdefaults]
+        default_realm = ATHENA.MIT.EDU
+
+The default realm affects Kerberos behavior in the following ways:
+
+* When a principal name is parsed from text, the default realm is used
+  if no ``@REALM`` component is specified.
+
+* The default realm affects login authorization as described below.
+
+* For programs which operate on a Kerberos database, the default realm
+  is used to determine which database to operate on, unless the **-r**
+  parameter is given to specify a realm.
+
+* A server program may use the default realm when looking up its key
+  in a :ref:`keytab file <keytab_file>`, if its realm is not
+  determined by :ref:`domain_realm` configuration or by the server
+  program itself.
+
+* If :ref:`kinit(1)` is passed the **-n** flag, it requests anonymous
+  tickets from the default realm.
+
+In some situations, these uses of the default realm might conflict.
+For example, it might be desirable for principal name parsing to use
+one realm by default, but for login authorization to use a second
+realm.  In this situation, the first realm can be configured as the
+default realm, and **auth_to_local** relations can be used as
+described below to use the second realm for login authorization.
+
+
+.. _login_authorization:
+
+Login authorization
+-------------------
+
+If a host runs a Kerberos-enabled login service such as OpenSSH with
+GSSAPIAuthentication enabled, login authorization rules determine
+whether a Kerberos principal is allowed to access a local account.
+
+By default, a Kerberos principal is allowed access to an account if
+its realm matches the default realm and its name matches the account
+name.  (For historical reasons, access is also granted by default if
+the name has two components and the second component matches the
+default realm; for instance, ``alice/ATHENA.MIT.EDU@ATHENA.MIT.EDU``
+is granted access to the ``alice`` account if ``ATHENA.MIT.EDU`` is
+the default realm.)
+
+The simplest way to control local access is using :ref:`.k5login(5)`
+files.  To use these, place a ``.k5login`` file in the home directory
+of each account listing the principal names which should have login
+access to that account.  If it is not desirable to use ``.k5login``
+files located in account home directories, the **k5login_directory**
+relation in the :ref:`libdefaults` section can specify a directory
+containing one file per account uname.
+
+By default, if a ``.k5login`` file is present, it controls
+authorization both positively and negatively--any principal name
+contained in the file is granted access and any other principal name
+is denied access, even if it would have had access if the ``.k5login``
+file didn't exist.  The **k5login_authoritative** relation in the
+:ref:`libdefaults` section can be set to false to make ``.k5login``
+files provide positive authorization only.
+
+The **auth_to_local** relation in the :ref:`realms` section for the
+default realm can specify pattern-matching rules to control login
+authorization.  For example, the following configuration allows access
+to principals from a different realm than the default realm::
+
+    [realms]
+        DEFAULT.REALM = {
+            # Allow access to principals from OTHER.REALM.
+            #
+            # [1:$1@$0] matches single-component principal names and creates
+            # a selection string containing the principal name and realm.
+            #
+            # (.*@OTHER\.REALM) matches against the selection string, so that
+            # only principals in OTHER.REALM are matched.
+            #
+            # s/@OTHER\.REALM$// removes the realm name, leaving behind the
+            # principal name as the acount name.
+            auth_to_local = RULE:[1:$1@$0](.*@OTHER\.REALM)s/@OTHER\.REALM$//
+
+            # Also allow principals from the default realm.  Omit this line
+            # to only allow access to principals in OTHER.REALM.
+            auth_to_local = DEFAULT
+        }
+
+The **auth_to_local_names** subsection of the :ref:`realms` section
+for the default realm can specify explicit mappings from principal
+names to local accounts.  The key used in this subsection is the
+principal name without realm, so it is only safe to use in a Kerberos
+environment with a single realm or a tightly controlled set of realms.
+An example use of **auth_to_local_names** might be::
+
+    [realms]
+        ATHENA.MIT.EDU = {
+            auth_to_local_names = {
+                # Careful, these match principals in any realm!
+                host/example.com = hostaccount
+                fred = localfred
+            }
+        }
+
+Local authorization behavior can also be modified using plugin
+modules; see :ref:`hostrealm_plugin` for details.
+
+
 .. _plugin_config:
 
 Plugin module configuration
