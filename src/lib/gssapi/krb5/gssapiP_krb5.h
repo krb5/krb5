@@ -1425,4 +1425,10 @@ iakerb_gss_pseudo_random(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
  * the format changes. */
 #define CRED_EXPORT_MAGIC "K5C1"
 
+OM_uint32
+gss_krb5int_get_cred_impersonator(OM_uint32 *minor_status,
+                                  const gss_cred_id_t cred_handle,
+                                  const gss_OID desired_object,
+                                  gss_buffer_set_t *data_set);
+
 #endif /* _GSSAPIP_KRB5_H_ */

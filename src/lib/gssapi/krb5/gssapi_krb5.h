@@ -96,6 +96,15 @@ GSS_DLLIMP extern const gss_OID_desc krb5_gss_oid_array[];
  */
 GSS_DLLIMP extern const gss_OID GSS_KRB5_CRED_NO_CI_FLAGS_X;
 
+/*
+ * This OID can be used with gss_inquire_cred_by_oid(0 to retrieve the
+ * impersonator name (if any).
+ *
+ * iso(1) member-body(2) United States(840) mit(113554) infosys(1) gssapi(2)
+ * krb5(2) krb5-gssapi-ext(5) get-cred-impersonator(14)
+ */
+GSS_DLLIMP extern const gss_OID GSS_KRB5_GET_CRED_IMPERSONATOR;
+
 #define gss_krb5_nt_general_name        gss_nt_krb5_name
 #define gss_krb5_nt_principal           gss_nt_krb5_principal
 #define gss_krb5_nt_service_name        gss_nt_service_name
