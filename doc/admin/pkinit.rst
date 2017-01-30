@@ -111,9 +111,9 @@ Generating client certificates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 PKINIT client certificates also must have some unusual certificate
-fields.  To generate a client certificate with OpenSSL, you will need
-an extensions file (different from the KDC extensions file above)
-containing::
+fields.  To generate a client certificate with OpenSSL for a
+single-component principal name, you will need an extensions file
+(different from the KDC extensions file above) containing::
 
     [client_cert]
     basicConstraints=CA:FALSE
@@ -163,6 +163,21 @@ protected from access by others.
 As in the KDC certificate, OpenSSL will display the client principal
 name as ``othername:<unsupported>`` in the Subject Alternative Name
 extension of a PKINIT client certificate.
+
+If the client principal name contains more than one component
+(e.g. ``host/example.com@REALM``), the ``[principals]`` section of
+``extensions.client`` must be altered to contain multiple entries.
+(Simply setting ``CLIENT`` to ``host/example.com`` would generate a
+certificate for ``host\/example.com@REALM`` which would not match the
+multi-component principal name.)  For a two-component principal, the
+section should read::
+
+    [principals]
+    princ1=GeneralString:${ENV::CLIENT1}
+    princ2=GeneralString:${ENV::CLIENT2}
+
+The environment variables ``CLIENT1`` and ``CLIENT2`` must then be set
+to the first and second components when running ``openssl x509``.
 
 
 Configuring the KDC
