@@ -42,6 +42,7 @@ typedef struct _krb5_pk_authenticator {
     krb5_timestamp  ctime;
     krb5_int32      nonce;  /* (0..4294967295) */
     krb5_checksum   paChecksum;
+    krb5_data      *freshnessToken;
 } krb5_pk_authenticator;
 
 /* PKAuthenticator draft9 */

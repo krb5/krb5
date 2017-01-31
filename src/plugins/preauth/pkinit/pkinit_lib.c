@@ -82,6 +82,8 @@ pkinit_init_plg_opts(pkinit_plg_opts **plgopts)
     opts->dh_or_rsa = DH_PROTOCOL;
     opts->allow_upn = 0;
     opts->require_crl_checking = 0;
+    opts->require_freshness = 0;
+    opts->disable_freshness = 0;
 
     opts->dh_min_bits = PKINIT_DEFAULT_DH_MIN_BITS;
 
@@ -145,6 +147,7 @@ free_krb5_auth_pack(krb5_auth_pack **in)
         free((*in)->clientPublicValue);
     }
     free((*in)->pkAuthenticator.paChecksum.contents);
+    krb5_free_data(NULL, (*in)->pkAuthenticator.freshnessToken);
     if ((*in)->supportedCMSTypes != NULL)
         free_krb5_algorithm_identifiers(&((*in)->supportedCMSTypes));
     if ((*in)->supportedKDFs) {

@@ -1442,9 +1442,12 @@ DEFFIELD(pk_authenticator_1, krb5_pk_authenticator, ctime, 1, kerberos_time);
 DEFFIELD(pk_authenticator_2, krb5_pk_authenticator, nonce, 2, int32);
 DEFFIELD(pk_authenticator_3, krb5_pk_authenticator, paChecksum, 3,
          ostring_checksum);
+DEFFIELD(pk_authenticator_4, krb5_pk_authenticator, freshnessToken, 4,
+         opt_ostring_data_ptr);
 static const struct atype_info *pk_authenticator_fields[] = {
     &k5_atype_pk_authenticator_0, &k5_atype_pk_authenticator_1,
-    &k5_atype_pk_authenticator_2, &k5_atype_pk_authenticator_3
+    &k5_atype_pk_authenticator_2, &k5_atype_pk_authenticator_3,
+    &k5_atype_pk_authenticator_4
 };
 DEFSEQTYPE(pk_authenticator, krb5_pk_authenticator, pk_authenticator_fields);
 

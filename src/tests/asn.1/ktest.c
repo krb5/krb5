@@ -725,6 +725,8 @@ ktest_make_sample_pk_authenticator(krb5_pk_authenticator *p)
     ktest_make_sample_checksum(&p->paChecksum);
     /* We don't encode the checksum type, only the contents. */
     p->paChecksum.checksum_type = 0;
+    p->freshnessToken = ealloc(sizeof(krb5_data));
+    ktest_make_sample_data(p->freshnessToken);
 }
 
 static void
@@ -1711,6 +1713,8 @@ ktest_empty_pk_authenticator(krb5_pk_authenticator *p)
 {
     ktest_empty_checksum(&p->paChecksum);
     p->paChecksum.contents = NULL;
+    krb5_free_data(NULL, p->freshnessToken);
+    p->freshnessToken = NULL;
 }
 
 static void

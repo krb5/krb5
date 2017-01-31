@@ -895,7 +895,7 @@ krb5_init_creds_init(krb5_context context,
     ctx->request = k5alloc(sizeof(krb5_kdc_req), &code);
     if (code != 0)
         goto cleanup;
-    ctx->enc_pa_rep_permitted = TRUE;
+    ctx->info_pa_permitted = TRUE;
     code = krb5_copy_principal(context, client, &ctx->request->client);
     if (code != 0)
         goto cleanup;
@@ -1389,7 +1389,11 @@ init_creds_step_request(krb5_context context,
         krb5_free_data(context, ctx->encoded_previous_request);
         ctx->encoded_previous_request = NULL;
     }
-    if (ctx->enc_pa_rep_permitted) {
+    if (ctx->info_pa_permitted) {
+        code = add_padata(&ctx->request->padata, KRB5_PADATA_AS_FRESHNESS,
+                          NULL, 0);
+        if (code)
+            goto cleanup;
         code = add_padata(&ctx->request->padata, KRB5_ENCPADATA_REQ_ENC_PA_REP,
                           NULL, 0);
     }
@@ -1530,7 +1534,7 @@ init_creds_step_reply(krb5_context context,
                    ctx->selected_preauth_type == KRB5_PADATA_NONE) {
             /* The KDC didn't like our informational padata (probably a pre-1.7
              * MIT krb5 KDC).  Retry without it. */
-            ctx->enc_pa_rep_permitted = FALSE;
+            ctx->info_pa_permitted = FALSE;
             ctx->restarted = TRUE;
             code = restart_init_creds_loop(context, ctx, FALSE);
         } else if (reply_code == KDC_ERR_PREAUTH_EXPIRED) {
@@ -1574,7 +1578,7 @@ init_creds_step_reply(krb5_context context,
                 goto cleanup;
             /* Reset per-realm negotiation state. */
             ctx->restarted = FALSE;
-            ctx->enc_pa_rep_permitted = TRUE;
+            ctx->info_pa_permitted = TRUE;
             code = restart_init_creds_loop(context, ctx, FALSE);
         } else {
             if (retry && ctx->selected_preauth_type != KRB5_PADATA_NONE) {

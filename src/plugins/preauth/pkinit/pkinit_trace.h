@@ -41,6 +41,8 @@
     TRACE(c, "PKINIT client found no acceptable EKU in KDC cert")
 #define TRACE_PKINIT_CLIENT_EKU_SKIP(c)                                 \
     TRACE(c, "PKINIT client skipping EKU check due to configuration")
+#define TRACE_PKINIT_CLIENT_FRESHNESS_TOKEN(c)                  \
+    TRACE(c, "PKINIT client received freshness token from KDC")
 #define TRACE_PKINIT_CLIENT_KDF_ALG(c, kdf, keyblock)                   \
     TRACE(c, "PKINIT client used KDF {hexdata} to compute reply key "   \
           "{keyblock}", kdf, keyblock)
