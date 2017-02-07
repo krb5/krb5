@@ -209,6 +209,7 @@ struct _pkinit_req_context {
     pkinit_identity_opts *idopts;
     int do_identity_matching;
     krb5_preauthtype pa_type;
+    int rfc4556_kdc;
     int rfc6112_kdc;
     int identity_initialized;
     int identity_prompted;

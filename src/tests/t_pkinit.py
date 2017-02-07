@@ -320,6 +320,14 @@ realm.kinit(realm.user_princ,
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
+# Supply the wrong PIN, and verify that we ignore the draft9 padata offer
+# in the KDC method data after RFC 4556 PKINIT fails.
+expected_trace = ('PKINIT client has no configured identity; giving up',
+                  'PKINIT client ignoring draft 9 offer from RFC 4556 KDC')
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % p11_identity],
+            password='wrong', expected_code=1, expected_trace=expected_trace)
+
 # PKINIT with PKCS11: identity, with a PIN supplied by the responder.
 # Supply the response in raw form.
 realm.run(['./responder', '-x', 'pkinit={"%s": 0}' % p11_token_identity,

@@ -47,6 +47,8 @@
 #define TRACE_PKINIT_CLIENT_KDF_OS2K(c, keyblock)                       \
     TRACE(c, "PKINIT client used octetstring2key to compute reply key " \
           "{keyblock}", keyblock)
+#define TRACE_PKINIT_CLIENT_NO_DRAFT9(c)                                \
+    TRACE(c, "PKINIT client ignoring draft 9 offer from RFC 4556 KDC")
 #define TRACE_PKINIT_CLIENT_NO_IDENTITY(c)                              \
     TRACE(c, "PKINIT client has no configured identity; giving up")
 #define TRACE_PKINIT_CLIENT_REP_CHECKSUM_FAIL(c, expected, received)    \
