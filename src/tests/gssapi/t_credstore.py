@@ -50,10 +50,9 @@ else:
 mark('rcache')
 # t_credstore -r should produce a replay error normally, but not with
 # rcache set to "none:".
-output = realm.run(['./t_credstore', '-r', '-a', 'p:' + realm.host_princ],
-                   expected_code=1)
-if 'gss_accept_sec_context(2): Request is a replay' not in output:
-    fail('Expected replay error not seen in t_credstore output')
+realm.run(['./t_credstore', '-r', '-a', 'p:' + realm.host_princ],
+          expected_code=1,
+          expected_msg='gss_accept_sec_context(2): Request is a replay')
 realm.run(['./t_credstore', '-r', '-a', 'p:' + realm.host_princ,
            'rcache', 'none:'])
 
