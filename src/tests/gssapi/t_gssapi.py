@@ -77,18 +77,17 @@ realm.run(['./t_credstore', '-s', 'p:' + service_cs, 'ccache', storagecache,
 
 # Test rcache feature of cred stores.  t_credstore -r should produce a
 # replay error normally, but not with rcache set to "none:".
-output = realm.run(['./t_credstore', '-r', '-a', 'p:' + realm.host_princ],
-                   expected_code=1)
-if 'gss_accept_sec_context(2): Request is a replay' not in output:
-    fail('Expected replay error not seen in t_credstore output')
+realm.run(['./t_credstore', '-r', '-a', 'p:' + realm.host_princ],
+          expected_code=1,
+          expected_msg='gss_accept_sec_context(2): Request is a replay')
 realm.run(['./t_credstore', '-r', '-a', 'p:' + realm.host_princ,
            'rcache', 'none:'])
 
 # Verify that we can't acquire acceptor creds without a keytab.
 os.remove(realm.keytab)
-output = realm.run(['./t_accname', 'p:abc'], expected_code=1)
-if ('gss_acquire_cred: Keytab' not in output or
-    'nonexistent or empty' not in output):
+out = realm.run(['./t_accname', 'p:abc'], expected_code=1)
+if ('gss_acquire_cred: Keytab' not in out or
+    'nonexistent or empty' not in out):
     fail('Expected error message not seen for nonexistent keytab')
 
 realm.stop()
@@ -143,23 +142,18 @@ shutil.copyfile(realm.keytab, realm.client_keytab)
 realm.run(['./t_inq_cred', '-k', '-b'], expected_msg=realm.host_princ)
 
 # Test gss_export_name behavior.
-out = realm.run(['./t_export_name', 'u:x'])
-if out != '0401000B06092A864886F7120102020000000D78404B5242544553542E434F4D\n':
-    fail('Unexpected output from t_export_name (krb5 username)')
-output = realm.run(['./t_export_name', '-s', 'u:xyz'])
-if output != '0401000806062B06010505020000000378797A\n':
-    fail('Unexpected output from t_export_name (SPNEGO username)')
-output = realm.run(['./t_export_name', 'p:a@b'])
-if output != '0401000B06092A864886F71201020200000003614062\n':
-    fail('Unexpected output from t_export_name (krb5 principal)')
-output = realm.run(['./t_export_name', '-s', 'p:a@b'])
-if output != '0401000806062B060105050200000003614062\n':
-    fail('Unexpected output from t_export_name (SPNEGO krb5 principal)')
+realm.run(['./t_export_name', 'u:x'], expected_msg=\
+          '0401000B06092A864886F7120102020000000D78404B5242544553542E434F4D\n')
+realm.run(['./t_export_name', '-s', 'u:xyz'],
+          expected_msg='0401000806062B06010505020000000378797A\n')
+realm.run(['./t_export_name', 'p:a@b'],
+          expected_msg='0401000B06092A864886F71201020200000003614062\n')
+realm.run(['./t_export_name', '-s', 'p:a@b'],
+          expected_msg='0401000806062B060105050200000003614062\n')
 
 # Test that composite-export tokens can be imported.
-output = realm.run(['./t_export_name', '-c', 'p:a@b'])
-if (output != '0402000B06092A864886F7120102020000000361406200000000\n'):
-    fail('Unexpected output from t_export_name (using COMPOSITE_EXPORT)')
+realm.run(['./t_export_name', '-c', 'p:a@b'], expected_msg=
+          '0402000B06092A864886F7120102020000000361406200000000\n')
 
 # Test gss_inquire_mechs_for_name behavior.
 krb5_mech = '{ 1 2 840 113554 1 2 2 }'
