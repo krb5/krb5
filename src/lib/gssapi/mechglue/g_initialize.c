@@ -782,6 +782,10 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gssspi_query_meta_data);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gssspi_exchange_meta_data);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gssspi_query_mechanism_info);
+	/* gss_get_mic_iov extensions (added 1.12, implementable 1.20) */
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_get_mic_iov);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_verify_mic_iov);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_get_mic_iov_length);
 
 	assert(mech_type != GSS_C_NO_OID);
 
@@ -886,6 +890,10 @@ build_interMech(void *dl, const gss_OID mech_type)
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_sec_context_by_mech);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_name_by_mech);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_cred_by_mech);
+	/* gss_get_mic_iov extensions (added 1.12, implementable 1.20) */
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _get_mic_iov);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _verify_mic_iov);
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _get_mic_iov_length);
 
 	mech->mech_type = *mech_type;
 	return mech;
