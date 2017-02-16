@@ -366,7 +366,7 @@ chpwfail:
            to mk_error do. */
         krberror.error = ret;
         krberror.error -= ERROR_TABLE_BASE_krb5;
-        if (krberror.error < 0 || krberror.error > KRB_ERR_MAX)
+        if (krberror.error > KRB_ERR_MAX)
             krberror.error = KRB_ERR_GENERIC;
 
         krberror.client = NULL;
