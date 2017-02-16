@@ -1079,8 +1079,8 @@ exit_func:
     return TRUE;
 }
 
-/* Empty out *keys/*nkeys if princ is protected with the lockdown attribute, or
- * if we fail to check. */
+/* Empty out *keys / *nkeys if princ is protected with the lockdown
+ * attribute, or if we fail to check. */
 static kadm5_ret_t
 chrand_check_lockdown(kadm5_server_handle_t handle, krb5_principal princ,
                       krb5_keyblock **keys, int *nkeys)
