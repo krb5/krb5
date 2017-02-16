@@ -331,18 +331,6 @@ system_freeaddrinfo (struct addrinfo *ai)
     freeaddrinfo(ai);
 }
 
-/* Note: Implementations written to RFC 2133 use size_t, while RFC
-   2553 implementations use socklen_t, for the second parameter.
-
-   Mac OS X (10.2) and AIX 4.3.3 appear to be in the RFC 2133 camp,
-   but we don't have an autoconf test for that right now.  */
-static inline int
-system_getnameinfo (const struct sockaddr *sa, socklen_t salen,
-                    char *host, size_t hostlen, char *serv, size_t servlen,
-                    int flags)
-{
-    return getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
-}
 #endif
 
 #if !defined (HAVE_GETADDRINFO) || defined(WRAP_GETADDRINFO) || defined(FAI_CACHE)
