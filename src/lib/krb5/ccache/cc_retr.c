@@ -211,7 +211,6 @@ krb5_cc_retrieve_cred_seq (krb5_context context, krb5_ccache id,
         int pref;
     } fetched, best;
     int have_creds = 0;
-    krb5_flags oflags = 0;
 #define fetchcreds (fetched.creds)
 
     kret = krb5_cc_start_seq_get(context, id, &cursor);
