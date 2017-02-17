@@ -7,10 +7,13 @@ We recommend using the GSSAPI (or a higher-level framework which
 encompasses GSSAPI, such as SASL) for secure network communication
 over using the libkrb5 API directly.
 
-GSSAPIv2 is specified in :rfc:`2743` and :rfc:`2744`.  This
-documentation will describe how various ways of using GSSAPI will
-behave with the krb5 mechanism as implemented in MIT krb5, as well as
-krb5-specific extensions to the GSSAPI.
+GSSAPIv2 is specified in :rfc:`2743` and :rfc:`2744`.  Also see
+:rfc:`7546` for a description of how to use the GSSAPI in a client or
+server program.
+
+This documentation will describe how various ways of using the
+GSSAPI will behave with the krb5 mechanism as implemented in MIT krb5,
+as well as krb5-specific extensions to the GSSAPI.
 
 
 Name types
@@ -27,7 +30,7 @@ name types are supported by the krb5 mechanism:
 
 * **GSS_KRB5_NT_PRINCIPAL_NAME**: The value should be a principal name
   string.  This name type only works with the krb5 mechanism, and is
-  defined in the ``<gssapi_krb5.h>`` header.
+  defined in the ``<gssapi/gssapi_krb5.h>`` header.
 
 * **GSS_C_NT_USER_NAME** or **GSS_C_NULL_OID**: The value is treated
   as an unparsed principal name string, as above.  These name types
@@ -237,6 +240,77 @@ delegated credentials received by gss_accept_sec_context_.  In this
 case, the contents of the credential cache are serialized, so that the
 resulting token may be imported even if the original memory credential
 cache no longer exists.
+
+
+Constrained delegation (S4U)
+----------------------------
+
+The Microsoft S4U2Self and S4U2Proxy Kerberos protocol extensions
+allow an intermediate service to acquire credentials from a client to
+a target service without requiring the client to delegate a
+ticket-granting ticket, if the KDC is configured to allow it.
+
+To perform a constrained delegation operation, the intermediate
+service must submit to the KDC an "evidence ticket" from the client to
+the intermediate service with the forwardable bit set.  An evidence
+ticket can be acquired when the client authenticates to the
+intermediate service with Kerberos, or with an S4U2Self request if the
+KDC allows it.  The MIT krb5 GSSAPI library represents an evidence
+ticket using a "proxy credential", which is a special kind of
+gss_cred_id_t object whose underlying credential cache contains the
+evidence ticket and a krbtgt ticket for the intermediate service.
+
+To acquire a proxy credential during client authentication, the
+service should first create an acceptor credential using the
+**GSS_C_BOTH** usage.  The application should then pass this
+credential as the *acceptor_cred_handle* to gss_accept_sec_context_,
+and also pass a *delegated_cred_handle* output parameter to receive a
+proxy credential containing the evidence ticket.  The output value of
+*delegated_cred_handle* may be a delegated ticket-granting ticket if
+the client sent one, or a proxy credential if the client authenticated
+with a forwardable service ticket, or **GSS_C_NO_CREDENTIAL** if
+neither is the case.
+
+To acquire a proxy credential using an S4U2Self request, the service
+can use the following GSSAPI extension::
+
+    OM_uint32 gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
+                                                gss_cred_id_t icred,
+                                                gss_name_t desired_name,
+                                                OM_uint32 time_req,
+                                                gss_OID_set desired_mechs,
+                                                gss_cred_usage_t cred_usage,
+                                                gss_cred_id_t *output_cred,
+                                                gss_OID_set *actual_mechs,
+                                                OM_uint32 *time_rec);
+
+The parameters to this function are similar to those of
+gss_acquire_cred_, except that *icred* is used to make an S4U2Self
+request to the KDC for a ticket from *desired_name* to the
+intermediate service.  Both *icred* and *desired_name* are required
+for this function; passing **GSS_C_NO_CREDENTIAL** or
+**GSS_C_NO_NAME** will cause the call to fail.  *icred* must contain a
+krbtgt ticket for the intermediate service.  If the KDC returns a
+forwardable ticket, the result of this operation is a proxy
+credential; if it is not forwardable, the result is a regular
+credential for *desired_name*.
+
+A recent KDC will usually allow any service to acquire a ticket from a
+client to itself with an S4U2Self request, but the ticket will only be
+forwardable if the service has a specific privilege.  In the MIT krb5
+KDC, this privilege is determined by the **ok_to_auth_as_delegate**
+bit on the intermediate service's principal entry, which can be
+configured with :ref:`kadmin(1)`.
+
+Once the intermediate service has a proxy credential, it can simply
+pass it to gss_init_sec_context_ as the *initiator_cred_handle*
+parameter, and the desired service as the *target_name* parameter.
+The GSSAPI library will present the krbtgt ticket and evidence ticket
+in the proxy credential to the KDC in an S4U2Proxy request; if the
+intermediate service has the appropriate permissions, the KDC will
+issue a ticket from the client to the target service.  The GSSAPI
+library will then use this ticket to authenticate to the target
+service.
 
 
 AEAD message wrapping
