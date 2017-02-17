@@ -181,11 +181,11 @@ is_loopback_address(struct sockaddr *sa)
 {
     switch (sa->sa_family) {
     case AF_INET: {
-        struct sockaddr_in *s4 = (struct sockaddr_in *)sa;
+        struct sockaddr_in *s4 = sa2sin(sa);
         return s4->sin_addr.s_addr == htonl(INADDR_LOOPBACK);
     }
     case AF_INET6: {
-        struct sockaddr_in6 *s6 = (struct sockaddr_in6 *)sa;
+        struct sockaddr_in6 *s6 = sa2sin6(sa);
         return IN6_IS_ADDR_LOOPBACK(&s6->sin6_addr);
     }
     default:
@@ -239,16 +239,17 @@ printifaddr(struct ifaddrs *ifp)
 #include <stdlib.h>
 
 static int
-addr_eq (const struct sockaddr *s1, const struct sockaddr *s2)
+addr_eq (struct sockaddr *s1, struct sockaddr *s2)
 {
     if (s1->sa_family != s2->sa_family)
         return 0;
-#define CMPTYPE(T,F) (!memcmp(&((const T*)s1)->F,&((const T*)s2)->F,sizeof(((const T*)s1)->F)))
     switch (s1->sa_family) {
     case AF_INET:
-        return CMPTYPE (struct sockaddr_in, sin_addr);
+        return !memcmp(&sa2sin(s1)->sin_addr, &sa2sin(s2)->sin_addr,
+                       sizeof(sa2sin(s1)->sin_addr));
     case AF_INET6:
-        return CMPTYPE (struct sockaddr_in6, sin6_addr);
+        return !memcmp(&sa2sin6(s1)->sin6_addr, &sa2sin6(s2)->sin6_addr,
+                       sizeof(sa2sin6(s1)->sin6_addr));
     default:
         /* Err on side of duplicate listings.  */
         return 0;
@@ -1183,14 +1184,14 @@ add_addr (void *P_data, struct sockaddr *a)
 #ifdef HAVE_NETINET_IN_H
     case AF_INET:
         address = make_addr (ADDRTYPE_INET, sizeof (struct in_addr),
-                             &((const struct sockaddr_in *) a)->sin_addr);
+                             &sa2sin(a)->sin_addr);
         if (address == NULL)
             data->mem_err++;
         break;
 
     case AF_INET6:
     {
-        const struct sockaddr_in6 *in = (const struct sockaddr_in6 *) a;
+        const struct sockaddr_in6 *in = sa2sin6(a);
 
         if (IN6_IS_ADDR_LINKLOCAL (&in->sin6_addr))
             break;
