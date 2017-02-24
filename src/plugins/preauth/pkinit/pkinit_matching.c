@@ -409,7 +409,7 @@ parse_rule_set(krb5_context context,
     }
     rs->num_crs = 0;
     while (remaining > 0) {
-        if (rs->relation == relation_none && rs->num_crs > 1) {
+        if (rs->relation == relation_none && rs->num_crs > 0) {
             pkiDebug("%s: Assuming AND relation for multiple components in rule '%s'\n",
                      __FUNCTION__, rule_in);
             rs->relation = relation_and;
