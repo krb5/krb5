@@ -791,7 +791,7 @@ resolve_server(krb5_context context, const krb5_data *realm,
     struct server_entry *entry = &servers->servers[ind];
     k5_transport transport;
     struct addrinfo *addrs, *a, hint, ai;
-    krb5_boolean defer;
+    krb5_boolean defer = FALSE;
     int err, result;
     char portbuf[PORT_LENGTH];
 
@@ -811,9 +811,13 @@ resolve_server(krb5_context context, const krb5_data *realm,
                               NULL, NULL, entry->uri_path, udpbufp);
     }
 
-    /* If the entry has a specified transport, use it. */
-    if (entry->transport != TCP_OR_UDP)
+    /* If the entry has a specified transport, use it, but possibly defer the
+     * addresses we add based on the strategy. */
+    if (entry->transport != TCP_OR_UDP) {
         transport = entry->transport;
+        defer = (entry->transport == TCP && strategy == UDP_FIRST) ||
+            (entry->transport == UDP && strategy == UDP_LAST);
+    }
 
     memset(&hint, 0, sizeof(hint));
     hint.ai_family = entry->family;
@@ -833,7 +837,7 @@ resolve_server(krb5_context context, const krb5_data *realm,
     /* Add each address with the specified or preferred transport. */
     retval = 0;
     for (a = addrs; a != 0 && retval == 0; a = a->ai_next) {
-        retval = add_connection(conns, transport, FALSE, a, ind, realm,
+        retval = add_connection(conns, transport, defer, a, ind, realm,
                                 entry->hostname, portbuf, entry->uri_path,
                                 udpbufp);
     }
