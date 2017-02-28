@@ -1458,6 +1458,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 
 	kdc slave config-files build-tools man doc include
 
+	plugins/certauth/test
 	plugins/hostrealm/test
 	plugins/localauth/test
 	plugins/kadm5_hook/test

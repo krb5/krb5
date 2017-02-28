@@ -93,4 +93,9 @@
 #define TRACE_PKINIT_OPENSSL_ERROR(c, msg)              \
     TRACE(c, "PKINIT OpenSSL error: {str}", msg)
 
+#define TRACE_CERTAUTH_VTINIT_FAIL(c, ret)                              \
+    TRACE(c, "certauth module failed to init vtable: {kerr}", ret)
+#define TRACE_CERTAUTH_INIT_FAIL(c, name, ret)                          \
+    TRACE(c, "certauth module {str} failed to init: {kerr}", name, ret)
+
 #endif /* PKINIT_TRACE_H */

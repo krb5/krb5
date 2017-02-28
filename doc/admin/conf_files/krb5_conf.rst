@@ -858,6 +858,27 @@ built-in modules exist for this interface:
     This module authorizes a principal to a local account if the
     principal name maps to the local account name.
 
+.. _certauth:
+
+certauth interface
+##################
+
+The certauth section (introduced in release 1.16) controls modules for
+the certificate authorization interface, which determines whether a
+certificate is allowed to preauthenticate a user via PKINIT.  The
+following built-in modules exist for this interface:
+
+**pkinit_san**
+    This module authorizes the certificate if it contains a PKINIT
+    Subject Alternative Name for the requested client principal, or a
+    Microsoft UPN SAN matching the principal if **pkinit_allow_upn**
+    is set to true for the realm.
+
+**pkinit_eku**
+    This module rejects the certificate if it does not contain an
+    Extended Key Usage attribute consistent with the
+    **pkinit_eku_checking** value for the realm.
+
 
 PKINIT options
 --------------

@@ -17,6 +17,7 @@ SUBDIRS=util include lib \
 	plugins/pwqual/test \
 	plugins/authdata/greet_server \
 	plugins/authdata/greet_client \
+	plugins/certauth/test \
 	plugins/kdb/db2 \
 	@ldap_plugin_dir@ \
 	plugins/kdb/test \

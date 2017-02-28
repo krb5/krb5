@@ -2133,6 +2133,7 @@ crypto_retrieve_X509_sans(krb5_context context,
 
     if (!(ext = X509_get_ext(cert, l)) || !(ialt = X509V3_EXT_d2i(ext))) {
         pkiDebug("%s: found no subject alt name extensions\n", __FUNCTION__);
+        retval = ENOENT;
         goto cleanup;
     }
     num_sans = sk_GENERAL_NAME_num(ialt);
@@ -6164,4 +6165,33 @@ crypto_get_deferred_ids(krb5_context context,
     deferred = id_cryptoctx->deferred_ids;
     ret = (const pkinit_deferred_id *)deferred;
     return ret;
+}
+
+/* Return the received certificate as DER-encoded data. */
+krb5_error_code
+crypto_encode_der_cert(krb5_context context, pkinit_req_crypto_context reqctx,
+                       uint8_t **der_out, size_t *der_len)
+{
+    int len;
+    unsigned char *der, *p;
+
+    *der_out = NULL;
+    *der_len = 0;
+
+    if (reqctx->received_cert == NULL)
+        return EINVAL;
+    p = NULL;
+    len = i2d_X509(reqctx->received_cert, NULL);
+    if (len <= 0)
+        return EINVAL;
+    p = der = malloc(len);
+    if (p == NULL)
+        return ENOMEM;
+    if (i2d_X509(reqctx->received_cert, &p) <= 0) {
+        free(p);
+        return EINVAL;
+    }
+    *der_out = der;
+    *der_len = len;
+    return 0;
 }

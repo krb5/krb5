@@ -31,5 +31,6 @@ Contents
    profile.rst
    gssapi.rst
    internal.rst
+   certauth.rst
 
 .. TODO: GSSAPI mechanism plugins
