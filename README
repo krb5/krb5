@@ -73,6 +73,41 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.15.1 (2017-03-01)
+------------------------------------
+
+This is a bug fix release.
+
+* Allow KDB modules to determine how the e_data field of principal
+  fields is freed
+
+* Fix udp_preference_limit when the KDC location is configured with
+  SRV records
+
+* Fix KDC and kadmind startup on some IPv4-only systems
+
+* Fix the processing of PKINIT certificate matching rules which have
+  two components and no explicit relation
+
+* Improve documentation
+
+krb5-1.15.1 changes by ticket ID
+--------------------------------
+
+7940    PKINIT docs only work for one-component client principals
+8523    Add krbPwdPolicy attributes to kerberos.ldif
+8524    Add caveats to krbtgt change documentation
+8525    Fix error handling in PKINIT decode_data()
+8530    KDC/kadmind explicit wildcard listener addresses do not use pktinfo
+8531    KDC/kadmind may fail to start on IPv4-only systems
+8532    Fix GSSAPI authind attribute name in docs
+8538    Need a way to free KDB module e_data
+8540    Document default realm and login authorization
+8552    Add GSSAPI S4U documentation
+8553    Fix PKINIT two-component matching rule parsing
+8554    udp_preference_limit fails with SRV records
+
+
 Major changes in 1.15 (2016-12-01)
 ----------------------------------
 
@@ -388,6 +423,7 @@ reports, suggestions, and valuable resources:
     Robbie Harwood
     Jakob Haufe
     Matthieu Hautreux
+    Jochen Hein
     Paul B. Henson
     Jeff Hodges
     Christopher Hogan
