@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.15\n"
+"Project-Id-Version: mit-krb5 1.15-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-01 14:29-0500\n"
+"POT-Creation-Date: 2017-03-02 11:33-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3644,227 +3644,227 @@ msgstr ""
 msgid "shutting down"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:221
+#: ../../src/lib/apputils/net-server.c:232
 msgid "Got signal to request exit"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:235
+#: ../../src/lib/apputils/net-server.c:246
 msgid "Got signal to reset"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:301
+#: ../../src/lib/apputils/net-server.c:312
 #, c-format
 msgid "Invalid port %d"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:314
+#: ../../src/lib/apputils/net-server.c:325
 #, c-format
 msgid "Removing address %s since wildcard address is being added"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:321
+#: ../../src/lib/apputils/net-server.c:332
 msgid "Address already added to server"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:492
+#: ../../src/lib/apputils/net-server.c:503
 #, c-format
 msgid "closing down fd %d"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:506
+#: ../../src/lib/apputils/net-server.c:517
 #, c-format
 msgid "descriptor %d closed but still in svc_fdset"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:532
+#: ../../src/lib/apputils/net-server.c:543
 msgid "cannot create io event"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:538
+#: ../../src/lib/apputils/net-server.c:549
 msgid "cannot save event"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:558
+#: ../../src/lib/apputils/net-server.c:569
 #, c-format
 msgid "file descriptor number %d too high"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:566
+#: ../../src/lib/apputils/net-server.c:577
 msgid "cannot allocate storage for connection info"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:605
+#: ../../src/lib/apputils/net-server.c:616
 #, c-format
 msgid "Cannot create TCP server socket on %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:614
+#: ../../src/lib/apputils/net-server.c:625
 #, c-format
 msgid "TCP socket fd number %d (for %s) too high"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:622
+#: ../../src/lib/apputils/net-server.c:633
 #, c-format
 msgid "Cannot enable SO_REUSEADDR on fd %d"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:629
+#: ../../src/lib/apputils/net-server.c:640
 #, c-format
 msgid "setsockopt(%d,IPV6_V6ONLY,1) failed"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:631
+#: ../../src/lib/apputils/net-server.c:642
 #, c-format
 msgid "setsockopt(%d,IPV6_V6ONLY,1) worked"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:634
+#: ../../src/lib/apputils/net-server.c:645
 msgid "no IPV6_V6ONLY socket option support"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:640
+#: ../../src/lib/apputils/net-server.c:651
 #, c-format
 msgid "Cannot bind server socket on %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:717
+#: ../../src/lib/apputils/net-server.c:728
 #, c-format
 msgid "Setting up %s socket for address %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:732
+#: ../../src/lib/apputils/net-server.c:743
 #, c-format
 msgid "Cannot listen on %s server socket on %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:741
+#: ../../src/lib/apputils/net-server.c:752
 #, c-format
 msgid "cannot set listening %s socket on %s non-blocking"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:750
+#: ../../src/lib/apputils/net-server.c:761
 #, c-format
 msgid "cannot set SO_LINGER on %s socket on %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:757
+#: ../../src/lib/apputils/net-server.c:768
 #, c-format
 msgid "Setting pktinfo on socket %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:762
+#: ../../src/lib/apputils/net-server.c:773
 #, c-format
 msgid "Cannot request packet info for UDP socket address %s port %d"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:764
+#: ../../src/lib/apputils/net-server.c:775
 msgid ""
 "System does not support pktinfo yet binding to a wildcard address.  Packets "
 "are not guaranteed to return on the received address."
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:777
+#: ../../src/lib/apputils/net-server.c:788
 msgid "Error attempting to add verto event"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:787
+#: ../../src/lib/apputils/net-server.c:798
 #, c-format
 msgid "Cannot create RPC service: %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:797
+#: ../../src/lib/apputils/net-server.c:808
 #, c-format
 msgid "Cannot register RPC service: %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:844
+#: ../../src/lib/apputils/net-server.c:855
 msgid "No addresses added to the net server"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:863
+#: ../../src/lib/apputils/net-server.c:874
 #, c-format
 msgid "Failed getting address info (for %s): %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:889
+#: ../../src/lib/apputils/net-server.c:904
 #, c-format
 msgid "Failed setting up a %s socket (for %s)"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:930
+#: ../../src/lib/apputils/net-server.c:951
 msgid "setting up network..."
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:933
+#: ../../src/lib/apputils/net-server.c:954
 msgid "Error setting up network"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:936
+#: ../../src/lib/apputils/net-server.c:957
 #, c-format
 msgid "set up %d sockets"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:939
+#: ../../src/lib/apputils/net-server.c:960
 msgid "no sockets set up?"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1000
-#: ../../src/lib/apputils/net-server.c:1054
+#: ../../src/lib/apputils/net-server.c:1021
+#: ../../src/lib/apputils/net-server.c:1075
 msgid "while dispatching (udp)"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1029
+#: ../../src/lib/apputils/net-server.c:1050
 #, c-format
 msgid "while sending reply to %s/%s from %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1034
+#: ../../src/lib/apputils/net-server.c:1055
 #, c-format
 msgid "short reply write %d vs %d\n"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1079
+#: ../../src/lib/apputils/net-server.c:1100
 msgid "while receiving from network"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1095
+#: ../../src/lib/apputils/net-server.c:1116
 #, c-format
 msgid "pktinfo says local addr is %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1128
+#: ../../src/lib/apputils/net-server.c:1149
 msgid "too many connections"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1151
+#: ../../src/lib/apputils/net-server.c:1172
 #, c-format
 msgid "dropping %s fd %d from %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1229
+#: ../../src/lib/apputils/net-server.c:1250
 #, c-format
 msgid "allocating buffer for new TCP session from %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1259
+#: ../../src/lib/apputils/net-server.c:1280
 msgid "while dispatching (tcp)"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1291
+#: ../../src/lib/apputils/net-server.c:1312
 msgid "error allocating tcp dispatch private!"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1338
+#: ../../src/lib/apputils/net-server.c:1359
 #, c-format
 msgid "TCP client %s wants %lu bytes, cap is %lu"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1346
+#: ../../src/lib/apputils/net-server.c:1367
 #, c-format
 msgid "error constructing KRB_ERR_FIELD_TOOLONG error! %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1530
+#: ../../src/lib/apputils/net-server.c:1551
 #, c-format
 msgid "accepted RPC connection on socket %d from %s"
 msgstr ""
@@ -4209,36 +4209,36 @@ msgstr ""
 msgid "No default realm set; cannot initialize KDB"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:328
+#: ../../src/lib/kdb/kdb5.c:373
 #, c-format
 msgid "Unable to find requested database type: %s"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:409 ../lib/krb5/error_tables/kdb5_err.c:55
+#: ../../src/lib/kdb/kdb5.c:453 ../lib/krb5/error_tables/kdb5_err.c:55
 msgid "Unable to find requested database type"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:417
+#: ../../src/lib/kdb/kdb5.c:461
 msgid "plugin symbol 'kdb_function_table' lookup failed"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:425
+#: ../../src/lib/kdb/kdb5.c:469
 #, c-format
 msgid ""
 "Unable to load requested database module '%s': plugin symbol "
 "'kdb_function_table' not found"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:564
+#: ../../src/lib/kdb/kdb5.c:607
 msgid "Cannot initialize database library"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:1717
+#: ../../src/lib/kdb/kdb5.c:1766
 #, c-format
 msgid "Illegal version number for KRB5_TL_MKEY_AUX %d\n"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:1889
+#: ../../src/lib/kdb/kdb5.c:1938
 #, c-format
 msgid "Illegal version number for KRB5_TL_ACTKVNO %d\n"
 msgstr ""
@@ -5376,7 +5376,7 @@ msgstr ""
 
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_nss.c:667
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:775
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4340
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4337
 msgid "Pass phrase for"
 msgstr ""
 
@@ -5438,27 +5438,27 @@ msgstr ""
 msgid "Failed to decrypt PKCS7 message"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4460
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4457
 #, c-format
 msgid "Cannot read certificate file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4467
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4464
 #, c-format
 msgid "Cannot read key file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5457
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5454
 #, c-format
 msgid "Cannot open file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5464
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5461
 #, c-format
 msgid "Cannot read file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:6139
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:6136
 #, c-format
 msgid "unknown code 0x%x"
 msgstr ""
