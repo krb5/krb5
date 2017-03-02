@@ -74,6 +74,47 @@ variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
 
+Major changes in 1.14.5 (2017-03-02)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix udp_preference_limit when the KDC location is configured with
+  SRV records
+
+* Fix the processing of PKINIT certificate matching rules which have
+  two components and no explicit relation
+
+* More reliably scrub secret data from memory when it is no longer
+  needed
+
+* Fix a bug which could cause KDC handling of OTP requests to fail
+  until the KDC is restarted
+
+* Fix PKINIT client with certain PKCS#11 middleware
+
+* Improve documentation
+
+krb5-1.14.5 changes by ticket ID
+--------------------------------
+
+8403    kinit documentation page
+8498    Potential memory leak in prepare_error_as()
+8500    Document krb5_kt_next_entry() requirement
+8504    Properly handle EOF condition on libkrad sockets
+8506    PKINIT fails with PKCS#11 middlware that implements PKCS#1 V2.1
+8509    Leak in krb5_cccol_have_content with truncated ccache
+8512    Fix detection of libaceclnt for securid_sam2
+8514    Make zap() more reliable
+8520    Relicense ccapi/common/win/OldCC/autolock.hxx
+8521    Allow slapd path configuration in t_kdb.py
+8523    Add krbPwdPolicy attributes to kerberos.ldif
+8524    Add caveats to krbtgt change documentation
+8525    Fix error handling in PKINIT decode_data()
+8553    Fix PKINIT two-component matching rule parsing
+8554    udp_preference_limit fails with SRV records
+
+
 Major changes in 1.14.4 (2016-09-13)
 ------------------------------------
 
@@ -581,6 +622,7 @@ reports, suggestions, and valuable resources:
     Remi Ferrand
     Paul Fertser
     William Fiveash
+    Jacques Florent
     Ákos Frohner
     Sebastian Galiano
     Marcus Granado
@@ -592,6 +634,7 @@ reports, suggestions, and valuable resources:
     Robbie Harwood
     Jakob Haufe
     Matthieu Hautreux
+    Jochen Hein
     Paul B. Henson
     Jeff Hodges
     Christopher Hogan
@@ -607,6 +650,7 @@ reports, suggestions, and valuable resources:
     Spencer Jackson
     Diogenes S. Jesus
     Pavel Jindra
+    Brian Johannesmeyer
     Joel Johnson
     Anders Kaseorg
     W. Trevor King
@@ -617,6 +661,7 @@ reports, suggestions, and valuable resources:
     Pierre Labastie
     Volker Lendecke
     Jan iankko Lieskovsky
+    Todd Lipcon
     Oliver Loch
     Kevin Longfellow
     Jon Looney
@@ -689,6 +734,7 @@ reports, suggestions, and valuable resources:
     Tsu-Phong Wu
     Xu Qiang
     Neng Xue
+    Zhaomo Yang
     Nickolai Zeldovich
     Hanz van Zijst
     Gertjan Zwartjes
