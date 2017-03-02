@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.14.4\n"
+"Project-Id-Version: mit-krb5 1.14.4-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-12 18:15-0400\n"
+"POT-Creation-Date: 2017-03-02 13:15-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,7 +54,7 @@ msgstr ""
 #: ../../src/clients/kdestroy/kdestroy.c:126
 #: ../../src/clients/klist/klist.c:255 ../../src/clients/ksu/main.c:131
 #: ../../src/clients/ksu/main.c:137 ../../src/clients/kswitch/kswitch.c:97
-#: ../../src/kadmin/ktutil/ktutil.c:52 ../../src/kdc/main.c:926
+#: ../../src/kadmin/ktutil/ktutil.c:52 ../../src/kdc/main.c:925
 #: ../../src/slave/kprop.c:101 ../../src/slave/kpropd.c:1056
 msgid "while initializing krb5"
 msgstr ""
@@ -3298,7 +3298,7 @@ msgstr ""
 msgid "starting"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:532 ../../src/kdc/main.c:1061
+#: ../../src/kadmin/server/ovsec_kadmd.c:532 ../../src/kdc/main.c:1060
 #, c-format
 msgid "%s: starting...\n"
 msgstr ""
@@ -3508,71 +3508,71 @@ msgstr ""
 msgid "Required auth indicators not present in ticket: %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:231
+#: ../../src/kdc/main.c:230
 #, c-format
 msgid "while getting context for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:329
+#: ../../src/kdc/main.c:328
 #, c-format
 msgid "while setting default realm to %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:337
+#: ../../src/kdc/main.c:336
 #, c-format
 msgid "while initializing database for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:346
+#: ../../src/kdc/main.c:345
 #, c-format
 msgid "while setting up master key name %s for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:359
+#: ../../src/kdc/main.c:358
 #, c-format
 msgid "while fetching master key %s for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:367
+#: ../../src/kdc/main.c:366
 #, c-format
 msgid "while fetching master keys list for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:376
+#: ../../src/kdc/main.c:375
 #, c-format
 msgid "while resolving kdb keytab for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:385
+#: ../../src/kdc/main.c:384
 #, c-format
 msgid "while building TGS name for realm %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:503
+#: ../../src/kdc/main.c:502
 #, c-format
 msgid "creating %d worker processes"
 msgstr ""
 
-#: ../../src/kdc/main.c:513
+#: ../../src/kdc/main.c:512
 msgid "Unable to reinitialize main loop"
 msgstr ""
 
-#: ../../src/kdc/main.c:518
+#: ../../src/kdc/main.c:517
 #, c-format
 msgid "Unable to initialize signal handlers in pid %d"
 msgstr ""
 
-#: ../../src/kdc/main.c:548
+#: ../../src/kdc/main.c:547
 #, c-format
 msgid "worker %ld exited with status %d"
 msgstr ""
 
-#: ../../src/kdc/main.c:572
+#: ../../src/kdc/main.c:571
 #, c-format
 msgid "signal %d received in supervisor"
 msgstr ""
 
-#: ../../src/kdc/main.c:591
+#: ../../src/kdc/main.c:590
 #, c-format
 msgid ""
 "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n"
@@ -3586,90 +3586,90 @@ msgid ""
 "arguments\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:653 ../../src/kdc/main.c:660 ../../src/kdc/main.c:774
+#: ../../src/kdc/main.c:652 ../../src/kdc/main.c:659 ../../src/kdc/main.c:773
 #, c-format
 msgid " KDC cannot initialize. Not enough memory\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:679 ../../src/kdc/main.c:722 ../../src/kdc/main.c:733
+#: ../../src/kdc/main.c:678 ../../src/kdc/main.c:721 ../../src/kdc/main.c:732
 #, c-format
 msgid "%s: KDC cannot initialize. Not enough memory\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:699 ../../src/kdc/main.c:816
+#: ../../src/kdc/main.c:698 ../../src/kdc/main.c:815
 #, c-format
 msgid "%s: cannot initialize realm %s - see log file for details\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:710
+#: ../../src/kdc/main.c:709
 #, c-format
 msgid "%s: cannot initialize realm %s. Not enough memory\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:761
+#: ../../src/kdc/main.c:760
 #, c-format
 msgid "invalid enctype %s"
 msgstr ""
 
-#: ../../src/kdc/main.c:804
+#: ../../src/kdc/main.c:803
 msgid "while attempting to retrieve default realm"
 msgstr ""
 
-#: ../../src/kdc/main.c:806
+#: ../../src/kdc/main.c:805
 #, c-format
 msgid "%s: %s, attempting to retrieve default realm\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:912
+#: ../../src/kdc/main.c:911
 #, c-format
 msgid "%s: cannot get memory for realm list\n"
 msgstr ""
 
-#: ../../src/kdc/main.c:947
+#: ../../src/kdc/main.c:946
 msgid "while initializing lookaside cache"
 msgstr ""
 
-#: ../../src/kdc/main.c:955
+#: ../../src/kdc/main.c:954
 msgid "while creating main loop"
 msgstr ""
 
-#: ../../src/kdc/main.c:965
+#: ../../src/kdc/main.c:964
 msgid "while initializing SAM"
 msgstr ""
 
-#: ../../src/kdc/main.c:1011
+#: ../../src/kdc/main.c:1010
 msgid "while initializing routing socket"
 msgstr ""
 
-#: ../../src/kdc/main.c:1017
+#: ../../src/kdc/main.c:1016
 msgid "while initializing signal handlers"
 msgstr ""
 
-#: ../../src/kdc/main.c:1024
+#: ../../src/kdc/main.c:1023
 msgid "while initializing network"
 msgstr ""
 
-#: ../../src/kdc/main.c:1029
+#: ../../src/kdc/main.c:1028
 msgid "while detaching from tty"
 msgstr ""
 
-#: ../../src/kdc/main.c:1036
+#: ../../src/kdc/main.c:1035
 msgid "while creating PID file"
 msgstr ""
 
-#: ../../src/kdc/main.c:1045
+#: ../../src/kdc/main.c:1044
 msgid "creating worker processes"
 msgstr ""
 
-#: ../../src/kdc/main.c:1055
+#: ../../src/kdc/main.c:1054
 msgid "while loading audit plugin module(s)"
 msgstr ""
 
-#: ../../src/kdc/main.c:1059
+#: ../../src/kdc/main.c:1058
 msgid "commencing operation"
 msgstr ""
 
-#: ../../src/kdc/main.c:1067
+#: ../../src/kdc/main.c:1066
 msgid "shutting down"
 msgstr ""
 
@@ -4359,11 +4359,11 @@ msgstr ""
 msgid "Can't find client principal %s in cache collection"
 msgstr ""
 
-#: ../../src/lib/krb5/ccache/cccursor.c:282
+#: ../../src/lib/krb5/ccache/cccursor.c:284
 msgid "No Kerberos credentials available"
 msgstr ""
 
-#: ../../src/lib/krb5/ccache/cccursor.c:288
+#: ../../src/lib/krb5/ccache/cccursor.c:290
 #, c-format
 msgid "No Kerberos credentials available (default cache: %s)"
 msgstr ""
@@ -5387,7 +5387,7 @@ msgstr ""
 
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_nss.c:667
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:717
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4178
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4174
 msgid "Pass phrase for"
 msgstr ""
 
@@ -5403,9 +5403,9 @@ msgstr ""
 
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1034
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1044
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1309
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1319
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1861
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1308
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1318
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1860
 msgid "Failed to DER encode PKCS7"
 msgstr ""
 
@@ -5413,63 +5413,63 @@ msgstr ""
 msgid "Failed to verify own certificate"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1293
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1292
 msgid "Failed to add digest attribute"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1425
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1424
 msgid "Failed to decode CMS message"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1443
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1442
 msgid "Invalid pkinit packet: octet string expected"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1462
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1461
 msgid "wrong oid\n"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1609
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1608
 msgid "Failed to verify received certificate"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1647
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1646
 msgid "Failed to verify CMS message"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1836
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1835
 msgid "Failed to encrypt PKCS7 object"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1911
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1910
 msgid "Failed to decode PKCS7"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1928
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1927
 msgid "Failed to decrypt PKCS7 message"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4298
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4294
 #, c-format
 msgid "Cannot read certificate file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4305
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4301
 #, c-format
 msgid "Cannot read key file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5295
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5291
 #, c-format
 msgid "Cannot open file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5302
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5298
 #, c-format
 msgid "Cannot read file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:6018
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:6014
 #, c-format
 msgid "unknown code 0x%x"
 msgstr ""
