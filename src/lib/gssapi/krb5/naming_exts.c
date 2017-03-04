@@ -319,8 +319,8 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
     krb5_data kattr;
     krb5_boolean kauthenticated;
     krb5_boolean kcomplete;
-    krb5_data kvalue;
-    krb5_data kdisplay_value;
+    krb5_data kvalue = empty_data();
+    krb5_data kdisplay_value = empty_data();
 
     if (minor_status != NULL)
         *minor_status = 0;
@@ -355,8 +355,8 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
                                        &kattr,
                                        &kauthenticated,
                                        &kcomplete,
-                                       value ? &kvalue : NULL,
-                                       display_value ? &kdisplay_value : NULL,
+                                       &kvalue,
+                                       &kdisplay_value,
                                        more);
     if (code == 0) {
         if (value != NULL)
@@ -367,13 +367,12 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
         if (complete != NULL)
             *complete = kcomplete;
 
-        if (display_value != NULL) {
-            if (code == 0)
-                code = data_to_gss(&kdisplay_value, display_value);
-            else
-                free(kdisplay_value.data);
-        }
+        if (display_value != NULL && code == 0)
+            code = data_to_gss(&kdisplay_value, display_value);
     }
+
+    free(kdisplay_value.data);
+    free(kvalue.data);
 
     k5_mutex_unlock(&kname->lock);
     krb5_free_context(context);
