@@ -620,6 +620,8 @@ test_kdc_check_lookaside_hit(void **state)
     assert_true(data_eq(rep, *result_data));
     assert_int_equal(hits, 1);
     assert_int_equal(e->num_hits, 1);
+
+    krb5_free_data(context, result_data);
 }
 
 static void
@@ -697,6 +699,8 @@ test_kdc_check_lookaside_hit_multiple(void **state)
     assert_int_equal(e1->num_hits, 1);
     assert_int_equal(e2->num_hits, 0);
 
+    krb5_free_data(context, result_data);
+
     /* Set result_data so we can verify that it is reset to NULL. */
     result_data = &req1;
     result = kdc_check_lookaside(context, &req2, &result_data);
@@ -729,6 +733,8 @@ test_kdc_check_lookaside_hit_hash_collision(void **state)
     assert_int_equal(hits, 1);
     assert_int_equal(e1->num_hits, 1);
     assert_int_equal(e2->num_hits, 0);
+
+    krb5_free_data(context, result_data);
 
     /* Set result_data so we can verify that it is reset to NULL. */
     result_data = &req1;
