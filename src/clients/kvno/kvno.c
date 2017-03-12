@@ -326,9 +326,7 @@ static void do_v5_kvno (int count, char *names[],
                 printf(_("%s: kvno = %d\n"), princ, ticket->enc_part.kvno);
         }
 
-        continue;
-
-    error:
+    cleanup:
         if (server != NULL)
             krb5_free_principal(context, server);
         if (ticket != NULL)
@@ -337,7 +335,11 @@ static void do_v5_kvno (int count, char *names[],
             krb5_free_creds(context, out_creds);
         if (princ != NULL)
             krb5_free_unparsed_name(context, princ);
+        continue;
+
+    error:
         errors++;
+        goto cleanup;
     }
 
     if (keytab)
