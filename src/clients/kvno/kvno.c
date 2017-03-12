@@ -151,6 +151,119 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
     fprintf (stderr, "\n");
 }
 
+/* Request a single service ticket and display its status (unless quiet is
+ * set).  On failure, display an error message and return non-zero. */
+static krb5_error_code
+kvno(const char *name, krb5_ccache ccache, krb5_principal me,
+     krb5_enctype etype, krb5_keytab keytab, const char *sname,
+     krb5_flags options, int unknown, krb5_principal for_user_princ, int proxy)
+{
+    krb5_error_code ret;
+    krb5_principal server = NULL;
+    krb5_ticket *ticket = NULL;
+    krb5_creds in_creds, *out_creds = NULL;
+    char *princ = NULL;
+
+    memset(&in_creds, 0, sizeof(in_creds));
+
+    if (sname != NULL) {
+        ret = krb5_sname_to_principal(context, name, sname, KRB5_NT_SRV_HST,
+                                      &server);
+    } else {
+        ret = krb5_parse_name(context, name, &server);
+    }
+    if (ret) {
+        if (!quiet)
+            com_err(prog, ret, _("while parsing principal name %s"), name);
+        goto cleanup;
+    }
+    if (unknown)
+        krb5_princ_type(context, server) = KRB5_NT_UNKNOWN;
+
+    ret = krb5_unparse_name(context, server, &princ);
+    if (ret) {
+        com_err(prog, ret, _("while formatting parsed principal name for "
+                             "'%s'"), name);
+        goto cleanup;
+    }
+
+    in_creds.keyblock.enctype = etype;
+
+    if (for_user_princ != NULL) {
+        if (!proxy && !krb5_principal_compare(context, me, server)) {
+            ret = EINVAL;
+            com_err(prog, ret,
+                    _("client and server principal names must match"));
+            goto cleanup;
+        }
+
+        in_creds.client = for_user_princ;
+        in_creds.server = me;
+
+        ret = krb5_get_credentials_for_user(context, options, ccache,
+                                            &in_creds, NULL, &out_creds);
+    } else {
+        in_creds.client = me;
+        in_creds.server = server;
+        ret = krb5_get_credentials(context, options, ccache, &in_creds,
+                                   &out_creds);
+    }
+
+    if (ret) {
+        com_err(prog, ret, _("while getting credentials for %s"), princ);
+        goto cleanup;
+    }
+
+    /* we need a native ticket */
+    ret = krb5_decode_ticket(&out_creds->ticket, &ticket);
+    if (ret) {
+        com_err(prog, ret, _("while decoding ticket for %s"), princ);
+        goto cleanup;
+    }
+
+    if (keytab != NULL) {
+        ret = krb5_server_decrypt_ticket_keytab(context, keytab, ticket);
+        if (ret) {
+            if (!quiet) {
+                fprintf(stderr, "%s: kvno = %d, keytab entry invalid\n", princ,
+                        ticket->enc_part.kvno);
+            }
+            com_err(prog, ret, _("while decrypting ticket for %s"), princ);
+            goto cleanup;
+        }
+        if (!quiet) {
+            printf(_("%s: kvno = %d, keytab entry valid\n"), princ,
+                   ticket->enc_part.kvno);
+        }
+        if (proxy) {
+            krb5_free_creds(context, out_creds);
+            out_creds = NULL;
+
+            in_creds.client = ticket->enc_part2->client;
+            in_creds.server = server;
+
+            ret = krb5_get_credentials_for_proxy(context, KRB5_GC_CANONICALIZE,
+                                                 ccache, &in_creds, ticket,
+                                                 &out_creds);
+            if (ret) {
+                com_err(prog, ret, _("%s: constrained delegation failed"),
+                        princ);
+                goto cleanup;
+            }
+        }
+    } else {
+        if (!quiet)
+            printf(_("%s: kvno = %d\n"), princ, ticket->enc_part.kvno);
+    }
+
+cleanup:
+    krb5_free_principal(context, server);
+    krb5_free_ticket(context, ticket);
+    krb5_free_creds(context, out_creds);
+    krb5_free_unparsed_name(context, princ);
+    return ret;
+}
+
 static void do_v5_kvno (int count, char *names[],
                         char * ccachestr, char *etypestr, char *keytab_name,
                         char *sname, int canon, int unknown, char *for_user,
@@ -161,7 +274,6 @@ static void do_v5_kvno (int count, char *names[],
     krb5_enctype etype;
     krb5_ccache ccache;
     krb5_principal me;
-    krb5_creds in_creds;
     krb5_keytab keytab = NULL;
     krb5_principal for_user_princ = NULL;
     krb5_flags options;
@@ -222,124 +334,9 @@ static void do_v5_kvno (int count, char *names[],
         options |= KRB5_GC_CANONICALIZE;
 
     for (i = 0; i < count; i++) {
-        krb5_principal server = NULL;
-        krb5_ticket *ticket = NULL;
-        krb5_creds *out_creds = NULL;
-        char *princ = NULL;
-
-        memset(&in_creds, 0, sizeof(in_creds));
-
-        if (sname != NULL) {
-            ret = krb5_sname_to_principal(context, names[i],
-                                          sname, KRB5_NT_SRV_HST,
-                                          &server);
-        } else {
-            ret = krb5_parse_name(context, names[i], &server);
-        }
-        if (ret) {
-            if (!quiet) {
-                com_err(prog, ret, _("while parsing principal name %s"),
-                        names[i]);
-            }
-            goto error;
-        }
-        if (unknown == 1) {
-            krb5_princ_type(context, server) = KRB5_NT_UNKNOWN;
-        }
-
-        ret = krb5_unparse_name(context, server, &princ);
-        if (ret) {
-            com_err(prog, ret, _("while formatting parsed principal name for "
-                                 "'%s'"), names[i]);
-            goto error;
-        }
-
-        in_creds.keyblock.enctype = etype;
-
-        if (for_user) {
-            if (!proxy &&
-                !krb5_principal_compare(context, me, server)) {
-                com_err(prog, EINVAL,
-                        _("client and server principal names must match"));
-                goto error;
-            }
-
-            in_creds.client = for_user_princ;
-            in_creds.server = me;
-
-            ret = krb5_get_credentials_for_user(context, options, ccache,
-                                                &in_creds, NULL, &out_creds);
-        } else {
-            in_creds.client = me;
-            in_creds.server = server;
-            ret = krb5_get_credentials(context, options, ccache,
-                                       &in_creds, &out_creds);
-        }
-
-        if (ret) {
-            com_err(prog, ret, _("while getting credentials for %s"), princ);
-            goto error;
-        }
-
-        /* we need a native ticket */
-        ret = krb5_decode_ticket(&out_creds->ticket, &ticket);
-        if (ret) {
-            com_err(prog, ret, _("while decoding ticket for %s"), princ);
-            goto error;
-        }
-
-        if (keytab) {
-            ret = krb5_server_decrypt_ticket_keytab(context, keytab, ticket);
-            if (ret) {
-                if (!quiet) {
-                    fprintf(stderr, "%s: kvno = %d, keytab entry invalid\n",
-                            princ, ticket->enc_part.kvno);
-                }
-                com_err(prog, ret, _("while decrypting ticket for %s"), princ);
-                goto error;
-            }
-            if (!quiet) {
-                printf(_("%s: kvno = %d, keytab entry valid\n"),
-                       princ, ticket->enc_part.kvno);
-            }
-            if (proxy) {
-                krb5_free_creds(context, out_creds);
-                out_creds = NULL;
-
-                in_creds.client = ticket->enc_part2->client;
-                in_creds.server = server;
-
-                ret = krb5_get_credentials_for_proxy(context,
-                                                     KRB5_GC_CANONICALIZE,
-                                                     ccache,
-                                                     &in_creds,
-                                                     ticket,
-                                                     &out_creds);
-                if (ret) {
-                    com_err(prog, ret,
-                            _("%s: constrained delegation failed"), princ);
-                    goto error;
-                }
-            }
-        } else {
-            if (!quiet)
-                printf(_("%s: kvno = %d\n"), princ, ticket->enc_part.kvno);
-        }
-
-    cleanup:
-        if (server != NULL)
-            krb5_free_principal(context, server);
-        if (ticket != NULL)
-            krb5_free_ticket(context, ticket);
-        if (out_creds != NULL)
-            krb5_free_creds(context, out_creds);
-        if (princ != NULL)
-            krb5_free_unparsed_name(context, princ);
-        continue;
-
-    error:
-        errors++;
-        goto cleanup;
+        if (kvno(names[i], ccache, me, etype, keytab, sname, options, unknown,
+                 for_user_princ, proxy) != 0)
+            errors++;
     }
 
     if (keytab)
