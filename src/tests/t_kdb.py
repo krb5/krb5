@@ -328,8 +328,7 @@ realm.run([kadminl, 'getprinc', 'alias'],
           expected_msg='Principal: canon@KRBTEST.COM\n')
 realm.run([kadminl, 'getprinc', 'canon'],
           expected_msg='Principal: canon@KRBTEST.COM\n')
-realm.run([kvno, 'alias'])
-realm.run([kvno, 'canon'])
+realm.run([kvno, 'alias', 'canon'])
 out = realm.run([klist])
 if 'alias@KRBTEST.COM\n' not in out or 'canon@KRBTEST.COM' not in out:
     fail('After fetching alias and canon, klist is missing one or both')
