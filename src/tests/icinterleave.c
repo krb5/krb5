@@ -119,6 +119,10 @@ main(int argc, char **argv)
         }
     }
 
+    for (i = 0; i < nclients; i++)
+        krb5_free_data_contents(ctx, &reps[i]);
+    free(reps);
+    free(iccs);
     krb5_free_context(ctx);
     return 0;
 }
