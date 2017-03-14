@@ -182,7 +182,7 @@ $(top_srcdir)/configure: @MAINT@ \
 		$(top_srcdir)/aclocal.m4
 	-$(RM) -r $(top_srcdir)/autom4te.cache
 	(cd $(top_srcdir) && \
-		$(AUTOCONF) --include=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS))
+		$(AUTOCONF) -f --include=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS))
 	-$(RM) -r $(top_srcdir)/autom4te.cache
 
 RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
