@@ -719,3 +719,40 @@ cleanup:
     crypto_cert_free_matching_data_list(context, matchdata);
     return retval;
 }
+
+krb5_error_code
+pkinit_client_cert_match(krb5_context context,
+                         pkinit_plg_crypto_context plgctx,
+                         pkinit_req_crypto_context reqctx,
+                         const char *match_rule,
+                         krb5_boolean *matched)
+{
+    krb5_error_code ret;
+    pkinit_cert_matching_data *md = NULL;
+    rule_component *rc = NULL;
+    int comp_match = 0;
+    rule_set *rs = NULL;
+
+    *matched = FALSE;
+    ret = parse_rule_set(context, match_rule, &rs);
+    if (ret)
+        goto cleanup;
+
+    ret = crypto_req_cert_matching_data(context, plgctx, reqctx, &md);
+    if (ret)
+        goto cleanup;
+
+    for (rc = rs->crs; rc != NULL; rc = rc->next) {
+        comp_match = component_match(context, rc, md);
+        if ((comp_match && rs->relation == relation_or) ||
+            (!comp_match && rs->relation == relation_and)) {
+            break;
+        }
+    }
+    *matched = comp_match;
+
+cleanup:
+    free_rule_set(context, rs);
+    crypto_cert_free_matching_data(context, md);
+    return ret;
+}

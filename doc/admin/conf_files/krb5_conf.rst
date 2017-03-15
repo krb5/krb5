@@ -879,6 +879,11 @@ following built-in modules exist for this interface:
     Extended Key Usage attribute consistent with the
     **pkinit_eku_checking** value for the realm.
 
+**dbmatch**
+    This module authorizes or rejects the certificate according to
+    whether it matches the **pkinit_cert_match** string attribute on
+    the client principal, if that attribute is present.
+
 
 PKINIT options
 --------------

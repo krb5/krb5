@@ -292,6 +292,43 @@ realm.run(['./responder', '-X', 'X509_user_identity=%s' % p12_enc_identity,
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
+# Match a single rule.
+rule = '<SAN>^user@KRBTEST.COM$'
+realm.run([kadminl, 'setstr', realm.user_princ, 'pkinit_cert_match', rule])
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % p12_identity])
+realm.klist(realm.user_princ)
+
+# Match a combined rule (default prefix is &&).
+rule = '<SUBJECT>CN=user$<KU>digitalSignature,keyEncipherment'
+realm.run([kadminl, 'setstr', realm.user_princ, 'pkinit_cert_match', rule])
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % p12_identity])
+realm.klist(realm.user_princ)
+
+# Fail an && rule.
+rule = '&&<SUBJECT>O=OTHER.COM<SAN>^user@KRBTEST.COM$'
+realm.run([kadminl, 'setstr', realm.user_princ, 'pkinit_cert_match', rule])
+msg = 'kinit: Certificate mismatch while getting initial credentials'
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % p12_identity],
+            expected_code=1, expected_msg=msg)
+
+# Pass an || rule.
+rule = '||<SUBJECT>O=KRBTEST.COM<SAN>^otheruser@KRBTEST.COM$'
+realm.run([kadminl, 'setstr', realm.user_princ, 'pkinit_cert_match', rule])
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % p12_identity])
+realm.klist(realm.user_princ)
+
+# Fail an || rule.
+rule = '||<SUBJECT>O=OTHER.COM<SAN>^otheruser@KRBTEST.COM$'
+realm.run([kadminl, 'setstr', realm.user_princ, 'pkinit_cert_match', rule])
+msg = 'kinit: Certificate mismatch while getting initial credentials'
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % p12_identity],
+            expected_code=1, expected_msg=msg)
+
 if not have_soft_pkcs11:
     skip_rest('PKINIT PKCS11 tests', 'soft-pkcs11.so not found')
 

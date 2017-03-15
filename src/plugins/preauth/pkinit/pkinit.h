@@ -293,6 +293,13 @@ krb5_error_code pkinit_cert_matching
 	pkinit_identity_crypto_context id_cryptoctx,
 	krb5_principal princ);
 
+krb5_error_code pkinit_client_cert_match
+	(krb5_context context,
+	pkinit_plg_crypto_context plgctx,
+	pkinit_req_crypto_context reqctx,
+	const char *match_rule,
+	krb5_boolean *matched);
+
 /*
  * Client's list of identities for which it needs PINs or passwords
  */

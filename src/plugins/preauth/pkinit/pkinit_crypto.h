@@ -637,4 +637,10 @@ krb5_error_code
 crypto_encode_der_cert(krb5_context context, pkinit_req_crypto_context reqctx,
 		       uint8_t **der_out, size_t *der_len);
 
+krb5_error_code
+crypto_req_cert_matching_data(krb5_context context,
+			      pkinit_plg_crypto_context plgctx,
+			      pkinit_req_crypto_context reqctx,
+			      pkinit_cert_matching_data **md_out);
+
 #endif	/* _PKINIT_CRYPTO_H */

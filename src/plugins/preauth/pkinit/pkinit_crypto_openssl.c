@@ -6124,3 +6124,21 @@ crypto_encode_der_cert(krb5_context context, pkinit_req_crypto_context reqctx,
     *der_len = len;
     return 0;
 }
+
+/*
+ * Get the certificate matching data from the request certificate.
+ */
+krb5_error_code
+crypto_req_cert_matching_data(krb5_context context,
+                              pkinit_plg_crypto_context plgctx,
+                              pkinit_req_crypto_context reqctx,
+                              pkinit_cert_matching_data **md_out)
+{
+    *md_out = NULL;
+
+    if (reqctx == NULL || reqctx->received_cert == NULL)
+        return ENOENT;
+
+    return get_matching_data(context, plgctx, reqctx, reqctx->received_cert,
+                             md_out);
+}

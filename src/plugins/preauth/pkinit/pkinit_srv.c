@@ -1518,6 +1518,56 @@ certauth_pkinit_eku_initvt(krb5_context context, int maj_ver, int min_ver,
     return 0;
 }
 
+/*
+ * Do certificate auth based on a match expression in the pkinit_cert_match
+ * attribute string.  An expression should be in the same form as those used
+ * for the pkinit_cert_match configuration option.
+ */
+static krb5_error_code
+dbmatch_authorize(krb5_context context, krb5_certauth_moddata moddata,
+                  const uint8_t *cert, size_t cert_len,
+                  krb5_const_principal princ, const void *opts,
+                  const krb5_db_entry *db_entry, char ***authinds_out)
+{
+    krb5_error_code ret;
+    const struct certauth_req_opts *req_opts = opts;
+    char *pattern;
+    krb5_boolean matched;
+
+    *authinds_out = NULL;
+
+    /* Fetch the matching pattern.  Pass if it isn't specified. */
+    ret = req_opts->cb->get_string(context, req_opts->rock,
+                                   "pkinit_cert_match", &pattern);
+    if (ret)
+        return ret;
+    if (pattern == NULL)
+        return KRB5_PLUGIN_NO_HANDLE;
+
+    /* Check the certificate against the match expression. */
+    ret = pkinit_client_cert_match(context, req_opts->plgctx->cryptoctx,
+                                   req_opts->reqctx->cryptoctx, pattern,
+                                   &matched);
+    req_opts->cb->free_string(context, req_opts->rock, pattern);
+    if (ret)
+        return ret;
+    return matched ? 0 : KRB5KDC_ERR_CERTIFICATE_MISMATCH;
+}
+
+static krb5_error_code
+certauth_dbmatch_initvt(krb5_context context, int maj_ver, int min_ver,
+                        krb5_plugin_vtable vtable)
+{
+    krb5_certauth_vtable vt;
+
+    if (maj_ver != 1)
+        return KRB5_PLUGIN_VER_NOTSUPP;
+    vt = (krb5_certauth_vtable)vtable;
+    vt->name = "dbmatch";
+    vt->authorize = dbmatch_authorize;
+    return 0;
+}
+
 static krb5_error_code
 load_certauth_plugins(krb5_context context, certauth_handle **handle_out)
 {
@@ -1534,6 +1584,11 @@ load_certauth_plugins(krb5_context context, certauth_handle **handle_out)
 
     ret = k5_plugin_register(context, PLUGIN_INTERFACE_CERTAUTH,
                              "pkinit_eku", certauth_pkinit_eku_initvt);
+    if (ret)
+        goto cleanup;
+
+    ret = k5_plugin_register(context, PLUGIN_INTERFACE_CERTAUTH, "dbmatch",
+                             certauth_dbmatch_initvt);
     if (ret)
         goto cleanup;
 
