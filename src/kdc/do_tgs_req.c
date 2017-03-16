@@ -909,6 +909,7 @@ prepare_error_tgs (struct kdc_request_state *state,
     krb5_data *scratch, *e_data_asn1 = NULL, *fast_edata = NULL;
     kdc_realm_t *kdc_active_realm = state->realm_data;
 
+    errpkt.magic = KV5M_ERROR;
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
 

@@ -301,7 +301,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                             int *conf_state, gss_qop_t *qop_state, int toktype)
 {
     krb5_context context = *contextptr;
-    krb5_data plain;
+    krb5_data plain = empty_data();
     uint64_t seqnum;
     size_t ec, rrc;
     int key_usage;

@@ -841,6 +841,8 @@ prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
     kdc_realm_t *kdc_active_realm = rstate->realm_data;
     size_t count;
 
+    errpkt.magic = KV5M_ERROR;
+
     if (e_data_in != NULL) {
         /* Add a PA-FX-COOKIE to e_data_in.  e_data is a shallow copy
          * containing aliases. */
