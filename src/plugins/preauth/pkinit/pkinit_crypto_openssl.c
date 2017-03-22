@@ -4944,135 +4944,15 @@ cleanup:
 }
 
 /*
- * Get number of certificates available after crypto_load_certs()
- */
-krb5_error_code
-crypto_cert_get_count(krb5_context context,
-                      pkinit_plg_crypto_context plg_cryptoctx,
-                      pkinit_req_crypto_context req_cryptoctx,
-                      pkinit_identity_crypto_context id_cryptoctx,
-                      int *cert_count)
-{
-    int count;
-
-    if (id_cryptoctx == NULL || id_cryptoctx->creds[0] == NULL)
-        return EINVAL;
-
-    for (count = 0;
-         count <= MAX_CREDS_ALLOWED && id_cryptoctx->creds[count] != NULL;
-         count++);
-    *cert_count = count;
-    return 0;
-}
-
-
-/*
- * Begin iteration over the certs loaded in crypto_load_certs()
- */
-krb5_error_code
-crypto_cert_iteration_begin(krb5_context context,
-                            pkinit_plg_crypto_context plg_cryptoctx,
-                            pkinit_req_crypto_context req_cryptoctx,
-                            pkinit_identity_crypto_context id_cryptoctx,
-                            pkinit_cert_iter_handle *ih_ret)
-{
-    struct _pkinit_cert_iter_data *id;
-
-    if (id_cryptoctx == NULL || ih_ret == NULL)
-        return EINVAL;
-    if (id_cryptoctx->creds[0] == NULL) /* No cred info available */
-        return ENOENT;
-
-    id = calloc(1, sizeof(*id));
-    if (id == NULL)
-        return ENOMEM;
-    id->magic = ITER_MAGIC;
-    id->plgctx = plg_cryptoctx,
-        id->reqctx = req_cryptoctx,
-        id->idctx = id_cryptoctx;
-    id->index = 0;
-    *ih_ret = (pkinit_cert_iter_handle) id;
-    return 0;
-}
-
-/*
- * End iteration over the certs loaded in crypto_load_certs()
- */
-krb5_error_code
-crypto_cert_iteration_end(krb5_context context,
-                          pkinit_cert_iter_handle ih)
-{
-    struct _pkinit_cert_iter_data *id = (struct _pkinit_cert_iter_data *)ih;
-
-    if (id == NULL || id->magic != ITER_MAGIC)
-        return EINVAL;
-    free(ih);
-    return 0;
-}
-
-/*
- * Get next certificate handle
- */
-krb5_error_code
-crypto_cert_iteration_next(krb5_context context,
-                           pkinit_cert_iter_handle ih,
-                           pkinit_cert_handle *ch_ret)
-{
-    struct _pkinit_cert_iter_data *id = (struct _pkinit_cert_iter_data *)ih;
-    struct _pkinit_cert_data *cd;
-    pkinit_identity_crypto_context id_cryptoctx;
-
-    if (id == NULL || id->magic != ITER_MAGIC)
-        return EINVAL;
-
-    if (ch_ret == NULL)
-        return EINVAL;
-
-    id_cryptoctx = id->idctx;
-    if (id_cryptoctx == NULL)
-        return EINVAL;
-
-    if (id_cryptoctx->creds[id->index] == NULL)
-        return PKINIT_ITER_NO_MORE;
-
-    cd = calloc(1, sizeof(*cd));
-    if (cd == NULL)
-        return ENOMEM;
-
-    cd->magic = CERT_MAGIC;
-    cd->plgctx = id->plgctx;
-    cd->reqctx = id->reqctx;
-    cd->idctx = id->idctx;
-    cd->index = id->index;
-    cd->cred = id_cryptoctx->creds[id->index++];
-    *ch_ret = (pkinit_cert_handle)cd;
-    return 0;
-}
-
-/*
- * Release cert handle
- */
-krb5_error_code
-crypto_cert_release(krb5_context context,
-                    pkinit_cert_handle ch)
-{
-    struct _pkinit_cert_data *cd = (struct _pkinit_cert_data *)ch;
-    if (cd == NULL || cd->magic != CERT_MAGIC)
-        return EINVAL;
-    free(cd);
-    return 0;
-}
-
-/*
  * Get certificate Key Usage and Extended Key Usage
  */
 static krb5_error_code
-crypto_retieve_X509_key_usage(krb5_context context,
-                              pkinit_plg_crypto_context plgcctx,
-                              pkinit_req_crypto_context reqcctx,
-                              X509 *x,
-                              unsigned int *ret_ku_bits,
-                              unsigned int *ret_eku_bits)
+crypto_retrieve_X509_key_usage(krb5_context context,
+                               pkinit_plg_crypto_context plgcctx,
+                               pkinit_req_crypto_context reqcctx,
+                               X509 *x,
+                               unsigned int *ret_ku_bits,
+                               unsigned int *ret_eku_bits)
 {
     krb5_error_code retval = 0;
     int i;
@@ -5171,55 +5051,99 @@ X509_NAME_oneline_ex(X509_NAME * a,
 }
 
 /*
- * Get certificate information
+ * Get number of certificates available after crypto_load_certs()
  */
-krb5_error_code
-crypto_cert_get_matching_data(krb5_context context,
-                              pkinit_cert_handle ch,
-                              pkinit_cert_matching_data **ret_md)
+static krb5_error_code
+crypto_cert_get_count(pkinit_identity_crypto_context id_cryptoctx,
+                      int *cert_count)
 {
-    krb5_error_code retval;
-    pkinit_cert_matching_data *md;
-    krb5_principal *pkinit_sans =NULL, *upn_sans = NULL;
-    struct _pkinit_cert_data *cd = (struct _pkinit_cert_data *)ch;
-    unsigned int i, j;
+    int count;
+
+    *cert_count = 0;
+    if (id_cryptoctx == NULL || id_cryptoctx->creds[0] == NULL)
+        return EINVAL;
+
+    for (count = 0;
+         count <= MAX_CREDS_ALLOWED && id_cryptoctx->creds[count] != NULL;
+         count++);
+    *cert_count = count;
+    return 0;
+}
+
+void
+crypto_cert_free_matching_data(krb5_context context,
+                               pkinit_cert_matching_data *md)
+{
+    int i;
+
+    if (md == NULL)
+        return;
+    free(md->subject_dn);
+    free(md->issuer_dn);
+    for (i = 0; md->sans != NULL && md->sans[i] != NULL; i++)
+        krb5_free_principal(context, md->sans[i]);
+    free(md->sans);
+    free(md);
+}
+
+/*
+ * Free certificate matching data.
+ */
+void
+crypto_cert_free_matching_data_list(krb5_context context,
+                                    pkinit_cert_matching_data **list)
+{
+    int i;
+
+    for (i = 0; list != NULL && list[i] != NULL; i++)
+        crypto_cert_free_matching_data(context, list[i]);
+    free(list);
+}
+
+/*
+ * Get certificate matching data for cert.
+ */
+static krb5_error_code
+get_matching_data(krb5_context context,
+                  pkinit_plg_crypto_context plg_cryptoctx,
+                  pkinit_req_crypto_context req_cryptoctx, X509 *cert,
+                  pkinit_cert_matching_data **md_out)
+{
+    krb5_error_code ret = ENOMEM;
+    pkinit_cert_matching_data *md = NULL;
+    krb5_principal *pkinit_sans = NULL, *upn_sans = NULL;
+    size_t i, j;
     char buf[DN_BUF_LEN];
     unsigned int bufsize = sizeof(buf);
 
-    if (cd == NULL || cd->magic != CERT_MAGIC)
-        return EINVAL;
-    if (ret_md == NULL)
-        return EINVAL;
+    *md_out = NULL;
 
     md = calloc(1, sizeof(*md));
     if (md == NULL)
-        return ENOMEM;
+        goto cleanup;
 
-    md->ch = ch;
-
-    /* get the subject name (in rfc2253 format) */
-    X509_NAME_oneline_ex(X509_get_subject_name(cd->cred->cert),
-                         buf, &bufsize, XN_FLAG_SEP_COMMA_PLUS);
+    /* Get the subject name (in rfc2253 format). */
+    X509_NAME_oneline_ex(X509_get_subject_name(cert), buf, &bufsize,
+                         XN_FLAG_SEP_COMMA_PLUS);
     md->subject_dn = strdup(buf);
     if (md->subject_dn == NULL) {
-        retval = ENOMEM;
+        ret = ENOMEM;
         goto cleanup;
     }
 
-    /* get the issuer name (in rfc2253 format) */
-    X509_NAME_oneline_ex(X509_get_issuer_name(cd->cred->cert),
-                         buf, &bufsize, XN_FLAG_SEP_COMMA_PLUS);
+    /* Get the issuer name (in rfc2253 format). */
+    X509_NAME_oneline_ex(X509_get_issuer_name(cert), buf, &bufsize,
+                         XN_FLAG_SEP_COMMA_PLUS);
     md->issuer_dn = strdup(buf);
     if (md->issuer_dn == NULL) {
-        retval = ENOMEM;
+        ret = ENOMEM;
         goto cleanup;
     }
 
-    /* get the san data */
-    retval = crypto_retrieve_X509_sans(context, cd->plgctx, cd->reqctx,
-                                       cd->cred->cert, &pkinit_sans,
-                                       &upn_sans, NULL);
-    if (retval)
+    /* Get the SAN data. */
+    ret = crypto_retrieve_X509_sans(context, plg_cryptoctx, req_cryptoctx,
+                                    cert, &pkinit_sans, &upn_sans, NULL);
+    if (ret)
         goto cleanup;
 
     j = 0;
@@ -5234,7 +5158,7 @@ crypto_cert_get_matching_data(krb5_context context,
     if (j != 0) {
         md->sans = calloc((size_t)j+1, sizeof(*md->sans));
         if (md->sans == NULL) {
-            retval = ENOMEM;
+            ret = ENOMEM;
             goto cleanup;
         }
         j = 0;
@@ -5252,88 +5176,96 @@ crypto_cert_get_matching_data(krb5_context context,
     } else
         md->sans = NULL;
 
-    /* get the KU and EKU data */
-
-    retval = crypto_retieve_X509_key_usage(context, cd->plgctx, cd->reqctx,
-                                           cd->cred->cert,
-                                           &md->ku_bits, &md->eku_bits);
-    if (retval)
+    /* Get the KU and EKU data. */
+    ret = crypto_retrieve_X509_key_usage(context, plg_cryptoctx,
+                                         req_cryptoctx, cert, &md->ku_bits,
+                                         &md->eku_bits);
+    if (ret)
         goto cleanup;
 
-    *ret_md = md;
-    retval = 0;
+    *md_out = md;
+    md = NULL;
+
 cleanup:
-    if (retval) {
-        if (md)
-            crypto_cert_free_matching_data(context, md);
+    crypto_cert_free_matching_data(context, md);
+    return ret;
+}
+
+krb5_error_code
+crypto_cert_get_matching_data(krb5_context context,
+                              pkinit_plg_crypto_context plg_cryptoctx,
+                              pkinit_req_crypto_context req_cryptoctx,
+                              pkinit_identity_crypto_context id_cryptoctx,
+                              pkinit_cert_matching_data ***md_out)
+{
+    krb5_error_code ret;
+    pkinit_cert_matching_data **md_list = NULL;
+    int count, i;
+
+    ret = crypto_cert_get_count(id_cryptoctx, &count);
+    if (ret)
+        goto cleanup;
+
+    md_list = calloc(count + 1, sizeof(*md_list));
+    if (md_list == NULL) {
+        ret = ENOMEM;
+        goto cleanup;
     }
-    return retval;
+
+    for (i = 0; i < count; i++) {
+        ret = get_matching_data(context, plg_cryptoctx, req_cryptoctx,
+                                id_cryptoctx->creds[i]->cert, &md_list[i]);
+        if (ret) {
+            pkiDebug("%s: crypto_cert_get_matching_data error %d, %s\n",
+                     __FUNCTION__, ret, error_message(ret));
+            goto cleanup;
+        }
+    }
+
+    *md_out = md_list;
+    md_list = NULL;
+
+cleanup:
+    crypto_cert_free_matching_data_list(context, md_list);
+    return ret;
 }
 
 /*
- * Free certificate information
+ * Set the certificate in idctx->creds[cred_index] as the selected certificate.
  */
 krb5_error_code
-crypto_cert_free_matching_data(krb5_context context,
-                               pkinit_cert_matching_data *md)
+crypto_cert_select(krb5_context context, pkinit_identity_crypto_context idctx,
+                   size_t cred_index)
 {
-    krb5_principal p;
-    int i;
+    pkinit_cred_info ci = NULL;
 
-    if (md == NULL)
-        return EINVAL;
-    if (md->subject_dn)
-        free(md->subject_dn);
-    if (md->issuer_dn)
-        free(md->issuer_dn);
-    if (md->sans) {
-        for (i = 0, p = md->sans[i]; p != NULL; p = md->sans[++i])
-            krb5_free_principal(context, p);
-        free(md->sans);
-    }
-    free(md);
-    return 0;
-}
+    if (cred_index >= MAX_CREDS_ALLOWED || idctx->creds[cred_index] == NULL)
+        return ENOENT;
 
-/*
- * Make this matching certificate "the chosen one"
- */
-krb5_error_code
-crypto_cert_select(krb5_context context,
-                   pkinit_cert_matching_data *md)
-{
-    struct _pkinit_cert_data *cd;
-    if (md == NULL)
-        return EINVAL;
-
-    cd = (struct _pkinit_cert_data *)md->ch;
-    if (cd == NULL || cd->magic != CERT_MAGIC)
-        return EINVAL;
-
+    ci = idctx->creds[cred_index];
     /* copy the selected cert into our id_cryptoctx */
-    if (cd->idctx->my_certs != NULL) {
-        sk_X509_pop_free(cd->idctx->my_certs, X509_free);
-    }
-    cd->idctx->my_certs = sk_X509_new_null();
-    sk_X509_push(cd->idctx->my_certs, cd->cred->cert);
-    free(cd->idctx->identity);
+    if (idctx->my_certs != NULL)
+        sk_X509_pop_free(idctx->my_certs, X509_free);
+    idctx->my_certs = sk_X509_new_null();
+    sk_X509_push(idctx->my_certs, ci->cert);
+    free(idctx->identity);
     /* hang on to the selected credential name */
-    if (cd->idctx->creds[cd->index]->name != NULL)
-        cd->idctx->identity = strdup(cd->idctx->creds[cd->index]->name);
+    if (ci->name != NULL)
+        idctx->identity = strdup(ci->name);
     else
-        cd->idctx->identity = NULL;
-    cd->idctx->creds[cd->index]->cert = NULL;       /* Don't free it twice */
-    cd->idctx->cert_index = 0;
+        idctx->identity = NULL;
 
-    if (cd->idctx->pkcs11_method != 1) {
-        cd->idctx->my_key = cd->cred->key;
-        cd->idctx->creds[cd->index]->key = NULL;    /* Don't free it twice */
+    ci->cert = NULL;       /* Don't free it twice */
+    idctx->cert_index = 0;
+    if (idctx->pkcs11_method != 1) {
+        idctx->my_key = ci->key;
+        ci->key = NULL;    /* Don't free it twice */
     }
 #ifndef WITHOUT_PKCS11
     else {
-        cd->idctx->cert_id = cd->cred->cert_id;
-        cd->idctx->creds[cd->index]->cert_id = NULL; /* Don't free it twice */
-        cd->idctx->cert_id_len = cd->cred->cert_id_len;
+        idctx->cert_id = ci->cert_id;
+        ci->cert_id = NULL; /* Don't free it twice */
+        idctx->cert_id_len = ci->cert_id_len;
     }
 #endif
     return 0;
@@ -5349,15 +5281,12 @@ crypto_cert_select_default(krb5_context context,
                            pkinit_identity_crypto_context id_cryptoctx)
 {
     krb5_error_code retval;
-    int cert_count = 0;
+    int cert_count;
 
-    retval = crypto_cert_get_count(context, plg_cryptoctx, req_cryptoctx,
-                                   id_cryptoctx, &cert_count);
-    if (retval) {
-        pkiDebug("%s: crypto_cert_get_count error %d, %s\n",
-                 __FUNCTION__, retval, error_message(retval));
+    retval = crypto_cert_get_count(id_cryptoctx, &cert_count);
+    if (retval)
         goto errout;
-    }
+
     if (cert_count != 1) {
         pkiDebug("%s: ERROR: There are %d certs to choose from, "
                  "but there must be exactly one.\n",
