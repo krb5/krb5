@@ -6114,10 +6114,10 @@ crypto_encode_der_cert(krb5_context context, pkinit_req_crypto_context reqctx,
     if (len <= 0)
         return EINVAL;
     p = der = malloc(len);
-    if (p == NULL)
+    if (der == NULL)
         return ENOMEM;
     if (i2d_X509(reqctx->received_cert, &p) <= 0) {
-        free(p);
+        free(der);
         return EINVAL;
     }
     *der_out = der;
