@@ -1150,7 +1150,7 @@ cms_signeddata_create(krb5_context context,
     X509_ALGOR *alg = NULL;
     ASN1_OCTET_STRING *digest = NULL;
     unsigned int alg_len = 0, digest_len = 0;
-    unsigned char *y = NULL, *alg_buf = NULL, *digest_buf = NULL;
+    unsigned char *y = NULL;
     X509 *cert = NULL;
     ASN1_OBJECT *oid = NULL, *oid_copy;
 
@@ -1317,18 +1317,12 @@ cms_signeddata_create(krb5_context context,
                 goto cleanup2;
             X509_ALGOR_set0(alg, OBJ_nid2obj(NID_sha1), V_ASN1_NULL, NULL);
             alg_len = i2d_X509_ALGOR(alg, NULL);
-            alg_buf = malloc(alg_len);
-            if (alg_buf == NULL)
-                goto cleanup2;
 
             digest = ASN1_OCTET_STRING_new();
             if (digest == NULL)
                 goto cleanup2;
             ASN1_OCTET_STRING_set(digest, md_data2, (int)md_len2);
             digest_len = i2d_ASN1_OCTET_STRING(digest, NULL);
-            digest_buf = malloc(digest_len);
-            if (digest_buf == NULL)
-                goto cleanup2;
 
             digestInfo_len = ASN1_object_size(1, (int)(alg_len + digest_len),
                                               V_ASN1_SEQUENCE);
@@ -1417,9 +1411,7 @@ cleanup2:
 #ifndef WITHOUT_PKCS11
         if (id_cryptoctx->pkcs11_method == 1 &&
             id_cryptoctx->mech == CKM_RSA_PKCS) {
-            free(digest_buf);
             free(digestInfo_buf);
-            free(alg_buf);
             if (digest != NULL)
                 ASN1_OCTET_STRING_free(digest);
         }
