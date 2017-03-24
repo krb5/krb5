@@ -278,51 +278,6 @@ if test "$PRNG_ALG" = fortuna; then
 	AC_DEFINE(FORTUNA,1,[Define if Fortuna PRNG is selected])
 fi
 
-# WITH_PKINIT_CRYPTO_IMPL
-
-PKINIT_CRYPTO_IMPL="$CRYPTO_IMPL"
-AC_ARG_WITH([pkinit-crypto-impl],
-AC_HELP_STRING([--with-pkinit-crypto-impl=IMPL], [use specified pkinit crypto implementation @<:@openssl@:>@]),
-[PKINIT_CRYPTO_IMPL=$withval
-AC_MSG_NOTICE(pkinit will use '$withval')
-], withval=$PKINIT_CRYPTO_IMPL)
-case "$withval" in
-builtin|openssl)
-  AC_CHECK_LIB(crypto, PKCS7_get_signer_info, PKINIT_CRYPTO_IMPL_LIBS=-lcrypto)
-  PKINIT_CRYPTO_IMPL=openssl
-  AC_CHECK_LIB(crypto, CMS_get0_content,
-               [AC_DEFINE([HAVE_OPENSSL_CMS], 1,
-                          [Define if OpenSSL supports cms.])])
-  ;;
-nss)
-  if test "${PKINIT_CRYPTO_IMPL_CFLAGS+set}" != set; then
-    PKINIT_CRYPTO_IMPL_CFLAGS=`pkg-config --cflags nss`
-  fi
-  if test "${PKINIT_CRYPTO_IMPL_LIBS+set}" != set; then
-    PKINIT_CRYPTO_IMPL_LIBS=`pkg-config --libs nss`
-  fi
-  AC_DEFINE(PKINIT_CRYPTO_IMPL_NSS,1,[Define if pkinit crypto implementation is NSS])
-  save_CFLAGS=$CFLAGS
-  CFLAGS="$CFLAGS $PKINIT_CRYPTO_IMPL_CFLAGS"
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-#include <nss.h>
-#if NSS_VMAJOR < 3 || (NSS_VMAJOR == 3 && NSS_VMINOR < 12)
-#error
-#elif NSS_VMAJOR == 3 && NSS_VMINOR == 12 && NSS_VPATCH < 11
-#error
-#endif
-  ])], [], [AC_MSG_ERROR([NSS version 3.12.11 or later required.])])
-  CFLAGS=$save_CFLAGS
-  ;;
-*)
-  AC_MSG_ERROR([Unknown crypto implementation $withval])
-  ;;
-esac
-AC_CONFIG_COMMANDS(PKINIT_CRYPTO_IMPL,,PKINIT_CRYPTO_IMPL=$PKINIT_CRYPTO_IMPL)
-AC_SUBST(PKINIT_CRYPTO_IMPL)
-AC_SUBST(PKINIT_CRYPTO_IMPL_CFLAGS)
-AC_SUBST(PKINIT_CRYPTO_IMPL_LIBS)
-
 # WITH_TLS_IMPL
 
 AC_ARG_WITH([tls-impl],
@@ -1099,6 +1054,7 @@ fi
 if test "$k5_cv_openssl_version_okay" = yes && (test "$enable_pkinit" = yes || test "$enable_pkinit" = try); then
   K5_GEN_MAKEFILE(plugins/preauth/pkinit)
   PKINIT=yes
+  AC_CHECK_LIB(crypto, CMS_get0_content, [AC_DEFINE([HAVE_OPENSSL_CMS], 1, [Define if OpenSSL supports cms.])])
 elif test "$k5_cv_openssl_version_okay" = no && test "$enable_pkinit" = yes; then
   AC_MSG_ERROR([Version of OpenSSL is too old; cannot enable PKINIT.])
 else
