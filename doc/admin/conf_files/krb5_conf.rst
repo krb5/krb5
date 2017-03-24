@@ -55,9 +55,10 @@ following directives at the beginning of a line::
 directory must exist and be readable.  Including a directory includes
 all files within the directory whose names consist solely of
 alphanumeric characters, dashes, or underscores.  Starting in release
-1.15, files with names ending in ".conf" are also included.  Included
-profile files are syntactically independent of their parents, so each
-included file must begin with a section header.
+1.15, files with names ending in ".conf" are also included, unless the
+name begins with ".".  Included profile files are syntactically
+independent of their parents, so each included file must begin with a
+section header.
 
 The krb5.conf file can specify that configuration should be obtained
 from a loadable module, rather than the file itself, using the
