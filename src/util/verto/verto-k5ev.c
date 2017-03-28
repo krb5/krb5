@@ -41,7 +41,12 @@
 /* Avoid using clock_gettime, which would create a dependency on librt. */
 #define EV_USE_MONOTONIC 0
 #define EV_USE_REALTIME 0
-#define EV_FEATURES 0x5f        /* Everything but back ends */
+#define EV_FEATURES 0x4f        /* No back ends or optional watchers */
+/* Enable the optional watcher types we use. */
+#define EV_IDLE_ENABLE 1
+#define EV_SIGNAL_ENABLE 1
+#define EV_CHILD_ENABLE 1
+/* Enable the back ends we want. */
 #ifdef HAVE_POLL_H
 #define EV_USE_POLL 1
 #endif
