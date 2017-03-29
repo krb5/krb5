@@ -188,6 +188,7 @@ verify_client_san(krb5_context context,
                                        plgctx->opts->allow_upn ? &upns : NULL,
                                        NULL);
     if (retval == ENOENT) {
+        TRACE_PKINIT_SERVER_NO_SAN(context);
         goto out;
     } else if (retval) {
         pkiDebug("%s: error from retrieve_certificate_sans()\n", __FUNCTION__);
@@ -224,7 +225,7 @@ verify_client_san(krb5_context context,
         krb5_free_unparsed_name(context, san_string);
 #endif
         if (cb->match_client(context, rock, princs[i])) {
-            pkiDebug("%s: pkinit san match found\n", __FUNCTION__);
+            TRACE_PKINIT_SERVER_MATCHING_SAN_FOUND(context);
             *valid_san = 1;
             retval = 0;
             goto out;
@@ -252,7 +253,7 @@ verify_client_san(krb5_context context,
         krb5_free_unparsed_name(context, san_string);
 #endif
         if (cb->match_client(context, rock, upns[i])) {
-            pkiDebug("%s: upn san match found\n", __FUNCTION__);
+            TRACE_PKINIT_SERVER_MATCHING_UPN_FOUND(context);
             *valid_san = 1;
             retval = 0;
             goto out;
@@ -300,7 +301,7 @@ verify_client_eku(krb5_context context,
     *eku_accepted = 0;
 
     if (plgctx->opts->require_eku == 0) {
-        pkiDebug("%s: configuration requests no EKU checking\n", __FUNCTION__);
+        TRACE_PKINIT_SERVER_EKU_SKIP(context);
         *eku_accepted = 1;
         retval = 0;
         goto out;
@@ -364,6 +365,7 @@ authorize_cert(krb5_context context, certauth_handle *certauth_modules,
     ret = KRB5_PLUGIN_NO_HANDLE;
     for (i = 0; certauth_modules != NULL && certauth_modules[i] != NULL; i++) {
         h = certauth_modules[i];
+        TRACE_PKINIT_SERVER_CERT_AUTH(context, h->vt.name);
         ret = h->vt.authorize(context, h->moddata, cert, cert_len, client,
                               &opts, db_ent, &ais);
         if (ret == 0)
@@ -449,7 +451,7 @@ pkinit_server_verify_padata(krb5_context context,
 
     switch ((int)data->pa_type) {
     case KRB5_PADATA_PK_AS_REQ:
-        pkiDebug("processing KRB5_PADATA_PK_AS_REQ\n");
+        TRACE_PKINIT_SERVER_PADATA_VERIFY(context);
         retval = k5int_decode_krb5_pa_pk_as_req(&k5data, &reqp);
         if (retval) {
             pkiDebug("decode_krb5_pa_pk_as_req failed\n");
@@ -472,7 +474,7 @@ pkinit_server_verify_padata(krb5_context context,
         break;
     case KRB5_PADATA_PK_AS_REP_OLD:
     case KRB5_PADATA_PK_AS_REQ_OLD:
-        pkiDebug("processing KRB5_PADATA_PK_AS_REQ_OLD\n");
+        TRACE_PKINIT_SERVER_PADATA_VERIFY_OLD(context);
         retval = k5int_decode_krb5_pa_pk_as_req_draft9(&k5data, &reqp9);
         if (retval) {
             pkiDebug("decode_krb5_pa_pk_as_req_draft9 failed\n");
@@ -500,7 +502,7 @@ pkinit_server_verify_padata(krb5_context context,
         goto cleanup;
     }
     if (retval) {
-        pkiDebug("pkcs7_signeddata_verify failed\n");
+        TRACE_PKINIT_SERVER_PADATA_VERIFY_FAIL(context);
         goto cleanup;
     }
     if (is_signed) {
@@ -830,7 +832,7 @@ pkinit_server_return_padata(krb5_context context,
         return ENOENT;
     }
 
-    pkiDebug("pkinit_return_padata: entered!\n");
+    TRACE_PKINIT_SERVER_RETURN_PADATA(context);
     reqctx = (pkinit_kdc_req_context)modreq;
 
     if (encrypting_key->contents) {
@@ -1455,8 +1457,7 @@ pkinit_san_authorize(krb5_context context, krb5_certauth_moddata moddata,
         return ret;
 
     if (!valid_san) {
-        pkiDebug("%s: did not find an acceptable SAN in user certificate\n",
-                 __FUNCTION__);
+        TRACE_PKINIT_SERVER_SAN_REJECT(context);
         return KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
     }
 
@@ -1482,8 +1483,7 @@ pkinit_eku_authorize(krb5_context context, krb5_certauth_moddata moddata,
         return ret;
 
     if (!valid_eku) {
-        pkiDebug("%s: did not find an acceptable EKU in user certificate\n",
-                 __FUNCTION__);
+        TRACE_PKINIT_SERVER_EKU_REJECT(context);
         return KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
     }
 
@@ -1664,7 +1664,7 @@ pkinit_server_plugin_init(krb5_context context,
         return ENOMEM;
 
     for (i = 0, j = 0; i < numrealms; i++) {
-        pkiDebug("%s: processing realm '%s'\n", __FUNCTION__, realmnames[i]);
+        TRACE_PKINIT_SERVER_INIT_REALM(context, realmnames[i]);
         retval = pkinit_server_plugin_init_realm(context, realmnames[i], &plgctx);
         if (retval == 0 && plgctx != NULL)
             realm_contexts[j++] = plgctx;

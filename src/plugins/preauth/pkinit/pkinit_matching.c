@@ -707,6 +707,7 @@ pkinit_cert_matching(krb5_context context,
             goto cleanup;
         }
     } else {
+        TRACE_PKINIT_NO_MATCHING_CERT(context);
         retval = ENOENT;    /* XXX */
         goto cleanup;
     }

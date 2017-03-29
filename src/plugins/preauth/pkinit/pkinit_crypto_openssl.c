@@ -2308,7 +2308,6 @@ crypto_check_cert_eku(krb5_context context,
 
     X509_NAME_oneline(X509_get_subject_name(reqctx->received_cert),
                       buf, sizeof(buf));
-    pkiDebug("%s: looking for EKUs in cert = %s\n", __FUNCTION__, buf);
 
     if ((i = X509_get_ext_by_NID(reqctx->received_cert,
                                  NID_ext_key_usage, -1)) >= 0) {
@@ -2342,7 +2341,6 @@ crypto_check_cert_eku(krb5_context context,
 
         if (found_eku) {
             ASN1_BIT_STRING *usage = NULL;
-            pkiDebug("%s: found acceptable EKU, checking for digitalSignature\n", __FUNCTION__);
 
             /* check that digitalSignature KeyUsage is present */
             X509_check_ca(reqctx->received_cert);
@@ -2351,12 +2349,10 @@ crypto_check_cert_eku(krb5_context context,
 
                 if (!ku_reject(reqctx->received_cert,
                                X509v3_KU_DIGITAL_SIGNATURE)) {
-                    pkiDebug("%s: found digitalSignature KU\n",
-                             __FUNCTION__);
+                    TRACE_PKINIT_EKU(context);
                     *valid_eku = 1;
                 } else
-                    pkiDebug("%s: didn't find digitalSignature KU\n",
-                             __FUNCTION__);
+                    TRACE_PKINIT_EKU_NO_KU(context);
             }
             ASN1_BIT_STRING_free(usage);
         }
@@ -4298,8 +4294,7 @@ pkinit_get_certs_pkcs12(krb5_context context,
 
     fp = fopen(idopts->cert_filename, "rb");
     if (fp == NULL) {
-        pkiDebug("Failed to open PKCS12 file '%s', error %d\n",
-                 idopts->cert_filename, errno);
+        TRACE_PKINIT_PKCS_OPEN_FAIL(context, idopts->cert_filename, errno);
         goto cleanup;
     }
     set_cloexec_file(fp);
@@ -4307,8 +4302,7 @@ pkinit_get_certs_pkcs12(krb5_context context,
     p12 = d2i_PKCS12_fp(fp, NULL);
     fclose(fp);
     if (p12 == NULL) {
-        pkiDebug("Failed to decode PKCS12 file '%s' contents\n",
-                 idopts->cert_filename);
+        TRACE_PKINIT_PKCS_DECODE_FAIL(context, idopts->cert_filename);
         goto cleanup;
     }
     /*
@@ -4326,7 +4320,7 @@ pkinit_get_certs_pkcs12(krb5_context context,
         char *p12name = reassemble_pkcs12_name(idopts->cert_filename);
         const char *tmp;
 
-        pkiDebug("Initial PKCS12_parse with no password failed\n");
+        TRACE_PKINIT_PKCS_PARSE_FAIL_FIRST(context);
 
         if (id_cryptoctx->defer_id_prompt) {
             /* Supply the identity name to be passed to the responder. */
@@ -4367,14 +4361,14 @@ pkinit_get_certs_pkcs12(krb5_context context,
                                           NULL, NULL, 1, &kprompt);
             k5int_set_prompt_types(context, 0);
             if (r) {
-                pkiDebug("Failed to prompt for PKCS12 password");
+                TRACE_PKINIT_PKCS_PROMPT_FAIL(context);
                 goto cleanup;
             }
         }
 
         ret = PKCS12_parse(p12, rdat.data, &y, &x, NULL);
         if (ret == 0) {
-            pkiDebug("Second PKCS12_parse with password failed\n");
+            TRACE_PKINIT_PKCS_PARSE_FAIL_SECOND(context);
             goto cleanup;
         }
     }
@@ -4497,8 +4491,7 @@ pkinit_get_certs_fs(krb5_context context,
     }
 
     if (idopts->key_filename == NULL) {
-        pkiDebug("%s: failed to get user's private key location\n",
-                 __FUNCTION__);
+        TRACE_PKINIT_NO_PRIVKEY(context);
         goto cleanup;
     }
 
@@ -4526,8 +4519,7 @@ pkinit_get_certs_dir(krb5_context context,
     char *dirname, *suf;
 
     if (idopts->cert_filename == NULL) {
-        pkiDebug("%s: failed to get user's certificate directory location\n",
-                 __FUNCTION__);
+        TRACE_PKINIT_NO_CERT(context);
         return ENOENT;
     }
 
@@ -4571,8 +4563,7 @@ pkinit_get_certs_dir(krb5_context context,
         retval = pkinit_load_fs_cert_and_key(context, id_cryptoctx,
                                              certname, keyname, i);
         if (retval == 0) {
-            pkiDebug("%s: Successfully loaded cert (and key) for %s\n",
-                     __FUNCTION__, dentry->d_name);
+            TRACE_PKINIT_LOADED_CERT(context, dentry->d_name);
             i++;
         }
         else
@@ -4580,8 +4571,7 @@ pkinit_get_certs_dir(krb5_context context,
     }
 
     if (!id_cryptoctx->defer_id_prompt && i == 0) {
-        pkiDebug("%s: No cert/key pairs found in directory '%s'\n",
-                 __FUNCTION__, idopts->cert_filename);
+        TRACE_PKINIT_NO_CERT_AND_KEY(context, idopts->cert_filename);
         retval = ENOENT;
         goto cleanup;
     }
@@ -5280,9 +5270,7 @@ crypto_cert_select_default(krb5_context context,
         goto errout;
 
     if (cert_count != 1) {
-        pkiDebug("%s: ERROR: There are %d certs to choose from, "
-                 "but there must be exactly one.\n",
-                 __FUNCTION__, cert_count);
+        TRACE_PKINIT_NO_DEFAULT_CERT(context, cert_count);
         retval = EINVAL;
         goto errout;
     }
@@ -5430,7 +5418,7 @@ load_cas_and_crls(krb5_context context,
     switch(catype) {
     case CATYPE_ANCHORS:
         if (sk_X509_num(ca_certs) == 0) {
-            pkiDebug("no anchors in file, %s\n", filename);
+            TRACE_PKINIT_NO_CA_ANCHOR(context, filename);
             if (id_cryptoctx->trustedCAs == NULL)
                 sk_X509_free(ca_certs);
         } else {
@@ -5440,7 +5428,7 @@ load_cas_and_crls(krb5_context context,
         break;
     case CATYPE_INTERMEDIATES:
         if (sk_X509_num(ca_certs) == 0) {
-            pkiDebug("no intermediates in file, %s\n", filename);
+            TRACE_PKINIT_NO_CA_INTERMEDIATE(context, filename);
             if (id_cryptoctx->intermediateCAs == NULL)
                 sk_X509_free(ca_certs);
         } else {
@@ -5450,7 +5438,7 @@ load_cas_and_crls(krb5_context context,
         break;
     case CATYPE_CRLS:
         if (sk_X509_CRL_num(ca_crls) == 0) {
-            pkiDebug("no crls in file, %s\n", filename);
+            TRACE_PKINIT_NO_CRL(context, filename);
             if (id_cryptoctx->revoked == NULL)
                 sk_X509_CRL_free(ca_crls);
         } else {
@@ -5536,14 +5524,14 @@ crypto_load_cas_and_crls(krb5_context context,
                          int catype,
                          char *id)
 {
-    pkiDebug("%s: called with idtype %s and catype %s\n",
-             __FUNCTION__, idtype2string(idtype), catype2string(catype));
     switch (idtype) {
     case IDTYPE_FILE:
+        TRACE_PKINIT_LOAD_FROM_FILE(context);
         return load_cas_and_crls(context, plg_cryptoctx, req_cryptoctx,
                                  id_cryptoctx, catype, id);
         break;
     case IDTYPE_DIR:
+        TRACE_PKINIT_LOAD_FROM_DIR(context);
         return load_cas_and_crls_dir(context, plg_cryptoctx, req_cryptoctx,
                                      id_cryptoctx, catype, id);
         break;
