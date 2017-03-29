@@ -261,8 +261,7 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
     krb5_gss_name_t kname;
     krb5_data *kattrs = NULL;
 
-    if (minor_status != NULL)
-        *minor_status = 0;
+    *minor_status = 0;
 
     if (attrs != NULL)
         *attrs = GSS_C_NO_BUFFER_SET;
@@ -322,8 +321,7 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
     krb5_data kvalue = empty_data();
     krb5_data kdisplay_value = empty_data();
 
-    if (minor_status != NULL)
-        *minor_status = 0;
+    *minor_status = 0;
 
     code = krb5_gss_init_context(&context);
     if (code != 0) {
@@ -393,8 +391,7 @@ krb5_gss_set_name_attribute(OM_uint32 *minor_status,
     krb5_data kattr;
     krb5_data kvalue;
 
-    if (minor_status != NULL)
-        *minor_status = 0;
+    *minor_status = 0;
 
     code = krb5_gss_init_context(&context);
     if (code != 0) {
@@ -443,8 +440,7 @@ krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
     krb5_gss_name_t kname;
     krb5_data kattr;
 
-    if (minor_status != NULL)
-        *minor_status = 0;
+    *minor_status = 0;
 
     code = krb5_gss_init_context(&context);
     if (code != 0) {
@@ -490,8 +486,7 @@ krb5_gss_map_name_to_any(OM_uint32 *minor_status,
     krb5_gss_name_t kname;
     char *kmodule;
 
-    if (minor_status != NULL)
-        *minor_status = 0;
+    *minor_status = 0;
 
     code = krb5_gss_init_context(&context);
     if (code != 0) {
@@ -542,8 +537,7 @@ krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
     krb5_gss_name_t kname;
     char *kmodule;
 
-    if (minor_status != NULL)
-        *minor_status = 0;
+    *minor_status = 0;
 
     code = krb5_gss_init_context(&context);
     if (code != 0) {
@@ -598,8 +592,7 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
     unsigned char *cp;
     size_t princlen;
 
-    if (minor_status != NULL)
-        *minor_status = 0;
+    *minor_status = 0;
 
     code = krb5_gss_init_context(&context);
     if (code != 0) {

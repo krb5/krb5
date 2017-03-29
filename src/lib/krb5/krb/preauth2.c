@@ -497,7 +497,7 @@ responder_get_answer(krb5_context context, krb5_clpreauth_rock rock,
     krb5_init_creds_context ctx = (krb5_init_creds_context)rock;
 
     /* Don't let plugins get the raw password. */
-    if (question && strcmp(KRB5_RESPONDER_QUESTION_PASSWORD, question) == 0)
+    if (strcmp(KRB5_RESPONDER_QUESTION_PASSWORD, question) == 0)
         return NULL;
     return k5_response_items_get_answer(ctx->rctx.items, question);
 }
