@@ -173,7 +173,7 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
             p = va_arg(ap, const char *);
             if (p == NULL && len != 0)
                 k5_buf_add(&buf, "(null)");
-            else
+            else if (p != NULL)
                 buf_add_printable_len(&buf, p, len);
         } else if (strcmp(tmpbuf, "hexlenstr") == 0) {
             len = va_arg(ap, size_t);
