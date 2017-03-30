@@ -357,6 +357,10 @@ static struct {
     {
         {GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID},
         gss_krb5int_extract_authtime_from_sec_context
+    },
+    {
+        {GET_SEC_CONTEXT_SASL_SSF_OID_LENGTH, GET_SEC_CONTEXT_SASL_SSF_OID},
+        gss_krb5int_sec_context_sasl_ssf
     }
 };
 

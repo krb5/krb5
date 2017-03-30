@@ -1144,6 +1144,12 @@ gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *,
                                               const gss_OID,
                                               gss_buffer_set_t *);
 
+#define GET_SEC_CONTEXT_SASL_SSF_OID_LENGTH 11
+#define GET_SEC_CONTEXT_SASL_SSF_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0f"
+OM_uint32
+gss_krb5int_sec_context_sasl_ssf(OM_uint32 *, const gss_ctx_id_t,
+                                 const gss_OID, gss_buffer_set_t *);
+
 #define GSS_KRB5_IMPORT_CRED_OID_LENGTH 11
 #define GSS_KRB5_IMPORT_CRED_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0d"
 
