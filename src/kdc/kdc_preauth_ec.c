@@ -66,6 +66,8 @@ ec_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     krb5_keyblock *kdc_challenge_key;
     krb5_kdcpreauth_modreq modreq = NULL;
     int i = 0;
+    char *ai = NULL, *realmstr = NULL;
+    krb5_data realm = request->server->realm;
 
     plain.data = NULL;
 
@@ -84,6 +86,15 @@ ec_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
         if (plain.data == NULL)
             retval = ENOMEM;
     }
+
+    /* Check for a configured FAST ec auth indicator. */
+    realmstr = k5memdup0(realm.data, realm.length, &retval);
+    if (realmstr != NULL)
+        retval = profile_get_string(context->profile, KRB5_CONF_REALMS,
+                                    realmstr,
+                                    KRB5_CONF_ENCRYPTED_CHALLENGE_INDICATOR,
+                                    NULL, &ai);
+
     if (retval == 0)
         retval = cb->client_keys(context, rock, &client_keys);
     if (retval == 0) {
@@ -124,8 +135,11 @@ ec_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
              */
             if (krb5_c_fx_cf2_simple(context, armor_key, "kdcchallengearmor",
                                      &client_keys[i], "challengelongterm",
-                                     &kdc_challenge_key) == 0)
+                                     &kdc_challenge_key) == 0) {
                 modreq = (krb5_kdcpreauth_modreq)kdc_challenge_key;
+                if (ai != NULL)
+                    cb->add_auth_indicator(context, rock, ai);
+            }
         } else { /*skew*/
             retval = KRB5KRB_AP_ERR_SKEW;
         }
@@ -137,6 +151,8 @@ ec_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
         krb5_free_enc_data(context, enc);
     if (ts)
         krb5_free_pa_enc_ts(context, ts);
+    free(realmstr);
+    free(ai);
 
     (*respond)(arg, retval, modreq, NULL, NULL);
 }

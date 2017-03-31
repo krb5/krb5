@@ -198,6 +198,11 @@ The following tags may be specified in a [realms] subsection:
     if there is no policy assigned to the principal, no dictionary
     checks of passwords will be performed.
 
+**encrypted_challenge_indicator**
+    (String.)  Specifies the authentication indicator value that the KDC
+    asserts into tickets obtained using FAST encrypted challenge
+    pre-authentication.  New in 1.16.
+
 **host_based_services**
     (Whitespace- or comma-separated list.)  Lists services which will
     get host-based referral processing even if the server principal is
