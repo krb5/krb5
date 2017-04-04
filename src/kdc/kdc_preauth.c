@@ -591,6 +591,12 @@ match_client(krb5_context context, krb5_kdcpreauth_rock rock,
     return match;
 }
 
+static krb5_principal
+client_name(krb5_context context, krb5_kdcpreauth_rock rock)
+{
+    return rock->client->princ;
+}
+
 static struct krb5_kdcpreauth_callbacks_st callbacks = {
     4,
     max_time_skew,
@@ -607,7 +613,8 @@ static struct krb5_kdcpreauth_callbacks_st callbacks = {
     add_auth_indicator,
     get_cookie,
     set_cookie,
-    match_client
+    match_client,
+    client_name
 };
 
 static krb5_error_code

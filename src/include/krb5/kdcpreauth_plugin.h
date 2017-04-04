@@ -232,6 +232,12 @@ typedef struct krb5_kdcpreauth_callbacks_st {
                                  krb5_kdcpreauth_rock rock,
                                  krb5_principal princ);
 
+    /*
+     * Get an alias to the client DB entry principal (possibly canonicalized).
+     */
+    krb5_principal (*client_name)(krb5_context context,
+                                  krb5_kdcpreauth_rock rock);
+
     /* End of version 4 kdcpreauth callbacks. */
 
 } *krb5_kdcpreauth_callbacks;
