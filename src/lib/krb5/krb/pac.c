@@ -436,8 +436,7 @@ k5_pac_validate_client(krb5_context context,
         pac_princname_length % 2)
         return ERANGE;
 
-    ret = krb5int_ucs2lecs_to_utf8s(p, (size_t)pac_princname_length / 2,
-                                    &pac_princname, NULL);
+    ret = k5_ucs2le_to_utf8(p, pac_princname_length, &pac_princname);
     if (ret != 0)
         return ret;
 

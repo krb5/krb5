@@ -54,9 +54,8 @@ k5_insert_client_info(krb5_context context,
     if (ret != 0)
         goto cleanup;
 
-    ret = krb5int_utf8s_to_ucs2les(princ_name_utf8,
-                                   &princ_name_ucs2,
-                                   &princ_name_ucs2_len);
+    ret = k5_utf8_to_ucs2le(princ_name_utf8, &princ_name_ucs2,
+                            &princ_name_ucs2_len);
     if (ret != 0)
         goto cleanup;
 
