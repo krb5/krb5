@@ -532,9 +532,9 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
     union {
 	kdb_last_t iprop_get_updates_1_arg;
     } argument;
-    char *result;
+    void *result;
     bool_t (*_xdr_argument)(), (*_xdr_result)();
-    char *(*local)(/* union XXX *, struct svc_req * */);
+    void *(*local)(/* union XXX *, struct svc_req * */);
     char *whoami = "krb5_iprop_prog_1";
 
     if (!check_iprop_rpcsec_auth(rqstp)) {
@@ -555,19 +555,19 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
     case IPROP_GET_UPDATES:
 	_xdr_argument = xdr_kdb_last_t;
 	_xdr_result = xdr_kdb_incr_result_t;
-	local = (char *(*)()) iprop_get_updates_1_svc;
+	local = (void *(*)()) iprop_get_updates_1_svc;
 	break;
 
     case IPROP_FULL_RESYNC:
 	_xdr_argument = xdr_void;
 	_xdr_result = xdr_kdb_fullresync_result_t;
-	local = (char *(*)()) iprop_full_resync_1_svc;
+	local = (void *(*)()) iprop_full_resync_1_svc;
 	break;
 
     case IPROP_FULL_RESYNC_EXT:
 	_xdr_argument = xdr_u_int32;
 	_xdr_result = xdr_kdb_fullresync_result_t;
-	local = (char *(*)()) iprop_full_resync_ext_1_svc;
+	local = (void *(*)()) iprop_full_resync_ext_1_svc;
 	break;
 
     default:
