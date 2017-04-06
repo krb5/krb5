@@ -688,6 +688,10 @@ process_tl_data(const char *fname, FILE *filep, int lineno,
                      _("cannot read tagged data type and length"));
             return EINVAL;
         }
+        if (i1 < INT16_MIN || i1 > INT16_MAX || u1 > UINT16_MAX) {
+            load_err(fname, lineno, _("data type or length overflowed"));
+            return EINVAL;
+        }
         tl->tl_data_type = i1;
         tl->tl_data_length = u1;
         if (read_octets_or_minus1(filep, tl->tl_data_length,
@@ -735,6 +739,10 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
         goto fail;
 
     /* Get memory for and form tagged data linked list */
+    if (u3 > UINT16_MAX) {
+        load_err(fname, *linenop, _("cannot allocate tl_data (too large)"));
+        goto fail;
+    }
     if (alloc_tl_data(u3, &dbentry->tl_data))
         goto fail;
     dbentry->n_tl_data = u3;
@@ -823,13 +831,17 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
             load_err(fname, *linenop, _("cannot read key size and version"));
             goto fail;
         }
+        if (t1 > KRB5_KDB_V1_KEY_DATA_ARRAY) {
+            load_err(fname, *linenop, _("unsupported key_data_ver version"));
+            goto fail;
+        }
 
         kd->key_data_ver = t1;
         kd->key_data_kvno = t2;
 
         for (j = 0; j < t1; j++) {
             nread = fscanf(filep, "%d\t%d\t", &t3, &t4);
-            if (nread != 2) {
+            if (nread != 2 || t4 < 0) {
                 load_err(fname, *linenop,
                          _("cannot read key type and length"));
                 goto fail;

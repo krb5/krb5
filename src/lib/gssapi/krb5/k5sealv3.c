@@ -110,6 +110,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         krb5_data plain;
         krb5_enc_data cipher;
         size_t ec_max;
+        size_t encrypt_size;
 
         /* 300: Adds some slop.  */
         if (SIZE_MAX - 300 < message->length)
@@ -128,7 +129,12 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
             return err;
 
         /* Get size of ciphertext.  */
-        bufsize = 16 + krb5_encrypt_size (plain.length, key->keyblock.enctype);
+        encrypt_size = krb5_encrypt_size(plain.length, key->keyblock.enctype);
+        if (encrypt_size > SIZE_MAX / 2) {
+            err = ENOMEM;
+            goto error;
+        }
+        bufsize = 16 + encrypt_size;
         /* Allocate space for header plus encrypted data.  */
         outbuf = gssalloc_malloc(bufsize);
         if (outbuf == NULL) {
