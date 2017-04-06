@@ -483,8 +483,7 @@ doit(int fd)
         perror("getpeername");
         exit(1);
     }
-    if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (caddr_t) &on,
-                   sizeof(on)) < 0) {
+    if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) < 0) {
         com_err(progname, errno,
                 _("while attempting setsockopt (SO_KEEPALIVE)"));
     }
@@ -589,13 +588,12 @@ full_resync(CLIENT *clnt)
     memset(&clnt_res, 0, sizeof(clnt_res));
 
     status = clnt_call(clnt, IPROP_FULL_RESYNC_EXT, (xdrproc_t)xdr_u_int32,
-                       (caddr_t)&vers, (xdrproc_t)xdr_kdb_fullresync_result_t,
-                       (caddr_t)&clnt_res, full_resync_timeout);
+                       &vers, (xdrproc_t)xdr_kdb_fullresync_result_t,
+                       &clnt_res, full_resync_timeout);
     if (status == RPC_PROCUNAVAIL) {
         status = clnt_call(clnt, IPROP_FULL_RESYNC, (xdrproc_t)xdr_void,
-                           (caddr_t *)&vers,
-                           (xdrproc_t)xdr_kdb_fullresync_result_t,
-                           (caddr_t)&clnt_res, full_resync_timeout);
+                           &vers, (xdrproc_t)xdr_kdb_fullresync_result_t,
+                           &clnt_res, full_resync_timeout);
     }
 
     return (status == RPC_SUCCESS) ? &clnt_res : NULL;
