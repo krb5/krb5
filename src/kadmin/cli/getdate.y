@@ -6,7 +6,7 @@
 **  <rsalz@bbn.com> and Jim Berets <jberets@bbn.com> in August, 1990;
 **  send any email to Rich.
 **
-**  This grammar has nine shift/reduce conflicts.
+**  This grammar has four shift/reduce conflicts.
 **
 **  This code is in the public domain and has no copyright.
 */
@@ -175,6 +175,9 @@ static time_t	yyRelMonth;
 static time_t	yyRelSeconds;
 
 %}
+
+/* Mute shift/reduce warning as per header comment. */
+%expect 4
 
 %union {
     time_t		Number;
