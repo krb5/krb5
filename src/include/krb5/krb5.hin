@@ -6002,15 +6002,19 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getremoteseqnumber(krb5_context context, krb5_auth_context auth_context,
                                  krb5_int32 *seqnumber);
 
-#if KRB5_DEPRECATED
-/** @deprecated Not replaced.
+/**
+ * Cause an auth context to use cipher state.
  *
- * RFC 4120 doesn't have anything like the initvector concept;
- * only really old protocols may need this API.
+ * @param [in]  context         Library context
+ * @param [in]  auth_context    Authentication context
+ *
+ * Prepare @a auth_context to use cipher state when krb5_mk_priv() or
+ * krb5_rd_priv() encrypt or decrypt data.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
  */
-KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_initivector(krb5_context context, krb5_auth_context auth_context);
-#endif
 
 /**
  * Set the replay cache in an auth context.
