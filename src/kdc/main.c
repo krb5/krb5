@@ -63,7 +63,6 @@ static int nofork = 0;
 static int workers = 0;
 static int time_offset = 0;
 static const char *pid_file = NULL;
-static int rkey_init_done = 0;
 static volatile int signal_received = 0;
 static volatile int sighup_received = 0;
 
@@ -398,28 +397,11 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
         goto whoops;
     }
 
-    if (!rkey_init_done) {
-        krb5_data seed;
-        /*
-         * If all that worked, then initialize the random key
-         * generators.
-         */
-
-        seed.length = rdp->realm_mkey.length;
-        seed.data = (char *)rdp->realm_mkey.contents;
-
-        if ((kret = krb5_c_random_add_entropy(rdp->realm_context,
-                                              KRB5_C_RANDSOURCE_TRUSTEDPARTY, &seed)))
-            goto whoops;
-
-        rkey_init_done = 1;
-    }
 whoops:
     /*
      * If we choked, then clean up any dirt we may have dropped on the floor.
      */
     if (kret) {
-
         finish_realm(rdp);
     }
     return(kret);

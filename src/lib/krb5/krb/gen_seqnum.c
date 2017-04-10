@@ -53,9 +53,6 @@ krb5_generate_seq_number(krb5_context context, const krb5_keyblock *key, krb5_ui
     krb5_error_code retval;
 
     seed = key2data(*key);
-    if ((retval = krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_TRUSTEDPARTY, &seed)))
-        return(retval);
-
     seed.length = sizeof(*seqno);
     seed.data = (char *) seqno;
     retval = krb5_c_random_make_octets(context, &seed);
