@@ -1367,7 +1367,6 @@ dnl =============================================================
 dnl Internal function for testing for getpeername prototype
 dnl
 AC_DEFUN([KRB5_GETPEERNAME_ARGS],[
-AC_DEFINE([GETPEERNAME_ARG2_TYPE],GETSOCKNAME_ARG2_TYPE,[Type of getpeername second argument.])
 AC_DEFINE([GETPEERNAME_ARG3_TYPE],GETSOCKNAME_ARG3_TYPE,[Type of getpeername second argument.])
 ])
 dnl
@@ -1412,7 +1411,6 @@ if test "$sock_set" = no; then
 fi
 res1=`echo "$res1" | tr -d '*' | sed -e 's/ *$//'`
 res2=`echo "$res2" | tr -d '*' | sed -e 's/ *$//'`
-AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG2_TYPE],$res1,[Type of pointer target for argument 2 to getsockname])
 AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG3_TYPE],$res2,[Type of pointer target for argument 3 to getsockname])
 ])
 dnl
