@@ -419,6 +419,13 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *outdata)
 #endif
     unsigned char pidbuf[4];
 
+    if (!have_entropy) {
+        /* add_entropy may not have been called, so try to seed from the most
+         * reasonable entropy source we have.  We don't error out if this
+         * fails because someone else may have also tried to seed. */
+        krb5_c_random_os_entropy(context, 1, NULL);
+    }
+
     k5_mutex_lock(&fortuna_lock);
 
     if (!have_entropy) {
