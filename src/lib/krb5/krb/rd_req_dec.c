@@ -363,7 +363,7 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
     krb5_enctype tkt_etype = req->ticket->enc_part.enctype;
     krb5_boolean similar_enctype;
     krb5_boolean tkt_server_mismatch = FALSE, found_server_match = FALSE;
-    krb5_boolean found_tkt_server = FALSE, found_enctype = FALSE;
+    krb5_boolean found_tkt_server = FALSE, found_tkt_realm = FALSE, found_enctype = FALSE;
     krb5_boolean found_kvno = FALSE, found_higher_kvno = FALSE;
 
 #ifdef LEAN_CLIENT
@@ -407,6 +407,7 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
 
         if (krb5_principal_compare(context, ent.principal, tkt_server)) {
             found_tkt_server = TRUE;
+            found_tkt_realm = TRUE;
             if (ent.vno == tkt_kvno) {
                 found_kvno = TRUE;
                 if (similar_enctype)
@@ -414,10 +415,12 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
             } else if (ent.vno > tkt_kvno) {
                 found_higher_kvno = TRUE;
             }
+        } else if (krb5_realm_compare(context, ent.principal, tkt_server)) {
+            found_tkt_realm = TRUE;
         }
 
-        /* Only try keys with similar enctypes to the ticket enctype. */
-        if (similar_enctype) {
+        /* Only try keys with similar enctypes to the ticket enctype and the same realm. */
+        if (similar_enctype && found_tkt_realm) {
             /* Coerce inexact matches to the request enctype. */
             ent.key.enctype = tkt_etype;
             if (try_one_entry(context, req, &ent, keyblock_out) == 0) {
