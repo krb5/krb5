@@ -54,6 +54,20 @@
 #define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | GROUP | NODELETE)
 #endif
 
+#if USE_DLOPEN
+#ifdef RTLD_GROUP
+#define GROUP RTLD_GROUP
+#else
+#define GROUP 0
+#endif
+#ifdef RTLD_NODELETE
+#define NODELETE RTLD_NODELETE
+#else
+#define NODELETE 0
+#endif
+#define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | GROUP | NODELETE)
+#endif
+
 #if USE_DLOPEN && USE_CFBUNDLE
 #include <CoreFoundation/CoreFoundation.h>
 
