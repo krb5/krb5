@@ -1,12 +1,14 @@
-language: c
+language: c++
 
 sudo: required
 
 dist: trusty
 
-compiler:
-  - clang
-  - gcc
+matrix:
+  include:
+  - compiler: clang
+    env: MAKEVARS=CPPFLAGS=-Werror
+  - compiler: gcc
 
 before_install:
   - sudo apt-get update -qq
@@ -21,4 +23,4 @@ before_install:
   - sudo make install
   - cd ../..
 
-script: cd src && autoreconf && ./configure --with-ldap && make && make check
+script: cd src && autoreconf && ./configure --enable-maintainer-mode --with-ldap && make $MAKEVARS && make check
