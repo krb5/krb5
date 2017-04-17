@@ -121,5 +121,6 @@ r1.kinit('user', password('user'), ['-C'])
 r1.klist('user@KRBTEST2.COM', 'krbtgt/KRBTEST2.COM')
 r1.kinit('abc@XYZ', 'pw', ['-E'])
 r1.klist('abc\@XYZ@KRBTEST2.COM', 'krbtgt/KRBTEST2.COM')
+r1.kinit('-R')
 
 success('KDC host referral tests')
