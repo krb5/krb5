@@ -33,9 +33,9 @@ utf8.so utf8.po $(OUTPRE)utf8.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/k5-utf8.h supp-int.h utf8.c
 utf8_conv.so utf8_conv.po $(OUTPRE)utf8_conv.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-utf8.h \
-  supp-int.h utf8_conv.c
+  $(BUILDTOP)/include/autoconf.h $(top_srcdir)/include/k5-buf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  $(top_srcdir)/include/k5-utf8.h supp-int.h utf8_conv.c
 gettimeofday.so gettimeofday.po $(OUTPRE)gettimeofday.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-thread.h gettimeofday.c
