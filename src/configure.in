@@ -25,6 +25,9 @@ AC_REQUIRE_CPP
 AC_CHECK_HEADER([stdint.h], [],
   [AC_MSG_ERROR([stdint.h is required])])
 
+AC_CHECK_HEADERS([libgen.h], [],
+  [AC_MSG_ERROR([Unable to find or include libgen.h])])
+
 AC_CACHE_CHECK([whether integers are two's complement],
   [krb5_cv_ints_twos_compl],
   [AC_COMPILE_IFELSE(
