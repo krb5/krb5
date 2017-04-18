@@ -24,7 +24,7 @@ krb5int_arcfour_string_to_key(const struct krb5_keytypes *ktp,
     utf8 = k5memdup0(string->data, string->length, &err);
     if (utf8 == NULL)
         return err;
-    err = k5_utf8_to_ucs2le(utf8, &copystr, &copystrlen);
+    err = k5_utf8_to_utf16le(utf8, &copystr, &copystrlen);
     free(utf8);
     if (err)
         return err;

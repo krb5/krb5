@@ -523,6 +523,7 @@ local.properties
 /src/util/support/t_path_win
 /src/util/support/t_unal
 /src/util/support/t_utf8
+/src/util/support/t_utf16
 
 /src/util/verto/rename.h
 
