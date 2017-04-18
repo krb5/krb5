@@ -346,7 +346,7 @@ For security reasons, .k5login files must be owned by
 the local user or by root.
 .TP
 .B \fBkcm_mach_service\fP
-On OS X only, determines the name of the bootstrap service used to
+On macOS only, determines the name of the bootstrap service used to
 contact the KCM daemon for the KCM credential cache type.  If the
 value is \fB\-\fP, Mach RPC will not be used to contact the KCM
 daemon.  The default value is \fBorg.h5l.kcm\fP\&.

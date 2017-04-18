@@ -1309,7 +1309,7 @@ if test "${localedir+set}" != set; then
 fi
 AC_SUBST(localedir)
 
-# For KCM lib/krb5/ccache to build KCM Mach RPC support for OS X only.
+# For KCM lib/krb5/ccache to build KCM Mach RPC support for macOS only.
 case $host in
 *-*-darwin* | *-*-rhapsody*) OSX=osx ;;
 *)                           OSX=no ;;
@@ -1343,10 +1343,10 @@ dnl brackets in the glob patterns.
 if test "${DEFCCNAME+set}" != set; then
 	[case $host in
 	*-*-darwin[0-9].* | *-*-darwin10.*)
-		# Use the normal default for OS X 10.6 (Darwin 10) and prior.
+		# Use the normal default for macOS 10.6 (Darwin 10) and prior.
 		;;
 	*-*-darwin*)
-		# For OS X 10.7 (Darwin 11) and later, the native ccache uses
+		# For macOS 10.7 (Darwin 11) and later, the native ccache uses
 		# the KCM daemon.
 		DEFCCNAME=KCM:
 		;;

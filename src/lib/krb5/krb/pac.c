@@ -791,8 +791,8 @@ mspac_verify(krb5_context kcontext,
      * If the above verification failed, don't fail the whole authentication,
      * just don't mark the PAC as verified.  A checksum mismatch can occur if
      * the PAC was copied from a cross-realm TGT by an ignorant KDC, and Apple
-     * Mac OS X Server Open Directory (as of 10.6) generates PACs with no
-     * server checksum at all.
+     * macOS Server Open Directory (as of 10.6) generates PACs with no server
+     * checksum at all.
      */
     return 0;
 }

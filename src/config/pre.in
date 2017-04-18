@@ -7,7 +7,7 @@
 #  srcdir=@srcdir@
 #  top_srcdir=@top_srcdir@
 # but these are only set by autoconf 2.53, and thus not useful to us on
-# Mac OS X yet (as of 10.2):
+# macOS yet (as of 10.2):
 #  abs_srcdir=@abs_srcdir@
 #  abs_top_srcdir=@abs_top_srcdir@
 #  builddir=@builddir@
@@ -402,10 +402,10 @@ HESIOD_LIBS	= @HESIOD_LIBS@
 KRB5_BASE_LIBS	= $(KRB5_LIB) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(GEN_LIB) $(LIBS) $(DL_LIB)
 KDB5_LIBS	= $(KDB5_LIB) $(GSSRPC_LIBS)
 GSS_LIBS	= $(GSS_KRB5_LIB)
-# needs fixing if ever used on Mac OS X!
+# needs fixing if ever used on macOS!
 GSSRPC_LIBS	= -lgssrpc $(GSS_LIBS)
 KADM_COMM_LIBS	= $(GSSRPC_LIBS)
-# need fixing if ever used on Mac OS X!
+# need fixing if ever used on macOS!
 KADMSRV_LIBS	= -lkadm5srv_mit $(HESIOD_LIBS) $(KDB5_LIBS) $(KADM_COMM_LIBS)
 KADMCLNT_LIBS	= -lkadm5clnt_mit $(KADM_COMM_LIBS)
 

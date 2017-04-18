@@ -162,7 +162,7 @@ Release 1.13
  -   Add client support for the Kerberos Cache Manager protocol. If
      the host is running a Heimdal kcm daemon, caches served by the
      daemon can be accessed with the KCM: cache type.
- -   When built on OS X 10.7 and higher, use "KCM:" as the default
+ -   When built on macOS 10.7 and higher, use "KCM:" as the default
      cachetype, unless overridden by command-line options or
      krb5-config values.
  -   Add support for doing unlocked database dumps for the DB2 KDC

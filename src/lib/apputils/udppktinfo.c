@@ -400,7 +400,7 @@ set_msg_from_ipv6_pktinfo(struct msghdr *msg, struct cmsghdr *cmsgptr,
     /*
      * Because of the possibility of asymmetric routing, we
      * normally don't want to specify an interface.  However,
-     * Mac OS X doesn't like sending from a link-local address
+     * macOS doesn't like sending from a link-local address
      * (which can come up in testing at least, if you wind up
      * with a "foo.local" name) unless we do specify the
      * interface.

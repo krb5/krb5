@@ -52,7 +52,7 @@
  * the data structures and flag values locally.
  *
  *
- * On Mac OS X, getaddrinfo results aren't cached (though
+ * On macOS, getaddrinfo results aren't cached (though
  * gethostbyname results are), so we need to build a cache here.  Now
  * things are getting really messy.  Because the cache is in use, we
  * use getservbyname, and throw away thread safety.  (Not that the
@@ -685,7 +685,7 @@ static inline int fai_add_hosts_by_name (const char *name,
            sometimes associates it with the specified service,
            sometimes not.
 
-           But on Mac OS X (10.3, 10.4) they've "extended" getaddrinfo
+           But on macOS (10.3, 10.4) they've "extended" getaddrinfo
            to make SRV RR queries.  (Please, somebody, show me
            something in the specs that actually supports this?  RFC
            3493 says nothing about it, but it does say getaddrinfo is

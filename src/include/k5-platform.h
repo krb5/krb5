@@ -512,7 +512,7 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 
    Linux: byteswap.h, bswap_16 etc.
    Solaris 10: none
-   Mac OS X: machine/endian.h or byte_order.h, NXSwap{Short,Int,LongLong}
+   macOS: machine/endian.h or byte_order.h, NXSwap{Short,Int,LongLong}
    NetBSD: sys/bswap.h, bswap16 etc.  */
 
 #if defined(HAVE_BYTESWAP_H) && defined(HAVE_BSWAP_16)

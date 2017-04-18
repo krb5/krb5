@@ -263,7 +263,7 @@ The libdefaults section may contain any of the following relations:
     the local user or by root.
 
 **kcm_mach_service**
-    On OS X only, determines the name of the bootstrap service used to
+    On macOS only, determines the name of the bootstrap service used to
     contact the KCM daemon for the KCM credential cache type.  If the
     value is ``-``, Mach RPC will not be used to contact the KCM
     daemon.  The default value is ``org.h5l.kcm``.

@@ -33,9 +33,9 @@
  * BIND 4 doesn't have the ns_initparse() API, so we need to do some
  * manual parsing via the HEADER struct.  BIND 8 does have
  * ns_initparse(), but has enums for the various protocol constants
- * rather than the BIND 4 macros.  BIND 9 (at least on Mac OS X
- * Panther) appears to disable res_nsearch() if BIND_8_COMPAT is
- * defined (which is necessary to obtain the HEADER struct).
+ * rather than the BIND 4 macros.  BIND 9 (at least on macOS 10.3)
+ * appears to disable res_nsearch() if BIND_8_COMPAT is defined
+ * (which is necessary to obtain the HEADER struct).
  *
  * We use ns_initparse() if available at all, and never define
  * BIND_8_COMPAT.  If there is no ns_initparse(), we do manual parsing

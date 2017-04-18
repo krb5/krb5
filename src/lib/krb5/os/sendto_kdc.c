@@ -253,7 +253,7 @@ cm_get_ssflags(struct select_state *selstate, int fd)
     struct pollfd *pfd = find_pollfd(selstate, fd);
 
     /*
-     * OS X sets POLLHUP without POLLOUT on connection error.  Catch this as
+     * macOS sets POLLHUP without POLLOUT on connection error.  Catch this as
      * well as other error events such as POLLNVAL, but only if POLLIN and
      * POLLOUT aren't set, as we can get POLLHUP along with POLLIN with TCP
      * data still to be read.
