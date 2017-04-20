@@ -1372,8 +1372,7 @@ get_endtime(time_ms endtime, struct conn_state *conns)
     struct conn_state *state;
 
     for (state = conns; state != NULL; state = state->next) {
-        if (state->addr.transport == TCP &&
-            (state->state == READING || state->state == WRITING) &&
+        if ((state->state == READING || state->state == WRITING) &&
             state->endtime > endtime)
             endtime = state->endtime;
     }
