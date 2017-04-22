@@ -181,7 +181,16 @@ typedef krb5_int32 krb5_cryptotype;
 
 typedef krb5_int32      krb5_preauthtype; /* This may change, later on */
 typedef krb5_int32      krb5_flags;
+
+/**
+ * Represents a timestamp in seconds since the POSIX epoch.  This legacy type
+ * is used frequently in the ABI, but cannot represent timestamps after 2038 as
+ * a positive number.  Code which uses this type should cast values of it to
+ * uint32_t so that negative values are treated as timestamps between 2038 and
+ * 2106 on platforms with 64-bit time_t.
+ */
 typedef krb5_int32      krb5_timestamp;
+
 typedef krb5_int32      krb5_deltat;
 
 /**

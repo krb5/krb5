@@ -2353,6 +2353,37 @@ k5memdup0(const void *in, size_t len, krb5_error_code *code)
     return ptr;
 }
 
+/* Convert a krb5_timestamp to a time_t value, treating the negative range of
+ * krb5_timestamp as times between 2038 and 2106 (if time_t is 64-bit). */
+static inline time_t
+ts2tt(krb5_timestamp timestamp)
+{
+    return (time_t)(uint32_t)timestamp;
+}
+
+/* Return the delta between two timestamps (a - b) as a signed 32-bit value,
+ * without relying on undefined behavior. */
+static inline krb5_deltat
+ts_delta(krb5_timestamp a, krb5_timestamp b)
+{
+    return (krb5_deltat)((uint32_t)a - (uint32_t)b);
+}
+
+/* Increment a timestamp by a signed 32-bit interval, without relying on
+ * undefined behavior. */
+static inline krb5_timestamp
+ts_incr(krb5_timestamp ts, krb5_deltat delta)
+{
+    return (krb5_timestamp)((uint32_t)ts + (uint32_t)delta);
+}
+
+/* Return true if a comes after b. */
+static inline krb5_boolean
+ts_after(krb5_timestamp a, krb5_timestamp b)
+{
+    return (uint32_t)a > (uint32_t)b;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
                               krb5_ccache ccache,
