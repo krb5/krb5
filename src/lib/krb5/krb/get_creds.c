@@ -808,7 +808,7 @@ get_cached_local_tgt(krb5_context context, krb5_tkt_creds_context ctx,
         return code;
 
     /* Check if the TGT is expired before bothering the KDC with it. */
-    if (now > tgt->times.endtime) {
+    if (ts_after(now, tgt->times.endtime)) {
         krb5_free_creds(context, tgt);
         return KRB5KRB_AP_ERR_TKT_EXPIRED;
     }

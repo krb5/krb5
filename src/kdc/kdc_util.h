@@ -452,6 +452,8 @@ struct krb5_kdcpreauth_rock_st {
 #define max(a, b)       ((a) > (b) ? (a) : (b))
 #endif
 
+#define ts_min(a, b) (ts_after(a, b) ? (b) : (a))
+
 #define ADDRTYPE2FAMILY(X)                                              \
     ((X) == ADDRTYPE_INET6 ? AF_INET6 : (X) == ADDRTYPE_INET ? AF_INET : -1)
 

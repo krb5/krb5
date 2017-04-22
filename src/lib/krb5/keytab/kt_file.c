@@ -264,9 +264,11 @@ more_recent(const krb5_keytab_entry *k1, const krb5_keytab_entry *k2)
      * limitations (8-bit kvno storage), pre-1.14 kadmin protocol limitations
      * (8-bit kvno marshalling), or KDB limitations (16-bit kvno storage).
      */
-    if (k1->timestamp >= k2->timestamp && k1->vno < 128 && k2->vno > 240)
+    if (!ts_after(k2->timestamp, k1->timestamp) &&
+        k1->vno < 128 && k2->vno > 240)
         return TRUE;
-    if (k1->timestamp <= k2->timestamp && k1->vno > 240 && k2->vno < 128)
+    if (!ts_after(k1->timestamp, k2->timestamp) &&
+        k1->vno > 240 && k2->vno < 128)
         return FALSE;
 
     /* Otherwise do a simple version comparison. */

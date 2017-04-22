@@ -72,7 +72,7 @@ void do_ccache_name (char *);
 int show_ccache (krb5_ccache);
 int check_ccache (krb5_ccache);
 void do_keytab (char *);
-void printtime (time_t);
+void printtime (krb5_timestamp);
 void one_addr (krb5_address *);
 void fillit (FILE *, unsigned int, int);
 
@@ -538,10 +538,10 @@ check_ccache(krb5_ccache cache)
     while (!(ret = krb5_cc_next_cred(kcontext, cache, &cur, &creds))) {
         if (is_local_tgt(creds.server, &princ->realm)) {
             found_tgt = TRUE;
-            if (creds.times.endtime > now)
+            if (ts_after(creds.times.endtime, now))
                 found_current_tgt = TRUE;
         } else if (!krb5_is_config_principal(kcontext, creds.server) &&
-                   creds.times.endtime > now) {
+                   ts_after(creds.times.endtime, now)) {
             found_current_cred = TRUE;
         }
         krb5_free_cred_contents(kcontext, &creds);
@@ -623,19 +623,13 @@ flags_string(cred)
 }
 
 void
-printtime(tv)
-    time_t tv;
+printtime(krb5_timestamp ts)
 {
-    char timestring[BUFSIZ];
-    char fill;
+    char timestring[BUFSIZ], fill = ' ';
 
-    fill = ' ';
-    if (!krb5_timestamp_to_sfstring((krb5_timestamp) tv,
-                                    timestring,
-                                    timestamp_width+1,
-                                    &fill)) {
+    if (!krb5_timestamp_to_sfstring(ts, timestring, timestamp_width + 1,
+                                    &fill))
         printf("%s", timestring);
-    }
 }
 
 static void

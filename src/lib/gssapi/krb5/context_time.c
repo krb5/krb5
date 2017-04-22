@@ -51,7 +51,7 @@ krb5_gss_context_time(minor_status, context_handle, time_rec)
         return(GSS_S_FAILURE);
     }
 
-    lifetime = ctx->krb_times.endtime - now;
+    lifetime = ts_delta(ctx->krb_times.endtime, now);
     if (!ctx->initiate)
         lifetime += ctx->k5_context->clockskew;
     if (lifetime <= 0) {

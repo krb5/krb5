@@ -500,12 +500,12 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
 
         old_starttime = enc_tkt_reply.times.starttime ?
             enc_tkt_reply.times.starttime : enc_tkt_reply.times.authtime;
-        old_life = enc_tkt_reply.times.endtime - old_starttime;
+        old_life = ts_delta(enc_tkt_reply.times.endtime, old_starttime);
 
         enc_tkt_reply.times.starttime = kdc_time;
         enc_tkt_reply.times.endtime =
-            min(header_ticket->enc_part2->times.renew_till,
-                kdc_time + old_life);
+            ts_min(header_ticket->enc_part2->times.renew_till,
+                   ts_incr(kdc_time, old_life));
     } else {
         /* not a renew request */
         enc_tkt_reply.times.starttime = kdc_time;

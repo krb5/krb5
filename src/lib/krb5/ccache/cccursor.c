@@ -159,7 +159,7 @@ krb5_cccol_last_change_time(krb5_context context,
         ret = krb5_cccol_cursor_next(context, c, &ccache);
         if (ccache) {
             ret = krb5_cc_last_change_time(context, ccache, &last_time);
-            if (!ret && last_time > max_change_time) {
+            if (!ret && ts_after(last_time, max_change_time)) {
                 max_change_time = last_time;
             }
             ret = 0;

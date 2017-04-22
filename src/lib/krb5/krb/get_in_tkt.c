@@ -40,24 +40,6 @@ static krb5_error_code sort_krb5_padata_sequence(krb5_context context,
                                                  krb5_pa_data **padata);
 
 /*
- * This function performs 32 bit bounded addition so we can generate
- * lifetimes without overflowing krb5_int32
- */
-static krb5_int32
-krb5int_addint32 (krb5_int32 x, krb5_int32 y)
-{
-    if ((x > 0) && (y > (KRB5_INT32_MAX - x))) {
-        /* sum will be be greater than KRB5_INT32_MAX */
-        return KRB5_INT32_MAX;
-    } else if ((x < 0) && (y < (KRB5_INT32_MIN - x))) {
-        /* sum will be less than KRB5_INT32_MIN */
-        return KRB5_INT32_MIN;
-    }
-
-    return x + y;
-}
-
-/*
  * Decrypt the AS reply in ctx, populating ctx->reply->enc_part2.  If
  * strengthen_key is not null, combine it with the reply key as specified in
  * RFC 6113 section 5.4.3.  Place the key used in *key_out.
@@ -267,21 +249,21 @@ verify_as_reply(krb5_context            context,
             (request->from != 0) &&
             (request->from != as_reply->enc_part2->times.starttime))
         || ((request->till != 0) &&
-            (as_reply->enc_part2->times.endtime > request->till))
+            ts_after(as_reply->enc_part2->times.endtime, request->till))
         || ((request->kdc_options & KDC_OPT_RENEWABLE) &&
             (request->rtime != 0) &&
-            (as_reply->enc_part2->times.renew_till > request->rtime))
+            ts_after(as_reply->enc_part2->times.renew_till, request->rtime))
         || ((request->kdc_options & KDC_OPT_RENEWABLE_OK) &&
             !(request->kdc_options & KDC_OPT_RENEWABLE) &&
             (as_reply->enc_part2->flags & KDC_OPT_RENEWABLE) &&
             (request->till != 0) &&
-            (as_reply->enc_part2->times.renew_till > request->till))
+            ts_after(as_reply->enc_part2->times.renew_till, request->till))
     ) {
         return KRB5_KDCREP_MODIFIED;
     }
 
     if (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) {
-        time_offset = as_reply->enc_part2->times.authtime - time_now;
+        time_offset = ts_delta(as_reply->enc_part2->times.authtime, time_now);
         retval = krb5_set_time_offsets(context, time_offset, 0);
         if (retval)
             return retval;
@@ -775,15 +757,15 @@ set_request_times(krb5_context context, krb5_init_creds_context ctx)
         return code;
 
     /* Omit request start time unless the caller explicitly asked for one. */
-    from = krb5int_addint32(now, ctx->start_time);
+    from = ts_incr(now, ctx->start_time);
     if (ctx->start_time != 0)
         ctx->request->from = from;
 
-    ctx->request->till = krb5int_addint32(from, ctx->tkt_life);
+    ctx->request->till = ts_incr(from, ctx->tkt_life);
 
     if (ctx->renew_life > 0) {
         /* Don't ask for a smaller renewable time than the lifetime. */
-        ctx->request->rtime = krb5int_addint32(from, ctx->renew_life);
+        ctx->request->rtime = ts_incr(from, ctx->renew_life);
         if (ctx->request->rtime < ctx->request->till)
             ctx->request->rtime = ctx->request->till;
         ctx->request->kdc_options &= ~KDC_OPT_RENEWABLE_OK;
@@ -1459,7 +1441,7 @@ note_req_timestamp(krb5_context context, krb5_init_creds_context ctx,
 
     if (k5_time_with_offset(0, 0, &now, &usec) != 0)
         return;
-    ctx->pa_offset = kdc_time - now;
+    ctx->pa_offset = ts_delta(kdc_time, now);
     ctx->pa_offset_usec = kdc_usec - usec;
     ctx->pa_offset_state = (ctx->fast_state->armor_key != NULL) ?
         AUTH_OFFSET : UNAUTH_OFFSET;
@@ -1850,6 +1832,7 @@ k5_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **out,
 {
     int i;
     krb5_int32 starttime;
+    krb5_deltat lifetime;
     krb5_get_init_creds_opt *opt;
     krb5_error_code retval;
 
@@ -1881,7 +1864,8 @@ k5_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **out,
         if (retval)
             goto cleanup;
         if (creds->times.starttime) starttime = creds->times.starttime;
-        krb5_get_init_creds_opt_set_tkt_life(opt, creds->times.endtime - starttime);
+        lifetime = ts_delta(creds->times.endtime, starttime);
+        krb5_get_init_creds_opt_set_tkt_life(opt, lifetime);
     }
     *out = opt;
     return 0;

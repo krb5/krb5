@@ -79,9 +79,9 @@ log_as_req(krb5_context context, const krb5_fulladdr *from,
         /* success */
         char rep_etypestr[128];
         rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), reply);
-        krb5_klog_syslog(LOG_INFO, _("AS_REQ (%s) %s: ISSUE: authtime %d, %s, "
+        krb5_klog_syslog(LOG_INFO, _("AS_REQ (%s) %s: ISSUE: authtime %u, %s, "
                                      "%s for %s"),
-                         ktypestr, fromstring, authtime,
+                         ktypestr, fromstring, (unsigned int)authtime,
                          rep_etypestr, cname2, sname2);
     } else {
         /* fail */
@@ -156,10 +156,10 @@ log_tgs_req(krb5_context ctx, const krb5_fulladdr *from,
        name (useful), and doesn't log ktypestr (probably not
        important).  */
     if (errcode != KRB5KDC_ERR_SERVER_NOMATCH) {
-        krb5_klog_syslog(LOG_INFO, _("TGS_REQ (%s) %s: %s: authtime %d, %s%s "
+        krb5_klog_syslog(LOG_INFO, _("TGS_REQ (%s) %s: %s: authtime %u, %s%s "
                                      "%s for %s%s%s"),
-                         ktypestr, fromstring, status, authtime, rep_etypestr,
-                         !errcode ? "," : "", logcname, logsname,
+                         ktypestr, fromstring, status, (unsigned int)authtime,
+                         rep_etypestr, !errcode ? "," : "", logcname, logsname,
                          errcode ? ", " : "", errcode ? emsg : "");
         if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION))
             krb5_klog_syslog(LOG_INFO,
@@ -171,9 +171,9 @@ log_tgs_req(krb5_context ctx, const krb5_fulladdr *from,
                              logaltcname);
 
     } else
-        krb5_klog_syslog(LOG_INFO, _("TGS_REQ %s: %s: authtime %d, %s for %s, "
+        krb5_klog_syslog(LOG_INFO, _("TGS_REQ %s: %s: authtime %u, %s for %s, "
                                      "2nd tkt client %s"),
-                         fromstring, status, authtime,
+                         fromstring, status, (unsigned int)authtime,
                          logcname, logsname, logaltcname);
 
     /* OpenSolaris: audit_krb5kdc_tgs_req(...)  or

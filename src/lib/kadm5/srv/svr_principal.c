@@ -400,7 +400,7 @@ kadm5_create_principal_3(void *server_handle,
     kdb->pw_expiration = 0;
     if (have_polent) {
         if(polent.pw_max_life)
-            kdb->pw_expiration = now + polent.pw_max_life;
+            kdb->pw_expiration = ts_incr(now, polent.pw_max_life);
         else
             kdb->pw_expiration = 0;
     }
@@ -612,7 +612,7 @@ kadm5_modify_principal(void *server_handle,
                                                   &(kdb->pw_expiration));
             if (ret)
                 goto done;
-            kdb->pw_expiration += pol.pw_max_life;
+            kdb->pw_expiration = ts_incr(kdb->pw_expiration, pol.pw_max_life);
         } else {
             kdb->pw_expiration = 0;
         }
@@ -1445,7 +1445,7 @@ kadm5_chpass_principal_3(void *server_handle,
         }
 
         if (pol.pw_max_life)
-            kdb->pw_expiration = now + pol.pw_max_life;
+            kdb->pw_expiration = ts_incr(now, pol.pw_max_life);
         else
             kdb->pw_expiration = 0;
     } else {
@@ -1624,7 +1624,7 @@ kadm5_randkey_principal_3(void *server_handle,
 #endif
 
         if (pol.pw_max_life)
-            kdb->pw_expiration = now + pol.pw_max_life;
+            kdb->pw_expiration = ts_incr(now, pol.pw_max_life);
         else
             kdb->pw_expiration = 0;
     } else {
@@ -1774,7 +1774,7 @@ kadm5_setv4key_principal(void *server_handle,
 #endif
 
         if (pol.pw_max_life)
-            kdb->pw_expiration = now + pol.pw_max_life;
+            kdb->pw_expiration = ts_incr(now, pol.pw_max_life);
         else
             kdb->pw_expiration = 0;
     } else {
@@ -2024,7 +2024,7 @@ kadm5_setkey_principal_4(void *server_handle, krb5_principal principal,
     }
     if (have_pol) {
         if (pol.pw_max_life)
-            kdb->pw_expiration = now + pol.pw_max_life;
+            kdb->pw_expiration = ts_incr(now, pol.pw_max_life);
         else
             kdb->pw_expiration = 0;
     } else {

@@ -287,18 +287,19 @@ krb5int_process_tgs_reply(krb5_context context,
         retval = KRB5_KDCREP_MODIFIED;
 
     if ((in_cred->times.endtime != 0) &&
-        (dec_rep->enc_part2->times.endtime > in_cred->times.endtime))
+        ts_after(dec_rep->enc_part2->times.endtime, in_cred->times.endtime))
         retval = KRB5_KDCREP_MODIFIED;
 
     if ((kdcoptions & KDC_OPT_RENEWABLE) &&
         (in_cred->times.renew_till != 0) &&
-        (dec_rep->enc_part2->times.renew_till > in_cred->times.renew_till))
+        ts_after(dec_rep->enc_part2->times.renew_till,
+                 in_cred->times.renew_till))
         retval = KRB5_KDCREP_MODIFIED;
 
     if ((kdcoptions & KDC_OPT_RENEWABLE_OK) &&
         (dec_rep->enc_part2->flags & KDC_OPT_RENEWABLE) &&
         (in_cred->times.endtime != 0) &&
-        (dec_rep->enc_part2->times.renew_till > in_cred->times.endtime))
+        ts_after(dec_rep->enc_part2->times.renew_till, in_cred->times.endtime))
         retval = KRB5_KDCREP_MODIFIED;
 
     if (retval != 0)

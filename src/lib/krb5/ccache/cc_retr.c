@@ -46,11 +46,11 @@ static krb5_boolean
 times_match(const krb5_ticket_times *t1, const krb5_ticket_times *t2)
 {
     if (t1->renew_till) {
-        if (t1->renew_till > t2->renew_till)
+        if (ts_after(t1->renew_till, t2->renew_till))
             return FALSE;               /* this one expires too late */
     }
     if (t1->endtime) {
-        if (t1->endtime > t2->endtime)
+        if (ts_after(t1->endtime, t2->endtime))
             return FALSE;               /* this one expires too late */
     }
     /* only care about expiration on a times_match */

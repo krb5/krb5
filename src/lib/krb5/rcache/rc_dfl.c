@@ -97,8 +97,7 @@ alive(krb5_int32 mytime, krb5_donot_replay *new1, krb5_deltat t)
 {
     if (mytime == 0)
         return CMP_HOHUM; /* who cares? */
-    /* I hope we don't have to worry about overflow */
-    if (new1->ctime + t < mytime)
+    if (ts_after(mytime, ts_incr(new1->ctime, t)))
         return CMP_EXPIRED;
     return CMP_HOHUM;
 }

@@ -47,7 +47,7 @@ krb5_set_real_time(krb5_context context, krb5_timestamp seconds, krb5_int32 micr
     if (retval)
         return retval;
 
-    os_ctx->time_offset = seconds - sec;
+    os_ctx->time_offset = ts_delta(seconds, sec);
     os_ctx->usec_offset = (microseconds > -1) ? microseconds - usec : 0;
 
     os_ctx->os_flags = ((os_ctx->os_flags & ~KRB5_OS_TOFFSET_TIME) |

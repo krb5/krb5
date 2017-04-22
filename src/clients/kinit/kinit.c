@@ -318,7 +318,7 @@ parse_options(argc, argv, opts)
                     fprintf(stderr, _("Bad start time value %s\n"), optarg);
                     errflg++;
                 } else {
-                    opts->starttime = abs_starttime - time(0);
+                    opts->starttime = ts_delta(abs_starttime, time(NULL));
                 }
             }
             break;

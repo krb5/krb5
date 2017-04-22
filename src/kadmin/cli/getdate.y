@@ -118,7 +118,7 @@ static int getdate_yyerror (char *);
 
 
 #define EPOCH		1970
-#define EPOCH_END	2038 /* assumes 32 bits */
+#define EPOCH_END	2106 /* assumes unsigned 32-bit range */
 #define HOUR(x)		((time_t)(x) * 60)
 #define SECSPERDAY	(24L * 60L * 60L)
 

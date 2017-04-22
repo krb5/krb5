@@ -1296,7 +1296,7 @@ find_actkvno(krb5_actkvno_node *list, krb5_timestamp now)
      * are in the future, we will return the first node; if all are in the
      * past, we will return the last node.
      */
-    while (list->next != NULL && list->next->act_time <= now)
+    while (list->next != NULL && !ts_after(list->next->act_time, now))
         list = list->next;
     return list->act_kvno;
 }

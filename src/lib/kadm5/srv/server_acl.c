@@ -408,13 +408,14 @@ kadm5int_acl_impose_restrictions(kcontext, recp, maskp, rp)
     }
     if (rp->mask & KADM5_PRINC_EXPIRE_TIME) {
         if (!(*maskp & KADM5_PRINC_EXPIRE_TIME)
-            || (recp->princ_expire_time > (now + rp->princ_lifetime)))
+            || ts_after(recp->princ_expire_time,
+                        ts_incr(now, rp->princ_lifetime)))
             recp->princ_expire_time = now + rp->princ_lifetime;
         *maskp |= KADM5_PRINC_EXPIRE_TIME;
     }
     if (rp->mask & KADM5_PW_EXPIRATION) {
         if (!(*maskp & KADM5_PW_EXPIRATION)
-            || (recp->pw_expiration > (now + rp->pw_lifetime)))
+            || ts_after(recp->pw_expiration, ts_incr(now, rp->pw_lifetime)))
             recp->pw_expiration = now + rp->pw_lifetime;
         *maskp |= KADM5_PW_EXPIRATION;
     }

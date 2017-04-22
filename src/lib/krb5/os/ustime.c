@@ -49,13 +49,13 @@ k5_time_with_offset(krb5_timestamp offset, krb5_int32 offset_usec,
     usec += offset_usec;
     if (usec > 1000000) {
         usec -= 1000000;
-        sec++;
+        sec = ts_incr(sec, 1);
     }
     if (usec < 0) {
         usec += 1000000;
-        sec--;
+        sec = ts_incr(sec, -1);
     }
-    sec += offset;
+    sec = ts_incr(sec, offset);
 
     *time_out = sec;
     *usec_out = usec;

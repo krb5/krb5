@@ -214,7 +214,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
      * boundaries) because accept_sec_context code is also similarly
      * non-forgiving.
      */
-    if (!krb5_gss_dbg_client_expcreds && result_creds->times.endtime < now) {
+    if (!krb5_gss_dbg_client_expcreds &&
+        ts_after(now, result_creds->times.endtime)) {
         code = KRB5KRB_AP_ERR_TKT_EXPIRED;
         goto cleanup;
     }
@@ -575,7 +576,7 @@ kg_new_connection(
     if (time_req == 0 || time_req == GSS_C_INDEFINITE) {
         ctx->krb_times.endtime = 0;
     } else {
-        ctx->krb_times.endtime = now + time_req;
+        ctx->krb_times.endtime = ts_incr(now, time_req);
     }
 
     if ((code = kg_duplicate_name(context, cred->name, &ctx->here)))
@@ -659,7 +660,7 @@ kg_new_connection(
     if (time_rec) {
         if ((code = krb5_timeofday(context, &now)))
             goto cleanup;
-        *time_rec = ctx->krb_times.endtime - now;
+        *time_rec = ts_delta(ctx->krb_times.endtime, now);
     }
 
     /* set the other returns */
@@ -873,7 +874,7 @@ mutual_auth(
     if (time_rec) {
         if ((code = krb5_timeofday(context, &now)))
             goto fail;
-        *time_rec = ctx->krb_times.endtime - now;
+        *time_rec = ts_delta(ctx->krb_times.endtime, now);
     }
 
     if (ret_flags)
