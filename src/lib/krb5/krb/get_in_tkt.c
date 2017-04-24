@@ -287,8 +287,8 @@ verify_as_reply(krb5_context            context,
             return retval;
     } else {
         if ((request->from == 0) &&
-            (labs(as_reply->enc_part2->times.starttime - time_now)
-             > context->clockskew))
+            !in_clock_skew(context, as_reply->enc_part2->times.starttime,
+                           time_now))
             return (KRB5_KDCREP_SKEW);
     }
     return 0;
