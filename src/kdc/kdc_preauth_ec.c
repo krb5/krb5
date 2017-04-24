@@ -56,7 +56,6 @@ ec_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
           krb5_kdcpreauth_verify_respond_fn respond, void *arg)
 {
     krb5_error_code retval = 0;
-    krb5_timestamp now;
     krb5_enc_data *enc = NULL;
     krb5_data scratch, plain;
     krb5_keyblock *armor_key = cb->fast_armor(context, rock);
@@ -124,24 +123,20 @@ ec_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     if (retval == 0)
         retval = decode_krb5_pa_enc_ts(&plain, &ts);
     if (retval == 0)
-        retval = krb5_timeofday(context, &now);
+        retval = krb5_check_clockskew(context, ts->patimestamp);
     if (retval == 0) {
-        if (labs(now-ts->patimestamp) < context->clockskew) {
-            enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
-            /*
-             * If this fails, we won't generate a reply to the client.  That
-             * may cause the client to fail, but at this point the KDC has
-             * considered this a success, so the return value is ignored.
-             */
-            if (krb5_c_fx_cf2_simple(context, armor_key, "kdcchallengearmor",
-                                     &client_keys[i], "challengelongterm",
-                                     &kdc_challenge_key) == 0) {
-                modreq = (krb5_kdcpreauth_modreq)kdc_challenge_key;
-                if (ai != NULL)
-                    cb->add_auth_indicator(context, rock, ai);
-            }
-        } else { /*skew*/
-            retval = KRB5KRB_AP_ERR_SKEW;
+        enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
+        /*
+         * If this fails, we won't generate a reply to the client.  That may
+         * cause the client to fail, but at this point the KDC has considered
+         * this a success, so the return value is ignored.
+         */
+        if (krb5_c_fx_cf2_simple(context, armor_key, "kdcchallengearmor",
+                                 &client_keys[i], "challengelongterm",
+                                 &kdc_challenge_key) == 0) {
+            modreq = (krb5_kdcpreauth_modreq)kdc_challenge_key;
+            if (ai != NULL)
+                cb->add_auth_indicator(context, rock, ai);
         }
     }
     cb->free_keys(context, rock, client_keys);
