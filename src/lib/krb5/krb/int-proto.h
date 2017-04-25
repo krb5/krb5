@@ -103,6 +103,9 @@ krb5_get_cred_via_tkt_ext(krb5_context context, krb5_creds *tkt,
                           krb5_keyblock **out_subkey);
 
 krb5_error_code
+k5_generate_nonce(krb5_context context, int32_t *out);
+
+krb5_error_code
 k5_make_tgs_req(krb5_context context, struct krb5int_fast_request_state *,
                 krb5_creds *tkt, krb5_flags kdcoptions,
                 krb5_address *const *address, krb5_pa_data **in_padata,

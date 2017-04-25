@@ -762,23 +762,6 @@ k5_init_creds_current_time(krb5_context context, krb5_init_creds_context ctx,
     }
 }
 
-/* Choose a random nonce for ctx->request. */
-static krb5_error_code
-pick_nonce(krb5_context context, krb5_init_creds_context ctx)
-{
-    krb5_error_code code = 0;
-    unsigned char random_buf[4];
-    krb5_data random_data = make_data(random_buf, 4);
-
-    /* We incorrectly encode this as signed, so make sure we use an unsigned
-     * value to avoid interoperability issues. */
-    code = krb5_c_random_make_octets(context, &random_data);
-    if (code != 0)
-        return code;
-    ctx->request->nonce = 0x7fffffff & load_32_n(random_buf);
-    return 0;
-}
-
 /* Set the timestamps for ctx->request based on the desired lifetimes. */
 static krb5_error_code
 set_request_times(krb5_context context, krb5_init_creds_context ctx)
@@ -1334,7 +1317,7 @@ init_creds_step_request(krb5_context context,
     }
 
     /* RFC 6113 requires a new nonce for the inner request on each try. */
-    code = pick_nonce(context, ctx);
+    code = k5_generate_nonce(context, &ctx->request->nonce);
     if (code != 0)
         goto cleanup;
 
