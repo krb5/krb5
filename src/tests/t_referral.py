@@ -17,13 +17,18 @@ os.rename(realm.ccache, savefile)
 # Get credentials and check that we got a referral to REFREALM.
 def testref(realm, nametype):
     shutil.copyfile(savefile, realm.ccache)
-    realm.run(['./gcred', nametype, 'a/x.d'])
-    realm.klist(realm.user_princ, 'a/x.d@REFREALM')
+    realm.run(['./gcred', nametype, 'a/x.d@'])
+    out = realm.run([klist]).split('\n')
+    if len(out) != 8:
+        fail('unexpected number of lines in klist output')
+    if out[5].split()[4] != 'a/x.d@' or out[6].split()[4] != 'a/x.d@REFREALM':
+        fail('unexpected service principals in klist output')
+    exit(0)
 
 # Get credentials and check that we get an error, not a referral.
 def testfail(realm, nametype):
     shutil.copyfile(savefile, realm.ccache)
-    realm.run(['./gcred', nametype, 'a/x.d'], expected_code=1,
+    realm.run(['./gcred', nametype, 'a/x.d@'], expected_code=1,
               expected_msg='not found in Kerberos database')
 
 # Create a modified KDC environment and restart the KDC.
