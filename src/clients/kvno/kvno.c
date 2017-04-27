@@ -36,8 +36,10 @@ extern int optind;
 extern char *optarg;
 
 static char *prog;
+static int quiet = 0;
 
-static void xusage()
+static void
+xusage()
 {
     fprintf(stderr, _("usage: %s [-C] [-u] [-c ccache] [-e etype]\n"), prog);
     fprintf(stderr, _("\t[-k keytab] [-S sname] [-U for_user [-P]]\n"));
@@ -45,18 +47,16 @@ static void xusage()
     exit(1);
 }
 
-int quiet = 0;
-
-static void do_v5_kvno (int argc, char *argv[],
-                        char *ccachestr, char *etypestr, char *keytab_name,
-                        char *sname, int canon, int unknown,
-                        char *for_user, int proxy);
+static void do_v5_kvno(int argc, char *argv[], char *ccachestr, char *etypestr,
+                       char *keytab_name, char *sname, int canon, int unknown,
+                       char *for_user, int proxy);
 
 #include <com_err.h>
-static void extended_com_err_fn (const char *, errcode_t, const char *,
-                                 va_list);
+static void extended_com_err_fn(const char *myprog, errcode_t code,
+                                const char *fmt, va_list args);
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
     int option;
     char *etypestr = NULL, *ccachestr = NULL, *keytab_name = NULL;
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     int canon = 0, unknown = 0, proxy = 0;
 
     setlocale(LC_ALL, "");
-    set_com_err_hook (extended_com_err_fn);
+    set_com_err_hook(extended_com_err_fn);
 
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
             break;
         case 'S':
             sname = optarg;
-            if (unknown == 1){
+            if (unknown == 1) {
                 fprintf(stderr,
                         _("Options -u and -S are mutually exclusive\n"));
                 xusage();
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
             break;
         case 'u':
             unknown = 1;
-            if (sname){
+            if (sname != NULL) {
                 fprintf(stderr,
                         _("Options -u and -S are mutually exclusive\n"));
                 xusage();
@@ -129,26 +129,26 @@ int main(int argc, char *argv[])
         }
     }
 
-    if ((argc - optind) < 1)
+    if (argc - optind < 1)
         xusage();
 
-    do_v5_kvno(argc - optind, argv + optind,
-               ccachestr, etypestr, keytab_name, sname,
-               canon, unknown, for_user, proxy);
+    do_v5_kvno(argc - optind, argv + optind, ccachestr, etypestr, keytab_name,
+               sname, canon, unknown, for_user, proxy);
     return 0;
 }
 
 #include <k5-int.h>
 static krb5_context context;
-static void extended_com_err_fn (const char *myprog, errcode_t code,
-                                 const char *fmt, va_list args)
+static void extended_com_err_fn(const char *myprog, errcode_t code,
+                                const char *fmt, va_list args)
 {
     const char *emsg;
-    emsg = krb5_get_error_message (context, code);
-    fprintf (stderr, "%s: %s ", myprog, emsg);
-    krb5_free_error_message (context, emsg);
-    vfprintf (stderr, fmt, args);
-    fprintf (stderr, "\n");
+
+    emsg = krb5_get_error_message(context, code);
+    fprintf(stderr, "%s: %s ", myprog, emsg);
+    krb5_free_error_message(context, emsg);
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
 }
 
 /* Request a single service ticket and display its status (unless quiet is
@@ -199,7 +199,6 @@ kvno(const char *name, krb5_ccache ccache, krb5_principal me,
 
         in_creds.client = for_user_princ;
         in_creds.server = me;
-
         ret = krb5_get_credentials_for_user(context, options, ccache,
                                             &in_creds, NULL, &out_creds);
     } else {
@@ -214,7 +213,7 @@ kvno(const char *name, krb5_ccache ccache, krb5_principal me,
         goto cleanup;
     }
 
-    /* we need a native ticket */
+    /* We need a native ticket. */
     ret = krb5_decode_ticket(&out_creds->ticket, &ticket);
     if (ret) {
         com_err(prog, ret, _("while decoding ticket for %s"), princ);
@@ -264,10 +263,10 @@ cleanup:
     return ret;
 }
 
-static void do_v5_kvno (int count, char *names[],
-                        char * ccachestr, char *etypestr, char *keytab_name,
-                        char *sname, int canon, int unknown, char *for_user,
-                        int proxy)
+static void
+do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
+           char *keytab_name, char *sname, int canon, int unknown,
+           char *for_user, int proxy)
 {
     krb5_error_code ret;
     int i, errors;
@@ -303,7 +302,7 @@ static void do_v5_kvno (int count, char *names[],
         exit(1);
     }
 
-    if (keytab_name) {
+    if (keytab_name != NULL) {
         ret = krb5_kt_resolve(context, keytab_name, &keytab);
         if (ret) {
             com_err(prog, ret, _("resolving keytab %s"), keytab_name);
@@ -327,19 +326,16 @@ static void do_v5_kvno (int count, char *names[],
         exit(1);
     }
 
+    options = canon ? KRB5_GC_CANONICALIZE : 0;
+
     errors = 0;
-
-    options = 0;
-    if (canon)
-        options |= KRB5_GC_CANONICALIZE;
-
     for (i = 0; i < count; i++) {
         if (kvno(names[i], ccache, me, etype, keytab, sname, options, unknown,
                  for_user_princ, proxy) != 0)
             errors++;
     }
 
-    if (keytab)
+    if (keytab != NULL)
         krb5_kt_close(context, keytab);
     krb5_free_principal(context, me);
     krb5_free_principal(context, for_user_princ);
