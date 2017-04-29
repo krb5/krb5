@@ -713,6 +713,9 @@ fi
 
 AC_HEADER_TIME
 AC_CHECK_TYPE(time_t, long)
+AC_CHECK_SIZEOF(time_t)
+SIZEOF_TIME_T=$ac_cv_sizeof_time_t
+AC_SUBST(SIZEOF_TIME_T)
 
 # Determine where to put the replay cache.
 

@@ -185,4 +185,36 @@ realm.run(['./t_ciflags', 'p:' + realm.host_princ])
 # contexts.
 realm.run(['./t_inq_ctx', 'user', password('user'), 'p:%s' % realm.host_princ])
 
+# Test lifetime results, using a realm with a large maximum lifetime
+# so that we can test ticket end dates after y2038.  There are no
+# time_t conversions involved, so we can run these tests on platforms
+# with 32-bit time_t.
+realm.stop()
+conf = {'realms': {'$realm': {'max_life': '9000d'}}}
+realm = K5Realm(kdc_conf=conf, get_creds=False)
+
+# Check a lifetime string result against an expected number value (or None).
+# Allow some variance due to time elapsed during the tests.
+def check_lifetime(msg, val, expected):
+    if expected is None and val != 'indefinite':
+        fail('%s: expected indefinite, got %s' % (msg, val))
+    if expected is not None and val == 'indefinite':
+        fail('%s: expected %d, got indefinite' % (msg, expected))
+    if expected is not None and abs(int(val) - expected) > 100:
+        fail('%s: expected %d, got %s' % (msg, expected, val))
+
+realm.kinit(realm.user_princ, password('user'), flags=['-l', '8500d'])
+out = realm.run(['./t_lifetime', 'p:' + realm.host_princ, str(8000 * 86400)])
+ln = out.split('\n')
+check_lifetime('icred gss_acquire_cred', ln[0], 8500 * 86400)
+check_lifetime('icred gss_inquire_cred', ln[1], 8500 * 86400)
+check_lifetime('acred gss_acquire_cred', ln[2], None)
+check_lifetime('acred gss_inquire_cred', ln[3], None)
+check_lifetime('ictx gss_init_sec_context', ln[4], 8000 * 86400)
+check_lifetime('ictx gss_inquire_context', ln[5], 8000 * 86400)
+check_lifetime('ictx gss_context_time', ln[6], 8000 * 86400)
+check_lifetime('actx gss_accept_sec_context', ln[7], 8000 * 86400 + 300)
+check_lifetime('actx gss_inquire_context', ln[8], 8000 * 86400 + 300)
+check_lifetime('actx gss_context_time', ln[9], 8000 * 86400 + 300)
+
 success('GSSAPI tests')

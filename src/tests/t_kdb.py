@@ -447,6 +447,13 @@ realm.run([kadminl, 'addprinc', '-policy', 'keepoldpasspol', '-pw', 'aaaa',
 for p in ('bbbb', 'cccc', 'aaaa'):
     realm.run([kadminl, 'cpw', '-keepold', '-pw', p, 'keepoldpassprinc'])
 
+if runenv.sizeof_time_t <= 4:
+    skipped('y2038 LDAP test', 'platform has 32-bit time_t')
+else:
+    # Test storage of timestamps after y2038.
+    realm.run([kadminl, 'modprinc', '-pwexpire', '2040-02-03', 'user'])
+    realm.run([kadminl, 'getprinc', 'user'], expected_msg=' 2040\n')
+
 realm.stop()
 
 # Briefly test dump and load.

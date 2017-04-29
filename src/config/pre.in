@@ -446,6 +446,8 @@ HAVE_SASL = @HAVE_SASL@
 # Whether we have libresolv 1.1.5 for URI discovery tests
 HAVE_RESOLV_WRAPPER = @HAVE_RESOLV_WRAPPER@
 
+SIZEOF_TIME_T = @SIZEOF_TIME_T@
+
 # error table rules
 #
 ### /* these are invoked as $(...) foo.et, which works, but could be better */

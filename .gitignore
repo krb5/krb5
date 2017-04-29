@@ -341,6 +341,7 @@ local.properties
 /src/lib/krb5/krb/t_walk_rtree
 /src/lib/krb5/krb/t_response_items
 /src/lib/krb5/krb/t_sname_match
+/src/lib/krb5/krb/t_valid_times
 
 /src/lib/krb5/os/t_expand_path
 /src/lib/krb5/os/t_locate_kdc
@@ -438,6 +439,7 @@ local.properties
 /src/tests/gssapi/t_inq_cred
 /src/tests/gssapi/t_inq_mechs_name
 /src/tests/gssapi/t_iov
+/src/tests/gssapi/t_lifetime
 /src/tests/gssapi/t_namingexts
 /src/tests/gssapi/t_oid
 /src/tests/gssapi/t_pcontok

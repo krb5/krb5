@@ -521,6 +521,7 @@ pyrunenv.vals: Makefile
 	done > $@
 	echo "tls_impl = '$(TLS_IMPL)'" >> $@
 	echo "have_sasl = '$(HAVE_SASL)'" >> $@
+	echo "sizeof_time_t = $(SIZEOF_TIME_T)" >> $@
 
 runenv.py: pyrunenv.vals
 	echo 'env = {}' > $@
