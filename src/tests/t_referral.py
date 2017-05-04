@@ -23,7 +23,6 @@ def testref(realm, nametype):
         fail('unexpected number of lines in klist output')
     if out[5].split()[4] != 'a/x.d@' or out[6].split()[4] != 'a/x.d@REFREALM':
         fail('unexpected service principals in klist output')
-    exit(0)
 
 # Get credentials and check that we get an error, not a referral.
 def testfail(realm, nametype):
