@@ -355,9 +355,6 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     TWRITE_STR(ptr, data->md5.contents, data->md5.length);
     TWRITE_INT(ptr, data->ctx->gss_flags, 0);
 
-    /* done with this, free it */
-    xfree(data->md5.contents);
-
     if (credmsg.data) {
         TWRITE_INT16(ptr, KRB5_GSS_FOR_CREDS_OPTION, 0);
         TWRITE_INT16(ptr, credmsg.length, 0);
@@ -429,6 +426,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
     code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
                                 NULL, k_cred, &ap_req);
     krb5_auth_con_set_authdata_context(context, ctx->auth_context, NULL);
+    krb5_free_checksum_contents(context, &cksum_struct.md5);
     krb5_free_data_contents(context, &cksum_struct.checksum_data);
     if (code)
         goto cleanup;
