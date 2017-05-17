@@ -184,7 +184,7 @@ check_min_life(void *server_handle, krb5_principal principal,
             (void) kadm5_free_principal_ent(handle->lhandle, &princ);
             return (ret == KADM5_UNK_POLICY) ? 0 : ret;
         }
-        if((now - princ.last_pwd_change) < pol.pw_min_life &&
+        if(ts_delta(now, princ.last_pwd_change) < pol.pw_min_life &&
            !(princ.attributes & KRB5_KDB_REQUIRES_PWCHANGE)) {
             if (msg_ret != NULL) {
                 time_t until;

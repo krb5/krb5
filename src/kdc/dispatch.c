@@ -104,7 +104,7 @@ reseed_random(krb5_context kdc_err_context)
         if (last_os_random == 0)
             last_os_random = now;
         /* Grab random data from OS every hour*/
-        if (now-last_os_random >= 60 * 60) {
+        if (ts_delta(now, last_os_random) >= 60 * 60) {
             krb5_c_random_os_entropy(kdc_err_context, 0, NULL);
             last_os_random = now;
         }
