@@ -1831,7 +1831,7 @@ k5_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **out,
                     krb5_creds *creds)
 {
     int i;
-    krb5_int32 starttime;
+    krb5_timestamp starttime;
     krb5_deltat lifetime;
     krb5_get_init_creds_opt *opt;
     krb5_error_code retval;

@@ -29,7 +29,10 @@
 
 k5_mutex_t krb5int_us_time_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
 
-struct time_now { krb5_int32 sec, usec; };
+struct time_now {
+    krb5_timestamp sec;
+    krb5_int32 usec;
+};
 
 #if defined(_WIN32)
 
@@ -73,7 +76,7 @@ get_time_now(struct time_now *n)
 static struct time_now last_time;
 
 krb5_error_code
-krb5_crypto_us_timeofday(krb5_int32 *seconds, krb5_int32 *microseconds)
+krb5_crypto_us_timeofday(krb5_timestamp *seconds, krb5_int32 *microseconds)
 {
     struct time_now now;
     krb5_error_code err;

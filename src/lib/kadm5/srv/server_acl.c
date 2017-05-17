@@ -375,7 +375,7 @@ kadm5int_acl_impose_restrictions(kcontext, recp, maskp, rp)
     restriction_t              *rp;
 {
     krb5_error_code     code;
-    krb5_int32          now;
+    krb5_timestamp      now;
 
     DPRINT(DEBUG_CALLS, acl_debug_level,
            ("* kadm5int_acl_impose_restrictions(..., *maskp=0x%08x, rp=0x%08x)\n",

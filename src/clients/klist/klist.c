@@ -56,7 +56,7 @@ int show_adtype = 0, show_all = 0, list_all = 0, use_client_keytab = 0;
 int show_config = 0;
 char *defname;
 char *progname;
-krb5_int32 now;
+krb5_timestamp now;
 unsigned int timestamp_width;
 
 krb5_context kcontext;

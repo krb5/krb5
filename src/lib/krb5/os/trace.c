@@ -340,7 +340,8 @@ krb5int_trace(krb5_context context, const char *fmt, ...)
     va_list ap;
     krb5_trace_info info;
     char *str = NULL, *msg = NULL;
-    krb5_int32 sec, usec;
+    krb5_timestamp sec;
+    krb5_int32 usec;
 
     if (context == NULL || context->trace_callback == NULL)
         return;

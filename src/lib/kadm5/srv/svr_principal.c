@@ -296,7 +296,7 @@ kadm5_create_principal_3(void *server_handle,
     osa_princ_ent_rec           adb;
     kadm5_policy_ent_rec        polent;
     krb5_boolean                have_polent = FALSE;
-    krb5_int32                  now;
+    krb5_timestamp              now;
     krb5_tl_data                *tl_data_tail;
     unsigned int                ret;
     kadm5_server_handle_t handle = server_handle;
@@ -1322,7 +1322,7 @@ kadm5_chpass_principal_3(void *server_handle,
                          int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
                          char *password)
 {
-    krb5_int32                  now;
+    krb5_timestamp              now;
     kadm5_policy_ent_rec        pol;
     osa_princ_ent_rec           adb;
     krb5_db_entry               *kdb;
@@ -1544,7 +1544,7 @@ kadm5_randkey_principal_3(void *server_handle,
 {
     krb5_db_entry               *kdb;
     osa_princ_ent_rec           adb;
-    krb5_int32                  now;
+    krb5_timestamp              now;
     kadm5_policy_ent_rec        pol;
     int                         ret, last_pwd, n_new_keys;
     krb5_boolean                have_pol = FALSE;
@@ -1686,7 +1686,7 @@ kadm5_setv4key_principal(void *server_handle,
 {
     krb5_db_entry               *kdb;
     osa_princ_ent_rec           adb;
-    krb5_int32                  now;
+    krb5_timestamp              now;
     kadm5_policy_ent_rec        pol;
     krb5_keysalt                keysalt;
     int                         i, kvno, ret;
@@ -1888,7 +1888,7 @@ kadm5_setkey_principal_4(void *server_handle, krb5_principal principal,
 {
     krb5_db_entry *kdb;
     osa_princ_ent_rec adb;
-    krb5_int32 now;
+    krb5_timestamp now;
     kadm5_policy_ent_rec pol;
     krb5_key_data *new_key_data = NULL;
     int i, j, ret, n_new_key_data = 0;

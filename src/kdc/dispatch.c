@@ -94,8 +94,8 @@ static void
 reseed_random(krb5_context kdc_err_context)
 {
     krb5_error_code retval;
-    krb5_int32 now, now_usec;
-    krb5_int32 usec_difference;
+    krb5_timestamp now;
+    krb5_int32 now_usec, usec_difference;
     krb5_data data;
 
     retval = krb5_crypto_us_timeofday(&now, &now_usec);

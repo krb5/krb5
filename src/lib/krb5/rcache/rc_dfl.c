@@ -93,7 +93,7 @@ cmp(krb5_donot_replay *old, krb5_donot_replay *new1, krb5_deltat t)
 }
 
 static int
-alive(krb5_int32 mytime, krb5_donot_replay *new1, krb5_deltat t)
+alive(krb5_timestamp mytime, krb5_donot_replay *new1, krb5_deltat t)
 {
     if (mytime == 0)
         return CMP_HOHUM; /* who cares? */
@@ -129,7 +129,7 @@ struct authlist
 
 static int
 rc_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep,
-         krb5_int32 now, krb5_boolean fromfile)
+         krb5_timestamp now, krb5_boolean fromfile)
 {
     struct dfl_data *t = (struct dfl_data *)id->data;
     unsigned int rephash;
@@ -536,7 +536,7 @@ krb5_rc_dfl_recover_locked(krb5_context context, krb5_rcache id)
     krb5_error_code retval;
     long max_size;
     int expired_entries = 0;
-    krb5_int32 now;
+    krb5_timestamp now;
 
     if ((retval = krb5_rc_io_open(context, &t->d, t->name))) {
         return retval;
@@ -706,7 +706,7 @@ krb5_rc_dfl_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep)
 {
     krb5_error_code ret;
     struct dfl_data *t;
-    krb5_int32 now;
+    krb5_timestamp now;
 
     ret = krb5_timeofday(context, &now);
     if (ret)
@@ -762,7 +762,7 @@ krb5_rc_dfl_expunge_locked(krb5_context context, krb5_rcache id)
     struct authlist **qt;
     struct authlist *r;
     struct authlist *rt;
-    krb5_int32 now;
+    krb5_timestamp now;
 
     if (krb5_timestamp(context, &now))
         now = 0;

@@ -159,7 +159,7 @@ kadm5_ret_t
 check_min_life(void *server_handle, krb5_principal principal,
                char *msg_ret, unsigned int msg_len)
 {
-    krb5_int32                  now;
+    krb5_timestamp              now;
     kadm5_ret_t                 ret;
     kadm5_policy_ent_rec        pol;
     kadm5_principal_ent_rec     princ;
