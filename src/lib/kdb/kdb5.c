@@ -322,12 +322,7 @@ copy_vtable(const kdb_vftabl *in, kdb_vftabl *out)
     out->audit_as_req = in->audit_as_req;
     out->refresh_config = in->refresh_config;
     out->check_allowed_to_delegate = in->check_allowed_to_delegate;
-
-    /* Copy fields for minor version 1 (major version 6). */
-    assert(KRB5_KDB_DAL_MAJOR_VERSION == 6);
-    out->free_principal_e_data = NULL;
-    if (in->min_ver >= 1)
-        out->free_principal_e_data = in->free_principal_e_data;
+    out->free_principal_e_data = in->free_principal_e_data;
 
     /* Set defaults for optional fields. */
     if (out->fetch_master_key == NULL)
@@ -2677,8 +2672,9 @@ krb5_db_check_policy_tgs(krb5_context kcontext, krb5_kdc_req *request,
 
 void
 krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
-                     krb5_db_entry *client, krb5_db_entry *server,
-                     krb5_timestamp authtime, krb5_error_code error_code)
+                     krb5_address *from, krb5_db_entry *client,
+                     krb5_db_entry *server, krb5_timestamp authtime,
+                     krb5_error_code error_code)
 {
     krb5_error_code status;
     kdb_vftabl *v;
@@ -2686,7 +2682,8 @@ krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
     status = get_vftabl(kcontext, &v);
     if (status || v->audit_as_req == NULL)
         return;
-    v->audit_as_req(kcontext, request, client, server, authtime, error_code);
+    v->audit_as_req(kcontext, request, from, client, server, authtime,
+                    error_code);
 }
 
 void

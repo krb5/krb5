@@ -243,8 +243,8 @@ check_entry(krb5_db_entry *ent)
 static void
 sim_preauth(krb5_timestamp authtime, krb5_boolean ok, krb5_db_entry **entp)
 {
-    /* Both back ends ignore the request parameter for now. */
-    krb5_db_audit_as_req(ctx, NULL, *entp, *entp, authtime,
+    /* Both back ends ignore the request and from parameters for now. */
+    krb5_db_audit_as_req(ctx, NULL, NULL, *entp, *entp, authtime,
                          ok ? 0 : KRB5KDC_ERR_PREAUTH_FAILED);
     krb5_db_free_principal(ctx, *entp);
     CHECK(krb5_db_get_principal(ctx, &sample_princ, 0, entp));

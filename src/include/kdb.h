@@ -69,7 +69,7 @@
 
 /* This version will be incremented when incompatible changes are made to the
  * KDB API, and will be kept in sync with the libkdb major version. */
-#define KRB5_KDB_API_VERSION 8
+#define KRB5_KDB_API_VERSION 9
 
 /* Salt types */
 #define KRB5_KDB_SALTTYPE_NORMAL        0
@@ -695,8 +695,9 @@ krb5_error_code krb5_db_check_policy_tgs(krb5_context kcontext,
                                          krb5_pa_data ***e_data);
 
 void krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
-                          krb5_db_entry *client, krb5_db_entry *server,
-                          krb5_timestamp authtime, krb5_error_code error_code);
+                          krb5_address *from, krb5_db_entry *client,
+                          krb5_db_entry *server, krb5_timestamp authtime,
+                          krb5_error_code error_code);
 
 void krb5_db_refresh_config(krb5_context kcontext);
 
@@ -865,7 +866,7 @@ krb5_error_code krb5_db_register_keytab(krb5_context context);
  * This number indicates the date of the last incompatible change to the DAL.
  * The maj_ver field of the module's vtable structure must match this version.
  */
-#define KRB5_KDB_DAL_MAJOR_VERSION 6
+#define KRB5_KDB_DAL_MAJOR_VERSION 7
 
 /*
  * A krb5_context can hold one database object.  Modules should use
@@ -1356,8 +1357,9 @@ typedef struct _kdb_vftabl {
      * AS request.
      */
     void (*audit_as_req)(krb5_context kcontext, krb5_kdc_req *request,
-                         krb5_db_entry *client, krb5_db_entry *server,
-                         krb5_timestamp authtime, krb5_error_code error_code);
+                         krb5_address *from, krb5_db_entry *client,
+                         krb5_db_entry *server, krb5_timestamp authtime,
+                         krb5_error_code error_code);
 
     /* Note: there is currently no method for auditing TGS requests. */
 

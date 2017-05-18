@@ -1551,8 +1551,9 @@ krb5_db2_check_policy_as(krb5_context kcontext, krb5_kdc_req *request,
 
 void
 krb5_db2_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
-                      krb5_db_entry *client, krb5_db_entry *server,
-                      krb5_timestamp authtime, krb5_error_code error_code)
+                      krb5_address *from, krb5_db_entry *client,
+                      krb5_db_entry *server, krb5_timestamp authtime,
+                      krb5_error_code error_code)
 {
     (void) krb5_db2_lockout_audit(kcontext, client, authtime, error_code);
 }
