@@ -36,6 +36,7 @@ extern int optind;
 extern char *optarg;
 
 static char *prog;
+static int quiet = 0;
 
 static void xusage()
 {
@@ -44,8 +45,6 @@ static void xusage()
     fprintf(stderr, _("\tservice1 service2 ...\n"));
     exit(1);
 }
-
-int quiet = 0;
 
 static void do_v5_kvno (int argc, char *argv[],
                         char *ccachestr, char *etypestr, char *keytab_name,
@@ -94,7 +93,7 @@ int main(int argc, char *argv[])
             break;
         case 'S':
             sname = optarg;
-            if (unknown == 1){
+            if (unknown == 1) {
                 fprintf(stderr,
                         _("Options -u and -S are mutually exclusive\n"));
                 xusage();
@@ -102,7 +101,7 @@ int main(int argc, char *argv[])
             break;
         case 'u':
             unknown = 1;
-            if (sname){
+            if (sname) {
                 fprintf(stderr,
                         _("Options -u and -S are mutually exclusive\n"));
                 xusage();
@@ -129,12 +128,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    if ((argc - optind) < 1)
+    if ((argc - optind) < 1) {
         xusage();
+    }
 
     do_v5_kvno(argc - optind, argv + optind,
                ccachestr, etypestr, keytab_name, sname,
                canon, unknown, for_user, proxy);
+
     return 0;
 }
 
@@ -214,7 +215,7 @@ kvno(const char *name, krb5_ccache ccache, krb5_principal me,
         goto cleanup;
     }
 
-    /* we need a native ticket */
+    /* We need a native ticket */
     ret = krb5_decode_ticket(&out_creds->ticket, &ticket);
     if (ret) {
         com_err(prog, ret, _("while decoding ticket for %s"), princ);
@@ -252,8 +253,9 @@ kvno(const char *name, krb5_ccache ccache, krb5_principal me,
             }
         }
     } else {
-        if (!quiet)
+        if (!quiet) {
             printf(_("%s: kvno = %d\n"), princ, ticket->enc_part.kvno);
+        }
     }
 
 cleanup:
@@ -279,6 +281,7 @@ static void do_v5_kvno (int count, char *names[],
     krb5_flags options;
 
     ret = krb5_init_context(&context);
+
     if (ret) {
         com_err(prog, ret, _("while initializing krb5 library"));
         exit(1);
@@ -294,10 +297,12 @@ static void do_v5_kvno (int count, char *names[],
         etype = 0;
     }
 
-    if (ccachestr)
+    if (ccachestr) {
         ret = krb5_cc_resolve(context, ccachestr, &ccache);
-    else
+    } else {
         ret = krb5_cc_default(context, &ccache);
+    }
+
     if (ret) {
         com_err(prog, ret, _("while opening ccache"));
         exit(1);
@@ -328,10 +333,11 @@ static void do_v5_kvno (int count, char *names[],
     }
 
     errors = 0;
-
     options = 0;
-    if (canon)
+
+    if (canon) {
         options |= KRB5_GC_CANONICALIZE;
+    }
 
     for (i = 0; i < count; i++) {
         if (kvno(names[i], ccache, me, etype, keytab, sname, options, unknown,
@@ -339,15 +345,18 @@ static void do_v5_kvno (int count, char *names[],
             errors++;
     }
 
-    if (keytab)
+    if (keytab) {
         krb5_kt_close(context, keytab);
+    }
+
     krb5_free_principal(context, me);
     krb5_free_principal(context, for_user_princ);
     krb5_cc_close(context, ccache);
     krb5_free_context(context);
 
-    if (errors)
+    if (errors) {
         exit(1);
+    }
 
     exit(0);
 }
