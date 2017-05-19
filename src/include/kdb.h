@@ -695,6 +695,7 @@ krb5_error_code krb5_db_check_policy_tgs(krb5_context kcontext,
                                          krb5_pa_data ***e_data);
 
 void krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
+                          const krb5_address *local_addr,
                           const krb5_address *remote_addr,
                           krb5_db_entry *client, krb5_db_entry *server,
                           krb5_timestamp authtime, krb5_error_code error_code);
@@ -1357,6 +1358,7 @@ typedef struct _kdb_vftabl {
      * AS request.
      */
     void (*audit_as_req)(krb5_context kcontext, krb5_kdc_req *request,
+                         const krb5_address *local_addr,
                          const krb5_address *remote_addr,
                          krb5_db_entry *client, krb5_db_entry *server,
                          krb5_timestamp authtime, krb5_error_code error_code);

@@ -160,6 +160,7 @@ struct as_req_state {
     struct kdc_request_state *rstate;
     char *sname, *cname;
     void *pa_context;
+    const krb5_fulladdr *local_addr;
     const krb5_fulladdr *remote_addr;
     krb5_data **auth_indicators;
 
@@ -359,9 +360,9 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
            state->reply.enc_part.ciphertext.length);
     free(state->reply.enc_part.ciphertext.data);
 
-    log_as_req(kdc_context, state->remote_addr, state->request, &state->reply,
-               state->client, state->cname, state->server,
-               state->sname, state->authtime, 0, 0, 0);
+    log_as_req(kdc_context, state->local_addr, state->remote_addr,
+               state->request, &state->reply, state->client, state->cname,
+               state->server, state->sname, state->authtime, 0, 0, 0);
     did_log = 1;
 
 egress:
@@ -381,10 +382,10 @@ egress:
         emsg = krb5_get_error_message(kdc_context, errcode);
 
     if (state->status) {
-        log_as_req(kdc_context, state->remote_addr, state->request,
-                   &state->reply, state->client, state->cname, state->server,
-                   state->sname, state->authtime, state->status, errcode,
-                   emsg);
+        log_as_req(kdc_context, state->local_addr, state->remote_addr,
+                   state->request, &state->reply, state->client,
+                   state->cname, state->server, state->sname, state->authtime,
+                   state->status, errcode, emsg);
         did_log = 1;
     }
     if (errcode) {
@@ -492,6 +493,7 @@ finish_preauth(void *arg, krb5_error_code code)
 /*ARGSUSED*/
 void
 process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
+               const krb5_fulladdr *local_addr,
                const krb5_fulladdr *remote_addr, kdc_realm_t *kdc_active_realm,
                verto_ctx *vctx, loop_respond_fn respond, void *arg)
 {
@@ -511,6 +513,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->arg = arg;
     state->request = request;
     state->req_pkt = req_pkt;
+    state->local_addr = local_addr;
     state->remote_addr = remote_addr;
     state->active_realm = kdc_active_realm;
 

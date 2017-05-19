@@ -187,8 +187,9 @@ dispatch(void *cb, const krb5_fulladdr *local_addr,
              */
             state->active_realm = setup_server_realm(handle, as_req->server);
             if (state->active_realm != NULL) {
-                process_as_req(as_req, pkt, remote_addr, state->active_realm,
-                               vctx, finish_dispatch_cache, state);
+                process_as_req(as_req, pkt, local_addr, remote_addr,
+                               state->active_realm, vctx,
+                               finish_dispatch_cache, state);
                 return;
             } else {
                 retval = KRB5KDC_ERR_WRONG_REALM;
