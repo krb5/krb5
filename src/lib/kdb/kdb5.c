@@ -2672,7 +2672,7 @@ krb5_db_check_policy_tgs(krb5_context kcontext, krb5_kdc_req *request,
 
 void
 krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
-                     krb5_address *from, krb5_db_entry *client,
+                     const krb5_address *remote_addr, krb5_db_entry *client,
                      krb5_db_entry *server, krb5_timestamp authtime,
                      krb5_error_code error_code)
 {
@@ -2682,7 +2682,7 @@ krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
     status = get_vftabl(kcontext, &v);
     if (status || v->audit_as_req == NULL)
         return;
-    v->audit_as_req(kcontext, request, from, client, server, authtime,
+    v->audit_as_req(kcontext, request, remote_addr, client, server, authtime,
                     error_code);
 }
 

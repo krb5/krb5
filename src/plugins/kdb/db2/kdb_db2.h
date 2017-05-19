@@ -134,8 +134,9 @@ krb5_db2_check_policy_as(krb5_context kcontext, krb5_kdc_req *request,
 
 void
 krb5_db2_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
-                      krb5_address *from, krb5_db_entry *client,
-                      krb5_db_entry *server, krb5_timestamp authtime,
+                      const krb5_address *remote_addr,
+                      krb5_db_entry *client, krb5_db_entry *server,
+                      krb5_timestamp authtime,
                       krb5_error_code error_code);
 
 #endif /* KRB5_KDB_DB2_H */

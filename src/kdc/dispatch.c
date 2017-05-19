@@ -120,7 +120,7 @@ reseed_random(krb5_context kdc_err_context)
 
 void
 dispatch(void *cb, struct sockaddr *local_saddr,
-         const krb5_fulladdr *from, krb5_data *pkt, int is_tcp,
+         const krb5_fulladdr *remote_addr, krb5_data *pkt, int is_tcp,
          verto_ctx *vctx, loop_respond_fn respond, void *arg)
 {
     krb5_error_code retval;
@@ -150,8 +150,8 @@ dispatch(void *cb, struct sockaddr *local_saddr,
         const char *name = 0;
         char buf[46];
 
-        name = inet_ntop (ADDRTYPE2FAMILY (from->address->addrtype),
-                          from->address->contents, buf, sizeof (buf));
+        name = inet_ntop(ADDRTYPE2FAMILY(remote_addr->address->addrtype),
+                         remote_addr->address->contents, buf, sizeof(buf));
         if (name == 0)
             name = "[unknown address type]";
         if (response)
@@ -177,7 +177,7 @@ dispatch(void *cb, struct sockaddr *local_saddr,
     /* try TGS_REQ first; they are more common! */
 
     if (krb5_is_tgs_req(pkt)) {
-        retval = process_tgs_req(handle, pkt, from, &response);
+        retval = process_tgs_req(handle, pkt, remote_addr, &response);
     } else if (krb5_is_as_req(pkt)) {
         if (!(retval = decode_krb5_as_req(pkt, &as_req))) {
             /*
@@ -187,8 +187,8 @@ dispatch(void *cb, struct sockaddr *local_saddr,
              */
             state->active_realm = setup_server_realm(handle, as_req->server);
             if (state->active_realm != NULL) {
-                process_as_req(as_req, pkt, from, state->active_realm, vctx,
-                               finish_dispatch_cache, state);
+                process_as_req(as_req, pkt, remote_addr, state->active_realm,
+                               vctx, finish_dispatch_cache, state);
                 return;
             } else {
                 retval = KRB5KDC_ERR_WRONG_REALM;

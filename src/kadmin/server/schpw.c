@@ -18,8 +18,8 @@
 
 static krb5_error_code
 process_chpw_request(krb5_context context, void *server_handle, char *realm,
-                     krb5_keytab keytab, const krb5_fulladdr *local_faddr,
-                     const krb5_fulladdr *remote_faddr, krb5_data *req,
+                     krb5_keytab keytab, const krb5_fulladdr *local_addr,
+                     const krb5_fulladdr *remote_addr, krb5_data *req,
                      krb5_data *rep)
 {
     krb5_error_code ret;
@@ -42,7 +42,7 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
     struct sockaddr_storage ss;
     socklen_t salen;
     char addrbuf[100];
-    krb5_address *addr = remote_faddr->address;
+    krb5_address *addr = remote_addr->address;
 
     *rep = empty_data();
 
@@ -237,7 +237,7 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
 
         sin->sin_family = AF_INET;
         memcpy(&sin->sin_addr, addr->contents, addr->length);
-        sin->sin_port = htons(remote_faddr->port);
+        sin->sin_port = htons(remote_addr->port);
         salen = sizeof(*sin);
         break;
     }
@@ -246,7 +246,7 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
 
         sin6->sin6_family = AF_INET6;
         memcpy(&sin6->sin6_addr, addr->contents, addr->length);
-        sin6->sin6_port = htons(remote_faddr->port);
+        sin6->sin6_port = htons(remote_addr->port);
         salen = sizeof(*sin6);
         break;
     }
@@ -326,7 +326,7 @@ chpwfail:
 
     if (ap_rep.length) {
         ret = krb5_auth_con_setaddrs(context, auth_context,
-                                     local_faddr->address, NULL);
+                                     local_addr->address, NULL);
         if (ret) {
             numresult = KRB5_KPASSWD_HARDERROR;
             strlcpy(strresult,
@@ -437,7 +437,7 @@ bailout:
 /* Dispatch routine for set/change password */
 void
 dispatch(void *handle, struct sockaddr *local_saddr,
-         const krb5_fulladdr *remote_faddr, krb5_data *request, int is_tcp,
+         const krb5_fulladdr *remote_addr, krb5_data *request, int is_tcp,
          verto_ctx *vctx, loop_respond_fn respond, void *arg)
 {
     krb5_error_code ret;
@@ -466,7 +466,7 @@ dispatch(void *handle, struct sockaddr *local_saddr,
                                server_handle->params.realm,
                                kt,
                                &local_faddr,
-                               remote_faddr,
+                               remote_addr,
                                request,
                                response);
 egress:

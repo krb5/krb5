@@ -131,8 +131,8 @@ struct connection {
     struct sockaddr_storage addr_s;
     socklen_t addrlen;
     char addrbuf[56];
-    krb5_fulladdr faddr;
-    krb5_address kaddr;
+    krb5_address remote_addr_buf;
+    krb5_fulladdr remote_addr;
 
     /* Incoming data (TCP) */
     size_t bufsiz;
@@ -951,8 +951,8 @@ struct udp_dispatch_state {
     void *handle;
     const char *prog;
     int port_fd;
-    krb5_address addr;
-    krb5_fulladdr faddr;
+    krb5_address remote_addr_buf;
+    krb5_fulladdr remote_addr;
     socklen_t saddr_len;
     socklen_t daddr_len;
     struct sockaddr_storage saddr;
@@ -1084,10 +1084,12 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
 
     state->request.length = cc;
     state->request.data = state->pktbuf;
-    state->faddr.address = &state->addr;
-    init_addr(&state->faddr, ss2sa(&state->saddr));
+
+    state->remote_addr.address = &state->remote_addr_buf;
+    init_addr(&state->remote_addr, ss2sa(&state->saddr));
+
     /* This address is in net order. */
-    dispatch(state->handle, ss2sa(&state->daddr), &state->faddr,
+    dispatch(state->handle, ss2sa(&state->daddr), &state->remote_addr,
              &state->request, 0, ctx, process_packet_response, state);
 }
 
@@ -1201,8 +1203,8 @@ accept_tcp_connection(verto_ctx *ctx, verto_ev *ev)
         return;
     }
     newconn->offset = 0;
-    newconn->faddr.address = &newconn->kaddr;
-    init_addr(&newconn->faddr, ss2sa(&newconn->addr_s));
+    newconn->remote_addr.address = &newconn->remote_addr_buf;
+    init_addr(&newconn->remote_addr, ss2sa(&newconn->addr_s));
     SG_SET(&newconn->sgbuf[0], newconn->lenbuf, 4);
     SG_SET(&newconn->sgbuf[1], 0, 0);
 }
@@ -1356,8 +1358,9 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
             goto kill_tcp_connection;
         }
 
-        dispatch(state->conn->handle, ss2sa(&state->local_saddr), &conn->faddr,
-                 &state->request, 1, ctx, process_tcp_response, state);
+        dispatch(state->conn->handle, ss2sa(&state->local_saddr),
+                 &conn->remote_addr, &state->request, 1, ctx,
+                 process_tcp_response, state);
     }
 
     return;
@@ -1505,8 +1508,8 @@ accept_rpc_connection(verto_ctx *ctx, verto_ev *ev)
         if (++tcp_or_rpc_data_counter > max_tcp_or_rpc_data_connections)
             kill_lru_tcp_or_rpc_connection(newconn->handle, newev);
 
-        newconn->faddr.address = &newconn->kaddr;
-        init_addr(&newconn->faddr, ss2sa(&newconn->addr_s));
+        newconn->remote_addr.address = &newconn->remote_addr_buf;
+        init_addr(&newconn->remote_addr, ss2sa(&newconn->addr_s));
     }
 }
 

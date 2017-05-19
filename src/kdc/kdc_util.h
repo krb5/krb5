@@ -346,7 +346,7 @@ kdc_get_ticket_renewtime(kdc_realm_t *realm, krb5_kdc_req *request,
                          krb5_db_entry *server, krb5_enc_tkt_part *tkt);
 
 void
-log_as_req(krb5_context context, const krb5_fulladdr *from,
+log_as_req(krb5_context context, const krb5_fulladdr *remote_addr,
            krb5_kdc_req *request, krb5_kdc_rep *reply,
            krb5_db_entry *client, const char *cname,
            krb5_db_entry *server, const char *sname,
