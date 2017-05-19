@@ -953,6 +953,8 @@ struct udp_dispatch_state {
     int port_fd;
     krb5_address remote_addr_buf;
     krb5_fulladdr remote_addr;
+    krb5_address local_addr_buf;
+    krb5_fulladdr local_addr;
     socklen_t saddr_len;
     socklen_t daddr_len;
     struct sockaddr_storage saddr;
@@ -1088,8 +1090,11 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
     state->remote_addr.address = &state->remote_addr_buf;
     init_addr(&state->remote_addr, ss2sa(&state->saddr));
 
+    state->local_addr.address = &state->local_addr_buf;
+    init_addr(&state->local_addr, ss2sa(&state->daddr));
+
     /* This address is in net order. */
-    dispatch(state->handle, ss2sa(&state->daddr), &state->remote_addr,
+    dispatch(state->handle, &state->local_addr, &state->remote_addr,
              &state->request, 0, ctx, process_packet_response, state);
 }
 
@@ -1211,6 +1216,8 @@ accept_tcp_connection(verto_ctx *ctx, verto_ev *ev)
 
 struct tcp_dispatch_state {
     struct sockaddr_storage local_saddr;
+    krb5_address local_addr_buf;
+    krb5_fulladdr local_addr;
     struct connection *conn;
     krb5_data request;
     verto_ctx *ctx;
@@ -1357,10 +1364,10 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
                              error_message(errno));
             goto kill_tcp_connection;
         }
-
-        dispatch(state->conn->handle, ss2sa(&state->local_saddr),
-                 &conn->remote_addr, &state->request, 1, ctx,
-                 process_tcp_response, state);
+        state->local_addr.address = &state->local_addr_buf;
+        init_addr(&state->local_addr, ss2sa(&state->local_saddr));
+        dispatch(state->conn->handle, &state->local_addr, &conn->remote_addr,
+                 &state->request, 1, ctx, process_tcp_response, state);
     }
 
     return;

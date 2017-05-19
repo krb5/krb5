@@ -436,19 +436,14 @@ bailout:
 
 /* Dispatch routine for set/change password */
 void
-dispatch(void *handle, struct sockaddr *local_saddr,
+dispatch(void *handle, const krb5_fulladdr *local_addr,
          const krb5_fulladdr *remote_addr, krb5_data *request, int is_tcp,
          verto_ctx *vctx, loop_respond_fn respond, void *arg)
 {
     krb5_error_code ret;
     krb5_keytab kt = NULL;
     kadm5_server_handle_t server_handle = (kadm5_server_handle_t)handle;
-    krb5_fulladdr local_faddr;
-    krb5_address local_kaddr_buf;
     krb5_data *response = NULL;
-
-    local_faddr.address = &local_kaddr_buf;
-    init_addr(&local_faddr, local_saddr);
 
     ret = krb5_kt_resolve(server_handle->context, "KDB:", &kt);
     if (ret != 0) {
@@ -465,7 +460,7 @@ dispatch(void *handle, struct sockaddr *local_saddr,
                                handle,
                                server_handle->params.realm,
                                kt,
-                               &local_faddr,
+                               local_addr,
                                remote_addr,
                                request,
                                response);

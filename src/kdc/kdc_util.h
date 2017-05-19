@@ -151,7 +151,7 @@ process_tgs_req (struct server_handle *, krb5_data *,
 /* dispatch.c */
 void
 dispatch (void *,
-          struct sockaddr *,
+          const krb5_fulladdr *,
           const krb5_fulladdr *,
           krb5_data *,
           int,

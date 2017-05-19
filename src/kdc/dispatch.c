@@ -119,7 +119,7 @@ reseed_random(krb5_context kdc_err_context)
 }
 
 void
-dispatch(void *cb, struct sockaddr *local_saddr,
+dispatch(void *cb, const krb5_fulladdr *local_addr,
          const krb5_fulladdr *remote_addr, krb5_data *pkt, int is_tcp,
          verto_ctx *vctx, loop_respond_fn respond, void *arg)
 {
