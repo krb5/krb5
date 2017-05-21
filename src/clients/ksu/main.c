@@ -119,6 +119,7 @@ main (argc, argv)
     krb5_boolean stored = FALSE, cc_reused = FALSE, given_princ = FALSE;
     krb5_boolean zero_password;
     krb5_boolean restrict_creds;
+    krb5_boolean given_princ = FALSE;
     krb5_deltat lifetime, rlife;
 
     params = (char **) xcalloc (2, sizeof (char *));
