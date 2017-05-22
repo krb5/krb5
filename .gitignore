@@ -163,8 +163,6 @@ local.properties
 
 /src/clients/kpasswd/kpasswd
 
-/src/clients/kpasswd/ksetpwd
-
 /src/clients/ksu/ksu
 
 /src/clients/kswitch/kswitch
