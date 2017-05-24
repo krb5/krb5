@@ -824,7 +824,7 @@ camellia256-cts-cmac camellia256-cts                 Camellia-256 CTS mode with 
 camellia128-cts-cmac camellia128-cts                 Camellia-128 CTS mode with CMAC
 des                                                  The DES family: des-cbc-crc, des-cbc-md5, and des-cbc-md4 (weak)
 des3                                                 The triple DES family: des3-cbc-sha1
-aes                                                  The AES family: aes256-cts-hmac-sha1-96 and aes128-cts-hmac-sha1-96
+aes                                                  The AES family: aes256-cts-hmac-sha1-96, aes128-cts-hmac-sha1-96, aes256-cts-hmac-sha384-192, and aes128-cts-hmac-sha256-128
 rc4                                                  The RC4 family: arcfour-hmac
 camellia                                             The Camellia family: camellia256-cts-cmac and camellia128-cts-cmac
 ==================================================== =========================================================
