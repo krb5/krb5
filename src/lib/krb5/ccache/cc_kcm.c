@@ -604,7 +604,7 @@ kcm_resolve(krb5_context context, krb5_ccache *cache_out, const char *residual)
     if (ret)
         goto cleanup;
 
-    if (*residual == '\0') {
+    if (*residual == '\0' || strchr(residual, ':') == NULL) {
         kcmreq_init(&req, KCM_OP_GET_DEFAULT_CACHE, NULL);
         ret = kcmio_call(context, io, &req);
         if (ret)
@@ -612,7 +612,23 @@ kcm_resolve(krb5_context context, krb5_ccache *cache_out, const char *residual)
         ret = kcmreq_get_name(&req, &defname);
         if (ret)
             goto cleanup;
-        residual = defname;
+
+        if (strchr(defname, ':') == NULL) {
+            /* Heimdal's KCM get_default_cache operation returns "KCM:UID" if
+             * there was no previous cache for this UID, IOW it always returns
+             * a collection name. Explicitly call gen_new to resolve
+             * a subsidiary
+             */
+            kcmreq_init(&req, KCM_OP_GEN_NEW, NULL);
+            ret = kcmio_call(context, io, &req);
+            if (ret)
+                goto cleanup;
+            ret = kcmreq_get_name(&req, &residual);
+            if (ret)
+                goto cleanup;
+        } else {
+            residual = defname;
+        }
     }
 
     ret = make_cache(context, residual, io, cache_out);
@@ -885,7 +901,8 @@ kcm_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor_out)
         return ret;
 
     /* If defname is a subsidiary cache, return a singleton cursor. */
-    if (strlen(defname) > 4)
+    /* subsidiary is denoted as KCM:UID:SUBSIDIARY_ID */
+    if (strlen(defname) > 4 && (strchr(defname+4, ':') != NULL))
         return make_ptcursor(defname + 4, NULL, io, cursor_out);
 
     kcmreq_init(&req, KCM_OP_GET_CACHE_UUID_LIST, NULL);
