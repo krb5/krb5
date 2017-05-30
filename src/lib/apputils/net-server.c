@@ -1329,7 +1329,6 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
     } else {
         /* msglen known. */
         socklen_t local_saddrlen = sizeof(struct sockaddr_storage);
-        struct sockaddr *local_saddrp = NULL;
 
         len = conn->msglen - (conn->offset - 4);
         nread = SOCKET_READ(verto_get_fd(ev),
@@ -1351,10 +1350,13 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
         state->request.data = conn->buffer + 4;
 
         if (getsockname(verto_get_fd(ev), ss2sa(&state->local_saddr),
-                        &local_saddrlen) == 0)
-            local_saddrp = ss2sa(&state->local_saddr);
+                        &local_saddrlen) < 0) {
+            krb5_klog_syslog(LOG_ERR, _("getsockname failed: %s"),
+                             error_message(errno));
+            goto kill_tcp_connection;
+        }
 
-        dispatch(state->conn->handle, local_saddrp, &conn->faddr,
+        dispatch(state->conn->handle, ss2sa(&state->local_saddr), &conn->faddr,
                  &state->request, 1, ctx, process_tcp_response, state);
     }
 
