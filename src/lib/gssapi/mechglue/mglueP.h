@@ -717,6 +717,7 @@ typedef struct gss_mech_config {
 	char *mechNameStr;		/* mechanism string name */
 	char *optionStr;		/* optional mech parameters */
 	void *dl_handle;		/* RTLD object handle for the mech */
+	int dl_handle_no_close;		/* whether to close on exit */
 	gss_OID mech_type;		/* mechanism oid */
 	gss_mechanism mech;		/* mechanism initialization struct */
  	int priority;			/* mechanism preference order */
