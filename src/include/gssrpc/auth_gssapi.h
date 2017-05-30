@@ -8,6 +8,10 @@
 
 GSSRPC__BEGIN_DECLS
 
+#include <gssapi/gssapi.h>
+#include <gssrpc/clnt.h>
+#include <gssrpc/svc.h>
+
 #define AUTH_GSSAPI_EXIT		0
 #define AUTH_GSSAPI_INIT 		1
 #define AUTH_GSSAPI_CONTINUE_INIT 	2

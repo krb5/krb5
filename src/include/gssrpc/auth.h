@@ -42,6 +42,7 @@
 #ifndef GSSRPC_AUTH_H
 #define GSSRPC_AUTH_H
 
+#include <gssrpc/types.h>
 #include <gssrpc/xdr.h>
 
 GSSRPC__BEGIN_DECLS

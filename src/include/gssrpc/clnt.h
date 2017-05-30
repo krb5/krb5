@@ -39,6 +39,8 @@
 #ifndef GSSRPC_CLNT_H
 #define GSSRPC_CLNT_H
 
+#include <gssrpc/auth.h>
+
 GSSRPC__BEGIN_DECLS
 /*
  * Rpc calls return an enum clnt_stat.  This should be looked at more,
