@@ -245,7 +245,6 @@ local.properties
 
 /src/lib/crypto/builtin/sha1/t_shs
 /src/lib/crypto/builtin/sha1/t_shs3
-/src/lib/crypto/builtin/sha2/t_sha256
 
 /src/lib/crypto/crypto_tests/aes-test
 /src/lib/crypto/crypto_tests/camellia-test
@@ -271,6 +270,7 @@ local.properties
 /src/lib/crypto/crypto_tests/t_prf.output
 /src/lib/crypto/crypto_tests/t_prng
 /src/lib/crypto/crypto_tests/t_prng.output
+/src/lib/crypto/crypto_tests/t_sha2
 /src/lib/crypto/crypto_tests/t_short
 /src/lib/crypto/crypto_tests/t_str2key
 /src/lib/crypto/crypto_tests/vk.txt
