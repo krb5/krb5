@@ -12,10 +12,10 @@
 #include <kadm5/admin.h>
 #include <kadm5/kadm_rpc.h>
 #include <kadm5/server_internal.h>
-#include <kadm5/server_acl.h>
 #include <syslog.h>
 #include <adm_proto.h>  /* krb5_klog_syslog */
 #include "misc.h"
+#include "auth_acl.h"
 
 extern gss_name_t                       gss_changepw_name;
 extern gss_name_t                       gss_oldchangepw_name;

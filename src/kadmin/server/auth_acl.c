@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/kadm5/srv/server_acl.c */
+/* kadmin/server/auth_acl.c */
 /*
  * Copyright 1995-2004, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -31,7 +31,7 @@
 #include <kadm5/server_internal.h>
 #include <kadm5/admin.h>
 #include "adm_proto.h"
-#include "server_acl.h"
+#include "auth_acl.h"
 #include <ctype.h>
 
 typedef struct _acl_op_table {
@@ -807,18 +807,4 @@ kadm5int_acl_check(kcontext, caller, opmask, principal, restrictions)
     krb5_free_principal(kcontext, caller_princ);
 
     return retval;
-}
-
-kadm5_ret_t
-kadm5_get_privs(void *server_handle, long *privs)
-{
-    CHECK_HANDLE(server_handle);
-
-    /* this is impossible to do with the current interface.  For now,
-       return all privs, which will confuse some clients, but not
-       deny any access to users of "smart" clients which try to cache */
-
-    *privs = ~0;
-
-    return KADM5_OK;
 }

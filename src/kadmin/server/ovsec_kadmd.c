@@ -51,7 +51,6 @@
 #include <gssrpc/auth_gssapi.h>
 #include <kadm5/admin.h>
 #include <kadm5/kadm_rpc.h>
-#include <kadm5/server_acl.h>
 #include <adm_proto.h>
 #include "kdb_kt.h"  /* for krb5_ktkdb_set_context */
 #include <string.h>
@@ -59,6 +58,7 @@
 #include <kdb_log.h>
 
 #include "misc.h"
+#include "auth_acl.h"
 
 #if defined(NEED_DAEMON_PROTO)
 int daemon(int, int);

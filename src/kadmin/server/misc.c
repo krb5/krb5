@@ -7,8 +7,8 @@
 #include    <k5-int.h>
 #include    <kdb.h>
 #include    <kadm5/server_internal.h>
-#include    <kadm5/server_acl.h>
 #include    "misc.h"
+#include    "auth_acl.h"
 #include    "net-server.h"
 
 /*

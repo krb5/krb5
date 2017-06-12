@@ -16,7 +16,6 @@
 #include <kadm5/admin.h>
 #include <kadm5/kadm_rpc.h>
 #include <kadm5/server_internal.h>
-#include <server_acl.h>
 #include <adm_proto.h>
 #include <string.h>
 #include <gssapi_krb5.h>
@@ -25,6 +24,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <kdb_log.h>
+#include "auth_acl.h"
 #include "misc.h"
 #include "osconf.h"
 
