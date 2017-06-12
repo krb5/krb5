@@ -359,7 +359,7 @@ krb5_ktfile_get_entry(krb5_context context, krb5_keytab id,
 
         }
 
-        if (kvno == IGNORE_VNO) {
+        if (kvno == IGNORE_VNO || new_entry.vno == IGNORE_VNO) {
             /* If this entry is more recent (or the first match), free the
              * current and keep the new.  Otherwise, free the new. */
             if (cur_entry.principal == NULL ||
