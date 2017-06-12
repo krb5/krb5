@@ -309,7 +309,7 @@ errcode_t profile_update_file_data_locked(prf_data_t data, char **ret_modspec)
     unsigned long frac;
     time_t now;
 #endif
-    FILE *f;
+    FILE *f = NULL;
     int isdir = 0;
 
 #ifdef HAVE_STAT
@@ -368,7 +368,8 @@ errcode_t profile_update_file_data_locked(prf_data_t data, char **ret_modspec)
         retval = profile_process_directory(data->filespec, &data->root);
     } else {
         retval = profile_parse_file(f, &data->root, ret_modspec);
-        (void)fclose(f);
+        if (f != NULL)
+            (void)fclose(f);
     }
     if (retval) {
         return retval;
