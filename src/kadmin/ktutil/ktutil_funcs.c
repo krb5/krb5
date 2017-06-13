@@ -64,7 +64,8 @@ krb5_error_code ktutil_delete(context, list, idx)
     krb5_kt_list *list;
     int idx;
 {
-    krb5_kt_list lp, prev;
+    krb5_kt_list lp = *list;
+    krb5_kt_list prev = NULL;
     int i;
 
     for (lp = *list, i = 1; lp; prev = lp, lp = lp->next, i++) {

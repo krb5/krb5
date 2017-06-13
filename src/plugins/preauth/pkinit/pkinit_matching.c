@@ -258,8 +258,8 @@ parse_rule_component(krb5_context context,
 {
     krb5_error_code retval;
     rule_component *rc = NULL;
-    keyword_type kw_type;
-    kw_value_type kwval_type;
+    keyword_type kw_type = kw_undefined;
+    kw_value_type kwval_type = kwvaltype_undefined;
     char err_buf[128];
     int ret;
     struct keyword_desc *kw, *nextkw;

@@ -3774,7 +3774,7 @@ pkinit_open_session(krb5_context context,
 {
     CK_ULONG i, r;
     unsigned char *cp;
-    size_t label_len;
+    size_t label_len = 0;
     CK_ULONG count = 0;
     CK_SLOT_ID_PTR slotlist;
     CK_TOKEN_INFO tinfo;
