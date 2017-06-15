@@ -185,10 +185,11 @@ realm.run(['./t_ciflags', 'p:' + realm.host_princ])
 # contexts.
 realm.run(['./t_inq_ctx', 'user', password('user'), 'p:%s' % realm.host_princ])
 
+if runenv.sizeof_time_t <= 4:
+    skip_rest('y2038 GSSAPI tests', 'platform has 32-bit time_t')
+
 # Test lifetime results, using a realm with a large maximum lifetime
-# so that we can test ticket end dates after y2038.  There are no
-# time_t conversions involved, so we can run these tests on platforms
-# with 32-bit time_t.
+# so that we can test ticket end dates after y2038.
 realm.stop()
 conf = {'realms': {'$realm': {'max_life': '9000d'}}}
 realm = K5Realm(kdc_conf=conf, get_creds=False)
