@@ -91,7 +91,7 @@ static const char *acl_line2long_msg = N_("%s: line %d too long, truncated");
 static const char *acl_op_bad_msg = N_("Unrecognized ACL operation '%c' in "
                                        "%s");
 static const char *acl_syn_err_msg = N_("%s: syntax error at line %d "
-                                        "<%10s...>");
+                                        "<%.10s...>");
 static const char *acl_cantopen_msg = N_("%s while opening ACL file %s");
 
 /*
@@ -107,9 +107,9 @@ kadm5int_acl_get_line(fp, lnp)
     static int  line_incr = 0;
     static char acl_buf[BUFSIZ];
 
-    *lnp += line_incr;
-    line_incr = 0;
     for (domore = 1; domore && !feof(fp); ) {
+        *lnp += line_incr;
+        line_incr = 0;
         /* Copy in the line, with continuations */
         for (i = 0; ((i < BUFSIZ) && !feof(fp)); i++) {
             int byte;
