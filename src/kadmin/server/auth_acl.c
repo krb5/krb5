@@ -38,15 +38,9 @@ struct acl_op_table {
 
 struct acl_entry {
     struct acl_entry *next;
-    char *client_string;
-    krb5_boolean client_bad;
     krb5_principal client;
     uint32_t op_allowed;
-    char *target_string;
-    krb5_boolean target_bad;
     krb5_principal target;
-    char *rs_string;
-    krb5_boolean rs_bad;
     struct kadm5_auth_restrictions *rs;
 };
 
@@ -72,7 +66,6 @@ struct wildstate {
 
 struct acl_state {
     struct acl_entry *list;
-    const char *fname;
 };
 
 static struct acl_state aclstate;
@@ -232,11 +225,8 @@ error:
 static void
 free_acl_entry(struct acl_entry *entry)
 {
-    free(entry->client_string);
     krb5_free_principal(NULL, entry->client);
-    free(entry->target_string);
     krb5_free_principal(NULL, entry->target);
-    free(entry->rs_string);
     if (entry->rs != NULL) {
         free(entry->rs->policy);
         free(entry->rs);
@@ -247,8 +237,9 @@ free_acl_entry(struct acl_entry *entry)
 /* Parse the four fields of an ACL entry and return a structure representing
  * it.  Log a message and return NULL on error. */
 static struct acl_entry *
-parse_entry(const char *client, const char *ops, const char *target,
-            const char *rs, const char *line, const char *fname)
+parse_entry(krb5_context context, const char *client, const char *ops,
+            const char *target, const char *rs, const char *line,
+            const char *fname)
 {
     struct acl_entry *entry;
     const char *op;
@@ -278,17 +269,25 @@ parse_entry(const char *client, const char *ops, const char *target,
         }
     }
 
-    entry->client_string = strdup(client);
-    if (entry->client_string == NULL)
-        goto error;
-    if (target != NULL) {
-        entry->target_string = strdup(target);
-        if (entry->target_string == NULL)
+    if (strcmp(client, "*") != 0) {
+        if (krb5_parse_name(context, client, &entry->client) != 0) {
+            krb5_klog_syslog(LOG_ERR, _("Cannot parse client principal '%s'"),
+                             client);
             goto error;
+        }
     }
+
+    if (target != NULL && strcmp(target, "*") != 0) {
+        if (krb5_parse_name(context, target, &entry->target) != 0) {
+            krb5_klog_syslog(LOG_ERR, _("Cannot parse target principal '%s'"),
+                             target);
+            goto error;
+        }
+    }
+
     if (rs != NULL) {
-        entry->rs_string = strdup(rs);
-        if (entry->rs_string == NULL)
+        entry->rs = parse_restrictions(rs, fname);
+        if (entry->rs == NULL)
             goto error;
     }
 
@@ -301,7 +300,7 @@ error:
 
 /* Parse the contents of an ACL line. */
 static struct acl_entry *
-parse_line(const char *line, const char *fname)
+parse_line(krb5_context context, const char *line, const char *fname)
 {
     struct acl_entry *entry = NULL;
     char *copy;
@@ -343,7 +342,7 @@ parse_line(const char *line, const char *fname)
     if (*rs == '\0')
         rs = NULL;
     if (*client != '\0' && *ops != '\0')
-        entry = parse_entry(client, ops, target, rs, line, fname);
+        entry = parse_entry(context, client, ops, target, rs, line, fname);
     free(copy);
     return entry;
 }
@@ -425,7 +424,7 @@ free_acl_entries(struct acl_state *state)
 
 /* Open and parse the ACL file. */
 static void
-load_acl_file(const char *fname, struct acl_state *state)
+load_acl_file(krb5_context context, const char *fname, struct acl_state *state)
 {
     FILE *fp;
     char *line;
@@ -450,7 +449,7 @@ load_acl_file(const char *fname, struct acl_state *state)
     /* Get a non-comment line. */
     while ((line = get_line(fp, fname, &lineno, &incr)) != NULL) {
         /* Parse it.  Fail out on syntax error. */
-        *entry_slot = parse_line(line, fname);
+        *entry_slot = parse_line(context, line, fname);
         if (*entry_slot == NULL) {
             krb5_klog_syslog(LOG_ERR,
                              _("%s: syntax error at line %d <%.10s...>"),
@@ -465,7 +464,6 @@ load_acl_file(const char *fname, struct acl_state *state)
     }
 
     fclose(fp);
-    state->fname = fname;
 }
 
 /*
@@ -528,55 +526,24 @@ match_princ(krb5_const_principal p1, krb5_const_principal p2,
 /* Find an ACL entry matching principal and target_principal.  Return NULL if
  * none is found. */
 static struct acl_entry *
-find_entry(krb5_context context, struct acl_state *state,
-           krb5_const_principal client, krb5_const_principal target)
+find_entry(struct acl_state *state, krb5_const_principal client,
+           krb5_const_principal target)
 {
     struct acl_entry *entry;
-    krb5_error_code ret;
     struct wildstate ws;
 
     for (entry = state->list; entry != NULL; entry = entry->next) {
         memset(&ws, 0, sizeof(ws));
-        if (entry->client_bad || entry->target_bad || entry->rs_bad)
-            continue;
-
-        /* The client principal must match or be "*" in the entry. */
-        if (strcmp(entry->client_string, "*") != 0) {
-            if (entry->client == NULL) {
-                ret = krb5_parse_name(context, entry->client_string,
-                                      &entry->client);
-                if (ret) {
-                    entry->client_bad = TRUE;
-                    continue;
-                }
-            }
+        if (entry->client != NULL) {
             if (!match_princ(entry->client, client, FALSE, &ws))
                 continue;
         }
 
-        /* The target principal must match if one is specified. */
-        if (entry->target_string != NULL &&
-            strcmp(entry->target_string, "*") != 0) {
-            if (entry->target == NULL) {
-                ret = krb5_parse_name(context, entry->target_string,
-                                      &entry->target);
-                if (ret) {
-                    entry->target_bad = TRUE;
-                    continue;
-                }
-            }
+        if (entry->target != NULL) {
             if (target == NULL)
                 continue;
             if (!match_princ(entry->target, target, TRUE, &ws))
                 continue;
-        }
-
-        if (entry->rs_string != NULL && entry->rs == NULL) {
-            entry->rs = parse_restrictions(entry->rs_string, aclstate.fname);
-            if (entry->rs == NULL) {
-                entry->rs_bad = TRUE;
-                continue;
-            }
         }
 
         return entry;
@@ -589,7 +556,7 @@ find_entry(krb5_context context, struct acl_state *state,
 krb5_error_code
 acl_init(krb5_context context, const char *acl_file)
 {
-    load_acl_file(acl_file, &aclstate);
+    load_acl_file(context, acl_file, &aclstate);
     return 0;
 }
 
@@ -611,7 +578,7 @@ acl_check(krb5_context context, krb5_const_principal client, uint32_t op,
     if (rs_out != NULL)
         *rs_out = NULL;
 
-    entry = find_entry(context, &aclstate, client, target);
+    entry = find_entry(&aclstate, client, target);
     if (entry == NULL)
         return FALSE;
     if (!(entry->op_allowed & op))
