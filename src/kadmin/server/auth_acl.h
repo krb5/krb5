@@ -28,24 +28,6 @@
 #define SERVER_ACL_H__
 
 /*
- * Debug definitions.
- */
-#define DEBUG_SPROC     1
-#define DEBUG_OPERATION 2
-#define DEBUG_HOST      4
-#define DEBUG_REALM     8
-#define DEBUG_REQUESTS  16
-#define DEBUG_ACL       32
-#define DEBUG_PROTO     64
-#define DEBUG_CALLS     128
-#define DEBUG_NOSLAVES  256
-#ifdef  DEBUG
-#define DPRINT(l1, cl, al)      if ((cl & l1) != 0) printf al
-#else   /* DEBUG */
-#define DPRINT(l1, cl, al)
-#endif  /* DEBUG */
-
-/*
  * Access control bits.
  */
 #define ACL_ADD                 1
@@ -58,7 +40,6 @@
 #define ACL_LIST                128
 #define ACL_SETKEY              256
 #define ACL_IPROP               512
-#define ACL_RENAME              (ACL_ADD+ACL_DELETE)
 
 #define ACL_ALL_MASK            (ACL_ADD        |       \
                                  ACL_DELETE     |       \
@@ -69,32 +50,25 @@
                                  ACL_IPROP      |       \
                                  ACL_SETKEY)
 
-typedef struct _restriction {
-    long                mask;
-    krb5_flags          require_attrs;
-    krb5_flags          forbid_attrs;
-    krb5_deltat         princ_lifetime;
-    krb5_deltat         pw_lifetime;
-    krb5_deltat         max_life;
-    krb5_deltat         max_renewable_life;
-    long                aux_attributes;
-    char                *policy;
-} restriction_t;
+struct kadm5_auth_restrictions {
+    long mask;
+    krb5_flags require_attrs;
+    krb5_flags forbid_attrs;
+    krb5_deltat princ_lifetime;
+    krb5_deltat pw_lifetime;
+    krb5_deltat max_life;
+    krb5_deltat max_renewable_life;
+    char *policy;
+};
 
-krb5_error_code kadm5int_acl_init(krb5_context, int, char *);
-void kadm5int_acl_finish(krb5_context, int);
-krb5_boolean kadm5int_acl_check(krb5_context,
-                                gss_name_t,
-                                krb5_int32,
-                                krb5_principal,
-                                restriction_t **);
-krb5_boolean kadm5int_acl_check_krb(krb5_context,
-                                    krb5_const_principal,
-                                    krb5_int32,
-                                    krb5_const_principal,
-                                    restriction_t **);
-krb5_error_code kadm5int_acl_impose_restrictions(krb5_context,
-                                                 kadm5_principal_ent_rec *,
-                                                 long *,
-                                                 restriction_t *);
+krb5_error_code acl_init(krb5_context context, const char *acl_file);
+void acl_finish(krb5_context);
+krb5_boolean acl_check(krb5_context context, krb5_const_principal client,
+                       uint32_t op, krb5_const_principal target,
+                       struct kadm5_auth_restrictions **rs_out);
+krb5_error_code acl_impose_restrictions(krb5_context context,
+                                        kadm5_principal_ent_rec *rec,
+                                        long *mask,
+                                        struct kadm5_auth_restrictions *rs);
+
 #endif  /* SERVER_ACL_H__ */

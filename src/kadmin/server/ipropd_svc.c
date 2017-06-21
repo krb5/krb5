@@ -129,6 +129,19 @@ buf_to_string(gss_buffer_desc *b)
     return s;
 }
 
+static krb5_boolean
+iprop_acl_check(krb5_context context, const char *client_name)
+{
+    krb5_principal client_princ;
+    krb5_boolean result;
+
+    if (krb5_parse_name(context, client_name, &client_princ) != 0)
+	return FALSE;
+    result = acl_check(context, client_princ, ACL_IPROP, NULL, NULL);
+    krb5_free_principal(context, client_princ);
+    return result;
+}
+
 kdb_incr_result_t *
 iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 {
@@ -174,11 +187,7 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
     DPRINT("%s: clprinc=`%s'\n\tsvcprinc=`%s'\n", whoami, client_name,
 	   service_name);
 
-    if (!kadm5int_acl_check(handle->context,
-			    rqst2name(rqstp),
-			    ACL_IPROP,
-			    NULL,
-			    NULL)) {
+    if (!iprop_acl_check(handle->context, client_name)) {
 	ret.ret = UPDATE_PERM_DENIED;
 
 	DPRINT("%s: PERMISSION DENIED: clprinc=`%s'\n\tsvcprinc=`%s'\n",
@@ -301,11 +310,7 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
     DPRINT("%s: clprinc=`%s'\n\tsvcprinc=`%s'\n",
 	    whoami, client_name, service_name);
 
-    if (!kadm5int_acl_check(handle->context,
-			    rqst2name(rqstp),
-			    ACL_IPROP,
-			    NULL,
-			    NULL)) {
+    if (!iprop_acl_check(handle->context, client_name)) {
 	ret.ret = UPDATE_PERM_DENIED;
 
 	DPRINT("%s: Permission denied\n", whoami);

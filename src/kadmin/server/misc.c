@@ -133,8 +133,7 @@ schpw_util_wrapper(void *server_handle,
         access_granted = FALSE;
 
     if (!access_granted &&
-        kadm5int_acl_check_krb(handle->context, client,
-                               ACL_CHANGEPW, target, NULL)) {
+        acl_check(handle->context, client, ACL_CHANGEPW, target, NULL)) {
         /*
          * Otherwise, principals with appropriate privileges can change
          * any password
