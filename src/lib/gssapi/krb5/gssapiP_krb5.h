@@ -157,6 +157,10 @@ enum qop {
     GSS_KRB5_CONF_C_QOP_MASK       = 0xff00
 };
 
+/* Macro to augment checking for partially created KRB5 wrapper structs */
+#define KRB5INT_CHK_EMPTY(p) (p != NULL && p->magic == KG_CONTEXT \
+    && p->k5_context == NULL)
+
 /** internal types **/
 
 typedef struct _krb5_gss_name_rec {
@@ -620,6 +624,11 @@ OM_uint32 KRB5_CALLCONV krb5_gss_accept_sec_context_ext
  krb5_gss_ctx_ext_t/*exts */
 );
 #endif /* LEAN_CLIENT */
+
+OM_uint32 KRB5_CALLCONV krb5_gss_create_sec_context
+(OM_uint32*,        /* minor_status */
+ gss_ctx_id_t*      /* context */
+);
 
 OM_uint32 KRB5_CALLCONV krb5_gss_inquire_sec_context_by_oid
 (OM_uint32*,       /* minor_status */
@@ -1426,6 +1435,10 @@ OM_uint32 KRB5_CALLCONV
 iakerb_gss_pseudo_random(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
                          int prf_key, const gss_buffer_t prf_in,
                          ssize_t desired_output_len, gss_buffer_t prf_out);
+
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_create_sec_context(OM_uint32 *minor_status,
+                              gss_ctx_id_t *context_handle);
 
 /* Magic string to identify exported krb5 GSS credentials.  Increment this if
  * the format changes. */

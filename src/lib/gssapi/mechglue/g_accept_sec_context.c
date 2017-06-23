@@ -180,8 +180,10 @@ gss_cred_id_t *		d_cred;
      * value of *context_handle to the union context variable.
      */
 
-    if(*context_handle == GSS_C_NO_CONTEXT) {
+    union_ctx_id = (gss_union_ctx_id_t)*context_handle;
 
+    if (*context_handle == GSS_C_NO_CONTEXT ||
+        (union_ctx_id != NULL && union_ctx_id->internal_ctx_id == NULL)) {
 	if (input_token_buffer == GSS_C_NO_BUFFER)
 	    return (GSS_S_CALL_INACCESSIBLE_READ);
 
@@ -218,25 +220,39 @@ gss_cred_id_t *		d_cred;
 	selected_mech = union_ctx_id->mech_type;
     }
 
+    /* Make a mech selection so we can use it when creating contexts. */
+    mech = gssint_get_mechanism(selected_mech);
+    if (!mech) {
+	status = GSS_S_BAD_MECH;
+	goto error_out;
+    }
+
     /* Now create a new context if we didn't get one. */
     if (*context_handle == GSS_C_NO_CONTEXT) {
-	status = GSS_S_FAILURE;
-	union_ctx_id = (gss_union_ctx_id_t)
-	    malloc(sizeof(gss_union_ctx_id_desc));
+	union_ctx_id = calloc(1, sizeof(gss_union_ctx_id_desc));
 	if (!union_ctx_id)
 	    return (GSS_S_FAILURE);
 
 	union_ctx_id->loopback = union_ctx_id;
 	union_ctx_id->internal_ctx_id = GSS_C_NO_CONTEXT;
+	/* set the new context handle to caller's data */
+	*context_handle = (gss_ctx_id_t)union_ctx_id;
+    }
+
+    if (union_ctx_id->internal_ctx_id == NULL) {
 	status = generic_gss_copy_oid(&temp_minor_status, selected_mech,
 				      &union_ctx_id->mech_type);
 	if (status != GSS_S_COMPLETE) {
-	    free(union_ctx_id);
-	    return (status);
+	    goto error_out;
 	}
 
-	/* set the new context handle to caller's data */
-	*context_handle = (gss_ctx_id_t)union_ctx_id;
+	if (mech->gss_create_sec_context != NULL) {
+	    status = mech->gss_create_sec_context(
+	        &temp_minor_status,
+	        &union_ctx_id->internal_ctx_id);
+	    if (status != GSS_S_COMPLETE)
+		goto error_out;
+	}
     }
 
     /*
@@ -256,12 +272,7 @@ gss_cred_id_t *		d_cred;
 	goto error_out;
     }
 
-    /*
-     * now select the approprate underlying mechanism routine and
-     * call it.
-     */
-
-    mech = gssint_get_mechanism(selected_mech);
+    /* now call the underlying mechanism routine. */
     if (mech && mech->gss_accept_sec_context) {
 
 	    status = mech->gss_accept_sec_context(minor_status,

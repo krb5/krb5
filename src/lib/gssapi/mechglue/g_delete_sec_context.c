@@ -94,9 +94,11 @@ gss_buffer_t		output_token;
     if (status)
 	return status;
 
-    /* now free up the space for the union context structure */
-    free(ctx->mech_type->elements);
-    free(ctx->mech_type);
+    if (ctx->mech_type != GSS_C_NO_OID) {
+	free(ctx->mech_type->elements);
+	free(ctx->mech_type);
+    }
+
     free(*context_handle);
     *context_handle = GSS_C_NO_CONTEXT;
 

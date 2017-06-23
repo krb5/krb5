@@ -763,6 +763,8 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_sec_context_by_mech);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_name_by_mech);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_cred_by_mech);
+	/* draft-ietf-kitten-channel-bound-flag */
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_create_sec_context);
 
 	assert(mech_type != GSS_C_NO_OID);
 
@@ -867,6 +869,8 @@ build_interMech(void *dl, const gss_OID mech_type)
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_sec_context_by_mech);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_name_by_mech);
 	RESOLVE_GSSI_SYMBOL(dl, mech, gssspi, _import_cred_by_mech);
+	/* draft-ietf-kitten-channel-bound-flag */
+	RESOLVE_GSSI_SYMBOL(dl, mech, gss, _create_sec_context);
 
 	mech->mech_type = *mech_type;
 	return mech;

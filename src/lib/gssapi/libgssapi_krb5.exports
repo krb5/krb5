@@ -55,6 +55,7 @@ gss_complete_auth_token
 gss_context_time
 gss_create_empty_buffer_set
 gss_create_empty_oid_set
+gss_create_sec_context
 gss_decapsulate_token
 gss_delete_name_attribute
 gss_delete_sec_context

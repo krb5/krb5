@@ -939,6 +939,7 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_get_mic_iov,
     krb5_gss_verify_mic_iov,
     krb5_gss_get_mic_iov_length,
+    krb5_gss_create_sec_context,
 };
 
 /* Functions which use security contexts or acquire creds are IAKERB-specific;
@@ -1031,6 +1032,7 @@ static struct gss_config iakerb_mechanism = {
     iakerb_gss_get_mic_iov,
     iakerb_gss_verify_mic_iov,
     iakerb_gss_get_mic_iov_length,
+    iakerb_gss_create_sec_context,
 };
 
 #ifdef _GSS_STATIC_LINK

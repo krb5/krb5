@@ -20,6 +20,7 @@ SRCS = \
 	$(srcdir)/g_compare_name.c \
 	$(srcdir)/g_complete_auth_token.c \
 	$(srcdir)/g_context_time.c \
+	$(srcdir)/g_create_sec_context.c \
 	$(srcdir)/g_decapsulate_token.c \
 	$(srcdir)/g_delete_sec_context.c \
 	$(srcdir)/g_del_name_attr.c \
@@ -84,6 +85,7 @@ OBJS = \
 	$(OUTPRE)g_compare_name.$(OBJEXT) \
 	$(OUTPRE)g_complete_auth_token.$(OBJEXT) \
 	$(OUTPRE)g_context_time.$(OBJEXT) \
+	$(OUTPRE)g_create_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_decapsulate_token.$(OBJEXT) \
 	$(OUTPRE)g_delete_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_del_name_attr.$(OBJEXT) \
@@ -148,6 +150,7 @@ STLIBOBJS = \
 	g_compare_name.o \
 	g_complete_auth_token.o \
 	g_context_time.o \
+	g_create_sec_context.o \
 	g_decapsulate_token.o \
 	g_delete_sec_context.o \
 	g_del_name_attr.o \

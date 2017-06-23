@@ -177,23 +177,34 @@ OM_uint32 *		time_rec;
      * value of *context_handle to the union context variable.
      */
 
-    if(*context_handle == GSS_C_NO_CONTEXT) {
+    if (*context_handle == GSS_C_NO_CONTEXT) {
 	status = GSS_S_FAILURE;
-	union_ctx_id = (gss_union_ctx_id_t)
-	    malloc(sizeof(gss_union_ctx_id_desc));
+	union_ctx_id = calloc(1, sizeof(gss_union_ctx_id_desc));
 	if (union_ctx_id == NULL)
 	    goto end;
+	/* copy the supplied context handle */
+	union_ctx_id->internal_ctx_id = GSS_C_NO_CONTEXT;
+	union_ctx_id->loopback = union_ctx_id;
+    } else {
+	union_ctx_id = (gss_union_ctx_id_t)*context_handle;
+    }
+
+    if (union_ctx_id->internal_ctx_id == NULL) {
+	status = GSS_S_FAILURE;
 
 	if (generic_gss_copy_oid(&temp_minor_status, selected_mech,
-				 &union_ctx_id->mech_type) != GSS_S_COMPLETE) {
-	    free(union_ctx_id);
+	                         &union_ctx_id->mech_type) != GSS_S_COMPLETE) {
 	    goto end;
 	}
 
-	/* copy the supplied context handle */
-	union_ctx_id->internal_ctx_id = GSS_C_NO_CONTEXT;
-    } else
-	union_ctx_id = (gss_union_ctx_id_t)*context_handle;
+	if (mech->gss_create_sec_context != NULL) {
+	    status = mech->gss_create_sec_context(
+	        &temp_minor_status,
+	        &union_ctx_id->internal_ctx_id);
+	    if (status != GSS_S_COMPLETE)
+		goto end;
+	}
+    }
 
     /*
      * get the appropriate cred handle from the union cred struct.
@@ -222,6 +233,7 @@ OM_uint32 *		time_rec;
 	ret_flags,
 	time_rec);
 
+end:
     if (status != GSS_S_COMPLETE && status != GSS_S_CONTINUE_NEEDED) {
 	/*
 	 * The spec says the preferred method is to delete all context info on
@@ -233,9 +245,18 @@ OM_uint32 *		time_rec;
 	map_error(minor_status, mech);
 	if (union_ctx_id->internal_ctx_id == GSS_C_NO_CONTEXT)
 	    *context_handle = GSS_C_NO_CONTEXT;
+
 	if (*context_handle == GSS_C_NO_CONTEXT) {
-	    free(union_ctx_id->mech_type->elements);
-	    free(union_ctx_id->mech_type);
+	    if (mech) {
+		mech->gss_delete_sec_context(&temp_minor_status,
+		                             &union_ctx_id->internal_ctx_id,
+		                             output_token);
+	    }
+
+	    if (union_ctx_id->mech_type != GSS_C_NO_OID) {
+		free(union_ctx_id->mech_type->elements);
+		free(union_ctx_id->mech_type);
+	    }
 	    free(union_ctx_id);
 	}
     } else if (*context_handle == GSS_C_NO_CONTEXT) {
@@ -243,7 +264,6 @@ OM_uint32 *		time_rec;
 	*context_handle = (gss_ctx_id_t)union_ctx_id;
     }
 
-end:
     if (union_name->mech_name == NULL ||
 	union_name->mech_name != internal_name) {
 	(void) gssint_release_internal_name(&temp_minor_status,

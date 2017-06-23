@@ -571,6 +571,17 @@ gss_import_cred(
     gss_buffer_t,              /* token */
     gss_cred_id_t *);          /* cred_handle */
 
+
+/*
+ * Channel Binding Extensions
+ * https://tools.ietf.org/html/draft-ietf-kitten-channel-bound-flag-01
+ */
+
+OM_uint32 KRB5_CALLCONV
+gss_create_sec_context(
+    OM_uint32 *,                /* minor_status */
+    gss_ctx_id_t *);            /* context */
+
 #ifdef __cplusplus
 }
 #endif
