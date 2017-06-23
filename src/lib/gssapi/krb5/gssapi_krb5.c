@@ -822,6 +822,23 @@ krb5_gss_authorize_localname(OM_uint32 *minor,
     return user_ok ? GSS_S_COMPLETE : GSS_S_UNAUTHORIZED;
 }
 
+OM_uint32 KRB5_CALLCONV
+krb5_gss_create_sec_context(OM_uint32 *minor, gss_ctx_id_t *context)
+{
+    krb5_gss_ctx_id_rec *ctx;
+
+    ctx = calloc(1, sizeof(krb5_gss_ctx_id_rec));
+    if (ctx == NULL) {
+        *minor = ENOMEM;
+        return GSS_S_FAILURE;
+    }
+    ctx->magic = KG_CONTEXT;
+
+    *context = (gss_ctx_id_t)ctx;
+    *minor = 0;
+    return GSS_S_COMPLETE;
+}
+
 static struct gss_config krb5_mechanism = {
     { GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID },
     NULL,
@@ -911,6 +928,7 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_get_mic_iov,
     krb5_gss_verify_mic_iov,
     krb5_gss_get_mic_iov_length,
+    krb5_gss_create_sec_context,
 };
 
 /* Functions which use security contexts or acquire creds are IAKERB-specific;
@@ -1003,6 +1021,7 @@ static struct gss_config iakerb_mechanism = {
     iakerb_gss_get_mic_iov,
     iakerb_gss_verify_mic_iov,
     iakerb_gss_get_mic_iov_length,
+    iakerb_gss_create_sec_context,
 };
 
 #ifdef _GSS_STATIC_LINK

@@ -657,6 +657,12 @@ spnego_gss_get_mic_iov_length(
 	int iov_count
 );
 
+OM_uint32 KRB5_CALLCONV
+spnego_gss_create_sec_context(
+	OM_uint32 *minor_status,
+	gss_ctx_id_t *context
+);
+
 #ifdef	__cplusplus
 }
 #endif

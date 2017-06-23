@@ -201,6 +201,20 @@ typedef struct _krb5_gss_ctx_ext_rec {
     } iakerb;
 } krb5_gss_ctx_ext_rec, *krb5_gss_ctx_ext_t;
 
+/*
+ * A krb5 mech context can be in the following states:
+ *
+ * - If k5_context is NULL, the context is empty.  It was created with
+ *   gss_create_sec_context() and may have flags or other parameters set via
+ *   setter functions, but it has not been used with gss_init_sec_context() or
+ *   gss_accept_sec_context().
+ *
+ * - Otherwise, if established is 0, the context is partially established.
+ *   initiate indicates whether the context is being used with
+ *   gss_init_sec_context() or gss_accept_sec_context().
+ *
+ * - If established is 1, the context is fully established.
+ */
 typedef struct _krb5_gss_ctx_id_rec {
     krb5_magic magic;
     unsigned int initiate : 1;   /* nonzero if initiating, zero if accepting */
@@ -620,6 +634,11 @@ OM_uint32 KRB5_CALLCONV krb5_gss_accept_sec_context_ext
  krb5_gss_ctx_ext_t/*exts */
 );
 #endif /* LEAN_CLIENT */
+
+OM_uint32 KRB5_CALLCONV krb5_gss_create_sec_context
+(OM_uint32*,        /* minor_status */
+ gss_ctx_id_t*      /* context */
+);
 
 OM_uint32 KRB5_CALLCONV krb5_gss_inquire_sec_context_by_oid
 (OM_uint32*,       /* minor_status */
@@ -1426,6 +1445,10 @@ OM_uint32 KRB5_CALLCONV
 iakerb_gss_pseudo_random(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
                          int prf_key, const gss_buffer_t prf_in,
                          ssize_t desired_output_len, gss_buffer_t prf_out);
+
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_create_sec_context(OM_uint32 *minor_status,
+                              gss_ctx_id_t *context_handle);
 
 /* Magic string to identify exported krb5 GSS credentials.  Increment this if
  * the format changes. */

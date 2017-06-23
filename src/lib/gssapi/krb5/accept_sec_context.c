@@ -285,11 +285,11 @@ cleanup:
  * Performs third leg of DCE authentication
  */
 static OM_uint32
-kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
-              input_token, input_chan_bindings, src_name, mech_type,
-              output_token, ret_flags, time_rec, delegated_cred_handle)
+kg_accept_dce(minor_status, ctx, verifier_cred_handle, input_token,
+              input_chan_bindings, src_name, mech_type, output_token,
+              ret_flags, time_rec, delegated_cred_handle)
     OM_uint32 *minor_status;
-    gss_ctx_id_t *context_handle;
+    krb5_gss_ctx_id_t ctx;
     gss_cred_id_t verifier_cred_handle;
     gss_buffer_t input_token;
     gss_channel_bindings_t input_chan_bindings;
@@ -301,7 +301,6 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
     gss_cred_id_t *delegated_cred_handle;
 {
     krb5_error_code code;
-    krb5_gss_ctx_id_rec *ctx = 0;
     krb5_timestamp now;
     krb5_gss_name_t name = NULL;
     krb5_ui_4 nonce = 0;
@@ -316,8 +315,6 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
     /* return a bogus cred handle */
     if (delegated_cred_handle)
         *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
-
-    ctx = (krb5_gss_ctx_id_rec *)*context_handle;
 
     code = krb5_timeofday(ctx->k5_context, &now);
     if (code != 0) {
@@ -366,13 +363,7 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
     return GSS_S_COMPLETE;
 
 fail:
-    /* real failure code follows */
-
-    (void) krb5_gss_delete_sec_context(minor_status, (gss_ctx_id_t *) &ctx,
-                                       NULL);
-    *context_handle = GSS_C_NO_CONTEXT;
     *minor_status = code;
-
     return major_status;
 }
 
@@ -414,13 +405,12 @@ kg_process_extension(krb5_context context,
 }
 
 static OM_uint32
-kg_accept_krb5(minor_status, context_handle,
-               verifier_cred_handle, input_token,
+kg_accept_krb5(minor_status, ctx, verifier_cred_handle, input_token,
                input_chan_bindings, src_name, mech_type,
                output_token, ret_flags, time_rec,
                delegated_cred_handle, exts)
     OM_uint32 *minor_status;
-    gss_ctx_id_t *context_handle;
+    krb5_gss_ctx_id_t ctx;
     gss_cred_id_t verifier_cred_handle;
     gss_buffer_t input_token;
     gss_channel_bindings_t input_chan_bindings;
@@ -432,7 +422,7 @@ kg_accept_krb5(minor_status, context_handle,
     gss_cred_id_t *delegated_cred_handle;
     krb5_gss_ctx_ext_t exts;
 {
-    krb5_context context;
+    krb5_context context = ctx->k5_context;
     unsigned char *ptr, *ptr2;
     char *sptr;
     OM_uint32 tmp;
@@ -446,7 +436,6 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_checksum reqcksum;
     krb5_gss_name_t name = NULL;
     krb5_ui_4 gss_flags = 0;
-    krb5_gss_ctx_id_rec *ctx = NULL;
     krb5_timestamp now;
     gss_buffer_desc token;
     krb5_auth_context auth_context = NULL;
@@ -474,12 +463,6 @@ kg_accept_krb5(minor_status, context_handle,
     if (code) {
         *minor_status = code;
         return(GSS_S_FAILURE);
-    }
-
-    code = krb5_gss_init_context(&context);
-    if (code) {
-        *minor_status = code;
-        return GSS_S_FAILURE;
     }
 
     /* set up returns to be freeable */
@@ -610,7 +593,6 @@ kg_accept_krb5(minor_status, context_handle,
 
     if ((code = krb5_auth_con_init(context, &auth_context))) {
         major_status = GSS_S_FAILURE;
-        save_error_info((OM_uint32)code, context);
         goto fail;
     }
     if (cred->rcache) {
@@ -855,17 +837,6 @@ kg_accept_krb5(minor_status, context_handle,
         goto fail;
     }
 
-    /* create the ctx struct and start filling it in */
-
-    if ((ctx = (krb5_gss_ctx_id_rec *) xmalloc(sizeof(krb5_gss_ctx_id_rec)))
-        == NULL) {
-        code = ENOMEM;
-        major_status = GSS_S_FAILURE;
-        goto fail;
-    }
-
-    memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
-    ctx->magic = KG_CONTEXT;
     ctx->mech_used = (gss_OID) mech_used;
     ctx->auth_context = auth_context;
     ctx->initiate = 0;
@@ -1086,7 +1057,6 @@ kg_accept_krb5(minor_status, context_handle,
 
             ctx->established = 0;
 
-            *context_handle = (gss_ctx_id_t)ctx;
             *minor_status = 0;
             major_status = GSS_S_CONTINUE_NEEDED;
 
@@ -1142,7 +1112,6 @@ kg_accept_krb5(minor_status, context_handle,
     if (ret_flags)
         *ret_flags = ctx->gss_flags;
 
-    *context_handle = (gss_ctx_id_t)ctx;
     *output_token = token;
 
     if (src_name)
@@ -1171,17 +1140,12 @@ fail:
     if (ap_rep.data)
         krb5_free_data_contents(context, &ap_rep);
     if (major_status == GSS_S_COMPLETE ||
-        (major_status == GSS_S_CONTINUE_NEEDED && code != KRB5KRB_AP_ERR_MSG_TYPE)) {
-        ctx->k5_context = context;
-        context = NULL;
+        (major_status == GSS_S_CONTINUE_NEEDED &&
+         code != KRB5KRB_AP_ERR_MSG_TYPE))
         goto done;
-    }
 
     /* from here on is the real "fail" code */
 
-    if (ctx)
-        (void) krb5_gss_delete_sec_context(&tmp_minor_status,
-                                           (gss_ctx_id_t *) &ctx, NULL);
     if (deleg_cred) { /* free memory associated with the deleg credential */
         if (deleg_cred->ccache)
             (void)krb5_cc_close(context, deleg_cred->ccache);
@@ -1248,11 +1212,6 @@ done:
         k5_mutex_unlock(&cred->lock);
     if (defcred)
         krb5_gss_release_cred(&tmp_minor_status, &defcred);
-    if (context) {
-        if (major_status && *minor_status)
-            save_error_info(*minor_status, context);
-        krb5_free_context(context);
-    }
     return (major_status);
 }
 #endif /* LEAN_CLIENT */
@@ -1273,32 +1232,36 @@ krb5_gss_accept_sec_context_ext(
     krb5_gss_ctx_ext_t exts)
 {
     krb5_gss_ctx_id_rec *ctx = (krb5_gss_ctx_id_rec *)*context_handle;
+    OM_uint32 status, tmpmin;
+    krb5_error_code ret;
 
-    /*
-     * Context handle must be unspecified.  Actually, it must be
-     * non-established, but currently, accept_sec_context never returns
-     * a non-established context handle.
-     */
-    /*SUPPRESS 29*/
-    if (ctx != NULL) {
-        if (ctx->established == 0 && (ctx->gss_flags & GSS_C_DCE_STYLE)) {
-            return kg_accept_dce(minor_status, context_handle,
-                                 verifier_cred_handle, input_token,
-                                 input_chan_bindings, src_name, mech_type,
-                                 output_token, ret_flags, time_rec,
-                                 delegated_cred_handle);
-        } else {
-            *minor_status = EINVAL;
-            save_error_string(EINVAL, "accept_sec_context called with existing context handle");
+    if (ctx->k5_context == NULL) {
+        ret = krb5_gss_init_context(&ctx->k5_context);
+        if (ret) {
+            *minor_status = ret;
             return GSS_S_FAILURE;
         }
+        status = kg_accept_krb5(minor_status, ctx, verifier_cred_handle,
+                                input_token, input_chan_bindings, src_name,
+                                mech_type, output_token, ret_flags, time_rec,
+                                delegated_cred_handle, exts);
+    } else if (!ctx->established && (ctx->gss_flags & GSS_C_DCE_STYLE)) {
+        status = kg_accept_dce(minor_status, ctx, verifier_cred_handle,
+                               input_token, input_chan_bindings, src_name,
+                               mech_type, output_token, ret_flags, time_rec,
+                               delegated_cred_handle);
+    } else {
+        /* The context must be empty or awaiting a DCE confirmation. */
+        *minor_status = EINVAL;
+        status = GSS_S_FAILURE;
     }
 
-    return kg_accept_krb5(minor_status, context_handle,
-                          verifier_cred_handle, input_token,
-                          input_chan_bindings, src_name, mech_type,
-                          output_token, ret_flags, time_rec,
-                          delegated_cred_handle, exts);
+    if (GSS_ERROR(status)) {
+        if (*minor_status)
+            save_error_info(*minor_status, ctx->k5_context);
+        (void)krb5_gss_delete_sec_context(&tmpmin, context_handle, NULL);
+    }
+    return status;
 }
 
 OM_uint32 KRB5_CALLCONV

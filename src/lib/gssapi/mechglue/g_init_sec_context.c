@@ -170,33 +170,38 @@ OM_uint32 *		time_rec;
 	    return (status);
     }
 
-    /*
-     * if context_handle is GSS_C_NO_CONTEXT, allocate a union context
-     * descriptor to hold the mech type information as well as the
-     * underlying mechanism context handle. Otherwise, cast the
-     * value of *context_handle to the union context variable.
-     */
+    union_ctx_id = (gss_union_ctx_id_t)*context_handle;
+    if (union_ctx_id != NULL && union_ctx_id->mech_type != GSS_C_NO_OID &&
+	union_ctx_id->internal_ctx_id == NULL) {
+	/* The context was partially destroyed by a previous call. */
+	status = GSS_S_NO_CONTEXT;
+	goto end;
+    }
 
-    if(*context_handle == GSS_C_NO_CONTEXT) {
-	status = GSS_S_FAILURE;
-	union_ctx_id = (gss_union_ctx_id_t)
-	    malloc(sizeof(gss_union_ctx_id_desc));
-	if (union_ctx_id == NULL)
+    /* Create a new context if we didn't get one. */
+    if (!union_ctx_id) {
+	union_ctx_id = calloc(1, sizeof(gss_union_ctx_id_desc));
+	if (union_ctx_id == NULL) {
+	    status = GSS_S_FAILURE;
 	    goto end;
+	}
+	union_ctx_id->internal_ctx_id = GSS_C_NO_CONTEXT;
+    }
 
+    /* Populate the context if it was empty or if we just created it. */
+    if (union_ctx_id->internal_ctx_id == NULL) {
 	if (generic_gss_copy_oid(&temp_minor_status, selected_mech,
 				 &union_ctx_id->mech_type) != GSS_S_COMPLETE) {
-	    free(union_ctx_id);
+	    status = GSS_S_FAILURE;
 	    goto end;
 	}
 
-	/* copy the supplied context handle */
-	union_ctx_id->internal_ctx_id = GSS_C_NO_CONTEXT;
-    } else {
-	union_ctx_id = (gss_union_ctx_id_t)*context_handle;
-	if (union_ctx_id->internal_ctx_id == GSS_C_NO_CONTEXT) {
-	    status = GSS_S_NO_CONTEXT;
-	    goto end;
+	if (mech->gss_create_sec_context != NULL) {
+	    status = mech->gss_create_sec_context(
+		&temp_minor_status,
+		&union_ctx_id->internal_ctx_id);
+	    if (status != GSS_S_COMPLETE)
+		goto end;
 	}
     }
 
@@ -227,6 +232,7 @@ OM_uint32 *		time_rec;
 	ret_flags,
 	time_rec);
 
+end:
     if (status != GSS_S_COMPLETE && status != GSS_S_CONTINUE_NEEDED) {
 	/*
 	 * RFC 2744 5.19 requires that we not create a context on a failed
@@ -237,8 +243,15 @@ OM_uint32 *		time_rec;
 	 */
 	map_error(minor_status, mech);
 	if (*context_handle == GSS_C_NO_CONTEXT) {
-	    free(union_ctx_id->mech_type->elements);
-	    free(union_ctx_id->mech_type);
+	    if (mech && mech->gss_delete_sec_context) {
+		mech->gss_delete_sec_context(&temp_minor_status,
+					     &union_ctx_id->internal_ctx_id,
+					     output_token);
+	    }
+	    if (union_ctx_id->mech_type != GSS_C_NO_OID) {
+		free(union_ctx_id->mech_type->elements);
+		free(union_ctx_id->mech_type);
+	    }
 	    free(union_ctx_id);
 	}
     } else if (*context_handle == GSS_C_NO_CONTEXT) {
@@ -246,7 +259,6 @@ OM_uint32 *		time_rec;
 	*context_handle = (gss_ctx_id_t)union_ctx_id;
     }
 
-end:
     if (union_name->mech_name == NULL ||
 	union_name->mech_name != internal_name) {
 	(void) gssint_release_internal_name(&temp_minor_status,

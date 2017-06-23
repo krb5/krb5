@@ -45,6 +45,7 @@ struct _iakerb_ctx_id_rec {
     krb5_init_creds_context icc;        /* Initiator only */
     krb5_tkt_creds_context tcc;         /* Initiator only */
     gss_ctx_id_t gssc;
+    int gssc_started;
     krb5_data conv;                     /* conversation for checksumming */
     unsigned int count;                 /* number of round trips */
     int initiate;
@@ -712,6 +713,7 @@ iakerb_alloc_context(iakerb_ctx_id_t *pctx, int initiate)
     ctx->defcred = GSS_C_NO_CREDENTIAL;
     ctx->magic = KG_IAKERB_CONTEXT;
     ctx->state = IAKERB_AS_REQ;
+    ctx->gssc_started = 0;
     ctx->count = 0;
     ctx->initiate = initiate;
     ctx->established = 0;
@@ -773,6 +775,29 @@ iakerb_make_exts(iakerb_ctx_id_t ctx, krb5_gss_ctx_ext_rec *exts)
 }
 
 OM_uint32 KRB5_CALLCONV
+iakerb_gss_create_sec_context(OM_uint32 *minor_status, gss_ctx_id_t *context)
+{
+    krb5_error_code code;
+    OM_uint32 status;
+    iakerb_ctx_id_t ctx;
+
+    code = iakerb_alloc_context(&ctx, -1);
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+
+    status = krb5_gss_create_sec_context(minor_status, &ctx->gssc);
+    if (status != GSS_S_COMPLETE) {
+        iakerb_release_context(ctx);
+        return status;
+    }
+
+    *context = (gss_ctx_id_t)ctx;
+    return GSS_S_COMPLETE;
+}
+
+OM_uint32 KRB5_CALLCONV
 iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
                               gss_cred_id_t verifier_cred_handle,
@@ -787,20 +812,14 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
 {
     OM_uint32 major_status = GSS_S_FAILURE;
     OM_uint32 code;
-    iakerb_ctx_id_t ctx;
-    int initialContextToken = (*context_handle == GSS_C_NO_CONTEXT);
+    iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)*context_handle;
+    int initialContextToken = (ctx->initiate == -1);
 
-    if (initialContextToken) {
-        code = iakerb_alloc_context(&ctx, 0);
-        if (code != 0)
-            goto cleanup;
-
-    } else
-        ctx = (iakerb_ctx_id_t)*context_handle;
+    ctx->initiate = 0;
 
     if (iakerb_is_iakerb_token(input_token)) {
-        if (ctx->gssc != GSS_C_NO_CONTEXT) {
-            /* We shouldn't get an IAKERB token now. */
+        if (ctx->gssc_started) {
+            /* We shouldn't get an IAKERB token after a krb5 token. */
             code = G_WRONG_TOKID;
             major_status = GSS_S_DEFECTIVE_TOKEN;
             goto cleanup;
@@ -847,6 +866,7 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
             ctx->established = 1;
         if (mech_type != NULL)
             *mech_type = (gss_OID)gss_mech_krb5;
+        ctx->gssc_started = 1;
     }
 
 cleanup:
@@ -876,18 +896,14 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
 {
     OM_uint32 major_status = GSS_S_FAILURE;
     krb5_error_code code;
-    iakerb_ctx_id_t ctx;
+    iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)*context_handle;
     krb5_gss_cred_id_t kcred;
     krb5_gss_name_t kname;
     krb5_boolean cred_locked = FALSE;
-    int initialContextToken = (*context_handle == GSS_C_NO_CONTEXT);
+    int initialContextToken = (ctx->initiate == -1);
 
+    ctx->initiate = 1;
     if (initialContextToken) {
-        code = iakerb_alloc_context(&ctx, 1);
-        if (code != 0) {
-            *minor_status = code;
-            goto cleanup;
-        }
         if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {
             major_status = iakerb_gss_acquire_cred(minor_status, NULL,
                                                    GSS_C_INDEFINITE,
@@ -899,7 +915,6 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
             claimant_cred_handle = ctx->defcred;
         }
     } else {
-        ctx = (iakerb_ctx_id_t)*context_handle;
         if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)
             claimant_cred_handle = ctx->defcred;
     }
@@ -951,7 +966,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
 
         iakerb_make_exts(ctx, &exts);
 
-        if (ctx->gssc == GSS_C_NO_CONTEXT)
+        if (!ctx->gssc_started)
             input_token = GSS_C_NO_BUFFER;
 
         /* IAKERB is finished, or we skipped to Kerberos directly. */
@@ -973,6 +988,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
             ctx->established = 1;
         if (actual_mech_type != NULL)
             *actual_mech_type = (gss_OID)gss_mech_krb5;
+        ctx->gssc_started = 1;
     } else {
         if (actual_mech_type != NULL)
             *actual_mech_type = (gss_OID)gss_mech_iakerb;
@@ -1002,9 +1018,6 @@ iakerb_gss_unwrap(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
 
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
-
     return krb5_gss_unwrap(minor_status, ctx->gssc, input_message_buffer,
                            output_message_buffer, conf_state, qop_state);
 }
@@ -1016,9 +1029,6 @@ iakerb_gss_wrap(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
                 gss_buffer_t output_message_buffer)
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
-
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
 
     return krb5_gss_wrap(minor_status, ctx->gssc, conf_req_flag, qop_req,
                          input_message_buffer, conf_state,
@@ -1032,9 +1042,6 @@ iakerb_gss_process_context_token(OM_uint32 *minor_status,
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
 
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_DEFECTIVE_TOKEN;
-
     return krb5_gss_process_context_token(minor_status, ctx->gssc,
                                           token_buffer);
 }
@@ -1044,9 +1051,6 @@ iakerb_gss_context_time(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
                         OM_uint32 *time_rec)
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
-
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
 
     return krb5_gss_context_time(minor_status, ctx->gssc, time_rec);
 }
@@ -1136,9 +1140,6 @@ iakerb_gss_inquire_context(OM_uint32 *minor_status,
     if (opened != NULL)
         *opened = ctx->established;
 
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_COMPLETE;
-
     ret = krb5_gss_inquire_context(minor_status, ctx->gssc, src_name,
                                    targ_name, lifetime_rec, mech_type,
                                    ctx_flags, initiate, opened);
@@ -1164,9 +1165,6 @@ iakerb_gss_wrap_size_limit(OM_uint32 *minor_status,
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
 
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
-
     return krb5_gss_wrap_size_limit(minor_status, ctx->gssc, conf_req_flag,
                                     qop_req, req_output_size, max_input_size);
 }
@@ -1178,9 +1176,6 @@ iakerb_gss_get_mic(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
 
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
-
     return krb5_gss_get_mic(minor_status, ctx->gssc, qop_req, message_buffer,
                             message_token);
 }
@@ -1191,9 +1186,6 @@ iakerb_gss_verify_mic(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
                       gss_qop_t *qop_state)
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
-
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
 
     return krb5_gss_verify_mic(minor_status, ctx->gssc, msg_buffer,
                                token_buffer, qop_state);
@@ -1207,9 +1199,6 @@ iakerb_gss_inquire_sec_context_by_oid(OM_uint32 *minor_status,
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
 
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_UNAVAILABLE;
-
     return krb5_gss_inquire_sec_context_by_oid(minor_status, ctx->gssc,
                                                desired_object, data_set);
 }
@@ -1222,7 +1211,7 @@ iakerb_gss_set_sec_context_option(OM_uint32 *minor_status,
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)*context_handle;
 
-    if (ctx == NULL || ctx->gssc == GSS_C_NO_CONTEXT)
+    if (ctx == NULL)
         return GSS_S_UNAVAILABLE;
 
     return krb5_gss_set_sec_context_option(minor_status, &ctx->gssc,
@@ -1236,9 +1225,6 @@ iakerb_gss_wrap_iov(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
 
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
-
     return krb5_gss_wrap_iov(minor_status, ctx->gssc, conf_req_flag, qop_req,
                              conf_state, iov, iov_count);
 }
@@ -1249,9 +1235,6 @@ iakerb_gss_unwrap_iov(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
                       gss_iov_buffer_desc *iov, int iov_count)
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
-
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
 
     return krb5_gss_unwrap_iov(minor_status, ctx->gssc, conf_state, qop_state,
                                iov, iov_count);
@@ -1265,9 +1248,6 @@ iakerb_gss_wrap_iov_length(OM_uint32 *minor_status,
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
 
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
-
     return krb5_gss_wrap_iov_length(minor_status, ctx->gssc, conf_req_flag,
                                     qop_req, conf_state, iov, iov_count);
 }
@@ -1278,9 +1258,6 @@ iakerb_gss_pseudo_random(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
                          ssize_t desired_output_len, gss_buffer_t prf_out)
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
-
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
 
     return krb5_gss_pseudo_random(minor_status, ctx->gssc, prf_key, prf_in,
                                   desired_output_len, prf_out);
@@ -1293,9 +1270,6 @@ iakerb_gss_get_mic_iov(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
 
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
-
     return krb5_gss_get_mic_iov(minor_status, ctx->gssc, qop_req, iov,
                                 iov_count);
 }
@@ -1307,9 +1281,6 @@ iakerb_gss_verify_mic_iov(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
 
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
-
     return krb5_gss_verify_mic_iov(minor_status, ctx->gssc, qop_state, iov,
                                    iov_count);
 }
@@ -1320,9 +1291,6 @@ iakerb_gss_get_mic_iov_length(OM_uint32 *minor_status,
                               gss_iov_buffer_desc *iov, int iov_count)
 {
     iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
-
-    if (ctx->gssc == GSS_C_NO_CONTEXT)
-        return GSS_S_NO_CONTEXT;
 
     return krb5_gss_get_mic_iov_length(minor_status, ctx->gssc, qop_req, iov,
                                        iov_count);
