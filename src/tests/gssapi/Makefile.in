@@ -10,7 +10,9 @@ LOCALINCLUDES = -I$(srcdir)/../../lib/gssapi/mechglue \
 
 SRCS=	$(srcdir)/ccinit.c $(srcdir)/ccrefresh.c $(srcdir)/common.c \
 	$(srcdir)/t_accname.c $(srcdir)/t_ccselect.c $(srcdir)/t_ciflags.c \
-	$(srcdir)/t_credstore.c $(srcdir)/t_enctypes.c $(srcdir)/t_err.c \
+	$(srcdir)/t_channel_bindings.c $(srcdir)/t_create_context.c \
+	$(srcdir)/t_create_exchange.c $(srcdir)/t_credstore.c \
+	$(srcdir)/t_enctypes.c $(srcdir)/t_err.c \
 	$(srcdir)/t_export_cred.c $(srcdir)/t_export_name.c \
 	$(srcdir)/t_gssexts.c $(srcdir)/t_imp_cred.c $(srcdir)/t_imp_name.c \
 	$(srcdir)/t_invalid.c $(srcdir)/t_inq_cred.c $(srcdir)/t_inq_ctx.c \
@@ -21,6 +23,7 @@ SRCS=	$(srcdir)/ccinit.c $(srcdir)/ccrefresh.c $(srcdir)/common.c \
 	$(srcdir)/t_spnego.c $(srcdir)/t_srcattrs.c
 
 OBJS=	ccinit.o ccrefresh.o common.o t_accname.o t_ccselect.o t_ciflags.o \
+	t_channel_bindings.o t_create_context.o t_create_exchange.o \
 	t_credstore.o t_enctypes.o t_err.o t_export_cred.o t_export_name.o \
 	t_gssexts.o t_imp_cred.o t_imp_name.o t_invalid.o t_inq_cred.o \
 	t_inq_ctx.o t_inq_mechs_name.o t_iov.o t_lifetime.o t_namingexts.o \
@@ -30,18 +33,21 @@ OBJS=	ccinit.o ccrefresh.o common.o t_accname.o t_ccselect.o t_ciflags.o \
 COMMON_DEPS= common.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 COMMON_LIBS= common.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
-all: ccinit ccrefresh t_accname t_ccselect t_ciflags t_credstore t_enctypes \
+all: ccinit ccrefresh t_accname t_ccselect t_ciflags t_channel_bindings \
+	t_create_context t_create_exchange t_credstore t_enctypes \
 	t_err t_export_cred t_export_name t_gssexts t_imp_cred t_imp_name \
 	t_invalid t_inq_cred t_inq_ctx t_inq_mechs_name t_iov t_lifetime \
 	t_namingexts t_oid t_pcontok t_prf t_s4u t_s4u2proxy_krb5 t_saslname \
 	t_spnego t_srcattrs
 
-check-unix: t_oid
+check-unix: t_oid t_create_context
 	$(RUN_TEST) ./t_invalid
 	$(RUN_TEST) ./t_oid
 	$(RUN_TEST) ./t_prf
+	$(RUN_TEST) ./t_create_context
 
-check-pytests: ccinit ccrefresh t_accname t_ccselect t_ciflags t_credstore \
+check-pytests: ccinit ccrefresh t_accname t_ccselect t_ciflags \
+	t_channel_bindings t_create_exchange t_credstore \
 	t_enctypes t_err t_export_cred t_export_name t_imp_cred t_inq_cred \
 	t_inq_ctx t_inq_mechs_name t_iov t_lifetime t_pcontok t_s4u \
 	t_s4u2proxy_krb5 t_spnego t_srcattrs
@@ -63,6 +69,12 @@ t_ccselect: t_ccselect.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_ccselect.o $(COMMON_LIBS)
 t_ciflags: t_ciflags.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_ciflags.o $(COMMON_LIBS)
+t_channel_bindings: t_channel_bindings.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_channel_bindings.o $(COMMON_LIBS)
+t_create_context: t_create_context.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_create_context.o $(COMMON_LIBS)
+t_create_exchange: t_create_exchange.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_create_exchange.o $(COMMON_LIBS)
 t_credstore: t_credstore.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_credstore.o $(COMMON_LIBS)
 t_enctypes: t_enctypes.o $(COMMON_DEPS)
@@ -112,6 +124,7 @@ t_srcattrs: t_srcattrs.o $(COMMON_DEPS)
 
 clean:
 	$(RM) ccinit ccrefresh t_accname t_ccselect t_ciflags t_credstore
+	$(RM) t_channel_bindings t_create_context t_create_exchange
 	$(RM) t_enctypes t_err t_export_cred t_export_name t_gssexts t_imp_cred
 	$(RM) t_imp_name t_invalid t_inq_cred t_inq_ctx t_inq_mechs_name t_iov
 	$(RM) t_lifetime t_namingexts t_oid t_pcontok t_prf t_s4u
