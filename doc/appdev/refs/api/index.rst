@@ -212,6 +212,7 @@ Rarely used public interfaces
    krb5_free_string.rst
    krb5_free_ticket.rst
    krb5_free_unparsed_name.rst
+   krb5_get_etype_info.rst
    krb5_get_permitted_enctypes.rst
    krb5_get_server_rcache.rst
    krb5_get_time_offsets.rst

@@ -7317,6 +7317,42 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds,
                              const char *in_tkt_service,
                              krb5_get_init_creds_opt *k5_gic_options);
 
+/**
+ * Retrieve enctype, salt and s2kparams from KDC
+ *
+ * @param [in]  context         Library context
+ * @param [in]  principal       Principal whose information is requested
+ * @param [in]  opt             Initial credential options
+ * @param [out] enctype_out     The enctype chosen by KDC
+ * @param [out] salt_out        Salt returned from KDC
+ * @param [out] s2kparams_out   String-to-key parameters returned from KDC
+ *
+ * Send an initial ticket request for @a principal and extract the encryption
+ * type, salt type, and string-to-key parameters from the KDC response.  If the
+ * KDC provides no etype-info, set @a enctype_out to @c ENCTYPE_NULL and set @a
+ * salt_out and @a s2kparams_out to empty.  If the KDC etype-info provides no
+ * salt, compute the default salt and place it in @a salt_out.  If the KDC
+ * etype-info provides no string-to-key parameters, set @a s2kparams_out to
+ * empty.
+ *
+ * @a opt may be used to specify options which affect the initial request, such
+ * as request encryption types or a FAST armor cache (see
+ * krb5_get_init_creds_opt_set_etype_list() and
+ * krb5_get_init_creds_opt_set_fast_ccache_name()).
+ *
+ * Use krb5_free_data_contents() to free @a salt_out and @a s2kparams_out when
+ * they are no longer needed.
+ *
+ * @version New in 1.17
+ *
+ * @retval 0 Success
+ * @return A Kerberos error code
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_get_etype_info(krb5_context context, krb5_principal principal,
+                    krb5_get_init_creds_opt *opt, krb5_enctype *enctype_out,
+                    krb5_data *salt_out, krb5_data *s2kparams_out);
+
 struct _krb5_init_creds_context;
 typedef struct _krb5_init_creds_context *krb5_init_creds_context;
 
@@ -8485,7 +8521,6 @@ krb5_set_kdc_send_hook(krb5_context context, krb5_pre_send_fn send_hook,
 void KRB5_CALLCONV
 krb5_set_kdc_recv_hook(krb5_context context, krb5_post_recv_fn recv_hook,
                        void *data);
-
 
 #if defined(TARGET_OS_MAC) && TARGET_OS_MAC
 #    pragma pack(pop)

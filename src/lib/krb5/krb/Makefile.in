@@ -55,6 +55,7 @@ STLIBOBJS= \
 	gen_subkey.o	\
 	gen_save_subkey.o	\
 	get_creds.o	\
+	get_etype_info.o \
 	get_in_tkt.o	\
 	gic_keytab.o	\
 	gic_opt.o	\
@@ -167,6 +168,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)gen_subkey.$(OBJEXT)	\
 	$(OUTPRE)gen_save_subkey.$(OBJEXT)	\
 	$(OUTPRE)get_creds.$(OBJEXT)	\
+	$(OUTPRE)get_etype_info.$(OBJEXT) \
 	$(OUTPRE)get_in_tkt.$(OBJEXT)	\
 	$(OUTPRE)gic_keytab.$(OBJEXT)	\
 	$(OUTPRE)gic_opt.$(OBJEXT)	\
@@ -279,6 +281,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/gen_subkey.c	\
 	$(srcdir)/gen_save_subkey.c	\
 	$(srcdir)/get_creds.c	\
+	$(srcdir)/get_etype_info.c \
 	$(srcdir)/get_in_tkt.c	\
 	$(srcdir)/gic_keytab.c	\
 	$(srcdir)/gic_opt.c	\
@@ -353,6 +356,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/t_ser.c	\
 	$(srcdir)/t_deltat.c	\
 	$(srcdir)/t_expand.c	\
+	$(srcdir)/t_get_etype_info.c \
 	$(srcdir)/t_pac.c	\
 	$(srcdir)/t_parse_host_string.c	\
 	$(srcdir)/t_princ.c	\
@@ -461,9 +465,12 @@ t_sname_match: t_sname_match.o sname_match.o $(KRB5_BASE_DEPLIBS)
 t_valid_times: t_valid_times.o valid_times.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_valid_times.o valid_times.o $(KRB5_BASE_LIBS)
 
+t_get_etype_info: t_get_etype_info.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_get_etype_info.o $(KRB5_BASE_LIBS)
+
 TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
 	t_in_ccache t_cc_config t_copy_context t_princ t_etypes t_vfy_increds \
-	t_response_items t_sname_match t_valid_times
+	t_response_items t_sname_match t_valid_times t_get_etype_info
 
 check-unix: $(TEST_PROGS)
 	$(RUN_TEST_LOCAL_CONF) ./t_kerb \
@@ -502,10 +509,11 @@ check-unix: $(TEST_PROGS)
 	$(RUN_TEST) ./t_sname_match
 	$(RUN_TEST) ./t_valid_times
 
-check-pytests: t_expire_warn t_vfy_increds
+check-pytests: t_expire_warn t_get_etype_info t_vfy_increds
 	$(RUNPYTEST) $(srcdir)/t_expire_warn.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_vfy_increds.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_in_ccache_patypes.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_get_etype_info.py $(PYTESTFLAGS)
 
 check-cmocka: t_parse_host_string
 	$(RUN_TEST) ./t_parse_host_string > /dev/null
@@ -530,6 +538,8 @@ clean:
 	$(OUTPRE)t_response_items.$(OBJEXT) \
 	$(OUTPRE)t_sname_match$(EXEEXT) $(OUTPRE)t_sname_match.$(OBJEXT) \
 	$(OUTPRE)t_valid_times$(EXEEXT) $(OUTPRE)t_valid_times.$(OBJEXT) \
+	$(OUTPRE)t_get_etype_info$(EXEEXT) \
+	$(OUTPRE)t_get_etype_info.$(OBJEXT) \
 	$(OUTPRE)t_parse_host_string$(EXEEXT) \
 	$(OUTPRE)t_parse_host_string.$(OBJEXT)
 

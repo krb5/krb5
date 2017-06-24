@@ -334,4 +334,8 @@ k5_gic_opt_shallow_copy(krb5_get_init_creds_opt *opt);
 int
 k5_gic_opt_pac_request(krb5_get_init_creds_opt *opt);
 
+krb5_error_code
+k5_get_etype_info(krb5_context context, krb5_init_creds_context ctx,
+                  krb5_pa_data **padata);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */

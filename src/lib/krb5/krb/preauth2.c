@@ -782,9 +782,9 @@ get_salt(krb5_context context, krb5_init_creds_context ctx,
 }
 
 /* Set etype info parameters in rock based on padata. */
-static krb5_error_code
-get_etype_info(krb5_context context, krb5_init_creds_context ctx,
-               krb5_pa_data **padata)
+krb5_error_code
+k5_get_etype_info(krb5_context context, krb5_init_creds_context ctx,
+                  krb5_pa_data **padata)
 {
     krb5_error_code ret = 0;
     krb5_pa_data *pa;
@@ -1023,7 +1023,7 @@ k5_preauth(krb5_context context, krb5_init_creds_context ctx,
     TRACE_PREAUTH_INPUT(context, in_padata);
 
     /* Scan the padata list and process etype-info or salt elements. */
-    ret = get_etype_info(context, ctx, in_padata);
+    ret = k5_get_etype_info(context, ctx, in_padata);
     if (ret)
         return ret;
 

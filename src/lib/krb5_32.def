@@ -475,6 +475,7 @@ EXPORTS
 	k5_enctype_to_ssf				@438 ; PRIVATE GSSAPI
 
 ; new in 1.17
+	krb5_get_etype_info				@447
 ; private symbols used by SPAKE client module
 	profile_get_string				@439 ; PRIVATE
 	profile_release_string				@440 ; PRIVATE

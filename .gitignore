@@ -371,6 +371,7 @@ local.properties
 /src/lib/krb5/krb/t_etypes
 /src/lib/krb5/krb/t_expand
 /src/lib/krb5/krb/t_expire_warn
+/src/lib/krb5/krb/t_get_etype_info
 /src/lib/krb5/krb/t_in_ccache
 /src/lib/krb5/krb/t_kerb
 /src/lib/krb5/krb/t_pac
