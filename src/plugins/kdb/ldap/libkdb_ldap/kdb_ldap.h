@@ -171,7 +171,6 @@ typedef struct _krb5_ldap_server_info krb5_ldap_server_info;
 typedef struct  _krb5_ldap_server_handle {
     int                              msgid;
     LDAP                             *ldap_handle;
-    krb5_boolean                     server_info_update_pending;
     krb5_ldap_server_info            *server_info;
     struct _krb5_ldap_server_handle  *next;
 } krb5_ldap_server_handle;
