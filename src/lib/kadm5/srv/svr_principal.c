@@ -1788,6 +1788,9 @@ kadm5_setv4key_principal(void *server_handle,
     /* unlock principal on this KDC */
     kdb->fail_auth_count = 0;
 
+    /* key data changed, let the database provider know */
+    kdb->mask = KADM5_KEY_DATA | KADM5_FAIL_AUTH_COUNT;
+
     if ((ret = kdb_put_entry(handle, kdb, &adb)))
         goto done;
 
@@ -2037,6 +2040,9 @@ kadm5_setkey_principal_4(void *server_handle, krb5_principal principal,
 
     /* Unlock principal on this KDC. */
     kdb->fail_auth_count = 0;
+
+    /* key data changed, let the database provider know */
+    kdb->mask = KADM5_KEY_DATA | KADM5_FAIL_AUTH_COUNT;
 
     ret = kdb_put_entry(handle, kdb, &adb);
     if (ret)
