@@ -22,6 +22,7 @@ SUBDIRS=util include lib \
 	plugins/kdb/db2 \
 	@ldap_plugin_dir@ \
 	plugins/kdb/test \
+	plugins/kdcpolicy/test \
 	plugins/preauth/otp \
 	plugins/preauth/pkinit \
 	plugins/preauth/test \

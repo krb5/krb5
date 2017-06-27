@@ -510,6 +510,12 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     kdc_get_ticket_renewtime(kdc_active_realm, request, header_enc_tkt, client,
                              server, &enc_tkt_reply);
 
+    errcode = check_kdcpolicy_tgs(kdc_context, request, server, header_ticket,
+                                  auth_indicators, kdc_time,
+                                  &enc_tkt_reply.times, &status);
+    if (errcode)
+        goto cleanup;
+
     /*
      * Set authtime to be the same as header or evidence ticket's
      */

@@ -375,11 +375,5 @@ validate_tgs_request(kdc_realm_t *kdc_active_realm,
     if (ret && ret != KRB5_PLUGIN_OP_NOTSUPP)
         return errcode_to_protocol(ret);
 
-    /* Check local policy. */
-    errcode = against_local_policy_tgs(request, server, ticket,
-                                       status, e_data);
-    if (errcode)
-        return errcode;
-
     return 0;
 }

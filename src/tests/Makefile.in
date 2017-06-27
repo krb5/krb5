@@ -174,6 +174,7 @@ check-pytests: unlockiter
 	$(RUNPYTEST) $(srcdir)/t_tabdump.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_certauth.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_y2038.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_kdcpolicy.py $(PYTESTFLAGS)
 
 clean:
 	$(RM) adata etinfo forward gcred hist hooks hrealm icinterleave icred

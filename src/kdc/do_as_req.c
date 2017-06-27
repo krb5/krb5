@@ -208,6 +208,13 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
 
     state->ticket_reply.enc_part2 = &state->enc_tkt_reply;
 
+    errcode = check_kdcpolicy_as(kdc_context, state->request, state->client,
+                                 state->server, state->auth_indicators,
+                                 state->kdc_time, &state->enc_tkt_reply.times,
+                                 &state->status);
+    if (errcode)
+        goto egress;
+
     /*
      * Find the server key
      */

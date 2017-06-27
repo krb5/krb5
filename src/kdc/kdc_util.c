@@ -642,7 +642,6 @@ validate_as_request(kdc_realm_t *kdc_active_realm,
                     krb5_db_entry server, krb5_timestamp kdc_time,
                     const char **status, krb5_pa_data ***e_data)
 {
-    int errcode;
     krb5_error_code ret;
 
     /*
@@ -749,12 +748,6 @@ validate_as_request(kdc_realm_t *kdc_active_realm,
                                   kdc_time, status, e_data);
     if (ret && ret != KRB5_PLUGIN_OP_NOTSUPP)
         return errcode_to_protocol(ret);
-
-    /* Check against local policy. */
-    errcode = against_local_policy_as(request, client, server,
-                                      kdc_time, status, e_data);
-    if (errcode)
-        return errcode;
 
     return 0;
 }

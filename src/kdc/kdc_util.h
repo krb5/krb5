@@ -166,17 +166,6 @@ kdc_err(krb5_context call_context, errcode_t code, const char *fmt, ...)
 #endif
     ;
 
-/* policy.c */
-int
-against_local_policy_as (krb5_kdc_req *, krb5_db_entry,
-                         krb5_db_entry, krb5_timestamp,
-                         const char **, krb5_pa_data ***);
-
-int
-against_local_policy_tgs (krb5_kdc_req *, krb5_db_entry,
-                          krb5_ticket *, const char **,
-                          krb5_pa_data ***);
-
 /* kdc_preauth.c */
 krb5_boolean
 enctype_requires_etype_info_2(krb5_enctype enctype);
