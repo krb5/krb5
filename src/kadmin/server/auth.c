@@ -66,7 +66,14 @@ auth_init(krb5_context context, const char *acl_file)
     krb5_plugin_initvt_fn *modules = NULL, *mod;
     size_t count;
     auth_handle h = NULL;
+    const int intf = PLUGIN_INTERFACE_KADM5_AUTH;
 
+    ret = k5_plugin_register(context, intf, "acl", kadm5_auth_acl_initvt);
+    if (ret)
+        goto cleanup;
+    ret = k5_plugin_register(context, intf, "self", kadm5_auth_self_initvt);
+    if (ret)
+        goto cleanup;
     ret = k5_plugin_load_all(context, PLUGIN_INTERFACE_KADM5_AUTH, &modules);
     if (ret)
         goto cleanup;

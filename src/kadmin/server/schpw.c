@@ -205,15 +205,6 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
         goto chpwfail;
     }
 
-    /* for cpw, verify that this is an AS_REQ ticket */
-    if (vno == 1 &&
-        (ticket->enc_part2->flags & TKT_FLG_INITIAL) == 0) {
-        numresult = KRB5_KPASSWD_INITIAL_FLAG_NEEDED;
-        strlcpy(strresult, "Ticket must be derived from a password",
-                sizeof(strresult));
-        goto chpwfail;
-    }
-
     /* change the password */
 
     ptr = k5memdup0(clear.data, clear.length, &ret);
@@ -291,6 +282,9 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
     switch (ret) {
     case KADM5_AUTH_CHANGEPW:
         numresult = KRB5_KPASSWD_ACCESSDENIED;
+        break;
+    case KADM5_AUTH_INITIAL:
+        numresult = KRB5_KPASSWD_INITIAL_FLAG_NEEDED;
         break;
     case KADM5_PASS_Q_TOOSHORT:
     case KADM5_PASS_REUSE:

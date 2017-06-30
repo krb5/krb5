@@ -213,16 +213,16 @@ realm.run([kadminl, 'renprinc', 'to', 'from'])
 kadmin_as(some_rename, ['renprinc', 'from', 'to'])
 realm.run([kadminl, 'renprinc', 'to', 'from'])
 kadmin_as(all_add, ['renprinc', 'from', 'to'], expected_code=1,
-          expected_msg="Operation requires ``delete'' privilege")
+          expected_msg="Insufficient authorization for operation")
 kadmin_as(all_delete, ['renprinc', 'from', 'to'], expected_code=1,
-          expected_msg="Operation requires ``add'' privilege")
+          expected_msg="Insufficient authorization for operation")
 kadmin_as(some_rename, ['renprinc', 'from', 'notto'], expected_code=1,
-          expected_msg="Operation requires ``add'' privilege")
+          expected_msg="Insufficient authorization for operation")
 realm.run([kadminl, 'renprinc', 'from', 'notfrom'])
 kadmin_as(some_rename, ['renprinc', 'notfrom', 'to'], expected_code=1,
-          expected_msg="Operation requires ``delete'' privilege")
+          expected_msg="Insufficient authorization for operation")
 kadmin_as(restricted_rename, ['renprinc', 'notfrom', 'to'], expected_code=1,
-          expected_msg="Operation requires ``add'' privilege")
+          expected_msg="Insufficient authorization for operation")
 realm.run([kadminl, 'delprinc', 'notfrom'])
 
 realm.addprinc('selected', 'pw')

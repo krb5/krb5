@@ -75,4 +75,11 @@ krb5_boolean auth_restrict(krb5_context context, int opcode,
 /* Notify modules that the most recent authorized operation has ended. */
 void auth_end(krb5_context context);
 
+/* initvt declarations for built-in modules */
+
+krb5_error_code kadm5_auth_acl_initvt(krb5_context context, int maj_ver,
+                                      int min_ver, krb5_plugin_vtable vtable);
+krb5_error_code kadm5_auth_self_initvt(krb5_context context, int maj_ver,
+                                       int min_ver, krb5_plugin_vtable vtable);
+
 #endif /* AUTH_H */

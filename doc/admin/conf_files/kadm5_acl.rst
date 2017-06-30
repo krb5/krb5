@@ -144,6 +144,19 @@ principals.
 any principal that it creates or modifies will not be able to get
 postdateable tickets or tickets with a life of longer than 9 hours.
 
+MODULE BEHAVIOR
+---------------
+
+The ACL file can coexist with other authorization modules in release
+1.16 and later, as configured in the :ref:`kadm5_auth` section of
+:ref:`krb5.conf(5)`.  The ACL file will positively authorize
+operations according to the rules above, but will never
+authoritatively deny an operation, so other modules can authorize
+operations in addition to those authorized by the ACL file.
+
+To operate without an ACL file, set the *acl_file* variable in
+:ref:`kdc.conf(5)` to the empty string with ``acl_file = ""``.
+
 SEE ALSO
 --------
 

@@ -86,9 +86,10 @@ The following tags may be specified in a [realms] subsection:
 **acl_file**
     (String.)  Location of the access control list file that
     :ref:`kadmind(8)` uses to determine which principals are allowed
-    which permissions on the Kerberos database.  The default value is
-    |kdcdir|\ ``/kadm5.acl``.  For more information on Kerberos ACL
-    file see :ref:`kadm5.acl(5)`.
+    which permissions on the Kerberos database.  To operate without an
+    ACL file, set this relation to the empty string with ``acl_file =
+    ""``.  The default value is |kdcdir|\ ``/kadm5.acl``.  For more
+    information on Kerberos ACL file see :ref:`kadm5.acl(5)`.
 
 **database_module**
     (String.)  This relation indicates the name of the configuration

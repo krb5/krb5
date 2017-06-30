@@ -778,6 +778,26 @@ interface can be used to write a plugin to synchronize MIT Kerberos
 with another database such as Active Directory.  No plugins are built
 in for this interface.
 
+.. _kadm5_auth:
+
+kadm5_auth interface
+====================
+
+The kadm5_auth section (introduced in release 1.16) controls modules
+for the kadmin authorization interface, which determines whether a
+client principal is allowed to perform a kadmin operation.  The
+following built-in modules exist for this interface:
+
+**acl**
+    This module reads the :ref:`kadm5.acl(5)` file, and authorizes
+    operations which are allowed according to the rules in the file.
+
+**self**
+    This module authorizes self-service operations including password
+    changes, creation of new random keys, fetching the client's
+    principal record or string attributes, and fetching the policy
+    record associated with the client principal.
+
 .. _clpreauth:
 
 .. _kdcpreauth:

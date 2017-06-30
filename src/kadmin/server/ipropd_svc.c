@@ -24,7 +24,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <kdb_log.h>
-#include "auth_acl.h"
+#include "auth.h"
 #include "misc.h"
 #include "osconf.h"
 
@@ -137,7 +137,8 @@ iprop_acl_check(krb5_context context, const char *client_name)
 
     if (krb5_parse_name(context, client_name, &client_princ) != 0)
 	return FALSE;
-    result = acl_check(context, client_princ, ACL_IPROP, NULL, NULL);
+    result = auth(context, OP_IPROP, client_princ,
+		  NULL, NULL, NULL, NULL, NULL, 0);
     krb5_free_principal(context, client_princ);
     return result;
 }
