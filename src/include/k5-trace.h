@@ -253,6 +253,13 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_INIT_CREDS_SERVICE(c, service)                    \
     TRACE(c, "Setting initial creds service to {str}", service)
 
+#define TRACE_KADM5_AUTH_VTINIT_FAIL(c, ret)                            \
+    TRACE(c, "kadm5_auth module failed to init vtable: {kerr}", ret)
+#define TRACE_KADM5_AUTH_INIT_FAIL(c, name, ret)                        \
+    TRACE(c, "kadm5_auth module {str} failed to init: {kerr}", ret)
+#define TRACE_KADM5_AUTH_INIT_SKIP(c, name)                             \
+    TRACE(c, "kadm5_auth module {str} declined to initialize", name)
+
 #define TRACE_KT_GET_ENTRY(c, keytab, princ, vno, enctype, err)         \
     TRACE(c, "Retrieving {princ} from {keytab} (vno {int}, enctype {etype}) " \
           "with result: {kerr}", princ, keytab, (int) vno, enctype, err)

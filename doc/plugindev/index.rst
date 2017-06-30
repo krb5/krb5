@@ -25,6 +25,7 @@ Contents
    ccselect.rst
    pwqual.rst
    kadm5_hook.rst
+   kadm5_auth.rst
    hostrealm.rst
    localauth.rst
    locate.rst
