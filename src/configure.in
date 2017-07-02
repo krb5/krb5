@@ -1421,6 +1421,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/hostrealm/test
 	plugins/localauth/test
 	plugins/kadm5_hook/test
+	plugins/kadm5_auth/test
 	plugins/pwqual/test
 	plugins/audit
 	plugins/audit/test

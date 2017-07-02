@@ -296,4 +296,19 @@ kadmin_as(all_extract, ['ktadd', '-norandkey', 'extractkeys'])
 realm.kinit('extractkeys', flags=['-k'])
 os.remove(realm.keytab)
 
+# Verify that self-service key changes require an initial ticket.
+realm.run([kadminl, 'cpw', '-pw', password('none'), 'none'])
+realm.run([kadminl, 'modprinc', '+allow_tgs_req', 'kadmin/admin'])
+realm.kinit('none', password('none'))
+realm.run([kvno, 'kadmin/admin'])
+msg = 'Operation requires initial ticket'
+realm.run([kadmin, '-c', realm.ccache, 'cpw', '-pw', 'newpw', 'none'],
+          expected_code=1, expected_msg=msg)
+realm.run([kadmin, '-c', realm.ccache, 'cpw', '-pw', 'newpw',
+           '-e', 'aes256-cts', 'none'], expected_code=1, expected_msg=msg)
+realm.run([kadmin, '-c', realm.ccache, 'cpw', '-randkey', 'none'],
+          expected_code=1, expected_msg=msg)
+realm.run([kadmin, '-c', realm.ccache, 'cpw', '-randkey', '-e', 'aes256-cts',
+           'none'], expected_code=1, expected_msg=msg)
+
 success('kadmin ACL enforcement')
