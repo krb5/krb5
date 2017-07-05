@@ -437,10 +437,16 @@ process_checksum(OM_uint32 *minor_status,
     krb5_data option;
     krb5_checksum reqcksum;
     unsigned char *ptr, *ptr2;
+    int is_null_cb = 0;
+    int is_valid_cb = 0;
+    int has_cb_success = 0;
 
     reqcksum.contents = 0;
 
     if (authdat->checksum == NULL) {
+        /* NULL checksum does not provide channel bindings */
+        is_null_cb = 1;
+
         /*
          * Some SMB client implementations use handcrafted GSSAPI code that
          * does not provide a checksum.  MS-KILE documents that the Microsoft
@@ -450,6 +456,9 @@ process_checksum(OM_uint32 *minor_status,
          */
         *gss_flags = 0;
     } else if (authdat->checksum->checksum_type != CKSUMTYPE_KG_CB) {
+        /* An unstructured checksum does not provide channel bindings */
+        is_null_cb = 1;
+
         /* Samba does not send 0x8003 GSS-API checksums */
         *code = krb5_auth_con_getkey_k(context, auth_context, &subkey);
         if (*code) {
@@ -538,13 +547,27 @@ process_checksum(OM_uint32 *minor_status,
         TREAD_STR(ptr, ptr2, reqcksum.length);
 
         if (input_chan_bindings != GSS_C_NO_CHANNEL_BINDINGS) {
-            if (memcmp(ptr2, reqcksum.contents, reqcksum.length) != 0) {
+            /*
+             * Perform a constant-time check for channel bindings and whether
+             * they match.
+             */
+            zero.length = reqcksum.length;
+            zero.data = calloc(1, sizeof(unsigned char) * reqcksum.length);
+
+            is_null_cb = k5_bcmp(zero.data, ptr2, reqcksum.length) == 0;
+            is_valid_cb = k5_bcmp(reqcksum.contents, ptr2,
+                                  reqcksum.length) == 0;
+
+            if (!is_null_cb && !is_valid_cb) {
                 xfree(reqcksum.contents);
                 reqcksum.contents = 0;
                 *code = 0;
                 major_status = GSS_S_BAD_BINDINGS;
                 goto fail;
             }
+
+            if (!is_null_cb)
+                has_cb_success = 1;
         }
 
         xfree(reqcksum.contents);
@@ -627,7 +650,19 @@ process_checksum(OM_uint32 *minor_status,
         }
     }
 
+    if ((is_null_cb &&
+        (input_chan_bindings != GSS_C_NO_CHANNEL_BINDINGS) &&
+        (ctx->ret_flags_understood & GSS_C_CB_CONFIRM_FLAG) == 0)) {
+        xfree(reqcksum.contents);
+        reqcksum.contents = 0;
+        *code = 0;
+        major_status = GSS_S_BAD_BINDINGS;
+    }
+
 fail:
+    if (has_cb_success)
+        *gss_flags |= GSS_C_CHANNEL_BOUND_FLAG;
+
     if (reqcksum.contents)
         xfree(reqcksum.contents);
 
@@ -707,6 +742,7 @@ kg_accept_krb5(minor_status, context_handle,
     token.value = 0;
     ap_req.data = 0;
     ap_rep.data = 0;
+    ctx->gss_flags = 0;
 
     if (mech_type)
         *mech_type = GSS_C_NULL_OID;
@@ -931,12 +967,14 @@ kg_accept_krb5(minor_status, context_handle,
     ctx->mech_used = (gss_OID) mech_used;
     ctx->auth_context = auth_context;
     ctx->initiate = 0;
-    ctx->gss_flags = (GSS_C_TRANS_FLAG |
+    ctx->gss_flags |= (GSS_C_TRANS_FLAG |
                       ((gss_flags) & (GSS_C_INTEG_FLAG | GSS_C_CONF_FLAG |
                                       GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
                                       GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG |
                                       GSS_C_DCE_STYLE | GSS_C_IDENTIFY_FLAG |
-                                      GSS_C_EXTENDED_ERROR_FLAG)));
+                                      GSS_C_EXTENDED_ERROR_FLAG |
+                                      GSS_C_CHANNEL_BOUND_FLAG)));
+
     ctx->seed_init = 0;
     ctx->cred_rcache = cred_rcache;
 
