@@ -412,6 +412,9 @@ kg_process_extension(krb5_context context,
  * length, 16-byte channel bindings, 4-byte flags) */
 #define MIN_8003_LEN (4 + CB_MD5_LEN + 4)
 
+/* A zero-value channel binding, for comparison */
+static const uint8_t null_cb[CB_MD5_LEN];
+
 /*
  * The krb5 GSS mech appropriates the authenticator checksum field from RFC
  * 4120 to store structured data instead of a checksum, indicated with checksum
@@ -436,6 +439,7 @@ process_checksum(OM_uint32 *minor_status, krb5_gss_ctx_id_t ctx,
     OM_uint32 status, option_id;
     size_t cb_len, option_len;
     krb5_boolean token_deleg_flag, valid;
+    krb5_boolean token_cb_present = FALSE, cb_match = FALSE;
     krb5_key subkey;
     krb5_data option, empty = empty_data();
     krb5_checksum cb_cksum;
@@ -500,7 +504,9 @@ process_checksum(OM_uint32 *minor_status, krb5_gss_ctx_id_t ctx,
                 goto fail;
             }
             assert(cb_cksum.length == cb_len);
-            if (k5_bcmp(token_cb, cb_cksum.contents, cb_len) != 0) {
+            token_cb_present = (k5_bcmp(token_cb, null_cb, cb_len) != 0);
+            cb_match = (k5_bcmp(token_cb, cb_cksum.contents, cb_len) == 0);
+            if (token_cb_present && !cb_match) {
                 status = GSS_S_BAD_BINDINGS;
                 goto fail;
             }
@@ -560,7 +566,17 @@ process_checksum(OM_uint32 *minor_status, krb5_gss_ctx_id_t ctx,
         }
     }
 
+    /* If the acceptor provided channel bindings, allow the initiator to omit
+     * them only if the acceptor understands the channel-bound flag. */
+    if (acceptor_cb != GSS_C_NO_CHANNEL_BINDINGS && !token_cb_present &&
+        !(ctx->ret_flags_understood & GSS_C_CHANNEL_BOUND_FLAG)) {
+        status = GSS_S_BAD_BINDINGS;
+        goto fail;
+    }
+
     status = GSS_S_COMPLETE;
+    if (cb_match)
+        *flags_out |= GSS_C_CHANNEL_BOUND_FLAG;
 
 fail:
     free(cb_cksum.contents);
@@ -822,7 +838,9 @@ kg_accept_krb5(minor_status, ctx, verifier_cred_handle, input_token,
                                       GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
                                       GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG |
                                       GSS_C_DCE_STYLE | GSS_C_IDENTIFY_FLAG |
-                                      GSS_C_EXTENDED_ERROR_FLAG)));
+                                      GSS_C_EXTENDED_ERROR_FLAG |
+                                      GSS_C_CHANNEL_BOUND_FLAG)));
+
     ctx->seed_init = 0;
     ctx->cred_rcache = cred_rcache;
 

@@ -583,6 +583,8 @@ gss_store_cred_into(
  * https://tools.ietf.org/html/draft-ietf-kitten-channel-bound-flag-03
  */
 
+#define GSS_C_CHANNEL_BOUND_FLAG 2048 /* 0x00000800 */
+
 OM_uint32 KRB5_CALLCONV
 gss_create_sec_context(
     OM_uint32 *,                /* minor_status */
