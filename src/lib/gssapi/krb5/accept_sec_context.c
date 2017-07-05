@@ -427,6 +427,9 @@ kg_process_extension(krb5_context context,
                          GSS_C_SEQUENCE_FLAG | GSS_C_DCE_STYLE |        \
                          GSS_C_IDENTIFY_FLAG | GSS_C_EXTENDED_ERROR_FLAG)
 
+/* A zero-value channel binding, for comparison */
+static const uint8_t null_cb[CB_MD5_LEN];
+
 /*
  * The krb5 GSS mech appropriates the authenticator checksum field from RFC
  * 4120 to store structured data instead of a checksum, indicated with checksum
@@ -435,9 +438,10 @@ kg_process_extension(krb5_context context,
  *
  * Interpret the checksum.  Read delegated creds into *deleg_out if it is not
  * NULL.  Set *flags_out to the allowed subset of token flags, plus
- * GSS_C_DELEG_FLAG if a delegated credential was present.  Process any
- * extensions found using exts.  On error, set *code_out to a krb5_error code
- * for use as a minor status value.
+ * GSS_C_DELEG_FLAG if a delegated credential was present and
+ * GSS_C_CHANNEL_BOUND_FLAG if matching channel bindings are present.  Process
+ * any extensions found using exts.  On error, set *code_out to a krb5_error
+ * code for use as a minor status value.
  */
 static OM_uint32
 process_checksum(OM_uint32 *minor_status, krb5_context context,
@@ -450,7 +454,7 @@ process_checksum(OM_uint32 *minor_status, krb5_context context,
     krb5_error_code code = 0;
     OM_uint32 status, option_id, token_flags;
     size_t cb_len, option_len;
-    krb5_boolean valid;
+    krb5_boolean valid, token_cb_present = FALSE, cb_match = FALSE;
     krb5_key subkey;
     krb5_data option, empty = empty_data();
     krb5_checksum cb_cksum;
@@ -516,7 +520,9 @@ process_checksum(OM_uint32 *minor_status, krb5_context context,
                 goto fail;
             }
             assert(cb_cksum.length == cb_len);
-            if (k5_bcmp(token_cb, cb_cksum.contents, cb_len) != 0) {
+            token_cb_present = (k5_bcmp(token_cb, null_cb, cb_len) != 0);
+            cb_match = (k5_bcmp(token_cb, cb_cksum.contents, cb_len) == 0);
+            if (token_cb_present && !cb_match) {
                 status = GSS_S_BAD_BINDINGS;
                 goto fail;
             }
@@ -525,6 +531,8 @@ process_checksum(OM_uint32 *minor_status, krb5_context context,
         /* Read the token flags and accept some of them as context flags. */
         token_flags = k5_input_get_uint32_le(&in);
         *flags_out = token_flags & INITIATOR_FLAGS;
+        if (cb_match)
+            *flags_out |= GSS_C_CHANNEL_BOUND_FLAG;
 
         /* Read the delegated credential if present. */
         if (in.len >= 4 && (token_flags & GSS_C_DELEG_FLAG)) {

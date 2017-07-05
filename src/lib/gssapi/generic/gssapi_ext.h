@@ -595,6 +595,8 @@ gss_store_cred_into(
  * attribute (along with any applicable RFC 5587 attributes).
  */
 
+#define GSS_C_CHANNEL_BOUND_FLAG 2048 /* 0x00000800 */
+
 OM_uint32 KRB5_CALLCONV
 gssspi_query_meta_data(
     OM_uint32 *minor_status,
