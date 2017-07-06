@@ -169,7 +169,7 @@ if test "$enable_thread_support" = yes ; then
 fi
 dnl Maybe this should be inside the conditional above?  Doesn't cache....
 if test "$enable_thread_support" = yes; then
-  ACX_PTHREAD(,[AC_MSG_ERROR([cannot determine options for enabling thread support; try --disable-thread-support])])
+  AX_PTHREAD(,[AC_MSG_ERROR([cannot determine options for enabling thread support; try --disable-thread-support])])
   AC_MSG_NOTICE(PTHREAD_CC = $PTHREAD_CC)
   AC_MSG_NOTICE(PTHREAD_CFLAGS = $PTHREAD_CFLAGS)
   AC_MSG_NOTICE(PTHREAD_LIBS = $PTHREAD_LIBS)
@@ -1647,8 +1647,8 @@ if test $krb5_cv_pragma_weak_ref = yes ; then
 fi])
 dnl
 dnl
-m4_include(config/ac-archive/acx_pthread.m4)
-m4_include(config/ac-archive/relpaths.m4)
+m4_include(config/ac-archive/ax_pthread.m4)
+m4_include(config/ac-archive/ax_recursive_eval.m4)
 dnl
 dnl
 dnl

@@ -1362,7 +1362,7 @@ if test "${DEFKTNAME+set}" != set; then
 	DEFKTNAME=FILE:/etc/krb5.keytab
 fi
 if test "${DEFCKTNAME+set}" != set; then
-	adl_RECURSIVE_EVAL($localstatedir, exp_localstatedir)
+	AX_RECURSIVE_EVAL($localstatedir, exp_localstatedir)
 	DEFCKTNAME=FILE:$exp_localstatedir/krb5/user/%{euid}/client.keytab
 fi
 AC_MSG_NOTICE([Default ccache name: $DEFCCNAME])
