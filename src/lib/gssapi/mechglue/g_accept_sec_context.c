@@ -253,6 +253,18 @@ gss_cred_id_t *		d_cred;
 	    if (status != GSS_S_COMPLETE)
 		goto error_out;
 	}
+
+	if (mech->gss_set_context_flags != NULL &&
+	    (union_ctx_id->req_flags != 0 ||
+	    union_ctx_id->ret_flags_understood != 0)) {
+	    status = mech->gss_set_context_flags(
+	        &temp_minor_status,
+	        union_ctx_id->internal_ctx_id,
+	        union_ctx_id->req_flags,
+	        union_ctx_id->ret_flags_understood);
+	    if (status != GSS_S_COMPLETE)
+		return status;
+	}
     }
 
     /*
@@ -404,7 +416,6 @@ error_out:
     if (tmp_src_name != GSS_C_NO_NAME)
 	(void) gss_release_buffer(&temp_minor_status,
 				  (gss_buffer_t)tmp_src_name);
-
     return (status);
 }
 #endif /* LEAN_CLIENT */

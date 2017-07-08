@@ -110,6 +110,8 @@ typedef struct {
 	OM_uint32 ctx_flags;
 	gss_name_t internal_name;
 	gss_OID actual_mech;
+	uint64_t req_flags;
+	uint64_t ret_flags_understood;
 } spnego_gss_ctx_id_rec, *spnego_gss_ctx_id_t;
 
 /*
@@ -665,6 +667,14 @@ OM_uint32 KRB5_CALLCONV
 spnego_gss_create_sec_context(
 	OM_uint32 *minor_status,
 	gss_ctx_id_t *context
+);
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_set_context_flags(
+	OM_uint32 *minor_status,
+	gss_ctx_id_t context,
+	uint64_t req_flags,
+	uint64_t ret_flags_understood
 );
 
 #ifdef	__cplusplus

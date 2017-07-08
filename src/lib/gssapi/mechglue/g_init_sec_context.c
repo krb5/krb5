@@ -204,7 +204,22 @@ OM_uint32 *		time_rec;
 	    if (status != GSS_S_COMPLETE)
 		goto end;
 	}
+
+	if (mech->gss_set_context_flags != NULL &&
+            (union_ctx_id->req_flags != 0 ||
+            union_ctx_id->ret_flags_understood != 0)) {
+	    status = mech->gss_set_context_flags(
+	        &temp_minor_status,
+	        union_ctx_id->internal_ctx_id,
+	        union_ctx_id->req_flags,
+	        union_ctx_id->ret_flags_understood);
+	    if (status != GSS_S_COMPLETE)
+	        goto end;
+	}
     }
+
+    if (req_flags == 0)
+	req_flags = union_ctx_id->req_flags;
 
     /*
      * get the appropriate cred handle from the union cred struct.

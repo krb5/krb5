@@ -799,6 +799,24 @@ iakerb_gss_create_sec_context(OM_uint32 *minor_status,
 }
 
 OM_uint32 KRB5_CALLCONV
+iakerb_gss_set_context_flags(OM_uint32 *minor_status,
+                             gss_ctx_id_t context_handle,
+                             uint64_t req_flags,
+                             uint64_t ret_flags_understood)
+{
+    iakerb_ctx_id_t ctx = (iakerb_ctx_id_t)context_handle;
+
+    if (ctx == NULL || ctx->gssc == NULL) {
+        if (minor_status != NULL)
+            *minor_status = 0;
+        return GSS_S_FAILURE | GSS_S_NO_CONTEXT;
+    }
+
+    return krb5_gss_set_context_flags(minor_status, ctx->gssc, req_flags,
+                                      ret_flags_understood);
+}
+
+OM_uint32 KRB5_CALLCONV
 iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
                               gss_cred_id_t verifier_cred_handle,

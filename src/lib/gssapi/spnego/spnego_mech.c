@@ -283,6 +283,7 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_verify_mic_iov,
 	spnego_gss_get_mic_iov_length,
 	spnego_gss_create_sec_context,
+	spnego_gss_set_context_flags
 };
 
 #ifdef _GSS_STATIC_LINK
@@ -911,6 +912,19 @@ init_ctx_call_init(OM_uint32 *minor_status,
 		ret = gss_create_sec_context(minor_status, &sc->ctx_handle);
 		if (ret != GSS_S_COMPLETE)
 			return ret;
+
+		if (sc->req_flags != 0 || sc->ret_flags_understood != 0) {
+			ret = gss_set_context_flags(minor_status,
+			                            sc->ctx_handle,
+			                            sc->req_flags,
+			                            sc->ret_flags_understood);
+			if (ret != GSS_S_COMPLETE) {
+				gss_delete_sec_context(minor_status,
+				                       &sc->ctx_handle,
+				                       GSS_C_NO_BUFFER);
+				return ret;
+			}
+		}
 	}
 
 	ret = gss_init_sec_context(minor_status,
@@ -1553,6 +1567,19 @@ acc_ctx_call_acc(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 		ret = gss_create_sec_context(minor_status, &sc->ctx_handle);
 		if (ret != GSS_S_COMPLETE)
 			return ret;
+
+		if (sc->req_flags != 0 || sc->ret_flags_understood != 0) {
+			ret = gss_set_context_flags(minor_status,
+			                            sc->ctx_handle,
+			                            sc->req_flags,
+			                            sc->ret_flags_understood);
+			if (ret != GSS_S_COMPLETE) {
+				gss_delete_sec_context(minor_status,
+				                       &sc->ctx_handle,
+				                       GSS_C_NO_BUFFER);
+				return ret;
+			}
+		}
 	}
 
 	mcred = (spcred == NULL) ? GSS_C_NO_CREDENTIAL : spcred->mcred;
@@ -3055,6 +3082,29 @@ spnego_gss_create_sec_context(OM_uint32 *minor_status,
 	ctx = create_spnego_ctx(0);
 
 	*context = (gss_ctx_id_t)ctx;
+
+	return GSS_S_COMPLETE;
+}
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_set_context_flags(OM_uint32 *minor_status,
+                             gss_ctx_id_t context,
+                             uint64_t req_flags,
+                             uint64_t ret_flags_understood)
+{
+	spnego_gss_ctx_id_t ctx;
+
+	if (context == GSS_C_NO_CONTEXT) {
+		return GSS_S_FAILURE | GSS_S_NO_CONTEXT;
+	}
+
+	ctx = (spnego_gss_ctx_id_t)context;
+	if (ctx->magic_num != SPNEGO_MAGIC_ID) {
+		return GSS_S_FAILURE | GSS_S_NO_CONTEXT;
+	}
+
+	ctx->req_flags = req_flags;
+	ctx->ret_flags_understood = ret_flags_understood;
 
 	return GSS_S_COMPLETE;
 }
