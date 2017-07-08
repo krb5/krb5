@@ -257,6 +257,8 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_cksumtype acceptor_subkey_cksumtype;
     int cred_rcache;             /* did we get rcache from creds? */
     krb5_authdata **authdata;
+    uint64_t req_flags;
+    uint64_t ret_flags_understood;
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern g_set kg_vdb;
@@ -638,6 +640,13 @@ OM_uint32 KRB5_CALLCONV krb5_gss_accept_sec_context_ext
 OM_uint32 KRB5_CALLCONV krb5_gss_create_sec_context
 (OM_uint32*,        /* minor_status */
  gss_ctx_id_t*      /* context */
+);
+
+OM_uint32 KRB5_CALLCONV krb5_gss_set_context_flags
+(OM_uint32*,        /* minor_status */
+ gss_ctx_id_t,      /* context */
+ uint64_t,          /* req_flags */
+ uint64_t           /* ret_flags_understood */
 );
 
 OM_uint32 KRB5_CALLCONV krb5_gss_inquire_sec_context_by_oid
@@ -1449,6 +1458,12 @@ iakerb_gss_pseudo_random(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
 OM_uint32 KRB5_CALLCONV
 iakerb_gss_create_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle);
+
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_set_context_flags(OM_uint32 *minor_status,
+                             gss_ctx_id_t context_handle,
+                             uint64_t req_flags,
+                             uint64_t ret_flags_understood);
 
 /* Magic string to identify exported krb5 GSS credentials.  Increment this if
  * the format changes. */

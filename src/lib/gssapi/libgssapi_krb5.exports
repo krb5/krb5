@@ -132,6 +132,7 @@ gss_release_name
 gss_release_oid
 gss_release_oid_set
 gss_seal
+gss_set_context_flags
 gss_set_name_attribute
 gss_set_neg_mechs
 gss_set_sec_context_option

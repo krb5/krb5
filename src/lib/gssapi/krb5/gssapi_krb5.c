@@ -839,6 +839,17 @@ krb5_gss_create_sec_context(OM_uint32 *minor, gss_ctx_id_t *context)
     return GSS_S_COMPLETE;
 }
 
+OM_uint32 KRB5_CALLCONV
+krb5_gss_set_context_flags(OM_uint32 *minor_status, gss_ctx_id_t context,
+                           uint64_t req_flags, uint64_t ret_flags_understood)
+{
+    krb5_gss_ctx_id_t ctx = (krb5_gss_ctx_id_t)context;
+
+    ctx->req_flags = req_flags;
+    ctx->ret_flags_understood = ret_flags_understood;
+    return GSS_S_COMPLETE;
+}
+
 static struct gss_config krb5_mechanism = {
     { GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID },
     NULL,
@@ -929,6 +940,7 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_verify_mic_iov,
     krb5_gss_get_mic_iov_length,
     krb5_gss_create_sec_context,
+    krb5_gss_set_context_flags
 };
 
 /* Functions which use security contexts or acquire creds are IAKERB-specific;
@@ -1022,6 +1034,7 @@ static struct gss_config iakerb_mechanism = {
     iakerb_gss_verify_mic_iov,
     iakerb_gss_get_mic_iov_length,
     iakerb_gss_create_sec_context,
+    iakerb_gss_set_context_flags
 };
 
 #ifdef _GSS_STATIC_LINK

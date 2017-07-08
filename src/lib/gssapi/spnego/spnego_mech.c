@@ -282,6 +282,7 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_verify_mic_iov,
 	spnego_gss_get_mic_iov_length,
 	spnego_gss_create_sec_context,
+	spnego_gss_set_context_flags
 };
 
 #ifdef _GSS_STATIC_LINK
@@ -471,8 +472,29 @@ create_spnego_ctx(int initiate)
 	spnego_ctx->initiate = initiate;
 	spnego_ctx->internal_name = GSS_C_NO_NAME;
 	spnego_ctx->actual_mech = GSS_C_NO_OID;
+	spnego_ctx->req_flags = 0;
+	spnego_ctx->ret_flags_understood = 0;
 
 	return (spnego_ctx);
+}
+
+/* If necessary, create sc->ctx_handle and set flags on it before a call
+ * to gss_init_sec_context() or gss_accept_sec_context(). */
+static OM_uint32
+prepare_mech_context(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc)
+{
+	OM_uint32 major;
+
+	/* We only need to prepare a union context if we have flags to set. */
+	if (sc->req_flags == 0 && sc->ret_flags_understood == 0)
+		return GSS_S_COMPLETE;
+
+	major = gss_create_sec_context(minor_status, &sc->ctx_handle);
+	if (major != GSS_S_COMPLETE)
+		return major;
+
+	return gss_set_context_flags(minor_status, sc->ctx_handle,
+				     sc->req_flags, sc->ret_flags_understood);
 }
 
 /* iso(1) org(3) dod(6) internet(1) private(4) enterprises(1) samba(7165)
@@ -904,6 +926,10 @@ init_ctx_call_init(OM_uint32 *minor_status,
 	mech_req_flags = req_flags;
 	if (spcred == NULL || !spcred->no_ask_integ)
 		mech_req_flags |= GSS_C_INTEG_FLAG;
+
+	ret = prepare_mech_context(minor_status, sc);
+	if (ret)
+		return ret;
 
 	ret = gss_init_sec_context(minor_status,
 				   mcred,
@@ -1519,6 +1545,10 @@ acc_ctx_call_acc(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 		}
 		ret = acc_ctx_vfy_oid(minor_status, sc, &mechoid,
 				      negState, tokflag);
+		if (ret != GSS_S_COMPLETE)
+			return ret;
+
+		ret = prepare_mech_context(minor_status, sc);
 		if (ret != GSS_S_COMPLETE)
 			return ret;
 	}
@@ -3009,6 +3039,17 @@ spnego_gss_create_sec_context(OM_uint32 *minor_status, gss_ctx_id_t *context)
 {
 	*context = (gss_ctx_id_t)create_spnego_ctx(-1);
 	return (*context == NULL) ? GSS_S_FAILURE : GSS_S_COMPLETE;
+}
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_set_context_flags(OM_uint32 *minor_status, gss_ctx_id_t context,
+			     uint64_t req_flags, uint64_t ret_flags_understood)
+{
+	spnego_gss_ctx_id_t ctx = (spnego_gss_ctx_id_t)context;
+
+	ctx->req_flags = req_flags;
+	ctx->ret_flags_understood = ret_flags_understood;
+	return GSS_S_COMPLETE;
 }
 
 /*
