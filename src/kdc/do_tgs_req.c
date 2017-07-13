@@ -823,7 +823,8 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     free(reply.enc_part.ciphertext.data);
 
 cleanup:
-    assert(status != NULL);
+    if (status == NULL)
+        status = "UNKNOWN_REASON";
     if (reply_key)
         krb5_free_keyblock(kdc_context, reply_key);
     if (errcode)
