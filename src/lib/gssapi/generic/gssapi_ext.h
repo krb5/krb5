@@ -584,6 +584,9 @@ gss_store_cred_into(
  */
 
 #define GSS_C_CHANNEL_BOUND_FLAG 2048 /* 0x00000800 */
+#define GSS_C_CB_CONFIRM_FLAG 2048 /* 0x00000800 */
+
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_CBINDING_CONFIRM;
 
 OM_uint32 KRB5_CALLCONV
 gss_create_sec_context(
