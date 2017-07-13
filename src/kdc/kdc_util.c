@@ -1220,8 +1220,10 @@ kdc_process_for_user(kdc_realm_t *kdc_active_realm,
     req_data.data = (char *)pa_data->contents;
 
     code = decode_krb5_pa_for_user(&req_data, &for_user);
-    if (code)
+    if (code) {
+        *status = "DECODE_PA_FOR_USER";
         return code;
+    }
 
     code = verify_for_user_checksum(kdc_context, tgs_session, for_user);
     if (code) {
@@ -1320,8 +1322,10 @@ kdc_process_s4u_x509_user(krb5_context context,
     req_data.data = (char *)pa_data->contents;
 
     code = decode_krb5_pa_s4u_x509_user(&req_data, s4u_x509_user);
-    if (code)
+    if (code) {
+        *status = "DECODE_PA_S4U_X509_USER";
         return code;
+    }
 
     code = verify_s4u_x509_user_checksum(context,
                                          tgs_subkey ? tgs_subkey :
@@ -1624,6 +1628,7 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm,
      * that is validated previously in validate_tgs_request().
      */
     if (request->kdc_options & (NON_TGT_OPTION | KDC_OPT_ENC_TKT_IN_SKEY)) {
+        *status = "INVALID_S4U2PROXY_OPTIONS";
         return KRB5KDC_ERR_BADOPTION;
     }
 
@@ -1631,6 +1636,7 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm,
     if (!krb5_principal_compare(kdc_context,
                                 server->princ, /* after canon */
                                 server_princ)) {
+        *status = "EVIDENCE_TICKET_MISMATCH";
         return KRB5KDC_ERR_SERVER_NOMATCH;
     }
 

@@ -365,8 +365,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     did_log = 1;
 
 egress:
-    if (errcode != 0)
-        assert (state->status != 0);
+    if (errcode != 0 && state->status == NULL)
+        state->status = "UNKNOWN_REASON";
 
     au_state->status = state->status;
     au_state->reply = &state->reply;
