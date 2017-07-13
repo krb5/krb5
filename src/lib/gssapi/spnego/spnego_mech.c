@@ -96,10 +96,11 @@ static gss_OID_set get_mech_set(OM_uint32 *, unsigned char **, unsigned int);
 static OM_uint32 get_req_flags(unsigned char **, OM_uint32, OM_uint32 *);
 static OM_uint32 get_available_mechs(OM_uint32 *, gss_name_t, gss_cred_usage_t,
 				     gss_const_key_value_set_t,
-				     gss_cred_id_t *, gss_OID_set *,
-				     OM_uint32 *);
+				     gss_cred_id_t *, gss_OID_set,
+				     gss_OID_set *, OM_uint32 *);
 static OM_uint32 get_negotiable_mechs(OM_uint32 *, spnego_gss_cred_id_t,
-				      gss_cred_usage_t, gss_OID_set *);
+				      gss_cred_usage_t, gss_OID_set,
+				      gss_OID_set *);
 static void release_spnego_ctx(spnego_gss_ctx_id_t *);
 static void clean_spnego_ctx(spnego_gss_ctx_id_t *);
 static spnego_gss_ctx_id_t create_spnego_ctx(int);
@@ -401,7 +402,7 @@ spnego_gss_acquire_cred_from(OM_uint32 *minor_status,
 	 */
 	status = get_available_mechs(minor_status, desired_name,
 				     cred_usage, cred_store, &mcred,
-				     &amechs, time_rec);
+				     GSS_C_NO_OID_SET, &amechs, time_rec);
 
 	if (actual_mechs && amechs != GSS_C_NULL_OID_SET) {
 		(void) gssint_copy_oid_set(&tmpmin, amechs, actual_mechs);
@@ -660,13 +661,30 @@ init_ctx_new(OM_uint32 *minor_status,
 {
 	OM_uint32 ret;
 	spnego_gss_ctx_id_t sc = NULL;
+	gss_OID_set desired_attrs = GSS_C_NO_OID_SET;
 
 	sc = *sc_out;
 	sc->initiate = 1;
 
+#if 0
+	/* Enable once mechanisms support CBINDING_MAY_CONFIRM */
+	if (sc->req_flags & GSS_C_CB_CONFIRM_FLAG) {
+		sc->req_flags |= GSS_C_MUTUAL_FLAG;
+		ret = gss_create_empty_oid_set(minor_status, &desired_attrs);
+		if (ret != GSS_S_COMPLETE)
+			return ret;
+
+		ret = gss_add_oid_set_member(
+		    minor_status,
+		    (gss_OID)GSS_C_MA_CBINDING_MAY_CONFIRM,
+		    &desired_attrs);
+		if (ret != GSS_S_COMPLETE)
+			return ret;
+	}
+#endif
 	/* determine negotiation mech set */
 	ret = get_negotiable_mechs(minor_status, spcred, GSS_C_INITIATE,
-				   &sc->mech_set);
+				   desired_attrs, &sc->mech_set);
 	if (ret != GSS_S_COMPLETE)
 		goto cleanup;
 
@@ -1301,7 +1319,7 @@ acc_ctx_hints(OM_uint32 *minor_status,
 	*minor_status = 0;
 
 	ret = get_negotiable_mechs(minor_status, spcred, GSS_C_ACCEPT,
-				   &supported_mechSet);
+				   GSS_C_NO_OID_SET, &supported_mechSet);
 	if (ret != GSS_S_COMPLETE)
 		goto cleanup;
 
@@ -1377,7 +1395,7 @@ acc_ctx_new(OM_uint32 *minor_status,
 		goto cleanup;
 	}
 	ret = get_negotiable_mechs(minor_status, spcred, GSS_C_ACCEPT,
-				   &supported_mechSet);
+				   GSS_C_NO_OID_SET, &supported_mechSet);
 	if (ret != GSS_S_COMPLETE) {
 		*return_token = NO_TOKEN_SEND;
 		goto cleanup;
@@ -1969,6 +1987,7 @@ spnego_gss_inquire_cred(
 			GSS_C_BOTH,
 			GSS_C_NO_CRED_STORE,
 			&creds,
+			GSS_C_NO_OID_SET,
 			mechanisms, NULL);
 		if (status != GSS_S_COMPLETE) {
 			dsyslog("Leaving inquire_cred\n");
@@ -2730,7 +2749,8 @@ spnego_gss_acquire_cred_with_password(OM_uint32 *minor_status,
 
 	status = get_available_mechs(minor_status, desired_name,
 				     cred_usage, GSS_C_NO_CRED_STORE,
-				     NULL, &amechs, NULL);
+				     NULL, GSS_C_NO_OID_SET,
+				     &amechs, NULL);
 	if (status != GSS_S_COMPLETE)
 	    goto cleanup;
 
@@ -3185,7 +3205,8 @@ static OM_uint32
 get_available_mechs(OM_uint32 *minor_status,
 	gss_name_t name, gss_cred_usage_t usage,
 	gss_const_key_value_set_t cred_store,
-	gss_cred_id_t *creds, gss_OID_set *rmechs, OM_uint32 *time_rec)
+	gss_cred_id_t *creds, gss_OID_set desired_attrs,
+	gss_OID_set *rmechs, OM_uint32 *time_rec)
 {
 	unsigned int	i;
 	int		found = 0;
@@ -3271,7 +3292,8 @@ get_available_mechs(OM_uint32 *minor_status,
  */
 static OM_uint32
 get_negotiable_mechs(OM_uint32 *minor_status, spnego_gss_cred_id_t spcred,
-		     gss_cred_usage_t usage, gss_OID_set *rmechs)
+		     gss_cred_usage_t usage, gss_OID_set desired_attrs,
+		     gss_OID_set *rmechs)
 {
 	OM_uint32 ret, tmpmin;
 	gss_cred_id_t creds = GSS_C_NO_CREDENTIAL, *credptr;
@@ -3289,7 +3311,7 @@ get_negotiable_mechs(OM_uint32 *minor_status, spnego_gss_cred_id_t spcred,
 		credptr = (usage == GSS_C_INITIATE) ? &creds : NULL;
 		ret = get_available_mechs(minor_status, GSS_C_NO_NAME, usage,
 					  GSS_C_NO_CRED_STORE, credptr,
-					  rmechs, NULL);
+					  desired_attrs, rmechs, NULL);
 		gss_release_cred(&tmpmin, &creds);
 		return (ret);
 	}
