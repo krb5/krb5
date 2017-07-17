@@ -240,10 +240,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     state->reply.ticket = &state->ticket_reply;
     state->reply_encpart.session = &state->session_key;
     if ((errcode = fetch_last_req_info(state->client,
-                                       &state->reply_encpart.last_req))) {
-        state->status = "FETCH_LAST_REQ";
+                                       &state->reply_encpart.last_req)))
         goto egress;
-    }
     state->reply_encpart.nonce = state->request->nonce;
     state->reply_encpart.key_exp = get_key_exp(state->client);
     state->reply_encpart.flags = state->enc_tkt_reply.flags;
@@ -301,27 +299,21 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
 
     errcode = krb5_encrypt_tkt_part(kdc_context, &state->server_keyblock,
                                     &state->ticket_reply);
-    if (errcode) {
-        state->status = "ENCRYPT_TICKET";
+    if (errcode)
         goto egress;
-    }
 
     errcode = kau_make_tkt_id(kdc_context, &state->ticket_reply,
                               &au_state->tkt_out_id);
-    if (errcode) {
-        state->status = "GENERATE_TICKET_ID";
+    if (errcode)
         goto egress;
-    }
 
     state->ticket_reply.enc_part.kvno = server_key->key_data_kvno;
     errcode = kdc_fast_response_handle_padata(state->rstate,
                                               state->request,
                                               &state->reply,
                                               state->client_keyblock.enctype);
-    if (errcode) {
-        state->status = "MAKE_FAST_RESPONSE";
+    if (errcode)
         goto egress;
-    }
 
     /* now encode/encrypt the response */
 
@@ -329,10 +321,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
 
     errcode = kdc_fast_handle_reply_key(state->rstate, &state->client_keyblock,
                                         &as_encrypting_key);
-    if (errcode) {
-        state->status = "MAKE_FAST_REPLY_KEY";
+    if (errcode)
         goto egress;
-    }
     errcode = return_enc_padata(kdc_context, state->req_pkt, state->request,
                                 as_encrypting_key, state->server,
                                 &state->reply_encpart, FALSE);
@@ -349,10 +339,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                                   &state->reply, &response);
     if (state->client_key != NULL)
         state->reply.enc_part.kvno = state->client_key->key_data_kvno;
-    if (errcode) {
-        state->status = "ENCODE_KDC_REP";
+    if (errcode)
         goto egress;
-    }
 
     /* these parts are left on as a courtesy from krb5_encode_kdc_rep so we
        can use them in raw form if needed.  But, we don't... */
@@ -547,7 +535,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     if (fetch_asn1_field((unsigned char *) req_pkt->data,
                          1, 4, &encoded_req_body) != 0) {
         errcode = ASN1_BAD_ID;
-        state->status = "FETCH_REQ_BODY";
         goto errout;
     }
     errcode = kdc_find_fast(&state->request, &encoded_req_body, NULL, NULL,
@@ -560,10 +547,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         /* Not a FAST request; copy the encoded request body. */
         errcode = krb5_copy_data(kdc_context, &encoded_req_body,
                                  &state->inner_body);
-        if (errcode) {
-            state->status = "COPY_REQ_BODY";
+        if (errcode)
             goto errout;
-        }
     }
     au_state->request = state->request;
     state->rock.request = state->request;
@@ -578,10 +563,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
     if ((errcode = krb5_unparse_name(kdc_context,
                                      state->request->client,
-                                     &state->cname))) {
-        state->status = "UNPARSE_CLIENT";
+                                     &state->cname)))
         goto errout;
-    }
     limit_string(state->cname);
 
     if (!state->request->server) {
@@ -591,10 +574,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
     if ((errcode = krb5_unparse_name(kdc_context,
                                      state->request->server,
-                                     &state->sname))) {
-        state->status = "UNPARSE_SERVER";
+                                     &state->sname)))
         goto errout;
-    }
     limit_string(state->sname);
 
     /*
@@ -674,18 +655,14 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     au_state->stage = VALIDATE_POL;
 
-    if ((errcode = krb5_timeofday(kdc_context, &state->kdc_time))) {
-        state->status = "TIMEOFDAY";
+    if ((errcode = krb5_timeofday(kdc_context, &state->kdc_time)))
         goto errout;
-    }
     state->authtime = state->kdc_time; /* for audit_as_request() */
 
     if ((errcode = validate_as_request(kdc_active_realm,
                                        state->request, *state->client,
                                        *state->server, state->kdc_time,
                                        &state->status, &state->e_data))) {
-        if (!state->status)
-            state->status = "UNKNOWN_REASON";
         errcode += ERROR_TABLE_BASE_krb5;
         goto errout;
     }
@@ -705,10 +682,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
 
     if ((errcode = krb5_c_make_random_key(kdc_context, useenctype,
-                                          &state->session_key))) {
-        state->status = "MAKE_RANDOM_KEY";
+                                          &state->session_key)))
         goto errout;
-    }
 
     /*
      * Canonicalization is only effective if we are issuing a TGT
@@ -789,10 +764,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         state->request->client = NULL;
         errcode = krb5_copy_principal(kdc_context, krb5_anonymous_principal(),
                                       &state->request->client);
-        if (errcode) {
-            state->status = "COPY_ANONYMOUS_PRINCIPAL";
+        if (errcode)
             goto errout;
-        }
         state->enc_tkt_reply.client = state->request->client;
         setflag(state->client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH);
     }
