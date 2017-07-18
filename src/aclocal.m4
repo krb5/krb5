@@ -630,8 +630,16 @@ else
     # works, but it also means that declaration-in-code warnings won't
     # be issued.
     # -v -fd -errwarn=E_DECLARATION_IN_CODE ...
-    WARN_CFLAGS="-errtags=yes -errwarn=E_BAD_PTR_INT_COMBINATION,E_BAD_PTR_INT_COMB_ARG,E_PTR_TO_VOID_IN_ARITHMETIC,E_NO_IMPLICIT_DECL_ALLOWED,E_ATTRIBUTE_PARAM_UNDEFINED"
-    WARN_CXXFLAGS="-errtags=yes +w +w2 -xport64"
+    if test "x$krb5_ac_warn_cflags_set" = xset ; then
+      AC_MSG_NOTICE(not adding extra warning flags because WARN_CFLAGS was set)
+    else
+      WARN_CFLAGS="-errtags=yes -errwarn=E_BAD_PTR_INT_COMBINATION,E_BAD_PTR_INT_COMB_ARG,E_PTR_TO_VOID_IN_ARITHMETIC,E_NO_IMPLICIT_DECL_ALLOWED,E_ATTRIBUTE_PARAM_UNDEFINED"
+    fi
+    if test "x$krb5_ac_warn_cxxflags_set" = xset ; then
+      AC_MSG_NOTICE(not adding extra warning flags because WARN_CXXFLAGS was set)
+    else
+      WARN_CXXFLAGS="-errtags=yes +w +w2 -xport64"
+    fi
   fi
 fi
 AC_SUBST(WARN_CFLAGS)
