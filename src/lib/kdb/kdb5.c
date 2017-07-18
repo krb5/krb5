@@ -1220,11 +1220,12 @@ krb5_db_fetch_mkey(krb5_context context, krb5_principal mname,
             krb5_db_entry *master_entry;
 
             rc = krb5_db_get_principal(context, mname, 0, &master_entry);
-            if (rc == 0) {
+            if (rc == 0 && master_entry->n_key_data > 0)
                 *kvno = (krb5_kvno) master_entry->key_data->key_data_kvno;
-                krb5_db_free_principal(context, master_entry);
-            } else
+            else
                 *kvno = 1;
+            if (rc == 0)
+                krb5_db_free_principal(context, master_entry);
         }
 
         if (!salt)
