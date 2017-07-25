@@ -137,6 +137,14 @@ main(int argc, char *argv[])
         exit(1);
     }
 
+    if (cache_name != NULL) {
+        code = krb5_cc_set_default_name(context, cache_name);
+        if (code) {
+            com_err(progname, code, _("while setting default cache name"));
+            exit(1);
+        }
+    }
+
     if (all) {
         code = krb5_cccol_cursor_new(context, &cursor);
         if (code) {
@@ -162,18 +170,10 @@ main(int argc, char *argv[])
         return 0;
     }
 
-    if (cache_name != NULL) {
-        code = krb5_cc_resolve(context, cache_name, &cache);
-        if (code != 0) {
-            com_err(progname, code, _("while resolving %s"), cache_name);
-            exit(1);
-        }
-    } else {
-        code = krb5_cc_default(context, &cache);
-        if (code) {
-            com_err(progname, code, _("while getting default ccache"));
-            exit(1);
-        }
+    code = krb5_cc_default(context, &cache);
+    if (code) {
+        com_err(progname, code, _("while resolving ccache"));
+        exit(1);
     }
 
     code = krb5_cc_destroy(context, cache);

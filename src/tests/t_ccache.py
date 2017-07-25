@@ -57,6 +57,7 @@ realm.addprinc('bob', password('bob'))
 realm.addprinc('carol', password('carol'))
 
 def collection_test(realm, ccname):
+    oldccname = realm.env['KRB5CCNAME']
     realm.env['KRB5CCNAME'] = ccname
 
     realm.run([klist, '-A', '-s'], expected_code=1)
@@ -82,7 +83,7 @@ def collection_test(realm, ccname):
     if '---\nalice@' not in output or output.count('\n') != 4:
         fail('klist -l did not show expected output after re-kinit for alice.')
     realm.kinit('bob', password('bob'))
-    output = realm.run([klist, '-A'])
+    output = realm.run([klist, '-A', ccname])
     if 'bob@' not in output.splitlines()[1] or 'alice@' not in output or \
             'carol' not in output or output.count('Default principal:') != 3:
         fail('klist -A did not show expected output after kinit for bob.')
@@ -90,17 +91,22 @@ def collection_test(realm, ccname):
     output = realm.run([klist, '-l'])
     if '---\ncarol@' not in output or output.count('\n') != 5:
         fail('klist -l did not show expected output after kswitch to carol.')
-    realm.run([kdestroy])
-    output = realm.run([klist, '-l'])
+
+    # Switch to specifying the collection name on the command line
+    # (only works with klist/kdestroy for now, not kinit/kswitch).
+    realm.env['KRB5CCNAME'] = oldccname
+
+    realm.run([kdestroy, '-c', ccname])
+    output = realm.run([klist, '-l', ccname])
     if 'carol@' in output or 'bob@' not in output or output.count('\n') != 4:
         fail('kdestroy failed to remove only primary ccache.')
-    realm.run([klist, '-s'], expected_code=1)
-    realm.run([klist, '-A', '-s'])
-    realm.run([kdestroy, '-A'])
-    output = realm.run([klist, '-l'], expected_code=1)
+    realm.run([klist, '-s', ccname], expected_code=1)
+    realm.run([klist, '-A', '-s', ccname])
+    realm.run([kdestroy, '-A', '-c', ccname])
+    output = realm.run([klist, '-l', ccname], expected_code=1)
     if not output.endswith('---\n') or output.count('\n') != 2:
         fail('kdestroy -a failed to empty cache collection.')
-    realm.run([klist, '-A', '-s'], expected_code=1)
+    realm.run([klist, '-A', '-s', ccname], expected_code=1)
 
 
 collection_test(realm, 'DIR:' + os.path.join(realm.testdir, 'cc'))

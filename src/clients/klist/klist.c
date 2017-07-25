@@ -69,7 +69,7 @@ static void show_credential(krb5_creds *);
 static void list_all_ccaches(void);
 static int list_ccache(krb5_ccache);
 static void show_all_ccaches(void);
-static void do_ccache_name(char *);
+static void do_ccache(void);
 static int show_ccache(krb5_ccache);
 static int check_ccache(krb5_ccache);
 static void do_keytab(const char *);
@@ -242,12 +242,20 @@ main(int argc, char *argv[])
         exit(1);
     }
 
+    if (name != NULL && mode != KEYTAB) {
+        ret = krb5_cc_set_default_name(context, name);
+        if (ret) {
+            com_err(progname, ret, _("while setting default cache name"));
+            exit(1);
+        }
+    }
+
     if (list_all)
         list_all_ccaches();
     else if (show_all)
         show_all_ccaches();
     else if (mode == DEFAULT || mode == CCACHE)
-        do_ccache_name(name);
+        do_ccache();
     else
         do_keytab(name);
     return 0;
@@ -443,25 +451,16 @@ show_all_ccaches(void)
 }
 
 static void
-do_ccache_name(char *name)
+do_ccache()
 {
     krb5_error_code ret;
     krb5_ccache cache;
 
-    if (name == NULL) {
-        ret = krb5_cc_default(context, &cache);
-        if (ret) {
-            if (!status_only)
-                com_err(progname, ret, _("while getting default ccache"));
-            exit(1);
-        }
-    } else {
-        ret = krb5_cc_resolve(context, name, &cache);
-        if (ret) {
-            if (!status_only)
-                com_err(progname, ret, _("while resolving ccache %s"), name);
-            exit(1);
-        }
+    ret = krb5_cc_default(context, &cache);
+    if (ret) {
+        if (!status_only)
+            com_err(progname, ret, _("while resolving ccache"));
+        exit(1);
     }
     exit(status_only ? check_ccache(cache) : show_ccache(cache));
 }
