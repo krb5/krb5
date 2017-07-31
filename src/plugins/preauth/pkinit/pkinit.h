@@ -73,6 +73,7 @@
 #define KRB5_CONF_PKINIT_IDENTITIES             "pkinit_identities"
 #define KRB5_CONF_PKINIT_IDENTITY               "pkinit_identity"
 #define KRB5_CONF_PKINIT_KDC_HOSTNAME           "pkinit_kdc_hostname"
+/* pkinit_kdc_ocsp has been removed */
 #define KRB5_CONF_PKINIT_KDC_OCSP               "pkinit_kdc_ocsp"
 #define KRB5_CONF_PKINIT_POOL                   "pkinit_pool"
 #define KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING   "pkinit_require_crl_checking"
@@ -173,7 +174,6 @@ typedef struct _pkinit_identity_opts {
     char **anchors;
     char **intermediates;
     char **crls;
-    char *ocsp;
     int  idtype;
     char *cert_filename;
     char *key_filename;

@@ -770,9 +770,6 @@ For information about the syntax of some of these options, see
     pkinit is used to authenticate.  This option may be specified
     multiple times.  (New in release 1.14.)
 
-**pkinit_kdc_ocsp**
-    Specifies the location of the KDC's OCSP.
-
 **pkinit_pool**
     Specifies the location of intermediate certificates which may be
     used by the KDC to complete the trust chain between a client's

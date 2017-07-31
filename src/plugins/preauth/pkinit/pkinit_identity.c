@@ -122,7 +122,6 @@ pkinit_init_identity_opts(pkinit_identity_opts **idopts)
     opts->anchors = NULL;
     opts->intermediates = NULL;
     opts->crls = NULL;
-    opts->ocsp = NULL;
 
     opts->cert_filename = NULL;
     opts->key_filename = NULL;
@@ -170,12 +169,6 @@ pkinit_dup_identity_opts(pkinit_identity_opts *src_opts,
     retval = copy_list(&newopts->crls, src_opts->crls);
     if (retval)
         goto cleanup;
-
-    if (src_opts->ocsp != NULL) {
-        newopts->ocsp = strdup(src_opts->ocsp);
-        if (newopts->ocsp == NULL)
-            goto cleanup;
-    }
 
     if (src_opts->cert_filename != NULL) {
         newopts->cert_filename = strdup(src_opts->cert_filename);
@@ -652,10 +645,6 @@ pkinit_identity_prompt(krb5_context context,
                                        CATYPE_CRLS);
         if (retval)
             goto errout;
-    }
-    if (idopts->ocsp != NULL) {
-        retval = ENOTSUP;
-        goto errout;
     }
 
 errout:

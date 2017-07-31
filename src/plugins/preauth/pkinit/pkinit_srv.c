@@ -1254,7 +1254,7 @@ static krb5_error_code
 pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 {
     krb5_error_code retval;
-    char *eku_string = NULL;
+    char *eku_string = NULL, *ocsp_check = NULL;
 
     pkiDebug("%s: entered for realm %s\n", __FUNCTION__, plgctx->realmname);
     retval = pkinit_kdcdefault_string(context, plgctx->realmname,
@@ -1289,7 +1289,15 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 
     pkinit_kdcdefault_string(context, plgctx->realmname,
                              KRB5_CONF_PKINIT_KDC_OCSP,
-                             &plgctx->idopts->ocsp);
+                             &ocsp_check);
+    if (ocsp_check != NULL) {
+        free(ocsp_check);
+        retval = ENOTSUP;
+        krb5_set_error_message(context, retval,
+                               _("OCSP is not supported: (realm: %s)"),
+                               plgctx->realmname);
+        goto errout;
+    }
 
     pkinit_kdcdefault_integer(context, plgctx->realmname,
                               KRB5_CONF_PKINIT_DH_MIN_BITS,

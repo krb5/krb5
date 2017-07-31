@@ -891,9 +891,6 @@ Specifies an authentication indicator to include in the ticket if
 pkinit is used to authenticate.  This option may be specified
 multiple times.  (New in release 1.14.)
 .TP
-.B \fBpkinit_kdc_ocsp\fP
-Specifies the location of the KDC\(aqs OCSP.
-.TP
 .B \fBpkinit_pool\fP
 Specifies the location of intermediate certificates which may be
 used by the KDC to complete the trust chain between a client\(aqs
