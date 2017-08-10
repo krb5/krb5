@@ -11,6 +11,8 @@
 #include    "auth_acl.h"
 #include    "net-server.h"
 
+extern void ipropx_notify_clients(krb5_context context);
+
 /*
  * Function: chpass_principal_wrapper_3
  *
@@ -50,9 +52,10 @@ chpass_principal_wrapper_3(void *server_handle,
     if (ret)
         return ret;
 
-    return kadm5_chpass_principal_3(server_handle, principal,
-                                    keepold, n_ks_tuple, ks_tuple,
-                                    password);
+    ret = kadm5_chpass_principal_3(server_handle, principal, keepold,
+                                   n_ks_tuple, ks_tuple, password);
+    ipropx_notify_clients(get_context(server_handle));
+    return ret;
 }
 
 
@@ -92,9 +95,10 @@ randkey_principal_wrapper_3(void *server_handle,
     ret = check_min_life(server_handle, principal, NULL, 0);
     if (ret)
         return ret;
-    return kadm5_randkey_principal_3(server_handle, principal,
-                                     keepold, n_ks_tuple, ks_tuple,
-                                     keys, n_keys);
+    ret = kadm5_randkey_principal_3(server_handle, principal, keepold,
+                                    n_ks_tuple, ks_tuple, keys, n_keys);
+    ipropx_notify_clients(get_context(server_handle));
+    return ret;
 }
 
 kadm5_ret_t
@@ -146,6 +150,7 @@ schpw_util_wrapper(void *server_handle,
                                           target,
                                           new_pw, ret_pw,
                                           msg_ret, msg_len);
+        ipropx_notify_clients(get_context(server_handle));
     } else {
         ret = KADM5_AUTH_CHANGEPW;
         strlcpy(msg_ret, "Unauthorized request", msg_len);

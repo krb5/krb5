@@ -7,7 +7,7 @@
 /* #pragma ident	"@(#)ipropd_svc.c	1.2	04/02/20 SMI" */
 
 
-#include "k5-platform.h"
+#include "k5-int.h"
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/resource.h> /* rlimit */
@@ -45,6 +45,11 @@ static char *reply_busy_str	= "UPDATE_BUSY";
 static char *reply_nil_str	= "UPDATE_NIL";
 static char *reply_perm_str	= "UPDATE_PERM_DENIED";
 static char *reply_unknown_str	= "<UNKNOWN_CODE>";
+
+static char *getclhoststr(const char *clprinc, char *cl, size_t len);
+static void ipropx_client_add(krb5_context context, char *client,
+			      kdb_sno_t client_sno, kdb_sno_t notified_sno);
+void ipropx_notify_clients(krb5_context context);
 
 #define	LOG_UNAUTH  _("Unauthorized request: %s, client=%s, service=%s, addr=%s")
 #define	LOG_DONE    _("Request: %s, %s, %s, client=%s, service=%s, addr=%s")
@@ -151,6 +156,7 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
     kadm5_server_handle_t handle = global_server_handle;
     char *client_name = 0, *service_name = 0;
     char obuf[256] = {0};
+    char clhost[MAXHOSTNAMELEN] = {0};
 
     /* default return code */
     ret.ret = UPDATE_ERROR;
@@ -212,6 +218,16 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 			_("%s; Incoming SerialNo=%lu; Outgoing SerialNo=N/A"),
 			replystr(ret.ret),
 			(unsigned long)arg->last_sno);
+    }
+
+    if (getclhoststr(client_name, clhost, sizeof(clhost)) != NULL) {
+	if (ret.ret == UPDATE_OK) {
+	    ipropx_client_add(handle->context, clhost, ret.lastentry.last_sno,
+			      ret.lastentry.last_sno);
+	} else if (ret.ret == UPDATE_NIL) {
+	    ipropx_client_add(handle->context, clhost, arg->last_sno,
+			      arg->last_sno);
+	}
     }
 
     DPRINT("%s: request %s %s\n\tclprinc=`%s'\n\tsvcprinc=`%s'\n",
@@ -541,6 +557,7 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
     bool_t (*_xdr_argument)(), (*_xdr_result)();
     void *(*local)(/* union XXX *, struct svc_req * */);
     char *whoami = "krb5_iprop_prog_1";
+    kadm5_server_handle_t handle = global_server_handle;
 
     if (!check_iprop_rpcsec_auth(rqstp)) {
 	krb5_klog_syslog(LOG_ERR, _("authentication attempt failed: %s, RPC "
@@ -548,6 +565,7 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
 			 client_addr(rqstp->rq_xprt),
 			 rqstp->rq_cred.oa_flavor);
 	svcerr_weakauth(transp);
+	(void) ipropx_notify_clients(handle->context);
 	return;
     }
 
@@ -555,6 +573,7 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
     case NULLPROC:
 	(void) svc_sendreply(transp, xdr_void,
 			     (char *)NULL);
+	(void) ipropx_notify_clients(handle->context);
 	return;
 
     case IPROP_GET_UPDATES:
@@ -649,3 +668,145 @@ kiprop_get_adm_host_srv_name(krb5_context context,
     return (KADM5_OK);
 }
 #endif
+
+typedef struct ipropx_notify {
+    char *host;
+    kdb_sno_t client_sno;
+    kdb_sno_t notified_sno;
+    struct ipropx_notify *next;
+} ipropx_notify;
+
+static ipropx_notify *ipropx_client_notifications = NULL;
+
+/*
+ * When an iprop "get" request is received, add the client to the
+ * notification list for future changes.
+ * If client_sno = 0, notifications will be suspended for the client.
+ */
+static void
+ipropx_client_add(krb5_context context, char *client, kdb_sno_t client_sno,
+		  kdb_sno_t notified_sno)
+{
+    ipropx_notify *last, *next;
+
+    if (!client || !client[0] || strlen(client) > MAXHOSTNAMELEN)
+	return;
+
+    /* Search for a match in the existing list */
+    last = ipropx_client_notifications;
+    while (last != NULL) {
+	if (!strcasecmp(client, last->host)) {
+	    last->client_sno = client_sno;
+	    last->notified_sno = notified_sno;
+	    return;
+	}
+	if (last->next == NULL)
+	    break;
+	last = last->next;
+    }
+
+    /* No match was found; add a new entry to the end of the list */
+    next = calloc(1, sizeof(ipropx_notify));
+    if (next == NULL)
+	return;
+    next->client_sno = client_sno;
+    next->notified_sno = notified_sno;
+    next->host = strdup(client);
+    if (next->host == NULL) {
+	free(next);
+	return;
+    }
+    if (last != NULL)
+	last->next = next;
+    else
+	ipropx_client_notifications = next;
+}
+
+/*
+ * Notify all registered iprop clients of recent db changes (unless they
+ * have not yet retrieved other updates). Once notified, drop the client
+ * until they check in again for their pending updates.
+ *
+ * Notification to the clients will be performed by sending a Kerberos
+ * generic error to the slave's KPROP_SERVICE port (to trigger the
+ * slave to signal the iprop process via USR1 to reset the timer).
+ */
+void
+ipropx_notify_clients(krb5_context context)
+{
+    const char *whoami = "ipropx_notify_clients";
+    pid_t child;
+    ipropx_notify *next = ipropx_client_notifications;
+    ipropx_notify *last;
+    ipropx_notify **prev_p = &ipropx_client_notifications;
+    kdb_hlog_t *ulog;
+    kdb_sno_t current_sno;
+    static kdb_sno_t last_sno = 0;
+    char *kprop_port;
+    uint32_t num_notified = 0;
+
+    if (!context || !context->kdblog_context)
+	return;
+    if (!(ulog = context->kdblog_context->ulog))
+	return;
+
+    current_sno = ulog->kdb_last_sno;
+
+    /* If there have been no updates, there is nothing to do. */
+    if (current_sno == last_sno)
+	return;
+    last_sno = current_sno;
+
+    while ((last = next) != NULL) {
+	next = last->next;
+
+	/* Skip slaves which have been informed about the latest update. */
+	if (last->client_sno == current_sno)
+	    continue;
+
+	/* Skip slaves which haven't pulled updates since being notified. */
+	if (last->notified_sno > last->client_sno)
+	    continue;
+
+	/*
+	 * XXX - Should we limit the number of concurrent child processes?
+	 *
+	 * It is very unlikely we will ever spawn more than 1 process
+	 * per slave (but it is theoretically possible because we are
+	 * subject to the OS scheduler).
+	 *
+	 * For environments with lots of slaves, tree propagation should
+	 * be used (especially since most locks are blocking).
+	 */
+	child = fork();
+	if (child == 0) {
+	    kprop_port = getenv("KPROP_PORT");
+	    if (kprop_port)
+		execl(kprop, "kprop", "-N", "-P", kprop_port, last->host, NULL);
+	    else
+		execl(kprop, "kprop", "-N", last->host, NULL);
+
+	    krb5_klog_syslog(LOG_ERR,
+			     _("iprop: unable to notify slave %s: %s"),
+			     last->host, strerror(errno));
+	    _exit(1);
+	} else if (child == -1) {
+	    /* fork error */
+	    krb5_klog_syslog(LOG_ERR,
+			     _("iprop: unable to notify slave %s: %s"),
+			     last->host, strerror(errno));
+	    prev_p = &last->next;
+	} else {
+	    num_notified++;
+	    /* Forget slave after notification until next iprop */
+	    free(last->host);
+	    free(last);
+	    *prev_p = next;
+	}
+    }
+    if (num_notified) {
+	    krb5_klog_syslog(LOG_INFO,
+			     _("iprop: Notifying %u slaves of pending "
+			       "updates"), num_notified);
+    }
+}
