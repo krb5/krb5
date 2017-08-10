@@ -501,9 +501,9 @@ kg_new_connection(
     krb5_gss_ctx_ext_t exts)
 {
     OM_uint32 major_status;
-    krb5_error_code code;
+    krb5_error_code code = 0;
     krb5_creds *k_cred = NULL;
-    krb5_gss_ctx_id_rec *ctx, *ctx_free;
+    krb5_gss_ctx_id_rec *ctx, *ctx_free = NULL;
     krb5_timestamp now;
     gss_buffer_desc token;
     krb5_keyblock *keyblock;
@@ -518,27 +518,20 @@ kg_new_connection(
     if ((cred->usage != GSS_C_INITIATE) &&
         (cred->usage != GSS_C_BOTH)) {
         *minor_status = 0;
-        return(GSS_S_NO_CRED);
+        major_status = GSS_S_NO_CRED;
+        goto cleanup;
     }
 
     /* complain if the input token is non-null */
 
     if (input_token != GSS_C_NO_BUFFER && input_token->length != 0) {
         *minor_status = 0;
-        return(GSS_S_DEFECTIVE_TOKEN);
-    }
-
-    /* create the ctx */
-
-    if ((ctx = (krb5_gss_ctx_id_rec *) xmalloc(sizeof(krb5_gss_ctx_id_rec)))
-        == NULL) {
-        *minor_status = ENOMEM;
-        return(GSS_S_FAILURE);
+        major_status = GSS_S_DEFECTIVE_TOKEN;
+        goto cleanup;
     }
 
     /* fill in the ctx */
-    memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
-    ctx->magic = KG_CONTEXT;
+    ctx = (krb5_gss_ctx_id_t)*context_handle;
     ctx_free = ctx;
     if ((code = krb5_auth_con_init(context, &ctx->auth_context)))
         goto cleanup;
@@ -695,6 +688,7 @@ cleanup:
         if (ctx_free->subkey)
             krb5_k_free_key(context, ctx_free->subkey);
         xfree(ctx_free);
+        *context_handle = NULL;
     }
 
     *minor_status = code;
@@ -917,7 +911,7 @@ krb5_gss_init_sec_context_ext(
     OM_uint32 major_status;
     OM_uint32 tmp_min_stat;
 
-    if (*context_handle == GSS_C_NO_CONTEXT) {
+    if (KRB5INT_CHK_EMPTY(((krb5_gss_ctx_id_t)*context_handle))) {
         kerr = krb5_gss_init_context(&context);
         if (kerr) {
             *minor_status = kerr;
@@ -960,7 +954,7 @@ krb5_gss_init_sec_context_ext(
     /* is this a new connection or not? */
 
     /*SUPPRESS 29*/
-    if (*context_handle == GSS_C_NO_CONTEXT) {
+    if (KRB5INT_CHK_EMPTY(((krb5_gss_ctx_id_t)*context_handle))) {
         /* verify the credential, or use the default */
         /*SUPPRESS 29*/
         if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {

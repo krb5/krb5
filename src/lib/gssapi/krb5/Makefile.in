@@ -36,6 +36,7 @@ SRCS = \
 	$(srcdir)/compare_name.c \
 	$(srcdir)/context_time.c \
 	$(srcdir)/copy_ccache.c \
+	$(srcdir)/create_sec_context.c \
 	$(srcdir)/cred_store.c \
 	$(srcdir)/delete_sec_context.c \
 	$(srcdir)/disp_name.c \
@@ -73,6 +74,7 @@ SRCS = \
 	$(srcdir)/set_allowable_enctypes.c \
 	$(srcdir)/ser_sctx.c \
 	$(srcdir)/set_ccache.c \
+	$(srcdir)/set_context_flags.c \
 	$(srcdir)/store_cred.c \
 	$(srcdir)/util_cksum.c \
 	$(srcdir)/util_crypt.c \
@@ -89,6 +91,7 @@ OBJS = \
 	$(OUTPRE)compare_name.$(OBJEXT) \
 	$(OUTPRE)context_time.$(OBJEXT) \
 	$(OUTPRE)copy_ccache.$(OBJEXT) \
+	$(OUTPRE)create_sec_context.$(OBJEXT) \
 	$(OUTPRE)cred_store.$(OBJEXT) \
 	$(OUTPRE)delete_sec_context.$(OBJEXT) \
 	$(OUTPRE)disp_name.$(OBJEXT) \
@@ -126,6 +129,7 @@ OBJS = \
 	$(OUTPRE)set_allowable_enctypes.$(OBJEXT) \
 	$(OUTPRE)ser_sctx.$(OBJEXT) \
 	$(OUTPRE)set_ccache.$(OBJEXT) \
+	$(OUTPRE)set_context_flags.$(OBJEXT) \
 	$(OUTPRE)store_cred.$(OBJEXT) \
 	$(OUTPRE)util_cksum.$(OBJEXT) \
 	$(OUTPRE)util_crypt.$(OBJEXT) \
@@ -145,6 +149,7 @@ STLIBOBJS = \
 	compare_name.o \
 	context_time.o \
 	copy_ccache.o \
+	create_sec_context.o \
 	cred_store.o \
 	delete_sec_context.o \
 	disp_name.o \
@@ -182,6 +187,7 @@ STLIBOBJS = \
 	set_allowable_enctypes.o \
 	ser_sctx.o \
 	set_ccache.o \
+	set_context_flags.o \
 	store_cred.o \
 	util_cksum.o \
 	util_crypt.o \

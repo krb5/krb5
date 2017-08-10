@@ -49,6 +49,10 @@ extern "C" {
 #define	ERR_SPNEGO_NEGOTIATION_FAILED		0x20000004
 #define	ERR_SPNEGO_NO_TOKEN_FROM_ACCEPTOR	0x20000005
 
+#define SPNEGOINT_CHK_EMPTY(p) ((p != NULL) \
+                                && p->magic_num == SPNEGO_MAGIC_ID \
+                                && p->ctx_handle == NULL)
+
 /*
  * send_token_flag is used to indicate in later steps what type
  * of token, if any should be sent or processed.
@@ -106,6 +110,8 @@ typedef struct {
 	OM_uint32 ctx_flags;
 	gss_name_t internal_name;
 	gss_OID actual_mech;
+	uint64_t req_flags;
+	uint64_t ret_flags_understood;
 } spnego_gss_ctx_id_rec, *spnego_gss_ctx_id_t;
 
 /*
@@ -655,6 +661,20 @@ spnego_gss_get_mic_iov_length(
 	gss_qop_t qop_req,
 	gss_iov_buffer_desc *iov,
 	int iov_count
+);
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_create_sec_context(
+	OM_uint32 *minor_status,
+	gss_ctx_id_t *context
+);
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_set_context_flags(
+	OM_uint32 *minor_status,
+	gss_ctx_id_t context,
+	uint64_t req_flags,
+	uint64_t ret_flags_understood
 );
 
 #ifdef	__cplusplus

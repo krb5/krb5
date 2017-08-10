@@ -286,7 +286,20 @@ main(int argc, char *argv[])
     major = gss_set_neg_mechs(&minor, verifier_cred_handle, &mechset_krb5);
     check_gsserr("gss_set_neg_mechs(acceptor)", major, minor);
 
+    major = gss_create_sec_context(&minor, &initiator_context);
+    check_gsserr("gss_create_sec_context(initiator)", major, minor);
+
+    major = gss_create_sec_context(&minor, &acceptor_context);
+    check_gsserr("gss_create_sec_context(acceptor)", major, minor);
+
     flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+
+    major = gss_set_context_flags(&minor, initiator_context, flags, flags);
+    check_gsserr("gss_set_context_flags(initiator)", major, minor);
+
+    major = gss_set_context_flags(&minor, acceptor_context, flags, flags);
+    check_gsserr("gss_set_context_flags(acceptor)", major, minor);
+
     establish_contexts(&mech_spnego, initiator_cred_handle,
                        verifier_cred_handle, target_name, flags,
                        &initiator_context, &acceptor_context, &source_name,
