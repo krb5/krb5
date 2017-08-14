@@ -44,7 +44,9 @@
 /* Abstract module data type. */
 typedef struct krb5_certauth_moddata_st *krb5_certauth_moddata;
 
-typedef struct _krb5_db_entry_new krb5_db_entry;
+/* A module can optionally include <kdb.h> to inspect the client principal
+ * entry when authorizing a request. */
+struct _krb5_db_entry_new;
 
 /*
  * Optional: Initialize module data.
@@ -80,7 +82,7 @@ typedef krb5_error_code
                               krb5_certauth_moddata moddata,
                               const uint8_t *cert, size_t cert_len,
                               krb5_const_principal princ, const void *opts,
-                              const krb5_db_entry *db_entry,
+                              const struct _krb5_db_entry_new *db_entry,
                               char ***authinds_out);
 
 /*
@@ -93,7 +95,7 @@ typedef void
                                    char **authinds);
 
 typedef struct krb5_certauth_vtable_st {
-    char *name;
+    const char *name;
     krb5_certauth_init_fn init;
     krb5_certauth_fini_fn fini;
     krb5_certauth_authorize_fn authorize;

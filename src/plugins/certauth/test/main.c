@@ -42,7 +42,8 @@ static krb5_error_code
 test1_authorize(krb5_context context, krb5_certauth_moddata moddata,
                 const uint8_t *cert, size_t cert_len,
                 krb5_const_principal princ, const void *opts,
-                const krb5_db_entry *db_entry, char ***authinds_out)
+                const struct _krb5_db_entry_new *db_entry,
+                char ***authinds_out)
 {
     char **ais = NULL;
 
@@ -136,7 +137,8 @@ static krb5_error_code
 test2_authorize(krb5_context context, krb5_certauth_moddata moddata,
                 const uint8_t *cert, size_t cert_len,
                 krb5_const_principal princ, const void *opts,
-                const krb5_db_entry *db_entry, char ***authinds_out)
+                const struct _krb5_db_entry_new *db_entry,
+                char ***authinds_out)
 {
     krb5_error_code ret;
     char *name = NULL, **ais = NULL;
