@@ -35,7 +35,7 @@
 #include <krb5/kdcpolicy_plugin.h>
 
 static krb5_error_code
-output_from_indicator(const char *const *auth_indicators,
+output_from_indicator(const char *const *auth_indicators, int divisor,
                       krb5_deltat *lifetime_out,
                       krb5_deltat *renew_lifetime_out,
                       const char **status)
@@ -46,11 +46,11 @@ output_from_indicator(const char *const *auth_indicators,
     }
 
     if (strcmp(auth_indicators[0], "ONE_HOUR") == 0) {
-        *lifetime_out = 3600;
+        *lifetime_out = 3600 / divisor;
         *renew_lifetime_out = *lifetime_out * 2;
         return 0;
     } else if (strcmp(auth_indicators[0], "SEVEN_HOURS") == 0) {
-        *lifetime_out = 7 * 3600;
+        *lifetime_out = 7 * 3600 / divisor;
         *renew_lifetime_out = *lifetime_out * 2;
         return 0;
     }
@@ -71,7 +71,7 @@ test_check_as(krb5_context context, krb5_kdcpolicy_moddata moddata,
         *status = "LOCAL_POLICY";
         return KRB5KDC_ERR_POLICY;
     }
-    return output_from_indicator(auth_indicators, lifetime_out,
+    return output_from_indicator(auth_indicators, 1, lifetime_out,
                                  renew_lifetime_out, status);
 }
 
@@ -87,7 +87,7 @@ test_check_tgs(krb5_context context, krb5_kdcpolicy_moddata moddata,
         *status = "LOCAL_POLICY";
         return KRB5KDC_ERR_POLICY;
     }
-    return output_from_indicator(auth_indicators, lifetime_out,
+    return output_from_indicator(auth_indicators, 2, lifetime_out,
                                  renew_lifetime_out, status);
 }
 

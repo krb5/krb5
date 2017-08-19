@@ -222,7 +222,7 @@ load_kdcpolicy_plugins(krb5_context context)
         if (h->vt.init != NULL) {
             ret = h->vt.init(context, &h->moddata);
             if (ret == KRB5_PLUGIN_NO_HANDLE) {
-                TRACE_KADM5_AUTH_INIT_SKIP(context, h->vt.name);
+                TRACE_KDCPOLICY_INIT_SKIP(context, h->vt.name);
                 free(h);
                 continue;
             }
