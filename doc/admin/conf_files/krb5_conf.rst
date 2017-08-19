@@ -781,7 +781,7 @@ in for this interface.
 .. _kadm5_auth:
 
 kadm5_auth interface
-====================
+####################
 
 The kadm5_auth section (introduced in release 1.16) controls modules
 for the kadmin authorization interface, which determines whether a
