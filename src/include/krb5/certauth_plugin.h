@@ -31,10 +31,33 @@
  */
 
 /*
- * Certificate authorization plugin interface.  The PKINIT server module uses
- * this interface to check client certificate attributes after the certificate
- * signature has been verified.
+ * Declarations for certauth plugin module implementors.
+ *
+ * The certauth pluggable interface currently has only one supported major
+ * version, which is 1.  Major version 1 has a current minor version number of
+ * 1.
+ *
+ * certauth plugin modules should define a function named
+ * certauth_<modulename>_initvt, matching the signature:
+ *
+ *   krb5_error_code
+ *   certauth_modname_initvt(krb5_context context, int maj_ver, int min_ver,
+ *                           krb5_plugin_vtable vtable);
+ *
+ * The initvt function should:
+ *
+ * - Check that the supplied maj_ver number is supported by the module, or
+ *   return KRB5_PLUGIN_VER_NOTSUPP if it is not.
+ *
+ * - Cast the vtable pointer as appropriate for maj_ver:
+ *     maj_ver == 1: Cast to krb5_certauth_vtable
+ *
+ * - Initialize the methods of the vtable, stopping as appropriate for the
+ *   supplied min_ver.  Optional methods may be left uninitialized.
+ *
+ * Memory for the vtable is allocated by the caller, not by the module.
  */
+
 #ifndef KRB5_CERTAUTH_PLUGIN_H
 #define KRB5_CERTAUTH_PLUGIN_H
 
