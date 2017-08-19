@@ -418,12 +418,12 @@ load_acl_file(krb5_context context, const char *fname, struct acl_state *state)
             krb5_klog_syslog(LOG_ERR,
                              _("%s: syntax error at line %d <%.10s...>"),
                              fname, lineno, line);
-            free_acl_entries(state);
-            free(line);
-            fclose(fp);
             k5_setmsg(context, EINVAL,
                       _("%s: syntax error at line %d <%.10s...>"),
                       fname, lineno, line);
+            free_acl_entries(state);
+            free(line);
+            fclose(fp);
             return EINVAL;
         }
         entry_slot = &(*entry_slot)->next;
