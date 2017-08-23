@@ -115,14 +115,6 @@ cleanup:
     return ret;
 }
 
-static krb5_error_code
-choose(krb5_context context, struct ccselect_module_handle *h,
-       krb5_principal server, krb5_ccache *cache_out,
-       krb5_principal *princ_out)
-{
-    return h->vt.choose(context, h->data, server, cache_out, princ_out);
-}
-
 krb5_error_code KRB5_CALLCONV
 krb5_cc_select(krb5_context context, krb5_principal server,
                krb5_ccache *cache_out, krb5_principal *princ_out)
@@ -171,7 +163,7 @@ krb5_cc_select(krb5_context context, krb5_principal server,
             h = *hp;
             if (h->priority != priority)
                 continue;
-            ret = choose(context, h, server, &cache, &princ);
+            ret = h->vt.choose(context, h->data, server, &cache, &princ);
             if (ret == 0) {
                 TRACE_CCSELECT_MODCHOICE(context, h->vt.name, server, cache,
                                          princ);
