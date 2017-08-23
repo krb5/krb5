@@ -745,6 +745,10 @@ disabled with the disable tag):
     Uses the service realm to guess an appropriate cache from the
     collection
 
+**hostname**
+    If the service principal is host-based, uses the service hostname
+    to guess an appropriate cache from the collection
+
 .. _pwqual:
 
 pwqual interface

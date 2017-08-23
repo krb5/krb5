@@ -33,6 +33,7 @@ host1 = 'p:' + r1.host_princ
 host2 = 'p:' + r2.host_princ
 foo = 'foo.krbtest.com'
 foo2 = 'foo.krbtest2.com'
+foobar = "foo.bar.krbtest.com"
 
 # These strings specify the target as a GSS name.  The resulting
 # principal will have the host-based type, with the referral realm
@@ -42,6 +43,7 @@ foo2 = 'foo.krbtest2.com'
 # single component.
 gssserver = 'h:host@' + foo
 gssserver2 = 'h:host@' + foo2
+gssserver_bar = 'h:host@' + foobar
 gsslocal = 'h:host@localhost'
 
 # refserver specifies the target as a principal in the referral realm.
@@ -77,10 +79,12 @@ r1.addprinc('host/localhost')
 r2.addprinc('host/localhost')
 r1.addprinc('host/' + foo)
 r2.addprinc('host/' + foo2)
+r1.addprinc('host/' + foobar)
 r1.extract_keytab('host/localhost', r1.keytab)
 r2.extract_keytab('host/localhost', r2.keytab)
 r1.extract_keytab('host/' + foo, r1.keytab)
 r2.extract_keytab('host/' + foo2, r2.keytab)
+r1.extract_keytab('host/' + foobar, r1.keytab)
 
 # Get tickets for one user in each realm (zaphod will be primary).
 r1.kinit(alice, password('alice'))
@@ -127,6 +131,11 @@ if output != (alice + '\n'):
 output = r2.run(['./t_ccselect', gsslocal])
 if output != (zaphod + '\n'):
     fail('zaphod not chosen via default realm fallback')
+
+# Check that realm ccselect fallback works correctly
+r1.run(['./t_ccselect', gssserver_bar], expected_msg=alice)
+r2.kinit(zaphod, password('zaphod'))
+r1.run(['./t_ccselect', gssserver_bar], expected_msg=alice)
 
 # Get a second cred in r1 (bob will be primary).
 r1.kinit(bob, password('bob'))

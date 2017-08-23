@@ -71,6 +71,11 @@ load_modules(krb5_context context)
     if (ret != 0)
         goto cleanup;
 
+    ret = k5_plugin_register(context, PLUGIN_INTERFACE_CCSELECT, "hostname",
+                             ccselect_hostname_initvt);
+    if (ret != 0)
+        goto cleanup;
+
     ret = k5_plugin_load_all(context, PLUGIN_INTERFACE_CCSELECT, &modules);
     if (ret != 0)
         goto cleanup;
