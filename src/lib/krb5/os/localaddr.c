@@ -862,6 +862,9 @@ get_ifreq_array(char **bufp, size_t *np, int s)
     int numifs = -1;
 #endif
 
+    *bufp = NULL;
+    *np = 0;
+
     /* At least on NetBSD, an ifreq can hold an IPv4 address, but
        isn't big enough for an IPv6 or ethernet address.  So add a
        little more space.  */
@@ -938,9 +941,9 @@ foreach_localaddr (/*@null@*/ void *data,
 #endif
 {
     struct ifreq *ifr, ifreq, *ifr2;
-    int s, code;
+    int s;
     char *buf = 0;
-    size_t size, n, i, j;
+    size_t n, i, j;
     int retval = 0;
 #ifdef LINUX_IPV6_HACK
     struct linux_ipv6_addr_list *linux_ipv6_addrs = get_linux_ipv6_addrs ();

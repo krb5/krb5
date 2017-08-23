@@ -361,16 +361,7 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 
 
 
-#if !defined(SHARED) && !defined(_WIN32)
-
-/*
- * In this case, we just don't care about finalization.  The code will still
- * define the function, but we won't do anything with it.
- */
-# define MAKE_FINI_FUNCTION(NAME)               \
-        static void NAME(void) UNUSED
-
-#elif defined(USE_LINKER_FINI_OPTION) || defined(_WIN32)
+#if defined(USE_LINKER_FINI_OPTION) || defined(_WIN32)
 /* If we're told the linker option will be used, it doesn't really
    matter what compiler we're using.  Do it the same way
    regardless.  */
@@ -403,6 +394,15 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
         void NAME(void)
 
 # endif
+
+#elif !defined(SHARED)
+
+/*
+ * In this case, we just don't care about finalization.  The code will still
+ * define the function, but we won't do anything with it.
+ */
+# define MAKE_FINI_FUNCTION(NAME)               \
+        static void NAME(void) UNUSED
 
 #elif defined(__GNUC__) && defined(DESTRUCTOR_ATTR_WORKS)
 /* If we're using gcc, if the C++ support works, the compiler should
