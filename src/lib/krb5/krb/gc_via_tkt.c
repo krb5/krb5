@@ -306,8 +306,8 @@ krb5int_process_tgs_reply(krb5_context context,
         goto cleanup;
 
     if (!in_cred->times.starttime &&
-        !in_clock_skew(context, dec_rep->enc_part2->times.starttime,
-                       timestamp)) {
+        !ts_within(dec_rep->enc_part2->times.starttime, timestamp,
+                   context->clockskew)) {
         retval = KRB5_KDCREP_SKEW;
         goto cleanup;
     }

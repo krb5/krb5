@@ -269,8 +269,8 @@ verify_as_reply(krb5_context            context,
             return retval;
     } else {
         if ((request->from == 0) &&
-            !in_clock_skew(context, as_reply->enc_part2->times.starttime,
-                           time_now))
+            !ts_within(as_reply->enc_part2->times.starttime, time_now,
+                       context->clockskew))
             return (KRB5_KDCREP_SKEW);
     }
     return 0;
@@ -766,7 +766,7 @@ set_request_times(krb5_context context, krb5_init_creds_context ctx)
     if (ctx->renew_life > 0) {
         /* Don't ask for a smaller renewable time than the lifetime. */
         ctx->request->rtime = ts_incr(from, ctx->renew_life);
-        if (ctx->request->rtime < ctx->request->till)
+        if (ts_after(ctx->request->till, ctx->request->rtime))
             ctx->request->rtime = ctx->request->till;
         ctx->request->kdc_options &= ~KDC_OPT_RENEWABLE_OK;
     } else {

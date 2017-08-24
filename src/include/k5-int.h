@@ -2386,6 +2386,13 @@ ts_after(krb5_timestamp a, krb5_timestamp b)
     return (uint32_t)a > (uint32_t)b;
 }
 
+/* Return true if a and b are within d seconds. */
+static inline krb5_boolean
+ts_within(krb5_timestamp a, krb5_timestamp b, krb5_deltat d)
+{
+    return !ts_after(a, ts_incr(b, d)) && !ts_after(b, ts_incr(a, d));
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
                               krb5_ccache ccache,

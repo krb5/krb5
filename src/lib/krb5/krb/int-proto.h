@@ -83,9 +83,6 @@ krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
                                  krb5_creds *in_creds, krb5_creds *mcreds,
                                  krb5_flags *fields);
 
-#define in_clock_skew(context, date, now)               \
-    (labs(ts_delta(date, now)) < (context)->clockskew)
-
 #define IS_TGS_PRINC(p) ((p)->length == 2 &&                            \
                          data_eq_string((p)->data[0], KRB5_TGS_NAME))
 

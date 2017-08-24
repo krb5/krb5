@@ -282,7 +282,7 @@ krb5_error_code krb5_check_exp(context, tkt_time)
 
     }
 
-    if (ts_delta(currenttime, tkt_time.endtime) > context->clockskew) {
+    if (ts_after(currenttime, ts_incr(tkt_time.endtime, context->clockskew))) {
         retval = KRB5KRB_AP_ERR_TKT_EXPIRED ;
         return retval;
     }

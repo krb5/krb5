@@ -1759,14 +1759,19 @@ kdc_get_ticket_endtime(kdc_realm_t *kdc_active_realm,
                        krb5_db_entry *server,
                        krb5_timestamp *out_endtime)
 {
-    krb5_timestamp until, life;
+    krb5_timestamp until;
+    krb5_deltat life;
 
     if (till == 0)
         till = kdc_infinity;
 
     until = ts_min(till, endtime);
 
+    /* Determine the requested lifetime, capped at the maximum valid time
+     * interval. */
     life = ts_delta(until, starttime);
+    if (ts_after(until, starttime) && life < 0)
+        life = INT32_MAX;
 
     if (client != NULL && client->max_life != 0)
         life = min(life, client->max_life);

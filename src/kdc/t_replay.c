@@ -906,7 +906,7 @@ test_kdc_insert_lookaside_cache_expire(void **state)
     assert_non_null(e);
     e->num_hits = 5;
 
-    time_return(STALE_TIME, 0);
+    time_return(STALE_TIME + 1, 0);
     kdc_insert_lookaside(context, &req2, NULL);
 
     assert_null(K5_LIST_FIRST(&hash_table[req_hash1]));
