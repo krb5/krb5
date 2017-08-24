@@ -2125,7 +2125,6 @@ crypto_retrieve_X509_sans(krb5_context context,
 
     if (!(ext = X509_get_ext(cert, l)) || !(ialt = X509V3_EXT_d2i(ext))) {
         pkiDebug("%s: found no subject alt name extensions\n", __FUNCTION__);
-        retval = ENOENT;
         goto cleanup;
     }
     num_sans = sk_GENERAL_NAME_num(ialt);
@@ -2228,31 +2227,29 @@ crypto_retrieve_X509_sans(krb5_context context,
     sk_GENERAL_NAME_pop_free(ialt, GENERAL_NAME_free);
 
     retval = 0;
-    if (princs)
+    if (princs != NULL && *princs != NULL) {
         *princs_ret = princs;
-    if (upns)
+        princs = NULL;
+    }
+    if (upns != NULL && *upns != NULL) {
         *upn_ret = upns;
-    if (dnss)
+        upns = NULL;
+    }
+    if (dnss != NULL && *dnss != NULL) {
         *dns_ret = dnss;
+        dnss = NULL;
+    }
 
 cleanup:
-    if (retval) {
-        if (princs != NULL) {
-            for (i = 0; princs[i] != NULL; i++)
-                krb5_free_principal(context, princs[i]);
-            free(princs);
-        }
-        if (upns != NULL) {
-            for (i = 0; upns[i] != NULL; i++)
-                krb5_free_principal(context, upns[i]);
-            free(upns);
-        }
-        if (dnss != NULL) {
-            for (i = 0; dnss[i] != NULL; i++)
-                free(dnss[i]);
-            free(dnss);
-        }
-    }
+    for (i = 0; princs != NULL && princs[i] != NULL; i++)
+        krb5_free_principal(context, princs[i]);
+    free(princs);
+    for (i = 0; upns != NULL && upns[i] != NULL; i++)
+        krb5_free_principal(context, upns[i]);
+    free(upns);
+    for (i = 0; dnss != NULL && dnss[i] != NULL; i++)
+        free(dnss[i]);
+    free(dnss);
     return retval;
 }
 

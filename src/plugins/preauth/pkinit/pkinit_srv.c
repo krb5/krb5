@@ -187,14 +187,18 @@ verify_client_san(krb5_context context,
                                        &princs,
                                        plgctx->opts->allow_upn ? &upns : NULL,
                                        NULL);
-    if (retval == ENOENT) {
-        TRACE_PKINIT_SERVER_NO_SAN(context);
-        goto out;
-    } else if (retval) {
+    if (retval) {
         pkiDebug("%s: error from retrieve_certificate_sans()\n", __FUNCTION__);
         retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
         goto out;
     }
+
+    if (princs == NULL && upns == NULL) {
+        TRACE_PKINIT_SERVER_NO_SAN(context);
+        retval = ENOENT;
+        goto out;
+    }
+
     /* XXX Verify this is consistent with client side XXX */
 #if 0
     retval = call_san_checking_plugins(context, plgctx, reqctx, princs,
@@ -1497,7 +1501,7 @@ pkinit_eku_authorize(krb5_context context, krb5_certauth_moddata moddata,
         return KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
     }
 
-    return 0;
+    return KRB5_PLUGIN_NO_HANDLE;
 }
 
 static krb5_error_code
