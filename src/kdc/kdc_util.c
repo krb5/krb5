@@ -1790,6 +1790,7 @@ kdc_get_ticket_renewtime(kdc_realm_t *realm, krb5_kdc_req *request,
 {
     krb5_timestamp rtime, max_rlife;
 
+    clear(tkt->flags, TKT_FLG_RENEWABLE);
     tkt->times.renew_till = 0;
 
     /* Don't issue renewable tickets if the client or server don't allow it,
@@ -1818,12 +1819,14 @@ kdc_get_ticket_renewtime(kdc_realm_t *realm, krb5_kdc_req *request,
         max_rlife = min(max_rlife, client->max_renewable_life);
     rtime = ts_min(rtime, ts_incr(tkt->times.starttime, max_rlife));
 
-    /* Make the ticket renewable if the truncated requested time is larger than
-     * the ticket end time. */
-    if (ts_after(rtime, tkt->times.endtime)) {
-        setflag(tkt->flags, TKT_FLG_RENEWABLE);
-        tkt->times.renew_till = rtime;
-    }
+    /* If the client only specified renewable-ok, don't issue a renewable
+     * ticket unless the truncated renew time exceeds the ticket end time. */
+    if (!isflagset(request->kdc_options, KDC_OPT_RENEWABLE) &&
+        !ts_after(rtime, tkt->times.endtime))
+        return;
+
+    setflag(tkt->flags, TKT_FLG_RENEWABLE);
+    tkt->times.renew_till = rtime;
 }
 
 /**
