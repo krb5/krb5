@@ -1,7 +1,7 @@
-mydir=plugins$(S)policy$(S)test
+mydir=plugins$(S)kdcpolicy$(S)test
 BUILDTOP=$(REL)..$(S)..$(S)..
 
-LIBBASE=policy_test
+LIBBASE=kdcpolicy_test
 LIBMAJOR=0
 LIBMINOR=0
 RELDIR=../plugins/kdcpolicy/test

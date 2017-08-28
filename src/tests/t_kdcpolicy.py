@@ -5,7 +5,7 @@ import re
 
 testpreauth = os.path.join(buildtop, 'plugins', 'preauth', 'test', 'test.so')
 testpolicy = os.path.join(buildtop, 'plugins', 'kdcpolicy', 'test',
-                          'policy_test.so')
+                          'kdcpolicy_test.so')
 krb5_conf = {'plugins': {'kdcpreauth': {'module': 'test:' + testpreauth},
                          'clpreauth': {'module': 'test:' + testpreauth},
                          'kdcpolicy': {'module': 'test:' + testpolicy}}}
