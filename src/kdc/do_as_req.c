@@ -840,7 +840,7 @@ prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
         e_data[count] = cookie;
     }
 
-    errpkt.ctime = request->nonce;
+    errpkt.ctime = 0;
     errpkt.cusec = 0;
 
     retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);

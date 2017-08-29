@@ -896,7 +896,7 @@ prepare_error_tgs (struct kdc_request_state *state,
     kdc_realm_t *kdc_active_realm = state->realm_data;
 
     errpkt.magic = KV5M_ERROR;
-    errpkt.ctime = request->nonce;
+    errpkt.ctime = 0;
     errpkt.cusec = 0;
 
     if ((retval = krb5_us_timeofday(kdc_context, &errpkt.stime,
