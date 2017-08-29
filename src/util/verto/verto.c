@@ -22,8 +22,6 @@
  * SOFTWARE.
  */
 
-#define _GNU_SOURCE /* For asprintf() */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,6 +42,8 @@
 
 #define  _str(s) # s
 #define __str(s) _str(s)
+
+#define MUTABLE(flags) (flags & _VERTO_EV_FLAG_MUTABLE_MASK)
 
 /* Remove flags we can emulate */
 #define make_actual(flags) ((flags) & ~(VERTO_EV_FLAG_PERSIST|VERTO_EV_FLAG_IO_CLOSE_FD))
@@ -103,7 +103,7 @@ struct module_record {
 /*
  * This symbol can be used when embedding verto.c in a library along with a
  * built-in private module, to preload the module instead of dynamically
- * linking it in later.  Define to verto_module_table_<modulename>.
+ * linking it in later.  Define to <modulename>.
  */
 extern verto_module MODTABLE(BUILTIN_MODULE);
 static module_record builtin_record = {
@@ -119,11 +119,34 @@ static int resize_cb_hierarchical;
 
 #ifdef HAVE_PTHREAD
 static pthread_mutex_t loaded_modules_mutex = PTHREAD_MUTEX_INITIALIZER;
-#define mutex_lock(x) pthread_mutex_lock(x)
-#define mutex_unlock(x) pthread_mutex_unlock(x)
+#define mutex_lock(x) { \
+        int c = pthread_mutex_lock(x); \
+        if (c != 0) { \
+            fprintf(stderr, "pthread_mutex_lock returned %d (%s) in %s", \
+                    c, strerror(c), __FUNCTION__); \
+        } \
+        assert(c == 0); \
+    }
+#define mutex_unlock(x) { \
+        int c = pthread_mutex_unlock(x); \
+        if (c != 0) { \
+            fprintf(stderr, "pthread_mutex_unlock returned %d (%s) in %s", \
+                    c, strerror(c), __FUNCTION__); \
+        } \
+        assert(c == 0); \
+    }
+#define mutex_destroy(x) { \
+        int c = pthread_mutex_destroy(x); \
+        if (c != 0) { \
+            fprintf(stderr, "pthread_mutex_destroy returned %d (%s) in %s", \
+                    c, strerror(c), __FUNCTION__); \
+        } \
+        assert(c == 0); \
+    }
 #else
 #define mutex_lock(x)
 #define mutex_unlock(x)
+#define mutex_destroy(x)
 #endif
 
 #define vfree(mem) vresize(mem, 0)
@@ -132,6 +155,11 @@ vresize(void *mem, size_t size)
 {
     if (!resize_cb)
         resize_cb = &realloc;
+    if (size == 0 && resize_cb == &realloc) {
+        /* Avoid memleak as realloc(X, 0) can return a free-able pointer. */
+        free(mem);
+        return NULL;
+    }
     return (*resize_cb)(mem, size);
 }
 
@@ -265,6 +293,7 @@ do_load_file(const char *filename, int reqsym, verto_ev_type reqtypes,
     tblname = int_get_table_name_from_filename(filename);
     if (!tblname) {
         free(tblname);
+        free(tmp->filename);
         vfree(tmp);
         return 0;
     }
@@ -278,6 +307,7 @@ do_load_file(const char *filename, int reqsym, verto_ev_type reqtypes,
         free(error);
         module_close(tmp->dll);
         free(tblname);
+        free(tmp->filename);
         vfree(tmp);
         return 0;
     }
@@ -494,6 +524,8 @@ remove_ev(verto_ev **origin, verto_ev *item)
 static void
 signal_ignore(verto_ctx *ctx, verto_ev *ev)
 {
+    (void) ctx;
+    (void) ev;
 }
 
 verto_ctx *
@@ -563,6 +595,24 @@ verto_free(verto_ctx *ctx)
         ctx->module->funcs->ctx_free(ctx->ctx);
 
     vfree(ctx);
+}
+
+void
+verto_cleanup(void)
+{
+    mutex_lock(&loaded_modules_mutex);
+
+    for (module_record *record = loaded_modules; record;
+         record = record->next) {
+        module_close(record->dll);
+        free(record->filename);
+    }
+
+    vfree(loaded_modules);
+    loaded_modules = NULL;
+
+    mutex_unlock(&loaded_modules_mutex);
+    mutex_destroy(&loaded_modules_mutex);
 }
 
 void
@@ -752,8 +802,12 @@ verto_set_flags(verto_ev *ev, verto_ev_flag flags)
     if (!ev)
         return;
 
+    /* No modification is needed, so do nothing. */
+    if (MUTABLE(ev->flags) == MUTABLE(flags))
+        return;
+
     ev->flags  &= ~_VERTO_EV_FLAG_MUTABLE_MASK;
-    ev->flags  |= flags & _VERTO_EV_FLAG_MUTABLE_MASK;
+    ev->flags  |= MUTABLE(flags);
 
     /* If setting flags isn't supported, just rebuild the event */
     if (!ev->ctx->module->funcs->ctx_set_flags) {
@@ -765,7 +819,7 @@ verto_set_flags(verto_ev *ev, verto_ev_flag flags)
     }
 
     ev->actual &= ~_VERTO_EV_FLAG_MUTABLE_MASK;
-    ev->actual |= flags & _VERTO_EV_FLAG_MUTABLE_MASK;
+    ev->actual |= MUTABLE(flags);
     ev->ctx->module->funcs->ctx_set_flags(ev->ctx->ctx, ev, ev->ev);
 }
 
@@ -861,7 +915,7 @@ verto_convert_module(const verto_module *module, int deflt, verto_mod_ctx *mctx)
     module_record *mr;
 
     if (!module)
-        goto error;
+        return NULL;
 
     if (deflt) {
         mutex_lock(&loaded_modules_mutex);
