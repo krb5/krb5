@@ -195,7 +195,8 @@ verto_set_default(const char *impl, verto_ev_type reqtypes);
  * @see verto_add_idle()
  * @see verto_add_signal()
  * @see verto_add_child()
- * @param resize The allocator to use (behaves like realloc())
+ * @param resize The allocator to use (behaves like realloc(),
+ *        resize(ptr, 0) frees memory pointed by ptr.)
  * @param hierarchical Zero if the allocator is not hierarchical
  */
 int
