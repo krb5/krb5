@@ -31,9 +31,11 @@ def test(testname, life, rlife, exp_life, exp_rlife, env=None):
     endtime = times[1]
     rtime = times[2] if len(times) >= 3 else None
 
-    # Check the ticket lifetime against expectations.
+    # Check the ticket lifetime against expectations.  If the lifetime
+    # was determined by the request, there may be a small error
+    # because KDC requests contain an end time rather than a lifetime.
     life = (endtime - starttime).seconds
-    if life != exp_life:
+    if abs(life - exp_life) > 5:
         fail('%s: expected life %d, got %d' % (testname, exp_life, life))
 
     # Check the ticket renewable lifetime against expectations.
@@ -43,7 +45,7 @@ def test(testname, life, rlife, exp_life, exp_rlife, env=None):
         fail('%s: ticket is renewable but has no renew_till' % testname)
     if rtime is not None:
         rlife = (rtime - starttime).seconds
-        if rlife != exp_rlife:
+        if abs(rlife - exp_rlife) > 5:
             fail('%s: expected rlife %d, got %d' (testname, exp_rlife, rlife))
 
 # Get renewable tickets.
