@@ -119,6 +119,7 @@ static int debug = 0;
 static int nodaemon = 0;
 static char *srvtab = NULL;
 static int standalone = 0;
+static const char *pid_file = NULL;
 
 static pid_t fullprop_child = (pid_t)-1;
 
@@ -171,8 +172,23 @@ usage()
             progname);
     fprintf(stderr, _("\t[-F kerberos_db_file ] [-p kdb5_util_pathname]\n"));
     fprintf(stderr, _("\t[-x db_args]* [-P port] [-a acl_file]\n"));
-    fprintf(stderr, _("\t[-A admin_server]\n"));
+    fprintf(stderr, _("\t[-A admin_server] [--pid-file=pid_file]\n"));
     exit(1);
+}
+
+static krb5_error_code
+write_pid_file(const char *path)
+{
+    FILE *fp;
+    unsigned long pid;
+
+    fp = fopen(path, "w");
+    if (fp == NULL)
+        return errno;
+    pid = (unsigned long)getpid();
+    if (fprintf(fp, "%ld\n", pid) < 0 || fclose(fp) == EOF)
+        return errno;
+    return 0;
 }
 
 typedef void (*sig_handler_fn)(int sig);
@@ -261,6 +277,14 @@ main(int argc, char **argv)
         } else {
             printf(_("ready\n"));
             fflush(stdout);
+        }
+        if (pid_file != NULL) {
+            retval = write_pid_file(pid_file);
+            if (retval) {
+                syslog(LOG_ERR, _("Could not write pid file %s: %s"),
+                       pid_file, strerror(errno));
+                exit(1);
+            }
         }
     } else {
         /*
@@ -1020,6 +1044,10 @@ parse_args(int argc, char **argv)
     char **newargs;
     int c;
     krb5_error_code retval;
+    enum { PID_FILE = 256 };
+    struct option long_options[] = {
+        { "pid-file", 1, NULL, PID_FILE },
+    };
 
     memset(&params, 0, sizeof(params));
 
@@ -1032,7 +1060,8 @@ parse_args(int argc, char **argv)
     }
 
     progname = argv[0];
-    while ((c = getopt(argc, argv, "A:f:F:p:P:r:s:DdSa:tx:")) != -1) {
+    while ((c = getopt_long(argc, argv, "A:f:F:p:P:r:s:DdSa:tx:",
+                            long_options, NULL)) != -1) {
         switch (c) {
         case 'A':
             params.mask |= KADM5_CONFIG_ADMIN_SERVER;
@@ -1083,6 +1112,9 @@ parse_args(int argc, char **argv)
             db_args[db_args_size] = optarg;
             db_args[db_args_size + 1] = NULL;
             db_args_size++;
+            break;
+        case PID_FILE:
+            pid_file = optarg;
             break;
         default:
             usage();
