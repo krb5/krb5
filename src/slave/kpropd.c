@@ -141,7 +141,7 @@ static const char *port = KPROP_SERVICE;
 static char **db_args = NULL;
 static int db_args_size = 0;
 
-static void parse_args(char **argv);
+static void parse_args(int argc, char **argv);
 static void do_standalone(void);
 static void doit(int fd);
 static krb5_error_code do_iprop(void);
@@ -238,7 +238,7 @@ main(int argc, char **argv)
     struct stat st;
 
     setlocale(LC_ALL, "");
-    parse_args(argv);
+    parse_args(argc, argv);
 
     if (fstat(0, &st) == -1) {
         com_err(progname, errno, _("while checking if stdin is a socket"));
@@ -1015,9 +1015,10 @@ kpropd_com_err_proc(const char *whoami, long code, const char *fmt,
 }
 
 static void
-parse_args(char **argv)
+parse_args(int argc, char **argv)
 {
-    char **newargs, *word, ch;
+    char **newargs;
+    int c;
     krb5_error_code retval;
 
     memset(&params, 0, sizeof(params));
@@ -1030,101 +1031,65 @@ parse_args(char **argv)
         exit(1);
     }
 
-    progname = *argv++;
-    while ((word = *argv++) != NULL) {
-        /* We don't take any arguments, only options */
-        if (*word != '-')
-            usage();
-
-        word++;
-        while (word != NULL && (ch = *word++) != '\0') {
-            switch (ch) {
-            case 'A':
-                params.mask |= KADM5_CONFIG_ADMIN_SERVER;
-                params.admin_server = (*word != '\0') ? word : *argv++;
-                if (params.admin_server == NULL)
-                    usage();
-                word = NULL;
-                break;
-            case 'f':
-                file = (*word != '\0') ? word : *argv++;
-                if (file == NULL)
-                    usage();
-                word = NULL;
-                break;
-            case 'F':
-                kerb_database = (*word != '\0') ? word : *argv++;
-                if (kerb_database == NULL)
-                    usage();
-                word = NULL;
-                break;
-            case 'p':
-                kdb5_util = (*word != '\0') ? word : *argv++;
-                if (kdb5_util == NULL)
-                    usage();
-                word = NULL;
-                break;
-            case 'P':
-                port = (*word != '\0') ? word : *argv++;
-                if (port == NULL)
-                    usage();
-                word = NULL;
-                break;
-            case 'r':
-                realm = (*word != '\0') ? word : *argv++;
-                if (realm == NULL)
-                    usage();
-                word = NULL;
-                break;
-            case 's':
-                srvtab = (*word != '\0') ? word : *argv++;
-                if (srvtab == NULL)
-                    usage();
-                word = NULL;
-                break;
-            case 'D':
-                nodaemon++;
-                break;
-            case 'd':
-                debug++;
-                break;
-            case 'S':
-                /* Standalone mode is now auto-detected; see main(). */
-                break;
-            case 'a':
-                acl_file_name = (*word != '\0') ? word : *argv++;
-                if (acl_file_name == NULL)
-                    usage();
-                word = NULL;
-                break;
-
-            case 't':
-                /* Undocumented option - for testing only.  Run the kpropd
-                 * server exactly once. */
-                runonce = 1;
-                break;
-
-            case 'x':
-                newargs = realloc(db_args,
-                                  (db_args_size + 2) * sizeof(*db_args));
-                if (newargs == NULL) {
-                    com_err(argv[0], errno, _("copying db args"));
-                    exit(1);
-                }
-                db_args = newargs;
-                db_args[db_args_size] = (*word != '\0') ? word : *argv++;
-                if (db_args[db_args_size] == NULL)
-                    usage();
-                word = NULL;
-                db_args[db_args_size + 1] = NULL;
-                db_args_size++;
-                break;
-
-            default:
-                usage();
+    progname = argv[0];
+    while ((c = getopt(argc, argv, "A:f:F:p:P:r:s:DdSa:tx:")) != -1) {
+        switch (c) {
+        case 'A':
+            params.mask |= KADM5_CONFIG_ADMIN_SERVER;
+            params.admin_server = optarg;
+            break;
+        case 'f':
+            file = optarg;
+            break;
+        case 'F':
+            kerb_database = optarg;
+            break;
+        case 'p':
+            kdb5_util = optarg;
+            break;
+        case 'P':
+            port = optarg;
+            break;
+        case 'r':
+            realm = optarg;
+            break;
+        case 's':
+            srvtab = optarg;
+            break;
+        case 'D':
+            nodaemon++;
+            break;
+        case 'd':
+            debug++;
+            break;
+        case 'S':
+            /* Standalone mode is now auto-detected; see main(). */
+            break;
+        case 'a':
+            acl_file_name = optarg;
+            break;
+        case 't':
+            /* Undocumented option - for testing only.  Run the kpropd
+             * server exactly once. */
+            runonce = 1;
+            break;
+        case 'x':
+            newargs = realloc(db_args, (db_args_size + 2) * sizeof(*db_args));
+            if (newargs == NULL) {
+                com_err(argv[0], errno, _("copying db args"));
+                exit(1);
             }
+            db_args = newargs;
+            db_args[db_args_size] = optarg;
+            db_args[db_args_size + 1] = NULL;
+            db_args_size++;
+            break;
+        default:
+            usage();
         }
     }
+    if (optind != argc)
+        usage();
 
     openlog("kpropd", LOG_PID | LOG_ODELAY, SYSLOG_CLASS);
     if (!debug)
