@@ -688,6 +688,9 @@ process_pa_data(krb5_context context, krb5_init_creds_context ctx,
                 }
                 free(mod_pa);
             }
+            /* Don't continue to try mechanisms after a keyboard interrupt. */
+            if (ret == KRB5_LIBOS_PWDINTR)
+                goto cleanup;
             if (ret == 0 && real) {
                 /* Stop now and record which real padata type we answered. */
                 *out_type = pa->pa_type;

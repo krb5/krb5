@@ -1358,6 +1358,9 @@ init_creds_step_request(krb5_context context,
             code = ctx->err_reply->error + ERROR_TABLE_BASE_krb5;
         }
     }
+    /* Don't continue after a keyboard interrupt. */
+    if (code == KRB5_LIBOS_PWDINTR)
+        goto cleanup;
     if (code) {
         /* See if we can try a different preauth mech before giving up. */
         k5_save_ctx_error(context, code, &save);
