@@ -73,6 +73,52 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.15.2 (2017-09-25)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a KDC denial of service vulnerability caused by unset status
+  strings [CVE-2017-11368]
+
+* Preserve GSS contexts on init/accept failure [CVE-2017-11462]
+
+* Fix kadm5 setkey operation with LDAP KDB module
+
+* Use a ten-second timeout after successful connection for HTTPS KDC
+  requests, as we do for TCP requests
+
+* Fix client null dereference when KDC offers encrypted challenge
+  without FAST
+
+* Ignore dotfiles when processing profile includedir directive
+
+* Improve documentation
+
+krb5-1.15.2 changes by ticket ID
+--------------------------------
+
+8557	Allow null outputs to gss_get_name_attribute()
+8559	Fix leaks in gss_inquire_cred_by_oid()
+8560	Force autoconf rebuild in maintainer rules
+8563	Ignore dotfiles in profile includedir
+8565	Fix krb5int_open_plugin_dirs() error handling
+8567	Bug in mslsa ccahe
+8573	Check for FAST in encrypted challenge client
+8576	Make RC4 string-to-key more robust
+8580	kinit fails for OTP users when using KdcProxy with both IPv4&6 DNS
+8581	Allow clock skew in krb5 gss_context_time()
+8584	Free GSS checksum data deterministically
+8585	Add aes-sha2 enctypes to aes family documentation
+8588	Fix kadm5.acl error reporting
+8589	setkey kadm5 operation does not work with LDAP KDB
+8593	Add aes-sha2 to default enctypes in docs
+8594	Clarify "all privileges" in kadm5.acl docs
+8598	Preserve GSS context on init/accept failure
+8599	Prevent KDC unset status assertion failures
+8600	Prevent null dereference with keyboard master key
+
+
 Major changes in 1.15.1 (2017-03-01)
 ------------------------------------
 
@@ -372,7 +418,9 @@ reports, suggestions, and valuable resources:
     Radoslav Bodo
     Sumit Bose
     Emmanuel Bouillon
+    Isaac Boukris
     Philip Brown
+    Samuel Cabrero
     Michael Calmer
     Andrea Campi
     Julien Chaffraix
@@ -441,6 +489,7 @@ reports, suggestions, and valuable resources:
     Pavel Jindra
     Brian Johannesmeyer
     Joel Johnson
+    Alexander Karaivanov
     Anders Kaseorg
     W. Trevor King
     Patrik Kis
@@ -453,6 +502,7 @@ reports, suggestions, and valuable resources:
     Todd Lipcon
     Oliver Loch
     Kevin Longfellow
+    Frank Lonigro
     Jon Looney
     Nuno Lopes
     Ryan Lynch
@@ -493,6 +543,7 @@ reports, suggestions, and valuable resources:
     Solly Ross
     Mike Roszkowski
     Guillaume Rousse
+    Joshua Schaeffer
     Andreas Schneider
     Tom Shaw
     Jim Shi
