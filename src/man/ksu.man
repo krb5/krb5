@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KSU" "1" " " "1.14.5" "MIT Kerberos"
+.TH "KSU" "1" " " "1.14.6" "MIT Kerberos"
 .SH NAME
 ksu \- Kerberized super-user
 .

@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "K5SRVUTIL" "1" " " "1.14.5" "MIT Kerberos"
+.TH "K5SRVUTIL" "1" " " "1.14.6" "MIT Kerberos"
 .SH NAME
 k5srvutil \- host key table (keytab) manipulation utility
 .

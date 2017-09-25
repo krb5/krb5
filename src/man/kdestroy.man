@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KDESTROY" "1" " " "1.14.5" "MIT Kerberos"
+.TH "KDESTROY" "1" " " "1.14.6" "MIT Kerberos"
 .SH NAME
 kdestroy \- destroy Kerberos tickets
 .
