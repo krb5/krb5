@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.14.5\n"
+"Project-Id-Version: mit-krb5 1.14.5-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-02 13:42-0500\n"
+"POT-Creation-Date: 2017-09-25 11:44-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4216,7 +4216,7 @@ msgstr ""
 
 #: ../../src/lib/kadm5/srv/server_acl.c:92
 #, c-format
-msgid "%s: syntax error at line %d <%10s...>"
+msgid "%s: syntax error at line %d <%.10s...>"
 msgstr ""
 
 #: ../../src/lib/kadm5/srv/server_acl.c:94
@@ -4266,12 +4266,12 @@ msgstr ""
 msgid "Cannot initialize database library"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:1651
+#: ../../src/lib/kdb/kdb5.c:1652
 #, c-format
 msgid "Illegal version number for KRB5_TL_MKEY_AUX %d\n"
 msgstr ""
 
-#: ../../src/lib/kdb/kdb5.c:1820
+#: ../../src/lib/kdb/kdb5.c:1821
 #, c-format
 msgid "Illegal version number for KRB5_TL_ACTKVNO %d\n"
 msgstr ""
