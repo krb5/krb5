@@ -145,9 +145,10 @@ The following tags may be specified in a [realms] subsection:
 .B \fBacl_file\fP
 (String.)  Location of the access control list file that
 \fIkadmind(8)\fP uses to determine which principals are allowed
-which permissions on the Kerberos database.  The default value is
-\fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/kadm5.acl\fP\&.  For more information on Kerberos ACL
-file see \fIkadm5.acl(5)\fP\&.
+which permissions on the Kerberos database.  To operate without an
+ACL file, set this relation to the empty string with \fBacl_file =
+""\fP\&.  The default value is \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/kadm5.acl\fP\&.  For more
+information on Kerberos ACL file see \fIkadm5.acl(5)\fP\&.
 .TP
 .B \fBdatabase_module\fP
 (String.)  This relation indicates the name of the configuration
