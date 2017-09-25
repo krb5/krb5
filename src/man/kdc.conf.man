@@ -1031,7 +1031,7 @@ _
 T{
 aes
 T}	T{
-The AES family: aes256\-cts\-hmac\-sha1\-96 and aes128\-cts\-hmac\-sha1\-96
+The AES family: aes256\-cts\-hmac\-sha1\-96, aes128\-cts\-hmac\-sha1\-96, aes256\-cts\-hmac\-sha384\-192, and aes128\-cts\-hmac\-sha256\-128
 T}
 _
 T{

@@ -230,16 +230,17 @@ sms@ATHENA.MIT.EDU        x   * \-maxlife 9h \-postdateable # line 6
 .UNINDENT
 .UNINDENT
 .sp
-(line 1) Any principal in the \fBATHENA.MIT.EDU\fP realm with
-an \fBadmin\fP instance has all administrative privileges.
+(line 1) Any principal in the \fBATHENA.MIT.EDU\fP realm with an
+\fBadmin\fP instance has all administrative privileges except extracting
+keys.
 .sp
-(lines 1\-3) The user \fBjoeadmin\fP has all permissions with his
-\fBadmin\fP instance, \fBjoeadmin/admin@ATHENA.MIT.EDU\fP (matches line
-1).  He has no permissions at all with his null instance,
-\fBjoeadmin@ATHENA.MIT.EDU\fP (matches line 2).  His \fBroot\fP and other
-non\-\fBadmin\fP, non\-null instances (e.g., \fBextra\fP or \fBdbadmin\fP) have
-inquire permissions with any principal that has the instance \fBroot\fP
-(matches line 3).
+(lines 1\-3) The user \fBjoeadmin\fP has all permissions except
+extracting keys with his \fBadmin\fP instance,
+\fBjoeadmin/admin@ATHENA.MIT.EDU\fP (matches line 1).  He has no
+permissions at all with his null instance, \fBjoeadmin@ATHENA.MIT.EDU\fP
+(matches line 2).  His \fBroot\fP and other non\-\fBadmin\fP, non\-null
+instances (e.g., \fBextra\fP or \fBdbadmin\fP) have inquire permissions
+with any principal that has the instance \fBroot\fP (matches line 3).
 .sp
 (line 4) Any \fBroot\fP principal in \fBATHENA.MIT.EDU\fP can inquire
 or change the password of their null instance, but not any other
@@ -253,9 +254,9 @@ permission can only be granted globally, not to specific target
 principals.
 .sp
 (line 6) Finally, the Service Management System principal
-\fBsms@ATHENA.MIT.EDU\fP has all permissions, but any principal that it
-creates or modifies will not be able to get postdateable tickets or
-tickets with a life of longer than 9 hours.
+\fBsms@ATHENA.MIT.EDU\fP has all permissions except extracting keys, but
+any principal that it creates or modifies will not be able to get
+postdateable tickets or tickets with a life of longer than 9 hours.
 .SH SEE ALSO
 .sp
 \fIkdc.conf(5)\fP, \fIkadmind(8)\fP
