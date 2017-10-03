@@ -652,6 +652,7 @@ callback(krb5_error_code retval, const krad_packet *rqst,
 
     /* Try the next token. */
     request_send(req);
+    return;
 
 error:
     req->cb(req->data, retval, otp_response_fail, NULL);
