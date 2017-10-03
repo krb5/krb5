@@ -283,6 +283,8 @@ get_server_key(context, server, enctype, key)
     krb5_data salt;
     krb5_data pwd;
 
+    *key = NULL;
+
     if ((retval = krb5_principal2salt(context, server, &salt)))
 	return retval;
 
@@ -294,8 +296,11 @@ get_server_key(context, server, enctype, key)
 
     if ((*key = (krb5_keyblock *)malloc(sizeof(krb5_keyblock)))) {
     	krb5_use_enctype(context, &eblock, enctype);
-    	if ((retval = krb5_string_to_key(context, &eblock, *key, &pwd, &salt)))
+	retval = krb5_string_to_key(context, &eblock, *key, &pwd, &salt);
+	if (retval) {
 	    free(*key);
+	    *key = NULL;
+	}
     } else
         retval = ENOMEM;
 
