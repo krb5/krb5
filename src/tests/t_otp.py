@@ -149,16 +149,22 @@ def verify(daemon, queue, reply, usernm, passwd):
     assert data['pass'] == [passwd]
     daemon.join()
 
-def otpconfig(toktype, username=None, indicators=None):
-    val = '[{"type": "%s"' % toktype
+# Compose a single token configuration.
+def otpconfig_1(toktype, username=None, indicators=None):
+    val = '{"type": "%s"' % toktype
     if username is not None:
         val += ', "username": "%s"' % username
     if indicators is not None:
         qind = ['"%s"' % s for s in indicators]
         jsonlist = '[' + ', '.join(qind) + ']'
         val += ', "indicators":' + jsonlist
-    val += '}]'
+    val += '}'
     return val
+
+# Compose a token configuration list suitable for the "otp" string
+# attribute.
+def otpconfig(toktype, username=None, indicators=None):
+    return '[' + otpconfig_1(toktype, username, indicators) + ']'
 
 prefix = "/tmp/%d" % os.getpid()
 secret_file = prefix + ".secret"
@@ -238,5 +244,21 @@ queue.get()
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', otpconfig('unix')])
 realm.kinit(realm.user_princ, 'accept', flags=flags)
 verify(daemon, queue, True, realm.user_princ, 'accept')
+
+## Regression test for #8708: test with the standard username and two
+## tokens configured, with the first rejecting and the second
+## accepting.  With the bug, the KDC incorrectly rejects the request
+## and then performs invalid memory accesses, most likely crashing.
+daemon1 = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept1', queue))
+daemon2 = UnixRadiusDaemon(args=(socket_file, '', 'accept2', queue))
+daemon1.start()
+queue.get()
+daemon2.start()
+queue.get()
+oconf = '[' + otpconfig_1('udp') + ', ' + otpconfig_1('unix') + ']'
+realm.run([kadminl, 'setstr', realm.user_princ, 'otp', oconf])
+realm.kinit(realm.user_princ, 'accept2', flags=flags)
+verify(daemon1, queue, False, realm.user_princ.split('@')[0], 'accept2')
+verify(daemon2, queue, True, realm.user_princ, 'accept2')
 
 success('OTP tests')
