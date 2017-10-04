@@ -76,8 +76,141 @@ beginning with krb5-1.8.
 Major changes in 1.16
 ---------------------
 
+Administrator experience:
+
+* The KDC can match PKINIT client certificates against the
+  "pkinit_cert_match" string attribute on the client principal entry,
+  using the same syntax as the existing "pkinit_cert_match" profile
+  option.
+
+* The ktutil addent command supports the "-k 0" option to ignore the
+  key version, and the "-s" option to use a non-default salt string.
+
+* kpropd supports a --pid-file option to write a pid file at startup,
+  when it is run in standalone mode.
+
+* The "encrypted_challenge_indicator" realm option can be used to
+  attach an authentication indicator to tickets obtained using FAST
+  encrypted challenge pre-authentication.
+
+* Localization support can be disabled at build time with the
+  --disable-nls configure option.
+
+Developer experience:
+
+* The kdcpolicy pluggable interface allows modules control whether
+  tickets are issued by the KDC.
+
+* The kadm5_auth pluggable interface allows modules to control whether
+  kadmind grants access to a kadmin request.
+
+* The certauth pluggable interface allows modules to control which
+  PKINIT client certificates can authenticate to which client
+  principals.
+
+* KDB modules can use the client and KDC interface IP addresses to
+  determine whether to allow an AS request.
+
+* GSS applications can query the bit strength of a krb5 GSS context
+  using the GSS_C_SEC_CONTEXT_SASL_SSF OID with
+  gss_inquire_sec_context_by_oid().
+
+* GSS applications can query the impersonator name of a krb5 GSS
+  credential using the GSS_KRB5_GET_CRED_IMPERSONATOR OID with
+  gss_inquire_cred_by_oid().
+
+* kdcpreauth modules can query the KDC for the canonicalized requested
+  client principal name, or match a principal name against the
+  requested client principal name with canonicalization.
+
+Protocol evolution:
+
+* The client library will continue to try pre-authentication
+  mechanisms after most failure conditions.
+
+* The KDC will issue trivially renewable tickets (where the renewable
+  lifetime is equal to or less than the ticket lifetime) if requested
+  by the client, to be friendlier to scripts.
+
+* The client library will use a random nonce for TGS requests instead
+  of the current system time.
+
+* For the RC4 string-to-key or PAC operations, UTF-16 is supported
+  (previously only UCS-2 was supported).
+
+* When matching PKINIT client certificates, UPN SANs will be matched
+  correctly as UPNs, with canonicalization.
+
+User experience:
+
+* Dates after the year 2038 are accepted (provided that the platform
+  time facilities support them), through the year 2106.
+
+* Automatic credential cache selection based on the client realm will
+  take into account the fallback realm and the service hostname.
+
+* Referral and alternate cross-realm TGTs will not be cached, avoiding
+  some scenarios where they can be added to the credential cache
+  multiple times.
+
+* A German translation has been added.
+
+Code quality:
+
+* The build is warning-clean under clang with the configured warning
+  options.
+
+* The automated test suite runs cleanly under AddressSanitizer.
+
 krb5-1.16 changes by ticket ID
 ------------------------------
+
+3349	 Allow keytab entries to ignore the key version
+7647	 let ktutil support non-default salts
+7877	 Interleaved init_creds operations use same per-request preauth context
+8352	 Year 2038 fixes
+8515	 Add German translation
+8517	 Add KRB5_TRACE calls for DNS lookups
+8518	 Remove redeclaration of ttyname() in ksu
+8526	 Constify service and hostname in krb5_mk_req()
+8527	 Clean up memory handling in krb5_fwd_tgt_creds()
+8528	 Improve PKINIT UPN SAN matching
+8529	 Add OpenLDAP LDIF file for Kerberos schema
+8533	 Bug in src/tests/responder.c
+8534	 Add configure option to disable nls support
+8537	 Preauthentication should continue after failure
+8539	 Preauth tryagain should copy KDC cookie
+8544	 Wrong PKCS11 PIN can trigger PKINIT draft9 code
+8548	 Add OID to inquire GSS cred impersonator name
+8549	 Use fallback realm for GSSAPI ccache selection
+8558	 kvno memory leak (1.15.1)
+8561	 Add certauth pluggable interface
+8562	 Add the certauth dbmatch module
+8568	 Convert some pkiDebug messages to TRACE macros
+8569	 Add support to query the SSF of a GSS context
+8570	 Add the client_name() kdcpreauth callback
+8571	 Use the canonical client principal name for OTP
+8572	 Un-deprecate krb5_auth_con_initivector()
+8575	 Add FAST encrypted challenge auth indicator
+8577	 Replace UCS-2 conversions with UTF-16
+8578	 Add various bound checks
+8579	 duplicate caching of some cross-realm TGTs
+8582	 Use a random nonce in TGS requests
+8583	 Pass client address to DAL audit_as_req
+8592	 Parse all kadm5.acl fields at startup
+8595	 Pluggable interface for kadmin authorization
+8597	 acx_pthread.m4 needs to be updated
+8602	 Make ccache name work for klist/kdestroy -A
+8603	 Remove incomplete PKINIT OCSP support
+8606	 Add KDC policy pluggable interface
+8607	 kpropd should write a pidfile when started in standalone mode...
+8608	 Fix AIX build issues
+8609	 Renewed tickets can be marked renewable with no renewable endtime
+8610	 Don't set ctime in KDC error replies
+8612	 Bump bundled libverto for 0.3.0 release
+8613	 Add hostname-based ccselect module
+8615	 Abort client preauth on keyboard interrupt
+
 
 Acknowledgements
 ----------------
@@ -168,7 +301,7 @@ Past and present members of the Kerberos Team at MIT:
     Zhanna Tsitkova
     Ted Ts'o
     Marshall Vale
-    Tom Yu
+    Taylor Yu
 
 The following external contributors have provided code, patches, bug
 reports, suggestions, and valuable resources:
@@ -191,7 +324,9 @@ reports, suggestions, and valuable resources:
     Radoslav Bodo
     Sumit Bose
     Emmanuel Bouillon
+    Isaac Boukris
     Philip Brown
+    Samuel Cabrero
     Michael Calmer
     Andrea Campi
     Julien Chaffraix
@@ -215,7 +350,9 @@ reports, suggestions, and valuable resources:
     Mark Deneen
     Günther Deschner
     John Devitofranceschi
+    Marc Dionne
     Roland Dowdeswell
+    Dorian Ducournau
     Viktor Dukhovni
     Jason Edgecombe
     Mark Eichin
@@ -230,6 +367,7 @@ reports, suggestions, and valuable resources:
     Remi Ferrand
     Paul Fertser
     William Fiveash
+    Jacques Florent
     Ákos Frohner
     Sebastian Galiano
     Marcus Granado
@@ -239,8 +377,10 @@ reports, suggestions, and valuable resources:
     Philip Guenther
     Dominic Hargreaves
     Robbie Harwood
+    John Hascall
     Jakob Haufe
     Matthieu Hautreux
+    Jochen Hein
     Paul B. Henson
     Jeff Hodges
     Christopher Hogan
@@ -256,18 +396,26 @@ reports, suggestions, and valuable resources:
     Spencer Jackson
     Diogenes S. Jesus
     Pavel Jindra
+    Brian Johannesmeyer
     Joel Johnson
+    Alexander Karaivanov
     Anders Kaseorg
+    Zentaro Kavanagh
+    Mubashir Kazia
     W. Trevor King
     Patrik Kis
+    Martin Kittel
     Mikkel Kruse
     Reinhard Kugler
     Tomas Kuthan
     Pierre Labastie
+    Chris Leick
     Volker Lendecke
     Jan iankko Lieskovsky
+    Todd Lipcon
     Oliver Loch
     Kevin Longfellow
+    Frank Lonigro
     Jon Looney
     Nuno Lopes
     Ryan Lynch
@@ -301,6 +449,7 @@ reports, suggestions, and valuable resources:
     Jonathan Reams
     Jonathan Reed
     Robert Relyea
+    Tony Reix
     Martin Rex
     Jason Rogers
     Matt Rogers
@@ -308,10 +457,13 @@ reports, suggestions, and valuable resources:
     Solly Ross
     Mike Roszkowski
     Guillaume Rousse
+    Joshua Schaeffer
     Andreas Schneider
     Tom Shaw
     Jim Shi
     Peter Shoults
+    Richard Silverman
+    Cel Skeggs
     Simo Sorce
     Michael Spang
     Michael Ströder
@@ -338,6 +490,7 @@ reports, suggestions, and valuable resources:
     Tsu-Phong Wu
     Xu Qiang
     Neng Xue
+    Zhaomo Yang
     Nickolai Zeldovich
     Hanz van Zijst
     Gertjan Zwartjes
