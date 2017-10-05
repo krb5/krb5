@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mit-krb5 1.16-prerelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-25 11:26-0400\n"
+"POT-Creation-Date: 2017-10-05 12:48-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4501,11 +4501,11 @@ msgstr ""
 msgid "Reply has wrong form of session key for anonymous request"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1679
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1682
 msgid "Failed to store credentials"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1768
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1771
 #, c-format
 msgid "Client '%s' not found in Kerberos database"
 msgstr ""
@@ -4573,15 +4573,15 @@ msgstr ""
 msgid "krb5_init_creds calls must use same library context"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/preauth2.c:713
+#: ../../src/lib/krb5/krb/preauth2.c:716
 msgid "Pre-authentication failed"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/preauth2.c:1094
+#: ../../src/lib/krb5/krb/preauth2.c:1097
 msgid "Unable to initialize preauth context"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/preauth2.c:1107
+#: ../../src/lib/krb5/krb/preauth2.c:1110
 #, c-format
 msgid "Preauth module %s"
 msgstr ""
