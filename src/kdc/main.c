@@ -53,8 +53,6 @@ extern int daemon(int, int);
 
 static void usage (char *);
 
-static krb5_error_code setup_sam (void);
-
 static void initialize_realms(krb5_context kcontext, int argc, char **argv,
                               int *tcp_listen_backlog_out);
 
@@ -590,13 +588,6 @@ create_workers(verto_ctx *ctx, int num)
     exit(0);
 }
 
-static krb5_error_code
-setup_sam(void)
-{
-    krb5_context ctx = shandle.kdc_err_context;
-    return krb5_c_make_random_key(ctx, ENCTYPE_DES_CBC_MD5, &psr_key);
-}
-
 static void
 usage(char *name)
 {
@@ -990,13 +981,6 @@ int main(int argc, char **argv)
     retval = load_kdcpolicy_plugins(kcontext);
     if (retval) {
         kdc_err(kcontext, retval, _("while loading KDC policy plugin"));
-        finish_realms();
-        return 1;
-    }
-
-    retval = setup_sam();
-    if (retval) {
-        kdc_err(kcontext, retval, _("while initializing SAM"));
         finish_realms();
         return 1;
     }
