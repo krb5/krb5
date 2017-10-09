@@ -440,8 +440,8 @@ proc delete_db {} {
 	$tmppwd/kdc-db.ulog \
 	$tmppwd/replica-db $tmppwd/replica-db.ok $tmppwd/replica-db.kadm5 $tmppwd/replica-db.kadm5.lock \
 	$tmppwd/replica-db~ $tmppwd/replica-db~.ok $tmppwd/replica-db~.kadm5 $tmppwd/replica-db~.kadm5.lock
-    # Creating a new database means we need a new srvtab.
-    file delete $tmppwd/srvtab $tmppwd/cpw_srvtab
+    # Creating a new database means we need a new keytab.
+    file delete $tmppwd/keytab $tmppwd/cpw_keytab
 }
 
 delete_db
@@ -1510,11 +1510,9 @@ proc start_kpropd {} {
 
     envstack_push
     setup_kerberos_env replica
-    spawn $KPROPD -S -d -t -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-replica-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl
+    spawn $KPROPD -S -d -t -P [expr 10 + $portbase] -s $tmppwd/keytab -f $tmppwd/incoming-replica-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl
     set kpropd_pid [exp_pid]
     set kpropd_spawn_id $spawn_id
-#    send_user [list $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-replica-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl]\n
-#    spawn_shell
     envstack_pop
 }
 
@@ -1859,13 +1857,13 @@ proc add_random_key { kkey standalone } {
     }
 }
 
-# setup_srvtab
-# Set up a srvtab file.  start_kerberos_daemons and add_random_key
+# setup_keytab
+# Set up a keytab file.  start_kerberos_daemons and add_random_key
 # $id/$hostname must be called before this procedure.  If the
 # argument is non-zero, call pass at relevant points.  Returns 1 on
 # success, 0 on failure. If the id field is not provided, host is used.
 
-proc setup_srvtab { standalone {id host} } {
+proc setup_keytab { standalone {id host} } {
     global REALMNAME
     global KADMIN_LOCAL
     global KEY
@@ -1874,17 +1872,17 @@ proc setup_srvtab { standalone {id host} } {
     global spawn_id
     global last_service
 
-    if {!$standalone && [file exists $tmppwd/srvtab] && $last_service == $id} {
+    if {!$standalone && [file exists $tmppwd/keytab] && $last_service == $id} {
 	return 1
     }
 
-    file delete $tmppwd/srvtab $tmppwd/srvtab.old
+    file delete $tmppwd/keytab $tmppwd/keytab.old
 
     if ![get_hostname] {
 	return 0
     }
 
-    file delete $hostname-new-srvtab
+    file delete $hostname-new-keytab
 
     envstack_push
     setup_kerberos_env kdc
@@ -1892,40 +1890,40 @@ proc setup_srvtab { standalone {id host} } {
     envstack_pop
     expect_after {
 	-re "(.*)\r\nkadmin.local:  " {
-	    fail "kadmin.local srvtab (unmatched output: $expect_out(1,string))"
+	    fail "kadmin.local keytab (unmatched output: $expect_out(1,string))"
 	    if {!$standalone} {
-		file delete $tmppwd/srvtab
+		file delete $tmppwd/keytab
 	    }
 	    catch "expect_after"
 	    return 0
 	}
 	timeout {
-	    fail "kadmin.local srvtab"
+	    fail "kadmin.local keytab"
 	    if {!$standalone} {
-		file delete $tmppwd/srvtab
+		file delete $tmppwd/keytab
 	    }
 	    catch "expect_after"
 	    return 0
 	}
 	eof {
-	    fail "kadmin.local srvtab"
+	    fail "kadmin.local keytab"
 	    if {!$standalone} {
-		file delete $tmppwd/srvtab
+		file delete $tmppwd/keytab
 	    }
 	    catch "expect_after"
 	    return 0
 	}
     }
     expect "kadmin.local:  "
-    send "xst -k $hostname-new-srvtab $id/$hostname kiprop/$hostname\r"
-    expect "xst -k $hostname-new-srvtab $id/$hostname kiprop/$hostname\r\n"
+    send "xst -k $hostname-new-keytab $id/$hostname kiprop/$hostname\r"
+    expect "xst -k $hostname-new-keytab $id/$hostname kiprop/$hostname\r\n"
     expect {
-	-re ".*Entry for principal $id/$hostname.* added to keytab WRFILE:$hostname-new-srvtab." { }
+	-re ".*Entry for principal $id/$hostname.* added to keytab WRFILE:$hostname-new-keytab." { }
 	-re "\r\nkadmin.local:  " {
 	    if {$standalone} {
-		fail "kadmin.local srvtab"
+		fail "kadmin.local keytab"
 	    } else {
-		file delete $tmppwd/srvtab
+		file delete $tmppwd/keytab
 	    }
 	    catch expect_after
 	    return 0
@@ -1935,27 +1933,27 @@ proc setup_srvtab { standalone {id host} } {
     send "quit\r"
     expect eof
     catch expect_after
-    if ![check_exit_status "kadmin.local srvtab"] {
+    if ![check_exit_status "kadmin.local keytab"] {
 	if {!$standalone} {
-	    file delete $tmppwd/srvtab
+	    file delete $tmppwd/keytab
 	}
 	return 0
     }
 
-    catch "exec mv -f $hostname-new-srvtab $tmppwd/srvtab" exec_output
+    catch "exec mv -f $hostname-new-keytab $tmppwd/keytab" exec_output
     if ![string match "" $exec_output] {
 	verbose -log "$exec_output"
-	perror "can't mv new srvtab"
+	perror "can't mv new keytab"
 	return 0
     }
 
     if {$standalone} {
-	pass "kadmin.local srvtab"
+	pass "kadmin.local keytab"
     }
 
-    # Make the srvtab file globally readable in case we are using a
-    # root shell and the srvtab is NFS mounted.
-    catch "exec chmod a+r $tmppwd/srvtab"
+    # Make the keytab file globally readable in case we are using a
+    # root shell and the keytab is NFS mounted.
+    catch "exec chmod a+r $tmppwd/keytab"
 
     # Remember what we just extracted
     set last_service $id

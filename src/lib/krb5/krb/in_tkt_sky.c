@@ -56,9 +56,9 @@ get_as_key_skey(krb5_context context, krb5_principal client,
   If addrs is non-NULL, it is used for the addresses requested.  If it is
   null, the system standard addresses are used.
 
-  If keyblock is NULL, an appropriate key for creds->client is retrieved
-  from the system key store (e.g. /etc/srvtab).  If keyblock is non-NULL,
-  it is used as the decryption key.
+  If keyblock is NULL, an appropriate key for creds->client is retrieved from
+  the system key store (e.g. /etc/krb5.keytab).  If keyblock is non-NULL, it
+  is used as the decryption key.
 
   A succesful call will place the ticket in the credentials cache ccache.
 

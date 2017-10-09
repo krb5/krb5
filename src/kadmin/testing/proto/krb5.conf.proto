@@ -1,6 +1,6 @@
 [libdefaults]
 	default_realm = __REALM__
-	default_keytab_name = FILE:__K5ROOT__/v5srvtab
+	default_keytab_name = FILE:__K5ROOT__/keytab
 	dns_fallback = no
 	plugin_base_dir = __PLUGIN_DIR__
 	allow_weak_crypto = true

@@ -98,9 +98,6 @@ x=$?
 rm /tmp/start_servers_local$$
 if test $x != 0 ; then exit 1 ; fi
 
-# rm -f /etc/v5srvtab
-# eval $LOCAL_MAKE_KEYTAB -princ host/xCANONHOSTx /etc/v5srvtab $REDIRECT
-
 # run the servers (from the build tree)
 
 adm_start_file=/tmp/adm_server_start.$$

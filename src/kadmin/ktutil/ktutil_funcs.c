@@ -368,22 +368,3 @@ krb5_error_code ktutil_write_keytab(context, list, name)
     krb5_kt_close(context, kt);
     return retval;
 }
-
-/*
- * Read in a named krb4 srvtab and append to list.  Allocate new list
- * if needed.
- */
-krb5_error_code ktutil_read_srvtab(context, name, list)
-    krb5_context context;
-    char *name;
-    krb5_kt_list *list;
-{
-    char *ktname;
-    krb5_error_code result;
-
-    if (asprintf(&ktname, "SRVTAB:%s", name) < 0)
-        return ENOMEM;
-    result = ktutil_read_keytab(context, ktname, list);
-    free(ktname);
-    return result;
-}

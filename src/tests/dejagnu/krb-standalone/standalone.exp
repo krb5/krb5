@@ -166,8 +166,8 @@ proc doit { } {
     verbose "wait -i $spawn_id returned $k_stat (kadmin addpol)"
     catch "close -i $spawn_id"
 
-    # Use ksrvutil to create a srvtab entry.
-    if ![setup_srvtab 1] {
+    # Use ksrvutil to create a keytab entry.
+    if ![setup_keytab 1] {
 	return
     }
 

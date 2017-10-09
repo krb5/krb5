@@ -139,7 +139,7 @@ proc rpc_test_start { } {
 
 	if [info exists server_pid] { rpc_test_exit }
 
-	set env(KRB5_KTNAME) FILE:$env(RPC_TEST_SRVTAB)
+	set env(KRB5_KTNAME) FILE:$env(RPC_TEST_KEYTAB)
 
  	verbose "% $SERVER" 1
 	set server_pid [spawn $SERVER $PROT]

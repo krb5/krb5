@@ -121,8 +121,8 @@ proc setup_database {} {
 if ![info exists CANON_HOST] {
     set CANON_HOST [exec $env(QUALNAME)]
     setup_database
-    file delete $env(RPC_TEST_SRVTAB)
-    exec $env(MAKE_KEYTAB) -princ "server/$CANON_HOST" $env(RPC_TEST_SRVTAB)
+    file delete $env(RPC_TEST_KEYTAB)
+    exec $env(MAKE_KEYTAB) -princ "server/$CANON_HOST" $env(RPC_TEST_KEYTAB)
 }
 
 

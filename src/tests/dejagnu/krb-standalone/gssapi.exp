@@ -238,9 +238,9 @@ proc doit { } {
 	perror "failed to set up gssservice/$hostname key"
     }
 
-    # Use kdb5_edit to create a srvtab entry for gssservice
-    if ![setup_srvtab 0 gssservice] {
-	perror "failed to set up gssservice srvtab"
+    # Use kdb5_edit to create a keytab entry for gssservice
+    if ![setup_keytab 0 gssservice] {
+	perror "failed to set up gssservice keytab"
     }
 
     catch "exec rm -f $tmppwd/gss_tk_0 $tmppwd/gss_tk_1 $tmppwd/gss_tk_2 $tmppwd/gss_tk_3"
@@ -278,7 +278,7 @@ proc doit { } {
     #
     # set KRB5CCNAME and KRB5_KTNAME
     #
-    set env(KRB5_KTNAME) FILE:$tmppwd/srvtab
+    set env(KRB5_KTNAME) FILE:$tmppwd/keytab
     verbose "KRB5_KTNAME=$env(KRB5_KTNAME)"
 
     # Now start the gss-server.

@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # This script performs additional setup for the RPC unit test.  It
-# assumes that gmake has put TOP and RPC_TEST_SRVTAB into the
+# assumes that gmake has put TOP and RPC_TEST_KEYTAB into the
 # environment. 
 #
 # $Id$
@@ -42,9 +42,9 @@ if test $? != 0 ; then
 fi
 rm /tmp/rpc_test_setup$$
 
-rm -f $RPC_TEST_SRVTAB
+rm -f $RPC_TEST_KEYTAB
 
-eval $MAKE_KEYTAB -princ server/$CANON_HOST $RPC_TEST_SRVTAB $REDIRECT
+eval $MAKE_KEYTAB -princ server/$CANON_HOST $RPC_TEST_KEYTAB $REDIRECT
 
 # grep -s "$CANON_HOST SECURE-TEST.OV.COM" /etc/krb.realms
 # if [ $? != 0 ]; then

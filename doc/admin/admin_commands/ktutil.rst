@@ -13,8 +13,8 @@ DESCRIPTION
 -----------
 
 The ktutil command invokes a command interface from which an
-administrator can read, write, or edit entries in a keytab or Kerberos
-V4 srvtab file.
+administrator can read, write, or edit entries in a keytab.  (Kerberos
+V4 srvtab files are no longer supported.)
 
 
 COMMANDS
@@ -38,15 +38,6 @@ Read the Kerberos V5 keytab file *keytab* into the current keylist.
 
 Alias: **rkt**
 
-read_st
-~~~~~~~
-
-    **read_st** *srvtab*
-
-Read the Kerberos V4 srvtab file *srvtab* into the current keylist.
-
-Alias: **rst**
-
 write_kt
 ~~~~~~~~
 
@@ -55,15 +46,6 @@ write_kt
 Write the current keylist into the Kerberos V5 keytab file *keytab*.
 
 Alias: **wkt**
-
-write_st
-~~~~~~~~
-
-    **write_st** *srvtab*
-
-Write the current keylist into the Kerberos V4 srvtab file *srvtab*.
-
-Alias: **wst**
 
 clear_list
 ~~~~~~~~~~

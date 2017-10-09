@@ -40,7 +40,7 @@ proc start_sim_server_daemon { } {
     global portbase
 
     # Start the sim_server
-    spawn $SIM_SERVER -p [expr 8 + $portbase] -S $tmppwd/srvtab
+    spawn $SIM_SERVER -p [expr 8 + $portbase] -S $tmppwd/keytab
     set sim_server_pid [exp_pid]
     set sim_server_spawn_id $spawn_id
 
@@ -179,8 +179,8 @@ proc doit { } {
 	return
     }
 
-    # Use ksrvutil to create a srvtab entry for sample
-    if ![setup_srvtab 1 sample] {
+    # Use ksrvutil to create a keytab entry for sample
+    if ![setup_keytab 1 sample] {
 	return
     }
 

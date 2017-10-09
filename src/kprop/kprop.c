@@ -49,7 +49,7 @@ static char *kprop_version = KPROP_PROT_VERSION;
 
 static char *progname = NULL;
 static int debug = 0;
-static char *srvtab = NULL;
+static char *keytab_path = NULL;
 static char *replica_host;
 static char *realm = NULL;
 static char *def_realm = NULL;
@@ -83,7 +83,7 @@ static void update_last_prop_file(char *hostname, char *file_name);
 static void usage()
 {
     fprintf(stderr, _("\nUsage: %s [-r realm] [-f file] [-d] [-P port] "
-                      "[-s srvtab] replica_host\n\n"), progname);
+                      "[-s keytab] replica_host\n\n"), progname);
     exit(1);
 }
 
@@ -140,7 +140,7 @@ parse_args(krb5_context context, int argc, char **argv)
             port = optarg;
             break;
         case 's':
-            srvtab = optarg;
+            keytab_path = optarg;
             break;
         default:
             usage();
@@ -191,8 +191,8 @@ get_tickets(krb5_context context)
         exit(1);
     }
 
-    if (srvtab != NULL) {
-        retval = krb5_kt_resolve(context, srvtab, &keytab);
+    if (keytab_path != NULL) {
+        retval = krb5_kt_resolve(context, keytab_path, &keytab);
         if (retval) {
             com_err(progname, retval, _("while resolving keytab"));
             exit(1);

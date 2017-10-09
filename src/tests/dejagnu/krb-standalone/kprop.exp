@@ -72,8 +72,8 @@ proc doit { } {
 	fail "kprop (host key)"
 	return
     }
-    if ![setup_srvtab 0] {
-	fail "kprop (srvtab)"
+    if ![setup_keytab 0] {
+	fail "kprop (keytab)"
 	return
     }
 
@@ -99,7 +99,7 @@ proc doit { } {
     sleep 1
 
     # Try a propagation.
-    spawn $KPROP -f $tmppwd/replica_datatrans -P [expr 10 + $portbase] -s $tmppwd/srvtab $hostname
+    spawn $KPROP -f $tmppwd/replica_datatrans -P [expr 10 + $portbase] -s $tmppwd/keytab $hostname
     expect eof
     set kprop_exit [check_exit_status "kprop (exit status)"]
     # log output for debugging

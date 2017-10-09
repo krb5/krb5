@@ -11,7 +11,7 @@ $usage = "Usage: $whoami [ -server server ] [ -princ principal ]
 	Default principals are host/hostname\@SECURE-TEST.OV.COM and
 	  test/hostname\@SECURE-TEST.OV.COM.
 	If any principals are specified, the default principals are
-	  not added to the srvtab.
+	  not added to the keytab.
 	The string \"xCANONHOSTx\" in a principal specification will be
 	  replaced by the canonical host name of the local host.";
 

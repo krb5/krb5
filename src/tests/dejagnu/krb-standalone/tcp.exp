@@ -33,11 +33,6 @@ proc doit { } {
 	return
     }
 
-    # Use ksrvutil to create a srvtab entry.
-#    if ![setup_srvtab 1] {
-#	return
-#    }
-
     # Use kinit to get a ticket.
     if ![kinit krbtest/admin adminpass$KEY 1] {
 	return

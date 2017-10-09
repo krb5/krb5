@@ -218,7 +218,7 @@ changepw/kerberos@$REALM	cil
 
 EOF
 
-eval $LOCAL_MAKE_KEYTAB -princ kadmin/admin -princ kadmin/changepw -princ ovsec_adm/admin -princ ovsec_adm/changepw $K5ROOT/ovsec_adm.srvtab $REDIRECT
+eval $LOCAL_MAKE_KEYTAB -princ kadmin/admin -princ kadmin/changepw -princ ovsec_adm/admin -princ ovsec_adm/changepw $K5ROOT/ovsec_adm.keytab $REDIRECT
 
 # Create $K5ROOT/setup.csh to make it easy to run other programs against
 # the test db

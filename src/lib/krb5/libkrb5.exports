@@ -459,7 +459,6 @@ krb5_kt_resolve
 krb5_kt_start_seq_get
 krb5_ktf_ops
 krb5_ktf_writable_ops
-krb5_kts_ops
 krb5_kuserok
 krb5_lock_file
 krb5_make_authdata_kdc_issued
