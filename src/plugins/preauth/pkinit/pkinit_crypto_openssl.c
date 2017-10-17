@@ -5002,33 +5002,29 @@ out:
     return retval;
 }
 
-/*
- * Return a string format of an X509_NAME in buf where
- * size is an in/out parameter.  On input it is the size
- * of the buffer, and on output it is the actual length
- * of the name.
- * If buf is NULL, returns the length req'd to hold name
- */
-static char *
-X509_NAME_oneline_ex(X509_NAME * a,
-                     char *buf,
-                     unsigned int *size,
-                     unsigned long flag)
+static krb5_error_code
+rfc2253_name(X509_NAME *name, char **str_out)
 {
-    BIO *out = NULL;
+    BIO *b = NULL;
+    char *str;
 
-    out = BIO_new(BIO_s_mem ());
-    if (X509_NAME_print_ex(out, a, 0, flag) > 0) {
-        if (buf != NULL && (*size) >  (unsigned int) BIO_number_written(out)) {
-            memset(buf, 0, *size);
-            BIO_read(out, buf, (int) BIO_number_written(out));
-        }
-        else {
-            *size = BIO_number_written(out);
-        }
-    }
-    BIO_free(out);
-    return (buf);
+    *str_out = NULL;
+    b = BIO_new(BIO_s_mem());
+    if (b == NULL)
+        return ENOMEM;
+    if (X509_NAME_print_ex(b, name, 0, XN_FLAG_SEP_COMMA_PLUS) < 0)
+        goto error;
+    str = calloc(BIO_number_written(b) + 1, 1);
+    if (str == NULL)
+        goto error;
+    BIO_read(b, str, BIO_number_written(b));
+    BIO_free(b);
+    *str_out = str;
+    return 0;
+
+error:
+    BIO_free(b);
+    return ENOMEM;
 }
 
 /*
@@ -5094,8 +5090,6 @@ get_matching_data(krb5_context context,
     pkinit_cert_matching_data *md = NULL;
     krb5_principal *pkinit_sans = NULL, *upn_sans = NULL;
     size_t i, j;
-    char buf[DN_BUF_LEN];
-    unsigned int bufsize = sizeof(buf);
 
     *md_out = NULL;
 
@@ -5103,23 +5097,12 @@ get_matching_data(krb5_context context,
     if (md == NULL)
         goto cleanup;
 
-    /* Get the subject name (in rfc2253 format). */
-    X509_NAME_oneline_ex(X509_get_subject_name(cert), buf, &bufsize,
-                         XN_FLAG_SEP_COMMA_PLUS);
-    md->subject_dn = strdup(buf);
-    if (md->subject_dn == NULL) {
-        ret = ENOMEM;
+    ret = rfc2253_name(X509_get_subject_name(cert), &md->subject_dn);
+    if (ret)
         goto cleanup;
-    }
-
-    /* Get the issuer name (in rfc2253 format). */
-    X509_NAME_oneline_ex(X509_get_issuer_name(cert), buf, &bufsize,
-                         XN_FLAG_SEP_COMMA_PLUS);
-    md->issuer_dn = strdup(buf);
-    if (md->issuer_dn == NULL) {
-        ret = ENOMEM;
+    ret = rfc2253_name(X509_get_issuer_name(cert), &md->issuer_dn);
+    if (ret)
         goto cleanup;
-    }
 
     /* Get the SAN data. */
     ret = crypto_retrieve_X509_sans(context, plg_cryptoctx, req_cryptoctx,
