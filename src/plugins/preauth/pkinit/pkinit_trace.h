@@ -102,6 +102,9 @@
     TRACE(c, "PKINIT server skipping EKU check due to configuration")
 #define TRACE_PKINIT_SERVER_INIT_REALM(c, realm)                \
     TRACE(c, "PKINIT server initializing realm {str}", realm)
+#define TRACE_PKINIT_SERVER_INIT_FAIL(c, realm, retval)                 \
+    TRACE(c, "PKINIT server initialization failed for realm {str}: {kerr}", \
+          realm, retval)
 #define TRACE_PKINIT_SERVER_MATCHING_UPN_FOUND(c)                       \
     TRACE(c, "PKINIT server found a matching UPN SAN in client cert")
 #define TRACE_PKINIT_SERVER_MATCHING_SAN_FOUND(c)                       \
