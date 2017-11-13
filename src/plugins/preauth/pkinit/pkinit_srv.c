@@ -1680,16 +1680,23 @@ pkinit_server_plugin_init(krb5_context context,
 
     for (i = 0, j = 0; i < numrealms; i++) {
         TRACE_PKINIT_SERVER_INIT_REALM(context, realmnames[i]);
-        retval = pkinit_server_plugin_init_realm(context, realmnames[i], &plgctx);
-        if (retval == 0 && plgctx != NULL)
+        krb5_clear_error_message(context);
+        retval = pkinit_server_plugin_init_realm(context, realmnames[i],
+                                                 &plgctx);
+        if (retval)
+            TRACE_PKINIT_SERVER_INIT_FAIL(context, realmnames[i], retval);
+        else
             realm_contexts[j++] = plgctx;
     }
 
     if (j == 0) {
-        retval = EINVAL;
-        krb5_set_error_message(context, retval,
-                               _("No realms configured correctly for pkinit "
-                                 "support"));
+        if (numrealms == 1) {
+            k5_prependmsg(context, retval, "PKINIT initialization failed");
+        } else {
+            retval = EINVAL;
+            k5_setmsg(context, retval,
+                      _("No realms configured correctly for pkinit support"));
+        }
         goto errout;
     }
 
