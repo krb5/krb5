@@ -179,10 +179,12 @@ select_poll (EV_P_ ev_tstamp timeout)
       #ifdef WSABASEERR
       /* on windows, select returns incompatible error codes, fix this */
       if (errno >= WSABASEERR && errno < WSABASEERR + 1000)
+        {
         if (errno == WSAENOTSOCK)
           errno = EBADF;
         else
           errno -= WSABASEERR;
+        }
       #endif
 
       #ifdef _WIN32
