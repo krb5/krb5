@@ -165,51 +165,55 @@ Code quality:
 krb5-1.16 changes by ticket ID
 ------------------------------
 
-3349	 Allow keytab entries to ignore the key version
-7647	 let ktutil support non-default salts
-7877	 Interleaved init_creds operations use same per-request preauth context
-8352	 Year 2038 fixes
-8515	 Add German translation
-8517	 Add KRB5_TRACE calls for DNS lookups
-8518	 Remove redeclaration of ttyname() in ksu
-8526	 Constify service and hostname in krb5_mk_req()
-8527	 Clean up memory handling in krb5_fwd_tgt_creds()
-8528	 Improve PKINIT UPN SAN matching
-8529	 Add OpenLDAP LDIF file for Kerberos schema
-8533	 Bug in src/tests/responder.c
-8534	 Add configure option to disable nls support
-8537	 Preauthentication should continue after failure
-8539	 Preauth tryagain should copy KDC cookie
-8544	 Wrong PKCS11 PIN can trigger PKINIT draft9 code
-8548	 Add OID to inquire GSS cred impersonator name
-8549	 Use fallback realm for GSSAPI ccache selection
-8558	 kvno memory leak (1.15.1)
-8561	 Add certauth pluggable interface
-8562	 Add the certauth dbmatch module
-8568	 Convert some pkiDebug messages to TRACE macros
-8569	 Add support to query the SSF of a GSS context
-8570	 Add the client_name() kdcpreauth callback
-8571	 Use the canonical client principal name for OTP
-8572	 Un-deprecate krb5_auth_con_initivector()
-8575	 Add FAST encrypted challenge auth indicator
-8577	 Replace UCS-2 conversions with UTF-16
-8578	 Add various bound checks
-8579	 duplicate caching of some cross-realm TGTs
-8582	 Use a random nonce in TGS requests
-8583	 Pass client address to DAL audit_as_req
-8592	 Parse all kadm5.acl fields at startup
-8595	 Pluggable interface for kadmin authorization
-8597	 acx_pthread.m4 needs to be updated
-8602	 Make ccache name work for klist/kdestroy -A
-8603	 Remove incomplete PKINIT OCSP support
-8606	 Add KDC policy pluggable interface
-8607	 kpropd should write a pidfile when started in standalone mode...
-8608	 Fix AIX build issues
-8609	 Renewed tickets can be marked renewable with no renewable endtime
-8610	 Don't set ctime in KDC error replies
-8612	 Bump bundled libverto for 0.3.0 release
-8613	 Add hostname-based ccselect module
-8615	 Abort client preauth on keyboard interrupt
+3349    Allow keytab entries to ignore the key version
+7647    let ktutil support non-default salts
+7877    Interleaved init_creds operations use same per-request preauth context
+8352    Year 2038 fixes
+8515    Add German translation
+8517    Add KRB5_TRACE calls for DNS lookups
+8518    Remove redeclaration of ttyname() in ksu
+8526    Constify service and hostname in krb5_mk_req()
+8527    Clean up memory handling in krb5_fwd_tgt_creds()
+8528    Improve PKINIT UPN SAN matching
+8529    Add OpenLDAP LDIF file for Kerberos schema
+8533    Bug in src/tests/responder.c
+8534    Add configure option to disable nls support
+8537    Preauthentication should continue after failure
+8539    Preauth tryagain should copy KDC cookie
+8544    Wrong PKCS11 PIN can trigger PKINIT draft9 code
+8548    Add OID to inquire GSS cred impersonator name
+8549    Use fallback realm for GSSAPI ccache selection
+8558    kvno memory leak (1.15.1)
+8561    Add certauth pluggable interface
+8562    Add the certauth dbmatch module
+8568    Convert some pkiDebug messages to TRACE macros
+8569    Add support to query the SSF of a GSS context
+8570    Add the client_name() kdcpreauth callback
+8571    Use the canonical client principal name for OTP
+8572    Un-deprecate krb5_auth_con_initivector()
+8575    Add FAST encrypted challenge auth indicator
+8577    Replace UCS-2 conversions with UTF-16
+8578    Add various bound checks
+8579    duplicate caching of some cross-realm TGTs
+8582    Use a random nonce in TGS requests
+8583    Pass client address to DAL audit_as_req
+8592    Parse all kadm5.acl fields at startup
+8595    Pluggable interface for kadmin authorization
+8597    acx_pthread.m4 needs to be updated
+8602    Make ccache name work for klist/kdestroy -A
+8603    Remove incomplete PKINIT OCSP support
+8606    Add KDC policy pluggable interface
+8607    kpropd should write a pidfile when started in standalone mode...
+8608    Fix AIX build issues
+8609    Renewed tickets can be marked renewable with no renewable endtime
+8610    Don't set ctime in KDC error replies
+8612    Bump bundled libverto for 0.3.0 release
+8613    Add hostname-based ccselect module
+8615    Abort client preauth on keyboard interrupt
+8616    Fix default enctype order in docs
+8617    PKINIT matching can crash for certs with long issuer and subject
+8620    Length check when parsing GSS token encapsulation
+8621    Expose context errors in pkinit_server_plugin_init
 
 
 Acknowledgements
@@ -400,6 +404,7 @@ reports, suggestions, and valuable resources:
     Joel Johnson
     Alexander Karaivanov
     Anders Kaseorg
+    Bar Katz
     Zentaro Kavanagh
     Mubashir Kazia
     W. Trevor King
