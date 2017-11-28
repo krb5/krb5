@@ -29,7 +29,7 @@ Obtaining the software
 ----------------------
 
 The source code can be obtained from MIT Kerberos Distribution page,
-at http://web.mit.edu/kerberos/dist/index.html.
+at https://kerberos.org/dist/index.html.
 The MIT Kerberos distribution comes in an archive file, generally
 named krb5-VERSION-signed.tar, where *VERSION* is a placeholder for
 the major and minor versions of MIT Kerberos.  (For example, MIT
