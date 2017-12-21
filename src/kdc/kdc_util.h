@@ -203,10 +203,10 @@ void
 free_padata_context(krb5_context context, void *padata_context);
 
 krb5_error_code
-add_pa_data_element (krb5_context context,
-                     krb5_pa_data *padata,
-                     krb5_pa_data ***out_padata,
-                     krb5_boolean copy);
+alloc_pa_data(krb5_preauthtype pa_type, size_t len, krb5_pa_data **out);
+
+krb5_error_code
+add_pa_data_element(krb5_pa_data ***list, krb5_pa_data *pa);
 
 /* kdc_preauth_ec.c */
 krb5_error_code

@@ -1617,18 +1617,20 @@ return_referral_enc_padata( krb5_context context,
 {
     krb5_error_code             code;
     krb5_tl_data                tl_data;
-    krb5_pa_data                pa_data;
+    krb5_pa_data                *pa;
 
     tl_data.tl_data_type = KRB5_TL_SVR_REFERRAL_DATA;
     code = krb5_dbe_lookup_tl_data(context, server, &tl_data);
     if (code || tl_data.tl_data_length == 0)
         return 0;
 
-    pa_data.magic = KV5M_PA_DATA;
-    pa_data.pa_type = KRB5_PADATA_SVR_REFERRAL_INFO;
-    pa_data.length = tl_data.tl_data_length;
-    pa_data.contents = tl_data.tl_data_contents;
-    return add_pa_data_element(context, &pa_data, &reply->enc_padata, TRUE);
+    code = alloc_pa_data(KRB5_PADATA_SVR_REFERRAL_INFO, tl_data.tl_data_length,
+                         &pa);
+    if (code)
+        return code;
+    memcpy(pa->contents, tl_data.tl_data_contents, tl_data.tl_data_length);
+    /* add_pa_data_element() claims pa on success or failure. */
+    return add_pa_data_element(&reply->enc_padata, pa);
 }
 
 krb5_error_code
