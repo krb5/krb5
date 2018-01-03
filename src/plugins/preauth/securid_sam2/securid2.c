@@ -313,8 +313,7 @@ verify_securid_data_2(krb5_context context, krb5_db_entry *client,
     }
 
     retval = krb5_dbe_find_enctype(context, client,
-                                   sr2->sam_enc_nonce_or_sad.enctype,
-                                   KRB5_KDB_SALTTYPE_NORMAL,
+                                   sr2->sam_enc_nonce_or_sad.enctype, -1,
                                    sr2->sam_enc_nonce_or_sad.kvno,
                                    &client_key_data);
     if (retval) {
