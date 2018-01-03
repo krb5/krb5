@@ -144,7 +144,7 @@ static preauth_system static_preauth_systems[] = {
     {
         "etype-info",
         KRB5_PADATA_ETYPE_INFO,
-        0,
+        PA_HARDWARE,
         NULL,
         NULL,
         NULL,
@@ -155,7 +155,7 @@ static preauth_system static_preauth_systems[] = {
     {
         "etype-info2",
         KRB5_PADATA_ETYPE_INFO2,
-        0,
+        PA_HARDWARE,
         NULL,
         NULL,
         NULL,
