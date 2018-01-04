@@ -62,6 +62,7 @@ krb5_keysalt_iterate
 krb5_klog_close
 krb5_klog_init
 krb5_klog_reopen
+krb5_klog_set_context
 krb5_klog_syslog
 krb5_string_to_keysalts
 xdr_chpass3_arg

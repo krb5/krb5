@@ -94,5 +94,25 @@ fictional pluggable interface named fences, for a module named
         return 0;
     }
 
+Logging from KDC and kadmind plugin modules
+-------------------------------------------
+
+Plugin modules for the KDC or kadmind daemons can write to the
+configured logging outputs (see :ref:`logging`) by calling the
+**com_err** function.  The first argument (*whoami*) is ignored.  If
+the second argument (*code*) is zero, the formatted message is logged
+at informational severity; otherwise, the formatted message is logged
+at error severity and includes the error message for the supplied
+code.  Here are examples::
+
+    com_err("", 0, "Client message contains %d items", nitems);
+    com_err("", retval, "while decoding client message");
+
+(The behavior described above is new in release 1.17.  In prior
+releases, the *whoami* argument is included for some logging output
+types, the logged message does not include the usual header for some
+output types, and the severity for syslog outputs is configured as
+part of the logging specification, defaulting to error severity.)
+
 .. _automake: http://www.gnu.org/software/automake/
 .. _libtool: http://www.gnu.org/software/libtool/

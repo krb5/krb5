@@ -173,142 +173,39 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
 #endif
     ;
 
+/*
+ * Write com_err() messages to the configured logging devices.  Ignore whoami,
+ * as krb5_klog_init() already received a whoami value.  If code is nonzero,
+ * log its error message (retrieved using err_context) and the formatted
+ * message at error severity.  If code is zero, log the formatted message at
+ * informational severity.
+ */
 static void
 klog_com_err_proc(const char *whoami, long int code, const char *format, va_list ap)
 {
-    char        outbuf[KRB5_KLOG_MAX_ERRMSG_SIZE];
-    int         lindex;
-    const char  *actual_format;
-    int         log_pri = -1;
-    char        *cp;
-    char        *syslogp;
+    struct k5buf buf;
+    const char *emsg;
 
-    if (whoami == NULL || format == NULL)
+    if (format == NULL)
         return;
 
-    /* Make the header */
-    snprintf(outbuf, sizeof(outbuf), "%s: ", whoami);
-    /*
-     * Squirrel away address after header for syslog since syslog makes
-     * a header
-     */
-    syslogp = &outbuf[strlen(outbuf)];
+    k5_buf_init_dynamic(&buf);
 
-    /* If reporting an error message, separate it. */
     if (code) {
-        const char *emsg;
-        outbuf[sizeof(outbuf) - 1] = '\0';
-
-        emsg = krb5_get_error_message (err_context, code);
-        strncat(outbuf, emsg, sizeof(outbuf) - 1 - strlen(outbuf));
-        strncat(outbuf, " - ", sizeof(outbuf) - 1 - strlen(outbuf));
+        /* Start with the error message and a separator. */
+        emsg = krb5_get_error_message(err_context, code);
+        k5_buf_add(&buf, emsg);
         krb5_free_error_message(err_context, emsg);
-    }
-    cp = &outbuf[strlen(outbuf)];
-
-    actual_format = format;
-    /*
-     * This is an unpleasant hack.  If the first character is less than
-     * 8, then we assume that it is a priority.
-     *
-     * Since it is not guaranteed that there is a direct mapping between
-     * syslog priorities (e.g. Ultrix and old BSD), we resort to this
-     * intermediate representation.
-     */
-    if ((((unsigned char) *format) > 0) && (((unsigned char) *format) <= 8)) {
-        actual_format = (format + 1);
-        switch ((unsigned char) *format) {
-        case 1:
-            log_pri = LOG_EMERG;
-            break;
-        case 2:
-            log_pri = LOG_ALERT;
-            break;
-        case 3:
-            log_pri = LOG_CRIT;
-            break;
-        default:
-        case 4:
-            log_pri = LOG_ERR;
-            break;
-        case 5:
-            log_pri = LOG_WARNING;
-            break;
-        case 6:
-            log_pri = LOG_NOTICE;
-            break;
-        case 7:
-            log_pri = LOG_INFO;
-            break;
-        case 8:
-            log_pri = LOG_DEBUG;
-            break;
-        }
+        k5_buf_add(&buf, " - ");
     }
 
-    /* Now format the actual message */
-    vsnprintf(cp, sizeof(outbuf) - (cp - outbuf), actual_format, ap);
+    /* Add the formatted message. */
+    k5_buf_add_vfmt(&buf, format, ap);
 
-    /*
-     * Now that we have the message formatted, perform the output to each
-     * logging specification.
-     */
-    for (lindex = 0; lindex < log_control.log_nentries; lindex++) {
-        /* Omit messages marked as LOG_DEBUG for non-syslog outputs unless we
-         * are configured to include them. */
-        if (log_pri == LOG_DEBUG && !log_control.log_debug &&
-            log_control.log_entries[lindex].log_type != K_LOG_SYSLOG)
-            continue;
+    if (k5_buf_status(&buf) == 0)
+        krb5_klog_syslog(code ? LOG_ERR : LOG_INFO, "%s", buf.data);
 
-        switch (log_control.log_entries[lindex].log_type) {
-        case K_LOG_FILE:
-        case K_LOG_STDERR:
-            /*
-             * Files/standard error.
-             */
-            if (fprintf(log_control.log_entries[lindex].lfu_filep, "%s\n",
-                        outbuf) < 0) {
-                /* Attempt to report error */
-                fprintf(stderr, log_file_err, whoami,
-                        log_control.log_entries[lindex].lfu_fname);
-            }
-            else {
-                fflush(log_control.log_entries[lindex].lfu_filep);
-            }
-            break;
-        case K_LOG_CONSOLE:
-        case K_LOG_DEVICE:
-            /*
-             * Devices (may need special handling)
-             */
-            if (DEVICE_PRINT(log_control.log_entries[lindex].ldu_filep,
-                             outbuf) < 0) {
-                /* Attempt to report error */
-                fprintf(stderr, log_device_err, whoami,
-                        log_control.log_entries[lindex].ldu_devname);
-            }
-            break;
-        case K_LOG_SYSLOG:
-            /*
-             * System log.
-             */
-            /*
-             * If we have specified a priority through our hackery, then
-             * use it, otherwise use the default.
-             */
-            if (log_pri >= 0)
-                log_pri |= log_control.log_entries[lindex].lsu_facility;
-            else
-                log_pri = log_control.log_entries[lindex].lsu_facility |
-                    log_control.log_entries[lindex].lsu_severity;
-
-            /* Log the message with our header trimmed off */
-            syslog(log_pri, "%s", syslogp);
-            break;
-        default:
-            break;
-        }
-    }
+    k5_buf_free(&buf);
 }
 
 /*
@@ -660,6 +557,13 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
             (void) set_com_err_hook(klog_com_err_proc);
     }
     return((log_control.log_nentries) ? 0 : ENOENT);
+}
+
+/* Reset the context used by the com_err hook to retrieve error messages. */
+void
+krb5_klog_set_context(krb5_context kcontext)
+{
+    err_context = kcontext;
 }
 
 /*

@@ -48,6 +48,7 @@ typedef struct ___krb5_key_salt_tuple krb5_key_salt_tuple;
 
 /* logger.c */
 krb5_error_code krb5_klog_init(krb5_context, char *, char *, krb5_boolean);
+void krb5_klog_set_context(krb5_context);
 void krb5_klog_close(krb5_context);
 int krb5_klog_syslog(int, const char *, ...)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
