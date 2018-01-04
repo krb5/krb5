@@ -76,6 +76,14 @@ void k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
 #endif
     ;
 
+/* Add sprintf-style formatted data to BUF, with a va_list.  The value of ap is
+ * undefined after the call. */
+void k5_buf_add_vfmt(struct k5buf *buf, const char *fmt, va_list ap)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 0)))
+#endif
+    ;
+
 /* Extend the length of buf by len and return a pointer to the reserved space,
  * to be filled in by the caller.  Return NULL on error. */
 void *k5_buf_get_space(struct k5buf *buf, size_t len);

@@ -141,9 +141,9 @@ k5_buf_add_len(struct k5buf *buf, const void *data, size_t len)
 }
 
 void
-k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
+k5_buf_add_vfmt(struct k5buf *buf, const char *fmt, va_list ap)
 {
-    va_list ap;
+    va_list apcopy;
     int r;
     size_t remaining;
     char *tmp;
@@ -154,9 +154,7 @@ k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
 
     if (buf->buftype == K5BUF_FIXED) {
         /* Format the data directly into the fixed buffer. */
-        va_start(ap, fmt);
         r = vsnprintf(endptr(buf), remaining, fmt, ap);
-        va_end(ap);
         if (SNPRINTF_OVERFLOW(r, remaining))
             set_error(buf);
         else
@@ -166,9 +164,9 @@ k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
 
     /* Optimistically format the data directly into the dynamic buffer. */
     assert(buf->buftype == K5BUF_DYNAMIC);
-    va_start(ap, fmt);
-    r = vsnprintf(endptr(buf), remaining, fmt, ap);
-    va_end(ap);
+    va_copy(apcopy, ap);
+    r = vsnprintf(endptr(buf), remaining, fmt, apcopy);
+    va_end(apcopy);
     if (!SNPRINTF_OVERFLOW(r, remaining)) {
         buf->len += (unsigned int) r;
         return;
@@ -179,9 +177,7 @@ k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
         if (!ensure_space(buf, r))
             return;
         remaining = buf->space - buf->len;
-        va_start(ap, fmt);
         r = vsnprintf(endptr(buf), remaining, fmt, ap);
-        va_end(ap);
         if (SNPRINTF_OVERFLOW(r, remaining))  /* Shouldn't ever happen. */
             k5_buf_free(buf);
         else
@@ -191,9 +187,7 @@ k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
 
     /* It's a pre-C99 snprintf implementation, or something else went wrong.
      * Fall back to asprintf. */
-    va_start(ap, fmt);
     r = vasprintf(&tmp, fmt, ap);
-    va_end(ap);
     if (r < 0) {
         k5_buf_free(buf);
         return;
@@ -204,6 +198,16 @@ k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
         buf->len += r;
     }
     free(tmp);
+}
+
+void
+k5_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    k5_buf_add_vfmt(buf, fmt, ap);
+    va_end(ap);
 }
 
 void *
