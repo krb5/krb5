@@ -127,14 +127,16 @@ setup_server_realm(struct server_handle *handle, krb5_principal sprinc)
         return NULL;
 
     if (kdc_numrealms > 1) {
-        if (!(newrealm = find_realm_data(handle, sprinc->realm.data,
-                                         (krb5_ui_4) sprinc->realm.length)))
-            return NULL;
-        else
-            return newrealm;
+        newrealm = find_realm_data(handle, sprinc->realm.data,
+                                   sprinc->realm.length);
+    } else {
+        newrealm = kdc_realmlist[0];
     }
-    else
-        return kdc_realmlist[0];
+    if (newrealm != NULL) {
+        krb5_klog_set_context(newrealm->realm_context);
+        shandle.kdc_err_context = newrealm->realm_context;
+    }
+    return newrealm;
 }
 
 static void
