@@ -116,7 +116,6 @@ struct log_entry {
         } log_file;
         struct log_syslog {
             int         ls_facility;
-            int         ls_severity;
         } log_syslog;
         struct log_device {
             FILE        *ld_filep;
@@ -127,7 +126,6 @@ struct log_entry {
 #define lfu_filep       log_union.log_file.lf_filep
 #define lfu_fname       log_union.log_file.lf_fname
 #define lsu_facility    log_union.log_syslog.ls_facility
-#define lsu_severity    log_union.log_syslog.ls_severity
 #define ldu_filep       log_union.log_device.ld_filep
 #define ldu_devname     log_union.log_device.ld_devname
 
@@ -332,9 +330,8 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
                 else if (!strncasecmp(cp, "SYSLOG", 6)) {
                     error = 0;
                     log_control.log_entries[i].lsu_facility = LOG_AUTH;
-                    log_control.log_entries[i].lsu_severity = LOG_ERR;
                     /*
-                     * Is there a severify specified?
+                     * Is there a severify (which is now ignored) specified?
                      */
                     if (cp[6] == ':') {
                         /*
@@ -346,41 +343,6 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
                             *cp2 = '\0';
                             cp2++;
                         }
-
-                        /*
-                         * Match a severity.
-                         */
-                        if (!strcasecmp(&cp[7], "ERR")) {
-                            log_control.log_entries[i].lsu_severity = LOG_ERR;
-                        }
-                        else if (!strcasecmp(&cp[7], "EMERG")) {
-                            log_control.log_entries[i].lsu_severity =
-                                LOG_EMERG;
-                        }
-                        else if (!strcasecmp(&cp[7], "ALERT")) {
-                            log_control.log_entries[i].lsu_severity =
-                                LOG_ALERT;
-                        }
-                        else if (!strcasecmp(&cp[7], "CRIT")) {
-                            log_control.log_entries[i].lsu_severity = LOG_CRIT;
-                        }
-                        else if (!strcasecmp(&cp[7], "WARNING")) {
-                            log_control.log_entries[i].lsu_severity =
-                                LOG_WARNING;
-                        }
-                        else if (!strcasecmp(&cp[7], "NOTICE")) {
-                            log_control.log_entries[i].lsu_severity =
-                                LOG_NOTICE;
-                        }
-                        else if (!strcasecmp(&cp[7], "INFO")) {
-                            log_control.log_entries[i].lsu_severity = LOG_INFO;
-                        }
-                        else if (!strcasecmp(&cp[7], "DEBUG")) {
-                            log_control.log_entries[i].lsu_severity =
-                                LOG_DEBUG;
-                        }
-                        else
-                            error = 1;
 
                         /*
                          * If there is a facility present, then parse that.
@@ -535,7 +497,6 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
         log_control.log_entries->log_type = K_LOG_SYSLOG;
         log_control.log_entries->log_2free = (krb5_pointer) NULL;
         log_facility = log_control.log_entries->lsu_facility = LOG_AUTH;
-        log_control.log_entries->lsu_severity = LOG_ERR;
         do_openlog = 1;
         log_control.log_nentries = 1;
     }

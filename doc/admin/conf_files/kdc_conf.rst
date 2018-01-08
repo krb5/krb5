@@ -599,19 +599,15 @@ Logging specifications may have the following forms:
 **SYSLOG**\ [\ **:**\ *severity*\ [\ **:**\ *facility*\ ]]
     This causes the daemon's logging messages to go to the system log.
 
-    The severity argument specifies the default severity of system log
-    messages.  This may be any of the following severities supported
-    by the syslog(3) call, minus the ``LOG_`` prefix: **EMERG**,
-    **ALERT**, **CRIT**, **ERR**, **WARNING**, **NOTICE**, **INFO**,
-    and **DEBUG**.
+    For backward compatibility, a severity argument may be specified,
+    and must be specified in order to specify a facility.  This
+    argument will be ignored.
 
     The facility argument specifies the facility under which the
     messages are logged.  This may be any of the following facilities
     supported by the syslog(3) call minus the LOG\_ prefix: **KERN**,
     **USER**, **MAIL**, **DAEMON**, **AUTH**, **LPR**, **NEWS**,
-    **UUCP**, **CRON**, and **LOCAL0** through **LOCAL7**.
-
-    If no severity is specified, the default is **ERR**.  If no
+    **UUCP**, **CRON**, and **LOCAL0** through **LOCAL7**.  If no
     facility is specified, the default is **AUTH**.
 
 In the following example, the logging messages from the KDC will go to
