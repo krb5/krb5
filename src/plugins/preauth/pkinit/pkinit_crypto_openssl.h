@@ -83,12 +83,17 @@ struct _pkinit_identity_crypto_context {
     CK_SLOT_ID slotid;
     char *token_label;
     char *cert_label;
+    char *cacert_label;
     /* These are crypto-specific */
     void *p11_module;
     CK_SESSION_HANDLE session;
     CK_FUNCTION_LIST_PTR p11;
     CK_BYTE_PTR cert_id;
     int cert_id_len;
+    /* Support CA inside token */
+    CK_BYTE_PTR cacert_id;
+    int cacert_id_len;
+    /* End Support CA inside token */
     CK_MECHANISM_TYPE mech;
 #endif
     krb5_boolean defer_id_prompt;

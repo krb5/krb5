@@ -183,6 +183,9 @@ typedef struct _pkinit_identity_opts {
     char *token_label;
     char *cert_id_string;
     char *cert_label;
+    /* Support CA cert inside token */
+    char *cacert_label;
+    char *cacert_id_string;
 #endif
 } pkinit_identity_opts;
 
