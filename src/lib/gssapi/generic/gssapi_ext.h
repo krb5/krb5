@@ -169,12 +169,31 @@ OM_uint32 KRB5_CALLCONV gss_set_sec_context_option
 	 const gss_OID /*desired_object*/,
 	 const gss_buffer_t /*value*/);
 
+/*
+ * Export import cred extensions from GGF, but using Heimdal's signatures
+ */
+OM_uint32 KRB5_CALLCONV gss_export_cred
+	(OM_uint32 * /* minor_status */,
+	 gss_cred_id_t /* cred_handle */,
+	 gss_buffer_t /* token */);
+
+OM_uint32 KRB5_CALLCONV gss_import_cred
+	(OM_uint32 * /* minor_status */,
+	 gss_buffer_t /* token */,
+	 gss_cred_id_t * /* cred_handle */);
+
+/*
+ * Heimdal extension
+ */
 OM_uint32 KRB5_CALLCONV gss_set_cred_option
 	(OM_uint32 * /*minor_status*/,
 	 gss_cred_id_t * /*cred*/,
 	 const gss_OID /*desired_object*/,
 	 const gss_buffer_t /*value*/);
 
+/*
+ * Call the given method on the given mechanism
+ */
 OM_uint32 KRB5_CALLCONV gssspi_mech_invoke
 	(OM_uint32 * /*minor_status*/,
 	 const gss_OID /*desired_mech*/,
@@ -558,18 +577,6 @@ gss_store_cred_into(
     gss_const_key_value_set_t, /* cred_store */
     gss_OID_set *,             /* elements_stored */
     gss_cred_usage_t *);       /* cred_usage_stored */
-
-OM_uint32 KRB5_CALLCONV
-gss_export_cred(
-    OM_uint32 *,               /* minor_status */
-    gss_cred_id_t,             /* cred_handle */
-    gss_buffer_t);             /* token */
-
-OM_uint32 KRB5_CALLCONV
-gss_import_cred(
-    OM_uint32 *,               /* minor_status */
-    gss_buffer_t,              /* token */
-    gss_cred_id_t *);          /* cred_handle */
 
 #ifdef __cplusplus
 }
