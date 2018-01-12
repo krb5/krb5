@@ -203,6 +203,12 @@ if out != 'KRBTEST.COM\n':
 # in the test LDAP server.
 realm.run([kadminl, 'ank', '-randkey', '-x', 'dn=cn=krb5', 'princ1'],
           expected_code=1, expected_msg='DN is out of the realm subtree')
+# Check that the DN container check is a hierarchy test, not a simple
+# suffix match (CVE-2018-5730).  We expect this operation to fail
+# either way (because "xcn" isn't a valid DN tag) but the container
+# check should happen before the DN is parsed.
+realm.run([kadminl, 'ank', '-randkey', '-x', 'dn=xcn=t1,cn=krb5', 'princ1'],
+          expected_code=1, expected_msg='DN is out of the realm subtree')
 realm.run([kadminl, 'ank', '-randkey', '-x', 'dn=cn=t2,cn=krb5', 'princ1'])
 realm.run([kadminl, 'getprinc', 'princ1'], expected_msg='Principal: princ1')
 realm.run([kadminl, 'ank', '-randkey', '-x', 'dn=cn=t2,cn=krb5', 'again'],
@@ -226,6 +232,11 @@ realm.run([kadminl, 'ank', '-randkey', '-x', 'containerdn=cn=t1,cn=krb5',
            'princ3'])
 realm.run([kadminl, 'modprinc', '-x', 'containerdn=cn=t2,cn=krb5', 'princ3'],
           expected_code=1, expected_msg='containerdn option not supported')
+# Verify that containerdn is checked when linkdn is also supplied
+# (CVE-2018-5730).
+realm.run([kadminl, 'ank', '-randkey', '-x', 'containerdn=cn=krb5',
+           '-x', 'linkdn=cn=t2,cn=krb5', 'princ4'], expected_code=1,
+          expected_msg='DN is out of the realm subtree')
 
 # Create and modify a ticket policy.
 kldaputil(['create_policy', '-maxtktlife', '3hour', '-maxrenewlife', '6hour',
