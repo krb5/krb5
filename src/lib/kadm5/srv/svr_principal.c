@@ -330,6 +330,13 @@ kadm5_create_principal_3(void *server_handle,
         return KADM5_BAD_MASK;
     if((mask & ~ALL_PRINC_MASK))
         return KADM5_BAD_MASK;
+    if (mask & KADM5_TL_DATA) {
+        for (tl_data_tail = entry->tl_data; tl_data_tail != NULL;
+             tl_data_tail = tl_data_tail->tl_data_next) {
+            if (tl_data_tail->tl_data_type < 256)
+                return KADM5_BAD_TL_TYPE;
+        }
+    }
 
     /*
      * Check to see if the principal exists

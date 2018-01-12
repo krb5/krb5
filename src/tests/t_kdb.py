@@ -171,6 +171,14 @@ out = realm.run([kadminl, 'ank', '-randkey', '-x', 'dn=cn=krb5', 'princ1'],
                 expected_code=1)
 if 'DN is out of the realm subtree' not in out:
     fail('Unexpected kadmin.local output for out-of-realm dn')
+# Check that the DN container check is a hierarchy test, not a simple
+# suffix match (CVE-2018-5730).  We expect this operation to fail
+# either way (because "xcn" isn't a valid DN tag) but the container
+# check should happen before the DN is parsed.
+out = realm.run([kadminl, 'ank', '-randkey', '-x', 'dn=xcn=t1,cn=krb5',
+                 'princ1'], expected_code=1)
+if 'DN is out of the realm subtree' not in out:
+    fail('Unexpected kadmin.local output for non-hierarchy dn prefix')
 realm.run([kadminl, 'ank', '-randkey', '-x', 'dn=cn=t2,cn=krb5', 'princ1'])
 out = realm.run([kadminl, 'getprinc', 'princ1'])
 if 'Principal: princ1' not in out:
@@ -208,6 +216,12 @@ out = realm.run([kadminl, 'modprinc', '-x', 'containerdn=cn=t2,cn=krb5',
                  'princ3'], expected_code=1)
 if 'containerdn option not supported' not in out:
     fail('Unexpected kadmin.local output trying to reset containerdn')
+# Verify that containerdn is checked when linkdn is also supplied
+# (CVE-2018-5730).
+out = realm.run([kadminl, 'ank', '-randkey', '-x', 'containerdn=cn=krb5',
+                 '-x', 'linkdn=cn=t2,cn=krb5', 'princ4'], expected_code=1)
+if 'DN is out of the realm subtree' not in out:
+    fail('Unexpected kadmin.local output for linkdn+containerdn test')
 
 # Create and modify a ticket policy.
 kldaputil(['create_policy', '-maxtktlife', '3hour', '-maxrenewlife', '6hour',
