@@ -151,6 +151,7 @@ static krb5_error_code
 init_tls_vtable(krb5_context context)
 {
     krb5_plugin_initvt_fn initfn;
+    krb5_error_code ret;
 
     if (context->tls != NULL)
         return 0;
@@ -161,8 +162,11 @@ init_tls_vtable(krb5_context context)
 
     /* Attempt to load the module; just let it stay nulled out on failure. */
     k5_plugin_register_dyn(context, PLUGIN_INTERFACE_TLS, "k5tls", "tls");
-    if (k5_plugin_load(context, PLUGIN_INTERFACE_TLS, "k5tls", &initfn) == 0)
+    ret = k5_plugin_load(context, PLUGIN_INTERFACE_TLS, "k5tls", &initfn);
+    if (!ret)
         (*initfn)(context, 0, 0, (krb5_plugin_vtable)context->tls);
+    else
+        TRACE_SENDTO_KDC_K5TLS_LOAD_ERROR(context, ret);
 
     return 0;
 }

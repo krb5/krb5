@@ -364,6 +364,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_SENDTO_KDC(c, len, rlm, master, tcp)                     \
     TRACE(c, "Sending request ({int} bytes) to {data}{str}{str}", len,  \
           rlm, (master) ? " (master)" : "", (tcp) ? " (tcp only)" : "")
+#define TRACE_SENDTO_KDC_K5TLS_LOAD_ERROR(c, ret)       \
+    TRACE(c, "Error loading k5tls module: {kerr}", ret)
 #define TRACE_SENDTO_KDC_MASTER(c, master)                              \
     TRACE(c, "Response was{str} from master KDC", (master) ? "" : " not")
 #define TRACE_SENDTO_KDC_RESOLVING(c, hostname)         \
