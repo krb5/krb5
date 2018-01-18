@@ -2,8 +2,6 @@ language: c++
 
 sudo: required
 
-dist: xenial
-
 matrix:
   include:
   - compiler: clang
