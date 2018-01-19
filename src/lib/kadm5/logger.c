@@ -201,7 +201,7 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
     k5_buf_add_vfmt(&buf, format, ap);
 
     if (k5_buf_status(&buf) == 0)
-        krb5_klog_syslog(code ? LOG_ERR : LOG_INFO, "%s", buf.data);
+        krb5_klog_syslog(code ? LOG_ERR : LOG_INFO, "%s", (char *)buf.data);
 
     k5_buf_free(&buf);
 }
