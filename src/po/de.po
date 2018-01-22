@@ -4852,7 +4852,7 @@ msgstr "Schlüsseltabelle enthält keine passenden Schlüssel für %s"
 #: ../../src/lib/krb5/krb/gic_pwd.c:75
 #, c-format
 msgid "Password for %s"
-msgstr "Passwort for %s"
+msgstr "Passwort für %s"
 
 #: ../../src/lib/krb5/krb/gic_pwd.c:227
 #, c-format
@@ -4864,12 +4864,12 @@ msgstr ""
 #: ../../src/lib/krb5/krb/gic_pwd.c:231
 #, c-format
 msgid "Warning: Your password will expire in %d hour%s on %s"
-msgstr "Warnung: Ihr Passwort wird in %d Stunden%s auf %s ablaufen."
+msgstr "Warnung: Ihr Passwort wird in %d Stunden%s am %s ablaufen."
 
 #: ../../src/lib/krb5/krb/gic_pwd.c:235
 #, c-format
 msgid "Warning: Your password will expire in %d days on %s"
-msgstr "Warnung: Ihr Passwort wird in %d Tagen auf %s ablaufen."
+msgstr "Warnung: Ihr Passwort wird in %d Tagen am %s ablaufen."
 
 #: ../../src/lib/krb5/krb/gic_pwd.c:409
 msgid "Password expired.  You must change it now."
