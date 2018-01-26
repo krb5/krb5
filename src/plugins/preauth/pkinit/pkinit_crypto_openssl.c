@@ -4636,6 +4636,43 @@ reassemble_pkcs11_name(pkinit_identity_opts *idopts)
     return ret;
 }
 
+static int
+hex_string_to_bin(const char *str, int *bin_len_out, CK_BYTE **bin_out)
+{
+    size_t str_len, i;
+    CK_BYTE *bin;
+    char *endptr, tmp[3] = { '\0', '\0', '\0' };
+    long val;
+
+    *bin_len_out = 0;
+    *bin_out = NULL;
+
+    str_len = strlen(str);
+    if (str_len % 2 != 0)
+        return EINVAL;
+    bin = malloc(str_len / 2);
+    if (bin == NULL)
+        return ENOMEM;
+
+    errno = 0;
+    for (i = 0; i < str_len / 2; i++) {
+        tmp[0] = str[i * 2];
+        tmp[1] = str[i * 2 + 1];
+
+        val = strtol(tmp, &endptr, 16);
+        if (val < 0 || val > 255 || errno != 0 || endptr != &tmp[2]) {
+            free(bin);
+            return EINVAL;
+        }
+
+        bin[i] = (CK_BYTE)val;
+    }
+
+    *bin_len_out = str_len / 2;
+    *bin_out = bin;
+    return 0;
+}
+
 static krb5_error_code
 pkinit_get_certs_pkcs11(krb5_context context,
                         pkinit_plg_crypto_context plg_cryptoctx,
@@ -4678,18 +4715,14 @@ pkinit_get_certs_pkcs11(krb5_context context,
     }
     /* Convert the ascii cert_id string into a binary blob */
     if (idopts->cert_id_string != NULL) {
-        BIGNUM *bn = NULL;
-        BN_hex2bn(&bn, idopts->cert_id_string);
-        if (bn == NULL)
-            return ENOMEM;
-        id_cryptoctx->cert_id_len = BN_num_bytes(bn);
-        id_cryptoctx->cert_id = malloc((size_t) id_cryptoctx->cert_id_len);
-        if (id_cryptoctx->cert_id == NULL) {
-            BN_free(bn);
-            return ENOMEM;
+        r = hex_string_to_bin(idopts->cert_id_string,
+                              &id_cryptoctx->cert_id_len,
+                              &id_cryptoctx->cert_id);
+        if (r != 0) {
+            pkiDebug("Failed to convert certid string [%s]\n",
+                     idopts->cert_id_string);
+            return r;
         }
-        BN_bn2bin(bn, id_cryptoctx->cert_id);
-        BN_free(bn);
     }
     id_cryptoctx->slotid = idopts->slotid;
     id_cryptoctx->pkcs11_method = 1;
