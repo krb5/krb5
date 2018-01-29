@@ -241,12 +241,18 @@ static int valid_name(const char *filename)
     }
     return 1;
 }
+#ifndef _WIN32
+static int valid_name_scandir(const struct dirent *d)
+{
+    return valid_name(d->d_name);
+}
+#endif
 
 /*
  * Include files within dirname.  Only files with names ending in ".conf", or
  * consisting entirely of alphanumeric characters, dashes, and underscores are
  * included.  This restriction avoids including editor backup files, .rpmsave
- * files, and the like.
+ * files, and the like.  Files are processed in alphanumeric order.
  */
 static errcode_t parse_include_dir(const char *dirname,
                                    struct profile_node *root_section)
@@ -287,18 +293,19 @@ cleanup:
 
 #else /* not _WIN32 */
 
-    DIR     *dir;
     char    *pathname;
     errcode_t retval = 0;
-    struct dirent *ent;
+    struct dirent **namelist;
+    int num_ents, i;
 
-    dir = opendir(dirname);
-    if (dir == NULL)
+    num_ents = scandir(dirname, &namelist, &valid_name_scandir, &alphasort);
+    if (num_ents == -1)
         return PROF_FAIL_INCLUDE_DIR;
-    while ((ent = readdir(dir)) != NULL) {
-        if (!valid_name(ent->d_name))
-            continue;
-        if (asprintf(&pathname, "%s/%s", dirname, ent->d_name) < 0) {
+
+    for (i = 0; i < num_ents; i++) {
+        retval = asprintf(&pathname, "%s/%s", dirname, namelist[i]->d_name);
+        free(namelist[i]);
+        if (retval < 0) {
             retval = ENOMEM;
             break;
         }
@@ -307,7 +314,10 @@ cleanup:
         if (retval)
             break;
     }
-    closedir(dir);
+    for (i++; i < num_ents; i++)
+        free(namelist[i]);
+
+    free(namelist);
     return retval;
 #endif /* not _WIN32 */
 }
