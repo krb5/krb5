@@ -58,7 +58,7 @@ krb5_rc_hash_message(krb5_context context, const krb5_data *message,
     *out = NULL;
 
     /* Calculate the binary checksum. */
-    retval = k5_sha256(message, cksum);
+    retval = k5_sha256(message, 1, cksum);
     if (retval)
         return retval;
 

@@ -634,9 +634,9 @@ krb5int_arcfour_gsscrypt(const krb5_keyblock *keyblock, krb5_keyusage usage,
 
 #define K5_SHA256_HASHLEN (256 / 8)
 
-/* Write the SHA-256 hash of in to out. */
+/* Write the SHA-256 hash of in (containing n elements) to out. */
 krb5_error_code
-k5_sha256(const krb5_data *in, uint8_t out[K5_SHA256_HASHLEN]);
+k5_sha256(const krb5_data *in, size_t n, uint8_t out[K5_SHA256_HASHLEN]);
 
 /*
  * Attempt to zero memory in a way that compilers won't optimize out.

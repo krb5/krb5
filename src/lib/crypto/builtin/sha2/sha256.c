@@ -257,12 +257,14 @@ k5_sha256_final(void *res, SHA256_CTX *m)
 }
 
 krb5_error_code
-k5_sha256(const krb5_data *in, uint8_t out[K5_SHA256_HASHLEN])
+k5_sha256(const krb5_data *in, size_t n, uint8_t out[K5_SHA256_HASHLEN])
 {
     SHA256_CTX ctx;
+    size_t i;
 
     k5_sha256_init(&ctx);
-    k5_sha256_update(&ctx, in->data, in->length);
+    for (i = 0; i < n; i++)
+        k5_sha256_update(&ctx, in[i].data, in[i].length);
     k5_sha256_final(out, &ctx);
     return 0;
 }
