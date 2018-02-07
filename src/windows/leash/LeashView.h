@@ -218,9 +218,9 @@ private:
                                CCacheDisplayData *elem,
                                int iItem,
                                char *principal,
-                               long issued,
-                               long valid_until,
-                               long renew_until,
+                               time_t issued,
+                               time_t valid_until,
+                               time_t renew_until,
                                char *encTypes,
                                unsigned long flags,
                                char *cache_name);
