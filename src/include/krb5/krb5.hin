@@ -106,7 +106,7 @@
 
 KRB5INT_BEGIN_DECLS
 
-#if TARGET_OS_MAC
+#if defined(TARGET_OS_MAC) && TARGET_OS_MAC
 #    pragma pack(push,2)
 #endif
 
@@ -8481,7 +8481,7 @@ krb5_set_kdc_recv_hook(krb5_context context, krb5_post_recv_fn recv_hook,
                        void *data);
 
 
-#if TARGET_OS_MAC
+#if defined(TARGET_OS_MAC) && TARGET_OS_MAC
 #    pragma pack(pop)
 #endif
 
