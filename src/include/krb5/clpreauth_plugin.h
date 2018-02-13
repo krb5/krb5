@@ -84,10 +84,9 @@ typedef struct krb5_clpreauth_callbacks_st {
     int vers;
 
     /*
-     * Get the enctype expected to be used to encrypt the encrypted portion of
-     * the AS_REP packet.  When handling a PREAUTH_REQUIRED error, this
-     * typically comes from etype-info2.  When handling an AS reply, it is
-     * initialized from the AS reply itself.
+     * If an AS-REP has been received, return the enctype of the AS-REP
+     * encrypted part.  Otherwise return the enctype chosen from etype-info, or
+     * the first requested enctype if no etype-info was received.
      */
     krb5_enctype (*get_etype)(krb5_context context, krb5_clpreauth_rock rock);
 

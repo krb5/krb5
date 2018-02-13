@@ -428,7 +428,11 @@ grow_pa_list(krb5_pa_data ***out_pa_list, int *out_pa_list_size,
 static krb5_enctype
 get_etype(krb5_context context, krb5_clpreauth_rock rock)
 {
-    return ((krb5_init_creds_context)rock)->etype;
+    krb5_init_creds_context ctx = (krb5_init_creds_context)rock;
+
+    if (ctx->reply != NULL)
+        return ctx->reply->enc_part.enctype;
+    return ctx->etype;
 }
 
 static krb5_keyblock *
