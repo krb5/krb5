@@ -29,6 +29,7 @@
  */
 
 #include "k5-int.h"
+#include "k5-hex.h"
 #include "ktutil.h"
 #include <string.h>
 #include <ctype.h>
@@ -106,9 +107,8 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     krb5_keyblock key;
     char buf[BUFSIZ];
     char promptstr[1024];
-
-    char *cp;
-    int i, tmp;
+    uint8_t *keybytes;
+    size_t keylen;
     unsigned int pwsize = BUFSIZ;
 
     retval = krb5_parse_name(context, princ_str, &princ);
@@ -199,24 +199,18 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
             goto cleanup;
         }
 
-        lp->entry->key.enctype = enctype;
-        lp->entry->key.contents = (krb5_octet *) malloc((strlen(buf) + 1) / 2);
-        if (!lp->entry->key.contents) {
-            retval = ENOMEM;
+        retval = k5_hex_decode(buf, &keybytes, &keylen);
+        if (retval) {
+            if (retval == EINVAL) {
+                fprintf(stderr, _("addent: Illegal character in key.\n"));
+                retval = 0;
+            }
             goto cleanup;
         }
 
-        i = 0;
-        for (cp = buf; *cp; cp += 2) {
-            if (!isxdigit((int) cp[0]) || !isxdigit((int) cp[1])) {
-                fprintf(stderr, _("addent: Illegal character in key.\n"));
-                retval = 0;
-                goto cleanup;
-            }
-            sscanf(cp, "%02x", &tmp);
-            lp->entry->key.contents[i++] = (krb5_octet) tmp;
-        }
-        lp->entry->key.length = i;
+        lp->entry->key.enctype = enctype;
+        lp->entry->key.contents = keybytes;
+        lp->entry->key.length = keylen;
     }
     lp->entry->principal = princ;
     lp->entry->vno = kvno;

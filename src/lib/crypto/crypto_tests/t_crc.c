@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <k5-hex.h>
 #include "crypto_int.h"
 
 #define HEX 1
@@ -139,31 +140,12 @@ timetest(unsigned int nblk, unsigned int blksiz)
 }
 #endif
 
-static void gethexstr(char *data, size_t *outlen, unsigned char *outbuf,
-                      size_t buflen)
-{
-    size_t inlen;
-    char *cp, buf[3];
-    long n;
-
-    inlen = strlen(data);
-    *outlen = 0;
-    for (cp = data; (size_t) (cp - data) < inlen; cp += 2) {
-        strncpy(buf, cp, 2);
-        buf[2] = '\0';
-        n = strtol(buf, NULL, 16);
-        outbuf[(*outlen)++] = n;
-        if (*outlen > buflen)
-            break;
-    }
-}
-
 static void
 verify(void)
 {
     unsigned int i;
     struct crc_trial trial;
-    unsigned char buf[4];
+    uint8_t *bytes;
     size_t len;
     unsigned long cksum;
     char *typestr;
@@ -179,9 +161,11 @@ verify(void)
             break;
         case HEX:
             typestr = "HEX";
-            gethexstr(trial.data, &len, buf, 4);
+            if (k5_hex_decode(trial.data, &bytes, &len) != 0)
+                abort();
             cksum = 0;
-            mit_crc32(buf, len, &cksum);
+            mit_crc32(bytes, len, &cksum);
+            free(bytes);
             break;
         default:
             typestr = "BOGUS";

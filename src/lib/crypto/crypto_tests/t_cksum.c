@@ -27,6 +27,7 @@
 /* Test checksum and checksum compatability for rsa-md[4,5]-des. */
 
 #include "k5-int.h"
+#include "k5-hex.h"
 
 #define MD5_K5BETA_COMPAT
 #define MD4_K5BETA_COMPAT
@@ -50,29 +51,6 @@ print_checksum(char *text, int number, char *message, krb5_checksum *checksum)
     printf("\n");
 }
 
-static void
-parse_hexstring(const char *s, krb5_checksum *cksum)
-{
-    size_t i, len;
-    unsigned int byte;
-    unsigned char *cp;
-
-    len = strlen(s);
-    cp = malloc(len / 2);
-    cksum->contents = cp;
-    if (cp == NULL) {
-        cksum->length = 0;
-        return;
-    }
-    cksum->length = len / 2;
-    for (i = 0; i + 1 < len; i += 2) {
-        sscanf(&s[i], "%2x", &byte);
-        *cp++ = byte;
-    }
-    cksum->checksum_type = CKTYPE;
-    cksum->magic = KV5M_CHECKSUM;
-}
-
 /*
  * Test the checksum verification of Old Style (tm) and correct RSA-MD[4,5]-DES
  * checksums.
@@ -86,6 +64,7 @@ main(argc, argv)
     char **argv;
 {
     int                   msgindex;
+    size_t                len;
     krb5_boolean          valid;
     krb5_keyblock         keyblock;
     krb5_key              key;
@@ -150,12 +129,14 @@ main(argc, argv)
         free(checksum.contents);
 
         /* Verify a known-good checksum for this plaintext. */
-        parse_hexstring(argv[msgindex+1], &knowncksum);
-        if (knowncksum.contents == NULL) {
-            printf("parse_hexstring failed\n");
-            kret = 1;
+        kret = k5_hex_decode(argv[msgindex + 1], &knowncksum.contents, &len);
+        if (kret) {
+            printf("k5_hex_decode failed\n");
             break;
         }
+        knowncksum.length = len;
+        knowncksum.checksum_type = CKTYPE;
+        knowncksum.magic = KV5M_CHECKSUM;
         kret = krb5_k_verify_checksum(NULL, key, 0, &plaintext, &knowncksum,
                                       &valid);
         if (kret != 0) {

@@ -37,6 +37,7 @@
  */
 
 #include <k5-int.h>
+#include <k5-hex.h>
 #include "kdb5_ldap_util.h"
 #include "kdb5_ldap_list.h"
 
@@ -96,11 +97,10 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
     char *service_object = NULL;
     char *file_name = NULL, *tmp_file = NULL;
     char passwd[MAX_SERVICE_PASSWD_LEN];
-    char *str = NULL;
+    char *str = NULL, *hexpasswd = NULL;
     char line[MAX_LEN];
     FILE *pfile = NULL;
     krb5_boolean print_usage = FALSE;
-    krb5_data hexpasswd = {0, 0, NULL};
     mode_t old_mode = 0;
 
     /*
@@ -183,21 +183,12 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
     }
 
     /* Convert the password to hexadecimal */
-    {
-        krb5_data pwd;
-
-        pwd.length = passwd_len;
-        pwd.data = passwd;
-
-        ret = tohex(pwd, &hexpasswd);
-        if (ret != 0) {
-            com_err(me, ret,
-                    _("Failed to convert the password to hexadecimal"));
-            memset(passwd, 0, passwd_len);
-            goto cleanup;
-        }
+    ret = k5_hex_encode(passwd, passwd_len, FALSE, &hexpasswd);
+    zap(passwd, passwd_len);
+    if (ret != 0) {
+        com_err(me, ret, _("Failed to convert the password to hexadecimal"));
+        goto cleanup;
     }
-    memset(passwd, 0, passwd_len);
 
     /* TODO: file lock for the service password file */
 
@@ -225,7 +216,7 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
     if (str == NULL) {
         if (feof(pfile)) {
             /* If the service object dn is not present in the service password file */
-            if (fprintf(pfile, "%s#{HEX}%s\n", service_object, hexpasswd.data) < 0) {
+            if (fprintf(pfile, "%s#{HEX}%s\n", service_object, hexpasswd) < 0) {
                 com_err(me, errno,
                         _("Failed to write service object password to file"));
                 fclose(pfile);
@@ -268,7 +259,7 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
         while (fgets(line, MAX_LEN, pfile) != NULL) {
             if (((str = strstr(line, service_object)) != NULL) &&
                 (line[strlen(service_object)] == '#')) {
-                if (fprintf(newfile, "%s#{HEX}%s\n", service_object, hexpasswd.data) < 0) {
+                if (fprintf(newfile, "%s#{HEX}%s\n", service_object, hexpasswd) < 0) {
                     com_err(me, errno, _("Failed to write service object "
                                          "password to file"));
                     fclose(newfile);
@@ -313,10 +304,7 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
 
 cleanup:
 
-    if (hexpasswd.length != 0) {
-        memset(hexpasswd.data, 0, hexpasswd.length);
-        free(hexpasswd.data);
-    }
+    zapfreestr(hexpasswd);
 
     if (service_object)
         free(service_object);

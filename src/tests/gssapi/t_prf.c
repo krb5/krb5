@@ -24,6 +24,7 @@
  */
 
 #include "k5-int.h"
+#include "k5-hex.h"
 #include "common.h"
 #include "mglueP.h"
 #include "gssapiP_krb5.h"
@@ -109,12 +110,14 @@ static struct {
 static size_t
 fromhex(const char *hexstr, unsigned char *out)
 {
-    const char *p;
-    size_t count;
+    uint8_t *bytes;
+    size_t len;
 
-    for (p = hexstr, count = 0; *p != '\0'; p += 2, count++)
-        sscanf(p, "%2hhx", &out[count]);
-    return count;
+    if (k5_hex_decode(hexstr, &bytes, &len) != 0)
+        abort();
+    memcpy(out, bytes, len);
+    free(bytes);
+    return len;
 }
 
 int

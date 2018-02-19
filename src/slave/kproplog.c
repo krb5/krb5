@@ -9,6 +9,7 @@
  */
 
 #include "k5-int.h"
+#include "k5-hex.h"
 #include <locale.h>
 #include <sys/types.h>
 #include <sys/mman.h>
@@ -106,15 +107,15 @@ print_deltat(uint32_t *deltat)
 static void
 print_hex(const char *tag, utf8str_t *str)
 {
-    unsigned int i;
     unsigned int len;
+    char *hex;
 
     len = str->utf8str_t_len;
 
-    printf("\t\t\t%s(%d): 0x", tag, len);
-    for (i = 0; i < len; i++)
-        printf("%02x", (krb5_octet)str->utf8str_t_val[i]);
-    printf("\n");
+    if (k5_hex_encode(str->utf8str_t_val, len, FALSE, &hex) != 0)
+        abort();
+    printf("\t\t\t%s(%d): 0x%s\n", tag, len, hex);
+    free(hex);
 }
 
 /* Display string primitive. */
