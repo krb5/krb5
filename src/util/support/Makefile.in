@@ -81,6 +81,7 @@ STLIBOBJS= \
 	path.o \
 	base64.o \
 	json.o \
+	hex.o \
 	bcmp.o \
 	strerror_r.o \
 	$(GETTIMEOFDAY_ST_OBJ) \
@@ -106,6 +107,7 @@ LIBOBJS= \
 	$(OUTPRE)path.$(OBJEXT) \
 	$(OUTPRE)base64.$(OBJEXT) \
 	$(OUTPRE)json.$(OBJEXT) \
+	$(OUTPRE)hex.$(OBJEXT) \
 	$(OUTPRE)bcmp.$(OBJEXT) \
 	$(OUTPRE)strerror_r.$(OBJEXT) \
 	$(GETTIMEOFDAY_OBJ) \
@@ -136,10 +138,12 @@ SRCS=\
 	$(srcdir)/t_unal.c \
 	$(srcdir)/t_path.c \
 	$(srcdir)/t_json.c \
+	$(srcdir)/t_hex.c \
 	$(srcdir)/zap.c \
 	$(srcdir)/path.c \
 	$(srcdir)/base64.c \
 	$(srcdir)/json.c \
+	$(srcdir)/hex.c \
 	$(srcdir)/bcmp.c \
 	$(srcdir)/strerror_r.c \
 	$(srcdir)/t_utf8.c \
@@ -215,6 +219,9 @@ T_JSON_OBJS= t_json.o json.o base64.o k5buf.o $(PRINTF_ST_OBJ)
 t_json: $(T_JSON_OBJS)
 	$(CC_LINK) -o $@ $(T_JSON_OBJS)
 
+t_hex: t_hex.o hex.o
+	$(CC_LINK) -o $@ t_hex.o hex.o
+
 t_unal: t_unal.o
 	$(CC_LINK) -o t_unal t_unal.o
 
@@ -226,7 +233,8 @@ T_UTF16_OBJS= t_utf16.o utf8_conv.o utf8.o k5buf.o $(PRINTF_ST_OBJ)
 t_utf16: $(T_UTF16_OBJS)
 	$(CC_LINK) -o $@ $(T_UTF16_OBJS)
 
-TEST_PROGS= t_k5buf t_path t_path_win t_base64 t_json t_unal t_utf8 t_utf16
+TEST_PROGS= t_k5buf t_path t_path_win t_base64 t_json t_hex t_unal t_utf8 \
+	t_utf16
 
 check-unix: $(TEST_PROGS)
 	./t_k5buf
@@ -234,6 +242,7 @@ check-unix: $(TEST_PROGS)
 	./t_path_win
 	./t_base64
 	./t_json
+	./t_hex
 	./t_unal
 	./t_utf8
 	./t_utf16
@@ -241,8 +250,8 @@ check-unix: $(TEST_PROGS)
 clean:
 	$(RM) t_k5buf.o t_k5buf t_unal.o t_unal path_win.o path_win
 	$(RM) t_path_win.o t_path_win t_path.o t_path t_base64.o t_base64
-	$(RM) t_json.o t_json libkrb5support.exports t_utf8.o t_utf8
-	$(RM) t_utf16.o t_utf16
+	$(RM) t_json.o t_json t_hex.o t_hex libkrb5support.exports
+	$(RM) t_utf8.o t_utf8 t_utf16.o t_utf16
 
 @lib_frag@
 @libobj_frag@

@@ -17,6 +17,8 @@ k5_get_error
 k5_free_error
 k5_clear_error
 k5_set_error_info_callout_fn
+k5_hex_decode
+k5_hex_encode
 k5_json_array_add
 k5_json_array_create
 k5_json_array_fmt
