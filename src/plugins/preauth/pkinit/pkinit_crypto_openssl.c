@@ -949,8 +949,31 @@ pkinit_init_certs(pkinit_identity_crypto_context ctx)
 }
 
 static void
+pkinit_free_cred(pkinit_cred_info creds)
+{
+    if (creds != NULL) {
+	if (creds->cert != NULL) {
+	    X509_free(creds->cert);
+	    creds->cert = NULL;	
+	}
+
+	if (creds->key != NULL) {
+	    EVP_PKEY_free(creds->key);
+	    creds->key = NULL;
+	}
+
+	free(creds->name);
+	creds->name = NULL;
+
+	free(creds);
+    }
+}
+
+static void
 pkinit_fini_certs(pkinit_identity_crypto_context ctx)
 {
+    unsigned int i;
+
     if (ctx == NULL)
         return;
 
@@ -968,6 +991,11 @@ pkinit_fini_certs(pkinit_identity_crypto_context ctx)
 
     if (ctx->revoked != NULL)
         sk_X509_CRL_pop_free(ctx->revoked, X509_CRL_free);
+
+    for (i = 0; i < MAX_CREDS_ALLOWED; i++) {
+	pkinit_free_cred(ctx->creds[i]);
+	ctx->creds[i] = NULL;
+    }
 }
 
 static krb5_error_code
