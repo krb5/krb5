@@ -1017,8 +1017,6 @@ pkinit_client_prep_questions(krb5_context context,
         }
 
         reqctx->identity_initialized = TRUE;
-        crypto_free_cert_info(context, plgctx->cryptoctx,
-                              reqctx->cryptoctx, reqctx->idctx);
         if (retval != 0) {
             pkiDebug("%s: not asking responder question\n", __FUNCTION__);
             retval = 0;

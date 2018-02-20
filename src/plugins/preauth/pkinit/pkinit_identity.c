@@ -543,6 +543,9 @@ pkinit_identity_initialize(krb5_context context,
                                    idopts, id_cryptoctx, princ, TRUE);
         if (retval)
             goto errout;
+
+        crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
+                              id_cryptoctx);
     } else {
         /* We're the anonymous principal. */
         retval = 0;
