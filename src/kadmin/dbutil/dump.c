@@ -104,6 +104,7 @@ master_key_convert(krb5_context context, krb5_db_entry *db_entry)
     krb5_kvno kvno;
     int i, j;
 
+    memset(&v5plainkey, 0, sizeof(krb5_keyblock));
     is_mkey = krb5_principal_compare(context, master_princ, db_entry->princ);
 
     if (is_mkey) {

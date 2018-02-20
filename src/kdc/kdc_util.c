@@ -515,6 +515,7 @@ find_server_key(krb5_context context,
         return KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
     if ((key = (krb5_keyblock *)malloc(sizeof *key)) == NULL)
         return ENOMEM;
+    memset(key, 0, sizeof(krb5_keyblock));
     retval = krb5_dbe_decrypt_key_data(context, NULL, server_key,
                                        key, NULL);
     if (retval)

@@ -57,6 +57,7 @@ main(int argc, char **argv)
     krb5_checksum sum;
     krb5_boolean val;
 
+    memset(&key, 0, sizeof(krb5_keyblock));
     if (argc != 5) {
         fprintf(stderr, "Usage: t_kperf {c|k}{e|d|m|v} type size nblocks\n");
         exit(1);

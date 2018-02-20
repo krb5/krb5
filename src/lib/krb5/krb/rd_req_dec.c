@@ -331,6 +331,7 @@ try_one_princ(krb5_context context, const krb5_ap_req *req,
     krb5_enctype tkt_etype = req->ticket->enc_part.enctype;
     krb5_principal tkt_server = req->ticket->server;
 
+    memset(&ent, 0, sizeof(krb5_keytab_entry));
     ret = krb5_kt_get_entry(context, keytab, princ, tkt_kvno, tkt_etype, &ent);
     if (ret) {
         return keytab_fetch_error(context, ret, princ, tkt_server, tkt_kvno,

@@ -64,6 +64,8 @@ main()
     pid_t pid, wpid;
     int status;
 
+    memset(&kb_aes, 0, sizeof(krb5_keyblock));
+    memset(&kb_rc4, 0, sizeof(krb5_keyblock));
     /* Seed the PRNG instead of creating a context, so we don't need
      * krb5.conf. */
     t(krb5_c_random_seed(ctx, &plain));

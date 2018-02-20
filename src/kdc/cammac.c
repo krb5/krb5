@@ -65,6 +65,7 @@ cammac_create(krb5_context context, krb5_enc_tkt_part *enc_tkt,
     krb5_keyblock tgtkey;
     krb5_checksum kdc_cksum, svc_cksum;
 
+    memset(&tgtkey, 0, sizeof(krb5_keyblock));
     *cammac_out = NULL;
     memset(&tgtkey, 0, sizeof(tgtkey));
     memset(&kdc_cksum, 0, sizeof(kdc_cksum));

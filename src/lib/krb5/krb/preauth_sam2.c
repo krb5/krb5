@@ -234,6 +234,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
         if (!(sc2b->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD)) {
             /* as_key = combine_key (as_key, string_to_key(SAD)) */
             krb5_keyblock tmp_kb;
+	    memset(&tmp_kb, 0, sizeof(krb5_keyblock));
 
             retval = krb5_c_string_to_key(context, sc2b->sam_etype,
                                           &response_data, salt, &tmp_kb);

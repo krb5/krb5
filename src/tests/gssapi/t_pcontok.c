@@ -69,6 +69,8 @@ make_delete_token(gss_krb5_lucid_context_v1_t *lctx, gss_buffer_desc *out)
     gss_krb5_lucid_key_t *lkey = &lctx->rfc1964_kd.ctx_key;
     int signalg = lctx->rfc1964_kd.sign_alg;
 
+    memset(&seqkb, 0, sizeof(krb5_keyblock));
+
     ret = krb5_init_context(&context);
     check_k5err(context, "krb5_init_context", ret);
 

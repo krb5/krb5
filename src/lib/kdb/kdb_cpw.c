@@ -100,6 +100,7 @@ preserve_one_old_key(krb5_context context, krb5_keyblock *mkey,
     krb5_keysalt salt;
 
     memset(new_kd, 0, sizeof(*new_kd));
+    memset(&kb, 0, sizeof(krb5_keyblock));
 
     ret = krb5_dbe_decrypt_key_data(context, mkey, old_kd, &kb, NULL);
     if (ret == 0) {
@@ -162,6 +163,7 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
     krb5_error_code       retval;
     krb5_key_data        *kd_slot;
 
+    memset(&key, 0, sizeof(krb5_keyblock));
     for (i = 0; i < ks_tuple_count; i++) {
         krb5_boolean similar;
 
@@ -264,6 +266,8 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
     int                   i, j;
     krb5_key_data        *kd_slot;
 
+    memset(&key, 0, sizeof(krb5_keyblock));
+    memset(&key_salt, 0, sizeof(krb5_keysalt));
     for (i = 0; i < ks_tuple_count; i++) {
         krb5_boolean similar;
 
@@ -351,9 +355,12 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
         retval = krb5_dbe_encrypt_key_data(context, master_key, &key,
                                            (const krb5_keysalt *)&key_salt,
                                            kvno, kd_slot);
-        if (key_salt.data.data)
+        if (key_salt.data.data) {
             free(key_salt.data.data);
+	    memset(&key_salt, 0, sizeof(krb5_keysalt));
+	}
         free(key.contents);
+	memset(&key, 0, sizeof(krb5_keyblock));
 
         if( retval )
             return retval;

@@ -111,6 +111,7 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     int i, tmp;
     unsigned int pwsize = BUFSIZ;
 
+    memset(&key, 0, sizeof(krb5_keyblock));
     retval = krb5_parse_name(context, princ_str, &princ);
     if (retval)
         return retval;

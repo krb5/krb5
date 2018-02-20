@@ -59,6 +59,7 @@ enc_ts_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     krb5_key_data *             client_key;
     krb5_int32                  start;
 
+    memset(&key, 0, sizeof(krb5_keyblock));
     scratch.data = (char *)pa->contents;
     scratch.length = pa->length;
 

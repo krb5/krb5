@@ -44,6 +44,7 @@ krb5int_dk_string_to_key(const struct krb5_keytypes *ktp,
 
     /* keyblock->length is checked by krb5int_derive_key. */
 
+    memset(&foldkeyblock, 0, sizeof(krb5_keyblock));
     keybytes = ktp->enc->keybytes;
     keylength = ktp->enc->keylength;
 

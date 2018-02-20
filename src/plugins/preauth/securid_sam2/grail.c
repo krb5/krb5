@@ -119,7 +119,7 @@ encrypt_track_data(krb5_context context, krb5_db_entry *client,
 
     *output = empty_data();
     enc.ciphertext = empty_data();
-    sam_key.contents = NULL;
+    memset(&sam_key, 0, sizeof(krb5_keyblock));
 
     ret = get_grail_key(context, client, &sam_key);
     if (ret != 0)

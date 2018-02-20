@@ -135,6 +135,8 @@ main(int argc, char **argv)
     {
         krb5_keyblock keyblk, *tmp;
 
+	memset(&keyblk, 0, sizeof(krb5_keyblock));
+
         ktest_make_sample_keyblock(&keyblk);
         leak_test(keyblk, encode_krb5_encryption_key,
                   decode_krb5_encryption_key, krb5_free_keyblock);

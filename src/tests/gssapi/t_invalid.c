@@ -128,6 +128,8 @@ make_fake_cfx_context()
     krb5_gss_ctx_id_t kgctx;
     krb5_keyblock kb;
 
+    memset(&kb, 0, sizeof(krb5_keyblock));
+
     kgctx = calloc(1, sizeof(*kgctx));
     if (kgctx == NULL)
         abort();
@@ -162,6 +164,8 @@ make_fake_context(const struct test *test)
     krb5_keyblock kb;
     unsigned char encbuf[8];
     size_t i;
+
+    memset(&kb, 0, sizeof(krb5_keyblock));
 
     kgctx = calloc(1, sizeof(*kgctx));
     if (kgctx == NULL)

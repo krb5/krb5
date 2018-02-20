@@ -293,6 +293,7 @@ get_server_key(context, server, enctype, key)
     pwd.length = strlen(string);
 
     if ((*key = (krb5_keyblock *)malloc(sizeof(krb5_keyblock)))) {
+	memset(*key, 0, sizeof(krb5_keyblock));
     	krb5_use_enctype(context, &eblock, enctype);
     	if ((retval = krb5_string_to_key(context, &eblock, *key, &pwd, &salt)))
 	    free(*key);

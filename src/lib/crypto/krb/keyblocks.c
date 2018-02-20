@@ -38,6 +38,7 @@ krb5int_c_init_keyblock(krb5_context context, krb5_enctype enctype,
     kb = malloc(sizeof(krb5_keyblock));
     if (kb == NULL)
         return ENOMEM;
+    memset(kb, 0, sizeof(krb5_keyblock));
     kb->magic = KV5M_KEYBLOCK;
     kb->enctype = enctype;
     kb->length = length;
@@ -83,6 +84,7 @@ krb5int_c_copy_keyblock(krb5_context context, const krb5_keyblock *from,
     new_key = malloc(sizeof(*new_key));
     if (!new_key)
         return ENOMEM;
+    memset(new_key, 0, sizeof(krb5_keyblock));
     code = krb5int_c_copy_keyblock_contents(context, from, new_key);
     if (code) {
         free(new_key);

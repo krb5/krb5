@@ -41,6 +41,7 @@ mk_xorkey(krb5_key origkey, krb5_key *xorkey)
     krb5_keyblock xorkeyblock;
     size_t i = 0;
 
+    memset(&xorkeyblock, 0, sizeof(krb5_keyblock));
     xorbytes = k5memdup(origkey->keyblock.contents, origkey->keyblock.length,
                         &retval);
     if (xorbytes == NULL)

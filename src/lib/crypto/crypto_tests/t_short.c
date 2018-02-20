@@ -83,6 +83,7 @@ test_enctype(krb5_enctype enctype)
     unsigned int dummy;
     size_t min_len, len;
 
+    memset(&keyblock, 0, sizeof(krb5_keyblock));
     printf("Testing enctype %d\n", (int) enctype);
     x(krb5_c_encrypt_length(NULL, enctype, 0, &min_len));
     x(krb5_c_make_random_key(NULL, enctype, &keyblock));

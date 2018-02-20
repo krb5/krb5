@@ -130,6 +130,8 @@ main(int argc, char *argv[])
     unsigned char k1buf[32], k2buf[32], outbuf[44];
     size_t i;
 
+    memset(&kb1, 0, sizeof(krb5_keyblock));
+    memset(&kb2, 0, sizeof(krb5_keyblock));
     /*
      * Fake up just enough of a krb5 GSS context to make gss_pseudo_random
      * work, with chosen subkeys and acceptor subkeys.  If we implement

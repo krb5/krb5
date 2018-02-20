@@ -228,6 +228,7 @@ krb5int_pbkdf2_hmac(const struct krb5_hash_provider *hash,
     krb5_crypto_iov iov;
     krb5_error_code err;
 
+    memset(&keyblock, 0, sizeof(krb5_keyblock));
     assert(hash->hashsize <= sizeof(tmp));
     if (pass->length > hash->blocksize) {
         d = make_data(tmp, hash->hashsize);

@@ -144,7 +144,8 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     memset(&reply_encpart, 0, sizeof(reply_encpart));
     memset(&ticket_reply, 0, sizeof(ticket_reply));
     memset(&enc_tkt_reply, 0, sizeof(enc_tkt_reply));
-    session_key.contents = NULL;
+    memset(&encrypting_key, 0, sizeof(krb5_keyblock));
+    memset(&session_key, 0, sizeof(krb5_keyblock));
 
     retval = decode_krb5_tgs_req(pkt, &request);
     if (retval)
@@ -553,6 +554,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
          * Convert server.key into a real key
          * (it may be encrypted in the database)
          */
+	memset(&encrypting_key, 0, sizeof (encrypting_key));
         if ((errcode = krb5_dbe_decrypt_key_data(kdc_context, NULL,
                                                  server_key, &encrypting_key,
                                                  NULL))) {
