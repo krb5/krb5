@@ -4446,6 +4446,11 @@ pkinit_load_fs_cert_and_key(krb5_context context,
         goto cleanup;
     }
 
+    if (id_cryptoctx->creds[cindex] != NULL) {
+	pkinit_free_cred(id_cryptoctx->creds[cindex]);
+	id_cryptoctx->creds[cindex] = NULL;
+    }
+
     id_cryptoctx->creds[cindex] = malloc(sizeof(struct _pkinit_cred_info));
     if (id_cryptoctx->creds[cindex] == NULL) {
         retval = ENOMEM;
@@ -4495,8 +4500,9 @@ pkinit_get_certs_fs(krb5_context context,
     }
 
     retval = pkinit_load_fs_cert_and_key(context, id_cryptoctx,
-                                         idopts->cert_filename,
-                                         idopts->key_filename, 0);
+					 idopts->cert_filename,
+					 idopts->key_filename, 0);
+
 cleanup:
     return retval;
 }
