@@ -983,6 +983,8 @@ int main(int argc, char **argv)
     retval = load_kdcpolicy_plugins(kcontext);
     if (retval) {
         kdc_err(kcontext, retval, _("while loading KDC policy plugin"));
+	unload_authdata_plugins(kcontext);
+	load_preauth_plugins(&shandle, kcontext, ctx);
         finish_realms();
         return 1;
     }
@@ -1008,6 +1010,9 @@ int main(int argc, char **argv)
         retval = loop_setup_signals(ctx, &shandle, reset_for_hangup);
         if (retval) {
             kdc_err(kcontext, retval, _("while initializing signal handlers"));
+	    unload_kdcpolicy_plugins(kcontext);
+	    unload_authdata_plugins(kcontext);
+	    load_preauth_plugins(&shandle, kcontext, ctx);
             finish_realms();
             return 1;
         }
@@ -1016,11 +1021,17 @@ int main(int argc, char **argv)
                                      tcp_listen_backlog))) {
     net_init_error:
         kdc_err(kcontext, retval, _("while initializing network"));
+	unload_kdcpolicy_plugins(kcontext);
+	unload_authdata_plugins(kcontext);
+	load_preauth_plugins(&shandle, kcontext, ctx);
         finish_realms();
         return 1;
     }
     if (!nofork && daemon(0, 0)) {
         kdc_err(kcontext, errno, _("while detaching from tty"));
+	unload_kdcpolicy_plugins(kcontext);
+	unload_authdata_plugins(kcontext);
+	load_preauth_plugins(&shandle, kcontext, ctx);
         finish_realms();
         return 1;
     }
@@ -1028,6 +1039,9 @@ int main(int argc, char **argv)
         retval = write_pid_file(pid_file);
         if (retval) {
             kdc_err(kcontext, retval, _("while creating PID file"));
+	    unload_kdcpolicy_plugins(kcontext);
+	    unload_authdata_plugins(kcontext);
+	    load_preauth_plugins(&shandle, kcontext, ctx);
             finish_realms();
             return 1;
         }
@@ -1037,6 +1051,9 @@ int main(int argc, char **argv)
         retval = create_workers(ctx, workers);
         if (retval) {
             kdc_err(kcontext, errno, _("creating worker processes"));
+	    unload_kdcpolicy_plugins(kcontext);
+	    unload_authdata_plugins(kcontext);
+	    load_preauth_plugins(&shandle, kcontext, ctx);
             return 1;
         }
         /* We get here only in a worker child process; re-initialize realms. */
@@ -1047,6 +1064,9 @@ int main(int argc, char **argv)
     retval = load_audit_modules(kcontext);
     if (retval) {
         kdc_err(kcontext, retval, _("while loading audit plugin module(s)"));
+	unload_kdcpolicy_plugins(kcontext);
+	unload_authdata_plugins(kcontext);
+	load_preauth_plugins(&shandle, kcontext, ctx);
         finish_realms();
         return 1;
     }
