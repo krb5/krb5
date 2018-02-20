@@ -2979,6 +2979,7 @@ server_process_dh(krb5_context context,
 
     retval = 0;
 
+    BN_free(client_pubkey);
     if (dh_server != NULL)
         DH_free(dh_server);
     return retval;
