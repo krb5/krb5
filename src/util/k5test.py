@@ -389,18 +389,18 @@ import imp
 def fail(msg):
     """Print a message and exit with failure."""
     global _current_pass
-    print "*** Failure:", msg
+    print("*** Failure:", msg)
     if _last_mark:
-        print "*** Last mark: %s" % _last_mark
+        print("*** Last mark: %s" % _last_mark)
     if _last_cmd:
-        print "*** Last command (#%d): %s" % (_cmd_index - 1, _last_cmd)
+        print("*** Last command (#%d): %s" % (_cmd_index - 1, _last_cmd))
     if _last_cmd_output:
-        print "*** Output of last command:"
+        print("*** Output of last command:")
         sys.stdout.write(_last_cmd_output)
     if _current_pass:
-        print "*** Failed in test pass:", _current_pass
+        print("*** Failed in test pass:", _current_pass)
     if _current_db:
-        print "*** Failed with db:", _current_db
+        print("*** Failed with db:", _current_db)
     sys.exit(1)
 
 
@@ -476,15 +476,16 @@ def _onexit():
         if not verbose:
             testlogfile = os.path.join(os.getcwd(), 'testlog')
             utildir = os.path.join(srctop, 'util')
-            print 'For details, see: %s' % testlogfile
-            print 'Or re-run this test script with the -v flag:'
-            print '    cd %s' % os.getcwd()
-            print '    PYTHONPATH=%s %s %s -v' % \
-                (utildir, sys.executable, sys.argv[0])
-            print
-        print 'Use --debug=NUM to run a command under a debugger.  Use'
-        print '--stop-after=NUM to stop after a daemon is started in order to'
-        print 'attach to it with a debugger.  Use --help to see other options.'
+            print('For details, see: %s' % testlogfile)
+            print('Or re-run this test script with the -v flag:')
+            print('    cd %s' % os.getcwd())
+            print('    PYTHONPATH=%s %s %s -v' %
+                  (utildir, sys.executable, sys.argv[0]))
+            print()
+        print('Use --debug=NUM to run a command under a debugger.  Use')
+        print('--stop-after=NUM to stop after a daemon is started in order to')
+        print('attach to it with a debugger.  Use --help to see other')
+        print('options.')
 
 
 def _onsigint(signum, frame):
@@ -534,8 +535,8 @@ def _get_hostname():
     hostname = socket.gethostname()
     try:
         ai = socket.getaddrinfo(hostname, None, 0, 0, 0, socket.AI_CANONNAME)
-    except socket.gaierror, (error, errstr):
-        fail('Local hostname "%s" does not resolve: %s.' % (hostname, errstr))
+    except socket.gaierror as e:
+        fail('Local hostname "%s" does not resolve: %s.' % (hostname, e[1]))
     (family, socktype, proto, canonname, sockaddr) = ai[0]
     try:
         name = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
@@ -605,7 +606,7 @@ def _match_cmdnum(cmdnum, ind):
 def _build_env():
     global buildtop, runenv
     env = os.environ.copy()
-    for (k, v) in runenv.env.iteritems():
+    for (k, v) in runenv.env.items():
         if v.find('./') == 0:
             env[k] = os.path.join(buildtop, v)
         else:
@@ -715,7 +716,8 @@ def _run_cmd(args, env, input=None, expected_code=0, expected_msg=None,
 
     # Run the command and log the result, folding stderr into stdout.
     proc = subprocess.Popen(args, stdin=infile, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT, env=env)
+                            stderr=subprocess.STDOUT, env=env,
+                            universal_newlines=True)
     (outdata, dummy_errdata) = proc.communicate(input)
     _last_cmd_output = outdata
     code = proc.returncode
@@ -745,10 +747,10 @@ def _debug_cmd(args, env, input):
            (_cmd_index, _shell_equiv(args)), True)
     if input:
         print
-        print '*** Enter the following input when appropriate:'
-        print 
-        print input
-        print
+        print('*** Enter the following input when appropriate:')
+        print()
+        print(input)
+        print()
     code = subprocess.call(args, env=env)
     output('*** [%d] Completed in debugger with return code %d\n' %
            (_cmd_index, code))
@@ -776,7 +778,8 @@ def _start_daemon(args, env, sentinel):
 
     # Start the daemon and look for the sentinel in stdout or stderr.
     proc = subprocess.Popen(args, stdin=null_input, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT, env=env)
+                            stderr=subprocess.STDOUT, env=env,
+                            universal_newlines=True)
     _last_cmd_output = ''
     while True:
         line = proc.stdout.readline()

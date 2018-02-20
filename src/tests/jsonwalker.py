@@ -2,8 +2,8 @@ import sys
 try:
     import cjson
 except ImportError:
-    print "Warning: skipping audit log verification because the cjson module" \
-          " is unavailable"
+    print("Warning: skipping audit log verification because the cjson module" \
+          " is unavailable")
     sys.exit(0)
 from collections import defaultdict
 from optparse import OptionParser
@@ -22,10 +22,10 @@ class Parser(object):
         result = self.parse(logs)
         if len(result) != len(self.defaults):
             diff = set(self.defaults.keys()).difference(result.keys())
-            print 'Test failed.'
-            print 'The following attributes were not set:'
+            print('Test failed.')
+            print('The following attributes were not set:')
             for it in diff:
-                print it
+                print(it)
             sys.exit(1)
 
     def flatten(self, defaults):
@@ -42,7 +42,7 @@ class Parser(object):
         result = dict()
         for path,value in self._walk(defaults):
             if path in result:
-                print 'Warning: attribute path %s already exists' % path
+                print('Warning: attribute path %s already exists' % path)
             result[path] = value
 
         return result
@@ -60,7 +60,7 @@ class Parser(object):
                         if v is not None:
                             dv = self.DEFAULTS[type(v)]
                         else:
-                            print 'Warning: attribute %s is set to None' % a
+                            print('Warning: attribute %s is set to None' % a)
                             continue
                     # by now we have default value
                     if v != dv:
@@ -96,7 +96,7 @@ if __name__ == '__main__':
                 content.append(cjson.decode(l.rstrip()))
         f.close()
     else:
-        print 'Input file in jason format is required'
+        print('Input file in jason format is required')
         exit()
 
     defaults = None

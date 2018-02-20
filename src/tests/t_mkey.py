@@ -310,10 +310,10 @@ realm.stop()
 mark('pre-1.7 stash file')
 dumpfile = os.path.join(srctop, 'tests', 'dumpfiles', 'dump.16')
 os.remove(stash_file)
-f = open(stash_file, 'w')
+f = open(stash_file, 'wb')
 f.write(struct.pack('=HL24s', 16, 24,
-                    '\xF8\x3E\xFB\xBA\x6D\x80\xD9\x54\xE5\x5D\xF2\xE0'
-                    '\x94\xAD\x6D\x86\xB5\x16\x37\xEC\x7C\x8A\xBC\x86'))
+                    b'\xF8\x3E\xFB\xBA\x6D\x80\xD9\x54\xE5\x5D\xF2\xE0'
+                    b'\x94\xAD\x6D\x86\xB5\x16\x37\xEC\x7C\x8A\xBC\x86'))
 f.close()
 realm.run([kdb5_util, 'load', dumpfile])
 nprincs = len(realm.run([kadminl, 'listprincs']).splitlines())

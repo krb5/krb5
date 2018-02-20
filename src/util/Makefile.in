@@ -26,3 +26,4 @@ install:
 
 clean-unix::
 	$(RM) *.pyc
+	$(RM) -r __pycache__

@@ -131,7 +131,9 @@ testd(realm, 'KRBTEST.COM', 'default_realm profile', env=notest2)
 # this behavior.
 mark('default_realm: test1 module')
 remove_default = {'libdefaults': {'default_realm': None}}
-nodefault_conf = dict(disable_conf.items() + remove_default.items())
+# Python 3.5+: nodefault_conf = {**disable_conf, **remove_default}
+nodefault_conf = dict(list(disable_conf.items()) +
+                      list(remove_default.items()))
 nodefault = realm.special_env('nodefault', False, krb5_conf=nodefault_conf)
 testd(realm, 'one', 'default_realm test1', env=nodefault)
 

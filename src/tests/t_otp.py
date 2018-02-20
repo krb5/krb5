@@ -29,8 +29,8 @@
 #
 
 from k5test import *
-from Queue import Empty
-import StringIO
+from queue import Empty
+from io import StringIO
 import struct
 
 try:
@@ -120,7 +120,8 @@ class UnixRadiusDaemon(RadiusDaemon):
         sock.listen(1)
         return (sock, addr)
 
-    def recvRequest(self, (sock, addr)):
+    def recvRequest(self, sock_and_addr):
+        sock, addr = sock_and_addr
         conn = sock.accept()[0]
         sock.close()
         os.remove(addr)

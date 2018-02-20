@@ -99,36 +99,36 @@ mark('32-bit kvno')
 
 # Test that klist -k can read a keytab entry without a 32-bit kvno and
 # reports the 8-bit key version.
-record = '\x00\x01'             # principal component count
-record += '\x00\x0bKRBTEST.COM' # realm
-record += '\x00\x04user'        # principal component
-record += '\x00\x00\x00\x01'    # name type (NT-PRINCIPAL)
-record += '\x54\xf7\x4d\x35'    # timestamp
-record += '\x02'                # key version
-record += '\x00\x12'            # enctype
-record += '\x00\x20'            # key length
-record += '\x00' * 32           # key bytes
-f = open(realm.keytab, 'w')
-f.write('\x05\x02\x00\x00\x00' + chr(len(record)))
+record = b'\x00\x01'             # principal component count
+record += b'\x00\x0bKRBTEST.COM' # realm
+record += b'\x00\x04user'        # principal component
+record += b'\x00\x00\x00\x01'    # name type (NT-PRINCIPAL)
+record += b'\x54\xf7\x4d\x35'    # timestamp
+record += b'\x02'                # key version
+record += b'\x00\x12'            # enctype
+record += b'\x00\x20'            # key length
+record += b'\x00' * 32           # key bytes
+f = open(realm.keytab, 'wb')
+f.write(b'\x05\x02\x00\x00\x00' + bytes([len(record)]))
 f.write(record)
 f.close()
 msg = '   2 %s' % realm.user_princ
 out = realm.run([klist, '-k'], expected_msg=msg)
 
 # Make sure zero-fill isn't treated as a 32-bit kvno.
-f = open(realm.keytab, 'w')
-f.write('\x05\x02\x00\x00\x00' + chr(len(record) + 4))
+f = open(realm.keytab, 'wb')
+f.write(b'\x05\x02\x00\x00\x00' + bytes([len(record) + 4]))
 f.write(record)
-f.write('\x00\x00\x00\x00')
+f.write(b'\x00\x00\x00\x00')
 f.close()
 msg = '   2 %s' % realm.user_princ
 out = realm.run([klist, '-k'], expected_msg=msg)
 
 # Make sure a hand-crafted 32-bit kvno is recognized.
-f = open(realm.keytab, 'w')
-f.write('\x05\x02\x00\x00\x00' + chr(len(record) + 4))
+f = open(realm.keytab, 'wb')
+f.write(b'\x05\x02\x00\x00\x00' + bytes([len(record) + 4]))
 f.write(record)
-f.write('\x00\x00\x00\x03')
+f.write(b'\x00\x00\x00\x03')
 f.close()
 msg = '   3 %s' % realm.user_princ
 out = realm.run([klist, '-k'], expected_msg=msg)

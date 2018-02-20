@@ -1,6 +1,5 @@
 from k5test import *
 import time
-from itertools import imap
 
 # Run kdbtest against the non-LDAP KDB modules.
 for realm in multidb_realms(create_kdb=False):
@@ -51,7 +50,7 @@ else:
 def slap_add(ldif):
     proc = subprocess.Popen([slapadd, '-b', 'cn=config', '-F', slapd_conf],
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
+                            stderr=subprocess.STDOUT, universal_newlines=True)
     (out, dummy) = proc.communicate(ldif)
     output(out)
     return proc.wait()
@@ -98,7 +97,7 @@ if slap_add('include: file://%s\n' % schema) != 0:
 ldap_homes = ['/etc/ldap', '/etc/openldap', '/usr/local/etc/openldap',
               '/usr/local/etc/ldap']
 local_schema_path = '/schema/core.ldif'
-core_schema = next((i for i in imap(lambda x:x+local_schema_path, ldap_homes)
+core_schema = next((i for i in map(lambda x:x+local_schema_path, ldap_homes)
                     if os.path.isfile(i)), None)
 if core_schema:
     if slap_add('include: file://%s\n' % core_schema) != 0:
@@ -114,7 +113,7 @@ atexit.register(kill_slapd)
 
 out = open(slapd_out, 'w')
 subprocess.call([slapd, '-h', ldap_uri, '-F', slapd_conf], stdout=out,
-                stderr=out)
+                stderr=out, universal_newlines=True)
 out.close()
 pidf = open(slapd_pidfile, 'r')
 slapd_pid = int(pidf.read())
@@ -158,7 +157,7 @@ def ldap_search(args):
     proc = subprocess.Popen([ldapsearch, '-H', ldap_uri, '-b', top_dn,
                              '-D', admin_dn, '-w', admin_pw, args],
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
+                            stderr=subprocess.STDOUT, universal_newlines=True)
     (out, dummy) = proc.communicate()
     return out
 
@@ -166,7 +165,7 @@ def ldap_modify(ldif, args=[]):
     proc = subprocess.Popen([ldapmodify, '-H', ldap_uri, '-D', admin_dn,
                              '-x', '-w', admin_pw] + args,
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
+                            stderr=subprocess.STDOUT, universal_newlines=True)
     (out, dummy) = proc.communicate(ldif)
     output(out)
 

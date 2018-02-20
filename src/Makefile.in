@@ -532,6 +532,7 @@ runenv.py: pyrunenv.vals
 
 clean-unix::
 	$(RM) runenv.py runenv.pyc pyrunenv.vals
+	$(RM) -r __pycache__
 
 COV_BUILD=	cov-build
 COV_ANALYZE=	cov-analyze
