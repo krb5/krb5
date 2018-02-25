@@ -949,8 +949,31 @@ pkinit_init_certs(pkinit_identity_crypto_context ctx)
 }
 
 static void
+pkinit_free_cred(pkinit_cred_info creds)
+{
+    if (creds != NULL) {
+	if (creds->cert != NULL) {
+	    X509_free(creds->cert);
+	    creds->cert = NULL;	
+	}
+
+	if (creds->key != NULL) {
+	    EVP_PKEY_free(creds->key);
+	    creds->key = NULL;
+	}
+
+	free(creds->name);
+	creds->name = NULL;
+
+	free(creds);
+    }
+}
+
+static void
 pkinit_fini_certs(pkinit_identity_crypto_context ctx)
 {
+    unsigned int i;
+
     if (ctx == NULL)
         return;
 
@@ -968,6 +991,11 @@ pkinit_fini_certs(pkinit_identity_crypto_context ctx)
 
     if (ctx->revoked != NULL)
         sk_X509_CRL_pop_free(ctx->revoked, X509_CRL_free);
+
+    for (i = 0; i < MAX_CREDS_ALLOWED; i++) {
+	pkinit_free_cred(ctx->creds[i]);
+	ctx->creds[i] = NULL;
+    }
 }
 
 static krb5_error_code
@@ -4447,6 +4475,11 @@ pkinit_load_fs_cert_and_key(krb5_context context,
         goto cleanup;
     }
 
+    if (id_cryptoctx->creds[cindex] != NULL) {
+	pkinit_free_cred(id_cryptoctx->creds[cindex]);
+	id_cryptoctx->creds[cindex] = NULL;
+    }
+
     id_cryptoctx->creds[cindex] = malloc(sizeof(struct _pkinit_cred_info));
     if (id_cryptoctx->creds[cindex] == NULL) {
         retval = ENOMEM;
@@ -4496,8 +4529,9 @@ pkinit_get_certs_fs(krb5_context context,
     }
 
     retval = pkinit_load_fs_cert_and_key(context, id_cryptoctx,
-                                         idopts->cert_filename,
-                                         idopts->key_filename, 0);
+					 idopts->cert_filename,
+					 idopts->key_filename, 0);
+
 cleanup:
     return retval;
 }
