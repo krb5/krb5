@@ -242,6 +242,7 @@ make_keys(char **strings, const char *princstr, krb5_db_entry *ent)
     for (i = 0; i < nstrings; i++) {
         ks = ks_lists[i];
         for (j = 0; j < ks_list_sizes[i]; j++) {
+	    memset(&kb, 0, sizeof(krb5_keyblock));
             make_keyblock(kvnos[i], ks[j].ks_enctype, ks[j].ks_salttype,
                           princstr, &kb);
             kd->key_data_ver = 2;

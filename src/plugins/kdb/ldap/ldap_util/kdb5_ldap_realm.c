@@ -1226,6 +1226,7 @@ kdb_ldap_tgt_keysalt_iterate(krb5_key_salt_tuple *ksent, krb5_pointer ptr)
     krb5_data   pwd;
     krb5_db_entry       *entry;
 
+    memset(&key, 0, sizeof(krb5_keyblock));
     iargs = (struct iterate_args *) ptr;
     kret = 0;
 
@@ -1288,6 +1289,7 @@ kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
     krb5_actkvno_node     actkvno;
 
     memset(&entry, 0, sizeof(entry));
+    memset(&key, 0, sizeof(krb5_keyblock));
 
     if ((pblock == NULL) || (context == NULL)) {
         retval = EINVAL;

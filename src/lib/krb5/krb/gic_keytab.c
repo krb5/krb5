@@ -46,6 +46,7 @@ get_as_key_keytab(krb5_context context,
     krb5_keytab_entry kt_ent;
     krb5_keyblock *kt_key;
 
+    memset(&kt_ent, 0, sizeof(krb5_keytab_entry));
     /* We don't need the password from the responder to create the AS key. */
     if (as_key == NULL)
         return 0;

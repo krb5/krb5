@@ -108,6 +108,7 @@ main(int argc, char **argv)
     unsigned char resultbuf[16];
     krb5_data result = make_data(resultbuf, 16);
 
+    memset(&keyblock, 0, sizeof(krb5_keyblock));
     /* Create the example key. */
     keyblock.magic = KV5M_KEYBLOCK;
     keyblock.enctype = ENCTYPE_CAMELLIA128_CTS_CMAC;

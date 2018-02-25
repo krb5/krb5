@@ -464,6 +464,7 @@ client_keys(krb5_context context, krb5_kdcpreauth_rock rock,
         if (krb5_dbe_find_enctype(context, client, request->ktype[i],
                                   -1, 0, &entry_key) != 0)
             continue;
+	memset(&key, 0, sizeof(krb5_keyblock));
         if (krb5_dbe_decrypt_key_data(context, NULL, entry_key,
                                       &key, NULL) != 0)
             continue;
@@ -1290,6 +1291,8 @@ return_padata(krb5_context context, krb5_kdcpreauth_rock rock,
     krb5_kdcpreauth_modreq      *modreq_ptr;
     krb5_boolean                key_modified;
     krb5_keyblock               original_key;
+
+    memset(&original_key, 0, sizeof(krb5_keyblock));
     if ((!*padata_context) &&
         (make_padata_context(context, padata_context) != 0)) {
         return KRB5KRB_ERR_GENERIC;

@@ -321,6 +321,7 @@ krb5int_derive_key(const struct krb5_enc_provider *enc,
     krb5_error_code ret;
     krb5_key dkey;
 
+    memset(&keyblock, 0, sizeof(krb5_keyblock));
     *outkey = NULL;
 
     /* Check for a cached result. */

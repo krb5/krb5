@@ -129,7 +129,8 @@ securid_decrypt_track_data_2(krb5_context context, krb5_db_entry *client,
     krb5_error_code retval;
     krb5_keyblock sam_key;
     krb5_enc_data tmp_enc_data;
-    sam_key.contents = NULL;
+
+    memset(&sam_key, 0, sizeof(krb5_keyblock));
 
     retval = get_securid_key(context, client, &sam_key);
     if (retval != 0)
@@ -168,6 +169,8 @@ securid_encrypt_track_data_2(krb5_context context, krb5_db_entry *client,
     size_t olen;
     krb5_keyblock sam_key;
     krb5_enc_data tmp_enc_data;
+
+    memset(&sam_key, 0, sizeof(krb5_keyblock));
 
     output->data = NULL;
 

@@ -937,6 +937,8 @@ check_pw_reuse(krb5_context context,
     krb5_key_data *key_data;
     krb5_error_code ret;
 
+    memset(&newkey, 0, sizeof(krb5_keyblock));
+    memset(&histkey, 0, sizeof(krb5_keyblock));
     assert (n_new_key_data >= 0);
     for (x = 0; x < (unsigned) n_new_key_data; x++) {
         /* Check only entries with the most recent kvno. */

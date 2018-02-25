@@ -124,6 +124,7 @@ main()
     size_t i, prfsz;
     const struct test *test;
 
+    memset(&kb, 0, sizeof(krb5_keyblock));
     for (i = 0; i < sizeof(tests) / sizeof(*tests); i++) {
         test = &tests[i];
         kb.magic = KV5M_KEYBLOCK;

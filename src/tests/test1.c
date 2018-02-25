@@ -43,6 +43,8 @@ tkt_test_1()
     static krb5_octet ip_addr_1[4] = { 18, 72, 0, 122 };
     char *out;
 
+    memset(&sess_k, 0, sizeof(krb5_keyblock));
+    memset(&serv_k, 0, sizeof(krb5_keyblock));
     /*
      * fill in some values on the "in" side of the ticket
      */

@@ -57,6 +57,7 @@ krb5_generate_subkey_extended(krb5_context context,
     keyblock = malloc(sizeof(krb5_keyblock));
     if (!keyblock)
         return ENOMEM;
+    memset(keyblock, 0, sizeof(krb5_keyblock));
 
     retval = krb5_c_make_random_key(context, enctype, keyblock);
     if (retval) {

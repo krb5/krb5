@@ -106,6 +106,7 @@ main(argc, argv)
     krb5_data             pwdata;
     char                  *pwd;
 
+    memset(&keyblock, 0, sizeof(krb5_keyblock));
     pwd = "test password";
     pwdata.length = strlen(pwd);
     pwdata.data = pwd;

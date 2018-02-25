@@ -119,6 +119,7 @@ static void test_cts()
     krb5_key key;
     krb5_error_code err;
 
+    memset(&keyblock, 0, sizeof(krb5_keyblock));
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
     iov.data.data = outbuf;
     in.data = (char *)input;

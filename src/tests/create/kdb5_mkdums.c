@@ -268,6 +268,8 @@ add_princ(context, str_newprinc)
         krb5_data pwd, salt;
         krb5_keyblock key;
 
+	memset(&key, 0, sizeof(krb5_keyblock));
+
         if ((retval = krb5_principal2salt(context, newprinc, &salt))) {
             com_err(progname, retval, "while converting princ to salt for '%s'",
                     princ_name);

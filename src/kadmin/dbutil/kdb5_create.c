@@ -373,6 +373,7 @@ tgt_keysalt_iterate(ksent, ptr)
     krb5_int32          ind;
     krb5_data   pwd;
 
+    memset(&key, 0, sizeof(krb5_keyblock));
     iargs = (struct iterate_args *) ptr;
     kret = 0;
 

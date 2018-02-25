@@ -201,6 +201,7 @@ main(int argc, char **argv)
     krb5_boolean valid, verbose = FALSE;
     int status = 0;
 
+    memset(&kb, 0, sizeof(krb5_keyblock));
     if (argc >= 2 && strcmp(argv[1], "-v") == 0)
         verbose = TRUE;
     for (i = 0; i < sizeof(test_cases) / sizeof(*test_cases); i++) {

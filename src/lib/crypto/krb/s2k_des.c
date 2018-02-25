@@ -50,6 +50,7 @@ des_cbc_mac(const unsigned char *keybits, const unsigned char *ivec,
     unsigned char zero[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
     krb5_data outd, ivecd;
 
+    memset(&kb, 0, sizeof(krb5_keyblock));
     /* Make a key from keybits. */
     kb.magic = KV5M_KEYBLOCK;
     kb.enctype = ENCTYPE_DES_CBC_CRC;

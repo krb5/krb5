@@ -232,6 +232,7 @@ static void test_hmac()
         },
     };
 
+    memset(&key, 0, sizeof(krb5_keyblock));
     for (i = 0; i < sizeof(md5tests)/sizeof(md5tests[0]); i++) {
         key.contents = (krb5_octet *)md5tests[i].key;
         key.length = md5tests[i].key_len;

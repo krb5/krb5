@@ -107,6 +107,7 @@ make_container(krb5_authdatatype ad_type, krb5_authdata *content)
     krb5_authdata *list[2], **enclist, *ad;
     krb5_keyblock kb;
 
+    memset(&kb, 0, sizeof(krb5_keyblock));
     list[0] = content;
     list[1] = NULL;
 

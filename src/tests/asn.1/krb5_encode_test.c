@@ -165,6 +165,9 @@ main(argc, argv)
     /* encode_krb5_encryption_key */
     {
         krb5_keyblock keyblk;
+
+	memset(&keyblk, 0, sizeof(krb5_keyblock));
+
         ktest_make_sample_keyblock(&keyblk);
         current_appl_type = 1005;
         encode_run(keyblk, "keyblock", "", encode_krb5_encryption_key);

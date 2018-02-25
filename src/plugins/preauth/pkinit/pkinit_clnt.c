@@ -1166,6 +1166,7 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     pkiDebug("pkinit_client_process %p %p %p %p\n",
              context, plgctx, reqctx, request);
 
+    memset(&as_key, 0, sizeof(krb5_keyblock));
 
     if (plgctx == NULL || reqctx == NULL)
         return EINVAL;

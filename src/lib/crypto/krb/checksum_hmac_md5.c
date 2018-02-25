@@ -46,6 +46,7 @@ krb5_error_code krb5int_hmacmd5_checksum(const struct krb5_cksumtypes *ctp,
     krb5_data ds = empty_data(), hashval = empty_data();
     char t[4];
 
+    memset(&ks, 0, sizeof(krb5_keyblock));
     if (key == NULL || key->keyblock.length > ctp->hash->blocksize)
         return KRB5_BAD_ENCTYPE;
     if (ctp->ctype == CKSUMTYPE_HMAC_MD5_ARCFOUR) {

@@ -85,6 +85,7 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
     const struct krb5_keytypes *ktp;
     krb5_boolean myalloc = FALSE;
 
+    memset(&tkeyblock, 0, sizeof(krb5_keyblock));
     if (!enctype_ok(key1->enctype) || !enctype_ok(key2->enctype))
         return KRB5_CRYPTO_INTERNAL;
 

@@ -40,8 +40,9 @@ krb5int_etm_checksum(const struct krb5_cksumtypes *ctp, krb5_key key,
     krb5_error_code ret;
     uint8_t label[5];
     krb5_data label_data = make_data(label, 5), kc = empty_data();
-    krb5_keyblock kb = { 0 };
+    krb5_keyblock kb;
 
+    memset(&kb, 0, sizeof(krb5_keyblock));
     /* Derive the checksum key. */
     store_32_be(usage, label);
     label[4] = 0x99;

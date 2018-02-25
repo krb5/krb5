@@ -48,6 +48,9 @@ main(int argc, char **argv)
 {
     krb5_keyblock kb1, kb2, result;
 
+    memset(&kb1, 0, sizeof(krb5_keyblock));
+    memset(&kb2, 0, sizeof(krb5_keyblock));
+    memset(&result, 0, sizeof(krb5_keyblock));
     kb1.enctype = ENCTYPE_DES_CBC_CRC;
     kb1.contents = des_key1;
     kb1.length = 8;

@@ -163,6 +163,7 @@ krb5_random_key(krb5_context context, const krb5_encrypt_block *eblock,
     key = malloc(sizeof(krb5_keyblock));
     if (key == NULL)
         return ENOMEM;
+    memset(key, 0, sizeof(krb5_keyblock));
 
     ret = krb5_c_make_random_key(context, eblock->crypto_entry, key);
     if (ret) {
@@ -241,6 +242,7 @@ krb5_calculate_checksum(krb5_context context, krb5_cksumtype ctype,
     krb5_error_code ret;
     krb5_checksum cksum;
 
+    memset(&keyblock, 0, sizeof(krb5_keyblock));
     if (seed != NULL) {
         keyblock.enctype = guess_enctype(ctype);
         keyblock.length = seed_length;
@@ -279,6 +281,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
     krb5_error_code ret;
     krb5_boolean valid;
 
+    memset(&keyblock, 0, sizeof(krb5_keyblock));
     if (seed != NULL) {
         keyblock.enctype = guess_enctype(ctype);
         keyblock.length = seed_length;

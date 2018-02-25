@@ -94,6 +94,7 @@ main(argc, argv)
     krb5_checksum         checksum, knowncksum;
 
     /* this is a terrible seed, but that's ok for the test. */
+    memset(&keyblock, 0, sizeof(krb5_keyblock));
 
     plaintext.length = 8;
     plaintext.data = (char *) testkey;

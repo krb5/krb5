@@ -706,6 +706,7 @@ generate(krb5_context context)
     size_t enclen;
     char buf[64];
 
+    memset(&kb, 0, sizeof(krb5_keyblock));
     ret = krb5_c_random_seed(context, &seed);
     assert(!ret);
     for (i = 0; i < sizeof(enctypes) / sizeof(*enctypes); i++) {
@@ -742,6 +743,8 @@ main(int argc, char **argv)
     struct test *test;
     krb5_keyblock kb;
     krb5_enc_data enc;
+
+    memset(&kb, 0, sizeof(krb5_keyblock));
 
     if (argc >= 2 && strcmp(argv[1], "-g") == 0)
         return generate(context);

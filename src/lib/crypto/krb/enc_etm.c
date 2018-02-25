@@ -102,8 +102,9 @@ hmac_ivec_data(const struct krb5_keytypes *ktp, const krb5_data *ki,
     krb5_error_code ret;
     krb5_data zeroivec = empty_data();
     krb5_crypto_iov *iovs = NULL;
-    krb5_keyblock kb = { 0 };
+    krb5_keyblock kb;
 
+    memset(&kb, 0, sizeof(krb5_keyblock));
     if (ivec == NULL) {
         ret = ktp->enc->init_state(NULL, 0, &zeroivec);
         if (ret)

@@ -122,6 +122,7 @@ test_mit_des_s2k ()
         krb5_error_code r;
         char buf[80];
 
+	memset(&key, 0, sizeof(krb5_keyblock));
         key.contents = key_contents;
 
         pd.length = strlen (p);
@@ -168,6 +169,7 @@ test_s2k (krb5_enctype enctype)
         krb5_error_code r;
         char buf[80];
 
+	memset(&key, 0, sizeof(krb5_keyblock));
         pd.length = strlen (p);
         pd.data = (char *) p;
         sd.length = strlen (s);
@@ -326,6 +328,8 @@ void test_dr_dk ()
         unsigned char dkData[KEYLENGTH];
         krb5_keyblock dk;
 
+	memset(&key, 0, sizeof(krb5_keyblock));
+	memset(&dk, 0, sizeof(krb5_keyblock));
         key.length = KEYLENGTH, key.contents = D.keydata;
         usage.length = D.usage_len, usage.data = D.usage;
         dr.length = KEYBYTES, dr.data = drData;
@@ -397,6 +401,8 @@ test_pbkdf2()
     krb5_keyblock k, dk;
     krb5_data usage, pass, salt;
 
+    memset(&k, 0, sizeof(krb5_keyblock));
+    memset(&dk, 0, sizeof(krb5_keyblock));
     d.data = x;
     dk.contents = x2;
 
