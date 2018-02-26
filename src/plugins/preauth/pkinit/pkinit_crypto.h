@@ -316,14 +316,14 @@ krb5_error_code client_create_dh
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
 	int dh_size,					/* IN
 		    specifies the DH modulous, eg 1024, 2048, or 4096 */
-	unsigned char **dh_paramas,			/* OUT
+	unsigned char **dh_params_out,			/* OUT
 		    contains DER encoded DH params */
-	unsigned int *dh_params_len,			/* OUT
-		    contains length of dh_parmas */
-	unsigned char **dh_pubkey,			/* OUT
+	unsigned int *dh_params_len_out,		/* OUT
+		    contains length of encoded DH params */
+	unsigned char **dh_pubkey_out,			/* OUT
 		    receives DER encoded DH pub key */
-	unsigned int *dh_pubkey_len);			/* OUT
-		    receives length of dh_pubkey */
+	unsigned int *dh_pubkey_len_out);			/* OUT
+		    receives length of DH pub key */
 
 /*
  * this function completes client's the DH protocol. client
@@ -339,10 +339,10 @@ krb5_error_code client_process_dh
 		    contains client's DER encoded DH pub key */
 	unsigned int dh_pubkey_len,			/* IN
 		    contains length of dh_pubkey */
-	unsigned char **dh_session_key,			/* OUT
+	unsigned char **client_key_out,			/* OUT
 		    receives DH secret key */
-	unsigned int *dh_session_key_len);		/* OUT
-		    receives length of dh_session_key */
+	unsigned int *client_key_len_out);		/* OUT
+		    receives length of DH secret key */
 
 /*
  * this function implements the KDC first part of the DH protocol.
@@ -372,14 +372,14 @@ krb5_error_code server_process_dh
 		    contains client's DER encoded DH pub key */
 	unsigned int received_pub_len,			/* IN
 		    contains length of received_pubkey */
-	unsigned char **dh_pubkey,			/* OUT
+	unsigned char **dh_pubkey_out,			/* OUT
 		    receives KDC's DER encoded DH pub key */
-	unsigned int *dh_pubkey_len,			/* OUT
+	unsigned int *dh_pubkey_len_out,		/* OUT
 		    receives length of dh_pubkey */
-	unsigned char **server_key,			/* OUT
+	unsigned char **server_key_out,			/* OUT
 		    receives DH secret key */
-	unsigned int *server_key_len);			/* OUT
-		    receives length of server_key */
+	unsigned int *server_key_len_out);		/* OUT
+		    receives length of DH secret key */
 
 /*
  * this functions takes in crypto specific representation of
