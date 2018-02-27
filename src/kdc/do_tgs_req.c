@@ -144,6 +144,7 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     memset(&reply_encpart, 0, sizeof(reply_encpart));
     memset(&ticket_reply, 0, sizeof(ticket_reply));
     memset(&enc_tkt_reply, 0, sizeof(enc_tkt_reply));
+    memset(&encrypting_key, 0, sizeof(encrypting_key));
     session_key.contents = NULL;
 
     retval = decode_krb5_tgs_req(pkt, &request);
@@ -721,8 +722,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
 
     errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key,
                                     &ticket_reply);
-    if (!isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY))
-        krb5_free_keyblock_contents(kdc_context, &encrypting_key);
     if (errcode) {
         status = "ENCRYPT_TICKET";
         goto cleanup;
@@ -825,6 +824,8 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
 cleanup:
     if (status == NULL)
         status = "UNKNOWN_REASON";
+    if (!isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY))
+        krb5_free_keyblock_contents(kdc_context, &encrypting_key);
     if (reply_key)
         krb5_free_keyblock(kdc_context, reply_key);
     if (errcode)
