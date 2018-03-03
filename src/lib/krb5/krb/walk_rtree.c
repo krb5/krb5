@@ -133,6 +133,12 @@ k5_client_realm_path(krb5_context context, const krb5_data *client,
     if (retval)
         return retval;
 
+    /* A capaths value of "." means no intermediates. */
+    if (capvals != NULL && capvals[0] != NULL && *capvals[0] == '.') {
+        profile_free_list(capvals);
+        capvals = NULL;
+    }
+
     /* Count capaths (if any) and allocate space.  Leave room for the client
      * realm, server realm, and terminator. */
     for (i = 0; capvals != NULL && capvals[i] != NULL; i++);
