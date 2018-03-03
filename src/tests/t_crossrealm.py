@@ -109,6 +109,16 @@ test_kvno(r1, r4.host_princ, 'KDC capaths')
 check_klist(r1, (tgt(r1, r1), tgt(r4, r3), r4.host_princ))
 stop(r1, r2, r3, r4)
 
+# A capaths value of '.' should enforce direct cross-realm, with no
+# intermediate.
+capaths = {'capaths': {'A.X': {'B.X': '.'}}}
+r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)),
+                          args=({'realm': 'A.X', 'krb5_conf': capaths},
+                                {'realm': 'X'}, {'realm': 'B.X'}))
+r1.run([kvno, r3.host_princ], expected_code=1,
+       expected_msg='Server krbtgt/B.X@A.X not found in Kerberos database')
+stop(r1, r2, r3)
+
 # Test transited error.  The KDC for C does not recognize B as an
 # intermediate realm for A->C, so it refuses to issue a service
 # ticket.
