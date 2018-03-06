@@ -87,8 +87,8 @@ struct _pkinit_identity_crypto_context {
     void *p11_module;
     CK_SESSION_HANDLE session;
     CK_FUNCTION_LIST_PTR p11;
-    CK_BYTE_PTR cert_id;
-    int cert_id_len;
+    uint8_t *cert_id;
+    size_t cert_id_len;
     CK_MECHANISM_TYPE mech;
 #endif
     krb5_boolean defer_id_prompt;

@@ -31,6 +31,7 @@
 
 #include "pkinit_crypto_openssl.h"
 #include "k5-buf.h"
+#include "k5-hex.h"
 #include <dlfcn.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -4636,43 +4637,6 @@ reassemble_pkcs11_name(pkinit_identity_opts *idopts)
     return ret;
 }
 
-static int
-hex_string_to_bin(const char *str, int *bin_len_out, CK_BYTE **bin_out)
-{
-    size_t str_len, i;
-    CK_BYTE *bin;
-    char *endptr, tmp[3] = { '\0', '\0', '\0' };
-    long val;
-
-    *bin_len_out = 0;
-    *bin_out = NULL;
-
-    str_len = strlen(str);
-    if (str_len % 2 != 0)
-        return EINVAL;
-    bin = malloc(str_len / 2);
-    if (bin == NULL)
-        return ENOMEM;
-
-    errno = 0;
-    for (i = 0; i < str_len / 2; i++) {
-        tmp[0] = str[i * 2];
-        tmp[1] = str[i * 2 + 1];
-
-        val = strtol(tmp, &endptr, 16);
-        if (val < 0 || val > 255 || errno != 0 || endptr != &tmp[2]) {
-            free(bin);
-            return EINVAL;
-        }
-
-        bin[i] = (CK_BYTE)val;
-    }
-
-    *bin_len_out = str_len / 2;
-    *bin_out = bin;
-    return 0;
-}
-
 static krb5_error_code
 pkinit_get_certs_pkcs11(krb5_context context,
                         pkinit_plg_crypto_context plg_cryptoctx,
@@ -4715,9 +4679,8 @@ pkinit_get_certs_pkcs11(krb5_context context,
     }
     /* Convert the ascii cert_id string into a binary blob */
     if (idopts->cert_id_string != NULL) {
-        r = hex_string_to_bin(idopts->cert_id_string,
-                              &id_cryptoctx->cert_id_len,
-                              &id_cryptoctx->cert_id);
+        r = k5_hex_decode(idopts->cert_id_string,
+                          &id_cryptoctx->cert_id, &id_cryptoctx->cert_id_len);
         if (r != 0) {
             pkiDebug("Failed to convert certid string [%s]\n",
                      idopts->cert_id_string);
