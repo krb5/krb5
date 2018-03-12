@@ -1402,6 +1402,17 @@ check_padata(krb5_context context, krb5_kdcpreauth_rock rock,
     next_padata(state);
 }
 
+/* Return true if k1 and k2 have the same type and contents. */
+static krb5_boolean
+keyblock_equal(const krb5_keyblock *k1, const krb5_keyblock *k2)
+{
+    if (k1->enctype != k2->enctype)
+        return FALSE;
+    if (k1->length != k2->length)
+        return FALSE;
+    return memcmp(k1->contents, k2->contents, k1->length) == 0;
+}
+
 /*
  * return_padata creates any necessary preauthentication
  * structures which should be returned by the KDC to the client
@@ -1452,16 +1463,6 @@ return_padata(krb5_context context, krb5_kdcpreauth_rock rock,
 
     for (pa_type = pa_order; *pa_type != -1; pa_type++) {
         ap = &preauth_systems[*pa_type];
-        if (!key_modified)
-            if (original_key.enctype != encrypting_key->enctype)
-                key_modified = TRUE;
-        if (!key_modified)
-            if (original_key.length != encrypting_key->length)
-                key_modified = TRUE;
-        if (!key_modified)
-            if (memcmp(original_key.contents, encrypting_key->contents,
-                       original_key.length) != 0)
-                key_modified = TRUE;
         if (key_modified && (ap->flags & PA_REPLACES_KEY))
             continue;
         if (ap->return_padata == 0)
@@ -1491,15 +1492,31 @@ return_padata(krb5_context context, krb5_kdcpreauth_rock rock,
             if (retval)
                 goto cleanup;
         }
+
+        if (!key_modified && !keyblock_equal(&original_key, encrypting_key))
+            key_modified = TRUE;
     }
 
-    /* Add etype-info and pw-salt pa-data as needed. */
-    retval = add_etype_info(context, rock, &send_pa_list);
-    if (retval)
-        goto cleanup;
-    retval = add_pw_salt(context, rock, &send_pa_list);
-    if (retval)
-        goto cleanup;
+    /*
+     * Add etype-info and pw-salt pa-data as needed.  If we replaced the reply
+     * key, we can't send consistent etype-info; the salt from the client key
+     * data doesn't correspond to the replaced reply key, and RFC 4120 section
+     * 5.2.7.5 forbids us from sending etype-info describing the initial reply
+     * key in an AS-REP if it doesn't have the same enctype as the replaced
+     * reply key.  For all current and forseeable preauth mechs, we can assume
+     * the client received etype-info2 in an earlier step and already computed
+     * the initial reply key if it needed it.  The client can determine the
+     * enctype of the replaced reply key from the etype field of the enc-part
+     * field of the AS-REP.
+     */
+    if (!key_modified) {
+        retval = add_etype_info(context, rock, &send_pa_list);
+        if (retval)
+            goto cleanup;
+        retval = add_pw_salt(context, rock, &send_pa_list);
+        if (retval)
+            goto cleanup;
+    }
 
     if (send_pa_list != NULL) {
         reply->padata = send_pa_list;
