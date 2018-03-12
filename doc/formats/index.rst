@@ -7,3 +7,4 @@ Protocols and file formats
    ccache_file_format
    keytab_file_format
    cookie
+   freshness_token

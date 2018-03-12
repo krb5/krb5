@@ -794,6 +794,10 @@ For information about the syntax of some of these options, see
     **pkinit_require_crl_checking** should be set to true if the
     policy is such that up-to-date CRLs must be present for every CA.
 
+**pkinit_require_freshness**
+    Specifies whether to require clients to include a freshness token
+    in PKINIT requests.  The default value is false.  (New in release
+    1.17.)
 
 .. _Encryption_types:
 

@@ -240,6 +240,23 @@ typedef struct krb5_kdcpreauth_callbacks_st {
 
     /* End of version 4 kdcpreauth callbacks. */
 
+    /*
+     * Instruct the KDC to send a freshness token in the method data
+     * accompanying a PREAUTH_REQUIRED or PREAUTH_FAILED error, if the client
+     * indicated support for freshness tokens.  This callback should only be
+     * invoked from the edata method.
+     */
+    void (*send_freshness_token)(krb5_context context,
+                                 krb5_kdcpreauth_rock rock);
+
+    /* Validate a freshness token sent by the client.  Return 0 on success,
+     * KRB5KDC_ERR_PREAUTH_EXPIRED on error. */
+    krb5_error_code (*check_freshness_token)(krb5_context context,
+                                             krb5_kdcpreauth_rock rock,
+                                             const krb5_data *token);
+
+    /* End of version 5 kdcpreauth callbacks. */
+
 } *krb5_kdcpreauth_callbacks;
 
 /* Optional: preauth plugin initialization function. */

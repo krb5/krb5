@@ -77,6 +77,7 @@
 #define KRB5_CONF_PKINIT_KDC_OCSP               "pkinit_kdc_ocsp"
 #define KRB5_CONF_PKINIT_POOL                   "pkinit_pool"
 #define KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING   "pkinit_require_crl_checking"
+#define KRB5_CONF_PKINIT_REQUIRE_FRESHNESS      "pkinit_require_freshness"
 #define KRB5_CONF_PKINIT_REVOKE                 "pkinit_revoke"
 
 /* Make pkiDebug(fmt,...) print, or not.  */
@@ -148,6 +149,7 @@ typedef struct _pkinit_plg_opts {
     int allow_upn;	    /* allow UPN-SAN instead of pkinit-SAN */
     int dh_or_rsa;	    /* selects DH or RSA based pkinit */
     int require_crl_checking; /* require CRL for a CA (default is false) */
+    int require_freshness;  /* require freshness token (default is false) */
     int disable_freshness;  /* disable freshness token on client for testing */
     int dh_min_bits;	    /* minimum DH modulus size allowed */
 } pkinit_plg_opts;

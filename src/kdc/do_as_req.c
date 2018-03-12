@@ -563,6 +563,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->rock.rstate = state->rstate;
     state->rock.vctx = vctx;
     state->rock.auth_indicators = &state->auth_indicators;
+    state->rock.send_freshness_token = FALSE;
     if (!state->request->client) {
         state->status = "NULL_CLIENT";
         errcode = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
@@ -659,6 +660,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         state->status = "GET_LOCAL_TGT";
         goto errout;
     }
+    state->rock.local_tgt = state->local_tgt;
 
     au_state->stage = VALIDATE_POL;
 

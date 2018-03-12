@@ -1029,7 +1029,10 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_AS_REQ 56
 #define KRB5_KEYUSAGE_CAMMAC 64
 
+/* Key usage values 512-1023 are reserved for uses internal to a Kerberos
+ * implementation. */
 #define KRB5_KEYUSAGE_PA_FX_COOKIE 513  /**< Used for encrypted FAST cookies */
+#define KRB5_KEYUSAGE_PA_AS_FRESHNESS 514  /**< Used for freshness tokens */
 /** @} */ /* end of KRB5_KEYUSAGE group */
 
 /**

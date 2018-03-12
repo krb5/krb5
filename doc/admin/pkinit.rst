@@ -327,3 +327,28 @@ appropriate :ref:`kdc_realms` subsection of the KDC's
 To obtain anonymous credentials on a client, run ``kinit -n``, or
 ``kinit -n @REALMNAME`` to specify a realm.  The resulting tickets
 will have the client name ``WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS``.
+
+
+Freshness tokens
+----------------
+
+Freshness tokens can ensure that the client has recently had access to
+its certificate private key.  If freshness tokens are not required by
+the KDC, a client program with temporary possession of the private key
+can compose requests for future timestamps and use them later.
+
+In release 1.17 and later, freshness tokens are supported by the
+client and are sent by the KDC when the client indicates support for
+them.  Because not all clients support freshness tokens yet, they are
+not required by default.  To check if freshness tokens are supported
+by a realm's clients, look in the KDC logs for the lines::
+
+    PKINIT: freshness token received from <client principal>
+    PKINIT: no freshness token received from <client principal>
+
+To require freshness tokens for all clients in a realm (except for
+clients authenticating anonymously), set the
+**pkinit_require_freshness** variable to ``true`` in the appropriate
+:ref:`kdc_realms` subsection of the KDC's :ref:`kdc.conf(5)` file.  To
+test that this option is in effect, run ``kinit -X disable_freshness``
+and verify that authentication is unsuccessful.

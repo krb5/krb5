@@ -427,11 +427,13 @@ struct krb5_kdcpreauth_rock_st {
     krb5_kdc_req *request;
     krb5_data *inner_body;
     krb5_db_entry *client;
+    krb5_db_entry *local_tgt;
     krb5_key_data *client_key;
     krb5_keyblock *client_keyblock;
     struct kdc_request_state *rstate;
     verto_ctx *vctx;
     krb5_data ***auth_indicators;
+    krb5_boolean send_freshness_token;
 };
 
 #define isflagset(flagfield, flag) (flagfield & (flag))

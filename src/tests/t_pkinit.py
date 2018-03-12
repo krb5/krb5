@@ -39,6 +39,8 @@ pkinit_kdc_conf = {'realms': {'$realm': {
             'pkinit_indicator': ['indpkinit1', 'indpkinit2']}}}
 restrictive_kdc_conf = {'realms': {'$realm': {
             'restrict_anonymous_to_tgt': 'true' }}}
+freshness_kdc_conf = {'realms': {'$realm': {
+            'pkinit_require_freshness': 'true'}}}
 
 testprincs = {'krbtgt/KRBTEST.COM': {'keys': 'aes128-cts'},
               'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
@@ -118,6 +120,10 @@ realm.kinit(realm.user_princ, password=password('user'))
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
+# Having tested password preauth, remove the keys for better error
+# reporting.
+realm.run([kadminl, 'purgekeys', '-all', realm.user_princ])
+
 # Test anonymous PKINIT.
 realm.kinit('@%s' % realm.realm, flags=['-n'], expected_code=1,
             expected_msg='not found in Kerberos database')
@@ -153,23 +159,32 @@ realm.run([kvno, realm.host_princ], expected_code=1,
 realm.kinit(realm.host_princ, flags=['-k'])
 realm.run([kvno, '-U', 'user', realm.host_princ])
 
-# Go back to a normal KDC and disable anonymous PKINIT.
+# Go back to the normal KDC environment.
 realm.stop_kdc()
 realm.start_kdc()
-realm.run([kadminl, 'delprinc', 'WELLKNOWN/ANONYMOUS'])
 
 # Run the basic test - PKINIT with FILE: identity, with no password on the key.
-realm.run(['./responder', '-x', 'pkinit=',
-           '-X', 'X509_user_identity=%s' % file_identity, realm.user_princ])
 realm.kinit(realm.user_princ,
-            flags=['-X', 'X509_user_identity=%s' % file_identity])
+            flags=['-X', 'X509_user_identity=%s' % file_identity],
+            expected_trace=('Sending unauthenticated request',
+                            '/Additional pre-authentication required',
+                            'Preauthenticating using KDC method data',
+                            'PKINIT client received freshness token from KDC',
+                            'PKINIT loading CA certs and CRLs from FILE',
+                            'PKINIT client making DH request',
+                            'Produced preauth for next request: 133, 16',
+                            'PKINIT client verified DH reply',
+                            'PKINIT client found id-pkinit-san in KDC cert',
+                            'PKINIT client matched KDC principal krbtgt/'))
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
 # Try again using RSA instead of DH.
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % file_identity,
-                   '-X', 'flag_RSA_PROTOCOL=yes'])
+                   '-X', 'flag_RSA_PROTOCOL=yes'],
+            expected_trace=('PKINIT client making RSA request',
+                            'PKINIT client verified RSA reply'))
 realm.klist(realm.user_princ)
 
 # Test a DH parameter renegotiation by temporarily setting a 4096-bit
@@ -192,8 +207,23 @@ expected_trace = ('Sending unauthenticated request',
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % file_identity],
             expected_trace=expected_trace)
+
+# Test enforcement of required freshness tokens.  (We can leave
+# freshness tokens required after this test.)
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % file_identity,
+                   '-X', 'disable_freshness=yes'])
+f_env = realm.special_env('freshness', True, kdc_conf=freshness_kdc_conf)
 realm.stop_kdc()
-realm.start_kdc()
+realm.start_kdc(env=f_env)
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % file_identity])
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % file_identity,
+                   '-X', 'disable_freshness=yes'],
+            expected_code=1, expected_msg='Preauthentication failed')
+# Anonymous should never require a freshness token.
+realm.kinit('@%s' % realm.realm, flags=['-n', '-X', 'disable_freshness=yes'])
 
 # Run the basic test - PKINIT with FILE: identity, with a password on the key,
 # supplied by the prompter.
@@ -229,8 +259,6 @@ shutil.copy(privkey_pem, os.path.join(path, 'user.key'))
 shutil.copy(privkey_enc_pem, os.path.join(path_enc, 'user.key'))
 shutil.copy(user_pem, os.path.join(path, 'user.crt'))
 shutil.copy(user_pem, os.path.join(path_enc, 'user.crt'))
-realm.run(['./responder', '-x', 'pkinit=', '-X',
-           'X509_user_identity=%s' % dir_identity, realm.user_princ])
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % dir_identity])
 realm.klist(realm.user_princ)
@@ -262,8 +290,6 @@ realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
 # PKINIT with PKCS12: identity, with no password on the bundle.
-realm.run(['./responder', '-x', 'pkinit=',
-           '-X', 'X509_user_identity=%s' % p12_identity, realm.user_princ])
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % p12_identity])
 realm.klist(realm.user_princ)
@@ -350,8 +376,6 @@ conf = open(softpkcs11rc, 'w')
 conf.write("%s\t%s\t%s\t%s\n" % ('user', 'user token', user_pem, privkey_pem))
 conf.close()
 # Expect to succeed without having to supply any more information.
-realm.run(['./responder', '-x', 'pkinit=',
-           '-X', 'X509_user_identity=%s' % p11_identity, realm.user_princ])
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % p11_identity])
 realm.klist(realm.user_princ)
