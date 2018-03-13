@@ -413,6 +413,7 @@ k5_pac_validate_client(krb5_context context,
     krb5_ui_2 pac_princname_length;
     int64_t pac_nt_authtime;
     krb5_principal pac_principal;
+    int flags;
 
     ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_CLIENT_INFO,
                                &client_info);
@@ -440,8 +441,12 @@ k5_pac_validate_client(krb5_context context,
     if (ret != 0)
         return ret;
 
-    ret = krb5_parse_name_flags(context, pac_princname,
-                                KRB5_PRINCIPAL_PARSE_NO_REALM, &pac_principal);
+    /* Parse the UTF-8 name as an enterprise principal if we are matching
+     * against one; otherwise parse it as a regular principal with no realm. */
+    flags = KRB5_PRINCIPAL_PARSE_NO_REALM;
+    if (principal->type == KRB5_NT_ENTERPRISE_PRINCIPAL)
+        flags |= KRB5_PRINCIPAL_PARSE_ENTERPRISE;
+    ret = krb5_parse_name_flags(context, pac_princname, flags, &pac_principal);
     if (ret != 0) {
         free(pac_princname);
         return ret;
