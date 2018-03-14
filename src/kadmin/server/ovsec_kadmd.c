@@ -560,5 +560,5 @@ main(int argc, char *argv[])
 
     krb5_klog_close(context);
     krb5_free_context(context);
-    exit(2);
+    exit(0);
 }
