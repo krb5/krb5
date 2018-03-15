@@ -18,15 +18,15 @@ realm.kinit('nokeyuser', password('user'), expected_code=1,
 # PA-FX-COOKIE; 2 is encrypted timestamp.
 
 # Test normal preauth flow.
-expected_trace = ('Sending unauthenticated request',
-                  '/Additional pre-authentication required',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Preauth module test (-123) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, -123',
-                  'Decrypted AS reply')
+msgs = ('Sending unauthenticated request',
+        '/Additional pre-authentication required',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Preauth module test (-123) (real) returned: 0/Success',
+        'Produced preauth for next request: PA-FX-COOKIE (133), -123',
+        'Decrypted AS reply')
 realm.run(['./icred', realm.user_princ, password('user')],
-          expected_msg='testval', expected_trace=expected_trace)
+          expected_msg='testval', expected_trace=msgs)
 
 # Test successful optimistic preauth.
 expected_trace = ('Attempting optimistic preauth',
@@ -39,136 +39,136 @@ realm.run(['./icred', '-o', '-123', realm.user_princ, password('user')],
 
 # Test optimistic preauth failing on client, followed by successful
 # preauth using the same module.
-expected_trace = ('Attempting optimistic preauth',
-                  'Processing preauth types: -123',
-                  '/induced optimistic fail',
-                  'Sending unauthenticated request',
-                  '/Additional pre-authentication required',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Preauth module test (-123) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, -123',
-                  'Decrypted AS reply')
+msgs = ('Attempting optimistic preauth',
+        'Processing preauth types: -123',
+        '/induced optimistic fail',
+        'Sending unauthenticated request',
+        '/Additional pre-authentication required',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Preauth module test (-123) (real) returned: 0/Success',
+        'Produced preauth for next request: PA-FX-COOKIE (133), -123',
+        'Decrypted AS reply')
 realm.run(['./icred', '-o', '-123', '-X', 'fail_optimistic', realm.user_princ,
            password('user')], expected_msg='testval',
-          expected_trace=expected_trace)
+          expected_trace=msgs)
 
 # Test optimistic preauth failing on KDC, followed by successful preauth
 # using the same module.
 realm.run([kadminl, 'setstr', realm.user_princ, 'failopt', 'yes'])
-expected_trace = ('Attempting optimistic preauth',
-                  'Processing preauth types: -123',
-                  'Preauth module test (-123) (real) returned: 0/Success',
-                  'Produced preauth for next request: -123',
-                  '/Preauthentication failed',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Preauth module test (-123) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, -123',
-                  'Decrypted AS reply')
+msgs = ('Attempting optimistic preauth',
+        'Processing preauth types: -123',
+        'Preauth module test (-123) (real) returned: 0/Success',
+        'Produced preauth for next request: -123',
+        '/Preauthentication failed',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Preauth module test (-123) (real) returned: 0/Success',
+        'Produced preauth for next request: PA-FX-COOKIE (133), -123',
+        'Decrypted AS reply')
 realm.run(['./icred', '-o', '-123', realm.user_princ, password('user')],
-          expected_msg='testval', expected_trace=expected_trace)
+          expected_msg='testval', expected_trace=msgs)
 realm.run([kadminl, 'delstr', realm.user_princ, 'failopt'])
 
 # Test KDC_ERR_MORE_PREAUTH_DATA_REQUIRED and secure cookies.
 realm.run([kadminl, 'setstr', realm.user_princ, '2rt', 'secondtrip'])
-expected_trace = ('Sending unauthenticated request',
-                  '/Additional pre-authentication required',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Preauth module test (-123) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, -123',
-                  '/More preauthentication data is required',
-                  'Continuing preauth mech -123',
-                  'Processing preauth types: -123, 133',
-                  'Produced preauth for next request: 133, -123',
-                  'Decrypted AS reply')
+msgs = ('Sending unauthenticated request',
+        '/Additional pre-authentication required',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Preauth module test (-123) (real) returned: 0/Success',
+        'Produced preauth for next request: PA-FX-COOKIE (133), -123',
+        '/More preauthentication data is required',
+        'Continuing preauth mech -123',
+        'Processing preauth types: -123, PA-FX-COOKIE (133)',
+        'Produced preauth for next request: PA-FX-COOKIE (133), -123',
+        'Decrypted AS reply')
 realm.run(['./icred', realm.user_princ, password('user')],
-          expected_msg='2rt: secondtrip', expected_trace=expected_trace)
+          expected_msg='2rt: secondtrip', expected_trace=msgs)
 
 # Test client-side failure after KDC_ERR_MORE_PREAUTH_DATA_REQUIRED,
 # falling back to encrypted timestamp.
-expected_trace = ('Sending unauthenticated request',
-                  '/Additional pre-authentication required',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Preauth module test (-123) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, -123',
-                  '/More preauthentication data is required',
-                  'Continuing preauth mech -123',
-                  'Processing preauth types: -123, 133',
-                  '/induced 2rt fail',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Encrypted timestamp (for ',
-                  'module encrypted_timestamp (2) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, 2',
-                  'Decrypted AS reply')
+msgs = ('Sending unauthenticated request',
+        '/Additional pre-authentication required',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Preauth module test (-123) (real) returned: 0/Success',
+        'Produced preauth for next request: PA-FX-COOKIE (133), -123',
+        '/More preauthentication data is required',
+        'Continuing preauth mech -123',
+        'Processing preauth types: -123, PA-FX-COOKIE (133)',
+        '/induced 2rt fail',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Encrypted timestamp (for ',
+        'module encrypted_timestamp (2) (real) returned: 0/Success',
+        'preauth for next request: PA-FX-COOKIE (133), PA-ENC-TIMESTAMP (2)',
+        'Decrypted AS reply')
 realm.run(['./icred', '-X', 'fail_2rt', realm.user_princ, password('user')],
-          expected_msg='2rt: secondtrip', expected_trace=expected_trace)
+          expected_msg='2rt: secondtrip', expected_trace=msgs)
 
 # Test KDC-side failure after KDC_ERR_MORE_PREAUTH_DATA_REQUIRED,
 # falling back to encrypted timestamp.
 realm.run([kadminl, 'setstr', realm.user_princ, 'fail2rt', 'yes'])
-expected_trace = ('Sending unauthenticated request',
-                  '/Additional pre-authentication required',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Preauth module test (-123) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, -123',
-                  '/More preauthentication data is required',
-                  'Continuing preauth mech -123',
-                  'Processing preauth types: -123, 133',
-                  'Preauth module test (-123) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, -123',
-                  '/Preauthentication failed',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Encrypted timestamp (for ',
-                  'module encrypted_timestamp (2) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, 2',
-                  'Decrypted AS reply')
+msgs = ('Sending unauthenticated request',
+        '/Additional pre-authentication required',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Preauth module test (-123) (real) returned: 0/Success',
+        'Produced preauth for next request: PA-FX-COOKIE (133), -123',
+        '/More preauthentication data is required',
+        'Continuing preauth mech -123',
+        'Processing preauth types: -123, PA-FX-COOKIE (133)',
+        'Preauth module test (-123) (real) returned: 0/Success',
+        'Produced preauth for next request: PA-FX-COOKIE (133), -123',
+        '/Preauthentication failed',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Encrypted timestamp (for ',
+        'module encrypted_timestamp (2) (real) returned: 0/Success',
+        'preauth for next request: PA-FX-COOKIE (133), PA-ENC-TIMESTAMP (2)',
+        'Decrypted AS reply')
 realm.run(['./icred', realm.user_princ, password('user')],
-          expected_msg='2rt: secondtrip', expected_trace=expected_trace)
+          expected_msg='2rt: secondtrip', expected_trace=msgs)
 realm.run([kadminl, 'delstr', realm.user_princ, 'fail2rt'])
 
 # Test tryagain flow by inducing a KDC_ERR_ENCTYPE_NOSUPP error on the KDC.
 realm.run([kadminl, 'setstr', realm.user_princ, 'err', 'testagain'])
-expected_trace = ('Sending unauthenticated request',
-                  '/Additional pre-authentication required',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Preauth module test (-123) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, -123',
-                  '/KDC has no support for encryption type',
-                  'Recovering from KDC error 14 using preauth mech -123',
-                  'Preauth tryagain input types (-123): -123, 133',
-                  'Preauth module test (-123) tryagain returned: 0/Success',
-                  'Followup preauth for next request: -123, 133',
-                  'Decrypted AS reply')
+msgs = ('Sending unauthenticated request',
+        '/Additional pre-authentication required',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Preauth module test (-123) (real) returned: 0/Success',
+        'Produced preauth for next request: PA-FX-COOKIE (133), -123',
+        '/KDC has no support for encryption type',
+        'Recovering from KDC error 14 using preauth mech -123',
+        'Preauth tryagain input types (-123): -123, PA-FX-COOKIE (133)',
+        'Preauth module test (-123) tryagain returned: 0/Success',
+        'Followup preauth for next request: -123, PA-FX-COOKIE (133)',
+        'Decrypted AS reply')
 realm.run(['./icred', realm.user_princ, password('user')],
-          expected_msg='tryagain: testagain', expected_trace=expected_trace)
+          expected_msg='tryagain: testagain', expected_trace=msgs)
 
 # Test a client-side tryagain failure, falling back to encrypted
 # timestamp.
-expected_trace = ('Sending unauthenticated request',
-                  '/Additional pre-authentication required',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Preauth module test (-123) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, -123',
-                  '/KDC has no support for encryption type',
-                  'Recovering from KDC error 14 using preauth mech -123',
-                  'Preauth tryagain input types (-123): -123, 133',
-                  '/induced tryagain fail',
-                  'Preauthenticating using KDC method data',
-                  'Processing preauth types:',
-                  'Encrypted timestamp (for ',
-                  'module encrypted_timestamp (2) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, 2',
-                  'Decrypted AS reply')
+msgs = ('Sending unauthenticated request',
+        '/Additional pre-authentication required',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Preauth module test (-123) (real) returned: 0/Success',
+        'Produced preauth for next request: PA-FX-COOKIE (133), -123',
+        '/KDC has no support for encryption type',
+        'Recovering from KDC error 14 using preauth mech -123',
+        'Preauth tryagain input types (-123): -123, PA-FX-COOKIE (133)',
+        '/induced tryagain fail',
+        'Preauthenticating using KDC method data',
+        'Processing preauth types:',
+        'Encrypted timestamp (for ',
+        'module encrypted_timestamp (2) (real) returned: 0/Success',
+        'preauth for next request: PA-FX-COOKIE (133), PA-ENC-TIMESTAMP (2)',
+        'Decrypted AS reply')
 realm.run(['./icred', '-X', 'fail_tryagain', realm.user_princ,
-           password('user')], expected_trace=expected_trace)
+           password('user')], expected_trace=msgs)
 
 # Test that multiple stepwise initial creds operations can be
 # performed with the same krb5_context, with proper tracking of

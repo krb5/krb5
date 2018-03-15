@@ -164,18 +164,19 @@ realm.stop_kdc()
 realm.start_kdc()
 
 # Run the basic test - PKINIT with FILE: identity, with no password on the key.
+msgs = ('Sending unauthenticated request',
+        '/Additional pre-authentication required',
+        'Preauthenticating using KDC method data',
+        'PKINIT client received freshness token from KDC',
+        'PKINIT loading CA certs and CRLs from FILE',
+        'PKINIT client making DH request',
+        ' preauth for next request: PA-FX-COOKIE (133), PA-PK-AS-REQ (16)',
+        'PKINIT client verified DH reply',
+        'PKINIT client found id-pkinit-san in KDC cert',
+        'PKINIT client matched KDC principal krbtgt/')
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % file_identity],
-            expected_trace=('Sending unauthenticated request',
-                            '/Additional pre-authentication required',
-                            'Preauthenticating using KDC method data',
-                            'PKINIT client received freshness token from KDC',
-                            'PKINIT loading CA certs and CRLs from FILE',
-                            'PKINIT client making DH request',
-                            'Produced preauth for next request: 133, 16',
-                            'PKINIT client verified DH reply',
-                            'PKINIT client found id-pkinit-san in KDC cert',
-                            'PKINIT client matched KDC principal krbtgt/'))
+            expected_trace=msgs)
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
@@ -194,19 +195,19 @@ minbits_kdc_conf = {'realms': {'$realm': {'pkinit_dh_min_bits': '4096'}}}
 minbits_env = realm.special_env('restrict', True, kdc_conf=minbits_kdc_conf)
 realm.stop_kdc()
 realm.start_kdc(env=minbits_env)
-expected_trace = ('Sending unauthenticated request',
-                  '/Additional pre-authentication required',
-                  'Preauthenticating using KDC method data',
-                  'Preauth module pkinit (16) (real) returned: 0/Success',
-                  'Produced preauth for next request: 133, 16',
-                  '/Key parameters not accepted',
-                  'Preauth tryagain input types (16): 109, 133',
-                  'trying again with KDC-provided parameters',
-                  'Preauth module pkinit (16) tryagain returned: 0/Success',
-                  'Followup preauth for next request: 16, 133')
+msgs = ('Sending unauthenticated request',
+        '/Additional pre-authentication required',
+        'Preauthenticating using KDC method data',
+        'Preauth module pkinit (16) (real) returned: 0/Success',
+        ' preauth for next request: PA-FX-COOKIE (133), PA-PK-AS-REQ (16)',
+        '/Key parameters not accepted',
+        'Preauth tryagain input types (16): 109, PA-FX-COOKIE (133)',
+        'trying again with KDC-provided parameters',
+        'Preauth module pkinit (16) tryagain returned: 0/Success',
+        ' preauth for next request: PA-PK-AS-REQ (16), PA-FX-COOKIE (133)')
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % file_identity],
-            expected_trace=expected_trace)
+            expected_trace=msgs)
 
 # Test enforcement of required freshness tokens.  (We can leave
 # freshness tokens required after this test.)

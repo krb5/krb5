@@ -75,6 +75,7 @@
  *   {cksum}       const krb5_checksum *, display cksumtype and hex checksum
  *   {princ}       krb5_principal, unparse and display
  *   {ptype}       krb5_int32, krb5_principal type, display name
+ *   {patype}      krb5_preauthtype, a single padata type number
  *   {patypes}     krb5_pa_data **, display list of padata type numbers
  *   {etype}       krb5_enctype, display shortest name of enctype
  *   {etypes}      krb5_enctype *, display list of enctypes
@@ -232,14 +233,14 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_INIT_CREDS_PREAUTH_DECRYPT_FAIL(c, code)                  \
     TRACE(c, "Decrypt with preauth AS key failed: {kerr}", code)
 #define TRACE_INIT_CREDS_PREAUTH_MORE(c, patype)                \
-    TRACE(c, "Continuing preauth mech {int}", (int)patype)
+    TRACE(c, "Continuing preauth mech {patype}", patype)
 #define TRACE_INIT_CREDS_PREAUTH_NONE(c)        \
     TRACE(c, "Sending unauthenticated request")
 #define TRACE_INIT_CREDS_PREAUTH_OPTIMISTIC(c)  \
     TRACE(c, "Attempting optimistic preauth")
 #define TRACE_INIT_CREDS_PREAUTH_TRYAGAIN(c, patype, code)              \
-    TRACE(c, "Recovering from KDC error {int} using preauth mech {int}", \
-          (int)patype, (int)code)
+    TRACE(c, "Recovering from KDC error {int} using preauth mech {patype}", \
+          patype, (int)code)
 #define TRACE_INIT_CREDS_RESTART_FAST(c)        \
     TRACE(c, "Restarting to upgrade to FAST")
 #define TRACE_INIT_CREDS_RESTART_PREAUTH_FAILED(c)                      \
@@ -290,7 +291,7 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 
 #define TRACE_PREAUTH_CONFLICT(c, name1, name2, patype)                 \
     TRACE(c, "Preauth module {str} conflicts with module {str} for pa " \
-          "type {int}", name1, name2, (int) patype)
+          "type {patype}", name1, name2, patype)
 #define TRACE_PREAUTH_COOKIE(c, len, data)                      \
     TRACE(c, "Received cookie: {lenstr}", (size_t) len, data)
 #define TRACE_PREAUTH_ENC_TS_KEY_GAK(c, keyblock)                       \
@@ -302,8 +303,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Selected etype info: etype {etype}, salt \"{data}\", " \
           "params \"{data}\"", etype, salt, s2kparams)
 #define TRACE_PREAUTH_INFO_FAIL(c, patype, code)                        \
-    TRACE(c, "Preauth builtin info function failure, type={int}: {kerr}", \
-          (int) patype, code)
+    TRACE(c, "Preauth builtin info function failure, type={patype}: {kerr}", \
+          patype, code)
 #define TRACE_PREAUTH_INPUT(c, padata)                          \
     TRACE(c, "Processing preauth types: {patypes}", padata)
 #define TRACE_PREAUTH_OUTPUT(c, padata)                                 \
@@ -314,8 +315,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_PREAUTH_SAM_KEY_GAK(c, keyblock)                  \
     TRACE(c, "AS key obtained for SAM: {keyblock}", keyblock)
 #define TRACE_PREAUTH_SALT(c, salt, patype)                          \
-    TRACE(c, "Received salt \"{data}\" via padata type {int}", salt, \
-          (int) patype)
+    TRACE(c, "Received salt \"{data}\" via padata type {patype}", salt, \
+          patype)
 #define TRACE_PREAUTH_SKIP(c, name, patype)                           \
     TRACE(c, "Skipping previously used preauth module {str} ({int})", \
           name, (int) patype)

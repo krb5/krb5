@@ -124,6 +124,50 @@ principal_type_string(krb5_int32 type)
 }
 
 static char *
+padata_type_string(krb5_preauthtype type)
+{
+    switch (type) {
+    case KRB5_PADATA_TGS_REQ: return "PA-TGS-REQ";
+    case KRB5_PADATA_ENC_TIMESTAMP: return "PA-ENC-TIMESTAMP";
+    case KRB5_PADATA_PW_SALT: return "PA-PW-SALT";
+    case KRB5_PADATA_ENC_UNIX_TIME: return "PA-ENC-UNIX-TIME";
+    case KRB5_PADATA_ENC_SANDIA_SECURID: return "PA-SANDIA-SECUREID";
+    case KRB5_PADATA_SESAME: return "PA-SESAME";
+    case KRB5_PADATA_OSF_DCE: return "PA-OSF-DCE";
+    case KRB5_CYBERSAFE_SECUREID: return "PA-CYBERSAFE-SECUREID";
+    case KRB5_PADATA_AFS3_SALT: return "PA-AFS3-SALT";
+    case KRB5_PADATA_ETYPE_INFO: return "PA-ETYPE-INFO";
+    case KRB5_PADATA_SAM_CHALLENGE: return "PA-SAM-CHALLENGE";
+    case KRB5_PADATA_SAM_RESPONSE: return "PA-SAM-RESPONSE";
+    case KRB5_PADATA_PK_AS_REQ_OLD: return "PA-PK-AS-REQ_OLD";
+    case KRB5_PADATA_PK_AS_REP_OLD: return "PA-PK-AS-REP_OLD";
+    case KRB5_PADATA_PK_AS_REQ: return "PA-PK-AS-REQ";
+    case KRB5_PADATA_PK_AS_REP: return "PA-PK-AS-REP";
+    case KRB5_PADATA_ETYPE_INFO2: return "PA-ETYPE-INFO2";
+    case KRB5_PADATA_SVR_REFERRAL_INFO: return "PA-SVR-REFERRAL-INFO";
+    case KRB5_PADATA_SAM_REDIRECT: return "PA-SAM-REDIRECT";
+    case KRB5_PADATA_GET_FROM_TYPED_DATA: return "PA-GET-FROM-TYPED-DATA";
+    case KRB5_PADATA_SAM_CHALLENGE_2: return "PA-SAM-CHALLENGE2";
+    case KRB5_PADATA_SAM_RESPONSE_2: return "PA-SAM-RESPONSE2";
+    case KRB5_PADATA_PAC_REQUEST: return "PA-PAC-REQUEST";
+    case KRB5_PADATA_FOR_USER: return "PA-FOR_USER";
+    case KRB5_PADATA_S4U_X509_USER: return "PA-FOR-X509-USER";
+    case KRB5_PADATA_AS_CHECKSUM: return "PA-AS-CHECKSUM";
+    case KRB5_PADATA_FX_COOKIE: return "PA-FX-COOKIE";
+    case KRB5_PADATA_FX_FAST: return "PA-FX-FAST";
+    case KRB5_PADATA_FX_ERROR: return "PA-FX-ERROR";
+    case KRB5_PADATA_ENCRYPTED_CHALLENGE: return "PA-ENCRYPTED-CHALLENGE";
+    case KRB5_PADATA_OTP_CHALLENGE: return "PA-OTP-CHALLENGE";
+    case KRB5_PADATA_OTP_REQUEST: return "PA-OTP-REQUEST";
+    case KRB5_PADATA_OTP_PIN_CHANGE: return "PA-OTP-PIN-CHANGE";
+    case KRB5_PADATA_PKINIT_KX: return "PA-PKINIT-KX";
+    case KRB5_ENCPADATA_REQ_ENC_PA_REP: return "PA-REQ-ENC-PA-REP";
+    case KRB5_PADATA_AS_FRESHNESS: return "PA_AS_FRESHNESS";
+    default: return NULL;
+    }
+}
+
+static char *
 trace_format(krb5_context context, const char *fmt, va_list ap)
 {
     struct k5buf buf;
@@ -140,6 +184,8 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
     krb5_key key;
     const krb5_checksum *cksum;
     krb5_pa_data **padata;
+    krb5_preauthtype pa_type;
+    const char *name;
     krb5_ccache ccache;
     krb5_keytab keytab;
     krb5_creds *creds;
@@ -271,10 +317,23 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
             if (padata == NULL || *padata == NULL)
                 k5_buf_add(&buf, "(empty)");
             for (; padata != NULL && *padata != NULL; padata++) {
-                k5_buf_add_fmt(&buf, "%d", (int)(*padata)->pa_type);
+                pa_type = (*padata)->pa_type;
+                name = padata_type_string(pa_type);
+                if (name != NULL)
+                    k5_buf_add_fmt(&buf, "%s (%d)", name, (int)pa_type);
+                else
+                    k5_buf_add_fmt(&buf, "%d", (int)pa_type);
+
                 if (*(padata + 1) != NULL)
                     k5_buf_add(&buf, ", ");
             }
+        } else if (strcmp(tmpbuf, "patype") == 0) {
+            pa_type = va_arg(ap, krb5_preauthtype);
+            name = padata_type_string(pa_type);
+            if (name != NULL)
+                k5_buf_add_fmt(&buf, "%s (%d)", name, (int)pa_type);
+            else
+                k5_buf_add_fmt(&buf, "%d", (int)pa_type);
         } else if (strcmp(tmpbuf, "etype") == 0) {
             etype = va_arg(ap, krb5_enctype);
             if (krb5_enctype_to_name(etype, TRUE, tmpbuf, sizeof(tmpbuf)) == 0)
