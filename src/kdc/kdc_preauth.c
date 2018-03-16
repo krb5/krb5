@@ -598,17 +598,18 @@ sort_pa_order(krb5_context context, krb5_kdc_req *request, int *pa_order)
                 break;
             }
         }
+        /* If we didn't find one, we have moved all of the key-replacing
+         * modules, and i is the count of those modules. */
+        if (j == n_repliers)
+            break;
     }
+    n_key_replacers = i;
 
     if (request->padata != NULL) {
         /* Now reorder the subset of modules which replace the key,
          * bubbling those which handle pa_data types provided by the
          * client ahead of the others.
          */
-        for (i = 0; preauth_systems[pa_order[i]].flags & PA_REPLACES_KEY; i++) {
-            continue;
-        }
-        n_key_replacers = i;
         for (i = 0; i < n_key_replacers; i++) {
             if (pa_list_includes(request->padata,
                                  preauth_systems[pa_order[i]].type))
