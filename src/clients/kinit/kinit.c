@@ -718,6 +718,7 @@ k5_kinit(struct k_opts *opts, struct k5_data *k5)
 #ifndef _WIN32
         if (strncmp(opts->keytab_name, "KDB:", 4) == 0) {
             ret = kinit_kdb_init(&k5->ctx, k5->me->realm.data);
+            errctx = k5->ctx;
             if (ret) {
                 com_err(progname, ret,
                         _("while setting up KDB keytab for realm %s"),
