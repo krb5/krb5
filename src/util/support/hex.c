@@ -37,7 +37,7 @@
 static inline char
 hex_digit(uint8_t bval, int uppercase)
 {
-    assert(bval >= 0 && bval <= 0xF);
+    assert(bval <= 0xF);
     if (bval < 10)
         return '0' + bval;
     else if (uppercase)
