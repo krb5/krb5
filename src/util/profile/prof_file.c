@@ -312,6 +312,9 @@ errcode_t profile_update_file_data_locked(prf_data_t data, char **ret_modspec)
     FILE *f;
     int isdir = 0;
 
+    if ((data->flags & PROFILE_FILE_NO_RELOAD) && data->root != NULL)
+        return 0;
+
 #ifdef HAVE_STAT
     now = time(0);
     if (now == data->last_stat && data->root != NULL) {
@@ -339,6 +342,10 @@ errcode_t profile_update_file_data_locked(prf_data_t data, char **ret_modspec)
         profile_free_node(data->root);
         data->root = 0;
     }
+
+    /* Only try to reload regular files, not devices such as pipes. */
+    if ((st.st_mode & S_IFMT) != S_IFREG)
+        data->flags |= PROFILE_FILE_NO_RELOAD;
 #else
     /*
      * If we don't have the stat() call, assume that our in-core
@@ -362,7 +369,7 @@ errcode_t profile_update_file_data_locked(prf_data_t data, char **ret_modspec)
     }
 
     data->upd_serial++;
-    data->flags &= PROFILE_FILE_SHARED;  /* FIXME same as '=' operator */
+    data->flags &= ~PROFILE_FILE_DIRTY;
 
     if (isdir) {
         retval = profile_process_directory(data->filespec, &data->root);
