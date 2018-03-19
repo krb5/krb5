@@ -52,6 +52,22 @@ Most commonly used options
     for information about using DNS to determine the default realm.
     DNS lookups for realm names are disabled by default.
 
+**-**\ **-with-dnssec-impl**
+    DNS lookups can be made securely with DNSSEC, and a backend must be
+    selected to do so.  By default, ``auto`` is selected, which
+    means that the system is scanned for suitable libraries and the proper
+    connectivity for libkrb5 is setup.  Note that additional configuration
+    in ``krb5.conf`` is needed to actually use this plugin.
+
+    Currently available backends are: ``unbound``, ``auto`` and ``no``
+    is equivalent to saying ``--without-dnssec-impl``.
+
+    Currently provided functionality is for the hostrealm plugin API;
+    other DNS-lookup APIs may be added in the future.  Note that there
+    is added value for the hostrealm API, which will not normally use
+    ``_kerberos TXT`` lookups in unsecured DNS, because this endangers
+    security.  Using DNSSEC, this danger is mitigated.
+
 **-**\ **-with-system-et**
     Use an installed version of the error-table (et) support software,
     the compile_et program, the com_err.h header file and the com_err

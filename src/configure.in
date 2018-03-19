@@ -321,6 +321,52 @@ AC_SUBST(TLS_IMPL)
 AC_SUBST(TLS_IMPL_CFLAGS)
 AC_SUBST(TLS_IMPL_LIBS)
 
+# Begin of DNSSEC
+
+AC_ARG_WITH([dnssec-impl],
+AC_HELP_STRING([--with-dnssec-impl=IMPL],
+               [use specified DNSSEC implementation @<:@auto@:>@]),
+[DNSSEC_IMPL=$withval],[DNSSEC_IMPL=auto])
+# When more options are added, the "auto" target should scan available options
+case "$DNSSEC_IMPL" in
+unbound|auto)
+  AC_CHECK_LIB(unbound,ub_resolve,[have_lib_unbound=true],[have_lib_unbound=false],
+               -lunbound)
+  AC_MSG_CHECKING([for Unbound])
+  if test x$have_lib_unbound = xtrue ; then
+    AC_DEFINE(DNSSEC_IMPL_UNBOUND,1,[Define if DNSSEC implementation is Unbound])
+    AC_MSG_RESULT([yes])
+    DNSSEC_IMPL_LIBS="-lunbound"
+    DNSSEC_IMPL=unbound
+    AC_MSG_NOTICE([DNSSEC module will use Unbound])
+  else
+    if test "$DNSSEC_IMPL" = unbound ; then
+      AC_MSG_ERROR([Unbound not found!])
+    else
+      AC_MSG_WARN([Unbound not found!])
+    fi
+    DNSSEC_IMPL=no
+    AC_MSG_NOTICE(building without DNSSEC support)
+  fi
+  ;;
+no)
+  AC_MSG_NOTICE(building without DNSSEC support)
+  ;;
+*)
+  AC_MSG_ERROR([Unsupported DNSSEC implementation $withval])
+  ;;
+esac
+
+if test "$DNSSEC_IMPL" = no; then
+   AC_DEFINE(DNSSEC_IMPL_NONE,1,[Define if no DNSSEC implementation is selected])
+fi
+
+AC_SUBST(DNSSEC_IMPL)
+AC_SUBST(DNSSEC_IMPL_CFLAGS)
+AC_SUBST(DNSSEC_IMPL_LIBS)
+
+# End of DNSSEC
+
 AC_ARG_ENABLE([aesni],
 AC_HELP_STRING([--disable-aesni],[Do not build with AES-NI support]), ,
 enable_aesni=check)
@@ -1440,6 +1486,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/authdata/greet_client
 	plugins/authdata/greet_server
 	plugins/tls/k5tls
+	plugins/dnssec/k5dnssec
 
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu clients/kswitch
