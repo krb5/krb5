@@ -27,7 +27,6 @@
  */
 #define KRB5_GENEROUS_LR_TYPE
 
-typedef krb5_octet asn1_octet;
 typedef krb5_error_code asn1_error_code;
 
 typedef enum { PRIMITIVE = 0x00, CONSTRUCTED = 0x20 } asn1_construction;

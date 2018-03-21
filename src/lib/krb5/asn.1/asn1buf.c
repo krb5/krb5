@@ -70,14 +70,14 @@
  * expansion of other stuff elsewhere.
  */
 static unsigned int asn1buf_free(const asn1buf *);
-static asn1_error_code asn1buf_ensure_space(asn1buf *, unsigned int);
-static asn1_error_code asn1buf_expand(asn1buf *, unsigned int);
+static krb5_error_code asn1buf_ensure_space(asn1buf *, unsigned int);
+static krb5_error_code asn1buf_expand(asn1buf *, unsigned int);
 #endif
 
 #define asn1_is_eoc(class, num, indef)                  \
     ((class) == UNIVERSAL && !(num) && !(indef))
 
-asn1_error_code
+krb5_error_code
 asn1buf_create(asn1buf **buf)
 {
     *buf = (asn1buf*)malloc(sizeof(asn1buf));
@@ -101,10 +101,10 @@ asn1buf_destroy(asn1buf **buf)
 #ifdef asn1buf_insert_octet
 #undef asn1buf_insert_octet
 #endif
-asn1_error_code
+krb5_error_code
 asn1buf_insert_octet(asn1buf *buf, const int o)
 {
-    asn1_error_code retval;
+    krb5_error_code retval;
 
     retval = asn1buf_ensure_space(buf,1U);
     if (retval) return retval;
@@ -113,10 +113,10 @@ asn1buf_insert_octet(asn1buf *buf, const int o)
     return 0;
 }
 
-asn1_error_code
+krb5_error_code
 asn1buf_insert_bytestring(asn1buf *buf, const unsigned int len, const void *sv)
 {
-    asn1_error_code retval;
+    krb5_error_code retval;
     unsigned int length;
     const char *s = sv;
 
@@ -128,7 +128,7 @@ asn1buf_insert_bytestring(asn1buf *buf, const unsigned int len, const void *sv)
     return 0;
 }
 
-asn1_error_code
+krb5_error_code
 asn12krb5_buf(const asn1buf *buf, krb5_data **code)
 {
     unsigned int i;
@@ -172,7 +172,7 @@ asn1buf_free(const asn1buf *buf)
 }
 
 #undef asn1buf_ensure_space
-asn1_error_code
+krb5_error_code
 asn1buf_ensure_space(asn1buf *buf, const unsigned int amount)
 {
     unsigned int avail = asn1buf_free(buf);
@@ -181,7 +181,7 @@ asn1buf_ensure_space(asn1buf *buf, const unsigned int amount)
     return asn1buf_expand(buf, amount-avail);
 }
 
-asn1_error_code
+krb5_error_code
 asn1buf_expand(asn1buf *buf, unsigned int inc)
 {
 #define STANDARD_INCREMENT 200
@@ -193,8 +193,7 @@ asn1buf_expand(asn1buf *buf, unsigned int inc)
     if (inc < STANDARD_INCREMENT)
         inc = STANDARD_INCREMENT;
 
-    buf->base = realloc(buf->base,
-                        (asn1buf_size(buf)+inc) * sizeof(asn1_octet));
+    buf->base = realloc(buf->base, asn1buf_size(buf) + inc);
     if (buf->base == NULL) return ENOMEM; /* XXX leak */
     buf->bound = (buf->base) + bound_offset + inc;
     buf->next = (buf->base) + next_offset;

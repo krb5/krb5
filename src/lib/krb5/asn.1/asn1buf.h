@@ -25,7 +25,7 @@ unsigned int asn1buf_free(const asn1buf *buf);
      : (unsigned int)((buf)->bound - (buf)->next + 1))
 
 
-asn1_error_code asn1buf_ensure_space(asn1buf *buf, const unsigned int amount);
+krb5_error_code asn1buf_ensure_space(asn1buf *buf, const unsigned int amount);
 /*
  * requires  *buf is allocated
  * modifies  *buf
@@ -38,7 +38,7 @@ asn1_error_code asn1buf_ensure_space(asn1buf *buf, const unsigned int amount);
      ? (asn1buf_expand((buf), (amount)-asn1buf_free(buf)))      \
      : 0)
 
-asn1_error_code asn1buf_expand(asn1buf *buf, unsigned int inc);
+krb5_error_code asn1buf_expand(asn1buf *buf, unsigned int inc);
 /*
  * requires  *buf is allocated
  * modifies  *buf
@@ -93,7 +93,7 @@ int asn1buf_len(const asn1buf *buf);
  *  (asn1buf_len)
  */
 
-asn1_error_code asn1buf_create(asn1buf **buf);
+krb5_error_code asn1buf_create(asn1buf **buf);
 /*
  * effects   Creates a new encoding buffer pointed to by *buf.
  *           Returns ENOMEM if the buffer can't be created.
@@ -108,10 +108,10 @@ void asn1buf_destroy(asn1buf **buf);
  *           necessary.  Returns ENOMEM memory is exhausted.
  */
 #if ((__GNUC__ >= 2) && !defined(ASN1BUF_OMIT_INLINE_FUNCS)) && !defined(CONFIG_SMALL)
-static inline asn1_error_code
+static inline krb5_error_code
 asn1buf_insert_octet(asn1buf *buf, const int o)
 {
-    asn1_error_code retval;
+    krb5_error_code retval;
 
     retval = asn1buf_ensure_space(buf,1U);
     if (retval) return retval;
@@ -120,10 +120,10 @@ asn1buf_insert_octet(asn1buf *buf, const int o)
     return 0;
 }
 #else
-asn1_error_code asn1buf_insert_octet(asn1buf *buf, const int o);
+krb5_error_code asn1buf_insert_octet(asn1buf *buf, const int o);
 #endif
 
-asn1_error_code
+krb5_error_code
 asn1buf_insert_bytestring(
     asn1buf *buf,
     const unsigned int len,
@@ -138,7 +138,7 @@ asn1buf_insert_bytestring(
 
 #define asn1buf_insert_octetstring asn1buf_insert_bytestring
 
-asn1_error_code asn12krb5_buf(const asn1buf *buf, krb5_data **code);
+krb5_error_code asn12krb5_buf(const asn1buf *buf, krb5_data **code);
 /*
  * modifies  *code
  * effects   Instantiates **code with the krb5_data representation of **buf.

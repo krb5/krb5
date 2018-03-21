@@ -48,12 +48,12 @@
  * Imports from asn1_k_encode.c.
  * XXX Must be manually synchronized for now.
  */
-IMPORT_TYPE(int32, krb5_int32);
+IMPORT_TYPE(int32, int32_t);
 
-DEFINTTYPE(int16, krb5_int16);
-DEFINTTYPE(uint16, krb5_ui_2);
+DEFINTTYPE(int16, int16_t);
+DEFINTTYPE(uint16, uint16_t);
 
-DEFCOUNTEDSTRINGTYPE(ui2_octetstring, unsigned char *, krb5_ui_2,
+DEFCOUNTEDSTRINGTYPE(ui2_octetstring, uint8_t *, uint16_t,
                      k5_asn1_encode_bytestring, k5_asn1_decode_bytestring,
                      ASN1_OCTETSTRING);
 
@@ -104,7 +104,7 @@ static const struct atype_info *key_data_fields[] = {
 };
 DEFSEQTYPE(key_data, krb5_key_data, key_data_fields);
 DEFPTRTYPE(ptr_key_data, key_data);
-DEFCOUNTEDSEQOFTYPE(cseqof_key_data, krb5_int16, ptr_key_data);
+DEFCOUNTEDSEQOFTYPE(cseqof_key_data, int16_t, ptr_key_data);
 
 DEFINT_IMMEDIATE(one, 1, ASN1_BAD_FORMAT);
 DEFCTAGGEDTYPE(ldap_key_seq_0, 0, one);
