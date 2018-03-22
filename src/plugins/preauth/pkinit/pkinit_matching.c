@@ -470,7 +470,6 @@ component_match(krb5_context context,
 {
     int match = 0;
     int i;
-    krb5_principal p;
     char *princ_string;
 
     switch (rc->kwval_type) {
@@ -483,12 +482,15 @@ component_match(krb5_context context,
             match = regexp_match(context, rc, md->issuer_dn);
             break;
         case kw_san:
-            if (md->sans == NULL)
-                break;
-            for (i = 0, p = md->sans[i]; p != NULL; p = md->sans[++i]) {
-                krb5_unparse_name(context, p, &princ_string);
+            for (i = 0; md->sans != NULL && md->sans[i] != NULL; i++) {
+                krb5_unparse_name(context, md->sans[i], &princ_string);
                 match = regexp_match(context, rc, princ_string);
                 krb5_free_unparsed_name(context, princ_string);
+                if (match)
+                    break;
+            }
+            for (i = 0; md->upns != NULL && md->upns[i] != NULL; i++) {
+                match = regexp_match(context, rc, md->upns[i]);
                 if (match)
                     break;
             }
@@ -572,12 +574,14 @@ check_all_certs(krb5_context context,
         pkiDebug("%s: subject: '%s'\n", __FUNCTION__, md->subject_dn);
 #if 0
         pkiDebug("%s: issuer:  '%s'\n", __FUNCTION__, md->subject_dn);
-        for (j = 0, p = md->sans[j]; p != NULL; p = md->sans[++j]) {
+        for (j = 0; md->sans != NULL && md->sans[j] != NULL; j++) {
             char *san_string;
-            krb5_unparse_name(context, p, &san_string);
-            pkiDebug("%s: san: '%s'\n", __FUNCTION__, san_string);
+            krb5_unparse_name(context, md->sans[j], &san_string);
+            pkiDebug("%s: PKINIT san: '%s'\n", __FUNCTION__, san_string);
             krb5_free_unparsed_name(context, san_string);
         }
+        for (j = 0; md->upns != NULL && md->upns[j] != NULL; j++)
+            pkiDebug("%s: UPN san: '%s'\n", __FUNCTION__, md->upns[j]);
 #endif
         certs_checked++;
         for (rc = rs->crs; rc != NULL; rc = rc->next) {
