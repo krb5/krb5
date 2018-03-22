@@ -97,8 +97,8 @@ typedef struct _pkinit_cert_matching_data {
     char *issuer_dn;	    /* rfc2253-style issuer name string */
     unsigned int ku_bits;   /* key usage information */
     unsigned int eku_bits;  /* extended key usage information */
-    krb5_principal *sans;   /* Null-terminated array of subject alternative
-			       name info (pkinit and ms-upn) */
+    krb5_principal *sans;   /* Null-terminated array of PKINIT SANs */
+    char **upns;	    /* Null-terimnated array of UPN SANs */
 } pkinit_cert_matching_data;
 
 /*
@@ -250,7 +250,7 @@ krb5_error_code crypto_retrieve_cert_sans
 		    if non-NULL, a null-terminated array of
 		    id-pkinit-san values found in the certificate
 		    are returned */
-	krb5_principal **upn_sans,			/* OUT
+	char ***upn_sans,				/* OUT
 		    if non-NULL, a null-terminated array of
 		    id-ms-upn-san values found in the certificate
 		    are returned */

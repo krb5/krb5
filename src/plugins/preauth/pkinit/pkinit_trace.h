@@ -121,6 +121,9 @@
     TRACE(c, "PKINIT server returning PA data")
 #define TRACE_PKINIT_SERVER_SAN_REJECT(c)                               \
     TRACE(c, "PKINIT server found no acceptable SAN in client cert")
+#define TRACE_PKINIT_SERVER_UPN_PARSE_FAIL(c, upn, ret)                 \
+    TRACE(c, "PKINIT server could not parse UPN \"{str}\": {kerr}",     \
+          upn, ret)
 
 #define TRACE_PKINIT_EKU(c)                                             \
     TRACE(c, "PKINIT found acceptable EKU and digitalSignature KU")

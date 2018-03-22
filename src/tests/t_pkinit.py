@@ -301,6 +301,13 @@ realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % p12_identity])
 realm.klist(realm.user_princ)
 
+# Regression test for #8670: match a UPN SAN with a single rule.
+rule = '<SAN>^user@krbtest.com$'
+realm.run([kadminl, 'setstr', realm.user_princ, 'pkinit_cert_match', rule])
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % p12_upn_identity])
+realm.klist(realm.user_princ)
+
 # Match a combined rule (default prefix is &&).
 rule = '<SUBJECT>CN=user$<KU>digitalSignature,keyEncipherment'
 realm.run([kadminl, 'setstr', realm.user_princ, 'pkinit_cert_match', rule])

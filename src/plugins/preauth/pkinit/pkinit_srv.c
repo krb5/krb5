@@ -174,8 +174,9 @@ verify_client_san(krb5_context context,
                   int *valid_san)
 {
     krb5_error_code retval;
-    krb5_principal *princs = NULL;
-    krb5_principal *upns = NULL;
+    krb5_principal *princs = NULL, upn;
+    krb5_boolean match;
+    char **upns = NULL;
     int i;
 #ifdef DEBUG_SAN_INFO
     char *client_string = NULL, *san_string;
@@ -251,12 +252,18 @@ verify_client_san(krb5_context context,
     pkiDebug("%s: Checking upn sans\n", __FUNCTION__);
     for (i = 0; upns[i] != NULL; i++) {
 #ifdef DEBUG_SAN_INFO
-        krb5_unparse_name(context, upns[i], &san_string);
         pkiDebug("%s: Comparing client '%s' to upn san value '%s'\n",
-                 __FUNCTION__, client_string, san_string);
-        krb5_free_unparsed_name(context, san_string);
+                 __FUNCTION__, client_string, upns[i]);
 #endif
-        if (cb->match_client(context, rock, upns[i])) {
+        retval = krb5_parse_name_flags(context, upns[i],
+                                       KRB5_PRINCIPAL_PARSE_ENTERPRISE, &upn);
+        if (retval) {
+            TRACE_PKINIT_SERVER_UPN_PARSE_FAIL(context, upns[i], retval);
+            continue;
+        }
+        match = cb->match_client(context, rock, upn);
+        krb5_free_principal(context, upn);
+        if (match) {
             TRACE_PKINIT_SERVER_MATCHING_UPN_FOUND(context);
             *valid_san = 1;
             retval = 0;
@@ -282,7 +289,7 @@ out:
     }
     if (upns != NULL) {
         for (i = 0; upns[i] != NULL; i++)
-            krb5_free_principal(context, upns[i]);
+            free(upns[i]);
         free(upns);
     }
 #ifdef DEBUG_SAN_INFO
