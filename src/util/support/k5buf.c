@@ -37,7 +37,7 @@
 /*
  * Structure invariants:
  *
- * buftype is K5BUF_FIXED, K5BUF_DYNAMIC, or K5BUF_ERROR
+ * buftype is K5BUF_FIXED, K5BUF_DYNAMIC, K5BUF_DYNAMIC_ZAP, or K5BUF_ERROR
  * if buftype is K5BUF_ERROR, the other fields are NULL or 0
  * if buftype is not K5BUF_ERROR:
  *   space > 0
@@ -77,22 +77,35 @@ ensure_space(struct k5buf *buf, size_t len)
         return 1;
     if (buf->buftype == K5BUF_FIXED) /* Can't resize a fixed buffer. */
         goto error_exit;
-    assert(buf->buftype == K5BUF_DYNAMIC);
+    assert(buf->buftype == K5BUF_DYNAMIC || buf->buftype == K5BUF_DYNAMIC_ZAP);
     new_space = buf->space * 2;
     while (new_space - buf->len - 1 < len) {
         if (new_space > SIZE_MAX / 2)
             goto error_exit;
         new_space *= 2;
     }
-    new_data = realloc(buf->data, new_space);
-    if (new_data == NULL)
-        goto error_exit;
+    if (buf->buftype == K5BUF_DYNAMIC_ZAP) {
+        /* realloc() could leave behind a partial copy of sensitive data. */
+        new_data = malloc(new_space);
+        if (new_data == NULL)
+            goto error_exit;
+        memcpy(new_data, buf->data, buf->len);
+        new_data[buf->len] = '\0';
+        zap(buf->data, buf->len);
+        free(buf->data);
+    } else {
+        new_data = realloc(buf->data, new_space);
+        if (new_data == NULL)
+            goto error_exit;
+    }
     buf->data = new_data;
     buf->space = new_space;
     return 1;
 
 error_exit:
-    if (buf->buftype == K5BUF_DYNAMIC)
+    if (buf->buftype == K5BUF_DYNAMIC_ZAP)
+        zap(buf->data, buf->len);
+    if (buf->buftype == K5BUF_DYNAMIC_ZAP || buf->buftype == K5BUF_DYNAMIC)
         free(buf->data);
     set_error(buf);
     return 0;
@@ -121,6 +134,14 @@ k5_buf_init_dynamic(struct k5buf *buf)
     }
     buf->len = 0;
     *endptr(buf) = '\0';
+}
+
+void
+k5_buf_init_dynamic_zap(struct k5buf *buf)
+{
+    k5_buf_init_dynamic(buf);
+    if (buf->buftype == K5BUF_DYNAMIC)
+        buf->buftype = K5BUF_DYNAMIC_ZAP;
 }
 
 void
@@ -163,7 +184,7 @@ k5_buf_add_vfmt(struct k5buf *buf, const char *fmt, va_list ap)
     }
 
     /* Optimistically format the data directly into the dynamic buffer. */
-    assert(buf->buftype == K5BUF_DYNAMIC);
+    assert(buf->buftype == K5BUF_DYNAMIC || buf->buftype == K5BUF_DYNAMIC_ZAP);
     va_copy(apcopy, ap);
     r = vsnprintf(endptr(buf), remaining, fmt, apcopy);
     va_end(apcopy);
@@ -197,6 +218,8 @@ k5_buf_add_vfmt(struct k5buf *buf, const char *fmt, va_list ap)
         memcpy(endptr(buf), tmp, r + 1);
         buf->len += r;
     }
+    if (buf->buftype == K5BUF_DYNAMIC_ZAP)
+        zap(tmp, strlen(tmp));
     free(tmp);
 }
 
@@ -241,7 +264,9 @@ k5_buf_free(struct k5buf *buf)
 {
     if (buf->buftype == K5BUF_ERROR)
         return;
-    assert(buf->buftype == K5BUF_DYNAMIC);
+    assert(buf->buftype == K5BUF_DYNAMIC || buf->buftype == K5BUF_DYNAMIC_ZAP);
+    if (buf->buftype == K5BUF_DYNAMIC_ZAP)
+        zap(buf->data, buf->len);
     free(buf->data);
     set_error(buf);
 }
