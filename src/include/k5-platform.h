@@ -40,7 +40,7 @@
  * + [v]asprintf
  * + strerror_r
  * + mkstemp
- * + zap (support function; macro is in k5-int.h)
+ * + zap (support function and macro)
  * + constant time memory comparison
  * + path manipulation
  * + _, N_, dgettext, bindtextdomain (for localization)
@@ -1020,6 +1020,51 @@ extern int krb5int_mkstemp(char *);
 #ifndef HAVE_GETTIMEOFDAY
 extern int krb5int_gettimeofday(struct timeval *tp, void *ignore);
 #define gettimeofday krb5int_gettimeofday
+#endif
+
+/*
+ * Attempt to zero memory in a way that compilers won't optimize out.
+ *
+ * This mechanism should work even for heap storage about to be freed,
+ * or automatic storage right before we return from a function.
+ *
+ * Then, even if we leak uninitialized memory someplace, or UNIX
+ * "core" files get created with world-read access, some of the most
+ * sensitive data in the process memory will already be safely wiped.
+ *
+ * We're not going so far -- yet -- as to try to protect key data that
+ * may have been written into swap space....
+ */
+#ifdef _WIN32
+# define zap(ptr, len) SecureZeroMemory(ptr, len)
+#elif defined(__STDC_LIB_EXT1__)
+/*
+ * Use memset_s() which cannot be optimized out.  Avoid memset_s(NULL, 0, 0, 0)
+ * which would cause a runtime constraint violation.
+ */
+static inline void zap(void *ptr, size_t len)
+{
+    if (len > 0)
+        memset_s(ptr, len, 0, len);
+}
+#elif defined(__GNUC__) || defined(__clang__)
+/*
+ * Use an asm statement which declares a memory clobber to force the memset to
+ * be carried out.  Avoid memset(NULL, 0, 0) which has undefined behavior.
+ */
+static inline void zap(void *ptr, size_t len)
+{
+    if (len > 0)
+        memset(ptr, 0, len);
+    __asm__ __volatile__("" : : "r" (ptr) : "memory");
+}
+#else
+/*
+ * Use a function from libkrb5support to defeat inlining unless link-time
+ * optimization is used.  The function uses a volatile pointer, which prevents
+ * current compilers from optimizing out the memset.
+ */
+# define zap(ptr, len) krb5int_zap(ptr, len)
 #endif
 
 extern void krb5int_zap(void *ptr, size_t len);
