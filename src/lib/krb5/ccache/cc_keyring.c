@@ -1295,7 +1295,7 @@ krcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
         goto errout;
 
     /* Serialize credential using the file ccache version 4 format. */
-    k5_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic_zap(&buf);
     k5_marshal_cred(&buf, 4, creds);
     ret = k5_buf_status(&buf);
     if (ret)

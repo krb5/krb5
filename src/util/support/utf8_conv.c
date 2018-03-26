@@ -99,7 +99,9 @@ k5_utf8_to_utf16le(const char *utf8, uint8_t **utf16_out, size_t *nbytes_out)
     *utf16_out = NULL;
     *nbytes_out = 0;
 
-    k5_buf_init_dynamic(&buf);
+    /* UTF-16 conversion is used for RC4 string-to-key, so treat this data as
+     * sensitive. */
+    k5_buf_init_dynamic_zap(&buf);
 
     /* Examine next UTF-8 character. */
     while (*utf8 != '\0') {

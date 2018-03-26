@@ -758,7 +758,7 @@ fcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
 
     memset(creds, 0, sizeof(*creds));
     k5_cc_mutex_lock(context, &data->lock);
-    k5_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic_zap(&buf);
 
     ret = krb5_lock_file(context, fileno(fcursor->fp), KRB5_LOCKMODE_SHARED);
     if (ret)
@@ -982,7 +982,7 @@ fcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
         goto cleanup;
 
     /* Marshal the cred and write it to the file with a single append write. */
-    k5_buf_init_dynamic(&buf);
+    k5_buf_init_dynamic_zap(&buf);
     k5_marshal_cred(&buf, version, creds);
     ret = k5_buf_status(&buf);
     if (ret)
