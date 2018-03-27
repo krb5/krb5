@@ -75,6 +75,7 @@ parse_data(struct k5input *in, krb5_data *out)
 {
     out->length = k5_input_get_uint32_be(in);
     out->data = (char *)k5_input_get_bytes(in, out->length);
+    out->magic = KV5M_DATA;
 }
 
 /* Parse a received cookie into its components.  The pointers stored in the

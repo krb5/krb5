@@ -69,6 +69,7 @@ ossl_fini(groupdata *gd)
     EC_POINT_free(gd->N);
     BN_CTX_free(gd->ctx);
     BN_free(gd->order);
+    free(gd);
 }
 
 static krb5_error_code
