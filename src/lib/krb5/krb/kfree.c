@@ -897,7 +897,9 @@ k5_free_spake_factor(krb5_context context, krb5_spake_factor *val)
 {
     if (val == NULL)
         return;
-    krb5_free_data(context, val->data);
+    if (val->data != NULL)
+        zapfree(val->data->data, val->data->length);
+    free(val->data);
     free(val);
 }
 
