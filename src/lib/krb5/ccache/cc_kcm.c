@@ -966,6 +966,9 @@ kcm_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
         kcmreq_init(&req, KCM_OP_GET_CACHE_BY_UUID, NULL);
         k5_buf_add_len(&req.reqbuf, id, KCM_UUID_LEN);
         ret = kcmio_call(context, data->io, &req);
+        /* Continue if the cache has been deleted. */
+        if (ret == KRB5_CC_END)
+            continue;
         if (ret)
             goto cleanup;
         ret = kcmreq_get_name(&req, &name);
