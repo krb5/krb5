@@ -21,8 +21,10 @@ Structure
 ---------
 
 The krb5.conf file is set up in the style of a Windows INI file.
-Sections are headed by the section name, in square brackets.  Each
-section may contain zero or more relations, of the form::
+Lines beginning with '#' or ';' (possibly after initial whitespace)
+are ignored as comments.  Sections are headed by the section name, in
+square brackets.  Each section may contain zero or more relations, of
+the form::
 
     foo = bar
 
