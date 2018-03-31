@@ -39,11 +39,25 @@
 #include <krb5/clpreauth_plugin.h>
 
 typedef struct reqstate_st {
+    krb5_pa_spake *msg;         /* set in prep_questions, used in process */
     krb5_keyblock *initial_key;
     krb5_data *support;
     krb5_data thash;
     krb5_data spakeresult;
 } reqstate;
+
+/* Return true if SF-NONE is present in factors. */
+static krb5_boolean
+contains_sf_none(krb5_spake_factor **factors)
+{
+    int i;
+
+    for (i = 0; factors != NULL && factors[i] != NULL; i++) {
+        if (factors[i]->type == SPAKE_SF_NONE)
+            return TRUE;
+    }
+    return FALSE;
+}
 
 static krb5_error_code
 spake_init(krb5_context context, krb5_clpreauth_moddata *moddata_out)
@@ -77,6 +91,7 @@ spake_request_fini(krb5_context context, krb5_clpreauth_moddata moddata,
 {
     reqstate *st = (reqstate *)modreq;
 
+    k5_free_pa_spake(context, st->msg);
     krb5_free_keyblock(context, st->initial_key);
     krb5_free_data(context, st->support);
     krb5_free_data_contents(context, &st->thash);
@@ -92,16 +107,42 @@ spake_prep_questions(krb5_context context, krb5_clpreauth_moddata moddata,
                      krb5_data *enc_req, krb5_data *enc_prev_req,
                      krb5_pa_data *pa_data)
 {
+    krb5_error_code ret;
+    groupstate *gstate = (groupstate *)moddata;
     reqstate *st = (reqstate *)modreq;
+    krb5_data in_data;
+    krb5_spake_challenge *ch;
 
     if (st == NULL)
         return ENOMEM;
-    if (st->initial_key == NULL && pa_data->length > 0)
+
+    /* We don't need to ask any questions to send a support message. */
+    if (pa_data->length == 0)
+        return 0;
+
+    /* Decode the incoming message, replacing any previous one in the request
+     * state.  If we can't decode it, we have no questions to ask. */
+    k5_free_pa_spake(context, st->msg);
+    st->msg = NULL;
+    in_data = make_data(pa_data->contents, pa_data->length);
+    ret = decode_krb5_pa_spake(&in_data, &st->msg);
+    if (ret)
+        return (ret == ENOMEM) ? ENOMEM : 0;
+
+    if (st->msg->choice == SPAKE_MSGTYPE_CHALLENGE) {
+        ch = &st->msg->u.challenge;
+        if (!group_is_permitted(gstate, ch->group))
+            return 0;
+        /* When second factor support is implemented, we should ask questions
+         * based on the factors in the challenge. */
+        if (!contains_sf_none(ch->factors))
+            return 0;
+        /* We will need the AS key to respond to the challenge. */
         cb->need_as_key(context, rock);
-
-    /* When second-factor is implemented, we should ask questions based on the
-     * factors in the challenge. */
-
+    } else if (st->msg->choice == SPAKE_MSGTYPE_ENCDATA) {
+        /* When second factor support is implemented, we should decrypt the
+         * encdata message and ask questions based on the factor data. */
+    }
     return 0;
 }
 
@@ -136,19 +177,6 @@ send_support(krb5_context context, groupstate *gstate, reqstate *st,
     return convert_to_padata(support, pa_out);
 }
 
-/* Return true if SF-NONE is present in factors. */
-static krb5_boolean
-contains_sf_none(krb5_spake_factor **factors)
-{
-    int i;
-
-    for (i = 0; factors != NULL && factors[i] != NULL; i++) {
-        if (factors[i]->type == SPAKE_SF_NONE)
-            return TRUE;
-    }
-    return FALSE;
-}
-
 static krb5_error_code
 process_challenge(krb5_context context, groupstate *gstate, reqstate *st,
                   krb5_spake_challenge *ch, const krb5_data *der_msg,
@@ -157,7 +185,7 @@ process_challenge(krb5_context context, groupstate *gstate, reqstate *st,
                   const krb5_data *der_req, krb5_pa_data ***pa_out)
 {
     krb5_error_code ret;
-    krb5_keyblock *k0 = NULL, *k1 = NULL;
+    krb5_keyblock *k0 = NULL, *k1 = NULL, *as_key;
     krb5_spake_factor factor;
     krb5_pa_spake msg;
     krb5_data *der_factor = NULL, *response;
@@ -167,8 +195,8 @@ process_challenge(krb5_context context, groupstate *gstate, reqstate *st,
 
     enc_factor.ciphertext = empty_data();
 
-    /* Not expected if we already computed the SPAKE result. */
-    if (st->spakeresult.length != 0)
+    /* Not expected if we processed a challenge and didn't reject it. */
+    if (st->initial_key != NULL)
         return KRB5KDC_ERR_PREAUTH_FAILED;
 
     if (!group_is_permitted(gstate, ch->group)) {
@@ -193,6 +221,12 @@ process_challenge(krb5_context context, groupstate *gstate, reqstate *st,
     if (!contains_sf_none(ch->factors))
         return KRB5KDC_ERR_PREAUTH_FAILED;
 
+    ret = cb->get_as_key(context, rock, &as_key);
+    if (ret)
+        goto cleanup;
+    ret = krb5_copy_keyblock(context, as_key, &st->initial_key);
+    if (ret)
+        goto cleanup;
     ret = derive_wbytes(context, ch->group, st->initial_key, &wbytes);
     if (ret)
         goto cleanup;
@@ -267,7 +301,7 @@ process_encdata(krb5_context context, reqstate *st, krb5_enc_data *enc,
                 krb5_pa_data ***pa_out)
 {
     /* Not expected if we haven't sent a response yet. */
-    if (st->spakeresult.length == 0)
+    if (st->initial_key == NULL || st->spakeresult.length == 0)
         return KRB5KDC_ERR_PREAUTH_FAILED;
 
     /*
@@ -292,9 +326,7 @@ spake_process(krb5_context context, krb5_clpreauth_moddata moddata,
     krb5_error_code ret;
     groupstate *gstate = (groupstate *)moddata;
     reqstate *st = (reqstate *)modreq;
-    krb5_pa_spake *msg;
     krb5_data in_data;
-    krb5_keyblock *as_key;
 
     if (st == NULL)
         return ENOMEM;
@@ -306,34 +338,23 @@ spake_process(krb5_context context, krb5_clpreauth_moddata moddata,
         return send_support(context, gstate, st, pa_out);
     }
 
-    /* We need the initial reply key to process any non-trivial message. */
-    if (st->initial_key == NULL) {
-        ret = cb->get_as_key(context, rock, &as_key);
-        if (ret)
-            return ret;
-        ret = krb5_copy_keyblock(context, as_key, &st->initial_key);
-        if (ret)
-            return ret;
-    }
-
-    in_data = make_data(pa_in->contents, pa_in->length);
-    ret = decode_krb5_pa_spake(&in_data, &msg);
-    if (ret)
-        return ret;
-
-    if (msg->choice == SPAKE_MSGTYPE_CHALLENGE) {
-        ret = process_challenge(context, gstate, st, &msg->u.challenge,
+    if (st->msg == NULL) {
+        /* The message failed to decode in spake_prep_questions(). */
+        ret = KRB5KDC_ERR_PREAUTH_FAILED;
+    } else if (st->msg->choice == SPAKE_MSGTYPE_CHALLENGE) {
+        in_data = make_data(pa_in->contents, pa_in->length);
+        ret = process_challenge(context, gstate, st, &st->msg->u.challenge,
                                 &in_data, cb, rock, prompter, prompter_data,
                                 der_req, pa_out);
-    } else if (msg->choice == SPAKE_MSGTYPE_ENCDATA) {
-        ret = process_encdata(context, st, &msg->u.encdata, cb, rock, prompter,
-                              prompter_data, der_prev_req, der_req, pa_out);
+    } else if (st->msg->choice == SPAKE_MSGTYPE_ENCDATA) {
+        ret = process_encdata(context, st, &st->msg->u.encdata, cb, rock,
+                              prompter, prompter_data, der_prev_req, der_req,
+                              pa_out);
     } else {
         /* Unexpected message type */
         ret = KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
-    k5_free_pa_spake(context, msg);
     return ret;
 }
 
