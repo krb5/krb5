@@ -389,6 +389,7 @@ DL_LIB		= @DL_LIB@
 
 CMOCKA_LIBS	= @CMOCKA_LIBS@
 LDAP_LIBS	= @LDAP_LIBS@
+LMDB_LIBS	= @LMDB_LIBS@
 
 KRB5_LIB			= -lkrb5
 K5CRYPTO_LIB			= -lk5crypto
@@ -448,6 +449,9 @@ HAVE_SASL = @HAVE_SASL@
 
 # Whether we are building support for NIST SPAKE groups using OpenSSL
 HAVE_SPAKE_OPENSSL = @HAVE_SPAKE_OPENSSL@
+
+# Whether we are building the LMDB KDB module
+HAVE_LMDB = @HAVE_LMDB@
 
 # Whether we have libresolv 1.1.5 for URI discovery tests
 HAVE_RESOLV_WRAPPER = @HAVE_RESOLV_WRAPPER@

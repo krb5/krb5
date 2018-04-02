@@ -21,6 +21,7 @@ SUBDIRS=util include lib \
 	plugins/certauth/test \
 	plugins/kdb/db2 \
 	@ldap_plugin_dir@ \
+	@lmdb_plugin_dir@ \
 	plugins/kdb/test \
 	plugins/kdcpolicy/test \
 	plugins/preauth/otp \
@@ -517,6 +518,7 @@ pyrunenv.vals: Makefile
 	echo "tls_impl = '$(TLS_IMPL)'" >> $@
 	echo "have_sasl = '$(HAVE_SASL)'" >> $@
 	echo "have_spake_openssl = '$(HAVE_SPAKE_OPENSSL)'" >> $@
+	echo "have_lmdb = '$(HAVE_LMDB)'" >> $@
 	echo "sizeof_time_t = $(SIZEOF_TIME_T)" >> $@
 
 runenv.py: pyrunenv.vals

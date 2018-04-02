@@ -1251,6 +1251,27 @@ AC_CHECK_LIB(aceclnt, SD_Init, [
 AC_SUBST(sam2_plugin)
 CFLAGS=$old_CFLAGS
 
+lmdb_plugin_dir=""
+HAVE_LMDB=no
+AC_ARG_WITH([lmdb],
+AC_HELP_STRING([--with-lmdb],
+	    [compile LMDB database backend module @<:@auto@:>@]),,
+	    [withval=auto])
+if test "$withval" = auto -o "$withval" = yes; then
+  AC_CHECK_LIB([lmdb],[mdb_env_create],[have_lmdb=true],[have_lmdb=false])
+  if test "$have_lmdb" = true; then
+    LMDB_LIBS=-llmdb
+    HAVE_LMDB=yes
+    lmdb_plugin_dir='plugins/kdb/lmdb'
+    K5_GEN_MAKEFILE(plugins/kdb/lmdb)
+  elif test "$withval" = yes; then
+    AC_MSG_ERROR([liblmdb not found])
+  fi
+fi
+AC_SUBST(HAVE_LMDB)
+AC_SUBST(LMDB_LIBS)
+AC_SUBST(lmdb_plugin_dir)
+
 # Kludge for simple server --- FIXME is this the best way to do this?
 
 if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
