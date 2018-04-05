@@ -179,6 +179,7 @@ pa_pkinit_gen_req(krb5_context context,
 
     *out_padata = return_pa_data;
     return_pa_data = NULL;
+    cb->disable_fallback(context, rock);
 
 cleanup:
     krb5_free_data(context, der_req);

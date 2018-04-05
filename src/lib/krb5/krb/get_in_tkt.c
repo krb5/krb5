@@ -1331,9 +1331,7 @@ init_creds_step_request(krb5_context context,
         krb5_free_pa_data(context, ctx->optimistic_padata);
         ctx->optimistic_padata = NULL;
         if (code) {
-            /* Make an unauthenticated request, and possibly try again using
-             * the same mechanisms as we tried optimistically. */
-            k5_reset_preauth_types_tried(ctx);
+            /* Make an unauthenticated request. */
             krb5_clear_error_message(context);
             code = 0;
         }
@@ -1360,6 +1358,9 @@ init_creds_step_request(krb5_context context,
     }
     /* Don't continue after a keyboard interrupt. */
     if (code == KRB5_LIBOS_PWDINTR)
+        goto cleanup;
+    /* Don't continue if fallback is disabled. */
+    if (code && ctx->fallback_disabled)
         goto cleanup;
     if (code) {
         /* See if we can try a different preauth mech before giving up. */
@@ -1549,16 +1550,10 @@ init_creds_step_reply(krb5_context context,
         } else if (reply_code == KDC_ERR_PREAUTH_FAILED && retry) {
             note_req_timestamp(context, ctx, ctx->err_reply->stime,
                                ctx->err_reply->susec);
-            if (ctx->method_padata == NULL) {
-                /* Optimistic preauth failed on the KDC.  Allow all mechanisms
-                 * to be tried again using method data. */
-                k5_reset_preauth_types_tried(ctx);
-            } else {
-                /* Don't try again with the mechanism that failed. */
-                code = k5_preauth_note_failed(ctx, ctx->selected_preauth_type);
-                if (code)
-                    goto cleanup;
-            }
+            /* Don't try again with the mechanism that failed. */
+            code = k5_preauth_note_failed(ctx, ctx->selected_preauth_type);
+            if (code)
+                goto cleanup;
             ctx->selected_preauth_type = KRB5_PADATA_NONE;
             /* Accept or update method data if the KDC sent it. */
             if (ctx->err_padata != NULL)

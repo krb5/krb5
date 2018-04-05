@@ -278,6 +278,10 @@ process_challenge(krb5_context context, groupstate *gstate, reqstate *st,
         goto cleanup;
     TRACE_SPAKE_SEND_RESPONSE(context);
     ret = convert_to_padata(response, pa_out);
+    if (ret)
+        goto cleanup;
+
+    cb->disable_fallback(context, rock);
 
 cleanup:
     krb5_free_keyblock(context, k0);

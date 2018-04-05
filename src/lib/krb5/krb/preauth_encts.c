@@ -109,6 +109,8 @@ encts_process(krb5_context context, krb5_clpreauth_moddata moddata,
     *out_padata = pa;
     pa = NULL;
 
+    cb->disable_fallback(context, rock);
+
 cleanup:
     krb5_free_data(context, ts);
     krb5_free_data(context, enc_ts);

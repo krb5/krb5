@@ -410,6 +410,7 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     sam_padata[1] = NULL;
 
     *out_padata = sam_padata;
+    cb->disable_fallback(context, rock);
 
     return(0);
 }

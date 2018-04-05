@@ -31,9 +31,7 @@ for gnum, gname in groups:
                 'Decrypted AS reply')
         realm.kinit('user', 'pw', expected_trace=msgs)
 
-        # Test an unsuccessful authentication.  (The client will try
-        # again with encrypted timestamp, which isn't really desired,
-        # but check for that as long as it is expected.)
+        # Test an unsuccessful authentication.
         msgs = ('/Additional pre-authentication required',
                 'Selected etype info:',
                 'Sending SPAKE support message',
@@ -42,9 +40,6 @@ for gnum, gname in groups:
                 'Continuing preauth mech PA-SPAKE (151)',
                 'SPAKE challenge received with group ' + str(gnum),
                 'Sending SPAKE response',
-                '/Preauthentication failed',
-                'Encrypted timestamp ',
-                'for next request: PA-FX-COOKIE (133), PA-ENC-TIMESTAMP (2)',
                 '/Preauthentication failed')
         realm.kinit('user', 'wrongpw', expected_code=1, expected_trace=msgs)
 
@@ -114,8 +109,6 @@ msgs = ('Attempting optimistic preauth',
         'for next request: PA-SPAKE (151)',
         '/Preauthentication failed',
         'Selected etype info:',
-        'SPAKE challenge with group 1 rejected',
-        'spake (151) (real) returned: -1765328360/Preauthentication failed',
         'Encrypted timestamp ',
         'for next request: PA-FX-COOKIE (133), PA-ENC-TIMESTAMP (2)',
         'AS key determined by preauth:',

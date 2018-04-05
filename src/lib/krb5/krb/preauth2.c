@@ -203,18 +203,6 @@ cleanup:
     free_handles(context, list);
 }
 
-/* Reset the memory of which preauth types we have already tried. */
-void
-k5_reset_preauth_types_tried(krb5_init_creds_context ctx)
-{
-    krb5_preauth_req_context reqctx = ctx->preauth_reqctx;
-
-    if (reqctx == NULL)
-        return;
-    free(reqctx->failed);
-    reqctx->failed = NULL;
-}
-
 /* Add pa_type to the list of types which has previously failed. */
 krb5_error_code
 k5_preauth_note_failed(krb5_init_creds_context ctx, krb5_preauthtype pa_type)
@@ -557,8 +545,14 @@ set_cc_config(krb5_context context, krb5_clpreauth_rock rock,
     return ret;
 }
 
+static void
+disable_fallback(krb5_context context, krb5_clpreauth_rock rock)
+{
+    ((krb5_init_creds_context)rock)->fallback_disabled = TRUE;
+}
+
 static struct krb5_clpreauth_callbacks_st callbacks = {
-    2,
+    3,
     get_etype,
     fast_armor,
     get_as_key,
@@ -568,7 +562,8 @@ static struct krb5_clpreauth_callbacks_st callbacks = {
     responder_get_answer,
     need_as_key,
     get_cc_config,
-    set_cc_config
+    set_cc_config,
+    disable_fallback
 };
 
 /* Tweak the request body, for now adding any enctypes which the module claims

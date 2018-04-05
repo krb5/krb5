@@ -1123,6 +1123,10 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
 
     /* Encode the request into the pa_data output. */
     retval = set_pa_data(req, pa_data_out);
+    if (retval != 0)
+        goto error;
+    cb->disable_fallback(context, rock);
+
 error:
     krb5_free_data_contents(context, &value);
     krb5_free_data_contents(context, &pin);
