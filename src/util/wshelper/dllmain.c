@@ -43,8 +43,6 @@ DllMain(
             return FALSE;
 	if ((dwHesPwUidIndex = TlsAlloc()) == TLS_OUT_OF_INDEXES)
             return FALSE;
-	if ((dwHesPwUidIndex = TlsAlloc()) == TLS_OUT_OF_INDEXES)
-            return FALSE;
 	if ((dwGhnIndex = TlsAlloc()) == TLS_OUT_OF_INDEXES)
             return FALSE;
 	if ((dwGhaIndex = TlsAlloc()) == TLS_OUT_OF_INDEXES)
