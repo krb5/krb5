@@ -9,7 +9,7 @@
  *
  * Each node may represent either a relation or a section header.
  *
- * A section header must have its value field set to 0, and may a one
+ * A section header must have its value field be null, and may have one
  * or more child nodes, pointed to by first_child.
  *
  * A relation has as its value a pointer to allocated memory
@@ -159,15 +159,22 @@ errcode_t profile_add_node(struct profile_node *section, const char *name,
         return PROF_ADD_NOT_SECTION;
 
     /*
-     * Find the place to insert the new node.  We look for the
-     * place *after* the last match of the node name, since
+     * Find the place to insert the new node.  If we are adding a subsection
+     * and already have a subsection with that name, merge them.  Otherwise,
+     * we look for the place *after* the last match of the node name, since
      * order matters.
      */
     for (p=section->first_child, last = 0; p; last = p, p = p->next) {
         int cmp;
         cmp = strcmp(p->name, name);
-        if (cmp > 0)
+        if (cmp > 0) {
             break;
+        } else if (value == NULL && cmp == 0 &&
+                   p->value == NULL && p->deleted != 1) {
+            /* Found duplicate subsection, so don't make a new one. */
+            *ret_node = p;
+            return 0;
+        }
     }
     retval = profile_create_node(name, value, &new);
     if (retval)
