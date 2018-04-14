@@ -369,19 +369,10 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 
     INIT_ULOG(context);
 
-    /* Lock the DB before the ulog to avoid deadlock. */
     retval = krb5_db_open(context, db_args,
                           KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN);
     if (retval)
         return retval;
-    retval = krb5_db_lock(context, KRB5_DB_LOCKMODE_EXCLUSIVE);
-    if (retval)
-        return retval;
-    retval = lock_ulog(context, KRB5_LOCKMODE_EXCLUSIVE);
-    if (retval) {
-        krb5_db_unlock(context);
-        return retval;
-    }
 
     no_of_updates = incr_ret->updates.kdb_ulog_t_len;
     upd = incr_ret->updates.kdb_ulog_t_val;
@@ -391,11 +382,7 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
         if (!upd->kdb_commit)
             continue;
 
-        /* If (unexpectedly) this update does not follow the last one we
-         * stored, discard any previous ulog state. */
-        if (ulog->kdb_num != 0 && upd->kdb_entry_sno != ulog->kdb_last_sno + 1)
-            reset_ulog(log_ctx);
-
+        /* Replay this update in the database. */
         if (upd->kdb_deleted) {
             dbprincstr = k5memdup0(upd->kdb_princ_name.utf8str_t_val,
                                    upd->kdb_princ_name.utf8str_t_len, &retval);
@@ -424,7 +411,18 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
                 goto cleanup;
         }
 
+        retval = lock_ulog(context, KRB5_LOCKMODE_EXCLUSIVE);
+        if (retval)
+            goto cleanup;
+
+        /* If (unexpectedly) this update does not follow the last one we
+         * stored, discard any previous ulog state. */
+        if (ulog->kdb_num != 0 && upd->kdb_entry_sno != ulog->kdb_last_sno + 1)
+            reset_ulog(log_ctx);
+
+        /* Store this update in the ulog for any downstream KDCs. */
         retval = store_update(log_ctx, upd);
+        unlock_ulog(context);
         if (retval)
             goto cleanup;
 
@@ -432,12 +430,10 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
     }
 
 cleanup:
+    if (retval)
+        (void)ulog_init_header(context);
     if (fupd)
         ulog_free_entries(fupd, no_of_updates);
-    if (retval)
-        reset_ulog(log_ctx);
-    unlock_ulog(context);
-    krb5_db_unlock(context);
     return retval;
 }
 
