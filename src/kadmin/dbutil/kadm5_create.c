@@ -68,28 +68,22 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm);
 int kadm5_create(kadm5_config_params *params)
 {
     int retval;
-    krb5_context context;
-
     kadm5_config_params lparams;
-
-    if ((retval = kadm5_init_krb5_context(&context)))
-        exit(ERR);
 
     /*
      * The lock file has to exist before calling kadm5_init, but
      * params->admin_lockfile may not be set yet...
      */
-    if ((retval = kadm5_get_config_params(context, 1,
-                                          params, &lparams))) {
+    retval = kadm5_get_config_params(util_context, 1, params, &lparams);
+    if (retval) {
         com_err(progname, retval, _("while looking up the Kerberos "
                                     "configuration"));
         return 1;
     }
 
-    retval = kadm5_create_magic_princs(&lparams, context);
+    retval = kadm5_create_magic_princs(&lparams, util_context);
 
-    kadm5_free_config_params(context, &lparams);
-    krb5_free_context(context);
+    kadm5_free_config_params(util_context, &lparams);
 
     return retval;
 }
