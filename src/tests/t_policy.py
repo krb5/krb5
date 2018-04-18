@@ -5,6 +5,7 @@ import re
 realm = K5Realm(create_host=False, start_kadmind=True)
 
 # Test password quality enforcement.
+mark('password quality')
 realm.run([kadminl, 'addpol', '-minlength', '6', '-minclasses', '2', 'pwpol'])
 realm.run([kadminl, 'addprinc', '-randkey', '-policy', 'pwpol', 'pwuser'])
 realm.run([kadminl, 'cpw', '-pw', 'sh0rt', 'pwuser'], expected_code=1,
@@ -15,6 +16,7 @@ realm.run([kadminl, 'cpw', '-pw', 'l0ngenough', 'pwuser'])
 
 # Test some password history enforcement.  Even with no history value,
 # the current password should be denied.
+mark('password history')
 realm.run([kadminl, 'cpw', '-pw', 'l0ngenough', 'pwuser'], expected_code=1,
           expected_msg='Cannot reuse password')
 realm.run([kadminl, 'modpol', '-history', '2', 'pwpol'])
@@ -25,6 +27,7 @@ realm.run([kadminl, 'cpw', '-pw', '3rdpassword', 'pwuser'])
 realm.run([kadminl, 'cpw', '-pw', 'l0ngenough', 'pwuser'])
 
 # Test references to nonexistent policies.
+mark('nonexistent policy references')
 realm.run([kadminl, 'addprinc', '-randkey', '-policy', 'newpol', 'newuser'])
 realm.run([kadminl, 'getprinc', 'newuser'],
           expected_msg='Policy: newpol [does not exist]\n')
@@ -36,6 +39,7 @@ realm.run([kadmin, '-p', 'pwuser', '-w', '3rdpassword', 'cpw', '-pw',
            '3rdpassword', 'pwuser'])
 
 # Create newpol and verify that it is enforced.
+mark('create referenced policy')
 realm.run([kadminl, 'addpol', '-minlength', '3', 'newpol'])
 realm.run([kadminl, 'getprinc', 'pwuser'], expected_msg='Policy: newpol\n')
 realm.run([kadminl, 'cpw', '-pw', 'aa', 'pwuser'], expected_code=1,
@@ -48,13 +52,14 @@ realm.run([kadminl, 'cpw', '-pw', 'aa', 'newuser'], expected_code=1,
           expected_msg='Password is too short')
 
 # Delete the policy and verify that it is no longer enforced.
+mark('delete referenced policy')
 realm.run([kadminl, 'delpol', 'newpol'])
 realm.run([kadminl, 'getpol', 'newpol'], expected_code=1,
           expected_msg='Policy does not exist')
 realm.run([kadminl, 'cpw', '-pw', 'aa', 'pwuser'])
 
 # Test basic password lockout support.
-
+mark('password lockout')
 realm.run([kadminl, 'addpol', '-maxfailure', '2', '-failurecountinterval',
            '5m', 'lockout'])
 realm.run([kadminl, 'modprinc', '+requires_preauth', '-policy', 'lockout',
@@ -81,7 +86,7 @@ realm.kinit(realm.user_princ, password('user'))
 # Regression test for issue #7099: databases created prior to krb5 1.3 have
 # multiple history keys, and kadmin prior to 1.7 didn't necessarily use the
 # first one to create history entries.
-
+mark('#7099 regression test')
 realm.stop()
 realm = K5Realm(start_kdc=False)
 # Create a history principal with two keys.
@@ -96,6 +101,7 @@ realm.run([kadminl, 'cpw', '-pw', password('user'), 'user'], expected_code=1,
           expected_msg='Cannot reuse password')
 
 # Test key/salt constraints.
+mark('allowedkeysalts')
 
 realm.stop()
 krb5_conf1 = {'libdefaults': {'supported_enctypes': 'aes256-cts'}}

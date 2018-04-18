@@ -18,6 +18,7 @@ realm.kinit('nokeyuser', password('user'), expected_code=1,
 # PA-FX-COOKIE; 2 is encrypted timestamp.
 
 # Test normal preauth flow.
+mark('normal')
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
         'Preauthenticating using KDC method data',
@@ -29,6 +30,7 @@ realm.run(['./icred', realm.user_princ, password('user')],
           expected_msg='testval', expected_trace=msgs)
 
 # Test successful optimistic preauth.
+mark('optimistic')
 expected_trace = ('Attempting optimistic preauth',
                   'Processing preauth types: -123',
                   'Preauth module test (-123) (real) returned: 0/Success',
@@ -39,6 +41,7 @@ realm.run(['./icred', '-o', '-123', realm.user_princ, password('user')],
 
 # Test optimistic preauth failing on client, falling back to encrypted
 # timestamp.
+mark('optimistic (client failure)')
 msgs = ('Attempting optimistic preauth',
         'Processing preauth types: -123',
         '/induced optimistic fail',
@@ -55,6 +58,7 @@ realm.run(['./icred', '-o', '-123', '-X', 'fail_optimistic', realm.user_princ,
 
 # Test optimistic preauth failing on KDC, falling back to encrypted
 # timestamp.
+mark('optimistic (KDC failure)')
 realm.run([kadminl, 'setstr', realm.user_princ, 'failopt', 'yes'])
 msgs = ('Attempting optimistic preauth',
         'Processing preauth types: -123',
@@ -73,6 +77,7 @@ realm.run(['./icred', '-o', '-123', realm.user_princ, password('user')],
 
 # Test optimistic preauth failing on KDC, stopping because the test
 # module disabled fallback.
+mark('optimistic (KDC failure, no fallback)')
 msgs = ('Attempting optimistic preauth',
         'Processing preauth types: -123',
         'Preauth module test (-123) (real) returned: 0/Success',
@@ -84,6 +89,7 @@ realm.run(['./icred', '-X', 'disable_fallback', '-o', '-123', realm.user_princ,
 realm.run([kadminl, 'delstr', realm.user_princ, 'failopt'])
 
 # Test KDC_ERR_MORE_PREAUTH_DATA_REQUIRED and secure cookies.
+mark('second round-trip')
 realm.run([kadminl, 'setstr', realm.user_princ, '2rt', 'secondtrip'])
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
@@ -101,6 +107,7 @@ realm.run(['./icred', realm.user_princ, password('user')],
 
 # Test client-side failure after KDC_ERR_MORE_PREAUTH_DATA_REQUIRED,
 # falling back to encrypted timestamp.
+mark('second round-trip (client failure)')
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
         'Preauthenticating using KDC method data',
@@ -122,6 +129,7 @@ realm.run(['./icred', '-X', 'fail_2rt', realm.user_princ, password('user')],
 
 # Test client-side failure after KDC_ERR_MORE_PREAUTH_DATA_REQUIRED,
 # stopping because the test module disabled fallback.
+mark('second round-trip (client failure, no fallback)')
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
         'Preauthenticating using KDC method data',
@@ -139,6 +147,7 @@ realm.run(['./icred', '-X', 'fail_2rt', '-X', 'disable_fallback',
 
 # Test KDC-side failure after KDC_ERR_MORE_PREAUTH_DATA_REQUIRED,
 # falling back to encrypted timestamp.
+mark('second round-trip (KDC failure)')
 realm.run([kadminl, 'setstr', realm.user_princ, 'fail2rt', 'yes'])
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
@@ -164,6 +173,7 @@ realm.run(['./icred', realm.user_princ, password('user')],
 
 # Test KDC-side failure after KDC_ERR_MORE_PREAUTH_DATA_REQUIRED,
 # stopping because the test module disabled fallback.
+mark('second round-trip (KDC failure, no fallback)')
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
         'Preauthenticating using KDC method data',
@@ -182,6 +192,7 @@ realm.run(['./icred', '-X', 'disable_fallback',
 realm.run([kadminl, 'delstr', realm.user_princ, 'fail2rt'])
 
 # Test tryagain flow by inducing a KDC_ERR_ENCTYPE_NOSUPP error on the KDC.
+mark('tryagain')
 realm.run([kadminl, 'setstr', realm.user_princ, 'err', 'testagain'])
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
@@ -200,6 +211,7 @@ realm.run(['./icred', realm.user_princ, password('user')],
 
 # Test a client-side tryagain failure, falling back to encrypted
 # timestamp.
+mark('tryagain (client failure)')
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
         'Preauthenticating using KDC method data',
@@ -221,6 +233,7 @@ realm.run(['./icred', '-X', 'fail_tryagain', realm.user_princ,
 
 # Test a client-side tryagain failure, stopping because the test
 # module disabled fallback.
+mark('tryagain (client failure, no fallback)')
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
         'Preauthenticating using KDC method data',
@@ -239,6 +252,7 @@ realm.run(['./icred', '-X', 'fail_tryagain', '-X', 'disable_fallback',
 # Test that multiple stepwise initial creds operations can be
 # performed with the same krb5_context, with proper tracking of
 # clpreauth module request handles.
+mark('interleaved')
 realm.run([kadminl, 'addprinc', '-pw', 'pw', 'u1'])
 realm.run([kadminl, 'addprinc', '+requires_preauth', '-pw', 'pw', 'u2'])
 realm.run([kadminl, 'addprinc', '+requires_preauth', '-pw', 'pw', 'u3'])

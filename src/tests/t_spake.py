@@ -10,7 +10,7 @@ else:
     groups = builtin_groups
 
 for gnum, gname in groups:
-    output('*** Testing group %s\n' % gname)
+    mark('group %s' % gname)
     conf = {'libdefaults': {'spake_preauth_groups': gname}}
     for realm in multipass_realms(create_user=False, create_host=False,
                                   krb5_conf=conf):
@@ -49,6 +49,7 @@ realm = K5Realm(create_user=False, krb5_conf=conf, kdc_conf=kdcconf)
 realm.run([kadminl, 'addprinc', '+preauth', '-pw', 'pw', 'user'])
 
 # Test with FAST.
+mark('FAST')
 msgs = ('Using FAST due to armor ccache negotiation',
         'FAST armor key:',
         'Sending unauthenticated request',
@@ -68,6 +69,7 @@ realm.kinit(realm.host_princ, flags=['-k'])
 realm.kinit('user', 'pw', flags=['-T', realm.ccache], expected_trace=msgs)
 
 # Test optimistic client preauth (151 is PA-SPAKE).
+mark('client optimistic')
 msgs = ('Attempting optimistic preauth',
         'Processing preauth types: PA-SPAKE (151)',
         'Sending SPAKE support message',
@@ -82,6 +84,7 @@ msgs = ('Attempting optimistic preauth',
 realm.run(['./icred', '-o', '151', 'user', 'pw'], expected_trace=msgs)
 
 # Test KDC optimistic challenge (accepted by client).
+mark('KDC optimistic')
 oconf = {'kdcdefaults': {'spake_preauth_kdc_challenge': 'edwards25519'}}
 oenv = realm.special_env('ochal', True, krb5_conf=oconf)
 realm.stop_kdc()
@@ -101,6 +104,7 @@ if runenv.have_spake_openssl != 'yes':
 
 # Test optimistic client preauth falling back to encrypted timestamp
 # because the KDC doesn't support any of the client groups.
+mark('client optimistic (fallback)')
 p256conf={'libdefaults': {'spake_preauth_groups': 'P-256'}}
 p256env = realm.special_env('p256', False, krb5_conf=p256conf)
 msgs = ('Attempting optimistic preauth',
@@ -117,6 +121,7 @@ realm.run(['./icred', '-o', '151', 'user', 'pw'], env=p256env,
           expected_trace=msgs)
 
 # Test KDC optimistic challenge (rejected by client).
+mark('KDC optimistic (rejected)')
 rconf = {'libdefaults': {'spake_preauth_groups': 'P-384,edwards25519'},
          'kdcdefaults': {'spake_preauth_kdc_challenge': 'P-384'}}
 renv = realm.special_env('ochal', True, krb5_conf=rconf)
@@ -138,6 +143,7 @@ msgs = ('Sending unauthenticated request',
 realm.kinit('user', 'pw', expected_trace=msgs)
 
 # Check that the auth indicator for SPAKE is properly included by the KDC.
+mark('auth indicator')
 realm.run([kvno, realm.host_princ])
 realm.run(['./adata', realm.host_princ], expected_msg='+97: [indspake]')
 

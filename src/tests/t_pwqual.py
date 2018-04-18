@@ -17,6 +17,8 @@ f.close()
 
 realm.run([kadminl, 'addpol', 'pol'])
 
+mark('pwqual modules')
+
 # The built-in "empty" module rejects empty passwords even without a policy.
 realm.run([kadminl, 'addprinc', '-pw', '', 'p1'], expected_code=1,
           expected_msg='Empty passwords are not allowed')
@@ -39,6 +41,8 @@ realm.run([kadminl, 'addprinc', '-pw', 'birdsoranges', 'p6'], expected_code=1,
 
 # These plugin ordering tests aren't specifically related to the
 # password quality interface, but are convenient to put here.
+
+mark('plugin module order')
 
 def test_order(realm, testname, conf, expected):
     conf = {'plugins': {'pwqual': conf}}

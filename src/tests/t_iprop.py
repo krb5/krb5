@@ -201,6 +201,7 @@ realm.run([kadminl, 'modprinc', '+allow_tix', pr2])
 check_ulog(6, 1, 6, [None, pr1, pr3, pr2, pr2, pr2])
 
 # Start kpropd for slave1 and get a full dump from master.
+mark('propagate M->1 full')
 kpropd1 = realm.start_kpropd(slave1, ['-d'])
 wait_for_prop(kpropd1, True, 1, 6)
 out = realm.run([kadminl, 'listprincs'], env=slave1)
@@ -209,6 +210,7 @@ if pr1 not in out or pr2 not in out or pr3 not in out:
 check_ulog(1, 6, 6, [None], slave1)
 
 # Make a change and check that it propagates incrementally.
+mark('propagate M->1 incremental')
 realm.run([kadminl, 'modprinc', '-allow_tix', pr2])
 check_ulog(7, 1, 7, [None, pr1, pr3, pr2, pr2, pr2, pr2])
 kpropd1.send_signal(signal.SIGUSR1)
@@ -227,6 +229,7 @@ realm.start_server([kadmind, '-r', realm.realm, '-nofork', '-proponly', '-W',
                     '-F', slave1_out_dump_path], 'starting...', slave1m)
 
 # Test similar default_realm and domain_realm map settings with -r realm.
+mark('propagate 1->3 full')
 slave3_in_dump_path = os.path.join(realm.testdir, 'dump.slave3.in')
 kpropd3 = realm.start_server([kpropd, '-d', '-D', '-r', realm.realm, '-P',
                               slave2_kprop_port, '-f', slave3_in_dump_path,
@@ -239,6 +242,7 @@ if pr1 not in out or pr2 not in out or pr3 not in out:
 check_ulog(1, 7, 7, [None], env=slave3)
 
 # Test an incremental propagation for the kpropd -r case.
+mark('propagate M->1->3 incremental')
 realm.run([kadminl, 'modprinc', '-maxlife', '20 minutes', pr1])
 check_ulog(8, 1, 8, [None, pr1, pr3, pr2, pr2, pr2, pr2, pr1])
 kpropd1.send_signal(signal.SIGUSR1)
@@ -254,6 +258,7 @@ realm.run([kadminl, '-r', realm.realm, 'getprinc', pr1], env=slave3,
 stop_daemon(kpropd3)
 
 # Test dissimilar default_realm and domain_realm map settings (no -r realm).
+mark('propagate 1->4 full')
 slave4_in_dump_path = os.path.join(realm.testdir, 'dump.slave4.in')
 kpropd4 = realm.start_server([kpropd, '-d', '-D', '-P', slave2_kprop_port,
                               '-f', slave4_in_dump_path, '-p', kdb5_util,
@@ -268,6 +273,7 @@ stop_daemon(kpropd4)
 # talking to the same host as master (we specify it anyway to exercise
 # the code), but slave2 defines iprop_port to $port8 so it will talk
 # to slave1.  Get a full dump from slave1.
+mark('propagate 1->2 full')
 kpropd2 = realm.start_server([kpropd, '-d', '-D', '-P', slave2_kprop_port,
                               '-f', slave2_in_dump_path, '-p', kdb5_util,
                               '-a', acl_file, '-A', hostname], 'ready', slave2)
@@ -279,6 +285,7 @@ if pr1 not in out or pr2 not in out or pr3 not in out:
 
 # Make another change and check that it propagates incrementally to
 # both slaves.
+mark('propagate M->1->2 incremental')
 realm.run([kadminl, 'modprinc', '-maxrenewlife', '22 hours', pr1])
 check_ulog(9, 1, 9, [None, pr1, pr3, pr2, pr2, pr2, pr2, pr1, pr1])
 kpropd1.send_signal(signal.SIGUSR1)
@@ -296,6 +303,7 @@ realm.run([kadminl, 'getprinc', pr1], env=slave2,
 # resync will use the old dump file and then propagate changes.
 # slave2 should still be in sync with slave1 after the resync, so make
 # sure it doesn't take a full resync.
+mark('propagate M->1->2 full')
 realm.run([kproplog, '-R'], slave1)
 check_ulog(1, 1, 1, [None], slave1)
 kpropd1.send_signal(signal.SIGUSR1)
@@ -307,6 +315,7 @@ check_ulog(3, 7, 9, [None, pr1, pr1], slave2)
 
 # Make another change and check that it propagates incrementally to
 # both slaves.
+mark('propagate M->1->2 incremental (after reset)')
 realm.run([kadminl, 'modprinc', '+allow_tix', pr2])
 check_ulog(10, 1, 10, [None, pr1, pr3, pr2, pr2, pr2, pr2, pr1, pr1, pr2])
 kpropd1.send_signal(signal.SIGUSR1)
@@ -319,6 +328,7 @@ check_ulog(4, 7, 10, [None, pr1, pr1, pr2], slave2)
 realm.run([kadminl, 'getprinc', pr2], env=slave2, expected_msg='Attributes:\n')
 
 # Create a policy and check that it propagates via full resync.
+mark('propagate M->1->2 full (new policy)')
 realm.run([kadminl, 'addpol', '-minclasses', '2', 'testpol'])
 check_ulog(1, 1, 1, [None])
 kpropd1.send_signal(signal.SIGUSR1)
@@ -333,6 +343,7 @@ realm.run([kadminl, 'getpol', 'testpol'], env=slave2,
           expected_msg='Minimum number of password character classes: 2')
 
 # Modify the policy and test that it also propagates via full resync.
+mark('propagate M->1->2 full (policy change)')
 realm.run([kadminl, 'modpol', '-minlength', '17', 'testpol'])
 check_ulog(1, 1, 1, [None])
 kpropd1.send_signal(signal.SIGUSR1)
@@ -347,6 +358,7 @@ realm.run([kadminl, 'getpol', 'testpol'], env=slave2,
           expected_msg='Minimum password length: 17')
 
 # Delete the policy and test that it propagates via full resync.
+mark('propgate M->1->2 full (policy delete)')
 realm.run([kadminl, 'delpol', 'testpol'])
 check_ulog(1, 1, 1, [None])
 kpropd1.send_signal(signal.SIGUSR1)
@@ -361,6 +373,7 @@ realm.run([kadminl, 'getpol', 'testpol'], env=slave2, expected_code=1,
           expected_msg='Policy does not exist')
 
 # Modify a principal on the master and test that it propagates incrementally.
+mark('propagate M->1->2 incremental (after policy changes)')
 realm.run([kadminl, 'modprinc', '-maxlife', '10 minutes', pr1])
 check_ulog(2, 1, 2, [None, pr1])
 kpropd1.send_signal(signal.SIGUSR1)
@@ -375,6 +388,7 @@ realm.run([kadminl, 'getprinc', pr1], env=slave2,
           expected_msg='Maximum ticket life: 0 days 00:10:00')
 
 # Delete a principal and test that it propagates incrementally.
+mark('propagate M->1->2 incremental (princ delete)')
 realm.run([kadminl, 'delprinc', pr3])
 check_ulog(3, 1, 3, [None, pr1, pr3])
 kpropd1.send_signal(signal.SIGUSR1)
@@ -389,6 +403,7 @@ realm.run([kadminl, 'getprinc', pr3], env=slave2, expected_code=1,
           expected_msg='Principal does not exist')
 
 # Rename a principal and test that it propagates incrementally.
+mark('propagate M->1->2 incremental (princ rename)')
 renpr = "quacked@" + realm.realm
 realm.run([kadminl, 'renprinc', pr1, renpr])
 check_ulog(6, 1, 6, [None, pr1, pr3, renpr, pr1, renpr])
@@ -408,6 +423,7 @@ realm.run([kadminl, 'getprinc', renpr], env=slave2)
 pr1 = renpr
 
 # Reset the ulog on the master to force a full resync.
+mark('propagate M->1->2 full (ulog reset)')
 realm.run([kproplog, '-R'])
 check_ulog(1, 1, 1, [None])
 kpropd1.send_signal(signal.SIGUSR1)
@@ -420,6 +436,7 @@ check_ulog(1, 1, 1, [None], slave2)
 # Stop the kprop daemons so we can test kpropd -t.
 stop_daemon(kpropd1)
 stop_daemon(kpropd2)
+mark('kpropd -t')
 
 # Test the case where no updates are needed.
 out = realm.run_kpropd_once(slave1, ['-d'])

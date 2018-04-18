@@ -25,6 +25,7 @@ f.close()
 
 # Destroy and load the database; check that the policies exist.
 # Spot-check principal and policy fields.
+mark('reload after dump')
 realm.run([kdb5_util, 'destroy', '-f'])
 realm.run([kdb5_util, 'load', dumpfile])
 out = realm.run([kadminl, 'getprincs'])
@@ -42,6 +43,7 @@ realm.run([kadminl, 'getpol', 'barney'],
           expected_msg='Number of old keys kept: 1')
 
 # Dump/load again, and make sure everything is still there.
+mark('second reload')
 realm.run([kdb5_util, 'dump', dumpfile])
 realm.run([kdb5_util, 'load', dumpfile])
 out = realm.run([kadminl, 'getprincs'])
@@ -64,6 +66,7 @@ realm.run([kdb5_util, 'load', srcdump])
 realm.run([kdb5_util, 'stash', '-P', 'master'])
 
 def dump_compare(realm, opt, srcfile):
+    mark('dump comparison against %s' % os.path.basename(srcfile))
     realm.run([kdb5_util, 'dump'] + opt + [dumpfile])
     if not cmp(srcfile, dumpfile, False):
         fail('Dump output does not match %s' % srcfile)
@@ -77,6 +80,7 @@ dump_compare(realm, ['-b7'], srcdump_b7)
 dump_compare(realm, ['-ov'], srcdump_ov)
 
 def load_dump_check_compare(realm, opt, srcfile):
+    mark('load check from %s' % os.path.basename(srcfile))
     realm.run([kdb5_util, 'destroy', '-f'])
     realm.run([kdb5_util, 'load'] + opt + [srcfile])
     realm.run([kadminl, 'getprincs'], expected_msg='user@')

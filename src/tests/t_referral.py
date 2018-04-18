@@ -39,6 +39,7 @@ def restart_kdc(realm, kdc_conf):
 # With no KDC configuration besides [domain_realm], we should get a
 # referral for a NT-SRV-HST or NT-SRV-INST server name, but not an
 # NT-UNKNOWN or NT-PRINCIPAL server name.
+mark('[domain-realm] only')
 testref(realm, 'srv-hst')
 testref(realm, 'srv-inst')
 testfail(realm, 'principal')
@@ -50,6 +51,7 @@ testfail(realm, 'unknown')
 # section, with the realm values supplementing the kdcdefaults values.
 # NT-SRV-HST server names should be unaffected by host_based_services,
 # and NT-PRINCIPAL server names shouldn't get a referral regardless.
+mark('host_based_services')
 restart_kdc(realm, {'kdcdefaults': {'host_based_services': '*'}})
 testref(realm, 'unknown')
 testfail(realm, 'principal')
@@ -69,6 +71,7 @@ testref(realm, 'srv-hst')
 
 # With no_host_referrals matching the first server name component, we
 # should not get a referral even for NT-SRV-HOST server names
+mark('no_host_referral')
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': '*'}})
 testfail(realm, 'srv-hst')
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': ['b', 'a,c']}})
@@ -95,6 +98,7 @@ refrealm.stop()
 
 # Regression test for #7483: a KDC should not return a host referral
 # to its own realm.
+mark('#7483 regression test')
 drealm = {'domain_realm': {'d': 'KRBTEST.COM'}}
 realm = K5Realm(kdc_conf=drealm, create_host=False)
 tracefile = os.path.join(realm.testdir, 'trace')
@@ -110,6 +114,7 @@ realm.stop()
 # Test client referrals.  Use the test KDB module for KRBTEST1.COM to
 # simulate referrals since our built-in modules do not support them.
 # No cross-realm TGTs are necessary.
+mark('client referrals')
 kdcconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
                                   'alias': {'user': '@KRBTEST2.COM',

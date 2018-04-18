@@ -8,16 +8,19 @@ for realm in multipass_realms(create_user=False):
 realm = K5Realm(get_creds=False, start_kadmind=True)
 
 # Test kinit with a partial keytab.
+mark('partial keytab')
 pkeytab = realm.keytab + '.partial'
 realm.run([ktutil], input=('rkt %s\ndelent 1\nwkt %s\n' %
                            (realm.keytab, pkeytab)))
 realm.kinit(realm.host_princ, flags=['-k', '-t', pkeytab])
 
 # Test kinit with no keys for client in keytab.
+mark('no keys for client')
 realm.kinit(realm.user_princ, flags=['-k'], expected_code=1,
             expected_msg='no suitable keys')
 
 # Test kinit and klist with client keytab defaults.
+mark('client keytab')
 realm.extract_keytab(realm.user_princ, realm.client_keytab);
 realm.run([kinit, '-k', '-i'])
 realm.klist(realm.user_princ)
@@ -29,6 +32,7 @@ if realm.client_keytab not in out or realm.user_princ not in out:
     fail('Expected output not seen from klist -k -i')
 
 # Test implicit request for keytab (-i or -t without -k)
+mark('implicit -k')
 realm.run([kdestroy])
 realm.kinit(realm.host_princ, flags=['-t', realm.keytab],
             expected_msg='keytab specified, forcing -k')
@@ -39,6 +43,7 @@ realm.kinit(realm.user_princ, flags=['-i'],
 realm.klist(realm.user_princ)
 
 # Test extracting keys with multiple key versions present.
+mark('multi-kvno extract')
 os.remove(realm.keytab)
 realm.run([kadminl, 'cpw', '-randkey', '-keepold', realm.host_princ])
 out = realm.run([kadminl, 'ktadd', '-norandkey', realm.host_princ])
@@ -49,6 +54,7 @@ if ' 1 host/' not in out or ' 2 host/' not in out:
     fail('Expected output not seen from klist -k -e')
 
 # Test again using kadmin over the network.
+mark('multi-kvno extract (via kadmin)')
 realm.prep_kadmin()
 os.remove(realm.keytab)
 out = realm.run_kadmin(['ktadd', '-norandkey', realm.host_princ])
@@ -72,6 +78,7 @@ def test_key_rotate(realm, princ, expected_kvno):
     msg = 'Key: vno %d,' % expected_kvno
     out = realm.run_kadmin(['getprinc', princ], expected_msg=msg)
 
+mark('key rotation across boundaries')
 princ = 'foo/bar@%s' % realm.realm
 realm.addprinc(princ)
 os.remove(realm.keytab)
@@ -88,6 +95,8 @@ realm.run([kadminl, 'modprinc', '-kvno', '65534', princ])
 test_key_rotate(realm, princ, 65535)
 test_key_rotate(realm, princ, 1)
 test_key_rotate(realm, princ, 2)
+
+mark('32-bit kvno')
 
 # Test that klist -k can read a keytab entry without a 32-bit kvno and
 # reports the 8-bit key version.
@@ -126,6 +135,7 @@ msg = '   3 %s' % realm.user_princ
 out = realm.run([klist, '-k'], expected_msg=msg)
 
 # Test parameter expansion in profile variables
+mark('parameter expansion')
 realm.stop()
 conf = {'libdefaults': {
         'default_keytab_name': 'testdir/%{null}abc%{uid}',

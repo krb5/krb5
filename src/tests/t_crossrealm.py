@@ -61,6 +61,7 @@ def tgt(r1, r2):
 
 
 # Basic two-realm test with cross TGTs in both directions.
+mark('two realms')
 r1, r2 = cross_realms(2)
 test_kvno(r1, r2.host_princ, 'basic r1->r2')
 check_klist(r1, (tgt(r1, r1), tgt(r2, r1), r2.host_princ))
@@ -72,6 +73,7 @@ stop(r1, r2)
 # client in A.X will ask for a cross TGT to B.X, but A.X's KDC only
 # has a TGT for the intermediate realm X, so it will return that
 # instead.  The client will use that to get a TGT for B.X.
+mark('hierarchical realms')
 r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)), 
                           args=({'realm': 'A.X'}, {'realm': 'X'},
                                 {'realm': 'B.X'}))
@@ -84,6 +86,7 @@ stop(r1, r2, r3)
 # The client will walk its A->D capaths to get TGTs for B, then C,
 # then D.  The KDCs for C and D need capaths settings to avoid failing
 # transited checks, including a capaths for A->C.
+mark('client capaths')
 capaths = {'capaths': {'A': {'D': ['B', 'C'], 'C': 'B'}}}
 r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
                               args=({'realm': 'A'},
@@ -99,6 +102,7 @@ stop(r1, r2, r3, r4)
 # Test KDC capaths.  The KDCs for A and B have appropriate capaths
 # settings to determine intermediate TGTs to return, but the client
 # has no idea.
+mark('kdc capaths')
 capaths = {'capaths': {'A': {'D': ['B', 'C'], 'C': 'B'}, 'B': {'D': 'C'}}}
 r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
                               args=({'realm': 'A', 'krb5_conf': capaths},
@@ -111,6 +115,7 @@ stop(r1, r2, r3, r4)
 
 # A capaths value of '.' should enforce direct cross-realm, with no
 # intermediate.
+mark('direct cross-realm enforcement')
 capaths = {'capaths': {'A.X': {'B.X': '.'}}}
 r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)),
                           args=({'realm': 'A.X', 'krb5_conf': capaths},
@@ -122,6 +127,7 @@ stop(r1, r2, r3)
 # Test transited error.  The KDC for C does not recognize B as an
 # intermediate realm for A->C, so it refuses to issue a service
 # ticket.
+mark('transited error (three realms)')
 capaths = {'capaths': {'A': {'C': 'B'}}}
 r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)),
                           args=({'realm': 'A', 'krb5_conf': capaths},
@@ -134,6 +140,7 @@ stop(r1, r2, r3)
 # Test a different kind of transited error.  The KDC for D does not
 # recognize B as an intermediate realm for A->C, so it refuses to
 # verify the krbtgt/C@B ticket in the TGS AP-REQ.
+mark('transited error (four realms)')
 capaths = {'capaths': {'A': {'D': ['B', 'C'], 'C': 'B'}, 'B': {'D': 'C'}}}
 r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
                               args=({'realm': 'A', 'krb5_conf': capaths},

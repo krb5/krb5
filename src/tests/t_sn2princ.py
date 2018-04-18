@@ -40,6 +40,7 @@ def testu(host, princhost, princrealm):
 
 # With the unknown principal type, we do not canonicalize or downcase,
 # but we do remove a trailing period and look up the realm.
+mark('unknown type')
 testu('ptr-mismatch.kerberos.org', 'ptr-mismatch.kerberos.org', 'R1')
 testu('Example.COM', 'Example.COM', 'R2')
 testu('abcde', 'abcde', '')
@@ -47,6 +48,7 @@ testu('abcde', 'abcde', '')
 # A ':port' or ':instance' trailer should be ignored for realm lookup.
 # If there is more than one colon in the name, we assume it's an IPv6
 # address and don't treat it as having a trailer.
+mark('port trailer')
 testu('example.com.:123', 'example.com.:123', 'R2')
 testu('Example.COM:xyZ', 'Example.COM:xyZ', 'R2')
 testu('example.com.::123', 'example.com.::123', '')
@@ -54,6 +56,7 @@ testu('example.com.::123', 'example.com.::123', '')
 # With dns_canonicalize_hostname=false, we downcase and remove
 # trailing dots but do not canonicalize the hostname.  Trailers do not
 # get downcased.
+mark('dns_canonicalize_host=false')
 testnc('ptr-mismatch.kerberos.org', 'ptr-mismatch.kerberos.org', 'R1')
 testnc('Example.COM', 'example.com', 'R2')
 testnc('abcde', 'abcde', '')
@@ -80,6 +83,7 @@ if canonname.lower() != fname:
               '%s forward resolves to %s, not %s' % (oname, canonname, fname))
 
 # Test forward-only canonicalization (rdns=false).
+mark('rdns=false')
 testnr(oname, fname, 'R1')
 testnr(oname + ':123', fname + ':123', 'R1')
 testnr(oname + ':xyZ', fname + ':xyZ', 'R1')
@@ -96,6 +100,7 @@ if rname == fname:
               'which should be different from %s' % (oname, rname, fname))
 
 # Test default canonicalization (forward and reverse lookup).
+mark('default')
 test(oname, rname, 'R3')
 test(oname + ':123', rname + ':123', 'R3')
 test(oname + ':xyZ', rname + ':xyZ', 'R3')

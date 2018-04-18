@@ -34,14 +34,17 @@ if not test_keyring:
     skipped('keyring ccache tests', 'keyring support not built')
 
 # Test kdestroy and klist of a non-existent ccache.
+mark('no ccache')
 realm.run([kdestroy])
 realm.run([klist], expected_code=1, expected_msg='No credentials cache found')
 
 # Test kinit with an inaccessible ccache.
+mark('inaccessible ccache')
 realm.kinit(realm.user_princ, password('user'), flags=['-c', 'testdir/xx/yy'],
             expected_code=1, expected_msg='Failed to store credentials')
 
 # Test klist -s with a single ccache.
+mark('klist -s single ccache')
 realm.run([klist, '-s'], expected_code=1)
 realm.kinit(realm.user_princ, password('user'))
 realm.run([klist, '-s'])
@@ -57,9 +60,11 @@ realm.addprinc('bob', password('bob'))
 realm.addprinc('carol', password('carol'))
 
 def collection_test(realm, ccname):
+    cctype = ccname.partition(':')[0]
     oldccname = realm.env['KRB5CCNAME']
     realm.env['KRB5CCNAME'] = ccname
 
+    mark('%s collection, single cache' % cctype)
     realm.run([klist, '-A', '-s'], expected_code=1)
     realm.kinit('alice', password('alice'))
     realm.run([klist], expected_msg='Default principal: alice@')
@@ -73,6 +78,7 @@ def collection_test(realm, ccname):
         fail('Initial kdestroy failed to empty cache collection.')
     realm.run([klist, '-A', '-s'], expected_code=1)
 
+    mark('%s collection, multiple caches' % cctype)
     realm.kinit('alice', password('alice'))
     realm.kinit('carol', password('carol'))
     output = realm.run([klist, '-l'])
@@ -96,6 +102,7 @@ def collection_test(realm, ccname):
     # (only works with klist/kdestroy for now, not kinit/kswitch).
     realm.env['KRB5CCNAME'] = oldccname
 
+    mark('%s collection, command-line specifier' % cctype)
     realm.run([kdestroy, '-c', ccname])
     output = realm.run([klist, '-l', ccname])
     if 'carol@' in output or 'bob@' not in output or output.count('\n') != 4:
@@ -127,6 +134,7 @@ if test_keyring:
     cleanup_keyring('@s', col_ringname)
 
     # Test legacy keyring cache linkage.
+    mark('legacy keyring cache linkage')
     realm.env['KRB5CCNAME'] = 'KEYRING:' + cname
     realm.run([kdestroy, '-A'])
     realm.kinit(realm.user_princ, password('user'))
@@ -150,6 +158,7 @@ if test_keyring:
     cleanup_keyring('@s', col_ringname)
 
 # Test parameter expansion in default_ccache_name
+mark('default_ccache_name parameter expansion')
 realm.stop()
 conf = {'libdefaults': {'default_ccache_name': 'testdir/%{null}abc%{uid}'}}
 realm = K5Realm(krb5_conf=conf, create_kdb=False)

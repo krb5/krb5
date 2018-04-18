@@ -95,22 +95,26 @@ def kt_test(realm, options, server_options=[]):
 for realm in multipass_realms():
     ccache_save(realm)
 
+    mark('TGS')
     tgs_test(realm, ['-krb5'])
     tgs_test(realm, ['-spnego'])
     tgs_test(realm, ['-iakerb'], ['-iakerb'])
     # test default (i.e., krb5) mechanism with GSS_C_DCE_STYLE
     tgs_test(realm, ['-dce'])
 
+    mark('pw')
     pw_test(realm, ['-krb5'])
     pw_test(realm, ['-spnego'])
     pw_test(realm, ['-iakerb'], ['-iakerb'])
     pw_test(realm, ['-dce'])
 
+    mark('wrong pw')
     wrong_pw_test(realm, ['-krb5'])
     wrong_pw_test(realm, ['-spnego'])
     wrong_pw_test(realm, ['-iakerb'], ['-iakerb'], True)
     wrong_pw_test(realm, ['-dce'])
 
+    mark('client keytab')
     realm.extract_keytab(realm.user_princ, realm.client_keytab)
     kt_test(realm, ['-krb5'])
     kt_test(realm, ['-spnego'])

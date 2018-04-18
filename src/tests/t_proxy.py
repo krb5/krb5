@@ -66,6 +66,7 @@ def start_proxy(realm, keycertpem):
     return realm.start_server(cmd, sentinel='proxy server ready')
 
 # Fail: untrusted issuer and hostname doesn't match.
+mark('untrusted issuer, hostname mismatch')
 output("running pass 1: issuer not trusted and hostname doesn't match\n")
 realm = K5Realm(krb5_conf=unanchored_krb5_conf, get_creds=False,
                 create_host=False)
@@ -75,6 +76,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Fail: untrusted issuer, host name matches subject.
+mark('untrusted issuer, hostname subject match')
 output("running pass 2: subject matches, issuer not trusted\n")
 realm = K5Realm(krb5_conf=unanchored_krb5_conf, get_creds=False,
                 create_host=False)
@@ -84,6 +86,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Fail: untrusted issuer, host name matches subjectAltName.
+mark('untrusted issuer, hostname SAN match')
 output("running pass 3: subjectAltName matches, issuer not trusted\n")
 realm = K5Realm(krb5_conf=unanchored_krb5_conf, get_creds=False,
                 create_host=False)
@@ -93,6 +96,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Fail: untrusted issuer, certificate signature is bad.
+mark('untrusted issuer, bad signature')
 output("running pass 4: subject matches, issuer not trusted\n")
 realm = K5Realm(krb5_conf=unanchored_krb5_conf, get_creds=False,
                 create_host=False)
@@ -102,6 +106,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Fail: trusted issuer but hostname doesn't match.
+mark('trusted issuer, hostname mismatch')
 output("running pass 5: issuer trusted but hostname doesn't match\n")
 realm = K5Realm(krb5_conf=anchored_name_krb5_conf, get_creds=False,
                 create_host=False)
@@ -111,6 +116,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Succeed: trusted issuer and host name matches subject.
+mark('trusted issuer, hostname subject match')
 output("running pass 6: issuer trusted, subject matches\n")
 realm = K5Realm(krb5_conf=anchored_name_krb5_conf, start_kadmind=True,
                 get_creds=False)
@@ -122,6 +128,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Succeed: trusted issuer and host name matches subjectAltName.
+mark('trusted issuer, hostname SAN match')
 output("running pass 7: issuer trusted, subjectAltName matches\n")
 realm = K5Realm(krb5_conf=anchored_name_krb5_conf, start_kadmind=True,
                 get_creds=False)
@@ -133,6 +140,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Fail: certificate signature is bad.
+mark('bad signature')
 output("running pass 8: issuer trusted and subjectAltName matches, sig bad\n")
 realm = K5Realm(krb5_conf=anchored_name_krb5_conf,
                 get_creds=False,
@@ -143,6 +151,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Fail: trusted issuer but IP doesn't match.
+mark('trusted issuer, IP mismatch')
 output("running pass 9: issuer trusted but no name matches IP\n")
 realm = K5Realm(krb5_conf=anchored_ipv4_krb5_conf, get_creds=False,
                 create_host=False)
@@ -152,6 +161,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Fail: trusted issuer, but subject does not match.
+mark('trusted issuer, IP mismatch (hostname in subject)')
 output("running pass 10: issuer trusted, but subject does not match IP\n")
 realm = K5Realm(krb5_conf=anchored_ipv4_krb5_conf, get_creds=False,
                 create_host=False)
@@ -161,6 +171,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Succeed: trusted issuer and host name matches subjectAltName.
+mark('trusted issuer, IP SAN match')
 output("running pass 11: issuer trusted, subjectAltName matches IP\n")
 realm = K5Realm(krb5_conf=anchored_ipv4_krb5_conf, start_kadmind=True,
                 get_creds=False)
@@ -172,6 +183,7 @@ stop_daemon(proxy)
 realm.stop()
 
 # Fail: certificate signature is bad.
+mark('bad signature (IP hostname)')
 output("running pass 12: issuer trusted, names don't match, signature bad\n")
 realm = K5Realm(krb5_conf=anchored_ipv4_krb5_conf, get_creds=False,
                 create_host=False)
@@ -182,6 +194,7 @@ realm.stop()
 
 # Succeed: trusted issuer and host name matches subject, using kadmin
 # configuration to find kpasswdd.
+mark('trusted issuer, hostname subject match (kadmin)')
 output("running pass 13: issuer trusted, subject matches\n")
 realm = K5Realm(krb5_conf=anchored_kadmin_krb5_conf, start_kadmind=True,
                 get_creds=False, create_host=False)
@@ -192,6 +205,7 @@ realm.stop()
 
 # Succeed: trusted issuer and host name matches subjectAltName, using
 # kadmin configuration to find kpasswdd.
+mark('trusted issuer, hostname SAN match (kadmin)')
 output("running pass 14: issuer trusted, subjectAltName matches\n")
 realm = K5Realm(krb5_conf=anchored_kadmin_krb5_conf, start_kadmind=True,
                 get_creds=False, create_host=False)
@@ -202,6 +216,7 @@ realm.stop()
 
 # Succeed: trusted issuer and host name matches subjectAltName (give or take
 # case).
+mark('trusted issuer, hostname SAN case-insensitive match')
 output("running pass 15: issuer trusted, subjectAltName case-insensitive\n")
 realm = K5Realm(krb5_conf=anchored_upcasename_krb5_conf, start_kadmind=True,
                 get_creds=False, create_host=False)

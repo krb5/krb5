@@ -79,6 +79,8 @@ realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=alias_kdc_conf,
                 create_kdb=False)
 realm.start_kdc()
 
+mark('UPN SANs')
+
 # Compatibility check: cert contains UPN "user", which matches the
 # request principal user@KRBTEST.COM if parsed as a normal principal.
 realm.kinit(realm.user_princ,
@@ -114,6 +116,7 @@ realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=pkinit_kdc_conf,
                 get_creds=False)
 
 # Sanity check - password-based preauth should still work.
+mark('password preauth sanity check')
 realm.run(['./responder', '-r', 'password=%s' % password('user'),
            realm.user_princ])
 realm.kinit(realm.user_princ, password=password('user'))
@@ -125,6 +128,7 @@ realm.run([kvno, realm.host_princ])
 realm.run([kadminl, 'purgekeys', '-all', realm.user_princ])
 
 # Test anonymous PKINIT.
+mark('anonymous')
 realm.kinit('@%s' % realm.realm, flags=['-n'], expected_code=1,
             expected_msg='not found in Kerberos database')
 realm.addprinc('WELLKNOWN/ANONYMOUS')
@@ -136,6 +140,7 @@ if '97:' in out:
     fail('auth indicators seen in anonymous PKINIT ticket')
 
 # Test anonymous kadmin.
+mark('anonymous kadmin')
 f = open(os.path.join(realm.testdir, 'acl'), 'a')
 f.write('WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS a *')
 f.close()
@@ -146,6 +151,7 @@ realm.run([kadmin, '-n', 'getprinc', 'testadd'], expected_code=1,
 realm.stop_kadmind()
 
 # Test with anonymous restricted; FAST should work but kvno should fail.
+mark('anonymous restricted')
 r_env = realm.special_env('restrict', True, kdc_conf=restrictive_kdc_conf)
 realm.stop_kdc()
 realm.start_kdc(env=r_env)
@@ -156,6 +162,7 @@ realm.run([kvno, realm.host_princ], expected_code=1,
 
 # Regression test for #8458: S4U2Self requests crash the KDC if
 # anonymous is restricted.
+mark('#8458 regression test')
 realm.kinit(realm.host_princ, flags=['-k'])
 realm.run([kvno, '-U', 'user', realm.host_princ])
 
@@ -164,6 +171,7 @@ realm.stop_kdc()
 realm.start_kdc()
 
 # Run the basic test - PKINIT with FILE: identity, with no password on the key.
+mark('FILE identity, no password')
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
         'Preauthenticating using KDC method data',
@@ -181,6 +189,7 @@ realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
 # Try again using RSA instead of DH.
+mark('FILE identity, no password, RSA')
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % file_identity,
                    '-X', 'flag_RSA_PROTOCOL=yes'],
@@ -191,6 +200,7 @@ realm.klist(realm.user_princ)
 # Test a DH parameter renegotiation by temporarily setting a 4096-bit
 # minimum on the KDC.  (Preauth type 16 is PKINIT PA_PK_AS_REQ;
 # 109 is PKINIT TD_DH_PARAMETERS; 133 is FAST PA-FX-COOKIE.)
+mark('DH parameter renegotiation')
 minbits_kdc_conf = {'realms': {'$realm': {'pkinit_dh_min_bits': '4096'}}}
 minbits_env = realm.special_env('restrict', True, kdc_conf=minbits_kdc_conf)
 realm.stop_kdc()
@@ -211,6 +221,7 @@ realm.kinit(realm.user_princ,
 
 # Test enforcement of required freshness tokens.  (We can leave
 # freshness tokens required after this test.)
+mark('freshness token enforcement')
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % file_identity,
                    '-X', 'disable_freshness=yes'])
@@ -229,6 +240,7 @@ realm.kinit('@%s' % realm.realm, flags=['-n', '-X', 'disable_freshness=yes'])
 # Run the basic test - PKINIT with FILE: identity, with a password on the key,
 # supplied by the prompter.
 # Expect failure if the responder does nothing, and we have no prompter.
+mark('FILE identity, password on key (prompter)')
 realm.run(['./responder', '-x', 'pkinit={"%s": 0}' % file_enc_identity,
           '-X', 'X509_user_identity=%s' % file_enc_identity, realm.user_princ],
           expected_code=2)
@@ -243,6 +255,7 @@ realm.run(['./adata', realm.host_princ],
 # Run the basic test - PKINIT with FILE: identity, with a password on the key,
 # supplied by the responder.
 # Supply the response in raw form.
+mark('FILE identity, password on key (responder)')
 realm.run(['./responder', '-x', 'pkinit={"%s": 0}' % file_enc_identity,
            '-r', 'pkinit={"%s": "encrypted"}' % file_enc_identity,
            '-X', 'X509_user_identity=%s' % file_enc_identity,
@@ -254,6 +267,7 @@ realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
 # PKINIT with DIR: identity, with no password on the key.
+mark('DIR identity, no password')
 os.mkdir(path)
 os.mkdir(path_enc)
 shutil.copy(privkey_pem, os.path.join(path, 'user.key'))
@@ -268,6 +282,7 @@ realm.run([kvno, realm.host_princ])
 # PKINIT with DIR: identity, with a password on the key, supplied by the
 # prompter.
 # Expect failure if the responder does nothing, and we have no prompter.
+mark('DIR identity, password on key (prompter)')
 realm.run(['./responder', '-x', 'pkinit={"%s": 0}' % dir_file_enc_identity,
            '-X', 'X509_user_identity=%s' % dir_enc_identity, realm.user_princ],
            expected_code=2)
@@ -280,6 +295,7 @@ realm.run([kvno, realm.host_princ])
 # PKINIT with DIR: identity, with a password on the key, supplied by the
 # responder.
 # Supply the response in raw form.
+mark('DIR identity, password on key (responder)')
 realm.run(['./responder', '-x', 'pkinit={"%s": 0}' % dir_file_enc_identity,
            '-r', 'pkinit={"%s": "encrypted"}' % dir_file_enc_identity,
            '-X', 'X509_user_identity=%s' % dir_enc_identity, realm.user_princ])
@@ -291,6 +307,7 @@ realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
 # PKINIT with PKCS12: identity, with no password on the bundle.
+mark('PKCS12 identity, no password')
 realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % p12_identity])
 realm.klist(realm.user_princ)
@@ -299,6 +316,7 @@ realm.run([kvno, realm.host_princ])
 # PKINIT with PKCS12: identity, with a password on the bundle, supplied by the
 # prompter.
 # Expect failure if the responder does nothing, and we have no prompter.
+mark('PKCS12 identity, password on bundle (prompter)')
 realm.run(['./responder', '-x', 'pkinit={"%s": 0}' % p12_enc_identity,
            '-X', 'X509_user_identity=%s' % p12_enc_identity, realm.user_princ],
            expected_code=2)
@@ -311,6 +329,7 @@ realm.run([kvno, realm.host_princ])
 # PKINIT with PKCS12: identity, with a password on the bundle, supplied by the
 # responder.
 # Supply the response in raw form.
+mark('PKCS12 identity, password on bundle (responder)')
 realm.run(['./responder', '-x', 'pkinit={"%s": 0}' % p12_enc_identity,
            '-r', 'pkinit={"%s": "encrypted"}' % p12_enc_identity,
            '-X', 'X509_user_identity=%s' % p12_enc_identity, realm.user_princ])
@@ -320,6 +339,8 @@ realm.run(['./responder', '-X', 'X509_user_identity=%s' % p12_enc_identity,
            realm.user_princ])
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
+
+mark('pkinit_cert_match rules')
 
 # Match a single rule.
 rule = '<SAN>^user@KRBTEST.COM$'
@@ -373,6 +394,7 @@ softpkcs11rc = os.path.join(os.getcwd(), 'testdir', 'soft-pkcs11.rc')
 realm.env['SOFTPKCS11RC'] = softpkcs11rc
 
 # PKINIT with PKCS11: identity, with no need for a PIN.
+mark('PKCS11 identity, no PIN')
 conf = open(softpkcs11rc, 'w')
 conf.write("%s\t%s\t%s\t%s\n" % ('user', 'user token', user_pem, privkey_pem))
 conf.close()
@@ -383,6 +405,7 @@ realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
 # PKINIT with PKCS11: identity, with a PIN supplied by the prompter.
+mark('PKCS11 identity, with PIN (prompter)')
 os.remove(softpkcs11rc)
 conf = open(softpkcs11rc, 'w')
 conf.write("%s\t%s\t%s\t%s\n" % ('user', 'user token', user_pem,
@@ -400,6 +423,7 @@ realm.run([kvno, realm.host_princ])
 
 # Supply the wrong PIN, and verify that we ignore the draft9 padata offer
 # in the KDC method data after RFC 4556 PKINIT fails.
+mark('PKCS11 identity, wrong PIN')
 expected_trace = ('PKINIT client has no configured identity; giving up',
                   'PKINIT client ignoring draft 9 offer from RFC 4556 KDC')
 realm.kinit(realm.user_princ,
@@ -408,6 +432,7 @@ realm.kinit(realm.user_princ,
 
 # PKINIT with PKCS11: identity, with a PIN supplied by the responder.
 # Supply the response in raw form.
+mark('PKCS11 identity, with PIN (responder)')
 realm.run(['./responder', '-x', 'pkinit={"%s": 0}' % p11_token_identity,
            '-r', 'pkinit={"%s": "encrypted"}' % p11_token_identity,
            '-X', 'X509_user_identity=%s' % p11_identity, realm.user_princ])
