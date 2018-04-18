@@ -468,6 +468,10 @@ main(int argc, char *argv[])
         fail_to_start(0, _("Missing required realm configuration"));
     if (!(params.mask & KADM5_CONFIG_ACL_FILE))
         fail_to_start(0, _("Missing required ACL file configuration"));
+    if (proponly && !params.iprop_enabled) {
+        fail_to_start(0, _("-proponly can only be used when "
+                           "iprop_enable is true"));
+    }
 
     ret = setup_loop(&params, proponly, &vctx);
     if (ret)
