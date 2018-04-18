@@ -141,6 +141,11 @@ Scripts may use the following functions and variables:
   added newline) in testlog, and write it to stdout if running
   verbosely.
 
+* mark(message): Place a divider message in the test output, to make
+  it easier to determine what part of the test script a command
+  invocation belongs to.  The last mark message will also be displayed
+  if a command invocation fails.  Do not include a newline in message.
+
 * which(progname): Return the location of progname in the executable
   path, or None if it is not found.
 
@@ -376,6 +381,8 @@ def fail(msg):
     """Print a message and exit with failure."""
     global _current_pass
     print "*** Failure:", msg
+    if _last_mark:
+        print "*** Last mark: %s" % _last_mark
     if _last_cmd:
         print "*** Last command (#%d): %s" % (_cmd_index - 1, _last_cmd)
     if _last_cmd_output:
@@ -390,6 +397,12 @@ def success(msg):
     global _success
     output('*** Success: %s\n' % msg)
     _success = True
+
+
+def mark(msg):
+    global _last_mark
+    output('\n====== %s ======\n' % msg)
+    _last_mark = msg
 
 
 def skipped(whatmsg, whymsg):
@@ -1275,6 +1288,7 @@ atexit.register(_onexit)
 signal.signal(signal.SIGINT, _onsigint)
 _outfile = open('testlog', 'w')
 _cmd_index = 1
+_last_mark = None
 _last_cmd = None
 _last_cmd_output = None
 buildtop = _find_buildtop()
