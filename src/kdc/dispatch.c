@@ -124,7 +124,7 @@ dispatch(void *cb, struct sockaddr *local_saddr,
          verto_ctx *vctx, loop_respond_fn respond, void *arg)
 {
     krb5_error_code retval;
-    krb5_kdc_req *as_req;
+    krb5_kdc_req *req = NULL;
     krb5_data *response = NULL;
     struct dispatch_state *state;
     struct server_handle *handle = cb;
@@ -176,28 +176,34 @@ dispatch(void *cb, struct sockaddr *local_saddr,
 
     /* try TGS_REQ first; they are more common! */
 
-    if (krb5_is_tgs_req(pkt)) {
-        retval = process_tgs_req(handle, pkt, from, &response);
-    } else if (krb5_is_as_req(pkt)) {
-        if (!(retval = decode_krb5_as_req(pkt, &as_req))) {
-            /*
-             * setup_server_realm() sets up the global realm-specific data
-             * pointer.
-             * process_as_req frees the request if it is called
-             */
-            state->active_realm = setup_server_realm(handle, as_req->server);
-            if (state->active_realm != NULL) {
-                process_as_req(as_req, pkt, from, state->active_realm, vctx,
-                               finish_dispatch_cache, state);
-                return;
-            } else {
-                retval = KRB5KDC_ERR_WRONG_REALM;
-                krb5_free_kdc_req(kdc_err_context, as_req);
-            }
-        }
-    } else
+    if (krb5_is_tgs_req(pkt))
+        retval = decode_krb5_tgs_req(pkt, &req);
+    else if (krb5_is_as_req(pkt))
+        retval = decode_krb5_as_req(pkt, &req);
+    else
         retval = KRB5KRB_AP_ERR_MSG_TYPE;
+    if (retval)
+        goto done;
 
+    state->active_realm = setup_server_realm(handle, req->server);
+    if (state->active_realm == NULL) {
+        retval = KRB5KDC_ERR_WRONG_REALM;
+        goto done;
+    }
+
+    if (krb5_is_tgs_req(pkt)) {
+        retval = process_tgs_req(req, pkt, from, state->active_realm,
+                                 &response);
+        req = NULL;
+    } else if (krb5_is_as_req(pkt)) {
+        /* process_as_req frees the request and calls finish_dispatch_cache. */
+        process_as_req(req, pkt, from, state->active_realm, vctx,
+                       finish_dispatch_cache, state);
+        return;
+    }
+
+done:
+    krb5_free_kdc_req(kdc_err_context, req);
     finish_dispatch_cache(state, retval, response);
 }
 

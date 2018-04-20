@@ -85,6 +85,7 @@ check-cmocka: t_replay
 check-pytests:
 	$(RUNPYTEST) $(srcdir)/t_workers.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_emptytgt.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_bigreply.py $(PYTESTFLAGS)
 
 install:
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
