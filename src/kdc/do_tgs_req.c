@@ -98,12 +98,12 @@ search_sprinc(kdc_realm_t *, krb5_kdc_req *, krb5_flags,
 
 /*ARGSUSED*/
 krb5_error_code
-process_tgs_req(struct server_handle *handle, krb5_data *pkt,
-                const krb5_fulladdr *from, krb5_data **response)
+process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
+                const krb5_fulladdr *from, kdc_realm_t *kdc_active_realm,
+                krb5_data **response)
 {
     krb5_keyblock * subkey = 0;
     krb5_keyblock *header_key = NULL;
-    krb5_kdc_req *request = 0;
     krb5_db_entry *server = NULL;
     krb5_db_entry *stkt_server = NULL;
     krb5_kdc_rep reply;
@@ -136,7 +136,6 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     krb5_pa_data *pa_tgs_req; /*points into request*/
     krb5_data scratch;
     krb5_pa_data **e_data = NULL;
-    kdc_realm_t *kdc_active_realm = NULL;
     krb5_audit_state *au_state = NULL;
     krb5_data **auth_indicators = NULL;
 
@@ -147,36 +146,25 @@ process_tgs_req(struct server_handle *handle, krb5_data *pkt,
     memset(&server_keyblock, 0, sizeof(server_keyblock));
     session_key.contents = NULL;
 
-    retval = decode_krb5_tgs_req(pkt, &request);
-    if (retval)
-        return retval;
     /* Save pointer to client-requested service principal, in case of
      * errors before a successful call to search_sprinc(). */
     sprinc = request->server;
 
     if (request->msg_type != KRB5_TGS_REQ) {
-        krb5_free_kdc_req(handle->kdc_err_context, request);
+        krb5_free_kdc_req(kdc_context, request);
         return KRB5_BADMSGTYPE;
     }
 
-    /*
-     * setup_server_realm() sets up the global realm-specific data pointer.
-     */
-    kdc_active_realm = setup_server_realm(handle, request->server);
-    if (kdc_active_realm == NULL) {
-        krb5_free_kdc_req(handle->kdc_err_context, request);
-        return KRB5KDC_ERR_WRONG_REALM;
-    }
     errcode = kdc_make_rstate(kdc_active_realm, &state);
     if (errcode !=0) {
-        krb5_free_kdc_req(handle->kdc_err_context, request);
+        krb5_free_kdc_req(kdc_context, request);
         return errcode;
     }
 
     /* Initialize audit state. */
     errcode = kau_init_kdc_req(kdc_context, request, from, &au_state);
     if (errcode) {
-        krb5_free_kdc_req(handle->kdc_err_context, request);
+        krb5_free_kdc_req(kdc_context, request);
         return errcode;
     }
     /* Seed the audit trail with the request ID and basic information. */

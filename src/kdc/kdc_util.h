@@ -145,9 +145,8 @@ process_as_req (krb5_kdc_req *, krb5_data *,
 
 /* do_tgs_req.c */
 krb5_error_code
-process_tgs_req (struct server_handle *, krb5_data *,
-                 const krb5_fulladdr *,
-                 krb5_data ** );
+process_tgs_req (krb5_kdc_req *, krb5_data *, const krb5_fulladdr *,
+                 kdc_realm_t *, krb5_data ** );
 /* dispatch.c */
 void
 dispatch (void *,
