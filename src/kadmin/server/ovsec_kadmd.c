@@ -106,7 +106,6 @@ fail_to_start(krb5_error_code code, const char *msg)
 {
     const char *errmsg;
 
-    fprintf(stderr, "%s: ", progname);
     if (code) {
         errmsg = krb5_get_error_message(context, code);
         fprintf(stderr, _("%s: %s while %s, aborting\n"), progname, errmsg,
