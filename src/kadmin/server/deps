@@ -83,9 +83,8 @@ $(OUTPRE)server_stubs.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 $(OUTPRE)ovsec_kadmd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_alloc.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(BUILDTOP)/include/gssrpc/types.h \
-  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/admin_internal.h \
-  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_err.h \
-  $(BUILDTOP)/include/kadm5/kadm_rpc.h $(BUILDTOP)/include/kadm5/server_internal.h \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/lib/gssapi/generic/gssapi_err_generic.h \
   $(BUILDTOP)/lib/gssapi/krb5/gssapi_err_krb5.h $(COM_ERR_DEPS) \

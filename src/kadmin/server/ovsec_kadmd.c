@@ -54,7 +54,6 @@
 #include <adm_proto.h>
 #include "kdb_kt.h"  /* for krb5_ktkdb_set_context */
 #include <string.h>
-#include "kadm5/server_internal.h" /* XXX for kadm5_server_handle_t */
 #include <kdb_log.h>
 
 #include "misc.h"
@@ -137,11 +136,10 @@ write_pid_file(const char *pid_file)
 /* Set up the main loop.  If proponly is set, don't set up ports for kpasswd or
  * kadmin.  May set *ctx_out even on error. */
 static krb5_error_code
-setup_loop(int proponly, verto_ctx **ctx_out)
+setup_loop(kadm5_config_params *params, int proponly, verto_ctx **ctx_out)
 {
     krb5_error_code ret;
     verto_ctx *ctx;
-    kadm5_server_handle_t handle = global_server_handle;
 
     *ctx_out = ctx = loop_init(VERTO_EV_TYPE_SIGNAL);
     if (ctx == NULL)
@@ -150,24 +148,23 @@ setup_loop(int proponly, verto_ctx **ctx_out)
     if (ret)
         return ret;
     if (!proponly) {
-        ret = loop_add_udp_address(handle->params.kpasswd_port,
-                                   handle->params.kpasswd_listen);
+        ret = loop_add_udp_address(params->kpasswd_port,
+                                   params->kpasswd_listen);
         if (ret)
             return ret;
-        ret = loop_add_tcp_address(handle->params.kpasswd_port,
-                                   handle->params.kpasswd_listen);
+        ret = loop_add_tcp_address(params->kpasswd_port,
+                                   params->kpasswd_listen);
         if (ret)
             return ret;
-        ret = loop_add_rpc_service(handle->params.kadmind_port,
-                                   handle->params.kadmind_listen,
+        ret = loop_add_rpc_service(params->kadmind_port,
+                                   params->kadmind_listen,
                                    KADM, KADMVERS, kadm_1);
         if (ret)
             return ret;
     }
 #ifndef DISABLE_IPROP
-    if (handle->params.iprop_enabled) {
-        ret = loop_add_rpc_service(handle->params.iprop_port,
-                                   handle->params.iprop_listen,
+    if (params->iprop_enabled) {
+        ret = loop_add_rpc_service(params->iprop_port, params->iprop_listen,
                                    KRB5_IPROP_PROG, KRB5_IPROP_VERS,
                                    krb5_iprop_prog_1);
         if (ret)
@@ -472,7 +469,7 @@ main(int argc, char *argv[])
     if (!(params.mask & KADM5_CONFIG_ACL_FILE))
         fail_to_start(0, _("Missing required ACL file configuration"));
 
-    ret = setup_loop(proponly, &vctx);
+    ret = setup_loop(&params, proponly, &vctx);
     if (ret)
         fail_to_start(ret, _("initializing network"));
 
