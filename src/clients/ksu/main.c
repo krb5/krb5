@@ -121,6 +121,9 @@ main (argc, argv)
     krb5_boolean restrict_creds;
     krb5_deltat lifetime, rlife;
 
+    if (argc == 0)
+        exit(1);
+
     params = (char **) xcalloc (2, sizeof (char *));
     params[1] = NULL;
 
@@ -138,8 +141,6 @@ main (argc, argv)
         exit(1);
     }
 
-    if (argc == 0)
-        exit(1);
     if (strrchr(argv[0], '/'))
         argv[0] = strrchr(argv[0], '/')+1;
     prog_name = argv[0];
