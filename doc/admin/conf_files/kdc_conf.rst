@@ -475,8 +475,8 @@ The following tags may be specified in a [dbmodules] subsection:
 
 **db_library**
     This tag indicates the name of the loadable database module.  The
-    value should be ``db2`` for the DB2 module and ``kldap`` for the
-    LDAP module.
+    value should be ``db2`` for the DB2 module, ``klmdb`` for the LMDB
+    module, or ``kldap`` for the LDAP module.
 
 **disable_last_success**
     If set to ``true``, suppresses KDC updates to the "Last successful
@@ -550,6 +550,24 @@ The following tags may be specified in a [dbmodules] subsection:
     **ldap_kdc_dn** and **ldap_kadmind_dn** objects, or for the
     **ldap_kdc_sasl_authcid** or **ldap_kadmind_sasl_authcid** names
     for SASL authentication.  This file must be kept secure.
+
+**mapsize**
+    This LMDB-specific tag indicates the maximum size of the two
+    database environments in megabytes.  The default value is 128.
+    Increase this value to address "Environment mapsize limit reached"
+    errors.  New in release 1.17.
+
+**max_readers**
+    This LMDB-specific tag indicates the maximum number of concurrent
+    reading processes for the databases.  The default value is 128.
+    New in release 1.17.
+
+**nosync**
+    This LMDB-specific tag can be set to improve the throughput of
+    kadmind and other administrative agents, at the expense of
+    durability (recent database changes may not survive a power outage
+    or other sudden reboot).  It does not affect the throughput of the
+    KDC.  The default value is false.  New in release 1.17.
 
 **unlockiter**
     If set to ``true``, this DB2-specific tag causes iteration

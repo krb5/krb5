@@ -115,6 +115,8 @@ LDAP replication, then account lockout state may be replicated between
 KDCs and the concerns of this section may not apply.
 
 
+.. _disable_lockout:
+
 KDC performance and account lockout
 -----------------------------------
 

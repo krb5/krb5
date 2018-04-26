@@ -33,7 +33,7 @@ Crypto backends:
     - builtin - MIT Kerberos native crypto library
     - OpenSSL (1.0\+) - http://www.openssl.org
 
-Database backends: LDAP, DB2
+Database backends: LDAP, DB2, LMDB
 
 krb4 support: Kerberos 5 release < 1.8
 

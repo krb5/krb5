@@ -1,3 +1,5 @@
+.. _conf_ldap:
+
 Configuring Kerberos with OpenLDAP back-end
 ===========================================
 

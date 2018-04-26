@@ -329,6 +329,9 @@ Optional packages
 **-**\ **-with-ldap**
     Compile OpenLDAP database backend module.
 
+**-**\ **-with-lmdb**
+    Compile LMDB database backend module.
+
 **-**\ **-with-tcl=**\ *path*
     Specifies that *path* is the location of a Tcl installation.
     Tcl is needed for some of the tests run by 'make check'; such tests
