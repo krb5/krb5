@@ -3,9 +3,9 @@ from k5test import *
 import time
 from itertools import imap
 
-# Run kdbtest against the BDB module.
-realm = K5Realm(create_kdb=False)
-realm.run(['./kdbtest'])
+# Run kdbtest against the non-LDAP KDB modules.
+for realm in multidb_realms(create_kdb=False):
+    realm.run(['./kdbtest'])
 
 # Set up an OpenLDAP test server if we can.
 

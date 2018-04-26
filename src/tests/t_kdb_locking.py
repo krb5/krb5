@@ -13,7 +13,7 @@ import os
 from k5test import *
 
 p = 'foo'
-realm = K5Realm(create_user=False)
+realm = K5Realm(create_user=False, bdb_only=True)
 realm.addprinc(p, p)
 
 kadm5_lock = os.path.join(realm.testdir, 'db.kadm5.lock')

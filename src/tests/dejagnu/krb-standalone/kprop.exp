@@ -6,7 +6,7 @@
 # processes when the procedure ends.
 
 proc setup_slave {} {
-    global tmppwd hostname REALMNAME
+    global tmppwd hostname REALMNAME env
     file delete $tmppwd/slave-stash $tmppwd/slave-acl
     file copy -force $tmppwd/stash:foo $tmppwd/slave-stash
     file copy -force $tmppwd/acl $tmppwd/slave-acl
@@ -16,7 +16,12 @@ proc setup_slave {} {
 	close $aclfile
     }
     file copy -force $tmppwd/adb.lock $tmppwd/slave-adb.lock
-    foreach suffix { {} .kadm5 .kadm5.lock .ok } {
+    if [info exists env(K5TEST_LMDB)] {
+	set suffixes { .mdb .mdb-lock .lockout.mdb .lockout.mdb-lock }
+    } else {
+	set suffixes { {} .kadm5 .kadm5.lock .ok }
+    }
+    foreach suffix $suffixes {
 	file copy -force $tmppwd/kdc-db$suffix $tmppwd/slave-db$suffix
     }
 }

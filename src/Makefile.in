@@ -490,7 +490,7 @@ check-prerecurse: runenv.py
 	$(RM) $(SKIPTESTS)
 	touch $(SKIPTESTS)
 
-check-unix:
+check-unix: check-lmdb-$(HAVE_LMDB)
 	cat $(SKIPTESTS)
 
 check-pytests-no: check-postrecurse
@@ -500,6 +500,10 @@ check-pytests-no: check-postrecurse
 check-cmocka-no: check-postrecurse
 	@echo 'Skipped cmocka tests: cmocka library or header not found' >> \
 		$(SKIPTESTS)
+
+check-lmdb-yes:
+check-lmdb-no:
+	@echo 'Skipped LMDB tests: LMDB KDB module not built' >> $(SKIPTESTS)
 
 # Create a test realm and spawn a shell in an environment pointing to it.
 # If CROSSNUM is set, create that many fully connected test realms and

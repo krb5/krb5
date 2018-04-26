@@ -118,6 +118,9 @@ keyword arguments:
 
 * get_creds=False: Don't get user credentials.
 
+* bdb_only=True: Use the DB2 KDB module even if K5TEST_LMDB is set in
+  the environment.
+
 Scripts may use the following functions and variables:
 
 * fail(message): Display message (plus leading marker and trailing
@@ -164,6 +167,12 @@ Scripts may use the following functions and variables:
   keyword with the exception of krbtgt_keysalt, which will not be
   honored.  If keywords contains krb5_conf and/or kdc_conf fragments,
   they will be merged with the default and per-pass specifications.
+
+* multidb_realms(**keywords): Yields a realm for multiple DB modules.
+  Currently DB2 and LMDB are included.  Ideally LDAP would be
+  included, but setting up a test LDAP server currently requires a
+  one-second delay, so all LDAP tests are currently confined to
+  t_kdb.py.  keywords may contain any K5Realm initializer.
 
 * cross_realms(num, xtgts=None, args=None, **keywords): This function
   returns a list of num realms, where each realm's configuration knows
@@ -390,6 +399,8 @@ def fail(msg):
         sys.stdout.write(_last_cmd_output)
     if _current_pass:
         print "*** Failed in test pass:", _current_pass
+    if _current_db:
+        print "*** Failed with db:", _current_db
     sys.exit(1)
 
 
@@ -810,8 +821,9 @@ class K5Realm(object):
                  krb5_conf=None, kdc_conf=None, create_kdb=True,
                  krbtgt_keysalt=None, create_user=True, get_creds=True,
                  create_host=True, start_kdc=True, start_kadmind=False,
-                 start_kpropd=False):
+                 start_kpropd=False, bdb_only=False):
         global hostname, _default_krb5_conf, _default_kdc_conf
+        global _lmdb_kdc_conf, _current_db
 
         self.realm = realm
         self.testdir = os.path.join(os.getcwd(), testdir)
@@ -826,7 +838,11 @@ class K5Realm(object):
         self.ccache = os.path.join(self.testdir, 'ccache')
         self.kadmin_ccache = os.path.join(self.testdir, 'kadmin_ccache')
         self._krb5_conf = _cfg_merge(_default_krb5_conf, krb5_conf)
-        self._kdc_conf = _cfg_merge(_default_kdc_conf, kdc_conf)
+        base_kdc_conf = _default_kdc_conf
+        if (os.getenv('K5TEST_LMDB') is not None and
+            not bdb_only and not _current_db):
+            base_kdc_conf = _cfg_merge(base_kdc_conf, _lmdb_kdc_conf)
+        self._kdc_conf = _cfg_merge(base_kdc_conf, kdc_conf)
         self._kdc_proc = None
         self._kadmind_proc = None
         self._kpropd_procs = []
@@ -1008,6 +1024,10 @@ class K5Realm(object):
         self._kpropd_procs.append(proc)
         return proc
 
+    def stop_kpropd(self, proc):
+        stop_daemon(proc)
+        self._kpropd_procs.remove(proc)
+
     def run_kpropd_once(self, env, args=[]):
         return self.run(self._kpropd_args() + ['-t'] + args, env=env)
 
@@ -1100,6 +1120,20 @@ def multipass_realms(**keywords):
         yield realm
         realm.stop()
         _current_pass = None
+
+
+def multidb_realms(**keywords):
+    global _current_db, _dbpasses
+    caller_kdc_conf = keywords.get('kdc_conf')
+    for p in _dbpasses:
+        (name, kdc_conf) = p
+        output('*** Using DB type %s\n' % name)
+        keywords['kdc_conf'] = _cfg_merge(kdc_conf, caller_kdc_conf)
+        _current_db = name
+        realm = K5Realm(**keywords)
+        yield realm
+        realm.stop()
+        _current_db = None
 
 
 def cross_realms(num, xtgts=None, args=None, **keywords):
@@ -1198,6 +1232,10 @@ _default_kdc_conf = {
         'default': 'FILE:$testdir/others.log'}}
 
 
+_lmdb_kdc_conf = {'dbmodules': {'db': {'db_library': 'klmdb',
+                                       'nosync': 'true'}}}
+
+
 # A pass is a tuple of: name, krbtgt_keysalt, krb5_conf, kdc_conf.
 _passes = [
     # No special settings; exercises AES256.
@@ -1282,6 +1320,7 @@ _passes = [
 
 _success = False
 _current_pass = None
+_current_db = None
 _daemons = []
 _parse_args()
 atexit.register(_onexit)
@@ -1297,6 +1336,11 @@ plugins = os.path.join(buildtop, 'plugins')
 runenv = _import_runenv()
 hostname = _get_hostname()
 null_input = open(os.devnull, 'r')
+
+# A DB pass is a tuple of: name, kdc_conf.
+_dbpasses = [('db2', None)]
+if runenv.have_lmdb == 'yes':
+    _dbpasses.append(('lmdb', _lmdb_kdc_conf))
 
 krb5kdc = os.path.join(buildtop, 'kdc', 'krb5kdc')
 kadmind = os.path.join(buildtop, 'kadmin', 'server', 'kadmind')

@@ -60,34 +60,36 @@ realm.run([kadminl, 'cpw', '-pw', 'aa', 'pwuser'])
 
 # Test basic password lockout support.
 mark('password lockout')
-realm.run([kadminl, 'addpol', '-maxfailure', '2', '-failurecountinterval',
-           '5m', 'lockout'])
-realm.run([kadminl, 'modprinc', '+requires_preauth', '-policy', 'lockout',
-           'user'])
+realm.stop()
+for realm in multidb_realms(create_host=False):
+    realm.run([kadminl, 'addpol', '-maxfailure', '2', '-failurecountinterval',
+               '5m', 'lockout'])
+    realm.run([kadminl, 'modprinc', '+requires_preauth', '-policy', 'lockout',
+               'user'])
 
-# kinit twice with the wrong password.
-realm.run([kinit, realm.user_princ], input='wrong\n', expected_code=1,
-          expected_msg='Password incorrect while getting initial credentials')
-realm.run([kinit, realm.user_princ], input='wrong\n', expected_code=1,
-          expected_msg='Password incorrect while getting initial credentials')
+    # kinit twice with the wrong password.
+    msg = 'Password incorrect while getting initial credentials'
+    realm.run([kinit, realm.user_princ], input='wrong\n', expected_code=1,
+              expected_msg=msg)
+    realm.run([kinit, realm.user_princ], input='wrong\n', expected_code=1,
+              expected_msg=msg)
 
-# Now the account should be locked out.
-m = 'Client\'s credentials have been revoked while getting initial credentials'
-realm.run([kinit, realm.user_princ], expected_code=1, expected_msg=m)
+    # Now the account should be locked out.
+    msg = 'credentials have been revoked while getting initial credentials'
+    realm.run([kinit, realm.user_princ], expected_code=1, expected_msg=msg)
 
-# Check that modprinc -unlock allows a further attempt.
-realm.run([kadminl, 'modprinc', '-unlock', 'user'])
-realm.kinit(realm.user_princ, password('user'))
+    # Check that modprinc -unlock allows a further attempt.
+    realm.run([kadminl, 'modprinc', '-unlock', 'user'])
+    realm.kinit(realm.user_princ, password('user'))
 
-# Make sure a nonexistent policy reference doesn't prevent authentication.
-realm.run([kadminl, 'delpol', 'lockout'])
-realm.kinit(realm.user_princ, password('user'))
+    # Make sure a nonexistent policy reference doesn't prevent authentication.
+    realm.run([kadminl, 'delpol', 'lockout'])
+    realm.kinit(realm.user_princ, password('user'))
 
 # Regression test for issue #7099: databases created prior to krb5 1.3 have
 # multiple history keys, and kadmin prior to 1.7 didn't necessarily use the
 # first one to create history entries.
 mark('#7099 regression test')
-realm.stop()
 realm = K5Realm(start_kdc=False)
 # Create a history principal with two keys.
 realm.run(['./hist', 'make'])
