@@ -73,6 +73,48 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.15.3 (2018-05-03)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix flaws in LDAP DN checking, including a null dereference KDC
+  crash which could be triggered by kadmin clients with administrative
+  privileges [CVE-2018-5729, CVE-2018-5730].
+
+* Fix a KDC PKINIT memory leak.
+
+* Fix a small KDC memory leak on transited or authdata errors when
+  processing TGS requests.
+
+* Fix a null dereference when the KDC sends a large TGS reply.
+
+* Fix "kdestroy -A" with the KCM credential cache type.
+
+* Fix the handling of capaths "." values.
+
+* Fix handling of repeated subsection specifications in profile files
+  (such as when multiple included files specify relations in the same
+  subsection).
+
+krb5-1.15.3 changes by ticket ID
+--------------------------------
+
+7863	profile library mishandles duplicate subsections
+8616	Fix default enctype order in docs
+8617	PKINIT matching can crash for certs with long issuer and subject
+8620	Length check when parsing GSS token encapsulation
+8639	Always set appdefault_get() output argument
+8643	Fix flaws in LDAP DN checking
+8644	Fix memory leak in KDC PKINIT code
+8645	Fix KDC encrypting key memory leak on some errors
+8646	Fix capaths "." values on client
+8658	kdestroy -A fails with KCM ccache type
+8666	KDC null dereference when TGS reply is too big for UDP
+8669	Fix doubled "kadmind:" in kadmind fail_to_start()
+8675	Set error message on KCM get_princ failure
+
+
 Major changes in 1.15.2 (2017-09-25)
 ------------------------------------
 
@@ -405,6 +447,7 @@ reports, suggestions, and valuable resources:
     Russell Allbery
     Brian Almeida
     Michael B Allen
+    Pooja Anil
     Heinz-Ado Arnolds
     Derek Atkins
     Mark Bannister
@@ -458,6 +501,7 @@ reports, suggestions, and valuable resources:
     JC Ferguson
     Remi Ferrand
     Paul Fertser
+    Fabiano Fidêncio
     William Fiveash
     Jacques Florent
     Ákos Frohner
@@ -532,6 +576,7 @@ reports, suggestions, and valuable resources:
     Zoran Pericic
     W. Michael Petullo
     Mark Phalan
+    Sharwan Ram
     Brett Randall
     Jonathan Reams
     Jonathan Reed
@@ -562,6 +607,7 @@ reports, suggestions, and valuable resources:
     John Washington
     Stef Walter
     Xi Wang
+    Nehal J Wani
     Kevin Wasserman
     Margaret Wasserman
     Marcus Watts
