@@ -114,7 +114,7 @@ extendedKeyUsage = $CLIENT_EKU_LIST
 EOF
 
 # Generate a private key.
-openssl genrsa $KEYSIZE -nodes > privkey.pem
+openssl genrsa $KEYSIZE > privkey.pem
 openssl rsa -in privkey.pem -out privkey-enc.pem -des3 -passout pass:encrypted
 
 # Generate a "CA" certificate.

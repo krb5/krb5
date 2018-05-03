@@ -79,7 +79,7 @@ extendedKeyUsage = $PROXY_EKU_LIST
 EOF
 
 # Generate a private key.
-openssl genrsa $KEYSIZE -nodes > privkey.pem
+openssl genrsa $KEYSIZE > privkey.pem
 
 # Generate a "CA" certificate.
 SUBJECT=signer openssl req -config openssl.cnf -new -x509 -extensions exts_ca \
