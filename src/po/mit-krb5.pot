@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.15.2\n"
+"Project-Id-Version: mit-krb5 1.15.2-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-25 12:24-0400\n"
+"POT-Creation-Date: 2018-05-03 12:59-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3141,144 +3141,144 @@ msgid ""
 "\t\t\tLook at each database documentation for supported arguments\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:112
+#: ../../src/kadmin/server/ovsec_kadmd.c:111
 #, c-format
 msgid "%s: %s while %s, aborting\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:114
+#: ../../src/kadmin/server/ovsec_kadmd.c:113
 #, c-format
 msgid "%s while %s, aborting\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:116
+#: ../../src/kadmin/server/ovsec_kadmd.c:115
 #, c-format
 msgid "%s: %s, aborting\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:117
+#: ../../src/kadmin/server/ovsec_kadmd.c:116
 #, c-format
 msgid "%s, aborting"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:286
+#: ../../src/kadmin/server/ovsec_kadmd.c:285
 #, c-format
 msgid ""
 "WARNING! Forged/garbled request: %s, claimed client = %.*s%s, server = %.*s"
 "%s, addr = %s"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:292
+#: ../../src/kadmin/server/ovsec_kadmd.c:291
 #, c-format
 msgid ""
 "WARNING! Forged/garbled request: %d, claimed client = %.*s%s, server = %.*s"
 "%s, addr = %s"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:306
+#: ../../src/kadmin/server/ovsec_kadmd.c:305
 #, c-format
 msgid "Miscellaneous RPC error: %s, %s"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:322
+#: ../../src/kadmin/server/ovsec_kadmd.c:321
 #, c-format
 msgid "%s Cannot decode status %d"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:340
+#: ../../src/kadmin/server/ovsec_kadmd.c:339
 #, c-format
 msgid "Authentication attempt failed: %s, GSS-API error strings are:"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:345
+#: ../../src/kadmin/server/ovsec_kadmd.c:344
 msgid "   GSS-API error strings complete."
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:382
+#: ../../src/kadmin/server/ovsec_kadmd.c:381
 #, c-format
 msgid "%s: cannot initialize. Not enough memory\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:454
+#: ../../src/kadmin/server/ovsec_kadmd.c:453
 #, c-format
 msgid "%s: %s while initializing context, aborting\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:465
+#: ../../src/kadmin/server/ovsec_kadmd.c:464
 msgid "initializing"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:469
+#: ../../src/kadmin/server/ovsec_kadmd.c:468
 msgid "getting config parameters"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:471
+#: ../../src/kadmin/server/ovsec_kadmd.c:470
 msgid "Missing required realm configuration"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:473
+#: ../../src/kadmin/server/ovsec_kadmd.c:472
 msgid "Missing required ACL file configuration"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:477
+#: ../../src/kadmin/server/ovsec_kadmd.c:476
 msgid "initializing network"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:482
+#: ../../src/kadmin/server/ovsec_kadmd.c:481
 msgid "Cannot build GSSAPI auth names"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:486
+#: ../../src/kadmin/server/ovsec_kadmd.c:485
 msgid "Cannot set up KDB keytab"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:489
+#: ../../src/kadmin/server/ovsec_kadmd.c:488
 msgid "Cannot set GSSAPI authentication names"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:506
+#: ../../src/kadmin/server/ovsec_kadmd.c:505
 msgid "Cannot initialize GSSAPI service name"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:510
+#: ../../src/kadmin/server/ovsec_kadmd.c:509
 msgid "initializing ACL file"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:513
+#: ../../src/kadmin/server/ovsec_kadmd.c:512
 msgid "spawning daemon process"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:517
+#: ../../src/kadmin/server/ovsec_kadmd.c:516
 msgid "creating PID file"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:520
+#: ../../src/kadmin/server/ovsec_kadmd.c:519
 msgid "Seeding random number generator"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:523
+#: ../../src/kadmin/server/ovsec_kadmd.c:522
 msgid "getting random seed"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:530
+#: ../../src/kadmin/server/ovsec_kadmd.c:529
 msgid "mapping update log"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:534
+#: ../../src/kadmin/server/ovsec_kadmd.c:533
 #, c-format
 msgid "%s: create IPROP svc (PROG=%d, VERS=%d)\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:542
+#: ../../src/kadmin/server/ovsec_kadmd.c:541
 msgid "starting"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:544 ../../src/kdc/main.c:1062
+#: ../../src/kadmin/server/ovsec_kadmd.c:543 ../../src/kdc/main.c:1062
 #, c-format
 msgid "%s: starting...\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:547
+#: ../../src/kadmin/server/ovsec_kadmd.c:546
 msgid "finished, exiting"
 msgstr ""
 
@@ -3340,11 +3340,11 @@ msgstr ""
 msgid "AS_REQ : handle_authdata (%d)"
 msgstr ""
 
-#: ../../src/kdc/do_tgs_req.c:661
+#: ../../src/kdc/do_tgs_req.c:650
 msgid "not checking transit path"
 msgstr ""
 
-#: ../../src/kdc/do_tgs_req.c:684
+#: ../../src/kdc/do_tgs_req.c:673
 #, c-format
 msgid "TGS_REQ : handle_authdata (%d)"
 msgstr ""
@@ -4310,6 +4310,11 @@ msgid ""
 "collection"
 msgstr ""
 
+#: ../../src/lib/krb5/ccache/cc_kcm.c:732
+#, c-format
+msgid "Credentials cache 'KCM:%s' not found"
+msgstr ""
+
 #: ../../src/lib/krb5/ccache/cc_keyring.c:1151
 msgid ""
 "Can't create new subsidiary cache because default cache is already a "
@@ -5215,77 +5220,76 @@ msgstr ""
 msgid "%s option value missing"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:696
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:671
+msgid "DN is out of the realm subtree"
+msgstr ""
+
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:703
+msgid "ldap object is already kerberized"
+msgstr ""
+
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:797
 msgid "Principal does not belong to the default realm"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:764
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:865
 #, c-format
 msgid ""
 "operation can not continue, more than one entry with principal name \"%s\" "
 "found"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:827
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:928
 #, c-format
 msgid "'%s' not found"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:904
-msgid "DN is out of the realm subtree"
-msgstr ""
-
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:960
-#, c-format
-msgid "ldap object is already kerberized"
-msgstr ""
-
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:980
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:992
 #, c-format
 msgid ""
 "link information can not be set/updated as the kerberos principal belongs to "
 "an ldap object"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:995
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1007
 #, c-format
 msgid "Failed getting object references"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1002
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1014
 #, c-format
 msgid "kerberos principal is already linked to a ldap object"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1340
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1352
 msgid "ticket policy object value: "
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1388
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1400
 #, c-format
 msgid "Principal delete failed (trying to replace entry): %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1398
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1410
 #, c-format
 msgid "Principal add failed: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1436
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1448
 #, c-format
 msgid "User modification failed: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1509
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1521
 #: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_realm.c:294
 msgid "Error reading ticket policy"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1639
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1651
 msgid "unable to decode stored principal key data"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1697
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1709
 msgid "unable to decode stored principal pw history"
 msgstr ""
 
@@ -5376,7 +5380,7 @@ msgstr ""
 
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_nss.c:667
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:775
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4337
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4338
 msgid "Pass phrase for"
 msgstr ""
 
@@ -5438,27 +5442,27 @@ msgstr ""
 msgid "Failed to decrypt PKCS7 message"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4457
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4458
 #, c-format
 msgid "Cannot read certificate file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4464
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4465
 #, c-format
 msgid "Cannot read key file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5454
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5440
 #, c-format
 msgid "Cannot open file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5461
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5447
 #, c-format
 msgid "Cannot read file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:6136
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:6122
 #, c-format
 msgid "unknown code 0x%x"
 msgstr ""
