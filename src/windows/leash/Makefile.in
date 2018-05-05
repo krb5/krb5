@@ -14,17 +14,6 @@ AFS_INCLUDES=
 AFS_LIBS=
 !endif
 
-!if defined(VISUALSTUDIOVERSION)
-MFC_VERSION=$(VISUALSTUDIOVERSION:.=)
-!else
-MFC_VERSION=100
-!endif
-
-!if defined(NODEBUG)
-MFCLIB=MFC$(MFC_VERSION).LIB
-!else
-MFCLIB=MFC$(MFC_VERSION)D.LIB
-!endif
 EXE_NAME=leash
 WSHELPER=wshelp32
 
@@ -101,7 +90,7 @@ all: Makefile $(OUTPRE)$(EXE_NAME).exe
 $(OUTPRE)$(EXE_NAME).exe: $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) /out:$@ /ENTRY:WinMainCRTStartup $(OBJS) $(XOBJS) \
 	  $(LIBS) $(SYSLIBS) $(BUILDTOP)\util\wshelper\$(OUTPRE)$(WSHELPER).lib \
-	  ../lib/$(OUTPRE)libwin.lib $(MFCLIB) $(SCLIB)
+	  ../lib/$(OUTPRE)libwin.lib $(SCLIB)
 	copy $@ "$(OUTPRE)MIT Kerberos.exe"
 
 kfwribbon.bml kfwribbon.h kfwribbon.rc: kfwribbon.xml
