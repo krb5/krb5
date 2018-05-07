@@ -96,9 +96,7 @@ ConsoleEcho::ConsoleEcho()
     FILE* fp = _fdopen(m_pipefd, "w");
     // copy to stdout
     *stdout = *fp;
-    // now slam the allocated FILE's _flag to zero to mark it as free without
-    // actually closing the os file handle and pipe
-    fp->_flag = 0;
+    // fp leaks, but we can't close it without closing the OS file handle
 
     // disable buffering
     setvbuf(stdout, NULL, _IONBF, 0);
