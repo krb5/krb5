@@ -1,7 +1,13 @@
 *~
 *.a
+*.dll
 *.dylib
+*.exe
+*.exp
+*.lib
+*.map
 *.o
+*.obj
 *.pc
 *.pyc
 *.so
@@ -155,6 +161,39 @@ local.properties
 
 /src/build-tools/krb5-config
 
+/src/ccapi/lib/ccapi_err.c
+/src/ccapi/lib/ccapi_err.h
+/src/ccapi/lib/win/srctmp/
+
+/src/ccapi/server/win/srctmp/
+
+/src/ccapi/test/ccapi_ccache.c
+/src/ccapi/test/ccapi_ccache_iterator.c
+/src/ccapi/test/ccapi_context.c
+/src/ccapi/test/ccapi_context_change_time.c
+/src/ccapi/test/ccapi_credentials.c
+/src/ccapi/test/ccapi_credentials_iterator.c
+/src/ccapi/test/ccapi_err.c
+/src/ccapi/test/ccapi_intermediates/
+/src/ccapi/test/ccapi_ipc.c
+/src/ccapi/test/ccapi_string.c
+/src/ccapi/test/ccapi_test/
+/src/ccapi/test/ccapi_v2.c
+/src/ccapi/test/cci_cred_union.c
+/src/ccapi/test/cci_debugging.h
+/src/ccapi/test/cci_identifier.c
+/src/ccapi/test/cci_message.c
+/src/ccapi/test/cci_os_identifier.c
+/src/ccapi/test/cci_types.h
+/src/ccapi/test/ccs_reply.h
+/src/ccapi/test/ccs_request.h
+/src/ccapi/test/ccs_request_c.c
+/src/ccapi/test/pingtest2.pdb
+/src/ccapi/test/pingtest2.exe.manifest
+/src/ccapi/test/testall1.exe
+/src/ccapi/test/testall1.map
+/src/ccapi/test/win-utils.h
+
 /src/clients/kdestroy/kdestroy
 
 /src/clients/kinit/kinit
@@ -193,6 +232,7 @@ local.properties
 /src/include/ss/
 /src/include/verto-k5ev.h
 /src/include/verto.h
+/src/include/*_err.h
 
 /src/include/gssrpc/types.h
 
@@ -233,6 +273,8 @@ local.properties
 /src/kdc/krb5kdc
 /src/kdc/rtest
 /src/kdc/t_replay
+
+/src/lib/k5sprt32.def
 
 /src/lib/crypto/builtin/aes/aes-gen
 /src/lib/crypto/builtin/aes/kresults.out
@@ -530,3 +572,13 @@ local.properties
 
 /src/plugins/kdb/db2/libdb2/test/t.be.db
 /src/plugins/kdb/db2/libdb2/test/t.le.db
+
+/src/windows/installer/wix/custom/custom.exp
+/src/windows/installer/wix/kfw.wixobj
+/src/windows/installer/wix/kfw.wixpdb
+
+/src/windows/leash/htmlhelp/MITKerberosHelp.chm
+/src/windows/leash/kfwribbon.bml
+/src/windows/leash/kfwribbon.h
+/src/windows/leash/kfwribbon.rc
+/src/windows/leash/out2con.sav
