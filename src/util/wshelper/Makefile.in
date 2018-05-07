@@ -54,7 +54,7 @@ clean-windows::
 
 $(OUTPRE)$(DLL_NAME).dll: $(DEF_FILE) $(OBJS) $(XOBJS)
 	link $(WINDLLFLAGS) -def:$(DEF_FILE) -out:$*.dll \
-	$(OBJS) $(XOBJS) $(WINLIBS) $(SCLIB)
+	$(OBJS) $(XOBJS) $(WINLIBS)
 	$(_VC_MANIFEST_EMBED_DLL)
 
 $(OUTPRE)dllmain.$(OBJEXT): pwd.h

@@ -137,7 +137,6 @@ ENTRYPOINT=_DllMainCRTStartup
 ENTRYPOINT=_DllMainCRTStartup@12
 !endif
 CCLINKOPTION=
-SCLIB=
 DEBUGOPT=/Zi
 
 #if the compiler is vstudio 8, generate manifest

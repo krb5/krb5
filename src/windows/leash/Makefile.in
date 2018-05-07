@@ -90,7 +90,7 @@ all: Makefile $(OUTPRE)$(EXE_NAME).exe
 $(OUTPRE)$(EXE_NAME).exe: $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) /out:$@ /ENTRY:WinMainCRTStartup $(OBJS) $(XOBJS) \
 	  $(LIBS) $(SYSLIBS) $(BUILDTOP)\util\wshelper\$(OUTPRE)$(WSHELPER).lib \
-	  ../lib/$(OUTPRE)libwin.lib $(SCLIB)
+	  ../lib/$(OUTPRE)libwin.lib
 	copy $@ "$(OUTPRE)MIT Kerberos.exe"
 
 kfwribbon.bml kfwribbon.h kfwribbon.rc: kfwribbon.xml

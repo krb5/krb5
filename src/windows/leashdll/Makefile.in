@@ -75,7 +75,7 @@ clean-windows::
 
 $(OUTPRE)$(DLL_NAME).dll: $(DEF_FILE) $(OBJS) $(XOBJS)
 	link $(WINDLLFLAGS) -def:$(DEF_FILE) -out:$*.dll \
-	$(OBJS) $(XOBJS) $(WINLIBS) ../lib/$(OUTPRE)libwin.lib $(SCLIB)
+	$(OBJS) $(XOBJS) $(WINLIBS) ../lib/$(OUTPRE)libwin.lib
 	$(_VC_MANIFEST_EMBED_DLL)
 
 #TODO: Add dependencies on include files here
