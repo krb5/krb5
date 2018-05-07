@@ -414,6 +414,16 @@ main (argc, argv)
     if (hp){
         if (gb_err) fprintf(stderr, "%s", gb_err);
         fprintf(stderr, _("account %s: authorization failed\n"), target_user);
+
+        if (cmd != NULL) {
+            syslog(LOG_WARNING,
+                   "Account %s: authorization for %s for execution of %s failed",
+                   target_user, source_user, cmd);
+        } else {
+            syslog(LOG_WARNING, "Account %s: authorization of %s failed",
+                   target_user, source_user);
+        }
+
         exit(1);
     }
 
