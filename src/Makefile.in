@@ -150,11 +150,9 @@ WINMAKEFILES=Makefile \
 	util\support\Makefile \
 	util\windows\Makefile \
 	util\wshelper\Makefile \
-	windows\Makefile windows\lib\Makefile \
-	windows\cns\Makefile windows\ms2mit\Makefile \
-	windows\wintel\Makefile windows\kfwlogon\Makefile \
-	windows\leashdll\Makefile windows\leash\Makefile \
-	windows\leash\htmlhelp\Makefile
+	windows\Makefile windows\lib\Makefile windows\ms2mit\Makefile \
+	windows\kfwlogon\Makefile windows\leashdll\Makefile \
+	windows\leash\Makefile windows\leash\htmlhelp\Makefile
 
 ##DOS##Makefile-windows: $(MKFDEP) $(WINMAKEFILES)
 
@@ -270,11 +268,7 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\lib\Makefile: windows\lib\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\cns\Makefile: windows\cns\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\ms2mit\Makefile: windows\ms2mit\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##windows\wintel\Makefile: windows\wintel\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\kfwlogon\Makefile: windows\kfwlogon\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -447,8 +441,6 @@ install-windows:
 	copy lib\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
 	copy lib\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) lib\$(OUTPRE)*.pdb "$(KRB_INSTALL_DIR)\bin\."
-	copy windows\cns\$(OUTPRE)krb5.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(INSTALLDBGSYMS) windows\cns\$(OUTPRE)krb5.pdb "$(KRB_INSTALL_DIR)\bin\."
 	copy appl\gss-sample\$(OUTPRE)gss-server.exe "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) appl\gss-sample\$(OUTPRE)gss-server.pdb "$(KRB_INSTALL_DIR)\bin\."
 	copy appl\gss-sample\$(OUTPRE)gss-client.exe "$(KRB_INSTALL_DIR)\bin\."
