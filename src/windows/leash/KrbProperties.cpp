@@ -14,7 +14,6 @@
 
 #include "stdafx.h"
 #include "KrbProperties.h"
-#include "Krb4Properties.h"
 
 #include "Leash.h"
 #include "wshelper.h"

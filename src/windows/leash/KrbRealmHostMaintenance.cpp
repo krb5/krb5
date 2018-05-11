@@ -16,7 +16,6 @@
 #include "stdafx.h"
 #include "leash.h"
 #include "KrbProperties.h"
-#include "Krb4Properties.h"
 #include "KrbAddRealm.h"
 #include "KrbAddHostServer.h"
 #include "KrbRealmHostMaintenance.h"

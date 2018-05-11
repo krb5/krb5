@@ -15,7 +15,6 @@
 
 #include "stdafx.h"
 #include "leash.h"
-#include "Krb4Properties.h"
 #include "KrbEditHostServer.h"
 #include "lglobals.h"
 

@@ -15,7 +15,6 @@
 
 #include "stdafx.h"
 #include "leash.h"
-#include "Krb4Properties.h"
 #include "Krb4EditDomainRealmList.h"
 #include "lglobals.h"
 

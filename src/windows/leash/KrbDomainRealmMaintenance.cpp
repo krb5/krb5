@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "leash.h"
 #include "KrbDomainRealmMaintenance.h"
-#include "Krb4AddToDomainRealmList.h"
 #include "Krb4EditDomainRealmList.h"
 #include "KrbProperties.h"
 

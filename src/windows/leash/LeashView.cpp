@@ -24,7 +24,6 @@
 #include "LeashDebugWindow.h"
 #include "LeashMessageBox.h"
 #include "LeashAboutBox.h"
-#include "Krb4Properties.h"
 #include "Krb5Properties.h"
 #include "LeashProperties.h"
 #include "KrbProperties.h"
