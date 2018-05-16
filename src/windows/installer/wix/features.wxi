@@ -51,6 +51,7 @@
                     Level="$(var.DebugSymLowLevel)" 
                     Title="!(loc.StrKerberosClientDebugTitle)">
                     <ComponentRef Id="cmf_bin_debug"/>
+                    <ComponentRef Id="cmf_preauth_debug"/>
 		    <ComponentRef Id="cmp_ClientSystemDebug"/>
                     <?include runtime_debug.wxi?>
 	        </Feature>
@@ -64,6 +65,7 @@
           <ComponentRef Id="cmf_leashw64_dll" />
           <ComponentRef Id="cmf_wshelp64_dll" />
           <ComponentRef Id="cmf_xpprof64_dll" />
+          <ComponentRef Id="cmf_spake64_dll" />
        <?endif?>
 
             <ComponentRef Id="cmf_comerr32_dll" />
@@ -86,6 +88,7 @@
             <ComponentRef Id="cmf_mit2ms_exe" />
             <ComponentRef Id="cmf_wshelp32_dll" />
             <ComponentRef Id="cmf_xpprof32_dll" />
+            <ComponentRef Id="cmf_spake32_dll" />
 
             <ComponentRef Id="cmf_leashw32_dll" />
 

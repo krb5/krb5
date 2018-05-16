@@ -473,3 +473,14 @@ EXPORTS
 
 ; new in 1.16
 	k5_enctype_to_ssf				@438 ; PRIVATE GSSAPI
+
+; new in 1.17
+; private symbols used by SPAKE client module
+	profile_get_string				@439 ; PRIVATE
+	profile_release_string				@440 ; PRIVATE
+	k5_sha256					@441 ; PRIVATE
+	krb5_encrypt_helper				@442 ; PRIVATE
+	encode_krb5_spake_factor			@443 ; PRIVATE
+	encode_krb5_pa_spake				@444 ; PRIVATE
+	decode_krb5_pa_spake				@445 ; PRIVATE
+	k5_free_pa_spake				@446 ; PRIVATE

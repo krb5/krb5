@@ -39,6 +39,7 @@
         <?error CPU is not set ?>
     <?endif?>
     <?define BinDir="$(env.KRB_INSTALL_DIR)\bin\"?>
+    <?define PreauthDir=$(env.KRB_INSTALL_DIR)\bin\plugins\preauth?>
     <?define LibDir="$(env.KRB_INSTALL_DIR)\lib\"?>
     <?define InstallerVersion="450"?>
     <?if $(env.CPU) = "i386"?>

@@ -346,6 +346,27 @@
                     </Component>
                 <?endif?>
 
+                  <Directory Id="dirplugins" Name="plugins">
+                    <Directory Id="dirpreauth" Name="preauth" FileSource="$(var.PreauthDir)">
+                      <Component Win64="$(var.Win64)" Id="cmf_spake32_dll" Guid="$(var.cmf_spake32_dll_guid)" DiskId="1">
+                        <File Id="fil_spake32_dll" Name="$(var.cmf_spake32_dll_name)" KeyPath="yes" />
+                      </Component>
+                      <?if $(var.Platform) = "x64"?>
+                        <Component Win64="$(var.Win64)" Id="cmf_spake64_dll" Guid="$(var.cmf_spake64_dll_guid)" DiskId="1">
+                          <File Id="fil_spake64_dll" Name="$(var.cmf_spake64_dll_name)" KeyPath="yes" />
+                        </Component>
+                      <?endif?>
+                      <?ifdef DebugSyms?>
+                        <Component Win64="$(var.Win64)" Id="cmf_preauth_debug" Guid="$(var.cmf_preauth_debug_guid)" DiskId="1">
+                          <?if $(var.Platform) = "Intel" ?>
+                            <File Id="fil_spake32_pdb" Name="spake32.pdb" />
+                          <?else?>
+                            <File Id="fil_spake32_pdb" Name="spake64.pdb" />
+                          <?endif?>
+                        </Component>
+                      <?endif?>
+                    </Directory> <!-- /preauth -->
+                  </Directory> <!-- /plugins -->
                 </Directory> <!-- /bin -->
                 
                 <Directory Id="dirinc" Name="include" FileSource="$(var.IncDir)">

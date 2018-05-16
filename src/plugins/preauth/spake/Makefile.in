@@ -13,6 +13,8 @@ RELDIR=../plugins/preauth/spake
 SHLIB_EXPDEPS=$(KRB5_BASE_DEPLIBS)
 SHLIB_EXPLIBS=$(KRB5_BASE_LIBS) $(SPAKE_OPENSSL_LIBS)
 
+WINLIBS = $(SLIB) $(KLIB) $(CLIB)
+
 STLIBOBJS=util.o iana.o groups.o openssl.o edwards25519.o \
 	spake_client.o spake_kdc.o
 
@@ -25,6 +27,15 @@ SRCS= \
 	$(srcdir)/spake_client.c \
 	$(srcdir)/spake_kdc.c
 
+# Don't include spake_kdc.c in the Windows object list since we don't
+# need it.
+OBJS=	$(OUTPRE)util.$(OBJEXT) \
+	$(OUTPRE)iana.$(OBJEXT) \
+	$(OUTPRE)groups.$(OBJEXT) \
+	$(OUTPRE)openssl.$(OBJEXT) \
+	$(OUTPRE)edwards25519.$(OBJEXT) \
+	$(OUTPRE)spake_client.$(OBJEXT)
+
 t_vectors: t_vectors.o $(STLIBOBJS) $(SHLIB_EXPDEPS)
 	$(CC_LINK) -o $@ t_vectors.o $(STLIBOBJS) $(SHLIB_EXPLIBS)
 
@@ -34,6 +45,13 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 check-unix: t_vectors
 	$(RUN_TEST_LOCAL_CONF) ./t_vectors
+
+all-windows: $(OUTPRE)$(SPAKELIB).dll
+clean-windows::
+	$(RM) $(OUTPRE)$(SPAKELIB).dll
+
+$(OUTPRE)$(SPAKELIB).dll: spake.def $(OBJS)
+	link /dll $(LOPTS) -def:spake.def -out:$*.dll $(OBJS) $(WINLIBS)
 
 @libnover_frag@
 @libobj_frag@

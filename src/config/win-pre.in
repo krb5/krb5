@@ -201,6 +201,7 @@ SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt32.lib
 GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi32.lib
 DLIB=wshelp32
 CCLIB=krbcc32
+SPAKELIB=spake32
 WLIB=
 
 !if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
@@ -212,6 +213,7 @@ SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt64.lib
 GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi64.lib
 DLIB=wshelp64
 CCLIB=krbcc64
+SPAKELIB=spake64
 WLIB=
 
 !endif

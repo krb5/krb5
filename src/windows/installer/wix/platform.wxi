@@ -18,6 +18,8 @@
   <?define cmf_wshelp32_dll_name="wshelp32.dll"?>
   <?define cmf_xpprof32_dll_guid="A7DF8BAF-7188-4C24-89FB-C8EB51571FD2"?>
   <?define cmf_xpprof32_dll_name="xpprof32.dll"?>
+  <?define cmf_spake32_dll_guid="36A1695B-A2B4-4A93-8C35-733A121923D4"?>
+  <?define cmf_spake32_dll_name="spake32.dll"?>
   <?if $(var.Platform) = "x64" ?>
         <?define UpgradeCode="6DA9CD86-6028-4852-8C94-452CAC229244"?>
         <?define PISystemFolder="System64Folder"?>
@@ -95,6 +97,8 @@
         <?define cmf_wshelp64_dll_name="wshelp64.dll"?>
         <?define cmf_xpprof64_dll_guid="B1112677-50A4-4430-846B-F824C859E3DF"?>
         <?define cmf_xpprof64_dll_name="xpprof64.dll"?>
+        <?define cmf_spake64_dll_guid="0E97B52A-EC8E-494C-BF5D-83AAACFEFDBA"?>
+        <?define cmf_spake64_dll_name="spake64.dll"?>
         <?define cmf_nidmgr32_dll_guid="8538212A-9BD5-4d62-BF29-36D853385F0A"?>
         <?define cmf_nidmgr32_dll_name="nidmgr64.dll"?>
         <?define cmf_nidmgr32_dll_w2k_guid="01655D48-C596-48f8-A0C3-5DB3FC833444"?>
@@ -103,6 +107,7 @@
         <?define cmf_krb5cred_en_us_dll_guid="223B7E9D-290F-40b8-89B3-F8337A8E082D"?>
         <?define cmf_krb5cred_en_us_dll_name="krb5cred_en_us.dll"?>
         <?define cmf_bin_debug_guid="F3432C85-89D9-4bd6-BD82-4ED49A118338"?>
+        <?define cmf_preauth_debug_guid="53491A4E-CB96-44D9-9B92-4ADF37C3A2D6"?>
 <?elseif $(var.Platform) = "Intel"?>
         <?define UpgradeCode="61211594-AAA1-4A98-A299-757326763CC7"?>
         <?define PISystemFolder="SystemFolder"?>
@@ -169,6 +174,7 @@
         <?define cmf_krb5cred_en_us_dll_guid="EA9ABE05-A85B-43BB-8741-50D3C3128632"?>
         <?define cmf_krb5cred_en_us_dll_name="krb5cred_en_us.dll"?>
         <?define cmf_bin_debug_guid="C8468854-8261-4781-8119-A612636841E3"?>
+        <?define cmf_preauth_debug_guid="169C0A38-EB79-4AA9-B78B-998B55084ECD"?>
 <?else?>
         <?error Unknown platform?>
 <?endif?>
