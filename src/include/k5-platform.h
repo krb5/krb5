@@ -1069,10 +1069,16 @@ int k5_path_isabs(const char *path);
 #define N_(s) s
 
 #if !defined(HAVE_GETOPT) || !defined(HAVE_UNISTD_H)
-extern int k5_opterr;
-extern int k5_optind;
-extern int k5_optopt;
-extern char *k5_optarg;
+/* Data objects imported from DLLs must be declared as such on Windows. */
+#if defined(_WIN32) && !defined(K5_GETOPT_C)
+#define K5_GETOPT_DECL __declspec(dllimport)
+#else
+#define K5_GETOPT_DECL
+#endif
+K5_GETOPT_DECL extern int k5_opterr;
+K5_GETOPT_DECL extern int k5_optind;
+K5_GETOPT_DECL extern int k5_optopt;
+K5_GETOPT_DECL extern char *k5_optarg;
 #define opterr k5_opterr
 #define optind k5_optind
 #define optopt k5_optopt

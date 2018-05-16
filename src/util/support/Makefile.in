@@ -173,8 +173,9 @@ SHLIB_EXPORT_FILE=libkrb5support.exports
 
 EXTRA_SUPPORT_SYMS= @EXTRA_SUPPORT_SYMS@
 ##DOS##EXTRA_SUPPORT_SYMS= krb5int_mkstemp krb5int_strlcpy krb5int_strlcat \
-##DOS##		k5_optind k5_optarg k5_opterr k5_optopt k5_getopt k5_getopt_long \
+##DOS##		k5_getopt k5_getopt_long \
 ##DOS##		krb5int_vasprintf krb5int_asprintf krb5int_gettimeofday $(IPC_SYMS)
+##DOS##DATA_SUPPORT_SYMS= k5_opterr k5_optind k5_optopt k5_optarg
 
 ##DOS##!if 0
 libkrb5support.exports: $(srcdir)/libkrb5support-fixed.exports Makefile
@@ -187,6 +188,7 @@ libkrb5support.exports: $(srcdir)/libkrb5support-fixed.exports Makefile
 ##DOS##libkrb5support.exports: libkrb5support-fixed.exports Makefile
 ##DOS##	$(CP) libkrb5support-fixed.exports new-exports
 ##DOS##	for %%x in ($(EXTRA_SUPPORT_SYMS) .) do if not %%x==. echo %%x >> new-exports
+##DOS##	for %%x in ($(DATA_SUPPORT_SYMS) .) do if not %x==. echo %%x DATA >> new-exports
 ##DOS##	$(RM) libkrb5support.exports
 ##DOS##	$(MV) new-exports libkrb5support.exports
 
