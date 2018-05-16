@@ -328,7 +328,8 @@ The libdefaults section may contain any of the following relations:
 **plugin_base_dir**
     If set, determines the base directory where krb5 plugins are
     located.  The default value is the ``krb5/plugins`` subdirectory
-    of the krb5 library directory.
+    of the krb5 library directory.  This relation is subject to
+    parameter expansion (see below) in release 1.17 and later.
 
 **preferred_preauth_types**
     This allows you to set the preferred preauthentication types which

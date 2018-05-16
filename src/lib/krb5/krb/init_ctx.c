@@ -145,6 +145,7 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
     } seed_data;
     krb5_data seed;
     int tmp;
+    char *plugin_dir = NULL;
 
     /* Verify some assumptions.  If the assumptions hold and the
        compiler is optimizing, this should result in no code being
@@ -261,8 +262,9 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
 
     retval = profile_get_string(ctx->profile, KRB5_CONF_LIBDEFAULTS,
                                 KRB5_CONF_PLUGIN_BASE_DIR, 0,
-                                DEFAULT_PLUGIN_BASE_DIR,
-                                &ctx->plugin_base_dir);
+                                DEFAULT_PLUGIN_BASE_DIR, &plugin_dir);
+    if (!retval)
+        retval = k5_expand_path_tokens(ctx, plugin_dir, &ctx->plugin_base_dir);
     if (retval) {
         TRACE_PROFILE_ERR(ctx, KRB5_CONF_PLUGIN_BASE_DIR,
                           KRB5_CONF_LIBDEFAULTS, retval);
@@ -288,9 +290,10 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
     (void)profile_get_string(ctx->profile, KRB5_CONF_LIBDEFAULTS,
                              KRB5_CONF_ERR_FMT, NULL, NULL, &ctx->err_fmt);
     *context_out = ctx;
-    return 0;
+    ctx = NULL;
 
 cleanup:
+    profile_release_string(plugin_dir);
     krb5_free_context(ctx);
     return retval;
 }
