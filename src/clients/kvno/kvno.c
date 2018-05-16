@@ -32,9 +32,6 @@
 #endif
 #include <string.h>
 
-extern int optind;
-extern char *optarg;
-
 static char *prog;
 static int quiet = 0;
 

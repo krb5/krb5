@@ -37,9 +37,6 @@
 #define BELL_CHAR '\007'
 #endif
 
-extern int optind;
-extern char *optarg;
-
 #ifndef _WIN32
 #define GET_PROGNAME(x) (strrchr((x), '/') ? strrchr((x), '/') + 1 : (x))
 #else

@@ -49,8 +49,6 @@
 #include <netdb.h>
 #endif
 
-extern int optind;
-
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
 int show_etype = 0, show_addresses = 0, no_resolve = 0, print_version = 0;
 int show_adtype = 0, show_all = 0, list_all = 0, use_client_keytab = 0;
