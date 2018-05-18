@@ -8,13 +8,13 @@ MIT Kerberos Ticket Manager application.
 
 To build Kerberos 5 on Windows, you will need the following:
 
-* A version of Visual Studio which includes the Microsoft Foundation
-  Classes libraries.  These instructions will work for Visual Studio
-  2017 Community or Professional, both of which include the MFC
-  libraries if the "Visual C++ MFC" checkbox is selected after
-  enabling the "Desktop development with C++" workload.  If you do not
-  plan to build the graphical ticket manager application, the MFC
-  libraries are not required.
+* A version of Visual Studio (at least 2013) which includes the
+  Microsoft Foundation Classes libraries.  These instructions will
+  work for Visual Studio 2017 Community or Professional, both of which
+  include the MFC libraries if the "Visual C++ MFC" checkbox is
+  selected after enabling the "Desktop development with C++" workload.
+  If you do not plan to build the graphical ticket manager
+  application, the MFC libraries are not required.
 
 * A version of Perl.
 
@@ -112,17 +112,9 @@ Step 10 may be skipped if uicc is already in your command-line path
 (try running "uicc" to see if you get a usage message or a not-found
 error), or if you are not building the graphical ticket manager.
 
-Visual Studio 2012 provides only a single command prompt.  Within this
-prompt, use "vcvarsall.bat x86" and "vcvarsall.bat amd64" to switch to
-32-bit and 64-bit mode.
-
-With Visual Studio 2010, it is necessary to separately install the
-Windows SDK version 7.1 and use the Microsoft Windows SDK -> Windows
-SDK X.Y Command Prompt menu item.  Within this command prompt, run
-"setenv /x86" and "setenv /x64" to switch to 32-bit and 64-bit mode.
-Also include the "/release" option if building with NODEBUG.  If you
-are building with NO_LEASH=1, Visual Studio 2010 itself is not
-necessary; Windows SDK version 7.1 alone is sufficient.
+Visual Studio 2013 and 2015 provide only a single command prompt.
+Within this prompt, use "vcvarsall.bat x86" and "vcvarsall.bat amd64"
+to switch to 32-bit and 64-bit mode.
 
 
 Running Kerberos 5 Apps:
