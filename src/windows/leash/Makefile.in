@@ -43,7 +43,7 @@ DEFINES = $(DEFINES) -DDBG
 
 ##### Linker
 LINK	= link
-LIBS	= $(GLIB) $(CLIB) $(WLIB)
+LIBS	= $(GLIB) $(CLIB)
 SYSLIBS	= kernel32.lib Iphlpapi.lib ws2_32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib version.lib
 LFLAGS	= /nologo $(LOPTS)
 

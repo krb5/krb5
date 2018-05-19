@@ -56,7 +56,7 @@
                     <?include runtime_debug.wxi?>
 	        </Feature>
 	    <?endif?>
-      <?if $(var.Platform)="x64"?>
+      <?if $(sys.BUILDARCH)="x64"?>
           <ComponentRef Id="cmf_comerr64_dll" />
           <ComponentRef Id="cmf_gssapi64_dll" />
           <ComponentRef Id="cmf_k5sprt64_dll" />
@@ -146,7 +146,7 @@
             Level="130" 
             Title="!(loc.KerberosSDKTitle)">
             
-        <?if $(var.Platform) = "Intel" ?>
+        <?if $(sys.BUILDARCH) = "x86" ?>
             <ComponentRef Id="cmp_dirlib_i386" />
         <?else?>
             <ComponentRef Id="cmp_dirlib_amd64" />
@@ -169,10 +169,6 @@
             Level="30" 
             Title="!(loc.KerberosDocTitle)">
 
-<!--            <?if $(var.Platform) = "Intel"?>
-                    <ComponentRef Id="efl_leash_userdoc_pdf" />
-            <?endif?> -->
-            
             <ComponentRef Id="rcm_common" />
             <ComponentRef Id="rcm_docs" />
         </Feature>

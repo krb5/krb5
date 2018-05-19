@@ -28,11 +28,7 @@ clean-windows::
 
 
 
-##WIN32##!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
-##WIN32##SLIBS = $(BUILDTOP)\util\support\$(OUTPRE)k5sprt64.lib
-##WIN32##!else
-##WIN32##SLIBS = $(BUILDTOP)\util\support\$(OUTPRE)k5sprt32.lib
-##WIN32##!endif
+##WIN32##SLIBS = $(BUILDTOP)\util\support\$(OUTPRE)k5sprt$(BITS).lib
 ##WIN32##CLIBS = $(BUILDTOP)\util\et\$(OUTPRE)comerr.lib
 ##WIN32##PLIBS = $(BUILDTOP)\util\profile\$(OUTPRE)profile.lib
 ##WIN32##KLIBS = krb5\$(OUTPRE)krb5.lib crypto\$(OUTPRE)crypto.lib \

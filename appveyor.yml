@@ -6,7 +6,6 @@ build_script:
   - cd %APPVEYOR_BUILD_FOLDER%\src
   - set PATH=%PATH%;%wix%bin
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
-  - set CPU=i386
   - set
   - nmake -f Makefile.in prep-windows
   - nmake
@@ -16,7 +15,6 @@ build_script:
   - rename kfw.msi kfw32.msi
   - cd ..\..\..
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-  - set CPU=AMD64
   - set
   - nmake clean
   - nmake

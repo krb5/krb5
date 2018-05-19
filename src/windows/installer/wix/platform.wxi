@@ -18,7 +18,7 @@
   <?define cmf_xpprof32_dll_name="xpprof32.dll"?>
   <?define cmf_spake32_dll_guid="36A1695B-A2B4-4A93-8C35-733A121923D4"?>
   <?define cmf_spake32_dll_name="spake32.dll"?>
-  <?if $(var.Platform) = "x64" ?>
+  <?if $(sys.BUILDARCH) = "x64" ?>
         <?define UpgradeCode="6DA9CD86-6028-4852-8C94-452CAC229244"?>
         <?define PISystemFolder="System64Folder"?>
         <?define PIProgramFilesFolder="ProgramFiles64Folder"?>
@@ -104,7 +104,7 @@
         <?define cmf_krb5cred_en_us_dll_name="krb5cred_en_us.dll"?>
         <?define cmf_bin_debug_guid="F3432C85-89D9-4bd6-BD82-4ED49A118338"?>
         <?define cmf_preauth_debug_guid="53491A4E-CB96-44D9-9B92-4ADF37C3A2D6"?>
-<?elseif $(var.Platform) = "Intel"?>
+<?elseif $(sys.BUILDARCH) = "x86"?>
         <?define UpgradeCode="61211594-AAA1-4A98-A299-757326763CC7"?>
         <?define PISystemFolder="SystemFolder"?>
         <?define PIProgramFilesFolder="ProgramFilesFolder"?>

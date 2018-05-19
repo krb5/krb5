@@ -34,6 +34,13 @@ CPU=i386
 !if ( "$(CPU)" != "i386" ) && ( "$(CPU)" != "ALPHA" ) && ( "$(CPU)" != "ALPHA64" ) && ( "$(CPU)" != "IA64" ) && ( "$(CPU)" != "AMD64" )
 !error Must specify CPU environment variable ( CPU=i386, CPU=ALPHA, CPU=ALPHA64,CPU=IA64, CPU=AMD64)
 !endif
+
+!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+BITS=64
+!else
+BITS=32
+!endif
+
 #
 # End of figuring out CPU
 #
@@ -114,7 +121,7 @@ CPPFLAGS=-I$(top_srcdir)\include -I$(top_srcdir)\include\krb5 $(DNSFLAGS) -DWIN3
 CCOPTS=-nologo /EHsc /W3 $(PDB_OPTS) $(DLL_FILE_DEF)
 LOPTS=-nologo -incremental:no -manifest
 
-!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+!if  ("$(BITS)" == "64" )
 ENTRYPOINT=_DllMainCRTStartup
 !else
 ENTRYPOINT=_DllMainCRTStartup@12
@@ -176,28 +183,13 @@ PERL=perl
 WCONFIG_EXE=$(BUILDTOP)\$(OUTPRE)wconfig.exe
 WCONFIG=$(WCONFIG_EXE:.exe=) $(WCONFIG_FLAGS)
 
-CLIB=$(BUILDTOP)\lib\$(OUTPRE)comerr32.lib
-PLIB=$(BUILDTOP)\lib\$(OUTPRE)xpprof32.lib
-KLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5_32.lib
-K4LIB=$(BUILDTOP)\lib\$(OUTPRE)krb4_32.lib
-SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt32.lib
-GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi32.lib
-CCLIB=krbcc32
-SPAKELIB=spake32
-WLIB=
-
-!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
-CLIB=$(BUILDTOP)\lib\$(OUTPRE)comerr64.lib
-PLIB=$(BUILDTOP)\lib\$(OUTPRE)xpprof64.lib
-KLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5_64.lib
-K4LIB=$(BUILDTOP)\lib\$(OUTPRE)krb4_64.lib
-SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt64.lib
-GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi64.lib
-CCLIB=krbcc64
-SPAKELIB=spake64
-WLIB=
-
-!endif
+CLIB=$(BUILDTOP)\lib\$(OUTPRE)comerr$(BITS).lib
+PLIB=$(BUILDTOP)\lib\$(OUTPRE)xpprof$(BITS).lib
+KLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5_$(BITS).lib
+SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt$(BITS).lib
+GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi$(BITS).lib
+CCLIB=krbcc$(BITS)
+SPAKELIB=spake$(BITS)
 
 KRB4_INCLUDES=-I$(BUILDTOP)/include/kerberosIV
 

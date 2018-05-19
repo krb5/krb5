@@ -90,26 +90,24 @@ In a 32-bit command shell:
  4) nmake [NODEBUG=1]                   # Build the sources
  5) nmake install [NODEBUG=1]           # Copy headers, libs, executables
  6) cd windows\installer\wix            # Go to where the installer source is
- 7) set CPU=i386                        # Specify 32-bit target
- 8) nmake [NODEBUG=1]                   # Build the installer
- 9) rename kfw.msi kfw32.msi            # Save the 32-bit installer
+ 7) nmake [NODEBUG=1]                   # Build the installer
+ 8) rename kfw.msi kfw32.msi            # Save the 32-bit installer
 
 In a 64-bit command shell:
 
-10) set PATH=%PATH%;"%WindowsSdkVerBinPath%"\x86  # To get uicc.exe
-11) set KRB_INSTALL_DIR=\path\to\dir    # Where bin/include/lib lives
-12) cd xxx\src                          # Go to where source lives
-13) nmake clean                         # Clean up the 32-bit objects
-14) nmake [NODEBUG=1]                   # Build the sources for 64-bit
-15) nmake install [NODEBUG=1]           # Copy 64-bit lib/executables
-16) cd windows\installer\wix            # Back to the installer source
-17) set CPU=AMD64                       # Specify 64-bit target
-18) nmake clean                         # Remove 32-bit leavings
-19) nmake [NODEBUG=1]                   # Build the 64-bit installer
-20) rename kfw.msi kfw64.msi            # And name it usefully
+ 9) set PATH=%PATH%;"%WindowsSdkVerBinPath%"\x86  # To get uicc.exe
+10) set KRB_INSTALL_DIR=\path\to\dir    # Where bin/include/lib lives
+11) cd xxx\src                          # Go to where source lives
+12) nmake clean                         # Clean up the 32-bit objects
+13) nmake [NODEBUG=1]                   # Build the sources for 64-bit
+14) nmake install [NODEBUG=1]           # Copy 64-bit lib/executables
+15) cd windows\installer\wix            # Back to the installer source
+16) nmake clean                         # Remove 32-bit leavings
+17) nmake [NODEBUG=1]                   # Build the 64-bit installer
+18) rename kfw.msi kfw64.msi            # And name it usefully
 
-Step 10 may be skipped if uicc is already in your command-line path
-(try running "uicc" to see if you get a usage message or a not-found
+Step 9 may be skipped if uicc is already in the command-line path (try
+running "uicc" to see if you get a usage message or a not-found
 error), or if you are not building the graphical ticket manager.
 
 Visual Studio 2013 and 2015 provide only a single command prompt.

@@ -35,22 +35,10 @@
     <?endif?>
 
     <!-- Build type specifications -->
-    <?ifndef env.CPU?>
-        <?error CPU is not set ?>
-    <?endif?>
     <?define BinDir="$(env.KRB_INSTALL_DIR)\bin\"?>
     <?define PreauthDir=$(env.KRB_INSTALL_DIR)\bin\plugins\preauth?>
     <?define LibDir="$(env.KRB_INSTALL_DIR)\lib\"?>
     <?define InstallerVersion="450"?>
-    <?if $(env.CPU) = "i386"?>
-        <?define Platform="Intel"?>
-        <?define Win64="no"?>
-    <?elseif $(env.CPU) = "AMD64"?>
-        <?define Platform="x64"?>
-        <?define Win64="yes"?>
-    <?else?>
-        <?error Unknown build type?>
-    <?endif?>
     <?ifndef env.VISUALSTUDIOVERSION?>
         <?define VCVer="100"?>
     <?elseif $(env.VISUALSTUDIOVERSION) = "11.0"?>
