@@ -8,10 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef NO_KRB4
-#include <winkrbid.h>
-#endif
-
 #ifdef WSHELPER
 #include <wshelper.h>
 #else
@@ -80,7 +76,7 @@ gettimeofday(
 
 
 LONG
-not_an_API_LeashGetTimeServerName(
+get_time_server_name(
     char *timeServerName,
     const char *valueName
     )
@@ -167,11 +163,7 @@ LONG Leash_timesync(int MessageP)
     WSADATA             wsaData;
     char                name[80];
 
-    if ((pkrb5_init_context == NULL)
-#ifndef NO_KRB4
-        && (ptkt_string == NULL)
-#endif
-         )
+    if (pkrb5_init_context == NULL)
         return(0);
 
     wVersionRequested = 0x0101;
@@ -192,7 +184,7 @@ LONG Leash_timesync(int MessageP)
     else
         Port = sp->s_port;
 
-    not_an_API_LeashGetTimeServerName(hostname, TIMEHOST);
+    get_time_server_name(hostname, TIMEHOST);
 
     rc = ProcessTimeSync(hostname, Port, tmpstr);
 

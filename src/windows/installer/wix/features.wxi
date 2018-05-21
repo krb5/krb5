@@ -100,10 +100,8 @@
             <ComponentRef Id="rcm_krb5_3" />
 
             <!-- Leash config options -->
-            <ComponentRef Id="rcm_leash_1" />
             <ComponentRef Id="rcm_leash_2" />
             <ComponentRef Id="rcm_leash_3" />
-            <ComponentRef Id="rcm_leash_5" />
             <ComponentRef Id="rcm_leash_6" />
             
             <ComponentRef Id="cmf_leash32_chm" />
@@ -116,7 +114,6 @@
             <ComponentRef Id="rcm_leashdll_5" />
             <ComponentRef Id="rcm_leashdll_6" />
             <ComponentRef Id="rcm_leashdll_7" />
-            <ComponentRef Id="rcm_leashdll_8" />
             <ComponentRef Id="rcm_leashdll_9" />
             <ComponentRef Id="rcm_leashdll_10" />
             <ComponentRef Id="rcm_leashdll_11" />

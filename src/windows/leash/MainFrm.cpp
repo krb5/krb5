@@ -165,8 +165,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 #ifndef NO_STATUS_BAR
 	if (!m_wndStatusBar.Create(this) ||
-		!m_wndStatusBar.SetIndicators(indicators,
-		  (CLeashApp::m_hAfsDLL ? 4 : 3)))
+	    !m_wndStatusBar.SetIndicators(indicators, 3))
 	{
 		MessageBox("There is problem creating the Leash Status Bar!",
                    "Error", MB_OK);

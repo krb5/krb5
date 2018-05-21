@@ -3,7 +3,6 @@
 
 mydir=.
 BUILDTOP=$(REL)..$(S)..
-DEFINES = -DNO_KRB4
 LOCALINCLUDES = -I$(BUILDTOP) -I$(BUILDTOP)\include -I$(BUILDTOP)\windows\include
 PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 

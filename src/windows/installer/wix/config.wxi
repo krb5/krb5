@@ -100,9 +100,6 @@
     <?endif?>
     
     <!-- Configuration macros -->
-    <?ifndef LeashAfsStatus?>
-        <?define LeashAfsStatus="1"?>
-    <?endif?>
     <?ifndef LeashCreateMissingConfig?>
         <?define LeashCreateMissingConfig="0"?>
     <?endif?>
@@ -136,9 +133,6 @@
     <?ifndef LeashPublicIp?>
         <?define LeashPublicIp="0"?>
     <?endif?>
-    <?ifndef LeashUseKrb4?>
-        <?define LeashUseKrb4="1"?>
-    <?endif?>
     <?ifndef LeashHideKinitOptions?>
         <?define LeashHideKinitOptions="0"?>
     <?endif?>
@@ -164,18 +158,6 @@
         <?define LeashPreserveKinitOptions="0"?>
     <?endif?>
     <!-- These actually have no defaults. -->
-    <?ifndef Krb4KrbRealms?>
-        <?define Krb4KrbRealms=""?>
-    <?endif?>
-    <?ifndef Krb4KrbConf?>
-        <?define Krb4KrbConf=""?>
-    <?endif?>
-    <?ifndef Krb4ConfigDir?>
-        <?define Krb4ConfigDir=""?>
-    <?endif?>
-    <?ifndef Krb4TicketFile?>
-        <?define Krb4TicketFile=""?>
-    <?endif?>
     <?ifndef Krb5Config?>
         <?define Krb5Config=""?>
     <?endif?>

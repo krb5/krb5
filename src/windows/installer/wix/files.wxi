@@ -177,10 +177,6 @@
                     </Component> -->
 
                     <!-- Leash32 configuration -->
-                    <Component Win64="$(var.Win64)" Id="rcm_leash_1" Guid="$(var.rcm_leash_1_guid)" DiskId="1">
-	                    <RegistryValue Id="reg_leash_1" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="AfsStatus" Type="integer" Value="[LEASHAFSSTATUS]" KeyPath="yes"/>
-	                    <Condition>LEASHAFSSTATUS</Condition>
-                    </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leash_2" Guid="$(var.rcm_leash_2_guid)" DiskId="1">
 	                    <RegistryValue Id="reg_leash_2" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="createmissingconfig" Type="integer" Value="[LEASHCREATEMISSINGCONFIG]" KeyPath="yes"/>
 	                    <Condition>LEASHCREATEMISSINGCONFIG</Condition>
@@ -188,10 +184,6 @@
                     <Component Win64="$(var.Win64)" Id="rcm_leash_3" Guid="$(var.rcm_leash_3_guid)" DiskId="1">
 	                    <RegistryValue Id="reg_leash_3" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="AutoRenewTickets" Type="integer" Value="[LEASHAUTORENEWTICKETS]" KeyPath="yes"/>
 	                    <Condition>LEASHAUTORENEWTICKETS</Condition>
-                    </Component>
-                    <Component Win64="$(var.Win64)" Id="rcm_leash_5" Guid="$(var.rcm_leash_5_guid)" DiskId="1">
-	                    <RegistryValue Id="reg_leash_5" Root="HKLM" Key="Software\MIT\Leash" Name="lock_file_locations" Type="integer" Value="[LEASHLOCKFILELOCATIONS]" KeyPath="yes"/>
-	                    <Condition>LEASHLOCKFILELOCATIONS</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leash_6" Guid="$(var.rcm_leash_6_guid)" DiskId="1">
 	                    <RegistryValue Id="reg_leash_6" Root="HKLM" Key="Software\MIT\Leash" Name="MsLsaImport" Type="integer" Value="[LEASHMSLSAIMPORT]" KeyPath="yes"/>
@@ -238,10 +230,6 @@
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_7" Guid="$(var.rcm_leashdll_7_guid)" DiskId="1">
 	                    <RegistryValue Id="reg_leashdll_7" Root="HKLM" Key="Software\MIT\Leash" Name="publicip" Type="integer" Value="[LEASHPUBLICIP]" KeyPath="yes"/>
 	                    <Condition>LEASHPUBLICIP</Condition>
-                    </Component>
-                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_8" Guid="$(var.rcm_leashdll_8_guid)" DiskId="1">
-	                    <RegistryValue Id="reg_leashdll_8" Root="HKLM" Key="Software\MIT\Leash" Name="usekrb4" Type="integer" Value="[LEASHUSEKRB4]" KeyPath="yes"/>
-	                    <Condition>LEASHUSEKRB4</Condition>
                     </Component>
                     <Component Win64="$(var.Win64)" Id="rcm_leashdll_9" Guid="$(var.rcm_leashdll_9_guid)" DiskId="1">
 	                    <RegistryValue Id="reg_leashdll_9" Root="HKLM" Key="Software\MIT\Leash" Name="hide_kinit_options" Type="integer" Value="[LEASHHIDEKINITOPTIONS]" KeyPath="yes"/>

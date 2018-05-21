@@ -172,20 +172,12 @@ Kerberos for Windows
 
 2.1.2    Leash GUI properties
 
-    LEASHAFSSTATUS
-	Setting: afs token retrieval
-	Values : '0' or '1'
-
     LEASHCREATEMISSINGCONFIG
 	Setting: automatic generation of missing configuration files
 	Values : '0' or '1'
 
     LEASHAUTORENEWTICKETS
 	Setting: automatic ticket renewal
-	Values : '0' or '1'
-
-    LEASHLOCKFILELOCATIONS
-	Setting: lock configuration files location
 	Values : '0' or '1'
 
     LEASHMSLSAIMPORT
@@ -222,10 +214,6 @@ Kerberos for Windows
 	Setting: default public ipv4 address
 	Values : numeric
 
-    LEASHUSEKRB4
-	Setting: request kerberos iv tickets
-	Values : '0' or '1'
-
     LEASHHIDEKINITOPTIONS
 	Setting: hide advanced kinit options in dialog
 	Values : '0' or '1'
@@ -258,22 +246,7 @@ Kerberos for Windows
 	Setting: Preserve ticket initialization dialog options
 	Values : numeric
 
-2.1.4  Kerberos 4 properties
-
-    KRB4KRBREALMS   (realms full pathname)
-    KRB4KRBCONF     (config full pathname)
-    KRB4KRBCONFIDIR (dir for both files)
-	Setting: location of krbrealm & krbconf
-	Values : string
-        (note that the three registry settings are conditioned
-        independently. I.e. If you only set KRB4KRBCONF, only the
-        krb.conf setting will be written.)
-
-    KRB4TICKETFILE
-	Setting: ticket file
-	Values : string
-
-2.1.5  Kerberos 5 properties
+2.1.4  Kerberos 5 properties
 
     KRB5CONFIG
 	Setting: location of krb5.ini
@@ -638,7 +611,6 @@ Kerberos for Windows
 
     Krb5Cred : Kerberos 5 credentials provider
     Krb5Ident: Kerberos 5 Identity provider
-    Krb4Cred : Kerberos 4 credentials provider
 
     Consult the vendors for the plug-in names of other third party
     plug-ins.  Additionally, the plug-ins configuration panel in the
@@ -803,57 +775,6 @@ Kerberos for Windows
 
         Obtain renewable tickets.
 
-
-3.1.4   Settings for the Kerberos 4 Credentials Provider Plug-in
-
-    Registry key 1: 'Software\MIT\NetIDMgr\KCDB\Identity\<principal name>\Krb4Cred'
-    Registry key 2: 'Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred\Parameters'
-    ---------------
-
-    Theses settings are also maintained per identity.  However, if the
-    setting is not specified for some identity or if the identity is
-    new, then the global default will be used (registry key 2).
-    Global defaults should be set in the second registry key.
-
-    Value   : Krb4NewCreds
-    Type    : DWORD (0 or 1)
-    Default : 1
-
-        If '1', obtains Kerberos 4 credentials.  Note that currently,
-        only one identity can have Kerberos 4 credentials at one time.
-
-    Value   : Krb4Method
-    Type    : DWORD (0, 1 or 2)
-    Default : 0
-
-        Method for obtaining Kerberos 4 credentials.  The values are
-        as follows:
-
-        0 : Automatically determine method
-        1 : Use password
-        2 : Use Kerberos 5 to 4 translation
-
-    Value   : DefaultLifetime
-    Type    : DWORD
-    Default : 36000
-
-        The default ticket lifetime, in seconds.
-
-    Value   : MaxLifetime
-    Type    : DWORD
-    Default : 86400
-
-        Maximum lifetime, in seconds.  This value is used to set the
-        range of the user interface controls that allow setting the
-        lifetime.
-
-    Value   : MinLifetime
-    Type    : DWORD
-    Default : 60
-
-        Minimum lifetime, in seconds.  This value is used to set the
-        range of the user interface controls that allow setting the
-        lifetime.
 
 ----------------------------------------------------------------------
 

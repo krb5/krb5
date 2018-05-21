@@ -23,19 +23,17 @@
 
 /* Standard Include files */
 #include <windows.h>
+#include <windowsx.h>
 #include <stdio.h>
 #include <string.h>
 
 /* Private Inlclude files */
 #include "leashdll.h"
-#include <conf.h>
 #include <leashwin.h>
 #include "leash-int.h"
 #include "leashids.h"
 #include <leasherr.h>
-#ifndef NO_KRB5
 #include <krb5.h>
-#endif /* NO_KRB5 */
 #include <commctrl.h>
 
 extern void * Leash_pec_create(HWND hEditCtl);
@@ -47,7 +45,6 @@ extern void Leash_pec_clear_history(void *pec);
 static long lsh_errno;
 static char *err_context;       /* error context */
 extern HINSTANCE hLeashInst;
-extern HINSTANCE hKrb4;
 extern HINSTANCE hKrb5;
 
 
@@ -982,88 +979,6 @@ GetProfileFile(
         confname[szConfname-1] = '\0';
     }
 
-    return FALSE;
-}
-
-BOOL
-GetKrb4ConFile(
-    LPSTR confname,
-    UINT szConfname
-    )
-{
-    if (hKrb5
-         )
-    { // hold krb.con where krb5.ini is located
-        CHAR krbConFile[MAX_PATH]="";
-        LPSTR pFind;
-
-        //strcpy(krbConFile, CLeashApp::m_krbv5_profile->first_file->filename);
-        if (GetProfileFile(krbConFile, sizeof(krbConFile)))
-        {
-            GetWindowsDirectory(krbConFile,sizeof(krbConFile));
-            krbConFile[MAX_PATH-1] = '\0';
-            strncat(krbConFile, "\\",sizeof(krbConFile)-strlen(krbConFile));
-            krbConFile[MAX_PATH-1] = '\0';
-            strncat(krbConFile, KRB5_FILE,sizeof(krbConFile)-strlen(krbConFile));
-            krbConFile[MAX_PATH-1] = '\0';
-        }
-
-        pFind = strrchr(krbConFile, '\\');
-        if (pFind)
-        {
-            *pFind = 0;
-            strncat(krbConFile, "\\",sizeof(krbConFile)-strlen(krbConFile));
-            krbConFile[MAX_PATH-1] = '\0';
-            strncat(krbConFile, KRB_FILE,sizeof(krbConFile)-strlen(krbConFile));
-            krbConFile[MAX_PATH-1] = '\0';
-        }
-        else
-            krbConFile[0] = 0;
-
-        strncpy(confname, krbConFile, szConfname);
-        confname[szConfname-1] = '\0';
-    }
-    return FALSE;
-}
-
-BOOL
-GetKrb4RealmFile(
-    LPSTR confname,
-    UINT szConfname
-    )
-{
-    if (hKrb5
-         )
-    { // hold krb.con where krb5.ini is located
-        CHAR krbRealmConFile[MAX_PATH];
-        LPSTR pFind;
-
-        //strcpy(krbRealmConFile, CLeashApp::m_krbv5_profile->first_file->filename);
-        if (GetProfileFile(krbRealmConFile, sizeof(krbRealmConFile)))
-        {
-            GetWindowsDirectory(krbRealmConFile,sizeof(krbRealmConFile));
-            krbRealmConFile[MAX_PATH-1] = '\0';
-            strncat(krbRealmConFile, "\\",sizeof(krbRealmConFile)-strlen(krbRealmConFile));
-            krbRealmConFile[MAX_PATH-1] = '\0';
-            strncat(krbRealmConFile, KRB5_FILE,sizeof(krbRealmConFile)-strlen(krbRealmConFile));
-            krbRealmConFile[MAX_PATH-1] = '\0';
-        }
-
-        pFind = strrchr(krbRealmConFile, '\\');
-        if (pFind)
-        {
-            *pFind = 0;
-            strncat(krbRealmConFile, "\\", sizeof(krbRealmConFile)-strlen(krbRealmConFile));
-            krbRealmConFile[MAX_PATH-1] = '\0';
-            strncat(krbRealmConFile, KRBREALM_FILE, sizeof(krbRealmConFile)-strlen(krbRealmConFile));
-            krbRealmConFile[MAX_PATH-1] = '\0';
-        }
-        else
-            krbRealmConFile[0] = 0;
-
-        strncpy(confname, krbRealmConFile, szConfname);
-        confname[szConfname-1] = '\0';
-    }
     return FALSE;
 }
 

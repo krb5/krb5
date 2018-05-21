@@ -24,10 +24,6 @@
 #include "LeashDebugWindow.h"
 #include "LeashMessageBox.h"
 #include "LeashAboutBox.h"
-#include "Krb5Properties.h"
-#include "LeashProperties.h"
-#include "KrbProperties.h"
-#include "AfsProperties.h"
 #include <krb5.h>
 
 #ifdef _DEBUG
@@ -82,23 +78,15 @@ BEGIN_MESSAGE_MAP(CLeashView, CListView)
 	ON_UPDATE_COMMAND_UI(ID_INIT_TICKET, OnUpdateInitTicket)
 	ON_UPDATE_COMMAND_UI(ID_RENEW_TICKET, OnUpdateRenewTicket)
 	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
-	ON_COMMAND(ID_AFS_CONTROL_PANEL, OnAfsControlPanel)
 	ON_UPDATE_COMMAND_UI(ID_DEBUG_MODE, OnUpdateDebugMode)
 	ON_UPDATE_COMMAND_UI(ID_CFG_FILES, OnUpdateCfgFiles)
-	ON_COMMAND(ID_KRB4_PROPERTIES, OnKrb4Properties)
-	ON_COMMAND(ID_KRB5_PROPERTIES, OnKrb5Properties)
-	ON_COMMAND(ID_LEASH_PROPERTIES, OnLeashProperties)
     ON_COMMAND(ID_LEASH_RESTORE, OnLeashRestore)
     ON_COMMAND(ID_LEASH_MINIMIZE, OnLeashMinimize)
 	ON_COMMAND(ID_LOW_TICKET_ALARM, OnLowTicketAlarm)
 	ON_COMMAND(ID_AUTO_RENEW, OnAutoRenew)
 	ON_UPDATE_COMMAND_UI(ID_LOW_TICKET_ALARM, OnUpdateLowTicketAlarm)
 	ON_UPDATE_COMMAND_UI(ID_AUTO_RENEW, OnUpdateAutoRenew)
-	ON_UPDATE_COMMAND_UI(ID_KRB4_PROPERTIES, OnUpdateKrb4Properties)
-	ON_UPDATE_COMMAND_UI(ID_KRB5_PROPERTIES, OnUpdateKrb5Properties)
-	ON_UPDATE_COMMAND_UI(ID_AFS_CONTROL_PANEL, OnUpdateAfsControlPanel)
 	ON_UPDATE_COMMAND_UI(ID_MAKE_DEFAULT, OnUpdateMakeDefault)
-	ON_COMMAND(ID_PROPERTIES, OnKrbProperties)
 	ON_UPDATE_COMMAND_UI(ID_PROPERTIES, OnUpdateProperties)
 	ON_COMMAND(ID_HELP_KERBEROS_, OnHelpKerberos)
 	ON_COMMAND(ID_HELP_LEASH32, OnHelpLeash32)
@@ -121,19 +109,8 @@ END_MESSAGE_MAP()
 
 
 time_t CLeashView::m_ticketTimeLeft = 0;  // # of seconds left before tickets expire
-INT  CLeashView::m_forwardableTicket = 0;
-INT  CLeashView::m_proxiableTicket = 0;
-INT  CLeashView::m_renewableTicket = 0;
-INT  CLeashView::m_noaddressTicket = 0;
-DWORD CLeashView::m_publicIPAddress = 0;
-INT  CLeashView::m_ticketStatusAfs = 0; // Defense Condition: are we low on tickets?
-INT  CLeashView::m_ticketStatusKrb4 = 0; // Defense Condition: are we low on tickets?
 INT  CLeashView::m_ticketStatusKrb5 = 0; // Defense Condition: are we low on tickets?
-INT  CLeashView::m_warningOfTicketTimeLeftAfs = 0; // Prevents warning box from coming up repeatively
-INT  CLeashView::m_warningOfTicketTimeLeftKrb4 = 0; // Prevents warning box from coming up repeatively
 INT  CLeashView::m_warningOfTicketTimeLeftKrb5 = 0; // Prevents warning box from coming up repeatively
-INT  CLeashView::m_warningOfTicketTimeLeftLockAfs = 0;
-INT  CLeashView::m_warningOfTicketTimeLeftLockKrb4 = 0;
 INT  CLeashView::m_warningOfTicketTimeLeftLockKrb5 = 0;
 INT  CLeashView::m_updateDisplayCount;
 INT  CLeashView::m_alreadyPlayedDisplayCount;
@@ -344,14 +321,8 @@ void DurationToString(long delta, LPTSTR *outStr)
 CLeashView::CLeashView()
 {
 ////@#+Need removing as well!
-#ifndef NO_KRB4
-    m_listKrb4 = NULL;
-#endif
-    m_listAfs = NULL;
     m_startup = TRUE;
-    m_warningOfTicketTimeLeftKrb4 = 0;
     m_warningOfTicketTimeLeftKrb5 = 0;
-    m_warningOfTicketTimeLeftLockKrb4 = 0;
     m_warningOfTicketTimeLeftLockKrb5 = 0;
     m_largeIcons = 0;
     m_destroyTicketsOnExit = 0;
@@ -376,11 +347,6 @@ CLeashView::CLeashView()
     m_hMenu = NULL;
     m_pApp = NULL;
     m_ccacheDisplay = NULL;
-    m_forwardableTicket = 0;
-    m_proxiableTicket = 0;
-    m_renewableTicket = 0;
-    m_noaddressTicket = 0;
-    m_publicIPAddress = 0;
     m_autoRenewTickets = 0;
     m_autoRenewalAttempted = 0;
     m_pWarningMessage = NULL;
@@ -496,8 +462,7 @@ time_t CLeashView::LeashTime()
 // Call while possessing a lock to ticketinfo.lockObj
 INT CLeashView::GetLowTicketStatus(int ver)
 {
-    BOOL b_notix = (ver == 5 && !ticketinfo.Krb5.btickets) ||
-                   (ver == 1 && !ticketinfo.Afs.btickets);
+    BOOL b_notix = (ver == 5 && !ticketinfo.Krb5.btickets);
 
     if (b_notix)
         return NO_TICKETS;
@@ -565,21 +530,6 @@ VOID CLeashView::OnShowWindow(BOOL bShow, UINT nStatus)
         // Get State of Upper Case Realm
         m_upperCaseRealm = pLeash_get_default_uppercaserealm();
 
-        // Forwardable flag
-        m_forwardableTicket = pLeash_get_default_forwardable();
-
-        // Proxiable flag
-        m_proxiableTicket = pLeash_get_default_proxiable();
-
-        // Renewable flag
-        m_renewableTicket = pLeash_get_default_renewable();
-
-        // No Address flag
-        m_noaddressTicket = pLeash_get_default_noaddresses();
-
-        // Public IP Address
-        m_publicIPAddress = pLeash_get_default_publicip();
-
         // UI main display column widths
         for (int i=0; i<NUM_VIEW_COLUMNS; i++) {
             ViewColumnInfo &info = sm_viewColumns[i];
@@ -596,32 +546,17 @@ VOID CLeashView::OnShowWindow(BOOL bShow, UINT nStatus)
 
     SetTimer(1, ONE_SECOND, TimerProc);
 
-    if (
-////
-#ifndef NO_KRB4
-	!CLeashApp::m_hKrb4DLL &&
-#endif
-	!CLeashApp::m_hKrb5DLL && !CLeashApp::m_hAfsDLL)
+    if (!CLeashApp::m_hKrb5DLL)
     {
 ////Update not to mention K4
-        AfxMessageBox("Neither Kerberos Four, Kerberos Five nor AFS is loaded!!!"
+        AfxMessageBox("Kerberos Five is not loaded!!!"
                    "\r\nYou will not be able to retrieve tickets and/or "
                    "tokens.",
                    MB_OK|MB_ICONWARNING);
     }
 
-    if (!CLeashApp::m_hAfsDLL)
-    {
-        // No AFS installed
-        SetDlgItemText(IDC_LABEL_KERB_TICKETS,
-                       "Your Kerberos Tickets (Issued/Expires/[Renew]/Principal)");
-    } else
-    {
-        // AFS installed
-        SetDlgItemText(IDC_LABEL_KERB_TICKETS,
-                       "Your Kerberos Tickets and AFS Tokens (Issued/Expires/[Renew]/Principal)");
-
-    }
+    SetDlgItemText(IDC_LABEL_KERB_TICKETS,
+		   "Your Kerberos Tickets (Issued/Expires/[Renew]/Principal)");
 
     // CLeashApp::m_krbv5_context = NULL;
 }
@@ -693,9 +628,7 @@ UINT CLeashView::InitTicket(void * hWnd)
         if (WaitForSingleObject( ticketinfo.lockObj, INFINITE ) != WAIT_OBJECT_0) {
             throw("Unable to lock ticketinfo");
         }
-        m_warningOfTicketTimeLeftKrb4 = 0;
         m_warningOfTicketTimeLeftKrb5 = 0;
-        m_ticketStatusKrb4 = 0;
         m_ticketStatusKrb5 = 0;
         ReleaseMutex(ticketinfo.lockObj);
         m_autoRenewalAttempted = 0;
@@ -758,9 +691,7 @@ cleanup:
                 throw("Unable to lock ticketinfo");
             }
             ticketinfo.Krb5.btickets = GOOD_TICKETS;
-            m_warningOfTicketTimeLeftKrb4 = 0;
             m_warningOfTicketTimeLeftKrb5 = 0;
-            m_ticketStatusKrb4 = 0;
             m_ticketStatusKrb5 = 0;
             ReleaseMutex(ticketinfo.lockObj);
             ::SendMessage((HWND)hWnd, WM_COMMAND, ID_UPDATE_DISPLAY, 0);
@@ -899,9 +830,7 @@ UINT CLeashView::RenewTicket(void * hWnd)
     // Try to renew
     BOOL b_renewed = pLeash_renew();
     if ( b_renewed ) {
-        m_warningOfTicketTimeLeftKrb4 = 0;
         m_warningOfTicketTimeLeftKrb5 = 0;
-        m_ticketStatusKrb4 = 0;
         m_ticketStatusKrb5 = 0;
         m_autoRenewalAttempted = 0;
         ReleaseMutex(ticketinfo.lockObj);
@@ -1229,8 +1158,6 @@ FindCCacheDisplayElem(CCacheDisplayData *pElem, int itemIndex)
 
 VOID CLeashView::OnUpdateDisplay()
 {
-    BOOL AfsEnabled = m_pApp->GetProfileInt("Settings", "AfsStatus", 1);
-
     CListCtrl& list = GetListCtrl();
     // @TODO: there is probably a more sensible place to initialize these...
     if ((m_BaseFont == NULL) && (list.GetFont())) {
@@ -1274,32 +1201,12 @@ VOID CLeashView::OnUpdateDisplay()
         }
     }
 
-#ifndef NO_KRB4
-    INT ticketIconStatusKrb4;
-    INT ticketIconStatus_SelectedKrb4;
-    INT iconStatusKrb4;
-#endif
-
     INT ticketIconStatusKrb5;
     INT ticketIconStatus_SelectedKrb5;
     INT iconStatusKrb5;
 
-    INT ticketIconStatusAfs;
-    INT ticketIconStatus_SelectedAfs;
-    INT iconStatusAfs;
-
-#ifndef NO_KRB4
-    LONG krb4Error;
-#endif
-    LONG afsError;
-
     if (WaitForSingleObject( ticketinfo.lockObj, 100 ) != WAIT_OBJECT_0)
         throw("Unable to lock ticketinfo");
-
-#ifndef NO_KRB4
-    // Get Kerb 4 tickets in list
-    krb4Error = pLeashKRB4GetTickets(&ticketinfo.Krb4, &m_listKrb4);
-#endif
 
     // Get Kerb 5 tickets in list
     LeashKRB5ListDefaultTickets(&ticketinfo.Krb5);
@@ -1318,54 +1225,10 @@ VOID CLeashView::OnUpdateDisplay()
         pprofile_init(filenames, &CLeashApp::m_krbv5_profile);
     }
 
-    // Get AFS Tokens in list
-    if (CLeashApp::m_hAfsDLL) {
-        char * principal;
-        if ( ticketinfo.Krb5.principal[0] )
-            principal = ticketinfo.Krb5.principal;
-        else
-            principal = "";
-        afsError = pLeashAFSGetToken(&ticketinfo.Afs, &m_listAfs, principal);
-    }
-
     /*
      * Update Ticket Status for Krb5 so that we may use their state
      * to select the appropriate Icon for the Parent Node
      */
-
-////Might need to delete dependent stuff as well!!!
-#ifndef NO_KRB4
-    /* Krb4 */
-    UpdateTicketTime(ticketinfo.Krb4);
-    m_ticketStatusKrb4 = GetLowTicketStatus(4);
-    if (!m_listKrb4 || EXPIRED_TICKETS == ticketinfo.Krb4.btickets ||
-         m_ticketStatusKrb4 == ZERO_MINUTES_LEFT)
-    {
-        ticketIconStatusKrb4 = EXPIRED_CLOCK;
-        ticketIconStatus_SelectedKrb4 = EXPIRED_CLOCK;
-        iconStatusKrb4 = EXPIRED_TICKET;
-    }
-    else if (TICKETS_LOW == ticketinfo.Krb4.btickets ||
-             m_ticketStatusKrb4 == FIVE_MINUTES_LEFT ||
-             m_ticketStatusKrb4 == TEN_MINUTES_LEFT ||
-             m_ticketStatusKrb4 == FIFTEEN_MINUTES_LEFT)
-    {
-        ticketIconStatusKrb4 = LOW_CLOCK;
-        ticketIconStatus_SelectedKrb4 = LOW_CLOCK;
-        iconStatusKrb4 = LOW_TICKET;
-    }
-    else if ( CLeashApp::m_hKrb4DLL )
-    {
-        ticketIconStatusKrb4 = ACTIVE_CLOCK;
-        ticketIconStatus_SelectedKrb4 = ACTIVE_CLOCK;
-        iconStatusKrb4 = ACTIVE_TICKET;
-    } else {
-        ticketIconStatusKrb4 = EXPIRED_CLOCK;
-        ticketIconStatus_SelectedKrb4 = EXPIRED_CLOCK;
-        iconStatusKrb4 = TICKET_NOT_INSTALLED;
-    }
-#endif
-
 
     /* Krb5 */
     UpdateTicketTime(ticketinfo.Krb5);
@@ -1397,37 +1260,6 @@ VOID CLeashView::OnUpdateDisplay()
         ticketIconStatusKrb5 = EXPIRED_CLOCK;
         ticketIconStatus_SelectedKrb5 = EXPIRED_CLOCK;
         iconStatusKrb5 = TICKET_NOT_INSTALLED;
-    }
-
-    /* Afs */
-    UpdateTicketTime(ticketinfo.Afs);
-    m_ticketStatusAfs = GetLowTicketStatus(1);
-    if (!m_listAfs || EXPIRED_TICKETS == ticketinfo.Afs.btickets ||
-         m_ticketStatusAfs == ZERO_MINUTES_LEFT)
-    {
-        ticketIconStatusAfs = EXPIRED_CLOCK;
-        ticketIconStatus_SelectedAfs = EXPIRED_CLOCK;
-        iconStatusAfs = EXPIRED_TICKET;
-    }
-    else if (TICKETS_LOW == ticketinfo.Afs.btickets ||
-             m_ticketStatusAfs == FIVE_MINUTES_LEFT ||
-             m_ticketStatusAfs == TEN_MINUTES_LEFT ||
-             m_ticketStatusAfs == FIFTEEN_MINUTES_LEFT)
-    {
-        ticketIconStatusAfs = LOW_CLOCK;
-        ticketIconStatus_SelectedAfs = LOW_CLOCK;
-        iconStatusAfs = LOW_TICKET;
-    }
-    else if ( CLeashApp::m_hAfsDLL )
-    {
-        ticketIconStatusAfs = ACTIVE_CLOCK;
-        ticketIconStatus_SelectedAfs = ACTIVE_CLOCK;
-        iconStatusAfs = ACTIVE_TICKET;
-    } else
-    {
-        ticketIconStatusAfs = EXPIRED_CLOCK;
-        ticketIconStatus_SelectedAfs = EXPIRED_CLOCK;
-        iconStatusAfs = TICKET_NOT_INSTALLED;
     }
 
     int trayIcon = NONE_PARENT_NODE;
@@ -1553,8 +1385,6 @@ VOID CLeashView::OnUpdateDisplay()
     LeashKRB5FreeTicketInfo(&ticketinfo.Krb5);
     LeashKRB5FreeTickets(&principallist);
 
-    // @TODO: AFS-specific here
-
     ReleaseMutex(ticketinfo.lockObj);
 }
 
@@ -1655,9 +1485,6 @@ VOID CLeashView::OnActivateView(BOOL bActivate, CView* pActivateView,
 
     m_alreadyPlayed = TRUE;
 
-    if (!CKrbProperties::KrbPropertiesOn)
-        SendMessage(WM_COMMAND, ID_UPDATE_DISPLAY, 0);
-
     if (m_debugStartUp)
     {
         OnDebugMode();
@@ -1671,11 +1498,6 @@ VOID CLeashView::OnActivateView(BOOL bActivate, CView* pActivateView,
 ////@#+Is this KRB4 only?
 VOID CLeashView::OnDebugMode()
 {
-#ifndef NO_KRB4
-    if (!pset_krb_debug)
-        return;
-#endif
-
     if (!m_pDebugWindow)
     {
         AfxMessageBox("There is a problem with the Leash Debug Window!",
@@ -1724,11 +1546,6 @@ VOID CLeashView::OnDebugMode()
 
         m_pApp->WriteProfileInt("Settings", "DebugWindow", FALSE_FLAG);
         m_pDebugWindow->DestroyWindow();
-////
-#ifndef NO_KRB4
-        pset_krb_debug(OFF);
-        pset_krb_ap_req_debug(OFF);
-#endif
         return;
     }
     else
@@ -1958,11 +1775,7 @@ VOID CLeashView::OnUpdateUppercaseRealm(CCmdUI *pCmdUI)
 VOID CLeashView::ResetTreeNodes()
 {
     m_hPrincipalState = 0;
-#ifndef NO_KRB4
-    m_hKerb4State = 0;
-#endif
     m_hKerb5State = 0;
-    m_hAFSState = 0;
 }
 
 VOID CLeashView::OnDestroy()
@@ -1998,13 +1811,7 @@ VOID CLeashView::OnUpdateDestroyTicket(CCmdUI* pCmdUI)
 
 VOID CLeashView::OnUpdateInitTicket(CCmdUI* pCmdUI)
 {
-    if (
-////Is this logic correct?
-#ifndef NO_KRB4
-	!CLeashApp::m_hKrb4DLL &&
-#endif
-	!CLeashApp::m_hKrb5DLL &&
-        !CLeashApp::m_hAfsDLL)
+  if (!CLeashApp::m_hKrb5DLL)
         pCmdUI->Enable(FALSE);
     else
         pCmdUI->Enable(TRUE);
@@ -2091,17 +1898,8 @@ LRESULT CLeashView::OnTrayIcon(WPARAM wParam, LPARAM lParam)
             menu->AppendMenu(MF_STRING, ID_INIT_TICKET, "&Get Tickets");
             if (WaitForSingleObject( ticketinfo.lockObj, INFINITE ) != WAIT_OBJECT_0)
                 throw("Unable to lock ticketinfo");
-            if (!(
-#ifndef NO_KRB4
-		ticketinfo.Krb4.btickets ||
-#endif
-		ticketinfo.Krb5.btickets) ||
-////Not entirely sure about the logic
-#ifndef NO_KRB4
-                 !CLeashApp::m_hKrb4DLL &&
-#endif
-		 !CLeashApp::m_hKrb5DLL &&
-                 !CLeashApp::m_hAfsDLL)
+            if (!ticketinfo.Krb5.btickets ||
+		!CLeashApp::m_hKrb5DLL)
                 nFlags = MF_STRING | MF_GRAYED;
             else
                 nFlags = MF_STRING;
@@ -2111,7 +1909,7 @@ LRESULT CLeashView::OnTrayIcon(WPARAM wParam, LPARAM lParam)
             else
                 nFlags = MF_STRING;
             menu->AppendMenu(MF_STRING, ID_IMPORT_TICKET, "&Import Tickets");
-            if (!ticketinfo.Krb5.btickets && !ticketinfo.Afs.btickets)
+            if (!ticketinfo.Krb5.btickets)
                 nFlags = MF_STRING | MF_GRAYED;
             else
                 nFlags = MF_STRING;
@@ -2161,12 +1959,6 @@ VOID CLeashView::OnAppAbout()
 }
 
 
-VOID CLeashView::OnAfsControlPanel()
-{
-    CAfsProperties afsProperties;
-    afsProperties.DoModal();
-}
-
 VOID CLeashView::OnInitialUpdate()
 {
     CListView::OnInitialUpdate();
@@ -2180,14 +1972,8 @@ VOID CLeashView::OnItemexpandedTreeview(NMHDR* pNMHDR, LRESULT* pResult)
 
     if (m_hPrincipal == pNMTreeView->itemNew.hItem)
         m_hPrincipalState = pNMTreeView->action;
-#ifndef NO_KRB4
-    else if (m_hKerb4 == pNMTreeView->itemNew.hItem)
-        m_hKerb4State = pNMTreeView->action;
-#endif
     else if (m_hKerb5 == pNMTreeView->itemNew.hItem)
         m_hKerb5State = pNMTreeView->action;
-    else if (m_hAFS ==  pNMTreeView->itemNew.hItem)
-        m_hAFSState =  pNMTreeView->action;
 
     CMainFrame::m_isBeingResized = TRUE;
     *pResult = 0;
@@ -2195,56 +1981,12 @@ VOID CLeashView::OnItemexpandedTreeview(NMHDR* pNMHDR, LRESULT* pResult)
 
 VOID CLeashView::OnUpdateDebugMode(CCmdUI* pCmdUI)
 {
-////
-#ifndef NO_KRB4
-    if (!pset_krb_debug)
-#endif
         pCmdUI->Enable(FALSE);
-////
-#ifndef NO_KRB4
-    else
-        pCmdUI->Enable(TRUE);
-#endif
 }
 
 VOID CLeashView::OnUpdateCfgFiles(CCmdUI* pCmdUI)
 {
-////
-#ifndef NO_KRB4
-    if (!pkrb_get_krbconf2)
-#endif
         pCmdUI->Enable(FALSE);
-////
-#ifndef NO_KRB4
-    else
-        pCmdUI->Enable(TRUE);
-#endif
-}
-
-VOID CLeashView::OnLeashProperties()
-{
-    CLeashProperties leashProperties;
-    leashProperties.DoModal();
-}
-
-VOID CLeashView::OnKrbProperties()
-{
-    CKrbProperties krbProperties("Kerberos Properties");
-    krbProperties.DoModal();
-}
-
-VOID CLeashView::OnKrb4Properties()
-{
-#ifndef NO_KRB4
-    CKrb4Properties krb4Properties("Kerberos Four Properties");
-    krb4Properties.DoModal();
-#endif
-}
-
-VOID CLeashView::OnKrb5Properties()
-{
-    CKrb5Properties krb5Properties("Kerberos Five Properties");
-    krb5Properties.DoModal();
 }
 
 /*
@@ -2369,10 +2111,8 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
         if (InterlockedDecrement(&m_timerMsgNotInProgress) == 0) {
 
             CString ticketStatusKrb5 = TCHAR(NOT_INSTALLED);
-            CString ticketStatusAfs  = TCHAR(NOT_INSTALLED);
             CString strTimeDate;
             CString lowTicketWarningKrb5;
-            CString lowTicketWarningAfs;
 
           timer_start:
             if (WaitForSingleObject( ticketinfo.lockObj, 100 ) != WAIT_OBJECT_0)
@@ -2469,113 +2209,6 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
             }
             //KRB5
 
-
-            if (CLeashApp::m_hAfsDLL)
-            {
-                // AFS
-                UpdateTicketTime(ticketinfo.Afs);
-                if (!ticketinfo.Afs.btickets)
-                {
-                    BOOL AfsEnabled = m_pApp->GetProfileInt("Settings", "AfsStatus", 1);
-                    if ( AfsEnabled )
-                        ticketStatusAfs = "AFS: No Tickets";
-                    else
-                        ticketStatusAfs = "AFS: Disabled";
-                }
-                else if (EXPIRED_TICKETS == ticketinfo.Afs.btickets)
-                {
-#ifndef NO_KRB5
-                    if (ticketinfo.Krb5.btickets &&
-                         EXPIRED_TICKETS != ticketinfo.Krb5.btickets &&
-                         m_autoRenewTickets &&
-                         !m_autoRenewalAttempted &&
-                         ticketinfo.Krb5.renew_until &&
-                         (ticketinfo.Krb5.issued + ticketinfo.Krb5.renew_until -LeashTime() > 20 * 60) &&
-                         !stricmp(ticketinfo.Krb5.principal,ticketinfo.Afs.principal)
-                         )
-                    {
-                        m_autoRenewalAttempted = 1;
-                        ReleaseMutex(ticketinfo.lockObj);
-                        AfxBeginThread(RenewTicket,m_hWnd);
-                        goto timer_start;
-                    }
-#endif /* NO_KRB5 */
-                    ticketStatusAfs = "AFS: Expired Tickets";
-                    lowTicketWarningAfs = "Your AFS token(s) have expired";
-                    if (!m_warningOfTicketTimeLeftLockAfs)
-                        m_warningOfTicketTimeLeftAfs = 0;
-                    m_warningOfTicketTimeLeftLockAfs = ZERO_MINUTES_LEFT;
-                    m_ticketTimeLeft = 0;
-                }
-                else
-                {
-                    m_ticketStatusAfs = GetLowTicketStatus(1);
-                    switch (m_ticketStatusAfs)
-                    {
-                    case FIFTEEN_MINUTES_LEFT:
-                        ticketinfo.Afs.btickets = TICKETS_LOW;
-
-                        lowTicketWarningAfs = "Less then 15 minutes left on your AFStoken(s)";
-                        break;
-                    case TEN_MINUTES_LEFT:
-                        ticketinfo.Afs.btickets = TICKETS_LOW;
-
-                        lowTicketWarningAfs = "Less then 10 minutes left on your AFS token(s)";
-
-                        if (!m_warningOfTicketTimeLeftLockAfs)
-                            m_warningOfTicketTimeLeftAfs = 0;
-
-                        m_warningOfTicketTimeLeftLockAfs = TEN_MINUTES_LEFT;
-                        break;
-                    case FIVE_MINUTES_LEFT:
-                        ticketinfo.Afs.btickets = TICKETS_LOW;
-                        if (m_warningOfTicketTimeLeftLockAfs == TEN_MINUTES_LEFT)
-                            m_warningOfTicketTimeLeftAfs = 0;
-
-                        m_warningOfTicketTimeLeftLockAfs = FIVE_MINUTES_LEFT;
-
-                        lowTicketWarningAfs = "Less then 5 minutes left on your AFS token(s)";
-                        break;
-                    default:
-                        m_ticketStatusAfs = 0;
-                        break;
-                    }
-
-                }
-
-                if (CMainFrame::m_isMinimum)
-                {
-                    // minimized dispay
-                    ticketStatusAfs.Format("AFS: %02d:%02d Left",
-                                            (m_ticketTimeLeft / 60L / 60L),
-                                            (m_ticketTimeLeft / 60L % 60L));
-                }
-                else
-                {
-                    // normal display
-                    if (GOOD_TICKETS == ticketinfo.Afs.btickets ||
-                         TICKETS_LOW == ticketinfo.Afs.btickets)
-                    {
-                        if ( m_ticketTimeLeft >= 60 ) {
-                            ticketStatusAfs.Format("AFS Token Life: %02d:%02d",
-                                                    (m_ticketTimeLeft / 60L / 60L),
-                                                    (m_ticketTimeLeft / 60L % 60L));
-                        } else {
-                            ticketStatusAfs.Format("AFS Token Life: < 1 min");
-                        }
-                    }
-#ifndef NO_STATUS_BAR
-                    if (CMainFrame::m_wndStatusBar)
-                    {
-                        CMainFrame::m_wndStatusBar.SetPaneInfo(3, 111113, SBPS_NORMAL, 130);
-                        CMainFrame::m_wndStatusBar.SetPaneText(3, ticketStatusAfs, SBT_POPOUT);
-                    }
-#endif
-                }
-            }
-            // AFS
-
-#ifndef NO_KRB5
             if ( m_ticketStatusKrb5 == TWENTY_MINUTES_LEFT &&
                  m_autoRenewTickets && !m_autoRenewalAttempted && ticketinfo.Krb5.renew_until &&
                  (ticketinfo.Krb5.renew_until - LeashTime() > 20 * 60))
@@ -2585,17 +2218,13 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
                 AfxBeginThread(RenewTicket,m_hWnd);
                 goto timer_start;
             }
-#endif /* NO_KRB5 */
 
             BOOL warningKrb5 = m_ticketStatusKrb5 > NO_TICKETS &&
                 m_ticketStatusKrb5 < TWENTY_MINUTES_LEFT &&
                     !m_warningOfTicketTimeLeftKrb5;
-            BOOL warningAfs = m_ticketStatusAfs > NO_TICKETS &&
-                m_ticketStatusAfs < TWENTY_MINUTES_LEFT &&
-                    !m_warningOfTicketTimeLeftAfs;
 
             // Play warning message only once per each case statement above
-            if (warningKrb5 || warningAfs)
+            if (warningKrb5)
             {
 
                 CString lowTicketWarning = "";
@@ -2604,13 +2233,6 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
                 if (warningKrb5) {
                     lowTicketWarning += lowTicketWarningKrb5;
                     m_warningOfTicketTimeLeftKrb5 = ON;
-                    warnings++;
-                }
-                if (warningAfs) {
-                    if ( warnings )
-                        lowTicketWarning += "\n";
-                    lowTicketWarning += lowTicketWarningAfs;
-                    m_warningOfTicketTimeLeftAfs = ON;
                     warnings++;
                 }
 
@@ -2625,17 +2247,10 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
 
             if (CMainFrame::m_isMinimum)
             {
-                if ( CLeashApp::m_hAfsDLL )
-                    strTimeDate = ( "MIT Kerberos - "
-                                    "[" + ticketStatusKrb5 + "] - " +
-                                    "[" + ticketStatusAfs + "] - " +
-                                    "[" + ticketinfo.Krb5.principal + "]" + " - " +
-                                    tTimeDate.Format("%A, %B %d, %Y  %H:%M "));
-                else
-                    strTimeDate = ( "MIT Kerberos - "
-                                    "[" + ticketStatusKrb5 + "] - " +
-                                    "[" + ticketinfo.Krb5.principal + "]" + " - " +
-                                    tTimeDate.Format("%A, %B %d, %Y  %H:%M "));
+	      strTimeDate = ( "MIT Kerberos - "
+			      "[" + ticketStatusKrb5 + "] - " +
+			      "[" + ticketinfo.Krb5.principal + "]" + " - " +
+			      tTimeDate.Format("%A, %B %d, %Y  %H:%M "));
             }
             else
             {
@@ -2757,44 +2372,10 @@ VOID CLeashView::AlarmBeep()
 
 VOID CLeashView::OnUpdateProperties(CCmdUI* pCmdUI)
 {
-    if (CLeashApp::m_hKrb5DLL
-#ifndef NO_KRB4
-	|| CLeashApp::m_hKrb4DLL
-#endif
-	)
-        pCmdUI->Enable();
-    else
-        pCmdUI->Enable(FALSE);
-}
-
-VOID CLeashView::OnUpdateKrb4Properties(CCmdUI* pCmdUI)
-{
-#ifndef NO_KRB4
-    if (CLeashApp::m_hKrb4DLL)
-        pCmdUI->Enable();
-    else
-#endif
-        pCmdUI->Enable(FALSE);
-}
-
-VOID CLeashView::OnUpdateKrb5Properties(CCmdUI* pCmdUI)
-{
     if (CLeashApp::m_hKrb5DLL)
         pCmdUI->Enable();
     else
         pCmdUI->Enable(FALSE);
-}
-
-VOID CLeashView::OnUpdateAfsControlPanel(CCmdUI* pCmdUI)
-{
-////Is the comment even correct?
-#ifndef NO_KRB4
-    // need Krb 4 to get AFS tokens
-    if (CLeashApp::m_hAfsDLL && CLeashApp::m_hKrb4DLL)
-        pCmdUI->Enable();
-    else
-#endif
-        pCmdUI->m_pMenu->DeleteMenu(pCmdUI->m_nID, MF_BYCOMMAND);
 }
 
 void CLeashView::OnHelpLeash32()
