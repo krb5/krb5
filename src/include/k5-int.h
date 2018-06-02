@@ -1831,15 +1831,12 @@ krb5int_random_string(krb5_context, char *string, unsigned int length);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 21
+#define KRB5INT_ACCESS_STRUCT_VERSION 22
 
 typedef struct _krb5int_access {
     krb5_error_code (*auth_con_get_subkey_enctype)(krb5_context,
                                                    krb5_auth_context,
                                                    krb5_enctype *);
-
-    krb5_error_code (*clean_hostname)(krb5_context, const char *, char *,
-                                      size_t);
 
     krb5_error_code (*mandatory_cksumtype)(krb5_context, krb5_enctype,
                                            krb5_cksumtype *);

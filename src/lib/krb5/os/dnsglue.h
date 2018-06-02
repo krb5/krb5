@@ -64,10 +64,6 @@
 #include <sys/param.h>          /* for MAXHOSTNAMELEN */
 #endif
 
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64       /* if we can't find it elswhere */
-#endif
-
 #ifndef MAXDNAME
 
 #ifdef NS_MAXDNAME
@@ -158,25 +154,6 @@ int krb5int_dns_nextans(struct krb5int_dns_state *,
 int krb5int_dns_expand(struct krb5int_dns_state *,
                        const unsigned char *, char *, int);
 void krb5int_dns_fini(struct krb5int_dns_state *);
-
-struct srv_dns_entry {
-    struct srv_dns_entry *next;
-    int priority;
-    int weight;
-    unsigned short port;
-    char *host;
-};
-
-krb5_error_code
-krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
-                             const char *service, const char *protocol,
-                             struct srv_dns_entry **answers);
-
-void krb5int_free_srv_dns_data(struct srv_dns_entry *);
-
-krb5_error_code
-k5_make_uri_query(krb5_context context, const krb5_data *realm,
-                  const char *service, struct srv_dns_entry **answers);
 
 #endif /* KRB5_DNS_LOOKUP */
 #endif /* !defined(KRB5_DNSGLUE_H) */

@@ -56,8 +56,6 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 #endif
             S (auth_con_get_subkey_enctype, krb5_auth_con_get_subkey_enctype),
 
-            S (clean_hostname, k5_clean_hostname),
-
 #ifndef LEAN_CLIENT
 #define SC(FIELD, VAL)  S(FIELD, VAL)
 #else /* disable */

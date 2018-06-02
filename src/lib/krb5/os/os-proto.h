@@ -110,6 +110,25 @@ krb5_error_code krb5_make_full_ipaddr(krb5_context,
 
 #endif /* HAVE_NETINET_IN_H */
 
+struct srv_dns_entry {
+    struct srv_dns_entry *next;
+    int priority;
+    int weight;
+    unsigned short port;
+    char *host;
+};
+
+krb5_error_code
+krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
+                             const char *service, const char *protocol,
+                             struct srv_dns_entry **answers);
+
+void krb5int_free_srv_dns_data(struct srv_dns_entry *);
+
+krb5_error_code
+k5_make_uri_query(krb5_context context, const krb5_data *realm,
+                  const char *service, struct srv_dns_entry **answers);
+
 krb5_error_code k5_try_realm_txt_rr(krb5_context context, const char *prefix,
                                     const char *name, char **realm);
 
@@ -128,7 +147,7 @@ krb5_error_code k5_sendto(krb5_context context, const krb5_data *message,
                                              void *),
                           void *msg_handler_data);
 
-krb5_error_code krb5int_get_fq_local_hostname(char *, size_t);
+krb5_error_code krb5int_get_fq_local_hostname(char **);
 
 /* The io vector is *not* const here, unlike writev()!  */
 int krb5int_net_writev (krb5_context, int, sg_buf *, int);
@@ -152,7 +171,6 @@ krb5_error_code k5_time_with_offset(krb5_timestamp offset,
                                     krb5_timestamp *time_out,
                                     krb5_int32 *usec_out);
 void k5_set_prompt_types(krb5_context, krb5_prompt_type *);
-krb5_error_code k5_clean_hostname(krb5_context, const char *, char *, size_t);
 krb5_boolean k5_is_numeric_address(const char *name);
 krb5_error_code k5_make_realmlist(const char *realm, char ***realms_out);
 krb5_error_code k5_kt_client_default_name(krb5_context context,

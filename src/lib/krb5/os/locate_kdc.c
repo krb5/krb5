@@ -27,17 +27,8 @@
 #include "k5-int.h"
 #include "fake-addrinfo.h"
 #include "os-proto.h"
+
 #ifdef KRB5_DNS_LOOKUP
-#ifdef WSHELPER
-#include <wshelper.h>
-#else /* WSHELPER */
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <arpa/nameser.h>
-#include <resolv.h>
-#include <netdb.h>
-#endif /* WSHELPER */
-#include "dnsglue.h"
 
 #define DEFAULT_LOOKUP_KDC 1
 #if KRB5_DNS_LOOKUP_REALM

@@ -364,7 +364,7 @@ k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
 {
     krb5_error_code retval = KRB5_ERR_HOST_REALM_UNKNOWN;
     const unsigned char *p, *base;
-    char host[MAXDNAME];
+    char *txtname = NULL;
     int ret, rdlen, len;
     struct krb5int_dns_state *ds = NULL;
     struct k5buf buf;
@@ -373,7 +373,7 @@ k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
      * Form our query, and send it via DNS
      */
 
-    k5_buf_init_fixed(&buf, host, sizeof(host));
+    k5_buf_init_dynamic(&buf);
     if (name == NULL || name[0] == '\0') {
         k5_buf_add(&buf, prefix);
     } else {
@@ -389,14 +389,15 @@ k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
            the local domain or domain search lists to be expanded.
         */
 
-        if (buf.len > 0 && host[buf.len - 1] != '.')
+        if (buf.len > 0 && ((char *)buf.data)[buf.len - 1] != '.')
             k5_buf_add(&buf, ".");
     }
     if (k5_buf_status(&buf) != 0)
         return KRB5_ERR_HOST_REALM_UNKNOWN;
-    ret = krb5int_dns_init(&ds, host, C_IN, T_TXT);
+    txtname = buf.data;
+    ret = krb5int_dns_init(&ds, txtname, C_IN, T_TXT);
     if (ret < 0) {
-        TRACE_TXT_LOOKUP_NOTFOUND(context, host);
+        TRACE_TXT_LOOKUP_NOTFOUND(context, txtname);
         goto errout;
     }
 
@@ -419,13 +420,11 @@ k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
     if ( (*realm)[len-1] == '.' )
         (*realm)[len-1] = '\0';
     retval = 0;
-    TRACE_TXT_LOOKUP_SUCCESS(context, host, *realm);
+    TRACE_TXT_LOOKUP_SUCCESS(context, txtname, *realm);
 
 errout:
-    if (ds != NULL) {
-        krb5int_dns_fini(ds);
-        ds = NULL;
-    }
+    krb5int_dns_fini(ds);
+    free(txtname);
     return retval;
 }
 
