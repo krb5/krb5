@@ -26,7 +26,8 @@
 
 /*
  * Glue layer for DNS resolver, to make parsing of replies easier
- * whether we are using BIND 4, 8, or 9.
+ * whether we are using BIND 4, 8, or 9.  This header is not used on
+ * Windows.
  */
 
 /*
@@ -50,15 +51,11 @@
 
 #include "k5-int.h"
 #include "os-proto.h"
-#ifdef WSHELPER
-#include <wshelper.h>
-#else /* WSHELPER */
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
 #include <resolv.h>
 #include <netdb.h>
-#endif /* WSHELPER */
 
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>          /* for MAXHOSTNAMELEN */

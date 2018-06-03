@@ -24,8 +24,12 @@
  * or implied warranty.
  */
 
-#include "autoconf.h"
+#include "k5-int.h"
+#include "os-proto.h"
+
 #ifdef KRB5_DNS_LOOKUP
+
+#ifndef _WIN32
 
 #include "dnsglue.h"
 #ifdef __APPLE__
@@ -352,11 +356,84 @@ out:
     return -1;
 }
 
-#endif
+#endif /* !HAVE_NS_INITPARSE */
+#endif /* not _WIN32 */
+
+/* Construct a DNS label of the form "prefix[.name.]".  name may be NULL. */
+static char *
+txt_lookup_name(const char *prefix, const char *name)
+{
+    struct k5buf buf;
+
+    k5_buf_init_dynamic(&buf);
+
+    if (name == NULL || name[0] == '\0') {
+        k5_buf_add(&buf, prefix);
+    } else {
+        k5_buf_add_fmt(&buf, "%s.%s", prefix, name);
+
+        /*
+         * Realm names don't (normally) end with ".", but if the query doesn't
+         * end with "." and doesn't get an answer as is, the resolv code will
+         * try appending the local domain.  Since the realm names are
+         * absolutes, let's stop that.
+         *
+         * But only if a name has been specified.  If we are performing a
+         * search on the prefix alone then the intention is to allow the local
+         * domain or domain search lists to be expanded.
+         */
+
+        if (buf.len > 0 && ((char *)buf.data)[buf.len - 1] != '.')
+            k5_buf_add(&buf, ".");
+    }
+
+    return buf.data;
+}
 
 /*
  * Try to look up a TXT record pointing to a Kerberos realm
  */
+
+#ifdef _WIN32
+
+#include <windns.h>
+
+krb5_error_code
+k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
+                    char **realm)
+{
+    krb5_error_code ret = 0;
+    char *txtname = NULL;
+    PDNS_RECORD rr = NULL;
+    DNS_STATUS st;
+
+    *realm = NULL;
+
+    txtname = txt_lookup_name(prefix, name);
+    if (txtname == NULL)
+        return ENOMEM;
+
+    st = DnsQuery_UTF8(txtname, DNS_TYPE_TEXT, DNS_QUERY_STANDARD, NULL,
+                       &rr, NULL);
+    if (st != ERROR_SUCCESS || rr == NULL) {
+        TRACE_TXT_LOOKUP_NOTFOUND(context, txtname);
+        ret = KRB5_ERR_HOST_REALM_UNKNOWN;
+        goto cleanup;
+    }
+
+    *realm = strdup(rr->Data.TXT.pStringArray[0]);
+    if (*realm == NULL)
+        ret = ENOMEM;
+    TRACE_TXT_LOOKUP_SUCCESS(context, txtname, *realm);
+
+cleanup:
+    free(txtname);
+    if (rr != NULL)
+        DnsRecordListFree(rr, DnsFreeRecordList);
+    return ret;
+}
+
+#else /* _WIN32 */
 
 krb5_error_code
 k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
@@ -367,34 +444,14 @@ k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
     char *txtname = NULL;
     int ret, rdlen, len;
     struct krb5int_dns_state *ds = NULL;
-    struct k5buf buf;
 
     /*
      * Form our query, and send it via DNS
      */
 
-    k5_buf_init_dynamic(&buf);
-    if (name == NULL || name[0] == '\0') {
-        k5_buf_add(&buf, prefix);
-    } else {
-        k5_buf_add_fmt(&buf, "%s.%s", prefix, name);
-
-        /* Realm names don't (normally) end with ".", but if the query
-           doesn't end with "." and doesn't get an answer as is, the
-           resolv code will try appending the local domain.  Since the
-           realm names are absolutes, let's stop that.
-
-           But only if a name has been specified.  If we are performing
-           a search on the prefix alone then the intention is to allow
-           the local domain or domain search lists to be expanded.
-        */
-
-        if (buf.len > 0 && ((char *)buf.data)[buf.len - 1] != '.')
-            k5_buf_add(&buf, ".");
-    }
-    if (k5_buf_status(&buf) != 0)
-        return KRB5_ERR_HOST_REALM_UNKNOWN;
-    txtname = buf.data;
+    txtname = txt_lookup_name(prefix, name);
+    if (txtname == NULL)
+        return ENOMEM;
     ret = krb5int_dns_init(&ds, txtname, C_IN, T_TXT);
     if (ret < 0) {
         TRACE_TXT_LOOKUP_NOTFOUND(context, txtname);
@@ -428,4 +485,5 @@ errout:
     return retval;
 }
 
+#endif /* not _WIN32 */
 #endif /* KRB5_DNS_LOOKUP */

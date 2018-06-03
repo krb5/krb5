@@ -118,7 +118,7 @@ clean-windows::
 ##WIN32##	  $(PLIBS) $(PGLUE) $(PRES) $(CLIB) $(SLIB) $(WINLIBS)
 ##WIN32##	$(_VC_MANIFEST_EMBED_DLL)
 
-##WIN32##$(KLIB): $(KDEF) $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(SLIB) $(MITLIBS) $(DNSLIBS)
+##WIN32##$(KLIB): $(KDEF) $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(SLIB) $(MITLIBS)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(KDEF) -out:$*.dll \
 ##WIN32##	  $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(SLIB) $(MITLIBS) $(DNSLIBS) $(WINLIBS)
 ##WIN32##	$(_VC_MANIFEST_EMBED_DLL)

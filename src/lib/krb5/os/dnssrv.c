@@ -26,8 +26,8 @@
 
 #include "autoconf.h"
 #ifdef KRB5_DNS_LOOKUP
-
-#include "dnsglue.h"
+#include "k5-int.h"
+#include "os-proto.h"
 
 /*
  * Lookup a KDC via DNS SRV records
@@ -101,6 +101,77 @@ place_srv_entry(struct srv_dns_entry **head, struct srv_dns_entry *new)
         }
     }
 }
+
+#ifdef _WIN32
+
+#include <windns.h>
+
+krb5_error_code
+k5_make_uri_query(krb5_context context, const krb5_data *realm,
+                  const char *service, struct srv_dns_entry **answers)
+{
+    /* Windows does not currently support the URI record type or make it
+     * possible to query for a record type it does not have support for. */
+    *answers = NULL;
+    return 0;
+}
+
+krb5_error_code
+krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
+                             const char *service, const char *protocol,
+                             struct srv_dns_entry **answers)
+{
+    char *name = NULL;
+    DNS_STATUS st;
+    PDNS_RECORD records, rr;
+    struct srv_dns_entry *head = NULL, *srv = NULL;
+
+    *answers = NULL;
+
+    name = make_lookup_name(realm, service, protocol);
+    if (name == NULL)
+        return 0;
+
+    TRACE_DNS_SRV_SEND(context, name);
+
+    st = DnsQuery_UTF8(name, DNS_TYPE_SRV, DNS_QUERY_STANDARD, NULL, &records,
+                       NULL);
+    if (st != ERROR_SUCCESS)
+        return 0;
+
+    for (rr = records; rr != NULL; rr = rr->pNext) {
+        if (rr->wType != DNS_TYPE_SRV)
+            continue;
+
+        srv = malloc(sizeof(struct srv_dns_entry));
+        if (srv == NULL)
+            goto cleanup;
+
+        srv->priority = rr->Data.SRV.wPriority;
+        srv->weight = rr->Data.SRV.wWeight;
+        srv->port = rr->Data.SRV.wPort;
+        /* Make sure the name looks fully qualified to the resolver. */
+        if (asprintf(&srv->host, "%s.", rr->Data.SRV.pNameTarget) < 0) {
+            free(srv);
+            goto cleanup;
+        }
+
+        TRACE_DNS_SRV_ANS(context, srv->host, srv->port, srv->priority,
+                          srv->weight);
+        place_srv_entry(&head, srv);
+    }
+
+cleanup:
+    free(name);
+    if (records != NULL)
+        DnsRecordListFree(records, DnsFreeRecordList);
+    *answers = head;
+    return 0;
+}
+
+#else /* _WIN32 */
+
+#include "dnsglue.h"
 
 /* Query the URI RR, collecting weight, priority, and target. */
 krb5_error_code
@@ -251,4 +322,6 @@ out:
     *answers = head;
     return 0;
 }
-#endif
+
+#endif /* not _WIN32 */
+#endif /* KRB5_DNS_LOOKUP */
