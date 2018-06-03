@@ -144,17 +144,6 @@
 #endif
 #endif /* LEASHDLL_LIB */
 
-#ifdef WSHELPER_LIB
-#define K5_DESCRIPTION "Winsock Helper (wshelper) API - " KRB5_PRODUCTNAME_STR "\0"
-#define K5_INTERNAL_NAME "wshelper\0"
-#define K5_FILETYPE	VFT_DLL
-#if defined(_WIN64)
-#define K5_ORIGINAL_NAME "wshelper64.dll\0"
-#else
-#define K5_ORIGINAL_NAME "wshelper32.dll\0"
-#endif
-#endif /* WSHELPER_LIB */
-
 #ifdef KRB5_APP
 #define K5_DESCRIPTION "KRB5 Ticket Manager - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_FILETYPE	VFT_APP

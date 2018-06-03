@@ -150,7 +150,6 @@ WINMAKEFILES=Makefile \
 	util\et\Makefile util\profile\Makefile util\profile\testmod\Makefile \
 	util\support\Makefile \
 	util\windows\Makefile \
-	util\wshelper\Makefile \
 	windows\Makefile windows\lib\Makefile windows\ms2mit\Makefile \
 	windows\kfwlogon\Makefile windows\leashdll\Makefile \
 	windows\leash\Makefile windows\leash\htmlhelp\Makefile \
@@ -263,8 +262,6 @@ WINMAKEFILES=Makefile \
 ##DOS##util\support\Makefile: util\support\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\windows\Makefile: util\windows\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##util\wshelper\Makefile: util\wshelper\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\Makefile: windows\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -466,9 +463,6 @@ install-windows:
 	copy windows\kfwlogon\$(OUTPRE)*.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy windows\kfwlogon\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) windows\kfwlogon\$(OUTPRE)*.pdb "$(KRB_INSTALL_DIR)\bin\."
-	copy util\wshelper\$(OUTPRE)$(DLIB).lib "$(KRB_INSTALL_DIR)\lib\."
-	copy util\wshelper\$(OUTPRE)$(DLIB).dll "$(KRB_INSTALL_DIR)\bin\."
-	$(INSTALLDBGSYMS) util\wshelper\$(OUTPRE)$(DLIB).pdb "$(KRB_INSTALL_DIR)\bin\."
 	copy ccapi\lib\win\srctmp\$(OUTPRE)$(CCLIB).dll "$(KRB_INSTALL_DIR)\bin\."
 	$(INSTALLDBGSYMS) ccapi\lib\win\srctmp\$(OUTPRE)$(CCLIB).pdb "$(KRB_INSTALL_DIR)\bin\."
 	copy ccapi\lib\win\srctmp\$(CCLIB).lib "$(KRB_INSTALL_DIR)\lib\."
@@ -647,8 +641,7 @@ OTHEREXCLUDES = \
 	util/profile/profile_tcl.c \
 	util/support/fnmatch.c \
 	util/verto \
-	util/k5ev \
-	util/wshelper
+	util/k5ev
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 

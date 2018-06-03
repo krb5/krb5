@@ -274,9 +274,6 @@
 	                    <RegistryKey Id="reg_ts_mit2ms_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" Action="createAndRemoveOnUninstall" />
 	                    <RegistryValue Id="reg_ts_mit2ms_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Win64="$(var.Win64)" Id="cmf_wshelp32_dll" Guid="$(var.cmf_wshelp32_dll_guid)" DiskId="1">
-	                    <File Id="fil_wshelp32_dll" Name="$(var.cmf_wshelp32_dll_name)" KeyPath="yes" />
-                    </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_xpprof32_dll" Guid="$(var.cmf_xpprof32_dll_guid)" DiskId="1">
 	                    <File Id="fil_xpprof32_dll" Name="$(var.cmf_xpprof32_dll_name)" KeyPath="yes" />
                     </Component>
@@ -299,9 +296,6 @@
                     <Component Win64="$(var.Win64)" Id="cmf_leashw64_dll" Guid="$(var.cmf_leashw64_dll_guid)" DiskId="1">
                       <File Id="fil_leashw64_dll" Name="$(var.cmf_leashw64_dll_name)" KeyPath="yes" />
                     </Component>
-                    <Component Win64="$(var.Win64)" Id="cmf_wshelp64_dll" Guid="$(var.cmf_wshelp64_dll_guid)" DiskId="1">
-                      <File Id="fil_wshelp64_dll" Name="$(var.cmf_wshelp64_dll_name)" KeyPath="yes" />
-                    </Component>
                     <Component Win64="$(var.Win64)" Id="cmf_xpprof64_dll" Guid="$(var.cmf_xpprof64_dll_guid)" DiskId="1">
                       <File Id="fil_xpprof64_dll" Name="$(var.cmf_xpprof64_dll_name)" KeyPath="yes" />
                     </Component>
@@ -317,7 +311,6 @@
 	                    <File Id="fil_k5sprt32_pdb" Name="k5sprt32.pdb" />
 	                    <File Id="fil_krbcc32_pdb" Name="krbcc32.pdb" />
 	                    <File Id="fil_leashw32_pdb" Name="leashw32.pdb" />
-	                    <File Id="fil_wshelp32_pdb" Name="wshelp32.pdb" />
 	                    <File Id="fil_xpprof32_pdb" Name="xpprof32.pdb" />
                         <?else?>
 	                    <File Id="fil_comerr64_pdb" Name="comerr64.pdb" />
@@ -326,7 +319,6 @@
 	                    <File Id="fil_k5sprt64_pdb" Name="k5sprt64.pdb" />
 	                    <File Id="fil_krbcc64_pdb" Name="krbcc64.pdb" />
 	                    <File Id="fil_leashw64_pdb" Name="leashw64.pdb" />
-	                    <File Id="fil_wshelp64_pdb" Name="wshelp64.pdb" />
 	                    <File Id="fil_xpprof64_pdb" Name="xpprof64.pdb" />
                         <?endif?>
                       <File Id="fil_leash_pdb" Name="leash.pdb" />
@@ -408,17 +400,6 @@
 <!--                            <File Id="fil_loadfuncs_c" Name="loadfuncs.c" /> -->
                             <File Id="fil_loadfuncs_h" Name="loadfuncs.h" KeyPath="yes" />
                         </Component>
-                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_wshelper" Guid="5A4FCD76-6DC6-455c-B465-FD8123252EBD" DiskId="1">
-                            <File Id="fil_hesiod_h" Name="hesiod.h" />
-                            <File Id="fil_mitwhich_h" Name="mitwhich.h" />
-                            <File Id="fil_resolv_h" Name="resolv.h" />
-                            <File Id="fil_wshelper_h" Name="wshelper.h" KeyPath="yes" />
-                        </Component>
-                        <Directory Id="dirinc_wshelper_arpa" Name="arpa" FileSource="$(var.SrcDir)\windows\include\arpa\">
-                            <Component Win64="$(var.Win64)" Id="cmp_dirinc_wshelper_arpa" Guid="42A19215-91D6-4cd6-8BE8-95105849B862" DiskId="1">
-                                <File Id="fil_nameser_h" Name="nameser.h" KeyPath="yes" />
-                            </Component>
-                        </Directory>
                     </Directory>
                 </Directory>
                 
@@ -431,7 +412,6 @@
                             <File Id="fil_krb5_32_lib" Name="krb5_32.lib" KeyPath="yes" />
                             <File Id="fil_krbcc32_lib" Name="krbcc32.lib" />
                             <File Id="fil_leashw32_lib" Name="leashw32.lib" />
-                            <File Id="fil_wshelp32_lib" Name="wshelp32.lib" />
                             <File Id="fil_xpprof32_lib" Name="xpprof32.lib" />
                         </Component>
                     </Directory>
@@ -444,7 +424,6 @@
                             <File Id="fil_krb5_64_lib" Name="krb5_64.lib" KeyPath="yes" />
                             <File Id="fil_krbcc64_lib" Name="krbcc64.lib" />
                             <File Id="fil_leashw64_lib" Name="leashw64.lib" />
-                            <File Id="fil_wshelp64_lib" Name="wshelp64.lib" />
                             <File Id="fil_xpprof64_lib" Name="xpprof64.lib" />
                         </Component>
                     </Directory>

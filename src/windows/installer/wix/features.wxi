@@ -63,7 +63,6 @@
           <ComponentRef Id="cmf_krb5_64_dll" />
           <ComponentRef Id="cmf_krbcc64_dll" />
           <ComponentRef Id="cmf_leashw64_dll" />
-          <ComponentRef Id="cmf_wshelp64_dll" />
           <ComponentRef Id="cmf_xpprof64_dll" />
           <ComponentRef Id="cmf_spake64_dll" />
        <?endif?>
@@ -86,7 +85,6 @@
             <ComponentRef Id="cmf_ccapiserver_exe" />
             <ComponentRef Id="cmf_ms2mit_exe" />
             <ComponentRef Id="cmf_mit2ms_exe" />
-            <ComponentRef Id="cmf_wshelp32_dll" />
             <ComponentRef Id="cmf_xpprof32_dll" />
             <ComponentRef Id="cmf_spake32_dll" />
 
@@ -159,8 +157,6 @@
 <!--            <ComponentRef Id="cmp_dirinc_krbcc" /> -->
             <ComponentRef Id="cmp_dirinc_leash" />
             <ComponentRef Id="cmp_dirinc_loadfuncs" />
-            <ComponentRef Id="cmp_dirinc_wshelper" />
-            <ComponentRef Id="cmp_dirinc_wshelper_arpa" />
             <ComponentRef Id="rcm_common" />
             <ComponentRef Id="rcm_sdk" />
         </Feature> <!-- /feaKfwSDK -->

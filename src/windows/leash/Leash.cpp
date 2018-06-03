@@ -23,14 +23,11 @@
 #include "LeashAboutBox.h"
 
 #include "reminder.h"
-#include "mitwhich.h"
 #include <leasherr.h>
 #include "lglobals.h"
 #include "out2con.h"
 #include <krb5.h>
 #include <com_err.h>
-
-#include <wshelper.h>
 
 #include <errno.h>
 

@@ -270,8 +270,4 @@ cc_free_NC_info,
 #define KRB5_REGISTRY_VALUE_CCNAME      "ccname"
 #define KRB5_REGISTRY_VALUE_CONFIGFILE  "config"
 
-/* must match values used within wshelper.dll */
-#define WSHELP_REGISTRY_KEY_NAME  "Software\\MIT\\WsHelper"
-#define WSHELP_REGISTRY_VALUE_DEBUG   "DebugOn"
-
 #endif /* __LEASH_INT_H__ */

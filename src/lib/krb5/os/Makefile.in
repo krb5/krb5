@@ -182,7 +182,7 @@ t_locate_kdc: t_locate_kdc.o
 t_locate_kdc.o: t_locate_kdc.c locate_kdc.c dnssrv.c dnsglue.c
 $(OUTPRE)t_locate_kdc.exe: $(OUTPRE)t_locate_kdc.obj \
 		$(KLIB) $(PLIB) $(CLIB) $(SLIB)
-	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(DNSLIBS)
+	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib
 
 t_trace: $(T_TRACE_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_trace $(T_TRACE_OBJS) $(KRB5_BASE_LIBS)

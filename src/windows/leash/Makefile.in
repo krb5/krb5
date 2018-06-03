@@ -2,11 +2,6 @@
 #
 
 EXE_NAME=leash
-WSHELPER=wshelp32
-
-!if ("$(CPU)" == "IA64") || ("$(CPU)" == "AMD64") || ("$(CPU)" == "ALPHA64")
-WSHELPER=wshelp64
-!endif
 
 SUBDIRS= htmlhelp
 
@@ -56,8 +51,7 @@ all: Makefile $(OUTPRE)$(EXE_NAME).exe
 
 $(OUTPRE)$(EXE_NAME).exe: $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) /out:$@ /ENTRY:WinMainCRTStartup $(OBJS) $(XOBJS) \
-	  $(LIBS) $(SYSLIBS) $(BUILDTOP)\util\wshelper\$(OUTPRE)$(WSHELPER).lib \
-	  ../lib/$(OUTPRE)libwin.lib
+	  $(LIBS) $(SYSLIBS) ../lib/$(OUTPRE)libwin.lib
 	copy $@ "$(OUTPRE)MIT Kerberos.exe"
 
 kfwribbon.bml kfwribbon.h kfwribbon.rc: kfwribbon.xml
