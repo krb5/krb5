@@ -58,6 +58,8 @@ k5_path_split
 k5_strerror_r
 k5_utf8_to_utf16le
 k5_utf16le_to_utf8
+k5_dir_filenames
+k5_free_filenames
 krb5int_key_register
 krb5int_key_delete
 krb5int_getspecific

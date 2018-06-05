@@ -44,6 +44,8 @@
  * + constant time memory comparison
  * + path manipulation
  * + _, N_, dgettext, bindtextdomain (for localization)
+ * + getopt_long
+ * + fetching filenames from a directory
  */
 
 #ifndef K5_PLATFORM_H
@@ -1147,5 +1149,10 @@ extern int k5_getopt_long(int nargc, char **nargv, char *options,
                           struct option *long_options, int *index);
 #define getopt_long k5_getopt_long
 #endif /* HAVE_GETOPT_LONG */
+
+/* Set *fnames_out to a null-terminated list of filenames within dirname,
+ * sorted according to strcmp().  Return 0 on success, or ENOENT/ENOMEM. */
+int k5_dir_filenames(const char *dirname, char ***fnames_out);
+void k5_free_filenames(char **fnames);
 
 #endif /* K5_PLATFORM_H */
