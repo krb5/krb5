@@ -60,7 +60,9 @@ alphanumeric characters, dashes, or underscores.  Starting in release
 1.15, files with names ending in ".conf" are also included, unless the
 name begins with ".".  Included profile files are syntactically
 independent of their parents, so each included file must begin with a
-section header.
+section header.  Starting in release 1.17, files are read in
+alphanumeric order; in previous releases, they may be read in any
+order.
 
 The krb5.conf file can specify that configuration should be obtained
 from a loadable module, rather than the file itself, using the
