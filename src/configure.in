@@ -22,6 +22,8 @@ AC_SUBST(KRB5_VERSION)
 
 AC_REQUIRE_CPP
 
+PKG_PROG_PKG_CONFIG
+
 AC_CHECK_HEADER([stdint.h], [],
   [AC_MSG_ERROR([stdint.h is required])])
 
@@ -1131,9 +1133,7 @@ AC_SUBST(CMOCKA_LIBS)
 # For URI lookup tests. Requires resolv_wrapper >= 1.1.5 for URI
 # support.
 HAVE_RESOLV_WRAPPER=0
-if pkg-config --atleast-version=1.1.5 resolv_wrapper; then
-    HAVE_RESOLV_WRAPPER=1
-fi
+PKG_CHECK_EXISTS([resolv_wrapper >= 1.1.5], [HAVE_RESOLV_WRAPPER=1])
 AC_SUBST(HAVE_RESOLV_WRAPPER)
 
 # for plugins/kdb/db2
@@ -1287,32 +1287,32 @@ AC_ARG_WITH([libedit],
 AC_ARG_WITH([readline],
 	    AC_HELP_STRING([--with-readline], [compile with GNU Readline]),
 	    [], [with_readline=no])
-AC_MSG_CHECKING([for readline support])
 if test "x$with_readline" = xyes; then
   with_libedit=no
 fi
 RL_CFLAGS=
 RL_LIBS=
 if test "x$with_libedit" != xno; then
-  if rl_cflags=`pkg-config --cflags libedit 2>&1`; then
-    RL_CFLAGS=$rl_cflags
-    RL_LIBS=`pkg-config --libs libedit`
+  PKG_CHECK_MODULES(LIBEDIT, libedit, [have_libedit=yes], [have_libedit=no])
+  if test "x$have_libedit" = xyes; then
+    RL_CFLAGS=$LIBEDIT_CFLAGS
+    RL_LIBS=$LIBEDIT_LIBS
     AC_DEFINE([HAVE_LIBEDIT], 1, [Define if building with libedit.])
-    AC_MSG_RESULT([using libedit])
-  elif test "x$with_libedit" = yes; then
+    AC_MSG_NOTICE([Using libedit for readline support])
+  elif test "x$with_libedit" = xyes; then
     # We were explicitly asked for libedit and couldn't find it.
-    AC_MSG_ERROR([Could not detect libedit with pkg-config.])
+    AC_MSG_ERROR([Could not detect libedit with pkg-config])
   else
-    AC_MSG_RESULT([not using any])
+    AC_MSG_NOTICE([Not using any readline support])
   fi
 elif test "x$with_readline" = xyes; then
-  AC_MSG_RESULT([using GNU Readline])
+  AC_MSG_NOTICE([Using GNU Readline])
   AC_CHECK_LIB([readline], [main], :,
 	       AC_MSG_FAILURE([Cannot find readline library.]), [-lncurses])
   AC_DEFINE([HAVE_READLINE], 1, [Define if building with GNU Readline.])
   RL_LIBS='-lreadline -lhistory -lncurses'
 else
-  AC_MSG_RESULT([not using any])
+  AC_MSG_RESULT([Not using any readline support])
 fi
 AC_SUBST([RL_CFLAGS])
 AC_SUBST([RL_LIBS])
@@ -1320,25 +1320,21 @@ AC_SUBST([RL_LIBS])
 AC_ARG_WITH([system-verto],
   [AC_HELP_STRING([--with-system-verto], [always use system verto library])],
   [], [with_system_verto=default])
-VERTO_CFLAGS=
-VERTO_LIBS="-lverto"
 VERTO_VERSION=k5
 if test "x$with_system_verto" != xno; then
-  if verto_cflags=`pkg-config --cflags libverto 2>&1`; then
-    VERTO_CFLAGS=$verto_cflags
-    VERTO_LIBS=`pkg-config --libs libverto`
+  PKG_CHECK_MODULES(VERTO, libverto, [have_sysverto=yes], [have_sysverto=no])
+  if test "x$have_sysverto" = xyes; then
     VERTO_VERSION=sys
-  else
-    AC_CHECK_LIB([verto], [verto_set_flags], [VERTO_VERSION=sys],
-      [if test "x$with_system_verto" = xyes; then
-        AC_MSG_ERROR([cannot detect system libverto])
-      fi])
+  elif test "x$with_system_verto" = xyes; then
+    AC_MSG_ERROR([cannot detect system libverto])
   fi
 fi
 if test "x$VERTO_VERSION" = xsys; then
   AC_MSG_NOTICE([Using system libverto])
 else
-  AC_MSG_RESULT([Using built-in libverto])
+  VERTO_CFLAGS=
+  VERTO_LIBS="-lverto"
+  AC_MSG_NOTICE([Using built-in libverto])
 fi
 AC_SUBST([VERTO_CFLAGS])
 AC_SUBST([VERTO_LIBS])

@@ -1657,6 +1657,7 @@ dnl
 dnl
 m4_include(config/ac-archive/ax_pthread.m4)
 m4_include(config/ac-archive/ax_recursive_eval.m4)
+m4_include(config/pkg.m4)
 dnl
 dnl
 dnl
