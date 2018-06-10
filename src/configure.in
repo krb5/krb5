@@ -22,6 +22,8 @@ AC_SUBST(KRB5_VERSION)
 
 AC_REQUIRE_CPP
 
+PKG_PROG_PKG_CONFIG
+
 AC_CHECK_HEADER([stdint.h], [],
   [AC_MSG_ERROR([stdint.h is required])])
 
@@ -1131,7 +1133,7 @@ AC_SUBST(CMOCKA_LIBS)
 # For URI lookup tests. Requires resolv_wrapper >= 1.1.5 for URI
 # support.
 HAVE_RESOLV_WRAPPER=0
-if pkg-config --atleast-version=1.1.5 resolv_wrapper; then
+if ${PKG_CONFIG} --atleast-version=1.1.5 resolv_wrapper; then
     HAVE_RESOLV_WRAPPER=1
 fi
 AC_SUBST(HAVE_RESOLV_WRAPPER)
@@ -1294,9 +1296,9 @@ fi
 RL_CFLAGS=
 RL_LIBS=
 if test "x$with_libedit" != xno; then
-  if rl_cflags=`pkg-config --cflags libedit 2>&1`; then
+  if rl_cflags=`${PKG_CONFIG} --cflags libedit 2>&1`; then
     RL_CFLAGS=$rl_cflags
-    RL_LIBS=`pkg-config --libs libedit`
+    RL_LIBS=`${PKG_CONFIG} --libs libedit`
     AC_DEFINE([HAVE_LIBEDIT], 1, [Define if building with libedit.])
     AC_MSG_RESULT([using libedit])
   elif test "x$with_libedit" = yes; then
@@ -1324,9 +1326,9 @@ VERTO_CFLAGS=
 VERTO_LIBS="-lverto"
 VERTO_VERSION=k5
 if test "x$with_system_verto" != xno; then
-  if verto_cflags=`pkg-config --cflags libverto 2>&1`; then
+  if verto_cflags=`${PKG_CONFIG} --cflags libverto 2>&1`; then
     VERTO_CFLAGS=$verto_cflags
-    VERTO_LIBS=`pkg-config --libs libverto`
+    VERTO_LIBS=`${PKG_CONFIG} --libs libverto`
     VERTO_VERSION=sys
   else
     AC_CHECK_LIB([verto], [verto_set_flags], [VERTO_VERSION=sys],
