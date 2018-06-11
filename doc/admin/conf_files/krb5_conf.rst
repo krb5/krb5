@@ -476,6 +476,16 @@ following tags may be specified in the realm's subsection:
     (for example, when converting ``rcmd.hostname`` to
     ``host/hostname.domain``).
 
+**disable_encrypted_timestamp**
+    If this flag is true, the client will not perform encrypted
+    timestamp preauthentication if requested by the KDC.  Setting this
+    flag can help to prevent dictionary attacks by active attackers,
+    if the realm's KDCs support SPAKE preauthentication or if initial
+    authentication always uses another mechanism or always uses FAST.
+    This flag persists across client referrals during initial
+    authentication.  This flag does not prevent the KDC from offering
+    encrypted timestamp.  New in release 1.17.
+
 **http_anchors**
     When KDCs and kpasswd servers are accessed through HTTPS proxies, this tag
     can be used to specify the location of the CA certificate which should be

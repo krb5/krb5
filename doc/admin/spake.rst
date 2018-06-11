@@ -30,6 +30,14 @@ principal entries, as you would for any preauthentication mechanism::
 Clients which do not implement SPAKE preauthentication will fall back
 to encrypted timestamp.
 
+An active attacker can force a fallback to encrypted timestamp by
+modifying the initial KDC response, defeating the protection against
+dictionary attacks.  To prevent this fallback on clients which do
+implement SPAKE preauthentication, set the
+**disable_encrypted_timestamp** variable to ``true`` in the
+:ref:`realms` subsection for realms whose KDCs offer SPAKE
+preauthentication.
+
 By default, SPAKE preauthentication requires an extra network round
 trip to the KDC during initial authentication.  If most of the clients
 in a realm support SPAKE, this extra round trip can be eliminated

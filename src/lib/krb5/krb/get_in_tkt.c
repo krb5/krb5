@@ -801,6 +801,24 @@ read_allowed_preauth_type(krb5_context context, krb5_init_creds_context ctx)
     free(tmp);
 }
 
+/* Return true if encrypted timestamp is disabled for realm. */
+static krb5_boolean
+encts_disabled(profile_t profile, const krb5_data *realm)
+{
+    krb5_error_code ret;
+    char *realmstr;
+    int bval;
+
+    realmstr = k5memdup0(realm->data, realm->length, &ret);
+    if (realmstr == NULL)
+        return FALSE;
+    ret = profile_get_boolean(profile, KRB5_CONF_REALMS, realmstr,
+                              KRB5_CONF_DISABLE_ENCRYPTED_TIMESTAMP, FALSE,
+                              &bval);
+    free(realmstr);
+    return (ret == 0) ? bval : FALSE;
+}
+
 /**
  * Throw away any pre-authentication realm state and begin with a
  * unauthenticated or optimistically authenticated request.  If fast_upgrade is
@@ -841,6 +859,11 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
         if (code)
             goto cleanup;
     }
+
+    /* Never set encts_disabled back to false, so it can't be circumvented with
+     * client realm referrals. */
+    if (encts_disabled(context->profile, &ctx->request->client->realm))
+        ctx->encts_disabled = TRUE;
 
     krb5_free_principal(context, ctx->request->server);
     ctx->request->server = NULL;

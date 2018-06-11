@@ -299,6 +299,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_PREAUTH_ENC_TS(c, sec, usec, plain, enc)                  \
     TRACE(c, "Encrypted timestamp (for {long}.{int}): plain {hexdata}, " \
           "encrypted {hexdata}", (long) sec, (int) usec, plain, enc)
+#define TRACE_PREAUTH_ENC_TS_DISABLED(c)                                \
+    TRACE(c, "Ignoring encrypted timestamp because it is disabled")
 #define TRACE_PREAUTH_ETYPE_INFO(c, etype, salt, s2kparams)          \
     TRACE(c, "Selected etype info: etype {etype}, salt \"{data}\", " \
           "params \"{data}\"", etype, salt, s2kparams)

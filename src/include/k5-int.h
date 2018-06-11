@@ -203,6 +203,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_DES_CRC_SESSION_SUPPORTED    "des_crc_session_supported"
 #define KRB5_CONF_DICT_FILE                    "dict_file"
 #define KRB5_CONF_DISABLE                      "disable"
+#define KRB5_CONF_DISABLE_ENCRYPTED_TIMESTAMP  "disable_encrypted_timestamp"
 #define KRB5_CONF_DISABLE_LAST_SUCCESS         "disable_last_success"
 #define KRB5_CONF_DISABLE_LOCKOUT              "disable_lockout"
 #define KRB5_CONF_DNS_CANONICALIZE_HOSTNAME    "dns_canonicalize_hostname"

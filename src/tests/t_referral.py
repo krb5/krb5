@@ -131,4 +131,17 @@ r1.klist('user@KRBTEST2.COM', 'krbtgt/KRBTEST2.COM')
 r1.kinit('abc@XYZ', 'pw', ['-E'])
 r1.klist('abc\@XYZ@KRBTEST2.COM', 'krbtgt/KRBTEST2.COM')
 
+# Test that disable_encrypted_timestamp persists across client
+# referrals.  (This test relies on SPAKE not being enabled by default
+# on the KDC.)
+r2.run([kadminl, 'modprinc', '+preauth', 'user'])
+msgs = ('Encrypted timestamp (for ')
+r1.kinit('user', password('user'), ['-C'], expected_trace=msgs)
+dconf = {'realms': {'$realm': {'disable_encrypted_timestamp': 'true'}}}
+denv = r1.special_env('disable_encts', False, krb5_conf=dconf)
+msgs = ('Ignoring encrypted timestamp because it is disabled',
+        '/Encrypted timestamp is disabled')
+r1.kinit('user', None, ['-C'], env=denv, expected_code=1, expected_trace=msgs,
+         expected_msg='Encrypted timestamp is disabled')
+
 success('KDC host referral tests')
