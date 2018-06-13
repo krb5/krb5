@@ -50,7 +50,7 @@ copyright = u'1985-2018, MIT'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-execfile("version.py")
+exec(open("version.py").read())
 # The short X.Y version.
 r_list = [r_major, r_minor]
 if r_patch:
@@ -238,7 +238,7 @@ if 'mansubs' in tags:
     ckeytab = '``@CKTNAME@``'
 elif 'pathsubs' in tags:
     # Read configured paths from a file produced by the build system.
-    execfile('paths.py')
+    exec(open("paths.py").read())
 else:
     bindir = ':ref:`BINDIR <paths>`'
     sbindir = ':ref:`SBINDIR <paths>`'
