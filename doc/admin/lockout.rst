@@ -1,3 +1,5 @@
+.. _lockout:
+
 Account lockout
 ===============
 

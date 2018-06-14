@@ -1,12 +1,14 @@
+.. _spake:
+
 SPAKE Preauthentication
 =======================
 
 SPAKE preauthentication (added in release 1.17) uses public key
-cryptography techniques to protect against password dictionary
-attacks.  Unlike :ref:`PKINIT <pkinit>`, it does not require any
-additional infrastructure such as certificates; it simply needs to be
-turned on.  Using SPAKE preauthentication may modestly increase the
-CPU and network load on the KDC.
+cryptography techniques to protect against :ref:`password dictionary
+attacks <dictionary>`.  Unlike :ref:`PKINIT <pkinit>`, it does not
+require any additional infrastructure such as certificates; it simply
+needs to be turned on.  Using SPAKE preauthentication may modestly
+increase the CPU and network load on the KDC.
 
 SPAKE preauthentication can use one of four elliptic curve groups for
 its password-authenticated key exchange.  The recommended group is

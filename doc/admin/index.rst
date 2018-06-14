@@ -17,6 +17,7 @@ For administrators
    pkinit.rst
    otp.rst
    spake.rst
+   dictionary.rst
    princ_dns.rst
    enctypes.rst
    https.rst
