@@ -239,8 +239,10 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
             realm[compo->length] = '\0';
         } else {
             tmp_realm_len =  strlen(tmp_realm);
-            if (tmp_realm_len > REALM_SZ - 1)
+            if (tmp_realm_len > REALM_SZ - 1) {
+                profile_release_string(tmp_realm);
                 return KRB5_INVALID_PRINCIPAL;
+            }
             strncpy(realm, tmp_realm, tmp_realm_len);
             realm[tmp_realm_len] = '\0';
             profile_release_string(tmp_realm);
@@ -332,7 +334,7 @@ krb5_425_conv_principal(krb5_context context, const char *name,
                 buf[sizeof(buf) - 1] = '\0';
                 retval = krb5_get_realm_domain(context, realm, &domain);
                 if (retval)
-                    return retval;
+                    goto cleanup;
                 if (domain) {
                     for (cp = domain; *cp; cp++)
                         if (isupper((unsigned char) (*cp)))
@@ -349,6 +351,7 @@ krb5_425_conv_principal(krb5_context context, const char *name,
 not_service:
     retval = krb5_build_principal(context, princ, strlen(realm), realm, name,
                                   instance, NULL);
+cleanup:
     if (iterator) profile_iterator_free (&iterator);
     if (full_name) profile_free_list(full_name);
     if (v4realms) profile_free_list(v4realms);
