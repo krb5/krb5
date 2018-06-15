@@ -90,7 +90,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
     krb5_deltat lifetime;
     krb5_gss_name_t ret_name;
     krb5_principal princ;
-    gss_OID_set mechs;
+    gss_OID_set mechs = GSS_C_NO_OID_SET;
     OM_uint32 major, tmpmin, ret;
 
     ret = GSS_S_FAILURE;
@@ -192,8 +192,10 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
         *cred_usage = cred->usage;
     k5_mutex_unlock(&cred->lock);
 
-    if (mechanisms)
+    if (mechanisms) {
         *mechanisms = mechs;
+        mechs = GSS_C_NO_OID_SET;
+    }
 
     if (cred_handle == GSS_C_NO_CREDENTIAL)
         krb5_gss_release_cred(minor_status, (gss_cred_id_t *)&cred);
@@ -205,6 +207,7 @@ fail:
     k5_mutex_unlock(&cred->lock);
     krb5_gss_release_cred(&tmpmin, &defcred);
     krb5_free_context(context);
+    (void)generic_gss_release_oid_set(&tmpmin, &mechs);
     return ret;
 }
 
