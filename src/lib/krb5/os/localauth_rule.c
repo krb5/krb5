@@ -146,7 +146,7 @@ aname_replacer(const char *string, const char **contextp, char **result)
 {
     krb5_error_code ret = 0;
     const char *cp, *ep, *tp;
-    char *current, *newstr, *rule = NULL, *repl = NULL;
+    char *newstr, *rule = NULL, *repl = NULL, *current = NULL;
     krb5_boolean doglobal;
 
     *result = NULL;
@@ -192,8 +192,10 @@ aname_replacer(const char *string, const char **contextp, char **result)
         current = newstr;
     }
     *result = current;
+    current = NULL;
 
 cleanup:
+    free(current);
     free(repl);
     free(rule);
     return ret;
