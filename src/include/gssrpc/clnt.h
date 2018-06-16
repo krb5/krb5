@@ -270,7 +270,7 @@ extern CLIENT *clnt_create(char *, rpcprog_t, rpcvers_t, char *);
  *	struct sockaddr_in *raddr;
  *	rpcprog_t prog;
  *	rpcvers_t version;
- *	register int *sockp;
+ *	int *sockp;
  *	u_int sendsz;
  *	u_int recvsz;
  */

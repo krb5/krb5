@@ -533,7 +533,7 @@ fail_name:
 
 void
 krb5_iprop_prog_1(struct svc_req *rqstp,
-		  register SVCXPRT *transp)
+		  SVCXPRT *transp)
 {
     union {
 	kdb_last_t iprop_get_updates_1_arg;

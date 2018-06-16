@@ -23,9 +23,9 @@ static struct option options[] = {
 
 long
 flag_val(string)
-    register char *string;
+    char *string;
 {
-    register struct option *opt;
+    struct option *opt;
     for (opt = options; opt->text; opt++)
         if (!strcmp(opt->text, string))
             return(opt->value);

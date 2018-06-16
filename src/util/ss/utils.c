@@ -78,7 +78,7 @@ gensym(name)
 
 /* concatenate three strings and return the result */
 char *str_concat3(a, b, c)
-    register char *a, *b, *c;
+    char *a, *b, *c;
 {
     char *result;
 
@@ -88,9 +88,9 @@ char *str_concat3(a, b, c)
 
 /* return copy of string enclosed in double-quotes */
 char *quote(string)
-    register char *string;
+    char *string;
 {
-    register char *result;
+    char *result;
 
     asprintf(&result, "\"%s\"", string);
     return(result);
@@ -99,10 +99,10 @@ char *quote(string)
 #ifndef HAVE_STRDUP
 /* make duplicate of string and return pointer */
 char *strdup(s)
-    register char *s;
+    char *s;
 {
-    register int len = strlen(s) + 1;
-    register char *new;
+    int len = strlen(s) + 1;
+    char *new;
     new = malloc(len);
     strncpy(new, s, len);
     return(new);

@@ -56,7 +56,7 @@ mit_des_cbc_cksum(const krb5_octet *in, krb5_octet *out,
     const unsigned DES_INT32 *kp;
     const unsigned char *ip;
     unsigned char *op;
-    register DES_INT32 len;
+    DES_INT32 len;
 
     /*
      * Initialize left and right with the contents of the initial

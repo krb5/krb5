@@ -932,7 +932,7 @@ cleanup:
 int standard_shell(sh)
     char *sh;
 {
-    register char *cp;
+    char *cp;
     char *getusershell();
 
     while ((cp = getusershell()) != NULL)

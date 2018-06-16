@@ -60,7 +60,7 @@ main(int argc, char **argv)
 {
      int c, prot;
      auth_gssapi_name names[2];
-     register SVCXPRT *transp;
+     SVCXPRT *transp;
      extern int optind;
 #ifdef POSIX_SIGNALS
      struct sigaction sa;

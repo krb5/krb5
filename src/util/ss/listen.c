@@ -61,8 +61,8 @@ static RETSIGTYPE listen_int_handler(signo)
 int ss_listen (sci_idx)
     int sci_idx;
 {
-    register char *cp;
-    register ss_data *info;
+    char *cp;
+    ss_data *info;
     char *input;
     int code;
     jmp_buf old_jmpb;
@@ -71,7 +71,7 @@ int ss_listen (sci_idx)
     struct sigaction isig, csig, nsig, osig;
     sigset_t nmask, omask;
 #else
-    register RETSIGTYPE (*sig_cont)();
+    RETSIGTYPE (*sig_cont)();
     RETSIGTYPE (*sig_int)(), (*old_sig_cont)();
     int mask;
 #endif
@@ -136,7 +136,7 @@ int ss_listen (sci_idx)
 
         code = ss_execute_line (sci_idx, input);
         if (code == SS_ET_COMMAND_NOT_FOUND) {
-            register char *c = input;
+            char *c = input;
             while (*c == ' ' || *c == '\t')
                 c++;
             cp = strchr (c, ' ');

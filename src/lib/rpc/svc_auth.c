@@ -47,8 +47,8 @@
  *
  *	enum auth_stat
  *	flavorx_auth(rqst, msg)
- *		register struct svc_req *rqst;
- *		register struct rpc_msg *msg;
+ *		struct svc_req *rqst;
+ *		struct rpc_msg *msg;
  *
  */
 
@@ -85,11 +85,11 @@ static int svcauthnum = sizeof(svcauthsw) / sizeof(struct svcauthsw_type);
  */
 enum auth_stat
 gssrpc__authenticate(
-	register struct svc_req *rqst,
+	struct svc_req *rqst,
 	struct rpc_msg *msg,
 	bool_t *no_dispatch)
 {
-	register int cred_flavor, i;
+	int cred_flavor, i;
 
 	rqst->rq_cred = msg->rm_call.cb_cred;
 	rqst->rq_xprt->xp_verf.oa_flavor = gssrpc__null_auth.oa_flavor;

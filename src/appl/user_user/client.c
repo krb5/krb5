@@ -36,7 +36,7 @@
 int main (int argc, char *argv[])
 {
     int s;
-    register int retval, i;
+    int retval, i;
     char *hname;          /* full name of server */
     char **srealms;       /* realm(s) of server */
     char *princ;          /* principal in credentials cache */

@@ -1452,7 +1452,7 @@ accept_rpc_connection(verto_ctx *ctx, verto_ev *ev)
     verto_ev_flag flags;
     struct connection *conn;
     fd_set fds;
-    register int s;
+    int s;
 
     conn = verto_get_private(ev);
 

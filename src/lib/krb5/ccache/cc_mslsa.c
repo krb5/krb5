@@ -1638,8 +1638,8 @@ krb5_lcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_close(krb5_context context, krb5_ccache id)
 {
-    register int closeval = KRB5_OK;
-    register krb5_lcc_data *data;
+    int closeval = KRB5_OK;
+    krb5_lcc_data *data;
 
     if (id) {
         data = (krb5_lcc_data *) id->data;
@@ -1665,7 +1665,7 @@ krb5_lcc_close(krb5_context context, krb5_ccache id)
 static krb5_error_code KRB5_CALLCONV
 krb5_lcc_destroy(krb5_context context, krb5_ccache id)
 {
-    register krb5_lcc_data *data;
+    krb5_lcc_data *data;
 
     if (id) {
         data = (krb5_lcc_data *) id->data;

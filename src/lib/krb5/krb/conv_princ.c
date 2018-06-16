@@ -130,8 +130,8 @@ static const struct krb_convert sconv_list[] = {
  * This falls in the "should have been in the ANSI C library"
  * category. :-)
  */
-static char *strnchr(register char *s, register int c,
-                     register unsigned int n)
+static char *
+strnchr(char *s, int c, unsigned int n)
 {
     if (n < 1)
         return 0;

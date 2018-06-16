@@ -1299,7 +1299,7 @@ krb5int_copy_authdatum(krb5_context context,
 void KRB5_CALLCONV
 krb5_free_authdata(krb5_context context, krb5_authdata **val)
 {
-    register krb5_authdata **temp;
+    krb5_authdata **temp;
 
     if (val == NULL)
         return;

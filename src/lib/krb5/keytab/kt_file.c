@@ -1182,7 +1182,7 @@ krb5_ktfileint_internal_read_entry(krb5_context context, krb5_keytab id, krb5_ke
     unsigned int u_count, u_princ_size;
     krb5_int16 enctype;
     krb5_int16 princ_size;
-    register int i;
+    int i;
     krb5_int32 size;
     krb5_int32 start_pos, pos;
     krb5_error_code error;

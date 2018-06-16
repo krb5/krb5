@@ -157,8 +157,8 @@ int
 
 int
 	string_to_key(str,key)
-	register char		*str;
-	register C_Block	*key;
+	char		*str;
+	C_Block	*key;
 
 	This routines converts an arbitrary length, null terminated string
 	to an 8 byte DES key, with each byte parity set to odd, per FIPS spec.

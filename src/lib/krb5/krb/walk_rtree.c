@@ -615,7 +615,7 @@ comtail(struct hstate *c, struct hstate *s, int sep)
 void
 krb5_free_realm_tree(krb5_context context, krb5_principal *realms)
 {
-    register krb5_principal *nrealms = realms;
+    krb5_principal *nrealms = realms;
     if (realms == NULL)
         return;
     while (*nrealms) {

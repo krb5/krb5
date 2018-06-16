@@ -216,8 +216,8 @@ int ProcessTimeSync(char *hostname, int Port, char *tmpstr)
 {
     char                buffer[512];
     int                 cc;
-    register long       *nettime;
-    register int        s;
+    long                *nettime;
+    int                 s;
     long                hosttime;
     struct hostent      *host;
     struct              timeval tv;

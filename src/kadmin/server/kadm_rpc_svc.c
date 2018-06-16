@@ -38,7 +38,7 @@ static int check_rpcsec_auth(struct svc_req *);
 
 void kadm_1(rqstp, transp)
    struct svc_req *rqstp;
-   register SVCXPRT *transp;
+   SVCXPRT *transp;
 {
      union {
 	  cprinc_arg create_principal_2_arg;

@@ -66,8 +66,8 @@ xdr_reference(
 	xdrproc_t proc		/* xdr routine to handle the object */
 	)
 {
-	register caddr_t loc = *pp;
-	register bool_t stat;
+	caddr_t loc = *pp;
+	bool_t stat;
 
 	if (loc == NULL)
 		switch (xdrs->x_op) {

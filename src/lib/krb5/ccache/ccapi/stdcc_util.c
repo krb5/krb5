@@ -921,8 +921,8 @@ cc_int32 krb5int_free_cc_cred_union (cred_union** creds)
  */
 static krb5_boolean
 times_match(t1, t2)
-    register const krb5_ticket_times *t1;
-    register const krb5_ticket_times *t2;
+    const krb5_ticket_times *t1;
+    const krb5_ticket_times *t2;
 {
     if (t1->renew_till) {
         if (ts_after(t1->renew_till, t2->renew_till))
@@ -938,7 +938,7 @@ times_match(t1, t2)
 
 static krb5_boolean
 times_match_exact (t1, t2)
-    register const krb5_ticket_times *t1, *t2;
+    const krb5_ticket_times *t1, *t2;
 {
     return (t1->authtime == t2->authtime
             && t1->starttime == t2->starttime
@@ -949,7 +949,7 @@ times_match_exact (t1, t2)
 static krb5_boolean
 standard_fields_match(context, mcreds, creds)
     krb5_context context;
-    register const krb5_creds *mcreds, *creds;
+    const krb5_creds *mcreds, *creds;
 {
     return (krb5_principal_compare(context, mcreds->client,creds->client) &&
             krb5_principal_compare(context, mcreds->server,creds->server));
@@ -960,7 +960,7 @@ standard_fields_match(context, mcreds, creds)
 static krb5_boolean
 srvname_match(context, mcreds, creds)
     krb5_context context;
-    register const krb5_creds *mcreds, *creds;
+    const krb5_creds *mcreds, *creds;
 {
     krb5_boolean retval;
     krb5_principal_data p1, p2;
@@ -1008,7 +1008,7 @@ authdata_match(mdata, data)
 
 static krb5_boolean
 data_match(data1, data2)
-    register const krb5_data *data1, *data2;
+    const krb5_data *data1, *data2;
 {
     if (!data1) {
         if (!data2)

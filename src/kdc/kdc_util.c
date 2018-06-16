@@ -87,8 +87,8 @@ concat_authorization_data(krb5_context context,
                           krb5_authdata **first, krb5_authdata **second,
                           krb5_authdata ***output)
 {
-    register int i, j;
-    register krb5_authdata **ptr, **retdata;
+    int i, j;
+    krb5_authdata **ptr, **retdata;
 
     /* count up the entries */
     i = 0;
@@ -638,7 +638,7 @@ check_anon(kdc_realm_t *kdc_active_realm,
                             KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)
 int
 validate_as_request(kdc_realm_t *kdc_active_realm,
-                    register krb5_kdc_req *request, krb5_db_entry client,
+                    krb5_kdc_req *request, krb5_db_entry client,
                     krb5_db_entry server, krb5_timestamp kdc_time,
                     const char **status, krb5_pa_data ***e_data)
 {

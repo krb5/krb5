@@ -65,7 +65,7 @@ static l_end()
 
 static l_quoted_string()
 {
-     register char *p;
+     char *p;
      yylval.dynstr = strdup(yytext+1);
      if (p=strrchr(yylval.dynstr, '"'))
 	  *p='\0';

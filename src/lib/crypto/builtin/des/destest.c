@@ -159,7 +159,7 @@ convert(text, cblock)
     char *text;
     unsigned char cblock[];
 {
-    register int i;
+    int i;
     for (i = 0; i < 8; i++) {
         if (!isascii((unsigned char)text[i * 2]))
             abort ();
@@ -189,7 +189,7 @@ des_cblock_print_file(x, fp)
     FILE *fp;
 {
     unsigned char *y = (unsigned char *) x;
-    register int i = 0;
+    int i = 0;
     fprintf(fp," 0x { ");
 
     while (i++ < 8) {
@@ -212,7 +212,7 @@ des_cblock_print_file(x, fp)
  */
 int
 mit_des_check_key_parity(key)
-    register mit_des_cblock key;
+    mit_des_cblock key;
 {
     unsigned int i;
 
@@ -231,7 +231,7 @@ mit_des_check_key_parity(key)
 
 void
 mit_des_fixup_key_parity(key)
-    register mit_des_cblock key;
+    mit_des_cblock key;
 {
     unsigned int i;
     for (i=0; i<sizeof(mit_des_cblock); i++)

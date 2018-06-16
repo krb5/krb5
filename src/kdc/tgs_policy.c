@@ -320,7 +320,7 @@ check_tgs_tgt(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
 
 int
 validate_tgs_request(kdc_realm_t *kdc_active_realm,
-                     register krb5_kdc_req *request, krb5_db_entry server,
+                     krb5_kdc_req *request, krb5_db_entry server,
                      krb5_ticket *ticket, krb5_timestamp kdc_time,
                      const char **status, krb5_pa_data ***e_data)
 {

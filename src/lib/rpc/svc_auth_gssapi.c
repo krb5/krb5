@@ -154,8 +154,8 @@ badauth(OM_uint32 maj, OM_uint32 minor, SVCXPRT *xprt)
 }
 
 enum auth_stat gssrpc__svcauth_gssapi(
-     register struct svc_req *rqst,
-     register struct rpc_msg *msg,
+     struct svc_req *rqst,
+     struct rpc_msg *msg,
      bool_t *no_dispatch)
 {
      XDR xdrs;
