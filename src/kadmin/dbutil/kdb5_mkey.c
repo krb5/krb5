@@ -1297,7 +1297,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
         com_err(progname, retval,
                 _("while updating mkey_aux data for master principal entry"));
         exit_status++;
-        return;
+        goto cleanup_return;
     }
 
     if ((retval = krb5_timeofday(util_context, &now))) {
