@@ -781,6 +781,7 @@ main(int argc, char **argv)
                 /* Accept a TCP connection */
                 if ((work->s = accept(stmp, NULL, 0)) < 0) {
                     perror("accepting connection");
+                    free(work);
                     continue;
                 }
 
