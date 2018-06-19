@@ -479,6 +479,7 @@ cache_set(
 		newbuf = mem_alloc(su->su_iosz);
 		if (newbuf == NULL) {
 			CACHE_PERROR("cache_set: could not allocate new rpc_buffer");
+			free(victim);
 			return;
 		}
 	}
