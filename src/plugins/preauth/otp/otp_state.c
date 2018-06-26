@@ -84,23 +84,23 @@ read_secret_file(const char *secret_file, char **secret)
 {
     char buf[MAX_SECRET_LEN];
     krb5_error_code retval;
-    char *filename;
+    char *filename = NULL;
     FILE *file;
-    int i, j;
+    size_t i, j;
 
     *secret = NULL;
 
     retval = k5_path_join(KDC_DIR, secret_file, &filename);
     if (retval != 0) {
         com_err("otp", retval, "Unable to resolve secret file '%s'", filename);
-        return retval;
+        goto cleanup;
     }
 
     file = fopen(filename, "r");
     if (file == NULL) {
         retval = errno;
         com_err("otp", retval, "Unable to open secret file '%s'", filename);
-        return retval;
+        goto cleanup;
     }
 
     if (fgets(buf, sizeof(buf), file) == NULL)
@@ -108,7 +108,7 @@ read_secret_file(const char *secret_file, char **secret)
     fclose(file);
     if (retval != 0) {
         com_err("otp", retval, "Unable to read secret file '%s'", filename);
-        return retval;
+        goto cleanup;
     }
 
     /* Strip whitespace. */
@@ -116,12 +116,15 @@ read_secret_file(const char *secret_file, char **secret)
         if (!isspace(buf[i]))
             break;
     }
-    for (j = strlen(buf) - i; j > 0; j--) {
+    for (j = strlen(buf); j > i; j--) {
         if (!isspace(buf[j - 1]))
             break;
     }
 
     *secret = k5memdup0(&buf[i], j - i, &retval);
+
+cleanup:
+    free(filename);
     return retval;
 }
 
