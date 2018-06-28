@@ -494,7 +494,8 @@ main(int argc, char **argv)
             exit(1);
         }
         printf(_("Reinitialized the ulog.\n"));
-        exit(0);
+        ulog_fini(context);
+        goto done;
     }
 
     ulog = map_ulog(params.iprop_logfile);
@@ -562,6 +563,7 @@ main(int argc, char **argv)
 
     printf("\n");
 
+done:
     kadm5_free_config_params(context, &params);
     krb5_free_context(context);
     return 0;
