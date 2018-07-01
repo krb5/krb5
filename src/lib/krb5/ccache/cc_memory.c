@@ -102,18 +102,20 @@ extern krb5_error_code krb5_change_cache (void);
 typedef struct _krb5_mcc_link {
     struct _krb5_mcc_link *next;
     krb5_creds *creds;
-} krb5_mcc_link, *krb5_mcc_cursor;
+} krb5_mcc_link;
 
 /* Per-cache data header.  */
 typedef struct _krb5_mcc_data {
     char *name;
     k5_cc_mutex lock;
     krb5_principal prin;
-    krb5_mcc_cursor link;
+    krb5_mcc_link *link;
     krb5_timestamp changetime;
     /* Time offsets for clock-skewed clients.  */
     krb5_int32 time_offset;
     krb5_int32 usec_offset;
+    int refcount;               /* One for the table slot, one per handle */
+    int generation;             /* Incremented at each initialize */
 } krb5_mcc_data;
 
 /* List of memory caches.  */
@@ -121,6 +123,12 @@ typedef struct krb5_mcc_list_node {
     struct krb5_mcc_list_node *next;
     krb5_mcc_data *cache;
 } krb5_mcc_list_node;
+
+/* Iterator over credentials in a memory cache. */
+struct mcc_cursor {
+    int generation;
+    krb5_mcc_link *next_link;
+};
 
 /* Iterator over memory caches.  */
 struct krb5_mcc_ptcursor_data {
@@ -132,7 +140,23 @@ static krb5_mcc_list_node *mcc_head = 0;
 
 static void update_mcc_change_time(krb5_mcc_data *);
 
-static void krb5_mcc_free (krb5_context context, krb5_ccache id);
+/* Remove creds from d, invalidate any existing cursors, and unset the client
+ * principal.  The caller is responsible for locking. */
+static void
+empty_mcc_cache(krb5_context context, krb5_mcc_data *d)
+{
+    krb5_mcc_link *curr, *next;
+
+    for (curr = d->link; curr != NULL; curr = next) {
+        next = curr->next;
+        krb5_free_creds(context, curr->creds);
+        free(curr);
+    }
+    d->link = NULL;
+    d->generation++;
+    krb5_free_principal(context, d->prin);
+    d->prin = NULL;
+}
 
 /*
  * Modifies:
@@ -150,16 +174,12 @@ krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
     krb5_os_context os_ctx = &context->os_context;
     krb5_error_code ret;
-    krb5_mcc_data *d;
+    krb5_mcc_data *d = id->data;
 
-    d = (krb5_mcc_data *)id->data;
     k5_cc_mutex_lock(context, &d->lock);
+    empty_mcc_cache(context, d);
 
-    krb5_mcc_free(context, id);
-
-    d = (krb5_mcc_data *)id->data;
-    ret = krb5_copy_principal(context, princ,
-                              &d->prin);
+    ret = krb5_copy_principal(context, princ, &d->prin);
     update_mcc_change_time(d);
 
     if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
@@ -185,61 +205,59 @@ krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_close(krb5_context context, krb5_ccache id)
 {
+    krb5_mcc_data *d = id->data;
+    int count;
+
     free(id);
-    return KRB5_OK;
-}
-
-static void
-krb5_mcc_free(krb5_context context, krb5_ccache id)
-{
-    krb5_mcc_cursor curr,next;
-    krb5_mcc_data *d;
-
-    d = (krb5_mcc_data *) id->data;
-    for (curr = d->link; curr;) {
-        krb5_free_creds(context, curr->creds);
-        next = curr->next;
-        free(curr);
-        curr = next;
+    k5_cc_mutex_lock(context, &d->lock);
+    count = --d->refcount;
+    k5_cc_mutex_unlock(context, &d->lock);
+    if (count == 0) {
+        /* This is the last active handle referencing d and d has been removed
+         * from the table, so we can release it. */
+        empty_mcc_cache(context, d);
+        free(d->name);
+        k5_cc_mutex_destroy(&d->lock);
+        free(d);
     }
-    d->link = NULL;
-    krb5_free_principal(context, d->prin);
+    return KRB5_OK;
 }
 
 /*
  * Effects:
  * Destroys the contents of id. id is invalid after call.
- *
- * Errors:
- * system errors (locks related)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_destroy(krb5_context context, krb5_ccache id)
 {
     krb5_mcc_list_node **curr, *node;
-    krb5_mcc_data *d;
+    krb5_mcc_data *d = id->data;
+    krb5_boolean removed_from_table = FALSE;
 
     k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
 
-    d = (krb5_mcc_data *)id->data;
     for (curr = &mcc_head; *curr; curr = &(*curr)->next) {
         if ((*curr)->cache == d) {
             node = *curr;
             *curr = node->next;
             free(node);
+            removed_from_table = TRUE;
             break;
         }
     }
     k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
 
+    /* Empty the cache and remove the reference for the table slot.  There will
+     * always be at least one reference left for the handle being destroyed. */
     k5_cc_mutex_lock(context, &d->lock);
-
-    krb5_mcc_free(context, id);
-    free(d->name);
+    empty_mcc_cache(context, d);
+    if (removed_from_table)
+        d->refcount--;
     k5_cc_mutex_unlock(context, &d->lock);
-    k5_cc_mutex_destroy(&d->lock);
-    free(d);
-    free(id);
+
+    /* Invalidate the handle, possibly removing the last reference to d and
+     * freeing it. */
+    krb5_mcc_close(context, id);
 
     krb5_change_cache ();
     return KRB5_OK;
@@ -279,9 +297,12 @@ krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     for (ptr = mcc_head; ptr; ptr=ptr->next)
         if (!strcmp(ptr->cache->name, residual))
             break;
-    if (ptr)
+    if (ptr != NULL) {
         d = ptr->cache;
-    else {
+        k5_cc_mutex_lock(context, &d->lock);
+        d->refcount++;
+        k5_cc_mutex_unlock(context, &d->lock);
+    } else {
         err = new_mcc_data(residual, &d);
         if (err) {
             k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
@@ -326,14 +347,18 @@ krb5_error_code KRB5_CALLCONV
 krb5_mcc_start_seq_get(krb5_context context, krb5_ccache id,
                        krb5_cc_cursor *cursor)
 {
-    krb5_mcc_cursor mcursor;
+    struct mcc_cursor *mcursor;
     krb5_mcc_data *d;
 
+    mcursor = malloc(sizeof(*mcursor));
+    if (mcursor == NULL)
+        return KRB5_CC_NOMEM;
     d = id->data;
     k5_cc_mutex_lock(context, &d->lock);
-    mcursor = d->link;
+    mcursor->generation = d->generation;
+    mcursor->next_link = d->link;
     k5_cc_mutex_unlock(context, &d->lock);
-    *cursor = (krb5_cc_cursor) mcursor;
+    *cursor = mcursor;
     return KRB5_OK;
 }
 
@@ -361,23 +386,34 @@ krb5_error_code KRB5_CALLCONV
 krb5_mcc_next_cred(krb5_context context, krb5_ccache id,
                    krb5_cc_cursor *cursor, krb5_creds *creds)
 {
-    krb5_mcc_cursor mcursor;
+    struct mcc_cursor *mcursor;
     krb5_error_code retval;
+    krb5_mcc_data *d = id->data;
 
-    /* Once the node in the linked list is created, it's never
-       modified, so we don't need to worry about locking here.  (Note
-       that we don't support _remove_cred.)  */
-    mcursor = (krb5_mcc_cursor) *cursor;
-    if (mcursor == NULL)
-        return KRB5_CC_END;
     memset(creds, 0, sizeof(krb5_creds));
-    if (mcursor->creds) {
-        retval = k5_copy_creds_contents(context, mcursor->creds, creds);
-        if (retval)
-            return retval;
+    mcursor = *cursor;
+    if (mcursor->next_link == NULL)
+        return KRB5_CC_END;
+
+    /*
+     * Check the cursor generation against the cache generation in case the
+     * cache has been reinitialized or destroyed, freeing the pointer in the
+     * cursor.  Keep the cache locked while we copy the creds and advance the
+     * pointer, in case another thread reinitializes the cache after we check
+     * the generation.
+     */
+    k5_cc_mutex_lock(context, &d->lock);
+    if (mcursor->generation != d->generation) {
+        k5_cc_mutex_unlock(context, &d->lock);
+        return KRB5_CC_END;
     }
-    *cursor = (krb5_cc_cursor)mcursor->next;
-    return KRB5_OK;
+
+    retval = k5_copy_creds_contents(context, mcursor->next_link->creds, creds);
+    if (retval == 0)
+        mcursor->next_link = mcursor->next_link->next;
+
+    k5_cc_mutex_unlock(context, &d->lock);
+    return retval;
 }
 
 /*
@@ -396,14 +432,18 @@ krb5_mcc_next_cred(krb5_context context, krb5_ccache id,
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor)
 {
-    *cursor = 0L;
+    free(*cursor);
+    *cursor = NULL;
     return KRB5_OK;
 }
 
-/* Utility routine: Creates the back-end data for a memory cache, and
-   threads it into the global linked list.
-
-   Call with the global list lock held.  */
+/*
+ * Utility routine: Creates the back-end data for a memory cache, and threads
+ * it into the global linked list.  Give the new object two references, one for
+ * the table slot and one for the caller's handle.
+ *
+ * Call with the global list lock held.
+ */
 static krb5_error_code
 new_mcc_data (const char *name, krb5_mcc_data **dataptr)
 {
@@ -432,6 +472,8 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
     d->changetime = 0;
     d->time_offset = 0;
     d->usec_offset = 0;
+    d->refcount = 2;
+    d->generation = 0;
     update_mcc_change_time(d);
 
     n = malloc(sizeof(krb5_mcc_list_node));
