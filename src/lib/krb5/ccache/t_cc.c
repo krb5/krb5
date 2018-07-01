@@ -386,6 +386,55 @@ test_misc(krb5_context context)
     krb5_cc_dfl_ops = ops_save;
 
 }
+
+/*
+ * Regression tests for #8202.  Because memory ccaches share objects between
+ * different handles to the same cache and between iterators and caches,
+ * historically there have been some bugs when those objects are released.
+ */
+static void
+test_memory_concurrent(krb5_context context)
+{
+    krb5_error_code kret;
+    krb5_ccache id1, id2;
+    krb5_cc_cursor cursor;
+    krb5_creds creds;
+
+    /* Create two handles to the same memory ccache and destroy them. */
+    kret = krb5_cc_resolve(context, "MEMORY:x", &id1);
+    CHECK(kret, "resolve 1");
+    kret = krb5_cc_resolve(context, "MEMORY:x", &id2);
+    CHECK(kret, "resolve 2");
+    kret = krb5_cc_destroy(context, id1);
+    CHECK(kret, "destroy 1");
+    kret = krb5_cc_destroy(context, id2);
+    CHECK(kret, "destroy 2");
+
+    kret = init_test_cred(context);
+    CHECK(kret, "init_creds");
+
+    /* Reinitialize the cache after creating an iterator for it, and verify
+     * that the iterator ends gracefully. */
+    kret = krb5_cc_resolve(context, "MEMORY:x", &id1);
+    CHECK(kret, "resolve");
+    kret = krb5_cc_initialize(context, id1, test_creds.client);
+    CHECK(kret, "initialize");
+    kret = krb5_cc_store_cred(context, id1, &test_creds);
+    CHECK(kret, "store");
+    kret = krb5_cc_start_seq_get(context, id1, &cursor);
+    CHECK(kret, "start_seq_get");
+    kret = krb5_cc_initialize(context, id1, test_creds.client);
+    CHECK(kret, "initialize again");
+    kret = krb5_cc_next_cred(context, id1, &cursor, &creds);
+    CHECK_BOOL(kret != KRB5_CC_END, "iterator should end", "next_cred");
+    kret = krb5_cc_end_seq_get(context, id1, &cursor);
+    CHECK(kret, "end_seq_get");
+    kret = krb5_cc_destroy(context, id1);
+    CHECK(kret, "destroy");
+
+    free_test_cred(context);
+}
+
 extern const krb5_cc_ops krb5_mcc_ops;
 extern const krb5_cc_ops krb5_fcc_ops;
 
@@ -433,6 +482,8 @@ main(void)
 
     do_test(context, "MEMORY:");
     do_test(context, "FILE:");
+
+    test_memory_concurrent(context);
 
     krb5_free_context(context);
     return 0;
