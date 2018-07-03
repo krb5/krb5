@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 # This is a regression test for
 # https://bugzilla.redhat.com/show_bug.cgi?id=586032 .
 #

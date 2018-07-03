@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Unfortunately, we can't reliably test the k5login module.  We can control

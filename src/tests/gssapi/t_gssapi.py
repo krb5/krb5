@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Test krb5 negotiation under SPNEGO for all enctype configurations.  Also

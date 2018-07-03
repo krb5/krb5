@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Define some convenience abbreviations for enctypes we will see in

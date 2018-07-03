@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 rollover_krb5_conf = {'libdefaults': {'allow_weak_crypto': 'true'}}

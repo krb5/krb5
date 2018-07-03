@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # The name and number of each supported SPAKE group.

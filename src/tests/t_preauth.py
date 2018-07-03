@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Test that the kdcpreauth client_keyblock() callback matches the key

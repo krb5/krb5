@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import kdcproxy
 from paste import httpserver
 import os

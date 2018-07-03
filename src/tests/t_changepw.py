@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # This file is intended to cover any password-changing mechanism.  For

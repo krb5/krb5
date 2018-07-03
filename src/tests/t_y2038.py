@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # These tests will become much less important after the y2038 boundary

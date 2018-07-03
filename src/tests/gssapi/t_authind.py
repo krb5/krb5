@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Test authentication indicators.  Load the test preauth module so we

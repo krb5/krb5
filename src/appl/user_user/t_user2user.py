@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # If uuserver is not compiled under -DDEBUG, then set to 0

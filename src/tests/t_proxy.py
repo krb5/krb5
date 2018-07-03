@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Skip this test if we're missing proxy functionality or parts of the proxy.
@@ -62,7 +61,8 @@ def start_proxy(realm, keycertpem):
     conf.write('kpasswd = kpasswd://localhost:%d\n' % (realm.portbase + 2))
     conf.close()
     realm.env['KDCPROXY_CONFIG'] = proxy_conf_path
-    cmd = [proxy_exec_path, str(realm.server_port()), keycertpem]
+    cmd = [sys.executable, proxy_exec_path, str(realm.server_port()),
+           keycertpem]
     return realm.start_server(cmd, sentinel='proxy server ready')
 
 # Fail: untrusted issuer and hostname doesn't match.

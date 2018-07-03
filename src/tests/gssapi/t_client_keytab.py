@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Set up a basic realm and a client keytab containing two user principals.

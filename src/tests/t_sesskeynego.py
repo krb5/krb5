@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 import re
 

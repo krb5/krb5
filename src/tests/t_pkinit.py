@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Skip this test if pkinit wasn't built.

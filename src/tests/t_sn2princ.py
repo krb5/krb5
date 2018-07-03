@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 offline = (len(args) > 0 and args[0] != "no")

@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 conf_slave = {'dbmodules': {'db': {'database_name': '$testdir/db.slave'}}}

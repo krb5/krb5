@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Default KDB iteration is locked.  Expect write lock failure unless

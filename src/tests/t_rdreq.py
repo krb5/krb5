@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 conf = {'realms': {'$realm': {'supported_enctypes': 'aes256-cts aes128-cts'}}}

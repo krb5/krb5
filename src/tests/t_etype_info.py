@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 supported_enctypes = 'aes128-cts des3-cbc-sha1 rc4-hmac des-cbc-crc:afs3'

@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Set the maximum UDP reply size very low, so that all replies go

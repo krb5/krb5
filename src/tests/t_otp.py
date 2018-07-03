@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Author: Nathaniel McCallum <npmccallum@redhat.com>
 #
 # Copyright (c) 2013 Red Hat, Inc.

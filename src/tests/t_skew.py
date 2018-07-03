@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Create a realm with the KDC one hour in the past.

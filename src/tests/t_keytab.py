@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 for realm in multipass_realms(create_user=False):

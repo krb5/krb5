@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 
 # Create a pair of realms, where KRBTEST1.COM can authenticate to

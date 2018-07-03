@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from k5test import *
 from datetime import datetime
 import re
