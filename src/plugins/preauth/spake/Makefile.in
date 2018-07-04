@@ -43,6 +43,9 @@ all-unix: all-liblinks
 install-unix: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
+clean:
+	$(RM) t_vectors t_vectors.o $(STLIBOBJS)
+
 check-unix: t_vectors
 	$(RUN_TEST_LOCAL_CONF) ./t_vectors
 

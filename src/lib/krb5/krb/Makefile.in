@@ -529,7 +529,7 @@ clean:
 	$(OUTPRE)t_response_items$(EXEEXT) \
 	$(OUTPRE)t_response_items.$(OBJEXT) \
 	$(OUTPRE)t_sname_match$(EXEEXT) $(OUTPRE)t_sname_match.$(OBJEXT) \
-	$(OUTPRE)t_valid_times$(EXEEXT) $(OUTPRE)t_valid_times.$(OBJECT) \
+	$(OUTPRE)t_valid_times$(EXEEXT) $(OUTPRE)t_valid_times.$(OBJEXT) \
 	$(OUTPRE)t_parse_host_string$(EXEEXT) \
 	$(OUTPRE)t_parse_host_string.$(OBJEXT)
 
