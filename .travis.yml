@@ -21,4 +21,4 @@ before_install:
   - sudo make install
   - cd ../..
 
-script: cd src && autoreconf && ./configure --enable-maintainer-mode --with-ldap && make $MAKEVARS && make check
+script: sh -ex .travis-ci.sh
