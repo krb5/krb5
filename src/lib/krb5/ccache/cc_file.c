@@ -1099,29 +1099,6 @@ fcc_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor)
     return 0;
 }
 
-/* Get the cache file's last modification time. */
-static krb5_error_code KRB5_CALLCONV
-fcc_last_change_time(krb5_context context, krb5_ccache id,
-                     krb5_timestamp *change_time)
-{
-    krb5_error_code ret = 0;
-    fcc_data *data = id->data;
-    struct stat buf;
-
-    *change_time = 0;
-
-    k5_cc_mutex_lock(context, &data->lock);
-
-    if (stat(data->filename, &buf) == -1)
-        ret = interpret_errno(context, errno);
-    else
-        *change_time = (krb5_timestamp)buf.st_mtime;
-
-    k5_cc_mutex_unlock(context, &data->lock);
-
-    return set_errmsg_filename(context, ret, data->filename);
-}
-
 /* Lock the cache handle against other threads.  (This does not lock the cache
  * file against other processes.) */
 static krb5_error_code KRB5_CALLCONV
@@ -1217,7 +1194,6 @@ const krb5_cc_ops krb5_fcc_ops = {
     fcc_ptcursor_next,
     fcc_ptcursor_free,
     NULL, /* move */
-    fcc_last_change_time,
     NULL, /* wasdefault */
     fcc_lock,
     fcc_unlock,
@@ -1288,7 +1264,6 @@ const krb5_cc_ops krb5_cc_file_ops = {
     fcc_ptcursor_next,
     fcc_ptcursor_free,
     NULL, /* move */
-    fcc_last_change_time,
     NULL, /* wasdefault */
     fcc_lock,
     fcc_unlock,

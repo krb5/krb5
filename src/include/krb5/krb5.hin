@@ -2611,45 +2611,6 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_move(krb5_context context, krb5_ccache src, krb5_ccache dst);
 
 /**
- * Return a timestamp of the last modification to a credential cache.
- *
- * @param [in]  context         Library context
- * @param [in]  ccache          Credential cache handle
- * @param [out] change_time     The last change time of @a ccache
- *
- * If an error occurs, @a change_time is set to 0.
- */
-krb5_error_code KRB5_CALLCONV
-krb5_cc_last_change_time(krb5_context context, krb5_ccache ccache,
-                         krb5_timestamp *change_time);
-
-/**
- * Lock a credential cache.
- *
- * @param [in]  context         Library context
- * @param [in]  ccache          Credential cache handle
- *
- * Use krb5_cc_unlock() to unlock the lock.
- *
- * @retval 0 Success; otherwise - Kerberos error codes
- */
-krb5_error_code KRB5_CALLCONV
-krb5_cc_lock(krb5_context context, krb5_ccache ccache);
-
-/**
- * Unlock a credential cache.
- *
- * @param [in]  context         Library context
- * @param [in]  ccache          Credential cache handle
- *
- * This function unlocks the @a ccache locked by krb5_cc_lock().
- *
- * @retval 0 Success; otherwise - Kerberos error codes
- */
-krb5_error_code KRB5_CALLCONV
-krb5_cc_unlock(krb5_context context, krb5_ccache ccache);
-
-/**
  * Prepare to iterate over the collection of known credential caches.
  *
  * @param [in]  context         Library context
@@ -2713,52 +2674,6 @@ krb5_cccol_cursor_free(krb5_context context, krb5_cccol_cursor *cursor);
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_have_content(krb5_context context);
-
-/**
- * Return a timestamp of the last modification of any known credential cache.
- *
- * @param [in]  context         Library context
- * @param [out] change_time     Last modification timestamp
- *
- * This function returns the most recent modification time of any known
- * credential cache, ignoring any caches which cannot supply a last
- * modification time.
- *
- * If there are no known credential caches, @a change_time is set to 0.
- *
- * @retval 0 Success; otherwise - Kerberos error codes
- */
-krb5_error_code KRB5_CALLCONV
-krb5_cccol_last_change_time(krb5_context context, krb5_timestamp *change_time);
-
-/**
- * Acquire a global lock for credential caches.
- *
- * @param [in]  context         Library context
- *
- * This function locks the global credential cache collection, ensuring
- * that no ccaches are added to or removed from it until the collection
- * lock is released.
- *
- * Use krb5_cccol_unlock() to unlock the lock.
- *
- * @retval 0 Success; otherwise - Kerberos error codes
- */
-
-krb5_error_code KRB5_CALLCONV
-krb5_cccol_lock(krb5_context context);
-
-/**
- * Release a global lock for credential caches.
- *
- * @param [in]  context         Library context
- *
- * This function unlocks the lock from krb5_cccol_lock().
- *
- * @retval 0 Success; otherwise - Kerberos error codes
- */
-krb5_error_code KRB5_CALLCONV
-krb5_cccol_unlock(krb5_context context);
 
 /**
  * Create a new credential cache of the specified type with a unique name.

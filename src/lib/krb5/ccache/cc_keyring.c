@@ -230,7 +230,6 @@ typedef struct _krcc_data
     key_serial_t collection_id; /* collection containing this cache keyring */
     key_serial_t cache_id;      /* keyring representing ccache */
     key_serial_t princ_id;      /* key holding principal info */
-    krb5_timestamp changetime;
     krb5_boolean is_legacy_type;
 } krcc_data;
 
@@ -274,8 +273,6 @@ static krb5_error_code save_time_offsets(krb5_context context, krb5_ccache id,
 static krb5_error_code get_time_offsets(krb5_context context, krb5_ccache id,
                                         int32_t *time_offset,
                                         int32_t *usec_offset);
-
-static void krcc_update_change_time(krcc_data *d);
 
 /* Note the following is a stub function for Linux */
 extern krb5_error_code krb5_change_cache(void);
@@ -850,7 +847,6 @@ clear_cache_keyring(krb5_context context, krb5_ccache id)
             return errno;
     }
     data->princ_id = 0;
-    krcc_update_change_time(data);
 
     return 0;
 }
@@ -1113,9 +1109,7 @@ make_krcc_data(const char *anchor_name, const char *collection_name,
     data->princ_id = 0;
     data->cache_id = cache_id;
     data->collection_id = collection_id;
-    data->changetime = 0;
     data->is_legacy_type = (strcmp(anchor_name, KRCC_LEGACY_ANCHOR) == 0);
-    krcc_update_change_time(data);
 
     *data_out = data;
     return 0;
@@ -1309,8 +1303,6 @@ krcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
     if (ret)
         goto errout;
 
-    krcc_update_change_time(data);
-
     /* Set appropriate timeouts on cache keys. */
     ret = krb5_timeofday(context, &now);
     if (ret)
@@ -1328,20 +1320,6 @@ errout:
     krb5_free_unparsed_name(context, keyname);
     k5_cc_mutex_unlock(context, &data->lock);
     return ret;
-}
-
-/* Get the cache's last modification time.  (This is currently broken; it
- * returns only the last change made using this handle.) */
-static krb5_error_code KRB5_CALLCONV
-krcc_last_change_time(krb5_context context, krb5_ccache id,
-                      krb5_timestamp *change_time)
-{
-    krcc_data *data = id->data;
-
-    k5_cc_mutex_lock(context, &data->lock);
-    *change_time = data->changetime;
-    k5_cc_mutex_unlock(context, &data->lock);
-    return 0;
 }
 
 /* Lock the cache handle against other threads.  (This does not lock the cache
@@ -1403,7 +1381,6 @@ save_principal(krb5_context context, krb5_ccache id, krb5_principal princ)
     } else {
         data->princ_id = newkey;
         ret = 0;
-        krcc_update_change_time(data);
     }
 
     k5_buf_free(&buf);
@@ -1430,7 +1407,6 @@ save_time_offsets(krb5_context context, krb5_ccache id, int32_t time_offset,
                      data->cache_id);
     if (newkey == -1)
         return errno;
-    krcc_update_change_time(data);
     return 0;
 }
 
@@ -1672,21 +1648,6 @@ cleanup:
 }
 
 /*
- * Utility routine: called by krcc_* functions to keep
- * result of krcc_last_change_time up to date.
- * Value monotonically increases -- based on but not guaranteed to be actual
- * system time.
- */
-
-static void
-krcc_update_change_time(krcc_data *data)
-{
-    krb5_timestamp now_time = time(NULL);
-    data->changetime = ts_after(now_time, data->changetime) ?
-        now_time : ts_incr(data->changetime, 1);
-}
-
-/*
  * ccache implementation storing credentials in the Linux keyring facility
  * The default is to put them at the session keyring level.
  * If "KEYRING:process:" or "KEYRING:thread:" is specified, then they will
@@ -1714,7 +1675,6 @@ const krb5_cc_ops krb5_krcc_ops = {
     krcc_ptcursor_next,
     krcc_ptcursor_free,
     NULL, /* move */
-    krcc_last_change_time, /* lastchange */
     NULL, /* wasdefault */
     krcc_lock,
     krcc_unlock,
@@ -1744,7 +1704,6 @@ const krb5_cc_ops krb5_krcc_ops = {
     NULL,
     NULL,
     NULL,                       /* added after 1.4 release */
-    NULL,
     NULL,
     NULL,
     NULL,

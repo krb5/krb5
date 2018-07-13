@@ -157,8 +157,6 @@ Rarely used public interfaces
    krb5_cc_get_config.rst
    krb5_cc_get_flags.rst
    krb5_cc_get_full_name.rst
-   krb5_cc_last_change_time.rst
-   krb5_cc_lock.rst
    krb5_cc_move.rst
    krb5_cc_next_cred.rst
    krb5_cc_remove_cred.rst
@@ -171,14 +169,10 @@ Rarely used public interfaces
    krb5_cc_store_cred.rst
    krb5_cc_support_switch.rst
    krb5_cc_switch.rst
-   krb5_cc_unlock.rst
    krb5_cccol_cursor_free.rst
    krb5_cccol_cursor_new.rst
    krb5_cccol_cursor_next.rst
    krb5_cccol_have_content.rst
-   krb5_cccol_last_change_time.rst
-   krb5_cccol_lock.rst
-   krb5_cccol_unlock.rst
    krb5_clear_error_message.rst
    krb5_check_clockskew.rst
    krb5_copy_addresses.rst

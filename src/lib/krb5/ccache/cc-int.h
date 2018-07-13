@@ -114,6 +114,18 @@ extern krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_unlock
 (krb5_context context);
 #endif
 
+krb5_error_code
+k5_cc_lock(krb5_context context, krb5_ccache ccache);
+
+krb5_error_code
+k5_cc_unlock(krb5_context context, krb5_ccache ccache);
+
+krb5_error_code
+k5_cccol_lock(krb5_context context);
+
+krb5_error_code
+k5_cccol_unlock(krb5_context context);
+
 void
 k5_cc_mutex_force_unlock(k5_cc_mutex *m);
 
@@ -200,8 +212,6 @@ struct _krb5_cc_ops {
                                                    krb5_cc_ptcursor *);
     krb5_error_code (KRB5_CALLCONV *move)(krb5_context, krb5_ccache,
                                           krb5_ccache);
-    krb5_error_code (KRB5_CALLCONV *lastchange)(krb5_context,
-                                                krb5_ccache, krb5_timestamp *);
     krb5_error_code (KRB5_CALLCONV *wasdefault)(krb5_context, krb5_ccache,
                                                 krb5_timestamp *);
     krb5_error_code (KRB5_CALLCONV *lock)(krb5_context, krb5_ccache);

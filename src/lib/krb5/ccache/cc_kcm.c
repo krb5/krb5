@@ -79,9 +79,8 @@ struct kcmreq {
 
 struct kcm_cache_data {
     char *residual;             /* immutable; may be accessed without lock */
-    k5_cc_mutex lock;           /* protects io and changetime */
+    k5_cc_mutex lock;           /* protects io */
     struct kcmio *io;
-    krb5_timestamp changetime;
 };
 
 struct kcm_ptcursor {
@@ -540,7 +539,6 @@ make_cache(krb5_context context, const char *residual, struct kcmio *io,
 
     data->residual = residual_copy;
     data->io = io;
-    data->changetime = 0;
     cache->ops = &krb5_kcm_ops;
     cache->data = data;
     cache->magic = KV5M_CCACHE;
@@ -555,19 +553,15 @@ oom:
     return ENOMEM;
 }
 
-/* Lock cache's I/O structure and use it to call the KCM daemon.  If modify is
- * true, update the last change time. */
+/* Lock cache's I/O structure and use it to call the KCM daemon. */
 static krb5_error_code
-cache_call(krb5_context context, krb5_ccache cache, struct kcmreq *req,
-           krb5_boolean modify)
+cache_call(krb5_context context, krb5_ccache cache, struct kcmreq *req)
 {
     krb5_error_code ret;
     struct kcm_cache_data *data = cache->data;
 
     k5_cc_mutex_lock(context, &data->lock);
     ret = kcmio_call(context, data->io, req);
-    if (modify && !ret)
-        data->changetime = time(NULL);
     k5_cc_mutex_unlock(context, &data->lock);
     return ret;
 }
@@ -580,7 +574,7 @@ get_kdc_offset(krb5_context context, krb5_ccache cache)
     int32_t time_offset;
 
     kcmreq_init(&req, KCM_OP_GET_KDC_OFFSET, cache);
-    if (cache_call(context, cache, &req, FALSE) != 0)
+    if (cache_call(context, cache, &req) != 0)
         goto cleanup;
     time_offset = k5_input_get_uint32_be(&req.reply);
     if (!req.reply.status)
@@ -603,7 +597,7 @@ set_kdc_offset(krb5_context context, krb5_ccache cache)
     if (context->os_context.os_flags & KRB5_OS_TOFFSET_VALID) {
         kcmreq_init(&req, KCM_OP_SET_KDC_OFFSET, cache);
         kcmreq_put32(&req, context->os_context.time_offset);
-        (void)cache_call(context, cache, &req, TRUE);
+        (void)cache_call(context, cache, &req);
         kcmreq_free(&req);
     }
 }
@@ -685,7 +679,7 @@ kcm_initialize(krb5_context context, krb5_ccache cache, krb5_principal princ)
 
     kcmreq_init(&req, KCM_OP_INITIALIZE, cache);
     k5_marshal_princ(&req.reqbuf, 4, princ);
-    ret = cache_call(context, cache, &req, TRUE);
+    ret = cache_call(context, cache, &req);
     kcmreq_free(&req);
     set_kdc_offset(context, cache);
     return ret;
@@ -711,7 +705,7 @@ kcm_destroy(krb5_context context, krb5_ccache cache)
     struct kcmreq req;
 
     kcmreq_init(&req, KCM_OP_DESTROY, cache);
-    ret = cache_call(context, cache, &req, TRUE);
+    ret = cache_call(context, cache, &req);
     kcmreq_free(&req);
     (void)kcm_close(context, cache);
     return ret;
@@ -725,7 +719,7 @@ kcm_store(krb5_context context, krb5_ccache cache, krb5_creds *cred)
 
     kcmreq_init(&req, KCM_OP_STORE, cache);
     k5_marshal_cred(&req.reqbuf, 4, cred);
-    ret = cache_call(context, cache, &req, TRUE);
+    ret = cache_call(context, cache, &req);
     kcmreq_free(&req);
     return ret;
 }
@@ -748,7 +742,7 @@ kcm_get_princ(krb5_context context, krb5_ccache cache,
     struct kcm_cache_data *data = cache->data;
 
     kcmreq_init(&req, KCM_OP_GET_PRINCIPAL, cache);
-    ret = cache_call(context, cache, &req, FALSE);
+    ret = cache_call(context, cache, &req);
     /* Heimdal KCM can respond with code 0 and no principal. */
     if (!ret && req.reply.len == 0)
         ret = KRB5_FCC_NOFILE;
@@ -776,7 +770,7 @@ kcm_start_seq_get(krb5_context context, krb5_ccache cache,
     get_kdc_offset(context, cache);
 
     kcmreq_init(&req, KCM_OP_GET_CRED_UUID_LIST, cache);
-    ret = cache_call(context, cache, &req, FALSE);
+    ret = cache_call(context, cache, &req);
     if (ret)
         goto cleanup;
     ret = kcmreq_get_uuid_list(&req, &uuids);
@@ -806,7 +800,7 @@ kcm_next_cred(krb5_context context, krb5_ccache cache, krb5_cc_cursor *cursor,
     k5_buf_add_len(&req.reqbuf, uuids->uuidbytes + (uuids->pos * KCM_UUID_LEN),
                    KCM_UUID_LEN);
     uuids->pos++;
-    ret = cache_call(context, cache, &req, FALSE);
+    ret = cache_call(context, cache, &req);
     if (!ret)
         ret = k5_unmarshal_cred(req.reply.ptr, req.reply.len, 4, cred_out);
     kcmreq_free(&req);
@@ -832,7 +826,7 @@ kcm_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
     kcmreq_init(&req, KCM_OP_REMOVE_CRED, cache);
     kcmreq_put32(&req, flags);
     k5_marshal_mcred(&req.reqbuf, mcred);
-    ret = cache_call(context, cache, &req, TRUE);
+    ret = cache_call(context, cache, &req);
     kcmreq_free(&req);
     return ret;
 }
@@ -1033,23 +1027,6 @@ kcm_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor)
 }
 
 static krb5_error_code KRB5_CALLCONV
-kcm_lastchange(krb5_context context, krb5_ccache cache,
-               krb5_timestamp *time_out)
-{
-    struct kcm_cache_data *data = cache->data;
-
-    /*
-     * KCM has no support for retrieving the last change time.  Return the time
-     * of the last change made through this handle, which isn't very useful,
-     * but is the best we can do for now.
-     */
-    k5_cc_mutex_lock(context, &data->lock);
-    *time_out = data->changetime;
-    k5_cc_mutex_unlock(context, &data->lock);
-    return 0;
-}
-
-static krb5_error_code KRB5_CALLCONV
 kcm_lock(krb5_context context, krb5_ccache cache)
 {
     k5_cc_mutex_lock(context, &((struct kcm_cache_data *)cache->data)->lock);
@@ -1070,7 +1047,7 @@ kcm_switch_to(krb5_context context, krb5_ccache cache)
     struct kcmreq req;
 
     kcmreq_init(&req, KCM_OP_SET_DEFAULT_CACHE, cache);
-    ret = cache_call(context, cache, &req, FALSE);
+    ret = cache_call(context, cache, &req);
     kcmreq_free(&req);
     return ret;
 }
@@ -1097,7 +1074,6 @@ const krb5_cc_ops krb5_kcm_ops = {
     kcm_ptcursor_next,
     kcm_ptcursor_free,
     NULL, /* move */
-    kcm_lastchange,
     NULL, /* wasdefault */
     kcm_lock,
     kcm_unlock,

@@ -142,41 +142,6 @@ krb5_cccol_cursor_free(krb5_context context,
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_cccol_last_change_time(krb5_context context,
-                            krb5_timestamp *change_time)
-{
-    krb5_error_code ret = 0;
-    krb5_cccol_cursor c = NULL;
-    krb5_ccache ccache = NULL;
-    krb5_timestamp last_time = 0;
-    krb5_timestamp max_change_time = 0;
-
-    *change_time = 0;
-
-    ret = krb5_cccol_cursor_new(context, &c);
-
-    while (!ret) {
-        ret = krb5_cccol_cursor_next(context, c, &ccache);
-        if (ccache) {
-            ret = krb5_cc_last_change_time(context, ccache, &last_time);
-            if (!ret && ts_after(last_time, max_change_time)) {
-                max_change_time = last_time;
-            }
-            ret = 0;
-        }
-        else {
-            break;
-        }
-    }
-    *change_time = max_change_time;
-    return ret;
-}
-
-/*
- * krb5_cccol_lock and krb5_cccol_unlock are defined in ccbase.c
- */
-
-krb5_error_code KRB5_CALLCONV
 krb5_cc_cache_match(krb5_context context, krb5_principal client,
                     krb5_ccache *cache_out)
 {

@@ -2203,7 +2203,6 @@ const krb5_cc_ops krb5_lcc_ops = {
     krb5_lcc_ptcursor_next,
     krb5_lcc_ptcursor_free,
     NULL, /* move */
-    NULL, /* lastchange */
     NULL, /* wasdefault */
     NULL, /* lock */
     NULL, /* unlock */

@@ -84,9 +84,6 @@ static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_next
 static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_free
 (krb5_context, krb5_cc_ptcursor *);
 
-static krb5_error_code KRB5_CALLCONV krb5_mcc_last_change_time
-(krb5_context, krb5_ccache, krb5_timestamp *);
-
 static krb5_error_code KRB5_CALLCONV krb5_mcc_lock
 (krb5_context context, krb5_ccache id);
 
@@ -111,7 +108,6 @@ typedef struct _krb5_mcc_data {
     k5_cc_mutex lock;
     krb5_principal prin;
     krb5_mcc_link *link;
-    krb5_timestamp changetime;
     /* Time offsets for clock-skewed clients.  */
     krb5_int32 time_offset;
     krb5_int32 usec_offset;
@@ -132,8 +128,6 @@ struct krb5_mcc_ptcursor_data {
 
 k5_cc_mutex krb5int_mcc_mutex = K5_CC_MUTEX_PARTIAL_INITIALIZER;
 static struct k5_hashtab *mcc_hashtab = NULL;
-
-static void update_mcc_change_time(krb5_mcc_data *);
 
 /* Ensure that mcc_hashtab is initialized.  Call with krb5int_mcc_mutex
  * locked. */
@@ -192,7 +186,6 @@ krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
     empty_mcc_cache(context, d);
 
     ret = krb5_copy_principal(context, princ, &d->prin);
-    update_mcc_change_time(d);
 
     if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
         /* Store client time offsets in the cache */
@@ -469,12 +462,10 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
     }
     d->link = NULL;
     d->prin = NULL;
-    d->changetime = 0;
     d->time_offset = 0;
     d->usec_offset = 0;
     d->refcount = 2;
     d->generation = 0;
-    update_mcc_change_time(d);
 
     if (k5_hashtab_add(mcc_hashtab, d->name, strlen(d->name), d) != 0) {
         free(d->name);
@@ -656,7 +647,6 @@ krb5_mcc_store(krb5_context ctx, krb5_ccache id, krb5_creds *creds)
     k5_cc_mutex_lock(ctx, &mptr->lock);
     new_node->next = mptr->link;
     mptr->link = new_node;
-    update_mcc_change_time(mptr);
     k5_cc_mutex_unlock(ctx, &mptr->lock);
     return 0;
 cleanup:
@@ -726,33 +716,6 @@ krb5_mcc_ptcursor_free(
 }
 
 static krb5_error_code KRB5_CALLCONV
-krb5_mcc_last_change_time(
-    krb5_context context,
-    krb5_ccache id,
-    krb5_timestamp *change_time)
-{
-    krb5_mcc_data *data = (krb5_mcc_data *) id->data;
-
-    k5_cc_mutex_lock(context, &data->lock);
-    *change_time = data->changetime;
-    k5_cc_mutex_unlock(context, &data->lock);
-    return 0;
-}
-
-/*
-  Utility routine: called by krb5_mcc_* functions to keep
-  result of krb5_mcc_last_change_time up to date
-*/
-
-static void
-update_mcc_change_time(krb5_mcc_data *d)
-{
-    krb5_timestamp now_time = time(NULL);
-    d->changetime = ts_after(now_time, d->changetime) ?
-        now_time : ts_incr(d->changetime, 1);
-}
-
-static krb5_error_code KRB5_CALLCONV
 krb5_mcc_lock(krb5_context context, krb5_ccache id)
 {
     krb5_mcc_data *data = (krb5_mcc_data *) id->data;
@@ -792,7 +755,6 @@ const krb5_cc_ops krb5_mcc_ops = {
     krb5_mcc_ptcursor_next,
     krb5_mcc_ptcursor_free,
     NULL, /* move */
-    krb5_mcc_last_change_time,
     NULL, /* wasdefault */
     krb5_mcc_lock,
     krb5_mcc_unlock,

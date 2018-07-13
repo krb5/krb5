@@ -92,7 +92,6 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
     krb5_stdccv3_ptcursor_next,
     krb5_stdccv3_ptcursor_free,
     NULL, /* move */
-    krb5_stdccv3_last_change_time, /* lastchange */
     NULL, /* wasdefault */
     krb5_stdccv3_lock,
     krb5_stdccv3_unlock,
@@ -113,7 +112,6 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
     krb5_stdcc_remove,
     krb5_stdcc_set_flags,
     krb5_stdcc_get_flags,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -1001,29 +999,6 @@ krb5_stdccv3_ptcursor_free(
         *cursor = NULL;
     }
     return 0;
-}
-
-krb5_error_code KRB5_CALLCONV krb5_stdccv3_last_change_time
-(krb5_context context, krb5_ccache id,
- krb5_timestamp *change_time)
-{
-    krb5_error_code err = 0;
-    stdccCacheDataPtr ccapi_data = id->data;
-    cc_time_t ccapi_change_time = 0;
-
-    *change_time = 0;
-
-    if (!err) {
-        err = stdccv3_setup(context, ccapi_data);
-    }
-    if (!err) {
-        err = cc_ccache_get_change_time (ccapi_data->NamedCache, &ccapi_change_time);
-    }
-    if (!err) {
-        *change_time = ccapi_change_time;
-    }
-
-    return cc_err_xlate (err);
 }
 
 krb5_error_code KRB5_CALLCONV krb5_stdccv3_lock
