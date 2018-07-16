@@ -186,7 +186,6 @@ kadm5_ret_t kadm5_init(krb5_context context, char *client_name, char *pass,
     handle->context = context;
 
     initialize_ovk_error_table();
-/*     initialize_adb_error_table(); */
     initialize_ovku_error_table();
 
     handle->magic_number = KADM5_SERVER_HANDLE_MAGIC;
@@ -206,16 +205,6 @@ kadm5_ret_t kadm5_init(krb5_context context, char *client_name, char *pass,
      * params_in->mask.
      */
     memset(&params_local, 0, sizeof(params_local));
-
-#if 0 /* Now that we look at krb5.conf as well as kdc.conf, we can
-         expect to see admin_server being set sometimes.  */
-#define ILLEGAL_PARAMS (KADM5_CONFIG_ADMIN_SERVER)
-    if (params_in && (params_in->mask & ILLEGAL_PARAMS)) {
-        free_db_args(handle);
-        free(handle);
-        return KADM5_BAD_SERVER_PARAMS;
-    }
-#endif
 
     ret = kadm5_get_config_params(handle->context, 1, params_in,
                                   &handle->params);

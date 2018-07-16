@@ -151,10 +151,6 @@ ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
                     krb5_encrypt_block *eblock;
 
                     eblock = (krb5_encrypt_block *) nctx;
-#if 0
-                    if (eblock->priv && eblock->priv_size)
-                        free(eblock->priv);
-#endif
                     if (eblock->key)
                         krb5_free_keyblock(ser_ctx, eblock->key);
                     free(eblock);
@@ -450,60 +446,6 @@ ser_rcache_test(krb5_context kcontext, int verbose)
     return(kret);
 }
 
-#if 0
-/*
- * Serialize krb5_encrypt_block.
- */
-static krb5_error_code
-ser_eblock_test(kcontext, verbose)
-    krb5_context        kcontext;
-    int                 verbose;
-{
-    krb5_error_code     kret;
-    krb5_encrypt_block  eblock;
-    krb5_keyblock       ukeyblock;
-    krb5_octet          keydata[8];
-
-    memset(&eblock, 0, sizeof(krb5_encrypt_block));
-    eblock.magic = KV5M_ENCRYPT_BLOCK;
-    krb5_use_enctype(kcontext, &eblock, DEFAULT_KDC_ENCTYPE);
-    if (!(kret = ser_data(verbose, "> NULL eblock",
-                          (krb5_pointer) &eblock, KV5M_ENCRYPT_BLOCK))) {
-#if 0
-        eblock.priv = (krb5_pointer) stuff;
-        eblock.priv_size = 8;
-#endif
-        if (!(kret = ser_data(verbose, "> eblock with private data",
-                              (krb5_pointer) &eblock,
-                              KV5M_ENCRYPT_BLOCK))) {
-            memset(&ukeyblock, 0, sizeof(ukeyblock));
-            memset(keydata, 0, sizeof(keydata));
-            ukeyblock.enctype = ENCTYPE_DES_CBC_MD5;
-            ukeyblock.length = sizeof(keydata);
-            ukeyblock.contents = keydata;
-            keydata[0] = 0xde;
-            keydata[1] = 0xad;
-            keydata[2] = 0xbe;
-            keydata[3] = 0xef;
-            keydata[4] = 0xfe;
-            keydata[5] = 0xed;
-            keydata[6] = 0xf0;
-            keydata[7] = 0xd;
-            eblock.key = &ukeyblock;
-            if (!(kret = ser_data(verbose, "> eblock with private key",
-                                  (krb5_pointer) &eblock,
-                                  KV5M_ENCRYPT_BLOCK))) {
-                if (verbose)
-                    printf("* eblock test succeeded\n");
-            }
-        }
-    }
-    if (kret)
-        printf("* eblock test failed\n");
-    return(kret);
-}
-#endif
-
 /*
  * Serialize krb5_principal
  */
@@ -584,7 +526,7 @@ main(int argc, char **argv)
     do_ptest = 1;
     do_rtest = 1;
     do_stest = 1;
-    while ((option = getopt(argc, argv, "acekprsxvACEKPRSX")) != -1) {
+    while ((option = getopt(argc, argv, "acekprsxvACKPRSX")) != -1) {
         switch (option) {
         case 'a':
             do_atest = 0;
@@ -619,11 +561,6 @@ main(int argc, char **argv)
         case 'C':
             do_ctest = 1;
             break;
-#if 0
-        case 'E':
-            do_etest = 1;
-            break;
-#endif
         case 'K':
             do_ktest = 1;
             break;
@@ -641,7 +578,7 @@ main(int argc, char **argv)
             break;
         default:
             fprintf(stderr,
-                    "%s: usage is %s [-acekprsxvACEKPRSX]\n",
+                    "%s: usage is %s [-acekprsxvACKPRSX]\n",
                     argv[0], argv[0]);
             exit(1);
             break;
@@ -682,14 +619,6 @@ main(int argc, char **argv)
         if (kret)
             goto fail;
     }
-#if 0 /* code to be tested is currently disabled */
-    if (do_etest) {
-        ch_err = 'e';
-        kret = ser_eblock_test(kcontext, verbose);
-        if (kret)
-            goto fail;
-    }
-#endif
     if (do_ptest) {
         ch_err = 'p';
         kret = ser_princ_test(kcontext, verbose);

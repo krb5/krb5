@@ -888,16 +888,10 @@ fake_getaddrinfo (const char *name, const char *serv,
        If it's not set, don't accept such names.  */
     if (flags & AI_NUMERICHOST) {
         struct in_addr addr4;
-#if 0
-        ret = inet_aton (name, &addr4);
-        if (ret)
-            return EAI_NONAME;
-#else
         addr4.s_addr = inet_addr (name);
         if (addr4.s_addr == 0xffffffff || addr4.s_addr == -1)
             /* 255.255.255.255 or parse error, both bad */
             return EAI_NONAME;
-#endif
         ret = fai_add_entry (&res, &addr4, port, &template);
     } else {
         ret = fai_add_hosts_by_name (name, &template, port, flags,

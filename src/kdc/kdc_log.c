@@ -94,14 +94,6 @@ log_as_req(krb5_context context,
     krb5_db_audit_as_req(context, request,
                          local_addr->address, remote_addr->address,
                          client, server, authtime, errcode);
-#if 0
-    /* Sun (OpenSolaris) version would probably something like this.
-       The client and server names passed can be null, unlike in the
-       logging routines used above.  Note that a struct in_addr is
-       used, but the real address could be an IPv6 address.  */
-    audit_krb5kdc_as_req(some in_addr *, (in_port_t)remote_addr->port, 0,
-                         cname, sname, errcode);
-#endif
 }
 
 /*

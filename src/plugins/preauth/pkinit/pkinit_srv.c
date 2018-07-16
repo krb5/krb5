@@ -204,24 +204,6 @@ verify_client_san(krb5_context context,
         goto out;
     }
 
-    /* XXX Verify this is consistent with client side XXX */
-#if 0
-    retval = call_san_checking_plugins(context, plgctx, reqctx, princs,
-                                       upns, NULL, &plugin_decision, &ignore);
-    pkiDebug("%s: call_san_checking_plugins() returned retval %d\n",
-             __FUNCTION__);
-    if (retval) {
-        retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
-        goto cleanup;
-    }
-    pkiDebug("%s: call_san_checking_plugins() returned decision %d\n",
-             __FUNCTION__, plugin_decision);
-    if (plugin_decision != NO_DECISION) {
-        retval = plugin_decision;
-        goto out;
-    }
-#endif
-
 #ifdef DEBUG_SAN_INFO
     krb5_unparse_name(context, client, &client_string);
 #endif

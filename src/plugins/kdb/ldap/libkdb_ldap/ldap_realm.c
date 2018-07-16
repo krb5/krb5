@@ -777,9 +777,6 @@ krb5_ldap_read_realm_params(krb5_context context, char *lrealm,
     ent = ldap_first_entry (ld, result);
     if (ent == NULL) {
         ldap_get_option (ld, LDAP_OPT_ERROR_NUMBER, (void *) &st);
-#if 0
-        st = translate_ldap_error(st, OP_SEARCH);
-#endif
         goto cleanup;
     }
 

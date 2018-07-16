@@ -448,11 +448,6 @@ int main (int argc, char **argv)
 {
     whoami = argv[0];
     test_nfold ();
-#if 0
-    test_mit_des_s2k ();
-    test_des3_s2k ();
-    test_dr_dk ();
-#endif
     test_pbkdf2();
     return 0;
 }

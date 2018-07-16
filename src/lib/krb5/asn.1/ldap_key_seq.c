@@ -96,9 +96,6 @@ no_salt(void *p)
 DEFOPTIONALTYPE(key_data_salt_if_present, is_salt_present, no_salt, krbsalt);
 DEFCTAGGEDTYPE(key_data_0, 0, key_data_salt_if_present);
 DEFCTAGGEDTYPE(key_data_1, 1, encryptionkey);
-#if 0 /* We don't support this field currently.  */
-DEFCTAGGEDTYPE(key_data_2, 2, s2kparams),
-#endif
 static const struct atype_info *key_data_fields[] = {
     &k5_atype_key_data_0, &k5_atype_key_data_1
 };

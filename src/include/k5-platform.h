@@ -526,15 +526,11 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 # endif
 #elif TARGET_OS_MAC
 # include <architecture/byte_order.h>
-# if 0 /* This causes compiler warnings.  */
-#  define SWAP16                OSSwapInt16
-# else
-#  define SWAP16                k5_swap16
+# define SWAP16                k5_swap16
 static inline unsigned int k5_swap16 (unsigned int x) {
     x &= 0xffff;
     return (x >> 8) | ((x & 0xff) << 8);
 }
-# endif
 # define SWAP32                 OSSwapInt32
 # define SWAP64                 OSSwapInt64
 #elif defined(HAVE_SYS_BSWAP_H)
@@ -848,25 +844,6 @@ k5_ntohll (uint64_t val)
    business.  Probably most callers won't check the return status
    anyways.  */
 
-#if 0
-static inline void
-set_cloexec_fd(int fd)
-{
-#if defined(F_SETFD)
-# ifdef FD_CLOEXEC
-    (void)fcntl(fd, F_SETFD, FD_CLOEXEC);
-# else
-    (void)fcntl(fd, F_SETFD, 1);
-# endif
-#endif
-}
-
-static inline void
-set_cloexec_file(FILE *f)
-{
-    return set_cloexec_fd(fileno(f));
-}
-#else
 /* Macros make the Sun compiler happier, and all variants of this do a
    single evaluation of the argument, and fcntl and fileno should
    produce reasonable error messages on type mismatches, on any system
@@ -881,9 +858,6 @@ set_cloexec_file(FILE *f)
 # define set_cloexec_fd(FD)     ((void)(FD))
 #endif
 #define set_cloexec_file(F)     set_cloexec_fd(fileno(F))
-#endif
-
-
 
 /* Since the original ANSI C spec left it undefined whether or
    how you could copy around a va_list, C 99 added va_copy.

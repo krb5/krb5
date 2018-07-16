@@ -233,13 +233,6 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
     get_integer(ctx, KRB5_CONF_CLOCKSKEW, DEFAULT_CLOCKSKEW, &tmp);
     ctx->clockskew = tmp;
 
-#if 0
-    /* Default ticket lifetime is currently not supported */
-    profile_get_integer(ctx->profile, KRB5_CONF_LIBDEFAULTS, "tkt_lifetime",
-                        0, 10 * 60 * 60, &tmp);
-    ctx->tkt_lifetime = tmp;
-#endif
-
     /* DCE 1.1 and below only support CKSUMTYPE_RSA_MD4 (2)  */
     /* DCE add kdc_req_checksum_type = 2 to krb5.conf */
     get_integer(ctx, KRB5_CONF_KDC_REQ_CHECKSUM_TYPE, CKSUMTYPE_RSA_MD5,

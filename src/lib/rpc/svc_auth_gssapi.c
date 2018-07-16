@@ -869,10 +869,6 @@ done:
      L_PRINTF(2, ("destroy_client: client %d destroyed\n", client_data->key));
 
      free(client_data);
-
-#if 0 /*ifdef PURIFY*/
-     purify_watch_n(client_data, sizeof(*client_data), "rw");
-#endif
 }
 
 static void dump_db(char *msg)

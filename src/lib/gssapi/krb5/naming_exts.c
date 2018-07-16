@@ -664,13 +664,3 @@ cleanup:
 
     return kg_map_name_error(minor_status, code);
 }
-
-#if 0
-OM_uint32
-krb5_gss_display_name_ext(OM_uint32 *minor_status,
-                          gss_name_t name,
-                          gss_OID display_as_name_type,
-                          gss_buffer_t display_name)
-{
-}
-#endif

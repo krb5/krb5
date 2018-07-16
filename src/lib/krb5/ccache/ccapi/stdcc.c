@@ -1300,14 +1300,6 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
         return cc_err_xlate(err);
     }
 
-#if 0
-    /*
-     * Some implementations don't set the principal name
-     * correctly, so we force set it to the correct value.
-     */
-    err = cc_set_principal(gCntrlBlock, ccapi_data->NamedCache,
-                           CC_CRED_V5, cName);
-#endif
     krb5_free_unparsed_name(context, cName);
     cache_changed();
 
@@ -1432,54 +1424,6 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_next_cred
  *
  * - try to find a matching credential in the cache
  */
-#if 0
-krb5_error_code KRB5_CALLCONV krb5_stdcc_retrieve
-(krb5_context context,
- krb5_ccache id,
- krb5_flags whichfields,
- krb5_creds *mcreds,
- krb5_creds *creds )
-{
-    krb5_error_code retval;
-    krb5_cc_cursor curs = NULL;
-    krb5_creds *fetchcreds;
-
-    if ((retval = stdcc_setup(context, NULL)))
-        return retval;
-
-    fetchcreds = (krb5_creds *)malloc(sizeof(krb5_creds));
-    if (fetchcreds == NULL) return KRB5_CC_NOMEM;
-
-    /* we're going to use the iterators */
-    krb5_stdcc_start_seq_get(context, id, &curs);
-
-    while (!krb5_stdcc_next_cred(context, id, &curs, fetchcreds)) {
-        /*
-         * look at each credential for a match
-         * use this match routine since it takes the
-         * whichfields and the API doesn't
-         */
-        if (stdccCredsMatch(context, fetchcreds,
-                            mcreds, whichfields)) {
-            /* we found it, copy and exit */
-            *creds = *fetchcreds;
-            krb5_stdcc_end_seq_get(context, id, &curs);
-            return 0;
-        }
-        /* free copy allocated by next_cred */
-        krb5_free_cred_contents(context, fetchcreds);
-    }
-
-    /* no luck, end get and exit */
-    krb5_stdcc_end_seq_get(context, id, &curs);
-
-    /* we're not using this anymore so we should get rid of it! */
-    free(fetchcreds);
-
-    return KRB5_CC_NOTFOUND;
-}
-#else
-
 krb5_error_code KRB5_CALLCONV
 krb5_stdcc_retrieve(context, id, whichfields, mcreds, creds)
     krb5_context context;
@@ -1491,8 +1435,6 @@ krb5_stdcc_retrieve(context, id, whichfields, mcreds, creds)
     return k5_cc_retrieve_cred_default(context, id, whichfields, mcreds,
                                        creds);
 }
-
-#endif
 
 /*
  *  end seq

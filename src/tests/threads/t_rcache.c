@@ -106,7 +106,6 @@ static void try_one (struct tinfo *t)
 static void *run_a_loop (void *x)
 {
     struct tinfo t = { 0 };
-/*    int chr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ_"[(*(int*)x) % 27]; */
 
     t.now = time(0);
     t.idx = *(int *)x;
@@ -117,12 +116,7 @@ static void *run_a_loop (void *x)
         t.now = time(0);
         try_one(&t);
         t.total++;
-#if 0
-        printf("%c", chr);
-        fflush(stdout);
-#endif
     }
-/*    printf("thread %u total %u\n", (unsigned) ((int *)x-ip), t.total);*/
     *(int*)x = t.total;
     return 0;
 }

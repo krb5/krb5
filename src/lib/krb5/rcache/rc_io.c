@@ -117,10 +117,6 @@ krb5_rc_io_mkstemp(krb5_context context, krb5_rc_iostuff *d, char *dir)
     return 0;
 }
 
-#if 0
-static krb5_error_code rc_map_errno (int) __attribute__((cold));
-#endif
-
 static krb5_error_code
 rc_map_errno (krb5_context context, int e, const char *fn,
               const char *operation)

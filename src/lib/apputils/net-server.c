@@ -1060,17 +1060,6 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
         return;
     }
 
-#if 0
-    if (state->daddr_len > 0) {
-        char addrbuf[100];
-        if (getnameinfo(ss2sa(&state->daddr), state->daddr_len,
-                        addrbuf, sizeof(addrbuf),
-                        0, 0, NI_NUMERICHOST))
-            strlcpy(addrbuf, "?", sizeof(addrbuf));
-        com_err(conn->prog, 0, _("pktinfo says local addr is %s"), addrbuf);
-    }
-#endif
-
     if (state->daddr_len == 0 && conn->type == CONN_UDP) {
         /*
          * An address couldn't be obtained, so the PKTINFO option probably
@@ -1116,11 +1105,6 @@ kill_lru_tcp_or_rpc_connection(void *handle, verto_ev *newev)
             continue;
         if (c->type != CONN_TCP && c->type != CONN_RPC)
             continue;
-#if 0
-        krb5_klog_syslog(LOG_INFO, "fd %d started at %ld",
-                         verto_get_fd(oldest_ev),
-                         c->start_time);
-#endif
         if (oldest_c == NULL
             || oldest_c->start_time > c->start_time) {
             oldest_ev = ev;
@@ -1186,10 +1170,6 @@ accept_tcp_connection(verto_ctx *ctx, verto_ev *ev)
             strlcpy(p, tmpbuf, end - p);
         }
     }
-#if 0
-    krb5_klog_syslog(LOG_INFO, "accepted TCP connection on socket %d from %s",
-                     s, newconn->addrbuf);
-#endif
 
     newconn->addr_s = addr_s;
     newconn->addrlen = addrlen;
@@ -1481,9 +1461,6 @@ accept_rpc_connection(verto_ctx *ctx, verto_ev *ev)
         newconn = verto_get_private(newev);
 
         set_cloexec_fd(s);
-#if 0
-        setnbio(s), setnolinger(s), setkeepalive(s);
-#endif
 
         if (getpeername(s, addr, &addrlen) ||
             getnameinfo(addr, addrlen,
@@ -1503,10 +1480,6 @@ accept_rpc_connection(verto_ctx *ctx, verto_ev *ev)
                 strlcpy(p, tmpbuf, end - p);
             }
         }
-#if 0
-        krb5_klog_syslog(LOG_INFO, _("accepted RPC connection on socket %d "
-                                     "from %s"), s, newconn->addrbuf);
-#endif
 
         newconn->addr_s = addr_s;
         newconn->addrlen = addrlen;

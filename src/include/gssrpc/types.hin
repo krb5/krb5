@@ -116,13 +116,6 @@ typedef int32_t		rpc_inline_t;
 #define mem_alloc(bsize)	malloc(bsize)
 #define mem_free(ptr, bsize)	free(ptr)
 
-#if 0
-#include <netdb.h> /* XXX This should not have to be here.
-		    * I got sick of seeing the warnings for MAXHOSTNAMELEN
-		    * and the two values were different. -- shanzer
-		    */
-#endif
-
 #ifndef INADDR_LOOPBACK
 #define       INADDR_LOOPBACK         (uint32_t)0x7F000001
 #endif

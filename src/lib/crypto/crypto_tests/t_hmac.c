@@ -46,17 +46,6 @@ static void keyToData (krb5_keyblock *k, krb5_data *d) {
     d->data = (char *) k->contents;
 }
 
-#if 0
-static void check_error (int r, int line) {
-    if (r != 0) {
-        fprintf (stderr, "%s:%d: %s\n", __FILE__, line,
-                 error_message (r));
-        exit (1);
-    }
-}
-#define CHECK check_error(r, __LINE__)
-#endif
-
 static void printd (const char *descr, krb5_data *d) {
     unsigned int i, j;
     const int r = 16;

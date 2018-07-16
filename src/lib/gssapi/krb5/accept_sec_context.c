@@ -654,17 +654,6 @@ kg_accept_krb5(minor_status, context_handle,
 
     krb5_auth_con_getauthenticator(context, auth_context, &authdat);
 
-#if 0
-    /* make sure the necessary parts of the authdat are present */
-
-    if ((authdat->authenticator->subkey == NULL) ||
-        (authdat->ticket->enc_part2 == NULL)) {
-        code = KG_NO_SUBKEY;
-        major_status = GSS_S_FAILURE;
-        goto fail;
-    }
-#endif
-
     if (authdat->checksum == NULL) {
         /*
          * Some SMB client implementations use handcrafted GSSAPI code that

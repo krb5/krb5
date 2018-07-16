@@ -267,19 +267,11 @@ Leash_changepwd_v5(
     if ( !pkrb5_init_context )
         goto cleanup;
 
-   if (rc = pkrb5_init_context(&context)) {
-#if 0
-       com_err(argv[0], ret, "initializing kerberos library");
-#endif
+   if (rc = pkrb5_init_context(&context))
        goto cleanup;
-   }
 
-   if (rc = pkrb5_parse_name(context, principal, &princ)) {
-#if 0
-       com_err(argv[0], ret, "parsing client name");
-#endif
+   if (rc = pkrb5_parse_name(context, principal, &princ))
        goto cleanup;
-   }
 
    pkrb5_get_init_creds_opt_init(&opts);
    pkrb5_get_init_creds_opt_set_tkt_life(&opts, 5*60);
@@ -293,29 +285,13 @@ Leash_changepwd_v5(
 
 
    if (rc = pkrb5_get_init_creds_password(context, &creds, princ, password,
-                                          0, 0, 0, "kadmin/changepw", &opts)) {
-       if (rc == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
-#if 0
-           com_err(argv[0], 0,
-                   "Password incorrect while getting initial ticket");
-#endif
-       }
-       else {
-#if 0
-           com_err(argv[0], ret, "getting initial ticket");
-#endif
-       }
+                                          0, 0, 0, "kadmin/changepw", &opts))
        goto cleanup;
-   }
 
    if (rc = pkrb5_change_password(context, &creds, newpassword,
                                   &result_code, &result_code_string,
-                                  &result_string)) {
-#if 0
-       com_err(argv[0], ret, "changing password");
-#endif
+                                  &result_string))
        goto cleanup;
-   }
 
    if (result_code) {
        int len = result_code_string.length +

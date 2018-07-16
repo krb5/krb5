@@ -131,17 +131,6 @@ check_reply_server(krb5_context context, krb5_flags kdcoptions,
         /* Canonicalization not requested, and not a TGS referral. */
         return KRB5_KDCREP_MODIFIED;
     }
-#if 0
-    /*
-     * Is this check needed?  find_nxt_kdc() in gc_frm_kdc.c already
-     * effectively checks this.
-     */
-    if (krb5_realm_compare(context, in_cred->client, in_cred->server) &&
-        data_eq(*in_cred->server->data[1], *in_cred->client->realm)) {
-        /* Attempted to rewrite local TGS. */
-        return KRB5_KDCREP_MODIFIED;
-    }
-#endif
     return 0;
 }
 

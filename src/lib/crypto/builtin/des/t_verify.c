@@ -334,30 +334,6 @@ main(argc,argv)
     exit(0);
 }
 
-#if 0
-void
-flip(array)
-    char *array;
-{
-    int old,new,i,j;
-    /* flips the bit order within each byte from 0 lsb to 0 msb */
-    for (i = 0; i<=7; i++) {
-        old = *array;
-        new = 0;
-        for (j = 0; j<=7; j++) {
-            if (old & 01)
-                new = new | 01;
-            if (j < 7) {
-                old = old >> 1;
-                new = new << 1;
-            }
-        }
-        *array = new;
-        array++;
-    }
-}
-#endif
-
 static void
 do_encrypt(in,out)
     unsigned char *in;

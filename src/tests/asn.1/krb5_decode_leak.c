@@ -633,18 +633,6 @@ main(int argc, char **argv)
                   krb5_free_ad_kdcissued);
         ktest_empty_ad_kdcissued(&kdci);
     }
-#if 0
-    /****************************************************************/
-    /* encode_krb5_ad_signedpath_data */
-    {
-        krb5_ad_signedpath_data spd, *tmp;
-        ktest_make_sample_ad_signedpath_data(&spd);
-        leak_test(spd, encode_krb5_ad_signedpath_data,
-                  decode_krb5_ad_signedpath_data,
-                  NULL);
-        ktest_empty_ad_signedpath_data(&spd);
-    }
-#endif
     /****************************************************************/
     /* encode_krb5_ad_signedpath */
     {

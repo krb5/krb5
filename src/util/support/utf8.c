@@ -404,28 +404,6 @@ int krb5int_utf8_isalnum(const char * p)
 
     return KRB5_ALNUM(c);
 }
-
-#if 0
-int krb5int_utf8_islower(const char * p)
-{
-    unsigned c = * (const unsigned char *) p;
-
-    if (!KRB5_ASCII(c))
-        return 0;
-
-    return KRB5_LOWER(c);
-}
-
-int krb5int_utf8_isupper(const char * p)
-{
-    unsigned c = * (const unsigned char *) p;
-
-    if (!KRB5_ASCII(c))
-        return 0;
-
-    return KRB5_UPPER(c);
-}
-#endif
 #endif
 
 

@@ -712,19 +712,6 @@ const char *missing_required_preauth(krb5_db_entry *client,
                                      krb5_db_entry *server,
                                      krb5_enc_tkt_part *enc_tkt_reply)
 {
-#if 0
-    /*
-     * If this is the pwchange service, and the pre-auth bit is set,
-     * allow it even if the HW preauth would normally be required.
-     *
-     * Sandia national labs wanted this for some strange reason... we
-     * leave it disabled normally.
-     */
-    if (isflagset(server->attributes, KRB5_KDB_PWCHANGE_SERVICE) &&
-        isflagset(enc_tkt_reply->flags, TKT_FLG_PRE_AUTH))
-        return 0;
-#endif
-
 #ifdef DEBUG
     krb5_klog_syslog (
         LOG_DEBUG,

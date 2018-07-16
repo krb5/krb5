@@ -572,17 +572,6 @@ check_all_certs(krb5_context context,
      */
     for (i = 0, md = matchdata[i]; md != NULL; md = matchdata[++i]) {
         pkiDebug("%s: subject: '%s'\n", __FUNCTION__, md->subject_dn);
-#if 0
-        pkiDebug("%s: issuer:  '%s'\n", __FUNCTION__, md->subject_dn);
-        for (j = 0; md->sans != NULL && md->sans[j] != NULL; j++) {
-            char *san_string;
-            krb5_unparse_name(context, md->sans[j], &san_string);
-            pkiDebug("%s: PKINIT san: '%s'\n", __FUNCTION__, san_string);
-            krb5_free_unparsed_name(context, san_string);
-        }
-        for (j = 0; md->upns != NULL && md->upns[j] != NULL; j++)
-            pkiDebug("%s: UPN san: '%s'\n", __FUNCTION__, md->upns[j]);
-#endif
         certs_checked++;
         for (rc = rs->crs; rc != NULL; rc = rc->next) {
             comp_match = component_match(context, rc, md);

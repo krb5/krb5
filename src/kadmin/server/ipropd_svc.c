@@ -621,32 +621,3 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
     }
 
 }
-
-#if 0
-/*
- * Get the host base service name for the kiprop principal. Returns
- * KADM5_OK on success. Caller must free the storage allocated for
- * host_service_name.
- */
-kadm5_ret_t
-kiprop_get_adm_host_srv_name(krb5_context context,
-			     const char *realm,
-			     char **host_service_name)
-{
-    kadm5_ret_t ret;
-    char *name;
-    char *host;
-
-    if (ret = kadm5_get_master(context, realm, &host))
-	return (ret);
-
-    if (asprintf(&name, "%s@%s", KIPROP_SVC_NAME, host) < 0) {
-	free(host);
-	return (ENOMEM);
-    }
-    free(host);
-    *host_service_name = name;
-
-    return (KADM5_OK);
-}
-#endif

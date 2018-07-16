@@ -1341,11 +1341,6 @@ AuthenticateProc(
         CSetDlgItemText(hDialog, IDC_EDIT_PRINCIPAL, principal);
         CSetDlgItemText(hDialog, IDC_EDIT_PASSWORD, "");
 
-#if 0  /* 20030619 - mjv wishes to return to the default character */
-        /* echo spaces */
-	CSendDlgItemMessage(hDialog, IDC_EDIT_PASSWORD, EM_SETPASSWORDCHAR, 32, 0);
-#endif
-
 	/* Set Lifetime Slider
 	*   min value = 5
 	*   max value = 1440
@@ -1732,12 +1727,6 @@ NewPasswordProc(
         if (hEditCtrl)
             pAutoComplete = Leash_pec_create(hEditCtrl);
 
-#if 0  /* 20030619 - mjv wishes to return to the default character */
-	/* echo spaces */
-	CSendDlgItemMessage(hDialog, IDC_EDIT_PASSWORD, EM_SETPASSWORDCHAR, 32, 0);
-	CSendDlgItemMessage(hDialog, IDC_EDIT_PASSWORD2, EM_SETPASSWORDCHAR, 32, 0);
-	CSendDlgItemMessage(hDialog, IDC_EDIT_PASSWORD3, EM_SETPASSWORDCHAR, 32, 0);
-#endif
         /* setup text of stuff. */
 
         if (Position.x > 0 && Position.y > 0 &&

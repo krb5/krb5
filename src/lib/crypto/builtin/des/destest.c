@@ -67,9 +67,6 @@ main(argc, argv)
     char *argv[];
 {
     char block1[17], block2[17], block3[17];
-#if 0
-    mit_des_cblock key, input, output, output2;
-#else
     /* Force tests of unaligned accesses.  */
     union { unsigned char c[8*4+3]; long l; } u;
     unsigned char *ioblocks = u.c;
@@ -77,7 +74,6 @@ main(argc, argv)
     unsigned char *output = ioblocks+10;
     unsigned char *output2 = ioblocks+19;
     unsigned char *key = ioblocks+27;
-#endif
     mit_des_key_schedule sched;
     int num = 0;
     int retval;

@@ -32,26 +32,6 @@ set tgt_support_desmd5 0
 # request a des-cbc-md4 session key.  Since only des-cbc-crc is in the
 # KDC's permitted_enctypes list, the TGT will be unusable.
 
-# KLUDGE for tracking down leaking ptys
-if 0 {
-    rename spawn oldspawn
-    rename wait oldwait
-    proc spawn { args } {
-	upvar 1 spawn_id spawn_id
-	verbose "spawn: args=$args"
-	set pid [eval oldspawn $args]
-	verbose "spawn: pid=$pid spawn_id=$spawn_id"
-	return $pid
-    }
-    proc wait { args } {
-	upvar 1 spawn_id spawn_id
-	verbose "wait: args=$args"
-	set ret [eval oldwait $args]
-	verbose "wait: $ret"
-	return $ret
-    }
-}
-
 if { [string length $VALGRIND] } {
     rename spawn valgrind_aux_spawn
     proc spawn { args } {

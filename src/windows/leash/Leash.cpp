@@ -39,8 +39,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-extern "C" int VScheckVersion(HWND hWnd, HANDLE hThisInstance);
-
 TicketInfoWrapper ticketinfo;
 
 HWND CLeashApp::m_hProgram = 0;
@@ -462,8 +460,6 @@ BOOL CLeashApp::InitInstance()
             IpAddrChangeMonitorInit(m_pMainWnd->m_hWnd);
         }
     }
-
-    VScheckVersion(m_pMainWnd->m_hWnd, AfxGetInstanceHandle());
 
     // The one and only window has been initialized, so show and update it.
     m_pMainWnd->SetWindowText("MIT Kerberos");

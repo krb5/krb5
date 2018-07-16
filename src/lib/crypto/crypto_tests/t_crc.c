@@ -107,41 +107,9 @@ struct crc_trial trials[] = {
 
 #define NTRIALS (sizeof(trials) / sizeof(trials[0]))
 
-#if 0
-static void
-timetest(unsigned int nblk, unsigned int blksiz)
-{
-    char *block;
-    unsigned int i;
-    struct tms before, after;
-    unsigned long cksum;
 
-    block = malloc(blksiz * nblk);
-    if (block == NULL)
-        exit(1);
-    for (i = 0; i < blksiz * nblk; i++)
-        block[i] = i % 256;
-    times(&before);
-    for (i = 0; i < nblk; i++) {
-        cksum = 0;
-        mit_crc32(block + i * blksiz, blksiz, &cksum);
-    }
-
-    times(&after);
-    printf("shift-8 implementation, %d blocks of %d bytes:\n",
-           nblk, blksiz);
-    printf("\tu=%ld s=%ld cu=%ld cs=%ld\n",
-           (long)(after.tms_utime - before.tms_utime),
-           (long)(after.tms_stime - before.tms_stime),
-           (long)(after.tms_cutime - before.tms_cutime),
-           (long)(after.tms_cstime - before.tms_cstime));
-
-    free(block);
-}
-#endif
-
-static void
-verify(void)
+int
+main(void)
 {
     unsigned int i;
     struct crc_trial trial;
@@ -176,14 +144,5 @@ verify(void)
                (trial.sum == cksum) ? "OK" : "***BAD***",
                typestr, trial.data, cksum);
     }
-}
-
-int
-main(void)
-{
-#if 0
-    timetest(64*1024, 1024);
-#endif
-    verify();
     exit(0);
 }

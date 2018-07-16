@@ -531,17 +531,6 @@ protected:
             IAutoCompleteDropDown* pacdd = NULL;
             hRes = pac->QueryInterface(IID_IAutoCompleteDropDown, (LPVOID*)&pacdd);
             pac->Release();
-
-        // @TODO: auto-suggest; other advanced options?
-#if 0
-            IAutoComplete2 *pac2;
-
-            if (SUCCEEDED(pac->QueryInterface(IID_IAutoComplete2,
-                                              (LPVOID*)&pac2))) {
-                pac2->SetOptions(ACO_AUTOSUGGEST);
-                pac2->Release();
-            }
-#endif
             m_acdd = pacdd;
         }
     }

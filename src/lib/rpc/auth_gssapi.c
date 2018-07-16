@@ -744,14 +744,6 @@ skip_call:
      }
 
      free(AUTH_PRIVATE(auth)->client_handle.value);
-
-#if 0
-     PRINTF(("gssapi_destroy: calling GSSAPI_EXIT\n"));
-     AUTH_PRIVATE(auth)->established = FALSE;
-     callstat = clnt_call(AUTH_PRIVATE(auth)->clnt, AUTH_GSSAPI_EXIT,
-			  xdr_void, NULL, xdr_void, NULL, timeout);
-#endif
-
      free(auth->ah_private);
      free(auth);
      PRINTF(("gssapi_destroy: done\n"));

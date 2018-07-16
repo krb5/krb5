@@ -391,9 +391,6 @@ build_mechSet(void)
 		g_mechSet.count = count;
 	}
 
-#if 0
-	g_mechSetTime = fileInfo.st_mtime;
-#endif
 	k5_mutex_unlock(&g_mechSetLock);
 	k5_mutex_unlock(&g_mechListLock);
 
@@ -916,10 +913,6 @@ loadInterMech(gss_mech_info minfo)
 
 	if (krb5int_open_plugin(minfo->uLibName, &dl, &errinfo) != 0 ||
 	    errinfo.code != 0) {
-#if 0
-		(void) syslog(LOG_INFO, "libgss dlopen(%s): %s\n",
-				aMech->uLibName, dlerror());
-#endif
 		return;
 	}
 
@@ -959,12 +952,6 @@ loadInterMech(gss_mech_info minfo)
 	dl = NULL;
 
 cleanup:
-#if 0
-	if (aMech->mech == NULL) {
-		(void) syslog(LOG_INFO, "unable to initialize mechanism"
-				" library [%s]\n", aMech->uLibName);
-	}
-#endif
 	if (dl != NULL)
 		krb5int_close_plugin(dl);
 	k5_clear_error(&errinfo);
@@ -1161,10 +1148,6 @@ gssint_get_mechanism(gss_const_OID oid)
 
 	if (krb5int_open_plugin(aMech->uLibName, &dl, &errinfo) != 0 ||
 	    errinfo.code != 0) {
-#if 0
-		(void) syslog(LOG_INFO, "libgss dlopen(%s): %s\n",
-				aMech->uLibName, dlerror());
-#endif
 		k5_mutex_unlock(&g_mechListLock);
 		return ((gss_mechanism)NULL);
 	}
@@ -1180,10 +1163,6 @@ gssint_get_mechanism(gss_const_OID oid)
 	}
 	if (aMech->mech == NULL) {
 		(void) krb5int_close_plugin(dl);
-#if 0
-		(void) syslog(LOG_INFO, "unable to initialize mechanism"
-				" library [%s]\n", aMech->uLibName);
-#endif
 		k5_mutex_unlock(&g_mechListLock);
 		return ((gss_mechanism)NULL);
 	}
@@ -1503,10 +1482,6 @@ addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib,
 	oidBuf.length = strlen(oid);
 	if (generic_gss_str_to_oid(&minor, &oidBuf, &mechOid)
 		!= GSS_S_COMPLETE) {
-#if 0
-		(void) syslog(LOG_INFO, "invalid mechanism oid"
-				" [%s] in configuration file", oid);
-#endif
 		return;
 	}
 

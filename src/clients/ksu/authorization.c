@@ -123,23 +123,6 @@ krb5_error_code krb5_authorization(context, principal, luser,
                 "In krb5_authorization: if auth files exist -> can access\n");
     }
 
-#if 0
-    if (cmd){
-        if(k5users_flag){
-            return 0; /* if  kusers does not exist -> done */
-        }else{
-            if(retval = k5users_lookup(users_fp,princname,
-                                       cmd,&retbool,out_fcmd)){
-                auth_cleanup(users_fp, login_fp, princname);
-                return retval;
-            }else{
-                *ok =retbool;
-                return retval;
-            }
-        }
-    }
-#endif
-
     /* if either file exists,
        first see if the principal is in the login in file,
        if it's not there check the k5users file */

@@ -441,16 +441,3 @@ main(void)
     return 0;
 
 }
-
-
-#if 0
-/* remove and add are functions, so that they can return NOWRITE
-   if not a writable keytab */
-krb5_error_code KRB5_CALLCONV krb5_kt_remove_entry
-(krb5_context,
- krb5_keytab,
- krb5_keytab_entry * );
-
-
-
-#endif

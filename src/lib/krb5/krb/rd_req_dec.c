@@ -441,30 +441,6 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
 #endif /* LEAN_CLIENT */
 }
 
-#if 0
-#include <syslog.h>
-static void
-debug_log_authz_data(const char *which, krb5_authdata **a)
-{
-    if (a) {
-        syslog(LOG_ERR|LOG_DAEMON, "%s authz data:", which);
-        while (*a) {
-            syslog(LOG_ERR|LOG_DAEMON, "  ad_type:%d length:%d '%.*s'",
-                   (*a)->ad_type, (*a)->length, (*a)->length,
-                   (char *) (*a)->contents);
-            a++;
-        }
-        syslog(LOG_ERR|LOG_DAEMON, "  [end]");
-    } else
-        syslog(LOG_ERR|LOG_DAEMON, "no %s authz data", which);
-}
-#else
-static void
-debug_log_authz_data(const char *which, krb5_authdata **a)
-{
-}
-#endif
-
 static krb5_error_code
 rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
                    const krb5_ap_req *req, krb5_const_principal server,
@@ -759,8 +735,6 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
                                     &((*auth_context)->key))))
         goto cleanup;
 
-    debug_log_authz_data("ticket", req->ticket->enc_part2->authorization_data);
-
     /*
      * If not AP_OPTS_MUTUAL_REQUIRED then and sequence numbers are used
      * then the default sequence number is the one's complement of the
@@ -855,10 +829,9 @@ decrypt_authenticator(krb5_context context, const krb5_ap_req *request,
         free(scratch.data);}
 
     /*  now decode the decrypted stuff */
-    if (!(retval = decode_krb5_authenticator(&scratch, &local_auth))) {
+    if (!(retval = decode_krb5_authenticator(&scratch, &local_auth)))
         *authpp = local_auth;
-        debug_log_authz_data("authenticator", local_auth->authorization_data);
-    }
+
     clean_scratch();
     return retval;
 }

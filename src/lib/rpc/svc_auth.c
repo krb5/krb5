@@ -59,9 +59,6 @@ static struct svcauthsw_type {
 } svcauthsw[] = {
      {AUTH_GSSAPI, gssrpc__svcauth_gssapi},	/* AUTH_GSSAPI */
      {AUTH_NONE, gssrpc__svcauth_none},		/* AUTH_NONE */
-#if 0
-     {AUTH_GSSAPI_COMPAT, gssrpc__svcauth_gssapi}, /* AUTH_GSSAPI_COMPAT */
-#endif
      {AUTH_UNIX, gssrpc__svcauth_unix},		/* AUTH_UNIX */
      {AUTH_SHORT, gssrpc__svcauth_short},	/* AUTH_SHORT */
      {RPCSEC_GSS, gssrpc__svcauth_gss}		/* RPCSEC_GSS */

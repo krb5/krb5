@@ -85,24 +85,10 @@ DECL_FUNC_PTR(cc_create);
 DECL_FUNC_PTR(cc_open);
 DECL_FUNC_PTR(cc_close);
 DECL_FUNC_PTR(cc_destroy);
-#if 0 /* Not used */
-#ifdef CC_API_VER2
-DECL_FUNC_PTR(cc_seq_fetch_NCs_begin);
-DECL_FUNC_PTR(cc_seq_fetch_NCs_next);
-DECL_FUNC_PTR(cc_seq_fetch_NCs_end);
-#else
-DECL_FUNC_PTR(cc_seq_fetch_NCs);
-#endif
-DECL_FUNC_PTR(cc_get_NC_info);
-DECL_FUNC_PTR(cc_free_NC_info);
-#endif
 DECL_FUNC_PTR(cc_get_name);
 DECL_FUNC_PTR(cc_set_principal);
 DECL_FUNC_PTR(cc_get_principal);
 DECL_FUNC_PTR(cc_get_cred_version);
-#if 0 /* Not used */
-DECL_FUNC_PTR(cc_lock_request);
-#endif
 DECL_FUNC_PTR(cc_store);
 DECL_FUNC_PTR(cc_remove_cred);
 #ifdef CC_API_VER2
@@ -127,18 +113,10 @@ FUNC_INFO krbcc_fi[] = {
     MAKE_FUNC_INFO(cc_open),
     MAKE_FUNC_INFO(cc_close),
     MAKE_FUNC_INFO(cc_destroy),
-#if 0 /* Not used */
-    MAKE_FUNC_INFO(cc_seq_fetch_NCs),
-    MAKE_FUNC_INFO(cc_get_NC_info),
-    MAKE_FUNC_INFO(cc_free_NC_info),
-#endif
     MAKE_FUNC_INFO(cc_get_name),
     MAKE_FUNC_INFO(cc_set_principal),
     MAKE_FUNC_INFO(cc_get_principal),
     MAKE_FUNC_INFO(cc_get_cred_version),
-#if 0 /* Not used */
-    MAKE_FUNC_INFO(cc_lock_request),
-#endif
     MAKE_FUNC_INFO(cc_store),
     MAKE_FUNC_INFO(cc_remove_cred),
 #ifdef CC_API_VER2
@@ -166,24 +144,10 @@ FUNC_INFO krbcc_fi[] = {
 #define cc_open pcc_open
 #define cc_close pcc_close
 #define cc_destroy pcc_destroy
-#if 0 /* Not used */
-#ifdef CC_API_VER2
-#define cc_seq_fetch_NCs_begin pcc_seq_fetch_NCs_begin
-#define cc_seq_fetch_NCs_next pcc_seq_fetch_NCs_next
-#define cc_seq_fetch_NCs_end pcc_seq_fetch_NCs_end
-#else
-#define cc_seq_fetch_NCs pcc_seq_fetch_NCs
-#endif
-#define cc_get_NC_info pcc_get_NC_info
-#define cc_free_NC_info pcc_free_NC_info
-#endif /* End of Not used */
 #define cc_get_name pcc_get_name
 #define cc_set_principal pcc_set_principal
 #define cc_get_principal pcc_get_principal
 #define cc_get_cred_version pcc_get_cred_version
-#if 0 /* Not used */
-#define cc_lock_request pcc_lock_request
-#endif
 #define cc_store pcc_store
 #define cc_remove_cred pcc_remove_cred
 #ifdef CC_API_VER2

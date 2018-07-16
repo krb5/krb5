@@ -507,24 +507,6 @@ verify_kdc_san(krb5_context context,
         for (hostptr = certhosts; *hostptr != NULL; hostptr++)
             TRACE_PKINIT_CLIENT_SAN_KDCCERT_DNSNAME(context, *hostptr);
     }
-#if 0
-    retval = call_san_checking_plugins(context, plgctx, reqctx, idctx,
-                                       princs, hosts, &plugin_decision,
-                                       need_eku_checking);
-    pkiDebug("%s: call_san_checking_plugins() returned retval %d\n",
-             __FUNCTION__);
-    if (retval) {
-        retval = KRB5KDC_ERR_KDC_NAME_MISMATCH;
-        goto out;
-    }
-    pkiDebug("%s: call_san_checking_plugins() returned decision %d and "
-             "need_eku_checking %d\n",
-             __FUNCTION__, plugin_decision, *need_eku_checking);
-    if (plugin_decision != NO_DECISION) {
-        retval = plugin_decision;
-        goto out;
-    }
-#endif
 
     pkiDebug("%s: Checking pkinit sans\n", __FUNCTION__);
     for (i = 0; princs != NULL && princs[i] != NULL; i++) {
