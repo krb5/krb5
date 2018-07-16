@@ -10,7 +10,7 @@ matrix:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y bison dejagnu gettext keyutils ldap-utils libldap2-dev libkeyutils-dev libssl-dev python-cjson python-paste python-pyrad slapd tcl-dev tcsh
+  - sudo apt-get install -y bison dejagnu gettext keyutils ldap-utils libldap2-dev libkeyutils-dev libssl-dev python3-paste slapd tcl-dev tcsh
   - mkdir -p cmocka/build
   - cd cmocka
   - wget https://cmocka.org/files/1.1/cmocka-1.1.1.tar.xz

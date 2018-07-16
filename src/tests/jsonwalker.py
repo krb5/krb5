@@ -1,10 +1,5 @@
 import sys
-try:
-    import cjson
-except ImportError:
-    print("Warning: skipping audit log verification because the cjson module" \
-          " is unavailable")
-    sys.exit(0)
+import json
 from collections import defaultdict
 from optparse import OptionParser
 
@@ -72,7 +67,7 @@ class Parser(object):
         """
         Generator that works through dictionary.
         """
-        for a,v in adict.iteritems():
+        for a,v in adict.items():
             if isinstance(v,dict):
                 for (attrpath,u) in self._walk(v):
                     yield (a+'.'+attrpath,u)
@@ -93,17 +88,16 @@ if __name__ == '__main__':
         with open(options.filename, 'r') as f:
             content = list()
             for l in f:
-                content.append(cjson.decode(l.rstrip()))
+                content.append(json.loads(l.rstrip()))
         f.close()
     else:
-        print('Input file in jason format is required')
+        print('Input file in JSON format is required')
         exit()
 
     defaults = None
     if options.defaults is not None:
         with open(options.defaults, 'r') as f:
-            defaults = cjson.decode(f.read())
-        f.close()
+            defaults = json.load(f)
 
     # run test
     p = Parser(defaults)
