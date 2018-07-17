@@ -782,19 +782,15 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
             pid_file = optarg;
             break;
         case 'p':
-            if (def_udp_listen)
-                free(def_udp_listen);
+            free(def_udp_listen);
+            free(def_tcp_listen);
             def_udp_listen = strdup(optarg);
-            if (!def_udp_listen) {
+            def_tcp_listen = strdup(optarg);
+            if (def_udp_listen == NULL || def_tcp_listen == NULL) {
                 fprintf(stderr, _(" KDC cannot initialize. Not enough "
                                   "memory\n"));
                 exit(1);
             }
-#if 0 /* not yet */
-            if (default_tcp_ports)
-                free(default_tcp_ports);
-            default_tcp_ports = strdup(optarg);
-#endif
             break;
         case 'T':
             time_offset = atoi(optarg);

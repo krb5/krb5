@@ -57,12 +57,12 @@ The **-P** *pid_file* option tells the KDC to write its PID into
 the KDC is still running and to allow init scripts to stop the correct
 process.
 
-The **-p** *portnum* option specifies the default UDP port numbers
-which the KDC should listen on for Kerberos version 5 requests, as a
-comma-separated list.  This value overrides the UDP port numbers
-specified in the :ref:`kdcdefaults` section of :ref:`kdc.conf(5)`, but
-may be overridden by realm-specific values.  If no value is given from
-any source, the default port is 88.
+The **-p** *portnum* option specifies the default UDP and TCP port
+numbers which the KDC should listen on for Kerberos version 5
+requests, as a comma-separated list.  This value overrides the port
+numbers specified in the :ref:`kdcdefaults` section of
+:ref:`kdc.conf(5)`, but may be overridden by realm-specific values.
+If no value is given from any source, the default port is 88.
 
 The **-w** *numworkers* option tells the KDC to fork *numworkers*
 processes to listen to the KDC ports and process requests in parallel.
