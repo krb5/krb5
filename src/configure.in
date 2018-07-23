@@ -576,6 +576,10 @@ fi
 ])
 
 
+# PTHREAD_CFLAGS changes which variant of these functions is declared
+# on Solaris 11, so use it for these tests.
+old_CFLAGS=$CFLAGS
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 AC_CHECK_FUNC(getpwnam_r,ac_cv_func_getpwnam_r=yes,ac_cv_func_getpwnam_r=no)
 AC_CHECK_FUNC(getpwuid_r,ac_cv_func_getpwuid_r=yes,ac_cv_func_getpwuid_r=no)
 if test "$ac_cv_func_getpwnam_r" = yes; then
@@ -625,6 +629,7 @@ if test "$ac_cv_func_getpwnam_r" = yes; then
     fi
   fi
 fi
+CFLAGS=$old_CFLAGS
 
 if test "$ac_cv_func_getpwnam_r" = no && test "$ac_cv_func_getpwuid_r" = yes; then
   # Actually, we could do this check, and the corresponding checks
