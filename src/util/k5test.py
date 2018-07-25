@@ -468,6 +468,7 @@ def _onexit():
     if _debug or _stop_before or _stop_after or _shell_before or _shell_after:
         # Wait before killing daemons in case one is being debugged.
         sys.stdout.write('*** Press return to kill daemons and exit script: ')
+        sys.stdout.flush()
         sys.stdin.readline()
     for proc in _daemons:
         os.kill(proc.pid, signal.SIGTERM)
@@ -669,6 +670,7 @@ def _valgrind(args):
 def _stop_or_shell(stop, shell, env, ind):
     if (_match_cmdnum(stop, ind)):
         sys.stdout.write('*** [%d] Waiting for return: ' % ind)
+        sys.stdout.flush()
         sys.stdin.readline()
     if (_match_cmdnum(shell, ind)):
         output('*** [%d] Spawning shell\n' % ind, True)
