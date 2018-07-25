@@ -134,9 +134,8 @@ The following tags may be specified in a [realms] subsection:
         the principal within this realm.
 
     **dup-skey**
-        Enabling this flag allows the principal to obtain a session
-        key for another user, permitting user-to-user authentication
-        for this principal.
+        Enabling this flag allows the KDC to issue user-to-user
+        service tickets for this principal.
 
     **forwardable**
         Enabling this flag allows the principal to obtain forwardable
@@ -193,7 +192,9 @@ The following tags may be specified in a [realms] subsection:
 
     **service**
         Enabling this flag allows the the KDC to issue service tickets
-        for this principal.
+        for this principal.  In release 1.17 and later, user-to-user
+        service tickets are still allowed if the **dup-skey** flag is
+        set.
 
     **tgt-based**
         Enabling this flag allows a principal to obtain tickets based

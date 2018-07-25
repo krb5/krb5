@@ -146,7 +146,8 @@ check_tgs_svc_deny_all(krb5_kdc_req *req, krb5_db_entry server,
         *status = "SERVER LOCKED OUT";
         return KDC_ERR_S_PRINCIPAL_UNKNOWN;
     }
-    if (server.attributes & KRB5_KDB_DISALLOW_SVR) {
+    if ((server.attributes & KRB5_KDB_DISALLOW_SVR) &&
+        !(req->kdc_options & KDC_OPT_ENC_TKT_IN_SKEY)) {
         *status = "SERVER NOT ALLOWED";
         return KDC_ERR_MUST_USE_USER2USER;
     }

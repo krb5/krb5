@@ -297,8 +297,9 @@ Options:
 
 {-\|+}\ **allow_dup_skey**
     **-allow_dup_skey** disables user-to-user authentication for this
-    principal by prohibiting this principal from obtaining a session
-    key for another user.  **+allow_dup_skey** clears this flag.
+    principal by prohibiting others from obtaining a service ticket
+    encrypted in this principal's TGT session key.
+    **+allow_dup_skey** clears this flag.
 
 {-\|+}\ **requires_preauth**
     **+requires_preauth** requires this principal to preauthenticate
@@ -325,7 +326,9 @@ Options:
 
 {-\|+}\ **allow_svr**
     **-allow_svr** prohibits the issuance of service tickets for this
-    principal.  **+allow_svr** clears this flag.
+    principal.  In release 1.17 and later, user-to-user service
+    tickets are still allowed unless the **-allow_dup_skey** flag is
+    also set.  **+allow_svr** clears this flag.
 
 {-\|+}\ **allow_tgs_req**
     **-allow_tgs_req** specifies that a Ticket-Granting Service (TGS)
