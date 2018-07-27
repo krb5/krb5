@@ -52,7 +52,7 @@
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
 int show_etype = 0, show_addresses = 0, no_resolve = 0, print_version = 0;
 int show_adtype = 0, show_all = 0, list_all = 0, use_client_keytab = 0;
-int show_config = 0;
+int show_config = 0, show_kvno = 0;
 char *defname;
 char *progname;
 krb5_timestamp now;
@@ -82,7 +82,7 @@ static void fillit(FILE *, unsigned int, int);
 static void
 usage()
 {
-    fprintf(stderr, _("Usage: %s [-e] [-V] [[-c] [-l] [-A] [-d] [-f] [-s] "
+    fprintf(stderr, _("Usage: %s [-e] [-V] [[-c] [-l] [-A] [-d] [-f] [-s] [-v] "
                       "[-a [-n]]] [-k [-t] [-K]] [name]\n"), progname);
     fprintf(stderr, _("\t-c specifies credentials cache\n"));
     fprintf(stderr, _("\t-k specifies keytab\n"));
@@ -96,6 +96,7 @@ usage()
     fprintf(stderr, _("\t\t-d shows the submitted authorization data "
                       "types\n"));
     fprintf(stderr, _("\t\t-f shows credentials flags\n"));
+    fprintf(stderr, _("\t\t-v shows kvno\n"));
     fprintf(stderr, _("\t\t-s sets exit status based on valid tgt "
                       "existence\n"));
     fprintf(stderr, _("\t\t-a displays the address list\n"));
@@ -133,7 +134,7 @@ main(int argc, char *argv[])
     name = NULL;
     mode = DEFAULT;
     /* V = version so v can be used for verbose later if desired. */
-    while ((c = getopt(argc, argv, "dfetKsnacki45lAVC")) != -1) {
+    while ((c = getopt(argc, argv, "dfetKsnvacki45lAVC")) != -1) {
         switch (c) {
         case 'd':
             show_adtype = 1;
@@ -143,6 +144,9 @@ main(int argc, char *argv[])
             break;
         case 'e':
             show_etype = 1;
+            break;
+        case 'v':
+            show_kvno = 1;
             break;
         case 't':
             show_time = 1;
@@ -656,7 +660,7 @@ static void
 show_credential(krb5_creds *cred)
 {
     krb5_error_code ret;
-    krb5_ticket *tkt;
+    krb5_ticket *tkt = NULL;
     char *name, *sname, *flags;
     int extra_field = 0, ccol = 0, i;
 
@@ -736,24 +740,35 @@ show_credential(krb5_creds *cred)
         extra_field = 0;
     }
 
-    if (show_etype) {
+    if (show_etype || show_kvno) {
         ret = krb5_decode_ticket(&cred->ticket, &tkt);
         if (ret)
             goto err_tkt;
+    }
 
+    if (show_etype) {
         if (!extra_field)
             fputs("\t",stdout);
         else
             fputs(", ",stdout);
         printf(_("Etype (skey, tkt): %s, "),
                etype_string(cred->keyblock.enctype));
-        printf("%s ", etype_string(tkt->enc_part.enctype));
+        printf("%s", etype_string(tkt->enc_part.enctype));
         extra_field++;
-
-    err_tkt:
-        if (tkt != NULL)
-            krb5_free_ticket(context, tkt);
     }
+
+    if (show_kvno) {
+        if (!extra_field)
+            fputs("\t",stdout);
+        else
+            fputs(", ",stdout);
+        printf("KVNO: %u",tkt->enc_part.kvno);
+        extra_field++;
+    }
+
+err_tkt:
+    if (tkt != NULL)
+        krb5_free_ticket(context, tkt);
 
     if (show_adtype) {
         if (cred->authdata != NULL) {
