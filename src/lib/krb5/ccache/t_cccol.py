@@ -100,10 +100,11 @@ if test_keyring:
 mark('MEMORY cursor')
 mfoo = 'MEMORY:foo'
 mbar = 'MEMORY:bar'
-cursor_test('filemem', [fccname, mfoo, mbar], [fccname, mfoo, mbar])
-cursor_test('dirmem', [dccname, mfoo], [duser, dalice, dbob, mfoo])
+cursor_test('filemem', [fccname, mfoo], [fccname])
+cursor_test('dirmem', [dccname, mfoo], [duser, dalice, dbob])
+cursor_test('mem', [mfoo, mbar], [mfoo])
 if test_keyring:
-    cursor_test('keyringmem', [krccname, mfoo], [kruser, kralice, krbob, mfoo])
+    cursor_test('keyringmem', [krccname, mfoo], [kruser, kralice, krbob])
 
 # Test krb5_cccol_have_content.
 mark('krb5_cccol_have_content')
