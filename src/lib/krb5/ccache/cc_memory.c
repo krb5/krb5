@@ -132,7 +132,7 @@ struct mcc_cursor {
 
 /* Iterator over memory caches.  */
 struct krb5_mcc_ptcursor_data {
-    struct krb5_mcc_list_node *cur;
+    krb5_boolean first;
 };
 
 k5_cc_mutex krb5int_mcc_mutex = K5_CC_MUTEX_PARTIAL_INITIALIZER;
@@ -693,9 +693,7 @@ krb5_mcc_ptcursor_new(
         return ENOMEM;
     }
     n->data = cdata;
-    k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
-    cdata->cur = mcc_head;
-    k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
+    cdata->first = TRUE;
     *cursor = n;
     return 0;
 }
@@ -707,22 +705,19 @@ krb5_mcc_ptcursor_next(
     krb5_ccache *ccache)
 {
     struct krb5_mcc_ptcursor_data *cdata = NULL;
+    const char *defname;
 
     *ccache = NULL;
     cdata = cursor->data;
-    if (cdata->cur == NULL)
+    if (!cdata->first)
+        return 0;
+    cdata->first = FALSE;
+
+    defname = krb5_cc_default_name(context);
+    if (defname == NULL || strncmp(defname, "MEMORY:", 7) != 0)
         return 0;
 
-    *ccache = malloc(sizeof(**ccache));
-    if (*ccache == NULL)
-        return ENOMEM;
-
-    (*ccache)->ops = &krb5_mcc_ops;
-    (*ccache)->data = cdata->cur->cache;
-    k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
-    cdata->cur = cdata->cur->next;
-    k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
-    return 0;
+    return krb5_cc_resolve(context, defname, ccache);
 }
 
 static krb5_error_code KRB5_CALLCONV
