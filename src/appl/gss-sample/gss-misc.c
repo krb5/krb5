@@ -115,7 +115,7 @@ read_all(int fildes, void *data, unsigned int nbyte)
 
     FD_ZERO(&rfds);
     FD_SET(fildes, &rfds);
-    tv.tv_sec = 10;
+    tv.tv_sec = 300;
     tv.tv_usec = 0;
 
     for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
