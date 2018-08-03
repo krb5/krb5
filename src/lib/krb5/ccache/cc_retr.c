@@ -164,6 +164,11 @@ pref (krb5_enctype my_ktype, int nktypes, krb5_enctype *ktypes)
 krb5_boolean
 krb5int_cc_creds_match_request(krb5_context context, krb5_flags whichfields, krb5_creds *mcreds, krb5_creds *creds)
 {
+    /* Only match a user-to-user credential if explicitly asked for, since the
+     * ticket won't work as a regular service ticket. */
+    if (! set(KRB5_TC_MATCH_IS_SKEY) && creds->is_skey)
+        return FALSE;
+
     if (((set(KRB5_TC_MATCH_SRV_NAMEONLY) &&
           srvname_match(context, mcreds, creds)) ||
          standard_fields_match(context, mcreds, creds))
