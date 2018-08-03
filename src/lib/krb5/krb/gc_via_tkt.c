@@ -34,7 +34,8 @@
 #include "fast.h"
 
 static krb5_error_code
-kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *const *address,
+kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep,
+             krb5_address *const *address, krb5_boolean is_skey,
              krb5_data *psectkt, krb5_creds **ppcreds)
 {
     krb5_error_code retval;
@@ -69,7 +70,7 @@ kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *const *a
     (*ppcreds)->magic = KV5M_CREDS;
 
     (*ppcreds)->authdata = NULL;                        /* not used */
-    (*ppcreds)->is_skey = psectkt->length != 0;
+    (*ppcreds)->is_skey = is_skey;
 
     if (pkdcrep->enc_part2->caddrs) {
         if ((retval = krb5_copy_addresses(context, pkdcrep->enc_part2->caddrs,
@@ -174,7 +175,7 @@ krb5int_process_tgs_reply(krb5_context context,
     krb5_error_code retval;
     krb5_kdc_rep *dec_rep = NULL;
     krb5_error *err_reply = NULL;
-    krb5_boolean s4u2self;
+    krb5_boolean s4u2self, is_skey;
 
     s4u2self = krb5int_find_pa_data(context, in_padata,
                                     KRB5_PADATA_S4U_X509_USER) ||
@@ -310,7 +311,8 @@ krb5int_process_tgs_reply(krb5_context context,
         dec_rep->enc_part2->enc_padata = NULL;
     }
 
-    retval = kdcrep2creds(context, dec_rep, address,
+    is_skey = (kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY);
+    retval = kdcrep2creds(context, dec_rep, address, is_skey,
                           &in_cred->second_ticket, out_cred);
     if (retval != 0)
         goto cleanup;
