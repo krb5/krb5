@@ -360,6 +360,7 @@ proc test10 {} {
 	puts stderr "Error: test10: Did not find expected chores."
 	exit 1
     }
+    profile_release $p
 }
 
 test1

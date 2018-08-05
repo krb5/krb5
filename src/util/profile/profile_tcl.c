@@ -2234,6 +2234,7 @@ _wrap_profile_get_string(ClientData clientData SWIGUNUSED, Tcl_Interp *interp, i
     char *s = (arg6 && *arg6) ? *arg6 : "";
     Tcl_ListObjAppendElement(interp, Tcl_GetObjResult(interp),
       Tcl_NewStringObj(s, strlen(s)));
+    profile_release_string(s);
   }
   if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
   if (alloc3 == SWIG_NEWOBJ) free((char*)buf3);
