@@ -559,6 +559,7 @@ local.properties
 
 /src/util/support/libkrb5support.exports
 /src/util/support/t_base64
+/src/util/support/t_hashtab
 /src/util/support/t_hex
 /src/util/support/t_json
 /src/util/support/t_k5buf

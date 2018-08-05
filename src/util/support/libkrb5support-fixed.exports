@@ -18,6 +18,11 @@ k5_get_error
 k5_free_error
 k5_clear_error
 k5_set_error_info_callout_fn
+k5_hashtab_add
+k5_hashtab_create
+k5_hashtab_free
+k5_hashtab_get
+k5_hashtab_remove
 k5_hex_decode
 k5_hex_encode
 k5_json_array_add
