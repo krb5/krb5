@@ -26,6 +26,7 @@
 
 #include "cc-int.h"
 #include "../krb/int-proto.h"
+#include "k5-hashtab.h"
 #include <errno.h>
 
 static krb5_error_code KRB5_CALLCONV krb5_mcc_close
@@ -118,12 +119,6 @@ typedef struct _krb5_mcc_data {
     int generation;             /* Incremented at each initialize */
 } krb5_mcc_data;
 
-/* List of memory caches.  */
-typedef struct krb5_mcc_list_node {
-    struct krb5_mcc_list_node *next;
-    krb5_mcc_data *cache;
-} krb5_mcc_list_node;
-
 /* Iterator over credentials in a memory cache. */
 struct mcc_cursor {
     int generation;
@@ -136,9 +131,26 @@ struct krb5_mcc_ptcursor_data {
 };
 
 k5_cc_mutex krb5int_mcc_mutex = K5_CC_MUTEX_PARTIAL_INITIALIZER;
-static krb5_mcc_list_node *mcc_head = 0;
+static struct k5_hashtab *mcc_hashtab = NULL;
 
 static void update_mcc_change_time(krb5_mcc_data *);
+
+/* Ensure that mcc_hashtab is initialized.  Call with krb5int_mcc_mutex
+ * locked. */
+static krb5_error_code
+init_table(krb5_context context)
+{
+    krb5_error_code ret;
+    uint8_t seed[K5_HASH_SEED_LEN];
+    krb5_data d = make_data(seed, sizeof(seed));
+
+    if (mcc_hashtab != NULL)
+        return 0;
+    ret = krb5_c_random_make_octets(context, &d);
+    if (ret)
+        return ret;
+    return k5_hashtab_create(seed, 64, &mcc_hashtab);
+}
 
 /* Remove creds from d, invalidate any existing cursors, and unset the client
  * principal.  The caller is responsible for locking. */
@@ -230,21 +242,13 @@ krb5_mcc_close(krb5_context context, krb5_ccache id)
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_destroy(krb5_context context, krb5_ccache id)
 {
-    krb5_mcc_list_node **curr, *node;
     krb5_mcc_data *d = id->data;
     krb5_boolean removed_from_table = FALSE;
 
+    /* Remove this node from the table if it is still present. */
     k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
-
-    for (curr = &mcc_head; *curr; curr = &(*curr)->next) {
-        if ((*curr)->cache == d) {
-            node = *curr;
-            *curr = node->next;
-            free(node);
-            removed_from_table = TRUE;
-            break;
-        }
-    }
+    if (k5_hashtab_remove(mcc_hashtab, d->name, strlen(d->name)))
+        removed_from_table = TRUE;
     k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
 
     /* Empty the cache and remove the reference for the table slot.  There will
@@ -289,16 +293,13 @@ krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 {
     krb5_os_context os_ctx = &context->os_context;
     krb5_ccache lid;
-    krb5_mcc_list_node *ptr;
     krb5_error_code err;
     krb5_mcc_data *d;
 
     k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
-    for (ptr = mcc_head; ptr; ptr=ptr->next)
-        if (!strcmp(ptr->cache->name, residual))
-            break;
-    if (ptr != NULL) {
-        d = ptr->cache;
+    init_table(context);
+    d = k5_hashtab_get(mcc_hashtab, residual, strlen(residual));
+    if (d != NULL) {
         k5_cc_mutex_lock(context, &d->lock);
         d->refcount++;
         k5_cc_mutex_unlock(context, &d->lock);
@@ -438,18 +439,17 @@ krb5_mcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *curso
 }
 
 /*
- * Utility routine: Creates the back-end data for a memory cache, and threads
- * it into the global linked list.  Give the new object two references, one for
- * the table slot and one for the caller's handle.
+ * Utility routine: Creates the back-end data for a memory cache, and adds it
+ * to the global table.  Give the new object two references, one for the table
+ * slot and one for the caller's handle.
  *
- * Call with the global list lock held.
+ * Call with the global table lock held.
  */
 static krb5_error_code
 new_mcc_data (const char *name, krb5_mcc_data **dataptr)
 {
     krb5_error_code err;
     krb5_mcc_data *d;
-    krb5_mcc_list_node *n;
 
     d = malloc(sizeof(krb5_mcc_data));
     if (d == NULL)
@@ -476,17 +476,12 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
     d->generation = 0;
     update_mcc_change_time(d);
 
-    n = malloc(sizeof(krb5_mcc_list_node));
-    if (n == NULL) {
+    if (k5_hashtab_add(mcc_hashtab, d->name, strlen(d->name), d) != 0) {
         free(d->name);
         k5_cc_mutex_destroy(&d->lock);
         free(d);
         return KRB5_CC_NOMEM;
     }
-
-    n->cache = d;
-    n->next = mcc_head;
-    mcc_head = n;
 
     *dataptr = d;
     return 0;
@@ -522,11 +517,10 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
     lid->ops = &krb5_mcc_ops;
 
     k5_cc_mutex_lock(context, &krb5int_mcc_mutex);
+    init_table(context);
 
     /* Check for uniqueness with mutex locked to avoid race conditions */
     while (1) {
-        krb5_mcc_list_node *ptr;
-
         err = krb5int_random_string (context, uniquename, sizeof (uniquename));
         if (err) {
             k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
@@ -534,12 +528,9 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
             return err;
         }
 
-        for (ptr = mcc_head; ptr; ptr=ptr->next) {
-            if (!strcmp(ptr->cache->name, uniquename)) {
-                break;  /* got a match, loop again */
-            }
-        }
-        if (!ptr) break; /* got to the end without finding a match */
+        if (k5_hashtab_get(mcc_hashtab, uniquename,
+                           strlen(uniquename)) == NULL)
+            break;
     }
 
     err = new_mcc_data(uniquename, &d);
