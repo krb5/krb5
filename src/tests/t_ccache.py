@@ -56,6 +56,7 @@ realm.run([klist, '-s'], expected_code=1)
 realm.addprinc('alice', password('alice'))
 realm.addprinc('bob', password('bob'))
 realm.addprinc('carol', password('carol'))
+realm.addprinc('doug', password('doug'))
 
 def collection_test(realm, ccname):
     cctype = ccname.partition(':')[0]
@@ -86,14 +87,16 @@ def collection_test(realm, ccname):
     output = realm.run([klist, '-l'])
     if '---\nalice@' not in output or output.count('\n') != 4:
         fail('klist -l did not show expected output after re-kinit for alice.')
+    realm.kinit('doug', password('doug'))
     realm.kinit('bob', password('bob'))
     output = realm.run([klist, '-A', ccname])
     if 'bob@' not in output.splitlines()[1] or 'alice@' not in output or \
-            'carol' not in output or output.count('Default principal:') != 3:
-        fail('klist -A did not show expected output after kinit for bob.')
+       'carol@' not in output or 'doug@' not in output or \
+       output.count('Default principal:') != 4:
+        fail('klist -A did not show expected output after kinit doug+bob.')
     realm.run([kswitch, '-p', 'carol'])
     output = realm.run([klist, '-l'])
-    if '---\ncarol@' not in output or output.count('\n') != 5:
+    if '---\ncarol@' not in output or output.count('\n') != 6:
         fail('klist -l did not show expected output after kswitch to carol.')
 
     # Switch to specifying the collection name on the command line
@@ -103,10 +106,14 @@ def collection_test(realm, ccname):
     mark('%s collection, command-line specifier' % cctype)
     realm.run([kdestroy, '-c', ccname])
     output = realm.run([klist, '-l', ccname])
-    if 'carol@' in output or 'bob@' not in output or output.count('\n') != 4:
+    if 'carol@' in output or 'bob@' not in output or output.count('\n') != 5:
         fail('kdestroy failed to remove only primary ccache.')
     realm.run([klist, '-s', ccname], expected_code=1)
     realm.run([klist, '-A', '-s', ccname])
+    realm.run([kdestroy, '-p', 'alice', '-c', ccname])
+    output = realm.run([klist, '-l', ccname])
+    if 'alice@' in output or 'bob@' not in output or output.count('\n') != 4:
+        fail('kdestroy -p failed to remove alice')
     realm.run([kdestroy, '-A', '-c', ccname])
     output = realm.run([klist, '-l', ccname], expected_code=1)
     if not output.endswith('---\n') or output.count('\n') != 2:

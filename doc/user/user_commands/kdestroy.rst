@@ -26,7 +26,8 @@ OPTIONS
 
 **-A**
     Destroys all caches in the collection, if a cache collection is
-    available.
+    available.  May be used with the **-c** option to specify the
+    collection to be destroyed.
 
 **-q**
     Run quietly.  Normally kdestroy beeps if it fails to destroy the
@@ -40,6 +41,11 @@ OPTIONS
     The default credentials cache may vary between systems.  If the
     **KRB5CCNAME** environment variable is set, its value is used to
     name the default ticket cache.
+
+**-p** *princ_name*
+    If a cache collection is available, destroy the cache for
+    *princ_name* instead of the primary cache.  May be used with the
+    **-c** option to specify the collection to be searched.
 
 
 NOTE
