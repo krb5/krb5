@@ -6,7 +6,7 @@ towards improving the MIT KC documentation content.  If you are an experienced
 Kerberos developer and/or administrator, please consider sharing your knowledge
 and experience with the Kerberos Community.  You can suggest your own topic or
 write about any of the topics listed
-`here <http://k5wiki.kerberos.org/wiki/Projects/Documentation_Tasks>`__.
+`here <https://k5wiki.kerberos.org/wiki/Projects/Documentation_Tasks>`__.
 
 If you have any questions, comments, or suggestions on the existing documents,
 please send your feedback via email to krb5-bugs@mit.edu. The HTML version of
@@ -22,7 +22,7 @@ unified in a central form.  Man pages, HTML documentation, and PDF
 documents are compiled from reStructuredText sources, and the application
 developer documentation incorporates Doxygen markup from the source
 tree.  This project was undertaken along the outline described
-`here <http://k5wiki.kerberos.org/wiki/Projects/Kerberos_Documentation>`__.
+`here <https://k5wiki.kerberos.org/wiki/Projects/Kerberos_Documentation>`__.
 
 Previous versions of Kerberos 5 attempted to maintain separate documentation
 in the texinfo format, with separate groff manual pages.  Having the API

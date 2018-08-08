@@ -18,7 +18,7 @@ Configuring Kerberos with OpenLDAP back-end
           certificate location in *slapd.conf* file.
 
           Refer to the following link for more information:
-          http://www.openldap.org/doc/admin23/tls.html
+          https://www.openldap.org/doc/admin23/tls.html
 
     B. Setting up SSL on OpenLDAP client:
 

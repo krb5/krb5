@@ -123,7 +123,7 @@ by ``make check``.  These tests require manual setup and teardown of
 support infrastructure which is not easily automated, or require
 excessive resources for ordinary use.  The procedure for running
 the manual tests is documented at
-http://k5wiki.kerberos.org/wiki/Manual_Testing.
+https://k5wiki.kerberos.org/wiki/Manual_Testing.
 
 
 Cleaning up the build

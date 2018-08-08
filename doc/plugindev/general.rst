@@ -114,5 +114,5 @@ types, the logged message does not include the usual header for some
 output types, and the severity for syslog outputs is configured as
 part of the logging specification, defaulting to error severity.)
 
-.. _automake: http://www.gnu.org/software/automake/
-.. _libtool: http://www.gnu.org/software/libtool/
+.. _automake: https://www.gnu.org/software/automake/
+.. _libtool: https://www.gnu.org/software/libtool/
