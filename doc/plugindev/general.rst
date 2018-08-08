@@ -94,5 +94,5 @@ fictional pluggable interface named fences, for a module named
         return 0;
     }
 
-.. _automake: http://www.gnu.org/software/automake/
-.. _libtool: http://www.gnu.org/software/libtool/
+.. _automake: https://www.gnu.org/software/automake/
+.. _libtool: https://www.gnu.org/software/libtool/

@@ -627,11 +627,11 @@ gss_get_mic_iov_length and gss_get_mic_iov::
         handle_error(major, minor);
 
 
-.. _gss_accept_sec_context: http://tools.ietf.org/html/rfc2744.html#section-5.1
-.. _gss_acquire_cred: http://tools.ietf.org/html/rfc2744.html#section-5.2
-.. _gss_export_name: http://tools.ietf.org/html/rfc2744.html#section-5.13
-.. _gss_get_name_attribute: http://tools.ietf.org/html/6680.html#section-7.5
-.. _gss_import_name: http://tools.ietf.org/html/rfc2744.html#section-5.16
-.. _gss_init_sec_context: http://tools.ietf.org/html/rfc2744.html#section-5.19
-.. _gss_inquire_name: http://tools.ietf.org/html/rfc6680.txt#section-7.4
-.. _gss_inquire_cred: http://tools.ietf.org/html/rfc2744.html#section-5.21
+.. _gss_accept_sec_context: https://tools.ietf.org/html/rfc2744.html#section-5.1
+.. _gss_acquire_cred: https://tools.ietf.org/html/rfc2744.html#section-5.2
+.. _gss_export_name: https://tools.ietf.org/html/rfc2744.html#section-5.13
+.. _gss_get_name_attribute: https://tools.ietf.org/html/6680.html#section-7.5
+.. _gss_import_name: https://tools.ietf.org/html/rfc2744.html#section-5.16
+.. _gss_init_sec_context: https://tools.ietf.org/html/rfc2744.html#section-5.19
+.. _gss_inquire_name: https://tools.ietf.org/html/rfc6680.txt#section-7.4
+.. _gss_inquire_cred: https://tools.ietf.org/html/rfc2744.html#section-5.21

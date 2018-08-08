@@ -10,7 +10,7 @@
 MIT Kerberos features
 =====================
 
-http://web.mit.edu/kerberos
+https://web.mit.edu/kerberos
 
 
 Quick facts
@@ -19,8 +19,8 @@ Quick facts
 License - :ref:`mitK5license`
 
 Releases:
-    - Latest stable: http://web.mit.edu/kerberos/krb5-1.16/
-    - Supported: http://web.mit.edu/kerberos/krb5-1.15/
+    - Latest stable: https://web.mit.edu/kerberos/krb5-1.16/
+    - Supported: https://web.mit.edu/kerberos/krb5-1.15/
     - Release cycle: 9 -- 12 months
 
 Supported platforms \/ OS distributions:
@@ -31,7 +31,7 @@ Supported platforms \/ OS distributions:
 
 Crypto backends:
     - builtin - MIT Kerberos native crypto library
-    - OpenSSL (1.0\+) - http://www.openssl.org
+    - OpenSSL (1.0\+) - https://www.openssl.org
 
 Database backends: LDAP, DB2
 
@@ -85,7 +85,7 @@ Starting from release 1.8:
 Feature list
 ------------
 
-For more information on the specific project see http://k5wiki.kerberos.org/wiki/Projects
+For more information on the specific project see https://k5wiki.kerberos.org/wiki/Projects
 
 Release 1.7
  -   Credentials delegation                   :rfc:`5896`
@@ -96,9 +96,9 @@ Release 1.7
 Release 1.8
  -   Anonymous PKINIT         :rfc:`6112` :ref:`anonymous_pkinit`
  -   Constrained delegation
- -   IAKERB                   http://tools.ietf.org/html/draft-ietf-krb-wg-iakerb-02
+ -   IAKERB                   https://tools.ietf.org/html/draft-ietf-krb-wg-iakerb-02
  -   Heimdal bridge plugin for KDC backend
- -   GSS-API S4U extensions   http://msdn.microsoft.com/en-us/library/cc246071
+ -   GSS-API S4U extensions   https://msdn.microsoft.com/en-us/library/cc246071
  -   GSS-API naming extensions                            :rfc:`6680`
  -   GSS-API extensions for storing delegated credentials :rfc:`5588`
 
@@ -132,20 +132,20 @@ Release 1.12
  -   Plugin to control krb5_aname_to_localname and krb5_kuserok behavior   :ref:`localauth_plugin`
  -   Plugin to control hostname-to-realm mappings and the default realm    :ref:`hostrealm_plugin`
  -   GSSAPI extensions for constructing MIC tokens using IOV lists         :ref:`gssapi_mic_token`
- -   Principal may refer to nonexistent policies `Policy Refcount project <http://k5wiki.kerberos.org/wiki/Projects/Policy_refcount_elimination>`_
- -   Support for having no long-term keys for a principal `Principals Without Keys project <http://k5wiki.kerberos.org/wiki/Projects/Principals_without_keys>`_
+ -   Principal may refer to nonexistent policies `Policy Refcount project <https://k5wiki.kerberos.org/wiki/Projects/Policy_refcount_elimination>`_
+ -   Support for having no long-term keys for a principal `Principals Without Keys project <https://k5wiki.kerberos.org/wiki/Projects/Principals_without_keys>`_
  -   Collection support to the KEYRING credential cache type on Linux :ref:`ccache_definition`
  -   FAST OTP preauthentication module for the KDC which uses RADIUS to validate OTP token values :ref:`otp_preauth`
- -   Experimental Audit plugin for KDC processing `Audit project <http://k5wiki.kerberos.org/wiki/Projects/Audit>`_
+ -   Experimental Audit plugin for KDC processing `Audit project <https://k5wiki.kerberos.org/wiki/Projects/Audit>`_
 
 Release 1.13
 
  -   Add support for accessing KDCs via an HTTPS proxy server using
      the `MS-KKDCP
-     <http://msdn.microsoft.com/en-us/library/hh553774.aspx>`_
+     <https://msdn.microsoft.com/en-us/library/hh553774.aspx>`_
      protocol.
  -   Add support for `hierarchical incremental propagation
-     <http://k5wiki.kerberos.org/wiki/Projects/Hierarchical_iprop>`_,
+     <https://k5wiki.kerberos.org/wiki/Projects/Hierarchical_iprop>`_,
      where slaves can act as intermediates between an upstream master
      and other downstream slaves.
  -   Add support for configuring GSS mechanisms using
@@ -153,12 +153,12 @@ Release 1.13
      ``/etc/gss/mech``.
  -   Add support to the LDAP KDB module for `binding to the LDAP
      server using SASL
-     <http://k5wiki.kerberos.org/wiki/Projects/LDAP_SASL_support>`_.
+     <https://k5wiki.kerberos.org/wiki/Projects/LDAP_SASL_support>`_.
  -   The KDC listens for TCP connections by default.
  -   Fix a minor key disclosure vulnerability where using the
      "keepold" option to the kadmin randkey operation could return the
      old keys. `[CVE-2014-5351]
-     <http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-5351>`_
+     <https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-5351>`_
  -   Add client support for the Kerberos Cache Manager protocol. If
      the host is running a Heimdal kcm daemon, caches served by the
      daemon can be accessed with the KCM: cache type.
@@ -407,12 +407,12 @@ Release 1.16
 - PKINIT with FAST on client   (release 1.10)     :rfc:`6113`
 - PKINIT                                          :rfc:`4556`
 - FX-COOKIE                                       :rfc:`6113#section-5.2`
-- S4U-X509-USER                (release 1.8)      http://msdn.microsoft.com/en-us/library/cc246091
+- S4U-X509-USER                (release 1.8)      https://msdn.microsoft.com/en-us/library/cc246091
 - OTP                          (release 1.12)     :ref:`otp_preauth`
 
 `PRNG`
 
 - modularity       (release 1.9)
 - Yarrow PRNG      (release < 1.10)
-- Fortuna PRNG     (release 1.9)       http://www.schneier.com/book-practical.html
+- Fortuna PRNG     (release 1.9)       https://www.schneier.com/book-practical.html
 - OS PRNG          (release 1.10)      OS's native PRNG
