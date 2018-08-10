@@ -81,7 +81,7 @@ gss_export_cred(OM_uint32 * minor_status, gss_cred_id_t cred_handle,
         mech_oid = &cred->mechs_array[i];
         public_oid = gssint_get_public_oid(mech_oid);
         mech = gssint_get_mechanism(mech_oid);
-        if (mech == NULL) {
+        if (public_oid == GSS_C_NO_OID || mech == NULL) {
             status = GSS_S_DEFECTIVE_CREDENTIAL;
             goto error;
         }
