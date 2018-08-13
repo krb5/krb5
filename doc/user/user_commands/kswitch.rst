@@ -53,4 +53,4 @@ FILES
 SEE ALSO
 --------
 
-:ref:`kinit(1)`, :ref:`kdestroy(1)`, :ref:`klist(1)`), kerberos(1)
+:ref:`kinit(1)`, :ref:`kdestroy(1)`, :ref:`klist(1)`, kerberos(1)
