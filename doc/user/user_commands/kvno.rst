@@ -14,6 +14,7 @@ SYNOPSIS
 [**-P**]
 [**-S** *sname*]
 [**-U** *for_user*]
+[**--u2u** *ccache*]
 *service1 service2* ...
 
 
@@ -62,6 +63,12 @@ OPTIONS
     acquire a ticket on behalf of *for_user*.  If constrained
     delegation is not requested, the service name must match the
     credentials cache client principal.
+
+**--u2u** *ccache*
+    Requests a user-to-user ticket.  *ccache* must contain a local
+    krbtgt ticket for the server principal.  The reported version
+    number will typically be 0, as the resulting ticket is not
+    encrypted in the server's long-term key.
 
 
 ENVIRONMENT

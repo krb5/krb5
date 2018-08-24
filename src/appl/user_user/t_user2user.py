@@ -4,12 +4,6 @@ from k5test import *
 debug_compiled=1
 
 for realm in multipass_realms():
-    # Verify that -allow_svr denies regular TGS requests, but allows
-    # user-to-user TGS requests.
-    realm.run([kadminl, 'modprinc', '-allow_svr', realm.user_princ])
-    realm.run([kvno, realm.user_princ], expected_code=1,
-               expected_msg='Server principal valid for user2user only')
-
     if debug_compiled == 0:
         realm.start_in_inetd(['./uuserver', 'uuserver'], port=9999)
     else:

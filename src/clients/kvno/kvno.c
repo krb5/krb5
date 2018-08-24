@@ -40,13 +40,13 @@ xusage()
 {
     fprintf(stderr, _("usage: %s [-C] [-u] [-c ccache] [-e etype]\n"), prog);
     fprintf(stderr, _("\t[-k keytab] [-S sname] [-U for_user [-P]]\n"));
-    fprintf(stderr, _("\tservice1 service2 ...\n"));
+    fprintf(stderr, _("\t[--u2u ccache] service1 service2 ...\n"));
     exit(1);
 }
 
 static void do_v5_kvno(int argc, char *argv[], char *ccachestr, char *etypestr,
                        char *keytab_name, char *sname, int canon, int unknown,
-                       char *for_user, int proxy);
+                       char *for_user, int proxy, const char *u2u_ccname);
 
 #include <com_err.h>
 static void extended_com_err_fn(const char *myprog, errcode_t code,
@@ -55,9 +55,15 @@ static void extended_com_err_fn(const char *myprog, errcode_t code,
 int
 main(int argc, char *argv[])
 {
+    enum { OPTION_U2U = 256 };
+    struct option lopts[] = {
+        { "u2u", 1, NULL, OPTION_U2U },
+        { NULL, 0, NULL, 0 }
+    };
+    const char *shopts = "uCc:e:hk:qPS:U:";
     int option;
     char *etypestr = NULL, *ccachestr = NULL, *keytab_name = NULL;
-    char *sname = NULL, *for_user = NULL;
+    char *sname = NULL, *for_user = NULL, *u2u_ccname = NULL;
     int canon = 0, unknown = 0, proxy = 0;
 
     setlocale(LC_ALL, "");
@@ -66,7 +72,7 @@ main(int argc, char *argv[])
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
 
-    while ((option = getopt(argc, argv, "uCc:e:hk:qPS:U:")) != -1) {
+    while ((option = getopt_long(argc, argv, shopts, lopts, NULL)) != -1) {
         switch (option) {
         case 'C':
             canon = 1;
@@ -108,10 +114,18 @@ main(int argc, char *argv[])
         case 'U':
             for_user = optarg; /* S4U2Self - protocol transition */
             break;
+        case OPTION_U2U:
+            u2u_ccname = optarg;
+            break;
         default:
             xusage();
             break;
         }
+    }
+
+    if (u2u_ccname != NULL && for_user != NULL) {
+        fprintf(stderr, _("Options --u2u and -P are mutually exclusive\n"));
+        xusage();
     }
 
     if (proxy) {
@@ -130,7 +144,7 @@ main(int argc, char *argv[])
         xusage();
 
     do_v5_kvno(argc - optind, argv + optind, ccachestr, etypestr, keytab_name,
-               sname, canon, unknown, for_user, proxy);
+               sname, canon, unknown, for_user, proxy, u2u_ccname);
     return 0;
 }
 
@@ -153,7 +167,8 @@ static void extended_com_err_fn(const char *myprog, errcode_t code,
 static krb5_error_code
 kvno(const char *name, krb5_ccache ccache, krb5_principal me,
      krb5_enctype etype, krb5_keytab keytab, const char *sname,
-     krb5_flags options, int unknown, krb5_principal for_user_princ, int proxy)
+     krb5_flags options, int unknown, krb5_principal for_user_princ, int proxy,
+     krb5_data *u2u_ticket)
 {
     krb5_error_code ret;
     krb5_principal server = NULL;
@@ -185,6 +200,9 @@ kvno(const char *name, krb5_ccache ccache, krb5_principal me,
     }
 
     in_creds.keyblock.enctype = etype;
+
+    if (u2u_ticket != NULL)
+        in_creds.second_ticket = *u2u_ticket;
 
     if (for_user_princ != NULL) {
         if (!proxy && !krb5_principal_compare(context, me, server)) {
@@ -260,10 +278,49 @@ cleanup:
     return ret;
 }
 
+/* Fetch the encoded local TGT for ccname's default client principal. */
+static krb5_error_code
+get_u2u_ticket(const char *ccname, krb5_data **ticket_out)
+{
+    krb5_error_code ret;
+    krb5_ccache cc = NULL;
+    krb5_creds mcred, *creds = NULL;
+
+    *ticket_out = NULL;
+    memset(&mcred, 0, sizeof(mcred));
+
+    ret = krb5_cc_resolve(context, ccname, &cc);
+    if (ret)
+        goto cleanup;
+    ret = krb5_cc_get_principal(context, cc, &mcred.client);
+    if (ret)
+        goto cleanup;
+    ret = krb5_build_principal_ext(context, &mcred.server,
+                                   mcred.client->realm.length,
+                                   mcred.client->realm.data,
+                                   KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
+                                   mcred.client->realm.length,
+                                   mcred.client->realm.data, 0);
+    if (ret)
+        goto cleanup;
+    ret = krb5_get_credentials(context, KRB5_GC_CACHED, cc, &mcred, &creds);
+    if (ret)
+        goto cleanup;
+
+    ret = krb5_copy_data(context, &creds->ticket, ticket_out);
+
+cleanup:
+    if (cc != NULL)
+        krb5_cc_close(context, cc);
+    krb5_free_cred_contents(context, &mcred);
+    krb5_free_creds(context, creds);
+    return ret;
+}
+
 static void
 do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
            char *keytab_name, char *sname, int canon, int unknown,
-           char *for_user, int proxy)
+           char *for_user, int proxy, const char *u2u_ccname)
 {
     krb5_error_code ret;
     int i, errors;
@@ -272,7 +329,8 @@ do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
     krb5_principal me;
     krb5_keytab keytab = NULL;
     krb5_principal for_user_princ = NULL;
-    krb5_flags options;
+    krb5_flags options = canon ? KRB5_GC_CANONICALIZE : 0;
+    krb5_data *u2u_ticket = NULL;
 
     ret = krb5_init_context(&context);
     if (ret) {
@@ -317,18 +375,26 @@ do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
         }
     }
 
+    if (u2u_ccname != NULL) {
+        ret = get_u2u_ticket(u2u_ccname, &u2u_ticket);
+        if (ret) {
+            com_err(prog, ret, _("while getting user-to-user ticket from %s"),
+                    u2u_ccname);
+            exit(1);
+        }
+        options |= KRB5_GC_USER_USER;
+    }
+
     ret = krb5_cc_get_principal(context, ccache, &me);
     if (ret) {
         com_err(prog, ret, _("while getting client principal name"));
         exit(1);
     }
 
-    options = canon ? KRB5_GC_CANONICALIZE : 0;
-
     errors = 0;
     for (i = 0; i < count; i++) {
         if (kvno(names[i], ccache, me, etype, keytab, sname, options, unknown,
-                 for_user_princ, proxy) != 0)
+                 for_user_princ, proxy, u2u_ticket) != 0)
             errors++;
     }
 
@@ -337,6 +403,7 @@ do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
     krb5_free_principal(context, me);
     krb5_free_principal(context, for_user_princ);
     krb5_cc_close(context, ccache);
+    krb5_free_data(context, u2u_ticket);
     krb5_free_context(context);
 
     if (errors)
