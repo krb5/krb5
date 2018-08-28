@@ -81,7 +81,7 @@ use::
 
 This will install the binaries under *DESTDIR/PREFIX*, e.g., the user
 programs will install into *DESTDIR/PREFIX/bin*, the libraries into
-*DESTDIR/PREFIX/lib*, etc.
+*DESTDIR/PREFIX/lib*, etc.  *DESTDIR* must be an absolute path.
 
 Some implementations of make allow multiple commands to be run in
 parallel, for faster builds.  We test our Makefiles in parallel builds
