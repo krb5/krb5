@@ -71,13 +71,15 @@ print_flags(unsigned int flags)
 }
 
 /* ctime() for uint32_t* */
-static char *
+static const char *
 ctime_uint32(uint32_t *time32)
 {
     time_t tmp;
+    const char *r;
 
     tmp = *time32;
-    return ctime(&tmp);
+    r = ctime(&tmp);
+    return (r == NULL) ? "(error)" : r;
 }
 
 /* Display time information. */

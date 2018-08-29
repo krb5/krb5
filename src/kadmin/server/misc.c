@@ -95,6 +95,8 @@ check_min_life(void *server_handle, krb5_principal principal,
                 until = princ.last_pwd_change + pol.pw_min_life;
 
                 time_string = ctime(&until);
+                if (time_string == NULL)
+                    time_string = "(error)";
                 errstr = error_message(CHPASS_UTIL_PASSWORD_TOO_SOON);
 
                 if (strlen(errstr) + strlen(time_string) < msg_len) {

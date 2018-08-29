@@ -249,7 +249,6 @@ void ktutil_list(argc, argv)
             time_t tstamp;
 
             tstamp = lp->entry->timestamp;
-            (void) localtime(&tstamp);
             lp->entry->timestamp = tstamp;
             fill = ' ';
             if (!krb5_timestamp_to_sfstring((krb5_timestamp)lp->entry->

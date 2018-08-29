@@ -40,14 +40,17 @@ extern kadm5_config_params global_params;
 extern krb5_context util_context;
 extern time_t get_date(char *);
 
-static char *strdate(krb5_timestamp when)
+static const char *
+strdate(krb5_timestamp when)
 {
     struct tm *tm;
     static char out[40];
     time_t lcltim = ts2tt(when);
 
     tm = localtime(&lcltim);
-    strftime(out, sizeof(out), "%a %b %d %H:%M:%S %Z %Y", tm);
+    if (tm == NULL ||
+        strftime(out, sizeof(out), "%a %b %d %H:%M:%S %Z %Y", tm) == 0)
+        strlcpy(out, "(error)", sizeof(out));
     return out;
 }
 

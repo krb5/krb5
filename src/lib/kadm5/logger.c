@@ -638,7 +638,9 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
     time_t      now;
 #ifdef  HAVE_STRFTIME
     size_t      soff;
-#endif  /* HAVE_STRFTIME */
+#else
+    char       *r;
+#endif
 
     /*
      * Format a syslog-esque message of the format:
@@ -667,7 +669,10 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
      *  dow mon dd hh:mm:ss tzs yyyy\n
      *  012345678901234567890123456789
      */
-    strncpy(outbuf, ctime(&now) + 4, 15);
+    r = ctime(&now);
+    if (r == NULL)
+        return(-1);
+    strncpy(outbuf, r + 4, 15);
     cp += 15;
 #endif  /* HAVE_STRFTIME */
 #ifdef VERBOSE_LOGS
