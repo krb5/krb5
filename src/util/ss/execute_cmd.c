@@ -147,6 +147,8 @@ ss_execute_command(sci_idx, argv)
     for (argp = argv; *argp; argp++)
         argc++;
     argp = (char **)malloc((argc+1)*sizeof(char *));
+    if (argp == NULL)
+        return(ENOMEM);
     for (i = 0; i <= argc; i++)
         argp[i] = argv[i];
     ret = really_execute_command(sci_idx, argc, &argp);
