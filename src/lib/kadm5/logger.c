@@ -638,6 +638,7 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
     time_t      now;
 #ifdef  HAVE_STRFTIME
     size_t      soff;
+    struct tm  *tm;
 #else
     char       *r;
 #endif
@@ -657,7 +658,10 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
     /*
      * Format the date: mon dd hh:mm:ss
      */
-    soff = strftime(outbuf, sizeof(outbuf), "%b %d %H:%M:%S", localtime(&now));
+    tm = localtime(&now);
+    if (tm == NULL)
+        return(-1);
+    soff = strftime(outbuf, sizeof(outbuf), "%b %d %H:%M:%S", tm);
     if (soff > 0)
         cp += soff;
     else
