@@ -7266,6 +7266,19 @@ krb5_get_init_creds_opt_set_responder(krb5_context context,
                                       krb5_responder_fn responder, void *data);
 
 /**
+* Get the lifetime remaining of kerberos password.
+* @param [in]  context         Library context
+* @param [in]  client          Client principal
+* @param [in]  password        Password
+* @param [out] rem_pw_exp_time Lifetime remaining of password
+*
+* This function allow get the lifetime remaining of kerberos password.
+*/
+krb5_error_code KRB5_CALLCONV
+krb5_get_pw_exp(krb5_context context, krb5_principal client,
+                const char *password, krb5_timestamp *rem_pw_exp_time);
+
+/**
  * Get initial credentials using a password.
  *
  * @param [in]  context         Library context

@@ -484,3 +484,4 @@ EXPORTS
 	encode_krb5_pa_spake				@444 ; PRIVATE
 	decode_krb5_pa_spake				@445 ; PRIVATE
 	k5_free_pa_spake				@446 ; PRIVATE
+	krb5_get_pw_exp					@447
