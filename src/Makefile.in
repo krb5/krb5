@@ -588,7 +588,6 @@ INDENTDIRS = \
 	util
 
 BSDFILES = \
-	kadmin/cli/strftime.c \
 	kadmin/server/ipropd_svc.c \
 	kadmin/server/kadm_rpc_svc.c \
 	lib/apputils/daemon.c \
@@ -597,7 +596,6 @@ BSDFILES = \
 	lib/kadm5/kadm_rpc.h \
 	lib/kadm5/kadm_rpc_xdr.c \
 	lib/kadm5/srv/adb_xdr.c \
-	lib/krb5/krb/strftime.c \
 	lib/krb5/krb/strptime.c \
 	slave/kpropd_rpc.c \
 	util/support/getopt.c \

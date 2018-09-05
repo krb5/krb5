@@ -117,12 +117,6 @@ krb5_salttype_to_string(krb5_int32 salttype, char *buffer, size_t buflen)
 
 /* (absolute) time conversions */
 
-#ifndef HAVE_STRFTIME
-#undef strftime
-#define strftime my_strftime
-static size_t strftime (char *, size_t, const char *, const struct tm *);
-#endif
-
 #ifdef HAVE_STRPTIME
 #ifdef NEED_STRPTIME_PROTO
 extern char *strptime (const char *, const char *,
@@ -291,7 +285,7 @@ krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen)
 #undef __P
 #define __P(X) X
 
-#if !defined (HAVE_STRFTIME) || !defined (HAVE_STRPTIME)
+#ifndef HAVE_STRPTIME
 #undef _CurrentTimeLocale
 #define _CurrentTimeLocale (&dummy_locale_info)
 
@@ -322,26 +316,6 @@ static const struct dummy_locale_info_t dummy_locale_info = {
 };
 #undef  TM_YEAR_BASE
 #define TM_YEAR_BASE 1900
-#endif
 
-#ifndef HAVE_STRFTIME
-#undef  DAYSPERLYEAR
-#define DAYSPERLYEAR 366
-#undef  DAYSPERNYEAR
-#define DAYSPERNYEAR 365
-#undef  DAYSPERWEEK
-#define DAYSPERWEEK 7
-#undef  isleap
-#define isleap(N)       ((N % 4) == 0 && (N % 100 != 0 || N % 400 == 0))
-#undef  tzname
-#define tzname my_tzname
-static const char *const tzname[2] = { 0, 0 };
-#undef  tzset
-#define tzset()
-
-#include "strftime.c"
-#endif
-
-#ifndef HAVE_STRPTIME
 #include "strptime.c"
 #endif

@@ -636,12 +636,8 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
     char        *syslogp;
     char        *cp;
     time_t      now;
-#ifdef  HAVE_STRFTIME
     size_t      soff;
     struct tm  *tm;
-#else
-    char       *r;
-#endif
 
     /*
      * Format a syslog-esque message of the format:
@@ -654,7 +650,7 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
      */
     cp = outbuf;
     (void) time(&now);
-#ifdef  HAVE_STRFTIME
+
     /*
      * Format the date: mon dd hh:mm:ss
      */
@@ -666,19 +662,7 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
         cp += soff;
     else
         return(-1);
-#else   /* HAVE_STRFTIME */
-    /*
-     * Format the date:
-     * We ASSUME here that the output of ctime is of the format:
-     *  dow mon dd hh:mm:ss tzs yyyy\n
-     *  012345678901234567890123456789
-     */
-    r = ctime(&now);
-    if (r == NULL)
-        return(-1);
-    strncpy(outbuf, r + 4, 15);
-    cp += 15;
-#endif  /* HAVE_STRFTIME */
+
 #ifdef VERBOSE_LOGS
     snprintf(cp, sizeof(outbuf) - (cp-outbuf), " %s %s[%ld](%s): ",
              log_control.log_hostname ? log_control.log_hostname : "",
