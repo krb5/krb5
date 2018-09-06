@@ -582,3 +582,50 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
             return (retval);
     return retval;
 }
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_pw_exp(krb5_context context, krb5_principal client,
+                const char *password, krb5_timestamp *rem_pw_exp_time) {
+
+    krb5_creds creds;
+    krb5_kdc_rep *as_reply;
+    krb5_data pw0;
+    krb5_error_code retval;
+    krb5_timestamp pw_exp, acct_exp, now;
+    krb5_boolean is_last_req;
+
+    struct gak_password gakpw;
+    int use_master;
+
+    retval = krb5_timeofday(context, &now);
+
+    if (retval != 0)
+        return(retval);
+    
+    use_master = 0;
+    as_reply = NULL;
+
+    memset(&gakpw, 0, sizeof(gakpw));
+
+    if (password != NULL) {
+        pw0 = string2data((char *)password);
+        gakpw.password = &pw0;
+    }
+
+    retval = k5_get_init_creds(context, &creds, client, 
+                               NULL, NULL, 0, NULL, NULL, 
+                               krb5_get_as_key_password, 
+                               &gakpw, &use_master, &as_reply);
+
+    if (retval != 0)
+        return(retval);
+
+    get_expiry_times(as_reply->enc_part2, &pw_exp, &acct_exp, &is_last_req);
+
+    *rem_pw_exp_time = pw_exp - now;
+
+    if (as_reply)
+        krb5_free_kdc_rep(context, as_reply);
+
+    return(retval);
+}

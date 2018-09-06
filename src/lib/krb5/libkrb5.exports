@@ -407,6 +407,7 @@ krb5_get_init_creds_opt_set_responder
 krb5_get_init_creds_opt_set_salt
 krb5_get_init_creds_opt_set_tkt_life
 krb5_get_init_creds_password
+krb5_get_pw_exp
 krb5_get_notification_message
 krb5_get_permitted_enctypes
 krb5_get_profile
