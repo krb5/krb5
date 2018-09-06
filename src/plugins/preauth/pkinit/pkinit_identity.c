@@ -317,29 +317,38 @@ parse_fs_options(krb5_context context,
                  const char *residual)
 {
     char *certname, *keyname, *save;
+    char *cert_filename = NULL, *key_filename = NULL;
     krb5_error_code retval = ENOMEM;
 
-    if (residual == NULL || residual[0] == '\0')
-        return 0;
+    if (residual == NULL || residual[0] == '\0' || residual[0] == ',')
+        return EINVAL;
 
     certname = strdup(residual);
     if (certname == NULL)
         goto cleanup;
 
     certname = strtok_r(certname, ",", &save);
+    if (certname == NULL)
+        goto cleanup;
     keyname = strtok_r(NULL, ",", &save);
 
-    idopts->cert_filename = strdup(certname);
-    if (idopts->cert_filename == NULL)
+    cert_filename = strdup(certname);
+    if (cert_filename == NULL)
         goto cleanup;
 
-    idopts->key_filename = strdup(keyname ? keyname : certname);
-    if (idopts->key_filename == NULL)
+    key_filename = strdup((keyname != NULL) ? keyname : certname);
+    if (key_filename == NULL)
         goto cleanup;
 
+    idopts->cert_filename = cert_filename;
+    idopts->key_filename = key_filename;
+    cert_filename = key_filename = NULL;
     retval = 0;
+
 cleanup:
     free(certname);
+    free(cert_filename);
+    free(key_filename);
     return retval;
 }
 

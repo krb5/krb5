@@ -393,6 +393,11 @@ realm.kinit(realm.user_princ,
             flags=['-X', 'X509_user_identity=%s' % p12_generic_identity])
 realm.klist(realm.user_princ)
 
+# Regression test for #8726: null deref when parsing a FILE residual
+# beginning with a comma.
+realm.kinit(realm.user_princ, flags=['-X', 'X509_user_identity=,'],
+            expected_code=1, expected_msg='Preauthentication failed while')
+
 if not have_soft_pkcs11:
     skip_rest('PKINIT PKCS11 tests', 'soft-pkcs11.so not found')
 
