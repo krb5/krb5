@@ -20,6 +20,7 @@ SRCS = \
 	$(srcdir)/g_compare_name.c \
 	$(srcdir)/g_complete_auth_token.c \
 	$(srcdir)/g_context_time.c \
+	$(srcdir)/g_create_sec_context.c \
 	$(srcdir)/g_decapsulate_token.c \
 	$(srcdir)/g_delete_sec_context.c \
 	$(srcdir)/g_del_name_attr.c \
@@ -59,6 +60,7 @@ SRCS = \
 	$(srcdir)/g_rel_oid_set.c \
 	$(srcdir)/g_saslname.c \
 	$(srcdir)/g_seal.c \
+	$(srcdir)/g_set_context_flags.c \
 	$(srcdir)/g_set_context_option.c \
 	$(srcdir)/g_set_cred_option.c \
 	$(srcdir)/g_set_name_attr.c \
@@ -84,6 +86,7 @@ OBJS = \
 	$(OUTPRE)g_compare_name.$(OBJEXT) \
 	$(OUTPRE)g_complete_auth_token.$(OBJEXT) \
 	$(OUTPRE)g_context_time.$(OBJEXT) \
+	$(OUTPRE)g_create_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_decapsulate_token.$(OBJEXT) \
 	$(OUTPRE)g_delete_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_del_name_attr.$(OBJEXT) \
@@ -123,6 +126,7 @@ OBJS = \
 	$(OUTPRE)g_rel_oid_set.$(OBJEXT) \
 	$(OUTPRE)g_saslname.$(OBJEXT) \
 	$(OUTPRE)g_seal.$(OBJEXT) \
+	$(OUTPRE)g_set_context_flags.$(OBJEXT) \
 	$(OUTPRE)g_set_context_option.$(OBJEXT) \
 	$(OUTPRE)g_set_cred_option.$(OBJEXT) \
 	$(OUTPRE)g_set_name_attr.$(OBJEXT) \
@@ -148,6 +152,7 @@ STLIBOBJS = \
 	g_compare_name.o \
 	g_complete_auth_token.o \
 	g_context_time.o \
+	g_create_sec_context.o \
 	g_decapsulate_token.o \
 	g_delete_sec_context.o \
 	g_del_name_attr.o \
@@ -187,6 +192,7 @@ STLIBOBJS = \
 	g_rel_oid_set.o \
 	g_saslname.o \
 	g_seal.o \
+	g_set_context_flags.o \
 	g_set_context_option.o \
 	g_set_cred_option.o \
 	g_set_name_attr.o \

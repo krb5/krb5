@@ -185,3 +185,6 @@ EXPORTS
 ; Added in 1.16
 	GSS_KRB5_GET_CRED_IMPERSONATOR			@148	DATA
 	GSS_C_SEC_CONTEXT_SASL_SSF			@149	DATA
+	gss_create_sec_context				@150
+	gss_set_context_flags				@151
+	GSS_C_MA_CBINDING_CONFIRM			@152	DATA

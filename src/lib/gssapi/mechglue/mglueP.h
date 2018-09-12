@@ -21,12 +21,21 @@ do {								\
 } while (0)
 
 /*
- * Array of context IDs typed by mechanism OID
+ * A mechanism context typed by mechanism OID.  If mech_type is GSS_C_NO_OID
+ * and internal_ctx_id is GSS_C_NO_CONTEXT, the context is empty--it was
+ * created by gss_create_sec_context(), but has no associated mechanism as it
+ * has not yet been used to establish a security context.  If mech_type is set
+ * but internal_ctx_id is GSS_C_NO_CONTEXT, the context is partially
+ * destroyed--the mechanism deleted the mechanism context during a call to
+ * gss_init_sec_context() or gss_accept_sec_context(), but we have preserved
+ * the union context for the application to delete.
  */
 typedef struct gss_union_ctx_id_struct {
 	struct gss_union_ctx_id_struct *loopback;
 	gss_OID			mech_type;
 	gss_ctx_id_t		internal_ctx_id;
+	uint64_t		req_flags;
+	uint64_t		ret_flags_understood;
 } gss_union_ctx_id_desc, *gss_union_ctx_id_t;
 
 /*
@@ -702,6 +711,22 @@ typedef struct gss_config {
 	    int				/* iov_count */
 	);
 
+	/* Channel binding signalling extensions */
+	/* https://tools.ietf.org/html/draft-ietf-kitten-channel-bound-flag-03 */
+
+	OM_uint32       (KRB5_CALLCONV *gss_create_sec_context)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t *		/* context */
+	);
+
+	OM_uint32       (KRB5_CALLCONV *gss_set_context_flags)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t,		/* context */
+	    uint64_t,			/* req_flags */
+	    uint64_t			/* ret_flags */
+	);
 } *gss_mechanism;
 
 /*

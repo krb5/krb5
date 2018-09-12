@@ -164,6 +164,17 @@ static const gss_OID_desc const_oids[] = {
      * infosys(1) gssapi(2) krb5(2) krb5-gssapi-ext(5) sasl-ssf(15)
      */
     {11, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0f"},
+
+    /*
+     * TODO: assign an OID for this.
+     *
+     * Attribute:
+     *   - GSS_C_MA_CBINDING_CONFIRM
+     *
+     * See:
+     * https://tools.ietf.org/html/draft-ietf-kitten-channel-bound-flag-03
+     */
+    {11, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\xf0"},
 };
 
 /* Here are the constants which point to the static structure above.
@@ -226,6 +237,8 @@ GSS_DLLIMP gss_const_OID GSS_C_MA_COMPRESS          = oids+34;
 GSS_DLLIMP gss_const_OID GSS_C_MA_CTX_TRANS         = oids+35;
 
 GSS_DLLIMP gss_OID GSS_C_SEC_CONTEXT_SASL_SSF = oids+36;
+
+GSS_DLLIMP gss_const_OID GSS_C_MA_CBINDING_CONFIRM     = oids+37;
 
 static gss_OID_set_desc gss_ma_known_attrs_desc = { 27, oids+9 };
 gss_OID_set gss_ma_known_attrs = &gss_ma_known_attrs_desc;
@@ -400,6 +413,12 @@ static struct mech_attr_info_desc {
         "GSS_C_MA_CTX_TRANS",
         "context-transfer",
         "Mechanism supports security context export/import.",
+    },
+    {
+        oids+37,
+        "GSS_C_MA_CBINDING_CONFIRM",
+        "channel-bindings-confirm",
+        "Mechanism supports always confirming channel binding success.",
     },
 };
 
