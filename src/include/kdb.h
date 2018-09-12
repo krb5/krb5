@@ -1257,14 +1257,15 @@ typedef struct _kdb_vftabl {
      *
      *   flags: The flags used to look up the client principal.
      *
-     *   client_princ: For S4U2Proxy TGS requests, the client principal
-     *     requested by the service; for regular TGS requests, the
+     *   client_princ: For S4U2Self and S4U2Proxy TGS requests, the client
+     *     principal requested by the service; for regular TGS requests, the
      *     possibly-canonicalized client principal.
      *
      *   client: The DB entry of the client.  For S4U2Self, this will be the DB
      *     entry for the client principal requested by the service).
      *
-     *   server: The DB entry of the service principal.
+     *   server: The DB entry of the service principal, or of a cross-realm
+     *     krbtgt principal in case of referral.
      *
      *   krbtgt: For TGS requests, the DB entry of the server of the ticket in
      *     the PA-TGS-REQ padata; this is usually a local or cross-realm krbtgt
