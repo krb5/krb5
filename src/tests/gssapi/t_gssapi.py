@@ -9,9 +9,11 @@ for realm in multipass_realms():
     realm.run(['./t_iov', '-s', 'p:' + realm.host_princ])
     realm.run(['./t_pcontok', 'p:' + realm.host_princ])
 
-### Test acceptor name behavior.
-
+# Test gss_add_cred().
 realm = K5Realm()
+realm.run(['./t_add_cred'])
+
+### Test acceptor name behavior.
 
 # Create some host-based principals and put most of them into the
 # keytab.  Rename one principal so that the keytab name matches the
