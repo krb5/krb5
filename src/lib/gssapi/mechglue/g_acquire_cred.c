@@ -517,6 +517,9 @@ gss_add_cred_from(minor_status, input_cred_handle,
 	free(union_cred->mechs_array);
 	free(union_cred->cred_array);
 	new_union_cred = union_cred;
+    } else if (input_cred_handle == GSS_C_NO_CREDENTIAL) {
+	new_union_cred = union_cred;
+	*output_cred_handle = (gss_cred_id_t)new_union_cred;
     } else {
 	new_union_cred = malloc(sizeof (gss_union_cred_desc));
 	if (new_union_cred == NULL) {
