@@ -46,7 +46,7 @@ int
 main()
 {
     OM_uint32 minor, major;
-    gss_cred_id_t cred1;
+    gss_cred_id_t cred1, cred2;
     gss_cred_usage_t usage;
 
     /* Check that we get the expected error if we pass neither an input nor an
@@ -92,7 +92,36 @@ main()
                                      NULL, &usage);
     assert(major == GSS_S_COMPLETE && usage == GSS_C_ACCEPT);
 
+    /* Start over with another new cred. */
     gss_release_cred(&minor, &cred1);
+    major = gss_add_cred(&minor, GSS_C_NO_CREDENTIAL, GSS_C_NO_NAME,
+                         &mech_krb5, GSS_C_ACCEPT, GSS_C_INDEFINITE,
+                         GSS_C_INDEFINITE, &cred1, NULL, NULL, NULL);
+    assert(major == GSS_S_COMPLETE);
+
+    /* Create an expanded cred by passing both an output handle and an input
+     * handle. */
+    major = gss_add_cred(&minor, cred1, GSS_C_NO_NAME, &mech_iakerb,
+                         GSS_C_INITIATE, GSS_C_INDEFINITE, GSS_C_INDEFINITE,
+                         &cred2, NULL, NULL, NULL);
+    assert(major == GSS_S_COMPLETE);
+
+    /* Verify mechanism creds in cred1 and cred2. */
+    major = gss_inquire_cred_by_mech(&minor, cred1, &mech_krb5, NULL, NULL,
+                                     NULL, &usage);
+    assert(major == GSS_S_COMPLETE && usage == GSS_C_ACCEPT);
+    major = gss_inquire_cred_by_mech(&minor, cred1, &mech_iakerb, NULL, NULL,
+                                     NULL, &usage);
+    assert(major == GSS_S_NO_CRED);
+    major = gss_inquire_cred_by_mech(&minor, cred2, &mech_krb5, NULL, NULL,
+                                     NULL, &usage);
+    assert(major == GSS_S_COMPLETE && usage == GSS_C_ACCEPT);
+    major = gss_inquire_cred_by_mech(&minor, cred2, &mech_iakerb, NULL, NULL,
+                                     NULL, &usage);
+    assert(major == GSS_S_COMPLETE && usage == GSS_C_INITIATE);
+
+    gss_release_cred(&minor, &cred1);
+    gss_release_cred(&minor, &cred2);
 
     return 0;
 }
