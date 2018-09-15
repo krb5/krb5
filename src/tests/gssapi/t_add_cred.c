@@ -48,6 +48,7 @@ main()
     OM_uint32 minor, major;
     gss_cred_id_t cred1;
     gss_cred_usage_t usage;
+    gss_name_t name;
 
     /* Check that we get the expected error if we pass neither an input nor an
      * output cred handle. */
@@ -55,6 +56,15 @@ main()
                          &mech_krb5, GSS_C_INITIATE, GSS_C_INDEFINITE,
                          GSS_C_INDEFINITE, NULL, NULL, NULL, NULL);
     assert(major == (GSS_S_CALL_INACCESSIBLE_WRITE | GSS_S_NO_CRED));
+
+    /* Regression test for #8737: make sure that desired_name is honored when
+     * creating a credential by passing in a non-matching name. */
+    name = import_name("p:does/not/match@WRONG_REALM");
+    major = gss_add_cred(&minor, GSS_C_NO_CREDENTIAL, name, &mech_krb5,
+                         GSS_C_INITIATE, GSS_C_INDEFINITE, GSS_C_INDEFINITE,
+                         &cred1, NULL, NULL, NULL);
+    assert(major == GSS_S_CRED_UNAVAIL);
+    gss_release_name(&minor, &name);
 
     /* Create cred1 with a krb5 initiator cred by passing an output handle but
      * no input handle. */
