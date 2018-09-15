@@ -502,22 +502,20 @@ gss_add_cred_from(minor_status, input_cred_handle,
 	    return (status);
     }
 
-    /* for default credentials we will use GSS_C_NO_NAME */
-    if (input_cred_handle != GSS_C_NO_CREDENTIAL ||
-        cred_store != GSS_C_NO_CRED_STORE) {
-	/* may need to create a mechanism specific name */
-	if (desired_name) {
-	    union_name = (gss_union_name_t)desired_name;
-	    if (union_name->mech_type &&
-		g_OID_equal(union_name->mech_type, selected_mech))
-		internal_name = union_name->mech_name;
-	    else {
-		if (gssint_import_internal_name(minor_status, selected_mech,
-						union_name, &allocated_name) !=
-		    GSS_S_COMPLETE)
-		    return (GSS_S_BAD_NAME);
-		internal_name = allocated_name;
+    /* We may need to create a mechanism specific name. */
+    if (desired_name != GSS_C_NO_NAME) {
+	union_name = (gss_union_name_t)desired_name;
+	if (union_name->mech_type &&
+	    g_OID_equal(union_name->mech_type, selected_mech)) {
+	    internal_name = union_name->mech_name;
+	} else {
+	    if (gssint_import_internal_name(minor_status, selected_mech,
+					    union_name, &allocated_name) !=
+		GSS_S_COMPLETE) {
+		status = GSS_S_BAD_NAME;
+		goto errout;
 	    }
+	    internal_name = allocated_name;
 	}
     }
 
