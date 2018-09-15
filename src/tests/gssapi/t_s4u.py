@@ -142,9 +142,12 @@ realm.stop()
 
 # Exercise cross-realm S4U2Self.  The query in the foreign realm will
 # fail, but we can check that the right server principal was used.
+# Include a regression test for #8741 by unsetting the default realm.
 r1, r2 = cross_realms(2, create_user=False)
 r1.run([kinit, '-k', r1.host_princ])
-r1.run(['./t_s4u', 'p:' + r2.host_princ], expected_code=1,
+remove_default = {'libdefaults': {'default_realm': None}}
+no_default = r1.special_env('no_default', False, krb5_conf=remove_default)
+r1.run(['./t_s4u', 'p:' + r2.host_princ], env=no_default, expected_code=1,
        expected_msg='Server not found in Kerberos database')
 r1.stop()
 r2.stop()
