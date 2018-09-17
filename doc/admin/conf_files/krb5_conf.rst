@@ -532,8 +532,8 @@ following tags may be specified in the realm's subsection:
     one case: If an attempt to get credentials fails because of an
     invalid password, the client software will attempt to contact the
     master KDC, in case the user's password has just been changed, and
-    the updated database has not been propagated to the slave servers
-    yet.
+    the updated database has not been propagated to the replica
+    servers yet.
 
 **v4_instance_convert**
     This subsection allows the administrator to configure exceptions

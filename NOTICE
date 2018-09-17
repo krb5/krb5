@@ -311,8 +311,8 @@ the following new or changed files:
    lib/kdb/kdb_log.c
    lib/kdb/kdb_log.h
    lib/krb5/error_tables/kdb5_err.et
-   slave/kpropd_rpc.c
-   slave/kproplog.c
+   kprop/kpropd_rpc.c
+   kprop/kproplog.c
 
 are subject to the following license:
 

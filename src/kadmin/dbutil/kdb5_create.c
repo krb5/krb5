@@ -308,8 +308,8 @@ void kdb5_create(argc, argv)
 
         /*
          * Since we're creating a new db we shouldn't worry about
-         * adding the initial principals since any slave might as well
-         * do full resyncs from this newly created db.
+         * adding the initial principals since any replica might as
+         * well do full resyncs from this newly created db.
          */
         log_ctx->iproprole = IPROP_NULL;
     }

@@ -106,20 +106,20 @@ properly on the client if the principal entry has no long-term keys.
 kprop: No route to host while connecting to server
 ..................................................
 
-Make sure that the hostname of the slave (as given to kprop) is
-correct, and that any firewalls between the master and the slave allow
-a connection on port 754.
+Make sure that the hostname of the replica KDC (as given to kprop) is
+correct, and that any firewalls between the master and the replica
+allow a connection on port 754.
 
 .. _kprop_con_refused:
 
 kprop: Connection refused while connecting to server
 ....................................................
 
-If the slave is intended to run kpropd out of inetd, make sure that
-inetd is configured to accept krb5_prop connections.  inetd may need
-to be restarted or sent a SIGHUP to recognize the new configuration.
-If the slave is intended to run kpropd in standalone mode, make sure
-that it is running.
+If the replica KDC is intended to run kpropd out of inetd, make sure
+that inetd is configured to accept krb5_prop connections.  inetd may
+need to be restarted or sent a SIGHUP to recognize the new
+configuration.  If the replica is intended to run kpropd in standalone
+mode, make sure that it is running.
 
 .. _kprop_sendauth_exchange:
 
@@ -128,8 +128,8 @@ kprop: Server rejected authentication (during sendauth exchange) while authentic
 
 Make sure that:
 
-#. The time is synchronized between the master and slave KDCs.
+#. The time is synchronized between the master and replica KDCs.
 #. The master stash file was copied from the master to the expected
-   location on the slave.
-#. The slave has a keytab file in the default location containing a
-   ``host`` principal for the slave's hostname.
+   location on the replica.
+#. The replica has a keytab file in the default location containing a
+   ``host`` principal for the replica's hostname.

@@ -228,9 +228,9 @@ The following tags may be specified in a [realms] subsection:
     Prior to release 1.11, the maximum value was 2500.
 
 **iprop_slave_poll**
-    (Delta time string.)  Specifies how often the slave KDC polls for
-    new updates from the master.  The default value is ``2m`` (that
-    is, two minutes).
+    (Delta time string.)  Specifies how often the replica KDC polls
+    for new updates from the master.  The default value is ``2m``
+    (that is, two minutes).
 
 **iprop_listen**
     (Whitespace- or comma-separated list.)  Specifies the iprop RPC
@@ -247,8 +247,8 @@ The following tags may be specified in a [realms] subsection:
 **iprop_port**
     (Port number.)  Specifies the port number to be used for
     incremental propagation.  When **iprop_enable** is true, this
-    relation is required in the slave configuration file, and this
-    relation or **iprop_listen** is required in the master
+    relation is required in the replica KDC configuration file, and
+    this relation or **iprop_listen** is required in the master
     configuration file, as there is no default port number.  Port
     numbers specified in **iprop_listen** entries will override this
     port number for the :ref:`kadmind(8)` daemon.
@@ -256,7 +256,7 @@ The following tags may be specified in a [realms] subsection:
 **iprop_resync_timeout**
     (Delta time string.)  Specifies the amount of time to wait for a
     full propagation to complete.  This is optional in configuration
-    files, and is used by slave KDCs only.  The default value is 5
+    files, and is used by replica KDCs only.  The default value is 5
     minutes (``5m``).  New in release 1.11.
 
 **iprop_logfile**

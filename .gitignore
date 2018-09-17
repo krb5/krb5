@@ -415,9 +415,9 @@ local.properties
 
 /src/po/*.mo
 
-/src/slave/kprop
-/src/slave/kpropd
-/src/slave/kproplog
+/src/kprop/kprop
+/src/kprop/kpropd
+/src/kprop/kproplog
 
 /src/tests/adata
 /src/tests/au.log

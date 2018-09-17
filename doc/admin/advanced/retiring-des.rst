@@ -134,11 +134,11 @@ existing tickets will still function until their scheduled expiry
 
 .. note::
 
-    The new ``krbtgt@REALM`` key should be propagated to slave KDCs
+    The new ``krbtgt@REALM`` key should be propagated to replica KDCs
     immediately so that TGTs issued by the master KDC can be used to
-    issue service tickets on slave KDCs.  Slave KDCs will refuse requests
-    using the new TGT kvno until the new krbtgt entry has been propagated
-    to them.
+    issue service tickets on replica KDCs.  Replica KDCs will refuse
+    requests using the new TGT kvno until the new krbtgt entry has
+    been propagated to them.
 
 It is necessary to explicitly specify the enctypes for the new database
 entry, since **supported_enctypes** has not been changed.  Leaving
@@ -321,8 +321,8 @@ The following KDC configuration will not generate DES keys by default:
 
     As before, the KDC process must be restarted for this change to take
     effect.  It is best practice to update kdc.conf on all KDCs, not just the
-    master, to avoid unpleasant surprises should the master fail and a slave
-    need to be promoted.
+    master, to avoid unpleasant surprises should the master fail and a
+    replica need to be promoted.
 
 It is now appropriate to remove the legacy single-DES key from the
 ``krbtgt/REALM`` entry:

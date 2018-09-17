@@ -9,10 +9,10 @@ following issues:
 * How you will assign your hostnames to Kerberos realms.
 * Which ports your KDC and and kadmind services will use, if they will
   not be using the default ports.
-* How many slave KDCs you need and where they should be located.
-* The hostnames of your master and slave KDCs.
+* How many replica KDCs you need and where they should be located.
+* The hostnames of your master and replica KDCs.
 * How frequently you will propagate the database from the master KDC
-  to the slave KDCs.
+  to the replica KDCs.
 
 
 Realm name
@@ -94,28 +94,28 @@ port numbers used by the Kerberos V5 programs, refer to the
 :ref:`conf_firewall`.
 
 
-Slave KDCs
-----------
+Replica KDCs
+------------
 
-Slave KDCs provide an additional source of Kerberos ticket-granting
+Replica KDCs provide an additional source of Kerberos ticket-granting
 services in the event of inaccessibility of the master KDC.  The
-number of slave KDCs you need and the decision of where to place them,
+number of replica KDCs you need and the decision of where to place them,
 both physically and logically, depends on the specifics of your
 network.
 
 Kerberos authentication requires that each client be able to contact a
 KDC.  Therefore, you need to anticipate any likely reason a KDC might
-be unavailable and have a slave KDC to take up the slack.
+be unavailable and have a replica KDC to take up the slack.
 
 Some considerations include:
 
-* Have at least one slave KDC as a backup, for when the master KDC is
-  down, is being upgraded, or is otherwise unavailable.
+* Have at least one replica KDC as a backup, for when the master KDC
+  is down, is being upgraded, or is otherwise unavailable.
 * If your network is split such that a network outage is likely to
   cause a network partition (some segment or segments of the network
-  to become cut off or isolated from other segments), have a slave KDC
-  accessible to each segment.
-* If possible, have at least one slave KDC in a different building
+  to become cut off or isolated from other segments), have a replica
+  KDC accessible to each segment.
+* If possible, have at least one replica KDC in a different building
   from the master, in case of power outages, fires, or other localized
   disasters.
 
@@ -127,8 +127,8 @@ Hostnames for KDCs
 
 MIT recommends that your KDCs have a predefined set of CNAME records
 (DNS hostname aliases), such as ``kerberos`` for the master KDC and
-``kerberos-1``, ``kerberos-2``, ... for the slave KDCs.  This way, if
-you need to swap a machine, you only need to change a DNS entry,
+``kerberos-1``, ``kerberos-2``, ... for the replica KDCs.  This way,
+if you need to swap a machine, you only need to change a DNS entry,
 rather than having to change hostnames.
 
 As of MIT krb5 1.4, clients can locate a realm's KDCs through DNS
@@ -248,7 +248,7 @@ Database propagation
 --------------------
 
 The Kerberos database resides on the master KDC, and must be
-propagated regularly (usually by a cron job) to the slave KDCs.  In
+propagated regularly (usually by a cron job) to the replica KDCs.  In
 deciding how frequently the propagation should happen, you will need
 to balance the amount of time the propagation takes against the
 maximum reasonable amount of time a user should have to wait for a
@@ -256,10 +256,10 @@ password change to take effect.
 
 If the propagation time is longer than this maximum reasonable time
 (e.g., you have a particularly large database, you have a lot of
-slaves, or you experience frequent network delays), you may wish to
+replicas, or you experience frequent network delays), you may wish to
 cut down on your propagation delay by performing the propagation in
 parallel.  To do this, have the master KDC propagate the database to
-one set of slaves, and then have each of these slaves propagate the
-database to additional slaves.
+one set of replicas, and then have each of these replicas propagate
+the database to additional replicas.
 
 See also :ref:`incr_db_prop`

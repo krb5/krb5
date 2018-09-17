@@ -146,8 +146,8 @@ Release 1.13
      protocol.
  -   Add support for `hierarchical incremental propagation
      <https://k5wiki.kerberos.org/wiki/Projects/Hierarchical_iprop>`_,
-     where slaves can act as intermediates between an upstream master
-     and other downstream slaves.
+     where replicas can act as intermediates between an upstream master
+     and other downstream replicas.
  -   Add support for configuring GSS mechanisms using
      ``/etc/gss/mech.d/*.conf`` files in addition to
      ``/etc/gss/mech``.
@@ -255,9 +255,9 @@ Release 1.14
 
  * Performance:
 
-   - On slave KDCs, poll the master KDC immediately after processing a
-     full resync, and do not require two full resyncs after the master
-     KDC's log file is reset.
+   - On replica KDCs, poll the master KDC immediately after processing
+     a full resync, and do not require two full resyncs after the
+     master KDC's log file is reset.
 
 Release 1.15
 

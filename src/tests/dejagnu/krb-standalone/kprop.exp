@@ -5,24 +5,24 @@
 # the rest of the tests inside a proc, so that we can easily kill the
 # processes when the procedure ends.
 
-proc setup_slave {} {
+proc setup_replica {} {
     global tmppwd hostname REALMNAME env
-    file delete $tmppwd/slave-stash $tmppwd/slave-acl
-    file copy -force $tmppwd/stash:foo $tmppwd/slave-stash
-    file copy -force $tmppwd/acl $tmppwd/slave-acl
+    file delete $tmppwd/replica-stash $tmppwd/replica-acl
+    file copy -force $tmppwd/stash:foo $tmppwd/replica-stash
+    file copy -force $tmppwd/acl $tmppwd/replica-acl
     if ![file exists $tmppwd/kpropdacl] {
 	set aclfile [open $tmppwd/kpropd-acl w]
 	puts $aclfile "host/$hostname@$REALMNAME"
 	close $aclfile
     }
-    file copy -force $tmppwd/adb.lock $tmppwd/slave-adb.lock
+    file copy -force $tmppwd/adb.lock $tmppwd/replica-adb.lock
     if [info exists env(K5TEST_LMDB)] {
 	set suffixes { .mdb .mdb-lock .lockout.mdb .lockout.mdb-lock }
     } else {
 	set suffixes { {} .kadm5 .kadm5.lock .ok }
     }
     foreach suffix $suffixes {
-	file copy -force $tmppwd/kdc-db$suffix $tmppwd/slave-db$suffix
+	file copy -force $tmppwd/kdc-db$suffix $tmppwd/replica-db$suffix
     }
 }
 
@@ -64,7 +64,7 @@ proc doit { } {
     if ![setup_kerberos_db 0] {
 	return
     }
-    setup_slave
+    setup_replica
     if ![start_kerberos_daemons 0] {
 	return
     }
@@ -79,7 +79,7 @@ proc doit { } {
 
     # Get kprop server up and running.
     envstack_push
-    setup_kerberos_env slave
+    setup_kerberos_env replica
     start_kpropd
     envstack_pop
 
@@ -91,7 +91,7 @@ proc doit { } {
     # Dump master database.
     envstack_push
     setup_kerberos_env kdc
-    spawn $KDB5_UTIL dump $tmppwd/slave_datatrans
+    spawn $KDB5_UTIL dump $tmppwd/replica_datatrans
     expect eof
     if ![check_exit_status "kprop (kdb5_util dump)"] { return }
 
@@ -99,7 +99,7 @@ proc doit { } {
     sleep 1
 
     # Try a propagation.
-    spawn $KPROP -f $tmppwd/slave_datatrans -P [expr 10 + $portbase] -s $tmppwd/srvtab $hostname
+    spawn $KPROP -f $tmppwd/replica_datatrans -P [expr 10 + $portbase] -s $tmppwd/srvtab $hostname
     expect eof
     set kprop_exit [check_exit_status "kprop (exit status)"]
     # log output for debugging
@@ -107,14 +107,14 @@ proc doit { } {
     if !$kprop_exit { return }
 
     # Examine new database.
-    setup_kerberos_env slave
+    setup_kerberos_env replica
     spawn $KADMIN_LOCAL -r $REALMNAME -q listprincs
     expect {
 	wakawaka@ {
 	    expect eof
 	}
 	eof {
-	    fail "kprop (updated slave data)"
+	    fail "kprop (updated replica data)"
 	    return
 	}
 	timeout {

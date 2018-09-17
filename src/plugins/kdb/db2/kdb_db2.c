@@ -110,11 +110,11 @@
  * a bug, since the database may be inconsistant.  Note that the
  * absence of a semaphore file does not prevent another _update_ from
  * taking place later.  Database replacements take place automatically
- * only on slave servers; a crash in the middle of an update will be
- * fixed by the next slave propagation.  A crash in the middle of an
- * update on the master would be somewhat more serious, but this would
- * likely be noticed by an administrator, who could fix the problem and
- * retry the operation.
+ * only on replica servers; a crash in the middle of an update will be
+ * fixed by the next propagation.  A crash in the middle of an on the
+ * master would be somewhat more serious, but this would likely be
+ * noticed by an administrator, who could fix the problem and retry
+ * the operation.
  */
 
 /* Evaluate to true if the krb5_context c contains an initialized db2

@@ -42,7 +42,7 @@ progpaths = [
     os.path.join('clients', 'ksu'),
     os.path.join('clients', 'kvno'),
     os.path.join('clients', 'kswitch'),
-    'slave'
+    'kprop'
 ]
 
 # Add program directories to the beginning of PATH.

@@ -322,13 +322,13 @@ Scripts may use the following realm methods and attributes:
   or similar methods.
 
 * realm.start_kpropd(env, args=[]): Start a kpropd process.  Pass an
-  environment created with realm.special_env() for the slave.  If args
-  is given, it contains a list of additional kpropd arguments.
+  environment created with realm.special_env() for the replica.  If
+  args is given, it contains a list of additional kpropd arguments.
   Returns a handle to the kpropd process.
 
 * realm.run_kpropd_once(env, args=[]): Run kpropd once, using the -t
   flag.  Pass an environment created with realm.special_env() for the
-  slave.  If args is given, it contains a list of additional kpropd
+  replica.  If args is given, it contains a list of additional kpropd
   arguments.  Returns the kpropd output.
 
 * realm.realm: The realm's name.
@@ -1019,10 +1019,10 @@ class K5Realm(object):
         self._kadmind_proc = None
 
     def _kpropd_args(self):
-        slavedump_path = os.path.join(self.testdir, 'incoming-slave-datatrans')
+        datatrans_path = os.path.join(self.testdir, 'incoming-datatrans')
         kpropdacl_path = os.path.join(self.testdir, 'kpropd-acl')
         return [kpropd, '-D', '-P', str(self.kprop_port()),
-                '-f', slavedump_path, '-p', kdb5_util, '-a', kpropdacl_path]
+                '-f', datatrans_path, '-p', kdb5_util, '-a', kpropdacl_path]
 
     def start_kpropd(self, env, args=[]):
         proc = _start_daemon(self._kpropd_args() + args, env, 'ready')
@@ -1362,6 +1362,6 @@ kvno = os.path.join(buildtop, 'clients', 'kvno', 'kvno')
 kdestroy = os.path.join(buildtop, 'clients', 'kdestroy', 'kdestroy')
 kpasswd = os.path.join(buildtop, 'clients', 'kpasswd', 'kpasswd')
 t_inetd = os.path.join(buildtop, 'tests', 'dejagnu', 't_inetd')
-kproplog = os.path.join(buildtop, 'slave', 'kproplog')
-kpropd = os.path.join(buildtop, 'slave', 'kpropd')
-kprop = os.path.join(buildtop, 'slave', 'kprop')
+kproplog = os.path.join(buildtop, 'kprop', 'kproplog')
+kpropd = os.path.join(buildtop, 'kprop', 'kpropd')
+kprop = os.path.join(buildtop, 'kprop', 'kprop')

@@ -338,8 +338,8 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
      * dump already exists or that dump is not in ipropx format, or the
      * sno and timestamp in the header of that dump are outside the
      * ulog.  This allows us to share a single global dump with all
-     * slaves, since it's OK to share an older dump, as long as its sno
-     * and timestamp are in the ulog (then the slaves can get the
+     * replicas, since it's OK to share an older dump, as long as its
+     * sno and timestamp are in the ulog (then the replicas can get the
      * subsequent updates very iprop).
      */
     if (asprintf(&ubuf, "%s -r %s dump -i%d -c %s", kdb5_util,
@@ -351,9 +351,9 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
     }
 
     /*
-     * Fork to dump the db and xfer it to the slave.
+     * Fork to dump the db and xfer it to the replica.
      * (the fork allows parent to return quickly and the child
-     * acts like a callback to the slave).
+     * acts like a callback to the replica).
      */
     fret = fork();
     DPRINT("%s: fork=%d (%d)\n", whoami, fret, getpid());
@@ -418,7 +418,7 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 
     default: /* parent */
 	ret.ret = UPDATE_OK;
-	/* not used by slave (sno is retrieved from kdb5_util dump) */
+	/* not used by replica (sno is retrieved from kdb5_util dump) */
 	ret.lastentry.last_sno = 0;
 	ret.lastentry.last_time.seconds = 0;
 	ret.lastentry.last_time.useconds = 0;

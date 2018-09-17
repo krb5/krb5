@@ -49,14 +49,14 @@ After the server begins running, it puts itself in the background and
 disassociates itself from its controlling terminal.
 
 kadmind can be configured for incremental database propagation.
-Incremental propagation allows slave KDC servers to receive principal
-and policy updates incrementally instead of receiving full dumps of
-the database.  This facility can be enabled in the :ref:`kdc.conf(5)`
-file with the **iprop_enable** option.  Incremental propagation
-requires the principal ``kiprop/MASTER\@REALM`` (where MASTER is the
-master KDC's canonical host name, and REALM the realm name).  In
-release 1.13, this principal is automatically created and registered
-into the datebase.
+Incremental propagation allows replica KDC servers to receive
+principal and policy updates incrementally instead of receiving full
+dumps of the database.  This facility can be enabled in the
+:ref:`kdc.conf(5)` file with the **iprop_enable** option.  Incremental
+propagation requires the principal ``kiprop/MASTER\@REALM`` (where
+MASTER is the master KDC's canonical host name, and REALM the realm
+name).  In release 1.13, this principal is automatically created and
+registered into the datebase.
 
 
 OPTIONS
@@ -78,10 +78,10 @@ OPTIONS
     the server to place itself in the background.
 
 **-proponly**
-    causes the server to only listen and respond to Kerberos slave
+    causes the server to only listen and respond to Kerberos replica
     incremental propagation polling requests.  This option can be used
-    to set up a hierarchical propagation topology where a slave KDC
-    provides incremental updates to other Kerberos slaves.
+    to set up a hierarchical propagation topology where a replica KDC
+    provides incremental updates to other Kerberos replicas.
 
 **-port** *port-number*
     specifies the port on which the administration server listens for
@@ -100,12 +100,12 @@ OPTIONS
 
 **-K** *kprop_path*
     specifies the path to the kprop command to use to send full dumps
-    to slaves in response to full resync requests.
+    to replicas in response to full resync requests.
 
 **-k** *kprop_port*
-    specifies the port by which the kprop process that is spawned by kadmind
-    connects to the slave kpropd, in order to transfer the dump file during
-    an iprop full resync request.
+    specifies the port by which the kprop process that is spawned by
+    kadmind connects to the replica kpropd, in order to transfer the
+    dump file during an iprop full resync request.
 
 **-F** *dump_file*
     specifies the file path to be used for dumping the KDB in response

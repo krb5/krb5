@@ -272,9 +272,9 @@ specifies the encryption type of the new master key; see
 values.  The **-s** option stashes the new master key in the stash
 file, which will be created if it doesn't already exist.
 
-After a new master key is added, it should be propagated to slave
+After a new master key is added, it should be propagated to replica
 servers via a manual or periodic invocation of :ref:`kprop(8)`.  Then,
-the stash files on the slave servers should be updated with the
+the stash files on the replica servers should be updated with the
 kdb5_util **stash** command.  Once those steps are complete, the key
 is ready to be marked active with the kdb5_util **use_mkey** command.
 

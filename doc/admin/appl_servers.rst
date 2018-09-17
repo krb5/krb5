@@ -121,16 +121,16 @@ Configuring your firewall to work with Kerberos V5
 
 If you need off-site users to be able to get Kerberos tickets in your
 realm, they must be able to get to your KDC.  This requires either
-that you have a slave KDC outside your firewall, or that you configure
-your firewall to allow UDP requests into at least one of your KDCs, on
-whichever port the KDC is running.  (The default is port 88; other
-ports may be specified in the KDC's :ref:`kdc.conf(5)` file.)
-Similarly, if you need off-site users to be able to change their
-passwords in your realm, they must be able to get to your Kerberos
-admin server on the kpasswd port (which defaults to 464).  If you need
-off-site users to be able to administer your Kerberos realm, they must
-be able to get to your Kerberos admin server on the administrative
-port (which defaults to 749).
+that you have a replica KDC outside your firewall, or that you
+configure your firewall to allow UDP requests into at least one of
+your KDCs, on whichever port the KDC is running.  (The default is port
+88; other ports may be specified in the KDC's :ref:`kdc.conf(5)`
+file.)  Similarly, if you need off-site users to be able to change
+their passwords in your realm, they must be able to get to your
+Kerberos admin server on the kpasswd port (which defaults to 464).  If
+you need off-site users to be able to administer your Kerberos realm,
+they must be able to get to your Kerberos admin server on the
+administrative port (which defaults to 749).
 
 If your on-site users inside your firewall will need to get to KDCs in
 other realms, you will also need to configure your firewall to allow

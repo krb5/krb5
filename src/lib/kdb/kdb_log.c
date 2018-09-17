@@ -178,7 +178,7 @@ extend_file_to(int fd, unsigned int new_size)
 /*
  * Resize the array elements.  We reinitialize the update log rather than
  * unrolling the the log and copying it over to a temporary log for obvious
- * performance reasons.  Slaves will subsequently do a full resync, but the
+ * performance reasons.  Replicas will subsequently do a full resync, but the
  * need for resizing should be very small.
  */
 static krb5_error_code
@@ -353,7 +353,7 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
         return ret;
 
     /* If we have reached the last possible serial number, reinitialize the
-     * ulog and start over.  Slaves will do a full resync. */
+     * ulog and start over.  Replicas will do a full resync. */
     if (ulog->kdb_last_sno == (kdb_sno_t)-1)
         reset_ulog(log_ctx);
 
@@ -364,7 +364,7 @@ ulog_add_update(krb5_context context, kdb_incr_update_t *upd)
     return ret;
 }
 
-/* Used by the slave to update its hash db from the incr update log. */
+/* Used by the replica to update its hash db from the incr update log. */
 krb5_error_code
 ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 {

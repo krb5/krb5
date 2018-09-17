@@ -1295,7 +1295,7 @@ dump_db(int argc, char **argv)
                 /*
                  * dump_sno is used to indicate if the serial number should be
                  * populated in the output file to be used later by iprop for
-                 * updating the slave's update log when loading.
+                 * updating the replica's update log when loading.
                  */
                 dump_sno = TRUE;
                 /* FLAG_OMIT_NRA is set to indicate that non-replicated
@@ -1649,7 +1649,7 @@ load_db(int argc, char **argv)
     if (log_ctx != NULL && log_ctx->iproprole && !update) {
         /* Don't record updates we are making to the temporary DB.  We will
          * reinitialize or update the ulog header after promoting it. */
-        log_ctx->iproprole = IPROP_SLAVE;
+        log_ctx->iproprole = IPROP_REPLICA;
         if (iprop_load) {
             /* Parse the iprop header information. */
             if (!parse_iprop_header(buf, &load, &last))

@@ -510,13 +510,13 @@ availability.  To roll over the master key, follow these steps:
    master key, the new key will have version 2.  The new master key
    will not be used until you make it active.
 
-#. Propagate the database to all slave KDCs, either manually or by
+#. Propagate the database to all replica KDCs, either manually or by
    waiting until the next scheduled propagation.  If you do not have
-   any slave KDCs, you can skip this and the next step.
+   any replica KDCs, you can skip this and the next step.
 
-#. On each slave KDC, run ``kdb5_util list_mkeys`` to verify that the
-   new master key is present, and then ``kdb5_util stash`` to write
-   the new master key to the slave KDC's stash file.
+#. On each replica KDC, run ``kdb5_util list_mkeys`` to verify that
+   the new master key is present, and then ``kdb5_util stash`` to
+   write the new master key to the replica KDC's stash file.
 
 #. On the master KDC, run ``kdb5_util use_mkey 2`` to begin using the
    new master key.  Replace ``2`` with the version of the new master
@@ -529,11 +529,11 @@ availability.  To roll over the master key, follow these steps:
    command will iterate over the database and re-encrypt all keys in
    the new master key.  If the database is large and uses DB2, the
    master KDC will become unavailable while this command runs, but
-   clients should fail over to slave KDCs (if any are present) during
-   this time period.  In release 1.13 and later, you can instead run
-   ``kdb5_util -x unlockiter update_princ_encryption`` to use unlocked
-   iteration; this variant will take longer, but will keep the
-   database available to the KDC and kadmind while it runs.
+   clients should fail over to replica KDCs (if any are present)
+   during this time period.  In release 1.13 and later, you can
+   instead run ``kdb5_util -x unlockiter update_princ_encryption`` to
+   use unlocked iteration; this variant will take longer, but will
+   keep the database available to the KDC and kadmind while it runs.
 
 #. On the master KDC, run ``kdb5_util purge_mkeys`` to clean up the
    old master key.
@@ -794,22 +794,22 @@ Overview
 
 At some very large sites, dumping and transmitting the database can
 take more time than is desirable for changes to propagate from the
-master KDC to the slave KDCs.  The incremental propagation support
+master KDC to the replica KDCs.  The incremental propagation support
 added in the 1.7 release is intended to address this.
 
 With incremental propagation enabled, all programs on the master KDC
 that change the database also write information about the changes to
 an "update log" file, maintained as a circular buffer of a certain
-size.  A process on each slave KDC connects to a service on the master
-KDC (currently implemented in the :ref:`kadmind(8)` server) and
+size.  A process on each replica KDC connects to a service on the
+master KDC (currently implemented in the :ref:`kadmind(8)` server) and
 periodically requests the changes that have been made since the last
 check.  By default, this check is done every two minutes.  If the
 database has just been modified in the previous several seconds
-(currently the threshold is hard-coded at 10 seconds), the slave will
-not retrieve updates, but instead will pause and try again soon after.
-This reduces the likelihood that incremental update queries will cause
-delays for an administrator trying to make a bunch of changes to the
-database at the same time.
+(currently the threshold is hard-coded at 10 seconds), the replica
+will not retrieve updates, but instead will pause and try again soon
+after.  This reduces the likelihood that incremental update queries
+will cause delays for an administrator trying to make a bunch of
+changes to the database at the same time.
 
 Incremental propagation uses the following entries in the per-realm
 data in the KDC config file (See :ref:`kdc.conf(5)`):
@@ -817,53 +817,54 @@ data in the KDC config file (See :ref:`kdc.conf(5)`):
 ====================== =============== ===========================================
 iprop_enable           *boolean*       If *true*, then incremental propagation is enabled, and (as noted below) normal kprop propagation is disabled. The default is *false*.
 iprop_master_ulogsize  *integer*       Indicates the number of entries that should be retained in the update log. The default is 1000; the maximum number is 2500.
-iprop_slave_poll       *time interval* Indicates how often the slave should poll the master KDC for changes to the database. The default is two minutes.
-iprop_port             *integer*       Specifies the port number to be used for incremental propagation. This is required in both master and slave configuration files.
-iprop_resync_timeout   *integer*       Specifies the number of seconds to wait for a full propagation to complete. This is optional on slave configurations.  Defaults to 300 seconds (5 minutes).
+iprop_slave_poll       *time interval* Indicates how often the replica should poll the master KDC for changes to the database. The default is two minutes.
+iprop_port             *integer*       Specifies the port number to be used for incremental propagation. This is required in both master and replica configuration files.
+iprop_resync_timeout   *integer*       Specifies the number of seconds to wait for a full propagation to complete. This is optional on replica configurations.  Defaults to 300 seconds (5 minutes).
 iprop_logfile          *file name*     Specifies where the update log file for the realm database is to be stored. The default is to use the *database_name* entry from the realms section of the config file :ref:`kdc.conf(5)`, with *.ulog* appended. (NOTE: If database_name isn't specified in the realms section, perhaps because the LDAP database back end is being used, or the file name is specified in the *dbmodules* section, then the hard-coded default for *database_name* is used. Determination of the *iprop_logfile*  default value will not use values from the *dbmodules* section.)
 ====================== =============== ===========================================
 
-Both master and slave sides must have a principal named
+Both master and replica sides must have a principal named
 ``kiprop/hostname`` (where *hostname* is the lowercase,
 fully-qualified, canonical name for the host) registered in the
 Kerberos database, and have keys for that principal stored in the
 default keytab file (|keytab|).  In release 1.13, the
 ``kiprop/hostname`` principal is created automatically for the master
-KDC, but it must still be created for slave KDCs.
+KDC, but it must still be created for replica KDCs.
 
 On the master KDC side, the ``kiprop/hostname`` principal must be
 listed in the kadmind ACL file :ref:`kadm5.acl(5)`, and given the
 **p** privilege (see :ref:`privileges`).
 
-On the slave KDC side, :ref:`kpropd(8)` should be run.  When
+On the replica KDC side, :ref:`kpropd(8)` should be run.  When
 incremental propagation is enabled, it will connect to the kadmind on
 the master KDC and start requesting updates.
 
 The normal kprop mechanism is disabled by the incremental propagation
-support.  However, if the slave has been unable to fetch changes from
-the master KDC for too long (network problems, perhaps), the log on
-the master may wrap around and overwrite some of the updates that the
-slave has not yet retrieved.  In this case, the slave will instruct
-the master KDC to dump the current database out to a file and invoke a
-one-time kprop propagation, with special options to also convey the
-point in the update log at which the slave should resume fetching
-incremental updates.  Thus, all the keytab and ACL setup previously
-described for kprop propagation is still needed.
+support.  However, if the replica has been unable to fetch changes
+from the master KDC for too long (network problems, perhaps), the log
+on the master may wrap around and overwrite some of the updates that
+the replica has not yet retrieved.  In this case, the replica will
+instruct the master KDC to dump the current database out to a file and
+invoke a one-time kprop propagation, with special options to also
+convey the point in the update log at which the replica should resume
+fetching incremental updates.  Thus, all the keytab and ACL setup
+previously described for kprop propagation is still needed.
 
-If an environment has a large number of slaves, it may be desirable to
-arrange them in a hierarchy instead of having the master serve updates
-to every slave.  To do this, run ``kadmind -proponly`` on each
-intermediate slave, and ``kpropd -A upstreamhostname`` on downstream
-slaves to direct each one to the appropriate upstream slave.
+If an environment has a large number of replicas, it may be desirable
+to arrange them in a hierarchy instead of having the master serve
+updates to every replica.  To do this, run ``kadmind -proponly`` on
+each intermediate replica, and ``kpropd -A upstreamhostname`` on
+downstream replicas to direct each one to the appropriate upstream
+replica.
 
 There are several known restrictions in the current implementation:
 
 - The incremental update protocol does not transport changes to policy
   objects.  Any policy changes on the master will result in full
-  resyncs to all slaves.
-- The slave's KDB module must support locking; it cannot be using the
+  resyncs to all replicas.
+- The replica's KDB module must support locking; it cannot be using the
   LDAP KDB module.
-- The master and slave must be able to initiate TCP connections in
+- The master and replica must be able to initiate TCP connections in
   both directions, without an intervening NAT.
 
 
@@ -885,10 +886,10 @@ rpcbind (also known as portmapper) and the client looks up the port
 number to contact.  In the MIT implementation, where interaction with
 some modern versions of rpcbind doesn't always work well, the port
 number must be specified in the config file on both the master and
-slave sides.
+replica sides.
 
 The Sun implementation hard-codes pathnames in ``/var/krb5`` for the
-update log and the per-slave kprop dump files.  In the MIT
+update log and the per-replica kprop dump files.  In the MIT
 implementation, the pathname for the update log is specified in the
-config file, and the per-slave dump files are stored in
+config file, and the per-replica dump files are stored in
 |kdcdir|\ ``/slave_datatrans_hostname``.

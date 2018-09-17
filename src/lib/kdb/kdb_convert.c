@@ -579,7 +579,7 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
                    kdb_incr_update_t *update)
 {
     krb5_db_entry *ent;
-    int slave;
+    int replica;
     krb5_principal mod_princ = NULL;
     int i, j, cnt = 0, mod_time = 0, nattrs;
     krb5_principal dbprinc;
@@ -592,8 +592,8 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
 
     *entry = NULL;
 
-    slave = (context->kdblog_context != NULL) &&
-        (context->kdblog_context->iproprole == IPROP_SLAVE);
+    replica = (context->kdblog_context != NULL) &&
+        (context->kdblog_context->iproprole == IPROP_REPLICA);
 
     /*
      * Store the no. of changed attributes in nattrs
@@ -655,17 +655,17 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
             break;
 
         case AT_LAST_SUCCESS:
-            if (!slave)
+            if (!replica)
                 ent->last_success = (krb5_timestamp) u.av_last_success;
             break;
 
         case AT_LAST_FAILED:
-            if (!slave)
+            if (!replica)
                 ent->last_failed = (krb5_timestamp) u.av_last_failed;
             break;
 
         case AT_FAIL_AUTH_COUNT:
-            if (!slave)
+            if (!replica)
                 ent->fail_auth_count = (krb5_kvno) u.av_fail_auth_count;
             break;
 

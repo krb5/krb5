@@ -17,7 +17,7 @@ lib_             Libraries for use with/by Kerberos V5
 plugins          Kerberos plugins directory
 po               Localization infrastructure
 prototype        Templates files containing the MIT copyright message and a placeholder for the title and description of the file.
-slave            Utilities for propagating the database to slave KDCs :ref:`kprop(8)` and :ref:`kpropd(8)`
+kprop            Utilities for propagating the database to replica KDCs :ref:`kprop(8)` and :ref:`kpropd(8)`
 tests            Test suite
 util_            Various utilities for building/configuring the code, sending bug reports, etc.
 windows          Source code for building Kerberos V5 on Windows (see windows/README)

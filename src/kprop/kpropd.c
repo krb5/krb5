@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* slave/kpropd.c */
+/* kprop/kpropd.c */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -168,7 +168,7 @@ static void
 usage()
 {
     fprintf(stderr,
-            _("\nUsage: %s [-r realm] [-s srvtab] [-dS] [-f slave_file]\n"),
+            _("\nUsage: %s [-r realm] [-s srvtab] [-dS] [-f replica_file]\n"),
             progname);
     fprintf(stderr, _("\t[-F kerberos_db_file ] [-p kdb5_util_pathname]\n"));
     fprintf(stderr, _("\t[-x db_args]* [-P port] [-a acl_file]\n"));
@@ -313,7 +313,7 @@ main(int argc, char **argv)
         exit(0);
     }
 
-    if (log_ctx == NULL || log_ctx->iproprole != IPROP_SLAVE) {
+    if (log_ctx == NULL || log_ctx->iproprole != IPROP_REPLICA) {
         do_standalone();
         /* do_standalone() should never return */
         assert(0);
@@ -883,7 +883,7 @@ reinit:
             /*
              * ulog_replay() will convert the ulog updates to db
              * entries using the kdb conv api and will commit
-             * the entries to the slave kdc database
+             * the entries to the replica kdc database
              */
             if (debug) {
                 fprintf(stderr, _("Got incremental updates "
@@ -942,7 +942,7 @@ reinit:
 
         case UPDATE_NIL:
             /*
-             * Master-slave are in sync
+             * Master-replica are in sync
              */
             if (debug)
                 fprintf(stderr, _("KDC is synchronized with master.\n"));
@@ -1166,7 +1166,7 @@ parse_args(int argc, char **argv)
         exit(1);
     }
     if (params.iprop_enabled == TRUE) {
-        ulog_set_role(kpropd_context, IPROP_SLAVE);
+        ulog_set_role(kpropd_context, IPROP_REPLICA);
 
         if (ulog_map(kpropd_context, params.iprop_logfile,
                      params.iprop_ulogsize)) {
@@ -1550,7 +1550,7 @@ load_database(krb5_context context, char *kdb_util, char *database_file_name)
         edit_av[count++] = "-d";
         edit_av[count++] = kerb_database;
     }
-    if (log_ctx && log_ctx->iproprole == IPROP_SLAVE)
+    if (log_ctx && log_ctx->iproprole == IPROP_REPLICA)
         edit_av[count++] = "-i";
     edit_av[count++] = database_file_name;
     edit_av[count++] = NULL;

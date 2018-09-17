@@ -933,10 +933,10 @@ typedef struct _kdb_vftabl {
      *
      * If db_args contains the value "temporary", the module should create an
      * exclusively locked side copy of the database suitable for loading in a
-     * propagation from master to slave.  This side copy will later be promoted
-     * with promote_db, allowing complete updates of the DB with no loss in
-     * read availability.  If the module cannot comply with this architecture,
-     * it should return an error.
+     * propagation from master to replica.  This side copy will later be
+     * promoted with promote_db, allowing complete updates of the DB with no
+     * loss in read availability.  If the module cannot comply with this
+     * architecture, it should return an error.
      */
     krb5_error_code (*create)(krb5_context kcontext, char *conf_section,
                               char **db_args);

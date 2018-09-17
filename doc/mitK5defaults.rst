@@ -29,8 +29,8 @@ Password change port                        464
 ========================================== =============================  ====================
 
 
-Slave KDC propagation defaults
-------------------------------
+Replica KDC propagation defaults
+--------------------------------
 
 This table shows defaults used by the :ref:`kprop(8)` and
 :ref:`kpropd(8)` programs.

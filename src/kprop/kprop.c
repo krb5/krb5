@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* slave/kprop.c */
+/* kprop/kprop.c */
 /*
  * Copyright 1990,1991,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -50,7 +50,7 @@ static char *kprop_version = KPROP_PROT_VERSION;
 static char *progname = NULL;
 static int debug = 0;
 static char *srvtab = NULL;
-static char *slave_host;
+static char *replica_host;
 static char *realm = NULL;
 static char *def_realm = NULL;
 static char *file = KPROP_DEFAULT_FILE;
@@ -83,7 +83,7 @@ static void update_last_prop_file(char *hostname, char *file_name);
 static void usage()
 {
     fprintf(stderr, _("\nUsage: %s [-r realm] [-f file] [-d] [-P port] "
-                      "[-s srvtab] slave_host\n\n"), progname);
+                      "[-s srvtab] replica_host\n\n"), progname);
     exit(1);
 }
 
@@ -106,12 +106,12 @@ main(int argc, char **argv)
     get_tickets(context);
 
     database_fd = open_database(context, file, &database_size);
-    open_connection(context, slave_host, &fd);
+    open_connection(context, replica_host, &fd);
     kerberos_authenticate(context, &auth_context, fd, my_principal, &my_creds);
     xmit_database(context, auth_context, my_creds, fd, database_fd,
                   database_size);
-    update_last_prop_file(slave_host, file);
-    printf(_("Database propagation to %s: SUCCEEDED\n"), slave_host);
+    update_last_prop_file(replica_host, file);
+    printf(_("Database propagation to %s: SUCCEEDED\n"), replica_host);
     krb5_free_cred_contents(context, my_creds);
     close_database(context, database_fd);
     krb5_free_default_realm(context, def_realm);
@@ -148,7 +148,7 @@ parse_args(krb5_context context, int argc, char **argv)
     }
     if (argc - optind != 1)
         usage();
-    slave_host = argv[optind];
+    replica_host = argv[optind];
 
     if (realm == NULL) {
         ret = krb5_get_default_realm(context, &def_realm);
@@ -176,9 +176,9 @@ get_tickets(krb5_context context)
         exit(1);
     }
 
-    /* Construct the principal name for the slave host. */
+    /* Construct the principal name for the replica host. */
     memset(&creds, 0, sizeof(creds));
-    retval = sn2princ_realm(context, slave_host, KPROP_SERVICE_NAME, realm,
+    retval = sn2princ_realm(context, replica_host, KPROP_SERVICE_NAME, realm,
                             &server_princ);
     if (retval) {
         com_err(progname, errno, _("while setting server principal name"));

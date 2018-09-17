@@ -10,7 +10,7 @@ SYNOPSIS
 [**-r** *realm*]
 [**-A** *admin_server*]
 [**-a** *acl_file*]
-[**-f** *slave_dumpfile*]
+[**-f** *replica_dumpfile*]
 [**-F** *principal_database*]
 [**-p** *kdb5_util_prog*]
 [**-P** *port*]
@@ -21,18 +21,19 @@ SYNOPSIS
 DESCRIPTION
 -----------
 
-The *kpropd* command runs on the slave KDC server.  It listens for
+The *kpropd* command runs on the replica KDC server.  It listens for
 update requests made by the :ref:`kprop(8)` program.  If incremental
 propagation is enabled, it periodically requests incremental updates
 from the master KDC.
 
-When the slave receives a kprop request from the master, kpropd
+When the replica receives a kprop request from the master, kpropd
 accepts the dumped KDC database and places it in a file, and then runs
 :ref:`kdb5_util(8)` to load the dumped database into the active
 database which is used by :ref:`krb5kdc(8)`.  This allows the master
 Kerberos server to use :ref:`kprop(8)` to propagate its database to
-the slave servers.  Upon a successful download of the KDC database
-file, the slave Kerberos server will have an up-to-date KDC database.
+the replica servers.  Upon a successful download of the KDC database
+file, the replica Kerberos server will have an up-to-date KDC
+database.
 
 Where incremental propagation is not used, kpropd is commonly invoked
 out of inetd(8) as a nowait service.  This is done by adding a line to
@@ -51,15 +52,15 @@ compatibility but does nothing.
 
 Incremental propagation may be enabled with the **iprop_enable**
 variable in :ref:`kdc.conf(5)`.  If incremental propagation is
-enabled, the slave periodically polls the master KDC for updates, at
+enabled, the replica periodically polls the master KDC for updates, at
 an interval determined by the **iprop_slave_poll** variable.  If the
-slave receives updates, kpropd updates its log file with any updates
+replica receives updates, kpropd updates its log file with any updates
 from the master.  :ref:`kproplog(8)` can be used to view a summary of
-the update entry log on the slave KDC.  If incremental propagation is
-enabled, the principal ``kiprop/slavehostname@REALM`` (where
-*slavehostname* is the name of the slave KDC host, and *REALM* is the
-name of the Kerberos realm) must be present in the slave's keytab
-file.
+the update entry log on the replica KDC.  If incremental propagation
+is enabled, the principal ``kiprop/replicahostname@REALM`` (where
+*replicahostname* is the name of the replica KDC host, and *REALM* is
+the name of the Kerberos realm) must be present in the replica's
+keytab file.
 
 :ref:`kproplog(8)` can be used to force full replication when iprop is
 enabled.

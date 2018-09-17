@@ -162,7 +162,7 @@ set passes {
 	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
 	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
 	{allow_weak_crypto(kdc)=false}
-	{allow_weak_crypto(slave)=false}
+	{allow_weak_crypto(replica)=false}
 	{allow_weak_crypto(client)=false}
 	{allow_weak_crypto(server)=false}
 	{master_key_type=aes256-cts-hmac-sha1-96}
@@ -174,19 +174,19 @@ set passes {
 	des3_krbtgt=0
 	{supported_enctypes=aes256-sha2:normal}
 	{permitted_enctypes(kdc)=aes256-sha2}
-	{permitted_enctypes(slave)=aes256-sha2}
+	{permitted_enctypes(replica)=aes256-sha2}
 	{permitted_enctypes(client)=aes256-sha2}
 	{permitted_enctypes(server)=aes256-sha2}
 	{default_tgs_enctypes(kdc)=aes256-sha2}
-	{default_tgs_enctypes(slave)=aes256-sha2}
+	{default_tgs_enctypes(replica)=aes256-sha2}
 	{default_tgs_enctypes(client)=aes256-sha2}
 	{default_tgs_enctypes(server)=aes256-sha2}
 	{default_tkt_enctypes(kdc)=aes256-sha2}
-	{default_tkt_enctypes(slave)=aes256-sha2}
+	{default_tkt_enctypes(replica)=aes256-sha2}
 	{default_tkt_enctypes(client)=aes256-sha2}
 	{default_tkt_enctypes(server)=aes256-sha2}
 	{allow_weak_crypto(kdc)=false}
-	{allow_weak_crypto(slave)=false}
+	{allow_weak_crypto(replica)=false}
 	{allow_weak_crypto(client)=false}
 	{allow_weak_crypto(server)=false}
 	{master_key_type=aes256-sha2}
@@ -198,19 +198,19 @@ set passes {
 	des3_krbtgt=0
 	{supported_enctypes=camellia256-cts:normal}
 	{permitted_enctypes(kdc)=camellia256-cts}
-	{permitted_enctypes(slave)=camellia256-cts}
+	{permitted_enctypes(replica)=camellia256-cts}
 	{permitted_enctypes(client)=camellia256-cts}
 	{permitted_enctypes(server)=camellia256-cts}
 	{default_tgs_enctypes(kdc)=camellia256-cts}
-	{default_tgs_enctypes(slave)=camellia256-cts}
+	{default_tgs_enctypes(replica)=camellia256-cts}
 	{default_tgs_enctypes(client)=camellia256-cts}
 	{default_tgs_enctypes(server)=camellia256-cts}
 	{default_tkt_enctypes(kdc)=camellia256-cts}
-	{default_tkt_enctypes(slave)=camellia256-cts}
+	{default_tkt_enctypes(replica)=camellia256-cts}
 	{default_tkt_enctypes(client)=camellia256-cts}
 	{default_tkt_enctypes(server)=camellia256-cts}
 	{allow_weak_crypto(kdc)=false}
-	{allow_weak_crypto(slave)=false}
+	{allow_weak_crypto(replica)=false}
 	{allow_weak_crypto(client)=false}
 	{allow_weak_crypto(server)=false}
 	{master_key_type=camellia256-cts}
@@ -259,7 +259,7 @@ set passes {
 	mode=udp
 	des3_krbtgt=0
 	{allow_weak_crypto(kdc)=false}
-	{allow_weak_crypto(slave)=false}
+	{allow_weak_crypto(replica)=false}
 	{allow_weak_crypto(client)=false}
 	{allow_weak_crypto(server)=false}
 	{dummy=[verbose -log "all default enctypes"]}
@@ -427,19 +427,19 @@ if ![info exists KEY] {
 # Clear away any files left over from a previous run.
 # We can't use them now because we don't know the right KEY.
 # krb5.conf might change if running tests on another host
-file delete $tmppwd/krb5.conf $tmppwd/kdc.conf $tmppwd/slave.conf \
+file delete $tmppwd/krb5.conf $tmppwd/kdc.conf $tmppwd/replica.conf \
     $tmppwd/krb5.client.conf $tmppwd/krb5.server.conf \
-    $tmppwd/krb5.kdc.conf $tmppwd/krb5.slave.conf
+    $tmppwd/krb5.kdc.conf $tmppwd/krb5.replica.conf
 
 proc delete_db {} {
     global tmppwd
-    # Master and slave db files
+    # Master and replica db files
     file delete $tmppwd/kdc-db $tmppwd/kdc-db.ok $tmppwd/kdc-db.kadm5 \
 	$tmppwd/kdc-db.kadm5.lock $tmppwd/kdc-db.mdb $tmppwd/kdc-db.mdb-lock \
 	$tmppwd/kdc-db.lockout.mdb $tmppwd/kdc-db.lockout.mdb-lock \
 	$tmppwd/kdc-db.ulog \
-	$tmppwd/slave-db $tmppwd/slave-db.ok $tmppwd/slave-db.kadm5 $tmppwd/slave-db.kadm5.lock \
-	$tmppwd/slave-db~ $tmppwd/slave-db~.ok $tmppwd/slave-db~.kadm5 $tmppwd/slave-db~.kadm5.lock
+	$tmppwd/replica-db $tmppwd/replica-db.ok $tmppwd/replica-db.kadm5 $tmppwd/replica-db.kadm5.lock \
+	$tmppwd/replica-db~ $tmppwd/replica-db~.ok $tmppwd/replica-db~.kadm5 $tmppwd/replica-db~.kadm5.lock
     # Creating a new database means we need a new srvtab.
     file delete $tmppwd/srvtab $tmppwd/cpw_srvtab
 }
@@ -486,10 +486,10 @@ foreach i {
     {KDESTROY $objdir/../../clients/kdestroy/kdestroy}
     {RESOLVE $objdir/../resolve/resolve}
     {T_INETD $objdir/t_inetd}
-    {KPROPLOG $objdir/../../slave/kproplog}
+    {KPROPLOG $objdir/../../kprop/kproplog}
     {KPASSWD $objdir/../../clients/kpasswd/kpasswd}
-    {KPROPD $objdir/../../slave/kpropd}
-    {KPROP $objdir/../../slave/kprop}
+    {KPROPD $objdir/../../kprop/kpropd}
+    {KPROP $objdir/../../kprop/kprop}
 } {
     set varname [lindex $i 0]
     if ![info exists $varname] {
@@ -780,7 +780,7 @@ proc setup_kerberos_files { } {
     setup_krb5_conf client
     setup_krb5_conf server
     setup_krb5_conf kdc
-    setup_krb5_conf slave
+    setup_krb5_conf replica
 
     # Create a kdc.conf file.
     if { ![file exists $tmppwd/kdc.conf] \
@@ -829,11 +829,11 @@ proc setup_kerberos_files { } {
 	close $conffile
     }
 
-    # Create a config file for the slave KDC (kpropd only, no normal
+    # Create a config file for the replica KDC (kpropd only, no normal
     # KDC processes).
-    if { ![file exists $tmppwd/slave.conf] \
+    if { ![file exists $tmppwd/replica.conf] \
 	    || $last_passname_conf != $multipass_name } {
-	set conffile [open $tmppwd/slave.conf w]
+	set conffile [open $tmppwd/replica.conf w]
 	puts $conffile "\[kdcdefaults\]"
 	puts $conffile "	kdc_listen = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
 	puts $conffile "	kdc_tcp_listen = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
@@ -842,8 +842,8 @@ proc setup_kerberos_files { } {
 	puts $conffile "	$REALMNAME = \{"
 	# Testing with a colon in the name exercises default handling
 	# for pathnames.
-	puts $conffile "		key_stash_file = $tmppwd/slave-stash"
-	puts $conffile "		acl_file = $tmppwd/slave-acl"
+	puts $conffile "		key_stash_file = $tmppwd/replica-stash"
+	puts $conffile "		acl_file = $tmppwd/replica-acl"
 	puts $conffile "		kadmind_port = [expr 4 + $portbase]"
 	puts $conffile "		kpasswd_port = [expr 5 + $portbase]"
 	puts $conffile "		max_life = 1:00:00"
@@ -868,7 +868,7 @@ proc setup_kerberos_files { } {
 	if { $ulog != 0 } {
 	    puts $conffile "		iprop_enable = true"
 	    puts $conffile "		iprop_port = [expr 9 + $portbase]"
-	    puts $conffile "		iprop_logfile = $tmppwd/slave-db.ulog"
+	    puts $conffile "		iprop_logfile = $tmppwd/replica-db.ulog"
 	} else {
 	    puts $conffile "# no ulog"
 	}
@@ -896,8 +896,9 @@ proc setup_kerberos_files { } {
 
 proc reset_kerberos_files { } {
     global tmppwd
-    file delete $tmppwd/kdc.conf $tmppwd/slave.conf $tmppwd/krb5.client.conf \
-	$tmppwd/krb5.server.conf $tmppwd/krb5.kdc.conf
+    file delete $tmppwd/kdc.conf $tmppwd/replica.conf \
+	$tmppwd/krb5.client.conf $tmppwd/krb5.server.conf \
+	$tmppwd/krb5.kdc.conf
     setup_kerberos_files
 }
 
@@ -1055,7 +1056,7 @@ proc setup_kerberos_env { {type client} } {
 	client	-
 	server	{ catch {unset env(KRB5_KDC_PROFILE)} }
 	kdc	{ set env(KRB5_KDC_PROFILE) $tmppwd/kdc.conf }
-	slave	{ set env(KRB5_KDC_PROFILE) $tmppwd/slave.conf }
+	replica	{ set env(KRB5_KDC_PROFILE) $tmppwd/replica.conf }
 	default	{ error "unknown config file type $type" }
     }
     if [info exists env(KRB5_KDC_PROFILE)] {
@@ -1401,11 +1402,11 @@ proc setup_kerberos_db { standalone } {
     return 1
 }
 
-# setup_slave_db
-# Initialize the slave Kerberos database.  Returns 1 on success, 0 on
+# setup_replica_db
+# Initialize the replica Kerberos database.  Returns 1 on success, 0 on
 # failure.
 
-proc setup_slave_db { } {
+proc setup_replica_db { } {
     global REALMNAME
     global KDB5_UTIL
     global KADMIN_LOCAL
@@ -1416,7 +1417,7 @@ proc setup_slave_db { } {
     set failall 0
 
     envstack_push
-    if { ![setup_kerberos_files] || ![setup_kerberos_env slave] } {
+    if { ![setup_kerberos_files] || ![setup_kerberos_env replica] } {
 	set failall 1
     }
 
@@ -1432,7 +1433,7 @@ proc setup_slave_db { } {
 	}
     }
 
-    set test "slave kdb5_util create "
+    set test "replica kdb5_util create "
     set body {
 	if $failall {
 	    break
@@ -1444,11 +1445,11 @@ proc setup_slave_db { } {
 
 	expect "Enter KDC database master key:"
 
-	set test "slave kdb5_util create (verify)"
+	set test "replica kdb5_util create (verify)"
 	send "masterkey$KEY\r"
 	expect "Re-enter KDC database master key to verify:"
 
-	set test "slave kdb5_util create"
+	set test "replica kdb5_util create"
 	send "masterkey$KEY\r"
 	expect {
 	    -re "\[Cc\]ouldn't" {
@@ -1471,7 +1472,7 @@ proc setup_slave_db { } {
     }
 
     # Stash the master key in a file.
-    set test "slave kdb5_util stash"
+    set test "replica kdb5_util stash"
     set body {
 	if $failall {
 	    break
@@ -1497,7 +1498,7 @@ proc setup_slave_db { } {
 
     if !$failall {
 	# create the admin database lock file
-	catch "exec touch $tmppwd/slave-adb.lock"
+	catch "exec touch $tmppwd/replica-adb.lock"
     }
 
     return [expr !$failall]
@@ -1508,11 +1509,11 @@ proc start_kpropd {} {
     global spawn_id
 
     envstack_push
-    setup_kerberos_env slave
-    spawn $KPROPD -S -d -t -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl
+    setup_kerberos_env replica
+    spawn $KPROPD -S -d -t -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-replica-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl
     set kpropd_pid [exp_pid]
     set kpropd_spawn_id $spawn_id
-#    send_user [list $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl]\n
+#    send_user [list $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-replica-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl]\n
 #    spawn_shell
     envstack_pop
 }

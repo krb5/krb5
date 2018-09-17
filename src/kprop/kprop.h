@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* slave/kprop.h */
+/* kprop/kprop.h */
 /*
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

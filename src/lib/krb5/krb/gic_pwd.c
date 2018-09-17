@@ -350,7 +350,7 @@ krb5_get_init_creds_password(krb5_context context,
         if (ret == 0)
             goto cleanup;
 
-        /* If the master is unreachable, return the error from the slave we
+        /* If the master is unreachable, return the error from the replica we
          * were able to contact and reset the use_master flag. */
         if (ret == KRB5_KDC_UNREACH || ret == KRB5_REALM_CANT_RESOLVE ||
             ret == KRB5_REALM_UNKNOWN) {

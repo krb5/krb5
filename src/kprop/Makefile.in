@@ -1,4 +1,4 @@
-mydir=slave
+mydir=kprop
 BUILDTOP=$(REL)..
 
 all:	kprop kpropd kproplog

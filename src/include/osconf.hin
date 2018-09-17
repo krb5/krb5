@@ -122,7 +122,7 @@
 #define KRB5_ENV_CCNAME "KRB5CCNAME"
 
 /*
- * krb5 slave support follows
+ * krb5 replica support follows
  */
 
 #define KPROP_DEFAULT_FILE KDC_DIR "/slave_datatrans"

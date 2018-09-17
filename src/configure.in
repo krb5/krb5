@@ -108,7 +108,7 @@ AC_ARG_ENABLE([athena],
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY
 KRB5_BUILD_PROGRAM
-# for slave
+# for kprop
 AC_TYPE_MODE_T
 AC_PROG_INSTALL
 KRB5_AC_NEED_DAEMON
@@ -1457,7 +1457,7 @@ dnl	lib/krb5/ccache/ccapi
 
 dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 
-	kdc slave config-files build-tools man doc include
+	kdc kprop config-files build-tools man doc include
 
 	plugins/certauth/test
 	plugins/hostrealm/test

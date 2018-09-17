@@ -12,15 +12,15 @@ SYNOPSIS
 [**-d**]
 [**-P** *port*]
 [**-s** *keytab*]
-*slave_host*
+*replica_host*
 
 
 DESCRIPTION
 -----------
 
 kprop is used to securely propagate a Kerberos V5 database dump file
-from the master Kerberos server to a slave Kerberos server, which is
-specified by *slave_host*.  The dump file must be created by
+from the master Kerberos server to a replica Kerberos server, which is
+specified by *replica_host*.  The dump file must be created by
 :ref:`kdb5_util(8)`.
 
 

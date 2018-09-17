@@ -2,23 +2,23 @@ Installing KDCs
 ===============
 
 When setting up Kerberos in a production environment, it is best to
-have multiple slave KDCs alongside with a master KDC to ensure the
+have multiple replica KDCs alongside with a master KDC to ensure the
 continued availability of the Kerberized services.  Each KDC contains
 a copy of the Kerberos database.  The master KDC contains the writable
-copy of the realm database, which it replicates to the slave KDCs at
+copy of the realm database, which it replicates to the replica KDCs at
 regular intervals.  All database changes (such as password changes)
-are made on the master KDC.  Slave KDCs provide Kerberos
+are made on the master KDC.  Replica KDCs provide Kerberos
 ticket-granting services, but not database administration, when the
 master KDC is unavailable.  MIT recommends that you install all of
 your KDCs to be able to function as either the master or one of the
-slaves.  This will enable you to easily switch your master KDC with
-one of the slaves if necessary (see :ref:`switch_master_slave`).  This
-installation procedure is based on that recommendation.
+replicas.  This will enable you to easily switch your master KDC with
+one of the replicas if necessary (see :ref:`switch_master_replica`).
+This installation procedure is based on that recommendation.
 
 .. warning::
 
     - The Kerberos system relies on the availability of correct time
-      information.  Ensure that the master and all slave KDCs have
+      information.  Ensure that the master and all replica KDCs have
       properly synchronized clocks.
 
     - It is best to install and run KDCs on secured and dedicated
@@ -41,7 +41,7 @@ source (See :ref:`do_build`).
           names::
 
              kerberos.mit.edu    - master KDC
-             kerberos-1.mit.edu  - slave KDC
+             kerberos-1.mit.edu  - replica KDC
              ATHENA.MIT.EDU      - realm name
              .k5.ATHENA.MIT.EDU  - stash file
              admin/admin         - admin principal
@@ -286,23 +286,23 @@ against the principals that you have created on the previous step
     shell% kinit admin/admin@ATHENA.MIT.EDU
 
 
-Install the slave KDCs
-----------------------
+Install the replica KDCs
+------------------------
 
-You are now ready to start configuring the slave KDCs.
+You are now ready to start configuring the replica KDCs.
 
 .. note::
 
           Assuming you are setting the KDCs up so that you can easily
-          switch the master KDC with one of the slaves, you should
+          switch the master KDC with one of the replicas, you should
           perform each of these steps on the master KDC as well as the
-          slave KDCs, unless these instructions specify otherwise.
+          replica KDCs, unless these instructions specify otherwise.
 
 
-.. _slave_host_key:
+.. _replica_host_key:
 
-Create host keytabs for slave KDCs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create host keytabs for replica KDCs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each KDC needs a ``host`` key in the Kerberos database.  These keys
 are used for mutual authentication when propagating the database dump
@@ -311,7 +311,8 @@ file from the master KDC to the secondary KDC servers.
 On the master KDC, connect to administrative interface and create the
 host principal for each of the KDCs' ``host`` services.  For example,
 if the master KDC were called ``kerberos.mit.edu``, and you had a
-slave KDC named ``kerberos-1.mit.edu``, you would type the following::
+replica KDC named ``kerberos-1.mit.edu``, you would type the
+following::
 
     shell% kadmin
     kadmin: addprinc -randkey host/kerberos.mit.edu
@@ -324,13 +325,13 @@ slave KDC named ``kerberos-1.mit.edu``, you would type the following::
 
 It is not strictly necessary to have the master KDC server in the
 Kerberos database, but it can be handy if you want to be able to swap
-the master KDC with one of the slaves.
+the master KDC with one of the replicas.
 
 Next, extract ``host`` random keys for all participating KDCs and
 store them in each host's default keytab file.  Ideally, you should
 extract each keytab locally on its own KDC.  If this is not feasible,
 you should use an encrypted session to send them across the network.
-To extract a keytab directly on a slave KDC called
+To extract a keytab directly on a replica KDC called
 ``kerberos-1.mit.edu``, you would execute the following command::
 
     kadmin: ktadd host/kerberos-1.mit.edu
@@ -343,7 +344,7 @@ To extract a keytab directly on a slave KDC called
     Entry for principal host/kerberos-1.mit.edu with kvno 2, encryption
         type arcfour-hmac added to keytab FILE:/etc/krb5.keytab.
 
-If you are instead extracting a keytab for the slave KDC called
+If you are instead extracting a keytab for the replica KDC called
 ``kerberos-1.mit.edu`` on the master KDC, you should use a dedicated
 temporary keytab file for that machine's keytab::
 
@@ -357,12 +358,12 @@ The file ``/tmp/kerberos-1.keytab`` can then be installed as
 ``/etc/krb5.keytab`` on the host ``kerberos-1.mit.edu``.
 
 
-Configure slave KDCs
-~~~~~~~~~~~~~~~~~~~~
+Configure replica KDCs
+~~~~~~~~~~~~~~~~~~~~~~
 
 Database propagation copies the contents of the master's database, but
 does not propagate configuration files, stash files, or the kadm5 ACL
-file.  The following files must be copied by hand to each slave (see
+file.  The following files must be copied by hand to each replica (see
 :ref:`mitK5defaults` for the default locations for these files):
 
 * krb5.conf
@@ -371,27 +372,27 @@ file.  The following files must be copied by hand to each slave (see
 * master key stash file
 
 Move the copied files into their appropriate directories, exactly as
-on the master KDC.  kadm5.acl is only needed to allow a slave to swap
-with the master KDC.
+on the master KDC.  kadm5.acl is only needed to allow a replica to
+swap with the master KDC.
 
-The database is propagated from the master KDC to the slave KDCs via
+The database is propagated from the master KDC to the replica KDCs via
 the :ref:`kpropd(8)` daemon.  You must explicitly specify the
 principals which are allowed to provide Kerberos dump updates on the
-slave machine with a new database.  Create a file named kpropd.acl in
-the KDC state directory containing the ``host`` principals for each of
-the KDCs::
+replica machine with a new database.  Create a file named kpropd.acl
+in the KDC state directory containing the ``host`` principals for each
+of the KDCs::
 
     host/kerberos.mit.edu@ATHENA.MIT.EDU
     host/kerberos-1.mit.edu@ATHENA.MIT.EDU
 
 .. note::
 
-          If you expect that the master and slave KDCs will be
+          If you expect that the master and replica KDCs will be
           switched at some point of time, list the host principals
           from all participating KDC servers in kpropd.acl files on
           all of the KDCs.  Otherwise, you only need to list the
           master KDC's host principal in the kpropd.acl files of the
-          slave KDCs.
+          replica KDCs.
 
 Then, add the following line to ``/etc/inetd.conf`` on each KDC
 (adjust the path to kpropd)::
@@ -402,31 +403,31 @@ You also need to add the following line to ``/etc/services`` on each
 KDC, if it is not already present (assuming that the default port is
 used)::
 
-    krb5_prop       754/tcp               # Kerberos slave propagation
+    krb5_prop       754/tcp               # Kerberos replica propagation
 
 Restart inetd daemon.
 
 Alternatively, start :ref:`kpropd(8)` as a stand-alone daemon.  This is
 required when incremental propagation is enabled.
 
-Now that the slave KDC is able to accept database propagation, you’ll
-need to propagate the database from the master server.
+Now that the replica KDC is able to accept database propagation,
+you’ll need to propagate the database from the master server.
 
-NOTE: Do not start the slave KDC yet; you still do not have a copy of
-the master's database.
+NOTE: Do not start the replica KDC yet; you still do not have a copy
+of the master's database.
 
 
-.. _kprop_to_slaves:
+.. _kprop_to_replicas:
 
-Propagate the database to each slave KDC
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Propagate the database to each replica KDC
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 First, create a dump file of the database on the master KDC, as
 follows::
 
     shell% kdb5_util dump /usr/local/var/krb5kdc/slave_datatrans
 
-Then, manually propagate the database to each slave KDC, as in the
+Then, manually propagate the database to each replica KDC, as in the
 following example::
 
     shell% kprop -f /usr/local/var/krb5kdc/slave_datatrans kerberos-1.mit.edu
@@ -457,7 +458,7 @@ following is an example of a Bourne shell script that will do this.
 You will need to set up a cron job to run this script at the intervals
 you decided on earlier (see :ref:`db_prop`).
 
-Now that the slave KDC has a copy of the Kerberos database, you can
+Now that the replica KDC has a copy of the Kerberos database, you can
 start the krb5kdc daemon::
 
     shell% krb5kdc
@@ -487,24 +488,24 @@ Once your KDCs are set up and running, you are ready to use
 services into the Kerberos database.  This procedure is described
 fully in :ref:`add_mod_del_princs`.
 
-You may occasionally want to use one of your slave KDCs as the master.
-This might happen if you are upgrading the master KDC, or if your
-master KDC has a disk crash.  See the following section for the
+You may occasionally want to use one of your replica KDCs as the
+master.  This might happen if you are upgrading the master KDC, or if
+your master KDC has a disk crash.  See the following section for the
 instructions.
 
 
-.. _switch_master_slave:
+.. _switch_master_replica:
 
-Switching master and slave KDCs
--------------------------------
+Switching master and replica KDCs
+---------------------------------
 
-You may occasionally want to use one of your slave KDCs as the master.
-This might happen if you are upgrading the master KDC, or if your
-master KDC has a disk crash.
+You may occasionally want to use one of your replica KDCs as the
+master.  This might happen if you are upgrading the master KDC, or if
+your master KDC has a disk crash.
 
 Assuming you have configured all of your KDCs to be able to function
-as either the master KDC or a slave KDC (as this document recommends),
-all you need to do to make the changeover is:
+as either the master KDC or a replica KDC (as this document
+recommends), all you need to do to make the changeover is:
 
 If the master KDC is still running, do the following on the *old*
 master KDC:
@@ -512,14 +513,14 @@ master KDC:
 #. Kill the kadmind process.
 #. Disable the cron job that propagates the database.
 #. Run your database propagation script manually, to ensure that the
-   slaves all have the latest copy of the database (see
-   :ref:`kprop_to_slaves`).
+   replicas all have the latest copy of the database (see
+   :ref:`kprop_to_replicas`).
 
 On the *new* master KDC:
 
 #. Start the :ref:`kadmind(8)` daemon (see :ref:`start_kdc_daemons`).
 #. Set up the cron job to propagate the database (see
-   :ref:`kprop_to_slaves`).
+   :ref:`kprop_to_replicas`).
 #. Switch the CNAMEs of the old and new master KDCs.  If you can't do
    this, you'll need to change the :ref:`krb5.conf(5)` file on every
    client machine in your Kerberos realm.
@@ -529,5 +530,5 @@ Incremental database propagation
 --------------------------------
 
 If you expect your Kerberos database to become large, you may wish to
-set up incremental propagation to slave KDCs.  See :ref:`incr_db_prop`
-for details.
+set up incremental propagation to replica KDCs.  See
+:ref:`incr_db_prop` for details.
