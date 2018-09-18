@@ -196,7 +196,7 @@ clntudp_bufcreate(
 	}
 	if (connect(*sockp, (struct sockaddr *)raddr, sizeof(*raddr)) < 0)
 	     goto fooy;
-	     cu->cu_llen = sizeof(cu->cu_laddr);
+	cu->cu_llen = sizeof(cu->cu_laddr);
 	if (getsockname(*sockp, (struct sockaddr *)&cu->cu_laddr, &cu->cu_llen) < 0)
 	     goto fooy;
 
