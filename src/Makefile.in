@@ -621,8 +621,6 @@ OTHEREXCLUDES = \
 	lib/krb5/unicode \
 	plugins/kdb/db2/libdb2 \
 	plugins/kdb/db2/pol_xdr.c \
-	plugins/kdb/ldap/libkdb_ldap/princ_xdr.c \
-	plugins/kdb/ldap/libkdb_ldap/princ_xdr.h \
 	plugins/preauth/pkinit/pkcs11.h \
 	plugins/preauth/pkinit/pkinit_accessor.h \
 	plugins/preauth/pkinit/pkinit_crypto.h \
