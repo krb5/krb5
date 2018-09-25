@@ -176,8 +176,9 @@ static time_t	yyRelSeconds;
 
 %}
 
-/* Mute shift/reduce warning as per header comment. */
-%expect 4
+/* This would mute the shift/reduce warnings as per header comment; however,
+ * it relies on bison extensions. */
+/* %expect 4 */
 
 %union {
     time_t		Number;
