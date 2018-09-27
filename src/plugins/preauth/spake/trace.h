@@ -69,6 +69,6 @@
 #define TRACE_SPAKE_SEND_SUPPORT(c)             \
     TRACE(c, "Sending SPAKE support message")
 #define TRACE_SPAKE_UNKNOWN_GROUP(c, name)                      \
-    TRACE(c, "Unrecognized SPAKE group name: {string}", name)
+    TRACE(c, "Unrecognized SPAKE group name: {str}", name)
 
 #endif /* TRACE_H */
