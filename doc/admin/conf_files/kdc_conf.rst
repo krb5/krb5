@@ -227,10 +227,15 @@ The following tags may be specified in a [realms] subsection:
     retained for incremental propagation.  The default value is 1000.
     Prior to release 1.11, the maximum value was 2500.
 
-**iprop_slave_poll**
+**iprop_replica_poll**
     (Delta time string.)  Specifies how often the replica KDC polls
     for new updates from the master.  The default value is ``2m``
-    (that is, two minutes).
+    (that is, two minutes).  New in release 1.17.
+
+**iprop_slave_poll**
+    (Delta time string.)  The name for **iprop_replica_poll** prior to
+    release 1.17.  Its value is used as a fallback if
+    **iprop_replica_poll** is not specified.
 
 **iprop_listen**
     (Whitespace- or comma-separated list.)  Specifies the iprop RPC

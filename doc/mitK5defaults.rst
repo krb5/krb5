@@ -35,16 +35,16 @@ Replica KDC propagation defaults
 This table shows defaults used by the :ref:`kprop(8)` and
 :ref:`kpropd(8)` programs.
 
-==========================  ==============================  ===========
-Description                 Default                         Environment
-==========================  ==============================  ===========
-kprop database dump file    |kdcdir|\ ``/slave_datatrans``
+==========================  ================================  ===========
+Description                 Default                           Environment
+==========================  ================================  ===========
+kprop database dump file    |kdcdir|\ ``/replica_datatrans``
 kpropd temporary dump file  |kdcdir|\ ``/from_master``
 kdb5_util location          |sbindir|\ ``/kdb5_util``
 kprop location              |sbindir|\ ``/kprop``
 kpropd ACL file             |kdcdir|\ ``/kpropd.acl``
-kprop port                  754                             KPROP_PORT
-==========================  ==============================  ===========
+kprop port                  754                               KPROP_PORT
+==========================  ================================  ===========
 
 
 .. _paths:

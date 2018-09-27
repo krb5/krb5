@@ -114,27 +114,27 @@ def check_ulog(num, first, last, entries, env=None):
 # DB and ulog file.
 conf = {'realms': {'$realm': {'iprop_enable': 'true',
                               'iprop_logfile': '$testdir/db.ulog'}}}
-conf_rep1 = {'realms': {'$realm': {'iprop_slave_poll': '600',
+conf_rep1 = {'realms': {'$realm': {'iprop_replica_poll': '600',
                                    'iprop_logfile': '$testdir/ulog.replica1'}},
              'dbmodules': {'db': {'database_name': '$testdir/db.replica1'}}}
 conf_rep1m = {'realms': {'$realm': {'iprop_logfile': '$testdir/ulog.replica1',
                                     'iprop_port': '$port8'}},
               'dbmodules': {'db': {'database_name': '$testdir/db.replica1'}}}
-conf_rep2 = {'realms': {'$realm': {'iprop_slave_poll': '600',
+conf_rep2 = {'realms': {'$realm': {'iprop_replica_poll': '600',
                                    'iprop_logfile': '$testdir/ulog.replica2',
                                    'iprop_port': '$port8'}},
              'dbmodules': {'db': {'database_name': '$testdir/db.replica2'}}}
 
 conf_foo = {'libdefaults': {'default_realm': 'FOO'},
             'domain_realm': {hostname: 'FOO'}}
-conf_rep3 = {'realms': {'$realm': {'iprop_slave_poll': '600',
+conf_rep3 = {'realms': {'$realm': {'iprop_replica_poll': '600',
                                    'iprop_logfile': '$testdir/ulog.replica3',
                                    'iprop_port': '$port8'},
                         'FOO': {'iprop_logfile': '$testdir/ulog.replica3'}},
             'dbmodules': {'db': {'database_name': '$testdir/db.replica3'}}}
 
 krb5_conf_rep4 = {'domain_realm': {hostname: 'FOO'}}
-conf_rep4 = {'realms': {'$realm': {'iprop_slave_poll': '600',
+conf_rep4 = {'realms': {'$realm': {'iprop_replica_poll': '600',
                                    'iprop_logfile': '$testdir/ulog.replica4',
                                    'iprop_port': '$port8'}},
              'dbmodules': {'db': {'database_name': '$testdir/db.replica4'}}}

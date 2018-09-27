@@ -125,7 +125,7 @@
  * krb5 replica support follows
  */
 
-#define KPROP_DEFAULT_FILE KDC_DIR "/slave_datatrans"
+#define KPROP_DEFAULT_FILE KDC_DIR "/replica_datatrans"
 #define KPROPD_DEFAULT_FILE KDC_DIR "/from_master"
 #define KPROPD_DEFAULT_KDB5_UTIL "@SBINDIR/kdb5_util"
 #define KPROPD_DEFAULT_KPROP "@SBINDIR/kprop"

@@ -804,7 +804,11 @@ krb5_error_code kadm5_get_config_params(krb5_context context,
     }
 
     GET_DELTAT_PARAM(iprop_poll_time, KADM5_CONFIG_POLL_TIME,
-                     KRB5_CONF_IPROP_SLAVE_POLL, 2 * 60); /* 2m */
+                     KRB5_CONF_IPROP_REPLICA_POLL, -1);
+    if (params.iprop_poll_time == -1) {
+        GET_DELTAT_PARAM(iprop_poll_time, KADM5_CONFIG_POLL_TIME,
+                         KRB5_CONF_IPROP_SLAVE_POLL, 2 * 60);
+    }
 
     *params_out = params;
 

@@ -53,7 +53,7 @@ compatibility but does nothing.
 Incremental propagation may be enabled with the **iprop_enable**
 variable in :ref:`kdc.conf(5)`.  If incremental propagation is
 enabled, the replica periodically polls the master KDC for updates, at
-an interval determined by the **iprop_slave_poll** variable.  If the
+an interval determined by the **iprop_replica_poll** variable.  If the
 replica receives updates, kpropd updates its log file with any updates
 from the master.  :ref:`kproplog(8)` can be used to view a summary of
 the update entry log on the replica KDC.  If incremental propagation

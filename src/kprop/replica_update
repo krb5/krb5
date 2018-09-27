@@ -7,7 +7,7 @@
 KDB_DIR=/usr/local/var/krb5kdc
 
 KDB_FILE=$KDB_DIR/principal.db
-DUMPFILE=$KDB_DIR/slave_datatrans
+DUMPFILE=$KDB_DIR/replica_datatrans
 KDB5_UTIL=/usr/local/sbin/kdb5_util
 KPROP=/usr/local/sbin/kprop
 

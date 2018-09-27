@@ -817,7 +817,7 @@ data in the KDC config file (See :ref:`kdc.conf(5)`):
 ====================== =============== ===========================================
 iprop_enable           *boolean*       If *true*, then incremental propagation is enabled, and (as noted below) normal kprop propagation is disabled. The default is *false*.
 iprop_master_ulogsize  *integer*       Indicates the number of entries that should be retained in the update log. The default is 1000; the maximum number is 2500.
-iprop_slave_poll       *time interval* Indicates how often the replica should poll the master KDC for changes to the database. The default is two minutes.
+iprop_replica_poll     *time interval* Indicates how often the replica should poll the master KDC for changes to the database. The default is two minutes.
 iprop_port             *integer*       Specifies the port number to be used for incremental propagation. This is required in both master and replica configuration files.
 iprop_resync_timeout   *integer*       Specifies the number of seconds to wait for a full propagation to complete. This is optional on replica configurations.  Defaults to 300 seconds (5 minutes).
 iprop_logfile          *file name*     Specifies where the update log file for the realm database is to be stored. The default is to use the *database_name* entry from the realms section of the config file :ref:`kdc.conf(5)`, with *.ulog* appended. (NOTE: If database_name isn't specified in the realms section, perhaps because the LDAP database back end is being used, or the file name is specified in the *dbmodules* section, then the hard-coded default for *database_name* is used. Determination of the *iprop_logfile*  default value will not use values from the *dbmodules* section.)
@@ -892,4 +892,4 @@ The Sun implementation hard-codes pathnames in ``/var/krb5`` for the
 update log and the per-replica kprop dump files.  In the MIT
 implementation, the pathname for the update log is specified in the
 config file, and the per-replica dump files are stored in
-|kdcdir|\ ``/slave_datatrans_hostname``.
+|kdcdir|\ ``/replica_datatrans_hostname``.

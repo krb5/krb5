@@ -226,6 +226,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_IPROP_MASTER_ULOGSIZE        "iprop_master_ulogsize"
 #define KRB5_CONF_IPROP_PORT                   "iprop_port"
 #define KRB5_CONF_IPROP_RESYNC_TIMEOUT         "iprop_resync_timeout"
+#define KRB5_CONF_IPROP_REPLICA_POLL           "iprop_replica_poll"
 #define KRB5_CONF_IPROP_SLAVE_POLL             "iprop_slave_poll"
 #define KRB5_CONF_K5LOGIN_AUTHORITATIVE        "k5login_authoritative"
 #define KRB5_CONF_K5LOGIN_DIRECTORY            "k5login_directory"

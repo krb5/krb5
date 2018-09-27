@@ -425,12 +425,12 @@ Propagate the database to each replica KDC
 First, create a dump file of the database on the master KDC, as
 follows::
 
-    shell% kdb5_util dump /usr/local/var/krb5kdc/slave_datatrans
+    shell% kdb5_util dump /usr/local/var/krb5kdc/replica_datatrans
 
 Then, manually propagate the database to each replica KDC, as in the
 following example::
 
-    shell% kprop -f /usr/local/var/krb5kdc/slave_datatrans kerberos-1.mit.edu
+    shell% kprop -f /usr/local/var/krb5kdc/replica_datatrans kerberos-1.mit.edu
 
     Database propagation to kerberos-1.mit.edu: SUCCEEDED
 
@@ -448,11 +448,11 @@ following is an example of a Bourne shell script that will do this.
 
     kdclist = "kerberos-1.mit.edu kerberos-2.mit.edu"
 
-    kdb5_util dump /usr/local/var/krb5kdc/slave_datatrans
+    kdb5_util dump /usr/local/var/krb5kdc/replica_datatrans
 
     for kdc in $kdclist
     do
-        kprop -f /usr/local/var/krb5kdc/slave_datatrans $kdc
+        kprop -f /usr/local/var/krb5kdc/replica_datatrans $kdc
     done
 
 You will need to set up a cron job to run this script at the intervals
