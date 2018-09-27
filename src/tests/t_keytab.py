@@ -148,4 +148,47 @@ out = realm.run([klist, '-k'], expected_code=1, expected_msg=msg)
 msg = 'FILE:testdir/xyz%s' % uidstr
 out = realm.run([klist, '-ki'], expected_code=1, expected_msg=msg)
 
+conf = {'libdefaults': {'allow_weak_crypto': 'true'}}
+realm = K5Realm(create_user=False, create_host=False, krb5_conf=conf)
+
+realm.run([kadminl, 'ank', '-pw', 'pw', 'default'])
+realm.run([kadminl, 'ank', '-e', 'aes256-cts:special', '-pw', 'pw', 'exp'])
+realm.run([kadminl, 'ank', '-e', 'aes256-cts:special', '-pw', 'pw', '+preauth',
+           'pexp'])
+realm.run([kadminl, 'ank', '-e', 'des-cbc-crc:afs3', '-pw', 'pw', 'afs'])
+realm.run([kadminl, 'ank', '-e', 'des-cbc-crc:afs3', '-pw', 'pw', '+preauth',
+           'pafs'])
+
+# Extract one of the explicit salt values from the database.
+out = realm.run([kdb5_util, 'tabdump', 'keyinfo'])
+salt_dict = {f[0]: f[5] for f in [l.split('\t') for l in out.splitlines()]}
+exp_salt = bytes.fromhex(salt_dict['exp@KRBTEST.COM']).decode('ascii')
+
+# Create a keytab using ktutil addent with the specified options and
+# password "pw".  Test that we can use it to get initial tickets.
+# Remove the keytab afterwards.
+def test_addent(realm, princ, opts):
+    realm.run([ktutil], input=('addent -password -p %s -k 1 %s\npw\nwkt %s\n' %
+                               (princ, opts, realm.keytab)))
+    realm.kinit(princ, flags=['-k'])
+    os.remove(realm.keytab)
+
+mark('ktutil addent')
+
+# Test with default salt.
+test_addent(realm, 'default', '-e aes128-cts')
+test_addent(realm, 'default', '-e aes256-cts')
+
+# Test with a salt specified to ktutil addent.
+test_addent(realm, 'exp', '-e aes256-cts -s %s' % exp_salt)
+
+# Test etype-info fetching.
+test_addent(realm, 'default', '-f')
+test_addent(realm, 'default', '-f -e aes128-cts')
+test_addent(realm, 'exp', '-f')
+test_addent(realm, 'pexp', '-f')
+test_addent(realm, 'afs', '-f')
+test_addent(realm, 'pafs', '-f')
+
+success('Keytab-related tests')
 success('Keytab-related tests')

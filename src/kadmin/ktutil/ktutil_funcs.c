@@ -82,16 +82,68 @@ krb5_error_code ktutil_delete(context, list, idx)
 }
 
 /*
+ * Determine the enctype, salt, and s2kparams for princ based on the presence
+ * of the -f flag (fetch), the optionally specified salt string, and the
+ * optionally specified enctype.  If the fetch flag is used, salt_str must not
+ * be given; if the fetch flag is not used, the enctype must be given.
+ */
+static krb5_error_code
+get_etype_info(krb5_context context, krb5_principal princ, int fetch,
+               char *salt_str, krb5_enctype *enctype_inout,
+               krb5_data *salt_out, krb5_data *s2kparams_out)
+{
+    krb5_error_code retval;
+    krb5_enctype enctype;
+    krb5_get_init_creds_opt *opt = NULL;
+    krb5_data salt;
+
+    *salt_out = empty_data();
+    *s2kparams_out = empty_data();
+
+    if (!fetch) {
+        /* Use the specified enctype and either the specified or default salt.
+         * Do not produce s2kparams. */
+        assert(*enctype_inout != ENCTYPE_NULL);
+        if (salt_str != NULL) {
+            salt = string2data(salt_str);
+            return krb5int_copy_data_contents(context, &salt, salt_out);
+        } else {
+            return krb5_principal2salt(context, princ, salt_out);
+        }
+    }
+
+    /* Get etype-info from the KDC. */
+    assert(salt_str == NULL);
+    if (*enctype_inout != ENCTYPE_NULL) {
+        retval = krb5_get_init_creds_opt_alloc(context, &opt);
+        if (retval)
+            return retval;
+        krb5_get_init_creds_opt_set_etype_list(opt, enctype_inout, 1);
+    }
+    retval = krb5_get_etype_info(context, princ, opt, &enctype, salt_out,
+                                 s2kparams_out);
+    krb5_get_init_creds_opt_free(context, opt);
+    if (retval)
+        return retval;
+    if (enctype == ENCTYPE_NULL)
+        return KRB5KDC_ERR_ETYPE_NOSUPP;
+
+    *enctype_inout = enctype;
+    return 0;
+}
+
+/*
  * Create a new keytab entry and add it to the keytab list.
  * Based on the value of use_pass, either prompt the user for a
  * password or key.  If the keytab list is NULL, allocate a new
  * one first.
  */
-krb5_error_code ktutil_add(context, list, princ_str, kvno,
+krb5_error_code ktutil_add(context, list, princ_str, fetch, kvno,
                            enctype_str, use_pass, salt_str)
     krb5_context context;
     krb5_kt_list *list;
     char *princ_str;
+    int fetch;
     krb5_kvno kvno;
     char *enctype_str;
     int use_pass;
@@ -100,10 +152,10 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     krb5_keytab_entry *entry;
     krb5_kt_list lp = NULL, prev = NULL;
     krb5_principal princ;
-    krb5_enctype enctype;
+    krb5_enctype enctype = ENCTYPE_NULL;
     krb5_timestamp now;
     krb5_error_code retval;
-    krb5_data password, salt, defsalt = empty_data();
+    krb5_data password, salt = empty_data(), params = empty_data(), *s2kparams;
     krb5_keyblock key;
     char buf[BUFSIZ];
     char promptstr[1024];
@@ -119,9 +171,11 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     retval = krb5_unparse_name(context, princ, &princ_str);
     if (retval)
         return retval;
-    retval = krb5_string_to_enctype(enctype_str, &enctype);
-    if (retval)
-        return KRB5_BAD_ENCTYPE;
+    if (enctype_str != NULL) {
+        retval = krb5_string_to_enctype(enctype_str, &enctype);
+        if (retval)
+            return KRB5_BAD_ENCTYPE;
+    }
     retval = krb5_timeofday(context, &now);
     if (retval)
         return retval;
@@ -166,16 +220,14 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
                                     &password.length);
         if (retval)
             goto cleanup;
-        if (salt_str != NULL) {
-            salt = string2data(salt_str);
-        } else {
-            retval = krb5_principal2salt(context, princ, &defsalt);
-            if (retval)
-                goto cleanup;
-            salt = defsalt;
-        }
-        retval = krb5_c_string_to_key(context, enctype, &password,
-                                      &salt, &key);
+
+        retval = get_etype_info(context, princ, fetch, salt_str,
+                                &enctype, &salt, &params);
+        if (retval)
+            goto cleanup;
+        s2kparams = (params.length > 0) ? &params : NULL;
+        retval = krb5_c_string_to_key_with_params(context, enctype, &password,
+                                                  &salt, s2kparams, &key);
         if (retval)
             goto cleanup;
         memset(password.data, 0, password.length);
@@ -225,7 +277,8 @@ cleanup:
     if (prev)
         prev->next = NULL;
     ktutil_free_kt_list(context, lp);
-    krb5_free_data_contents(context, &defsalt);
+    krb5_free_data_contents(context, &salt);
+    krb5_free_data_contents(context, &params);
     return retval;
 }
 

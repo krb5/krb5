@@ -140,7 +140,7 @@ void ktutil_add_entry(argc, argv)
     char *princ = NULL;
     char *enctype = NULL;
     krb5_kvno kvno = 0;
-    int use_pass = 0, use_key = 0, use_kvno = 0, i;
+    int use_pass = 0, use_key = 0, use_kvno = 0, fetch = 0, i;
     char *salt = NULL;
 
     for (i = 1; i < argc; i++) {
@@ -169,18 +169,23 @@ void ktutil_add_entry(argc, argv)
             salt = argv[++i];
             continue;
         }
+        if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-f", 2))
+            fetch++;
     }
 
-    if (!((argc == 8 && princ && use_kvno && enctype) ||
-          (argc == 10 && princ && use_kvno && enctype && salt)) ||
-        use_pass + use_key != 1) {
+    if (princ == NULL || use_pass + use_key != 1 || !use_kvno ||
+        (fetch && salt != NULL)) {
         fprintf(stderr, _("usage: %s (-key | -password) -p principal "
-                          "-k kvno -e enctype [-s salt]\n"), argv[0]);
+                          "-k kvno [-e enctype] [-f|-s salt]\n"), argv[0]);
+        return;
+    }
+    if (!fetch && enctype == NULL) {
+        fprintf(stderr, _("enctype must be specified if not using -f\n"));
         return;
     }
 
-    retval = ktutil_add(kcontext, &ktlist, princ, kvno, enctype, use_pass,
-                        salt);
+    retval = ktutil_add(kcontext, &ktlist, princ, fetch, kvno, enctype,
+                        use_pass, salt);
     if (retval)
         com_err(argv[0], retval, _("while adding new entry"));
 }
