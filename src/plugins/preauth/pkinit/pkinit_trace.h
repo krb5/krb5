@@ -72,9 +72,9 @@
 #define TRACE_PKINIT_CLIENT_REQ_RSA(c)                  \
     TRACE(c, "PKINIT client making RSA request")
 #define TRACE_PKINIT_CLIENT_SAN_CONFIG_DNSNAME(c, host)                 \
-    TRACE(c, "PKINIT client config accepts KDC dNSName SAN {string}", host)
+    TRACE(c, "PKINIT client config accepts KDC dNSName SAN {str}", host)
 #define TRACE_PKINIT_CLIENT_SAN_MATCH_DNSNAME(c, host)                  \
-    TRACE(c, "PKINIT client matched KDC hostname {string} against "     \
+    TRACE(c, "PKINIT client matched KDC hostname {str} against "     \
           "dNSName SAN; EKU check still required", host)
 #define TRACE_PKINIT_CLIENT_SAN_MATCH_NONE(c)                           \
     TRACE(c, "PKINIT client found no acceptable SAN in KDC cert")
@@ -84,7 +84,7 @@
 #define TRACE_PKINIT_CLIENT_SAN_ERR(c)                          \
     TRACE(c, "PKINIT client failed to decode SANs in KDC cert")
 #define TRACE_PKINIT_CLIENT_SAN_KDCCERT_DNSNAME(c, host)                \
-    TRACE(c, "PKINIT client found dNSName SAN in KDC cert: {string}", host)
+    TRACE(c, "PKINIT client found dNSName SAN in KDC cert: {str}", host)
 #define TRACE_PKINIT_CLIENT_SAN_KDCCERT_PRINC(c, princ)                 \
     TRACE(c, "PKINIT client found id-pkinit-san in KDC cert: {princ}", princ)
 #define TRACE_PKINIT_CLIENT_TRYAGAIN(c)                                 \
