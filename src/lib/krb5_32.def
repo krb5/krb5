@@ -476,6 +476,8 @@ EXPORTS
 
 ; new in 1.17
 	krb5_get_etype_info				@447
+	krb5_pac_sign_ext				@448
+	krb5_pac_verify_ext				@449
 ; private symbols used by SPAKE client module
 	profile_get_string				@439 ; PRIVATE
 	profile_release_string				@440 ; PRIVATE

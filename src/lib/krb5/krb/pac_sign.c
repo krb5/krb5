@@ -33,7 +33,8 @@ static krb5_error_code
 k5_insert_client_info(krb5_context context,
                       krb5_pac pac,
                       krb5_timestamp authtime,
-                      krb5_const_principal principal)
+                      krb5_const_principal principal,
+                      krb5_boolean with_realm)
 {
     krb5_error_code ret;
     krb5_data client_info;
@@ -41,16 +42,23 @@ k5_insert_client_info(krb5_context context,
     unsigned char *princ_name_utf16 = NULL, *p;
     size_t princ_name_utf16_len = 0;
     uint64_t nt_authtime;
+    int flags = 0;
 
     /* If we already have a CLIENT_INFO buffer, then just validate it */
     if (k5_pac_locate_buffer(context, pac, KRB5_PAC_CLIENT_INFO,
                              &client_info) == 0) {
-        return k5_pac_validate_client(context, pac, authtime, principal);
+        return k5_pac_validate_client(context, pac, authtime, principal,
+                                      with_realm);
     }
 
-    ret = krb5_unparse_name_flags(context, principal,
-                                  KRB5_PRINCIPAL_UNPARSE_NO_REALM,
-                                  &princ_name_utf8);
+    if (!with_realm) {
+        flags |= KRB5_PRINCIPAL_UNPARSE_NO_REALM;
+    } else if (principal->type == KRB5_NT_ENTERPRISE_PRINCIPAL) {
+        /* Avoid quoting the first @ sign for enterprise name with realm. */
+        flags |= KRB5_PRINCIPAL_UNPARSE_DISPLAY;
+    }
+
+    ret = krb5_unparse_name_flags(context, principal, flags, &princ_name_utf8);
     if (ret != 0)
         goto cleanup;
 
@@ -183,6 +191,17 @@ krb5_pac_sign(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
               krb5_const_principal principal, const krb5_keyblock *server_key,
               const krb5_keyblock *privsvr_key, krb5_data *data)
 {
+    return krb5_pac_sign_ext(context, pac, authtime, principal, server_key,
+                             privsvr_key, FALSE, data);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_pac_sign_ext(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
+                  krb5_const_principal principal,
+                  const krb5_keyblock *server_key,
+                  const krb5_keyblock *privsvr_key, krb5_boolean with_realm,
+                  krb5_data *data)
+{
     krb5_error_code ret;
     krb5_data server_cksum, privsvr_cksum;
     krb5_cksumtype server_cksumtype, privsvr_cksumtype;
@@ -192,7 +211,8 @@ krb5_pac_sign(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
     data->data = NULL;
 
     if (principal != NULL) {
-        ret = k5_insert_client_info(context, pac, authtime, principal);
+        ret = k5_insert_client_info(context, pac, authtime, principal,
+                                    with_realm);
         if (ret != 0)
             return ret;
     }

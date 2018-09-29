@@ -90,7 +90,8 @@ krb5_error_code
 k5_pac_validate_client(krb5_context context,
                        const krb5_pac pac,
                        krb5_timestamp authtime,
-                       krb5_const_principal principal);
+                       krb5_const_principal principal,
+                       krb5_boolean with_realm);
 
 krb5_error_code
 k5_pac_add_buffer(krb5_context context,
