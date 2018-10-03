@@ -33,6 +33,9 @@ static char *readline(const char *prompt)
     struct termios termbuf;
     char input[BUFSIZ];
 
+    /* Make sure we don't buffer anything beyond the line read. */
+    setvbuf(stdin, 0, _IONBF, 0);
+
     if (tcgetattr(STDIN_FILENO, &termbuf) == 0) {
         termbuf.c_lflag |= ICANON|ISIG|ECHO;
         tcsetattr(STDIN_FILENO, TCSANOW, &termbuf);
