@@ -40,8 +40,9 @@ typedef WSABUF sg_buf;
  */
 /* WSASend returns 0 or SOCKET_ERROR.  */
 #define SOCKET_WRITEV_TEMP DWORD
-#define SOCKET_WRITEV(FD, SG, LEN, TMP)                         \
-    (WSASend((FD), (SG), (LEN), &(TMP), 0, 0, 0) ? -1 : (TMP))
+#define SOCKET_WRITEV(FD, SG, LEN, TMP)                 \
+    (WSASend((FD), (SG), (LEN), &(TMP), 0, 0, 0) ?      \
+     (ssize_t)-1 : (ssize_t)(TMP))
 
 #define SHUTDOWN_READ   SD_RECEIVE
 #define SHUTDOWN_WRITE  SD_SEND
