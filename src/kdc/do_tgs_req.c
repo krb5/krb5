@@ -269,6 +269,8 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     errcode = kdc_process_s4u2self_req(kdc_active_realm,
                                        request,
                                        header_enc_tkt->client,
+                                       header_ticket->server,
+                                       is_referral,
                                        server,
                                        subkey,
                                        header_enc_tkt->session,
@@ -288,16 +290,8 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
 
     if (errcode)
         goto cleanup;
-    if (s4u_x509_user != NULL) {
+    if (s4u_x509_user != NULL)
         setflag(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION);
-        if (is_referral) {
-            /* The requesting server appears to no longer exist, and we found
-             * a referral instead.  Treat this as a server lookup failure. */
-            errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
-            status = "LOOKING_UP_SERVER";
-            goto cleanup;
-        }
-    }
 
     /* Deal with user-to-user and constrained delegation */
     errcode = decrypt_2ndtkt(kdc_active_realm, request, c_flags,

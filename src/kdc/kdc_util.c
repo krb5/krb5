@@ -1441,6 +1441,8 @@ krb5_error_code
 kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
                          krb5_kdc_req *request,
                          krb5_const_principal client_princ,
+                         krb5_const_principal header_srv_princ,
+                         krb5_boolean issuing_referral,
                          const krb5_db_entry *server,
                          krb5_keyblock *tgs_subkey,
                          krb5_keyblock *tgs_session,
@@ -1450,6 +1452,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
                          const char **status)
 {
     krb5_error_code             code;
+    krb5_boolean                is_local_tgt;
     krb5_pa_data                *pa_data;
     int                         flags;
     krb5_db_entry               *princ;
@@ -1541,6 +1544,14 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
     if (request->kdc_options & AS_INVALID_OPTIONS) {
         *status = "INVALID AS OPTIONS";
         return KRB5KDC_ERR_BADOPTION;
+    }
+
+    is_local_tgt = !is_cross_tgs_principal(header_srv_princ);
+    if (is_local_tgt && issuing_referral) {
+        /* The requesting server appears to no longer exist, and we found
+         * a referral instead.  Treat this as a server lookup failure. */
+        *status = "LOOKING_UP_SERVER";
+        return KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
     }
 
     /*

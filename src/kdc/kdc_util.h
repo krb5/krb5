@@ -269,6 +269,8 @@ krb5_error_code
 kdc_process_s4u2self_req (kdc_realm_t *kdc_active_realm,
                           krb5_kdc_req *request,
                           krb5_const_principal client_princ,
+                          krb5_const_principal header_srv_princ,
+                          krb5_boolean issuing_referral,
                           const krb5_db_entry *server,
                           krb5_keyblock *tgs_subkey,
                           krb5_keyblock *tgs_session,
