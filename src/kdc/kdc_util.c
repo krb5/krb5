@@ -1546,6 +1546,19 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
         return KRB5KDC_ERR_BADOPTION;
     }
 
+    /*
+     * Valid S4U2Self requests can occur in the following combinations:
+     *
+     * (1) local TGT, local user, local server
+     * (2) cross TGT, local user, issuing referral
+     * (3) cross TGT, non-local user, issuing referral
+     * (4) cross TGT, non-local user, local server
+     *
+     * The first case is for a single-realm S4U2Self scenario; the second,
+     * third, and fourth cases are for the initial, intermediate (if any), and
+     * final cross-realm requests in a multi-realm scenario.
+     */
+
     is_local_tgt = !is_cross_tgs_principal(header_srv_princ);
     if (is_local_tgt && issuing_referral) {
         /* The requesting server appears to no longer exist, and we found
@@ -1561,6 +1574,13 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
                            (*s4u_x509_user)->user_id.user)) {
         krb5_db_entry no_server;
         krb5_pa_data **e_data = NULL;
+
+        if (!is_local_tgt && !issuing_referral) {
+            /* A local server should not need a cross-realm TGT to impersonate
+             * a local principal. */
+            *status = "NOT_CROSS_REALM_REQUEST";
+            return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error */
+        }
 
         code = krb5_db_get_principal(kdc_context,
                                      (*s4u_x509_user)->user_id.user,
@@ -1584,6 +1604,14 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
         }
 
         *princ_ptr = princ;
+    } else if (is_local_tgt) {
+        /*
+         * The server is asking to impersonate a principal from another realm,
+         * using a local TGT.  It should instead ask that principal's realm and
+         * follow referrals back to us.
+         */
+        *status = "S4U2SELF_CLIENT_NOT_OURS";
+        return KRB5KDC_ERR_POLICY; /* match Windows error */
     }
 
     return 0;
