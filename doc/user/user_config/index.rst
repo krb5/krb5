@@ -8,5 +8,6 @@ been disabled by your host's configuration):
 .. toctree::
    :maxdepth: 1
 
+   kerberos.rst
    k5login.rst
    k5identity.rst
