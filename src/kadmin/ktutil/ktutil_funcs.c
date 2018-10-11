@@ -149,73 +149,52 @@ krb5_error_code ktutil_add(context, list, princ_str, fetch, kvno,
     int use_pass;
     char *salt_str;
 {
-    krb5_keytab_entry *entry;
-    krb5_kt_list lp = NULL, prev = NULL;
+    krb5_keytab_entry *entry = NULL;
+    krb5_kt_list lp, *last;
     krb5_principal princ;
     krb5_enctype enctype = ENCTYPE_NULL;
     krb5_timestamp now;
     krb5_error_code retval;
-    krb5_data password, salt = empty_data(), params = empty_data(), *s2kparams;
+    krb5_data password = empty_data(), salt = empty_data();
+    krb5_data params = empty_data(), *s2kparams;
     krb5_keyblock key;
     char buf[BUFSIZ];
     char promptstr[1024];
+    char *princ_full = NULL;
     uint8_t *keybytes;
     size_t keylen;
     unsigned int pwsize = BUFSIZ;
 
     retval = krb5_parse_name(context, princ_str, &princ);
     if (retval)
-        return retval;
+        goto cleanup;
     /* now unparse in order to get the default realm appended
        to princ_str, if no realm was specified */
-    retval = krb5_unparse_name(context, princ, &princ_str);
+    retval = krb5_unparse_name(context, princ, &princ_full);
     if (retval)
-        return retval;
+        goto cleanup;
     if (enctype_str != NULL) {
         retval = krb5_string_to_enctype(enctype_str, &enctype);
-        if (retval)
-            return KRB5_BAD_ENCTYPE;
+        if (retval) {
+            retval = KRB5_BAD_ENCTYPE;
+            goto cleanup;
+        }
     }
     retval = krb5_timeofday(context, &now);
     if (retval)
-        return retval;
+        goto cleanup;
 
-    if (*list) {
-        /* point lp at the tail of the list */
-        for (lp = *list; lp->next; lp = lp->next);
-    }
-    entry = (krb5_keytab_entry *) malloc(sizeof(krb5_keytab_entry));
-    if (!entry) {
-        return ENOMEM;
-    }
-    memset(entry, 0, sizeof(*entry));
-
-    if (!lp) {          /* if list is empty, start one */
-        lp = (krb5_kt_list) malloc(sizeof(*lp));
-        if (!lp) {
-            return ENOMEM;
-        }
-    } else {
-        lp->next = (krb5_kt_list) malloc(sizeof(*lp));
-        if (!lp->next) {
-            return ENOMEM;
-        }
-        prev = lp;
-        lp = lp->next;
-    }
-    lp->next = NULL;
-    lp->entry = entry;
+    entry = k5alloc(sizeof(*entry), &retval);
+    if (entry == NULL)
+        goto cleanup;
 
     if (use_pass) {
-        password.length = pwsize;
-        password.data = (char *) malloc(pwsize);
-        if (!password.data) {
-            retval = ENOMEM;
+        retval = alloc_data(&password, pwsize);
+        if (retval)
             goto cleanup;
-        }
 
         snprintf(promptstr, sizeof(promptstr), _("Password for %.1000s"),
-                 princ_str);
+                 princ_full);
         retval = krb5_read_password(context, promptstr, NULL, password.data,
                                     &password.length);
         if (retval)
@@ -230,11 +209,9 @@ krb5_error_code ktutil_add(context, list, princ_str, fetch, kvno,
                                                   &salt, s2kparams, &key);
         if (retval)
             goto cleanup;
-        memset(password.data, 0, password.length);
-        password.length = 0;
-        lp->entry->key = key;
+        entry->key = key;
     } else {
-        printf(_("Key for %s (hex): "), princ_str);
+        printf(_("Key for %s (hex): "), princ_full);
         fgets(buf, BUFSIZ, stdin);
         /*
          * We need to get rid of the trailing '\n' from fgets.
@@ -260,25 +237,30 @@ krb5_error_code ktutil_add(context, list, princ_str, fetch, kvno,
             goto cleanup;
         }
 
-        lp->entry->key.enctype = enctype;
-        lp->entry->key.contents = keybytes;
-        lp->entry->key.length = keylen;
+        entry->key.enctype = enctype;
+        entry->key.contents = keybytes;
+        entry->key.length = keylen;
     }
-    lp->entry->principal = princ;
-    lp->entry->vno = kvno;
-    lp->entry->timestamp = now;
+    entry->principal = princ;
+    entry->vno = kvno;
+    entry->timestamp = now;
 
-    if (!*list)
-        *list = lp;
-
-    return 0;
+    /* Add entry to the end of the list (or create a new list if empty). */
+    lp = k5alloc(sizeof(*lp), &retval);
+    if (lp == NULL)
+        goto cleanup;
+    lp->next = NULL;
+    lp->entry = entry;
+    entry = NULL;
+    for (last = list; *last != NULL; last = &(*last)->next);
+    *last = lp;
 
 cleanup:
-    if (prev)
-        prev->next = NULL;
-    ktutil_free_kt_list(context, lp);
+    krb5_kt_free_entry(context, entry);
+    zapfree(password.data, password.length);
     krb5_free_data_contents(context, &salt);
     krb5_free_data_contents(context, &params);
+    krb5_free_unparsed_name(context, princ_full);
     return retval;
 }
 
