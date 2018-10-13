@@ -64,6 +64,9 @@
  * Key values are generated using a hash of the kvno, enctype, salt type, and
  * principal name.  This module does not use master key encryption, so it
  * serves as a partial test of the DAL's ability to avoid that.
+ *
+ * For cross realm, just add outbound 'krbtgt/OTHER_REALM' principal to each
+ * kdc configuration, while for inbound trust the local krbtgt will be used.
  */
 
 #include "k5-int.h"
@@ -297,12 +300,27 @@ test_close(krb5_context context)
     return 0;
 }
 
+/* Return the principal name krbtgt/tgs_realm@our_realm. */
+static krb5_principal
+tgtname(krb5_context context, const krb5_data *tgs_realm,
+        const krb5_data *our_realm)
+{
+    krb5_principal princ;
+
+    check(krb5_build_principal_ext(context, &princ,
+                                   our_realm->length, our_realm->data,
+                                   KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
+                                   tgs_realm->length, tgs_realm->data, 0));
+    princ->type = KRB5_NT_SRV_INST;
+    return princ;
+}
+
 static krb5_error_code
 test_get_principal(krb5_context context, krb5_const_principal search_for,
                    unsigned int flags, krb5_db_entry **entry)
 {
     krb5_error_code ret;
-    krb5_principal princ = NULL;
+    krb5_principal princ = NULL, tgtprinc;
     krb5_principal_data empty_princ = { KV5M_PRINCIPAL };
     testhandle h = context->dal_handle->db_context;
     char *search_name = NULL, *canon = NULL, *flagstr, **names, **key_strings;
@@ -330,14 +348,25 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
                 princ = NULL;
                 ret = 0;
                 goto cleanup;
+            } else if (flags & KRB5_KDB_FLAG_CANONICALIZE) {
+                /* Generate a server referral by looking up the TGT for the
+                 * canonical name's realm. */
+                tgtprinc = tgtname(context, &princ->realm, &search_for->realm);
+                krb5_free_principal(context, princ);
+                princ = tgtprinc;
+
+                krb5_free_unparsed_name(context, search_name);
+                check(krb5_unparse_name_flags(context, princ,
+                                              KRB5_PRINCIPAL_UNPARSE_NO_REALM,
+                                              &search_name));
+                ename = search_name;
             } else {
-                /* We could look up a cross-realm TGS entry, but we don't need
-                 * that behavior yet. */
                 ret = KRB5_KDB_NOENTRY;
                 goto cleanup;
             }
+        } else {
+            ename = canon;
         }
-        ename = canon;
     } else {
         check(krb5_copy_principal(context, search_for, &princ));
         ename = search_name;

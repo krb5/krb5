@@ -139,21 +139,43 @@ if 'auth1: user@' not in out or 'auth2: user@' not in out:
 
 realm.stop()
 
-# Exercise cross-realm S4U2Self.  The query in the foreign realm will
-# fail, but we can check that the right server principal was used.
+# Test cross realm S4U2Self using server referrals.
+mark('cross-realm S4U2Self')
+testprincs = {'krbtgt/SREALM': {'keys': 'aes128-cts'},
+              'krbtgt/UREALM': {'keys': 'aes128-cts'},
+              'user': {'keys': 'aes128-cts'}}
+kdcconf1 = {'realms': {'$realm': {'database_module': 'test'}},
+            'dbmodules': {'test': {'db_library': 'test',
+                                   'princs': testprincs }}}
+kdcconf2 = {'realms': {'$realm': {'database_module': 'test'}},
+            'dbmodules': {'test': {'db_library': 'test',
+                                   'princs': testprincs,
+                                   'alias': {'user@SREALM': '@SREALM'}}}}
+r1, r2 = cross_realms(2, xtgts=(),
+                      args=({'realm': 'SREALM', 'kdc_conf': kdcconf1},
+                            {'realm': 'UREALM', 'kdc_conf': kdcconf2}),
+                      create_kdb=False)
+
+r1.start_kdc()
+r2.start_kdc()
+r1.extract_keytab(r1.user_princ, r1.keytab)
+r1.kinit(r1.user_princ, None, ['-k', '-t', r1.keytab])
+
 # Include a regression test for #8741 by unsetting the default realm.
-r1, r2 = cross_realms(2, create_user=False)
-r1.run([kinit, '-k', r1.host_princ])
 remove_default = {'libdefaults': {'default_realm': None}}
 no_default = r1.special_env('no_default', False, krb5_conf=remove_default)
-r1.run(['./t_s4u', 'p:' + r2.host_princ], env=no_default, expected_code=1,
-       expected_msg='Server not found in Kerberos database')
+msgs = ('Getting credentials user@UREALM -> user@SREALM',
+        '/Matching credential not found',
+        'Getting credentials user@SREALM -> krbtgt/UREALM@SREALM',
+        'Received creds for desired service krbtgt/UREALM@SREALM',
+        'via TGT krbtgt/UREALM@SREALM after requesting user\\@SREALM@UREALM',
+        'krbtgt/SREALM@UREALM differs from requested user\\@SREALM@UREALM',
+        'via TGT krbtgt/SREALM@UREALM after requesting user@SREALM',
+        'TGS reply is for user@UREALM -> user@SREALM')
+r1.run(['./t_s4u', 'p:' + r2.user_princ, '-', r1.keytab], env=no_default,
+       expected_trace=msgs)
+
 r1.stop()
 r2.stop()
-with open(os.path.join(r2.testdir, 'kdc.log')) as f:
-    kdclog = f.read()
-exp_princ = r1.host_princ.replace('/', '\\/').replace('@', '\\@')
-if ('for %s@%s, Server not found' % (exp_princ, r2.realm)) not in kdclog:
-    fail('cross-realm s4u2self (kdc log)')
 
 success('S4U test cases')
