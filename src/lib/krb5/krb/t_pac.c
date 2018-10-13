@@ -511,12 +511,12 @@ check_pac(krb5_context context, int index, const unsigned char *pdata,
     ret = krb5_pac_verify_ext(context, pac, auth_time, p, server_key, kdc_key,
                               with_realm);
     if (ret)
-        err(context, ret, "[pac: %d] krb5_pac_verify_ex", index);
+        err(context, ret, "[pac: %d] krb5_pac_verify_ext", index);
 
     ret = krb5_pac_sign_ext(context, pac, auth_time, p, server_key,
                             kdc_sign_key, with_realm, &data);
     if (ret)
-        err(context, ret, "[pac: %d] krb5_pac_sign_ex", index);
+        err(context, ret, "[pac: %d] krb5_pac_sign_ext", index);
 
     krb5_pac_free(context, pac);
 
@@ -528,7 +528,7 @@ check_pac(krb5_context context, int index, const unsigned char *pdata,
     ret = krb5_pac_verify_ext(context, pac, auth_time, p, server_key, kdc_key,
                               with_realm);
     if (ret)
-        err(context, ret, "[pac: %d] krb5_pac_verify_ex 2", index);
+        err(context, ret, "[pac: %d] krb5_pac_verify_ext 2", index);
 
     /* make a copy and try to reproduce it */
     {
@@ -574,7 +574,7 @@ check_pac(krb5_context context, int index, const unsigned char *pdata,
         ret = krb5_pac_sign_ext(context, pac2, auth_time, p, server_key,
                                 kdc_sign_key, with_realm, &data);
         if (ret)
-            err(context, ret, "[pac: %d] krb5_pac_sign_ex 4", index);
+            err(context, ret, "[pac: %d] krb5_pac_sign_ext 4", index);
 
         krb5_pac_free(context, pac2);
 
@@ -585,7 +585,7 @@ check_pac(krb5_context context, int index, const unsigned char *pdata,
         ret = krb5_pac_verify_ext(context, pac2, auth_time, p, server_key,
                                   kdc_key, with_realm);
         if (ret)
-            err(context, ret, "[pac: %d] krb5_pac_verify_ex 4", index);
+            err(context, ret, "[pac: %d] krb5_pac_verify_ext 4", index);
 
         krb5_free_data_contents(context, &data);
 
