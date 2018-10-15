@@ -1494,7 +1494,7 @@ restore_dump(krb5_context context, char *dumpfile, FILE *f,
 }
 
 /*
- * Usage: load_db [-ov] [-b7] [-r13] [-verbose] [-update] [-hash]
+ * Usage: load_db [-ov] [-b7] [-r13] [-r18] [-verbose] [-update] [-hash]
  *                filename
  */
 void

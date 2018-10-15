@@ -377,14 +377,14 @@ To restore a Kerberos database dump from a file, use the
 Examples
 ########
 
-To load a single principal, either replacing or updating the database:
+To dump a single principal and later load it, updating the database:
 
 ::
 
-     shell% kdb5_util load dumpfile principal
+     shell% kdb5_util dump dumpfile principal@REALM
      shell%
 
-     shell% kdb5_util load -update dumpfile principal
+     shell% kdb5_util load -update dumpfile
      shell%
 
 

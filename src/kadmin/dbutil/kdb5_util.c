@@ -77,10 +77,11 @@ kadm5_config_params global_params;
 void usage()
 {
     fprintf(stderr,
-            _("Usage: kdb5_util [-x db_args]* [-r realm] [-d dbname] "
-              "[-k mkeytype] [-M mkeyname]\n"
-              "\t        [-kv mkeyVNO] [-sf stashfilename] [-m] cmd "
-              "[cmd_options]\n"
+            _("Usage: kdb5_util [-r realm] [-d dbname] "
+              "[-k mkeytype] [-kv mkeyVNO]\n"
+              "\t        [-M mkeyname] [-m] [-sf stashfilename] "
+              "[-P password]\n"
+              "\t        [-x db_args]* cmd [cmd_options]\n"
               "\tcreate  [-s]\n"
               "\tdestroy [-f]\n"
               "\tstash   [-f keyfile]\n"
