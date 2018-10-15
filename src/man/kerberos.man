@@ -34,12 +34,12 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .sp
 The Kerberos system authenticates individual users in a network
 environment.  After authenticating yourself to Kerberos, you can use
-Kerberos\-enabled programs without having to present passwords.
+Kerberos\-enabled programs without having to present passwords or
+certificates to those programs.
 .sp
-If you enter your username and kinit(1) responds with this
-message:
+If you receive the following response from kinit(1):
 .sp
-kinit(v5): Client not found in Kerberos database while getting initial
+kinit: Client not found in Kerberos database while getting initial
 credentials
 .sp
 you haven\(aqt been registered as a Kerberos user.  See your system
@@ -51,10 +51,13 @@ is the \fBinstance\fP, which in the case of a user is usually null.
 Some users may have privileged instances, however, such as \fBroot\fP or
 \fBadmin\fP\&.  In the case of a service, the instance is the fully
 qualified name of the machine on which it runs; i.e. there can be an
-rlogin service running on the machine ABC, which is different from the
-rlogin service running on the machine XYZ.  The third part of a
-Kerberos name is the \fBrealm\fP\&.  The realm corresponds to the Kerberos
-service providing authentication for the principal.
+ssh service running on the machine ABC (\fI\%ssh/ABC@REALM\fP), which is
+different from the ssh service running on the machine XYZ
+(\fI\%ssh/XYZ@REALM\fP).  The third part of a Kerberos name is the \fBrealm\fP\&.
+The realm corresponds to the Kerberos service providing authentication
+for the principal.  Realms are conventionally all\-uppercase, and often
+match the end of hostnames in the realm (for instance, host01.example.com
+might be in realm EXAMPLE.COM).
 .sp
 When writing a Kerberos name, the principal name is separated from the
 instance (if not null) by a slash, and the realm (if not the local
@@ -77,63 +80,71 @@ cbrown/root@FUBAR.ORG
 When you authenticate yourself with Kerberos you get an initial
 Kerberos \fBticket\fP\&.  (A Kerberos ticket is an encrypted protocol
 message that provides authentication.)  Kerberos uses this ticket for
-network utilities such as rlogin and rcp.  The ticket transactions are
-done transparently, so you don\(aqt have to worry about their management.
+network utilities such as ssh.  The ticket transactions are done
+transparently, so you don\(aqt have to worry about their management.
 .sp
-Note, however, that tickets expire.  Privileged tickets, such as those
-with the instance \fBroot\fP, expire in a few minutes, while tickets
-that carry more ordinary privileges may be good for several hours or a
-day, depending on the installation\(aqs policy.  If your login session
-extends beyond the time limit, you will have to re\-authenticate
-yourself to Kerberos to get new tickets.  Use the kinit(1)
-command to re\-authenticate yourself.
+Note, however, that tickets expire.  Administrators may configure more
+privileged tickets, such as those with service or instance of \fBroot\fP
+or \fBadmin\fP, to expire in a few minutes, while tickets that carry
+more ordinary privileges may be good for several hours or a day.  If
+your login session extends beyond the time limit, you will have to
+re\-authenticate yourself to Kerberos to get new tickets using the
+kinit(1) command.
 .sp
-If you use the kinit command to get your tickets, make sure you use
-the kdestroy command to destroy your tickets before you end your login
-session.  You should put the kdestroy command in your \fB\&.logout\fP file
-so that your tickets will be destroyed automatically when you logout.
-For more information about the kinit and kdestroy commands, see the
-kinit(1) and kdestroy(1) manual pages.
+Some tickets are \fBrenewable\fP beyond their initial lifetime.  This
+means that \fBkinit \-R\fP can extend their lifetime without requiring
+you to re\-authenticate.
+.sp
+If you wish to delete your local tickets, use the kdestroy(1)
+command.
 .sp
 Kerberos tickets can be forwarded.  In order to forward tickets, you
 must request \fBforwardable\fP tickets when you kinit.  Once you have
 forwardable tickets, most Kerberos programs have a command line option
-to forward them to the remote host.
+to forward them to the remote host.  This can be useful for, e.g.,
+running kinit on your local machine and then sshing into another to do
+work.  Note that this should not be done on untrusted machines since
+they will then have your tickets.
 .SH ENVIRONMENT VARIABLES
 .sp
 Several environment variables affect the operation of Kerberos\-enabled
-programs.  These inclide:
+programs.  These include:
 .INDENT 0.0
 .TP
 \fBKRB5CCNAME\fP
-Specifies the location of the credential cache, in the form
-\fITYPE\fP:\fIresidual\fP\&.  If no \fItype\fP prefix is present, the \fBFILE\fP
-type is assumed and \fIresidual\fP is the pathname of the cache file.
-A collection of multiple caches may be used by specifying the
-\fBdir\fP type and the pathname of a private directory (which must
-already exist).  The default cache file is /tmp/krb5cc_*uid*,
-where \fIuid\fP is the decimal user ID of the user.
+Default name for the credentials cache file, in the form
+\fITYPE\fP:\fIresidual\fP\&.  The type of the default cache may determine
+the availability of a cache collection.  \fBFILE\fP is not a
+collection type; \fBKEYRING\fP, \fBDIR\fP, and \fBKCM\fP are.
+.sp
+If not set, the value of \fBdefault_ccache_name\fP from
+configuration files (see \fBKRB5_CONFIG\fP) will be used.  If that
+is also not set, the default \fItype\fP is \fBFILE\fP, and the
+\fIresidual\fP is the path /tmp/krb5cc_*uid*, where \fIuid\fP is the
+decimal user ID of the user.
 .TP
 \fBKRB5_KTNAME\fP
-Specifies the location of the keytab file, in the form
+Specifies the location of the default keytab file, in the form
 \fITYPE\fP:\fIresidual\fP\&.  If no \fItype\fP is present, the \fBFILE\fP type is
-assumed and \fIresidual\fP is the pathname of the keytab file.  The
-default keytab file is \fB/etc/krb5.keytab\fP\&.
+assumed and \fIresidual\fP is the pathname of the keytab file.  If
+unset, \fB@KTNAME@\fP will be used.
 .TP
 \fBKRB5_CONFIG\fP
 Specifies the location of the Kerberos configuration file.  The
-default is \fB/etc/krb5.conf\fP\&.
+default is \fB@SYSCONFDIR@\fP\fB/krb5.conf\fP\&.  Multiple filenames can
+be specified, separated by a colon; all files which are present
+will be read.
 .TP
 \fBKRB5_KDC_PROFILE\fP
 Specifies the location of the KDC configuration file, which
 contains additional configuration directives for the Key
 Distribution Center daemon and associated programs.  The default
-is \fB/usr/local/var/krb5kdc/kdc.conf\fP\&.
+is \fB@LOCALSTATEDIR@\fP\fB/krb5kdc\fP\fB/kdc.conf\fP\&.
 .TP
 \fBKRB5RCACHETYPE\fP
 Specifies the default type of replay cache to use for servers.
 Valid types include \fBdfl\fP for the normal file type and \fBnone\fP
-for no replay cache.
+for no replay cache.  The default is \fBdfl\fP\&.
 .TP
 \fBKRB5RCACHEDIR\fP
 Specifies the default directory for replay caches used by servers.
@@ -143,7 +154,17 @@ or \fB/var/tmp\fP if \fBTMPDIR\fP is not set.
 \fBKRB5_TRACE\fP
 Specifies a filename to write trace log output to.  Trace logs can
 help illuminate decisions made internally by the Kerberos
-libraries.  The default is not to write trace log output anywhere.
+libraries.  For example, \fBenv KRB5_TRACE=/dev/stderr kinit\fP
+would send tracing information for kinit(1) to
+\fB/dev/stderr\fP\&.  The default is not to write trace log output
+anywhere.
+.TP
+\fBKRB5_CLIENT_KTNAME\fP
+Default client keytab file name.  If unset, \fB@CKTNAME@\fP will be
+used).
+.TP
+\fBKPROP_PORT\fP
+kprop(8) port to use.  Defaults to 754.
 .UNINDENT
 .sp
 Most environment variables are disabled for certain programs, such as
@@ -161,6 +182,7 @@ kadmind(8), kdb5_util(8), krb5kdc(8)
 Steve Miller, MIT Project Athena/Digital Equipment Corporation
 Clifford Neuman, MIT Project Athena
 Greg Hudson, MIT Kerberos Consortium
+Robbie Harwood, Red Hat, Inc.
 .fi
 .sp
 .SH HISTORY
@@ -170,8 +192,8 @@ contributions from many outside parties.  It is currently maintained
 by the MIT Kerberos Consortium.
 .SH RESTRICTIONS
 .sp
-Copyright 1985, 1986, 1989\-1996, 2002, 2011 Masachusetts Institute of
-Technology
+Copyright 1985, 1986, 1989\-1996, 2002, 2011, 2018 Masachusetts
+Institute of Technology
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
