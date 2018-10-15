@@ -884,7 +884,8 @@ start_connection(krb5_context context, struct conn_state *state,
     }
 
     /* Start connecting to KDC.  */
-    e = connect(fd, (struct sockaddr *)&state->addr.saddr, state->addr.len);
+    e = SOCKET_CONNECT(fd, (struct sockaddr *)&state->addr.saddr,
+                       state->addr.len);
     if (e != 0) {
         /*
          * This is the path that should be followed for non-blocking
