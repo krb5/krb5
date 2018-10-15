@@ -70,14 +70,11 @@ OPTIONS
     number will typically be 0, as the resulting ticket is not
     encrypted in the server's long-term key.
 
-
 ENVIRONMENT
 -----------
 
-kvno uses the following environment variable:
-
-**KRB5CCNAME**
-    Location of the credentials (ticket) cache.
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
 
 
 FILES
@@ -90,4 +87,4 @@ FILES
 SEE ALSO
 --------
 
-:ref:`kinit(1)`, :ref:`kdestroy(1)`
+:ref:`kinit(1)`, :ref:`kdestroy(1)`, :ref:`kerberos(7)`

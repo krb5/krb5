@@ -105,15 +105,8 @@ value is used to locate the default ticket cache.
 ENVIRONMENT
 -----------
 
-klist uses the following environment variable:
-
-**KRB5CCNAME**
-    Location of the default Kerberos 5 credentials (ticket) cache, in
-    the form *type*:*residual*.  If no *type* prefix is present, the
-    **FILE** type is assumed.  The type of the default cache may
-    determine the availability of a cache collection; for instance, a
-    default cache of type **DIR** causes caches within the directory
-    to be present in the collection.
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
 
 
 FILES
@@ -129,4 +122,4 @@ FILES
 SEE ALSO
 --------
 
-:ref:`kinit(1)`, :ref:`kdestroy(1)`
+:ref:`kinit(1)`, :ref:`kdestroy(1)`, :ref:`kerberos(7)`

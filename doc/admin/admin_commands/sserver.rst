@@ -99,7 +99,14 @@ COMMON ERROR MESSAGES
    probably not installed in the proper directory.
 
 
+ENVIRONMENT
+-----------
+
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
+
+
 SEE ALSO
 --------
 
-:ref:`sclient(1)`, services(5), inetd(8)
+:ref:`sclient(1)`, :ref:`kerberos(7)`, services(5), inetd(8)

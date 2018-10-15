@@ -103,14 +103,12 @@ description for further details.
 ENVIRONMENT
 -----------
 
-krb5kdc uses the following environment variables:
-
-* **KRB5_CONFIG**
-* **KRB5_KDC_PROFILE**
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
 
 
 SEE ALSO
 --------
 
 :ref:`kdb5_util(8)`, :ref:`kdc.conf(5)`, :ref:`krb5.conf(5)`,
-:ref:`kdb5_ldap_util(8)`
+:ref:`kdb5_ldap_util(8)`, :ref:`kerberos(7)`

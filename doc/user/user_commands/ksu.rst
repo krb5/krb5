@@ -385,3 +385,16 @@ AUTHOR OF KSU
 -------------
 
 GENNADY (ARI) MEDVINSKY
+
+
+ENVIRONMENT
+-----------
+
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
+
+
+SEE ALSO
+--------
+
+:ref:`kerberos(7)`, :ref:`kinit(1)`
