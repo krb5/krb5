@@ -169,13 +169,6 @@ void kdb5_create(argc, argv)
         case 's':
             do_stash++;
             break;
-        case 'h':
-            if (!add_db_arg("hash=true")) {
-                com_err(progname, ENOMEM,
-                        _("while parsing command arguments\n"));
-                exit(1);
-            }
-            break;
         case 'W':
             strong_random = 0;
             break;

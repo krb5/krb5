@@ -12,10 +12,12 @@ SYNOPSIS
 [**-r** *realm*]
 [**-d** *dbname*]
 [**-k** *mkeytype*]
-[**-M** *mkeyname*]
 [**-kv** *mkeyVNO*]
-[**-sf** *stashfilename*]
+[**-M** *mkeyname*]
 [**-m**]
+[**-sf** *stashfilename*]
+[**-P** *password*]
+[**-x** *db_args*]
 *command* [*command_options*]
 
 .. _kdb5_util_synopsis_end:
@@ -79,6 +81,10 @@ COMMAND-LINE OPTIONS
     expose the password to other users on the system via the process
     list.
 
+**-x** *db_args*
+    specifies database-specific options.  See :ref:`kadmin(1)` for
+    supported options.
+
 .. _kdb5_util_options_end:
 
 
@@ -130,9 +136,10 @@ dump
 
 .. _kdb5_util_dump:
 
-    **dump** [**-b7**\|\ **-ov**\|\ **-r13**] [**-verbose**]
-    [**-mkey_convert**] [**-new_mkey_file** *mkey_file*] [**-rev**]
-    [**-recurse**] [*filename* [*principals*...]]
+    **dump** [**-b7**\|\ **-ov**\|\ **-r13**\|\ **-r18**]
+    [**-verbose**] [**-mkey_convert**] [**-new_mkey_file**
+    *mkey_file*] [**-rev**] [**-recurse**] [*filename*
+    [*principals*...]]
 
 Dumps the current Kerberos and KADM5 database into an ASCII file.  By
 default, the database is dumped in current format, "kdb5_util
@@ -197,8 +204,8 @@ load
 
 .. _kdb5_util_load:
 
-    **load** [**-b7**\|\ **-ov**\|\ **-r13**] [**-hash**]
-    [**-verbose**] [**-update**] *filename* [*dbname*]
+    **load** [**-b7**\|\ **-ov**\|\ **-r13**\|\ **-r18**] [**-hash**]
+    [**-verbose**] [**-update**] *filename*
 
 Loads a database dump from the named file into the named database.  If
 no option is given to determine the format of the dump file, the
@@ -230,10 +237,11 @@ Options:
     releases prior to 1.11.
 
 **-hash**
-    requires the database to be stored as a hash.  If this option is
-    not specified, the database will be stored as a btree.  This
-    option is not recommended, as databases stored in hash format are
-    known to corrupt data and lose principals.
+    stores the database in hash format, if using the DB2 database
+    type.  If this option is not specified, the database will be
+    stored in btree format.  This option is not recommended, as
+    databases stored in hash format are known to corrupt data and lose
+    principals.
 
 **-verbose**
     causes the name of each principal and policy to be printed as it
@@ -244,9 +252,6 @@ Options:
     database.  Otherwise, a new database is created containing only
     what is in the dump file and the old one destroyed upon successful
     completion.
-
-If specified, *dbname* overrides the value specified on the command
-line or the default.
 
 .. _kdb5_util_load_end:
 
