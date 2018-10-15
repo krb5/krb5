@@ -140,6 +140,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
     krb5_authdata_context ad_context = NULL;
     OM_uint32 status = GSS_S_FAILURE;
     krb5_gss_name_t name;
+    int flags = 0;
 
     *output_name = NULL;
     *minor_status = 0;
@@ -206,7 +207,10 @@ krb5_gss_import_name(minor_status, input_name_buffer,
         if ((input_name_type == GSS_C_NULL_OID) ||
             g_OID_equal(input_name_type, gss_nt_krb5_name) ||
             g_OID_equal(input_name_type, gss_nt_user_name)) {
-            stringrep = (char *) tmp;
+            stringrep = tmp;
+        } else if (g_OID_equal(input_name_type, GSS_KRB5_NT_ENTERPRISE_NAME)) {
+            stringrep = tmp;
+            flags |= KRB5_PRINCIPAL_PARSE_ENTERPRISE;
 #ifndef NO_PASSWORD
         } else if (g_OID_equal(input_name_type, gss_nt_machine_uid_name)) {
             uid = *(uid_t *) input_name_buffer->value;
@@ -296,7 +300,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
         /* At this point, stringrep is set, or if not, code is. */
         if (stringrep) {
-            code = krb5_parse_name(context, (char *)stringrep, &princ);
+            code = krb5_parse_name_flags(context, stringrep, flags, &princ);
             if (code)
                 goto cleanup;
         } else {

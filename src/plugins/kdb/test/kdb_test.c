@@ -334,7 +334,8 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
                                   &search_name));
     canon = get_string(h, "alias", search_name, NULL);
     if (canon != NULL) {
-        if (!(flags & KRB5_KDB_FLAG_ALIAS_OK)) {
+        if (!(flags & KRB5_KDB_FLAG_ALIAS_OK) &&
+            search_for->type != KRB5_NT_ENTERPRISE_PRINCIPAL) {
             ret = KRB5_KDB_NOENTRY;
             goto cleanup;
         }

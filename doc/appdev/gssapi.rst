@@ -55,6 +55,12 @@ name types are supported by the krb5 mechanism:
 * **GSS_C_NT_EXPORT_NAME**: The value must be the result of a
   gss_export_name_ call.
 
+* **GSS_KRB5_NT_ENTERPRISE_NAME**: The value should be a krb5
+  enterprise name string (see :rfc:`6806` section 5), in the form
+  ``user@suffix``.  This name type is used to convey alias names, and
+  is defined in the ``<gssapi/gssapi_krb5.h>`` header.  (New in
+  release 1.17.)
+
 
 Initiator credentials
 ---------------------

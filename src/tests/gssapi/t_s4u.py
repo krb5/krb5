@@ -143,14 +143,16 @@ realm.stop()
 mark('cross-realm S4U2Self')
 testprincs = {'krbtgt/SREALM': {'keys': 'aes128-cts'},
               'krbtgt/UREALM': {'keys': 'aes128-cts'},
-              'user': {'keys': 'aes128-cts'}}
+              'user': {'keys': 'aes128-cts', 'flags': '+preauth'}}
 kdcconf1 = {'realms': {'$realm': {'database_module': 'test'}},
             'dbmodules': {'test': {'db_library': 'test',
-                                   'princs': testprincs }}}
+                                   'princs': testprincs,
+                                   'alias': {'enterprise@abc': '@UREALM'}}}}
 kdcconf2 = {'realms': {'$realm': {'database_module': 'test'}},
             'dbmodules': {'test': {'db_library': 'test',
                                    'princs': testprincs,
-                                   'alias': {'user@SREALM': '@SREALM'}}}}
+                                   'alias': {'user@SREALM': '@SREALM',
+                                             'enterprise@abc': 'user'}}}}
 r1, r2 = cross_realms(2, xtgts=(),
                       args=({'realm': 'SREALM', 'kdc_conf': kdcconf1},
                             {'realm': 'UREALM', 'kdc_conf': kdcconf2}),
@@ -173,6 +175,24 @@ msgs = ('Getting credentials user@UREALM -> user@SREALM',
         'via TGT krbtgt/SREALM@UREALM after requesting user@SREALM',
         'TGS reply is for user@UREALM -> user@SREALM')
 r1.run(['./t_s4u', 'p:' + r2.user_princ, '-', r1.keytab], env=no_default,
+       expected_trace=msgs)
+
+# Test realm identification of enterprise principal names ([MS-S4U]
+# 3.1.5.1.1.1).  Attach a bogus realm to the enterprise name to verify
+# that we start at the server realm.
+mark('cross-realm S4U2Self with enterprise name')
+msgs = ('Getting initial credentials for enterprise\\@abc@SREALM',
+        'Processing preauth types: PA-FOR-X509-USER (130)',
+        'Sending unauthenticated request',
+        '/Realm not local to KDC',
+        'Following referral to realm UREALM',
+        'Processing preauth types: PA-FOR-X509-USER (130)',
+        'Sending unauthenticated request',
+        '/Additional pre-authentication required',
+        '/Generic preauthentication failure',
+        'Getting credentials enterprise\\@abc@UREALM -> user@SREALM',
+        'TGS reply is for enterprise\@abc@UREALM -> user@SREALM')
+r1.run(['./t_s4u', 'e:enterprise@abc@NOREALM', '-', r1.keytab],
        expected_trace=msgs)
 
 r1.stop()

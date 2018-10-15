@@ -40,6 +40,7 @@ check-unix: t_oid
 	$(RUN_TEST) ./t_invalid
 	$(RUN_TEST) ./t_oid
 	$(RUN_TEST) ./t_prf
+	$(RUN_TEST) ./t_imp_name
 
 check-pytests: ccinit ccrefresh t_accname t_add_cred t_ccselect t_ciflags \
 	t_credstore t_enctypes t_err t_export_cred t_export_name t_imp_cred \

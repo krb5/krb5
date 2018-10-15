@@ -97,10 +97,12 @@ import_name(const char *str)
         nametype = GSS_C_NT_USER_NAME;
     else if (*str == 'p')
         nametype = (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME;
+    else if (*str == 'e')
+        nametype = (gss_OID)GSS_KRB5_NT_ENTERPRISE_NAME;
     else if (*str == 'h')
         nametype = GSS_C_NT_HOSTBASED_SERVICE;
     if (nametype == NULL || str[1] != ':')
-        errout("names must begin with u: or p: or h:");
+        errout("names must begin with u: or p: or e: or h:");
     buf.value = (char *)str + 2;
     buf.length = strlen(str) - 2;
     major = gss_import_name(&minor, &buf, nametype, &name);
