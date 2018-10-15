@@ -456,7 +456,14 @@ Example::
 .. _kdb5_ldap_util_list_policy_end:
 
 
+ENVIRONMENT
+-----------
+
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
+
+
 SEE ALSO
 --------
 
-:ref:`kadmin(1)`
+:ref:`kadmin(1)`, :ref:`kerberos(7)`

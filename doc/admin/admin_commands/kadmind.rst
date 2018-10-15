@@ -116,8 +116,15 @@ OPTIONS
     <dboptions>` in :ref:`kadmin(1)` for supported arguments.
 
 
+ENVIRONMENT
+-----------
+
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
+
+
 SEE ALSO
 --------
 
 :ref:`kpasswd(1)`, :ref:`kadmin(1)`, :ref:`kdb5_util(8)`,
-:ref:`kdb5_ldap_util(8)`, :ref:`kadm5.acl(5)`
+:ref:`kdb5_ldap_util(8)`, :ref:`kadm5.acl(5)`, :ref:`kerberos(7)`

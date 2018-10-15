@@ -80,4 +80,4 @@ the following output::
 SEE ALSO
 --------
 
-kerberos(1), cc(1)
+:ref:`kerberos(7)`, cc(1)

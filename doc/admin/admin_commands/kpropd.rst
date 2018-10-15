@@ -129,7 +129,15 @@ kpropd.acl
     will allow Kerberos database propagation via :ref:`kprop(8)`.
 
 
+ENVIRONMENT
+-----------
+
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
+
+
 SEE ALSO
 --------
 
-:ref:`kprop(8)`, :ref:`kdb5_util(8)`, :ref:`krb5kdc(8)`, inetd(8)
+:ref:`kprop(8)`, :ref:`kdb5_util(8)`, :ref:`krb5kdc(8)`,
+:ref:`kerberos(7)`, inetd(8)

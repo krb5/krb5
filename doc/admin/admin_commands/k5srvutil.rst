@@ -56,7 +56,14 @@ k5srvutil uses the :ref:`kadmin(1)` program to edit the keytab in
 place.
 
 
+ENVIRONMENT
+-----------
+
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
+
+
 SEE ALSO
 --------
 
-:ref:`kadmin(1)`, :ref:`ktutil(1)`
+:ref:`kadmin(1)`, :ref:`ktutil(1)`, :ref:`kerberos(7)`

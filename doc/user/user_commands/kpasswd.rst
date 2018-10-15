@@ -33,7 +33,14 @@ OPTIONS
     identity of the user invoking the kpasswd command.
 
 
+ENVIRONMENT
+-----------
+
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
+
+
 SEE ALSO
 --------
 
-:ref:`kadmin(1)`, :ref:`kadmind(8)`
+:ref:`kadmin(1)`, :ref:`kadmind(8)`, :ref:`kerberos(7)`

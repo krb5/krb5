@@ -127,7 +127,14 @@ EXAMPLE
     ktutil:
 
 
+ENVIRONMENT
+-----------
+
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
+
+
 SEE ALSO
 --------
 
-:ref:`kadmin(1)`, :ref:`kdb5_util(8)`
+:ref:`kadmin(1)`, :ref:`kdb5_util(8)`, :ref:`kerberos(7)`

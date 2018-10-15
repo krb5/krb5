@@ -996,7 +996,14 @@ The kadmin program was originally written by Tom Yu at MIT, as an
 interface to the OpenVision Kerberos administration program.
 
 
+ENVIRONMENT
+-----------
+
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
+
+
 SEE ALSO
 --------
 
-:ref:`kpasswd(1)`, :ref:`kadmind(8)`
+:ref:`kpasswd(1)`, :ref:`kadmind(8)`, :ref:`kerberos(7)`

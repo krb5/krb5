@@ -496,7 +496,14 @@ Examples::
     bar@EXAMPLE.COM	1	1	des-cbc-crc	normal	-1
 
 
+ENVIRONMENT
+-----------
+
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
+
+
 SEE ALSO
 --------
 
-:ref:`kadmin(1)`
+:ref:`kadmin(1)`, :ref:`kerberos(7)`

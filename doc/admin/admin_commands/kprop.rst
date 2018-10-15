@@ -49,12 +49,12 @@ OPTIONS
 ENVIRONMENT
 -----------
 
-*kprop* uses the following environment variable:
-
-* **KRB5_CONFIG**
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
 
 
 SEE ALSO
 --------
 
-:ref:`kpropd(8)`, :ref:`kdb5_util(8)`, :ref:`krb5kdc(8)`
+:ref:`kpropd(8)`, :ref:`kdb5_util(8)`, :ref:`krb5kdc(8)`,
+:ref:`kerberos(7)`

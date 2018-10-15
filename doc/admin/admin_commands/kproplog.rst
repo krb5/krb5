@@ -74,12 +74,11 @@ OPTIONS
 ENVIRONMENT
 -----------
 
-kproplog uses the following environment variables:
-
-* **KRB5_KDC_PROFILE**
+See :ref:`kerberos(7)` for a description of Kerberos environment
+variables.
 
 
 SEE ALSO
 --------
 
-:ref:`kpropd(8)`
+:ref:`kpropd(8)`, :ref:`kerberos(7)`
