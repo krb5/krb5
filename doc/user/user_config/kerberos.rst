@@ -8,12 +8,12 @@ DESCRIPTION
 
 The Kerberos system authenticates individual users in a network
 environment.  After authenticating yourself to Kerberos, you can use
-Kerberos-enabled programs without having to present passwords.
+Kerberos-enabled programs without having to present passwords or
+certificates to those programs.
 
-If you enter your username and :ref:`kinit(1)` responds with this
-message:
+If you receive the following response from :ref:`kinit(1)`:
 
-kinit(v5): Client not found in Kerberos database while getting initial
+kinit: Client not found in Kerberos database while getting initial
 credentials
 
 you haven't been registered as a Kerberos user.  See your system
@@ -25,10 +25,13 @@ is the **instance**, which in the case of a user is usually null.
 Some users may have privileged instances, however, such as ``root`` or
 ``admin``.  In the case of a service, the instance is the fully
 qualified name of the machine on which it runs; i.e. there can be an
-rlogin service running on the machine ABC, which is different from the
-rlogin service running on the machine XYZ.  The third part of a
-Kerberos name is the **realm**.  The realm corresponds to the Kerberos
-service providing authentication for the principal.
+ssh service running on the machine ABC (ssh/ABC@REALM), which is
+different from the ssh service running on the machine XYZ
+(ssh/XYZ@REALM).  The third part of a Kerberos name is the **realm**.
+The realm corresponds to the Kerberos service providing authentication
+for the principal.  Realms are conventionally all-uppercase, and often
+match the end of hostnames in the realm (for instance, host01.example.com
+might be in realm EXAMPLE.COM).
 
 When writing a Kerberos name, the principal name is separated from the
 instance (if not null) by a slash, and the realm (if not the local
@@ -43,64 +46,72 @@ of valid Kerberos names::
 When you authenticate yourself with Kerberos you get an initial
 Kerberos **ticket**.  (A Kerberos ticket is an encrypted protocol
 message that provides authentication.)  Kerberos uses this ticket for
-network utilities such as rlogin and rcp.  The ticket transactions are
-done transparently, so you don't have to worry about their management.
+network utilities such as ssh.  The ticket transactions are done
+transparently, so you don't have to worry about their management.
 
-Note, however, that tickets expire.  Privileged tickets, such as those
-with the instance ``root``, expire in a few minutes, while tickets
-that carry more ordinary privileges may be good for several hours or a
-day, depending on the installation's policy.  If your login session
-extends beyond the time limit, you will have to re-authenticate
-yourself to Kerberos to get new tickets.  Use the :ref:`kinit(1)`
-command to re-authenticate yourself.
+Note, however, that tickets expire.  Administrators may configure more
+privileged tickets, such as those with service or instance of ``root``
+or ``admin``, to expire in a few minutes, while tickets that carry
+more ordinary privileges may be good for several hours or a day.  If
+your login session extends beyond the time limit, you will have to
+re-authenticate yourself to Kerberos to get new tickets using the
+:ref:`kinit(1)` command.
 
-If you use the kinit command to get your tickets, make sure you use
-the kdestroy command to destroy your tickets before you end your login
-session.  You should put the kdestroy command in your ``.logout`` file
-so that your tickets will be destroyed automatically when you logout.
-For more information about the kinit and kdestroy commands, see the
-:ref:`kinit(1)` and :ref:`kdestroy(1)` manual pages.
+Some tickets are **renewable** beyond their initial lifetime.  This
+means that ``kinit -R`` can extend their lifetime without requiring
+you to re-authenticate.
+
+If you wish to delete your local tickets, use the :ref:`kdestroy(1)`
+command.
 
 Kerberos tickets can be forwarded.  In order to forward tickets, you
 must request **forwardable** tickets when you kinit.  Once you have
 forwardable tickets, most Kerberos programs have a command line option
-to forward them to the remote host.
+to forward them to the remote host.  This can be useful for, e.g.,
+running kinit on your local machine and then sshing into another to do
+work.  Note that this should not be done on untrusted machines since
+they will then have your tickets.
 
 ENVIRONMENT VARIABLES
 ---------------------
 
 Several environment variables affect the operation of Kerberos-enabled
-programs.  These inclide:
+programs.  These include:
 
 **KRB5CCNAME**
-    Specifies the location of the credential cache, in the form
-    *TYPE*:*residual*.  If no *type* prefix is present, the **FILE**
-    type is assumed and *residual* is the pathname of the cache file.
-    A collection of multiple caches may be used by specifying the
-    **dir** type and the pathname of a private directory (which must
-    already exist).  The default cache file is /tmp/krb5cc_*uid*,
-    where *uid* is the decimal user ID of the user.
+    Default name for the credentials cache file, in the form
+    *TYPE*:*residual*.  The type of the default cache may determine
+    the availability of a cache collection.  ``FILE`` is not a
+    collection type; ``KEYRING``, ``DIR``, and ``KCM`` are.
+
+    If not set, the value of **default_ccache_name** from
+    configuration files (see **KRB5_CONFIG**) will be used.  If that
+    is also not set, the default *type* is ``FILE``, and the
+    *residual* is the path /tmp/krb5cc_*uid*, where *uid* is the
+    decimal user ID of the user.
 
 **KRB5_KTNAME**
-    Specifies the location of the keytab file, in the form
+    Specifies the location of the default keytab file, in the form
     *TYPE*:*residual*.  If no *type* is present, the **FILE** type is
-    assumed and *residual* is the pathname of the keytab file.  The
-    default keytab file is ``/etc/krb5.keytab``.
+    assumed and *residual* is the pathname of the keytab file.  If
+    unset, |keytab| will be used.
 
 **KRB5_CONFIG**
     Specifies the location of the Kerberos configuration file.  The
-    default is ``/etc/krb5.conf``.
+    default is |sysconfdir|\ ``/krb5.conf``.  Multiple filenames can
+    be specified, separated by a colon; all files which are present
+    will be read.
 
 **KRB5_KDC_PROFILE**
     Specifies the location of the KDC configuration file, which
     contains additional configuration directives for the Key
     Distribution Center daemon and associated programs.  The default
-    is ``/usr/local/var/krb5kdc/kdc.conf``.
+    is |kdcdir|\ ``/kdc.conf``.
 
 **KRB5RCACHETYPE**
     Specifies the default type of replay cache to use for servers.
-    Valid types include **dfl** for the normal file type and **none**
-    for no replay cache.
+    Valid types include ``dfl`` for the normal file type and ``none``
+    for no replay cache.  The default is ``dfl``.
 
 **KRB5RCACHEDIR**
     Specifies the default directory for replay caches used by servers.
@@ -110,7 +121,17 @@ programs.  These inclide:
 **KRB5_TRACE**
     Specifies a filename to write trace log output to.  Trace logs can
     help illuminate decisions made internally by the Kerberos
-    libraries.  The default is not to write trace log output anywhere.
+    libraries.  For example, ``env KRB5_TRACE=/dev/stderr kinit``
+    would send tracing information for :ref:`kinit(1)` to
+    ``/dev/stderr``.  The default is not to write trace log output
+    anywhere.
+
+**KRB5_CLIENT_KTNAME**
+    Default client keytab file name.  If unset, |ckeytab| will be
+    used).
+
+**KPROP_PORT**
+    :ref:`kprop(8)` port to use.  Defaults to 754.
 
 Most environment variables are disabled for certain programs, such as
 login system programs and setuid programs, which are designed to be
@@ -133,6 +154,7 @@ AUTHORS
 | Steve Miller, MIT Project Athena/Digital Equipment Corporation
 | Clifford Neuman, MIT Project Athena
 | Greg Hudson, MIT Kerberos Consortium
+| Robbie Harwood, Red Hat, Inc.
 
 HISTORY
 -------
@@ -144,5 +166,5 @@ by the MIT Kerberos Consortium.
 RESTRICTIONS
 ------------
 
-Copyright 1985, 1986, 1989-1996, 2002, 2011 Masachusetts Institute of
-Technology
+Copyright 1985, 1986, 1989-1996, 2002, 2011, 2018 Masachusetts
+Institute of Technology
