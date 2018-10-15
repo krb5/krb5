@@ -1453,7 +1453,8 @@ dump_db(int argc, char **argv)
         goto error;
     }
 
-    if (dump->dump_policy != NULL) {
+    /* Don't dump policies if specific principal entries were requested. */
+    if (dump->dump_policy != NULL && args.nnames == 0) {
         ret = krb5_db_iter_policy(util_context, "*", dump->dump_policy, &args);
         if (ret) {
             com_err(progname, ret, _("performing %s dump"), dump->name);
