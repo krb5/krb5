@@ -299,13 +299,36 @@ kcmio_unix_socket_write(krb5_context context, struct kcmio *io, void *request,
 {
     char lenbytes[4];
     sg_buf sg[2];
+    int ret;
+    krb5_boolean reconnected = FALSE;
 
     SG_SET(&sg[0], lenbytes, sizeof(lenbytes));
     SG_SET(&sg[1], request, len);
     store_32_be(len, lenbytes);
-    if (krb5int_net_writev(context, io->fd, sg, 2) < 0)
-        return errno;
-    return 0;
+
+    for (;;) {
+        ret = krb5int_net_writev(context, io->fd, sg, 2);
+        if (ret < 0)
+            ret = errno;
+        if (ret != EPIPE || reconnected)
+            return ret;
+
+        /*
+         * Try once to reconnect on an EPIPE, in case the server has an idle
+         * timeout (like sssd does) and we went too long between ccache
+         * operations.  Reconnecting might also help if the server was
+         * restarted for an upgrade--although the server must be designed to
+         * always listen for connections on the socket during upgrades, or a
+         * single reconnect attempt won't be robust.
+         */
+        close(io->fd);
+        ret = kcmio_unix_socket_connect(context, io);
+        if (ret)
+            return ret;
+        reconnected = TRUE;
+    }
+
+    return ret;
 }
 
 /* Read a KCM reply: 4-byte big-endian length, 4-byte big-endian status code,
