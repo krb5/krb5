@@ -496,7 +496,8 @@ following tags may be specified in the realm's subsection:
 
 **kpasswd_server**
     Points to the server where all the password changes are performed.
-    If there is no such entry, the port 464 on the **admin_server**
+    If there is no such entry, DNS will be queried (unless forbidden
+    by **dns_lookup_kdc**).  Finally, port 464 on the **admin_server**
     host will be tried.
 
 **master_kdc**
