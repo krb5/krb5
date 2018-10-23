@@ -63,8 +63,7 @@ s4u_identify_user(krb5_context context,
     krb5_creds creds;
     int use_master = 0;
     krb5_get_init_creds_opt *opts = NULL;
-    krb5_principal_data client_data;
-    krb5_principal client;
+    krb5_principal_data client;
     krb5_s4u_userid userid;
 
     *canon_user = NULL;
@@ -102,19 +101,19 @@ s4u_identify_user(krb5_context context,
     krb5_get_init_creds_opt_set_canonicalize(opts, 1);
     krb5_get_init_creds_opt_set_preauth_list(opts, ptypes, 1);
 
-    if (in_creds->client != NULL)
-        client = in_creds->client;
-    else {
-        client_data.magic = KV5M_PRINCIPAL;
-        client_data.realm = in_creds->server->realm;
+    if (in_creds->client != NULL) {
+        client = *in_creds->client;
+        client.realm = in_creds->server->realm;
+    } else {
+        client.magic = KV5M_PRINCIPAL;
+        client.realm = in_creds->server->realm;
         /* should this be NULL, empty or a fixed string? XXX */
-        client_data.data = NULL;
-        client_data.length = 0;
-        client_data.type = KRB5_NT_ENTERPRISE_PRINCIPAL;
-        client = &client_data;
+        client.data = NULL;
+        client.length = 0;
+        client.type = KRB5_NT_ENTERPRISE_PRINCIPAL;
     }
 
-    code = k5_get_init_creds(context, &creds, client, NULL, NULL, 0, NULL,
+    code = k5_get_init_creds(context, &creds, &client, NULL, NULL, 0, NULL,
                              opts, krb5_get_as_key_noop, &userid, &use_master,
                              NULL);
     if (code == 0 || code == KRB5_PREAUTH_FAILED) {
