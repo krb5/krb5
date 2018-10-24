@@ -1018,9 +1018,10 @@ typedef struct _kdb_vftabl {
      *     requested; also set by the admin interface.  Determines whether the
      *     module should return in-realm aliases.
      *
-     * A module can return in-realm aliases if KRB5_KDB_FLAG_ALIAS_OK is set.
-     * To return an in-realm alias, fill in a different value for
-     * entries->princ than the one requested.
+     * A module can return in-realm aliases if KRB5_KDB_FLAG_ALIAS_OK is set,
+     * or if search_for->type is KRB5_NT_ENTERPRISE_PRINCIPAL.  To return an
+     * in-realm alias, fill in a different value for entries->princ than the
+     * one requested.
      *
      * A module can return out-of-realm referrals if KRB5_KDB_FLAG_CANONICALIZE
      * is set.  For AS request clients (KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY is
