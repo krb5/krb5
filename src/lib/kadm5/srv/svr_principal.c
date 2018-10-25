@@ -1564,8 +1564,10 @@ kadm5_randkey_principal_3(void *server_handle,
     if (krb5_principal_compare(handle->context, principal, hist_princ)) {
         /* If changing the history entry, the new entry must have exactly one
          * key. */
-        if (keepold)
-            return KADM5_PROTECT_PRINCIPAL;
+        if (keepold) {
+            ret = KADM5_PROTECT_PRINCIPAL;
+            goto done;
+        }
         new_n_ks_tuple = 1;
     }
 
