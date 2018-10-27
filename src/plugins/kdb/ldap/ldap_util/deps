@@ -37,8 +37,9 @@ $(OUTPRE)kdb5_ldap_list.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   kdb5_ldap_list.h
 $(OUTPRE)kdb5_ldap_realm.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
-  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/admin_internal.h \
+  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(srcdir)/../libkdb_ldap/kdb_ldap.h \
   $(srcdir)/../libkdb_ldap/ldap_krbcontainer.h $(srcdir)/../libkdb_ldap/ldap_misc.h \

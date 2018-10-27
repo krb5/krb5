@@ -163,7 +163,7 @@ hostrealm_dns.so hostrealm_dns.po $(OUTPRE)hostrealm_dns.$(OBJEXT): \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/hostrealm_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  dnsglue.h hostrealm_dns.c os-proto.h
+  hostrealm_dns.c os-proto.h
 hostrealm_domain.so hostrealm_domain.po $(OUTPRE)hostrealm_domain.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
