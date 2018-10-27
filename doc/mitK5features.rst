@@ -19,8 +19,8 @@ Quick facts
 License - :ref:`mitK5license`
 
 Releases:
-    - Latest stable: https://web.mit.edu/kerberos/krb5-1.16/
-    - Supported: https://web.mit.edu/kerberos/krb5-1.15/
+    - Latest stable: https://web.mit.edu/kerberos/krb5-1.17/
+    - Supported: https://web.mit.edu/kerberos/krb5-1.16/
     - Release cycle: 9 -- 12 months
 
 Supported platforms \/ OS distributions:
@@ -398,6 +398,79 @@ Release 1.16
 
   - The automated test suite runs cleanly under AddressSanitizer.
 
+Release 1.17
+
+* Administrator experience:
+
+  - A new Kerberos database module using the Lightning Memory-Mapped
+    Database library (LMDB) has been added.  The LMDB KDB module
+    should be more performant and more robust than the DB2 module, and
+    may become the default module for new databases in a future
+    release.
+
+  - "kdb5_util dump" will no longer dump policy entries when specific
+    principal names are requested.
+
+* Developer experience:
+
+  - The new krb5_get_etype_info() API can be used to retrieve enctype,
+    salt, and string-to-key parameters from the KDC for a client
+    principal.
+
+  - The new GSS_KRB5_NT_ENTERPRISE_NAME name type allows enterprise
+    principal names to be used with GSS-API functions.
+
+  - KDC and kadmind modules which call com_err() will now write to the
+    log file in a format more consistent with other log messages.
+
+  - Programs which use large numbers of memory credential caches
+    should perform better.
+
+* Protocol evolution:
+
+  - The SPAKE pre-authentication mechanism is now supported.  This
+    mechanism protects against password dictionary attacks without
+    requiring any additional infrastructure such as certificates.
+    SPAKE is enabled by default on clients, but must be manually
+    enabled on the KDC for this release.
+
+  - PKINIT freshness tokens are now supported.  Freshness tokens can
+    protect against scenarios where an attacker uses temporary access
+    to a smart card to generate authentication requests for the
+    future.
+
+  - Password change operations now prefer TCP over UDP, to avoid
+    spurious error messages about replays when a response packet is
+    dropped.
+
+  - The KDC now supports cross-realm S4U2Self requests when used with
+    a third-party KDB module such as Samba's.  The client code for
+    cross-realm S4U2Self requests is also now more robust.
+
+* User experience:
+
+  - The new ktutil addent -f flag can be used to fetch salt
+    information from the KDC for password-based keys.
+
+  - The new kdestroy -p option can be used to destroy a credential
+    cache within a collection by client principal name.
+
+  - The Kerberos man page has been restored, and documents the
+    environment variables that affect programs using the Kerberos
+    library.
+
+* Code quality:
+
+  - Python test scripts now use Python 3.
+
+  - Python test scripts now display markers in verbose output, making
+    it easier to find where a failure occurred within the scripts.
+
+  - The Windows build system has been simplified and updated to work
+    with more recent versions of Visual Studio.  A large volume of
+    unused Windows-specific code has been removed.  Visual Studio 2013
+    or later is now required.
+
 `Pre-authentication mechanisms`
 
 - PW-SALT                                         :rfc:`4120#section-5.2.7.3`
@@ -409,6 +482,7 @@ Release 1.16
 - FX-COOKIE                                       :rfc:`6113#section-5.2`
 - S4U-X509-USER                (release 1.8)      https://msdn.microsoft.com/en-us/library/cc246091
 - OTP                          (release 1.12)     :ref:`otp_preauth`
+- SPAKE                        (release 1.17)     :ref:`spake`
 
 `PRNG`
 
