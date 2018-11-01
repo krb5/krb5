@@ -73,6 +73,43 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.15.4 (2018-11-01)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix bugs with concurrent use of MEMORY ccache handles.
+
+* Fix a KDC crash when falling back between multiple OTP tokens
+  configured for a principal entry.
+
+* Fix memory bugs when gss_add_cred() is used to create a new
+  credential, and fix a bug where it ignores the desired_name.
+
+* Fix the behavior of gss_inquire_cred_by_mech() when the credential
+  does not contain an element of the requested mechanism.
+
+* Make cross-realm S4U2Self requests work on the client when no
+  default_realm is configured.
+
+krb5-1.15.4 changes by ticket ID
+--------------------------------
+
+8202    memory ccache cursors are invalidated by initialize
+8677    Escape curly braces in def-check.pl regexes
+8684    Fix option parsing on Windows
+8704    Resource leak in read_secret_file()
+8708    Incorrect error handling in OTP plugin
+8727    Check strdup return in kadm5_get_config_params()
+8729    Memory leak in gss_add_cred() creation case
+8734    gss_add_cred() aliases memory when creating extended cred
+8736    Check mech cred in gss_inquire_cred_by_mech()
+8737    gss_add_cred() ignores desired_name if creating a new credential
+8741    S4U2Self client code fails with no default realm
+8743    Fix incorrect TRACE usages to use {str}
+8759    Resource leak in kadm5_randkey_principal_3()
+
+
 Major changes in 1.15.3 (2018-05-03)
 ------------------------------------
 
@@ -545,12 +582,14 @@ reports, suggestions, and valuable resources:
     Jan iankko Lieskovsky
     Todd Lipcon
     Oliver Loch
+    Chris Long
     Kevin Longfellow
     Frank Lonigro
     Jon Looney
     Nuno Lopes
     Ryan Lynch
     Roland Mainz
+    Sorin Manolache
     Andrei Maslennikov
     Michael Mattioli
     Nathaniel McCallum
@@ -622,6 +661,7 @@ reports, suggestions, and valuable resources:
     Neng Xue
     Zhaomo Yang
     Nickolai Zeldovich
+    Bean Zhang
     Hanz van Zijst
     Gertjan Zwartjes
 
