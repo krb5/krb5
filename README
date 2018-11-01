@@ -73,6 +73,54 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.16.2 (2018-11-01)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix bugs with concurrent use of MEMORY ccache handles.
+
+* Fix a KDC crash when falling back between multiple OTP tokens
+  configured for a principal entry.
+
+* Fix memory bugs when gss_add_cred() is used to create a new
+  credential, and fix a bug where it ignores the desired_name.
+
+* Fix the behavior of gss_inquire_cred_by_mech() when the credential
+  does not contain an element of the requested mechanism.
+
+* Make cross-realm S4U2Self requests work on the client when no
+  default_realm is configured.
+
+* Add a kerberos(7) man page containing documentation of the
+  environment variables that affect Kerberos programs.
+
+krb5-1.16.2 changes by ticket ID
+--------------------------------
+
+8202    memory ccache cursors are invalidated by initialize
+8677    Escape curly braces in def-check.pl regexes
+8684    Fix option parsing on Windows
+8704    Resource leak in read_secret_file()
+8708    Incorrect error handling in OTP plugin
+8716    Remove outdated note in krb5kdc man page
+8725    Update many documentation links to https
+8727    Check strdup return in kadm5_get_config_params()
+8728    doc: kswitch manual "see also" subsection typo
+8729    Memory leak in gss_add_cred() creation case
+8731    Document that DESTDIR must be an absolute path
+8733    Multiple pkinit_identities semantics are unclear and perhaps not useful
+8734    gss_add_cred() aliases memory when creating extended cred
+8736    Check mech cred in gss_inquire_cred_by_mech()
+8737    gss_add_cred() ignores desired_name if creating a new credential
+8741    S4U2Self client code fails with no default realm
+8743    Fix incorrect TRACE usages to use {str}
+8751    Fix up kdb5_util documentation
+8754    Correct kpasswd_server description in krb5.conf(5)
+8755    Bring back general kerberos man page
+8759    Resource leak in kadm5_randkey_principal_3()
+
+
 Major changes in 1.16.1 (2018-05-03)
 ------------------------------------
 
@@ -105,21 +153,21 @@ This is a bug fix release.
 krb5-1.16.1 changes by ticket ID
 --------------------------------
 
-7863	profile library mishandles duplicate subsections
-8622	Point to kerberos.org/dist
-8639	Always set appdefault_get() output argument
-8640	krb5 build
-8643	Fix flaws in LDAP DN checking
-8644	Fix memory leak in KDC PKINIT code
-8645	Fix KDC encrypting key memory leak on some errors
-8646	Fix capaths "." values on client
-8649	Allow validation of PACs with enterprise names
-8658	kdestroy -A fails with KCM ccache type
-8660	Document comments in krb5.conf
-8666	KDC null dereference when TGS reply is too big for UDP
-8669	Fix doubled "kadmind:" in kadmind fail_to_start()
-8670	Regression in rule-based matching of PKINIT client certs with UPN SANs
-8675	Set error message on KCM get_princ failure
+7863    profile library mishandles duplicate subsections
+8622    Point to kerberos.org/dist
+8639    Always set appdefault_get() output argument
+8640    krb5 build
+8643    Fix flaws in LDAP DN checking
+8644    Fix memory leak in KDC PKINIT code
+8645    Fix KDC encrypting key memory leak on some errors
+8646    Fix capaths "." values on client
+8649    Allow validation of PACs with enterprise names
+8658    kdestroy -A fails with KCM ccache type
+8660    Document comments in krb5.conf
+8666    KDC null dereference when TGS reply is too big for UDP
+8669    Fix doubled "kadmind:" in kadmind fail_to_start()
+8670    Regression in rule-based matching of PKINIT client certs with UPN SANs
+8675    Set error message on KCM get_princ failure
 
 
 Major changes in 1.16 (2017-12-05)
@@ -471,12 +519,14 @@ reports, suggestions, and valuable resources:
     Jan iankko Lieskovsky
     Todd Lipcon
     Oliver Loch
+    Chris Long
     Kevin Longfellow
     Frank Lonigro
     Jon Looney
     Nuno Lopes
     Ryan Lynch
     Roland Mainz
+    Sorin Manolache
     Andrei Maslennikov
     Michael Mattioli
     Nathaniel McCallum
@@ -551,6 +601,7 @@ reports, suggestions, and valuable resources:
     Neng Xue
     Zhaomo Yang
     Nickolai Zeldovich
+    Bean Zhang
     Hanz van Zijst
     Gertjan Zwartjes
 
