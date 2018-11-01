@@ -48,37 +48,37 @@ and prints out the key version numbers of each.
 .SH OPTIONS
 .INDENT 0.0
 .TP
-.B \fB\-c\fP \fIccache\fP
+\fB\-c\fP \fIccache\fP
 Specifies the name of a credentials cache to use (if not the
 default)
 .TP
-.B \fB\-e\fP \fIetype\fP
+\fB\-e\fP \fIetype\fP
 Specifies the enctype which will be requested for the session key
 of all the services named on the command line.  This is useful in
 certain backward compatibility situations.
 .TP
-.B \fB\-q\fP
+\fB\-q\fP
 Suppress printing output when successful.  If a service ticket
 cannot be obtained, an error message will still be printed and
 kvno will exit with nonzero status.
 .TP
-.B \fB\-h\fP
+\fB\-h\fP
 Prints a usage statement and exits.
 .TP
-.B \fB\-P\fP
+\fB\-P\fP
 Specifies that the \fIservice1 service2\fP ...  arguments are to be
 treated as services for which credentials should be acquired using
 constrained delegation.  This option is only valid when used in
 conjunction with protocol transition.
 .TP
-.B \fB\-S\fP \fIsname\fP
+\fB\-S\fP \fIsname\fP
 Specifies that the \fIservice1 service2\fP ... arguments are
 interpreted as hostnames, and the service principals are to be
 constructed from those hostnames and the service name \fIsname\fP\&.
 The service hostnames will be canonicalized according to the usual
 rules for constructing service principals.
 .TP
-.B \fB\-U\fP \fIfor_user\fP
+\fB\-U\fP \fIfor_user\fP
 Specifies that protocol transition (S4U2Self) is to be used to
 acquire a ticket on behalf of \fIfor_user\fP\&.  If constrained
 delegation is not requested, the service name must match the
@@ -86,12 +86,8 @@ credentials cache client principal.
 .UNINDENT
 .SH ENVIRONMENT
 .sp
-kvno uses the following environment variable:
-.INDENT 0.0
-.TP
-.B \fBKRB5CCNAME\fP
-Location of the credentials (ticket) cache.
-.UNINDENT
+See kerberos(7) for a description of Kerberos environment
+variables.
 .SH FILES
 .INDENT 0.0
 .TP
@@ -100,7 +96,7 @@ Default location of the credentials cache
 .UNINDENT
 .SH SEE ALSO
 .sp
-\fIkinit(1)\fP, \fIkdestroy(1)\fP
+kinit(1), kdestroy(1), kerberos(7)
 .SH AUTHOR
 MIT
 .SH COPYRIGHT

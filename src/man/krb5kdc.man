@@ -80,7 +80,7 @@ process.
 The \fB\-p\fP \fIportnum\fP option specifies the default UDP port numbers
 which the KDC should listen on for Kerberos version 5 requests, as a
 comma\-separated list.  This value overrides the UDP port numbers
-specified in the \fIkdcdefaults\fP section of \fIkdc.conf(5)\fP, but
+specified in the kdcdefaults section of kdc.conf(5), but
 may be overridden by realm\-specific values.  If no value is given from
 any source, the default port is 88.
 .sp
@@ -92,18 +92,8 @@ will relay SIGHUP signals to the worker subprocesses, and will
 terminate the worker subprocess if the it is itself terminated or if
 any other worker process exits.
 .sp
-\fBNOTE:\fP
-.INDENT 0.0
-.INDENT 3.5
-On operating systems which do not have \fIpktinfo\fP support,
-using worker processes will prevent the KDC from listening
-for UDP packets on network interfaces created after the KDC
-starts.
-.UNINDENT
-.UNINDENT
-.sp
 The \fB\-x\fP \fIdb_args\fP option specifies database\-specific arguments.
-See \fIDatabase Options\fP in \fIkadmin(1)\fP for
+See Database Options in kadmin(1) for
 supported arguments.
 .sp
 The \fB\-T\fP \fIoffset\fP option specifies a time offset, in seconds, which
@@ -129,24 +119,19 @@ krb5kdc \-p 2001 \-r REALM1 \-p 2002 \-r REALM2 \-r REALM3
 .sp
 specifies that the KDC listen on port 2001 for REALM1 and on port 2002
 for REALM2 and REALM3.  Additionally, per\-realm parameters may be
-specified in the \fIkdc.conf(5)\fP file.  The location of this file
+specified in the kdc.conf(5) file.  The location of this file
 may be specified by the \fBKRB5_KDC_PROFILE\fP environment variable.
 Per\-realm parameters specified in this file take precedence over
-options specified on the command line.  See the \fIkdc.conf(5)\fP
+options specified on the command line.  See the kdc.conf(5)
 description for further details.
 .SH ENVIRONMENT
 .sp
-krb5kdc uses the following environment variables:
-.INDENT 0.0
-.IP \(bu 2
-\fBKRB5_CONFIG\fP
-.IP \(bu 2
-\fBKRB5_KDC_PROFILE\fP
-.UNINDENT
+See kerberos(7) for a description of Kerberos environment
+variables.
 .SH SEE ALSO
 .sp
-\fIkdb5_util(8)\fP, \fIkdc.conf(5)\fP, \fIkrb5.conf(5)\fP,
-\fIkdb5_ldap_util(8)\fP
+kdb5_util(8), kdc.conf(5), krb5.conf(5),
+kdb5_ldap_util(8), kerberos(7)
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
