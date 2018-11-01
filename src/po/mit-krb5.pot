@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR MIT
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the mit-krb5 package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.15.3\n"
+"Project-Id-Version: mit-krb5 1.15.3-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-03 14:23-0400\n"
+"POT-Creation-Date: 2018-11-01 18:23-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,87 +18,87 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: ../../src/clients/kdestroy/kdestroy.c:56
+#: ../../src/clients/kdestroy/kdestroy.c:53
 #, c-format
 msgid "Usage: %s [-A] [-q] [-c cache_name]\n"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:57
+#: ../../src/clients/kdestroy/kdestroy.c:54
 #, c-format
 msgid "\t-A destroy all credential caches in collection\n"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:58
+#: ../../src/clients/kdestroy/kdestroy.c:55
 #, c-format
 msgid "\t-q quiet mode\n"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:59
-#: ../../src/clients/kswitch/kswitch.c:45
+#: ../../src/clients/kdestroy/kdestroy.c:56
+#: ../../src/clients/kswitch/kswitch.c:42
 #, c-format
 msgid "\t-c specify name of credentials cache\n"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:73
-#: ../../src/clients/kdestroy/kdestroy.c:151
+#: ../../src/clients/kdestroy/kdestroy.c:70
+#: ../../src/clients/kdestroy/kdestroy.c:148
 msgid "while listing credential caches"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:80
+#: ../../src/clients/kdestroy/kdestroy.c:77
 #, c-format
 msgid "Other credential caches present, use -A to destroy all\n"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:116
+#: ../../src/clients/kdestroy/kdestroy.c:113
 #: ../../src/clients/kinit/kinit.c:358 ../../src/clients/ksu/main.c:285
 #, c-format
 msgid "Only one -c option allowed\n"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:123
-#: ../../src/clients/kinit/kinit.c:387 ../../src/clients/klist/klist.c:178
+#: ../../src/clients/kdestroy/kdestroy.c:120
+#: ../../src/clients/kinit/kinit.c:387 ../../src/clients/klist/klist.c:176
 #, c-format
 msgid "Kerberos 4 is no longer supported\n"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:144
-#: ../../src/clients/klist/klist.c:249 ../../src/clients/ksu/main.c:131
-#: ../../src/clients/ksu/main.c:137 ../../src/clients/kswitch/kswitch.c:97
+#: ../../src/clients/kdestroy/kdestroy.c:141
+#: ../../src/clients/klist/klist.c:247 ../../src/clients/ksu/main.c:131
+#: ../../src/clients/ksu/main.c:137 ../../src/clients/kswitch/kswitch.c:94
 #: ../../src/kadmin/ktutil/ktutil.c:52 ../../src/kdc/main.c:953
 #: ../../src/slave/kprop.c:102 ../../src/slave/kpropd.c:1031
 msgid "while initializing krb5"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:158
+#: ../../src/clients/kdestroy/kdestroy.c:155
 msgid "composing ccache name"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:163
+#: ../../src/clients/kdestroy/kdestroy.c:160
 #, c-format
 msgid "while destroying cache %s"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:176
-#: ../../src/clients/kswitch/kswitch.c:104
+#: ../../src/clients/kdestroy/kdestroy.c:173
+#: ../../src/clients/kswitch/kswitch.c:101
 #, c-format
 msgid "while resolving %s"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:182
-#: ../../src/clients/kinit/kinit.c:485 ../../src/clients/klist/klist.c:457
+#: ../../src/clients/kdestroy/kdestroy.c:179
+#: ../../src/clients/kinit/kinit.c:485 ../../src/clients/klist/klist.c:455
 msgid "while getting default ccache"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:189 ../../src/clients/ksu/main.c:977
+#: ../../src/clients/kdestroy/kdestroy.c:186 ../../src/clients/ksu/main.c:977
 msgid "while destroying cache"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:192
+#: ../../src/clients/kdestroy/kdestroy.c:189
 #, c-format
 msgid "Ticket cache NOT destroyed!\n"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:194
+#: ../../src/clients/kdestroy/kdestroy.c:191
 #, c-format
 msgid "Ticket cache %cNOT%c destroyed!\n"
 msgstr ""
@@ -272,7 +272,7 @@ msgstr ""
 msgid "keytab specified, forcing -k\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:435 ../../src/clients/klist/klist.c:217
+#: ../../src/clients/kinit/kinit.c:435 ../../src/clients/klist/klist.c:215
 #, c-format
 msgid "Extra arguments (starting with \"%s\").\n"
 msgstr ""
@@ -333,7 +333,7 @@ msgstr ""
 msgid "Unable to identify user\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:589 ../../src/clients/kswitch/kswitch.c:116
+#: ../../src/clients/kinit/kinit.c:589 ../../src/clients/kswitch/kswitch.c:113
 #, c-format
 msgid "while searching for ccache for %s"
 msgstr ""
@@ -380,7 +380,7 @@ msgstr ""
 msgid "while setting up KDB keytab for realm %s"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:778 ../../src/clients/kvno/kvno.c:197
+#: ../../src/clients/kinit/kinit.c:778 ../../src/clients/kvno/kvno.c:194
 #, c-format
 msgid "resolving keytab %s"
 msgstr ""
@@ -454,152 +454,152 @@ msgstr ""
 msgid "Authenticated to Kerberos v5\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:87
+#: ../../src/clients/klist/klist.c:85
 #, c-format
 msgid ""
 "Usage: %s [-e] [-V] [[-c] [-l] [-A] [-d] [-f] [-s] [-a [-n]]] [-k [-t] [-K]] "
 "[name]\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:89
+#: ../../src/clients/klist/klist.c:87
 #, c-format
 msgid "\t-c specifies credentials cache\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:90
+#: ../../src/clients/klist/klist.c:88
 #, c-format
 msgid "\t-k specifies keytab\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:91
+#: ../../src/clients/klist/klist.c:89
 #, c-format
 msgid "\t   (Default is credentials cache)\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:92
+#: ../../src/clients/klist/klist.c:90
 #, c-format
 msgid "\t-i uses default client keytab if no name given\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:93
+#: ../../src/clients/klist/klist.c:91
 #, c-format
 msgid "\t-l lists credential caches in collection\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:94
+#: ../../src/clients/klist/klist.c:92
 #, c-format
 msgid "\t-A shows content of all credential caches\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:95
+#: ../../src/clients/klist/klist.c:93
 #, c-format
 msgid "\t-e shows the encryption type\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:96
+#: ../../src/clients/klist/klist.c:94
 #, c-format
 msgid "\t-V shows the Kerberos version and exits\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:97
+#: ../../src/clients/klist/klist.c:95
 #, c-format
 msgid "\toptions for credential caches:\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:98
+#: ../../src/clients/klist/klist.c:96
 #, c-format
 msgid "\t\t-d shows the submitted authorization data types\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:100
+#: ../../src/clients/klist/klist.c:98
 #, c-format
 msgid "\t\t-f shows credentials flags\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:101
+#: ../../src/clients/klist/klist.c:99
 #, c-format
 msgid "\t\t-s sets exit status based on valid tgt existence\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:103
+#: ../../src/clients/klist/klist.c:101
 #, c-format
 msgid "\t\t-a displays the address list\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:104
+#: ../../src/clients/klist/klist.c:102
 #, c-format
 msgid "\t\t\t-n do not reverse-resolve\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:105
+#: ../../src/clients/klist/klist.c:103
 #, c-format
 msgid "\toptions for keytabs:\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:106
+#: ../../src/clients/klist/klist.c:104
 #, c-format
 msgid "\t\t-t shows keytab entry timestamps\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:107
+#: ../../src/clients/klist/klist.c:105
 #, c-format
 msgid "\t\t-K shows keytab entry keys\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:226
+#: ../../src/clients/klist/klist.c:224
 #, c-format
 msgid "%s version %s\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:278
+#: ../../src/clients/klist/klist.c:276
 msgid "while getting default client keytab"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:283
+#: ../../src/clients/klist/klist.c:281
 msgid "while getting default keytab"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:288 ../../src/kadmin/cli/keytab.c:103
+#: ../../src/clients/klist/klist.c:286 ../../src/kadmin/cli/keytab.c:103
 #, c-format
 msgid "while resolving keytab %s"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:294 ../../src/kadmin/cli/keytab.c:87
+#: ../../src/clients/klist/klist.c:292 ../../src/kadmin/cli/keytab.c:87
 msgid "while getting keytab name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:301 ../../src/kadmin/cli/keytab.c:422
+#: ../../src/clients/klist/klist.c:299 ../../src/kadmin/cli/keytab.c:422
 msgid "while starting keytab scan"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:322 ../../src/clients/klist/klist.c:485
+#: ../../src/clients/klist/klist.c:320 ../../src/clients/klist/klist.c:483
 #: ../../src/clients/ksu/ccache.c:465 ../../src/kadmin/dbutil/dump.c:553
 #: ../../src/kadmin/dbutil/tabdump.c:552
 msgid "while unparsing principal name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:347 ../../src/kadmin/cli/keytab.c:466
+#: ../../src/clients/klist/klist.c:345 ../../src/kadmin/cli/keytab.c:466
 msgid "while scanning keytab"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:351 ../../src/kadmin/cli/keytab.c:471
+#: ../../src/clients/klist/klist.c:349 ../../src/kadmin/cli/keytab.c:471
 msgid "while ending keytab scan"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:368 ../../src/clients/klist/klist.c:430
+#: ../../src/clients/klist/klist.c:366 ../../src/clients/klist/klist.c:428
 msgid "while listing ccache collection"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:407
+#: ../../src/clients/klist/klist.c:405
 msgid "(Expired)"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:463
+#: ../../src/clients/klist/klist.c:461
 #, c-format
 msgid "while resolving ccache %s"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:489
+#: ../../src/clients/klist/klist.c:487
 #, c-format
 msgid ""
 "Ticket cache: %s:%s\n"
@@ -607,73 +607,73 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:500
+#: ../../src/clients/klist/klist.c:498
 msgid "while starting to retrieve tickets"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:513
+#: ../../src/clients/klist/klist.c:511
 msgid "while finishing ticket retrieval"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:518
+#: ../../src/clients/klist/klist.c:516
 msgid "while retrieving a ticket"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:677 ../../src/clients/ksu/ccache.c:450
+#: ../../src/clients/klist/klist.c:675 ../../src/clients/ksu/ccache.c:450
 #: ../../src/slave/kpropd.c:1214 ../../src/slave/kpropd.c:1274
 msgid "while unparsing client name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:682 ../../src/clients/ksu/ccache.c:455
+#: ../../src/clients/klist/klist.c:680 ../../src/clients/ksu/ccache.c:455
 #: ../../src/slave/kprop.c:212
 msgid "while unparsing server name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:711 ../../src/clients/ksu/ccache.c:480
+#: ../../src/clients/klist/klist.c:709 ../../src/clients/ksu/ccache.c:480
 #, c-format
 msgid "\tfor client %s"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:723 ../../src/clients/ksu/ccache.c:489
+#: ../../src/clients/klist/klist.c:721 ../../src/clients/ksu/ccache.c:489
 msgid "renew until "
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:740 ../../src/clients/ksu/ccache.c:499
+#: ../../src/clients/klist/klist.c:738 ../../src/clients/ksu/ccache.c:499
 #, c-format
 msgid "Flags: %s"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:759
+#: ../../src/clients/klist/klist.c:757
 #, c-format
 msgid "Etype (skey, tkt): %s, "
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:776
+#: ../../src/clients/klist/klist.c:774
 #, c-format
 msgid "AD types: "
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:793
+#: ../../src/clients/klist/klist.c:791
 #, c-format
 msgid "\tAddresses: (none)\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:795
+#: ../../src/clients/klist/klist.c:793
 #, c-format
 msgid "\tAddresses: "
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:828
+#: ../../src/clients/klist/klist.c:826
 #, c-format
 msgid "broken address (type %d length %d)"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:848
+#: ../../src/clients/klist/klist.c:846
 #, c-format
 msgid "unknown addrtype %d"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:857
+#: ../../src/clients/klist/klist.c:855
 #, c-format
 msgid "unprintable address (type %d, error %d %s)"
 msgstr ""
@@ -1146,119 +1146,119 @@ msgstr ""
 msgid "while changing to target uid for destroying ccache"
 msgstr ""
 
-#: ../../src/clients/kswitch/kswitch.c:44
+#: ../../src/clients/kswitch/kswitch.c:41
 #, c-format
 msgid "Usage: %s {-c cache_name | -p principal}\n"
 msgstr ""
 
-#: ../../src/clients/kswitch/kswitch.c:46
+#: ../../src/clients/kswitch/kswitch.c:43
 #, c-format
 msgid "\t-p specify name of principal\n"
 msgstr ""
 
-#: ../../src/clients/kswitch/kswitch.c:69
+#: ../../src/clients/kswitch/kswitch.c:66
 #, c-format
 msgid "Only one -c or -p option allowed\n"
 msgstr ""
 
-#: ../../src/clients/kswitch/kswitch.c:88
+#: ../../src/clients/kswitch/kswitch.c:85
 #, c-format
 msgid "One of -c or -p must be specified\n"
 msgstr ""
 
-#: ../../src/clients/kswitch/kswitch.c:110 ../../src/clients/kvno/kvno.c:207
-#: ../../src/clients/kvno/kvno.c:241 ../../src/kadmin/cli/keytab.c:373
+#: ../../src/clients/kswitch/kswitch.c:107 ../../src/clients/kvno/kvno.c:204
+#: ../../src/clients/kvno/kvno.c:238 ../../src/kadmin/cli/keytab.c:373
 #: ../../src/kadmin/dbutil/kdb5_util.c:584
 #, c-format
 msgid "while parsing principal name %s"
 msgstr ""
 
-#: ../../src/clients/kswitch/kswitch.c:125
+#: ../../src/clients/kswitch/kswitch.c:122
 msgid "while switching to credential cache"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:42
+#: ../../src/clients/kvno/kvno.c:39
 #, c-format
 msgid "usage: %s [-C] [-u] [-c ccache] [-e etype]\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:43
+#: ../../src/clients/kvno/kvno.c:40
 #, c-format
 msgid "\t[-k keytab] [-S sname] [-U for_user [-P]]\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:44
+#: ../../src/clients/kvno/kvno.c:41
 #, c-format
 msgid "\tservice1 service2 ...\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:99 ../../src/clients/kvno/kvno.c:107
+#: ../../src/clients/kvno/kvno.c:96 ../../src/clients/kvno/kvno.c:104
 #, c-format
 msgid "Options -u and -S are mutually exclusive\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:122
+#: ../../src/clients/kvno/kvno.c:119
 #, c-format
 msgid "Option -P (constrained delegation) requires keytab to be specified\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:126
+#: ../../src/clients/kvno/kvno.c:123
 #, c-format
 msgid ""
 "Option -P (constrained delegation) requires option -U (protocol transition)\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:171 ../../src/kadmin/cli/kadmin.c:310
+#: ../../src/clients/kvno/kvno.c:168 ../../src/kadmin/cli/kadmin.c:310
 msgid "while initializing krb5 library"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:178
+#: ../../src/clients/kvno/kvno.c:175
 msgid "while converting etype"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:190
+#: ../../src/clients/kvno/kvno.c:187
 msgid "while opening ccache"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:214
+#: ../../src/clients/kvno/kvno.c:211
 msgid "while getting client principal name"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:252
+#: ../../src/clients/kvno/kvno.c:249
 #, c-format
 msgid "while formatting parsed principal name for '%s'"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:263
+#: ../../src/clients/kvno/kvno.c:260
 msgid "client and server principal names must match"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:280
+#: ../../src/clients/kvno/kvno.c:277
 #, c-format
 msgid "while getting credentials for %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:287
+#: ../../src/clients/kvno/kvno.c:284
 #, c-format
 msgid "while decoding ticket for %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:298
+#: ../../src/clients/kvno/kvno.c:295
 #, c-format
 msgid "while decrypting ticket for %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:302
+#: ../../src/clients/kvno/kvno.c:299
 #, c-format
 msgid "%s: kvno = %d, keytab entry valid\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:320
+#: ../../src/clients/kvno/kvno.c:317
 #, c-format
 msgid "%s: constrained delegation failed"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:326
+#: ../../src/clients/kvno/kvno.c:323
 #, c-format
 msgid "%s: kvno = %d\n"
 msgstr ""
@@ -2200,8 +2200,7 @@ msgstr ""
 msgid "Database not currently opened!"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1356
-#: ../../src/kadmin/dbutil/kdb5_stash.c:116
+#: ../../src/kadmin/dbutil/dump.c:1356 ../../src/kadmin/dbutil/kdb5_stash.c:116
 #: ../../src/kadmin/dbutil/kdb5_util.c:485
 msgid "while reading master key"
 msgstr ""
