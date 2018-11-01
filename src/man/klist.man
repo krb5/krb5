@@ -46,24 +46,24 @@ credentials cache, or the keys held in a keytab file.
 .SH OPTIONS
 .INDENT 0.0
 .TP
-.B \fB\-e\fP
+\fB\-e\fP
 Displays the encryption types of the session key and the ticket
 for each credential in the credential cache, or each key in the
 keytab file.
 .TP
-.B \fB\-l\fP
+\fB\-l\fP
 If a cache collection is available, displays a table summarizing
 the caches present in the collection.
 .TP
-.B \fB\-A\fP
+\fB\-A\fP
 If a cache collection is available, displays the contents of all
 of the caches in the collection.
 .TP
-.B \fB\-c\fP
+\fB\-c\fP
 List tickets held in a credentials cache. This is the default if
 neither \fB\-c\fP nor \fB\-k\fP is specified.
 .TP
-.B \fB\-f\fP
+\fB\-f\fP
 Shows the flags present in the credentials, using the following
 abbreviations:
 .INDENT 7.0
@@ -90,39 +90,39 @@ a    anonymous
 .UNINDENT
 .UNINDENT
 .TP
-.B \fB\-s\fP
+\fB\-s\fP
 Causes klist to run silently (produce no output).  klist will exit
 with status 1 if the credentials cache cannot be read or is
 expired, and with status 0 otherwise.
 .TP
-.B \fB\-a\fP
+\fB\-a\fP
 Display list of addresses in credentials.
 .TP
-.B \fB\-n\fP
+\fB\-n\fP
 Show numeric addresses instead of reverse\-resolving addresses.
 .TP
-.B \fB\-C\fP
+\fB\-C\fP
 List configuration data that has been stored in the credentials
 cache when klist encounters it.  By default, configuration data
 is not listed.
 .TP
-.B \fB\-k\fP
+\fB\-k\fP
 List keys held in a keytab file.
 .TP
-.B \fB\-i\fP
+\fB\-i\fP
 In combination with \fB\-k\fP, defaults to using the default client
 keytab instead of the default acceptor keytab, if no name is
 given.
 .TP
-.B \fB\-t\fP
+\fB\-t\fP
 Display the time entry timestamps for each keytab entry in the
 keytab file.
 .TP
-.B \fB\-K\fP
+\fB\-K\fP
 Display the value of the encryption key in each keytab entry in
 the keytab file.
 .TP
-.B \fB\-V\fP
+\fB\-V\fP
 Display the Kerberos version number and exit.
 .UNINDENT
 .sp
@@ -135,7 +135,7 @@ value is used to locate the default ticket cache.
 klist uses the following environment variable:
 .INDENT 0.0
 .TP
-.B \fBKRB5CCNAME\fP
+\fBKRB5CCNAME\fP
 Location of the default Kerberos 5 credentials (ticket) cache, in
 the form \fItype\fP:\fIresidual\fP\&.  If no \fItype\fP prefix is present, the
 \fBFILE\fP type is assumed.  The type of the default cache may
@@ -154,7 +154,7 @@ Default location for the local host\(aqs keytab file.
 .UNINDENT
 .SH SEE ALSO
 .sp
-\fIkinit(1)\fP, \fIkdestroy(1)\fP
+kinit(1), kdestroy(1)
 .SH AUTHOR
 MIT
 .SH COPYRIGHT

@@ -164,7 +164,7 @@ ktutil:
 .UNINDENT
 .SH SEE ALSO
 .sp
-\fIkadmin(1)\fP, \fIkdb5_util(8)\fP
+kadmin(1), kdb5_util(8)
 .SH AUTHOR
 MIT
 .SH COPYRIGHT

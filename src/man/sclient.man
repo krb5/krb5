@@ -36,12 +36,12 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH DESCRIPTION
 .sp
 sclient is a sample application, primarily useful for testing
-purposes.  It contacts a sample server \fIsserver(8)\fP and
+purposes.  It contacts a sample server sserver(8) and
 authenticates to it using Kerberos version 5 tickets, then displays
 the server\(aqs response.
 .SH SEE ALSO
 .sp
-\fIkinit(1)\fP, \fIsserver(8)\fP
+kinit(1), sserver(8)
 .SH AUTHOR
 MIT
 .SH COPYRIGHT

@@ -41,10 +41,10 @@ collection, if a cache collection is available.
 .SH OPTIONS
 .INDENT 0.0
 .TP
-.B \fB\-c\fP \fIcachename\fP
+\fB\-c\fP \fIcachename\fP
 Directly specifies the credential cache to be made primary.
 .TP
-.B \fB\-p\fP \fIprincipal\fP
+\fB\-p\fP \fIprincipal\fP
 Causes the cache collection to be searched for a cache containing
 credentials for \fIprincipal\fP\&.  If one is found, that collection is
 made primary.
@@ -54,7 +54,7 @@ made primary.
 kswitch uses the following environment variables:
 .INDENT 0.0
 .TP
-.B \fBKRB5CCNAME\fP
+\fBKRB5CCNAME\fP
 Location of the default Kerberos 5 credentials (ticket) cache, in
 the form \fItype\fP:\fIresidual\fP\&.  If no \fItype\fP prefix is present, the
 \fBFILE\fP type is assumed.  The type of the default cache may
@@ -70,7 +70,7 @@ Default location of Kerberos 5 credentials cache
 .UNINDENT
 .SH SEE ALSO
 .sp
-\fIkinit(1)\fP, \fIkdestroy(1)\fP, \fIklist(1)\fP), kerberos(1)
+kinit(1), kdestroy(1), klist(1)), kerberos(1)
 .SH AUTHOR
 MIT
 .SH COPYRIGHT

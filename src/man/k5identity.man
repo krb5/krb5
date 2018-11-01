@@ -50,19 +50,19 @@ principal is chosen as the client principal.  The following fields are
 recognized:
 .INDENT 0.0
 .TP
-.B \fBrealm\fP
+\fBrealm\fP
 If the realm of the server principal is known, it is matched
 against \fIvalue\fP, which may be a pattern using shell wildcards.
 For host\-based server principals, the realm will generally only be
-known if there is a \fIdomain_realm\fP section in
-\fIkrb5.conf(5)\fP with a mapping for the hostname.
+known if there is a domain_realm section in
+krb5.conf(5) with a mapping for the hostname.
 .TP
-.B \fBservice\fP
+\fBservice\fP
 If the server principal is a host\-based principal, its service
 component is matched against \fIvalue\fP, which may be a pattern using
 shell wildcards.
 .TP
-.B \fBhost\fP
+\fBhost\fP
 If the server principal is a host\-based principal, its hostname
 component is converted to lower case and matched against \fIvalue\fP,
 which may be a pattern using shell wildcards.
@@ -94,7 +94,7 @@ alice/mail@EXAMPLE.COM  host=mail.example.com service=imap
 .UNINDENT
 .SH SEE ALSO
 .sp
-kerberos(1), \fIkrb5.conf(5)\fP
+kerberos(1), krb5.conf(5)
 .SH AUTHOR
 MIT
 .SH COPYRIGHT

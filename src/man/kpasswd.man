@@ -55,7 +55,7 @@ identity of the user invoking the kpasswd command.
 .UNINDENT
 .SH SEE ALSO
 .sp
-\fIkadmin(1)\fP, \fIkadmind(8)\fP
+kadmin(1), kadmind(8)
 .SH AUTHOR
 MIT
 .SH COPYRIGHT

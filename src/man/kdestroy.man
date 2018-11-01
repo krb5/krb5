@@ -45,15 +45,15 @@ credentials cache is destroyed.
 .SH OPTIONS
 .INDENT 0.0
 .TP
-.B \fB\-A\fP
+\fB\-A\fP
 Destroys all caches in the collection, if a cache collection is
 available.
 .TP
-.B \fB\-q\fP
+\fB\-q\fP
 Run quietly.  Normally kdestroy beeps if it fails to destroy the
 user\(aqs tickets.  The \fB\-q\fP flag suppresses this behavior.
 .TP
-.B \fB\-c\fP \fIcache_name\fP
+\fB\-c\fP \fIcache_name\fP
 Use \fIcache_name\fP as the credentials (ticket) cache name and
 location; if this option is not used, the default cache name and
 location are used.
@@ -72,7 +72,7 @@ when you log out.
 kdestroy uses the following environment variable:
 .INDENT 0.0
 .TP
-.B \fBKRB5CCNAME\fP
+\fBKRB5CCNAME\fP
 Location of the default Kerberos 5 credentials (ticket) cache, in
 the form \fItype\fP:\fIresidual\fP\&.  If no \fItype\fP prefix is present, the
 \fBFILE\fP type is assumed.  The type of the default cache may
@@ -88,7 +88,7 @@ Default location of Kerberos 5 credentials cache
 .UNINDENT
 .SH SEE ALSO
 .sp
-\fIkinit(1)\fP, \fIklist(1)\fP
+kinit(1), klist(1)
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
