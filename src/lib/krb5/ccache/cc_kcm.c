@@ -308,8 +308,9 @@ kcmio_unix_socket_write(krb5_context context, struct kcmio *io, void *request,
 
     for (;;) {
         ret = krb5int_net_writev(context, io->fd, sg, 2);
-        if (ret < 0)
-            ret = errno;
+        if (ret >= 0)
+            return 0;
+        ret = errno;
         if (ret != EPIPE || reconnected)
             return ret;
 
@@ -327,8 +328,6 @@ kcmio_unix_socket_write(krb5_context context, struct kcmio *io, void *request,
             return ret;
         reconnected = TRUE;
     }
-
-    return ret;
 }
 
 /* Read a KCM reply: 4-byte big-endian length, 4-byte big-endian status code,
