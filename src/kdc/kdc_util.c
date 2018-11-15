@@ -697,29 +697,6 @@ validate_as_request(kdc_realm_t *kdc_active_realm,
         return(KDC_ERR_CANNOT_POSTDATE);
     }
 
-    /*
-     * A Windows KDC will return KDC_ERR_PREAUTH_REQUIRED instead of
-     * KDC_ERR_POLICY in the following case:
-     *
-     *   - KDC_OPT_FORWARDABLE is set in KDCOptions but local
-     *     policy has KRB5_KDB_DISALLOW_FORWARDABLE set for the
-     *     client, and;
-     *   - KRB5_KDB_REQUIRES_PRE_AUTH is set for the client but
-     *     preauthentication data is absent in the request.
-     *
-     * Hence, this check most be done after the check for preauth
-     * data, and is now performed by validate_forwardable() (the
-     * contents of which were previously below).
-     */
-
-    /* Client and server must allow proxiable tickets */
-    if (isflagset(request->kdc_options, KDC_OPT_PROXIABLE) &&
-        (isflagset(client.attributes, KRB5_KDB_DISALLOW_PROXIABLE) ||
-         isflagset(server.attributes, KRB5_KDB_DISALLOW_PROXIABLE))) {
-        *status = "PROXIABLE NOT ALLOWED";
-        return(KDC_ERR_POLICY);
-    }
-
     /* Check to see if client is locked out */
     if (isflagset(client.attributes, KRB5_KDB_DISALLOW_ALL_TIX)) {
         *status = "CLIENT LOCKED OUT";
@@ -752,19 +729,54 @@ validate_as_request(kdc_realm_t *kdc_active_realm,
     return 0;
 }
 
-int
-validate_forwardable(krb5_kdc_req *request, krb5_db_entry client,
-                     krb5_db_entry server, krb5_timestamp kdc_time,
-                     const char **status)
+/*
+ * Compute ticket flags based on the request, the client and server DB entry
+ * (which may prohibit forwardable or proxiable tickets), and the header
+ * ticket.  client may be NULL for a TGS request (although it may be set, such
+ * as for an S4U2Self request).  header_enc may be NULL for an AS request.
+ */
+krb5_flags
+get_ticket_flags(krb5_flags reqflags, krb5_db_entry *client,
+                 krb5_db_entry *server, krb5_enc_tkt_part *header_enc)
 {
-    *status = NULL;
-    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE) &&
-        (isflagset(client.attributes, KRB5_KDB_DISALLOW_FORWARDABLE) ||
-         isflagset(server.attributes, KRB5_KDB_DISALLOW_FORWARDABLE))) {
-        *status = "FORWARDABLE NOT ALLOWED";
-        return(KDC_ERR_POLICY);
-    } else
-        return 0;
+    krb5_flags flags;
+
+    /* Indicate support for encrypted padata (RFC 6806), and set flags based on
+     * request options and the header ticket. */
+    flags = OPTS2FLAGS(reqflags) | TKT_FLG_ENC_PA_REP;
+    if (reqflags & KDC_OPT_POSTDATED)
+        flags |= TKT_FLG_INVALID;
+    if (header_enc != NULL)
+        flags |= COPY_TKT_FLAGS(header_enc->flags);
+    if (header_enc == NULL)
+        flags |= TKT_FLG_INITIAL;
+
+    /* For TGS requests, indicate if the service is marked ok-as-delegate. */
+    if (header_enc != NULL && (server->attributes & KRB5_KDB_OK_AS_DELEGATE))
+        flags |= TKT_FLG_OK_AS_DELEGATE;
+
+    /* Unset PROXIABLE if it is disallowed. */
+    if (client != NULL && (client->attributes & KRB5_KDB_DISALLOW_PROXIABLE))
+        flags &= ~TKT_FLG_PROXIABLE;
+    if (server->attributes & KRB5_KDB_DISALLOW_PROXIABLE)
+        flags &= ~TKT_FLG_PROXIABLE;
+    if (header_enc != NULL && !(header_enc->flags & TKT_FLG_PROXIABLE))
+        flags &= ~TKT_FLG_PROXIABLE;
+
+    /* Unset FORWARDABLE if it is disallowed. */
+    if (client != NULL && (client->attributes & KRB5_KDB_DISALLOW_FORWARDABLE))
+        flags &= ~TKT_FLG_FORWARDABLE;
+    if (server->attributes & KRB5_KDB_DISALLOW_FORWARDABLE)
+        flags &= ~TKT_FLG_FORWARDABLE;
+    if (header_enc != NULL && !(header_enc->flags & TKT_FLG_FORWARDABLE))
+        flags &= ~TKT_FLG_FORWARDABLE;
+
+    /* We don't currently handle issuing anonymous tickets based on
+     * non-anonymous ones. */
+    if (header_enc != NULL && !(header_enc->flags & TKT_FLG_ANONYMOUS))
+        flags &= ~TKT_FLG_ANONYMOUS;
+
+    return flags;
 }
 
 /* Return KRB5KDC_ERR_POLICY if indicators does not contain the required auth

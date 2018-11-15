@@ -86,14 +86,13 @@ validate_as_request (kdc_realm_t *, krb5_kdc_req *, krb5_db_entry,
                      const char **, krb5_pa_data ***);
 
 int
-validate_forwardable(krb5_kdc_req *, krb5_db_entry,
-                     krb5_db_entry, krb5_timestamp,
-                     const char **);
-
-int
 validate_tgs_request (kdc_realm_t *, krb5_kdc_req *, krb5_db_entry,
                       krb5_ticket *, krb5_timestamp,
                       const char **, krb5_pa_data ***);
+
+krb5_flags
+get_ticket_flags(krb5_flags reqflags, krb5_db_entry *client,
+                 krb5_db_entry *server, krb5_enc_tkt_part *header_enc);
 
 krb5_error_code
 check_indicators(krb5_context context, krb5_db_entry *server,

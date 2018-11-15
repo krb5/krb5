@@ -378,15 +378,16 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     else
         ticket_reply.server = request->server; /* XXX careful for realm... */
 
-    enc_tkt_reply.flags = OPTS2FLAGS(request->kdc_options);
-    enc_tkt_reply.flags |= COPY_TKT_FLAGS(header_enc_tkt->flags);
+    enc_tkt_reply.flags = get_ticket_flags(request->kdc_options, client,
+                                           server, header_enc_tkt);
     enc_tkt_reply.times.starttime = 0;
 
-    if (isflagset(server->attributes, KRB5_KDB_OK_AS_DELEGATE))
-        setflag(enc_tkt_reply.flags, TKT_FLG_OK_AS_DELEGATE);
-
-    /* Indicate support for encrypted padata (RFC 6806). */
-    setflag(enc_tkt_reply.flags, TKT_FLG_ENC_PA_REP);
+    /* OK_TO_AUTH_AS_DELEGATE must be set on the service requesting S4U2Self
+     * for forwardable tickets to be issued. */
+    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
+        !is_referral &&
+        !isflagset(server->attributes, KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
+        clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
 
     /* don't use new addresses unless forwarded, see below */
 
@@ -401,37 +402,6 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
      * realms may refuse to issue renewable tickets
      */
 
-    if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE)) {
-
-        if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
-            /*
-             * If S4U2Self principal is not forwardable, then mark ticket as
-             * unforwardable. This behaviour matches Windows, but it is
-             * different to the MIT AS-REQ path, which returns an error
-             * (KDC_ERR_POLICY) if forwardable tickets cannot be issued.
-             *
-             * Consider this block the S4U2Self equivalent to
-             * validate_forwardable().
-             */
-            if (client != NULL &&
-                isflagset(client->attributes, KRB5_KDB_DISALLOW_FORWARDABLE))
-                clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-            /*
-             * Forwardable flag is propagated along referral path.
-             */
-            else if (!isflagset(header_enc_tkt->flags, TKT_FLG_FORWARDABLE))
-                clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-            /*
-             * OK_TO_AUTH_AS_DELEGATE must be set on the service requesting
-             * S4U2Self in order for forwardable tickets to be returned.
-             */
-            else if (!is_referral &&
-                     !isflagset(server->attributes,
-                                KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
-                clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
-        }
-    }
-
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDED) ||
         isflagset(request->kdc_options, KDC_OPT_PROXY)) {
 
@@ -440,16 +410,10 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         enc_tkt_reply.caddrs = request->addresses;
         reply_encpart.caddrs = request->addresses;
     }
-    /* We don't currently handle issuing anonymous tickets based on
-     * non-anonymous ones, so just ignore the option. */
-    if (isflagset(request->kdc_options, KDC_OPT_REQUEST_ANONYMOUS) &&
-        !isflagset(header_enc_tkt->flags, TKT_FLG_ANONYMOUS))
-        clear(enc_tkt_reply.flags, TKT_FLG_ANONYMOUS);
 
-    if (isflagset(request->kdc_options, KDC_OPT_POSTDATED)) {
-        setflag(enc_tkt_reply.flags, TKT_FLG_INVALID);
+    if (isflagset(request->kdc_options, KDC_OPT_POSTDATED))
         enc_tkt_reply.times.starttime = request->from;
-    } else
+    else
         enc_tkt_reply.times.starttime = kdc_time;
 
     if (isflagset(request->kdc_options, KDC_OPT_VALIDATE)) {

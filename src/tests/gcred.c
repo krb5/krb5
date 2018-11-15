@@ -66,20 +66,32 @@ main(int argc, char **argv)
     krb5_principal client, server;
     krb5_ccache ccache;
     krb5_creds in_creds, *creds;
+    krb5_flags options = 0;
     char *name;
+    int c;
 
     check(krb5_init_context(&ctx));
 
-    /* Parse arguments. */
-    assert(argc == 3);
-    check(krb5_parse_name(ctx, argv[2], &server));
-    if (strcmp(argv[1], "unknown") == 0)
+    while ((c = getopt(argc, argv, "f")) != -1) {
+        switch (c) {
+        case 'f':
+            options |= KRB5_GC_FORWARDABLE;
+            break;
+        default:
+            abort();
+        }
+    }
+    argc -= optind;
+    argv += optind;
+    assert(argc == 2);
+    check(krb5_parse_name(ctx, argv[1], &server));
+    if (strcmp(argv[0], "unknown") == 0)
         server->type = KRB5_NT_UNKNOWN;
-    else if (strcmp(argv[1], "principal") == 0)
+    else if (strcmp(argv[0], "principal") == 0)
         server->type = KRB5_NT_PRINCIPAL;
-    else if (strcmp(argv[1], "srv-inst") == 0)
+    else if (strcmp(argv[0], "srv-inst") == 0)
         server->type = KRB5_NT_SRV_INST;
-    else if (strcmp(argv[1], "srv-hst") == 0)
+    else if (strcmp(argv[0], "srv-hst") == 0)
         server->type = KRB5_NT_SRV_HST;
     else
         abort();
@@ -89,7 +101,7 @@ main(int argc, char **argv)
     memset(&in_creds, 0, sizeof(in_creds));
     in_creds.client = client;
     in_creds.server = server;
-    check(krb5_get_credentials(ctx, 0, ccache, &in_creds, &creds));
+    check(krb5_get_credentials(ctx, options, ccache, &in_creds, &creds));
     check(krb5_unparse_name(ctx, creds->server, &name));
     printf("%s\n", name);
 

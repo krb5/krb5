@@ -192,13 +192,6 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
 
     au_state->stage = ENCR_REP;
 
-    if ((errcode = validate_forwardable(state->request, *state->client,
-                                        *state->server, state->kdc_time,
-                                        &state->status))) {
-        errcode += ERROR_TABLE_BASE_krb5;
-        goto egress;
-    }
-
     errcode = check_indicators(kdc_context, state->server,
                                state->auth_indicators);
     if (errcode) {
@@ -708,11 +701,10 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
 
     /* Copy options that request the corresponding ticket flags. */
-    state->enc_tkt_reply.flags = OPTS2FLAGS(state->request->kdc_options);
+    state->enc_tkt_reply.flags = get_ticket_flags(state->request->kdc_options,
+                                                  state->client, state->server,
+                                                  NULL);
     state->enc_tkt_reply.times.authtime = state->authtime;
-
-    setflag(state->enc_tkt_reply.flags, TKT_FLG_INITIAL);
-    setflag(state->enc_tkt_reply.flags, TKT_FLG_ENC_PA_REP);
 
     /*
      * It should be noted that local policy may affect the
@@ -732,10 +724,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     state->enc_tkt_reply.transited.tr_contents = empty_string;
 
-    if (isflagset(state->request->kdc_options, KDC_OPT_POSTDATED)) {
-        setflag(state->enc_tkt_reply.flags, TKT_FLG_INVALID);
+    if (isflagset(state->request->kdc_options, KDC_OPT_POSTDATED))
         state->enc_tkt_reply.times.starttime = state->request->from;
-    } else
+    else
         state->enc_tkt_reply.times.starttime = state->kdc_time;
 
     kdc_get_ticket_endtime(kdc_active_realm,
