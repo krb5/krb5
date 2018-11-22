@@ -22,7 +22,10 @@
 
 from k5test import *
 
-realm = K5Realm(create_host=False)
+kcm_socket_path = os.path.join(os.getcwd(), 'testdir', 'kcm')
+conf = {'libdefaults': {'kcm_socket': kcm_socket_path,
+                        'kcm_mach_service': '-'}}
+realm = K5Realm(create_host=False, krb5_conf=conf)
 
 keyctl = which('keyctl')
 out = realm.run([klist, '-c', 'KEYRING:process:abcd'], expected_code=1)
@@ -122,6 +125,10 @@ def collection_test(realm, ccname):
 
 
 collection_test(realm, 'DIR:' + os.path.join(realm.testdir, 'cc'))
+kcmserver_path = os.path.join(srctop, 'tests', 'kcmserver.py')
+realm.start_server([sys.executable, kcmserver_path, kcm_socket_path],
+                   'starting...')
+collection_test(realm, 'KCM:')
 if test_keyring:
     def cleanup_keyring(anchor, name):
         out = realm.run(['keyctl', 'list', anchor])
