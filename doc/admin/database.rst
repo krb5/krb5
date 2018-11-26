@@ -535,6 +535,10 @@ availability.  To roll over the master key, follow these steps:
    use unlocked iteration; this variant will take longer, but will
    keep the database available to the KDC and kadmind while it runs.
 
+#. Wait until the above changes have propagated to all replica KDCs
+   and until all running KDC and kadmind processes have serviced
+   requests using updated principal entries.
+
 #. On the master KDC, run ``kdb5_util purge_mkeys`` to clean up the
    old master key.
 
