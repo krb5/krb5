@@ -617,7 +617,7 @@ For example:
         auth_to_local = RULE:[2:$1](johndoe)s/^.*$/guest/
         auth_to_local = RULE:[2:$1;$2](^.*;admin$)s/;admin$//
         auth_to_local = RULE:[2:$2](^.*;root)s/^.*$/root/
-        auto_to_local = DEFAULT
+        auth_to_local = DEFAULT
     }
 .ft P
 .fi

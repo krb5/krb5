@@ -454,7 +454,7 @@ following tags may be specified in the realm's subsection:
                 auth_to_local = RULE:[2:$1](johndoe)s/^.*$/guest/
                 auth_to_local = RULE:[2:$1;$2](^.*;admin$)s/;admin$//
                 auth_to_local = RULE:[2:$2](^.*;root)s/^.*$/root/
-                auto_to_local = DEFAULT
+                auth_to_local = DEFAULT
             }
 
     would result in any principal without ``root`` or ``admin`` as the
