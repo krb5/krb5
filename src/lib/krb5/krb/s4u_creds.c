@@ -116,7 +116,7 @@ s4u_identify_user(krb5_context context,
     code = k5_get_init_creds(context, &creds, &client, NULL, NULL, 0, NULL,
                              opts, krb5_get_as_key_noop, &userid, &use_master,
                              NULL);
-    if (code == 0 || code == KRB5_PREAUTH_FAILED) {
+    if (!code || code == KRB5_PREAUTH_FAILED || code == KRB5KDC_ERR_KEY_EXP) {
         *canon_user = userid.user;
         userid.user = NULL;
         code = 0;

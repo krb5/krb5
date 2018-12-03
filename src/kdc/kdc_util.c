@@ -1595,6 +1595,11 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
 
         memset(&no_server, 0, sizeof(no_server));
 
+        /* Ignore password expiration and needchange attributes (as Windows
+         * does), since S4U2Self is not password authentication. */
+        princ->pw_expiration = 0;
+        clear(princ->attributes, KRB5_KDB_REQUIRES_PWCHANGE);
+
         code = validate_as_request(kdc_active_realm, request, *princ,
                                    no_server, kdc_time, status, &e_data);
         if (code) {
