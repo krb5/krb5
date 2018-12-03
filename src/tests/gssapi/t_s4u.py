@@ -19,6 +19,14 @@ pservice2 = 'p:' + service2
 # Get forwardable creds for service1 in the default cache.
 realm.kinit(service1, None, ['-f', '-k'])
 
+# Try S4U2Self for user with a restricted password.
+realm.run([kadminl, 'modprinc', '+needchange', realm.user_princ])
+realm.run(['./t_s4u', 'e:user', '-'])
+realm.run([kadminl, 'modprinc', '-needchange',
+          '-pwexpire', '1/1/2000', realm.user_princ])
+realm.run(['./t_s4u', 'e:user', '-'])
+realm.run([kadminl, 'modprinc', '-pwexpire', 'never', realm.user_princ])
+
 # Try krb5 -> S4U2Proxy with forwardable user creds.  This should fail
 # at the S4U2Proxy step since the DB2 back end currently has no
 # support for allowing it.
