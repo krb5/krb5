@@ -39,6 +39,7 @@
 
 #include "k5-int.h"
 #include "int-proto.h"
+#include "os-proto.h"
 #include "fast.h"
 
 /*
@@ -1249,6 +1250,26 @@ krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
         return EINVAL;
 }
 
+static krb5_error_code
+try_get_creds(krb5_context context, krb5_flags options, krb5_ccache ccache,
+              krb5_creds *in_creds, krb5_creds *creds_out)
+{
+    krb5_error_code code;
+    krb5_tkt_creds_context ctx = NULL;
+
+    code = krb5_tkt_creds_init(context, ccache, in_creds, options, &ctx);
+    if (code)
+        goto cleanup;
+    code = krb5_tkt_creds_get(context, ctx);
+    if (code)
+        goto cleanup;
+    code = krb5_tkt_creds_get_creds(context, ctx, creds_out);
+
+cleanup:
+    krb5_tkt_creds_free(context, ctx);
+    return code;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_credentials(krb5_context context, krb5_flags options,
                      krb5_ccache ccache, krb5_creds *in_creds,
@@ -1256,7 +1277,10 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
 {
     krb5_error_code code;
     krb5_creds *ncreds = NULL;
-    krb5_tkt_creds_context ctx = NULL;
+    krb5_creds canon_creds, store_creds;
+    krb5_principal_data canon_server;
+    krb5_data canon_components[2];
+    char *hostname = NULL, *canon_hostname = NULL;
 
     *out_creds = NULL;
 
@@ -1265,22 +1289,59 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     if (ncreds == NULL)
         goto cleanup;
 
-    /* Make and execute a krb5_tkt_creds context to get the credential. */
-    code = krb5_tkt_creds_init(context, ccache, in_creds, options, &ctx);
-    if (code != 0)
+    code = try_get_creds(context, options, ccache, in_creds, ncreds);
+    if (!code) {
+        *out_creds = ncreds;
+        return 0;
+    }
+
+    /* Possibly try again with the canonicalized hostname, if the server is
+     * host-based and we are configured for fallback canonicalization. */
+    if (code != KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN)
         goto cleanup;
-    code = krb5_tkt_creds_get(context, ctx);
-    if (code != 0)
+    if (context->dns_canonicalize_hostname != CANONHOST_FALLBACK)
         goto cleanup;
-    code = krb5_tkt_creds_get_creds(context, ctx, ncreds);
-    if (code != 0)
+    if (in_creds->server->type != KRB5_NT_SRV_HST ||
+        in_creds->server->length != 2)
         goto cleanup;
+
+    hostname = k5memdup0(in_creds->server->data[1].data,
+                         in_creds->server->data[1].length, &code);
+    if (hostname == NULL)
+        goto cleanup;
+    code = k5_expand_hostname(context, hostname, TRUE, &canon_hostname);
+    if (code)
+        goto cleanup;
+
+    TRACE_GET_CREDS_FALLBACK(context, canon_hostname);
+
+    /* Make shallow copies of in_creds and its server to alter the hostname. */
+    canon_components[0] = in_creds->server->data[0];
+    canon_components[1] = string2data(canon_hostname);
+    canon_server = *in_creds->server;
+    canon_server.data = canon_components;
+    canon_creds = *in_creds;
+    canon_creds.server = &canon_server;
+
+    code = try_get_creds(context, options | KRB5_GC_NO_STORE, ccache,
+                         &canon_creds, ncreds);
+    if (code)
+        goto cleanup;
+
+    if (!(options & KRB5_GC_NO_STORE)) {
+        /* Store the creds under the originally requested server name.  The
+         * ccache layer will also store them under the ticket server name. */
+        store_creds = *ncreds;
+        store_creds.server = in_creds->server;
+        (void)krb5_cc_store_cred(context, ccache, &store_creds);
+    }
 
     *out_creds = ncreds;
     ncreds = NULL;
 
 cleanup:
+    free(hostname);
+    free(canon_hostname);
     krb5_free_creds(context, ncreds);
-    krb5_tkt_creds_free(context, ctx);
     return code;
 }

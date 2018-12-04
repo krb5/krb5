@@ -1158,6 +1158,12 @@ k5_plugin_register_dyn(krb5_context context, int interface_id,
 void
 k5_plugin_free_context(krb5_context context);
 
+enum dns_canonhost {
+    CANONHOST_FALSE = 0,
+    CANONHOST_TRUE = 1,
+    CANONHOST_FALLBACK = 2
+};
+
 struct _kdb5_dal_handle;        /* private, in kdb5.h */
 typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _kdb_log_context;
@@ -1221,7 +1227,7 @@ struct _krb5_context {
 
     krb5_boolean allow_weak_crypto;
     krb5_boolean ignore_acceptor_hostname;
-    krb5_boolean dns_canonicalize_hostname;
+    enum dns_canonhost dns_canonicalize_hostname;
 
     krb5_trace_callback trace_callback;
     void *trace_callback_data;

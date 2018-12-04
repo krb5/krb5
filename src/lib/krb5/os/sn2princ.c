@@ -53,19 +53,23 @@ use_reverse_dns(krb5_context context)
     return value;
 }
 
-krb5_error_code KRB5_CALLCONV
-krb5_expand_hostname(krb5_context context, const char *host,
-                     char **canonhost_out)
+krb5_error_code
+k5_expand_hostname(krb5_context context, const char *host,
+                   krb5_boolean is_fallback, char **canonhost_out)
 {
     struct addrinfo *ai = NULL, hint;
     char namebuf[NI_MAXHOST], *copy, *p;
     int err;
     const char *canonhost;
+    krb5_boolean use_dns;
 
     *canonhost_out = NULL;
 
     canonhost = host;
-    if (context->dns_canonicalize_hostname) {
+    use_dns = (context->dns_canonicalize_hostname == CANONHOST_TRUE ||
+               (is_fallback &&
+                context->dns_canonicalize_hostname == CANONHOST_FALLBACK));
+    if (use_dns) {
         /* Try a forward lookup of the hostname. */
         memset(&hint, 0, sizeof(hint));
         hint.ai_flags = AI_CANONNAME;
@@ -110,6 +114,13 @@ cleanup:
     if (ai != NULL)
         freeaddrinfo(ai);
     return (*canonhost_out == NULL) ? ENOMEM : 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_expand_hostname(krb5_context context, const char *host,
+                     char **canonhost_out)
+{
+    return k5_expand_hostname(context, host, FALSE, canonhost_out);
 }
 
 /* If hostname appears to have a :port or :instance trailer (used in MSSQLSvc

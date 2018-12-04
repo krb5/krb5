@@ -83,6 +83,10 @@ struct sendto_callback_info {
     void *data;
 };
 
+krb5_error_code k5_expand_hostname(krb5_context context, const char *host,
+                                   krb5_boolean is_fallback,
+                                   char **canonhost_out);
+
 krb5_error_code k5_locate_server(krb5_context, const krb5_data *realm,
                                  struct serverlist *serverlist,
                                  enum locate_service_type svc,

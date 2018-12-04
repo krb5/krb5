@@ -66,6 +66,7 @@ main(int argc, char **argv)
     krb5_principal client, server;
     krb5_ccache ccache;
     krb5_creds in_creds, *creds;
+    krb5_ticket *ticket;
     krb5_flags options = 0;
     char *name;
     int c;
@@ -102,9 +103,11 @@ main(int argc, char **argv)
     in_creds.client = client;
     in_creds.server = server;
     check(krb5_get_credentials(ctx, options, ccache, &in_creds, &creds));
-    check(krb5_unparse_name(ctx, creds->server, &name));
+    check(krb5_decode_ticket(&creds->ticket, &ticket));
+    check(krb5_unparse_name(ctx, ticket->server, &name));
     printf("%s\n", name);
 
+    krb5_free_ticket(ctx, ticket);
     krb5_free_unparsed_name(ctx, name);
     krb5_free_creds(ctx, creds);
     krb5_free_principal(ctx, client);

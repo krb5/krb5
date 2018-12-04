@@ -145,7 +145,7 @@ main(int argc, char **argv)
     ctx->udp_pref_limit = 2345;
     ctx->use_conf_ktypes = TRUE;
     ctx->ignore_acceptor_hostname = TRUE;
-    ctx->dns_canonicalize_hostname = FALSE;
+    ctx->dns_canonicalize_hostname = CANONHOST_FALSE;
     free(ctx->plugin_base_dir);
     check((ctx->plugin_base_dir = strdup("/a/b/c/d")) != NULL);
 

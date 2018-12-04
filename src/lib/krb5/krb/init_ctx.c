@@ -101,6 +101,30 @@ get_boolean(krb5_context ctx, const char *name, int def_val, int *boolean_out)
     return retval;
 }
 
+static krb5_error_code
+get_tristate(krb5_context ctx, const char *name, const char *third_option,
+             int third_option_val, int def_val, int *val_out)
+{
+    krb5_error_code retval;
+    char *str;
+    int match;
+
+    retval = profile_get_boolean(ctx->profile, KRB5_CONF_LIBDEFAULTS, name,
+                                 NULL, def_val, val_out);
+    if (retval != PROF_BAD_BOOLEAN)
+        return retval;
+    retval = profile_get_string(ctx->profile, KRB5_CONF_LIBDEFAULTS, name,
+                                NULL, NULL, &str);
+    if (retval)
+        return retval;
+    match = (strcasecmp(third_option, str) == 0);
+    free(str);
+    if (!match)
+        return EINVAL;
+    *val_out = third_option_val;
+    return 0;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_init_context(krb5_context *context)
 {
@@ -213,7 +237,8 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
         goto cleanup;
     ctx->ignore_acceptor_hostname = tmp;
 
-    retval = get_boolean(ctx, KRB5_CONF_DNS_CANONICALIZE_HOSTNAME, 1, &tmp);
+    retval = get_tristate(ctx, KRB5_CONF_DNS_CANONICALIZE_HOSTNAME, "fallback",
+                          CANONHOST_FALLBACK, 1, &tmp);
     if (retval)
         goto cleanup;
     ctx->dns_canonicalize_hostname = tmp;

@@ -191,6 +191,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_FAST_REQUIRED(c)                                  \
     TRACE(c, "Using FAST due to KRB5_FAST_REQUIRED flag")
 
+#define TRACE_GET_CREDS_FALLBACK(c, hostname)                           \
+    TRACE(c, "Falling back to canonicalized server hostname {str}", hostname)
+
 #define TRACE_GIC_PWD_CHANGED(c)                                \
     TRACE(c, "Getting initial TGT with changed password")
 #define TRACE_GIC_PWD_CHANGEPW(c, tries)                                \

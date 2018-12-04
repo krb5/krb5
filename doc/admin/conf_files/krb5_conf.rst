@@ -201,6 +201,10 @@ The libdefaults section may contain any of the following relations:
     means that short hostnames will not be canonicalized to
     fully-qualified hostnames.  The default value is true.
 
+    If this option is set to ``fallback`` (new in release 1.18), DNS
+    canonicalization will only be performed the server hostname is not
+    found with the original name when requesting credentials.
+
 **dns_lookup_kdc**
     Indicate whether DNS SRV records should be used to locate the KDCs
     and other servers for a realm, if they are not listed in the
