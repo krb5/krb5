@@ -231,6 +231,7 @@ krb5-1.17 changes by ticket ID
 8741    S4U2Self client code fails with no default realm
 8742    Use "replica" in iprop settings
 8743    Fix incorrect TRACE usages to use {str}
+8744    KDC/kadmind may not follow master key change before purge_mkeys
 8745    libss without readline can interfere with reading passwords
 8746    Fix 64-bit Windows socket write error handling
 8747    Allow referrals for cross-realm S4U2Self requests
@@ -246,6 +247,7 @@ krb5-1.17 changes by ticket ID
 8757    Start S4U2Self realm lookup at server realm
 8759    Resource leak in kadm5_randkey_principal_3()
 8760    Retry KCM writes once on remote hangup
+8762    Fix spelling of auth_to_local example
 
 Acknowledgements
 ----------------
