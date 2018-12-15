@@ -1640,7 +1640,6 @@ return_enc_padata(krb5_context context, krb5_data *req_pkt,
     krb5_error_code code = 0;
     /* This should be initialized and only used for Win2K compat and other
      * specific standardized uses such as FAST negotiation. */
-    assert(reply_encpart->enc_padata == NULL);
     if (is_referral) {
         code = return_referral_enc_padata(context, reply_encpart, server);
         if (code)
