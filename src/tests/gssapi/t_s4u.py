@@ -144,6 +144,13 @@ if 'auth1: user@' not in out or 'auth2: user@' not in out:
 
 realm.stop()
 
+for realm in multipass_realms(create_host=False, get_creds=False):
+    service1 = 'service/1@%s' % realm.realm
+    realm.addprinc(service1)
+    realm.extract_keytab(service1, realm.keytab)
+    realm.kinit(service1, None, ['-k'])
+    realm.run(['./t_s4u', 'p:user', '-'])
+
 # Exercise cross-realm S4U2Self.  The query in the foreign realm will
 # fail, but we can check that the right server principal was used.
 # Include a regression test for #8741 by unsetting the default realm.
