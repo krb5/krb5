@@ -3855,8 +3855,8 @@ pkinit_open_session(krb5_context context,
     pkiDebug("open_session: slotid %d (%lu of %d)\n", (int)cctx->slotid,
              i + 1, (int) count);
 
-    /* Login if needed */
-    if (tinfo.flags & CKF_LOGIN_REQUIRED) {
+    /* Login if needed, or possible. */
+    if (tinfo.flags & (CKF_LOGIN_REQUIRED | CKF_PROTECTED_AUTHENTICATION_PATH)) {
         if (cctx->p11_module_name != NULL) {
             if (cctx->slotid != PK_NOSLOT) {
                 if (asprintf(&p11name,
