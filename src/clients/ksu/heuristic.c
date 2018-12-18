@@ -266,7 +266,6 @@ get_authorized_princ_names(luser, cmd, princ_list)
 
     retval = list_union(k5login_list, k5users_filt_list, &combined_list);
     if (retval){
-        close_time(k5users_flag,users_fp, k5login_flag,login_fp);
         return retval;
     }
     *princ_list = combined_list;
