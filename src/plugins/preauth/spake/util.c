@@ -91,8 +91,8 @@ update_thash(krb5_context context, groupstate *gstate, int32_t group,
 
     /* Set up the data array and hash it with the group's hash function. */
     dlist[0] = *thash;
-    dlist[1] = (data1 != NULL) ? *data1 : empty_data();
-    dlist[2] = (data2 != NULL) ? *data2 : empty_data();
+    dlist[1] = (data1 != NULL) ? *((krb5_data *)data1) : empty_data();
+    dlist[2] = (data2 != NULL) ? *((krb5_data *)data2) : empty_data();
     return group_hash(context, gstate, group, dlist, 3,
                       (uint8_t *)thash->data);
 }
