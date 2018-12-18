@@ -842,6 +842,10 @@ AC_CHECK_TYPES([struct rt_msghdr], , , [
 #include <net/route.h>
 ])
 
+# Tests for 64-bit edwards25519 code.
+AC_CHECK_SIZEOF([size_t])
+AC_CHECK_TYPES([__int128_t, __uint128_t])
+
 # stuff for util/profile
 
 # AC_KRB5_TCL already done

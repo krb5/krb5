@@ -628,7 +628,7 @@ update_ldap_mod_auth_ind(krb5_context context, krb5_db_entry *entry,
     int i = 0;
     krb5_error_code ret;
     char *auth_ind = NULL;
-    char *strval[10] = {};
+    char *strval[10] = { 0 };
     char *ai, *ai_save = NULL;
     int sv_num = sizeof(strval) / sizeof(*strval);
 
