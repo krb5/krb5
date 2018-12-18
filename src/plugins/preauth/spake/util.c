@@ -78,6 +78,7 @@ update_thash(krb5_context context, groupstate *gstate, int32_t group,
     krb5_error_code ret;
     size_t hashlen;
     krb5_data dlist[3];
+    const krb5_data empty = empty_data();
 
     if (thash->length == 0) {
         /* Initialize the transcript hash to all zeros. */
@@ -91,8 +92,8 @@ update_thash(krb5_context context, groupstate *gstate, int32_t group,
 
     /* Set up the data array and hash it with the group's hash function. */
     dlist[0] = *thash;
-    dlist[1] = (data1 != NULL) ? *data1 : empty_data();
-    dlist[2] = (data2 != NULL) ? *data2 : empty_data();
+    dlist[1] = (data1 != NULL) ? *data1 : empty;
+    dlist[2] = (data2 != NULL) ? *data2 : empty;
     return group_hash(context, gstate, group, dlist, 3,
                       (uint8_t *)thash->data);
 }
