@@ -102,6 +102,10 @@
 #endif
 
 /*
+ * Solaris/Developer Studio lacks support for __int128_t
+ */
+#ifndef __SUNPRO_C
+/*
  * These preprocessor conditionals are derived the BoringSSL
  * include/openssl/base.h (OPENSSL_64_BIT) and crypto/internal.h
  * (BORINGSSL_HAS_UINT128).
@@ -113,6 +117,7 @@ typedef __int128_t int128_t;
 typedef __uint128_t uint128_t;
 #endif
 #endif
+#endif	/* __SUNPRO_C */
 
 #ifndef EDWARDS25519_ASSERTS
 #define assert_fe(f)
