@@ -1450,7 +1450,7 @@ dnl	lib/krb5/ccache/ccapi
 	lib/krb5/keytab lib/krb5/krb lib/krb5/rcache lib/krb5/os
 	lib/krb5/unicode
 
-	lib/gssapi lib/gssapi/generic lib/gssapi/krb5 lib/gssapi/spnego
+	lib/gssapi lib/gssapi/generic lib/gssapi/krb5 lib/gssapi/spnego lib/gssapi/negoex
 	lib/gssapi/mechglue
 
 	lib/rpc lib/rpc/unit-test

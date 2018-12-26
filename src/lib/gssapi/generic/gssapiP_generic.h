@@ -327,4 +327,33 @@ OM_uint32 generic_gss_display_mech_attr(
       gss_buffer_t       short_desc,
       gss_buffer_t       long_desc);
 
+/*
+ * Private NegoEx entry points.
+ */
+OM_uint32 KRB5_CALLCONV
+gss_query_meta_data(
+    OM_uint32 *minor_status,
+    gss_const_OID mech_oid,
+    gss_cred_id_t cred_handle,
+    gss_ctx_id_t *context_handle,
+    const gss_name_t targ_name,
+    OM_uint32 req_flags,
+    gss_buffer_t meta_data);
+
+OM_uint32 KRB5_CALLCONV
+gss_exchange_meta_data(
+    OM_uint32 *minor_status,
+    gss_const_OID mech_oid,
+    gss_cred_id_t cred_handle,
+    gss_ctx_id_t *context_handle,
+    const gss_name_t targ_name,
+    OM_uint32 req_flags,
+    gss_const_buffer_t meta_data);
+
+OM_uint32 KRB5_CALLCONV
+gss_query_mechanism_info(
+    OM_uint32 *minor_status,
+    gss_const_OID mech_oid,
+    unsigned char auth_scheme[16]);
+
 #endif /* _GSSAPIP_GENERIC_H_ */

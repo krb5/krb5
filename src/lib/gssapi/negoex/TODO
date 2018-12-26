@@ -1,0 +1,2 @@
+* prevent NegoEx from being used outside SPNEGO
+* replace marshalling code to prevent alignment issues

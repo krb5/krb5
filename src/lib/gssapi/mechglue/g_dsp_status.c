@@ -307,6 +307,11 @@ gss_buffer_t outStr;
 			currErr = 1 << 17; /* illegal value */
 
 		switch (currErr) {
+		case GSS_S_PROMPTING_NEEDED:
+			errStr = _("The caller must prompt for credentials and "
+				   "call the routine again");
+			break;
+
 		case GSS_S_CONTINUE_NEEDED:
 			errStr = _("The routine must be called again to "
 				   "complete its function");

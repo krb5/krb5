@@ -407,6 +407,7 @@ typedef enum {
 #if defined(__MACH__) && defined(__APPLE__)
     K5_KEY_IPC_CONNECTION_INFO,
 #endif
+    K5_KEY_GSS_NEGOEX_CALL_DEPTH,
     K5_KEY_MAX
 } k5_key_t;
 /* rename shorthand symbols for export */

@@ -53,6 +53,7 @@
 #ifdef _GSS_STATIC_LINK
 #include "gssapiP_krb5.h"
 #include "gssapiP_spnego.h"
+#include "gssapiP_negoex.h"
 #endif
 
 #define MECH_SYM "gss_mech_initialize"
@@ -119,6 +120,7 @@ gssint_mechglue_init(void)
 #ifdef _GSS_STATIC_LINK
 	err = gss_krb5int_lib_init();
 	err = gss_spnegoint_lib_init();
+	err = gss_negoexint_lib_init();
 #endif
 
 	err = gssint_mecherrmap_init();
@@ -139,6 +141,7 @@ gssint_mechglue_fini(void)
 	printf("gssint_mechglue_fini\n");
 #endif
 #ifdef _GSS_STATIC_LINK
+	gss_negoexint_lib_fini();
 	gss_spnegoint_lib_fini();
 	gss_krb5int_lib_fini();
 #endif
@@ -204,40 +207,45 @@ gss_OID *oid;
 
 /*
  * Wrapper around inquire_attrs_for_mech to determine whether a mechanism has
- * the deprecated attribute.  Must be called without g_mechSetLock since it
- * will call into the mechglue.
+ * should be indicated to gss_indicate_mechs(), i.e. has neither the deprecated
+ * nor not-indicated attributes set.  Must be called without g_mechSetLock since
+ * it will call into the mechglue.
  */
 static int
-is_deprecated(gss_OID element)
+is_indicated(gss_OID element)
 {
 	OM_uint32 major, minor;
 	gss_OID_set mech_attrs = GSS_C_NO_OID_SET;
-	int deprecated = 0;
+	int not_indicated = 0;
 
 	major = gss_inquire_attrs_for_mech(&minor, element, &mech_attrs, NULL);
 	if (major == GSS_S_COMPLETE) {
 		gss_test_oid_set_member(&minor, (gss_OID)GSS_C_MA_DEPRECATED,
-					mech_attrs, &deprecated);
+					mech_attrs, &not_indicated);
+		if (!not_indicated)
+		    gss_test_oid_set_member(&minor, (gss_OID)GSS_C_MA_NOT_INDICATED,
+					    mech_attrs, &not_indicated);
 	}
 
 	if (mech_attrs != GSS_C_NO_OID_SET)
 		gss_release_oid_set(&minor, &mech_attrs);
 
-	return deprecated;
+	return !not_indicated;
 }
 
 /*
- * Removes mechs with the deprecated attribute from an OID set.  Must be
- * called without g_mechSetLock held since it calls into the mechglue.
+ * Removes mechs with the deprecated or not-indicated attributes from an
+ * OID set.  Must be called without g_mechSetLock held since it calls
+ * into the mechglue.
  */
 static void
-prune_deprecated(gss_OID_set mech_set)
+prune_to_indicated_mechs(gss_OID_set mech_set)
 {
 	OM_uint32 i, j;
 
 	j = 0;
 	for (i = 0; i < mech_set->count; i++) {
-	    if (!is_deprecated(&mech_set->elements[i]))
+	    if (is_indicated(&mech_set->elements[i]))
 		mech_set->elements[j++] = mech_set->elements[i];
 	    else
 		gssalloc_free(mech_set->elements[i].elements);
@@ -255,10 +263,9 @@ prune_deprecated(gss_OID_set mech_set)
  * To avoid reading the configuration file each call, we will save a
  * a mech oid set, and only update it once the file has changed.
  */
-OM_uint32 KRB5_CALLCONV
-gss_indicate_mechs(minorStatus, mechSet_out)
-OM_uint32 *minorStatus;
-gss_OID_set *mechSet_out;
+OM_uint32
+gssint_indicate_mechs(OM_uint32 *minorStatus,
+		      gss_OID_set *mechSet_out)
 {
 	OM_uint32 status;
 
@@ -289,12 +296,23 @@ gss_OID_set *mechSet_out;
 	status = generic_gss_copy_oid_set(minorStatus, &g_mechSet, mechSet_out);
 	k5_mutex_unlock(&g_mechSetLock);
 
-	if (*mechSet_out != GSS_C_NO_OID_SET)
-		prune_deprecated(*mechSet_out);
+	return (status);
+} /* gssint_indicate_mechs */
+
+OM_uint32 KRB5_CALLCONV
+gss_indicate_mechs(minorStatus, mechSet_out)
+OM_uint32 *minorStatus;
+gss_OID_set *mechSet_out;
+{
+	OM_uint32 status;
+
+	status = gssint_indicate_mechs(minorStatus, mechSet_out);
+
+	if (mechSet_out != NULL && *mechSet_out != GSS_C_NO_OID_SET)
+		prune_to_indicated_mechs(*mechSet_out);
 
 	return (status);
-} /* gss_indicate_mechs */
-
+}
 
 /* Call with g_mechSetLock held, or during final cleanup.  */
 static void
@@ -760,6 +778,10 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_sec_context_by_mech);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_name_by_mech);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_cred_by_mech);
+        /* draft-zhu-negoex */
+        GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_query_meta_data);
+        GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_exchange_meta_data);
+        GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_query_mechanism_info);
 
 	assert(mech_type != GSS_C_NO_OID);
 

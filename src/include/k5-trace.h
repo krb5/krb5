@@ -505,4 +505,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_KDCPOLICY_INIT_SKIP(c, name)                              \
     TRACE(c, "kadm5_auth module {str} declined to initialize", name)
 
+#define TRACE_NEGOEX_AUTH_SCHEMES(c, str)                               \
+    TRACE(c, "{str}", str)
+#define TRACE_NEGOEX_MESSAGE(c, str)                                    \
+    TRACE(c, "{str}", str)
+
 #endif /* K5_TRACE_H */

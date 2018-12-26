@@ -237,6 +237,9 @@ OM_uint32 KRB5_CALLCONV gss_unwrap_aead
  */
 GSS_DLLIMP extern gss_OID GSS_C_INQ_SSPI_SESSION_KEY;
 
+GSS_DLLIMP extern gss_OID GSS_C_INQ_NEGOEX_KEY;
+GSS_DLLIMP extern gss_OID GSS_C_INQ_NEGOEX_VERIFY_KEY;
+
 OM_uint32 KRB5_CALLCONV gss_complete_auth_token
 	(OM_uint32 *minor_status,
 	 const gss_ctx_id_t context_handle,

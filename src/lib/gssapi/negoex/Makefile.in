@@ -1,0 +1,60 @@
+mydir=lib$(S)gssapi$(S)negoex
+BUILDTOP=$(REL)..$(S)..$(S)..
+LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../mechglue -I$(srcdir)/../mechglue
+DEFINES=-D_GSS_STATIC_LINK=1
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=negoex
+##DOS##OBJFILE = ..\$(OUTPRE)negoex.lst
+
+##DOS##DLL_EXP_TYPE=GSS
+
+ETSRCS= negoex_err.c
+ETOBJS= $(OUTPRE)negoex_err.$(OBJEXT)
+ETHDRS= negoex_err.h
+
+$(OUTPRE)negoex_err.$(OBJEXT): negoex_err.c
+negoex_err.h: negoex_err.et
+negoex_err.c: negoex_err.et
+
+SRCS =	$(srcdir)/negoex_cred.c	    \
+	$(srcdir)/negoex_ctx.c	    \
+	$(srcdir)/negoex_mech.c	    \
+	$(srcdir)/negoex_mit.c	    \
+	$(srcdir)/negoex_stubs.c    \
+	$(srcdir)/negoex_trace.c    \
+	$(srcdir)/negoex_util.c
+
+OBJS =	$(OUTPRE)negoex_cred.$(OBJEXT)	\
+	$(OUTPRE)negoex_ctx.$(OBJEXT)	\
+	$(OUTPRE)negoex_mech.$(OBJEXT)	\
+	$(OUTPRE)negoex_mit.$(OBJEXT)	\
+	$(OUTPRE)negoex_stubs.$(OBJEXT)	\
+	$(OUTPRE)negoex_trace.$(OBJEXT)	\
+	$(OUTPRE)negoex_util.$(OBJEXT)	\
+	$(OUTPRE)negoex_err.$(OBJEXT)
+
+STLIBOBJS = negoex_cred.o	    \
+	    negoex_ctx.o	    \
+	    negoex_mech.o	    \
+	    negoex_mit.o	    \
+	    negoex_stubs.o	    \
+	    negoex_trace.o	    \
+	    negoex_util.o	    \
+	    negoex_err.o
+
+$(OBJS): $(ETHDRS)
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix: $(SRCS) $(ETHDRS)
+all-unix: all-libobjs
+
+clean-unix:: clean-libobjs
+	$(RM) $(ETHDRS) $(ETSRCS)
+
+depend: $(ETSRCS) $(ETHDRS)
+
+install:
+
+@libobj_frag@

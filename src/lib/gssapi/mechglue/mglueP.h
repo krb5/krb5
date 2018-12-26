@@ -702,6 +702,35 @@ typedef struct gss_config {
 	    int				/* iov_count */
 	);
 
+	OM_uint32	(KRB5_CALLCONV *gss_query_meta_data)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_const_OID,		/* mech_oid */
+	    gss_cred_id_t,		/* cred_handle */
+	    gss_ctx_id_t *,		/* context_handle */
+	    const gss_name_t,		/* targ_name */
+	    OM_uint32,			/* req_flags */
+	    gss_buffer_t		/* meta_data */
+	/* */);
+
+	OM_uint32	(KRB5_CALLCONV *gss_exchange_meta_data)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_const_OID,		/* mech_oid */
+	    gss_cred_id_t,		/* cred_handle */
+	    gss_ctx_id_t *,		/* context_handle */
+	    const gss_name_t,		/* targ_name */
+	    OM_uint32,			/* req_flags */
+	    gss_const_buffer_t		/* meta_data */
+	/* */);
+
+	OM_uint32	(KRB5_CALLCONV *gss_query_mechanism_info)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_const_OID,		/* mech_oid */
+	    unsigned char[16]		/* auth_scheme */
+	/* */);
+
 } *gss_mechanism;
 
 /*
@@ -824,6 +853,10 @@ gssint_unwrap_aead (gss_mechanism,	/* mech */
 		    int *,		/* conf_state */
 		    gss_qop_t *);	/* qop_state */
 
+/* indicates all mechanisms including deprecated and "not indicated" */
+OM_uint32
+gssint_indicate_mechs (OM_uint32 *,	/* minor_status */
+		       gss_OID_set *);	/* mech_set */
 
 /* Use this to map an error code that was returned from a mech
    operation; the mech will be asked to produce the associated error

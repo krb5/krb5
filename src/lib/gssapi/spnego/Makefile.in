@@ -1,6 +1,6 @@
 mydir=lib$(S)gssapi$(S)spnego
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../mechglue -I$(srcdir)/../mechglue
+LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../mechglue -I$(srcdir)/../mechglue -I../negoex -I$(srcdir)/../negoex
 DEFINES=-D_GSS_STATIC_LINK=1
 
 ##DOS##BUILDTOP = ..\..\..

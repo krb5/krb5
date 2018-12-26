@@ -227,7 +227,9 @@ OM_uint32 *		time_rec;
 	ret_flags,
 	time_rec);
 
-    if (status != GSS_S_COMPLETE && status != GSS_S_CONTINUE_NEEDED) {
+    if (status != GSS_S_COMPLETE &&
+	status != GSS_S_CONTINUE_NEEDED &&
+	status != GSS_S_PROMPTING_NEEDED) {
 	/*
 	 * RFC 2744 5.19 requires that we not create a context on a failed
 	 * first call to init, and recommends that on a failed subsequent call

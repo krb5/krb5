@@ -1,11 +1,11 @@
 mydir=lib$(S)gssapi
 BUILDTOP=$(REL)..$(S)..
-SUBDIRS= generic krb5 spnego mechglue
+SUBDIRS= generic krb5 negoex spnego mechglue
 DEFINES=-D_GSS_STATIC_LINK=1
 
 ##DOSLIBNAME=$(OUTPRE)gssapi.lib
-##DOSOBJFILELIST=@$(OUTPRE)mechglue.lst @$(OUTPRE)spnego.lst @$(OUTPRE)generic.lst @$(OUTPRE)krb5.lst # @$(OUTPRE)gssapi.lst
-##DOSOBJFILEDEP=$(OUTPRE)mechglue.lst $(OUTPRE)spnego.lst $(OUTPRE)generic.lst $(OUTPRE)krb5.lst # $(OUTPRE)gssapi.lst
+##DOSOBJFILELIST=@$(OUTPRE)mechglue.lst @$(OUTPRE)spnego.lst @$(OUTPRE)negoex.lst @$(OUTPRE)generic.lst @$(OUTPRE)krb5.lst # @$(OUTPRE)gssapi.lst
+##DOSOBJFILEDEP=$(OUTPRE)mechglue.lst $(OUTPRE)spnego.lst $(OUTPRE)negoex.lst $(OUTPRE)generic.lst $(OUTPRE)krb5.lst # $(OUTPRE)gssapi.lst
 
 ###DOSOBJFILE=$(OUTPRE)gssapi.lst
 ##DOSLIBOBJS=$(OBJS)
@@ -23,8 +23,8 @@ LIBMAJOR=2
 LIBMINOR=2
 #LIBINITFUNC=gssint_lib_init
 #LIBFINIFUNC=gssint_lib_fini
-STOBJLISTS=OBJS.ST generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST spnego/OBJS.ST
-SUBDIROBJLISTS=generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST spnego/OBJS.ST
+STOBJLISTS=OBJS.ST generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST spnego/OBJS.ST negoex/OBJS.ST
+SUBDIROBJLISTS=generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST spnego/OBJS.ST negoex/OBJS.ST
 SHLIB_EXPDEPS=\
 	$(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB) $(COM_ERR_DEPLIB)
 SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
@@ -94,7 +94,7 @@ verify-calling-conventions-gssapi: merged-gssapi-header.h
 # appears to be properly serializing the subdir processing and local
 # compiles... so far.
 ##DOS##!if 0
-$(EXPORTED_HEADERS) generic/gssapi.h krb5/gssapi_err_krb5.h generic/gssapi_err_generic.h krb5/gssapi_krb5.h: all-recurse
+$(EXPORTED_HEADERS) generic/gssapi.h krb5/gssapi_err_krb5.h generic/gssapi_err_generic.h krb5/gssapi_krb5.h negoex/negoex_err.h: all-recurse
 	: $@ updated by recursion rule
 ##DOS##!endif
 

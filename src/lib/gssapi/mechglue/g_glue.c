@@ -257,17 +257,19 @@ OM_uint32 gssint_get_mech_type_oid(OID, token)
 /*
  * The following mechanisms do not always identify themselves
  * per the GSS-API specification, when interoperating with MS
- * peers. We include the OIDs here so we do not have to ilnk
+ * peers. We include the OIDs here so we do not have to link
  * with the mechanism.
  */
 static gss_OID_desc gss_ntlm_mechanism_oid_desc =
 	{10, (void *)"\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a"};
+#define NTLMSSP_SIGNATURE "NTLMSSP"
+static gss_OID_desc gss_negoex_mechanism_oid_desc =
+        {10, (void *)"\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x1e"};
+#define NEGOEX_SIGNATURE  "NEGOEXTS"
 static gss_OID_desc gss_spnego_mechanism_oid_desc =
 	{6, (void *)"\x2b\x06\x01\x05\x05\x02"};
 static gss_OID_desc gss_krb5_mechanism_oid_desc =
 	{9, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02"};
-
-#define NTLMSSP_SIGNATURE "NTLMSSP"
 
 OM_uint32 gssint_get_mech_type(OID, token)
     gss_OID		OID;
@@ -278,6 +280,9 @@ OM_uint32 gssint_get_mech_type(OID, token)
 	memcmp(token->value, NTLMSSP_SIGNATURE,
 	       sizeof(NTLMSSP_SIGNATURE)) == 0) {
 	*OID = gss_ntlm_mechanism_oid_desc;
+    } else if (token->length >= 8 &&
+	memcmp(token->value, NEGOEX_SIGNATURE, 8) == 0) {
+	*OID = gss_negoex_mechanism_oid_desc;
     } else if (token->length != 0 &&
 	       ((char *)token->value)[0] == 0x6E) {
  	/* Could be a raw AP-REQ (check for APPLICATION tag) */

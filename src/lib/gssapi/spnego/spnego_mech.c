@@ -65,12 +65,13 @@
 #include	"gssapiP_spnego.h"
 #include	<gssapi_err_generic.h>
 
-
 #undef g_token_size
 #undef g_verify_token_header
 #undef g_make_token_header
 
-#define HARD_ERROR(v) ((v) != GSS_S_COMPLETE && (v) != GSS_S_CONTINUE_NEEDED)
+#define HARD_ERROR(v) ((v) != GSS_S_COMPLETE &&         \
+                       (v) != GSS_S_CONTINUE_NEEDED &&  \
+                       (v) != GSS_S_PROMPTING_NEEDED)
 typedef const gss_OID_desc *gss_OID_const;
 
 /* der routines defined in libgss */
@@ -1157,7 +1158,8 @@ cleanup:
 			*actual_mech = spnego_ctx->actual_mech;
 		if (ret_flags != NULL)
 			*ret_flags = spnego_ctx->ctx_flags;
-	} else if (ret != GSS_S_CONTINUE_NEEDED) {
+	} else if (ret != GSS_S_CONTINUE_NEEDED &&
+		   ret != GSS_S_PROMPTING_NEEDED) {
 		if (spnego_ctx != NULL) {
 			gss_delete_sec_context(&tmpmin,
 					       &spnego_ctx->ctx_handle,
@@ -2911,6 +2913,12 @@ spnego_gss_set_neg_mechs(OM_uint32 *minor_status,
 	gss_release_oid_set(minor_status, &spcred->neg_mechs);
 	ret = generic_gss_copy_oid_set(minor_status, mech_list,
 				       &spcred->neg_mechs);
+	if (ret == GSS_S_COMPLETE) {
+		(void) gss_set_neg_mechs(minor_status,
+					 spcred->mcred,
+					 spcred->neg_mechs);
+	}
+
 	return (ret);
 }
 
@@ -3097,7 +3105,12 @@ release_spnego_ctx(spnego_gss_ctx_id_t *ctx)
  * SPNEGO because it will also return the SPNEGO mech and we do not
  * want to consider SPNEGO as an available security mech for
  * negotiation. For this reason, get_available_mechs will return
- * all available, non-deprecated mechs except SPNEGO.
+ * all available, non-deprecated mechs except SPNEGO and NegoEx-
+ * only mechanisms.
+ *
+ * Note that gss_acquire_cred_from(GSS_C_NO_OID_SET) will filter
+ * out hidden (GSS_C_MA_NOT_INDICATED) mechanisms such as NegoEx, so
+ * calling gss_indicate_mechs_by_attrs() also works around that.
  *
  * If a ptr to a creds list is given, this function will attempt
  * to acquire creds for the creds given and trim the list of
@@ -3110,57 +3123,33 @@ get_available_mechs(OM_uint32 *minor_status,
 	gss_const_key_value_set_t cred_store,
 	gss_cred_id_t *creds, gss_OID_set *rmechs, OM_uint32 *time_rec)
 {
-	unsigned int	i;
-	int		found = 0;
 	OM_uint32 major_status = GSS_S_COMPLETE, tmpmin;
 	gss_OID_set mechs, goodmechs;
 	gss_OID_set_desc except_attrs;
-	gss_OID_desc attr_oids[2];
+	gss_OID_desc attr_oids[4];
+
+	*rmechs = GSS_C_NO_OID_SET;
 
 	attr_oids[0] = *GSS_C_MA_DEPRECATED;
 	attr_oids[1] = *GSS_C_MA_NOT_DFLT_MECH;
-	except_attrs.count = 2;
+	attr_oids[2] = *GSS_C_MA_MECH_NEGO;	/* Exclude ourselves */
+	attr_oids[3] = *GSS_C_MA_NEGOEX_ONLY;	/* Exclude NegoEx-only mechs */
+	except_attrs.count = sizeof(attr_oids) / sizeof(attr_oids[0]);
 	except_attrs.elements = attr_oids;
 	major_status = gss_indicate_mechs_by_attrs(minor_status,
 						   GSS_C_NO_OID_SET,
 						   &except_attrs,
 						   GSS_C_NO_OID_SET, &mechs);
 
-	if (major_status != GSS_S_COMPLETE) {
-		return (major_status);
-	}
-
-	major_status = gss_create_empty_oid_set(minor_status, rmechs);
-
-	if (major_status != GSS_S_COMPLETE) {
-		(void) gss_release_oid_set(minor_status, &mechs);
-		return (major_status);
-	}
-
-	for (i = 0; i < mechs->count && major_status == GSS_S_COMPLETE; i++) {
-		if ((mechs->elements[i].length
-		    != spnego_mechanism.mech_type.length) ||
-		    memcmp(mechs->elements[i].elements,
-			spnego_mechanism.mech_type.elements,
-			spnego_mechanism.mech_type.length)) {
-
-			major_status = gss_add_oid_set_member(minor_status,
-							      &mechs->elements[i],
-							      rmechs);
-			if (major_status == GSS_S_COMPLETE)
-				found++;
-		}
-	}
-
 	/*
 	 * If the caller wanted a list of creds returned,
 	 * trim the list of mechanisms down to only those
 	 * for which the creds are valid.
 	 */
-	if (found > 0 && major_status == GSS_S_COMPLETE && creds != NULL) {
+	if (mechs->count > 0 && major_status == GSS_S_COMPLETE && creds != NULL) {
 		major_status = gss_acquire_cred_from(minor_status, name,
 						     GSS_C_INDEFINITE,
-						     *rmechs, usage,
+						     mechs, usage,
 						     cred_store, creds,
 						     &goodmechs, time_rec);
 
@@ -3168,16 +3157,16 @@ get_available_mechs(OM_uint32 *minor_status,
 		 * Drop the old list in favor of the new
 		 * "trimmed" list.
 		 */
-		(void) gss_release_oid_set(&tmpmin, rmechs);
 		if (major_status == GSS_S_COMPLETE) {
-			(void) gssint_copy_oid_set(&tmpmin,
-					goodmechs, rmechs);
-			(void) gss_release_oid_set(&tmpmin, &goodmechs);
+			(void) gss_release_oid_set(&tmpmin, &mechs);
+			mechs = goodmechs;
 		}
 	}
 
-	(void) gss_release_oid_set(&tmpmin, &mechs);
-	if (found == 0 || major_status != GSS_S_COMPLETE) {
+	if (mechs->count > 0 && major_status == GSS_S_COMPLETE) {
+		*rmechs = mechs;
+	} else {
+		(void) gss_release_oid_set(&tmpmin, &mechs);
 		*minor_status = ERR_SPNEGO_NO_MECHS_AVAILABLE;
 		map_errcode(minor_status);
 		if (major_status == GSS_S_COMPLETE)
@@ -3186,6 +3175,8 @@ get_available_mechs(OM_uint32 *minor_status,
 
 	return (major_status);
 }
+
+extern gss_OID GSS_NEGOEX_MECHANISM;
 
 /*
  * Return a list of mechanisms we are willing to negotiate for a credential,
@@ -3249,6 +3240,16 @@ get_negotiable_mechs(OM_uint32 *minor_status, spnego_gss_cred_id_t spcred,
 					     &intersect_mechs);
 		if (ret != GSS_S_COMPLETE)
 			break;
+	}
+
+	/* add NegoEx mech if cred had it; NegoEx will filter further */
+	gss_test_oid_set_member(&tmpmin,
+				GSS_NEGOEX_MECHANISM,
+				cred_mechs, &present);
+	if (ret == GSS_S_COMPLETE && present) {
+		ret = gss_add_oid_set_member(minor_status,
+					     GSS_NEGOEX_MECHANISM,
+					     &intersect_mechs);
 	}
 
 	gss_release_oid_set(&tmpmin, &cred_mechs);

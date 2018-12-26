@@ -110,7 +110,7 @@ gss_indicate_mechs_by_attrs(
 
     *mechs = GSS_C_NO_OID_SET;
 
-    status = gss_indicate_mechs(minor, &allMechs);
+    status = gssint_indicate_mechs(minor, &allMechs);
     if (GSS_ERROR(status))
         goto cleanup;
 

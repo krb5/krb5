@@ -136,7 +136,7 @@ WINMAKEFILES=Makefile \
 	lib\crypto\crypto_tests\Makefile \
 	lib\gssapi\Makefile lib\gssapi\generic\Makefile \
 	lib\gssapi\krb5\Makefile lib\gssapi\mechglue\Makefile \
-	lib\gssapi\spnego\Makefile \
+	lib\gssapi\negoex\Makefile lib\gssapi\spnego\Makefile \
 	lib\krb5\Makefile \
 	lib\krb5\asn.1\Makefile lib\krb5\ccache\Makefile \
 	lib\krb5\ccache\ccapi\Makefile \
@@ -225,6 +225,8 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\mechglue\Makefile: lib\gssapi\mechglue\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\gssapi\negoex\Makefile: lib\gssapi\negoex\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\spnego\Makefile: lib\gssapi\spnego\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\krb5\Makefile: lib\gssapi\krb5\Makefile.in $(MKFDEP)
@@ -303,6 +305,7 @@ INC = include/
 ET  = lib/krb5/error_tables/
 GG  = lib/gssapi/generic/
 GK  = lib/gssapi/krb5/
+GN  = lib/gssapi/negoex/
 PR  = util/profile/
 CE  = util/et/
 CCL = ccapi/lib/
@@ -317,6 +320,7 @@ ETOUT =	\
 	$(PR)prof_err.h $(PR)prof_err.c \
 	$(GG)gssapi_err_generic.h $(GG)gssapi_err_generic.c \
 	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c \
+	$(GN)negoex_err.h $(GN)negoex_err.c \
 	$(CCL)ccapi_err.h $(CCL)ccapi_err.c
 
 HOUT =	$(INC)krb5/krb5.h $(GG)gssapi.h $(PR)profile.h
@@ -351,6 +355,8 @@ $(GG)gssapi_err_generic.h: $(AH) $(GG)gssapi_err_generic.et
 	$(AWK) -f $(AH) outfile=$@ $(GG)gssapi_err_generic.et
 $(GK)gssapi_err_krb5.h: $(AH) $(GK)gssapi_err_krb5.et
 	$(AWK) -f $(AH) outfile=$@ $(GK)gssapi_err_krb5.et
+$(GN)negoex_err.h: $(AH) $(GN)negoex_err.et
+	$(AWK) -f $(AH) outfile=$@ $(GN)negoex_err.et
 $(CCL)ccapi_err.h: $(AH) $(CCL)ccapi_err.et
 	$(AWK) -f $(AH) outfile=$@ $(CCL)ccapi_err.et
 $(CE)test1.h: $(AH) $(CE)test1.et
@@ -376,6 +382,8 @@ $(GG)gssapi_err_generic.c: $(AC) $(GG)gssapi_err_generic.et
 	$(AWK) -f $(AC) outfile=$@ $(GG)gssapi_err_generic.et
 $(GK)gssapi_err_krb5.c: $(AC) $(GK)gssapi_err_krb5.et
 	$(AWK) -f $(AC) outfile=$@ $(GK)gssapi_err_krb5.et
+$(GN)negoex_err.c: $(AC) $(GN)negoex_err.et
+	$(AWK) -f $(AC) outfile=$@ $(GN)negoex_err.et
 $(CCL)ccapi_err.c: $(AC) $(CCL)ccapi_err.et
 	$(AWK) -f $(AC) outfile=$@ $(CCL)ccapi_err.et
 $(CE)test1.c: $(AC) $(CE)test1.et
@@ -616,6 +624,7 @@ OTHEREXCLUDES = \
 	lib/gssapi/generic/gssapi_ext.h \
 	lib/gssapi/krb5/gssapiP_krb5.h \
 	lib/gssapi/mechglue \
+	lib/gssapi/negoex \
 	lib/gssapi/spnego \
 	lib/krb5/krb/deltat.c \
 	lib/krb5/unicode \

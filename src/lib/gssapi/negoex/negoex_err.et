@@ -1,0 +1,50 @@
+#
+# Copyright (C) 2011-2018 PADL Software Pty Ltd.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# * Redistributions of source code must retain the above copyright
+#   notice, this list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright
+#   notice, this list of conditions and the following disclaimer in
+#   the documentation and/or other materials provided with the
+#   distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+# OF THE POSSIBILITY OF SUCH DAMAGE.
+
+error_table nego
+
+error_code NEGOEX_RESERVED,                       ""
+error_code NEGOEX_INVALID_MESSAGE_SIGNATURE,      "Invalid NegoEx signature"
+error_code NEGOEX_INVALID_MESSAGE_TYPE,           "Invalid NegoEx message type"
+error_code NEGOEX_INVALID_MESSAGE_SIZE,           "Invalid NegoEx message size"
+error_code NEGOEX_INVALID_CONVERSATION_ID,        "Invalid NegoEx conversation ID"
+error_code NEGOEX_AUTH_SCHEME_NOT_FOUND,          "NegoEx authentication scheme not found"
+error_code NEGOEX_AUTH_SCHEME_MISMATCH,           "NegoEx authentication scheme mismatch"
+error_code NEGOEX_MISSING_NEGO_MESSAGE,           "Missing NegoEx negotiate message"
+error_code NEGOEX_MISSING_VERIFY_MESSAGE,         "Missing NegoEx verify message"
+error_code NEGOEX_MISSING_AP_REQUEST_MESSAGE,     "Missing NegoEx authentication protocol request message"
+error_code NEGOEX_NO_AVAILABLE_MECHS,             "No mutually supported NegoEx authentication schemes"
+error_code NEGOEX_NO_VERIFY_KEY,                  "No NegoEx verify key"
+error_code NEGOEX_UNKNOWN_CHECKSUM_SCHEME,        "Unknown NegoEx checksum scheme"
+error_code NEGOEX_INVALID_CHECKSUM,               "Invalid NegoEx checksum"
+error_code NEGOEX_UNSUPPORTED_CRITICAL_EXTENSION, "Unsupported critical NegoEx extension"
+error_code NEGOEX_DUPLICATE_MESSAGE,              "Duplicate NegoEx message"
+error_code NEGOEX_MESSAGE_OUT_OF_SEQUENCE,        "NegoEx message out of sequence"
+error_code NEGOEX_UNKNOWN_ALERT_ERROR,            "Unknown NegoEx alert code"
+end
