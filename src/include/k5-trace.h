@@ -294,6 +294,11 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_MSPAC_DISCARD_UNVERF(c)           \
     TRACE(c, "Filtering out unverified MS PAC")
 
+#define TRACE_NEGOEX_INCOMING(c, seqnum, typestr, info)                 \
+    TRACE(c, "NegoEx received [{int}]{str}: {str}", (int)seqnum, typestr, info)
+#define TRACE_NEGOEX_OUTGOING(c, seqnum, typestr, info)                 \
+    TRACE(c, "NegoEx sending [{int}]{str}: {str}", (int)seqnum, typestr, info)
+
 #define TRACE_PREAUTH_CONFLICT(c, name1, name2, patype)                 \
     TRACE(c, "Preauth module {str} conflicts with module {str} for pa " \
           "type {patype}", name1, name2, patype)

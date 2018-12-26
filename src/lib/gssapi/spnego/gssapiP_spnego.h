@@ -12,7 +12,12 @@
 extern "C" {
 #endif
 
+typedef struct spnego_ctx_st *spnego_gss_ctx_id_t;
+
 #include <gssapi/gssapi.h>
+#include <gssapi/gssapi_ext.h>
+#include <k5-queue.h>
+#include "gssapiP_negoex.h"
 
 #define	SEC_CONTEXT_TOKEN 1
 #define	SPNEGO_SIZE_OF_INT 4
@@ -41,13 +46,27 @@ extern "C" {
 #define GENERAL_STRING		0x1b
 
 /*
- * SPNEGO specific error codes (minor status codes)
+ * SPNEGO and NegoEx minor status codes
  */
-#define	ERR_SPNEGO_NO_MECHS_AVAILABLE		0x20000001
-#define	ERR_SPNEGO_NO_CREDS_ACQUIRED		0x20000002
-#define	ERR_SPNEGO_NO_MECH_FROM_ACCEPTOR	0x20000003
-#define	ERR_SPNEGO_NEGOTIATION_FAILED		0x20000004
-#define	ERR_SPNEGO_NO_TOKEN_FROM_ACCEPTOR	0x20000005
+#define ERR_SPNEGO_NO_MECHS_AVAILABLE			0x20000001
+#define ERR_SPNEGO_NO_CREDS_ACQUIRED			0x20000002
+#define ERR_SPNEGO_NO_MECH_FROM_ACCEPTOR		0x20000003
+#define ERR_SPNEGO_NEGOTIATION_FAILED			0x20000004
+#define ERR_SPNEGO_NO_TOKEN_FROM_ACCEPTOR		0x20000005
+#define ERR_NEGOEX_INVALID_MESSAGE_SIGNATURE		0x20000006
+#define ERR_NEGOEX_INVALID_MESSAGE_TYPE			0x20000007
+#define ERR_NEGOEX_INVALID_MESSAGE_SIZE			0x20000008
+#define ERR_NEGOEX_INVALID_CONVERSATION_ID		0x20000009
+#define ERR_NEGOEX_AUTH_SCHEME_NOT_FOUND		0x20000010
+#define ERR_NEGOEX_MISSING_NEGO_MESSAGE			0x20000011
+#define ERR_NEGOEX_MISSING_AP_REQUEST_MESSAGE		0x20000012
+#define ERR_NEGOEX_NO_AVAILABLE_MECHS			0x20000013
+#define ERR_NEGOEX_NO_VERIFY_KEY			0x20000014
+#define ERR_NEGOEX_UNKNOWN_CHECKSUM_SCHEME		0x20000015
+#define ERR_NEGOEX_INVALID_CHECKSUM			0x20000016
+#define ERR_NEGOEX_UNSUPPORTED_CRITICAL_EXTENSION	0x20000017
+#define ERR_NEGOEX_UNSUPPORTED_VERSION			0x20000018
+#define ERR_NEGOEX_MESSAGE_OUT_OF_SEQUENCE		0x20000019
 
 /*
  * send_token_flag is used to indicate in later steps what type
@@ -89,7 +108,7 @@ typedef struct {
 } spnego_gss_cred_id_rec, *spnego_gss_cred_id_t;
 
 /* Structure for context handle */
-typedef struct {
+struct spnego_ctx_st {
 	OM_uint32	magic_num;
 	gss_buffer_desc DER_mechTypes;
 	gss_OID_set mech_set;
@@ -107,7 +126,13 @@ typedef struct {
 	gss_name_t internal_name;
 	gss_OID actual_mech;
 	gss_cred_id_t deleg_cred;
-} spnego_gss_ctx_id_rec, *spnego_gss_ctx_id_t;
+	int negoex_step;
+	struct k5buf negoex_transcript;
+	uint32_t negoex_seqnum;
+	conversation_id negoex_conv_id;
+	K5_TAILQ_HEAD(negoex_mech_list, negoex_auth_mech) negoex_mechs;
+	krb5_context kctx;
+};
 
 /*
  * The magic number must be less than a standard pagesize

@@ -702,6 +702,37 @@ typedef struct gss_config {
 	    int				/* iov_count */
 	);
 
+	/* NegoEx extensions added in 1.18 */
+
+	OM_uint32	(KRB5_CALLCONV *gssspi_query_meta_data)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_const_OID,		/* mech_oid */
+	    gss_cred_id_t,		/* cred_handle */
+	    gss_ctx_id_t *,		/* context_handle */
+	    const gss_name_t,		/* targ_name */
+	    OM_uint32,			/* req_flags */
+	    gss_buffer_t		/* meta_data */
+	/* */);
+
+	OM_uint32	(KRB5_CALLCONV *gssspi_exchange_meta_data)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_const_OID,		/* mech_oid */
+	    gss_cred_id_t,		/* cred_handle */
+	    gss_ctx_id_t *,		/* context_handle */
+	    const gss_name_t,		/* targ_name */
+	    OM_uint32,			/* req_flags */
+	    gss_const_buffer_t		/* meta_data */
+	/* */);
+
+	OM_uint32	(KRB5_CALLCONV *gssspi_query_mechanism_info)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_const_OID,		/* mech_oid */
+	    unsigned char[16]		/* auth_scheme */
+	/* */);
+
 } *gss_mechanism;
 
 /*

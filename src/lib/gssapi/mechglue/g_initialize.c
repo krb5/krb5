@@ -770,6 +770,10 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_sec_context_by_mech);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_name_by_mech);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_import_cred_by_mech);
+	/* draft-zhu-negoex */
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gssspi_query_meta_data);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gssspi_exchange_meta_data);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gssspi_query_mechanism_info);
 
 	assert(mech_type != GSS_C_NO_OID);
 

@@ -31,6 +31,31 @@ the mechanism's status codes onto unique values, and then map them
 back again when **gss_display_status** is called.
 
 
+NegoEx modules
+--------------
+
+Some Windows GSSAPI mechanisms can only be negotiated via a Microsoft
+extension to SPNEGO called NegoEx.  Beginning with release 1.18,
+mechanism modules can support NegoEx as follows:
+
+* Implement the gssspi_query_meta_data(), gssspi_exchange_meta_data(),
+  and gssspi_query_mechanism_info() SPIs declared in
+  ``<gssapi/gssapi_ext.h>``.
+
+* Implement gss_inquire_sec_context_by_oid() and answer the
+  **GSS_C_INQ_NEGOEX_KEY** and **GSS_C_INQ_NEGOEX_VERIFY_KEY** OIDs
+  to provide the checksum keys for outgoing and incoming checksums,
+  respectively.  The answer must be in two buffers: the first buffer
+  contains the key contents, and the second buffer contains the key
+  encryption type as a four-byte little-endian integer.
+
+By default, NegoEx mechanisms will not be directly negotiated via
+SPNEGO.  If direct SPNEGO negotiation is required for
+interoperability, implement gss_inquire_attrs_for_mech() and assert
+the GSS_C_MA_NEGOEX_AND_SPNEGO attribute (along with any applicable
+RFC 5587 attributes).
+
+
 Interposer modules
 ------------------
 
