@@ -129,7 +129,7 @@ init_ctx_reselect(OM_uint32 *, spnego_gss_ctx_id_t, OM_uint32,
 		  gss_OID, gss_buffer_t *, gss_buffer_t *, send_token_flag *);
 static OM_uint32
 init_ctx_call_init(OM_uint32 *, spnego_gss_ctx_id_t, spnego_gss_cred_id_t,
-		   gss_name_t, OM_uint32, OM_uint32, gss_buffer_t,
+		   OM_uint32, gss_name_t, OM_uint32, OM_uint32, gss_buffer_t,
 		   gss_OID *, gss_buffer_t, OM_uint32 *, OM_uint32 *,
 		   send_token_flag *);
 
@@ -724,11 +724,20 @@ init_ctx_cont(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 			       &supportedMech, responseToken, mechListMIC);
 	if (ret != GSS_S_COMPLETE)
 		goto cleanup;
-	if (*acc_negState == REJECT) {
-		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
-		map_errcode(minor_status);
+
+	/* Bail out now on a reject with no error token.  If we have an error
+	 * token, keep going and get a better error status from the mech. */
+	if (*acc_negState == REJECT && *responseToken == GSS_C_NO_BUFFER) {
+		if (!sc->nego_done) {
+			/* RFC 4178 says to return GSS_S_BAD_MECH on a
+			 * mechanism negotiation failure. */
+			*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
+			map_errcode(minor_status);
+			ret = GSS_S_BAD_MECH;
+		} else {
+			ret = GSS_S_FAILURE;
+		}
 		*tokflag = NO_TOKEN_SEND;
-		ret = GSS_S_FAILURE;
 		goto cleanup;
 	}
 	/*
@@ -886,6 +895,7 @@ static OM_uint32
 init_ctx_call_init(OM_uint32 *minor_status,
 		   spnego_gss_ctx_id_t sc,
 		   spnego_gss_cred_id_t spcred,
+		   OM_uint32 acc_negState,
 		   gss_name_t target_name,
 		   OM_uint32 req_flags,
 		   OM_uint32 time_req,
@@ -918,6 +928,14 @@ init_ctx_call_init(OM_uint32 *minor_status,
 				   mechtok_out,
 				   &sc->ctx_flags,
 				   time_rec);
+
+	/* Bail out if the acceptor gave us an error token but the mech didn't
+	 * see it as an error. */
+	if (acc_negState == REJECT && !GSS_ERROR(ret)) {
+		ret = GSS_S_DEFECTIVE_TOKEN;
+		goto fail;
+	}
+
 	if (ret == GSS_S_COMPLETE) {
 		sc->mech_complete = 1;
 		if (ret_flags != NULL)
@@ -959,10 +977,10 @@ init_ctx_call_init(OM_uint32 *minor_status,
 	gss_release_buffer(&tmpmin, &sc->DER_mechTypes);
 	if (put_mech_set(sc->mech_set, &sc->DER_mechTypes) < 0)
 		goto fail;
-	tmpret = init_ctx_call_init(&tmpmin, sc, spcred, target_name,
-				    req_flags, time_req, mechtok_in,
-				    actual_mech, mechtok_out, ret_flags,
-				    time_rec, send_token);
+	tmpret = init_ctx_call_init(&tmpmin, sc, spcred, acc_negState,
+				    target_name, req_flags, time_req,
+				    mechtok_in, actual_mech, mechtok_out,
+				    ret_flags, time_rec, send_token);
 	if (HARD_ERROR(tmpret))
 		goto fail;
 	*minor_status = tmpmin;
@@ -1060,13 +1078,11 @@ spnego_gss_init_sec_context(
 	/* Step 2: invoke the selected or optimistic mechanism's
 	 * gss_init_sec_context function, if it didn't complete previously. */
 	if (!spnego_ctx->mech_complete) {
-		ret = init_ctx_call_init(
-			minor_status, spnego_ctx, spcred,
-			target_name, req_flags,
-			time_req, mechtok_in,
-			actual_mech, &mechtok_out,
-			ret_flags, time_rec,
-			&send_token);
+		ret = init_ctx_call_init(minor_status, spnego_ctx, spcred,
+					 acc_negState, target_name, req_flags,
+					 time_req, mechtok_in, actual_mech,
+					 &mechtok_out, ret_flags, time_rec,
+					 &send_token);
 		if (ret != GSS_S_COMPLETE)
 			goto cleanup;
 
