@@ -912,6 +912,8 @@ init_ctx_call_init(OM_uint32 *minor_status,
 {
 	OM_uint32 ret, tmpret, tmpmin, mech_req_flags;
 	gss_cred_id_t mcred;
+	int is_error_tok = *negState == REJECT &&
+			   sc->ctx_handle != GSS_C_NO_CONTEXT;
 
 	mcred = (spcred == NULL) ? GSS_C_NO_CREDENTIAL : spcred->mcred;
 
@@ -932,6 +934,20 @@ init_ctx_call_init(OM_uint32 *minor_status,
 				   mechtok_out,
 				   &sc->ctx_flags,
 				   time_rec);
+	if (is_error_tok) {
+		/* If we were processing an error token, bail immediately */
+		if (!GSS_ERROR(ret)) {
+			/*
+			 * Error tokens must cause mech to return an error; if not,
+			 * return the error we would have returned had we not received
+			 * an error token.
+			 */
+			*minor_status = GSS_S_BAD_MECH;
+			ret = GSS_S_FAILURE;
+		}
+		goto fail;
+	}
+
 	if (ret == GSS_S_COMPLETE) {
 		sc->mech_complete = 1;
 		if (ret_flags != NULL)
@@ -1078,7 +1094,13 @@ spnego_gss_init_sec_context(
 		ret = init_ctx_cont(minor_status, spnego_ctx,
 				    input_token, &mechtok_in,
 				    &mechListMIC_in, &negState, &send_token);
-		if (HARD_ERROR(ret)) {
+		/*
+		 * Bail unless the negotiation failed and we have a mechanism
+		 * error token from the acceptor.
+		 */
+		if (HARD_ERROR(ret) &&
+		    (*minor_status != ERR_SPNEGO_NEGOTIATION_FAILED ||
+		     mechtok_in == GSS_C_NO_BUFFER)) {
 			goto cleanup;
 		}
 	}
