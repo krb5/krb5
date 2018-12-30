@@ -2093,14 +2093,8 @@ static int decrypt_key_data(krb5_context context,
         ret = krb5_dbe_decrypt_key_data(context, NULL, &key_data[i], &keys[i],
                                         NULL);
         if (ret) {
-            for (; i >= 0; i--) {
-                if (keys[i].contents) {
-                    memset (keys[i].contents, 0, keys[i].length);
-                    free( keys[i].contents );
-                }
-            }
-
-            memset(keys, 0, n_key_data*sizeof(krb5_keyblock));
+            for (; i >= 0; i--)
+                krb5_free_keyblock_contents(context, &keys[i]);
             free(keys);
             return ret;
         }

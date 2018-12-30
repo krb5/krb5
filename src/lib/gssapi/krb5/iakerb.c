@@ -262,7 +262,6 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
     /*
      * Assemble the IAKERB-HEADER from the realm and cookie
      */
-    memset(&iah, 0, sizeof(iah));
     iah.target_realm = *realm;
     iah.cookie = cookie;
 
