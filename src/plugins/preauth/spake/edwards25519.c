@@ -107,7 +107,10 @@
  * (BORINGSSL_HAS_UINT128).
  */
 #if defined(__x86_64) || defined(_M_AMD64) || defined(_M_X64) || defined(__aarch64__) || ((defined(__PPC64__) || defined(__powerpc64__)) && defined(_LITTLE_ENDIAN)) || defined(__mips__) && defined(__LP64__)
-#if !defined(_MSC_VER) || defined(__clang__)
+/*
+ * Not all compilers provide 128bit integer types.
+ */
+#if defined(HAVE___INT128_T) && defined(HAVE___UINT128_T)
 #define BORINGSSL_CURVE25519_64BIT
 typedef __int128_t int128_t;
 typedef __uint128_t uint128_t;

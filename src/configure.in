@@ -851,7 +851,8 @@ AC_SUBST(DO_TCL)
 
 # types libdb2 wants
 
-AC_CHECK_TYPES([ssize_t, u_char, u_int, u_long, u_int8_t, u_int16_t, u_int32_t, int8_t, int16_t, int32_t])
+AC_CHECK_TYPES([ssize_t, u_char, u_int, u_long, u_int8_t, u_int16_t, u_int32_t,
+int8_t, int16_t, int32_t, __int128_t, __uint128_t])
 
 # Some libdb2 test programs want a shell that supports functions.
 FCTSH=false
