@@ -227,6 +227,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_INIT_CREDS_GAK(c, salt, s2kparams)                    \
     TRACE(c, "Getting AS key, salt \"{data}\", params \"{data}\"",  \
           salt, s2kparams)
+#define TRACE_INIT_CREDS_IDENTIFIED_REALM(c, realm)                     \
+    TRACE(c, "Identified realm of client principal as {data}", realm)
 #define TRACE_INIT_CREDS_KEYTAB_LOOKUP(c, etypes)               \
     TRACE(c, "Looked up etypes in keytab: {etypes}", etypes)
 #define TRACE_INIT_CREDS_KEYTAB_LOOKUP_FAILED(c, code)          \

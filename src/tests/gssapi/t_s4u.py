@@ -198,14 +198,12 @@ r1.run(['./t_s4u', 'p:' + r2.user_princ, '-', r1.keytab], env=no_default,
 # that we start at the server realm.
 mark('cross-realm S4U2Self with enterprise name')
 msgs = ('Getting initial credentials for enterprise\\@abc@SREALM',
-        'Processing preauth types: PA-FOR-X509-USER (130)',
         'Sending unauthenticated request',
         '/Realm not local to KDC',
         'Following referral to realm UREALM',
-        'Processing preauth types: PA-FOR-X509-USER (130)',
         'Sending unauthenticated request',
         '/Additional pre-authentication required',
-        '/Generic preauthentication failure',
+        'Identified realm of client principal as UREALM',
         'Getting credentials enterprise\\@abc@UREALM -> user@SREALM',
         'TGS reply is for enterprise\@abc@UREALM -> user@SREALM')
 r1.run(['./t_s4u', 'e:enterprise@abc@NOREALM', '-', r1.keytab],

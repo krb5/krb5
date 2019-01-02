@@ -291,6 +291,17 @@ k5_get_init_creds(krb5_context context, krb5_creds *creds,
                   get_as_key_fn gak, void *gak_data, int *master,
                   krb5_kdc_rep **as_reply);
 
+/*
+ * Make AS requests with the canonicalize flag set, stopping when we get a
+ * message indicating which realm the client principal is in.  Set *client_out
+ * to a copy of client with the canonical realm.  If subject_cert is non-null,
+ * include PA_S4U_X509_USER pa-data with the subject certificate each request.
+ * (See [MS-SFU] 3.1.5.1.1.1 and 3.1.5.1.1.2.)
+ */
+krb5_error_code
+k5_identify_realm(krb5_context context, krb5_principal client,
+                  const krb5_data *subject_cert, krb5_principal *client_out);
+
 krb5_error_code
 k5_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **opt,
                     krb5_flags options, krb5_address *const *addrs,

@@ -1424,6 +1424,13 @@ init_creds_step_request(krb5_context context,
     if (code)
         goto cleanup;
 
+    if (ctx->subject_cert != NULL) {
+        code = add_padata(&ctx->request->padata, KRB5_PADATA_S4U_X509_USER,
+                          ctx->subject_cert->data, ctx->subject_cert->length);
+        if (code)
+            return code;
+    }
+
     code = maybe_add_pac_request(context, ctx);
     if (code)
         goto cleanup;
@@ -1566,6 +1573,12 @@ init_creds_step_reply(krb5_context context,
              * FAST upgrade. */
             ctx->restarted = FALSE;
             code = restart_init_creds_loop(context, ctx, FALSE);
+        } else if (ctx->identify_realm &&
+                   (reply_code == KDC_ERR_PREAUTH_REQUIRED ||
+                    reply_code == KDC_ERR_KEY_EXP)) {
+            /* The client exists in this realm; we can stop. */
+            ctx->complete = TRUE;
+            goto cleanup;
         } else if (reply_code == KDC_ERR_PREAUTH_REQUIRED && retry) {
             note_req_timestamp(context, ctx, ctx->err_reply->stime,
                                ctx->err_reply->susec);
@@ -1624,6 +1637,12 @@ init_creds_step_reply(krb5_context context,
                                          ctx->reply, &strengthen_key);
     if (code != 0)
         goto cleanup;
+
+    if (ctx->identify_realm) {
+        /* Just getting a reply means the client exists in this realm. */
+        ctx->complete = TRUE;
+        goto cleanup;
+    }
 
     code = sort_krb5_padata_sequence(context, &ctx->request->client->realm,
                                      ctx->reply->padata);
@@ -1847,6 +1866,46 @@ cleanup:
     krb5_init_creds_free(context, ctx);
 
     return code;
+}
+
+krb5_error_code
+k5_identify_realm(krb5_context context, krb5_principal client,
+                  const krb5_data *subject_cert, krb5_principal *client_out)
+{
+    krb5_error_code ret;
+    krb5_get_init_creds_opt *opts = NULL;
+    krb5_init_creds_context ctx = NULL;
+    int use_master = 0;
+
+    *client_out = NULL;
+
+    ret = krb5_get_init_creds_opt_alloc(context, &opts);
+    if (ret)
+        goto cleanup;
+    krb5_get_init_creds_opt_set_tkt_life(opts, 15);
+    krb5_get_init_creds_opt_set_renew_life(opts, 0);
+    krb5_get_init_creds_opt_set_forwardable(opts, 0);
+    krb5_get_init_creds_opt_set_proxiable(opts, 0);
+    krb5_get_init_creds_opt_set_canonicalize(opts, 1);
+
+    ret = krb5_init_creds_init(context, client, NULL, NULL, 0, opts, &ctx);
+    if (ret)
+        goto cleanup;
+
+    ctx->identify_realm = TRUE;
+    ctx->subject_cert = subject_cert;
+
+    ret = k5_init_creds_get(context, ctx, &use_master);
+    if (ret)
+        goto cleanup;
+
+    TRACE_INIT_CREDS_IDENTIFIED_REALM(context, &ctx->request->client->realm);
+    ret = krb5_copy_principal(context, ctx->request->client, client_out);
+
+cleanup:
+    krb5_get_init_creds_opt_free(context, opts);
+    krb5_init_creds_free(context, ctx);
+    return ret;
 }
 
 krb5_error_code
