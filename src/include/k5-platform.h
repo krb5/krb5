@@ -1023,6 +1023,10 @@ static inline void zap(void *ptr, size_t len)
     if (len > 0)
         memset_s(ptr, len, 0, len);
 }
+#elif defined(HAVE_EXPLICIT_BZERO)
+# define zap(ptr, len) explicit_bzero(ptr, len)
+#elif defined(HAVE_EXPLICIT_MEMSET)
+# define zap(ptr, len) explicit_memset(ptr, 0, len)
 #elif defined(__GNUC__) || defined(__clang__)
 /*
  * Use an asm statement which declares a memory clobber to force the memset to
@@ -1032,7 +1036,7 @@ static inline void zap(void *ptr, size_t len)
 {
     if (len > 0)
         memset(ptr, 0, len);
-    __asm__ __volatile__("" : : "r" (ptr) : "memory");
+    __asm__ __volatile__("" : : "g" (ptr) : "memory");
 }
 #else
 /*
