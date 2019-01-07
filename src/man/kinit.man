@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KINIT" "1" " " "1.17" "MIT Kerberos"
+.TH "KINIT" "1" " " "1.18" "MIT Kerberos"
 .SH NAME
 kinit \- obtain and cache Kerberos ticket-granting ticket
 .
@@ -113,8 +113,7 @@ KDC to reply with a different client principal from the one
 requested.
 .TP
 \fB\-E\fP
-treats the principal name as an enterprise name (implies the
-\fB\-C\fP option).
+treats the principal name as an enterprise name.
 .TP
 \fB\-v\fP
 requests that the ticket\-granting ticket in the cache (with the
