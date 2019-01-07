@@ -92,8 +92,7 @@ OPTIONS
     requested.
 
 **-E**
-    treats the principal name as an enterprise name (implies the
-    **-C** option).
+    treats the principal name as an enterprise name.
 
 **-v**
     requests that the ticket-granting ticket in the cache (with the
