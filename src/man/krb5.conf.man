@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KRB5.CONF" "5" " " "1.15.4" "MIT Kerberos"
+.TH "KRB5.CONF" "5" " " "1.15.5" "MIT Kerberos"
 .SH NAME
 krb5.conf \- Kerberos configuration file
 .

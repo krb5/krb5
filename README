@@ -73,6 +73,30 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.15.5 (2019-01-07)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a regression in the MEMORY credential cache type which could
+  cause client programs to crash.
+
+* MEMORY credential caches will not be listed in the global
+  collection, with the exception of the default credential cache if it
+  is of type MEMORY.
+
+* Remove an incorrect assertion in the KDC which could be used to
+  cause a crash [CVE-2018-20217].
+
+krb5-1.15.5 changes by ticket ID
+--------------------------------
+
+8720    Don't include all MEMORY ccaches in collection
+8767    Remove incorrect KDC assertion
+8768    Fix double-close in ksu get_authorized_princ_names
+8771    Memory ccache regression in 1.15.4, 1.16.2
+
+
 Major changes in 1.15.4 (2018-11-01)
 ------------------------------------
 
@@ -592,6 +616,7 @@ reports, suggestions, and valuable resources:
     Sorin Manolache
     Andrei Maslennikov
     Michael Mattioli
+    Andreas Maus
     Nathaniel McCallum
     Greg McClement
     Cameron Meadors
