@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KERBEROS" "7" " " "1.16.2" "MIT Kerberos"
+.TH "KERBEROS" "7" " " "1.16.3" "MIT Kerberos"
 .SH NAME
 kerberos \- Overview of using Kerberos
 .
