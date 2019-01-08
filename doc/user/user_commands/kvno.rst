@@ -13,7 +13,9 @@ SYNOPSIS
 [**-h**]
 [**-P**]
 [**-S** *sname*]
+[**-I** *for_user*]
 [**-U** *for_user*]
+[**-F** *cert_file*]
 [**--u2u** *ccache*]
 *service1 service2* ...
 
@@ -58,11 +60,19 @@ OPTIONS
     The service hostnames will be canonicalized according to the usual
     rules for constructing service principals.
 
-**-U** *for_user*
+**-I** *for_user*
     Specifies that protocol transition (S4U2Self) is to be used to
     acquire a ticket on behalf of *for_user*.  If constrained
     delegation is not requested, the service name must match the
     credentials cache client principal.
+
+**-U** *for_user*
+    Same as -I, but treats *for_user* as an enterprise name.
+
+**-F** *cert_file*
+    Specifies that protocol transition is to be used, identifying the
+    client principal with the X.509 certificate in *cert_file*.  The
+    certificate file must be in PEM format.
 
 **--u2u** *ccache*
     Requests a user-to-user ticket.  *ccache* must contain a local
