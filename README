@@ -73,8 +73,8 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.17
----------------------
+Major changes in 1.17 (2019-01-08)
+----------------------------------
 
 Administrator experience:
 
@@ -248,6 +248,10 @@ krb5-1.17 changes by ticket ID
 8759    Resource leak in kadm5_randkey_principal_3()
 8760    Retry KCM writes once on remote hangup
 8762    Fix spelling of auth_to_local example
+8763    Ignore password attributes for S4U2Self requests
+8767    Remove incorrect KDC assertion
+8768    Fix double-close in ksu get_authorized_princ_names
+8769    Fix build issues with Solaris native compiler
 
 Acknowledgements
 ----------------
