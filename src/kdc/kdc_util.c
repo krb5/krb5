@@ -1055,84 +1055,87 @@ void limit_string(char *name)
     return;
 }
 
-/*
- * L10_2 = log10(2**x), rounded up; log10(2) ~= 0.301.
- */
-#define L10_2(x) ((int)(((x * 301) + 999) / 1000))
-
-/*
- * Max length of sprintf("%ld") for an int of type T; includes leading
- * minus sign and terminating NUL.
- */
-#define D_LEN(t) (L10_2(sizeof(t) * CHAR_BIT) + 2)
-
-void
-ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype)
+/* Wrapper of krb5_enctype_to_name() to include the PKINIT types. */
+static krb5_error_code
+enctype_name(krb5_enctype ktype, char *buf, size_t buflen)
 {
-    int i;
-    char stmp[D_LEN(krb5_enctype) + 1];
-    char *p;
+    char *name;
 
-    if (nktypes < 0
-        || len < (sizeof(" etypes {...}") + D_LEN(int))) {
-        *s = '\0';
-        return;
-    }
+    if (buflen == 0)
+        return EINVAL;
+    *buf = '\0'; /* ensure these are always valid C-strings */
 
-    snprintf(s, len, "%d etypes {", nktypes);
-    for (i = 0; i < nktypes; i++) {
-        snprintf(stmp, sizeof(stmp), "%s%ld", i ? " " : "", (long)ktype[i]);
-        if (strlen(s) + strlen(stmp) + sizeof("}") > len)
-            break;
-        strlcat(s, stmp, len);
-    }
-    if (i < nktypes) {
-        /*
-         * We broke out of the loop. Try to truncate the list.
-         */
-        p = s + strlen(s);
-        while (p - s + sizeof("...}") > len) {
-            while (p > s && *p != ' ' && *p != '{')
-                *p-- = '\0';
-            if (p > s && *p == ' ') {
-                *p-- = '\0';
-                continue;
-            }
-        }
-        strlcat(s, "...", len);
-    }
-    strlcat(s, "}", len);
-    return;
+    /* rfc4556 recommends that clients wishing to indicate support for these
+     * pkinit algorithms include them in the etype field of the AS-REQ. */
+    if (ktype == ENCTYPE_DSA_SHA1_CMS)
+        name = "id-dsa-with-sha1-CmsOID";
+    else if (ktype == ENCTYPE_MD5_RSA_CMS)
+        name = "md5WithRSAEncryption-CmsOID";
+    else if (ktype == ENCTYPE_SHA1_RSA_CMS)
+        name = "sha-1WithRSAEncryption-CmsOID";
+    else if (ktype == ENCTYPE_RC2_CBC_ENV)
+        name = "rc2-cbc-EnvOID";
+    else if (ktype == ENCTYPE_RSA_ENV)
+        name = "rsaEncryption-EnvOID";
+    else if (ktype == ENCTYPE_RSA_ES_OAEP_ENV)
+        name = "id-RSAES-OAEP-EnvOID";
+    else if (ktype == ENCTYPE_DES3_CBC_ENV)
+        name = "des-ede3-cbc-EnvOID";
+    else
+        return krb5_enctype_to_name(ktype, FALSE, buf, buflen);
+
+    if (strlcpy(name, buf, buflen) >= buflen)
+        return ENOMEM;
+    return 0;
 }
 
-void
-rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
+char *
+ktypes2str(krb5_enctype *ktype, int nktypes)
 {
-    char stmp[sizeof("ses=") + D_LEN(krb5_enctype)];
+    struct k5buf buf;
+    int i;
+    char name[64];
 
-    if (len < (3 * D_LEN(krb5_enctype)
-               + sizeof("etypes {rep= tkt= ses=}"))) {
-        *s = '\0';
-        return;
+    if (nktypes < 0)
+        return NULL;
+
+    k5_buf_init_dynamic(&buf);
+    k5_buf_add_fmt(&buf, "%d etypes {", nktypes);
+    for (i = 0; i < nktypes; i++) {
+        enctype_name(ktype[i], name, sizeof(name));
+        k5_buf_add_fmt(&buf, "%s%s(%ld)", i ? ", " : "", name, (long)ktype[i]);
     }
+    k5_buf_add(&buf, "}");
+    return buf.data;
+}
 
-    snprintf(s, len, "etypes {rep=%ld", (long)rep->enc_part.enctype);
+char *
+rep_etypes2str(krb5_kdc_rep *rep)
+{
+    struct k5buf buf;
+    char name[64];
+    krb5_enctype etype;
+
+    k5_buf_init_dynamic(&buf);
+    k5_buf_add(&buf, "etypes {rep=");
+    enctype_name(rep->enc_part.enctype, name, sizeof(name));
+    k5_buf_add_fmt(&buf, "%s(%ld)", name, (long)rep->enc_part.enctype);
 
     if (rep->ticket != NULL) {
-        snprintf(stmp, sizeof(stmp),
-                 " tkt=%ld", (long)rep->ticket->enc_part.enctype);
-        strlcat(s, stmp, len);
+        etype = rep->ticket->enc_part.enctype;
+        enctype_name(etype, name, sizeof(name));
+        k5_buf_add_fmt(&buf, ", tkt=%s(%ld)", name, (long)etype);
     }
 
-    if (rep->ticket != NULL
-        && rep->ticket->enc_part2 != NULL
-        && rep->ticket->enc_part2->session != NULL) {
-        snprintf(stmp, sizeof(stmp), " ses=%ld",
-                 (long)rep->ticket->enc_part2->session->enctype);
-        strlcat(s, stmp, len);
+    if (rep->ticket != NULL && rep->ticket->enc_part2 != NULL &&
+        rep->ticket->enc_part2->session != NULL) {
+        etype = rep->ticket->enc_part2->session->enctype;
+        enctype_name(etype, name, sizeof(name));
+        k5_buf_add_fmt(&buf, ", ses=%s(%ld)", name, (long)etype);
     }
-    strlcat(s, "}", len);
-    return;
+
+    k5_buf_add(&buf, "}");
+    return buf.data;
 }
 
 static krb5_error_code

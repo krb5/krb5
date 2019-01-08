@@ -109,11 +109,9 @@ select_session_keytype (kdc_realm_t *kdc_active_realm,
 
 void limit_string (char *name);
 
-void
-ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype);
+char *ktypes2str(krb5_enctype *ktype, int nktypes);
 
-void
-rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep);
+char *rep_etypes2str(krb5_kdc_rep *rep);
 
 /* authind.c */
 krb5_boolean
