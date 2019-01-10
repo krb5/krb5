@@ -1451,12 +1451,16 @@ kadmin_getprinc(int argc, char *argv[])
         for (i = 0; i < dprinc.n_key_data; i++) {
             krb5_key_data *key_data = &dprinc.key_data[i];
             char enctype[BUFSIZ], salttype[BUFSIZ];
+            char *deprecated = "";
 
             if (krb5_enctype_to_name(key_data->key_data_type[0], FALSE,
                                      enctype, sizeof(enctype)))
                 snprintf(enctype, sizeof(enctype), _("<Encryption type 0x%x>"),
                          key_data->key_data_type[0]);
-            printf("Key: vno %d, %s", key_data->key_data_kvno, enctype);
+            if (krb5int_c_deprecated_enctype(key_data->key_data_type[0]))
+                deprecated = "DEPRECATED:";
+            printf("Key: vno %d, %s%s", key_data->key_data_kvno, deprecated,
+                   enctype);
             if (key_data->key_data_ver > 1 &&
                 key_data->key_data_type[1] != KRB5_KDB_SALTTYPE_NORMAL) {
                 if (krb5_salttype_to_string(key_data->key_data_type[1],

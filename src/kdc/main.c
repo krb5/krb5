@@ -210,12 +210,23 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
     char                *svalue = NULL;
     const char          *hierarchy[4];
     krb5_kvno       mkvno = IGNORE_VNO;
+    char ename[32];
 
     memset(rdp, 0, sizeof(kdc_realm_t));
     if (!realm) {
         kret = EINVAL;
         goto whoops;
     }
+
+    if (def_enctype != ENCTYPE_UNKNOWN &&
+        krb5int_c_deprecated_enctype(def_enctype)) {
+        if (krb5_enctype_to_name(def_enctype, FALSE, ename, sizeof(ename)))
+            ename[0] = '\0';
+        fprintf(stderr,
+                _("Requested master password enctype %s in %s is DEPRECATED!"),
+                ename, realm);
+    }
+
     hierarchy[0] = KRB5_CONF_REALMS;
     hierarchy[1] = realm;
     hierarchy[3] = NULL;
@@ -368,6 +379,14 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
                 _("while fetching master key %s for realm %s"),
                 rdp->realm_mpname, realm);
         goto whoops;
+    }
+
+    if (krb5int_c_deprecated_enctype(rdp->realm_mkey.enctype)) {
+        if (krb5_enctype_to_name(rdp->realm_mkey.enctype, FALSE, ename,
+                                 sizeof(ename)))
+            ename[0] = '\0';
+        fprintf(stderr, _("Stash file %s uses DEPRECATED enctype %s!"),
+                rdp->realm_stash, ename);
     }
 
     if ((kret = krb5_db_fetch_mkey_list(rdp->realm_context, rdp->realm_mprinc,

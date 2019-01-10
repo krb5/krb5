@@ -9,8 +9,11 @@ from k5test import *
 aes256 = 'aes256-cts-hmac-sha1-96'
 aes128 = 'aes128-cts-hmac-sha1-96'
 des3 = 'des3-cbc-sha1'
+d_des3 = 'DEPRECATED:des3-cbc-sha1'
 des3raw = 'des3-cbc-raw'
+d_des3raw = 'DEPRECATED:des3-cbc-raw'
 rc4 = 'arcfour-hmac'
+d_rc4 = 'DEPRECATED:arcfour-hmac'
 
 # These tests make assumptions about the default enctype lists, so set
 # them explicitly rather than relying on the library defaults.
@@ -92,7 +95,7 @@ test_err('acc aes128', None, 'aes128-cts',
 # no acceptor subkey will be generated because we can't upgrade to a
 # CFX enctype.
 test('init des3', 'des3', None,
-     tktenc=aes256, tktsession=des3,
+     tktenc=aes256, tktsession=d_des3,
      proto='rfc1964', isubkey=des3raw, asubkey=None)
 
 # Force the ticket session key to be rc4, so we can test some subkey
@@ -103,7 +106,7 @@ realm.run([kadminl, 'setstr', realm.host_princ, 'session_enctypes', 'rc4'])
 # [aes256 aes128 des3] and the acceptor should upgrade to an aes256
 # subkey.
 test('upgrade noargs', None, None,
-     tktenc=aes256, tktsession=rc4,
+     tktenc=aes256, tktsession=d_rc4,
      proto='cfx', isubkey=rc4, asubkey=aes256)
 
 # If the initiator won't permit rc4 as a session key, it won't be able
@@ -113,14 +116,14 @@ test_err('upgrade init aes', 'aes', None, 'no support for encryption type')
 # If the initiator permits rc4 but prefers aes128, it will send an
 # upgrade list of [aes128] and the acceptor will upgrade to aes128.
 test('upgrade init aes128+rc4', 'aes128-cts rc4', None,
-     tktenc=aes256, tktsession=rc4,
+     tktenc=aes256, tktsession=d_rc4,
      proto='cfx', isubkey=rc4, asubkey=aes128)
 
 # If the initiator permits rc4 but prefers des3, it will send an
 # upgrade list of [des3], but the acceptor won't generate a subkey
 # because des3 isn't a CFX enctype.
 test('upgrade init des3+rc4', 'des3 rc4', None,
-     tktenc=aes256, tktsession=rc4,
+     tktenc=aes256, tktsession=d_rc4,
      proto='rfc1964', isubkey=rc4, asubkey=None)
 
 # If the acceptor permits only aes128, subkey negotiation will fail
@@ -134,14 +137,14 @@ test_err('upgrade acc aes128', None, 'aes128-cts',
 # If the acceptor permits rc4 but prefers aes128, it will negotiate an
 # upgrade to aes128.
 test('upgrade acc aes128 rc4', None, 'aes128-cts rc4',
-     tktenc=aes256, tktsession=rc4,
+     tktenc=aes256, tktsession=d_rc4,
      proto='cfx', isubkey=rc4, asubkey=aes128)
 
 # In this test, the initiator and acceptor each prefer an AES enctype
 # to rc4, but they can't agree on which one, so no subkey is
 # generated.
 test('upgrade mismatch', 'aes128-cts rc4', 'aes256-cts rc4',
-     tktenc=aes256, tktsession=rc4,
+     tktenc=aes256, tktsession=d_rc4,
      proto='rfc1964', isubkey=rc4, asubkey=None)
 
 success('gss_krb5_set_allowable_enctypes tests')

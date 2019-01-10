@@ -571,11 +571,17 @@ static char *
 etype_string(krb5_enctype enctype)
 {
     static char buf[100];
-    krb5_error_code ret;
+    char *bp = buf;
+    size_t deplen, buflen = sizeof(buf);
 
-    ret = krb5_enctype_to_name(enctype, FALSE, buf, sizeof(buf));
-    if (ret)
-        snprintf(buf, sizeof(buf), "etype %d", enctype);
+    if (krb5int_c_deprecated_enctype(enctype)) {
+        deplen = strlcpy(bp, "DEPRECATED:", buflen);
+        buflen -= deplen;
+        bp += deplen;
+    }
+
+    if (krb5_enctype_to_name(enctype, FALSE, bp, buflen))
+        snprintf(bp, buflen, "etype %d", enctype);
     return buf;
 }
 

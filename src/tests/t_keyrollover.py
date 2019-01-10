@@ -22,8 +22,9 @@ realm.run([kvno, princ1])
 realm.run([kadminl, 'purgekeys', realm.krbtgt_princ])
 # Make sure an old TGT fails after purging old TGS key.
 realm.run([kvno, princ2], expected_code=1)
-msg = 'krbtgt/%s@%s\n\tEtype (skey, tkt): des-cbc-crc, des-cbc-crc' % \
-    (realm.realm, realm.realm)
+ddes = "DEPRECATED:des-cbc-crc"
+msg = 'krbtgt/%s@%s\n\tEtype (skey, tkt): %s, %s' % \
+    (realm.realm, realm.realm, ddes, ddes)
 realm.run([klist, '-e'], expected_msg=msg)
 
 # Check that new key actually works.
@@ -48,7 +49,8 @@ realm.run([kadminl, 'cpw', '-randkey', '-keepold', '-e', 'aes256-cts',
            realm.krbtgt_princ])
 realm.run([kadminl, 'modprinc', '-kvno', '1', realm.krbtgt_princ])
 out = realm.run([kadminl, 'getprinc', realm.krbtgt_princ])
-if 'vno 1, aes256' not in out or 'vno 1, des3' not in out:
+if 'vno 1, aes256-cts' not in out or \
+   'vno 1, DEPRECATED:des3-cbc-sha1' not in out:
     fail('keyrollover: setup for TGS enctype test failed')
 # Now present the DES3 ticket to the KDC and make sure it's rejected.
 realm.run([kvno, realm.host_princ], expected_code=1)

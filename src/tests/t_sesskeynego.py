@@ -62,11 +62,11 @@ test_kvno(realm, 'aes128-cts-hmac-sha1-96', 'aes256-cts-hmac-sha1-96')
 # 3b: Negotiate rc4-hmac session key when principal only has aes256 long-term.
 realm.run([kadminl, 'setstr', 'server', 'session_enctypes',
            'rc4-hmac,aes128-cts,aes256-cts'])
-test_kvno(realm, 'arcfour-hmac', 'aes256-cts-hmac-sha1-96')
+test_kvno(realm, 'DEPRECATED:arcfour-hmac', 'aes256-cts-hmac-sha1-96')
 
 # 3c: Test des-cbc-crc default assumption.
 realm.run([kadminl, 'delstr', 'server', 'session_enctypes'])
-test_kvno(realm, 'des-cbc-crc', 'aes256-cts-hmac-sha1-96')
+test_kvno(realm, 'DEPRECATED:des-cbc-crc', 'aes256-cts-hmac-sha1-96')
 realm.stop()
 
 # Last go: test that we can disable the des-cbc-crc assumption
