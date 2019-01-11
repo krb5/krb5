@@ -42,6 +42,7 @@ s4u_identify_user(krb5_context context,
                   krb5_principal *canon_user)
 {
     krb5_principal_data client;
+    krb5_data empty_name = empty_data();
 
     *canon_user = NULL;
 
@@ -65,14 +66,22 @@ s4u_identify_user(krb5_context context,
     if (in_creds->client != NULL) {
         client = *in_creds->client;
         client.realm = in_creds->server->realm;
-    } else {
-        client.magic = KV5M_PRINCIPAL;
-        client.realm = in_creds->server->realm;
-        /* should this be NULL, empty or a fixed string? XXX */
-        client.data = NULL;
-        client.length = 0;
-        client.type = KRB5_NT_ENTERPRISE_PRINCIPAL;
+
+        /* Don't send subject_cert if we have an enterprise principal. */
+        return k5_identify_realm(context, &client, NULL, canon_user);
     }
+
+    client.magic = KV5M_PRINCIPAL;
+    client.realm = in_creds->server->realm;
+
+    /*
+     * Windows clients send the certificate subject as the client name.
+     * However, Windows KDC seem to be happy with an empty string as long as
+     * the name-type is NT-X500-PRINCIPAL.
+     */
+    client.data = &empty_name;
+    client.length = 1;
+    client.type = KRB5_NT_X500_PRINCIPAL;
 
     return k5_identify_realm(context, &client, subject_cert, canon_user);
 }
@@ -194,7 +203,6 @@ build_pa_s4u_x509_user(krb5_context context,
     krb5_error_code code;
     krb5_pa_s4u_x509_user *s4u_user = (krb5_pa_s4u_x509_user *)gcvt_data;
     krb5_data *data = NULL;
-    krb5_pa_data **padata;
     krb5_cksumtype cksumtype;
     int i;
 
@@ -230,31 +238,17 @@ build_pa_s4u_x509_user(krb5_context context,
     if (code != 0)
         goto cleanup;
 
+    /* Find the empty PA-S4U-X509-USER element placed in the TGS request padata
+     * by krb5_get_self_cred_from_kdc() and replace it with the encoding. */
     assert(tgsreq->padata != NULL);
-
-    for (i = 0; tgsreq->padata[i] != NULL; i++)
-        ;
-
-    padata = realloc(tgsreq->padata,
-                     (i + 2) * sizeof(krb5_pa_data *));
-    if (padata == NULL) {
-        code = ENOMEM;
-        goto cleanup;
+    for (i = 0; tgsreq->padata[i] != NULL; i++) {
+        if (tgsreq->padata[i]->pa_type == KRB5_PADATA_S4U_X509_USER)
+            break;
     }
-    tgsreq->padata = padata;
-
-    padata[i] = malloc(sizeof(krb5_pa_data));
-    if (padata[i] == NULL) {
-        code = ENOMEM;
-        goto cleanup;
-    }
-    padata[i]->magic = KV5M_PA_DATA;
-    padata[i]->pa_type = KRB5_PADATA_S4U_X509_USER;
-    padata[i]->length = data->length;
-    padata[i]->contents = (krb5_octet *)data->data;
-
-    padata[i + 1] = NULL;
-
+    assert(tgsreq->padata[i] != NULL);
+    free(tgsreq->padata[i]->contents);
+    tgsreq->padata[i]->length = data->length;
+    tgsreq->padata[i]->contents = (krb5_octet *)data->data;
     free(data);
     data = NULL;
 
@@ -268,12 +262,19 @@ cleanup:
     return code;
 }
 
+/*
+ * Validate the S4U2Self padata in the KDC reply.  If update_req_user is true
+ * and the KDC sent S4U-X509-USER padata, replace req_s4u_user->user_id.user
+ * with the checksum-protected client name from the KDC.  If update_req_user is
+ * false, verify that the client name has not changed.
+ */
 static krb5_error_code
 verify_s4u2self_reply(krb5_context context,
                       krb5_keyblock *subkey,
                       krb5_pa_s4u_x509_user *req_s4u_user,
                       krb5_pa_data **rep_padata,
-                      krb5_pa_data **enc_padata)
+                      krb5_pa_data **enc_padata,
+                      krb5_boolean update_req_user)
 {
     krb5_error_code code;
     krb5_pa_data *rep_s4u_padata, *enc_s4u_padata;
@@ -341,6 +342,24 @@ verify_s4u2self_reply(krb5_context context,
     if (code != 0)
         goto cleanup;
     if (valid == FALSE) {
+        code = KRB5_KDCREP_MODIFIED;
+        goto cleanup;
+    }
+
+    if (rep_s4u_user->user_id.user == NULL ||
+        rep_s4u_user->user_id.user->length == 0) {
+        code = KRB5_KDCREP_MODIFIED;
+        goto cleanup;
+    }
+
+    if (update_req_user) {
+        krb5_free_principal(context, req_s4u_user->user_id.user);
+        code = krb5_copy_principal(context, rep_s4u_user->user_id.user,
+                                   &req_s4u_user->user_id.user);
+        if (code != 0)
+            goto cleanup;
+    } else if (!krb5_principal_compare(context, rep_s4u_user->user_id.user,
+                                       req_s4u_user->user_id.user)) {
         code = KRB5_KDCREP_MODIFIED;
         goto cleanup;
     }
@@ -449,11 +468,10 @@ krb5_get_self_cred_from_kdc(krb5_context context,
         }
     } else {
         code = krb5_build_principal_ext(context, &s4u_user.user_id.user,
-                                        user_realm->length,
-                                        user_realm->data);
+                                        user_realm->length, user_realm->data,
+                                        0);
         if (code != 0)
             goto cleanup;
-        s4u_user.user_id.user->type = KRB5_NT_ENTERPRISE_PRINCIPAL;
     }
     if (subject_cert != NULL)
         s4u_user.user_id.subject_cert = *subject_cert;
@@ -503,15 +521,24 @@ krb5_get_self_cred_from_kdc(krb5_context context,
         krb5_pa_data **enc_padata = NULL;
         krb5_keyblock *subkey = NULL;
 
+        in_padata = k5calloc(3, sizeof(krb5_pa_data *), &code);
+        if (in_padata == NULL)
+            goto cleanup;
+
+        in_padata[0] = k5alloc(sizeof(krb5_pa_data), &code);
+        if (in_padata[0] == NULL) {
+            krb5_free_pa_data(context, in_padata);
+            goto cleanup;
+        }
+
+        in_padata[0]->magic = KV5M_PA_DATA;
+        in_padata[0]->pa_type = KRB5_PADATA_S4U_X509_USER;
+        in_padata[0]->length = 0;
+        in_padata[0]->contents = NULL;
+
         if (s4u_user.user_id.user != NULL && s4u_user.user_id.user->length) {
-            in_padata = calloc(2, sizeof(krb5_pa_data *));
-            if (in_padata == NULL) {
-                code = ENOMEM;
-                goto cleanup;
-            }
-            code = build_pa_for_user(context,
-                                     tgtptr,
-                                     &s4u_user.user_id, &in_padata[0]);
+            code = build_pa_for_user(context, tgtptr, &s4u_user.user_id,
+                                     &in_padata[1]);
             if (code != 0) {
                 krb5_free_pa_data(context, in_padata);
                 goto cleanup;
@@ -544,8 +571,10 @@ krb5_get_self_cred_from_kdc(krb5_context context,
             goto cleanup;
         }
 
-        code = verify_s4u2self_reply(context, subkey, &s4u_user,
-                                     out_padata, enc_padata);
+        /* Update s4u_user.user_id.user if this is the initial request to the
+         * client realm; otherwise verify that it doesn't change. */
+        code = verify_s4u2self_reply(context, subkey, &s4u_user, out_padata,
+                                     enc_padata, referral_count == 0);
 
         krb5_free_checksum_contents(context, &s4u_user.cksum);
         krb5_free_pa_data(context, in_padata);
@@ -556,10 +585,17 @@ krb5_get_self_cred_from_kdc(krb5_context context,
         if (code != 0)
             goto cleanup;
 
+        /* Only include a cert in the initial request to the client realm. */
+        s4u_user.user_id.subject_cert = empty_data();
+
         if (krb5_principal_compare(context,
                                    in_creds->server,
                                    (*out_creds)->server)) {
-            code = 0;
+            /* Verify that the unprotected client name in the reply matches the
+             * checksum-protected one from the client realm's KDC padata. */
+            if (!krb5_principal_compare(context, (*out_creds)->client,
+                                        s4u_user.user_id.user))
+                code = KRB5_KDCREP_MODIFIED;
             goto cleanup;
         } else if (IS_TGS_PRINC((*out_creds)->server)) {
             krb5_data *r1 = &tgtptr->server->data[1];
@@ -654,6 +690,26 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
         goto cleanup;
 
     assert(*out_creds != NULL);
+
+    /* If we canonicalized the client name or discovered it using subject_cert,
+     * check if we had cached credentials and return them if found. */
+    if (in_creds->client == NULL ||
+        !krb5_principal_compare(context, in_creds->client,
+                                (*out_creds)->client)) {
+        krb5_creds *old_creds;
+        krb5_creds mcreds = *in_creds;
+        mcreds.client = (*out_creds)->client;
+        code = krb5_get_credentials(context, options | KRB5_GC_CACHED, ccache,
+                                    &mcreds, &old_creds);
+        if (code == 0) {
+            krb5_free_creds(context, *out_creds);
+            *out_creds = old_creds;
+            options |= KRB5_GC_NO_STORE;
+        } else if (code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE) {
+            goto cleanup;
+        }
+        code = 0;
+    }
 
     if ((options & KRB5_GC_NO_STORE) == 0) {
         code = krb5_cc_store_cred(context, ccache, *out_creds);
