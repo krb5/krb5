@@ -85,7 +85,8 @@ test('both aes128', 'aes128-cts', 'aes128-cts',
 # If only the acceptor constrains the permitted session enctypes to
 # aes128, subkey negotiation fails because the acceptor considers the
 # aes256 session key to be non-permitted.
-test_err('acc aes128', None, 'aes128-cts', 'Encryption type not permitted')
+test_err('acc aes128', None, 'aes128-cts',
+         'Encryption type aes256-cts-hmac-sha1-96 not permitted')
 
 # If the initiator constrains the permitted session enctypes to des3,
 # no acceptor subkey will be generated because we can't upgrade to a
@@ -128,7 +129,7 @@ test('upgrade init des3+rc4', 'des3 rc4', None,
 # is only for the sake of the kernel, since we could upgrade to an
 # aes128 subkey, but it's the current semantics.)
 test_err('upgrade acc aes128', None, 'aes128-cts',
-         'Encryption type ArcFour with HMAC/md5 not permitted')
+         'Encryption type arcfour-hmac not permitted')
 
 # If the acceptor permits rc4 but prefers aes128, it will negotiate an
 # upgrade to aes128.

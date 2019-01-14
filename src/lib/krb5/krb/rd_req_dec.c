@@ -864,9 +864,8 @@ negotiate_etype(krb5_context context,
         if (permitted == FALSE) {
             char enctype_name[30];
 
-            if (krb5_enctype_to_string(desired_etypes[i],
-                                       enctype_name,
-                                       sizeof(enctype_name)) == 0)
+            if (krb5_enctype_to_name(desired_etypes[i], FALSE, enctype_name,
+                                     sizeof(enctype_name)) == 0)
                 k5_setmsg(context, KRB5_NOPERM_ETYPE,
                           _("Encryption type %s not permitted"), enctype_name);
             return KRB5_NOPERM_ETYPE;
