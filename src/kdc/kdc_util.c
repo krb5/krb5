@@ -193,6 +193,17 @@ comp_cksum(krb5_context kcontext, krb5_data *source, krb5_ticket *ticket,
     return(0);
 }
 
+/* Return true if padata contains an entry of either S4U2Self type. */
+static inline krb5_boolean
+has_s4u2self_padata(krb5_pa_data **padata)
+{
+    if (krb5int_find_pa_data(NULL, padata, KRB5_PADATA_FOR_USER) != NULL)
+        return TRUE;
+    if (krb5int_find_pa_data(NULL, padata, KRB5_PADATA_S4U_X509_USER) != NULL)
+        return TRUE;
+    return FALSE;
+}
+
 /* If a header ticket is decrypted, *ticket_out is filled in even on error. */
 krb5_error_code
 kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
@@ -305,16 +316,12 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
     }
 
     /* make sure the client is of proper lineage (see above) */
-    if (foreign_server &&
-        !krb5int_find_pa_data(kdc_context,
-                              request->padata, KRB5_PADATA_FOR_USER)) {
-        if (is_local_principal(kdc_active_realm,
-                               ticket->enc_part2->client)) {
-            /* someone in a foreign realm claiming to be local */
-            krb5_klog_syslog(LOG_INFO, _("PROCESS_TGS: failed lineage check"));
-            retval = KRB5KDC_ERR_POLICY;
-            goto cleanup_authenticator;
-        }
+    if (foreign_server && !has_s4u2self_padata(request->padata) &&
+        is_local_principal(kdc_active_realm, ticket->enc_part2->client)) {
+        /* someone in a foreign realm claiming to be local */
+        krb5_klog_syslog(LOG_INFO, _("PROCESS_TGS: failed lineage check"));
+        retval = KRB5KDC_ERR_POLICY;
+        goto cleanup_authenticator;
     }
 
     /*
