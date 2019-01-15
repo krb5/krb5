@@ -114,7 +114,14 @@ struct krb5_keytypes {
     unsigned int ssf;
 };
 
-#define ETYPE_WEAK 1
+/*
+ * "Weak" means the enctype is believed to be vulnerable to practical attacks,
+ * and will be disabled unless allow_weak_crypto is set to true.  "Deprecated"
+ * means the enctype has been deprecated by the IETF, and affects display and
+ * logging.
+ */
+#define ETYPE_WEAK (1 << 0)
+#define ETYPE_DEPRECATED (1 << 1)
 
 extern const struct krb5_keytypes krb5int_enctypes_list[];
 extern const int krb5int_enctypes_length;

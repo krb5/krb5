@@ -51,6 +51,13 @@ krb5int_c_weak_enctype(krb5_enctype etype)
     return (ktp != NULL && (ktp->flags & ETYPE_WEAK) != 0);
 }
 
+krb5_boolean KRB5_CALLCONV
+krb5int_c_deprecated_enctype(krb5_enctype etype)
+{
+    const struct krb5_keytypes *ktp = find_enctype(etype);
+    return ktp != NULL && (ktp->flags & ETYPE_DEPRECATED) != 0;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_c_enctype_compare(krb5_context context, krb5_enctype e1, krb5_enctype e2,
                        krb5_boolean *similar)
