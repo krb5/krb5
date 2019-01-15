@@ -1270,7 +1270,8 @@ kerberos_authenticate(krb5_context context, int fd, krb5_principal *clientp,
             exit(1);
         }
 
-        retval = krb5_enctype_to_string(*etype, etypebuf, sizeof(etypebuf));
+        retval = krb5_enctype_to_name(*etype, FALSE, etypebuf,
+                                      sizeof(etypebuf));
         if (retval) {
             com_err(progname, retval, _("while unparsing ticket etype"));
             exit(1);
