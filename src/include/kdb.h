@@ -707,6 +707,12 @@ krb5_error_code krb5_db_check_allowed_to_delegate(krb5_context kcontext,
                                                   const krb5_db_entry *server,
                                                   krb5_const_principal proxy);
 
+krb5_error_code krb5_db_get_s4u_x509_principal(krb5_context kcontext,
+                                               const krb5_data *client_cert,
+                                               krb5_const_principal in_princ,
+                                               unsigned int flags,
+                                               krb5_db_entry **entry);
+
 /**
  * Sort an array of @a krb5_key_data keys in descending order by their kvno.
  * Key data order within a kvno is preserved.
@@ -1389,8 +1395,6 @@ typedef struct _kdb_vftabl {
                                                  const krb5_db_entry *server,
                                                  krb5_const_principal proxy);
 
-    /* End of minor version 0. */
-
     /*
      * Optional: Free the e_data pointer of a database entry.  If this method
      * is not implemented, the e_data pointer in principal entries will be
@@ -1398,7 +1402,28 @@ typedef struct _kdb_vftabl {
      */
     void (*free_principal_e_data)(krb5_context kcontext, krb5_octet *e_data);
 
-    /* End of minor version 1 for major version 6. */
+    /* End of minor version 0. */
+
+    /*
+     * Optional: get a principal entry for S4U2Self based on X509 certificate.
+     *
+     * If flags include KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY, princ->realm
+     * indicates the request realm, but the data components should be ignored.
+     * The module can return an out-of-realm client referral as it would for
+     * get_principal().
+     *
+     * If flags does not include KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY, princ is
+     * from PA-S4U-X509-USER.  If it contains data components (and not just a
+     * realm), the module should verify that it is the same as the lookup
+     * result for client_cert.  The module should not return a referral.
+     */
+    krb5_error_code (*get_s4u_x509_principal)(krb5_context kcontext,
+                                              const krb5_data *client_cert,
+                                              krb5_const_principal princ,
+                                              unsigned int flags,
+                                              krb5_db_entry **entry_out);
+
+    /* End of minor version 1 for major version 7. */
 } kdb_vftabl;
 
 #endif /* !defined(_WIN32) */

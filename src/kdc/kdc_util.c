@@ -1364,8 +1364,8 @@ kdc_process_s4u_x509_user(krb5_context context,
         return code;
     }
 
-    if (krb5_princ_size(context, (*s4u_x509_user)->user_id.user) == 0 ||
-        (*s4u_x509_user)->user_id.subject_cert.length != 0) {
+    if (krb5_princ_size(context, (*s4u_x509_user)->user_id.user) == 0 &&
+        (*s4u_x509_user)->user_id.subject_cert.length == 0) {
         *status = "INVALID_S4U2SELF_REQUEST";
         krb5_free_pa_s4u_x509_user(context, *s4u_x509_user);
         *s4u_x509_user = NULL;
@@ -1487,6 +1487,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
     krb5_pa_data                *pa_data;
     int                         flags;
     krb5_db_entry               *princ;
+    krb5_s4u_userid             *id;
 
     *princ_ptr = NULL;
 
@@ -1516,6 +1517,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
         } else
             return 0;
     }
+    id = &(*s4u_x509_user)->user_id;
 
     /*
      * We need to compare the client name in the TGT with the requested
@@ -1601,8 +1603,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
     /*
      * Do not attempt to lookup principals in foreign realms.
      */
-    if (is_local_principal(kdc_active_realm,
-                           (*s4u_x509_user)->user_id.user)) {
+    if (is_local_principal(kdc_active_realm, id->user)) {
         krb5_db_entry no_server;
         krb5_pa_data **e_data = NULL;
 
@@ -1613,9 +1614,20 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
             return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error */
         }
 
-        code = krb5_db_get_principal(kdc_context,
-                                     (*s4u_x509_user)->user_id.user,
-                                     KRB5_KDB_FLAG_INCLUDE_PAC, &princ);
+        if (id->subject_cert.length != 0) {
+            code = krb5_db_get_s4u_x509_principal(kdc_context,
+                                                  &id->subject_cert, id->user,
+                                                  KRB5_KDB_FLAG_INCLUDE_PAC,
+                                                  &princ);
+            if (code == 0 && id->user->length == 0) {
+                krb5_free_principal(kdc_context, id->user);
+                code = krb5_copy_principal(kdc_context, princ->princ,
+                                           &id->user);
+            }
+        } else {
+            code = krb5_db_get_principal(kdc_context, id->user,
+                                         KRB5_KDB_FLAG_INCLUDE_PAC, &princ);
+        }
         if (code == KRB5_KDB_NOENTRY) {
             *status = "UNKNOWN_S4U2SELF_PRINCIPAL";
             return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
@@ -1647,6 +1659,14 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
          * follow referrals back to us.
          */
         *status = "S4U2SELF_CLIENT_NOT_OURS";
+        return KRB5KDC_ERR_POLICY; /* match Windows error */
+    } else if (id->user->length == 0) {
+        /*
+         * Only a KDC in the client realm can handle a certificate-only
+         * S4U2Self request.  Other KDCs require a principal name and ignore
+         * the subject-certificate field.
+         */
+        *status = "INVALID_XREALM_S4U2SELF_REQUEST";
         return KRB5KDC_ERR_POLICY; /* match Windows error */
     }
 

@@ -130,6 +130,25 @@ select_client_key(krb5_context context, krb5_db_entry *client,
     return 0;
 }
 
+static krb5_error_code
+lookup_client(krb5_context context, krb5_kdc_req *req, unsigned int flags,
+              krb5_db_entry **entry_out)
+{
+    krb5_pa_data *pa;
+    krb5_data cert;
+
+    *entry_out = NULL;
+    pa = krb5int_find_pa_data(context, req->padata, KRB5_PADATA_S4U_X509_USER);
+    if (pa != NULL && pa->length != 0 &&
+        req->client->type == KRB5_NT_X500_PRINCIPAL) {
+        cert = make_data(pa->contents, pa->length);
+        return krb5_db_get_s4u_x509_principal(context, &cert, req->client,
+                                              flags, entry_out);
+    } else {
+        return krb5_db_get_principal(context, req->client, flags, entry_out);
+    }
+}
+
 struct as_req_state {
     loop_respond_fn respond;
     void *arg;
@@ -597,8 +616,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     if (include_pac_p(kdc_context, state->request)) {
         setflag(state->c_flags, KRB5_KDB_FLAG_INCLUDE_PAC);
     }
-    errcode = krb5_db_get_principal(kdc_context, state->request->client,
-                                    state->c_flags, &state->client);
+    errcode = lookup_client(kdc_context, state->request, state->c_flags,
+                            &state->client);
     if (errcode == KRB5_KDB_CANTLOCK_DB)
         errcode = KRB5KDC_ERR_SVC_UNAVAILABLE;
     if (errcode == KRB5_KDB_NOENTRY) {

@@ -324,6 +324,12 @@ copy_vtable(const kdb_vftabl *in, kdb_vftabl *out)
     out->check_allowed_to_delegate = in->check_allowed_to_delegate;
     out->free_principal_e_data = in->free_principal_e_data;
 
+    /* Copy fields for minor version 1 (major version 7). */
+    assert(KRB5_KDB_DAL_MAJOR_VERSION == 7);
+    out->get_s4u_x509_principal = NULL;
+    if (in->min_ver >= 1)
+        out->get_s4u_x509_principal = in->get_s4u_x509_principal;
+
     /* Set defaults for optional fields. */
     if (out->fetch_master_key == NULL)
         out->fetch_master_key = krb5_db_def_fetch_mkey;
@@ -2715,6 +2721,32 @@ krb5_db_check_allowed_to_delegate(krb5_context kcontext,
     if (v->check_allowed_to_delegate == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
     return v->check_allowed_to_delegate(kcontext, client, server, proxy);
+}
+
+krb5_error_code
+krb5_db_get_s4u_x509_principal(krb5_context kcontext,
+                               const krb5_data *client_cert,
+                               krb5_const_principal in_princ,
+                               unsigned int flags, krb5_db_entry **entry)
+{
+    krb5_error_code ret;
+    kdb_vftabl *v;
+
+    ret = get_vftabl(kcontext, &v);
+    if (ret)
+        return ret;
+    if (v->get_s4u_x509_principal == NULL)
+        return KRB5_PLUGIN_OP_NOTSUPP;
+    ret = v->get_s4u_x509_principal(kcontext, client_cert, in_princ, flags,
+                                    entry);
+    if (ret)
+        return ret;
+
+    /* Sort the keys in the db entry, same as get_principal(). */
+    if ((*entry)->key_data != NULL)
+        krb5_dbe_sort_key_data((*entry)->key_data, (*entry)->n_key_data);
+
+    return 0;
 }
 
 void
