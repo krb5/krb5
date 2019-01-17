@@ -358,7 +358,7 @@ class DoxyBuilderTypes(DoxyTypes):
         result = self.run(filename, include=['typedef'])
         target_dir = '%s/types' % (self.target_dir)
         if not os.path.exists(target_dir):
-            os.makedirs(target_dir, 0755)
+            os.makedirs(target_dir, 0o755)
         for t in result:
             obj = DocModel(**t)
             self.save(obj, self.templates, target_dir)
@@ -369,7 +369,7 @@ class DoxyBuilderTypes(DoxyTypes):
         result = self.run(filename, include=['define'])
         target_dir = '%s/macros' % (self.target_dir)
         if not os.path.exists(target_dir):
-            os.makedirs(target_dir, 0755)
+            os.makedirs(target_dir, 0o755)
         for t in result:
             obj = DocModel(**t)
             tmpl = {'composite': 'define_document.tmpl'}
