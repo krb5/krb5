@@ -423,6 +423,64 @@ cleanup:
     return ret;
 }
 
+static void
+lookup_princ_by_cert(krb5_context context, const krb5_data *client_cert,
+                     krb5_principal *princ)
+{
+    krb5_error_code ret;
+    char *cert_princ_name;
+
+    /* The test client sends a principal string instead of a cert. */
+    cert_princ_name = k5memdup0(client_cert->data, client_cert->length, &ret);
+    check(ret);
+
+    check(krb5_parse_name(context, cert_princ_name, princ));
+    free(cert_princ_name);
+}
+
+static krb5_error_code
+test_get_s4u_x509_principal(krb5_context context, const krb5_data *client_cert,
+                            krb5_const_principal princ, unsigned int flags,
+                            krb5_db_entry **entry)
+{
+    krb5_error_code ret;
+    krb5_principal cert_princ, canon_princ;
+    testhandle h = context->dal_handle->db_context;
+    krb5_boolean match;
+    char *canon, *princ_name;
+
+    lookup_princ_by_cert(context, client_cert, &cert_princ);
+
+    ret = test_get_principal(context, cert_princ, flags, entry);
+    krb5_free_principal(context, cert_princ);
+    if (ret || (flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY))
+        return ret;
+
+    if (!krb5_realm_compare(context, princ, (*entry)->princ))
+        abort();
+
+    if (princ->length == 0 ||
+        krb5_principal_compare(context, princ, (*entry)->princ))
+        return 0;
+
+    check(krb5_unparse_name_flags(context, princ,
+                                  KRB5_PRINCIPAL_UNPARSE_NO_REALM,
+                                  &princ_name));
+    canon = get_string(h, "alias", princ_name, NULL);
+    krb5_free_unparsed_name(context, princ_name);
+    if (canon != NULL &&
+        ((flags & KRB5_KDB_FLAG_ALIAS_OK) ||
+         princ->type == KRB5_NT_ENTERPRISE_PRINCIPAL)) {
+        check(krb5_parse_name(context, canon, &canon_princ));
+        match = krb5_principal_compare(context, canon_princ, (*entry)->princ);
+        krb5_free_principal(context, canon_princ);
+        if (match)
+            return 0;
+    }
+
+    return KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
+}
+
 static krb5_error_code
 test_fetch_master_key(krb5_context context, krb5_principal mname,
                       krb5_keyblock *key_out, krb5_kvno *kvno_out,
@@ -535,7 +593,7 @@ test_check_allowed_to_delegate(krb5_context context,
 
 kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     KRB5_KDB_DAL_MAJOR_VERSION,             /* major version number */
-    0,                                      /* minor version number 0 */
+    1,                                      /* minor version number */
     test_init,
     test_cleanup,
     test_open,
@@ -569,5 +627,7 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     NULL, /* check_policy_tgs */
     NULL, /* audit_as_req */
     NULL, /* refresh_config */
-    test_check_allowed_to_delegate
+    test_check_allowed_to_delegate,
+    NULL, /* free_principal_e_data */
+    test_get_s4u_x509_principal
 };
