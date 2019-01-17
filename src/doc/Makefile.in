@@ -48,7 +48,7 @@ html: composite
 
 # Dummy target for use in an unconfigured source tree.
 htmlsrc:
-	$(MAKE) -f Makefile.in srcdir=. top_srcdir=.. PYTHON=python html clean
+	$(MAKE) -f Makefile.in srcdir=. top_srcdir=.. PYTHON=python3 html clean
 
 # Create HTML documentation in html_subst suitable for
 # installation by an OS package, with substitutions for configured
