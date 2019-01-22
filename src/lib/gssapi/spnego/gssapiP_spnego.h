@@ -21,7 +21,7 @@ extern "C" {
 #define	ACCEPT_INCOMPLETE 1
 #define	REJECT 2
 #define REQUEST_MIC 3
-#define	ACCEPT_DEFECTIVE_TOKEN 0xffffffffUL
+#define	UNSPECIFIED 0xffffffffUL
 
 /*
  * constants for der encoding/decoding routines.
