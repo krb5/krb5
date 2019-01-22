@@ -100,7 +100,6 @@ kdb_check: kdc.conf krb5.conf
 	$(RUN_DB_TEST) ../tests/create/kdb5_mkdums $(KTEST_OPTS)
 	$(RUN_DB_TEST) ../tests/verify/kdb5_verify $(KTEST_OPTS)
 	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump
-	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -ov $(TEST_DB).ovdump
 	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	@echo "====> NOTE!"
 	@echo "The following 'create' command is needed due to a change"
@@ -108,16 +107,11 @@ kdb_check: kdc.conf krb5.conf
 	@echo ====
 	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create -W
 	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load $(TEST_DB).dump
-	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load -update -ov $(TEST_DB).ovdump
 	$(RUN_DB_TEST) ../tests/verify/kdb5_verify $(KTEST_OPTS)
 	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump2
-	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -ov $(TEST_DB).ovdump2
 	sort $(TEST_DB).dump > $(TEST_DB).sort
 	sort $(TEST_DB).dump2 > $(TEST_DB).sort2
-	sort $(TEST_DB).ovdump > $(TEST_DB).ovsort
-	sort $(TEST_DB).ovdump2 > $(TEST_DB).ovsort2
 	cmp $(TEST_DB).sort $(TEST_DB).sort2
-	cmp $(TEST_DB).ovsort $(TEST_DB).ovsort2
 	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
 

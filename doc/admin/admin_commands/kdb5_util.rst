@@ -136,7 +136,7 @@ dump
 
 .. _kdb5_util_dump:
 
-    **dump** [**-b7**\|\ **-ov**\|\ **-r13**\|\ **-r18**]
+    **dump** [**-b7**\|\ **-r13**\|\ **-r18**]
     [**-verbose**] [**-mkey_convert**] [**-new_mkey_file**
     *mkey_file*] [**-rev**] [**-recurse**] [*filename*
     [*principals*...]]
@@ -150,9 +150,6 @@ load_dump version 7".  If filename is not specified, or is the string
     causes the dump to be in the Kerberos 5 Beta 7 format ("kdb5_util
     load_dump version 4").  This was the dump format produced on
     releases prior to 1.2.2.
-
-**-ov**
-    causes the dump to be in "ovsec_adm_export" format.
 
 **-r13**
     causes the dump to be in the Kerberos 5 1.3 format ("kdb5_util
@@ -204,7 +201,7 @@ load
 
 .. _kdb5_util_load:
 
-    **load** [**-b7**\|\ **-ov**\|\ **-r13**\|\ **-r18**] [**-hash**]
+    **load** [**-b7**\|\ **-r13**\|\ **-r18**] [**-hash**]
     [**-verbose**] [**-update**] *filename*
 
 Loads a database dump from the named file into the named database.  If
@@ -221,10 +218,6 @@ Options:
     requires the database to be in the Kerberos 5 Beta 7 format
     ("kdb5_util load_dump version 4").  This was the dump format
     produced on releases prior to 1.2.2.
-
-**-ov**
-    requires the database to be in "ovsec_adm_import" format.  Must be
-    used with the **-update** option.
 
 **-r13**
     requires the database to be in Kerberos 5 1.3 format ("kdb5_util
