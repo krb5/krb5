@@ -511,7 +511,6 @@ k5_cccol_lock(krb5_context context)
 #endif
 #ifdef USE_CCAPI_V3
     ret = krb5_stdccv3_context_lock(context);
-#endif
     if (ret) {
         k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
         k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
@@ -519,6 +518,7 @@ k5_cccol_lock(krb5_context context)
         k5_cc_mutex_unlock(context, &cccol_lock);
         return ret;
     }
+#endif
     k5_mutex_unlock(&cc_typelist_lock);
     return ret;
 }
