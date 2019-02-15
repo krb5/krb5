@@ -1,32 +1,144 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/krb5/krb/privsafe.c - Shared logic for KRB-SAFE and KRB-PRIV messages */
 /*
- * Copyright (C) 2011 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2011,2019 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "k5-int.h"
 #include "int-proto.h"
 #include "auth_con.h"
+
+krb5_error_code
+k5_privsafe_gen_rdata(krb5_context context, krb5_auth_context authcon,
+                      krb5_replay_data *rdata, krb5_replay_data *caller_rdata)
+{
+    krb5_error_code ret;
+    krb5_int32 flags = authcon->auth_context_flags;
+    krb5_boolean do_time = !!(flags & KRB5_AUTH_CONTEXT_DO_TIME);
+    krb5_boolean do_sequence = !!(flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE);
+    krb5_boolean ret_time = !!(flags & KRB5_AUTH_CONTEXT_RET_TIME);
+    krb5_boolean ret_sequence = !!(flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE);
+
+    memset(rdata, 0, sizeof(*rdata));
+    if ((ret_time || ret_sequence) && caller_rdata == NULL)
+        return KRB5_RC_REQUIRED;
+
+    if (do_time || ret_time) {
+        ret = krb5_us_timeofday(context, &rdata->timestamp, &rdata->usec);
+        if (ret)
+            return ret;
+        if (ret_time) {
+            caller_rdata->timestamp = rdata->timestamp;
+            caller_rdata->usec = rdata->usec;
+        }
+    }
+    if (do_sequence || ret_sequence) {
+        rdata->seq = authcon->local_seq_number;
+        if (ret_sequence)
+            caller_rdata->seq = rdata->seq;
+    }
+
+    return 0;
+}
+
+krb5_error_code
+k5_privsafe_gen_addrs(krb5_context context, krb5_auth_context authcon,
+                      krb5_address *lstorage, krb5_address *rstorage,
+                      krb5_address **local_out, krb5_address **remote_out)
+{
+    krb5_error_code ret;
+
+    *local_out = NULL;
+    *remote_out = NULL;
+
+    if (authcon->local_addr != NULL) {
+        if (authcon->local_port != NULL) {
+            ret = krb5_make_fulladdr(context, authcon->local_addr,
+                                     authcon->local_port, lstorage);
+            if (ret)
+                return ret;
+            *local_out = lstorage;
+        } else {
+            *local_out = authcon->local_addr;
+        }
+    }
+
+    if (authcon->remote_addr != NULL) {
+        if (authcon->remote_port != NULL) {
+            ret = krb5_make_fulladdr(context, authcon->remote_addr,
+                                     authcon->remote_port, rstorage);
+            if (ret)
+                return ret;
+            *remote_out = rstorage;
+        } else {
+            *remote_out = authcon->remote_addr;
+        }
+    }
+
+    return 0;
+}
+
+krb5_error_code
+k5_privsafe_check_replay(krb5_context context, krb5_auth_context authcon,
+                         krb5_address *addr, const char *uniq,
+                         const krb5_replay_data *rdata,
+                         krb5_boolean check_time)
+{
+    krb5_error_code ret;
+    krb5_donot_replay replay;
+    char *client = NULL;
+
+    if (!(authcon->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME))
+        return 0;
+
+    if (authcon->rcache == NULL)
+        return KRB5_RC_REQUIRED;
+
+    if (check_time) {
+        ret = krb5_check_clockskew(context, rdata->timestamp);
+        if (ret)
+            return ret;
+    }
+
+    ret = krb5_gen_replay_name(context, addr, uniq, &client);
+    if (ret)
+        return ret;
+
+    replay.client = client;
+    replay.server = "";
+    replay.msghash = NULL;
+    replay.cusec = rdata->usec;
+    replay.ctime = rdata->timestamp;
+    ret = krb5_rc_store(context, authcon->rcache, &replay);
+    free(replay.client);
+    return ret;
+}
 
 /*
  * k5_privsafe_check_seqnum

@@ -460,12 +460,13 @@ gen_save_subkey.so gen_save_subkey.po $(OUTPRE)gen_save_subkey.$(OBJEXT): \
 get_creds.so get_creds.po $(OUTPRE)get_creds.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
-  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
-  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
+  $(COM_ERR_DEPS) $(srcdir)/../os/os-proto.h $(top_srcdir)/include/k5-buf.h \
+  $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
+  $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
+  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
+  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   fast.h get_creds.c int-proto.h
 get_etype_info.so get_etype_info.po $(OUTPRE)get_etype_info.$(OBJEXT): \
@@ -627,8 +628,8 @@ mk_cred.so mk_cred.po $(OUTPRE)mk_cred.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h auth_con.h cleanup.h \
-  int-proto.h mk_cred.c
+  $(top_srcdir)/include/socket-utils.h auth_con.h int-proto.h \
+  mk_cred.c
 mk_error.so mk_error.po $(OUTPRE)mk_error.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -649,7 +650,7 @@ mk_priv.so mk_priv.po $(OUTPRE)mk_priv.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h auth_con.h cleanup.h \
+  $(top_srcdir)/include/socket-utils.h auth_con.h int-proto.h \
   mk_priv.c
 mk_rep.so mk_rep.po $(OUTPRE)mk_rep.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
@@ -692,7 +693,7 @@ mk_safe.so mk_safe.po $(OUTPRE)mk_safe.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h auth_con.h cleanup.h \
+  $(top_srcdir)/include/socket-utils.h auth_con.h int-proto.h \
   mk_safe.c
 pac.so pac.po $(OUTPRE)pac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
@@ -875,7 +876,7 @@ rd_cred.so rd_cred.po $(OUTPRE)rd_cred.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h auth_con.h cleanup.h \
+  $(top_srcdir)/include/socket-utils.h auth_con.h int-proto.h \
   rd_cred.c
 rd_error.so rd_error.po $(OUTPRE)rd_error.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
@@ -940,8 +941,8 @@ rd_safe.so rd_safe.po $(OUTPRE)rd_safe.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h auth_con.h cleanup.h \
-  int-proto.h rd_safe.c
+  $(top_srcdir)/include/socket-utils.h auth_con.h int-proto.h \
+  rd_safe.c
 recvauth.so recvauth.po $(OUTPRE)recvauth.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

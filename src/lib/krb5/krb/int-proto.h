@@ -143,6 +143,30 @@ krb5int_validate_times(krb5_context, krb5_ticket_times *);
 krb5_error_code
 krb5int_copy_authdatum(krb5_context, const krb5_authdata *, krb5_authdata **);
 
+/* Set replay data fields in rdata and caller_rdata according to the flags in
+ * authcon. */
+krb5_error_code
+k5_privsafe_gen_rdata(krb5_context context, krb5_auth_context authcon,
+                      krb5_replay_data *rdata, krb5_replay_data *caller_rdata);
+
+/*
+ * Set *local_out and *remote_out to addresses based on authcon.  The resulting
+ * pointers should not be freed, but addresses may be placed into *lstorage and
+ * *rstorage which the caller must free, even on error.
+ */
+krb5_error_code
+k5_privsafe_gen_addrs(krb5_context context, krb5_auth_context authcon,
+                      krb5_address *lstorage, krb5_address *rstorage,
+                      krb5_address **local_out, krb5_address **remote_out);
+
+/* If the DO_TIME flag is set in authcon, store a replay record.  If check_time
+ * is true, also check that the timestamp is within clock skew. */
+krb5_error_code
+k5_privsafe_check_replay(krb5_context context, krb5_auth_context authcon,
+                         krb5_address *addr, const char *uniq,
+                         const krb5_replay_data *rdata,
+                         krb5_boolean check_time);
+
 krb5_boolean
 k5_privsafe_check_seqnum(krb5_context ctx, krb5_auth_context ac,
                          krb5_ui_4 in_seq);

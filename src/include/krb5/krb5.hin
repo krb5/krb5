@@ -3310,20 +3310,20 @@ krb5_rd_error(krb5_context context, const krb5_data *enc_errbuf,
  * @param [in]  context         Library context
  * @param [in]  auth_context    Authentication context
  * @param [in]  inbuf           @c KRB-SAFE message to be parsed
- * @param [out] outbuf          Data parsed from @c KRB-SAFE message
- * @param [out] outdata         Replay data. Specify NULL if not needed
+ * @param [out] userdata_out    Data parsed from @c KRB-SAFE message
+ * @param [out] rdata_out       Replay data. Specify NULL if not needed
  *
  * This function parses a @c KRB-SAFE message, verifies its integrity, and
- * stores its data into @a outbuf.
+ * stores its data into @a userdata_out.
  *
- * @note The @a outdata argument is required if #KRB5_AUTH_CONTEXT_RET_TIME or
- *       #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.
+ * @note The @a rdata_out argument is required if #KRB5_AUTH_CONTEXT_RET_TIME
+ * or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.
  *
  * @note @a auth_context must have a remote address set.  This address will be
- *       used to verify the sender address in the KRB-SAFE message.  If @a
- *       auth_context has a local address set, it will be used to verify the
- *       receiver address in the KRB-SAFE message if the message contains one.
- *       Both addresses must use type @c ADDRTYPE_ADDRPORT.
+ * used to verify the sender address in the KRB-SAFE message.  If @a
+ * auth_context has a local address set, it will be used to verify the receiver
+ * address in the KRB-SAFE message if the message contains one.  Both addresses
+ * must use type @c ADDRTYPE_ADDRPORT.
  *
  * If the #KRB5_AUTH_CONTEXT_DO_SEQUENCE flag is set in @a auth_context, the
  * sequence number of the KRB-SAFE message is checked against the remote
@@ -3336,14 +3336,15 @@ krb5_rd_error(krb5_context context, const krb5_data *enc_errbuf,
  *     (which is usually five minutes).
  * @li The message must not be a replayed message field in @a auth_context.
  *
- * Use krb5_free_data_contents() to free @a outbuf when it is no longer needed.
+ * Use krb5_free_data_contents() to free @a userdata_out when it is no longer
+ * needed.
  *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
-             const krb5_data *inbuf, krb5_data *outbuf,
-             krb5_replay_data *outdata);
+             const krb5_data *inbuf, krb5_data *userdata_out,
+             krb5_replay_data *rdata_out);
 
 /**
  * Process a @c KRB-PRIV message.
@@ -3351,21 +3352,20 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
  * @param [in]  context         Library context
  * @param [in]  auth_context    Authentication structure
  * @param [in]  inbuf           @c KRB-PRIV message to be parsed
- * @param [out] outbuf          Data parsed from @c KRB-PRIV message
- * @param [out] outdata         Replay data. Specify NULL if not needed
+ * @param [out] userdata_out    Data parsed from @c KRB-PRIV message
+ * @param [out] rdata_out       Replay data. Specify NULL if not needed
  *
  * This function parses a @c KRB-PRIV message, verifies its integrity, and
- * stores its unencrypted data into @a outbuf.
+ * stores its unencrypted data into @a userdata_out.
  *
- * @note If the #KRB5_AUTH_CONTEXT_RET_TIME or
- *       #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in @a auth_context, @a
- *       outdata is required.
+ * @note If the #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE
+ * flag is set in @a auth_context, @a rdata_out is required.
  *
  * @note @a auth_context must have a remote address set.  This address will be
- *       used to verify the sender address in the KRB-PRIV message.  If @a
- *       auth_context has a local address set, it will be used to verify the
- *       receiver address in the KRB-PRIV message if the message contains one.
- *       Both addresses must use type @c ADDRTYPE_ADDRPORT.
+ * used to verify the sender address in the KRB-PRIV message.  If @a
+ * auth_context has a local address set, it will be used to verify the receiver
+ * address in the KRB-PRIV message if the message contains one.  Both addresses
+ * must use type @c ADDRTYPE_ADDRPORT.
  *
  * If the #KRB5_AUTH_CONTEXT_DO_SEQUENCE flag is set in @a auth_context, the
  * sequence number of the KRB-SAFE message is checked against the remote
@@ -3378,12 +3378,15 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
  *     (which is usually five minutes).
  * @li The message must not be a replayed message field in @a auth_context.
  *
+ * Use krb5_free_data_contents() to free @a userdata_out when it is no longer
+ * needed.
+ *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
-             const krb5_data *inbuf, krb5_data *outbuf,
-             krb5_replay_data *outdata);
+             const krb5_data *inbuf, krb5_data *userdata_out,
+             krb5_replay_data *rdata_out);
 
 /**
  * Convert a string principal name to a krb5_principal structure.
@@ -5245,8 +5248,8 @@ krb5_kt_read_service_key(krb5_context context, krb5_pointer keyprocarg,
  * @param [in]  context         Library context
  * @param [in]  auth_context    Authentication context
  * @param [in]  userdata        User data in the message
- * @param [out] outbuf          Formatted @c KRB-SAFE buffer
- * @param [out] outdata         Replay data. Specify NULL if not needed
+ * @param [out] der_out         Formatted @c KRB-SAFE buffer
+ * @param [out] rdata_out       Replay data. Specify NULL if not needed
  *
  * This function creates an integrity protected @c KRB-SAFE message
  * using data supplied by the application.
@@ -5268,19 +5271,20 @@ krb5_kt_read_service_key(krb5_context context, krb5_pointer keyprocarg,
  *
  * If either #KRB5_AUTH_CONTEXT_DO_SEQUENCE or
  * #KRB5_AUTH_CONTEXT_RET_SEQUENCE is set, the @a auth_context local sequence
- * number will be placed in @a outdata as its sequence number.
+ * number will be placed in @a rdata_out as its sequence number.
  *
- * @note The @a outdata argument is required if #KRB5_AUTH_CONTEXT_RET_TIME or
- *       #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.
+ * @note The @a rdata_out argument is required if #KRB5_AUTH_CONTEXT_RET_TIME
+ * or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.
  *
- * Use krb5_free_data_contents() to free @a outbuf when it is no longer needed.
+ * Use krb5_free_data_contents() to free @a der_out when it is no longer
+ * needed.
  *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
-             const krb5_data *userdata, krb5_data *outbuf,
-             krb5_replay_data *outdata);
+             const krb5_data *userdata, krb5_data *der_out,
+             krb5_replay_data *rdata_out);
 
 /**
  * Format a @c KRB-PRIV message.
@@ -5288,8 +5292,8 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
  * @param [in]  context         Library context
  * @param [in]  auth_context    Authentication context
  * @param [in]  userdata        User data for @c KRB-PRIV message
- * @param [out] outbuf          Formatted @c KRB-PRIV message
- * @param [out] outdata         Replay cache handle (NULL if not needed)
+ * @param [out] der_out         Formatted @c KRB-PRIV message
+ * @param [out] rdata_out       Replay cache handle (NULL if not needed)
  *
  * This function is similar to krb5_mk_safe(), but the message is encrypted and
  * integrity-protected, not just integrity-protected.
@@ -5301,7 +5305,7 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
  *
  * @note If the #KRB5_AUTH_CONTEXT_RET_TIME or
  * #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in @a auth_context, the @a
- * outdata is required.
+ * rdata_out is required.
  *
  * @note The flags from @a auth_context specify whether sequence numbers or
  * timestamps will be used to identify the message.  Valid values are:
@@ -5312,14 +5316,14 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
  *                                       @a auth_context in replay cache.
  * @li #KRB5_AUTH_CONTEXT_RET_SEQUENCE - Use local sequence numbers from
  *                                       @a auth_context as a sequence number
- *                                       in the encrypted message @a outbuf.
+ *                                       in the encrypted message @a der_out.
  *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
-             const krb5_data *userdata, krb5_data *outbuf,
-             krb5_replay_data *outdata);
+             const krb5_data *userdata, krb5_data *der_out,
+             krb5_replay_data *rdata_out);
 
 /**
  * Client function for @c sendauth protocol.
@@ -5437,15 +5441,15 @@ krb5_recvauth_version(krb5_context context,
  *
  * @param [in]  context         Library context
  * @param [in]  auth_context    Authentication context
- * @param [in]  ppcreds         Null-terminated array of credentials
- * @param [out] ppdata          Encoded credentials
- * @param [out] outdata         Replay cache information (NULL if not needed)
+ * @param [in]  creds           Null-terminated array of credentials
+ * @param [out] der_out         Encoded credentials
+ * @param [out] rdata_out       Replay cache information (NULL if not needed)
  *
- * This function takes an array of credentials @a ppcreds and formats
- * a @c KRB-CRED message @a ppdata to pass to krb5_rd_cred().
+ * This function takes an array of credentials @a creds and formats
+ * a @c KRB-CRED message @a der_out to pass to krb5_rd_cred().
  *
  * @note If the #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE
- *       flag is set in @a auth_context, @a outdata is required.
+ * flag is set in @a auth_context, @a rdata_out is required.
  *
  * The message will be encrypted using the send subkey of @a auth_context if it
  * is present, or the session key otherwise.
@@ -5461,17 +5465,17 @@ krb5_recvauth_version(krb5_context context,
  */
 krb5_error_code KRB5_CALLCONV
 krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
-              krb5_creds **ppcreds, krb5_data **ppdata,
-              krb5_replay_data *outdata);
+              krb5_creds **creds, krb5_data **der_out,
+              krb5_replay_data *rdata_out);
 
 /**
  * Format a @c KRB-CRED message for a single set of credentials.
  *
  * @param [in]  context         Library context
  * @param [in]  auth_context    Authentication context
- * @param [in]  pcreds          Pointer to credentials
- * @param [out] ppdata          Encoded credentials
- * @param [out] outdata         Replay cache data (NULL if not needed)
+ * @param [in]  creds           Pointer to credentials
+ * @param [out] der_out         Encoded credentials
+ * @param [out] rdata_out       Replay cache data (NULL if not needed)
  *
  * This is a convenience function that calls krb5_mk_ncred() with a single set
  * of credentials.
@@ -5487,33 +5491,33 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
  */
 krb5_error_code KRB5_CALLCONV
 krb5_mk_1cred(krb5_context context, krb5_auth_context auth_context,
-              krb5_creds *pcreds, krb5_data **ppdata,
-              krb5_replay_data *outdata);
+              krb5_creds *creds, krb5_data **der_out,
+              krb5_replay_data *rdata_out);
 
 /**
  * Read and validate a @c KRB-CRED message.
  *
  * @param [in]  context         Library context
  * @param [in]  auth_context    Authentication context
- * @param [in]  pcreddata       @c KRB-CRED message
- * @param [out] pppcreds        Null-terminated array of forwarded credentials
- * @param [out] outdata         Replay data (NULL if not needed)
+ * @param [in]  creddata        @c KRB-CRED message
+ * @param [out] creds_out       Null-terminated array of forwarded credentials
+ * @param [out] rdata_out       Replay data (NULL if not needed)
  *
- * @note The @a outdata argument is required if #KRB5_AUTH_CONTEXT_RET_TIME or
- *       #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.`
+ * @note The @a rdata_out argument is required if #KRB5_AUTH_CONTEXT_RET_TIME
+ * or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.`
  *
- * @a pcreddata will be decrypted using the receiving subkey if it is present
- * in @a auth_context, or the session key if the receiving subkey is not
- * present or fails to decrypt the message.
+ * @a creddata will be decrypted using the receiving subkey if it is present in
+ * @a auth_context, or the session key if the receiving subkey is not present
+ * or fails to decrypt the message.
  *
- * Use krb5_free_tgt_creds() to free @a pppcreds when it is no longer needed.
+ * Use krb5_free_tgt_creds() to free @a creds_out when it is no longer needed.
  *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
-             krb5_data *pcreddata, krb5_creds ***pppcreds,
-             krb5_replay_data *outdata);
+             krb5_data *creddata, krb5_creds ***creds_out,
+             krb5_replay_data *rdata_out);
 
 /**
  * Get a forwarded TGT and format a @c KRB-CRED message.
