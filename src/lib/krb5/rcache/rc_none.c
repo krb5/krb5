@@ -50,6 +50,7 @@ krb5_rc_none_noargs(krb5_context ctx, krb5_rcache rc)
 static krb5_error_code KRB5_CALLCONV
 krb5_rc_none_close(krb5_context ctx, krb5_rcache rc)
 {
+    k5_mutex_destroy(&rc->lock);
     free (rc);
     return 0;
 }
