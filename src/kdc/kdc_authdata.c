@@ -361,7 +361,7 @@ fetch_kdb_authdata(krb5_context context, unsigned int flags,
      * not be changed until the final hop.
      */
     if (isflagset(flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION))
-        actual_client = for_user_princ;
+        actual_client = client == NULL ? for_user_princ : enc_tkt_req->client;
     else
         actual_client = enc_tkt_reply->client;
 
