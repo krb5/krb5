@@ -72,7 +72,7 @@ First, you will need a file containing the following::
     principal_name=EXP:1,SEQUENCE:kdc_principal_seq
 
     [kdc_principal_seq]
-    name_type=EXP:0,INTEGER:1
+    name_type=EXP:0,INTEGER:2
     name_string=EXP:1,SEQUENCE:kdc_principals
 
     [kdc_principals]

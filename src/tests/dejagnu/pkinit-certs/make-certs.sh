@@ -1,6 +1,7 @@
 #!/bin/sh -e
 
 NAMETYPE=1
+KRBTGT_NAMETYPE=2
 KEYSIZE=2048
 DAYS=4000
 REALM=KRBTEST.COM
@@ -54,7 +55,7 @@ basicConstraints = critical,CA:TRUE
 1.component=GeneralString:$REALM
 
 [princ_kdc]
-nametype=EXPLICIT:0,INTEGER:$NAMETYPE
+nametype=EXPLICIT:0,INTEGER:$KRBTGT_NAMETYPE
 components=EXPLICIT:1,SEQUENCE:components_kdc
 
 [krb5princ_kdc]
