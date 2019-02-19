@@ -64,7 +64,7 @@ static void try_one (struct tinfo *t)
 {
     krb5_donot_replay r;
     krb5_error_code err;
-    char buf[100], buf2[100];
+    char buf[100], buf2[100], tag[8];
     krb5_rcache my_rcache;
 
     snprintf(buf, sizeof(buf), "host/all-in-one.mit.edu/%p@ATHENA.MIT.EDU",
@@ -72,6 +72,7 @@ static void try_one (struct tinfo *t)
     r.server = buf;
     r.client = (t->my_cusec & 7) + "abcdefgh@ATHENA.MIT.EDU";
     r.msghash = NULL;
+    r.tag = empty_data();
     if (t->now != t->my_ctime) {
         if (t->my_ctime != 0) {
             snprintf(buf2, sizeof(buf2), "%3d: %ld %5d\n", t->idx,
@@ -84,6 +85,9 @@ static void try_one (struct tinfo *t)
         t->my_cusec++;
     r.ctime = t->my_ctime;
     r.cusec = t->my_cusec;
+    store_32_be(r.ctime, tag);
+    store_32_be(r.cusec, tag + 4);
+    r.tag = make_data(tag, 8);
     if (!init_once) {
         err = krb5_get_server_rcache(ctx, &piece, &my_rcache);
         if (err) {

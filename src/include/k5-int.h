@@ -1965,6 +1965,7 @@ typedef struct _krb5_donot_replay {
     char *server;                       /* null-terminated */
     char *client;                       /* null-terminated */
     char *msghash;                      /* null-terminated */
+    krb5_data tag;
     krb5_int32 cusec;
     krb5_timestamp ctime;
 } krb5_donot_replay;

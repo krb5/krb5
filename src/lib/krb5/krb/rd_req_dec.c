@@ -595,9 +595,13 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
         tktauthent.ticket = req->ticket;
         tktauthent.authenticator = (*auth_context)->authentp;
         if (!(retval = krb5_auth_to_rep(context, &tktauthent, &rep))) {
-            retval = krb5_rc_hash_message(context,
-                                          &req->authenticator.ciphertext,
-                                          &rep.msghash);
+            retval = k5_rc_tag_from_ciphertext(context, &req->authenticator,
+                                               &rep.tag);
+            if (!retval) {
+                retval = krb5_rc_hash_message(context,
+                                              &req->authenticator.ciphertext,
+                                              &rep.msghash);
+            }
             if (!retval) {
                 retval = krb5_rc_store(context, (*auth_context)->rcache, &rep);
                 free(rep.msghash);
