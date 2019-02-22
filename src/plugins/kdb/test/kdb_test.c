@@ -502,8 +502,8 @@ mkauthdata(krb5_context context, krb5_const_principal princ,
     ad = ealloc(sizeof(*ad));
     ad->magic = KV5M_AUTHDATA;
     ad->ad_type = TEST_AD_TYPE;
-    ad->length = sizeof(prefix) + strlen(princ_str) + 3;
-    data = (char *)ealloc(ad->length);
+    ad->length = sizeof(prefix) + strlen(princ_str) + 2;
+    data = (char *)ealloc(ad->length + 1);
 
     strcpy(data, prefix);
     if (princ->type == KRB5_NT_ENTERPRISE_PRINCIPAL)
@@ -541,7 +541,8 @@ test_sign_authdata(krb5_context context, unsigned int flags,
     if (!(flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY)) {
         check(krb5_find_authdata(context, tgt_auth_data, NULL,
                                  TEST_AD_TYPE, &testad));
-        if (testad == NULL || testad[0] == NULL)
+      if (testad != NULL) {
+        if (testad[0] == NULL)
             abort();
 
         for (i = 0; testad[i]; i++)
@@ -560,6 +561,7 @@ test_sign_authdata(krb5_context context, unsigned int flags,
             ad = mkauthdata(context, client ? client->princ :
                             client_princ, sign_realm);
         }
+      }
     }
 
     list = ealloc(2 * sizeof(*list));
