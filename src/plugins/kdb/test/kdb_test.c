@@ -479,6 +479,45 @@ test_encrypt_key_data(krb5_context context, const krb5_keyblock *mkey,
     return 0;
 }
 
+static void
+freeauthdata(krb5_authdata *ad)
+{
+    if (ad)
+        free(ad->contents);
+    free(ad);
+}
+
+static krb5_authdata *
+mkauthdata(krb5_context context, krb5_const_principal princ,
+           krb5_boolean with_realm)
+{
+    const char prefix[] = "db-authdata-test:";
+    krb5_authdata *ad;
+    char *princ_str, *data;
+
+    check(krb5_unparse_name_flags(context, princ, with_realm ? 0 :
+                                  KRB5_PRINCIPAL_UNPARSE_NO_REALM,
+                                  &princ_str));
+
+    ad = ealloc(sizeof(*ad));
+    ad->magic = KV5M_AUTHDATA;
+    ad->ad_type = TEST_AD_TYPE;
+    ad->length = sizeof(prefix) + strlen(princ_str) + 3;
+    data = (char *)ealloc(ad->length);
+
+    strcpy(data, prefix);
+    if (princ->type == KRB5_NT_ENTERPRISE_PRINCIPAL)
+        strcat(data, "e:");
+    else
+        strcat(data, "p:");
+    strcat(data, princ_str);
+    strcat(data, ":");
+
+    krb5_free_unparsed_name(context, princ_str);
+    ad->contents = (uint8_t *) data;
+    return ad;
+}
+
 static krb5_error_code
 test_sign_authdata(krb5_context context, unsigned int flags,
                    krb5_const_principal client_princ, krb5_db_entry *client,
@@ -488,13 +527,41 @@ test_sign_authdata(krb5_context context, unsigned int flags,
                    krb5_timestamp authtime, krb5_authdata **tgt_auth_data,
                    krb5_authdata ***signed_auth_data)
 {
-    krb5_authdata **list, *ad;
+    krb5_authdata **list, *ad, *last;
+    krb5_authdata **testad = NULL;
+    krb5_boolean verify_realm = FALSE;
+    krb5_boolean sign_realm = FALSE;
+    int i;
 
-    ad = ealloc(sizeof(*ad));
-    ad->magic = KV5M_AUTHDATA;
-    ad->ad_type = TEST_AD_TYPE;
-    ad->contents = (uint8_t *)estrdup("db-authdata-test");
-    ad->length = strlen((char *)ad->contents);
+    if (client == NULL && (flags & KRB5_KDB_FLAG_PROTOCOL_TRANSITION))
+        verify_realm = TRUE;
+
+    ad = mkauthdata(context, client_princ, verify_realm);
+
+    if (!(flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY)) {
+        check(krb5_find_authdata(context, tgt_auth_data, NULL,
+                                 TEST_AD_TYPE, &testad));
+        if (testad == NULL || testad[0] == NULL)
+            abort();
+
+        for (i = 0; testad[i]; i++)
+            last = testad[i];
+
+        if (last->length != ad->length ||
+            memcmp(last->contents, ad->contents, ad->length))
+            abort();
+
+        krb5_free_authdata(context, testad);
+
+        if (flags & KRB5_KDB_FLAG_PROTOCOL_TRANSITION) {
+            if (flags & KRB5_KDB_FLAG_CROSS_REALM)
+                sign_realm = TRUE;
+            freeauthdata(ad);
+            ad = mkauthdata(context, client ? client->princ :
+                            client_princ, sign_realm);
+        }
+    }
+
     list = ealloc(2 * sizeof(*list));
     list[0] = ad;
     list[1] = NULL;
