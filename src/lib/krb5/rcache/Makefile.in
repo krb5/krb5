@@ -6,6 +6,7 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 
 STLIBOBJS = \
+	memrcache.o	\
 	rc_base.o	\
 	rc_dfl.o 	\
 	rc_io.o		\
@@ -16,6 +17,7 @@ STLIBOBJS = \
 	rcfns.o
 
 OBJS=	\
+	$(OUTPRE)memrcache.$(OBJEXT)	\
 	$(OUTPRE)rc_base.$(OBJEXT)	\
 	$(OUTPRE)rc_dfl.$(OBJEXT) 	\
 	$(OUTPRE)rc_io.$(OBJEXT)	\
@@ -26,6 +28,7 @@ OBJS=	\
 	$(OUTPRE)rcfns.$(OBJEXT)
 
 SRCS=	\
+	$(srcdir)/memrcache.c	\
 	$(srcdir)/rc_base.c	\
 	$(srcdir)/rc_dfl.c 	\
 	$(srcdir)/rc_io.c	\
@@ -34,6 +37,7 @@ SRCS=	\
 	$(srcdir)/rc_conv.c	\
 	$(srcdir)/ser_rc.c	\
 	$(srcdir)/rcfns.c	\
+	$(srcdir)/t_memrcache.c	\
 	$(srcdir)/t_replay.c
 
 ##DOS##LIBOBJS = $(OBJS)
@@ -41,10 +45,19 @@ SRCS=	\
 all-unix: all-libobjs
 clean-unix:: clean-libobjs
 
+t_memrcache: t_memrcache.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_memrcache.o $(KRB5_BASE_LIBS)
+
 T_REPLAY_OBJS= t_replay.o
 
 t_replay: $(T_REPLAY_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_replay $(T_REPLAY_OBJS) $(KRB5_BASE_LIBS)
+
+check-unix: t_memrcache
+	$(RUN_TEST) ./t_memrcache
+
+clean-unix::
+	$(RM) t_memrcache.o t_memrcache
 
 @libobj_frag@
 
