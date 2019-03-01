@@ -78,6 +78,7 @@ krb5_auth_con_free(krb5_context context, krb5_auth_context auth_context)
     if (auth_context->ad_context)
         krb5_authdata_context_free(context, auth_context->ad_context);
     free(auth_context);
+    k5_memrcache_free(context, auth_context->memrcache);
     return 0;
 }
 

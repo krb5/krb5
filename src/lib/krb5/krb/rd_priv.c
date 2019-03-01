@@ -36,13 +36,15 @@
 
 /*
  * Unmarshal a KRB-PRIV message from der_krbpriv, placing the confidential user
- * data in *userdata_out and replay data in *rdata_out.  The caller should free
- * *userdata_out when finished.
+ * data in *userdata_out, ciphertext in *enc_out, and replay data in
+ * *rdata_out.  The caller should free *userdata_out and *enc_out when
+ * finished.
  */
 static krb5_error_code
 read_krbpriv(krb5_context context, krb5_auth_context authcon,
              const krb5_data *der_krbpriv, const krb5_key key,
-             krb5_replay_data *rdata_out, krb5_data *userdata_out)
+             krb5_replay_data *rdata_out, krb5_data *userdata_out,
+             krb5_enc_data *enc_out)
 {
     krb5_error_code ret;
     krb5_priv *privmsg = NULL;
@@ -84,6 +86,9 @@ read_krbpriv(krb5_context context, krb5_auth_context authcon,
     *userdata_out = encpart->user_data;
     encpart->user_data.data = NULL;
 
+    *enc_out = privmsg->enc_part;
+    memset(&privmsg->enc_part, 0, sizeof(privmsg->enc_part));
+
 cleanup:
     krb5_free_priv_enc_part(context, encpart);
     krb5_free_priv(context, privmsg);
@@ -99,26 +104,24 @@ krb5_rd_priv(krb5_context context, krb5_auth_context authcon,
     krb5_error_code ret;
     krb5_key key;
     krb5_replay_data rdata;
+    krb5_enc_data enc;
     krb5_data userdata = empty_data();
     const krb5_int32 flags = authcon->auth_context_flags;
 
     *userdata_out = empty_data();
+    memset(&enc, 0, sizeof(enc));
 
     if (((flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
          (flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) && rdata_out == NULL)
         return KRB5_RC_REQUIRED;
 
-    if ((flags & KRB5_AUTH_CONTEXT_DO_TIME) && authcon->remote_addr == NULL)
-        return KRB5_REMOTE_ADDR_REQUIRED;
-
     key = (authcon->recv_subkey != NULL) ? authcon->recv_subkey : authcon->key;
     memset(&rdata, 0, sizeof(rdata));
-    ret = read_krbpriv(context, authcon, inbuf, key, &rdata, &userdata);
+    ret = read_krbpriv(context, authcon, inbuf, key, &rdata, &userdata, &enc);
     if (ret)
         goto cleanup;
 
-    ret = k5_privsafe_check_replay(context, authcon, authcon->remote_addr,
-                                   "_priv", &rdata, TRUE);
+    ret = k5_privsafe_check_replay(context, authcon, &rdata, &enc, NULL);
     if (ret)
         goto cleanup;
 
@@ -141,6 +144,7 @@ krb5_rd_priv(krb5_context context, krb5_auth_context authcon,
     userdata = empty_data();
 
 cleanup:
+    krb5_free_data_contents(context, &enc.ciphertext);
     krb5_free_data_contents(context, &userdata);
     return ret;
 }

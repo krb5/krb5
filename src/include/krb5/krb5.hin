@@ -3316,25 +3316,24 @@ krb5_rd_error(krb5_context context, const krb5_data *enc_errbuf,
  * This function parses a @c KRB-SAFE message, verifies its integrity, and
  * stores its data into @a userdata_out.
  *
- * @note The @a rdata_out argument is required if #KRB5_AUTH_CONTEXT_RET_TIME
- * or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.
+ * @note The @a rdata_out argument is required if the
+ * #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set
+ * in @a auth_context.
  *
- * @note @a auth_context must have a remote address set.  This address will be
- * used to verify the sender address in the KRB-SAFE message.  If @a
- * auth_context has a local address set, it will be used to verify the receiver
- * address in the KRB-SAFE message if the message contains one.  Both addresses
- * must use type @c ADDRTYPE_ADDRPORT.
+ * If @a auth_context has a remote address set, the address will be used to
+ * verify the sender address in the KRB-SAFE message.  If @a auth_context has a
+ * local address set, it will be used to verify the receiver address in the
+ * KRB-SAFE message if the message contains one.
  *
  * If the #KRB5_AUTH_CONTEXT_DO_SEQUENCE flag is set in @a auth_context, the
  * sequence number of the KRB-SAFE message is checked against the remote
  * sequence number field of @a auth_context.  Otherwise, the sequence number is
  * not used.
  *
- * If the #KRB5_AUTH_CONTEXT_DO_TIME flag is set in @a auth_context,
- * then two additional checks are performed:
- * @li The timestamp in the message must be within the permitted clock skew
- *     (which is usually five minutes).
- * @li The message must not be a replayed message field in @a auth_context.
+ * If the #KRB5_AUTH_CONTEXT_DO_TIME flag is set in @a auth_context, then the
+ * timestamp in the message is verified to be within the permitted clock skew
+ * of the current time, and the message is checked against an in-memory replay
+ * cache to detect reflections or replays.
  *
  * Use krb5_free_data_contents() to free @a userdata_out when it is no longer
  * needed.
@@ -3358,25 +3357,24 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
  * This function parses a @c KRB-PRIV message, verifies its integrity, and
  * stores its unencrypted data into @a userdata_out.
  *
- * @note If the #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE
- * flag is set in @a auth_context, @a rdata_out is required.
+ * @note The @a rdata_out argument is required if the
+ * #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set
+ * in @a auth_context.
  *
- * @note @a auth_context must have a remote address set.  This address will be
- * used to verify the sender address in the KRB-PRIV message.  If @a
- * auth_context has a local address set, it will be used to verify the receiver
- * address in the KRB-PRIV message if the message contains one.  Both addresses
- * must use type @c ADDRTYPE_ADDRPORT.
+ * If @a auth_context has a remote address set, the address will be used to
+ * verify the sender address in the KRB-PRIV message.  If @a auth_context has a
+ * local address set, it will be used to verify the receiver address in the
+ * KRB-PRIV message if the message contains one.
  *
  * If the #KRB5_AUTH_CONTEXT_DO_SEQUENCE flag is set in @a auth_context, the
- * sequence number of the KRB-SAFE message is checked against the remote
+ * sequence number of the KRB-PRIV message is checked against the remote
  * sequence number field of @a auth_context.  Otherwise, the sequence number is
  * not used.
  *
- * If the #KRB5_AUTH_CONTEXT_DO_TIME flag is set in @a auth_context,
- * then two additional checks are performed:
- * @li The timestamp in the message must be within the permitted clock skew
- *     (which is usually five minutes).
- * @li The message must not be a replayed message field in @a auth_context.
+ * If the #KRB5_AUTH_CONTEXT_DO_TIME flag is set in @a auth_context, then the
+ * timestamp in the message is verified to be within the permitted clock skew
+ * of the current time, and the message is checked against an in-memory replay
+ * cache to detect reflections or replays.
  *
  * Use krb5_free_data_contents() to free @a userdata_out when it is no longer
  * needed.
@@ -5263,18 +5261,22 @@ krb5_kt_read_service_key(krb5_context context, krb5_pointer keyprocarg,
  * optional; if specified, it will be used to form the receiver address used in
  * the message.
  *
- * If #KRB5_AUTH_CONTEXT_DO_TIME flag is set in the @a auth_context, an entry
- * describing the message is entered in the replay cache @a
- * auth_context->rcache which enables the caller to detect if this message is
- * reflected by an attacker.  If #KRB5_AUTH_CONTEXT_DO_TIME is not set, the
- * replay cache is not used.
+ * @note The @a rdata_out argument is required if the
+ * #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set
+ * in @a auth_context.
  *
- * If either #KRB5_AUTH_CONTEXT_DO_SEQUENCE or
- * #KRB5_AUTH_CONTEXT_RET_SEQUENCE is set, the @a auth_context local sequence
- * number will be placed in @a rdata_out as its sequence number.
+ * If the #KRB5_AUTH_CONTEXT_DO_TIME flag is set in @a auth_context, a
+ * timestamp is included in the KRB-SAFE message, and an entry for the message
+ * is entered in an in-memory replay cache to detect if the message is
+ * reflected by an attacker.  If #KRB5_AUTH_CONTEXT_DO_TIME is not set, no
+ * replay cache is used.  If #KRB5_AUTH_CONTEXT_RET_TIME is set in @a
+ * auth_context, a timestamp is included in the KRB-SAFE message and is stored
+ * in @a rdata_out.
  *
- * @note The @a rdata_out argument is required if #KRB5_AUTH_CONTEXT_RET_TIME
- * or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.
+ * If either #KRB5_AUTH_CONTEXT_DO_SEQUENCE or #KRB5_AUTH_CONTEXT_RET_SEQUENCE
+ * is set, the @a auth_context local sequence number is included in the
+ * KRB-SAFE message and then incremented.  If #KRB5_AUTH_CONTEXT_RET_SEQUENCE
+ * is set, the sequence number used is stored in @a rdata_out.
  *
  * Use krb5_free_data_contents() to free @a der_out when it is no longer
  * needed.
@@ -5293,30 +5295,35 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
  * @param [in]  auth_context    Authentication context
  * @param [in]  userdata        User data for @c KRB-PRIV message
  * @param [out] der_out         Formatted @c KRB-PRIV message
- * @param [out] rdata_out       Replay cache handle (NULL if not needed)
+ * @param [out] rdata_out       Replay data (NULL if not needed)
  *
  * This function is similar to krb5_mk_safe(), but the message is encrypted and
  * integrity-protected, not just integrity-protected.
  *
  * The local address in @a auth_context must be set, and is used to form the
- * sender address used in the KRB-SAFE message.  The remote address is
+ * sender address used in the KRB-PRIV message.  The remote address is
  * optional; if specified, it will be used to form the receiver address used in
  * the message.
  *
- * @note If the #KRB5_AUTH_CONTEXT_RET_TIME or
- * #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in @a auth_context, the @a
- * rdata_out is required.
+ * @note The @a rdata_out argument is required if the
+ * #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set
+ * in @a auth_context.
  *
- * @note The flags from @a auth_context specify whether sequence numbers or
- * timestamps will be used to identify the message.  Valid values are:
+ * If the #KRB5_AUTH_CONTEXT_DO_TIME flag is set in @a auth_context, a
+ * timestamp is included in the KRB-PRIV message, and an entry for the message
+ * is entered in an in-memory replay cache to detect if the message is
+ * reflected by an attacker.  If #KRB5_AUTH_CONTEXT_DO_TIME is not set, no
+ * replay cache is used.  If #KRB5_AUTH_CONTEXT_RET_TIME is set in @a
+ * auth_context, a timestamp is included in the KRB-PRIV message and is stored
+ * in @a rdata_out.
  *
- * @li #KRB5_AUTH_CONTEXT_DO_TIME      - Use timestamps in @a outdata
- * @li #KRB5_AUTH_CONTEXT_RET_TIME     - Copy timestamp to @a outdata.
- * @li #KRB5_AUTH_CONTEXT_DO_SEQUENCE  - Use local sequence numbers from
- *                                       @a auth_context in replay cache.
- * @li #KRB5_AUTH_CONTEXT_RET_SEQUENCE - Use local sequence numbers from
- *                                       @a auth_context as a sequence number
- *                                       in the encrypted message @a der_out.
+ * If either #KRB5_AUTH_CONTEXT_DO_SEQUENCE or #KRB5_AUTH_CONTEXT_RET_SEQUENCE
+ * is set, the @a auth_context local sequence number is included in the
+ * KRB-PRIV message and then incremented.  If #KRB5_AUTH_CONTEXT_RET_SEQUENCE
+ * is set, the sequence number used is stored in @a rdata_out.
+ *
+ * Use krb5_free_data_contents() to free @a der_out when it is no longer
+ * needed.
  *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
@@ -5448,11 +5455,33 @@ krb5_recvauth_version(krb5_context context,
  * This function takes an array of credentials @a creds and formats
  * a @c KRB-CRED message @a der_out to pass to krb5_rd_cred().
  *
- * @note If the #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE
- * flag is set in @a auth_context, @a rdata_out is required.
+ * The local and remote addresses in @a auth_context are optional; if either is
+ * specified, they are used to form the sender and receiver addresses in the
+ * KRB-CRED message.
+ *
+ * @note The @a rdata_out argument is required if the
+ * #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set
+ * in @a auth_context.
+ *
+ * If the #KRB5_AUTH_CONTEXT_DO_TIME flag is set in @a auth_context, an entry
+ * for the message is entered in an in-memory replay cache to detect if the
+ * message is reflected by an attacker.  If #KRB5_AUTH_CONTEXT_DO_TIME is not
+ * set, no replay cache is used.  If #KRB5_AUTH_CONTEXT_RET_TIME is set in @a
+ * auth_context, the timestamp used for the KRB-CRED message is stored in @a
+ * rdata_out.
+ *
+ * If either #KRB5_AUTH_CONTEXT_DO_SEQUENCE or #KRB5_AUTH_CONTEXT_RET_SEQUENCE
+ * is set, the @a auth_context local sequence number is included in the
+ * KRB-CRED message and then incremented.  If #KRB5_AUTH_CONTEXT_RET_SEQUENCE
+ * is set, the sequence number used is stored in @a rdata_out.
+ *
+ * Use krb5_free_data_contents() to free @a der_out when it is no longer
+ * needed.
  *
  * The message will be encrypted using the send subkey of @a auth_context if it
- * is present, or the session key otherwise.
+ * is present, or the session key otherwise.  If neither key is present, the
+ * credentials will not be encrypted, and the message should only be sent over
+ * a secure channel.  No replay cache entry is used in this case.
  *
  * @retval
  *  0 Success
@@ -5503,8 +5532,9 @@ krb5_mk_1cred(krb5_context context, krb5_auth_context auth_context,
  * @param [out] creds_out       Null-terminated array of forwarded credentials
  * @param [out] rdata_out       Replay data (NULL if not needed)
  *
- * @note The @a rdata_out argument is required if #KRB5_AUTH_CONTEXT_RET_TIME
- * or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.`
+ * @note The @a rdata_out argument is required if the
+ * #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set
+ * in @a auth_context.`
  *
  * @a creddata will be decrypted using the receiving subkey if it is present in
  * @a auth_context, or the session key if the receiving subkey is not present

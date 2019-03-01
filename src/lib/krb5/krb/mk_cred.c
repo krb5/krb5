@@ -66,14 +66,16 @@ encrypt_credencpart(krb5_context context, krb5_cred_enc_part *encpart,
 
 /*
  * Marshal a KRB-CRED message into der_out, encrypted with key (or unencrypted
- * if key is NULL).  Use the timestamp and sequence number from rdata and the
- * addresses from local_addr and remote_addr (either of which may be NULL).
- * der_out should be freed by the caller when finished.
+ * if key is NULL).  Store the ciphertext in enc_out.  Use the timestamp and
+ * sequence number from rdata and the addresses from local_addr and remote_addr
+ * (either of which may be NULL).  der_out and enc_out should be freed by the
+ * caller when finished.
  */
 static krb5_error_code
 create_krbcred(krb5_context context, krb5_creds **creds, krb5_key key,
                const krb5_replay_data *rdata, krb5_address *local_addr,
-               krb5_address *remote_addr, krb5_data **der_out)
+               krb5_address *remote_addr, krb5_data **der_out,
+               krb5_enc_data *enc_out)
 {
     krb5_error_code ret;
     krb5_cred_enc_part credenc;
@@ -84,6 +86,7 @@ create_krbcred(krb5_context context, krb5_creds **creds, krb5_key key,
     size_t i, ncreds;
 
     *der_out = NULL;
+    memset(enc_out, 0, sizeof(*enc_out));
     memset(&enc, 0, sizeof(enc));
 
     for (ncreds = 0; creds[ncreds] != NULL; ncreds++);
@@ -137,6 +140,9 @@ create_krbcred(krb5_context context, krb5_creds **creds, krb5_key key,
     if (ret)
         goto cleanup;
 
+    *enc_out = enc;
+    memset(&enc, 0, sizeof(enc));
+
 cleanup:
     krb5_free_tickets(context, tickets);
     krb5_free_data_contents(context, &enc.ciphertext);
@@ -154,9 +160,11 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context authcon,
     krb5_key key;
     krb5_replay_data rdata;
     krb5_data *der_krbcred = NULL;
+    krb5_enc_data enc;
     krb5_address *local_addr, *remote_addr, lstorage, rstorage;
 
     *der_out = NULL;
+    memset(&enc, 0, sizeof(enc));
     memset(&lstorage, 0, sizeof(lstorage));
     memset(&rstorage, 0, sizeof(rstorage));
 
@@ -180,14 +188,15 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context authcon,
 
     key = (authcon->send_subkey != NULL) ? authcon->send_subkey : authcon->key;
     ret = create_krbcred(context, creds, key, &rdata, local_addr, remote_addr,
-                         &der_krbcred);
+                         &der_krbcred, &enc);
     if (ret)
         goto cleanup;
 
-    ret = k5_privsafe_check_replay(context, authcon, authcon->local_addr,
-                                   "_forw", &rdata, FALSE);
-    if (ret)
-        goto cleanup;
+    if (key != NULL) {
+        ret = k5_privsafe_check_replay(context, authcon, NULL, &enc, NULL);
+        if (ret)
+            goto cleanup;
+    }
 
     *der_out = der_krbcred;
     der_krbcred = NULL;
@@ -196,6 +205,7 @@ krb5_mk_ncred(krb5_context context, krb5_auth_context authcon,
         authcon->local_seq_number++;
 
 cleanup:
+    krb5_free_data_contents(context, &enc.ciphertext);
     free(lstorage.contents);
     free(rstorage.contents);
     if (der_krbcred != NULL) {

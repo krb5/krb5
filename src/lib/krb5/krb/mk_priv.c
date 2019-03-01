@@ -35,16 +35,16 @@
 #include "auth_con.h"
 
 /*
- * Marshal a KRB-PRIV message into der_out, encrypted with key.  Use the
- * timestamp and sequence number from rdata and the addresses from local_addr
- * and remote_addr (the second of which may be NULL).  der_out should be freed
- * by the caller when finished.
+ * Marshal a KRB-PRIV message into der_out, encrypted with key.  Store the
+ * ciphertext in enc_out.  Use the timestamp and sequence number from rdata and
+ * the addresses from local_addr and remote_addr (the second of which may be
+ * NULL).  der_out and enc_out should be freed by the caller when finished.
  */
 static krb5_error_code
 create_krbpriv(krb5_context context, const krb5_data *userdata,
                krb5_key key, const krb5_replay_data *rdata,
                krb5_address *local_addr, krb5_address *remote_addr,
-               krb5_data *cstate, krb5_data *der_out)
+               krb5_data *cstate, krb5_data *der_out, krb5_enc_data *enc_out)
 {
     krb5_enctype enctype = krb5_k_key_enctype(context, key);
     krb5_error_code ret;
@@ -91,6 +91,9 @@ create_krbpriv(krb5_context context, const krb5_data *userdata,
     *der_out = *der_krbpriv;
     free(der_krbpriv);
 
+    *enc_out = privmsg.enc_part;
+    memset(&privmsg.enc_part, 0, sizeof(privmsg.enc_part));
+
 cleanup:
     zapfree(privmsg.enc_part.ciphertext.data,
             privmsg.enc_part.ciphertext.length);
@@ -111,9 +114,11 @@ krb5_mk_priv(krb5_context context, krb5_auth_context authcon,
     krb5_key key;
     krb5_replay_data rdata;
     krb5_data der_krbpriv = empty_data();
+    krb5_enc_data enc;
     krb5_address *local_addr, *remote_addr, lstorage, rstorage;
 
     *der_out = empty_data();
+    memset(&enc, 0, sizeof(enc));
     memset(&lstorage, 0, sizeof(lstorage));
     memset(&rstorage, 0, sizeof(rstorage));
     if (!authcon->local_addr)
@@ -130,12 +135,11 @@ krb5_mk_priv(krb5_context context, krb5_auth_context authcon,
 
     key = (authcon->send_subkey != NULL) ? authcon->send_subkey : authcon->key;
     ret = create_krbpriv(context, userdata, key, &rdata, local_addr,
-                         remote_addr, &authcon->cstate, &der_krbpriv);
+                         remote_addr, &authcon->cstate, &der_krbpriv, &enc);
     if (ret)
         goto cleanup;
 
-    ret = k5_privsafe_check_replay(context, authcon, authcon->local_addr,
-                                   "_priv", &rdata, FALSE);
+    ret = k5_privsafe_check_replay(context, authcon, NULL, &enc, NULL);
     if (ret)
         goto cleanup;
 
@@ -147,6 +151,7 @@ krb5_mk_priv(krb5_context context, krb5_auth_context authcon,
 
 cleanup:
     krb5_free_data_contents(context, &der_krbpriv);
+    zapfree(enc.ciphertext.data, enc.ciphertext.length);
     free(lstorage.contents);
     free(rstorage.contents);
     return ret;

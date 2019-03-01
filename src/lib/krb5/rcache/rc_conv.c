@@ -74,3 +74,23 @@ krb5_rc_hash_message(krb5_context context, const krb5_data *message,
     *out = hash;
     return 0;
 }
+
+krb5_error_code
+k5_rc_tag_from_ciphertext(krb5_context context, const krb5_enc_data *enc,
+                          krb5_data *tag_out)
+{
+    krb5_error_code ret;
+    const krb5_data *cdata = &enc->ciphertext;
+    unsigned int len;
+
+    *tag_out = empty_data();
+
+    ret = krb5_c_crypto_length(context, enc->enctype,
+                               KRB5_CRYPTO_TYPE_CHECKSUM, &len);
+    if (ret)
+        return ret;
+    if (cdata->length < len)
+        return EINVAL;
+    *tag_out = make_data(cdata->data + cdata->length - len, len);
+    return 0;
+}

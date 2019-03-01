@@ -8,10 +8,10 @@ RUN_DB_TEST = $(RUN_SETUP) KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf \
 
 OBJS= adata.o etinfo.o forward.o gcred.o hist.o hooks.o hrealm.o \
 	icinterleave.o icred.o kdbtest.o localauth.o plugorder.o rdreq.o \
-	responder.o s2p.o s4u2proxy.o unlockiter.o
+	replay.o responder.o s2p.o s4u2proxy.o unlockiter.o
 EXTRADEPSRCS= adata.c etinfo.c forward.c gcred.c hist.c hooks.c hrealm.c \
-	icinterleave.c icred.c kdbtest.c localauth.c plugorder.c rdreq.o \
-	responder.c s2p.c s4u2proxy.c unlockiter.c
+	icinterleave.c icred.c kdbtest.c localauth.c plugorder.c rdreq.c \
+	replay.c responder.c s2p.c s4u2proxy.c unlockiter.c
 
 TEST_DB = ./testdb
 TEST_REALM = FOO.TEST.REALM
@@ -62,6 +62,9 @@ plugorder: plugorder.o $(KRB5_BASE_DEPLIBS)
 
 rdreq: rdreq.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ rdreq.o $(KRB5_BASE_LIBS)
+
+replay: replay.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ replay.o $(KRB5_BASE_LIBS)
 
 responder: responder.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ responder.o $(KRB5_BASE_LIBS)
@@ -119,7 +122,7 @@ kdb_check: kdc.conf krb5.conf
 	$(RM) $(TEST_DB)* stash_file
 
 check-pytests: adata etinfo forward gcred hist hooks hrealm icinterleave icred
-check-pytests: kdbtest localauth plugorder rdreq responder s2p s4u2proxy
+check-pytests: kdbtest localauth plugorder rdreq replay responder s2p s4u2proxy
 check-pytests: unlockiter
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_hooks.py $(PYTESTFLAGS)
@@ -178,10 +181,11 @@ check-pytests: unlockiter
 	$(RUNPYTEST) $(srcdir)/t_kdcpolicy.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_u2u.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kdcoptions.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_replay.py $(PYTESTFLAGS)
 
 clean:
 	$(RM) adata etinfo forward gcred hist hooks hrealm icinterleave icred
-	$(RM) kdbtest localauth plugorder rdreq responder s2p s4u2proxy
+	$(RM) kdbtest localauth plugorder rdreq replay responder s2p s4u2proxy
 	$(RM) unlockiter
 	$(RM) krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap

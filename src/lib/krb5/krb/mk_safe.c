@@ -36,15 +36,16 @@
 
 /*
  * Marshal a KRB-SAFE message into der_out, with a keyed checksum of type
- * sumtype.  Use the timestamp and sequence number from rdata and the addresses
- * from local_addr and remote_addr (the second of which may be NULL).  der_out
- * should be freed by the caller when finished.
+ * sumtype.  Store the checksum in cksum_out.  Use the timestamp and sequence
+ * number from rdata and the addresses from local_addr and remote_addr (the
+ * second of which may be NULL).  der_out and cksum_out should be freed by the
+ * caller when finished.
  */
 static krb5_error_code
 create_krbsafe(krb5_context context, const krb5_data *userdata, krb5_key key,
                const krb5_replay_data *rdata, krb5_address *local_addr,
                krb5_address *remote_addr, krb5_cksumtype sumtype,
-               krb5_data *der_out)
+               krb5_data *der_out, krb5_checksum *cksum_out)
 {
     krb5_error_code ret;
     krb5_safe safemsg;
@@ -85,12 +86,14 @@ create_krbsafe(krb5_context context, const krb5_data *userdata, krb5_key key,
     /* Encode the message again with the real checksum. */
     safemsg.checksum = &safe_checksum;
     ret = encode_krb5_safe(&safemsg, &der_krbsafe);
-    krb5_free_checksum_contents(context, &safe_checksum);
-    if (ret)
+    if (ret) {
+        krb5_free_checksum_contents(context, &safe_checksum);
         return ret;
+    }
 
     *der_out = *der_krbsafe;
     free(der_krbsafe);
+    *cksum_out = safe_checksum;
     return 0;
 }
 
@@ -126,10 +129,12 @@ krb5_mk_safe(krb5_context context, krb5_auth_context authcon,
     krb5_key key;
     krb5_replay_data rdata;
     krb5_data der_krbsafe = empty_data();
+    krb5_checksum cksum;
     krb5_address *local_addr, *remote_addr, lstorage, rstorage;
     krb5_cksumtype sumtype;
 
     *der_out = empty_data();
+    memset(&cksum, 0, sizeof(cksum));
     memset(&lstorage, 0, sizeof(lstorage));
     memset(&rstorage, 0, sizeof(rstorage));
     if (authcon->local_addr == NULL)
@@ -147,12 +152,11 @@ krb5_mk_safe(krb5_context context, krb5_auth_context authcon,
     key = (authcon->send_subkey != NULL) ? authcon->send_subkey : authcon->key;
     sumtype = safe_cksumtype(context, authcon, key->keyblock.enctype);
     ret = create_krbsafe(context, userdata, key, &rdata, local_addr,
-                         remote_addr, sumtype, &der_krbsafe);
+                         remote_addr, sumtype, &der_krbsafe, &cksum);
     if (ret)
         goto cleanup;
 
-    ret = k5_privsafe_check_replay(context, authcon, authcon->local_addr,
-                                   "_safe", &rdata, FALSE);
+    ret = k5_privsafe_check_replay(context, authcon, NULL, NULL, &cksum);
     if (ret)
         goto cleanup;
 
@@ -164,6 +168,7 @@ krb5_mk_safe(krb5_context context, krb5_auth_context authcon,
 
 cleanup:
     krb5_free_data_contents(context, &der_krbsafe);
+    krb5_free_checksum_contents(context, &cksum);
     free(lstorage.contents);
     free(rstorage.contents);
     return ret;

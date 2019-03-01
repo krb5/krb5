@@ -106,38 +106,38 @@ k5_privsafe_gen_addrs(krb5_context context, krb5_auth_context authcon,
 
 krb5_error_code
 k5_privsafe_check_replay(krb5_context context, krb5_auth_context authcon,
-                         krb5_address *addr, const char *uniq,
                          const krb5_replay_data *rdata,
-                         krb5_boolean check_time)
+                         const krb5_enc_data *enc, const krb5_checksum *cksum)
 {
     krb5_error_code ret;
-    krb5_donot_replay replay;
-    char *client = NULL;
+    krb5_data tag;
+
+    assert(enc != NULL || cksum != NULL);
 
     if (!(authcon->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME))
         return 0;
 
-    if (authcon->rcache == NULL)
-        return KRB5_RC_REQUIRED;
-
-    if (check_time) {
+    if (rdata != NULL) {
         ret = krb5_check_clockskew(context, rdata->timestamp);
         if (ret)
             return ret;
     }
 
-    ret = krb5_gen_replay_name(context, addr, uniq, &client);
-    if (ret)
-        return ret;
+    if (enc != NULL) {
+        ret = k5_rc_tag_from_ciphertext(context, enc, &tag);
+        if (ret)
+            return ret;
+    } else {
+        tag = make_data(cksum->contents, cksum->length);
+    }
 
-    replay.client = client;
-    replay.server = "";
-    replay.msghash = NULL;
-    replay.cusec = rdata->usec;
-    replay.ctime = rdata->timestamp;
-    ret = krb5_rc_store(context, authcon->rcache, &replay);
-    free(replay.client);
-    return ret;
+    if (authcon->memrcache == NULL) {
+        ret = k5_memrcache_create(context, &authcon->memrcache);
+        if (ret)
+            return ret;
+    }
+
+    return k5_memrcache_store(context, authcon->memrcache, &tag);
 }
 
 /*

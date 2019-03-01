@@ -159,13 +159,16 @@ k5_privsafe_gen_addrs(krb5_context context, krb5_auth_context authcon,
                       krb5_address *lstorage, krb5_address *rstorage,
                       krb5_address **local_out, krb5_address **remote_out);
 
-/* If the DO_TIME flag is set in authcon, store a replay record.  If check_time
- * is true, also check that the timestamp is within clock skew. */
+/*
+ * If the DO_TIME flag is set in authcon, store a replay record in a memory
+ * replay cache (initializing one if necessary).  Either enc or cksum must be
+ * non-null.  If rdata is not null, also check that its timestamp is within
+ * clock skew.
+ */
 krb5_error_code
 k5_privsafe_check_replay(krb5_context context, krb5_auth_context authcon,
-                         krb5_address *addr, const char *uniq,
                          const krb5_replay_data *rdata,
-                         krb5_boolean check_time);
+                         const krb5_enc_data *enc, const krb5_checksum *cksum);
 
 krb5_boolean
 k5_privsafe_check_seqnum(krb5_context ctx, krb5_auth_context ac,

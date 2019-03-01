@@ -158,9 +158,6 @@ krb5_rd_cred(krb5_context context, krb5_auth_context authcon,
         replaydata_out == NULL)
         return KRB5_RC_REQUIRED;
 
-    if ((flags & KRB5_AUTH_CONTEXT_DO_TIME) && authcon->rcache == NULL)
-        return KRB5_RC_REQUIRED;
-
     ret = decode_krb5_cred(creddata, &krbcred);
     if (ret)
         goto cleanup;
@@ -173,13 +170,13 @@ krb5_rd_cred(krb5_context context, krb5_auth_context authcon,
     if (ret)
         goto cleanup;
 
-    rdata.timestamp = encpart->timestamp;
-    rdata.usec = encpart->usec;
-    rdata.seq = encpart->nonce;
-    ret = k5_privsafe_check_replay(context, authcon, authcon->remote_addr,
-                                   "_forw", &rdata, TRUE);
-    if (ret)
-        goto cleanup;
+    if (authcon->recv_subkey != NULL || authcon->key != NULL) {
+        rdata.timestamp = encpart->timestamp;
+        ret = k5_privsafe_check_replay(context, authcon, &rdata,
+                                       &krbcred->enc_part, NULL);
+        if (ret)
+            goto cleanup;
+    }
 
     if (flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) {
         if (authcon->remote_seq_number != (uint32_t)encpart->nonce) {

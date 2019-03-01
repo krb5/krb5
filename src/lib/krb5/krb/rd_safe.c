@@ -36,23 +36,26 @@
 
 /*
  * Unmarshal a KRB-SAFE message from der_krbsafe, placing the
- * integrity-protected user data in *userdata_out and replay data in
- * *rdata_out.  The caller should free *userdata_out when finished.
+ * integrity-protected user data in *userdata_out, replay data in *rdata_out,
+ * and checksum in *cksum_out.  The caller should free *userdata_out and
+ * *cksum_out when finished.
  */
 static krb5_error_code
 read_krbsafe(krb5_context context, krb5_auth_context ac,
              const krb5_data *der_krbsafe, krb5_key key,
-             krb5_replay_data *rdata_out, krb5_data *userdata_out)
+             krb5_replay_data *rdata_out, krb5_data *userdata_out,
+             krb5_checksum **cksum_out)
 {
     krb5_error_code ret;
     krb5_safe *krbsafe;
     krb5_data *safe_body = NULL, *der_zerosafe = NULL;
-    krb5_checksum zero_cksum, *safe_cksum;
+    krb5_checksum zero_cksum, *safe_cksum = NULL;
     krb5_octet zero_octet = 0;
     krb5_boolean valid;
     struct krb5_safe_with_body swb;
 
     *userdata_out = empty_data();
+    *cksum_out = NULL;
     if (!krb5_is_krb_safe(der_krbsafe))
         return KRB5KRB_AP_ERR_MSG_TYPE;
 
@@ -75,7 +78,8 @@ read_krbsafe(krb5_context context, krb5_auth_context ac,
     if (ret)
         goto cleanup;
 
-    /* Regenerate the KRB-SAFE message without the checksum. */
+    /* Regenerate the KRB-SAFE message without the checksum.  Save the message
+     * checksum to verify. */
     safe_cksum = krbsafe->checksum;
     zero_cksum.length = 0;
     zero_cksum.checksum_type = 0;
@@ -84,7 +88,7 @@ read_krbsafe(krb5_context context, krb5_auth_context ac,
     swb.body = safe_body;
     swb.safe = krbsafe;
     ret = encode_krb5_safe_with_body(&swb, &der_zerosafe);
-    krbsafe->checksum = safe_cksum;
+    krbsafe->checksum = NULL;
     if (ret)
         goto cleanup;
 
@@ -109,6 +113,9 @@ read_krbsafe(krb5_context context, krb5_auth_context ac,
     *userdata_out = krbsafe->user_data;
     krbsafe->user_data.data = NULL;
 
+    *cksum_out = safe_cksum;
+    safe_cksum = NULL;
+
 cleanup:
     if (der_zerosafe != NULL) {
         zap(der_zerosafe->data, der_zerosafe->length);
@@ -116,6 +123,7 @@ cleanup:
     }
     krb5_free_data(context, safe_body);
     krb5_free_safe(context, krbsafe);
+    krb5_free_checksum(context, safe_cksum);
     return ret;
 }
 
@@ -128,6 +136,7 @@ krb5_rd_safe(krb5_context context, krb5_auth_context authcon,
     krb5_key key;
     krb5_replay_data rdata;
     krb5_data userdata = empty_data();
+    krb5_checksum *cksum;
     const krb5_int32 flags = authcon->auth_context_flags;
 
     *userdata_out = empty_data();
@@ -136,17 +145,14 @@ krb5_rd_safe(krb5_context context, krb5_auth_context authcon,
          (flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) && rdata_out == NULL)
         return KRB5_RC_REQUIRED;
 
-    if ((flags & KRB5_AUTH_CONTEXT_DO_TIME) && authcon->remote_addr == NULL)
-        return KRB5_REMOTE_ADDR_REQUIRED;
-
     key = (authcon->recv_subkey != NULL) ? authcon->recv_subkey : authcon->key;
     memset(&rdata, 0, sizeof(rdata));
-    ret = read_krbsafe(context, authcon, inbuf, key, &rdata, &userdata);
+    ret = read_krbsafe(context, authcon, inbuf, key, &rdata, &userdata,
+                       &cksum);
     if (ret)
         goto cleanup;
 
-    ret = k5_privsafe_check_replay(context, authcon, authcon->remote_addr,
-                                   "_safe", &rdata, TRUE);
+    ret = k5_privsafe_check_replay(context, authcon, &rdata, NULL, cksum);
     if (ret)
         goto cleanup;
 
@@ -170,5 +176,6 @@ krb5_rd_safe(krb5_context context, krb5_auth_context authcon,
 
 cleanup:
     krb5_free_data_contents(context, &userdata);
+    krb5_free_checksum(context, cksum);
     return ret;
 }

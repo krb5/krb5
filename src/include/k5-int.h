@@ -1989,6 +1989,12 @@ krb5_error_code krb5_auth_to_rep(krb5_context, krb5_tkt_authent *,
 krb5_error_code krb5_rc_hash_message(krb5_context context,
                                      const krb5_data *message, char **out);
 
+/* Set *tag_out to the integrity tag of *enc.  (Does not allocate memory;
+ * returned buffer is a subrange of *ctext.) */
+krb5_error_code
+k5_rc_tag_from_ciphertext(krb5_context context, const krb5_enc_data *enc,
+                          krb5_data *tag_out);
+
 krb5_error_code KRB5_CALLCONV
 krb5_rc_initialize(krb5_context, krb5_rcache, krb5_deltat);
 
