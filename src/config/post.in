@@ -181,7 +181,7 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/deps $(BUILDTOP)/config.status \
 $(BUILDTOP)/config.status: $(top_srcdir)/configure
 	(cd $(BUILDTOP) && $(SHELL) config.status --recheck)
 $(top_srcdir)/configure: @MAINT@ \
-		$(top_srcdir)/configure.in \
+		$(top_srcdir)/configure.ac \
 		$(top_srcdir)/patchlevel.h \
 		$(top_srcdir)/aclocal.m4
 	(cd $(top_srcdir) && \

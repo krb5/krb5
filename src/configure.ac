@@ -916,7 +916,7 @@ ath_compat=compat,)
 AC_CHECK_PROG(have_RUNTEST,runtest,runtest)
 AC_CHECK_PROG(have_PERL,perl,perl)
 if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
- 	DO_TEST=ok
+	DO_TEST=ok
 fi
 AC_SUBST(DO_TEST)
 
