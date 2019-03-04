@@ -589,9 +589,11 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
      * Note that according to the referrals draft we should
      * always canonicalize enterprise principal names.
      */
-    if (isflagset(state->request->kdc_options, KDC_OPT_CANONICALIZE) ||
-        state->request->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL) {
+    if (isflagset(state->request->kdc_options, KDC_OPT_CANONICALIZE)) {
         setflag(state->c_flags, KRB5_KDB_FLAG_CANONICALIZE);
+        setflag(state->c_flags, KRB5_KDB_FLAG_ALIAS_OK);
+    }
+    if (state->request->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL) {
         setflag(state->c_flags, KRB5_KDB_FLAG_ALIAS_OK);
     }
     if (include_pac_p(kdc_context, state->request)) {

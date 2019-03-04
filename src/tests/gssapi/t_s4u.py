@@ -208,8 +208,8 @@ msgs = ('Getting initial credentials for enterprise\\@abc@SREALM',
         '/Generic preauthentication failure',
         'Getting credentials enterprise\\@abc@UREALM -> user@SREALM',
         'TGS reply is for enterprise\@abc@UREALM -> user@SREALM')
-#r1.run(['./t_s4u', 'e:enterprise@abc@NOREALM', '-', r1.keytab],
-#       expected_trace=msgs)
+r1.run(['./t_s4u', 'e:enterprise@abc@NOREALM', '-', r1.keytab],
+       expected_trace=msgs)
 
 r1.stop()
 r2.stop()

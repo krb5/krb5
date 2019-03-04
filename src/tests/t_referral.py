@@ -116,13 +116,34 @@ realm.stop()
 mark('client referrals')
 kdcconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
+                                  'princs': {'krbtgt/$realm':
+                                             {'keys': 'aes128-cts'},
+                                            'r1_user':
+                                             {'keys': 'aes128-cts'}},
                                   'alias': {'user': '@KRBTEST2.COM',
+                                            'u_r1': 'r1_user',
+                                            'r1_u@XYZ': 'r1_user',
                                             'abc@XYZ': '@KRBTEST2.COM'}}}}
 r1, r2 = cross_realms(2, xtgts=(),
                       args=({'kdc_conf': kdcconf, 'create_kdb': False}, None),
                       create_host=False)
 r2.addprinc('abc\@XYZ', 'pw')
 r1.start_kdc()
+
+r1.extract_keytab('r1_user', r1.keytab)
+r1.kinit('r1_user', None, ['-k', '-t', r1.keytab])
+r1.klist('r1_user@KRBTEST1.COM', 'krbtgt/KRBTEST1.COM')
+# to test in-realm aliases, we'd need a way to change the name in the keytab
+# (klist -K | ktutil), or simpler, to add pw config to kdb_test module.
+#r1.kinit('u_r1', None, ['-k', '-t', r1.keytab])
+#r1.klist('u_r1@KRBTEST1.COM', 'krbtgt/KRBTEST1.COM')
+#r1.kinit('u_r1', None, ['-C', '-k', '-t', r1.keytab])
+#r1.klist('r1_user@KRBTEST1.COM', 'krbtgt/KRBTEST1.COM')
+#r1.kinit('r1_u@XYZ', None, ['-E', '-k', '-t', r1.keytab])
+#r1.klist('r1_u@XYZ@KRBTEST1.COM', 'krbtgt/KRBTEST1.COM') # or r1_user ?
+#r1.kinit('r1_u@XYZ', None, ['-C', '-E', '-k', '-t', r1.keytab])
+#r1.klist('r1_user@KRBTEST1.COM', 'krbtgt/KRBTEST1.COM')
+
 r1.kinit('user', expected_code=1,
          expected_msg='not found in Kerberos database')
 r1.kinit('user', password('user'), ['-C'])

@@ -334,14 +334,18 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
                                   &search_name));
     canon = get_string(h, "alias", search_name, NULL);
     if (canon != NULL) {
-        if (!(flags & KRB5_KDB_FLAG_ALIAS_OK) &&
-            search_for->type != KRB5_NT_ENTERPRISE_PRINCIPAL) {
-            ret = KRB5_KDB_NOENTRY;
-            goto cleanup;
-        }
         check(krb5_parse_name(context, canon, &princ));
         if (!krb5_realm_compare(context, search_for, princ)) {
             if (flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) {
+                /* Per RFC 6806 section 7. Client Referrals, the
+                 * canonicalize flag must be set. Note that Windows KDCs do
+                 * not seem to require it as they'll return client referral
+                 * for enterprise name even if the flag isn't set. */
+                if (!(flags & KRB5_KDB_FLAG_ALIAS_OK)) {
+                    ret = KRB5_KDB_NOENTRY;
+                    goto cleanup;
+                }
+
                 /* Return a client referral by creating an entry with only the
                  * principal set. */
                 *entry = ealloc(sizeof(**entry));
@@ -385,8 +389,15 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
     /* No error exits after this point. */
 
     ent = ealloc(sizeof(*ent));
-    ent->princ = princ;
-    princ = NULL;
+
+    /* Windows only canonicalize client names if the canonicalize flag is
+     * set on the request. MIT always canonicalize enterprise principals.
+     * For Windoes behaviour, check KRB5_KDB_FLAG_CANONICALIZE instead. */
+    if (flags & KRB5_KDB_FLAG_ALIAS_OK){
+        ent->princ = princ;
+        princ = NULL;
+    } else
+        check(krb5_copy_principal(context, search_for, &ent->princ));
 
     flagstr = get_string(h, "princs", ename, "flags");
     if (flagstr != NULL) {
