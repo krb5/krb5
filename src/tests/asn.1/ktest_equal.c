@@ -1055,7 +1055,7 @@ ktest_equal_kkdcp_message(krb5_kkdcp_message *ref, krb5_kkdcp_message *var)
     else if (ref == NULL || var == NULL) return FALSE;
     p = p && data_eq(ref->kerb_message, var->kerb_message);
     p = p && data_eq(ref->target_domain, var->target_domain);
-    p = p && (ref->dclocator_hint == var->dclocator_hint);
+    p = p && scalar_equal(dclocator_hint);
     return p;
 }
 
@@ -1098,7 +1098,7 @@ ktest_equal_secure_cookie(krb5_secure_cookie *ref, krb5_secure_cookie *var)
     if (ref == var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     p = p && ktest_equal_sequence_of_pa_data(ref->data, var->data);
-    p = p && ref->time == ref->time;
+    p = p && scalar_equal(time);
     return p;
 }
 
