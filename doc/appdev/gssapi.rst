@@ -258,13 +258,13 @@ ticket-granting ticket, if the KDC is configured to allow it.
 
 To perform a constrained delegation operation, the intermediate
 service must submit to the KDC an "evidence ticket" from the client to
-the intermediate service with the forwardable bit set.  An evidence
-ticket can be acquired when the client authenticates to the
-intermediate service with Kerberos, or with an S4U2Self request if the
-KDC allows it.  The MIT krb5 GSSAPI library represents an evidence
-ticket using a "proxy credential", which is a special kind of
-gss_cred_id_t object whose underlying credential cache contains the
-evidence ticket and a krbtgt ticket for the intermediate service.
+the intermediate service.  An evidence ticket can be acquired when the
+client authenticates to the intermediate service with Kerberos, or
+with an S4U2Self request if the KDC allows it.  The MIT krb5 GSSAPI
+library represents an evidence ticket using a "proxy credential",
+which is a special kind of gss_cred_id_t object whose underlying
+credential cache contains the evidence ticket and a krbtgt ticket for
+the intermediate service.
 
 To acquire a proxy credential during client authentication, the
 service should first create an acceptor credential using the
@@ -273,9 +273,9 @@ credential as the *acceptor_cred_handle* to gss_accept_sec_context_,
 and also pass a *delegated_cred_handle* output parameter to receive a
 proxy credential containing the evidence ticket.  The output value of
 *delegated_cred_handle* may be a delegated ticket-granting ticket if
-the client sent one, or a proxy credential if the client authenticated
-with a forwardable service ticket, or **GSS_C_NO_CREDENTIAL** if
-neither is the case.
+the client sent one, or a proxy credential if not.  If the library can
+determine that the client's ticket is not a valid evidence ticket, it
+will place **GSS_C_NO_CREDENTIAL** in *delegated_cred_handle*.
 
 To acquire a proxy credential using an S4U2Self request, the service
 can use the following GSSAPI extension::
@@ -296,17 +296,10 @@ request to the KDC for a ticket from *desired_name* to the
 intermediate service.  Both *icred* and *desired_name* are required
 for this function; passing **GSS_C_NO_CREDENTIAL** or
 **GSS_C_NO_NAME** will cause the call to fail.  *icred* must contain a
-krbtgt ticket for the intermediate service.  If the KDC returns a
-forwardable ticket, the result of this operation is a proxy
-credential; if it is not forwardable, the result is a regular
-credential for *desired_name*.
-
-A recent KDC will usually allow any service to acquire a ticket from a
-client to itself with an S4U2Self request, but the ticket will only be
-forwardable if the service has a specific privilege.  In the MIT krb5
-KDC, this privilege is determined by the **ok_to_auth_as_delegate**
-bit on the intermediate service's principal entry, which can be
-configured with :ref:`kadmin(1)`.
+krbtgt ticket for the intermediate service.  The result of this
+operation is a proxy credential.  (Prior to release 1.18, the result
+of this operation may be a regular credential for *desired_name*, if
+the KDC issues a non-forwardable ticket.)
 
 Once the intermediate service has a proxy credential, it can simply
 pass it to gss_init_sec_context_ as the *initiator_cred_handle*

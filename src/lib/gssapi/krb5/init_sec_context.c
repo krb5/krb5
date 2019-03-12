@@ -196,7 +196,6 @@ static krb5_error_code get_credentials(context, cred, server, now,
         if (code)
             goto cleanup;
 
-        assert(evidence_creds.ticket_flags & TKT_FLG_FORWARDABLE);
         in_creds.client = cred->impersonator;
         in_creds.second_ticket = evidence_creds.ticket;
         flags = KRB5_GC_CANONICALIZE | KRB5_GC_CONSTRAINED_DELEGATION;

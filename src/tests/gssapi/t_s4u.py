@@ -47,23 +47,20 @@ if ('auth1: ' + realm.user_princ not in output or
     'NOT_ALLOWED_TO_DELEGATE' not in output):
     fail('krb5 -> s4u2proxy (SPNEGO)')
 
-# Try krb5 -> S4U2Proxy without forwardable user creds.  This should
-# result in no delegated credential being created by
-# accept_sec_context.
+# Try krb5 -> S4U2Proxy without forwardable user creds.
 realm.kinit(realm.user_princ, password('user'), ['-c', usercache])
-realm.run(['./t_s4u2proxy_krb5', usercache, storagecache, pservice1,
-           pservice1, pservice2], expected_msg='no credential delegated')
+output = realm.run(['./t_s4u2proxy_krb5', usercache, storagecache, pservice1,
+                   pservice1, pservice2], expected_code=1)
+if ('auth1: ' + realm.user_princ not in output or
+    'EVIDENCE_TKT_NOT_FORWARDABLE' not in output):
+    fail('krb5 -> s4u2proxy not-forwardable')
 
-# Try S4U2Self.  Ask for an S4U2Proxy step; this won't happen because
+# Try S4U2Self.  Ask for an S4U2Proxy step; this won't succeed because
 # service/1 isn't allowed to get a forwardable S4U2Self ticket.
-output = realm.run(['./t_s4u', puser, pservice2])
-if ('Warning: no delegated cred handle' not in output or
-    'Source name:\t' + realm.user_princ not in output):
-    fail('s4u2self')
-output = realm.run(['./t_s4u', '--spnego', puser, pservice2])
-if ('Warning: no delegated cred handle' not in output or
-    'Source name:\t' + realm.user_princ not in output):
-    fail('s4u2self (SPNEGO)')
+realm.run(['./t_s4u', puser, pservice2], expected_code=1,
+          expected_msg='EVIDENCE_TKT_NOT_FORWARDABLE')
+realm.run(['./t_s4u', '--spnego', puser, pservice2], expected_code=1,
+          expected_msg='EVIDENCE_TKT_NOT_FORWARDABLE')
 
 # Correct that problem and try again.  As above, the S4U2Proxy step
 # won't actually succeed since we don't support that in DB2.

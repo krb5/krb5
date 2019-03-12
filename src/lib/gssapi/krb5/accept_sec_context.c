@@ -945,8 +945,7 @@ kg_accept_krb5(minor_status, context_handle,
 
     if (delegated_cred_handle != NULL &&
         deleg_cred == NULL && /* no unconstrained delegation */
-        cred->usage == GSS_C_BOTH &&
-        (ticket->enc_part2->flags & TKT_FLG_FORWARDABLE)) {
+        cred->usage == GSS_C_BOTH) {
         /*
          * Now, we always fabricate a delegated credentials handle
          * containing the service ticket to ourselves, which can be

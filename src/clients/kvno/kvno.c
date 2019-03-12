@@ -148,11 +148,7 @@ main(int argc, char *argv[])
     }
 
     if (proxy) {
-        if (keytab_name == NULL) {
-            fprintf(stderr, _("Option -P (constrained delegation) "
-                              "requires keytab to be specified\n"));
-            xusage();
-        } else if (!impersonate) {
+        if (!impersonate) {
             fprintf(stderr, _("Option -P (constrained delegation) requires "
                               "option -I|-U|-F (protocol transition)\n"));
             xusage();
@@ -360,25 +356,27 @@ kvno(const char *name, krb5_ccache ccache, krb5_principal me,
             printf(_("%s: kvno = %d, keytab entry valid\n"), princ,
                    ticket->enc_part.kvno);
         }
-        if (proxy) {
-            krb5_free_creds(context, out_creds);
-            out_creds = NULL;
-
-            in_creds.client = ticket->enc_part2->client;
-            in_creds.server = server;
-
-            ret = krb5_get_credentials_for_proxy(context, KRB5_GC_CANONICALIZE,
-                                                 ccache, &in_creds, ticket,
-                                                 &out_creds);
-            if (ret) {
-                com_err(prog, ret, _("%s: constrained delegation failed"),
-                        princ);
-                goto cleanup;
-            }
-        }
     } else {
         if (!quiet)
             printf(_("%s: kvno = %d\n"), princ, ticket->enc_part.kvno);
+    }
+
+    if (proxy) {
+        in_creds.client = out_creds->client;
+        out_creds->client = NULL;
+        krb5_free_creds(context, out_creds);
+        out_creds = NULL;
+        in_creds.server = server;
+
+        ret = krb5_get_credentials_for_proxy(context, KRB5_GC_CANONICALIZE,
+                                             ccache, &in_creds, ticket,
+                                             &out_creds);
+        krb5_free_principal(context, in_creds.client);
+        if (ret) {
+            com_err(prog, ret, _("%s: constrained delegation failed"),
+                    princ);
+            goto cleanup;
+        }
     }
 
 cleanup:

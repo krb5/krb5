@@ -1150,24 +1150,19 @@ krb5_get_credentials_for_proxy(krb5_context context,
 
     *out_creds = NULL;
 
-    if (in_creds == NULL || in_creds->client == NULL ||
-        evidence_tkt == NULL || evidence_tkt->enc_part2 == NULL) {
+    if (in_creds == NULL || in_creds->client == NULL || evidence_tkt == NULL) {
         code = EINVAL;
         goto cleanup;
     }
 
     /*
      * Caller should have set in_creds->client to match evidence
-     * ticket client
+     * ticket client.  If we can, verify it before issuing the request.
      */
-    if (!krb5_principal_compare(context, evidence_tkt->enc_part2->client,
+    if (evidence_tkt->enc_part2 != NULL &&
+        !krb5_principal_compare(context, evidence_tkt->enc_part2->client,
                                 in_creds->client)) {
         code = EINVAL;
-        goto cleanup;
-    }
-
-    if ((evidence_tkt->enc_part2->flags & TKT_FLG_FORWARDABLE) == 0) {
-        code = KRB5_TKT_NOT_FORWARDABLE;
         goto cleanup;
     }
 
@@ -1213,8 +1208,7 @@ krb5_get_credentials_for_proxy(krb5_context context,
      * Check client name because we couldn't compare that inside
      * krb5_get_credentials() (enc_part2 is unavailable in clear)
      */
-    if (!krb5_principal_compare(context,
-                                evidence_tkt->enc_part2->client,
+    if (!krb5_principal_compare(context, in_creds->client,
                                 (*out_creds)->client)) {
         code = KRB5_KDCREP_MODIFIED;
         goto cleanup;

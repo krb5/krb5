@@ -261,17 +261,9 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     if (code != 0)
         goto cleanup;
 
-    /*
-     * Only return a "proxy" credential for use with constrained
-     * delegation if the subject credentials are forwardable.
-     * Submitting non-forwardable credentials to the KDC for use
-     * with constrained delegation will only return an error.
-     */
-    if (subject_creds->ticket_flags & TKT_FLG_FORWARDABLE) {
-        code = make_proxy_cred(context, cred, impersonator_cred);
-        if (code != 0)
-            goto cleanup;
-    }
+    code = make_proxy_cred(context, cred, impersonator_cred);
+    if (code != 0)
+        goto cleanup;
 
     code = krb5_cc_store_cred(context, cred->ccache, subject_creds);
     if (code != 0)
