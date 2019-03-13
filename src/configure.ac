@@ -323,6 +323,27 @@ AC_SUBST(TLS_IMPL)
 AC_SUBST(TLS_IMPL_CFLAGS)
 AC_SUBST(TLS_IMPL_LIBS)
 
+AC_ARG_WITH([keyutils],
+AC_HELP_STRING([--without-keyutils],[do not link with libkeyutils]),
+            [], [with_keyutils=check])
+if test "$with_keyutils" != no; then
+  have_keyutils=false
+  AC_CHECK_HEADERS([keyutils.h],
+    AC_CHECK_LIB(keyutils, add_key, [have_keyutils=true]))
+  if test "$have_keyutils" = true; then
+    AC_DEFINE(USE_KEYRING_CCACHE, 1,
+              [Define if the keyring ccache should be enabled])
+    LIBS="-lkeyutils $LIBS"
+    # If libkeyutils supports persistent keyrings, use them.
+    AC_CHECK_LIB(keyutils, keyctl_get_persistent,
+      [AC_DEFINE(HAVE_PERSISTENT_KEYRING, 1,
+                 [Define if persistent keyrings are supported])
+      ])
+  elif test "$with_keyutils" = yes; then
+    AC_MSG_ERROR([libkeyutils not found])
+  fi
+fi
+
 # The SPAKE preauth plugin currently supports edwards25519 natively,
 # and can support three NIST groups using OpenSSL.
 HAVE_SPAKE_OPENSSL=no

@@ -387,6 +387,10 @@ Optional packages
     ``--without-krb5-config`` to disable the use of krb5-config and
     use the usual built-in defaults.
 
+**-**\ **-without-keyutils**
+    Build without libkeyutils support.  This disables the KEYRING
+    credential cache type.
+
 
 Examples
 --------
