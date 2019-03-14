@@ -666,6 +666,16 @@ zapfreestr(void *str)
     }
 }
 
+/* Convenience function: zap and free krb5_data pointer if it is non-NULL. */
+static inline void
+zapfreedata(krb5_data *data)
+{
+    if (data != NULL) {
+        zapfree(data->data, data->length);
+        free(data);
+    }
+}
+
 /*
  * Combine two keys (normally used by the hardware preauth mechanism)
  */
