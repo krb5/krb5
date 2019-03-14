@@ -78,8 +78,7 @@ create_krbsafe(krb5_context context, const krb5_data *userdata, krb5_key key,
     ret = krb5_k_make_checksum(context, sumtype, key,
                                KRB5_KEYUSAGE_KRB_SAFE_CKSUM, der_krbsafe,
                                &safe_checksum);
-    zap(der_krbsafe->data, der_krbsafe->length);
-    krb5_free_data(context, der_krbsafe);
+    zapfreedata(der_krbsafe);
     if (ret)
         return ret;
 

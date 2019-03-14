@@ -59,8 +59,7 @@ encrypt_credencpart(krb5_context context, krb5_cred_enc_part *encpart,
     ret = k5_encrypt_keyhelper(context, key, KRB5_KEYUSAGE_KRB_CRED_ENCPART,
                                der_enccred, encdata_out);
 
-    zap(der_enccred->data, der_enccred->length);
-    krb5_free_data(context, der_enccred);
+    zapfreedata(der_enccred);
     return ret;
 }
 
@@ -208,10 +207,7 @@ cleanup:
     krb5_free_data_contents(context, &enc.ciphertext);
     free(lstorage.contents);
     free(rstorage.contents);
-    if (der_krbcred != NULL) {
-        zap(der_krbcred->data, der_krbcred->length);
-        krb5_free_data(context, der_krbcred);
-    }
+    zapfreedata(der_krbcred);
     return ret;
 }
 

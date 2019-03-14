@@ -117,10 +117,7 @@ read_krbsafe(krb5_context context, krb5_auth_context ac,
     safe_cksum = NULL;
 
 cleanup:
-    if (der_zerosafe != NULL) {
-        zap(der_zerosafe->data, der_zerosafe->length);
-        krb5_free_data(context, der_zerosafe);
-    }
+    zapfreedata(der_zerosafe);
     krb5_free_data(context, safe_body);
     krb5_free_safe(context, krbsafe);
     krb5_free_checksum(context, safe_cksum);

@@ -50,7 +50,7 @@ create_krbpriv(krb5_context context, const krb5_data *userdata,
     krb5_error_code ret;
     krb5_priv privmsg;
     krb5_priv_enc_part encpart;
-    krb5_data *der_encpart, *der_krbpriv;
+    krb5_data *der_encpart = NULL, *der_krbpriv;
     size_t enclen;
 
     memset(&privmsg, 0, sizeof(privmsg));
@@ -97,10 +97,7 @@ create_krbpriv(krb5_context context, const krb5_data *userdata,
 cleanup:
     zapfree(privmsg.enc_part.ciphertext.data,
             privmsg.enc_part.ciphertext.length);
-    if (der_encpart != NULL) {
-        zap(der_encpart->data, der_encpart->length);
-        krb5_free_data(context, der_encpart);
-    }
+    zapfreedata(der_encpart);
     return ret;
 }
 
