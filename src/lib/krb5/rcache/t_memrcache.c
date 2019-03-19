@@ -77,5 +77,6 @@ main()
     assert(e != NULL && K5_TAILQ_NEXT(e, links) == NULL);
     k5_memrcache_free(context, mrc);
 
+    krb5_free_context(context);
     return 0;
 }
