@@ -463,6 +463,7 @@ test_get_s4u_x509_principal(krb5_context context, const krb5_data *client_cert,
         krb5_principal_compare(context, princ, (*entry)->princ))
         return 0;
 
+    match = FALSE;
     check(krb5_unparse_name_flags(context, princ,
                                   KRB5_PRINCIPAL_UNPARSE_NO_REALM,
                                   &princ_name));
@@ -474,11 +475,10 @@ test_get_s4u_x509_principal(krb5_context context, const krb5_data *client_cert,
         check(krb5_parse_name(context, canon, &canon_princ));
         match = krb5_principal_compare(context, canon_princ, (*entry)->princ);
         krb5_free_principal(context, canon_princ);
-        if (match)
-            return 0;
     }
 
-    return KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
+    free(canon);
+    return match ? 0 : KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
 }
 
 static krb5_error_code
