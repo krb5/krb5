@@ -222,7 +222,8 @@ do_ccache(krb5_context ctx,
     }
     code = pkrb5_cc_start_seq_get(ctx, cache, &cur);
     if (code) {
-        functionName = "krb5_cc_start_seq_get";
+        // MSLSA errors here if no TGT is found; suppress error message box
+        code = 0;
         goto cleanup;
     }
     if (*ticketInfoTail)
