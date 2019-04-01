@@ -36,7 +36,7 @@
 
 #define KRB5_OK 0
 
-krb5_creds test_creds;
+krb5_creds test_creds, test_creds2;
 
 int debug=0;
 
@@ -144,6 +144,10 @@ init_test_cred(krb5_context context)
     a->length = 2;
     test_creds.authdata[1] = a;
 
+    memcpy(&test_creds2, &test_creds, sizeof(test_creds));
+    kret = krb5_build_principal(context, &test_creds2.server, sizeof(REALM),
+                                REALM, "server-comp1", "server-comp3", NULL);
+
 cleanup:
     if(kret) {
         if (test_creds.client) {
@@ -170,6 +174,7 @@ free_test_cred(krb5_context context)
     krb5_free_principal(context, test_creds.client);
 
     krb5_free_principal(context, test_creds.server);
+    krb5_free_principal(context, test_creds2.server);
 
     if(test_creds.authdata) {
         krb5_free_authdata(context, test_creds.authdata);
@@ -200,6 +205,44 @@ free_test_cred(krb5_context context)
     if (experr != kret) { CHECK(kret, msg);}
 
 static void
+check_num_entries(krb5_context context, krb5_ccache cache, int expected,
+                  unsigned linenum)
+{
+    krb5_error_code ret;
+    krb5_cc_cursor cursor;
+    krb5_creds creds;
+    int count = 0;
+
+    ret = krb5_cc_start_seq_get(context, cache, &cursor);
+    if (ret != 0) {
+        com_err("", ret, "(on line %d) - krb5_cc_start_seq_get", linenum);
+        fflush(stderr);
+        exit(1);
+    }
+
+    while (1) {
+        ret = krb5_cc_next_cred(context, cache, &cursor, &creds);
+        if (ret)
+            break;
+
+        count++;
+        krb5_free_cred_contents(context, &creds);
+    }
+    krb5_cc_end_seq_get(context, cache, &cursor);
+    if (ret != KRB5_CC_END) {
+        CHECK(ret, "counting entries in ccache");
+    }
+
+    if (count != expected) {
+        com_err("", KRB5_FCC_INTERNAL,
+                "(on line %d) - count didn't match (expected %d, got %d)",
+                linenum, expected, count);
+        fflush(stderr);
+        exit(1);
+    }
+}
+
+static void
 cc_test(krb5_context context, const char *name, krb5_flags flags)
 {
     krb5_ccache id, id2;
@@ -207,6 +250,7 @@ cc_test(krb5_context context, const char *name, krb5_flags flags)
     krb5_error_code kret;
     krb5_cc_cursor cursor;
     krb5_principal tmp;
+    krb5_flags matchflags = KRB5_TC_MATCH_IS_SKEY;
 
     const char *c_name;
     char newcache[300];
@@ -311,9 +355,90 @@ cc_test(krb5_context context, const char *name, krb5_flags flags)
     kret = krb5_cc_destroy(context, id2);
     CHECK(kret, "destroy id2");
 
+    /* ----------------------------------------------------- */
+    /* Test credential removal */
+    kret = krb5_cc_resolve(context, name, &id);
+    CHECK(kret, "resolving for remove");
+
+    kret = krb5_cc_initialize(context, id, test_creds.client);
+    CHECK(kret, "initialize for remove");
+    check_num_entries(context, id, 0, __LINE__);
+
+    kret = krb5_cc_store_cred(context, id, &test_creds);
+    CHECK(kret, "store for remove (first pass)");
+    check_num_entries(context, id, 1, __LINE__); /* 1 */
+
+    kret = krb5_cc_remove_cred(context, id, matchflags, &test_creds);
+    CHECK(kret, "removing credential (first pass)");
+    check_num_entries(context, id, 0, __LINE__); /* empty */
+
+    kret = krb5_cc_store_cred(context, id, &test_creds);
+    CHECK(kret, "first store for remove (second pass)");
+    check_num_entries(context, id, 1, __LINE__); /* 1 */
+
+    kret = krb5_cc_store_cred(context, id, &test_creds2);
+    CHECK(kret, "second store for remove (second pass)");
+    check_num_entries(context, id, 2, __LINE__); /* 1, 2 */
+
+    kret = krb5_cc_remove_cred(context, id, matchflags, &test_creds2);
+    CHECK(kret, "first remove (second pass)");
+    check_num_entries(context, id, 1, __LINE__); /* 1 */
+
+    kret = krb5_cc_store_cred(context, id, &test_creds2);
+    CHECK(kret, "third store for remove (second pass)");
+    check_num_entries(context, id, 2, __LINE__); /* 1, 2 */
+
+    kret = krb5_cc_remove_cred(context, id, matchflags, &test_creds);
+    CHECK(kret, "second remove (second pass)");
+    check_num_entries(context, id, 1, __LINE__); /* 2 */
+
+    kret = krb5_cc_remove_cred(context, id, matchflags, &test_creds2);
+    CHECK(kret, "third remove (second pass)");
+    check_num_entries(context, id, 0, __LINE__); /* empty */
+
+    kret = krb5_cc_destroy(context, id);
+    CHECK(kret, "destruction for remove");
+
+    /* Test removal with iteration. */
+    kret = krb5_cc_resolve(context, name, &id);
+    CHECK(kret, "resolving for remove-iter");
+
+    kret = krb5_cc_initialize(context, id, test_creds.client);
+    CHECK(kret, "initialize for remove-iter");
+
+    kret = krb5_cc_store_cred(context, id, &test_creds);
+    CHECK(kret, "first store for remove-iter");
+
+    kret = krb5_cc_store_cred(context, id, &test_creds2);
+    CHECK(kret, "second store for remove-iter");
+
+    kret = krb5_cc_start_seq_get(context, id, &cursor);
+    CHECK(kret, "start_seq_get for remove-iter");
+
+    kret = krb5_cc_remove_cred(context, id, matchflags, &test_creds);
+    CHECK(kret, "remove for remove-iter");
+
+    while (1) {
+        /* The removed credential may or may not be present in the cache -
+         * either behavior is technically correct. */
+        kret = krb5_cc_next_cred(context, id, &cursor, &creds);
+        if (kret == KRB5_CC_END)
+            break;
+        CHECK(kret, "next_cred for remove-iter: %s");
+
+        CHECK(creds.times.endtime == 0, "no-lifetime cred");
+
+        krb5_free_cred_contents(context, &creds);
+    }
+
+    kret = krb5_cc_end_seq_get(context, id, &cursor);
+    CHECK(kret, "end_seq_get for remove-iter");
+
+    kret = krb5_cc_destroy(context, id);
+    CHECK(kret, "destruction for remove-iter");
+
     free(save_type);
     free_test_cred(context);
-
 }
 
 /*

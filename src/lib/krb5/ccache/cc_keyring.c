@@ -1028,40 +1028,44 @@ krcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
 
     memset(creds, 0, sizeof(krb5_creds));
 
-    /* The cursor has the entire list of keys.  (Note that we don't support
-     * remove_cred.) */
+    /* The cursor has the entire list of keys. */
     krcursor = *cursor;
     if (krcursor == NULL)
         return KRB5_CC_END;
 
-    /* If we're pointing past the end of the keys array, there are no more. */
-    if (krcursor->currkey >= krcursor->numkeys)
-        return KRB5_CC_END;
+    while (krcursor->currkey < krcursor->numkeys) {
+        /* If we're pointing at the entry with the principal, or at the key
+         * with the time offsets, skip it. */
+        if (krcursor->keys[krcursor->currkey] == krcursor->princ_id ||
+            krcursor->keys[krcursor->currkey] == krcursor->offsets_id) {
+            krcursor->currkey++;
+            continue;
+        }
 
-    /* If we're pointing at the entry with the principal, or at the key
-     * with the time offsets, skip it. */
-    while (krcursor->keys[krcursor->currkey] == krcursor->princ_id ||
-           krcursor->keys[krcursor->currkey] == krcursor->offsets_id) {
+        /* Read the key; the right size buffer will be allocated and
+         * returned. */
+        psize = keyctl_read_alloc(krcursor->keys[krcursor->currkey],
+                                  &payload);
+        if (psize != -1) {
+            krcursor->currkey++;
+
+            /* Unmarshal the cred using the file ccache version 4 format. */
+            ret = k5_unmarshal_cred(payload, psize, 4, creds);
+            free(payload);
+            return ret;
+        } else if (errno != ENOKEY && errno != EACCES) {
+            DEBUG_PRINT(("Error reading key %d: %s\n",
+                         krcursor->keys[krcursor->currkey], strerror(errno)));
+            return KRB5_FCC_NOFILE;
+        }
+
+        /* The current key was unlinked, probably by a remove_cred call; move
+         * on to the next one. */
         krcursor->currkey++;
-        /* Check if we have now reached the end */
-        if (krcursor->currkey >= krcursor->numkeys)
-            return KRB5_CC_END;
     }
 
-    /* Read the key; the right size buffer will be allocated and returned. */
-    psize = keyctl_read_alloc(krcursor->keys[krcursor->currkey], &payload);
-    if (psize == -1) {
-        DEBUG_PRINT(("Error reading key %d: %s\n",
-                     krcursor->keys[krcursor->currkey],
-                     strerror(errno)));
-        return KRB5_FCC_NOFILE;
-    }
-    krcursor->currkey++;
-
-    /* Unmarshal the credential using the file ccache version 4 format. */
-    ret = k5_unmarshal_cred(payload, psize, 4, creds);
-    free(payload);
-    return ret;
+    /* No more keys in keyring. */
+    return KRB5_CC_END;
 }
 
 /* Release an iteration cursor. */
@@ -1242,12 +1246,41 @@ krcc_retrieve(krb5_context context, krb5_ccache id,
                                        creds);
 }
 
-/* Non-functional stub for removing a cred from the cache keyring. */
+/* Remove a credential from the cache keyring. */
 static krb5_error_code KRB5_CALLCONV
 krcc_remove_cred(krb5_context context, krb5_ccache cache,
                  krb5_flags flags, krb5_creds *creds)
 {
-    return KRB5_CC_NOSUPP;
+    krb5_error_code ret;
+    krcc_data *data = cache->data;
+    krb5_cc_cursor cursor;
+    krb5_creds c;
+    krcc_cursor krcursor;
+    key_serial_t key;
+    krb5_boolean match;
+
+    ret = krcc_start_seq_get(context, cache, &cursor);
+    if (ret)
+        return ret;
+
+    for (;;) {
+        ret = krcc_next_cred(context, cache, &cursor, &c);
+        if (ret)
+            break;
+        match = krb5int_cc_creds_match_request(context, flags, creds, &c);
+        krb5_free_cred_contents(context, &c);
+        if (match) {
+            krcursor = cursor;
+            key = krcursor->keys[krcursor->currkey - 1];
+            if (keyctl_unlink(key, data->cache_id) == -1) {
+                ret = errno;
+                break;
+            }
+        }
+    }
+
+    krcc_end_seq_get(context, cache, &cursor);
+    return (ret == KRB5_CC_END) ? 0 : ret;
 }
 
 /* Set flags on the cache.  (We don't care about any flags.) */

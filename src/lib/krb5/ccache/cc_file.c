@@ -744,6 +744,14 @@ cleanup:
     return set_errmsg_filename(context, ret, data->filename);
 }
 
+/* Return true if cred is a removed entry (assuming that no legitimate cred
+ * entries will have authtime=-1 and endtime=0). */
+static inline krb5_boolean
+cred_removed(krb5_creds *c)
+{
+    return c->times.endtime == 0 && c->times.authtime == -1;
+}
+
 /* Get the next credential from the cache file. */
 static krb5_error_code KRB5_CALLCONV
 fcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
@@ -765,19 +773,30 @@ fcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
         goto cleanup;
     file_locked = TRUE;
 
-    /* Load a marshalled cred into memory. */
-    ret = get_size(context, fcursor->fp, &maxsize);
-    if (ret)
-        goto cleanup;
-    ret = load_cred(context, fcursor->fp, fcursor->version, maxsize, &buf);
-    if (ret)
-        goto cleanup;
-    ret = k5_buf_status(&buf);
-    if (ret)
-        goto cleanup;
+    for (;;) {
+        /* Load a marshalled cred into memory. */
+        ret = get_size(context, fcursor->fp, &maxsize);
+        if (ret)
+            goto cleanup;
+        ret = load_cred(context, fcursor->fp, fcursor->version, maxsize, &buf);
+        if (ret)
+            goto cleanup;
+        ret = k5_buf_status(&buf);
+        if (ret)
+            goto cleanup;
 
-    /* Unmarshal it from buf into creds. */
-    ret = k5_unmarshal_cred(buf.data, buf.len, fcursor->version, creds);
+        /* Unmarshal it from buf into creds. */
+        ret = k5_unmarshal_cred(buf.data, buf.len, fcursor->version, creds);
+        if (ret)
+            goto cleanup;
+
+        /* Keep going if this entry has been removed; otherwise stop. */
+        if (!cred_removed(creds))
+            break;
+
+        k5_buf_truncate(&buf, 0);
+        krb5_free_cred_contents(context, creds);
+    }
 
 cleanup:
     if (file_locked)
@@ -1002,12 +1021,142 @@ cleanup:
     return set_errmsg_filename(context, ret ? ret : ret2, data->filename);
 }
 
-/* Non-functional stub for removing a cred from the cache file. */
+/*
+ * Overwrite cred in the ccache file with an entry that should not match any
+ * reasonable search.  Deletion is not guaranteed.  This method is originally
+ * from Heimdal, with the addition of setting authtime to -1.
+ */
+static krb5_error_code
+delete_cred(krb5_context context, krb5_ccache cache, krb5_cc_cursor *cursor,
+            krb5_creds *cred)
+{
+    krb5_error_code ret;
+    krb5_fcc_cursor *fcursor = *cursor;
+    fcc_data *data = cache->data;
+    struct k5buf expected = EMPTY_K5BUF, overwrite = EMPTY_K5BUF;
+    int fd = -1;
+    uint8_t *on_disk = NULL;
+    ssize_t rwret;
+    off_t start_offset;
+
+    k5_buf_init_dynamic_zap(&expected);
+    k5_buf_init_dynamic_zap(&overwrite);
+
+    /* Re-marshal cred to get its byte representation in the file. */
+    k5_marshal_cred(&expected, fcursor->version, cred);
+    ret = k5_buf_status(&expected);
+    if (ret)
+        goto cleanup;
+
+    /*
+     * Mark the cred expired so that it will be skipped over by any future
+     * match checks.  Heimdal only sets endtime, but we also set authtime to
+     * distinguish from gssproxy's creds.
+     */
+    cred->times.endtime = 0;
+    cred->times.authtime = -1;
+
+    /* For config entries, also change the realm so that other implementations
+     * won't match them. */
+    if (cred->server != NULL && cred->server->realm.length > 0 &&
+        strcmp(cred->server->realm.data, "X-CACHECONF:") == 0)
+        memcpy(cred->server->realm.data, "X-RMED-CONF:", 12);
+
+    k5_marshal_cred(&overwrite, fcursor->version, cred);
+    ret = k5_buf_status(&overwrite);
+    if (ret)
+        goto cleanup;
+
+    if (expected.len != overwrite.len) {
+        ret = KRB5_CC_FORMAT;
+        goto cleanup;
+    }
+
+    /* Get a non-O_APPEND handle to the raw file. */
+    fd = open(data->filename, O_RDWR | O_BINARY | O_CLOEXEC);
+    if (fd == -1) {
+        ret = interpret_errno(context, errno);
+        goto cleanup;
+    }
+
+    start_offset = ftell(fcursor->fp);
+    if (start_offset == -1) {
+        ret = interpret_errno(context, errno);
+        goto cleanup;
+    }
+    start_offset -= expected.len;
+
+    /* Read the bytes at the entry to be overwritten. */
+    if (lseek(fd, start_offset, SEEK_SET) == -1) {
+        ret = interpret_errno(context, errno);
+        goto cleanup;
+    }
+    on_disk = k5alloc(expected.len, &ret);
+    if (ret != 0)
+        goto cleanup;
+    rwret = read(fd, on_disk, expected.len);
+    if (rwret < 0) {
+        ret = interpret_errno(context, errno);
+        goto cleanup;
+    } else if ((size_t)rwret != expected.len) {
+        ret = KRB5_CC_FORMAT;
+        goto cleanup;
+    }
+
+    /*
+     * If the bytes have changed, either someone else removed the same cred or
+     * the cache was reinitialized.  Either way the cred is no longer present,
+     * so return successfully.
+     */
+    if (memcmp(on_disk, expected.data, expected.len) != 0)
+        goto cleanup;
+
+    /* Write out the altered entry. */
+    if (lseek(fd, start_offset, SEEK_SET) == -1) {
+        ret = interpret_errno(context, errno);
+        goto cleanup;
+    }
+    rwret = write(fd, overwrite.data, overwrite.len);
+    if (rwret < 0) {
+        ret = interpret_errno(context, errno);
+        goto cleanup;
+    }
+
+cleanup:
+    close(fd);
+    zapfree(on_disk, expected.len);
+    k5_buf_free(&expected);
+    k5_buf_free(&overwrite);
+    return ret;
+}
+
+/* Remove the given creds from the ccache file. */
 static krb5_error_code KRB5_CALLCONV
 fcc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
                 krb5_creds *creds)
 {
-    return KRB5_CC_NOSUPP;
+    krb5_error_code ret;
+    krb5_cc_cursor cursor;
+    krb5_creds cur;
+
+    ret = krb5_cc_start_seq_get(context, cache, &cursor);
+    if (ret)
+        return ret;
+
+    for (;;) {
+        ret = krb5_cc_next_cred(context, cache, &cursor, &cur);
+        if (ret)
+            break;
+
+        if (krb5int_cc_creds_match_request(context, flags, creds, &cur))
+            ret = delete_cred(context, cache, &cursor, &cur);
+        krb5_free_cred_contents(context, &cur);
+        if (ret)
+            break;
+    }
+
+    krb5_cc_end_seq_get(context, cache, &cursor);
+    return (ret == KRB5_CC_END) ? 0 : ret;
 }
 
 static krb5_error_code KRB5_CALLCONV

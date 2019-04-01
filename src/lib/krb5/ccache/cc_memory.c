@@ -398,14 +398,23 @@ krb5_mcc_next_cred(krb5_context context, krb5_ccache id,
      */
     k5_cc_mutex_lock(context, &d->lock);
     if (mcursor->generation != d->generation) {
-        k5_cc_mutex_unlock(context, &d->lock);
-        return KRB5_CC_END;
+        retval = KRB5_CC_END;
+        goto done;
+    }
+
+    /* Skip over removed creds. */
+    while (mcursor->next_link != NULL && mcursor->next_link->creds == NULL)
+        mcursor->next_link = mcursor->next_link->next;
+    if (mcursor->next_link == NULL) {
+        retval = KRB5_CC_END;
+        goto done;
     }
 
     retval = k5_copy_creds_contents(context, mcursor->next_link->creds, creds);
     if (retval == 0)
         mcursor->next_link = mcursor->next_link->next;
 
+done:
     k5_cc_mutex_unlock(context, &d->lock);
     return retval;
 }
@@ -583,16 +592,31 @@ krb5_mcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
 }
 
 /*
- * Non-functional stub implementation for krb5_mcc_remove
+ * Modifies:
+ * the memory cache
  *
- * Errors:
- *    KRB5_CC_NOSUPP - not implemented
+ * Effects:
+ * Remove the given creds from the ccache.
  */
 static krb5_error_code KRB5_CALLCONV
 krb5_mcc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
                      krb5_creds *creds)
 {
-    return KRB5_CC_NOSUPP;
+    krb5_mcc_data *data = (krb5_mcc_data *)cache->data;
+    krb5_mcc_link *l;
+
+    k5_cc_mutex_lock(context, &data->lock);
+
+    for (l = data->link; l != NULL; l = l->next) {
+        if (l->creds != NULL &&
+            krb5int_cc_creds_match_request(context, flags, creds, l->creds)) {
+            krb5_free_creds(context, l->creds);
+            l->creds = NULL;
+        }
+    }
+
+    k5_cc_mutex_unlock(context, &data->lock);
+    return 0;
 }
 
 
