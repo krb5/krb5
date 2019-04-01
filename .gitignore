@@ -416,6 +416,8 @@ local.properties
 
 /src/plugins/preauth/pkinit/pkinit_kdf_test
 
+/src/plugins/preauth/spake/t_vectors
+
 /src/po/*.mo
 
 /src/kprop/kprop
