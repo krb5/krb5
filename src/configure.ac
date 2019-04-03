@@ -1467,7 +1467,6 @@ V5_AC_OUTPUT_MAKEFILE(.
 	lib/crypto/crypto_tests
 
 	lib/krb5 lib/krb5/error_tables lib/krb5/asn.1 lib/krb5/ccache
-dnl	lib/krb5/ccache/ccapi
 	lib/krb5/keytab lib/krb5/krb lib/krb5/rcache lib/krb5/os
 	lib/krb5/unicode
 
@@ -1479,8 +1478,6 @@ dnl	lib/krb5/ccache/ccapi
 	lib/kadm5 lib/kadm5/clnt lib/kadm5/srv lib/kadm5/unit-test
 	lib/krad
 	lib/apputils
-
-dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 
 	kdc kprop config-files build-tools man doc include
 
