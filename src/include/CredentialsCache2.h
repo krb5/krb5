@@ -86,35 +86,12 @@ typedef struct cc_credentials_v5_compat {
 } cc_credentials_v5_compat;
 
 enum {
-    MAX_V4_CRED_LEN = 1250
-};
-
-enum {
     KRB_NAME_SZ = 40,
     KRB_INSTANCE_SZ = 40,
     KRB_REALM_SZ = 40
 };
 
-typedef struct cc_credentials_v4_compat {
-    unsigned char       kversion;
-    char                principal[KRB_NAME_SZ+1];
-    char                principal_instance[KRB_INSTANCE_SZ+1];
-    char                service[KRB_NAME_SZ+1];
-    char                service_instance[KRB_INSTANCE_SZ+1];
-    char                realm[KRB_REALM_SZ+1];
-    unsigned char       session_key[8];
-    cc_int32            kvno;
-    cc_int32            str_to_key;
-    long                issue_date;
-    cc_int32            lifetime;
-    cc_uint32           address;
-    cc_int32            ticket_sz;
-    unsigned char       ticket[MAX_V4_CRED_LEN];
-    unsigned long       oops;
-} cc_credentials_v4_compat;
-
 typedef union cred_ptr_union_compat {
-    cc_credentials_v4_compat* pV4Cred;
     cc_credentials_v5_compat* pV5Cred;
 } cred_ptr_union_compat;
 
@@ -135,7 +112,6 @@ typedef struct infoNC infoNC;
 
 /* Some old type names */
 
-typedef cc_credentials_v4_compat V4Cred_type;
 typedef cc_credentials_v5_compat cc_creds;
 struct ccache_cit;
 typedef struct ccache_cit ccache_cit;
@@ -166,7 +142,7 @@ enum {
 
 enum {
     CC_CRED_UNKNOWN,
-    CC_CRED_V4,
+    /* CC_CRED_V4, */
     CC_CRED_V5,
     CC_CRED_MAX
 };

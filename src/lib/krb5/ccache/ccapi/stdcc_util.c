@@ -521,9 +521,6 @@ cred_union_release (cc_credentials_union *in_cred_union)
 
             free (cv5);
 
-        } else if (in_cred_union->version == cc_credentials_v4 &&
-                   in_cred_union->credentials.credentials_v4) {
-            free (in_cred_union->credentials.credentials_v4);
         }
         free ((cc_credentials_union *) in_cred_union);
     }
@@ -892,10 +889,7 @@ static void deep_free_cc_v5_creds (cc_creds* creds)
 
 static void deep_free_cc_creds (cred_union creds)
 {
-    if (creds.cred_type == CC_CRED_V4) {
-        /* we shouldn't get this, of course */
-        free (creds.cred.pV4Cred);
-    } else if (creds.cred_type == CC_CRED_V5) {
+    if (creds.cred_type == CC_CRED_V5) {
         deep_free_cc_v5_creds (creds.cred.pV5Cred);
     }
 }
