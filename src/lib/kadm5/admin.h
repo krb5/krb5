@@ -394,9 +394,6 @@ kadm5_ret_t    kadm5_randkey_principal_3(void *server_handle,
                                          krb5_key_salt_tuple *ks_tuple,
                                          krb5_keyblock **keyblocks,
                                          int *n_keys);
-kadm5_ret_t    kadm5_setv4key_principal(void *server_handle,
-                                        krb5_principal principal,
-                                        krb5_keyblock *keyblock);
 
 kadm5_ret_t    kadm5_setkey_principal(void *server_handle,
                                       krb5_principal principal,

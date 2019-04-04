@@ -53,7 +53,6 @@ void kadm_1(rqstp, transp)
 	  mpol_arg modify_policy_2_arg;
 	  gpol_arg get_policy_2_arg;
 	  setkey_arg setkey_principal_2_arg;
-	  setv4key_arg setv4key_principal_2_arg;
 	  cprinc3_arg create_principal3_2_arg;
 	  chpass3_arg chpass_principal3_2_arg;
 	  chrand3_arg chrand_principal3_2_arg;
@@ -132,12 +131,6 @@ void kadm_1(rqstp, transp)
 	  xdr_argument = xdr_chpass_arg;
 	  xdr_result = xdr_generic_ret;
 	  local = (bool_t (*)()) chpass_principal_2_svc;
-	  break;
-
-     case SETV4KEY_PRINCIPAL:
-	  xdr_argument = xdr_setv4key_arg;
-	  xdr_result = xdr_generic_ret;
-	  local = (bool_t (*)()) setv4key_principal_2_svc;
 	  break;
 
      case SETKEY_PRINCIPAL:

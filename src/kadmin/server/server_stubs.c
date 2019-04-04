@@ -894,56 +894,6 @@ exit_func:
 }
 
 bool_t
-setv4key_principal_2_svc(setv4key_arg *arg, generic_ret *ret,
-                         struct svc_req *rqstp)
-{
-    char                            *prime_arg = NULL;
-    gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
-    gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
-    kadm5_server_handle_t           handle;
-    const char                      *errmsg = NULL;
-
-    ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
-                           &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
-    if (ret->code)
-        goto exit_func;
-
-    ret->code = check_lockdown_keys(handle, arg->princ);
-    if (ret->code != KADM5_OK) {
-        if (ret->code == KADM5_PROTECT_KEYS) {
-            log_unauth("kadm5_setv4key_principal", prime_arg, &client_name,
-                       &service_name, rqstp);
-            ret->code = KADM5_AUTH_SETKEY;
-        }
-    } else if (!(CHANGEPW_SERVICE(rqstp)) &&
-               stub_auth(handle, OP_SETKEY, arg->princ, NULL, NULL, NULL)) {
-        ret->code = kadm5_setv4key_principal(handle, arg->princ,
-                                             arg->keyblock);
-    } else {
-        log_unauth("kadm5_setv4key_principal", prime_arg,
-                   &client_name, &service_name, rqstp);
-        ret->code = KADM5_AUTH_SETKEY;
-    }
-
-    if (ret->code != KADM5_AUTH_SETKEY) {
-        if (ret->code != 0)
-            errmsg = krb5_get_error_message(handle->context, ret->code);
-
-        log_done("kadm5_setv4key_principal", prime_arg, errmsg,
-                 &client_name, &service_name, rqstp);
-
-        if (errmsg != NULL)
-            krb5_free_error_message(handle->context, errmsg);
-    }
-
-exit_func:
-    stub_cleanup(handle, prime_arg, &client_name, &service_name);
-    return TRUE;
-}
-
-
-bool_t
 setkey_principal_2_svc(setkey_arg *arg, generic_ret *ret,
                        struct svc_req *rqstp)
 {

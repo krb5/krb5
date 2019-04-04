@@ -227,7 +227,7 @@ log_badverf(gss_name_t client_name, gss_name_t server_name,
         {14, "GET_PRINCS"},
         {15, "GET_POLS"},
         {16, "SETKEY_PRINCIPAL"},
-        {17, "SETV4KEY_PRINCIPAL"},
+        /* 17 was "SETV4KEY_PRINCIPAL" */
         {18, "CREATE_PRINCIPAL3"},
         {19, "CHPASS_PRINCIPAL3"},
         {20, "CHRAND_PRINCIPAL3"},
