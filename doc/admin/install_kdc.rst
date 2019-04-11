@@ -340,7 +340,7 @@ To extract a keytab directly on a replica KDC called
     Entry for principal host/kerberos-1.mit.edu with kvno 2, encryption
         type aes128-cts-hmac-sha1-96 added to keytab FILE:/etc/krb5.keytab.
     Entry for principal host/kerberos-1.mit.edu with kvno 2, encryption
-        type des3-cbc-sha1 added to keytab FILE:/etc/krb5.keytab.
+        type aes256-cts-hmac-sha384-192 added to keytab FILE:/etc/krb5.keytab.
     Entry for principal host/kerberos-1.mit.edu with kvno 2, encryption
         type arcfour-hmac added to keytab FILE:/etc/krb5.keytab.
 

@@ -483,7 +483,7 @@ availability.  To roll over the master key, follow these steps:
 
     $ kdb5_util list_mkeys
     Master keys for Principal: K/M@KRBTEST.COM
-    KVNO: 1, Enctype: des-cbc-crc, Active on: Wed Dec 31 19:00:00 EST 1969 *
+    KVNO: 1, Enctype: aes256-cts-hmac-sha384-192, Active on: Thu Jan 01 00:00:00 UTC 1970 *
 
 #. On the master KDC, run ``kdb5_util use_mkey 1`` to ensure that a
    master key activation list is present in the database.  This step

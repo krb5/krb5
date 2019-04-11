@@ -569,16 +569,16 @@ Examples::
     Principal: tlyu/admin@BLEEP.COM
     Expiration date: [never]
     Last password change: Mon Aug 12 14:16:47 EDT 1996
-    Password expiration date: [none]
+    Password expiration date: [never]
     Maximum ticket life: 0 days 10:00:00
     Maximum renewable life: 7 days 00:00:00
     Last modified: Mon Aug 12 14:16:47 EDT 1996 (bjaspan/admin@BLEEP.COM)
     Last successful authentication: [never]
     Last failed authentication: [never]
     Failed password attempts: 0
-    Number of keys: 2
-    Key: vno 1, des-cbc-crc
-    Key: vno 1, des-cbc-crc:v4
+    Number of keys: 1
+    Key: vno 1, aes256-cts-hmac-sha384-192
+    MKey: vno 1
     Attributes:
     Policy: [none]
 

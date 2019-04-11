@@ -529,17 +529,17 @@ Examples:
 $ kdb5_util tabdump \-o keyinfo.txt keyinfo
 $ cat keyinfo.txt
 name        keyindex        kvno    enctype salttype        salt
+K/M@EXAMPLE.COM     0       1       aes256\-cts\-hmac\-sha384\-192      normal  \-1
 foo@EXAMPLE.COM     0       1       aes128\-cts\-hmac\-sha1\-96 normal  \-1
 bar@EXAMPLE.COM     0       1       aes128\-cts\-hmac\-sha1\-96 normal  \-1
-bar@EXAMPLE.COM     1       1       des\-cbc\-crc     normal  \-1
 $ sqlite3
 sqlite> .mode tabs
 sqlite> .import keyinfo.txt keyinfo
-sqlite> select * from keyinfo where enctype like \(aqdes\-cbc\-%\(aq;
-bar@EXAMPLE.COM     1       1       des\-cbc\-crc     normal  \-1
+sqlite> select * from keyinfo where enctype like \(aqaes256\-%\(aq;
+K/M@EXAMPLE.COM     1       1       aes256\-cts\-hmac\-sha384\-192      normal  \-1
 sqlite> .quit
-$ awk \-F\(aq\et\(aq \(aq$4 ~ /des\-cbc\-/ { print }\(aq keyinfo.txt
-bar@EXAMPLE.COM     1       1       des\-cbc\-crc     normal  \-1
+$ awk \-F\(aq\et\(aq \(aq$4 ~ /aes256\-/ { print }\(aq keyinfo.txt
+K/M@EXAMPLE.COM     1       1       aes256\-cts\-hmac\-sha384\-192      normal  \-1
 .ft P
 .fi
 .UNINDENT

@@ -44,18 +44,13 @@ pop, the administrator ``joeadmin`` would issue the command (on
 ``trillium.mit.edu``)::
 
     trillium% kadmin
-    kadmin5: ktadd host/trillium.mit.edu ftp/trillium.mit.edu
-        pop/trillium.mit.edu
-    kadmin: Entry for principal host/trillium.mit.edu@ATHENA.MIT.EDU with
-        kvno 3, encryption type DES-CBC-CRC added to keytab
-        FILE:/etc/krb5.keytab.
-    kadmin: Entry for principal ftp/trillium.mit.edu@ATHENA.MIT.EDU with
-        kvno 3, encryption type DES-CBC-CRC added to keytab
-        FILE:/etc/krb5.keytab.
-    kadmin: Entry for principal pop/trillium.mit.edu@ATHENA.MIT.EDU with
-        kvno 3, encryption type DES-CBC-CRC added to keytab
-        FILE:/etc/krb5.keytab.
-    kadmin5: quit
+    Authenticating as principal root/admin@ATHENA.MIT.EDU with password.
+    Password for root/admin@ATHENA.MIT.EDU:
+    kadmin: ktadd host/trillium.mit.edu ftp/trillium.mit.edu pop/trillium.mit.edu
+    Entry for principal host/trillium.mit.edu@ATHENA.MIT.EDU with kvno 3, encryption type aes256-cts-hmac-sha384-192 added to keytab FILE:/etc/krb5.keytab.
+    kadmin: Entry for principal ftp/trillium.mit.edu@ATHENA.MIT.EDU with kvno 3, encryption type aes256-cts-hmac-sha384-192 added to keytab FILE:/etc/krb5.keytab.
+    kadmin: Entry for principal pop/trillium.mit.edu@ATHENA.MIT.EDU with kvno 3, encryption type aes256-cts-hmac-sha384-192 added to keytab FILE:/etc/krb5.keytab.
+    kadmin: quit
     trillium%
 
 If you generate the keytab file on another host, you need to get a

@@ -476,17 +476,17 @@ Examples::
     $ kdb5_util tabdump -o keyinfo.txt keyinfo
     $ cat keyinfo.txt
     name	keyindex	kvno	enctype	salttype	salt
+    K/M@EXAMPLE.COM	0	1	aes256-cts-hmac-sha384-192	normal	-1
     foo@EXAMPLE.COM	0	1	aes128-cts-hmac-sha1-96	normal	-1
     bar@EXAMPLE.COM	0	1	aes128-cts-hmac-sha1-96	normal	-1
-    bar@EXAMPLE.COM	1	1	des-cbc-crc	normal	-1
     $ sqlite3
     sqlite> .mode tabs
     sqlite> .import keyinfo.txt keyinfo
-    sqlite> select * from keyinfo where enctype like 'des-cbc-%';
-    bar@EXAMPLE.COM	1	1	des-cbc-crc	normal	-1
+    sqlite> select * from keyinfo where enctype like 'aes256-%';
+    K/M@EXAMPLE.COM	1	1	aes256-cts-hmac-sha384-192	normal	-1
     sqlite> .quit
-    $ awk -F'\t' '$4 ~ /des-cbc-/ { print }' keyinfo.txt
-    bar@EXAMPLE.COM	1	1	des-cbc-crc	normal	-1
+    $ awk -F'\t' '$4 ~ /aes256-/ { print }' keyinfo.txt
+    K/M@EXAMPLE.COM	1	1	aes256-cts-hmac-sha384-192	normal	-1
 
 
 ENVIRONMENT
