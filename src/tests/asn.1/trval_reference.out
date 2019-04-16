@@ -1180,7 +1180,7 @@ encode_krb5_sam_challenge_2_body:
 .  [5] [Octet String] "challenge ipse"
 .  [6] [Octet String] "response_prompt ipse"
 .  [8] [Integer] 5517840
-.  [9] [Integer] 1
+.  [9] [Integer] 20
 
 encode_krb5_sam_response_2:
 
@@ -1189,7 +1189,7 @@ encode_krb5_sam_response_2:
 .  [1] [Bit String] 0x80000000
 .  [2] [Octet String] "track data"
 .  [3] [Sequence/Sequence Of]
-.  .  [0] [Integer] 1
+.  .  [0] [Integer] 20
 .  .  [1] [Integer] 3382
 .  .  [2] [Octet String] "nonce or sad"
 .  [4] [Integer] 5517840

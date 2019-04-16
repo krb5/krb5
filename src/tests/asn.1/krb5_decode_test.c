@@ -934,7 +934,7 @@ int main(argc, argv)
     /* decode_sam_challenge_2_body */
     {
         setup(krb5_sam_challenge_2_body,ktest_make_sample_sam_challenge_2_body);
-        decode_run("sam_challenge_2_body","","30 64 A0 03 02 01 2A A1 07 03 05 00 80 00 00 00 A2 0B 04 09 74 79 70 65 20 6E 61 6D 65 A4 11 04 0F 63 68 61 6C 6C 65 6E 67 65 20 6C 61 62 65 6C A5 10 04 0E 63 68 61 6C 6C 65 6E 67 65 20 69 70 73 65 A6 16 04 14 72 65 73 70 6F 6E 73 65 5F 70 72 6F 6D 70 74 20 69 70 73 65 A8 05 02 03 54 32 10 A9 03 02 01 01",decode_krb5_sam_challenge_2_body,ktest_equal_sam_challenge_2_body,krb5_free_sam_challenge_2_body);
+        decode_run("sam_challenge_2_body","","30 64 A0 03 02 01 2A A1 07 03 05 00 80 00 00 00 A2 0B 04 09 74 79 70 65 20 6E 61 6D 65 A4 11 04 0F 63 68 61 6C 6C 65 6E 67 65 20 6C 61 62 65 6C A5 10 04 0E 63 68 61 6C 6C 65 6E 67 65 20 69 70 73 65 A6 16 04 14 72 65 73 70 6F 6E 73 65 5F 70 72 6F 6D 70 74 20 69 70 73 65 A8 05 02 03 54 32 10 A9 03 02 01 14",decode_krb5_sam_challenge_2_body,ktest_equal_sam_challenge_2_body,krb5_free_sam_challenge_2_body);
         ktest_empty_sam_challenge_2_body(&ref);
 
     }

@@ -507,7 +507,7 @@ ktest_make_sample_sam_challenge_2_body(krb5_sam_challenge_2_body *p)
     krb5_data_parse(&p->sam_response_prompt, "response_prompt ipse");
     p->sam_pk_for_sad = empty_data();
     p->sam_nonce = 0x543210;
-    p->sam_etype = ENCTYPE_DES_CBC_CRC;
+    p->sam_etype = ENCTYPE_AES256_CTS_HMAC_SHA384_192;
 }
 
 void
@@ -518,7 +518,7 @@ ktest_make_sample_sam_response_2(krb5_sam_response_2 *p)
     p->sam_flags = KRB5_SAM_USE_SAD_AS_KEY; /* KRB5_SAM_* values */
     krb5_data_parse(&p->sam_track_id, "track data");
     krb5_data_parse(&p->sam_enc_nonce_or_sad.ciphertext, "nonce or sad");
-    p->sam_enc_nonce_or_sad.enctype = ENCTYPE_DES_CBC_CRC;
+    p->sam_enc_nonce_or_sad.enctype = ENCTYPE_AES256_CTS_HMAC_SHA384_192;
     p->sam_enc_nonce_or_sad.kvno = 3382;
     p->sam_nonce = 0x543210;
 }
