@@ -1058,8 +1058,7 @@ delete_cred(krb5_context context, krb5_ccache cache, krb5_cc_cursor *cursor,
 
     /* For config entries, also change the realm so that other implementations
      * won't match them. */
-    if (cred->server != NULL && cred->server->realm.length > 0 &&
-        strcmp(cred->server->realm.data, "X-CACHECONF:") == 0)
+    if (data_eq_string(cred->server->realm, "X-CACHECONF:"))
         memcpy(cred->server->realm.data, "X-RMED-CONF:", 12);
 
     k5_marshal_cred(&overwrite, fcursor->version, cred);
