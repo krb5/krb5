@@ -31,7 +31,9 @@ OPTIONS
 -------
 
 The **-r** *realm* option specifies the realm for which the server
-should provide service.
+should provide service.  This option may be specified multiple times
+to serve multiple realms.  If no **-r** option is given, the default
+realm (as specified in :ref:`krb5.conf(5)`) will be served.
 
 The **-d** *dbname* option specifies the name under which the
 principal database can be found.  This option does not apply to the
