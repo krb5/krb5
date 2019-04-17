@@ -211,38 +211,20 @@ sam2_process(krb5_context context, krb5_clpreauth_moddata moddata,
     /* Get encryption key to be used for checksum and sam_response */
     if (!(sc2b->sam_flags & KRB5_SAM_USE_SAD_AS_KEY)) {
         /* Retain as_key from above gak_fct call. */
-
-        if (!(sc2b->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD)) {
-            /* as_key = combine_key (as_key, string_to_key(SAD)) */
-            krb5_keyblock tmp_kb;
-
-            retval = krb5_c_string_to_key(context, sc2b->sam_etype,
-                                          &response_data, salt, &tmp_kb);
-
-            if (retval) {
-                krb5_free_sam_challenge_2(context, sc2);
-                krb5_free_sam_challenge_2_body(context, sc2b);
-                if (defsalt.length) free(defsalt.data);
-                return(retval);
-            }
-
-            /* This should be a call to the crypto library some day */
-            /* key types should already match the sam_etype */
-            retval = krb5int_c_combine_keys(context, &ctx->as_key, &tmp_kb,
-                                            &ctx->as_key);
-
-            if (retval) {
-                krb5_free_sam_challenge_2(context, sc2);
-                krb5_free_sam_challenge_2_body(context, sc2b);
-                if (defsalt.length) free(defsalt.data);
-                return(retval);
-            }
-            krb5_free_keyblock_contents(context, &tmp_kb);
-        }
-
         if (defsalt.length)
             free(defsalt.data);
 
+        if (!(sc2b->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD)) {
+            /*
+             * If no flags are set, the protocol calls for us to combine the
+             * initial reply key with the SAD, using a method which is only
+             * specified for DES and 3DES enctypes.  We no longer support this
+             * case.
+             */
+            krb5_free_sam_challenge_2(context, sc2);
+            krb5_free_sam_challenge_2_body(context, sc2b);
+            return(KRB5_SAM_UNSUPPORTED);
+        }
     } else {
         /* as_key = string_to_key(SAD) */
 
