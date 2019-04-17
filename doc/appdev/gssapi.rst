@@ -619,16 +619,14 @@ gss_get_mic_iov_length and gss_get_mic_iov::
     iov[1].buffer.value = "message";
     iov[1].buffer.length = 7;
 
-    major = gss_wrap_iov_length(&minor, ctx, 1, GSS_C_QOP_DEFAULT,
-                                NULL, iov, 2);
+    major = gss_get_mic_iov_length(&minor, ctx, GSS_C_QOP_DEFAULT, iov, 2);
     if (GSS_ERROR(major))
         handle_error(major, minor);
     if (iov[0].buffer.length > sizeof(data))
         handle_out_of_space_error();
     iov[0].buffer.value = data;
 
-    major = gss_wrap_iov(&minor, ctx, 1, GSS_C_QOP_DEFAULT, NULL,
-                         iov, 2);
+    major = gss_get_mic_iov(&minor, ctx, GSS_C_QOP_DEFAULT, iov, 2);
     if (GSS_ERROR(major))
         handle_error(major, minor);
 
