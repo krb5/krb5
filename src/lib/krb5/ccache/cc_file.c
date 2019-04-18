@@ -1122,7 +1122,8 @@ delete_cred(krb5_context context, krb5_ccache cache, krb5_cc_cursor *cursor,
     }
 
 cleanup:
-    close(fd);
+    if (fd >= 0)
+        close(fd);
     zapfree(on_disk, expected.len);
     k5_buf_free(&expected);
     k5_buf_free(&overwrite);
