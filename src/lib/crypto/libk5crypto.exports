@@ -58,7 +58,6 @@ krb5_c_prf_length
 krb5int_c_mandatory_cksumtype
 krb5_c_fx_cf2_simple
 krb5int_c_weak_enctype
-krb5int_c_combine_keys
 krb5_encrypt_data
 krb5int_c_copy_keyblock
 krb5int_c_copy_keyblock_contents

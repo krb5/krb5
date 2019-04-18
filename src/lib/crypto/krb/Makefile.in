@@ -22,7 +22,6 @@ STLIBOBJS=\
 	cksumtypes.o		\
 	cmac.o			\
 	coll_proof_cksum.o	\
-	combine_keys.o		\
 	crypto_length.o		\
 	crypto_libinit.o	\
 	default_state.o 	\
@@ -84,7 +83,6 @@ OBJS=\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
 	$(OUTPRE)cmac.$(OBJEXT)			\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
-	$(OUTPRE)combine_keys.$(OBJEXT)		\
 	$(OUTPRE)crypto_length.$(OBJEXT)	\
 	$(OUTPRE)crypto_libinit.$(OBJEXT)	\
 	$(OUTPRE)default_state.$(OBJEXT) 	\
@@ -146,7 +144,6 @@ SRCS=\
 	$(srcdir)/cksumtypes.c		\
 	$(srcdir)/cmac.c		\
 	$(srcdir)/coll_proof_cksum.c	\
-	$(srcdir)/combine_keys.c	\
 	$(srcdir)/crypto_length.c	\
 	$(srcdir)/crypto_libinit.c	\
 	$(srcdir)/default_state.c 	\

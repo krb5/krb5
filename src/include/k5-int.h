@@ -672,13 +672,6 @@ zapfreedata(krb5_data *data)
     }
 }
 
-/*
- * Combine two keys (normally used by the hardware preauth mechanism)
- */
-krb5_error_code
-krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
-                       krb5_keyblock *key2, krb5_keyblock *outkey);
-
 void krb5int_c_free_keyblock(krb5_context, krb5_keyblock *key);
 void krb5int_c_free_keyblock_contents(krb5_context, krb5_keyblock *);
 krb5_error_code krb5int_c_init_keyblock(krb5_context, krb5_enctype enctype,
