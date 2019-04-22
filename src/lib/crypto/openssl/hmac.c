@@ -117,7 +117,7 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
                       const krb5_crypto_iov *data, size_t num_data,
                       krb5_data *output)
 {
-    unsigned int i = 0, md_len = 0;
+    unsigned int i = 0, md_len = 0, ok;
     unsigned char md[EVP_MAX_MD_SIZE];
     HMAC_CTX *ctx;
     size_t hashsize, blocksize;
@@ -137,22 +137,22 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
     if (ctx == NULL)
         return ENOMEM;
 
-    HMAC_Init(ctx, keyblock->contents, keyblock->length, map_digest(hash));
-    for (i = 0; i < num_data; i++) {
+    ok = HMAC_Init_ex(ctx, keyblock->contents, keyblock->length,
+                      map_digest(hash), NULL);
+    for (i = 0; ok && i < num_data; i++) {
         const krb5_crypto_iov *iov = &data[i];
 
         if (SIGN_IOV(iov))
-            HMAC_Update(ctx, (uint8_t *)iov->data.data, iov->data.length);
+            ok = HMAC_Update(ctx, (uint8_t *)iov->data.data, iov->data.length);
     }
-    HMAC_Final(ctx, md, &md_len);
-    if ( md_len <= output->length) {
+    if (ok)
+        ok = HMAC_Final(ctx, md, &md_len);
+    if (ok && md_len <= output->length) {
         output->length = md_len;
         memcpy(output->data, md, output->length);
     }
     HMAC_CTX_free(ctx);
-    return 0;
-
-
+    return ok ? 0 : KRB5_CRYPTO_INTERNAL;
 }
 
 krb5_error_code
