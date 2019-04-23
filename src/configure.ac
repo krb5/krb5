@@ -1339,9 +1339,9 @@ if test "x$with_libedit" != xno; then
 elif test "x$with_readline" = xyes; then
   AC_MSG_NOTICE([Using GNU Readline])
   AC_CHECK_LIB([readline], [main], :,
-	       AC_MSG_FAILURE([Cannot find readline library.]), [-lncurses])
+	       AC_MSG_FAILURE([Cannot find readline library.]))
   AC_DEFINE([HAVE_READLINE], 1, [Define if building with GNU Readline.])
-  RL_LIBS='-lreadline -lhistory -lncurses'
+  RL_LIBS='-lreadline'
 else
   AC_MSG_RESULT([Not using any readline support])
 fi
