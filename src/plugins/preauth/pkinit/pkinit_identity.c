@@ -29,15 +29,9 @@
  * SUCH DAMAGES.
  */
 
-#include <errno.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <dlfcn.h>
-#include <unistd.h>
-#include <dirent.h>
-
 #include "pkinit.h"
+#include <dlfcn.h>
+#include <dirent.h>
 
 static void
 free_list(char **list)
@@ -430,7 +424,8 @@ process_option_identity(krb5_context context,
     switch (idtype) {
     case IDTYPE_ENVVAR:
         return process_option_identity(context, plg_cryptoctx, req_cryptoctx,
-                                       idopts, id_cryptoctx, getenv(residual));
+                                       idopts, id_cryptoctx,
+                                       secure_getenv(residual));
         break;
     case IDTYPE_FILE:
         retval = parse_fs_options(context, idopts, residual);

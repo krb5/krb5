@@ -300,7 +300,7 @@ krb5_cc_default_name(krb5_context context)
         return os_ctx->default_ccname;
 
     /* Try the environment variable first. */
-    envstr = getenv(KRB5_ENV_CCNAME);
+    envstr = secure_getenv(KRB5_ENV_CCNAME);
     if (envstr != NULL) {
         os_ctx->default_ccname = strdup(envstr);
         return os_ctx->default_ccname;

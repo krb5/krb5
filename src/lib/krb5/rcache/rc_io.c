@@ -48,13 +48,13 @@ getdir(void)
 {
     char *dir;
 
-    if (!(dir = getenv("KRB5RCACHEDIR"))) {
+    if (!(dir = secure_getenv("KRB5RCACHEDIR"))) {
 #if defined(_WIN32)
         if (!(dir = getenv("TEMP")))
             if (!(dir = getenv("TMP")))
                 dir = "C:";
 #else
-        if (!(dir = getenv("TMPDIR"))) {
+        if (!(dir = secure_getenv("TMPDIR"))) {
 #ifdef RCTMPDIR
             dir = RCTMPDIR;
 #else

@@ -280,7 +280,7 @@ expand_temp_folder(krb5_context context, PTYPE param, const char *postfix,
     const char *p = NULL;
 
     if (context == NULL || !context->profile_secure)
-        p = getenv("TMPDIR");
+        p = secure_getenv("TMPDIR");
     *ret = strdup((p != NULL) ? p : "/tmp");
     if (*ret == NULL)
         return ENOMEM;

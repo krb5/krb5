@@ -399,7 +399,7 @@ load_anchor(SSL_CTX *ctx, const char *location)
     } else if (strncmp(location, "DIR:", 4) == 0) {
         return load_anchor_dir(store, location + 4);
     } else if (strncmp(location, "ENV:", 4) == 0) {
-        envloc = getenv(location + 4);
+        envloc = secure_getenv(location + 4);
         if (envloc == NULL)
             return ENOENT;
         return load_anchor(ctx, envloc);

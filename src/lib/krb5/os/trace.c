@@ -389,7 +389,7 @@ k5_init_trace(krb5_context context)
 {
     const char *filename;
 
-    filename = getenv("KRB5_TRACE");
+    filename = secure_getenv("KRB5_TRACE");
     if (filename)
         (void) krb5_set_trace_filename(context, filename);
 }

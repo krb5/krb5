@@ -107,7 +107,7 @@ char *
 krb5_rc_default_type(krb5_context context)
 {
     char *s;
-    if ((s = getenv("KRB5RCACHETYPE")))
+    if ((s = secure_getenv("KRB5RCACHETYPE")))
         return s;
     else
         return "dfl";
@@ -117,7 +117,7 @@ char *
 krb5_rc_default_name(krb5_context context)
 {
     char *s;
-    if ((s = getenv("KRB5RCACHENAME")))
+    if ((s = secure_getenv("KRB5RCACHENAME")))
         return s;
     else
         return (char *) 0;

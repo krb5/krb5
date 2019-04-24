@@ -73,7 +73,7 @@ krb5_aprof_init(char *fname, char *envname, krb5_pointer *acontextp)
     ret = krb5_get_default_config_files(&filenames);
     if (ret)
         return ret;
-    if (envname == NULL || (kdc_config = getenv(envname)) == NULL)
+    if (envname == NULL || (kdc_config = secure_getenv(envname)) == NULL)
         kdc_config = fname;
     k5_buf_init_dynamic(&buf);
     if (kdc_config)
