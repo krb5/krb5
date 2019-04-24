@@ -45,6 +45,7 @@
  * + path manipulation
  * + _, N_, dgettext, bindtextdomain (for localization)
  * + getopt_long
+ * + secure_getenv
  * + fetching filenames from a directory
  */
 
@@ -1133,6 +1134,14 @@ extern int k5_getopt_long(int nargc, char **nargv, char *options,
                           struct option *long_options, int *index);
 #define getopt_long k5_getopt_long
 #endif /* HAVE_GETOPT_LONG */
+
+#if defined(_WIN32)
+/* On Windows there is never a need to ignore the process environment. */
+#define secure_getenv getenv
+#elif !defined(HAVE_SECURE_GETENV)
+#define secure_getenv k5_secure_getenv
+extern char *k5_secure_getenv(const char *name);
+#endif
 
 /* Set *fnames_out to a null-terminated list of filenames within dirname,
  * sorted according to strcmp().  Return 0 on success, or ENOENT/ENOMEM. */

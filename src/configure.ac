@@ -148,7 +148,7 @@ AC_SUBST(po)
 
 # for kdc
 AC_CHECK_HEADERS(sys/sockio.h ifaddrs.h unistd.h fnmatch.h)
-AC_CHECK_FUNCS(vsprintf vasprintf vsnprintf strlcpy fnmatch)
+AC_CHECK_FUNCS(vsprintf vasprintf vsnprintf strlcpy fnmatch secure_getenv)
 
 EXTRA_SUPPORT_SYMS=
 AC_CHECK_FUNC(strlcpy,
@@ -207,6 +207,18 @@ KRB5_NEED_PROTO([#include <string.h>
 /* Solaris 8 declares swab in stdlib.h.  */
 #include <stdlib.h>
 ],swab,1)
+
+AC_CHECK_FUNC(secure_getenv,
+[SECURE_GETENV_ST_OBJ=
+SECURE_GETENV_OBJ=
+SECURE_GETENV_INIT=],
+[SECURE_GETENV_ST_OBJ=secure_getenv.o
+SECURE_GETENV_OBJ='$(OUTPRE)secure_getenv.$(OBJEXT)'
+SECURE_GETENV_INIT=k5_secure_getenv_init
+EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS k5_secure_getenv"])
+AC_SUBST(SECURE_GETENV_OBJ)
+AC_SUBST(SECURE_GETENV_ST_OBJ)
+AC_SUBST(SECURE_GETENV_INIT)
 
 AC_PROG_AWK
 KRB5_AC_INET6
@@ -442,7 +454,7 @@ AC_PROG_LEX
 AC_C_CONST
 AC_HEADER_DIRENT
 AC_FUNC_STRERROR_R
-AC_CHECK_FUNCS(strdup setvbuf seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strptime geteuid setenv unsetenv getenv gmtime_r localtime_r bswap16 bswap64 mkstemp getusershell access getcwd srand48 srand srandom stat strchr strerror timegm explicit_bzero explicit_memset)
+AC_CHECK_FUNCS(strdup setvbuf seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strptime geteuid setenv unsetenv getenv gmtime_r localtime_r bswap16 bswap64 mkstemp getusershell access getcwd srand48 srand srandom stat strchr strerror timegm explicit_bzero explicit_memset getresuid getresgid)
 
 AC_CHECK_FUNC(mkstemp,
 [MKSTEMP_ST_OBJ=
