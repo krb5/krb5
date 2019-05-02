@@ -91,7 +91,6 @@
 extern time_t get_date(char *); /* kadmin/cli/getdate.o */
 
 char *yes = "yes\n"; /* \n to compare against result of fgets */
-krb5_key_salt_tuple def_kslist = {ENCTYPE_DES_CBC_CRC, KRB5_KDB_SALTTYPE_NORMAL};
 
 krb5_data tgt_princ_entries[] = {
     {0, KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME},

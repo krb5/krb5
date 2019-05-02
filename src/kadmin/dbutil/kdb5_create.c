@@ -66,8 +66,6 @@ enum ap_op {
     TGT_KEY                             /* special handling for tgt key */
 };
 
-krb5_key_salt_tuple def_kslist = { ENCTYPE_DES_CBC_CRC, KRB5_KDB_SALTTYPE_NORMAL };
-
 struct realm_info {
     krb5_deltat max_life;
     krb5_deltat max_rlife;
@@ -76,15 +74,7 @@ struct realm_info {
     krb5_keyblock *key;
     krb5_int32 nkslist;
     krb5_key_salt_tuple *kslist;
-} rblock = { /* XXX */
-    KRB5_KDB_MAX_LIFE,
-    KRB5_KDB_MAX_RLIFE,
-    KRB5_KDB_EXPIRATION,
-    KRB5_KDB_DEF_FLAGS,
-    (krb5_keyblock *) NULL,
-    1,
-    &def_kslist
-};
+} rblock;
 
 struct iterate_args {
     krb5_context        ctx;
