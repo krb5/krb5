@@ -47,9 +47,10 @@ static krb5_error_code armor_ap_request
     if (retval == 0)
         retval = krb5_auth_con_setflags(kdc_context,
                                         authcontext, 0); /*disable replay cache*/
-    retval = krb5_rd_req(kdc_context, &authcontext,
-                         &armor->armor_value, NULL /*server*/,
-                         kdc_active_realm->realm_keytab,  NULL, &ticket);
+    if (retval == 0)
+        retval = krb5_rd_req(kdc_context, &authcontext, &armor->armor_value,
+                             NULL /*server*/, kdc_active_realm->realm_keytab,
+                             NULL, &ticket);
     if (retval != 0) {
         const char * errmsg = krb5_get_error_message(kdc_context, retval);
         k5_setmsg(kdc_context, retval, _("%s while handling ap-request armor"),
@@ -132,7 +133,7 @@ kdc_find_fast(krb5_kdc_req **requestptr,
 {
     krb5_error_code retval = 0;
     krb5_pa_data *fast_padata;
-    krb5_data scratch, *inner_body = NULL;
+    krb5_data scratch, plaintext, *inner_body = NULL;
     krb5_fast_req * fast_req = NULL;
     krb5_kdc_req *request = *requestptr;
     krb5_fast_armored_req *fast_armored_req = NULL;
@@ -183,11 +184,10 @@ kdc_find_fast(krb5_kdc_req **requestptr,
             }
         }
         if (retval == 0) {
-            krb5_data plaintext;
             plaintext.length = fast_armored_req->enc_part.ciphertext.length;
-            plaintext.data = malloc(plaintext.length);
-            if (plaintext.data == NULL)
-                retval = ENOMEM;
+            plaintext.data = k5alloc(plaintext.length, &retval);
+        }
+        if (retval == 0) {
             retval = krb5_c_decrypt(kdc_context,
                                     state->armor_key,
                                     KRB5_KEYUSAGE_FAST_ENC, NULL,
