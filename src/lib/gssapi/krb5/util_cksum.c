@@ -48,6 +48,7 @@ kg_checksum_channel_bindings(context, cb, cksum)
 
     cksum->checksum_type = CKSUMTYPE_RSA_MD5;
     cksum->length = sumlen;
+    cksum->magic = KV5M_CHECKSUM;
 
     /* generate a buffer full of zeros if no cb specified */
 

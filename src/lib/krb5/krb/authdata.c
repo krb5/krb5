@@ -976,9 +976,7 @@ krb5_authdata_export_internal(krb5_context kcontext,
 
     *ptr = NULL;
 
-    name.length = strlen(module_name);
-    name.data = (char *)module_name;
-
+    name = make_data((char *)module_name, strlen(module_name));
     module = k5_ad_find_module(kcontext, context, AD_USAGE_MASK, &name);
     if (module == NULL)
         return ENOENT;
@@ -1005,9 +1003,7 @@ krb5_authdata_free_internal(krb5_context kcontext,
     krb5_data name;
     struct _krb5_authdata_context_module *module;
 
-    name.length = strlen(module_name);
-    name.data = (char *)module_name;
-
+    name = make_data((char *)module_name, strlen(module_name));
     module = k5_ad_find_module(kcontext, context, AD_USAGE_MASK, &name);
     if (module == NULL)
         return ENOENT;
