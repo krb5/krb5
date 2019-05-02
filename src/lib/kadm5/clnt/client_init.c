@@ -465,6 +465,9 @@ gic_iter(kadm5_server_handle_t handle, enum init_type init_type,
     /* Credentials for kadmin don't need to be forwardable or proxiable. */
     if (init_type != INIT_CREDS) {
         code = krb5_get_init_creds_opt_alloc(ctx, &opt);
+        if (code)
+            goto error;
+
         krb5_get_init_creds_opt_set_forwardable(opt, 0);
         krb5_get_init_creds_opt_set_proxiable(opt, 0);
         krb5_get_init_creds_opt_set_out_ccache(ctx, opt, ccache);

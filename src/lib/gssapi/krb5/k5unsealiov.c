@@ -281,6 +281,7 @@ kg_unseal_v1_iov(krb5_context context,
         (!ctx->initiate && direction != 0)) {
         *minor_status = (OM_uint32)G_BAD_DIRECTION;
         retval = GSS_S_BAD_SIG;
+        goto cleanup;
     }
 
     code = 0;
