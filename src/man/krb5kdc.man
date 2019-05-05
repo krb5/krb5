@@ -70,9 +70,7 @@ The \fB\-m\fP option specifies that the master database password should
 be fetched from the keyboard rather than from a stash file.
 .sp
 The \fB\-n\fP option specifies that the KDC does not put itself in the
-background and does not disassociate itself from the terminal.  In
-normal operation, you should always allow the KDC to place itself in
-the background.
+background and does not disassociate itself from the terminal.
 .sp
 The \fB\-P\fP \fIpid_file\fP option tells the KDC to write its PID into
 \fIpid_file\fP after it starts up.  This can be used to identify whether
