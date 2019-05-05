@@ -74,8 +74,7 @@ OPTIONS
 
 **-nofork**
     causes the server to remain in the foreground and remain
-    associated to the terminal.  In normal operation, you should allow
-    the server to place itself in the background.
+    associated to the terminal.
 
 **-proponly**
     causes the server to only listen and respond to Kerberos replica

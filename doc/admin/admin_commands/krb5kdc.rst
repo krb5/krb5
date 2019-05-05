@@ -50,9 +50,7 @@ The **-m** option specifies that the master database password should
 be fetched from the keyboard rather than from a stash file.
 
 The **-n** option specifies that the KDC does not put itself in the
-background and does not disassociate itself from the terminal.  In
-normal operation, you should always allow the KDC to place itself in
-the background.
+background and does not disassociate itself from the terminal.
 
 The **-P** *pid_file* option tells the KDC to write its PID into
 *pid_file* after it starts up.  This can be used to identify whether
