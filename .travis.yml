@@ -6,6 +6,10 @@ matrix:
   include:
   - compiler: clang
     env: MAKEVARS=CPPFLAGS=-Werror
+  - compiler: clang
+    env:
+      - MAKEVARS=CPPFLAGS=-Werror
+      - CONFIGURE_OPTS=--with-crypto-impl=openssl
   - compiler: gcc
 
 before_install:

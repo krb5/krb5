@@ -1,6 +1,6 @@
 cd src
 autoreconf
-./configure --enable-maintainer-mode --with-ldap
+./configure --enable-maintainer-mode --with-ldap $CONFIGURE_OPTS
 make $MAKEVARS
 make check
 make distclean
