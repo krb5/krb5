@@ -81,12 +81,8 @@ static int openssl_callback (int, X509_STORE_CTX *);
 static int openssl_callback_ignore_crls (int, X509_STORE_CTX *);
 
 static int pkcs7_decrypt
-(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
- PKCS7 *p7, BIO *bio);
-
-static BIO * pkcs7_dataDecode
-(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
- PKCS7 *p7);
+(krb5_context context, pkinit_identity_crypto_context id_cryptoctx, PKCS7 *p7,
+ unsigned char **data_out, unsigned int *len_out);
 
 static ASN1_OBJECT * pkinit_pkcs7type2oid
 (pkinit_plg_crypto_context plg_cryptoctx, int pkcs7_type);
@@ -1964,9 +1960,6 @@ cms_envelopeddata_verify(krb5_context context,
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     PKCS7 *p7 = NULL;
-    BIO *out = NULL;
-    int i = 0;
-    unsigned int size = 0;
     const unsigned char *p = enveloped_data;
     unsigned int tmp_buf_len = 0, tmp_buf2_len = 0, vfy_buf_len = 0;
     unsigned char *tmp_buf = NULL, *tmp_buf2 = NULL, *vfy_buf = NULL;
@@ -1991,25 +1984,12 @@ cms_envelopeddata_verify(krb5_context context,
     }
 
     /* decrypt received PKCS7 message */
-    out = BIO_new(BIO_s_mem());
-    if (pkcs7_decrypt(context, id_cryptoctx, p7, out)) {
+    if (pkcs7_decrypt(context, id_cryptoctx, p7, &tmp_buf, &tmp_buf_len)) {
         pkiDebug("PKCS7 decryption successful\n");
     } else {
         retval = oerr(context, 0, _("Failed to decrypt PKCS7 message"));
         goto cleanup;
     }
-
-    /* transfer the decoded PKCS7 SignedData message into a separate buffer */
-    for (;;) {
-        if ((tmp_buf = realloc(tmp_buf, size + 1024 * 10)) == NULL)
-            goto cleanup;
-        i = BIO_read(out, &(tmp_buf[size]), 1024 * 10);
-        if (i <= 0)
-            break;
-        else
-            size += i;
-    }
-    tmp_buf_len = size;
 
 #ifdef DEBUG_ASN1
     print_buffer_bin(tmp_buf, tmp_buf_len, "/tmp/client_enc_keypack");
@@ -2072,8 +2052,6 @@ cleanup:
 
     if (p7 != NULL)
         PKCS7_free(p7);
-    if (out != NULL)
-        BIO_free(out);
     free(tmp_buf);
     free(tmp_buf2);
 
@@ -5714,39 +5692,6 @@ cleanup:
     return retval;
 }
 
-static int
-pkcs7_decrypt(krb5_context context,
-              pkinit_identity_crypto_context id_cryptoctx,
-              PKCS7 *p7,
-              BIO *data)
-{
-    BIO *tmpmem = NULL;
-    int retval = 0, i = 0;
-    char buf[4096];
-
-    if(p7 == NULL)
-        return 0;
-
-    if(!PKCS7_type_is_enveloped(p7)) {
-        pkiDebug("wrong pkcs7 content type\n");
-        return 0;
-    }
-
-    if(!(tmpmem = pkcs7_dataDecode(context, id_cryptoctx, p7))) {
-        pkiDebug("unable to decrypt pkcs7 object\n");
-        return 0;
-    }
-
-    for(;;) {
-        i = BIO_read(tmpmem, buf, sizeof(buf));
-        if (i <= 0) break;
-        BIO_write(data, buf, i);
-        BIO_free_all(tmpmem);
-        return 1;
-    }
-    return retval;
-}
-
 krb5_error_code
 pkinit_process_td_trusted_certifiers(
     krb5_context context,
@@ -5827,118 +5772,86 @@ cleanup:
     return retval;
 }
 
-static BIO *
-pkcs7_dataDecode(krb5_context context,
-                 pkinit_identity_crypto_context id_cryptoctx,
-                 PKCS7 *p7)
+/* Originally based on OpenSSL's PKCS7_dataDecode(), now modified to remove the
+ * use of BIO objects and to fit the PKINIT internal interfaces. */
+static int
+pkcs7_decrypt(krb5_context context,
+              pkinit_identity_crypto_context id_cryptoctx, PKCS7 *p7,
+              unsigned char **data_out, unsigned int *len_out)
 {
-    unsigned int eklen=0, tkeylen=0;
-    BIO *out=NULL,*etmp=NULL,*bio=NULL;
-    unsigned char *ek=NULL, *tkey=NULL;
-    ASN1_OCTET_STRING *data_body=NULL;
-    const EVP_CIPHER *evp_cipher=NULL;
-    EVP_CIPHER_CTX *evp_ctx=NULL;
-    X509_ALGOR *enc_alg=NULL;
-    STACK_OF(PKCS7_RECIP_INFO) *rsk=NULL;
-    PKCS7_RECIP_INFO *ri=NULL;
+    krb5_error_code ret;
+    int ok = 0, plaintext_len = 0, final_len;
+    unsigned int keylen = 0, eklen = 0, blocksize;
+    unsigned char *ek = NULL, *tkey = NULL, *plaintext = NULL, *use_key;
+    ASN1_OCTET_STRING *data_body = p7->d.enveloped->enc_data->enc_data;
+    const EVP_CIPHER *evp_cipher;
+    EVP_CIPHER_CTX *evp_ctx = NULL;
+    X509_ALGOR *enc_alg = p7->d.enveloped->enc_data->algorithm;
+    STACK_OF(PKCS7_RECIP_INFO) *rsk = p7->d.enveloped->recipientinfo;
+    PKCS7_RECIP_INFO *ri = NULL;
 
-    p7->state=PKCS7_S_HEADER;
+    *data_out = NULL;
+    *len_out = 0;
 
-    rsk=p7->d.enveloped->recipientinfo;
-    enc_alg=p7->d.enveloped->enc_data->algorithm;
-    data_body=p7->d.enveloped->enc_data->enc_data;
-    evp_cipher=EVP_get_cipherbyobj(enc_alg->algorithm);
-    if (evp_cipher == NULL) {
-        PKCS7err(PKCS7_F_PKCS7_DATADECODE,PKCS7_R_UNSUPPORTED_CIPHER_TYPE);
-        goto cleanup;
-    }
-
-    if ((etmp=BIO_new(BIO_f_cipher())) == NULL) {
-        PKCS7err(PKCS7_F_PKCS7_DATADECODE,ERR_R_BIO_LIB);
-        goto cleanup;
-    }
-
-    /* It was encrypted, we need to decrypt the secret key
-     * with the private key */
+    p7->state = PKCS7_S_HEADER;
 
     /* RFC 4556 section 3.2.3.2 requires that there be exactly one
      * recipientInfo. */
     if (sk_PKCS7_RECIP_INFO_num(rsk) != 1) {
         pkiDebug("invalid number of EnvelopedData RecipientInfos\n");
-        goto cleanup;
+        return 0;
     }
-
     ri = sk_PKCS7_RECIP_INFO_value(rsk, 0);
-    (void)pkinit_decode_data(context, id_cryptoctx,
-                             ASN1_STRING_get0_data(ri->enc_key),
-                             ASN1_STRING_length(ri->enc_key), &ek, &eklen);
 
-    evp_ctx=NULL;
-    BIO_get_cipher_ctx(etmp,&evp_ctx);
-    if (EVP_CipherInit_ex(evp_ctx,evp_cipher,NULL,NULL,NULL,0) <= 0)
+    evp_cipher = EVP_get_cipherbyobj(enc_alg->algorithm);
+    if (evp_cipher == NULL)
         goto cleanup;
-    if (EVP_CIPHER_asn1_to_param(evp_ctx,enc_alg->parameter) < 0)
+    keylen = EVP_CIPHER_key_length(evp_cipher);
+    blocksize = EVP_CIPHER_block_size(evp_cipher);
+
+    evp_ctx = EVP_CIPHER_CTX_new();
+    if (evp_ctx == NULL)
+        goto cleanup;
+    if (!EVP_DecryptInit(evp_ctx, evp_cipher, NULL, NULL) ||
+        EVP_CIPHER_asn1_to_param(evp_ctx, enc_alg->parameter) <= 0)
         goto cleanup;
 
     /* Generate a random symmetric key to avoid exposing timing data if RSA
      * decryption fails the padding check. */
-    tkeylen = EVP_CIPHER_CTX_key_length(evp_ctx);
-    tkey = OPENSSL_malloc(tkeylen);
-    if (tkey == NULL)
-        goto cleanup;
-    if (EVP_CIPHER_CTX_rand_key(evp_ctx, tkey) <= 0)
-        goto cleanup;
-    if (ek == NULL) {
-        ek = tkey;
-        eklen = tkeylen;
-        tkey = NULL;
-    }
-
-    if (eklen != (unsigned)EVP_CIPHER_CTX_key_length(evp_ctx)) {
-        /* Some S/MIME clients don't use the same key
-         * and effective key length. The key length is
-         * determined by the size of the decrypted RSA key.
-         */
-        if (!EVP_CIPHER_CTX_set_key_length(evp_ctx, (int)eklen)) {
-            ek = tkey;
-            eklen = tkeylen;
-            tkey = NULL;
-        }
-    }
-    if (EVP_CipherInit_ex(evp_ctx,NULL,NULL,ek,NULL,0) <= 0)
+    tkey = malloc(keylen);
+    if (tkey == NULL || !EVP_CIPHER_CTX_rand_key(evp_ctx, tkey))
         goto cleanup;
 
-    if (out == NULL)
-        out=etmp;
-    else
-        BIO_push(out,etmp);
-    etmp=NULL;
+    /* Decrypt the secret key with the private key. */
+    ret = pkinit_decode_data(context, id_cryptoctx,
+                             ASN1_STRING_get0_data(ri->enc_key),
+                             ASN1_STRING_length(ri->enc_key), &ek, &eklen);
+    use_key = (ret || eklen != keylen) ? tkey : ek;
 
-    if (data_body->length > 0)
-        bio = BIO_new_mem_buf(data_body->data, data_body->length);
-    else {
-        bio=BIO_new(BIO_s_mem());
-        BIO_set_mem_eof_return(bio,0);
-    }
-    BIO_push(out,bio);
-    bio=NULL;
+    /* Allocate a plaintext buffer and decrypt data_body into it. */
+    plaintext = malloc(data_body->length + blocksize);
+    if (plaintext == NULL)
+        goto cleanup;
+    if (!EVP_DecryptInit(evp_ctx, NULL, use_key, NULL))
+        goto cleanup;
+    if (!EVP_DecryptUpdate(evp_ctx, plaintext, &plaintext_len,
+                           data_body->data, data_body->length))
+        goto cleanup;
+    if (!EVP_DecryptFinal(evp_ctx, plaintext + plaintext_len, &final_len))
+        goto cleanup;
+    plaintext_len += final_len;
 
-    if (0) {
-    cleanup:
-        if (out != NULL) BIO_free_all(out);
-        if (etmp != NULL) BIO_free_all(etmp);
-        if (bio != NULL) BIO_free_all(bio);
-        out=NULL;
-    }
-    if (ek != NULL) {
-        OPENSSL_cleanse(ek, eklen);
-        OPENSSL_free(ek);
-    }
-    if (tkey != NULL) {
-        OPENSSL_cleanse(tkey, tkeylen);
-        OPENSSL_free(tkey);
-    }
-    return(out);
+    *len_out = plaintext_len;
+    *data_out = plaintext;
+    plaintext = NULL;
+    ok = 1;
+
+cleanup:
+    EVP_CIPHER_CTX_free(evp_ctx);
+    zapfree(plaintext, plaintext_len);
+    zapfree(ek, eklen);
+    zapfree(tkey, keylen);
+    return ok;
 }
 
 #ifdef DEBUG_DH
