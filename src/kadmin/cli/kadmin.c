@@ -797,11 +797,11 @@ kadmin_cpw(int argc, char *argv[])
     char **db_args = NULL;
     int db_args_size = 0;
 
-    if (argc < 2) {
+    if (argc < 1) {
         cpw_usage(NULL);
         return;
     }
-    for (argv++, argc--; argc > 1; argc--, argv++) {
+    for (argv++, argc--; argc > 0 && **argv == '-'; argc--, argv++) {
         if (!strcmp("-x", *argv)) {
             argc--;
             if (argc < 1) {
@@ -841,12 +841,16 @@ kadmin_cpw(int argc, char *argv[])
                 goto cleanup;
             }
         } else {
+            com_err("change_password", 0, _("unrecognized option %s"), *argv);
             cpw_usage(NULL);
             goto cleanup;
         }
     }
-    if (*argv == NULL) {
-        com_err("change_password", 0, _("missing principal name"));
+    if (argc != 1) {
+        if (argc < 1)
+            com_err("change_password", 0, _("missing principal name"));
+        else
+            com_err("change_password", 0, _("too many arguments"));
         cpw_usage(NULL);
         goto cleanup;
     }
