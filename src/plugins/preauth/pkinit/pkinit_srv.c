@@ -258,15 +258,7 @@ verify_client_san(krb5_context context,
     }
     pkiDebug("%s: no upn san match found\n", __FUNCTION__);
 
-    /* We found no match */
-    if (princs != NULL || upns != NULL) {
-        *valid_san = 0;
-        /* XXX ??? If there was one or more name in the cert, but
-         * none matched the client name, then return mismatch? */
-        retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
-    }
     retval = 0;
-
 out:
     if (princs != NULL) {
         for (i = 0; princs[i] != NULL; i++)

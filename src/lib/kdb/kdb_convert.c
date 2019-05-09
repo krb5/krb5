@@ -305,8 +305,6 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entry,
     krb5_error_code ret;
     kdbe_attr_type_t *attr_types;
     int kadm_data_yes;
-    /* always exclude non-replicated attributes, for now */
-    krb5_boolean exclude_nra = TRUE;
 
     nattrs = tmpint = 0;
     final = -1;
@@ -356,7 +354,8 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entry,
             nattrs++;
         }
     } else {
-        find_changed_attrs(curr, entry, exclude_nra, attr_types, &nattrs);
+        /* Always exclude non-replicated attributes for now. */
+        find_changed_attrs(curr, entry, TRUE, attr_types, &nattrs);
         krb5_db_free_principal(context, curr);
     }
 
@@ -399,31 +398,6 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entry,
                 ULOG_ENTRY_TYPE(update, ++final).av_type = AT_PW_EXP;
                 ULOG_ENTRY(update, final).av_pw_exp =
                     (uint32_t)entry->pw_expiration;
-            }
-            break;
-
-        case AT_LAST_SUCCESS:
-            if (!exclude_nra && entry->last_success >= 0) {
-                ULOG_ENTRY_TYPE(update, ++final).av_type = AT_LAST_SUCCESS;
-                ULOG_ENTRY(update, final).av_last_success =
-                    (uint32_t)entry->last_success;
-            }
-            break;
-
-        case AT_LAST_FAILED:
-            if (!exclude_nra && entry->last_failed >= 0) {
-                ULOG_ENTRY_TYPE(update, ++final).av_type = AT_LAST_FAILED;
-                ULOG_ENTRY(update, final).av_last_failed =
-                    (uint32_t)entry->last_failed;
-            }
-            break;
-
-        case AT_FAIL_AUTH_COUNT:
-            if (!exclude_nra) {
-                ULOG_ENTRY_TYPE(update, ++final).av_type =
-                    AT_FAIL_AUTH_COUNT;
-                ULOG_ENTRY(update, final).av_fail_auth_count =
-                    (uint32_t)entry->fail_auth_count;
             }
             break;
 
@@ -552,10 +526,8 @@ ulog_conv_2logentry(krb5_context context, krb5_db_entry *entry,
 /* END CSTYLED */
 
         case AT_LEN:
-            if (entry->len >= 0) {
-                ULOG_ENTRY_TYPE(update, ++final).av_type = AT_LEN;
-                ULOG_ENTRY(update, final).av_len = (int16_t)entry->len;
-            }
+            ULOG_ENTRY_TYPE(update, ++final).av_type = AT_LEN;
+            ULOG_ENTRY(update, final).av_len = (int16_t)entry->len;
             break;
 
         default:

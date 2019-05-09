@@ -720,11 +720,6 @@ show_credential(krb5_creds *cred)
         extra_field += 2;
     }
 
-    if (extra_field > 3) {
-        fputs("\n", stdout);
-        extra_field = 0;
-    }
-
     if (show_flags) {
         flags = flags_string(cred);
         if (flags && *flags) {
