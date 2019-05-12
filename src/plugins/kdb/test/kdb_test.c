@@ -57,8 +57,16 @@
  *                 }
  *             }
  *             delegation = {
+ *                 # Traditional constrained delegation; target_service
+ *                 # must be in the same realm.
  *                 intermediate_service = target_service
  *             }
+ *             rbcd = {
+ *                 # Resource-based constrained delegation;
+ *                 # intermediate_service may be in a different realm.
+ *                 target_service = intermediate_service
+ *             }
+ *             ad_type = mspac
  *         }
  *
  * Key values are generated using a hash of the kvno, enctype, salt type,
@@ -79,6 +87,9 @@
 #include <ctype.h>
 
 #define TEST_AD_TYPE -456
+
+#define IS_TGS_PRINC(p) ((p)->length == 2 &&                            \
+                         data_eq_string((p)->data[0], KRB5_TGS_NAME))
 
 typedef struct {
     void *profile;
@@ -543,6 +554,326 @@ test_encrypt_key_data(krb5_context context, const krb5_keyblock *mkey,
     return 0;
 }
 
+typedef struct {
+    char *pac_princ;
+    struct {
+        char *proxy_target;
+        char *impersonator;
+    } deleg_info;
+    krb5_boolean not_delegated;
+    krb5_pac pac;
+} pac_info;
+
+static void
+free_pac_info(krb5_context context, pac_info *info)
+{
+    if (info == NULL)
+        return;
+
+    free(info->pac_princ);
+    free(info->deleg_info.proxy_target);
+    free(info->deleg_info.impersonator);
+    krb5_pac_free(context, info->pac);
+    free(info);
+}
+
+/*
+ * Create a PAC object with a fake logon-info blob.  Instead of a real
+ * KERB_VALIDATION_INFO structure, store a byte indicating whether the
+ * USER_NOT_DELEGATED bit is set.
+ */
+static krb5_error_code
+create_pac(krb5_context context, krb5_boolean not_delegated, krb5_pac *pac_out)
+{
+    krb5_data data;
+    krb5_pac pac;
+    char nd;
+
+    nd = not_delegated ? 1 : 0;
+    data = make_data(&nd, 1);
+    check(krb5_pac_init(context, &pac));
+    check(krb5_pac_add_buffer(context, pac, KRB5_PAC_LOGON_INFO, &data));
+
+    *pac_out = pac;
+    return 0;
+}
+
+/* Create a fake PAC, setting the USER_NOT_DELEGATED bit if the client DB entry
+ * disallows forwardable tickets. */
+static krb5_error_code
+create_pac_db(krb5_context context, krb5_db_entry *client, krb5_pac *pac_out)
+{
+    krb5_boolean not_delegated;
+    /* Use disallow_forwardable as delegation_not_allowed attribute */
+    not_delegated = (client->attributes & KRB5_KDB_DISALLOW_FORWARDABLE);
+    return create_pac(context, not_delegated, pac_out);
+}
+
+/* Locate the PAC in tgt_authdata and set *pac_out to its PAC object
+ * representation.  Set it to NULL if no PAC is present. */
+static void
+parse_ticket_pac(krb5_context context, krb5_authdata **tgt_auth_data,
+                 krb5_pac *pac_out)
+{
+    krb5_authdata **authdata;
+
+    *pac_out = NULL;
+
+    check(krb5_find_authdata(context, tgt_auth_data, NULL,
+                             KRB5_AUTHDATA_WIN2K_PAC, &authdata));
+    if (authdata == NULL)
+        return;
+    assert(authdata[1] == NULL);
+    check(krb5_pac_parse(context, authdata[0]->contents, authdata[0]->length,
+                         pac_out));
+    krb5_free_authdata(context, authdata);
+}
+
+/* Verify the KDC signature against the local TGT key.  tgt_key must be the
+ * decrypted first key data entry of tgt. */
+static krb5_error_code
+verify_kdc_signature(krb5_context context, krb5_pac pac,
+                     krb5_keyblock *tgt_key, krb5_db_entry *tgt)
+{
+    krb5_error_code ret;
+    krb5_key_data *kd;
+    krb5_keyblock old_key;
+    krb5_kvno kvno;
+    int tries;
+
+    ret = krb5_pac_verify(context, pac, 0, NULL, NULL, tgt_key);
+    if (ret != KRB5KRB_AP_ERR_BAD_INTEGRITY)
+        return ret;
+
+    kvno = tgt->key_data[0].key_data_kvno - 1;
+
+    /* There is no kvno in PAC signatures, so try two previous versions. */
+    for (tries = 2; tries > 0 && kvno > 0; tries--, kvno--) {
+        ret = krb5_dbe_find_enctype(context, tgt, -1, -1, kvno, &kd);
+        if (ret)
+            return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+        ret = krb5_dbe_decrypt_key_data(context, NULL, kd, &old_key, NULL);
+        if (ret)
+            return ret;
+        ret = krb5_pac_verify(context, pac, 0, NULL, NULL, &old_key);
+        krb5_free_keyblock_contents(context, &old_key);
+        if (!ret)
+            return 0;
+
+        /* Try the next lower kvno on the next iteration. */
+        kvno = kd->key_data_kvno - 1;
+    }
+
+    return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+}
+
+static krb5_error_code
+verify_ticket_pac(krb5_context context, krb5_pac pac, unsigned int flags,
+                  krb5_const_principal client_princ, krb5_boolean check_realm,
+                  krb5_keyblock *server_key, krb5_keyblock *local_tgt_key,
+                  krb5_db_entry *local_tgt, krb5_timestamp authtime)
+{
+    check(krb5_pac_verify_ext(context, pac, authtime, client_princ, server_key,
+                              NULL, check_realm));
+    if (flags & KRB5_KDB_FLAG_CROSS_REALM)
+        return 0;
+    return verify_kdc_signature(context, pac, local_tgt_key, local_tgt);
+}
+
+static void
+get_pac_info(krb5_context context, krb5_authdata **in_authdata,
+             pac_info **info_out)
+{
+    krb5_error_code ret;
+    krb5_pac pac = NULL;
+    krb5_data data;
+    char *sep = NULL;
+    pac_info *info;
+
+    *info_out = NULL;
+
+    parse_ticket_pac(context, in_authdata, &pac);
+    if (pac == NULL)
+        return;
+
+    info = ealloc(sizeof(*info));
+
+    /* Read the fake logon-info buffer from the PAC and set not_delegated
+     * according to the byte value. */
+    check(krb5_pac_get_client_info(context, pac, NULL, &info->pac_princ));
+    check(krb5_pac_get_buffer(context, pac, KRB5_PAC_LOGON_INFO, &data));
+    assert(data.length == 1);
+    info->not_delegated = *data.data;
+    krb5_free_data_contents(context, &data);
+
+    ret = krb5_pac_get_buffer(context, pac, KRB5_PAC_DELEGATION_INFO, &data);
+    if (ret && ret != ENOENT)
+        abort();
+    if (!ret) {
+        sep = memchr(data.data, ':', data.length);
+        assert(sep != NULL);
+        info->deleg_info.proxy_target = k5memdup0(data.data, sep - data.data,
+                                                  &ret);
+        check(ret);
+        info->deleg_info.impersonator = k5memdup0(sep + 1, data.length - 1 -
+                                                  (sep - data.data), &ret);
+        check(ret);
+        krb5_free_data_contents(context, &data);
+    }
+
+    info->pac = pac;
+    *info_out = info;
+}
+
+/* Add a fake delegation-info buffer to pac containing the proxy target and
+ * impersonator from info. */
+static void
+add_delegation_info(krb5_context context, krb5_pac pac, pac_info *info)
+{
+    krb5_data data;
+    char *str;
+
+    if (info->deleg_info.proxy_target == NULL)
+        return;
+
+    if (asprintf(&str, "%s:%s", info->deleg_info.proxy_target,
+                 info->deleg_info.impersonator) < 0)
+        abort();
+    data = string2data(str);
+    check(krb5_pac_add_buffer(context, pac, KRB5_PAC_DELEGATION_INFO, &data));
+    free(str);
+}
+
+/* Set *out to an AD-IF-RELEVANT authdata element containing a PAC authdata
+ * element with contents pac_data. */
+static void
+encode_pac_ad(krb5_context context, krb5_data *pac_data, krb5_authdata **out)
+{
+    krb5_authdata pac_ad, *list[2], **ifrel;
+
+    pac_ad.magic = KV5M_AUTHDATA;
+    pac_ad.ad_type = KRB5_AUTHDATA_WIN2K_PAC;
+    pac_ad.contents = (krb5_octet *)pac_data->data;;
+    pac_ad.length = pac_data->length;
+    list[0] = &pac_ad;
+    list[1] = NULL;
+
+    check(krb5_encode_authdata_container(context, KRB5_AUTHDATA_IF_RELEVANT,
+                                         list, &ifrel));
+    assert(ifrel[1] == NULL);
+    *out = ifrel[0];
+    free(ifrel);
+}
+
+/* Parse a PAC client-info string into a principal name.  If xrealm_s4u is
+ * true, expect a realm in the string. */
+static krb5_error_code
+parse_pac_princ(krb5_context context, krb5_boolean xrealm_s4u, char *pac_princ,
+                krb5_principal *client_out)
+{
+    int n_atsigns = 0, flags = 0;
+    char *p = pac_princ;
+
+    while (*p++) {
+        if (*p == '@')
+            n_atsigns++;
+    }
+    if (xrealm_s4u) {
+        flags |= KRB5_PRINCIPAL_PARSE_REQUIRE_REALM;
+        n_atsigns--;
+    } else {
+        flags |= KRB5_PRINCIPAL_PARSE_NO_REALM;
+    }
+    assert(n_atsigns == 0 || n_atsigns == 1);
+    if (n_atsigns == 1)
+        flags |= KRB5_PRINCIPAL_PARSE_ENTERPRISE;
+    check(krb5_parse_name_flags(context, pac_princ, flags, client_out));
+    (*client_out)->type = KRB5_NT_MS_PRINCIPAL;
+    return 0;
+}
+
+/* Set *ad_out to a fake PAC for testing, or to NULL if it doesn't make sense
+ * to generate a PAC for the request. */
+static void
+generate_pac(krb5_context context, unsigned int flags,
+             krb5_const_principal client_princ,
+             krb5_const_principal server_princ, krb5_db_entry *client,
+             krb5_db_entry *header_server, krb5_db_entry *local_tgt,
+             krb5_keyblock *server_key, krb5_keyblock *header_key,
+             krb5_keyblock *local_tgt_key, krb5_timestamp authtime,
+             pac_info *info, krb5_authdata **ad_out)
+{
+    krb5_boolean sign_realm, check_realm;
+    krb5_data pac_data;
+    krb5_pac pac = NULL;
+    krb5_principal pac_princ = NULL;
+
+    *ad_out = NULL;
+
+    check_realm = ((flags & KRB5_KDB_FLAGS_S4U) &&
+                   (flags & KRB5_KDB_FLAG_CROSS_REALM));
+    sign_realm = ((flags & KRB5_KDB_FLAGS_S4U) &&
+                  (flags & KRB5_KDB_FLAG_ISSUING_REFERRAL));
+
+    if (client != NULL &&
+        ((flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) ||
+         (flags & KRB5_KDB_FLAG_PROTOCOL_TRANSITION))) {
+        /* For AS or local-realm S4U2Self, generate an initial PAC. */
+        check(create_pac_db(context, client, &pac));
+    } else if (info == NULL) {
+        /* If there is no input PAC, do not generate one. */
+        assert((flags & KRB5_KDB_FLAGS_S4U) == 0);
+        return;
+    } else {
+        if (IS_TGS_PRINC(server_princ) &&
+            info->deleg_info.proxy_target != NULL) {
+            /* RBCD transitive trust. */
+            assert(flags & KRB5_KDB_FLAG_CROSS_REALM);
+            assert(!(flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION));
+            check(parse_pac_princ(context, TRUE, info->pac_princ, &pac_princ));
+            client_princ = pac_princ;
+            check_realm = TRUE;
+            sign_realm = TRUE;
+        } else if ((flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) &&
+                   !(flags & KRB5_KDB_FLAG_CROSS_REALM)) {
+            /*
+             * Initial RBCD and old constrained delegation requests to
+             * impersonator realm; create delegation info blob.  We cannot
+             * assume that proxy_target is NULL as the evidence ticket could
+             * have been acquired via constrained delegation.
+             */
+            free(info->deleg_info.proxy_target);
+            check(krb5_unparse_name_flags(context, server_princ,
+                                          KRB5_PRINCIPAL_UNPARSE_NO_REALM,
+                                          &info->deleg_info.proxy_target));
+            /* This is supposed to be a list of impersonators, but we currently
+             * only deal with one. */
+            free(info->deleg_info.impersonator);
+            check(krb5_unparse_name(context, header_server->princ,
+                                    &info->deleg_info.impersonator));
+        } else if (flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) {
+            /* Last cross realm RBCD request to proxy realm. */
+            assert(info->deleg_info.proxy_target != NULL);
+        }
+
+        /* We have already verified the PAC in get_authdata_info, but we should
+         * be able to verify the signatures here as well. */
+        check(verify_ticket_pac(context, info->pac, flags, client_princ,
+                                check_realm, header_key, local_tgt_key,
+                                local_tgt, authtime));
+
+        /* Create a new pac as we may be altering pac principal's realm */
+        check(create_pac(context, info->not_delegated, &pac));
+        add_delegation_info(context, pac, info);
+    }
+    check(krb5_pac_sign_ext(context, pac, authtime, client_princ, server_key,
+                            local_tgt_key, sign_realm, &pac_data));
+    krb5_pac_free(context, pac);
+    krb5_free_principal(context, pac_princ);
+    encode_pac_ad(context, &pac_data, ad_out);
+    krb5_free_data_contents(context, &pac_data);
+}
+
 static krb5_error_code
 test_sign_authdata(krb5_context context, unsigned int flags,
                    krb5_const_principal client_princ,
@@ -555,18 +886,35 @@ test_sign_authdata(krb5_context context, unsigned int flags,
                    void *ad_info, krb5_data ***auth_indicators,
                    krb5_authdata ***signed_auth_data)
 {
-    krb5_authdata **list, *ad;
+    testhandle h = context->dal_handle->db_context;
+    krb5_authdata *pac_ad = NULL, *test_ad = NULL, **list;
     krb5_data **inds, d;
     int i, val;
+    char *ad_type;
 
-    ad = ealloc(sizeof(*ad));
-    ad->magic = KV5M_AUTHDATA;
-    ad->ad_type = TEST_AD_TYPE;
-    ad->contents = (uint8_t *)estrdup("db-authdata-test");
-    ad->length = strlen((char *)ad->contents);
-    list = ealloc(2 * sizeof(*list));
-    list[0] = ad;
-    list[1] = NULL;
+    generate_pac(context, flags, client_princ, server_princ, client,
+                 header_server, local_tgt, server_key, header_key,
+                 local_tgt_key, authtime, ad_info, &pac_ad);
+
+    /*
+     * Omit test_ad if ad_type is mspac (only), as handle_signticket() fails in
+     * constrained delegation if the PAC is not the only authorization data
+     * element.
+     */
+    ad_type = get_string(h, "ad_type", NULL, NULL);
+    if (ad_type == NULL || strcmp(ad_type, "mspac") != 0) {
+        test_ad = ealloc(sizeof(*test_ad));
+        test_ad->magic = KV5M_AUTHDATA;
+        test_ad->ad_type = TEST_AD_TYPE;
+        test_ad->contents = (uint8_t *)estrdup("db-authdata-test");
+        test_ad->length = strlen((char *)test_ad->contents);
+    }
+    free(ad_type);
+
+    list = ealloc(3 * sizeof(*list));
+    list[0] = (test_ad != NULL) ? test_ad : pac_ad;
+    list[1] = (test_ad != NULL) ? pac_ad : NULL;
+    list[2] = NULL;
     *signed_auth_data = list;
 
     /* If we see an auth indicator "dbincrX", replace the whole indicator list
@@ -589,35 +937,144 @@ test_sign_authdata(krb5_context context, unsigned int flags,
     return 0;
 }
 
+static krb5_boolean
+match_in_table(krb5_context context, const char *table, const char *sprinc,
+               const char *tprinc)
+{
+    testhandle h = context->dal_handle->db_context;
+    krb5_error_code ret;
+    char **values, **v;
+    krb5_boolean found = FALSE;
+
+    set_names(h, table, sprinc, NULL);
+    ret = profile_get_values(h->profile, h->names, &values);
+    assert(ret == 0 || ret == PROF_NO_RELATION);
+    if (ret)
+        return FALSE;
+    for (v = values; *v != NULL; v++) {
+        if (strcmp(*v, tprinc) == 0) {
+            found = TRUE;
+            break;
+        }
+    }
+    profile_free_list(values);
+    return found;
+}
+
 static krb5_error_code
 test_check_allowed_to_delegate(krb5_context context,
                                krb5_const_principal client,
                                const krb5_db_entry *server,
                                krb5_const_principal proxy)
 {
-    krb5_error_code ret;
-    testhandle h = context->dal_handle->db_context;
-    char *sprinc, *tprinc, **values, **v;
+    char *sprinc, *tprinc;
     krb5_boolean found = FALSE;
 
     check(krb5_unparse_name_flags(context, server->princ,
                                   KRB5_PRINCIPAL_UNPARSE_NO_REALM, &sprinc));
     check(krb5_unparse_name_flags(context, proxy,
                                   KRB5_PRINCIPAL_UNPARSE_NO_REALM, &tprinc));
-    set_names(h, "delegation", sprinc, NULL);
-    ret = profile_get_values(h->profile, h->names, &values);
-    if (ret != PROF_NO_RELATION) {
-        for (v = values; *v != NULL; v++) {
-            if (strcmp(*v, tprinc) == 0) {
-                found = TRUE;
-                break;
-            }
-        }
-        profile_free_list(values);
-    }
+    found = match_in_table(context, "delegation", sprinc, tprinc);
     krb5_free_unparsed_name(context, sprinc);
     krb5_free_unparsed_name(context, tprinc);
     return found ? 0 : KRB5KDC_ERR_POLICY;
+}
+
+static krb5_error_code
+test_allowed_to_delegate_from(krb5_context context,
+                              krb5_const_principal client,
+                              krb5_const_principal server,
+                              void *server_ad_info, const krb5_db_entry *proxy)
+{
+    char *sprinc, *tprinc;
+    pac_info *info = (pac_info *)server_ad_info;
+    krb5_boolean found = FALSE;
+
+    check(krb5_unparse_name(context, proxy->princ, &sprinc));
+    check(krb5_unparse_name(context, server, &tprinc));
+    assert(strncmp(info->pac_princ, tprinc, strlen(info->pac_princ)) == 0);
+    found = match_in_table(context, "rbcd", sprinc, tprinc);
+    krb5_free_unparsed_name(context, sprinc);
+    krb5_free_unparsed_name(context, tprinc);
+    return found ? 0 : KRB5KDC_ERR_POLICY;
+}
+
+static krb5_error_code
+test_get_authdata_info(krb5_context context, unsigned int flags,
+                       krb5_authdata **in_authdata,
+                       krb5_const_principal client_princ,
+                       krb5_const_principal server_princ,
+                       krb5_keyblock *server_key, krb5_keyblock *krbtgt_key,
+                       krb5_db_entry *krbtgt, krb5_timestamp authtime,
+                       void **ad_info_out, krb5_principal *client_out)
+{
+    pac_info *info = NULL;
+    krb5_boolean rbcd_transitive, xrealm_s4u;
+    krb5_principal pac_princ = NULL;
+    char *proxy_name = NULL, *impersonator_name = NULL;
+
+    get_pac_info(context, in_authdata, &info);
+    if (info == NULL)
+        return 0;
+
+    /* Transitive RBCD requests are not flagged as constrained delegation */
+    if (info->not_delegated &&
+        (info->deleg_info.proxy_target ||
+         (flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))) {
+        free_pac_info(context, info);
+        return KRB5KDC_ERR_BADOPTION;
+    }
+
+    rbcd_transitive = IS_TGS_PRINC(server_princ) &&
+        (flags & KRB5_KDB_FLAG_CROSS_REALM) && info->deleg_info.proxy_target &&
+        !(flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
+
+    xrealm_s4u = rbcd_transitive || ((flags & KRB5_KDB_FLAG_CROSS_REALM) &&
+                                     (flags & KRB5_KDB_FLAGS_S4U));
+
+    check(parse_pac_princ(context, xrealm_s4u, info->pac_princ, &pac_princ));
+
+    /* Cross-realm and transitive trust RBCD requests */
+    if (rbcd_transitive || ((flags & KRB5_KDB_FLAG_CROSS_REALM) &&
+                            (flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))) {
+        assert(info->deleg_info.proxy_target != NULL);
+        assert(info->deleg_info.impersonator != NULL);
+        /* We must be able to find the impersonator in the delegation info. */
+        assert(!krb5_principal_compare(context, client_princ, pac_princ));
+        check(krb5_unparse_name(context, client_princ, &impersonator_name));
+        assert(strcmp(info->deleg_info.impersonator, impersonator_name) == 0);
+        krb5_free_unparsed_name(context, impersonator_name);
+        client_princ = pac_princ;
+        /* In the non-transitive case we can match the proxy too. */
+        if (!rbcd_transitive) {
+            check(krb5_unparse_name_flags(context, server_princ,
+                                          KRB5_PRINCIPAL_UNPARSE_NO_REALM,
+                                          &proxy_name));
+            assert(info->deleg_info.proxy_target != NULL);
+            assert(strcmp(info->deleg_info.proxy_target, proxy_name) == 0);
+            krb5_free_unparsed_name(context, proxy_name);
+        }
+    }
+
+    check(verify_ticket_pac(context, info->pac, flags, client_princ,
+                            xrealm_s4u, server_key, krbtgt_key, krbtgt,
+                            authtime));
+
+    *ad_info_out = info;
+    if (client_out != NULL)
+        *client_out = pac_princ;
+    else
+        krb5_free_principal(context, pac_princ);
+
+    return 0;
+}
+
+static void
+test_free_authdata_info(krb5_context context, void *ad_info)
+{
+    pac_info *info = (pac_info *)ad_info;
+
+    free_pac_info(context, info);
 }
 
 kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
@@ -658,5 +1115,8 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     NULL, /* refresh_config */
     test_check_allowed_to_delegate,
     NULL, /* free_principal_e_data */
-    test_get_s4u_x509_principal
+    test_get_s4u_x509_principal,
+    test_allowed_to_delegate_from,
+    test_get_authdata_info,
+    test_free_authdata_info
 };

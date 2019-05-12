@@ -278,4 +278,103 @@ r1.run([kvno, '-U', 'enterprise@abc', '-F', cert_path, r1.user_princ],
 r1.stop()
 r2.stop()
 
+mark('Resource-based constrained delegation')
+
+a_princs = {'krbtgt/A': {'keys': 'aes128-cts'},
+            'krbtgt/B': {'keys': 'aes128-cts'},
+            'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
+            'sensitive': {'keys': 'aes128-cts',
+                          'flags': '+disallow_forwardable'},
+            'impersonator': {'keys': 'aes128-cts'},
+            'rb': {'keys': 'aes128-cts'}}
+a_kconf = {'realms': {'$realm': {'database_module': 'test'}},
+           'dbmodules': {'test': {'db_library': 'test',
+                                  'ad_type': 'mspac',
+                                  'princs': a_princs,
+                                  'rbcd': {'rb@A': 'impersonator@A'},
+                                  'alias': {'rb@A': 'rb',
+                                            'rb@B': '@B',
+                                            'rb@C': '@B',
+                                            'service/rb.a': 'rb',
+                                            'service/rb.b': '@B',
+                                            'service/rb.c': '@B' }}}}
+
+b_princs = {'krbtgt/B': {'keys': 'aes128-cts'},
+            'krbtgt/A': {'keys': 'aes128-cts'},
+            'krbtgt/C': {'keys': 'aes128-cts'},
+            'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
+            'rb': {'keys': 'aes128-cts'}}
+b_kconf = {'realms': {'$realm': {'database_module': 'test'}},
+           'dbmodules': {'test': {'db_library': 'test',
+                                  'ad_type': 'mspac',
+                                  'princs': b_princs,
+                                  'rbcd': {'rb@B': 'impersonator@A'},
+                                  'alias': {'rb@B': 'rb',
+                                            'service/rb.b': 'rb',
+                                            'rb@C': '@C',
+                                            'impersonator@A': '@A',
+                                            'service/rb.c': '@C'}}}}
+
+c_princs = {'krbtgt/C': {'keys': 'aes128-cts'},
+            'krbtgt/B': {'keys': 'aes128-cts'},
+            'rb': {'keys': 'aes128-cts'}}
+c_kconf = {'realms': {'$realm': {'database_module': 'test'}},
+           'capaths': { 'A' : { 'C' : 'B' }},
+           'dbmodules': {'test': {'db_library': 'test',
+                                  'ad_type': 'mspac',
+                                  'princs': c_princs,
+                                  'rbcd': {'rb@C': 'impersonator@A'},
+                                  'alias': {'rb@C': 'rb',
+                                            'service/rb.c': 'rb' }}}}
+
+ra, rb, rc = cross_realms(3, xtgts=(),
+                          args=({'realm': 'A', 'kdc_conf': a_kconf},
+                                {'realm': 'B', 'kdc_conf': b_kconf},
+                                {'realm': 'C', 'kdc_conf': c_kconf}),
+                          create_kdb=False)
+
+ra.start_kdc()
+rb.start_kdc()
+rc.start_kdc()
+
+domain_realm = {'domain_realm': {'.a':'A', '.b':'B', '.c':'C'}}
+domain_conf = ra.special_env('domain_conf', False, krb5_conf=domain_realm)
+
+ra.extract_keytab('impersonator@A', ra.keytab)
+ra.kinit('impersonator@A', None, ['-k', '-t', ra.keytab])
+
+mark('Local-realm RBCD')
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'p:rb'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'e:rb'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'p:rb@A'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'e:rb@A'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'e:rb@A@'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'e:rb@A@A'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'h:service@rb.a'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'h:service@rb.a'], env=domain_conf)
+ra.run(['./t_s4u', 'p:' + 'sensitive@A', 'h:service@rb.a'], expected_code=1)
+ra.run(['./t_s4u', 'p:' + rb.user_princ, 'h:service@rb.a'])
+
+mark('Cross-realm RBCD')
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'e:rb@B'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'e:rb@B@'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'e:rb@B@A'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'h:service@rb.b'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'h:service@rb.b'], env=domain_conf)
+ra.run(['./t_s4u', 'p:' + 'sensitive@A', 'h:service@rb.b'], expected_code=1)
+ra.run(['./t_s4u', 'p:' + rb.user_princ, 'h:service@rb.b'])
+
+mark('RBCD transitive trust')
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'e:rb@C'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'e:rb@C@'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'e:rb@C@A'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'h:service@rb.c'])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'h:service@rb.c'], env=domain_conf)
+ra.run(['./t_s4u', 'p:' + 'sensitive@A', 'h:service@rb.c'], expected_code=1)
+ra.run(['./t_s4u', 'p:' + rb.user_princ, 'h:service@rb.c'])
+
+ra.stop()
+rb.stop()
+rc.stop()
+
 success('S4U test cases')
