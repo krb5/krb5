@@ -53,7 +53,6 @@ tgs_construct_ap_req(krb5_context context, krb5_data *checksum_data,
                      krb5_creds *tgt, krb5_keyblock *subkey,
                      krb5_data **ap_req_asn1_out)
 {
-    krb5_cksumtype cksumtype;
     krb5_error_code ret;
     krb5_checksum checksum;
     krb5_authenticator authent;
@@ -67,24 +66,8 @@ tgs_construct_ap_req(krb5_context context, krb5_data *checksum_data,
     memset(&ap_req, 0, sizeof(ap_req));
     memset(&authent_enc, 0, sizeof(authent_enc));
 
-    /* Determine the authenticator checksum type. */
-    switch (tgt->keyblock.enctype) {
-    case ENCTYPE_DES_CBC_CRC:
-    case ENCTYPE_DES_CBC_MD4:
-    case ENCTYPE_DES_CBC_MD5:
-    case ENCTYPE_ARCFOUR_HMAC:
-    case ENCTYPE_ARCFOUR_HMAC_EXP:
-        cksumtype = context->kdc_req_sumtype;
-        break;
-    default:
-        ret = krb5int_c_mandatory_cksumtype(context, tgt->keyblock.enctype,
-                                            &cksumtype);
-        if (ret)
-            goto cleanup;
-    }
-
     /* Generate checksum. */
-    ret = krb5_c_make_checksum(context, cksumtype, &tgt->keyblock,
+    ret = krb5_c_make_checksum(context, 0, &tgt->keyblock,
                                KRB5_KEYUSAGE_TGS_REQ_AUTH_CKSUM, checksum_data,
                                &checksum);
     if (ret)

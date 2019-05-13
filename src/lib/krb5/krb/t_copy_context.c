@@ -77,9 +77,6 @@ check_context(krb5_context c, krb5_context r)
     check(c->os_context.os_flags == r->os_context.os_flags);
     compare_string(c->os_context.default_ccname, r->os_context.default_ccname);
     check(c->clockskew == r->clockskew);
-    check(c->kdc_req_sumtype == r->kdc_req_sumtype);
-    check(c->default_ap_req_sumtype == r->default_ap_req_sumtype);
-    check(c->default_safe_sumtype == r->default_safe_sumtype);
     check(c->kdc_default_options == r->kdc_default_options);
     check(c->library_options == r->library_options);
     check(c->profile_secure == r->profile_secure);
@@ -136,9 +133,6 @@ main(int argc, char **argv)
     check(krb5_cc_set_default_name(ctx, "defccname") == 0);
     check(krb5_set_default_realm(ctx, "defrealm") == 0);
     ctx->clockskew = 18;
-    ctx->kdc_req_sumtype = CKSUMTYPE_NIST_SHA;
-    ctx->default_ap_req_sumtype = CKSUMTYPE_HMAC_SHA1_96_AES128;
-    ctx->default_safe_sumtype = CKSUMTYPE_HMAC_SHA1_96_AES256;
     ctx->kdc_default_options = KDC_OPT_FORWARDABLE;
     ctx->library_options = 0;
     ctx->profile_secure = TRUE;

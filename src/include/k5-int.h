@@ -181,7 +181,6 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_ACL_FILE                     "acl_file"
 #define KRB5_CONF_ADMIN_SERVER                 "admin_server"
 #define KRB5_CONF_ALLOW_WEAK_CRYPTO            "allow_weak_crypto"
-#define KRB5_CONF_AP_REQ_CHECKSUM_TYPE         "ap_req_checksum_type"
 #define KRB5_CONF_AUTH_TO_LOCAL                "auth_to_local"
 #define KRB5_CONF_AUTH_TO_LOCAL_NAMES          "auth_to_local_names"
 #define KRB5_CONF_CANONICALIZE                 "canonicalize"
@@ -240,7 +239,6 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_KDC_LISTEN                   "kdc_listen"
 #define KRB5_CONF_KDC_MAX_DGRAM_REPLY_SIZE     "kdc_max_dgram_reply_size"
 #define KRB5_CONF_KDC_PORTS                    "kdc_ports"
-#define KRB5_CONF_KDC_REQ_CHECKSUM_TYPE        "kdc_req_checksum_type"
 #define KRB5_CONF_KDC_TCP_PORTS                "kdc_tcp_ports"
 #define KRB5_CONF_KDC_TCP_LISTEN               "kdc_tcp_listen"
 #define KRB5_CONF_KDC_TCP_LISTEN_BACKLOG       "kdc_tcp_listen_backlog"
@@ -288,7 +286,6 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_REJECT_BAD_TRANSIT           "reject_bad_transit"
 #define KRB5_CONF_RENEW_LIFETIME               "renew_lifetime"
 #define KRB5_CONF_RESTRICT_ANONYMOUS_TO_TGT    "restrict_anonymous_to_tgt"
-#define KRB5_CONF_SAFE_CHECKSUM_TYPE           "safe_checksum_type"
 #define KRB5_CONF_SUPPORTED_ENCTYPES           "supported_enctypes"
 #define KRB5_CONF_SPAKE_PREAUTH_INDICATOR      "spake_preauth_indicator"
 #define KRB5_CONF_SPAKE_PREAUTH_KDC_CHALLENGE  "spake_preauth_kdc_challenge"
@@ -1194,9 +1191,6 @@ struct _krb5_context {
     void            *ser_ctx;
     /* allowable clock skew */
     krb5_deltat     clockskew;
-    krb5_cksumtype  kdc_req_sumtype;
-    krb5_cksumtype  default_ap_req_sumtype;
-    krb5_cksumtype  default_safe_sumtype;
     krb5_flags      kdc_default_options;
     krb5_flags      library_options;
     krb5_boolean    profile_secure;

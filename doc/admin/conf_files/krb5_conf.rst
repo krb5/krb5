@@ -111,14 +111,6 @@ The libdefaults section may contain any of the following relations:
     strong crypto.  Users in affected environments should set this tag
     to true until their infrastructure adopts stronger ciphers.
 
-**ap_req_checksum_type**
-    An integer which specifies the type of AP-REQ checksum to use in
-    authenticators.  This variable should be unset so the appropriate
-    checksum for the encryption key in use will be used.  This can be
-    set if backward compatibility requires a specific checksum type.
-    See the **kdc_req_checksum_type** configuration option for the
-    possible values and their meanings.
-
 **canonicalize**
     If this flag is set to true, initial ticket requests to the KDC
     will request canonicalization of the client principal name, and
@@ -297,26 +289,6 @@ The libdefaults section may contain any of the following relations:
     corrective factor is only used by the Kerberos library; it is not
     used to change the system clock.  The default value is 1.
 
-**kdc_req_checksum_type**
-    An integer which specifies the type of checksum to use for the KDC
-    requests, for compatibility with very old KDC implementations.
-    This value is only used for DES keys; other keys use the preferred
-    checksum type for those keys.
-
-    The possible values and their meanings are as follows.
-
-    ======== ===============================
-    1        CRC32
-    2        RSA MD4
-    3        RSA MD4 DES
-    4        DES CBC
-    7        RSA MD5
-    8        RSA MD5 DES
-    9        NIST SHA
-    12       HMAC SHA1 DES3
-    -138     Microsoft MD5 HMAC checksum type
-    ======== ===============================
-
 **noaddresses**
     If this flag is true, requests for initial tickets will not be
     made with address restrictions set, allowing the tickets to be
@@ -364,15 +336,6 @@ The libdefaults section may contain any of the following relations:
 **renew_lifetime**
     (:ref:`duration` string.)  Sets the default renewable lifetime
     for initial ticket requests.  The default value is 0.
-
-**safe_checksum_type**
-    An integer which specifies the type of checksum to use for the
-    KRB-SAFE requests.  By default it is set to 8 (RSA MD5 DES).  For
-    compatibility with applications linked against DCE version 1.1 or
-    earlier Kerberos libraries, use a value of 3 to use the RSA MD4
-    DES instead.  This field is ignored when its value is incompatible
-    with the session key type.  See the **kdc_req_checksum_type**
-    configuration option for the possible values and their meanings.
 
 **spake_preauth_groups**
     A whitespace or comma-separated list of words which specifies the

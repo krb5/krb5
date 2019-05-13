@@ -124,9 +124,6 @@ krb5_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
      *  krb5_int32                      for n_tgs_etypes*sizeof(krb5_int32)
      *  nktypes*sizeof(krb5_int32)      for tgs_etypes.
      *  krb5_int32                      for clockskew
-     *  krb5_int32                      for kdc_req_sumtype
-     *  krb5_int32                      for ap_req_sumtype
-     *  krb5_int32                      for safe_sumtype
      *  krb5_int32                      for kdc_default_options
      *  krb5_int32                      for library_options
      *  krb5_int32                      for profile_secure
@@ -139,7 +136,7 @@ krb5_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
     kret = EINVAL;
     if ((context = (krb5_context) arg)) {
         /* Calculate base length */
-        required = (14 * sizeof(krb5_int32) +
+        required = (11 * sizeof(krb5_int32) +
                     (etypes_len(context->in_tkt_etypes) * sizeof(krb5_int32)) +
                     (etypes_len(context->tgs_etypes) * sizeof(krb5_int32)));
 
@@ -251,24 +248,6 @@ krb5_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **b
 
     /* Now allowable clockskew */
     kret = krb5_ser_pack_int32((krb5_int32) context->clockskew,
-                               &bp, &remain);
-    if (kret)
-        return (kret);
-
-    /* Now kdc_req_sumtype */
-    kret = krb5_ser_pack_int32((krb5_int32) context->kdc_req_sumtype,
-                               &bp, &remain);
-    if (kret)
-        return (kret);
-
-    /* Now default ap_req_sumtype */
-    kret = krb5_ser_pack_int32((krb5_int32) context->default_ap_req_sumtype,
-                               &bp, &remain);
-    if (kret)
-        return (kret);
-
-    /* Now default safe_sumtype */
-    kret = krb5_ser_pack_int32((krb5_int32) context->default_safe_sumtype,
                                &bp, &remain);
     if (kret)
         return (kret);
@@ -425,21 +404,6 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
         goto cleanup;
     context->clockskew = (krb5_deltat) ibuf;
-
-    /* kdc_req_sumtype */
-    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
-        goto cleanup;
-    context->kdc_req_sumtype = (krb5_cksumtype) ibuf;
-
-    /* default ap_req_sumtype */
-    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
-        goto cleanup;
-    context->default_ap_req_sumtype = (krb5_cksumtype) ibuf;
-
-    /* default_safe_sumtype */
-    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
-        goto cleanup;
-    context->default_safe_sumtype = (krb5_cksumtype) ibuf;
 
     /* kdc_default_options */
     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
