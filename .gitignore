@@ -388,6 +388,8 @@ local.properties
 /src/lib/krb5/os/t_trace
 
 /src/lib/krb5/rcache/t_memrcache
+/src/lib/krb5/rcache/t_rcfile2
+/src/lib/krb5/rcache/testrcache
 
 /src/lib/krb5/unicode/.links
 /src/lib/krb5/unicode/ucdata.[ch]

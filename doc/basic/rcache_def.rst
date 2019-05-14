@@ -9,7 +9,7 @@ request is detected in the replay cache, an error message is sent to
 the application program.
 
 The replay cache interface, like the credential cache and
-:ref:`keytab_definition` interfaces, uses `type:value` strings to
+:ref:`keytab_definition` interfaces, uses `type:residual` strings to
 indicate the type of replay cache and any associated cache naming
 data to use.
 
@@ -57,17 +57,27 @@ additional messages), or if the simple act of presenting the
 authenticator triggers some interesting action in the service being
 attacked.
 
-Default rcache type
--------------------
+Replay cache types
+------------------
 
-There is currently only one implemented kind of replay cache, called
-**dfl**.  It stores replay data in one file, occasionally rewriting it
-to purge old, expired entries.
+Unlike the credential cache and keytab interfaces, replay cache types
+are in lowercase.  The following types are defined:
+
+#. **none** disables the replay cache.  The residual value is ignored.
+
+#. **file2** (new in release 1.18) uses a hash-based format to store
+   replay records.  The file may grow to accomodate hash collisions.
+   The residual value is the filename.
+
+#. **dfl** is the default type if no environment variable or
+   configuration specifies a different type.  It stores replay data in
+   a file, occasionally rewriting it to purge old, expired entries.
 
 The default type can be overridden by the **KRB5RCACHETYPE**
 environment variable.
 
-The placement of the replay cache file is determined by the following:
+For the dfl type, the placement of the replay cache file is determined
+by the following:
 
 #. The **KRB5RCACHEDIR** environment variable;
 

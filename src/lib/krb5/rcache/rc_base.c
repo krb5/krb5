@@ -19,7 +19,8 @@ struct krb5_rc_typelist {
     struct krb5_rc_typelist *next;
 };
 static struct krb5_rc_typelist none = { &krb5_rc_none_ops, 0 };
-static struct krb5_rc_typelist krb5_rc_typelist_dfl = { &krb5_rc_dfl_ops, &none };
+static struct krb5_rc_typelist file2 = { &krb5_rc_file2_ops, &none };
+static struct krb5_rc_typelist krb5_rc_typelist_dfl = { &krb5_rc_dfl_ops, &file2 };
 static struct krb5_rc_typelist *typehead = &krb5_rc_typelist_dfl;
 static k5_mutex_t rc_typelist_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 

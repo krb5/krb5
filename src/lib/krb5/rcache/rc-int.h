@@ -86,6 +86,12 @@ typedef struct _krb5_rc_ops krb5_rc_ops;
 krb5_error_code krb5_rc_register_type(krb5_context, const krb5_rc_ops *);
 
 extern const krb5_rc_ops krb5_rc_dfl_ops;
+extern const krb5_rc_ops krb5_rc_file2_ops;
 extern const krb5_rc_ops krb5_rc_none_ops;
+
+/* Check and store a replay record in an open (but not locked) file descriptor,
+ * using the file2 format.  fd is assumed to be at offset 0. */
+krb5_error_code k5_rcfile2_store(krb5_context context, int fd,
+                                 krb5_donot_replay *rep);
 
 #endif /* __KRB5_RCACHE_INT_H__ */
