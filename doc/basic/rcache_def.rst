@@ -71,21 +71,30 @@ are in lowercase.  The following types are defined:
 
 #. **dfl** is the default type if no environment variable or
    configuration specifies a different type.  It stores replay data in
-   a file, occasionally rewriting it to purge old, expired entries.
+   a file2 replay cache with a filename based on the effective uid.
+   The residual value is ignored.
 
 The default type can be overridden by the **KRB5RCACHETYPE**
 environment variable.
 
-For the dfl type, the placement of the replay cache file is determined
-by the following:
+For the dfl type, the location of the replay cache file is determined
+as follows:
 
-#. The **KRB5RCACHEDIR** environment variable;
+#. The directory is taken from the **KRB5RCACHEDIR** environment
+   variable, or the **TMPDIR** environment variable, or a temporary
+   directory determined at configuration time such as ``/var/tmp``, in
+   descending order of preference.
 
-#. If KRB5RCACHEDIR is unspecified, on UNIX, the library
-   will fall back to the environment variable **TMPDIR**, and then to
-   a temporary directory determined at configuration time such as
-   */tmp* or */var/tmp*; on Windows, it will check the environment
-   variables *TEMP* and *TMP*, and fall back to the directory C:\\.
+#. The filename is ``krb5_EUID.rcache2`` where EUID is the effective
+   uid of the process.
+
+#. The file is opened without following symbolic links, and ownership
+   of the file is verified to match the effective uid.
+
+On Windows, the directory for the dfl type is the local appdata
+directory, unless overridden by the **KRB5RCACHEDIR** environment
+variable.  The filename on Windows is ``krb5.rcache2``, and the file
+is opened normally.
 
 Performance issues
 ------------------

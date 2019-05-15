@@ -10,8 +10,6 @@ STLIBOBJS = \
 	rc_base.o	\
 	rc_dfl.o 	\
 	rc_file2.o	\
-	rc_io.o		\
-	rcdef.o		\
 	rc_none.o	\
 	rc_conv.o	\
 	ser_rc.o	\
@@ -22,8 +20,6 @@ OBJS=	\
 	$(OUTPRE)rc_base.$(OBJEXT)	\
 	$(OUTPRE)rc_dfl.$(OBJEXT) 	\
 	$(OUTPRE)rc_file2.$(OBJEXT) 	\
-	$(OUTPRE)rc_io.$(OBJEXT)	\
-	$(OUTPRE)rcdef.$(OBJEXT)	\
 	$(OUTPRE)rc_none.$(OBJEXT)	\
 	$(OUTPRE)rc_conv.$(OBJEXT)	\
 	$(OUTPRE)ser_rc.$(OBJEXT)	\
@@ -34,8 +30,6 @@ SRCS=	\
 	$(srcdir)/rc_base.c	\
 	$(srcdir)/rc_dfl.c 	\
 	$(srcdir)/rc_file2.c 	\
-	$(srcdir)/rc_io.c	\
-	$(srcdir)/rcdef.c	\
 	$(srcdir)/rc_none.c	\
 	$(srcdir)/rc_conv.c	\
 	$(srcdir)/ser_rc.c	\

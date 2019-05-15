@@ -5,4 +5,4 @@ SUBDIRS = scripts util
 all:
 
 clean:
-	-$(RM) -r krb5-test-root admin_* init-* kadmin_* kdc_rcache.* ovsec-*
+	-$(RM) -r krb5-test-root admin_* init-* *.rcache2 ovsec-*
