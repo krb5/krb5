@@ -13,6 +13,7 @@
 #include "rc_base.h"
 #include "rc-int.h"
 #include "k5-thread.h"
+#include "../os/os-proto.h"
 
 struct krb5_rc_typelist {
     const krb5_rc_ops *ops;
@@ -124,25 +125,65 @@ krb5_rc_default_name(krb5_context context)
         return (char *) 0;
 }
 
+static krb5_error_code
+resolve_type_and_residual(krb5_context context, const char *type,
+                          char *residual, krb5_rcache *rc_out)
+{
+    krb5_error_code ret;
+    krb5_rcache rc;
+
+    *rc_out = NULL;
+
+    ret = krb5_rc_resolve_type(context, &rc, type);
+    if (ret)
+        return ret;
+
+    ret = krb5_rc_resolve(context, rc, residual);
+    if (ret) {
+        k5_mutex_destroy(&rc->lock);
+        free(rc);
+        return ret;
+    }
+
+    rc->magic = KV5M_RCACHE;
+    *rc_out = rc;
+    return 0;
+}
+
 krb5_error_code
 krb5_rc_default(krb5_context context, krb5_rcache *idptr)
 {
-    krb5_error_code retval;
-    krb5_rcache id;
+    krb5_error_code ret;
+    const char *val;
+    char *profstr, *rcname;
 
     *idptr = NULL;
-    retval = krb5_rc_resolve_type(context, &id, krb5_rc_default_type(context));
-    if (retval)
-        return retval;
-    retval = krb5_rc_resolve(context, id, krb5_rc_default_name(context));
-    if (retval) {
-        k5_mutex_destroy(&id->lock);
-        free(id);
-        return retval;
+
+    /* If KRB5RCACHENAME is set in the environment, resolve it. */
+    val = secure_getenv("KRB5RCACHENAME");
+    if (val != NULL)
+        return krb5_rc_resolve_full(context, idptr, val);
+
+    /* If KRB5RCACHETYPE is set in the environment, resolve it with an empty
+     * residual (primarily to support KRB5RCACHETYPE=none). */
+    val = secure_getenv("KRB5RCACHETYPE");
+    if (val != NULL)
+        return resolve_type_and_residual(context, val, "", idptr);
+
+    /* If [libdefaults] default_rcache_name is set, expand path tokens in the
+     * value and resolve it. */
+    if (profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                           KRB5_CONF_DEFAULT_RCACHE_NAME, NULL, NULL,
+                           &profstr) == 0 && profstr != NULL) {
+        ret = k5_expand_path_tokens(context, profstr, &rcname);
+        profile_release_string(profstr);
+        ret = krb5_rc_resolve_full(context, idptr, rcname);
+        free(rcname);
+        return ret;
     }
-    id->magic = KV5M_RCACHE;
-    *idptr = id;
-    return retval;
+
+    /* Resolve the default type with no residual. */
+    return resolve_type_and_residual(context, "dfl", "", idptr);
 }
 
 
@@ -150,33 +191,20 @@ krb5_error_code
 krb5_rc_resolve_full(krb5_context context, krb5_rcache *idptr,
                      const char *string_name)
 {
-    char *type;
-    char *residual;
-    krb5_error_code retval;
-    unsigned int diff;
-    krb5_rcache id;
+    krb5_error_code ret;
+    char *type, *sep;
 
     *idptr = NULL;
 
-    if (!(residual = strchr(string_name,':')))
+    sep = strchr(string_name, ':');
+    if (sep == NULL)
         return KRB5_RC_PARSE;
 
-    diff = residual - string_name;
-    if (!(type = malloc(diff + 1)))
-        return KRB5_RC_MALLOC;
-    (void) strncpy(type, string_name, diff);
-    type[residual - string_name] = '\0';
+    type = k5memdup0(string_name, sep - string_name, &ret);
+    if (type == NULL)
+        return ret;
 
-    retval = krb5_rc_resolve_type(context, &id,type);
+    ret = resolve_type_and_residual(context, type, sep + 1, idptr);
     free(type);
-    if (retval)
-        return retval;
-    if ((retval = krb5_rc_resolve(context, id,residual + 1))) {
-        k5_mutex_destroy(&id->lock);
-        free(id);
-        return retval;
-    }
-    id->magic = KV5M_RCACHE;
-    *idptr = id;
-    return retval;
+    return ret;
 }

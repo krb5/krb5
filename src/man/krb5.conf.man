@@ -242,6 +242,11 @@ This relation specifies the default keytab name to be used by
 application servers such as sshd.  The default is \fB@KTNAME@\fP\&.  This
 relation is subject to parameter expansion (see below).
 .TP
+\fBdefault_rcache_name\fP
+This relation specifies the name of the default replay cache.
+The default is \fBdfl:\fP\&.  This relation is subject to parameter
+expansion (see below).  New in release 1.18.
+.TP
 \fBdefault_realm\fP
 Identifies the default Kerberos realm for the client.  Set its
 value to your Kerberos realm.  If this value is not set, then a

@@ -148,6 +148,11 @@ The libdefaults section may contain any of the following relations:
     application servers such as sshd.  The default is |keytab|.  This
     relation is subject to parameter expansion (see below).
 
+**default_rcache_name**
+    This relation specifies the name of the default replay cache.
+    The default is ``dfl:``.  This relation is subject to parameter
+    expansion (see below).  New in release 1.18.
+
 **default_realm**
     Identifies the default Kerberos realm for the client.  Set its
     value to your Kerberos realm.  If this value is not set, then a

@@ -196,6 +196,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_DEFAULT_KEYTAB_NAME          "default_keytab_name"
 #define KRB5_CONF_DEFAULT_PRINCIPAL_EXPIRATION "default_principal_expiration"
 #define KRB5_CONF_DEFAULT_PRINCIPAL_FLAGS      "default_principal_flags"
+#define KRB5_CONF_DEFAULT_RCACHE_NAME          "default_rcache_name"
 #define KRB5_CONF_DEFAULT_REALM                "default_realm"
 #define KRB5_CONF_DEFAULT_TGS_ENCTYPES         "default_tgs_enctypes"
 #define KRB5_CONF_DEFAULT_TKT_ENCTYPES         "default_tkt_enctypes"
