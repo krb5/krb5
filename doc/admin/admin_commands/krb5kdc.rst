@@ -41,7 +41,7 @@ LDAP database.
 
 The **-k** *keytype* option specifies the key type of the master key
 to be entered manually as a password when **-m** is given; the default
-is ``des-cbc-crc``.
+is |defmkey|.
 
 The **-M** *mkeyname* option specifies the principal name for the
 master key in the database (usually ``K/M`` in the KDC's realm).

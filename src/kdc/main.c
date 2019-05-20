@@ -777,7 +777,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
         case 'm':                       /* manual type-in of master key */
             manual = TRUE;
             if (menctype == ENCTYPE_UNKNOWN)
-                menctype = ENCTYPE_DES_CBC_CRC;
+                menctype = DEFAULT_KDC_ENCTYPE;
             break;
         case 'M':                       /* master key name in DB */
             mkey_name = optarg;

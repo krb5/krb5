@@ -61,7 +61,7 @@ LDAP database.
 .sp
 The \fB\-k\fP \fIkeytype\fP option specifies the key type of the master key
 to be entered manually as a password when \fB\-m\fP is given; the default
-is \fBdes\-cbc\-crc\fP\&.
+is \fBaes256\-cts\-hmac\-sha1\-96\fP\&.
 .sp
 The \fB\-M\fP \fImkeyname\fP option specifies the principal name for the
 master key in the database (usually \fBK/M\fP in the KDC\(aqs realm).
