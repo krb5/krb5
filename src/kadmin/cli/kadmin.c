@@ -1461,7 +1461,9 @@ kadmin_getprinc(int argc, char *argv[])
                                      enctype, sizeof(enctype)))
                 snprintf(enctype, sizeof(enctype), _("<Encryption type 0x%x>"),
                          key_data->key_data_type[0]);
-            if (krb5int_c_deprecated_enctype(key_data->key_data_type[0]))
+            if (!krb5_c_valid_enctype(key_data->key_data_type[0]))
+                deprecated = "UNSUPPORTED:";
+            else if (krb5int_c_deprecated_enctype(key_data->key_data_type[0]))
                 deprecated = "DEPRECATED:";
             printf("Key: vno %d, %s%s", key_data->key_data_kvno, deprecated,
                    enctype);
