@@ -223,7 +223,8 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
         if (krb5_enctype_to_name(def_enctype, FALSE, ename, sizeof(ename)))
             ename[0] = '\0';
         fprintf(stderr,
-                _("Requested master password enctype %s in %s is DEPRECATED!"),
+                _("Requested master password enctype %s in %s is "
+                  "DEPRECATED!\n"),
                 ename, realm);
     }
 
@@ -385,7 +386,7 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
         if (krb5_enctype_to_name(rdp->realm_mkey.enctype, FALSE, ename,
                                  sizeof(ename)))
             ename[0] = '\0';
-        fprintf(stderr, _("Stash file %s uses DEPRECATED enctype %s!"),
+        fprintf(stderr, _("Stash file %s uses DEPRECATED enctype %s!\n"),
                 rdp->realm_stash, ename);
     }
 
