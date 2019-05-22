@@ -82,6 +82,7 @@ krb5_cc_store_cred(krb5_context context, krb5_ccache cache,
 {
     krb5_error_code ret;
     krb5_ticket *tkt;
+    krb5_creds mcreds, old_creds;
     krb5_principal s1, s2;
 
     TRACE_CC_STORE(context, cache, creds);
@@ -98,12 +99,15 @@ krb5_cc_store_cred(krb5_context context, krb5_ccache cache,
     if (ret) return 0;
     s2 = tkt->server;
     if (!krb5_principal_compare(context, s1, s2)) {
-        creds->server = s2;
-        TRACE_CC_STORE_TKT(context, cache, creds);
-        /* remove any dups */
-        krb5_cc_remove_cred(context, cache, KRB5_TC_MATCH_AUTHDATA, creds);
-        ret = cache->ops->store(context, cache, creds);
-        creds->server = s1;
+        mcreds = *creds;
+        mcreds.server = s2;
+        TRACE_CC_STORE_TKT(context, cache, &mcreds);
+        ret = krb5_cc_retrieve_cred(context, cache, KRB5_TC_MATCH_AUTHDATA,
+                                    &mcreds, &old_creds);
+        if (ret == 0)
+            krb5_free_cred_contents(context, &old_creds);
+        else if (ret == KRB5_CC_NOTFOUND)
+            ret = cache->ops->store(context, cache, &mcreds);
     }
     krb5_free_ticket(context, tkt);
     return ret;
