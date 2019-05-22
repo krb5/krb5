@@ -222,7 +222,7 @@ int main(argc, argv)
         exit(1);
     }
     memset(cmd_argv, 0, sizeof(char *)*argc);
-    cmd_argc = 1;
+    cmd_argc = 0;
 
     argv++; argc--;
     while (*argv) {
@@ -288,11 +288,6 @@ int main(argc, argv)
             manual_mkey = TRUE;
             global_params.mkey_from_kbd = 1;
             global_params.mask |= KADM5_CONFIG_MKEY_FROM_KBD;
-        } else if (cmd_lookup(*argv) != NULL) {
-            if (cmd_argv[0] == NULL)
-                cmd_argv[0] = *argv;
-            else
-                usage();
         } else {
             cmd_argv[cmd_argc++] = *argv;
         }
@@ -300,6 +295,9 @@ int main(argc, argv)
     }
 
     if (cmd_argv[0] == NULL)
+        usage();
+    cmd = cmd_lookup(cmd_argv[0]);
+    if (cmd == NULL)
         usage();
 
     if( !util_context->default_realm )
@@ -335,7 +333,6 @@ int main(argc, argv)
                 "while setting up enctype %d", master_keyblock.enctype);
     }
 
-    cmd = cmd_lookup(cmd_argv[0]);
     if (cmd->opendb && open_db_and_mkey())
         return exit_status;
 
