@@ -22,7 +22,7 @@ salts = [('des3-cbc-sha1', 'norealm'),
 # These enctypes are chosen to cover the different string-to-key routines.
 # Omit ":normal" from aes256 to check that salttype defaulting works.
 second_kstypes = ['aes256-cts-hmac-sha1-96', 'arcfour-hmac:normal',
-                  'des3-cbc-sha1:normal', 'des-cbc-crc:normal']
+                  'des3-cbc-sha1:normal']
 
 # Test using different salt types in a principal's key list.
 # Parameters from one key in the list must not leak over to later ones.

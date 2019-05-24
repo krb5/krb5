@@ -16,21 +16,6 @@ set stty_init {erase \^h kill \^u}
 set env(TERM) dumb
 
 set des3_krbtgt 0
-set tgt_support_desmd5 0
-
-# The names of the individual passes must be unique; lots of things
-# depend on it.  The PASSES variable may not contain comments; only
-# small pieces get evaluated, so comments will do strange things.
-
-# Most of the purpose of using multiple passes is to exercise the
-# dependency of various bugs on configuration file settings,
-# particularly with regards to encryption types.
-
-# The des.no-kdc-md5 pass will fail if the KDC does not constrain
-# session key enctypes to those in its permitted_enctypes list.  It
-# works by assuming enctype similarity, thus allowing the client to
-# request a des-cbc-md4 session key.  Since only des-cbc-crc is in the
-# KDC's permitted_enctypes list, the TGT will be unusable.
 
 if { [string length $VALGRIND] } {
     rename spawn valgrind_aux_spawn
@@ -111,47 +96,21 @@ if { $PRIOCNTL_HACK } {
     }
 }
 
-# The des.des3-tgt.no-kdc-des3 pass will fail if the KDC doesn't
-# constrain ticket key enctypes to those in permitted_enctypes.  It
-# does this by not putting des3 in the permitted_enctypes, while
-# creating a TGT princpal that has a des3 key as well as a des key.
+# The names of the individual passes must be unique; lots of things
+# depend on it.  The PASSES variable may not contain comments; only
+# small pieces get evaluated, so comments will do strange things.
 
-# XXX -- master_key_type is fragile w.r.t. permitted_enctypes; it is
-# possible to configure things such that you have a master_key_type
-# that is not permitted, and the error message used to be cryptic.
+# Most of the purpose of using multiple passes is to exercise the
+# dependency of various bugs on configuration file settings,
+# particularly with regards to encryption types.
 
 set passes {
-    {
-	des
-	mode=udp
-	des3_krbtgt=0
-	{supported_enctypes=des-cbc-crc:normal}
-	{dummy=[verbose -log "DES TGT, DES enctype"]}
-    }
-    {
-	des.des3tgt
-	mode=udp
-	des3_krbtgt=1
-	{supported_enctypes=des-cbc-crc:normal}
-	{dummy=[verbose -log "DES3 TGT, DES enctype"]}
-    }
     {
 	des3
 	mode=udp
 	des3_krbtgt=1
-	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
-	{dummy=[verbose -log "DES3 TGT, DES3 + DES enctypes"]}
-    }
-    {
-	aes-des
-	mode=udp
-	des3_krbtgt=0
-	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des-cbc-crc:normal}
-	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des-cbc-crc}
-	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des-cbc-crc}
-	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des-cbc-crc}
-	{master_key_type=aes256-cts-hmac-sha1-96}
-	{dummy=[verbose -log "AES + DES enctypes"]}
+	{supported_enctypes=des3-cbc-sha1:normal}
+	{dummy=[verbose -log "DES3 TGT, DES3 enctype"]}
     }
     {
 	aes-only
@@ -220,10 +179,10 @@ set passes {
 	aes-des3
 	mode=udp
 	des3_krbtgt=0
-	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
-	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
-	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
-	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
+	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal}
+	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des3-cbc-sha1}
+	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des3-cbc-sha1}
+	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des3-cbc-sha1}
 	{master_key_type=aes256-cts-hmac-sha1-96}
 	{dummy=[verbose -log "AES + DES3 + DES enctypes"]}
     }
@@ -231,12 +190,12 @@ set passes {
 	aes-des3tgt
 	mode=udp
 	des3_krbtgt=1
-	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
-	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
-	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
-	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
+	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal}
+	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des3-cbc-sha1}
+	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des3-cbc-sha1}
+	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des3-cbc-sha1}
 	{master_key_type=aes256-cts-hmac-sha1-96}
-	{dummy=[verbose -log "AES + DES enctypes, DES3 TGT"]}
+	{dummy=[verbose -log "AES enctypes, DES3 TGT"]}
     }
     {
 	all-enctypes
@@ -248,114 +207,7 @@ set passes {
 	{allow_weak_crypto(server)=false}
 	{dummy=[verbose -log "all default enctypes"]}
     }
-    {
-	des.no-kdc-md5
-	mode=udp
-	des3_krbtgt=0
-	tgt_support_desmd5=0
-	{permitted_enctypes(kdc)=des-cbc-crc}
-	{default_tgs_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
-	{default_tkt_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
-	{supported_enctypes=des-cbc-crc:normal}
-	{master_key_type=des-cbc-crc}
-	{dummy=[verbose -log \
-		"DES TGT, KDC permitting only des-cbc-crc"]}
-    }
-    {
-	des.des3-tgt.no-kdc-des3
-	mode=udp
-	tgt_support_desmd5=0
-	{permitted_enctypes(kdc)=des-cbc-crc}
-	{default_tgs_enctypes(client)=des-cbc-crc}
-	{default_tkt_enctypes(client)=des-cbc-crc}
-	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
-	{master_key_type=des-cbc-crc}
-	{dummy=[verbose -log \
-		"DES3 TGT, KDC permitting only des-cbc-crc"]}
-    }
 }
-
-# des.md5-tgt is set as unused, since it won't trigger the error case
-# if SUPPORT_DESMD5 isn't honored.
-
-# The des.md5-tgt pass will fail if enctype similarity is inconsisent;
-# between 1.0.x and 1.1, the decrypt functions became more strict
-# about matching enctypes, while the KDB retrieval functions didn't
-# coerce the enctype to match what was requested.  It works by setting
-# SUPPORT_DESMD5 on the TGT principal, forcing an enctype of
-# des-cbc-md5 on the TGT key.  Since the database only contains a
-# des-cbc-crc key, the decrypt will fail if enctypes are not coerced.
-
-# des.no-kdc-md5.client-md4-skey is retained in unsed_passes, even
-# though des.no-kdc-md5 is roughly equivalent, since the associated
-# comment needs additional investigation at some point re the kadmin
-# client.
-
-# The des.no-kdc-md5.client-md4-skey will fail on TGS requests due to
-# the KDC issuing session keys that it won't accept.  It will also
-# fail for a kadmin client, but for different reasons, since the kadm5
-# library does some curious filtering of enctypes, and also uses
-# get_in_tkt() rather than get_init_creds(); the former does an
-# intersection of the enctypes provided by the caller and those listed
-# in the config file!
-
-set unused_passes {
-    {
-	des.md5-tgt
-	des3_krbtgt=0
-	tgt_support_desmd5=1
-	supported_enctypes=des-cbc-crc:normal
-	{permitted_enctypes(kdc)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
-	{permitted_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
-	{dummy=[verbose -log "DES TGT, SUPPORTS_DESMD5"]}
-    }
-    {
-	des.md5-tgt.no-kdc-md5
-	des3_krbtgt=0
-	tgt_support_desmd5=1
-	{permitted_enctypes(kdc)=des-cbc-crc}
-	{default_tgs_enctypes(client)=des-cbc-crc}
-	{default_tkt_enctypes(client)=des-cbc-crc}
-	{supported_enctypes=des-cbc-crc:normal}
-	{master_key_type=des-cbc-crc}
-	{dummy=[verbose -log \
-		"DES TGT, SUPPORTS_DESMD5, KDC permitting only des-cbc-crc"]}
-    }
-    {
-	des.no-kdc-md5.client-md4-skey
-	des3_krbtgt=0
-	{permitted_enctypes(kdc)=des-cbc-crc}
-	{permitted_enctypes(client)=des-cbc-crc des-cbc-md4}
-	{default_tgs_enctypes(client)=des-cbc-crc des-cbc-md4}
-	{default_tkt_enctypes(client)=des-cbc-md4}
-	{supported_enctypes=des-cbc-crc:normal}
-	{dummy=[verbose -log \
-		"DES TGT, DES enctype, KDC permitting only des-cbc-crc, client requests des-cbc-md4 session key"]}
-    }
-    {
-	all-enctypes
-	des3_krbtgt=1
-	{supported_enctypes=\
-	aes256-cts-hmac-sha1-96:normal aes256-cts-hmac-sha1-96:norealm \
-	aes128-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:norealm \
-	des3-cbc-sha1:normal des3-cbc-sha1:none \
-	des-cbc-md5:normal des-cbc-md4:normal des-cbc-crc:normal \
-	}
-	{dummy=[verbose -log "DES3 TGT, default enctypes"]}
-    }
-    {
-	aes-tcp
-	mode=tcp
-	des3_krbtgt=0
-	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
-	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
-	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
-	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
-	{master_key_type=aes256-cts-hmac-sha1-96}
-	{dummy=[verbose -log "AES via TCP"]}
-    }
-}
-#	{supported_enctypes=des-cbc-md5:normal des-cbc-crc:normal twofish256-hmac-sha1:normal }
 
 # This shouldn't be necessary on dejagnu-1.4 and later, but 1.3 seems
 # to need it because its runtest.exp doesn't deal with PASS at all.
@@ -1095,7 +947,7 @@ proc setup_kerberos_db { standalone } {
     global REALMNAME KDB5_UTIL KADMIN_LOCAL KEY
     global tmppwd hostname
     global spawn_id
-    global des3_krbtgt tgt_support_desmd5
+    global des3_krbtgt
     global multipass_name last_passname_db
 
     set failall 0
@@ -1309,48 +1161,6 @@ proc setup_kerberos_db { standalone } {
 	    expect "cpw -randkey krbtgt/$REALMNAME@$REALMNAME\r"
 	    expect {
 		"Key for \"krbtgt/$REALMNAME@$REALMNAME\" randomized." { }
-	    }
-	    expect "kadmin.local: "
-	    send "quit\r"
-	    expect eof
-	    catch expect_after
-	    if ![check_exit_status kadmin_local] {
-		break
-	    }
-	}
-	set ret [catch $body]
-	catch "expect eof"
-	catch expect_after
-	if $ret {
-	    set failall 1
-	    if $standalone {
-		fail $test
-	    } else {
-		delete_db
-	    }
-	} else {
-	    if $standalone {
-		pass $test
-	    }
-	}
-    }
-    if $tgt_support_desmd5 {
-	# Make TGT support des-cbc-md5
-	set test "kadmin.local TGT to SUPPORT_DESMD5"
-	set body {
-	    if $failall {
-		break
-	    }
-	    spawn $KADMIN_LOCAL -r $REALMNAME
-	    verbose "starting $test"
-	    expect_after $def_exp_after
-
-	    expect "kadmin.local: "
-	    send "modprinc +support_desmd5 krbtgt/$REALMNAME@$REALMNAME\r"
-	    # It echos...
-	    expect "modprinc +support_desmd5 krbtgt/$REALMNAME@$REALMNAME\r"
-	    expect {
-		"Principal \"krbtgt/$REALMNAME@$REALMNAME\" modified.\r\n" { }
 	    }
 	    expect "kadmin.local: "
 	    send "quit\r"

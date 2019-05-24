@@ -893,7 +893,7 @@ ktest_make_sample_sp80056a_other_info(krb5_sp80056a_other_info *p)
 void
 ktest_make_sample_pkinit_supp_pub_info(krb5_pkinit_supp_pub_info *p)
 {
-    p->enctype = ENCTYPE_DES_CBC_CRC;
+    p->enctype = ENCTYPE_AES256_CTS_HMAC_SHA384_192;
     ktest_make_sample_data(&p->as_req);
     ktest_make_sample_data(&p->pk_as_rep);
 }

@@ -16,9 +16,7 @@ EXTRADEPSRCS=\
 	$(srcdir)/aes-test.c	\
 	$(srcdir)/camellia-test.c	\
 	$(srcdir)/t_cf2.c	\
-	$(srcdir)/t_cksum.c	\
 	$(srcdir)/t_cksums.c	\
-	$(srcdir)/t_crc.c	\
 	$(srcdir)/t_mddriver.c	\
 	$(srcdir)/t_kperf.c	\
 	$(srcdir)/t_sha2.c	\
@@ -30,15 +28,12 @@ EXTRADEPSRCS=\
 
 ##DOS##BUILDTOP = ..\..\..
 
-# NOTE: The t_cksum known checksum values are primarily for regression
-# testing.  They are not derived a priori, but are known to produce
-# checksums that interoperate.
 check-unix: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
-		t_cksum4 t_cksum5 t_cksums \
+		t_cksums \
 		aes-test  \
 		camellia-test  \
 		t_mddriver4 t_mddriver \
-		t_crc t_cts t_sha2 t_short t_str2key t_derive t_fork t_cf2 \
+		t_cts t_sha2 t_short t_str2key t_derive t_fork t_cf2 \
 		t_combine
 	$(RUN_TEST) ./t_nfold
 	$(RUN_TEST) ./t_encrypt
@@ -47,10 +42,7 @@ check-unix: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
 	$(RUN_TEST) ./t_cmac
 	$(RUN_TEST) ./t_hmac
 	$(RUN_TEST) ./t_prf
-	$(RUN_TEST) ./t_cksum4 "this is a test" e3f76a07f3401e3536b43a3f54226c39422c35682c354835
-	$(RUN_TEST) ./t_cksum5 "this is a test" e3f76a07f3401e351143ee6f4c09be1edb4264d55015db53
 	$(RUN_TEST) ./t_cksums
-	$(RUN_TEST) ./t_crc
 	$(RUN_TEST) ./t_cts
 	$(RUN_TEST) ./aes-test -k > vk.txt
 	cmp vk.txt $(srcdir)/expect-vk.txt
@@ -109,23 +101,8 @@ t_short$(EXEEXT): t_short.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_short.$(OBJEXT) \
 		$(KRB5_BASE_LIBS)
 
-t_cksum4.o: $(srcdir)/t_cksum.c
-	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_cksum4.o -c $(srcdir)/t_cksum.c
-
-t_cksum5.o: $(srcdir)/t_cksum.c
-	$(CC) -DMD=5 $(ALL_CFLAGS) -o t_cksum5.o -c $(srcdir)/t_cksum.c
-
-t_cksum4: t_cksum4.o $(CRYTPO_DEPLIB)
-	$(CC_LINK) -o t_cksum4 t_cksum4.o $(KRB5_BASE_LIBS)
-
-t_cksum5: t_cksum5.o $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o t_cksum5 t_cksum5.o $(KRB5_BASE_LIBS)
-
 t_cksums: t_cksums.o $(CRYTPO_DEPLIB)
 	$(CC_LINK) -o t_cksums t_cksums.o -lkrb5 $(KRB5_BASE_LIBS)
-
-t_crc: t_crc.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ t_crc.o $(KRB5_BASE_LIBS)
 
 aes-test: aes-test.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(KRB5_BASE_LIBS)
@@ -165,9 +142,9 @@ clean:
 		t_decrypt.o t_decrypt t_prng.o t_prng t_cmac.o t_cmac \
 		t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o t_prf t_prf.o \
 		aes-test.o aes-test vt.txt vk.txt kresults.out \
-		t_crc.o t_crc t_cts.o t_cts \
+		t_cts.o t_cts \
 		t_mddriver4.o t_mddriver4 t_mddriver.o t_mddriver \
-		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o t_cksums t_cksums.o \
+		t_cksums t_cksums.o \
 		t_kperf.o t_kperf t_sha2.o t_sha2 t_short t_short.o t_str2key \
 		t_str2key.o t_derive t_derive.o t_fork t_fork.o \
 		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT) \

@@ -1514,8 +1514,6 @@ static Tcl_DString *unparse_keytype(krb5_enctype enctype)
     switch (enctype) {
         /* XXX is this right? */
     case ENCTYPE_NULL: Tcl_DStringAppend(str, "ENCTYPE_NULL", -1); break;
-    case ENCTYPE_DES_CBC_CRC:
-        Tcl_DStringAppend(str, "ENCTYPE_DES_CBC_CRC", -1); break;
     default:
         sprintf(buf, "UNKNOWN KEYTYPE (0x%x)", enctype);
         Tcl_DStringAppend(str, buf, -1);

@@ -1307,7 +1307,7 @@ _passes = [
                     'master_key_type': 'aes256-sha2'}}}),
 
     # Test a setup with modern principal keys but an old TGT key.
-    ('aes256.destgt', 'des-cbc-crc:normal',
+    ('aes256.destgt', 'arcfour-hmac:normal',
      {'libdefaults': {'allow_weak_crypto': 'true'}},
      None)
 ]

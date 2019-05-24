@@ -2,7 +2,7 @@ from k5test import *
 
 rollover_krb5_conf = {'libdefaults': {'allow_weak_crypto': 'true'}}
 
-realm = K5Realm(krbtgt_keysalt='des-cbc-crc:normal',
+realm = K5Realm(krbtgt_keysalt='aes128-cts-hmac-sha256-128:normal',
                 krb5_conf=rollover_krb5_conf)
 
 princ1 = 'host/test1@%s' % (realm.realm,)
@@ -22,9 +22,9 @@ realm.run([kvno, princ1])
 realm.run([kadminl, 'purgekeys', realm.krbtgt_princ])
 # Make sure an old TGT fails after purging old TGS key.
 realm.run([kvno, princ2], expected_code=1)
-ddes = "DEPRECATED:des-cbc-crc"
+et = "aes128-cts-hmac-sha256-128"
 msg = 'krbtgt/%s@%s\n\tEtype (skey, tkt): %s, %s' % \
-    (realm.realm, realm.realm, ddes, ddes)
+    (realm.realm, realm.realm, et, et)
 realm.run([klist, '-e'], expected_msg=msg)
 
 # Check that new key actually works.

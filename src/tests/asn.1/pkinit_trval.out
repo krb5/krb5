@@ -145,6 +145,6 @@ encode_krb5_sp80056a_other_info:
 encode_krb5_pkinit_supp_pub_info:
 
 [Sequence/Sequence Of]
-.  [0] [Integer] 1
+.  [0] [Integer] 20
 .  [1] [Octet String] "krb5data"
 .  [2] [Octet String] "krb5data"

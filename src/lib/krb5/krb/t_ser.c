@@ -272,7 +272,7 @@ ser_acontext_test(krb5_context kcontext, int verbose)
                               KV5M_AUTH_CONTEXT))) {
             memset(&ukeyblock, 0, sizeof(ukeyblock));
             memset(keydata, 0, sizeof(keydata));
-            ukeyblock.enctype = ENCTYPE_DES_CBC_MD5;
+            ukeyblock.enctype = ENCTYPE_AES128_CTS_HMAC_SHA256_128;
             ukeyblock.length = sizeof(keydata);
             ukeyblock.contents = keydata;
             keydata[0] = 0xde;

@@ -16,10 +16,9 @@ proc test100 {} {
 	return
     }
 
-    # I'd like to specify a long list of keysalt tuples and make sure
-    # that randkey does the right thing, but we can only use those
-    # enctypes that krbtgt has a key for: des-cbc-crc:normal and
-    # des-cbc-crc:v4, according to the prototype kdc.conf.
+    # I'd like to specify a long list of keysalt tuples and make sure that
+    # randkey does the right thing, but we can only use those enctypes that
+    # krbtgt has a key for: 3DES and AES, according to the prototype kdc.conf.
     if {! [cmd [format {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
@@ -47,10 +46,10 @@ proc test100 {} {
     }
 
     # XXX Perhaps I should actually check the key type returned.
-    if {$num_keys == 2} {
+    if {$num_keys == 5} {
 	pass "$test"
     } else {
-	fail "$test: $num_keys keys, should be 2"
+	fail "$test: $num_keys keys, should be 5"
     }
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 	perror "$test: unexpected failure in destroy"

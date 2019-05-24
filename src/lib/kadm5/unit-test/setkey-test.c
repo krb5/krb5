@@ -19,15 +19,15 @@ need a random number generator
 #endif  /* no random */
 
 krb5_keyblock test1[] = {
-    {0, ENCTYPE_DES_CBC_CRC, 0, 0},
+    {0, ENCTYPE_AES128_CTS_HMAC_SHA1_96, 0, 0},
     {-1},
 };
 krb5_keyblock test2[] = {
-    {0, ENCTYPE_DES_CBC_CRC, 0, 0},
+    {0, ENCTYPE_AES128_CTS_HMAC_SHA1_96, 0, 0},
     {-1},
 };
 krb5_keyblock test3[] = {
-    {0, ENCTYPE_DES_CBC_CRC, 0, 0},
+    {0, ENCTYPE_AES128_CTS_HMAC_SHA1_96, 0, 0},
     {-1},
 };
 

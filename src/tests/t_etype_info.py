@@ -24,7 +24,7 @@ def test_etinfo(princ, enctypes, expected_lines):
 # With no newer enctypes in the request, PA-ETYPE-INFO2,
 # PA-ETYPE-INFO, and PA-PW-SALT appear in the AS-REP, each listing one
 # key for the most preferred matching enctype.
-test_etinfo('user', 'rc4-hmac-exp des3 rc4 des-cbc-crc',
+test_etinfo('user', 'rc4-hmac-exp des3 rc4',
             ['asrep etype_info2 des3-cbc-sha1 KRBTEST.COMuser',
              'asrep etype_info des3-cbc-sha1 KRBTEST.COMuser',
              'asrep pw_salt KRBTEST.COMuser'])
@@ -37,7 +37,7 @@ test_etinfo('user', 'rc4 aes256-cts',
 
 # In preauth-required errors, PA-PW-SALT does not appear, but the same
 # etype-info2 values are expected.
-test_etinfo('preauthuser', 'rc4-hmac-exp des3 rc4 des-cbc-crc',
+test_etinfo('preauthuser', 'rc4-hmac-exp des3 rc4',
             ['error etype_info2 des3-cbc-sha1 KRBTEST.COMpreauthuser',
              'error etype_info des3-cbc-sha1 KRBTEST.COMpreauthuser'])
 test_etinfo('preauthuser', 'rc4 aes256-cts',

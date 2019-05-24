@@ -27,7 +27,7 @@
 /*
  * This harness tests checksum results against known values.  With the -v flag,
  * results for all tests are displayed.  This harness only works for
- * deterministic checksums; for rsa-md4-des and rsa-md5-des, see t_cksum.c.
+ * deterministic checksums.
  */
 
 #include "k5-int.h"
@@ -40,12 +40,6 @@ struct test {
     krb5_data keybits;
     krb5_data cksum;
 } test_cases[] = {
-    {
-        { KV5M_DATA, 3, "abc" },
-        CKSUMTYPE_CRC32, 0, 0, { KV5M_DATA, 0, "" },
-        { KV5M_DATA, 4,
-          "\xD0\x98\x65\xCA" }
-    },
     {
         { KV5M_DATA, 3, "one" },
         CKSUMTYPE_RSA_MD4, 0, 0, { KV5M_DATA, 0, "" },
