@@ -441,13 +441,6 @@ marks the server principal as host\-based or the service is also
 listed in \fBhost_based_services\fP\&.  \fBno_host_referral = *\fP will
 disable referral processing altogether.
 .TP
-\fBdes_crc_session_supported\fP
-(Boolean value).  If set to true, the KDC will assume that service
-principals support des\-cbc\-crc for session key enctype negotiation
-purposes.  If \fBallow_weak_crypto\fP in libdefaults is
-false, or if des\-cbc\-crc is not a permitted enctype, then this
-variable has no effect.  Defaults to true.  New in release 1.11.
-.TP
 \fBreject_bad_transit\fP
 (Boolean value.)  If set to true, the KDC will check the list of
 transited realms for cross\-realm tickets against the transit path
@@ -969,30 +962,6 @@ center;
 |l|l|.
 _
 T{
-des\-cbc\-crc
-T}	T{
-DES cbc mode with CRC\-32 (weak)
-T}
-_
-T{
-des\-cbc\-md4
-T}	T{
-DES cbc mode with RSA\-MD4 (weak)
-T}
-_
-T{
-des\-cbc\-md5
-T}	T{
-DES cbc mode with RSA\-MD5 (weak)
-T}
-_
-T{
-des\-cbc\-raw
-T}	T{
-DES cbc mode raw (weak)
-T}
-_
-T{
 des3\-cbc\-raw
 T}	T{
 Triple DES cbc mode raw (weak)
@@ -1002,12 +971,6 @@ T{
 des3\-cbc\-sha1 des3\-hmac\-sha1 des3\-cbc\-sha1\-kd
 T}	T{
 Triple DES cbc mode with HMAC/sha1
-T}
-_
-T{
-des\-hmac\-sha1
-T}	T{
-DES with HMAC/sha1 (weak)
 T}
 _
 T{
@@ -1059,12 +1022,6 @@ Camellia\-128 CTS mode with CMAC
 T}
 _
 T{
-des
-T}	T{
-The DES family: des\-cbc\-crc, des\-cbc\-md5, and des\-cbc\-md4 (weak)
-T}
-_
-T{
 des3
 T}	T{
 The triple DES family: des3\-cbc\-sha1
@@ -1095,8 +1052,8 @@ types for the variable in question.  Types or families can be removed
 from the current list by prefixing them with a minus sign ("\-").
 Types or families can be prefixed with a plus sign ("+") for symmetry;
 it has the same meaning as just listing the type or family.  For
-example, "\fBDEFAULT \-des\fP" would be the default set of encryption
-types with DES types removed, and "\fBdes3 DEFAULT\fP" would be the
+example, "\fBDEFAULT \-rc4\fP" would be the default set of encryption
+types with RC4 types removed, and "\fBdes3 DEFAULT\fP" would be the
 default set of encryption types with triple DES types moved to the
 front.
 .sp

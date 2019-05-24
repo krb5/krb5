@@ -204,18 +204,6 @@ combine_keys.so combine_keys.po $(OUTPRE)combine_keys.$(OBJEXT): \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h combine_keys.c \
   crypto_int.h
-crc32.so crc32.po $(OUTPRE)crc32.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
-  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
-  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  crc32.c crypto_int.h
 crypto_length.so crypto_length.po $(OUTPRE)crypto_length.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -372,18 +360,6 @@ enc_etm.so enc_etm.po $(OUTPRE)enc_etm.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   crypto_int.h enc_etm.c
-enc_old.so enc_old.po $(OUTPRE)enc_old.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
-  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
-  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  crypto_int.h enc_old.c
 enc_raw.so enc_raw.po $(OUTPRE)enc_raw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
@@ -660,18 +636,6 @@ random_to_key.so random_to_key.po $(OUTPRE)random_to_key.$(OBJEXT): \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h crypto_int.h random_to_key.c
-s2k_des.so s2k_des.po $(OUTPRE)s2k_des.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
-  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
-  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  crypto_int.h s2k_des.c
 s2k_pbkdf2.so s2k_pbkdf2.po $(OUTPRE)s2k_pbkdf2.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

@@ -400,7 +400,7 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
     } else
         context->tgs_etypes = NULL;
 
-    /* Allowable checksum */
+    /* Allowable clockskew */
     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
         goto cleanup;
     context->clockskew = (krb5_deltat) ibuf;

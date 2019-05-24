@@ -22,6 +22,11 @@ However, deployments of krb5 using Kerberos databases created with older
 versions of krb5 will not necessarily start using strong crypto for
 ordinary operation without administrator intervention.
 
+MIT krb5 began flagging deprecated encryption types with release 1.17,
+and removed DES (single-DES) support in release 1.18.  As a
+consequence, a release prior to 1.18 is required to perform these
+migrations.
+
 Types of keys
 -------------
 

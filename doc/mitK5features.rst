@@ -37,7 +37,7 @@ Database backends: LDAP, DB2, LMDB
 
 krb4 support: Kerberos 5 release < 1.8
 
-DES support: configurable (See :ref:`retiring-des`)
+DES support: Kerberos 5 release < 1.18 (See :ref:`retiring-des`)
 
 Interoperability
 ----------------

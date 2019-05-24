@@ -48,17 +48,12 @@ Session key selection
 The KDC chooses the session key enctype by taking the intersection of
 its **permitted_enctypes** list, the list of long-term keys for the
 most recent kvno of the service, and the client's requested list of
-enctypes.  If **allow_weak_crypto** is true, all services are assumed
-to support des-cbc-crc.
+enctypes.
 
-Starting in krb5-1.11, **des_crc_session_supported** in
-:ref:`kdc.conf(5)` allows additional control over whether the KDC
-issues des-cbc-crc session keys.
-
-Also starting in krb5-1.11, it is possible to set a string attribute
-on a service principal to control what session key enctypes the KDC
-may issue for service tickets for that principal.  See
-:ref:`set_string` in :ref:`kadmin(1)` for details.
+Starting in krb5-1.11, it is possible to set a string attribute on a
+service principal to control what session key enctypes the KDC may
+issue for service tickets for that principal.  See :ref:`set_string`
+in :ref:`kadmin(1)` for details.
 
 
 Choosing enctypes for a service
@@ -86,11 +81,11 @@ affect how enctypes are chosen.
 
 **allow_weak_crypto**
     defaults to *false* starting with krb5-1.8.  When *false*, removes
-    single-DES enctypes (and other weak enctypes) from
-    **permitted_enctypes**, **default_tkt_enctypes**, and
-    **default_tgs_enctypes**.  Do not set this to *true* unless the
-    use of weak enctypes is an acceptable risk for your environment
-    and the weak enctypes are required for backward compatibility.
+    weak enctypes from **permitted_enctypes**,
+    **default_tkt_enctypes**, and **default_tgs_enctypes**.  Do not
+    set this to *true* unless the use of weak enctypes is an
+    acceptable risk for your environment and the weak enctypes are
+    required for backward compatibility.
 
 **permitted_enctypes**
     controls the set of enctypes that a service will accept as session
@@ -127,9 +122,9 @@ See :ref:`Encryption_types` for additional information about enctypes.
 ========================== ===== ======== =======
 enctype                    weak? krb5     Windows
 ========================== ===== ======== =======
-des-cbc-crc                weak  all      >=2000
-des-cbc-md4                weak  all      ?
-des-cbc-md5                weak  all      >=2000
+des-cbc-crc                weak  <1.18    >=2000
+des-cbc-md4                weak  <1.18    ?
+des-cbc-md5                weak  <1.18    >=2000
 des3-cbc-sha1                    >=1.1    none
 arcfour-hmac                     >=1.3    >=2000
 arcfour-hmac-exp           weak  >=1.3    >=2000
@@ -141,6 +136,7 @@ camellia128-cts-cmac             >=1.9    none
 camellia256-cts-cmac             >=1.9    none
 ========================== ===== ======== =======
 
-krb5 releases 1.8 and later disable the single-DES enctypes by
-default.  Microsoft Windows releases Windows 7 and later disable
-single-DES enctypes by default.
+krb5 releases 1.18 and later do not support single-DES.  krb5 releases
+1.8 and later disable the single-DES enctypes by default.  Microsoft
+Windows releases Windows 7 and later disable single-DES enctypes by
+default.

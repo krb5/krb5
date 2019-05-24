@@ -254,7 +254,7 @@ the client should request when making a TGS\-REQ, in order of
 preference from highest to lowest.  The list may be delimited with
 commas or whitespace.  See Encryption_types in
 kdc.conf(5) for a list of the accepted values for this tag.
-The default value is \fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac des\-cbc\-crc des\-cbc\-md5 des\-cbc\-md4\fP, but single\-DES encryption types
+The default value is \fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP, but weak encryption types
 will be implicitly removed from this list if the value of
 \fBallow_weak_crypto\fP is false.
 .sp
@@ -268,7 +268,7 @@ Identifies the supported list of session key encryption types that
 the client should request when making an AS\-REQ, in order of
 preference from highest to lowest.  The format is the same as for
 default_tgs_enctypes.  The default value for this tag is
-\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac des\-cbc\-crc des\-cbc\-md5 des\-cbc\-md4\fP, but single\-DES encryption types will be implicitly
+\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP, but weak encryption types will be implicitly
 removed from this list if the value of \fBallow_weak_crypto\fP is
 false.
 .sp
@@ -388,7 +388,7 @@ used across NATs.  The default value is true.
 \fBpermitted_enctypes\fP
 Identifies all encryption types that are permitted for use in
 session key encryption.  The default value for this tag is
-\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac des\-cbc\-crc des\-cbc\-md5 des\-cbc\-md4\fP, but single\-DES encryption types will be implicitly
+\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP, but weak encryption types will be implicitly
 removed from this list if the value of \fBallow_weak_crypto\fP is
 false.
 .TP

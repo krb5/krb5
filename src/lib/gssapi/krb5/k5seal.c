@@ -71,7 +71,6 @@ make_seal_token_v1 (krb5_context context,
     char *data_ptr;
     krb5_data plaind;
     krb5_checksum md5cksum;
-    krb5_checksum cksum;
     /* msglen contains the message length
      * we are signing/encrypting.  tmsglen
      * contains the length of the message
@@ -137,12 +136,8 @@ make_seal_token_v1 (krb5_context context,
 
     /* pad the plaintext, encrypt if needed, and stick it in the token */
 
-    /* initialize the the cksum */
+    /* initialize the the checksum */
     switch (signalg) {
-    case SGN_ALG_DES_MAC_MD5:
-    case SGN_ALG_MD2_5:
-        md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
-        break;
     case SGN_ALG_HMAC_SHA1_DES3_KD:
         md5cksum.checksum_type = CKSUMTYPE_HMAC_SHA1_DES3;
         break;
@@ -152,7 +147,6 @@ make_seal_token_v1 (krb5_context context,
             sign_usage = 15;
         break;
     default:
-    case SGN_ALG_DES_MAC:
         abort ();
     }
 
@@ -203,26 +197,6 @@ make_seal_token_v1 (krb5_context context,
         return(code);
     }
     switch(signalg) {
-    case SGN_ALG_DES_MAC_MD5:
-    case 3:
-
-        code = kg_encrypt_inplace(context, seq, KG_USAGE_SEAL,
-                                  (g_OID_equal(oid, gss_mech_krb5_old) ?
-                                   seq->keyblock.contents : NULL),
-                                  md5cksum.contents, 16);
-        if (code) {
-            krb5_free_checksum_contents(context, &md5cksum);
-            xfree (plain);
-            gssalloc_free(t);
-            return code;
-        }
-
-        cksum.length = cksum_size;
-        cksum.contents = md5cksum.contents + 16 - cksum.length;
-
-        memcpy(ptr+14, cksum.contents, cksum.length);
-        break;
-
     case SGN_ALG_HMAC_SHA1_DES3_KD:
         /*
          * Using key derivation, the call to krb5_c_make_checksum

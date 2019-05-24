@@ -130,10 +130,6 @@ lookup_etypes_for_keytab(krb5_context context, krb5_keytab keytab,
         }
         etypes = p;
         etypes[count++] = etype;
-        /* All DES key types work with des-cbc-crc, which is more likely to be
-         * accepted by the KDC (since MIT KDCs refuse des-cbc-md5). */
-        if (etype == ENCTYPE_DES_CBC_MD5 || etype == ENCTYPE_DES_CBC_MD4)
-            etypes[count++] = ENCTYPE_DES_CBC_CRC;
         etypes[count] = 0;
     }
     if (ret != KRB5_KT_END)

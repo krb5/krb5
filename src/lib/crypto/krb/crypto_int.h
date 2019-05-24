@@ -180,8 +180,6 @@ extern const size_t krb5int_cksumtypes_length;
 /*** Prototypes for enctype table functions ***/
 
 /* Length */
-unsigned int krb5int_old_crypto_length(const struct krb5_keytypes *ktp,
-                                       krb5_cryptotype type);
 unsigned int krb5int_raw_crypto_length(const struct krb5_keytypes *ktp,
                                        krb5_cryptotype type);
 unsigned int krb5int_arcfour_crypto_length(const struct krb5_keytypes *ktp,
@@ -196,10 +194,6 @@ unsigned int krb5int_aes2_crypto_length(const struct krb5_keytypes *ktp,
                                         krb5_cryptotype type);
 
 /* Encrypt */
-krb5_error_code krb5int_old_encrypt(const struct krb5_keytypes *ktp,
-                                    krb5_key key, krb5_keyusage usage,
-                                    const krb5_data *ivec,
-                                    krb5_crypto_iov *data, size_t num_data);
 krb5_error_code krb5int_raw_encrypt(const struct krb5_keytypes *ktp,
                                     krb5_key key, krb5_keyusage usage,
                                     const krb5_data *ivec,
@@ -224,10 +218,6 @@ krb5_error_code krb5int_etm_encrypt(const struct krb5_keytypes *ktp,
                                     krb5_crypto_iov *data, size_t num_data);
 
 /* Decrypt */
-krb5_error_code krb5int_old_decrypt(const struct krb5_keytypes *ktp,
-                                    krb5_key key, krb5_keyusage usage,
-                                    const krb5_data *ivec,
-                                    krb5_crypto_iov *data, size_t num_data);
 krb5_error_code krb5int_raw_decrypt(const struct krb5_keytypes *ktp,
                                     krb5_key key, krb5_keyusage usage,
                                     const krb5_data *ivec,
@@ -388,10 +378,6 @@ krb5_error_code krb5int_cmac_checksum(const struct krb5_enc_provider *enc,
                                       size_t num_data,
                                       krb5_data *output);
 
-/* Compute a CRC-32 checksum.  c is in-out to allow chaining; init to 0. */
-#define CRC32_CKSUM_LENGTH 4
-void mit_crc32(krb5_pointer in, size_t in_length, unsigned long *c);
-
 /* Translate an RFC 3961 key usage to a Microsoft RC4 usage. */
 krb5_keyusage krb5int_arcfour_translate_usage(krb5_keyusage usage);
 
@@ -455,7 +441,6 @@ void k5_iov_cursor_put(struct iov_cursor *cursor, unsigned char *block);
 /* Modules must implement the k5_sha256() function prototyped in k5-int.h. */
 
 /* Modules must implement the following enc_providers and hash_providers: */
-extern const struct krb5_enc_provider krb5int_enc_des;
 extern const struct krb5_enc_provider krb5int_enc_des3;
 extern const struct krb5_enc_provider krb5int_enc_arcfour;
 extern const struct krb5_enc_provider krb5int_enc_aes128;
@@ -465,7 +450,6 @@ extern const struct krb5_enc_provider krb5int_enc_aes256_ctr;
 extern const struct krb5_enc_provider krb5int_enc_camellia128;
 extern const struct krb5_enc_provider krb5int_enc_camellia256;
 
-extern const struct krb5_hash_provider krb5int_hash_crc32;
 extern const struct krb5_hash_provider krb5int_hash_md4;
 extern const struct krb5_hash_provider krb5int_hash_md5;
 extern const struct krb5_hash_provider krb5int_hash_sha1;

@@ -1011,9 +1011,6 @@ kg_accept_krb5(minor_status, context_handle,
             }
 
             switch (negotiated_etype) {
-            case ENCTYPE_DES_CBC_MD5:
-            case ENCTYPE_DES_CBC_MD4:
-            case ENCTYPE_DES_CBC_CRC:
             case ENCTYPE_DES3_CBC_SHA1:
             case ENCTYPE_ARCFOUR_HMAC:
             case ENCTYPE_ARCFOUR_HMAC_EXP:

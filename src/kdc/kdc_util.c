@@ -998,17 +998,6 @@ dbentry_supports_enctype(kdc_realm_t *kdc_active_realm, krb5_db_entry *server,
     free(etypes_str);
     free(etypes);
 
-    /* If configured to, assume every server without a session_enctypes
-     * attribute supports DES_CBC_CRC. */
-    if (kdc_active_realm->realm_assume_des_crc_sess &&
-        enctype == ENCTYPE_DES_CBC_CRC)
-        return TRUE;
-
-    /* Due to an ancient interop problem, assume nothing supports des-cbc-md5
-     * unless there's a session_enctypes explicitly saying that it does. */
-    if (enctype == ENCTYPE_DES_CBC_MD5)
-        return FALSE;
-
     /* Assume the server supports any enctype it has a long-term key for. */
     return !krb5_dbe_find_enctype(kdc_context, server, enctype, -1, 0, &datap);
 }
@@ -1779,9 +1768,6 @@ krb5_boolean
 enctype_requires_etype_info_2(krb5_enctype enctype)
 {
     switch(enctype) {
-    case ENCTYPE_DES_CBC_CRC:
-    case ENCTYPE_DES_CBC_MD4:
-    case ENCTYPE_DES_CBC_MD5:
     case ENCTYPE_DES3_CBC_SHA1:
     case ENCTYPE_DES3_CBC_RAW:
     case ENCTYPE_ARCFOUR_HMAC:

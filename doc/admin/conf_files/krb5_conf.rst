@@ -106,10 +106,7 @@ The libdefaults section may contain any of the following relations:
     in :ref:`Encryption_types` in :ref:`kdc.conf(5)`) will be filtered
     out of the lists **default_tgs_enctypes**,
     **default_tkt_enctypes**, and **permitted_enctypes**.  The default
-    value for this tag is false, which may cause authentication
-    failures in existing Kerberos infrastructures that do not support
-    strong crypto.  Users in affected environments should set this tag
-    to true until their infrastructure adopts stronger ciphers.
+    value for this tag is false.
 
 **canonicalize**
     If this flag is set to true, initial ticket requests to the KDC
@@ -163,9 +160,7 @@ The libdefaults section may contain any of the following relations:
     preference from highest to lowest.  The list may be delimited with
     commas or whitespace.  See :ref:`Encryption_types` in
     :ref:`kdc.conf(5)` for a list of the accepted values for this tag.
-    The default value is |defetypes|, but single-DES encryption types
-    will be implicitly removed from this list if the value of
-    **allow_weak_crypto** is false.
+    The default value is |defetypes|.
 
     Do not set this unless required for specific backward
     compatibility purposes; stale values of this setting can prevent
@@ -177,9 +172,7 @@ The libdefaults section may contain any of the following relations:
     the client should request when making an AS-REQ, in order of
     preference from highest to lowest.  The format is the same as for
     default_tgs_enctypes.  The default value for this tag is
-    |defetypes|, but single-DES encryption types will be implicitly
-    removed from this list if the value of **allow_weak_crypto** is
-    false.
+    |defetypes|.
 
     Do not set this unless required for specific backward
     compatibility purposes; stale values of this setting can prevent
@@ -297,9 +290,7 @@ The libdefaults section may contain any of the following relations:
 **permitted_enctypes**
     Identifies all encryption types that are permitted for use in
     session key encryption.  The default value for this tag is
-    |defetypes|, but single-DES encryption types will be implicitly
-    removed from this list if the value of **allow_weak_crypto** is
-    false.
+    |defetypes|.
 
 **plugin_base_dir**
     If set, determines the base directory where krb5 plugins are

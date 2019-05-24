@@ -60,9 +60,6 @@ static krb5_boolean
 enctype_ok(krb5_enctype e)
 {
     switch (e) {
-    case ENCTYPE_DES_CBC_CRC:
-    case ENCTYPE_DES_CBC_MD4:
-    case ENCTYPE_DES_CBC_MD5:
     case ENCTYPE_DES3_CBC_SHA1:
         return TRUE;
     default:

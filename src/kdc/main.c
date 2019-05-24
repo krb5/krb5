@@ -307,12 +307,6 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
                                 &rdp->realm_reject_bad_transit))
         rdp->realm_reject_bad_transit = TRUE;
 
-    /* Handle assume des-cbc-crc is supported for session keys */
-    hierarchy[2] = KRB5_CONF_DES_CRC_SESSION_SUPPORTED;
-    if (krb5_aprof_get_boolean(aprof, hierarchy, TRUE,
-                               &rdp->realm_assume_des_crc_sess))
-        rdp->realm_assume_des_crc_sess = TRUE;
-
     /* Handle ticket maximum life */
     hierarchy[2] = KRB5_CONF_MAX_LIFE;
     if (krb5_aprof_get_deltat(aprof, hierarchy, TRUE, &rdp->realm_maxlife))

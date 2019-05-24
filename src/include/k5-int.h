@@ -199,7 +199,6 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_DEFAULT_REALM                "default_realm"
 #define KRB5_CONF_DEFAULT_TGS_ENCTYPES         "default_tgs_enctypes"
 #define KRB5_CONF_DEFAULT_TKT_ENCTYPES         "default_tkt_enctypes"
-#define KRB5_CONF_DES_CRC_SESSION_SUPPORTED    "des_crc_session_supported"
 #define KRB5_CONF_DICT_FILE                    "dict_file"
 #define KRB5_CONF_DISABLE                      "disable"
 #define KRB5_CONF_DISABLE_ENCRYPTED_TIMESTAMP  "disable_encrypted_timestamp"

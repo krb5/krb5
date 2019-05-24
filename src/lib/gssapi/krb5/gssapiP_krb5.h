@@ -120,17 +120,17 @@ extern const gss_OID_set kg_all_mechs;
 /* These are to be stored in little-endian order, i.e., des-mac is
    stored as 02 00.  */
 enum sgn_alg {
-    SGN_ALG_DES_MAC_MD5           = 0x0000,
-    SGN_ALG_MD2_5                 = 0x0001,
-    SGN_ALG_DES_MAC               = 0x0002,
-    SGN_ALG_3                     = 0x0003, /* not published */
+    /* SGN_ALG_DES_MAC_MD5           = 0x0000, */
+    /* SGN_ALG_MD2_5                 = 0x0001, */
+    /* SGN_ALG_DES_MAC               = 0x0002, */
+    /* SGN_ALG_3                     = 0x0003, /\* not published *\/ */
     SGN_ALG_HMAC_MD5              = 0x0011, /* microsoft w2k;  */
     SGN_ALG_HMAC_SHA1_DES3_KD     = 0x0004
 };
 enum seal_alg {
     SEAL_ALG_NONE            = 0xffff,
-    SEAL_ALG_DES             = 0x0000,
-    SEAL_ALG_1               = 0x0001, /* not published */
+    /* SEAL_ALG_DES             = 0x0000, */
+    /* SEAL_ALG_1               = 0x0001, /\* not published *\/ */
     SEAL_ALG_MICROSOFT_RC4   = 0x0010, /* microsoft w2k;  */
     SEAL_ALG_DES3KD          = 0x0002
 };
@@ -147,12 +147,12 @@ enum seal_alg {
 #define KG_USAGE_INITIATOR_SIGN 25
 
 enum qop {
-    GSS_KRB5_INTEG_C_QOP_MD5       = 0x0001, /* *partial* MD5 = "MD2.5" */
-    GSS_KRB5_INTEG_C_QOP_DES_MD5   = 0x0002,
-    GSS_KRB5_INTEG_C_QOP_DES_MAC   = 0x0003,
+    /* GSS_KRB5_INTEG_C_QOP_MD5       = 0x0001, */
+    /* GSS_KRB5_INTEG_C_QOP_DES_MD5   = 0x0002, */
+    /* GSS_KRB5_INTEG_C_QOP_DES_MAC   = 0x0003, */
     GSS_KRB5_INTEG_C_QOP_HMAC_SHA1 = 0x0004,
     GSS_KRB5_INTEG_C_QOP_MASK      = 0x00ff,
-    GSS_KRB5_CONF_C_QOP_DES        = 0x0100,
+    /* GSS_KRB5_CONF_C_QOP_DES        = 0x0100, */
     GSS_KRB5_CONF_C_QOP_DES3_KD    = 0x0200,
     GSS_KRB5_CONF_C_QOP_MASK       = 0xff00
 };

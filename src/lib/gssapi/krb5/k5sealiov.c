@@ -145,10 +145,6 @@ make_seal_token_v1_iov(krb5_context context,
 
     /* initialize the checksum */
     switch (ctx->signalg) {
-    case SGN_ALG_DES_MAC_MD5:
-    case SGN_ALG_MD2_5:
-        md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
-        break;
     case SGN_ALG_HMAC_SHA1_DES3_KD:
         md5cksum.checksum_type = CKSUMTYPE_HMAC_SHA1_DES3;
         break;
@@ -158,7 +154,6 @@ make_seal_token_v1_iov(krb5_context context,
             sign_usage = 15;
         break;
     default:
-    case SGN_ALG_DES_MAC:
         abort ();
     }
 
@@ -183,21 +178,6 @@ make_seal_token_v1_iov(krb5_context context,
         goto cleanup;
 
     switch (ctx->signalg) {
-    case SGN_ALG_DES_MAC_MD5:
-    case SGN_ALG_3:
-        code = kg_encrypt_inplace(context, ctx->seq, KG_USAGE_SEAL,
-                                  (g_OID_equal(ctx->mech_used,
-                                               gss_mech_krb5_old) ?
-                                   ctx->seq->keyblock.contents : NULL),
-                                  md5cksum.contents, 16);
-        if (code != 0)
-            goto cleanup;
-
-        cksum.length = ctx->cksum_size;
-        cksum.contents = md5cksum.contents + 16 - cksum.length;
-
-        memcpy(ptr + 14, cksum.contents, cksum.length);
-        break;
     case SGN_ALG_HMAC_SHA1_DES3_KD:
         assert(md5cksum.length == ctx->cksum_size);
         memcpy(ptr + 14, md5cksum.contents, md5cksum.length);

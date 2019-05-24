@@ -82,36 +82,6 @@ generate_authenticator(krb5_context,
                        krb5_enctype *desired_etypes,
                        krb5_enctype tkt_enctype);
 
-/* Return the checksum type for the AP request, or 0 to use the enctype's
- * mandatory checksum. */
-static krb5_cksumtype
-ap_req_cksum(krb5_context context, krb5_auth_context auth_context,
-             krb5_enctype enctype)
-{
-    /* Use the configured checksum type if one was set. */
-    if (auth_context->req_cksumtype)
-        return auth_context->req_cksumtype;
-
-    /*
-     * Otherwise choose based on the enctype.  For interoperability with very
-     * old implementations, use unkeyed MD4 or MD5 checkums for DES enctypes.
-     * (The authenticator checksum does not have to be keyed since it is
-     * contained within an encrypted blob.)
-     */
-    switch (enctype) {
-    case ENCTYPE_DES_CBC_CRC:
-    case ENCTYPE_DES_CBC_MD5:
-        return CKSUMTYPE_RSA_MD5;
-        break;
-    case ENCTYPE_DES_CBC_MD4:
-        return CKSUMTYPE_RSA_MD4;
-        break;
-    default:
-        /* Use the mandatory checksum type for the enctype. */
-        return 0;
-    }
-}
-
 krb5_error_code KRB5_CALLCONV
 krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
                      krb5_flags ap_req_options, krb5_data *in_data,
@@ -198,15 +168,10 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
             checksum.length = in_data->length;
             checksum.contents = (krb5_octet *) in_data->data;
         } else {
-            krb5_enctype enctype = krb5_k_key_enctype(context,
-                                                      (*auth_context)->key);
-            krb5_cksumtype cksumtype = ap_req_cksum(context, *auth_context,
-                                                    enctype);
-            if ((retval = krb5_k_make_checksum(context,
-                                               cksumtype,
-                                               (*auth_context)->key,
-                                               KRB5_KEYUSAGE_AP_REQ_AUTH_CKSUM,
-                                               in_data, &checksum)))
+            retval = krb5_k_make_checksum(context, 0, (*auth_context)->key,
+                                          KRB5_KEYUSAGE_AP_REQ_AUTH_CKSUM,
+                                          in_data, &checksum);
+            if (retval)
                 goto cleanup_cksum;
         }
         checksump = &checksum;

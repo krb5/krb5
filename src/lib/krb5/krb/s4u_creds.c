@@ -287,9 +287,6 @@ verify_s4u2self_reply(krb5_context context,
     assert(req_s4u_user != NULL);
 
     switch (subkey->enctype) {
-    case ENCTYPE_DES_CBC_CRC:
-    case ENCTYPE_DES_CBC_MD4:
-    case ENCTYPE_DES_CBC_MD5:
     case ENCTYPE_DES3_CBC_SHA1:
     case ENCTYPE_DES3_CBC_RAW:
     case ENCTYPE_ARCFOUR_HMAC:

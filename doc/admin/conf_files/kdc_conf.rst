@@ -381,13 +381,6 @@ The following tags may be specified in a [realms] subsection:
     listed in **host_based_services**.  ``no_host_referral = *`` will
     disable referral processing altogether.
 
-**des_crc_session_supported**
-    (Boolean value).  If set to true, the KDC will assume that service
-    principals support des-cbc-crc for session key enctype negotiation
-    purposes.  If **allow_weak_crypto** in :ref:`libdefaults` is
-    false, or if des-cbc-crc is not a permitted enctype, then this
-    variable has no effect.  Defaults to true.  New in release 1.11.
-
 **reject_bad_transit**
     (Boolean value.)  If set to true, the KDC will check the list of
     transited realms for cross-realm tickets against the transit path
@@ -848,13 +841,8 @@ Encryption types marked as "weak" are available for compatibility but
 not recommended for use.
 
 ==================================================== =========================================================
-des-cbc-crc                                          DES cbc mode with CRC-32 (weak)
-des-cbc-md4                                          DES cbc mode with RSA-MD4 (weak)
-des-cbc-md5                                          DES cbc mode with RSA-MD5 (weak)
-des-cbc-raw                                          DES cbc mode raw (weak)
 des3-cbc-raw                                         Triple DES cbc mode raw (weak)
 des3-cbc-sha1 des3-hmac-sha1 des3-cbc-sha1-kd        Triple DES cbc mode with HMAC/sha1
-des-hmac-sha1                                        DES with HMAC/sha1 (weak)
 aes256-cts-hmac-sha1-96 aes256-cts aes256-sha1       AES-256 CTS mode with 96-bit SHA-1 HMAC
 aes128-cts-hmac-sha1-96 aes128-cts aes128-sha1       AES-128 CTS mode with 96-bit SHA-1 HMAC
 aes256-cts-hmac-sha384-192 aes256-sha2               AES-256 CTS mode with 192-bit SHA-384 HMAC
@@ -863,7 +851,6 @@ arcfour-hmac rc4-hmac arcfour-hmac-md5               RC4 with HMAC/MD5
 arcfour-hmac-exp rc4-hmac-exp arcfour-hmac-md5-exp   Exportable RC4 with HMAC/MD5 (weak)
 camellia256-cts-cmac camellia256-cts                 Camellia-256 CTS mode with CMAC
 camellia128-cts-cmac camellia128-cts                 Camellia-128 CTS mode with CMAC
-des                                                  The DES family: des-cbc-crc, des-cbc-md5, and des-cbc-md4 (weak)
 des3                                                 The triple DES family: des3-cbc-sha1
 aes                                                  The AES family: aes256-cts-hmac-sha1-96, aes128-cts-hmac-sha1-96, aes256-cts-hmac-sha384-192, and aes128-cts-hmac-sha256-128
 rc4                                                  The RC4 family: arcfour-hmac
@@ -875,8 +862,8 @@ types for the variable in question.  Types or families can be removed
 from the current list by prefixing them with a minus sign ("-").
 Types or families can be prefixed with a plus sign ("+") for symmetry;
 it has the same meaning as just listing the type or family.  For
-example, "``DEFAULT -des``" would be the default set of encryption
-types with DES types removed, and "``des3 DEFAULT``" would be the
+example, "``DEFAULT -rc4``" would be the default set of encryption
+types with RC4 types removed, and "``des3 DEFAULT``" would be the
 default set of encryption types with triple DES types moved to the
 front.
 
